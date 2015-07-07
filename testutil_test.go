@@ -25,4 +25,6 @@ func TestTestingFramework(t *testing.T) {
 		test.EqualNotNil(v)
 	}
 
+	test.EqualFloat64(1, 1.2, 0.3)
+
 }

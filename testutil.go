@@ -30,14 +30,21 @@ func (t *Test) EqualString(compare, expected string) {
 
 func (t *Test) EqualInt(compare, expected int) {
 	if compare != expected {
-		t.t.Errorf("expected '%s', was '%s'", expected, compare)
+		t.t.Errorf("expected '%d', was '%d'", expected, compare)
 		debug.PrintStack()
 	}
 }
 
 func (t *Test) EqualInt64(compare, expected int64) {
 	if compare != expected {
-		t.t.Errorf("expected '%s', was '%s'", expected, compare)
+		t.t.Errorf("expected '%d', was '%d'", expected, compare)
+		debug.PrintStack()
+	}
+}
+
+func (t *Test) EqualFloat64(compare, expected, tolerance float64) {
+	if compare < expected-tolerance || compare > expected+tolerance {
+		t.t.Errorf("expected '%f', was '%f' (with tolerance %f)", expected, compare, tolerance)
 		debug.PrintStack()
 	}
 }
