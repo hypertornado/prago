@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestUser(t *testing.T) {
+func TestRouterNormal(t *testing.T) {
 	r := NewRoute(POST, "/a/:id/:name/aa", nil, []Constraint{})
 	params, ok := r.match("POST", "/a/123/ondra/aa")
 	if ok != true {
@@ -82,6 +82,30 @@ func TestUser(t *testing.T) {
 	}
 	_, ok = r.match("GET", "/a/123/karel/aa")
 	if ok != false {
+		t.Error(ok)
+	}
+}
+
+func TestRouterFallback(t *testing.T) {
+	r := NewRoute(GET, "*some", nil, []Constraint{})
+	params, ok := r.match("GET", "/XXX")
+	if ok != true {
+		t.Error(ok)
+	}
+	if params["some"] != "/XXX" {
+		t.Error(params["some"])
+	}
+}
+
+func TestRouterAny(t *testing.T) {
+	r := NewRoute(ANY, "/hello", nil, []Constraint{})
+	_, ok := r.match("GET", "/hello")
+	if ok != true {
+		t.Error(ok)
+	}
+
+	_, ok = r.match("POST", "/hello")
+	if ok != true {
 		t.Error(ok)
 	}
 

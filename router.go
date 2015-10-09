@@ -13,6 +13,7 @@ const (
 	POST
 	PUT
 	DELETE
+	ANY
 )
 
 func MiddlewareDispatcher(p Request) {
@@ -64,6 +65,7 @@ func NewRoute(m method, str string, action *Action, constraints []Constraint) *R
 		POST:   "POST",
 		PUT:    "PUT",
 		DELETE: "DELETE",
+		ANY:    "ANY",
 	}
 
 	return &Route{items, methodName[m], constraints, action}
@@ -103,7 +105,7 @@ func ConstraintRegexp(item string, reg *regexp.Regexp) func(map[string]string) b
 
 func (r *Route) match(method, path string) (ret map[string]string, ok bool) {
 	ok = false
-	if len(r.method) > 0 && r.method != method {
+	if r.method != "ANY" && len(r.method) > 0 && r.method != method {
 		return
 	}
 
@@ -111,11 +113,21 @@ func (r *Route) match(method, path string) (ret map[string]string, ok bool) {
 		return
 	}
 	items := strings.Split(path, "/")
+	m := make(map[string]string)
+
+	if len(r.items) == 1 && strings.HasPrefix(r.items[0], "*") {
+		ok = true
+		if len(r.items[0]) > 1 {
+			m[r.items[0][1:]] = path
+			ret = m
+		}
+		return
+	}
 
 	if len(items) != len(r.items) {
 		return
 	}
-	m := make(map[string]string)
+
 	for i := 0; i < len(items); i++ {
 		expect := r.items[i]
 		if len(expect) > 1 && strings.HasPrefix(expect, ":") {
