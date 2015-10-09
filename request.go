@@ -10,11 +10,12 @@ import (
 type Request interface {
 	IsProcessed() bool
 	SetProcessed()
-	HttpIO() (w http.ResponseWriter, r *http.Request)
 	Params() url.Values
 	App() AppInterface
 	SetData(string, interface{})
 	GetData(string) interface{}
+	Request() *http.Request
+	Response() http.ResponseWriter
 	AllRequestData() map[string]interface{}
 	Header() http.Header
 	Session() *sessions.Session
@@ -37,11 +38,11 @@ func (p *request) IsProcessed() bool {
 	return processed
 }
 
-func (p *request) SetProcessed()                                    { p.data["processed"] = true }
-func (p *request) HttpIO() (w http.ResponseWriter, r *http.Request) { return p.w, p.r }
+func (p *request) SetProcessed()                     { p.data["processed"] = true }
+func (p *request) Request() (r *http.Request)        { return p.r }
+func (p *request) Response() (w http.ResponseWriter) { return p.w }
 func (p *request) Params() url.Values {
-	_, r := p.HttpIO()
-	return r.Form
+	return p.Request().Form
 }
 func (p *request) SetData(k string, v interface{})        { p.data[k] = v }
 func (p *request) GetData(k string) interface{}           { return p.data[k] }
@@ -66,6 +67,5 @@ func newRequest(w http.ResponseWriter, r *http.Request, app AppInterface) *reque
 }
 
 func MiddlewareLogBefore(p Request) {
-	_, r := p.HttpIO()
-	p.App().Log().Println(r.Method, r.URL.String())
+	p.App().Log().Println(p.Request().Method, p.Request().URL.String())
 }

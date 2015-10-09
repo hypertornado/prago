@@ -13,8 +13,7 @@ func MiddlewareStatic(p Request) {
 	if p.IsProcessed() {
 		return
 	}
-	w, r := p.HttpIO()
-	err := ServeStatic(w, r)
+	err := ServeStatic(p.Response(), p.Request())
 	if err == nil {
 		p.SetProcessed()
 	}

@@ -36,9 +36,8 @@ func (r *Router) AddRoute(route *Route) {
 }
 
 func (router *Router) Process(request Request) {
-	_, r := request.HttpIO()
 	for _, route := range router.routes {
-		params, match := route.match(r.Method, r.URL.Path)
+		params, match := route.match(request.Request().Method, request.Request().URL.Path)
 		if match {
 			for k, v := range params {
 				request.Params().Add(k, v)

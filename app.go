@@ -102,36 +102,33 @@ func handleRequest(w http.ResponseWriter, r *http.Request, app *App) {
 }
 
 func recoveryFromServerError(p Request, recoveryData interface{}) {
-	w, _ := p.HttpIO()
-	w.WriteHeader(500)
+	p.Response().WriteHeader(500)
 	if p.App().DevelopmentMode() {
-		w.Write([]byte(fmt.Sprintf("500 - error\n%s\nstack:\n", recoveryData)))
-		w.Write(debug.Stack())
+		p.Response().Write([]byte(fmt.Sprintf("500 - error\n%s\nstack:\n", recoveryData)))
+		p.Response().Write(debug.Stack())
 	} else {
-		w.Write([]byte("We are sorry, some error occured. Admin has been contacted. (500)"))
+		p.Response().Write([]byte("We are sorry, some error occured. Admin has been contacted. (500)"))
 	}
 }
 
 func MiddlewareParseRequest(p Request) {
-	_, r := p.HttpIO()
-
-	contentType := r.Header.Get("Content-Type")
+	contentType := p.Request().Header.Get("Content-Type")
 
 	var err error
 
 	if strings.HasPrefix(contentType, "multipart/form-data") {
-		err = r.ParseMultipartForm(1000000)
+		err = p.Request().ParseMultipartForm(1000000)
 		if err != nil {
 			panic(err)
 		}
 
-		for k, values := range r.MultipartForm.Value {
+		for k, values := range p.Request().MultipartForm.Value {
 			for _, v := range values {
-				r.Form.Add(k, v)
+				p.Request().Form.Add(k, v)
 			}
 		}
 	} else {
-		err = r.ParseForm()
+		err = p.Request().ParseForm()
 		if err != nil {
 			panic(err)
 		}

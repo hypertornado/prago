@@ -30,8 +30,6 @@ func MiddlewareWriteResponse(p Request) {
 
 	renderDefaultNotFound := false
 
-	w, _ := p.HttpIO()
-
 	statusCode, statusCodeOk := p.GetData("statusCode").(int)
 	if !statusCodeOk {
 		if len(p.Header().Get("Location")) > 0 {
@@ -53,9 +51,8 @@ func MiddlewareWriteResponse(p Request) {
 		body = []byte("404 - not found")
 	}
 
-	w.WriteHeader(statusCode)
-	w.Write(body)
-
+	p.Response().WriteHeader(statusCode)
+	p.Response().Write(body)
 	p.SetProcessed()
 }
 
