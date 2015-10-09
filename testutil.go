@@ -11,6 +11,7 @@ type Test struct {
 }
 
 func NewTest(t *testing.T) *Test {
+	panic("test util is deprecated")
 	return &Test{t}
 }
 
