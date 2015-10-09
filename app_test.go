@@ -19,15 +19,15 @@ func TestApp(t *testing.T) {
 		t.Error(w.Body.String())
 	}
 
-	/*app.Route(GET, "*some", app.MainController(), func(request Request) {
+	app.Route(GET, "*some", app.MainController(), func(request Request) {
 		s := request.Params().Get("some")
 		request.SetData("body", []byte("star "+s))
 	})
 	w = httptest.NewRecorder()
 	r, _ = http.NewRequest("GET", "/b/abc", nil)
 	handleRequest(w, r, app)
-	if w.Body.String() != "star abc" {
+	if w.Body.String() != "star /b/abc" {
 		t.Error(w.Body.String())
-	}*/
+	}
 
 }
