@@ -5,26 +5,39 @@ import (
 )
 
 func TestUser(t *testing.T) {
-	test := NewTest(t)
-	test.EqualTrue(true)
-
 	r := NewRoute(POST, "/a/:id/:name/aa", nil, []Constraint{})
 	params, ok := r.match("POST", "/a/123/ondra/aa")
-	test.EqualTrue(ok)
-	test.EqualString(params["id"], "123")
-	test.EqualString(params["name"], "ondra")
-	test.EqualInt(len(params), 2)
+	if ok != true {
+		t.Error(ok)
+	}
+	if params["id"] != "123" {
+		t.Error(params["id"])
+	}
+	if params["name"] != "ondra" {
+		t.Error(params["name"])
+	}
+	if len(params) != 2 {
+		t.Error(len(params))
+	}
 
 	r = NewRoute(GET, "/a/:id/:name/aa", nil, []Constraint{})
 	_, ok = r.match("POST", "/a/123/ondra/aa")
-	test.EqualFalse(ok)
+	if ok != false {
+		t.Error(ok)
+	}
 	_, ok = r.match("GET", "/b/123/ondra/aa")
-	test.EqualFalse(ok)
+	if ok != false {
+		t.Error(ok)
+	}
 	_, ok = r.match("GET", "/a/123/ondra/aa/")
-	test.EqualFalse(ok)
+	if ok != false {
+		t.Error(ok)
+	}
 
 	_, ok = r.match("GET", "/a/123/o/aa")
-	test.EqualTrue(ok)
+	if ok != true {
+		t.Error(ok)
+	}
 
 	constraint := func(m map[string]string) bool {
 		item, ok := m["name"]
@@ -37,25 +50,39 @@ func TestUser(t *testing.T) {
 	r = NewRoute(GET, "/a/:id/:name/aa", nil, []Constraint{constraint})
 
 	_, ok = r.match("GET", "/a/123/ondra/aa")
-	test.EqualTrue(ok)
+	if ok != true {
+		t.Error(ok)
+	}
 	_, ok = r.match("GET", "/a/123/o/aa")
-	test.EqualFalse(ok)
+	if ok != false {
+		t.Error(ok)
+	}
 
 	constraint = ConstraintInt("id")
 	r = NewRoute(GET, "/a/:id/:name/aa", nil, []Constraint{constraint})
 	_, ok = r.match("GET", "/a/123/ondra/aa")
-	test.EqualTrue(ok)
+	if ok != true {
+		t.Error(ok)
+	}
 	_, ok = r.match("GET", "/a/0/ondra/aa")
-	test.EqualFalse(ok)
+	if ok != false {
+		t.Error(ok)
+	}
 	_, ok = r.match("GET", "/a/123AA/ondra/aa")
-	test.EqualFalse(ok)
+	if ok != false {
+		t.Error(ok)
+	}
 
 	constraint = ConstraintWhitelist("name", []string{"ondra", "pepa"})
 	r = NewRoute(GET, "/a/:id/:name/aa", nil, []Constraint{constraint})
 
 	_, ok = r.match("GET", "/a/123/ondra/aa")
-	test.EqualTrue(ok)
+	if ok != true {
+		t.Error(ok)
+	}
 	_, ok = r.match("GET", "/a/123/karel/aa")
-	test.EqualFalse(ok)
+	if ok != false {
+		t.Error(ok)
+	}
 
 }

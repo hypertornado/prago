@@ -7,16 +7,17 @@ import (
 )
 
 func TestApp(t *testing.T) {
-	test := NewTest(t)
 	app := NewApp()
-	w := httptest.NewRecorder()
-	r, _ := http.NewRequest("GET", "/h", nil)
 
 	app.Route(GET, "/h", app.MainController(), func(request Request) {
 		request.SetData("body", []byte("hello"))
 	})
 
+	w := httptest.NewRecorder()
+	r, _ := http.NewRequest("GET", "/h", nil)
 	handleRequest(w, r, app)
-	test.EqualString(w.Body.String(), "hello")
+	if w.Body.String() != "hello" {
+		t.Error(w.Body.String())
+	}
 
 }
