@@ -14,7 +14,10 @@ func Render(request Request, statusCode int, viewName string) {
 
 	request.SetData("statusCode", statusCode)
 
-	Must(request.App().Templates().ExecuteTemplate(buf, viewName, request.AllRequestData()))
+	err := request.App().Templates().ExecuteTemplate(buf, viewName, request.AllRequestData())
+	if err != nil {
+		panic(err)
+	}
 
 	request.SetData("body", buf.Bytes())
 

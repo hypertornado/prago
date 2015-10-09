@@ -31,12 +31,6 @@ func PrettyUrl(s string) string {
 	return slugify.Slugify(s)
 }
 
-func Must(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 var seeded = false
 

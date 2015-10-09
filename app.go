@@ -121,7 +121,9 @@ func MiddlewareParseRequest(p Request) {
 
 	if strings.HasPrefix(contentType, "multipart/form-data") {
 		err = r.ParseMultipartForm(1000000)
-		Must(err)
+		if err != nil {
+			panic(err)
+		}
 
 		for k, values := range r.MultipartForm.Value {
 			for _, v := range values {
@@ -130,6 +132,8 @@ func MiddlewareParseRequest(p Request) {
 		}
 	} else {
 		err = r.ParseForm()
-		Must(err)
+		if err != nil {
+			panic(err)
+		}
 	}
 }

@@ -13,7 +13,9 @@ func MiddlewareInitSession(request Request) {
 		request.Log().Errorln("Session not valid")
 		w, _ := request.HttpIO()
 		w.Header().Set("Set-Cookie", sessionName+"=; expires=Thu, 01 Jan 1970 00:00:01 GMT;")
-		Must(err)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	request.SetData("session", session)
