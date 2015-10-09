@@ -28,6 +28,8 @@ func MiddlewareWriteResponse(p Request) {
 		return
 	}
 
+	renderDefaultNotFound := false
+
 	w, _ := p.HttpIO()
 
 	statusCode, statusCodeOk := p.GetData("statusCode").(int)
@@ -36,11 +38,19 @@ func MiddlewareWriteResponse(p Request) {
 			statusCode = http.StatusMovedPermanently
 		} else {
 			statusCode = http.StatusOK
+			renderDefaultNotFound = true
 		}
 	}
 	body, bodyOk := p.GetData("body").([]byte)
 	if !bodyOk {
 		body = []byte{}
+	} else {
+		renderDefaultNotFound = false
+	}
+
+	if renderDefaultNotFound {
+		statusCode = http.StatusNotFound
+		body = []byte("404 - not found")
 	}
 
 	w.WriteHeader(statusCode)
