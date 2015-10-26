@@ -3,7 +3,6 @@ package prago
 import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
-	"github.com/gorilla/sessions"
 	"html/template"
 	"net/http"
 	"runtime/debug"
@@ -18,12 +17,10 @@ type AppInterface interface {
 	Router() *Router
 	Route(method method, path string, controller *Controller, fn func(p Request), c ...Constraint)
 	MainController() *Controller
-	SessionStore() sessions.Store
 	DevelopmentMode() bool
 }
 
 type App struct {
-	sessionStore    sessions.Store
 	log             *logrus.Logger
 	developmentMode bool
 	templates       *template.Template
@@ -41,22 +38,18 @@ func NewApp() *App {
 		middlewares: []Middleware{
 			MiddlewareLogBefore,
 			MiddlewareParseRequest,
-			MiddlewareInitSession,
 			MiddlewareStatic,
 			MiddlewareDispatcher,
-			MiddlewareSaveSession,
 			MiddlewareWriteResponse,
 		},
 	}
 }
 
 func (h *App) DevelopmentMode() bool                     { return h.developmentMode }
-func (h *App) AddSessionStore(store sessions.Store)      { h.sessionStore = store }
 func (h *App) AddTemplates(templates *template.Template) { h.templates = templates }
 func (h *App) Log() *logrus.Logger                       { return h.log }
 func (h *App) Templates() *template.Template             { return h.templates }
 func (h *App) Router() *Router                           { return h.router }
-func (h *App) SessionStore() sessions.Store              { return h.sessionStore }
 func (h *App) MainController() *Controller               { return h.mainController }
 
 func (h *App) Route(m method, path string, controller *Controller, action func(p Request), constraints ...Constraint) {

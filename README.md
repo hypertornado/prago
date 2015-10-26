@@ -5,7 +5,5 @@ Prago is simple web framework fo Go language I am using for my projects. It is i
  * Middleware principle
  * Router
  * View renderer
- * Testing framework
- * Session handling
  * Internationalization support
  * Logging

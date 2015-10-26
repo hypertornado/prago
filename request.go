@@ -2,7 +2,6 @@ package prago
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/gorilla/sessions"
 	"net/http"
 	"net/url"
 )
@@ -18,7 +17,6 @@ type Request interface {
 	Response() http.ResponseWriter
 	AllRequestData() map[string]interface{}
 	Header() http.Header
-	Session() *sessions.Session
 	Log() *logrus.Logger
 }
 
@@ -49,13 +47,6 @@ func (p *request) GetData(k string) interface{}           { return p.data[k] }
 func (p *request) AllRequestData() map[string]interface{} { return p.data }
 func (p *request) App() AppInterface                      { return p.app }
 func (p *request) Header() http.Header                    { return p.w.Header() }
-func (p *request) Session() *sessions.Session {
-	session, ok := p.GetData("session").(*sessions.Session)
-	if !ok {
-		panic("can't get session")
-	}
-	return session
-}
 
 func newRequest(w http.ResponseWriter, r *http.Request, app AppInterface) *request {
 	return &request{
