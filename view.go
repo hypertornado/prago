@@ -10,8 +10,6 @@ import (
 func Render(request Request, statusCode int, viewName string) {
 	buf := new(bytes.Buffer)
 	request.Header().Add("Content-type", "text/html")
-	request.Header().Add("Framework", "prago")
-
 	request.SetData("statusCode", statusCode)
 
 	err := request.App().Templates().ExecuteTemplate(buf, viewName, request.AllRequestData())
