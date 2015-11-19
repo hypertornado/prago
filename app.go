@@ -99,6 +99,8 @@ func recoveryFromServerError(p Request, recoveryData interface{}) {
 	if p.App().DevelopmentMode() {
 		p.Response().Write([]byte(fmt.Sprintf("500 - error\n%s\nstack:\n", recoveryData)))
 		p.Response().Write(debug.Stack())
+		p.Log().Errorln(fmt.Sprintf("500 - error\n%s\nstack:\n", recoveryData))
+		p.Log().Errorln(string(debug.Stack()))
 	} else {
 		p.Response().Write([]byte("We are sorry, some error occured. Admin has been contacted. (500)"))
 	}
