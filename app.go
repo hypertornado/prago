@@ -102,7 +102,7 @@ func recoveryFromServerError(p Request, recoveryData interface{}) {
 		p.Log().Errorln(fmt.Sprintf("500 - error\n%s\nstack:\n", recoveryData))
 		p.Log().Errorln(string(debug.Stack()))
 	} else {
-		p.Response().Write([]byte("We are sorry, some error occured. Admin has been contacted. (500)"))
+		p.Response().Write([]byte("We are sorry, some error occured. (500)"))
 	}
 }
 
