@@ -37,6 +37,7 @@ func NewApp() *App {
 		mainController: newController(nil),
 		middlewares: []Middleware{
 			MiddlewareLogBefore,
+			MiddlewareRemoveTrailingSlash,
 			MiddlewareParseRequest,
 			MiddlewareStatic,
 			MiddlewareDispatcher,
@@ -103,6 +104,15 @@ func recoveryFromServerError(p Request, recoveryData interface{}) {
 		p.Log().Errorln(string(debug.Stack()))
 	} else {
 		p.Response().Write([]byte("We are sorry, some error occured. (500)"))
+	}
+}
+
+func MiddlewareRemoveTrailingSlash(p Request) {
+	path := p.Request().URL.Path
+	if p.Request().Method == "GET" && len(path) > 1 && path == p.Request().URL.String() && strings.HasSuffix(path, "/") {
+		Redirect(p, path[0:len(path)-1])
+		p.Response().WriteHeader(http.StatusMovedPermanently)
+		p.SetProcessed()
 	}
 }
 

@@ -19,6 +19,12 @@ func TestApp(t *testing.T) {
 		t.Error(w.Body.String())
 	}
 
+	r, _ = http.NewRequest("GET", "/h/", nil)
+	handleRequest(w, r, app)
+	if w.Body.String() != "hello" {
+		t.Error(w.Body.String())
+	}
+
 	app.Route(GET, "*some", app.MainController(), func(request Request) {
 		s := request.Params().Get("some")
 		request.SetData("body", []byte("star "+s))
