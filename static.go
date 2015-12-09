@@ -7,6 +7,7 @@ import (
 
 var (
 	FileNotFoundError = errors.New("requested file is folder")
+	StaticDirPath     = "public"
 )
 
 func MiddlewareStatic(p Request) {
@@ -20,8 +21,7 @@ func MiddlewareStatic(p Request) {
 }
 
 func ServeStatic(w http.ResponseWriter, r *http.Request) error {
-
-	return serveFile(w, r, http.Dir("public"), r.URL.Path)
+	return serveFile(w, r, http.Dir(StaticDirPath), r.URL.Path)
 }
 
 func serveFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name string) (err error) {

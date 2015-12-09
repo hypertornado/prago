@@ -18,7 +18,6 @@ func Render(request Request, statusCode int, viewName string) {
 	}
 
 	request.SetData("body", buf.Bytes())
-
 }
 
 func MiddlewareWriteResponse(p Request) {
