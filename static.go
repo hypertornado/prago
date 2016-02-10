@@ -38,7 +38,20 @@ func serveFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name 
 	}
 
 	if d.IsDir() {
-		return FileNotFoundError
+		f.Close()
+		f, err = fs.Open(name + "/index.html")
+		if err != nil {
+			return
+		}
+
+		d, err = f.Stat()
+		if err != nil {
+			return FileNotFoundError
+		}
+
+		if d.IsDir() {
+			return FileNotFoundError
+		}
 	}
 
 	http.ServeContent(w, r, d.Name(), d.ModTime(), f)
