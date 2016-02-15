@@ -1,4 +1,4 @@
-package fw
+package prago
 
 import (
 	"fmt"

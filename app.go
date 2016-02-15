@@ -1,81 +1,96 @@
 package prago
 
 import (
+	"errors"
 	"fmt"
 	"github.com/Sirupsen/logrus"
-	"html/template"
 	"net/http"
 	"runtime/debug"
 	"strconv"
-	"strings"
 	"time"
 )
 
-type AppInterface interface {
-	Log() *logrus.Logger
-	Templates() *template.Template
-	Router() *Router
-	Route(method method, path string, controller *Controller, fn func(p Request), c ...Constraint)
-	MainController() *Controller
-	DevelopmentMode() bool
-}
-
 type App struct {
-	log             *logrus.Logger
-	developmentMode bool
-	templates       *template.Template
-	router          *Router
-	mainController  *Controller
-	middlewares     []Middleware
+	data               map[string]interface{}
+	events             *Events
+	requestMiddlewares []RequestMiddleware
+	middlewares        []Middleware
 }
 
-func NewApp() *App {
-	return &App{
-		log:            defaultLogger(),
-		templates:      nil,
-		router:         NewRouter(),
-		mainController: newController(nil),
-		middlewares: []Middleware{
-			MiddlewareLogBefore,
-			MiddlewareRemoveTrailingSlash,
-			MiddlewareParseRequest,
-			MiddlewareStatic,
-			MiddlewareDispatcher,
-			MiddlewareWriteResponse,
-		},
+type RequestMiddleware func(Request, func())
+
+func NewApp(name string) *App {
+	app := &App{
+		data:               make(map[string]interface{}),
+		events:             NewEvents(),
+		requestMiddlewares: []RequestMiddleware{},
+		middlewares:        []Middleware{},
 	}
+
+	app.data["logger"] = defaultLogger()
+	app.data["mainController"] = newMainController(app)
+	app.data["appName"] = name
+	app.data["router"] = NewRouter()
+
+	app.AddMiddleware(MiddlewareConfig{})
+	app.AddMiddleware(MiddlewareRemoveTrailingSlash)
+	app.AddMiddleware(MiddlewareStatic)
+	app.AddMiddleware(MiddlewareParseRequest)
+	app.AddMiddleware(MiddlewareView{})
+	app.AddMiddleware(MiddlewareDispatcher)
+
+	return app
 }
 
-func (h *App) DevelopmentMode() bool                     { return h.developmentMode }
-func (h *App) AddTemplates(templates *template.Template) { h.templates = templates }
-func (h *App) Log() *logrus.Logger                       { return h.log }
-func (h *App) Templates() *template.Template             { return h.templates }
-func (h *App) Router() *Router                           { return h.router }
-func (h *App) MainController() *Controller               { return h.mainController }
+func (a *App) AddMiddleware(m Middleware) {
+	a.middlewares = append(a.middlewares, m)
+}
 
-func (h *App) Route(m method, path string, controller *Controller, action func(p Request), constraints ...Constraint) {
+func (a *App) Data() map[string]interface{} {
+	return a.data
+}
+
+func (a *App) Init(init func(*App)) {
+	for _, v := range a.middlewares {
+		v.Init(a)
+	}
+	a.bind(init)
+}
+
+func (a *App) MainController() (ret *Controller) {
+	ret = a.data["mainController"].(*Controller)
+	if ret == nil {
+		panic("couldnt find controller")
+	}
+	return
+}
+
+func (a *App) Route(m method, path string, controller *Controller, action func(p Request), constraints ...Constraint) error {
+	router := a.data["router"].(*Router)
+	if router == nil {
+		return errors.New("couldnt find router")
+	}
+
 	bindedAction := controller.NewAction(action)
 	route := NewRoute(m, path, bindedAction, constraints)
-	h.Router().AddRoute(route)
+	router.AddRoute(route)
+	return nil
 }
 
-func (h *App) ListenAndServe(port int, developmentMode bool) error {
-
-	h.developmentMode = developmentMode
+func (a *App) ListenAndServe(port int, developmentMode bool) error {
+	a.data["developmentMode"] = developmentMode
 
 	server := &http.Server{
 		Addr:           ":" + strconv.Itoa(port),
-		Handler:        h,
+		Handler:        a,
 		ReadTimeout:    2 * time.Minute,
 		WriteTimeout:   2 * time.Minute,
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	writeStartInfo(h.Log(), port, developmentMode)
+	writeStartInfo(a.data["logger"].(*logrus.Logger), port, developmentMode)
 	return server.ListenAndServe()
 }
-
-type Middleware func(Request)
 
 func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handleRequest(w, r, app)
@@ -90,14 +105,27 @@ func handleRequest(w http.ResponseWriter, r *http.Request, app *App) {
 		}
 	}()
 
-	for _, middleware := range app.middlewares {
-		middleware(request)
+	callRequestMiddlewares(request, app.requestMiddlewares)
+}
+
+func callRequestMiddlewares(request Request, middlewares []RequestMiddleware) {
+	f := func() {}
+	for i := len(middlewares) - 1; i >= 0; i-- {
+		j := i
+		prevF := f
+		f = func() {
+			middlewares[j](request, prevF)
+		}
 	}
+	f()
 }
 
 func recoveryFromServerError(p Request, recoveryData interface{}) {
 	p.Response().WriteHeader(500)
-	if p.App().DevelopmentMode() {
+
+	developmentMode := p.App().data["developmentMode"].(bool)
+
+	if developmentMode {
 		p.Response().Write([]byte(fmt.Sprintf("500 - error\n%s\nstack:\n", recoveryData)))
 		p.Response().Write(debug.Stack())
 	} else {
@@ -105,37 +133,4 @@ func recoveryFromServerError(p Request, recoveryData interface{}) {
 	}
 	p.Log().Errorln(fmt.Sprintf("500 - error\n%s\nstack:\n", recoveryData))
 	p.Log().Errorln(string(debug.Stack()))
-}
-
-func MiddlewareRemoveTrailingSlash(p Request) {
-	path := p.Request().URL.Path
-	if p.Request().Method == "GET" && len(path) > 1 && path == p.Request().URL.String() && strings.HasSuffix(path, "/") {
-		Redirect(p, path[0:len(path)-1])
-		p.Response().WriteHeader(http.StatusMovedPermanently)
-		p.SetProcessed()
-	}
-}
-
-func MiddlewareParseRequest(p Request) {
-	contentType := p.Request().Header.Get("Content-Type")
-
-	var err error
-
-	if strings.HasPrefix(contentType, "multipart/form-data") {
-		err = p.Request().ParseMultipartForm(1000000)
-		if err != nil {
-			panic(err)
-		}
-
-		for k, values := range p.Request().MultipartForm.Value {
-			for _, v := range values {
-				p.Request().Form.Add(k, v)
-			}
-		}
-	} else {
-		err = p.Request().ParseForm()
-		if err != nil {
-			panic(err)
-		}
-	}
 }

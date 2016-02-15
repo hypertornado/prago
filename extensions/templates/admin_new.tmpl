@@ -1,0 +1,17 @@
+{{define "admin_new"}}
+
+<h1>Nový {{.admin_resource.Name}}</h1>
+
+<form method="post" action="">
+
+{{range $item := .admin_node}}
+
+  {{tmpl $item.Template $item}}
+
+{{end}}
+
+<br>
+<input type="submit" value="Odeslat">
+</form>
+
+{{end}}

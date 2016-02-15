@@ -10,7 +10,7 @@ type Request interface {
 	IsProcessed() bool
 	SetProcessed()
 	Params() url.Values
-	App() AppInterface
+	App() *App
 	SetData(string, interface{})
 	GetData(string) interface{}
 	Request() *http.Request
@@ -24,11 +24,11 @@ type request struct {
 	w    http.ResponseWriter
 	r    *http.Request
 	data map[string]interface{}
-	app  AppInterface
+	app  *App
 }
 
 func (p *request) Log() *logrus.Logger {
-	return p.App().Log()
+	return p.App().data["logger"].(*logrus.Logger)
 }
 
 func (p *request) IsProcessed() bool {
@@ -45,10 +45,10 @@ func (p *request) Params() url.Values {
 func (p *request) SetData(k string, v interface{})        { p.data[k] = v }
 func (p *request) GetData(k string) interface{}           { return p.data[k] }
 func (p *request) AllRequestData() map[string]interface{} { return p.data }
-func (p *request) App() AppInterface                      { return p.app }
+func (p *request) App() *App                              { return p.app }
 func (p *request) Header() http.Header                    { return p.w.Header() }
 
-func newRequest(w http.ResponseWriter, r *http.Request, app AppInterface) *request {
+func newRequest(w http.ResponseWriter, r *http.Request, app *App) *request {
 	return &request{
 		w:    w,
 		r:    r,
@@ -58,5 +58,5 @@ func newRequest(w http.ResponseWriter, r *http.Request, app AppInterface) *reque
 }
 
 func MiddlewareLogBefore(p Request) {
-	p.App().Log().Println(p.Request().Method, p.Request().URL.String())
+	p.App().data["logger"].(*logrus.Logger).Println(p.Request().Method, p.Request().URL.String())
 }

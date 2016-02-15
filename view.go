@@ -8,11 +8,16 @@ import (
 )
 
 func Render(request Request, statusCode int, viewName string) {
+	templates, ok := request.App().data["templates"].(*template.Template)
+	if !ok {
+		panic("couldnt find templates")
+	}
+
 	buf := new(bytes.Buffer)
 	request.Header().Add("Content-type", "text/html")
 	request.SetData("statusCode", statusCode)
 
-	err := request.App().Templates().ExecuteTemplate(buf, viewName, request.AllRequestData())
+	err := templates.ExecuteTemplate(buf, viewName, request.AllRequestData())
 	if err != nil {
 		panic(err)
 	}
@@ -20,7 +25,32 @@ func Render(request Request, statusCode int, viewName string) {
 	request.SetData("body", buf.Bytes())
 }
 
-func MiddlewareWriteResponse(p Request) {
+type MiddlewareView struct{}
+
+func (m MiddlewareView) Init(app *App) error {
+	translations := NewI18N()
+
+	funcs := template.FuncMap{}
+
+	templates, err := loadTemplates(
+		funcs,
+		[]string{
+			"server/templates/*.tmpl",
+		}, translations)
+	if err != nil {
+		panic(err)
+	}
+
+	app.data["templates"] = templates
+	app.data["templateFuncs"] = funcs
+
+	app.requestMiddlewares = append(app.requestMiddlewares, requestMiddlewareView)
+	return nil
+}
+
+func requestMiddlewareView(p Request, next func()) {
+	next()
+
 	if p.IsProcessed() {
 		return
 	}
@@ -53,8 +83,7 @@ func MiddlewareWriteResponse(p Request) {
 	p.SetProcessed()
 }
 
-func LoadTemplates(patterns []string, translations *I18N) (t *template.Template, err error) {
-	funcs := template.FuncMap{}
+func loadTemplates(funcs template.FuncMap, patterns []string, translations *I18N) (t *template.Template, err error) {
 	funcs["T"] = func(locale interface{}, id string) (string, error) {
 		localeStr := ""
 		if reflect.ValueOf(locale).Kind() == reflect.String {

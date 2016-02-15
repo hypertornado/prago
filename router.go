@@ -16,11 +16,18 @@ const (
 	ANY
 )
 
-func MiddlewareDispatcher(p Request) {
+func requestMiddlewareDispatcher(p Request, next func()) {
 	if p.IsProcessed() {
 		return
 	}
-	p.App().Router().Process(p)
+
+	router := p.App().data["router"].(*Router)
+	if router == nil {
+		panic("couldnt find router")
+	}
+	router.Process(p)
+
+	next()
 }
 
 type Router struct {

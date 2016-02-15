@@ -10,7 +10,7 @@ var (
 	StaticDirPath     = "public"
 )
 
-func MiddlewareStatic(p Request) {
+func requestMiddlewareStatic(p Request, next func()) {
 	if p.IsProcessed() {
 		return
 	}
@@ -18,6 +18,8 @@ func MiddlewareStatic(p Request) {
 	if err == nil {
 		p.SetProcessed()
 	}
+
+	next()
 }
 
 func ServeStatic(w http.ResponseWriter, r *http.Request) error {
@@ -25,7 +27,6 @@ func ServeStatic(w http.ResponseWriter, r *http.Request) error {
 }
 
 func serveFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name string) (err error) {
-
 	f, err := fs.Open(name)
 	if err != nil {
 		return

@@ -2,25 +2,30 @@ package prago
 
 type Controller struct {
 	parent        *Controller
+	app           *App
 	aroundActions []func(p Request, next func())
 }
 
-func newController(parent *Controller) *Controller {
+func newMainController(app *App) *Controller {
 	return &Controller{
-		parent:        parent,
+		parent:        nil,
+		app:           app,
 		aroundActions: []func(p Request, next func()){},
 	}
 }
 
 func (c *Controller) SubController() (controller *Controller) {
-	return newController(c)
+	return &Controller{
+		parent:        c,
+		app:           c.app,
+		aroundActions: []func(p Request, next func()){},
+	}
 }
 
-func (c *Controller) AddBeforeAction(fn func(p Request) bool) {
+func (c *Controller) AddBeforeAction(fn func(p Request)) {
 	c.AddAroundAction(func(p Request, next func()) {
-		if fn(p) {
-			next()
-		}
+		fn(p)
+		next()
 	})
 }
 
@@ -70,4 +75,20 @@ func (c *Controller) callArounds(p Request, i int, finalFunc func(), down bool) 
 	} else {
 		finalFunc()
 	}
+}
+
+func (c *Controller) Get(path string, action func(p Request), constraints ...Constraint) {
+	c.app.Route(GET, path, c, action, constraints...)
+}
+
+func (c *Controller) Post(path string, action func(p Request), constraints ...Constraint) {
+	c.app.Route(POST, path, c, action, constraints...)
+}
+
+func (c *Controller) Put(path string, action func(p Request), constraints ...Constraint) {
+	c.app.Route(PUT, path, c, action, constraints...)
+}
+
+func (c *Controller) Delete(path string, action func(p Request), constraints ...Constraint) {
+	c.app.Route(DELETE, path, c, action, constraints...)
 }

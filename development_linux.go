@@ -1,3 +1,3 @@
-package fw
+package prago
 
 func developmentCSS() {}
