@@ -8,9 +8,7 @@ import (
 )
 
 func (app *App) bind(init func(*App)) {
-
 	cmd := kingpin.New("", "")
-
 	serverCommand := cmd.Command("server", "Run server")
 	port := serverCommand.Flag("port", "server port").Default("8585").Short('p').Int()
 	developmentMode := serverCommand.Flag("development", "Is in development mode").Default("false").Short('d').Bool()
@@ -28,7 +26,7 @@ func (app *App) bind(init func(*App)) {
 	switch command {
 	case serverCommand.FullCommand():
 		init(app)
-		app.Start(*port, *developmentMode)
+		app.start(*port, *developmentMode)
 	case buildCommand.FullCommand():
 		build()
 	case cssCommand.FullCommand():
@@ -39,7 +37,7 @@ func (app *App) bind(init func(*App)) {
 	}
 }
 
-func (a *App) Start(port int, developmentMode bool) {
+func (a *App) start(port int, developmentMode bool) {
 	err := a.ListenAndServe(port, developmentMode)
 	if err != nil {
 		panic(err)
@@ -52,7 +50,7 @@ func build() {
 
 func development(app *App) {
 	go developmentCSS()
-	app.Start(8585, true)
+	app.start(8585, true)
 }
 
 func compileCss() error {

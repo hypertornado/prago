@@ -1,4 +1,4 @@
-package prago
+package utils
 
 import (
 	"testing"
@@ -16,5 +16,4 @@ func TestUtils(t *testing.T) {
 			t.Errorf("pretty url of '%s' is '%s' instead of '%s", v[0], PrettyUrl(v[0]), v[1])
 		}
 	}
-
 }

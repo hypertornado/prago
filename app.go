@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Sirupsen/logrus"
+	"github.com/hypertornado/prago/utils"
 	"net/http"
 	"runtime/debug"
 	"strconv"
@@ -27,7 +28,7 @@ func NewApp(name string) *App {
 		middlewares:        []Middleware{},
 	}
 
-	app.data["logger"] = defaultLogger()
+	app.data["logger"] = utils.DefaultLogger()
 	app.data["mainController"] = newMainController(app)
 	app.data["appName"] = name
 	app.data["router"] = NewRouter()
@@ -50,10 +51,14 @@ func (a *App) Data() map[string]interface{} {
 	return a.data
 }
 
-func (a *App) Init(init func(*App)) {
+func (a *App) initMiddlewares() {
 	for _, v := range a.middlewares {
 		v.Init(a)
 	}
+}
+
+func (a *App) Init(init func(*App)) {
+	a.initMiddlewares()
 	a.bind(init)
 }
 
@@ -88,7 +93,7 @@ func (a *App) ListenAndServe(port int, developmentMode bool) error {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	writeStartInfo(a.data["logger"].(*logrus.Logger), port, developmentMode)
+	utils.WriteStartInfo(a.data["logger"].(*logrus.Logger), port, developmentMode)
 	return server.ListenAndServe()
 }
 
@@ -133,4 +138,8 @@ func recoveryFromServerError(p Request, recoveryData interface{}) {
 	}
 	p.Log().Errorln(fmt.Sprintf("500 - error\n%s\nstack:\n", recoveryData))
 	p.Log().Errorln(string(debug.Stack()))
+}
+
+func Redirect(request Request, urlStr string) {
+	request.Header().Set("Location", urlStr)
 }

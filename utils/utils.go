@@ -1,4 +1,4 @@
-package prago
+package utils
 
 import (
 	"github.com/Machiel/slugify"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func defaultLogger() *logrus.Logger {
+func DefaultLogger() *logrus.Logger {
 	ret := logrus.New()
 	logFormatter := new(logrus.TextFormatter)
 	logFormatter.FullTimestamp = true
@@ -16,15 +16,11 @@ func defaultLogger() *logrus.Logger {
 	return ret
 }
 
-func writeStartInfo(log *logrus.Logger, port int, developmentMode bool) {
+func WriteStartInfo(log *logrus.Logger, port int, developmentMode bool) {
 	log.WithField("port", port).
 		WithField("pid", os.Getpid()).
 		WithField("development mode", developmentMode).
 		Info("Server started")
-}
-
-func Redirect(request Request, urlStr string) {
-	request.Header().Set("Location", urlStr)
 }
 
 func PrettyUrl(s string) string {

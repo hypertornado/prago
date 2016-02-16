@@ -2,9 +2,9 @@ package prago
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"net/http"
-	"reflect"
 )
 
 func Render(request Request, statusCode int, viewName string) {
@@ -28,23 +28,23 @@ func Render(request Request, statusCode int, viewName string) {
 type MiddlewareView struct{}
 
 func (m MiddlewareView) Init(app *App) error {
-	translations := NewI18N()
+	app.requestMiddlewares = append(app.requestMiddlewares, requestMiddlewareView)
 
 	funcs := template.FuncMap{}
 
-	templates, err := loadTemplates(
-		funcs,
-		[]string{
-			"server/templates/*.tmpl",
-		}, translations)
+	templatePaths := []string{
+		"server/templates/*.tmpl",
+	}
+
+	templates, err := loadTemplates(funcs, templatePaths)
 	if err != nil {
-		panic(err)
+		fmt.Println("couldnt load templates")
+		return nil
 	}
 
 	app.data["templates"] = templates
 	app.data["templateFuncs"] = funcs
 
-	app.requestMiddlewares = append(app.requestMiddlewares, requestMiddlewareView)
 	return nil
 }
 
@@ -83,14 +83,14 @@ func requestMiddlewareView(p Request, next func()) {
 	p.SetProcessed()
 }
 
-func loadTemplates(funcs template.FuncMap, patterns []string, translations *I18N) (t *template.Template, err error) {
-	funcs["T"] = func(locale interface{}, id string) (string, error) {
+func loadTemplates(funcs template.FuncMap, patterns []string) (t *template.Template, err error) {
+	/*funcs["T"] = func(locale interface{}, id string) (string, error) {
 		localeStr := ""
 		if reflect.ValueOf(locale).Kind() == reflect.String {
 			localeStr = reflect.ValueOf(locale).String()
 		}
 		return translations.GetTranslation(localeStr, id), nil
-	}
+	}*/
 
 	funcs["Plain"] = func(data string) template.HTML {
 		return template.HTML(data)
