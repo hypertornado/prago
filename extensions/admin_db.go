@@ -90,8 +90,9 @@ func getStructDescription(item interface{}) (map[string]*mysqlColumn, error) {
 	return columns, nil
 }
 
-func getStructScanners(value reflect.Value) (map[string]*scanner, error) {
-	ret := map[string]*scanner{}
+func getStructScanners(value reflect.Value) (names []string, scanners []interface{}, err error) {
+	names = []string{}
+	scanners = []interface{}{}
 
 	for i := 0; i < value.Type().NumField(); i++ {
 		use := true
@@ -106,11 +107,12 @@ func getStructScanners(value reflect.Value) (map[string]*scanner, error) {
 			use = false
 		}
 		if use {
-			ret[name] = &scanner{value.Field(i)}
+			names = append(names, name)
+			scanners = append(scanners, &scanner{value.Field(i)})
 		}
 	}
 
-	return ret, nil
+	return
 }
 
 type scanner struct {
@@ -142,19 +144,12 @@ func (s *scanner) Scan(src interface{}) error {
 func getItem(db *sql.DB, tableName string, item interface{}, id int64) error {
 	value := reflect.ValueOf(item).Elem()
 
-	scanners, err := getStructScanners(value)
+	names, scanners, err := getStructScanners(value)
 	if err != nil {
 		return err
 	}
 
-	keys := []string{}
-	values := []interface{}{}
-	for k, v := range scanners {
-		keys = append(keys, k)
-		values = append(values, v)
-	}
-
-	q := fmt.Sprintf("SELECT %s FROM `%s` WHERE id=?", strings.Join(keys, ", "), tableName)
+	q := fmt.Sprintf("SELECT %s FROM `%s` WHERE id=?", strings.Join(names, ", "), tableName)
 	rows, err := db.Query(q, id)
 	if err != nil {
 		return err
@@ -162,7 +157,7 @@ func getItem(db *sql.DB, tableName string, item interface{}, id int64) error {
 	defer rows.Close()
 	rows.Next()
 
-	return rows.Scan(values...)
+	return rows.Scan(scanners...)
 }
 
 func listItems(db *sql.DB, tableName string, items interface{}) error {
@@ -170,7 +165,28 @@ func listItems(db *sql.DB, tableName string, items interface{}) error {
 	sliceItemType := originalValue.Type().Elem()
 	slice := reflect.New(reflect.SliceOf(sliceItemType)).Elem()
 
-	slice.Set(reflect.Append(slice, reflect.New(sliceItemType).Elem()))
+	newValue := reflect.New(sliceItemType).Elem()
+	names, scanners, err := getStructScanners(newValue)
+	if err != nil {
+		return err
+	}
+
+	q := fmt.Sprintf("SELECT %s FROM `%s`;", strings.Join(names, ", "), tableName)
+	rows, err := db.Query(q)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		newValue = reflect.New(sliceItemType).Elem()
+		names, scanners, err = getStructScanners(newValue)
+		if err != nil {
+			return err
+		}
+
+		rows.Scan(scanners...)
+		slice.Set(reflect.Append(slice, newValue))
+	}
 
 	originalValue.Set(slice)
 	return nil
