@@ -90,15 +90,12 @@ func getStructDescription(item interface{}) (map[string]*mysqlColumn, error) {
 	return columns, nil
 }
 
-func getStructScanners(item interface{}) (map[string]*scanner, error) {
-	typ := reflect.TypeOf(item).Elem()
-	val := reflect.ValueOf(item).Elem()
-
+func getStructScanners(value reflect.Value) (map[string]*scanner, error) {
 	ret := map[string]*scanner{}
 
-	for i := 0; i < typ.NumField(); i++ {
+	for i := 0; i < value.Type().NumField(); i++ {
 		use := true
-		field := typ.Field(i)
+		field := value.Type().Field(i)
 		name := utils.PrettyUrl(field.Name)
 
 		switch field.Type.Kind().String() {
@@ -109,7 +106,7 @@ func getStructScanners(item interface{}) (map[string]*scanner, error) {
 			use = false
 		}
 		if use {
-			ret[name] = &scanner{val.Field(i)}
+			ret[name] = &scanner{value.Field(i)}
 		}
 	}
 
@@ -143,7 +140,9 @@ func (s *scanner) Scan(src interface{}) error {
 }
 
 func getItem(db *sql.DB, tableName string, item interface{}, id int64) error {
-	scanners, err := getStructScanners(item)
+	value := reflect.ValueOf(item).Elem()
+
+	scanners, err := getStructScanners(value)
 	if err != nil {
 		return err
 	}
@@ -167,6 +166,13 @@ func getItem(db *sql.DB, tableName string, item interface{}, id int64) error {
 }
 
 func listItems(db *sql.DB, tableName string, items interface{}) error {
+	originalValue := reflect.ValueOf(items).Elem()
+	sliceItemType := originalValue.Type().Elem()
+	slice := reflect.New(reflect.SliceOf(sliceItemType)).Elem()
+
+	slice.Set(reflect.Append(slice, reflect.New(sliceItemType).Elem()))
+
+	originalValue.Set(slice)
 	return nil
 }
 

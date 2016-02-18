@@ -66,6 +66,12 @@ func TestAdminDB(t *testing.T) {
 	if n2.Count != count1 {
 		t.Fatal(n2.Count)
 	}
+
+	var nodes []TestNode
+	listItems(db, tableName, &nodes)
+
+	fmt.Println(nodes)
+
 }
 
 func TestAdminStructDescription(t *testing.T) {
