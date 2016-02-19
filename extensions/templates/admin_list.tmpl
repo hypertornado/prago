@@ -2,13 +2,13 @@
 
 <h2>{{.admin_resource.Name}}</h2>
 
+{{ $adminResource := .admin_resource }}
 
 <ul>
 {{range $item := .admin_items}}
-  <li><a href="{{.Url}}">{{.Name}}</a></li>
+  <li><a href="{{ $adminResource.ID}}/{{$item.ID}}">{{.Name}}</a></li>
 {{end}}
 </ul>
 
-<a href="{{.admin_resource.ID}}/new">New</a>
-
+<a href="{{.admin_resource.ID}}/new"> New</a>
 {{end}}

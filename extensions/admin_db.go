@@ -8,13 +8,22 @@ import (
 	"strings"
 )
 
+type mysqlColumn struct {
+	Field   string
+	Type    string
+	Null    string
+	Key     string
+	Default sql.NullString
+	Extra   sql.NullString
+}
+
 func dropTable(db *sql.DB, tableName string) error {
 	_, err := db.Exec(fmt.Sprintf("drop table `%s`;", tableName))
 	return err
 }
 
-func createTable(db *sql.DB, tableName string, item interface{}) error {
-	description, err := getStructDescription(item)
+func createTable(db *sql.DB, tableName string, typ reflect.Type) error {
+	description, err := getStructDescription(typ)
 	if err != nil {
 		return err
 	}
@@ -59,10 +68,9 @@ func getTableDescription(db *sql.DB, tableName string) (map[string]*mysqlColumn,
 	return columns, nil
 }
 
-func getStructDescription(item interface{}) (map[string]*mysqlColumn, error) {
+func getStructDescription(typ reflect.Type) (map[string]*mysqlColumn, error) {
 	columns := map[string]*mysqlColumn{}
 
-	typ := reflect.TypeOf(item)
 	if typ.Kind() == reflect.Ptr {
 		typ = typ.Elem()
 	}
@@ -160,9 +168,7 @@ func getItem(db *sql.DB, tableName string, item interface{}, id int64) error {
 	return rows.Scan(scanners...)
 }
 
-func listItems(db *sql.DB, tableName string, items interface{}) error {
-	originalValue := reflect.ValueOf(items).Elem()
-	sliceItemType := originalValue.Type().Elem()
+func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}) error {
 	slice := reflect.New(reflect.SliceOf(sliceItemType)).Elem()
 
 	newValue := reflect.New(sliceItemType).Elem()
@@ -188,7 +194,7 @@ func listItems(db *sql.DB, tableName string, items interface{}) error {
 		slice.Set(reflect.Append(slice, newValue))
 	}
 
-	originalValue.Set(slice)
+	reflect.ValueOf(items).Elem().Set(slice)
 	return nil
 }
 

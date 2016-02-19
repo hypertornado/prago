@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/hypertornado/prago"
+	"github.com/jinzhu/gorm"
 	"html/template"
 	"strconv"
 )
@@ -14,6 +15,7 @@ type Admin struct {
 	AppName   string
 	Resources []*AdminResource
 	db        *sql.DB
+	gorm      *gorm.DB
 }
 
 func (a *Admin) Migrate() (err error) {
@@ -24,18 +26,6 @@ func (a *Admin) Migrate() (err error) {
 		}
 	}
 	return
-}
-
-func NewAdminInput(name string) *AdminResourceItem {
-	return &AdminResourceItem{
-		Name:     name,
-		Template: "admin_input",
-	}
-}
-
-type AdminResourceItem struct {
-	Name     string
-	Template string
 }
 
 func (a *Admin) AddResource(resource *AdminResource) {
@@ -63,6 +53,7 @@ func (a *Admin) adminHeaderData() interface{} {
 func (a *Admin) Init(app *prago.App) error {
 	a.AppName = app.Data()["appName"].(string)
 	a.db = app.Data()["db"].(*sql.DB)
+	a.gorm = app.Data()["gorm"].(*gorm.DB)
 	t := app.Data()["templates"].(*template.Template)
 	if t == nil {
 		panic("templates not found")

@@ -5,35 +5,31 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hypertornado/prago/utils"
+	"github.com/jinzhu/gorm"
 	"reflect"
 )
 
 type AdminResource struct {
 	ID    string
 	Name  string
-	Item  interface{}
-	Items []*AdminResourceItem
+	Typ   reflect.Type
 	admin *Admin
 }
 
 func NewResource(item interface{}) (*AdminResource, error) {
-	name := reflect.TypeOf(item).Name()
+	typ := reflect.TypeOf(item)
+	name := typ.Name()
 
 	ret := &AdminResource{
-		Item: item,
 		Name: name,
 		ID:   utils.PrettyUrl(name),
+		Typ:  typ,
 	}
 	return ret, nil
 }
 
-type mysqlColumn struct {
-	Field   string
-	Type    string
-	Null    string
-	Key     string
-	Default sql.NullString
-	Extra   sql.NullString
+func (ar *AdminResource) gorm() *gorm.DB {
+	return ar.admin.gorm
 }
 
 func (ar *AdminResource) db() *sql.DB {
@@ -49,35 +45,17 @@ type listResult struct {
 	Name string
 }
 
-func (ar *AdminResource) List() ([]listResult, error) {
-	ret := []listResult{}
-	q := fmt.Sprintf("SELECT id, name FROM `%s`;", ar.tableName())
-
-	rows, err := ar.db().Query(q)
-	if err != nil {
-		return ret, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var id int64
-		var name string
-		rows.Scan(&id, &name)
-		item := &listResult{
-			Url:  fmt.Sprintf("%s/%s/%d", ar.admin.Prefix, ar.ID, id),
-			Name: name,
-		}
-		ret = append(ret, *item)
-	}
-
-	return ret, nil
+func (ar *AdminResource) List() (interface{}, error) {
+	var items interface{}
+	listItems(ar.db(), ar.tableName(), ar.Typ, &items)
+	return items, nil
 }
 
 func (ar *AdminResource) CreateItem(item interface{}) error {
 	typ := reflect.TypeOf(item)
-	id := utils.PrettyUrl(typ.Name())
+	id := utils.PrettyUrl(typ.Elem().Name())
 	if id != ar.tableName() {
-		return errors.New("Wrong class of item")
+		return errors.New("Wrong class of item " + id + " " + ar.tableName())
 	}
 
 	return createItem(ar.db(), ar.tableName(), item)
@@ -92,5 +70,5 @@ func (ar *AdminResource) Migrate() error {
 	}
 
 	_, err = getTableDescription(ar.db(), ar.tableName())
-	return createTable(ar.db(), ar.tableName(), ar.Item)
+	return createTable(ar.db(), ar.tableName(), ar.Typ)
 }

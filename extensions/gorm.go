@@ -22,7 +22,7 @@ func (g *Gorm) Init(app *prago.App) error {
 	password := config["dbPassword"]
 	db, err := g.connectMySQL(user, password, dbName)
 	app.Data()["db"] = db.DB()
-	app.Data()["gorm"] = db
+	app.Data()["gorm"] = &db
 	g.DB = db
 	return err
 }
