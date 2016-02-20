@@ -3,7 +3,6 @@ package extensions
 import (
 	"bytes"
 	"database/sql"
-	"fmt"
 	"github.com/hypertornado/prago"
 	"github.com/jinzhu/gorm"
 	"html/template"
@@ -58,6 +57,8 @@ func (a *Admin) Init(app *prago.App) error {
 	if t == nil {
 		panic("templates not found")
 	}
+
+	//TODO: read from config
 	path := "/Users/ondrejodchazel/projects/go/src/github.com/hypertornado/prago/extensions/templates/"
 
 	var err error
@@ -126,26 +127,26 @@ func (a *Admin) Init(app *prago.App) error {
 		})
 
 		resourceController.Get(a.Prefix+"/"+resource.ID+"/new", func(request prago.Request) {
-
-			//request.SetData("admin_node")
 			request.SetData("admin_yield", "admin_new")
 			prago.Render(request, 200, "admin_layout")
 		})
 
 		resourceController.Post(a.Prefix+"/"+resource.ID+"/new", func(request prago.Request) {
-			fmt.Println(request.Params())
 			prago.Redirect(request, a.Prefix+"/"+resource.ID)
 		})
 
 		resourceController.Get(a.Prefix+"/"+resource.ID+"/:id", func(request prago.Request) {
-
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			if err != nil {
 				panic(err)
 			}
 
-			fmt.Println(id)
+			item, err := resource.Get(int64(id))
+			if err != nil {
+				panic(err)
+			}
 
+			request.SetData("admin_item", item)
 			request.SetData("admin_yield", "admin_edit")
 			prago.Render(request, 200, "admin_layout")
 		})

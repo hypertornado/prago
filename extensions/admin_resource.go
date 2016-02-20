@@ -40,15 +40,16 @@ func (ar *AdminResource) tableName() string {
 	return ar.ID
 }
 
-type listResult struct {
-	Url  string
-	Name string
-}
-
 func (ar *AdminResource) List() (interface{}, error) {
 	var items interface{}
 	listItems(ar.db(), ar.tableName(), ar.Typ, &items)
 	return items, nil
+}
+
+func (ar *AdminResource) Get(id int64) (interface{}, error) {
+	var item interface{}
+	getItem(ar.db(), ar.tableName(), ar.Typ, &item, id)
+	return item, nil
 }
 
 func (ar *AdminResource) CreateItem(item interface{}) error {

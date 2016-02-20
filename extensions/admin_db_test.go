@@ -31,7 +31,7 @@ func TestAdminDB(t *testing.T) {
 	var err error
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, TestNode{})
+	createTable(db, tableName, reflect.TypeOf(TestNode{}))
 
 	name1 := "A2"
 	var count1 int64 = 13
@@ -53,9 +53,9 @@ func TestAdminDB(t *testing.T) {
 		t.Fatal(n1.ID)
 	}
 
-	n2 := &TestNode{}
+	n2 := TestNode{}
 
-	err = getItem(db, tableName, n2, n1.ID)
+	err = getItem(db, tableName, reflect.TypeOf(TestNode{}), &n2, n1.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +88,7 @@ func TestAdminDB(t *testing.T) {
 }
 
 func TestAdminStructDescription(t *testing.T) {
-	getStructDescription(&TestNode{})
+	getStructDescription(reflect.TypeOf(&TestNode{}))
 }
 
 func NewSTR() {

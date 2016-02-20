@@ -149,9 +149,8 @@ func (s *scanner) Scan(src interface{}) error {
 	return nil
 }
 
-func getItem(db *sql.DB, tableName string, item interface{}, id int64) error {
-	value := reflect.ValueOf(item).Elem()
-
+func getItem(db *sql.DB, tableName string, itemType reflect.Type, item interface{}, id int64) error {
+	value := reflect.New(itemType).Elem()
 	names, scanners, err := getStructScanners(value)
 	if err != nil {
 		return err
@@ -165,7 +164,14 @@ func getItem(db *sql.DB, tableName string, item interface{}, id int64) error {
 	defer rows.Close()
 	rows.Next()
 
-	return rows.Scan(scanners...)
+	err = rows.Scan(scanners...)
+	if err != nil {
+		return err
+	}
+
+	reflect.ValueOf(item).Elem().Set(value)
+
+	return nil
 }
 
 func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}) error {
