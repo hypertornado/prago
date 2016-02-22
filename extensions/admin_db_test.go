@@ -24,7 +24,8 @@ func init() {
 type TestNode struct {
 	ID          int64
 	Name        string
-	Description string
+	Description string `prago-admin-type:"text"`
+	OK          bool
 	Count       int64
 }
 
@@ -37,8 +38,8 @@ func TestAdminDB(t *testing.T) {
 	name1 := "A2"
 	var count1 int64 = 13
 
-	n0 := &TestNode{Name: "A1"}
-	n1 := &TestNode{Name: name1, Count: count1}
+	n0 := &TestNode{Name: "A1", OK: false}
+	n1 := &TestNode{Name: name1, Count: count1, OK: true}
 
 	err = createItem(db, tableName, n0)
 	if err != nil {
@@ -67,6 +68,10 @@ func TestAdminDB(t *testing.T) {
 
 	if n2.Count != count1 {
 		t.Fatal(n2.Count)
+	}
+
+	if n2.OK != true {
+		t.Fatal(n2.OK)
 	}
 
 	var nodesIface interface{}

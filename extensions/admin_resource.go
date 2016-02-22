@@ -70,10 +70,20 @@ func (ar *AdminResource) getItems(itemVal reflect.Value) ([]AdminRowItem, error)
 
 	for i := 0; i < ar.Typ.NumField(); i++ {
 		field := ar.Typ.Field(i)
+
+		var templateType string
+
+		switch field.Tag.Get("prago-admin-type") {
+		case "text":
+			templateType = "admin_item_textarea"
+		default:
+			templateType = "admin_item_input"
+		}
+
 		structItem := AdminRowItem{
 			Name:      field.Name,
 			NameHuman: field.Name,
-			Template:  "admin_item_input",
+			Template:  templateType,
 		}
 
 		reflect.ValueOf(&structItem.Value).Elem().Set(itemVal.Field(i))

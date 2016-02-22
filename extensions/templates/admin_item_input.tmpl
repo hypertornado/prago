@@ -4,3 +4,10 @@
 <input type="text" name="{{.Name}}" value="{{.Value}}">
 </div>
 {{end}}
+
+{{define "admin_item_textarea"}}
+<div style="border: 1px solid red;">
+<div>{{.NameHuman}}</div>
+<textarea name="{{.Name}}">{{.Value}}</textarea>
+</div>
+{{end}}

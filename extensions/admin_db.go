@@ -83,11 +83,17 @@ func getStructDescription(typ reflect.Type) (map[string]*mysqlColumn, error) {
 			Field: utils.PrettyUrl(field.Name),
 		}
 
-		switch field.Type.Kind().String() {
-		case "int64":
+		switch field.Type.Kind() {
+		case reflect.Bool:
+			column.Type = "bool"
+		case reflect.Int64:
 			column.Type = "bigint(20)"
-		case "string":
-			column.Type = "varchar(255)"
+		case reflect.String:
+			if field.Tag.Get("prago-admin-type") == "text" {
+				column.Type = "text"
+			} else {
+				column.Type = "varchar(255)"
+			}
 		default:
 			fmt.Println("Cant use field", field.Name)
 			use = false
@@ -108,9 +114,10 @@ func getStructScanners(value reflect.Value) (names []string, scanners []interfac
 		field := value.Type().Field(i)
 		name := utils.PrettyUrl(field.Name)
 
-		switch field.Type.Kind().String() {
-		case "int64":
-		case "string":
+		switch field.Type.Kind() {
+		case reflect.Int64:
+		case reflect.Bool:
+		case reflect.String:
 		default:
 			fmt.Println("Cant use field", field.Name)
 			use = false
@@ -132,6 +139,13 @@ func (s *scanner) Scan(src interface{}) error {
 	var err error
 
 	switch s.value.Type().Kind() {
+	case reflect.Bool:
+		nb := sql.NullBool{}
+		err := nb.Scan(src)
+		if err != nil {
+			return err
+		}
+		s.value.SetBool(nb.Bool)
 	case reflect.String:
 		ns := sql.NullString{}
 		err = ns.Scan(src)
@@ -220,6 +234,8 @@ func prepareValues(value reflect.Value) (names []string, questionMarks []string,
 		val := value.FieldByName(field.Name)
 
 		switch field.Type.Kind() {
+		case reflect.Bool:
+			values = append(values, val.Bool())
 		case reflect.String:
 			values = append(values, val.String())
 		case reflect.Int64:
@@ -294,7 +310,7 @@ func bindData(item interface{}, data url.Values) {
 		case reflect.String:
 			val.SetString(data.Get(field.Name))
 		case reflect.Int64:
-			//values = append(values, val.Int())
+			//val.Set(data.Get(field.Name))
 		default:
 			continue
 		}
