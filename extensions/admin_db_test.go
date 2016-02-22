@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"reflect"
 	"testing"
+	"time"
 )
 
 var db *sql.DB
@@ -27,6 +28,7 @@ type TestNode struct {
 	Description string `prago-admin-type:"text"`
 	OK          bool
 	Count       int64
+	Changed     time.Time
 }
 
 func TestAdminDB(t *testing.T) {

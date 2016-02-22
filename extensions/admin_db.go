@@ -6,6 +6,7 @@ import (
 	"github.com/hypertornado/prago/utils"
 	"net/url"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -305,12 +306,20 @@ func bindData(item interface{}, data url.Values) {
 		}
 
 		val := value.FieldByName(field.Name)
+		urlValue := data.Get(field.Name)
 
 		switch field.Type.Kind() {
 		case reflect.String:
-			val.SetString(data.Get(field.Name))
+			val.SetString(urlValue)
+		case reflect.Bool:
+			if urlValue == "on" {
+				val.SetBool(true)
+			} else {
+				val.SetBool(false)
+			}
 		case reflect.Int64:
-			//val.Set(data.Get(field.Name))
+			i, _ := strconv.Atoi(urlValue)
+			val.SetInt(int64(i))
 		default:
 			continue
 		}

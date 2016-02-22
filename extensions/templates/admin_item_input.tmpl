@@ -11,3 +11,10 @@
 <textarea name="{{.Name}}">{{.Value}}</textarea>
 </div>
 {{end}}
+
+{{define "admin_item_checkbox"}}
+<div style="border: 1px solid red;">
+<input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}>
+<span>{{.NameHuman}}</span>
+</div>
+{{end}}

@@ -71,13 +71,16 @@ func (ar *AdminResource) getItems(itemVal reflect.Value) ([]AdminRowItem, error)
 	for i := 0; i < ar.Typ.NumField(); i++ {
 		field := ar.Typ.Field(i)
 
-		var templateType string
+		templateType := "admin_item_input"
 
-		switch field.Tag.Get("prago-admin-type") {
-		case "text":
-			templateType = "admin_item_textarea"
-		default:
-			templateType = "admin_item_input"
+		switch field.Type.Kind() {
+		case reflect.Bool:
+			templateType = "admin_item_checkbox"
+		case reflect.String:
+			switch field.Tag.Get("prago-admin-type") {
+			case "text":
+				templateType = "admin_item_textarea"
+			}
 		}
 
 		structItem := AdminRowItem{
