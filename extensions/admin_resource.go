@@ -86,6 +86,10 @@ func (ar *AdminResource) getItems(itemVal reflect.Value) ([]AdminRowItem, error)
 	return items, nil
 }
 
+func (ar *AdminResource) Delete(id int64) error {
+	return deleteItem(ar.db(), ar.tableName(), id)
+}
+
 func (ar *AdminResource) CreateItemFromParams(params url.Values) error {
 	var item interface{}
 	val := reflect.New(ar.Typ)

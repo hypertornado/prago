@@ -273,6 +273,12 @@ func createItem(db *sql.DB, tableName string, item interface{}) error {
 	return nil
 }
 
+func deleteItem(db *sql.DB, tableName string, id int64) error {
+	q := fmt.Sprintf("DELETE FROM %s WHERE id=%d", tableName, id)
+	_, err := db.Exec(q)
+	return err
+}
+
 func bindData(item interface{}, data url.Values) {
 	value := reflect.ValueOf(item).Elem()
 	for i := 0; i < value.Type().NumField(); i++ {

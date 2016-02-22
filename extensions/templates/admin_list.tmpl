@@ -6,7 +6,12 @@
 
 <ul>
 {{range $item := .admin_items}}
-  <li><a href="{{ $adminResource.ID}}/{{$item.ID}}">{{.Name}}</a></li>
+  <li>
+    <a href="{{ $adminResource.ID}}/{{$item.ID}}">{{.Name}}</a>
+    <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete" onsubmit="return window.confirm('Really?');">
+      <input type="submit" value="Delete">
+    </form>
+  </li>
 {{end}}
 </ul>
 

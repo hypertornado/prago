@@ -176,6 +176,20 @@ func (a *Admin) Init(app *prago.App) error {
 
 			prago.Redirect(request, a.Prefix+"/"+resource.ID)
 		})
+
+		resourceController.Post(a.Prefix+"/"+resource.ID+"/:id/delete", func(request prago.Request) {
+			id, err := strconv.Atoi(request.Params().Get("id"))
+			if err != nil {
+				panic(err)
+			}
+
+			err = resource.Delete(int64(id))
+			if err != nil {
+				panic(err)
+			}
+
+			prago.Redirect(request, a.Prefix+"/"+resource.ID)
+		})
 	}
 
 	return nil

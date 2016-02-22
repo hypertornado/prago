@@ -111,6 +111,14 @@ func TestAdminDB(t *testing.T) {
 		t.Fatal(changedNodeResult.Name)
 	}
 
+	deleteItem(db, tableName, 2)
+
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface)
+	nodes = nodesIface.([]TestNode)
+
+	if len(nodes) != 2 {
+		t.Fatal(len(nodes))
+	}
 }
 
 func TestAdminStructDescription(t *testing.T) {
