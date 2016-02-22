@@ -98,16 +98,18 @@ func (ar *AdminResource) CreateItemFromParams(params url.Values) error {
 }
 
 func (ar *AdminResource) UpdateItemFromParams(id int64, params url.Values) error {
-	item, _, err := ar.Get(id)
+
+	var item interface{}
+	val := reflect.New(ar.Typ)
+	reflect.ValueOf(&item).Elem().Set(val)
+
+	err := getItem(ar.db(), ar.tableName(), ar.Typ, item, id)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(item)
-	fmt.Println(reflect.TypeOf(item))
-	bindData(&item, params)
-	//return saveItem(ar.db(), ar.tableName(), item)
-	return nil
+	bindData(item, params)
+	return saveItem(ar.db(), ar.tableName(), item)
 }
 
 func (ar *AdminResource) CreateItem(item interface{}) error {
