@@ -127,11 +127,22 @@ func (a *Admin) Init(app *prago.App) error {
 		})
 
 		resourceController.Get(a.Prefix+"/"+resource.ID+"/new", func(request prago.Request) {
+
+			descriptions, err := resource.GetItems()
+			if err != nil {
+				panic(err)
+			}
+
+			request.SetData("admin_item_descriptions", descriptions)
 			request.SetData("admin_yield", "admin_new")
 			prago.Render(request, 200, "admin_layout")
 		})
 
-		resourceController.Post(a.Prefix+"/"+resource.ID+"/new", func(request prago.Request) {
+		resourceController.Post(a.Prefix+"/"+resource.ID, func(request prago.Request) {
+			err := resource.CreateItemFromParams(request.Params())
+			if err != nil {
+				panic(err)
+			}
 			prago.Redirect(request, a.Prefix+"/"+resource.ID)
 		})
 
@@ -141,14 +152,29 @@ func (a *Admin) Init(app *prago.App) error {
 				panic(err)
 			}
 
-			item, err := resource.Get(int64(id))
+			item, descriptions, err := resource.Get(int64(id))
 			if err != nil {
 				panic(err)
 			}
 
 			request.SetData("admin_item", item)
+			request.SetData("admin_item_descriptions", descriptions)
 			request.SetData("admin_yield", "admin_edit")
 			prago.Render(request, 200, "admin_layout")
+		})
+
+		resourceController.Post(a.Prefix+"/"+resource.ID+"/:id", func(request prago.Request) {
+			id, err := strconv.Atoi(request.Params().Get("id"))
+			if err != nil {
+				panic(err)
+			}
+
+			err = resource.UpdateItemFromParams(int64(id), request.Params())
+			if err != nil {
+				panic(err)
+			}
+
+			prago.Redirect(request, a.Prefix+"/"+resource.ID)
 		})
 	}
 

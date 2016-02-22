@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/hypertornado/prago/utils"
 	"github.com/jinzhu/gorm"
+	"net/url"
 	"reflect"
 )
 
@@ -46,10 +47,67 @@ func (ar *AdminResource) List() (interface{}, error) {
 	return items, nil
 }
 
-func (ar *AdminResource) Get(id int64) (interface{}, error) {
+type AdminRowItem struct {
+	Name      string
+	NameHuman string
+	Template  string
+	Value     interface{}
+}
+
+func (ar *AdminResource) Get(id int64) (interface{}, []AdminRowItem, error) {
 	var item interface{}
 	getItem(ar.db(), ar.tableName(), ar.Typ, &item, id)
-	return item, nil
+	items, err := ar.getItems(reflect.ValueOf(item))
+	return item, items, err
+}
+
+func (ar *AdminResource) GetItems() ([]AdminRowItem, error) {
+	return ar.getItems(reflect.New(ar.Typ).Elem())
+}
+
+func (ar *AdminResource) getItems(itemVal reflect.Value) ([]AdminRowItem, error) {
+	items := []AdminRowItem{}
+
+	for i := 0; i < ar.Typ.NumField(); i++ {
+		field := ar.Typ.Field(i)
+		structItem := AdminRowItem{
+			Name:      field.Name,
+			NameHuman: field.Name,
+			Template:  "admin_item_input",
+		}
+
+		reflect.ValueOf(&structItem.Value).Elem().Set(itemVal.Field(i))
+
+		if structItem.Name != "ID" {
+			items = append(items, structItem)
+		}
+	}
+
+	return items, nil
+}
+
+func (ar *AdminResource) CreateItemFromParams(params url.Values) error {
+	var item interface{}
+	val := reflect.New(ar.Typ)
+	reflect.ValueOf(&item).Elem().Set(val)
+
+	fmt.Println(item)
+	fmt.Println(reflect.TypeOf(item))
+	bindData(item, params)
+	return createItem(ar.db(), ar.tableName(), item)
+}
+
+func (ar *AdminResource) UpdateItemFromParams(id int64, params url.Values) error {
+	item, _, err := ar.Get(id)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(item)
+	fmt.Println(reflect.TypeOf(item))
+	bindData(&item, params)
+	//return saveItem(ar.db(), ar.tableName(), item)
+	return nil
 }
 
 func (ar *AdminResource) CreateItem(item interface{}) error {

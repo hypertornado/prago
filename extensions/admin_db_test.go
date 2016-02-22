@@ -5,6 +5,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
+	"net/url"
 	"reflect"
 	"testing"
 )
@@ -85,50 +86,47 @@ func TestAdminDB(t *testing.T) {
 		t.Fatal(nodes[1].Count)
 	}
 
+	var item interface{}
+	val := reflect.New(reflect.TypeOf(TestNode{}))
+	reflect.ValueOf(&item).Elem().Set(val)
+
+	values := make(url.Values)
+	values.Set("Name", "somename")
+	bindData(item, values)
+	createItem(db, tableName, item)
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface)
+	nodes = nodesIface.([]TestNode)
+
+	if len(nodes) != 3 {
+		t.Fatal(len(nodes))
+	}
+
+	changedNode := &TestNode{ID: 2, Name: "changedname"}
+	saveItem(db, tableName, changedNode)
+
+	var changedNodeResult TestNode
+	getItem(db, tableName, reflect.TypeOf(TestNode{}), &changedNodeResult, 2)
+
+	if changedNodeResult.Name != "changedname" {
+		t.Fatal(changedNodeResult.Name)
+	}
+
 }
 
 func TestAdminStructDescription(t *testing.T) {
 	getStructDescription(reflect.TypeOf(&TestNode{}))
+
 }
 
-func NewSTR() {
-	//data := []string{"A"}
-	var si interface{} //= data
-
-	appendStr(&si)
-
-	//fmt.Println(si.([]string))
-}
-
-func appendStr(i interface{}) {
-	typ := reflect.SliceOf(reflect.TypeOf(""))
-	val := reflect.New(typ).Elem()
-
-	s := reflect.New(reflect.TypeOf("")).Elem()
-	s.SetString("ABC")
-
-	val = reflect.Append(val, s)
-	s.SetString("DEF")
-	val = reflect.Append(val, s)
-
-	reflect.ValueOf(i).Elem().Set(val)
-}
-
-func NewARR() interface{} {
-	var ret interface{}
-	CreateSTR(&ret)
-	return ret
-}
-
-func CreateSTR(i interface{}) {
-	typ := reflect.TypeOf("")
-	val := reflect.New(typ).Elem()
-	val.SetString("Jupiiii")
-
-	reflect.ValueOf(i).Elem().Set(val)
+func f(i interface{}) {
+	//typ := reflect.ValueOf(i).Elem().Type()
+	reflect.ValueOf(i).Elem().FieldByName("ID").SetInt(54)
 }
 
 func TestAdminReflect(t *testing.T) {
-	NewSTR()
-	//fmt.Println(NewARR())
+
+	var item interface{}
+	item = &TestNode{Name: "NAAME"}
+
+	f(item)
 }

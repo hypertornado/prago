@@ -1,4 +1,6 @@
 {{define "admin_item_input"}}
-<p>{{.Name}}</p>
-<input type="text" name="{{.Name}}">
+<div style="border: 1px solid red;">
+<div>{{.NameHuman}}</div>
+<input type="text" name="{{.Name}}" value="{{.Value}}">
+</div>
 {{end}}

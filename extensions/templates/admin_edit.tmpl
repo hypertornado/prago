@@ -1,9 +1,15 @@
 {{define "admin_edit"}}
 
-<h2>Edit {{.admin_resource.Name}}</h2>
+<h2>Edit {{.admin_resource.Name}} - {{.admin_item.Name}}</h2>
 
-{{.admin_item.Name}}
+<form method="POST" action="{{.admin_item.ID}}">
 
+{{range $item := .admin_item_descriptions}}
+  {{tmpl $item.Template $item}}
+{{end}}
 
+<input type="submit" value="Save">
+
+</form>
 
 {{end}}

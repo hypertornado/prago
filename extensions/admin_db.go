@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/hypertornado/prago/utils"
+	"net/url"
 	"reflect"
 	"strings"
 )
@@ -204,12 +205,10 @@ func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items i
 	return nil
 }
 
-func createItem(db *sql.DB, tableName string, item interface{}) error {
-	value := reflect.ValueOf(item).Elem()
-
-	names := []string{}
-	questionMarks := []string{}
-	values := []interface{}{}
+func prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
+	names = []string{}
+	questionMarks = []string{}
+	values = []interface{}{}
 
 	for i := 0; i < value.Type().NumField(); i++ {
 		field := value.Type().Field(i)
@@ -233,6 +232,32 @@ func createItem(db *sql.DB, tableName string, item interface{}) error {
 		names = append(names, "`"+utils.PrettyUrl(field.Name)+"`")
 		questionMarks = append(questionMarks, "?")
 	}
+	return
+}
+
+func saveItem(db *sql.DB, tableName string, item interface{}) error {
+	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
+	value := reflect.ValueOf(item).Elem()
+	names, _, values, err := prepareValues(value)
+	if err != nil {
+		return err
+	}
+	updateNames := []string{}
+	for _, v := range names {
+		updateNames = append(updateNames, fmt.Sprintf(" %s=? ", v))
+	}
+	q := fmt.Sprintf("UPDATE `%s` SET %s WHERE id=%d;", tableName, strings.Join(updateNames, ", "), id)
+	_, err = db.Exec(q, values...)
+	return err
+}
+
+func createItem(db *sql.DB, tableName string, item interface{}) error {
+	value := reflect.ValueOf(item).Elem()
+
+	names, questionMarks, values, err := prepareValues(value)
+	if err != nil {
+		return err
+	}
 
 	q := fmt.Sprintf("INSERT INTO `%s` (%s) VALUES (%s);", tableName, strings.Join(names, ", "), strings.Join(questionMarks, ", "))
 	res, err := db.Exec(q, values...)
@@ -246,4 +271,26 @@ func createItem(db *sql.DB, tableName string, item interface{}) error {
 
 	reflect.ValueOf(item).Elem().FieldByName("ID").SetInt(id)
 	return nil
+}
+
+func bindData(item interface{}, data url.Values) {
+	value := reflect.ValueOf(item).Elem()
+	for i := 0; i < value.Type().NumField(); i++ {
+		field := value.Type().Field(i)
+
+		if field.Name == "ID" {
+			continue
+		}
+
+		val := value.FieldByName(field.Name)
+
+		switch field.Type.Kind() {
+		case reflect.String:
+			val.SetString(data.Get(field.Name))
+		case reflect.Int64:
+			//values = append(values, val.Int())
+		default:
+			continue
+		}
+	}
 }
