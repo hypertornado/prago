@@ -3,6 +3,7 @@ package extensions
 import (
 	"bytes"
 	"database/sql"
+	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
 	"github.com/jinzhu/gorm"
 	"html/template"
@@ -15,6 +16,7 @@ type Admin struct {
 	Resources []*AdminResource
 	db        *sql.DB
 	gorm      *gorm.DB
+	authData  map[string]string
 }
 
 func (a *Admin) Migrate() (err error) {
@@ -25,6 +27,10 @@ func (a *Admin) Migrate() (err error) {
 		}
 	}
 	return
+}
+
+func (a *Admin) SetAuthData(authData map[string]string) {
+	a.authData = authData
 }
 
 func (a *Admin) AddResource(resource *AdminResource) {
@@ -62,6 +68,7 @@ func (a *Admin) Init(app *prago.App) error {
 	path := "/Users/ondrejodchazel/projects/go/src/github.com/hypertornado/prago/extensions/templates/"
 
 	var err error
+
 	err = a.Migrate()
 	if err != nil {
 		panic(err)
@@ -86,13 +93,61 @@ func (a *Admin) Init(app *prago.App) error {
 
 	app.Data()["templates"] = t
 
-	adminController := app.MainController().SubController()
+	adminAccessController := app.MainController().SubController()
+
+	adminAccessController.Get(a.Prefix+"/login", func(request prago.Request) {
+		prago.Render(request, 200, "admin_login")
+	})
+
+	adminAccessController.Get(a.Prefix+"/logout", func(request prago.Request) {
+		session := request.GetData("session").(*sessions.Session)
+		delete(session.Values, "email")
+		err := session.Save(request.Request(), request.Response())
+		if err != nil {
+			panic(err)
+		}
+		prago.Redirect(request, a.Prefix+"/login")
+	})
+
+	adminAccessController.Post(a.Prefix+"/login", func(request prago.Request) {
+		email := request.Params().Get("email")
+		password := request.Params().Get("password")
+
+		session := request.GetData("session").(*sessions.Session)
+		requestedPassword, validUser := a.authData[email]
+		if validUser && password == requestedPassword {
+			session.Values["email"] = email
+		} else {
+			prago.Redirect(request, a.Prefix+"/login")
+			return
+		}
+
+		err := session.Save(request.Request(), request.Response())
+		if err != nil {
+			panic(err)
+		}
+		prago.Redirect(request, a.Prefix)
+	})
+
+	adminController := adminAccessController.SubController()
 
 	adminController.AddAroundAction(func(request prago.Request, next func()) {
 		request.SetData("appName", request.App().Data()["appName"].(string))
 		request.SetData("admin_header", a.adminHeaderData())
 
 		request.SetData("admin_yield", "admin_home")
+
+		session := request.GetData("session").(*sessions.Session)
+
+		email, ok := session.Values["email"].(string)
+		_, userFound := a.authData[email]
+
+		if !ok || !userFound {
+			prago.Redirect(request, a.Prefix+"/login")
+			return
+		}
+
+		request.SetData("admin_header_email", email)
 
 		next()
 	})

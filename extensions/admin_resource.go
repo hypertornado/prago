@@ -155,7 +155,7 @@ func (ar *AdminResource) Migrate() error {
 	fmt.Println("Migrating ", ar.Name, ar.ID)
 	err = dropTable(ar.db(), ar.tableName())
 	if err != nil {
-		return err
+		fmt.Println(err)
 	}
 
 	_, err = getTableDescription(ar.db(), ar.tableName())
