@@ -21,13 +21,16 @@ type AdminResource struct {
 func NewResource(item interface{}) (*AdminResource, error) {
 	typ := reflect.TypeOf(item)
 	name := typ.Name()
-
 	ret := &AdminResource{
 		Name: name,
 		ID:   utils.PrettyUrl(name),
 		Typ:  typ,
 	}
 	return ret, nil
+}
+
+func (ar *AdminResource) SetName(name string) {
+	ar.Name = name
 }
 
 func (ar *AdminResource) gorm() *gorm.DB {

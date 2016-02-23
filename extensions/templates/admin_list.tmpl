@@ -4,16 +4,23 @@
 
 {{ $adminResource := .admin_resource }}
 
-<ul>
+<table class="admin_table">
 {{range $item := .admin_items}}
-  <li>
-    <a href="{{ $adminResource.ID}}/{{$item.ID}}">{{.Name}}</a>
-    <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete" onsubmit="return window.confirm('Really?');">
-      <input type="submit" value="Delete">
-    </form>
-  </li>
+  <tr>
+    <td nowrap>
+      {{.ID}}
+    </td>
+    <td style="width: 100%;">
+      <a href="{{ $adminResource.ID}}/{{$item.ID}}">{{.Name}}</a>
+    </td>
+    <td nowrap>
+      <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete" onsubmit="return window.confirm('Really want to delete?');">
+        <input type="submit" value="Delete" class="btn">
+      </form>
+    </td>
+  </tr>
 {{end}}
-</ul>
+</table>
 
-<a href="{{.admin_resource.ID}}/new"> New</a>
+<a href="{{.admin_resource.ID}}/new" class="btn">New {{.admin_resource.Name}}</a>
 {{end}}

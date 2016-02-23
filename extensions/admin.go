@@ -56,7 +56,6 @@ func (a *Admin) adminHeaderData() interface{} {
 }
 
 func (a *Admin) Init(app *prago.App) error {
-	a.AppName = app.Data()["appName"].(string)
 	a.db = app.Data()["db"].(*sql.DB)
 	a.gorm = app.Data()["gorm"].(*gorm.DB)
 	t := app.Data()["templates"].(*template.Template)
@@ -250,9 +249,10 @@ func (a *Admin) Init(app *prago.App) error {
 	return nil
 }
 
-func NewAdmin(prefix string) *Admin {
+func NewAdmin(prefix, name string) *Admin {
 	return &Admin{
 		Prefix:    prefix,
+		AppName:   name,
 		Resources: []*AdminResource{},
 	}
 }
