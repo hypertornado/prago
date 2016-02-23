@@ -3,11 +3,13 @@ package extensions
 import (
 	"database/sql"
 	"fmt"
+	"github.com/go-sql-driver/mysql"
 	"github.com/hypertornado/prago/utils"
 	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type mysqlColumn struct {
@@ -85,6 +87,13 @@ func getStructDescription(typ reflect.Type) (map[string]*mysqlColumn, error) {
 		}
 
 		switch field.Type.Kind() {
+		case reflect.Struct:
+			dateType := reflect.TypeOf(time.Now())
+			if field.Type == dateType {
+				column.Type = "datetime"
+			} else {
+				use = false
+			}
 		case reflect.Bool:
 			column.Type = "bool"
 		case reflect.Int64:
@@ -96,7 +105,6 @@ func getStructDescription(typ reflect.Type) (map[string]*mysqlColumn, error) {
 				column.Type = "varchar(255)"
 			}
 		default:
-			fmt.Println("Cant use field", field.Name)
 			use = false
 		}
 		if use {
@@ -119,8 +127,11 @@ func getStructScanners(value reflect.Value) (names []string, scanners []interfac
 		case reflect.Int64:
 		case reflect.Bool:
 		case reflect.String:
+		case reflect.Struct:
+			if field.Type != reflect.TypeOf(time.Now()) {
+				use = false
+			}
 		default:
-			fmt.Println("Cant use field", field.Name)
 			use = false
 		}
 		if use {
@@ -140,6 +151,13 @@ func (s *scanner) Scan(src interface{}) error {
 	var err error
 
 	switch s.value.Type().Kind() {
+	case reflect.Struct:
+		nt := mysql.NullTime{}
+		err := nt.Scan(src)
+		if err != nil {
+			return err
+		}
+		s.value.Set(reflect.ValueOf(nt.Time))
 	case reflect.Bool:
 		nb := sql.NullBool{}
 		err := nb.Scan(src)
@@ -235,6 +253,15 @@ func prepareValues(value reflect.Value) (names []string, questionMarks []string,
 		val := value.FieldByName(field.Name)
 
 		switch field.Type.Kind() {
+		case reflect.Struct:
+			if field.Type == reflect.TypeOf(time.Now()) {
+				var tm time.Time
+				reflect.ValueOf(&tm).Elem().Set(val)
+				timeStr := tm.Format("2006-01-02 15:04:05")
+				values = append(values, timeStr)
+			} else {
+				continue
+			}
 		case reflect.Bool:
 			values = append(values, val.Bool())
 		case reflect.String:
@@ -242,7 +269,6 @@ func prepareValues(value reflect.Value) (names []string, questionMarks []string,
 		case reflect.Int64:
 			values = append(values, val.Int())
 		default:
-			fmt.Println("wrong kind")
 			continue
 		}
 
@@ -309,6 +335,13 @@ func bindData(item interface{}, data url.Values) {
 		urlValue := data.Get(field.Name)
 
 		switch field.Type.Kind() {
+		case reflect.Struct:
+			if field.Type == reflect.TypeOf(time.Now()) {
+				tm, err := time.Parse("2006-01-02", urlValue)
+				if err == nil {
+					val.Set(reflect.ValueOf(tm))
+				}
+			}
 		case reflect.String:
 			val.SetString(urlValue)
 		case reflect.Bool:

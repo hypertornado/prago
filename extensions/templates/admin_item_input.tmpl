@@ -18,3 +18,10 @@
 <span>{{.NameHuman}}</span>
 </div>
 {{end}}
+
+{{define "admin_item_date"}}
+<div style="border: 1px solid red;">
+<div>{{.NameHuman}}</div>
+<input type="date" name="{{.Name}}" value="{{.Value}}">
+</div>
+{{end}}

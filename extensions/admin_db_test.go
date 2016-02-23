@@ -31,17 +31,52 @@ type TestNode struct {
 	Changed     time.Time
 }
 
+func TestAdminTime(t *testing.T) {
+	tableName := "node"
+	dropTable(db, tableName)
+	createTable(db, tableName, reflect.TypeOf(TestNode{}))
+
+	n0 := &TestNode{Changed: time.Now()}
+	createItem(db, tableName, n0)
+
+	n1 := TestNode{}
+	getItem(db, tableName, reflect.TypeOf(TestNode{}), &n1, n0.ID)
+
+	if n0.Changed.Format("2006-01-02 15:04:05") != n1.Changed.Format("2006-01-02 15:04:05") {
+		t.Fatal(n0.Changed, n1.Changed)
+	}
+}
+
+func TestAdminBind(t *testing.T) {
+	n := &TestNode{}
+
+	values := make(url.Values)
+	values.Set("Name", "ABC")
+	values.Set("Changed", "2014-11-10")
+	bindData(n, values)
+
+	if n.Name != "ABC" {
+		t.Fatal(n.Name)
+	}
+
+	if n.Changed.Format("2006-01-02") != "2014-11-10" {
+		t.Fatal(n.Changed)
+	}
+}
+
 func TestAdminDB(t *testing.T) {
 	var err error
 	tableName := "node"
 	dropTable(db, tableName)
 	createTable(db, tableName, reflect.TypeOf(TestNode{}))
 
+	timeNow := time.Now()
+
 	name1 := "A2"
 	var count1 int64 = 13
 
-	n0 := &TestNode{Name: "A1", OK: false}
-	n1 := &TestNode{Name: name1, Count: count1, OK: true}
+	n0 := &TestNode{Name: "A1", OK: false, Changed: timeNow}
+	n1 := &TestNode{Name: name1, Count: count1, OK: true, Changed: timeNow}
 
 	err = createItem(db, tableName, n0)
 	if err != nil {
@@ -133,15 +168,10 @@ func TestAdminStructDescription(t *testing.T) {
 
 }
 
-func f(i interface{}) {
-	//typ := reflect.ValueOf(i).Elem().Type()
-	reflect.ValueOf(i).Elem().FieldByName("ID").SetInt(54)
-}
-
 func TestAdminReflect(t *testing.T) {
-
-	var item interface{}
-	item = &TestNode{Name: "NAAME"}
-
-	f(item)
+	/*tn := time.Now()
+	fmt.Println(tn)
+	var t2 time.Time
+	reflect.ValueOf(&t2).Elem().Set(reflect.ValueOf(tn))
+	fmt.Println(t2)*/
 }

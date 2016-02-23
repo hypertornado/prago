@@ -8,6 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"net/url"
 	"reflect"
+	"time"
 )
 
 type AdminResource struct {
@@ -71,25 +72,32 @@ func (ar *AdminResource) getItems(itemVal reflect.Value) ([]AdminRowItem, error)
 	for i := 0; i < ar.Typ.NumField(); i++ {
 		field := ar.Typ.Field(i)
 
-		templateType := "admin_item_input"
-
-		switch field.Type.Kind() {
-		case reflect.Bool:
-			templateType = "admin_item_checkbox"
-		case reflect.String:
-			switch field.Tag.Get("prago-admin-type") {
-			case "text":
-				templateType = "admin_item_textarea"
-			}
-		}
-
 		structItem := AdminRowItem{
 			Name:      field.Name,
 			NameHuman: field.Name,
-			Template:  templateType,
+			Template:  "admin_item_input",
 		}
 
 		reflect.ValueOf(&structItem.Value).Elem().Set(itemVal.Field(i))
+
+		switch field.Type.Kind() {
+		case reflect.Struct:
+			if field.Type == reflect.TypeOf(time.Now()) {
+				structItem.Template = "admin_item_date"
+				var tm time.Time
+				reflect.ValueOf(&tm).Elem().Set(reflect.ValueOf(structItem.Value))
+				newVal := reflect.New(reflect.TypeOf("")).Elem()
+				newVal.SetString(tm.Format("2006-01-02"))
+				reflect.ValueOf(&structItem.Value).Elem().Set(newVal)
+			}
+		case reflect.Bool:
+			structItem.Template = "admin_item_checkbox"
+		case reflect.String:
+			switch field.Tag.Get("prago-admin-type") {
+			case "text":
+				structItem.Template = "admin_item_textarea"
+			}
+		}
 
 		if structItem.Name != "ID" {
 			items = append(items, structItem)
@@ -107,9 +115,6 @@ func (ar *AdminResource) CreateItemFromParams(params url.Values) error {
 	var item interface{}
 	val := reflect.New(ar.Typ)
 	reflect.ValueOf(&item).Elem().Set(val)
-
-	fmt.Println(item)
-	fmt.Println(reflect.TypeOf(item))
 	bindData(item, params)
 	return createItem(ar.db(), ar.tableName(), item)
 }
@@ -144,7 +149,7 @@ func (ar *AdminResource) Migrate() error {
 	fmt.Println("Migrating ", ar.Name, ar.ID)
 	err = dropTable(ar.db(), ar.tableName())
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	_, err = getTableDescription(ar.db(), ar.tableName())
