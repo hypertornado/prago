@@ -57,6 +57,7 @@ func newRequest(w http.ResponseWriter, r *http.Request, app *App) *request {
 	}
 }
 
-func MiddlewareLogBefore(p Request) {
-	p.App().data["logger"].(*logrus.Logger).Println(p.Request().Method, p.Request().URL.String())
+func requestMiddlewareLogBefore(r Request, next func()) {
+	r.App().data["logger"].(*logrus.Logger).Println(r.Request().Method, r.Request().URL.String())
+	next()
 }
