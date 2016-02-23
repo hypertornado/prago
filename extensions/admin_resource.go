@@ -52,6 +52,7 @@ type AdminRowItem struct {
 	Name      string
 	NameHuman string
 	Template  string
+	Error     string
 	Value     interface{}
 }
 
@@ -97,6 +98,11 @@ func (ar *AdminResource) getItems(itemVal reflect.Value) ([]AdminRowItem, error)
 			case "text":
 				structItem.Template = "admin_item_textarea"
 			}
+		}
+
+		description := field.Tag.Get("prago-admin-description")
+		if len(description) > 0 {
+			structItem.NameHuman = description
 		}
 
 		if structItem.Name != "ID" {

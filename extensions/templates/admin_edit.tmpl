@@ -2,13 +2,15 @@
 
 <h2>Edit {{.admin_resource.Name}} - {{.admin_item.Name}}</h2>
 
-<form method="POST" action="{{.admin_item.ID}}">
+<a href="../{{.admin_resource.ID}}">Back</a>
+
+<form method="POST" action="{{.admin_item.ID}}" class="form">
 
 {{range $item := .admin_item_descriptions}}
   {{tmpl $item.Template $item}}
 {{end}}
 
-<input type="submit" value="Save">
+<input type="submit" value="Save" class="btn">
 
 </form>
 

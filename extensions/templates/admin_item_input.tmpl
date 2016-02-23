@@ -1,27 +1,39 @@
 {{define "admin_item_input"}}
-<div style="border: 1px solid red;">
-<div>{{.NameHuman}}</div>
-<input type="text" name="{{.Name}}" value="{{.Value}}">
-</div>
+<label class="form_label">
+  {{if .Error}}
+    <div class="form_label_error">{{.Error}}</div>
+  {{end}}
+  <span class="form_label_text">{{.NameHuman}}</span>
+  <input name="{{.Name}}" value="{{.Value}}" class="input form_input">
+</label>
 {{end}}
 
 {{define "admin_item_textarea"}}
-<div style="border: 1px solid red;">
-<div>{{.NameHuman}}</div>
-<textarea name="{{.Name}}">{{.Value}}</textarea>
-</div>
+<label class="form_label">
+  {{if .Error}}
+    <div class="form_label_error">{{.Error}}</div>
+  {{end}}
+  <span class="form_label_text">{{.NameHuman}}</span>
+  <textarea name="{{.Name}}" class="input form_input textarea">{{.Value}}</textarea>
+</label>
 {{end}}
 
 {{define "admin_item_checkbox"}}
-<div style="border: 1px solid red;">
-<input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}>
-<span>{{.NameHuman}}</span>
-</div>
+<label class="form_label">
+  {{if .Error}}
+    <div class="form_label_error">{{.Error}}</div>
+  {{end}}
+  <input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}>
+  <span class="form_label_text-inline">{{.NameHuman}}</span>
+</label>
 {{end}}
 
 {{define "admin_item_date"}}
-<div style="border: 1px solid red;">
-<div>{{.NameHuman}}</div>
-<input type="date" name="{{.Name}}" value="{{.Value}}">
-</div>
+<label class="form_label">
+  {{if .Error}}
+    <div class="form_label_error">{{.Error}}</div>
+  {{end}}
+  <span class="form_label_text">{{.NameHuman}}</span>
+  <input type="date" name="{{.Name}}" value="{{.Value}}" class="input form_input">
+</label>
 {{end}}
