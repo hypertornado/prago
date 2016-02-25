@@ -20,12 +20,12 @@
         <h1><a href="{{.admin_header.prefix}}">{{.admin_header.appName}}</a></h1>
 
 
-        {{ $adminResource := .admin_resource }}
+        {{ $admin_resource := .admin_resource }}
 
         <ul class="admin_header_list">
             <li><a href="/" style="text-decoration: none;">🌐</a></li>
             {{range $item := .admin_header.menu}}
-                <li class="{{if $adminResource}}{{ if eq $adminResource.ID $item.id }}admin_header_item-active{{end}}{{end}}">
+                <li class="{{if $admin_resource}}{{ if eq $admin_resource.ID $item.id }}admin_header_item-active{{end}}{{end}}">
                     <a href="{{$item.url}}">{{$item.name}}</a>
                 </li>
             {{end}}
