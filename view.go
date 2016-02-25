@@ -2,6 +2,7 @@ package prago
 
 import (
 	"bytes"
+	"errors"
 	"html/template"
 	"net/http"
 )
@@ -29,20 +30,17 @@ type MiddlewareView struct{}
 func (m MiddlewareView) Init(app *App) error {
 	app.requestMiddlewares = append(app.requestMiddlewares, requestMiddlewareView)
 
-	funcs := template.FuncMap{}
+	templates := template.New("")
+	templateFuncs := template.FuncMap{}
 
-	templatePaths := []string{
-		"server/templates/*.tmpl",
+	templateFuncs["Plain"] = func(data string) template.HTML {
+		return template.HTML(data)
 	}
 
-	templates, err := loadTemplates(funcs, templatePaths)
-	if err != nil {
-		return err
-	}
+	templates = templates.Funcs(templateFuncs)
 
 	app.data["templates"] = templates
-	app.data["templateFuncs"] = funcs
-
+	app.data["templateFuncs"] = templateFuncs
 	return nil
 }
 
@@ -77,26 +75,28 @@ func requestMiddlewareView(p Request, next func()) {
 	p.SetProcessed()
 }
 
-func loadTemplates(funcs template.FuncMap, patterns []string) (t *template.Template, err error) {
-	/*funcs["T"] = func(locale interface{}, id string) (string, error) {
-		localeStr := ""
-		if reflect.ValueOf(locale).Kind() == reflect.String {
-			localeStr = reflect.ValueOf(locale).String()
-		}
-		return translations.GetTranslation(localeStr, id), nil
-	}*/
+func (app *App) LoadTemplate(pattern string) (err error) {
+	templates, ok := app.data["templates"].(*template.Template)
+	if !ok {
+		return errors.New("Templates not initialized")
+	}
 
-	funcs["Plain"] = func(data string) template.HTML {
+	templateFuncs, ok := app.data["templateFuncs"].(template.FuncMap)
+	if !ok {
+		return errors.New("Template function maps not initialized")
+	}
+
+	templateFuncs["Plain"] = func(data string) template.HTML {
 		return template.HTML(data)
 	}
 
-	t = template.New("")
-	t = t.Funcs(funcs)
-	for _, v := range patterns {
-		t, err = t.ParseGlob(v)
-		if err != nil {
-			return nil, err
-		}
+	templates = templates.Funcs(templateFuncs)
+	templates, err = templates.ParseGlob(pattern)
+	if err != nil {
+		return err
 	}
-	return t, err
+
+	app.data["templates"] = templates
+	app.data["templateFuncs"] = templateFuncs
+	return nil
 }

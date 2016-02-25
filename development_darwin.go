@@ -26,8 +26,6 @@ func developmentCSS() {
 	p.Start()
 }
 
-//func task
-
 type FuncCmd struct {
 	f func() error
 }

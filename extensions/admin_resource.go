@@ -18,8 +18,7 @@ type AdminResource struct {
 	Typ                reflect.Type
 	ResourceController *prago.Controller
 	item               interface{}
-	//resourceInitializer *func(*Admin, *AdminResource) error
-	admin *Admin
+	admin              *Admin
 }
 
 func NewResource(item interface{}) (*AdminResource, error) {

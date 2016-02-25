@@ -3,6 +3,7 @@ package extensions
 import (
 	"bytes"
 	"database/sql"
+	"errors"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
 	"github.com/jinzhu/gorm"
@@ -49,33 +50,11 @@ func (a *Admin) adminHeaderData() interface{} {
 func (a *Admin) Init(app *prago.App) error {
 	a.db = app.Data()["db"].(*sql.DB)
 	a.gorm = app.Data()["gorm"].(*gorm.DB)
-	t := app.Data()["templates"].(*template.Template)
-	if t == nil {
-		panic("templates not found")
-	}
 
-	//TODO: read from config
-	path := "/Users/ondrejodchazel/projects/go/src/github.com/hypertornado/prago/extensions/templates/"
-
-	var err error
-	funcs := app.Data()["templateFuncs"].(template.FuncMap)
-	if funcs == nil {
-		panic("funcs not found")
-	}
-
-	funcs["tmpl"] = func(templateName string, x interface{}) (template.HTML, error) {
-		var buf bytes.Buffer
-		err := t.ExecuteTemplate(&buf, templateName, x)
-		return template.HTML(buf.String()), err
-	}
-
-	t = t.Funcs(funcs)
-	t, err = t.ParseGlob(path + "/*.tmpl")
+	err := a.initTemplates(app)
 	if err != nil {
-		panic(err)
+		return err
 	}
-
-	app.Data()["templates"] = t
 
 	adminAccessController := app.MainController().SubController()
 
@@ -146,6 +125,38 @@ func (a *Admin) Init(app *prago.App) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (a *Admin) initTemplates(app *prago.App) error {
+	templates := app.Data()["templates"].(*template.Template)
+	if templates == nil {
+		return errors.New("Templates not initialized")
+	}
+
+	//TODO: read from config
+	//path := "/Users/ondrejodchazel/projects/go/src/github.com/hypertornado/prago/extensions/templates/"
+
+	templateFuncs := app.Data()["templateFuncs"].(template.FuncMap)
+	if templateFuncs == nil {
+		return errors.New("Funcs not initialized")
+	}
+
+	templateFuncs["tmpl"] = func(templateName string, x interface{}) (template.HTML, error) {
+		var buf bytes.Buffer
+		err := templates.ExecuteTemplate(&buf, templateName, x)
+		return template.HTML(buf.String()), err
+	}
+
+	templates = templates.Funcs(templateFuncs)
+	/*t, err = t.ParseGlob(path + "/*.tmpl")
+	if err != nil {
+		panic(err)
+	}*/
+
+	app.Data()["templates"] = templates
+	app.Data()["templateFuncs"] = templateFuncs
+
 	return nil
 }
 
