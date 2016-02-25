@@ -2,7 +2,6 @@ package prago
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"net/http"
 )
@@ -38,8 +37,7 @@ func (m MiddlewareView) Init(app *App) error {
 
 	templates, err := loadTemplates(funcs, templatePaths)
 	if err != nil {
-		fmt.Println("couldnt load templates")
-		return nil
+		return err
 	}
 
 	app.data["templates"] = templates
@@ -59,12 +57,8 @@ func requestMiddlewareView(p Request, next func()) {
 
 	statusCode, statusCodeOk := p.GetData("statusCode").(int)
 	if !statusCodeOk {
-		if len(p.Header().Get("Location")) > 0 {
-			statusCode = http.StatusMovedPermanently
-		} else {
-			statusCode = http.StatusOK
-			renderDefaultNotFound = true
-		}
+		statusCode = http.StatusOK
+		renderDefaultNotFound = true
 	}
 	body, bodyOk := p.GetData("body").([]byte)
 	if !bodyOk {

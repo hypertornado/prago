@@ -52,15 +52,23 @@ func (a *App) Data() map[string]interface{} {
 	return a.data
 }
 
-func (a *App) initMiddlewares() {
+func (a *App) initMiddlewares() error {
 	for _, v := range a.middlewares {
-		v.Init(a)
+		err := v.Init(a)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func (a *App) Init(init func(*App)) {
-	a.initMiddlewares()
-	a.bind(init)
+func (a *App) Init(init func(*App)) error {
+	err := a.initMiddlewares()
+	if err != nil {
+		return err
+	}
+	err = a.bind(init)
+	return err
 }
 
 func (a *App) MainController() (ret *Controller) {
@@ -143,4 +151,5 @@ func recoveryFromServerError(p Request, recoveryData interface{}) {
 
 func Redirect(request Request, urlStr string) {
 	request.Header().Set("Location", urlStr)
+	request.Response().WriteHeader(http.StatusMovedPermanently)
 }

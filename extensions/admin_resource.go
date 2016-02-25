@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/utils"
 	"github.com/jinzhu/gorm"
 	"net/url"
@@ -12,9 +13,12 @@ import (
 )
 
 type AdminResource struct {
-	ID    string
-	Name  string
-	Typ   reflect.Type
+	ID                 string
+	Name               string
+	Typ                reflect.Type
+	ResourceController *prago.Controller
+	item               interface{}
+	//resourceInitializer *func(*Admin, *AdminResource) error
 	admin *Admin
 }
 
@@ -25,12 +29,18 @@ func NewResource(item interface{}) (*AdminResource, error) {
 		Name: name,
 		ID:   utils.PrettyUrl(name),
 		Typ:  typ,
+		item: item,
 	}
-	return ret, nil
-}
 
-func (ar *AdminResource) SetName(name string) {
-	ar.Name = name
+	iface, ok := item.(interface {
+		AdminName() string
+	})
+
+	if ok {
+		ret.Name = iface.AdminName()
+	}
+
+	return ret, nil
 }
 
 func (ar *AdminResource) gorm() *gorm.DB {
@@ -49,6 +59,14 @@ func (ar *AdminResource) List() (interface{}, error) {
 	var items interface{}
 	listItems(ar.db(), ar.tableName(), ar.Typ, &items)
 	return items, nil
+}
+
+func (ar *AdminResource) ResourceURL(suffix string) string {
+	ret := ar.admin.Prefix + "/" + ar.ID
+	if len(suffix) > 0 {
+		ret += "/" + suffix
+	}
+	return ret
 }
 
 type AdminRowItem struct {

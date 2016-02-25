@@ -7,7 +7,7 @@ import (
 	"os/exec"
 )
 
-func (app *App) bind(init func(*App)) {
+func (app *App) bind(init func(*App)) error {
 	cmd := kingpin.New("", "")
 	serverCommand := cmd.Command("server", "Run server")
 	port := serverCommand.Flag("port", "server port").Default("8585").Short('p').Int()
@@ -20,7 +20,7 @@ func (app *App) bind(init func(*App)) {
 
 	command, err := cmd.Parse(os.Args[1:])
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	switch command {
@@ -35,6 +35,7 @@ func (app *App) bind(init func(*App)) {
 		init(app)
 		development(app)
 	}
+	return nil
 }
 
 func (a *App) start(port int, developmentMode bool) {
