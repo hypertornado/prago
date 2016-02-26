@@ -112,7 +112,7 @@ func TestAdminDB(t *testing.T) {
 	}
 
 	var nodesIface interface{}
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface)
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, nil)
 
 	nodes := nodesIface.([]TestNode)
 
@@ -136,7 +136,7 @@ func TestAdminDB(t *testing.T) {
 	values.Set("Name", "somename")
 	bindData(item, values)
 	createItem(db, tableName, item)
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface)
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, nil)
 	nodes = nodesIface.([]TestNode)
 
 	if len(nodes) != 3 {
@@ -155,7 +155,7 @@ func TestAdminDB(t *testing.T) {
 
 	deleteItem(db, tableName, 2)
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface)
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, nil)
 	nodes = nodesIface.([]TestNode)
 
 	if len(nodes) != 2 {
@@ -163,9 +163,67 @@ func TestAdminDB(t *testing.T) {
 	}
 }
 
-func TestAdminStructDescription(t *testing.T) {
-	getStructDescription(reflect.TypeOf(&TestNode{}))
+func TestAdminDBList(t *testing.T) {
+	tableName := "node"
+	dropTable(db, tableName)
+	createTable(db, tableName, reflect.TypeOf(TestNode{}))
 
+	createItem(db, tableName, &TestNode{Name: "B", Changed: time.Now().Add(1 * time.Minute)})
+	createItem(db, tableName, &TestNode{Name: "A"})
+	createItem(db, tableName, &TestNode{Name: "B", Changed: time.Now()})
+	createItem(db, tableName, &TestNode{Name: "C"})
+
+	var nodes []TestNode
+
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, nil)
+	compareResults(t, nodes, []int64{1, 2, 3, 4})
+
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, &listQuery{
+		order: []listQueryOrder{{name: "id", asc: false}},
+	})
+	compareResults(t, nodes, []int64{4, 3, 2, 1})
+
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, &listQuery{
+		order: []listQueryOrder{{name: "name", asc: false}, {name: "changed", asc: true}},
+	})
+	compareResults(t, nodes, []int64{4, 3, 1, 2})
+
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, &listQuery{
+		order: []listQueryOrder{{name: "name", asc: false}, {name: "changed", asc: false}},
+	})
+	compareResults(t, nodes, []int64{4, 1, 3, 2})
+
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, &listQuery{
+		offset: 1,
+		limit:  2,
+	})
+	compareResults(t, nodes, []int64{2, 3})
+
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, &listQuery{
+		whereString: "name=?",
+		whereParams: []interface{}{"B"},
+	})
+	compareResults(t, nodes, []int64{1, 3})
+
+	whereString, whereParams := mapToDBQuery(map[string]interface{}{"name": "B"})
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, &listQuery{
+		whereString: whereString,
+		whereParams: whereParams,
+	})
+	compareResults(t, nodes, []int64{1, 3})
+
+}
+
+func compareResults(t *testing.T, nodes []TestNode, ids []int64) {
+	if len(nodes) != len(ids) {
+		t.Fatal("not equal length ", len(nodes))
+	}
+
+	for i, _ := range nodes {
+		if nodes[i].ID != ids[i] {
+			t.Fatal(nodes[i], ids)
+		}
+	}
 }
 
 func TestAdminReflect(t *testing.T) {

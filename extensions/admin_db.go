@@ -208,36 +208,6 @@ func getItem(db *sql.DB, tableName string, itemType reflect.Type, item interface
 	return nil
 }
 
-func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}) error {
-	slice := reflect.New(reflect.SliceOf(sliceItemType)).Elem()
-
-	newValue := reflect.New(sliceItemType).Elem()
-	names, scanners, err := getStructScanners(newValue)
-	if err != nil {
-		return err
-	}
-
-	q := fmt.Sprintf("SELECT %s FROM `%s`;", strings.Join(names, ", "), tableName)
-	rows, err := db.Query(q)
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		newValue = reflect.New(sliceItemType).Elem()
-		names, scanners, err = getStructScanners(newValue)
-		if err != nil {
-			return err
-		}
-
-		rows.Scan(scanners...)
-		slice.Set(reflect.Append(slice, newValue))
-	}
-
-	reflect.ValueOf(items).Elem().Set(slice)
-	return nil
-}
-
 func prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
 	names = []string{}
 	questionMarks = []string{}
