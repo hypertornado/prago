@@ -56,7 +56,7 @@ func (ar *AdminResource) tableName() string {
 
 func (ar *AdminResource) List() (interface{}, error) {
 	var items interface{}
-	listItems(ar.db(), ar.tableName(), ar.Typ, &items, nil)
+	listItems(ar.db(), ar.tableName(), ar.Typ, &items, listQuery{})
 	return items, nil
 }
 

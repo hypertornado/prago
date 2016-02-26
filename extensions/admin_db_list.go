@@ -62,12 +62,8 @@ func mapToDBQuery(m map[string]interface{}) (str string, params []interface{}) {
 	return
 }
 
-func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}, query *listQuery) error {
+func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}, query listQuery) error {
 	slice := reflect.New(reflect.SliceOf(sliceItemType)).Elem()
-
-	if query == nil {
-		query = &listQuery{}
-	}
 
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
