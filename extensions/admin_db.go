@@ -184,28 +184,11 @@ func (s *scanner) Scan(src interface{}) error {
 }
 
 func getItem(db *sql.DB, tableName string, itemType reflect.Type, item interface{}, id int64) error {
-	value := reflect.New(itemType).Elem()
-	names, scanners, err := getStructScanners(value)
-	if err != nil {
-		return err
-	}
-
-	q := fmt.Sprintf("SELECT %s FROM `%s` WHERE id=?", strings.Join(names, ", "), tableName)
-	rows, err := db.Query(q, id)
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-	rows.Next()
-
-	err = rows.Scan(scanners...)
-	if err != nil {
-		return err
-	}
-
-	reflect.ValueOf(item).Elem().Set(value)
-
-	return nil
+	whereString, whereParams := mapToDBQuery(map[string]interface{}{"id": id})
+	return getFirstItem(db, tableName, itemType, item, listQuery{
+		whereString: whereString,
+		whereParams: whereParams,
+	})
 }
 
 func prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {

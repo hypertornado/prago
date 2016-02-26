@@ -80,6 +80,22 @@ func countItems(db *sql.DB, tableName string, query listQuery) (int64, error) {
 	return i, err
 }
 
+func getFirstItem(db *sql.DB, tableName string, sliceItemType reflect.Type, item interface{}, query listQuery) error {
+	var items interface{}
+	err := listItems(db, tableName, sliceItemType, &items, query)
+	if err != nil {
+		return err
+	}
+
+	val := reflect.ValueOf(items)
+	if val.Len() > 0 {
+		itemVal := val.Index(0)
+		reflect.ValueOf(item).Elem().Set(itemVal)
+	}
+
+	return nil
+}
+
 func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}, query listQuery) error {
 	slice := reflect.New(reflect.SliceOf(sliceItemType)).Elem()
 

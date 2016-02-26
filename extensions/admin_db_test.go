@@ -227,6 +227,16 @@ func TestAdminDBList(t *testing.T) {
 		t.Fatal(i)
 	}
 
+	var node TestNode
+	getFirstItem(db, tableName, reflect.TypeOf(TestNode{}), &node, listQuery{
+		whereString: whereString,
+		whereParams: whereParams,
+		offset:      1,
+	})
+
+	if node.ID != 3 {
+		t.Fatal(node.ID)
+	}
 }
 
 func compareResults(t *testing.T, nodes []TestNode, ids []int64) {
