@@ -25,7 +25,6 @@ func buildOrderString(params []listQueryOrder) string {
 	if len(params) == 0 {
 		params = []listQueryOrder{{name: "id", asc: true}}
 	}
-
 	items := []string{}
 	for _, v := range params {
 		order := "ASC"
@@ -36,6 +35,20 @@ func buildOrderString(params []listQueryOrder) string {
 		items = append(items, item)
 	}
 	return strings.Join(items, ", ")
+}
+
+func buildLimitString(offset, limit int64) string {
+	if limit <= 0 {
+		limit = math.MaxInt64
+	}
+	return fmt.Sprintf("LIMIT %d, %d", offset, limit)
+}
+
+func buildWhereString(where string) string {
+	if len(where) == 0 {
+		where = "1"
+	}
+	return where
 }
 
 func mapToDBQuery(m map[string]interface{}) (str string, params []interface{}) {
@@ -57,23 +70,13 @@ func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items i
 	}
 
 	orderString := buildOrderString(query.order)
+	limitString := buildLimitString(query.offset, query.limit)
+	whereString := buildWhereString(query.whereString)
 
 	newValue := reflect.New(sliceItemType).Elem()
 	names, scanners, err := getStructScanners(newValue)
 	if err != nil {
 		return err
-	}
-
-	var defaultLimit int64 = math.MaxInt64
-	limit := defaultLimit
-	if query.limit > 0 {
-		limit = query.limit
-	}
-	limitString := fmt.Sprintf("LIMIT %d, %d", query.offset, limit)
-
-	whereString := query.whereString
-	if len(whereString) == 0 {
-		whereString = "1"
 	}
 
 	q := fmt.Sprintf("SELECT %s FROM `%s` WHERE %s ORDER BY %s %s;", strings.Join(names, ", "), tableName, whereString, orderString, limitString)
@@ -88,7 +91,6 @@ func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items i
 		if err != nil {
 			return err
 		}
-
 		rows.Scan(scanners...)
 		slice.Set(reflect.Append(slice, newValue))
 	}
