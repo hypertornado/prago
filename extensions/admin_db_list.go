@@ -34,7 +34,7 @@ func buildOrderString(params []listQueryOrder) string {
 		item := fmt.Sprintf("`%s` %s", v.name, order)
 		items = append(items, item)
 	}
-	return strings.Join(items, ", ")
+	return fmt.Sprintf("ORDER BY %s", strings.Join(items, ", "))
 }
 
 func buildLimitString(offset, limit int64) string {
@@ -48,7 +48,7 @@ func buildWhereString(where string) string {
 	if len(where) == 0 {
 		where = "1"
 	}
-	return where
+	return fmt.Sprintf("WHERE %s", where)
 }
 
 func mapToDBQuery(m map[string]interface{}) (str string, params []interface{}) {
@@ -60,6 +60,24 @@ func mapToDBQuery(m map[string]interface{}) (str string, params []interface{}) {
 	}
 	str = strings.Join(items, ", ")
 	return
+}
+
+func countItems(db *sql.DB, tableName string, query listQuery) (int64, error) {
+	orderString := buildOrderString(query.order)
+	limitString := buildLimitString(query.offset, query.limit)
+	whereString := buildWhereString(query.whereString)
+
+	q := fmt.Sprintf("SELECT COUNT(*) FROM `%s` %s %s %s;", tableName, whereString, orderString, limitString)
+	rows, err := db.Query(q, query.whereParams...)
+	if err != nil {
+		return -1, err
+	}
+
+	rows.Next()
+
+	var i int64
+	err = rows.Scan(&i)
+	return i, err
 }
 
 func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}, query listQuery) error {
@@ -75,7 +93,7 @@ func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items i
 		return err
 	}
 
-	q := fmt.Sprintf("SELECT %s FROM `%s` WHERE %s ORDER BY %s %s;", strings.Join(names, ", "), tableName, whereString, orderString, limitString)
+	q := fmt.Sprintf("SELECT %s FROM `%s` %s %s %s;", strings.Join(names, ", "), tableName, whereString, orderString, limitString)
 	rows, err := db.Query(q, query.whereParams...)
 	if err != nil {
 		return err

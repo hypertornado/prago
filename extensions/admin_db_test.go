@@ -212,6 +212,21 @@ func TestAdminDBList(t *testing.T) {
 	})
 	compareResults(t, nodes, []int64{1, 3})
 
+	var i int64
+
+	i, _ = countItems(db, tableName, listQuery{})
+	if i != 4 {
+		t.Fatal(i)
+	}
+
+	i, _ = countItems(db, tableName, listQuery{
+		whereString: whereString,
+		whereParams: whereParams,
+	})
+	if i != 2 {
+		t.Fatal(i)
+	}
+
 }
 
 func compareResults(t *testing.T, nodes []TestNode, ids []int64) {
