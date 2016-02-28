@@ -198,8 +198,7 @@ func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
 	})
 
 	resourceController.Get(resource.ResourceURL("new"), func(request prago.Request) {
-
-		descriptions, err := resource.GetNewDescriptions()
+		descriptions, err := resource.GetFormItems(resource.item)
 		if err != nil {
 			panic(err)
 		}
@@ -228,13 +227,13 @@ func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
 			panic(err)
 		}
 
-		descriptions, err := resource.GetDescriptions(item)
+		formItems, err := resource.GetFormItems(item)
 		if err != nil {
 			panic(err)
 		}
 
 		request.SetData("admin_item", item)
-		request.SetData("admin_item_descriptions", descriptions)
+		request.SetData("admin_form_items", formItems)
 		request.SetData("admin_yield", "admin_edit")
 		prago.Render(request, 200, "admin_layout")
 	})

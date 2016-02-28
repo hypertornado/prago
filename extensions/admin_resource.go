@@ -70,20 +70,12 @@ type AdminRowItem struct {
 	Value     interface{}
 }
 
-func (ar *AdminResource) GetNewDescriptions() ([]AdminRowItem, error) {
-	return ar.getDescriptions(reflect.New(ar.Typ).Elem())
-}
-
-func (ar *AdminResource) GetDescriptions(item interface{}) ([]AdminRowItem, error) {
-	return ar.getDescriptions(reflect.ValueOf(item))
-}
-
-func (ar *AdminResource) getDescriptions(itemVal reflect.Value) ([]AdminRowItem, error) {
+func (ar *AdminResource) GetFormItems(item interface{}) ([]AdminRowItem, error) {
+	itemVal := reflect.ValueOf(item)
 	items := []AdminRowItem{}
 
 	for i := 0; i < ar.Typ.NumField(); i++ {
 		field := ar.Typ.Field(i)
-
 		structItem := AdminRowItem{
 			Name:      field.Name,
 			NameHuman: field.Name,
@@ -120,7 +112,6 @@ func (ar *AdminResource) getDescriptions(itemVal reflect.Value) ([]AdminRowItem,
 			items = append(items, structItem)
 		}
 	}
-
 	return items, nil
 }
 

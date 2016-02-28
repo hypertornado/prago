@@ -6,18 +6,12 @@
 
 <form method="POST" action="{{.admin_item.ID}}" class="form">
 
-{{range $item := .admin_item_descriptions}}
+{{range $item := .admin_form_items}}
   {{tmpl $item.Template $item}}
 {{end}}
 
 <input type="submit" value="Save" class="btn">
 
 </form>
-
-{{end}}
-
-{{define "admin_editNEW"}}
-
-<h2>Edit {{.admin_resource.Name}} - {{.admin_item}}</h2>
 
 {{end}}
