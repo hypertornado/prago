@@ -54,11 +54,11 @@ func (ar *AdminResource) tableName() string {
 	return ar.ID
 }
 
-func (ar *AdminResource) List() (interface{}, error) {
+/*func (ar *AdminResource) List() (interface{}, error) {
 	var items interface{}
 	listItems(ar.db(), ar.tableName(), ar.Typ, &items, listQuery{})
 	return items, nil
-}
+}*/
 
 func (ar *AdminResource) ResourceURL(suffix string) string {
 	ret := ar.admin.Prefix + "/" + ar.ID
@@ -76,18 +76,22 @@ type AdminRowItem struct {
 	Value     interface{}
 }
 
-func (ar *AdminResource) Get(id int64) (interface{}, []AdminRowItem, error) {
+/*func (ar *AdminResource) Get(id int64) (interface{}, []AdminRowItem, error) {
 	var item interface{}
 	getItem(ar.db(), ar.tableName(), ar.Typ, &item, id)
 	items, err := ar.getItems(reflect.ValueOf(item))
 	return item, items, err
+}*/
+
+func (ar *AdminResource) GetNewDescriptions() ([]AdminRowItem, error) {
+	return ar.getDescriptions(reflect.New(ar.Typ).Elem())
 }
 
-func (ar *AdminResource) GetItems() ([]AdminRowItem, error) {
-	return ar.getItems(reflect.New(ar.Typ).Elem())
+func (ar *AdminResource) GetDescriptions(item interface{}) ([]AdminRowItem, error) {
+	return ar.getDescriptions(reflect.ValueOf(item))
 }
 
-func (ar *AdminResource) getItems(itemVal reflect.Value) ([]AdminRowItem, error) {
+func (ar *AdminResource) getDescriptions(itemVal reflect.Value) ([]AdminRowItem, error) {
 	items := []AdminRowItem{}
 
 	for i := 0; i < ar.Typ.NumField(); i++ {
@@ -170,6 +174,7 @@ func (ar *AdminResource) CreateItem(item interface{}) error {
 	return createItem(ar.db(), ar.tableName(), item)
 }
 
+//TODO: dont drop table
 func (ar *AdminResource) Migrate() error {
 	var err error
 	fmt.Println("Migrating ", ar.Name, ar.ID)

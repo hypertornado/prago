@@ -188,7 +188,7 @@ func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
 	resourceController := resource.ResourceController
 
 	resourceController.Get(resource.ResourceURL(""), func(request prago.Request) {
-		row_items, err := resource.List()
+		row_items, err := resource.Query().List()
 		if err != nil {
 			panic(err)
 		}
@@ -199,7 +199,7 @@ func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
 
 	resourceController.Get(resource.ResourceURL("new"), func(request prago.Request) {
 
-		descriptions, err := resource.GetItems()
+		descriptions, err := resource.GetNewDescriptions()
 		if err != nil {
 			panic(err)
 		}
@@ -223,7 +223,12 @@ func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
 			panic(err)
 		}
 
-		item, descriptions, err := resource.Get(int64(id))
+		item, err := resource.Query().Where(map[string]interface{}{"id": int64(id)}).First()
+		if err != nil {
+			panic(err)
+		}
+
+		descriptions, err := resource.GetDescriptions(item)
 		if err != nil {
 			panic(err)
 		}
