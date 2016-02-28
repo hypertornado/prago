@@ -237,6 +237,23 @@ func TestAdminDBList(t *testing.T) {
 	if node.ID != 3 {
 		t.Fatal(node.ID)
 	}
+
+	whereString, whereParams = mapToDBQuery(map[string]interface{}{"name": "B"})
+	count, err := deleteItems(db, tableName, listQuery{
+		whereString: whereString,
+		whereParams: whereParams,
+	})
+
+	if count != 2 {
+		t.Fatal(count)
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{})
+	compareResults(t, nodes, []int64{2, 4})
+
 }
 
 func compareResults(t *testing.T, nodes []TestNode, ids []int64) {

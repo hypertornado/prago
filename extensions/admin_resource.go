@@ -54,12 +54,6 @@ func (ar *AdminResource) tableName() string {
 	return ar.ID
 }
 
-/*func (ar *AdminResource) List() (interface{}, error) {
-	var items interface{}
-	listItems(ar.db(), ar.tableName(), ar.Typ, &items, listQuery{})
-	return items, nil
-}*/
-
 func (ar *AdminResource) ResourceURL(suffix string) string {
 	ret := ar.admin.Prefix + "/" + ar.ID
 	if len(suffix) > 0 {
@@ -75,13 +69,6 @@ type AdminRowItem struct {
 	Error     string
 	Value     interface{}
 }
-
-/*func (ar *AdminResource) Get(id int64) (interface{}, []AdminRowItem, error) {
-	var item interface{}
-	getItem(ar.db(), ar.tableName(), ar.Typ, &item, id)
-	items, err := ar.getItems(reflect.ValueOf(item))
-	return item, items, err
-}*/
 
 func (ar *AdminResource) GetNewDescriptions() ([]AdminRowItem, error) {
 	return ar.getDescriptions(reflect.New(ar.Typ).Elem())

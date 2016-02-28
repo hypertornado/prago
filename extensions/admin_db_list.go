@@ -44,6 +44,13 @@ func buildLimitString(offset, limit int64) string {
 	return fmt.Sprintf("LIMIT %d, %d", offset, limit)
 }
 
+func buildLimitWithoutOffsetString(limit int64) string {
+	if limit <= 0 {
+		limit = math.MaxInt64
+	}
+	return fmt.Sprintf("LIMIT %d", limit)
+}
+
 func buildWhereString(where string) string {
 	if len(where) == 0 {
 		where = "1"
@@ -72,7 +79,6 @@ func countItems(db *sql.DB, tableName string, query listQuery) (int64, error) {
 	if err != nil {
 		return -1, err
 	}
-
 	rows.Next()
 
 	var i int64
@@ -98,7 +104,6 @@ func getFirstItem(db *sql.DB, tableName string, sliceItemType reflect.Type, item
 
 func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}, query listQuery) error {
 	slice := reflect.New(reflect.SliceOf(sliceItemType)).Elem()
-
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.whereString)
@@ -127,4 +132,17 @@ func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items i
 
 	reflect.ValueOf(items).Elem().Set(slice)
 	return nil
+}
+
+func deleteItems(db *sql.DB, tableName string, query listQuery) (int64, error) {
+	limitString := buildLimitWithoutOffsetString(query.limit)
+	whereString := buildWhereString(query.whereString)
+
+	q := fmt.Sprintf("DELETE FROM `%s` %s %s;", tableName, whereString, limitString)
+	res, err := db.Exec(q, query.whereParams...)
+	if err != nil {
+		return -1, err
+	}
+
+	return res.RowsAffected()
 }
