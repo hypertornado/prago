@@ -258,7 +258,7 @@ func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
 			panic(err)
 		}
 
-		err = resource.Delete(int64(id))
+		_, err = resource.Query().Where(map[string]interface{}{"id": int64(id)}).Delete()
 		if err != nil {
 			panic(err)
 		}

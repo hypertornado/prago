@@ -36,3 +36,7 @@ func (q *adminResourceQuery) List() (items interface{}, err error) {
 	err = listItems(q.db, q.tableName, q.sliceItemType, &items, q.query)
 	return
 }
+
+func (q *adminResourceQuery) Delete() (count int64, err error) {
+	return deleteItems(q.db, q.tableName, q.query)
+}
