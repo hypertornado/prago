@@ -37,3 +37,26 @@
   <input type="date" name="{{.Name}}" value="{{.Value}}" class="input form_input">
 </label>
 {{end}}
+
+{{define "admin_item_readonly"}}
+<label class="form_label">
+  {{if .Error}}
+    <div class="form_label_error">{{.Error}}</div>
+  {{end}}
+  <span class="form_label_text">{{.NameHuman}}</span>
+  <div>{{.Value}}</div>
+</label>
+{{end}}
+
+{{define "admin_item_file"}}
+<label class="form_label">
+  {{if .Error}}
+    <div class="form_label_error">{{.Error}}</div>
+  {{end}}
+  <span class="form_label_text">{{.NameHuman}}</span>
+  <input type="file" name="{{.Name}}" accept=".jpeg,.jpg" class="input form_input">
+</label>
+{{end}}
+
+{{define "admin_item_hidden"}}
+{{end}}

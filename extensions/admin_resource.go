@@ -31,12 +31,18 @@ func NewResource(item interface{}) (*AdminResource, error) {
 		item: item,
 	}
 
-	iface, ok := item.(interface {
+	ifaceName, ok := item.(interface {
 		AdminName() string
 	})
-
 	if ok {
-		ret.Name = iface.AdminName()
+		ret.Name = ifaceName.AdminName()
+	}
+
+	ifaceID, ok := item.(interface {
+		AdminID() string
+	})
+	if ok {
+		ret.ID = ifaceID.AdminID()
 	}
 
 	return ret, nil
@@ -62,7 +68,7 @@ func (ar *AdminResource) ResourceURL(suffix string) string {
 	return ret
 }
 
-type AdminRowItem struct {
+type AdminFormItem struct {
 	Name      string
 	NameHuman string
 	Template  string
@@ -70,13 +76,25 @@ type AdminRowItem struct {
 	Value     interface{}
 }
 
-func (ar *AdminResource) GetFormItems(item interface{}) ([]AdminRowItem, error) {
+func (ar *AdminResource) GetFormItems(item interface{}) ([]AdminFormItem, error) {
+	init, ok := ar.item.(interface {
+		GetFormItems(*AdminResource, interface{}) ([]AdminFormItem, error)
+	})
+
+	if ok {
+		return init.GetFormItems(ar, item)
+	} else {
+		return GetFormItemsDefault(ar, item)
+	}
+}
+
+func GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, error) {
 	itemVal := reflect.ValueOf(item)
-	items := []AdminRowItem{}
+	items := []AdminFormItem{}
 
 	for i := 0; i < ar.Typ.NumField(); i++ {
 		field := ar.Typ.Field(i)
-		structItem := AdminRowItem{
+		structItem := AdminFormItem{
 			Name:      field.Name,
 			NameHuman: field.Name,
 			Template:  "admin_item_input",
@@ -106,6 +124,11 @@ func (ar *AdminResource) GetFormItems(item interface{}) ([]AdminRowItem, error) 
 		description := field.Tag.Get("prago-admin-description")
 		if len(description) > 0 {
 			structItem.NameHuman = description
+		}
+
+		accessTag := field.Tag.Get("prago-admin-access")
+		if accessTag == "-" || structItem.Name == "CreatedAt" || structItem.Name == "UpdatedAt" {
+			structItem.Template = "admin_item_readonly"
 		}
 
 		if structItem.Name != "ID" {

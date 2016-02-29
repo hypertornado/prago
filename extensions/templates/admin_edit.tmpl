@@ -4,14 +4,9 @@
 
 <a href="../{{.admin_resource.ID}}">Back</a>
 
-<form method="POST" action="{{.admin_item.ID}}" class="form">
-
-{{range $item := .admin_form_items}}
-  {{tmpl $item.Template $item}}
-{{end}}
-
+<form method="POST" action="{{.admin_item.ID}}" class="form" enctype="multipart/form-data">
+{{tmpl "admin_form" .}}
 <input type="submit" value="Save" class="btn">
-
 </form>
 
 {{end}}

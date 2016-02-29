@@ -1,0 +1,5 @@
+{{define "admin_form"}}
+{{range $item := .admin_form_items}}
+  {{tmpl $item.Template $item}}
+{{end}}
+{{end}}

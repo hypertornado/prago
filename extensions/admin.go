@@ -134,9 +134,6 @@ func (a *Admin) initTemplates(app *prago.App) error {
 		return errors.New("Templates not initialized")
 	}
 
-	//TODO: read from config
-	//path := "/Users/ondrejodchazel/projects/go/src/github.com/hypertornado/prago/extensions/templates/"
-
 	templateFuncs := app.Data()["templateFuncs"].(template.FuncMap)
 	if templateFuncs == nil {
 		return errors.New("Funcs not initialized")
@@ -149,10 +146,6 @@ func (a *Admin) initTemplates(app *prago.App) error {
 	}
 
 	templates = templates.Funcs(templateFuncs)
-	/*t, err = t.ParseGlob(path + "/*.tmpl")
-	if err != nil {
-		panic(err)
-	}*/
 
 	app.Data()["templates"] = templates
 	app.Data()["templateFuncs"] = templateFuncs
@@ -184,10 +177,8 @@ func (a *Admin) initResource(resource *AdminResource) error {
 	}
 }
 
-func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
-	resourceController := resource.ResourceController
-
-	resourceController.Get(resource.ResourceURL(""), func(request prago.Request) {
+func BindList(a *Admin, resource *AdminResource) {
+	resource.ResourceController.Get(resource.ResourceURL(""), func(request prago.Request) {
 		row_items, err := resource.Query().List()
 		if err != nil {
 			panic(err)
@@ -196,27 +187,33 @@ func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
 		request.SetData("admin_yield", "admin_list")
 		prago.Render(request, 200, "admin_layout")
 	})
+}
 
-	resourceController.Get(resource.ResourceURL("new"), func(request prago.Request) {
-		descriptions, err := resource.GetFormItems(resource.item)
+func BindNew(a *Admin, resource *AdminResource) {
+	resource.ResourceController.Get(resource.ResourceURL("new"), func(request prago.Request) {
+		formItems, err := resource.GetFormItems(resource.item)
 		if err != nil {
 			panic(err)
 		}
 
-		request.SetData("admin_item_descriptions", descriptions)
+		request.SetData("admin_form_items", formItems)
 		request.SetData("admin_yield", "admin_new")
 		prago.Render(request, 200, "admin_layout")
 	})
+}
 
-	resourceController.Post(resource.ResourceURL(""), func(request prago.Request) {
+func BindCreate(a *Admin, resource *AdminResource) {
+	resource.ResourceController.Post(resource.ResourceURL(""), func(request prago.Request) {
 		err := resource.CreateItemFromParams(request.Params())
 		if err != nil {
 			panic(err)
 		}
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
+}
 
-	resourceController.Get(resource.ResourceURL(":id"), func(request prago.Request) {
+func BindDetail(a *Admin, resource *AdminResource) {
+	resource.ResourceController.Get(resource.ResourceURL(":id"), func(request prago.Request) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		if err != nil {
 			panic(err)
@@ -237,8 +234,10 @@ func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
 		request.SetData("admin_yield", "admin_edit")
 		prago.Render(request, 200, "admin_layout")
 	})
+}
 
-	resourceController.Post(resource.ResourceURL(":id"), func(request prago.Request) {
+func BindUpdate(a *Admin, resource *AdminResource) {
+	resource.ResourceController.Post(resource.ResourceURL(":id"), func(request prago.Request) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		if err != nil {
 			panic(err)
@@ -250,8 +249,10 @@ func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
 		}
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
+}
 
-	resourceController.Post(resource.ResourceURL(":id/delete"), func(request prago.Request) {
+func BindDelete(a *Admin, resource *AdminResource) {
+	resource.ResourceController.Post(resource.ResourceURL(":id/delete"), func(request prago.Request) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		if err != nil {
 			panic(err)
@@ -264,6 +265,15 @@ func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
 
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
+}
+
+func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
+	BindList(a, resource)
+	BindNew(a, resource)
+	BindCreate(a, resource)
+	BindDetail(a, resource)
+	BindUpdate(a, resource)
+	BindDelete(a, resource)
 	return nil
 }
 
