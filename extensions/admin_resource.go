@@ -77,6 +77,7 @@ type AdminFormItem struct {
 }
 
 func (ar *AdminResource) GetFormItems(item interface{}) ([]AdminFormItem, error) {
+
 	init, ok := ar.item.(interface {
 		GetFormItems(*AdminResource, interface{}) ([]AdminFormItem, error)
 	})
@@ -100,7 +101,9 @@ func GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, 
 			Template:  "admin_item_input",
 		}
 
-		reflect.ValueOf(&structItem.Value).Elem().Set(itemVal.Field(i))
+		reflect.ValueOf(&structItem.Value).Elem().Set(
+			itemVal.Field(i),
+		)
 
 		switch field.Type.Kind() {
 		case reflect.Struct:

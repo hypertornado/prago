@@ -92,15 +92,16 @@ func getFirstItem(db *sql.DB, tableName string, sliceItemType reflect.Type, item
 	if err != nil {
 		return err
 	}
+
 	val := reflect.ValueOf(items)
+
 	if val.Len() > 0 {
-		itemVal := val.Index(0)
-		reflect.ValueOf(item).Elem().Set(itemVal)
+		reflect.ValueOf(&item).Elem().Elem().Elem().Set(val.Index(0).Elem())
 	}
 	return nil
 }
 
-func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}, query listQuery) error {
+func listItemsOLD(db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}, query listQuery) error {
 	slice := reflect.New(reflect.SliceOf(sliceItemType)).Elem()
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
@@ -132,7 +133,7 @@ func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items i
 	return nil
 }
 
-func listItemsPointers(db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}, query listQuery) error {
+func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}, query listQuery) error {
 	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(sliceItemType))).Elem()
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)

@@ -64,6 +64,33 @@ func TestAdminBind(t *testing.T) {
 	if n.Changed.Format("2006-01-02") != "2014-11-10" {
 		t.Fatal(n.Changed)
 	}
+}
+
+func TestAdminDBFirst(t *testing.T) {
+	var err error
+	tableName := "node"
+	dropTable(db, tableName)
+	createTable(db, tableName, reflect.TypeOf(TestNode{}))
+
+	n0 := &TestNode{Name: "A"}
+	n1 := &TestNode{Name: "B"}
+
+	err = createItem(db, tableName, n0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = createItem(db, tableName, n1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var node *TestNode = &TestNode{Name: "OLD"}
+	getFirstItem(db, tableName, reflect.TypeOf(TestNode{}), node, listQuery{})
+
+	if node.Name != "A" {
+		t.Fatal(node.Name)
+	}
 
 }
 
@@ -227,9 +254,9 @@ func TestAdminResourceQuery(t *testing.T) {
 
 	BindName(&ii)
 
-	n, ok := firstItem.(TestNode)
+	n, ok := firstItem.(*TestNode)
 	if !ok {
-		t.Fatal("not node type")
+		t.Fatal("not node pointer type - ", reflect.TypeOf(firstItem))
 	}
 
 	if n.Name != "A1" {
@@ -250,38 +277,38 @@ func TestAdminDBList(t *testing.T) {
 
 	var nodes []*TestNode
 
-	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{})
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{})
 	compareResults(t, nodes, []int64{1, 2, 3, 4})
 
-	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		order: []listQueryOrder{{name: "id", asc: false}},
 	})
 	compareResults(t, nodes, []int64{4, 3, 2, 1})
 
-	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		order: []listQueryOrder{{name: "name", asc: false}, {name: "changed", asc: true}},
 	})
 	compareResults(t, nodes, []int64{4, 3, 1, 2})
 
-	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		order: []listQueryOrder{{name: "name", asc: false}, {name: "changed", asc: false}},
 	})
 	compareResults(t, nodes, []int64{4, 1, 3, 2})
 
-	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		offset: 1,
 		limit:  2,
 	})
 	compareResults(t, nodes, []int64{2, 3})
 
-	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		whereString: "name=?",
 		whereParams: []interface{}{"B"},
 	})
 	compareResults(t, nodes, []int64{1, 3})
 
 	whereString, whereParams := mapToDBQuery(map[string]interface{}{"name": "B"})
-	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		whereString: whereString,
 		whereParams: whereParams,
 	})
@@ -326,7 +353,7 @@ func TestAdminDBList(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{})
+	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{})
 	compareResults(t, nodes, []int64{2, 4})
 
 }
