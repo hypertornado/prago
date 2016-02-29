@@ -48,20 +48,23 @@ func TestAdminTime(t *testing.T) {
 }
 
 func TestAdminBind(t *testing.T) {
-	n := &TestNode{}
-
+	n := TestNode{}
 	values := make(url.Values)
 	values.Set("Name", "ABC")
 	values.Set("Changed", "2014-11-10")
-	BindData(n, values, BindDataFilterDefault)
+
+	var in interface{}
+	in = &n
+
+	BindData(&in, values, BindDataFilterDefault)
 
 	if n.Name != "ABC" {
 		t.Fatal(n.Name)
 	}
-
 	if n.Changed.Format("2006-01-02") != "2014-11-10" {
 		t.Fatal(n.Changed)
 	}
+
 }
 
 func TestAdminDB(t *testing.T) {
@@ -161,6 +164,78 @@ func TestAdminDB(t *testing.T) {
 	if len(nodes) != 2 {
 		t.Fatal(len(nodes))
 	}
+}
+
+/*func TestAdminPokus(t *testing.T) {
+	//var str = "pokus"
+	//var item interface{} = str
+
+	var constructed interface{}
+
+	newVal := reflect.New(reflect.TypeOf(""))
+	reflect.ValueOf(&constructed).Elem().Set(newVal)
+
+	fmt.Println(reflect.TypeOf(constructed))
+	//fmt.Println(reflect.ValueOf(constructed).Elem().Elem().Type())
+	fmt.Println(constructed)
+}*/
+
+func TestReflect(t *testing.T) {
+	var i interface{} = createStruct()
+	changeStruct(&i)
+	if i.(*TestNode).Name != "CHANGED" {
+		t.Fatal("not changed")
+	}
+}
+
+func createStruct() interface{} {
+	return &TestNode{Name: "No"}
+}
+
+func changeStruct(i interface{}) {
+	val := reflect.ValueOf(i).Elem().Elem().Elem()
+	val.FieldByName("Name").SetString("CHANGED")
+}
+
+func TestAdminResourceQuery(t *testing.T) {
+	tableName := "node"
+	dropTable(db, tableName)
+	createTable(db, tableName, reflect.TypeOf(TestNode{}))
+
+	q := &adminResourceQuery{
+		query:         listQuery{},
+		db:            db,
+		tableName:     tableName,
+		sliceItemType: reflect.TypeOf(TestNode{}),
+	}
+
+	n0 := &TestNode{Name: "A1", OK: false}
+
+	err := q.Save(n0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	firstItem, err := q.Where(map[string]interface{}{"id": 1}).First()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var ii interface{}
+
+	ii = &firstItem
+
+	BindName(&ii)
+
+	n, ok := firstItem.(TestNode)
+	if !ok {
+		t.Fatal("not node type")
+	}
+
+	if n.Name != "A1" {
+		t.Fatal(n.Name)
+	}
+
 }
 
 func TestAdminDBList(t *testing.T) {

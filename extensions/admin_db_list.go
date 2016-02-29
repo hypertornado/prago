@@ -92,13 +92,11 @@ func getFirstItem(db *sql.DB, tableName string, sliceItemType reflect.Type, item
 	if err != nil {
 		return err
 	}
-
 	val := reflect.ValueOf(items)
 	if val.Len() > 0 {
 		itemVal := val.Index(0)
 		reflect.ValueOf(item).Elem().Set(itemVal)
 	}
-
 	return nil
 }
 

@@ -1,6 +1,7 @@
 package extensions
 
 import (
+	"github.com/hypertornado/prago"
 	"time"
 )
 
@@ -26,6 +27,26 @@ func (FileResource) GetFormItems(ar *AdminResource, item interface{}) ([]AdminFo
 	}
 
 	items = append([]AdminFormItem{newItem}, items...)
-
 	return items, err
+}
+
+func (FileResource) AdminInitResource(a *Admin, resource *AdminResource) error {
+	BindList(a, resource)
+	BindNew(a, resource)
+	BindDetail(a, resource)
+	BindUpdate(a, resource)
+	BindDelete(a, resource)
+
+	resource.ResourceController.Post(resource.ResourceURL(""), func(request prago.Request) {
+		/*err := resource.CreateItemFromParams(request.Params())
+		if err != nil {
+			panic(err)
+		}
+		prago.Redirect(request, a.Prefix+"/"+resource.ID)*/
+
+		panic("NNN")
+
+	})
+
+	return nil
 }

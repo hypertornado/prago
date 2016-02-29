@@ -283,7 +283,16 @@ func BindDataFilterDefault(field reflect.StructField) bool {
 }
 
 func BindData(item interface{}, data url.Values, bindDataFilter func(reflect.StructField) bool) {
-	value := reflect.ValueOf(item).Elem()
+
+	value := reflect.ValueOf(item)
+	for i := 0; i < 10; i++ {
+		fmt.Println(value.Kind())
+		if value.Kind() == reflect.Struct {
+			break
+		}
+		value = value.Elem()
+	}
+
 	for i := 0; i < value.Type().NumField(); i++ {
 		field := value.Type().Field(i)
 

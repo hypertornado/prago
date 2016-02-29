@@ -147,7 +147,6 @@ func (ar *AdminResource) CreateItemFromParams(params url.Values) error {
 }
 
 func (ar *AdminResource) UpdateItemFromParams(id int64, params url.Values) error {
-
 	var item interface{}
 	val := reflect.New(ar.Typ)
 	reflect.ValueOf(&item).Elem().Set(val)
@@ -159,6 +158,31 @@ func (ar *AdminResource) UpdateItemFromParams(id int64, params url.Values) error
 
 	BindData(item, params, BindDataFilterDefault)
 	return saveItem(ar.db(), ar.tableName(), item)
+}
+
+func (ar *AdminResource) UpdateItemFromParamsNEW(id int64, params url.Values) error {
+	item, err := ar.Query().Where(map[string]interface{}{"id": id}).First()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(item)
+	BindName(item)
+
+	//BindData(&item, params, BindDataFilterDefault)
+	//return saveItem(ar.db(), ar.tableName(), item)
+	return nil
+}
+
+func BindName(item interface{}) {
+	value := reflect.ValueOf(item).Elem().Elem().Elem().Elem()
+
+	fmt.Println(value.CanSet())
+
+	//nameField := value.FieldByName("Name")
+	//fmt.Println(nameField)
+	//fmt.Println(nameField.CanSet())
+	//nameField.SetString("CHANGED")
 }
 
 func (ar *AdminResource) CreateItem(item interface{}) error {

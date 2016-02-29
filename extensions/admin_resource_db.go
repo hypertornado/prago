@@ -21,10 +21,17 @@ func (ar *AdminResource) Query() *adminResourceQuery {
 	}
 }
 
+func (ar *AdminResource) NewItem() *adminResourceQuery {
+	return nil
+}
+
 func (q *adminResourceQuery) Where(w map[string]interface{}) *adminResourceQuery {
 	q.query.whereString, q.query.whereParams = mapToDBQuery(w)
 	return q
+}
 
+func (q *adminResourceQuery) Save(item interface{}) error {
+	return createItem(q.db, q.tableName, item)
 }
 
 func (q *adminResourceQuery) First() (item interface{}, err error) {
