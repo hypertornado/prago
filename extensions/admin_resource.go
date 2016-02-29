@@ -142,7 +142,7 @@ func (ar *AdminResource) CreateItemFromParams(params url.Values) error {
 	var item interface{}
 	val := reflect.New(ar.Typ)
 	reflect.ValueOf(&item).Elem().Set(val)
-	bindData(item, params)
+	BindData(item, params, BindDataFilterDefault)
 	return createItem(ar.db(), ar.tableName(), item)
 }
 
@@ -157,7 +157,7 @@ func (ar *AdminResource) UpdateItemFromParams(id int64, params url.Values) error
 		return err
 	}
 
-	bindData(item, params)
+	BindData(item, params, BindDataFilterDefault)
 	return saveItem(ar.db(), ar.tableName(), item)
 }
 

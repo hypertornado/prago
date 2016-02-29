@@ -275,12 +275,19 @@ func deleteItem(db *sql.DB, tableName string, id int64) error {
 	return err
 }
 
-func bindData(item interface{}, data url.Values) {
+func BindDataFilterDefault(field reflect.StructField) bool {
+	if field.Name == "ID" {
+		return false
+	}
+	return true
+}
+
+func BindData(item interface{}, data url.Values, bindDataFilter func(reflect.StructField) bool) {
 	value := reflect.ValueOf(item).Elem()
 	for i := 0; i < value.Type().NumField(); i++ {
 		field := value.Type().Field(i)
 
-		if field.Name == "ID" {
+		if !bindDataFilter(field) {
 			continue
 		}
 

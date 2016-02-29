@@ -53,7 +53,7 @@ func TestAdminBind(t *testing.T) {
 	values := make(url.Values)
 	values.Set("Name", "ABC")
 	values.Set("Changed", "2014-11-10")
-	bindData(n, values)
+	BindData(n, values, BindDataFilterDefault)
 
 	if n.Name != "ABC" {
 		t.Fatal(n.Name)
@@ -134,7 +134,7 @@ func TestAdminDB(t *testing.T) {
 
 	values := make(url.Values)
 	values.Set("Name", "somename")
-	bindData(item, values)
+	BindData(item, values, BindDataFilterDefault)
 	createItem(db, tableName, item)
 	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
 	nodes = nodesIface.([]TestNode)
