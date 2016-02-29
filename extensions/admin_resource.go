@@ -175,9 +175,9 @@ func (ar *AdminResource) UpdateItemFromParamsNEW(id int64, params url.Values) er
 }
 
 func BindName(item interface{}) {
-	value := reflect.ValueOf(item).Elem().Elem().Elem().Elem()
+	//value := reflect.ValueOf(item).Elem().Elem().Elem().Elem()
 
-	fmt.Println(value.CanSet())
+	//fmt.Println(value.CanSet())
 
 	//nameField := value.FieldByName("Name")
 	//fmt.Println(nameField)

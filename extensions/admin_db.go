@@ -286,7 +286,6 @@ func BindData(item interface{}, data url.Values, bindDataFilter func(reflect.Str
 
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
-		fmt.Println(value.Kind())
 		if value.Kind() == reflect.Struct {
 			break
 		}
