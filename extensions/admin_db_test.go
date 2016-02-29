@@ -248,40 +248,40 @@ func TestAdminDBList(t *testing.T) {
 	createItem(db, tableName, &TestNode{Name: "B", Changed: time.Now()})
 	createItem(db, tableName, &TestNode{Name: "C"})
 
-	var nodes []TestNode
+	var nodes []*TestNode
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{})
+	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{})
 	compareResults(t, nodes, []int64{1, 2, 3, 4})
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		order: []listQueryOrder{{name: "id", asc: false}},
 	})
 	compareResults(t, nodes, []int64{4, 3, 2, 1})
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		order: []listQueryOrder{{name: "name", asc: false}, {name: "changed", asc: true}},
 	})
 	compareResults(t, nodes, []int64{4, 3, 1, 2})
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		order: []listQueryOrder{{name: "name", asc: false}, {name: "changed", asc: false}},
 	})
 	compareResults(t, nodes, []int64{4, 1, 3, 2})
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		offset: 1,
 		limit:  2,
 	})
 	compareResults(t, nodes, []int64{2, 3})
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		whereString: "name=?",
 		whereParams: []interface{}{"B"},
 	})
 	compareResults(t, nodes, []int64{1, 3})
 
 	whereString, whereParams := mapToDBQuery(map[string]interface{}{"name": "B"})
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		whereString: whereString,
 		whereParams: whereParams,
 	})
@@ -326,12 +326,12 @@ func TestAdminDBList(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{})
+	listItemsPointers(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{})
 	compareResults(t, nodes, []int64{2, 4})
 
 }
 
-func compareResults(t *testing.T, nodes []TestNode, ids []int64) {
+func compareResults(t *testing.T, nodes []*TestNode, ids []int64) {
 	if len(nodes) != len(ids) {
 		t.Fatal("not equal length ", len(nodes))
 	}
