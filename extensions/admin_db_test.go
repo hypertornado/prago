@@ -144,7 +144,7 @@ func TestAdminDB(t *testing.T) {
 	var nodesIface interface{}
 	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
 
-	nodes := nodesIface.([]TestNode)
+	nodes := nodesIface.([]*TestNode)
 
 	if len(nodes) != 2 {
 		t.Fatal(len(nodes))
@@ -167,7 +167,7 @@ func TestAdminDB(t *testing.T) {
 	BindData(item, values, BindDataFilterDefault)
 	createItem(db, tableName, item)
 	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
-	nodes = nodesIface.([]TestNode)
+	nodes = nodesIface.([]*TestNode)
 
 	if len(nodes) != 3 {
 		t.Fatal(len(nodes))
@@ -176,8 +176,8 @@ func TestAdminDB(t *testing.T) {
 	changedNode := &TestNode{ID: 2, Name: "changedname"}
 	saveItem(db, tableName, changedNode)
 
-	var changedNodeResult TestNode
-	getItem(db, tableName, reflect.TypeOf(TestNode{}), &changedNodeResult, 2)
+	changedNodeResult := &TestNode{}
+	getItem(db, tableName, reflect.TypeOf(TestNode{}), changedNodeResult, 2)
 
 	if changedNodeResult.Name != "changedname" {
 		t.Fatal(changedNodeResult.Name)
@@ -186,7 +186,7 @@ func TestAdminDB(t *testing.T) {
 	deleteItem(db, tableName, 2)
 
 	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
-	nodes = nodesIface.([]TestNode)
+	nodes = nodesIface.([]*TestNode)
 
 	if len(nodes) != 2 {
 		t.Fatal(len(nodes))
@@ -248,13 +248,7 @@ func TestAdminResourceQuery(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var ii interface{}
-
-	ii = &firstItem
-
-	BindName(&ii)
-
-	n, ok := firstItem.(*TestNode)
+	n, ok := firstItem.(TestNode)
 	if !ok {
 		t.Fatal("not node pointer type - ", reflect.TypeOf(firstItem))
 	}
