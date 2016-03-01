@@ -2,12 +2,17 @@ package extensions
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/utils"
 	"github.com/jinzhu/gorm"
 	"reflect"
 	"time"
+)
+
+var (
+	ErrorDontHaveModel = errors.New("This resource does not have model")
 )
 
 type AdminResource struct {
@@ -17,16 +22,18 @@ type AdminResource struct {
 	ResourceController *prago.Controller
 	item               interface{}
 	admin              *Admin
+	hasModel           bool
 }
 
 func NewResource(item interface{}) (*AdminResource, error) {
 	typ := reflect.TypeOf(item)
 	name := typ.Name()
 	ret := &AdminResource{
-		Name: name,
-		ID:   utils.PrettyUrl(name),
-		Typ:  typ,
-		item: item,
+		Name:     name,
+		ID:       utils.PrettyUrl(name),
+		Typ:      typ,
+		item:     item,
+		hasModel: true,
 	}
 
 	ifaceName, ok := item.(interface {
@@ -41,6 +48,13 @@ func NewResource(item interface{}) (*AdminResource, error) {
 	})
 	if ok {
 		ret.ID = ifaceID.AdminID()
+	}
+
+	ifaceHasModel, ok := item.(interface {
+		AdminHasModel() bool
+	})
+	if ok {
+		ret.hasModel = ifaceHasModel.AdminHasModel()
 	}
 
 	return ret, nil
