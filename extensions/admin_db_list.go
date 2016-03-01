@@ -86,7 +86,7 @@ func countItems(db *sql.DB, tableName string, query listQuery) (int64, error) {
 	return i, err
 }
 
-func getFirstItem(db *sql.DB, tableName string, sliceItemType reflect.Type, item interface{}, query listQuery) error {
+func getFirstItemNONPOINTER(db *sql.DB, tableName string, sliceItemType reflect.Type, item interface{}, query listQuery) error {
 	var items interface{}
 	err := listItems(db, tableName, sliceItemType, &items, query)
 	if err != nil {
@@ -101,7 +101,7 @@ func getFirstItem(db *sql.DB, tableName string, sliceItemType reflect.Type, item
 	return nil
 }
 
-func getFirstItem2(db *sql.DB, tableName string, sliceItemType reflect.Type, item interface{}, query listQuery) error {
+func getFirstItem(db *sql.DB, tableName string, sliceItemType reflect.Type, item interface{}, query listQuery) error {
 	var items interface{}
 	err := listItems(db, tableName, sliceItemType, &items, query)
 	if err != nil {

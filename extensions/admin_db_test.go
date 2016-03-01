@@ -75,7 +75,7 @@ func TestAdminTime(t *testing.T) {
 	n0 := &TestNode{Changed: time.Now()}
 	createItem(db, tableName, n0)
 
-	n1 := TestNode{}
+	n1 := &TestNode{}
 	getItem(db, tableName, reflect.TypeOf(TestNode{}), &n1, n0.ID)
 
 	if n0.Changed.Format("2006-01-02 15:04:05") != n1.Changed.Format("2006-01-02 15:04:05") {
@@ -122,7 +122,7 @@ func TestAdminDBFirst(t *testing.T) {
 	}
 
 	var node *TestNode = &TestNode{Name: "OLD"}
-	getFirstItem(db, tableName, reflect.TypeOf(TestNode{}), node, listQuery{})
+	getFirstItem(db, tableName, reflect.TypeOf(TestNode{}), &node, listQuery{})
 
 	if node.Name != "A" {
 		t.Fatal(node.Name)
@@ -154,7 +154,7 @@ func TestAdminListItems(t *testing.T) {
 	}
 
 	var nodeIface interface{}
-	getFirstItem2(db, tableName, reflect.TypeOf(TestNode{}), &nodeIface, listQuery{})
+	getFirstItem(db, tableName, reflect.TypeOf(TestNode{}), &nodeIface, listQuery{})
 
 	_, ok = nodeIface.(*TestNode)
 	if !ok {
@@ -202,7 +202,7 @@ func TestAdminDB(t *testing.T) {
 		t.Fatal(n1.ID)
 	}
 
-	n2 := TestNode{}
+	n2 := &TestNode{}
 
 	err = getItem(db, tableName, reflect.TypeOf(TestNode{}), &n2, n1.ID)
 	if err != nil {
@@ -257,7 +257,7 @@ func TestAdminDB(t *testing.T) {
 	saveItem(db, tableName, changedNode)
 
 	changedNodeResult := &TestNode{}
-	getItem(db, tableName, reflect.TypeOf(TestNode{}), changedNodeResult, 2)
+	getItem(db, tableName, reflect.TypeOf(TestNode{}), &changedNodeResult, 2)
 
 	if changedNodeResult.Name != "changedname" {
 		t.Fatal(changedNodeResult.Name)
@@ -297,7 +297,7 @@ func TestAdminResourceQuery(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	n, ok := firstItem.(TestNode)
+	n, ok := firstItem.(*TestNode)
 	if !ok {
 		t.Fatal("bad type")
 	}
@@ -371,7 +371,7 @@ func TestAdminDBList(t *testing.T) {
 		t.Fatal(i)
 	}
 
-	var node TestNode
+	var node *TestNode
 	getFirstItem(db, tableName, reflect.TypeOf(TestNode{}), &node, listQuery{
 		whereString: whereString,
 		whereParams: whereParams,
