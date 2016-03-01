@@ -2,6 +2,7 @@ package extensions
 
 import (
 	"database/sql"
+	"fmt"
 	"reflect"
 )
 
@@ -23,6 +24,11 @@ func (ar *AdminResource) Query() *adminResourceQuery {
 		tableName:     ar.tableName(),
 		sliceItemType: ar.Typ,
 	}
+}
+
+func (ar *AdminResource) NewItem() (item interface{}, err error) {
+	reflect.ValueOf(&item).Elem().Set(reflect.New(ar.Typ))
+	return
 }
 
 func (q *adminResourceQuery) Where(w map[string]interface{}) *adminResourceQuery {

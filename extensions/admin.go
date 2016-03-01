@@ -191,7 +191,13 @@ func BindList(a *Admin, resource *AdminResource) {
 
 func BindNew(a *Admin, resource *AdminResource) {
 	resource.ResourceController.Get(resource.ResourceURL("new"), func(request prago.Request) {
-		formItems, err := resource.GetFormItems(resource.item)
+
+		item, err := resource.NewItem()
+		if err != nil {
+			panic(err)
+		}
+
+		formItems, err := resource.GetFormItems(item)
 		if err != nil {
 			panic(err)
 		}
