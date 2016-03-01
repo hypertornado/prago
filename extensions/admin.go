@@ -47,6 +47,10 @@ func (a *Admin) adminHeaderData() interface{} {
 	return ret
 }
 
+func (a *Admin) DB() *sql.DB {
+	return a.db
+}
+
 func (a *Admin) Init(app *prago.App) error {
 	a.db = app.Data()["db"].(*sql.DB)
 	a.gorm = app.Data()["gorm"].(*gorm.DB)
@@ -177,22 +181,44 @@ func (a *Admin) initResource(resource *AdminResource) error {
 	}
 }
 
+func (a *Admin) GetURL(resource *AdminResource, suffix string) string {
+	ret := a.Prefix + "/" + resource.ID
+	if len(suffix) > 0 {
+		ret += "/" + suffix
+	}
+	return ret
+}
+
 func BindList(a *Admin, resource *AdminResource) {
-	resource.ResourceController.Get(resource.ResourceURL(""), func(request prago.Request) {
-		q := resource.Query()
+	resource.ResourceController.Get(a.GetURL(resource, ""), func(request prago.Request) {
+
+		listTableHeader, err := resource.ListTableHeader()
+		if err != nil {
+			panic(err)
+		}
+
+		/*q := resource.Query()
 		q = resource.queryFilter(q)
 		row_items, err := q.List()
 		if err != nil {
 			panic(err)
+		}*/
+
+		listTableItems, err := resource.ListTableItems()
+		if err != nil {
+			panic(err)
 		}
-		request.SetData("admin_items", row_items)
+
+		request.SetData("admin_list_table_items", listTableItems)
+		request.SetData("admin_list_table_header", listTableHeader)
+		//request.SetData("admin_items", row_items)
 		request.SetData("admin_yield", "admin_list")
 		prago.Render(request, 200, "admin_layout")
 	})
 }
 
 func BindNew(a *Admin, resource *AdminResource) {
-	resource.ResourceController.Get(resource.ResourceURL("new"), func(request prago.Request) {
+	resource.ResourceController.Get(a.GetURL(resource, "new"), func(request prago.Request) {
 
 		item, err := resource.NewItem()
 		if err != nil {
@@ -211,7 +237,7 @@ func BindNew(a *Admin, resource *AdminResource) {
 }
 
 func BindCreate(a *Admin, resource *AdminResource) {
-	resource.ResourceController.Post(resource.ResourceURL(""), func(request prago.Request) {
+	resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
 		item, err := resource.NewItem()
 		if err != nil {
 			panic(err)
@@ -226,7 +252,7 @@ func BindCreate(a *Admin, resource *AdminResource) {
 }
 
 func BindDetail(a *Admin, resource *AdminResource) {
-	resource.ResourceController.Get(resource.ResourceURL(":id"), func(request prago.Request) {
+	resource.ResourceController.Get(a.GetURL(resource, ":id"), func(request prago.Request) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		if err != nil {
 			panic(err)
@@ -250,7 +276,7 @@ func BindDetail(a *Admin, resource *AdminResource) {
 }
 
 func BindUpdate(a *Admin, resource *AdminResource) {
-	resource.ResourceController.Post(resource.ResourceURL(":id"), func(request prago.Request) {
+	resource.ResourceController.Post(a.GetURL(resource, ":id"), func(request prago.Request) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		if err != nil {
 			panic(err)
@@ -276,7 +302,7 @@ func BindUpdate(a *Admin, resource *AdminResource) {
 }
 
 func BindDelete(a *Admin, resource *AdminResource) {
-	resource.ResourceController.Post(resource.ResourceURL(":id/delete"), func(request prago.Request) {
+	resource.ResourceController.Post(a.GetURL(resource, ":id/delete"), func(request prago.Request) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		if err != nil {
 			panic(err)

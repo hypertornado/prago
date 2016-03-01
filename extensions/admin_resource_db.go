@@ -61,6 +61,10 @@ func (q *ResourceQuery) OrderDesc(name string) *ResourceQuery {
 	return q
 }
 
+func (q *ResourceQuery) Count() (int64, error) {
+	return countItems(q.db, q.tableName, q.query)
+}
+
 func (q *ResourceQuery) First() (item interface{}, err error) {
 	if q.err != nil {
 		return nil, q.err

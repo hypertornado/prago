@@ -13,6 +13,12 @@ import (
 
 var db *sql.DB
 
+type dbProvider struct{}
+
+func (dbProvider) DB() *sql.DB {
+	return db
+}
+
 func init() {
 	connectString := fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local", "prago", "prago", "prago_test")
 	g, err := gorm.Open("mysql", connectString)

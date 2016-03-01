@@ -1,7 +1,7 @@
 package extensions
 
 import (
-	"github.com/hypertornado/prago"
+	//"github.com/hypertornado/prago"
 	"time"
 )
 
@@ -37,16 +37,16 @@ func (FileResource) AdminInitResource(a *Admin, resource *AdminResource) error {
 	BindUpdate(a, resource)
 	BindDelete(a, resource)
 
-	resource.ResourceController.Post(resource.ResourceURL(""), func(request prago.Request) {
-		/*err := resource.CreateItemFromParams(request.Params())
-		if err != nil {
-			panic(err)
-		}
-		prago.Redirect(request, a.Prefix+"/"+resource.ID)*/
+	//resource.ResourceController.Post(resource.ResourceURL(""), func(request prago.Request) {
+	/*err := resource.CreateItemFromParams(request.Params())
+	if err != nil {
+		panic(err)
+	}
+	prago.Redirect(request, a.Prefix+"/"+resource.ID)*/
 
-		panic("NNN")
+	//panic("NNN")
 
-	})
+	//})
 
 	return nil
 }

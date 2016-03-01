@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/utils"
-	"github.com/jinzhu/gorm"
+	//"github.com/jinzhu/gorm"
 	"reflect"
 	"time"
 )
@@ -15,18 +15,24 @@ var (
 	ErrorDontHaveModel = errors.New("This resource does not have model")
 )
 
+type DBProvider interface {
+	DB() *sql.DB
+}
+
 type AdminResource struct {
 	ID                 string
 	Name               string
 	Typ                reflect.Type
 	ResourceController *prago.Controller
 	item               interface{}
-	admin              *Admin
+	admin              DBProvider
 	hasModel           bool
 	queryFilter        func(*ResourceQuery) *ResourceQuery
 }
 
 func NewResource(item interface{}) (*AdminResource, error) {
+	//TODO: check item is struct
+
 	typ := reflect.TypeOf(item)
 	name := typ.Name()
 	ret := &AdminResource{
@@ -70,12 +76,12 @@ func NewResource(item interface{}) (*AdminResource, error) {
 	return ret, nil
 }
 
-func (ar *AdminResource) gorm() *gorm.DB {
+/*func (ar *AdminResource) gorm() *gorm.DB {
 	return ar.admin.gorm
-}
+}*/
 
 func (ar *AdminResource) db() *sql.DB {
-	return ar.admin.db
+	return ar.admin.DB()
 }
 
 func (ar *AdminResource) tableName() string {
@@ -85,14 +91,6 @@ func (ar *AdminResource) tableName() string {
 func QueryFilterDefault(q *ResourceQuery) *ResourceQuery {
 	q.Order("id")
 	return q
-}
-
-func (ar *AdminResource) ResourceURL(suffix string) string {
-	ret := ar.admin.Prefix + "/" + ar.ID
-	if len(suffix) > 0 {
-		ret += "/" + suffix
-	}
-	return ret
 }
 
 type AdminFormItem struct {
@@ -166,6 +164,53 @@ func GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, 
 		}
 	}
 	return items, nil
+}
+
+type ListTableRow struct {
+	ID    int64
+	Items []string
+}
+
+func (resource *AdminResource) ListTableItems() (ret []ListTableRow, err error) {
+	q := resource.Query()
+	q = resource.queryFilter(q)
+	rowItems, err := q.List()
+
+	val := reflect.ValueOf(rowItems)
+	for i := 0; i < val.Len(); i++ {
+		row := ListTableRow{}
+
+		itemVal := val.Index(i).Elem()
+		for j := 0; j < itemVal.NumField(); j++ {
+			field := itemVal.Type().Field(j)
+			add := ""
+			shouldAdd := false
+			if field.Name == "Name" {
+				newVal := itemVal.FieldByName(field.Name)
+				reflect.ValueOf(&add).Elem().Set(newVal)
+				shouldAdd = true
+			}
+			if field.Name == "ID" {
+				var ii int64
+				newVal := itemVal.FieldByName(field.Name)
+				reflect.ValueOf(&ii).Elem().Set(newVal)
+				add = fmt.Sprintf("%d", ii)
+				shouldAdd = true
+				row.ID = ii
+			}
+
+			if shouldAdd {
+				row.Items = append(row.Items, add)
+			}
+		}
+		ret = append(ret, row)
+	}
+	return
+}
+
+func (ar *AdminResource) ListTableHeader() (ret []string, err error) {
+	ret = []string{"#", "Name"}
+	return
 }
 
 //TODO: dont drop table

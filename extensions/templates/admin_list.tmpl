@@ -5,13 +5,21 @@
 {{ $adminResource := .admin_resource }}
 
 <table class="admin_table">
-{{range $item := .admin_items}}
   <tr>
-    <td nowrap>
-      {{.ID}}
+  {{range $item := .admin_list_table_header}}
+    <th>{{$item}}</th>
+  {{end}}
+  <th colspan="2"></th>
+  </tr>
+{{range $item := .admin_list_table_items}}
+  <tr>
+    {{range $cell := $item.Items}}
+    <td>
+      {{ $cell }}
     </td>
-    <td style="width: 100%;">
-      <a href="{{ $adminResource.ID}}/{{$item.ID}}">{{.Name}}</a>
+    {{end}}
+    <td nowrap>
+      <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">Edit</a> 
     </td>
     <td nowrap>
       <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete" onsubmit="return window.confirm('Really want to delete?');">
