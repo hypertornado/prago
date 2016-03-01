@@ -101,6 +101,21 @@ func getFirstItem(db *sql.DB, tableName string, sliceItemType reflect.Type, item
 	return nil
 }
 
+func getFirstItem2(db *sql.DB, tableName string, sliceItemType reflect.Type, item interface{}, query listQuery) error {
+	var items interface{}
+	err := listItems(db, tableName, sliceItemType, &items, query)
+	if err != nil {
+		return err
+	}
+
+	val := reflect.ValueOf(items)
+
+	if val.Len() > 0 {
+		reflect.ValueOf(item).Elem().Set(val.Index(0))
+	}
+	return nil
+}
+
 func listItemsOLD(db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}, query listQuery) error {
 	slice := reflect.New(reflect.SliceOf(sliceItemType)).Elem()
 	orderString := buildOrderString(query.order)
@@ -152,13 +167,45 @@ func listItems(db *sql.DB, tableName string, sliceItemType reflect.Type, items i
 	}
 	defer rows.Close()
 	for rows.Next() {
-		newValue = reflect.New(sliceItemType) //.Elem()
+		newValue = reflect.New(sliceItemType)
 		names, scanners, err = getStructScanners(newValue.Elem())
 		if err != nil {
 			return err
 		}
 		rows.Scan(scanners...)
 		slice.Set(reflect.Append(slice, newValue))
+	}
+
+	reflect.ValueOf(items).Elem().Set(slice)
+	return nil
+}
+
+func listItems2(db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}, query listQuery) error {
+	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(sliceItemType)))
+	orderString := buildOrderString(query.order)
+	limitString := buildLimitString(query.offset, query.limit)
+	whereString := buildWhereString(query.whereString)
+
+	newValue := reflect.New(sliceItemType).Elem()
+	names, scanners, err := getStructScanners(newValue)
+	if err != nil {
+		return err
+	}
+
+	q := fmt.Sprintf("SELECT %s FROM `%s` %s %s %s;", strings.Join(names, ", "), tableName, whereString, orderString, limitString)
+	rows, err := db.Query(q, query.whereParams...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		newValue = reflect.New(sliceItemType)
+		names, scanners, err = getStructScanners(newValue.Elem())
+		if err != nil {
+			return err
+		}
+		rows.Scan(scanners...)
+		slice.Elem().Set(reflect.Append(slice.Elem(), newValue))
 	}
 
 	reflect.ValueOf(items).Elem().Set(slice)

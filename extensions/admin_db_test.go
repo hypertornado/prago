@@ -31,6 +31,42 @@ type TestNode struct {
 	Changed     time.Time
 }
 
+func TestReflect(t *testing.T) {
+	var i interface{}
+	createStruct(&i)
+	changeStruct(i)
+	if i.(*TestStruct).Name != "Bar" {
+		t.Fatal("not changed")
+	}
+
+	i = createStructFactory()
+	changeStruct(i)
+	if i.(*TestStruct).Name != "Bar" {
+		t.Fatal("not changed")
+	}
+}
+
+type TestStruct struct {
+	Name string
+}
+
+func createStruct(i interface{}) {
+	el := &TestStruct{Name: "Foo"}
+	reflect.ValueOf(i).Elem().Set(reflect.ValueOf(el))
+}
+
+func createStructFactory() interface{} {
+	var ret interface{}
+	createStruct(&ret)
+	return ret
+}
+
+func changeStruct(i interface{}) {
+	val := reflect.ValueOf(&i).Elem().Elem().Elem()
+	field := val.FieldByName("Name")
+	field.SetString("Bar")
+}
+
 func TestAdminTime(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
@@ -91,7 +127,51 @@ func TestAdminDBFirst(t *testing.T) {
 	if node.Name != "A" {
 		t.Fatal(node.Name)
 	}
+}
 
+func TestAdminListItems(t *testing.T) {
+	tableName := "node"
+	dropTable(db, tableName)
+	createTable(db, tableName, reflect.TypeOf(TestNode{}))
+
+	createItem(db, tableName, &TestNode{Name: "A"})
+	createItem(db, tableName, &TestNode{Name: "B"})
+
+	var nodesIface interface{}
+	listItems2(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
+
+	nodes, ok := nodesIface.(*[]*TestNode)
+	if !ok {
+		t.Fatal(reflect.TypeOf(nodesIface))
+	}
+
+	if len(*nodes) != 2 {
+		t.Fatal(len(*nodes))
+	}
+
+	if (*nodes)[0].Name != "A" {
+		t.Fatal((*nodes)[0].Name)
+	}
+
+	var nodeIface interface{}
+	getFirstItem2(db, tableName, reflect.TypeOf(TestNode{}), &nodeIface, listQuery{})
+
+	_, ok = nodeIface.(*TestNode)
+	if !ok {
+		t.Fatal(reflect.TypeOf(nodeIface))
+	}
+
+	bindName(&nodeIface)
+
+	if nodeIface.(*TestNode).Name != "CHANGED" {
+		t.Fatal("Wrong changed")
+	}
+}
+
+func bindName(item interface{}) {
+	value := reflect.ValueOf(item).Elem().Elem().Elem()
+	field := value.FieldByName("Name")
+	field.SetString("CHANGED")
 }
 
 func TestAdminDB(t *testing.T) {
@@ -193,37 +273,6 @@ func TestAdminDB(t *testing.T) {
 	}
 }
 
-/*func TestAdminPokus(t *testing.T) {
-	//var str = "pokus"
-	//var item interface{} = str
-
-	var constructed interface{}
-
-	newVal := reflect.New(reflect.TypeOf(""))
-	reflect.ValueOf(&constructed).Elem().Set(newVal)
-
-	fmt.Println(reflect.TypeOf(constructed))
-	//fmt.Println(reflect.ValueOf(constructed).Elem().Elem().Type())
-	fmt.Println(constructed)
-}*/
-
-func TestReflect(t *testing.T) {
-	var i interface{} = createStruct()
-	changeStruct(&i)
-	if i.(*TestNode).Name != "CHANGED" {
-		t.Fatal("not changed")
-	}
-}
-
-func createStruct() interface{} {
-	return &TestNode{Name: "No"}
-}
-
-func changeStruct(i interface{}) {
-	val := reflect.ValueOf(i).Elem().Elem().Elem()
-	val.FieldByName("Name").SetString("CHANGED")
-}
-
 func TestAdminResourceQuery(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
@@ -250,13 +299,12 @@ func TestAdminResourceQuery(t *testing.T) {
 
 	n, ok := firstItem.(TestNode)
 	if !ok {
-		t.Fatal("not node pointer type - ", reflect.TypeOf(firstItem))
+		t.Fatal("bad type")
 	}
 
 	if n.Name != "A1" {
 		t.Fatal(n.Name)
 	}
-
 }
 
 func TestAdminDBList(t *testing.T) {
