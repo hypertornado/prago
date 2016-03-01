@@ -2,7 +2,6 @@ package extensions
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/utils"
@@ -138,16 +137,6 @@ func GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, 
 		}
 	}
 	return items, nil
-}
-
-func (ar *AdminResource) CreateItem(item interface{}) error {
-	typ := reflect.TypeOf(item)
-	id := utils.PrettyUrl(typ.Elem().Name())
-	if id != ar.tableName() {
-		return errors.New("Wrong class of item " + id + " " + ar.tableName())
-	}
-
-	return createItem(ar.db(), ar.tableName(), item)
 }
 
 //TODO: dont drop table
