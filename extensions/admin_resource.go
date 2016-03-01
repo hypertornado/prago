@@ -7,7 +7,6 @@ import (
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/utils"
 	"github.com/jinzhu/gorm"
-	"net/url"
 	"reflect"
 	"time"
 )
@@ -139,14 +138,6 @@ func GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, 
 		}
 	}
 	return items, nil
-}
-
-func (ar *AdminResource) CreateItemFromParams(params url.Values) error {
-	var item interface{}
-	val := reflect.New(ar.Typ)
-	reflect.ValueOf(&item).Elem().Set(val)
-	BindData(item, params, BindDataFilterDefault)
-	return createItem(ar.db(), ar.tableName(), item)
 }
 
 func (ar *AdminResource) CreateItem(item interface{}) error {

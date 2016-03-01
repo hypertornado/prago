@@ -2,7 +2,6 @@ package extensions
 
 import (
 	"database/sql"
-	"fmt"
 	"reflect"
 )
 
@@ -15,6 +14,10 @@ type adminResourceQuery struct {
 
 func (ar *AdminResource) Save(item interface{}) error {
 	return saveItem(ar.db(), ar.tableName(), item)
+}
+
+func (ar *AdminResource) Create(item interface{}) error {
+	return createItem(ar.db(), ar.tableName(), item)
 }
 
 func (ar *AdminResource) Query() *adminResourceQuery {

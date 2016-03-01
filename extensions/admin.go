@@ -210,7 +210,12 @@ func BindNew(a *Admin, resource *AdminResource) {
 
 func BindCreate(a *Admin, resource *AdminResource) {
 	resource.ResourceController.Post(resource.ResourceURL(""), func(request prago.Request) {
-		err := resource.CreateItemFromParams(request.Params())
+		item, err := resource.NewItem()
+		if err != nil {
+			panic(err)
+		}
+		BindData(item, request.Params(), BindDataFilterDefault)
+		err = resource.Create(item)
 		if err != nil {
 			panic(err)
 		}
