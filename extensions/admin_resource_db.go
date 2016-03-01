@@ -51,6 +51,16 @@ func (q *adminResourceQuery) Where(w map[string]interface{}) *adminResourceQuery
 	return q
 }
 
+func (q *adminResourceQuery) Order(name string) *adminResourceQuery {
+	q.query.order = append(q.query.order, listQueryOrder{name: name})
+	return q
+}
+
+func (q *adminResourceQuery) OrderDesc(name string) *adminResourceQuery {
+	q.query.order = append(q.query.order, listQueryOrder{name: name, desc: true})
+	return q
+}
+
 func (q *adminResourceQuery) First() (item interface{}, err error) {
 	if q.err != nil {
 		return nil, q.err

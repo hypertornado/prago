@@ -18,17 +18,17 @@ type listQuery struct {
 
 type listQueryOrder struct {
 	name string
-	asc  bool
+	desc bool
 }
 
 func buildOrderString(params []listQueryOrder) string {
 	if len(params) == 0 {
-		params = []listQueryOrder{{name: "id", asc: true}}
+		params = []listQueryOrder{{name: "id"}}
 	}
 	items := []string{}
 	for _, v := range params {
 		order := "ASC"
-		if !v.asc {
+		if v.desc {
 			order = "DESC"
 		}
 		item := fmt.Sprintf("`%s` %s", v.name, order)

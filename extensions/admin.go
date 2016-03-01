@@ -179,7 +179,7 @@ func (a *Admin) initResource(resource *AdminResource) error {
 
 func BindList(a *Admin, resource *AdminResource) {
 	resource.ResourceController.Get(resource.ResourceURL(""), func(request prago.Request) {
-		row_items, err := resource.Query().List()
+		row_items, err := resource.Query().Order("name").List()
 		if err != nil {
 			panic(err)
 		}

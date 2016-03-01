@@ -287,10 +287,7 @@ func TestAdminResourceQuery(t *testing.T) {
 
 	n0 := &TestNode{Name: "A1", OK: false}
 
-	err := q.Save(n0)
-	if err != nil {
-		t.Fatal(err)
-	}
+	createItem(db, tableName, n0)
 
 	firstItem, err := q.Where(map[string]interface{}{"id": 1}).First()
 	if err != nil {
@@ -323,17 +320,17 @@ func TestAdminDBList(t *testing.T) {
 	compareResults(t, nodes, []int64{1, 2, 3, 4})
 
 	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
-		order: []listQueryOrder{{name: "id", asc: false}},
+		order: []listQueryOrder{{name: "id", desc: true}},
 	})
 	compareResults(t, nodes, []int64{4, 3, 2, 1})
 
 	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
-		order: []listQueryOrder{{name: "name", asc: false}, {name: "changed", asc: true}},
+		order: []listQueryOrder{{name: "name", desc: true}, {name: "changed", desc: false}},
 	})
 	compareResults(t, nodes, []int64{4, 3, 1, 2})
 
 	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
-		order: []listQueryOrder{{name: "name", asc: false}, {name: "changed", asc: false}},
+		order: []listQueryOrder{{name: "name", desc: true}, {name: "changed", desc: true}},
 	})
 	compareResults(t, nodes, []int64{4, 1, 3, 2})
 

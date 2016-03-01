@@ -23,6 +23,8 @@ type AdminResource struct {
 	item               interface{}
 	admin              *Admin
 	hasModel           bool
+	orderName          string
+	orderDesc          bool
 }
 
 func NewResource(item interface{}) (*AdminResource, error) {
