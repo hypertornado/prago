@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-type adminResourceQuery struct {
+type ResourceQuery struct {
 	query         listQuery
 	db            *sql.DB
 	tableName     string
@@ -27,12 +27,12 @@ func (ar *AdminResource) Create(item interface{}) error {
 	return createItem(ar.db(), ar.tableName(), item)
 }
 
-func (ar *AdminResource) Query() *adminResourceQuery {
+func (ar *AdminResource) Query() *ResourceQuery {
 	var err error
 	if !ar.hasModel {
 		err = ErrorDontHaveModel
 	}
-	return &adminResourceQuery{
+	return &ResourceQuery{
 		query:         listQuery{},
 		db:            ar.db(),
 		tableName:     ar.tableName(),
@@ -46,22 +46,22 @@ func (ar *AdminResource) NewItem() (item interface{}, err error) {
 	return
 }
 
-func (q *adminResourceQuery) Where(w map[string]interface{}) *adminResourceQuery {
+func (q *ResourceQuery) Where(w map[string]interface{}) *ResourceQuery {
 	q.query.whereString, q.query.whereParams = mapToDBQuery(w)
 	return q
 }
 
-func (q *adminResourceQuery) Order(name string) *adminResourceQuery {
+func (q *ResourceQuery) Order(name string) *ResourceQuery {
 	q.query.order = append(q.query.order, listQueryOrder{name: name})
 	return q
 }
 
-func (q *adminResourceQuery) OrderDesc(name string) *adminResourceQuery {
+func (q *ResourceQuery) OrderDesc(name string) *ResourceQuery {
 	q.query.order = append(q.query.order, listQueryOrder{name: name, desc: true})
 	return q
 }
 
-func (q *adminResourceQuery) First() (item interface{}, err error) {
+func (q *ResourceQuery) First() (item interface{}, err error) {
 	if q.err != nil {
 		return nil, q.err
 	}
@@ -69,7 +69,7 @@ func (q *adminResourceQuery) First() (item interface{}, err error) {
 	return
 }
 
-func (q *adminResourceQuery) List() (items interface{}, err error) {
+func (q *ResourceQuery) List() (items interface{}, err error) {
 	if q.err != nil {
 		return nil, q.err
 	}
@@ -77,7 +77,7 @@ func (q *adminResourceQuery) List() (items interface{}, err error) {
 	return
 }
 
-func (q *adminResourceQuery) Delete() (count int64, err error) {
+func (q *ResourceQuery) Delete() (count int64, err error) {
 	if q.err != nil {
 		return -1, q.err
 	}

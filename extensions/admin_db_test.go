@@ -278,7 +278,7 @@ func TestAdminResourceQuery(t *testing.T) {
 	dropTable(db, tableName)
 	createTable(db, tableName, reflect.TypeOf(TestNode{}))
 
-	q := &adminResourceQuery{
+	q := &ResourceQuery{
 		query:         listQuery{},
 		db:            db,
 		tableName:     tableName,

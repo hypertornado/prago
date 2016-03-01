@@ -23,8 +23,7 @@ type AdminResource struct {
 	item               interface{}
 	admin              *Admin
 	hasModel           bool
-	orderName          string
-	orderDesc          bool
+	queryFilter        func(*ResourceQuery) *ResourceQuery
 }
 
 func NewResource(item interface{}) (*AdminResource, error) {
@@ -59,6 +58,15 @@ func NewResource(item interface{}) (*AdminResource, error) {
 		ret.hasModel = ifaceHasModel.AdminHasModel()
 	}
 
+	ret.queryFilter = QueryFilterDefault
+
+	ifaceHasQueryFilter, ok := item.(interface {
+		AdminQueryFilter(*ResourceQuery) *ResourceQuery
+	})
+	if ok {
+		ret.queryFilter = ifaceHasQueryFilter.AdminQueryFilter
+	}
+
 	return ret, nil
 }
 
@@ -72,6 +80,11 @@ func (ar *AdminResource) db() *sql.DB {
 
 func (ar *AdminResource) tableName() string {
 	return ar.ID
+}
+
+func QueryFilterDefault(q *ResourceQuery) *ResourceQuery {
+	q.Order("id")
+	return q
 }
 
 func (ar *AdminResource) ResourceURL(suffix string) string {
