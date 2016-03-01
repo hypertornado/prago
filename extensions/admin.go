@@ -243,10 +243,21 @@ func BindUpdate(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		err = resource.UpdateItemFromParams(int64(id), request.Params())
+		item, err := resource.Query().Where(map[string]interface{}{"id": int64(id)}).First()
 		if err != nil {
 			panic(err)
 		}
+
+		err = BindData(item, request.Params(), BindDataFilterDefault)
+		if err != nil {
+			panic(err)
+		}
+
+		err = resource.Save(item)
+		if err != nil {
+			panic(err)
+		}
+
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 }

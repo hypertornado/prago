@@ -282,7 +282,7 @@ func BindDataFilterDefault(field reflect.StructField) bool {
 	return true
 }
 
-func BindData(item interface{}, data url.Values, bindDataFilter func(reflect.StructField) bool) {
+func BindData(item interface{}, data url.Values, bindDataFilter func(reflect.StructField) bool) error {
 
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
@@ -325,4 +325,5 @@ func BindData(item interface{}, data url.Values, bindDataFilter func(reflect.Str
 			continue
 		}
 	}
+	return nil
 }

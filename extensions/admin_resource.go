@@ -90,7 +90,7 @@ func (ar *AdminResource) GetFormItems(item interface{}) ([]AdminFormItem, error)
 }
 
 func GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, error) {
-	itemVal := reflect.ValueOf(item)
+	itemVal := reflect.ValueOf(item).Elem()
 	items := []AdminFormItem{}
 
 	for i := 0; i < ar.Typ.NumField(); i++ {
@@ -147,34 +147,6 @@ func (ar *AdminResource) CreateItemFromParams(params url.Values) error {
 	reflect.ValueOf(&item).Elem().Set(val)
 	BindData(item, params, BindDataFilterDefault)
 	return createItem(ar.db(), ar.tableName(), item)
-}
-
-func (ar *AdminResource) UpdateItemFromParamsOLD(id int64, params url.Values) error {
-	var item interface{}
-	val := reflect.New(ar.Typ)
-	reflect.ValueOf(&item).Elem().Set(val)
-
-	err := getItem(ar.db(), ar.tableName(), ar.Typ, item, id)
-	if err != nil {
-		return err
-	}
-
-	BindData(item, params, BindDataFilterDefault)
-	return saveItem(ar.db(), ar.tableName(), item)
-}
-
-func (ar *AdminResource) UpdateItemFromParams(id int64, params url.Values) error {
-	item, err := ar.Query().Where(map[string]interface{}{"id": id}).First()
-	if err != nil {
-		panic(err)
-	}
-
-	var in interface{}
-	in = &item
-
-	BindData(&in, params, BindDataFilterDefault)
-	return saveItem(ar.db(), ar.tableName(), item)
-	return nil
 }
 
 func (ar *AdminResource) CreateItem(item interface{}) error {

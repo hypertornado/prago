@@ -12,6 +12,10 @@ type adminResourceQuery struct {
 	sliceItemType reflect.Type
 }
 
+func (ar *AdminResource) Save(item interface{}) error {
+	return saveItem(ar.db(), ar.tableName(), item)
+}
+
 func (ar *AdminResource) Query() *adminResourceQuery {
 	return &adminResourceQuery{
 		query:         listQuery{},
@@ -19,10 +23,6 @@ func (ar *AdminResource) Query() *adminResourceQuery {
 		tableName:     ar.tableName(),
 		sliceItemType: ar.Typ,
 	}
-}
-
-func (ar *AdminResource) NewItem() *adminResourceQuery {
-	return nil
 }
 
 func (q *adminResourceQuery) Where(w map[string]interface{}) *adminResourceQuery {
