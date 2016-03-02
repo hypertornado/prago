@@ -192,26 +192,12 @@ func (a *Admin) GetURL(resource *AdminResource, suffix string) string {
 func BindList(a *Admin, resource *AdminResource) {
 	resource.ResourceController.Get(a.GetURL(resource, ""), func(request prago.Request) {
 
-		listTableHeader, err := resource.ListTableHeader()
+		tableData, err := resource.ListTableItems()
 		if err != nil {
 			panic(err)
 		}
 
-		/*q := resource.Query()
-		q = resource.queryFilter(q)
-		row_items, err := q.List()
-		if err != nil {
-			panic(err)
-		}*/
-
-		listTableItems, err := resource.ListTableItems()
-		if err != nil {
-			panic(err)
-		}
-
-		request.SetData("admin_list_table_items", listTableItems)
-		request.SetData("admin_list_table_header", listTableHeader)
-		//request.SetData("admin_items", row_items)
+		request.SetData("admin_list_table_data", tableData)
 		request.SetData("admin_yield", "admin_list")
 		prago.Render(request, 200, "admin_layout")
 	})

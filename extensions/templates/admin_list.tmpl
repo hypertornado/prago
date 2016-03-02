@@ -6,12 +6,12 @@
 
 <table class="admin_table">
   <tr>
-  {{range $item := .admin_list_table_header}}
-    <th>{{$item}}</th>
+  {{range $item := .admin_list_table_data.Header}}
+    <th>{{$item.NameHuman}}</th>
   {{end}}
   <th colspan="2"></th>
   </tr>
-{{range $item := .admin_list_table_items}}
+{{range $item := .admin_list_table_data.Rows}}
   <tr>
     {{range $cell := $item.Items}}
     <td>

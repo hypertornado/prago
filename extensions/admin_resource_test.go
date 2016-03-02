@@ -6,15 +6,20 @@ import (
 )
 
 type ResourceStruct struct {
-	ID   int64
-	Name string
+	ID      int64
+	Name    string
+	Other   string
+	Showing string `prago-admin-show:"yes"`
 }
 
 func TestResource(t *testing.T) {
 	resource, _ := NewResource(ResourceStruct{})
 	resource.admin = dbProvider{}
 
-	resource.Migrate()
+	err := resource.Migrate()
+	if err != nil {
+		t.Fatal(err)
+	}
 	resource.Create(&ResourceStruct{Name: "First"})
 	resource.Create(&ResourceStruct{Name: "Second"})
 

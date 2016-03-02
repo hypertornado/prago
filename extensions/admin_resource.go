@@ -171,46 +171,68 @@ type ListTableRow struct {
 	Items []string
 }
 
-func (resource *AdminResource) ListTableItems() (ret []ListTableRow, err error) {
+type ListTableHeader struct {
+	Name      string
+	NameHuman string
+}
+
+type ListTable struct {
+	Header []ListTableHeader
+	Rows   []ListTableRow
+}
+
+func (resource *AdminResource) ListTableItems() (table ListTable, err error) {
 	q := resource.Query()
 	q = resource.queryFilter(q)
 	rowItems, err := q.List()
 
+	for i := 0; i < resource.Typ.NumField(); i++ {
+		field := resource.Typ.Field(i)
+		tag := field.Tag.Get("prago-admin-show")
+		if len(tag) > 0 || field.Name == "ID" || field.Name == "Name" {
+			table.Header = append(table.Header, ListTableHeader{Name: field.Name, NameHuman: field.Name})
+		}
+	}
+
 	val := reflect.ValueOf(rowItems)
 	for i := 0; i < val.Len(); i++ {
 		row := ListTableRow{}
-
 		itemVal := val.Index(i).Elem()
-		for j := 0; j < itemVal.NumField(); j++ {
-			field := itemVal.Type().Field(j)
-			add := ""
-			shouldAdd := false
-			if field.Name == "Name" {
-				newVal := itemVal.FieldByName(field.Name)
-				reflect.ValueOf(&add).Elem().Set(newVal)
-				shouldAdd = true
-			}
-			if field.Name == "ID" {
-				var ii int64
-				newVal := itemVal.FieldByName(field.Name)
-				reflect.ValueOf(&ii).Elem().Set(newVal)
-				add = fmt.Sprintf("%d", ii)
-				shouldAdd = true
-				row.ID = ii
-			}
 
-			if shouldAdd {
-				row.Items = append(row.Items, add)
-			}
+		for _, h := range table.Header {
+			fieldVal := itemVal.FieldByName(h.Name)
+			row.Items = append(row.Items, ValueToString(fieldVal))
 		}
-		ret = append(ret, row)
+		row.ID = itemVal.FieldByName("ID").Int()
+		table.Rows = append(table.Rows, row)
 	}
 	return
 }
 
-func (ar *AdminResource) ListTableHeader() (ret []string, err error) {
-	ret = []string{"#", "Name"}
-	return
+func ValueToString(val reflect.Value) string {
+	var item interface{}
+	reflect.ValueOf(&item).Elem().Set(val)
+	switch val.Kind() {
+	case reflect.String:
+		return fmt.Sprintf("%s", item)
+	case reflect.Int64:
+		return fmt.Sprintf("%d", item)
+	case reflect.Bool:
+		var b bool = item.(bool)
+		if b {
+			return "✔"
+		} else {
+			return "x"
+		}
+	}
+
+	if val.Type() == reflect.TypeOf(time.Now()) {
+		var tm time.Time
+		reflect.ValueOf(&tm).Elem().Set(val)
+		return tm.Format("2006-01-02 15:04:05")
+	}
+
+	return fmt.Sprintf("%s", item)
 }
 
 //TODO: dont drop table
