@@ -15,7 +15,7 @@
   <tr>
     {{range $cell := $item.Items}}
     <td>
-      {{ $cell }}
+      {{ tmpl $cell.TemplateName $cell.Value }}
     </td>
     {{end}}
     <td nowrap>

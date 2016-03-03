@@ -166,9 +166,14 @@ func GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, 
 	return items, nil
 }
 
+type ItemCell struct {
+	TemplateName string
+	Value        interface{}
+}
+
 type ListTableRow struct {
 	ID    int64
-	Items []string
+	Items []ItemCell
 }
 
 type ListTableHeader struct {
@@ -200,8 +205,9 @@ func (resource *AdminResource) ListTableItems() (table ListTable, err error) {
 		itemVal := val.Index(i).Elem()
 
 		for _, h := range table.Header {
+			structField, _ := resource.Typ.FieldByName(h.Name)
 			fieldVal := itemVal.FieldByName(h.Name)
-			row.Items = append(row.Items, ValueToString(fieldVal))
+			row.Items = append(row.Items, ValueToCell(structField, fieldVal))
 		}
 		row.ID = itemVal.FieldByName("ID").Int()
 		table.Rows = append(table.Rows, row)
@@ -209,30 +215,48 @@ func (resource *AdminResource) ListTableItems() (table ListTable, err error) {
 	return
 }
 
-func ValueToString(val reflect.Value) string {
+func ValueToCell(field reflect.StructField, val reflect.Value) (cell ItemCell) {
+	cell.TemplateName = "admin_string"
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
-	switch val.Kind() {
-	case reflect.String:
-		return fmt.Sprintf("%s", item)
-	case reflect.Int64:
-		return fmt.Sprintf("%d", item)
-	case reflect.Bool:
-		var b bool = item.(bool)
-		if b {
-			return "✔"
-		} else {
-			return "x"
-		}
+	cell.Value = item
+
+	if field.Tag.Get("prago-admin-type") == "image" {
+		cell.TemplateName = "admin_image"
 	}
 
 	if val.Type() == reflect.TypeOf(time.Now()) {
 		var tm time.Time
 		reflect.ValueOf(&tm).Elem().Set(val)
-		return tm.Format("2006-01-02 15:04:05")
+		cell.Value = tm.Format("2006-01-02 15:04:05")
 	}
 
-	return fmt.Sprintf("%s", item)
+	return
+
+	/*
+		reflect.ValueOf(&item).Elem().Set(val)
+		switch val.Kind() {
+		case reflect.String:
+			return fmt.Sprintf("%s", item)
+		case reflect.Int64:
+			return fmt.Sprintf("%d", item)
+		case reflect.Bool:
+			var b bool = item.(bool)
+			if b {
+				return "✔"
+			} else {
+				return "x"
+			}
+		}
+
+		if val.Type() == reflect.TypeOf(time.Now()) {
+			var tm time.Time
+			reflect.ValueOf(&tm).Elem().Set(val)
+			return tm.Format("2006-01-02 15:04:05")
+		}
+
+		return fmt.Sprintf("%s", item)
+	*/
 }
 
 //TODO: dont drop table
