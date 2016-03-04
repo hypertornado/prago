@@ -11,7 +11,10 @@ import (
 	"time"
 )
 
-var db *sql.DB
+var (
+	db          *sql.DB
+	structCache *AdminStructCache
+)
 
 type dbProvider struct{}
 
@@ -20,6 +23,12 @@ func (dbProvider) DB() *sql.DB {
 }
 
 func init() {
+	var err error
+	structCache, err = NewAdminStructCache(TestNode{})
+	if err != nil {
+		panic(err)
+	}
+
 	connectString := fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local", "prago", "prago", "prago_test")
 	g, err := gorm.Open("mysql", connectString)
 	if err != nil {
@@ -76,7 +85,8 @@ func changeStruct(i interface{}) {
 func TestAdminTime(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, reflect.TypeOf(TestNode{}))
+
+	createTable(db, tableName, structCache)
 
 	n0 := &TestNode{Changed: time.Now()}
 	createItem(db, tableName, n0)
@@ -112,7 +122,7 @@ func TestAdminDBFirst(t *testing.T) {
 	var err error
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, reflect.TypeOf(TestNode{}))
+	createTable(db, tableName, structCache)
 
 	n0 := &TestNode{Name: "A"}
 	n1 := &TestNode{Name: "B"}
@@ -138,7 +148,7 @@ func TestAdminDBFirst(t *testing.T) {
 func TestAdminListItems(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, reflect.TypeOf(TestNode{}))
+	createTable(db, tableName, structCache)
 
 	createItem(db, tableName, &TestNode{Name: "A"})
 	createItem(db, tableName, &TestNode{Name: "B"})
@@ -184,7 +194,7 @@ func TestAdminDB(t *testing.T) {
 	var err error
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, reflect.TypeOf(TestNode{}))
+	createTable(db, tableName, structCache)
 
 	timeNow := time.Now()
 
@@ -282,7 +292,7 @@ func TestAdminDB(t *testing.T) {
 func TestAdminResourceQuery(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, reflect.TypeOf(TestNode{}))
+	createTable(db, tableName, structCache)
 
 	q := &ResourceQuery{
 		query:         listQuery{},
@@ -313,7 +323,7 @@ func TestAdminResourceQuery(t *testing.T) {
 func TestAdminDBList(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, reflect.TypeOf(TestNode{}))
+	createTable(db, tableName, structCache)
 
 	createItem(db, tableName, &TestNode{Name: "B", Changed: time.Now().Add(1 * time.Minute)})
 	createItem(db, tableName, &TestNode{Name: "A"})

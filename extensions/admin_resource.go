@@ -28,19 +28,24 @@ type AdminResource struct {
 	admin              DBProvider
 	hasModel           bool
 	queryFilter        func(*ResourceQuery) *ResourceQuery
+	adminStructCache   *AdminStructCache
 }
 
 func NewResource(item interface{}) (*AdminResource, error) {
-	//TODO: check item is struct
+	structCache, err := NewAdminStructCache(item)
+	if err != nil {
+		return nil, err
+	}
 
 	typ := reflect.TypeOf(item)
 	name := typ.Name()
 	ret := &AdminResource{
-		Name:     name,
-		ID:       utils.PrettyUrl(name),
-		Typ:      typ,
-		item:     item,
-		hasModel: true,
+		Name:             name,
+		ID:               utils.PrettyUrl(name),
+		Typ:              typ,
+		item:             item,
+		hasModel:         true,
+		adminStructCache: structCache,
 	}
 
 	ifaceName, ok := item.(interface {
@@ -271,5 +276,5 @@ func (ar *AdminResource) Migrate() error {
 	}
 
 	_, err = getTableDescription(ar.db(), ar.tableName())
-	return createTable(ar.db(), ar.tableName(), ar.Typ)
+	return createTable(ar.db(), ar.tableName(), ar.adminStructCache)
 }

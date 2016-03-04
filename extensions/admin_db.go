@@ -27,8 +27,8 @@ func dropTable(db *sql.DB, tableName string) error {
 	return err
 }
 
-func createTable(db *sql.DB, tableName string, typ reflect.Type) error {
-	description, err := getStructDescription(typ)
+func createTable(db *sql.DB, tableName string, adminStruct *AdminStructCache) error {
+	description, err := adminStruct.getStructDescription()
 	if err != nil {
 		return err
 	}
@@ -70,48 +70,6 @@ func getTableDescription(db *sql.DB, tableName string) (map[string]*mysqlColumn,
 		columns[column.Field] = column
 	}
 
-	return columns, nil
-}
-
-func getStructDescription(typ reflect.Type) (map[string]*mysqlColumn, error) {
-	columns := map[string]*mysqlColumn{}
-
-	if typ.Kind() == reflect.Ptr {
-		typ = typ.Elem()
-	}
-
-	for i := 0; i < typ.NumField(); i++ {
-		use := true
-		field := typ.Field(i)
-		column := &mysqlColumn{
-			Field: utils.PrettyUrl(field.Name),
-		}
-
-		switch field.Type.Kind() {
-		case reflect.Struct:
-			dateType := reflect.TypeOf(time.Now())
-			if field.Type == dateType {
-				column.Type = "datetime"
-			} else {
-				use = false
-			}
-		case reflect.Bool:
-			column.Type = "bool"
-		case reflect.Int64:
-			column.Type = "bigint(20)"
-		case reflect.String:
-			if field.Tag.Get("prago-admin-type") == "text" {
-				column.Type = "text"
-			} else {
-				column.Type = "varchar(255)"
-			}
-		default:
-			use = false
-		}
-		if use {
-			columns[column.Field] = column
-		}
-	}
 	return columns, nil
 }
 
