@@ -86,9 +86,9 @@ func countItems(db *sql.DB, tableName string, query listQuery) (int64, error) {
 	return i, err
 }
 
-func getFirstItem(structCache *AdminStructCache, db *sql.DB, tableName string, sliceItemTypeTOREMOVE reflect.Type, item interface{}, query listQuery) error {
+func getFirstItem(structCache *AdminStructCache, db *sql.DB, tableName string, item interface{}, query listQuery) error {
 	var items interface{}
-	err := listItems(structCache, db, tableName, structCache.typ, &items, query)
+	err := listItems(structCache, db, tableName, &items, query)
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func getFirstItem(structCache *AdminStructCache, db *sql.DB, tableName string, s
 	return nil
 }
 
-func listItems(structCache *AdminStructCache, db *sql.DB, tableName string, sliceItemTypeTOREMOVE reflect.Type, items interface{}, query listQuery) error {
+func listItems(structCache *AdminStructCache, db *sql.DB, tableName string, items interface{}, query listQuery) error {
 	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(structCache.typ))).Elem()
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)

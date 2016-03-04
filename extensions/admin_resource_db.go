@@ -69,7 +69,7 @@ func (q *ResourceQuery) First() (item interface{}, err error) {
 	if q.err != nil {
 		return nil, q.err
 	}
-	err = getFirstItem(q.structCache, q.db, q.tableName, q.structCache.typ, &item, q.query)
+	err = getFirstItem(q.structCache, q.db, q.tableName, &item, q.query)
 	return
 }
 
@@ -77,7 +77,7 @@ func (q *ResourceQuery) List() (items interface{}, err error) {
 	if q.err != nil {
 		return nil, q.err
 	}
-	err = listItems(q.structCache, q.db, q.tableName, q.structCache.typ, &items, q.query)
+	err = listItems(q.structCache, q.db, q.tableName, &items, q.query)
 	return
 }
 
