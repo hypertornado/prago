@@ -41,52 +41,54 @@ func newAdminStructField(field reflect.StructField) *adminStructField {
 		name:          field.Name,
 		lowercaseName: utils.PrettyUrl(field.Name),
 		typ:           field.Type,
+		tags:          make(map[string]string),
 	}
+
+	for _, v := range []string{"prago-admin-type"} {
+		ret.tags[v] = field.Tag.Get(v)
+	}
+
+	ret.mysqlDescription = ret.getMysqlDescription()
+
 	return ret
 }
 
 type adminStructField struct {
-	name          string
-	lowercaseName string
-	typ           reflect.Type
+	name             string
+	lowercaseName    string
+	typ              reflect.Type
+	tags             map[string]string
+	mysqlDescription string
+}
+
+func (f *adminStructField) getMysqlDescription() string {
+	switch f.typ.Kind() {
+	case reflect.Struct:
+		dateType := reflect.TypeOf(time.Now())
+		if f.typ == dateType {
+			return "datetime"
+		}
+	case reflect.Bool:
+		return "bool"
+	case reflect.Int64:
+		return "bigint(20)"
+	case reflect.String:
+		if f.tags["prago-admin-type"] == "text" {
+			return "text"
+		} else {
+			return "varchar(255)"
+		}
+	}
+	return ""
 }
 
 func (s *AdminStructCache) getStructDescription() (columns []*mysqlColumn, err error) {
-	typ := s.typ
-	if typ.Kind() == reflect.Ptr {
-		typ = typ.Elem()
-	}
-
-	for i := 0; i < typ.NumField(); i++ {
-		use := true
-		field := typ.Field(i)
-		column := &mysqlColumn{
-			Field: utils.PrettyUrl(field.Name),
-		}
-
-		switch field.Type.Kind() {
-		case reflect.Struct:
-			dateType := reflect.TypeOf(time.Now())
-			if field.Type == dateType {
-				column.Type = "datetime"
-			} else {
-				use = false
-			}
-		case reflect.Bool:
-			column.Type = "bool"
-		case reflect.Int64:
-			column.Type = "bigint(20)"
-		case reflect.String:
-			if field.Tag.Get("prago-admin-type") == "text" {
-				column.Type = "text"
-			} else {
-				column.Type = "varchar(255)"
-			}
-		default:
-			use = false
-		}
-		if use {
-			columns = append(columns, column)
+	for _, field := range s.fieldArrays {
+		if len(field.mysqlDescription) > 0 {
+			columns = append(columns, &mysqlColumn{
+				Field: field.lowercaseName,
+				Type:  field.mysqlDescription,
+			})
 		}
 	}
 	return
