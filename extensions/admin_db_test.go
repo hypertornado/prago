@@ -154,19 +154,19 @@ func TestAdminListItems(t *testing.T) {
 	createItem(db, tableName, &TestNode{Name: "B"})
 
 	var nodesIface interface{}
-	listItems2(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
+	listItems(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
 
-	nodes, ok := nodesIface.(*[]*TestNode)
+	nodes, ok := nodesIface.([]*TestNode)
 	if !ok {
 		t.Fatal(reflect.TypeOf(nodesIface))
 	}
 
-	if len(*nodes) != 2 {
-		t.Fatal(len(*nodes))
+	if len(nodes) != 2 {
+		t.Fatal(len(nodes))
 	}
 
-	if (*nodes)[0].Name != "A" {
-		t.Fatal((*nodes)[0].Name)
+	if (nodes)[0].Name != "A" {
+		t.Fatal((nodes)[0].Name)
 	}
 
 	var nodeIface interface{}

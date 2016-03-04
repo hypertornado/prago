@@ -133,38 +133,6 @@ func listItems(structCache *AdminStructCache, db *sql.DB, tableName string, slic
 	return nil
 }
 
-func listItems2(structCache *AdminStructCache, db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}, query listQuery) error {
-	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(sliceItemType)))
-	orderString := buildOrderString(query.order)
-	limitString := buildLimitString(query.offset, query.limit)
-	whereString := buildWhereString(query.whereString)
-
-	newValue := reflect.New(sliceItemType).Elem()
-	names, scanners, err := structCache.getStructScanners(newValue)
-	if err != nil {
-		return err
-	}
-
-	q := fmt.Sprintf("SELECT %s FROM `%s` %s %s %s;", strings.Join(names, ", "), tableName, whereString, orderString, limitString)
-	rows, err := db.Query(q, query.whereParams...)
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		newValue = reflect.New(sliceItemType)
-		names, scanners, err = structCache.getStructScanners(newValue.Elem())
-		if err != nil {
-			return err
-		}
-		rows.Scan(scanners...)
-		slice.Elem().Set(reflect.Append(slice.Elem(), newValue))
-	}
-
-	reflect.ValueOf(items).Elem().Set(slice)
-	return nil
-}
-
 func deleteItems(db *sql.DB, tableName string, query listQuery) (int64, error) {
 	limitString := buildLimitWithoutOffsetString(query.limit)
 	whereString := buildWhereString(query.whereString)
