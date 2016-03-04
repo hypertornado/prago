@@ -114,9 +114,6 @@ func (s *scanner) Scan(src interface{}) error {
 }
 
 func prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
-	names = []string{}
-	questionMarks = []string{}
-	values = []interface{}{}
 
 	for i := 0; i < value.Type().NumField(); i++ {
 		field := value.Type().Field(i)
