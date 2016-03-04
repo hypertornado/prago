@@ -1,16 +1,18 @@
 package extensions
 
 import (
+	"bytes"
 	"errors"
-	"fmt"
 	"github.com/hypertornado/prago"
-	//"github.com/nfnt/resize"
+	"github.com/nfnt/resize"
 	"github.com/renstrom/shortuuid"
+	"image"
 	"image/jpeg"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -43,18 +45,49 @@ func (FileResource) GetFormItems(ar *AdminResource, item interface{}) ([]AdminFo
 	return items, err
 }
 
-func ResizeImage(params, id string) (bytes []byte, err error) {
+func ResizeImage(param, id string) (out []byte, err error) {
+	wrongFormat := errors.New("Wrong format of params")
+
 	id = strings.Split(id, ".")[0]
 
 	var file *os.File
-	file, err = os.Open("public/img/uploaded/" + id + ".jpg")
+	file, err = os.Open("public/files/uploaded/" + id + ".jpg")
 	if err != nil {
 		return
 	}
 
-	fmt.Println(file)
+	params := strings.Split(param, "x")
+	if len(params) != 2 {
+		err = wrongFormat
+		return
+	}
 
-	return ioutil.ReadAll(file)
+	uintParams := []uint{0, 0}
+
+	for k, v := range params {
+		var intVal int
+		intVal, err = strconv.Atoi(v)
+		if err != nil {
+			return
+		}
+		if intVal < 0 {
+			err = wrongFormat
+			return
+		}
+		uintParams[k] = uint(intVal)
+	}
+
+	var img image.Image
+	img, err = jpeg.Decode(file)
+	if err != nil {
+		return
+	}
+	file.Close()
+
+	img = resize.Resize(uintParams[0], uintParams[1], img, resize.Lanczos3)
+	buf := bytes.NewBufferString("")
+	jpeg.Encode(buf, img, nil)
+	return ioutil.ReadAll(buf)
 }
 
 func (FileResource) AdminInitResource(a *Admin, resource *AdminResource) error {
@@ -86,17 +119,17 @@ func (FileResource) AdminInitResource(a *Admin, resource *AdminResource) error {
 		if err != nil {
 			panic(err)
 		}
-		BindData(item, request.Params(), BindDataFilterDefault)
+		BindData(item, request, BindDataFilterDefault)
 
-		fr, ok := item.(*FileResource)
+		/*fr, ok := item.(*FileResource)
 		if !ok {
 			panic("wrong type")
-		}
+		}*/
 
-		err = fr.NewImageFromMultipartForm(request.Request(), "file")
+		/*err = NewImageFromMultipartForm(request.Request(), "file")
 		if err != nil {
 			panic(err)
-		}
+		}*/
 
 		err = resource.Create(item)
 		if err != nil {
@@ -108,17 +141,17 @@ func (FileResource) AdminInitResource(a *Admin, resource *AdminResource) error {
 	return nil
 }
 
-func (fr *FileResource) NewImage(data io.ReadCloser, fileType string) (err error) {
+func NewImage(data io.ReadCloser, fileType string) (uuid string, err error) {
 	defer data.Close()
 
 	img, err := jpeg.Decode(data)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	uuid := shortuuid.UUID()
+	uuid = shortuuid.UUID()
 
-	file, err := os.Create("public/img/uploaded/" + uuid + "." + fileType)
+	file, err := os.Create("public/files/uploaded/" + uuid + "." + fileType)
 	if err != nil {
 		return
 	}
@@ -127,18 +160,14 @@ func (fr *FileResource) NewImage(data io.ReadCloser, fileType string) (err error
 	if err != nil {
 		return
 	}
-
-	fr.UUID = uuid
-	fr.Width = int64(img.Bounds().Max.X)
-	fr.Height = int64(img.Bounds().Max.Y)
-
 	return
 }
 
-func (fr *FileResource) NewImageFromMultipartForm(request *http.Request, name string) error {
+func NewImageFromMultipartForm(request *http.Request, name string) (string, error) {
 	files := request.MultipartForm.File[name]
+
 	if len(files) != 1 {
-		return errors.New("not one image specified")
+		return "", errors.New("not one image specified")
 	}
 
 	file := files[0]
@@ -149,8 +178,9 @@ func (fr *FileResource) NewImageFromMultipartForm(request *http.Request, name st
 
 	f, err := file.Open()
 	if err != nil {
-		return err
+		return "", err
 	}
+	defer f.Close()
 
-	return fr.NewImage(f, fileType)
+	return NewImage(f, fileType)
 }

@@ -48,12 +48,18 @@
 </label>
 {{end}}
 
-{{define "admin_item_file"}}
+{{define "admin_item_image"}}
+
 <label class="form_label">
   {{if .Error}}
     <div class="form_label_error">{{.Error}}</div>
   {{end}}
   <span class="form_label_text">{{.NameHuman}}</span>
+
+  {{if .Value}}
+  <img src="/files/uploaded/{{.Value}}.jpg" style="max-width: 100px; max-height: 100px; display: block; margin: 5px;">
+  {{end}}
+
   <input type="file" name="{{.Name}}" accept=".jpeg,.jpg" class="input form_input">
 </label>
 {{end}}
@@ -63,8 +69,4 @@
 
 {{define "admin_string"}}
 {{.}}
-{{end}}
-
-{{define "admin_image"}}
-<img src="/img/uploaded/{{.}}.jpg" style="max-width: 100px; max-height: 100px;">
 {{end}}

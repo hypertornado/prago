@@ -228,7 +228,7 @@ func BindCreate(a *Admin, resource *AdminResource) {
 		if err != nil {
 			panic(err)
 		}
-		BindData(item, request.Params(), BindDataFilterDefault)
+		BindData(item, request, BindDataFilterDefault)
 		err = resource.Create(item)
 		if err != nil {
 			panic(err)
@@ -273,7 +273,7 @@ func BindUpdate(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		err = BindData(item, request.Params(), BindDataFilterDefault)
+		err = BindData(item, request, BindDataFilterDefault)
 		if err != nil {
 			panic(err)
 		}

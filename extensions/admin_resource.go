@@ -146,6 +146,8 @@ func GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, 
 			switch field.Tag.Get("prago-admin-type") {
 			case "text":
 				structItem.Template = "admin_item_textarea"
+			case "image":
+				structItem.Template = "admin_item_image"
 			}
 		}
 
