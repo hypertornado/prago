@@ -92,7 +92,12 @@ func TestAdminTime(t *testing.T) {
 	createItem(db, tableName, n0)
 
 	n1 := &TestNode{}
-	getItem(structCache, db, tableName, reflect.TypeOf(TestNode{}), &n1, n0.ID)
+
+	whereString, whereParams := mapToDBQuery(map[string]interface{}{"id": n0.ID})
+	getFirstItem(structCache, db, tableName, reflect.TypeOf(TestNode{}), &n1, listQuery{
+		whereString: whereString,
+		whereParams: whereParams,
+	})
 
 	if n0.Changed.Format("2006-01-02 15:04:05") != n1.Changed.Format("2006-01-02 15:04:05") {
 		t.Fatal(n0.Changed, n1.Changed)
@@ -220,7 +225,11 @@ func TestAdminDB(t *testing.T) {
 
 	n2 := &TestNode{}
 
-	err = getItem(structCache, db, tableName, reflect.TypeOf(TestNode{}), &n2, n1.ID)
+	whereString, whereParams := mapToDBQuery(map[string]interface{}{"id": n1.ID})
+	err = getFirstItem(structCache, db, tableName, reflect.TypeOf(TestNode{}), &n2, listQuery{
+		whereString: whereString,
+		whereParams: whereParams,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -273,7 +282,12 @@ func TestAdminDB(t *testing.T) {
 	saveItem(db, tableName, changedNode)
 
 	changedNodeResult := &TestNode{}
-	getItem(structCache, db, tableName, reflect.TypeOf(TestNode{}), &changedNodeResult, 2)
+
+	whereString, whereParams = mapToDBQuery(map[string]interface{}{"id": 2})
+	getFirstItem(structCache, db, tableName, reflect.TypeOf(TestNode{}), &changedNodeResult, listQuery{
+		whereString: whereString,
+		whereParams: whereParams,
+	})
 
 	if changedNodeResult.Name != "changedname" {
 		t.Fatal(changedNodeResult.Name)

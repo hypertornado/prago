@@ -113,14 +113,6 @@ func (s *scanner) Scan(src interface{}) error {
 	return nil
 }
 
-func getItem(structCache *AdminStructCache, db *sql.DB, tableName string, itemType reflect.Type, item interface{}, id int64) error {
-	whereString, whereParams := mapToDBQuery(map[string]interface{}{"id": id})
-	return getFirstItem(structCache, db, tableName, itemType, item, listQuery{
-		whereString: whereString,
-		whereParams: whereParams,
-	})
-}
-
 func prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
 	names = []string{}
 	questionMarks = []string{}
