@@ -1,6 +1,7 @@
 package extensions
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/hypertornado/prago/utils"
@@ -26,7 +27,7 @@ func NewAdminStructCache(item interface{}) (ret *AdminStructCache, err error) {
 	}
 
 	for i := 0; i < typ.NumField(); i++ {
-		field := newAdminStructField(typ.Field(i))
+		field := newAdminStructField(typ.Field(i), i)
 		ret.fieldArrays = append(ret.fieldArrays, field)
 		ret.fieldMap[field.name] = field
 	}
@@ -36,12 +37,13 @@ func NewAdminStructCache(item interface{}) (ret *AdminStructCache, err error) {
 	return
 }
 
-func newAdminStructField(field reflect.StructField) *adminStructField {
+func newAdminStructField(field reflect.StructField, order int) *adminStructField {
 	ret := &adminStructField{
 		name:          field.Name,
 		lowercaseName: utils.PrettyUrl(field.Name),
 		typ:           field.Type,
 		tags:          make(map[string]string),
+		order:         order,
 	}
 
 	for _, v := range []string{"prago-admin-type"} {
@@ -58,7 +60,9 @@ type adminStructField struct {
 	lowercaseName    string
 	typ              reflect.Type
 	tags             map[string]string
+	order            int
 	mysqlDescription string
+	scanner          sql.Scanner
 }
 
 func (f *adminStructField) getMysqlDescription() string {
@@ -89,32 +93,6 @@ func (s *AdminStructCache) getStructDescription() (columns []*mysqlColumn, err e
 				Field: field.lowercaseName,
 				Type:  field.mysqlDescription,
 			})
-		}
-	}
-	return
-}
-
-func (s *AdminStructCache) getStructScanners(value reflect.Value) (names []string, scanners []interface{}, err error) {
-
-	for i := 0; i < value.Type().NumField(); i++ {
-		use := true
-		field := value.Type().Field(i)
-		name := utils.PrettyUrl(field.Name)
-
-		switch field.Type.Kind() {
-		case reflect.Int64:
-		case reflect.Bool:
-		case reflect.String:
-		case reflect.Struct:
-			if field.Type != reflect.TypeOf(time.Now()) {
-				use = false
-			}
-		default:
-			use = false
-		}
-		if use {
-			names = append(names, name)
-			scanners = append(scanners, &scanner{value.Field(i)})
 		}
 	}
 	return

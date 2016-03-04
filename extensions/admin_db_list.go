@@ -142,6 +142,5 @@ func deleteItems(db *sql.DB, tableName string, query listQuery) (int64, error) {
 	if err != nil {
 		return -1, err
 	}
-
 	return res.RowsAffected()
 }
