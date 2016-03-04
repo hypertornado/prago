@@ -73,35 +73,6 @@ func getTableDescription(db *sql.DB, tableName string) (map[string]*mysqlColumn,
 	return columns, nil
 }
 
-func getStructScanners(value reflect.Value) (names []string, scanners []interface{}, err error) {
-	names = []string{}
-	scanners = []interface{}{}
-
-	for i := 0; i < value.Type().NumField(); i++ {
-		use := true
-		field := value.Type().Field(i)
-		name := utils.PrettyUrl(field.Name)
-
-		switch field.Type.Kind() {
-		case reflect.Int64:
-		case reflect.Bool:
-		case reflect.String:
-		case reflect.Struct:
-			if field.Type != reflect.TypeOf(time.Now()) {
-				use = false
-			}
-		default:
-			use = false
-		}
-		if use {
-			names = append(names, name)
-			scanners = append(scanners, &scanner{value.Field(i)})
-		}
-	}
-
-	return
-}
-
 type scanner struct {
 	value reflect.Value
 }
@@ -142,9 +113,9 @@ func (s *scanner) Scan(src interface{}) error {
 	return nil
 }
 
-func getItem(db *sql.DB, tableName string, itemType reflect.Type, item interface{}, id int64) error {
+func getItem(structCache *AdminStructCache, db *sql.DB, tableName string, itemType reflect.Type, item interface{}, id int64) error {
 	whereString, whereParams := mapToDBQuery(map[string]interface{}{"id": id})
-	return getFirstItem(db, tableName, itemType, item, listQuery{
+	return getFirstItem(structCache, db, tableName, itemType, item, listQuery{
 		whereString: whereString,
 		whereParams: whereParams,
 	})

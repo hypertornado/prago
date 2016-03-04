@@ -93,3 +93,29 @@ func (s *AdminStructCache) getStructDescription() (columns []*mysqlColumn, err e
 	}
 	return
 }
+
+func (s *AdminStructCache) getStructScanners(value reflect.Value) (names []string, scanners []interface{}, err error) {
+
+	for i := 0; i < value.Type().NumField(); i++ {
+		use := true
+		field := value.Type().Field(i)
+		name := utils.PrettyUrl(field.Name)
+
+		switch field.Type.Kind() {
+		case reflect.Int64:
+		case reflect.Bool:
+		case reflect.String:
+		case reflect.Struct:
+			if field.Type != reflect.TypeOf(time.Now()) {
+				use = false
+			}
+		default:
+			use = false
+		}
+		if use {
+			names = append(names, name)
+			scanners = append(scanners, &scanner{value.Field(i)})
+		}
+	}
+	return
+}

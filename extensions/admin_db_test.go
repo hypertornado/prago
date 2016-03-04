@@ -92,7 +92,7 @@ func TestAdminTime(t *testing.T) {
 	createItem(db, tableName, n0)
 
 	n1 := &TestNode{}
-	getItem(db, tableName, reflect.TypeOf(TestNode{}), &n1, n0.ID)
+	getItem(structCache, db, tableName, reflect.TypeOf(TestNode{}), &n1, n0.ID)
 
 	if n0.Changed.Format("2006-01-02 15:04:05") != n1.Changed.Format("2006-01-02 15:04:05") {
 		t.Fatal(n0.Changed, n1.Changed)
@@ -138,7 +138,7 @@ func TestAdminDBFirst(t *testing.T) {
 	}
 
 	var node *TestNode = &TestNode{Name: "OLD"}
-	getFirstItem(db, tableName, reflect.TypeOf(TestNode{}), &node, listQuery{})
+	getFirstItem(structCache, db, tableName, reflect.TypeOf(TestNode{}), &node, listQuery{})
 
 	if node.Name != "A" {
 		t.Fatal(node.Name)
@@ -154,7 +154,7 @@ func TestAdminListItems(t *testing.T) {
 	createItem(db, tableName, &TestNode{Name: "B"})
 
 	var nodesIface interface{}
-	listItems2(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
+	listItems2(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
 
 	nodes, ok := nodesIface.(*[]*TestNode)
 	if !ok {
@@ -170,7 +170,7 @@ func TestAdminListItems(t *testing.T) {
 	}
 
 	var nodeIface interface{}
-	getFirstItem(db, tableName, reflect.TypeOf(TestNode{}), &nodeIface, listQuery{})
+	getFirstItem(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodeIface, listQuery{})
 
 	_, ok = nodeIface.(*TestNode)
 	if !ok {
@@ -220,7 +220,7 @@ func TestAdminDB(t *testing.T) {
 
 	n2 := &TestNode{}
 
-	err = getItem(db, tableName, reflect.TypeOf(TestNode{}), &n2, n1.ID)
+	err = getItem(structCache, db, tableName, reflect.TypeOf(TestNode{}), &n2, n1.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -238,7 +238,7 @@ func TestAdminDB(t *testing.T) {
 	}
 
 	var nodesIface interface{}
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
+	listItems(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
 
 	nodes := nodesIface.([]*TestNode)
 
@@ -262,7 +262,7 @@ func TestAdminDB(t *testing.T) {
 	values.Set("Name", "somename")
 	BindData(item, values, nil, BindDataFilterDefault)
 	createItem(db, tableName, item)
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
+	listItems(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
 	nodes = nodesIface.([]*TestNode)
 
 	if len(nodes) != 3 {
@@ -273,7 +273,7 @@ func TestAdminDB(t *testing.T) {
 	saveItem(db, tableName, changedNode)
 
 	changedNodeResult := &TestNode{}
-	getItem(db, tableName, reflect.TypeOf(TestNode{}), &changedNodeResult, 2)
+	getItem(structCache, db, tableName, reflect.TypeOf(TestNode{}), &changedNodeResult, 2)
 
 	if changedNodeResult.Name != "changedname" {
 		t.Fatal(changedNodeResult.Name)
@@ -281,7 +281,7 @@ func TestAdminDB(t *testing.T) {
 
 	deleteItem(db, tableName, 2)
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
+	listItems(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodesIface, listQuery{})
 	nodes = nodesIface.([]*TestNode)
 
 	if len(nodes) != 2 {
@@ -295,10 +295,10 @@ func TestAdminResourceQuery(t *testing.T) {
 	createTable(db, tableName, structCache)
 
 	q := &ResourceQuery{
-		query:         listQuery{},
-		db:            db,
-		tableName:     tableName,
-		sliceItemType: reflect.TypeOf(TestNode{}),
+		query:       listQuery{},
+		db:          db,
+		tableName:   tableName,
+		structCache: structCache,
 	}
 
 	n0 := &TestNode{Name: "A1", OK: false}
@@ -332,38 +332,38 @@ func TestAdminDBList(t *testing.T) {
 
 	var nodes []*TestNode
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{})
+	listItems(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{})
 	compareResults(t, nodes, []int64{1, 2, 3, 4})
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItems(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		order: []listQueryOrder{{name: "id", desc: true}},
 	})
 	compareResults(t, nodes, []int64{4, 3, 2, 1})
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItems(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		order: []listQueryOrder{{name: "name", desc: true}, {name: "changed", desc: false}},
 	})
 	compareResults(t, nodes, []int64{4, 3, 1, 2})
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItems(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		order: []listQueryOrder{{name: "name", desc: true}, {name: "changed", desc: true}},
 	})
 	compareResults(t, nodes, []int64{4, 1, 3, 2})
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItems(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		offset: 1,
 		limit:  2,
 	})
 	compareResults(t, nodes, []int64{2, 3})
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItems(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		whereString: "name=?",
 		whereParams: []interface{}{"B"},
 	})
 	compareResults(t, nodes, []int64{1, 3})
 
 	whereString, whereParams := mapToDBQuery(map[string]interface{}{"name": "B"})
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
+	listItems(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{
 		whereString: whereString,
 		whereParams: whereParams,
 	})
@@ -385,7 +385,7 @@ func TestAdminDBList(t *testing.T) {
 	}
 
 	var node *TestNode
-	getFirstItem(db, tableName, reflect.TypeOf(TestNode{}), &node, listQuery{
+	getFirstItem(structCache, db, tableName, reflect.TypeOf(TestNode{}), &node, listQuery{
 		whereString: whereString,
 		whereParams: whereParams,
 		offset:      1,
@@ -408,7 +408,7 @@ func TestAdminDBList(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	listItems(db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{})
+	listItems(structCache, db, tableName, reflect.TypeOf(TestNode{}), &nodes, listQuery{})
 	compareResults(t, nodes, []int64{2, 4})
 
 }

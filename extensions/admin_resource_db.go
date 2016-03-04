@@ -6,11 +6,11 @@ import (
 )
 
 type ResourceQuery struct {
-	query         listQuery
-	db            *sql.DB
-	tableName     string
-	sliceItemType reflect.Type
-	err           error
+	query       listQuery
+	db          *sql.DB
+	tableName   string
+	structCache *AdminStructCache
+	err         error
 }
 
 func (ar *AdminResource) Save(item interface{}) error {
@@ -33,11 +33,11 @@ func (ar *AdminResource) Query() *ResourceQuery {
 		err = ErrorDontHaveModel
 	}
 	return &ResourceQuery{
-		query:         listQuery{},
-		db:            ar.db(),
-		tableName:     ar.tableName(),
-		sliceItemType: ar.Typ,
-		err:           err,
+		query:       listQuery{},
+		db:          ar.db(),
+		tableName:   ar.tableName(),
+		structCache: ar.adminStructCache,
+		err:         err,
 	}
 }
 
@@ -69,7 +69,7 @@ func (q *ResourceQuery) First() (item interface{}, err error) {
 	if q.err != nil {
 		return nil, q.err
 	}
-	err = getFirstItem(q.db, q.tableName, q.sliceItemType, &item, q.query)
+	err = getFirstItem(q.structCache, q.db, q.tableName, q.structCache.typ, &item, q.query)
 	return
 }
 
@@ -77,7 +77,7 @@ func (q *ResourceQuery) List() (items interface{}, err error) {
 	if q.err != nil {
 		return nil, q.err
 	}
-	err = listItems(q.db, q.tableName, q.sliceItemType, &items, q.query)
+	err = listItems(q.structCache, q.db, q.tableName, q.structCache.typ, &items, q.query)
 	return
 }
 
