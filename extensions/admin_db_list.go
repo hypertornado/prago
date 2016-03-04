@@ -86,9 +86,9 @@ func countItems(db *sql.DB, tableName string, query listQuery) (int64, error) {
 	return i, err
 }
 
-func getFirstItem(structCache *AdminStructCache, db *sql.DB, tableName string, sliceItemType reflect.Type, item interface{}, query listQuery) error {
+func getFirstItem(structCache *AdminStructCache, db *sql.DB, tableName string, sliceItemTypeTOREMOVE reflect.Type, item interface{}, query listQuery) error {
 	var items interface{}
-	err := listItems(structCache, db, tableName, sliceItemType, &items, query)
+	err := listItems(structCache, db, tableName, structCache.typ, &items, query)
 	if err != nil {
 		return err
 	}
@@ -101,13 +101,13 @@ func getFirstItem(structCache *AdminStructCache, db *sql.DB, tableName string, s
 	return nil
 }
 
-func listItems(structCache *AdminStructCache, db *sql.DB, tableName string, sliceItemType reflect.Type, items interface{}, query listQuery) error {
-	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(sliceItemType))).Elem()
+func listItems(structCache *AdminStructCache, db *sql.DB, tableName string, sliceItemTypeTOREMOVE reflect.Type, items interface{}, query listQuery) error {
+	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(structCache.typ))).Elem()
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.whereString)
 
-	newValue := reflect.New(sliceItemType).Elem()
+	newValue := reflect.New(structCache.typ).Elem()
 	names, scanners, err := structCache.getStructScanners(newValue)
 	if err != nil {
 		return err
@@ -120,7 +120,7 @@ func listItems(structCache *AdminStructCache, db *sql.DB, tableName string, slic
 	}
 	defer rows.Close()
 	for rows.Next() {
-		newValue = reflect.New(sliceItemType)
+		newValue = reflect.New(structCache.typ)
 		names, scanners, err = structCache.getStructScanners(newValue.Elem())
 		if err != nil {
 			return err
