@@ -60,6 +60,8 @@ func (a *Admin) Init(app *prago.App) error {
 		return err
 	}
 
+	BindImageResizer(app.MainController())
+
 	adminAccessController := app.MainController().SubController()
 
 	adminAccessController.Get(a.Prefix+"/login", func(request prago.Request) {
@@ -228,7 +230,7 @@ func BindCreate(a *Admin, resource *AdminResource) {
 		if err != nil {
 			panic(err)
 		}
-		BindData(item, request, BindDataFilterDefault)
+		BindData(item, request.Params(), request.Request().MultipartForm, BindDataFilterDefault)
 		err = resource.Create(item)
 		if err != nil {
 			panic(err)
@@ -273,7 +275,7 @@ func BindUpdate(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		err = BindData(item, request, BindDataFilterDefault)
+		err = BindData(item, request.Params(), request.Request().MultipartForm, BindDataFilterDefault)
 		if err != nil {
 			panic(err)
 		}

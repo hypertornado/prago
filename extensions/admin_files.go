@@ -10,40 +10,11 @@ import (
 	"image/jpeg"
 	"io"
 	"io/ioutil"
-	"net/http"
+	"mime/multipart"
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
-
-type FileResource struct {
-	ID           int64
-	Name         string
-	UUID         string `prago-admin-access:"-" prago-admin-type:"image" prago-admin-show:"yes"`
-	Description  string `prago-admin-type:"text"`
-	Width        int64
-	Height       int64
-	OriginalName string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-}
-
-func (FileResource) AdminName() string { return "Soubory" }
-func (FileResource) AdminID() string   { return "files" }
-
-func (FileResource) GetFormItems(ar *AdminResource, item interface{}) ([]AdminFormItem, error) {
-	items, err := GetFormItemsDefault(ar, item)
-
-	newItem := AdminFormItem{
-		Name:      "file",
-		NameHuman: "File",
-		Template:  "admin_item_file",
-	}
-
-	items = append([]AdminFormItem{newItem}, items...)
-	return items, err
-}
 
 func ResizeImage(param, id string) (out []byte, err error) {
 	wrongFormat := errors.New("Wrong format of params")
@@ -90,14 +61,8 @@ func ResizeImage(param, id string) (out []byte, err error) {
 	return ioutil.ReadAll(buf)
 }
 
-func (FileResource) AdminInitResource(a *Admin, resource *AdminResource) error {
-	BindList(a, resource)
-	BindNew(a, resource)
-	BindDetail(a, resource)
-	BindUpdate(a, resource)
-	BindDelete(a, resource)
-
-	resource.ResourceController.Get("/img/:resize/:id", func(request prago.Request) {
+func BindImageResizer(controller *prago.Controller) {
+	controller.Get("/img/:resize/:id", func(request prago.Request) {
 		bytes, err := ResizeImage(request.Params().Get("resize"), request.Params().Get("id"))
 		if err != nil {
 			panic(err)
@@ -111,34 +76,7 @@ func (FileResource) AdminInitResource(a *Admin, resource *AdminResource) error {
 		}
 
 		request.SetProcessed()
-
 	})
-
-	resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
-		item, err := resource.NewItem()
-		if err != nil {
-			panic(err)
-		}
-		BindData(item, request, BindDataFilterDefault)
-
-		/*fr, ok := item.(*FileResource)
-		if !ok {
-			panic("wrong type")
-		}*/
-
-		/*err = NewImageFromMultipartForm(request.Request(), "file")
-		if err != nil {
-			panic(err)
-		}*/
-
-		err = resource.Create(item)
-		if err != nil {
-			panic(err)
-		}
-
-		prago.Redirect(request, a.Prefix+"/"+resource.ID)
-	})
-	return nil
 }
 
 func NewImage(data io.ReadCloser, fileType string) (uuid string, err error) {
@@ -163,8 +101,9 @@ func NewImage(data io.ReadCloser, fileType string) (uuid string, err error) {
 	return
 }
 
-func NewImageFromMultipartForm(request *http.Request, name string) (string, error) {
-	files := request.MultipartForm.File[name]
+func NewImageFromMultipartForm(form *multipart.Form, formItemName string) (string, error) {
+
+	files := form.File[formItemName]
 
 	if len(files) != 1 {
 		return "", errors.New("not one image specified")

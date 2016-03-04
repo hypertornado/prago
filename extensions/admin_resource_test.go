@@ -1,7 +1,6 @@
 package extensions
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -21,7 +20,7 @@ func TestResource(t *testing.T) {
 		t.Fatal(err)
 	}
 	resource.Create(&ResourceStruct{Name: "First"})
-	resource.Create(&ResourceStruct{Name: "Second"})
+	resource.Create(&ResourceStruct{Name: "Second", Showing: "show"})
 
 	count, err := resource.Query().Count()
 	if err != nil {
@@ -34,6 +33,11 @@ func TestResource(t *testing.T) {
 
 	items, _ := resource.ListTableItems()
 
-	fmt.Println(items)
+	if len(items.Header) != 3 {
+		t.Fatal(len(items.Header))
+	}
 
+	if items.Rows[1].Items[2].Value.(string) != "show" {
+		t.Fatal(items.Rows[1].Items[2].Value.(string))
+	}
 }

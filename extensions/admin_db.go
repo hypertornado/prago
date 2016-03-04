@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/go-sql-driver/mysql"
-	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/utils"
+	"mime/multipart"
+	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
@@ -282,8 +283,8 @@ func BindDataFilterDefault(field reflect.StructField) bool {
 	return true
 }
 
-func BindData(item interface{}, request prago.Request, bindDataFilter func(reflect.StructField) bool) error {
-	data := request.Params()
+func BindData(item interface{}, params url.Values, form *multipart.Form, bindDataFilter func(reflect.StructField) bool) error {
+	data := params
 
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
@@ -313,7 +314,7 @@ func BindData(item interface{}, request prago.Request, bindDataFilter func(refle
 			}
 		case reflect.String:
 			if field.Tag.Get("prago-admin-type") == "image" {
-				imageId, err := NewImageFromMultipartForm(request.Request(), field.Name)
+				imageId, err := NewImageFromMultipartForm(form, field.Name)
 				if err == nil {
 					val.SetString(imageId)
 				}
