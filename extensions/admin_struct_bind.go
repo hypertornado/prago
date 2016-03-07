@@ -19,6 +19,10 @@ func (cache *AdminStructCache) BindDataNEW(item interface{}, params url.Values, 
 	return nil
 }
 
+func (field *adminStructField) bindField(params url.Values, form *multipart.Form) {
+
+}
+
 func (cache *AdminStructCache) BindData(item interface{}, params url.Values, form *multipart.Form, bindDataFilter func(*adminStructField) bool) error {
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
@@ -64,44 +68,5 @@ func (cache *AdminStructCache) BindData(item interface{}, params url.Values, for
 			val.SetInt(int64(i))
 		}
 	}
-	/*
-		for i := 0; i < value.Type().NumField(); i++ {
-			field := value.Type().Field(i)
-
-			if !bindDataFilter(field) {
-				continue
-			}
-
-			val := value.FieldByName(field.Name)
-			urlValue := params.Get(field.Name)
-
-			switch field.Type.Kind() {
-			case reflect.Struct:
-				if field.Type == reflect.TypeOf(time.Now()) {
-					tm, err := time.Parse("2006-01-02", urlValue)
-					if err == nil {
-						val.Set(reflect.ValueOf(tm))
-					}
-				}
-			case reflect.String:
-				if field.Tag.Get("prago-admin-type") == "image" {
-					imageId, err := NewImageFromMultipartForm(form, field.Name)
-					if err == nil {
-						val.SetString(imageId)
-					}
-				} else {
-					val.SetString(urlValue)
-				}
-			case reflect.Bool:
-				if urlValue == "on" {
-					val.SetBool(true)
-				} else {
-					val.SetBool(false)
-				}
-			case reflect.Int64:
-				i, _ := strconv.Atoi(urlValue)
-				val.SetInt(int64(i))
-			}
-		}*/
 	return nil
 }
