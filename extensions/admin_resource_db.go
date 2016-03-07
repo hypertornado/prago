@@ -3,6 +3,7 @@ package extensions
 import (
 	"database/sql"
 	"reflect"
+	"time"
 )
 
 type ResourceQuery struct {
@@ -17,12 +18,28 @@ func (ar *AdminResource) Save(item interface{}) error {
 	if !ar.hasModel {
 		return ErrorDontHaveModel
 	}
+
+	val := reflect.ValueOf(item).Elem()
+	timeVal := reflect.ValueOf(time.Now())
+	fn := "UpdatedAt"
+	if val.FieldByName(fn).IsValid() && val.FieldByName(fn).CanSet() && val.FieldByName(fn).Type() == timeVal.Type() {
+		val.FieldByName(fn).Set(timeVal)
+	}
+
 	return saveItem(ar.db(), ar.tableName(), item)
 }
 
 func (ar *AdminResource) Create(item interface{}) error {
 	if !ar.hasModel {
 		return ErrorDontHaveModel
+	}
+
+	val := reflect.ValueOf(item).Elem()
+	timeVal := reflect.ValueOf(time.Now())
+	for _, fieldName := range []string{"CreatedAt", "UpdatedAt"} {
+		if val.FieldByName(fieldName).IsValid() && val.FieldByName(fieldName).CanSet() && val.FieldByName(fieldName).Type() == timeVal.Type() {
+			val.FieldByName(fieldName).Set(timeVal)
+		}
 	}
 	return createItem(ar.db(), ar.tableName(), item)
 }

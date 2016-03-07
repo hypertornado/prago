@@ -118,63 +118,6 @@ func (ar *AdminResource) GetFormItems(item interface{}) ([]AdminFormItem, error)
 	}
 }
 
-func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, error) {
-	itemVal := reflect.ValueOf(item).Elem()
-	items := []AdminFormItem{}
-
-	//for i := 0; i < ar.Typ.NumField(); i++ {
-	//	field := ar.Typ.Field(i)
-
-	for i, field := range cache.fieldArrays {
-
-		structItem := AdminFormItem{
-			Name:      field.name,
-			NameHuman: field.name,
-			Template:  "admin_item_input",
-		}
-
-		reflect.ValueOf(&structItem.Value).Elem().Set(
-			itemVal.Field(i),
-		)
-
-		switch field.typ.Kind() {
-		case reflect.Struct:
-			if field.typ == reflect.TypeOf(time.Now()) {
-				structItem.Template = "admin_item_date"
-				var tm time.Time
-				reflect.ValueOf(&tm).Elem().Set(reflect.ValueOf(structItem.Value))
-				newVal := reflect.New(reflect.TypeOf("")).Elem()
-				newVal.SetString(tm.Format("2006-01-02"))
-				reflect.ValueOf(&structItem.Value).Elem().Set(newVal)
-			}
-		case reflect.Bool:
-			structItem.Template = "admin_item_checkbox"
-		case reflect.String:
-			switch field.tags["prago-admin-type"] {
-			case "text":
-				structItem.Template = "admin_item_textarea"
-			case "image":
-				structItem.Template = "admin_item_image"
-			}
-		}
-
-		description := field.tags["prago-admin-description"]
-		if len(description) > 0 {
-			structItem.NameHuman = description
-		}
-
-		accessTag := field.tags["prago-admin-access"]
-		if accessTag == "-" || structItem.Name == "CreatedAt" || structItem.Name == "UpdatedAt" {
-			structItem.Template = "admin_item_readonly"
-		}
-
-		if structItem.Name != "ID" {
-			items = append(items, structItem)
-		}
-	}
-	return items, nil
-}
-
 type ItemCell struct {
 	TemplateName string
 	Value        interface{}
@@ -271,7 +214,7 @@ func ValueToCell(field reflect.StructField, val reflect.Value) (cell ItemCell) {
 //TODO: dont drop table
 func (ar *AdminResource) Migrate() error {
 	var err error
-	fmt.Println("Migrating ", ar.Name, ar.ID)
+	//fmt.Println("Migrating ", ar.Name, ar.ID)
 	err = dropTable(ar.db(), ar.tableName())
 	if err != nil {
 		fmt.Println(err)

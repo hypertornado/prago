@@ -3,7 +3,6 @@ package extensions
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/hypertornado/prago/utils"
 	"reflect"
 	"time"
@@ -31,8 +30,6 @@ func NewAdminStructCache(item interface{}) (ret *AdminStructCache, err error) {
 		ret.fieldArrays = append(ret.fieldArrays, field)
 		ret.fieldMap[field.name] = field
 	}
-
-	fmt.Println(ret)
 
 	return
 }
@@ -96,4 +93,57 @@ func (s *AdminStructCache) getStructDescription() (columns []*mysqlColumn, err e
 		}
 	}
 	return
+}
+
+func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, error) {
+	itemVal := reflect.ValueOf(item).Elem()
+	items := []AdminFormItem{}
+
+	for i, field := range cache.fieldArrays {
+		structItem := AdminFormItem{
+			Name:      field.name,
+			NameHuman: field.name,
+			Template:  "admin_item_input",
+		}
+
+		reflect.ValueOf(&structItem.Value).Elem().Set(
+			itemVal.Field(i),
+		)
+
+		switch field.typ.Kind() {
+		case reflect.Struct:
+			if field.typ == reflect.TypeOf(time.Now()) {
+				structItem.Template = "admin_item_date"
+				var tm time.Time
+				reflect.ValueOf(&tm).Elem().Set(reflect.ValueOf(structItem.Value))
+				newVal := reflect.New(reflect.TypeOf("")).Elem()
+				newVal.SetString(tm.Format("2006-01-02"))
+				reflect.ValueOf(&structItem.Value).Elem().Set(newVal)
+			}
+		case reflect.Bool:
+			structItem.Template = "admin_item_checkbox"
+		case reflect.String:
+			switch field.tags["prago-admin-type"] {
+			case "text":
+				structItem.Template = "admin_item_textarea"
+			case "image":
+				structItem.Template = "admin_item_image"
+			}
+		}
+
+		description := field.tags["prago-admin-description"]
+		if len(description) > 0 {
+			structItem.NameHuman = description
+		}
+
+		accessTag := field.tags["prago-admin-access"]
+		if accessTag == "-" || structItem.Name == "CreatedAt" || structItem.Name == "UpdatedAt" {
+			structItem.Template = "admin_item_readonly"
+		}
+
+		if structItem.Name != "ID" {
+			items = append(items, structItem)
+		}
+	}
+	return items, nil
 }

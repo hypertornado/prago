@@ -2,24 +2,33 @@ package extensions
 
 import (
 	"testing"
+	"time"
 )
 
 type ResourceStruct struct {
-	ID      int64
-	Name    string
-	Other   string
-	Showing string `prago-admin-show:"yes"`
+	ID        int64
+	Name      string
+	Other     string
+	Showing   string `prago-admin-show:"yes"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
-func TestResource(t *testing.T) {
+func prepareResource() *AdminResource {
 	resource, _ := NewResource(ResourceStruct{})
 	resource.admin = dbProvider{}
 
 	err := resource.Migrate()
 	if err != nil {
-		t.Fatal(err)
+		panic(err)
 	}
-	resource.Create(&ResourceStruct{Name: "First"})
+	return resource
+}
+
+func TestResource(t *testing.T) {
+	resource := prepareResource()
+
+	resource.Create(&ResourceStruct{Name: "First", CreatedAt: time.Now()})
 	resource.Create(&ResourceStruct{Name: "Second", Showing: "show"})
 
 	count, err := resource.Query().Count()
@@ -39,5 +48,28 @@ func TestResource(t *testing.T) {
 
 	if items.Rows[1].Items[2].Value.(string) != "show" {
 		t.Fatal(items.Rows[1].Items[2].Value.(string))
+	}
+}
+
+func TestResourceTimestamps(t *testing.T) {
+	resource := prepareResource()
+
+	testStartTime := time.Now().Truncate(time.Second)
+
+	resource.Create(&ResourceStruct{Name: "A"})
+
+	itemIface, err := resource.Query().Where(map[string]interface{}{"id": 1}).First()
+	if err != nil {
+		panic(err)
+	}
+
+	item := itemIface.(*ResourceStruct)
+
+	if item.UpdatedAt.Before(testStartTime) || time.Now().Before(item.UpdatedAt) {
+		t.Fatal(item.UpdatedAt)
+	}
+
+	if item.CreatedAt.Before(testStartTime) || time.Now().Before(item.CreatedAt) {
+		t.Fatal(item.CreatedAt)
 	}
 }
