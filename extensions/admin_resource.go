@@ -107,7 +107,6 @@ type AdminFormItem struct {
 }
 
 func (ar *AdminResource) GetFormItems(item interface{}) ([]AdminFormItem, error) {
-
 	init, ok := ar.item.(interface {
 		GetFormItems(*AdminResource, interface{}) ([]AdminFormItem, error)
 	})
@@ -115,19 +114,22 @@ func (ar *AdminResource) GetFormItems(item interface{}) ([]AdminFormItem, error)
 	if ok {
 		return init.GetFormItems(ar, item)
 	} else {
-		return GetFormItemsDefault(ar, item)
+		return ar.adminStructCache.GetFormItemsDefault(ar, item)
 	}
 }
 
-func GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, error) {
+func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, error) {
 	itemVal := reflect.ValueOf(item).Elem()
 	items := []AdminFormItem{}
 
-	for i := 0; i < ar.Typ.NumField(); i++ {
-		field := ar.Typ.Field(i)
+	//for i := 0; i < ar.Typ.NumField(); i++ {
+	//	field := ar.Typ.Field(i)
+
+	for i, field := range cache.fieldArrays {
+
 		structItem := AdminFormItem{
-			Name:      field.Name,
-			NameHuman: field.Name,
+			Name:      field.name,
+			NameHuman: field.name,
 			Template:  "admin_item_input",
 		}
 
@@ -135,9 +137,9 @@ func GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, 
 			itemVal.Field(i),
 		)
 
-		switch field.Type.Kind() {
+		switch field.typ.Kind() {
 		case reflect.Struct:
-			if field.Type == reflect.TypeOf(time.Now()) {
+			if field.typ == reflect.TypeOf(time.Now()) {
 				structItem.Template = "admin_item_date"
 				var tm time.Time
 				reflect.ValueOf(&tm).Elem().Set(reflect.ValueOf(structItem.Value))
@@ -148,7 +150,7 @@ func GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, 
 		case reflect.Bool:
 			structItem.Template = "admin_item_checkbox"
 		case reflect.String:
-			switch field.Tag.Get("prago-admin-type") {
+			switch field.tags["prago-admin-type"] {
 			case "text":
 				structItem.Template = "admin_item_textarea"
 			case "image":
@@ -156,12 +158,12 @@ func GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, 
 			}
 		}
 
-		description := field.Tag.Get("prago-admin-description")
+		description := field.tags["prago-admin-description"]
 		if len(description) > 0 {
 			structItem.NameHuman = description
 		}
 
-		accessTag := field.Tag.Get("prago-admin-access")
+		accessTag := field.tags["prago-admin-access"]
 		if accessTag == "-" || structItem.Name == "CreatedAt" || structItem.Name == "UpdatedAt" {
 			structItem.Template = "admin_item_readonly"
 		}

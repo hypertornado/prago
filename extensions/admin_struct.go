@@ -56,7 +56,7 @@ func newAdminStructField(field reflect.StructField, order int) *adminStructField
 		order:         order,
 	}
 
-	for _, v := range []string{"prago-admin-type"} {
+	for _, v := range []string{"prago-admin-type", "prago-admin-description", "prago-admin-access"} {
 		ret.tags[v] = field.Tag.Get(v)
 	}
 
