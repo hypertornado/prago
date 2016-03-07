@@ -293,7 +293,10 @@ func TestAdminDB(t *testing.T) {
 		t.Fatal(changedNodeResult.Name)
 	}
 
-	deleteItem(db, tableName, 2)
+	deleteItems(db, tableName, listQuery{
+		whereString: whereString,
+		whereParams: whereParams,
+	})
 
 	listItems(structCache, db, tableName, &nodesIface, listQuery{})
 	nodes = nodesIface.([]*TestNode)
