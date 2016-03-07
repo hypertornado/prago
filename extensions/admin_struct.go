@@ -37,6 +37,16 @@ func NewAdminStructCache(item interface{}) (ret *AdminStructCache, err error) {
 	return
 }
 
+type adminStructField struct {
+	name             string
+	lowercaseName    string
+	typ              reflect.Type
+	tags             map[string]string
+	order            int
+	mysqlDescription string
+	scanner          sql.Scanner
+}
+
 func newAdminStructField(field reflect.StructField, order int) *adminStructField {
 	ret := &adminStructField{
 		name:          field.Name,
@@ -53,16 +63,6 @@ func newAdminStructField(field reflect.StructField, order int) *adminStructField
 	ret.mysqlDescription = ret.getMysqlDescription()
 
 	return ret
-}
-
-type adminStructField struct {
-	name             string
-	lowercaseName    string
-	typ              reflect.Type
-	tags             map[string]string
-	order            int
-	mysqlDescription string
-	scanner          sql.Scanner
 }
 
 func (f *adminStructField) getMysqlDescription() string {
