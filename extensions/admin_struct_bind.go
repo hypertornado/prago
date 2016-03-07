@@ -15,7 +15,7 @@ func BindDataFilterDefault(field reflect.StructField) bool {
 	return true
 }
 
-func BindData(item interface{}, params url.Values, form *multipart.Form, bindDataFilter func(reflect.StructField) bool) error {
+func (cache *AdminStructCache) BindData(item interface{}, params url.Values, form *multipart.Form, bindDataFilter func(reflect.StructField) bool) error {
 	data := params
 
 	value := reflect.ValueOf(item)

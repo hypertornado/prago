@@ -113,7 +113,7 @@ func TestAdminBind(t *testing.T) {
 	var in interface{}
 	in = &n
 
-	BindData(&in, values, nil, BindDataFilterDefault)
+	structCache.BindData(&in, values, nil, BindDataFilterDefault)
 
 	if n.Name != "ABC" {
 		t.Fatal(n.Name)
@@ -269,7 +269,7 @@ func TestAdminDB(t *testing.T) {
 
 	values := make(url.Values)
 	values.Set("Name", "somename")
-	BindData(item, values, nil, BindDataFilterDefault)
+	structCache.BindData(item, values, nil, BindDataFilterDefault)
 	createItem(db, tableName, item)
 	listItems(structCache, db, tableName, &nodesIface, listQuery{})
 	nodes = nodesIface.([]*TestNode)
