@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
 	"github.com/jinzhu/gorm"
 	"html/template"
+	"reflect"
 	"strconv"
 )
 
@@ -15,19 +17,58 @@ type Admin struct {
 	Prefix          string
 	AppName         string
 	Resources       []*AdminResource
+	resourceMap     map[reflect.Type]*AdminResource
 	AdminController *prago.Controller
 	db              *sql.DB
 	gorm            *gorm.DB
 	authData        map[string]string
 }
 
+func NewAdmin(prefix, name string) *Admin {
+	return &Admin{
+		Prefix:      prefix,
+		AppName:     name,
+		Resources:   []*AdminResource{},
+		resourceMap: make(map[reflect.Type]*AdminResource),
+	}
+}
+
 func (a *Admin) SetAuthData(authData map[string]string) {
 	a.authData = authData
+}
+
+func (a *Admin) Create(item interface{}) error {
+	typ := reflect.TypeOf(item).Elem()
+	resource, ok := a.resourceMap[typ]
+	if !ok {
+		return errors.New(fmt.Sprintf("Can't find resource with type %s.", typ))
+	}
+
+	return resource.Create(item)
+}
+
+func (a *Admin) Migrate() error {
+	fmt.Println("MIGRATING")
+
+	for _, resource := range a.Resources {
+		if resource.hasModel {
+			fmt.Println("Migrating", resource.Name)
+			err := resource.Migrate()
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (a *Admin) AddResource(resource *AdminResource) {
 	resource.admin = a
 	a.Resources = append(a.Resources, resource)
+	if resource.hasModel {
+		a.resourceMap[resource.Typ] = resource
+	}
+
 }
 
 func (a *Admin) adminHeaderData() interface{} {
@@ -313,12 +354,4 @@ func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
 	BindUpdate(a, resource)
 	BindDelete(a, resource)
 	return nil
-}
-
-func NewAdmin(prefix, name string) *Admin {
-	return &Admin{
-		Prefix:    prefix,
-		AppName:   name,
-		Resources: []*AdminResource{},
-	}
 }

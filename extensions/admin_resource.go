@@ -211,7 +211,6 @@ func ValueToCell(field reflect.StructField, val reflect.Value) (cell ItemCell) {
 	*/
 }
 
-//TODO: dont drop table
 func (ar *AdminResource) Migrate() error {
 	var err error
 	//fmt.Println("Migrating ", ar.Name, ar.ID)
