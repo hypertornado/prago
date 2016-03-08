@@ -33,6 +33,20 @@ func NewAdmin(prefix, name string) *Admin {
 	}
 }
 
+func (a *Admin) CreateResources(items ...interface{}) error {
+	for _, item := range items {
+		resource, err := NewResource(item)
+		if err != nil {
+			return err
+		}
+		err = a.AddResource(resource)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (a *Admin) SetAuthData(authData map[string]string) {
 	a.authData = authData
 }
@@ -49,7 +63,6 @@ func (a *Admin) Create(item interface{}) error {
 
 func (a *Admin) Migrate() error {
 	fmt.Println("MIGRATING")
-
 	for _, resource := range a.Resources {
 		if resource.hasModel {
 			fmt.Println("Migrating", resource.Name)
@@ -62,13 +75,13 @@ func (a *Admin) Migrate() error {
 	return nil
 }
 
-func (a *Admin) AddResource(resource *AdminResource) {
+func (a *Admin) AddResource(resource *AdminResource) error {
 	resource.admin = a
 	a.Resources = append(a.Resources, resource)
 	if resource.hasModel {
 		a.resourceMap[resource.Typ] = resource
 	}
-
+	return nil
 }
 
 func (a *Admin) adminHeaderData() interface{} {
