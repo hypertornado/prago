@@ -6,6 +6,16 @@ import (
 	"reflect"
 )
 
+func (a *Admin) Create(item interface{}) error {
+	typ := reflect.TypeOf(item).Elem()
+	resource, ok := a.resourceMap[typ]
+	if !ok {
+		return errors.New(fmt.Sprintf("Can't find resource with type %s.", typ))
+	}
+
+	return resource.Create(item)
+}
+
 type AdminQuery struct {
 	query listQuery
 	admin *Admin

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
 	"github.com/jinzhu/gorm"
@@ -51,21 +50,9 @@ func (a *Admin) SetAuthData(authData map[string]string) {
 	a.authData = authData
 }
 
-func (a *Admin) Create(item interface{}) error {
-	typ := reflect.TypeOf(item).Elem()
-	resource, ok := a.resourceMap[typ]
-	if !ok {
-		return errors.New(fmt.Sprintf("Can't find resource with type %s.", typ))
-	}
-
-	return resource.Create(item)
-}
-
 func (a *Admin) Migrate() error {
-	fmt.Println("MIGRATING")
 	for _, resource := range a.Resources {
 		if resource.hasModel {
-			fmt.Println("Migrating", resource.Name)
 			err := resource.Migrate()
 			if err != nil {
 				return err
