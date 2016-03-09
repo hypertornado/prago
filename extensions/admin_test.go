@@ -44,4 +44,13 @@ func TestAdmin(t *testing.T) {
 	if list[1].Name != "B" {
 		t.Fatal(list[1].Name)
 	}
+
+	count, err := admin.Query().Count(&ResourceStruct{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Fatal(count)
+	}
+
 }

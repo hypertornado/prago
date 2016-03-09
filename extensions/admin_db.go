@@ -65,3 +65,12 @@ func (aq *AdminQuery) Get(item interface{}) error {
 	}
 	return nil
 }
+
+func (aq *AdminQuery) Count(item interface{}) (int64, error) {
+	typ := reflect.TypeOf(item).Elem()
+	resource, ok := aq.admin.resourceMap[typ]
+	if !ok {
+		return -1, errors.New(fmt.Sprintf("Can't find resource with type %s.", typ))
+	}
+	return countItems(aq.admin.db, resource.tableName(), aq.query)
+}
