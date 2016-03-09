@@ -31,4 +31,17 @@ func TestAdmin(t *testing.T) {
 		t.Fatal(item.Name)
 	}
 
+	var list []*ResourceStruct
+	err = admin.Query().Get(&list)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(list) != 2 {
+		t.Fatal(len(list))
+	}
+
+	if list[1].Name != "B" {
+		t.Fatal(list[1].Name)
+	}
 }
