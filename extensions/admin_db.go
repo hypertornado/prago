@@ -17,13 +17,14 @@ func (a *Admin) Create(item interface{}) error {
 }
 
 type AdminQuery struct {
-	query listQuery
+	query *listQuery
 	admin *Admin
 	err   error
 }
 
 func (a *Admin) Query() *AdminQuery {
 	return &AdminQuery{
+		query: &listQuery{},
 		admin: a,
 	}
 }

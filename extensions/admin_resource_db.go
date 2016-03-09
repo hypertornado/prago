@@ -7,7 +7,7 @@ import (
 )
 
 type ResourceQuery struct {
-	query       listQuery
+	query       *listQuery
 	db          *sql.DB
 	tableName   string
 	structCache *AdminStructCache
@@ -50,7 +50,7 @@ func (ar *AdminResource) Query() *ResourceQuery {
 		err = ErrorDontHaveModel
 	}
 	return &ResourceQuery{
-		query:       listQuery{},
+		query:       &listQuery{},
 		db:          ar.db(),
 		tableName:   ar.tableName(),
 		structCache: ar.adminStructCache,

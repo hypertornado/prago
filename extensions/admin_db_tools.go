@@ -206,7 +206,7 @@ func mapToDBQuery(m map[string]interface{}) (str string, params []interface{}) {
 	return
 }
 
-func countItems(db *sql.DB, tableName string, query listQuery) (int64, error) {
+func countItems(db *sql.DB, tableName string, query *listQuery) (int64, error) {
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.whereString)
@@ -223,7 +223,7 @@ func countItems(db *sql.DB, tableName string, query listQuery) (int64, error) {
 	return i, err
 }
 
-func getFirstItem(structCache *AdminStructCache, db *sql.DB, tableName string, item interface{}, query listQuery) error {
+func getFirstItem(structCache *AdminStructCache, db *sql.DB, tableName string, item interface{}, query *listQuery) error {
 	var items interface{}
 	err := listItems(structCache, db, tableName, &items, query)
 	if err != nil {
@@ -238,7 +238,7 @@ func getFirstItem(structCache *AdminStructCache, db *sql.DB, tableName string, i
 	return nil
 }
 
-func listItems(structCache *AdminStructCache, db *sql.DB, tableName string, items interface{}, query listQuery) error {
+func listItems(structCache *AdminStructCache, db *sql.DB, tableName string, items interface{}, query *listQuery) error {
 	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(structCache.typ))).Elem()
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
@@ -270,7 +270,7 @@ func listItems(structCache *AdminStructCache, db *sql.DB, tableName string, item
 	return nil
 }
 
-func deleteItems(db *sql.DB, tableName string, query listQuery) (int64, error) {
+func deleteItems(db *sql.DB, tableName string, query *listQuery) (int64, error) {
 	limitString := buildLimitWithoutOffsetString(query.limit)
 	whereString := buildWhereString(query.whereString)
 
