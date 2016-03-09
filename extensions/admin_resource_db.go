@@ -86,6 +86,16 @@ func (q *ResourceQuery) OrderDesc(name string) *ResourceQuery {
 	return q
 }
 
+func (q *ResourceQuery) Limit(i int64) *ResourceQuery {
+	q.query.limit = i
+	return q
+}
+
+func (q *ResourceQuery) Offset(i int64) *ResourceQuery {
+	q.query.limit = i
+	return q
+}
+
 func (q *ResourceQuery) Count() (int64, error) {
 	return countItems(q.db, q.tableName, q.query)
 }

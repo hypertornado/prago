@@ -29,6 +29,31 @@ func (a *Admin) Query() *AdminQuery {
 	}
 }
 
+func (q *AdminQuery) Where(w map[string]interface{}) *AdminQuery {
+	q.query.where(w)
+	return q
+}
+
+func (q *AdminQuery) Order(name string) *AdminQuery {
+	q.query.addOrder(name, false)
+	return q
+}
+
+func (q *AdminQuery) OrderDesc(name string) *AdminQuery {
+	q.query.addOrder(name, true)
+	return q
+}
+
+func (q *AdminQuery) Limit(i int64) *AdminQuery {
+	q.query.limit = i
+	return q
+}
+
+func (q *AdminQuery) Offset(i int64) *AdminQuery {
+	q.query.offset = i
+	return q
+}
+
 func (aq *AdminQuery) Get(item interface{}) error {
 	if aq.err != nil {
 		return aq.err

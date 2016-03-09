@@ -22,6 +22,7 @@ func TestAdmin(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	admin.Create(&ResourceStruct{Name: "C"})
 	admin.Create(&ResourceStruct{Name: "B"})
 
 	var item ResourceStruct
@@ -37,20 +38,27 @@ func TestAdmin(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(list) != 2 {
+	if len(list) != 3 {
 		t.Fatal(len(list))
 	}
 
-	if list[1].Name != "B" {
-		t.Fatal(list[1].Name)
+	if list[2].Name != "B" {
+		t.Fatal(list[2].Name)
 	}
 
 	count, err := admin.Query().Count(&ResourceStruct{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if count != 2 {
+	if count != 3 {
 		t.Fatal(count)
 	}
 
+	admin.Query().Limit(1).Offset(1).Limit(1).Get(&list)
+	if len(list) != 1 {
+		t.Fatal(len(list))
+	}
+	if list[0].Name != "C" {
+		t.Fatal(list[0].Name)
+	}
 }
