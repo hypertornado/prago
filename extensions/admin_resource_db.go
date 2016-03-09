@@ -14,6 +14,14 @@ type ResourceQuery struct {
 	err         error
 }
 
+func (q *listQuery) where(w map[string]interface{}) {
+	q.whereString, q.whereParams = mapToDBQuery(w)
+}
+
+func (q *listQuery) addOrder(name string, desc bool) {
+	q.order = append(q.order, listQueryOrder{name: name, desc: desc})
+}
+
 func (ar *AdminResource) Save(item interface{}) error {
 	if !ar.hasModel {
 		return ErrorDontHaveModel
@@ -64,17 +72,17 @@ func (ar *AdminResource) NewItem() (item interface{}, err error) {
 }
 
 func (q *ResourceQuery) Where(w map[string]interface{}) *ResourceQuery {
-	q.query.whereString, q.query.whereParams = mapToDBQuery(w)
+	q.query.where(w)
 	return q
 }
 
 func (q *ResourceQuery) Order(name string) *ResourceQuery {
-	q.query.order = append(q.query.order, listQueryOrder{name: name})
+	q.query.addOrder(name, false)
 	return q
 }
 
 func (q *ResourceQuery) OrderDesc(name string) *ResourceQuery {
-	q.query.order = append(q.query.order, listQueryOrder{name: name, desc: true})
+	q.query.addOrder(name, true)
 	return q
 }
 
