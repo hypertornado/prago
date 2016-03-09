@@ -18,50 +18,39 @@ func (a *Admin) Query() *AdminQuery {
 	}
 }
 
-/*func (aq *AdminQuery) GetList(item interface{}) error {
-	if aq.err != nil {
-		return aq.err
-	}
-
-	typ := reflect.TypeOf(item).Elem()
-
-	fmt.Println(typ.Kind())
-
-}*/
-
 func (aq *AdminQuery) Get(item interface{}) error {
 	if aq.err != nil {
 		return aq.err
 	}
 
+	var err error
+	slice := false
+
 	typ := reflect.TypeOf(item).Elem()
 
 	if typ.Kind() == reflect.Slice {
+		slice = true
 		typ = typ.Elem().Elem()
+	}
 
-		resource, ok := aq.admin.resourceMap[typ]
-		if !ok {
-			return errors.New(fmt.Sprintf("Can't find resource with type %s.", typ))
-		}
+	resource, ok := aq.admin.resourceMap[typ]
+	if !ok {
+		return errors.New(fmt.Sprintf("Can't find resource with type %s.", typ))
+	}
 
-		var newItem interface{}
-		err := listItems(resource.adminStructCache, aq.admin.db, resource.tableName(), &newItem, aq.query)
-		reflect.ValueOf(item).Elem().Set(reflect.ValueOf(newItem))
-
-		return err
-	} else {
-		resource, ok := aq.admin.resourceMap[typ]
-		if !ok {
-			return errors.New(fmt.Sprintf("Can't find resource with type %s.", typ))
-		}
-
-		var newItem interface{}
-		err := getFirstItem(resource.adminStructCache, aq.admin.db, resource.tableName(), &newItem, aq.query)
+	var newItem interface{}
+	if slice {
+		err = listItems(resource.adminStructCache, aq.admin.db, resource.tableName(), &newItem, aq.query)
 		if err != nil {
 			return err
 		}
-
+		reflect.ValueOf(item).Elem().Set(reflect.ValueOf(newItem))
+	} else {
+		err = getFirstItem(resource.adminStructCache, aq.admin.db, resource.tableName(), &newItem, aq.query)
+		if err != nil {
+			return err
+		}
 		reflect.ValueOf(item).Elem().Set(reflect.ValueOf(newItem).Elem())
-		return nil
 	}
+	return nil
 }
