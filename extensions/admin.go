@@ -192,6 +192,9 @@ func (a *Admin) initTemplates(app *prago.App) error {
 		return template.HTML(buf.String()), err
 	}
 
+	templateFuncs["markdown"] = func(text string) template.HTML {
+		return template.HTML(Markdown(text))
+	}
 	templates = templates.Funcs(templateFuncs)
 
 	app.Data()["templates"] = templates
