@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"errors"
+	"github.com/golang-commonmark/markdown"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
 	"github.com/jinzhu/gorm"
@@ -181,24 +182,15 @@ func (a *Admin) initTemplates(app *prago.App) error {
 		return errors.New("Templates not initialized")
 	}
 
-	templateFuncs := app.Data()["templateFuncs"].(template.FuncMap)
-	if templateFuncs == nil {
-		return errors.New("Funcs not initialized")
-	}
-
-	templateFuncs["tmpl"] = func(templateName string, x interface{}) (template.HTML, error) {
+	app.AddTemplateFunction("tmpl", func(templateName string, x interface{}) (template.HTML, error) {
 		var buf bytes.Buffer
 		err := templates.ExecuteTemplate(&buf, templateName, x)
 		return template.HTML(buf.String()), err
-	}
+	})
 
-	templateFuncs["markdown"] = func(text string) template.HTML {
-		return template.HTML(Markdown(text))
-	}
-	templates = templates.Funcs(templateFuncs)
-
-	app.Data()["templates"] = templates
-	app.Data()["templateFuncs"] = templateFuncs
+	app.AddTemplateFunction("markdown", func(text string) template.HTML {
+		return template.HTML(markdown.New().RenderToString([]byte(text)))
+	})
 
 	return nil
 }
