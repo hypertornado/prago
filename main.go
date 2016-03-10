@@ -79,3 +79,9 @@ func commandHelper(cmd *exec.Cmd, out io.Writer) error {
 	}
 	return nil
 }
+
+func Must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
