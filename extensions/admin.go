@@ -13,6 +13,10 @@ import (
 	"strconv"
 )
 
+var (
+	ErrorNotFound = errors.New("ErrorNotFound")
+)
+
 type Admin struct {
 	Prefix          string
 	AppName         string

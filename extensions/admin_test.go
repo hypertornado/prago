@@ -16,6 +16,9 @@ func TestAdmin(t *testing.T) {
 	admin.Migrate()
 
 	var err error
+	var item ResourceStruct
+
+	err = admin.Query().Get(&item)
 
 	err = admin.Create(&ResourceStruct{Name: "A"})
 	if err != nil {
@@ -25,7 +28,6 @@ func TestAdmin(t *testing.T) {
 	admin.Create(&ResourceStruct{Name: "C"})
 	admin.Create(&ResourceStruct{Name: "B"})
 
-	var item ResourceStruct
 	admin.Query().Get(&item)
 
 	if item.Name != "A" {

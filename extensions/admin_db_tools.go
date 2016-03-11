@@ -234,8 +234,10 @@ func getFirstItem(structCache *AdminStructCache, db *sql.DB, tableName string, i
 
 	if val.Len() > 0 {
 		reflect.ValueOf(item).Elem().Set(val.Index(0))
+		return nil
+	} else {
+		return ErrorNotFound
 	}
-	return nil
 }
 
 func listItems(structCache *AdminStructCache, db *sql.DB, tableName string, items interface{}, query *listQuery) error {

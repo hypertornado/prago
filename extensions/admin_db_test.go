@@ -129,6 +129,12 @@ func TestAdminDBFirst(t *testing.T) {
 	dropTable(db, tableName)
 	createTable(db, tableName, structCache)
 
+	var node *TestNode
+	err = getFirstItem(structCache, db, tableName, &node, &listQuery{})
+	if err != ErrorNotFound {
+		t.Fatal("wrong error")
+	}
+
 	n0 := &TestNode{Name: "A"}
 	n1 := &TestNode{Name: "B"}
 
@@ -142,7 +148,6 @@ func TestAdminDBFirst(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var node *TestNode = &TestNode{Name: "OLD"}
 	getFirstItem(structCache, db, tableName, &node, &listQuery{})
 
 	if node.Name != "A" {
