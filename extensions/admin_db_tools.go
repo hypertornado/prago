@@ -202,7 +202,7 @@ func mapToDBQuery(m map[string]interface{}) (str string, params []interface{}) {
 		items = append(items, item)
 		params = append(params, v)
 	}
-	str = strings.Join(items, ", ")
+	str = strings.Join(items, " AND ")
 	return
 }
 

@@ -412,6 +412,13 @@ func TestAdminDBList(t *testing.T) {
 		t.Fatal(node.ID)
 	}
 
+	whereString, whereParams = mapToDBQuery(map[string]interface{}{"name": "B", "id": 1})
+	listItems(structCache, db, tableName, &nodes, &listQuery{
+		whereString: whereString,
+		whereParams: whereParams,
+	})
+	compareResults(t, nodes, []int64{1})
+
 	whereString, whereParams = mapToDBQuery(map[string]interface{}{"name": "B"})
 	count, err := deleteItems(db, tableName, &listQuery{
 		whereString: whereString,
