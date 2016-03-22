@@ -52,23 +52,13 @@ func (a *App) Data() map[string]interface{} {
 	return a.data
 }
 
-func (a *App) initMiddlewares() error {
-	for _, v := range a.middlewares {
-		err := v.Init(a)
-		if err != nil {
+func (a *App) Init(init func(*App)) error {
+	for _, middleware := range a.middlewares {
+		if err := middleware.Init(a); err != nil {
 			return err
 		}
 	}
-	return nil
-}
-
-func (a *App) Init(init func(*App)) error {
-	err := a.initMiddlewares()
-	if err != nil {
-		return err
-	}
-	err = a.bind(init)
-	return err
+	return a.cmd(init)
 }
 
 func (a *App) MainController() (ret *Controller) {

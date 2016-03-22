@@ -7,7 +7,7 @@ import (
 	"os/exec"
 )
 
-func (app *App) bind(init func(*App)) error {
+func (app *App) cmd(init func(*App)) error {
 	cmd := kingpin.New("", "")
 	serverCommand := cmd.Command("server", "Run server")
 	port := serverCommand.Flag("port", "server port").Default("8585").Short('p').Int()
