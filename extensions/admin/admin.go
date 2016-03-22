@@ -55,6 +55,18 @@ func (a *Admin) SetAuthData(authData map[string]string) {
 	a.authData = authData
 }
 
+func (a *Admin) UnsafeDropTables() error {
+	for _, resource := range a.Resources {
+		if resource.hasModel {
+			err := resource.UnsafeDropTable()
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func (a *Admin) Migrate() error {
 	for _, resource := range a.Resources {
 		if resource.hasModel {

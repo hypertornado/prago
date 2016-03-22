@@ -13,6 +13,7 @@ func prepareAdmin() *Admin {
 func TestAdmin(t *testing.T) {
 	admin := prepareAdmin()
 	admin.CreateResources(ResourceStruct{})
+	admin.UnsafeDropTables()
 	admin.Migrate()
 
 	var err error

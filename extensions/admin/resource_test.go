@@ -18,10 +18,18 @@ func prepareResource() *AdminResource {
 	resource, _ := NewResource(ResourceStruct{})
 	resource.admin = dbProvider{}
 
-	err := resource.Migrate()
+	resource.UnsafeDropTable()
+	resource.Migrate()
+
+	/*err := resource.UnsafeDropTable()
 	if err != nil {
 		panic(err)
 	}
+
+	err = resource.Migrate()
+	if err != nil {
+		panic(err)
+	}*/
 	return resource
 }
 

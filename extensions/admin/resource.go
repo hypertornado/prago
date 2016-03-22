@@ -3,10 +3,8 @@ package admin
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/utils"
-	//"github.com/jinzhu/gorm"
 	"reflect"
 	"time"
 )
@@ -191,18 +189,13 @@ func ValueToCell(field reflect.StructField, val reflect.Value) (cell ItemCell) {
 		reflect.ValueOf(&tm).Elem().Set(val)
 		cell.Value = tm.Format("2006-01-02 15:04:05")
 	}
-
 	return
 }
 
-func (ar *AdminResource) Migrate() error {
-	var err error
-	//fmt.Println("Migrating ", ar.Name, ar.ID)
-	err = dropTable(ar.db(), ar.tableName())
-	if err != nil {
-		fmt.Println(err)
-	}
+func (ar *AdminResource) UnsafeDropTable() error {
+	return dropTable(ar.db(), ar.tableName())
+}
 
-	_, err = getTableDescription(ar.db(), ar.tableName())
+func (ar *AdminResource) Migrate() error {
 	return createTable(ar.db(), ar.tableName(), ar.adminStructCache)
 }
