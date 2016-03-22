@@ -35,9 +35,16 @@ func (cache *AdminStructCache) BindData(item interface{}, params url.Values, for
 		switch field.typ.Kind() {
 		case reflect.Struct:
 			if field.typ == reflect.TypeOf(time.Now()) {
-				tm, err := time.Parse("2006-01-02", urlValue)
-				if err == nil {
-					val.Set(reflect.ValueOf(tm))
+				if field.tags["prago-admin-type"] == "timestamp" {
+					tm, err := time.Parse("2006-01-02 15:04", urlValue)
+					if err == nil {
+						val.Set(reflect.ValueOf(tm))
+					}
+				} else {
+					tm, err := time.Parse("2006-01-02", urlValue)
+					if err == nil {
+						val.Set(reflect.ValueOf(tm))
+					}
 				}
 			}
 		case reflect.String:

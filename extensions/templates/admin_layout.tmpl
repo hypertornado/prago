@@ -33,7 +33,12 @@
     </div>
 
     <div class="admin_content">
+
+    {{if .template_before}}{{tmpl .template_before .}}{{end}}
+
     {{tmpl .admin_yield .}}
+
+    {{if .template_after}}{{tmpl .template_after .}}{{end}}
 
     </div>
     

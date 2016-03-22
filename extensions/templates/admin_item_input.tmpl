@@ -38,6 +38,16 @@
 </label>
 {{end}}
 
+{{define "admin_item_timestamp"}}
+<label class="form_label">
+  {{if .Error}}
+    <div class="form_label_error">{{.Error}}</div>
+  {{end}}
+  <span class="form_label_text">{{.NameHuman}}</span>
+  <input placeholder="Example: 2001-12-06 20:30" name="{{.Name}}" value="{{.Value}}" class="input form_input">
+</label>
+{{end}}
+
 {{define "admin_item_readonly"}}
 <label class="form_label">
   {{if .Error}}

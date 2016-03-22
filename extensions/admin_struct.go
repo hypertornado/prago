@@ -113,11 +113,17 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 		switch field.typ.Kind() {
 		case reflect.Struct:
 			if field.typ == reflect.TypeOf(time.Now()) {
-				structItem.Template = "admin_item_date"
 				var tm time.Time
 				reflect.ValueOf(&tm).Elem().Set(reflect.ValueOf(structItem.Value))
 				newVal := reflect.New(reflect.TypeOf("")).Elem()
-				newVal.SetString(tm.Format("2006-01-02"))
+
+				if field.tags["prago-admin-type"] == "timestamp" {
+					structItem.Template = "admin_item_timestamp"
+					newVal.SetString(tm.Format("2006-01-02 15:04"))
+				} else {
+					structItem.Template = "admin_item_date"
+					newVal.SetString(tm.Format("2006-01-02"))
+				}
 				reflect.ValueOf(&structItem.Value).Elem().Set(newVal)
 			}
 		case reflect.Bool:
