@@ -12,7 +12,19 @@ type MiddlewareCmd struct {
 }
 
 func (m MiddlewareCmd) Init(app *App) error {
-	app.data["kingpin"] = kingpin.New("", "")
+	cmd := kingpin.New("", "")
+
+	xx := cmd.Command("xx", "xx help")
+
+	commands := map[*kingpin.CmdClause]func(app *App) error{}
+
+	commands[xx] = func(app *App) error {
+		println("xx cmd")
+		return nil
+	}
+
+	app.data["kingpin"] = cmd
+	app.data["commands"] = commands
 	return nil
 }
 
@@ -31,12 +43,12 @@ func (mr MiddlewareRun) Init(app *App) error {
 	cssCommand := cmd.Command("css", "Build CSS")
 	devCommand := cmd.Command("dev", "Development")
 
-	command, err := cmd.Parse(os.Args[1:])
+	commandName, err := cmd.Parse(os.Args[1:])
 	if err != nil {
 		return err
 	}
 
-	switch command {
+	switch commandName {
 	case serverCommand.FullCommand():
 		mr.Fn(app)
 		app.start(*port, *developmentMode)
@@ -47,6 +59,13 @@ func (mr MiddlewareRun) Init(app *App) error {
 	case devCommand.FullCommand():
 		mr.Fn(app)
 		development(app)
+	default:
+		commands := app.data["commands"].(map[*kingpin.CmdClause]func(app *App) error)
+		for command, fn := range commands {
+			if command.FullCommand() == commandName {
+				return fn(app)
+			}
+		}
 	}
 	return nil
 }
