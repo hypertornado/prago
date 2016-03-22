@@ -454,10 +454,51 @@ func compareResults(t *testing.T, nodes []*TestNode, ids []int64) {
 	}
 }
 
-func TestAdminReflect(t *testing.T) {
-	/*tn := time.Now()
-	fmt.Println(tn)
-	var t2 time.Time
-	reflect.ValueOf(&t2).Elem().Set(reflect.ValueOf(tn))
-	fmt.Println(t2)*/
+type N1 struct {
+	ID   int64
+	Name string
+}
+
+type N2 struct {
+	ID          int64
+	Name        string
+	Description string
+}
+
+func TestMigrateTable(t *testing.T) {
+	var err error
+	tableName := "node"
+	dropTable(db, tableName)
+
+	structCache1, _ := NewAdminStructCache(N1{})
+	structCache2, _ := NewAdminStructCache(N2{})
+
+	createTable(db, tableName, structCache1)
+
+	createItem(db, tableName, &N1{Name: "A"})
+
+	err = migrateTable(db, tableName, structCache2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	createItem(db, tableName, &N2{Name: "B", Description: "D"})
+
+	var nodes []*N2
+	err = listItems(structCache2, db, tableName, &nodes, &listQuery{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if nodes[0].Name != "A" {
+		t.Fatal(nodes[0])
+	}
+
+	if nodes[1].Name != "B" {
+		t.Fatal(nodes[1])
+	}
+
+	if nodes[1].Description != "D" {
+		t.Fatal(nodes[1])
+	}
 }

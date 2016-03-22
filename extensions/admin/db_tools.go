@@ -46,6 +46,50 @@ func createTable(db *sql.DB, tableName string, adminStruct *AdminStructCache) er
 	return err
 }
 
+func migrateTable(db *sql.DB, tableName string, adminStruct *AdminStructCache) error {
+	structDescription, err := adminStruct.getStructDescription()
+	if err != nil {
+		return err
+	}
+
+	tableDescription, err := getTableDescription(db, tableName)
+	if err != nil {
+		return err
+	}
+
+	tableDescriptionMap := map[string]bool{}
+	for _, item := range tableDescription {
+		tableDescriptionMap[item.Field] = true
+	}
+
+	var columns []*mysqlColumn
+
+	for _, item := range structDescription {
+		if !tableDescriptionMap[item.Field] {
+			columns = append(columns, item)
+		}
+	}
+
+	if len(columns) == 0 {
+		return nil
+	}
+
+	items := []string{}
+
+	for _, v := range columns {
+		additional := ""
+		if v.Field == "id" {
+			additional = "NOT NULL AUTO_INCREMENT PRIMARY KEY"
+		}
+		item := fmt.Sprintf("ADD COLUMN %s %s %s", v.Field, v.Type, additional)
+		items = append(items, item)
+	}
+
+	q := fmt.Sprintf("ALTER TABLE %s %s;", tableName, strings.Join(items, ", "))
+	_, err = db.Exec(q)
+	return err
+}
+
 func getTableDescription(db *sql.DB, tableName string) (map[string]*mysqlColumn, error) {
 	columns := map[string]*mysqlColumn{}
 	rows, err := db.Query(fmt.Sprintf("describe `%s`;", tableName))

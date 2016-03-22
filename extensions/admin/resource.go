@@ -197,5 +197,10 @@ func (ar *AdminResource) UnsafeDropTable() error {
 }
 
 func (ar *AdminResource) Migrate() error {
-	return createTable(ar.db(), ar.tableName(), ar.adminStructCache)
+	_, err := getTableDescription(ar.db(), ar.tableName())
+	if err == nil {
+		return migrateTable(ar.db(), ar.tableName(), ar.adminStructCache)
+	} else {
+		return createTable(ar.db(), ar.tableName(), ar.adminStructCache)
+	}
 }

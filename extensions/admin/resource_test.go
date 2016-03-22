@@ -20,16 +20,6 @@ func prepareResource() *AdminResource {
 
 	resource.UnsafeDropTable()
 	resource.Migrate()
-
-	/*err := resource.UnsafeDropTable()
-	if err != nil {
-		panic(err)
-	}
-
-	err = resource.Migrate()
-	if err != nil {
-		panic(err)
-	}*/
 	return resource
 }
 
