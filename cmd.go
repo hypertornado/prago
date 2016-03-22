@@ -7,6 +7,13 @@ import (
 	"os/exec"
 )
 
+type MiddlewareCmd struct{}
+
+func (MiddlewareCmd) Init(app *App) error {
+	println("init")
+	return nil
+}
+
 func (app *App) cmd(init func(*App)) error {
 	cmd := kingpin.New("", "")
 	serverCommand := cmd.Command("server", "Run server")

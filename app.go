@@ -33,6 +33,7 @@ func NewApp(name string) *App {
 	app.data["appName"] = name
 	app.data["router"] = NewRouter()
 
+	app.AddMiddleware(MiddlewareCmd{})
 	app.AddMiddleware(MiddlewareConfig{})
 	app.AddMiddleware(MiddlewareLogBefore)
 	app.AddMiddleware(MiddlewareRemoveTrailingSlash)
