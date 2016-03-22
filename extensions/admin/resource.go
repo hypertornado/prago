@@ -193,31 +193,6 @@ func ValueToCell(field reflect.StructField, val reflect.Value) (cell ItemCell) {
 	}
 
 	return
-
-	/*
-		reflect.ValueOf(&item).Elem().Set(val)
-		switch val.Kind() {
-		case reflect.String:
-			return fmt.Sprintf("%s", item)
-		case reflect.Int64:
-			return fmt.Sprintf("%d", item)
-		case reflect.Bool:
-			var b bool = item.(bool)
-			if b {
-				return "✔"
-			} else {
-				return "x"
-			}
-		}
-
-		if val.Type() == reflect.TypeOf(time.Now()) {
-			var tm time.Time
-			reflect.ValueOf(&tm).Elem().Set(val)
-			return tm.Format("2006-01-02 15:04:05")
-		}
-
-		return fmt.Sprintf("%s", item)
-	*/
 }
 
 func (ar *AdminResource) Migrate() error {
