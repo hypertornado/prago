@@ -1,4 +1,4 @@
-package extensions
+package admin
 
 import (
 	"errors"
