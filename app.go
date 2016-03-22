@@ -53,13 +53,13 @@ func (a *App) Data() map[string]interface{} {
 	return a.data
 }
 
-func (a *App) Init(init func(*App)) error {
+func (a *App) Init() error {
 	for _, middleware := range a.middlewares {
 		if err := middleware.Init(a); err != nil {
 			return err
 		}
 	}
-	return a.cmd(init)
+	return nil
 }
 
 func (a *App) MainController() (ret *Controller) {

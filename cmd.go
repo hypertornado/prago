@@ -7,15 +7,21 @@ import (
 	"os/exec"
 )
 
-type MiddlewareCmd struct{}
+type MiddlewareCmd struct {
+	kingpin *kingpin.Application
+}
 
-func (MiddlewareCmd) Init(app *App) error {
-	println("init")
+func (m MiddlewareCmd) Init(app *App) error {
+	app.data["kingpin"] = kingpin.New("", "")
 	return nil
 }
 
-func (app *App) cmd(init func(*App)) error {
-	cmd := kingpin.New("", "")
+type MiddlewareRun struct {
+	Fn func(*App)
+}
+
+func (mr MiddlewareRun) Init(app *App) error {
+	cmd := app.data["kingpin"].(*kingpin.Application)
 	serverCommand := cmd.Command("server", "Run server")
 	port := serverCommand.Flag("port", "server port").Default("8585").Short('p').Int()
 	developmentMode := serverCommand.Flag("development", "Is in development mode").Default("false").Short('d').Bool()
@@ -32,14 +38,14 @@ func (app *App) cmd(init func(*App)) error {
 
 	switch command {
 	case serverCommand.FullCommand():
-		init(app)
+		mr.Fn(app)
 		app.start(*port, *developmentMode)
 	case buildCommand.FullCommand():
 		build()
 	case cssCommand.FullCommand():
 		compileCss()
 	case devCommand.FullCommand():
-		init(app)
+		mr.Fn(app)
 		development(app)
 	}
 	return nil
