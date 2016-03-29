@@ -7,38 +7,14 @@ import (
 	"os/exec"
 )
 
-type MiddlewareCmd struct {
-	kingpin *kingpin.Application
-}
+type MiddlewareCmd struct{}
 
 func (m MiddlewareCmd) Init(app *App) error {
-	cmd := kingpin.New("", "")
-
-	xx := cmd.Command("xx", "xx help")
-
-	commands := map[*kingpin.CmdClause]func(app *App) error{}
-
-	commands[xx] = func(app *App) error {
-		println("xx cmd")
-		return nil
-	}
-
-	app.data["kingpin"] = cmd
-	app.data["commands"] = commands
-	return nil
-}
-
-type MiddlewareRun struct {
-	Fn func(*App)
-}
-
-func (mr MiddlewareRun) Init(app *App) error {
 	app.kingpin = kingpin.New("", "")
 	app.commands = map[*kingpin.CmdClause]func(app *App) error{}
 
 	devCommand := app.kingpin.Command("dev", "Development")
 	app.commands[devCommand] = func(app *App) error {
-		mr.Fn(app)
 		return development(app)
 	}
 
@@ -46,41 +22,15 @@ func (mr MiddlewareRun) Init(app *App) error {
 	port := serverCommand.Flag("port", "server port").Default("8585").Short('p').Int()
 	developmentMode := serverCommand.Flag("development", "Is in development mode").Default("false").Short('d').Bool()
 	app.commands[serverCommand] = func(app *App) error {
-		mr.Fn(app)
 		return app.start(*port, *developmentMode)
 	}
-
 	return nil
 }
 
-func (mr MiddlewareRun) InitOLD(app *App) error {
-	cmd := app.data["kingpin"].(*kingpin.Application)
-	serverCommand := cmd.Command("server", "Run server")
-	port := serverCommand.Flag("port", "server port").Default("8585").Short('p').Int()
-	developmentMode := serverCommand.Flag("development", "Is in development mode").Default("false").Short('d').Bool()
+type MiddlewareRun struct{ Fn func(*App) }
 
-	devCommand := cmd.Command("dev", "Development")
-
-	commandName, err := cmd.Parse(os.Args[1:])
-	if err != nil {
-		return err
-	}
-
-	switch commandName {
-	case serverCommand.FullCommand():
-		mr.Fn(app)
-		app.start(*port, *developmentMode)
-	case devCommand.FullCommand():
-		mr.Fn(app)
-		development(app)
-	default:
-		commands := app.data["commands"].(map[*kingpin.CmdClause]func(app *App) error)
-		for command, fn := range commands {
-			if command.FullCommand() == commandName {
-				return fn(app)
-			}
-		}
-	}
+func (mr MiddlewareRun) Init(app *App) error {
+	mr.Fn(app)
 	return nil
 }
 
