@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/hypertornado/prago/utils"
+	"gopkg.in/alecthomas/kingpin.v2"
 	"net/http"
+	"os"
 	"runtime/debug"
 	"strconv"
 	"time"
@@ -16,6 +18,8 @@ type App struct {
 	events             *Events
 	requestMiddlewares []RequestMiddleware
 	middlewares        []Middleware
+	kingpin            *kingpin.Application
+	commands           map[*kingpin.CmdClause]func(app *App) error
 }
 
 type RequestMiddleware func(Request, func())
@@ -59,7 +63,19 @@ func (a *App) Init() error {
 			return err
 		}
 	}
-	return nil
+
+	commandName, err := a.kingpin.Parse(os.Args[1:])
+	if err != nil {
+		return err
+	}
+
+	for command, fn := range a.commands {
+		if command.FullCommand() == commandName {
+			return fn(a)
+		}
+	}
+
+	return errors.New("command not found: " + commandName)
 }
 
 func (a *App) MainController() (ret *Controller) {

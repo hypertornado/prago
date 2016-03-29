@@ -33,14 +33,24 @@ type MiddlewareRun struct {
 }
 
 func (mr MiddlewareRun) Init(app *App) error {
+	app.kingpin = kingpin.New("", "")
+	app.commands = map[*kingpin.CmdClause]func(app *App) error{}
+
+	devCommand := app.kingpin.Command("dev", "Development")
+	app.commands[devCommand] = func(app *App) error {
+		mr.Fn(app)
+		return development(app)
+	}
+
+	return nil
+}
+
+func (mr MiddlewareRun) InitOLD(app *App) error {
 	cmd := app.data["kingpin"].(*kingpin.Application)
 	serverCommand := cmd.Command("server", "Run server")
 	port := serverCommand.Flag("port", "server port").Default("8585").Short('p').Int()
 	developmentMode := serverCommand.Flag("development", "Is in development mode").Default("false").Short('d').Bool()
 
-	buildCommand := cmd.Command("build", "Build version")
-
-	cssCommand := cmd.Command("css", "Build CSS")
 	devCommand := cmd.Command("dev", "Development")
 
 	commandName, err := cmd.Parse(os.Args[1:])
@@ -52,10 +62,6 @@ func (mr MiddlewareRun) Init(app *App) error {
 	case serverCommand.FullCommand():
 		mr.Fn(app)
 		app.start(*port, *developmentMode)
-	case buildCommand.FullCommand():
-		build()
-	case cssCommand.FullCommand():
-		compileCss()
 	case devCommand.FullCommand():
 		mr.Fn(app)
 		development(app)
@@ -77,13 +83,10 @@ func (a *App) start(port int, developmentMode bool) {
 	}
 }
 
-func build() {
-	println("not implemented")
-}
-
-func development(app *App) {
+func development(app *App) error {
 	go developmentCSS()
 	app.start(8585, true)
+	return nil
 }
 
 func compileCss() error {
