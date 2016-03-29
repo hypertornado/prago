@@ -113,7 +113,14 @@ func (a *Admin) Init(app *prago.App) error {
 	a.db = app.Data()["db"].(*sql.DB)
 	a.gorm = app.Data()["gorm"].(*gorm.DB)
 
-	err := a.initTemplates(app)
+	var err error
+
+	err = a.bindAdminCommand(app)
+	if err != nil {
+		return err
+	}
+
+	err = a.initTemplates(app)
 	if err != nil {
 		return err
 	}
@@ -189,6 +196,25 @@ func (a *Admin) Init(app *prago.App) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (a *Admin) bindAdminCommand(app *prago.App) error {
+	adminCommand := app.CreateCommand("admin", "Admin tasks")
+
+	adminSubcommand := adminCommand.Arg("admincommand", "").Required().String()
+
+	app.AddCommand(adminCommand, func(app *prago.App) error {
+		switch *adminSubcommand {
+		case "migrate":
+			println("Migrating database")
+			return a.Migrate()
+		default:
+			println("unknown admin subcommand " + *adminSubcommand)
+		}
+		return nil
+	})
+
 	return nil
 }
 

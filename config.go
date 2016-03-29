@@ -3,6 +3,7 @@ package prago
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -23,6 +24,15 @@ func (m MiddlewareConfig) Init(app *App) error {
 		return err
 	}
 	app.data["config"] = kv
+
+	configCommand := app.CreateCommand("config", "Print app configuration")
+	app.AddCommand(configCommand, func(app *App) error {
+		for k, v := range kv {
+			fmt.Println(k, ":", v)
+		}
+		return nil
+	})
+
 	return nil
 }
 

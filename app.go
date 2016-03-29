@@ -49,6 +49,14 @@ func NewApp(name string) *App {
 	return app
 }
 
+func (a *App) AddCommand(cmd *kingpin.CmdClause, fn func(app *App) error) {
+	a.commands[cmd] = fn
+}
+
+func (a *App) CreateCommand(name, description string) *kingpin.CmdClause {
+	return a.kingpin.Command(name, description)
+}
+
 func (a *App) AddMiddleware(m Middleware) {
 	a.middlewares = append(a.middlewares, m)
 }
