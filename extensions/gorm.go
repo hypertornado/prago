@@ -5,6 +5,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/hypertornado/prago"
 	"github.com/jinzhu/gorm"
+	"os"
+	"os/exec"
 )
 
 type Gorm struct {
@@ -24,6 +26,20 @@ func (g *Gorm) Init(app *prago.App) error {
 	app.Data()["db"] = db.DB()
 	app.Data()["gorm"] = &db
 	g.DB = db
+
+	dumpCommand := app.CreateCommand("dump", "Dump database")
+	app.AddCommand(dumpCommand, func(app *prago.App) error {
+
+		cmd := exec.Command("mysqldump", "-u"+user, "-p"+password, dbName)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err := cmd.Start()
+		if err != nil {
+			panic(err)
+		}
+		return nil
+	})
+
 	return err
 }
 
