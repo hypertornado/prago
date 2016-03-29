@@ -42,6 +42,14 @@ func (mr MiddlewareRun) Init(app *App) error {
 		return development(app)
 	}
 
+	serverCommand := app.kingpin.Command("server", "Run server")
+	port := serverCommand.Flag("port", "server port").Default("8585").Short('p').Int()
+	developmentMode := serverCommand.Flag("development", "Is in development mode").Default("false").Short('d').Bool()
+	app.commands[serverCommand] = func(app *App) error {
+		mr.Fn(app)
+		return app.start(*port, *developmentMode)
+	}
+
 	return nil
 }
 
@@ -76,11 +84,8 @@ func (mr MiddlewareRun) InitOLD(app *App) error {
 	return nil
 }
 
-func (a *App) start(port int, developmentMode bool) {
-	err := a.ListenAndServe(port, developmentMode)
-	if err != nil {
-		panic(err)
-	}
+func (a *App) start(port int, developmentMode bool) error {
+	return a.ListenAndServe(port, developmentMode)
 }
 
 func development(app *App) error {
