@@ -88,7 +88,7 @@ func (app *App) getTemplates() (*template.Template, template.FuncMap, error) {
 	return templates, templateFuncs, nil
 }
 
-func (app *App) LoadTemplate(pattern string) (err error) {
+func (app *App) LoadTemplatePath(pattern string) (err error) {
 	templates, templateFuncs, err := app.getTemplates()
 	if err != nil {
 		return err
@@ -102,6 +102,23 @@ func (app *App) LoadTemplate(pattern string) (err error) {
 
 	app.data["templates"] = templates
 	return nil
+}
+
+func (app *App) LoadTemplateFromString(in string) (err error) {
+	templates, templateFuncs, err := app.getTemplates()
+	if err != nil {
+		return err
+	}
+
+	templates = templates.Funcs(templateFuncs)
+	templates, err = templates.Parse(in)
+	if err != nil {
+		return err
+	}
+
+	app.data["templates"] = templates
+	return nil
+
 }
 
 func (app *App) AddTemplateFunction(name string, f interface{}) (err error) {
