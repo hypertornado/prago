@@ -1,6 +1,8 @@
 package extensions
 
 import (
+	"bufio"
+	"errors"
 	"fmt"
 	"github.com/hypertornado/prago"
 	"io/ioutil"
@@ -17,6 +19,14 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 
 	var version = app.Data()["version"].(string)
 	var appName = app.Data()["appName"].(string)
+	config, err := app.Config()
+	if err != nil {
+		return errors.New("Config not found in BuildMiddleware Init")
+	}
+	ssh, ok := config["ssh"]
+	if !ok {
+		fmt.Println("'ssh' key not set up in config.json file. Release command will not work.")
+	}
 
 	versionCommand := app.CreateCommand("version", "Print version")
 	app.AddCommand(versionCommand, func(app *prago.App) error {
@@ -26,9 +36,28 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 
 	buildCommand := app.CreateCommand("build", "Build cmd")
 	app.AddCommand(buildCommand, func(app *prago.App) error {
-		return b.build(app.Data()["appName"].(string), "v1")
+		return b.build(appName, version)
 	})
+
+	releaseCommand := app.CreateCommand("release", "Release cmd")
+	releaseCommandVersion := releaseCommand.Arg("version", "").Required().String()
+	app.AddCommand(releaseCommand, func(app *prago.App) error {
+		return b.release(appName, *releaseCommandVersion, ssh)
+	})
+
 	return nil
+}
+
+func (b BuildMiddleware) release(appName, version, auth string) error {
+	from := os.Getenv("HOME") + "/." + appName + "/versions/" + appName + "." + version
+	to := fmt.Sprintf("%s:~/.%s/versions", auth, appName)
+	fmt.Println(from)
+	fmt.Println(to)
+
+	cmd := exec.Command("scp", "-r", from, to)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
 
 type buildFlag struct {
@@ -54,14 +83,12 @@ func (b BuildMiddleware) build(appName, version string) error {
 		return err
 	}
 
-	//defer os.RemoveAll(dir)
+	defer os.RemoveAll(dir)
 
-	if true {
-		for _, buildFlag := range []buildFlag{ /*linuxBuild,*/ macBuild} {
-			err := buildExecutable(buildFlag, appName, dirPath)
-			if err != nil {
-				return err
-			}
+	for _, buildFlag := range []buildFlag{linuxBuild, macBuild} {
+		err := buildExecutable(buildFlag, appName, dirPath)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -70,6 +97,24 @@ func (b BuildMiddleware) build(appName, version string) error {
 		copyFiles(v[0], copyPath)
 	}
 
+	buildPath := os.Getenv("HOME") + "/." + appName + "/versions"
+	os.Mkdir(buildPath, 0777)
+	buildDir := buildPath + "/" + dirName
+
+	_, err = os.Open(buildDir)
+	if err == nil {
+		fmt.Printf("There is already file '%s'. Do you want to delete? (yes|no)\n", buildDir)
+		reader := bufio.NewReader(os.Stdin)
+		text, _ := reader.ReadString('\n')
+		if text == "yes\n" || text == "y\n" {
+			fmt.Println("Deleting " + buildDir)
+			os.RemoveAll(buildDir)
+		} else {
+			return errors.New("Have not deleted old version.")
+		}
+	}
+
+	copyFiles(dirPath, buildPath)
 	return nil
 }
 
