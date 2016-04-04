@@ -1,3 +1,3 @@
 package prago
 
-func developmentCSS() {}
+func developmentCSS() error { return nil }

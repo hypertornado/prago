@@ -9,21 +9,22 @@ import (
 	"strings"
 )
 
-func developmentCSS() {
+func developmentCSS() error {
 	p := goauto.NewPipeline("CSS Pipeline", goauto.Verbose)
 	defer p.Stop()
 
 	wd := filepath.Join("public", "css")
 	if err := p.WatchRecursive(wd, goauto.IgnoreHidden); err != nil {
-		panic(err)
+		return err
 	}
 
 	workflow := goauto.NewWorkflow(NewFuncCmd(compileCss))
 	if err := workflow.WatchPattern(".*\\.less$"); err != nil {
-		panic(err)
+		return err
 	}
 	p.Add(workflow)
 	p.Start()
+	return nil
 }
 
 type FuncCmd struct {

@@ -9,13 +9,24 @@ import (
 	"path/filepath"
 )
 
-type BuildMiddleware struct{}
+type BuildMiddleware struct {
+	Copy [][2]string
+}
 
 func (b BuildMiddleware) Init(app *prago.App) error {
 
+	var version = app.Data()["version"].(string)
+	var appName = app.Data()["appName"].(string)
+
+	versionCommand := app.CreateCommand("version", "Print version")
+	app.AddCommand(versionCommand, func(app *prago.App) error {
+		fmt.Println(appName, version)
+		return nil
+	})
+
 	buildCommand := app.CreateCommand("build", "Build cmd")
 	app.AddCommand(buildCommand, func(app *prago.App) error {
-		return build(app.Data()["appName"].(string), "v1")
+		return b.build(app.Data()["appName"].(string), "v1")
 	})
 	return nil
 }
@@ -29,7 +40,7 @@ type buildFlag struct {
 var linuxBuild = buildFlag{"linux", "linux", "386"}
 var macBuild = buildFlag{"mac", "darwin", "amd64"}
 
-func build(appName, version string) error {
+func (b BuildMiddleware) build(appName, version string) error {
 	fmt.Println(appName, version)
 	dir, err := ioutil.TempDir("", "build")
 	if err != nil {
@@ -45,8 +56,6 @@ func build(appName, version string) error {
 
 	//defer os.RemoveAll(dir)
 
-	fmt.Println(dirPath)
-
 	if true {
 		for _, buildFlag := range []buildFlag{ /*linuxBuild,*/ macBuild} {
 			err := buildExecutable(buildFlag, appName, dirPath)
@@ -56,7 +65,10 @@ func build(appName, version string) error {
 		}
 	}
 
-	copyFiles("public", dirPath)
+	for _, v := range b.Copy {
+		copyPath := filepath.Join(dirPath, v[1])
+		copyFiles(v[0], copyPath)
+	}
 
 	return nil
 }
@@ -75,5 +87,6 @@ func buildExecutable(bf buildFlag, appName, dirPath string) error {
 }
 
 func copyFiles(from, to string) error {
+	fmt.Println("copying", from, "to", to)
 	return exec.Command("cp", "-R", from, to).Run()
 }

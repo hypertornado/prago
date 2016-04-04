@@ -24,7 +24,7 @@ type App struct {
 
 type RequestMiddleware func(Request, func())
 
-func NewApp(name string) *App {
+func NewApp(name, version string) *App {
 	app := &App{
 		data:               make(map[string]interface{}),
 		events:             NewEvents(),
@@ -36,6 +36,7 @@ func NewApp(name string) *App {
 	app.data["mainController"] = newMainController(app)
 	app.data["appName"] = name
 	app.data["router"] = NewRouter()
+	app.data["version"] = version
 
 	app.AddMiddleware(MiddlewareCmd{})
 	app.AddMiddleware(MiddlewareConfig{})
