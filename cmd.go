@@ -40,8 +40,7 @@ func (a *App) start(port int, developmentMode bool) error {
 
 func development(app *App) error {
 	go developmentCSS()
-	app.start(8585, true)
-	return nil
+	return app.start(8585, true)
 }
 
 func compileCss() error {
