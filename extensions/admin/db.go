@@ -39,8 +39,10 @@ func (a *Admin) Query() *AdminQuery {
 	}
 }
 
-func (q *AdminQuery) Where(w map[string]interface{}) *AdminQuery {
-	q.query.where(w)
+func (q *AdminQuery) Where(w ...interface{}) *AdminQuery {
+	if q.err == nil {
+		q.err = q.query.where(w...)
+	}
 	return q
 }
 

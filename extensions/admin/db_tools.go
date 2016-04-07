@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var Debug = false
+
 type mysqlColumn struct {
 	Field   string
 	Type    string
@@ -297,6 +299,9 @@ func listItems(structCache *AdminStructCache, db *sql.DB, tableName string, item
 	}
 
 	q := fmt.Sprintf("SELECT %s FROM `%s` %s %s %s;", strings.Join(names, ", "), tableName, whereString, orderString, limitString)
+	if Debug {
+		fmt.Println(q, query.whereParams)
+	}
 	rows, err := db.Query(q, query.whereParams...)
 	if err != nil {
 		return err

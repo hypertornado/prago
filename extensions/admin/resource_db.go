@@ -2,9 +2,12 @@ package admin
 
 import (
 	"database/sql"
+	"errors"
 	"reflect"
 	"time"
 )
+
+var ErrorWrongWhereFormat = errors.New("Wrong Where Format")
 
 type ResourceQuery struct {
 	query       *listQuery
@@ -14,8 +17,51 @@ type ResourceQuery struct {
 	err         error
 }
 
-func (q *listQuery) where(w map[string]interface{}) {
-	q.whereString, q.whereParams = mapToDBQuery(w)
+func (q *listQuery) where(data ...interface{}) error {
+	var whereParams []interface{}
+	var whereString string
+	var err error
+
+	if len(data) == 0 {
+		return ErrorWrongWhereFormat
+	}
+	if len(data) == 1 {
+		whereString, whereParams, err = q.whereSingle(data[0])
+		if err != nil {
+			return err
+		}
+	} else {
+		first, ok := data[0].(string)
+		if !ok {
+			return ErrorWrongWhereFormat
+		}
+		whereString = first
+		whereParams = data[1:len(data)]
+	}
+
+	if len(q.whereString) > 0 {
+		q.whereString += " and "
+	}
+	q.whereString += whereString
+	q.whereParams = append(q.whereParams, whereParams...)
+
+	return nil
+}
+
+func (q *listQuery) whereSingle(data interface{}) (whereString string, whereParams []interface{}, err error) {
+	switch data.(type) {
+	case string:
+		whereString = data.(string)
+	case int64:
+		whereString, whereParams = mapToDBQuery(map[string]interface{}{"id": data.(int64)})
+	case int:
+		whereString, whereParams = mapToDBQuery(map[string]interface{}{"id": data.(int)})
+	case map[string]interface{}:
+		whereString, whereParams = mapToDBQuery(data.(map[string]interface{}))
+	default:
+		err = ErrorWrongWhereFormat
+	}
+	return
 }
 
 func (q *listQuery) addOrder(name string, desc bool) {
@@ -71,8 +117,10 @@ func (ar *AdminResource) NewItem() (item interface{}, err error) {
 	return
 }
 
-func (q *ResourceQuery) Where(w map[string]interface{}) *ResourceQuery {
-	q.query.where(w)
+func (q *ResourceQuery) Where(w interface{}) *ResourceQuery {
+	if q.err == nil {
+		q.err = q.query.where(w)
+	}
 	return q
 }
 

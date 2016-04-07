@@ -10,7 +10,7 @@ func prepareAdmin() *Admin {
 	return admin
 }
 
-func TestAdmin(t *testing.T) {
+func TestAdminQuery(t *testing.T) {
 	admin := prepareAdmin()
 	admin.CreateResources(ResourceStruct{})
 	admin.UnsafeDropTables()
@@ -18,8 +18,6 @@ func TestAdmin(t *testing.T) {
 
 	var err error
 	var item ResourceStruct
-
-	err = admin.Query().Get(&item)
 
 	err = admin.Create(&ResourceStruct{Name: "A"})
 	if err != nil {
@@ -29,7 +27,26 @@ func TestAdmin(t *testing.T) {
 	admin.Create(&ResourceStruct{Name: "C"})
 	admin.Create(&ResourceStruct{Name: "B"})
 
+	err = admin.Query().Where(2).Get(&item)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.Name != "C" {
+		t.Fatal(item.Name)
+	}
+
+	err = admin.Query().Where("id=?", 2).Get(&item)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.Name != "C" {
+		t.Fatal(item.Name)
+	}
+
 	admin.Query().Get(&item)
+	if item.Name != "A" {
+		t.Fatal(item.Name)
+	}
 
 	if item.Name != "A" {
 		t.Fatal(item.Name)
