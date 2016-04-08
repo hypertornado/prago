@@ -1,5 +1,4 @@
 package admin
-
 const TEMPLATES = `
 {{define "admin_edit"}}
 
@@ -122,8 +121,7 @@ const TEMPLATES = `
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="/admin/normalize.css">
-    <link rel="stylesheet" href="/admin/admin.css">
+    <link rel="stylesheet" href="{{.admin_header.prefix}}/admin.css">
   </head>
   <body class="admin">
     <div class="admin_header">

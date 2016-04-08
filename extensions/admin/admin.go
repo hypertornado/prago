@@ -189,6 +189,12 @@ func (a *Admin) Init(app *prago.App) error {
 		prago.Render(request, 200, "admin_layout")
 	})
 
+	a.AdminController.Get(a.Prefix+"/admin.css", func(request prago.Request) {
+		request.Response().Header().Add("Content-type", "text/css")
+		request.SetData("statusCode", 200)
+		request.SetData("body", []byte(CSS))
+	})
+
 	for i, _ := range a.Resources {
 		resource := a.Resources[i]
 		err = a.initResource(resource)

@@ -1,0 +1,159 @@
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+html, body{
+  height: 100%;
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  line-height: 1.4em;
+  color: #01354a;
+}
+
+p {
+  margin: 0px;
+  margin-bottom: 0.5em;
+}
+
+
+a {
+  color: #01354a;
+}
+
+.admin_header {
+  background: #fafafa;
+  padding: 10px 10px;
+  font-size: 1.0em;
+  border-bottom: 1px solid #ddd;
+  color: black;
+}
+
+.admin_header h1 {
+  display: inline-block;
+  font-size: 1.1em;
+  margin: 0px 5px;
+}
+
+.admin_header_list {
+  margin: 0px;
+  padding: 0px;
+}
+.admin_header_list {
+  display: inline-block;
+}
+.admin_header_list li {
+  display: inline-block;
+  padding: 0px 2px;
+}
+.admin_header_list-right {
+  float: right;
+}
+.admin_content {
+  max-width: 600px;
+  padding: 10px 10px;
+  margin: 0 auto;
+}
+.admin_footer {
+  background: #01354a;
+  color: white;
+  text-align: center;
+  margin: 0 auto;
+  padding: 20px 10px;
+}
+.admin_table {
+  width: 100%;
+}
+.admin_table thead {
+  font-weight: bold;
+}
+.admin_table td {
+  padding: 3px 5px;
+  border: 1px solid #ccc;
+}
+
+
+
+.btn {
+  background: #dd2e4f;
+  display: inline-block;
+  padding: 5px 10px;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+  font-family: 'Catamaran', sans-serif;
+  border: none;
+  outline: none;
+  border: 1px solid rgba(0,0,0,0);
+  line-height: 1em;
+}
+
+.btn:focus {
+  border: 1px solid #009ee0;
+}
+
+
+.form {
+  background-color: #fafafa;
+  padding: 5px 20px 20px 20px;
+  margin: 10px auto;
+  border-radius: 3px;
+  box-shadow: 0px 0px 2px rgba(0,0,0,0.1);
+}
+
+.form_label {
+  display: block;
+  margin: 20px 0px;
+}
+
+.form_label_text-checkbox {
+  padding: 0px 5px;
+}
+
+.input {
+  display: inline-block;
+  padding: 6px 5px;
+  font-size: 13px;
+  line-height: 20px;
+  color: #333;
+  width: 100%;
+  vertical-align: middle;
+  border: 1px solid #d5d5d5;
+  border-radius: 3px;
+  outline: none;
+}
+
+.input:focus {
+  border-color: #009ee0;
+}
+
+.textarea {
+  min-height: 150px;
+}
+
+.admin_table {
+  width: 100%;
+  margin-bottom: 30px;
+}
+.admin_table thead {
+  font-weight: bold;
+}
+.admin_table td {
+  padding: 3px 5px;
+  border: 1px solid #ccc;
+}
+
+.admin_header_item-active {
+  //background-color: white;
+  //border: 2px solid #009ee0;
+}
+
+.admin_header_item-active a {
+  //color: black;
+  //text-decoration: none;
+  //color: #009ee0;
+  font-weight: bold;
+}
