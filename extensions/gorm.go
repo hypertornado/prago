@@ -19,8 +19,8 @@ func (g *Gorm) Init(app *prago.App) error {
 		return err
 	}
 
-	user := app.Data()["appName"].(string)
-	dbName := app.Data()["appName"].(string)
+	user := config["dbUser"]
+	dbName := config["dbName"]
 	password := config["dbPassword"]
 	db, err := g.connectMySQL(user, password, dbName)
 	app.Data()["db"] = db.DB()
