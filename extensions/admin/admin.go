@@ -7,7 +7,6 @@ import (
 	"github.com/golang-commonmark/markdown"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
-	"github.com/jinzhu/gorm"
 	"html/template"
 	"reflect"
 	"strconv"
@@ -24,7 +23,6 @@ type Admin struct {
 	resourceMap     map[reflect.Type]*AdminResource
 	AdminController *prago.Controller
 	db              *sql.DB
-	gorm            *gorm.DB
 	authData        map[string]string
 }
 
@@ -111,7 +109,6 @@ func (a *Admin) DB() *sql.DB {
 
 func (a *Admin) Init(app *prago.App) error {
 	a.db = app.Data()["db"].(*sql.DB)
-	a.gorm = app.Data()["gorm"].(*gorm.DB)
 
 	var err error
 
