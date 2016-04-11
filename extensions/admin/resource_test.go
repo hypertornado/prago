@@ -26,10 +26,23 @@ func prepareResource() *AdminResource {
 func TestResource(t *testing.T) {
 	resource := prepareResource()
 
+	items, err := resource.ListTableItems()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err := resource.Query().Count()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 0 {
+		t.Fatal(count)
+	}
+
 	resource.Create(&ResourceStruct{Name: "First", CreatedAt: time.Now()})
 	resource.Create(&ResourceStruct{Name: "Second", Showing: "show"})
 
-	count, err := resource.Query().Count()
+	count, err = resource.Query().Count()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +51,7 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	items, _ := resource.ListTableItems()
+	items, _ = resource.ListTableItems()
 
 	if len(items.Header) != 3 {
 		t.Fatal(len(items.Header))

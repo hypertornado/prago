@@ -7,7 +7,7 @@ import (
 )
 
 func TestApp(t *testing.T) {
-	app := NewApp("test app")
+	app := NewApp("test app", "v1")
 	app.initMiddlewares()
 
 	app.Route(GET, "/h", app.MainController(), func(request Request) {
