@@ -127,6 +127,11 @@ func (a *Admin) Init(app *prago.App) error {
 
 	BindImageResizer(app.MainController())
 
+	err = app.LoadTemplateFromString(TEMPLATES)
+	if err != nil {
+		panic(err)
+	}
+
 	adminAccessController := app.MainController().SubController()
 
 	adminAccessController.Get(a.Prefix+"/login", func(request prago.Request) {
