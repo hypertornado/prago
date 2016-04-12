@@ -46,6 +46,10 @@ func (q *AdminQuery) Where(w ...interface{}) *AdminQuery {
 	return q
 }
 
+func (q *AdminQuery) WhereIs(name string, value interface{}) *AdminQuery {
+	return q.Where(map[string]interface{}{name: value})
+}
+
 func (q *AdminQuery) Order(name string) *AdminQuery {
 	q.query.addOrder(name, false)
 	return q
