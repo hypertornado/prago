@@ -196,16 +196,15 @@ const TEMPLATES = `
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Admin</title>
+    <title>{{.name}} Admin Log In</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="/admin/normalize.css">
-    <link rel="stylesheet" href="/admin/admin.css">
+    <link rel="stylesheet" href="{{.admin_header_prefix}}/admin.css">
   </head>
   <body class="admin">
     <div class="admin_content">
-    <h1>Admin Log In</h1>
+    <h2>{{.name}} Admin Log In</h2>
 
     <form class="form" method="POST">
         <label class="form_label">

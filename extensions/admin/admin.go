@@ -141,6 +141,8 @@ func (a *Admin) Init(app *prago.App) error {
 	adminAccessController := app.MainController().SubController()
 
 	adminAccessController.Get(a.Prefix+"/login", func(request prago.Request) {
+		request.SetData("admin_header_prefix", a.Prefix)
+		request.SetData("name", a.AppName)
 		prago.Render(request, 200, "admin_login")
 	})
 
