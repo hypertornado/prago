@@ -1,10 +1,10 @@
 package extensions
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/utils"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -103,17 +103,14 @@ func (b BuildMiddleware) build(appName, version string) error {
 
 	_, err = os.Open(buildDir)
 	if err == nil {
-		fmt.Printf("There is already file '%s'. Do you want to delete? (yes|no)\n", buildDir)
-		reader := bufio.NewReader(os.Stdin)
-		text, _ := reader.ReadString('\n')
-		if text == "yes\n" || text == "y\n" {
+		question := fmt.Sprintf("There is already file '%s'. Do you want to delete?", buildDir)
+		if utils.ConsoleQuestion(question) {
 			fmt.Println("Deleting " + buildDir)
 			os.RemoveAll(buildDir)
 		} else {
 			return errors.New("Have not deleted old version.")
 		}
 	}
-
 	copyFiles(dirPath, buildPath)
 	return nil
 }

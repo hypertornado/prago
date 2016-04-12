@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"bufio"
+	"fmt"
 	"github.com/Machiel/slugify"
 	"github.com/Sirupsen/logrus"
 	"math/rand"
@@ -40,4 +42,14 @@ func RandomString(n int) string {
 		b[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(b)
+}
+
+func ConsoleQuestion(question string) bool {
+	fmt.Printf("%s (yes|no)\n", question)
+	reader := bufio.NewReader(os.Stdin)
+	text, _ := reader.ReadString('\n')
+	if text == "yes\n" || text == "y\n" {
+		return true
+	}
+	return false
 }

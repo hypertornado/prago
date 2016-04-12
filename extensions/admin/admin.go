@@ -7,6 +7,7 @@ import (
 	"github.com/golang-commonmark/markdown"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/utils"
 	"html/template"
 	"reflect"
 	"strconv"
@@ -24,6 +25,7 @@ type Admin struct {
 	AdminController *prago.Controller
 	db              *sql.DB
 	authData        map[string]string
+	seedFn          func(*prago.App) error
 }
 
 func NewAdmin(prefix, name string) *Admin {
@@ -33,6 +35,10 @@ func NewAdmin(prefix, name string) *Admin {
 		Resources:   []*AdminResource{},
 		resourceMap: make(map[reflect.Type]*AdminResource),
 	}
+}
+
+func (a *Admin) Seed(fn func(*prago.App) error) {
+	a.seedFn = fn
 }
 
 func (a *Admin) CreateResources(items ...interface{}) error {
@@ -216,7 +222,25 @@ func (a *Admin) bindAdminCommand(app *prago.App) error {
 		switch *adminSubcommand {
 		case "migrate":
 			println("Migrating database")
-			return a.Migrate()
+			err := a.Migrate()
+			if err == nil {
+				println("Migrate done")
+			}
+			return err
+		case "seed":
+			if a.seedFn != nil {
+				println("Seeding")
+				return a.seedFn(app)
+			} else {
+				return errors.New("No seed function defined")
+			}
+		case "drop":
+			if utils.ConsoleQuestion("Really want to drop table?") {
+				println("Dropping table")
+				return a.UnsafeDropTables()
+			} else {
+				return nil
+			}
 		default:
 			println("unknown admin subcommand " + *adminSubcommand)
 		}
