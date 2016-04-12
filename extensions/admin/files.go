@@ -16,13 +16,15 @@ import (
 	"strings"
 )
 
+var FilesBasePath = ""
+
 func ResizeImage(param, id string) (out []byte, err error) {
 	wrongFormat := errors.New("Wrong format of params")
 
 	id = strings.Split(id, ".")[0]
 
 	var file *os.File
-	file, err = os.Open("public/files/uploaded/" + id + ".jpg")
+	file, err = os.Open(FilesBasePath + "/" + id + ".jpg")
 	if err != nil {
 		return
 	}
@@ -61,7 +63,8 @@ func ResizeImage(param, id string) (out []byte, err error) {
 	return ioutil.ReadAll(buf)
 }
 
-func BindImageResizer(controller *prago.Controller) {
+func BindImageResizer(controller *prago.Controller, path string) {
+	FilesBasePath = path
 	controller.Get("/img/:resize/:id", func(request prago.Request) {
 		bytes, err := ResizeImage(request.Params().Get("resize"), request.Params().Get("id"))
 		if err != nil {
@@ -89,7 +92,7 @@ func NewImage(data io.ReadCloser, fileType string) (uuid string, err error) {
 
 	uuid = shortuuid.UUID()
 
-	file, err := os.Create("public/files/uploaded/" + uuid + "." + fileType)
+	file, err := os.Create(FilesBasePath + "/" + uuid + "." + fileType)
 	if err != nil {
 		return
 	}

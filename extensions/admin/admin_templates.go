@@ -98,7 +98,7 @@ const TEMPLATES = `
   <span class="form_label_text">{{.NameHuman}}</span>
 
   {{if .Value}}
-  <img src="/files/uploaded/{{.Value}}.jpg" style="max-width: 100px; max-height: 100px; display: block; margin: 5px;">
+  <img src="/img/200x0/{{.Value}}.jpg" style="max-width: 100px; max-height: 100px; display: block; margin: 5px;">
   {{end}}
 
   <input type="file" name="{{.Name}}" accept=".jpeg,.jpg" class="input form_input">

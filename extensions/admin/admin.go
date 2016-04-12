@@ -9,6 +9,7 @@ import (
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/utils"
 	"html/template"
+	"os"
 	"reflect"
 	"strconv"
 )
@@ -128,7 +129,9 @@ func (a *Admin) Init(app *prago.App) error {
 		return err
 	}
 
-	BindImageResizer(app.MainController())
+	appName := app.Data()["appName"].(string)
+	path := os.Getenv("HOME") + "/." + appName + "/files"
+	BindImageResizer(app.MainController(), path)
 
 	err = app.LoadTemplateFromString(TEMPLATES)
 	if err != nil {
