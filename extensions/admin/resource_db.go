@@ -90,9 +90,15 @@ func (ar *AdminResource) Create(item interface{}) error {
 
 	val := reflect.ValueOf(item).Elem()
 	timeVal := reflect.ValueOf(time.Now())
+	var t time.Time
 	for _, fieldName := range []string{"CreatedAt", "UpdatedAt"} {
-		if val.FieldByName(fieldName).IsValid() && val.FieldByName(fieldName).CanSet() && val.FieldByName(fieldName).Type() == timeVal.Type() {
-			val.FieldByName(fieldName).Set(timeVal)
+		field := val.FieldByName(fieldName)
+		if field.IsValid() && field.CanSet() && field.Type() == timeVal.Type() {
+			//TODO: create test for not seting value on non-zero times
+			reflect.ValueOf(&t).Elem().Set(field)
+			if t.IsZero() {
+				field.Set(timeVal)
+			}
 		}
 	}
 	return createItem(ar.db(), ar.tableName(), item)
