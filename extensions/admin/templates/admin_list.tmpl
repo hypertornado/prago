@@ -4,6 +4,8 @@
 
 {{ $adminResource := .admin_resource }}
 
+<a href="{{.admin_resource.ID}}/new" class="btn">Nový {{.admin_resource.Name}}</a>
+
 <table class="admin_table">
   <tr>
   {{range $item := .admin_list_table_data.Header}}
@@ -19,16 +21,15 @@
     </td>
     {{end}}
     <td nowrap>
-      <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">Edit</a> 
+      <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">Upravit</a> 
     </td>
     <td nowrap>
-      <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete" onsubmit="return window.confirm('Really want to delete?');">
-        <input type="submit" value="Delete" class="btn">
+      <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete" onsubmit="return window.confirm('Opravdu chete položku smazat?');">
+        <input type="submit" value="Smazat" class="btn">
       </form>
     </td>
   </tr>
 {{end}}
 </table>
 
-<a href="{{.admin_resource.ID}}/new" class="btn">New {{.admin_resource.Name}}</a>
 {{end}}

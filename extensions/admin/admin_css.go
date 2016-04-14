@@ -25,6 +25,10 @@ a {
   color: #01354a;
 }
 
+a:hover {
+  text-decoration: none;
+}
+
 .admin_header {
   background: #fafafa;
   padding: 10px 10px;

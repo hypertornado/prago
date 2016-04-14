@@ -156,6 +156,12 @@ func (a *Admin) Init(app *prago.App) error {
 		prago.Redirect(request, a.Prefix+"/login")
 	})
 
+	adminAccessController.Get(a.Prefix+"/admin.css", func(request prago.Request) {
+		request.Response().Header().Add("Content-type", "text/css")
+		request.SetData("statusCode", 200)
+		request.SetData("body", []byte(CSS))
+	})
+
 	adminAccessController.Post(a.Prefix+"/login", func(request prago.Request) {
 		email := request.Params().Get("email")
 		password := request.Params().Get("password")
@@ -200,12 +206,6 @@ func (a *Admin) Init(app *prago.App) error {
 
 	a.AdminController.Get(a.Prefix, func(request prago.Request) {
 		prago.Render(request, 200, "admin_layout")
-	})
-
-	a.AdminController.Get(a.Prefix+"/admin.css", func(request prago.Request) {
-		request.Response().Header().Add("Content-type", "text/css")
-		request.SetData("statusCode", 200)
-		request.SetData("body", []byte(CSS))
 	})
 
 	for i, _ := range a.Resources {

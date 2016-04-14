@@ -2,13 +2,13 @@ package admin
 const TEMPLATES = `
 {{define "admin_edit"}}
 
-<h2>Edit {{.admin_resource.Name}} - {{.admin_item.Name}}</h2>
+<h2>Upravit {{.admin_resource.Name}} - {{.admin_item.Name}}</h2>
 
-<a href="../{{.admin_resource.ID}}">Back</a>
+<a href="../{{.admin_resource.ID}}">Zpět</a>
 
 <form method="POST" action="{{.admin_item.ID}}" class="form" enctype="multipart/form-data">
 {{tmpl "admin_form" .}}
-<input type="submit" value="Save" class="btn">
+<input type="submit" value="Uložit" class="btn">
 </form>
 
 {{end}}{{define "admin_form"}}
@@ -163,6 +163,8 @@ const TEMPLATES = `
 
 {{ $adminResource := .admin_resource }}
 
+<a href="{{.admin_resource.ID}}/new" class="btn">Nový {{.admin_resource.Name}}</a>
+
 <table class="admin_table">
   <tr>
   {{range $item := .admin_list_table_data.Header}}
@@ -178,25 +180,24 @@ const TEMPLATES = `
     </td>
     {{end}}
     <td nowrap>
-      <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">Edit</a> 
+      <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">Upravit</a> 
     </td>
     <td nowrap>
-      <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete" onsubmit="return window.confirm('Really want to delete?');">
-        <input type="submit" value="Delete" class="btn">
+      <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete" onsubmit="return window.confirm('Opravdu chete položku smazat?');">
+        <input type="submit" value="Smazat" class="btn">
       </form>
     </td>
   </tr>
 {{end}}
 </table>
 
-<a href="{{.admin_resource.ID}}/new" class="btn">New {{.admin_resource.Name}}</a>
 {{end}}{{define "admin_login"}}
 <!doctype html>
 <html>
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{.name}} Admin Log In</title>
+    <title>{{.name}} admin přihlášení</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -204,7 +205,7 @@ const TEMPLATES = `
   </head>
   <body class="admin">
     <div class="admin_content">
-    <h2>{{.name}} Admin Log In</h2>
+    <h2>{{.name}} admin přihlášení</h2>
 
     <form class="form" method="POST">
         <label class="form_label">
@@ -213,11 +214,11 @@ const TEMPLATES = `
         </label>
 
         <label class="form_label">
-          <span class="form_label_text">Password</span>
+          <span class="form_label_text">Heslo</span>
           <input type="password" name="password" class="input form_input">
         </label>
 
-        <input type="submit" value="Log In" class="btn">
+        <input type="submit" value="Přihlásit se" class="btn">
 
     </form>
 
@@ -229,11 +230,11 @@ const TEMPLATES = `
 
 <h2>New {{.admin_resource.Name}}</h2>
 
-<a href="../{{.admin_resource.ID}}">Back</a>
+<a href="../{{.admin_resource.ID}}">Zpět</a>
 
 <form method="POST" action="../{{.admin_resource.ID}}" class="form" enctype="multipart/form-data">
 {{tmpl "admin_form" .}}
-<input type="submit" value="Create" class="btn">
+<input type="submit" value="Vytvořit" class="btn">
 </form>
 
 {{end}}`
