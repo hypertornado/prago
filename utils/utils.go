@@ -18,13 +18,6 @@ func DefaultLogger() *logrus.Logger {
 	return ret
 }
 
-func WriteStartInfo(log *logrus.Logger, port int, developmentMode bool) {
-	log.WithField("port", port).
-		WithField("pid", os.Getpid()).
-		WithField("development mode", developmentMode).
-		Info("Server started")
-}
-
 func PrettyUrl(s string) string {
 	return slugify.Slugify(s)
 }

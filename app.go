@@ -6,6 +6,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/hypertornado/prago/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"runtime/debug"
@@ -118,8 +119,28 @@ func (a *App) ListenAndServe(port int, developmentMode bool) error {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	utils.WriteStartInfo(a.data["logger"].(*logrus.Logger), port, developmentMode)
+	a.writeStartInfo(a.data["logger"].(*logrus.Logger), port, developmentMode)
 	return server.ListenAndServe()
+}
+
+func (a *App) writeStartInfo(log *logrus.Logger, port int, developmentMode bool) error {
+	appName := a.Data()["appName"].(string)
+	pid := os.Getpid()
+
+	pidData := []byte(fmt.Sprintf("%d", pid))
+	path := os.Getenv("HOME") + "/." + appName + "/last.pid"
+
+	err := ioutil.WriteFile(path, pidData, 0777)
+	if err != nil {
+		return err
+	}
+
+	log.WithField("port", port).
+		WithField("pid", pid).
+		WithField("development mode", developmentMode).
+		Info("Server started")
+
+	return nil
 }
 
 func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {

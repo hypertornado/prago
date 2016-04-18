@@ -12,6 +12,8 @@ type MiddlewareCmd struct{}
 func (m MiddlewareCmd) Init(app *App) error {
 	app.kingpin = kingpin.New("", "")
 	app.commands = map[*kingpin.CmdClause]func(app *App) error{}
+	
+
 
 	devCommand := app.kingpin.Command("dev", "Development")
 	app.commands[devCommand] = func(app *App) error {
