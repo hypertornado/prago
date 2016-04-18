@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Sirupsen/logrus"
-	"github.com/hypertornado/prago/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"io/ioutil"
 	"net/http"
@@ -21,27 +20,29 @@ type App struct {
 	middlewares        []Middleware
 	kingpin            *kingpin.Application
 	commands           map[*kingpin.CmdClause]func(app *App) error
+	logger             *logrus.Logger
+	dotPath            string
 }
 
 type RequestMiddleware func(Request, func())
 
-func NewApp(name, version string) *App {
+func NewApp(appName, version string) *App {
 	app := &App{
 		data:               make(map[string]interface{}),
 		events:             NewEvents(),
 		requestMiddlewares: []RequestMiddleware{},
 		middlewares:        []Middleware{},
+		dotPath:            os.Getenv("HOME") + "/." + appName,
 	}
 
-	app.data["logger"] = utils.DefaultLogger()
 	app.data["mainController"] = newMainController(app)
-	app.data["appName"] = name
+	app.data["appName"] = appName
 	app.data["router"] = NewRouter()
 	app.data["version"] = version
 
 	app.AddMiddleware(MiddlewareCmd{})
 	app.AddMiddleware(MiddlewareConfig{})
-	app.AddMiddleware(MiddlewareLogBefore)
+	app.AddMiddleware(MiddlewareLogger{})
 	app.AddMiddleware(MiddlewareRemoveTrailingSlash)
 	app.AddMiddleware(MiddlewareStatic)
 	app.AddMiddleware(MiddlewareParseRequest)
@@ -50,6 +51,8 @@ func NewApp(name, version string) *App {
 
 	return app
 }
+
+func (a *App) Log() *logrus.Logger { return a.logger }
 
 func (a *App) AddCommand(cmd *kingpin.CmdClause, fn func(app *App) error) {
 	a.commands[cmd] = fn
@@ -119,23 +122,23 @@ func (a *App) ListenAndServe(port int, developmentMode bool) error {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	a.writeStartInfo(a.data["logger"].(*logrus.Logger), port, developmentMode)
+	a.writeStartInfo(port, developmentMode)
 	return server.ListenAndServe()
 }
 
-func (a *App) writeStartInfo(log *logrus.Logger, port int, developmentMode bool) error {
-	appName := a.Data()["appName"].(string)
+func (a *App) writeStartInfo(port int, developmentMode bool) error {
 	pid := os.Getpid()
 
-	pidData := []byte(fmt.Sprintf("%d", pid))
-	path := os.Getenv("HOME") + "/." + appName + "/last.pid"
-
-	err := ioutil.WriteFile(path, pidData, 0777)
+	err := ioutil.WriteFile(
+		a.dotPath+"/last.pid",
+		[]byte(fmt.Sprintf("%d", pid)),
+		0777,
+	)
 	if err != nil {
 		return err
 	}
 
-	log.WithField("port", port).
+	a.Log().WithField("port", port).
 		WithField("pid", pid).
 		WithField("development mode", developmentMode).
 		Info("Server started")

@@ -10,7 +10,6 @@ var (
 	MiddlewareDispatcher          = requestMiddleware{requestMiddlewareDispatcher}
 	MiddlewareRemoveTrailingSlash = requestMiddleware{requestMiddlewareRemoveTrailingSlash}
 	MiddlewareParseRequest        = requestMiddleware{requestMiddlewareParseRequest}
-	MiddlewareLogBefore           = requestMiddleware{requestMiddlewareLogBefore}
 )
 
 type Middleware interface {

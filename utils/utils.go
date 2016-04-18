@@ -4,19 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/Machiel/slugify"
-	"github.com/Sirupsen/logrus"
 	"math/rand"
 	"os"
 	"time"
 )
-
-func DefaultLogger() *logrus.Logger {
-	ret := logrus.New()
-	logFormatter := new(logrus.TextFormatter)
-	logFormatter.FullTimestamp = true
-	ret.Formatter = logFormatter
-	return ret
-}
 
 func PrettyUrl(s string) string {
 	return slugify.Slugify(s)

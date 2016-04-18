@@ -28,7 +28,7 @@ type request struct {
 }
 
 func (p *request) Log() *logrus.Logger {
-	return p.App().data["logger"].(*logrus.Logger)
+	return p.App().Log()
 }
 
 func (p *request) IsProcessed() bool {
@@ -55,9 +55,4 @@ func newRequest(w http.ResponseWriter, r *http.Request, app *App) *request {
 		app:  app,
 		data: make(map[string]interface{}),
 	}
-}
-
-func requestMiddlewareLogBefore(r Request, next func()) {
-	r.App().data["logger"].(*logrus.Logger).Println(r.Request().Method, r.Request().URL.String())
-	next()
 }
