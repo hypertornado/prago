@@ -114,6 +114,10 @@ func (a *App) Route(m method, path string, controller *Controller, action func(p
 func (a *App) ListenAndServe(port int, developmentMode bool) error {
 	a.data["developmentMode"] = developmentMode
 
+	if developmentMode {
+		a.logger.Out = os.Stderr
+	}
+
 	server := &http.Server{
 		Addr:           ":" + strconv.Itoa(port),
 		Handler:        a,
