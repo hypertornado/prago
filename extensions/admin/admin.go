@@ -7,6 +7,7 @@ import (
 	"github.com/golang-commonmark/markdown"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/hypertornado/prago/utils"
 	"html/template"
 	"os"
@@ -115,6 +116,8 @@ func (a *Admin) DB() *sql.DB {
 }
 
 func (a *Admin) Init(app *prago.App) error {
+	defaultLocale := "cs"
+
 	a.db = app.Data()["db"].(*sql.DB)
 
 	var err error
@@ -139,6 +142,10 @@ func (a *Admin) Init(app *prago.App) error {
 	}
 
 	adminAccessController := app.MainController().SubController()
+
+	adminAccessController.AddBeforeAction(func(request prago.Request) {
+		request.SetData("locale", defaultLocale)
+	})
 
 	adminAccessController.Get(a.Prefix+"/login", func(request prago.Request) {
 		request.SetData("admin_header_prefix", a.Prefix)
@@ -269,6 +276,10 @@ func (a *Admin) initTemplates(app *prago.App) error {
 
 	app.AddTemplateFunction("markdown", func(text string) template.HTML {
 		return template.HTML(markdown.New().RenderToString([]byte(text)))
+	})
+
+	app.AddTemplateFunction("message", func(language, id string) template.HTML {
+		return template.HTML(messages.Messages.Get(language, id))
 	})
 
 	return nil

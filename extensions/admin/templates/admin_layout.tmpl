@@ -13,7 +13,7 @@
   <body class="admin">
     <div class="admin_header">
         <ul class="admin_header_list admin_header_list-right">
-            <li>{{.admin_header_email}} | <a href="{{.admin_header.prefix}}/logout">Odhlásit se</a></li>
+            <li>{{.admin_header_email}} | <a href="{{.admin_header.prefix}}/logout">{{message .locale "admin_log_out"}}</a></li>
         </ul>
 
         <h1><a href="{{.admin_header.prefix}}">{{.admin_header.appName}}</a></h1>

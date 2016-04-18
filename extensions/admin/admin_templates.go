@@ -2,13 +2,13 @@ package admin
 const TEMPLATES = `
 {{define "admin_edit"}}
 
-<h2>Upravit {{.admin_resource.Name}} - {{.admin_item.Name}}</h2>
+<h2>{{message .locale "admin_edit"}} - {{.admin_item.Name}}</h2>
 
-<a href="../{{.admin_resource.ID}}">Zpět</a>
+<a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
 
 <form method="POST" action="{{.admin_item.ID}}" class="form" enctype="multipart/form-data">
 {{tmpl "admin_form" .}}
-<input type="submit" value="Uložit" class="btn">
+<input type="submit" value="{{message .locale "admin_save"}}" class="btn">
 </form>
 
 {{end}}{{define "admin_form"}}
@@ -126,7 +126,7 @@ const TEMPLATES = `
   <body class="admin">
     <div class="admin_header">
         <ul class="admin_header_list admin_header_list-right">
-            <li>{{.admin_header_email}} | <a href="{{.admin_header.prefix}}/logout">Odhlásit se</a></li>
+            <li>{{.admin_header_email}} | <a href="{{.admin_header.prefix}}/logout">{{message .locale "admin_log_out"}}</a></li>
         </ul>
 
         <h1><a href="{{.admin_header.prefix}}">{{.admin_header.appName}}</a></h1>
@@ -162,8 +162,9 @@ const TEMPLATES = `
 <h2>{{.admin_resource.Name}}</h2>
 
 {{ $adminResource := .admin_resource }}
+{{ $locale := .locale}}
 
-<a href="{{.admin_resource.ID}}/new" class="btn">Nový {{.admin_resource.Name}}</a>
+<a href="{{.admin_resource.ID}}/new" class="btn">{{message .locale "admin_new"}}</a>
 
 <table class="admin_table">
   <tr>
@@ -180,11 +181,11 @@ const TEMPLATES = `
     </td>
     {{end}}
     <td nowrap>
-      <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">Upravit</a> 
+      <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">{{message $locale "admin_edit"}}</a> 
     </td>
     <td nowrap>
-      <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete" onsubmit="return window.confirm('Opravdu chete položku smazat?');">
-        <input type="submit" value="Smazat" class="btn">
+      <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete" onsubmit="return window.confirm('{{message $locale "admin_delete_confirmation"}}');">
+        <input type="submit" value="{{message $locale "admin_delete"}}" class="btn">
       </form>
     </td>
   </tr>
@@ -197,28 +198,27 @@ const TEMPLATES = `
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{.name}} admin přihlášení</title>
+    <title>{{.name}} - {{message .locale "admin_login_name"}}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <link rel="stylesheet" href="{{.admin_header_prefix}}/admin.css">
   </head>
   <body class="admin">
     <div class="admin_content">
-    <h2>{{.name}} admin přihlášení</h2>
+    <h2>{{.name}} - {{message .locale "admin_login_name"}}</h2>
 
     <form class="form" method="POST">
         <label class="form_label">
-          <span class="form_label_text">Email</span>
+          <span class="form_label_text">{{message .locale "admin_email"}}</span>
           <input type="email" name="email" autofocus class="input form_input">
         </label>
 
         <label class="form_label">
-          <span class="form_label_text">Heslo</span>
+          <span class="form_label_text">{{message .locale "admin_password"}}</span>
           <input type="password" name="password" class="input form_input">
         </label>
 
-        <input type="submit" value="Přihlásit se" class="btn">
+        <input type="submit" value="{{message .locale "admin_login_action"}}" class="btn">
 
     </form>
 
@@ -228,13 +228,13 @@ const TEMPLATES = `
 
 {{end}}{{define "admin_new"}}
 
-<h2>New {{.admin_resource.Name}}</h2>
+<h2>{{message .locale "admin_new"}} - {{.admin_resource.Name}}</h2>
 
-<a href="../{{.admin_resource.ID}}">Zpět</a>
+<a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
 
 <form method="POST" action="../{{.admin_resource.ID}}" class="form" enctype="multipart/form-data">
 {{tmpl "admin_form" .}}
-<input type="submit" value="Vytvořit" class="btn">
+<input type="submit" value="{{message .locale "admin_create"}}" class="btn">
 </form>
 
 {{end}}`

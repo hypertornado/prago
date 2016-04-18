@@ -3,8 +3,9 @@
 <h2>{{.admin_resource.Name}}</h2>
 
 {{ $adminResource := .admin_resource }}
+{{ $locale := .locale}}
 
-<a href="{{.admin_resource.ID}}/new" class="btn">Nový {{.admin_resource.Name}}</a>
+<a href="{{.admin_resource.ID}}/new" class="btn">{{message .locale "admin_new"}}</a>
 
 <table class="admin_table">
   <tr>
@@ -21,11 +22,11 @@
     </td>
     {{end}}
     <td nowrap>
-      <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">Upravit</a> 
+      <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">{{message $locale "admin_edit"}}</a> 
     </td>
     <td nowrap>
-      <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete" onsubmit="return window.confirm('Opravdu chete položku smazat?');">
-        <input type="submit" value="Smazat" class="btn">
+      <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete" onsubmit="return window.confirm('{{message $locale "admin_delete_confirmation"}}');">
+        <input type="submit" value="{{message $locale "admin_delete"}}" class="btn">
       </form>
     </td>
   </tr>

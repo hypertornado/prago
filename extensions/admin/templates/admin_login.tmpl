@@ -4,28 +4,27 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{.name}} admin přihlášení</title>
+    <title>{{.name}} - {{message .locale "admin_login_name"}}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <link rel="stylesheet" href="{{.admin_header_prefix}}/admin.css">
   </head>
   <body class="admin">
     <div class="admin_content">
-    <h2>{{.name}} admin přihlášení</h2>
+    <h2>{{.name}} - {{message .locale "admin_login_name"}}</h2>
 
     <form class="form" method="POST">
         <label class="form_label">
-          <span class="form_label_text">Email</span>
+          <span class="form_label_text">{{message .locale "admin_email"}}</span>
           <input type="email" name="email" autofocus class="input form_input">
         </label>
 
         <label class="form_label">
-          <span class="form_label_text">Heslo</span>
+          <span class="form_label_text">{{message .locale "admin_password"}}</span>
           <input type="password" name="password" class="input form_input">
         </label>
 
-        <input type="submit" value="Přihlásit se" class="btn">
+        <input type="submit" value="{{message .locale "admin_login_action"}}" class="btn">
 
     </form>
 

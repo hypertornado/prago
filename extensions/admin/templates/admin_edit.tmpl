@@ -1,12 +1,12 @@
 {{define "admin_edit"}}
 
-<h2>Upravit {{.admin_resource.Name}} - {{.admin_item.Name}}</h2>
+<h2>{{message .locale "admin_edit"}} - {{.admin_item.Name}}</h2>
 
-<a href="../{{.admin_resource.ID}}">Zpět</a>
+<a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
 
 <form method="POST" action="{{.admin_item.ID}}" class="form" enctype="multipart/form-data">
 {{tmpl "admin_form" .}}
-<input type="submit" value="Uložit" class="btn">
+<input type="submit" value="{{message .locale "admin_save"}}" class="btn">
 </form>
 
 {{end}}
