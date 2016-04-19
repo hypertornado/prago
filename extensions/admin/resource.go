@@ -88,10 +88,6 @@ func NewResource(item interface{}) (*AdminResource, error) {
 	return ret, nil
 }
 
-/*func (ar *AdminResource) gorm() *gorm.DB {
-	return ar.admin.gorm
-}*/
-
 func (ar *AdminResource) db() *sql.DB {
 	return ar.admin.DB()
 }
@@ -121,7 +117,7 @@ func (ar *AdminResource) GetFormItems(item interface{}) ([]AdminFormItem, error)
 	if ok {
 		return init.GetFormItems(ar, item)
 	} else {
-		return ar.adminStructCache.GetFormItemsDefault(ar, item)
+		return ar.adminStructCache.GetFormItemsDefault(ar, item, defaultLocale)
 	}
 }
 
@@ -145,9 +141,38 @@ type ListTable struct {
 	Rows   []ListTableRow
 }
 
-func (resource *AdminResource) ListTableItems() (table ListTable, err error) {
+func (resource *AdminResource) ListTableItems(lang string) (table ListTable, err error) {
 	q := resource.Query()
 	q = resource.queryFilter(q)
+	rowItems, err := q.List()
+
+	for _, v := range resource.adminStructCache.fieldArrays {
+		showTag := v.tags["prago-admin-show"]
+		if len(showTag) > 0 || v.name == "ID" || v.name == "Name" {
+			table.Header = append(table.Header, ListTableHeader{Name: v.name, NameHuman: v.humanName(lang)})
+		}
+	}
+
+	val := reflect.ValueOf(rowItems)
+	for i := 0; i < val.Len(); i++ {
+		row := ListTableRow{}
+		itemVal := val.Index(i).Elem()
+
+		for _, h := range table.Header {
+			structField, _ := resource.Typ.FieldByName(h.Name)
+			fieldVal := itemVal.FieldByName(h.Name)
+			row.Items = append(row.Items, ValueToCell(structField, fieldVal))
+		}
+		row.ID = itemVal.FieldByName("ID").Int()
+		table.Rows = append(table.Rows, row)
+	}
+	return
+}
+
+func (resource *AdminResource) ListTableItemsOLD() (table ListTable, err error) {
+	q := resource.Query()
+	q = resource.queryFilter(q)
+	//cache := resource.adminStructCache
 	rowItems, err := q.List()
 
 	for i := 0; i < resource.Typ.NumField(); i++ {

@@ -19,15 +19,25 @@ type messages struct {
 }
 
 func (m *messages) Get(lang, id string, params ...interface{}) string {
+	ret := m.GetNullable(lang, id, params...)
+	if ret == nil {
+		return id
+	} else {
+		return *ret
+	}
+}
+
+func (m *messages) GetNullable(lang, id string, params ...interface{}) *string {
 	loc, ok := m.m[lang]
 	if !ok {
-		return id
+		return nil
 	}
 
 	str, ok := loc[id]
 	if !ok {
-		return id
+		return nil
 	}
 
-	return fmt.Sprintf(str, params...)
+	ret := fmt.Sprintf(str, params...)
+	return &ret
 }

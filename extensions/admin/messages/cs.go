@@ -13,4 +13,10 @@ var cs = map[string]string{
 	"admin_password":            "Heslo",
 	"admin_login_action":        "Přihlásit se",
 	"admin_save":                "Uložit",
+	"Name":                      "Jméno",
+	"Description":               "Popis",
+	"Image":                     "Obrázek",
+	"Hidden":                    "Skrytá položka",
+	"CreatedAt":                 "Vytvořeno",
+	"UpdatedAt":                 "Aktualizováno",
 }

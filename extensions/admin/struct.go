@@ -3,6 +3,7 @@ package admin
 import (
 	"database/sql"
 	"errors"
+	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/hypertornado/prago/utils"
 	"reflect"
 	"time"
@@ -44,6 +45,20 @@ type adminStructField struct {
 	scanner          sql.Scanner
 }
 
+func (a *adminStructField) humanName(lang string) (ret string) {
+	description := a.tags["prago-admin-description"]
+	if len(description) > 0 {
+		return description
+	} else {
+		translatedName := messages.Messages.GetNullable(lang, a.name)
+		if translatedName == nil {
+			return a.name
+		} else {
+			return *translatedName
+		}
+	}
+}
+
 func newAdminStructField(field reflect.StructField, order int) *adminStructField {
 	ret := &adminStructField{
 		name:          field.Name,
@@ -53,7 +68,7 @@ func newAdminStructField(field reflect.StructField, order int) *adminStructField
 		order:         order,
 	}
 
-	for _, v := range []string{"prago-admin-type", "prago-admin-description", "prago-admin-access"} {
+	for _, v := range []string{"prago-admin-type", "prago-admin-description", "prago-admin-access", "prago-admin-show"} {
 		ret.tags[v] = field.Tag.Get(v)
 	}
 
@@ -95,7 +110,7 @@ func (s *AdminStructCache) getStructDescription() (columns []*mysqlColumn, err e
 	return
 }
 
-func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item interface{}) ([]AdminFormItem, error) {
+func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item interface{}, lang string) ([]AdminFormItem, error) {
 	itemVal := reflect.ValueOf(item).Elem()
 	items := []AdminFormItem{}
 
@@ -137,10 +152,7 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 			}
 		}
 
-		description := field.tags["prago-admin-description"]
-		if len(description) > 0 {
-			structItem.NameHuman = description
-		}
+		structItem.NameHuman = field.humanName(lang)
 
 		accessTag := field.tags["prago-admin-access"]
 		if accessTag == "-" || structItem.Name == "CreatedAt" || structItem.Name == "UpdatedAt" {

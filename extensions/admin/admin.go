@@ -17,6 +17,7 @@ import (
 
 var (
 	ErrorNotFound = errors.New("ErrorNotFound")
+	defaultLocale = "cs"
 )
 
 type Admin struct {
@@ -116,8 +117,6 @@ func (a *Admin) DB() *sql.DB {
 }
 
 func (a *Admin) Init(app *prago.App) error {
-	defaultLocale := "cs"
-
 	a.db = app.Data()["db"].(*sql.DB)
 
 	var err error
@@ -320,7 +319,7 @@ func (a *Admin) GetURL(resource *AdminResource, suffix string) string {
 func BindList(a *Admin, resource *AdminResource) {
 	resource.ResourceController.Get(a.GetURL(resource, ""), func(request prago.Request) {
 
-		tableData, err := resource.ListTableItems()
+		tableData, err := resource.ListTableItems(defaultLocale)
 		if err != nil {
 			panic(err)
 		}
