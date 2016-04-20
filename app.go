@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+var loggerMiddleware = &MiddlewareLogger{}
+
 type App struct {
 	data               map[string]interface{}
 	events             *Events
@@ -22,6 +24,7 @@ type App struct {
 	commands           map[*kingpin.CmdClause]func(app *App) error
 	logger             *logrus.Logger
 	dotPath            string
+	cron               *cron
 }
 
 type RequestMiddleware func(Request, func())
@@ -39,10 +42,11 @@ func NewApp(appName, version string) *App {
 	app.data["appName"] = appName
 	app.data["router"] = NewRouter()
 	app.data["version"] = version
+	app.cron = newCron()
 
 	app.AddMiddleware(MiddlewareCmd{})
 	app.AddMiddleware(MiddlewareConfig{})
-	app.AddMiddleware(MiddlewareLogger{})
+	app.AddMiddleware(loggerMiddleware)
 	app.AddMiddleware(MiddlewareRemoveTrailingSlash)
 	app.AddMiddleware(MiddlewareStatic)
 	app.AddMiddleware(MiddlewareParseRequest)
@@ -115,7 +119,7 @@ func (a *App) ListenAndServe(port int, developmentMode bool) error {
 	a.data["developmentMode"] = developmentMode
 
 	if developmentMode {
-		a.logger.Out = os.Stderr
+		loggerMiddleware.setStdOut()
 	}
 
 	server := &http.Server{

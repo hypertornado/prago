@@ -10,7 +10,10 @@ import (
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/hypertornado/prago/utils"
 	"html/template"
+	"io/ioutil"
+	"net/http"
 	"os"
+	"os/exec"
 	"reflect"
 	"strconv"
 )
@@ -212,6 +215,60 @@ func (a *Admin) Init(app *prago.App) error {
 
 	a.AdminController.Get(a.Prefix, func(request prago.Request) {
 		prago.Render(request, 200, "admin_layout")
+	})
+
+	a.AdminController.Get(a.Prefix+"/dump.sql", func(request prago.Request) {
+		config, err := request.App().Config()
+		if err != nil {
+			panic(err)
+		}
+
+		user := config["dbUser"]
+		dbName := config["dbName"]
+		password := config["dbPassword"]
+
+		cmd := exec.Command("mysqldump", "-u"+user, "-p"+password, dbName)
+
+		outPipe, err := cmd.StdoutPipe()
+		if err != nil {
+			panic(err)
+		}
+
+		request.Response().WriteHeader(200)
+
+		var finished chan bool
+
+		go func() {
+			out, err := ioutil.ReadAll(outPipe)
+			if err != nil {
+				panic(err)
+			}
+			println(string(out))
+			request.Response().Write(out)
+			println("XXX")
+
+			flusher, ok := request.Response().(http.Flusher)
+			if !ok {
+				panic(ok)
+			}
+
+			flusher.Flush()
+
+			finished <- true
+		}()
+
+		err = cmd.Start()
+		if err != nil {
+			panic(err)
+		}
+
+		err = cmd.Wait()
+		if err != nil {
+			panic(err)
+		}
+
+		<-finished
+		request.SetProcessed()
 	})
 
 	for i, _ := range a.Resources {
