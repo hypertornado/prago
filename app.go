@@ -57,6 +57,7 @@ func NewApp(appName, version string) *App {
 }
 
 func (a *App) Log() *logrus.Logger { return a.logger }
+func (a *App) DotPath() string     { return a.dotPath }
 
 func (a *App) AddCommand(cmd *kingpin.CmdClause, fn func(app *App) error) {
 	a.commands[cmd] = fn
