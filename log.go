@@ -45,9 +45,6 @@ func (m *MiddlewareLogger) Init(app *App) error {
 			oldFile.Close()
 		}
 	}, func(in time.Time) time.Time {
-		if in.IsZero() {
-			in = time.Now()
-		}
 		return in.Add(24 * time.Hour)
 	})
 	app.requestMiddlewares = append(app.requestMiddlewares, requestMiddlewareLogBefore)
