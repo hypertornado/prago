@@ -1,19 +1,21 @@
 package prago
 
 import (
+	"errors"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"io"
 	"os"
 	"os/exec"
+	"strconv"
 )
+
+var defaultPort = 8585
 
 type MiddlewareCmd struct{}
 
 func (m MiddlewareCmd) Init(app *App) error {
 	app.kingpin = kingpin.New("", "")
 	app.commands = map[*kingpin.CmdClause]func(app *App) error{}
-	
-
 
 	devCommand := app.kingpin.Command("dev", "Development")
 	app.commands[devCommand] = func(app *App) error {
@@ -21,10 +23,26 @@ func (m MiddlewareCmd) Init(app *App) error {
 	}
 
 	serverCommand := app.kingpin.Command("server", "Run server")
-	port := serverCommand.Flag("port", "server port").Default("8585").Short('p').Int()
+	portFlag := serverCommand.Flag("port", "server port").Short('p').Int()
 	developmentMode := serverCommand.Flag("development", "Is in development mode").Default("false").Short('d').Bool()
 	app.commands[serverCommand] = func(app *App) error {
-		return app.start(*port, *developmentMode)
+		var port = defaultPort
+		if portFlag != nil && *portFlag > 0 {
+			port = *portFlag
+		} else {
+			config, err := app.Config()
+			if err != nil {
+				return err
+			}
+			configPort, ok := config["port"]
+			if ok {
+				port, err = strconv.Atoi(configPort)
+				if err != nil {
+					return errors.New("Wrong format of 'port' entry in config file. Should be int.")
+				}
+			}
+		}
+		return app.start(port, *developmentMode)
 	}
 	return nil
 }
@@ -42,7 +60,7 @@ func (a *App) start(port int, developmentMode bool) error {
 
 func development(app *App) error {
 	go developmentCSS()
-	return app.start(8585, true)
+	return app.start(defaultPort, true)
 }
 
 func compileCss() error {

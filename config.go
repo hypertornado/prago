@@ -14,7 +14,7 @@ func (m MiddlewareConfig) Init(app *App) error {
 	path := os.Getenv("HOME") + "/." + app.data["appName"].(string) + "/config.json"
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return err
+		return errors.New(fmt.Sprintf("Error while opening file %s: %s", path, err))
 	}
 
 	kv := make(map[string]string)

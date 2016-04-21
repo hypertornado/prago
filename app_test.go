@@ -1,6 +1,5 @@
 package prago
 
-/*
 import (
 	"net/http"
 	"net/http/httptest"
@@ -8,8 +7,11 @@ import (
 )
 
 func TestApp(t *testing.T) {
-	app := NewApp("test app", "v1")
-	app.initMiddlewares()
+	app := NewApp("prago_test", "v1")
+	err := app.Init()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	app.Route(GET, "/h", app.MainController(), func(request Request) {
 		request.SetData("body", []byte("hello"))
@@ -40,4 +42,4 @@ func TestApp(t *testing.T) {
 		t.Error(w.Body.String())
 	}
 
-}*/
+}
