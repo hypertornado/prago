@@ -222,6 +222,8 @@ const TEMPLATES = `
 
     </form>
 
+    <a href="{{.admin_header_prefix}}/user/new">Create User</a>
+
     </div>
   </body>
 </html>
@@ -236,6 +238,42 @@ const TEMPLATES = `
 {{tmpl "admin_form" .}}
 <input type="submit" value="{{message .locale "admin_create"}}" class="btn">
 </form>
+
+{{end}}{{define "admin_new_user"}}
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{{.name}} - {{message .locale "admin_login_name"}}</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{.admin_header_prefix}}/admin.css">
+  </head>
+  <body class="admin">
+    <div class="admin_content">
+    <h2>{{.name}}CREATE - {{message .locale "admin_login_name"}}</h2>
+
+    <form class="form" method="POST">
+        <label class="form_label">
+          <span class="form_label_text">{{message .locale "admin_email"}}</span>
+          <input type="email" name="email" autofocus class="input form_input">
+        </label>
+
+        <label class="form_label">
+          <span class="form_label_text">{{message .locale "admin_password"}}</span>
+          <input type="password" name="password" class="input form_input">
+        </label>
+
+        <input type="submit" value="{{message .locale "admin_login_action"}}" class="btn">
+
+    </form>
+
+    <a href="{{.admin_header_prefix}}/user/login">Log In</a>
+
+    </div>
+  </body>
+</html>
 
 {{end}}`
 

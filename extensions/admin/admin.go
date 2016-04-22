@@ -12,6 +12,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"os/exec"
 	"reflect"
@@ -25,23 +26,28 @@ var (
 )
 
 type Admin struct {
-	Prefix          string
-	AppName         string
-	Resources       []*AdminResource
-	resourceMap     map[reflect.Type]*AdminResource
-	AdminController *prago.Controller
-	db              *sql.DB
-	authData        map[string]string
-	seedFn          func(*prago.App) error
+	Prefix                string
+	AppName               string
+	Resources             []*AdminResource
+	resourceMap           map[reflect.Type]*AdminResource
+	AdminController       *prago.Controller
+	AdminAccessController *prago.Controller
+	db                    *sql.DB
+	authData              map[string]string
+	seedFn                func(*prago.App) error
 }
 
 func NewAdmin(prefix, name string) *Admin {
-	return &Admin{
+	ret := &Admin{
 		Prefix:      prefix,
 		AppName:     name,
 		Resources:   []*AdminResource{},
 		resourceMap: make(map[reflect.Type]*AdminResource),
 	}
+
+	ret.CreateResources(User{})
+
+	return ret
 }
 
 func (a *Admin) Seed(fn func(*prago.App) error) {
@@ -60,10 +66,6 @@ func (a *Admin) CreateResources(items ...interface{}) error {
 		}
 	}
 	return nil
-}
-
-func (a *Admin) SetAuthData(authData map[string]string) {
-	a.authData = authData
 }
 
 func (a *Admin) UnsafeDropTables() error {
@@ -145,55 +147,9 @@ func (a *Admin) Init(app *prago.App) error {
 		panic(err)
 	}
 
-	adminAccessController := app.MainController().SubController()
+	a.AdminAccessController = app.MainController().SubController()
 
-	adminAccessController.AddBeforeAction(func(request prago.Request) {
-		request.SetData("locale", defaultLocale)
-	})
-
-	adminAccessController.Get(a.Prefix+"/login", func(request prago.Request) {
-		request.SetData("admin_header_prefix", a.Prefix)
-		request.SetData("name", a.AppName)
-		prago.Render(request, 200, "admin_login")
-	})
-
-	adminAccessController.Get(a.Prefix+"/logout", func(request prago.Request) {
-		session := request.GetData("session").(*sessions.Session)
-		delete(session.Values, "email")
-		err := session.Save(request.Request(), request.Response())
-		if err != nil {
-			panic(err)
-		}
-		prago.Redirect(request, a.Prefix+"/login")
-	})
-
-	adminAccessController.Get(a.Prefix+"/admin.css", func(request prago.Request) {
-		request.Response().Header().Add("Content-type", "text/css")
-		request.SetData("statusCode", 200)
-		request.SetData("body", []byte(CSS))
-	})
-
-	adminAccessController.Post(a.Prefix+"/login", func(request prago.Request) {
-		email := request.Params().Get("email")
-		password := request.Params().Get("password")
-
-		session := request.GetData("session").(*sessions.Session)
-		requestedPassword, validUser := a.authData[email]
-		if validUser && password == requestedPassword {
-			session.Values["email"] = email
-		} else {
-			prago.Redirect(request, a.Prefix+"/login")
-			return
-		}
-
-		err := session.Save(request.Request(), request.Response())
-		if err != nil {
-			panic(err)
-		}
-		prago.Redirect(request, a.Prefix)
-	})
-
-	a.AdminController = adminAccessController.SubController()
+	a.AdminController = a.AdminAccessController.SubController()
 
 	a.AdminController.AddAroundAction(func(request prago.Request, next func()) {
 		request.SetData("appName", request.App().Data()["appName"].(string))
@@ -203,20 +159,45 @@ func (a *Admin) Init(app *prago.App) error {
 
 		session := request.GetData("session").(*sessions.Session)
 
-		email, ok := session.Values["email"].(string)
-		_, userFound := a.authData[email]
+		userId, ok := session.Values["user_id"].(int64)
 
-		if !ok || !userFound {
-			prago.Redirect(request, a.Prefix+"/login")
+		if !ok {
+			prago.Redirect(request, a.Prefix+"/user/login")
 			return
 		}
 
-		request.SetData("admin_header_email", email)
+		var user User
+		err := a.Query().WhereIs("id", userId).Get(&user)
+		if err != nil {
+			prago.Redirect(request, a.Prefix+"/user/login")
+			return
+
+		}
+
+		request.SetData("admin_header_email", user.Email)
 		next()
 	})
 
 	a.AdminController.Get(a.Prefix, func(request prago.Request) {
 		prago.Render(request, 200, "admin_layout")
+	})
+
+	a.AdminController.Get(a.Prefix+"/chunked", func(request prago.Request) {
+
+		request.Response().WriteHeader(200)
+
+		chunked := httputil.NewChunkedWriter(request.Response())
+
+		for i := 0; i < 300; i++ {
+			chunked.Write([]byte("xr\n"))
+			time.Sleep(10 * time.Millisecond)
+			request.Response().Header().Set("Content-Length", "0")
+		}
+
+		chunked.Close()
+
+		request.SetProcessed()
+
 	})
 
 	a.AdminController.Get(a.Prefix+"/dump.sql", func(request prago.Request) {
@@ -245,9 +226,8 @@ func (a *Admin) Init(app *prago.App) error {
 			if err != nil {
 				panic(err)
 			}
-			println(string(out))
+			//println(string(out))
 			request.Response().Write(out)
-			println("XXX")
 
 			flusher, ok := request.Response().(http.Flusher)
 			if !ok {
@@ -255,6 +235,8 @@ func (a *Admin) Init(app *prago.App) error {
 			}
 
 			flusher.Flush()
+
+			println("flushed")
 
 			finished <- true
 		}()
@@ -269,7 +251,14 @@ func (a *Admin) Init(app *prago.App) error {
 			panic(err)
 		}
 
+		println("wait")
+
 		<-finished
+
+		request.Response().Header().Set("Content-Length", "0")
+
+		println("finished")
+
 		request.SetProcessed()
 	})
 
@@ -284,7 +273,7 @@ func (a *Admin) Init(app *prago.App) error {
 }
 
 func (a *Admin) bindAdminCommand(app *prago.App) error {
-	adminCommand := app.CreateCommand("admin", "Admin tasks")
+	adminCommand := app.CreateCommand("admin", "Admin tasks (migrate|seed|drop)")
 
 	adminSubcommand := adminCommand.Arg("admincommand", "").Required().String()
 

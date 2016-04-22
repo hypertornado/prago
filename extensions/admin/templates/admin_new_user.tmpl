@@ -1,4 +1,4 @@
-{{define "admin_login"}}
+{{define "admin_new_user"}}
 <!doctype html>
 <html>
   <head>
@@ -11,7 +11,7 @@
   </head>
   <body class="admin">
     <div class="admin_content">
-    <h2>{{.name}} - {{message .locale "admin_login_name"}}</h2>
+    <h2>{{.name}}CREATE - {{message .locale "admin_login_name"}}</h2>
 
     <form class="form" method="POST">
         <label class="form_label">
@@ -28,7 +28,7 @@
 
     </form>
 
-    <a href="{{.admin_header_prefix}}/user/new">Create User</a>
+    <a href="{{.admin_header_prefix}}/user/login">Log In</a>
 
     </div>
   </body>

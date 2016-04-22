@@ -26,6 +26,7 @@ type AdminResource struct {
 	admin              DBProvider
 	hasModel           bool
 	hasView            bool
+	table              string
 	queryFilter        func(*ResourceQuery) *ResourceQuery
 	adminStructCache   *AdminStructCache
 }
@@ -76,6 +77,15 @@ func NewResource(item interface{}) (*AdminResource, error) {
 		ret.hasView = ifaceHasView.AdminHasView()
 	}
 
+	ifaceHasTableName, ok := item.(interface {
+		AdminHasTableName() string
+	})
+	if ok {
+		ret.table = ifaceHasTableName.AdminHasTableName()
+	} else {
+		ret.table = ret.ID
+	}
+
 	ret.queryFilter = QueryFilterDefault
 
 	ifaceHasQueryFilter, ok := item.(interface {
@@ -93,7 +103,7 @@ func (ar *AdminResource) db() *sql.DB {
 }
 
 func (ar *AdminResource) tableName() string {
-	return ar.ID
+	return ar.table
 }
 
 func QueryFilterDefault(q *ResourceQuery) *ResourceQuery {
