@@ -117,12 +117,16 @@ func newAdminStructField(field reflect.StructField, order int) *adminStructField
 	return ret
 }
 
-func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item interface{}, lang string) ([]AdminFormItem, error) {
+func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item interface{}, lang string) (*Form, error) {
+	form := &Form{}
+
+	form.Method = "POST"
+	form.SubmitValue = "Send"
+
 	itemVal := reflect.ValueOf(item).Elem()
-	items := []AdminFormItem{}
 
 	for i, field := range cache.fieldArrays {
-		structItem := AdminFormItem{
+		structItem := FormItem{
 			Name:      field.name,
 			NameHuman: field.name,
 			Template:  "admin_item_input",
@@ -167,8 +171,8 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 		}
 
 		if structItem.Name != "ID" {
-			items = append(items, structItem)
+			form.Items = append(form.Items, structItem)
 		}
 	}
-	return items, nil
+	return form, nil
 }

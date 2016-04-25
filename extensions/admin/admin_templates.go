@@ -6,15 +6,19 @@ const TEMPLATES = `
 
 <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
 
-<form method="POST" action="{{.admin_item.ID}}" class="form" enctype="multipart/form-data">
-{{tmpl "admin_form" .}}
-<input type="submit" value="{{message .locale "admin_save"}}" class="btn">
-</form>
+{{tmpl "admin_form" .admin_form}}
 
 {{end}}{{define "admin_form"}}
-{{range $item := .admin_form_items}}
+
+<form method="{{.Method}}" action="{{.Action}}" class="form" enctype="multipart/form-data">
+
+{{range $item := .Items}}
   {{tmpl $item.Template $item}}
 {{end}}
+
+<input type="submit" value="{{.SubmitValue}}" class="btn">
+</form>
+
 {{end}}{{define "admin_home"}}
 
 <h2>{{.admin_header.appName}}</h2>
@@ -234,10 +238,7 @@ const TEMPLATES = `
 
 <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
 
-<form method="POST" action="../{{.admin_resource.ID}}" class="form" enctype="multipart/form-data">
-{{tmpl "admin_form" .}}
-<input type="submit" value="{{message .locale "admin_create"}}" class="btn">
-</form>
+{{tmpl "admin_form" .admin_form}}
 
 {{end}}{{define "admin_new_user"}}
 <!doctype html>

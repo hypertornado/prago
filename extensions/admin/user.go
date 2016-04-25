@@ -10,13 +10,17 @@ import (
 type User struct {
 	ID                int64
 	Name              string
-	Email             string
+	Email             string `prago-admin-unique:"true"`
 	Password          string
 	Locale            string
+	IsSysadmin        bool
+	IsAdmin           bool
 	IsActive          bool
-	LoggedInTime      time.Time
 	LoggedInIP        string
 	LoggedInUseragent string
+	LoggedInTime      time.Time
+	EmailConfirmedAt  time.Time
+	EmailRenewedAt    time.Time
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 }

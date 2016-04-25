@@ -4,9 +4,6 @@
 
 <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
 
-<form method="POST" action="{{.admin_item.ID}}" class="form" enctype="multipart/form-data">
-{{tmpl "admin_form" .}}
-<input type="submit" value="{{message .locale "admin_save"}}" class="btn">
-</form>
+{{tmpl "admin_form" .admin_form}}
 
 {{end}}

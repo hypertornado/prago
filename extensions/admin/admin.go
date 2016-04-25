@@ -386,12 +386,15 @@ func BindNew(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		formItems, err := resource.GetFormItems(item)
+		form, err := resource.GetForm(item)
 		if err != nil {
 			panic(err)
 		}
 
-		request.SetData("admin_form_items", formItems)
+		form.Action = "../" + resource.ID
+		form.SubmitValue = messages.Messages.Get(defaultLocale, "admin_create")
+
+		request.SetData("admin_form", form)
 		request.SetData("admin_yield", "admin_new")
 		prago.Render(request, 200, "admin_layout")
 	})
@@ -424,13 +427,16 @@ func BindDetail(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		formItems, err := resource.GetFormItems(item)
+		form, err := resource.GetForm(item)
 		if err != nil {
 			panic(err)
 		}
 
+		form.Action = request.Params().Get("id")
+		form.SubmitValue = messages.Messages.Get(defaultLocale, "admin_edit")
+
 		request.SetData("admin_item", item)
-		request.SetData("admin_form_items", formItems)
+		request.SetData("admin_form", form)
 		request.SetData("admin_yield", "admin_edit")
 		prago.Render(request, 200, "admin_layout")
 	})

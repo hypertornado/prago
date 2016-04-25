@@ -1,5 +1,12 @@
 {{define "admin_form"}}
-{{range $item := .admin_form_items}}
+
+<form method="{{.Method}}" action="{{.Action}}" class="form" enctype="multipart/form-data">
+
+{{range $item := .Items}}
   {{tmpl $item.Template $item}}
 {{end}}
+
+<input type="submit" value="{{.SubmitValue}}" class="btn">
+</form>
+
 {{end}}
