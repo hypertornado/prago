@@ -9,7 +9,7 @@ type ResourceStruct struct {
 	ID        int64
 	Name      string
 	Other     string
-	Showing   string `prago-admin-show:"yes"`
+	Showing   string `prago-admin-show:"true"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
