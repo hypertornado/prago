@@ -3,6 +3,7 @@ package admin
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/hypertornado/prago/utils"
 	"reflect"
@@ -46,6 +47,47 @@ type adminStructField struct {
 	scanner          sql.Scanner
 }
 
+func (a *adminStructField) fieldDescriptionMysql() string {
+	additional := ""
+	if a.lowercaseName == "id" {
+		additional = "NOT NULL AUTO_INCREMENT PRIMARY KEY"
+	}
+	return fmt.Sprintf("%s %s %s", a.lowercaseName, a.getMysqlDescription(), additional)
+}
+
+func (s *AdminStructCache) getStructDescription() (columns []*mysqlColumn, err error) {
+	for _, field := range s.fieldArrays {
+		if len(field.mysqlDescription) > 0 {
+			columns = append(columns, &mysqlColumn{
+				Field: field.lowercaseName,
+				Type:  field.mysqlDescription,
+			})
+		}
+	}
+	return
+}
+
+func (f *adminStructField) getMysqlDescription() string {
+	switch f.typ.Kind() {
+	case reflect.Struct:
+		dateType := reflect.TypeOf(time.Now())
+		if f.typ == dateType {
+			return "datetime"
+		}
+	case reflect.Bool:
+		return "bool"
+	case reflect.Int64:
+		return "bigint(20)"
+	case reflect.String:
+		if f.tags["prago-admin-type"] == "text" {
+			return "text"
+		} else {
+			return "varchar(255)"
+		}
+	}
+	return ""
+}
+
 func (a *adminStructField) humanName(lang string) (ret string) {
 	description := a.tags["prago-admin-description"]
 	if len(description) > 0 {
@@ -86,39 +128,6 @@ func newAdminStructField(field reflect.StructField, order int) *adminStructField
 	ret.mysqlDescription = ret.getMysqlDescription()
 
 	return ret
-}
-
-func (f *adminStructField) getMysqlDescription() string {
-	switch f.typ.Kind() {
-	case reflect.Struct:
-		dateType := reflect.TypeOf(time.Now())
-		if f.typ == dateType {
-			return "datetime"
-		}
-	case reflect.Bool:
-		return "bool"
-	case reflect.Int64:
-		return "bigint(20)"
-	case reflect.String:
-		if f.tags["prago-admin-type"] == "text" {
-			return "text"
-		} else {
-			return "varchar(255)"
-		}
-	}
-	return ""
-}
-
-func (s *AdminStructCache) getStructDescription() (columns []*mysqlColumn, err error) {
-	for _, field := range s.fieldArrays {
-		if len(field.mysqlDescription) > 0 {
-			columns = append(columns, &mysqlColumn{
-				Field: field.lowercaseName,
-				Type:  field.mysqlDescription,
-			})
-		}
-	}
-	return
 }
 
 func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item interface{}, lang string) ([]AdminFormItem, error) {

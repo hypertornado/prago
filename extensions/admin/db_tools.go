@@ -26,23 +26,11 @@ func dropTable(db *sql.DB, tableName string) error {
 	return err
 }
 
-func createTable(db *sql.DB, tableName string, adminStruct *AdminStructCache) error {
-	description, err := adminStruct.getStructDescription()
-	if err != nil {
-		return err
-	}
-
+func createTable(db *sql.DB, tableName string, adminStruct *AdminStructCache) (err error) {
 	items := []string{}
-
-	for _, v := range description {
-		additional := ""
-		if v.Field == "id" {
-			additional = "NOT NULL AUTO_INCREMENT PRIMARY KEY"
-		}
-		item := fmt.Sprintf("%s %s %s", v.Field, v.Type, additional)
-		items = append(items, item)
+	for _, v := range adminStruct.fieldArrays {
+		items = append(items, v.fieldDescriptionMysql())
 	}
-
 	q := fmt.Sprintf("CREATE TABLE %s (%s);", tableName, strings.Join(items, ", "))
 	_, err = db.Exec(q)
 	return err
