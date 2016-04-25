@@ -62,6 +62,33 @@ func TestResource(t *testing.T) {
 	}
 }
 
+func TestResourceUnique(t *testing.T) {
+	type ResourceStructUnique struct {
+		ID   int64
+		Name string `prago-admin-unique:"true"`
+	}
+
+	resource, _ := NewResource(ResourceStructUnique{})
+	resource.admin = dbProvider{}
+
+	resource.UnsafeDropTable()
+	resource.Migrate()
+
+	resource.Create(&ResourceStructUnique{Name: "A"})
+	resource.Create(&ResourceStructUnique{Name: "B"})
+	resource.Create(&ResourceStructUnique{Name: "A"})
+
+	count, err := resource.Query().Count()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if count != 2 {
+		t.Fatal(count)
+	}
+
+}
+
 func TestResourceTimestamps(t *testing.T) {
 	resource := prepareResource()
 

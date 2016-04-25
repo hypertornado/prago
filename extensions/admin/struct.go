@@ -69,6 +69,10 @@ func (a *adminStructField) fieldDescriptionMysql() string {
 	additional := ""
 	if a.lowercaseName == "id" {
 		additional = "NOT NULL AUTO_INCREMENT PRIMARY KEY"
+	} else {
+		if a.unique {
+			additional = "UNIQUE"
+		}
 	}
 	return fmt.Sprintf("%s %s %s", a.lowercaseName, fieldDescription, additional)
 }
