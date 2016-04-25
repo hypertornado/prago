@@ -37,55 +37,40 @@ func NewAdminStructCache(item interface{}) (ret *AdminStructCache, err error) {
 }
 
 type adminStructField struct {
-	name             string
-	lowercaseName    string
-	typ              reflect.Type
-	tags             map[string]string
-	order            int
-	mysqlDescription string
-	unique           bool
-	scanner          sql.Scanner
+	name          string
+	lowercaseName string
+	typ           reflect.Type
+	tags          map[string]string
+	order         int
+	unique        bool
+	scanner       sql.Scanner
 }
 
 func (a *adminStructField) fieldDescriptionMysql() string {
+	var fieldDescription string
+	switch a.typ.Kind() {
+	case reflect.Struct:
+		dateType := reflect.TypeOf(time.Now())
+		if a.typ == dateType {
+			fieldDescription = "datetime"
+		}
+	case reflect.Bool:
+		fieldDescription = "bool"
+	case reflect.Int64:
+		fieldDescription = "bigint(20)"
+	case reflect.String:
+		if a.tags["prago-admin-type"] == "text" {
+			fieldDescription = "text"
+		} else {
+			fieldDescription = "varchar(255)"
+		}
+	}
+
 	additional := ""
 	if a.lowercaseName == "id" {
 		additional = "NOT NULL AUTO_INCREMENT PRIMARY KEY"
 	}
-	return fmt.Sprintf("%s %s %s", a.lowercaseName, a.getMysqlDescription(), additional)
-}
-
-func (s *AdminStructCache) getStructDescription() (columns []*mysqlColumn, err error) {
-	for _, field := range s.fieldArrays {
-		if len(field.mysqlDescription) > 0 {
-			columns = append(columns, &mysqlColumn{
-				Field: field.lowercaseName,
-				Type:  field.mysqlDescription,
-			})
-		}
-	}
-	return
-}
-
-func (f *adminStructField) getMysqlDescription() string {
-	switch f.typ.Kind() {
-	case reflect.Struct:
-		dateType := reflect.TypeOf(time.Now())
-		if f.typ == dateType {
-			return "datetime"
-		}
-	case reflect.Bool:
-		return "bool"
-	case reflect.Int64:
-		return "bigint(20)"
-	case reflect.String:
-		if f.tags["prago-admin-type"] == "text" {
-			return "text"
-		} else {
-			return "varchar(255)"
-		}
-	}
-	return ""
+	return fmt.Sprintf("%s %s %s", a.lowercaseName, fieldDescription, additional)
 }
 
 func (a *adminStructField) humanName(lang string) (ret string) {
@@ -124,8 +109,6 @@ func newAdminStructField(field reflect.StructField, order int) *adminStructField
 	if ret.tags["prago-admin-unique"] == "true" {
 		ret.unique = true
 	}
-
-	ret.mysqlDescription = ret.getMysqlDescription()
 
 	return ret
 }
