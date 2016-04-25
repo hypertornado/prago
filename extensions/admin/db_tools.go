@@ -37,11 +37,6 @@ func createTable(db *sql.DB, tableName string, adminStruct *AdminStructCache) (e
 }
 
 func migrateTable(db *sql.DB, tableName string, adminStruct *AdminStructCache) error {
-	structDescription, err := adminStruct.getStructDescription()
-	if err != nil {
-		return err
-	}
-
 	tableDescription, err := getTableDescription(db, tableName)
 	if err != nil {
 		return err
@@ -52,27 +47,16 @@ func migrateTable(db *sql.DB, tableName string, adminStruct *AdminStructCache) e
 		tableDescriptionMap[item.Field] = true
 	}
 
-	var columns []*mysqlColumn
-
-	for _, item := range structDescription {
-		if !tableDescriptionMap[item.Field] {
-			columns = append(columns, item)
-		}
-	}
-
-	if len(columns) == 0 {
-		return nil
-	}
-
 	items := []string{}
 
-	for _, v := range columns {
-		additional := ""
-		if v.Field == "id" {
-			additional = "NOT NULL AUTO_INCREMENT PRIMARY KEY"
+	for _, v := range adminStruct.fieldArrays {
+		if !tableDescriptionMap[v.lowercaseName] {
+			items = append(items, fmt.Sprintf("ADD COLUMN %s", v.fieldDescriptionMysql()))
 		}
-		item := fmt.Sprintf("ADD COLUMN %s %s %s", v.Field, v.Type, additional)
-		items = append(items, item)
+	}
+
+	if len(items) == 0 {
+		return nil
 	}
 
 	q := fmt.Sprintf("ALTER TABLE %s %s;", tableName, strings.Join(items, ", "))
