@@ -42,6 +42,7 @@ type adminStructField struct {
 	tags             map[string]string
 	order            int
 	mysqlDescription string
+	unique           bool
 	scanner          sql.Scanner
 }
 
@@ -68,8 +69,18 @@ func newAdminStructField(field reflect.StructField, order int) *adminStructField
 		order:         order,
 	}
 
-	for _, v := range []string{"prago-admin-type", "prago-admin-description", "prago-admin-access", "prago-admin-show"} {
+	for _, v := range []string{
+		"prago-admin-type",
+		"prago-admin-description",
+		"prago-admin-access",
+		"prago-admin-show",
+		"prago-admin-unique",
+	} {
 		ret.tags[v] = field.Tag.Get(v)
+	}
+
+	if ret.tags["prago-admin-unique"] == "true" {
+		ret.unique = true
 	}
 
 	ret.mysqlDescription = ret.getMysqlDescription()
