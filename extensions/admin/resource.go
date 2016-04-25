@@ -179,36 +179,6 @@ func (resource *AdminResource) ListTableItems(lang string) (table ListTable, err
 	return
 }
 
-func (resource *AdminResource) ListTableItemsOLD() (table ListTable, err error) {
-	q := resource.Query()
-	q = resource.queryFilter(q)
-	//cache := resource.adminStructCache
-	rowItems, err := q.List()
-
-	for i := 0; i < resource.Typ.NumField(); i++ {
-		field := resource.Typ.Field(i)
-		tag := field.Tag.Get("prago-admin-show")
-		if len(tag) > 0 || field.Name == "ID" || field.Name == "Name" {
-			table.Header = append(table.Header, ListTableHeader{Name: field.Name, NameHuman: field.Name})
-		}
-	}
-
-	val := reflect.ValueOf(rowItems)
-	for i := 0; i < val.Len(); i++ {
-		row := ListTableRow{}
-		itemVal := val.Index(i).Elem()
-
-		for _, h := range table.Header {
-			structField, _ := resource.Typ.FieldByName(h.Name)
-			fieldVal := itemVal.FieldByName(h.Name)
-			row.Items = append(row.Items, ValueToCell(structField, fieldVal))
-		}
-		row.ID = itemVal.FieldByName("ID").Int()
-		table.Rows = append(table.Rows, row)
-	}
-	return
-}
-
 func ValueToCell(field reflect.StructField, val reflect.Value) (cell ItemCell) {
 	cell.TemplateName = "admin_string"
 	var item interface{}
