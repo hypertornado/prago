@@ -119,7 +119,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 				return true
 			}, "Email already registered."),
 		)
-		form.AddEmailInput("password", messages.Messages.Get(locale, "admin_password"),
+		form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_password"),
 			MinLengthValidator("Heslo musi mit alespon 8 znaku.", 8),
 		)
 		return form
@@ -166,6 +166,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 			prago.Redirect(request, a.Prefix)
 
 		} else {
+			form.ItemMap["password"].Value = ""
 			renderRegistration(request, form, locale)
 		}
 	})

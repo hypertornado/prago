@@ -13,11 +13,25 @@ const TEMPLATES = `
 <form method="{{.Method}}" action="{{.Action}}" class="form" enctype="multipart/form-data" novalidate>
 
 {{if .Errors}}
-<div class="form_error">{{.Errors}}</div>
+  <div class="form_errors">
+    {{range $error := .Errors}}
+      <div class="form_errors_error">{{$error}}</div>
+    {{end}}
+  </div>
 {{end}}
 
 {{range $item := .Items}}
-  {{tmpl $item.Template $item}}
+  <label class="form_label{{if .Errors}} form_label-errors{{end}}">
+    <span class="form_label_text">{{.NameHuman}}</span>
+    {{if .Errors}}
+      <div class="form_label_errors">
+        {{range $error := .Errors}}
+          <div class="form_label_errors_error">{{$error}}</div>
+        {{end}}
+      </div>
+    {{end}}
+    {{tmpl $item.Template $item}}
+  </label>
 {{end}}
 
 <input type="submit" value="{{.SubmitValue}}" class="btn">
@@ -38,99 +52,44 @@ const TEMPLATES = `
 </table>
 
 {{end}}{{define "admin_item_input"}}
-<label class="form_label">
-  {{if .Errors}}
-    <div class="form_label_error">{{.Errors}}</div>
-  {{end}}
-  <span class="form_label_text">{{.NameHuman}}</span>
   <input name="{{.Name}}" value="{{.Value}}" class="input form_input">
-</label>
 {{end}}
 
 {{define "admin_item_email"}}
-<label class="form_label">
-  {{if .Errors}}
-    <div class="form_label_error">{{.Errors}}</div>
-  {{end}}
-  <span class="form_label_text">{{.NameHuman}}</span>
   <input name="{{.Name}}" value="{{.Value}}" type="email" class="input form_input" spellcheck="false">
-</label>
 {{end}}
 
 {{define "admin_item_password"}}
-<label class="form_label">
-  {{if .Errors}}
-    <div class="form_label_error">{{.Errors}}</div>
-  {{end}}
-  <span class="form_label_text">{{.NameHuman}}</span>
   <input name="{{.Name}}" value="{{.Value}}" type="password" class="input form_input">
-</label>
 {{end}}
 
 {{define "admin_item_textarea"}}
-<label class="form_label">
-  {{if .Errors}}
-    <div class="form_label_error">{{.Errors}}</div>
-  {{end}}
-  <span class="form_label_text">{{.NameHuman}}</span>
   <textarea name="{{.Name}}" class="input form_input textarea">{{.Value}}</textarea>
-</label>
 {{end}}
 
 {{define "admin_item_checkbox"}}
-<label class="form_label">
-  {{if .Errors}}
-    <div class="form_label_error">{{.Errors}}</div>
-  {{end}}
   <input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}>
   <span class="form_label_text-inline">{{.NameHuman}}</span>
-</label>
 {{end}}
 
 {{define "admin_item_date"}}
-<label class="form_label">
-  {{if .Errors}}
-    <div class="form_label_error">{{.Errors}}</div>
-  {{end}}
-  <span class="form_label_text">{{.NameHuman}}</span>
   <input type="date" name="{{.Name}}" value="{{.Value}}" class="input form_input">
-</label>
 {{end}}
 
 {{define "admin_item_timestamp"}}
-<label class="form_label">
-  {{if .Errors}}
-    <div class="form_label_error">{{.Errors}}</div>
-  {{end}}
-  <span class="form_label_text">{{.NameHuman}}</span>
   <input placeholder="Example: 2001-12-06 20:30" name="{{.Name}}" value="{{.Value}}" class="input form_input">
-</label>
 {{end}}
 
 {{define "admin_item_readonly"}}
-<label class="form_label">
-  {{if .Errors}}
-    <div class="form_label_error">{{.Errors}}</div>
-  {{end}}
-  <span class="form_label_text">{{.NameHuman}}</span>
   <div>{{.Value}}</div>
-</label>
 {{end}}
 
 {{define "admin_item_image"}}
-
-<label class="form_label">
-  {{if .Errors}}
-    <div class="form_label_error">{{.Errors}}</div>
-  {{end}}
-  <span class="form_label_text">{{.NameHuman}}</span>
-
   {{if .Value}}
   <img src="/img/200x0/{{.Value}}.jpg" style="max-width: 100px; max-height: 100px; display: block; margin: 5px;">
   {{end}}
 
   <input type="file" name="{{.Name}}" accept=".jpeg,.jpg" class="input form_input">
-</label>
 {{end}}
 
 {{define "admin_item_hidden"}}

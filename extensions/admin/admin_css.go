@@ -115,6 +115,18 @@ a:hover {
   margin: 20px 0px;
 }
 
+.form_label-errors {
+  color: #dd2e4f;
+}
+
+.form_label-errors input, .form_label-errors textarea {
+  border-color: #dd2e4f !important;
+}
+
+.form_label_errors {
+  font-size: 0.8em;
+}
+
 .form_label_text-checkbox {
   padding: 0px 5px;
 }

@@ -3,11 +3,25 @@
 <form method="{{.Method}}" action="{{.Action}}" class="form" enctype="multipart/form-data" novalidate>
 
 {{if .Errors}}
-<div class="form_error">{{.Errors}}</div>
+  <div class="form_errors">
+    {{range $error := .Errors}}
+      <div class="form_errors_error">{{$error}}</div>
+    {{end}}
+  </div>
 {{end}}
 
 {{range $item := .Items}}
-  {{tmpl $item.Template $item}}
+  <label class="form_label{{if .Errors}} form_label-errors{{end}}">
+    <span class="form_label_text">{{.NameHuman}}</span>
+    {{if .Errors}}
+      <div class="form_label_errors">
+        {{range $error := .Errors}}
+          <div class="form_label_errors_error">{{$error}}</div>
+        {{end}}
+      </div>
+    {{end}}
+    {{tmpl $item.Template $item}}
+  </label>
 {{end}}
 
 <input type="submit" value="{{.SubmitValue}}" class="btn">
