@@ -111,33 +111,6 @@ func QueryFilterDefault(q *ResourceQuery) *ResourceQuery {
 	return q
 }
 
-type Form struct {
-	Method      string
-	Action      string
-	SubmitValue string
-	Items       []FormItem
-}
-
-type FormItem struct {
-	Name      string
-	NameHuman string
-	Template  string
-	Error     string
-	Value     interface{}
-}
-
-func (ar *AdminResource) GetForm(item interface{}) (*Form, error) {
-	init, ok := ar.item.(interface {
-		GetForm(*AdminResource, interface{}) (*Form, error)
-	})
-
-	if ok {
-		return init.GetForm(ar, item)
-	} else {
-		return ar.adminStructCache.GetFormItemsDefault(ar, item, defaultLocale)
-	}
-}
-
 type ItemCell struct {
 	TemplateName string
 	Value        interface{}

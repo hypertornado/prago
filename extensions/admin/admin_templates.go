@@ -10,7 +10,11 @@ const TEMPLATES = `
 
 {{end}}{{define "admin_form"}}
 
-<form method="{{.Method}}" action="{{.Action}}" class="form" enctype="multipart/form-data">
+<form method="{{.Method}}" action="{{.Action}}" class="form" enctype="multipart/form-data" novalidate>
+
+{{if .Errors}}
+<div class="form_error">{{.Errors}}</div>
+{{end}}
 
 {{range $item := .Items}}
   {{tmpl $item.Template $item}}
@@ -35,18 +39,38 @@ const TEMPLATES = `
 
 {{end}}{{define "admin_item_input"}}
 <label class="form_label">
-  {{if .Error}}
-    <div class="form_label_error">{{.Error}}</div>
+  {{if .Errors}}
+    <div class="form_label_error">{{.Errors}}</div>
   {{end}}
   <span class="form_label_text">{{.NameHuman}}</span>
   <input name="{{.Name}}" value="{{.Value}}" class="input form_input">
 </label>
 {{end}}
 
+{{define "admin_item_email"}}
+<label class="form_label">
+  {{if .Errors}}
+    <div class="form_label_error">{{.Errors}}</div>
+  {{end}}
+  <span class="form_label_text">{{.NameHuman}}</span>
+  <input name="{{.Name}}" value="{{.Value}}" type="email" class="input form_input" spellcheck="false">
+</label>
+{{end}}
+
+{{define "admin_item_password"}}
+<label class="form_label">
+  {{if .Errors}}
+    <div class="form_label_error">{{.Errors}}</div>
+  {{end}}
+  <span class="form_label_text">{{.NameHuman}}</span>
+  <input name="{{.Name}}" value="{{.Value}}" type="password" class="input form_input">
+</label>
+{{end}}
+
 {{define "admin_item_textarea"}}
 <label class="form_label">
-  {{if .Error}}
-    <div class="form_label_error">{{.Error}}</div>
+  {{if .Errors}}
+    <div class="form_label_error">{{.Errors}}</div>
   {{end}}
   <span class="form_label_text">{{.NameHuman}}</span>
   <textarea name="{{.Name}}" class="input form_input textarea">{{.Value}}</textarea>
@@ -55,8 +79,8 @@ const TEMPLATES = `
 
 {{define "admin_item_checkbox"}}
 <label class="form_label">
-  {{if .Error}}
-    <div class="form_label_error">{{.Error}}</div>
+  {{if .Errors}}
+    <div class="form_label_error">{{.Errors}}</div>
   {{end}}
   <input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}>
   <span class="form_label_text-inline">{{.NameHuman}}</span>
@@ -65,8 +89,8 @@ const TEMPLATES = `
 
 {{define "admin_item_date"}}
 <label class="form_label">
-  {{if .Error}}
-    <div class="form_label_error">{{.Error}}</div>
+  {{if .Errors}}
+    <div class="form_label_error">{{.Errors}}</div>
   {{end}}
   <span class="form_label_text">{{.NameHuman}}</span>
   <input type="date" name="{{.Name}}" value="{{.Value}}" class="input form_input">
@@ -75,8 +99,8 @@ const TEMPLATES = `
 
 {{define "admin_item_timestamp"}}
 <label class="form_label">
-  {{if .Error}}
-    <div class="form_label_error">{{.Error}}</div>
+  {{if .Errors}}
+    <div class="form_label_error">{{.Errors}}</div>
   {{end}}
   <span class="form_label_text">{{.NameHuman}}</span>
   <input placeholder="Example: 2001-12-06 20:30" name="{{.Name}}" value="{{.Value}}" class="input form_input">
@@ -85,8 +109,8 @@ const TEMPLATES = `
 
 {{define "admin_item_readonly"}}
 <label class="form_label">
-  {{if .Error}}
-    <div class="form_label_error">{{.Error}}</div>
+  {{if .Errors}}
+    <div class="form_label_error">{{.Errors}}</div>
   {{end}}
   <span class="form_label_text">{{.NameHuman}}</span>
   <div>{{.Value}}</div>
@@ -96,8 +120,8 @@ const TEMPLATES = `
 {{define "admin_item_image"}}
 
 <label class="form_label">
-  {{if .Error}}
-    <div class="form_label_error">{{.Error}}</div>
+  {{if .Errors}}
+    <div class="form_label_error">{{.Errors}}</div>
   {{end}}
   <span class="form_label_text">{{.NameHuman}}</span>
 
@@ -202,31 +226,20 @@ const TEMPLATES = `
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{.name}} - {{message .locale "admin_login_name"}}</title>
+    <title>{{.title}}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{.admin_header_prefix}}/admin.css">
   </head>
   <body class="admin">
     <div class="admin_content">
-    <h2>{{.name}} - {{message .locale "admin_login_name"}}</h2>
+    <h2>{{.title}}</h2>
 
-    <form class="form" method="POST">
-        <label class="form_label">
-          <span class="form_label_text">{{message .locale "admin_email"}}</span>
-          <input type="email" name="email" autofocus class="input form_input">
-        </label>
+    {{tmpl "admin_form" .admin_form}}
 
-        <label class="form_label">
-          <span class="form_label_text">{{message .locale "admin_password"}}</span>
-          <input type="password" name="password" class="input form_input">
-        </label>
-
-        <input type="submit" value="{{message .locale "admin_login_action"}}" class="btn">
-
-    </form>
-
-    <a href="{{.admin_header_prefix}}/user/new">Create User</a>
+    <div style="text-align: center">
+    {{Plain .bottom}}
+    </div>
 
     </div>
   </body>

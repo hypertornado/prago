@@ -1,6 +1,10 @@
 {{define "admin_form"}}
 
-<form method="{{.Method}}" action="{{.Action}}" class="form" enctype="multipart/form-data">
+<form method="{{.Method}}" action="{{.Action}}" class="form" enctype="multipart/form-data" novalidate>
+
+{{if .Errors}}
+<div class="form_error">{{.Errors}}</div>
+{{end}}
 
 {{range $item := .Items}}
   {{tmpl $item.Template $item}}

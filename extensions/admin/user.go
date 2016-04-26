@@ -2,8 +2,10 @@ package admin
 
 import (
 	"code.google.com/p/go.crypto/bcrypt"
+	"fmt"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/extensions/admin/messages"
 	"time"
 )
 
@@ -27,6 +29,25 @@ type User struct {
 
 func (User) AdminTableName() string { return "admin_user" }
 
+func LoginForm(locale string) *Form {
+	form := NewForm()
+	form.Method = "POST"
+	form.SubmitValue = messages.Messages.Get(locale, "admin_login_action")
+
+	form.AddItem(&FormItem{
+		Name:      "email",
+		Template:  "admin_item_email",
+		NameHuman: messages.Messages.Get(locale, "admin_email"),
+	})
+
+	form.AddItem(&FormItem{
+		Name:      "email",
+		Template:  "admin_item_password",
+		NameHuman: messages.Messages.Get(locale, "admin_password"),
+	})
+	return form
+}
+
 func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 
 	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
@@ -34,8 +55,18 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 	})
 
 	a.AdminAccessController.Get(a.GetURL(resource, "login"), func(request prago.Request) {
+		locale := defaultLocale
+
+		title := fmt.Sprintf("%s - %s", a.AppName, messages.Messages.Get(locale, "admin_login_name"))
+
+		request.SetData("bottom", fmt.Sprintf("<a href=\"new\">%s</a><br><a href=\"forgot\">%s</a>",
+			messages.Messages.Get(locale, "admin_register"),
+			messages.Messages.Get(locale, "admin_forgoten"),
+		))
 		request.SetData("admin_header_prefix", a.Prefix)
-		request.SetData("name", a.AppName)
+		request.SetData("admin_form", LoginForm(locale))
+		request.SetData("title", title)
+
 		prago.Render(request, 200, "admin_login")
 	})
 
@@ -67,27 +98,76 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		prago.Redirect(request, a.Prefix)
 	})
 
-	a.AdminAccessController.Get(a.GetURL(resource, "new"), func(request prago.Request) {
+	newUserForm := func(locale string) *Form {
+		form := NewForm()
+		form.Method = "POST"
+		form.SubmitValue = messages.Messages.Get(locale, "admin_register")
+		form.AddTextInput("name", messages.Messages.Get(locale, "Name"),
+			NonEmptyValidator("Musi mit text"),
+		)
+		form.AddEmailInput("email", messages.Messages.Get(locale, "admin_email"),
+			EmailValidator("Email not valid"),
+			NewValidator(func(field *FormItem) bool {
+				if len(field.Errors) != 0 {
+					return true
+				}
+				var user User
+				a.Query().WhereIs("email", field.Value).Get(&user)
+				if user.Email == field.Value {
+					return false
+				}
+				return true
+			}, "Email already registered."),
+		)
+		form.AddEmailInput("password", messages.Messages.Get(locale, "admin_password"),
+			MinLengthValidator("Heslo musi mit alespon 8 znaku.", 8),
+		)
+		return form
+	}
+
+	renderRegistration := func(request prago.Request, form *Form, locale string) {
+		title := fmt.Sprintf("%s - %s", a.AppName, messages.Messages.Get(locale, "admin_register"))
+		request.SetData("bottom", fmt.Sprintf("<a href=\"login\">%s</a>",
+			messages.Messages.Get(locale, "admin_login_action"),
+		))
 		request.SetData("admin_header_prefix", a.Prefix)
-		request.SetData("name", a.AppName)
-		prago.Render(request, 200, "admin_new_user")
+		request.SetData("admin_form", form)
+		request.SetData("title", title)
+
+		prago.Render(request, 200, "admin_login")
+	}
+
+	a.AdminAccessController.Get(a.GetURL(resource, "new"), func(request prago.Request) {
+		locale := defaultLocale
+		renderRegistration(request, newUserForm(locale), locale)
 	})
 
 	a.AdminAccessController.Post(a.GetURL(resource, "new"), func(request prago.Request) {
-		email := request.Params().Get("email")
-		password := request.Params().Get("password")
+		locale := defaultLocale
 
-		passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-		prago.Must(err)
+		form := newUserForm(locale)
 
-		user := &User{}
-		user.Email = email
-		user.Password = string(passwordHash)
+		form.BindData(request.Params())
+		form.Validate()
 
-		prago.Must(a.Create(user))
+		if form.Valid {
+			email := request.Params().Get("email")
+			password := request.Params().Get("password")
 
-		prago.Redirect(request, a.Prefix)
+			passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+			prago.Must(err)
 
+			user := &User{}
+			user.Email = email
+			user.Password = string(passwordHash)
+
+			prago.Must(a.Create(user))
+
+			prago.Redirect(request, a.Prefix)
+
+		} else {
+			renderRegistration(request, form, locale)
+		}
 	})
 
 	a.AdminAccessController.Get(a.Prefix+"/logout", func(request prago.Request) {

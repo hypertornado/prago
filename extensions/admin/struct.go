@@ -118,7 +118,7 @@ func newAdminStructField(field reflect.StructField, order int) *adminStructField
 }
 
 func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item interface{}, lang string) (*Form, error) {
-	form := &Form{}
+	form := NewForm()
 
 	form.Method = "POST"
 	form.SubmitValue = "Send"
@@ -126,13 +126,13 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 	itemVal := reflect.ValueOf(item).Elem()
 
 	for i, field := range cache.fieldArrays {
-		structItem := FormItem{
+		item := &FormItem{
 			Name:      field.name,
 			NameHuman: field.name,
 			Template:  "admin_item_input",
 		}
 
-		reflect.ValueOf(&structItem.Value).Elem().Set(
+		reflect.ValueOf(&item.Value).Elem().Set(
 			itemVal.Field(i),
 		)
 
@@ -140,38 +140,40 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 		case reflect.Struct:
 			if field.typ == reflect.TypeOf(time.Now()) {
 				var tm time.Time
-				reflect.ValueOf(&tm).Elem().Set(reflect.ValueOf(structItem.Value))
+				reflect.ValueOf(&tm).Elem().Set(reflect.ValueOf(item.Value))
 				newVal := reflect.New(reflect.TypeOf("")).Elem()
 
 				if field.tags["prago-admin-type"] == "timestamp" {
-					structItem.Template = "admin_item_timestamp"
+					item.Template = "admin_item_timestamp"
 					newVal.SetString(tm.Format("2006-01-02 15:04"))
 				} else {
-					structItem.Template = "admin_item_date"
+					item.Template = "admin_item_date"
 					newVal.SetString(tm.Format("2006-01-02"))
 				}
-				reflect.ValueOf(&structItem.Value).Elem().Set(newVal)
+				reflect.ValueOf(&item.Value).Elem().Set(newVal)
 			}
 		case reflect.Bool:
-			structItem.Template = "admin_item_checkbox"
+			item.Template = "admin_item_checkbox"
 		case reflect.String:
 			switch field.tags["prago-admin-type"] {
 			case "text":
-				structItem.Template = "admin_item_textarea"
+				item.Template = "admin_item_textarea"
 			case "image":
-				structItem.Template = "admin_item_image"
+				item.Template = "admin_item_image"
 			}
 		}
 
-		structItem.NameHuman = field.humanName(lang)
+		item.NameHuman = field.humanName(lang)
 
 		accessTag := field.tags["prago-admin-access"]
-		if accessTag == "-" || structItem.Name == "CreatedAt" || structItem.Name == "UpdatedAt" {
-			structItem.Template = "admin_item_readonly"
+		if accessTag == "-" || item.Name == "CreatedAt" || item.Name == "UpdatedAt" {
+			item.Template = "admin_item_readonly"
 		}
 
-		if structItem.Name != "ID" {
-			form.Items = append(form.Items, structItem)
+		form.AddItem(item)
+
+		if item.Name != "ID" {
+			form.Items = append(form.Items, item)
 		}
 	}
 	return form, nil
