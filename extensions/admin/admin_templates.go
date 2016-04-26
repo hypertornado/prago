@@ -21,17 +21,24 @@ const TEMPLATES = `
 {{end}}
 
 {{range $item := .Items}}
-  <label class="form_label{{if .Errors}} form_label-errors{{end}}">
-    <span class="form_label_text">{{.NameHuman}}</span>
-    {{if .Errors}}
-      <div class="form_label_errors">
-        {{range $error := .Errors}}
-          <div class="form_label_errors_error">{{$error}}</div>
-        {{end}}
-      </div>
-    {{end}}
-    {{tmpl $item.SubTemplate $item}}
-  </label>
+
+  {{if $item.Template}}
+    {{tmpl $item.Template $item}}
+  {{else}}
+    <label class="form_label{{if .Errors}} form_label-errors{{end}}">
+      {{if eq .HiddenName false}}
+        <span class="form_label_text">{{.NameHuman}}</span>
+      {{end}}
+      {{if .Errors}}
+        <div class="form_label_errors">
+          {{range $error := .Errors}}
+            <div class="form_label_errors_error">{{$error}}</div>
+          {{end}}
+        </div>
+      {{end}}
+      {{tmpl $item.SubTemplate $item}}
+    </label>
+  {{end}}
 {{end}}
 
 <input type="submit" value="{{.SubmitValue}}" class="btn">

@@ -122,6 +122,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_register_password"),
 			MinLengthValidator("", 8),
 		)
+		form.AddCheckboxInput("ok", "XX")
 		return form
 	}
 

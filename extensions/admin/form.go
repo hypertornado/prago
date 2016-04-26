@@ -24,7 +24,11 @@ type ItemValidator interface {
 type FormItem struct {
 	Name        string
 	NameHuman   string
+	Required    bool
+	Inactive    bool
+	HiddenName  bool
 	SubTemplate string
+	Template    string
 	Errors      []string
 	Value       string
 	form        *Form
@@ -79,6 +83,12 @@ func (f *Form) AddEmailInput(name, description string, validators ...ItemValidat
 
 func (f *Form) AddPasswordInput(name, description string, validators ...ItemValidator) *FormItem {
 	return f.addInput(name, description, "admin_item_password", validators)
+}
+
+func (f *Form) AddCheckboxInput(name, description string, validators ...ItemValidator) *FormItem {
+	input := f.addInput(name, description, "admin_item_checkbox", validators)
+	input.HiddenName = true
+	return input
 }
 
 func (f *FormItem) AddError(err string) {
