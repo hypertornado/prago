@@ -40,8 +40,6 @@ const TEMPLATES = `
     </label>
   {{end}}
 {{end}}
-
-<input type="submit" value="{{.SubmitValue}}" class="btn">
 </form>
 
 {{end}}{{define "admin_home"}}
@@ -97,6 +95,10 @@ const TEMPLATES = `
   {{end}}
 
   <input type="file" name="{{.Name}}" accept=".jpeg,.jpg" class="input form_input">
+{{end}}
+
+{{define "admin_item_submit"}}
+  <input type="submit" name="{{.Name}}" value="{{.NameHuman}}" class="btn">
 {{end}}
 
 {{define "admin_item_hidden"}}

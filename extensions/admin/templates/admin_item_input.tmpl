@@ -39,6 +39,10 @@
   <input type="file" name="{{.Name}}" accept=".jpeg,.jpg" class="input form_input">
 {{end}}
 
+{{define "admin_item_submit"}}
+  <input type="submit" name="{{.Name}}" value="{{.NameHuman}}" class="btn">
+{{end}}
+
 {{define "admin_item_hidden"}}
 {{end}}
 

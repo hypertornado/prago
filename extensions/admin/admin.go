@@ -392,7 +392,7 @@ func BindNew(a *Admin, resource *AdminResource) {
 		}
 
 		form.Action = "../" + resource.ID
-		form.SubmitValue = messages.Messages.Get(defaultLocale, "admin_create")
+		form.ItemMap["_submit"].NameHuman = messages.Messages.Get(defaultLocale, "admin_create")
 
 		request.SetData("admin_form", form)
 		request.SetData("admin_yield", "admin_new")
@@ -433,7 +433,8 @@ func BindDetail(a *Admin, resource *AdminResource) {
 		}
 
 		form.Action = request.Params().Get("id")
-		form.SubmitValue = messages.Messages.Get(defaultLocale, "admin_edit")
+
+		form.ItemMap["_submit"].NameHuman = messages.Messages.Get(defaultLocale, "admin_edit")
 
 		request.SetData("admin_item", item)
 		request.SetData("admin_form", form)

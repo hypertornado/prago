@@ -32,7 +32,6 @@ func (User) AdminTableName() string { return "admin_user" }
 func LoginForm(locale string) *Form {
 	form := NewForm()
 	form.Method = "POST"
-	form.SubmitValue = messages.Messages.Get(locale, "admin_login_action")
 
 	form.AddItem(&FormItem{
 		Name:        "email",
@@ -45,6 +44,9 @@ func LoginForm(locale string) *Form {
 		SubTemplate: "admin_item_password",
 		NameHuman:   messages.Messages.Get(locale, "admin_password"),
 	})
+
+	form.AddSubmit("send", messages.Messages.Get(locale, "admin_login_action"))
+
 	return form
 }
 
@@ -101,7 +103,6 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 	newUserForm := func(locale string) *Form {
 		form := NewForm()
 		form.Method = "POST"
-		form.SubmitValue = messages.Messages.Get(locale, "admin_register")
 		form.AddTextInput("name", messages.Messages.Get(locale, "Name"),
 			NonEmptyValidator(messages.Messages.Get(locale, "admin_user_name_not_empty")),
 		)
@@ -122,7 +123,8 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_register_password"),
 			MinLengthValidator("", 8),
 		)
-		form.AddCheckboxInput("ok", "XX")
+		form.AddCheckbox("ok", "XX")
+		form.AddSubmit("send", messages.Messages.Get(locale, "admin_register"))
 		return form
 	}
 

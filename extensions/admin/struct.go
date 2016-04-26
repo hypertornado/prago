@@ -121,8 +121,6 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 	form := NewForm()
 
 	form.Method = "POST"
-	form.SubmitValue = "Send"
-
 	itemVal := reflect.ValueOf(item).Elem()
 
 	for i, field := range cache.fieldArrays {
@@ -176,5 +174,7 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 			form.Items = append(form.Items, item)
 		}
 	}
+
+	form.AddSubmit("_submit", "Submit")
 	return form, nil
 }

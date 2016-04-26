@@ -8,13 +8,12 @@ import (
 //TODO: tests
 
 type Form struct {
-	Method      string
-	Action      string
-	SubmitValue string
-	Items       []*FormItem
-	ItemMap     map[string]*FormItem
-	Errors      []string
-	Valid       bool
+	Method  string
+	Action  string
+	Items   []*FormItem
+	ItemMap map[string]*FormItem
+	Errors  []string
+	Valid   bool
 }
 
 type ItemValidator interface {
@@ -85,7 +84,13 @@ func (f *Form) AddPasswordInput(name, description string, validators ...ItemVali
 	return f.addInput(name, description, "admin_item_password", validators)
 }
 
-func (f *Form) AddCheckboxInput(name, description string, validators ...ItemValidator) *FormItem {
+func (f *Form) AddSubmit(name, description string, validators ...ItemValidator) *FormItem {
+	input := f.addInput(name, description, "", validators)
+	input.Template = "admin_item_submit"
+	return input
+}
+
+func (f *Form) AddCheckbox(name, description string, validators ...ItemValidator) *FormItem {
 	input := f.addInput(name, description, "admin_item_checkbox", validators)
 	input.HiddenName = true
 	return input
