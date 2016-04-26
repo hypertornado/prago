@@ -127,9 +127,9 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 
 	for i, field := range cache.fieldArrays {
 		item := &FormItem{
-			Name:      field.name,
-			NameHuman: field.name,
-			Template:  "admin_item_input",
+			Name:        field.name,
+			NameHuman:   field.name,
+			SubTemplate: "admin_item_input",
 		}
 
 		reflect.ValueOf(&item.Value).Elem().Set(
@@ -144,22 +144,22 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 				newVal := reflect.New(reflect.TypeOf("")).Elem()
 
 				if field.tags["prago-admin-type"] == "timestamp" {
-					item.Template = "admin_item_timestamp"
+					item.SubTemplate = "admin_item_timestamp"
 					newVal.SetString(tm.Format("2006-01-02 15:04"))
 				} else {
-					item.Template = "admin_item_date"
+					item.SubTemplate = "admin_item_date"
 					newVal.SetString(tm.Format("2006-01-02"))
 				}
 				reflect.ValueOf(&item.Value).Elem().Set(newVal)
 			}
 		case reflect.Bool:
-			item.Template = "admin_item_checkbox"
+			item.SubTemplate = "admin_item_checkbox"
 		case reflect.String:
 			switch field.tags["prago-admin-type"] {
 			case "text":
-				item.Template = "admin_item_textarea"
+				item.SubTemplate = "admin_item_textarea"
 			case "image":
-				item.Template = "admin_item_image"
+				item.SubTemplate = "admin_item_image"
 			}
 		}
 
@@ -167,7 +167,7 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 
 		accessTag := field.tags["prago-admin-access"]
 		if accessTag == "-" || item.Name == "CreatedAt" || item.Name == "UpdatedAt" {
-			item.Template = "admin_item_readonly"
+			item.SubTemplate = "admin_item_readonly"
 		}
 
 		form.AddItem(item)

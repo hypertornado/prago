@@ -35,15 +35,15 @@ func LoginForm(locale string) *Form {
 	form.SubmitValue = messages.Messages.Get(locale, "admin_login_action")
 
 	form.AddItem(&FormItem{
-		Name:      "email",
-		Template:  "admin_item_email",
-		NameHuman: messages.Messages.Get(locale, "admin_email"),
+		Name:        "email",
+		SubTemplate: "admin_item_email",
+		NameHuman:   messages.Messages.Get(locale, "admin_email"),
 	})
 
 	form.AddItem(&FormItem{
-		Name:      "email",
-		Template:  "admin_item_password",
-		NameHuman: messages.Messages.Get(locale, "admin_password"),
+		Name:        "email",
+		SubTemplate: "admin_item_password",
+		NameHuman:   messages.Messages.Get(locale, "admin_password"),
 	})
 	return form
 }
@@ -103,10 +103,10 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		form.Method = "POST"
 		form.SubmitValue = messages.Messages.Get(locale, "admin_register")
 		form.AddTextInput("name", messages.Messages.Get(locale, "Name"),
-			NonEmptyValidator("Musi mit text"),
+			NonEmptyValidator(messages.Messages.Get(locale, "admin_user_name_not_empty")),
 		)
 		form.AddEmailInput("email", messages.Messages.Get(locale, "admin_email"),
-			EmailValidator("Email not valid"),
+			EmailValidator(messages.Messages.Get(locale, "admin_email_not_valid")),
 			NewValidator(func(field *FormItem) bool {
 				if len(field.Errors) != 0 {
 					return true
@@ -117,10 +117,10 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 					return false
 				}
 				return true
-			}, "Email already registered."),
+			}, messages.Messages.Get(locale, "admin_email_already_registered")),
 		)
-		form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_password"),
-			MinLengthValidator("Heslo musi mit alespon 8 znaku.", 8),
+		form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_register_password"),
+			MinLengthValidator("", 8),
 		)
 		return form
 	}

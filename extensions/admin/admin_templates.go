@@ -30,7 +30,7 @@ const TEMPLATES = `
         {{end}}
       </div>
     {{end}}
-    {{tmpl $item.Template $item}}
+    {{tmpl $item.SubTemplate $item}}
   </label>
 {{end}}
 

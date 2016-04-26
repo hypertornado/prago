@@ -22,13 +22,13 @@ type ItemValidator interface {
 }
 
 type FormItem struct {
-	Name       string
-	NameHuman  string
-	Template   string
-	Errors     []string
-	Value      string
-	form       *Form
-	validators []ItemValidator
+	Name        string
+	NameHuman   string
+	SubTemplate string
+	Errors      []string
+	Value       string
+	form        *Form
+	validators  []ItemValidator
 }
 
 func (f *Form) Validate() {
@@ -60,9 +60,9 @@ func (f *Form) BindData(params url.Values) {
 
 func (f *Form) addInput(name, description, template string, validators []ItemValidator) *FormItem {
 	item := &FormItem{
-		Name:      name,
-		Template:  template,
-		NameHuman: description,
+		Name:        name,
+		SubTemplate: template,
+		NameHuman:   description,
 	}
 	item.validators = validators
 	f.AddItem(item)
