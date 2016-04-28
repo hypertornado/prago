@@ -41,6 +41,12 @@ func (s *Sessions) around(request prago.Request, next func()) {
 		panic(err)
 	}
 
+	flashes := session.Flashes()
+	if len(flashes) > 0 {
+		request.SetData("flash_messages", flashes)
+		prago.Must(session.Save(request.Request(), request.Response()))
+	}
+
 	request.SetData("session", session)
 	next()
 }

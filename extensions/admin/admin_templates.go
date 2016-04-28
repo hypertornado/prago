@@ -8,6 +8,14 @@ const TEMPLATES = `
 
 {{tmpl "admin_form" .admin_form}}
 
+{{end}}{{define "admin_flash"}}
+{{if .flash_messages}}
+<div class="flash">
+{{range $message := .flash_messages}}
+  <div class="flash_message">{{$message}}</div>
+{{end}}
+</div>
+{{end}}
 {{end}}{{define "admin_form"}}
 
 <form method="{{.Method}}" action="{{.Action}}" class="form" enctype="multipart/form-data" novalidate>
@@ -120,6 +128,7 @@ const TEMPLATES = `
     <link rel="stylesheet" href="{{.admin_header.prefix}}/admin.css">
   </head>
   <body class="admin">
+    {{tmpl "admin_flash" .}}
     <div class="admin_header">
         <ul class="admin_header_list admin_header_list-right">
             <li>{{.admin_header_email}} | <a href="{{.admin_header.prefix}}/logout">{{message .locale "admin_log_out"}}</a></li>
@@ -200,6 +209,8 @@ const TEMPLATES = `
     <link rel="stylesheet" href="{{.admin_header_prefix}}/admin.css">
   </head>
   <body class="admin">
+    {{tmpl "admin_flash" .}}
+
     <div class="admin_content">
     <h2>{{.title}}</h2>
 

@@ -20,6 +20,8 @@ var cs = map[string]string{
 	"admin_email_already_registered": "Uživatel s tímto emailem je již zaregistrován.",
 	"admin_user_name_not_empty":      "Jméno uživatele nemůže být prázdné",
 	"admin_login_error":              "Špatný email, nebo heslo.",
+	"admin_login_ok":                 "Přihlášení proběhlo úspěšně",
+	"admin_logout_ok":                "Uživatel odhlášen",
 	"Name":                           "Jméno",
 	"Description":                    "Popis",
 	"Image":                          "Obrázek",

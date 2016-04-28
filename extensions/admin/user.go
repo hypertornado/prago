@@ -68,6 +68,8 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		email := request.Params().Get("email")
 		password := request.Params().Get("password")
 
+		session := request.GetData("session").(*sessions.Session)
+
 		locale := defaultLocale
 		form := loginForm(locale)
 		form.Items[0].Value = email
@@ -77,6 +79,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		err := a.Query().WhereIs("email", email).Get(&user)
 		if err != nil {
 			if err == ErrorNotFound {
+				prago.Must(session.Save(request.Request(), request.Response()))
 				renderLogin(request, form, locale)
 				return
 			} else {
@@ -91,8 +94,8 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 			return
 		}
 
-		session := request.GetData("session").(*sessions.Session)
 		session.Values["user_id"] = user.ID
+		session.AddFlash(messages.Messages.Get(locale, "admin_login_ok"))
 		prago.Must(session.Save(request.Request(), request.Response()))
 		prago.Redirect(request, a.Prefix)
 	})
@@ -120,7 +123,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_register_password"),
 			MinLengthValidator("", 8),
 		)
-		form.AddCheckbox("ok", "XX")
+		//form.AddCheckbox("ok", "XX")
 		form.AddSubmit("send", messages.Messages.Get(locale, "admin_register"))
 		return form
 	}
@@ -174,6 +177,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 	a.AdminAccessController.Get(a.Prefix+"/logout", func(request prago.Request) {
 		session := request.GetData("session").(*sessions.Session)
 		delete(session.Values, "user_id")
+		session.AddFlash(messages.Messages.Get(defaultLocale, "admin_logout_ok"))
 		err := session.Save(request.Request(), request.Response())
 		if err != nil {
 			panic(err)

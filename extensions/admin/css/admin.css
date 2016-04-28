@@ -184,8 +184,17 @@ a:hover {
 }
 
 .admin_header_item-active a {
-  //color: black;
-  //text-decoration: none;
-  //color: #009ee0;
   font-weight: bold;
+}
+
+.flash {
+  text-align: center;
+  padding: 5px;
+  background: #009ee0;
+}
+
+.flash_message {
+  color: white;
+  font-weight: bold;
+  display: inline-block;
 }

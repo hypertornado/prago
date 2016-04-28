@@ -16,4 +16,6 @@ var en = map[string]string{
 	"admin_forgoten":            "Forgot your password?",
 	"admin_register":            "Create account",
 	"admin_login_error":         "Wrong user email or password.",
+	"admin_login_ok":            "Log in was succesful",
+	"admin_logout_ok":           "User logged out",
 }
