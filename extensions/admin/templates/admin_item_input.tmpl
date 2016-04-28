@@ -1,30 +1,30 @@
 {{define "admin_item_input"}}
-  <input name="{{.Name}}" value="{{.Value}}" class="input form_input">
+  <input name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}>
 {{end}}
 
 {{define "admin_item_email"}}
-  <input name="{{.Name}}" value="{{.Value}}" type="email" class="input form_input" spellcheck="false">
+  <input name="{{.Name}}" value="{{.Value}}" type="email" class="input form_input" spellcheck="false"{{if .Focused}} autofocus{{end}}>
 {{end}}
 
 {{define "admin_item_password"}}
-  <input name="{{.Name}}" value="{{.Value}}" type="password" class="input form_input">
+  <input name="{{.Name}}" value="{{.Value}}" type="password" class="input form_input"{{if .Focused}} autofocus{{end}}>
 {{end}}
 
 {{define "admin_item_textarea"}}
-  <textarea name="{{.Name}}" class="input form_input textarea">{{.Value}}</textarea>
+  <textarea name="{{.Name}}" class="input form_input textarea"{{if .Focused}} autofocus{{end}}>{{.Value}}</textarea>
 {{end}}
 
 {{define "admin_item_checkbox"}}
-  <input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}>
+  <input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}>
   <span class="form_label_text-inline">{{.NameHuman}}</span>
 {{end}}
 
 {{define "admin_item_date"}}
-  <input type="date" name="{{.Name}}" value="{{.Value}}" class="input form_input">
+  <input type="date" name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}>
 {{end}}
 
 {{define "admin_item_timestamp"}}
-  <input placeholder="Example: 2001-12-06 20:30" name="{{.Name}}" value="{{.Value}}" class="input form_input">
+  <input placeholder="Example: 2001-12-06 20:30" name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}>
 {{end}}
 
 {{define "admin_item_readonly"}}
@@ -36,11 +36,11 @@
   <img src="/img/200x0/{{.Value}}.jpg" style="max-width: 100px; max-height: 100px; display: block; margin: 5px;">
   {{end}}
 
-  <input type="file" name="{{.Name}}" accept=".jpeg,.jpg" class="input form_input">
+  <input type="file" name="{{.Name}}" accept=".jpeg,.jpg" class="input form_input"{{if .Focused}} autofocus{{end}}>
 {{end}}
 
 {{define "admin_item_submit"}}
-  <input type="submit" name="{{.Name}}" value="{{.NameHuman}}" class="btn">
+  <input type="submit" name="{{.Name}}" value="{{.NameHuman}}" class="btn"{{if .Focused}} autofocus{{end}}>
 {{end}}
 
 {{define "admin_item_hidden"}}

@@ -24,6 +24,7 @@ type FormItem struct {
 	Name        string
 	NameHuman   string
 	Required    bool
+	Focused     bool
 	Inactive    bool
 	HiddenName  bool
 	SubTemplate string

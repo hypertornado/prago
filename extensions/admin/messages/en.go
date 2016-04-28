@@ -15,4 +15,5 @@ var en = map[string]string{
 	"admin_save":                "Save",
 	"admin_forgoten":            "Forgot your password?",
 	"admin_register":            "Create account",
+	"admin_login_error":         "Wrong user email or password.",
 }

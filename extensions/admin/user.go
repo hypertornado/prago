@@ -29,58 +29,56 @@ type User struct {
 
 func (User) AdminTableName() string { return "admin_user" }
 
-func LoginForm(locale string) *Form {
-	form := NewForm()
-	form.Method = "POST"
-
-	form.AddItem(&FormItem{
-		Name:        "email",
-		SubTemplate: "admin_item_email",
-		NameHuman:   messages.Messages.Get(locale, "admin_email"),
-	})
-
-	form.AddItem(&FormItem{
-		Name:        "email",
-		SubTemplate: "admin_item_password",
-		NameHuman:   messages.Messages.Get(locale, "admin_password"),
-	})
-
-	form.AddSubmit("send", messages.Messages.Get(locale, "admin_login_action"))
-
-	return form
-}
-
 func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 
 	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
 		request.SetData("locale", defaultLocale)
 	})
 
-	a.AdminAccessController.Get(a.GetURL(resource, "login"), func(request prago.Request) {
-		locale := defaultLocale
+	loginForm := func(locale string) *Form {
+		form := NewForm()
+		form.Method = "POST"
+		form.AddEmailInput("email", messages.Messages.Get(locale, "admin_email")).Focused = true
+		form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_password"))
+		form.AddSubmit("send", messages.Messages.Get(locale, "admin_login_action"))
+		return form
+	}
 
+	renderLogin := func(request prago.Request, form *Form, locale string) {
 		title := fmt.Sprintf("%s - %s", a.AppName, messages.Messages.Get(locale, "admin_login_name"))
-
 		request.SetData("bottom", fmt.Sprintf("<a href=\"new\">%s</a><br><a href=\"forgot\">%s</a>",
 			messages.Messages.Get(locale, "admin_register"),
 			messages.Messages.Get(locale, "admin_forgoten"),
 		))
 		request.SetData("admin_header_prefix", a.Prefix)
-		request.SetData("admin_form", LoginForm(locale))
+		request.SetData("admin_form", form)
 		request.SetData("title", title)
 
 		prago.Render(request, 200, "admin_login")
+	}
+
+	a.AdminAccessController.Get(a.GetURL(resource, "login"), func(request prago.Request) {
+		locale := defaultLocale
+		form := loginForm(locale)
+		renderLogin(request, form, locale)
+
 	})
 
 	a.AdminAccessController.Post(a.GetURL(resource, "login"), func(request prago.Request) {
 		email := request.Params().Get("email")
 		password := request.Params().Get("password")
 
+		locale := defaultLocale
+		form := loginForm(locale)
+		form.Items[0].Value = email
+		form.Errors = []string{messages.Messages.Get(locale, "admin_login_error")}
+
 		var user User
 		err := a.Query().WhereIs("email", email).Get(&user)
 		if err != nil {
 			if err == ErrorNotFound {
-				prago.Redirect(request, a.GetURL(resource, "login"))
+				renderLogin(request, form, locale)
+				return
 			} else {
 				panic(err)
 			}
@@ -89,13 +87,12 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 		if err != nil {
-			prago.Redirect(request, a.GetURL(resource, "login"))
+			renderLogin(request, form, locale)
 			return
 		}
 
 		session := request.GetData("session").(*sessions.Session)
 		session.Values["user_id"] = user.ID
-
 		prago.Must(session.Save(request.Request(), request.Response()))
 		prago.Redirect(request, a.Prefix)
 	})
