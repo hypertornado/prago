@@ -226,6 +226,8 @@ const TEMPLATES = `
   </body>
 </html>
 
+{{end}}{{define "admin_message"}}
+<h1>{{.message}}</h1>
 {{end}}{{define "admin_new"}}
 
 <h2>{{message .locale "admin_new"}} - {{.admin_resource.Name}}</h2>

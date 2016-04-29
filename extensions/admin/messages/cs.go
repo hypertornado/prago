@@ -22,6 +22,8 @@ var cs = map[string]string{
 	"admin_login_error":              "Špatný email, nebo heslo.",
 	"admin_login_ok":                 "Přihlášení proběhlo úspěšně",
 	"admin_logout_ok":                "Uživatel odhlášen",
+	"admin_403":                      "Přístup zamítnut",
+	"admin_404":                      "Stránka nenalezena",
 	"Name":                           "Jméno",
 	"Description":                    "Popis",
 	"Image":                          "Obrázek",

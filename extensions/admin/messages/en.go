@@ -18,4 +18,6 @@ var en = map[string]string{
 	"admin_login_error":         "Wrong user email or password.",
 	"admin_login_ok":            "Log in was succesful",
 	"admin_logout_ok":           "User logged out",
+	"admin_403":                 "Access denied",
+	"admin_404":                 "Page not found",
 }

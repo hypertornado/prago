@@ -230,7 +230,6 @@ func (a *Admin) Init(app *prago.App) error {
 			if err != nil {
 				panic(err)
 			}
-			//println(string(out))
 			request.Response().Write(out)
 
 			flusher, ok := request.Response().(http.Flusher)
@@ -273,6 +272,13 @@ func (a *Admin) Init(app *prago.App) error {
 			return err
 		}
 	}
+
+	a.AdminController.Get(a.Prefix+"/*", func(request prago.Request) {
+		request.SetData("message", messages.Messages.Get(defaultLocale, "admin_404"))
+		request.SetData("admin_yield", "admin_message")
+		prago.Render(request, 200, "admin_layout")
+	})
+
 	return nil
 }
 
