@@ -56,15 +56,73 @@ func (router *Router) Process(request Request) {
 }
 
 type Route struct {
-	items       []string
 	method      string
 	constraints []Constraint
 	action      *Action
+	pathMatcher pathMatcherFn
 }
 
-func NewRoute(m method, str string, action *Action, constraints []Constraint) *Route {
-	items := strings.Split(str, "/")
+type pathMatcherFn func(string) (map[string]string, bool)
 
+func matcherBasic(route string) pathMatcherFn {
+	routeItems := strings.Split(route, "/")
+
+	return func(path string) (m map[string]string, ok bool) {
+		items := strings.Split(path, "/")
+		m = make(map[string]string)
+
+		if len(items) != len(routeItems) {
+			return
+		}
+
+		for i := 0; i < len(items); i++ {
+			expect := routeItems[i]
+			if len(expect) > 1 && strings.HasPrefix(expect, ":") {
+				m[expect[1:]] = items[i]
+			} else {
+				if expect != items[i] {
+					return
+				}
+			}
+		}
+		return m, true
+	}
+}
+
+func matcherStar(route string) pathMatcherFn {
+	if !strings.HasPrefix(route, "*") {
+		return nil
+	}
+	routeName := route[1:]
+	return func(path string) (m map[string]string, ok bool) {
+		m = make(map[string]string)
+		if len(routeName) > 0 {
+			m[routeName] = path
+		}
+		return m, true
+	}
+}
+
+func matcherStarMiddle(route string) pathMatcherFn {
+	starIndex := strings.Index(route, "/*")
+	if starIndex <= 0 {
+		return nil
+	}
+	prefix := route[0 : starIndex+1]
+	routeName := route[starIndex+2:]
+	return func(path string) (m map[string]string, ok bool) {
+		if !strings.HasPrefix(path, prefix) {
+			return nil, false
+		}
+		m = make(map[string]string)
+		if len(routeName) > 0 {
+			m[routeName] = path[starIndex+1:]
+		}
+		return m, true
+	}
+}
+
+func NewRoute(m method, path string, action *Action, constraints []Constraint) (route *Route) {
 	methodName := map[method]string{
 		GET:    "GET",
 		HEAD:   "HEAD",
@@ -74,7 +132,19 @@ func NewRoute(m method, str string, action *Action, constraints []Constraint) *R
 		ANY:    "ANY",
 	}
 
-	return &Route{items, methodName[m], constraints, action}
+	route = &Route{
+		method:      methodName[m],
+		constraints: constraints,
+		action:      action,
+	}
+
+	for _, v := range []func(string) pathMatcherFn{matcherStar, matcherStarMiddle, matcherBasic} {
+		if route.pathMatcher != nil {
+			break
+		}
+		route.pathMatcher = v(path)
+	}
+	return
 }
 
 type Constraint func(map[string]string) bool
@@ -109,49 +179,33 @@ func ConstraintRegexp(item string, reg *regexp.Regexp) func(map[string]string) b
 	}
 }
 
-func (r *Route) match(method, path string) (ret map[string]string, ok bool) {
-	ok = false
-	if r.method != "ANY" && len(r.method) > 0 && r.method != method {
-		return
+func (r *Route) match(method, path string) (map[string]string, bool) {
+	if !methodMatch(r.method, method) {
+		return nil, false
 	}
 
 	if !strings.HasPrefix(path, "/") {
-		return
-	}
-	items := strings.Split(path, "/")
-	m := make(map[string]string)
-
-	if len(r.items) == 1 && strings.HasPrefix(r.items[0], "*") {
-		ok = true
-		if len(r.items[0]) > 1 {
-			m[r.items[0][1:]] = path
-			ret = m
-		}
-		return
+		return nil, false
 	}
 
-	if len(items) != len(r.items) {
-		return
-	}
-
-	for i := 0; i < len(items); i++ {
-		expect := r.items[i]
-		if len(expect) > 1 && strings.HasPrefix(expect, ":") {
-			m[expect[1:]] = items[i]
-		} else {
-			if expect != items[i] {
-				return
-			}
-		}
+	m, ok := r.pathMatcher(path)
+	if !ok {
+		return nil, false
 	}
 
 	for _, constraint := range r.constraints {
 		ok = constraint(m)
 		if ok != true {
-			return ret, false
+			return nil, false
 		}
 	}
 
-	ret = m
-	return ret, true
+	return m, true
+}
+
+func methodMatch(m1, m2 string) bool {
+	if m1 != "ANY" && len(m1) > 0 && m1 != m2 {
+		return false
+	}
+	return true
 }
