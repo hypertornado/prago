@@ -165,7 +165,7 @@ func ValueToCell(field reflect.StructField, val reflect.Value) (cell ItemCell) {
 	reflect.ValueOf(&item).Elem().Set(val)
 	cell.Value = item
 
-	if field.Tag.Get("prago-admin-type") == "image" {
+	if field.Tag.Get("prago-type") == "image" {
 		cell.TemplateName = "admin_image"
 	}
 

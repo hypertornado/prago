@@ -35,7 +35,7 @@ func (cache *AdminStructCache) BindData(item interface{}, params url.Values, for
 		switch field.typ.Kind() {
 		case reflect.Struct:
 			if field.typ == reflect.TypeOf(time.Now()) {
-				if field.tags["prago-admin-type"] == "timestamp" {
+				if field.tags["prago-type"] == "timestamp" {
 					tm, err := time.Parse("2006-01-02 15:04", urlValue)
 					if err == nil {
 						val.Set(reflect.ValueOf(tm))
@@ -48,7 +48,7 @@ func (cache *AdminStructCache) BindData(item interface{}, params url.Values, for
 				}
 			}
 		case reflect.String:
-			if field.tags["prago-admin-type"] == "image" {
+			if field.tags["prago-type"] == "image" {
 				imageId, err := NewImageFromMultipartForm(form, field.name)
 				if err == nil {
 					val.SetString(imageId)

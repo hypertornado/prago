@@ -40,7 +40,7 @@ func init() {
 type TestNode struct {
 	ID          int64
 	Name        string
-	Description string `prago-admin-type:"text"`
+	Description string `prago-type:"text"`
 	OK          bool
 	Count       int64
 	Changed     time.Time

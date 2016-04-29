@@ -59,7 +59,7 @@ func (a *adminStructField) fieldDescriptionMysql() string {
 	case reflect.Int64:
 		fieldDescription = "bigint(20)"
 	case reflect.String:
-		if a.tags["prago-admin-type"] == "text" {
+		if a.tags["prago-type"] == "text" {
 			fieldDescription = "text"
 		} else {
 			fieldDescription = "varchar(255)"
@@ -78,7 +78,7 @@ func (a *adminStructField) fieldDescriptionMysql() string {
 }
 
 func (a *adminStructField) humanName(lang string) (ret string) {
-	description := a.tags["prago-admin-description"]
+	description := a.tags["prago-description"]
 	if len(description) > 0 {
 		return description
 	} else {
@@ -101,10 +101,10 @@ func newAdminStructField(field reflect.StructField, order int) *adminStructField
 	}
 
 	for _, v := range []string{
-		"prago-admin-type",
-		"prago-admin-description",
-		"prago-admin-visible",
-		"prago-admin-editable",
+		"prago-type",
+		"prago-description",
+		"prago-visible",
+		"prago-editable",
 		"prago-preview",
 		"prago-unique",
 	} {
@@ -143,7 +143,7 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 		case reflect.Struct:
 			if field.typ == reflect.TypeOf(time.Now()) {
 				tm := ifaceVal.(time.Time)
-				if field.tags["prago-admin-type"] == "timestamp" {
+				if field.tags["prago-type"] == "timestamp" {
 					item.SubTemplate = "admin_item_timestamp"
 					item.Value = tm.Format("2006-01-02 15:04")
 				} else {
@@ -164,7 +164,7 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 			item.HiddenName = true
 		case reflect.String:
 			item.Value = ifaceVal.(string)
-			switch field.tags["prago-admin-type"] {
+			switch field.tags["prago-type"] {
 			case "text":
 				item.SubTemplate = "admin_item_textarea"
 			case "image":
@@ -182,7 +182,7 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 
 		item.NameHuman = field.humanName(lang)
 
-		visibleTag := field.tags["prago-admin-visible"]
+		visibleTag := field.tags["prago-visible"]
 		if visibleTag == "true" {
 			visible = true
 		}
@@ -190,7 +190,7 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 			visible = false
 		}
 
-		editableTag := field.tags["prago-admin-editable"]
+		editableTag := field.tags["prago-editable"]
 		if editableTag == "true" {
 			item.Readonly = false
 		}
