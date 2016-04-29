@@ -14,7 +14,7 @@
     {{tmpl "admin_flash" .}}
     <div class="admin_header">
         <ul class="admin_header_list admin_header_list-right">
-            <li>{{.admin_header_email}} | <a href="{{.admin_header.prefix}}/logout">{{message .locale "admin_log_out"}}</a></li>
+            <li>{{.currentuser.Email}} | <a href="{{.admin_header.prefix}}/logout?_csrfToken={{._csrfToken}}">{{message .locale "admin_log_out"}}</a></li>
         </ul>
 
         <h1><a href="{{.admin_header.prefix}}">{{.admin_header.appName}}</a></h1>

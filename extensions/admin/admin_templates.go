@@ -131,7 +131,7 @@ const TEMPLATES = `
     {{tmpl "admin_flash" .}}
     <div class="admin_header">
         <ul class="admin_header_list admin_header_list-right">
-            <li>{{.admin_header_email}} | <a href="{{.admin_header.prefix}}/logout">{{message .locale "admin_log_out"}}</a></li>
+            <li>{{.currentuser.Email}} | <a href="{{.admin_header.prefix}}/logout?_csrfToken={{._csrfToken}}">{{message .locale "admin_log_out"}}</a></li>
         </ul>
 
         <h1><a href="{{.admin_header.prefix}}">{{.admin_header.appName}}</a></h1>
@@ -166,8 +166,10 @@ const TEMPLATES = `
 
 <h2>{{.admin_resource.Name}}</h2>
 
-{{ $adminResource := .admin_resource }}
-{{ $locale := .locale}}
+{{$adminResource := .admin_resource }}
+{{$locale := .locale}}
+
+{{$csrfToken := ._csrfToken}}
 
 <a href="{{.admin_resource.ID}}/new" class="btn">{{message .locale "admin_new"}}</a>
 
@@ -189,7 +191,7 @@ const TEMPLATES = `
       <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">{{message $locale "admin_edit"}}</a> 
     </td>
     <td nowrap>
-      <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete" onsubmit="return window.confirm('{{message $locale "admin_delete_confirmation"}}');">
+      <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete?_csrfToken={{$csrfToken}}" onsubmit="return window.confirm('{{message $locale "admin_delete_confirmation"}}');">
         <input type="submit" value="{{message $locale "admin_delete"}}" class="btn">
       </form>
     </td>

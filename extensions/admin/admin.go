@@ -174,7 +174,11 @@ func (a *Admin) Init(app *prago.App) error {
 
 		}
 
-		request.SetData("admin_header_email", user.Email)
+		config, err := request.App().Config()
+		prago.Must(err)
+		randomness := config["random"]
+		request.SetData("_csrfToken", user.CSRFToken(randomness))
+		request.SetData("currentuser", user)
 		next()
 	})
 
@@ -393,6 +397,7 @@ func BindNew(a *Admin, resource *AdminResource) {
 
 		form.Action = "../" + resource.ID
 		form.ItemMap["_submit"].NameHuman = messages.Messages.Get(defaultLocale, "admin_create")
+		AddCSRFToken(form, request)
 
 		request.SetData("admin_form", form)
 		request.SetData("admin_yield", "admin_new")
@@ -402,6 +407,7 @@ func BindNew(a *Admin, resource *AdminResource) {
 
 func BindCreate(a *Admin, resource *AdminResource) {
 	resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
+		ValidateCSRF(request)
 		item, err := resource.NewItem()
 		if err != nil {
 			panic(err)
@@ -433,8 +439,8 @@ func BindDetail(a *Admin, resource *AdminResource) {
 		}
 
 		form.Action = request.Params().Get("id")
-
 		form.ItemMap["_submit"].NameHuman = messages.Messages.Get(defaultLocale, "admin_edit")
+		AddCSRFToken(form, request)
 
 		request.SetData("admin_item", item)
 		request.SetData("admin_form", form)
@@ -445,6 +451,7 @@ func BindDetail(a *Admin, resource *AdminResource) {
 
 func BindUpdate(a *Admin, resource *AdminResource) {
 	resource.ResourceController.Post(a.GetURL(resource, ":id"), func(request prago.Request) {
+		ValidateCSRF(request)
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		if err != nil {
 			panic(err)
@@ -471,6 +478,7 @@ func BindUpdate(a *Admin, resource *AdminResource) {
 
 func BindDelete(a *Admin, resource *AdminResource) {
 	resource.ResourceController.Post(a.GetURL(resource, ":id/delete"), func(request prago.Request) {
+		ValidateCSRF(request)
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		if err != nil {
 			panic(err)

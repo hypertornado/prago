@@ -2,10 +2,12 @@ package admin
 
 import (
 	"code.google.com/p/go.crypto/bcrypt"
+	"crypto/md5"
 	"fmt"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/extensions/admin/messages"
+	"io"
 	"time"
 )
 
@@ -25,6 +27,36 @@ type User struct {
 	EmailRenewedAt    time.Time
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
+}
+
+func (u *User) CSRFToken(randomness string) string {
+	if len(randomness) <= 0 {
+		panic("randomness too short")
+	}
+
+	h := md5.New()
+	io.WriteString(h, fmt.Sprintf("%d%s%s", u.ID, randomness, u.LoggedInTime))
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+func CSRFToken(request prago.Request) string {
+	fmt.Println(request.GetData("_csrfToken"))
+	return request.GetData("_csrfToken").(string)
+}
+
+func AddCSRFToken(form *Form, request prago.Request) {
+	form.AddHidden("_csrfToken", CSRFToken(request))
+}
+
+func ValidateCSRF(request prago.Request) {
+	token := CSRFToken(request)
+	if len(token) == 0 {
+		panic("token not set")
+	}
+	paramsToken := request.Params().Get("_csrfToken")
+	if paramsToken != token {
+		panic("Wrong CSRF token")
+	}
 }
 
 func (User) AdminTableName() string { return "admin_user" }
@@ -174,7 +206,14 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		}
 	})
 
-	a.AdminAccessController.Get(a.Prefix+"/logout", func(request prago.Request) {
+	a.AdminAccessController.Get(a.Prefix+"/admin.css", func(request prago.Request) {
+		request.Response().Header().Add("Content-type", "text/css")
+		request.SetData("statusCode", 200)
+		request.SetData("body", []byte(CSS))
+	})
+
+	a.AdminController.Get(a.Prefix+"/logout", func(request prago.Request) {
+		ValidateCSRF(request)
 		session := request.GetData("session").(*sessions.Session)
 		delete(session.Values, "user_id")
 		session.AddFlash(messages.Messages.Get(defaultLocale, "admin_logout_ok"))
@@ -183,12 +222,6 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 			panic(err)
 		}
 		prago.Redirect(request, a.GetURL(resource, "login"))
-	})
-
-	a.AdminAccessController.Get(a.Prefix+"/admin.css", func(request prago.Request) {
-		request.Response().Header().Add("Content-type", "text/css")
-		request.SetData("statusCode", 200)
-		request.SetData("body", []byte(CSS))
 	})
 
 	BindList(a, resource)
