@@ -137,7 +137,7 @@ func (resource *AdminResource) ListTableItems(lang string) (table ListTable, err
 	rowItems, err := q.List()
 
 	for _, v := range resource.adminStructCache.fieldArrays {
-		showTag := v.tags["prago-admin-show"]
+		showTag := v.tags["prago-preview"]
 		if showTag == "true" || v.name == "ID" || v.name == "Name" {
 			table.Header = append(table.Header, ListTableHeader{Name: v.name, NameHuman: v.humanName(lang)})
 		}

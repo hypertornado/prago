@@ -105,13 +105,13 @@ func newAdminStructField(field reflect.StructField, order int) *adminStructField
 		"prago-admin-description",
 		"prago-admin-visible",
 		"prago-admin-editable",
-		"prago-admin-show",
-		"prago-admin-unique",
+		"prago-preview",
+		"prago-unique",
 	} {
 		ret.tags[v] = field.Tag.Get(v)
 	}
 
-	if ret.tags["prago-admin-unique"] == "true" {
+	if ret.tags["prago-unique"] == "true" {
 		ret.unique = true
 	}
 
@@ -158,6 +158,9 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 			}
 		case reflect.Bool:
 			item.SubTemplate = "admin_item_checkbox"
+			if ifaceVal.(bool) {
+				item.Value = "on"
+			}
 			item.HiddenName = true
 		case reflect.String:
 			item.Value = ifaceVal.(string)

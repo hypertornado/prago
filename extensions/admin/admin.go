@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/golang-commonmark/markdown"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
@@ -90,6 +91,12 @@ func (a *Admin) Migrate() error {
 		}
 	}
 	return nil
+}
+
+func FlashMessage(request prago.Request, message string) {
+	session := request.GetData("session").(*sessions.Session)
+	session.AddFlash(message)
+	prago.Must(session.Save(request.Request(), request.Response()))
 }
 
 func (a *Admin) AddResource(resource *AdminResource) error {
@@ -423,6 +430,8 @@ func BindCreate(a *Admin, resource *AdminResource) {
 		if err != nil {
 			panic(err)
 		}
+
+		FlashMessage(request, messages.Messages.Get(defaultLocale, "admin_item_created"))
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 }
@@ -473,11 +482,14 @@ func BindUpdate(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
+		fmt.Println(item)
+
 		err = resource.Save(item)
 		if err != nil {
 			panic(err)
 		}
 
+		FlashMessage(request, messages.Messages.Get(defaultLocale, "admin_item_edited"))
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 }
@@ -495,6 +507,7 @@ func BindDelete(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
+		FlashMessage(request, messages.Messages.Get(defaultLocale, "admin_item_deleted"))
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 }

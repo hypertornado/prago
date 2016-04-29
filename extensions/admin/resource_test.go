@@ -9,7 +9,7 @@ type ResourceStruct struct {
 	ID        int64
 	Name      string
 	Other     string
-	Showing   string `prago-admin-show:"true"`
+	Showing   string `prago-preview:"true"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -65,7 +65,7 @@ func TestResource(t *testing.T) {
 func TestResourceUnique(t *testing.T) {
 	type ResourceStructUnique struct {
 		ID   int64
-		Name string `prago-admin-unique:"true"`
+		Name string `prago-unique:"true"`
 	}
 
 	resource, _ := NewResource(ResourceStructUnique{})

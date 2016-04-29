@@ -14,7 +14,7 @@ import (
 type User struct {
 	ID                int64
 	Name              string
-	Email             string `prago-admin-unique:"true"`
+	Email             string `prago-unique:"true" prago-preview:"true"`
 	Password          string
 	Locale            string
 	IsSysadmin        bool
@@ -40,7 +40,6 @@ func (u *User) CSRFToken(randomness string) string {
 }
 
 func CSRFToken(request prago.Request) string {
-	fmt.Println(request.GetData("_csrfToken"))
 	return request.GetData("_csrfToken").(string)
 }
 
@@ -224,7 +223,9 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		prago.Redirect(request, a.GetURL(resource, "login"))
 	})
 
-	BindList(a, resource)
+	//BindList(a, resource)
+
+	prago.Must(AdminInitResourceDefault(a, resource))
 
 	return nil
 }
