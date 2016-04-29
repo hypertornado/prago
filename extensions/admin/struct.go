@@ -103,7 +103,8 @@ func newAdminStructField(field reflect.StructField, order int) *adminStructField
 	for _, v := range []string{
 		"prago-admin-type",
 		"prago-admin-description",
-		"prago-admin-access",
+		"prago-admin-visible",
+		"prago-admin-editable",
 		"prago-admin-show",
 		"prago-admin-unique",
 	} {
@@ -124,54 +125,78 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 	itemVal := reflect.ValueOf(item).Elem()
 
 	for i, field := range cache.fieldArrays {
+
+		visible := true
+		var ifaceVal interface{}
+
 		item := &FormItem{
 			Name:        field.name,
 			NameHuman:   field.name,
 			SubTemplate: "admin_item_input",
 		}
 
-		reflect.ValueOf(&item.Value).Elem().Set(
+		reflect.ValueOf(&ifaceVal).Elem().Set(
 			itemVal.Field(i),
 		)
 
 		switch field.typ.Kind() {
 		case reflect.Struct:
 			if field.typ == reflect.TypeOf(time.Now()) {
-				var tm time.Time
-				reflect.ValueOf(&tm).Elem().Set(reflect.ValueOf(item.Value))
-				newVal := reflect.New(reflect.TypeOf("")).Elem()
-
+				tm := ifaceVal.(time.Time)
 				if field.tags["prago-admin-type"] == "timestamp" {
 					item.SubTemplate = "admin_item_timestamp"
-					newVal.SetString(tm.Format("2006-01-02 15:04"))
+					item.Value = tm.Format("2006-01-02 15:04")
 				} else {
 					item.SubTemplate = "admin_item_date"
-					newVal.SetString(tm.Format("2006-01-02"))
+					item.Value = tm.Format("2006-01-02")
 				}
-				reflect.ValueOf(&item.Value).Elem().Set(newVal)
+				if item.Name == "CreatedAt" || item.Name == "UpdatedAt" {
+					item.Readonly = true
+				}
+			} else {
+				visible = false
 			}
 		case reflect.Bool:
 			item.SubTemplate = "admin_item_checkbox"
+			item.HiddenName = true
 		case reflect.String:
+			item.Value = ifaceVal.(string)
 			switch field.tags["prago-admin-type"] {
 			case "text":
 				item.SubTemplate = "admin_item_textarea"
 			case "image":
 				item.SubTemplate = "admin_item_image"
 			}
+		case reflect.Int64:
+			item.Value = fmt.Sprintf("%d", ifaceVal.(int64))
+			if item.Name == "ID" {
+				visible = false
+			}
+		default:
+			visible = false
+			panic("Wrong type" + field.typ.Kind().String())
 		}
 
 		item.NameHuman = field.humanName(lang)
 
-		accessTag := field.tags["prago-admin-access"]
-		if accessTag == "-" || item.Name == "CreatedAt" || item.Name == "UpdatedAt" {
-			item.SubTemplate = "admin_item_readonly"
+		visibleTag := field.tags["prago-admin-visible"]
+		if visibleTag == "true" {
+			visible = true
+		}
+		if visibleTag == "false" {
+			visible = false
 		}
 
-		form.AddItem(item)
+		editableTag := field.tags["prago-admin-editable"]
+		if editableTag == "true" {
+			item.Readonly = false
+		}
+		if editableTag == "false" {
+			item.Readonly = true
+		}
 
-		if item.Name != "ID" {
-			form.Items = append(form.Items, item)
+		if visible {
+			form.AddItem(item)
 		}
 	}
 

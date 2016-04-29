@@ -25,7 +25,7 @@ type FormItem struct {
 	NameHuman   string
 	Required    bool
 	Focused     bool
-	Inactive    bool
+	Readonly    bool
 	HiddenName  bool
 	SubTemplate string
 	Template    string
@@ -94,6 +94,13 @@ func (f *Form) AddSubmit(name, description string, validators ...ItemValidator) 
 func (f *Form) AddCheckbox(name, description string, validators ...ItemValidator) *FormItem {
 	input := f.addInput(name, description, "admin_item_checkbox", validators)
 	input.HiddenName = true
+	return input
+}
+
+func (f *Form) AddHidden(name, value string, validators ...ItemValidator) *FormItem {
+	input := f.addInput(name, "", "", validators)
+	input.Template = "admin_item_hidden"
+	input.Value = value
 	return input
 }
 

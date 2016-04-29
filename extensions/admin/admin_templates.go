@@ -65,36 +65,32 @@ const TEMPLATES = `
 </table>
 
 {{end}}{{define "admin_item_input"}}
-  <input name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}>
+  <input name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_email"}}
-  <input name="{{.Name}}" value="{{.Value}}" type="email" class="input form_input" spellcheck="false"{{if .Focused}} autofocus{{end}}>
+  <input name="{{.Name}}" value="{{.Value}}" type="email" class="input form_input" spellcheck="false"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_password"}}
-  <input name="{{.Name}}" value="{{.Value}}" type="password" class="input form_input"{{if .Focused}} autofocus{{end}}>
+  <input name="{{.Name}}" value="{{.Value}}" type="password" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_textarea"}}
-  <textarea name="{{.Name}}" class="input form_input textarea"{{if .Focused}} autofocus{{end}}>{{.Value}}</textarea>
+  <textarea name="{{.Name}}" class="input form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
 {{end}}
 
 {{define "admin_item_checkbox"}}
-  <input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}>
+  <input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
   <span class="form_label_text-inline">{{.NameHuman}}</span>
 {{end}}
 
 {{define "admin_item_date"}}
-  <input type="date" name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}>
+  <input type="date" name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_timestamp"}}
-  <input placeholder="Example: 2001-12-06 20:30" name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}>
-{{end}}
-
-{{define "admin_item_readonly"}}
-  <div>{{.Value}}</div>
+  <input placeholder="Example: 2001-12-06 20:30" name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_image"}}
@@ -102,15 +98,19 @@ const TEMPLATES = `
   <img src="/img/200x0/{{.Value}}.jpg" style="max-width: 100px; max-height: 100px; display: block; margin: 5px;">
   {{end}}
 
+  {{if .Readonly}}
   <input type="file" name="{{.Name}}" accept=".jpeg,.jpg" class="input form_input"{{if .Focused}} autofocus{{end}}>
+  {{end}}
 {{end}}
 
 {{define "admin_item_submit"}}
-  <input type="submit" name="{{.Name}}" value="{{.NameHuman}}" class="btn"{{if .Focused}} autofocus{{end}}>
+  <input type="submit" name="{{.Name}}" value="{{.NameHuman}}" class="btn"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_hidden"}}
+<input type="hidden" name="{{.Name}}" value="{{.Value}}">
 {{end}}
+
 
 {{define "admin_string"}}
 {{.}}

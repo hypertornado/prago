@@ -160,6 +160,11 @@ a:hover {
   outline: none;
 }
 
+.input[readonly], .textarea[readonly] {
+  border: 1px solid #d5d5d5 !important;
+  background: #fafafa !important;
+}
+
 .input:focus {
   border-color: #009ee0;
 }
