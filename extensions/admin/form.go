@@ -5,10 +5,6 @@ import (
 	"net/url"
 )
 
-var (
-	csrfTokenName = "_csrfToken"
-)
-
 //TODO: tests
 
 type Form struct {
@@ -112,10 +108,6 @@ func (f *FormItem) AddError(err string) {
 	f.Errors = append(f.Errors, err)
 	f.form.Valid = false
 }
-
-/*func (f *Form) AddCSRFToken(user *User) *FormItem {
-	f.AddHidden(csrfTokenName, value)
-}*/
 
 func (ar *AdminResource) GetForm(item interface{}) (*Form, error) {
 	init, ok := ar.item.(interface {
