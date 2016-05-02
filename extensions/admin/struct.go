@@ -133,11 +133,26 @@ func DefaultVisibilityFilter(field *StructField) bool {
 	if visibleTag == "false" {
 		visible = false
 	}
-
 	return visible
 }
 
-func (cache *StructCache) GetFormItemsDefault(inValues interface{}, lang string, visible StructFieldFilter) (*Form, error) {
+func DefaultEditabilityFilter(field *StructField) bool {
+	editable := true
+	if field.Name == "CreatedAt" || field.Name == "UpdatedAt" {
+		editable = false
+	}
+
+	editableTag := field.Tags["prago-editable"]
+	if editableTag == "true" {
+		editable = true
+	}
+	if editableTag == "false" {
+		editable = false
+	}
+	return editable
+}
+
+func (cache *StructCache) GetFormItemsDefault(inValues interface{}, lang string, visible StructFieldFilter, editable StructFieldFilter) (*Form, error) {
 	form := NewForm()
 
 	form.Method = "POST"
@@ -156,6 +171,10 @@ func (cache *StructCache) GetFormItemsDefault(inValues interface{}, lang string,
 			SubTemplate: "admin_item_input",
 		}
 
+		if !editable(field) {
+			item.Readonly = true
+		}
+
 		reflect.ValueOf(&ifaceVal).Elem().Set(
 			itemVal.Field(i),
 		)
@@ -170,9 +189,6 @@ func (cache *StructCache) GetFormItemsDefault(inValues interface{}, lang string,
 				} else {
 					item.SubTemplate = "admin_item_date"
 					item.Value = tm.Format("2006-01-02")
-				}
-				if item.Name == "CreatedAt" || item.Name == "UpdatedAt" {
-					item.Readonly = true
 				}
 			}
 		case reflect.Bool:
@@ -196,14 +212,6 @@ func (cache *StructCache) GetFormItemsDefault(inValues interface{}, lang string,
 		}
 
 		item.NameHuman = field.humanName(lang)
-
-		editableTag := field.Tags["prago-editable"]
-		if editableTag == "true" {
-			item.Readonly = false
-		}
-		if editableTag == "false" {
-			item.Readonly = true
-		}
 
 		form.AddItem(item)
 	}
