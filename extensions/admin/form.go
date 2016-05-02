@@ -110,7 +110,7 @@ func (f *FormItem) AddError(err string) {
 }
 
 func (ar *AdminResource) GetForm(item interface{}) (*Form, error) {
-	return ar.StructCache.GetFormItemsDefault(item, defaultLocale)
+	return ar.StructCache.GetFormItemsDefault(item, defaultLocale, DefaultVisibilityFilter)
 }
 
 func NewValidator(fn func(field *FormItem) bool, message string) ItemValidator {

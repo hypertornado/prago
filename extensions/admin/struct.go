@@ -118,23 +118,36 @@ func newStructField(field reflect.StructField, order int) *StructField {
 	return ret
 }
 
-type StructFieldVisibler func(field *StructField) bool
+type StructFieldFilter func(field *StructField) bool
 
-func DefaultVisibler(field *StructField) bool {
+func DefaultVisibilityFilter(field *StructField) bool {
 	visible := true
-	//if field.name
+	if field.Name == "ID" {
+		visible = false
+	}
+
+	visibleTag := field.Tags["prago-visible"]
+	if visibleTag == "true" {
+		visible = true
+	}
+	if visibleTag == "false" {
+		visible = false
+	}
+
 	return visible
 }
 
-func (cache *StructCache) GetFormItemsDefault(inValues interface{}, lang string) (*Form, error) {
+func (cache *StructCache) GetFormItemsDefault(inValues interface{}, lang string, visible StructFieldFilter) (*Form, error) {
 	form := NewForm()
 
 	form.Method = "POST"
 	itemVal := reflect.ValueOf(inValues).Elem()
 
 	for i, field := range cache.fieldArrays {
+		if !visible(field) {
+			continue
+		}
 
-		visible := true
 		var ifaceVal interface{}
 
 		item := &FormItem{
@@ -161,8 +174,6 @@ func (cache *StructCache) GetFormItemsDefault(inValues interface{}, lang string)
 				if item.Name == "CreatedAt" || item.Name == "UpdatedAt" {
 					item.Readonly = true
 				}
-			} else {
-				visible = false
 			}
 		case reflect.Bool:
 			item.SubTemplate = "admin_item_checkbox"
@@ -180,23 +191,11 @@ func (cache *StructCache) GetFormItemsDefault(inValues interface{}, lang string)
 			}
 		case reflect.Int64:
 			item.Value = fmt.Sprintf("%d", ifaceVal.(int64))
-			if item.Name == "ID" {
-				visible = false
-			}
 		default:
-			visible = false
 			panic("Wrong type" + field.Typ.Kind().String())
 		}
 
 		item.NameHuman = field.humanName(lang)
-
-		visibleTag := field.Tags["prago-visible"]
-		if visibleTag == "true" {
-			visible = true
-		}
-		if visibleTag == "false" {
-			visible = false
-		}
 
 		editableTag := field.Tags["prago-editable"]
 		if editableTag == "true" {
@@ -206,9 +205,7 @@ func (cache *StructCache) GetFormItemsDefault(inValues interface{}, lang string)
 			item.Readonly = true
 		}
 
-		if visible {
-			form.AddItem(item)
-		}
+		form.AddItem(item)
 	}
 
 	return form, nil
