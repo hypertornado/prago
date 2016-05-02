@@ -108,18 +108,29 @@ func (a *Admin) AddResource(resource *AdminResource) error {
 	return nil
 }
 
-func (a *Admin) adminHeaderData() interface{} {
+func (a *Admin) GetUser(request prago.Request) User {
+	return request.GetData("currentuser").(User)
+}
+
+func (a *Admin) adminHeaderData(request prago.Request) interface{} {
 	ret := map[string]interface{}{
 		"appName": a.AppName,
 		"prefix":  a.Prefix,
 	}
+
+	user := a.GetUser(request)
+
 	menuitems := []map[string]interface{}{}
 	for _, resource := range a.Resources {
-		menuitems = append(menuitems, map[string]interface{}{
+		newItem := map[string]interface{}{
 			"name": resource.Name,
 			"id":   resource.ID,
 			"url":  a.Prefix + "/" + resource.ID,
-		})
+		}
+
+		if resource.Authenticate(user) {
+			menuitems = append(menuitems, newItem)
+		}
 	}
 	ret["menu"] = menuitems
 	return ret
@@ -159,8 +170,6 @@ func (a *Admin) Init(app *prago.App) error {
 	a.AdminController = a.AdminAccessController.SubController()
 
 	a.AdminController.AddAroundAction(func(request prago.Request, next func()) {
-		request.SetData("appName", request.App().Data()["appName"].(string))
-		request.SetData("admin_header", a.adminHeaderData())
 
 		request.SetData("admin_yield", "admin_home")
 
@@ -186,6 +195,10 @@ func (a *Admin) Init(app *prago.App) error {
 		randomness := config["random"]
 		request.SetData("_csrfToken", user.CSRFToken(randomness))
 		request.SetData("currentuser", user)
+
+		request.SetData("appName", request.App().Data()["appName"].(string))
+		request.SetData("admin_header", a.adminHeaderData(request))
+
 		next()
 	})
 
@@ -359,6 +372,17 @@ func (a *Admin) initResource(resource *AdminResource) error {
 
 		if !request.IsProcessed() && request.GetData("statusCode") == nil {
 			prago.Render(request, 200, "admin_layout")
+		}
+	})
+
+	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
+		user := request.GetData("currentuser").(User)
+		if !resource.Authenticate(user) {
+			request.SetData("message", messages.Messages.Get(defaultLocale, "admin_403"))
+			request.SetData("admin_yield", "admin_message")
+			prago.Render(request, 403, "admin_layout")
+		} else {
+			next()
 		}
 	})
 

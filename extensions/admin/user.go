@@ -29,6 +29,10 @@ type User struct {
 	UpdatedAt         time.Time
 }
 
+func (User) Authenticate(u User) bool {
+	return AuthenticateSysadmin(u)
+}
+
 func (u *User) CSRFToken(randomness string) string {
 	if len(randomness) <= 0 {
 		panic("randomness too short")

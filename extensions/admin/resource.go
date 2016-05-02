@@ -22,6 +22,7 @@ type AdminResource struct {
 	Name               string
 	Typ                reflect.Type
 	ResourceController *prago.Controller
+	Authenticate       Authenticatizer
 	item               interface{}
 	admin              DBProvider
 	hasModel           bool
@@ -43,6 +44,7 @@ func NewResource(item interface{}) (*AdminResource, error) {
 		Name:             name,
 		ID:               utils.PrettyUrl(name),
 		Typ:              typ,
+		Authenticate:     AuthenticateAdmin,
 		item:             item,
 		hasModel:         true,
 		hasView:          true,
@@ -75,6 +77,13 @@ func NewResource(item interface{}) (*AdminResource, error) {
 	})
 	if ok {
 		ret.hasView = ifaceHasView.AdminHasView()
+	}
+
+	ifaceHasAuthenticate, ok := item.(interface {
+		Authenticate(User) bool
+	})
+	if ok {
+		ret.Authenticate = ifaceHasAuthenticate.Authenticate
 	}
 
 	ifaceHasTableName, ok := item.(interface {
