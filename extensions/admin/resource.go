@@ -3,6 +3,7 @@ package admin
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/utils"
 	"reflect"
@@ -80,7 +81,7 @@ func NewResource(item interface{}) (*AdminResource, error) {
 	}
 
 	ifaceHasAuthenticate, ok := item.(interface {
-		Authenticate(User) bool
+		Authenticate(*User) bool
 	})
 	if ok {
 		ret.Authenticate = ifaceHasAuthenticate.Authenticate
@@ -122,7 +123,7 @@ func QueryFilterDefault(q *ResourceQuery) *ResourceQuery {
 
 type ItemCell struct {
 	TemplateName string
-	Value        interface{}
+	Value        string
 }
 
 type ListTableRow struct {
@@ -183,7 +184,17 @@ func ValueToCell(field reflect.StructField, val reflect.Value) (cell ItemCell) {
 	cell.TemplateName = "admin_string"
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
-	cell.Value = item
+
+	switch item.(type) {
+	case string:
+		cell.Value = item.(string)
+	case bool:
+		if item.(bool) {
+			cell.Value = "✅"
+		}
+	case int64:
+		cell.Value = fmt.Sprintf("%d", item.(int64))
+	}
 
 	if field.Tag.Get("prago-type") == "image" {
 		cell.TemplateName = "admin_image"
@@ -193,15 +204,6 @@ func ValueToCell(field reflect.StructField, val reflect.Value) (cell ItemCell) {
 		var tm time.Time
 		reflect.ValueOf(&tm).Elem().Set(val)
 		cell.Value = tm.Format("2006-01-02 15:04:05")
-	}
-
-	boolVal, isBool := item.(bool)
-	if isBool {
-		if boolVal {
-			cell.Value = "✅"
-		} else {
-			cell.Value = ""
-		}
 	}
 
 	return

@@ -203,6 +203,5 @@ func (cache *AdminStructCache) GetFormItemsDefault(ar *AdminResource, item inter
 		}
 	}
 
-	form.AddSubmit("_submit", "Submit")
 	return form, nil
 }

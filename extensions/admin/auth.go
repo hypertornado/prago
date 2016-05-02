@@ -1,8 +1,8 @@
 package admin
 
-type Authenticatizer func(User) bool
+type Authenticatizer func(*User) bool
 
-func AuthenticateAdmin(u User) bool {
+func AuthenticateAdmin(u *User) bool {
 	if u.IsSysadmin {
 		return true
 	}
@@ -12,7 +12,7 @@ func AuthenticateAdmin(u User) bool {
 	return false
 }
 
-func AuthenticateSysadmin(u User) bool {
+func AuthenticateSysadmin(u *User) bool {
 	if u.IsSysadmin {
 		return true
 	}

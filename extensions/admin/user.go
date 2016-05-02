@@ -29,7 +29,7 @@ type User struct {
 	UpdatedAt         time.Time
 }
 
-func (User) Authenticate(u User) bool {
+func (User) Authenticate(u *User) bool {
 	return AuthenticateSysadmin(u)
 }
 
@@ -225,6 +225,25 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 			panic(err)
 		}
 		prago.Redirect(request, a.GetURL(resource, "login"))
+	})
+
+	a.AdminController.Get(a.GetURL(resource, "settings"), func(request prago.Request) {
+		user := a.GetUser(request)
+
+		form, err := resource.GetForm(user)
+		if err != nil {
+			panic(err)
+		}
+
+		//form.Action = request.Params().Get("id")
+		form.ItemMap["_submit"].NameHuman = messages.Messages.Get(defaultLocale, "admin_edit")
+		AddCSRFToken(form, request)
+
+		request.SetData("admin_item", user)
+		request.SetData("admin_form", form)
+		request.SetData("admin_yield", "admin_edit")
+		prago.Render(request, 200, "admin_layout")
+
 	})
 
 	//BindList(a, resource)

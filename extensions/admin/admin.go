@@ -108,8 +108,8 @@ func (a *Admin) AddResource(resource *AdminResource) error {
 	return nil
 }
 
-func (a *Admin) GetUser(request prago.Request) User {
-	return request.GetData("currentuser").(User)
+func (a *Admin) GetUser(request prago.Request) *User {
+	return request.GetData("currentuser").(*User)
 }
 
 func (a *Admin) adminHeaderData(request prago.Request) interface{} {
@@ -194,7 +194,7 @@ func (a *Admin) Init(app *prago.App) error {
 		prago.Must(err)
 		randomness := config["random"]
 		request.SetData("_csrfToken", user.CSRFToken(randomness))
-		request.SetData("currentuser", user)
+		request.SetData("currentuser", &user)
 
 		request.SetData("appName", request.App().Data()["appName"].(string))
 		request.SetData("admin_header", a.adminHeaderData(request))
@@ -376,7 +376,7 @@ func (a *Admin) initResource(resource *AdminResource) error {
 	})
 
 	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
-		user := request.GetData("currentuser").(User)
+		user := request.GetData("currentuser").(*User)
 		if !resource.Authenticate(user) {
 			request.SetData("message", messages.Messages.Get(defaultLocale, "admin_403"))
 			request.SetData("admin_yield", "admin_message")
@@ -433,7 +433,7 @@ func BindNew(a *Admin, resource *AdminResource) {
 		}
 
 		form.Action = "../" + resource.ID
-		form.ItemMap["_submit"].NameHuman = messages.Messages.Get(defaultLocale, "admin_create")
+		form.AddSubmit("_submit", messages.Messages.Get(defaultLocale, "admin_create"))
 		AddCSRFToken(form, request)
 
 		request.SetData("admin_form", form)
@@ -478,7 +478,7 @@ func BindDetail(a *Admin, resource *AdminResource) {
 		}
 
 		form.Action = request.Params().Get("id")
-		form.ItemMap["_submit"].NameHuman = messages.Messages.Get(defaultLocale, "admin_edit")
+		form.AddSubmit("_submit", messages.Messages.Get(defaultLocale, "admin_edit"))
 		AddCSRFToken(form, request)
 
 		request.SetData("admin_item", item)
