@@ -449,7 +449,7 @@ func BindCreate(a *Admin, resource *AdminResource) {
 		if err != nil {
 			panic(err)
 		}
-		resource.adminStructCache.BindData(item, request.Params(), request.Request().MultipartForm, BindDataFilterDefault)
+		resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, BindDataFilterDefault)
 		err = resource.Create(item)
 		if err != nil {
 			panic(err)
@@ -501,7 +501,7 @@ func BindUpdate(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		err = resource.adminStructCache.BindData(item, request.Params(), request.Request().MultipartForm, BindDataFilterDefault)
+		err = resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, BindDataFilterDefault)
 		if err != nil {
 			panic(err)
 		}

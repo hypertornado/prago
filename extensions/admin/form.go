@@ -110,15 +110,7 @@ func (f *FormItem) AddError(err string) {
 }
 
 func (ar *AdminResource) GetForm(item interface{}) (*Form, error) {
-	init, ok := ar.item.(interface {
-		GetForm(*AdminResource, interface{}) (*Form, error)
-	})
-
-	if ok {
-		return init.GetForm(ar, item)
-	} else {
-		return ar.adminStructCache.GetFormItemsDefault(ar, item, defaultLocale)
-	}
+	return ar.StructCache.GetFormItemsDefault(item, defaultLocale)
 }
 
 func NewValidator(fn func(field *FormItem) bool, message string) ItemValidator {

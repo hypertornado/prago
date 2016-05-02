@@ -92,13 +92,13 @@ func (aq *AdminQuery) Get(item interface{}) error {
 
 	var newItem interface{}
 	if slice {
-		err = listItems(resource.adminStructCache, aq.admin.db, resource.tableName(), &newItem, aq.query)
+		err = listItems(resource.StructCache, aq.admin.db, resource.tableName(), &newItem, aq.query)
 		if err != nil {
 			return err
 		}
 		reflect.ValueOf(item).Elem().Set(reflect.ValueOf(newItem))
 	} else {
-		err = getFirstItem(resource.adminStructCache, aq.admin.db, resource.tableName(), &newItem, aq.query)
+		err = getFirstItem(resource.StructCache, aq.admin.db, resource.tableName(), &newItem, aq.query)
 		if err != nil {
 			return err
 		}

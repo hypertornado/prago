@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (s *AdminStructCache) getStructScanners(value reflect.Value) (names []string, scanners []interface{}, err error) {
+func (s *StructCache) getStructScanners(value reflect.Value) (names []string, scanners []interface{}, err error) {
 	if value.Type() != s.typ {
 		err = errors.New("Types dont match")
 		return
@@ -16,20 +16,20 @@ func (s *AdminStructCache) getStructScanners(value reflect.Value) (names []strin
 
 	for _, v := range s.fieldArrays {
 		use := true
-		switch v.typ.Kind() {
+		switch v.Typ.Kind() {
 		case reflect.Int64:
 		case reflect.Bool:
 		case reflect.String:
 		case reflect.Struct:
-			if v.typ != reflect.TypeOf(time.Now()) {
+			if v.Typ != reflect.TypeOf(time.Now()) {
 				use = false
 			}
 		default:
 			use = false
 		}
 		if use {
-			names = append(names, v.lowercaseName)
-			scanners = append(scanners, &scanner{value.Field(v.order)})
+			names = append(names, v.LowercaseName)
+			scanners = append(scanners, &scanner{value.Field(v.Order)})
 		}
 	}
 	return

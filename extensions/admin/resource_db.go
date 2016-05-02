@@ -13,7 +13,7 @@ type ResourceQuery struct {
 	query       *listQuery
 	db          *sql.DB
 	tableName   string
-	structCache *AdminStructCache
+	structCache *StructCache
 	err         error
 }
 
@@ -113,7 +113,7 @@ func (ar *AdminResource) Query() *ResourceQuery {
 		query:       &listQuery{},
 		db:          ar.db(),
 		tableName:   ar.tableName(),
-		structCache: ar.adminStructCache,
+		structCache: ar.StructCache,
 		err:         err,
 	}
 }

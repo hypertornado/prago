@@ -30,11 +30,11 @@ type AdminResource struct {
 	hasView            bool
 	table              string
 	queryFilter        func(*ResourceQuery) *ResourceQuery
-	adminStructCache   *AdminStructCache
+	StructCache        *StructCache
 }
 
 func NewResource(item interface{}) (*AdminResource, error) {
-	structCache, err := NewAdminStructCache(item)
+	structCache, err := NewStructCache(item)
 	if err != nil {
 		return nil, err
 	}
@@ -42,14 +42,14 @@ func NewResource(item interface{}) (*AdminResource, error) {
 	typ := reflect.TypeOf(item)
 	name := typ.Name()
 	ret := &AdminResource{
-		Name:             name,
-		ID:               utils.PrettyUrl(name),
-		Typ:              typ,
-		Authenticate:     AuthenticateAdmin,
-		item:             item,
-		hasModel:         true,
-		hasView:          true,
-		adminStructCache: structCache,
+		Name:         name,
+		ID:           utils.PrettyUrl(name),
+		Typ:          typ,
+		Authenticate: AuthenticateAdmin,
+		item:         item,
+		hasModel:     true,
+		hasView:      true,
+		StructCache:  structCache,
 	}
 
 	ifaceName, ok := item.(interface {
@@ -146,12 +146,12 @@ func (resource *AdminResource) ListTableItems(lang string) (table ListTable, err
 	q = resource.queryFilter(q)
 	rowItems, err := q.List()
 
-	for _, v := range resource.adminStructCache.fieldArrays {
+	for _, v := range resource.StructCache.fieldArrays {
 		show := false
-		if v.name == "ID" || v.name == "Name" {
+		if v.Name == "ID" || v.Name == "Name" {
 			show = true
 		}
-		showTag := v.tags["prago-preview"]
+		showTag := v.Tags["prago-preview"]
 		if showTag == "true" {
 			show = true
 		}
@@ -160,7 +160,7 @@ func (resource *AdminResource) ListTableItems(lang string) (table ListTable, err
 		}
 
 		if show {
-			table.Header = append(table.Header, ListTableHeader{Name: v.name, NameHuman: v.humanName(lang)})
+			table.Header = append(table.Header, ListTableHeader{Name: v.Name, NameHuman: v.humanName(lang)})
 		}
 	}
 
@@ -216,8 +216,8 @@ func (ar *AdminResource) UnsafeDropTable() error {
 func (ar *AdminResource) Migrate() error {
 	_, err := getTableDescription(ar.db(), ar.tableName())
 	if err == nil {
-		return migrateTable(ar.db(), ar.tableName(), ar.adminStructCache)
+		return migrateTable(ar.db(), ar.tableName(), ar.StructCache)
 	} else {
-		return createTable(ar.db(), ar.tableName(), ar.adminStructCache)
+		return createTable(ar.db(), ar.tableName(), ar.StructCache)
 	}
 }

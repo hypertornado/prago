@@ -13,7 +13,7 @@ import (
 
 var (
 	db          *sql.DB
-	structCache *AdminStructCache
+	structCache *StructCache
 )
 
 type dbProvider struct{}
@@ -24,7 +24,7 @@ func (dbProvider) DB() *sql.DB {
 
 func init() {
 	var err error
-	structCache, err = NewAdminStructCache(TestNode{})
+	structCache, err = NewStructCache(TestNode{})
 	if err != nil {
 		panic(err)
 	}
@@ -470,8 +470,8 @@ func TestMigrateTable(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
 
-	structCache1, _ := NewAdminStructCache(N1{})
-	structCache2, _ := NewAdminStructCache(N2{})
+	structCache1, _ := NewStructCache(N1{})
+	structCache2, _ := NewStructCache(N2{})
 
 	createTable(db, tableName, structCache1)
 

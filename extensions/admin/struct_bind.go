@@ -8,14 +8,14 @@ import (
 	"time"
 )
 
-func BindDataFilterDefault(field *adminStructField) bool {
-	if field.name == "ID" {
+func BindDataFilterDefault(field *StructField) bool {
+	if field.Name == "ID" {
 		return false
 	}
 	return true
 }
 
-func (cache *AdminStructCache) BindData(item interface{}, params url.Values, form *multipart.Form, bindDataFilter func(*adminStructField) bool) error {
+func (cache *StructCache) BindData(item interface{}, params url.Values, form *multipart.Form, bindDataFilter func(*StructField) bool) error {
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
 		if value.Kind() == reflect.Struct {
@@ -29,13 +29,13 @@ func (cache *AdminStructCache) BindData(item interface{}, params url.Values, for
 			continue
 		}
 
-		val := value.FieldByName(field.name)
+		val := value.FieldByName(field.Name)
 
-		urlValue := params.Get(field.name)
-		switch field.typ.Kind() {
+		urlValue := params.Get(field.Name)
+		switch field.Typ.Kind() {
 		case reflect.Struct:
-			if field.typ == reflect.TypeOf(time.Now()) {
-				if field.tags["prago-type"] == "timestamp" {
+			if field.Typ == reflect.TypeOf(time.Now()) {
+				if field.Tags["prago-type"] == "timestamp" {
 					tm, err := time.Parse("2006-01-02 15:04", urlValue)
 					if err == nil {
 						val.Set(reflect.ValueOf(tm))
@@ -48,8 +48,8 @@ func (cache *AdminStructCache) BindData(item interface{}, params url.Values, for
 				}
 			}
 		case reflect.String:
-			if field.tags["prago-type"] == "image" {
-				imageId, err := NewImageFromMultipartForm(form, field.name)
+			if field.Tags["prago-type"] == "image" {
+				imageId, err := NewImageFromMultipartForm(form, field.Name)
 				if err == nil {
 					val.SetString(imageId)
 				}

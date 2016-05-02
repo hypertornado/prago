@@ -26,7 +26,7 @@ func dropTable(db *sql.DB, tableName string) error {
 	return err
 }
 
-func createTable(db *sql.DB, tableName string, adminStruct *AdminStructCache) (err error) {
+func createTable(db *sql.DB, tableName string, adminStruct *StructCache) (err error) {
 	items := []string{}
 	for _, v := range adminStruct.fieldArrays {
 		items = append(items, v.fieldDescriptionMysql())
@@ -36,7 +36,7 @@ func createTable(db *sql.DB, tableName string, adminStruct *AdminStructCache) (e
 	return err
 }
 
-func migrateTable(db *sql.DB, tableName string, adminStruct *AdminStructCache) error {
+func migrateTable(db *sql.DB, tableName string, adminStruct *StructCache) error {
 	tableDescription, err := getTableDescription(db, tableName)
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func migrateTable(db *sql.DB, tableName string, adminStruct *AdminStructCache) e
 	items := []string{}
 
 	for _, v := range adminStruct.fieldArrays {
-		if !tableDescriptionMap[v.lowercaseName] {
+		if !tableDescriptionMap[v.LowercaseName] {
 			items = append(items, fmt.Sprintf("ADD COLUMN %s", v.fieldDescriptionMysql()))
 		}
 	}
@@ -241,7 +241,7 @@ func countItems(db *sql.DB, tableName string, query *listQuery) (int64, error) {
 	return i, err
 }
 
-func getFirstItem(structCache *AdminStructCache, db *sql.DB, tableName string, item interface{}, query *listQuery) error {
+func getFirstItem(structCache *StructCache, db *sql.DB, tableName string, item interface{}, query *listQuery) error {
 	var items interface{}
 	err := listItems(structCache, db, tableName, &items, query)
 	if err != nil {
@@ -258,7 +258,7 @@ func getFirstItem(structCache *AdminStructCache, db *sql.DB, tableName string, i
 	}
 }
 
-func listItems(structCache *AdminStructCache, db *sql.DB, tableName string, items interface{}, query *listQuery) error {
+func listItems(structCache *StructCache, db *sql.DB, tableName string, items interface{}, query *listQuery) error {
 	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(structCache.typ))).Elem()
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
