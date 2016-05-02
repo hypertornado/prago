@@ -12,13 +12,13 @@ import (
 )
 
 type User struct {
-	ID                int64
-	Name              string
+	ID                int64  `prago-preview:"false"`
+	Name              string `prago-preview:"false"`
 	Email             string `prago-unique:"true" prago-preview:"true"`
 	Password          string
 	Locale            string
-	IsSysadmin        bool
-	IsAdmin           bool
+	IsSysadmin        bool `prago-preview:"true" prago-description:"Sysadmin"`
+	IsAdmin           bool `prago-preview:"true" prago-description:"Admin"`
 	IsActive          bool
 	LoggedInIP        string
 	LoggedInUseragent string

@@ -146,8 +146,19 @@ func (resource *AdminResource) ListTableItems(lang string) (table ListTable, err
 	rowItems, err := q.List()
 
 	for _, v := range resource.adminStructCache.fieldArrays {
+		show := false
+		if v.name == "ID" || v.name == "Name" {
+			show = true
+		}
 		showTag := v.tags["prago-preview"]
-		if showTag == "true" || v.name == "ID" || v.name == "Name" {
+		if showTag == "true" {
+			show = true
+		}
+		if showTag == "false" {
+			show = false
+		}
+
+		if show {
 			table.Header = append(table.Header, ListTableHeader{Name: v.name, NameHuman: v.humanName(lang)})
 		}
 	}
@@ -183,6 +194,16 @@ func ValueToCell(field reflect.StructField, val reflect.Value) (cell ItemCell) {
 		reflect.ValueOf(&tm).Elem().Set(val)
 		cell.Value = tm.Format("2006-01-02 15:04:05")
 	}
+
+	boolVal, isBool := item.(bool)
+	if isBool {
+		if boolVal {
+			cell.Value = "✅"
+		} else {
+			cell.Value = ""
+		}
+	}
+
 	return
 }
 
