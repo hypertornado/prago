@@ -272,5 +272,11 @@ const TEMPLATES = `
   </body>
 </html>
 
+{{end}}{{define "admin_settings"}}
+
+<h2>{{message .locale "admin_settings"}}</h2>
+
+{{tmpl "admin_form" .admin_form}}
+
 {{end}}`
 

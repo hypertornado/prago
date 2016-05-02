@@ -230,23 +230,20 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 	a.AdminController.Get(a.GetURL(resource, "settings"), func(request prago.Request) {
 		user := a.GetUser(request)
 
-		form, err := resource.GetForm(user)
+		form, err := resource.StructCache.GetFormItemsDefault(user, defaultLocale, WhiteListFilter("Name", "Email", "Locale"), WhiteListFilter("Name", "Locale"))
 		if err != nil {
 			panic(err)
 		}
 
-		//form.Action = request.Params().Get("id")
-		form.ItemMap["_submit"].NameHuman = messages.Messages.Get(defaultLocale, "admin_edit")
+		form.AddSubmit("_submit", messages.Messages.Get(defaultLocale, "admin_edit"))
 		AddCSRFToken(form, request)
 
 		request.SetData("admin_item", user)
 		request.SetData("admin_form", form)
-		request.SetData("admin_yield", "admin_edit")
+		request.SetData("admin_yield", "admin_settings")
 		prago.Render(request, 200, "admin_layout")
 
 	})
-
-	//BindList(a, resource)
 
 	prago.Must(AdminInitResourceDefault(a, resource))
 

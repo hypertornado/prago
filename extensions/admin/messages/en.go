@@ -23,4 +23,6 @@ var en = map[string]string{
 	"admin_item_created":        "Item created",
 	"admin_item_edited":         "Item edited",
 	"admin_item_deleted":        "Item deleted",
+
+	"admin_settings": "Settings",
 }

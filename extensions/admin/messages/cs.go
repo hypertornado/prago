@@ -33,4 +33,6 @@ var cs = map[string]string{
 	"Hidden":                         "Skrytá položka",
 	"CreatedAt":                      "Vytvořeno",
 	"UpdatedAt":                      "Aktualizováno",
+
+	"admin_settings": "Nastavení",
 }

@@ -152,6 +152,16 @@ func DefaultEditabilityFilter(field *StructField) bool {
 	return editable
 }
 
+func WhiteListFilter(in ...string) StructFieldFilter {
+	m := make(map[string]bool)
+	for _, v := range in {
+		m[v] = true
+	}
+	return func(field *StructField) bool {
+		return m[field.Name]
+	}
+}
+
 func (cache *StructCache) GetFormItemsDefault(inValues interface{}, lang string, visible StructFieldFilter, editable StructFieldFilter) (*Form, error) {
 	form := NewForm()
 
