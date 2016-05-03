@@ -169,9 +169,6 @@ func (a *Admin) Init(app *prago.App) error {
 	a.AdminController = a.AdminAccessController.SubController()
 
 	a.AdminController.AddAroundAction(func(request prago.Request, next func()) {
-
-		Locale(request)
-
 		request.SetData("admin_yield", "admin_home")
 
 		session := request.GetData("session").(*sessions.Session)
@@ -196,6 +193,7 @@ func (a *Admin) Init(app *prago.App) error {
 		randomness := config["random"]
 		request.SetData("_csrfToken", user.CSRFToken(randomness))
 		request.SetData("currentuser", &user)
+		request.SetData("locale", GetLocale(request))
 
 		request.SetData("appName", request.App().Data()["appName"].(string))
 		request.SetData("admin_header", a.adminHeaderData(request))
@@ -295,7 +293,7 @@ func (a *Admin) Init(app *prago.App) error {
 	}
 
 	a.AdminController.Get(a.Prefix+"/*", func(request prago.Request) {
-		request.SetData("message", messages.Messages.Get(defaultLocale, "admin_404"))
+		request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_404"))
 		request.SetData("admin_yield", "admin_message")
 		prago.Render(request, 200, "admin_layout")
 	})
@@ -379,7 +377,7 @@ func (a *Admin) initResource(resource *AdminResource) error {
 	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
 		user := request.GetData("currentuser").(*User)
 		if !resource.Authenticate(user) {
-			request.SetData("message", messages.Messages.Get(defaultLocale, "admin_403"))
+			request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_403"))
 			request.SetData("admin_yield", "admin_message")
 			prago.Render(request, 403, "admin_layout")
 		} else {
@@ -409,7 +407,7 @@ func (a *Admin) GetURL(resource *AdminResource, suffix string) string {
 func BindList(a *Admin, resource *AdminResource) {
 	resource.ResourceController.Get(a.GetURL(resource, ""), func(request prago.Request) {
 
-		tableData, err := resource.ListTableItems(defaultLocale)
+		tableData, err := resource.ListTableItems(GetLocale(request))
 		if err != nil {
 			panic(err)
 		}
@@ -428,13 +426,13 @@ func BindNew(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		form, err := resource.StructCache.GetForm(item, defaultLocale, DefaultVisibilityFilter, DefaultEditabilityFilter)
+		form, err := resource.StructCache.GetForm(item, GetLocale(request), DefaultVisibilityFilter, DefaultEditabilityFilter)
 		if err != nil {
 			panic(err)
 		}
 
 		form.Action = "../" + resource.ID
-		form.AddSubmit("_submit", messages.Messages.Get(defaultLocale, "admin_create"))
+		form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_create"))
 		AddCSRFToken(form, request)
 
 		request.SetData("admin_form", form)
@@ -456,7 +454,7 @@ func BindCreate(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		FlashMessage(request, messages.Messages.Get(defaultLocale, "admin_item_created"))
+		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 }
@@ -473,13 +471,13 @@ func BindDetail(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		form, err := resource.StructCache.GetForm(item, defaultLocale, DefaultVisibilityFilter, DefaultEditabilityFilter)
+		form, err := resource.StructCache.GetForm(item, GetLocale(request), DefaultVisibilityFilter, DefaultEditabilityFilter)
 		if err != nil {
 			panic(err)
 		}
 
 		form.Action = request.Params().Get("id")
-		form.AddSubmit("_submit", messages.Messages.Get(defaultLocale, "admin_edit"))
+		form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
 		AddCSRFToken(form, request)
 
 		request.SetData("admin_item", item)
@@ -514,7 +512,7 @@ func BindUpdate(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		FlashMessage(request, messages.Messages.Get(defaultLocale, "admin_item_edited"))
+		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_edited"))
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 }
@@ -532,7 +530,7 @@ func BindDelete(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		FlashMessage(request, messages.Messages.Get(defaultLocale, "admin_item_deleted"))
+		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_deleted"))
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 }

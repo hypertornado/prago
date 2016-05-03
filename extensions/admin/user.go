@@ -68,7 +68,7 @@ func (User) AdminTableName() string { return "admin_user" }
 func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 
 	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
-		request.SetData("locale", defaultLocale)
+		request.SetData("locale", GetLocale(request))
 	})
 
 	loginForm := func(locale string) *Form {
@@ -94,7 +94,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 	}
 
 	a.AdminAccessController.Get(a.GetURL(resource, "login"), func(request prago.Request) {
-		locale := defaultLocale
+		locale := GetLocale(request)
 		form := loginForm(locale)
 		renderLogin(request, form, locale)
 
@@ -106,7 +106,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 
 		session := request.GetData("session").(*sessions.Session)
 
-		locale := defaultLocale
+		locale := GetLocale(request)
 		form := loginForm(locale)
 		form.Items[0].Value = email
 		form.Errors = []string{messages.Messages.Get(locale, "admin_login_error")}
@@ -177,12 +177,12 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 	}
 
 	a.AdminAccessController.Get(a.GetURL(resource, "new"), func(request prago.Request) {
-		locale := defaultLocale
+		locale := GetLocale(request)
 		renderRegistration(request, newUserForm(locale), locale)
 	})
 
 	a.AdminAccessController.Post(a.GetURL(resource, "new"), func(request prago.Request) {
-		locale := defaultLocale
+		locale := GetLocale(request)
 
 		form := newUserForm(locale)
 
@@ -220,7 +220,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		ValidateCSRF(request)
 		session := request.GetData("session").(*sessions.Session)
 		delete(session.Values, "user_id")
-		session.AddFlash(messages.Messages.Get(defaultLocale, "admin_logout_ok"))
+		session.AddFlash(messages.Messages.Get(GetLocale(request), "admin_logout_ok"))
 		err := session.Save(request.Request(), request.Response())
 		if err != nil {
 			panic(err)
@@ -228,25 +228,47 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		prago.Redirect(request, a.GetURL(resource, "login"))
 	})
 
-	a.AdminController.Get(a.GetURL(resource, "settings"), func(request prago.Request) {
-		user := a.GetUser(request)
-
-		form, err := resource.StructCache.GetForm(user, defaultLocale, WhiteListFilter("Name", "Email", "Locale"), WhiteListFilter("Name", "Locale"))
+	settingsForm := func(locale string, user *User) *Form {
+		form, err := resource.StructCache.GetForm(user, locale, WhiteListFilter("Name", "Email"), WhiteListFilter("Name", "Locale"))
 		if err != nil {
 			panic(err)
 		}
 
-		sel := form.AddSelect("locale", "b", [][2]string{{"a", "a1"}, {"b", "b1"}, {"c", "c1"}})
-		sel.Value = "b"
+		sel := form.AddSelect("Locale", messages.Messages.Get(locale, "admin_locale"), availableLocales)
+		sel.Value = user.Locale
 
-		form.AddSubmit("_submit", messages.Messages.Get(defaultLocale, "admin_edit"))
-		AddCSRFToken(form, request)
+		form.AddSubmit("_submit", messages.Messages.Get(locale, "admin_edit"))
+		return form
+	}
 
+	renderSettings := func(request prago.Request, user *User, form *Form) {
 		request.SetData("admin_item", user)
 		request.SetData("admin_form", form)
 		request.SetData("admin_yield", "admin_settings")
 		prago.Render(request, 200, "admin_layout")
+	}
 
+	a.AdminController.Get(a.GetURL(resource, "settings"), func(request prago.Request) {
+		user := a.GetUser(request)
+		form := settingsForm(GetLocale(request), user)
+		AddCSRFToken(form, request)
+		renderSettings(request, user, form)
+	})
+
+	a.AdminController.Post(a.GetURL(resource, "settings"), func(request prago.Request) {
+		ValidateCSRF(request)
+		user := a.GetUser(request)
+		form := settingsForm(GetLocale(request), user)
+		AddCSRFToken(form, request)
+		form.Validate()
+		if form.Valid {
+			prago.Must(resource.StructCache.BindData(user, request.Params(), request.Request().MultipartForm, form.GetFilter()))
+			prago.Must(resource.Save(user))
+			FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_settings_changed"))
+			prago.Redirect(request, a.GetURL(resource, "settings"))
+			return
+		}
+		renderSettings(request, user, form)
 	})
 
 	prago.Must(AdminInitResourceDefault(a, resource))

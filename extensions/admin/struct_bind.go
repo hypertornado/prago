@@ -15,7 +15,7 @@ func BindDataFilterDefault(field *StructField) bool {
 	return true
 }
 
-func (cache *StructCache) BindData(item interface{}, params url.Values, form *multipart.Form, bindDataFilter func(*StructField) bool) error {
+func (cache *StructCache) BindData(item interface{}, params url.Values, multiForm *multipart.Form, bindDataFilter StructFieldFilter) error {
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
 		if value.Kind() == reflect.Struct {
@@ -49,7 +49,7 @@ func (cache *StructCache) BindData(item interface{}, params url.Values, form *mu
 			}
 		case reflect.String:
 			if field.Tags["prago-type"] == "image" {
-				imageId, err := NewImageFromMultipartForm(form, field.Name)
+				imageId, err := NewImageFromMultipartForm(multiForm, field.Name)
 				if err == nil {
 					val.SetString(imageId)
 				}

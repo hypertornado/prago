@@ -34,5 +34,7 @@ var cs = map[string]string{
 	"CreatedAt":                      "Vytvořeno",
 	"UpdatedAt":                      "Aktualizováno",
 
-	"admin_settings": "Nastavení",
+	"admin_settings":         "Nastavení",
+	"admin_settings_changed": "Nastavení změněno",
+	"admin_locale":           "Jazyk",
 }

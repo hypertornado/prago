@@ -63,6 +63,17 @@ func (f *Form) BindData(params url.Values) {
 	}
 }
 
+func (f *Form) GetFilter() StructFieldFilter {
+	return func(field *StructField) bool {
+		name := field.Name
+		item, found := f.ItemMap[name]
+		if found && !item.Readonly {
+			return true
+		}
+		return false
+	}
+}
+
 func (f *Form) addInput(name, description, template string, validators []ItemValidator) *FormItem {
 	item := &FormItem{
 		Name:        name,

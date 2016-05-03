@@ -111,7 +111,7 @@ const TEMPLATES = `
   <select name="{{.Name}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
     {{$val := .Value}}
     {{range $value := .Values}}
-      <option name="{{index $value 0}}"{{if eq $val (index $value 0)}} selected{{end}}>{{index $value 1}}</option>
+      <option value="{{index $value 0}}"{{if eq $val (index $value 0)}} selected{{end}}>{{index $value 1}}</option>
     {{end}}
   </select>
 {{end}}

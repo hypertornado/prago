@@ -1,34 +1,39 @@
 package admin
 
 import (
-	"fmt"
 	"github.com/hypertornado/prago"
 	"golang.org/x/text/language"
 )
 
 var (
-	defaultLocale    = "cs"
 	supportedLocales = []language.Tag{language.Czech, language.English}
 	languageMatcher  = language.NewMatcher(supportedLocales)
 	localeNames      = map[string]string{
 		"cs": "Čeština",
 		"en": "English",
 	}
+	availableLocales = [][2]string{{"en", "English"}, {"cs", "Čeština"}}
 )
 
-func Locale(request prago.Request) {
-	if true {
-		return
+func GetLocale(request prago.Request) string {
+	user, hasUser := request.GetData("currentuser").(*User)
+	if hasUser {
+		if validLocale(user.Locale) {
+			return user.Locale
+		}
 	}
+	return localeFromRequest(request)
+}
 
+func validLocale(in string) bool {
+	_, ok := localeNames[in]
+	return ok
+}
+
+func localeFromRequest(request prago.Request) string {
 	acceptHeader := request.Request().Header.Get("Accept-Language")
-	println(acceptHeader)
 
-	t, q, err := language.ParseAcceptLanguage(acceptHeader)
+	t, _, _ := language.ParseAcceptLanguage(acceptHeader)
 	tag, _, _ := languageMatcher.Match(t...)
-	fmt.Println(tag.String())
-	fmt.Printf("%5v (t: %6v; q: %3v; err: %v)\n", tag, t, q, err)
-
-	//println(language.Czech.String())
-	//println(language.English.String())
+	return tag.String()
 }
