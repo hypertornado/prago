@@ -50,6 +50,12 @@ const TEMPLATES = `
 {{end}}
 </form>
 
+{{end}}{{define "admin_form_view"}}
+
+<h2>{{.name}}</h2>
+
+{{tmpl "admin_form" .admin_form}}
+
 {{end}}{{define "admin_home"}}
 
 <h2>{{.admin_header.appName}}</h2>
@@ -284,6 +290,8 @@ const TEMPLATES = `
 {{end}}{{define "admin_settings"}}
 
 <h2>{{message .locale "admin_settings"}}</h2>
+
+<a href="password">{{message .locale "admin_password_change"}}</a>
 
 {{tmpl "admin_form" .admin_form}}
 

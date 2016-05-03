@@ -3,6 +3,7 @@ package admin
 import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
@@ -33,6 +34,26 @@ func (User) AdminName(lang string) string { return messages.Messages.Get(lang, "
 
 func (User) Authenticate(u *User) bool {
 	return AuthenticateSysadmin(u)
+}
+
+func (u *User) IsPassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func (u *User) NewPassword(password string) error {
+	if len(password) < 8 {
+		return errors.New("short password")
+	}
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
+		return err
+	}
+	u.Password = string(passwordHash)
+	return nil
 }
 
 func (u *User) CSRFToken(randomness string) string {
@@ -126,8 +147,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 			return
 		}
 
-		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-		if err != nil {
+		if !user.IsPassword(password) {
 			renderLogin(request, form, locale)
 			return
 		}
@@ -193,15 +213,9 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 
 		if form.Valid {
 			email := request.Params().Get("email")
-			password := request.Params().Get("password")
-
-			passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-			prago.Must(err)
-
 			user := &User{}
 			user.Email = email
-			user.Password = string(passwordHash)
-
+			prago.Must(user.NewPassword(request.Params().Get("password")))
 			prago.Must(a.Create(user))
 
 			prago.Redirect(request, a.Prefix)
@@ -251,7 +265,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 	}
 
 	a.AdminController.Get(a.GetURL(resource, "settings"), func(request prago.Request) {
-		user := a.GetUser(request)
+		user := GetUser(request)
 		form := settingsForm(GetLocale(request), user)
 		AddCSRFToken(form, request)
 		renderSettings(request, user, form)
@@ -259,7 +273,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 
 	a.AdminController.Post(a.GetURL(resource, "settings"), func(request prago.Request) {
 		ValidateCSRF(request)
-		user := a.GetUser(request)
+		user := GetUser(request)
 		form := settingsForm(GetLocale(request), user)
 		AddCSRFToken(form, request)
 		form.Validate()
@@ -271,6 +285,58 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 			return
 		}
 		renderSettings(request, user, form)
+	})
+
+	changePasswordForm := func(request prago.Request) *Form {
+		user := GetUser(request)
+		locale := GetLocale(request)
+		oldValidator := NewValidator(func(field *FormItem) bool {
+			if !user.IsPassword(field.Value) {
+				return false
+			}
+			return true
+		}, messages.Messages.Get(locale, "admin_password_wrong"))
+
+		form := NewForm()
+		form.Method = "POST"
+		form.AddPasswordInput("oldpassword",
+			messages.Messages.Get(locale, "admin_password_old"),
+			oldValidator,
+		)
+		form.AddPasswordInput("newpassword",
+			messages.Messages.Get(locale, "admin_password_new"),
+			MinLengthValidator(messages.Messages.Get(locale, "admin_password_length"), 8),
+		)
+		form.AddSubmit("_submit", messages.Messages.Get(locale, "admin_save"))
+		return form
+	}
+
+	renderPasswordForm := func(request prago.Request, form *Form) {
+		request.SetData("name", messages.Messages.Get(GetLocale(request), "admin_password_change"))
+		request.SetData("admin_form", form)
+		request.SetData("admin_yield", "admin_form_view")
+		prago.Render(request, 200, "admin_layout")
+	}
+
+	a.AdminController.Get(a.GetURL(resource, "password"), func(request prago.Request) {
+		form := changePasswordForm(request)
+		renderPasswordForm(request, form)
+	})
+
+	a.AdminController.Post(a.GetURL(resource, "password"), func(request prago.Request) {
+		form := changePasswordForm(request)
+		form.BindData(request.Params())
+		form.Validate()
+		if form.Valid {
+			password := request.Params().Get("newpassword")
+			user := GetUser(request)
+			prago.Must(user.NewPassword(password))
+			prago.Must(resource.Save(user))
+			FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_password_changed"))
+			prago.Redirect(request, a.GetURL(resource, "settings"))
+		} else {
+			renderPasswordForm(request, form)
+		}
 	})
 
 	prago.Must(AdminInitResourceDefault(a, resource))

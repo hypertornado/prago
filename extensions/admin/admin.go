@@ -107,7 +107,7 @@ func (a *Admin) AddResource(resource *AdminResource) error {
 	return nil
 }
 
-func (a *Admin) GetUser(request prago.Request) *User {
+func GetUser(request prago.Request) *User {
 	return request.GetData("currentuser").(*User)
 }
 
@@ -117,7 +117,7 @@ func (a *Admin) adminHeaderData(request prago.Request) interface{} {
 		"prefix":  a.Prefix,
 	}
 
-	user := a.GetUser(request)
+	user := GetUser(request)
 	locale := GetLocale(request)
 
 	menuitems := []map[string]interface{}{}

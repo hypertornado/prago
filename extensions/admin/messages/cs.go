@@ -38,4 +38,10 @@ var cs = map[string]string{
 	"admin_settings_changed": "Nastavení změněno",
 	"admin_locale":           "Jazyk",
 	"admin_users":            "Uživatelé",
+	"admin_password_change":  "Změnit heslo",
+	"admin_password_wrong":   "Špatné heslo",
+	"admin_password_old":     "Staré heslo",
+	"admin_password_new":     "Nové heslo",
+	"admin_password_length":  "Heslo musí mít alespoň 8 znaků",
+	"admin_password_changed": "Heslo změněno",
 }

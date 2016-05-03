@@ -28,4 +28,10 @@ var en = map[string]string{
 	"admin_settings_changed": "Settings changed",
 	"admin_locale":           "Locale",
 	"admin_users":            "Users",
+	"admin_password_change":  "Change password",
+	"admin_password_wrong":   "Wrong password",
+	"admin_password_old":     "Old password",
+	"admin_password_new":     "New password",
+	"admin_password_length":  "Password must be at least 8 characters long",
+	"admin_password_changed": "Password changed",
 }
