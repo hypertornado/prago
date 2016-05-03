@@ -31,6 +31,7 @@ type FormItem struct {
 	Template    string
 	Errors      []string
 	Value       string
+	Values      interface{}
 	form        *Form
 	validators  []ItemValidator
 }
@@ -97,20 +98,21 @@ func (f *Form) AddCheckbox(name, description string, validators ...ItemValidator
 	return input
 }
 
-func (f *Form) AddHidden(name, value string, validators ...ItemValidator) *FormItem {
+func (f *Form) AddHidden(name string, validators ...ItemValidator) *FormItem {
 	input := f.addInput(name, "", "", validators)
 	input.Template = "admin_item_hidden"
-	input.Value = value
+	return input
+}
+
+func (f *Form) AddSelect(name, description string, values [][2]string, validators ...ItemValidator) *FormItem {
+	input := f.addInput(name, description, "admin_item_select", validators)
+	input.Values = values
 	return input
 }
 
 func (f *FormItem) AddError(err string) {
 	f.Errors = append(f.Errors, err)
 	f.form.Valid = false
-}
-
-func (ar *AdminResource) GetForm(item interface{}) (*Form, error) {
-	return ar.StructCache.GetFormItemsDefault(item, defaultLocale, DefaultVisibilityFilter, DefaultEditabilityFilter)
 }
 
 func NewValidator(fn func(field *FormItem) bool, message string) ItemValidator {

@@ -162,7 +162,7 @@ func WhiteListFilter(in ...string) StructFieldFilter {
 	}
 }
 
-func (cache *StructCache) GetFormItemsDefault(inValues interface{}, lang string, visible StructFieldFilter, editable StructFieldFilter) (*Form, error) {
+func (cache *StructCache) GetForm(inValues interface{}, lang string, visible StructFieldFilter, editable StructFieldFilter) (*Form, error) {
 	form := NewForm()
 
 	form.Method = "POST"

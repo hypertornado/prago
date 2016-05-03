@@ -158,6 +158,13 @@ a:hover {
   border: 1px solid #d5d5d5;
   border-radius: 3px;
   outline: none;
+  background: white;
+}
+
+select.input {
+  -webkit-appearance: menulist-button;
+  appearance: menulist-button;
+  height: 34px;
 }
 
 .input[readonly], .textarea[readonly] {

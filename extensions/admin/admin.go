@@ -23,7 +23,6 @@ import (
 
 var (
 	ErrorNotFound = errors.New("ErrorNotFound")
-	defaultLocale = "cs"
 )
 
 type Admin struct {
@@ -170,6 +169,8 @@ func (a *Admin) Init(app *prago.App) error {
 	a.AdminController = a.AdminAccessController.SubController()
 
 	a.AdminController.AddAroundAction(func(request prago.Request, next func()) {
+
+		Locale(request)
 
 		request.SetData("admin_yield", "admin_home")
 
@@ -427,7 +428,7 @@ func BindNew(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		form, err := resource.GetForm(item)
+		form, err := resource.StructCache.GetForm(item, defaultLocale, DefaultVisibilityFilter, DefaultEditabilityFilter)
 		if err != nil {
 			panic(err)
 		}
@@ -472,7 +473,7 @@ func BindDetail(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		form, err := resource.GetForm(item)
+		form, err := resource.StructCache.GetForm(item, defaultLocale, DefaultVisibilityFilter, DefaultEditabilityFilter)
 		if err != nil {
 			panic(err)
 		}

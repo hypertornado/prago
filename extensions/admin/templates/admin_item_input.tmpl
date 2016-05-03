@@ -41,6 +41,15 @@
   <input type="submit" name="{{.Name}}" value="{{.NameHuman}}" class="btn"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
+{{define "admin_item_select"}}
+  <select name="{{.Name}}" class="input form_input">
+    {{$val := .Value}}
+    {{range $value := .Values}}
+      <option name="{{index $value 0}}"{{if eq $val (index $value 0)}} selected{{end}}>{{index $value 1}}</option>
+    {{end}}
+  </select>
+{{end}}
+
 {{define "admin_item_hidden"}}
 <input type="hidden" name="{{.Name}}" value="{{.Value}}">
 {{end}}

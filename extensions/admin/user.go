@@ -48,7 +48,8 @@ func CSRFToken(request prago.Request) string {
 }
 
 func AddCSRFToken(form *Form, request prago.Request) {
-	form.AddHidden("_csrfToken", CSRFToken(request))
+	formItem := form.AddHidden("_csrfToken")
+	formItem.Value = CSRFToken(request)
 }
 
 func ValidateCSRF(request prago.Request) {
@@ -230,10 +231,13 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 	a.AdminController.Get(a.GetURL(resource, "settings"), func(request prago.Request) {
 		user := a.GetUser(request)
 
-		form, err := resource.StructCache.GetFormItemsDefault(user, defaultLocale, WhiteListFilter("Name", "Email", "Locale"), WhiteListFilter("Name", "Locale"))
+		form, err := resource.StructCache.GetForm(user, defaultLocale, WhiteListFilter("Name", "Email", "Locale"), WhiteListFilter("Name", "Locale"))
 		if err != nil {
 			panic(err)
 		}
+
+		sel := form.AddSelect("locale", "b", [][2]string{{"a", "a1"}, {"b", "b1"}, {"c", "c1"}})
+		sel.Value = "b"
 
 		form.AddSubmit("_submit", messages.Messages.Get(defaultLocale, "admin_edit"))
 		AddCSRFToken(form, request)
