@@ -20,7 +20,7 @@ type DBProvider interface {
 
 type AdminResource struct {
 	ID                 string
-	Name               string
+	Name               func(string) string
 	Typ                reflect.Type
 	ResourceController *prago.Controller
 	Authenticate       Authenticatizer
@@ -40,10 +40,10 @@ func NewResource(item interface{}) (*AdminResource, error) {
 	}
 
 	typ := reflect.TypeOf(item)
-	name := typ.Name()
+	defaultName := typ.Name()
 	ret := &AdminResource{
-		Name:         name,
-		ID:           utils.PrettyUrl(name),
+		Name:         func(string) string { return defaultName },
+		ID:           utils.PrettyUrl(defaultName),
 		Typ:          typ,
 		Authenticate: AuthenticateAdmin,
 		item:         item,
@@ -53,10 +53,10 @@ func NewResource(item interface{}) (*AdminResource, error) {
 	}
 
 	ifaceName, ok := item.(interface {
-		AdminName() string
+		AdminName(string) string
 	})
 	if ok {
-		ret.Name = ifaceName.AdminName()
+		ret.Name = ifaceName.AdminName
 	}
 
 	ifaceID, ok := item.(interface {

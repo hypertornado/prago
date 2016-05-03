@@ -29,6 +29,8 @@ type User struct {
 	UpdatedAt         time.Time
 }
 
+func (User) AdminName(lang string) string { return messages.Messages.Get(lang, "admin_users") }
+
 func (User) Authenticate(u *User) bool {
 	return AuthenticateSysadmin(u)
 }

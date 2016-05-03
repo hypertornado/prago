@@ -27,4 +27,5 @@ var en = map[string]string{
 	"admin_settings":         "Settings",
 	"admin_settings_changed": "Settings changed",
 	"admin_locale":           "Locale",
+	"admin_users":            "Users",
 }

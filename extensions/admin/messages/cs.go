@@ -37,4 +37,5 @@ var cs = map[string]string{
 	"admin_settings":         "Nastavení",
 	"admin_settings_changed": "Nastavení změněno",
 	"admin_locale":           "Jazyk",
+	"admin_users":            "Uživatelé",
 }

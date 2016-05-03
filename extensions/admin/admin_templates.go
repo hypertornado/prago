@@ -173,7 +173,7 @@ const TEMPLATES = `
 
 {{end}}{{define "admin_list"}}
 
-<h2>{{.admin_resource.Name}}</h2>
+<h2>{{call .admin_resource.Name .locale}}</h2>
 
 {{$adminResource := .admin_resource }}
 {{$locale := .locale}}

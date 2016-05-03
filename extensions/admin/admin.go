@@ -118,11 +118,12 @@ func (a *Admin) adminHeaderData(request prago.Request) interface{} {
 	}
 
 	user := a.GetUser(request)
+	locale := GetLocale(request)
 
 	menuitems := []map[string]interface{}{}
 	for _, resource := range a.Resources {
 		newItem := map[string]interface{}{
-			"name": resource.Name,
+			"name": resource.Name(locale),
 			"id":   resource.ID,
 			"url":  a.Prefix + "/" + resource.ID,
 		}
