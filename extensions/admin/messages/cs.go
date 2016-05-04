@@ -44,4 +44,6 @@ var cs = map[string]string{
 	"admin_password_new":     "Nové heslo",
 	"admin_password_length":  "Heslo musí mít alespoň 8 znaků",
 	"admin_password_changed": "Heslo změněno",
+
+	"admin_files": "Soubory",
 }

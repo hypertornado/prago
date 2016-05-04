@@ -34,4 +34,6 @@ var en = map[string]string{
 	"admin_password_new":     "New password",
 	"admin_password_length":  "Password must be at least 8 characters long",
 	"admin_password_changed": "Password changed",
+
+	"admin_files": "Files",
 }

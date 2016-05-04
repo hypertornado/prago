@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/nfnt/resize"
 	"github.com/renstrom/shortuuid"
 	"image"
@@ -14,7 +15,24 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
+
+type File struct {
+	ID          int64  `prago-preview:"false"`
+	Name        string `prago-preview:"false"`
+	Description string `prago-type:"text"`
+	UID         string `prago-unique:"true"`
+	Extension   string
+	Size        int64
+	Width       int64
+	Height      int64
+	UserId      int64
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+func (File) AdminName(lang string) string { return messages.Messages.Get(lang, "admin_files") }
 
 var FilesBasePath = ""
 
