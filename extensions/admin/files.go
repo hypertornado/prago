@@ -44,6 +44,17 @@ func (File) AdminAfterFormCreated(f *Form, request prago.Request, newItem bool) 
 		newForm.AddTextareaInput("Description", messages.Messages.Get(GetLocale(request), "Description"))
 		newForm.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_create"))
 	} else {
+		fi := newForm.AddTextInput("Name", messages.Messages.Get(GetLocale(request), "Name"))
+		fi.Readonly = true
+		fi.Value = f.GetItemByName("Name").Value
+
+		fi = newForm.AddTextInput("url", messages.Messages.Get(GetLocale(request), "Url"))
+		fi.Readonly = true
+		fi.Value = f.GetItemByName("UID").Value
+
+		fi = newForm.AddTextareaInput("Description", messages.Messages.Get(GetLocale(request), "Description"))
+		fi.Value = f.GetItemByName("Description").Value
+		fi.Focused = true
 		newForm.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
 	}
 	AddCSRFToken(newForm, request)
@@ -71,6 +82,9 @@ func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
 		file.Description = request.Params().Get("Description")
 		file.UID = shortuuid.UUID()
 
+		folderPath, filePath := file.GetPath("public/xfiles")
+		prago.Must(loadFile(folderPath, filePath, multipartFiles[0]))
+
 		prago.Must(resource.Create(file))
 		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
@@ -78,7 +92,7 @@ func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
 
 	//BindCreate(a, resource)
 	BindDetail(a, resource)
-	//BindUpdate(a, resource)
+	BindUpdate(a, resource)
 	BindDelete(a, resource)
 	return nil
 }
@@ -105,6 +119,32 @@ func (f *File) GetPath(prefix string) (folder, file string) {
 
 	file = folder + pathSeparator + f.UID[5:] + "-" + f.Name
 	return
+}
+
+func loadFile(folder, path string, header *multipart.FileHeader) error {
+	if !strings.HasPrefix(path, folder) {
+		return errors.New("folder path should be prefix of path")
+	}
+	err := os.MkdirAll(folder, 0777)
+	if err != nil {
+		return err
+	}
+
+	inFile, err := header.Open()
+	if err != nil {
+		return err
+	}
+
+	outFile, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	io.Copy(outFile, inFile)
+
+	defer outFile.Close()
+	defer inFile.Close()
+	return nil
 }
 
 var FilesBasePath = ""
