@@ -8,13 +8,6 @@ import (
 	"time"
 )
 
-func BindDataFilterDefault(field *StructField) bool {
-	if field.Name == "ID" {
-		return false
-	}
-	return true
-}
-
 func (cache *StructCache) BindData(item interface{}, params url.Values, multiForm *multipart.Form, bindDataFilter StructFieldFilter) error {
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {

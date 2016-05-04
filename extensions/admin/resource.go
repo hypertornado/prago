@@ -31,7 +31,6 @@ type AdminResource struct {
 	table              string
 	queryFilter        func(*ResourceQuery) *ResourceQuery
 	StructCache        *StructCache
-	BindDataFilter     StructFieldFilter
 	VisibilityFilter   StructFieldFilter
 	EditabilityFilter  StructFieldFilter
 }
@@ -53,7 +52,6 @@ func NewResource(item interface{}) (*AdminResource, error) {
 		hasModel:          true,
 		hasView:           true,
 		StructCache:       structCache,
-		BindDataFilter:    BindDataFilterDefault,
 		VisibilityFilter:  DefaultVisibilityFilter,
 		EditabilityFilter: DefaultEditabilityFilter,
 	}
