@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/golang-commonmark/markdown"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
@@ -12,8 +11,6 @@ import (
 	"github.com/hypertornado/prago/utils"
 	"html/template"
 	"io/ioutil"
-	"net/http"
-	"net/http/httputil"
 	"os"
 	"os/exec"
 	"reflect"
@@ -45,7 +42,7 @@ func NewAdmin(prefix, name string) *Admin {
 		resourceMap: make(map[reflect.Type]*AdminResource),
 	}
 
-	ret.CreateResources(User{})
+	ret.CreateResources(User{}, File{})
 
 	return ret
 }
@@ -204,85 +201,6 @@ func (a *Admin) Init(app *prago.App) error {
 
 	a.AdminController.Get(a.Prefix, func(request prago.Request) {
 		prago.Render(request, 200, "admin_layout")
-	})
-
-	a.AdminController.Get(a.Prefix+"/chunked", func(request prago.Request) {
-
-		request.Response().WriteHeader(200)
-
-		chunked := httputil.NewChunkedWriter(request.Response())
-
-		for i := 0; i < 300; i++ {
-			chunked.Write([]byte("xr\n"))
-			time.Sleep(10 * time.Millisecond)
-			request.Response().Header().Set("Content-Length", "0")
-		}
-
-		chunked.Close()
-
-		request.SetProcessed()
-
-	})
-
-	a.AdminController.Get(a.Prefix+"/dump.sql", func(request prago.Request) {
-		config, err := request.App().Config()
-		if err != nil {
-			panic(err)
-		}
-
-		user := config["dbUser"]
-		dbName := config["dbName"]
-		password := config["dbPassword"]
-
-		cmd := exec.Command("mysqldump", "-u"+user, "-p"+password, dbName)
-
-		outPipe, err := cmd.StdoutPipe()
-		if err != nil {
-			panic(err)
-		}
-
-		request.Response().WriteHeader(200)
-
-		var finished chan bool
-
-		go func() {
-			out, err := ioutil.ReadAll(outPipe)
-			if err != nil {
-				panic(err)
-			}
-			request.Response().Write(out)
-
-			flusher, ok := request.Response().(http.Flusher)
-			if !ok {
-				panic(ok)
-			}
-
-			flusher.Flush()
-
-			println("flushed")
-
-			finished <- true
-		}()
-
-		err = cmd.Start()
-		if err != nil {
-			panic(err)
-		}
-
-		err = cmd.Wait()
-		if err != nil {
-			panic(err)
-		}
-
-		println("wait")
-
-		<-finished
-
-		request.Response().Header().Set("Content-Length", "0")
-
-		println("finished")
-
-		request.SetProcessed()
 	})
 
 	for i, _ := range a.Resources {
@@ -505,8 +423,6 @@ func BindUpdate(a *Admin, resource *AdminResource) {
 		if err != nil {
 			panic(err)
 		}
-
-		fmt.Println(item)
 
 		err = resource.Save(item)
 		if err != nil {
