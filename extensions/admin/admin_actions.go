@@ -28,7 +28,7 @@ func BindNew(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		form, err := resource.StructCache.GetForm(item, GetLocale(request), DefaultVisibilityFilter, DefaultEditabilityFilter)
+		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		if err != nil {
 			panic(err)
 		}
@@ -50,7 +50,7 @@ func BindCreate(a *Admin, resource *AdminResource) {
 		if err != nil {
 			panic(err)
 		}
-		resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, BindDataFilterDefault)
+		resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, resource.BindDataFilter)
 		err = resource.Create(item)
 		if err != nil {
 			panic(err)
@@ -73,7 +73,7 @@ func BindDetail(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		form, err := resource.StructCache.GetForm(item, GetLocale(request), DefaultVisibilityFilter, DefaultEditabilityFilter)
+		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		if err != nil {
 			panic(err)
 		}
@@ -102,7 +102,7 @@ func BindUpdate(a *Admin, resource *AdminResource) {
 			panic(err)
 		}
 
-		err = resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, BindDataFilterDefault)
+		err = resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, resource.BindDataFilter)
 		if err != nil {
 			panic(err)
 		}

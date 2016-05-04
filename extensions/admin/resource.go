@@ -31,6 +31,9 @@ type AdminResource struct {
 	table              string
 	queryFilter        func(*ResourceQuery) *ResourceQuery
 	StructCache        *StructCache
+	BindDataFilter     StructFieldFilter
+	VisibilityFilter   StructFieldFilter
+	EditabilityFilter  StructFieldFilter
 }
 
 func NewResource(item interface{}) (*AdminResource, error) {
@@ -42,14 +45,17 @@ func NewResource(item interface{}) (*AdminResource, error) {
 	typ := reflect.TypeOf(item)
 	defaultName := typ.Name()
 	ret := &AdminResource{
-		Name:         func(string) string { return defaultName },
-		ID:           utils.PrettyUrl(defaultName),
-		Typ:          typ,
-		Authenticate: AuthenticateAdmin,
-		item:         item,
-		hasModel:     true,
-		hasView:      true,
-		StructCache:  structCache,
+		Name:              func(string) string { return defaultName },
+		ID:                utils.PrettyUrl(defaultName),
+		Typ:               typ,
+		Authenticate:      AuthenticateAdmin,
+		item:              item,
+		hasModel:          true,
+		hasView:           true,
+		StructCache:       structCache,
+		BindDataFilter:    BindDataFilterDefault,
+		VisibilityFilter:  DefaultVisibilityFilter,
+		EditabilityFilter: DefaultEditabilityFilter,
 	}
 
 	ifaceName, ok := item.(interface {
