@@ -8,12 +8,11 @@ import (
 //TODO: tests
 
 type Form struct {
-	Method  string
-	Action  string
-	Items   []*FormItem
-	ItemMap map[string]*FormItem
-	Errors  []string
-	Valid   bool
+	Method string
+	Action string
+	Items  []*FormItem
+	Errors []string
+	Valid  bool
 }
 
 type ItemValidator interface {
@@ -46,14 +45,21 @@ func (f *Form) Validate() {
 
 func NewForm() *Form {
 	ret := &Form{}
-	ret.ItemMap = make(map[string]*FormItem)
 	ret.Valid = true
 	return ret
 }
 
+func (f *Form) GetItemByName(name string) *FormItem {
+	for _, v := range f.Items {
+		if v.Name == name {
+			return v
+		}
+	}
+	return nil
+}
+
 func (f *Form) AddItem(item *FormItem) {
 	item.form = f
-	f.ItemMap[item.Name] = item
 	f.Items = append(f.Items, item)
 }
 
@@ -64,13 +70,14 @@ func (f *Form) BindData(params url.Values) {
 }
 
 func (f *Form) GetFilter() StructFieldFilter {
-	return func(field *StructField) bool {
-		name := field.Name
-		item, found := f.ItemMap[name]
-		if found && !item.Readonly {
-			return true
+	allowed := make(map[string]bool)
+	for _, v := range f.Items {
+		if !v.Readonly {
+			allowed[v.Name] = true
 		}
-		return false
+	}
+	return func(field *StructField) bool {
+		return allowed[field.Name]
 	}
 }
 

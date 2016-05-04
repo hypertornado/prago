@@ -221,7 +221,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 			prago.Redirect(request, a.Prefix)
 
 		} else {
-			form.ItemMap["password"].Value = ""
+			form.GetItemByName("password").Value = ""
 			renderRegistration(request, form, locale)
 		}
 	})
