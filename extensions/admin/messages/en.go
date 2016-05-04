@@ -36,4 +36,5 @@ var en = map[string]string{
 	"admin_password_changed": "Password changed",
 
 	"admin_files": "Files",
+	"admin_file":  "File",
 }

@@ -10,13 +10,12 @@ func BindList(a *Admin, resource *AdminResource) {
 	resource.ResourceController.Get(a.GetURL(resource, ""), func(request prago.Request) {
 
 		tableData, err := resource.ListTableItems(GetLocale(request))
-		if err != nil {
-			panic(err)
-		}
+		prago.Must(err)
 
 		request.SetData("admin_list_table_data", tableData)
 		request.SetData("admin_yield", "admin_list")
 		prago.Render(request, 200, "admin_layout")
+
 	})
 }
 
@@ -35,6 +34,10 @@ func BindNew(a *Admin, resource *AdminResource) {
 		form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_create"))
 		AddCSRFToken(form, request)
 
+		if resource.AfterFormCreated != nil {
+			form = resource.AfterFormCreated(form, request, true)
+		}
+
 		request.SetData("admin_form", form)
 		request.SetData("admin_yield", "admin_new")
 		prago.Render(request, 200, "admin_layout")
@@ -49,6 +52,10 @@ func BindCreate(a *Admin, resource *AdminResource) {
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
+
+		if resource.AfterFormCreated != nil {
+			form = resource.AfterFormCreated(form, request, true)
+		}
 
 		resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.GetFilter())
 		prago.Must(resource.Create(item))
@@ -73,6 +80,10 @@ func BindDetail(a *Admin, resource *AdminResource) {
 		form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
 		AddCSRFToken(form, request)
 
+		if resource.AfterFormCreated != nil {
+			form = resource.AfterFormCreated(form, request, false)
+		}
+
 		request.SetData("admin_item", item)
 		request.SetData("admin_form", form)
 		request.SetData("admin_yield", "admin_edit")
@@ -91,6 +102,10 @@ func BindUpdate(a *Admin, resource *AdminResource) {
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
+
+		if resource.AfterFormCreated != nil {
+			form = resource.AfterFormCreated(form, request, false)
+		}
 
 		err = resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.GetFilter())
 		prago.Must(err)

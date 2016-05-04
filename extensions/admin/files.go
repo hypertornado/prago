@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/extensions/admin/messages"
+	"github.com/hypertornado/prago/utils"
 	"github.com/nfnt/resize"
 	"github.com/renstrom/shortuuid"
 	"image"
@@ -19,8 +20,8 @@ import (
 )
 
 type File struct {
-	ID          int64  `prago-preview:"false"`
-	Name        string `prago-preview:"false"`
+	ID          int64
+	Name        string
 	Description string `prago-type:"text"`
 	UID         string `prago-unique:"true"`
 	Extension   string
@@ -33,6 +34,78 @@ type File struct {
 }
 
 func (File) AdminName(lang string) string { return messages.Messages.Get(lang, "admin_files") }
+
+func (File) AdminAfterFormCreated(f *Form, request prago.Request, newItem bool) *Form {
+	newForm := NewForm()
+	newForm.Method = f.Method
+	newForm.Action = f.Action
+	if newItem {
+		newForm.AddFileInput("file", messages.Messages.Get(GetLocale(request), "admin_file"))
+		newForm.AddTextareaInput("Description", messages.Messages.Get(GetLocale(request), "Description"))
+		newForm.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_create"))
+	} else {
+		newForm.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
+	}
+	AddCSRFToken(newForm, request)
+	return newForm
+}
+
+func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
+	BindList(a, resource)
+	BindNew(a, resource)
+
+	resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
+		ValidateCSRF(request)
+
+		multipartFiles := request.Request().MultipartForm.File["file"]
+		if len(multipartFiles) != 1 {
+			panic("must have 1 file selected")
+		}
+
+		fileName := utils.PrettyFilename(multipartFiles[0].Filename)
+
+		item, err := resource.NewItem()
+		prago.Must(err)
+		file := item.(*File)
+		file.Name = fileName
+		file.Description = request.Params().Get("Description")
+		file.UID = shortuuid.UUID()
+
+		prago.Must(resource.Create(file))
+		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
+		prago.Redirect(request, a.Prefix+"/"+resource.ID)
+	})
+
+	//BindCreate(a, resource)
+	BindDetail(a, resource)
+	//BindUpdate(a, resource)
+	BindDelete(a, resource)
+	return nil
+}
+
+func (f *File) SaveData(header *multipart.FileHeader) error {
+	//header.Open()
+	return nil
+}
+
+func (f *File) GetPath(prefix string) (folder, file string) {
+	pathSeparator := "/"
+	folder = prefix
+	if len(folder) > 0 && !strings.HasSuffix(folder, pathSeparator) {
+		folder += pathSeparator
+	}
+
+	if len(f.UID) < 7 {
+		panic("too short uid")
+	}
+
+	uidPrefix := f.UID[0:5]
+	folders := strings.Split(uidPrefix, "")
+	folder += strings.Join(folders, pathSeparator)
+
+	file = folder + pathSeparator + f.UID[5:] + "-" + f.Name
+	return
+}
 
 var FilesBasePath = ""
 

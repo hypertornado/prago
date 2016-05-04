@@ -37,6 +37,10 @@
   {{end}}
 {{end}}
 
+{{define "admin_item_file"}}
+  <input type="file" name="{{.Name}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+{{end}}
+
 {{define "admin_item_submit"}}
   <input type="submit" name="{{.Name}}" value="{{.NameHuman}}" class="btn"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}

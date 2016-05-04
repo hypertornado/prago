@@ -57,8 +57,8 @@ func TestResource(t *testing.T) {
 		t.Fatal(len(items.Header))
 	}
 
-	if items.Rows[1].Items[2].Value.(string) != "show" {
-		t.Fatal(items.Rows[1].Items[2].Value.(string))
+	if items.Rows[1].Items[2].Value != "show" {
+		t.Fatal(items.Rows[1].Items[2].Value)
 	}
 }
 

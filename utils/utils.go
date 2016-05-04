@@ -6,8 +6,20 @@ import (
 	"github.com/Machiel/slugify"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 )
+
+func PrettyFilename(s string) string {
+	if len(s) > 100 {
+		s = s[len(s)-99:]
+	}
+	items := strings.Split(s, ".")
+	for i, _ := range items {
+		items[i] = PrettyUrl(items[i])
+	}
+	return strings.Join(items, ".")
+}
 
 func PrettyUrl(s string) string {
 	return slugify.Slugify(s)

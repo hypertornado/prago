@@ -109,6 +109,10 @@ const TEMPLATES = `
   {{end}}
 {{end}}
 
+{{define "admin_item_file"}}
+  <input type="file" name="{{.Name}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+{{end}}
+
 {{define "admin_item_submit"}}
   <input type="submit" name="{{.Name}}" value="{{.NameHuman}}" class="btn"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
@@ -245,7 +249,7 @@ const TEMPLATES = `
 <h1>{{.message}}</h1>
 {{end}}{{define "admin_new"}}
 
-<h2>{{message .locale "admin_new"}} - {{.admin_resource.Name}}</h2>
+<h2>{{message .locale "admin_new"}} - {{call .admin_resource.Name .locale}}</h2>
 
 <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
 

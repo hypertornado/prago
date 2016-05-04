@@ -46,4 +46,5 @@ var cs = map[string]string{
 	"admin_password_changed": "Heslo změněno",
 
 	"admin_files": "Soubory",
+	"admin_file":  "Soubor",
 }

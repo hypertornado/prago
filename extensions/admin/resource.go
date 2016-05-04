@@ -31,6 +31,7 @@ type AdminResource struct {
 	table              string
 	queryFilter        func(*ResourceQuery) *ResourceQuery
 	StructCache        *StructCache
+	AfterFormCreated   func(*Form, prago.Request, bool) *Form
 	VisibilityFilter   StructFieldFilter
 	EditabilityFilter  StructFieldFilter
 }
@@ -107,6 +108,13 @@ func NewResource(item interface{}) (*AdminResource, error) {
 	})
 	if ok {
 		ret.queryFilter = ifaceHasQueryFilter.AdminQueryFilter
+	}
+
+	ifaceAdminAfterFormCreated, ok := item.(interface {
+		AdminAfterFormCreated(*Form, prago.Request, bool) *Form
+	})
+	if ok {
+		ret.AfterFormCreated = ifaceAdminAfterFormCreated.AdminAfterFormCreated
 	}
 
 	return ret, nil

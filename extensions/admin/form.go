@@ -96,12 +96,20 @@ func (f *Form) AddTextInput(name, description string, validators ...ItemValidato
 	return f.addInput(name, description, "admin_item_input", validators)
 }
 
+func (f *Form) AddTextareaInput(name, description string, validators ...ItemValidator) *FormItem {
+	return f.addInput(name, description, "admin_item_textarea", validators)
+}
+
 func (f *Form) AddEmailInput(name, description string, validators ...ItemValidator) *FormItem {
 	return f.addInput(name, description, "admin_item_email", validators)
 }
 
 func (f *Form) AddPasswordInput(name, description string, validators ...ItemValidator) *FormItem {
 	return f.addInput(name, description, "admin_item_password", validators)
+}
+
+func (f *Form) AddFileInput(name, description string, validators ...ItemValidator) *FormItem {
+	return f.addInput(name, description, "admin_item_file", validators)
 }
 
 func (f *Form) AddSubmit(name, description string, validators ...ItemValidator) *FormItem {
