@@ -62,8 +62,6 @@ func (File) AdminAfterFormCreated(f *Form, request prago.Request, newItem bool) 
 }
 
 func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
-	BindList(a, resource)
-	BindNew(a, resource)
 
 	resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
 		ValidateCSRF(request)
@@ -90,10 +88,8 @@ func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 
-	//BindCreate(a, resource)
-	BindDetail(a, resource)
-	BindUpdate(a, resource)
-	BindDelete(a, resource)
+	resource.Actions["create"] = nil
+
 	return nil
 }
 

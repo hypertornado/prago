@@ -308,10 +308,12 @@ func (a *Admin) initResource(resource *AdminResource) error {
 	})
 
 	if ok {
-		return init.AdminInitResource(a, resource)
-	} else {
-		return AdminInitResourceDefault(a, resource)
+		err := init.AdminInitResource(a, resource)
+		if err != nil {
+			return err
+		}
 	}
+	return AdminInitResourceDefault(a, resource)
 }
 
 func (a *Admin) GetURL(resource *AdminResource, suffix string) string {

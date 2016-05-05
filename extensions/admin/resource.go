@@ -34,6 +34,7 @@ type AdminResource struct {
 	AfterFormCreated   func(*Form, prago.Request, bool) *Form
 	VisibilityFilter   StructFieldFilter
 	EditabilityFilter  StructFieldFilter
+	Actions            map[string]ActionBinder
 }
 
 func NewResource(item interface{}) (*AdminResource, error) {
@@ -55,6 +56,15 @@ func NewResource(item interface{}) (*AdminResource, error) {
 		StructCache:       structCache,
 		VisibilityFilter:  DefaultVisibilityFilter,
 		EditabilityFilter: DefaultEditabilityFilter,
+	}
+
+	ret.Actions = map[string]ActionBinder{
+		"list":   BindList,
+		"new":    BindNew,
+		"create": BindCreate,
+		"detail": BindDetail,
+		"update": BindUpdate,
+		"delete": BindDelete,
 	}
 
 	ifaceName, ok := item.(interface {

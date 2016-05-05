@@ -6,6 +6,8 @@ import (
 	"strconv"
 )
 
+type ActionBinder func(a *Admin, resource *AdminResource)
+
 func BindList(a *Admin, resource *AdminResource) {
 	resource.ResourceController.Get(a.GetURL(resource, ""), func(request prago.Request) {
 
@@ -133,11 +135,10 @@ func BindDelete(a *Admin, resource *AdminResource) {
 }
 
 func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
-	BindList(a, resource)
-	BindNew(a, resource)
-	BindCreate(a, resource)
-	BindDetail(a, resource)
-	BindUpdate(a, resource)
-	BindDelete(a, resource)
+	for _, v := range resource.Actions {
+		if v != nil {
+			v(a, resource)
+		}
+	}
 	return nil
 }
