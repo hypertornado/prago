@@ -3,6 +3,7 @@ package admin
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/hypertornado/prago/utils"
@@ -44,57 +45,109 @@ func (File) AdminAfterFormCreated(f *Form, request prago.Request, newItem bool) 
 		newForm.AddTextareaInput("Description", messages.Messages.Get(GetLocale(request), "Description"))
 		newForm.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_create"))
 	} else {
-		fi := newForm.AddTextInput("Name", messages.Messages.Get(GetLocale(request), "Name"))
-		fi.Readonly = true
-		fi.Value = f.GetItemByName("Name").Value
-
-		fi = newForm.AddTextInput("url", messages.Messages.Get(GetLocale(request), "Url"))
-		fi.Readonly = true
-		fi.Value = f.GetItemByName("UID").Value
-
-		fi = newForm.AddTextareaInput("Description", messages.Messages.Get(GetLocale(request), "Description"))
-		fi.Value = f.GetItemByName("Description").Value
-		fi.Focused = true
-		newForm.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
+		newForm.AddTextareaInput("Description", messages.Messages.Get(GetLocale(request), "Description"))
 	}
 	AddCSRFToken(newForm, request)
 	return newForm
 }
 
 func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
+	config, err := a.App.Config()
+	prago.Must(err)
 
-	resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
-		ValidateCSRF(request)
+	var fileUploadPath string
+	var fileDownloadPath string
+	var ok bool
+	fileUploadPath, ok = config["fileUploadPath"]
+	if !ok {
+		return errors.New("fileUploadPath not defined in config")
+	}
 
-		multipartFiles := request.Request().MultipartForm.File["file"]
-		if len(multipartFiles) != 1 {
-			panic("must have 1 file selected")
-		}
+	fileDownloadPath, ok = config["fileDownloadPath"]
+	if !ok {
+		return errors.New("fileDownloadPath not defined in config")
+	}
+	if !strings.HasSuffix(fileUploadPath, "/") {
+		fileUploadPath += "/"
+	}
+	if !strings.HasSuffix(fileDownloadPath, "/") {
+		fileDownloadPath += "/"
+	}
 
-		fileName := utils.PrettyFilename(multipartFiles[0].Filename)
+	resource.Actions["create"] = func(a *Admin, resource *AdminResource) {
+		resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
+			ValidateCSRF(request)
 
-		item, err := resource.NewItem()
-		prago.Must(err)
-		file := item.(*File)
-		file.Name = fileName
-		file.Description = request.Params().Get("Description")
-		file.UID = shortuuid.UUID()
+			multipartFiles := request.Request().MultipartForm.File["file"]
+			if len(multipartFiles) != 1 {
+				panic("must have 1 file selected")
+			}
 
-		folderPath, filePath := file.GetPath("public/xfiles")
-		prago.Must(loadFile(folderPath, filePath, multipartFiles[0]))
+			fileName := utils.PrettyFilename(multipartFiles[0].Filename)
 
-		prago.Must(resource.Create(file))
-		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
-		prago.Redirect(request, a.Prefix+"/"+resource.ID)
-	})
+			item, err := resource.NewItem()
+			prago.Must(err)
+			file := item.(*File)
+			file.Name = fileName
+			file.Description = request.Params().Get("Description")
+			file.UID = shortuuid.UUID()
+			file.UserId = GetUser(request).ID
 
-	resource.Actions["create"] = nil
+			folderPath, filePath := file.GetPath(fileUploadPath + "original")
+			prago.Must(loadFile(folderPath, filePath, multipartFiles[0]))
 
-	return nil
-}
+			prago.Must(file.Update(fileUploadPath))
 
-func (f *File) SaveData(header *multipart.FileHeader) error {
-	//header.Open()
+			prago.Must(resource.Create(file))
+			FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
+			prago.Redirect(request, a.Prefix+"/"+resource.ID)
+		})
+	}
+
+	resource.Actions["detail"] = func(a *Admin, resource *AdminResource) {
+		resource.ResourceController.Get(a.GetURL(resource, ":id"), func(request prago.Request) {
+			id, err := strconv.Atoi(request.Params().Get("id"))
+			prago.Must(err)
+
+			item, err := resource.Query().Where(map[string]interface{}{"id": int64(id)}).First()
+			prago.Must(err)
+
+			file := item.(*File)
+
+			form := NewForm()
+			form.Method = "POST"
+
+			fi := form.AddTextInput("Name", messages.Messages.Get(GetLocale(request), "Name"))
+			fi.Readonly = true
+			fi.Value = file.Name
+
+			_, fileUrl := file.GetPath(fileDownloadPath + "original")
+
+			fi = form.AddTextInput("url", messages.Messages.Get(GetLocale(request), "Url"))
+			fi.Readonly = true
+			fi.Value = fileUrl
+
+			fi = form.AddTextInput("size", messages.Messages.Get(GetLocale(request), "Size"))
+			fi.Readonly = true
+			fi.Value = fmt.Sprintf("%d", file.Size)
+
+			fi = form.AddTextInput("size", messages.Messages.Get(GetLocale(request), "Uploaded By"))
+			fi.Readonly = true
+			fi.Value = fmt.Sprintf("%d", file.UserId)
+
+			fi = form.AddTextareaInput("Description", messages.Messages.Get(GetLocale(request), "Description"))
+			fi.Value = file.Description
+			fi.Focused = true
+			form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
+			AddCSRFToken(form, request)
+
+			request.SetData("admin_item", item)
+			request.SetData("admin_form", form)
+			request.SetData("admin_yield", "admin_edit")
+			prago.Render(request, 200, "admin_layout")
+		})
+	}
+
 	return nil
 }
 
@@ -115,6 +168,31 @@ func (f *File) GetPath(prefix string) (folder, file string) {
 
 	file = folder + pathSeparator + f.UID[5:] + "-" + f.Name
 	return
+}
+
+func (f *File) Update(fileUploadPath string) error {
+	_, path := f.GetPath(fileUploadPath + "original")
+
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	stat, err := file.Stat()
+	if err != nil {
+		return err
+	}
+
+	f.Size = stat.Size()
+	return nil
+}
+
+func (f *File) IsImage() bool {
+	if strings.HasSuffix(f.Name, ".jpg") || strings.HasSuffix(f.Name, ".jpeg") {
+		return true
+	}
+	return false
 }
 
 func loadFile(folder, path string, header *multipart.FileHeader) error {

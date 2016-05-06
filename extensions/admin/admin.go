@@ -28,6 +28,7 @@ type Admin struct {
 	resourceMap           map[reflect.Type]*AdminResource
 	AdminController       *prago.Controller
 	AdminAccessController *prago.Controller
+	App                   *prago.App
 	db                    *sql.DB
 	authData              map[string]string
 	seedFn                func(*prago.App) error
@@ -137,6 +138,7 @@ func (a *Admin) DB() *sql.DB {
 }
 
 func (a *Admin) Init(app *prago.App) error {
+	a.App = app
 	a.db = app.Data()["db"].(*sql.DB)
 	bindDBBackupCron(app)
 
@@ -220,7 +222,7 @@ func (a *Admin) Init(app *prago.App) error {
 }
 
 func (a *Admin) bindAdminCommand(app *prago.App) error {
-	adminCommand := app.CreateCommand("admin", "Admin tasks (migrate|seed|drop)")
+	adminCommand := app.CreateCommand("admin", "Admin tasks (migrate|seed|drop|thumbnails)")
 
 	adminSubcommand := adminCommand.Arg("admincommand", "").Required().String()
 
@@ -247,6 +249,9 @@ func (a *Admin) bindAdminCommand(app *prago.App) error {
 			} else {
 				return nil
 			}
+		case "thumbnails":
+			println("thumbs are GOOD")
+			return nil
 		default:
 			println("unknown admin subcommand " + *adminSubcommand)
 		}

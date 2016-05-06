@@ -135,6 +135,15 @@ func BindDelete(a *Admin, resource *AdminResource) {
 }
 
 func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
+	defaultActions := []string{"list", "new", "create", "detail", "update", "delete"}
+	for _, v := range defaultActions {
+		action := resource.Actions[v]
+		if action != nil {
+			action(a, resource)
+			delete(resource.Actions, v)
+		}
+	}
+
 	for _, v := range resource.Actions {
 		if v != nil {
 			v(a, resource)
