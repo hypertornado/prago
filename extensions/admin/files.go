@@ -20,12 +20,18 @@ import (
 	"time"
 )
 
+var ThumbnailSizes = map[string][2]uint{
+	"large":  {1000, 0},
+	"medium": {400, 0},
+	"small":  {200, 0},
+}
+
 type File struct {
 	ID          int64
 	Name        string
 	Description string `prago-type:"text"`
 	UID         string `prago-unique:"true"`
-	Extension   string
+	FileType    string
 	Size        int64
 	Width       int64
 	Height      int64
@@ -131,9 +137,13 @@ func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
 			fi.Readonly = true
 			fi.Value = fmt.Sprintf("%d", file.Size)
 
-			fi = form.AddTextInput("size", messages.Messages.Get(GetLocale(request), "Uploaded By"))
+			fi = form.AddTextInput("uploadedBy", messages.Messages.Get(GetLocale(request), "Uploaded By"))
 			fi.Readonly = true
 			fi.Value = fmt.Sprintf("%d", file.UserId)
+
+			fi = form.AddTextInput("fileType", messages.Messages.Get(GetLocale(request), "Type"))
+			fi.Readonly = true
+			fi.Value = file.FileType
 
 			if file.IsImage() {
 				fi = form.AddTextInput("width", messages.Messages.Get(GetLocale(request), "Width"))
@@ -143,6 +153,13 @@ func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
 				fi = form.AddTextInput("height", messages.Messages.Get(GetLocale(request), "Height"))
 				fi.Readonly = true
 				fi.Value = fmt.Sprintf("%d", file.Height)
+
+				for _, v := range []string{"large", "medium", "small"} {
+					fi = form.AddTextInput("thumb"+v, messages.Messages.Get(GetLocale(request), v))
+					fi.Readonly = true
+					_, path := file.GetPath(fileDownloadPath + "thumb/" + v)
+					fi.Value = path
+				}
 
 			}
 
@@ -343,6 +360,29 @@ func (f *File) Update(fileUploadPath string) error {
 		bounds := img.Bounds()
 		f.Width = int64(bounds.Size().X)
 		f.Height = int64(bounds.Size().Y)
+		f.FileType = "image"
+
+		for k, v := range ThumbnailSizes {
+			dirPath, filePath := f.GetPath(fileUploadPath + "thumb/" + k)
+			fmt.Println(dirPath, filePath, v)
+			err := os.MkdirAll(dirPath, 0777)
+			if err != nil {
+				return err
+			}
+
+			outFile, err := os.Create(filePath)
+			defer outFile.Close()
+			if err != nil {
+				return err
+			}
+
+			resizedImg := resize.Resize(v[0], v[1], img, resize.Lanczos3)
+			err = jpeg.Encode(outFile, resizedImg, nil)
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil
