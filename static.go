@@ -10,6 +10,22 @@ var (
 	StaticDirPaths    = []string{"public"}
 )
 
+type MiddlewareStatic struct{}
+
+func (ms MiddlewareStatic) Init(app *App) error {
+
+	paths, err := app.Config().Get("staticPaths")
+	if err == nil {
+		newPaths := []string{}
+		for _, p := range paths.([]interface{}) {
+			newPaths = append(newPaths, p.(string))
+		}
+		StaticDirPaths = newPaths
+	}
+	app.requestMiddlewares = append(app.requestMiddlewares, requestMiddlewareStatic)
+	return nil
+}
+
 func requestMiddlewareStatic(p Request, next func()) {
 	if p.IsProcessed() {
 		return

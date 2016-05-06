@@ -48,7 +48,7 @@ func NewApp(appName, version string) *App {
 	app.AddMiddleware(MiddlewareConfig{})
 	app.AddMiddleware(loggerMiddleware)
 	app.AddMiddleware(MiddlewareRemoveTrailingSlash)
-	app.AddMiddleware(MiddlewareStatic)
+	app.AddMiddleware(MiddlewareStatic{})
 	app.AddMiddleware(MiddlewareParseRequest)
 	app.AddMiddleware(MiddlewareView{})
 	app.AddMiddleware(MiddlewareDispatcher)
