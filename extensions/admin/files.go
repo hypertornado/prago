@@ -170,31 +170,6 @@ func (f *File) GetPath(prefix string) (folder, file string) {
 	return
 }
 
-func (f *File) Update(fileUploadPath string) error {
-	_, path := f.GetPath(fileUploadPath + "original")
-
-	file, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	stat, err := file.Stat()
-	if err != nil {
-		return err
-	}
-
-	f.Size = stat.Size()
-	return nil
-}
-
-func (f *File) IsImage() bool {
-	if strings.HasSuffix(f.Name, ".jpg") || strings.HasSuffix(f.Name, ".jpeg") {
-		return true
-	}
-	return false
-}
-
 func loadFile(folder, path string, header *multipart.FileHeader) error {
 	if !strings.HasPrefix(path, folder) {
 		return errors.New("folder path should be prefix of path")
@@ -330,4 +305,54 @@ func NewImageFromMultipartForm(form *multipart.Form, formItemName string) (strin
 	defer f.Close()
 
 	return NewImage(f, fileType)
+}
+
+func (f *File) Update(fileUploadPath string) error {
+	_, path := f.GetPath(fileUploadPath + "original")
+
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	stat, err := file.Stat()
+	if err != nil {
+		return err
+	}
+
+	f.Size = stat.Size()
+	return nil
+}
+
+func (f *File) IsImage() bool {
+	if strings.HasSuffix(f.Name, ".jpg") || strings.HasSuffix(f.Name, ".jpeg") {
+		return true
+	}
+	return false
+}
+
+func UpdateFiles(a *Admin) error {
+	config, err := a.App.Config()
+	prago.Must(err)
+
+	fileUploadPath := config["fileUploadPath"]
+	if !strings.HasSuffix(fileUploadPath, "/") {
+		fileUploadPath += "/"
+	}
+
+	var files []*File
+	a.Query().Get(&files)
+	for _, file := range files {
+		fmt.Println(file.UID, file.Name)
+		err := file.Update(fileUploadPath)
+		if err != nil {
+			return err
+		}
+		err = a.Save(file)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

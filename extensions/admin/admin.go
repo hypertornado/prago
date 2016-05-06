@@ -250,8 +250,8 @@ func (a *Admin) bindAdminCommand(app *prago.App) error {
 				return nil
 			}
 		case "thumbnails":
-			println("thumbs are GOOD")
-			return nil
+			println("Updating thumbnails")
+			return UpdateFiles(a)
 		default:
 			println("unknown admin subcommand " + *adminSubcommand)
 		}
