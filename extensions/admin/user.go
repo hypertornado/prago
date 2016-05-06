@@ -225,12 +225,6 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		}
 	})
 
-	a.AdminAccessController.Get(a.Prefix+"/admin.css", func(request prago.Request) {
-		request.Response().Header().Add("Content-type", "text/css")
-		request.SetData("statusCode", 200)
-		request.SetData("body", []byte(CSS))
-	})
-
 	a.AdminController.Get(a.Prefix+"/logout", func(request prago.Request) {
 		ValidateCSRF(request)
 		session := request.GetData("session").(*sessions.Session)
