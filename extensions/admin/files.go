@@ -58,21 +58,10 @@ func (File) AdminAfterFormCreated(f *Form, request prago.Request, newItem bool) 
 }
 
 func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
-	config, err := a.App.Config()
-	prago.Must(err)
 
-	var fileUploadPath string
-	var fileDownloadPath string
-	var ok bool
-	fileUploadPath, ok = config["fileUploadPath"]
-	if !ok {
-		return errors.New("fileUploadPath not defined in config")
-	}
+	fileUploadPath := a.App.Config().GetString("fileUploadPath")
+	fileDownloadPath := a.App.Config().GetString("fileDownloadPath")
 
-	fileDownloadPath, ok = config["fileDownloadPath"]
-	if !ok {
-		return errors.New("fileDownloadPath not defined in config")
-	}
 	if !strings.HasSuffix(fileUploadPath, "/") {
 		fileUploadPath += "/"
 	}
@@ -396,10 +385,7 @@ func (f *File) IsImage() bool {
 }
 
 func UpdateFiles(a *Admin) error {
-	config, err := a.App.Config()
-	prago.Must(err)
-
-	fileUploadPath := config["fileUploadPath"]
+	fileUploadPath := a.App.Config().GetString("fileUploadPath")
 	if !strings.HasSuffix(fileUploadPath, "/") {
 		fileUploadPath += "/"
 	}

@@ -11,13 +11,7 @@ type Sessions struct {
 }
 
 func (s *Sessions) Init(app *prago.App) error {
-	config, err := app.Config()
-	if err != nil {
-		return err
-	}
-
-	cookieStore := sessions.NewCookieStore([]byte(config["random"]))
-	s.cookieStore = cookieStore
+	s.cookieStore = sessions.NewCookieStore([]byte(app.Config().GetString("random")))
 	s.app = app
 	app.Data()["sessionStore"] = s
 

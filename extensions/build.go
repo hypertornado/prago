@@ -19,14 +19,7 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 
 	var version = app.Data()["version"].(string)
 	var appName = app.Data()["appName"].(string)
-	config, err := app.Config()
-	if err != nil {
-		return errors.New("Config not found in BuildMiddleware Init")
-	}
-	ssh, ok := config["ssh"]
-	if !ok {
-		fmt.Println("'ssh' key not set up in config.json file. Release command will not work.")
-	}
+	ssh := app.Config().GetString("ssh")
 
 	versionCommand := app.CreateCommand("version", "Print version")
 	app.AddCommand(versionCommand, func(app *prago.App) error {

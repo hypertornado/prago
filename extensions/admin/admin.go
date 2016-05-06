@@ -187,9 +187,7 @@ func (a *Admin) Init(app *prago.App) error {
 
 		}
 
-		config, err := request.App().Config()
-		prago.Must(err)
-		randomness := config["random"]
+		randomness := app.Config().GetString("random")
 		request.SetData("_csrfToken", user.CSRFToken(randomness))
 		request.SetData("currentuser", &user)
 		request.SetData("locale", GetLocale(request))
@@ -330,14 +328,9 @@ func (a *Admin) GetURL(resource *AdminResource, suffix string) string {
 }
 
 func bindDBBackupCron(app *prago.App) {
-	config, err := app.Config()
-	if err != nil {
-		panic(err)
-	}
-
-	user := config["dbUser"]
-	dbName := config["dbName"]
-	password := config["dbPassword"]
+	user := app.Config().GetString("dbUser")
+	dbName := app.Config().GetString("dbName")
+	password := app.Config().GetString("dbPassword")
 
 	app.AddCronTask("backup db", func() {
 		app.Log().Println("Creating backup")

@@ -14,14 +14,9 @@ type Gorm struct {
 }
 
 func (g *Gorm) Init(app *prago.App) error {
-	config, err := app.Config()
-	if err != nil {
-		return err
-	}
-
-	user := config["dbUser"]
-	dbName := config["dbName"]
-	password := config["dbPassword"]
+	user := app.Config().GetString("dbUser")
+	dbName := app.Config().GetString("dbName")
+	password := app.Config().GetString("dbPassword")
 	db, err := g.connectMySQL(user, password, dbName)
 	app.Data()["db"] = db.DB()
 	app.Data()["gorm"] = &db

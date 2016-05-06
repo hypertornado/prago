@@ -7,23 +7,27 @@ import (
 
 var (
 	FileNotFoundError = errors.New("requested file is folder")
-	StaticDirPath     = "public"
+	StaticDirPaths    = []string{"public"}
 )
 
 func requestMiddlewareStatic(p Request, next func()) {
 	if p.IsProcessed() {
 		return
 	}
-	err := ServeStatic(p.Response(), p.Request())
-	if err == nil {
+	if ServeStatic(p.Response(), p.Request()) {
 		p.SetProcessed()
 	}
-
 	next()
 }
 
-func ServeStatic(w http.ResponseWriter, r *http.Request) error {
-	return serveFile(w, r, http.Dir(StaticDirPath), r.URL.Path)
+func ServeStatic(w http.ResponseWriter, r *http.Request) bool {
+	for _, v := range StaticDirPaths {
+		err := serveFile(w, r, http.Dir(v), r.URL.Path)
+		if err == nil {
+			return true
+		}
+	}
+	return false
 }
 
 func serveFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name string) (err error) {

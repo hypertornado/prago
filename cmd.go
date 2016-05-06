@@ -30,13 +30,9 @@ func (m MiddlewareCmd) Init(app *App) error {
 		if portFlag != nil && *portFlag > 0 {
 			port = *portFlag
 		} else {
-			config, err := app.Config()
-			if err != nil {
-				return err
-			}
-			configPort, ok := config["port"]
-			if ok {
-				port, err = strconv.Atoi(configPort)
+			configPort, err := app.Config().Get("port")
+			if err == nil {
+				port, err = strconv.Atoi(configPort.(string))
 				if err != nil {
 					return errors.New("Wrong format of 'port' entry in config file. Should be int.")
 				}
