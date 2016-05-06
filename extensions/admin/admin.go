@@ -213,7 +213,7 @@ func (a *Admin) Init(app *prago.App) error {
 	a.AdminController.Get(a.Prefix+"/*", func(request prago.Request) {
 		request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_404"))
 		request.SetData("admin_yield", "admin_message")
-		prago.Render(request, 200, "admin_layout")
+		prago.Render(request, 404, "admin_layout")
 	})
 
 	return nil

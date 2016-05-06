@@ -145,6 +145,9 @@ const TEMPLATES = `
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="stylesheet" href="{{.admin_header.prefix}}/admin.css">
+    <script type="text/javascript" src="{{.admin_header.prefix}}/jquery.js"></script>
+    <script type="text/javascript" src="{{.admin_header.prefix}}/script.js"></script>
+
   </head>
   <body class="admin">
     {{tmpl "admin_flash" .}}
