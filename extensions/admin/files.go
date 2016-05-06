@@ -135,6 +135,17 @@ func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
 			fi.Readonly = true
 			fi.Value = fmt.Sprintf("%d", file.UserId)
 
+			if file.IsImage() {
+				fi = form.AddTextInput("width", messages.Messages.Get(GetLocale(request), "Width"))
+				fi.Readonly = true
+				fi.Value = fmt.Sprintf("%d", file.Width)
+
+				fi = form.AddTextInput("height", messages.Messages.Get(GetLocale(request), "Height"))
+				fi.Readonly = true
+				fi.Value = fmt.Sprintf("%d", file.Height)
+
+			}
+
 			fi = form.AddTextareaInput("Description", messages.Messages.Get(GetLocale(request), "Description"))
 			fi.Value = file.Description
 			fi.Focused = true
@@ -322,6 +333,18 @@ func (f *File) Update(fileUploadPath string) error {
 	}
 
 	f.Size = stat.Size()
+
+	if f.IsImage() {
+		println("IMAGE")
+		img, err := jpeg.Decode(file)
+		if err != nil {
+			return err
+		}
+		bounds := img.Bounds()
+		f.Width = int64(bounds.Size().X)
+		f.Height = int64(bounds.Size().Y)
+	}
+
 	return nil
 }
 
