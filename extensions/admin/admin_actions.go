@@ -11,7 +11,7 @@ type ActionBinder func(a *Admin, resource *AdminResource)
 func BindList(a *Admin, resource *AdminResource) {
 	resource.ResourceController.Get(a.GetURL(resource, ""), func(request prago.Request) {
 
-		tableData, err := resource.ListTableItems(GetLocale(request))
+		tableData, err := resource.ListTableItems(request)
 		prago.Must(err)
 
 		request.SetData("admin_list_table_data", tableData)

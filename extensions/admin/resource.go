@@ -7,6 +7,7 @@ import (
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/utils"
 	"reflect"
+	"strconv"
 	"time"
 )
 
@@ -24,6 +25,7 @@ type AdminResource struct {
 	Typ                reflect.Type
 	ResourceController *prago.Controller
 	Authenticate       Authenticatizer
+	Pagination         int64
 	item               interface{}
 	admin              DBProvider
 	hasModel           bool
@@ -50,6 +52,7 @@ func NewResource(item interface{}) (*AdminResource, error) {
 		ID:                utils.PrettyUrl(defaultName),
 		Typ:               typ,
 		Authenticate:      AuthenticateAdmin,
+		Pagination:        5,
 		item:              item,
 		hasModel:          true,
 		hasView:           true,
@@ -159,13 +162,47 @@ type ListTableHeader struct {
 }
 
 type ListTable struct {
-	Header []ListTableHeader
-	Rows   []ListTableRow
+	Header     []ListTableHeader
+	Rows       []ListTableRow
+	Pagination Pagination
 }
 
-func (resource *AdminResource) ListTableItems(lang string) (table ListTable, err error) {
+type Pagination struct {
+	PrevUrl string
+	NextUrl string
+	Pages   []string
+}
+
+func (resource *AdminResource) ListTableItems(request prago.Request) (table ListTable, err error) {
+	requestQuery := request.Request().URL.Query()
+	fmt.Println(requestQuery)
+
+	lang := GetLocale(request)
 	q := resource.Query()
 	q = resource.queryFilter(q)
+
+	var count int64
+	count, err = q.Count()
+	if err != nil {
+		return
+	}
+
+	totalPages := (count / resource.Pagination) + 1
+	var page int64 = 1
+	queryPage := requestQuery.Get("p")
+	if len(queryPage) > 0 {
+		convertedPage, err := strconv.Atoi(queryPage)
+		if err == nil && convertedPage > 1 {
+			page = int64(convertedPage)
+		}
+	}
+
+	fmt.Println(count, resource.Pagination, totalPages, page)
+
+	q.Offset((page - 1) * resource.Pagination)
+	//q.Offset(3)
+	q.Limit(resource.Pagination)
+
 	rowItems, err := q.List()
 
 	for _, v := range resource.StructCache.fieldArrays {

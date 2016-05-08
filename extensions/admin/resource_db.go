@@ -146,7 +146,7 @@ func (q *ResourceQuery) Limit(i int64) *ResourceQuery {
 }
 
 func (q *ResourceQuery) Offset(i int64) *ResourceQuery {
-	q.query.limit = i
+	q.query.offset = i
 	return q
 }
 
