@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/utils"
+	"net/url"
 	"reflect"
 	"strconv"
 	"time"
@@ -52,7 +53,7 @@ func NewResource(item interface{}) (*AdminResource, error) {
 		ID:                utils.PrettyUrl(defaultName),
 		Typ:               typ,
 		Authenticate:      AuthenticateAdmin,
-		Pagination:        5,
+		Pagination:        1000,
 		item:              item,
 		hasModel:          true,
 		hasView:           true,
@@ -168,14 +169,19 @@ type ListTable struct {
 }
 
 type Pagination struct {
-	PrevUrl string
-	NextUrl string
-	Pages   []string
+	Prev  Page
+	Next  Page
+	Pages []Page
+}
+
+type Page struct {
+	Name    string
+	Url     string
+	Current bool
 }
 
 func (resource *AdminResource) ListTableItems(request prago.Request) (table ListTable, err error) {
 	requestQuery := request.Request().URL.Query()
-	fmt.Println(requestQuery)
 
 	lang := GetLocale(request)
 	q := resource.Query()
@@ -188,19 +194,33 @@ func (resource *AdminResource) ListTableItems(request prago.Request) (table List
 	}
 
 	totalPages := (count / resource.Pagination) + 1
-	var page int64 = 1
+	var currentPage int64 = 1
 	queryPage := requestQuery.Get("p")
 	if len(queryPage) > 0 {
 		convertedPage, err := strconv.Atoi(queryPage)
 		if err == nil && convertedPage > 1 {
-			page = int64(convertedPage)
+			currentPage = int64(convertedPage)
 		}
 	}
 
-	fmt.Println(count, resource.Pagination, totalPages, page)
+	for i := int64(1); i <= totalPages; i++ {
+		p := Page{}
+		p.Name = fmt.Sprintf("%d", i)
+		if i == currentPage {
+			p.Current = true
+		}
 
-	q.Offset((page - 1) * resource.Pagination)
-	//q.Offset(3)
+		p.Url = request.Request().URL.Path
+		if i > 1 {
+			newUrlValues := make(url.Values)
+			newUrlValues.Set("p", fmt.Sprintf("%d", i))
+			p.Url += "?" + newUrlValues.Encode()
+		}
+
+		table.Pagination.Pages = append(table.Pagination.Pages, p)
+	}
+
+	q.Offset((currentPage - 1) * resource.Pagination)
 	q.Limit(resource.Pagination)
 
 	rowItems, err := q.List()

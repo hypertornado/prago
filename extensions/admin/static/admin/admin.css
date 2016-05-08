@@ -210,3 +210,11 @@ select.input {
   font-weight: bold;
   display: inline-block;
 }
+
+.pagination {
+  text-align: center;
+}
+
+.pagination_page-current {
+  font-weight: bold;
+}

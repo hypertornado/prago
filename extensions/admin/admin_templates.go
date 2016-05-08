@@ -222,6 +222,16 @@ const TEMPLATES = `
 {{end}}
 </table>
 
+<div class="pagination">
+{{range $page := .admin_list_table_data.Pagination.Pages}}
+  {{if $page.Current}}
+    <span class="pagination_page pagination_page-current">{{$page.Name}}</span>
+  {{else}}
+    <a href="{{$page.Url}}" class="pagination_page">{{$page.Name}}</a>
+  {{end}}
+{{end}}
+</div>
+
 {{end}}{{define "admin_login"}}
 <!doctype html>
 <html>
