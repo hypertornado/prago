@@ -66,18 +66,23 @@ function imagePicker() {
     return img;
   }
 
+  function createDraggableImg(item) {
+    var img = itemToImg(item);
+    img.attr("draggable", "true");
+    bindDraggableEvents(img);
+    img.click(function (event) {
+      $(event.currentTarget).remove();
+    });
+    return img;
+  }
+
   function loadImageToPopup(value) {
     selectedContainer.text("Loading...");
     if (value.length > 0) {
       loadImages(value, "", function(items) {
         selectedContainer.text("");
         items.forEach(function (item){
-          var img = itemToImg(item);
-          img.attr("draggable", "true");
-          bindDraggableEvents(img);
-          img.click(function (event) {
-            $(event.currentTarget).remove();
-          });
+          var img = createDraggableImg(item);
           selectedContainer.append(img);
         });
       });
@@ -129,7 +134,6 @@ function imagePicker() {
       showPopup(el);
       return false;
     });
-    $(el).find(".admin_images_edit").click();
   }
 
   function showPreview(el) {
@@ -137,7 +141,6 @@ function imagePicker() {
     var list = $(el).find(".admin_images_list");
     list.text("Loading...");
     var jsonResponse;
-    console.log(value);
     if (value.length > 0) {
       loadImages(value, "", function(items) {
         list.text("");
@@ -149,6 +152,43 @@ function imagePicker() {
       });
     }
   }
+
+  $(".admin_images_popup_box_upload_btn").click(function (e) {
+    var files = $(".admin_images_popup_box_upload input")[0].files
+    var data = new FormData();
+    $.each(files, function(key, value) {
+        data.append("file", value);
+    });
+
+    $(".admin_images_popup_box_upload_message").text("Uploading...");
+    $(".admin_images_popup_box_upload_btn").hide();
+    $(".admin_images_popup_box_upload input").hide();
+
+    $.ajax({
+        url: '/admin/_api/image/upload',
+        type: 'POST',
+        data: data,
+        cache: false,
+        dataType: 'json',
+        processData: false, // Don't process the files
+        contentType: false, // Set content type to false as jQuery will tell the server its a query string request
+        success: function(items) {
+          items.forEach(function (item){
+            var img = createDraggableImg(item);
+            selectedContainer.append(img);
+          });
+
+          $(".admin_images_popup_box_upload_message").text("Uploaded successfully.");
+          $(".admin_images_popup_box_upload_btn").show();
+          $(".admin_images_popup_box_upload input").show();
+        },
+        error: function() {
+            $(".admin_images_popup_box_upload_message").text("Error while uploading files.");
+            $(".admin_images_popup_box_upload_btn").show();
+            $(".admin_images_popup_box_upload input").show();
+        }
+    });
+  });
 
   $(".admin_images").each(
     function(i) {

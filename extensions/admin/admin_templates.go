@@ -100,12 +100,6 @@ const TEMPLATES = `
 {{end}}
 
 {{define "admin_item_image"}}
- <div class="admin_images">
-    <input name="{{.Name}}" value="{{.Value}}" type="hidden">
-  </div>
-{{end}}
-
-{{define "admin_item_images"}}
   <div class="admin_images">
     <input name="{{.Name}}" value="{{.Value}}" type="hidden">
     <div class="admin_images_list"></div>
@@ -188,16 +182,19 @@ const TEMPLATES = `
 
     <div id="admin_images_popup">
       <div class="admin_images_popup_box">
-        <div class="admin_images_popup_box_header">
-          Selected images
+        <div class="admin_images_popup_box_header admin_popup_section">
+          <h3>Selected images</h3>
+          <div class="admin_images_popup_box_content"></div>
         </div>
-        <div class="admin_images_popup_box_content">
-
+        <div class="admin_images_popup_box_upload admin_popup_section">
+            <h3>Upload new files</h3>
+            <div><input type="file" accept=".jpg,.jpeg" multiple class="admin_popup_file"></div>
+            <div class="admin_images_popup_box_upload_message"></div>
+            <button class="admin_images_popup_box_upload_btn btn">Upload</button>
         </div>
-        <div class="admin_images_popup_box_new">
-          Add Image
+        <div class="admin_images_popup_box_new admin_popup_section">
+          <h3>Add Image</h3>
           <input class="admin_images_popup_filter"><button class="btn admin_images_popup_filter_button">Filter</button>
-          <a href="/admin/file/new" class="btn" target="_blank">Upload new image</a>
           <div class="admin_images_popup_box_new_list">
           </div>
         </div>

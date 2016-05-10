@@ -251,3 +251,18 @@ select.input {
   max-height: 100px;
   margin: 3px;
 }
+
+.admin_popup_section {
+  background-color: #eee;
+  padding: 5px;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+
+.admin_popup_section h3 {
+  margin: 5px 0px;
+}
+
+.admin_popup_file {
+  margin-bottom: 15px;
+}

@@ -21,6 +21,11 @@ import (
 	"time"
 )
 
+var (
+	fileUploadPath   = ""
+	fileDownloadPath = ""
+)
+
 var ThumbnailSizes = map[string][2]uint{
 	"large":  {1000, 0},
 	"medium": {400, 0},
@@ -58,10 +63,20 @@ func (File) AdminAfterFormCreated(f *Form, request prago.Request, newItem bool) 
 	return newForm
 }
 
-func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
+func UploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File, error) {
+	fileName := utils.PrettyFilename(fileHeader.Filename)
+	file := &File{}
+	file.Name = fileName
+	file.UID = shortuuid.UUID()
+	folderPath, filePath := file.GetPath(fileUploadPath + "original")
+	prago.Must(loadFile(folderPath, filePath, fileHeader))
+	prago.Must(file.Update(fileUploadPath))
+	return file, nil
+}
 
-	fileUploadPath := a.App.Config().GetString("fileUploadPath")
-	fileDownloadPath := a.App.Config().GetString("fileDownloadPath")
+func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
+	fileUploadPath = a.App.Config().GetString("fileUploadPath")
+	fileDownloadPath = a.App.Config().GetString("fileDownloadPath")
 
 	if !strings.HasSuffix(fileUploadPath, "/") {
 		fileUploadPath += "/"
@@ -81,22 +96,14 @@ func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
 				panic("must have 1 file selected")
 			}
 
-			fileName := utils.PrettyFilename(multipartFiles[0].Filename)
-
-			item, err := resource.NewItem()
-			prago.Must(err)
-			file := item.(*File)
-			file.Name = fileName
-			file.Description = request.Params().Get("Description")
-			file.UID = shortuuid.UUID()
+			file, err := UploadFile(multipartFiles[0], fileUploadPath)
+			if err != nil {
+				panic(err)
+			}
 			file.UserId = GetUser(request).ID
-
-			folderPath, filePath := file.GetPath(fileUploadPath + "original")
-			prago.Must(loadFile(folderPath, filePath, multipartFiles[0]))
-
-			prago.Must(file.Update(fileUploadPath))
-
+			file.Description = request.Params().Get("Description")
 			prago.Must(resource.Create(file))
+
 			FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
 			prago.Redirect(request, a.Prefix+"/"+resource.ID)
 		})
@@ -271,6 +278,26 @@ type ImageResponse struct {
 	Thumb       string
 }
 
+func writeFileResponse(request prago.Request, files []*File) {
+	responseData := []*ImageResponse{}
+	for _, v := range files {
+		ir := &ImageResponse{
+			ID:          v.ID,
+			UID:         v.UID,
+			Name:        v.Name,
+			Description: v.Description,
+		}
+
+		_, fileUrl := v.GetPath(fileDownloadPath + "thumb/small")
+		ir.Thumb = fileUrl
+
+		responseData = append(responseData, ir)
+	}
+
+	WriteApi(request, responseData, 200)
+
+}
+
 func BindImageAPI(a *Admin, fileDownloadPath string) {
 	a.App.MainController().Get(a.Prefix+"/_api/image/list", func(request prago.Request) {
 		var images []*File
@@ -296,28 +323,27 @@ func BindImageAPI(a *Admin, fileDownloadPath string) {
 				q = q.Where("name LIKE ?", filter)
 			}
 			prago.Must(q.Get(&images))
-			fmt.Println(images)
 		}
+		writeFileResponse(request, images)
 
-		responseData := []*ImageResponse{}
+	})
 
-		for _, v := range images {
-			ir := &ImageResponse{
-				ID:          v.ID,
-				UID:         v.UID,
-				Name:        v.Name,
-				Description: v.Description,
+	a.AdminController.Post(a.Prefix+"/_api/image/upload", func(request prago.Request) {
+		multipartFiles := request.Request().MultipartForm.File["file"]
+
+		files := []*File{}
+
+		for _, v := range multipartFiles {
+			file, err := UploadFile(v, fileUploadPath)
+			if err != nil {
+				panic(err)
 			}
-
-			_, fileUrl := v.GetPath(fileDownloadPath + "thumb/small")
-			ir.Thumb = fileUrl
-
-			responseData = append(responseData, ir)
+			file.UserId = GetUser(request).ID
+			prago.Must(a.Create(file))
+			files = append(files, file)
 		}
 
-		fmt.Println(responseData)
-
-		WriteApi(request, responseData, 200)
+		writeFileResponse(request, files)
 	})
 }
 
@@ -435,7 +461,6 @@ func (f *File) Update(fileUploadPath string) error {
 	f.Size = stat.Size()
 
 	if f.IsImage() {
-		println("IMAGE")
 		img, err := jpeg.Decode(file)
 		if err != nil {
 			return err
@@ -447,7 +472,6 @@ func (f *File) Update(fileUploadPath string) error {
 
 		for k, v := range ThumbnailSizes {
 			dirPath, filePath := f.GetPath(fileUploadPath + "thumb/" + k)
-			fmt.Println(dirPath, filePath, v)
 			err := os.MkdirAll(dirPath, 0777)
 			if err != nil {
 				return err
@@ -479,11 +503,6 @@ func (f *File) IsImage() bool {
 }
 
 func UpdateFiles(a *Admin) error {
-	fileUploadPath := a.App.Config().GetString("fileUploadPath")
-	if !strings.HasSuffix(fileUploadPath, "/") {
-		fileUploadPath += "/"
-	}
-
 	var files []*File
 	a.Query().Get(&files)
 	for _, file := range files {
