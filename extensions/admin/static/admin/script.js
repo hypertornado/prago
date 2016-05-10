@@ -25,6 +25,7 @@ function imagePicker() {
           cloned.click(function (event) {
             $(event.currentTarget).remove();
           });
+          bindDraggableEvents(cloned);
           selectedContainer.append(cloned);
         });
         loadedContainer.append(img);
@@ -44,8 +45,6 @@ function imagePicker() {
       if (this != draggedElement) {
         var uid = $(this).data("uid");
         var src = $(this).attr("src");
-
-        console.log(uid, src);
 
         $(this).data("uid", $(draggedElement).data("uid"));
         $(this).attr("src", $(draggedElement).attr("src"));
