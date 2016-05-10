@@ -2,6 +2,7 @@ package admin
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/hypertornado/prago"
@@ -68,6 +69,8 @@ func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
 	if !strings.HasSuffix(fileDownloadPath, "/") {
 		fileDownloadPath += "/"
 	}
+
+	BindImageAPI(a, fileDownloadPath)
 
 	resource.Actions["create"] = func(a *Admin, resource *AdminResource) {
 		resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
@@ -258,6 +261,97 @@ func ResizeImage(param, id string) (out []byte, err error) {
 	buf := bytes.NewBufferString("")
 	jpeg.Encode(buf, img, nil)
 	return ioutil.ReadAll(buf)
+}
+
+type ImageResponse struct {
+	ID          int64
+	UID         string
+	Name        string
+	Description string
+	Thumb       string
+}
+
+func BindImageAPI(a *Admin, fileDownloadPath string) {
+	a.App.MainController().Get(a.Prefix+"/_api/image/list", func(request prago.Request) {
+		var images []*File
+
+		if len(request.Params().Get("ids")) > 0 {
+			ids := strings.Split(request.Params().Get("ids"), ",")
+
+			for _, v := range ids {
+				var image File
+				err := a.Query().WhereIs("uid", v).Get(&image)
+				if err == nil {
+					images = append(images, &image)
+				} else {
+					if err != ErrorNotFound {
+						panic(err)
+					}
+				}
+			}
+		} else {
+			filter := "%" + request.Params().Get("q") + "%"
+			q := a.Query().WhereIs("filetype", "image").OrderDesc("createdat").Limit(10)
+			if len(request.Params().Get("q")) > 0 {
+				q = q.Where("name LIKE ?", filter)
+			}
+			prago.Must(q.Get(&images))
+			fmt.Println(images)
+		}
+
+		responseData := []*ImageResponse{}
+
+		for _, v := range images {
+			ir := &ImageResponse{
+				ID:          v.ID,
+				UID:         v.UID,
+				Name:        v.Name,
+				Description: v.Description,
+			}
+
+			_, fileUrl := v.GetPath(fileDownloadPath + "thumb/small")
+			ir.Thumb = fileUrl
+
+			responseData = append(responseData, ir)
+		}
+
+		fmt.Println(responseData)
+
+		WriteApi(request, responseData, 200)
+	})
+}
+
+func WriteApi(r prago.Request, data interface{}, code int) {
+	r.SetProcessed()
+
+	r.Response().Header().Add("Content-type", "application/json")
+
+	pretty := false
+	if r.Params().Get("pretty") == "true" {
+		pretty = true
+	}
+
+	var responseToWrite interface{}
+	if code >= 400 {
+		responseToWrite = map[string]interface{}{"error": data, "errorCode": code}
+	} else {
+		responseToWrite = data
+	}
+
+	var result []byte
+	var e error
+
+	if pretty == true {
+		result, e = json.MarshalIndent(responseToWrite, "", "  ")
+	} else {
+		result, e = json.Marshal(responseToWrite)
+	}
+
+	if e != nil {
+		panic("error while generating JSON output")
+	}
+	r.Response().WriteHeader(code)
+	r.Response().Write(result)
 }
 
 func BindImageResizer(controller *prago.Controller, path string) {

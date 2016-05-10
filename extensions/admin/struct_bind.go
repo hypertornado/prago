@@ -41,14 +41,7 @@ func (cache *StructCache) BindData(item interface{}, params url.Values, multiFor
 				}
 			}
 		case reflect.String:
-			if field.Tags["prago-type"] == "image" {
-				imageId, err := NewImageFromMultipartForm(multiForm, field.Name)
-				if err == nil {
-					val.SetString(imageId)
-				}
-			} else {
-				val.SetString(urlValue)
-			}
+			val.SetString(urlValue)
 		case reflect.Bool:
 			if urlValue == "on" {
 				val.SetBool(true)

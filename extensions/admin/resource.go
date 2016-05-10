@@ -279,6 +279,10 @@ func ValueToCell(field reflect.StructField, val reflect.Value) (cell ItemCell) {
 		cell.TemplateName = "admin_image"
 	}
 
+	if field.Tag.Get("prago-type") == "images" {
+		cell.TemplateName = "admin_images"
+	}
+
 	if val.Type() == reflect.TypeOf(time.Now()) {
 		var tm time.Time
 		reflect.ValueOf(&tm).Elem().Set(val)

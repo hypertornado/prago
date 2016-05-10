@@ -45,6 +45,28 @@
     {{if .template_after}}{{tmpl .template_after .}}{{end}}
 
     </div>
+
+    <div id="admin_images_popup">
+      <div class="admin_images_popup_box">
+        <div class="admin_images_popup_box_header">
+          Selected images
+        </div>
+        <div class="admin_images_popup_box_content">
+
+        </div>
+        <div class="admin_images_popup_box_new">
+          Add Image
+          <input class="admin_images_popup_filter"><button class="btn admin_images_popup_filter_button">Filter</button>
+          <a href="/admin/file/new" class="btn" target="_blank">Upload new image</a>
+          <div class="admin_images_popup_box_new_list">
+          </div>
+        </div>
+        <div class="admin_images_popup_box_footer">
+          <button class="btn admin_images_popup_save">Save</button>
+          <button class="btn admin_images_popup_cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
     
   </body>
 </html>

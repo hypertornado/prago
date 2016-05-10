@@ -100,13 +100,17 @@ const TEMPLATES = `
 {{end}}
 
 {{define "admin_item_image"}}
-  {{if .Value}}
-  <img src="/img/200x0/{{.Value}}.jpg" style="max-width: 100px; max-height: 100px; display: block; margin: 5px;">
-  {{end}}
+ <div class="admin_images">
+    <input name="{{.Name}}" value="{{.Value}}" type="hidden">
+  </div>
+{{end}}
 
-  {{if .Readonly}}
-  <input type="file" name="{{.Name}}" accept=".jpeg,.jpg" class="input form_input"{{if .Focused}} autofocus{{end}}>
-  {{end}}
+{{define "admin_item_images"}}
+  <div class="admin_images">
+    <input name="{{.Name}}" value="{{.Value}}" type="hidden">
+    <div class="admin_images_list"></div>
+    <a href="#" class="btn admin_images_edit">Edit</a>
+  </div>
 {{end}}
 
 {{define "admin_item_file"}}
@@ -180,6 +184,28 @@ const TEMPLATES = `
 
     {{if .template_after}}{{tmpl .template_after .}}{{end}}
 
+    </div>
+
+    <div id="admin_images_popup">
+      <div class="admin_images_popup_box">
+        <div class="admin_images_popup_box_header">
+          Selected images
+        </div>
+        <div class="admin_images_popup_box_content">
+
+        </div>
+        <div class="admin_images_popup_box_new">
+          Add Image
+          <input class="admin_images_popup_filter"><button class="btn admin_images_popup_filter_button">Filter</button>
+          <a href="/admin/file/new" class="btn" target="_blank">Upload new image</a>
+          <div class="admin_images_popup_box_new_list">
+          </div>
+        </div>
+        <div class="admin_images_popup_box_footer">
+          <button class="btn admin_images_popup_save">Save</button>
+          <button class="btn admin_images_popup_cancel">Cancel</button>
+        </div>
+      </div>
     </div>
     
   </body>
