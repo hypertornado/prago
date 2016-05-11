@@ -37,6 +37,10 @@ func (m MiddlewareView) Init(app *App) error {
 		return template.HTML(data)
 	}
 
+	templateFuncs["CSS"] = func(data string) template.CSS {
+		return template.CSS(data)
+	}
+
 	templates = templates.Funcs(templateFuncs)
 
 	app.data["templates"] = templates

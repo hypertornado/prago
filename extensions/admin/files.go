@@ -495,6 +495,23 @@ func (f *File) Update(fileUploadPath string) error {
 	return nil
 }
 
+func (f *File) getSize(size string) string {
+	_, path := f.GetPath(fileDownloadPath + "thumb/" + size)
+	return path
+}
+
+func (f *File) GetLarge() string {
+	return f.getSize("large")
+}
+
+func (f *File) GetMedium() string {
+	return f.getSize("medium")
+}
+
+func (f *File) GetSmall() string {
+	return f.getSize("small")
+}
+
 func (f *File) IsImage() bool {
 	if strings.HasSuffix(f.Name, ".jpg") || strings.HasSuffix(f.Name, ".jpeg") {
 		return true
