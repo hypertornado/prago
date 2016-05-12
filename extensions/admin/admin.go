@@ -154,10 +154,6 @@ func (a *Admin) Init(app *prago.App) error {
 		return err
 	}
 
-	appName := app.Data()["appName"].(string)
-	path := os.Getenv("HOME") + "/." + appName + "/files"
-	BindImageResizer(app.MainController(), path)
-
 	err = app.LoadTemplateFromString(TEMPLATES)
 	if err != nil {
 		panic(err)
