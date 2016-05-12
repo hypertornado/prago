@@ -274,9 +274,11 @@ const TEMPLATES = `
 
     {{tmpl "admin_form" .admin_form}}
 
+    {{if .bottom}}
     <div style="text-align: center">
     {{Plain .bottom}}
     </div>
+    {{end}}
 
     </div>
   </body>

@@ -105,10 +105,10 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 
 	renderLogin := func(request prago.Request, form *Form, locale string) {
 		title := fmt.Sprintf("%s - %s", a.AppName, messages.Messages.Get(locale, "admin_login_name"))
-		request.SetData("bottom", fmt.Sprintf("<a href=\"new\">%s</a><br><a href=\"forgot\">%s</a>",
+		/*request.SetData("bottom", fmt.Sprintf("<a href=\"new\">%s</a><br><a href=\"forgot\">%s</a>",
 			messages.Messages.Get(locale, "admin_register"),
 			messages.Messages.Get(locale, "admin_forgoten"),
-		))
+		))*/
 		request.SetData("admin_header_prefix", a.Prefix)
 		request.SetData("admin_form", form)
 		request.SetData("title", title)
@@ -151,6 +151,11 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 			renderLogin(request, form, locale)
 			return
 		}
+
+		user.LoggedInTime = time.Now()
+		user.LoggedInUseragent = request.Request().UserAgent()
+		user.LoggedInIP = request.Request().RemoteAddr
+		prago.Must(a.Save(&user))
 
 		session.Values["user_id"] = user.ID
 		session.AddFlash(messages.Messages.Get(locale, "admin_login_ok"))
@@ -197,12 +202,12 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		prago.Render(request, 200, "admin_login")
 	}
 
-	a.AdminAccessController.Get(a.GetURL(resource, "new"), func(request prago.Request) {
+	a.AdminAccessController.Get(a.GetURL(resource, "registration"), func(request prago.Request) {
 		locale := GetLocale(request)
 		renderRegistration(request, newUserForm(locale), locale)
 	})
 
-	a.AdminAccessController.Post(a.GetURL(resource, "new"), func(request prago.Request) {
+	a.AdminAccessController.Post(a.GetURL(resource, "registration"), func(request prago.Request) {
 		locale := GetLocale(request)
 
 		form := newUserForm(locale)
@@ -214,6 +219,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 			email := request.Params().Get("email")
 			user := &User{}
 			user.Email = email
+			user.IsActive = true
 			prago.Must(user.NewPassword(request.Params().Get("password")))
 			prago.Must(a.Create(user))
 
