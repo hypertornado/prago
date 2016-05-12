@@ -142,10 +142,8 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 				prago.Must(session.Save(request.Request(), request.Response()))
 				renderLogin(request, form, locale)
 				return
-			} else {
-				panic(err)
 			}
-			return
+			panic(err)
 		}
 
 		if !user.IsPassword(password) {
