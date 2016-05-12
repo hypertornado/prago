@@ -9,6 +9,7 @@ import (
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"io"
+	"strconv"
 	"time"
 )
 
@@ -161,6 +162,28 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		session.AddFlash(messages.Messages.Get(locale, "admin_login_ok"))
 		prago.Must(session.Save(request.Request(), request.Response()))
 		prago.Redirect(request, a.Prefix)
+	})
+
+	a.AdminController.Get(a.GetURL(resource, "as")+"/:id", func(request prago.Request) {
+
+		u := GetUser(request)
+		if !u.IsSysadmin {
+			panic("access denied")
+		}
+
+		id, err := strconv.Atoi(request.Params().Get("id"))
+		if err != nil {
+			panic(err)
+		}
+
+		var user User
+		prago.Must(a.Query().WhereIs("id", id).Get(&user))
+
+		session := request.GetData("session").(*sessions.Session)
+		session.Values["user_id"] = user.ID
+		prago.Must(session.Save(request.Request(), request.Response()))
+		prago.Redirect(request, a.Prefix)
+
 	})
 
 	newUserForm := func(locale string) *Form {
