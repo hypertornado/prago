@@ -27,6 +27,7 @@ type AdminResource struct {
 	ResourceController *prago.Controller
 	Authenticate       Authenticatizer
 	Pagination         int64
+	Order              bool //TODO: remove, use just after order item
 	item               interface{}
 	admin              DBProvider
 	hasModel           bool
@@ -166,6 +167,7 @@ type ListTable struct {
 	Header     []ListTableHeader
 	Rows       []ListTableRow
 	Pagination Pagination
+	Order      bool
 }
 
 type Pagination struct {
@@ -182,6 +184,7 @@ type Page struct {
 
 func (resource *AdminResource) ListTableItems(request prago.Request) (table ListTable, err error) {
 	requestQuery := request.Request().URL.Query()
+	table.Order = resource.Order
 
 	lang := GetLocale(request)
 	q := resource.Query()
