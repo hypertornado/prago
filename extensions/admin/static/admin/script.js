@@ -55,7 +55,6 @@ function imagePicker() {
     });
 
     el.on("dragover", function(e){
-      //console.log("dragover");
       e.preventDefault();
     });
   }
@@ -77,8 +76,8 @@ function imagePicker() {
   }
 
   function loadImageToPopup(value) {
-    selectedContainer.text("Loading...");
     if (value.length > 0) {
+      selectedContainer.text("Loading...");
       loadImages(value, "", function(items) {
         selectedContainer.text("");
         items.forEach(function (item){
@@ -111,6 +110,7 @@ function imagePicker() {
   function showPopup(el) {
     connectedItem = el;
     loadImageToPopup($(el).find("input").val());
+    $(el).find("admin_images_popup_box").focus();
     popup.show();
   }
 
@@ -139,13 +139,13 @@ function imagePicker() {
   function showPreview(el) {
     var value = $(el).find("input").val();
     var list = $(el).find(".admin_images_list");
-    list.text("Loading...");
     var jsonResponse;
     if (value.length > 0) {
+      list.text("Loading...");
       loadImages(value, "", function(items) {
         list.text("");
         items.forEach(function (item){
-          var link = $("<a href='/admin/file/"+item.ID+"'></a>");
+          var link = $("<a href='/admin/file/"+item.ID+"' target='_blank'></a>");
           link.append($("<img>").attr("src", item.Thumb).addClass("admin_images_img"));
           list.append(link);
         });
