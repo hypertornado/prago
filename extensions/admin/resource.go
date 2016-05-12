@@ -65,6 +65,7 @@ func NewResource(item interface{}) (*AdminResource, error) {
 
 	ret.Actions = map[string]ActionBinder{
 		"list":   BindList,
+		"order":  BindOrder,
 		"new":    BindNew,
 		"create": BindCreate,
 		"detail": BindDetail,
@@ -183,6 +184,7 @@ type Page struct {
 }
 
 func (resource *AdminResource) ListTableItems(request prago.Request) (table ListTable, err error) {
+
 	requestQuery := request.Request().URL.Query()
 	table.Order = resource.Order
 

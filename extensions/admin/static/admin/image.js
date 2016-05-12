@@ -1,4 +1,4 @@
-function imagePicker() {
+function bindImagePicker() {
   var popup = $("#admin_images_popup");
 
   popup.click(function(e){

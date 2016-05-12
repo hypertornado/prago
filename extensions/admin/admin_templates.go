@@ -146,6 +146,7 @@ const TEMPLATES = `
     <link rel="stylesheet" href="{{.admin_header.prefix}}/admin.css">
     <script type="text/javascript" src="{{.admin_header.prefix}}/jquery.js"></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/image.js"></script>
+    <script type="text/javascript" src="{{.admin_header.prefix}}/order.js"></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/script.js"></script>
 
   </head>
@@ -221,14 +222,14 @@ const TEMPLATES = `
 <a href="{{.admin_resource.ID}}/new" class="btn">{{message .locale "admin_new"}}</a>
 
 <table class="admin_table{{if .admin_list_table_data.Order}} admin_table-order{{end}}">
-  <tr>
+  <tr class="admin_table_header">
   {{range $item := .admin_list_table_data.Header}}
     <th>{{$item.NameHuman}}</th>
   {{end}}
   <th colspan="2"></th>
   </tr>
 {{range $item := .admin_list_table_data.Rows}}
-  <tr data-id="{{$item.ID}}">
+  <tr data-id="{{$item.ID}}" class="admin_table_row">
     {{range $cell := $item.Items}}
     <td>
       {{ tmpl $cell.TemplateName $cell.Value }}

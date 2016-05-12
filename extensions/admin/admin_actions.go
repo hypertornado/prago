@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"encoding/json"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"strconv"
@@ -134,8 +135,31 @@ func BindDelete(a *Admin, resource *AdminResource) {
 	})
 }
 
+func BindOrder(a *Admin, resource *AdminResource) {
+	resource.ResourceController.Post(a.GetURL(resource, "order"), func(request prago.Request) {
+		decoder := json.NewDecoder(request.Request().Body)
+		var t = map[string][]int{}
+		err := decoder.Decode(&t)
+		prago.Must(err)
+
+		order, ok := t["order"]
+		if !ok {
+			panic("wrong format")
+		}
+
+		for i, id := range order {
+			item, err := resource.Query().Where(id).First()
+			prago.Must(err)
+			prago.Must(resource.StructCache.BindOrder(item, int64(i)))
+			prago.Must(resource.Save(item))
+		}
+
+		WriteApi(request, true, 200)
+	})
+}
+
 func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
-	defaultActions := []string{"list", "new", "create", "detail", "update", "delete"}
+	defaultActions := []string{"list", "order", "new", "create", "detail", "update", "delete"}
 	for _, v := range defaultActions {
 		action := resource.Actions[v]
 		if action != nil {
