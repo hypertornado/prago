@@ -1,4 +1,5 @@
 package admin
+
 const TEMPLATES = `
 {{define "admin_edit"}}
 
@@ -341,4 +342,3 @@ const TEMPLATES = `
 {{tmpl "admin_form" .admin_form}}
 
 {{end}}`
-

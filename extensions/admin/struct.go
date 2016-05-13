@@ -32,7 +32,6 @@ func NewStructCache(item interface{}) (ret *StructCache, err error) {
 		ret.fieldArrays = append(ret.fieldArrays, field)
 		ret.fieldMap[field.Name] = field
 	}
-
 	return
 }
 
@@ -81,14 +80,12 @@ func (a *StructField) humanName(lang string) (ret string) {
 	description := a.Tags["prago-description"]
 	if len(description) > 0 {
 		return description
-	} else {
-		translatedName := messages.Messages.GetNullable(lang, a.Name)
-		if translatedName == nil {
-			return a.Name
-		} else {
-			return *translatedName
-		}
 	}
+	translatedName := messages.Messages.GetNullable(lang, a.Name)
+	if translatedName == nil {
+		return a.Name
+	}
+	return *translatedName
 }
 
 func newStructField(field reflect.StructField, order int) *StructField {
