@@ -6,21 +6,21 @@
 {{$locale := .locale}}
 
 {{$csrfToken := ._csrfToken}}
-{{$table := .admin_list_table_data}}
+{{$table := .admin_list}}
 
 {{if $table.HasNew}}
   <a href="{{.admin_resource.ID}}/new" class="btn">{{message .locale "admin_new"}}</a>
 {{end}}
 
-<table class="admin_table{{if .admin_list_table_data.Order}} admin_table-order{{end}}">
+<table class="admin_table{{if .admin_list.Order}} admin_table-order{{end}}">
   <tr class="admin_table_header">
-  {{range $item := .admin_list_table_data.Header}}
+  {{range $item := .admin_list.Header}}
     <th>{{$item.NameHuman}}</th>
   {{end}}
   <th></th>
   {{if $table.HasDelete}}<th></th>{{end}}
   </tr>
-{{range $item := .admin_list_table_data.Rows}}
+{{range $item := .admin_list.Rows}}
   <tr data-id="{{$item.ID}}" class="admin_table_row">
     {{range $cell := $item.Items}}
     <td>
@@ -42,7 +42,7 @@
 </table>
 
 <div class="pagination">
-{{range $page := .admin_list_table_data.Pagination.Pages}}
+{{range $page := .admin_list.Pagination.Pages}}
   {{if $page.Current}}
     <span class="pagination_page pagination_page-current">{{$page.Name}}</span>
   {{else}}

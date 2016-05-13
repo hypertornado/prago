@@ -161,14 +161,13 @@ func (ar *AdminResource) tableName() string {
 	return ar.table
 }
 
-type ItemCell struct {
-	TemplateName string
-	Value        string
-}
-
-type ListTableRow struct {
-	ID    int64
-	Items []ItemCell
+type List struct {
+	Header     []ListTableHeader
+	Rows       []ListTableRow
+	Pagination Pagination
+	Order      bool
+	HasDelete  bool
+	HasNew     bool
 }
 
 type ListTableHeader struct {
@@ -176,13 +175,14 @@ type ListTableHeader struct {
 	NameHuman string
 }
 
-type ListTable struct {
-	Header     []ListTableHeader
-	Rows       []ListTableRow
-	Pagination Pagination
-	Order      bool
-	HasDelete  bool
-	HasNew     bool
+type ListTableRow struct {
+	ID    int64
+	Items []ItemCell
+}
+
+type ItemCell struct {
+	TemplateName string
+	Value        string
 }
 
 type Pagination struct {
@@ -197,7 +197,7 @@ type Page struct {
 	Current bool
 }
 
-func (resource *AdminResource) ListTableItems(lang string, path string, requestQuery url.Values) (table ListTable, err error) {
+func (resource *AdminResource) GetList(lang string, path string, requestQuery url.Values) (list List, err error) {
 	q := resource.Query()
 	if resource.OrderDesc {
 		q = q.OrderDesc(resource.OrderByColumn)
@@ -205,11 +205,11 @@ func (resource *AdminResource) ListTableItems(lang string, path string, requestQ
 		q = q.Order(resource.OrderByColumn)
 	}
 
-	_, table.HasDelete = resource.Actions["delete"]
-	_, table.HasNew = resource.Actions["new"]
+	_, list.HasDelete = resource.Actions["delete"]
+	_, list.HasNew = resource.Actions["new"]
 
 	if resource.StructCache.OrderColumnName == resource.OrderByColumn && !resource.OrderDesc {
-		table.Order = true
+		list.Order = true
 	}
 
 	var count int64
@@ -247,7 +247,7 @@ func (resource *AdminResource) ListTableItems(lang string, path string, requestQ
 				p.Url += "?" + newUrlValues.Encode()
 			}
 
-			table.Pagination.Pages = append(table.Pagination.Pages, p)
+			list.Pagination.Pages = append(list.Pagination.Pages, p)
 		}
 	}
 
@@ -270,7 +270,7 @@ func (resource *AdminResource) ListTableItems(lang string, path string, requestQ
 		}
 
 		if show {
-			table.Header = append(table.Header, ListTableHeader{Name: v.Name, NameHuman: v.humanName(lang)})
+			list.Header = append(list.Header, ListTableHeader{Name: v.Name, NameHuman: v.humanName(lang)})
 		}
 	}
 
@@ -279,13 +279,13 @@ func (resource *AdminResource) ListTableItems(lang string, path string, requestQ
 		row := ListTableRow{}
 		itemVal := val.Index(i).Elem()
 
-		for _, h := range table.Header {
+		for _, h := range list.Header {
 			structField, _ := resource.Typ.FieldByName(h.Name)
 			fieldVal := itemVal.FieldByName(h.Name)
 			row.Items = append(row.Items, ValueToCell(structField, fieldVal))
 		}
 		row.ID = itemVal.FieldByName("ID").Int()
-		table.Rows = append(table.Rows, row)
+		list.Rows = append(list.Rows, row)
 	}
 	return
 }

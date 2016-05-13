@@ -159,7 +159,7 @@ function bindImagePicker() {
     $(".admin_images_popup_box_upload_message").text("Uploading...");
     $(".admin_images_popup_box_upload_btn").hide();
     $(".admin_images_popup_box_upload input").hide();
-
+    //TODO: get prefix for admin
     $.ajax({
         url: '/admin/_api/image/upload',
         type: 'POST',

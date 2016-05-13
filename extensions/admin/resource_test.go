@@ -26,7 +26,7 @@ func prepareResource() *AdminResource {
 func TestResource(t *testing.T) {
 	resource := prepareResource()
 
-	items, err := resource.ListTableItems("en", "", make(map[string][]string))
+	items, err := resource.GetList("en", "", make(map[string][]string))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,7 +51,7 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	items, _ = resource.ListTableItems("en", "", make(map[string][]string))
+	items, _ = resource.GetList("en", "", make(map[string][]string))
 
 	if len(items.Header) != 3 {
 		t.Fatal(len(items.Header))
