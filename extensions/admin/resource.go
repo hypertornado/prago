@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/hypertornado/prago/utils"
 	"net/url"
 	"reflect"
@@ -29,8 +30,8 @@ type AdminResource struct {
 	Pagination         int64
 	item               interface{}
 	admin              DBProvider
-	hasModel           bool
-	hasView            bool
+	HasModel           bool
+	HasView            bool
 	table              string
 	queryFilter        func(*ResourceQuery) *ResourceQuery
 	StructCache        *StructCache
@@ -53,10 +54,10 @@ func NewResource(item interface{}) (*AdminResource, error) {
 		ID:                utils.PrettyUrl(defaultName),
 		Typ:               typ,
 		Authenticate:      AuthenticateAdmin,
-		Pagination:        1000,
+		Pagination:        100000,
 		item:              item,
-		hasModel:          true,
-		hasView:           true,
+		HasModel:          true,
+		HasView:           true,
 		StructCache:       structCache,
 		VisibilityFilter:  DefaultVisibilityFilter,
 		EditabilityFilter: DefaultEditabilityFilter,
@@ -84,20 +85,6 @@ func NewResource(item interface{}) (*AdminResource, error) {
 	})
 	if ok {
 		ret.ID = ifaceID.AdminID()
-	}
-
-	ifaceHasModel, ok := item.(interface {
-		AdminHasModel() bool
-	})
-	if ok {
-		ret.hasModel = ifaceHasModel.AdminHasModel()
-	}
-
-	ifaceHasView, ok := item.(interface {
-		AdminHasView() bool
-	})
-	if ok {
-		ret.hasView = ifaceHasView.AdminHasView()
 	}
 
 	ifaceHasAuthenticate, ok := item.(interface {
@@ -133,6 +120,43 @@ func NewResource(item interface{}) (*AdminResource, error) {
 	}
 
 	return ret, nil
+}
+
+func (a *Admin) initResource(resource *AdminResource) error {
+
+	resource.ResourceController = a.AdminController.SubController()
+
+	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
+		request.SetData("admin_resource", resource)
+		next()
+
+		if !request.IsProcessed() && request.GetData("statusCode") == nil {
+			prago.Render(request, 200, "admin_layout")
+		}
+	})
+
+	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
+		user := request.GetData("currentuser").(*User)
+		if !resource.Authenticate(user) {
+			request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_403"))
+			request.SetData("admin_yield", "admin_message")
+			prago.Render(request, 403, "admin_layout")
+		} else {
+			next()
+		}
+	})
+
+	init, ok := resource.item.(interface {
+		AdminInitResource(*Admin, *AdminResource) error
+	})
+
+	if ok {
+		err := init.AdminInitResource(a, resource)
+		if err != nil {
+			return err
+		}
+	}
+	return AdminInitResourceDefault(a, resource)
 }
 
 func (ar *AdminResource) db() *sql.DB {

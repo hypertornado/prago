@@ -67,7 +67,7 @@ func (a *Admin) CreateResources(items ...interface{}) error {
 
 func (a *Admin) UnsafeDropTables() error {
 	for _, resource := range a.Resources {
-		if resource.hasModel {
+		if resource.HasModel {
 			err := resource.UnsafeDropTable()
 			if err != nil {
 				return err
@@ -79,7 +79,7 @@ func (a *Admin) UnsafeDropTables() error {
 
 func (a *Admin) Migrate() error {
 	for _, resource := range a.Resources {
-		if resource.hasModel {
+		if resource.HasModel {
 			err := resource.Migrate()
 			if err != nil {
 				return err
@@ -98,7 +98,7 @@ func FlashMessage(request prago.Request, message string) {
 func (a *Admin) AddResource(resource *AdminResource) error {
 	resource.admin = a
 	a.Resources = append(a.Resources, resource)
-	if resource.hasModel {
+	if resource.HasModel {
 		a.resourceMap[resource.Typ] = resource
 	}
 	return nil
@@ -276,43 +276,6 @@ func (a *Admin) initTemplates(app *prago.App) error {
 	})
 
 	return nil
-}
-
-func (a *Admin) initResource(resource *AdminResource) error {
-
-	resource.ResourceController = a.AdminController.SubController()
-
-	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
-		request.SetData("admin_resource", resource)
-		next()
-
-		if !request.IsProcessed() && request.GetData("statusCode") == nil {
-			prago.Render(request, 200, "admin_layout")
-		}
-	})
-
-	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
-		user := request.GetData("currentuser").(*User)
-		if !resource.Authenticate(user) {
-			request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_403"))
-			request.SetData("admin_yield", "admin_message")
-			prago.Render(request, 403, "admin_layout")
-		} else {
-			next()
-		}
-	})
-
-	init, ok := resource.item.(interface {
-		AdminInitResource(*Admin, *AdminResource) error
-	})
-
-	if ok {
-		err := init.AdminInitResource(a, resource)
-		if err != nil {
-			return err
-		}
-	}
-	return AdminInitResourceDefault(a, resource)
 }
 
 func (a *Admin) GetURL(resource *AdminResource, suffix string) string {

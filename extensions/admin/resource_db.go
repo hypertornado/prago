@@ -69,7 +69,7 @@ func (q *listQuery) addOrder(name string, desc bool) {
 }
 
 func (ar *AdminResource) Save(item interface{}) error {
-	if !ar.hasModel {
+	if !ar.HasModel {
 		return ErrorDontHaveModel
 	}
 
@@ -84,7 +84,7 @@ func (ar *AdminResource) Save(item interface{}) error {
 }
 
 func (ar *AdminResource) Create(item interface{}) error {
-	if !ar.hasModel {
+	if !ar.HasModel {
 		return ErrorDontHaveModel
 	}
 
@@ -106,7 +106,7 @@ func (ar *AdminResource) Create(item interface{}) error {
 
 func (ar *AdminResource) Query() *ResourceQuery {
 	var err error
-	if !ar.hasModel {
+	if !ar.HasModel {
 		err = ErrorDontHaveModel
 	}
 	return &ResourceQuery{
