@@ -30,7 +30,7 @@ var ThumbnailSizes = map[string][2]uint{
 }
 
 type File struct {
-	ID          int64
+	ID          int64 `prago-order-desc:"true"`
 	Name        string
 	Description string `prago-type:"text"`
 	UID         string `prago-unique:"true"`
@@ -72,6 +72,8 @@ func UploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File,
 }
 
 func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
+	resource.Pagination = 10
+
 	fileUploadPath = a.App.Config().GetString("fileUploadPath")
 	fileDownloadPath = a.App.Config().GetString("fileDownloadPath")
 

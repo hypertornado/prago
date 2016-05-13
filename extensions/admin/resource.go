@@ -213,7 +213,11 @@ func (resource *AdminResource) ListTableItems(lang string, path string, requestQ
 		return
 	}
 
-	totalPages := (count / resource.Pagination) + 1
+	totalPages := (count / resource.Pagination)
+	if count%resource.Pagination != 0 {
+		totalPages += +1
+	}
+
 	var currentPage int64 = 1
 	queryPage := requestQuery.Get("p")
 	if len(queryPage) > 0 {
