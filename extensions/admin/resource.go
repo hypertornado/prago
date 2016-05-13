@@ -183,12 +183,9 @@ type Page struct {
 	Current bool
 }
 
-func (resource *AdminResource) ListTableItems(request prago.Request) (table ListTable, err error) {
-
-	requestQuery := request.Request().URL.Query()
+func (resource *AdminResource) ListTableItems(lang string, path string, requestQuery url.Values) (table ListTable, err error) {
 	table.Order = resource.Order
 
-	lang := GetLocale(request)
 	q := resource.Query()
 	q = resource.queryFilter(q)
 
@@ -215,7 +212,7 @@ func (resource *AdminResource) ListTableItems(request prago.Request) (table List
 			p.Current = true
 		}
 
-		p.Url = request.Request().URL.Path
+		p.Url = path
 		if i > 1 {
 			newUrlValues := make(url.Values)
 			newUrlValues.Set("p", fmt.Sprintf("%d", i))
