@@ -18,8 +18,7 @@ func (cache *StructCache) BindOrder(item interface{}, order int64) error {
 		value = value.Elem()
 	}
 
-	//TODO: better detection of name
-	val := value.FieldByName("OrderPosition")
+	val := value.FieldByName(cache.orderFieldName)
 	val.SetInt(order)
 	return nil
 }

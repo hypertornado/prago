@@ -11,9 +11,10 @@ import (
 )
 
 type StructCache struct {
-	typ         reflect.Type
-	fieldArrays []*StructField
-	fieldMap    map[string]*StructField
+	typ            reflect.Type
+	fieldArrays    []*StructField
+	fieldMap       map[string]*StructField
+	orderFieldName string
 }
 
 func NewStructCache(item interface{}) (ret *StructCache, err error) {
@@ -29,6 +30,9 @@ func NewStructCache(item interface{}) (ret *StructCache, err error) {
 
 	for i := 0; i < typ.NumField(); i++ {
 		field := newStructField(typ.Field(i), i)
+		if field.Tags["prago-type"] == "order" {
+			ret.orderFieldName = field.Name
+		}
 		ret.fieldArrays = append(ret.fieldArrays, field)
 		ret.fieldMap[field.Name] = field
 	}
@@ -120,6 +124,10 @@ type StructFieldFilter func(field *StructField) bool
 func DefaultVisibilityFilter(field *StructField) bool {
 	visible := true
 	if field.Name == "ID" {
+		visible = false
+	}
+
+	if field.Tags["prago-type"] == "order" {
 		visible = false
 	}
 
