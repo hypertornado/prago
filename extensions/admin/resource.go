@@ -28,12 +28,13 @@ type AdminResource struct {
 	ResourceController *prago.Controller
 	Authenticate       Authenticatizer
 	Pagination         int64
-	item               interface{}
-	admin              DBProvider
+	OrderByColumn      string
+	OrderDesc          bool
 	HasModel           bool
 	HasView            bool
+	item               interface{}
+	admin              DBProvider
 	table              string
-	queryFilter        func(*ResourceQuery) *ResourceQuery
 	StructCache        *StructCache
 	AfterFormCreated   func(*Form, prago.Request, bool) *Form
 	VisibilityFilter   StructFieldFilter
@@ -51,13 +52,15 @@ func NewResource(item interface{}) (*AdminResource, error) {
 	defaultName := typ.Name()
 	ret := &AdminResource{
 		Name:              func(string) string { return defaultName },
-		ID:                utils.PrettyUrl(defaultName),
+		ID:                utils.ColumnName(defaultName),
 		Typ:               typ,
 		Authenticate:      AuthenticateAdmin,
 		Pagination:        100000,
-		item:              item,
+		OrderByColumn:     "id",
+		OrderDesc:         false,
 		HasModel:          true,
 		HasView:           true,
+		item:              item,
 		StructCache:       structCache,
 		VisibilityFilter:  DefaultVisibilityFilter,
 		EditabilityFilter: DefaultEditabilityFilter,
@@ -101,15 +104,6 @@ func NewResource(item interface{}) (*AdminResource, error) {
 		ret.table = ifaceHasTableName.AdminHasTableName()
 	} else {
 		ret.table = ret.ID
-	}
-
-	ret.queryFilter = QueryFilterDefault
-
-	ifaceHasQueryFilter, ok := item.(interface {
-		AdminQueryFilter(*ResourceQuery) *ResourceQuery
-	})
-	if ok {
-		ret.queryFilter = ifaceHasQueryFilter.AdminQueryFilter
 	}
 
 	ifaceAdminAfterFormCreated, ok := item.(interface {
@@ -167,11 +161,6 @@ func (ar *AdminResource) tableName() string {
 	return ar.table
 }
 
-func QueryFilterDefault(q *ResourceQuery) *ResourceQuery {
-	q.Order("id")
-	return q
-}
-
 type ItemCell struct {
 	TemplateName string
 	Value        string
@@ -207,10 +196,16 @@ type Page struct {
 }
 
 func (resource *AdminResource) ListTableItems(lang string, path string, requestQuery url.Values) (table ListTable, err error) {
-	table.Order = resource.StructCache.CanOrder()
-
 	q := resource.Query()
-	q = resource.queryFilter(q)
+	if resource.OrderDesc {
+		q = q.OrderDesc(resource.OrderByColumn)
+	} else {
+		q = q.Order(resource.OrderByColumn)
+	}
+
+	if resource.StructCache.OrderFieldName == resource.OrderByColumn && !resource.OrderDesc {
+		table.Order = true
+	}
 
 	var count int64
 	count, err = q.Count()

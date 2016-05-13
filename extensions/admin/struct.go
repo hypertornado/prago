@@ -11,10 +11,11 @@ import (
 )
 
 type StructCache struct {
-	typ            reflect.Type
-	fieldArrays    []*StructField
-	fieldMap       map[string]*StructField
-	orderFieldName string
+	typ             reflect.Type
+	fieldArrays     []*StructField
+	fieldMap        map[string]*StructField
+	OrderFieldName  string
+	OrderColumnName string
 }
 
 func NewStructCache(item interface{}) (ret *StructCache, err error) {
@@ -31,7 +32,8 @@ func NewStructCache(item interface{}) (ret *StructCache, err error) {
 	for i := 0; i < typ.NumField(); i++ {
 		field := newStructField(typ.Field(i), i)
 		if field.Tags["prago-type"] == "order" {
-			ret.orderFieldName = field.Name
+			ret.OrderFieldName = field.Name
+			ret.OrderColumnName = field.ColumnName
 		}
 		ret.fieldArrays = append(ret.fieldArrays, field)
 		ret.fieldMap[field.Name] = field
@@ -40,20 +42,13 @@ func NewStructCache(item interface{}) (ret *StructCache, err error) {
 }
 
 type StructField struct {
-	Name          string
-	LowercaseName string
-	Typ           reflect.Type
-	Tags          map[string]string
-	Order         int
-	Unique        bool
-	Scanner       sql.Scanner
-}
-
-func (c *StructCache) CanOrder() bool {
-	if len(c.orderFieldName) > 0 {
-		return true
-	}
-	return false
+	Name       string
+	ColumnName string
+	Typ        reflect.Type
+	Tags       map[string]string
+	Order      int
+	Unique     bool
+	Scanner    sql.Scanner
 }
 
 func (a *StructField) fieldDescriptionMysql() string {
@@ -77,14 +72,14 @@ func (a *StructField) fieldDescriptionMysql() string {
 	}
 
 	additional := ""
-	if a.LowercaseName == "id" {
+	if a.ColumnName == "id" {
 		additional = "NOT NULL AUTO_INCREMENT PRIMARY KEY"
 	} else {
 		if a.Unique {
 			additional = "UNIQUE"
 		}
 	}
-	return fmt.Sprintf("%s %s %s", a.LowercaseName, fieldDescription, additional)
+	return fmt.Sprintf("%s %s %s", a.ColumnName, fieldDescription, additional)
 }
 
 func (a *StructField) humanName(lang string) (ret string) {
@@ -101,11 +96,11 @@ func (a *StructField) humanName(lang string) (ret string) {
 
 func newStructField(field reflect.StructField, order int) *StructField {
 	ret := &StructField{
-		Name:          field.Name,
-		LowercaseName: utils.PrettyUrl(field.Name),
-		Typ:           field.Type,
-		Tags:          make(map[string]string),
-		Order:         order,
+		Name:       field.Name,
+		ColumnName: utils.ColumnName(field.Name),
+		Typ:        field.Type,
+		Tags:       make(map[string]string),
+		Order:      order,
 	}
 
 	for _, v := range []string{

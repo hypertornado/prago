@@ -18,7 +18,7 @@ func (cache *StructCache) BindOrder(item interface{}, order int64) error {
 		value = value.Elem()
 	}
 
-	val := value.FieldByName(cache.orderFieldName)
+	val := value.FieldByName(cache.OrderFieldName)
 	val.SetInt(order)
 	return nil
 }

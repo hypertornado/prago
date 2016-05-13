@@ -50,7 +50,7 @@ func migrateTable(db *sql.DB, tableName string, adminStruct *StructCache) error 
 	items := []string{}
 
 	for _, v := range adminStruct.fieldArrays {
-		if !tableDescriptionMap[v.LowercaseName] {
+		if !tableDescriptionMap[v.ColumnName] {
 			items = append(items, fmt.Sprintf("ADD COLUMN %s", v.fieldDescriptionMysql()))
 		}
 	}
@@ -119,7 +119,7 @@ func prepareValues(value reflect.Value) (names []string, questionMarks []string,
 			continue
 		}
 
-		names = append(names, "`"+utils.PrettyUrl(field.Name)+"`")
+		names = append(names, "`"+utils.ColumnName(field.Name)+"`")
 		questionMarks = append(questionMarks, "?")
 	}
 	return

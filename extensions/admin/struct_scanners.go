@@ -28,7 +28,7 @@ func (s *StructCache) getStructScanners(value reflect.Value) (names []string, sc
 			use = false
 		}
 		if use {
-			names = append(names, v.LowercaseName)
+			names = append(names, v.ColumnName)
 			scanners = append(scanners, &scanner{value.Field(v.Order)})
 		}
 	}

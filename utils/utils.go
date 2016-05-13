@@ -49,3 +49,7 @@ func ConsoleQuestion(question string) bool {
 	}
 	return false
 }
+
+func ColumnName(fieldName string) string {
+	return PrettyUrl(fieldName)
+}
