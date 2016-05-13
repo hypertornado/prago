@@ -180,7 +180,7 @@ select.input {
 
 .admin_table {
   width: 100%;
-  margin-bottom: 30px;
+  margin: 10px 0px;
 }
 .admin_table thead {
   font-weight: bold;
