@@ -1,5 +1,4 @@
 package admin
-
 const TEMPLATES = `
 {{define "admin_edit"}}
 
@@ -219,15 +218,19 @@ const TEMPLATES = `
 {{$locale := .locale}}
 
 {{$csrfToken := ._csrfToken}}
+{{$table := .admin_list_table_data}}
 
-<a href="{{.admin_resource.ID}}/new" class="btn">{{message .locale "admin_new"}}</a>
+{{if $table.HasNew}}
+  <a href="{{.admin_resource.ID}}/new" class="btn">{{message .locale "admin_new"}}</a>
+{{end}}
 
 <table class="admin_table{{if .admin_list_table_data.Order}} admin_table-order{{end}}">
   <tr class="admin_table_header">
   {{range $item := .admin_list_table_data.Header}}
     <th>{{$item.NameHuman}}</th>
   {{end}}
-  <th colspan="2"></th>
+  <th></th>
+  {{if $table.HasDelete}}<th></th>{{end}}
   </tr>
 {{range $item := .admin_list_table_data.Rows}}
   <tr data-id="{{$item.ID}}" class="admin_table_row">
@@ -239,11 +242,13 @@ const TEMPLATES = `
     <td nowrap>
       <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">{{message $locale "admin_edit"}}</a> 
     </td>
-    <td nowrap>
-      <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete?_csrfToken={{$csrfToken}}" onsubmit="return window.confirm('{{message $locale "admin_delete_confirmation"}}');">
-        <input type="submit" value="{{message $locale "admin_delete"}}" class="btn">
-      </form>
-    </td>
+    {{if $table.HasDelete}}
+      <td nowrap>
+        <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete?_csrfToken={{$csrfToken}}" onsubmit="return window.confirm('{{message $locale "admin_delete_confirmation"}}');">
+          <input type="submit" value="{{message $locale "admin_delete"}}" class="btn">
+        </form>
+      </td>
+    {{end}}
   </tr>
 {{end}}
 </table>
@@ -342,3 +347,4 @@ const TEMPLATES = `
 {{tmpl "admin_form" .admin_form}}
 
 {{end}}`
+

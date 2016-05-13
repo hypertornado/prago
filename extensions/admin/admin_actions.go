@@ -160,17 +160,20 @@ func BindOrder(a *Admin, resource *AdminResource) {
 
 func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
 	defaultActions := []string{"list", "order", "new", "create", "detail", "update", "delete"}
+	usedActions := make(map[string]bool)
 	for _, v := range defaultActions {
 		action := resource.Actions[v]
 		if action != nil {
 			action(a, resource)
-			delete(resource.Actions, v)
+			usedActions[v] = true
 		}
 	}
 
-	for _, v := range resource.Actions {
+	for k, v := range resource.Actions {
 		if v != nil {
-			v(a, resource)
+			if usedActions[k] == false {
+				v(a, resource)
+			}
 		}
 	}
 	return nil

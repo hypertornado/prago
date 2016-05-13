@@ -181,6 +181,8 @@ type ListTable struct {
 	Rows       []ListTableRow
 	Pagination Pagination
 	Order      bool
+	HasDelete  bool
+	HasNew     bool
 }
 
 type Pagination struct {
@@ -202,6 +204,9 @@ func (resource *AdminResource) ListTableItems(lang string, path string, requestQ
 	} else {
 		q = q.Order(resource.OrderByColumn)
 	}
+
+	_, table.HasDelete = resource.Actions["delete"]
+	_, table.HasNew = resource.Actions["new"]
 
 	if resource.StructCache.OrderColumnName == resource.OrderByColumn && !resource.OrderDesc {
 		table.Order = true
