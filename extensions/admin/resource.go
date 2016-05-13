@@ -27,7 +27,6 @@ type AdminResource struct {
 	ResourceController *prago.Controller
 	Authenticate       Authenticatizer
 	Pagination         int64
-	Order              bool //TODO: remove, use just after order item
 	item               interface{}
 	admin              DBProvider
 	hasModel           bool
@@ -184,7 +183,7 @@ type Page struct {
 }
 
 func (resource *AdminResource) ListTableItems(lang string, path string, requestQuery url.Values) (table ListTable, err error) {
-	table.Order = resource.Order
+	table.Order = resource.StructCache.CanOrder()
 
 	q := resource.Query()
 	q = resource.queryFilter(q)

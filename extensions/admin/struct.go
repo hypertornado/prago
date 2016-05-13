@@ -49,6 +49,13 @@ type StructField struct {
 	Scanner       sql.Scanner
 }
 
+func (c *StructCache) CanOrder() bool {
+	if len(c.orderFieldName) > 0 {
+		return true
+	}
+	return false
+}
+
 func (a *StructField) fieldDescriptionMysql() string {
 	var fieldDescription string
 	switch a.Typ.Kind() {
