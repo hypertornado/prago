@@ -72,7 +72,7 @@ func UploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File,
 }
 
 func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
-	resource.Pagination = 10
+	resource.Pagination = 100
 
 	fileUploadPath = a.App.Config().GetString("fileUploadPath")
 	fileDownloadPath = a.App.Config().GetString("fileDownloadPath")
