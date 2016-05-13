@@ -41,6 +41,38 @@ func NewStructCache(item interface{}) (ret *StructCache, err error) {
 	return
 }
 
+func (cs *StructCache) GetDefaultOrder() (column string, desc bool) {
+	column = ""
+
+	for _, v := range cs.fieldArrays {
+		add := false
+		if v.ColumnName == "id" {
+			add = true
+		}
+		if v.Tags["prago-type"] == "order" {
+			add = true
+		}
+		if v.Tags["prago-order"] == "true" {
+			add = true
+		}
+		if v.Tags["prago-order-desc"] == "true" {
+			add = true
+		}
+		if v.Tags["prago-order"] == "false" {
+			add = false
+		}
+
+		if add == true {
+			column = v.ColumnName
+			desc = false
+			if v.Tags["prago-order-desc"] == "true" {
+				desc = true
+			}
+		}
+	}
+	return
+}
+
 type StructField struct {
 	Name       string
 	ColumnName string
@@ -110,6 +142,8 @@ func newStructField(field reflect.StructField, order int) *StructField {
 		"prago-editable",
 		"prago-preview",
 		"prago-unique",
+		"prago-order",
+		"prago-order-desc",
 	} {
 		ret.Tags[v] = field.Tag.Get(v)
 	}

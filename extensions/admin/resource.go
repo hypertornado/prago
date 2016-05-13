@@ -56,8 +56,6 @@ func NewResource(item interface{}) (*AdminResource, error) {
 		Typ:               typ,
 		Authenticate:      AuthenticateAdmin,
 		Pagination:        100000,
-		OrderByColumn:     "id",
-		OrderDesc:         false,
 		HasModel:          true,
 		HasView:           true,
 		item:              item,
@@ -75,6 +73,8 @@ func NewResource(item interface{}) (*AdminResource, error) {
 		"update": BindUpdate,
 		"delete": BindDelete,
 	}
+
+	ret.OrderByColumn, ret.OrderDesc = structCache.GetDefaultOrder()
 
 	ifaceName, ok := item.(interface {
 		AdminName(string) string
@@ -203,7 +203,7 @@ func (resource *AdminResource) ListTableItems(lang string, path string, requestQ
 		q = q.Order(resource.OrderByColumn)
 	}
 
-	if resource.StructCache.OrderFieldName == resource.OrderByColumn && !resource.OrderDesc {
+	if resource.StructCache.OrderColumnName == resource.OrderByColumn && !resource.OrderDesc {
 		table.Order = true
 	}
 
@@ -223,21 +223,23 @@ func (resource *AdminResource) ListTableItems(lang string, path string, requestQ
 		}
 	}
 
-	for i := int64(1); i <= totalPages; i++ {
-		p := Page{}
-		p.Name = fmt.Sprintf("%d", i)
-		if i == currentPage {
-			p.Current = true
-		}
+	if totalPages > 1 {
+		for i := int64(1); i <= totalPages; i++ {
+			p := Page{}
+			p.Name = fmt.Sprintf("%d", i)
+			if i == currentPage {
+				p.Current = true
+			}
 
-		p.Url = path
-		if i > 1 {
-			newUrlValues := make(url.Values)
-			newUrlValues.Set("p", fmt.Sprintf("%d", i))
-			p.Url += "?" + newUrlValues.Encode()
-		}
+			p.Url = path
+			if i > 1 {
+				newUrlValues := make(url.Values)
+				newUrlValues.Set("p", fmt.Sprintf("%d", i))
+				p.Url += "?" + newUrlValues.Encode()
+			}
 
-		table.Pagination.Pages = append(table.Pagination.Pages, p)
+			table.Pagination.Pages = append(table.Pagination.Pages, p)
+		}
 	}
 
 	q.Offset((currentPage - 1) * resource.Pagination)
