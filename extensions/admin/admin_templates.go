@@ -124,10 +124,15 @@ const TEMPLATES = `
   </select>
 {{end}}
 
+{{define "admin_item_place"}}
+<div class="admin_place">
+  <input type="hidden" name="{{.Name}}" value="{{.Value}}">
+</div>
+{{end}}
+
 {{define "admin_item_hidden"}}
 <input type="hidden" name="{{.Name}}" value="{{.Value}}">
 {{end}}
-
 
 {{define "admin_string"}}
 {{.}}
@@ -147,6 +152,8 @@ const TEMPLATES = `
     <script type="text/javascript" src="{{.admin_header.prefix}}/jquery.js"></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/image.js"></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/order.js"></script>
+    <script type="text/javascript" src="{{.admin_header.prefix}}/place.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces" async defer></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/script.js"></script>
 
   </head>

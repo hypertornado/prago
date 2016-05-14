@@ -266,3 +266,7 @@ select.input {
 .admin_popup_file {
   margin-bottom: 15px;
 }
+
+.admin_place_map {
+  height: 300px;
+}

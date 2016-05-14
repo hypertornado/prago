@@ -52,10 +52,15 @@
   </select>
 {{end}}
 
+{{define "admin_item_place"}}
+<div class="admin_place">
+  <input type="hidden" name="{{.Name}}" value="{{.Value}}">
+</div>
+{{end}}
+
 {{define "admin_item_hidden"}}
 <input type="hidden" name="{{.Name}}" value="{{.Value}}">
 {{end}}
-
 
 {{define "admin_string"}}
 {{.}}

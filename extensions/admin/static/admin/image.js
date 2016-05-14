@@ -187,7 +187,7 @@ function bindImagePicker() {
   });
 
   $(".admin_images").each(
-    function(i) {
+    function() {
       bindImage(this);
     }
   );

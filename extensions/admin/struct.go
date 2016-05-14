@@ -255,6 +255,8 @@ func (cache *StructCache) GetForm(inValues interface{}, lang string, visible Str
 				item.SubTemplate = "admin_item_textarea"
 			case "image":
 				item.SubTemplate = "admin_item_image"
+			case "place":
+				item.SubTemplate = "admin_item_place"
 			}
 		case reflect.Int64:
 			item.Value = fmt.Sprintf("%d", ifaceVal.(int64))
