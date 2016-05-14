@@ -142,6 +142,8 @@ func (a *Admin) Init(app *prago.App) error {
 	a.db = app.Data()["db"].(*sql.DB)
 	bindDBBackupCron(app)
 
+	BindMarkdownAPI(a)
+
 	var err error
 
 	err = a.bindAdminCommand(app)

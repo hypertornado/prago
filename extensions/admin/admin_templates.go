@@ -86,6 +86,13 @@ const TEMPLATES = `
   <textarea name="{{.Name}}" class="input form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
 {{end}}
 
+{{define "admin_item_markdown"}}
+  <div class="admin_markdown">
+    <textarea name="{{.Name}}" class="input form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
+    <div class="admin_markdown_preview"></div>
+  </div>
+{{end}}
+
 {{define "admin_item_checkbox"}}
   <input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
   <span class="form_label_text-inline">{{.NameHuman}}</span>
@@ -153,6 +160,7 @@ const TEMPLATES = `
     <script type="text/javascript" src="{{.admin_header.prefix}}/image.js"></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/order.js"></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/place.js"></script>
+    <script type="text/javascript" src="{{.admin_header.prefix}}/markdown.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces" async defer></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/script.js"></script>
 

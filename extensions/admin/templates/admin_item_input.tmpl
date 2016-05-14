@@ -14,6 +14,13 @@
   <textarea name="{{.Name}}" class="input form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
 {{end}}
 
+{{define "admin_item_markdown"}}
+  <div class="admin_markdown">
+    <textarea name="{{.Name}}" class="input form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
+    <div class="admin_markdown_preview"></div>
+  </div>
+{{end}}
+
 {{define "admin_item_checkbox"}}
   <input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
   <span class="form_label_text-inline">{{.NameHuman}}</span>

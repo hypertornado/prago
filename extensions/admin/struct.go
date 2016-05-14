@@ -96,7 +96,7 @@ func (a *StructField) fieldDescriptionMysql() string {
 	case reflect.Int64:
 		fieldDescription = "bigint(20)"
 	case reflect.String:
-		if a.Tags["prago-type"] == "text" || a.Tags["prago-type"] == "image" {
+		if a.Tags["prago-type"] == "text" || a.Tags["prago-type"] == "image" || a.Tags["prago-type"] == "markdown" {
 			fieldDescription = "text"
 		} else {
 			fieldDescription = "varchar(255)"
@@ -253,6 +253,8 @@ func (cache *StructCache) GetForm(inValues interface{}, lang string, visible Str
 			switch field.Tags["prago-type"] {
 			case "text":
 				item.SubTemplate = "admin_item_textarea"
+			case "markdown":
+				item.SubTemplate = "admin_item_markdown"
 			case "image":
 				item.SubTemplate = "admin_item_image"
 			case "place":

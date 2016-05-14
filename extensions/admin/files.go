@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/hypertornado/prago"
@@ -297,39 +296,6 @@ func BindImageAPI(a *Admin, fileDownloadPath string) {
 
 		writeFileResponse(request, files)
 	})
-}
-
-func WriteApi(r prago.Request, data interface{}, code int) {
-	r.SetProcessed()
-
-	r.Response().Header().Add("Content-type", "application/json")
-
-	pretty := false
-	if r.Params().Get("pretty") == "true" {
-		pretty = true
-	}
-
-	var responseToWrite interface{}
-	if code >= 400 {
-		responseToWrite = map[string]interface{}{"error": data, "errorCode": code}
-	} else {
-		responseToWrite = data
-	}
-
-	var result []byte
-	var e error
-
-	if pretty == true {
-		result, e = json.MarshalIndent(responseToWrite, "", "  ")
-	} else {
-		result, e = json.Marshal(responseToWrite)
-	}
-
-	if e != nil {
-		panic("error while generating JSON output")
-	}
-	r.Response().WriteHeader(code)
-	r.Response().Write(result)
 }
 
 func (f *File) Update(fileUploadPath string) error {

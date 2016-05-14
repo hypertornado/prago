@@ -270,3 +270,27 @@ select.input {
 .admin_place_map {
   height: 300px;
 }
+
+.admin_markdown textarea {
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+  border-bottom: none;
+}
+
+.admin_markdown_preview {
+  font-size: 0.8em;
+  background: white;
+  border: 1px solid #d5d5d5;
+  border-top: none;
+  padding: 5px;
+  background: repeating-linear-gradient(
+    45deg,
+    #fff,
+    #fff 10px,
+    #fafafa 10px,
+    #fafafa 20px
+  );
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+
+}
