@@ -294,3 +294,16 @@ select.input {
   border-bottom-right-radius: 3px;
 
 }
+
+.admin_timestamp_date {
+  width: 150px;
+}
+
+.admin_timestamp_hour {
+  width: 60px;
+}
+
+.admin_timestamp_minute {
+  width: 60px;
+}
+

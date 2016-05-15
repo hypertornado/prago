@@ -103,7 +103,20 @@ const TEMPLATES = `
 {{end}}
 
 {{define "admin_item_timestamp"}}
-  <input placeholder="Example: 2001-12-06 20:30" name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  {{if .Readonly}}
+    <input name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}} readonly>
+  {{else}}
+    <div class="admin_timestamp">
+      <input type="hidden" name="{{.Name}}" value="{{.Value}}">
+
+      <input type="date" name="_admin_timestamp_hidden" class="input form_input admin_timestamp_date"{{if .Focused}} autofocus{{end}}>
+
+      <select class="input form_input admin_timestamp_hour"></select>
+      <span class="admin_timestamp_divider">:</span>
+      <select class="input form_input admin_timestamp_minute"></select>
+
+    </div>
+  {{end}}
 {{end}}
 
 {{define "admin_item_image"}}
@@ -160,6 +173,7 @@ const TEMPLATES = `
     <script type="text/javascript" src="{{.admin_header.prefix}}/image.js"></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/order.js"></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/place.js"></script>
+    <script type="text/javascript" src="{{.admin_header.prefix}}/timestamp.js"></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/markdown.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces" async defer></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/script.js"></script>
