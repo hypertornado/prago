@@ -154,6 +154,13 @@ const TEMPLATES = `
 <input type="hidden" name="{{.Name}}" value="{{.Value}}">
 {{end}}
 
+{{define "admin_item_relation"}}
+<div class="admin_item_relation">
+  <input type="hidden" name="{{.Name}}" value="{{.Value}}" data-relation="{{.Values}}">
+  <progress></progress>
+</div>
+{{end}}
+
 {{define "admin_string"}}
 {{.}}
 {{end}}
@@ -175,11 +182,12 @@ const TEMPLATES = `
     <script type="text/javascript" src="{{.admin_header.prefix}}/place.js"></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/timestamp.js"></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/markdown.js"></script>
+    <script type="text/javascript" src="{{.admin_header.prefix}}/relation.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces" async defer></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/script.js"></script>
 
   </head>
-  <body class="admin">
+  <body class="admin" data-admin-prefix="{{.admin_header.prefix}}">
     {{tmpl "admin_flash" .}}
     <div class="admin_header">
         <ul class="admin_header_list admin_header_list-right">

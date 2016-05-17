@@ -262,11 +262,20 @@ func (cache *StructCache) GetForm(inValues interface{}, lang string, visible Str
 			}
 		case reflect.Int64:
 			item.Value = fmt.Sprintf("%d", ifaceVal.(int64))
+			switch field.Tags["prago-type"] {
+			case "relation":
+				item.SubTemplate = "admin_item_relation"
+				//r :=
+				item.Values = utils.ColumnName(item.Name)
+				//item.Values = [][2]string{{"a", "b"}, {"c", "d"}}
+			}
 		default:
 			panic("Wrong type" + field.Typ.Kind().String())
 		}
 
 		item.NameHuman = field.humanName(lang)
+
+		//admin_item_select
 
 		form.AddItem(item)
 	}

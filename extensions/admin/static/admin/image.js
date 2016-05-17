@@ -1,5 +1,6 @@
 function bindImagePicker() {
   var popup = $("#admin_images_popup");
+  var adminPrefix = $("body").data("admin-prefix");
 
   popup.click(function(e){
     if (e.target == popup[0]) {
@@ -28,7 +29,6 @@ function bindImagePicker() {
       });
     });
   }
-  doFilter();
 
   var draggedElement;
 
@@ -108,6 +108,7 @@ function bindImagePicker() {
     loadImageToPopup($(el).find("input").val());
     $(el).find("admin_images_popup_box").focus();
     popup.show();
+    doFilter();
   }
 
   function hidePopup() {
@@ -116,7 +117,7 @@ function bindImagePicker() {
 
   function loadImages(ids, q, handler) {
     $.ajax({
-      "url": "/admin/_api/image/list",
+      "url": adminPrefix + "/_api/image/list",
       "data": {"ids":ids, "q": q},
       "complete": function (responseData) {
         handler(responseData.responseJSON);
@@ -141,7 +142,7 @@ function bindImagePicker() {
       loadImages(value, "", function(items) {
         list.text("");
         items.forEach(function (item){
-          var link = $("<a href='/admin/file/"+item.ID+"' target='_blank'></a>");
+          var link = $("<a href='" + adminPrefix + "/file/"+item.ID+"' target='_blank'></a>");
           link.append($("<img>").attr("src", item.Thumb).addClass("admin_images_img"));
           list.append(link);
         });
@@ -159,9 +160,9 @@ function bindImagePicker() {
     $(".admin_images_popup_box_upload_message").text("Uploading...");
     $(".admin_images_popup_box_upload_btn").hide();
     $(".admin_images_popup_box_upload input").hide();
-    //TODO: get prefix for admin
+
     $.ajax({
-        url: '/admin/_api/image/upload',
+        url: adminPrefix + "/_api/image/upload",
         type: 'POST',
         data: data,
         cache: false,

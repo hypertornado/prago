@@ -19,9 +19,9 @@ function bindMarkdowns() {
 
     function loadPreview() {
       changed = false;
-      console.log("L");
+      var adminPrefix = $("body").data("admin-prefix");
       $.ajax({
-          url: '/admin/_api/markdown',
+          url: adminPrefix + "/_api/markdown",
           type: 'POST',
           data: textarea.val(),
           cache: false,

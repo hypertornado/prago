@@ -26,6 +26,7 @@ type Admin struct {
 	AppName               string
 	Resources             []*AdminResource
 	resourceMap           map[reflect.Type]*AdminResource
+	resourceNameMap       map[string]*AdminResource
 	AdminController       *prago.Controller
 	AdminAccessController *prago.Controller
 	App                   *prago.App
@@ -36,10 +37,11 @@ type Admin struct {
 
 func NewAdmin(prefix, name string) *Admin {
 	ret := &Admin{
-		Prefix:      prefix,
-		AppName:     name,
-		Resources:   []*AdminResource{},
-		resourceMap: make(map[reflect.Type]*AdminResource),
+		Prefix:          prefix,
+		AppName:         name,
+		Resources:       []*AdminResource{},
+		resourceMap:     make(map[reflect.Type]*AdminResource),
+		resourceNameMap: make(map[string]*AdminResource),
 	}
 
 	ret.CreateResources(User{}, File{})
@@ -100,6 +102,7 @@ func (a *Admin) AddResource(resource *AdminResource) error {
 	a.Resources = append(a.Resources, resource)
 	if resource.HasModel {
 		a.resourceMap[resource.Typ] = resource
+		a.resourceNameMap[resource.ID] = resource
 	}
 	return nil
 }
@@ -143,6 +146,7 @@ func (a *Admin) Init(app *prago.App) error {
 	bindDBBackupCron(app)
 
 	BindMarkdownAPI(a)
+	BindListResourceAPI(a)
 
 	var err error
 

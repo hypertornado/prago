@@ -82,6 +82,13 @@
 <input type="hidden" name="{{.Name}}" value="{{.Value}}">
 {{end}}
 
+{{define "admin_item_relation"}}
+<div class="admin_item_relation">
+  <input type="hidden" name="{{.Name}}" value="{{.Value}}" data-relation="{{.Values}}">
+  <progress></progress>
+</div>
+{{end}}
+
 {{define "admin_string"}}
 {{.}}
 {{end}}

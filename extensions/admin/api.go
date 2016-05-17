@@ -17,6 +17,16 @@ func BindMarkdownAPI(a *Admin) {
 	})
 }
 
+func BindListResourceAPI(a *Admin) {
+	a.App.MainController().Get(a.Prefix+"/_api/resource/:name", func(request prago.Request) {
+		name := request.Params().Get("name")
+		resource := a.resourceNameMap[name]
+		items, err := resource.Query().List()
+		prago.Must(err)
+		WriteApi(request, items, 200)
+	})
+}
+
 func WriteApi(r prago.Request, data interface{}, code int) {
 	r.SetProcessed()
 

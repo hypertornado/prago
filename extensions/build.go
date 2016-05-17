@@ -19,6 +19,8 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 
 	var version = app.Data()["version"].(string)
 	var appName = app.Data()["appName"].(string)
+
+	//TODO: dont require ssh in config
 	ssh := app.Config().GetString("ssh")
 
 	versionCommand := app.CreateCommand("version", "Print version")
