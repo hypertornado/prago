@@ -17,5 +17,4 @@ func TestFiles(t *testing.T) {
 	if file != "x/a/b/c/d/e/fgh-ABC.jpg" {
 		t.Fatal(file)
 	}
-
 }

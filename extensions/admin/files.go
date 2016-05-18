@@ -6,12 +6,12 @@ import (
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/hypertornado/prago/utils"
-	"github.com/nfnt/resize"
 	"github.com/renstrom/shortuuid"
 	"image/jpeg"
 	"io"
 	"mime/multipart"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -23,9 +23,9 @@ var (
 )
 
 var ThumbnailSizes = map[string][2]uint{
-	"large":  {1000, 0},
-	"medium": {400, 0},
-	"small":  {200, 0},
+	"large":  {1000, 1000},
+	"medium": {400, 400},
+	"small":  {200, 200},
 }
 
 type File struct {
@@ -331,21 +331,15 @@ func (f *File) Update(fileUploadPath string) error {
 				return err
 			}
 
-			outFile, err := os.Create(filePath)
-			defer outFile.Close()
-			if err != nil {
-				return err
-			}
-
-			resizedImg := resize.Resize(v[0], v[1], img, resize.Lanczos3)
-			err = jpeg.Encode(outFile, resizedImg, nil)
+			cmd := exec.Command("convert", path, "-thumbnail", fmt.Sprintf("%dx%d", v[0], v[1]), filePath)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err = cmd.Run()
 			if err != nil {
 				return err
 			}
 		}
-
 	}
-
 	return nil
 }
 
@@ -378,13 +372,15 @@ func UpdateFiles(a *Admin) error {
 	a.Query().Get(&files)
 	for _, file := range files {
 		fmt.Println(file.UID, file.Name)
-		err := file.Update(fileUploadPath)
-		if err != nil {
-			return err
-		}
-		err = a.Save(file)
-		if err != nil {
-			return err
+		if file.IsImage() {
+			err := file.Update(fileUploadPath)
+			if err != nil {
+				return err
+			}
+			err = a.Save(file)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
