@@ -274,7 +274,7 @@ func (a *Admin) initTemplates(app *prago.App) error {
 	})
 
 	app.AddTemplateFunction("markdown", func(text string) template.HTML {
-		return template.HTML(markdown.New().RenderToString([]byte(text)))
+		return template.HTML(markdown.New(markdown.Breaks(true)).RenderToString([]byte(text)))
 	})
 
 	app.AddTemplateFunction("message", func(language, id string) template.HTML {
