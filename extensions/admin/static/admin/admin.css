@@ -248,10 +248,18 @@ select.input {
   overflow: auto;
 }
 
+.admin_images_popup_box:focus {
+  outline: none;
+}
+
 .admin_images_img {
   display: inline-block;
   max-height: 100px;
   margin: 3px;
+}
+
+.admin_images_edit {
+  display: none;
 }
 
 .admin_popup_section {

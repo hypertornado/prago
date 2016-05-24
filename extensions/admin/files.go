@@ -273,7 +273,7 @@ func BindImageAPI(a *Admin, fileDownloadPath string) {
 			filter := "%" + request.Params().Get("q") + "%"
 			q := a.Query().WhereIs("filetype", "image").OrderDesc("createdat").Limit(10)
 			if len(request.Params().Get("q")) > 0 {
-				q = q.Where("name LIKE ?", filter)
+				q = q.Where("name LIKE ? OR description LIKE ?", filter, filter)
 			}
 			prago.Must(q.Get(&images))
 		}

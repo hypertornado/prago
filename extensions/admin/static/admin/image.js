@@ -8,7 +8,7 @@ function bindImagePicker() {
     }
   });
 
-  var loadedContainer = $("#admin_images_popup .admin_images_popup_box_new_list");
+  var loadedContainer = popup.find(".admin_images_popup_box_new_list");
   var selectedContainer = $("#admin_images_popup .admin_images_popup_box_content");
   var doFilter = function() {
     loadedContainer.text("Loading...");
@@ -136,11 +136,15 @@ function bindImagePicker() {
   function showPreview(el) {
     var value = $(el).find("input").val();
     var list = $(el).find(".admin_images_list");
+    list.text("");
+    $(el).find(".admin_images_edit").hide();
+    $(el).find("progress").show();
     var jsonResponse;
     if (value.length > 0) {
-      list.text("Loading...");
       loadImages(value, "", function(items) {
         list.text("");
+        $(el).find(".admin_images_edit").show();
+        $(el).find("progress").hide();
         items.forEach(function (item){
           var link = $("<a href='" + adminPrefix + "/file/"+item.ID+"' target='_blank'></a>");
           link.append($("<img>").attr("src", item.Thumb).addClass("admin_images_img"));

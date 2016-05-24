@@ -124,6 +124,7 @@ const TEMPLATES = `
     <input name="{{.Name}}" value="{{.Value}}" type="hidden">
     <div class="admin_images_list"></div>
     <a href="#" class="btn admin_images_edit">Edit</a>
+    <progress></progress>
   </div>
 {{end}}
 
