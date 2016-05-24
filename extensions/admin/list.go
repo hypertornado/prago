@@ -163,5 +163,9 @@ func ValueToCell(field reflect.StructField, val reflect.Value) (cell ListCell) {
 		cell.Value = tm.Format("2006-01-02 15:04:05")
 	}
 
+	if len(field.Tag.Get("prago-preview-type")) > 0 {
+		cell.TemplateName = field.Tag.Get("prago-preview-type")
+	}
+
 	return
 }

@@ -144,6 +144,7 @@ func newStructField(field reflect.StructField, order int) *StructField {
 		"prago-unique",
 		"prago-order",
 		"prago-order-desc",
+		"prago-preview-type",
 	} {
 		ret.Tags[v] = field.Tag.Get(v)
 	}

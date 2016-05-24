@@ -32,7 +32,7 @@ type File struct {
 	ID          int64 `prago-order-desc:"true"`
 	Name        string
 	Description string `prago-type:"text" prago-preview:"true"`
-	UID         string `prago-unique:"true" prago-preview:"true"`
+	UID         string `prago-unique:"true" prago-preview:"true" prago-preview-type:"admin_image"`
 	FileType    string
 	Size        int64
 	Width       int64
