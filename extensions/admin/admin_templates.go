@@ -154,6 +154,12 @@ const TEMPLATES = `
 <input type="hidden" name="{{.Name}}" value="{{.Value}}">
 {{end}}
 
+{{define "admin_item_link"}}
+<div>
+  <a href="{{.Value}}" target="_blank">{{.Value}}</a>
+</div>
+{{end}}
+
 {{define "admin_item_relation"}}
 <div class="admin_item_relation">
   <input type="hidden" name="{{.Name}}" value="{{.Value}}" data-relation="{{.Values}}">

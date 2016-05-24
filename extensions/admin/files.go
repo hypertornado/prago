@@ -129,6 +129,7 @@ func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
 			fi = form.AddTextInput("url", messages.Messages.Get(GetLocale(request), "Url"))
 			fi.Readonly = true
 			fi.Value = fileUrl
+			fi.SubTemplate = "admin_item_link"
 
 			fi = form.AddTextInput("size", messages.Messages.Get(GetLocale(request), "Size"))
 			fi.Readonly = true
@@ -156,6 +157,7 @@ func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
 					fi.Readonly = true
 					_, path := file.GetPath(fileDownloadPath + "thumb/" + v)
 					fi.Value = path
+					fi.SubTemplate = "admin_item_link"
 				}
 
 			}
