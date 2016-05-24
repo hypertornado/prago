@@ -1,0 +1,47 @@
+{{define "admin_stats"}}
+<h1>Stats</h1>
+
+<table class="admin_table">
+{{range $item := .stats}}
+  <tr>
+    <td>{{index $item 0}}</td>
+    <td>{{index $item 1}}</td>
+  </tr>
+{{end}}
+</table>
+
+<h2>OS</h2>
+
+<table class="admin_table">
+{{range $item := .osStats}}
+  <tr>
+    <td>{{index $item 0}}</td>
+    <td>{{index $item 1}}</td>
+  </tr>
+{{end}}
+</table>
+
+<h2>Memory</h2>
+
+<table class="admin_table">
+{{range $item := .memStats}}
+  <tr>
+    <td>{{index $item 0}}</td>
+    <td>{{index $item 1}}</td>
+  </tr>
+{{end}}
+</table>
+
+<h2>Environment</h2>
+
+<table class="admin_table">
+{{range $item := .environmentStats}}
+  <tr>
+    <td>{{index $item 0}}</td>
+    <td>{{index $item 1}}</td>
+  </tr>
+{{end}}
+</table>
+
+
+{{end}}

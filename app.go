@@ -118,6 +118,8 @@ func (a *App) Route(m method, path string, controller *Controller, action func(p
 
 func (a *App) ListenAndServe(port int, developmentMode bool) error {
 	a.data["developmentMode"] = developmentMode
+	a.data["port"] = port
+	a.data["startedAt"] = time.Now()
 
 	if developmentMode {
 		loggerMiddleware.setStdOut()
