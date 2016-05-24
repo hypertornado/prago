@@ -59,13 +59,15 @@ a:hover {
   max-width: 600px;
   padding: 10px 10px;
   margin: 0 auto;
+  min-height: calc(100vh - 67px);
 }
 .admin_footer {
-  background: #01354a;
-  color: white;
-  text-align: center;
-  margin: 0 auto;
-  padding: 20px 10px;
+  background: #fafafa;
+  padding: 0px 10px;
+  font-size: 0.7em;
+  border-top: 1px solid #ddd;
+  color: #ccc;
+  text-align: right;
 }
 .admin_table {
   width: 100%;

@@ -219,6 +219,10 @@ const TEMPLATES = `
 
     </div>
 
+    <div class="admin_footer">
+      {{.appName}} {{.appVersion}}
+    </div>
+
     <div id="admin_images_popup">
       <div class="admin_images_popup_box" tabindex="1">
         <div class="admin_images_popup_box_header admin_popup_section">
