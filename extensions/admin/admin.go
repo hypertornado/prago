@@ -365,6 +365,17 @@ func (a *Admin) initTemplates(app *prago.App) error {
 		return template.HTML(messages.Messages.Get(language, id))
 	})
 
+	app.AddTemplateFunction("thumb", func(ids string) string {
+		for _, v := range strings.Split(ids, ",") {
+			var image File
+			err := a.Query().WhereIs("uid", v).Get(&image)
+			if err == nil && image.IsImage() {
+				return image.GetSmall()
+			}
+		}
+		return ""
+	})
+
 	return nil
 }
 

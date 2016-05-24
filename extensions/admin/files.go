@@ -32,7 +32,7 @@ type File struct {
 	ID          int64 `prago-order-desc:"true"`
 	Name        string
 	Description string `prago-type:"text" prago-preview:"true"`
-	UID         string `prago-unique:"true"`
+	UID         string `prago-unique:"true" prago-preview:"true"`
 	FileType    string
 	Size        int64
 	Width       int64
@@ -257,7 +257,6 @@ func BindImageAPI(a *Admin, fileDownloadPath string) {
 
 		if len(request.Params().Get("ids")) > 0 {
 			ids := strings.Split(request.Params().Get("ids"), ",")
-
 			for _, v := range ids {
 				var image File
 				err := a.Query().WhereIs("uid", v).Get(&image)

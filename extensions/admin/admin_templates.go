@@ -168,6 +168,10 @@ const TEMPLATES = `
 </div>
 {{end}}
 
+{{define "admin_image"}}
+<img src="{{thumb .}}">
+{{end}}
+
 {{define "admin_string"}}
 {{.}}
 {{end}}
