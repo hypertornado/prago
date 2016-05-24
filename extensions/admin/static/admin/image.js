@@ -150,6 +150,9 @@ function bindImagePicker() {
           link.append($("<img>").attr("src", item.Thumb).addClass("admin_images_img"));
           list.append(link);
         });
+
+        $(el).find(".admin_images_edit").click();
+
       });
     }
   }
@@ -160,6 +163,9 @@ function bindImagePicker() {
     $.each(files, function(key, value) {
         data.append("file", value);
     });
+
+    data.append("description", $(".admin_popup_file_description").val());
+    $(".admin_popup_file_description").val("");
 
     $(".admin_images_popup_box_upload_message").text("Uploading...");
     $(".admin_images_popup_box_upload_btn").hide();

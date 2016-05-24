@@ -31,7 +31,7 @@ var ThumbnailSizes = map[string][2]uint{
 type File struct {
 	ID          int64 `prago-order-desc:"true"`
 	Name        string
-	Description string `prago-type:"text"`
+	Description string `prago-type:"text" prago-preview:"true"`
 	UID         string `prago-unique:"true"`
 	FileType    string
 	Size        int64
@@ -284,6 +284,8 @@ func BindImageAPI(a *Admin, fileDownloadPath string) {
 	a.AdminController.Post(a.Prefix+"/_api/image/upload", func(request prago.Request) {
 		multipartFiles := request.Request().MultipartForm.File["file"]
 
+		description := request.Params().Get("description")
+
 		files := []*File{}
 
 		for _, v := range multipartFiles {
@@ -292,6 +294,7 @@ func BindImageAPI(a *Admin, fileDownloadPath string) {
 				panic(err)
 			}
 			file.UserId = GetUser(request).ID
+			file.Description = description
 			prago.Must(a.Create(file))
 			files = append(files, file)
 		}
