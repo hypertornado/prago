@@ -150,9 +150,6 @@ function bindImagePicker() {
           link.append($("<img>").attr("src", item.Thumb).addClass("admin_images_img"));
           list.append(link);
         });
-
-        $(el).find(".admin_images_edit").click();
-
       });
     }
   }
