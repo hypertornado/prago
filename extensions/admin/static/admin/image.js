@@ -142,16 +142,23 @@ function bindImagePicker() {
     var jsonResponse;
     if (value.length > 0) {
       loadImages(value, "", function(items) {
-        list.text("");
-        $(el).find(".admin_images_edit").show();
-        $(el).find("progress").hide();
+        doneLoading(el);
         items.forEach(function (item){
           var link = $("<a href='" + adminPrefix + "/file/"+item.ID+"' target='_blank'></a>");
           link.append($("<img>").attr("src", item.Thumb).addClass("admin_images_img"));
           list.append(link);
         });
       });
+    } else {
+      doneLoading(el);
     }
+  }
+
+  function doneLoading(el) {
+    var list = $(el).find(".admin_images_list");
+    list.text("");
+    $(el).find(".admin_images_edit").show();
+    $(el).find("progress").hide();
   }
 
   $(".admin_images_popup_box_upload_btn").click(function (e) {
