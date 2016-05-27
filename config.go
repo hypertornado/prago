@@ -68,7 +68,7 @@ func (c *Config) Get(name string) (interface{}, error) {
 func (c *Config) GetString(name string) string {
 	item, err := c.Get(name)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("Error while getting '%s': %s", name, err.Error()))
 	}
 	str, ok := item.(string)
 	if !ok {
