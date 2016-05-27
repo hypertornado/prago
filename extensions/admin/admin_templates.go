@@ -412,6 +412,17 @@ const TEMPLATES = `
 {{end}}
 </table>
 
+<h2>Configuration</h2>
+
+<table class="admin_table">
+{{range $item := .configStats}}
+  <tr>
+    <td>{{index $item 0}}</td>
+    <td>{{index $item 1}}</td>
+  </tr>
+{{end}}
+</table>
+
 <h2>OS</h2>
 
 <table class="admin_table">

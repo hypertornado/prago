@@ -233,6 +233,8 @@ func (a *Admin) Init(app *prago.App) error {
 		stats = append(stats, [2]string{"GOOS", runtime.GOOS})
 		stats = append(stats, [2]string{"GOMAXPROCS", fmt.Sprintf("%d", runtime.GOMAXPROCS(-1))})
 
+		configStats := request.App().Config().Export()
+
 		osStats := [][2]string{}
 		osStats = append(osStats, [2]string{"EGID", fmt.Sprintf("%d", os.Getegid())})
 		osStats = append(osStats, [2]string{"EUID", fmt.Sprintf("%d", os.Geteuid())})
@@ -281,6 +283,7 @@ func (a *Admin) Init(app *prago.App) error {
 		}
 
 		request.SetData("stats", stats)
+		request.SetData("configStats", configStats)
 		request.SetData("osStats", osStats)
 		request.SetData("memStats", memStats)
 		request.SetData("environmentStats", environmentStats)

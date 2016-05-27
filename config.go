@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
 )
 
 type MiddlewareConfig struct{}
@@ -38,6 +39,22 @@ func (m MiddlewareConfig) Init(app *App) error {
 
 type Config struct {
 	v map[string]interface{}
+}
+
+func (c *Config) Export() [][2]string {
+	keys := []string{}
+	for k, _ := range c.v {
+		keys = append(keys, k)
+	}
+	keySlice := sort.StringSlice(keys)
+	keySlice.Sort()
+
+	ret := [][2]string{}
+	for _, v := range keys {
+		ret = append(ret, [2]string{v, fmt.Sprintf("%s", c.v[v])})
+	}
+
+	return ret
 }
 
 func (c *Config) Get(name string) (interface{}, error) {
