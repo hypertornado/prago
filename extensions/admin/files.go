@@ -364,6 +364,11 @@ func (f *File) GetSmall() string {
 	return f.getSize("small")
 }
 
+func (f *File) GetOriginal() string {
+	_, path := f.GetPath(fileDownloadPath + "original")
+	return path
+}
+
 func (f *File) IsImage() bool {
 	if strings.HasSuffix(f.Name, ".jpg") || strings.HasSuffix(f.Name, ".jpeg") {
 		return true
