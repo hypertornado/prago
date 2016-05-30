@@ -234,6 +234,7 @@ func countItems(db *sql.DB, tableName string, query *listQuery) (int64, error) {
 	if err != nil {
 		return -1, err
 	}
+	defer rows.Close()
 	rows.Next()
 
 	var i int64
