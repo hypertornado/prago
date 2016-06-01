@@ -40,6 +40,16 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 		return b.release(appName, *releaseCommandVersion, ssh)
 	})
 
+	remoteCommand := app.CreateCommand("remote", "Remote")
+	remoteCommandVersion := remoteCommand.Arg("version", "").Required().String()
+	app.AddCommand(remoteCommand, func(app *prago.App) error {
+		cmdStr := fmt.Sprintf("cd ~/.%s/versions/%s.%s; killall %s.linux; nohup ./%s.linux server & exit;", appName, appName, *remoteCommandVersion, appName, appName)
+		cmd := exec.Command("ssh", ssh, cmdStr)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		return cmd.Run()
+	})
+
 	return nil
 }
 
