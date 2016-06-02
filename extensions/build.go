@@ -53,13 +53,22 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 	return nil
 }
 
-func (b BuildMiddleware) release(appName, version, auth string) error {
+func (b BuildMiddleware) release(appName, version, ssh string) error {
 	from := os.Getenv("HOME") + "/." + appName + "/versions/" + appName + "." + version
-	to := fmt.Sprintf("%s:~/.%s/versions", auth, appName)
-	fmt.Println(from)
-	fmt.Println(to)
+	to := fmt.Sprintf("%s:~/.%s/versions", ssh, appName)
 
-	cmd := exec.Command("scp", "-r", from, to)
+	mkdirStr := fmt.Sprintf("mkdir -p ~/.%s/versions", appName)
+	fmt.Println(mkdirStr)
+	cmd := exec.Command("ssh", ssh, mkdirStr)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("scp", "-r", from, to)
+	cmd = exec.Command("scp", "-r", from, to)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
