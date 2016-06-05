@@ -53,3 +53,12 @@ func ConsoleQuestion(question string) bool {
 func ColumnName(fieldName string) string {
 	return PrettyUrl(fieldName)
 }
+
+func Crop(text string, count int) string {
+	runes := []rune(text)
+	if len(runes) <= count {
+		return text
+	} else {
+		return string(runes[0:count])
+	}
+}

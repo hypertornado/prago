@@ -17,3 +17,12 @@ func TestUtils(t *testing.T) {
 		}
 	}
 }
+
+func TestCrop(t *testing.T) {
+
+	croped := Crop("žšč", 2)
+	if croped != "žš" {
+		t.Fatal(croped)
+	}
+
+}
