@@ -59,6 +59,11 @@ func Crop(text string, count int) string {
 	if len(runes) <= count {
 		return text
 	} else {
-		return string(runes[0:count])
+		ret := string(runes[0:count])
+		i := strings.LastIndex(ret, " ")
+		if i < 0 {
+			return text
+		}
+		return ret[0:i] + "…"
 	}
 }

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -20,9 +21,19 @@ func TestUtils(t *testing.T) {
 
 func TestCrop(t *testing.T) {
 
-	croped := Crop("žšč", 2)
-	if croped != "žš" {
-		t.Fatal(croped)
+	for k, v := range []struct {
+		in    string
+		index int
+		out   string
+	}{
+		{"žšč", 2, "žšč"},
+		{"žšč řďť ňěóireowprieow", 6, "žšč…"},
+		{"", 6, ""},
+	} {
+		croped := Crop(v.in, v.index)
+		if croped != v.out {
+			t.Fatal(fmt.Sprintf("%d Expected '%s', got '%s'", k, v.out, croped))
+		}
 	}
 
 }
