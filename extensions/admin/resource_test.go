@@ -6,12 +6,13 @@ import (
 )
 
 type ResourceStruct struct {
-	ID        int64
-	Name      string
-	Other     string
-	Showing   string `prago-preview:"true"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID          int64
+	Name        string
+	Other       string
+	Showing     string `prago-preview:"true"`
+	IsSomething bool
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 func prepareResource() *AdminResource {
@@ -110,4 +111,32 @@ func TestResourceTimestamps(t *testing.T) {
 	if item.CreatedAt.Before(testStartTime) || time.Now().Before(item.CreatedAt) {
 		t.Fatal(item.CreatedAt)
 	}
+}
+
+func TestResourceBool(t *testing.T) {
+	resource := prepareResource()
+
+	resource.Create(&ResourceStruct{Name: "A", IsSomething: false})
+	resource.Create(&ResourceStruct{Name: "B", IsSomething: true})
+
+	itemIface, err := resource.Query().Where(map[string]interface{}{"issomething": true}).First()
+	if err != nil {
+		panic(err)
+	}
+
+	item := itemIface.(*ResourceStruct)
+	if item.Name != "B" {
+		t.Fatal(item)
+	}
+
+	itemIface, err = resource.Query().Where(map[string]interface{}{"issomething": false}).First()
+	if err != nil {
+		panic(err)
+	}
+
+	item = itemIface.(*ResourceStruct)
+	if item.Name != "A" {
+		t.Fatal(item)
+	}
+
 }

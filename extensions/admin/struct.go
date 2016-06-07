@@ -92,7 +92,7 @@ func (a *StructField) fieldDescriptionMysql() string {
 			fieldDescription = "datetime"
 		}
 	case reflect.Bool:
-		fieldDescription = "bool"
+		fieldDescription = "bool NOT NULL"
 	case reflect.Int64:
 		fieldDescription = "bigint(20)"
 	case reflect.String:
