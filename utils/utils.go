@@ -64,6 +64,6 @@ func Crop(text string, count int) string {
 		if i < 0 {
 			return text
 		}
-		return ret[0:i] + "…"
+		return ret[0:i]
 	}
 }

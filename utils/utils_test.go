@@ -27,7 +27,7 @@ func TestCrop(t *testing.T) {
 		out   string
 	}{
 		{"žšč", 2, "žšč"},
-		{"žšč řďť ňěóireowprieow", 6, "žšč…"},
+		{"žšč řďť ňěóireowprieow", 6, "žšč"},
 		{"", 6, ""},
 	} {
 		croped := Crop(v.in, v.index)
