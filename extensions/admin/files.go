@@ -335,7 +335,7 @@ func (f *File) Update(fileUploadPath string) error {
 				return err
 			}
 
-			cmd := exec.Command("convert", path, "-thumbnail", fmt.Sprintf("%dx%d", v[0], v[1]), filePath)
+			cmd := exec.Command("convert", path, "-auto-orient", "-thumbnail", fmt.Sprintf("%dx%d", v[0], v[1]), filePath)
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			err = cmd.Run()
