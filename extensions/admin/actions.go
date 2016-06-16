@@ -15,6 +15,12 @@ func BindList(a *Admin, resource *AdminResource) {
 		listData, err := resource.GetList(GetLocale(request), request.Request().URL.Path, request.Request().URL.Query())
 		prago.Must(err)
 
+		if resource.BeforeList != nil {
+			if !resource.BeforeList(request, listData) {
+				return
+			}
+		}
+
 		request.SetData("admin_list", listData)
 		request.SetData("admin_yield", "admin_list")
 		prago.Render(request, 200, "admin_layout")
@@ -28,6 +34,12 @@ func BindNew(a *Admin, resource *AdminResource) {
 		item, err := resource.NewItem()
 		if err != nil {
 			panic(err)
+		}
+
+		if resource.BeforeNew != nil {
+			if !resource.BeforeNew(request, item) {
+				return
+			}
 		}
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
@@ -61,7 +73,20 @@ func BindCreate(a *Admin, resource *AdminResource) {
 		}
 
 		resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.GetFilter())
+
+		if resource.BeforeCreate != nil {
+			if !resource.BeforeCreate(request, item) {
+				return
+			}
+		}
+
 		prago.Must(resource.Create(item))
+
+		if resource.AfterCreate != nil {
+			if !resource.AfterCreate(request, item) {
+				return
+			}
+		}
 
 		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
@@ -85,6 +110,12 @@ func BindDetail(a *Admin, resource *AdminResource) {
 
 		if resource.AfterFormCreated != nil {
 			form = resource.AfterFormCreated(form, request, false)
+		}
+
+		if resource.BeforeDetail != nil {
+			if !resource.BeforeDetail(request, item) {
+				return
+			}
 		}
 
 		request.SetData("admin_item", item)
@@ -113,8 +144,20 @@ func BindUpdate(a *Admin, resource *AdminResource) {
 		err = resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.GetFilter())
 		prago.Must(err)
 
+		if resource.BeforeUpdate != nil {
+			if !resource.BeforeUpdate(request, item) {
+				return
+			}
+		}
+
 		err = resource.Save(item)
 		prago.Must(err)
+
+		if resource.AfterUpdate != nil {
+			if !resource.AfterUpdate(request, item) {
+				return
+			}
+		}
 
 		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_edited"))
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
@@ -127,8 +170,20 @@ func BindDelete(a *Admin, resource *AdminResource) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
 
+		if resource.BeforeDelete != nil {
+			if !resource.BeforeDelete(request, id) {
+				return
+			}
+		}
+
 		_, err = resource.Query().Where(map[string]interface{}{"id": int64(id)}).Delete()
 		prago.Must(err)
+
+		if resource.AfterDelete != nil {
+			if !resource.AfterDelete(request, id) {
+				return
+			}
+		}
 
 		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_deleted"))
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)

@@ -13,6 +13,8 @@ var (
 	ErrorDontHaveModel = errors.New("This resource does not have model")
 )
 
+type ResourceAction func(prago.Request, interface{}) bool
+
 type DBProvider interface {
 	DB() *sql.DB
 }
@@ -36,6 +38,16 @@ type AdminResource struct {
 	VisibilityFilter   StructFieldFilter
 	EditabilityFilter  StructFieldFilter
 	Actions            map[string]ActionBinder
+
+	BeforeList   ResourceAction
+	BeforeNew    ResourceAction
+	BeforeCreate ResourceAction
+	AfterCreate  ResourceAction
+	BeforeDetail ResourceAction
+	BeforeUpdate ResourceAction
+	AfterUpdate  ResourceAction
+	BeforeDelete ResourceAction
+	AfterDelete  ResourceAction
 }
 
 func NewResource(item interface{}) (*AdminResource, error) {
