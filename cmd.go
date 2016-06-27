@@ -3,9 +3,6 @@ package prago
 import (
 	"errors"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"io"
-	"os"
-	"os/exec"
 	"strconv"
 )
 
@@ -55,34 +52,14 @@ func (a *App) start(port int, developmentMode bool) error {
 }
 
 func development(app *App) error {
-	go developmentCSS()
+	_, ok := app.data["development"]
+	if ok {
+		fn, ok := app.data["development"].(func())
+		if ok {
+			go fn()
+		}
+	}
 	return app.start(defaultPort, true)
-}
-
-func compileCss() error {
-	outfile, err := os.Create("public/compiled.css")
-	if err != nil {
-		return err
-	}
-	defer outfile.Close()
-
-	return commandHelper(exec.Command("lessc", "public/css/index.less"), outfile)
-}
-
-func commandHelper(cmd *exec.Cmd, out io.Writer) error {
-	var err error
-	cmd.Stdout = out
-	cmd.Stderr = os.Stderr
-
-	err = cmd.Start()
-	if err != nil {
-		return err
-	}
-	err = cmd.Wait()
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func Must(err error) {
