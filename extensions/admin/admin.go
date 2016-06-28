@@ -56,6 +56,15 @@ func (a *Admin) Seed(fn func(*prago.App) error) {
 	a.seedFn = fn
 }
 
+func (a *Admin) CreateResource(item interface{}) (resource *AdminResource, err error) {
+	resource, err = NewResource(item)
+	if err != nil {
+		return
+	}
+	err = a.AddResource(resource)
+	return
+}
+
 func (a *Admin) CreateResources(items ...interface{}) error {
 	for _, item := range items {
 		resource, err := NewResource(item)
