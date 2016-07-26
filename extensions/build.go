@@ -20,9 +20,6 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 	var version = app.Data()["version"].(string)
 	var appName = app.Data()["appName"].(string)
 
-	//TODO: dont require ssh in config
-	ssh := app.Config().GetString("ssh")
-
 	versionCommand := app.CreateCommand("version", "Print version")
 	app.AddCommand(versionCommand, func(app *prago.App) error {
 		fmt.Println(appName, version)
@@ -34,21 +31,28 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 		return b.build(appName, version)
 	})
 
-	releaseCommand := app.CreateCommand("release", "Release cmd")
-	releaseCommandVersion := releaseCommand.Arg("version", "").Required().String()
-	app.AddCommand(releaseCommand, func(app *prago.App) error {
-		return b.release(appName, *releaseCommandVersion, ssh)
-	})
+	sshVal, err := app.Config().Get("ssh")
 
-	remoteCommand := app.CreateCommand("remote", "Remote")
-	remoteCommandVersion := remoteCommand.Arg("version", "").Required().String()
-	app.AddCommand(remoteCommand, func(app *prago.App) error {
-		cmdStr := fmt.Sprintf("cd ~/.%s/versions/%s.%s; killall %s.linux; nohup ./%s.linux server & exit;", appName, appName, *remoteCommandVersion, appName, appName)
-		cmd := exec.Command("ssh", ssh, cmdStr)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		return cmd.Run()
-	})
+	if err == nil {
+		ssh := sshVal.(string)
+
+		releaseCommand := app.CreateCommand("release", "Release cmd")
+		releaseCommandVersion := releaseCommand.Arg("version", "").Required().String()
+		app.AddCommand(releaseCommand, func(app *prago.App) error {
+			return b.release(appName, *releaseCommandVersion, ssh)
+		})
+
+		remoteCommand := app.CreateCommand("remote", "Remote")
+		remoteCommandVersion := remoteCommand.Arg("version", "").Required().String()
+		app.AddCommand(remoteCommand, func(app *prago.App) error {
+			cmdStr := fmt.Sprintf("cd ~/.%s/versions/%s.%s; killall %s.linux; nohup ./%s.linux server & exit;", appName, appName, *remoteCommandVersion, appName, appName)
+			cmd := exec.Command("ssh", ssh, cmdStr)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			return cmd.Run()
+		})
+
+	}
 
 	return nil
 }
