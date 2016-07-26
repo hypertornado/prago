@@ -37,6 +37,7 @@ func createTable(db *sql.DB, tableName string, adminStruct *StructCache) (err er
 }
 
 func migrateTable(db *sql.DB, tableName string, adminStruct *StructCache) error {
+	fmt.Printf("Migrating table '%s'\n", tableName)
 	tableDescription, err := getTableDescription(db, tableName)
 	if err != nil {
 		return err
@@ -60,6 +61,7 @@ func migrateTable(db *sql.DB, tableName string, adminStruct *StructCache) error 
 	}
 
 	q := fmt.Sprintf("ALTER TABLE %s %s;", tableName, strings.Join(items, ", "))
+	fmt.Printf(" %s\n", q)
 	_, err = db.Exec(q)
 	return err
 }
