@@ -6,7 +6,6 @@ import (
 )
 
 var (
-	MiddlewareDispatcher          = requestMiddleware{requestMiddlewareDispatcher}
 	MiddlewareRemoveTrailingSlash = requestMiddleware{requestMiddlewareRemoveTrailingSlash}
 	MiddlewareParseRequest        = requestMiddleware{requestMiddlewareParseRequest}
 )

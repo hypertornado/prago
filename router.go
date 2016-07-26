@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 )
@@ -16,16 +17,30 @@ const (
 	ANY
 )
 
-func requestMiddlewareDispatcher(p Request, next func()) {
+type MiddlewareDispatcher struct {
+	router *Router
+}
+
+func (m MiddlewareDispatcher) Init(app *App) error {
+	m.router = NewRouter()
+	app.data["router"] = m.router
+	app.requestMiddlewares = append(app.requestMiddlewares, m.requestMiddlewareDispatcher)
+
+	routerCommand := app.CreateCommand("routes", "Show routes")
+	app.AddCommand(routerCommand, func(app *App) error {
+		m.router.Print()
+		return nil
+	})
+
+	return nil
+}
+
+func (m MiddlewareDispatcher) requestMiddlewareDispatcher(p Request, next func()) {
 	if p.IsProcessed() {
 		return
 	}
 
-	router := p.App().data["router"].(*Router)
-	if router == nil {
-		panic("couldnt find router")
-	}
-	router.Process(p)
+	m.router.Process(p)
 
 	next()
 }
@@ -55,8 +70,15 @@ func (r *Router) Process(request Request) {
 	}
 }
 
+func (r *Router) Print() {
+	for _, v := range r.routes {
+		fmt.Printf("%s %s\n", v.method, v.path)
+	}
+}
+
 type Route struct {
 	method      string
+	path        string
 	constraints []Constraint
 	action      *Action
 	pathMatcher pathMatcherFn
@@ -134,6 +156,7 @@ func NewRoute(m method, path string, action *Action, constraints []Constraint) (
 
 	route = &Route{
 		method:      methodName[m],
+		path:        path,
 		constraints: constraints,
 		action:      action,
 	}

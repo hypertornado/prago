@@ -40,7 +40,6 @@ func NewApp(appName, version string) *App {
 
 	app.data["mainController"] = newMainController(app)
 	app.data["appName"] = appName
-	app.data["router"] = NewRouter()
 	app.data["version"] = version
 	app.cron = newCron()
 
@@ -51,7 +50,7 @@ func NewApp(appName, version string) *App {
 	app.AddMiddleware(MiddlewareStatic{})
 	app.AddMiddleware(MiddlewareParseRequest)
 	app.AddMiddleware(MiddlewareView{})
-	app.AddMiddleware(MiddlewareDispatcher)
+	app.AddMiddleware(MiddlewareDispatcher{})
 
 	return app
 }
