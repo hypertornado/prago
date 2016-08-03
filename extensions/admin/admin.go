@@ -8,12 +8,12 @@ import (
 	"github.com/golang-commonmark/markdown"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/extensions"
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/hypertornado/prago/utils"
 	"html/template"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"reflect"
 	"runtime"
 	"strings"
@@ -400,36 +400,11 @@ func (a *Admin) GetURL(resource *AdminResource, suffix string) string {
 }
 
 func bindDBBackupCron(app *prago.App) {
-	user := app.Config().GetString("dbUser")
-	dbName := app.Config().GetString("dbName")
-	password := app.Config().GetString("dbPassword")
-
 	app.AddCronTask("backup db", func() {
-		app.Log().Println("Creating backup")
-		cmd := exec.Command("mysqldump", "-u"+user, "-p"+password, dbName)
-
-		dirPath := app.DotPath() + "/backups"
-		os.Mkdir(dirPath, 0777)
-
-		filePath := dirPath + "/" + time.Now().Format("2006_01_02_15_04_05") + ".sql"
-
-		file, err := os.Create(filePath)
-		if err != nil {
-			app.Log().Error("Error while creating backup file:", err)
-			return
-		}
-
-		cmd.Stdout = file
-		defer file.Close()
-
-		err = cmd.Run()
+		err := extensions.BackupApp(app)
 		if err != nil {
 			app.Log().Error("Error while creating backup:", err)
-			return
 		}
-
-		app.Log().Println("Backup created at:", filePath)
-
 	}, func(t time.Time) time.Time {
 		return t.AddDate(0, 0, 1)
 	})

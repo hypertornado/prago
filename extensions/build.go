@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 )
 
 type BuildMiddleware struct {
@@ -53,9 +54,79 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 			return cmd.Run()
 		})
 
+		backupCommand := app.CreateCommand("backup", "Backup")
+		app.AddCommand(backupCommand, BackupApp)
+
 	}
 
 	return nil
+}
+
+func BackupApp(app *prago.App) error {
+	app.Log().Println("Creating backup")
+
+	var appName = app.Data()["appName"].(string)
+
+	dir, err := ioutil.TempDir("", "backup")
+	if err != nil {
+		return err
+	}
+
+	dirPath := filepath.Join(dir, time.Now().Format("2006-01-02_15:04:05"))
+	err = os.Mkdir(dirPath, 0777)
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(dir)
+
+	user := app.Config().GetString("dbUser")
+	dbName := app.Config().GetString("dbName")
+	password := app.Config().GetString("dbPassword")
+
+	cmd := exec.Command("mysqldump", "-u"+user, "-p"+password, dbName)
+
+	dbFilePath := filepath.Join(dirPath, "db.sql")
+
+	dbFile, err := os.Create(dbFilePath)
+	defer dbFile.Close()
+	if err != nil {
+		return err
+	}
+
+	cmd.Stdout = dbFile
+
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	paths, err := app.Config().Get("staticPaths")
+	if err != nil {
+		return err
+	}
+
+	for k, v := range paths.([]interface{}) {
+
+		staticPath := filepath.Join(dirPath, "static", fmt.Sprintf("%d", k))
+
+		err = exec.Command("mkdir", "-p", staticPath).Run()
+		if err != nil {
+			return err
+		}
+
+		err = copyFiles(v.(string), staticPath)
+		if err != nil {
+			return err
+		}
+	}
+
+	backupsPath := filepath.Join(os.Getenv("HOME"), "."+appName, "backups")
+	err = exec.Command("mkdir", "-p", backupsPath).Run()
+	if err != nil {
+		return err
+	}
+
+	return copyFiles(dirPath, backupsPath)
 }
 
 func (b BuildMiddleware) release(appName, version, ssh string) error {
@@ -130,8 +201,7 @@ func (b BuildMiddleware) build(appName, version string) error {
 			return errors.New("Have not deleted old version.")
 		}
 	}
-	copyFiles(dirPath, buildPath)
-	return nil
+	return copyFiles(dirPath, buildPath)
 }
 
 func buildExecutable(bf buildFlag, appName, dirPath string) error {
