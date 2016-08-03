@@ -13,6 +13,7 @@ function bindOrder() {
 
       $(row).on("dragstart", function(e) {
         draggedElement = this;
+        e.originalEvent.dataTransfer.setData('text/plain', '');
       });
 
       $(row).on("drop", function(e) {
@@ -35,6 +36,7 @@ function bindOrder() {
 
           saveOrder();
         }
+        return false;
       });
 
       $(row).on("dragover", function(e){
