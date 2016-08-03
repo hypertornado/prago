@@ -206,6 +206,7 @@ func recoveryFromServerError(p Request, recoveryData interface{}) {
 }
 
 func Redirect(request Request, urlStr string) {
+	request.SetProcessed()
 	request.Header().Set("Location", urlStr)
 	request.Response().WriteHeader(http.StatusMovedPermanently)
 }

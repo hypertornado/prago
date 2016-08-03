@@ -57,6 +57,25 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 		backupCommand := app.CreateCommand("backup", "Backup")
 		app.AddCommand(backupCommand, BackupApp)
 
+		syncBackupCommand := app.CreateCommand("syncbackups", "Sync backups from server")
+		app.AddCommand(syncBackupCommand, func(app *prago.App) error {
+
+			to := filepath.Join(os.Getenv("HOME"), "."+appName, "serverbackups")
+			err = exec.Command("mkdir", "-p", to).Run()
+			if err != nil {
+				return err
+			}
+
+			from := fmt.Sprintf("%s:~/.%s/backups/*", ssh, appName)
+
+			fmt.Println("scp", "-r", from, to)
+			cmd := exec.Command("scp", "-r", from, to)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			return cmd.Run()
+
+		})
+
 	}
 
 	return nil
