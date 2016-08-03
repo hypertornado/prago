@@ -5,14 +5,12 @@ import (
 	"testing"
 )
 
-func TestUtils(t *testing.T) {
+func TestPrettyUrl(t *testing.T) {
 
-	data := [][]string{
-		[]string{"hello", "hello"},
-		[]string{"  Šíleně žluťoučký kůň úpěl   ďábelské ódy.  ", "silene-zlutoucky-kun-upel-dabelske-ody"},
-	}
-
-	for _, v := range data {
+	for _, v := range [][2]string{
+		{"hello", "hello"},
+		{"  Šíleně žluťoučký kůň úpěl   ďábelské ódy.  ", "silene-zlutoucky-kun-upel-dabelske-ody"},
+	} {
 		if PrettyUrl(v[0]) != v[1] {
 			t.Errorf("pretty url of '%s' is '%s' instead of '%s", v[0], PrettyUrl(v[0]), v[1])
 		}
@@ -33,6 +31,17 @@ func TestCrop(t *testing.T) {
 		croped := Crop(v.in, v.index)
 		if croped != v.out {
 			t.Fatal(fmt.Sprintf("%d Expected '%s', got '%s'", k, v.out, croped))
+		}
+	}
+}
+
+func TestFilenames(t *testing.T) {
+	for _, v := range [][2]string{
+		{"abc", "abc"},
+		{"žluťoučký.kůň", "zlutoucky.kun"},
+	} {
+		if PrettyFilename(v[0]) != v[1] {
+			t.Fatal(fmt.Printf("Expected %s, got %s", v[1], PrettyFilename(v[0])))
 		}
 	}
 
