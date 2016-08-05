@@ -1,5 +1,9 @@
 package prago
 
+import (
+	"net/http"
+)
+
 func Must(err error) {
 	if err != nil {
 		panic(err)
