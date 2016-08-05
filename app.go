@@ -95,14 +95,6 @@ func (a *App) Init() error {
 	return errors.New("command not found: " + commandName)
 }
 
-func (a *App) MainController() (ret *Controller) {
-	ret = a.data["mainController"].(*Controller)
-	if ret == nil {
-		panic("couldnt find controller")
-	}
-	return
-}
-
 func (a *App) Route(m method, path string, controller *Controller, action func(p Request), constraints ...Constraint) error {
 	router := a.data["router"].(*Router)
 	if router == nil {
@@ -203,10 +195,4 @@ func recoveryFromServerError(p Request, recoveryData interface{}) {
 	}
 	p.Log().Errorln(fmt.Sprintf("500 - error\n%s\nstack:\n", recoveryData))
 	p.Log().Errorln(string(debug.Stack()))
-}
-
-func Redirect(request Request, urlStr string) {
-	request.SetProcessed()
-	request.Header().Set("Location", urlStr)
-	request.Response().WriteHeader(http.StatusMovedPermanently)
 }

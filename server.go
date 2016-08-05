@@ -14,11 +14,6 @@ func (m MiddlewareCmd) Init(app *App) error {
 	app.kingpin = kingpin.New("", "")
 	app.commands = map[*kingpin.CmdClause]func(app *App) error{}
 
-	devCommand := app.kingpin.Command("dev", "Development")
-	app.commands[devCommand] = func(app *App) error {
-		return development(app)
-	}
-
 	serverCommand := app.kingpin.Command("server", "Run server")
 	portFlag := serverCommand.Flag("port", "server port").Short('p').Int()
 	developmentMode := serverCommand.Flag("development", "Is in development mode").Default("false").Short('d').Bool()
@@ -35,35 +30,18 @@ func (m MiddlewareCmd) Init(app *App) error {
 				}
 			}
 		}
-		return app.start(port, *developmentMode)
+		return app.StartServer(port, *developmentMode)
 	}
 	return nil
 }
 
-type MiddlewareRun struct{ Fn func(*App) }
+type MiddlewareServer struct{ Fn func(*App) }
 
-func (mr MiddlewareRun) Init(app *App) error {
+func (mr MiddlewareServer) Init(app *App) error {
 	mr.Fn(app)
 	return nil
 }
 
-func (a *App) start(port int, developmentMode bool) error {
+func (a *App) StartServer(port int, developmentMode bool) error {
 	return a.ListenAndServe(port, developmentMode)
-}
-
-func development(app *App) error {
-	_, ok := app.data["development"]
-	if ok {
-		fn, ok := app.data["development"].(func())
-		if ok {
-			go fn()
-		}
-	}
-	return app.start(defaultPort, true)
-}
-
-func Must(err error) {
-	if err != nil {
-		panic(err)
-	}
 }

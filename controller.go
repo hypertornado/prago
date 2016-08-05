@@ -6,6 +6,14 @@ type Controller struct {
 	aroundActions []func(p Request, next func())
 }
 
+func (a *App) MainController() (ret *Controller) {
+	ret = a.data["mainController"].(*Controller)
+	if ret == nil {
+		panic("couldnt find controller")
+	}
+	return
+}
+
 func newMainController(app *App) *Controller {
 	return &Controller{
 		parent:        nil,
