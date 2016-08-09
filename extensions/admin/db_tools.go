@@ -32,6 +32,7 @@ func createTable(db *sql.DB, tableName string, adminStruct *StructCache) (err er
 		items = append(items, v.fieldDescriptionMysql())
 	}
 	q := fmt.Sprintf("CREATE TABLE %s (%s);", tableName, strings.Join(items, ", "))
+	fmt.Printf(" %s\n", q)
 	_, err = db.Exec(q)
 	return err
 }
