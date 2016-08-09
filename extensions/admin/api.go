@@ -21,6 +21,12 @@ func BindListResourceAPI(a *Admin) {
 	a.App.MainController().Get(a.Prefix+"/_api/resource/:name", func(request prago.Request) {
 		name := request.Params().Get("name")
 		resource := a.resourceNameMap[name]
+		c, err := resource.Query().Count()
+		prago.Must(err)
+		if c == 0 {
+			WriteApi(request, []string{}, 200)
+			return
+		}
 		items, err := resource.Query().List()
 		prago.Must(err)
 		WriteApi(request, items, 200)
