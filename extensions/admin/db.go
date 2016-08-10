@@ -7,36 +7,35 @@ import (
 )
 
 func (a *Admin) Create(item interface{}) error {
-	typ := reflect.TypeOf(item).Elem()
-	resource, ok := a.resourceMap[typ]
-	if !ok {
-		return errors.New(fmt.Sprintf("Can't find resource with type %s.", typ))
+	resource, err := a.getResourceByItem(item)
+	if err != nil {
+		return err
 	}
-
 	return resource.Create(item)
 }
 
 func (a *Admin) Save(item interface{}) error {
-	typ := reflect.TypeOf(item).Elem()
-	resource, ok := a.resourceMap[typ]
-	if !ok {
-		return errors.New(fmt.Sprintf("Can't find resource with type %s.", typ))
+	resource, err := a.getResourceByItem(item)
+	if err != nil {
+		return err
 	}
 
 	return resource.Save(item)
-}
-
-type AdminQuery struct {
-	query *listQuery
-	admin *Admin
-	err   error
 }
 
 func (a *Admin) Query() *AdminQuery {
 	return &AdminQuery{
 		query: &listQuery{},
 		admin: a,
+		db:    a.DB(),
 	}
+}
+
+type AdminQuery struct {
+	query *listQuery
+	admin *Admin
+	db    dbIface
+	err   error
 }
 
 func (q *AdminQuery) Where(w ...interface{}) *AdminQuery {
@@ -92,13 +91,13 @@ func (aq *AdminQuery) Get(item interface{}) error {
 
 	var newItem interface{}
 	if slice {
-		err = listItems(resource.StructCache, aq.admin.db, resource.tableName(), &newItem, aq.query)
+		err = listItems(resource.StructCache, aq.db, resource.tableName(), &newItem, aq.query)
 		if err != nil {
 			return err
 		}
 		reflect.ValueOf(item).Elem().Set(reflect.ValueOf(newItem))
 	} else {
-		err = getFirstItem(resource.StructCache, aq.admin.db, resource.tableName(), &newItem, aq.query)
+		err = getFirstItem(resource.StructCache, aq.db, resource.tableName(), &newItem, aq.query)
 		if err != nil {
 			return err
 		}
@@ -113,5 +112,7 @@ func (aq *AdminQuery) Count(item interface{}) (int64, error) {
 	if !ok {
 		return -1, errors.New(fmt.Sprintf("Can't find resource with type %s.", typ))
 	}
-	return countItems(aq.admin.db, resource.tableName(), aq.query)
+	return countItems(aq.db, resource.tableName(), aq.query)
 }
+
+//TODO: Delete action

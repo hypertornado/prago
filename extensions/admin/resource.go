@@ -3,6 +3,7 @@ package admin
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/hypertornado/prago/utils"
@@ -159,6 +160,15 @@ func (a *Admin) initResource(resource *AdminResource) error {
 		}
 	}
 	return AdminInitResourceDefault(a, resource)
+}
+
+func (a *Admin) getResourceByItem(item interface{}) (*AdminResource, error) {
+	typ := reflect.TypeOf(item).Elem()
+	resource, ok := a.resourceMap[typ]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("Can't find resource with type %s.", typ))
+	}
+	return resource, nil
 }
 
 func (ar *AdminResource) db() *sql.DB {

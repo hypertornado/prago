@@ -69,6 +69,10 @@ func (q *listQuery) addOrder(name string, desc bool) {
 }
 
 func (ar *AdminResource) Save(item interface{}) error {
+	return ar.saveWithDBIface(item, ar.admin.DB())
+}
+
+func (ar *AdminResource) saveWithDBIface(item interface{}, db dbIface) error {
 	if !ar.HasModel {
 		return ErrorDontHaveModel
 	}
@@ -80,10 +84,14 @@ func (ar *AdminResource) Save(item interface{}) error {
 		val.FieldByName(fn).Set(timeVal)
 	}
 
-	return saveItem(ar.db(), ar.tableName(), item)
+	return saveItem(db, ar.tableName(), item)
 }
 
 func (ar *AdminResource) Create(item interface{}) error {
+	return ar.createWithDBIface(item, ar.admin.DB())
+}
+
+func (ar *AdminResource) createWithDBIface(item interface{}, db dbIface) error {
 	if !ar.HasModel {
 		return ErrorDontHaveModel
 	}
@@ -101,7 +109,7 @@ func (ar *AdminResource) Create(item interface{}) error {
 			}
 		}
 	}
-	return createItem(ar.db(), ar.tableName(), item)
+	return createItem(db, ar.tableName(), item)
 }
 
 func (ar *AdminResource) Query() *ResourceQuery {
