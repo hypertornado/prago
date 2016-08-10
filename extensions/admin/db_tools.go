@@ -34,12 +34,17 @@ type listQueryOrder struct {
 	desc bool
 }
 
-func dropTable(db *sql.DB, tableName string) error {
+type dbIface interface {
+	Exec(string, ...interface{}) (sql.Result, error)
+	Query(string, ...interface{}) (*sql.Rows, error)
+}
+
+func dropTable(db dbIface, tableName string) error {
 	_, err := db.Exec(fmt.Sprintf("drop table `%s`;", tableName))
 	return err
 }
 
-func createTable(db *sql.DB, tableName string, adminStruct *StructCache, verbose bool) (err error) {
+func createTable(db dbIface, tableName string, adminStruct *StructCache, verbose bool) (err error) {
 	if verbose {
 		fmt.Printf("Creating table '%s'\n", tableName)
 	}
@@ -55,7 +60,7 @@ func createTable(db *sql.DB, tableName string, adminStruct *StructCache, verbose
 	return err
 }
 
-func migrateTable(db *sql.DB, tableName string, adminStruct *StructCache, verbose bool) error {
+func migrateTable(db dbIface, tableName string, adminStruct *StructCache, verbose bool) error {
 	if verbose {
 		fmt.Printf("Migrating table '%s'\n", tableName)
 	}
@@ -89,7 +94,7 @@ func migrateTable(db *sql.DB, tableName string, adminStruct *StructCache, verbos
 	return err
 }
 
-func getTableDescription(db *sql.DB, tableName string) (map[string]*mysqlColumn, error) {
+func getTableDescription(db dbIface, tableName string) (map[string]*mysqlColumn, error) {
 	columns := map[string]*mysqlColumn{}
 	rows, err := db.Query(fmt.Sprintf("describe `%s`;", tableName))
 	if err != nil {
@@ -150,7 +155,7 @@ func prepareValues(value reflect.Value) (names []string, questionMarks []string,
 	return
 }
 
-func saveItem(db *sql.DB, tableName string, item interface{}) error {
+func saveItem(db dbIface, tableName string, item interface{}) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	value := reflect.ValueOf(item).Elem()
 	names, _, values, err := prepareValues(value)
@@ -166,7 +171,7 @@ func saveItem(db *sql.DB, tableName string, item interface{}) error {
 	return err
 }
 
-func createItem(db *sql.DB, tableName string, item interface{}) error {
+func createItem(db dbIface, tableName string, item interface{}) error {
 	value := reflect.ValueOf(item).Elem()
 
 	names, questionMarks, values, err := prepareValues(value)
@@ -236,7 +241,7 @@ func mapToDBQuery(m map[string]interface{}) (str string, params []interface{}) {
 	return
 }
 
-func countItems(db *sql.DB, tableName string, query *listQuery) (int64, error) {
+func countItems(db dbIface, tableName string, query *listQuery) (int64, error) {
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.whereString)
@@ -254,7 +259,7 @@ func countItems(db *sql.DB, tableName string, query *listQuery) (int64, error) {
 	return i, err
 }
 
-func getFirstItem(structCache *StructCache, db *sql.DB, tableName string, item interface{}, query *listQuery) error {
+func getFirstItem(structCache *StructCache, db dbIface, tableName string, item interface{}, query *listQuery) error {
 	var items interface{}
 	err := listItems(structCache, db, tableName, &items, query)
 	if err != nil {
@@ -271,7 +276,7 @@ func getFirstItem(structCache *StructCache, db *sql.DB, tableName string, item i
 	}
 }
 
-func listItems(structCache *StructCache, db *sql.DB, tableName string, items interface{}, query *listQuery) error {
+func listItems(structCache *StructCache, db dbIface, tableName string, items interface{}, query *listQuery) error {
 	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(structCache.typ))).Elem()
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
@@ -306,7 +311,7 @@ func listItems(structCache *StructCache, db *sql.DB, tableName string, items int
 	return nil
 }
 
-func deleteItems(db *sql.DB, tableName string, query *listQuery) (int64, error) {
+func deleteItems(db dbIface, tableName string, query *listQuery) (int64, error) {
 	limitString := buildLimitWithoutOffsetString(query.limit)
 	whereString := buildWhereString(query.whereString)
 
