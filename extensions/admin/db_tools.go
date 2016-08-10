@@ -21,6 +21,19 @@ type mysqlColumn struct {
 	Extra   sql.NullString
 }
 
+type listQuery struct {
+	whereString string
+	whereParams []interface{}
+	limit       int64
+	offset      int64
+	order       []listQueryOrder
+}
+
+type listQueryOrder struct {
+	name string
+	desc bool
+}
+
 func dropTable(db *sql.DB, tableName string) error {
 	_, err := db.Exec(fmt.Sprintf("drop table `%s`;", tableName))
 	return err
@@ -173,19 +186,6 @@ func createItem(db *sql.DB, tableName string, item interface{}) error {
 
 	reflect.ValueOf(item).Elem().FieldByName("ID").SetInt(id)
 	return nil
-}
-
-type listQuery struct {
-	whereString string
-	whereParams []interface{}
-	limit       int64
-	offset      int64
-	order       []listQueryOrder
-}
-
-type listQueryOrder struct {
-	name string
-	desc bool
 }
 
 func buildOrderString(params []listQueryOrder) string {
