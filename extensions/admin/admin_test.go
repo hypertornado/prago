@@ -14,7 +14,7 @@ func TestAdminQuery(t *testing.T) {
 	admin := prepareAdmin()
 	admin.CreateResources(ResourceStruct{})
 	admin.UnsafeDropTables()
-	admin.Migrate()
+	admin.Migrate(false)
 
 	var err error
 	var item ResourceStruct

@@ -91,10 +91,10 @@ func (a *Admin) UnsafeDropTables() error {
 	return nil
 }
 
-func (a *Admin) Migrate() error {
+func (a *Admin) Migrate(verbose bool) error {
 	for _, resource := range a.Resources {
 		if resource.HasModel {
-			err := resource.Migrate()
+			err := resource.migrate(verbose)
 			if err != nil {
 				return err
 			}
@@ -326,7 +326,7 @@ func (a *Admin) bindAdminCommand(app *prago.App) error {
 		switch *adminSubcommand {
 		case "migrate":
 			println("Migrating database")
-			err := a.Migrate()
+			err := a.Migrate(true)
 			if err == nil {
 				println("Migrate done")
 			}

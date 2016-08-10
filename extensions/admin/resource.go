@@ -173,11 +173,11 @@ func (ar *AdminResource) UnsafeDropTable() error {
 	return dropTable(ar.db(), ar.tableName())
 }
 
-func (ar *AdminResource) Migrate() error {
+func (ar *AdminResource) migrate(verbose bool) error {
 	_, err := getTableDescription(ar.db(), ar.tableName())
 	if err == nil {
-		return migrateTable(ar.db(), ar.tableName(), ar.StructCache)
+		return migrateTable(ar.db(), ar.tableName(), ar.StructCache, verbose)
 	} else {
-		return createTable(ar.db(), ar.tableName(), ar.StructCache)
+		return createTable(ar.db(), ar.tableName(), ar.StructCache, verbose)
 	}
 }

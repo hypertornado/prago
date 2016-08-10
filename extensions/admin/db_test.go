@@ -86,7 +86,7 @@ func TestAdminTime(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
 
-	createTable(db, tableName, structCache)
+	createTable(db, tableName, structCache, false)
 
 	n0 := &TestNode{Changed: time.Now()}
 	createItem(db, tableName, n0)
@@ -127,7 +127,7 @@ func TestAdminDBFirst(t *testing.T) {
 	var err error
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, structCache)
+	createTable(db, tableName, structCache, false)
 
 	var node *TestNode
 	err = getFirstItem(structCache, db, tableName, &node, &listQuery{})
@@ -158,7 +158,7 @@ func TestAdminDBFirst(t *testing.T) {
 func TestAdminListItems(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, structCache)
+	createTable(db, tableName, structCache, false)
 
 	createItem(db, tableName, &TestNode{Name: "A"})
 	createItem(db, tableName, &TestNode{Name: "B"})
@@ -204,7 +204,7 @@ func TestAdminDB(t *testing.T) {
 	var err error
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, structCache)
+	createTable(db, tableName, structCache, false)
 
 	timeNow := time.Now()
 
@@ -314,7 +314,7 @@ func TestAdminDB(t *testing.T) {
 func TestAdminResourceQuery(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, structCache)
+	createTable(db, tableName, structCache, false)
 
 	q := &ResourceQuery{
 		query:       &listQuery{},
@@ -345,7 +345,7 @@ func TestAdminResourceQuery(t *testing.T) {
 func TestAdminDBList(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, structCache)
+	createTable(db, tableName, structCache, false)
 
 	createItem(db, tableName, &TestNode{Name: "B", Changed: time.Now().Add(1 * time.Minute)})
 	createItem(db, tableName, &TestNode{Name: "A"})
@@ -473,11 +473,11 @@ func TestMigrateTable(t *testing.T) {
 	structCache1, _ := NewStructCache(N1{})
 	structCache2, _ := NewStructCache(N2{})
 
-	createTable(db, tableName, structCache1)
+	createTable(db, tableName, structCache1, false)
 
 	createItem(db, tableName, &N1{Name: "A"})
 
-	err = migrateTable(db, tableName, structCache2)
+	err = migrateTable(db, tableName, structCache2, false)
 	if err != nil {
 		t.Fatal(err)
 	}

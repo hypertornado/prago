@@ -20,7 +20,7 @@ func prepareResource() *AdminResource {
 	resource.admin = dbProvider{}
 
 	resource.UnsafeDropTable()
-	resource.Migrate()
+	resource.migrate(false)
 	return resource
 }
 
@@ -73,7 +73,7 @@ func TestResourceUnique(t *testing.T) {
 	resource.admin = dbProvider{}
 
 	resource.UnsafeDropTable()
-	resource.Migrate()
+	resource.migrate(false)
 
 	resource.Create(&ResourceStructUnique{Name: "A"})
 	resource.Create(&ResourceStructUnique{Name: "B"})
