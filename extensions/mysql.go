@@ -11,22 +11,30 @@ import (
 type Mysql struct{}
 
 func (m *Mysql) Init(app *prago.App) error {
-	user := app.Config().GetString("dbUser")
-	dbName := app.Config().GetString("dbName")
-	password := app.Config().GetString("dbPassword")
+	db, err := ConnectMysql(
+		app.Config().GetString("dbUser"),
+		app.Config().GetString("dbName"),
+		app.Config().GetString("dbPassword"),
+	)
+	if err != nil {
+		return err
+	}
 
+	app.Data()["db"] = db
+	return nil
+}
+
+func ConnectMysql(user, password, dbName string) (*sql.DB, error) {
 	connectString := fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local", user, password, dbName)
 	db, err := sql.Open("mysql", connectString)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error while opening MySQL database: %s", err))
+		return nil, errors.New(fmt.Sprintf("Error while opening MySQL database: %s", err))
 	}
 
 	err = db.Ping()
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error while opening MySQL database: %s", err))
+		return nil, errors.New(fmt.Sprintf("Error while ping to MySQL database: %s", err))
 	}
 
-	app.Data()["db"] = db
-
-	return nil
+	return db, nil
 }
