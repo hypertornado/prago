@@ -53,7 +53,7 @@ func createTable(db dbIface, tableName string, adminStruct *StructCache, verbose
 		items = append(items, v.fieldDescriptionMysql())
 	}
 	q := fmt.Sprintf("CREATE TABLE %s (%s);", tableName, strings.Join(items, ", "))
-	if verbose {
+	if verbose || Debug {
 		fmt.Printf(" %s\n", q)
 	}
 	_, err = db.Exec(q)
@@ -87,7 +87,7 @@ func migrateTable(db dbIface, tableName string, adminStruct *StructCache, verbos
 	}
 
 	q := fmt.Sprintf("ALTER TABLE %s %s;", tableName, strings.Join(items, ", "))
-	if verbose {
+	if verbose || Debug {
 		fmt.Printf(" %s\n", q)
 	}
 	_, err = db.Exec(q)
@@ -167,6 +167,9 @@ func saveItem(db dbIface, tableName string, item interface{}) error {
 		updateNames = append(updateNames, fmt.Sprintf(" %s=? ", v))
 	}
 	q := fmt.Sprintf("UPDATE `%s` SET %s WHERE id=%d;", tableName, strings.Join(updateNames, ", "), id)
+	if Debug {
+		fmt.Println(q, values)
+	}
 	_, err = db.Exec(q, values...)
 	return err
 }
@@ -180,6 +183,9 @@ func createItem(db dbIface, tableName string, item interface{}) error {
 	}
 
 	q := fmt.Sprintf("INSERT INTO `%s` (%s) VALUES (%s);", tableName, strings.Join(names, ", "), strings.Join(questionMarks, ", "))
+	if Debug {
+		fmt.Println(q, values)
+	}
 	res, err := db.Exec(q, values...)
 	if err != nil {
 		return err
@@ -247,6 +253,9 @@ func countItems(db dbIface, tableName string, query *listQuery) (int64, error) {
 	whereString := buildWhereString(query.whereString)
 
 	q := fmt.Sprintf("SELECT COUNT(*) FROM `%s` %s %s %s;", tableName, whereString, orderString, limitString)
+	if Debug {
+		fmt.Println(q, query.whereParams)
+	}
 	rows, err := db.Query(q, query.whereParams...)
 	if err != nil {
 		return -1, err
@@ -316,6 +325,9 @@ func deleteItems(db dbIface, tableName string, query *listQuery) (int64, error) 
 	whereString := buildWhereString(query.whereString)
 
 	q := fmt.Sprintf("DELETE FROM `%s` %s %s;", tableName, whereString, limitString)
+	if Debug {
+		fmt.Println(q, query.whereParams)
+	}
 	res, err := db.Exec(q, query.whereParams...)
 	if err != nil {
 		return -1, err

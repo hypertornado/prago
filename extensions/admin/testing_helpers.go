@@ -12,6 +12,7 @@ func NewAdminMockup(user, password, dbName string) (*Admin, error) {
 
 	admin := NewAdmin("test", "test")
 	admin.db = db
+	admin.UnsafeDropTables()
 
 	return admin, nil
 }
