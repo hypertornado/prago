@@ -114,4 +114,10 @@ func (aq *AdminQuery) Count(item interface{}) (int64, error) {
 	return countItems(aq.db, resource.tableName(), aq.query)
 }
 
-//TODO: Delete action
+func (aq *AdminQuery) Delete(item interface{}) (int64, error) {
+	resource, err := aq.admin.getResourceByItem(item)
+	if err != nil {
+		return -1, err
+	}
+	return deleteItems(aq.db, resource.tableName(), aq.query)
+}

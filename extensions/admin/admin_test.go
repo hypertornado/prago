@@ -81,4 +81,13 @@ func TestAdminQuery(t *testing.T) {
 	if list[0].Name != "C" {
 		t.Fatal(list[0].Name)
 	}
+
+	if count, _ = admin.Query().WhereIs("name", "A").Delete(&ResourceStruct{}); count != 1 {
+		t.Fatal(count)
+	}
+
+	if count, _ = admin.Query().Count(&ResourceStruct{}); count != 2 {
+		t.Fatal(count)
+	}
+
 }
