@@ -89,7 +89,11 @@ func (a *StructField) fieldDescriptionMysql() string {
 	case reflect.Struct:
 		dateType := reflect.TypeOf(time.Now())
 		if a.Typ == dateType {
-			fieldDescription = "datetime"
+			if a.Tags["prago-type"] == "date" {
+				fieldDescription = "date"
+			} else {
+				fieldDescription = "datetime"
+			}
 		}
 	case reflect.Bool:
 		fieldDescription = "bool NOT NULL"

@@ -44,6 +44,7 @@ type TestNode struct {
 	OK          bool
 	Count       int64
 	Changed     time.Time
+	Date        time.Time `prago-type:"date"`
 }
 
 func TestReflect(t *testing.T) {
@@ -88,7 +89,9 @@ func TestAdminTime(t *testing.T) {
 
 	createTable(db, tableName, structCache, false)
 
-	n0 := &TestNode{Changed: time.Now()}
+	tn := time.Now()
+
+	n0 := &TestNode{Changed: tn, Date: tn}
 	createItem(db, tableName, n0)
 
 	n1 := &TestNode{}
@@ -98,6 +101,18 @@ func TestAdminTime(t *testing.T) {
 		whereString: whereString,
 		whereParams: whereParams,
 	})
+
+	if n1.Date.Hour() != 0 {
+		t.Fatal(n1.Date.Hour())
+	}
+
+	if n1.Date.Minute() != 0 {
+		t.Fatal(n1.Date.Minute())
+	}
+
+	if n1.Date.Second() != 0 {
+		t.Fatal(n1.Date.Second())
+	}
 
 	if n0.Changed.Format("2006-01-02 15:04:05") != n1.Changed.Format("2006-01-02 15:04:05") {
 		t.Fatal(n0.Changed, n1.Changed)

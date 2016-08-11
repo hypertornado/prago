@@ -13,8 +13,8 @@ type Mysql struct{}
 func (m *Mysql) Init(app *prago.App) error {
 	db, err := ConnectMysql(
 		app.Config().GetString("dbUser"),
-		app.Config().GetString("dbName"),
 		app.Config().GetString("dbPassword"),
+		app.Config().GetString("dbName"),
 	)
 	if err != nil {
 		return err
