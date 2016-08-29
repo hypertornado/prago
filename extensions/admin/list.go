@@ -30,6 +30,7 @@ type ListRow struct {
 type ListCell struct {
 	TemplateName string
 	Value        string
+	Url          string
 }
 
 type Pagination struct {
@@ -129,7 +130,7 @@ func (resource *AdminResource) GetList(lang string, path string, requestQuery ur
 		for _, h := range list.Header {
 			structField, _ := resource.Typ.FieldByName(h.Name)
 			fieldVal := itemVal.FieldByName(h.Name)
-			row.Items = append(row.Items, ValueToCell(structField, fieldVal))
+			row.Items = append(row.Items, resource.ValueToCell(structField, fieldVal))
 		}
 		row.ID = itemVal.FieldByName("ID").Int()
 		list.Rows = append(list.Rows, row)
@@ -137,7 +138,7 @@ func (resource *AdminResource) GetList(lang string, path string, requestQuery ur
 	return
 }
 
-func ValueToCell(field reflect.StructField, val reflect.Value) (cell ListCell) {
+func (resource *AdminResource) ValueToCell(field reflect.StructField, val reflect.Value) (cell ListCell) {
 	cell.TemplateName = "admin_string"
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
@@ -151,6 +152,19 @@ func ValueToCell(field reflect.StructField, val reflect.Value) (cell ListCell) {
 		}
 	case int64:
 		cell.Value = fmt.Sprintf("%d", item.(int64))
+		if field.Tag.Get("prago-type") == "relation" {
+			relationResource := resource.admin.GetResourceByName(field.Name)
+			relationItem, err := relationResource.Query().Where(map[string]interface{}{"id": item.(int64)}).First()
+			if err != nil {
+				panic(err)
+			}
+
+			nameField := reflect.ValueOf(relationItem).Elem().FieldByName("Name")
+			cell.Value = nameField.String()
+			cell.TemplateName = "admin_link"
+			cell.Url = fmt.Sprintf("%s/%d", relationResource.ID, item.(int64))
+			return
+		}
 	}
 
 	if field.Tag.Get("prago-type") == "image" {

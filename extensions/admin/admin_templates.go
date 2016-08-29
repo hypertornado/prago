@@ -169,11 +169,15 @@ const TEMPLATES = `
 {{end}}
 
 {{define "admin_image"}}
-<img src="{{thumb .}}">
+<img src="{{thumb .Value}}">
+{{end}}
+
+{{define "admin_link"}}
+  <a href="{{.Url}}">{{.Value}}</a>
 {{end}}
 
 {{define "admin_string"}}
-{{.}}
+{{.Value}}
 {{end}}
 {{define "admin_layout"}}
 <!doctype html>
@@ -290,7 +294,7 @@ const TEMPLATES = `
   <tr data-id="{{$item.ID}}" class="admin_table_row">
     {{range $cell := $item.Items}}
     <td>
-      {{ tmpl $cell.TemplateName $cell.Value }}
+      {{ tmpl $cell.TemplateName $cell }}
     </td>
     {{end}}
     <td nowrap>

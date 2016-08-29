@@ -22,6 +22,10 @@ func (dbProvider) DB() *sql.DB {
 	return db
 }
 
+func (dbProvider) GetResourceByName(string) *AdminResource {
+	return nil
+}
+
 func init() {
 	var err error
 	structCache, err = NewStructCache(TestNode{})

@@ -97,9 +97,13 @@
 {{end}}
 
 {{define "admin_image"}}
-<img src="{{thumb .}}">
+<img src="{{thumb .Value}}">
+{{end}}
+
+{{define "admin_link"}}
+  <a href="{{.Url}}">{{.Value}}</a>
 {{end}}
 
 {{define "admin_string"}}
-{{.}}
+{{.Value}}
 {{end}}

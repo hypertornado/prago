@@ -24,7 +24,7 @@
   <tr data-id="{{$item.ID}}" class="admin_table_row">
     {{range $cell := $item.Items}}
     <td>
-      {{ tmpl $cell.TemplateName $cell.Value }}
+      {{ tmpl $cell.TemplateName $cell }}
     </td>
     {{end}}
     <td nowrap>

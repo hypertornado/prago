@@ -79,7 +79,7 @@ func requestMiddlewareView(p Request, next func()) {
 	p.SetProcessed()
 }
 
-func (app *App) getTemplates() (*template.Template, template.FuncMap, error) {
+func (app *App) GetTemplates() (*template.Template, template.FuncMap, error) {
 	templates, ok := app.data["templates"].(*template.Template)
 	if !ok {
 		return nil, nil, errors.New("Templates not initialized")
@@ -93,7 +93,7 @@ func (app *App) getTemplates() (*template.Template, template.FuncMap, error) {
 }
 
 func (app *App) LoadTemplatePath(pattern string) (err error) {
-	templates, templateFuncs, err := app.getTemplates()
+	templates, templateFuncs, err := app.GetTemplates()
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (app *App) LoadTemplatePath(pattern string) (err error) {
 }
 
 func (app *App) LoadTemplateFromString(in string) (err error) {
-	templates, templateFuncs, err := app.getTemplates()
+	templates, templateFuncs, err := app.GetTemplates()
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func (app *App) LoadTemplateFromString(in string) (err error) {
 }
 
 func (app *App) AddTemplateFunction(name string, f interface{}) (err error) {
-	_, templateFuncs, err := app.getTemplates()
+	_, templateFuncs, err := app.GetTemplates()
 	if err != nil {
 		return err
 	}

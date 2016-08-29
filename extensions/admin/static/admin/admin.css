@@ -68,18 +68,6 @@ a:hover {
   color: #ccc;
   text-align: right;
 }
-.admin_table {
-  width: 100%;
-}
-.admin_table thead {
-  font-weight: bold;
-}
-.admin_table td {
-  padding: 3px 5px;
-  border: 1px solid #ccc;
-}
-
-
 
 .btn {
   background: #dd2e4f;
@@ -190,10 +178,8 @@ select.input {
   padding: 3px 5px;
   border: 1px solid #ccc;
 }
-
-.admin_header_item-active {
-  //background-color: white;
-  //border: 2px solid #009ee0;
+.admin_table th {
+  padding: 1px;
 }
 
 .admin_header_item-active a {

@@ -119,6 +119,10 @@ func (a *Admin) AddResource(resource *AdminResource) error {
 	return nil
 }
 
+func (a *Admin) GetResourceByName(name string) *AdminResource {
+	return a.resourceNameMap[utils.ColumnName(name)]
+}
+
 func GetUser(request prago.Request) *User {
 	return request.GetData("currentuser").(*User)
 }

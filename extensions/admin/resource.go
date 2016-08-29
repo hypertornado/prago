@@ -18,6 +18,7 @@ type ResourceAction func(prago.Request, interface{}) bool
 
 type DBProvider interface {
 	DB() *sql.DB
+	GetResourceByName(string) *AdminResource
 }
 
 type AdminResource struct {
