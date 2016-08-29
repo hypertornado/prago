@@ -210,7 +210,8 @@ func (a *Admin) Init(app *prago.App) error {
 		request.SetData("currentuser", &user)
 		request.SetData("locale", GetLocale(request))
 
-		request.SetData("appName", request.App().Data()["appName"].(string))
+		request.SetData("appName", a.AppName)
+		request.SetData("appCode", request.App().Data()["appName"].(string))
 		request.SetData("appVersion", request.App().Data()["version"].(string))
 		request.SetData("admin_header", a.adminHeaderData(request))
 

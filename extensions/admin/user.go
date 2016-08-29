@@ -288,6 +288,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		user := GetUser(request)
 		form := settingsForm(GetLocale(request), user)
 		AddCSRFToken(form, request)
+		request.SetData("admin_title", messages.Messages.Get(GetLocale(request), "admin_settings"))
 		renderSettings(request, user, form)
 	})
 
@@ -332,7 +333,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 	}
 
 	renderPasswordForm := func(request prago.Request, form *Form) {
-		request.SetData("name", messages.Messages.Get(GetLocale(request), "admin_password_change"))
+		request.SetData("admin_title", messages.Messages.Get(GetLocale(request), "admin_password_change"))
 		request.SetData("admin_form", form)
 		request.SetData("admin_yield", "admin_form_view")
 		prago.Render(request, 200, "admin_layout")

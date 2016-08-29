@@ -21,6 +21,7 @@ func BindList(a *Admin, resource *AdminResource) {
 			}
 		}
 
+		request.SetData("admin_title", resource.Name(GetLocale(request)))
 		request.SetData("admin_list", listData)
 		request.SetData("admin_yield", "admin_list")
 		prago.Render(request, 200, "admin_layout")
@@ -52,6 +53,8 @@ func BindNew(a *Admin, resource *AdminResource) {
 		if resource.AfterFormCreated != nil {
 			form = resource.AfterFormCreated(form, request, true)
 		}
+
+		request.SetData("admin_title", messages.Messages.Get(GetLocale(request), "admin_new")+" - "+resource.Name(GetLocale(request)))
 
 		request.SetData("admin_form", form)
 		request.SetData("admin_yield", "admin_new")
@@ -118,6 +121,7 @@ func BindDetail(a *Admin, resource *AdminResource) {
 			}
 		}
 
+		request.SetData("admin_title", messages.Messages.Get(GetLocale(request), "admin_edit")+" - "+resource.Name(GetLocale(request)))
 		request.SetData("admin_item", item)
 		request.SetData("admin_form", form)
 		request.SetData("admin_yield", "admin_edit")

@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{if .admin_title}}{{.admin_title}}{{else}}Admin{{end}}</title>
+    <title>{{if .admin_title}}{{.admin_title}} - {{.appName}}{{else}}Admin - {{.appName}}{{end}}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -54,7 +54,7 @@
     </div>
 
     <div class="admin_footer">
-      {{.appName}} {{.appVersion}}
+      {{.appCode}} {{.appVersion}}
     </div>
 
     <div id="admin_images_popup">

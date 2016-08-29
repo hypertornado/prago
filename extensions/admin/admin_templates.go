@@ -2,7 +2,7 @@ package admin
 const TEMPLATES = `
 {{define "admin_edit"}}
 
-<h2>{{message .locale "admin_edit"}} - {{.admin_item.Name}}</h2>
+<h2>{{.admin_title}}</h2>
 
 <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
 
@@ -52,7 +52,7 @@ const TEMPLATES = `
 
 {{end}}{{define "admin_form_view"}}
 
-<h2>{{.name}}</h2>
+<h2>{{.admin_title}}</h2>
 
 {{tmpl "admin_form" .admin_form}}
 
@@ -185,7 +185,7 @@ const TEMPLATES = `
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Admin</title>
+    <title>{{if .admin_title}}{{.admin_title}} - {{.appName}}{{else}}Admin - {{.appName}}{{end}}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -235,7 +235,7 @@ const TEMPLATES = `
     </div>
 
     <div class="admin_footer">
-      {{.appName}} {{.appVersion}}
+      {{.appCode}} {{.appVersion}}
     </div>
 
     <div id="admin_images_popup">
@@ -270,7 +270,7 @@ const TEMPLATES = `
 
 {{end}}{{define "admin_list"}}
 
-<h2>{{call .admin_resource.Name .locale}}</h2>
+<h2>{{.admin_title}}</h2>
 
 {{$adminResource := .admin_resource }}
 {{$locale := .locale}}
@@ -355,7 +355,7 @@ const TEMPLATES = `
 <h1>{{.message}}</h1>
 {{end}}{{define "admin_new"}}
 
-<h2>{{message .locale "admin_new"}} - {{call .admin_resource.Name .locale}}</h2>
+<h2>{{.admin_title}}</h2>
 
 <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
 
@@ -399,7 +399,7 @@ const TEMPLATES = `
 
 {{end}}{{define "admin_settings"}}
 
-<h2>{{message .locale "admin_settings"}}</h2>
+<h2>{{.admin_title}}</h2>
 
 <a href="password">{{message .locale "admin_password_change"}}</a>
 
