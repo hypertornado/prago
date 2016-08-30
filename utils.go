@@ -11,7 +11,7 @@ func Must(err error) {
 }
 
 func Redirect(request Request, urlStr string) {
-	request.SetProcessed()
 	request.Header().Set("Location", urlStr)
-	request.Response().WriteHeader(http.StatusMovedPermanently)
+	request.Response().WriteHeader(http.StatusFound)
+	request.SetProcessed()
 }

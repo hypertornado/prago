@@ -8,8 +8,11 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/extensions/admin/messages"
+	"github.com/sendgrid/sendgrid-go"
 	"io"
+	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -45,6 +48,13 @@ func (u *User) IsPassword(password string) bool {
 	return true
 }
 
+func (u *User) EmailConfirmed() bool {
+	if u.EmailConfirmedAt.Before(time.Now().AddDate(-1000, 0, 0)) {
+		return false
+	}
+	return true
+}
+
 func (u *User) NewPassword(password string) error {
 	if len(password) < 8 {
 		return errors.New("short password")
@@ -55,6 +65,13 @@ func (u *User) NewPassword(password string) error {
 	}
 	u.Password = string(passwordHash)
 	return nil
+}
+
+func (u User) EmailToken(app *prago.App) string {
+	randomness := app.Config().GetString("random")
+	h := md5.New()
+	io.WriteString(h, fmt.Sprintf("%s%s", u.Email, randomness))
+	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 func (u *User) CSRFToken(randomness string) string {
@@ -89,6 +106,55 @@ func ValidateCSRF(request prago.Request) {
 
 func (User) AdminTableName() string { return "admin_user" }
 
+func (u User) SendConfirmEmail(request prago.Request, a *Admin) error {
+
+	if u.EmailConfirmed() {
+		return errors.New("email already confirmed")
+	}
+
+	locale := GetLocale(request)
+
+	urlValues := make(url.Values)
+	urlValues.Add("email", u.Email)
+	urlValues.Add("token", u.EmailToken(a.App))
+
+	subject := messages.Messages.Get(locale, "admin_confirm_email_subject", a.AppName)
+	link := request.App().Config().GetString("baseUrl") + a.Prefix + "/user/confirm_email?" + urlValues.Encode()
+	body := messages.Messages.Get(locale, "admin_confirm_email_body", link, link, a.AppName)
+
+	message := sendgrid.NewMail()
+	message.SetFrom(a.noReplyEmail)
+	message.AddTo(u.Email)
+	message.AddToName(u.Name)
+	message.SetSubject(subject)
+	message.SetHTML(body)
+	return a.sendgridClient.Send(message)
+}
+
+func (u User) getRenewUrl(request prago.Request, a *Admin) string {
+	urlValues := make(url.Values)
+	urlValues.Add("email", u.Email)
+	urlValues.Add("token", u.EmailToken(a.App))
+	return request.App().Config().GetString("baseUrl") + a.Prefix + "/user/renew_password?" + urlValues.Encode()
+}
+
+func (u User) SendRenew(request prago.Request, a *Admin) error {
+
+	locale := GetLocale(request)
+
+	subject := messages.Messages.Get(locale, "admin_forgotten_email_subject", a.AppName)
+	link := u.getRenewUrl(request, a)
+	body := messages.Messages.Get(locale, "admin_forgotten_email_body", link, link, a.AppName)
+
+	message := sendgrid.NewMail()
+	message.SetFrom(a.noReplyEmail)
+	message.AddTo(u.Email)
+	message.AddToName(u.Name)
+	message.SetSubject(subject)
+	message.SetHTML(body)
+	return a.sendgridClient.Send(message)
+}
+
 func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 
 	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
@@ -105,11 +171,11 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 	}
 
 	renderLogin := func(request prago.Request, form *Form, locale string) {
-		title := fmt.Sprintf("%s - %s", a.AppName, messages.Messages.Get(locale, "admin_login_name"))
-		/*request.SetData("bottom", fmt.Sprintf("<a href=\"new\">%s</a><br><a href=\"forgot\">%s</a>",
+		title := fmt.Sprintf("%s - %s", messages.Messages.Get(locale, "admin_login_name"), a.AppName)
+		request.SetData("bottom", fmt.Sprintf("<a href=\"registration\">%s</a><br><a href=\"forgot\">%s</a>",
 			messages.Messages.Get(locale, "admin_register"),
 			messages.Messages.Get(locale, "admin_forgoten"),
-		))*/
+		))
 		request.SetData("admin_header_prefix", a.Prefix)
 		request.SetData("admin_form", form)
 		request.SetData("title", title)
@@ -117,15 +183,159 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 		prago.Render(request, 200, "admin_login")
 	}
 
+	a.AdminAccessController.Get(a.GetURL(resource, "confirm_email"), func(request prago.Request) {
+		email := request.Params().Get("email")
+		token := request.Params().Get("token")
+
+		var user User
+		err := a.Query().WhereIs("email", email).Get(&user)
+		if err == nil {
+			if !user.EmailConfirmed() {
+				if token == user.EmailToken(request.App()) {
+					user.EmailConfirmedAt = time.Now()
+					err = a.Save(&user)
+					if err == nil {
+						FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_confirm_email_ok"))
+						prago.Redirect(request, a.Prefix+"/user/login")
+						return
+					}
+				}
+			}
+		}
+
+		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_confirm_email_fail"))
+		prago.Redirect(request, a.Prefix+"/user/login")
+	})
+
+	forgotForm := func(locale string) *Form {
+		form := NewForm()
+		form.Method = "POST"
+		form.AddEmailInput("email", messages.Messages.Get(locale, "admin_email")).Focused = true
+		form.AddSubmit("send", messages.Messages.Get(locale, "admin_forgotten_submit"))
+		return form
+	}
+
+	renderForgot := func(request prago.Request, form *Form, locale string) {
+		title := fmt.Sprintf("%s - %s", messages.Messages.Get(locale, "admin_forgotten_name"), a.AppName)
+		request.SetData("bottom", fmt.Sprintf("<a href=\"login\">%s</a>",
+			messages.Messages.Get(locale, "admin_login_action"),
+		))
+		request.SetData("admin_header_prefix", a.Prefix)
+		request.SetData("admin_form", form)
+		request.SetData("title", title)
+
+		prago.Render(request, 200, "admin_login")
+	}
+
+	a.AdminAccessController.Get(a.GetURL(resource, "forgot"), func(request prago.Request) {
+		locale := GetLocale(request)
+		form := forgotForm(locale)
+		renderForgot(request, form, locale)
+	})
+
+	a.AdminAccessController.Post(a.GetURL(resource, "forgot"), func(request prago.Request) {
+		email := request.Params().Get("email")
+		email = FixEmail(email)
+
+		var user User
+		err := a.Query().WhereIs("email", email).Get(&user)
+		if err == nil {
+			if user.EmailConfirmed() {
+				if !time.Now().AddDate(0, 0, -1).Before(user.EmailRenewedAt) {
+					user.EmailRenewedAt = time.Now()
+					err = a.Save(&user)
+					if err == nil {
+						err = user.SendRenew(request, a)
+						if err == nil {
+							FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_forgoten_sent", user.Email))
+							prago.Redirect(request, a.Prefix+"/user/login")
+							return
+						}
+					}
+				}
+			}
+		}
+
+		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_forgoten_error", user.Email))
+		prago.Redirect(request, a.Prefix+"/user/forgot")
+	})
+
+	renewPasswordForm := func(locale string) (form *Form) {
+		form = NewForm()
+		form.Method = "POST"
+
+		passwordInput := form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_password_new"),
+			MinLengthValidator(messages.Messages.Get(locale, "admin_password_length"), 8))
+		passwordInput.Focused = true
+		form.AddSubmit("send", messages.Messages.Get(locale, "admin_forgoten_set"))
+		return
+	}
+
+	renderRenew := func(request prago.Request, form *Form, locale string) {
+		email := request.Params().Get("email")
+		email = FixEmail(email)
+		title := fmt.Sprintf("%s - %s", email, messages.Messages.Get(locale, "admin_forgoten_set"))
+		request.SetData("bottom", fmt.Sprintf("<a href=\"login\">%s</a>",
+			messages.Messages.Get(locale, "admin_login_action"),
+		))
+		request.SetData("admin_header_prefix", a.Prefix)
+		request.SetData("admin_form", form)
+		request.SetData("title", title)
+
+		prago.Render(request, 200, "admin_login")
+	}
+
+	a.AdminAccessController.Get(a.GetURL(resource, "renew_password"), func(request prago.Request) {
+		locale := GetLocale(request)
+		form := renewPasswordForm(locale)
+		renderRenew(request, form, locale)
+	})
+
+	a.AdminAccessController.Post(a.GetURL(resource, "renew_password"), func(request prago.Request) {
+		locale := GetLocale(request)
+
+		form := renewPasswordForm(locale)
+
+		form.BindData(request.Params())
+		form.Validate()
+
+		email := request.Params().Get("email")
+		email = FixEmail(email)
+		token := request.Params().Get("token")
+
+		errStr := messages.Messages.Get(locale, "admin_error")
+
+		var user User
+		err := a.Query().WhereIs("email", email).Get(&user)
+		if err == nil {
+			if token == user.EmailToken(request.App()) {
+				if form.Valid {
+					err = user.NewPassword(request.Params().Get("password"))
+					if err == nil {
+						err = a.Save(&user)
+						if err == nil {
+							FlashMessage(request, messages.Messages.Get(locale, "admin_password_changed"))
+							prago.Redirect(request, a.Prefix+"/user/login")
+							return
+						}
+					}
+				}
+			}
+		}
+		FlashMessage(request, errStr)
+		form.GetItemByName("password").Value = ""
+		renderLogin(request, form, locale)
+	})
+
 	a.AdminAccessController.Get(a.GetURL(resource, "login"), func(request prago.Request) {
 		locale := GetLocale(request)
 		form := loginForm(locale)
 		renderLogin(request, form, locale)
-
 	})
 
 	a.AdminAccessController.Post(a.GetURL(resource, "login"), func(request prago.Request) {
 		email := request.Params().Get("email")
+		email = FixEmail(email)
 		password := request.Params().Get("password")
 
 		session := request.GetData("session").(*sessions.Session)
@@ -212,7 +422,7 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 	}
 
 	renderRegistration := func(request prago.Request, form *Form, locale string) {
-		title := fmt.Sprintf("%s - %s", a.AppName, messages.Messages.Get(locale, "admin_register"))
+		title := fmt.Sprintf("%s - %s", messages.Messages.Get(locale, "admin_register"), a.AppName)
 		request.SetData("bottom", fmt.Sprintf("<a href=\"login\">%s</a>",
 			messages.Messages.Get(locale, "admin_login_action"),
 		))
@@ -238,14 +448,18 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 
 		if form.Valid {
 			email := request.Params().Get("email")
+			email = FixEmail(email)
 			user := &User{}
 			user.Email = email
+			user.Name = request.Params().Get("name")
 			user.IsActive = true
+			user.Locale = locale
 			prago.Must(user.NewPassword(request.Params().Get("password")))
+			prago.Must(user.SendConfirmEmail(request, a))
 			prago.Must(a.Create(user))
 
-			prago.Redirect(request, a.Prefix)
-
+			FlashMessage(request, messages.Messages.Get(locale, "admin_confirm_email_send", user.Email))
+			prago.Redirect(request, a.Prefix+"/user/login")
 		} else {
 			form.GetItemByName("password").Value = ""
 			renderRegistration(request, form, locale)
@@ -361,4 +575,8 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 	})
 
 	return nil
+}
+
+func FixEmail(in string) string {
+	return strings.ToLower(in)
 }

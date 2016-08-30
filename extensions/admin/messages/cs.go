@@ -1,6 +1,8 @@
 package messages
 
 var cs = map[string]string{
+	"admin_error": "Nastala chyba",
+
 	"admin_log_out":                  "Odhlásit se",
 	"admin_new":                      "Nová položka",
 	"admin_edit":                     "Upravit",
@@ -8,7 +10,7 @@ var cs = map[string]string{
 	"admin_delete_confirmation":      "Opravdu chete položku smazat?",
 	"admin_back":                     "Zpět",
 	"admin_create":                   "Vytvořit",
-	"admin_login_name":               "přihlášení do administrace",
+	"admin_login_name":               "Přihlášení do administrace",
 	"admin_email":                    "Email",
 	"admin_password":                 "Heslo",
 	"admin_login_action":             "Přihlásit se",
@@ -44,6 +46,20 @@ var cs = map[string]string{
 	"admin_password_new":     "Nové heslo",
 	"admin_password_length":  "Heslo musí mít alespoň 8 znaků",
 	"admin_password_changed": "Heslo změněno",
+	"admin_forgoten_set":     "Nastavit nové heslo",
+
+	"admin_forgotten_name":          "Obnovit zapomenuté heslo",
+	"admin_forgotten_submit":        "Poslat email s instrukcemi",
+	"admin_forgotten_email_subject": "Obnovit heslo pro %s",
+	"admin_forgotten_email_body":    "Zapomněli jste heslo?<br><br>Vaše heslo můžete obnovit na <a href=\"%s\">%s</a><br><br>%s",
+	"admin_forgoten_sent":           "Instrukce pro obnovení hesla poslána na email %s",
+	"admin_forgoten_error":          "Instrukce pro obnovu hesla nelze poslat na email %s",
+
+	"admin_confirm_email_subject": "Potvrďte svůj registrační email na %s",
+	"admin_confirm_email_body":    "Děkujeme za registraci,<br><br>váš email můžete potvrdit na <a href=\"%s\">%s</a>.<br><br>%s",
+	"admin_confirm_email_ok":      "Email potvrzen",
+	"admin_confirm_email_fail":    "Email se nepodařilo potvrdit",
+	"admin_confirm_email_send":    "Registrace hotova. Potvrďte prosím svůj email %s",
 
 	"admin_files": "Soubory",
 	"admin_file":  "Soubor",

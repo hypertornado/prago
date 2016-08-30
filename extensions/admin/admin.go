@@ -11,6 +11,7 @@ import (
 	"github.com/hypertornado/prago/extensions"
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/hypertornado/prago/utils"
+	"github.com/sendgrid/sendgrid-go"
 	"html/template"
 	"io/ioutil"
 	"os"
@@ -36,6 +37,8 @@ type Admin struct {
 	db                    *sql.DB
 	authData              map[string]string
 	seedFn                func(*prago.App) error
+	sendgridClient        *sendgrid.SGClient
+	noReplyEmail          string
 }
 
 func NewAdmin(prefix, name string) *Admin {
@@ -165,6 +168,9 @@ func (a *Admin) Init(app *prago.App) error {
 	BindListResourceAPI(a)
 
 	var err error
+
+	a.sendgridClient = sendgrid.NewSendGridClientWithApiKey(app.Config().GetString("sendgridApi"))
+	a.noReplyEmail = app.Config().GetString("noReplyEmail")
 
 	err = a.bindAdminCommand(app)
 	if err != nil {

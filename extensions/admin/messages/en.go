@@ -1,6 +1,8 @@
 package messages
 
 var en = map[string]string{
+	"admin_error": "Error happened",
+
 	"admin_log_out":             "Log out",
 	"admin_new":                 "New item",
 	"admin_edit":                "Edit",
@@ -34,6 +36,20 @@ var en = map[string]string{
 	"admin_password_new":     "New password",
 	"admin_password_length":  "Password must be at least 8 characters long",
 	"admin_password_changed": "Password changed",
+
+	"admin_forgotten_name":          "Renew forgotten password",
+	"admin_forgotten_submit":        "Send renew email",
+	"admin_forgotten_email_subject": "Renew your password on %s",
+	"admin_forgotten_email_body":    "Forgot your password?<br><br>You can renew your password at <a href=\"%s\">%s</a><br><br>%s",
+	"admin_forgoten_sent":           "Instructions for password renewal were send to %s",
+	"admin_forgoten_error":          "Can't send password renewal instructions on %s",
+	"admin_forgoten_set":            "Set new password",
+
+	"admin_confirm_email_subject": "Confirm your registration email on %s",
+	"admin_confirm_email_body":    "Thanks for your registration,<br><br>you can confirm your email on <a href=\"%s\">%s</a>.<br><br>%s",
+	"admin_confirm_email_ok":      "Email confirmed",
+	"admin_confirm_email_fail":    "Failed to confirm email",
+	"admin_confirm_email_send":    "Registration done. Please confirm your email %s",
 
 	"admin_files": "Files",
 	"admin_file":  "File",
