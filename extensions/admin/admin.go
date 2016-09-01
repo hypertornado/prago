@@ -50,7 +50,8 @@ func NewAdmin(prefix, name string) *Admin {
 		resourceNameMap: make(map[string]*AdminResource),
 	}
 
-	ret.CreateResources(User{}, File{})
+	ret.CreateResource(User{})
+	ret.CreateResource(File{})
 
 	return ret
 }
@@ -66,20 +67,6 @@ func (a *Admin) CreateResource(item interface{}) (resource *AdminResource, err e
 	}
 	err = a.AddResource(resource)
 	return
-}
-
-func (a *Admin) CreateResources(items ...interface{}) error {
-	for _, item := range items {
-		resource, err := NewResource(item)
-		if err != nil {
-			return err
-		}
-		err = a.AddResource(resource)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func (a *Admin) UnsafeDropTables() error {
