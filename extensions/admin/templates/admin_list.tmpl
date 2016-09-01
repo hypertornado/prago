@@ -1,24 +1,24 @@
 {{define "admin_list"}}
 
-<h2>{{.admin_title}}</h2>
-
 {{$adminResource := .admin_resource }}
 {{$locale := .locale}}
 
 {{$csrfToken := ._csrfToken}}
 {{$table := .admin_list}}
 
-{{if $table.HasNew}}
-  <a href="{{.admin_resource.ID}}/new" class="btn">{{message .locale "admin_new"}}</a>
-{{end}}
+
+<h2>{{.admin_title}}</h2>
 
 <table class="admin_table{{if .admin_list.Order}} admin_table-order{{end}}">
   <tr class="admin_table_header">
   {{range $item := .admin_list.Header}}
     <th>{{$item.NameHuman}}</th>
   {{end}}
-  <th></th>
-  {{if $table.HasDelete}}<th></th>{{end}}
+  <th{{if $table.HasDelete}} colspan="2"{{end}}>
+    {{if $table.HasNew}}
+      <a href="{{.admin_resource.ID}}/new" class="btn btn-primary">{{message .locale "admin_new"}}</a>
+    {{end}}
+  </th>
   </tr>
 {{range $item := .admin_list.Rows}}
   <tr data-id="{{$item.ID}}" class="admin_table_row">
@@ -27,11 +27,11 @@
       {{ tmpl $cell.TemplateName $cell }}
     </td>
     {{end}}
-    <td nowrap>
+    <td nowrap class="center top" style="width: 0px;">
       <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">{{message $locale "admin_edit"}}</a> 
     </td>
     {{if $table.HasDelete}}
-      <td nowrap>
+      <td nowrap class="center top" style="width: 0px;">
         <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete?_csrfToken={{$csrfToken}}" onsubmit="return window.confirm('{{message $locale "admin_delete_confirmation"}}');">
           <input type="submit" value="{{message $locale "admin_delete"}}" class="btn">
         </form>
