@@ -36,6 +36,10 @@ type User struct {
 
 func (User) AdminName(lang string) string { return messages.Messages.Get(lang, "admin_users") }
 
+func (u *User) AdminItemName(lang string) string {
+	return u.Email
+}
+
 func (User) Authenticate(u *User) bool {
 	return AuthenticateSysadmin(u)
 }

@@ -159,7 +159,18 @@ func (resource *AdminResource) ValueToCell(field reflect.StructField, val reflec
 				panic(err)
 			}
 
+			ifaceItemName, ok := relationItem.(interface {
+				AdminItemName(string) string
+			})
+			if ok {
+				cell.Value = ifaceItemName.AdminItemName("cs")
+				cell.TemplateName = "admin_link"
+				cell.Url = fmt.Sprintf("%s/%d", relationResource.ID, item.(int64))
+				return
+			}
+
 			nameField := reflect.ValueOf(relationItem).Elem().FieldByName("Name")
+
 			cell.Value = nameField.String()
 			cell.TemplateName = "admin_link"
 			cell.Url = fmt.Sprintf("%s/%d", relationResource.ID, item.(int64))

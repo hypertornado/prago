@@ -19,11 +19,11 @@ function bindRelations() {
 
         responseData.forEach(function (i) {
           var selected = false;
-          if (originalValue == i["ID"]) {
+          if (originalValue == i["id"]) {
             selected = true;
           }
 
-          addOption(select, i["ID"], i["Name"], selected);
+          addOption(select, i["id"], i["name"], selected);
         })
 
         el.append(select);

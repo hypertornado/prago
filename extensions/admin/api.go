@@ -5,6 +5,7 @@ import (
 	"github.com/golang-commonmark/markdown"
 	"github.com/hypertornado/prago"
 	"io/ioutil"
+	"reflect"
 )
 
 func BindMarkdownAPI(a *Admin) {
@@ -17,8 +18,14 @@ func BindMarkdownAPI(a *Admin) {
 	})
 }
 
+type resourceItem struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
 func BindListResourceAPI(a *Admin) {
 	a.App.MainController().Get(a.Prefix+"/_api/resource/:name", func(request prago.Request) {
+		locale := GetLocale(request)
 		name := request.Params().Get("name")
 		resource := a.resourceNameMap[name]
 		c, err := resource.Query().Count()
@@ -27,9 +34,36 @@ func BindListResourceAPI(a *Admin) {
 			WriteApi(request, []string{}, 200)
 			return
 		}
+
+		ret := []resourceItem{}
+
 		items, err := resource.Query().List()
 		prago.Must(err)
-		WriteApi(request, items, 200)
+
+		itemsVal := reflect.ValueOf(items)
+
+		for i := 0; i < itemsVal.Len(); i++ {
+			item := itemsVal.Index(i)
+
+			id := item.Elem().FieldByName("ID").Int()
+
+			var name string
+			ifaceItemName, ok := item.Interface().(interface {
+				AdminItemName(string) string
+			})
+			if ok {
+				name = ifaceItemName.AdminItemName(locale)
+			} else {
+				name = item.Elem().FieldByName("Name").String()
+			}
+
+			ret = append(ret, resourceItem{
+				ID:   id,
+				Name: name,
+			})
+		}
+
+		WriteApi(request, ret, 200)
 	})
 }
 
