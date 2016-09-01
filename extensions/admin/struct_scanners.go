@@ -18,6 +18,7 @@ func (s *StructCache) getStructScanners(value reflect.Value) (names []string, sc
 		use := true
 		switch v.Typ.Kind() {
 		case reflect.Int64:
+		case reflect.Float64:
 		case reflect.Bool:
 		case reflect.String:
 		case reflect.Struct:
@@ -71,6 +72,13 @@ func (s *scanner) Scan(src interface{}) error {
 			return err
 		}
 		s.value.SetInt(ni.Int64)
+	case reflect.Float64:
+		ni := sql.NullFloat64{}
+		err = ni.Scan(src)
+		if err != nil {
+			return err
+		}
+		s.value.SetFloat(ni.Float64)
 	}
 	return nil
 }

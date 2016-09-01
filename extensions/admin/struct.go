@@ -97,6 +97,8 @@ func (a *StructField) fieldDescriptionMysql() string {
 		}
 	case reflect.Bool:
 		fieldDescription = "bool NOT NULL"
+	case reflect.Float64:
+		fieldDescription = "double"
 	case reflect.Int64:
 		fieldDescription = "bigint(20)"
 	case reflect.String:
@@ -105,6 +107,8 @@ func (a *StructField) fieldDescriptionMysql() string {
 		} else {
 			fieldDescription = "varchar(255)"
 		}
+	default:
+		panic("non supported type " + a.Typ.Kind().String())
 	}
 
 	additional := ""

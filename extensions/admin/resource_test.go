@@ -11,6 +11,7 @@ type ResourceStruct struct {
 	Other       string
 	Showing     string `prago-preview:"true"`
 	IsSomething bool
+	Floating    float64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

@@ -66,6 +66,9 @@ func (cache *StructCache) BindData(item interface{}, params url.Values, multiFor
 		case reflect.Int64:
 			i, _ := strconv.Atoi(urlValue)
 			val.SetInt(int64(i))
+		case reflect.Float64:
+			i, _ := strconv.ParseFloat(urlValue, 64)
+			val.SetFloat(i)
 		}
 	}
 	return nil

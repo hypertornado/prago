@@ -145,6 +145,8 @@ func prepareValues(value reflect.Value) (names []string, questionMarks []string,
 			values = append(values, val.String())
 		case reflect.Int64:
 			values = append(values, val.Int())
+		case reflect.Float64:
+			values = append(values, val.Float())
 		default:
 			continue
 		}

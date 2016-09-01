@@ -12,14 +12,14 @@ func prepareAdmin() *Admin {
 
 func TestAdminQuery(t *testing.T) {
 	admin := prepareAdmin()
-	admin.CreateResources(ResourceStruct{})
+	admin.CreateResource(ResourceStruct{})
 	admin.UnsafeDropTables()
 	admin.Migrate(false)
 
 	var err error
 	var item ResourceStruct
 
-	err = admin.Create(&ResourceStruct{Name: "A"})
+	err = admin.Create(&ResourceStruct{Name: "A", Floating: 3.14})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,13 +43,15 @@ func TestAdminQuery(t *testing.T) {
 		t.Fatal(item.Name)
 	}
 
+	Debug = true
 	admin.Query().Get(&item)
 	if item.Name != "A" {
 		t.Fatal(item.Name)
 	}
+	Debug = false
 
-	if item.Name != "A" {
-		t.Fatal(item.Name)
+	if item.Floating < 3 || item.Floating > 4 {
+		t.Fatal(item.Floating)
 	}
 
 	var list []*ResourceStruct

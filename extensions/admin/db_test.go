@@ -47,6 +47,7 @@ type TestNode struct {
 	Description string `prago-type:"text"`
 	OK          bool
 	Count       int64
+	Floating    float64
 	Changed     time.Time
 	Date        time.Time `prago-type:"date"`
 }
@@ -90,7 +91,6 @@ func changeStruct(i interface{}) {
 func TestAdminTime(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
-
 	createTable(db, tableName, structCache, false)
 
 	tn := time.Now()
@@ -128,11 +128,16 @@ func TestAdminBind(t *testing.T) {
 	values := make(url.Values)
 	values.Set("Name", "ABC")
 	values.Set("Changed", "2014-11-10")
+	values.Set("Floating", "3.14")
 
 	var in interface{}
 	in = &n
 
 	structCache.BindData(&in, values, nil, DefaultEditabilityFilter)
+
+	if n.Floating < 3 || n.Floating > 4 {
+		t.Fatal(n.Floating)
+	}
 
 	if n.Name != "ABC" {
 		t.Fatal(n.Name)
