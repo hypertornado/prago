@@ -31,7 +31,8 @@ func BindListResourceAPI(a *Admin) {
 		resource := a.resourceNameMap[name]
 
 		if !resource.Authenticate(user) {
-			panic("EEE")
+			Render403(request)
+			return
 		}
 
 		c, err := resource.Query().Count()

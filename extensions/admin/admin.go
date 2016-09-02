@@ -215,6 +215,12 @@ func (a *Admin) Init(app *prago.App) error {
 	})
 
 	a.AdminController.Get(a.Prefix+"/_stats", func(request prago.Request) {
+
+		if !AuthenticateSysadmin(GetUser(request)) {
+			Render403(request)
+			return
+		}
+
 		stats := [][2]string{}
 
 		stats = append(stats, [2]string{"App name", request.App().Data()["appName"].(string)})
@@ -306,9 +312,7 @@ func (a *Admin) Init(app *prago.App) error {
 	}
 
 	a.AdminController.Get(a.Prefix+"/*", func(request prago.Request) {
-		request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_404"))
-		request.SetData("admin_yield", "admin_message")
-		prago.Render(request, 404, "admin_layout")
+		Render404(request)
 	})
 
 	return nil

@@ -142,9 +142,7 @@ func (a *Admin) initResource(resource *AdminResource) error {
 	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
 		user := request.GetData("currentuser").(*User)
 		if !resource.Authenticate(user) {
-			request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_403"))
-			request.SetData("admin_yield", "admin_message")
-			prago.Render(request, 403, "admin_layout")
+			Render403(request)
 		} else {
 			next()
 		}
@@ -191,4 +189,16 @@ func (ar *AdminResource) migrate(verbose bool) error {
 	} else {
 		return createTable(ar.db(), ar.tableName(), ar.StructCache, verbose)
 	}
+}
+
+func Render403(request prago.Request) {
+	request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_403"))
+	request.SetData("admin_yield", "admin_message")
+	prago.Render(request, 403, "admin_layout")
+}
+
+func Render404(request prago.Request) {
+	request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_404"))
+	request.SetData("admin_yield", "admin_message")
+	prago.Render(request, 404, "admin_layout")
 }
