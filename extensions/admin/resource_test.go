@@ -139,5 +139,15 @@ func TestResourceBool(t *testing.T) {
 	if item.Name != "A" {
 		t.Fatal(item)
 	}
+}
+
+func TestResourceCreateWithID(t *testing.T) {
+	resource := prepareResource()
+	resource.Create(&ResourceStruct{ID: 85, Name: "A"})
+	item, _ := resource.Query().First()
+	id := item.(*ResourceStruct).ID
+	if id != 85 {
+		t.Fatal(id)
+	}
 
 }

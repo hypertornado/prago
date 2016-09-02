@@ -123,11 +123,14 @@ func prepareValues(value reflect.Value) (names []string, questionMarks []string,
 	for i := 0; i < value.Type().NumField(); i++ {
 		field := value.Type().Field(i)
 
-		if field.Name == "ID" {
-			continue
-		}
-
 		val := value.FieldByName(field.Name)
+
+		if field.Name == "ID" {
+			//TODO: is it really necessary to omit ids?
+			if val.Int() <= 0 {
+				continue
+			}
+		}
 
 		switch field.Type.Kind() {
 		case reflect.Struct:
