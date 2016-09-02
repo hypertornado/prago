@@ -43,12 +43,10 @@ func TestAdminQuery(t *testing.T) {
 		t.Fatal(item.Name)
 	}
 
-	Debug = true
 	admin.Query().Get(&item)
 	if item.Name != "A" {
 		t.Fatal(item.Name)
 	}
-	Debug = false
 
 	if item.Floating < 3 || item.Floating > 4 {
 		t.Fatal(item.Floating)
