@@ -200,8 +200,9 @@ select.input {
   height: 34px;
 }
 
-.input[readonly], .textarea[readonly] {
-  border: none !important;
+.input[readonly], .textarea[readonly], .input[disabled], .textarea[disabled] {
+  border-color: #eee;
+  background: #fafafa;
   color: #888;
   box-shadow: none;
 }
