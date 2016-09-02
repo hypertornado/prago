@@ -367,7 +367,8 @@ func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
 
 		user.LoggedInTime = time.Now()
 		user.LoggedInUseragent = request.Request().UserAgent()
-		user.LoggedInIP = request.Request().RemoteAddr
+		user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
+
 		prago.Must(a.Save(&user))
 
 		session.Values["user_id"] = user.ID
