@@ -286,7 +286,7 @@ const TEMPLATES = `
   {{end}}
   <th{{if $table.HasDelete}} colspan="2"{{end}}>
     {{if $table.HasNew}}
-      <a href="{{.admin_resource.ID}}/new" class="btn btn-primary">{{message .locale "admin_new"}}</a>
+      <a href="{{.admin_resource.ID}}/new" class="btn">{{message .locale "admin_new"}}</a>
     {{end}}
   </th>
   </tr>
