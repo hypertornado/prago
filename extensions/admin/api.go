@@ -9,7 +9,7 @@ import (
 )
 
 func BindMarkdownAPI(a *Admin) {
-	a.App.MainController().Post(a.Prefix+"/_api/markdown", func(request prago.Request) {
+	a.AdminController.Post(a.Prefix+"/_api/markdown", func(request prago.Request) {
 		data, err := ioutil.ReadAll(request.Request().Body)
 		if err != nil {
 			panic(err)
@@ -24,10 +24,16 @@ type resourceItem struct {
 }
 
 func BindListResourceAPI(a *Admin) {
-	a.App.MainController().Get(a.Prefix+"/_api/resource/:name", func(request prago.Request) {
+	a.AdminController.Get(a.Prefix+"/_api/resource/:name", func(request prago.Request) {
 		locale := GetLocale(request)
+		user := GetUser(request)
 		name := request.Params().Get("name")
 		resource := a.resourceNameMap[name]
+
+		if !resource.Authenticate(user) {
+			panic("EEE")
+		}
+
 		c, err := resource.Query().Count()
 		prago.Must(err)
 		if c == 0 {

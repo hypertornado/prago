@@ -8,7 +8,7 @@ import (
 
 func TestApp(t *testing.T) {
 	app := NewApp("prago_test", "v1")
-	err := app.Init()
+	err := app.initMiddlewares()
 	if err != nil {
 		t.Fatal(err)
 	}

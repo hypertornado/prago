@@ -149,8 +149,11 @@ func (a *Admin) DB() *sql.DB {
 func (a *Admin) Init(app *prago.App) error {
 	a.App = app
 	a.db = app.Data()["db"].(*sql.DB)
-	bindDBBackupCron(app)
 
+	a.AdminAccessController = app.MainController().SubController()
+	a.AdminController = a.AdminAccessController.SubController()
+
+	bindDBBackupCron(app)
 	BindMarkdownAPI(a)
 	BindListResourceAPI(a)
 
@@ -173,10 +176,6 @@ func (a *Admin) Init(app *prago.App) error {
 	if err != nil {
 		panic(err)
 	}
-
-	a.AdminAccessController = app.MainController().SubController()
-
-	a.AdminController = a.AdminAccessController.SubController()
 
 	a.AdminController.AddAroundAction(func(request prago.Request, next func()) {
 		request.SetData("admin_yield", "admin_home")

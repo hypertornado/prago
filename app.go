@@ -74,11 +74,19 @@ func (a *App) Data() map[string]interface{} {
 	return a.data
 }
 
-func (a *App) Init() error {
+func (a *App) initMiddlewares() error {
 	for _, middleware := range a.middlewares {
 		if err := middleware.Init(a); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (a *App) Init() error {
+	err := a.initMiddlewares()
+	if err != nil {
+		return err
 	}
 
 	commandName, err := a.kingpin.Parse(os.Args[1:])
