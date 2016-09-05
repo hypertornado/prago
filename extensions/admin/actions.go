@@ -218,6 +218,9 @@ func BindOrder(a *Admin, resource *AdminResource) {
 }
 
 func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
+	if !resource.HasModel || !resource.HasView {
+		return nil
+	}
 	defaultActions := []string{"list", "order", "new", "create", "detail", "update", "delete"}
 	usedActions := make(map[string]bool)
 	for _, v := range defaultActions {
