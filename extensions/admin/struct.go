@@ -276,6 +276,8 @@ func (cache *StructCache) GetForm(inValues interface{}, lang string, visible Str
 				item.SubTemplate = "admin_item_relation"
 				item.Values = utils.ColumnName(item.Name)
 			}
+		case reflect.Float64:
+			item.Value = fmt.Sprintf("%f", ifaceVal.(float64))
 		default:
 			panic("Wrong type" + field.Typ.Kind().String())
 		}
