@@ -12,6 +12,7 @@ type ResourceStruct struct {
 	Showing     string `prago-preview:"true"`
 	IsSomething bool
 	Floating    float64
+	Date        time.Time `prago-type:"date"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
@@ -87,6 +88,17 @@ func TestResourceUnique(t *testing.T) {
 
 	if count != 2 {
 		t.Fatal(count)
+	}
+}
+
+func TestResourceDate(t *testing.T) {
+	resource := prepareResource()
+	tm := time.Now()
+
+	resource.Create(&ResourceStruct{Date: tm})
+	_, err := resource.Query().Where(map[string]interface{}{"date": tm.Format("2006-01-02")}).First()
+	if err != nil {
+		t.Fatal(err)
 	}
 
 }
