@@ -192,12 +192,17 @@ a:hover {
   line-height: 1.4rem;
   width: 100%;
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.075);
+  background-color: white;
 }
 
 select.input {
   -webkit-appearance: menulist-button;
   appearance: menulist-button;
-  height: 34px;
+  height: 35px;
+}
+
+input[type=date].input {
+  height: 35px;
 }
 
 .input[readonly], .textarea[readonly], .input[disabled], .textarea[disabled] {
