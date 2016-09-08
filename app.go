@@ -16,6 +16,9 @@ import (
 var loggerMiddleware = &MiddlewareLogger{}
 
 type App struct {
+	DevelopmentMode    bool
+	Port               int
+	StartedAt          time.Time
 	data               map[string]interface{}
 	events             *Events
 	requestMiddlewares []RequestMiddleware
@@ -116,9 +119,9 @@ func (a *App) Route(m method, path string, controller *Controller, action func(p
 }
 
 func (a *App) ListenAndServe(port int, developmentMode bool) error {
-	a.data["developmentMode"] = developmentMode
-	a.data["port"] = port
-	a.data["startedAt"] = time.Now()
+	a.DevelopmentMode = developmentMode
+	a.Port = port
+	a.StartedAt = time.Now()
 
 	if developmentMode {
 		loggerMiddleware.setStdOut()
@@ -132,11 +135,11 @@ func (a *App) ListenAndServe(port int, developmentMode bool) error {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	a.writeStartInfo(port, developmentMode)
+	a.writeStartInfo()
 	return server.ListenAndServe()
 }
 
-func (a *App) writeStartInfo(port int, developmentMode bool) error {
+func (a *App) writeStartInfo() error {
 	pid := os.Getpid()
 
 	err := ioutil.WriteFile(
@@ -149,14 +152,14 @@ func (a *App) writeStartInfo(port int, developmentMode bool) error {
 	}
 
 	developmentModeStr := "false"
-	if developmentMode {
+	if a.DevelopmentMode {
 		developmentModeStr = "true"
 	}
-	fmt.Printf("Server started\nport: %d\npid: %d\ndevelopment mode: %s\n", port, pid, developmentModeStr)
+	fmt.Printf("Server started\nport: %d\npid: %d\ndevelopment mode: %s\n", a.Port, pid, developmentModeStr)
 
-	a.Log().WithField("port", port).
+	a.Log().WithField("port", a.Port).
 		WithField("pid", pid).
-		WithField("development mode", developmentMode).
+		WithField("development mode", a.DevelopmentMode).
 		Info("Server started")
 
 	return nil
@@ -193,9 +196,7 @@ func callRequestMiddlewares(request Request, middlewares []RequestMiddleware) {
 func recoveryFromServerError(p Request, recoveryData interface{}) {
 	p.Response().WriteHeader(500)
 
-	developmentMode := p.App().data["developmentMode"].(bool)
-
-	if developmentMode {
+	if p.App().DevelopmentMode {
 		p.Response().Write([]byte(fmt.Sprintf("500 - error\n%s\nstack:\n", recoveryData)))
 		p.Response().Write(debug.Stack())
 	} else {

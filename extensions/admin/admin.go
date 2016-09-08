@@ -229,15 +229,12 @@ func (a *Admin) Init(app *prago.App) error {
 		port := request.App().Data()["port"].(int)
 		stats = append(stats, [2]string{"Port", fmt.Sprintf("%d", port)})
 
-		developmentMode := request.App().Data()["developmentMode"].(bool)
 		developmentModeStr := "false"
-		if developmentMode {
+		if request.App().DevelopmentMode {
 			developmentModeStr = "true"
 		}
 		stats = append(stats, [2]string{"Development mode", developmentModeStr})
-
-		startedAt := request.App().Data()["startedAt"].(time.Time)
-		stats = append(stats, [2]string{"Started at", startedAt.Format(time.RFC3339)})
+		stats = append(stats, [2]string{"Started at", request.App().StartedAt.Format(time.RFC3339)})
 
 		stats = append(stats, [2]string{"Go version", runtime.Version()})
 		stats = append(stats, [2]string{"Compiler", runtime.Compiler})
