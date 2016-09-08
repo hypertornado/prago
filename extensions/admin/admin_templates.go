@@ -189,7 +189,7 @@ const TEMPLATES = `
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="{{.admin_header.prefix}}/normalize.css">
+    <link rel="stylesheet" href="{{.admin_header.prefix}}/normalize.css?v={{.version}}">
     <link rel="stylesheet" href="{{.admin_header.prefix}}/admin.css">
     <script type="text/javascript" src="{{.admin_header.prefix}}/jquery.js"></script>
     <script type="text/javascript" src="{{.admin_header.prefix}}/image.js"></script>
