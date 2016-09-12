@@ -13,6 +13,7 @@ type ResourceStruct struct {
 	IsSomething bool
 	Floating    float64
 	Date        time.Time `prago-type:"date"`
+	privateint  int64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
@@ -161,5 +162,16 @@ func TestResourceCreateWithID(t *testing.T) {
 	if id != 85 {
 		t.Fatal(id)
 	}
+}
 
+func TestShouldNotCreateResourceWithPointer(t *testing.T) {
+	var err error
+	_, err = NewResource(&ResourceStruct{})
+	if err == nil {
+		t.Fatal("Should have non nil error")
+	}
+	_, err = NewResource(85)
+	if err == nil {
+		t.Fatal("Should have non nil error")
+	}
 }

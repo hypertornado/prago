@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/hypertornado/prago/utils"
+	"go/ast"
 	"reflect"
 	"time"
 )
@@ -30,13 +31,15 @@ func NewStructCache(item interface{}) (ret *StructCache, err error) {
 	}
 
 	for i := 0; i < typ.NumField(); i++ {
-		field := newStructField(typ.Field(i), i)
-		if field.Tags["prago-type"] == "order" {
-			ret.OrderFieldName = field.Name
-			ret.OrderColumnName = field.ColumnName
+		if ast.IsExported(typ.Field(i).Name) {
+			field := newStructField(typ.Field(i), i)
+			if field.Tags["prago-type"] == "order" {
+				ret.OrderFieldName = field.Name
+				ret.OrderColumnName = field.ColumnName
+			}
+			ret.fieldArrays = append(ret.fieldArrays, field)
+			ret.fieldMap[field.Name] = field
 		}
-		ret.fieldArrays = append(ret.fieldArrays, field)
-		ret.fieldMap[field.Name] = field
 	}
 	return
 }

@@ -16,6 +16,7 @@ func (s *StructCache) getStructScanners(value reflect.Value) (names []string, sc
 
 	for _, v := range s.fieldArrays {
 		use := true
+
 		switch v.Typ.Kind() {
 		case reflect.Int64:
 		case reflect.Float64:
