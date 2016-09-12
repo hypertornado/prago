@@ -118,11 +118,9 @@ func getTableDescription(db dbIface, tableName string) (map[string]*mysqlColumn,
 	return columns, nil
 }
 
-func prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
+func (sc *StructCache) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
 
-	for i := 0; i < value.Type().NumField(); i++ {
-		field := value.Type().Field(i)
-
+	for _, field := range sc.fieldArrays {
 		val := value.FieldByName(field.Name)
 
 		if field.Name == "ID" {
@@ -132,9 +130,9 @@ func prepareValues(value reflect.Value) (names []string, questionMarks []string,
 			}
 		}
 
-		switch field.Type.Kind() {
+		switch field.Typ.Kind() {
 		case reflect.Struct:
-			if field.Type == reflect.TypeOf(time.Now()) {
+			if field.Typ == reflect.TypeOf(time.Now()) {
 				var tm time.Time
 				reflect.ValueOf(&tm).Elem().Set(val)
 				timeStr := tm.Format("2006-01-02 15:04:05")
@@ -160,10 +158,10 @@ func prepareValues(value reflect.Value) (names []string, questionMarks []string,
 	return
 }
 
-func saveItem(db dbIface, tableName string, item interface{}) error {
+func (sc *StructCache) saveItem(db dbIface, tableName string, item interface{}) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	value := reflect.ValueOf(item).Elem()
-	names, _, values, err := prepareValues(value)
+	names, _, values, err := sc.prepareValues(value)
 	if err != nil {
 		return err
 	}
@@ -179,10 +177,10 @@ func saveItem(db dbIface, tableName string, item interface{}) error {
 	return err
 }
 
-func createItem(db dbIface, tableName string, item interface{}) error {
+func (sc *StructCache) createItem(db dbIface, tableName string, item interface{}) error {
 	value := reflect.ValueOf(item).Elem()
 
-	names, questionMarks, values, err := prepareValues(value)
+	names, questionMarks, values, err := sc.prepareValues(value)
 	if err != nil {
 		return err
 	}

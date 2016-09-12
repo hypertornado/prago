@@ -96,7 +96,7 @@ func TestAdminTime(t *testing.T) {
 	tn := time.Now()
 
 	n0 := &TestNode{Changed: tn, Date: tn}
-	createItem(db, tableName, n0)
+	structCache.createItem(db, tableName, n0)
 
 	n1 := &TestNode{}
 
@@ -162,12 +162,12 @@ func TestAdminDBFirst(t *testing.T) {
 	n0 := &TestNode{Name: "A"}
 	n1 := &TestNode{Name: "B"}
 
-	err = createItem(db, tableName, n0)
+	err = structCache.createItem(db, tableName, n0)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = createItem(db, tableName, n1)
+	err = structCache.createItem(db, tableName, n1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -184,8 +184,8 @@ func TestAdminListItems(t *testing.T) {
 	dropTable(db, tableName)
 	createTable(db, tableName, structCache, false)
 
-	createItem(db, tableName, &TestNode{Name: "A"})
-	createItem(db, tableName, &TestNode{Name: "B"})
+	structCache.createItem(db, tableName, &TestNode{Name: "A"})
+	structCache.createItem(db, tableName, &TestNode{Name: "B"})
 
 	var nodesIface interface{}
 	listItems(structCache, db, tableName, &nodesIface, &listQuery{})
@@ -238,12 +238,12 @@ func TestAdminDB(t *testing.T) {
 	n0 := &TestNode{Name: "A1", OK: false, Changed: timeNow}
 	n1 := &TestNode{Name: name1, Count: count1, OK: true, Changed: timeNow}
 
-	err = createItem(db, tableName, n0)
+	err = structCache.createItem(db, tableName, n0)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = createItem(db, tableName, n1)
+	err = structCache.createItem(db, tableName, n1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -299,7 +299,7 @@ func TestAdminDB(t *testing.T) {
 	values := make(url.Values)
 	values.Set("Name", "somename")
 	structCache.BindData(item, values, nil, DefaultEditabilityFilter)
-	createItem(db, tableName, item)
+	structCache.createItem(db, tableName, item)
 	listItems(structCache, db, tableName, &nodesIface, &listQuery{})
 	nodes = nodesIface.([]*TestNode)
 
@@ -308,7 +308,7 @@ func TestAdminDB(t *testing.T) {
 	}
 
 	changedNode := &TestNode{ID: 2, Name: "changedname"}
-	saveItem(db, tableName, changedNode)
+	structCache.saveItem(db, tableName, changedNode)
 
 	changedNodeResult := &TestNode{}
 
@@ -349,7 +349,7 @@ func TestAdminResourceQuery(t *testing.T) {
 
 	n0 := &TestNode{Name: "A1", OK: false}
 
-	createItem(db, tableName, n0)
+	structCache.createItem(db, tableName, n0)
 
 	firstItem, err := q.Where(map[string]interface{}{"id": 1}).First()
 	if err != nil {
@@ -371,10 +371,10 @@ func TestAdminDBList(t *testing.T) {
 	dropTable(db, tableName)
 	createTable(db, tableName, structCache, false)
 
-	createItem(db, tableName, &TestNode{Name: "B", Changed: time.Now().Add(1 * time.Minute)})
-	createItem(db, tableName, &TestNode{Name: "A"})
-	createItem(db, tableName, &TestNode{Name: "B", Changed: time.Now()})
-	createItem(db, tableName, &TestNode{Name: "C"})
+	structCache.createItem(db, tableName, &TestNode{Name: "B", Changed: time.Now().Add(1 * time.Minute)})
+	structCache.createItem(db, tableName, &TestNode{Name: "A"})
+	structCache.createItem(db, tableName, &TestNode{Name: "B", Changed: time.Now()})
+	structCache.createItem(db, tableName, &TestNode{Name: "C"})
 
 	var nodes []*TestNode
 
@@ -499,14 +499,14 @@ func TestMigrateTable(t *testing.T) {
 
 	createTable(db, tableName, structCache1, false)
 
-	createItem(db, tableName, &N1{Name: "A"})
+	structCache1.createItem(db, tableName, &N1{Name: "A"})
 
 	err = migrateTable(db, tableName, structCache2, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	createItem(db, tableName, &N2{Name: "B", Description: "D"})
+	structCache2.createItem(db, tableName, &N2{Name: "B", Description: "D"})
 
 	var nodes []*N2
 	err = listItems(structCache2, db, tableName, &nodes, &listQuery{})

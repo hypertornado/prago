@@ -84,7 +84,7 @@ func (ar *AdminResource) saveWithDBIface(item interface{}, db dbIface) error {
 		val.FieldByName(fn).Set(timeVal)
 	}
 
-	return saveItem(db, ar.tableName(), item)
+	return ar.StructCache.saveItem(db, ar.tableName(), item)
 }
 
 func (ar *AdminResource) Create(item interface{}) error {
@@ -109,7 +109,7 @@ func (ar *AdminResource) createWithDBIface(item interface{}, db dbIface) error {
 			}
 		}
 	}
-	return createItem(db, ar.tableName(), item)
+	return ar.StructCache.createItem(db, ar.tableName(), item)
 }
 
 func (ar *AdminResource) Query() *ResourceQuery {
