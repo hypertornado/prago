@@ -10,7 +10,7 @@ type TransactionTestStruct struct {
 	Count int64
 }
 
-func prepareTransactionResource() (*Admin, *AdminResource) {
+func prepareTransactionResource() (*Admin, *Resource) {
 	admin := prepareAdmin()
 	resource, _ := admin.CreateResource(TransactionTestStruct{})
 	admin.UnsafeDropTables()

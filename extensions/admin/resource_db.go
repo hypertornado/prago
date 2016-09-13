@@ -68,11 +68,11 @@ func (q *listQuery) addOrder(name string, desc bool) {
 	q.order = append(q.order, listQueryOrder{name: name, desc: desc})
 }
 
-func (ar *AdminResource) Save(item interface{}) error {
+func (ar *Resource) Save(item interface{}) error {
 	return ar.saveWithDBIface(item, ar.admin.DB())
 }
 
-func (ar *AdminResource) saveWithDBIface(item interface{}, db dbIface) error {
+func (ar *Resource) saveWithDBIface(item interface{}, db dbIface) error {
 	if !ar.HasModel {
 		return ErrorDontHaveModel
 	}
@@ -87,11 +87,11 @@ func (ar *AdminResource) saveWithDBIface(item interface{}, db dbIface) error {
 	return ar.StructCache.saveItem(db, ar.tableName(), item)
 }
 
-func (ar *AdminResource) Create(item interface{}) error {
+func (ar *Resource) Create(item interface{}) error {
 	return ar.createWithDBIface(item, ar.admin.DB())
 }
 
-func (ar *AdminResource) createWithDBIface(item interface{}, db dbIface) error {
+func (ar *Resource) createWithDBIface(item interface{}, db dbIface) error {
 	if !ar.HasModel {
 		return ErrorDontHaveModel
 	}
@@ -112,7 +112,7 @@ func (ar *AdminResource) createWithDBIface(item interface{}, db dbIface) error {
 	return ar.StructCache.createItem(db, ar.tableName(), item)
 }
 
-func (ar *AdminResource) Query() *ResourceQuery {
+func (ar *Resource) Query() *ResourceQuery {
 	var err error
 	if !ar.HasModel {
 		err = ErrorDontHaveModel
@@ -126,7 +126,7 @@ func (ar *AdminResource) Query() *ResourceQuery {
 	}
 }
 
-func (ar *AdminResource) NewItem() (item interface{}, err error) {
+func (ar *Resource) NewItem() (item interface{}, err error) {
 	reflect.ValueOf(&item).Elem().Set(reflect.New(ar.Typ))
 	return
 }

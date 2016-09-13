@@ -22,7 +22,7 @@ func (dbProvider) DB() *sql.DB {
 	return db
 }
 
-func (dbProvider) GetResourceByName(string) *AdminResource {
+func (dbProvider) GetResourceByName(string) *Resource {
 	return nil
 }
 

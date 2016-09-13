@@ -18,7 +18,7 @@ type ResourceStruct struct {
 	UpdatedAt   time.Time
 }
 
-func prepareResource() *AdminResource {
+func prepareResource() *Resource {
 	resource, _ := NewResource(ResourceStruct{})
 	resource.admin = dbProvider{}
 

@@ -70,7 +70,7 @@ func UploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File,
 	return file, nil
 }
 
-func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
+func (File) InitResource(a *Admin, resource *Resource) error {
 	resource.Pagination = 100
 
 	fileUploadPath = a.App.Config().GetString("fileUploadPath")
@@ -85,7 +85,7 @@ func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
 
 	BindImageAPI(a, fileDownloadPath)
 
-	resource.Actions["create"] = func(a *Admin, resource *AdminResource) {
+	resource.Actions["create"] = func(a *Admin, resource *Resource) {
 		resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
 			ValidateCSRF(request)
 
@@ -107,7 +107,7 @@ func (File) AdminInitResource(a *Admin, resource *AdminResource) error {
 		})
 	}
 
-	resource.Actions["detail"] = func(a *Admin, resource *AdminResource) {
+	resource.Actions["detail"] = func(a *Admin, resource *Resource) {
 		resource.ResourceController.Get(a.GetURL(resource, ":id"), func(request prago.Request) {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			prago.Must(err)

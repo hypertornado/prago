@@ -159,7 +159,7 @@ func (u User) SendRenew(request prago.Request, a *Admin) error {
 	return a.sendgridClient.Send(message)
 }
 
-func (User) AdminInitResource(a *Admin, resource *AdminResource) error {
+func (User) InitResource(a *Admin, resource *Resource) error {
 
 	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
 		request.SetData("locale", GetLocale(request))

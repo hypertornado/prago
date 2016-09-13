@@ -45,7 +45,7 @@ type Page struct {
 	Current bool
 }
 
-func (resource *AdminResource) GetList(lang string, path string, requestQuery url.Values) (list List, err error) {
+func (resource *Resource) GetList(lang string, path string, requestQuery url.Values) (list List, err error) {
 	q := resource.Query()
 	if resource.OrderDesc {
 		q = q.OrderDesc(resource.OrderByColumn)
@@ -138,7 +138,7 @@ func (resource *AdminResource) GetList(lang string, path string, requestQuery ur
 	return
 }
 
-func (resource *AdminResource) ValueToCell(field reflect.StructField, val reflect.Value) (cell ListCell) {
+func (resource *Resource) ValueToCell(field reflect.StructField, val reflect.Value) (cell ListCell) {
 	cell.TemplateName = "admin_string"
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)

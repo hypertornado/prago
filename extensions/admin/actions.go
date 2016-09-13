@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-type ActionBinder func(a *Admin, resource *AdminResource)
+type ActionBinder func(a *Admin, resource *Resource)
 
-func BindList(a *Admin, resource *AdminResource) {
+func BindList(a *Admin, resource *Resource) {
 	resource.ResourceController.Get(a.GetURL(resource, ""), func(request prago.Request) {
 
 		listData, err := resource.GetList(GetLocale(request), request.Request().URL.Path, request.Request().URL.Query())
@@ -29,9 +29,8 @@ func BindList(a *Admin, resource *AdminResource) {
 	})
 }
 
-func BindNew(a *Admin, resource *AdminResource) {
+func BindNew(a *Admin, resource *Resource) {
 	resource.ResourceController.Get(a.GetURL(resource, "new"), func(request prago.Request) {
-
 		item, err := resource.NewItem()
 		if err != nil {
 			panic(err)
@@ -62,7 +61,7 @@ func BindNew(a *Admin, resource *AdminResource) {
 	})
 }
 
-func BindCreate(a *Admin, resource *AdminResource) {
+func BindCreate(a *Admin, resource *Resource) {
 	resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
 		ValidateCSRF(request)
 		item, err := resource.NewItem()
@@ -96,7 +95,7 @@ func BindCreate(a *Admin, resource *AdminResource) {
 	})
 }
 
-func BindDetail(a *Admin, resource *AdminResource) {
+func BindDetail(a *Admin, resource *Resource) {
 	resource.ResourceController.Get(a.GetURL(resource, ":id"), func(request prago.Request) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
@@ -129,7 +128,7 @@ func BindDetail(a *Admin, resource *AdminResource) {
 	})
 }
 
-func BindUpdate(a *Admin, resource *AdminResource) {
+func BindUpdate(a *Admin, resource *Resource) {
 	resource.ResourceController.Post(a.GetURL(resource, ":id"), func(request prago.Request) {
 		ValidateCSRF(request)
 		id, err := strconv.Atoi(request.Params().Get("id"))
@@ -168,7 +167,7 @@ func BindUpdate(a *Admin, resource *AdminResource) {
 	})
 }
 
-func BindDelete(a *Admin, resource *AdminResource) {
+func BindDelete(a *Admin, resource *Resource) {
 	resource.ResourceController.Post(a.GetURL(resource, ":id/delete"), func(request prago.Request) {
 		ValidateCSRF(request)
 		id, err := strconv.Atoi(request.Params().Get("id"))
@@ -194,7 +193,7 @@ func BindDelete(a *Admin, resource *AdminResource) {
 	})
 }
 
-func BindOrder(a *Admin, resource *AdminResource) {
+func BindOrder(a *Admin, resource *Resource) {
 	resource.ResourceController.Post(a.GetURL(resource, "order"), func(request prago.Request) {
 		decoder := json.NewDecoder(request.Request().Body)
 		var t = map[string][]int{}
@@ -217,7 +216,7 @@ func BindOrder(a *Admin, resource *AdminResource) {
 	})
 }
 
-func AdminInitResourceDefault(a *Admin, resource *AdminResource) error {
+func InitResourceDefault(a *Admin, resource *Resource) error {
 	if !resource.HasModel || !resource.HasView {
 		return nil
 	}

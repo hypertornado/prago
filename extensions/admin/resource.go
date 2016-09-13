@@ -14,14 +14,14 @@ var (
 	ErrorDontHaveModel = errors.New("This resource does not have model")
 )
 
-type ResourceAction func(prago.Request, interface{}) bool
+type Action func(prago.Request, interface{}) bool
 
 type DBProvider interface {
 	DB() *sql.DB
-	GetResourceByName(string) *AdminResource
+	GetResourceByName(string) *Resource
 }
 
-type AdminResource struct {
+type Resource struct {
 	ID                 string
 	Name               func(string) string
 	Typ                reflect.Type
@@ -41,18 +41,18 @@ type AdminResource struct {
 	EditabilityFilter  StructFieldFilter
 	Actions            map[string]ActionBinder
 
-	BeforeList   ResourceAction
-	BeforeNew    ResourceAction
-	BeforeCreate ResourceAction
-	AfterCreate  ResourceAction
-	BeforeDetail ResourceAction
-	BeforeUpdate ResourceAction
-	AfterUpdate  ResourceAction
-	BeforeDelete ResourceAction
-	AfterDelete  ResourceAction
+	BeforeList   Action
+	BeforeNew    Action
+	BeforeCreate Action
+	AfterCreate  Action
+	BeforeDetail Action
+	BeforeUpdate Action
+	AfterUpdate  Action
+	BeforeDelete Action
+	AfterDelete  Action
 }
 
-func NewResource(item interface{}) (*AdminResource, error) {
+func NewResource(item interface{}) (*Resource, error) {
 	structCache, err := NewStructCache(item)
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func NewResource(item interface{}) (*AdminResource, error) {
 
 	typ := reflect.TypeOf(item)
 	defaultName := typ.Name()
-	ret := &AdminResource{
+	ret := &Resource{
 		Name:              func(string) string { return defaultName },
 		ID:                utils.ColumnName(defaultName),
 		Typ:               typ,
@@ -126,7 +126,7 @@ func NewResource(item interface{}) (*AdminResource, error) {
 	return ret, nil
 }
 
-func (a *Admin) initResource(resource *AdminResource) error {
+func (a *Admin) initResource(resource *Resource) error {
 
 	resource.ResourceController = a.AdminController.SubController()
 
@@ -149,19 +149,19 @@ func (a *Admin) initResource(resource *AdminResource) error {
 	})
 
 	init, ok := resource.item.(interface {
-		AdminInitResource(*Admin, *AdminResource) error
+		InitResource(*Admin, *Resource) error
 	})
 
 	if ok {
-		err := init.AdminInitResource(a, resource)
+		err := init.InitResource(a, resource)
 		if err != nil {
 			return err
 		}
 	}
-	return AdminInitResourceDefault(a, resource)
+	return InitResourceDefault(a, resource)
 }
 
-func (a *Admin) getResourceByItem(item interface{}) (*AdminResource, error) {
+func (a *Admin) getResourceByItem(item interface{}) (*Resource, error) {
 	typ := reflect.TypeOf(item).Elem()
 	resource, ok := a.resourceMap[typ]
 	if !ok {
@@ -170,19 +170,19 @@ func (a *Admin) getResourceByItem(item interface{}) (*AdminResource, error) {
 	return resource, nil
 }
 
-func (ar *AdminResource) db() *sql.DB {
+func (ar *Resource) db() *sql.DB {
 	return ar.admin.DB()
 }
 
-func (ar *AdminResource) tableName() string {
+func (ar *Resource) tableName() string {
 	return ar.table
 }
 
-func (ar *AdminResource) UnsafeDropTable() error {
+func (ar *Resource) UnsafeDropTable() error {
 	return dropTable(ar.db(), ar.tableName())
 }
 
-func (ar *AdminResource) migrate(verbose bool) error {
+func (ar *Resource) migrate(verbose bool) error {
 	_, err := getTableDescription(ar.db(), ar.tableName())
 	if err == nil {
 		return migrateTable(ar.db(), ar.tableName(), ar.StructCache, verbose)
