@@ -18,8 +18,12 @@ type List struct {
 }
 
 type ListHeader struct {
-	Name      string
-	NameHuman string
+	Name        string
+	NameHuman   string
+	CanOrder    bool
+	Ordered     bool
+	OrderedDesc bool
+	OrderPath   string
 }
 
 type ListRow struct {
@@ -46,17 +50,57 @@ type Page struct {
 }
 
 func (resource *Resource) GetList(lang string, path string, requestQuery url.Values) (list List, err error) {
+	orderItem := resource.OrderByColumn
+	orderDesc := resource.OrderDesc
+	isDefaultOrder := true
+	wasSomeOrderSet := false
+
+	var qOrder string
+	qOrder = requestQuery.Get("order")
+	if len(qOrder) > 0 {
+		orderItem = qOrder
+		orderDesc = false
+		wasSomeOrderSet = true
+	}
+
+	qOrder = requestQuery.Get("orderdesc")
+	if len(qOrder) > 0 {
+		orderItem = qOrder
+		orderDesc = true
+		wasSomeOrderSet = true
+	}
+
+	if orderItem != resource.OrderByColumn || orderDesc != resource.OrderDesc {
+		isDefaultOrder = false
+	}
+
+	if wasSomeOrderSet && isDefaultOrder {
+		err = ErrorNotFound
+		return
+	}
+
+	orderField, ok := resource.StructCache.fieldMap[orderItem]
+	if !ok || !orderField.CanOrder {
+		err = ErrorNotFound
+		return
+	}
+
+	if (orderItem != resource.OrderByColumn) && !orderField.canShow() {
+		err = ErrorNotFound
+		return
+	}
+
 	q := resource.Query()
-	if resource.OrderDesc {
-		q = q.OrderDesc(resource.OrderByColumn)
+	if orderDesc {
+		q.OrderDesc(orderItem)
 	} else {
-		q = q.Order(resource.OrderByColumn)
+		q.Order(orderItem)
 	}
 
 	_, list.HasDelete = resource.Actions["delete"]
 	_, list.HasNew = resource.Actions["new"]
 
-	if resource.StructCache.OrderColumnName == resource.OrderByColumn && !resource.OrderDesc {
+	if resource.StructCache.OrderColumnName == orderItem && !orderDesc {
 		list.Order = true
 	}
 
@@ -92,6 +136,13 @@ func (resource *Resource) GetList(lang string, path string, requestQuery url.Val
 			if i > 1 {
 				newUrlValues := make(url.Values)
 				newUrlValues.Set("p", fmt.Sprintf("%d", i))
+				if !isDefaultOrder {
+					if orderDesc {
+						newUrlValues.Set("orderdesc", orderItem)
+					} else {
+						newUrlValues.Set("order", orderItem)
+					}
+				}
 				p.Url += "?" + newUrlValues.Encode()
 			}
 
@@ -105,20 +156,44 @@ func (resource *Resource) GetList(lang string, path string, requestQuery url.Val
 	rowItems, err := q.List()
 
 	for _, v := range resource.StructCache.fieldArrays {
-		show := false
-		if v.Name == "ID" || v.Name == "Name" {
-			show = true
-		}
-		showTag := v.Tags["prago-preview"]
-		if showTag == "true" {
-			show = true
-		}
-		if showTag == "false" {
-			show = false
-		}
+		if v.canShow() {
+			headerItem := ListHeader{
+				Name:      v.Name,
+				NameHuman: v.humanName(lang),
+			}
 
-		if show {
-			list.Header = append(list.Header, ListHeader{Name: v.Name, NameHuman: v.humanName(lang)})
+			if v.CanOrder {
+				headerItem.CanOrder = true
+				shouldOrderDesc := false
+
+				if orderItem == v.ColumnName {
+					headerItem.Ordered = true
+					headerItem.OrderedDesc = orderDesc
+					if !orderDesc {
+						shouldOrderDesc = true
+					}
+				}
+
+				newUrlValues := make(url.Values)
+				if currentPage > 1 {
+					newUrlValues.Set("p", fmt.Sprintf("%d", currentPage))
+				}
+
+				if !(v.ColumnName == resource.OrderByColumn && shouldOrderDesc == resource.OrderDesc) {
+					if shouldOrderDesc {
+						newUrlValues.Set("orderdesc", v.ColumnName)
+					} else {
+						newUrlValues.Set("order", v.ColumnName)
+					}
+				}
+				encodedValue := newUrlValues.Encode()
+				headerItem.OrderPath = path
+				if encodedValue != "" {
+					headerItem.OrderPath += "?" + newUrlValues.Encode()
+				}
+			}
+
+			list.Header = append(list.Header, headerItem)
 		}
 	}
 

@@ -38,7 +38,7 @@ func NewStructCache(item interface{}) (ret *StructCache, err error) {
 				ret.OrderColumnName = field.ColumnName
 			}
 			ret.fieldArrays = append(ret.fieldArrays, field)
-			ret.fieldMap[field.Name] = field
+			ret.fieldMap[field.ColumnName] = field
 		}
 	}
 	return
@@ -84,6 +84,7 @@ type StructField struct {
 	Order      int
 	Unique     bool
 	Scanner    sql.Scanner
+	CanOrder   bool
 }
 
 func (a *StructField) fieldDescriptionMysql() string {
@@ -125,6 +126,20 @@ func (a *StructField) fieldDescriptionMysql() string {
 	return fmt.Sprintf("%s %s %s", a.ColumnName, fieldDescription, additional)
 }
 
+func (v *StructField) canShow() (show bool) {
+	if v.Name == "ID" || v.Name == "Name" {
+		show = true
+	}
+	showTag := v.Tags["prago-preview"]
+	if showTag == "true" {
+		show = true
+	}
+	if showTag == "false" {
+		show = false
+	}
+	return
+}
+
 func (a *StructField) humanName(lang string) (ret string) {
 	description := a.Tags["prago-description"]
 	if len(description) > 0 {
@@ -144,6 +159,7 @@ func newStructField(field reflect.StructField, order int) *StructField {
 		Typ:        field.Type,
 		Tags:       make(map[string]string),
 		Order:      order,
+		CanOrder:   true,
 	}
 
 	for _, v := range []string{

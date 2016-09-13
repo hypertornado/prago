@@ -190,16 +190,16 @@ const TEMPLATES = `
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="stylesheet" href="{{.admin_header.prefix}}/normalize.css?v={{.version}}">
-    <link rel="stylesheet" href="{{.admin_header.prefix}}/admin.css">
-    <script type="text/javascript" src="{{.admin_header.prefix}}/jquery.js"></script>
-    <script type="text/javascript" src="{{.admin_header.prefix}}/image.js"></script>
-    <script type="text/javascript" src="{{.admin_header.prefix}}/order.js"></script>
-    <script type="text/javascript" src="{{.admin_header.prefix}}/place.js"></script>
-    <script type="text/javascript" src="{{.admin_header.prefix}}/timestamp.js"></script>
-    <script type="text/javascript" src="{{.admin_header.prefix}}/markdown.js"></script>
-    <script type="text/javascript" src="{{.admin_header.prefix}}/relation.js"></script>
+    <link rel="stylesheet" href="{{.admin_header.prefix}}/admin.css?v={{.version}}">
+    <script type="text/javascript" src="{{.admin_header.prefix}}/jquery.js?v={{.version}}"></script>
+    <script type="text/javascript" src="{{.admin_header.prefix}}/image.js?v={{.version}}"></script>
+    <script type="text/javascript" src="{{.admin_header.prefix}}/order.js?v={{.version}}"></script>
+    <script type="text/javascript" src="{{.admin_header.prefix}}/place.js?v={{.version}}"></script>
+    <script type="text/javascript" src="{{.admin_header.prefix}}/timestamp.js?v={{.version}}"></script>
+    <script type="text/javascript" src="{{.admin_header.prefix}}/markdown.js?v={{.version}}"></script>
+    <script type="text/javascript" src="{{.admin_header.prefix}}/relation.js?v={{.version}}"></script>
     <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces" async defer></script>
-    <script type="text/javascript" src="{{.admin_header.prefix}}/script.js"></script>
+    <script type="text/javascript" src="{{.admin_header.prefix}}/script.js?v={{.version}}"></script>
 
   </head>
   <body class="admin" data-admin-prefix="{{.admin_header.prefix}}">
@@ -282,7 +282,15 @@ const TEMPLATES = `
 <table class="admin_table{{if .admin_list.Order}} admin_table-order{{end}}">
   <tr class="admin_table_header">
   {{range $item := .admin_list.Header}}
-    <th>{{$item.NameHuman}}</th>
+    <th>
+      {{if $item.CanOrder}}
+        <a href="{{$item.OrderPath}}" class="{{if $item.Ordered}}ordered{{end}}{{if $item.OrderedDesc}} ordered-desc{{end}}">
+      {{- end -}}
+        {{- $item.NameHuman -}}
+      {{if $item.CanOrder -}}
+        </a>
+      {{end}}
+    </th>
   {{end}}
   <th{{if $table.HasDelete}} colspan="2"{{end}}>
     {{if $table.HasNew}}

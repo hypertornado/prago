@@ -13,7 +13,14 @@ func BindList(a *Admin, resource *Resource) {
 	resource.ResourceController.Get(a.GetURL(resource, ""), func(request prago.Request) {
 
 		listData, err := resource.GetList(GetLocale(request), request.Request().URL.Path, request.Request().URL.Query())
-		prago.Must(err)
+		if err != nil {
+			if err == ErrorNotFound {
+				Render404(request)
+				return
+			} else {
+				panic(err)
+			}
+		}
 
 		if resource.BeforeList != nil {
 			if !resource.BeforeList(request, listData) {

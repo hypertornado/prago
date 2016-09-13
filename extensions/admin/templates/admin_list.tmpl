@@ -12,7 +12,15 @@
 <table class="admin_table{{if .admin_list.Order}} admin_table-order{{end}}">
   <tr class="admin_table_header">
   {{range $item := .admin_list.Header}}
-    <th>{{$item.NameHuman}}</th>
+    <th>
+      {{if $item.CanOrder}}
+        <a href="{{$item.OrderPath}}" class="{{if $item.Ordered}}ordered{{end}}{{if $item.OrderedDesc}} ordered-desc{{end}}">
+      {{- end -}}
+        {{- $item.NameHuman -}}
+      {{if $item.CanOrder -}}
+        </a>
+      {{end}}
+    </th>
   {{end}}
   <th{{if $table.HasDelete}} colspan="2"{{end}}>
     {{if $table.HasNew}}

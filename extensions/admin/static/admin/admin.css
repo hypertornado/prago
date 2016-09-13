@@ -237,6 +237,7 @@ input[type=date].input {
 .admin_table th {
   padding: 5px;
   vertical-align: bottom;
+  font-weight: normal;
 }
 
 .admin_header_item-active a {
@@ -353,5 +354,17 @@ input[type=date].input {
 
 .admin_timestamp_minute {
   width: 60px;
+}
+
+.ordered {
+  font-weight: bold;
+}
+
+.ordered:after {
+  content: "↓";
+}
+
+.ordered-desc:after {
+  content: "↑";
 }
 
