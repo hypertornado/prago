@@ -116,6 +116,10 @@ func (u User) SendConfirmEmail(request prago.Request, a *Admin) error {
 		return errors.New("email already confirmed")
 	}
 
+	if a.noReplyEmail == "" {
+		return errors.New("no reply email empty")
+	}
+
 	locale := GetLocale(request)
 
 	urlValues := make(url.Values)
@@ -143,6 +147,9 @@ func (u User) getRenewUrl(request prago.Request, a *Admin) string {
 }
 
 func (u User) SendRenew(request prago.Request, a *Admin) error {
+	if a.noReplyEmail == "" {
+		return errors.New("no reply email empty")
+	}
 
 	locale := GetLocale(request)
 

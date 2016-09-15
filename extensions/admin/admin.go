@@ -158,7 +158,8 @@ func (a *Admin) Init(app *prago.App) error {
 	var err error
 
 	a.sendgridClient = sendgrid.NewSendGridClientWithApiKey(app.Config().GetString("sendgridApi"))
-	a.noReplyEmail = app.Config().GetString("noReplyEmail")
+
+	a.noReplyEmail = app.Config().GetStringWithFallback("noReplyEmail", "")
 
 	err = a.bindAdminCommand(app)
 	if err != nil {

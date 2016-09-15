@@ -77,6 +77,18 @@ func (c *Config) GetString(name string) string {
 	return str
 }
 
+func (c *Config) GetStringWithFallback(name, fallback string) string {
+	item, err := c.Get(name)
+	if err != nil {
+		return fallback
+	}
+	str, ok := item.(string)
+	if !ok {
+		return fallback
+	}
+	return str
+}
+
 func (a *App) Config() *Config {
 	ret, ok := a.data["config"].(map[string]interface{})
 	if !ok {

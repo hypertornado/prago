@@ -46,7 +46,7 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 		remoteCommand := app.CreateCommand("remote", "Remote")
 		remoteCommandVersion := remoteCommand.Arg("version", "").Default(version).String()
 		app.AddCommand(remoteCommand, func(app *prago.App) error {
-			return remote(appName, *remoteCommandVersion, ssh)
+			return b.remote(appName, *remoteCommandVersion, ssh)
 		})
 
 		backupCommand := app.CreateCommand("backup", "Backup")
@@ -54,19 +54,12 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 
 		syncBackupCommand := app.CreateCommand("syncbackups", "Sync backups from server")
 		app.AddCommand(syncBackupCommand, func(app *prago.App) error {
-			to := filepath.Join(os.Getenv("HOME"), "."+appName, "serverbackups")
-			err = exec.Command("mkdir", "-p", to).Run()
-			if err != nil {
-				return err
-			}
+			return b.syncBackups(appName, ssh)
+		})
 
-			from := fmt.Sprintf("%s:~/.%s/backups/*", ssh, appName)
-
-			fmt.Println("scp", "-r", from, to)
-			cmd := exec.Command("scp", "-r", from, to)
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			return cmd.Run()
+		partyCommand := app.CreateCommand("party", "release and run current version")
+		app.AddCommand(partyCommand, func(app *prago.App) error {
+			return b.party(appName, version, ssh)
 		})
 
 	}
@@ -74,7 +67,36 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 	return nil
 }
 
-func remote(appName, version, ssh string) error {
+func (b BuildMiddleware) party(appName, version, ssh string) (err error) {
+	if err = b.build(appName, version); err != nil {
+		return err
+	}
+	if err = b.release(appName, version, ssh); err != nil {
+		return err
+	}
+	if err = b.remote(appName, version, ssh); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (b BuildMiddleware) syncBackups(appName, ssh string) error {
+	to := filepath.Join(os.Getenv("HOME"), "."+appName, "serverbackups")
+	err := exec.Command("mkdir", "-p", to).Run()
+	if err != nil {
+		return err
+	}
+
+	from := fmt.Sprintf("%s:~/.%s/backups/*", ssh, appName)
+
+	fmt.Println("scp", "-r", from, to)
+	cmd := exec.Command("scp", "-r", from, to)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func (b BuildMiddleware) remote(appName, version, ssh string) error {
 	cmdStr := fmt.Sprintf("cd ~/.%s/versions/%s.%s; ./%s.linux admin migrate; killall %s.linux; nohup ./%s.linux server > /dev/null 2>&1 & exit;", appName, appName, version, appName, appName, appName)
 	println(cmdStr)
 	cmd := exec.Command("ssh", ssh, cmdStr)
@@ -177,7 +199,7 @@ type buildFlag struct {
 	goarch string
 }
 
-var linuxBuild = buildFlag{"linux", "linux", "386"}
+var linuxBuild = buildFlag{"linux", "linux", "amd64"}
 var macBuild = buildFlag{"mac", "darwin", "amd64"}
 
 func (b BuildMiddleware) build(appName, version string) error {
