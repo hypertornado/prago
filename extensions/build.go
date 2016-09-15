@@ -46,12 +46,7 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 		remoteCommand := app.CreateCommand("remote", "Remote")
 		remoteCommandVersion := remoteCommand.Arg("version", "").Default(version).String()
 		app.AddCommand(remoteCommand, func(app *prago.App) error {
-			cmdStr := fmt.Sprintf("cd ~/.%s/versions/%s.%s; ./%s.linux admin migrate; killall %s.linux; nohup ./%s.linux server > /dev/null 2>&1 & exit;", appName, appName, *remoteCommandVersion, appName, appName, appName)
-			println(cmdStr)
-			cmd := exec.Command("ssh", ssh, cmdStr)
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			return cmd.Run()
+			return remote(appName, *remoteCommandVersion, ssh)
 		})
 
 		backupCommand := app.CreateCommand("backup", "Backup")
@@ -59,7 +54,6 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 
 		syncBackupCommand := app.CreateCommand("syncbackups", "Sync backups from server")
 		app.AddCommand(syncBackupCommand, func(app *prago.App) error {
-
 			to := filepath.Join(os.Getenv("HOME"), "."+appName, "serverbackups")
 			err = exec.Command("mkdir", "-p", to).Run()
 			if err != nil {
@@ -73,12 +67,20 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			return cmd.Run()
-
 		})
 
 	}
 
 	return nil
+}
+
+func remote(appName, version, ssh string) error {
+	cmdStr := fmt.Sprintf("cd ~/.%s/versions/%s.%s; ./%s.linux admin migrate; killall %s.linux; nohup ./%s.linux server > /dev/null 2>&1 & exit;", appName, appName, version, appName, appName, appName)
+	println(cmdStr)
+	cmd := exec.Command("ssh", ssh, cmdStr)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
 
 func BackupApp(app *prago.App) error {
