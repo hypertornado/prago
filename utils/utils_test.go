@@ -44,5 +44,16 @@ func TestFilenames(t *testing.T) {
 			t.Fatal(fmt.Printf("Expected %s, got %s", v[1], PrettyFilename(v[0])))
 		}
 	}
+}
+
+func TestFilterMarkdown(t *testing.T) {
+	for _, v := range [][2]string{
+		{"abc", "abc"},
+		{"x[a](b)c[z](y)t", "xaczt"},
+	} {
+		if filterMarkdown(v[0]) != v[1] {
+			t.Fatal(fmt.Printf("Expected %s, got %s", v[1], filterMarkdown(v[0])))
+		}
+	}
 
 }

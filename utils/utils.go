@@ -6,6 +6,7 @@ import (
 	"github.com/Machiel/slugify"
 	"math/rand"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -52,6 +53,16 @@ func ConsoleQuestion(question string) bool {
 
 func ColumnName(fieldName string) string {
 	return PrettyUrl(fieldName)
+}
+
+func filterMarkdown(in string) string {
+	r := regexp.MustCompile("\\[([^\\]]+)\\]\\(([^)]+)\\)")
+	return r.ReplaceAllString(in, "$1")
+}
+
+func CropMarkdown(text string, count int) string {
+	text = filterMarkdown(text)
+	return Crop(text, count)
 }
 
 func Crop(text string, count int) string {
