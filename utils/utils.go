@@ -60,6 +60,8 @@ func filterMarkdown(in string) string {
 	return r.ReplaceAllString(in, "$1")
 }
 
+//TODO: now just links are filtered, better will be to use markdown custom renderers
+//https://godoc.org/github.com/russross/blackfriday#Renderer
 func CropMarkdown(text string, count int) string {
 	text = filterMarkdown(text)
 	return Crop(text, count)
