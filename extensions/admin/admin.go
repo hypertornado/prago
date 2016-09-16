@@ -132,7 +132,7 @@ func (a *Admin) adminHeaderData(request prago.Request) interface{} {
 			"url":  a.Prefix + "/" + resource.ID,
 		}
 
-		if resource.Authenticate(user) {
+		if resource.HasView && resource.Authenticate(user) {
 			menuitems = append(menuitems, newItem)
 		}
 	}
@@ -157,8 +157,7 @@ func (a *Admin) Init(app *prago.App) error {
 
 	var err error
 
-	a.sendgridClient = sendgrid.NewSendGridClientWithApiKey(app.Config().GetString("sendgridApi"))
-
+	a.sendgridClient = sendgrid.NewSendGridClientWithApiKey(app.Config().GetStringWithFallback("sendgridApi", ""))
 	a.noReplyEmail = app.Config().GetStringWithFallback("noReplyEmail", "")
 
 	err = a.bindAdminCommand(app)
