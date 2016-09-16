@@ -338,8 +338,8 @@ const TEMPLATES = `
     <title>{{.title}}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{{.admin_header_prefix}}/normalize.css">
-    <link rel="stylesheet" href="{{.admin_header_prefix}}/admin.css">
+    <link rel="stylesheet" href="{{.admin_header_prefix}}/normalize.css?v={{.version}}">
+    <link rel="stylesheet" href="{{.admin_header_prefix}}/admin.css?v={{.version}}">
   </head>
   <body class="admin">
     {{tmpl "admin_flash" .}}
