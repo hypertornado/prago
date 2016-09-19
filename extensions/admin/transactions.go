@@ -60,3 +60,7 @@ func (t *Transaction) Commit() error {
 func (t *Transaction) Rollback() error {
 	return t.tx.Rollback()
 }
+
+func (t *Transaction) Tx() *sql.Tx {
+	return t.tx
+}

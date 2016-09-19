@@ -102,7 +102,6 @@ func (ar *Resource) createWithDBIface(item interface{}, db dbIface) error {
 	for _, fieldName := range []string{"CreatedAt", "UpdatedAt"} {
 		field := val.FieldByName(fieldName)
 		if field.IsValid() && field.CanSet() && field.Type() == timeVal.Type() {
-			//TODO: create test for not seting value on non-zero times
 			reflect.ValueOf(&t).Elem().Set(field)
 			if t.IsZero() {
 				field.Set(timeVal)
