@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/golang-commonmark/markdown"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
@@ -80,14 +81,32 @@ func (a *Admin) UnsafeDropTables() error {
 }
 
 func (a *Admin) Migrate(verbose bool) error {
+	tables, err := listTables(a.db)
+	if err != nil {
+		return err
+	}
 	for _, resource := range a.Resources {
 		if resource.HasModel {
+			tables[resource.tableName()] = false
 			err := resource.migrate(verbose)
 			if err != nil {
 				return err
 			}
 		}
 	}
+
+	if verbose {
+		unusedTables := []string{}
+		for k, v := range tables {
+			if v == true {
+				unusedTables = append(unusedTables, k)
+			}
+		}
+		if len(unusedTables) > 0 {
+			fmt.Printf("Unused tables: %s\n", strings.Join(unusedTables, ", "))
+		}
+	}
+
 	return nil
 }
 

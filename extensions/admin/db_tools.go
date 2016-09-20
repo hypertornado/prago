@@ -45,6 +45,26 @@ func dropTable(db dbIface, tableName string) error {
 	return err
 }
 
+func listTables(db dbIface) (ret map[string]bool, err error) {
+	ret = make(map[string]bool)
+	var rows *sql.Rows
+	rows, err = db.Query("show tables;")
+	defer rows.Close()
+	if err != nil {
+		return ret, err
+	}
+
+	for rows.Next() {
+		var name string
+		err = rows.Scan(&name)
+		if err != nil {
+			return
+		}
+		ret[name] = true
+	}
+	return
+}
+
 func createTable(db dbIface, tableName string, adminStruct *StructCache, verbose bool) (err error) {
 	if verbose {
 		fmt.Printf("Creating table '%s'\n", tableName)
