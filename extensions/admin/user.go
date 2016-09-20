@@ -139,6 +139,30 @@ func (u User) SendConfirmEmail(request prago.Request, a *Admin) error {
 	return a.sendgridClient.Send(message)
 }
 
+func (u User) SendAdminEmail(request prago.Request, a *Admin) error {
+	if a.noReplyEmail == "" {
+		return errors.New("no reply email empty")
+	}
+	var users []*User
+	err := a.Query().WhereIs("isadmin", true).Get(&users)
+	if err != nil {
+		return err
+	}
+	for _, user := range users {
+		message := sendgrid.NewMail()
+		message.SetFrom(a.noReplyEmail)
+		message.AddTo(user.Email)
+		message.AddToName(user.Name)
+		message.SetSubject("New registration on " + a.AppName)
+		message.SetHTML(fmt.Sprintf("New user registered on %s: %s (%s)", a.AppName, u.Email, u.Name))
+		err = a.sendgridClient.Send(message)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (u User) getRenewUrl(request prago.Request, a *Admin) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", u.Email)
@@ -468,6 +492,10 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 			user.Locale = locale
 			prago.Must(user.NewPassword(request.Params().Get("password")))
 			prago.Must(user.SendConfirmEmail(request, a))
+			err := user.SendAdminEmail(request, a)
+			if err != nil {
+				request.App().Log().Println(err)
+			}
 			prago.Must(a.Create(user))
 
 			FlashMessage(request, messages.Messages.Get(locale, "admin_confirm_email_send", user.Email))
