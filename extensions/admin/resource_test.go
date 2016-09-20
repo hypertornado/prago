@@ -164,6 +164,15 @@ func TestResourceCreateWithID(t *testing.T) {
 	}
 }
 
+func TestShouldNotSaveWithZeroID(t *testing.T) {
+	resource := prepareResource()
+	err := resource.Save(&ResourceStruct{})
+	if err == nil {
+		t.Fatal("should not be nil")
+	}
+
+}
+
 func TestShouldNotCreateResourceWithPointer(t *testing.T) {
 	var err error
 	_, err = NewResource(&ResourceStruct{})

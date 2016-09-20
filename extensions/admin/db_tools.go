@@ -2,6 +2,7 @@ package admin
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/hypertornado/prago/utils"
 	"math"
@@ -173,8 +174,18 @@ func (sc *StructCache) saveItem(db dbIface, tableName string, item interface{}) 
 	if Debug {
 		fmt.Println(q, values)
 	}
-	_, err = db.Exec(q, values...)
-	return err
+	execResult, err := db.Exec(q, values...)
+	if err != nil {
+		return err
+	}
+	affected, err := execResult.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return errors.New("Zero rows affected by save operation.")
+	}
+	return nil
 }
 
 func (sc *StructCache) createItem(db dbIface, tableName string, item interface{}) error {

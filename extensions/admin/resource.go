@@ -36,7 +36,7 @@ type Resource struct {
 	admin              DBProvider
 	table              string
 	StructCache        *StructCache
-	AfterFormCreated   func(*Form, prago.Request, bool) *Form
+	AfterFormCreated   func(f *Form, request prago.Request, newItem bool) *Form
 	VisibilityFilter   StructFieldFilter
 	EditabilityFilter  StructFieldFilter
 	Actions            map[string]ActionBinder

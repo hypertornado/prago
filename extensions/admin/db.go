@@ -19,7 +19,6 @@ func (a *Admin) Save(item interface{}) error {
 	if err != nil {
 		return err
 	}
-
 	return resource.Save(item)
 }
 
