@@ -80,6 +80,20 @@ func migrateTable(db dbIface, tableName string, adminStruct *StructCache, verbos
 	for _, v := range adminStruct.fieldArrays {
 		if !tableDescriptionMap[v.ColumnName] {
 			items = append(items, fmt.Sprintf("ADD COLUMN %s", v.fieldDescriptionMysql()))
+		} else {
+			tableDescriptionMap[v.ColumnName] = false
+		}
+	}
+
+	if verbose {
+		unusedFields := []string{}
+		for k, v := range tableDescriptionMap {
+			if v == true {
+				unusedFields = append(unusedFields, k)
+			}
+		}
+		if len(unusedFields) > 0 {
+			fmt.Printf(" unused fields in model: %s\n", strings.Join(unusedFields, ", "))
 		}
 	}
 
@@ -92,6 +106,7 @@ func migrateTable(db dbIface, tableName string, adminStruct *StructCache, verbos
 		fmt.Printf(" %s\n", q)
 	}
 	_, err = db.Exec(q)
+
 	return err
 }
 
