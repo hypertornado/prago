@@ -219,7 +219,7 @@ func BindOrder(a *Admin, resource *Resource) {
 			prago.Must(resource.Save(item))
 		}
 
-		WriteApi(request, true, 200)
+		prago.WriteAPI(request, true, 200)
 	})
 }
 

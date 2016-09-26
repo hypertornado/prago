@@ -246,9 +246,7 @@ func writeFileResponse(request prago.Request, files []*File) {
 
 		responseData = append(responseData, ir)
 	}
-
-	WriteApi(request, responseData, 200)
-
+	prago.WriteAPI(request, responseData, 200)
 }
 
 func BindImageAPI(a *Admin, fileDownloadPath string) {

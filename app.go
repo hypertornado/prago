@@ -20,7 +20,6 @@ type App struct {
 	Port               int
 	StartedAt          time.Time
 	data               map[string]interface{}
-	events             *Events
 	requestMiddlewares []RequestMiddleware
 	middlewares        []Middleware
 	kingpin            *kingpin.Application
@@ -35,7 +34,6 @@ type RequestMiddleware func(Request, func())
 func NewApp(appName, version string) *App {
 	app := &App{
 		data:               make(map[string]interface{}),
-		events:             NewEvents(),
 		requestMiddlewares: []RequestMiddleware{},
 		middlewares:        []Middleware{},
 		dotPath:            os.Getenv("HOME") + "/." + appName,
