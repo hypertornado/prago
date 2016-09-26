@@ -17,7 +17,7 @@ func (m MiddlewareDevelopment) Init(app *prago.App) error {
 		if len(m.Settings.LessTarget) > 0 {
 			go developmentLess(m.Settings.LessDir, m.Settings.LessTarget)
 		}
-		return app.StartServer(defaultPort, true)
+		return app.ListenAndServe(defaultPort, true)
 
 	})
 	return nil
@@ -42,8 +42,6 @@ func developmentLess(sourcePath, targetPath string) {
 	p.Add(workflow)
 	p.Start()
 }
-
-//func task
 
 type FuncCmd struct {
 	f func() error

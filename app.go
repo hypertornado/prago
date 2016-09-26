@@ -32,6 +32,7 @@ type App struct {
 
 type requestMiddleware func(Request, func())
 
+//NewApp creates App structure for prago app
 func NewApp(appName, version string) *App {
 	app := &App{
 		data:               make(map[string]interface{}),
@@ -53,52 +54,59 @@ func NewApp(appName, version string) *App {
 	app.AddMiddleware(MiddlewareParseRequest)
 	app.AddMiddleware(MiddlewareView{})
 	app.AddMiddleware(MiddlewareDispatcher{})
-
 	return app
 }
 
-func (a *App) Log() *logrus.Logger { return a.logger }
-func (a *App) DotPath() string     { return a.dotPath }
+//Log returns logger structure
+func (app *App) Log() *logrus.Logger { return app.logger }
 
-func (a *App) AddCommand(cmd *kingpin.CmdClause, fn func(app *App) error) {
-	a.commands[cmd] = fn
+//DotPath returns path to hidden directory with app configuration and data
+func (app *App) DotPath() string { return app.dotPath }
+
+//CreateCommand creates command for command line
+func (app *App) CreateCommand(name, description string) *kingpin.CmdClause {
+	return app.kingpin.Command(name, description)
 }
 
-func (a *App) CreateCommand(name, description string) *kingpin.CmdClause {
-	return a.kingpin.Command(name, description)
+//AddCommand adds function for command line command
+func (app *App) AddCommand(cmd *kingpin.CmdClause, fn func(a *App) error) {
+	app.commands[cmd] = fn
 }
 
-func (a *App) AddMiddleware(m Middleware) {
-	a.middlewares = append(a.middlewares, m)
+//AddMiddleware adds optional middlewares
+func (app *App) AddMiddleware(m Middleware) {
+	app.middlewares = append(app.middlewares, m)
 }
 
-func (a *App) Data() map[string]interface{} {
-	return a.data
+//Data returns map of all app data
+func (app *App) Data() map[string]interface{} {
+	return app.data
 }
 
-func (a *App) initMiddlewares() error {
-	for _, middleware := range a.middlewares {
-		if err := middleware.Init(a); err != nil {
+func (app *App) initMiddlewares() error {
+	for _, middleware := range app.middlewares {
+		if err := middleware.Init(app); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (a *App) Init() error {
-	err := a.initMiddlewares()
+//Init runs all middleware init function
+func (app *App) Init() error {
+	err := app.initMiddlewares()
 	if err != nil {
 		return err
 	}
 
-	commandName, err := a.kingpin.Parse(os.Args[1:])
+	commandName, err := app.kingpin.Parse(os.Args[1:])
 	if err != nil {
 		return err
 	}
 
-	for command, fn := range a.commands {
+	for command, fn := range app.commands {
 		if command.FullCommand() == commandName {
-			return fn(a)
+			return fn(app)
 		}
 	}
 
@@ -117,6 +125,7 @@ func (app *App) route(m method, path string, controller *Controller, action func
 	return nil
 }
 
+//ListenAndServe starts server on port
 func (app *App) ListenAndServe(port int, developmentMode bool) error {
 	app.DevelopmentMode = developmentMode
 	app.Port = port

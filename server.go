@@ -30,7 +30,7 @@ func (m MiddlewareCmd) Init(app *App) error {
 				}
 			}
 		}
-		return app.StartServer(port, *developmentMode)
+		return app.ListenAndServe(port, *developmentMode)
 	}
 	return nil
 }
@@ -40,8 +40,4 @@ type MiddlewareServer struct{ Fn func(*App) }
 func (mr MiddlewareServer) Init(app *App) error {
 	mr.Fn(app)
 	return nil
-}
-
-func (a *App) StartServer(port int, developmentMode bool) error {
-	return a.ListenAndServe(port, developmentMode)
 }
