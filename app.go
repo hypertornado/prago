@@ -104,7 +104,7 @@ func (a *App) Init() error {
 	return errors.New("command not found: " + commandName)
 }
 
-func (app *App) Route(m method, path string, controller *Controller, action func(p Request), constraints ...Constraint) error {
+func (app *App) route(m method, path string, controller *Controller, action func(p Request), constraints ...Constraint) error {
 	router := app.data["router"].(*router)
 	if router == nil {
 		return errors.New("couldnt find router")

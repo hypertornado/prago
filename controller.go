@@ -86,17 +86,17 @@ func (c *Controller) callArounds(p Request, i int, finalFunc func(), down bool) 
 }
 
 func (c *Controller) Get(path string, action func(p Request), constraints ...Constraint) {
-	c.app.Route(get, path, c, action, constraints...)
+	c.app.route(get, path, c, action, constraints...)
 }
 
 func (c *Controller) Post(path string, action func(p Request), constraints ...Constraint) {
-	c.app.Route(post, path, c, action, constraints...)
+	c.app.route(post, path, c, action, constraints...)
 }
 
 func (c *Controller) Put(path string, action func(p Request), constraints ...Constraint) {
-	c.app.Route(put, path, c, action, constraints...)
+	c.app.route(put, path, c, action, constraints...)
 }
 
 func (c *Controller) Delete(path string, action func(p Request), constraints ...Constraint) {
-	c.app.Route(del, path, c, action, constraints...)
+	c.app.route(del, path, c, action, constraints...)
 }
