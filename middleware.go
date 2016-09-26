@@ -6,19 +6,19 @@ import (
 )
 
 var (
-	MiddlewareRemoveTrailingSlash = requestMiddleware{requestMiddlewareRemoveTrailingSlash}
-	MiddlewareParseRequest        = requestMiddleware{requestMiddlewareParseRequest}
+	MiddlewareRemoveTrailingSlash = getMiddleware{requestMiddlewareRemoveTrailingSlash}
+	MiddlewareParseRequest        = getMiddleware{requestMiddlewareParseRequest}
 )
 
 type Middleware interface {
 	Init(*App) error
 }
 
-type requestMiddleware struct {
-	rm RequestMiddleware
+type getMiddleware struct {
+	rm requestMiddleware
 }
 
-func (m requestMiddleware) Init(app *App) error {
+func (m getMiddleware) Init(app *App) error {
 	app.requestMiddlewares = append(app.requestMiddlewares, m.rm)
 	return nil
 }

@@ -15,12 +15,13 @@ import (
 
 var loggerMiddleware = &MiddlewareLogger{}
 
+//App is main struct of prago application
 type App struct {
 	DevelopmentMode    bool
 	Port               int
 	StartedAt          time.Time
 	data               map[string]interface{}
-	requestMiddlewares []RequestMiddleware
+	requestMiddlewares []requestMiddleware
 	middlewares        []Middleware
 	kingpin            *kingpin.Application
 	commands           map[*kingpin.CmdClause]func(app *App) error
@@ -29,12 +30,12 @@ type App struct {
 	cron               *cron
 }
 
-type RequestMiddleware func(Request, func())
+type requestMiddleware func(Request, func())
 
 func NewApp(appName, version string) *App {
 	app := &App{
 		data:               make(map[string]interface{}),
-		requestMiddlewares: []RequestMiddleware{},
+		requestMiddlewares: []requestMiddleware{},
 		middlewares:        []Middleware{},
 		dotPath:            os.Getenv("HOME") + "/." + appName,
 	}
@@ -179,7 +180,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request, app *App) {
 	callRequestMiddlewares(request, app.requestMiddlewares)
 }
 
-func callRequestMiddlewares(request Request, middlewares []RequestMiddleware) {
+func callRequestMiddlewares(request Request, middlewares []requestMiddleware) {
 	f := func() {}
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		j := i
