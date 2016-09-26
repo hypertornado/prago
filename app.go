@@ -104,22 +104,22 @@ func (a *App) Init() error {
 	return errors.New("command not found: " + commandName)
 }
 
-func (a *App) Route(m method, path string, controller *Controller, action func(p Request), constraints ...Constraint) error {
-	router := a.data["router"].(*Router)
+func (app *App) Route(m method, path string, controller *Controller, action func(p Request), constraints ...Constraint) error {
+	router := app.data["router"].(*router)
 	if router == nil {
 		return errors.New("couldnt find router")
 	}
 
 	bindedAction := controller.NewAction(action)
-	route := NewRoute(m, path, bindedAction, constraints)
-	router.AddRoute(route)
+	route := newRoute(m, path, bindedAction, constraints)
+	router.addRoute(route)
 	return nil
 }
 
-func (a *App) ListenAndServe(port int, developmentMode bool) error {
-	a.DevelopmentMode = developmentMode
-	a.Port = port
-	a.StartedAt = time.Now()
+func (app *App) ListenAndServe(port int, developmentMode bool) error {
+	app.DevelopmentMode = developmentMode
+	app.Port = port
+	app.StartedAt = time.Now()
 
 	if developmentMode {
 		loggerMiddleware.setStdOut()
@@ -127,21 +127,21 @@ func (a *App) ListenAndServe(port int, developmentMode bool) error {
 
 	server := &http.Server{
 		Addr:           ":" + strconv.Itoa(port),
-		Handler:        a,
+		Handler:        app,
 		ReadTimeout:    2 * time.Minute,
 		WriteTimeout:   2 * time.Minute,
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	a.writeStartInfo()
+	app.writeStartInfo()
 	return server.ListenAndServe()
 }
 
-func (a *App) writeStartInfo() error {
+func (app *App) writeStartInfo() error {
 	pid := os.Getpid()
 
 	err := ioutil.WriteFile(
-		a.dotPath+"/last.pid",
+		app.dotPath+"/last.pid",
 		[]byte(fmt.Sprintf("%d", pid)),
 		0777,
 	)
@@ -150,14 +150,14 @@ func (a *App) writeStartInfo() error {
 	}
 
 	developmentModeStr := "false"
-	if a.DevelopmentMode {
+	if app.DevelopmentMode {
 		developmentModeStr = "true"
 	}
-	fmt.Printf("Server started\nport: %d\npid: %d\ndevelopment mode: %s\n", a.Port, pid, developmentModeStr)
+	fmt.Printf("Server started\nport: %d\npid: %d\ndevelopment mode: %s\n", app.Port, pid, developmentModeStr)
 
-	a.Log().WithField("port", a.Port).
+	app.Log().WithField("port", app.Port).
 		WithField("pid", pid).
-		WithField("development mode", a.DevelopmentMode).
+		WithField("development mode", app.DevelopmentMode).
 		Info("Server started")
 
 	return nil

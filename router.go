@@ -18,17 +18,17 @@ const (
 )
 
 type MiddlewareDispatcher struct {
-	router *Router
+	router *router
 }
 
 func (m MiddlewareDispatcher) Init(app *App) error {
-	m.router = NewRouter()
+	m.router = newRouter()
 	app.data["router"] = m.router
 	app.requestMiddlewares = append(app.requestMiddlewares, m.requestMiddlewareDispatcher)
 
 	routerCommand := app.CreateCommand("routes", "Show routes")
 	app.AddCommand(routerCommand, func(app *App) error {
-		m.router.Print()
+		m.router.print()
 		return nil
 	})
 
@@ -40,24 +40,24 @@ func (m MiddlewareDispatcher) requestMiddlewareDispatcher(p Request, next func()
 		return
 	}
 
-	m.router.Process(p)
+	m.router.process(p)
 
 	next()
 }
 
-type Router struct {
-	routes []*Route
+type router struct {
+	routes []*route
 }
 
-func NewRouter() *Router {
-	return &Router{[]*Route{}}
+func newRouter() *router {
+	return &router{[]*route{}}
 }
 
-func (r *Router) AddRoute(route *Route) {
+func (r *router) addRoute(route *route) {
 	r.routes = append(r.routes, route)
 }
 
-func (r *Router) Process(request Request) {
+func (r *router) process(request Request) {
 	for _, route := range r.routes {
 		params, match := route.match(request.Request().Method, request.Request().URL.Path)
 		if match {
@@ -70,13 +70,13 @@ func (r *Router) Process(request Request) {
 	}
 }
 
-func (r *Router) Print() {
+func (r *router) print() {
 	for _, v := range r.routes {
 		fmt.Printf("%s %s\n", v.method, v.path)
 	}
 }
 
-type Route struct {
+type route struct {
 	method      string
 	path        string
 	constraints []Constraint
@@ -144,7 +144,7 @@ func matcherStarMiddle(route string) pathMatcherFn {
 	}
 }
 
-func NewRoute(m method, path string, action *Action, constraints []Constraint) (route *Route) {
+func newRoute(m method, path string, action *Action, constraints []Constraint) (ret *route) {
 	methodName := map[method]string{
 		GET:    "GET",
 		HEAD:   "HEAD",
@@ -154,7 +154,7 @@ func NewRoute(m method, path string, action *Action, constraints []Constraint) (
 		ANY:    "ANY",
 	}
 
-	route = &Route{
+	ret = &route{
 		method:      methodName[m],
 		path:        path,
 		constraints: constraints,
@@ -162,10 +162,10 @@ func NewRoute(m method, path string, action *Action, constraints []Constraint) (
 	}
 
 	for _, v := range []func(string) pathMatcherFn{matcherStar, matcherStarMiddle, matcherBasic} {
-		if route.pathMatcher != nil {
+		if ret.pathMatcher != nil {
 			break
 		}
-		route.pathMatcher = v(path)
+		ret.pathMatcher = v(path)
 	}
 	return
 }
@@ -202,7 +202,7 @@ func ConstraintRegexp(item string, reg *regexp.Regexp) func(map[string]string) b
 	}
 }
 
-func (r *Route) match(method, path string) (map[string]string, bool) {
+func (r *route) match(method, path string) (map[string]string, bool) {
 	if !methodMatch(r.method, method) {
 		return nil, false
 	}
