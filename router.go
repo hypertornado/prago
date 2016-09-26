@@ -9,12 +9,12 @@ import (
 type method int
 
 const (
-	GET method = iota
-	HEAD
-	POST
-	PUT
-	DELETE
-	ANY
+	get method = iota
+	head
+	post
+	put
+	del
+	any
 )
 
 type MiddlewareDispatcher struct {
@@ -146,12 +146,12 @@ func matcherStarMiddle(route string) pathMatcherFn {
 
 func newRoute(m method, path string, action *Action, constraints []Constraint) (ret *route) {
 	methodName := map[method]string{
-		GET:    "GET",
-		HEAD:   "HEAD",
-		POST:   "POST",
-		PUT:    "PUT",
-		DELETE: "DELETE",
-		ANY:    "ANY",
+		get:  "GET",
+		head: "HEAD",
+		post: "POST",
+		put:  "PUT",
+		del:  "DELETE",
+		any:  "ANY",
 	}
 
 	ret = &route{
