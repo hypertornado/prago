@@ -9,6 +9,7 @@ import (
 	"os/exec"
 )
 
+//TODO: remove this in all projects
 type Gorm struct {
 	DB gorm.DB
 }
@@ -24,7 +25,6 @@ func (g *Gorm) Init(app *prago.App) error {
 
 	dumpCommand := app.CreateCommand("dump", "Dump database")
 	app.AddCommand(dumpCommand, func(app *prago.App) error {
-
 		cmd := exec.Command("mysqldump", "-u"+user, "-p"+password, dbName)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
