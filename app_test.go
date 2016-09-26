@@ -13,11 +13,11 @@ func TestApp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	app.Route(get, "/h", app.MainController(), func(request Request) {
+	app.route(get, "/h", app.MainController(), func(request Request) {
 		request.SetData("body", []byte("hello"))
 	})
 
-	app.Route(get, "*some", app.MainController(), func(request Request) {
+	app.route(get, "*some", app.MainController(), func(request Request) {
 		s := request.Params().Get("some")
 		request.SetData("body", []byte("star "+s))
 	})
