@@ -194,12 +194,13 @@ func callRequestMiddlewares(request Request, middlewares []RequestMiddleware) {
 }
 
 func recoveryFromServerError(p Request, recoveryData interface{}) {
-	p.Response().WriteHeader(500)
-
 	if p.App().DevelopmentMode {
+		p.Response().Header().Set("Content-Type", "text/plain")
+		p.Response().WriteHeader(500)
 		p.Response().Write([]byte(fmt.Sprintf("500 - error\n%s\nstack:\n", recoveryData)))
 		p.Response().Write(debug.Stack())
 	} else {
+		p.Response().WriteHeader(500)
 		p.Response().Write([]byte("We are sorry, some error occured. (500)"))
 	}
 	p.Log().Errorln(fmt.Sprintf("500 - error\n%s\nstack:\n", recoveryData))
