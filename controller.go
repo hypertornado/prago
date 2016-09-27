@@ -22,7 +22,7 @@ func newMainController(app *App) *Controller {
 	}
 }
 
-func (c *Controller) SubController() (controller *Controller) {
+func (c *Controller) SubController() *Controller {
 	return &Controller{
 		parent:        c,
 		app:           c.app,
@@ -46,21 +46,6 @@ func (c *Controller) AddAfterAction(fn func(p Request)) {
 
 func (c *Controller) AddAroundAction(fn func(p Request, next func())) {
 	c.aroundActions = append(c.aroundActions, fn)
-}
-
-type Action struct {
-	controller *Controller
-	fn         func(p Request)
-}
-
-func (c *Controller) NewAction(fn func(p Request)) *Action {
-	return &Action{c, fn}
-}
-
-func (a *Action) call(p Request) {
-	a.controller.callArounds(p, 0, func() {
-		a.fn(p)
-	}, true)
 }
 
 func (c *Controller) callArounds(p Request, i int, finalFunc func(), down bool) {

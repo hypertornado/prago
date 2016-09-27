@@ -5,7 +5,7 @@ import (
 )
 
 func TestRouterNormal(t *testing.T) {
-	r := newRoute(post, "/a/:id/:name/aa", nil, []Constraint{})
+	r := newRoute(post, "/a/:id/:name/aa", nil, nil, []Constraint{})
 	params, ok := r.match("POST", "/a/123/ondra/aa")
 	if ok != true {
 		t.Fatal(ok)
@@ -20,7 +20,7 @@ func TestRouterNormal(t *testing.T) {
 		t.Fatal(len(params))
 	}
 
-	r = newRoute(get, "/a/:id/:name/aa", nil, []Constraint{})
+	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []Constraint{})
 	_, ok = r.match("POST", "/a/123/ondra/aa")
 	if ok != false {
 		t.Fatal(ok)
@@ -47,7 +47,7 @@ func TestRouterNormal(t *testing.T) {
 		return true
 	}
 
-	r = newRoute(get, "/a/:id/:name/aa", nil, []Constraint{constraint})
+	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []Constraint{constraint})
 
 	_, ok = r.match("GET", "/a/123/ondra/aa")
 	if ok != true {
@@ -59,7 +59,7 @@ func TestRouterNormal(t *testing.T) {
 	}
 
 	constraint = ConstraintInt("id")
-	r = newRoute(get, "/a/:id/:name/aa", nil, []Constraint{constraint})
+	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []Constraint{constraint})
 	_, ok = r.match("GET", "/a/123/ondra/aa")
 	if ok != true {
 		t.Fatal(ok)
@@ -74,7 +74,7 @@ func TestRouterNormal(t *testing.T) {
 	}
 
 	constraint = ConstraintWhitelist("name", []string{"ondra", "pepa"})
-	r = newRoute(get, "/a/:id/:name/aa", nil, []Constraint{constraint})
+	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []Constraint{constraint})
 
 	_, ok = r.match("GET", "/a/123/ondra/aa")
 	if ok != true {
@@ -87,7 +87,7 @@ func TestRouterNormal(t *testing.T) {
 }
 
 func TestRouterFallback(t *testing.T) {
-	r := newRoute(get, "*some", nil, []Constraint{})
+	r := newRoute(get, "*some", nil, nil, []Constraint{})
 	params, ok := r.match("GET", "/XXX")
 	if ok != true {
 		t.Fatal(ok)
@@ -96,7 +96,7 @@ func TestRouterFallback(t *testing.T) {
 		t.Fatal(params["some"])
 	}
 
-	r = newRoute(get, "/a/b/*some", nil, []Constraint{})
+	r = newRoute(get, "/a/b/*some", nil, nil, []Constraint{})
 	params, ok = r.match("GET", "/a/b/c/d")
 	if ok != true {
 		t.Fatal(ok)
@@ -108,7 +108,7 @@ func TestRouterFallback(t *testing.T) {
 }
 
 func TestRouterAny(t *testing.T) {
-	r := newRoute(any, "/hello", nil, []Constraint{})
+	r := newRoute(any, "/hello", nil, nil, []Constraint{})
 	_, ok := r.match("GET", "/hello")
 	if ok != true {
 		t.Fatal(ok)

@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var loggerMiddleware = &MiddlewareLogger{}
+var loggerMiddleware = &middlewareLogger{}
 
 //App is main struct of prago application
 type App struct {
@@ -47,7 +47,7 @@ func NewApp(appName, version string) *App {
 	app.cron = newCron()
 
 	app.AddMiddleware(MiddlewareCmd{})
-	app.AddMiddleware(MiddlewareConfig{})
+	app.AddMiddleware(middlewareConfig{})
 	app.AddMiddleware(loggerMiddleware)
 	app.AddMiddleware(MiddlewareRemoveTrailingSlash)
 	app.AddMiddleware(MiddlewareStatic{})
@@ -113,14 +113,13 @@ func (app *App) Init() error {
 	return errors.New("command not found: " + commandName)
 }
 
-func (app *App) route(m method, path string, controller *Controller, action func(p Request), constraints ...Constraint) error {
+func (app *App) route(m method, path string, controller *Controller, routeAction func(p Request), constraints ...Constraint) error {
 	router := app.data["router"].(*router)
 	if router == nil {
 		return errors.New("couldnt find router")
 	}
 
-	bindedAction := controller.NewAction(action)
-	route := newRoute(m, path, bindedAction, constraints)
+	route := newRoute(m, path, controller, routeAction, constraints)
 	router.addRoute(route)
 	return nil
 }

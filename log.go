@@ -7,12 +7,12 @@ import (
 	"time"
 )
 
-type MiddlewareLogger struct {
+type middlewareLogger struct {
 	file   *os.File
 	logger *logrus.Logger
 }
 
-func (m *MiddlewareLogger) Init(app *App) error {
+func (m *middlewareLogger) Init(app *App) error {
 	var err error
 
 	err = os.Mkdir(app.dotPath+"/log", 0777)
@@ -51,7 +51,7 @@ func (m *MiddlewareLogger) Init(app *App) error {
 	return nil
 }
 
-func (m *MiddlewareLogger) setStdOut() {
+func (m *middlewareLogger) setStdOut() {
 	if m.file != nil {
 		m.logger.Out = os.Stdout
 		m.file.Close()
@@ -59,7 +59,7 @@ func (m *MiddlewareLogger) setStdOut() {
 	}
 }
 
-func (m *MiddlewareLogger) removeLogFiles(app *App, deadline time.Time) {
+func (m *middlewareLogger) removeLogFiles(app *App, deadline time.Time) {
 	logPath := app.dotPath + "/log"
 	files, err := ioutil.ReadDir(logPath)
 	if err != nil {
@@ -78,7 +78,7 @@ func (m *MiddlewareLogger) removeLogFiles(app *App, deadline time.Time) {
 	}
 }
 
-func (m *MiddlewareLogger) openLogFile(app *App) (file *os.File) {
+func (m *middlewareLogger) openLogFile(app *App) (file *os.File) {
 	var err error
 
 	logPath := app.dotPath + "/log/" + time.Now().Format("2006_01_02_15_04_05") + ".log"

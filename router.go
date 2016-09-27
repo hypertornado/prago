@@ -64,7 +64,11 @@ func (r *router) process(request Request) {
 			for k, v := range params {
 				request.Params().Add(k, v)
 			}
-			route.action.call(request)
+
+			route.controller.callArounds(request, 0, func() {
+				route.fn(request)
+			}, true)
+
 			return
 		}
 	}
@@ -80,8 +84,9 @@ type route struct {
 	method      string
 	path        string
 	constraints []Constraint
-	action      *Action
 	pathMatcher pathMatcherFn
+	controller  *Controller
+	fn          func(p Request)
 }
 
 type pathMatcherFn func(string) (map[string]string, bool)
@@ -144,7 +149,7 @@ func matcherStarMiddle(route string) pathMatcherFn {
 	}
 }
 
-func newRoute(m method, path string, action *Action, constraints []Constraint) (ret *route) {
+func newRoute(m method, path string, controller *Controller, fn func(p Request), constraints []Constraint) (ret *route) {
 	methodName := map[method]string{
 		get:  "GET",
 		head: "HEAD",
@@ -158,7 +163,8 @@ func newRoute(m method, path string, action *Action, constraints []Constraint) (
 		method:      methodName[m],
 		path:        path,
 		constraints: constraints,
-		action:      action,
+		controller:  controller,
+		fn:          fn,
 	}
 
 	for _, v := range []func(string) pathMatcherFn{matcherStar, matcherStarMiddle, matcherBasic} {

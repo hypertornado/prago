@@ -9,13 +9,13 @@ import (
 	"sort"
 )
 
-type MiddlewareConfig struct{}
+type middlewareConfig struct{}
 
-func (m MiddlewareConfig) Init(app *App) error {
+func (m middlewareConfig) Init(app *App) error {
 	path := os.Getenv("HOME") + "/." + app.data["appName"].(string) + "/config.json"
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error while opening file %s: %s", path, err))
+		return fmt.Errorf("Error while opening file %s: %s", path, err)
 	}
 
 	kv := make(map[string]interface{})
@@ -37,13 +37,15 @@ func (m MiddlewareConfig) Init(app *App) error {
 	return nil
 }
 
+//Config manages data from configuration file
 type Config struct {
 	v map[string]interface{}
 }
 
+//Export outputs config data in human readable form
 func (c *Config) Export() [][2]string {
 	keys := []string{}
-	for k, _ := range c.v {
+	for k := range c.v {
 		keys = append(keys, k)
 	}
 	keySlice := sort.StringSlice(keys)
@@ -57,6 +59,7 @@ func (c *Config) Export() [][2]string {
 	return ret
 }
 
+//Get returns config item
 func (c *Config) Get(name string) (interface{}, error) {
 	val, ok := c.v[name]
 	if ok {
@@ -65,6 +68,8 @@ func (c *Config) Get(name string) (interface{}, error) {
 	return nil, errors.New("Item in config not found")
 }
 
+//GetString returns config string item
+//panics when item is not set or not a string
 func (c *Config) GetString(name string) string {
 	item, err := c.Get(name)
 	if err != nil {
@@ -77,6 +82,7 @@ func (c *Config) GetString(name string) string {
 	return str
 }
 
+//GetStringWithFallback returns config string with default fallback value
 func (c *Config) GetStringWithFallback(name, fallback string) string {
 	item, err := c.Get(name)
 	if err != nil {
@@ -89,6 +95,7 @@ func (c *Config) GetStringWithFallback(name, fallback string) string {
 	return str
 }
 
+//Config returns configuration from app data
 func (a *App) Config() *Config {
 	ret, ok := a.data["config"].(map[string]interface{})
 	if !ok {
