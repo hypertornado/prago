@@ -5,25 +5,28 @@ import (
 	"net/http"
 )
 
+//Must panics when error is not nil
 func Must(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
 
-func Redirect(request Request, urlStr string) {
-	request.Header().Set("Location", urlStr)
+//Redirect redirects request to new url
+func Redirect(request Request, url string) {
+	request.Header().Set("Location", url)
 	request.Response().WriteHeader(http.StatusFound)
 	request.SetProcessed()
 }
 
-func WriteAPI(r Request, data interface{}, code int) {
-	r.SetProcessed()
+//WriteAPI writes data as JSON response to request with http code
+func WriteAPI(request Request, data interface{}, code int) {
+	request.SetProcessed()
 
-	r.Response().Header().Add("Content-type", "application/json")
+	request.Response().Header().Add("Content-type", "application/json")
 
 	pretty := false
-	if r.Params().Get("pretty") == "true" {
+	if request.Params().Get("pretty") == "true" {
 		pretty = true
 	}
 
@@ -46,6 +49,6 @@ func WriteAPI(r Request, data interface{}, code int) {
 	if e != nil {
 		panic("error while generating JSON output")
 	}
-	r.Response().WriteHeader(code)
-	r.Response().Write(result)
+	request.Response().WriteHeader(code)
+	request.Response().Write(result)
 }
