@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+//Render outputs view of viewName with statusCode to request
 func Render(request Request, statusCode int, viewName string) {
 	templates, ok := request.App().data["templates"].(*template.Template)
 	if !ok {
@@ -25,9 +26,9 @@ func Render(request Request, statusCode int, viewName string) {
 	request.SetData("body", buf.Bytes())
 }
 
-type MiddlewareView struct{}
+type middlewareView struct{}
 
-func (m MiddlewareView) Init(app *App) error {
+func (m middlewareView) Init(app *App) error {
 	app.requestMiddlewares = append(app.requestMiddlewares, requestMiddlewareView)
 
 	templates := template.New("")
@@ -79,6 +80,7 @@ func requestMiddlewareView(p Request, next func()) {
 	p.SetProcessed()
 }
 
+//GetTemplates return app's html templates
 func (app *App) GetTemplates() (*template.Template, template.FuncMap, error) {
 	templates, ok := app.data["templates"].(*template.Template)
 	if !ok {
@@ -92,6 +94,7 @@ func (app *App) GetTemplates() (*template.Template, template.FuncMap, error) {
 	return templates, templateFuncs, nil
 }
 
+//LoadTemplatePath loads app's html templates from path pattern
 func (app *App) LoadTemplatePath(pattern string) (err error) {
 	templates, templateFuncs, err := app.GetTemplates()
 	if err != nil {
@@ -108,6 +111,7 @@ func (app *App) LoadTemplatePath(pattern string) (err error) {
 	return nil
 }
 
+//LoadTemplateFromString loads app's html templates from string
 func (app *App) LoadTemplateFromString(in string) (err error) {
 	templates, templateFuncs, err := app.GetTemplates()
 	if err != nil {
@@ -125,6 +129,7 @@ func (app *App) LoadTemplateFromString(in string) (err error) {
 
 }
 
+//AddTemplateFunction adds template function
 func (app *App) AddTemplateFunction(name string, f interface{}) (err error) {
 	_, templateFuncs, err := app.GetTemplates()
 	if err != nil {
