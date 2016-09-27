@@ -155,7 +155,7 @@ func TestAdminDBFirst(t *testing.T) {
 
 	var node *TestNode
 	err = getFirstItem(structCache, db, tableName, &node, &listQuery{})
-	if err != ErrorNotFound {
+	if err != ErrItemNotFound {
 		t.Fatal("wrong error")
 	}
 

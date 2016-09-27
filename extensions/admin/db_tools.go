@@ -329,7 +329,7 @@ func getFirstItem(structCache *StructCache, db dbIface, tableName string, item i
 		reflect.ValueOf(item).Elem().Set(val.Index(0))
 		return nil
 	} else {
-		return ErrorNotFound
+		return ErrItemNotFound
 	}
 }
 

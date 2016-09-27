@@ -261,7 +261,7 @@ func BindImageAPI(a *Admin, fileDownloadPath string) {
 				if err == nil {
 					images = append(images, &image)
 				} else {
-					if err != ErrorNotFound {
+					if err != ErrItemNotFound {
 						panic(err)
 					}
 				}

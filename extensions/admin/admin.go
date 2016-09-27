@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	ErrorNotFound = errors.New("ErrorNotFound")
+	ErrItemNotFound = errors.New("item not found")
 )
 
 type Admin struct {

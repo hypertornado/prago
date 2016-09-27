@@ -75,18 +75,18 @@ func (resource *Resource) GetList(lang string, path string, requestQuery url.Val
 	}
 
 	if wasSomeOrderSet && isDefaultOrder {
-		err = ErrorNotFound
+		err = ErrItemNotFound
 		return
 	}
 
 	orderField, ok := resource.StructCache.fieldMap[orderItem]
 	if !ok || !orderField.CanOrder {
-		err = ErrorNotFound
+		err = ErrItemNotFound
 		return
 	}
 
 	if (orderItem != resource.OrderByColumn) && !orderField.canShow() {
-		err = ErrorNotFound
+		err = ErrItemNotFound
 		return
 	}
 

@@ -383,7 +383,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		var user User
 		err := a.Query().WhereIs("email", email).Get(&user)
 		if err != nil {
-			if err == ErrorNotFound {
+			if err == ErrItemNotFound {
 				prago.Must(session.Save(request.Request(), request.Response()))
 				renderLogin(request, form, locale)
 				return
