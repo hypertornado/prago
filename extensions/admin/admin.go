@@ -172,8 +172,8 @@ func (a *Admin) Init(app *prago.App) error {
 	a.AdminController = a.AdminAccessController.SubController()
 
 	bindDBBackupCron(app)
-	BindMarkdownAPI(a)
-	BindListResourceAPI(a)
+	bindMarkdownAPI(a)
+	bindListResourceAPI(a)
 
 	var err error
 

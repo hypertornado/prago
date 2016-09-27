@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func BindMarkdownAPI(a *Admin) {
+func bindMarkdownAPI(a *Admin) {
 	a.AdminController.Post(a.Prefix+"/_api/markdown", func(request prago.Request) {
 		data, err := ioutil.ReadAll(request.Request().Body)
 		if err != nil {
@@ -22,7 +22,7 @@ type resourceItem struct {
 	Name string `json:"name"`
 }
 
-func BindListResourceAPI(a *Admin) {
+func bindListResourceAPI(a *Admin) {
 	a.AdminController.Get(a.Prefix+"/_api/resource/:name", func(request prago.Request) {
 		locale := GetLocale(request)
 		user := GetUser(request)
