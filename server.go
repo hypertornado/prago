@@ -26,7 +26,7 @@ func (m middlewareCmd) Init(app *App) error {
 			if err == nil {
 				port, err = strconv.Atoi(configPort.(string))
 				if err != nil {
-					return errors.New("Wrong format of 'port' entry in config file. Should be int.")
+					return errors.New("wrong format of 'port' entry in config file, should be int")
 				}
 			}
 		}

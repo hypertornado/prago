@@ -84,12 +84,12 @@ func requestMiddlewareView(p Request, next func()) {
 func (app *App) GetTemplates() (*template.Template, template.FuncMap, error) {
 	templates, ok := app.data["templates"].(*template.Template)
 	if !ok {
-		return nil, nil, errors.New("Templates not initialized")
+		return nil, nil, errors.New("templates not initialized")
 	}
 
 	templateFuncs, ok := app.data["templateFuncs"].(template.FuncMap)
 	if !ok {
-		return nil, nil, errors.New("Template function maps not initialized")
+		return nil, nil, errors.New("template function maps not initialized")
 	}
 	return templates, templateFuncs, nil
 }

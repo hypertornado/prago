@@ -1,3 +1,4 @@
+//Package prago is MVC framework for go
 package prago
 
 import (

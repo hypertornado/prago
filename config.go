@@ -15,7 +15,7 @@ func (m middlewareConfig) Init(app *App) error {
 	path := os.Getenv("HOME") + "/." + app.data["appName"].(string) + "/config.json"
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("Error while opening file %s: %s", path, err)
+		return fmt.Errorf("error while opening file %s: %s", path, err)
 	}
 
 	kv := make(map[string]interface{})
@@ -65,7 +65,7 @@ func (c *Config) Get(name string) (interface{}, error) {
 	if ok {
 		return val, nil
 	}
-	return nil, errors.New("Item in config not found")
+	return nil, errors.New("item in config not found")
 }
 
 //GetString returns config string item
@@ -73,11 +73,11 @@ func (c *Config) Get(name string) (interface{}, error) {
 func (c *Config) GetString(name string) string {
 	item, err := c.Get(name)
 	if err != nil {
-		panic(fmt.Sprintf("Error while getting '%s': %s", name, err.Error()))
+		panic(fmt.Sprintf("error while getting '%s': %s", name, err.Error()))
 	}
 	str, ok := item.(string)
 	if !ok {
-		panic("Config item is not string")
+		panic("config item is not string")
 	}
 	return str
 }
