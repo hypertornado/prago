@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-var ErrorWrongWhereFormat = errors.New("Wrong Where Format")
+var ErrWrongWhereFormat = errors.New("wrong Where Format")
 
 type ResourceQuery struct {
 	query       *listQuery
@@ -23,7 +23,7 @@ func (q *listQuery) where(data ...interface{}) error {
 	var err error
 
 	if len(data) == 0 {
-		return ErrorWrongWhereFormat
+		return ErrWrongWhereFormat
 	}
 	if len(data) == 1 {
 		whereString, whereParams, err = q.whereSingle(data[0])
@@ -33,7 +33,7 @@ func (q *listQuery) where(data ...interface{}) error {
 	} else {
 		first, ok := data[0].(string)
 		if !ok {
-			return ErrorWrongWhereFormat
+			return ErrWrongWhereFormat
 		}
 		whereString = first
 		whereParams = data[1:len(data)]
@@ -59,7 +59,7 @@ func (q *listQuery) whereSingle(data interface{}) (whereString string, wherePara
 	case map[string]interface{}:
 		whereString, whereParams = mapToDBQuery(data.(map[string]interface{}))
 	default:
-		err = ErrorWrongWhereFormat
+		err = ErrWrongWhereFormat
 	}
 	return
 }

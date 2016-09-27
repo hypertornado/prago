@@ -5,6 +5,14 @@ import (
 	"reflect"
 )
 
+//Query represents query to db
+type Query struct {
+	query *listQuery
+	admin *Admin
+	db    dbIface
+	err   error
+}
+
 //Create item in db
 func (a *Admin) Create(item interface{}) error {
 	resource, err := a.getResourceByItem(item)
@@ -30,14 +38,6 @@ func (a *Admin) Query() *Query {
 		admin: a,
 		db:    a.getDB(),
 	}
-}
-
-//Query represents query to db
-type Query struct {
-	query *listQuery
-	admin *Admin
-	db    dbIface
-	err   error
 }
 
 //Where adds where query
