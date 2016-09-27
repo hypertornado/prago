@@ -14,7 +14,7 @@ type ActionBinder func(a *Admin, resource *Resource)
 func BindList(a *Admin, resource *Resource) {
 	resource.ResourceController.Get(a.GetURL(resource, ""), func(request prago.Request) {
 
-		listData, err := resource.GetList(GetLocale(request), request.Request().URL.Path, request.Request().URL.Query())
+		listData, err := resource.getList(GetLocale(request), request.Request().URL.Path, request.Request().URL.Query())
 		if err != nil {
 			if err == ErrItemNotFound {
 				Render404(request)

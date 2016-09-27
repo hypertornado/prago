@@ -8,16 +8,16 @@ import (
 	"time"
 )
 
-type List struct {
-	Header     []ListHeader
-	Rows       []ListRow
-	Pagination Pagination
+type list struct {
+	Header     []listHeader
+	Rows       []listRow
+	Pagination pagination
 	Order      bool
 	HasDelete  bool
 	HasNew     bool
 }
 
-type ListHeader struct {
+type listHeader struct {
 	Name        string
 	NameHuman   string
 	CanOrder    bool
@@ -26,30 +26,30 @@ type ListHeader struct {
 	OrderPath   string
 }
 
-type ListRow struct {
+type listRow struct {
 	ID    int64
-	Items []ListCell
+	Items []listCell
 }
 
-type ListCell struct {
+type listCell struct {
 	TemplateName string
 	Value        string
-	Url          string
+	URL          string
 }
 
-type Pagination struct {
-	Prev  Page
-	Next  Page
-	Pages []Page
+type pagination struct {
+	Prev  page
+	Next  page
+	Pages []page
 }
 
-type Page struct {
+type page struct {
 	Name    string
-	Url     string
+	URL     string
 	Current bool
 }
 
-func (resource *Resource) GetList(lang string, path string, requestQuery url.Values) (list List, err error) {
+func (resource *Resource) getList(lang string, path string, requestQuery url.Values) (list list, err error) {
 	orderItem := resource.OrderByColumn
 	orderDesc := resource.OrderDesc
 	isDefaultOrder := true
@@ -126,24 +126,24 @@ func (resource *Resource) GetList(lang string, path string, requestQuery url.Val
 
 	if totalPages > 1 {
 		for i := int64(1); i <= totalPages; i++ {
-			p := Page{}
+			p := page{}
 			p.Name = fmt.Sprintf("%d", i)
 			if i == currentPage {
 				p.Current = true
 			}
 
-			p.Url = path
+			p.URL = path
 			if i > 1 {
-				newUrlValues := make(url.Values)
-				newUrlValues.Set("p", fmt.Sprintf("%d", i))
+				newURLValues := make(url.Values)
+				newURLValues.Set("p", fmt.Sprintf("%d", i))
 				if !isDefaultOrder {
 					if orderDesc {
-						newUrlValues.Set("orderdesc", orderItem)
+						newURLValues.Set("orderdesc", orderItem)
 					} else {
-						newUrlValues.Set("order", orderItem)
+						newURLValues.Set("order", orderItem)
 					}
 				}
-				p.Url += "?" + newUrlValues.Encode()
+				p.URL += "?" + newURLValues.Encode()
 			}
 
 			list.Pagination.Pages = append(list.Pagination.Pages, p)
@@ -157,7 +157,7 @@ func (resource *Resource) GetList(lang string, path string, requestQuery url.Val
 
 	for _, v := range resource.StructCache.fieldArrays {
 		if v.canShow() {
-			headerItem := ListHeader{
+			headerItem := listHeader{
 				Name:      v.Name,
 				NameHuman: v.humanName(lang),
 			}
@@ -174,22 +174,22 @@ func (resource *Resource) GetList(lang string, path string, requestQuery url.Val
 					}
 				}
 
-				newUrlValues := make(url.Values)
+				newURLValues := make(url.Values)
 				if currentPage > 1 {
-					newUrlValues.Set("p", fmt.Sprintf("%d", currentPage))
+					newURLValues.Set("p", fmt.Sprintf("%d", currentPage))
 				}
 
 				if !(v.ColumnName == resource.OrderByColumn && shouldOrderDesc == resource.OrderDesc) {
 					if shouldOrderDesc {
-						newUrlValues.Set("orderdesc", v.ColumnName)
+						newURLValues.Set("orderdesc", v.ColumnName)
 					} else {
-						newUrlValues.Set("order", v.ColumnName)
+						newURLValues.Set("order", v.ColumnName)
 					}
 				}
-				encodedValue := newUrlValues.Encode()
+				encodedValue := newURLValues.Encode()
 				headerItem.OrderPath = path
 				if encodedValue != "" {
-					headerItem.OrderPath += "?" + newUrlValues.Encode()
+					headerItem.OrderPath += "?" + newURLValues.Encode()
 				}
 			}
 
@@ -199,13 +199,13 @@ func (resource *Resource) GetList(lang string, path string, requestQuery url.Val
 
 	val := reflect.ValueOf(rowItems)
 	for i := 0; i < val.Len(); i++ {
-		row := ListRow{}
+		row := listRow{}
 		itemVal := val.Index(i).Elem()
 
 		for _, h := range list.Header {
 			structField, _ := resource.Typ.FieldByName(h.Name)
 			fieldVal := itemVal.FieldByName(h.Name)
-			row.Items = append(row.Items, resource.ValueToCell(structField, fieldVal))
+			row.Items = append(row.Items, resource.valueToCell(structField, fieldVal))
 		}
 		row.ID = itemVal.FieldByName("ID").Int()
 		list.Rows = append(list.Rows, row)
@@ -213,7 +213,7 @@ func (resource *Resource) GetList(lang string, path string, requestQuery url.Val
 	return
 }
 
-func (resource *Resource) ValueToCell(field reflect.StructField, val reflect.Value) (cell ListCell) {
+func (resource *Resource) valueToCell(field reflect.StructField, val reflect.Value) (cell listCell) {
 	cell.TemplateName = "admin_string"
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
@@ -240,7 +240,7 @@ func (resource *Resource) ValueToCell(field reflect.StructField, val reflect.Val
 			if ok {
 				cell.Value = ifaceItemName.AdminItemName("cs")
 				cell.TemplateName = "admin_link"
-				cell.Url = fmt.Sprintf("%s/%d", relationResource.ID, item.(int64))
+				cell.URL = fmt.Sprintf("%s/%d", relationResource.ID, item.(int64))
 				return
 			}
 
@@ -248,7 +248,7 @@ func (resource *Resource) ValueToCell(field reflect.StructField, val reflect.Val
 
 			cell.Value = nameField.String()
 			cell.TemplateName = "admin_link"
-			cell.Url = fmt.Sprintf("%s/%d", relationResource.ID, item.(int64))
+			cell.URL = fmt.Sprintf("%s/%d", relationResource.ID, item.(int64))
 			return
 		}
 	}
