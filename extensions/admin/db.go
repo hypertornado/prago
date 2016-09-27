@@ -6,6 +6,7 @@ import (
 	"reflect"
 )
 
+//Create item in db
 func (a *Admin) Create(item interface{}) error {
 	resource, err := a.getResourceByItem(item)
 	if err != nil {
@@ -14,6 +15,7 @@ func (a *Admin) Create(item interface{}) error {
 	return resource.Create(item)
 }
 
+//Save item to db
 func (a *Admin) Save(item interface{}) error {
 	resource, err := a.getResourceByItem(item)
 	if err != nil {
@@ -22,6 +24,7 @@ func (a *Admin) Save(item interface{}) error {
 	return resource.Save(item)
 }
 
+//Query item from db
 func (a *Admin) Query() *AdminQuery {
 	return &AdminQuery{
 		query: &listQuery{},
