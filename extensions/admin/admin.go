@@ -127,7 +127,7 @@ func (a *Admin) AddResource(resource *Resource) error {
 }
 
 func (a *Admin) GetResourceByName(name string) *Resource {
-	return a.resourceNameMap[utils.ColumnName(name)]
+	return a.resourceNameMap[ColumnName(name)]
 }
 
 func GetUser(request prago.Request) *User {
@@ -363,5 +363,8 @@ func bindDBBackupCron(app *prago.App) {
 	}, func(t time.Time) time.Time {
 		return t.Add(1 * time.Hour)
 	})
+}
 
+func ColumnName(fieldName string) string {
+	return utils.PrettyURL(fieldName)
 }

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/extensions/admin/messages"
-	"github.com/hypertornado/prago/utils"
 	"reflect"
 )
 
@@ -62,7 +61,7 @@ func NewResource(item interface{}) (*Resource, error) {
 	defaultName := typ.Name()
 	ret := &Resource{
 		Name:              func(string) string { return defaultName },
-		ID:                utils.ColumnName(defaultName),
+		ID:                ColumnName(defaultName),
 		Typ:               typ,
 		Authenticate:      AuthenticateAdmin,
 		Pagination:        100000,

@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/hypertornado/prago/utils"
 	"math"
 	"reflect"
 	"strings"
@@ -188,7 +187,7 @@ func (sc *StructCache) prepareValues(value reflect.Value) (names []string, quest
 			continue
 		}
 
-		names = append(names, "`"+utils.ColumnName(field.Name)+"`")
+		names = append(names, "`"+ColumnName(field.Name)+"`")
 		questionMarks = append(questionMarks, "?")
 	}
 	return

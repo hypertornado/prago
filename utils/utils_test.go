@@ -5,14 +5,14 @@ import (
 	"testing"
 )
 
-func TestPrettyUrl(t *testing.T) {
+func TestPrettyURL(t *testing.T) {
 
 	for _, v := range [][2]string{
 		{"hello", "hello"},
 		{"  Šíleně žluťoučký kůň úpěl   ďábelské ódy.  ", "silene-zlutoucky-kun-upel-dabelske-ody"},
 	} {
-		if PrettyUrl(v[0]) != v[1] {
-			t.Errorf("pretty url of '%s' is '%s' instead of '%s", v[0], PrettyUrl(v[0]), v[1])
+		if PrettyURL(v[0]) != v[1] {
+			t.Errorf("pretty url of '%s' is '%s' instead of '%s", v[0], PrettyURL(v[0]), v[1])
 		}
 	}
 }
