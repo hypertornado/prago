@@ -7,8 +7,10 @@ import (
 	"strconv"
 )
 
+//ActionBinder is function for binding actions
 type ActionBinder func(a *Admin, resource *Resource)
 
+//BindList is default list binder
 func BindList(a *Admin, resource *Resource) {
 	resource.ResourceController.Get(a.GetURL(resource, ""), func(request prago.Request) {
 
@@ -17,9 +19,8 @@ func BindList(a *Admin, resource *Resource) {
 			if err == ErrorNotFound {
 				Render404(request)
 				return
-			} else {
-				panic(err)
 			}
+			panic(err)
 		}
 
 		if resource.BeforeList != nil {
@@ -36,6 +37,7 @@ func BindList(a *Admin, resource *Resource) {
 	})
 }
 
+//BindNew is default new binder
 func BindNew(a *Admin, resource *Resource) {
 	resource.ResourceController.Get(a.GetURL(resource, "new"), func(request prago.Request) {
 		item, err := resource.NewItem()
@@ -68,6 +70,7 @@ func BindNew(a *Admin, resource *Resource) {
 	})
 }
 
+//BindCreate is default create binder
 func BindCreate(a *Admin, resource *Resource) {
 	resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
 		ValidateCSRF(request)
@@ -102,6 +105,7 @@ func BindCreate(a *Admin, resource *Resource) {
 	})
 }
 
+//BindDetail is default detail binder
 func BindDetail(a *Admin, resource *Resource) {
 	resource.ResourceController.Get(a.GetURL(resource, ":id"), func(request prago.Request) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
@@ -135,6 +139,7 @@ func BindDetail(a *Admin, resource *Resource) {
 	})
 }
 
+//BindUpdate is default update binder
 func BindUpdate(a *Admin, resource *Resource) {
 	resource.ResourceController.Post(a.GetURL(resource, ":id"), func(request prago.Request) {
 		ValidateCSRF(request)
@@ -174,6 +179,7 @@ func BindUpdate(a *Admin, resource *Resource) {
 	})
 }
 
+//BindDelete is default delete binder
 func BindDelete(a *Admin, resource *Resource) {
 	resource.ResourceController.Post(a.GetURL(resource, ":id/delete"), func(request prago.Request) {
 		ValidateCSRF(request)
@@ -200,6 +206,7 @@ func BindDelete(a *Admin, resource *Resource) {
 	})
 }
 
+//BindOrder is default order binder
 func BindOrder(a *Admin, resource *Resource) {
 	resource.ResourceController.Post(a.GetURL(resource, "order"), func(request prago.Request) {
 		decoder := json.NewDecoder(request.Request().Body)
@@ -223,6 +230,7 @@ func BindOrder(a *Admin, resource *Resource) {
 	})
 }
 
+//InitResourceDefault is default resource initializer
 func InitResourceDefault(a *Admin, resource *Resource) error {
 	if !resource.HasModel || !resource.HasView {
 		return nil
