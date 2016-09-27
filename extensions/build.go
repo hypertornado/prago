@@ -12,10 +12,12 @@ import (
 	"time"
 )
 
+//BuildMiddleware allows binary building and release
 type BuildMiddleware struct {
 	Copy [][2]string
 }
 
+//Init initializes build middleware
 func (b BuildMiddleware) Init(app *prago.App) error {
 
 	var version = app.Data()["version"].(string)
@@ -105,6 +107,7 @@ func (b BuildMiddleware) remote(appName, version, ssh string) error {
 	return cmd.Run()
 }
 
+//BackupApp backups whole app
 func BackupApp(app *prago.App) error {
 	app.Log().Println("Creating backup")
 
