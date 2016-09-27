@@ -74,7 +74,7 @@ func (ar *Resource) Save(item interface{}) error {
 
 func (ar *Resource) saveWithDBIface(item interface{}, db dbIface) error {
 	if !ar.HasModel {
-		return ErrorDontHaveModel
+		return ErrDontHaveModel
 	}
 
 	val := reflect.ValueOf(item).Elem()
@@ -93,7 +93,7 @@ func (ar *Resource) Create(item interface{}) error {
 
 func (ar *Resource) createWithDBIface(item interface{}, db dbIface) error {
 	if !ar.HasModel {
-		return ErrorDontHaveModel
+		return ErrDontHaveModel
 	}
 
 	val := reflect.ValueOf(item).Elem()
@@ -114,7 +114,7 @@ func (ar *Resource) createWithDBIface(item interface{}, db dbIface) error {
 func (ar *Resource) Query() *ResourceQuery {
 	var err error
 	if !ar.HasModel {
-		err = ErrorDontHaveModel
+		err = ErrDontHaveModel
 	}
 	return &ResourceQuery{
 		query:       &listQuery{},

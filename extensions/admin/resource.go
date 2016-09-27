@@ -9,9 +9,7 @@ import (
 	"reflect"
 )
 
-var (
-	ErrorDontHaveModel = errors.New("This resource does not have model")
-)
+var ErrDontHaveModel = errors.New("resource does not have model")
 
 type Action func(prago.Request, interface{}) bool
 

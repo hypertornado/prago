@@ -49,6 +49,11 @@ type page struct {
 	Current bool
 }
 
+//GetList of resource items
+func (resource *Resource) GetList(lang string, path string, requestQuery url.Values) (list list, err error) {
+	return resource.getList(lang, path, requestQuery)
+}
+
 func (resource *Resource) getList(lang string, path string, requestQuery url.Values) (list list, err error) {
 	orderItem := resource.OrderByColumn
 	orderDesc := resource.OrderDesc
