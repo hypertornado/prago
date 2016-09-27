@@ -359,6 +359,17 @@ func bindDBBackupCron(app *prago.App) {
 	})
 }
 
+//NewAdminMockup creates mockup of admin for testing purposes
+func NewAdminMockup(user, password, dbName string) (*Admin, error) {
+	db, err := extensions.ConnectMysql(user, password, dbName)
+	if err != nil {
+		return nil, err
+	}
+	admin := NewAdmin("test", "test")
+	admin.db = db
+	return admin, nil
+}
+
 func columnName(fieldName string) string {
 	return utils.PrettyURL(fieldName)
 }
