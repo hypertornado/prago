@@ -68,7 +68,7 @@ func (q *listQuery) addOrder(name string, desc bool) {
 	q.order = append(q.order, listQueryOrder{name: name, desc: desc})
 }
 
-func (ar *Resource) Save(item interface{}) error {
+func (ar *Resource) save(item interface{}) error {
 	return ar.saveWithDBIface(item, ar.admin.getDB())
 }
 

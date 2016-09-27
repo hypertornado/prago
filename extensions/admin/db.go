@@ -28,7 +28,7 @@ func (a *Admin) Save(item interface{}) error {
 	if err != nil {
 		return err
 	}
-	return resource.Save(item)
+	return resource.save(item)
 }
 
 //Query item from db

@@ -164,7 +164,7 @@ func BindUpdate(a *Admin, resource *Resource) {
 			}
 		}
 
-		err = resource.Save(item)
+		err = resource.save(item)
 		prago.Must(err)
 
 		if resource.AfterUpdate != nil {
@@ -222,7 +222,7 @@ func BindOrder(a *Admin, resource *Resource) {
 			item, err := resource.Query().Where(id).First()
 			prago.Must(err)
 			prago.Must(resource.StructCache.BindOrder(item, int64(i)))
-			prago.Must(resource.Save(item))
+			prago.Must(resource.save(item))
 		}
 
 		prago.WriteAPI(request, true, 200)
