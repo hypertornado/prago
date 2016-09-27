@@ -30,7 +30,7 @@ func bindListResourceAPI(a *Admin) {
 		resource := a.resourceNameMap[name]
 
 		if !resource.Authenticate(user) {
-			Render403(request)
+			render403(request)
 			return
 		}
 

@@ -55,7 +55,7 @@ func NewAdmin(prefix, name string) *Admin {
 
 //CreateResource creates new resource based on item
 func (a *Admin) CreateResource(item interface{}) (resource *Resource, err error) {
-	resource, err = NewResource(item)
+	resource, err = newResource(item)
 	if err != nil {
 		return
 	}
@@ -67,7 +67,7 @@ func (a *Admin) CreateResource(item interface{}) (resource *Resource, err error)
 func (a *Admin) UnsafeDropTables() error {
 	for _, resource := range a.Resources {
 		if resource.HasModel {
-			err := resource.UnsafeDropTable()
+			err := resource.unsafeDropTable()
 			if err != nil {
 				return err
 			}
@@ -243,7 +243,7 @@ func (a *Admin) Init(app *prago.App) error {
 	}
 
 	a.AdminController.Get(a.Prefix+"/*", func(request prago.Request) {
-		Render404(request)
+		render404(request)
 	})
 
 	return nil

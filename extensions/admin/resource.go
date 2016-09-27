@@ -9,8 +9,10 @@ import (
 	"reflect"
 )
 
+//ErrDontHaveModel is returned when item does not have a model
 var ErrDontHaveModel = errors.New("resource does not have model")
 
+//Action represents functions which can be added before or after admin operations
 type Action func(prago.Request, interface{}) bool
 
 type dbProvider interface {
@@ -18,6 +20,7 @@ type dbProvider interface {
 	getResourceByName(string) *Resource
 }
 
+//Resource is structure representing one item in admin menu or one table in database
 type Resource struct {
 	ID                 string
 	Name               func(string) string
@@ -49,7 +52,8 @@ type Resource struct {
 	AfterDelete  Action
 }
 
-func NewResource(item interface{}) (*Resource, error) {
+//TODO: inline this
+func newResource(item interface{}) (*Resource, error) {
 	structCache, err := NewStructCache(item)
 	if err != nil {
 		return nil, err
@@ -139,7 +143,7 @@ func (a *Admin) initResource(resource *Resource) error {
 	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
 		user := request.GetData("currentuser").(*User)
 		if !resource.Authenticate(user) {
-			Render403(request)
+			render403(request)
 		} else {
 			next()
 		}
@@ -162,7 +166,7 @@ func (a *Admin) getResourceByItem(item interface{}) (*Resource, error) {
 	typ := reflect.TypeOf(item).Elem()
 	resource, ok := a.resourceMap[typ]
 	if !ok {
-		return nil, errors.New(fmt.Sprintf("Can't find resource with type %s.", typ))
+		return nil, fmt.Errorf("Can't find resource with type %s.", typ)
 	}
 	return resource, nil
 }
@@ -175,7 +179,7 @@ func (ar *Resource) tableName() string {
 	return ar.table
 }
 
-func (ar *Resource) UnsafeDropTable() error {
+func (ar *Resource) unsafeDropTable() error {
 	return dropTable(ar.db(), ar.tableName())
 }
 
@@ -183,18 +187,17 @@ func (ar *Resource) migrate(verbose bool) error {
 	_, err := getTableDescription(ar.db(), ar.tableName())
 	if err == nil {
 		return migrateTable(ar.db(), ar.tableName(), ar.StructCache, verbose)
-	} else {
-		return createTable(ar.db(), ar.tableName(), ar.StructCache, verbose)
 	}
+	return createTable(ar.db(), ar.tableName(), ar.StructCache, verbose)
 }
 
-func Render403(request prago.Request) {
+func render403(request prago.Request) {
 	request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_403"))
 	request.SetData("admin_yield", "admin_message")
 	prago.Render(request, 403, "admin_layout")
 }
 
-func Render404(request prago.Request) {
+func render404(request prago.Request) {
 	request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_404"))
 	request.SetData("admin_yield", "admin_message")
 	prago.Render(request, 404, "admin_layout")

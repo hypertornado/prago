@@ -11,7 +11,7 @@ import (
 
 func stats(request prago.Request) {
 	if !AuthenticateSysadmin(GetUser(request)) {
-		Render403(request)
+		render403(request)
 		return
 	}
 

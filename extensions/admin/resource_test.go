@@ -19,10 +19,10 @@ type ResourceStruct struct {
 }
 
 func prepareResource() *Resource {
-	resource, _ := NewResource(ResourceStruct{})
+	resource, _ := newResource(ResourceStruct{})
 	resource.admin = dbTestProvider{}
 
-	resource.UnsafeDropTable()
+	resource.unsafeDropTable()
 	resource.migrate(false)
 	return resource
 }
@@ -72,10 +72,10 @@ func TestResourceUnique(t *testing.T) {
 		Name string `prago-unique:"true"`
 	}
 
-	resource, _ := NewResource(ResourceStructUnique{})
+	resource, _ := newResource(ResourceStructUnique{})
 	resource.admin = dbTestProvider{}
 
-	resource.UnsafeDropTable()
+	resource.unsafeDropTable()
 	resource.migrate(false)
 
 	resource.Create(&ResourceStructUnique{Name: "A"})
@@ -175,11 +175,11 @@ func TestShouldNotSaveWithZeroID(t *testing.T) {
 
 func TestShouldNotCreateResourceWithPointer(t *testing.T) {
 	var err error
-	_, err = NewResource(&ResourceStruct{})
+	_, err = newResource(&ResourceStruct{})
 	if err == nil {
 		t.Fatal("Should have non nil error")
 	}
-	_, err = NewResource(85)
+	_, err = newResource(85)
 	if err == nil {
 		t.Fatal("Should have non nil error")
 	}

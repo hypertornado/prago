@@ -17,7 +17,7 @@ func BindList(a *Admin, resource *Resource) {
 		listData, err := resource.getList(GetLocale(request), request.Request().URL.Path, request.Request().URL.Query())
 		if err != nil {
 			if err == ErrItemNotFound {
-				Render404(request)
+				render404(request)
 				return
 			}
 			panic(err)
