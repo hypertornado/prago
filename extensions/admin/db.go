@@ -25,16 +25,16 @@ func (a *Admin) Save(item interface{}) error {
 }
 
 //Query item from db
-func (a *Admin) Query() *AdminQuery {
-	return &AdminQuery{
+func (a *Admin) Query() *Query {
+	return &Query{
 		query: &listQuery{},
 		admin: a,
 		db:    a.getDB(),
 	}
 }
 
-//AdminQuery represents query to db
-type AdminQuery struct {
+//Query represents query to db
+type Query struct {
 	query *listQuery
 	admin *Admin
 	db    dbIface
@@ -42,7 +42,7 @@ type AdminQuery struct {
 }
 
 //Where adds where query
-func (q *AdminQuery) Where(w ...interface{}) *AdminQuery {
+func (q *Query) Where(w ...interface{}) *Query {
 	if q.err == nil {
 		q.err = q.query.where(w...)
 	}
@@ -50,36 +50,36 @@ func (q *AdminQuery) Where(w ...interface{}) *AdminQuery {
 }
 
 //WhereIs adds where query for single item
-func (q *AdminQuery) WhereIs(name string, value interface{}) *AdminQuery {
+func (q *Query) WhereIs(name string, value interface{}) *Query {
 	return q.Where(map[string]interface{}{name: value})
 }
 
 //Order sets order column
-func (q *AdminQuery) Order(name string) *AdminQuery {
+func (q *Query) Order(name string) *Query {
 	q.query.addOrder(name, false)
 	return q
 }
 
 //OrderDesc sets descending order column
-func (q *AdminQuery) OrderDesc(name string) *AdminQuery {
+func (q *Query) OrderDesc(name string) *Query {
 	q.query.addOrder(name, true)
 	return q
 }
 
 //Limit query's result
-func (q *AdminQuery) Limit(limit int64) *AdminQuery {
+func (q *Query) Limit(limit int64) *Query {
 	q.query.limit = limit
 	return q
 }
 
 //Offset of query's result
-func (q *AdminQuery) Offset(offset int64) *AdminQuery {
+func (q *Query) Offset(offset int64) *Query {
 	q.query.offset = offset
 	return q
 }
 
 //Get item or items with query
-func (aq *AdminQuery) Get(item interface{}) error {
+func (aq *Query) Get(item interface{}) error {
 	if aq.err != nil {
 		return aq.err
 	}
@@ -117,7 +117,7 @@ func (aq *AdminQuery) Get(item interface{}) error {
 }
 
 //Count items with query
-func (aq *AdminQuery) Count(item interface{}) (int64, error) {
+func (aq *Query) Count(item interface{}) (int64, error) {
 	resource, err := aq.admin.getResourceByItem(item)
 	if err != nil {
 		return -1, err
@@ -126,7 +126,7 @@ func (aq *AdminQuery) Count(item interface{}) (int64, error) {
 }
 
 //Delete item with query
-func (aq *AdminQuery) Delete(item interface{}) (int64, error) {
+func (aq *Query) Delete(item interface{}) (int64, error) {
 	resource, err := aq.admin.getResourceByItem(item)
 	if err != nil {
 		return -1, err

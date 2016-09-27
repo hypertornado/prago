@@ -42,11 +42,11 @@ func (t *Transaction) Save(item interface{}) error {
 	return resource.saveWithDBIface(item, t.tx)
 }
 
-func (t *Transaction) Query() *AdminQuery {
+func (t *Transaction) Query() *Query {
 	if t.err != nil {
-		return &AdminQuery{err: t.err}
+		return &Query{err: t.err}
 	}
-	return &AdminQuery{
+	return &Query{
 		query: &listQuery{},
 		admin: t.admin,
 		db:    t.tx,
