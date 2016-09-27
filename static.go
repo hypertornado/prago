@@ -5,40 +5,40 @@ import (
 	"net/http"
 )
 
-var (
-	FileNotFoundError = errors.New("requested file is folder")
-	StaticDirPaths    = []string{"public"}
-)
+//ErrFileNotFound is returned when file is not found
+var ErrFileNotFound = errors.New("requested file is folder")
 
-type MiddlewareStatic struct{}
+type middlewareStatic struct {
+	staticDirPaths []string
+}
 
-func (ms MiddlewareStatic) Init(app *App) error {
-
+func (ms middlewareStatic) Init(app *App) error {
+	ms.staticDirPaths = []string{"public"}
 	paths, err := app.Config().Get("staticPaths")
 	if err == nil {
 		newPaths := []string{}
 		for _, p := range paths.([]interface{}) {
 			newPaths = append(newPaths, p.(string))
 		}
-		StaticDirPaths = newPaths
+		ms.staticDirPaths = newPaths
 	}
-	app.requestMiddlewares = append(app.requestMiddlewares, requestMiddlewareStatic)
+	app.requestMiddlewares = append(app.requestMiddlewares, ms.requestMiddlewareStatic)
 	return nil
 }
 
-func requestMiddlewareStatic(p Request, next func()) {
+func (ms middlewareStatic) requestMiddlewareStatic(p Request, next func()) {
 	if p.IsProcessed() {
 		return
 	}
-	if ServeStatic(p.Response(), p.Request()) {
+	if ms.serveStatic(p.Response(), p.Request()) {
 		p.SetProcessed()
 	}
 	next()
 }
 
-func ServeStatic(w http.ResponseWriter, r *http.Request) bool {
-	for _, v := range StaticDirPaths {
-		err := serveFile(w, r, http.Dir(v), r.URL.Path)
+func (ms middlewareStatic) serveStatic(w http.ResponseWriter, r *http.Request) bool {
+	for _, v := range ms.staticDirPaths {
+		err := ms.serveFile(w, r, http.Dir(v), r.URL.Path)
 		if err == nil {
 			return true
 		}
@@ -46,7 +46,7 @@ func ServeStatic(w http.ResponseWriter, r *http.Request) bool {
 	return false
 }
 
-func serveFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name string) (err error) {
+func (ms middlewareStatic) serveFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name string) (err error) {
 	f, err := fs.Open(name)
 	if err != nil {
 		return
@@ -55,7 +55,7 @@ func serveFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name 
 
 	d, err := f.Stat()
 	if err != nil {
-		return FileNotFoundError
+		return ErrFileNotFound
 	}
 
 	if d.IsDir() {
@@ -67,11 +67,11 @@ func serveFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name 
 
 		d, err = f.Stat()
 		if err != nil {
-			return FileNotFoundError
+			return ErrFileNotFound
 		}
 
 		if d.IsDir() {
-			return FileNotFoundError
+			return ErrFileNotFound
 		}
 	}
 
