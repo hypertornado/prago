@@ -5,6 +5,7 @@ import (
 	"github.com/hypertornado/prago"
 )
 
+//Sitemap renders sites sitemap xml file
 func Sitemap(request prago.Request, urls []string) {
 	request.Response().Header().Set("Content-Type", "text/xml")
 	request.Response().WriteHeader(200)

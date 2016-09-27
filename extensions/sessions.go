@@ -5,11 +5,13 @@ import (
 	"github.com/hypertornado/prago"
 )
 
+//Sessions middleware
 type Sessions struct {
 	cookieStore *sessions.CookieStore
 	app         *prago.App
 }
 
+//Init sessions middleware
 func (s *Sessions) Init(app *prago.App) error {
 	s.cookieStore = sessions.NewCookieStore([]byte(app.Config().GetString("random")))
 	s.app = app
