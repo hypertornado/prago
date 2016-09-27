@@ -1,5 +1,5 @@
 package admin
-const TEMPLATES = `
+const adminTemplates = `
 {{define "admin_edit"}}
 
 <h2>{{.admin_title}}</h2>

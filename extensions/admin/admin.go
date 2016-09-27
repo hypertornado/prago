@@ -190,7 +190,7 @@ func (a *Admin) Init(app *prago.App) error {
 		return err
 	}
 
-	err = app.LoadTemplateFromString(TEMPLATES)
+	err = app.LoadTemplateFromString(adminTemplates)
 	if err != nil {
 		panic(err)
 	}
