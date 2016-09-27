@@ -35,8 +35,10 @@ func (m middlewareCmd) Init(app *App) error {
 	return nil
 }
 
+//MiddlewareServer adds user code into app
 type MiddlewareServer struct{ Fn func(*App) }
 
+//Init initializes MiddlewareServer
 func (mr MiddlewareServer) Init(app *App) error {
 	mr.Fn(app)
 	return nil
