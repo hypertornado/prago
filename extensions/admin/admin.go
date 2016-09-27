@@ -271,7 +271,7 @@ func (a *Admin) bindAdminCommand(app *prago.App) error {
 			return nil
 		case "thumbnails":
 			println("Updating thumbnails")
-			return UpdateFiles(a)
+			return updateFiles(a)
 		default:
 			println("unknown admin subcommand " + *adminSubcommand)
 		}
@@ -305,7 +305,7 @@ func (a *Admin) initTemplates(app *prago.App) error {
 		for _, v := range strings.Split(ids, ",") {
 			var image File
 			err := a.Query().WhereIs("uid", v).Get(&image)
-			if err == nil && image.IsImage() {
+			if err == nil && image.isImage() {
 				return image.GetSmall()
 			}
 		}

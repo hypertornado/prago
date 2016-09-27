@@ -8,7 +8,7 @@ func TestFiles(t *testing.T) {
 	f := &File{}
 	f.Name = "ABC.jpg"
 	f.UID = "abcdefgh"
-	folder, file := f.GetPath("x")
+	folder, file := f.getPath("x")
 
 	if folder != "x/a/b/c/d/e" {
 		t.Fatal(folder)
