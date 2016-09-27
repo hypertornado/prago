@@ -129,6 +129,7 @@ func (a *Admin) getResourceByName(name string) *Resource {
 	return a.resourceNameMap[columnName(name)]
 }
 
+//GetUser returns currently logged in user
 func GetUser(request prago.Request) *User {
 	return request.GetData("currentuser").(*User)
 }
@@ -162,6 +163,7 @@ func (a *Admin) getDB() *sql.DB {
 	return a.db
 }
 
+//Init admin middleware
 func (a *Admin) Init(app *prago.App) error {
 	a.App = app
 	a.db = app.Data()["db"].(*sql.DB)
@@ -198,7 +200,7 @@ func (a *Admin) Init(app *prago.App) error {
 
 		session := request.GetData("session").(*sessions.Session)
 
-		userId, ok := session.Values["user_id"].(int64)
+		userID, ok := session.Values["user_id"].(int64)
 
 		if !ok {
 			prago.Redirect(request, a.Prefix+"/user/login")
@@ -206,7 +208,7 @@ func (a *Admin) Init(app *prago.App) error {
 		}
 
 		var user User
-		err := a.Query().WhereIs("id", userId).Get(&user)
+		err := a.Query().WhereIs("id", userID).Get(&user)
 		if err != nil {
 			prago.Redirect(request, a.Prefix+"/user/login")
 			return
