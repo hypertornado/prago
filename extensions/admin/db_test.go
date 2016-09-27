@@ -16,13 +16,13 @@ var (
 	structCache *StructCache
 )
 
-type dbProvider struct{}
+type dbTestProvider struct{}
 
-func (dbProvider) DB() *sql.DB {
+func (dbTestProvider) getDB() *sql.DB {
 	return db
 }
 
-func (dbProvider) GetResourceByName(string) *Resource {
+func (dbTestProvider) getResourceByName(string) *Resource {
 	return nil
 }
 

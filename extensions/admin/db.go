@@ -26,7 +26,7 @@ func (a *Admin) Query() *AdminQuery {
 	return &AdminQuery{
 		query: &listQuery{},
 		admin: a,
-		db:    a.DB(),
+		db:    a.getDB(),
 	}
 }
 

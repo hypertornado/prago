@@ -20,7 +20,7 @@ type ResourceStruct struct {
 
 func prepareResource() *Resource {
 	resource, _ := NewResource(ResourceStruct{})
-	resource.admin = dbProvider{}
+	resource.admin = dbTestProvider{}
 
 	resource.UnsafeDropTable()
 	resource.migrate(false)
@@ -73,7 +73,7 @@ func TestResourceUnique(t *testing.T) {
 	}
 
 	resource, _ := NewResource(ResourceStructUnique{})
-	resource.admin = dbProvider{}
+	resource.admin = dbTestProvider{}
 
 	resource.UnsafeDropTable()
 	resource.migrate(false)

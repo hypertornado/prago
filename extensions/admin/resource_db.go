@@ -69,7 +69,7 @@ func (q *listQuery) addOrder(name string, desc bool) {
 }
 
 func (ar *Resource) Save(item interface{}) error {
-	return ar.saveWithDBIface(item, ar.admin.DB())
+	return ar.saveWithDBIface(item, ar.admin.getDB())
 }
 
 func (ar *Resource) saveWithDBIface(item interface{}, db dbIface) error {
@@ -88,7 +88,7 @@ func (ar *Resource) saveWithDBIface(item interface{}, db dbIface) error {
 }
 
 func (ar *Resource) Create(item interface{}) error {
-	return ar.createWithDBIface(item, ar.admin.DB())
+	return ar.createWithDBIface(item, ar.admin.getDB())
 }
 
 func (ar *Resource) createWithDBIface(item interface{}, db dbIface) error {

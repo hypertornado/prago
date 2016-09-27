@@ -228,7 +228,7 @@ func (resource *Resource) ValueToCell(field reflect.StructField, val reflect.Val
 	case int64:
 		cell.Value = fmt.Sprintf("%d", item.(int64))
 		if field.Tag.Get("prago-type") == "relation" {
-			relationResource := resource.admin.GetResourceByName(field.Name)
+			relationResource := resource.admin.getResourceByName(field.Name)
 			relationItem, err := relationResource.Query().Where(map[string]interface{}{"id": item.(int64)}).First()
 			if err != nil {
 				panic(err)

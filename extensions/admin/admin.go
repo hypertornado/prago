@@ -59,7 +59,7 @@ func (a *Admin) CreateResource(item interface{}) (resource *Resource, err error)
 	if err != nil {
 		return
 	}
-	err = a.AddResource(resource)
+	err = a.addResource(resource)
 	return
 }
 
@@ -114,7 +114,8 @@ func AddFlashMessage(request prago.Request, message string) {
 	prago.Must(session.Save(request.Request(), request.Response()))
 }
 
-func (a *Admin) AddResource(resource *Resource) error {
+//TODO: inline this method
+func (a *Admin) addResource(resource *Resource) error {
 	resource.admin = a
 	a.Resources = append(a.Resources, resource)
 	if resource.HasModel {
@@ -124,7 +125,7 @@ func (a *Admin) AddResource(resource *Resource) error {
 	return nil
 }
 
-func (a *Admin) GetResourceByName(name string) *Resource {
+func (a *Admin) getResourceByName(name string) *Resource {
 	return a.resourceNameMap[columnName(name)]
 }
 
@@ -157,7 +158,7 @@ func (a *Admin) adminHeaderData(request prago.Request) interface{} {
 	return ret
 }
 
-func (a *Admin) DB() *sql.DB {
+func (a *Admin) getDB() *sql.DB {
 	return a.db
 }
 

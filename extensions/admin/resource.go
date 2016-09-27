@@ -15,9 +15,9 @@ var (
 
 type Action func(prago.Request, interface{}) bool
 
-type DBProvider interface {
-	DB() *sql.DB
-	GetResourceByName(string) *Resource
+type dbProvider interface {
+	getDB() *sql.DB
+	getResourceByName(string) *Resource
 }
 
 type Resource struct {
@@ -32,7 +32,7 @@ type Resource struct {
 	HasModel           bool
 	HasView            bool
 	item               interface{}
-	admin              DBProvider
+	admin              dbProvider
 	table              string
 	StructCache        *StructCache
 	AfterFormCreated   func(f *Form, request prago.Request, newItem bool) *Form
@@ -170,7 +170,7 @@ func (a *Admin) getResourceByItem(item interface{}) (*Resource, error) {
 }
 
 func (ar *Resource) db() *sql.DB {
-	return ar.admin.DB()
+	return ar.admin.getDB()
 }
 
 func (ar *Resource) tableName() string {

@@ -11,7 +11,7 @@ type Transaction struct {
 }
 
 func (a *Admin) Transaction() (transaction *Transaction) {
-	tx, err := a.DB().Begin()
+	tx, err := a.getDB().Begin()
 	transaction = &Transaction{
 		err: err,
 	}
