@@ -230,7 +230,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 					user.EmailConfirmedAt = time.Now()
 					err = a.Save(&user)
 					if err == nil {
-						FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_confirm_email_ok"))
+						AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_confirm_email_ok"))
 						prago.Redirect(request, a.Prefix+"/user/login")
 						return
 					}
@@ -238,7 +238,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 			}
 		}
 
-		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_confirm_email_fail"))
+		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_confirm_email_fail"))
 		prago.Redirect(request, a.Prefix+"/user/login")
 	})
 
@@ -282,7 +282,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 					if err == nil {
 						err = user.SendRenew(request, a)
 						if err == nil {
-							FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_forgoten_sent", user.Email))
+							AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_forgoten_sent", user.Email))
 							prago.Redirect(request, a.Prefix+"/user/login")
 							return
 						}
@@ -291,7 +291,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 			}
 		}
 
-		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_forgoten_error", user.Email))
+		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_forgoten_error", user.Email))
 		prago.Redirect(request, a.Prefix+"/user/forgot")
 	})
 
@@ -349,7 +349,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 					if err == nil {
 						err = a.Save(&user)
 						if err == nil {
-							FlashMessage(request, messages.Messages.Get(locale, "admin_password_changed"))
+							AddFlashMessage(request, messages.Messages.Get(locale, "admin_password_changed"))
 							prago.Redirect(request, a.Prefix+"/user/login")
 							return
 						}
@@ -357,7 +357,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 				}
 			}
 		}
-		FlashMessage(request, errStr)
+		AddFlashMessage(request, errStr)
 		form.GetItemByName("password").Value = ""
 		renderLogin(request, form, locale)
 	})
@@ -498,7 +498,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 			}
 			prago.Must(a.Create(user))
 
-			FlashMessage(request, messages.Messages.Get(locale, "admin_confirm_email_send", user.Email))
+			AddFlashMessage(request, messages.Messages.Get(locale, "admin_confirm_email_send", user.Email))
 			prago.Redirect(request, a.Prefix+"/user/login")
 		} else {
 			form.GetItemByName("password").Value = ""
@@ -555,7 +555,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		if form.Valid {
 			prago.Must(resource.StructCache.BindData(user, request.Params(), request.Request().MultipartForm, form.GetFilter()))
 			prago.Must(resource.Save(user))
-			FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_settings_changed"))
+			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_settings_changed"))
 			prago.Redirect(request, a.GetURL(resource, "settings"))
 			return
 		}
@@ -607,7 +607,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 			user := GetUser(request)
 			prago.Must(user.NewPassword(password))
 			prago.Must(resource.Save(user))
-			FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_password_changed"))
+			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_password_changed"))
 			prago.Redirect(request, a.GetURL(resource, "settings"))
 		} else {
 			renderPasswordForm(request, form)

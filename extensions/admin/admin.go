@@ -53,6 +53,7 @@ func NewAdmin(prefix, name string) *Admin {
 	return ret
 }
 
+//CreateResource creates new resource based on item
 func (a *Admin) CreateResource(item interface{}) (resource *Resource, err error) {
 	resource, err = NewResource(item)
 	if err != nil {
@@ -62,6 +63,7 @@ func (a *Admin) CreateResource(item interface{}) (resource *Resource, err error)
 	return
 }
 
+//UnsafeDropTables drop all tables, useful mainly in tests
 func (a *Admin) UnsafeDropTables() error {
 	for _, resource := range a.Resources {
 		if resource.HasModel {
@@ -74,6 +76,7 @@ func (a *Admin) UnsafeDropTables() error {
 	return nil
 }
 
+//Migrate migrates all resource's tables
 func (a *Admin) Migrate(verbose bool) error {
 	tables, err := listTables(a.db)
 	if err != nil {
@@ -104,7 +107,8 @@ func (a *Admin) Migrate(verbose bool) error {
 	return nil
 }
 
-func FlashMessage(request prago.Request, message string) {
+//AddFlashMessage adds flash message to request
+func AddFlashMessage(request prago.Request, message string) {
 	session := request.GetData("session").(*sessions.Session)
 	session.AddFlash(message)
 	prago.Must(session.Save(request.Request(), request.Response()))

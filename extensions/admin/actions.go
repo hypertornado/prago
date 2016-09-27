@@ -100,7 +100,7 @@ func BindCreate(a *Admin, resource *Resource) {
 			}
 		}
 
-		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
+		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 }
@@ -174,7 +174,7 @@ func BindUpdate(a *Admin, resource *Resource) {
 			}
 		}
 
-		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_edited"))
+		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_edited"))
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 }
@@ -201,7 +201,7 @@ func BindDelete(a *Admin, resource *Resource) {
 			}
 		}
 
-		FlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_deleted"))
+		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_deleted"))
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 }
