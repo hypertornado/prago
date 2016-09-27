@@ -7,6 +7,7 @@ import (
 
 //TODO: tests
 
+//Form represents admin form
 type Form struct {
 	Method string
 	Action string
@@ -15,10 +16,12 @@ type Form struct {
 	Valid  bool
 }
 
+//ItemValidator represents validator for form item
 type ItemValidator interface {
 	Validate(*FormItem)
 }
 
+//FormItem represents item of form
 type FormItem struct {
 	Name        string
 	NameHuman   string
@@ -35,6 +38,7 @@ type FormItem struct {
 	validators  []ItemValidator
 }
 
+//Validate form
 func (f *Form) Validate() {
 	for _, item := range f.Items {
 		for _, validator := range item.validators {
@@ -43,12 +47,14 @@ func (f *Form) Validate() {
 	}
 }
 
+//NewForm creates new form
 func NewForm() *Form {
 	ret := &Form{}
 	ret.Valid = true
 	return ret
 }
 
+//GetItemByName returns form item found by name
 func (f *Form) GetItemByName(name string) *FormItem {
 	for _, v := range f.Items {
 		if v.Name == name {
@@ -58,17 +64,20 @@ func (f *Form) GetItemByName(name string) *FormItem {
 	return nil
 }
 
+//AddItem adds form item
 func (f *Form) AddItem(item *FormItem) {
 	item.form = f
 	f.Items = append(f.Items, item)
 }
 
+//BindData to form
 func (f *Form) BindData(params url.Values) {
 	for _, v := range f.Items {
 		v.Value = params.Get(v.Name)
 	}
 }
 
+//GetFilter returns struct filter
 func (f *Form) GetFilter() StructFieldFilter {
 	allowed := make(map[string]bool)
 	for _, v := range f.Items {
@@ -92,55 +101,66 @@ func (f *Form) addInput(name, description, template string, validators []ItemVal
 	return item
 }
 
+//AddTextInput to form
 func (f *Form) AddTextInput(name, description string, validators ...ItemValidator) *FormItem {
 	return f.addInput(name, description, "admin_item_input", validators)
 }
 
+//AddTextareaInput to form
 func (f *Form) AddTextareaInput(name, description string, validators ...ItemValidator) *FormItem {
 	return f.addInput(name, description, "admin_item_textarea", validators)
 }
 
+//AddEmailInput to form
 func (f *Form) AddEmailInput(name, description string, validators ...ItemValidator) *FormItem {
 	return f.addInput(name, description, "admin_item_email", validators)
 }
 
+//AddPasswordInput to form
 func (f *Form) AddPasswordInput(name, description string, validators ...ItemValidator) *FormItem {
 	return f.addInput(name, description, "admin_item_password", validators)
 }
 
+//AddFileInput to form
 func (f *Form) AddFileInput(name, description string, validators ...ItemValidator) *FormItem {
 	return f.addInput(name, description, "admin_item_file", validators)
 }
 
+//AddSubmit to form
 func (f *Form) AddSubmit(name, description string, validators ...ItemValidator) *FormItem {
 	input := f.addInput(name, description, "", validators)
 	input.Template = "admin_item_submit"
 	return input
 }
 
+//AddCheckbox to form
 func (f *Form) AddCheckbox(name, description string, validators ...ItemValidator) *FormItem {
 	input := f.addInput(name, description, "admin_item_checkbox", validators)
 	input.HiddenName = true
 	return input
 }
 
+//AddHidden to form
 func (f *Form) AddHidden(name string, validators ...ItemValidator) *FormItem {
 	input := f.addInput(name, "", "", validators)
 	input.Template = "admin_item_hidden"
 	return input
 }
 
+//AddSelect to form
 func (f *Form) AddSelect(name, description string, values [][2]string, validators ...ItemValidator) *FormItem {
 	input := f.addInput(name, description, "admin_item_select", validators)
 	input.Values = values
 	return input
 }
 
+//AddError to form
 func (f *FormItem) AddError(err string) {
 	f.Errors = append(f.Errors, err)
 	f.form.Valid = false
 }
 
+//NewValidator creates new item validator with error message
 func NewValidator(fn func(field *FormItem) bool, message string) ItemValidator {
 	return validator{
 		fn:      fn,
@@ -159,6 +179,7 @@ func (v validator) Validate(field *FormItem) {
 	}
 }
 
+//EmailValidator for validation of email inputs
 func EmailValidator(Error string) ItemValidator {
 	return NewValidator(func(field *FormItem) bool {
 		if !govalidator.IsEmail(field.Value) {
@@ -168,6 +189,7 @@ func EmailValidator(Error string) ItemValidator {
 	}, Error)
 }
 
+//NonEmptyValidator for validation of nonempty inputs
 func NonEmptyValidator(Error string) ItemValidator {
 	return NewValidator(func(field *FormItem) bool {
 		if len(field.Value) == 0 {
@@ -177,6 +199,7 @@ func NonEmptyValidator(Error string) ItemValidator {
 	}, Error)
 }
 
+//MinLengthValidator for validation of min length of field
 func MinLengthValidator(Error string, minLength int) ItemValidator {
 	return NewValidator(func(field *FormItem) bool {
 		if len(field.Value) <= minLength {
@@ -186,6 +209,7 @@ func MinLengthValidator(Error string, minLength int) ItemValidator {
 	}, Error)
 }
 
+//MaxLengthValidator for validation of max length of field
 func MaxLengthValidator(Error string, maxLength int) ItemValidator {
 	return NewValidator(func(field *FormItem) bool {
 		if len(field.Value) >= maxLength {
