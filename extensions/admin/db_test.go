@@ -471,7 +471,7 @@ func compareResults(t *testing.T, nodes []*TestNode, ids []int64) {
 		t.Fatal("not equal length ", len(nodes))
 	}
 
-	for i, _ := range nodes {
+	for i := range nodes {
 		if nodes[i].ID != ids[i] {
 			t.Fatal(nodes[i], ids)
 		}

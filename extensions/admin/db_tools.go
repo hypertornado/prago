@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+//Debug enables logging of all sql queries
 var Debug = false
 
 type mysqlColumn struct {
@@ -328,9 +329,8 @@ func getFirstItem(structCache *StructCache, db dbIface, tableName string, item i
 	if val.Len() > 0 {
 		reflect.ValueOf(item).Elem().Set(val.Index(0))
 		return nil
-	} else {
-		return ErrItemNotFound
 	}
+	return ErrItemNotFound
 }
 
 func listItems(structCache *StructCache, db dbIface, tableName string, items interface{}, query *listQuery) error {
