@@ -44,6 +44,8 @@ func newCron() *cron {
 	return cr
 }
 
+//AddCronTask ads task function with name, which is executed regularly
+//timer functions returns next execution time
 func (a *App) AddCronTask(name string, task func(), timer func(time.Time) time.Time) {
 	a.cron.mutex.Lock()
 	ct := &cronTask{
