@@ -87,7 +87,7 @@ func (ar *Resource) saveWithDBIface(item interface{}, db dbIface) error {
 	return ar.StructCache.saveItem(db, ar.tableName(), item)
 }
 
-func (ar *Resource) Create(item interface{}) error {
+func (ar *Resource) create(item interface{}) error {
 	return ar.createWithDBIface(item, ar.admin.getDB())
 }
 
@@ -125,7 +125,7 @@ func (ar *Resource) Query() *ResourceQuery {
 	}
 }
 
-func (ar *Resource) NewItem() (item interface{}, err error) {
+func (ar *Resource) newItem() (item interface{}, err error) {
 	reflect.ValueOf(&item).Elem().Set(reflect.New(ar.Typ))
 	return
 }

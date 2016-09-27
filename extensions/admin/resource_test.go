@@ -43,8 +43,8 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	resource.Create(&ResourceStruct{Name: "First", CreatedAt: time.Now()})
-	resource.Create(&ResourceStruct{Name: "Second", Showing: "show"})
+	resource.create(&ResourceStruct{Name: "First", CreatedAt: time.Now()})
+	resource.create(&ResourceStruct{Name: "Second", Showing: "show"})
 
 	count, err = resource.Query().Count()
 	if err != nil {
@@ -78,9 +78,9 @@ func TestResourceUnique(t *testing.T) {
 	resource.unsafeDropTable()
 	resource.migrate(false)
 
-	resource.Create(&ResourceStructUnique{Name: "A"})
-	resource.Create(&ResourceStructUnique{Name: "B"})
-	resource.Create(&ResourceStructUnique{Name: "A"})
+	resource.create(&ResourceStructUnique{Name: "A"})
+	resource.create(&ResourceStructUnique{Name: "B"})
+	resource.create(&ResourceStructUnique{Name: "A"})
 
 	count, err := resource.Query().Count()
 	if err != nil {
@@ -96,7 +96,7 @@ func TestResourceDate(t *testing.T) {
 	resource := prepareResource()
 	tm := time.Now()
 
-	resource.Create(&ResourceStruct{Date: tm})
+	resource.create(&ResourceStruct{Date: tm})
 	_, err := resource.Query().Where(map[string]interface{}{"date": tm.Format("2006-01-02")}).First()
 	if err != nil {
 		t.Fatal(err)
@@ -109,7 +109,7 @@ func TestResourceTimestamps(t *testing.T) {
 
 	testStartTime := time.Now().Truncate(time.Second)
 
-	resource.Create(&ResourceStruct{Name: "A"})
+	resource.create(&ResourceStruct{Name: "A"})
 
 	itemIface, err := resource.Query().Where(map[string]interface{}{"id": 1}).First()
 	if err != nil {
@@ -130,8 +130,8 @@ func TestResourceTimestamps(t *testing.T) {
 func TestResourceBool(t *testing.T) {
 	resource := prepareResource()
 
-	resource.Create(&ResourceStruct{Name: "A", IsSomething: false})
-	resource.Create(&ResourceStruct{Name: "B", IsSomething: true})
+	resource.create(&ResourceStruct{Name: "A", IsSomething: false})
+	resource.create(&ResourceStruct{Name: "B", IsSomething: true})
 
 	itemIface, err := resource.Query().Where(map[string]interface{}{"issomething": true}).First()
 	if err != nil {
@@ -156,7 +156,7 @@ func TestResourceBool(t *testing.T) {
 
 func TestResourceCreateWithID(t *testing.T) {
 	resource := prepareResource()
-	resource.Create(&ResourceStruct{ID: 85, Name: "A"})
+	resource.create(&ResourceStruct{ID: 85, Name: "A"})
 	item, _ := resource.Query().First()
 	id := item.(*ResourceStruct).ID
 	if id != 85 {

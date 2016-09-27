@@ -19,7 +19,7 @@ func (a *Admin) Create(item interface{}) error {
 	if err != nil {
 		return err
 	}
-	return resource.Create(item)
+	return resource.create(item)
 }
 
 //Save item to db

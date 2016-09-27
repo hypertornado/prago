@@ -28,7 +28,6 @@ func BindList(a *Admin, resource *Resource) {
 				return
 			}
 		}
-
 		request.SetData("admin_title", resource.Name(GetLocale(request)))
 		request.SetData("admin_list", listData)
 		request.SetData("admin_yield", "admin_list")
@@ -40,7 +39,7 @@ func BindList(a *Admin, resource *Resource) {
 //BindNew is default new binder
 func BindNew(a *Admin, resource *Resource) {
 	resource.ResourceController.Get(a.GetURL(resource, "new"), func(request prago.Request) {
-		item, err := resource.NewItem()
+		item, err := resource.newItem()
 		if err != nil {
 			panic(err)
 		}
@@ -74,7 +73,7 @@ func BindNew(a *Admin, resource *Resource) {
 func BindCreate(a *Admin, resource *Resource) {
 	resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
 		ValidateCSRF(request)
-		item, err := resource.NewItem()
+		item, err := resource.newItem()
 		prago.Must(err)
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
@@ -92,7 +91,7 @@ func BindCreate(a *Admin, resource *Resource) {
 			}
 		}
 
-		prago.Must(resource.Create(item))
+		prago.Must(resource.create(item))
 
 		if resource.AfterCreate != nil {
 			if !resource.AfterCreate(request, item) {
