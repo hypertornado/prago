@@ -20,10 +20,10 @@ import (
 	"time"
 )
 
-var (
-	ErrItemNotFound = errors.New("item not found")
-)
+//ErrItemNotFound is returned when no item is found
+var ErrItemNotFound = errors.New("item not found")
 
+//Admin is struct representing admin extension
 type Admin struct {
 	Prefix                string
 	AppName               string
@@ -35,11 +35,11 @@ type Admin struct {
 	App                   *prago.App
 	db                    *sql.DB
 	authData              map[string]string
-	seedFn                func(*prago.App) error
 	sendgridClient        *sendgrid.SGClient
 	noReplyEmail          string
 }
 
+//NewAdmin creates new administration on prefix url with name
 func NewAdmin(prefix, name string) *Admin {
 	ret := &Admin{
 		Prefix:          prefix,
@@ -48,15 +48,9 @@ func NewAdmin(prefix, name string) *Admin {
 		resourceMap:     make(map[reflect.Type]*Resource),
 		resourceNameMap: make(map[string]*Resource),
 	}
-
 	ret.CreateResource(User{})
 	ret.CreateResource(File{})
-
 	return ret
-}
-
-func (a *Admin) Seed(fn func(*prago.App) error) {
-	a.seedFn = fn
 }
 
 func (a *Admin) CreateResource(item interface{}) (resource *Resource, err error) {
@@ -249,7 +243,7 @@ func (a *Admin) Init(app *prago.App) error {
 }
 
 func (a *Admin) bindAdminCommand(app *prago.App) error {
-	adminCommand := app.CreateCommand("admin", "Admin tasks (migrate|seed|drop|thumbnails)")
+	adminCommand := app.CreateCommand("admin", "Admin tasks (migrate|drop|thumbnails)")
 
 	adminSubcommand := adminCommand.Arg("admincommand", "").Required().String()
 
@@ -262,13 +256,6 @@ func (a *Admin) bindAdminCommand(app *prago.App) error {
 				println("Migrate done")
 			}
 			return err
-		case "seed":
-			if a.seedFn != nil {
-				println("Seeding")
-				return a.seedFn(app)
-			} else {
-				return errors.New("No seed function defined")
-			}
 		case "drop":
 			if utils.ConsoleQuestion("Really want to drop table?") {
 				println("Dropping table")
