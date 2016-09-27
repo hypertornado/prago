@@ -128,11 +128,11 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 			fi.Readonly = true
 			fi.Value = file.Name
 
-			_, fileUrl := file.getPath(fileDownloadPath + "original")
+			_, fileURL := file.getPath(fileDownloadPath + "original")
 
 			fi = form.AddTextInput("url", messages.Messages.Get(GetLocale(request), "Url"))
 			fi.Readonly = true
-			fi.Value = fileUrl
+			fi.Value = fileURL
 			fi.SubTemplate = "admin_item_link"
 
 			fi = form.AddTextInput("size", messages.Messages.Get(GetLocale(request), "Size"))
@@ -245,8 +245,8 @@ func writeFileResponse(request prago.Request, files []*File) {
 			Description: v.Description,
 		}
 
-		_, fileUrl := v.getPath(fileDownloadPath + "thumb/small")
-		ir.Thumb = fileUrl
+		_, fileURL := v.getPath(fileDownloadPath + "thumb/small")
+		ir.Thumb = fileURL
 
 		responseData = append(responseData, ir)
 	}
@@ -354,18 +354,22 @@ func (f *File) getSize(size string) string {
 	return path
 }
 
+//GetLarge file path
 func (f *File) GetLarge() string {
 	return f.getSize("large")
 }
 
+//GetMedium file path
 func (f *File) GetMedium() string {
 	return f.getSize("medium")
 }
 
+//GetSmall file path
 func (f *File) GetSmall() string {
 	return f.getSize("small")
 }
 
+//GetOriginal file path
 func (f *File) GetOriginal() string {
 	_, path := f.getPath(fileDownloadPath + "original")
 	return path
