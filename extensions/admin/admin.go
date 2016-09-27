@@ -234,7 +234,7 @@ func (a *Admin) Init(app *prago.App) error {
 
 	a.AdminController.Get(a.Prefix+"/_stats", stats)
 
-	for i, _ := range a.Resources {
+	for i := range a.Resources {
 		resource := a.Resources[i]
 		err = a.initResource(resource)
 		if err != nil {
@@ -267,9 +267,8 @@ func (a *Admin) bindAdminCommand(app *prago.App) error {
 			if utils.ConsoleQuestion("Really want to drop table?") {
 				println("Dropping table")
 				return a.UnsafeDropTables()
-			} else {
-				return nil
 			}
+			return nil
 		case "thumbnails":
 			println("Updating thumbnails")
 			return UpdateFiles(a)
@@ -316,6 +315,7 @@ func (a *Admin) initTemplates(app *prago.App) error {
 	return nil
 }
 
+//GetURL returns url for resource with given suffix
 func (a *Admin) GetURL(resource *Resource, suffix string) string {
 	ret := a.Prefix + "/" + resource.ID
 	if len(suffix) > 0 {
