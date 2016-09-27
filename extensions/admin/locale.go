@@ -15,6 +15,7 @@ var (
 	availableLocales = [][2]string{{"en", "English"}, {"cs", "Čeština"}}
 )
 
+//GetLocale from request
 func GetLocale(request prago.Request) string {
 	user, hasUser := request.GetData("currentuser").(*User)
 	if hasUser {
