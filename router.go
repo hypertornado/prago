@@ -17,11 +17,11 @@ const (
 	any
 )
 
-type MiddlewareDispatcher struct {
+type middlewareDispatcher struct {
 	router *router
 }
 
-func (m MiddlewareDispatcher) Init(app *App) error {
+func (m middlewareDispatcher) Init(app *App) error {
 	m.router = newRouter()
 	app.data["router"] = m.router
 	app.requestMiddlewares = append(app.requestMiddlewares, m.requestMiddlewareDispatcher)
@@ -35,7 +35,7 @@ func (m MiddlewareDispatcher) Init(app *App) error {
 	return nil
 }
 
-func (m MiddlewareDispatcher) requestMiddlewareDispatcher(p Request, next func()) {
+func (m middlewareDispatcher) requestMiddlewareDispatcher(p Request, next func()) {
 	if p.IsProcessed() {
 		return
 	}
@@ -176,14 +176,17 @@ func newRoute(m method, path string, controller *Controller, fn func(p Request),
 	return
 }
 
+//Constraint add constraints on request
 type Constraint func(map[string]string) bool
 
+//ConstraintInt limits request item on numeric types
 func ConstraintInt(item string) func(map[string]string) bool {
 	reg, _ := regexp.Compile("^[1-9][0-9]*$")
 	f := ConstraintRegexp(item, reg)
 	return f
 }
 
+//ConstraintWhitelist limits request item on allowed values
 func ConstraintWhitelist(item string, allowedValues []string) func(map[string]string) bool {
 	allowedMap := make(map[string]bool)
 	for _, v := range allowedValues {
@@ -192,19 +195,18 @@ func ConstraintWhitelist(item string, allowedValues []string) func(map[string]st
 	return func(m map[string]string) bool {
 		if value, ok := m[item]; ok {
 			return allowedMap[value]
-		} else {
-			return false
 		}
+		return false
 	}
 }
 
+//ConstraintRegexp limits request item by regexp
 func ConstraintRegexp(item string, reg *regexp.Regexp) func(map[string]string) bool {
 	return func(m map[string]string) bool {
 		if value, ok := m[item]; ok {
 			return reg.Match([]byte(value))
-		} else {
-			return false
 		}
+		return false
 	}
 }
 

@@ -53,7 +53,7 @@ func NewApp(appName, version string) *App {
 	app.AddMiddleware(MiddlewareStatic{})
 	app.AddMiddleware(middlewareParseRequest)
 	app.AddMiddleware(MiddlewareView{})
-	app.AddMiddleware(MiddlewareDispatcher{})
+	app.AddMiddleware(middlewareDispatcher{})
 	return app
 }
 
