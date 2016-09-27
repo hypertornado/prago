@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 )
@@ -79,9 +78,9 @@ func (q *Query) Offset(offset int64) *Query {
 }
 
 //Get item or items with query
-func (aq *Query) Get(item interface{}) error {
-	if aq.err != nil {
-		return aq.err
+func (q *Query) Get(item interface{}) error {
+	if q.err != nil {
+		return q.err
 	}
 
 	var err error
@@ -94,20 +93,20 @@ func (aq *Query) Get(item interface{}) error {
 		typ = typ.Elem().Elem()
 	}
 
-	resource, ok := aq.admin.resourceMap[typ]
+	resource, ok := q.admin.resourceMap[typ]
 	if !ok {
-		return errors.New(fmt.Sprintf("Can't find resource with type %s.", typ))
+		return fmt.Errorf("Can't find resource with type %s.", typ)
 	}
 
 	var newItem interface{}
 	if slice {
-		err = listItems(resource.StructCache, aq.db, resource.tableName(), &newItem, aq.query)
+		err = listItems(resource.StructCache, q.db, resource.tableName(), &newItem, q.query)
 		if err != nil {
 			return err
 		}
 		reflect.ValueOf(item).Elem().Set(reflect.ValueOf(newItem))
 	} else {
-		err = getFirstItem(resource.StructCache, aq.db, resource.tableName(), &newItem, aq.query)
+		err = getFirstItem(resource.StructCache, q.db, resource.tableName(), &newItem, q.query)
 		if err != nil {
 			return err
 		}
@@ -117,19 +116,19 @@ func (aq *Query) Get(item interface{}) error {
 }
 
 //Count items with query
-func (aq *Query) Count(item interface{}) (int64, error) {
-	resource, err := aq.admin.getResourceByItem(item)
+func (q *Query) Count(item interface{}) (int64, error) {
+	resource, err := q.admin.getResourceByItem(item)
 	if err != nil {
 		return -1, err
 	}
-	return countItems(aq.db, resource.tableName(), aq.query)
+	return countItems(q.db, resource.tableName(), q.query)
 }
 
 //Delete item with query
-func (aq *Query) Delete(item interface{}) (int64, error) {
-	resource, err := aq.admin.getResourceByItem(item)
+func (q *Query) Delete(item interface{}) (int64, error) {
+	resource, err := q.admin.getResourceByItem(item)
 	if err != nil {
 		return -1, err
 	}
-	return deleteItems(aq.db, resource.tableName(), aq.query)
+	return deleteItems(q.db, resource.tableName(), q.query)
 }
