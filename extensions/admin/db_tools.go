@@ -187,7 +187,7 @@ func (sc *StructCache) prepareValues(value reflect.Value) (names []string, quest
 			continue
 		}
 
-		names = append(names, "`"+ColumnName(field.Name)+"`")
+		names = append(names, "`"+columnName(field.Name)+"`")
 		questionMarks = append(questionMarks, "?")
 	}
 	return

@@ -61,7 +61,7 @@ func NewResource(item interface{}) (*Resource, error) {
 	defaultName := typ.Name()
 	ret := &Resource{
 		Name:              func(string) string { return defaultName },
-		ID:                ColumnName(defaultName),
+		ID:                columnName(defaultName),
 		Typ:               typ,
 		Authenticate:      AuthenticateAdmin,
 		Pagination:        100000,

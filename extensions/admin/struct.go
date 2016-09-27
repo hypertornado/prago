@@ -154,7 +154,7 @@ func (a *StructField) humanName(lang string) (ret string) {
 func newStructField(field reflect.StructField, order int) *StructField {
 	ret := &StructField{
 		Name:       field.Name,
-		ColumnName: ColumnName(field.Name),
+		ColumnName: columnName(field.Name),
 		Typ:        field.Type,
 		Tags:       make(map[string]string),
 		Order:      order,
@@ -292,7 +292,7 @@ func (cache *StructCache) GetForm(inValues interface{}, lang string, visible Str
 			switch field.Tags["prago-type"] {
 			case "relation":
 				item.SubTemplate = "admin_item_relation"
-				item.Values = ColumnName(item.Name)
+				item.Values = columnName(item.Name)
 			}
 		case reflect.Float64:
 			item.Value = fmt.Sprintf("%f", ifaceVal.(float64))
