@@ -46,12 +46,12 @@ func NewApp(appName, version string) *App {
 	app.data["version"] = version
 	app.cron = newCron()
 
-	app.AddMiddleware(MiddlewareCmd{})
+	app.AddMiddleware(middlewareCmd{})
 	app.AddMiddleware(middlewareConfig{})
 	app.AddMiddleware(loggerMiddleware)
-	app.AddMiddleware(MiddlewareRemoveTrailingSlash)
+	app.AddMiddleware(middlewareRemoveTrailingSlash)
 	app.AddMiddleware(MiddlewareStatic{})
-	app.AddMiddleware(MiddlewareParseRequest)
+	app.AddMiddleware(middlewareParseRequest)
 	app.AddMiddleware(MiddlewareView{})
 	app.AddMiddleware(MiddlewareDispatcher{})
 	return app
@@ -188,19 +188,19 @@ func handleRequest(w http.ResponseWriter, r *http.Request, app *App) {
 	callRequestMiddlewares(request, app.requestMiddlewares)
 }
 
-func callRequestMiddlewares(request Request, middlewares []requestMiddleware) {
+func callRequestMiddlewares(request *Request, middlewares []requestMiddleware) {
 	f := func() {}
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		j := i
 		prevF := f
 		f = func() {
-			middlewares[j](request, prevF)
+			middlewares[j](*request, prevF)
 		}
 	}
 	f()
 }
 
-func recoveryFromServerError(p Request, recoveryData interface{}) {
+func recoveryFromServerError(p *Request, recoveryData interface{}) {
 	if p.App().DevelopmentMode {
 		p.Response().Header().Set("Content-Type", "text/plain")
 		p.Response().WriteHeader(500)

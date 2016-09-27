@@ -8,9 +8,9 @@ import (
 
 var defaultPort = 8585
 
-type MiddlewareCmd struct{}
+type middlewareCmd struct{}
 
-func (m MiddlewareCmd) Init(app *App) error {
+func (m middlewareCmd) Init(app *App) error {
 	app.kingpin = kingpin.New("", "")
 	app.commands = map[*kingpin.CmdClause]func(app *App) error{}
 

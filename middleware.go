@@ -6,10 +6,11 @@ import (
 )
 
 var (
-	MiddlewareRemoveTrailingSlash = getMiddleware{requestMiddlewareRemoveTrailingSlash}
-	MiddlewareParseRequest        = getMiddleware{requestMiddlewareParseRequest}
+	middlewareRemoveTrailingSlash = getMiddleware{requestMiddlewareRemoveTrailingSlash}
+	middlewareParseRequest        = getMiddleware{requestMiddlewareParseRequest}
 )
 
+//Middleware interface has Init method for middleware initialization
 type Middleware interface {
 	Init(*App) error
 }
