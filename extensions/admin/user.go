@@ -564,7 +564,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		AddCSRFToken(form, request)
 		form.Validate()
 		if form.Valid {
-			prago.Must(resource.StructCache.BindData(user, request.Params(), request.Request().MultipartForm, form.GetFilter()))
+			prago.Must(resource.StructCache.BindData(user, request.Params(), request.Request().MultipartForm, form.getFilter()))
 			prago.Must(resource.save(user))
 			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_settings_changed"))
 			prago.Redirect(request, a.GetURL(resource, "settings"))

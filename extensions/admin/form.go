@@ -78,7 +78,7 @@ func (f *Form) BindData(params url.Values) {
 }
 
 //GetFilter returns struct filter
-func (f *Form) GetFilter() structFieldFilter {
+func (f *Form) getFilter() structFieldFilter {
 	allowed := make(map[string]bool)
 	for _, v := range f.Items {
 		if !v.Readonly {

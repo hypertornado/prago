@@ -83,7 +83,7 @@ func BindCreate(a *Admin, resource *Resource) {
 			form = resource.AfterFormCreated(form, request, true)
 		}
 
-		resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.GetFilter())
+		resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.getFilter())
 
 		if resource.BeforeCreate != nil {
 			if !resource.BeforeCreate(request, item) {
@@ -155,7 +155,7 @@ func BindUpdate(a *Admin, resource *Resource) {
 			form = resource.AfterFormCreated(form, request, false)
 		}
 
-		err = resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.GetFilter())
+		err = resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.getFilter())
 		prago.Must(err)
 
 		if resource.BeforeUpdate != nil {
