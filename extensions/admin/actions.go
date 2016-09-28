@@ -89,7 +89,7 @@ func BindCreate(a *Admin, resource *Resource) {
 			}
 		}
 
-		prago.Must(resource.create(item))
+		prago.Must(a.Create(item))
 
 		if resource.AfterCreate != nil {
 			if !resource.AfterCreate(request, item) {

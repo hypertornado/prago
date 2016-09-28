@@ -87,10 +87,6 @@ func (ar *Resource) saveWithDBIface(item interface{}, db dbIface) error {
 	return ar.StructCache.saveItem(db, ar.tableName(), item)
 }
 
-func (ar *Resource) create(item interface{}) error {
-	return ar.createWithDBIface(item, ar.admin.getDB())
-}
-
 func (ar *Resource) createWithDBIface(item interface{}, db dbIface) error {
 	if !ar.HasModel {
 		return ErrDontHaveModel

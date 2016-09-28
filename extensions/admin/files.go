@@ -104,7 +104,7 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 			}
 			file.User = GetUser(request).ID
 			file.Description = request.Params().Get("Description")
-			prago.Must(resource.create(file))
+			prago.Must(a.Create(file))
 
 			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
 			prago.Redirect(request, a.Prefix+"/"+resource.ID)

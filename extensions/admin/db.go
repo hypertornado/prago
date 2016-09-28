@@ -19,7 +19,7 @@ func (a *Admin) Create(item interface{}) error {
 	if err != nil {
 		return err
 	}
-	return resource.create(item)
+	return resource.createWithDBIface(item, a.getDB())
 }
 
 //Save item to db
