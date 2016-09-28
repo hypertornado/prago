@@ -303,6 +303,18 @@ func (a *Admin) GetURL(resource *Resource, suffix string) string {
 	return ret
 }
 
+func render403(request prago.Request) {
+	request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_403"))
+	request.SetData("admin_yield", "admin_message")
+	prago.Render(request, 403, "admin_layout")
+}
+
+func render404(request prago.Request) {
+	request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_404"))
+	request.SetData("admin_yield", "admin_message")
+	prago.Render(request, 404, "admin_layout")
+}
+
 func bindDBBackupCron(app *prago.App) {
 	app.AddCronTask("backup db", func() {
 		err := extensions.BackupApp(app)
