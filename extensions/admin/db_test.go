@@ -335,37 +335,6 @@ func TestAdminDB(t *testing.T) {
 	}
 }
 
-func TestAdminResourceQuery(t *testing.T) {
-	tableName := "node"
-	dropTable(db, tableName)
-	createTable(db, tableName, cache, false)
-
-	q := &ResourceQuery{
-		query:       &listQuery{},
-		db:          db,
-		tableName:   tableName,
-		structCache: cache,
-	}
-
-	n0 := &TestNode{Name: "A1", OK: false}
-
-	cache.createItem(db, tableName, n0)
-
-	firstItem, err := q.Where(map[string]interface{}{"id": 1}).First()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	n, ok := firstItem.(*TestNode)
-	if !ok {
-		t.Fatal("bad type")
-	}
-
-	if n.Name != "A1" {
-		t.Fatal(n.Name)
-	}
-}
-
 func TestAdminDBList(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)

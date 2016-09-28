@@ -135,7 +135,7 @@ func prepareResource() (*Admin, *Resource) {
 func TestResource(t *testing.T) {
 	admin, resource := prepareResource()
 
-	items, err := resource.getList("en", "", make(map[string][]string))
+	items, err := resource.getList(admin, "en", "", make(map[string][]string))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,7 +160,7 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	items, _ = resource.getList("en", "", make(map[string][]string))
+	items, _ = resource.getList(admin, "en", "", make(map[string][]string))
 
 	if len(items.Header) != 3 {
 		t.Fatal(len(items.Header))
@@ -201,11 +201,13 @@ func TestResourceDate(t *testing.T) {
 	tm := time.Now()
 
 	admin.Create(&ResourceStruct{Date: tm})
-	_, err := resource.Query().Where(map[string]interface{}{"date": tm.Format("2006-01-02")}).First()
+
+	var item interface{}
+	resource.newItem(&item)
+	err := admin.Query().WhereIs("date", tm.Format("2006-01-02")).Get(item)
 	if err != nil {
 		t.Fatal(err)
 	}
-
 }
 
 func TestResourceTimestamps(t *testing.T) {
@@ -215,7 +217,9 @@ func TestResourceTimestamps(t *testing.T) {
 
 	admin.Create(&ResourceStruct{Name: "A"})
 
-	itemIface, err := resource.Query().Where(map[string]interface{}{"id": 1}).First()
+	var itemIface interface{}
+	resource.newItem(&itemIface)
+	err := admin.Query().WhereIs("id", 1).Get(itemIface)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -237,7 +241,10 @@ func TestResourceBool(t *testing.T) {
 	admin.Create(&ResourceStruct{Name: "A", IsSomething: false})
 	admin.Create(&ResourceStruct{Name: "B", IsSomething: true})
 
-	itemIface, err := resource.Query().Where(map[string]interface{}{"issomething": true}).First()
+	var itemIface interface{}
+	resource.newItem(&itemIface)
+	err := admin.Query().WhereIs("issomething", true).Get(itemIface)
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -247,7 +254,7 @@ func TestResourceBool(t *testing.T) {
 		t.Fatal(item)
 	}
 
-	itemIface, err = resource.Query().Where(map[string]interface{}{"issomething": false}).First()
+	err = admin.Query().WhereIs("issomething", false).Get(itemIface)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -262,7 +269,10 @@ func TestResourceCreateWithID(t *testing.T) {
 	admin, resource := prepareResource()
 	admin.Create(&ResourceStruct{ID: 85, Name: "A"})
 
-	item, _ := resource.Query().First()
+	var item interface{}
+	resource.newItem(&item)
+
+	admin.Query().Get(item)
 	id := item.(*ResourceStruct).ID
 	if id != 85 {
 		t.Fatal(id)
