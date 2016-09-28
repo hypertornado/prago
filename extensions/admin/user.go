@@ -565,7 +565,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		form.Validate()
 		if form.Valid {
 			prago.Must(resource.StructCache.BindData(user, request.Params(), request.Request().MultipartForm, form.getFilter()))
-			prago.Must(resource.save(user))
+			prago.Must(a.Save(user))
 			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_settings_changed"))
 			prago.Redirect(request, a.GetURL(resource, "settings"))
 			return
@@ -617,7 +617,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 			password := request.Params().Get("newpassword")
 			user := GetUser(request)
 			prago.Must(user.newPassword(password))
-			prago.Must(resource.save(user))
+			prago.Must(a.Save(user))
 			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_password_changed"))
 			prago.Redirect(request, a.GetURL(resource, "settings"))
 		} else {

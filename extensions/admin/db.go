@@ -28,7 +28,7 @@ func (a *Admin) Save(item interface{}) error {
 	if err != nil {
 		return err
 	}
-	return resource.save(item)
+	return resource.saveWithDBIface(item, a.getDB())
 }
 
 //Query item from db
