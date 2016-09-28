@@ -113,7 +113,7 @@ func TestResourceTimestamps(t *testing.T) {
 
 	itemIface, err := resource.Query().Where(map[string]interface{}{"id": 1}).First()
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 
 	item := itemIface.(*ResourceStruct)
@@ -135,7 +135,7 @@ func TestResourceBool(t *testing.T) {
 
 	itemIface, err := resource.Query().Where(map[string]interface{}{"issomething": true}).First()
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 
 	item := itemIface.(*ResourceStruct)
@@ -145,7 +145,7 @@ func TestResourceBool(t *testing.T) {
 
 	itemIface, err = resource.Query().Where(map[string]interface{}{"issomething": false}).First()
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 
 	item = itemIface.(*ResourceStruct)

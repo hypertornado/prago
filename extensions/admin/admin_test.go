@@ -11,19 +11,23 @@ func prepareAdmin() *Admin {
 }
 
 func TestAdminQuery(t *testing.T) {
-	admin := prepareAdmin()
-	admin.CreateResource(ResourceStruct{})
-	admin.UnsafeDropTables()
-	admin.Migrate(false)
-
 	var err error
 	var item ResourceStruct
+	var createdItem interface{}
+	var resource *Resource
+
+	admin := prepareAdmin()
+	resource, err = admin.CreateResource(ResourceStruct{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	admin.UnsafeDropTables()
+	admin.Migrate(false)
 
 	err = admin.Create(&ResourceStruct{Name: "A", Floating: 3.14})
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	admin.Create(&ResourceStruct{Name: "C"})
 	admin.Create(&ResourceStruct{Name: "B"})
 
@@ -33,6 +37,15 @@ func TestAdminQuery(t *testing.T) {
 	}
 	if item.Name != "C" {
 		t.Fatal(item.Name)
+	}
+
+	resource.createNewItem(&createdItem)
+	err = admin.Query().Where(2).Get(createdItem)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if createdItem.(*ResourceStruct).Name != "C" {
+		t.Fatal(createdItem.(*ResourceStruct).Name)
 	}
 
 	err = admin.Query().Where("id=?", 2).Get(&item)

@@ -130,6 +130,10 @@ func (ar *Resource) newItem() (item interface{}, err error) {
 	return
 }
 
+func (ar *Resource) createNewItem(item interface{}) {
+	reflect.ValueOf(item).Elem().Set(reflect.New(ar.Typ))
+}
+
 func (q *ResourceQuery) Where(w interface{}) *ResourceQuery {
 	if q.err == nil {
 		q.err = q.query.where(w)
