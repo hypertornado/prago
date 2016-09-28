@@ -37,11 +37,8 @@ func TestAdminQuery(t *testing.T) {
 	var createdItem interface{}
 	var resource *Resource
 
-	admin, _ := prepareResource()
-	resource, err = admin.CreateResource(ResourceStruct{})
-	if err != nil {
-		t.Fatal(err)
-	}
+	admin, resource := prepareResource()
+
 	admin.UnsafeDropTables()
 	admin.Migrate(false)
 
@@ -288,11 +285,16 @@ func TestShouldNotSaveWithZeroID(t *testing.T) {
 
 func TestShouldNotCreateResourceWithPointer(t *testing.T) {
 	var err error
-	_, err = newResource(&ResourceStruct{})
+	admin, _ := prepareResource()
+	_, err = admin.CreateResource(ResourceStruct{})
 	if err == nil {
 		t.Fatal("Should have non nil error")
 	}
-	_, err = newResource(85)
+	_, err = admin.CreateResource(&ResourceStruct{})
+	if err == nil {
+		t.Fatal("Should have non nil error")
+	}
+	_, err = admin.CreateResource(85)
 	if err == nil {
 		t.Fatal("Should have non nil error")
 	}

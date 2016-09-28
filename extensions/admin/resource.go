@@ -23,7 +23,7 @@ type dbProvider interface {
 //Resource is structure representing one item in admin menu or one table in database
 type Resource struct {
 	ID                 string
-	Name               func(string) string
+	Name               func(locale string) string
 	Typ                reflect.Type
 	ResourceController *prago.Controller
 	Authenticate       Authenticatizer
@@ -52,8 +52,8 @@ type Resource struct {
 	AfterDelete  Action
 }
 
-//TODO: inline this
-func newResource(item interface{}) (*Resource, error) {
+//CreateResource creates new resource based on item
+func (a *Admin) CreateResource(item interface{}) (ret *Resource, err error) {
 	cache, err := newStructCache(item)
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func newResource(item interface{}) (*Resource, error) {
 
 	typ := reflect.TypeOf(item)
 	defaultName := typ.Name()
-	ret := &Resource{
+	ret = &Resource{
 		Name:              func(string) string { return defaultName },
 		ID:                columnName(defaultName),
 		Typ:               typ,
@@ -124,7 +124,19 @@ func newResource(item interface{}) (*Resource, error) {
 		ret.AfterFormCreated = ifaceAdminAfterFormCreated.AdminAfterFormCreated
 	}
 
-	return ret, nil
+	ret.admin = a
+	a.Resources = append(a.Resources, ret)
+	if ret.HasModel {
+		_, typFound := a.resourceMap[ret.Typ]
+		if typFound {
+			return nil, fmt.Errorf("resource with type %s already created", ret.Typ)
+		}
+
+		a.resourceMap[ret.Typ] = ret
+		a.resourceNameMap[ret.ID] = ret
+	}
+
+	return ret, err
 }
 
 func (a *Admin) initResource(resource *Resource) error {

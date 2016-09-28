@@ -53,16 +53,6 @@ func NewAdmin(prefix, name string) *Admin {
 	return ret
 }
 
-//CreateResource creates new resource based on item
-func (a *Admin) CreateResource(item interface{}) (resource *Resource, err error) {
-	resource, err = newResource(item)
-	if err != nil {
-		return
-	}
-	err = a.addResource(resource)
-	return
-}
-
 //UnsafeDropTables drop all tables, useful mainly in tests
 func (a *Admin) UnsafeDropTables() error {
 	for _, resource := range a.Resources {
@@ -112,17 +102,6 @@ func AddFlashMessage(request prago.Request, message string) {
 	session := request.GetData("session").(*sessions.Session)
 	session.AddFlash(message)
 	prago.Must(session.Save(request.Request(), request.Response()))
-}
-
-//TODO: inline this method
-func (a *Admin) addResource(resource *Resource) error {
-	resource.admin = a
-	a.Resources = append(a.Resources, resource)
-	if resource.HasModel {
-		a.resourceMap[resource.Typ] = resource
-		a.resourceNameMap[resource.ID] = resource
-	}
-	return nil
 }
 
 func (a *Admin) getResourceByName(name string) *Resource {
