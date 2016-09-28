@@ -23,7 +23,7 @@ func (cache *structCache) BindOrder(item interface{}, order int64) error {
 	return nil
 }
 
-func (cache *structCache) BindData(item interface{}, params url.Values, multiForm *multipart.Form, bindDataFilter StructFieldFilter) error {
+func (cache *structCache) BindData(item interface{}, params url.Values, multiForm *multipart.Form, bindDataFilter structFieldFilter) error {
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
 		if value.Kind() == reflect.Struct {

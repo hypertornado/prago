@@ -182,9 +182,9 @@ func newStructField(field reflect.StructField, order int) *structField {
 	return ret
 }
 
-type StructFieldFilter func(field *structField) bool
+type structFieldFilter func(field *structField) bool
 
-func DefaultVisibilityFilter(field *structField) bool {
+func defaultVisibilityFilter(field *structField) bool {
 	visible := true
 	if field.Name == "ID" {
 		visible = false
@@ -204,7 +204,7 @@ func DefaultVisibilityFilter(field *structField) bool {
 	return visible
 }
 
-func DefaultEditabilityFilter(field *structField) bool {
+func defaultEditabilityFilter(field *structField) bool {
 	editable := true
 	if field.Name == "CreatedAt" || field.Name == "UpdatedAt" {
 		editable = false
@@ -220,7 +220,7 @@ func DefaultEditabilityFilter(field *structField) bool {
 	return editable
 }
 
-func WhiteListFilter(in ...string) StructFieldFilter {
+func whiteListFilter(in ...string) structFieldFilter {
 	m := make(map[string]bool)
 	for _, v := range in {
 		m[v] = true
@@ -230,7 +230,7 @@ func WhiteListFilter(in ...string) StructFieldFilter {
 	}
 }
 
-func (cache *structCache) GetForm(inValues interface{}, lang string, visible StructFieldFilter, editable StructFieldFilter) (*Form, error) {
+func (cache *structCache) GetForm(inValues interface{}, lang string, visible structFieldFilter, editable structFieldFilter) (*Form, error) {
 	form := NewForm()
 
 	form.Method = "POST"

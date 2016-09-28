@@ -530,7 +530,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 	})
 
 	settingsForm := func(locale string, user *User) *Form {
-		form, err := resource.StructCache.GetForm(user, locale, WhiteListFilter("Name", "Email"), WhiteListFilter("Name", "Locale"))
+		form, err := resource.StructCache.GetForm(user, locale, whiteListFilter("Name", "Email"), whiteListFilter("Name", "Locale"))
 		if err != nil {
 			panic(err)
 		}

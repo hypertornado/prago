@@ -133,7 +133,7 @@ func TestAdminBind(t *testing.T) {
 	var in interface{}
 	in = &n
 
-	cache.BindData(&in, values, nil, DefaultEditabilityFilter)
+	cache.BindData(&in, values, nil, defaultEditabilityFilter)
 
 	if n.Floating < 3 || n.Floating > 4 {
 		t.Fatal(n.Floating)
@@ -298,7 +298,7 @@ func TestAdminDB(t *testing.T) {
 
 	values := make(url.Values)
 	values.Set("Name", "somename")
-	cache.BindData(item, values, nil, DefaultEditabilityFilter)
+	cache.BindData(item, values, nil, defaultEditabilityFilter)
 	cache.createItem(db, tableName, item)
 	listItems(cache, db, tableName, &nodesIface, &listQuery{})
 	nodes = nodesIface.([]*TestNode)

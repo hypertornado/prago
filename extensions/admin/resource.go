@@ -37,8 +37,8 @@ type Resource struct {
 	table              string
 	StructCache        *structCache
 	AfterFormCreated   func(f *Form, request prago.Request, newItem bool) *Form
-	VisibilityFilter   StructFieldFilter
-	EditabilityFilter  StructFieldFilter
+	VisibilityFilter   structFieldFilter
+	EditabilityFilter  structFieldFilter
 	Actions            map[string]ActionBinder
 
 	BeforeList   Action
@@ -71,8 +71,8 @@ func newResource(item interface{}) (*Resource, error) {
 		HasView:           true,
 		item:              item,
 		StructCache:       cache,
-		VisibilityFilter:  DefaultVisibilityFilter,
-		EditabilityFilter: DefaultEditabilityFilter,
+		VisibilityFilter:  defaultVisibilityFilter,
+		EditabilityFilter: defaultEditabilityFilter,
 	}
 
 	ret.Actions = map[string]ActionBinder{
