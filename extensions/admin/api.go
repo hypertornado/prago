@@ -27,7 +27,12 @@ func bindListResourceAPI(a *Admin) {
 		locale := GetLocale(request)
 		user := GetUser(request)
 		name := request.Params().Get("name")
-		resource := a.resourceNameMap[name]
+		resource, found := a.resourceNameMap[name]
+
+		if !found {
+			render404(request)
+			return
+		}
 
 		if !resource.Authenticate(user) {
 			render403(request)
