@@ -45,10 +45,11 @@ func bindListResourceAPI(a *Admin) {
 
 		ret := []resourceItem{}
 
-		items, err := resource.Query().List()
-		prago.Must(err)
+		var items interface{}
+		resource.newItems(&items)
+		prago.Must(a.Query().Get(items))
 
-		itemsVal := reflect.ValueOf(items)
+		itemsVal := reflect.ValueOf(items).Elem()
 
 		for i := 0; i < itemsVal.Len(); i++ {
 			item := itemsVal.Index(i)

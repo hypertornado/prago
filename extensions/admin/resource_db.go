@@ -1,21 +1,12 @@
 package admin
 
 import (
-	"database/sql"
 	"errors"
 	"reflect"
 	"time"
 )
 
 var ErrWrongWhereFormat = errors.New("wrong Where Format")
-
-type ResourceQuery struct {
-	query       *listQuery
-	db          *sql.DB
-	tableName   string
-	structCache *structCache
-	err         error
-}
 
 func (q *listQuery) where(data ...interface{}) error {
 	var whereParams []interface{}
@@ -103,55 +94,10 @@ func (ar *Resource) createWithDBIface(item interface{}, db dbIface) error {
 	return ar.StructCache.createItem(db, ar.tableName(), item)
 }
 
-func (ar *Resource) Query() *ResourceQuery {
-	var err error
-	if !ar.HasModel {
-		err = ErrDontHaveModel
-	}
-	return &ResourceQuery{
-		query:       &listQuery{},
-		db:          ar.db(),
-		tableName:   ar.tableName(),
-		structCache: ar.StructCache,
-		err:         err,
-	}
-}
-
 func (ar *Resource) newItem(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(ar.Typ))
 }
 
-func (q *ResourceQuery) Where(w interface{}) *ResourceQuery {
-	if q.err == nil {
-		q.err = q.query.where(w)
-	}
-	return q
-}
-
-func (q *ResourceQuery) Order(name string) *ResourceQuery {
-	q.query.addOrder(name, false)
-	return q
-}
-
-func (q *ResourceQuery) OrderDesc(name string) *ResourceQuery {
-	q.query.addOrder(name, true)
-	return q
-}
-
-func (q *ResourceQuery) Limit(i int64) *ResourceQuery {
-	q.query.limit = i
-	return q
-}
-
-func (q *ResourceQuery) Offset(i int64) *ResourceQuery {
-	q.query.offset = i
-	return q
-}
-
-func (q *ResourceQuery) List() (items interface{}, err error) {
-	if q.err != nil {
-		return nil, q.err
-	}
-	err = listItems(q.structCache, q.db, q.tableName, &items, q.query)
-	return
+func (ar *Resource) newItems(item interface{}) {
+	reflect.ValueOf(item).Elem().Set(reflect.New(reflect.SliceOf(reflect.PtrTo(ar.Typ))))
 }

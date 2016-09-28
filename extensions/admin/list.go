@@ -96,7 +96,7 @@ func (resource *Resource) getList(admin *Admin, lang string, path string, reques
 		return
 	}
 
-	q := resource.Query()
+	q := admin.Query()
 	if orderDesc {
 		q.OrderDesc(orderItem)
 	} else {
@@ -114,7 +114,6 @@ func (resource *Resource) getList(admin *Admin, lang string, path string, reques
 	var item interface{}
 	resource.newItem(&item)
 	count, err = admin.Query().Count(item)
-	//count, err = q.Count()
 	if err != nil {
 		return
 	}
@@ -162,7 +161,9 @@ func (resource *Resource) getList(admin *Admin, lang string, path string, reques
 	q.Offset((currentPage - 1) * resource.Pagination)
 	q.Limit(resource.Pagination)
 
-	rowItems, err := q.List()
+	var rowItems interface{}
+	resource.newItems(&rowItems)
+	q.Get(rowItems)
 
 	for _, v := range resource.StructCache.fieldArrays {
 		if v.canShow() {
@@ -206,7 +207,7 @@ func (resource *Resource) getList(admin *Admin, lang string, path string, reques
 		}
 	}
 
-	val := reflect.ValueOf(rowItems)
+	val := reflect.ValueOf(rowItems).Elem()
 	for i := 0; i < val.Len(); i++ {
 		row := listRow{}
 		itemVal := val.Index(i).Elem()
