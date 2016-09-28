@@ -123,7 +123,10 @@ type ResourceStruct struct {
 
 func prepareResource() (*Admin, *Resource) {
 	admin := prepareAdmin()
-	resource := admin.CreateResource(ResourceStruct{})
+	resource, err := admin.CreateResource(ResourceStruct{})
+	if err != nil {
+		panic(err)
+	}
 	admin.UnsafeDropTables()
 	admin.Migrate(false)
 	return admin, resource
@@ -145,8 +148,8 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	resource.create(&ResourceStruct{Name: "First", CreatedAt: time.Now()})
-	resource.create(&ResourceStruct{Name: "Second", Showing: "show"})
+	admin.Create(&ResourceStruct{Name: "First", CreatedAt: time.Now()})
+	admin.Create(&ResourceStruct{Name: "Second", Showing: "show"})
 
 	count, err = resource.Query().Count()
 	if err != nil {
@@ -174,15 +177,14 @@ func TestResourceUnique(t *testing.T) {
 		Name string `prago-unique:"true"`
 	}
 
-	resource, _ := newResource(ResourceStructUnique{})
-	resource.admin = dbTestProvider{}
+	admin, _ := prepareResource()
+	resource, _ := admin.CreateResource(ResourceStructUnique{})
+	admin.UnsafeDropTables()
+	admin.Migrate(false)
 
-	resource.unsafeDropTable()
-	resource.migrate(false)
-
-	resource.create(&ResourceStructUnique{Name: "A"})
-	resource.create(&ResourceStructUnique{Name: "B"})
-	resource.create(&ResourceStructUnique{Name: "A"})
+	admin.Create(&ResourceStructUnique{Name: "A"})
+	admin.Create(&ResourceStructUnique{Name: "B"})
+	admin.Create(&ResourceStructUnique{Name: "A"})
 
 	count, err := resource.Query().Count()
 	if err != nil {
@@ -195,10 +197,10 @@ func TestResourceUnique(t *testing.T) {
 }
 
 func TestResourceDate(t *testing.T) {
-	resource := prepareResource()
+	admin, resource := prepareResource()
 	tm := time.Now()
 
-	resource.create(&ResourceStruct{Date: tm})
+	admin.Create(&ResourceStruct{Date: tm})
 	_, err := resource.Query().Where(map[string]interface{}{"date": tm.Format("2006-01-02")}).First()
 	if err != nil {
 		t.Fatal(err)
@@ -207,11 +209,11 @@ func TestResourceDate(t *testing.T) {
 }
 
 func TestResourceTimestamps(t *testing.T) {
-	resource := prepareResource()
+	admin, resource := prepareResource()
 
 	testStartTime := time.Now().Truncate(time.Second)
 
-	resource.create(&ResourceStruct{Name: "A"})
+	admin.Create(&ResourceStruct{Name: "A"})
 
 	itemIface, err := resource.Query().Where(map[string]interface{}{"id": 1}).First()
 	if err != nil {
@@ -230,10 +232,10 @@ func TestResourceTimestamps(t *testing.T) {
 }
 
 func TestResourceBool(t *testing.T) {
-	resource := prepareResource()
+	admin, resource := prepareResource()
 
-	resource.create(&ResourceStruct{Name: "A", IsSomething: false})
-	resource.create(&ResourceStruct{Name: "B", IsSomething: true})
+	admin.Create(&ResourceStruct{Name: "A", IsSomething: false})
+	admin.Create(&ResourceStruct{Name: "B", IsSomething: true})
 
 	itemIface, err := resource.Query().Where(map[string]interface{}{"issomething": true}).First()
 	if err != nil {
@@ -257,8 +259,9 @@ func TestResourceBool(t *testing.T) {
 }
 
 func TestResourceCreateWithID(t *testing.T) {
-	resource := prepareResource()
-	resource.create(&ResourceStruct{ID: 85, Name: "A"})
+	admin, resource := prepareResource()
+	admin.Create(&ResourceStruct{ID: 85, Name: "A"})
+
 	item, _ := resource.Query().First()
 	id := item.(*ResourceStruct).ID
 	if id != 85 {
@@ -267,8 +270,8 @@ func TestResourceCreateWithID(t *testing.T) {
 }
 
 func TestShouldNotSaveWithZeroID(t *testing.T) {
-	resource := prepareResource()
-	err := resource.save(&ResourceStruct{})
+	admin, _ := prepareResource()
+	err := admin.Save(&ResourceStruct{})
 	if err == nil {
 		t.Fatal("should not be nil")
 	}
