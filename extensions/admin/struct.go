@@ -12,8 +12,8 @@ import (
 
 type structCache struct {
 	typ             reflect.Type
-	fieldArrays     []*StructField
-	fieldMap        map[string]*StructField
+	fieldArrays     []*structField
+	fieldMap        map[string]*structField
 	OrderFieldName  string
 	OrderColumnName string
 }
@@ -26,7 +26,7 @@ func newStructCache(item interface{}) (ret *structCache, err error) {
 
 	ret = &structCache{
 		typ:      typ,
-		fieldMap: make(map[string]*StructField),
+		fieldMap: make(map[string]*structField),
 	}
 
 	for i := 0; i < typ.NumField(); i++ {
@@ -75,7 +75,7 @@ func (cs *structCache) GetDefaultOrder() (column string, desc bool) {
 	return
 }
 
-type StructField struct {
+type structField struct {
 	Name       string
 	ColumnName string
 	Typ        reflect.Type
@@ -86,7 +86,7 @@ type StructField struct {
 	CanOrder   bool
 }
 
-func (a *StructField) fieldDescriptionMysql() string {
+func (a *structField) fieldDescriptionMysql() string {
 	var fieldDescription string
 	switch a.Typ.Kind() {
 	case reflect.Struct:
@@ -125,7 +125,7 @@ func (a *StructField) fieldDescriptionMysql() string {
 	return fmt.Sprintf("%s %s %s", a.ColumnName, fieldDescription, additional)
 }
 
-func (v *StructField) canShow() (show bool) {
+func (v *structField) canShow() (show bool) {
 	if v.Name == "ID" || v.Name == "Name" {
 		show = true
 	}
@@ -139,7 +139,7 @@ func (v *StructField) canShow() (show bool) {
 	return
 }
 
-func (a *StructField) humanName(lang string) (ret string) {
+func (a *structField) humanName(lang string) (ret string) {
 	description := a.Tags["prago-description"]
 	if len(description) > 0 {
 		return description
@@ -151,8 +151,8 @@ func (a *StructField) humanName(lang string) (ret string) {
 	return *translatedName
 }
 
-func newStructField(field reflect.StructField, order int) *StructField {
-	ret := &StructField{
+func newStructField(field reflect.StructField, order int) *structField {
+	ret := &structField{
 		Name:       field.Name,
 		ColumnName: columnName(field.Name),
 		Typ:        field.Type,
@@ -182,9 +182,9 @@ func newStructField(field reflect.StructField, order int) *StructField {
 	return ret
 }
 
-type StructFieldFilter func(field *StructField) bool
+type StructFieldFilter func(field *structField) bool
 
-func DefaultVisibilityFilter(field *StructField) bool {
+func DefaultVisibilityFilter(field *structField) bool {
 	visible := true
 	if field.Name == "ID" {
 		visible = false
@@ -204,7 +204,7 @@ func DefaultVisibilityFilter(field *StructField) bool {
 	return visible
 }
 
-func DefaultEditabilityFilter(field *StructField) bool {
+func DefaultEditabilityFilter(field *structField) bool {
 	editable := true
 	if field.Name == "CreatedAt" || field.Name == "UpdatedAt" {
 		editable = false
@@ -225,7 +225,7 @@ func WhiteListFilter(in ...string) StructFieldFilter {
 	for _, v := range in {
 		m[v] = true
 	}
-	return func(field *StructField) bool {
+	return func(field *structField) bool {
 		return m[field.Name]
 	}
 }
