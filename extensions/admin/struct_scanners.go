@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (s *StructCache) getStructScanners(value reflect.Value) (names []string, scanners []interface{}, err error) {
+func (s *structCache) getStructScanners(value reflect.Value) (names []string, scanners []interface{}, err error) {
 	if value.Type() != s.typ {
 		err = errors.New("Types dont match")
 		return

@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-type StructCache struct {
+type structCache struct {
 	typ             reflect.Type
 	fieldArrays     []*StructField
 	fieldMap        map[string]*StructField
@@ -18,13 +18,13 @@ type StructCache struct {
 	OrderColumnName string
 }
 
-func NewStructCache(item interface{}) (ret *StructCache, err error) {
+func newStructCache(item interface{}) (ret *structCache, err error) {
 	typ := reflect.TypeOf(item)
 	if typ.Kind() != reflect.Struct {
 		return nil, errors.New("item is not a structure")
 	}
 
-	ret = &StructCache{
+	ret = &structCache{
 		typ:      typ,
 		fieldMap: make(map[string]*StructField),
 	}
@@ -43,7 +43,7 @@ func NewStructCache(item interface{}) (ret *StructCache, err error) {
 	return
 }
 
-func (cs *StructCache) GetDefaultOrder() (column string, desc bool) {
+func (cs *structCache) GetDefaultOrder() (column string, desc bool) {
 	column = ""
 
 	for _, v := range cs.fieldArrays {
@@ -230,7 +230,7 @@ func WhiteListFilter(in ...string) StructFieldFilter {
 	}
 }
 
-func (cache *StructCache) GetForm(inValues interface{}, lang string, visible StructFieldFilter, editable StructFieldFilter) (*Form, error) {
+func (cache *structCache) GetForm(inValues interface{}, lang string, visible StructFieldFilter, editable StructFieldFilter) (*Form, error) {
 	form := NewForm()
 
 	form.Method = "POST"

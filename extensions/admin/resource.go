@@ -35,7 +35,7 @@ type Resource struct {
 	item               interface{}
 	admin              dbProvider
 	table              string
-	StructCache        *StructCache
+	StructCache        *structCache
 	AfterFormCreated   func(f *Form, request prago.Request, newItem bool) *Form
 	VisibilityFilter   StructFieldFilter
 	EditabilityFilter  StructFieldFilter
@@ -54,7 +54,7 @@ type Resource struct {
 
 //TODO: inline this
 func newResource(item interface{}) (*Resource, error) {
-	structCache, err := NewStructCache(item)
+	cache, err := newStructCache(item)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func newResource(item interface{}) (*Resource, error) {
 		HasModel:          true,
 		HasView:           true,
 		item:              item,
-		StructCache:       structCache,
+		StructCache:       cache,
 		VisibilityFilter:  DefaultVisibilityFilter,
 		EditabilityFilter: DefaultEditabilityFilter,
 	}
@@ -85,7 +85,7 @@ func newResource(item interface{}) (*Resource, error) {
 		"delete": BindDelete,
 	}
 
-	ret.OrderByColumn, ret.OrderDesc = structCache.GetDefaultOrder()
+	ret.OrderByColumn, ret.OrderDesc = cache.GetDefaultOrder()
 
 	ifaceName, ok := item.(interface {
 		AdminName(string) string

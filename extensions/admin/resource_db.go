@@ -13,7 +13,7 @@ type ResourceQuery struct {
 	query       *listQuery
 	db          *sql.DB
 	tableName   string
-	structCache *StructCache
+	structCache *structCache
 	err         error
 }
 

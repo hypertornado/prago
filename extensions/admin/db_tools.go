@@ -65,7 +65,7 @@ func listTables(db dbIface) (ret map[string]bool, err error) {
 	return
 }
 
-func createTable(db dbIface, tableName string, adminStruct *StructCache, verbose bool) (err error) {
+func createTable(db dbIface, tableName string, adminStruct *structCache, verbose bool) (err error) {
 	if verbose {
 		fmt.Printf("Creating table '%s'\n", tableName)
 	}
@@ -81,7 +81,7 @@ func createTable(db dbIface, tableName string, adminStruct *StructCache, verbose
 	return err
 }
 
-func migrateTable(db dbIface, tableName string, adminStruct *StructCache, verbose bool) error {
+func migrateTable(db dbIface, tableName string, adminStruct *structCache, verbose bool) error {
 	if verbose {
 		fmt.Printf("Migrating table '%s'\n", tableName)
 	}
@@ -154,7 +154,7 @@ func getTableDescription(db dbIface, tableName string) (map[string]*mysqlColumn,
 	return columns, nil
 }
 
-func (sc *StructCache) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
+func (sc *structCache) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
 
 	for _, field := range sc.fieldArrays {
 		val := value.FieldByName(field.Name)
@@ -194,7 +194,7 @@ func (sc *StructCache) prepareValues(value reflect.Value) (names []string, quest
 	return
 }
 
-func (sc *StructCache) saveItem(db dbIface, tableName string, item interface{}) error {
+func (sc *structCache) saveItem(db dbIface, tableName string, item interface{}) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	value := reflect.ValueOf(item).Elem()
 	names, _, values, err := sc.prepareValues(value)
@@ -223,7 +223,7 @@ func (sc *StructCache) saveItem(db dbIface, tableName string, item interface{}) 
 	return nil
 }
 
-func (sc *StructCache) createItem(db dbIface, tableName string, item interface{}) error {
+func (sc *structCache) createItem(db dbIface, tableName string, item interface{}) error {
 	value := reflect.ValueOf(item).Elem()
 
 	names, questionMarks, values, err := sc.prepareValues(value)
@@ -317,9 +317,9 @@ func countItems(db dbIface, tableName string, query *listQuery) (int64, error) {
 	return i, err
 }
 
-func getFirstItem(structCache *StructCache, db dbIface, tableName string, item interface{}, query *listQuery) error {
+func getFirstItem(cache *structCache, db dbIface, tableName string, item interface{}, query *listQuery) error {
 	var items interface{}
-	err := listItems(structCache, db, tableName, &items, query)
+	err := listItems(cache, db, tableName, &items, query)
 	if err != nil {
 		return err
 	}
@@ -333,14 +333,14 @@ func getFirstItem(structCache *StructCache, db dbIface, tableName string, item i
 	return ErrItemNotFound
 }
 
-func listItems(structCache *StructCache, db dbIface, tableName string, items interface{}, query *listQuery) error {
-	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(structCache.typ))).Elem()
+func listItems(cache *structCache, db dbIface, tableName string, items interface{}, query *listQuery) error {
+	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(cache.typ))).Elem()
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.whereString)
 
-	newValue := reflect.New(structCache.typ).Elem()
-	names, scanners, err := structCache.getStructScanners(newValue)
+	newValue := reflect.New(cache.typ).Elem()
+	names, scanners, err := cache.getStructScanners(newValue)
 	if err != nil {
 		return err
 	}
@@ -355,8 +355,8 @@ func listItems(structCache *StructCache, db dbIface, tableName string, items int
 	}
 	defer rows.Close()
 	for rows.Next() {
-		newValue = reflect.New(structCache.typ)
-		names, scanners, err = structCache.getStructScanners(newValue.Elem())
+		newValue = reflect.New(cache.typ)
+		names, scanners, err = cache.getStructScanners(newValue.Elem())
 		if err != nil {
 			return err
 		}

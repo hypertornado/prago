@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (cache *StructCache) BindOrder(item interface{}, order int64) error {
+func (cache *structCache) BindOrder(item interface{}, order int64) error {
 	value := reflect.ValueOf(item)
 
 	for i := 0; i < 10; i++ {
@@ -23,7 +23,7 @@ func (cache *StructCache) BindOrder(item interface{}, order int64) error {
 	return nil
 }
 
-func (cache *StructCache) BindData(item interface{}, params url.Values, multiForm *multipart.Form, bindDataFilter StructFieldFilter) error {
+func (cache *structCache) BindData(item interface{}, params url.Values, multiForm *multipart.Form, bindDataFilter StructFieldFilter) error {
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
 		if value.Kind() == reflect.Struct {

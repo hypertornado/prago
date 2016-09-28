@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	db          *sql.DB
-	structCache *StructCache
+	db    *sql.DB
+	cache *structCache
 )
 
 type dbTestProvider struct{}
@@ -28,7 +28,7 @@ func (dbTestProvider) getResourceByName(string) *Resource {
 
 func init() {
 	var err error
-	structCache, err = NewStructCache(TestNode{})
+	cache, err = newStructCache(TestNode{})
 	if err != nil {
 		panic(err)
 	}
@@ -91,17 +91,17 @@ func changeStruct(i interface{}) {
 func TestAdminTime(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, structCache, false)
+	createTable(db, tableName, cache, false)
 
 	tn := time.Now()
 
 	n0 := &TestNode{Changed: tn, Date: tn}
-	structCache.createItem(db, tableName, n0)
+	cache.createItem(db, tableName, n0)
 
 	n1 := &TestNode{}
 
 	whereString, whereParams := mapToDBQuery(map[string]interface{}{"id": n0.ID})
-	getFirstItem(structCache, db, tableName, &n1, &listQuery{
+	getFirstItem(cache, db, tableName, &n1, &listQuery{
 		whereString: whereString,
 		whereParams: whereParams,
 	})
@@ -133,7 +133,7 @@ func TestAdminBind(t *testing.T) {
 	var in interface{}
 	in = &n
 
-	structCache.BindData(&in, values, nil, DefaultEditabilityFilter)
+	cache.BindData(&in, values, nil, DefaultEditabilityFilter)
 
 	if n.Floating < 3 || n.Floating > 4 {
 		t.Fatal(n.Floating)
@@ -151,10 +151,10 @@ func TestAdminDBFirst(t *testing.T) {
 	var err error
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, structCache, false)
+	createTable(db, tableName, cache, false)
 
 	var node *TestNode
-	err = getFirstItem(structCache, db, tableName, &node, &listQuery{})
+	err = getFirstItem(cache, db, tableName, &node, &listQuery{})
 	if err != ErrItemNotFound {
 		t.Fatal("wrong error")
 	}
@@ -162,17 +162,17 @@ func TestAdminDBFirst(t *testing.T) {
 	n0 := &TestNode{Name: "A"}
 	n1 := &TestNode{Name: "B"}
 
-	err = structCache.createItem(db, tableName, n0)
+	err = cache.createItem(db, tableName, n0)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = structCache.createItem(db, tableName, n1)
+	err = cache.createItem(db, tableName, n1)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	getFirstItem(structCache, db, tableName, &node, &listQuery{})
+	getFirstItem(cache, db, tableName, &node, &listQuery{})
 
 	if node.Name != "A" {
 		t.Fatal(node.Name)
@@ -182,13 +182,13 @@ func TestAdminDBFirst(t *testing.T) {
 func TestAdminListItems(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, structCache, false)
+	createTable(db, tableName, cache, false)
 
-	structCache.createItem(db, tableName, &TestNode{Name: "A"})
-	structCache.createItem(db, tableName, &TestNode{Name: "B"})
+	cache.createItem(db, tableName, &TestNode{Name: "A"})
+	cache.createItem(db, tableName, &TestNode{Name: "B"})
 
 	var nodesIface interface{}
-	listItems(structCache, db, tableName, &nodesIface, &listQuery{})
+	listItems(cache, db, tableName, &nodesIface, &listQuery{})
 
 	nodes, ok := nodesIface.([]*TestNode)
 	if !ok {
@@ -204,7 +204,7 @@ func TestAdminListItems(t *testing.T) {
 	}
 
 	var nodeIface interface{}
-	getFirstItem(structCache, db, tableName, &nodeIface, &listQuery{})
+	getFirstItem(cache, db, tableName, &nodeIface, &listQuery{})
 
 	_, ok = nodeIface.(*TestNode)
 	if !ok {
@@ -228,7 +228,7 @@ func TestAdminDB(t *testing.T) {
 	var err error
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, structCache, false)
+	createTable(db, tableName, cache, false)
 
 	timeNow := time.Now()
 
@@ -238,12 +238,12 @@ func TestAdminDB(t *testing.T) {
 	n0 := &TestNode{Name: "A1", OK: false, Changed: timeNow}
 	n1 := &TestNode{Name: name1, Count: count1, OK: true, Changed: timeNow}
 
-	err = structCache.createItem(db, tableName, n0)
+	err = cache.createItem(db, tableName, n0)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = structCache.createItem(db, tableName, n1)
+	err = cache.createItem(db, tableName, n1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -255,7 +255,7 @@ func TestAdminDB(t *testing.T) {
 	n2 := &TestNode{}
 
 	whereString, whereParams := mapToDBQuery(map[string]interface{}{"id": n1.ID})
-	err = getFirstItem(structCache, db, tableName, &n2, &listQuery{
+	err = getFirstItem(cache, db, tableName, &n2, &listQuery{
 		whereString: whereString,
 		whereParams: whereParams,
 	})
@@ -276,7 +276,7 @@ func TestAdminDB(t *testing.T) {
 	}
 
 	var nodesIface interface{}
-	listItems(structCache, db, tableName, &nodesIface, &listQuery{})
+	listItems(cache, db, tableName, &nodesIface, &listQuery{})
 
 	nodes := nodesIface.([]*TestNode)
 
@@ -298,9 +298,9 @@ func TestAdminDB(t *testing.T) {
 
 	values := make(url.Values)
 	values.Set("Name", "somename")
-	structCache.BindData(item, values, nil, DefaultEditabilityFilter)
-	structCache.createItem(db, tableName, item)
-	listItems(structCache, db, tableName, &nodesIface, &listQuery{})
+	cache.BindData(item, values, nil, DefaultEditabilityFilter)
+	cache.createItem(db, tableName, item)
+	listItems(cache, db, tableName, &nodesIface, &listQuery{})
 	nodes = nodesIface.([]*TestNode)
 
 	if len(nodes) != 3 {
@@ -308,12 +308,12 @@ func TestAdminDB(t *testing.T) {
 	}
 
 	changedNode := &TestNode{ID: 2, Name: "changedname"}
-	structCache.saveItem(db, tableName, changedNode)
+	cache.saveItem(db, tableName, changedNode)
 
 	changedNodeResult := &TestNode{}
 
 	whereString, whereParams = mapToDBQuery(map[string]interface{}{"id": 2})
-	getFirstItem(structCache, db, tableName, &changedNodeResult, &listQuery{
+	getFirstItem(cache, db, tableName, &changedNodeResult, &listQuery{
 		whereString: whereString,
 		whereParams: whereParams,
 	})
@@ -327,7 +327,7 @@ func TestAdminDB(t *testing.T) {
 		whereParams: whereParams,
 	})
 
-	listItems(structCache, db, tableName, &nodesIface, &listQuery{})
+	listItems(cache, db, tableName, &nodesIface, &listQuery{})
 	nodes = nodesIface.([]*TestNode)
 
 	if len(nodes) != 2 {
@@ -338,18 +338,18 @@ func TestAdminDB(t *testing.T) {
 func TestAdminResourceQuery(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, structCache, false)
+	createTable(db, tableName, cache, false)
 
 	q := &ResourceQuery{
 		query:       &listQuery{},
 		db:          db,
 		tableName:   tableName,
-		structCache: structCache,
+		structCache: cache,
 	}
 
 	n0 := &TestNode{Name: "A1", OK: false}
 
-	structCache.createItem(db, tableName, n0)
+	cache.createItem(db, tableName, n0)
 
 	firstItem, err := q.Where(map[string]interface{}{"id": 1}).First()
 	if err != nil {
@@ -369,47 +369,47 @@ func TestAdminResourceQuery(t *testing.T) {
 func TestAdminDBList(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
-	createTable(db, tableName, structCache, false)
+	createTable(db, tableName, cache, false)
 
-	structCache.createItem(db, tableName, &TestNode{Name: "B", Changed: time.Now().Add(1 * time.Minute)})
-	structCache.createItem(db, tableName, &TestNode{Name: "A"})
-	structCache.createItem(db, tableName, &TestNode{Name: "B", Changed: time.Now()})
-	structCache.createItem(db, tableName, &TestNode{Name: "C"})
+	cache.createItem(db, tableName, &TestNode{Name: "B", Changed: time.Now().Add(1 * time.Minute)})
+	cache.createItem(db, tableName, &TestNode{Name: "A"})
+	cache.createItem(db, tableName, &TestNode{Name: "B", Changed: time.Now()})
+	cache.createItem(db, tableName, &TestNode{Name: "C"})
 
 	var nodes []*TestNode
 
-	listItems(structCache, db, tableName, &nodes, &listQuery{})
+	listItems(cache, db, tableName, &nodes, &listQuery{})
 	compareResults(t, nodes, []int64{1, 2, 3, 4})
 
-	listItems(structCache, db, tableName, &nodes, &listQuery{
+	listItems(cache, db, tableName, &nodes, &listQuery{
 		order: []listQueryOrder{{name: "id", desc: true}},
 	})
 	compareResults(t, nodes, []int64{4, 3, 2, 1})
 
-	listItems(structCache, db, tableName, &nodes, &listQuery{
+	listItems(cache, db, tableName, &nodes, &listQuery{
 		order: []listQueryOrder{{name: "name", desc: true}, {name: "changed", desc: false}},
 	})
 	compareResults(t, nodes, []int64{4, 3, 1, 2})
 
-	listItems(structCache, db, tableName, &nodes, &listQuery{
+	listItems(cache, db, tableName, &nodes, &listQuery{
 		order: []listQueryOrder{{name: "name", desc: true}, {name: "changed", desc: true}},
 	})
 	compareResults(t, nodes, []int64{4, 1, 3, 2})
 
-	listItems(structCache, db, tableName, &nodes, &listQuery{
+	listItems(cache, db, tableName, &nodes, &listQuery{
 		offset: 1,
 		limit:  2,
 	})
 	compareResults(t, nodes, []int64{2, 3})
 
-	listItems(structCache, db, tableName, &nodes, &listQuery{
+	listItems(cache, db, tableName, &nodes, &listQuery{
 		whereString: "name=?",
 		whereParams: []interface{}{"B"},
 	})
 	compareResults(t, nodes, []int64{1, 3})
 
 	whereString, whereParams := mapToDBQuery(map[string]interface{}{"name": "B"})
-	listItems(structCache, db, tableName, &nodes, &listQuery{
+	listItems(cache, db, tableName, &nodes, &listQuery{
 		whereString: whereString,
 		whereParams: whereParams,
 	})
@@ -431,7 +431,7 @@ func TestAdminDBList(t *testing.T) {
 	}
 
 	var node *TestNode
-	getFirstItem(structCache, db, tableName, &node, &listQuery{
+	getFirstItem(cache, db, tableName, &node, &listQuery{
 		whereString: whereString,
 		whereParams: whereParams,
 		offset:      1,
@@ -442,7 +442,7 @@ func TestAdminDBList(t *testing.T) {
 	}
 
 	whereString, whereParams = mapToDBQuery(map[string]interface{}{"name": "B", "id": 1})
-	listItems(structCache, db, tableName, &nodes, &listQuery{
+	listItems(cache, db, tableName, &nodes, &listQuery{
 		whereString: whereString,
 		whereParams: whereParams,
 	})
@@ -461,7 +461,7 @@ func TestAdminDBList(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	listItems(structCache, db, tableName, &nodes, &listQuery{})
+	listItems(cache, db, tableName, &nodes, &listQuery{})
 	compareResults(t, nodes, []int64{2, 4})
 
 }
@@ -494,22 +494,22 @@ func TestMigrateTable(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
 
-	structCache1, _ := NewStructCache(N1{})
-	structCache2, _ := NewStructCache(N2{})
+	cache1, _ := newStructCache(N1{})
+	cache2, _ := newStructCache(N2{})
 
-	createTable(db, tableName, structCache1, false)
+	createTable(db, tableName, cache1, false)
 
-	structCache1.createItem(db, tableName, &N1{Name: "A"})
+	cache1.createItem(db, tableName, &N1{Name: "A"})
 
-	err = migrateTable(db, tableName, structCache2, false)
+	err = migrateTable(db, tableName, cache2, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	structCache2.createItem(db, tableName, &N2{Name: "B", Description: "D"})
+	cache2.createItem(db, tableName, &N2{Name: "B", Description: "D"})
 
 	var nodes []*N2
-	err = listItems(structCache2, db, tableName, &nodes, &listQuery{})
+	err = listItems(cache2, db, tableName, &nodes, &listQuery{})
 	if err != nil {
 		t.Fatal(err)
 	}
