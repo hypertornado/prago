@@ -13,8 +13,7 @@ type ActionBinder func(a *Admin, resource *Resource)
 //BindList is default list binder
 func BindList(a *Admin, resource *Resource) {
 	resource.ResourceController.Get(a.GetURL(resource, ""), func(request prago.Request) {
-
-		listData, err := resource.getList(GetLocale(request), request.Request().URL.Path, request.Request().URL.Query())
+		listData, err := resource.getList(a, GetLocale(request), request.Request().URL.Path, request.Request().URL.Query())
 		if err != nil {
 			if err == ErrItemNotFound {
 				render404(request)
@@ -108,8 +107,9 @@ func BindDetail(a *Admin, resource *Resource) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
 
-		item, err := resource.Query().Where(map[string]interface{}{"id": int64(id)}).First()
-		prago.Must(err)
+		var item interface{}
+		resource.newItem(&item)
+		prago.Must(a.Query().WhereIs("id", int64(id)).Get(item))
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
@@ -143,8 +143,9 @@ func BindUpdate(a *Admin, resource *Resource) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
 
-		item, err := resource.Query().Where(map[string]interface{}{"id": int64(id)}).First()
-		prago.Must(err)
+		var item interface{}
+		resource.newItem(&item)
+		prago.Must(a.Query().WhereIs("id", int64(id)).Get(item))
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
@@ -217,8 +218,9 @@ func BindOrder(a *Admin, resource *Resource) {
 		}
 
 		for i, id := range order {
-			item, err := resource.Query().Where(id).First()
-			prago.Must(err)
+			var item interface{}
+			resource.newItem(&item)
+			prago.Must(a.Query().WhereIs("id", int64(id)).Get(item))
 			prago.Must(resource.StructCache.BindOrder(item, int64(i)))
 			prago.Must(a.Save(item))
 		}

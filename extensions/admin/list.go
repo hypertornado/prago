@@ -2,6 +2,7 @@ package admin
 
 import (
 	"fmt"
+	"github.com/hypertornado/prago"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -50,11 +51,11 @@ type page struct {
 }
 
 //GetList of resource items
-func (resource *Resource) GetList(lang string, path string, requestQuery url.Values) (list list, err error) {
-	return resource.getList(lang, path, requestQuery)
+func (resource *Resource) GetList(admin *Admin, lang string, path string, requestQuery url.Values) (list list, err error) {
+	return resource.getList(admin, lang, path, requestQuery)
 }
 
-func (resource *Resource) getList(lang string, path string, requestQuery url.Values) (list list, err error) {
+func (resource *Resource) getList(admin *Admin, lang string, path string, requestQuery url.Values) (list list, err error) {
 	orderItem := resource.OrderByColumn
 	orderDesc := resource.OrderDesc
 	isDefaultOrder := true
@@ -210,7 +211,7 @@ func (resource *Resource) getList(lang string, path string, requestQuery url.Val
 		for _, h := range list.Header {
 			structField, _ := resource.Typ.FieldByName(h.Name)
 			fieldVal := itemVal.FieldByName(h.Name)
-			row.Items = append(row.Items, resource.valueToCell(structField, fieldVal))
+			row.Items = append(row.Items, resource.valueToCell(admin, structField, fieldVal))
 		}
 		row.ID = itemVal.FieldByName("ID").Int()
 		list.Rows = append(list.Rows, row)
@@ -218,7 +219,7 @@ func (resource *Resource) getList(lang string, path string, requestQuery url.Val
 	return
 }
 
-func (resource *Resource) valueToCell(field reflect.StructField, val reflect.Value) (cell listCell) {
+func (resource *Resource) valueToCell(admin *Admin, field reflect.StructField, val reflect.Value) (cell listCell) {
 	cell.TemplateName = "admin_string"
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
@@ -234,10 +235,10 @@ func (resource *Resource) valueToCell(field reflect.StructField, val reflect.Val
 		cell.Value = fmt.Sprintf("%d", item.(int64))
 		if field.Tag.Get("prago-type") == "relation" {
 			relationResource := resource.admin.getResourceByName(field.Name)
-			relationItem, err := relationResource.Query().Where(map[string]interface{}{"id": item.(int64)}).First()
-			if err != nil {
-				panic(err)
-			}
+
+			var relationItem interface{}
+			relationResource.newItem(&relationItem)
+			prago.Must(admin.Query().WhereIs("id", item.(int64)).Get(relationItem))
 
 			ifaceItemName, ok := relationItem.(interface {
 				AdminItemName(string) string

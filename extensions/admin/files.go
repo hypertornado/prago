@@ -116,10 +116,8 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			prago.Must(err)
 
-			item, err := resource.Query().Where(map[string]interface{}{"id": int64(id)}).First()
-			prago.Must(err)
-
-			file := item.(*File)
+			var file File
+			prago.Must(a.Query().WhereIs("id", int64(id)).Get(&file))
 
 			form := NewForm()
 			form.Method = "POST"
@@ -172,7 +170,7 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 			form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
 			AddCSRFToken(form, request)
 
-			request.SetData("admin_item", item)
+			request.SetData("admin_item", file)
 			request.SetData("admin_form", form)
 			request.SetData("admin_yield", "admin_edit")
 			prago.Render(request, 200, "admin_layout")

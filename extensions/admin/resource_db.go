@@ -152,13 +152,13 @@ func (q *ResourceQuery) Count() (int64, error) {
 	return countItems(q.db, q.tableName, q.query)
 }
 
-func (q *ResourceQuery) First() (item interface{}, err error) {
+/*func (q *ResourceQuery) First() (item interface{}, err error) {
 	if q.err != nil {
 		return nil, q.err
 	}
 	err = getFirstItem(q.structCache, q.db, q.tableName, &item, q.query)
 	return
-}
+}*/
 
 func (q *ResourceQuery) List() (items interface{}, err error) {
 	if q.err != nil {
