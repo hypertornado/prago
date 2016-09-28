@@ -190,7 +190,9 @@ func BindDelete(a *Admin, resource *Resource) {
 			}
 		}
 
-		_, err = resource.Query().Where(map[string]interface{}{"id": int64(id)}).Delete()
+		var item interface{}
+		resource.newItem(&item)
+		_, err = a.Query().WhereIs("id", int64(id)).Delete(item)
 		prago.Must(err)
 
 		if resource.AfterDelete != nil {
