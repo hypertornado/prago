@@ -111,7 +111,10 @@ func (resource *Resource) getList(admin *Admin, lang string, path string, reques
 	}
 
 	var count int64
-	count, err = q.Count()
+	var item interface{}
+	resource.newItem(&item)
+	count, err = admin.Query().Count(item)
+	//count, err = q.Count()
 	if err != nil {
 		return
 	}

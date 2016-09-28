@@ -4,25 +4,11 @@ import (
 	"testing"
 )
 
-type TransactionTestStruct struct {
-	ID    int64
-	Name  string
-	Count int64
-}
-
-func prepareTransactionResource() (*Admin, *Resource) {
-	admin := prepareAdmin()
-	resource, _ := admin.CreateResource(TransactionTestStruct{})
-	admin.UnsafeDropTables()
-	admin.Migrate(false)
-	return admin, resource
-}
-
 func TestTransactions(t *testing.T) {
-	admin, resource := prepareTransactionResource()
+	admin, _ := prepareResource()
 
-	s1 := TransactionTestStruct{Name: "a"}
-	s2 := TransactionTestStruct{Name: "b"}
+	s1 := ResourceStruct{Name: "a"}
+	s2 := ResourceStruct{Name: "b"}
 
 	t1 := admin.Transaction()
 
@@ -34,7 +20,7 @@ func TestTransactions(t *testing.T) {
 
 	var c int64
 
-	c, _ = resource.Query().Count()
+	c, _ = admin.Query().Count(&ResourceStruct{})
 	if c != 0 {
 		t.Fatal(c)
 	}
@@ -48,7 +34,7 @@ func TestTransactions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c, _ = resource.Query().Count()
+	c, _ = admin.Query().Count(&ResourceStruct{})
 	if c != 1 {
 		t.Fatal(c)
 	}

@@ -5,10 +5,35 @@ import (
 	"time"
 )
 
+type ResourceStruct struct {
+	ID          int64
+	Name        string
+	Other       string
+	Showing     string `prago-preview:"true"`
+	IsSomething bool
+	Floating    float64
+	Date        time.Time `prago-type:"date"`
+	Count       int64
+	privateint  int64
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
 func prepareAdmin() *Admin {
 	admin := NewAdmin("admin", "AAA")
 	admin.db = db
 	return admin
+}
+
+func prepareResource() (*Admin, *Resource) {
+	admin := prepareAdmin()
+	resource, err := admin.CreateResource(ResourceStruct{})
+	if err != nil {
+		panic(err)
+	}
+	admin.UnsafeDropTables()
+	admin.Migrate(false)
+	return admin, resource
 }
 
 func TestAdminQuery(t *testing.T) {
@@ -106,32 +131,6 @@ func TestAdminQuery(t *testing.T) {
 
 }
 
-//RESOURCE TESTS
-
-type ResourceStruct struct {
-	ID          int64
-	Name        string
-	Other       string
-	Showing     string `prago-preview:"true"`
-	IsSomething bool
-	Floating    float64
-	Date        time.Time `prago-type:"date"`
-	privateint  int64
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-}
-
-func prepareResource() (*Admin, *Resource) {
-	admin := prepareAdmin()
-	resource, err := admin.CreateResource(ResourceStruct{})
-	if err != nil {
-		panic(err)
-	}
-	admin.UnsafeDropTables()
-	admin.Migrate(false)
-	return admin, resource
-}
-
 func TestResource(t *testing.T) {
 	admin, resource := prepareResource()
 
@@ -140,7 +139,9 @@ func TestResource(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	count, err := resource.Query().Count()
+	var item interface{}
+	resource.newItem(&item)
+	count, err := admin.Query().Count(item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -151,7 +152,7 @@ func TestResource(t *testing.T) {
 	admin.Create(&ResourceStruct{Name: "First", CreatedAt: time.Now()})
 	admin.Create(&ResourceStruct{Name: "Second", Showing: "show"})
 
-	count, err = resource.Query().Count()
+	count, err = admin.Query().Count(item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -186,7 +187,9 @@ func TestResourceUnique(t *testing.T) {
 	admin.Create(&ResourceStructUnique{Name: "B"})
 	admin.Create(&ResourceStructUnique{Name: "A"})
 
-	count, err := resource.Query().Count()
+	var item interface{}
+	resource.newItem(&item)
+	count, err := admin.Query().Count(item)
 	if err != nil {
 		t.Fatal(err)
 	}

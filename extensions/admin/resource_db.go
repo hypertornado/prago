@@ -148,10 +148,6 @@ func (q *ResourceQuery) Offset(i int64) *ResourceQuery {
 	return q
 }
 
-func (q *ResourceQuery) Count() (int64, error) {
-	return countItems(q.db, q.tableName, q.query)
-}
-
 func (q *ResourceQuery) List() (items interface{}, err error) {
 	if q.err != nil {
 		return nil, q.err

@@ -34,7 +34,9 @@ func bindListResourceAPI(a *Admin) {
 			return
 		}
 
-		c, err := resource.Query().Count()
+		var item interface{}
+		resource.newItem(&item)
+		c, err := a.Query().Count(item)
 		prago.Must(err)
 		if c == 0 {
 			prago.WriteAPI(request, []string{}, 200)
