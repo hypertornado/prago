@@ -6,7 +6,8 @@ import (
 	"time"
 )
 
-var ErrWrongWhereFormat = errors.New("wrong Where Format")
+//ErrWrongWhereFormat is returned when where query has a bad format
+var ErrWrongWhereFormat = errors.New("wrong where format")
 
 func (q *listQuery) where(data ...interface{}) error {
 	var whereParams []interface{}
