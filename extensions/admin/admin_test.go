@@ -19,14 +19,9 @@ type ResourceStruct struct {
 	UpdatedAt   time.Time
 }
 
-func prepareAdmin() *Admin {
+func prepareResource() (*Admin, *Resource) {
 	admin := NewAdmin("admin", "AAA")
 	admin.db = db
-	return admin
-}
-
-func prepareResource() (*Admin, *Resource) {
-	admin := prepareAdmin()
 	resource, err := admin.CreateResource(ResourceStruct{})
 	if err != nil {
 		panic(err)
@@ -42,7 +37,7 @@ func TestAdminQuery(t *testing.T) {
 	var createdItem interface{}
 	var resource *Resource
 
-	admin := prepareAdmin()
+	admin, _ := prepareResource()
 	resource, err = admin.CreateResource(ResourceStruct{})
 	if err != nil {
 		t.Fatal(err)
