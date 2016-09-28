@@ -5,8 +5,9 @@ import (
 )
 
 var (
+	//Messages is singleton for admin translated messages
 	Messages         *messages
-	fallbackLanguage string = "en"
+	fallbackLanguage = "en"
 )
 
 func init() {
