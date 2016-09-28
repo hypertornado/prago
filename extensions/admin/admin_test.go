@@ -39,7 +39,7 @@ func TestAdminQuery(t *testing.T) {
 		t.Fatal(item.Name)
 	}
 
-	resource.createNewItem(&createdItem)
+	resource.newItem(&createdItem)
 	err = admin.Query().Where(2).Get(createdItem)
 	if err != nil {
 		t.Fatal(err)

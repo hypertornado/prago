@@ -125,12 +125,7 @@ func (ar *Resource) Query() *ResourceQuery {
 	}
 }
 
-func (ar *Resource) newItem() (item interface{}, err error) {
-	reflect.ValueOf(&item).Elem().Set(reflect.New(ar.Typ))
-	return
-}
-
-func (ar *Resource) createNewItem(item interface{}) {
+func (ar *Resource) newItem(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(ar.Typ))
 }
 

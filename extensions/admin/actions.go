@@ -39,10 +39,8 @@ func BindList(a *Admin, resource *Resource) {
 //BindNew is default new binder
 func BindNew(a *Admin, resource *Resource) {
 	resource.ResourceController.Get(a.GetURL(resource, "new"), func(request prago.Request) {
-		item, err := resource.newItem()
-		if err != nil {
-			panic(err)
-		}
+		var item interface{}
+		resource.newItem(&item)
 
 		if resource.BeforeNew != nil {
 			if !resource.BeforeNew(request, item) {
@@ -73,8 +71,8 @@ func BindNew(a *Admin, resource *Resource) {
 func BindCreate(a *Admin, resource *Resource) {
 	resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
 		ValidateCSRF(request)
-		item, err := resource.newItem()
-		prago.Must(err)
+		var item interface{}
+		resource.newItem(&item)
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
