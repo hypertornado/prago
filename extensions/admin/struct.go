@@ -86,13 +86,13 @@ type structField struct {
 	CanOrder   bool
 }
 
-func (a *structField) fieldDescriptionMysql() string {
+func (sf *structField) fieldDescriptionMysql() string {
 	var fieldDescription string
-	switch a.Typ.Kind() {
+	switch sf.Typ.Kind() {
 	case reflect.Struct:
 		dateType := reflect.TypeOf(time.Now())
-		if a.Typ == dateType {
-			if a.Tags["prago-type"] == "date" {
+		if sf.Typ == dateType {
+			if sf.Tags["prago-type"] == "date" {
 				fieldDescription = "date"
 			} else {
 				fieldDescription = "datetime"
@@ -105,31 +105,31 @@ func (a *structField) fieldDescriptionMysql() string {
 	case reflect.Int64:
 		fieldDescription = "bigint(20)"
 	case reflect.String:
-		if a.Tags["prago-type"] == "text" || a.Tags["prago-type"] == "image" || a.Tags["prago-type"] == "markdown" {
+		if sf.Tags["prago-type"] == "text" || sf.Tags["prago-type"] == "image" || sf.Tags["prago-type"] == "markdown" {
 			fieldDescription = "text"
 		} else {
 			fieldDescription = "varchar(255)"
 		}
 	default:
-		panic("non supported type " + a.Typ.Kind().String())
+		panic("non supported type " + sf.Typ.Kind().String())
 	}
 
 	additional := ""
-	if a.ColumnName == "id" {
+	if sf.ColumnName == "id" {
 		additional = "NOT NULL AUTO_INCREMENT PRIMARY KEY"
 	} else {
-		if a.Unique {
+		if sf.Unique {
 			additional = "UNIQUE"
 		}
 	}
-	return fmt.Sprintf("%s %s %s", a.ColumnName, fieldDescription, additional)
+	return fmt.Sprintf("%s %s %s", sf.ColumnName, fieldDescription, additional)
 }
 
-func (v *structField) canShow() (show bool) {
-	if v.Name == "ID" || v.Name == "Name" {
+func (sf *structField) canShow() (show bool) {
+	if sf.Name == "ID" || sf.Name == "Name" {
 		show = true
 	}
-	showTag := v.Tags["prago-preview"]
+	showTag := sf.Tags["prago-preview"]
 	if showTag == "true" {
 		show = true
 	}
@@ -139,14 +139,14 @@ func (v *structField) canShow() (show bool) {
 	return
 }
 
-func (a *structField) humanName(lang string) (ret string) {
-	description := a.Tags["prago-description"]
+func (sf *structField) humanName(lang string) (ret string) {
+	description := sf.Tags["prago-description"]
 	if len(description) > 0 {
 		return description
 	}
-	translatedName := messages.Messages.GetNullable(lang, a.Name)
+	translatedName := messages.Messages.GetNullable(lang, sf.Name)
 	if translatedName == nil {
-		return a.Name
+		return sf.Name
 	}
 	return *translatedName
 }
