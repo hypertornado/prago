@@ -10,6 +10,9 @@ import (
 	"time"
 )
 
+//ErrWrongWhereFormat is returned when where query has a bad format
+var ErrWrongWhereFormat = errors.New("wrong where format")
+
 //Debug enables logging of all sql queries
 var Debug = false
 
@@ -22,6 +25,11 @@ type mysqlColumn struct {
 	Extra   sql.NullString
 }
 
+type listQueryOrder struct {
+	name string
+	desc bool
+}
+
 type listQuery struct {
 	whereString string
 	whereParams []interface{}
@@ -30,18 +38,10 @@ type listQuery struct {
 	order       []listQueryOrder
 }
 
-type listQueryOrder struct {
-	name string
-	desc bool
-}
-
 type dbIface interface {
 	Exec(string, ...interface{}) (sql.Result, error)
 	Query(string, ...interface{}) (*sql.Rows, error)
 }
-
-//ErrWrongWhereFormat is returned when where query has a bad format
-var ErrWrongWhereFormat = errors.New("wrong where format")
 
 func (q *listQuery) where(data ...interface{}) error {
 	var whereParams []interface{}
