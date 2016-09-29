@@ -12,12 +12,16 @@ import (
 )
 
 func (m MiddlewareDevelopment) Init(app *prago.App) error {
-	app.AddCommand(app.CreateCommand("dev", "Development"), func(app *prago.App) error {
 
+	devCommand := app.CreateCommand("dev", "Development")
+	portFlag := devCommand.Flag("port", "server port").Short('p').Default("8585").Int()
+	developmentMode := devCommand.Flag("development", "Is in development mode").Default("t").Short('d').Bool()
+
+	app.AddCommand(devCommand, func(app *prago.App) error {
 		if len(m.Settings.LessTarget) > 0 {
 			go developmentLess(m.Settings.LessDir, m.Settings.LessTarget)
 		}
-		return app.ListenAndServe(defaultPort, true)
+		return app.ListenAndServe(*portFlag, *developmentMode)
 
 	})
 	return nil

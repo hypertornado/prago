@@ -17,7 +17,8 @@ func (m middlewareCmd) Init(app *App) error {
 	serverCommand := app.CreateCommand("server", "Run server")
 	portFlag := serverCommand.Flag("port", "server port").Short('p').Int()
 	developmentMode := serverCommand.Flag("development", "Is in development mode").Default("false").Short('d').Bool()
-	app.commands[serverCommand] = func(app *App) error {
+
+	app.AddCommand(serverCommand, func(app *App) error {
 		var port = defaultPort
 		if portFlag != nil && *portFlag > 0 {
 			port = *portFlag
@@ -31,7 +32,7 @@ func (m middlewareCmd) Init(app *App) error {
 			}
 		}
 		return app.ListenAndServe(port, *developmentMode)
-	}
+	})
 	return nil
 }
 
