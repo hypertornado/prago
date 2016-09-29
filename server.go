@@ -14,7 +14,7 @@ func (m middlewareCmd) Init(app *App) error {
 	app.kingpin = kingpin.New("", "")
 	app.commands = map[*kingpin.CmdClause]func(app *App) error{}
 
-	serverCommand := app.kingpin.Command("server", "Run server")
+	serverCommand := app.CreateCommand("server", "Run server")
 	portFlag := serverCommand.Flag("port", "server port").Short('p').Int()
 	developmentMode := serverCommand.Flag("development", "Is in development mode").Default("false").Short('d').Bool()
 	app.commands[serverCommand] = func(app *App) error {
