@@ -21,6 +21,7 @@ type App struct {
 	DevelopmentMode    bool
 	Port               int
 	StartedAt          time.Time
+	RecoveryFunc       func(*Request, interface{})
 	data               map[string]interface{}
 	requestMiddlewares []requestMiddleware
 	middlewares        []Middleware
@@ -36,6 +37,7 @@ type requestMiddleware func(Request, func())
 //NewApp creates App structure for prago app
 func NewApp(appName, version string) *App {
 	app := &App{
+		RecoveryFunc:       defaultRecovery,
 		data:               make(map[string]interface{}),
 		requestMiddlewares: []requestMiddleware{},
 		middlewares:        []Middleware{},
@@ -182,7 +184,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request, app *App) {
 
 	defer func() {
 		if recoveryData := recover(); recoveryData != nil {
-			recoveryFromServerError(request, recoveryData)
+			app.RecoveryFunc(request, recoveryData)
 		}
 	}()
 
@@ -201,16 +203,9 @@ func callRequestMiddlewares(request *Request, middlewares []requestMiddleware) {
 	f()
 }
 
-func recoveryFromServerError(p *Request, recoveryData interface{}) {
-	if p.App().DevelopmentMode {
-		p.Response().Header().Set("Content-Type", "text/plain")
-		p.Response().WriteHeader(500)
-		p.Response().Write([]byte(fmt.Sprintf("500 - error\n%s\nstack:\n", recoveryData)))
-		p.Response().Write(debug.Stack())
-	} else {
-		p.Response().WriteHeader(500)
-		p.Response().Write([]byte("We are sorry, some error occured. (500)"))
-	}
-	p.Log().Errorln(fmt.Sprintf("500 - error\n%s\nstack:\n", recoveryData))
+func defaultRecovery(p *Request, recoveryData interface{}) {
+	p.Response().WriteHeader(500)
+	p.Response().Write([]byte("500 Internal Server Error"))
+	p.Log().Errorln(fmt.Sprintf("500 Internal Server Error\n%s\nstack:\n", recoveryData))
 	p.Log().Errorln(string(debug.Stack()))
 }

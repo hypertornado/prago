@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func (m MiddlewareDevelopment) Init(app *prago.App) error {
+func (m MiddlewareDevelopment) initPlatform(app *prago.App) error {
 
 	devCommand := app.CreateCommand("dev", "Development")
 	portFlag := devCommand.Flag("port", "server port").Short('p').Default("8585").Int()
