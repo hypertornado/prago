@@ -53,12 +53,3 @@ func (p *Request) App() *App { return p.app }
 
 //Header returns request header
 func (p *Request) Header() http.Header { return p.w.Header() }
-
-func newRequest(w http.ResponseWriter, r *http.Request, app *App) *Request {
-	return &Request{
-		w:    w,
-		r:    r,
-		app:  app,
-		data: make(map[string]interface{}),
-	}
-}

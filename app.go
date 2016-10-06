@@ -180,7 +180,12 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleRequest(w http.ResponseWriter, r *http.Request, app *App) {
-	request := newRequest(w, r, app)
+	request := &Request{
+		w:    w,
+		r:    r,
+		app:  app,
+		data: make(map[string]interface{}),
+	}
 
 	defer func() {
 		if recoveryData := recover(); recoveryData != nil {

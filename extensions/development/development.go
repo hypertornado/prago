@@ -35,7 +35,7 @@ func DevelopmentRecovery(p *prago.Request, recoveryData interface{}) {
 			panic(err)
 		}
 
-		byteData := recoveryData.(string)
+		byteData := fmt.Sprintf("%s", recoveryData)
 
 		buf := new(bytes.Buffer)
 		err = temp.ExecuteTemplate(buf, "development_error", map[string]interface{}{
