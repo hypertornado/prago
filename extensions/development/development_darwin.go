@@ -18,9 +18,13 @@ func (m MiddlewareDevelopment) initPlatform(app *prago.App) error {
 	developmentMode := devCommand.Flag("development", "Is in development mode").Default("t").Short('d').Bool()
 
 	app.AddCommand(devCommand, func(app *prago.App) error {
-		if len(m.Settings.LessTarget) > 0 {
-			go developmentLess(m.Settings.LessDir, m.Settings.LessTarget)
+
+		if m.Settings.Less != nil {
+			for _, v := range m.Settings.Less {
+				go developmentLess(v.SourceDir, v.Target)
+			}
 		}
+
 		return app.ListenAndServe(*portFlag, *developmentMode)
 
 	})

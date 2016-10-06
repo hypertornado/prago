@@ -11,8 +11,12 @@ import (
 var defaultPort = 8585
 
 type DevelopmentSettings struct {
-	LessDir    string
-	LessTarget string
+	Less []Less
+}
+
+type Less struct {
+	SourceDir string
+	Target    string
 }
 
 type MiddlewareDevelopment struct {
