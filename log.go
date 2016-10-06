@@ -81,7 +81,7 @@ func (m *middlewareLogger) removeLogFiles(app *App, deadline time.Time) {
 func (m *middlewareLogger) openLogFile(app *App) (file *os.File) {
 	var err error
 
-	logPath := app.dotPath + "/log/" + time.Now().Format("2006_01_02_15_04_05") + ".log"
+	logPath := app.dotPath + "/log/" + time.Now().Format("2006-01-02_15:04:05") + ".log"
 	file, err = os.OpenFile(logPath, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
 	if err != nil {
 		panic(err)
