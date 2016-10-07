@@ -212,6 +212,18 @@ func (a *Admin) Init(app *prago.App) error {
 	})
 
 	a.AdminController.Get(a.Prefix+"/_stats", stats)
+	a.AdminController.Get(a.Prefix+"/_static/admin.js", func(request prago.Request) {
+		request.Response().Header().Set("Content-type", "text/javascript")
+		request.Response().WriteHeader(200)
+		request.Response().Write([]byte(adminJS))
+		request.SetProcessed()
+	})
+	a.AdminController.Get(a.Prefix+"/_static/admin.css", func(request prago.Request) {
+		request.Response().Header().Set("Content-type", "text/css; charset=utf-8")
+		request.Response().WriteHeader(200)
+		request.Response().Write([]byte(adminCSS))
+		request.SetProcessed()
+	})
 
 	for i := range a.Resources {
 		resource := a.Resources[i]
