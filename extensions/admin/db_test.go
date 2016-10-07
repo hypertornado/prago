@@ -2,9 +2,7 @@ package admin
 
 import (
 	"database/sql"
-	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
+	"github.com/hypertornado/prago/extensions"
 	"net/url"
 	"reflect"
 	"testing"
@@ -33,12 +31,10 @@ func init() {
 		panic(err)
 	}
 
-	connectString := fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local", "prago", "prago", "prago_test")
-	g, err := gorm.Open("mysql", connectString)
+	db, err = extensions.ConnectMysql("prago", "prago", "prago_test")
 	if err != nil {
 		panic(err)
 	}
-	db = g.DB()
 }
 
 type TestNode struct {
