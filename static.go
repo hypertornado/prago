@@ -14,7 +14,7 @@ type middlewareStatic struct {
 
 func (ms middlewareStatic) Init(app *App) error {
 	ms.staticDirPaths = []string{"public"}
-	paths, err := app.Config().Get("staticPaths")
+	paths, err := app.Config.Get("staticPaths")
 	if err == nil {
 		newPaths := []string{}
 		for _, p := range paths.([]interface{}) {

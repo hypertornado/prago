@@ -23,7 +23,7 @@ func (m middlewareCmd) Init(app *App) error {
 		if portFlag != nil && *portFlag > 0 {
 			port = *portFlag
 		} else {
-			configPort, err := app.Config().Get("port")
+			configPort, err := app.Config.Get("port")
 			if err == nil {
 				port, err = strconv.Atoi(configPort.(string))
 				if err != nil {

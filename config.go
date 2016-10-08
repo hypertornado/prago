@@ -12,6 +12,10 @@ import (
 type middlewareConfig struct{}
 
 func (m middlewareConfig) Init(app *App) error {
+	if app.Config != nil {
+		return nil
+	}
+
 	path := os.Getenv("HOME") + "/." + app.data["appName"].(string) + "/config.json"
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -24,7 +28,7 @@ func (m middlewareConfig) Init(app *App) error {
 	if err != nil {
 		return err
 	}
-	app.data["config"] = kv
+	app.Config = &config{kv}
 
 	configCommand := app.CreateCommand("config", "Print app configuration")
 	app.AddCommand(configCommand, func(app *App) error {
@@ -37,13 +41,16 @@ func (m middlewareConfig) Init(app *App) error {
 	return nil
 }
 
-//Config manages data from configuration file
-type Config struct {
+type config struct {
 	v map[string]interface{}
 }
 
+func (c *config) Set(k string, val interface{}) {
+	c.v[k] = val
+}
+
 //Export outputs config data in human readable form
-func (c *Config) Export() [][2]string {
+func (c *config) Export() [][2]string {
 	keys := []string{}
 	for k := range c.v {
 		keys = append(keys, k)
@@ -60,7 +67,7 @@ func (c *Config) Export() [][2]string {
 }
 
 //Get returns config item
-func (c *Config) Get(name string) (interface{}, error) {
+func (c *config) Get(name string) (interface{}, error) {
 	val, ok := c.v[name]
 	if ok {
 		return val, nil
@@ -70,7 +77,7 @@ func (c *Config) Get(name string) (interface{}, error) {
 
 //GetString returns config string item
 //panics when item is not set or not a string
-func (c *Config) GetString(name string) string {
+func (c *config) GetString(name string) string {
 	item, err := c.Get(name)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting '%s': %s", name, err.Error()))
@@ -83,7 +90,7 @@ func (c *Config) GetString(name string) string {
 }
 
 //GetStringWithFallback returns config string with default fallback value
-func (c *Config) GetStringWithFallback(name, fallback string) string {
+func (c *config) GetStringWithFallback(name, fallback string) string {
 	item, err := c.Get(name)
 	if err != nil {
 		return fallback
@@ -93,13 +100,4 @@ func (c *Config) GetStringWithFallback(name, fallback string) string {
 		return fallback
 	}
 	return str
-}
-
-//Config returns configuration from app data
-func (a *App) Config() *Config {
-	ret, ok := a.data["config"].(map[string]interface{})
-	if !ok {
-		panic("cant get config")
-	}
-	return &Config{ret}
 }

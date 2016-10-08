@@ -22,6 +22,7 @@ type App struct {
 	Port               int
 	StartedAt          time.Time
 	RecoveryFunc       func(*Request, interface{})
+	Config             *config
 	data               map[string]interface{}
 	requestMiddlewares []requestMiddleware
 	middlewares        []Middleware

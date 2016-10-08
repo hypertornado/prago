@@ -13,9 +13,7 @@ type middlewareLogger struct {
 }
 
 func (m *middlewareLogger) Init(app *App) error {
-	var err error
-
-	err = os.Mkdir(app.dotPath+"/log", 0777)
+	err := os.MkdirAll(app.dotPath+"/log", 0777)
 	if err != nil && !os.IsExist(err) {
 		return err
 	}
