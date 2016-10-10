@@ -162,11 +162,7 @@ func (app *App) writeStartInfo() error {
 		return err
 	}
 
-	developmentModeStr := "false"
-	if app.DevelopmentMode {
-		developmentModeStr = "true"
-	}
-	fmt.Printf("Server started\nport: %d\npid: %d\ndevelopment mode: %s\n", app.Port, pid, developmentModeStr)
+	fmt.Printf("Server started\nport: %d\npid: %d\ndevelopment mode: %t\n", app.Port, pid, app.DevelopmentMode)
 
 	app.Log().WithField("port", app.Port).
 		WithField("pid", pid).
