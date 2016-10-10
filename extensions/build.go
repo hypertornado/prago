@@ -34,7 +34,7 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 		return b.build(appName, version)
 	})
 
-	sshVal, err := app.Config().Get("ssh")
+	sshVal, err := app.Config.Get("ssh")
 
 	if err == nil {
 		ssh := sshVal.(string)
@@ -125,9 +125,9 @@ func BackupApp(app *prago.App) error {
 	}
 	defer os.RemoveAll(dir)
 
-	user := app.Config().GetString("dbUser")
-	dbName := app.Config().GetString("dbName")
-	password := app.Config().GetString("dbPassword")
+	user := app.Config.GetString("dbUser")
+	dbName := app.Config.GetString("dbName")
+	password := app.Config.GetString("dbPassword")
 
 	cmd := exec.Command("mysqldump", "-u"+user, "-p"+password, dbName)
 
@@ -146,7 +146,7 @@ func BackupApp(app *prago.App) error {
 		return err
 	}
 
-	paths, err := app.Config().Get("staticPaths")
+	paths, err := app.Config.Get("staticPaths")
 	if err != nil {
 		return err
 	}

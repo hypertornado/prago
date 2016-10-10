@@ -77,8 +77,8 @@ func uploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File,
 func (File) InitResource(a *Admin, resource *Resource) error {
 	resource.Pagination = 100
 
-	fileUploadPath = a.App.Config().GetString("fileUploadPath")
-	fileDownloadPath = a.App.Config().GetString("fileDownloadPath")
+	fileUploadPath = a.App.Config.GetString("fileUploadPath")
+	fileDownloadPath = a.App.Config.GetString("fileDownloadPath")
 
 	if !strings.HasSuffix(fileUploadPath, "/") {
 		fileUploadPath += "/"

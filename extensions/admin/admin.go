@@ -156,8 +156,8 @@ func (a *Admin) Init(app *prago.App) error {
 
 	var err error
 
-	a.sendgridClient = sendgrid.NewSendGridClientWithApiKey(app.Config().GetStringWithFallback("sendgridApi", ""))
-	a.noReplyEmail = app.Config().GetStringWithFallback("noReplyEmail", "")
+	a.sendgridClient = sendgrid.NewSendGridClientWithApiKey(app.Config.GetStringWithFallback("sendgridApi", ""))
+	a.noReplyEmail = app.Config.GetStringWithFallback("noReplyEmail", "")
 
 	err = a.bindAdminCommand(app)
 	if err != nil {
@@ -194,7 +194,7 @@ func (a *Admin) Init(app *prago.App) error {
 
 		}
 
-		randomness := app.Config().GetString("random")
+		randomness := app.Config.GetString("random")
 		request.SetData("_csrfToken", user.CSRFToken(randomness))
 		request.SetData("currentuser", &user)
 		request.SetData("locale", GetLocale(request))

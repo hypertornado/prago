@@ -13,7 +13,7 @@ type Sessions struct {
 
 //Init sessions middleware
 func (s *Sessions) Init(app *prago.App) error {
-	s.cookieStore = sessions.NewCookieStore([]byte(app.Config().GetString("random")))
+	s.cookieStore = sessions.NewCookieStore([]byte(app.Config.GetString("random")))
 	s.app = app
 	app.Data()["sessionStore"] = s
 

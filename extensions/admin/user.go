@@ -77,7 +77,7 @@ func (u *User) newPassword(password string) error {
 }
 
 func (u User) emailToken(app *prago.App) string {
-	randomness := app.Config().GetString("random")
+	randomness := app.Config.GetString("random")
 	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%s%s", u.Email, randomness))
 	return fmt.Sprintf("%x", h.Sum(nil))
@@ -137,7 +137,7 @@ func (u User) sendConfirmEmail(request prago.Request, a *Admin) error {
 	urlValues.Add("token", u.emailToken(a.App))
 
 	subject := messages.Messages.Get(locale, "admin_confirm_email_subject", a.AppName)
-	link := request.App().Config().GetString("baseUrl") + a.Prefix + "/user/confirm_email?" + urlValues.Encode()
+	link := request.App().Config.GetString("baseUrl") + a.Prefix + "/user/confirm_email?" + urlValues.Encode()
 	body := messages.Messages.Get(locale, "admin_confirm_email_body", link, link, a.AppName)
 
 	message := sendgrid.NewMail()
@@ -177,7 +177,7 @@ func (u User) getRenewURL(request prago.Request, a *Admin) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", u.Email)
 	urlValues.Add("token", u.emailToken(a.App))
-	return request.App().Config().GetString("baseUrl") + a.Prefix + "/user/renew_password?" + urlValues.Encode()
+	return request.App().Config.GetString("baseUrl") + a.Prefix + "/user/renew_password?" + urlValues.Encode()
 }
 
 func (u User) sendRenew(request prago.Request, a *Admin) error {

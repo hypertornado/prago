@@ -36,7 +36,7 @@ func stats(request prago.Request) {
 	stats = append(stats, [2]string{"GOOS", runtime.GOOS})
 	stats = append(stats, [2]string{"GOMAXPROCS", fmt.Sprintf("%d", runtime.GOMAXPROCS(-1))})
 
-	configStats := request.App().Config().Export()
+	configStats := request.App().Config.Export()
 
 	osStats := [][2]string{}
 	osStats = append(osStats, [2]string{"EGID", fmt.Sprintf("%d", os.Getegid())})

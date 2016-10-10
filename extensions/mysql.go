@@ -15,9 +15,9 @@ type Mysql struct{}
 
 //Init Mysql middleware
 func (m *Mysql) Init(app *prago.App) error {
-	dbUser := app.Config().GetString("dbUser")
-	dbPassword := app.Config().GetString("dbPassword")
-	dbName := app.Config().GetString("dbName")
+	dbUser := app.Config.GetString("dbUser")
+	dbPassword := app.Config.GetString("dbPassword")
+	dbName := app.Config.GetString("dbName")
 	db, err := ConnectMysql(dbUser, dbPassword, dbName)
 	if err != nil {
 		return err
