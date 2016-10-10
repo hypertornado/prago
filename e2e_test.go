@@ -19,10 +19,21 @@ func TestE2E(t *testing.T) {
 	defer session.Delete()
 
 	session.SetURL("http://localhost:8587/h")
-	source := session.GetElementByID("hello").Text()
-
+	source := session.GetElementByID("content").Text()
 	if source != "hello" {
 		t.Fatal(source)
+	}
+
+	session.SetURL("http://localhost:8587/h/")
+	source = session.GetElementByID("content").Text()
+	if source != "hello" {
+		t.Fatal(source)
+	}
+
+	session.SetURL("http://localhost:8587/b/abc")
+	source = session.GetElementByID("content").Text()
+	if source != "/b/abc" {
+		t.Fatal(session.GetSource())
 	}
 }
 
@@ -57,13 +68,13 @@ func initE2Etest(app *App) {
 	app.MainController().Get("/h", func(request Request) {
 		request.Header().Add("Content-type", "text/html")
 		request.Response().WriteHeader(200)
-		request.Response().Write([]byte("<div id=\"hello\">hello</div>"))
+		request.Response().Write([]byte("<div id=\"content\">hello</div>"))
 		request.SetProcessed()
 	})
-	app.MainController().Get("/*some", func(request Request) {
+	app.MainController().Get("*some", func(request Request) {
 		request.Header().Add("Content-type", "text/html")
 		request.Response().WriteHeader(200)
-		request.Response().Write([]byte(request.Params().Get("some")))
+		request.Response().Write([]byte("<div id=\"content\">" + request.Params().Get("some") + "</div>"))
 		request.SetProcessed()
 	})
 }

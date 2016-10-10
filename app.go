@@ -177,10 +177,6 @@ func (app *App) writeStartInfo() error {
 }
 
 func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	handleRequest(w, r, app)
-}
-
-func handleRequest(w http.ResponseWriter, r *http.Request, app *App) {
 	request := &Request{
 		w:    w,
 		r:    r,
