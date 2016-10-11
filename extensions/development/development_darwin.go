@@ -3,31 +3,12 @@ package development
 import (
 	"fmt"
 	"github.com/dshills/goauto"
-	"github.com/hypertornado/prago"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 )
-
-func (m MiddlewareDevelopment) initPlatform(app *prago.App) error {
-
-	devCommand := app.CreateCommand("dev", "Development")
-	portFlag := devCommand.Flag("port", "server port").Short('p').Default("8585").Int()
-	developmentMode := devCommand.Flag("development", "Is in development mode").Default("t").Short('d').Bool()
-
-	app.AddCommand(devCommand, func(app *prago.App) error {
-		if m.Settings.Less != nil {
-			for _, v := range m.Settings.Less {
-				go developmentLess(v.SourceDir, v.Target)
-			}
-		}
-
-		return app.ListenAndServe(*portFlag, *developmentMode)
-	})
-	return nil
-}
 
 func developmentLess(sourcePath, targetPath string) {
 
