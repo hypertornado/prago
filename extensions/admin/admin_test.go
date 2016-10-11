@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -300,11 +301,18 @@ func TestShouldNotCreateResourceWithPointer(t *testing.T) {
 	}
 }
 
-func TestLongText(t *testing.T) {
-	text := string(make([]byte, 1000))
+func TestLongSaveText(t *testing.T) {
+	text := "some" + string(make([]byte, 100000))
 	admin, _ := prepareResource()
 	err := admin.Create(&ResourceStruct{Name: text})
 	if err != nil {
 		t.Fatal(err)
 	}
+	var item ResourceStruct
+	admin.Query().WhereIs("id", 1).Get(&item)
+
+	if !strings.HasPrefix(item.Name, "some") {
+		t.Fatal(item.Name)
+	}
+
 }
