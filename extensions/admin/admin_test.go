@@ -299,3 +299,12 @@ func TestShouldNotCreateResourceWithPointer(t *testing.T) {
 		t.Fatal("Should have non nil error")
 	}
 }
+
+func TestLongText(t *testing.T) {
+	text := string(make([]byte, 1000))
+	admin, _ := prepareResource()
+	err := admin.Create(&ResourceStruct{Name: text})
+	if err != nil {
+		t.Fatal(err)
+	}
+}

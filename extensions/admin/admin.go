@@ -350,7 +350,7 @@ func bindDBBackupCron(app *prago.App) {
 		for _, file := range files {
 			if file.ModTime().Before(deadline) {
 				removePath := backupPath + "/" + file.Name()
-				err := os.Remove(removePath)
+				err := os.RemoveAll(removePath)
 				if err != nil {
 					app.Log().Println("Error while removing old backup file:", err)
 				}
