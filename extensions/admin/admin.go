@@ -218,7 +218,7 @@ func (a *Admin) Init(app *prago.App) error {
 		request.Response().Write([]byte(adminJS))
 		request.SetProcessed()
 	})
-	a.AdminController.Get(a.Prefix+"/_static/admin.css", func(request prago.Request) {
+	a.App.MainController().Get(a.Prefix+"/_static/admin.css", func(request prago.Request) {
 		request.Response().Header().Set("Content-type", "text/css; charset=utf-8")
 		request.Response().WriteHeader(200)
 		request.Response().Write([]byte(adminCSS))
