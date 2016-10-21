@@ -147,22 +147,21 @@ func BackupApp(app *prago.App) error {
 	}
 
 	paths, err := app.Config.Get("staticPaths")
-	if err != nil {
-		return err
-	}
 
-	for k, v := range paths.([]interface{}) {
+	if err == nil {
+		for k, v := range paths.([]interface{}) {
 
-		staticPath := filepath.Join(dirPath, "static", fmt.Sprintf("%d", k))
+			staticPath := filepath.Join(dirPath, "static", fmt.Sprintf("%d", k))
 
-		err = exec.Command("mkdir", "-p", staticPath).Run()
-		if err != nil {
-			return err
-		}
+			err = exec.Command("mkdir", "-p", staticPath).Run()
+			if err != nil {
+				return err
+			}
 
-		err = copyFiles(v.(string), staticPath)
-		if err != nil {
-			return err
+			err = copyFiles(v.(string), staticPath)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
