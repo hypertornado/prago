@@ -1,6 +1,6 @@
 function bindPlaces() {
   function bindPlace(el: any) {
-    var mapEl = document.createElement("div")
+    var mapEl = document.createElement("div");
     mapEl.classList.add("admin_place_map");
     el.appendChild(mapEl);
 
