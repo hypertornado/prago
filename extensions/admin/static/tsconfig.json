@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": false,
+        "outFile": "public/admin/_static/admin.js"
+    },
+    "files": [
+        "js/google_maps.d.ts",
+        "js/places.ts",
+        "js/load.ts"
+    ]
+}

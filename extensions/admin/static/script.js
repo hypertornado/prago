@@ -471,7 +471,6 @@ function bindRelations() {
 }
 
 function bindPlaces() {
-
   function bindPlace(el) {
     var mapEl = $("<div></div>").addClass("admin_place_map");
     el.append(mapEl);
