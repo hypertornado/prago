@@ -28,7 +28,6 @@ function bindOrder() {
             }
           })
 
-
           if (draggedIndex <= thisIndex) {
             thisIndex += 1
           }
@@ -54,15 +53,11 @@ function bindOrder() {
         order.push(parseInt(item.getAttribute("data-id")))
       });
 
-      console.log(order);
-
       var request = new XMLHttpRequest();
       request.open("POST", ajaxPath, true);
 
       request.onload = function() {
-        if (this.status == 200) {
-          console.log("ok");
-        } else {
+        if (this.status != 200) {
           console.error("Error while saving order.")
         }
       }
