@@ -25,7 +25,6 @@ function bindMarkdowns() {
 
       request.onload = function() {
         if (this.status == 200) {
-          console.log(JSON.parse(this.response));
           var previewEl = el.getElementsByClassName("admin_markdown_preview")[0];
           previewEl.innerHTML = JSON.parse(this.response);
         } else {

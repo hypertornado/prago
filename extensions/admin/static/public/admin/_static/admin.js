@@ -1,3 +1,75 @@
+function DOMinsertChildAtIndex(parent, child, index) {
+    if (index >= parent.children.length) {
+        parent.appendChild(child);
+    }
+    else {
+        parent.insertBefore(child, parent.children[index]);
+    }
+}
+function bindOrder() {
+    function orderTable(el) {
+        var rows = el.getElementsByClassName("admin_table_row");
+        Array.prototype.forEach.call(rows, function (item, i) {
+            bindDraggable(item);
+        });
+        var draggedElement;
+        function bindDraggable(row) {
+            row.setAttribute("draggable", "true");
+            row.addEventListener("dragstart", function (ev) {
+                draggedElement = this;
+                ev.dataTransfer.setData('text/plain', '');
+            });
+            row.addEventListener("drop", function (ev) {
+                var targetEl = this;
+                if (this != draggedElement) {
+                    var draggedIndex = -1;
+                    var thisIndex = -1;
+                    Array.prototype.forEach.call(el.getElementsByClassName("admin_table_row"), function (item, i) {
+                        if (item == draggedElement) {
+                            draggedIndex = i;
+                        }
+                        if (item == targetEl) {
+                            thisIndex = i;
+                        }
+                    });
+                    if (draggedIndex <= thisIndex) {
+                        thisIndex += 1;
+                    }
+                    DOMinsertChildAtIndex(targetEl.parentElement, draggedElement, thisIndex + 1);
+                    saveOrder();
+                }
+                return false;
+            });
+            row.addEventListener("dragover", function (ev) {
+                ev.preventDefault();
+            });
+        }
+        function saveOrder() {
+            var ajaxPath = document.location.pathname + "/order";
+            var order = [];
+            var rows = el.getElementsByClassName("admin_table_row");
+            Array.prototype.forEach.call(rows, function (item, i) {
+                order.push(parseInt(item.getAttribute("data-id")));
+            });
+            console.log(order);
+            var request = new XMLHttpRequest();
+            request.open("POST", ajaxPath, true);
+            request.onload = function () {
+                if (this.status == 200) {
+                    console.log("ok");
+                }
+                else {
+                    console.error("Error while saving order.");
+                }
+            };
+            request.send(JSON.stringify({ "order": order }));
+        }
+    }
+    var elements = document.querySelectorAll(".admin_table-order");
+    Array.prototype.forEach.call(elements, function (el, i) {
+        orderTable(el);
+    });
+}
 function bindMarkdowns() {
     function bindMarkdown(el) {
         var textarea = el.getElementsByTagName("textarea")[0];
@@ -21,7 +93,6 @@ function bindMarkdowns() {
             request.open("POST", document.body.getAttribute("data-admin-prefix") + "/_api/markdown", true);
             request.onload = function () {
                 if (this.status == 200) {
-                    console.log(JSON.parse(this.response));
                     var previewEl = el.getElementsByClassName("admin_markdown_preview")[0];
                     previewEl.innerHTML = JSON.parse(this.response);
                 }
@@ -216,6 +287,7 @@ function bindPlaces() {
     });
 }
 window.onload = function () {
+    bindOrder();
     bindMarkdowns();
     bindTimestamps();
     bindRelations();

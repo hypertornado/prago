@@ -8,6 +8,8 @@
     },
     "files": [
         "js/google_maps.d.ts",
+        "js/utils.ts",
+        "js/order.ts",
         "js/markdown.ts",
         "js/timestamps.ts",
         "js/relations.ts",
