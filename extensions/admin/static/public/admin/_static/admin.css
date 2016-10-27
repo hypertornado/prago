@@ -439,9 +439,6 @@ input[type=date].input {
   max-height: 100px;
   margin: 3px;
 }
-.admin_images_edit {
-  display: none;
-}
 .admin_popup_section {
   background-color: #eee;
   padding: 5px;

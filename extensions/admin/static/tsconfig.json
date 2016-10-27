@@ -3,12 +3,13 @@
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
-        "sourceMap": false,
+        "sourceMap": true,
         "outFile": "public/admin/_static/admin.js"
     },
     "files": [
         "js/google_maps.d.ts",
         "js/utils.ts",
+        "js/imagepicker.ts",
         "js/order.ts",
         "js/markdown.ts",
         "js/timestamps.ts",
