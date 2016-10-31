@@ -186,8 +186,8 @@ function bindImagePicker() {
 
   function showLoadedResult(text: string) {
     document.getElementsByClassName("admin_images_popup_box_upload_message")[0].textContent = text;
-    (<HTMLElement>document.querySelector("admin_images_popup_box_upload_btn")).style.display = "";
-    (<HTMLElement>document.querySelector("admin_images_popup_box_upload input")).style.display = "";
+    (<HTMLElement>document.querySelector(".admin_images_popup_box_upload_btn")).style.display = "";
+    (<HTMLElement>document.querySelector(".admin_images_popup_box_upload input")).style.display = "";
   }
 
   document.getElementsByClassName("admin_images_popup_box_upload_btn")[0].addEventListener("click", function (e) {
@@ -204,10 +204,9 @@ function bindImagePicker() {
 
     document.getElementsByClassName("admin_images_popup_box_upload_message")[0].textContent = "Uploading...";
     (<HTMLElement>document.getElementsByClassName("admin_images_popup_box_upload_btn")[0]).style.display = "none";
-    (<HTMLElement>document.querySelector("admin_images_popup_box_upload input")).style.display = "none";
+    (<HTMLElement>document.querySelector(".admin_images_popup_box_upload input")).style.display = "none";
 
     var request = new XMLHttpRequest();
-    request.setRequestHeader('Content-Type', 'multipart/form-data');
     request.open("POST", adminPrefix + "/_api/image/upload");
 
     request.onload = function() {
@@ -223,31 +222,6 @@ function bindImagePicker() {
       }
     }
     request.send(data);
-
-    /*$.ajax({
-        url: adminPrefix + "/_api/image/upload",
-        type: 'POST',
-        data: data,
-        cache: false,
-        dataType: 'json',
-        processData: false, // Don't process the files
-        contentType: false, // Set content type to false as jQuery will tell the server its a query string request
-        success: function(items) {
-          items.forEach(function (item){
-            var img = createDraggableImg(item);
-            selectedContainer.append(img);
-          });
-
-          $(".admin_images_popup_box_upload_message").text("Uploaded successfully.");
-          $(".admin_images_popup_box_upload_btn").show();
-          $(".admin_images_popup_box_upload input").show();
-        },
-        error: function() {
-            $(".admin_images_popup_box_upload_message").text("Error while uploading files.");
-            $(".admin_images_popup_box_upload_btn").show();
-            $(".admin_images_popup_box_upload input").show();
-        }
-    });*/
   });
 
   var elements = document.querySelectorAll(".admin_images");

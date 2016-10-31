@@ -169,8 +169,8 @@ function bindImagePicker() {
     }
     function showLoadedResult(text) {
         document.getElementsByClassName("admin_images_popup_box_upload_message")[0].textContent = text;
-        document.querySelector("admin_images_popup_box_upload_btn").style.display = "";
-        document.querySelector("admin_images_popup_box_upload input").style.display = "";
+        document.querySelector(".admin_images_popup_box_upload_btn").style.display = "";
+        document.querySelector(".admin_images_popup_box_upload input").style.display = "";
     }
     document.getElementsByClassName("admin_images_popup_box_upload_btn")[0].addEventListener("click", function (e) {
         var filesInput = document.querySelector(".admin_images_popup_box_upload input");
@@ -183,9 +183,8 @@ function bindImagePicker() {
         document.getElementsByClassName("admin_popup_file_description")[0].value = "";
         document.getElementsByClassName("admin_images_popup_box_upload_message")[0].textContent = "Uploading...";
         document.getElementsByClassName("admin_images_popup_box_upload_btn")[0].style.display = "none";
-        document.querySelector("admin_images_popup_box_upload input").style.display = "none";
+        document.querySelector(".admin_images_popup_box_upload input").style.display = "none";
         var request = new XMLHttpRequest();
-        request.setRequestHeader('Content-Type', 'multipart/form-data');
         request.open("POST", adminPrefix + "/_api/image/upload");
         request.onload = function () {
             if (this.status == 200) {
