@@ -489,4 +489,3 @@ window.onload = function () {
     bindRelations();
     bindImagePicker();
 };
-//# sourceMappingURL=admin.js.map
