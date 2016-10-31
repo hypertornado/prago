@@ -102,9 +102,8 @@ function bindImagePicker() {
         connectedItem = el;
         var val = el.getElementsByTagName("input")[0].value;
         loadImageToPopup(val);
-        var focusable = el.getElementsByClassName("admin_images_popup_box")[0];
-        console.log(el);
-        console.log(focusable);
+        var focusable = document.getElementsByClassName("admin_images_popup_box")[0];
+        focusable.focus();
         popup.style.display = "block";
         doFilter();
     }
@@ -112,9 +111,15 @@ function bindImagePicker() {
         popup.style.display = "none";
     }
     function loadImages(ids, q, handler) {
-        var url = adminPrefix + "/_api/image/list";
+        var url = adminPrefix + "/_api/image/list?";
+        if (ids.length > 0) {
+            url += "ids=" + encodeURIComponent(ids);
+        }
+        else {
+            url += "q=" + encodeURIComponent(q);
+        }
         var request = new XMLHttpRequest();
-        request.open("GET", url);
+        request.open("GET", url, true);
         request.onload = function () {
             if (this.status == 200) {
                 handler(JSON.parse(this.response));
@@ -123,7 +128,7 @@ function bindImagePicker() {
                 console.error("Error while loading images.");
             }
         };
-        request.send(JSON.stringify({ "ids": ids, "q": q }));
+        request.send();
     }
     function bindImage(el) {
         showPreview(el);

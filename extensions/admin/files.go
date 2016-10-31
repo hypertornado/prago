@@ -255,6 +255,8 @@ func bindImageAPI(a *Admin, fileDownloadPath string) {
 	a.App.MainController().Get(a.Prefix+"/_api/image/list", func(request prago.Request) {
 		var images []*File
 
+		fmt.Println(request.Params().Get("ids"))
+
 		if len(request.Params().Get("ids")) > 0 {
 			ids := strings.Split(request.Params().Get("ids"), ",")
 			for _, v := range ids {

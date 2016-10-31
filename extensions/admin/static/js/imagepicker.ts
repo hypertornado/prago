@@ -101,7 +101,7 @@ function bindImagePicker() {
 
     var str = items.join(",");
     connectedItem.getElementsByTagName("input")[0].value = str
-    showPreview(connectedItem)
+    showPreview(connectedItem);
   });
 
   popup.getElementsByClassName("admin_images_popup_cancel")[0].addEventListener("click", hidePopup);
@@ -111,10 +111,8 @@ function bindImagePicker() {
     connectedItem = el;
     var val: string = el.getElementsByTagName("input")[0].value
     loadImageToPopup(val);
-    var focusable = <HTMLElement>el.getElementsByClassName("admin_images_popup_box")[0];
-    console.log(el);
-    console.log(focusable);
-    //focusable.focus();
+    var focusable = <HTMLElement>document.getElementsByClassName("admin_images_popup_box")[0];
+    focusable.focus();
     popup.style.display = "block";
     doFilter();
   }
@@ -124,10 +122,16 @@ function bindImagePicker() {
   }
 
   function loadImages(ids: string, q: string, handler: (any)) {
-    var url: string = adminPrefix + "/_api/image/list";
+    var url: string = adminPrefix + "/_api/image/list?";
+
+    if (ids.length > 0) {
+      url += "ids=" + encodeURIComponent(ids);
+    } else {
+      url += "q=" + encodeURIComponent(q);
+    }
 
     var request = new XMLHttpRequest();
-    request.open("GET", url);
+    request.open("GET", url, true);
 
     request.onload = function() {
         if (this.status == 200) {
@@ -136,7 +140,7 @@ function bindImagePicker() {
           console.error("Error while loading images.");
         }
     }
-    request.send(JSON.stringify({"ids":ids, "q": q}));
+    request.send();
   }
 
   function bindImage(el: HTMLElement) {
