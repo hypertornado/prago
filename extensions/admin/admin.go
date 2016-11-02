@@ -150,6 +150,12 @@ func (a *Admin) Init(app *prago.App) error {
 	a.AdminAccessController = app.MainController().SubController()
 	a.AdminController = a.AdminAccessController.SubController()
 
+	googleApiKey := app.Config.GetStringWithFallback("google", "")
+
+	a.AdminController.AddBeforeAction(func(request prago.Request) {
+		request.SetData("google", googleApiKey)
+	})
+
 	bindDBBackupCron(app)
 	bindMarkdownAPI(a)
 	bindListResourceAPI(a)
