@@ -57,7 +57,8 @@ func ConsoleQuestion(question string) bool {
 
 func filterMarkdown(in string) string {
 	r := regexp.MustCompile("\\[([^\\]]+)\\]\\(([^)]+)\\)")
-	return r.ReplaceAllString(in, "$1")
+	in = r.ReplaceAllString(in, "$1")
+	return strings.Replace(in, "\\", "", -1)
 }
 
 //CropMarkdown remove all markdown special characters
