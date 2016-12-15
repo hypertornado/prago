@@ -142,6 +142,10 @@ func (a *Admin) getDB() *sql.DB {
 	return a.db
 }
 
+func (a *Admin) GetDB() *sql.DB {
+	return a.getDB()
+}
+
 //Init admin middleware
 func (a *Admin) Init(app *prago.App) error {
 	a.App = app
