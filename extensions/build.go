@@ -99,7 +99,7 @@ func (b BuildMiddleware) syncBackups(appName, ssh string) error {
 }
 
 func (b BuildMiddleware) remote(appName, version, ssh string) error {
-	cmdStr := fmt.Sprintf("cd ~/.%s/versions/%s.%s; ./%s.linux admin migrate; killall %s.linux; nohup ./%s.linux server > /dev/null 2>&1 & exit;", appName, appName, version, appName, appName, appName)
+	cmdStr := fmt.Sprintf("cd ~/.%s/versions/%s.%s; ./%s.linux admin migrate; killall %s.linux; nohup ./%s.linux server & exit;", appName, appName, version, appName, appName, appName)
 	println(cmdStr)
 	cmd := exec.Command("ssh", ssh, cmdStr)
 	cmd.Stdout = os.Stdout

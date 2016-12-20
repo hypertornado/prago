@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -17,7 +18,7 @@ func (c *cron) scheduler() {
 		for _, task := range c.tasks {
 			c.mutex.Lock()
 			if task.scheduled.Before(time.Now()) {
-				task.task()
+				runCronTask(task.task)
 				now := time.Now()
 				task.lastExecuted = now
 				task.scheduled = task.timer(now)
@@ -25,6 +26,15 @@ func (c *cron) scheduler() {
 			c.mutex.Unlock()
 		}
 	}
+}
+
+func runCronTask(task func()) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in runCronTask", r)
+		}
+	}()
+	task()
 }
 
 type cronTask struct {
