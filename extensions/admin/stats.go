@@ -20,9 +20,6 @@ func stats(request prago.Request) {
 	stats = append(stats, [2]string{"App name", request.App().Data()["appName"].(string)})
 	stats = append(stats, [2]string{"App version", request.App().Data()["version"].(string)})
 
-	port := request.App().Data()["port"].(int)
-	stats = append(stats, [2]string{"Port", fmt.Sprintf("%d", port)})
-
 	developmentModeStr := "false"
 	if request.App().DevelopmentMode {
 		developmentModeStr = "true"
