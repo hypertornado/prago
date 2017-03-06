@@ -106,6 +106,7 @@ const developmentErrorTmpl = `
   		color: white;
   		padding: 10px 10px;
   		margin: 0px;
+      line-height: 1.2em;
   	}
 
   	.err {

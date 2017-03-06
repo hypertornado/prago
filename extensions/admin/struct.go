@@ -44,8 +44,6 @@ func newStructCache(item interface{}) (ret *structCache, err error) {
 }
 
 func (cache *structCache) GetDefaultOrder() (column string, desc bool) {
-	column = ""
-
 	for _, v := range cache.fieldArrays {
 		add := false
 		if v.ColumnName == "id" {

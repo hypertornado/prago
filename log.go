@@ -88,6 +88,8 @@ func (m *middlewareLogger) openLogFile(app *App) (file *os.File) {
 }
 
 func requestMiddlewareLogBefore(r Request, next func()) {
-	r.App().Log().Println(r.Request().Method, r.Request().URL.String())
+	if r.Request().Header.Get("X-Dont-Log") != "true" {
+		r.App().Log().Println(r.Request().Method, r.Request().URL.String())
+	}
 	next()
 }
