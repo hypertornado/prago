@@ -200,6 +200,13 @@ func ConstraintWhitelist(item string, allowedValues []string) func(map[string]st
 	}
 }
 
+//ConstraintMap limits request item on allowed values
+func ConstraintMap(item string, allowedValues map[string]bool) func(map[string]string) bool {
+	return func(m map[string]string) bool {
+		return allowedValues[m[item]]
+	}
+}
+
 //ConstraintRegexp limits request item by regexp
 func ConstraintRegexp(item string, reg *regexp.Regexp) func(map[string]string) bool {
 	return func(m map[string]string) bool {

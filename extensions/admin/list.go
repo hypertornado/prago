@@ -2,7 +2,6 @@ package admin
 
 import (
 	"fmt"
-	"github.com/hypertornado/prago"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -242,7 +241,14 @@ func (resource *Resource) valueToCell(admin *Admin, field reflect.StructField, v
 
 			var relationItem interface{}
 			relationResource.newItem(&relationItem)
-			prago.Must(admin.Query().WhereIs("id", item.(int64)).Get(relationItem))
+			err := admin.Query().WhereIs("id", item.(int64)).Get(relationItem)
+			if err != nil {
+				if err == ErrItemNotFound {
+					cell.Value = ""
+					return
+				}
+				panic(err)
+			}
 
 			ifaceItemName, ok := relationItem.(interface {
 				AdminItemName(string) string
