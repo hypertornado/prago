@@ -175,6 +175,8 @@ table {
 }
 html {
   box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 *,
 *:before,
@@ -185,9 +187,12 @@ html,
 body {
   height: 100%;
   font-family: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Oxygen, Ubuntu, Cantarell, "Open Sans", sans-serif;
-  font-size: 15px;
+  font-size: 13px;
   line-height: 1.4em;
-  color: #333;
+  color: #444;
+}
+.shadow {
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
 }
 h1 {
   font-size: 1.5rem;
@@ -197,7 +202,7 @@ h1 {
 h2 {
   font-size: 1.4rem;
   line-height: 1.4em;
-  margin: 0.5em 0 0.2em 0;
+  margin: 0px;
 }
 h3 {
   font-size: 1.3rem;
@@ -231,49 +236,34 @@ a {
 a:hover {
   text-decoration: none;
 }
-.admin_header {
-  background: #f5f5f5;
-  padding: 10px 10px;
-  border: 1px solid #e5e5e5;
-}
-.admin_header h1 {
-  display: inline-block;
-  font-size: 1.1em;
-  margin: 0px 5px;
-}
-.admin_header_list {
-  margin: 0px;
-  padding: 0px;
-}
-.admin_header_list {
-  display: inline-block;
-}
-.admin_header_list li {
-  display: inline-block;
-  padding: 0px 2px;
-}
-.admin_header_list-right {
-  float: right;
-}
 .admin_content {
+  padding: 5px;
+  background-color: #eee;
+}
+.admin_box {
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  margin: 5px auto;
+  background-color: white;
+  padding: 10px;
+  border-radius: 3px;
   max-width: 600px;
-  padding: 10px 10px;
-  margin: 0 auto;
 }
 .admin_footer {
-  background: #f5f5f5;
   padding: 0px 10px;
   font-size: 0.7em;
-  border: 1px solid #e5e5e5;
+  border-top: 1px solid #e5e5e5;
   color: #888;
   text-align: right;
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 2;
 }
 .btn {
   display: inline-block;
   padding: 3px 12px;
   font-size: 0.9em;
   font-weight: bold;
-  line-height: 20px;
+  line-height: 1.2em;
   color: #333;
   white-space: nowrap;
   vertical-align: middle;
@@ -310,7 +300,7 @@ a:hover {
 }
 .form_label {
   display: block;
-  margin: 20px 0px;
+  margin: 10px 0px;
 }
 .form_label-required input {
   border-width: 2px;
@@ -333,8 +323,8 @@ a:hover {
 }
 .input {
   display: inline-block;
-  padding: 6px 8px;
-  line-height: 20px;
+  padding: 2px 8px;
+  line-height: 1.2em;
   color: #333;
   vertical-align: middle;
   border: 1px solid #ddd;
@@ -376,12 +366,24 @@ input[type=date].input {
 .admin_table {
   width: 100%;
 }
+.admin_table-list {
+  background-color: white;
+  margin: 10px 0px;
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+}
 .admin_table thead {
   font-weight: bold;
 }
 .admin_table td {
   padding: 2px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #f1f1f1;
+}
+.admin_table-list td {
+  border-left: none;
+  border-bottom: none;
+}
+.admin_table-list tr td:last-child {
+  border-right: none;
 }
 .admin_table th {
   padding: 5px;
@@ -487,4 +489,57 @@ input[type=date].input {
 }
 .ordered-desc:after {
   content: "↑";
+}
+.admin_header {
+  background: white;
+  font-size: 14px;
+  padding-bottom: 0px;
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 2;
+}
+.admin_header_top {
+  display: flex;
+  padding: 0px 5px;
+}
+.admin_header_top_item {
+  padding: 5px;
+}
+.admin_header a {
+  text-decoration: none;
+  line-height: 1.6em;
+}
+.admin_header a:hover {
+  background-color: #eee;
+}
+.admin_header_top_space {
+  flex-grow: 2;
+}
+.admin_header_name {
+  font-weight: bold;
+}
+.admin_header_resources {
+  border-top: 1px solid #e5e5e5;
+  margin: 0px;
+  padding: 0px;
+  clear: both;
+  display: flex;
+  margin-left: -2px;
+  font-size: 0px;
+  padding-left: 5px;
+}
+.admin_header_resource {
+  text-transform: uppercase;
+  padding: 5px 5px;
+  margin: 0px;
+  margin-right: 2px;
+  font-size: 12px;
+  border-bottom: 2px solid none;
+}
+.admin_header_resource:hover {
+  background-color: #eee;
+}
+.admin_header_resource-active {
+  font-weight: bold;
+  border-bottom: 2px solid #4078c0;
 }

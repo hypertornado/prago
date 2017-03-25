@@ -1,9 +1,13 @@
 {{define "admin_edit"}}
 
-<h2>{{.admin_title}}</h2>
+<div class="admin_box">
 
-<a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
+  <h2>{{.admin_title}}</h2>
 
-{{tmpl "admin_form" .admin_form}}
+  <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
+
+  {{tmpl "admin_form" .admin_form}}
+
+</div>
 
 {{end}}

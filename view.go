@@ -72,7 +72,7 @@ func requestMiddlewareView(p Request, next func()) {
 
 	if renderDefaultNotFound {
 		statusCode = http.StatusNotFound
-		body = []byte("404 - not found")
+		body = []byte("404 ⏤ not found")
 	}
 
 	p.Response().WriteHeader(statusCode)

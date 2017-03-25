@@ -11,25 +11,26 @@
   </head>
   <body class="admin">
     <div class="admin_content">
-    <h2>{{.name}}CREATE - {{message .locale "admin_login_name"}}</h2>
+      <div class="admin_box">
+        <h2>{{.name}} ⏤ {{message .locale "admin_login_name"}}</h2>
 
-    <form class="form" method="POST">
-        <label class="form_label">
-          <span class="form_label_text">{{message .locale "admin_email"}}</span>
-          <input type="email" name="email" autofocus class="input form_input">
-        </label>
+        <form class="form" method="POST">
+            <label class="form_label">
+              <span class="form_label_text">{{message .locale "admin_email"}}</span>
+              <input type="email" name="email" autofocus class="input form_input">
+            </label>
 
-        <label class="form_label">
-          <span class="form_label_text">{{message .locale "admin_password"}}</span>
-          <input type="password" name="password" class="input form_input">
-        </label>
+            <label class="form_label">
+              <span class="form_label_text">{{message .locale "admin_password"}}</span>
+              <input type="password" name="password" class="input form_input">
+            </label>
 
-        <input type="submit" value="{{message .locale "admin_login_action"}}" class="btn">
+            <input type="submit" value="{{message .locale "admin_login_action"}}" class="btn">
 
-    </form>
+        </form>
 
-    <a href="{{.admin_header_prefix}}/user/login">Log In</a>
-
+        <a href="{{.admin_header_prefix}}/user/login">Log In</a>
+      </div>
     </div>
   </body>
 </html>

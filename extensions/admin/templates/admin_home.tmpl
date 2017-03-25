@@ -1,15 +1,18 @@
 {{define "admin_home"}}
 
-<h2>{{.admin_header.appName}}</h2>
+<div class="admin_box">
 
-<table class="admin_table">
-{{range $item := .admin_header.menu}}
-  <tr>
-    <td style="width: 100%;">
-      <a href="{{$item.url}}">{{$item.name}}</a>
-    </td>
-  </tr>
-{{end}}
-</table>
+  <h2>{{.admin_header.appName}}</h2>
+
+  <table class="admin_table">
+  {{range $item := .admin_header.menu}}
+    <tr>
+      <td>
+        <a href="{{$item.url}}">{{$item.name}}</a>
+      </td>
+    </tr>
+  {{end}}
+  </table>
+</div>
 
 {{end}}

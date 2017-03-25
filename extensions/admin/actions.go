@@ -58,7 +58,7 @@ func BindNew(a *Admin, resource *Resource) {
 			form = resource.AfterFormCreated(form, request, true)
 		}
 
-		request.SetData("admin_title", messages.Messages.Get(GetLocale(request), "admin_new")+" - "+resource.Name(GetLocale(request)))
+		request.SetData("admin_title", messages.Messages.Get(GetLocale(request), "admin_new")+" ⏤ "+resource.Name(GetLocale(request)))
 
 		request.SetData("admin_form", form)
 		request.SetData("admin_yield", "admin_new")
@@ -128,7 +128,7 @@ func BindDetail(a *Admin, resource *Resource) {
 			}
 		}
 
-		request.SetData("admin_title", messages.Messages.Get(GetLocale(request), "admin_edit")+" - "+resource.Name(GetLocale(request)))
+		request.SetData("admin_title", messages.Messages.Get(GetLocale(request), "admin_edit")+" ⏤ "+resource.Name(GetLocale(request)))
 		request.SetData("admin_item", item)
 		request.SetData("admin_form", form)
 		request.SetData("admin_yield", "admin_edit")

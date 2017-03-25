@@ -13,17 +13,17 @@
   <body class="admin">
     {{tmpl "admin_flash" .}}
 
-    <div class="admin_content">
-    <h2>{{.title}}</h2>
+    <div class="admin_box">
 
-    {{tmpl "admin_form" .admin_form}}
+        <h2>{{.title}}</h2>
 
-    {{if .bottom}}
-    <div style="text-align: center">
-    {{Plain .bottom}}
-    </div>
-    {{end}}
+        {{tmpl "admin_form" .admin_form}}
 
+        {{if .bottom}}
+        <div style="text-align: center">
+        {{Plain .bottom}}
+        </div>
+        {{end}}
     </div>
   </body>
 </html>

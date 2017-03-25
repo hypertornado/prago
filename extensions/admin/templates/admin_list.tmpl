@@ -9,7 +9,7 @@
 
 <h2>{{.admin_title}}</h2>
 
-<table class="admin_table{{if .admin_list.Order}} admin_table-order{{end}}">
+<table class="admin_table admin_table-list {{if .admin_list.Order}} admin_table-order{{end}}">
   <tr class="admin_table_header">
   {{range $item := .admin_list.Header}}
     <th>

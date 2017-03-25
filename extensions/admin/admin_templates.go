@@ -2,11 +2,15 @@ package admin
 const adminTemplates = `
 {{define "admin_edit"}}
 
-<h2>{{.admin_title}}</h2>
+<div class="admin_box">
 
-<a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
+  <h2>{{.admin_title}}</h2>
 
-{{tmpl "admin_form" .admin_form}}
+  <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
+
+  {{tmpl "admin_form" .admin_form}}
+
+</div>
 
 {{end}}{{define "admin_flash"}}
 {{if .flash_messages}}
@@ -58,17 +62,20 @@ const adminTemplates = `
 
 {{end}}{{define "admin_home"}}
 
-<h2>{{.admin_header.appName}}</h2>
+<div class="admin_box">
 
-<table class="admin_table">
-{{range $item := .admin_header.menu}}
-  <tr>
-    <td style="width: 100%;">
-      <a href="{{$item.url}}">{{$item.name}}</a>
-    </td>
-  </tr>
-{{end}}
-</table>
+  <h2>{{.admin_header.appName}}</h2>
+
+  <table class="admin_table">
+  {{range $item := .admin_header.menu}}
+    <tr>
+      <td>
+        <a href="{{$item.url}}">{{$item.name}}</a>
+      </td>
+    </tr>
+  {{end}}
+  </table>
+</div>
 
 {{end}}{{define "admin_item_input"}}
   <input name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
@@ -185,7 +192,7 @@ const adminTemplates = `
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{if .admin_title}}{{.admin_title}} - {{.appName}}{{else}}Admin - {{.appName}}{{end}}</title>
+    <title>{{if .admin_title}}{{.admin_title}} ⏤ {{.appName}}{{else}}Admin ⏤ {{.appName}}{{end}}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -197,23 +204,22 @@ const adminTemplates = `
   <body class="admin" data-admin-prefix="{{.admin_header.prefix}}">
     {{tmpl "admin_flash" .}}
     <div class="admin_header">
-        <ul class="admin_header_list admin_header_list-right">
-            <li><a href="{{.admin_header.prefix}}/user/settings">{{.currentuser.Email}}</a> <a href="{{.admin_header.prefix}}/logout?_csrfToken={{._csrfToken}}">{{message .locale "admin_log_out"}}</a></li>
-        </ul>
-
-        <h1><a href="{{.admin_header.prefix}}">{{.admin_header.appName}}</a></h1>
+        <div class="admin_header_top">
+            <a href="{{.admin_header.prefix}}" class="admin_header_name admin_header_top_item">{{.admin_header.appName}}</a>
+            <div class="admin_header_top_item admin_header_top_space"></div>
+            <div class="admin_header_top_item">{{.currentuser.Email}}</div>
+            <a href="{{.admin_header.prefix}}/user/settings" class="admin_header_top_item">{{message .locale "admin_settings"}}</a>
+            <a href="{{.admin_header.prefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
+        </div>
 
 
         {{ $admin_resource := .admin_resource }}
 
-        <ul class="admin_header_list">
-            <li><a href="/" style="text-decoration: none;">🌐</a></li>
+        <div class="admin_header_resources">
             {{range $item := .admin_header.menu}}
-                <li class="{{if $admin_resource}}{{ if eq $admin_resource.ID $item.id }}admin_header_item-active{{end}}{{end}}">
-                    <a href="{{$item.url}}">{{$item.name}}</a>
-                </li>
+                <a href="{{$item.url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.id }}admin_header_resource-active{{end}}{{end}}">{{$item.name}}</a>
             {{end}}
-        </ul>
+        </div>
     </div>
 
     <div class="admin_content">
@@ -271,7 +277,7 @@ const adminTemplates = `
 
 <h2>{{.admin_title}}</h2>
 
-<table class="admin_table{{if .admin_list.Order}} admin_table-order{{end}}">
+<table class="admin_table admin_table-list {{if .admin_list.Order}} admin_table-order{{end}}">
   <tr class="admin_table_header">
   {{range $item := .admin_list.Header}}
     <th>
@@ -336,17 +342,17 @@ const adminTemplates = `
   <body class="admin">
     {{tmpl "admin_flash" .}}
 
-    <div class="admin_content">
-    <h2>{{.title}}</h2>
+    <div class="admin_box">
 
-    {{tmpl "admin_form" .admin_form}}
+        <h2>{{.title}}</h2>
 
-    {{if .bottom}}
-    <div style="text-align: center">
-    {{Plain .bottom}}
-    </div>
-    {{end}}
+        {{tmpl "admin_form" .admin_form}}
 
+        {{if .bottom}}
+        <div style="text-align: center">
+        {{Plain .bottom}}
+        </div>
+        {{end}}
     </div>
   </body>
 </html>
@@ -355,11 +361,13 @@ const adminTemplates = `
 <h1>{{.message}}</h1>
 {{end}}{{define "admin_new"}}
 
-<h2>{{.admin_title}}</h2>
+<div class="admin_box">
+  <h2>{{.admin_title}}</h2>
 
-<a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
+  <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
 
-{{tmpl "admin_form" .admin_form}}
+  {{tmpl "admin_form" .admin_form}}
+</div>
 
 {{end}}{{define "admin_new_user"}}
 <!doctype html>
@@ -374,25 +382,26 @@ const adminTemplates = `
   </head>
   <body class="admin">
     <div class="admin_content">
-    <h2>{{.name}}CREATE - {{message .locale "admin_login_name"}}</h2>
+      <div class="admin_box">
+        <h2>{{.name}} ⏤ {{message .locale "admin_login_name"}}</h2>
 
-    <form class="form" method="POST">
-        <label class="form_label">
-          <span class="form_label_text">{{message .locale "admin_email"}}</span>
-          <input type="email" name="email" autofocus class="input form_input">
-        </label>
+        <form class="form" method="POST">
+            <label class="form_label">
+              <span class="form_label_text">{{message .locale "admin_email"}}</span>
+              <input type="email" name="email" autofocus class="input form_input">
+            </label>
 
-        <label class="form_label">
-          <span class="form_label_text">{{message .locale "admin_password"}}</span>
-          <input type="password" name="password" class="input form_input">
-        </label>
+            <label class="form_label">
+              <span class="form_label_text">{{message .locale "admin_password"}}</span>
+              <input type="password" name="password" class="input form_input">
+            </label>
 
-        <input type="submit" value="{{message .locale "admin_login_action"}}" class="btn">
+            <input type="submit" value="{{message .locale "admin_login_action"}}" class="btn">
 
-    </form>
+        </form>
 
-    <a href="{{.admin_header_prefix}}/user/login">Log In</a>
-
+        <a href="{{.admin_header_prefix}}/user/login">Log In</a>
+      </div>
     </div>
   </body>
 </html>
@@ -643,6 +652,8 @@ table {
 }
 html {
   box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 *,
 *:before,
@@ -653,9 +664,12 @@ html,
 body {
   height: 100%;
   font-family: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Oxygen, Ubuntu, Cantarell, "Open Sans", sans-serif;
-  font-size: 15px;
+  font-size: 13px;
   line-height: 1.4em;
-  color: #333;
+  color: #444;
+}
+.shadow {
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
 }
 h1 {
   font-size: 1.5rem;
@@ -665,7 +679,7 @@ h1 {
 h2 {
   font-size: 1.4rem;
   line-height: 1.4em;
-  margin: 0.5em 0 0.2em 0;
+  margin: 0px;
 }
 h3 {
   font-size: 1.3rem;
@@ -699,40 +713,22 @@ a {
 a:hover {
   text-decoration: none;
 }
-.admin_header {
-  background: #f5f5f5;
-  padding: 10px 10px;
-  border: 1px solid #e5e5e5;
-}
-.admin_header h1 {
-  display: inline-block;
-  font-size: 1.1em;
-  margin: 0px 5px;
-}
-.admin_header_list {
-  margin: 0px;
-  padding: 0px;
-}
-.admin_header_list {
-  display: inline-block;
-}
-.admin_header_list li {
-  display: inline-block;
-  padding: 0px 2px;
-}
-.admin_header_list-right {
-  float: right;
-}
 .admin_content {
+  padding: 5px;
+  background-color: #eee;
+}
+.admin_box {
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  margin: 5px auto;
+  background-color: white;
+  padding: 10px;
+  border-radius: 3px;
   max-width: 600px;
-  padding: 10px 10px;
-  margin: 0 auto;
 }
 .admin_footer {
-  background: #f5f5f5;
   padding: 0px 10px;
   font-size: 0.7em;
-  border: 1px solid #e5e5e5;
+  border-top: 1px solid #e5e5e5;
   color: #888;
   text-align: right;
 }
@@ -741,7 +737,7 @@ a:hover {
   padding: 3px 12px;
   font-size: 0.9em;
   font-weight: bold;
-  line-height: 20px;
+  line-height: 1.2em;
   color: #333;
   white-space: nowrap;
   vertical-align: middle;
@@ -778,7 +774,7 @@ a:hover {
 }
 .form_label {
   display: block;
-  margin: 20px 0px;
+  margin: 10px 0px;
 }
 .form_label-required input {
   border-width: 2px;
@@ -801,10 +797,9 @@ a:hover {
 }
 .input {
   display: inline-block;
-  padding: 6px 8px;
-  line-height: 20px;
+  padding: 2px 8px;
+  line-height: 1.2em;
   color: #333;
-  white-space: nowrap;
   vertical-align: middle;
   border: 1px solid #ddd;
   border-radius: 3px;
@@ -845,12 +840,24 @@ input[type=date].input {
 .admin_table {
   width: 100%;
 }
+.admin_table-list {
+  background-color: white;
+  margin: 10px 0px;
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+}
 .admin_table thead {
   font-weight: bold;
 }
 .admin_table td {
   padding: 2px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #f1f1f1;
+}
+.admin_table-list td {
+  border-left: none;
+  border-bottom: none;
+}
+.admin_table-list tr td:last-child {
+  border-right: none;
 }
 .admin_table th {
   padding: 5px;
@@ -956,6 +963,66 @@ input[type=date].input {
 }
 .ordered-desc:after {
   content: "↑";
+}
+.admin_header {
+  background: white;
+  border-bottom: 1px solid #e5e5e5;
+  font-size: 14px;
+  padding-bottom: 0px;
+}
+.admin_header_top {
+  display: flex;
+}
+.admin_header_top_item {
+  padding: 5px;
+}
+.admin_header a {
+  text-decoration: none;
+  line-height: 1.6em;
+}
+.admin_header a:hover {
+  background-color: #eee;
+}
+.admin_header_top_space {
+  flex-grow: 2;
+}
+.admin_header_name {
+  font-weight: bold;
+}
+.admin_header_user {
+  float: right;
+  display: inline-block;
+  margin: 0px;
+  padding: 0px;
+}
+.admin_header_user li {
+  display: inline-block;
+  margin: 0px;
+}
+.admin_header_resources {
+  border-top: 1px solid #e5e5e5;
+  margin: 0px;
+  padding: 0px;
+  clear: both;
+  display: flex;
+  margin-left: -2px;
+  font-size: 0px;
+  padding-left: 5px;
+}
+.admin_header_resource {
+  text-transform: uppercase;
+  padding: 5px 5px;
+  margin: 0px;
+  margin-right: 2px;
+  font-size: 12px;
+  border-bottom: 2px solid none;
+}
+.admin_header_resource:hover {
+  background-color: #eee;
+}
+.admin_header_resource-active {
+  font-weight: bold;
+  border-bottom: 2px solid #4078c0;
 }
 `
 
