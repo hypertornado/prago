@@ -4,4 +4,5 @@ window.onload = function() {
   bindTimestamps();
   bindRelations();
   bindImagePicker();
+  bindDelete();
 }

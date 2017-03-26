@@ -15,6 +15,7 @@
         "js/timestamps.ts",
         "js/relations.ts",
         "js/places.ts",
+        "js/delete-action.ts",
         "js/load.ts"
     ]
 }

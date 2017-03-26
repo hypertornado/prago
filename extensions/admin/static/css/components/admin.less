@@ -133,6 +133,23 @@ a:hover {
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
 }
 
+.btngrp {
+  display: flex;
+  text-align: right;
+  justify-content: flex-end;
+}
+
+.btngrp > :not(:last-child) {
+  border-right: none;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+.btngrp > :not(:first-child) {
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+
 .form {
   //padding: 5px;
 }

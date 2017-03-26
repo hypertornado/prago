@@ -202,7 +202,8 @@ func BindDelete(a *Admin, resource *Resource) {
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_deleted"))
-		prago.Redirect(request, a.Prefix+"/"+resource.ID)
+		prago.WriteAPI(request, true, 200)
+		//prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 }
 

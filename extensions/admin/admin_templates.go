@@ -291,7 +291,7 @@ const adminTemplates = `
       {{end}}
     </th>
   {{end}}
-  <th{{if $table.HasDelete}} colspan="2"{{end}}>
+  <th>
     {{if $table.HasNew}}
       <a href="{{.admin_resource.ID}}/new" class="btn">{{message .locale "admin_new"}}</a>
     {{end}}
@@ -305,15 +305,15 @@ const adminTemplates = `
     </td>
     {{end}}
     <td nowrap class="center top" style="width: 0px;">
-      <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">{{message $locale "admin_edit"}}</a> 
+      <div class="btngrp">
+        <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">{{message $locale "admin_edit"}}</a> 
+        {{if $table.HasDelete}}
+          <div class="btn admin-action-delete" data-action="{{ $adminResource.ID}}/{{$item.ID}}/delete?_csrfToken={{$csrfToken}}" data-confirm-message="{{message $locale "admin_delete_confirmation"}}">
+            {{message $locale "admin_delete"}}
+          </div>
+        {{end}}
+      </div>
     </td>
-    {{if $table.HasDelete}}
-      <td nowrap class="center top" style="width: 0px;">
-        <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete?_csrfToken={{$csrfToken}}" onsubmit="return window.confirm('{{message $locale "admin_delete_confirmation"}}');">
-          <input type="submit" value="{{message $locale "admin_delete"}}" class="btn">
-        </form>
-      </td>
-    {{end}}
   </tr>
 {{end}}
 </table>
@@ -771,6 +771,20 @@ a:hover {
   background-image: none;
   border-color: #d5d5d5;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+.btngrp {
+  display: flex;
+  text-align: right;
+  justify-content: flex-end;
+}
+.btngrp > :not(:last-child) {
+  border-right: none;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+.btngrp > :not(:first-child) {
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
 }
 .form_errors_error {
   border: 1px solid #dd2e4f;
@@ -1514,12 +1528,37 @@ function bindPlaces() {
         bindPlace(el);
     });
 }
+function bindDelete() {
+    var deleteButtons = document.querySelectorAll(".admin-action-delete");
+    for (var i = 0; i < deleteButtons.length; i++) {
+        bindDeleteButton(deleteButtons[i]);
+    }
+}
+function bindDeleteButton(btn) {
+    btn.addEventListener("click", function () {
+        var message = btn.getAttribute("data-confirm-message");
+        var url = btn.getAttribute("data-action");
+        if (confirm(message)) {
+            var request = new XMLHttpRequest();
+            request.open("POST", url, true);
+            request.onload = function () {
+                if (this.status == 200) {
+                    console.log("ok");
+                }
+                else {
+                    console.error("Error while deleting item");
+                }
+            };
+        }
+    });
+}
 window.onload = function () {
     bindOrder();
     bindMarkdowns();
     bindTimestamps();
     bindRelations();
     bindImagePicker();
+    bindDelete();
 };
 `
 

@@ -22,7 +22,7 @@
       {{end}}
     </th>
   {{end}}
-  <th{{if $table.HasDelete}} colspan="2"{{end}}>
+  <th>
     {{if $table.HasNew}}
       <a href="{{.admin_resource.ID}}/new" class="btn">{{message .locale "admin_new"}}</a>
     {{end}}
@@ -36,15 +36,15 @@
     </td>
     {{end}}
     <td nowrap class="center top" style="width: 0px;">
-      <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">{{message $locale "admin_edit"}}</a> 
+      <div class="btngrp">
+        <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">{{message $locale "admin_edit"}}</a> 
+        {{if $table.HasDelete}}
+          <div class="btn admin-action-delete" data-action="{{ $adminResource.ID}}/{{$item.ID}}/delete?_csrfToken={{$csrfToken}}" data-confirm-message="{{message $locale "admin_delete_confirmation"}}">
+            {{message $locale "admin_delete"}}
+          </div>
+        {{end}}
+      </div>
     </td>
-    {{if $table.HasDelete}}
-      <td nowrap class="center top" style="width: 0px;">
-        <form method="POST" action="{{ $adminResource.ID}}/{{$item.ID}}/delete?_csrfToken={{$csrfToken}}" onsubmit="return window.confirm('{{message $locale "admin_delete_confirmation"}}');">
-          <input type="submit" value="{{message $locale "admin_delete"}}" class="btn">
-        </form>
-      </td>
-    {{end}}
   </tr>
 {{end}}
 </table>
