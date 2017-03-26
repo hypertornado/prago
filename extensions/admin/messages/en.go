@@ -2,6 +2,7 @@ package messages
 
 var en = map[string]string{
 	"admin_error": "Error happened",
+	"admin_admin": "Administration",
 
 	"admin_log_out":             "Log out",
 	"admin_new":                 "New item",

@@ -64,13 +64,13 @@ const adminTemplates = `
 
 <div class="admin_box">
 
-  <h2>{{.admin_header.appName}}</h2>
+  <h2>{{.admin_header.Name}}</h2>
 
   <table class="admin_table">
-  {{range $item := .admin_header.menu}}
+  {{range $item := .admin_header.Items}}
     <tr>
       <td>
-        <a href="{{$item.url}}">{{$item.name}}</a>
+        <a href="{{$item.Url}}">{{$item.Name}}</a>
       </td>
     </tr>
   {{end}}
@@ -196,28 +196,29 @@ const adminTemplates = `
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="{{.admin_header.prefix}}/_static/admin.css?v={{.version}}">
-    <script type="text/javascript" src="{{.admin_header.prefix}}/_static/admin.js?v={{.version}}"></script>
+    <link rel="stylesheet" href="{{.admin_header.UrlPrefix}}/_static/admin.css?v={{.version}}">
+    <script type="text/javascript" src="{{.admin_header.UrlPrefix}}/_static/admin.js?v={{.version}}"></script>
     <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces&key={{.google}}" async defer></script>
 
   </head>
-  <body class="admin" data-admin-prefix="{{.admin_header.prefix}}">
+  <body class="admin" data-admin-prefix="{{.admin_header.UrlPrefix}}">
     {{tmpl "admin_flash" .}}
     <div class="admin_header">
         <div class="admin_header_top">
-            <a href="{{.admin_header.prefix}}" class="admin_header_name admin_header_top_item">{{.admin_header.appName}}</a>
+            <a href="{{.admin_header.UrlPrefix}}" class="admin_header_name admin_header_top_item">{{message .locale "admin_admin"}} ⏤ {{.admin_header.Name}}</a>
+            <a href="/" class="admin_header_top_item">{{.admin_header.HomepageUrl}}</a>
             <div class="admin_header_top_item admin_header_top_space"></div>
             <div class="admin_header_top_item">{{.currentuser.Email}}</div>
-            <a href="{{.admin_header.prefix}}/user/settings" class="admin_header_top_item">{{message .locale "admin_settings"}}</a>
-            <a href="{{.admin_header.prefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
+            <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_header_top_item">{{message .locale "admin_settings"}}</a>
+            <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
         </div>
 
 
         {{ $admin_resource := .admin_resource }}
 
         <div class="admin_header_resources">
-            {{range $item := .admin_header.menu}}
-                <a href="{{$item.url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.id }}admin_header_resource-active{{end}}{{end}}">{{$item.name}}</a>
+            {{range $item := .admin_header.Items}}
+                <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
             {{end}}
         </div>
     </div>
@@ -408,11 +409,14 @@ const adminTemplates = `
 
 {{end}}{{define "admin_settings"}}
 
-<h2>{{.admin_title}}</h2>
+<div class="admin_box">
 
-<a href="password">{{message .locale "admin_password_change"}}</a>
+  <h2>{{.admin_title}}</h2>
 
-{{tmpl "admin_form" .admin_form}}
+  <a href="password">{{message .locale "admin_password_change"}}</a>
+
+  {{tmpl "admin_form" .admin_form}}
+</div>
 
 {{end}}{{define "admin_stats"}}
 <h1>Stats</h1>
@@ -731,6 +735,9 @@ a:hover {
   border-top: 1px solid #e5e5e5;
   color: #888;
   text-align: right;
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 2;
 }
 .btn {
   display: inline-block;
@@ -966,19 +973,23 @@ input[type=date].input {
 }
 .admin_header {
   background: white;
-  border-bottom: 1px solid #e5e5e5;
   font-size: 14px;
   padding-bottom: 0px;
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 2;
+  line-height: 1.6em;
 }
 .admin_header_top {
   display: flex;
+  padding: 0px 5px;
+  flex-wrap: wrap;
 }
 .admin_header_top_item {
   padding: 5px;
 }
 .admin_header a {
   text-decoration: none;
-  line-height: 1.6em;
 }
 .admin_header a:hover {
   background-color: #eee;
@@ -989,16 +1000,6 @@ input[type=date].input {
 .admin_header_name {
   font-weight: bold;
 }
-.admin_header_user {
-  float: right;
-  display: inline-block;
-  margin: 0px;
-  padding: 0px;
-}
-.admin_header_user li {
-  display: inline-block;
-  margin: 0px;
-}
 .admin_header_resources {
   border-top: 1px solid #e5e5e5;
   margin: 0px;
@@ -1008,6 +1009,7 @@ input[type=date].input {
   margin-left: -2px;
   font-size: 0px;
   padding-left: 5px;
+  flex-wrap: wrap;
 }
 .admin_header_resource {
   text-transform: uppercase;

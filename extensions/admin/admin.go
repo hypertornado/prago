@@ -113,28 +113,40 @@ func GetUser(request prago.Request) *User {
 	return request.GetData("currentuser").(*User)
 }
 
-func (a *Admin) adminHeaderData(request prago.Request) interface{} {
-	ret := map[string]interface{}{
-		"appName": a.AppName,
-		"prefix":  a.Prefix,
+type AdminHeaderData struct {
+	Name        string
+	UrlPrefix   string
+	HomepageUrl string
+	Items       []AdminHeaderItem
+}
+
+type AdminHeaderItem struct {
+	Name string
+	ID   string
+	Url  string
+}
+
+func (a *Admin) HeaderData(request prago.Request) *AdminHeaderData {
+
+	ret := &AdminHeaderData{
+		Name:        a.AppName,
+		UrlPrefix:   a.Prefix,
+		HomepageUrl: request.Request().Host,
+		Items:       []AdminHeaderItem{},
 	}
 
 	user := GetUser(request)
 	locale := GetLocale(request)
 
-	menuitems := []map[string]interface{}{}
 	for _, resource := range a.Resources {
-		newItem := map[string]interface{}{
-			"name": resource.Name(locale),
-			"id":   resource.ID,
-			"url":  a.Prefix + "/" + resource.ID,
-		}
-
 		if resource.HasView && resource.Authenticate(user) {
-			menuitems = append(menuitems, newItem)
+			ret.Items = append(ret.Items, AdminHeaderItem{
+				Name: resource.Name(locale),
+				ID:   resource.ID,
+				Url:  a.Prefix + "/" + resource.ID,
+			})
 		}
 	}
-	ret["menu"] = menuitems
 	return ret
 }
 
@@ -212,7 +224,7 @@ func (a *Admin) Init(app *prago.App) error {
 		request.SetData("appName", a.AppName)
 		request.SetData("appCode", request.App().Data()["appName"].(string))
 		request.SetData("appVersion", request.App().Data()["version"].(string))
-		request.SetData("admin_header", a.adminHeaderData(request))
+		request.SetData("admin_header", a.HeaderData(request))
 
 		next()
 	})

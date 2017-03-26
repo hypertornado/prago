@@ -2,6 +2,7 @@ package messages
 
 var cs = map[string]string{
 	"admin_error": "Nastala chyba",
+	"admin_admin": "Administrace",
 
 	"admin_log_out":                  "Odhlásit se",
 	"admin_new":                      "Nová položka",

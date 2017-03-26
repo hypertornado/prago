@@ -2,13 +2,13 @@
 
 <div class="admin_box">
 
-  <h2>{{.admin_header.appName}}</h2>
+  <h2>{{.admin_header.Name}}</h2>
 
   <table class="admin_table">
-  {{range $item := .admin_header.menu}}
+  {{range $item := .admin_header.Items}}
     <tr>
       <td>
-        <a href="{{$item.url}}">{{$item.name}}</a>
+        <a href="{{$item.Url}}">{{$item.Name}}</a>
       </td>
     </tr>
   {{end}}
