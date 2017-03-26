@@ -25,6 +25,8 @@ var ErrItemNotFound = errors.New("item not found")
 
 //Admin is struct representing admin extension
 type Admin struct {
+	Logo                  string
+	Background            string
 	Prefix                string
 	AppName               string
 	Resources             []*Resource
@@ -115,6 +117,8 @@ func GetUser(request prago.Request) *User {
 
 type AdminHeaderData struct {
 	Name        string
+	Logo        string
+	Background  string
 	UrlPrefix   string
 	HomepageUrl string
 	Items       []AdminHeaderItem
@@ -130,6 +134,8 @@ func (a *Admin) HeaderData(request prago.Request) *AdminHeaderData {
 
 	ret := &AdminHeaderData{
 		Name:        a.AppName,
+		Logo:        a.Logo,
+		Background:  a.Background,
 		UrlPrefix:   a.Prefix,
 		HomepageUrl: request.Request().Host,
 		Items:       []AdminHeaderItem{},

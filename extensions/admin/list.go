@@ -9,6 +9,8 @@ import (
 )
 
 type list struct {
+	Name       string
+	Colspan    int64
 	Header     []listHeader
 	Rows       []listRow
 	Pagination pagination
@@ -55,6 +57,8 @@ func (resource *Resource) GetList(admin *Admin, lang string, path string, reques
 }
 
 func (resource *Resource) getList(admin *Admin, lang string, path string, requestQuery url.Values) (list list, err error) {
+	list.Colspan = 1
+
 	orderItem := resource.OrderByColumn
 	orderDesc := resource.OrderDesc
 	isDefaultOrder := true
@@ -101,6 +105,8 @@ func (resource *Resource) getList(admin *Admin, lang string, path string, reques
 	} else {
 		q.Order(orderItem)
 	}
+
+	list.Name = resource.Name(lang)
 
 	_, list.HasDelete = resource.Actions["delete"]
 	_, list.HasNew = resource.Actions["new"]
@@ -218,6 +224,7 @@ func (resource *Resource) getList(admin *Admin, lang string, path string, reques
 		}
 		row.ID = itemVal.FieldByName("ID").Int()
 		list.Rows = append(list.Rows, row)
+		list.Colspan = int64(len(row.Items)) + 1
 	}
 	return
 }
@@ -231,8 +238,9 @@ func (resource *Resource) valueToCell(admin *Admin, field reflect.StructField, v
 	case string:
 		cell.Value = item.(string)
 	case bool:
+		cell.TemplateName = "admin_cell_checkbox"
 		if item.(bool) {
-			cell.Value = "✅"
+			cell.Value = "true"
 		}
 	case int64:
 		cell.Value = fmt.Sprintf("%d", item.(int64))

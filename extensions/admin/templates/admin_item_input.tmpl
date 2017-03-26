@@ -97,7 +97,9 @@
 {{end}}
 
 {{define "admin_image"}}
-<img src="{{thumb .Value}}">
+  <div class="admin_thumb">
+    <img src="{{thumb .Value}}">
+  </div>
 {{end}}
 
 {{define "admin_link"}}
@@ -106,4 +108,14 @@
 
 {{define "admin_string"}}
 {{.Value}}
+{{end}}
+
+{{define "admin_cell_checkbox"}}
+<div class="center">
+  {{if .Value}}
+    ✅
+  {{else}}
+    -
+  {{end}}
+</div>
 {{end}}

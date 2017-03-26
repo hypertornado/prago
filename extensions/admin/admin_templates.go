@@ -56,9 +56,13 @@ const adminTemplates = `
 
 {{end}}{{define "admin_form_view"}}
 
+<div class="admin_box">
+
 <h2>{{.admin_title}}</h2>
 
 {{tmpl "admin_form" .admin_form}}
+
+</div>
 
 {{end}}{{define "admin_home"}}
 
@@ -176,7 +180,9 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_image"}}
-<img src="{{thumb .Value}}">
+  <div class="admin_thumb">
+    <img src="{{thumb .Value}}">
+  </div>
 {{end}}
 
 {{define "admin_link"}}
@@ -185,6 +191,16 @@ const adminTemplates = `
 
 {{define "admin_string"}}
 {{.Value}}
+{{end}}
+
+{{define "admin_cell_checkbox"}}
+<div class="center">
+  {{if .Value}}
+    ✅
+  {{else}}
+    -
+  {{end}}
+</div>
 {{end}}
 {{define "admin_layout"}}
 <!doctype html>
@@ -201,11 +217,19 @@ const adminTemplates = `
     <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces&key={{.google}}" async defer></script>
 
   </head>
-  <body class="admin" data-admin-prefix="{{.admin_header.UrlPrefix}}">
+  <body class="admin" data-admin-prefix="{{.admin_header.UrlPrefix}}"
+    {{if .admin_header.Background}}
+      style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255,255,255, 0.9) 100%), url('{{.admin_header.Background}}'); background-size: cover;" 
+    {{end}}
+    >
     {{tmpl "admin_flash" .}}
     <div class="admin_header">
         <div class="admin_header_top">
-            <a href="{{.admin_header.UrlPrefix}}" class="admin_header_name admin_header_top_item">{{message .locale "admin_admin"}} ⏤ {{.admin_header.Name}}</a>
+            <a href="{{.admin_header.UrlPrefix}}" class="admin_header_name admin_header_top_item">
+              {{if .admin_header.Logo}}
+                <div class="admin_logo" style="background-image: url('{{.admin_header.Logo}}');"></div>
+              {{end}}
+            {{message .locale "admin_admin"}} ⏤ {{.admin_header.Name}}</a>
             <a href="/" class="admin_header_top_item">{{.admin_header.HomepageUrl}}</a>
             <div class="admin_header_top_item admin_header_top_space"></div>
             <div class="admin_header_top_item">{{.currentuser.Email}}</div>
@@ -276,10 +300,13 @@ const adminTemplates = `
 {{$table := .admin_list}}
 
 
-<h2>{{.admin_title}}</h2>
-
 <table class="admin_table admin_table-list {{if .admin_list.Order}} admin_table-order{{end}}">
-  <tr class="admin_table_header">
+  <tr>
+    <td colspan="{{.admin_list.Colspan}}">
+      <h2>{{.admin_title}}</h2>
+    </td>
+  </tr>
+  <tr>
   {{range $item := .admin_list.Header}}
     <th>
       {{if $item.CanOrder}}
@@ -304,7 +331,7 @@ const adminTemplates = `
       {{ tmpl $cell.TemplateName $cell }}
     </td>
     {{end}}
-    <td nowrap class="center top" style="width: 0px;">
+    <td nowrap class="center top">
       <div class="btngrp">
         <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">{{message $locale "admin_edit"}}</a> 
         {{if $table.HasDelete}}
@@ -316,17 +343,20 @@ const adminTemplates = `
     </td>
   </tr>
 {{end}}
-</table>
-
-<div class="pagination">
-{{range $page := .admin_list.Pagination.Pages}}
-  {{if $page.Current}}
-    <span class="pagination_page pagination_page-current">{{$page.Name}}</span>
-  {{else}}
-    <a href="{{$page.URL}}" class="pagination_page">{{$page.Name}}</a>
+  {{if .admin_list.Pagination.Pages}}
+    <tr>
+      <td colspan="{{.admin_list.Colspan}}" class="pagination">
+        {{range $page := .admin_list.Pagination.Pages}}
+          {{if $page.Current}}
+            <span class="pagination_page pagination_page-current">{{$page.Name}}</span>
+          {{else}}
+            <a href="{{$page.URL}}" class="pagination_page">{{$page.Name}}</a>
+          {{end}}
+        {{end}}
+      </td>
+    </tr>
   {{end}}
-{{end}}
-</div>
+</table>
 
 {{end}}{{define "admin_login"}}
 <!doctype html>
@@ -672,6 +702,10 @@ body {
   line-height: 1.4em;
   color: #444;
 }
+body {
+  background-color: #f3f3f3;
+  background-size: cover;
+}
 .shadow {
   box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
 }
@@ -719,7 +753,6 @@ a:hover {
 }
 .admin_content {
   padding: 5px;
-  background-color: #eee;
 }
 .admin_box {
   box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
@@ -738,6 +771,8 @@ a:hover {
   box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
   position: relative;
   z-index: 2;
+  background-color: white;
+  display: none;
 }
 .btn {
   display: inline-block;
@@ -884,6 +919,12 @@ input[type=date].input {
   padding: 5px;
   vertical-align: bottom;
   font-weight: normal;
+  border: 1px solid #f1f1f1;
+  border-left: none;
+  background-color: #fafafa;
+}
+.admin_table th a {
+  display: block;
 }
 .admin_header_item-active a {
   font-weight: bold;
@@ -967,6 +1008,12 @@ input[type=date].input {
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
 }
+.admin_thumb {
+  text-align: center;
+}
+.admin_thumb img {
+  max-height: 30px;
+}
 .admin_timestamp_date {
   width: 150px;
 }
@@ -994,10 +1041,20 @@ input[type=date].input {
   z-index: 2;
   line-height: 1.6em;
 }
+.admin_logo {
+  width: 40px;
+  height: 20px;
+  border: 0px solid red;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-right: 10px;
+}
 .admin_header_top {
   display: flex;
   padding: 0px 5px;
   flex-wrap: wrap;
+  align-items: center;
 }
 .admin_header_top_item {
   padding: 5px;
@@ -1013,6 +1070,8 @@ input[type=date].input {
 }
 .admin_header_name {
   font-weight: bold;
+  display: flex;
+  align-items: center;
 }
 .admin_header_resources {
   border-top: 1px solid #e5e5e5;
@@ -1543,12 +1602,13 @@ function bindDeleteButton(btn) {
             request.open("POST", url, true);
             request.onload = function () {
                 if (this.status == 200) {
-                    console.log("ok");
+                    document.location.reload();
                 }
                 else {
                     console.error("Error while deleting item");
                 }
             };
+            request.send();
         }
     });
 }

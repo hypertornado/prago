@@ -15,6 +15,11 @@ html, body{
   color: #444;
 }
 
+body {
+  background-color: #f3f3f3;
+  background-size: cover;
+}
+
 .shadow {
   box-shadow: 0px 1px 4px 0px rgba(0,0,0,0.2);
 }
@@ -74,7 +79,7 @@ a:hover {
 
 .admin_content {
   padding: 5px;
-  background-color: #eee;
+  //background-color: #eee;
 }
 
 .admin_box {
@@ -95,6 +100,8 @@ a:hover {
   .shadow;
   position: relative;
   z-index: 2;
+  background-color: white;
+  display: none;
 }
 
 .btn {
@@ -268,6 +275,13 @@ input[type=date].input {
   padding: 5px;
   vertical-align: bottom;
   font-weight: normal;
+  border: 1px solid #f1f1f1;
+  border-left: none;
+  background-color: #fafafa;
+}
+
+.admin_table th a {
+  display: block;
 }
 
 .admin_header_item-active a {
@@ -368,7 +382,14 @@ input[type=date].input {
   color: #888;
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
+}
 
+.admin_thumb {
+  text-align: center;
+}
+
+.admin_thumb img {
+  max-height: 30px;
 }
 
 .admin_timestamp_date {

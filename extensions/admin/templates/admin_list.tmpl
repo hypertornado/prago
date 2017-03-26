@@ -7,10 +7,13 @@
 {{$table := .admin_list}}
 
 
-<h2>{{.admin_title}}</h2>
-
 <table class="admin_table admin_table-list {{if .admin_list.Order}} admin_table-order{{end}}">
-  <tr class="admin_table_header">
+  <tr>
+    <td colspan="{{.admin_list.Colspan}}">
+      <h2>{{.admin_title}}</h2>
+    </td>
+  </tr>
+  <tr>
   {{range $item := .admin_list.Header}}
     <th>
       {{if $item.CanOrder}}
@@ -35,7 +38,7 @@
       {{ tmpl $cell.TemplateName $cell }}
     </td>
     {{end}}
-    <td nowrap class="center top" style="width: 0px;">
+    <td nowrap class="center top">
       <div class="btngrp">
         <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">{{message $locale "admin_edit"}}</a> 
         {{if $table.HasDelete}}
@@ -47,16 +50,19 @@
     </td>
   </tr>
 {{end}}
-</table>
-
-<div class="pagination">
-{{range $page := .admin_list.Pagination.Pages}}
-  {{if $page.Current}}
-    <span class="pagination_page pagination_page-current">{{$page.Name}}</span>
-  {{else}}
-    <a href="{{$page.URL}}" class="pagination_page">{{$page.Name}}</a>
+  {{if .admin_list.Pagination.Pages}}
+    <tr>
+      <td colspan="{{.admin_list.Colspan}}" class="pagination">
+        {{range $page := .admin_list.Pagination.Pages}}
+          {{if $page.Current}}
+            <span class="pagination_page pagination_page-current">{{$page.Name}}</span>
+          {{else}}
+            <a href="{{$page.URL}}" class="pagination_page">{{$page.Name}}</a>
+          {{end}}
+        {{end}}
+      </td>
+    </tr>
   {{end}}
-{{end}}
-</div>
+</table>
 
 {{end}}
