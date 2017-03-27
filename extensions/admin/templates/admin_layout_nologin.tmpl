@@ -1,0 +1,25 @@
+{{define "admin_layout_nologin"}}
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{{.title}}</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{.admin_header_prefix}}/normalize.css?v={{.version}}">
+    <link rel="stylesheet" href="{{.admin_header_prefix}}/_static/admin.css?v={{.version}}">
+  </head>
+  <body class="admin_nologin"
+    {{if .background}}
+      style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255,255,255, 0.9) 100%), url('{{.background}}'); background-size: cover; background-attachment: fixed;" 
+    {{end}}
+  >
+    {{tmpl "admin_flash" .}}
+
+    {{tmpl .yield .}}
+
+  </body>
+</html>
+
+{{end}}

@@ -230,7 +230,7 @@ const adminTemplates = `
   </head>
   <body class="admin" data-admin-prefix="{{.admin_header.UrlPrefix}}"
     {{if .admin_header.Background}}
-      style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255,255,255, 0.9) 100%), url('{{.admin_header.Background}}'); background-size: cover;" 
+      style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255,255,255, 0.9) 100%), url('{{.admin_header.Background}}'); background-size: cover; background-attachment: fixed;" 
     {{end}}
     >
     {{tmpl "admin_flash" .}}
@@ -300,6 +300,30 @@ const adminTemplates = `
       </div>
     </div>
 -->
+  </body>
+</html>
+
+{{end}}{{define "admin_layout_nologin"}}
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{{.title}}</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{.admin_header_prefix}}/normalize.css?v={{.version}}">
+    <link rel="stylesheet" href="{{.admin_header_prefix}}/_static/admin.css?v={{.version}}">
+  </head>
+  <body class="admin_nologin"
+    {{if .background}}
+      style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255,255,255, 0.9) 100%), url('{{.background}}'); background-size: cover; background-attachment: fixed;" 
+    {{end}}
+  >
+    {{tmpl "admin_flash" .}}
+
+    {{tmpl .yield .}}
+
   </body>
 </html>
 
@@ -375,35 +399,17 @@ const adminTemplates = `
 </table>
 
 {{end}}{{define "admin_login"}}
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{.title}}</title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{{.admin_header_prefix}}/normalize.css?v={{.version}}">
-    <link rel="stylesheet" href="{{.admin_header_prefix}}/_static/admin.css?v={{.version}}">
-  </head>
-  <body class="admin">
-    {{tmpl "admin_flash" .}}
+<div class="admin_box">
+    <h2>{{.title}}</h2>
 
-    <div class="admin_box">
+    {{tmpl "admin_form" .admin_form}}
 
-        <h2>{{.title}}</h2>
-
-        {{tmpl "admin_form" .admin_form}}
-
-        {{if .bottom}}
-        <div style="text-align: center">
-        {{Plain .bottom}}
-        </div>
-        {{end}}
+    {{if .bottom}}
+    <div style="text-align: center">
+    {{Plain .bottom}}
     </div>
-  </body>
-</html>
-
+    {{end}}
+</div>
 {{end}}{{define "admin_message"}}
 
 <div class="admin_box">
@@ -418,43 +424,6 @@ const adminTemplates = `
 
   {{tmpl "admin_form" .admin_form}}
 </div>
-
-{{end}}{{define "admin_new_user"}}
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{.name}} - {{message .locale "admin_login_name"}}</title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{{.admin_header.prefix}}/_static/admin.css?v={{.version}}">
-  </head>
-  <body class="admin">
-    <div class="admin_content">
-      <div class="admin_box">
-        <h2>{{.name}} ⏤ {{message .locale "admin_login_name"}}</h2>
-
-        <form class="form" method="POST">
-            <label class="form_label">
-              <span class="form_label_text">{{message .locale "admin_email"}}</span>
-              <input type="email" name="email" autofocus class="input form_input">
-            </label>
-
-            <label class="form_label">
-              <span class="form_label_text">{{message .locale "admin_password"}}</span>
-              <input type="password" name="password" class="input form_input">
-            </label>
-
-            <input type="submit" value="{{message .locale "admin_login_action"}}" class="btn">
-
-        </form>
-
-        <a href="{{.admin_header_prefix}}/user/login">Log In</a>
-      </div>
-    </div>
-  </body>
-</html>
 
 {{end}}{{define "admin_settings"}}
 
@@ -715,7 +684,6 @@ html {
 }
 html,
 body {
-  height: 100%;
   font-family: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Oxygen, Ubuntu, Cantarell, "Open Sans", sans-serif;
   font-size: 13px;
   line-height: 1.4em;
@@ -724,6 +692,10 @@ body {
 body {
   background-color: #f3f3f3;
   background-size: cover;
+  background-attachment: fixed;
+}
+.admin_nologin {
+  padding-top: 20px;
 }
 .shadow {
   box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);

@@ -226,7 +226,8 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		request.SetData("admin_form", form)
 		request.SetData("title", title)
 
-		prago.Render(request, 200, "admin_login")
+		request.SetData("yield", "admin_login")
+		prago.Render(request, 200, "admin_layout_nologin")
 	}
 
 	a.AdminAccessController.Get(a.GetURL(resource, "confirm_email"), func(request prago.Request) {
@@ -270,7 +271,8 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		request.SetData("admin_form", form)
 		request.SetData("title", title)
 
-		prago.Render(request, 200, "admin_login")
+		request.SetData("yield", "admin_login")
+		prago.Render(request, 200, "admin_layout_nologin")
 	}
 
 	a.AdminAccessController.Get(a.GetURL(resource, "forgot"), func(request prago.Request) {
@@ -328,7 +330,8 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		request.SetData("admin_form", form)
 		request.SetData("title", title)
 
-		prago.Render(request, 200, "admin_login")
+		request.SetData("yield", "admin_login")
+		prago.Render(request, 200, "admin_layout_nologin")
 	}
 
 	a.AdminAccessController.Get(a.GetURL(resource, "renew_password"), func(request prago.Request) {
@@ -477,7 +480,8 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		request.SetData("admin_form", form)
 		request.SetData("title", title)
 
-		prago.Render(request, 200, "admin_login")
+		request.SetData("yield", "admin_login")
+		prago.Render(request, 200, "admin_layout_nologin")
 	}
 
 	a.AdminAccessController.Get(a.GetURL(resource, "registration"), func(request prago.Request) {

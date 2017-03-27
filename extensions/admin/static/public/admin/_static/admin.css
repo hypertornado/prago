@@ -185,7 +185,6 @@ html {
 }
 html,
 body {
-  height: 100%;
   font-family: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Oxygen, Ubuntu, Cantarell, "Open Sans", sans-serif;
   font-size: 13px;
   line-height: 1.4em;
@@ -194,6 +193,10 @@ body {
 body {
   background-color: #f3f3f3;
   background-size: cover;
+  background-attachment: fixed;
+}
+.admin_nologin {
+  padding-top: 20px;
 }
 .shadow {
   box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);

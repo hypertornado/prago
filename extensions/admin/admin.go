@@ -170,6 +170,10 @@ func (a *Admin) Init(app *prago.App) error {
 	a.db = app.Data()["db"].(*sql.DB)
 
 	a.AdminAccessController = app.MainController().SubController()
+	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
+		request.SetData("background", a.Background)
+	})
+
 	a.AdminController = a.AdminAccessController.SubController()
 
 	googleApiKey := app.Config.GetStringWithFallback("google", "")
