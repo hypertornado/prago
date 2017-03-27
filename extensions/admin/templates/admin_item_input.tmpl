@@ -49,6 +49,17 @@
 
 {{define "admin_item_image"}}
   <div class="admin_images">
+    <input name="{{.Name}}" value="{{.Value}}" type="hidden" class="admin_images_hidden">
+    <div class="admin_images_loaded hidden">
+      <input type="file" accept=".jpg,.jpeg" multiple class="admin_images_fileinput">
+      <div class="admin_images_preview"></div>
+    </div>
+    <progress></progress>
+  </div>
+{{end}}
+
+{{define "admin_item_image_OLD"}}
+  <div class="admin_images_OLD">
     <input name="{{.Name}}" value="{{.Value}}" type="hidden">
     <div class="admin_images_list"></div>
     <a href="#" class="btn admin_images_edit">Edit</a>

@@ -1,8 +1,8 @@
-window.onload = function() {
+document.addEventListener("DOMContentLoaded", () => {
   bindOrder();
   bindMarkdowns();
   bindTimestamps();
   bindRelations();
-  bindImagePicker();
+  bindImagePickers();
   bindDelete();
-}
+});

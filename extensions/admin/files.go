@@ -252,10 +252,27 @@ func writeFileResponse(request prago.Request, files []*File) {
 }
 
 func bindImageAPI(a *Admin, fileDownloadPath string) {
+	a.App.MainController().Get(a.Prefix+"/file/uuid/:uuid", func(request prago.Request) {
+		var image File
+		err := a.Query().WhereIs("uid", request.Params().Get("uuid")).Get(&image)
+		if err != nil {
+			panic(err)
+		}
+		prago.Redirect(request,
+			fmt.Sprintf("%s/file/%d", a.Prefix, image.ID),
+		)
+	})
+
+	a.App.MainController().Get(a.Prefix+"/_api/image/thumb/:id", func(request prago.Request) {
+		var image File
+		err := a.Query().WhereIs("uid", request.Params().Get("id")).Get(&image)
+		if err != nil {
+			panic(err)
+		}
+		prago.Redirect(request, image.GetMedium())
+	})
 	a.App.MainController().Get(a.Prefix+"/_api/image/list", func(request prago.Request) {
 		var images []*File
-
-		fmt.Println(request.Params().Get("ids"))
 
 		if len(request.Params().Get("ids")) > 0 {
 			ids := strings.Split(request.Params().Get("ids"), ",")
