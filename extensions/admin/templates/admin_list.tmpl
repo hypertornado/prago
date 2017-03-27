@@ -6,6 +6,10 @@
 {{$csrfToken := ._csrfToken}}
 {{$table := .admin_list}}
 
+{{range $snippet := .admin_resource.Snippets}}
+  {{tmpl $snippet.Template nil}}
+{{end}}
+
 
 <table class="admin_table admin_table-list {{if .admin_list.Order}} admin_table-order{{end}}">
   <tr>

@@ -311,6 +311,10 @@ const adminTemplates = `
 {{$csrfToken := ._csrfToken}}
 {{$table := .admin_list}}
 
+{{range $snippet := .admin_resource.Snippets}}
+  {{tmpl $snippet.Template nil}}
+{{end}}
+
 
 <table class="admin_table admin_table-list {{if .admin_list.Order}} admin_table-order{{end}}">
   <tr>
@@ -1005,6 +1009,10 @@ input[type=date].input {
 }
 .admin_images_fileinput {
   display: block;
+  margin: 0px auto;
+  border: 1px solid #eee;
+  padding: 3px;
+  border-radius: 3px;
 }
 /*
 #admin_images_popup {
