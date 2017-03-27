@@ -137,7 +137,7 @@ func (a *Admin) HeaderData(request prago.Request) *AdminHeaderData {
 		Logo:        a.Logo,
 		Background:  a.Background,
 		UrlPrefix:   a.Prefix,
-		HomepageUrl: request.Request().Host,
+		HomepageUrl: request.App().Config.GetStringWithFallback("baseUrl", request.Request().Host),
 		Items:       []AdminHeaderItem{},
 	}
 
