@@ -16,7 +16,6 @@ type list struct {
 	Rows       []listRow
 	Pagination pagination
 	Order      bool
-	HasDelete  bool
 }
 
 type listHeader struct {
@@ -108,8 +107,6 @@ func (resource *Resource) getList(admin *Admin, lang string, path string, reques
 	}
 
 	list.Name = resource.Name(lang)
-
-	_, list.HasDelete = resource.Actions["delete"]
 
 	if resource.StructCache.OrderColumnName == orderItem && !orderDesc {
 		list.Order = true

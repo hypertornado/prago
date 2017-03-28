@@ -27,28 +27,28 @@ type Snippet struct {
 
 //Resource is structure representing one item in admin menu or one table in database
 type Resource struct {
-	ID                 string
-	Snippets           []Snippet
-	Name               func(locale string) string
-	Typ                reflect.Type
-	ResourceController *prago.Controller
-	Authenticate       Authenticatizer
-	Pagination         int64
-	OrderByColumn      string
-	OrderDesc          bool
-	HasModel           bool
-	HasView            bool
-	item               interface{}
-	admin              dbProvider
-	table              string
-	StructCache        *structCache
-	AfterFormCreated   func(f *Form, request prago.Request, newItem bool) *Form
-	VisibilityFilter   structFieldFilter
-	EditabilityFilter  structFieldFilter
-	Actions            map[string]ActionBinder
-	ResourceActions    []ResourceAction
-	CanCreate          bool
-	CanEdit            bool
+	ID                  string
+	Snippets            []Snippet
+	Name                func(locale string) string
+	Typ                 reflect.Type
+	ResourceController  *prago.Controller
+	Authenticate        Authenticatizer
+	Pagination          int64
+	OrderByColumn       string
+	OrderDesc           bool
+	HasModel            bool
+	HasView             bool
+	item                interface{}
+	admin               dbProvider
+	table               string
+	StructCache         *structCache
+	AfterFormCreated    func(f *Form, request prago.Request, newItem bool) *Form
+	VisibilityFilter    structFieldFilter
+	EditabilityFilter   structFieldFilter
+	ResourceActions     []ResourceAction
+	ResourceItemActions []ResourceAction
+	CanCreate           bool
+	CanEdit             bool
 
 	BeforeList   Action
 	BeforeNew    Action
@@ -84,13 +84,6 @@ func (a *Admin) CreateResource(item interface{}) (ret *Resource, err error) {
 		EditabilityFilter: defaultEditabilityFilter,
 		CanCreate:         true,
 		CanEdit:           true,
-	}
-
-	ret.Actions = map[string]ActionBinder{
-		"order":  BindOrder,
-		"detail": BindDetail,
-		"update": BindUpdate,
-		"delete": BindDelete,
 	}
 
 	ret.OrderByColumn, ret.OrderDesc = cache.GetDefaultOrder()

@@ -347,6 +347,14 @@ func (a *Admin) GetURL(resource *Resource, suffix string) string {
 	return ret
 }
 
+func (a *Admin) GetItemURL(resource *Resource, suffix string) string {
+	ret := a.Prefix + "/" + resource.ID + "/:id"
+	if len(suffix) > 0 {
+		ret += "/" + suffix
+	}
+	return ret
+}
+
 func render403(request prago.Request) {
 	request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_403"))
 	request.SetData("admin_yield", "admin_message")

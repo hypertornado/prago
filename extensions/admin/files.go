@@ -89,93 +89,89 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 
 	bindImageAPI(a, fileDownloadPath)
 
-	resource.Actions["create"] = func(a *Admin, resource *Resource) {
-		resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
-			ValidateCSRF(request)
+	resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
+		ValidateCSRF(request)
 
-			multipartFiles := request.Request().MultipartForm.File["file"]
-			if len(multipartFiles) != 1 {
-				panic("must have 1 file selected")
-			}
+		multipartFiles := request.Request().MultipartForm.File["file"]
+		if len(multipartFiles) != 1 {
+			panic("must have 1 file selected")
+		}
 
-			file, err := uploadFile(multipartFiles[0], fileUploadPath)
-			if err != nil {
-				panic(err)
-			}
-			file.User = GetUser(request).ID
-			file.Description = request.Params().Get("Description")
-			prago.Must(a.Create(file))
+		file, err := uploadFile(multipartFiles[0], fileUploadPath)
+		if err != nil {
+			panic(err)
+		}
+		file.User = GetUser(request).ID
+		file.Description = request.Params().Get("Description")
+		prago.Must(a.Create(file))
 
-			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
-			prago.Redirect(request, a.Prefix+"/"+resource.ID)
-		})
-	}
+		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
+		prago.Redirect(request, a.Prefix+"/"+resource.ID)
+	})
 
-	resource.Actions["detail"] = func(a *Admin, resource *Resource) {
-		resource.ResourceController.Get(a.GetURL(resource, ":id"), func(request prago.Request) {
-			id, err := strconv.Atoi(request.Params().Get("id"))
-			prago.Must(err)
+	resource.ResourceController.Get(a.GetURL(resource, ":id"), func(request prago.Request) {
+		id, err := strconv.Atoi(request.Params().Get("id"))
+		prago.Must(err)
 
-			var file File
-			prago.Must(a.Query().WhereIs("id", int64(id)).Get(&file))
+		var file File
+		prago.Must(a.Query().WhereIs("id", int64(id)).Get(&file))
 
-			form := NewForm()
-			form.Method = "POST"
+		form := NewForm()
+		form.Method = "POST"
 
-			fi := form.AddTextInput("Name", messages.Messages.Get(GetLocale(request), "Name"))
+		fi := form.AddTextInput("Name", messages.Messages.Get(GetLocale(request), "Name"))
+		fi.Readonly = true
+		fi.Value = file.Name
+
+		_, fileURL := file.getPath(fileDownloadPath + "original")
+
+		fi = form.AddTextInput("url", messages.Messages.Get(GetLocale(request), "Url"))
+		fi.Readonly = true
+		fi.Value = fileURL
+		fi.SubTemplate = "admin_item_link"
+
+		fi = form.AddTextInput("size", messages.Messages.Get(GetLocale(request), "Size"))
+		fi.Readonly = true
+		fi.Value = fmt.Sprintf("%d", file.Size)
+
+		fi = form.AddTextInput("uploadedBy", messages.Messages.Get(GetLocale(request), "Uploaded By"))
+		fi.Readonly = true
+		fi.Value = fmt.Sprintf("%d", file.User)
+
+		fi = form.AddTextInput("fileType", messages.Messages.Get(GetLocale(request), "Type"))
+		fi.Readonly = true
+		fi.Value = file.FileType
+
+		if file.isImage() {
+			fi = form.AddTextInput("width", messages.Messages.Get(GetLocale(request), "Width"))
 			fi.Readonly = true
-			fi.Value = file.Name
+			fi.Value = fmt.Sprintf("%d", file.Width)
 
-			_, fileURL := file.getPath(fileDownloadPath + "original")
-
-			fi = form.AddTextInput("url", messages.Messages.Get(GetLocale(request), "Url"))
+			fi = form.AddTextInput("height", messages.Messages.Get(GetLocale(request), "Height"))
 			fi.Readonly = true
-			fi.Value = fileURL
-			fi.SubTemplate = "admin_item_link"
+			fi.Value = fmt.Sprintf("%d", file.Height)
 
-			fi = form.AddTextInput("size", messages.Messages.Get(GetLocale(request), "Size"))
-			fi.Readonly = true
-			fi.Value = fmt.Sprintf("%d", file.Size)
-
-			fi = form.AddTextInput("uploadedBy", messages.Messages.Get(GetLocale(request), "Uploaded By"))
-			fi.Readonly = true
-			fi.Value = fmt.Sprintf("%d", file.User)
-
-			fi = form.AddTextInput("fileType", messages.Messages.Get(GetLocale(request), "Type"))
-			fi.Readonly = true
-			fi.Value = file.FileType
-
-			if file.isImage() {
-				fi = form.AddTextInput("width", messages.Messages.Get(GetLocale(request), "Width"))
+			for _, v := range []string{"large", "medium", "small"} {
+				fi = form.AddTextInput("thumb"+v, messages.Messages.Get(GetLocale(request), v))
 				fi.Readonly = true
-				fi.Value = fmt.Sprintf("%d", file.Width)
-
-				fi = form.AddTextInput("height", messages.Messages.Get(GetLocale(request), "Height"))
-				fi.Readonly = true
-				fi.Value = fmt.Sprintf("%d", file.Height)
-
-				for _, v := range []string{"large", "medium", "small"} {
-					fi = form.AddTextInput("thumb"+v, messages.Messages.Get(GetLocale(request), v))
-					fi.Readonly = true
-					_, path := file.getPath(fileDownloadPath + "thumb/" + v)
-					fi.Value = path
-					fi.SubTemplate = "admin_item_link"
-				}
-
+				_, path := file.getPath(fileDownloadPath + "thumb/" + v)
+				fi.Value = path
+				fi.SubTemplate = "admin_item_link"
 			}
 
-			fi = form.AddTextareaInput("Description", messages.Messages.Get(GetLocale(request), "Description"))
-			fi.Value = file.Description
-			fi.Focused = true
-			form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
-			AddCSRFToken(form, request)
+		}
 
-			request.SetData("admin_item", file)
-			request.SetData("admin_form", form)
-			request.SetData("admin_yield", "admin_edit")
-			prago.Render(request, 200, "admin_layout")
-		})
-	}
+		fi = form.AddTextareaInput("Description", messages.Messages.Get(GetLocale(request), "Description"))
+		fi.Value = file.Description
+		fi.Focused = true
+		form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
+		AddCSRFToken(form, request)
+
+		request.SetData("admin_item", file)
+		request.SetData("admin_form", form)
+		request.SetData("admin_yield", "admin_edit")
+		prago.Render(request, 200, "admin_layout")
+	})
 
 	return nil
 }

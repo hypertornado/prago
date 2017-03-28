@@ -118,18 +118,15 @@ var ActionCreate = ResourceAction{
 	},
 }
 
-//ActionBinder is function for binding actions
-type ActionBinder func(a *Admin, resource *Resource)
-
-//BindDetail is default detail binder
-func BindDetail(a *Admin, resource *Resource) {
-	resource.ResourceController.Get(a.GetURL(resource, ":id"), func(request prago.Request) {
+var ActionEdit = ResourceAction{
+	Url: "edit",
+	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
 
 		var item interface{}
 		resource.newItem(&item)
-		prago.Must(a.Query().WhereIs("id", int64(id)).Get(item))
+		prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
@@ -153,19 +150,20 @@ func BindDetail(a *Admin, resource *Resource) {
 		request.SetData("admin_form", form)
 		request.SetData("admin_yield", "admin_edit")
 		prago.Render(request, 200, "admin_layout")
-	})
+	},
 }
 
-//BindUpdate is default update binder
-func BindUpdate(a *Admin, resource *Resource) {
-	resource.ResourceController.Post(a.GetURL(resource, ":id"), func(request prago.Request) {
+var ActionUpdate = ResourceAction{
+	Url:    "edit",
+	Method: "post",
+	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
 		ValidateCSRF(request)
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
 
 		var item interface{}
 		resource.newItem(&item)
-		prago.Must(a.Query().WhereIs("id", int64(id)).Get(item))
+		prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
@@ -182,9 +180,7 @@ func BindUpdate(a *Admin, resource *Resource) {
 				return
 			}
 		}
-
-		err = a.Save(item)
-		prago.Must(err)
+		prago.Must(admin.Save(item))
 
 		if resource.AfterUpdate != nil {
 			if !resource.AfterUpdate(request, item) {
@@ -193,13 +189,14 @@ func BindUpdate(a *Admin, resource *Resource) {
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_edited"))
-		prago.Redirect(request, a.Prefix+"/"+resource.ID)
-	})
+		prago.Redirect(request, admin.Prefix+"/"+resource.ID)
+	},
 }
 
-//BindDelete is default delete binder
-func BindDelete(a *Admin, resource *Resource) {
-	resource.ResourceController.Post(a.GetURL(resource, ":id/delete"), func(request prago.Request) {
+var ActionDelete = ResourceAction{
+	Url:    "delete",
+	Method: "post",
+	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
 		ValidateCSRF(request)
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
@@ -212,7 +209,7 @@ func BindDelete(a *Admin, resource *Resource) {
 
 		var item interface{}
 		resource.newItem(&item)
-		_, err = a.Query().WhereIs("id", int64(id)).Delete(item)
+		_, err = admin.Query().WhereIs("id", int64(id)).Delete(item)
 		prago.Must(err)
 
 		if resource.AfterDelete != nil {
@@ -223,13 +220,13 @@ func BindDelete(a *Admin, resource *Resource) {
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_deleted"))
 		prago.WriteAPI(request, true, 200)
-		//prago.Redirect(request, a.Prefix+"/"+resource.ID)
-	})
+	},
 }
 
-//BindOrder is default order binder
-func BindOrder(a *Admin, resource *Resource) {
-	resource.ResourceController.Post(a.GetURL(resource, "order"), func(request prago.Request) {
+var ActionOrder = ResourceAction{
+	Url:    "order",
+	Method: "post",
+	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
 		decoder := json.NewDecoder(request.Request().Body)
 		var t = map[string][]int{}
 		err := decoder.Decode(&t)
@@ -243,17 +240,31 @@ func BindOrder(a *Admin, resource *Resource) {
 		for i, id := range order {
 			var item interface{}
 			resource.newItem(&item)
-			prago.Must(a.Query().WhereIs("id", int64(id)).Get(item))
+			prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
 			prago.Must(resource.StructCache.BindOrder(item, int64(i)))
-			prago.Must(a.Save(item))
+			prago.Must(admin.Save(item))
 		}
 
 		prago.WriteAPI(request, true, 200)
-	})
+	},
 }
 
 func BindResourceAction(a *Admin, resource *Resource, action ResourceAction) error {
-	url := a.GetURL(resource, action.Url)
+	return BindAction(a, resource, action, false)
+}
+
+func BindResourceItemAction(a *Admin, resource *Resource, action ResourceAction) error {
+	return BindAction(a, resource, action, true)
+}
+
+func BindAction(a *Admin, resource *Resource, action ResourceAction, isItemAction bool) error {
+	var url string
+	if isItemAction {
+		url = a.GetItemURL(resource, action.Url)
+	} else {
+		url = a.GetURL(resource, action.Url)
+	}
+
 	method := strings.ToLower(action.Method)
 	controller := resource.ResourceController
 
@@ -282,28 +293,18 @@ func InitResourceDefault(a *Admin, resource *Resource) error {
 	}
 
 	BindResourceAction(a, resource, ActionList)
+	BindResourceAction(a, resource, ActionOrder)
 
 	if resource.CanCreate {
 		BindResourceAction(a, resource, ActionNew)
 		BindResourceAction(a, resource, ActionCreate)
 	}
 
-	defaultActions := []string{"order", "detail", "update", "delete"}
-	usedActions := make(map[string]bool)
-	for _, v := range defaultActions {
-		action := resource.Actions[v]
-		if action != nil {
-			action(a, resource)
-			usedActions[v] = true
-		}
+	if resource.CanEdit {
+		BindResourceItemAction(a, resource, ActionEdit)
+		BindResourceItemAction(a, resource, ActionUpdate)
+		BindResourceItemAction(a, resource, ActionDelete)
 	}
 
-	for k, v := range resource.Actions {
-		if v != nil {
-			if usedActions[k] == false {
-				v(a, resource)
-			}
-		}
-	}
 	return nil
 }
