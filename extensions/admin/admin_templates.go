@@ -343,7 +343,15 @@ const adminTemplates = `
 <table class="admin_table admin_table-list {{if .admin_list.Order}} admin_table-order{{end}}">
   <tr>
     <td colspan="{{.admin_list.Colspan}}">
-      <h2>{{.admin_title}}</h2>
+      <div class="admin_table_listheader">
+        <h2>{{.admin_title}}</h2>
+
+        <div>
+        {{if $table.HasNew}}
+          <a href="{{.admin_resource.ID}}/new" class="btn">{{message .locale "admin_new"}}</a>
+        {{end}}
+        </div>
+      </div>
     </td>
   </tr>
   <tr>
@@ -359,9 +367,7 @@ const adminTemplates = `
     </th>
   {{end}}
   <th>
-    {{if $table.HasNew}}
-      <a href="{{.admin_resource.ID}}/new" class="btn">{{message .locale "admin_new"}}</a>
-    {{end}}
+    
   </th>
   </tr>
 {{range $item := .admin_list.Rows}}
@@ -898,6 +904,9 @@ input[type=date].input {
   background-color: white;
   margin: 10px 0px;
   box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+}
+.admin_table_listheader {
+  display: flex;
 }
 .admin_table thead {
   font-weight: bold;
