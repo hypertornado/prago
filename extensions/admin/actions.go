@@ -5,15 +5,32 @@ import (
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"strconv"
+	"strings"
 )
 
-//ActionBinder is function for binding actions
-type ActionBinder func(a *Admin, resource *Resource)
+type ButtonData struct {
+	Name   string
+	Url    string
+	Params map[string]string
+}
 
-//BindList is default list binder
-func BindList(a *Admin, resource *Resource) {
-	resource.ResourceController.Get(a.GetURL(resource, ""), func(request prago.Request) {
-		listData, err := resource.getList(a, GetLocale(request), request.Request().URL.Path, request.Request().URL.Query())
+type ResourceAction struct {
+	Name    func(string) string
+	Method  string
+	Url     string
+	Handler func(*Admin, *Resource, prago.Request)
+}
+
+func (ra *ResourceAction) GetName(language string) string {
+	if ra.Name != nil {
+		return ra.Name(language)
+	}
+	return ra.Url
+}
+
+var ActionList = ResourceAction{
+	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
+		listData, err := resource.getList(admin, GetLocale(request), request.Request().URL.Path, request.Request().URL.Query())
 		if err != nil {
 			if err == ErrItemNotFound {
 				render404(request)
@@ -31,13 +48,12 @@ func BindList(a *Admin, resource *Resource) {
 		request.SetData("admin_list", listData)
 		request.SetData("admin_yield", "admin_list")
 		prago.Render(request, 200, "admin_layout")
-
-	})
+	},
 }
 
-//BindNew is default new binder
-func BindNew(a *Admin, resource *Resource) {
-	resource.ResourceController.Get(a.GetURL(resource, "new"), func(request prago.Request) {
+var ActionNew = ResourceAction{
+	Url: "new",
+	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
 		var item interface{}
 		resource.newItem(&item)
 
@@ -63,12 +79,13 @@ func BindNew(a *Admin, resource *Resource) {
 		request.SetData("admin_form", form)
 		request.SetData("admin_yield", "admin_new")
 		prago.Render(request, 200, "admin_layout")
-	})
+	},
 }
 
-//BindCreate is default create binder
-func BindCreate(a *Admin, resource *Resource) {
-	resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
+var ActionCreate = ResourceAction{
+	Method: "post",
+	Url:    "",
+	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
 		ValidateCSRF(request)
 		var item interface{}
 		resource.newItem(&item)
@@ -88,7 +105,7 @@ func BindCreate(a *Admin, resource *Resource) {
 			}
 		}
 
-		prago.Must(a.Create(item))
+		prago.Must(admin.Create(item))
 
 		if resource.AfterCreate != nil {
 			if !resource.AfterCreate(request, item) {
@@ -97,9 +114,12 @@ func BindCreate(a *Admin, resource *Resource) {
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
-		prago.Redirect(request, a.Prefix+"/"+resource.ID)
-	})
+		prago.Redirect(request, admin.Prefix+"/"+resource.ID)
+	},
 }
+
+//ActionBinder is function for binding actions
+type ActionBinder func(a *Admin, resource *Resource)
 
 //BindDetail is default detail binder
 func BindDetail(a *Admin, resource *Resource) {
@@ -232,12 +252,43 @@ func BindOrder(a *Admin, resource *Resource) {
 	})
 }
 
+func BindResourceAction(a *Admin, resource *Resource, action ResourceAction) error {
+	url := a.GetURL(resource, action.Url)
+	method := strings.ToLower(action.Method)
+	controller := resource.ResourceController
+
+	var fn func(request prago.Request) = func(request prago.Request) {
+		action.Handler(a, resource, request)
+	}
+
+	switch method {
+	case "post":
+		controller.Post(url, fn)
+	default:
+		controller.Get(url, fn)
+	}
+
+	return nil
+}
+
 //InitResourceDefault is default resource initializer
 func InitResourceDefault(a *Admin, resource *Resource) error {
+	for _, v := range resource.ResourceActions {
+		BindResourceAction(a, resource, v)
+	}
+
 	if !resource.HasModel || !resource.HasView {
 		return nil
 	}
-	defaultActions := []string{"list", "order", "new", "create", "detail", "update", "delete"}
+
+	BindResourceAction(a, resource, ActionList)
+
+	if resource.CanCreate {
+		BindResourceAction(a, resource, ActionNew)
+		BindResourceAction(a, resource, ActionCreate)
+	}
+
+	defaultActions := []string{"order", "detail", "update", "delete"}
 	usedActions := make(map[string]bool)
 	for _, v := range defaultActions {
 		action := resource.Actions[v]

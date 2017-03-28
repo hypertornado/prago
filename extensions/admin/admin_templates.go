@@ -346,9 +346,9 @@ const adminTemplates = `
       <div class="admin_table_listheader">
         <h2>{{.admin_title}}</h2>
 
-        <div>
-        {{if $table.HasNew}}
-          <a href="{{.admin_resource.ID}}/new" class="btn">{{message .locale "admin_new"}}</a>
+        <div class="btngrp">
+        {{range $item := .admin_list.Actions}}
+          <a href="{{$item.Url}}" class="btn">{{$item.Name}}</a>
         {{end}}
         </div>
       </div>
@@ -907,6 +907,9 @@ input[type=date].input {
 }
 .admin_table_listheader {
   display: flex;
+  justify-content: space-between;
+  margin: 5px;
+  align-items: center;
 }
 .admin_table thead {
   font-weight: bold;

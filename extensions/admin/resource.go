@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/extensions/admin/messages"
 	"reflect"
 	"time"
 )
@@ -45,6 +46,9 @@ type Resource struct {
 	VisibilityFilter   structFieldFilter
 	EditabilityFilter  structFieldFilter
 	Actions            map[string]ActionBinder
+	ResourceActions    []ResourceAction
+	CanCreate          bool
+	CanEdit            bool
 
 	BeforeList   Action
 	BeforeNew    Action
@@ -78,13 +82,12 @@ func (a *Admin) CreateResource(item interface{}) (ret *Resource, err error) {
 		StructCache:       cache,
 		VisibilityFilter:  defaultVisibilityFilter,
 		EditabilityFilter: defaultEditabilityFilter,
+		CanCreate:         true,
+		CanEdit:           true,
 	}
 
 	ret.Actions = map[string]ActionBinder{
-		"list":   BindList,
 		"order":  BindOrder,
-		"new":    BindNew,
-		"create": BindCreate,
 		"detail": BindDetail,
 		"update": BindUpdate,
 		"delete": BindDelete,
@@ -253,4 +256,32 @@ func (ar *Resource) newItem(item interface{}) {
 
 func (ar *Resource) newItems(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(reflect.SliceOf(reflect.PtrTo(ar.Typ))))
+}
+
+func (ar *Resource) ResourceActionsButtonData(lang string) []ButtonData {
+	ret := []ButtonData{}
+	if ar.CanCreate {
+		ret = append(ret, ButtonData{
+			Name: messages.Messages.Get(lang, "admin_new"),
+			Url:  fmt.Sprintf("%s/new", ar.ID),
+		})
+	}
+
+	for _, v := range ar.ResourceActions {
+		name := v.Url
+		if v.Name != nil {
+			name = v.Name(lang)
+		}
+
+		ret = append(ret, ButtonData{
+			Name: name,
+			Url:  fmt.Sprintf("%s/%s", ar.ID, v.Url),
+		})
+	}
+
+	return ret
+}
+
+func (ar *Resource) AddResourceAction(action ResourceAction) {
+	ar.ResourceActions = append(ar.ResourceActions, action)
 }

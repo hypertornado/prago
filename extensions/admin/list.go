@@ -10,13 +10,13 @@ import (
 
 type list struct {
 	Name       string
+	Actions    []ButtonData
 	Colspan    int64
 	Header     []listHeader
 	Rows       []listRow
 	Pagination pagination
 	Order      bool
 	HasDelete  bool
-	HasNew     bool
 }
 
 type listHeader struct {
@@ -58,6 +58,7 @@ func (resource *Resource) GetList(admin *Admin, lang string, path string, reques
 
 func (resource *Resource) getList(admin *Admin, lang string, path string, requestQuery url.Values) (list list, err error) {
 	list.Colspan = 1
+	list.Actions = resource.ResourceActionsButtonData(lang)
 
 	orderItem := resource.OrderByColumn
 	orderDesc := resource.OrderDesc
@@ -109,7 +110,6 @@ func (resource *Resource) getList(admin *Admin, lang string, path string, reques
 	list.Name = resource.Name(lang)
 
 	_, list.HasDelete = resource.Actions["delete"]
-	_, list.HasNew = resource.Actions["new"]
 
 	if resource.StructCache.OrderColumnName == orderItem && !orderDesc {
 		list.Order = true
