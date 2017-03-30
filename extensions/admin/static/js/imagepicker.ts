@@ -68,7 +68,7 @@ class ImagePicker {
   }
 
   updateHiddenData() {
-    var ids = [];
+    var ids: any[] = [];
     for (var i = 0; i < this.preview.children.length; i++) {
       var item = <HTMLDivElement>this.preview.children[i];
       var uuid = item.getAttribute("data-uuid");
