@@ -9,13 +9,14 @@ import (
 )
 
 type list struct {
-	Name       string
-	Actions    []ButtonData
-	Colspan    int64
-	Header     []listHeader
-	Rows       []listRow
-	Pagination pagination
-	Order      bool
+	Name        string
+	Actions     []ButtonData
+	ItemActions []ButtonData
+	Colspan     int64
+	Header      []listHeader
+	Rows        []listRow
+	Pagination  pagination
+	Order       bool
 }
 
 type listHeader struct {
@@ -28,8 +29,9 @@ type listHeader struct {
 }
 
 type listRow struct {
-	ID    int64
-	Items []listCell
+	ID      int64
+	Items   []listCell
+	Actions []ButtonData
 }
 
 type listCell struct {
@@ -57,6 +59,7 @@ func (resource *Resource) GetList(admin *Admin, lang string, path string, reques
 
 func (resource *Resource) getList(admin *Admin, lang string, path string, requestQuery url.Values) (list list, err error) {
 	list.Colspan = 1
+
 	list.Actions = resource.ResourceActionsButtonData(lang)
 
 	orderItem := resource.OrderByColumn
@@ -220,6 +223,7 @@ func (resource *Resource) getList(admin *Admin, lang string, path string, reques
 			row.Items = append(row.Items, resource.valueToCell(admin, structField, fieldVal))
 		}
 		row.ID = itemVal.FieldByName("ID").Int()
+		row.Actions = resource.ResourceItemActionsButtonData(lang, row.ID)
 		list.Rows = append(list.Rows, row)
 		list.Colspan = int64(len(row.Items)) + 1
 	}

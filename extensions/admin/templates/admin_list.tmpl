@@ -50,11 +50,12 @@
     {{end}}
     <td nowrap class="center top">
       <div class="btngrp">
-        <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">{{message $locale "admin_edit"}}</a> 
-        {{if $table.HasDelete}}
-          <div class="btn admin-action-delete" data-action="{{ $adminResource.ID}}/{{$item.ID}}/delete?_csrfToken={{$csrfToken}}" data-confirm-message="{{message $locale "admin_delete_confirmation"}}">
-            {{message $locale "admin_delete"}}
-          </div>
+        {{range $action := $item.Actions}}
+          {{if $action.Url}}
+            <a href="{{$action.Url}}" class="btn">{{$action.Name}}</a>
+          {{else}}
+            <div{{range $k, $v := $action.Params}} {{HTMLAttr $k}}="{{$v}}"{{end}}>{{$action.Name}}</div>
+          {{end}}
         {{end}}
       </div>
     </td>

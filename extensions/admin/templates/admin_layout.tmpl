@@ -13,7 +13,7 @@
     <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces&key={{.google}}" async defer></script>
 
   </head>
-  <body class="admin" data-admin-prefix="{{.admin_header.UrlPrefix}}"
+  <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.admin_header.UrlPrefix}}"
     {{if .admin_header.Background}}
       style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255,255,255, 0.9) 100%), url('{{.admin_header.Background}}'); background-size: cover; background-attachment: fixed;" 
     {{end}}

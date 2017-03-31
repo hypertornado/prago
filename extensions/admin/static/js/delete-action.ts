@@ -6,9 +6,10 @@ function bindDelete() {
 }
 
 function bindDeleteButton(btn: HTMLDivElement) {
+  var csrfToken = document.body.getAttribute("data-csrf-token")
   btn.addEventListener("click", () => {
     var message = btn.getAttribute("data-confirm-message");
-    var url = btn.getAttribute("data-action");
+    var url = btn.getAttribute("data-action") + csrfToken;
 
     if (confirm(message)) {
       var request = new XMLHttpRequest();

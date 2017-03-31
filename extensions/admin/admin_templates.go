@@ -228,7 +228,7 @@ const adminTemplates = `
     <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces&key={{.google}}" async defer></script>
 
   </head>
-  <body class="admin" data-admin-prefix="{{.admin_header.UrlPrefix}}"
+  <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.admin_header.UrlPrefix}}"
     {{if .admin_header.Background}}
       style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255,255,255, 0.9) 100%), url('{{.admin_header.Background}}'); background-size: cover; background-attachment: fixed;" 
     {{end}}
@@ -379,11 +379,12 @@ const adminTemplates = `
     {{end}}
     <td nowrap class="center top">
       <div class="btngrp">
-        <a href="{{ $adminResource.ID}}/{{$item.ID}}" class="btn">{{message $locale "admin_edit"}}</a> 
-        {{if $table.HasDelete}}
-          <div class="btn admin-action-delete" data-action="{{ $adminResource.ID}}/{{$item.ID}}/delete?_csrfToken={{$csrfToken}}" data-confirm-message="{{message $locale "admin_delete_confirmation"}}">
-            {{message $locale "admin_delete"}}
-          </div>
+        {{range $action := $item.Actions}}
+          {{if $action.Url}}
+            <a href="{{$action.Url}}" class="btn">{{$action.Name}}</a>
+          {{else}}
+            <div{{range $k, $v := $action.Params}} {{HTMLAttr $k}}="{{$v}}"{{end}}>{{$action.Name}}</div>
+          {{end}}
         {{end}}
       </div>
     </td>
@@ -412,7 +413,7 @@ const adminTemplates = `
 
     {{if .bottom}}
     <div style="text-align: center">
-    {{Plain .bottom}}
+    {{HTML .bottom}}
     </div>
     {{end}}
 </div>
@@ -1591,9 +1592,10 @@ function bindDelete() {
     }
 }
 function bindDeleteButton(btn) {
+    var csrfToken = document.body.getAttribute("data-csrf-token");
     btn.addEventListener("click", function () {
         var message = btn.getAttribute("data-confirm-message");
-        var url = btn.getAttribute("data-action");
+        var url = btn.getAttribute("data-action") + csrfToken;
         if (confirm(message)) {
             var request = new XMLHttpRequest();
             request.open("POST", url, true);

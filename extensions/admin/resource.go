@@ -271,6 +271,41 @@ func (ar *Resource) ResourceActionsButtonData(lang string) []ButtonData {
 			Url:  fmt.Sprintf("%s/%s", ar.ID, v.Url),
 		})
 	}
+	return ret
+}
+
+func (ar *Resource) ResourceItemActionsButtonData(lang string, id int64) []ButtonData {
+	prefix := fmt.Sprintf("%s/%d", ar.ID, id)
+
+	ret := []ButtonData{}
+	if ar.CanEdit {
+		ret = append(ret, ButtonData{
+			Name: messages.Messages.Get(lang, "admin_edit"),
+			Url:  prefix + "/edit",
+		})
+
+		ret = append(ret, ButtonData{
+			Name: messages.Messages.Get(lang, "admin_delete"),
+			Url:  "",
+			Params: map[string]string{
+				"class":                "btn admin-action-delete",
+				"data-action":          fmt.Sprintf("%s/%d/delete?_csrfToken=", ar.ID, id),
+				"data-confirm-message": messages.Messages.Get(lang, "admin_delete_confirmation"),
+			},
+		})
+	}
+
+	for _, v := range ar.ResourceItemActions {
+		name := v.Url
+		if v.Name != nil {
+			name = v.Name(lang)
+		}
+
+		ret = append(ret, ButtonData{
+			Name: name,
+			Url:  prefix + "/" + v.Url,
+		})
+	}
 
 	return ret
 }

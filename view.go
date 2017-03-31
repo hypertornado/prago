@@ -34,8 +34,12 @@ func (m middlewareView) Init(app *App) error {
 	templates := template.New("")
 	templateFuncs := template.FuncMap{}
 
-	templateFuncs["Plain"] = func(data string) template.HTML {
+	templateFuncs["HTML"] = func(data string) template.HTML {
 		return template.HTML(data)
+	}
+
+	templateFuncs["HTMLAttr"] = func(data string) template.HTMLAttr {
+		return template.HTMLAttr(data)
 	}
 
 	templateFuncs["CSS"] = func(data string) template.CSS {
