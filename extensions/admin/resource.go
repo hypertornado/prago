@@ -293,6 +293,17 @@ func (ar *Resource) ResourceItemActionsButtonData(lang string, id int64) []Butto
 				"data-confirm-message": messages.Messages.Get(lang, "admin_delete_confirmation"),
 			},
 		})
+
+		if ar.StructCache.OrderColumnName != "" {
+			ret = append(ret, ButtonData{
+				Name: "☰",
+				Url:  "",
+				Params: map[string]string{
+					"class": "btn admin-action-order",
+				},
+			})
+		}
+
 	}
 
 	for _, v := range ar.ResourceItemActions {

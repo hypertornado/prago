@@ -306,6 +306,7 @@ const adminTemplates = `
   {{tmpl $snippet.Template nil}}
 {{end}}
 
+{{$list := .admin_list}}
 
 <table class="admin_table admin_table-list {{if .admin_list.Order}} admin_table-order{{end}}">
   <tr>
