@@ -6,7 +6,7 @@ const adminTemplates = `
 
   <h2>{{.admin_title}}</h2>
 
-  <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
+  <a href="../../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
 
   {{tmpl "admin_form" .admin_form}}
 
@@ -966,56 +966,6 @@ input[type=date].input {
   padding: 3px;
   border-radius: 3px;
 }
-/*
-#admin_images_popup {
-  display: none;
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  padding: 15px;
-  background: rgba(0,0,0,0.4);
-  width: 100%;
-  height: 100%;
-  text-align: center;
-}
-
-.admin_images_popup_box {
-  text-align: left;
-  max-width: 600px;
-  width: 100%;
-  padding: 5px;
-  background: white;
-  display: inline-block;
-  border-radius: 3px;
-  max-height: 100%;
-  overflow: auto;
-}
-
-.admin_images_popup_box:focus {
-  outline: none;
-}
-
-.admin_images_img {
-  display: inline-block;
-  max-height: 100px;
-  margin: 3px;
-}
-
-.admin_popup_section {
-  background-color: #eee;
-  padding: 5px;
-  border-radius: 3px;
-  margin-bottom: 10px;
-}
-
-.admin_popup_section h3 {
-  margin: 5px 0px;
-}
-
-.admin_popup_file {
-  margin-bottom: 15px;
-}
-*/
 .admin_place_map {
   height: 300px;
 }
