@@ -131,7 +131,7 @@ var ActionEdit = ResourceAction{
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
 
-		form.Action = request.Params().Get("id")
+		form.Action = "edit"
 		form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
 		AddCSRFToken(form, request)
 

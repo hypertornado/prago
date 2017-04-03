@@ -1002,6 +1002,10 @@ input[type=date].input {
 .admin_timestamp_minute {
   width: 60px;
 }
+.admin-action-order {
+  background: #fafafa !important;
+  cursor: move;
+}
 .ordered {
   font-weight: bold;
 }
