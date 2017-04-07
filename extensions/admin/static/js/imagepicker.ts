@@ -19,7 +19,7 @@ class ImagePicker {
     this.adminPrefix = document.body.getAttribute("data-admin-prefix");
     this.hiddenInput = <HTMLInputElement>el.querySelector(".admin_images_hidden");
     this.preview = <HTMLDivElement>el.querySelector(".admin_images_preview");
-    this.fileInput = <HTMLInputElement>document.querySelector(".admin_images_fileinput");
+    this.fileInput = <HTMLInputElement>this.el.querySelector(".admin_images_fileinput");
     this.progress = <HTMLProgressElement>this.el.querySelector("progress");
 
     this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
@@ -35,6 +35,7 @@ class ImagePicker {
     }
 
     this.fileInput.addEventListener("change", () => {
+      console.log("change");
       var files = this.fileInput.files
       var formData = new FormData();
       if (files.length == 0) {

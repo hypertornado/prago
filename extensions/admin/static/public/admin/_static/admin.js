@@ -19,7 +19,7 @@ var ImagePicker = (function () {
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.hiddenInput = el.querySelector(".admin_images_hidden");
         this.preview = el.querySelector(".admin_images_preview");
-        this.fileInput = document.querySelector(".admin_images_fileinput");
+        this.fileInput = this.el.querySelector(".admin_images_fileinput");
         this.progress = this.el.querySelector("progress");
         this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
         this.hideProgress();
@@ -31,6 +31,7 @@ var ImagePicker = (function () {
             }
         }
         this.fileInput.addEventListener("change", function () {
+            console.log("change");
             var files = _this.fileInput.files;
             var formData = new FormData();
             if (files.length == 0) {
