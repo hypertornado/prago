@@ -335,6 +335,17 @@ func (a *Admin) initTemplates(app *prago.App) error {
 		return ""
 	})
 
+	app.AddTemplateFunction("img", func(ids string) string {
+		for _, v := range strings.Split(ids, ",") {
+			var image File
+			err := a.Query().WhereIs("uid", v).Get(&image)
+			if err == nil && image.isImage() {
+				return image.GetLarge()
+			}
+		}
+		return ""
+	})
+
 	return nil
 }
 

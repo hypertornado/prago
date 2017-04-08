@@ -219,7 +219,7 @@ const adminTemplates = `
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{if .admin_title}}{{.admin_title}} ⏤ {{.appName}}{{else}}Admin ⏤ {{.appName}}{{end}}</title>
+    <title>{{if .admin_title}}{{.admin_title}} — {{.appName}}{{else}}Admin — {{.appName}}{{end}}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -240,7 +240,7 @@ const adminTemplates = `
               {{if .admin_header.Logo}}
                 <div class="admin_logo" style="background-image: url('{{.admin_header.Logo}}');"></div>
               {{end}}
-            {{message .locale "admin_admin"}} ⏤ {{.admin_header.Name}}</a>
+            {{message .locale "admin_admin"}} — {{.admin_header.Name}}</a>
             <a href="/" class="admin_header_top_item">{{.admin_header.HomepageUrl}}</a>
             <div class="admin_header_top_item admin_header_top_space"></div>
             <div class="admin_header_top_item">{{.currentuser.Email}}</div>
@@ -826,7 +826,7 @@ a:hover {
 }
 .input {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 2px 2px;
   line-height: 1.2em;
   color: #333;
   vertical-align: middle;
@@ -1107,7 +1107,7 @@ var ImagePicker = (function () {
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.hiddenInput = el.querySelector(".admin_images_hidden");
         this.preview = el.querySelector(".admin_images_preview");
-        this.fileInput = document.querySelector(".admin_images_fileinput");
+        this.fileInput = this.el.querySelector(".admin_images_fileinput");
         this.progress = this.el.querySelector("progress");
         this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
         this.hideProgress();
@@ -1119,6 +1119,7 @@ var ImagePicker = (function () {
             }
         }
         this.fileInput.addEventListener("change", function () {
+            console.log("change");
             var files = _this.fileInput.files;
             var formData = new FormData();
             if (files.length == 0) {

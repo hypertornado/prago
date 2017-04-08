@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{if .admin_title}}{{.admin_title}} ⏤ {{.appName}}{{else}}Admin ⏤ {{.appName}}{{end}}</title>
+    <title>{{if .admin_title}}{{.admin_title}} — {{.appName}}{{else}}Admin — {{.appName}}{{end}}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -25,7 +25,7 @@
               {{if .admin_header.Logo}}
                 <div class="admin_logo" style="background-image: url('{{.admin_header.Logo}}');"></div>
               {{end}}
-            {{message .locale "admin_admin"}} ⏤ {{.admin_header.Name}}</a>
+            {{message .locale "admin_admin"}} — {{.admin_header.Name}}</a>
             <a href="/" class="admin_header_top_item">{{.admin_header.HomepageUrl}}</a>
             <div class="admin_header_top_item admin_header_top_space"></div>
             <div class="admin_header_top_item">{{.currentuser.Email}}</div>

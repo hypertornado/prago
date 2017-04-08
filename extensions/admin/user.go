@@ -217,7 +217,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 	}
 
 	renderLogin := func(request prago.Request, form *Form, locale string) {
-		title := fmt.Sprintf("%s ⏤ %s", messages.Messages.Get(locale, "admin_login_name"), a.AppName)
+		title := fmt.Sprintf("%s — %s", messages.Messages.Get(locale, "admin_login_name"), a.AppName)
 		request.SetData("bottom", fmt.Sprintf("<a href=\"registration\">%s</a><br><a href=\"forgot\">%s</a>",
 			messages.Messages.Get(locale, "admin_register"),
 			messages.Messages.Get(locale, "admin_forgoten"),
@@ -263,7 +263,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 	}
 
 	renderForgot := func(request prago.Request, form *Form, locale string) {
-		title := fmt.Sprintf("%s ⏤ %s", messages.Messages.Get(locale, "admin_forgotten_name"), a.AppName)
+		title := fmt.Sprintf("%s — %s", messages.Messages.Get(locale, "admin_forgotten_name"), a.AppName)
 		request.SetData("bottom", fmt.Sprintf("<a href=\"login\">%s</a>",
 			messages.Messages.Get(locale, "admin_login_action"),
 		))
@@ -322,7 +322,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 	renderRenew := func(request prago.Request, form *Form, locale string) {
 		email := request.Params().Get("email")
 		email = fixEmail(email)
-		title := fmt.Sprintf("%s ⏤ %s", email, messages.Messages.Get(locale, "admin_forgoten_set"))
+		title := fmt.Sprintf("%s — %s", email, messages.Messages.Get(locale, "admin_forgoten_set"))
 		request.SetData("bottom", fmt.Sprintf("<a href=\"login\">%s</a>",
 			messages.Messages.Get(locale, "admin_login_action"),
 		))
@@ -472,7 +472,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 	}
 
 	renderRegistration := func(request prago.Request, form *Form, locale string) {
-		title := fmt.Sprintf("%s ⏤ %s", messages.Messages.Get(locale, "admin_register"), a.AppName)
+		title := fmt.Sprintf("%s — %s", messages.Messages.Get(locale, "admin_register"), a.AppName)
 		request.SetData("bottom", fmt.Sprintf("<a href=\"login\">%s</a>",
 			messages.Messages.Get(locale, "admin_login_action"),
 		))

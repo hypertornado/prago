@@ -14,6 +14,7 @@ import (
 	"time"
 )
 
+//TODO: dont make it global
 var loggerMiddleware = &middlewareLogger{}
 
 //App is main struct of prago application
