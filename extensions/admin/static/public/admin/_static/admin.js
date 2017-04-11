@@ -172,7 +172,7 @@ function bindOrder() {
                     if (draggedIndex <= thisIndex) {
                         thisIndex += 1;
                     }
-                    DOMinsertChildAtIndex(targetEl.parentElement, draggedElement, thisIndex + 1);
+                    DOMinsertChildAtIndex(targetEl.parentElement, draggedElement, thisIndex + 2);
                     saveOrder();
                 }
                 return false;

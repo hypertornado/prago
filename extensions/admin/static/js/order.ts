@@ -32,7 +32,7 @@ function bindOrder() {
             thisIndex += 1
           }
 
-          DOMinsertChildAtIndex(targetEl.parentElement, draggedElement, thisIndex + 1);
+          DOMinsertChildAtIndex(targetEl.parentElement, draggedElement, thisIndex + 2);
 
           saveOrder();
         }
