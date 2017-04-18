@@ -14,10 +14,15 @@ type NewsletterMiddleware struct {
 	SenderEmail string
 }
 
-func (nm *NewsletterMiddleware) Init(app *prago.App) error {
+func (nm NewsletterMiddleware) Init(app *prago.App) error {
 	println("newsletter INIT")
 
 	_, err := nm.Admin.CreateResource(Newsletter{})
+	if err != nil {
+		return err
+	}
+
+	_, err = nm.Admin.CreateResource(NewsletterPersons{})
 	if err != nil {
 		return err
 	}
@@ -34,4 +39,14 @@ type Newsletter struct {
 	SentAt        time.Time
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
+}
+
+type NewsletterPersons struct {
+	ID           int64
+	Name         string `prago-preview:"true" prago-description:"Jméno příjemce"`
+	Email        string
+	Confirmed    bool
+	Unsubscribed bool
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
