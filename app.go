@@ -140,7 +140,7 @@ func (app *App) ListenAndServe(port int, developmentMode bool) error {
 	}
 
 	server := &http.Server{
-		Addr:           "127.0.0.1:" + strconv.Itoa(port),
+		Addr:           "0.0.0.0:" + strconv.Itoa(port),
 		Handler:        app,
 		ReadTimeout:    2 * time.Minute,
 		WriteTimeout:   2 * time.Minute,
