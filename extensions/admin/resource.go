@@ -321,6 +321,10 @@ func (ar *Resource) ResourceItemActionsButtonData(lang string, id int64) []Butto
 	return ret
 }
 
+func (ar *Resource) AddResourceItemAction(action ResourceAction) {
+	ar.ResourceItemActions = append(ar.ResourceItemActions, action)
+}
+
 func (ar *Resource) AddResourceAction(action ResourceAction) {
 	ar.ResourceActions = append(ar.ResourceActions, action)
 }

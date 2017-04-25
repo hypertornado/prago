@@ -288,6 +288,10 @@ func InitResourceDefault(a *Admin, resource *Resource) error {
 		BindResourceAction(a, resource, v)
 	}
 
+	for _, v := range resource.ResourceItemActions {
+		BindResourceItemAction(a, resource, v)
+	}
+
 	if !resource.HasModel || !resource.HasView {
 		return nil
 	}
