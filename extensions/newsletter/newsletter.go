@@ -13,7 +13,71 @@ import (
 //https://github.com/chris-ramon/douceur
 //https://github.com/aymerick/douceur
 
-const newsletterTemplate = ``
+const newsletterTemplate = `
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Email title or subject</title>
+
+<style type="text/css">
+  body {
+  	background-color: #edfaff;
+  	font-style: normal;
+  	font-size: 15px;
+  	line-height: 1.5em;
+  	font-weight: 400;
+  	color: #01354a;
+  	font-family: Arial, sans-serif;
+  }
+
+  .middle {
+  	background-color: #fff;
+  	padding: 10px;
+  }
+
+  a {
+    color: #009ee0;
+  }
+
+  a:hover {
+    text-decoration: none;
+  }
+
+  .unsubscribe {
+  	color: #999;
+  	display: block;
+  	text-align: center;
+  	font-size: 11px;
+  }
+
+  h1 {
+  	text-align: center;
+  }
+
+</style>
+
+</head>
+<body>
+<table border="0" cellspacing="0" width="100%">
+    <tr>
+        <td></td>
+        <td width="450" class="middle">
+        	<div class="middle_header">
+        		<a href="https://www.lazne-podebrady.cz">Novinky z Lázních Poděbrady</a>
+        		<h1>{{.title}}</h1>
+        	</div>
+        	{{.content}}
+
+        	<a href="{{.unsubscribe}}" class="unsubscribe">Odhlásit odběr novinek</a>
+        </td>
+        <td></td>
+     </tr>
+</table> 
+</body>
+</html>
+`
 
 type NewsletterMiddleware struct {
 	Admin       *administration.Admin
@@ -80,7 +144,9 @@ func (n Newsletter) GetBody() (string, error) {
 
 	buf := new(bytes.Buffer)
 	err = t.ExecuteTemplate(buf, "newsletter", map[string]interface{}{
-		"content": template.HTML(content),
+		"title":       n.Name,
+		"unsubscribe": "https://www.lazne-podebrady.cz/zrusit-newsletter",
+		"content":     template.HTML(content),
 	})
 	if err != nil {
 		return "", err
