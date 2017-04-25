@@ -13,19 +13,7 @@ import (
 //https://github.com/chris-ramon/douceur
 //https://github.com/aymerick/douceur
 
-const newsletterTemplate = `
-
-<style>
-p {
-	color: red;
-}
-</style>
-
-<h1>HEADER</h1>
-
-{{.content}}
-
-`
+const newsletterTemplate = ``
 
 type NewsletterMiddleware struct {
 	Admin       *administration.Admin

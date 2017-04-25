@@ -137,6 +137,9 @@ func (app *App) ListenAndServe(port int, developmentMode bool) error {
 
 	if developmentMode {
 		loggerMiddleware.setStdOut()
+		/*app.MainController().AddBeforeAction(func(request Request) {
+			Must(app.ReloadTemplates())
+		})*/
 	}
 
 	server := &http.Server{

@@ -7,6 +7,16 @@ import (
 	"net/http"
 )
 
+type templateCache struct {
+	path bool
+	val  string
+}
+
+var (
+	loadedTemplatePaths = []templateCache{}
+	loadedTemplateFuncs = map[string]interface{}{}
+)
+
 //Render outputs view of viewName with statusCode to request
 func Render(request Request, statusCode int, viewName string) {
 	templates, ok := request.App().data["templates"].(*template.Template)
@@ -31,25 +41,21 @@ type middlewareView struct{}
 func (m middlewareView) Init(app *App) error {
 	app.requestMiddlewares = append(app.requestMiddlewares, requestMiddlewareView)
 
-	templates := template.New("")
-	templateFuncs := template.FuncMap{}
+	app.data["templates"] = template.New("")
+	app.data["templateFuncs"] = template.FuncMap{}
 
-	templateFuncs["HTML"] = func(data string) template.HTML {
+	app.AddTemplateFunction("HTML", func(data string) template.HTML {
 		return template.HTML(data)
-	}
+	})
 
-	templateFuncs["HTMLAttr"] = func(data string) template.HTMLAttr {
+	app.AddTemplateFunction("HTMLAttr", func(data string) template.HTMLAttr {
 		return template.HTMLAttr(data)
-	}
+	})
 
-	templateFuncs["CSS"] = func(data string) template.CSS {
+	app.AddTemplateFunction("CSS", func(data string) template.CSS {
 		return template.CSS(data)
-	}
+	})
 
-	templates = templates.Funcs(templateFuncs)
-
-	app.data["templates"] = templates
-	app.data["templateFuncs"] = templateFuncs
 	return nil
 }
 
@@ -84,6 +90,33 @@ func requestMiddlewareView(p Request, next func()) {
 	p.SetProcessed()
 }
 
+func (app *App) ReloadTemplates() error {
+	panic("DOES NOT WORK")
+	app.data["templates"] = template.New("")
+	app.data["templateFuncs"] = template.FuncMap{}
+
+	for k, v := range loadedTemplateFuncs {
+		err := app.addTemplateFunction(k, v)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, v := range loadedTemplatePaths {
+		var err error
+		if v.path {
+			err = app.loadTemplatePath(v.val)
+		} else {
+			err = app.loadTemplateFromString(v.val)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 //GetTemplates return app's html templates
 func (app *App) GetTemplates() (*template.Template, template.FuncMap, error) {
 	templates, ok := app.data["templates"].(*template.Template)
@@ -100,6 +133,11 @@ func (app *App) GetTemplates() (*template.Template, template.FuncMap, error) {
 
 //LoadTemplatePath loads app's html templates from path pattern
 func (app *App) LoadTemplatePath(pattern string) (err error) {
+	loadedTemplatePaths = append(loadedTemplatePaths, templateCache{true, pattern})
+	return app.loadTemplatePath(pattern)
+}
+
+func (app *App) loadTemplatePath(pattern string) (err error) {
 	templates, templateFuncs, err := app.GetTemplates()
 	if err != nil {
 		return err
@@ -117,6 +155,11 @@ func (app *App) LoadTemplatePath(pattern string) (err error) {
 
 //LoadTemplateFromString loads app's html templates from string
 func (app *App) LoadTemplateFromString(in string) (err error) {
+	loadedTemplatePaths = append(loadedTemplatePaths, templateCache{false, in})
+	return app.loadTemplateFromString(in)
+}
+
+func (app *App) loadTemplateFromString(in string) (err error) {
 	templates, templateFuncs, err := app.GetTemplates()
 	if err != nil {
 		return err
@@ -135,6 +178,11 @@ func (app *App) LoadTemplateFromString(in string) (err error) {
 
 //AddTemplateFunction adds template function
 func (app *App) AddTemplateFunction(name string, f interface{}) (err error) {
+	loadedTemplateFuncs[name] = f
+	return app.addTemplateFunction(name, f)
+}
+
+func (app *App) addTemplateFunction(name string, f interface{}) (err error) {
 	_, templateFuncs, err := app.GetTemplates()
 	if err != nil {
 		return err
