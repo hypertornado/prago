@@ -2,11 +2,16 @@ package newsletter
 
 import (
 	"bytes"
+	"encoding/csv"
+	"errors"
+	"fmt"
 	"github.com/chris-ramon/douceur/inliner"
 	"github.com/golang-commonmark/markdown"
 	"github.com/hypertornado/prago"
 	administration "github.com/hypertornado/prago/extensions/admin"
 	"html/template"
+	"io/ioutil"
+	"strings"
 	"time"
 )
 
@@ -85,6 +90,12 @@ type NewsletterMiddleware struct {
 }
 
 func (nm NewsletterMiddleware) Init(app *prago.App) error {
+	newsletterImportCommand := app.CreateCommand("newsletter:import", "Import newsletter list csv")
+	path := newsletterImportCommand.Arg("path", "").Required().String()
+	app.AddCommand(newsletterImportCommand, func(app *prago.App) (err error) {
+		return nm.importMailchimpList(*path)
+	})
+
 	_, err := nm.Admin.CreateResource(Newsletter{})
 	if err != nil {
 		return err
@@ -96,6 +107,55 @@ func (nm NewsletterMiddleware) Init(app *prago.App) error {
 	}
 
 	return nil
+}
+
+func (nm NewsletterMiddleware) importMailchimpList(path string) error {
+	fmt.Println("Importing mailchimp list from", path)
+
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	r := csv.NewReader(strings.NewReader(string(data)))
+	records, err := r.ReadAll()
+	if err != nil {
+		return err
+	}
+	for _, record := range records {
+		if len(record) < 3 {
+			continue
+		}
+		email := strings.Trim(record[0], " ")
+		name := strings.Trim(record[1]+" "+record[2], " ")
+		err := nm.addEmail(email, name)
+		if err != nil {
+			fmt.Println("Error while importing", email, name)
+			fmt.Println(err)
+		}
+	}
+
+	return nil
+}
+
+func (nm NewsletterMiddleware) addEmail(email, name string) error {
+	if !strings.Contains(email, "@") {
+		return errors.New("Wrong email format")
+	}
+
+	err := nm.Admin.Query().WhereIs("email", email).Get(&NewsletterPersons{})
+	if err == nil {
+		fmt.Println("-", email)
+		return err
+	}
+	fmt.Println("+", email)
+
+	person := NewsletterPersons{
+		Name:      name,
+		Email:     email,
+		Confirmed: true,
+	}
+	return nm.Admin.Create(&person)
 }
 
 type Newsletter struct {
