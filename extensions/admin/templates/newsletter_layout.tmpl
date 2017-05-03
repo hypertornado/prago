@@ -1,0 +1,44 @@
+{{define "newsletter_layout"}}
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{{.title}}</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style type="text/css">
+      body {
+        font-family: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Oxygen, Ubuntu, Cantarell, "Open Sans", sans-serif;
+      }
+
+      label {
+        display: block;
+        margin: 10px 0px;
+      }
+      .box {
+        margin: 0 auto;
+        padding: 5px;
+        border: 0px solid red;
+        max-width: 500px;
+      }
+
+      input {
+        max-width: 200px;
+        display: block;
+      }
+
+    </style>
+
+  </head>
+  <body>
+    <div class="box">
+      <a href="/">{{.site}}</a>
+      <h1>{{.title}}</h1>
+    {{tmpl .yield .}}
+    </div>
+  </body>
+</html>
+
+{{end}}

@@ -400,16 +400,6 @@ const adminTemplates = `
   {{tmpl "admin_form" .admin_form}}
 </div>
 
-{{end}}{{define "admin_newsletter"}}
-
-NEWSLETTER 2
-
-{{.}}
-
-{{.content}}
-
-XXX
-
 {{end}}{{define "admin_settings"}}
 
 <div class="admin_box">
@@ -478,6 +468,76 @@ XXX
 </table>
 
 
+{{end}}{{define "newsletter_empty"}}{{end}}{{define "newsletter_layout"}}
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{{.title}}</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style type="text/css">
+      body {
+        font-family: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Oxygen, Ubuntu, Cantarell, "Open Sans", sans-serif;
+      }
+
+      label {
+        display: block;
+        margin: 10px 0px;
+      }
+      .box {
+        margin: 0 auto;
+        padding: 5px;
+        border: 0px solid red;
+        max-width: 500px;
+      }
+
+      input {
+        max-width: 200px;
+        display: block;
+      }
+
+    </style>
+
+  </head>
+  <body>
+    <div class="box">
+      <a href="/">{{.site}}</a>
+      <h1>{{.title}}</h1>
+    {{tmpl .yield .}}
+    </div>
+  </body>
+</html>
+
+{{end}}{{define "newsletter_send_preview"}}
+<div class="admin_box">
+<form method="POST" action="send-preview">
+<h1>Odeslat náhled newsletteru</h1>
+<label>
+  Seznam emailů na poslání preview (jeden email na řádek)
+  <textarea class="input" name="emails"></textarea>
+</label>
+
+<input type="submit" class="btn">
+</form>
+</div>
+
+
+{{end}}{{define "newsletter_subscribe"}}
+<form method="post" action="/newsletter-subscribe">
+<label>
+  Vaše jméno
+  <input type="text" name="name">
+</label>
+<label>
+  Email
+  <input type="email" name="email">
+</label>
+<input type="submit" value="Přihlásit se k odběru newsletteru">
+<input type="hidden" name="csrf" value="{{.csrf}}">
+</form>
 {{end}}`
 
 

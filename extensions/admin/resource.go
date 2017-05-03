@@ -312,10 +312,12 @@ func (ar *Resource) ResourceItemActionsButtonData(lang string, id int64) []Butto
 			name = v.Name(lang)
 		}
 
-		ret = append(ret, ButtonData{
-			Name: name,
-			Url:  prefix + "/" + v.Url,
-		})
+		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
+			ret = append(ret, ButtonData{
+				Name: name,
+				Url:  prefix + "/" + v.Url,
+			})
+		}
 	}
 
 	return ret

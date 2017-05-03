@@ -2,6 +2,7 @@ package newsletter
 
 import (
 	"bytes"
+	"crypto/md5"
 	"encoding/csv"
 	"errors"
 	"fmt"
@@ -9,10 +10,17 @@ import (
 	"github.com/golang-commonmark/markdown"
 	"github.com/hypertornado/prago"
 	administration "github.com/hypertornado/prago/extensions/admin"
+	"github.com/sendgrid/sendgrid-go"
 	"html/template"
+	"io"
 	"io/ioutil"
+	"net/url"
 	"strings"
 	"time"
+)
+
+var (
+	ErrEmailAlreadyInList = errors.New("email already in newsletter list")
 )
 
 //https://github.com/chris-ramon/douceur
@@ -24,7 +32,7 @@ const newsletterTemplate = `
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Email title or subject</title>
+<title>{{.title}}</title>
 
 <style type="text/css">
   body {
@@ -70,7 +78,7 @@ const newsletterTemplate = `
         <td></td>
         <td width="450" class="middle">
         	<div class="middle_header">
-        		<a href="https://www.lazne-podebrady.cz">Novinky z Lázních Poděbrady</a>
+        		<a href="{{.baseUrl}}">{{.site}}</a>
         		<h1>{{.title}}</h1>
         	</div>
         	{{.content}}
@@ -84,29 +92,184 @@ const newsletterTemplate = `
 </html>
 `
 
+var nmMiddleware *NewsletterMiddleware
+
 type NewsletterMiddleware struct {
-	Admin       *administration.Admin
-	SenderEmail string
+	Name           string
+	baseUrl        string
+	Admin          *administration.Admin
+	SenderEmail    string
+	Randomness     string
+	SendgridKey    string
+	sendgridClient *sendgrid.SGClient
+	controller     *prago.Controller
 }
 
 func (nm NewsletterMiddleware) Init(app *prago.App) error {
+	if nmMiddleware != nil {
+		return errors.New("cant initialize more then one instance of newsletter")
+	}
+	nmMiddleware = &nm
+
+	nmMiddleware.controller = app.MainController().SubController()
+	nmMiddleware.baseUrl = app.Config.GetString("baseUrl")
+
+	nmMiddleware.sendgridClient = sendgrid.NewSendGridClientWithApiKey(
+		app.Config.GetString("sendgridApi"),
+	)
+
 	newsletterImportCommand := app.CreateCommand("newsletter:import", "Import newsletter list csv")
 	path := newsletterImportCommand.Arg("path", "").Required().String()
 	app.AddCommand(newsletterImportCommand, func(app *prago.App) (err error) {
-		return nm.importMailchimpList(*path)
+		return nmMiddleware.importMailchimpList(*path)
 	})
 
-	_, err := nm.Admin.CreateResource(Newsletter{})
+	nmMiddleware.controller.AddBeforeAction(func(request prago.Request) {
+		request.SetData("site", nmMiddleware.Name)
+	})
+
+	nmMiddleware.controller.Get("/newsletter-subscribe", func(request prago.Request) {
+		request.SetData("title", "Přihlásit se k odběru newsletteru")
+		request.SetData("csrf", nmMiddleware.csrf(request))
+		request.SetData("yield", "newsletter_subscribe")
+		prago.Render(request, 200, "newsletter_layout")
+	})
+
+	nmMiddleware.controller.Post("/newsletter-subscribe", func(request prago.Request) {
+		if nmMiddleware.csrf(request) != request.Params().Get("csrf") {
+			panic("wrong csrf")
+		}
+
+		email := request.Params().Get("email")
+		email = strings.Trim(email, " ")
+		name := request.Params().Get("name")
+
+		var message string
+		err := nmMiddleware.AddEmail(email, name, false)
+		if err == nil {
+			err := nmMiddleware.sendConfirmEmail(name, email)
+			if err != nil {
+				panic(err)
+			}
+			message = "Ověřte prosím vaši emailovou adresu " + email
+		}
+
+		request.SetData("title", message)
+		request.SetData("yield", "newsletter_empty")
+		prago.Render(request, 200, "newsletter_layout")
+	})
+
+	nmMiddleware.controller.Get("/newsletter-confirm", func(request prago.Request) {
+		email := request.Params().Get("email")
+		secret := request.Params().Get("secret")
+
+		if nmMiddleware.secret(email) != secret {
+			panic("wrong secret")
+		}
+
+		var person NewsletterPersons
+		err := nmMiddleware.Admin.Query().WhereIs("email", email).Get(&person)
+		if err != nil {
+			panic("can't find user")
+		}
+
+		person.Confirmed = true
+		err = nmMiddleware.Admin.Save(&person)
+		if err != nil {
+			panic(err)
+		}
+
+		request.SetData("title", "Odběr emailu potvrzen")
+		request.SetData("yield", "newsletter_empty")
+		prago.Render(request, 200, "newsletter_layout")
+	})
+
+	nmMiddleware.controller.Get("/newsletter-unsubscribe", func(request prago.Request) {
+		email := request.Params().Get("email")
+		secret := request.Params().Get("secret")
+
+		if nmMiddleware.secret(email) != secret {
+			panic("wrong secret")
+		}
+
+		var person NewsletterPersons
+		err := nmMiddleware.Admin.Query().WhereIs("email", email).Get(&person)
+		if err != nil {
+			panic("can't find user")
+		}
+
+		person.Unsubscribed = true
+		err = nmMiddleware.Admin.Save(&person)
+		if err != nil {
+			panic(err)
+		}
+
+		request.SetData("title", "Odhlášení z odebírání newsletteru proběhlo úspěšně.")
+		request.SetData("yield", "newsletter_empty")
+		prago.Render(request, 200, "newsletter_layout")
+	})
+
+	_, err := nmMiddleware.Admin.CreateResource(Newsletter{})
 	if err != nil {
 		return err
 	}
 
-	_, err = nm.Admin.CreateResource(NewsletterPersons{})
+	_, err = nmMiddleware.Admin.CreateResource(NewsletterPersons{})
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (nm NewsletterMiddleware) sendConfirmEmail(name, email string) error {
+	message := sendgrid.NewMail()
+	message.SetFrom(nm.SenderEmail)
+	message.AddTo(email)
+	message.AddToName(name)
+	message.SetSubject("Potvrďte prosím odběr newsletteru " + nm.Name)
+	message.SetText(nm.confirmEmailBody(name, email))
+	return nm.sendgridClient.Send(message)
+}
+
+func (nm NewsletterMiddleware) confirmEmailBody(name, email string) string {
+	values := make(url.Values)
+	values.Set("email", email)
+	values.Set("secret", nm.secret(email))
+
+	u := fmt.Sprintf("%s/newsletter-confirm?%s",
+		nm.baseUrl,
+		values.Encode(),
+	)
+
+	return fmt.Sprintf("Potvrďte prosím odběr newsletteru z webu %s kliknutím na adresu:\n\n%s",
+		nm.Name,
+		u,
+	)
+}
+
+func (nm NewsletterMiddleware) unsubscribeUrl(email string) string {
+	values := make(url.Values)
+	values.Set("email", email)
+	values.Set("secret", nm.secret(email))
+
+	return fmt.Sprintf("%s/newsletter-unsubscribe?%s",
+		nm.baseUrl,
+		values.Encode(),
+	)
+}
+
+func (nm NewsletterMiddleware) secret(email string) string {
+	h := md5.New()
+	io.WriteString(h, fmt.Sprintf("secret%s%s", nm.Randomness, email))
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+func (nm NewsletterMiddleware) csrf(request prago.Request) string {
+	h := md5.New()
+	io.WriteString(h, fmt.Sprintf("%s%s", nm.Randomness, request.Request().UserAgent()))
+	return fmt.Sprintf("%x", h.Sum(nil))
+
 }
 
 func (nm NewsletterMiddleware) importMailchimpList(path string) error {
@@ -128,7 +291,7 @@ func (nm NewsletterMiddleware) importMailchimpList(path string) error {
 		}
 		email := strings.Trim(record[0], " ")
 		name := strings.Trim(record[1]+" "+record[2], " ")
-		err := nm.addEmail(email, name)
+		err := nm.AddEmail(email, name, true)
 		if err != nil {
 			fmt.Println("Error while importing", email, name)
 			fmt.Println(err)
@@ -138,22 +301,20 @@ func (nm NewsletterMiddleware) importMailchimpList(path string) error {
 	return nil
 }
 
-func (nm NewsletterMiddleware) addEmail(email, name string) error {
+func (nm NewsletterMiddleware) AddEmail(email, name string, confirm bool) error {
 	if !strings.Contains(email, "@") {
 		return errors.New("Wrong email format")
 	}
 
 	err := nm.Admin.Query().WhereIs("email", email).Get(&NewsletterPersons{})
 	if err == nil {
-		fmt.Println("-", email)
-		return err
+		return ErrEmailAlreadyInList
 	}
-	fmt.Println("+", email)
 
 	person := NewsletterPersons{
 		Name:      name,
 		Email:     email,
-		Confirmed: true,
+		Confirmed: confirm,
 	}
 	return nm.Admin.Create(&person)
 }
@@ -161,7 +322,6 @@ func (nm NewsletterMiddleware) addEmail(email, name string) error {
 type Newsletter struct {
 	ID            int64
 	Name          string `prago-preview:"true" prago-description:"Jméno newsletteru"`
-	Subject       string
 	Body          string `prago-type:"markdown"`
 	PreviewSentAt time.Time
 	SentAt        time.Time
@@ -171,7 +331,7 @@ type Newsletter struct {
 
 func (Newsletter) InitResource(a *administration.Admin, resource *administration.Resource) error {
 	previewAction := administration.ResourceAction{
-		Name: func(string) string { return "Preview" },
+		Name: func(string) string { return "Náhled" },
 		Url:  "preview",
 		Handler: func(admin *administration.Admin, resource *administration.Resource, request prago.Request) {
 			var newsletter Newsletter
@@ -180,7 +340,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 				panic(err)
 			}
 
-			body, err := newsletter.GetBody()
+			body, err := nmMiddleware.GetBody(newsletter, "")
 			if err != nil {
 				panic(err)
 			}
@@ -190,11 +350,66 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 		},
 	}
 
+	sendPreviewAction := administration.ResourceAction{
+		Name: func(string) string { return "Odeslat náhled" },
+		Url:  "send-preview",
+		Handler: func(admin *administration.Admin, resource *administration.Resource, request prago.Request) {
+			request.SetData("admin_yield", "newsletter_send_preview")
+			prago.Render(request, 200, "admin_layout")
+		},
+	}
+
+	doSendPreviewAction := administration.ResourceAction{
+		Url:    "send-preview",
+		Method: "post",
+		Handler: func(admin *administration.Admin, resource *administration.Resource, request prago.Request) {
+			var newsletter Newsletter
+			err := admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
+			if err != nil {
+				panic(err)
+			}
+
+			emails := parseEmails(request.Params().Get("emails"))
+			nmMiddleware.SendEmails(newsletter, emails)
+			administration.AddFlashMessage(request, "Náhled newsletteru odeslán.")
+			prago.Redirect(request, admin.GetURL(resource, ""))
+		},
+	}
+
 	resource.AddResourceItemAction(previewAction)
+	resource.AddResourceItemAction(sendPreviewAction)
+	resource.AddResourceItemAction(doSendPreviewAction)
 	return nil
 }
 
-func (n Newsletter) GetBody() (string, error) {
+func parseEmails(emails string) []string {
+	ret := []string{}
+
+	for _, v := range strings.Split(emails, "\n") {
+		v = strings.Trim(v, " ")
+		if len(v) > 0 {
+			ret = append(ret, v)
+		}
+	}
+	return ret
+}
+
+func (nm *NewsletterMiddleware) SendEmails(n Newsletter, emails []string) error {
+	for _, v := range emails {
+		body, err := nm.GetBody(n, v)
+		if err == nil {
+			message := sendgrid.NewMail()
+			message.SetFrom(nm.SenderEmail)
+			message.AddTo(v)
+			message.SetSubject(n.Name)
+			message.SetHTML(body)
+			nm.sendgridClient.Send(message)
+		}
+	}
+	return nil
+}
+
+func (nm *NewsletterMiddleware) GetBody(n Newsletter, email string) (string, error) {
 	t, err := template.New("newsletter").Parse(newsletterTemplate)
 	if err != nil {
 		return "", err
@@ -204,8 +419,10 @@ func (n Newsletter) GetBody() (string, error) {
 
 	buf := new(bytes.Buffer)
 	err = t.ExecuteTemplate(buf, "newsletter", map[string]interface{}{
+		"baseUrl":     nm.baseUrl,
+		"site":        nm.Name,
 		"title":       n.Name,
-		"unsubscribe": "https://www.lazne-podebrady.cz/zrusit-newsletter",
+		"unsubscribe": nm.unsubscribeUrl(email),
 		"content":     template.HTML(content),
 	})
 	if err != nil {
@@ -223,9 +440,9 @@ func (n Newsletter) GetBody() (string, error) {
 type NewsletterPersons struct {
 	ID           int64
 	Name         string `prago-preview:"true" prago-description:"Jméno příjemce"`
-	Email        string
-	Confirmed    bool
-	Unsubscribed bool
+	Email        string `prago-preview:"true"`
+	Confirmed    bool   `prago-preview:"true"`
+	Unsubscribed bool   `prago-preview:"true"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }

@@ -1,0 +1,15 @@
+{{define "newsletter_send_preview"}}
+<div class="admin_box">
+<form method="POST" action="send-preview">
+<h1>Odeslat náhled newsletteru</h1>
+<label>
+  Seznam emailů na poslání preview (jeden email na řádek)
+  <textarea class="input" name="emails"></textarea>
+</label>
+
+<input type="submit" class="btn">
+</form>
+</div>
+
+
+{{end}}
