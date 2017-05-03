@@ -179,7 +179,7 @@ func (nm NewsletterMiddleware) Init(app *prago.App) error {
 			panic(err)
 		}
 
-		request.SetData("title", "Odběr emailu potvrzen")
+		request.SetData("title", "Odběr newsletteru potvrzen")
 		request.SetData("yield", "newsletter_empty")
 		prago.Render(request, 200, "newsletter_layout")
 	})
@@ -445,4 +445,8 @@ type NewsletterPersons struct {
 	Unsubscribed bool   `prago-preview:"true"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+}
+
+func (NewsletterPersons) Authenticate(u *administration.User) bool {
+	return administration.AuthenticateSysadmin(u)
 }
