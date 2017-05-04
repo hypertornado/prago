@@ -50,6 +50,10 @@ const newsletterTemplate = `
   	padding: 10px;
   }
 
+  img {
+  	max-width: 100%;
+  }
+
   a {
     color: #009ee0;
   }
@@ -78,7 +82,7 @@ const newsletterTemplate = `
         <td></td>
         <td width="450" class="middle">
         	<div class="middle_header">
-        		<a href="{{.baseUrl}}">{{.site}}</a>
+        		<a href="{{.baseUrl}}/?utm_source=newsletter&utm_medium=prago&utm_campaign={{.id}}">{{.site}}</a>
         		<h1>{{.title}}</h1>
         	</div>
         	{{.content}}
@@ -368,6 +372,8 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 			if err != nil {
 				panic(err)
 			}
+			newsletter.PreviewSentAt = time.Now()
+			admin.Save(&newsletter)
 
 			emails := parseEmails(request.Params().Get("emails"))
 			nmMiddleware.SendEmails(newsletter, emails)
@@ -376,9 +382,63 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 		},
 	}
 
+	sendAction := administration.ResourceAction{
+		Name: func(string) string { return "Odeslat" },
+		Url:  "send",
+		Handler: func(admin *administration.Admin, resource *administration.Resource, request prago.Request) {
+			var newsletter Newsletter
+			err := admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
+			if err != nil {
+				panic(err)
+			}
+
+			recipients, err := nmMiddleware.GetRecipients()
+			if err != nil {
+				panic(err)
+			}
+
+			request.SetData("title", newsletter.Name)
+			request.SetData("recipients", recipients)
+			request.SetData("recipients_count", len(recipients))
+			request.SetData("admin_yield", "newsletter_send")
+			prago.Render(request, 200, "admin_layout")
+		},
+	}
+
+	doSendAction := administration.ResourceAction{
+		Url:    "send",
+		Method: "post",
+		Handler: func(admin *administration.Admin, resource *administration.Resource, request prago.Request) {
+			var newsletter Newsletter
+			err := admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
+			if err != nil {
+				panic(err)
+			}
+			newsletter.SentAt = time.Now()
+			admin.Save(&newsletter)
+
+			recipients, err := nmMiddleware.GetRecipients()
+			if err != nil {
+				panic(err)
+			}
+
+			err = nmMiddleware.SendEmails(newsletter, recipients)
+			if err != nil {
+				panic(err)
+			}
+
+			request.SetData("recipients", recipients)
+			request.SetData("recipients_count", len(recipients))
+			request.SetData("admin_yield", "newsletter_sent")
+			prago.Render(request, 200, "admin_layout")
+		},
+	}
+
 	resource.AddResourceItemAction(previewAction)
 	resource.AddResourceItemAction(sendPreviewAction)
 	resource.AddResourceItemAction(doSendPreviewAction)
+	resource.AddResourceItemAction(sendAction)
+	resource.AddResourceItemAction(doSendAction)
 	return nil
 }
 
@@ -394,8 +454,24 @@ func parseEmails(emails string) []string {
 	return ret
 }
 
+func (nm *NewsletterMiddleware) GetRecipients() ([]string, error) {
+	ret := []string{}
+
+	var persons []*NewsletterPersons
+	err := nm.Admin.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Get(&persons)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range persons {
+		ret = append(ret, v.Email)
+	}
+	return ret, nil
+}
+
 func (nm *NewsletterMiddleware) SendEmails(n Newsletter, emails []string) error {
 	for _, v := range emails {
+		fmt.Println("sending", v)
 		body, err := nm.GetBody(n, v)
 		if err == nil {
 			message := sendgrid.NewMail()
@@ -403,7 +479,10 @@ func (nm *NewsletterMiddleware) SendEmails(n Newsletter, emails []string) error 
 			message.AddTo(v)
 			message.SetSubject(n.Name)
 			message.SetHTML(body)
-			nm.sendgridClient.Send(message)
+			err = nm.sendgridClient.Send(message)
+		}
+		if err != nil {
+			fmt.Println("ERROR", err.Error())
 		}
 	}
 	return nil
@@ -415,10 +494,11 @@ func (nm *NewsletterMiddleware) GetBody(n Newsletter, email string) (string, err
 		return "", err
 	}
 
-	content := markdown.New().RenderToString([]byte(n.Body))
+	content := markdown.New(markdown.HTML(true)).RenderToString([]byte(n.Body))
 
 	buf := new(bytes.Buffer)
 	err = t.ExecuteTemplate(buf, "newsletter", map[string]interface{}{
+		"id":          n.ID,
 		"baseUrl":     nm.baseUrl,
 		"site":        nm.Name,
 		"title":       n.Name,

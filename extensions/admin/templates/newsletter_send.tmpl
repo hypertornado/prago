@@ -1,0 +1,17 @@
+{{define "newsletter_send"}}
+
+<div class="admin_box">
+<form method="POST" action="send">
+<h1>Odeslat newsletter - {{.title}}</h1>
+
+<b>Emailové adresy ({{.recipients_count}})</b>
+{{range $item := .recipients}}
+  <div>{{$item}}</div>
+{{end}}
+
+
+<input type="submit" class="btn" value="Odeslat newsletter">
+</form>
+</div>
+
+{{end}}

@@ -511,6 +511,22 @@ const adminTemplates = `
   </body>
 </html>
 
+{{end}}{{define "newsletter_send"}}
+
+<div class="admin_box">
+<form method="POST" action="send">
+<h1>Odeslat newsletter - {{.title}}</h1>
+
+<b>Emailové adresy ({{.recipients_count}})</b>
+{{range $item := .recipients}}
+  <div>{{$item}}</div>
+{{end}}
+
+
+<input type="submit" class="btn" value="Odeslat newsletter">
+</form>
+</div>
+
 {{end}}{{define "newsletter_send_preview"}}
 <div class="admin_box">
 <form method="POST" action="send-preview">
@@ -524,6 +540,18 @@ const adminTemplates = `
 </form>
 </div>
 
+
+{{end}}{{define "newsletter_sent"}}
+
+<div class="admin_box">
+  <h1>Newsletter odeslán</h1>
+
+  <b>Emailové adresy ({{.recipients_count}})</b>
+  {{range $item := .recipients}}
+    <div>{{$item}}</div>
+  {{end}}
+  
+</div>
 
 {{end}}{{define "newsletter_subscribe"}}
 <form method="post" action="/newsletter-subscribe">
