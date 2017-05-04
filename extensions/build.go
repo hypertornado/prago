@@ -220,7 +220,7 @@ func (b BuildMiddleware) build(appName, version string) error {
 
 	defer os.RemoveAll(dir)
 
-	for _, buildFlag := range []buildFlag{linuxBuild, macBuild} {
+	for _, buildFlag := range []buildFlag{linuxBuild} {
 		err := buildExecutable(buildFlag, appName, dirPath)
 		if err != nil {
 			return err
