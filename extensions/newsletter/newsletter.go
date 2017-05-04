@@ -384,6 +384,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 
 	sendAction := administration.ResourceAction{
 		Name: func(string) string { return "Odeslat" },
+		Auth: administration.AuthenticateSysadmin,
 		Url:  "send",
 		Handler: func(admin *administration.Admin, resource *administration.Resource, request prago.Request) {
 			var newsletter Newsletter

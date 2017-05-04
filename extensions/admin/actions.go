@@ -16,6 +16,7 @@ type ButtonData struct {
 
 type ResourceAction struct {
 	Name    func(string) string
+	Auth    Authenticatizer
 	Method  string
 	Url     string
 	Handler func(*Admin, *Resource, prago.Request)
@@ -30,7 +31,8 @@ func (ra *ResourceAction) GetName(language string) string {
 
 var ActionList = ResourceAction{
 	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
-		listData, err := resource.getList(admin, GetLocale(request), request.Request().URL.Path, request.Request().URL.Query())
+		user := request.GetData("currentuser").(*User)
+		listData, err := resource.getList(admin, request.Request().URL.Path, request.Request().URL.Query(), user)
 		if err != nil {
 			if err == ErrItemNotFound {
 				render404(request)
@@ -269,6 +271,14 @@ func BindAction(a *Admin, resource *Resource, action ResourceAction, isItemActio
 	controller := resource.ResourceController
 
 	var fn func(request prago.Request) = func(request prago.Request) {
+		if action.Auth != nil {
+			user := request.GetData("currentuser").(*User)
+			if !action.Auth(user) {
+				render403(request)
+				return
+			}
+		}
+
 		action.Handler(a, resource, request)
 	}
 

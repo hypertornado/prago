@@ -53,14 +53,16 @@ type page struct {
 }
 
 //GetList of resource items
-func (resource *Resource) GetList(admin *Admin, lang string, path string, requestQuery url.Values) (list list, err error) {
-	return resource.getList(admin, lang, path, requestQuery)
+func (resource *Resource) GetList(admin *Admin, path string, requestQuery url.Values, user *User) (list list, err error) {
+	return resource.getList(admin, path, requestQuery, user)
 }
 
-func (resource *Resource) getList(admin *Admin, lang string, path string, requestQuery url.Values) (list list, err error) {
+func (resource *Resource) getList(admin *Admin, path string, requestQuery url.Values, user *User) (list list, err error) {
+	lang := user.Locale
+
 	list.Colspan = 1
 
-	list.Actions = resource.ResourceActionsButtonData(lang)
+	list.Actions = resource.ResourceActionsButtonData(user)
 
 	orderItem := resource.OrderByColumn
 	orderDesc := resource.OrderDesc
@@ -223,7 +225,7 @@ func (resource *Resource) getList(admin *Admin, lang string, path string, reques
 			row.Items = append(row.Items, resource.valueToCell(admin, structField, fieldVal))
 		}
 		row.ID = itemVal.FieldByName("ID").Int()
-		row.Actions = resource.ResourceItemActionsButtonData(lang, row.ID)
+		row.Actions = resource.ResourceItemActionsButtonData(user, row.ID)
 		list.Rows = append(list.Rows, row)
 		list.Colspan = int64(len(row.Items)) + 1
 	}

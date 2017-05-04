@@ -251,11 +251,11 @@ func (ar *Resource) newItems(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(reflect.SliceOf(reflect.PtrTo(ar.Typ))))
 }
 
-func (ar *Resource) ResourceActionsButtonData(lang string) []ButtonData {
+func (ar *Resource) ResourceActionsButtonData(user *User) []ButtonData {
 	ret := []ButtonData{}
 	if ar.CanCreate {
 		ret = append(ret, ButtonData{
-			Name: messages.Messages.Get(lang, "admin_new"),
+			Name: messages.Messages.Get(user.Locale, "admin_new"),
 			Url:  fmt.Sprintf("%s/new", ar.ID),
 		})
 	}
@@ -263,34 +263,36 @@ func (ar *Resource) ResourceActionsButtonData(lang string) []ButtonData {
 	for _, v := range ar.ResourceActions {
 		name := v.Url
 		if v.Name != nil {
-			name = v.Name(lang)
+			name = v.Name(user.Locale)
 		}
 
-		ret = append(ret, ButtonData{
-			Name: name,
-			Url:  fmt.Sprintf("%s/%s", ar.ID, v.Url),
-		})
+		if v.Auth == nil || v.Auth(user) {
+			ret = append(ret, ButtonData{
+				Name: name,
+				Url:  fmt.Sprintf("%s/%s", ar.ID, v.Url),
+			})
+		}
 	}
 	return ret
 }
 
-func (ar *Resource) ResourceItemActionsButtonData(lang string, id int64) []ButtonData {
+func (ar *Resource) ResourceItemActionsButtonData(user *User, id int64) []ButtonData {
 	prefix := fmt.Sprintf("%s/%d", ar.ID, id)
 
 	ret := []ButtonData{}
 	if ar.CanEdit {
 		ret = append(ret, ButtonData{
-			Name: messages.Messages.Get(lang, "admin_edit"),
+			Name: messages.Messages.Get(user.Locale, "admin_edit"),
 			Url:  prefix + "/edit",
 		})
 
 		ret = append(ret, ButtonData{
-			Name: messages.Messages.Get(lang, "admin_delete"),
+			Name: messages.Messages.Get(user.Locale, "admin_delete"),
 			Url:  "",
 			Params: map[string]string{
 				"class":                "btn admin-action-delete",
 				"data-action":          fmt.Sprintf("%s/%d/delete?_csrfToken=", ar.ID, id),
-				"data-confirm-message": messages.Messages.Get(lang, "admin_delete_confirmation"),
+				"data-confirm-message": messages.Messages.Get(user.Locale, "admin_delete_confirmation"),
 			},
 		})
 
@@ -309,14 +311,17 @@ func (ar *Resource) ResourceItemActionsButtonData(lang string, id int64) []Butto
 	for _, v := range ar.ResourceItemActions {
 		name := v.Url
 		if v.Name != nil {
-			name = v.Name(lang)
+			name = v.Name(user.Locale)
 		}
 
 		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
-			ret = append(ret, ButtonData{
-				Name: name,
-				Url:  prefix + "/" + v.Url,
-			})
+
+			if v.Auth == nil || v.Auth(user) {
+				ret = append(ret, ButtonData{
+					Name: name,
+					Url:  prefix + "/" + v.Url,
+				})
+			}
 		}
 	}
 
