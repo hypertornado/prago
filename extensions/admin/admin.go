@@ -210,7 +210,6 @@ func (a *Admin) Init(app *prago.App) error {
 		request.SetData("admin_yield", "admin_home")
 
 		session := request.GetData("session").(*sessions.Session)
-
 		userID, ok := session.Values["user_id"].(int64)
 
 		if !ok {

@@ -134,7 +134,9 @@ var ActionEdit = ResourceAction{
 		prago.Must(err)
 
 		form.Action = "edit"
+		form.AddHidden("_submit_and_stay_clicked")
 		form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
+		form.AddSubmit("_submit_and_stay", messages.Messages.Get(GetLocale(request), "admin_edit_and_stay"))
 		AddCSRFToken(form, request)
 
 		if resource.AfterFormCreated != nil {
@@ -191,7 +193,13 @@ var ActionUpdate = ResourceAction{
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_edited"))
-		prago.Redirect(request, admin.Prefix+"/"+resource.ID)
+
+		if request.Params().Get("_submit_and_stay_clicked") == "true" {
+			prago.Redirect(request, request.Request().URL.RequestURI())
+		} else {
+			prago.Redirect(request, admin.Prefix+"/"+resource.ID)
+		}
+
 	},
 }
 

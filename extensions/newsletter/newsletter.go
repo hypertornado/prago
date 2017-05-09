@@ -23,9 +23,6 @@ var (
 	ErrEmailAlreadyInList = errors.New("email already in newsletter list")
 )
 
-//https://github.com/chris-ramon/douceur
-//https://github.com/aymerick/douceur
-
 const newsletterTemplate = `
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -134,13 +131,13 @@ func (nm NewsletterMiddleware) Init(app *prago.App) error {
 
 	nmMiddleware.controller.Get("/newsletter-subscribe", func(request prago.Request) {
 		request.SetData("title", "Přihlásit se k odběru newsletteru")
-		request.SetData("csrf", nmMiddleware.csrf(request))
+		request.SetData("csrf", nmMiddleware.CSFR(request))
 		request.SetData("yield", "newsletter_subscribe")
 		prago.Render(request, 200, "newsletter_layout")
 	})
 
 	nmMiddleware.controller.Post("/newsletter-subscribe", func(request prago.Request) {
-		if nmMiddleware.csrf(request) != request.Params().Get("csrf") {
+		if nmMiddleware.CSFR(request) != request.Params().Get("csrf") {
 			panic("wrong csrf")
 		}
 
@@ -156,6 +153,12 @@ func (nm NewsletterMiddleware) Init(app *prago.App) error {
 				panic(err)
 			}
 			message = "Ověřte prosím vaši emailovou adresu " + email
+		} else {
+			if err == ErrEmailAlreadyInList {
+				message = "Email se již nachází v naší emailové databázi"
+			} else {
+				panic(err)
+			}
 		}
 
 		request.SetData("title", message)
@@ -269,7 +272,7 @@ func (nm NewsletterMiddleware) secret(email string) string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-func (nm NewsletterMiddleware) csrf(request prago.Request) string {
+func (nm NewsletterMiddleware) CSFR(request prago.Request) string {
 	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%s%s", nm.Randomness, request.Request().UserAgent()))
 	return fmt.Sprintf("%x", h.Sum(nil))
