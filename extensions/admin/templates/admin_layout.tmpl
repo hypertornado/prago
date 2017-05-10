@@ -10,6 +10,9 @@
 
     <link rel="stylesheet" href="{{.admin_header.UrlPrefix}}/_static/admin.css?v={{.version}}">
     <script type="text/javascript" src="{{.admin_header.UrlPrefix}}/_static/admin.js?v={{.version}}"></script>
+    {{range $javascript := .javascripts}}
+        <script type="text/javascript" src="{{$javascript}}"></script>
+    {{end}}
     <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces&key={{.google}}" async defer></script>
 
   </head>

@@ -125,7 +125,7 @@ func createTable(db dbIface, tableName string, adminStruct *structCache, verbose
 	}
 	items := []string{}
 	for _, v := range adminStruct.fieldArrays {
-		items = append(items, v.fieldDescriptionMysql())
+		items = append(items, v.fieldDescriptionMysql(adminStruct.fieldTypes))
 	}
 	q := fmt.Sprintf("CREATE TABLE %s (%s);", tableName, strings.Join(items, ", "))
 	if verbose || Debug {
@@ -153,7 +153,7 @@ func migrateTable(db dbIface, tableName string, adminStruct *structCache, verbos
 
 	for _, v := range adminStruct.fieldArrays {
 		if !tableDescriptionMap[v.ColumnName] {
-			items = append(items, fmt.Sprintf("ADD COLUMN %s", v.fieldDescriptionMysql()))
+			items = append(items, fmt.Sprintf("ADD COLUMN %s", v.fieldDescriptionMysql(adminStruct.fieldTypes)))
 		} else {
 			tableDescriptionMap[v.ColumnName] = false
 		}

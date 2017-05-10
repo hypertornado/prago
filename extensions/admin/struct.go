@@ -10,23 +10,30 @@ import (
 	"time"
 )
 
+type FieldType struct {
+	FormSubTemplate    string
+	DBFieldDescription string
+}
+
 type structCache struct {
 	typ             reflect.Type
 	fieldArrays     []*structField
 	fieldMap        map[string]*structField
+	fieldTypes      map[string]FieldType
 	OrderFieldName  string
 	OrderColumnName string
 }
 
-func newStructCache(item interface{}) (ret *structCache, err error) {
+func newStructCache(item interface{}, fieldTypes map[string]FieldType) (ret *structCache, err error) {
 	typ := reflect.TypeOf(item)
 	if typ.Kind() != reflect.Struct {
 		return nil, errors.New("item is not a structure")
 	}
 
 	ret = &structCache{
-		typ:      typ,
-		fieldMap: make(map[string]*structField),
+		typ:        typ,
+		fieldMap:   make(map[string]*structField),
+		fieldTypes: fieldTypes,
 	}
 
 	for i := 0; i < typ.NumField(); i++ {
@@ -84,32 +91,38 @@ type structField struct {
 	CanOrder   bool
 }
 
-func (sf *structField) fieldDescriptionMysql() string {
+func (sf *structField) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {
 	var fieldDescription string
-	switch sf.Typ.Kind() {
-	case reflect.Struct:
-		dateType := reflect.TypeOf(time.Now())
-		if sf.Typ == dateType {
-			if sf.Tags["prago-type"] == "date" {
-				fieldDescription = "date"
-			} else {
-				fieldDescription = "datetime"
+
+	t, found := fieldTypes[sf.Tags["prago-type"]]
+	if found {
+		fieldDescription = t.DBFieldDescription
+	} else {
+		switch sf.Typ.Kind() {
+		case reflect.Struct:
+			dateType := reflect.TypeOf(time.Now())
+			if sf.Typ == dateType {
+				if sf.Tags["prago-type"] == "date" {
+					fieldDescription = "date"
+				} else {
+					fieldDescription = "datetime"
+				}
 			}
+		case reflect.Bool:
+			fieldDescription = "bool NOT NULL"
+		case reflect.Float64:
+			fieldDescription = "double"
+		case reflect.Int64:
+			fieldDescription = "bigint(20)"
+		case reflect.String:
+			if sf.Tags["prago-type"] == "text" || sf.Tags["prago-type"] == "image" || sf.Tags["prago-type"] == "markdown" {
+				fieldDescription = "text"
+			} else {
+				fieldDescription = "varchar(255)"
+			}
+		default:
+			panic("non supported type " + sf.Typ.Kind().String())
 		}
-	case reflect.Bool:
-		fieldDescription = "bool NOT NULL"
-	case reflect.Float64:
-		fieldDescription = "double"
-	case reflect.Int64:
-		fieldDescription = "bigint(20)"
-	case reflect.String:
-		if sf.Tags["prago-type"] == "text" || sf.Tags["prago-type"] == "image" || sf.Tags["prago-type"] == "markdown" {
-			fieldDescription = "text"
-		} else {
-			fieldDescription = "varchar(255)"
-		}
-	default:
-		panic("non supported type " + sf.Typ.Kind().String())
 	}
 
 	additional := ""
@@ -231,6 +244,8 @@ func whiteListFilter(in ...string) structFieldFilter {
 func (cache *structCache) GetForm(inValues interface{}, lang string, visible structFieldFilter, editable structFieldFilter) (*Form, error) {
 	form := NewForm()
 
+	//cache.fieldTypes
+
 	form.Method = "POST"
 	itemVal := reflect.ValueOf(inValues).Elem()
 
@@ -255,47 +270,52 @@ func (cache *structCache) GetForm(inValues interface{}, lang string, visible str
 			itemVal.Field(i),
 		)
 
-		switch field.Typ.Kind() {
-		case reflect.Struct:
-			if field.Typ == reflect.TypeOf(time.Now()) {
-				tm := ifaceVal.(time.Time)
-				if field.Tags["prago-type"] == "timestamp" {
-					item.SubTemplate = "admin_item_timestamp"
-					item.Value = tm.Format("2006-01-02 15:04")
-				} else {
-					item.SubTemplate = "admin_item_date"
-					item.Value = tm.Format("2006-01-02")
+		t, found := cache.fieldTypes[field.Tags["prago-type"]]
+		if found {
+			item.SubTemplate = t.FormSubTemplate
+		} else {
+			switch field.Typ.Kind() {
+			case reflect.Struct:
+				if field.Typ == reflect.TypeOf(time.Now()) {
+					tm := ifaceVal.(time.Time)
+					if field.Tags["prago-type"] == "timestamp" {
+						item.SubTemplate = "admin_item_timestamp"
+						item.Value = tm.Format("2006-01-02 15:04")
+					} else {
+						item.SubTemplate = "admin_item_date"
+						item.Value = tm.Format("2006-01-02")
+					}
 				}
+			case reflect.Bool:
+				item.SubTemplate = "admin_item_checkbox"
+				if ifaceVal.(bool) {
+					item.Value = "on"
+				}
+				item.HiddenName = true
+			case reflect.String:
+				item.Value = ifaceVal.(string)
+				switch field.Tags["prago-type"] {
+				case "text":
+					item.SubTemplate = "admin_item_textarea"
+				case "markdown":
+					item.SubTemplate = "admin_item_markdown"
+				case "image":
+					item.SubTemplate = "admin_item_image"
+				case "place":
+					item.SubTemplate = "admin_item_place"
+				}
+			case reflect.Int64:
+				item.Value = fmt.Sprintf("%d", ifaceVal.(int64))
+				switch field.Tags["prago-type"] {
+				case "relation":
+					item.SubTemplate = "admin_item_relation"
+					item.Values = columnName(item.Name)
+				}
+			case reflect.Float64:
+				item.Value = fmt.Sprintf("%f", ifaceVal.(float64))
+			default:
+				panic("Wrong type" + field.Typ.Kind().String())
 			}
-		case reflect.Bool:
-			item.SubTemplate = "admin_item_checkbox"
-			if ifaceVal.(bool) {
-				item.Value = "on"
-			}
-			item.HiddenName = true
-		case reflect.String:
-			item.Value = ifaceVal.(string)
-			switch field.Tags["prago-type"] {
-			case "text":
-				item.SubTemplate = "admin_item_textarea"
-			case "markdown":
-				item.SubTemplate = "admin_item_markdown"
-			case "image":
-				item.SubTemplate = "admin_item_image"
-			case "place":
-				item.SubTemplate = "admin_item_place"
-			}
-		case reflect.Int64:
-			item.Value = fmt.Sprintf("%d", ifaceVal.(int64))
-			switch field.Tags["prago-type"] {
-			case "relation":
-				item.SubTemplate = "admin_item_relation"
-				item.Values = columnName(item.Name)
-			}
-		case reflect.Float64:
-			item.Value = fmt.Sprintf("%f", ifaceVal.(float64))
-		default:
-			panic("Wrong type" + field.Typ.Kind().String())
 		}
 
 		item.NameHuman = field.humanName(lang)

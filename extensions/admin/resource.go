@@ -63,7 +63,7 @@ type Resource struct {
 
 //CreateResource creates new resource based on item
 func (a *Admin) CreateResource(item interface{}) (ret *Resource, err error) {
-	cache, err := newStructCache(item)
+	cache, err := newStructCache(item, a.fieldTypes)
 	if err != nil {
 		return nil, err
 	}

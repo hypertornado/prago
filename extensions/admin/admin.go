@@ -39,6 +39,8 @@ type Admin struct {
 	authData              map[string]string
 	sendgridClient        *sendgrid.SGClient
 	noReplyEmail          string
+	fieldTypes            map[string]FieldType
+	javascripts           []string
 }
 
 //NewAdmin creates new administration on prefix url with name
@@ -49,6 +51,8 @@ func NewAdmin(prefix, name string) *Admin {
 		Resources:       []*Resource{},
 		resourceMap:     make(map[reflect.Type]*Resource),
 		resourceNameMap: make(map[string]*Resource),
+		fieldTypes:      make(map[string]FieldType),
+		javascripts:     []string{},
 	}
 	ret.CreateResource(User{})
 	ret.CreateResource(File{})
@@ -66,6 +70,14 @@ func (a *Admin) UnsafeDropTables() error {
 		}
 	}
 	return nil
+}
+
+func (a *Admin) AddFieldType(name string, fieldType FieldType) {
+	a.fieldTypes[name] = fieldType
+}
+
+func (a *Admin) AddJavascript(url string) {
+	a.javascripts = append(a.javascripts, url)
 }
 
 //Migrate migrates all resource's tables
@@ -172,6 +184,7 @@ func (a *Admin) Init(app *prago.App) error {
 	a.AdminAccessController = app.MainController().SubController()
 	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
 		request.SetData("background", a.Background)
+		request.SetData("javascripts", a.javascripts)
 	})
 
 	a.AdminController = a.AdminAccessController.SubController()

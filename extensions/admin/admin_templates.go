@@ -225,6 +225,9 @@ const adminTemplates = `
 
     <link rel="stylesheet" href="{{.admin_header.UrlPrefix}}/_static/admin.css?v={{.version}}">
     <script type="text/javascript" src="{{.admin_header.UrlPrefix}}/_static/admin.js?v={{.version}}"></script>
+    {{range $javascript := .javascripts}}
+        <script type="text/javascript" src="{{$javascript}}"></script>
+    {{end}}
     <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces&key={{.google}}" async defer></script>
 
   </head>
@@ -1638,6 +1641,16 @@ document.addEventListener("DOMContentLoaded", function () {
     bindRelations();
     bindImagePickers();
     bindDelete();
+    bindClickAndStay();
 });
+function bindClickAndStay() {
+    var els = document.getElementsByName("_submit_and_stay");
+    var elsClicked = document.getElementsByName("_submit_and_stay_clicked");
+    if (els.length == 1 && elsClicked.length == 1) {
+        els[0].addEventListener("click", function () {
+            elsClicked[0].value = "true";
+        });
+    }
+}
 `
 
