@@ -224,6 +224,10 @@ const adminTemplates = `
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="stylesheet" href="{{.admin_header.UrlPrefix}}/_static/admin.css?v={{.version}}">
+    {{range $c := .css}}
+        <link rel="stylesheet" href="{{$c}}">
+    {{end}}
+
     <script type="text/javascript" src="{{.admin_header.UrlPrefix}}/_static/admin.js?v={{.version}}"></script>
     {{range $javascript := .javascripts}}
         <script type="text/javascript" src="{{$javascript}}"></script>

@@ -41,6 +41,7 @@ type Admin struct {
 	noReplyEmail          string
 	fieldTypes            map[string]FieldType
 	javascripts           []string
+	css                   []string
 }
 
 //NewAdmin creates new administration on prefix url with name
@@ -53,6 +54,7 @@ func NewAdmin(prefix, name string) *Admin {
 		resourceNameMap: make(map[string]*Resource),
 		fieldTypes:      make(map[string]FieldType),
 		javascripts:     []string{},
+		css:             []string{},
 	}
 	ret.CreateResource(User{})
 	ret.CreateResource(File{})
@@ -78,6 +80,10 @@ func (a *Admin) AddFieldType(name string, fieldType FieldType) {
 
 func (a *Admin) AddJavascript(url string) {
 	a.javascripts = append(a.javascripts, url)
+}
+
+func (a *Admin) AddCSS(url string) {
+	a.css = append(a.css, url)
 }
 
 //Migrate migrates all resource's tables
@@ -185,6 +191,7 @@ func (a *Admin) Init(app *prago.App) error {
 	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
 		request.SetData("background", a.Background)
 		request.SetData("javascripts", a.javascripts)
+		request.SetData("css", a.css)
 	})
 
 	a.AdminController = a.AdminAccessController.SubController()
