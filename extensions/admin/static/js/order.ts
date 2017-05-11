@@ -27,13 +27,7 @@ function bindOrder() {
               thisIndex = i;
             }
           })
-
-          if (draggedIndex <= thisIndex) {
-            thisIndex += 1
-          }
-
-          DOMinsertChildAtIndex(targetEl.parentElement, draggedElement, thisIndex + 2);
-
+          DOMinsertChildAtIndex(targetEl.parentElement, draggedElement, thisIndex);
           saveOrder();
         }
         return false;

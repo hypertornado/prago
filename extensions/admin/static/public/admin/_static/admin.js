@@ -143,6 +143,35 @@ var ImagePicker = (function () {
     };
     return ImagePicker;
 }());
+function bindLists() {
+    var els = document.getElementsByClassName("admin_table-list");
+    for (var i = 0; i < els.length; i++) {
+        new List(els[i]);
+    }
+}
+var List = (function () {
+    function List(el) {
+        var _this = this;
+        this.tbody = el.querySelector("tbody");
+        this.tbody.textContent = "";
+        var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        var typeName = el.getAttribute("data-type");
+        var request = new XMLHttpRequest();
+        request.open("GET", adminPrefix + "/_api/list/" + typeName + document.location.search, true);
+        request.addEventListener("load", function () {
+            if (request.status == 200) {
+                _this.tbody.innerHTML = request.response;
+                bindOrder();
+                bindDelete();
+            }
+            else {
+                alert("error");
+            }
+        });
+        request.send();
+    }
+    return List;
+}());
 function bindOrder() {
     function orderTable(el) {
         var rows = el.getElementsByClassName("admin_table_row");
@@ -169,10 +198,7 @@ function bindOrder() {
                             thisIndex = i;
                         }
                     });
-                    if (draggedIndex <= thisIndex) {
-                        thisIndex += 1;
-                    }
-                    DOMinsertChildAtIndex(targetEl.parentElement, draggedElement, thisIndex + 2);
+                    DOMinsertChildAtIndex(targetEl.parentElement, draggedElement, thisIndex);
                     saveOrder();
                 }
                 return false;
@@ -446,13 +472,12 @@ function bindDeleteButton(btn) {
     });
 }
 document.addEventListener("DOMContentLoaded", function () {
-    bindOrder();
     bindMarkdowns();
     bindTimestamps();
     bindRelations();
     bindImagePickers();
-    bindDelete();
     bindClickAndStay();
+    bindLists();
 });
 function bindClickAndStay() {
     var els = document.getElementsByName("_submit_and_stay");

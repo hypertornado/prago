@@ -204,6 +204,7 @@ func (a *Admin) Init(app *prago.App) error {
 
 	bindDBBackupCron(app)
 	bindMarkdownAPI(a)
+	bindListAPI(a)
 	bindListResourceAPI(a)
 
 	var err error

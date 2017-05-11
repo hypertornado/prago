@@ -12,7 +12,8 @@
 
 {{$list := .admin_list}}
 
-<table class="admin_table admin_table-list {{if .admin_list.Order}} admin_table-order{{end}}">
+<table class="admin_table admin_table-list {{if .admin_list.Order}} admin_table-order{{end}}" data-type="{{.admin_list.TypeID}}">
+  <thead>
   <tr>
     <td colspan="{{.admin_list.Colspan}}">
       <div class="admin_table_listheader">
@@ -38,10 +39,15 @@
       {{end}}
     </th>
   {{end}}
-  <th>
-    
-  </th>
+  <th></th>
   </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+{{end}}
+
+{{define "admin_list_cells"}}
 {{range $item := .admin_list.Rows}}
   <tr data-id="{{$item.ID}}" class="admin_table_row">
     {{range $cell := $item.Items}}
@@ -62,19 +68,17 @@
     </td>
   </tr>
 {{end}}
-  {{if .admin_list.Pagination.Pages}}
-    <tr>
-      <td colspan="{{.admin_list.Colspan}}" class="pagination">
-        {{range $page := .admin_list.Pagination.Pages}}
-          {{if $page.Current}}
-            <span class="pagination_page pagination_page-current">{{$page.Name}}</span>
-          {{else}}
-            <a href="{{$page.URL}}" class="pagination_page">{{$page.Name}}</a>
-          {{end}}
+{{if .admin_list.Pagination.Pages}}
+  <tr>
+    <td colspan="{{.admin_list.Colspan}}" class="pagination">
+      {{range $page := .admin_list.Pagination.Pages}}
+        {{if $page.Current}}
+          <span class="pagination_page pagination_page-current">{{$page.Name}}</span>
+        {{else}}
+          <a href="{{$page.URL}}" class="pagination_page">{{$page.Name}}</a>
         {{end}}
-      </td>
-    </tr>
-  {{end}}
-</table>
-
+      {{end}}
+    </td>
+  </tr>
+{{end}}
 {{end}}

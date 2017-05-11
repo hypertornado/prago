@@ -10,6 +10,7 @@ import (
 
 type list struct {
 	Name        string
+	TypeID      string
 	Actions     []ButtonData
 	ItemActions []ButtonData
 	Colspan     int64
@@ -61,7 +62,7 @@ func (resource *Resource) getList(admin *Admin, path string, requestQuery url.Va
 	lang := user.Locale
 
 	list.Colspan = 1
-
+	list.TypeID = resource.ID
 	list.Actions = resource.ResourceActionsButtonData(user)
 
 	orderItem := resource.OrderByColumn

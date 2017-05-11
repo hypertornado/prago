@@ -10,6 +10,7 @@
         "js/google_maps.d.ts",
         "js/utils.ts",
         "js/imagepicker.ts",
+        "js/list.ts",
         "js/order.ts",
         "js/markdown.ts",
         "js/timestamps.ts",

@@ -22,13 +22,38 @@ type resourceItem struct {
 	Name string `json:"name"`
 }
 
+func bindListAPI(a *Admin) {
+	a.AdminController.Get(a.Prefix+"/_api/list/:name", func(request prago.Request) {
+		//locale := GetLocale(request)
+		user := GetUser(request)
+		name := request.Params().Get("name")
+		resource, found := a.resourceNameMap[name]
+		if !found {
+			render404(request)
+			return
+		}
+
+		if !resource.Authenticate(user) {
+			render403(request)
+			return
+		}
+
+		listData, err := resource.getList(a, "", request.Request().URL.Query(), user)
+		if err != nil {
+			panic(err)
+		}
+
+		request.SetData("admin_list", listData)
+		prago.Render(request, 200, "admin_list_cells")
+	})
+}
+
 func bindListResourceAPI(a *Admin) {
 	a.AdminController.Get(a.Prefix+"/_api/resource/:name", func(request prago.Request) {
 		locale := GetLocale(request)
 		user := GetUser(request)
 		name := request.Params().Get("name")
 		resource, found := a.resourceNameMap[name]
-
 		if !found {
 			render404(request)
 			return
