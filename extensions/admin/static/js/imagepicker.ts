@@ -35,7 +35,6 @@ class ImagePicker {
     }
 
     this.fileInput.addEventListener("change", () => {
-      console.log("change");
       var files = this.fileInput.files
       var formData = new FormData();
       if (files.length == 0) {
@@ -57,6 +56,7 @@ class ImagePicker {
             this.addImage(data[i].UID);
           }
         } else {
+          alert("Error while uploading image.");
           console.error("Error while loading item.");
         }
       })

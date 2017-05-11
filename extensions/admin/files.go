@@ -7,7 +7,9 @@ import (
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/hypertornado/prago/utils"
 	"github.com/renstrom/shortuuid"
+	"image"
 	"image/jpeg"
+	"image/png"
 	"io"
 	"mime/multipart"
 	"os"
@@ -334,7 +336,14 @@ func (f *File) update(fileUploadPath string) error {
 	f.Size = stat.Size()
 
 	if f.isImage() {
-		img, err := jpeg.Decode(file)
+		var decoder func(io.Reader) (image.Image, error)
+		if f.isPNGImage() {
+			decoder = png.Decode
+		} else {
+			decoder = jpeg.Decode
+		}
+
+		img, err := decoder(file)
 		if err != nil {
 			return err
 		}
@@ -389,7 +398,14 @@ func (f *File) GetOriginal() string {
 }
 
 func (f *File) isImage() bool {
-	if strings.HasSuffix(f.Name, ".jpg") || strings.HasSuffix(f.Name, ".jpeg") {
+	if strings.HasSuffix(f.Name, ".jpg") || strings.HasSuffix(f.Name, ".jpeg") || strings.HasSuffix(f.Name, ".png") {
+		return true
+	}
+	return false
+}
+
+func (f *File) isPNGImage() bool {
+	if strings.HasSuffix(f.Name, ".png") {
 		return true
 	}
 	return false

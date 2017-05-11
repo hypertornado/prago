@@ -31,7 +31,6 @@ var ImagePicker = (function () {
             }
         }
         this.fileInput.addEventListener("change", function () {
-            console.log("change");
             var files = _this.fileInput.files;
             var formData = new FormData();
             if (files.length == 0) {
@@ -51,6 +50,7 @@ var ImagePicker = (function () {
                     }
                 }
                 else {
+                    alert("Error while uploading image.");
                     console.error("Error while loading item.");
                 }
             });
