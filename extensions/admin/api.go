@@ -13,7 +13,7 @@ func bindMarkdownAPI(a *Admin) {
 		if err != nil {
 			panic(err)
 		}
-		prago.WriteAPI(request, markdown.New().RenderToString(data), 200)
+		prago.WriteAPI(request, markdown.New(markdown.HTML(true), markdown.Breaks(true)).RenderToString(data), 200)
 	})
 }
 

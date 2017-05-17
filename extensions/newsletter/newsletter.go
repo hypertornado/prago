@@ -76,6 +76,15 @@ const newsletterTemplate = `
   	border-bottom: none;
   }
 
+  table {
+  	margin-top: 5px;
+  }
+
+  td {
+  	padding: 0px 5px;
+  	vertical-align: top;
+  }
+
 </style>
 
 </head>

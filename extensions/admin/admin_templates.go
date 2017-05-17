@@ -510,12 +510,6 @@ const adminTemplates = `
         max-width: 200px;
         display: block;
       }
-
-      h1 {
-        line-height: 2em;
-        color: red;
-      }
-
     </style>
 
   </head>
@@ -1101,6 +1095,7 @@ input[type=date].input {
   color: #888;
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
+  overflow: auto;
 }
 .admin_thumb {
   text-align: center;
@@ -1355,10 +1350,13 @@ function bindLists() {
 var List = (function () {
     function List(el) {
         var _this = this;
+        var typeName = el.getAttribute("data-type");
+        if (!typeName) {
+            return;
+        }
         this.tbody = el.querySelector("tbody");
         this.tbody.textContent = "";
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        var typeName = el.getAttribute("data-type");
         var request = new XMLHttpRequest();
         request.open("GET", adminPrefix + "/_api/list/" + typeName + document.location.search, true);
         request.addEventListener("load", function () {
