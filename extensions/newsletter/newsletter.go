@@ -68,6 +68,12 @@ const newsletterTemplate = `
 
   h1 {
   	text-align: center;
+  	line-height: 1.2em;
+  }
+
+  hr {
+  	border-top: 1px solid #009ee0;
+  	border-bottom: none;
   }
 
 </style>

@@ -511,6 +511,11 @@ const adminTemplates = `
         display: block;
       }
 
+      h1 {
+        line-height: 2em;
+        color: red;
+      }
+
     </style>
 
   </head>
