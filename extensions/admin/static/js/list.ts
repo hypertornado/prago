@@ -9,12 +9,16 @@ class List {
   tbody: HTMLElement;
 
   constructor(el: HTMLTableElement) {
+    var typeName = el.getAttribute("data-type");
+    if (!typeName) {
+      return;
+    }
+
+
     this.tbody = <HTMLElement>el.querySelector("tbody");
     this.tbody.textContent = "";
 
     var adminPrefix = document.body.getAttribute("data-admin-prefix");
-
-    var typeName = el.getAttribute("data-type");
 
     var request = new XMLHttpRequest();
     request.open("GET", adminPrefix + "/_api/list/" + typeName + document.location.search, true);

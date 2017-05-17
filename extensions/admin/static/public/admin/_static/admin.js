@@ -152,10 +152,13 @@ function bindLists() {
 var List = (function () {
     function List(el) {
         var _this = this;
+        var typeName = el.getAttribute("data-type");
+        if (!typeName) {
+            return;
+        }
         this.tbody = el.querySelector("tbody");
         this.tbody.textContent = "";
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        var typeName = el.getAttribute("data-type");
         var request = new XMLHttpRequest();
         request.open("GET", adminPrefix + "/_api/list/" + typeName + document.location.search, true);
         request.addEventListener("load", function () {
