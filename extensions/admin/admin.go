@@ -300,23 +300,23 @@ func (a *Admin) bindAdminCommand(app *prago.App) error {
 	app.AddCommand(adminCommand, func(app *prago.App) error {
 		switch *adminSubcommand {
 		case "migrate":
-			println("Migrating database")
+			app.Log().Println("Migrating database")
 			err := a.Migrate(true)
 			if err == nil {
-				println("Migrate done")
+				app.Log().Println("Migrate done")
 			}
 			return err
 		case "drop":
 			if utils.ConsoleQuestion("Really want to drop table?") {
-				println("Dropping table")
+				app.Log().Println("Dropping table")
 				return a.UnsafeDropTables()
 			}
 			return nil
 		case "thumbnails":
-			println("Updating thumbnails")
+			app.Log().Println("Updating thumbnails")
 			return updateFiles(a)
 		default:
-			println("unknown admin subcommand " + *adminSubcommand)
+			app.Log().Println("unknown admin subcommand " + *adminSubcommand)
 		}
 		return nil
 	})

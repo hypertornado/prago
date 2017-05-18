@@ -33,7 +33,7 @@ func (m middlewareConfig) Init(app *App) error {
 	configCommand := app.CreateCommand("config", "Print app configuration")
 	app.AddCommand(configCommand, func(app *App) error {
 		for k, v := range kv {
-			fmt.Println(k, ":", v)
+			app.Log().Println(k, ":", v)
 		}
 		return nil
 	})

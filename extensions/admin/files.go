@@ -415,7 +415,6 @@ func updateFiles(a *Admin) error {
 	var files []*File
 	a.Query().Get(&files)
 	for _, file := range files {
-		fmt.Println(file.UID, file.Name)
 		if file.isImage() {
 			err := file.update(fileUploadPath)
 			if err != nil {

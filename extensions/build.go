@@ -25,7 +25,7 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 
 	versionCommand := app.CreateCommand("version", "Print version")
 	app.AddCommand(versionCommand, func(app *prago.App) error {
-		fmt.Println(appName, version)
+		app.Log().Println(appName, version)
 		return nil
 	})
 
