@@ -504,23 +504,37 @@ const adminTemplates = `
       .box {
         margin: 0 auto;
         padding: 5px;
-        border: 0px solid red;
-        max-width: 500px;
+        max-width: 5000px;
+      }
+
+      .box table {
+        table-layout: fixed;
       }
 
       input {
         max-width: 200px;
         display: block;
       }
+
+      td {
+        width: 50%;
+      }
+
     </style>
 
   </head>
   <body>
-    <div class="box">
-      <a href="/">{{.site}}</a>
-      <h1>{{.title}}</h1>
-    {{tmpl .yield .}}
-    </div>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td align="center">
+          <div class="box">
+            <a href="/">{{.site}}</a>
+            <h1>{{.title}}</h1>
+            {{tmpl .yield .}}
+          </div>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
 

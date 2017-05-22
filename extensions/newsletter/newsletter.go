@@ -39,7 +39,7 @@ const newsletterTemplate = `
   	line-height: 1.5em;
   	font-weight: 400;
   	color: #01354a;
-  	font-family: Arial, sans-serif;
+  	font-family: Arial, sans-serif !important;
   }
 
   .middle {
@@ -89,10 +89,10 @@ const newsletterTemplate = `
 
 </head>
 <body>
-<table border="0" cellspacing="0" width="100%">
-    <tr>
-        <td></td>
-        <td width="450" class="middle">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0"><tr><td width="100%" align="center">
+	<table width="450" border="0" align="center" cellpadding="0" cellspacing="0">
+		<tr><td width="450" align="left" class="middle">
         	<div class="middle_header">
         		<a href="{{.baseUrl}}/?utm_source=newsletter&utm_medium=prago&utm_campaign={{.id}}">{{.site}}</a>
         		<h1>{{.title}}</h1>
@@ -100,10 +100,10 @@ const newsletterTemplate = `
         	{{.content}}
 
         	<a href="{{.unsubscribe}}" class="unsubscribe">Odhlásit odběr novinek</a>
-        </td>
-        <td></td>
-     </tr>
-</table> 
+    </td></tr>
+	</table>
+</td></tr></table>
+
 </body>
 </html>
 `
@@ -355,12 +355,10 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 	resource.AddSnippet("newsletter_snippet")
 
 	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
-		//var persons []*NewsletterPersons
 		ret, err := a.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&NewsletterPersons{})
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(ret)
 		request.SetData("recipients_count", ret)
 	})
 
