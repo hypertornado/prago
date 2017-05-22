@@ -6,8 +6,10 @@
 {{$csrfToken := ._csrfToken}}
 {{$table := .admin_list}}
 
+{{$global := .}}
+
 {{range $snippet := .admin_resource.Snippets}}
-  {{tmpl $snippet.Template nil}}
+  {{tmpl $snippet.Template $global}}
 {{end}}
 
 {{$list := .admin_list}}

@@ -309,8 +309,10 @@ const adminTemplates = `
 {{$csrfToken := ._csrfToken}}
 {{$table := .admin_list}}
 
+{{$global := .}}
+
 {{range $snippet := .admin_resource.Snippets}}
-  {{tmpl $snippet.Template nil}}
+  {{tmpl $snippet.Template $global}}
 {{end}}
 
 {{$list := .admin_list}}
@@ -562,6 +564,12 @@ const adminTemplates = `
     <div>{{$item}}</div>
   {{end}}
   
+</div>
+
+{{end}}{{define "newsletter_snippet"}}
+
+<div class="admin_box">
+Počet odběratelů newsletteru: {{.recipients_count}}
 </div>
 
 {{end}}{{define "newsletter_subscribe"}}

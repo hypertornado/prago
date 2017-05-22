@@ -352,6 +352,18 @@ type Newsletter struct {
 }
 
 func (Newsletter) InitResource(a *administration.Admin, resource *administration.Resource) error {
+	resource.AddSnippet("newsletter_snippet")
+
+	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
+		//var persons []*NewsletterPersons
+		ret, err := a.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&NewsletterPersons{})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(ret)
+		request.SetData("recipients_count", ret)
+	})
+
 	previewAction := administration.ResourceAction{
 		Name: func(string) string { return "Náhled" },
 		Url:  "preview",
