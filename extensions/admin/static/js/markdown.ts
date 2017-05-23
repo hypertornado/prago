@@ -23,14 +23,14 @@ function bindMarkdowns() {
       var request = new XMLHttpRequest();
       request.open("POST", document.body.getAttribute("data-admin-prefix") + "/_api/markdown", true);
 
-      request.onload = function() {
-        if (this.status == 200) {
+      request.addEventListener("load", () => {
+        if (request.status == 200) {
           var previewEl = el.getElementsByClassName("admin_markdown_preview")[0];
-          previewEl.innerHTML = JSON.parse(this.response);
+          previewEl.innerHTML = JSON.parse(request.response);
         } else {
           console.error("Error while loading markdown preview.");
         }
-      }
+      });
       request.send(textarea.value);
     }
   }

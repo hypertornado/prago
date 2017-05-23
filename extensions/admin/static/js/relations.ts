@@ -20,9 +20,9 @@ function bindRelations() {
 
     var progress = el.getElementsByTagName("progress")[0];
 
-    request.onload = function() {
-      if (this.status >= 200 && this.status < 400) {
-        var resp = JSON.parse(this.response);
+    request.addEventListener("load", () => {
+      if (request.status >= 200 && request.status < 400) {
+        var resp = JSON.parse(request.response);
         addOption(select, "0", "", false);
 
         Array.prototype.forEach.call(resp, function (item: any, i: number){
@@ -37,7 +37,7 @@ function bindRelations() {
         console.error("Error wile loading relation " + relationName + ".");
       }
       progress.style.display = 'none';
-    };
+    });
 
     request.onerror = function() {
       console.error("Error wile loading relation " + relationName + ".");

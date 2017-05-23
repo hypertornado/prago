@@ -219,11 +219,11 @@ function bindOrder() {
             });
             var request = new XMLHttpRequest();
             request.open("POST", ajaxPath, true);
-            request.onload = function () {
-                if (this.status != 200) {
+            request.addEventListener("load", function () {
+                if (request.status != 200) {
                     console.error("Error while saving order.");
                 }
-            };
+            });
             request.send(JSON.stringify({ "order": order }));
         }
     }
@@ -253,15 +253,15 @@ function bindMarkdowns() {
             changed = false;
             var request = new XMLHttpRequest();
             request.open("POST", document.body.getAttribute("data-admin-prefix") + "/_api/markdown", true);
-            request.onload = function () {
-                if (this.status == 200) {
+            request.addEventListener("load", function () {
+                if (request.status == 200) {
                     var previewEl = el.getElementsByClassName("admin_markdown_preview")[0];
-                    previewEl.innerHTML = JSON.parse(this.response);
+                    previewEl.innerHTML = JSON.parse(request.response);
                 }
                 else {
                     console.error("Error while loading markdown preview.");
                 }
-            };
+            });
             request.send(textarea.value);
         }
     }
@@ -354,9 +354,9 @@ function bindRelations() {
         var request = new XMLHttpRequest();
         request.open("GET", adminPrefix + "/_api/resource/" + relationName, true);
         var progress = el.getElementsByTagName("progress")[0];
-        request.onload = function () {
-            if (this.status >= 200 && this.status < 400) {
-                var resp = JSON.parse(this.response);
+        request.addEventListener("load", function () {
+            if (request.status >= 200 && request.status < 400) {
+                var resp = JSON.parse(request.response);
                 addOption(select, "0", "", false);
                 Array.prototype.forEach.call(resp, function (item, i) {
                     var selected = false;
@@ -371,7 +371,7 @@ function bindRelations() {
                 console.error("Error wile loading relation " + relationName + ".");
             }
             progress.style.display = 'none';
-        };
+        });
         request.onerror = function () {
             console.error("Error wile loading relation " + relationName + ".");
             progress.style.display = 'none';
@@ -455,6 +455,7 @@ function bindDelete() {
     }
 }
 function bindDeleteButton(btn) {
+    var _this = this;
     var csrfToken = document.body.getAttribute("data-csrf-token");
     btn.addEventListener("click", function () {
         var message = btn.getAttribute("data-confirm-message");
@@ -462,14 +463,14 @@ function bindDeleteButton(btn) {
         if (confirm(message)) {
             var request = new XMLHttpRequest();
             request.open("POST", url, true);
-            request.onload = function () {
-                if (this.status == 200) {
+            request.addEventListener("load", function () {
+                if (_this.status == 200) {
                     document.location.reload();
                 }
                 else {
                     console.error("Error while deleting item");
                 }
-            };
+            });
             request.send();
         }
     });

@@ -15,13 +15,13 @@ function bindDeleteButton(btn: HTMLDivElement) {
       var request = new XMLHttpRequest();
       request.open("POST", url, true);
 
-      request.onload = function() {
+      request.addEventListener("load", () => {
         if (this.status == 200) {
           document.location.reload();
         } else {
           console.error("Error while deleting item");
         }
-      }
+      })
       request.send();
     }
   });

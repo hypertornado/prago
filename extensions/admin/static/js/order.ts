@@ -50,11 +50,11 @@ function bindOrder() {
       var request = new XMLHttpRequest();
       request.open("POST", ajaxPath, true);
 
-      request.onload = function() {
-        if (this.status != 200) {
+      request.addEventListener("load", () => {
+        if (request.status != 200) {
           console.error("Error while saving order.")
         }
-      }
+      });
       request.send(JSON.stringify({"order": order}))
     }
   }
