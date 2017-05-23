@@ -786,8 +786,8 @@ body {
   background-size: cover;
   background-attachment: fixed;
 }
-.admin_nologin {
-  padding-top: 20px;
+.admin_nologin > .admin_box {
+  margin-top: 20px;
 }
 .shadow {
   box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
@@ -973,7 +973,8 @@ input[type=date].input {
   color: #888;
   box-shadow: none;
 }
-.input:focus {
+.input:focus,
+.btn:focus {
   border-color: #009ee0;
   background-color: white;
   outline: none;
@@ -1407,6 +1408,9 @@ function bindOrder() {
                             thisIndex = i;
                         }
                     });
+                    if (draggedIndex < thisIndex) {
+                        thisIndex += 1;
+                    }
                     DOMinsertChildAtIndex(targetEl.parentElement, draggedElement, thisIndex);
                     saveOrder();
                 }
