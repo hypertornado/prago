@@ -33,7 +33,7 @@
   {{range $item := .admin_list.Header}}
     <th>
       {{if $item.CanOrder}}
-        <a href="#">
+        <a href="#" class="admin_table_orderheader" data-name="{{$item.ColumnName}}">
       {{- end -}}
         {{- $item.NameHuman -}}
       {{if $item.CanOrder -}}

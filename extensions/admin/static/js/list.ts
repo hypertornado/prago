@@ -6,6 +6,9 @@ function bindLists() {
 }
 
 class List {
+  adminPrefix: string;
+  typeName: string;
+
   tbody: HTMLElement;
   el: HTMLTableElement;
   filterInputs: NodeListOf<Element>;
@@ -16,10 +19,9 @@ class List {
 
   constructor(el: HTMLTableElement) {
     this.el = el;
-    this.parseSearch(document.location.search);
 
-    var typeName = el.getAttribute("data-type");
-    if (!typeName) {
+    this.typeName = el.getAttribute("data-type");
+    if (!this.typeName) {
       return;
     }
 
@@ -29,7 +31,7 @@ class List {
 
     this.bindFilter();
 
-    var adminPrefix = document.body.getAttribute("data-admin-prefix");
+    this.adminPrefix = document.body.getAttribute("data-admin-prefix");
 
     this.orderColumn = el.getAttribute("data-order-column");
     if (el.getAttribute("data-order-desc") == "true") {
@@ -38,10 +40,14 @@ class List {
       this.orderDesc = false;
     }
 
-    console.log(this.orderColumn, this.orderDesc);
+    this.bindOrder();
 
+    this.load();
+  }
+
+  load() {
     var request = new XMLHttpRequest();
-    request.open("POST", adminPrefix + "/_api/list/" + typeName + document.location.search, true);
+    request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + document.location.search, true);
     request.addEventListener("load", () => {
       if (request.status == 200) {
         this.tbody.innerHTML = request.response;
@@ -51,11 +57,50 @@ class List {
         alert("error");
       }
     });
-
     var requestData = this.getListRequest();
-    console.log(requestData);
-
     request.send(JSON.stringify(requestData));
+  }
+
+  bindOrder() {
+    this.renderOrder();
+    var headers = this.el.querySelectorAll(".admin_table_orderheader");
+    for (var i = 0; i < headers.length; i++) {
+      var header = <HTMLAnchorElement>headers[i];
+      header.addEventListener("click", (e) => {
+        var el = <HTMLAnchorElement>e.target;
+        var name = el.getAttribute("data-name");
+        if (name == this.orderColumn) {
+          if (this.orderDesc) {
+            this.orderDesc = false;
+          } else {
+            this.orderDesc = true;
+          }
+        } else {
+          this.orderColumn = name;
+          this.orderDesc = false;
+        }
+        this.renderOrder();
+        this.load();
+        e.preventDefault();
+        return false;
+      });
+    }
+  }
+
+  renderOrder() {
+    var headers = this.el.querySelectorAll(".admin_table_orderheader");
+    for (var i = 0; i < headers.length; i++) {
+      var header = <HTMLAnchorElement>headers[i];
+      header.classList.remove("ordered");
+      header.classList.remove("ordered-desc");
+      var name = header.getAttribute("data-name");
+      if (name == this.orderColumn) {
+        header.classList.add("ordered");
+        if (this.orderDesc) {
+          header.classList.add("ordered-desc");
+        }
+      }
+    }
   }
 
   getListRequest(): any {
@@ -65,11 +110,6 @@ class List {
     ret.OrderDesc = this.orderDesc;
     ret.Filter = {};
     return ret;
-  }
-
-  parseSearch(url: string) {
-    //url = url.substr(1);
-    //console.log(getParams(url))
   }
 
   bindFilter() {

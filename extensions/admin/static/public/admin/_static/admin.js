@@ -151,17 +151,15 @@ function bindLists() {
 }
 var List = (function () {
     function List(el) {
-        var _this = this;
         this.el = el;
-        this.parseSearch(document.location.search);
-        var typeName = el.getAttribute("data-type");
-        if (!typeName) {
+        this.typeName = el.getAttribute("data-type");
+        if (!this.typeName) {
             return;
         }
         this.tbody = el.querySelector("tbody");
         this.tbody.textContent = "";
         this.bindFilter();
-        var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.orderColumn = el.getAttribute("data-order-column");
         if (el.getAttribute("data-order-desc") == "true") {
             this.orderDesc = true;
@@ -169,9 +167,13 @@ var List = (function () {
         else {
             this.orderDesc = false;
         }
-        console.log(this.orderColumn, this.orderDesc);
+        this.bindOrder();
+        this.load();
+    }
+    List.prototype.load = function () {
+        var _this = this;
         var request = new XMLHttpRequest();
-        request.open("POST", adminPrefix + "/_api/list/" + typeName + document.location.search, true);
+        request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + document.location.search, true);
         request.addEventListener("load", function () {
             if (request.status == 200) {
                 _this.tbody.innerHTML = request.response;
@@ -183,9 +185,51 @@ var List = (function () {
             }
         });
         var requestData = this.getListRequest();
-        console.log(requestData);
         request.send(JSON.stringify(requestData));
-    }
+    };
+    List.prototype.bindOrder = function () {
+        var _this = this;
+        this.renderOrder();
+        var headers = this.el.querySelectorAll(".admin_table_orderheader");
+        for (var i = 0; i < headers.length; i++) {
+            var header = headers[i];
+            header.addEventListener("click", function (e) {
+                var el = e.target;
+                var name = el.getAttribute("data-name");
+                if (name == _this.orderColumn) {
+                    if (_this.orderDesc) {
+                        _this.orderDesc = false;
+                    }
+                    else {
+                        _this.orderDesc = true;
+                    }
+                }
+                else {
+                    _this.orderColumn = name;
+                    _this.orderDesc = false;
+                }
+                _this.renderOrder();
+                _this.load();
+                e.preventDefault();
+                return false;
+            });
+        }
+    };
+    List.prototype.renderOrder = function () {
+        var headers = this.el.querySelectorAll(".admin_table_orderheader");
+        for (var i = 0; i < headers.length; i++) {
+            var header = headers[i];
+            header.classList.remove("ordered");
+            header.classList.remove("ordered-desc");
+            var name = header.getAttribute("data-name");
+            if (name == this.orderColumn) {
+                header.classList.add("ordered");
+                if (this.orderDesc) {
+                    header.classList.add("ordered-desc");
+                }
+            }
+        }
+    };
     List.prototype.getListRequest = function () {
         var ret = {};
         ret.Page = 1;
@@ -193,8 +237,6 @@ var List = (function () {
         ret.OrderDesc = this.orderDesc;
         ret.Filter = {};
         return ret;
-    };
-    List.prototype.parseSearch = function (url) {
     };
     List.prototype.bindFilter = function () {
         this.filterInputs = this.el.querySelectorAll(".admin_table_filter_item");

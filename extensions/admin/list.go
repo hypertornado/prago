@@ -93,6 +93,7 @@ func (resource *Resource) getListHeader(admin *Admin, path string, user *User) (
 
 	for _, v := range resource.StructCache.fieldArrays {
 		if v.canShow() {
+			list.Colspan += 1
 			headerItem := listHeader{
 				Name:       v.Name,
 				NameHuman:  v.humanName(lang),

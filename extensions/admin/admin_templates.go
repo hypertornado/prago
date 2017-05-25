@@ -336,7 +336,7 @@ const adminTemplates = `
   {{range $item := .admin_list.Header}}
     <th>
       {{if $item.CanOrder}}
-        <a href="#">
+        <a href="#" class="admin_table_orderheader" data-name="{{$item.ColumnName}}">
       {{- end -}}
         {{- $item.NameHuman -}}
       {{if $item.CanOrder -}}
@@ -1368,17 +1368,15 @@ function bindLists() {
 }
 var List = (function () {
     function List(el) {
-        var _this = this;
         this.el = el;
-        this.parseSearch(document.location.search);
-        var typeName = el.getAttribute("data-type");
-        if (!typeName) {
+        this.typeName = el.getAttribute("data-type");
+        if (!this.typeName) {
             return;
         }
         this.tbody = el.querySelector("tbody");
         this.tbody.textContent = "";
         this.bindFilter();
-        var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.orderColumn = el.getAttribute("data-order-column");
         if (el.getAttribute("data-order-desc") == "true") {
             this.orderDesc = true;
@@ -1386,9 +1384,12 @@ var List = (function () {
         else {
             this.orderDesc = false;
         }
-        console.log(this.orderColumn, this.orderDesc);
+        this.load();
+    }
+    List.prototype.load = function () {
+        var _this = this;
         var request = new XMLHttpRequest();
-        request.open("POST", adminPrefix + "/_api/list/" + typeName + document.location.search, true);
+        request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + document.location.search, true);
         request.addEventListener("load", function () {
             if (request.status == 200) {
                 _this.tbody.innerHTML = request.response;
@@ -1400,9 +1401,8 @@ var List = (function () {
             }
         });
         var requestData = this.getListRequest();
-        console.log(requestData);
         request.send(JSON.stringify(requestData));
-    }
+    };
     List.prototype.getListRequest = function () {
         var ret = {};
         ret.Page = 1;
@@ -1410,8 +1410,6 @@ var List = (function () {
         ret.OrderDesc = this.orderDesc;
         ret.Filter = {};
         return ret;
-    };
-    List.prototype.parseSearch = function (url) {
     };
     List.prototype.bindFilter = function () {
         this.filterInputs = this.el.querySelectorAll(".admin_table_filter_item");

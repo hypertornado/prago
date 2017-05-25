@@ -2,7 +2,6 @@ package admin
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/golang-commonmark/markdown"
 	"github.com/hypertornado/prago"
 	"io/ioutil"
@@ -49,8 +48,6 @@ func bindListAPI(a *Admin) {
 		if err != nil {
 			panic(err)
 		}
-
-		fmt.Println(req)
 
 		listData, err := resource.getListContent(a, "", &req, user)
 		if err != nil {
