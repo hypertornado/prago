@@ -14,11 +14,15 @@ class List {
   filterInputs: NodeListOf<Element>;
   changed: boolean;
   changedTimestamp: number;
+  
   orderColumn: string;
   orderDesc: boolean;
+  page: number;
 
   constructor(el: HTMLTableElement) {
     this.el = el;
+
+    this.page = 1;
 
     this.typeName = el.getAttribute("data-type");
     if (!this.typeName) {
@@ -53,12 +57,28 @@ class List {
         this.tbody.innerHTML = request.response;
         bindOrder();
         bindDelete();
+        this.bindPage();
       } else {
         alert("error");
       }
     });
     var requestData = this.getListRequest();
     request.send(JSON.stringify(requestData));
+  }
+
+  bindPage() {
+    var pages = this.el.querySelectorAll(".pagination_page");
+    for (var i = 0; i < pages.length; i++) {
+      var pageEl = <HTMLAnchorElement>pages[i];
+      pageEl.addEventListener("click", (e) => {
+        var el = <HTMLAnchorElement>e.target;
+        var page = parseInt(el.getAttribute("data-page"));
+        this.page = page;
+        this.load();
+        e.preventDefault();
+        return false;
+      })
+    }
   }
 
   bindOrder() {
@@ -105,7 +125,7 @@ class List {
 
   getListRequest(): any {
     var ret: any = {};
-    ret.Page = 1;
+    ret.Page = this.page;
     ret.OrderBy = this.orderColumn;
     ret.OrderDesc = this.orderDesc;
     ret.Filter = {};

@@ -388,9 +388,9 @@ const adminTemplates = `
     <td colspan="{{.admin_list.Colspan}}" class="pagination">
       {{range $page := .admin_list.Pagination.Pages}}
         {{if $page.Current}}
-          <span class="pagination_page pagination_page-current">{{$page.Name}}</span>
+          <span class="pagination_page_current">{{$page.Page}}</span>
         {{else}}
-          <a href="{{$page.URL}}" class="pagination_page">{{$page.Name}}</a>
+          <a href="#" class="pagination_page" data-page="{{$page.Page}}">{{$page.Page}}</a>
         {{end}}
       {{end}}
     </td>
@@ -1049,7 +1049,7 @@ input[type=date].input {
 .pagination {
   text-align: center;
 }
-.pagination_page-current {
+.pagination_page_current {
   font-weight: bold;
 }
 /* images */
@@ -1384,6 +1384,7 @@ var List = (function () {
         else {
             this.orderDesc = false;
         }
+        this.bindOrder();
         this.load();
     }
     List.prototype.load = function () {
@@ -1402,6 +1403,49 @@ var List = (function () {
         });
         var requestData = this.getListRequest();
         request.send(JSON.stringify(requestData));
+    };
+    List.prototype.bindOrder = function () {
+        var _this = this;
+        this.renderOrder();
+        var headers = this.el.querySelectorAll(".admin_table_orderheader");
+        for (var i = 0; i < headers.length; i++) {
+            var header = headers[i];
+            header.addEventListener("click", function (e) {
+                var el = e.target;
+                var name = el.getAttribute("data-name");
+                if (name == _this.orderColumn) {
+                    if (_this.orderDesc) {
+                        _this.orderDesc = false;
+                    }
+                    else {
+                        _this.orderDesc = true;
+                    }
+                }
+                else {
+                    _this.orderColumn = name;
+                    _this.orderDesc = false;
+                }
+                _this.renderOrder();
+                _this.load();
+                e.preventDefault();
+                return false;
+            });
+        }
+    };
+    List.prototype.renderOrder = function () {
+        var headers = this.el.querySelectorAll(".admin_table_orderheader");
+        for (var i = 0; i < headers.length; i++) {
+            var header = headers[i];
+            header.classList.remove("ordered");
+            header.classList.remove("ordered-desc");
+            var name = header.getAttribute("data-name");
+            if (name == this.orderColumn) {
+                header.classList.add("ordered");
+                if (this.orderDesc) {
+                    header.classList.add("ordered-desc");
+                }
+            }
+        }
     };
     List.prototype.getListRequest = function () {
         var ret = {};

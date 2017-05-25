@@ -2,7 +2,6 @@ package admin
 
 import (
 	"fmt"
-	"net/url"
 	"reflect"
 	"time"
 )
@@ -46,14 +45,11 @@ type listCell struct {
 }
 
 type pagination struct {
-	Prev  page
-	Next  page
 	Pages []page
 }
 
 type page struct {
-	Name    string
-	URL     string
+	Page    int64
 	Current bool
 }
 
@@ -140,17 +136,11 @@ func (resource *Resource) getListContent(admin *Admin, path string, requestQuery
 
 	if totalPages > 1 {
 		for i := int64(1); i <= totalPages; i++ {
-			p := page{}
-			p.Name = fmt.Sprintf("%d", i)
+			p := page{
+				Page: i,
+			}
 			if i == currentPage {
 				p.Current = true
-			}
-
-			p.URL = path
-			if i > 1 {
-				newURLValues := make(url.Values)
-				newURLValues.Set("p", fmt.Sprintf("%d", i))
-				p.URL += "?" + newURLValues.Encode()
 			}
 
 			list.Pagination.Pages = append(list.Pagination.Pages, p)

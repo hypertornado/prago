@@ -85,9 +85,9 @@
     <td colspan="{{.admin_list.Colspan}}" class="pagination">
       {{range $page := .admin_list.Pagination.Pages}}
         {{if $page.Current}}
-          <span class="pagination_page pagination_page-current">{{$page.Name}}</span>
+          <span class="pagination_page_current">{{$page.Page}}</span>
         {{else}}
-          <a href="{{$page.URL}}" class="pagination_page">{{$page.Name}}</a>
+          <a href="#" class="pagination_page" data-page="{{$page.Page}}">{{$page.Page}}</a>
         {{end}}
       {{end}}
     </td>

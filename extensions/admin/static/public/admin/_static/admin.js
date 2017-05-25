@@ -152,6 +152,7 @@ function bindLists() {
 var List = (function () {
     function List(el) {
         this.el = el;
+        this.page = 1;
         this.typeName = el.getAttribute("data-type");
         if (!this.typeName) {
             return;
@@ -179,6 +180,7 @@ var List = (function () {
                 _this.tbody.innerHTML = request.response;
                 bindOrder();
                 bindDelete();
+                _this.bindPage();
             }
             else {
                 alert("error");
@@ -186,6 +188,21 @@ var List = (function () {
         });
         var requestData = this.getListRequest();
         request.send(JSON.stringify(requestData));
+    };
+    List.prototype.bindPage = function () {
+        var _this = this;
+        var pages = this.el.querySelectorAll(".pagination_page");
+        for (var i = 0; i < pages.length; i++) {
+            var pageEl = pages[i];
+            pageEl.addEventListener("click", function (e) {
+                var el = e.target;
+                var page = parseInt(el.getAttribute("data-page"));
+                _this.page = page;
+                _this.load();
+                e.preventDefault();
+                return false;
+            });
+        }
     };
     List.prototype.bindOrder = function () {
         var _this = this;
@@ -232,7 +249,7 @@ var List = (function () {
     };
     List.prototype.getListRequest = function () {
         var ret = {};
-        ret.Page = 1;
+        ret.Page = this.page;
         ret.OrderBy = this.orderColumn;
         ret.OrderDesc = this.orderDesc;
         ret.Filter = {};
