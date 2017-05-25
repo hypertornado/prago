@@ -53,13 +53,14 @@ class List {
     var request = new XMLHttpRequest();
     request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + document.location.search, true);
     request.addEventListener("load", () => {
+      this.tbody.innerHTML = "";
       if (request.status == 200) {
         this.tbody.innerHTML = request.response;
         bindOrder();
         bindDelete();
         this.bindPage();
       } else {
-        alert("error");
+        console.error("error while loading list");
       }
     });
     var requestData = this.getListRequest();
@@ -128,7 +129,21 @@ class List {
     ret.Page = this.page;
     ret.OrderBy = this.orderColumn;
     ret.OrderDesc = this.orderDesc;
-    ret.Filter = {};
+    ret.Filter = this.getFilterData();
+    return ret;
+  }
+
+  getFilterData(): any {
+    var ret: any = {};
+    var items = this.el.querySelectorAll(".admin_table_filter_item");
+    for (var i = 0; i < items.length; i++) {
+      var item = <HTMLInputElement>items[i];
+      var typ = item.getAttribute("data-typ");
+      var val = item.value;
+      if (val) {
+        ret[typ] = val;
+      }
+    }
     return ret;
   }
 
@@ -143,6 +158,7 @@ class List {
   }
 
   inputListener() {
+    this.page = 1;
     this.changed = true;
     this.changedTimestamp = Date.now();
   }
@@ -151,7 +167,7 @@ class List {
     setInterval(() =>{
       if (this.changed == true && Date.now() - this.changedTimestamp > 500) {
         this.changed = false;
-        console.log("X");
+        this.load();
       }
     }, 200);
   }

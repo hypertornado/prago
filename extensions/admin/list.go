@@ -3,6 +3,7 @@ package admin
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -111,6 +112,15 @@ func (resource *Resource) getListHeader(admin *Admin, path string, user *User) (
 	return
 }
 
+func addFilterToQuery(q *Query, filter map[string]string) {
+	for k, v := range filter {
+		v = "%" + v + "%"
+		k = strings.Replace(k, "`", "", -1)
+		str := fmt.Sprintf("`%s` LIKE ?", k)
+		q = q.Where(str, v)
+	}
+}
+
 func (resource *Resource) getListContent(admin *Admin, path string, requestQuery *listRequest, user *User) (list listContent, err error) {
 	q := admin.Query()
 	if requestQuery.OrderDesc {
@@ -122,7 +132,9 @@ func (resource *Resource) getListContent(admin *Admin, path string, requestQuery
 	var count int64
 	var item interface{}
 	resource.newItem(&item)
-	count, err = admin.Query().Count(item)
+	countQuery := admin.Query()
+	addFilterToQuery(countQuery, requestQuery.Filter)
+	count, err = countQuery.Count(item)
 	if err != nil {
 		return
 	}
@@ -147,6 +159,7 @@ func (resource *Resource) getListContent(admin *Admin, path string, requestQuery
 		}
 	}
 
+	addFilterToQuery(q, requestQuery.Filter)
 	q.Offset((currentPage - 1) * resource.Pagination)
 	q.Limit(resource.Pagination)
 

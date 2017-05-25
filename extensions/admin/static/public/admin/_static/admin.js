@@ -176,6 +176,7 @@ var List = (function () {
         var request = new XMLHttpRequest();
         request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + document.location.search, true);
         request.addEventListener("load", function () {
+            _this.tbody.innerHTML = "";
             if (request.status == 200) {
                 _this.tbody.innerHTML = request.response;
                 bindOrder();
@@ -183,7 +184,7 @@ var List = (function () {
                 _this.bindPage();
             }
             else {
-                alert("error");
+                console.error("error while loading list");
             }
         });
         var requestData = this.getListRequest();
@@ -252,7 +253,20 @@ var List = (function () {
         ret.Page = this.page;
         ret.OrderBy = this.orderColumn;
         ret.OrderDesc = this.orderDesc;
-        ret.Filter = {};
+        ret.Filter = this.getFilterData();
+        return ret;
+    };
+    List.prototype.getFilterData = function () {
+        var ret = {};
+        var items = this.el.querySelectorAll(".admin_table_filter_item");
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            var typ = item.getAttribute("data-typ");
+            var val = item.value;
+            if (val) {
+                ret[typ] = val;
+            }
+        }
         return ret;
     };
     List.prototype.bindFilter = function () {
@@ -265,6 +279,7 @@ var List = (function () {
         this.inputPeriodicListener();
     };
     List.prototype.inputListener = function () {
+        this.page = 1;
         this.changed = true;
         this.changedTimestamp = Date.now();
     };
@@ -273,7 +288,7 @@ var List = (function () {
         setInterval(function () {
             if (_this.changed == true && Date.now() - _this.changedTimestamp > 500) {
                 _this.changed = false;
-                console.log("X");
+                _this.load();
             }
         }, 200);
     };
