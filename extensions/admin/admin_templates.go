@@ -317,7 +317,7 @@ const adminTemplates = `
 
 {{$list := .admin_list}}
 
-<table class="admin_table admin_table-list {{if .admin_list.Order}} admin_table-order{{end}}" data-type="{{.admin_list.TypeID}}">
+<table class="admin_table admin_table-list {{if .admin_list.CanChangeOrder}} admin_table-order{{end}}" data-type="{{.admin_list.TypeID}}" data-order-column="{{.admin_list.OrderColumn}}" data-order-desc="{{.admin_list.OrderDesc}}">
   <thead>
   <tr>
     <td colspan="{{.admin_list.Colspan}}">
@@ -336,7 +336,7 @@ const adminTemplates = `
   {{range $item := .admin_list.Header}}
     <th>
       {{if $item.CanOrder}}
-        <a href="{{$item.OrderPath}}" class="{{if $item.Ordered}}ordered{{end}}{{if $item.OrderedDesc}} ordered-desc{{end}}">
+        <a href="#">
       {{- end -}}
         {{- $item.NameHuman -}}
       {{if $item.CanOrder -}}
@@ -345,6 +345,16 @@ const adminTemplates = `
     </th>
   {{end}}
   <th></th>
+  </tr>
+  <tr>
+    {{range $item := .admin_list.Header}}
+      <th>
+        {{if $item.CanFilter}}
+          <input class="input admin_table_filter_item" data-typ="{{$item.ColumnName}}">
+        {{end}}
+      </th>
+    {{end}}
+    <th></th>
   </tr>
   </thead>
   <tbody></tbody>
@@ -1359,15 +1369,26 @@ function bindLists() {
 var List = (function () {
     function List(el) {
         var _this = this;
+        this.el = el;
+        this.parseSearch(document.location.search);
         var typeName = el.getAttribute("data-type");
         if (!typeName) {
             return;
         }
         this.tbody = el.querySelector("tbody");
         this.tbody.textContent = "";
+        this.bindFilter();
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        this.orderColumn = el.getAttribute("data-order-column");
+        if (el.getAttribute("data-order-desc") == "true") {
+            this.orderDesc = true;
+        }
+        else {
+            this.orderDesc = false;
+        }
+        console.log(this.orderColumn, this.orderDesc);
         var request = new XMLHttpRequest();
-        request.open("GET", adminPrefix + "/_api/list/" + typeName + document.location.search, true);
+        request.open("POST", adminPrefix + "/_api/list/" + typeName + document.location.search, true);
         request.addEventListener("load", function () {
             if (request.status == 200) {
                 _this.tbody.innerHTML = request.response;
@@ -1378,10 +1399,56 @@ var List = (function () {
                 alert("error");
             }
         });
-        request.send();
+        var requestData = this.getListRequest();
+        console.log(requestData);
+        request.send(JSON.stringify(requestData));
     }
+    List.prototype.getListRequest = function () {
+        var ret = {};
+        ret.Page = 1;
+        ret.OrderBy = this.orderColumn;
+        ret.OrderDesc = this.orderDesc;
+        ret.Filter = {};
+        return ret;
+    };
+    List.prototype.parseSearch = function (url) {
+    };
+    List.prototype.bindFilter = function () {
+        this.filterInputs = this.el.querySelectorAll(".admin_table_filter_item");
+        for (var i = 0; i < this.filterInputs.length; i++) {
+            var input = this.filterInputs[i];
+            input.addEventListener("change", this.inputListener.bind(this));
+            input.addEventListener("keyup", this.inputListener.bind(this));
+        }
+        this.inputPeriodicListener();
+    };
+    List.prototype.inputListener = function () {
+        this.changed = true;
+        this.changedTimestamp = Date.now();
+    };
+    List.prototype.inputPeriodicListener = function () {
+        var _this = this;
+        setInterval(function () {
+            if (_this.changed == true && Date.now() - _this.changedTimestamp > 500) {
+                _this.changed = false;
+                console.log("X");
+            }
+        }, 200);
+    };
     return List;
 }());
+var getParams = function (query) {
+    if (!query) {
+        return {};
+    }
+    return (/^[?#]/.test(query) ? query.slice(1) : query)
+        .split('&')
+        .reduce(function (params, param) {
+        var _a = param.split('='), key = _a[0], value = _a[1];
+        params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
+        return params;
+    }, {});
+};
 function bindOrder() {
     function orderTable(el) {
         var rows = el.getElementsByClassName("admin_table_row");

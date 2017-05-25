@@ -1,6 +1,8 @@
 package admin
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/golang-commonmark/markdown"
 	"github.com/hypertornado/prago"
 	"io/ioutil"
@@ -23,8 +25,7 @@ type resourceItem struct {
 }
 
 func bindListAPI(a *Admin) {
-	a.AdminController.Get(a.Prefix+"/_api/list/:name", func(request prago.Request) {
-		//locale := GetLocale(request)
+	a.AdminController.Post(a.Prefix+"/_api/list/:name", func(request prago.Request) {
 		user := GetUser(request)
 		name := request.Params().Get("name")
 		resource, found := a.resourceNameMap[name]
@@ -38,7 +39,20 @@ func bindListAPI(a *Admin) {
 			return
 		}
 
-		listData, err := resource.getList(a, "", request.Request().URL.Query(), user)
+		data, err := ioutil.ReadAll(request.Request().Body)
+		if err != nil {
+			panic(err)
+		}
+
+		var req listRequest
+		err = json.Unmarshal(data, &req)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println(req)
+
+		listData, err := resource.getListContent(a, "", &req, user)
 		if err != nil {
 			panic(err)
 		}

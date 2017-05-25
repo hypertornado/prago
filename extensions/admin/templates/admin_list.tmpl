@@ -14,7 +14,7 @@
 
 {{$list := .admin_list}}
 
-<table class="admin_table admin_table-list {{if .admin_list.Order}} admin_table-order{{end}}" data-type="{{.admin_list.TypeID}}">
+<table class="admin_table admin_table-list {{if .admin_list.CanChangeOrder}} admin_table-order{{end}}" data-type="{{.admin_list.TypeID}}" data-order-column="{{.admin_list.OrderColumn}}" data-order-desc="{{.admin_list.OrderDesc}}">
   <thead>
   <tr>
     <td colspan="{{.admin_list.Colspan}}">
@@ -33,7 +33,7 @@
   {{range $item := .admin_list.Header}}
     <th>
       {{if $item.CanOrder}}
-        <a href="{{$item.OrderPath}}" class="{{if $item.Ordered}}ordered{{end}}{{if $item.OrderedDesc}} ordered-desc{{end}}">
+        <a href="#">
       {{- end -}}
         {{- $item.NameHuman -}}
       {{if $item.CanOrder -}}
@@ -42,6 +42,16 @@
     </th>
   {{end}}
   <th></th>
+  </tr>
+  <tr>
+    {{range $item := .admin_list.Header}}
+      <th>
+        {{if $item.CanFilter}}
+          <input class="input admin_table_filter_item" data-typ="{{$item.ColumnName}}">
+        {{end}}
+      </th>
+    {{end}}
+    <th></th>
   </tr>
   </thead>
   <tbody></tbody>

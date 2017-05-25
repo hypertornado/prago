@@ -32,7 +32,7 @@ func (ra *ResourceAction) GetName(language string) string {
 var ActionList = ResourceAction{
 	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
 		user := request.GetData("currentuser").(*User)
-		listData, err := resource.getList(admin, request.Request().URL.Path, request.Request().URL.Query(), user)
+		listData, err := resource.getListHeader(admin, request.Request().URL.Path, user)
 		if err != nil {
 			if err == ErrItemNotFound {
 				render404(request)
