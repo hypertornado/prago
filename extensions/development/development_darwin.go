@@ -27,6 +27,12 @@ func developmentLess(sourcePath, targetPath string) {
 		panic(err)
 	}
 	p.Add(workflow)
+
+	err := compileLess(filepath.Join(sourcePath, "index.less"), targetPath)
+	if err != nil {
+		panic(err)
+	}
+
 	p.Start()
 }
 
