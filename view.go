@@ -25,7 +25,7 @@ func Render(request Request, statusCode int, viewName string) {
 	}
 
 	buf := new(bytes.Buffer)
-	request.Header().Add("Content-type", "text/html")
+	request.Header().Add("Content-Type", "text/html")
 	request.SetData("statusCode", statusCode)
 
 	err := templates.ExecuteTemplate(buf, viewName, request.AllRequestData())
