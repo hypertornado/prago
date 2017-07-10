@@ -50,6 +50,7 @@ func (File) AdminName(lang string) string { return messages.Messages.Get(lang, "
 
 //AdminAfterFormCreated creates form for file upload
 func (File) AdminAfterFormCreated(f *Form, request prago.Request, newItem bool) *Form {
+	fmt.Println("here")
 	newForm := NewForm()
 	newForm.Method = f.Method
 	newForm.Action = f.Action
@@ -111,7 +112,7 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 
-	resource.ResourceController.Get(a.GetURL(resource, ":id"), func(request prago.Request) {
+	resource.ResourceController.Get(a.GetURL(resource, ":id/edit"), func(request prago.Request) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
 
@@ -145,6 +146,7 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 		fi.Value = file.FileType
 
 		if file.isImage() {
+			fmt.Println("YYYY")
 			fi = form.AddTextInput("width", messages.Messages.Get(GetLocale(request), "Width"))
 			fi.Readonly = true
 			fi.Value = fmt.Sprintf("%d", file.Width)
