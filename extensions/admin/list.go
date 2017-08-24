@@ -223,7 +223,7 @@ func (resource *Resource) valueToCell(admin *Admin, field reflect.StructField, v
 			if ok {
 				cell.Value = ifaceItemName.AdminItemName("cs")
 				cell.TemplateName = "admin_link"
-				cell.URL = fmt.Sprintf("%s/%d", relationResource.ID, item.(int64))
+				cell.URL = fmt.Sprintf("%s/%d/edit", relationResource.ID, item.(int64))
 				return
 			}
 
@@ -231,7 +231,7 @@ func (resource *Resource) valueToCell(admin *Admin, field reflect.StructField, v
 
 			cell.Value = nameField.String()
 			cell.TemplateName = "admin_link"
-			cell.URL = fmt.Sprintf("%s/%d", relationResource.ID, item.(int64))
+			cell.URL = fmt.Sprintf("%s/%d/edit", relationResource.ID, item.(int64))
 			return
 		}
 	}
