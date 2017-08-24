@@ -13,6 +13,7 @@ import (
 type FieldType struct {
 	FormSubTemplate    string
 	DBFieldDescription string
+	ValuesSource       *func() interface{}
 }
 
 type structCache struct {
@@ -95,7 +96,7 @@ func (sf *structField) fieldDescriptionMysql(fieldTypes map[string]FieldType) st
 	var fieldDescription string
 
 	t, found := fieldTypes[sf.Tags["prago-type"]]
-	if found {
+	if found && t.DBFieldDescription != "" {
 		fieldDescription = t.DBFieldDescription
 	} else {
 		switch sf.Typ.Kind() {
@@ -244,8 +245,6 @@ func whiteListFilter(in ...string) structFieldFilter {
 func (cache *structCache) GetForm(inValues interface{}, lang string, visible structFieldFilter, editable structFieldFilter) (*Form, error) {
 	form := NewForm()
 
-	//cache.fieldTypes
-
 	form.Method = "POST"
 	itemVal := reflect.ValueOf(inValues).Elem()
 
@@ -273,6 +272,10 @@ func (cache *structCache) GetForm(inValues interface{}, lang string, visible str
 		t, found := cache.fieldTypes[field.Tags["prago-type"]]
 		if found {
 			item.SubTemplate = t.FormSubTemplate
+			if t.ValuesSource != nil {
+				item.Values = (*t.ValuesSource)()
+			}
+			item.Value = ifaceVal.(string)
 		} else {
 			switch field.Typ.Kind() {
 			case reflect.Struct:

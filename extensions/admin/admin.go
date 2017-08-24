@@ -42,6 +42,7 @@ type Admin struct {
 	fieldTypes            map[string]FieldType
 	javascripts           []string
 	css                   []string
+	roles                 map[string]map[string]bool
 }
 
 //NewAdmin creates new administration on prefix url with name
@@ -58,6 +59,28 @@ func NewAdmin(prefix, name string) *Admin {
 	}
 	ret.CreateResource(User{})
 	ret.CreateResource(File{})
+
+	var fp = func() interface{} {
+
+		roleNames := []string{""}
+		if ret.roles != nil {
+			for k, _ := range ret.roles {
+				roleNames = append(roleNames, k)
+			}
+		}
+
+		vals := [][2]string{}
+		for _, v := range roleNames {
+			vals = append(vals, [2]string{v, v})
+		}
+		return vals
+	}
+
+	ret.AddFieldType("role", FieldType{
+		FormSubTemplate: "admin_item_select",
+		ValuesSource:    &fp,
+	})
+
 	return ret
 }
 

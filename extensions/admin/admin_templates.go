@@ -141,15 +141,6 @@ const adminTemplates = `
   </div>
 {{end}}
 
-{{define "admin_item_image_OLD"}}
-  <div class="admin_images_OLD">
-    <input name="{{.Name}}" value="{{.Value}}" type="hidden">
-    <div class="admin_images_list"></div>
-    <a href="#" class="btn admin_images_edit">Edit</a>
-    <progress></progress>
-  </div>
-{{end}}
-
 {{define "admin_item_file"}}
   <input type="file" name="{{.Name}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}

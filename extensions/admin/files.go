@@ -146,7 +146,6 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 		fi.Value = file.FileType
 
 		if file.isImage() {
-			fmt.Println("YYYY")
 			fi = form.AddTextInput("width", messages.Messages.Get(GetLocale(request), "Width"))
 			fi.Readonly = true
 			fi.Value = fmt.Sprintf("%d", file.Width)
