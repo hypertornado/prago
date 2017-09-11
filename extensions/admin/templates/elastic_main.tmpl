@@ -1,0 +1,34 @@
+{{define "elastic_index"}}
+<h1>Elastic Index</h1>
+
+<h2>Global Stats</h2>
+  <ul>
+    {{range $url := .urls}}
+    <li><a href="{{index $url 0}}">{{index $url 1}}</a></li>
+    {{end}}
+  </ul>
+
+<h2>Indexes</h2>
+  <ul>
+    {{range $index := .indexes}}
+    <li><a href="elastic/index/{{$index}}">{{$index}}</a></li>
+    {{end}}
+  </ul>
+
+{{end}}
+
+{{define "elastic_pre"}}
+<h1>{{.admin_title}}</h1>
+  <pre>
+    {{.data}}
+  </pre>
+{{end}}
+
+{{define "elastic_detail"}}
+  <h1>Index {{.index_name}}</h1>
+  
+  <h2>Field stats</h2>
+
+  {{.fieldStats}}
+
+{{end}}
