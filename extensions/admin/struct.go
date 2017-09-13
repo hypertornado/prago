@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/hypertornado/prago/extensions/admin/messages"
 	"go/ast"
 	"reflect"
 	"time"
+
+	"github.com/hypertornado/prago/extensions/admin/messages"
 )
 
 type FieldType struct {

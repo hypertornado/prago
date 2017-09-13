@@ -139,7 +139,7 @@ class List {
     for (var i = 0; i < items.length; i++) {
       var item = <HTMLInputElement>items[i];
       var typ = item.getAttribute("data-typ");
-      var val = item.value;
+      var val = item.value.trim();
       if (val) {
         ret[typ] = val;
       }

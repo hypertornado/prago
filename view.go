@@ -90,33 +90,6 @@ func requestMiddlewareView(p Request, next func()) {
 	p.SetProcessed()
 }
 
-func (app *App) ReloadTemplates() error {
-	panic("DOES NOT WORK")
-	app.data["templates"] = template.New("")
-	app.data["templateFuncs"] = template.FuncMap{}
-
-	for k, v := range loadedTemplateFuncs {
-		err := app.addTemplateFunction(k, v)
-		if err != nil {
-			return err
-		}
-	}
-
-	for _, v := range loadedTemplatePaths {
-		var err error
-		if v.path {
-			err = app.loadTemplatePath(v.val)
-		} else {
-			err = app.loadTemplateFromString(v.val)
-		}
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 //GetTemplates return app's html templates
 func (app *App) GetTemplates() (*template.Template, template.FuncMap, error) {
 	templates, ok := app.data["templates"].(*template.Template)

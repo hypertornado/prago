@@ -90,7 +90,7 @@ func (resource *Resource) getListHeader(admin *Admin, path string, user *User) (
 
 	for _, v := range resource.StructCache.fieldArrays {
 		if v.canShow() {
-			list.Colspan += 1
+			list.Colspan++
 			headerItem := listHeader{
 				Name:       v.Name,
 				NameHuman:  v.humanName(lang),
@@ -100,11 +100,15 @@ func (resource *Resource) getListHeader(admin *Admin, path string, user *User) (
 			if v.Typ.Kind() == reflect.String {
 				headerItem.CanFilter = true
 			}
+			headerItem.CanFilter = true
+
+			if v.Typ.Kind() == reflect.Int64 || v.Typ.Kind() == reflect.Int {
+				headerItem.CanFilter = true
+			}
 
 			if v.CanOrder {
 				headerItem.CanOrder = true
 			}
-
 			list.Header = append(list.Header, headerItem)
 		}
 	}
