@@ -19,6 +19,8 @@ class List {
   orderDesc: boolean;
   page: number;
 
+  progress: HTMLProgressElement;
+
   constructor(el: HTMLTableElement) {
     this.el = el;
 
@@ -29,6 +31,7 @@ class List {
       return;
     }
 
+    this.progress = <HTMLProgressElement>el.querySelector(".admin_table_progress");
 
     this.tbody = <HTMLElement>el.querySelector("tbody");
     this.tbody.textContent = "";
@@ -50,6 +53,7 @@ class List {
   }
 
   load() {
+    this.progress.classList.remove("hidden");
     var request = new XMLHttpRequest();
     request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + document.location.search, true);
     request.addEventListener("load", () => {
@@ -62,6 +66,7 @@ class List {
       } else {
         console.error("error while loading list");
       }
+      this.progress.classList.add("hidden");
     });
     var requestData = this.getListRequest();
     request.send(JSON.stringify(requestData));
@@ -157,10 +162,14 @@ class List {
     this.inputPeriodicListener();
   }
 
-  inputListener() {
+  inputListener(e: any) {
+    if (e.keyCode == 9 || e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
+      return;
+    }
     this.page = 1;
     this.changed = true;
     this.changedTimestamp = Date.now();
+    this.progress.classList.remove("hidden");
   }
 
   inputPeriodicListener() {

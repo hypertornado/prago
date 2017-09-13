@@ -157,6 +157,7 @@ var List = (function () {
         if (!this.typeName) {
             return;
         }
+        this.progress = el.querySelector(".admin_table_progress");
         this.tbody = el.querySelector("tbody");
         this.tbody.textContent = "";
         this.bindFilter();
@@ -173,6 +174,7 @@ var List = (function () {
     }
     List.prototype.load = function () {
         var _this = this;
+        this.progress.classList.remove("hidden");
         var request = new XMLHttpRequest();
         request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + document.location.search, true);
         request.addEventListener("load", function () {
@@ -186,6 +188,7 @@ var List = (function () {
             else {
                 console.error("error while loading list");
             }
+            _this.progress.classList.add("hidden");
         });
         var requestData = this.getListRequest();
         request.send(JSON.stringify(requestData));
@@ -278,10 +281,14 @@ var List = (function () {
         }
         this.inputPeriodicListener();
     };
-    List.prototype.inputListener = function () {
+    List.prototype.inputListener = function (e) {
+        if (e.keyCode == 9 || e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
+            return;
+        }
         this.page = 1;
         this.changed = true;
         this.changedTimestamp = Date.now();
+        this.progress.classList.remove("hidden");
     };
     List.prototype.inputPeriodicListener = function () {
         var _this = this;

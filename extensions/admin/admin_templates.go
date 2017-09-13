@@ -345,7 +345,9 @@ const adminTemplates = `
         {{end}}
       </th>
     {{end}}
-    <th></th>
+    <th>
+      <progress class="admin_table_progress"></progress>
+    </th>
   </tr>
   </thead>
   <tbody></tbody>
@@ -1398,6 +1400,8 @@ var List = (function () {
         if (!this.typeName) {
             return;
         }
+        this.progress = el.querySelector(".admin_table_progress");
+        console.log(this.progress);
         this.tbody = el.querySelector("tbody");
         this.tbody.textContent = "";
         this.bindFilter();
