@@ -8,6 +8,7 @@
     },
     "files": [
         "js/google_maps.d.ts",
+        "js/autoresize.ts",
         "js/utils.ts",
         "js/imagepicker.ts",
         "js/list.ts",

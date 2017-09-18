@@ -1,3 +1,23 @@
+var Autoresize = (function () {
+    function Autoresize(el) {
+        this.el = el;
+        this.el.addEventListener('change', this.resizeIt.bind(this));
+        this.el.addEventListener('cut', this.delayedResize.bind(this));
+        this.el.addEventListener('paste', this.delayedResize.bind(this));
+        this.el.addEventListener('drop', this.delayedResize.bind(this));
+        this.el.addEventListener('keydown', this.delayedResize.bind(this));
+        this.resizeIt();
+    }
+    Autoresize.prototype.delayedResize = function () {
+        var self = this;
+        setTimeout(function () { self.resizeIt(); }, 0);
+    };
+    Autoresize.prototype.resizeIt = function () {
+        this.el.style.height = 'auto';
+        this.el.style.height = this.el.scrollHeight + 'px';
+    };
+    return Autoresize;
+}());
 function DOMinsertChildAtIndex(parent, child, index) {
     if (index >= parent.children.length) {
         parent.appendChild(child);
@@ -374,43 +394,137 @@ function bindOrder() {
     });
 }
 function bindMarkdowns() {
-    function bindMarkdown(el) {
-        var textarea = el.getElementsByTagName("textarea")[0];
-        var lastChanged = Date.now();
-        var changed = false;
-        setInterval(function () {
-            if (changed && (Date.now() - lastChanged > 500)) {
-                loadPreview();
-            }
-        }, 100);
-        textarea.addEventListener("change", textareaChanged);
-        textarea.addEventListener("keyup", textareaChanged);
-        function textareaChanged() {
-            changed = true;
-            lastChanged = Date.now();
-        }
-        loadPreview();
-        function loadPreview() {
-            changed = false;
-            var request = new XMLHttpRequest();
-            request.open("POST", document.body.getAttribute("data-admin-prefix") + "/_api/markdown", true);
-            request.addEventListener("load", function () {
-                if (request.status == 200) {
-                    var previewEl = el.getElementsByClassName("admin_markdown_preview")[0];
-                    previewEl.innerHTML = JSON.parse(request.response);
-                }
-                else {
-                    console.error("Error while loading markdown preview.");
-                }
-            });
-            request.send(textarea.value);
-        }
-    }
     var elements = document.querySelectorAll(".admin_markdown");
     Array.prototype.forEach.call(elements, function (el, i) {
-        bindMarkdown(el);
+        new MarkdownEditor(el);
     });
 }
+var MarkdownEditor = (function () {
+    function MarkdownEditor(el) {
+        var _this = this;
+        this.el = el;
+        this.textarea = el.querySelector(".textarea");
+        this.preview = el.querySelector(".admin_markdown_preview");
+        new Autoresize(this.textarea);
+        var prefix = document.body.getAttribute("data-admin-prefix");
+        var helpLink = el.querySelector(".admin_markdown_show_help");
+        helpLink.setAttribute("href", prefix + "/_help/markdown");
+        this.lastChanged = Date.now();
+        this.changed = false;
+        var showChange = el.querySelector(".admin_markdown_preview_show");
+        showChange.addEventListener("change", function () {
+            _this.preview.classList.toggle("hidden");
+        });
+        setInterval(function () {
+            if (_this.changed && (Date.now() - _this.lastChanged > 500)) {
+                _this.loadPreview();
+            }
+        }, 100);
+        this.textarea.addEventListener("change", this.textareaChanged.bind(this));
+        this.textarea.addEventListener("keyup", this.textareaChanged.bind(this));
+        this.loadPreview();
+        this.bindCommands();
+        this.bindShortcuts();
+    }
+    MarkdownEditor.prototype.bindCommands = function () {
+        var _this = this;
+        var btns = this.el.querySelectorAll(".admin_markdown_command");
+        for (var i = 0; i < btns.length; i++) {
+            btns[i].addEventListener("mousedown", function (e) {
+                var cmd = e.target.getAttribute("data-cmd");
+                _this.executeCommand(cmd);
+                e.preventDefault();
+                return false;
+            });
+        }
+    };
+    MarkdownEditor.prototype.bindShortcuts = function () {
+        var _this = this;
+        this.textarea.addEventListener("keydown", function (e) {
+            if (e.metaKey == false && e.ctrlKey == false) {
+                return;
+            }
+            switch (e.keyCode) {
+                case 66:
+                    _this.executeCommand("b");
+                    break;
+                case 73:
+                    _this.executeCommand("i");
+                    break;
+                case 75:
+                    _this.executeCommand("h2");
+                    break;
+                case 85:
+                    _this.executeCommand("a");
+                    break;
+            }
+        });
+    };
+    MarkdownEditor.prototype.executeCommand = function (commandName) {
+        switch (commandName) {
+            case "b":
+                this.setAroundMarkdown("**", "**");
+                break;
+            case "i":
+                this.setAroundMarkdown("*", "*");
+                break;
+            case "a":
+                this.setAroundMarkdown("[", "]()");
+                var newEnd = this.textarea.selectionEnd + 2;
+                this.textarea.selectionStart = newEnd;
+                this.textarea.selectionEnd = newEnd;
+                break;
+            case "h2":
+                var start = "## ";
+                var end = "";
+                var text = this.textarea.value;
+                if (text[this.textarea.selectionStart - 1] !== "\n") {
+                    start = "\n" + start;
+                }
+                if (text[this.textarea.selectionEnd] !== "\n") {
+                    end = "\n";
+                }
+                this.setAroundMarkdown(start, end);
+                break;
+        }
+        this.textareaChanged();
+    };
+    MarkdownEditor.prototype.setAroundMarkdown = function (before, after) {
+        var text = this.textarea.value;
+        var selected = text.substr(this.textarea.selectionStart, this.textarea.selectionEnd - this.textarea.selectionStart);
+        var newText = text.substr(0, this.textarea.selectionStart);
+        newText += before;
+        var newStart = newText.length;
+        newText += selected;
+        var newEnd = newText.length;
+        newText += after;
+        newText += text.substr(this.textarea.selectionEnd, text.length);
+        this.textarea.value = newText;
+        this.textarea.selectionStart = newStart;
+        this.textarea.selectionEnd = newEnd;
+        this.textarea.focus();
+    };
+    MarkdownEditor.prototype.textareaChanged = function () {
+        this.changed = true;
+        this.lastChanged = Date.now();
+    };
+    MarkdownEditor.prototype.loadPreview = function () {
+        var _this = this;
+        this.changed = false;
+        var request = new XMLHttpRequest();
+        request.open("POST", document.body.getAttribute("data-admin-prefix") + "/_api/markdown", true);
+        request.addEventListener("load", function () {
+            if (request.status == 200) {
+                _this.preview.innerHTML = JSON.parse(request.response);
+            }
+            else {
+                console.error("Error while loading markdown preview.");
+            }
+        });
+        request.send(this.textarea.value);
+    };
+    return MarkdownEditor;
+}());
 function bindTimestamps() {
     function bindTimestamp(el) {
         var hidden = el.getElementsByTagName("input")[0];

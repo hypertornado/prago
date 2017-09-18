@@ -302,7 +302,7 @@ func (cache *structCache) GetForm(inValues interface{}, lang string, visible str
 				case "text":
 					item.SubTemplate = "admin_item_textarea"
 				case "markdown":
-					item.SubTemplate = "admin_item_markdown"
+					item.Template = "admin_item_markdown"
 				case "image":
 					item.SubTemplate = "admin_item_image"
 				case "place":

@@ -1,0 +1,35 @@
+{{define "admin_help_markdown"}}
+
+<div class="admin_box">
+  <h1>Nápověda k Markdown</h1>
+
+  <p>
+    Markdown je jazyk na zápis formátovaného textu na webové stránky.
+  </p>
+
+  <h2>Odstavce</h2>
+  <p>Odstavce textu vytvoříte stejně jako v programu MS Word - stačí odřádkovat.</p>
+
+  <h2>Tučný text a kurzíva</h2>
+  <p>Text můžete označit <b>tučně</b> pomocí dvou hvězdiček (<code>Toto je **tučný** text</code>). U kurzívy stačí jedna hvězdička</p>
+
+  <h2>Odkazy</h2>
+  <p>Odkazy jdou vložit dvěma způsoby. Pokud vložíte text s webovou adresou, sám se změní na odkaz (např <code>http://www.seznam.cz</code> se změní na <a href="http://www.seznam.cz">http://www.seznam.cz</a>).</p>
+
+  <p>Pokud chcete použit odkaz na konkrétních slovech, dáte tyto slova do hranatých závorek a adresu odkazu za to do závorek kulatých (např. <code>[Seznam](http://www.seznam.cz)</code> se vykreslí jako <a href="http://www.seznam.cz">Seznam</a>).</p>
+
+  <h2>Nadpisy</h2>
+  <p>Nejčastěji používaný odkaz druhé úrovně vytvoříte tak, že jeho text dáte na samotný řádek a před něj dáte dva znaky "#" (<code>## Toto je nadpis</code>).</p>
+
+  <h2>Seznam</h2>
+  <p>Seznam s odrážkami vytvoříte tak, že každou položku seznamu dáte na zvláštní řádek a přidáte na začátek řádku "* " (např. <code>* první odrážka</code>)</p>
+
+  <h2>Obrázky</h2>
+  <p>Obrázky se vloží takto: <code>![popis obrázku](http://odkaz/na/obrazek)</code>.</p>
+
+  <h2>Ostatní</h2>
+  <p>Může být potřeba vložit nějaké jiné formátování, nebo prvek. Například chcete vložit YouTube video. Ve většině případů jde do Markdown textu vložit i HTML prvky. Pokud HTML příliš neovládáte, je ve většině případů lepší se tomuto způsobu vyhnout.</p>
+
+</div>
+
+{{end}}

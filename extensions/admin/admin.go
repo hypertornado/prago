@@ -286,6 +286,11 @@ func (a *Admin) Init(app *prago.App) error {
 		prago.Render(request, 200, "admin_layout")
 	})
 
+	a.AdminController.Get(a.Prefix+"/_help/markdown", func(request prago.Request) {
+		request.SetData("admin_yield", "admin_help_markdown")
+		prago.Render(request, 200, "admin_layout")
+	})
+
 	a.AdminController.Get(a.Prefix+"/_stats", stats)
 	a.AdminController.Get(a.Prefix+"/_static/admin.js", func(request prago.Request) {
 		request.Response().Header().Set("Content-type", "text/javascript")

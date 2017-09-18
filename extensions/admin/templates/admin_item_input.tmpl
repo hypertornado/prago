@@ -15,10 +15,27 @@
 {{end}}
 
 {{define "admin_item_markdown"}}
+<div class="form_label">
+  <span class="form_label_text">{{.NameHuman}}</span>
   <div class="admin_markdown">
+
+    <div class="btnlist">
+      <div class="btn admin_markdown_command" data-cmd="b" title="ctrl+b">B</div>
+      <div class="btn admin_markdown_command" data-cmd="i" title="ctrl+i">I</div>
+      <div class="btn admin_markdown_command" data-cmd="a" title="ctrl+u">Odkaz</div>
+      <div class="btn admin_markdown_command" data-cmd="h2" title="ctrl+k">Nadpis</div>
+    </div>
+
+    &nbsp;&nbsp;<a href="" target="_blank" class="admin_markdown_show_help">Zobrazit nápovědu</a>&nbsp;&nbsp;
+
+    <label>
+      <input type="checkbox" class="admin_markdown_preview_show"> Zobrazit náhled
+    </label>
+
     <textarea name="{{.Name}}" class="input form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
-    <div class="admin_markdown_preview"></div>
+    <div class="admin_markdown_preview hidden"></div>
   </div>
+</div>
 {{end}}
 
 {{define "admin_item_checkbox"}}

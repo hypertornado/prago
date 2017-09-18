@@ -201,6 +201,12 @@ body {
 .shadow {
   box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
 }
+code {
+  background-color: #fafafa;
+  padding: 0px 3px;
+  border-radius: 3px;
+  border: 1px solid #ddd;
+}
 h1 {
   font-size: 1.5rem;
   line-height: 1.4em;
@@ -295,6 +301,18 @@ a:hover {
   -webkit-appearance: none;
   outline: none;
   text-decoration: none;
+}
+.btnlist {
+  display: inline-flex;
+}
+.btnlist .btn:not(:last-child) {
+  border-right: none;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+.btnlist .btn:not(:first-child) {
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
 }
 .btn:hover {
   background-image: linear-gradient(#eee, #ddd);
@@ -499,18 +517,17 @@ input[type=date].input {
 }
 /*markdown*/
 .admin_markdown textarea {
-  border-bottom-left-radius: 0px;
-  border-bottom-right-radius: 0px;
-  border-bottom: none;
+  margin-top: 5px;
   white-space: pre-wrap;
 }
 .admin_markdown_preview {
+  margin-top: 5px;
   background: white;
   border: 1px dashed #e5e5e5;
   padding: 5px;
-  font-size: 0.7em;
+  font-size: 0.9em;
   line-height: 1.4em;
-  color: #888;
+  color: #333;
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
   overflow: auto;
