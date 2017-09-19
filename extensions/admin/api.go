@@ -2,6 +2,7 @@ package admin
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/golang-commonmark/markdown"
 	"github.com/hypertornado/prago"
 	"io/ioutil"
@@ -54,6 +55,7 @@ func bindListAPI(a *Admin) {
 			panic(err)
 		}
 
+		request.Response().Header().Set("X-Total-Count", fmt.Sprintf("%d", listData.TotalCount))
 		request.SetData("admin_list", listData)
 		prago.Render(request, 200, "admin_list_cells")
 	})

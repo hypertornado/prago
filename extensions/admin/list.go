@@ -3,6 +3,7 @@ package admin
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -20,14 +21,15 @@ type list struct {
 }
 
 type listHeader struct {
-	Name       string
-	NameHuman  string
-	ColumnName string
-	CanOrder   bool
-	CanFilter  bool
+	Name         string
+	NameHuman    string
+	ColumnName   string
+	CanOrder     bool
+	FilterLayout string
 }
 
 type listContent struct {
+	TotalCount int64
 	Rows       []listRow
 	Pagination pagination
 	Colspan    int64
@@ -61,11 +63,6 @@ type listRequest struct {
 	Filter    map[string]string
 }
 
-//GetList of resource items
-/*func (resource *Resource) GetList(admin *Admin, path string, requestQuery url.Values, user *User) (list list, err error) {
-	return resource.getList(admin, path, requestQuery, user)
-}*/
-
 func (resource *Resource) getListHeader(admin *Admin, path string, user *User) (list list, err error) {
 	lang := user.Locale
 
@@ -97,14 +94,7 @@ func (resource *Resource) getListHeader(admin *Admin, path string, user *User) (
 				ColumnName: v.ColumnName,
 			}
 
-			if v.Typ.Kind() == reflect.String {
-				headerItem.CanFilter = true
-			}
-			headerItem.CanFilter = true
-
-			if v.Typ.Kind() == reflect.Int64 || v.Typ.Kind() == reflect.Int {
-				headerItem.CanFilter = true
-			}
+			headerItem.FilterLayout = v.filterLayout()
 
 			if v.CanOrder {
 				headerItem.CanOrder = true
@@ -116,12 +106,54 @@ func (resource *Resource) getListHeader(admin *Admin, path string, user *User) (
 	return
 }
 
-func addFilterToQuery(q *Query, filter map[string]string) {
+func (sf *structField) filterLayout() string {
+	if sf == nil {
+		return ""
+	}
+	if sf.Typ.Kind() == reflect.String &&
+		(sf.Tags["prago-type"] == "" || sf.Tags["prago-type"] == "text" || sf.Tags["prago-type"] == "markdown") {
+		return "filter_layout_text"
+	}
+
+	if sf.Typ.Kind() == reflect.Int64 || sf.Typ.Kind() == reflect.Int {
+		return "filter_layout_number"
+	}
+
+	if sf.Typ.Kind() == reflect.Bool {
+		return "filter_layout_boolean"
+	}
+	return ""
+}
+
+func (resource *Resource) addFilterToQuery(q *Query, filter map[string]string) {
 	for k, v := range filter {
-		v = "%" + v + "%"
-		k = strings.Replace(k, "`", "", -1)
-		str := fmt.Sprintf("`%s` LIKE ?", k)
-		q = q.Where(str, v)
+		field := resource.StructCache.fieldMap[k]
+		if field == nil {
+			continue
+		}
+
+		layout := field.filterLayout()
+
+		switch layout {
+		case "filter_layout_text":
+			v = "%" + v + "%"
+			k = strings.Replace(k, "`", "", -1)
+			str := fmt.Sprintf("`%s` LIKE ?", k)
+			q = q.Where(str, v)
+		case "filter_layout_number":
+			v = strings.Trim(v, " ")
+			numVal, err := strconv.Atoi(v)
+			if err == nil {
+				q.WhereIs(k, numVal)
+			}
+		case "filter_layout_boolean":
+			switch v {
+			case "true":
+				q.WhereIs(k, true)
+			case "false":
+				q.WhereIs(k, false)
+			}
+		}
 	}
 }
 
@@ -137,11 +169,12 @@ func (resource *Resource) getListContent(admin *Admin, path string, requestQuery
 	var item interface{}
 	resource.newItem(&item)
 	countQuery := admin.Query()
-	addFilterToQuery(countQuery, requestQuery.Filter)
+	resource.addFilterToQuery(countQuery, requestQuery.Filter)
 	count, err = countQuery.Count(item)
 	if err != nil {
 		return
 	}
+	list.TotalCount = count
 
 	totalPages := (count / resource.Pagination)
 	if count%resource.Pagination != 0 {
@@ -163,7 +196,7 @@ func (resource *Resource) getListContent(admin *Admin, path string, requestQuery
 		}
 	}
 
-	addFilterToQuery(q, requestQuery.Filter)
+	resource.addFilterToQuery(q, requestQuery.Filter)
 	q.Offset((currentPage - 1) * resource.Pagination)
 	q.Limit(resource.Pagination)
 
@@ -189,6 +222,7 @@ func (resource *Resource) getListContent(admin *Admin, path string, requestQuery
 		list.Rows = append(list.Rows, row)
 		list.Colspan = int64(len(row.Items)) + 1
 	}
+
 	return
 }
 

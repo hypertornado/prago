@@ -386,10 +386,13 @@ a:hover {
 select.input {
   -webkit-appearance: menulist-button;
   appearance: menulist-button;
-  height: 35px;
+  height: 24px;
+}
+select.admin_table_filter_item {
+  width: auto;
 }
 input[type=date].input {
-  height: 35px;
+  height: 24px;
 }
 .input[readonly],
 .textarea[readonly],

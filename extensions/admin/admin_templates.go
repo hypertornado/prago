@@ -364,7 +364,7 @@ const adminTemplates = `
   <tr>
     <td colspan="{{.admin_list.Colspan}}">
       <div class="admin_table_listheader">
-        <h2>{{.admin_title}}</h2>
+        <h2>{{.admin_title}} (<span class="admin_table_count"></span>)</h2>
 
         <div class="btngrp">
         {{range $item := .admin_list.Actions}}
@@ -391,8 +391,8 @@ const adminTemplates = `
   <tr>
     {{range $item := .admin_list.Header}}
       <th>
-        {{if $item.CanFilter}}
-          <input class="input admin_table_filter_item" data-typ="{{$item.ColumnName}}">
+        {{if $item.FilterLayout}}
+          {{tmpl $item.FilterLayout $item}}
         {{end}}
       </th>
     {{end}}
@@ -403,6 +403,22 @@ const adminTemplates = `
   </thead>
   <tbody></tbody>
 </table>
+{{end}}
+
+{{define "filter_layout_text"}}
+  <input class="input admin_table_filter_item" data-typ="{{.ColumnName}}">
+{{end}}
+
+{{define "filter_layout_number"}}
+  <input class="input admin_table_filter_item" data-typ="{{.ColumnName}}">
+{{end}}
+
+{{define "filter_layout_boolean"}}
+  <select class="input admin_table_filter_item" data-typ="{{.ColumnName}}">
+    <option value=""></option>
+    <option value="true">✅</option>
+    <option value="false">-</option>
+  </select>
 
 {{end}}
 
@@ -1064,10 +1080,13 @@ a:hover {
 select.input {
   -webkit-appearance: menulist-button;
   appearance: menulist-button;
-  height: 35px;
+  height: 24px;
+}
+select.admin_table_filter_item {
+  width: auto;
 }
 input[type=date].input {
-  height: 35px;
+  height: 24px;
 }
 .input[readonly],
 .textarea[readonly],
@@ -1535,6 +1554,8 @@ var List = (function () {
             _this.tbody.innerHTML = "";
             if (request.status == 200) {
                 _this.tbody.innerHTML = request.response;
+                var count = request.getResponseHeader("X-Total-Count");
+                _this.el.querySelector(".admin_table_count").textContent = count;
                 bindOrder();
                 bindDelete();
                 _this.bindPage();
@@ -1775,7 +1796,6 @@ var MarkdownEditor = (function () {
     MarkdownEditor.prototype.bindShortcuts = function () {
         var _this = this;
         this.textarea.addEventListener("keydown", function (e) {
-            console.log(e.keyCode);
             if (e.metaKey == false && e.ctrlKey == false) {
                 return;
             }

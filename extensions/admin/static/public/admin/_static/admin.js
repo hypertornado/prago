@@ -201,6 +201,8 @@ var List = (function () {
             _this.tbody.innerHTML = "";
             if (request.status == 200) {
                 _this.tbody.innerHTML = request.response;
+                var count = request.getResponseHeader("X-Total-Count");
+                _this.el.querySelector(".admin_table_count").textContent = count;
                 bindOrder();
                 bindDelete();
                 _this.bindPage();

@@ -60,6 +60,8 @@ class List {
       this.tbody.innerHTML = "";
       if (request.status == 200) {
         this.tbody.innerHTML = request.response;
+        var count = request.getResponseHeader("X-Total-Count");
+        this.el.querySelector(".admin_table_count").textContent = count;
         bindOrder();
         bindDelete();
         this.bindPage();
