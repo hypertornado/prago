@@ -68,7 +68,7 @@ func (resource *Resource) getListHeader(admin *Admin, path string, user *User) (
 
 	list.Colspan = 1
 	list.TypeID = resource.ID
-	list.Actions = resource.ResourceActionsButtonData(user)
+	list.Actions = resource.ResourceActionsButtonData(user, admin)
 
 	list.OrderColumn = resource.OrderByColumn
 	list.OrderDesc = resource.OrderDesc
@@ -218,7 +218,7 @@ func (resource *Resource) getListContent(admin *Admin, path string, requestQuery
 		}
 
 		row.ID = itemVal.FieldByName("ID").Int()
-		row.Actions = resource.ResourceItemActionsButtonData(user, row.ID)
+		row.Actions = resource.ResourceItemActionsButtonData(user, row.ID, admin)
 		list.Rows = append(list.Rows, row)
 		list.Colspan = int64(len(row.Items)) + 1
 	}

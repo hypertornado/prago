@@ -171,9 +171,10 @@ type AdminHeaderItem struct {
 	Url  string
 }
 
-func (a *Admin) HeaderData(request prago.Request) *AdminHeaderData {
+func (a *Admin) HeaderAndFooterData(request prago.Request) (headerData *AdminHeaderData,
+	footerData []AdminHeaderItem) {
 
-	ret := &AdminHeaderData{
+	headerData = &AdminHeaderData{
 		Name:        a.AppName,
 		Logo:        a.Logo,
 		Background:  a.Background,
@@ -187,14 +188,22 @@ func (a *Admin) HeaderData(request prago.Request) *AdminHeaderData {
 
 	for _, resource := range a.Resources {
 		if resource.HasView && resource.Authenticate(user) {
-			ret.Items = append(ret.Items, AdminHeaderItem{
-				Name: resource.Name(locale),
-				ID:   resource.ID,
-				Url:  a.Prefix + "/" + resource.ID,
-			})
+			if resource.DisplayInFooter {
+				footerData = append(footerData, AdminHeaderItem{
+					Name: resource.Name(locale),
+					ID:   resource.ID,
+					Url:  a.Prefix + "/" + resource.ID,
+				})
+			} else {
+				headerData.Items = append(headerData.Items, AdminHeaderItem{
+					Name: resource.Name(locale),
+					ID:   resource.ID,
+					Url:  a.Prefix + "/" + resource.ID,
+				})
+			}
 		}
 	}
-	return ret
+	return
 }
 
 func (a *Admin) getDB() *sql.DB {
@@ -277,12 +286,16 @@ func (a *Admin) Init(app *prago.App) error {
 		request.SetData("appName", a.AppName)
 		request.SetData("appCode", request.App().Data()["appName"].(string))
 		request.SetData("appVersion", request.App().Data()["version"].(string))
-		request.SetData("admin_header", a.HeaderData(request))
+
+		headerData, footerData := a.HeaderAndFooterData(request)
+		request.SetData("admin_header", headerData)
+		request.SetData("admin_footer", footerData)
 
 		next()
 	})
 
 	a.AdminController.Get(a.Prefix, func(request prago.Request) {
+		request.SetData("home_data", a.GetHomeData(request))
 		prago.Render(request, 200, "admin_layout")
 	})
 

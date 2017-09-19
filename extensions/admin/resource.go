@@ -38,6 +38,7 @@ type Resource struct {
 	OrderDesc           bool
 	HasModel            bool
 	HasView             bool
+	DisplayInFooter     bool
 	item                interface{}
 	admin               dbProvider
 	table               string
@@ -49,6 +50,8 @@ type Resource struct {
 	ResourceItemActions []ResourceAction
 	CanCreate           bool
 	CanEdit             bool
+
+	PreviewURLFunction func(interface{}) string
 
 	BeforeList   Action
 	BeforeNew    Action
@@ -251,16 +254,19 @@ func (ar *Resource) newItems(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(reflect.SliceOf(reflect.PtrTo(ar.Typ))))
 }
 
-func (ar *Resource) ResourceActionsButtonData(user *User) []ButtonData {
+func (ar *Resource) ResourceActionsButtonData(user *User, admin *Admin) []ButtonData {
 	ret := []ButtonData{}
 	if ar.CanCreate {
 		ret = append(ret, ButtonData{
 			Name: messages.Messages.Get(user.Locale, "admin_new"),
-			Url:  fmt.Sprintf("%s/new", ar.ID),
+			Url:  admin.GetURL(ar, "new"),
 		})
 	}
 
 	for _, v := range ar.ResourceActions {
+		if v.Url == "" {
+			continue
+		}
 		name := v.Url
 		if v.Name != nil {
 			name = v.Name(user.Locale)
@@ -269,17 +275,34 @@ func (ar *Resource) ResourceActionsButtonData(user *User) []ButtonData {
 		if v.Auth == nil || v.Auth(user) {
 			ret = append(ret, ButtonData{
 				Name: name,
-				Url:  fmt.Sprintf("%s/%s", ar.ID, v.Url),
+				Url:  admin.GetURL(ar, v.Url),
 			})
 		}
 	}
 	return ret
 }
 
-func (ar *Resource) ResourceItemActionsButtonData(user *User, id int64) []ButtonData {
+func (ar *Resource) ResourceItemActionsButtonData(user *User, id int64, admin *Admin) []ButtonData {
 	prefix := fmt.Sprintf("%s/%d", ar.ID, id)
 
 	ret := []ButtonData{}
+	if ar.PreviewURLFunction != nil {
+		var item interface{}
+		ar.newItem(&item)
+		err := admin.Query().WhereIs("id", id).Get(item)
+		if err == nil {
+			url := ar.PreviewURLFunction(item)
+			if url != "" {
+				ret = append(ret, ButtonData{
+					Name: messages.Messages.Get(user.Locale, "admin_view"),
+					Url:  url,
+					Params: map[string]string{
+						"target": "_blank",
+					},
+				})
+			}
+		}
+	}
 	if ar.CanEdit {
 		ret = append(ret, ButtonData{
 			Name: messages.Messages.Get(user.Locale, "admin_edit"),

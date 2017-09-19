@@ -59,6 +59,12 @@
     {{if .template_after}}{{tmpl .template_after .}}{{end}}
 
     </div>
+
+    <div class="admin_footer">
+        {{range $item := .admin_footer}}
+            <a href="{{$item.Url}}" class="admin_footer_resource">{{$item.Name}}</a>
+        {{end}}
+    </div>
   </body>
 </html>
 

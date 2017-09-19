@@ -8,6 +8,7 @@ var cs = map[string]string{
 	"admin_new":                      "Nová položka",
 	"admin_edit":                     "Upravit",
 	"admin_edit_and_stay":            "Upravit a zůstat",
+	"admin_view":                     "Zobrazit",
 	"admin_delete":                   "Smazat",
 	"admin_delete_confirmation":      "Opravdu chete položku smazat?",
 	"admin_back":                     "Zpět",

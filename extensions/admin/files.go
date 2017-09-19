@@ -78,6 +78,7 @@ func uploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File,
 
 //InitResource of file
 func (File) InitResource(a *Admin, resource *Resource) error {
+	resource.DisplayInFooter = true
 	resource.Pagination = 100
 
 	fileUploadPath = a.App.Config.GetString("fileUploadPath")

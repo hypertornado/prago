@@ -203,6 +203,7 @@ func (u User) sendRenew(request prago.Request, a *Admin) error {
 
 //InitResource for user
 func (User) InitResource(a *Admin, resource *Resource) error {
+	resource.DisplayInFooter = true
 
 	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
 		request.SetData("locale", GetLocale(request))

@@ -5,8 +5,6 @@ import (
 	"net/url"
 )
 
-//TODO: tests
-
 //Form represents admin form
 type Form struct {
 	Method string

@@ -8,6 +8,7 @@ var en = map[string]string{
 	"admin_new":                 "New item",
 	"admin_edit":                "Edit",
 	"admin_edit_and_stay":       "Edit and stay",
+	"admin_view":                "View",
 	"admin_delete":              "Delete",
 	"admin_delete_confirmation": "Really want to delete this item?",
 	"admin_back":                "Back",

@@ -32,6 +32,7 @@ type App struct {
 	logger             *logrus.Logger
 	dotPath            string
 	cron               *cron
+	mainController     *Controller
 }
 
 type requestMiddleware func(Request, func())
@@ -45,8 +46,8 @@ func NewApp(appName, version string) *App {
 		middlewares:        []Middleware{},
 		dotPath:            os.Getenv("HOME") + "/." + appName,
 	}
+	app.mainController = newMainController(app)
 
-	app.data["mainController"] = newMainController(app)
 	app.data["appName"] = appName
 	app.data["version"] = version
 	app.cron = newCron()
@@ -137,9 +138,6 @@ func (app *App) ListenAndServe(port int, developmentMode bool) error {
 
 	if developmentMode {
 		loggerMiddleware.setStdOut()
-		/*app.MainController().AddBeforeAction(func(request Request) {
-			Must(app.ReloadTemplates())
-		})*/
 	}
 
 	server := &http.Server{

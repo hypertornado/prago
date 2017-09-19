@@ -9,13 +9,8 @@ type Controller struct {
 
 //MainController returns main controller of application
 //all controllers in app are children of this controller
-//TODO: add main controller directly to app
 func (a *App) MainController() (ret *Controller) {
-	ret = a.data["mainController"].(*Controller)
-	if ret == nil {
-		panic("couldnt find controller")
-	}
-	return
+	return a.mainController
 }
 
 func newMainController(app *App) *Controller {

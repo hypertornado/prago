@@ -21,7 +21,7 @@
       <div class="admin_table_listheader">
         <h2>{{.admin_title}} (<span class="admin_table_count"></span>)</h2>
 
-        <div class="btngrp">
+        <div class="btngroup">
         {{range $item := .admin_list.Actions}}
           <a href="{{$item.Url}}" class="btn">{{$item.Name}}</a>
         {{end}}
@@ -86,10 +86,12 @@
     </td>
     {{end}}
     <td nowrap class="center top">
-      <div class="btngrp">
+      <div class="btngroup">
         {{range $action := $item.Actions}}
           {{if $action.Url}}
-            <a href="{{$action.Url}}" class="btn">{{$action.Name}}</a>
+            <a href="{{$action.Url}}" class="btn"
+              {{range $k, $v := $action.Params}} {{HTMLAttr $k}}="{{$v}}"{{end}}
+            >{{$action.Name}}</a>
           {{else}}
             <div{{range $k, $v := $action.Params}} {{HTMLAttr $k}}="{{$v}}"{{end}}>{{$action.Name}}</div>
           {{end}}

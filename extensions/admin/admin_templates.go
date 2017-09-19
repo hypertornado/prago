@@ -105,10 +105,23 @@ const adminTemplates = `
   <h2>{{.admin_header.Name}}</h2>
 
   <table class="admin_table">
-  {{range $item := .admin_header.Items}}
+  <tr>
+    <th>Název</th>
+    <th>Počet položek</th>
+    <th>Akce</th>
+  </tr>
+  {{range $item := .home_data}}
     <tr>
       <td>
-        <a href="{{$item.Url}}">{{$item.Name}}</a>
+        <a href="{{$item.URL}}">{{$item.Name}}</a>
+      </td>
+      <td>
+        {{$item.Count}}
+      </td>
+      <td>
+        {{range $action := $item.Actions}}
+          <a class="btn" href="{{$action.Url}}">{{$action.Name}}</a>
+        {{end}}
       </td>
     </tr>
   {{end}}
@@ -136,7 +149,7 @@ const adminTemplates = `
   <span class="form_label_text">{{.NameHuman}}</span>
   <div class="admin_markdown">
 
-    <div class="btnlist">
+    <div class="btngroup">
       <div class="btn admin_markdown_command" data-cmd="b" title="ctrl+b">B</div>
       <div class="btn admin_markdown_command" data-cmd="i" title="ctrl+i">I</div>
       <div class="btn admin_markdown_command" data-cmd="a" title="ctrl+u">Odkaz</div>
@@ -316,6 +329,12 @@ const adminTemplates = `
     {{if .template_after}}{{tmpl .template_after .}}{{end}}
 
     </div>
+
+    <div class="admin_footer">
+        {{range $item := .admin_footer}}
+            <a href="{{$item.Url}}" class="admin_footer_resource">{{$item.Name}}</a>
+        {{end}}
+    </div>
   </body>
 </html>
 
@@ -366,7 +385,7 @@ const adminTemplates = `
       <div class="admin_table_listheader">
         <h2>{{.admin_title}} (<span class="admin_table_count"></span>)</h2>
 
-        <div class="btngrp">
+        <div class="btngroup">
         {{range $item := .admin_list.Actions}}
           <a href="{{$item.Url}}" class="btn">{{$item.Name}}</a>
         {{end}}
@@ -431,10 +450,12 @@ const adminTemplates = `
     </td>
     {{end}}
     <td nowrap class="center top">
-      <div class="btngrp">
+      <div class="btngroup">
         {{range $action := $item.Actions}}
           {{if $action.Url}}
-            <a href="{{$action.Url}}" class="btn">{{$action.Name}}</a>
+            <a href="{{$action.Url}}" class="btn"
+              {{range $k, $v := $action.Params}} {{HTMLAttr $k}}="{{$v}}"{{end}}
+            >{{$action.Name}}</a>
           {{else}}
             <div{{range $k, $v := $action.Params}} {{HTMLAttr $k}}="{{$v}}"{{end}}>{{$action.Name}}</div>
           {{end}}
@@ -963,15 +984,15 @@ a:hover {
 }
 .admin_footer {
   padding: 0px 10px;
-  font-size: 0.7em;
+  font-size: 0.9em;
   border-top: 1px solid #e5e5e5;
   color: #888;
-  text-align: right;
+  text-align: center;
   box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
   position: relative;
   z-index: 2;
   background-color: white;
-  display: none;
+  padding: 5px 20px;
 }
 .btn {
   display: inline-block;
@@ -996,15 +1017,15 @@ a:hover {
   outline: none;
   text-decoration: none;
 }
-.btnlist {
+.btngroup {
   display: inline-flex;
 }
-.btnlist .btn:not(:last-child) {
+.btngroup .btn:not(:last-child) {
   border-right: none;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
 }
-.btnlist .btn:not(:first-child) {
+.btngroup .btn:not(:first-child) {
   border-top-left-radius: 0px;
   border-bottom-left-radius: 0px;
 }
@@ -1017,20 +1038,6 @@ a:hover {
   background-image: none;
   border-color: #d5d5d5;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
-}
-.btngrp {
-  display: flex;
-  text-align: right;
-  justify-content: flex-end;
-}
-.btngrp > :not(:last-child) {
-  border-right: none;
-  border-top-right-radius: 0px;
-  border-bottom-right-radius: 0px;
-}
-.btngrp > :not(:first-child) {
-  border-top-left-radius: 0px;
-  border-bottom-left-radius: 0px;
 }
 .form_errors_error {
   border: 1px solid #dd2e4f;

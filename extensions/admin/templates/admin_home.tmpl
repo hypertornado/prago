@@ -5,10 +5,23 @@
   <h2>{{.admin_header.Name}}</h2>
 
   <table class="admin_table">
-  {{range $item := .admin_header.Items}}
+  <tr>
+    <th>Název</th>
+    <th>Počet položek</th>
+    <th>Akce</th>
+  </tr>
+  {{range $item := .home_data}}
     <tr>
       <td>
-        <a href="{{$item.Url}}">{{$item.Name}}</a>
+        <a href="{{$item.URL}}">{{$item.Name}}</a>
+      </td>
+      <td>
+        {{$item.Count}}
+      </td>
+      <td>
+        {{range $action := $item.Actions}}
+          <a class="btn" href="{{$action.Url}}">{{$action.Name}}</a>
+        {{end}}
       </td>
     </tr>
   {{end}}
