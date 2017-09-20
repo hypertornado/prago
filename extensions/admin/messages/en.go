@@ -20,6 +20,7 @@ var en = map[string]string{
 	"admin_save":                "Save",
 	"admin_forgoten":            "Forgot your password?",
 	"admin_register":            "Create account",
+	"admin_register_password":   "Password (at least 7 characters)",
 	"admin_login_error":         "Wrong user email or password.",
 	"admin_login_ok":            "Log in was succesful",
 	"admin_logout_ok":           "User logged out",
@@ -37,7 +38,7 @@ var en = map[string]string{
 	"admin_password_wrong":   "Wrong password",
 	"admin_password_old":     "Old password",
 	"admin_password_new":     "New password",
-	"admin_password_length":  "Password must be at least 8 characters long",
+	"admin_password_length":  "Password must be at least 7 characters long",
 	"admin_password_changed": "Password changed",
 
 	"admin_forgotten_name":          "Renew forgotten password",

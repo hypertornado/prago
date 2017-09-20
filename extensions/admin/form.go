@@ -200,7 +200,7 @@ func NonEmptyValidator(Error string) ItemValidator {
 //MinLengthValidator for validation of min length of field
 func MinLengthValidator(Error string, minLength int) ItemValidator {
 	return NewValidator(func(field *FormItem) bool {
-		if len(field.Value) <= minLength {
+		if len(field.Value) < minLength {
 			return false
 		}
 		return true

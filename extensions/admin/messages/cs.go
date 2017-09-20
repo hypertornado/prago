@@ -20,7 +20,7 @@ var cs = map[string]string{
 	"admin_save":                     "Uložit",
 	"admin_forgoten":                 "Zapomenuté heslo?",
 	"admin_register":                 "Nový účet",
-	"admin_register_password":        "Heslo (alespoň 8 znaků)",
+	"admin_register_password":        "Heslo (alespoň 7 znaků)",
 	"admin_email_not_valid":          "Neplatný formát emailu.",
 	"admin_email_already_registered": "Uživatel s tímto emailem je již zaregistrován.",
 	"admin_user_name_not_empty":      "Jméno uživatele nemůže být prázdné",
@@ -47,7 +47,7 @@ var cs = map[string]string{
 	"admin_password_wrong":   "Špatné heslo",
 	"admin_password_old":     "Staré heslo",
 	"admin_password_new":     "Nové heslo",
-	"admin_password_length":  "Heslo musí mít alespoň 8 znaků",
+	"admin_password_length":  "Heslo musí mít alespoň 7 znaků",
 	"admin_password_changed": "Heslo změněno",
 	"admin_forgoten_set":     "Nastavit nové heslo",
 

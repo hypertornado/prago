@@ -66,7 +66,7 @@ func (u *User) emailConfirmed() bool {
 }
 
 func (u *User) newPassword(password string) error {
-	if len(password) < 8 {
+	if len(password) < 7 {
 		return errors.New("short password")
 	}
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
@@ -315,7 +315,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		form.Method = "POST"
 
 		passwordInput := form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_password_new"),
-			MinLengthValidator(messages.Messages.Get(locale, "admin_password_length"), 8))
+			MinLengthValidator(messages.Messages.Get(locale, "admin_password_length"), 7))
 		passwordInput.Focused = true
 		form.AddSubmit("send", messages.Messages.Get(locale, "admin_forgoten_set"))
 		return
@@ -467,7 +467,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 			}, messages.Messages.Get(locale, "admin_email_already_registered")),
 		)
 		form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_register_password"),
-			MinLengthValidator("", 8),
+			MinLengthValidator("", 7),
 		)
 		form.AddSubmit("send", messages.Messages.Get(locale, "admin_register"))
 		return form
@@ -597,7 +597,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		)
 		form.AddPasswordInput("newpassword",
 			messages.Messages.Get(locale, "admin_password_new"),
-			MinLengthValidator(messages.Messages.Get(locale, "admin_password_length"), 8),
+			MinLengthValidator(messages.Messages.Get(locale, "admin_password_length"), 7),
 		)
 		form.AddSubmit("_submit", messages.Messages.Get(locale, "admin_save"))
 		return form
