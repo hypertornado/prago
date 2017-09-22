@@ -27,6 +27,25 @@ class ImagePicker {
 
     var ids = this.hiddenInput.value.split(",");
 
+    this.fileInput.addEventListener("dragenter", (ev) => {
+      this.fileInput.classList.add("admin_images_fileinput-droparea");
+    });
+
+    this.fileInput.addEventListener("dragleave", (ev) => {
+      this.fileInput.classList.remove("admin_images_fileinput-droparea");
+    });
+
+    this.fileInput.addEventListener("dragover", (ev) => {
+      ev.preventDefault();
+    });
+
+    this.fileInput.addEventListener("drop", (ev) => {
+      return;
+      /*console.log(ev.dataTransfer);
+      ev.preventDefault();
+      return false;*/
+    });
+
     for (var i = 0; i < ids.length; i++) {
       var id = ids[i];
       if (id) {

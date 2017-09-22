@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"github.com/russross/blackfriday"
-	"regexp"
 	"strings"
 )
 

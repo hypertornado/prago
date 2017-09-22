@@ -1213,9 +1213,14 @@ input[type=date].input {
 .admin_images_fileinput {
   display: block;
   margin: 0px auto;
-  border: 1px solid #eee;
+  border: 3px dashed #eee;
   padding: 3px;
   border-radius: 3px;
+  padding: 20px;
+}
+.admin_images_fileinput-droparea {
+  border: 3px dashed #aaa;
+  background-color: #fafafa;
 }
 .admin_place_map {
   height: 300px;
@@ -1405,6 +1410,18 @@ var ImagePicker = (function () {
         this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
         this.hideProgress();
         var ids = this.hiddenInput.value.split(",");
+        this.fileInput.addEventListener("dragenter", function (ev) {
+            _this.fileInput.classList.add("admin_images_fileinput-droparea");
+        });
+        this.fileInput.addEventListener("dragleave", function (ev) {
+            _this.fileInput.classList.remove("admin_images_fileinput-droparea");
+        });
+        this.fileInput.addEventListener("dragover", function (ev) {
+            ev.preventDefault();
+        });
+        this.fileInput.addEventListener("drop", function (ev) {
+            return;
+        });
         for (var i = 0; i < ids.length; i++) {
             var id = ids[i];
             if (id) {

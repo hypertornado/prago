@@ -44,6 +44,18 @@ var ImagePicker = (function () {
         this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
         this.hideProgress();
         var ids = this.hiddenInput.value.split(",");
+        this.fileInput.addEventListener("dragenter", function (ev) {
+            _this.fileInput.classList.add("admin_images_fileinput-droparea");
+        });
+        this.fileInput.addEventListener("dragleave", function (ev) {
+            _this.fileInput.classList.remove("admin_images_fileinput-droparea");
+        });
+        this.fileInput.addEventListener("dragover", function (ev) {
+            ev.preventDefault();
+        });
+        this.fileInput.addEventListener("drop", function (ev) {
+            return;
+        });
         for (var i = 0; i < ids.length; i++) {
             var id = ids[i];
             if (id) {
