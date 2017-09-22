@@ -1,9 +1,9 @@
 {{define "admin_flash"}}
-{{if .flash_messages}}
-<div class="flash">
-{{range $message := .flash_messages}}
-  <div class="flash_message">{{$message}}</div>
-{{end}}
-</div>
-{{end}}
+  {{if .flash_messages}}
+    <div class="flash">
+      {{range $message := .flash_messages}}
+        <div class="flash_message">{{$message}}</div>
+      {{end}}
+    </div>
+  {{end}}
 {{end}}

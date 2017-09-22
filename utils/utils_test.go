@@ -48,11 +48,14 @@ func TestFilenames(t *testing.T) {
 
 func TestFilterMarkdown(t *testing.T) {
 	for _, v := range [][2]string{
-		{"abc", "abc"},
-		{"x[a](b)c[z](y)t", "xaczt"},
+		{"ab**c**d", "abcd"},
+		{"a\nb", "a b"},
+		{"a\n\nb", "a b"},
+		{"a[b](/xx)c", "abc"},
+		{"ka\n\n# b\nc", "ka b c"},
 	} {
 		if filterMarkdown(v[0]) != v[1] {
-			t.Fatal(fmt.Printf("Expected %s, got %s", v[1], filterMarkdown(v[0])))
+			t.Fatal(fmt.Printf("Expected %s, got %s\n", v[1], filterMarkdown(v[0])))
 		}
 	}
 

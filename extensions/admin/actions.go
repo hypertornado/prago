@@ -2,6 +2,7 @@ package admin
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"strconv"
@@ -15,11 +16,13 @@ type ButtonData struct {
 }
 
 type ResourceAction struct {
-	Name    func(string) string
-	Auth    Authenticatizer
-	Method  string
-	Url     string
-	Handler func(*Admin, *Resource, prago.Request)
+	Name         func(string) string
+	Auth         Authenticatizer
+	Method       string
+	Url          string
+	Handler      func(*Admin, *Resource, prago.Request)
+	ButtonParams map[string]string
+	//AfterFunc    func(user *User, id int64, admin *Admin)
 }
 
 func (ra *ResourceAction) GetName(language string) string {
@@ -68,6 +71,7 @@ var ActionNew = ResourceAction{
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
 
+		form.Classes = append(form.Classes, "form_leavealert")
 		form.Action = "../" + resource.ID
 		form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_create"))
 		AddCSRFToken(form, request)
@@ -133,6 +137,7 @@ var ActionEdit = ResourceAction{
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
 
+		form.Classes = append(form.Classes, "form_leavealert")
 		form.Action = "edit"
 		form.AddHidden("_submit_and_stay_clicked")
 		form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
@@ -259,15 +264,15 @@ var ActionOrder = ResourceAction{
 	},
 }
 
-func BindResourceAction(a *Admin, resource *Resource, action ResourceAction) error {
-	return BindAction(a, resource, action, false)
+func bindResourceAction(a *Admin, resource *Resource, action ResourceAction) error {
+	return bindAction(a, resource, action, false)
 }
 
-func BindResourceItemAction(a *Admin, resource *Resource, action ResourceAction) error {
-	return BindAction(a, resource, action, true)
+func bindResourceItemAction(a *Admin, resource *Resource, action ResourceAction) error {
+	return bindAction(a, resource, action, true)
 }
 
-func BindAction(a *Admin, resource *Resource, action ResourceAction, isItemAction bool) error {
+func bindAction(a *Admin, resource *Resource, action ResourceAction, isItemAction bool) error {
 	var url string
 	if isItemAction {
 		url = a.GetItemURL(resource, action.Url)
@@ -286,7 +291,6 @@ func BindAction(a *Admin, resource *Resource, action ResourceAction, isItemActio
 				return
 			}
 		}
-
 		action.Handler(a, resource, request)
 	}
 
@@ -296,37 +300,144 @@ func BindAction(a *Admin, resource *Resource, action ResourceAction, isItemActio
 	default:
 		controller.Get(url, fn)
 	}
-
 	return nil
 }
 
 //InitResourceDefault is default resource initializer
 func InitResourceDefault(a *Admin, resource *Resource) error {
 	for _, v := range resource.ResourceActions {
-		BindResourceAction(a, resource, v)
+		bindResourceAction(a, resource, v)
 	}
 
 	for _, v := range resource.ResourceItemActions {
-		BindResourceItemAction(a, resource, v)
+		bindResourceItemAction(a, resource, v)
 	}
 
 	if !resource.HasModel || !resource.HasView {
 		return nil
 	}
 
-	BindResourceAction(a, resource, ActionList)
-	BindResourceAction(a, resource, ActionOrder)
+	bindResourceAction(a, resource, ActionList)
+	bindResourceAction(a, resource, ActionOrder)
 
 	if resource.CanCreate {
-		BindResourceAction(a, resource, ActionNew)
-		BindResourceAction(a, resource, ActionCreate)
+		bindResourceAction(a, resource, ActionNew)
+		bindResourceAction(a, resource, ActionCreate)
 	}
 
 	if resource.CanEdit {
-		BindResourceItemAction(a, resource, ActionEdit)
-		BindResourceItemAction(a, resource, ActionUpdate)
-		BindResourceItemAction(a, resource, ActionDelete)
+		bindResourceItemAction(a, resource, ActionEdit)
+		bindResourceItemAction(a, resource, ActionUpdate)
+		bindResourceItemAction(a, resource, ActionDelete)
 	}
 
 	return nil
+}
+
+func (ar *Resource) ResourceActionsButtonData(user *User, admin *Admin) []ButtonData {
+	ret := []ButtonData{}
+	if ar.CanCreate {
+		ret = append(ret, ButtonData{
+			Name: messages.Messages.Get(user.Locale, "admin_new"),
+			Url:  admin.GetURL(ar, "new"),
+		})
+	}
+
+	for _, v := range ar.ResourceActions {
+		if v.Url == "" {
+			continue
+		}
+		name := v.Url
+		if v.Name != nil {
+			name = v.Name(user.Locale)
+		}
+
+		if v.Auth == nil || v.Auth(user) {
+			ret = append(ret, ButtonData{
+				Name: name,
+				Url:  admin.GetURL(ar, v.Url),
+			})
+		}
+	}
+	return ret
+}
+
+func (ar *Resource) ResourceItemActionsButtonData(user *User, id int64, admin *Admin) []ButtonData {
+	prefix := fmt.Sprintf("%s/%d", ar.ID, id)
+
+	ret := []ButtonData{}
+	if ar.PreviewURLFunction != nil {
+		var item interface{}
+		ar.newItem(&item)
+		err := admin.Query().WhereIs("id", id).Get(item)
+		if err == nil {
+			url := ar.PreviewURLFunction(item)
+			if url != "" {
+				ret = append(ret, ButtonData{
+					Name: messages.Messages.Get(user.Locale, "admin_view"),
+					Url:  url,
+					Params: map[string]string{
+						"target": "_blank",
+					},
+				})
+			}
+		}
+	}
+	if ar.CanEdit {
+		ret = append(ret, ButtonData{
+			Name: messages.Messages.Get(user.Locale, "admin_edit"),
+			Url:  prefix + "/edit",
+		})
+
+		ret = append(ret, ButtonData{
+			Name: messages.Messages.Get(user.Locale, "admin_delete"),
+			Url:  "",
+			Params: map[string]string{
+				"class":                "btn admin-action-delete",
+				"data-action":          fmt.Sprintf("%s/%d/delete?_csrfToken=", ar.ID, id),
+				"data-confirm-message": messages.Messages.Get(user.Locale, "admin_delete_confirmation"),
+			},
+		})
+
+		if ar.StructCache.OrderColumnName != "" {
+			ret = append(ret, ButtonData{
+				Name: "☰",
+				Url:  "",
+				Params: map[string]string{
+					"class": "btn admin-action-order",
+				},
+			})
+		}
+	}
+
+	for _, v := range ar.ResourceItemActions {
+		if v.Name == nil {
+			continue
+		}
+		name := v.Url
+		if v.Name != nil {
+			name = v.Name(user.Locale)
+		}
+
+		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
+
+			if v.Auth == nil || v.Auth(user) {
+				ret = append(ret, ButtonData{
+					Name:   name,
+					Url:    prefix + "/" + v.Url,
+					Params: v.ButtonParams,
+				})
+			}
+		}
+	}
+
+	return ret
+}
+
+func (ar *Resource) AddResourceItemAction(action ResourceAction) {
+	ar.ResourceItemActions = append(ar.ResourceItemActions, action)
+}
+
+func (ar *Resource) AddResourceAction(action ResourceAction) {
+	ar.ResourceActions = append(ar.ResourceActions, action)
 }

@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //bindDelete();
   bindClickAndStay();
   bindLists();
+  bindForm();
 });
 
 function bindClickAndStay() {

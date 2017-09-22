@@ -1,6 +1,6 @@
 {{define "admin_form"}}
 
-<form method="{{.Method}}" action="{{.Action}}" class="form" enctype="multipart/form-data" novalidate>
+<form method="{{.Method}}" action="{{.Action}}" class="form{{range $class := .Classes}} {{$class}}{{end}}" enctype="multipart/form-data" novalidate>
 
 {{if .Errors}}
   <div class="form_errors">

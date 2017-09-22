@@ -13,16 +13,17 @@ const adminTemplates = `
 </div>
 
 {{end}}{{define "admin_flash"}}
-{{if .flash_messages}}
-<div class="flash">
-{{range $message := .flash_messages}}
-  <div class="flash_message">{{$message}}</div>
+  {{if .flash_messages}}
+    <div class="flash">
+      {{range $message := .flash_messages}}
+        <div class="flash_message">{{$message}}</div>
+      {{end}}
+    </div>
+  {{end}}
 {{end}}
-</div>
-{{end}}
-{{end}}{{define "admin_form"}}
+{{define "admin_form"}}
 
-<form method="{{.Method}}" action="{{.Action}}" class="form" enctype="multipart/form-data" novalidate>
+<form method="{{.Method}}" action="{{.Action}}" class="form{{range $class := .Classes}} {{$class}}{{end}}" enctype="multipart/form-data" novalidate>
 
 {{if .Errors}}
   <div class="form_errors">
@@ -2092,6 +2093,30 @@ function bindDeleteButton(btn) {
         }
     });
 }
+function bindForm() {
+    var els = document.querySelectorAll(".form_leavealert");
+    for (var i = 0; i < els.length; i++) {
+        new Form(els[i]);
+    }
+}
+var Form = (function () {
+    function Form(el) {
+        var _this = this;
+        this.allow = false;
+        el.addEventListener("submit", function () {
+            _this.allow = true;
+        });
+        window.addEventListener("beforeunload", function (e) {
+            if (_this.allow) {
+                return;
+            }
+            var confirmationMessage = "Chcete opustit stránku bez uložení změn?";
+            e.returnValue = confirmationMessage;
+            return confirmationMessage;
+        });
+    }
+    return Form;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     bindMarkdowns();
     bindTimestamps();
@@ -2099,6 +2124,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindImagePickers();
     bindClickAndStay();
     bindLists();
+    bindForm();
 });
 function bindClickAndStay() {
     var els = document.getElementsByName("_submit_and_stay");

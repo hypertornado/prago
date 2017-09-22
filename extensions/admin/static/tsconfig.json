@@ -18,6 +18,7 @@
         "js/relations.ts",
         "js/places.ts",
         "js/delete-action.ts",
+        "js/form.ts",
         "js/load.ts"
     ]
 }

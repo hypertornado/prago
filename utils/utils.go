@@ -6,7 +6,6 @@ import (
 	"github.com/Machiel/slugify"
 	"math/rand"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -53,20 +52,6 @@ func ConsoleQuestion(question string) bool {
 		return true
 	}
 	return false
-}
-
-func filterMarkdown(in string) string {
-	r := regexp.MustCompile("\\[([^\\]]+)\\]\\(([^)]+)\\)")
-	in = r.ReplaceAllString(in, "$1")
-	return strings.Replace(in, "\\", "", -1)
-}
-
-//CropMarkdown remove all markdown special characters
-//TODO: now just links are filtered, better will be to use markdown custom renderers
-//https://godoc.org/github.com/russross/blackfriday#Renderer
-func CropMarkdown(text string, count int) string {
-	text = filterMarkdown(text)
-	return Crop(text, count)
 }
 
 //Crop removes text longer then count

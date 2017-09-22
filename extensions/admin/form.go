@@ -7,11 +7,12 @@ import (
 
 //Form represents admin form
 type Form struct {
-	Method string
-	Action string
-	Items  []*FormItem
-	Errors []string
-	Valid  bool
+	Method  string
+	Action  string
+	Items   []*FormItem
+	Errors  []string
+	Valid   bool
+	Classes []string
 }
 
 //ItemValidator represents validator for form item

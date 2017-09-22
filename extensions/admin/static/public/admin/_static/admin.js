@@ -732,6 +732,30 @@ function bindDeleteButton(btn) {
         }
     });
 }
+function bindForm() {
+    var els = document.querySelectorAll(".form_leavealert");
+    for (var i = 0; i < els.length; i++) {
+        new Form(els[i]);
+    }
+}
+var Form = (function () {
+    function Form(el) {
+        var _this = this;
+        this.allow = false;
+        el.addEventListener("submit", function () {
+            _this.allow = true;
+        });
+        window.addEventListener("beforeunload", function (e) {
+            if (_this.allow) {
+                return;
+            }
+            var confirmationMessage = "Chcete opustit stránku bez uložení změn?";
+            e.returnValue = confirmationMessage;
+            return confirmationMessage;
+        });
+    }
+    return Form;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     bindMarkdowns();
     bindTimestamps();
@@ -739,6 +763,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindImagePickers();
     bindClickAndStay();
     bindLists();
+    bindForm();
 });
 function bindClickAndStay() {
     var els = document.getElementsByName("_submit_and_stay");

@@ -205,6 +205,32 @@ func (u User) sendRenew(request prago.Request, a *Admin) error {
 func (User) InitResource(a *Admin, resource *Resource) error {
 	resource.DisplayInFooter = true
 
+	resource.AddResourceItemAction(
+		ResourceAction{
+			Name:   func(string) string { return "Přihlásit se jako" },
+			Url:    "loginas",
+			Method: "get",
+			Handler: func(admin *Admin, resource *Resource, request prago.Request) {
+				u := GetUser(request)
+				if !u.IsSysadmin {
+					panic("access denied")
+				}
+
+				id, err := strconv.Atoi(request.Params().Get("id"))
+				if err != nil {
+					panic(err)
+				}
+
+				var user User
+				prago.Must(a.Query().WhereIs("id", id).Get(&user))
+
+				session := request.GetData("session").(*sessions.Session)
+				session.Values["user_id"] = user.ID
+				prago.Must(session.Save(request.Request(), request.Response()))
+				prago.Redirect(request, a.Prefix)
+			},
+		})
+
 	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
 		request.SetData("locale", GetLocale(request))
 	})
@@ -422,28 +448,6 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		session.AddFlash(messages.Messages.Get(locale, "admin_login_ok"))
 		prago.Must(session.Save(request.Request(), request.Response()))
 		prago.Redirect(request, a.Prefix)
-	})
-
-	a.AdminController.Get(a.GetURL(resource, "as")+"/:id", func(request prago.Request) {
-
-		u := GetUser(request)
-		if !u.IsSysadmin {
-			panic("access denied")
-		}
-
-		id, err := strconv.Atoi(request.Params().Get("id"))
-		if err != nil {
-			panic(err)
-		}
-
-		var user User
-		prago.Must(a.Query().WhereIs("id", id).Get(&user))
-
-		session := request.GetData("session").(*sessions.Session)
-		session.Values["user_id"] = user.ID
-		prago.Must(session.Save(request.Request(), request.Response()))
-		prago.Redirect(request, a.Prefix)
-
 	})
 
 	newUserForm := func(locale string) *Form {
