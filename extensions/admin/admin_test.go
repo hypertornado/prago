@@ -127,7 +127,7 @@ func TestAdminQuery(t *testing.T) {
 func TestResource(t *testing.T) {
 	admin, resource := prepareResource()
 
-	items, err := resource.getList(admin, "en", "", make(map[string][]string))
+	items, err := resource.getListContent(admin, &listRequest{OrderBy: "id"}, &User{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,10 +154,13 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	items, _ = resource.getList(admin, "en", "", make(map[string][]string))
+	items, _ = resource.getListContent(admin, &listRequest{OrderBy: "id", Page: 1}, &User{})
 
-	if len(items.Header) != 3 {
-		t.Fatal(len(items.Header))
+	t.Log(items)
+	t.Log(items.Rows)
+
+	if len(items.Rows[0].Items) != 3 {
+		t.Fatal("wrong length")
 	}
 
 	if items.Rows[1].Items[2].Value != "show" {

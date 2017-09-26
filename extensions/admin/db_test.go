@@ -26,7 +26,7 @@ func (dbTestProvider) getResourceByName(string) *Resource {
 
 func init() {
 	var err error
-	cache, err = newStructCache(TestNode{})
+	cache, err = newStructCache(TestNode{}, make(map[string]FieldType))
 	if err != nil {
 		panic(err)
 	}
@@ -459,8 +459,8 @@ func TestMigrateTable(t *testing.T) {
 	tableName := "node"
 	dropTable(db, tableName)
 
-	cache1, _ := newStructCache(N1{})
-	cache2, _ := newStructCache(N2{})
+	cache1, _ := newStructCache(N1{}, make(map[string]FieldType))
+	cache2, _ := newStructCache(N2{}, make(map[string]FieldType))
 
 	createTable(db, tableName, cache1, false)
 

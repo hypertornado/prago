@@ -63,7 +63,7 @@ type listRequest struct {
 	Filter    map[string]string
 }
 
-func (resource *Resource) getListHeader(admin *Admin, path string, user *User) (list list, err error) {
+func (resource *Resource) getListHeader(admin *Admin, user *User) (list list, err error) {
 	lang := user.Locale
 
 	list.Colspan = 1
@@ -125,7 +125,7 @@ func (sf *structField) filterLayout() string {
 	return ""
 }
 
-func (resource *Resource) addFilterToQuery(q *Query, filter map[string]string) {
+func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Query {
 	for k, v := range filter {
 		field := resource.StructCache.fieldMap[k]
 		if field == nil {
@@ -144,32 +144,33 @@ func (resource *Resource) addFilterToQuery(q *Query, filter map[string]string) {
 			v = strings.Trim(v, " ")
 			numVal, err := strconv.Atoi(v)
 			if err == nil {
-				q.WhereIs(k, numVal)
+				q = q.WhereIs(k, numVal)
 			}
 		case "filter_layout_boolean":
 			switch v {
 			case "true":
-				q.WhereIs(k, true)
+				q = q.WhereIs(k, true)
 			case "false":
-				q.WhereIs(k, false)
+				q = q.WhereIs(k, false)
 			}
 		}
 	}
+	return q
 }
 
-func (resource *Resource) getListContent(admin *Admin, path string, requestQuery *listRequest, user *User) (list listContent, err error) {
+func (resource *Resource) getListContent(admin *Admin, requestQuery *listRequest, user *User) (list listContent, err error) {
 	q := admin.Query()
 	if requestQuery.OrderDesc {
-		q.OrderDesc(requestQuery.OrderBy)
+		q = q.OrderDesc(requestQuery.OrderBy)
 	} else {
-		q.Order(requestQuery.OrderBy)
+		q = q.Order(requestQuery.OrderBy)
 	}
 
 	var count int64
 	var item interface{}
 	resource.newItem(&item)
 	countQuery := admin.Query()
-	resource.addFilterToQuery(countQuery, requestQuery.Filter)
+	countQuery = resource.addFilterToQuery(countQuery, requestQuery.Filter)
 	count, err = countQuery.Count(item)
 	if err != nil {
 		return
@@ -196,9 +197,9 @@ func (resource *Resource) getListContent(admin *Admin, path string, requestQuery
 		}
 	}
 
-	resource.addFilterToQuery(q, requestQuery.Filter)
-	q.Offset((currentPage - 1) * resource.Pagination)
-	q.Limit(resource.Pagination)
+	q = resource.addFilterToQuery(q, requestQuery.Filter)
+	q = q.Offset((currentPage - 1) * resource.Pagination)
+	q = q.Limit(resource.Pagination)
 
 	var rowItems interface{}
 	resource.newItems(&rowItems)

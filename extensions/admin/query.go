@@ -32,8 +32,8 @@ func (a *Admin) Save(item interface{}) error {
 }
 
 //Query item from db
-func (a *Admin) Query() *Query {
-	return &Query{
+func (a *Admin) Query() Query {
+	return Query{
 		query: &listQuery{},
 		admin: a,
 		db:    a.getDB(),
@@ -41,7 +41,7 @@ func (a *Admin) Query() *Query {
 }
 
 //Where adds where query
-func (q *Query) Where(w ...interface{}) *Query {
+func (q Query) Where(w ...interface{}) Query {
 	if q.err == nil {
 		q.err = q.query.where(w...)
 	}
@@ -49,36 +49,36 @@ func (q *Query) Where(w ...interface{}) *Query {
 }
 
 //WhereIs adds where query for single item
-func (q *Query) WhereIs(name string, value interface{}) *Query {
+func (q Query) WhereIs(name string, value interface{}) Query {
 	return q.Where(map[string]interface{}{name: value})
 }
 
 //Order sets order column
-func (q *Query) Order(name string) *Query {
+func (q Query) Order(name string) Query {
 	q.query.addOrder(name, false)
 	return q
 }
 
 //OrderDesc sets descending order column
-func (q *Query) OrderDesc(name string) *Query {
+func (q Query) OrderDesc(name string) Query {
 	q.query.addOrder(name, true)
 	return q
 }
 
 //Limit query's result
-func (q *Query) Limit(limit int64) *Query {
+func (q Query) Limit(limit int64) Query {
 	q.query.limit = limit
 	return q
 }
 
 //Offset of query's result
-func (q *Query) Offset(offset int64) *Query {
+func (q Query) Offset(offset int64) Query {
 	q.query.offset = offset
 	return q
 }
 
 //Get item or items with query
-func (q *Query) Get(item interface{}) error {
+func (q Query) Get(item interface{}) error {
 	if q.err != nil {
 		return q.err
 	}
@@ -116,7 +116,7 @@ func (q *Query) Get(item interface{}) error {
 }
 
 //Count items with query
-func (q *Query) Count(item interface{}) (int64, error) {
+func (q Query) Count(item interface{}) (int64, error) {
 	resource, err := q.admin.getResourceByItem(item)
 	if err != nil {
 		return -1, err
@@ -125,7 +125,7 @@ func (q *Query) Count(item interface{}) (int64, error) {
 }
 
 //Delete item with query
-func (q *Query) Delete(item interface{}) (int64, error) {
+func (q Query) Delete(item interface{}) (int64, error) {
 	resource, err := q.admin.getResourceByItem(item)
 	if err != nil {
 		return -1, err

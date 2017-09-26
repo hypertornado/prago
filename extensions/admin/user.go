@@ -155,7 +155,7 @@ func (u User) sendAdminEmail(request prago.Request, a *Admin) error {
 		return errors.New("no reply email empty")
 	}
 	var users []*User
-	err := a.Query().WhereIs("isadmin", true).Get(&users)
+	err := a.Query().WhereIs("issysadmin", true).Get(&users)
 	if err != nil {
 		return err
 	}

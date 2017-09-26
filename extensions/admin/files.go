@@ -50,7 +50,6 @@ func (File) AdminName(lang string) string { return messages.Messages.Get(lang, "
 
 //AdminAfterFormCreated creates form for file upload
 func (File) AdminAfterFormCreated(f *Form, request prago.Request, newItem bool) *Form {
-	fmt.Println("here")
 	newForm := NewForm()
 	newForm.Method = f.Method
 	newForm.Action = f.Action

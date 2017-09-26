@@ -66,7 +66,7 @@ func (q *listQuery) where(data ...interface{}) error {
 	}
 
 	if len(q.whereString) > 0 {
-		q.whereString += " and "
+		q.whereString += " AND "
 	}
 	q.whereString += whereString
 	q.whereParams = append(q.whereParams, whereParams...)

@@ -22,7 +22,6 @@ type ResourceAction struct {
 	Url          string
 	Handler      func(*Admin, *Resource, prago.Request)
 	ButtonParams map[string]string
-	//AfterFunc    func(user *User, id int64, admin *Admin)
 }
 
 func (ra *ResourceAction) GetName(language string) string {
@@ -35,7 +34,7 @@ func (ra *ResourceAction) GetName(language string) string {
 var ActionList = ResourceAction{
 	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
 		user := request.GetData("currentuser").(*User)
-		listData, err := resource.getListHeader(admin, request.Request().URL.Path, user)
+		listData, err := resource.getListHeader(admin, user)
 		if err != nil {
 			if err == ErrItemNotFound {
 				render404(request)

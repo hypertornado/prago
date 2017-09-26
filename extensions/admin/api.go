@@ -50,7 +50,7 @@ func bindListAPI(a *Admin) {
 			panic(err)
 		}
 
-		listData, err := resource.getListContent(a, "", &req, user)
+		listData, err := resource.getListContent(a, &req, user)
 		if err != nil {
 			panic(err)
 		}
