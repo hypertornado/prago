@@ -1366,13 +1366,7 @@ progress {
 const adminJS = `
 var Autoresize = (function () {
     function Autoresize(el) {
-        this.el = el;
-        this.el.addEventListener('change', this.resizeIt.bind(this));
-        this.el.addEventListener('cut', this.delayedResize.bind(this));
-        this.el.addEventListener('paste', this.delayedResize.bind(this));
-        this.el.addEventListener('drop', this.delayedResize.bind(this));
-        this.el.addEventListener('keydown', this.delayedResize.bind(this));
-        this.resizeIt();
+        return;
     }
     Autoresize.prototype.delayedResize = function () {
         var self = this;
@@ -2093,7 +2087,6 @@ function bindDelete() {
     }
 }
 function bindDeleteButton(btn) {
-    var _this = this;
     var csrfToken = document.body.getAttribute("data-csrf-token");
     btn.addEventListener("click", function () {
         var message = btn.getAttribute("data-confirm-message");
@@ -2102,7 +2095,7 @@ function bindDeleteButton(btn) {
             var request = new XMLHttpRequest();
             request.open("POST", url, true);
             request.addEventListener("load", function () {
-                if (_this.status == 200) {
+                if (request.status == 200) {
                     document.location.reload();
                 }
                 else {
