@@ -16,7 +16,7 @@ function bindDeleteButton(btn: HTMLDivElement) {
       request.open("POST", url, true);
 
       request.addEventListener("load", () => {
-        if (this.status == 200) {
+        if (request.status == 200) {
           document.location.reload();
         } else {
           console.error("Error while deleting item");

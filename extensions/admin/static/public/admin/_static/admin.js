@@ -727,7 +727,6 @@ function bindDelete() {
     }
 }
 function bindDeleteButton(btn) {
-    var _this = this;
     var csrfToken = document.body.getAttribute("data-csrf-token");
     btn.addEventListener("click", function () {
         var message = btn.getAttribute("data-confirm-message");
@@ -736,7 +735,7 @@ function bindDeleteButton(btn) {
             var request = new XMLHttpRequest();
             request.open("POST", url, true);
             request.addEventListener("load", function () {
-                if (_this.status == 200) {
+                if (request.status == 200) {
                     document.location.reload();
                 }
                 else {

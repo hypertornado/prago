@@ -158,6 +158,7 @@ func GetUser(request prago.Request) *User {
 
 type AdminHeaderData struct {
 	Name        string
+	Language    string
 	Logo        string
 	Background  string
 	UrlPrefix   string
@@ -174,17 +175,18 @@ type AdminHeaderItem struct {
 func (a *Admin) HeaderAndFooterData(request prago.Request) (headerData *AdminHeaderData,
 	footerData []AdminHeaderItem) {
 
+	user := GetUser(request)
+	locale := GetLocale(request)
+
 	headerData = &AdminHeaderData{
 		Name:        a.AppName,
+		Language:    locale,
 		Logo:        a.Logo,
 		Background:  a.Background,
 		UrlPrefix:   a.Prefix,
 		HomepageUrl: request.App().Config.GetStringWithFallback("baseUrl", request.Request().Host),
 		Items:       []AdminHeaderItem{},
 	}
-
-	user := GetUser(request)
-	locale := GetLocale(request)
 
 	for _, resource := range a.Resources {
 		if resource.HasView && resource.Authenticate(user) {

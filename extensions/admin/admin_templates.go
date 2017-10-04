@@ -271,7 +271,7 @@ const adminTemplates = `
 {{end}}
 {{define "admin_layout"}}
 <!doctype html>
-<html>
+<html lang="{{.admin_header.Language}}">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -1420,6 +1420,9 @@ var ImagePicker = (function () {
             ev.preventDefault();
         });
         this.fileInput.addEventListener("drop", function (ev) {
+            console.log("x");
+            var text = ev.dataTransfer.getData('Text');
+            console.log(text);
             return;
         });
         for (var i = 0; i < ids.length; i++) {
