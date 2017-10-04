@@ -2,6 +2,9 @@ class Autoresize {
   el: HTMLTextAreaElement;
 
   constructor(el: HTMLTextAreaElement) {
+    //DISABLED
+    return;
+    /*
     this.el = el;
 
     this.el.addEventListener('change', this.resizeIt.bind(this));
@@ -10,7 +13,7 @@ class Autoresize {
     this.el.addEventListener('drop', this.delayedResize.bind(this));
     this.el.addEventListener('keydown', this.delayedResize.bind(this));
 
-    this.resizeIt();
+    this.resizeIt();*/
   }
 
   delayedResize () {

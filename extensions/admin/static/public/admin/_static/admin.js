@@ -1,12 +1,6 @@
 var Autoresize = (function () {
     function Autoresize(el) {
-        this.el = el;
-        this.el.addEventListener('change', this.resizeIt.bind(this));
-        this.el.addEventListener('cut', this.delayedResize.bind(this));
-        this.el.addEventListener('paste', this.delayedResize.bind(this));
-        this.el.addEventListener('drop', this.delayedResize.bind(this));
-        this.el.addEventListener('keydown', this.delayedResize.bind(this));
-        this.resizeIt();
+        return;
     }
     Autoresize.prototype.delayedResize = function () {
         var self = this;
