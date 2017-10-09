@@ -204,17 +204,17 @@ func loadFile(folder, path string, header *multipart.FileHeader) error {
 	}
 	err := os.MkdirAll(folder, 0777)
 	if err != nil {
-		return err
+		return fmt.Errorf("mkdirall : %s", err)
 	}
 
 	inFile, err := header.Open()
 	if err != nil {
-		return err
+		return fmt.Errorf("opening header: %s", err)
 	}
 
 	outFile, err := os.Create(path)
 	if err != nil {
-		return err
+		return fmt.Errorf("creating file: %s", err)
 	}
 
 	io.Copy(outFile, inFile)
@@ -325,13 +325,13 @@ func (f *File) update(fileUploadPath string) error {
 
 	file, err := os.Open(path)
 	if err != nil {
-		return err
+		return fmt.Errorf("opening file: %s", err)
 	}
 	defer file.Close()
 
 	stat, err := file.Stat()
 	if err != nil {
-		return err
+		return fmt.Errorf("getting file stats: %s", err)
 	}
 
 	f.Size = stat.Size()
@@ -346,7 +346,7 @@ func (f *File) update(fileUploadPath string) error {
 
 		img, err := decoder(file)
 		if err != nil {
-			return err
+			return fmt.Errorf("decoder: %s", err)
 		}
 		bounds := img.Bounds()
 		f.Width = int64(bounds.Size().X)
@@ -357,7 +357,7 @@ func (f *File) update(fileUploadPath string) error {
 			dirPath, filePath := f.getPath(fileUploadPath + "thumb/" + k)
 			err := os.MkdirAll(dirPath, 0777)
 			if err != nil {
-				return err
+				return fmt.Errorf("making dir: %s", err)
 			}
 
 			cmd := exec.Command("convert", path, "-auto-orient", "-thumbnail", fmt.Sprintf("%dx%d", v[0], v[1]), filePath)
@@ -365,7 +365,7 @@ func (f *File) update(fileUploadPath string) error {
 			cmd.Stderr = os.Stderr
 			err = cmd.Run()
 			if err != nil {
-				return err
+				return fmt.Errorf("executing convert: %s", err)
 			}
 		}
 	}
@@ -419,11 +419,11 @@ func updateFiles(a *Admin) error {
 		if file.isImage() {
 			err := file.update(fileUploadPath)
 			if err != nil {
-				return err
+				return fmt.Errorf("updating file: %s", err)
 			}
 			err = a.Save(file)
 			if err != nil {
-				return err
+				return fmt.Errorf("saving file: %s", err)
 			}
 		}
 	}
