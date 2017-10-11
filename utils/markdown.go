@@ -14,6 +14,8 @@ func filterMarkdown(in string) string {
 	))
 	ret = strings.Trim(ret, " ")
 	ret = strings.Replace(ret, "\n", " ", -1)
+	ret = strings.Replace(ret, "---", "—", -1)
+	ret = strings.Replace(ret, "--", "–", -1)
 	return ret
 }
 
