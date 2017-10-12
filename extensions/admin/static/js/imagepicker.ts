@@ -111,10 +111,17 @@ class ImagePicker {
 
     container.addEventListener("dragstart", (e) => {
       this.draggedElement = <HTMLAnchorElement>e.target;
+      //(e as DragEvent).dataTransfer.setData('text/plain', '');
     });
 
     container.addEventListener("drop", (e) => {
       var droppedElement: Element = e.toElement;
+
+      //firefox dont have toElement, but have originalTarget
+      if (!droppedElement) {
+        droppedElement = <Element>(<any>e).originalTarget;
+      }
+
       for (var i = 0; i < 3; i++) {
         if (droppedElement.nodeName == "A") {
           break;
@@ -126,6 +133,7 @@ class ImagePicker {
       var draggedIndex: number = -1;
       var droppedIndex: number = -1;
       var parent = this.draggedElement.parentElement;
+
       for (var i = 0; i < parent.children.length; i++) {
         var child = parent.children[i];
         if (child == this.draggedElement) {
@@ -145,6 +153,9 @@ class ImagePicker {
 
       DOMinsertChildAtIndex(parent, this.draggedElement, droppedIndex);
       this.updateHiddenData();
+
+      e.preventDefault();
+      return false;
     });
 
     container.addEventListener("dragover", (e) => {

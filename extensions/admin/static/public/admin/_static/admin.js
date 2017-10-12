@@ -111,6 +111,9 @@ var ImagePicker = (function () {
         });
         container.addEventListener("drop", function (e) {
             var droppedElement = e.toElement;
+            if (!droppedElement) {
+                droppedElement = e.originalTarget;
+            }
             for (var i = 0; i < 3; i++) {
                 if (droppedElement.nodeName == "A") {
                     break;
@@ -139,6 +142,8 @@ var ImagePicker = (function () {
             }
             DOMinsertChildAtIndex(parent, _this.draggedElement, droppedIndex);
             _this.updateHiddenData();
+            e.preventDefault();
+            return false;
         });
         container.addEventListener("dragover", function (e) {
             e.preventDefault();

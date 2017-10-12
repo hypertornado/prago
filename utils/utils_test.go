@@ -54,6 +54,7 @@ func TestFilterMarkdown(t *testing.T) {
 		{"a[b](/xx)c", "abc"},
 		{"ka\n\n# b\nc", "ka b c"},
 		{"a --- b", "a — b"},
+		{"## popis aktuality", "popis aktuality"},
 	} {
 		if filterMarkdown(v[0]) != v[1] {
 			t.Fatal(fmt.Printf("Expected %s, got %s\n", v[1], filterMarkdown(v[0])))

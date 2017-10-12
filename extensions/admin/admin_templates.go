@@ -1087,6 +1087,7 @@ a:hover {
 }
 select.input {
   -webkit-appearance: menulist-button;
+  -moz-appearance: none;
   appearance: menulist-button;
   height: 24px;
 }
@@ -1404,20 +1405,33 @@ var ImagePicker = (function () {
         this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
         this.hideProgress();
         var ids = this.hiddenInput.value.split(",");
+        this.fileInput.addEventListener("dragstart", function (ev) {
+            console.log("drag start");
+            ev.preventDefault();
+            return false;
+        });
         this.fileInput.addEventListener("dragenter", function (ev) {
+            console.log("drag enter");
             _this.fileInput.classList.add("admin_images_fileinput-droparea");
+            ev.preventDefault();
+            return false;
         });
         this.fileInput.addEventListener("dragleave", function (ev) {
+            console.log("drag leave");
             _this.fileInput.classList.remove("admin_images_fileinput-droparea");
+            ev.preventDefault();
+            return false;
         });
         this.fileInput.addEventListener("dragover", function (ev) {
+            console.log("drag over");
             ev.preventDefault();
+            return false;
         });
         this.fileInput.addEventListener("drop", function (ev) {
-            console.log("x");
+            console.log("drop");
             var text = ev.dataTransfer.getData('Text');
-            console.log(text);
-            return;
+            ev.preventDefault();
+            return false;
         });
         for (var i = 0; i < ids.length; i++) {
             var id = ids[i];

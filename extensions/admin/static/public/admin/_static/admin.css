@@ -371,6 +371,7 @@ a:hover {
 }
 select.input {
   -webkit-appearance: menulist-button;
+  -moz-appearance: none;
   appearance: menulist-button;
   height: 24px;
 }
