@@ -64,6 +64,12 @@
   <input class="input admin_table_filter_item" data-typ="{{.ColumnName}}">
 {{end}}
 
+{{define "filter_layout_relation"}}
+  <select class="input admin_table_filter_item admin_table_filter_item-relations" data-typ="{{.ColumnName}}">
+    <option value="" selected=""></option>
+  </select>
+{{end}}
+
 {{define "filter_layout_number"}}
   <input class="input admin_table_filter_item" data-typ="{{.ColumnName}}">
 {{end}}
@@ -74,7 +80,6 @@
     <option value="true">✅</option>
     <option value="false">-</option>
   </select>
-
 {{end}}
 
 {{define "admin_list_cells"}}

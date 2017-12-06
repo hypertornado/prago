@@ -429,6 +429,12 @@ const adminTemplates = `
   <input class="input admin_table_filter_item" data-typ="{{.ColumnName}}">
 {{end}}
 
+{{define "filter_layout_relation"}}
+  <select class="input admin_table_filter_item admin_table_filter_item-relations" data-typ="{{.ColumnName}}">
+    <option value="" selected=""></option>
+  </select>
+{{end}}
+
 {{define "filter_layout_number"}}
   <input class="input admin_table_filter_item" data-typ="{{.ColumnName}}">
 {{end}}
@@ -439,7 +445,6 @@ const adminTemplates = `
     <option value="true">✅</option>
     <option value="false">-</option>
   </select>
-
 {{end}}
 
 {{define "admin_list_cells"}}
@@ -1405,33 +1410,20 @@ var ImagePicker = (function () {
         this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
         this.hideProgress();
         var ids = this.hiddenInput.value.split(",");
-        this.fileInput.addEventListener("dragstart", function (ev) {
-            console.log("drag start");
-            ev.preventDefault();
-            return false;
-        });
         this.fileInput.addEventListener("dragenter", function (ev) {
-            console.log("drag enter");
             _this.fileInput.classList.add("admin_images_fileinput-droparea");
-            ev.preventDefault();
-            return false;
         });
         this.fileInput.addEventListener("dragleave", function (ev) {
-            console.log("drag leave");
             _this.fileInput.classList.remove("admin_images_fileinput-droparea");
-            ev.preventDefault();
-            return false;
         });
         this.fileInput.addEventListener("dragover", function (ev) {
-            console.log("drag over");
             ev.preventDefault();
-            return false;
         });
         this.fileInput.addEventListener("drop", function (ev) {
-            console.log("drop");
+            console.log("x");
             var text = ev.dataTransfer.getData('Text');
-            ev.preventDefault();
-            return false;
+            console.log(text);
+            return;
         });
         for (var i = 0; i < ids.length; i++) {
             var id = ids[i];
@@ -1491,6 +1483,9 @@ var ImagePicker = (function () {
         });
         container.addEventListener("drop", function (e) {
             var droppedElement = e.toElement;
+            if (!droppedElement) {
+                droppedElement = e.originalTarget;
+            }
             for (var i = 0; i < 3; i++) {
                 if (droppedElement.nodeName == "A") {
                     break;
@@ -1519,6 +1514,8 @@ var ImagePicker = (function () {
             }
             DOMinsertChildAtIndex(parent, _this.draggedElement, droppedIndex);
             _this.updateHiddenData();
+            e.preventDefault();
+            return false;
         });
         container.addEventListener("dragover", function (e) {
             e.preventDefault();
@@ -1684,6 +1681,8 @@ var List = (function () {
         return ret;
     };
     List.prototype.bindFilter = function () {
+        console.log("XXX");
+        this.bindFilterRelations();
         this.filterInputs = this.el.querySelectorAll(".admin_table_filter_item");
         for (var i = 0; i < this.filterInputs.length; i++) {
             var input = this.filterInputs[i];
@@ -1700,6 +1699,16 @@ var List = (function () {
         this.changed = true;
         this.changedTimestamp = Date.now();
         this.progress.classList.remove("hidden");
+    };
+    List.prototype.bindFilterRelations = function () {
+        var els = this.el.querySelectorAll(".admin_table_filter_item-relations");
+        for (var i = 0; i < els.length; i++) {
+            this.bindFilterRelation(els[i]);
+        }
+    };
+    List.prototype.bindFilterRelation = function (select) {
+        console.log("HERE");
+        console.log(select);
     };
     List.prototype.inputPeriodicListener = function () {
         var _this = this;

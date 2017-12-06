@@ -155,6 +155,7 @@ class List {
   }
 
   bindFilter() {
+    this.bindFilterRelations();
     this.filterInputs = this.el.querySelectorAll(".admin_table_filter_item");
     for (var i = 0; i < this.filterInputs.length; i++) {
       var input: HTMLInputElement = <HTMLInputElement>this.filterInputs[i];
@@ -172,6 +173,36 @@ class List {
     this.changed = true;
     this.changedTimestamp = Date.now();
     this.progress.classList.remove("hidden");
+  }
+
+  bindFilterRelations() {
+    var els = this.el.querySelectorAll(".admin_table_filter_item-relations");
+    for (var i = 0; i < els.length; i++) {
+      this.bindFilterRelation(<HTMLSelectElement>els[i]);
+    }
+  }
+
+  bindFilterRelation(select: HTMLSelectElement) {
+    var typ = select.getAttribute("data-typ");
+
+    var adminPrefix = document.body.getAttribute("data-admin-prefix");
+    var request = new XMLHttpRequest();
+    request.open("GET", adminPrefix + "/_api/resource/" + typ, true);
+
+    request.addEventListener("load", () => {
+      if (request.status == 200) {
+        var resp = JSON.parse(request.response);
+        for (var item of resp) {
+          var option = document.createElement("option");
+          option.setAttribute("value", item.id);
+          option.innerText = item.name;
+          select.appendChild(option);
+        }
+      } else {
+        console.error("Error wile loading relation " + typ + ".");
+      }
+    });
+    request.send();
   }
 
   inputPeriodicListener() {

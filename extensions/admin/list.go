@@ -116,6 +116,9 @@ func (sf *structField) filterLayout() string {
 	}
 
 	if sf.Typ.Kind() == reflect.Int64 || sf.Typ.Kind() == reflect.Int {
+		if sf.Tags["prago-type"] == "relation" {
+			return "filter_layout_relation"
+		}
 		return "filter_layout_number"
 	}
 
@@ -140,7 +143,7 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 			k = strings.Replace(k, "`", "", -1)
 			str := fmt.Sprintf("`%s` LIKE ?", k)
 			q = q.Where(str, v)
-		case "filter_layout_number":
+		case "filter_layout_number", "filter_layout_relation":
 			v = strings.Trim(v, " ")
 			numVal, err := strconv.Atoi(v)
 			if err == nil {

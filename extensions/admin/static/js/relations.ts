@@ -54,7 +54,6 @@ function bindRelations() {
     option.setAttribute("value", value);
     option.innerText = description;
     select.appendChild(option);
-
   }
 
   var elements = document.querySelectorAll(".admin_item_relation");
