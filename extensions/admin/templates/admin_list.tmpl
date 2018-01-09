@@ -7,7 +7,6 @@
 {{$table := .admin_list}}
 
 {{$global := .}}
-
 {{range $snippet := .admin_resource.Snippets}}
   {{tmpl $snippet.Template $global}}
 {{end}}

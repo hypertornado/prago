@@ -2,7 +2,6 @@ package elastic
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/hypertornado/prago"
 	administration "github.com/hypertornado/prago/extensions/admin"
 	"golang.org/x/net/context"
@@ -26,7 +25,6 @@ type ElasticMiddleware struct {
 }
 
 func (em *ElasticMiddleware) Init(app *prago.App) error {
-	fmt.Println("init elastic middleware")
 	elasticMiddleware = em
 
 	client, err := elastic.NewClient()

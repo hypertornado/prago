@@ -56,15 +56,27 @@ func ConsoleQuestion(question string) bool {
 
 //Crop removes text longer then count
 //it tries not to split in the middle of words
-func Crop(text string, count int) string {
-	runes := []rune(text)
-	if len(runes) <= count {
-		return text
+func Crop(in string, cropLength int) string {
+	if cropLength < 0 {
+		return in
 	}
-	ret := string(runes[0:count])
-	i := strings.LastIndex(ret, " ")
-	if i < 0 {
-		return text
+	inRune := []rune(in)
+	if len(inRune) < cropLength {
+		return in
+	} else {
+		inRune = inRune[:cropLength]
+		in = strings.TrimRightFunc(string(inRune), func(r rune) bool {
+			if r == ' ' {
+				return false
+			}
+			return true
+		})
+		in = strings.TrimRightFunc(in, func(r rune) bool {
+			if r == ' ' {
+				return true
+			}
+			return false
+		})
+		return in + "…"
 	}
-	return ret[0:i]
 }

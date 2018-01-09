@@ -40,13 +40,8 @@ class ImagePicker {
     });
 
     this.fileInput.addEventListener("drop", (ev) => {
-      console.log("x");
       var text = ev.dataTransfer.getData('Text');
-      console.log(text);
       return;
-      /*console.log(ev.dataTransfer);
-      ev.preventDefault();
-      return false;*/
     });
 
     for (var i = 0; i < ids.length; i++) {

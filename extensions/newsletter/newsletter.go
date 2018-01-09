@@ -14,6 +14,7 @@ import (
 	"html/template"
 	"io"
 	"io/ioutil"
+	"net/mail"
 	"net/url"
 	"strings"
 	"time"
@@ -115,6 +116,7 @@ type NewsletterMiddleware struct {
 	baseUrl        string
 	Admin          *administration.Admin
 	SenderEmail    string
+	SenderName     string
 	Randomness     string
 	SendgridKey    string
 	sendgridClient *sendgrid.SGClient
@@ -246,7 +248,13 @@ func (nm NewsletterMiddleware) Init(app *prago.App) error {
 
 func (nm NewsletterMiddleware) sendConfirmEmail(name, email string) error {
 	message := sendgrid.NewMail()
-	message.SetFrom(nm.SenderEmail)
+
+	address := mail.Address{
+		Name:    nm.SenderName,
+		Address: nm.SenderEmail,
+	}
+
+	message.SetFromEmail(&address)
 	message.AddTo(email)
 	message.AddToName(name)
 	message.SetSubject("Potvrďte prosím odběr newsletteru " + nm.Name)
@@ -500,11 +508,16 @@ func (nm *NewsletterMiddleware) GetRecipients() ([]string, error) {
 
 func (nm *NewsletterMiddleware) SendEmails(n Newsletter, emails []string) error {
 	for _, v := range emails {
-		fmt.Println("sending", v)
 		body, err := nm.GetBody(n, v)
 		if err == nil {
 			message := sendgrid.NewMail()
-			message.SetFrom(nm.SenderEmail)
+
+			address := mail.Address{
+				Name:    nm.SenderName,
+				Address: nm.SenderEmail,
+			}
+			message.SetFromEmail(&address)
+
 			message.AddTo(v)
 			message.SetSubject(n.Name)
 			message.SetHTML(body)

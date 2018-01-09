@@ -129,6 +129,11 @@ const adminTemplates = `
   </table>
 </div>
 
+{{$global := .}}
+{{range $snippet := .snippets}}
+  {{tmpl $snippet.Template $global}}
+{{end}}
+
 {{end}}{{define "admin_item_input"}}
   <input name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
@@ -372,7 +377,6 @@ const adminTemplates = `
 {{$table := .admin_list}}
 
 {{$global := .}}
-
 {{range $snippet := .admin_resource.Snippets}}
   {{tmpl $snippet.Template $global}}
 {{end}}
@@ -1420,9 +1424,7 @@ var ImagePicker = (function () {
             ev.preventDefault();
         });
         this.fileInput.addEventListener("drop", function (ev) {
-            console.log("x");
             var text = ev.dataTransfer.getData('Text');
-            console.log(text);
             return;
         });
         for (var i = 0; i < ids.length; i++) {
@@ -1681,7 +1683,6 @@ var List = (function () {
         return ret;
     };
     List.prototype.bindFilter = function () {
-        console.log("XXX");
         this.bindFilterRelations();
         this.filterInputs = this.el.querySelectorAll(".admin_table_filter_item");
         for (var i = 0; i < this.filterInputs.length; i++) {
@@ -1707,8 +1708,26 @@ var List = (function () {
         }
     };
     List.prototype.bindFilterRelation = function (select) {
-        console.log("HERE");
-        console.log(select);
+        var typ = select.getAttribute("data-typ");
+        var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        var request = new XMLHttpRequest();
+        request.open("GET", adminPrefix + "/_api/resource/" + typ, true);
+        request.addEventListener("load", function () {
+            if (request.status == 200) {
+                var resp = JSON.parse(request.response);
+                for (var _i = 0, resp_1 = resp; _i < resp_1.length; _i++) {
+                    var item = resp_1[_i];
+                    var option = document.createElement("option");
+                    option.setAttribute("value", item.id);
+                    option.innerText = item.name;
+                    select.appendChild(option);
+                }
+            }
+            else {
+                console.error("Error wile loading relation " + typ + ".");
+            }
+        });
+        request.send();
     };
     List.prototype.inputPeriodicListener = function () {
         var _this = this;

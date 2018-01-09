@@ -28,4 +28,9 @@
   </table>
 </div>
 
+{{$global := .}}
+{{range $snippet := .snippets}}
+  {{tmpl $snippet.Template $global}}
+{{end}}
+
 {{end}}

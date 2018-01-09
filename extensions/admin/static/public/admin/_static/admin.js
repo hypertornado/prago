@@ -48,9 +48,7 @@ var ImagePicker = (function () {
             ev.preventDefault();
         });
         this.fileInput.addEventListener("drop", function (ev) {
-            console.log("x");
             var text = ev.dataTransfer.getData('Text');
-            console.log(text);
             return;
         });
         for (var i = 0; i < ids.length; i++) {

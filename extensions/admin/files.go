@@ -77,7 +77,7 @@ func uploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File,
 
 //InitResource of file
 func (File) InitResource(a *Admin, resource *Resource) error {
-	resource.DisplayInFooter = true
+	resource.DisplayInFooter = false
 	resource.Pagination = 100
 
 	fileUploadPath = a.App.Config.GetString("fileUploadPath")
@@ -258,7 +258,7 @@ func bindImageAPI(a *Admin, fileDownloadPath string) {
 			panic(err)
 		}
 		prago.Redirect(request,
-			fmt.Sprintf("%s/file/%d", a.Prefix, image.ID),
+			fmt.Sprintf("%s/file/%d/edit", a.Prefix, image.ID),
 		)
 	})
 
@@ -361,7 +361,6 @@ func (f *File) update(fileUploadPath string) error {
 			}
 
 			cmd := exec.Command("convert", path, "-auto-orient", "-thumbnail", fmt.Sprintf("%dx%d", v[0], v[1]), filePath)
-			fmt.Println(cmd)
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			err = cmd.Run()

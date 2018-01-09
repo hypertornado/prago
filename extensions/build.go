@@ -109,19 +109,20 @@ func (b BuildMiddleware) remote(appName, version, ssh string) error {
 
 //BackupApp backups whole app
 func BackupApp(app *prago.App) error {
+
 	app.Log().Println("Creating backup")
 
 	var appName = app.Data()["appName"].(string)
 
 	dir, err := ioutil.TempDir("", "backup")
 	if err != nil {
-		return err
+		return fmt.Errorf("creating backup tmp dir: %s", err)
 	}
 
 	dirPath := filepath.Join(dir, time.Now().Format("2006-01-02_15:04:05"))
 	err = os.Mkdir(dirPath, 0777)
 	if err != nil {
-		return err
+		return fmt.Errorf("creating backup tmp dir with date: %s", err)
 	}
 	defer os.RemoveAll(dir)
 
@@ -129,46 +130,52 @@ func BackupApp(app *prago.App) error {
 	dbName := app.Config.GetString("dbName")
 	password := app.Config.GetString("dbPassword")
 
-	cmd := exec.Command("mysqldump", "-u"+user, "-p"+password, dbName)
+	var dumpCmd *exec.Cmd
+
+	if password == "" {
+		dumpCmd = exec.Command("mysqldump", "-u"+user, dbName)
+	} else {
+		dumpCmd = exec.Command("mysqldump", "-u"+user, "-p"+password, dbName)
+	}
 
 	dbFilePath := filepath.Join(dirPath, "db.sql")
 
 	dbFile, err := os.Create(dbFilePath)
 	defer dbFile.Close()
 	if err != nil {
-		return err
+		return fmt.Errorf("creating backup db file: %s", err)
 	}
 
-	cmd.Stdout = dbFile
+	dumpCmd.Stdout = dbFile
 
-	err = cmd.Run()
+	err = dumpCmd.Run()
 	if err != nil {
-		return err
+		return fmt.Errorf("dumping cmd: %s", err)
 	}
 
-	paths, err := app.Config.Get("staticPaths")
-
-	if err == nil {
+	//TODO: enable backup of static resources
+	//paths, err := app.Config.Get("staticPaths")
+	/*if err == nil {
 		for k, v := range paths.([]interface{}) {
 
 			staticPath := filepath.Join(dirPath, "static", fmt.Sprintf("%d", k))
 
 			err = exec.Command("mkdir", "-p", staticPath).Run()
 			if err != nil {
-				return err
+				return fmt.Errorf("mkdir for static paths backup: %s", err)
 			}
 
 			err = copyFiles(v.(string), staticPath)
 			if err != nil {
-				return err
+				return fmt.Errorf("copying backup files: %s", err)
 			}
 		}
-	}
+	}*/
 
 	backupsPath := filepath.Join(os.Getenv("HOME"), "."+appName, "backups")
 	err = exec.Command("mkdir", "-p", backupsPath).Run()
 	if err != nil {
-		return err
+		return fmt.Errorf("making dir for backup files: %s", err)
 	}
 
 	return copyFiles(dirPath, backupsPath)
@@ -264,5 +271,9 @@ func buildExecutable(bf buildFlag, appName, dirPath string) error {
 
 func copyFiles(from, to string) error {
 	fmt.Println("copying", from, "to", to)
-	return exec.Command("cp", "-R", from, to).Run()
+	err := exec.Command("cp", "-R", from, to).Run()
+	if err != nil {
+		return fmt.Errorf("error while copying files from %s to %s: %s", from, to, err)
+	}
+	return nil
 }

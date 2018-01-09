@@ -92,7 +92,7 @@ func (app *App) Data() map[string]interface{} {
 func (app *App) initMiddlewares() error {
 	for _, middleware := range app.middlewares {
 		if err := middleware.Init(app); err != nil {
-			return err
+			return fmt.Errorf("initializating middleware: %s", err)
 		}
 	}
 	return nil
@@ -102,17 +102,21 @@ func (app *App) initMiddlewares() error {
 func (app *App) Init() error {
 	err := app.initMiddlewares()
 	if err != nil {
-		return err
+		return fmt.Errorf("initializating middlewares: %s", err)
 	}
 
 	commandName, err := app.kingpin.Parse(os.Args[1:])
 	if err != nil {
-		return err
+		return fmt.Errorf("parsing command name %s", err)
 	}
 
 	for command, fn := range app.commands {
 		if command.FullCommand() == commandName {
-			return fn(app)
+			err := fn(app)
+			if err != nil {
+				return fmt.Errorf("running command name %s: %s", commandName, err)
+			}
+			return nil
 		}
 	}
 

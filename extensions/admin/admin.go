@@ -43,6 +43,7 @@ type Admin struct {
 	javascripts           []string
 	css                   []string
 	roles                 map[string]map[string]bool
+	snippets              []Snippet
 }
 
 //NewAdmin creates new administration on prefix url with name
@@ -56,6 +57,7 @@ func NewAdmin(prefix, name string) *Admin {
 		fieldTypes:      make(map[string]FieldType),
 		javascripts:     []string{},
 		css:             []string{},
+		snippets:        []Snippet{},
 	}
 	ret.CreateResource(User{})
 	ret.CreateResource(File{})
@@ -82,6 +84,10 @@ func NewAdmin(prefix, name string) *Admin {
 	})
 
 	return ret
+}
+
+func (a *Admin) AddSnippet(name string) {
+	a.snippets = append(a.snippets, Snippet{name})
 }
 
 //UnsafeDropTables drop all tables, useful mainly in tests
@@ -298,6 +304,7 @@ func (a *Admin) Init(app *prago.App) error {
 
 	a.AdminController.Get(a.Prefix, func(request prago.Request) {
 		request.SetData("home_data", a.GetHomeData(request))
+		request.SetData("snippets", a.snippets)
 		prago.Render(request, 200, "admin_layout")
 	})
 
