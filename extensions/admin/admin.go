@@ -82,7 +82,6 @@ func NewAdmin(prefix, name string) *Admin {
 		FormSubTemplate: "admin_item_select",
 		ValuesSource:    &fp,
 	})
-
 	return ret
 }
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/extensions/admin/messages"
+	"github.com/hypertornado/prago/pragocdn/cdnclient"
 	"github.com/hypertornado/prago/utils"
 	"github.com/renstrom/shortuuid"
 	"image"
@@ -14,6 +15,7 @@ import (
 	"mime/multipart"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -24,10 +26,19 @@ var (
 	fileDownloadPath = ""
 )
 
+var filesCDN cdnclient.CDNAccount
+
 var thumbnailSizes = map[string][2]uint{
 	"large":  {1000, 1000},
 	"medium": {400, 400},
 	"small":  {200, 200},
+}
+
+func initCDN(a *Admin) {
+	cdnURL := a.App.Config.GetStringWithFallback("cdnURL", "https://prago-cdn.com")
+	cdnAccount := a.App.Config.GetStringWithFallback("cdnAccount", a.AppName)
+	cdnPassword := a.App.Config.GetStringWithFallback("cdnPassword", "")
+	filesCDN = cdnclient.NewCDNAccount(cdnURL, cdnAccount, cdnPassword)
 }
 
 //File is structure representing files in admin
@@ -77,6 +88,51 @@ func uploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File,
 
 //InitResource of file
 func (File) InitResource(a *Admin, resource *Resource) error {
+	initCDN(a)
+
+	filesExportCommand := a.App.CreateCommand("files:export", "export all files")
+	a.App.AddCommand(filesExportCommand, func(app *prago.App) (err error) {
+		fmt.Println("EXPORT COMMAND")
+
+		var files []*File
+		err = a.Query().Get(&files)
+		if err != nil {
+			return err
+		}
+
+		backupDir := fmt.Sprintf("%s/image-export-%s-%s", os.Getenv("HOME"), a.AppName, shortuuid.UUID())
+
+		fmt.Println("Backing files to", backupDir)
+
+		for _, v := range files {
+			_, path := v.getPath(fileUploadPath + "original")
+			fmt.Println(v.UID, path)
+
+			dirPath := fmt.Sprintf("%s/%s/%s", backupDir, v.UID[0:2], v.UID[2:4])
+			err = os.MkdirAll(dirPath, 0777)
+			if err != nil {
+				fmt.Println("mkdir error", err)
+				continue
+			}
+
+			extension := filepath.Ext(v.Name)
+			filePath := fmt.Sprintf("%s/%s%s", dirPath, v.UID, extension)
+
+			cmd := exec.Command("cp", path, filePath)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err = cmd.Run()
+			if err != nil {
+				fmt.Println("cp error", err)
+				continue
+			}
+		}
+
+		fmt.Println("Backed files to", backupDir)
+
+		return nil
+	})
+
 	resource.DisplayInFooter = false
 	resource.Pagination = 100
 
@@ -218,7 +274,6 @@ func loadFile(folder, path string, header *multipart.FileHeader) error {
 	}
 
 	io.Copy(outFile, inFile)
-
 	defer outFile.Close()
 	defer inFile.Close()
 	return nil
@@ -270,6 +325,7 @@ func bindImageAPI(a *Admin, fileDownloadPath string) {
 		}
 		prago.Redirect(request, image.GetMedium())
 	})
+
 	a.App.MainController().Get(a.Prefix+"/_api/image/list", func(request prago.Request) {
 		var images []*File
 
@@ -295,7 +351,6 @@ func bindImageAPI(a *Admin, fileDownloadPath string) {
 			prago.Must(q.Get(&images))
 		}
 		writeFileResponse(request, images)
-
 	})
 
 	a.AdminController.Post(a.Prefix+"/_api/image/upload", func(request prago.Request) {
@@ -372,30 +427,34 @@ func (f *File) update(fileUploadPath string) error {
 	return nil
 }
 
-func (f *File) getSize(size string) string {
+/*func (f *File) getSize(size string) string {
 	_, path := f.getPath(fileDownloadPath + "thumb/" + size)
 	return path
-}
+}*/
 
 //GetLarge file path
 func (f *File) GetLarge() string {
-	return f.getSize("large")
+	return filesCDN.GetImageURL(f.UID, f.Name, 1000)
+	//return f.getSize("large")
 }
 
 //GetMedium file path
 func (f *File) GetMedium() string {
-	return f.getSize("medium")
+	return filesCDN.GetImageURL(f.UID, f.Name, 400)
+	//return f.getSize("medium")
 }
 
 //GetSmall file path
 func (f *File) GetSmall() string {
-	return f.getSize("small")
+	return filesCDN.GetImageURL(f.UID, f.Name, 200)
+	//return f.getSize("small")
 }
 
 //GetOriginal file path
 func (f *File) GetOriginal() string {
-	_, path := f.getPath(fileDownloadPath + "original")
-	return path
+	return filesCDN.GetFileURL(f.UID, f.Name)
+	//_, path := f.getPath(fileDownloadPath + "original")
+	//return path
 }
 
 func (f *File) isImage() bool {
