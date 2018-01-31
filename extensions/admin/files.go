@@ -32,7 +32,7 @@ var thumbnailSizes = map[string][2]uint{
 }
 
 func initCDN(a *Admin) {
-	cdnURL := a.App.Config.GetStringWithFallback("cdnURL", "https://prago-cdn.com")
+	cdnURL := a.App.Config.GetStringWithFallback("cdnURL", "https://www.prago-cdn.com")
 	cdnAccount := a.App.Config.GetStringWithFallback("cdnAccount", a.AppName)
 	cdnPassword := a.App.Config.GetStringWithFallback("cdnPassword", "")
 	filesCDN = cdnclient.NewCDNAccount(cdnURL, cdnAccount, cdnPassword)

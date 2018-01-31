@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/extensions"
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 	"github.com/hypertornado/prago/utils"
 	"io"
@@ -42,6 +43,7 @@ func main() {
 	}
 
 	app := prago.NewApp("pragocdn", version)
+	app.AddMiddleware(extensions.BuildMiddleware{})
 	app.AddMiddleware(prago.MiddlewareServer{Fn: start})
 	prago.Must(app.Init())
 }
