@@ -361,9 +361,6 @@ func (a *Admin) bindAdminCommand(app *prago.App) error {
 				return a.UnsafeDropTables()
 			}
 			return nil
-		case "thumbnails":
-			app.Log().Println("Updating thumbnails")
-			return updateFiles(a)
 		default:
 			app.Log().Println("unknown admin subcommand " + *adminSubcommand)
 		}
@@ -397,7 +394,7 @@ func (a *Admin) initTemplates(app *prago.App) error {
 		for _, v := range strings.Split(ids, ",") {
 			var image File
 			err := a.Query().WhereIs("uid", v).Get(&image)
-			if err == nil && image.isImage() {
+			if err == nil && image.IsImage() {
 				return image.GetSmall()
 			}
 		}
@@ -408,7 +405,7 @@ func (a *Admin) initTemplates(app *prago.App) error {
 		for _, v := range strings.Split(ids, ",") {
 			var image File
 			err := a.Query().WhereIs("uid", v).Get(&image)
-			if err == nil && image.isImage() {
+			if err == nil && image.IsImage() {
 				return image.GetLarge()
 			}
 		}

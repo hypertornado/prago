@@ -8,9 +8,6 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 	"github.com/hypertornado/prago/utils"
 	"github.com/renstrom/shortuuid"
-	"image"
-	"image/jpeg"
-	"image/png"
 	"io"
 	"mime/multipart"
 	"os"
@@ -47,10 +44,6 @@ type File struct {
 	Name        string
 	Description string `prago-type:"text" prago-preview:"true"`
 	UID         string `prago-unique:"true" prago-preview:"true" prago-preview-type:"admin_image"`
-	FileType    string
-	Size        int64
-	Width       int64
-	Height      int64
 	User        int64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
@@ -189,27 +182,11 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 		fi.Value = fileURL
 		fi.SubTemplate = "admin_item_link"
 
-		fi = form.AddTextInput("size", messages.Messages.Get(GetLocale(request), "Size"))
-		fi.Readonly = true
-		fi.Value = fmt.Sprintf("%d", file.Size)
-
 		fi = form.AddTextInput("uploadedBy", messages.Messages.Get(GetLocale(request), "Uploaded By"))
 		fi.Readonly = true
 		fi.Value = fmt.Sprintf("%d", file.User)
 
-		fi = form.AddTextInput("fileType", messages.Messages.Get(GetLocale(request), "Type"))
-		fi.Readonly = true
-		fi.Value = file.FileType
-
-		if file.isImage() {
-			fi = form.AddTextInput("width", messages.Messages.Get(GetLocale(request), "Width"))
-			fi.Readonly = true
-			fi.Value = fmt.Sprintf("%d", file.Width)
-
-			fi = form.AddTextInput("height", messages.Messages.Get(GetLocale(request), "Height"))
-			fi.Readonly = true
-			fi.Value = fmt.Sprintf("%d", file.Height)
-
+		if file.IsImage() {
 			for _, v := range []string{"large", "medium", "small"} {
 				fi = form.AddTextInput("thumb"+v, messages.Messages.Get(GetLocale(request), v))
 				fi.Readonly = true
@@ -217,7 +194,6 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 				fi.Value = path
 				fi.SubTemplate = "admin_item_link"
 			}
-
 		}
 
 		fi = form.AddTextareaInput("Description", messages.Messages.Get(GetLocale(request), "Description"))
@@ -384,30 +360,7 @@ func (f *File) update(fileUploadPath string) error {
 	}
 	defer file.Close()
 
-	stat, err := file.Stat()
-	if err != nil {
-		return fmt.Errorf("getting file stats: %s", err)
-	}
-
-	f.Size = stat.Size()
-
-	if f.isImage() {
-		var decoder func(io.Reader) (image.Image, error)
-		if f.isPNGImage() {
-			decoder = png.Decode
-		} else {
-			decoder = jpeg.Decode
-		}
-
-		img, err := decoder(file)
-		if err != nil {
-			return fmt.Errorf("decoder: %s", err)
-		}
-		bounds := img.Bounds()
-		f.Width = int64(bounds.Size().X)
-		f.Height = int64(bounds.Size().Y)
-		f.FileType = "image"
-
+	if f.IsImage() {
 		for k, v := range thumbnailSizes {
 			dirPath, filePath := f.getPath(fileUploadPath + "thumb/" + k)
 			err := os.MkdirAll(dirPath, 0777)
@@ -426,11 +379,6 @@ func (f *File) update(fileUploadPath string) error {
 	}
 	return nil
 }
-
-/*func (f *File) getSize(size string) string {
-	_, path := f.getPath(fileDownloadPath + "thumb/" + size)
-	return path
-}*/
 
 //GetLarge file path
 func (f *File) GetLarge() string {
@@ -457,25 +405,19 @@ func (f *File) GetOriginal() string {
 	//return path
 }
 
-func (f *File) isImage() bool {
+func (f *File) IsImage() bool {
 	if strings.HasSuffix(f.Name, ".jpg") || strings.HasSuffix(f.Name, ".jpeg") || strings.HasSuffix(f.Name, ".png") {
 		return true
 	}
 	return false
 }
 
-func (f *File) isPNGImage() bool {
-	if strings.HasSuffix(f.Name, ".png") {
-		return true
-	}
-	return false
-}
-
+/*
 func updateFiles(a *Admin) error {
 	var files []*File
 	a.Query().Get(&files)
 	for _, file := range files {
-		if file.isImage() {
+		if file.IsImage() {
 			err := file.update(fileUploadPath)
 			if err != nil {
 				return fmt.Errorf("updating file: %s", err)
@@ -488,3 +430,4 @@ func updateFiles(a *Admin) error {
 	}
 	return nil
 }
+*/
