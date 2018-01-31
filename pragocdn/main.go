@@ -32,12 +32,12 @@ func main() {
 		panic(err)
 	}
 
-	for _, v := range config.Accounts {
+	for k, v := range config.Accounts {
 		err := prepareAccountDirectories(v.Name)
 		if err != nil {
 			panic(err)
 		}
-		accounts[v.Name] = &v
+		accounts[v.Name] = &config.Accounts[k]
 	}
 
 	app := prago.NewApp("pragocdn", version)
@@ -46,6 +46,8 @@ func main() {
 }
 
 func uploadFile(account CDNConfigAccount, extension string, inData io.Reader) (*cdnclient.CDNUploadData, error) {
+	fmt.Println("uploading file to account", account.Name)
+
 	uuid := utils.RandomString(20)
 	dirPath := getFileDirectoryPath(account.Name, uuid)
 
@@ -81,6 +83,9 @@ func start(app *prago.App) {
 		if account == nil {
 			panic("no account")
 		}
+
+		fmt.Println("UPLOAD ACCOUNT", accountName)
+		fmt.Println("UPLOAD ACCOUNT FOUND", account.Name)
 
 		authorization := request.Request().Header.Get("X-Authorization")
 		if account.Password != authorization {
@@ -255,20 +260,25 @@ func convertedFilePath(account, uuid, extension, format string) (string, error) 
 	outputPath := getCacheFilePath(account, uuid, format, extension)
 
 	if singleSizeRegexp.MatchString(format) {
-		return outputPath, vipsThumbnail(originalPath, outputPath, format, false)
+		return outputPath, vipsThumbnail(originalPath, outputPath, format, extension, false)
 	}
 
 	if sizeRegexp.MatchString(format) {
-		return outputPath, vipsThumbnail(originalPath, outputPath, format, true)
+		return outputPath, vipsThumbnail(originalPath, outputPath, format, extension, true)
 	}
 
 	return "", errors.New("wrong file convert format")
 }
 
-func vipsThumbnail(originalPath, outputPath, size string, crop bool) error {
+func vipsThumbnail(originalPath, outputPath, size, extension string, crop bool) error {
 	_, err := os.Open(outputPath)
 	if err == nil {
 		return nil
+	}
+
+	outputParameters := "[strip]"
+	if extension == "jpg" {
+		outputParameters = "[optimize_coding,strip]"
 	}
 
 	cmdAr := []string{
@@ -276,7 +286,7 @@ func vipsThumbnail(originalPath, outputPath, size string, crop bool) error {
 		"-s",
 		size,
 		"-o",
-		outputPath + "[optimize_coding,strip]",
+		outputPath + outputParameters,
 	}
 
 	if config.Profile != "" {

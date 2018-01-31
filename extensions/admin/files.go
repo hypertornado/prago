@@ -35,6 +35,7 @@ func initCDN(a *Admin) {
 	cdnURL := a.App.Config.GetStringWithFallback("cdnURL", "https://prago-cdn.com")
 	cdnAccount := a.App.Config.GetStringWithFallback("cdnAccount", a.AppName)
 	cdnPassword := a.App.Config.GetStringWithFallback("cdnPassword", "")
+	fmt.Println("inited CDN", cdnURL, cdnAccount, cdnPassword)
 	filesCDN = cdnclient.NewCDNAccount(cdnURL, cdnAccount, cdnPassword)
 }
 
@@ -72,11 +73,31 @@ func uploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File,
 	fileName := utils.PrettyFilename(fileHeader.Filename)
 	file := &File{}
 	file.Name = fileName
-	file.UID = shortuuid.UUID()
-	folderPath, filePath := file.getPath(fileUploadPath + "original")
-	prago.Must(loadFile(folderPath, filePath, fileHeader))
-	prago.Must(file.update(fileUploadPath))
+
+	openedFile, err := fileHeader.Open()
+	if err != nil {
+		return nil, fmt.Errorf("opening multipart file: %s", err)
+	}
+	defer openedFile.Close()
+
+	uploadData, err := filesCDN.UploadFile(openedFile, file.GetExtension())
+	if err != nil {
+		return nil, fmt.Errorf("uploading multipart file: %s", err)
+	}
+
+	file.UID = uploadData.UUID
+
+	//file.UID = shortuuid.UUID()
+
+	//folderPath, filePath := file.getPath(fileUploadPath + "original")
+	//prago.Must(loadFile(folderPath, filePath, fileHeader))
 	return file, nil
+}
+
+func (f File) GetExtension() string {
+	extension := filepath.Ext(f.Name)
+	extension = strings.Replace(extension, ".", "", -1)
+	return extension
 }
 
 //InitResource of file
@@ -351,58 +372,24 @@ func bindImageAPI(a *Admin, fileDownloadPath string) {
 	})
 }
 
-func (f *File) update(fileUploadPath string) error {
-	_, path := f.getPath(fileUploadPath + "original")
-
-	file, err := os.Open(path)
-	if err != nil {
-		return fmt.Errorf("opening file: %s", err)
-	}
-	defer file.Close()
-
-	if f.IsImage() {
-		for k, v := range thumbnailSizes {
-			dirPath, filePath := f.getPath(fileUploadPath + "thumb/" + k)
-			err := os.MkdirAll(dirPath, 0777)
-			if err != nil {
-				return fmt.Errorf("making dir: %s", err)
-			}
-
-			cmd := exec.Command("convert", path, "-auto-orient", "-thumbnail", fmt.Sprintf("%dx%d", v[0], v[1]), filePath)
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			err = cmd.Run()
-			if err != nil {
-				return fmt.Errorf("executing convert: %s", err)
-			}
-		}
-	}
-	return nil
-}
-
 //GetLarge file path
 func (f *File) GetLarge() string {
 	return filesCDN.GetImageURL(f.UID, f.Name, 1000)
-	//return f.getSize("large")
 }
 
 //GetMedium file path
 func (f *File) GetMedium() string {
 	return filesCDN.GetImageURL(f.UID, f.Name, 400)
-	//return f.getSize("medium")
 }
 
 //GetSmall file path
 func (f *File) GetSmall() string {
 	return filesCDN.GetImageURL(f.UID, f.Name, 200)
-	//return f.getSize("small")
 }
 
 //GetOriginal file path
 func (f *File) GetOriginal() string {
 	return filesCDN.GetFileURL(f.UID, f.Name)
-	//_, path := f.getPath(fileDownloadPath + "original")
-	//return path
 }
 
 func (f *File) IsImage() bool {
@@ -411,23 +398,3 @@ func (f *File) IsImage() bool {
 	}
 	return false
 }
-
-/*
-func updateFiles(a *Admin) error {
-	var files []*File
-	a.Query().Get(&files)
-	for _, file := range files {
-		if file.IsImage() {
-			err := file.update(fileUploadPath)
-			if err != nil {
-				return fmt.Errorf("updating file: %s", err)
-			}
-			err = a.Save(file)
-			if err != nil {
-				return fmt.Errorf("saving file: %s", err)
-			}
-		}
-	}
-	return nil
-}
-*/
