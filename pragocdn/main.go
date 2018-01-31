@@ -7,6 +7,7 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 	"github.com/hypertornado/prago/utils"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -46,8 +47,6 @@ func main() {
 }
 
 func uploadFile(account CDNConfigAccount, extension string, inData io.Reader) (*cdnclient.CDNUploadData, error) {
-	fmt.Println("uploading file to account", account.Name)
-
 	uuid := utils.RandomString(20)
 	dirPath := getFileDirectoryPath(account.Name, uuid)
 
@@ -75,6 +74,11 @@ func uploadFile(account CDNConfigAccount, extension string, inData io.Reader) (*
 }
 
 func start(app *prago.App) {
+	app.MainController().Get("/", func(request prago.Request) {
+		out := fmt.Sprintf("Prago CDN\nhttps://www.prago-cdn.com\nversion %s\nadmin Ondřej Odcházel, https//www.odchazel.com", version)
+		http.Error(request.Response(), out, 200)
+		request.SetProcessed()
+	})
 
 	app.MainController().Post("/:account/upload/:extension", func(request prago.Request) {
 		defer request.Request().Body.Close()
@@ -83,9 +87,6 @@ func start(app *prago.App) {
 		if account == nil {
 			panic("no account")
 		}
-
-		fmt.Println("UPLOAD ACCOUNT", accountName)
-		fmt.Println("UPLOAD ACCOUNT FOUND", account.Name)
 
 		authorization := request.Request().Header.Get("X-Authorization")
 		if account.Password != authorization {
@@ -104,11 +105,12 @@ func start(app *prago.App) {
 		prago.WriteAPI(request, data, 200)
 	})
 
-	app.MainController().Get("/:account/:uuid/:format/:name", func(request prago.Request) {
+	app.MainController().Get("/:account/:uuid/:format/:hash/:name", func(request prago.Request) {
 		errCode, err, stream := getFile(
 			request.Params().Get("account"),
 			request.Params().Get("uuid"),
 			request.Params().Get("format"),
+			request.Params().Get("hash"),
 			request.Params().Get("name"),
 		)
 
@@ -126,8 +128,19 @@ func start(app *prago.App) {
 		if err != nil {
 			panic(err)
 		}
-
 		return
+	})
+
+	app.MainController().Delete("/:account/:uuid", func(request prago.Request) {
+		err := deleteFile(
+			request.Params().Get("account"),
+			request.Request().Header.Get("X-Authorization"),
+			request.Params().Get("uuid"),
+		)
+		if err != nil {
+			panic(err)
+		}
+		prago.WriteAPI(request, true, 200)
 	})
 }
 
@@ -135,7 +148,49 @@ var fileExtensionMap = map[string]string{
 	"jpeg": "jpg",
 }
 
-func getFile(accountName, uuid, format, name string) (eddCode int, err error, source io.Reader) {
+func deleteFile(accountName, password, uuid string) error {
+	account := accounts[accountName]
+	if account == nil {
+		return errors.New("account not found")
+	}
+
+	if !uuidRegex.MatchString(uuid) {
+		return errors.New("wrongs uuid format: " + uuid)
+	}
+
+	if account.Password != password {
+		return errors.New("wrong password")
+	}
+
+	dirPath := getFileDirectoryPath(accountName, uuid)
+	files, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		return err
+	}
+
+	var name string
+	for _, v := range files {
+		fileName := v.Name()
+		if strings.HasPrefix(name, uuid+".") {
+			name = fileName
+			break
+		}
+	}
+
+	if name == "" {
+		return errors.New("no file found")
+	}
+
+	filePath := fmt.Sprintf("%s/%s", dirPath, name)
+	deletedDir := fmt.Sprintf("%s/.pragocdn/deleted/%s", homePath, accountName)
+
+	cmd := exec.Command("mv", filePath, deletedDir)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func getFile(accountName, uuid, format, hash, name string) (eddCode int, err error, source io.Reader) {
 	account := accounts[accountName]
 	if account == nil {
 		return 404, errors.New("account not found"), nil
@@ -155,6 +210,17 @@ func getFile(accountName, uuid, format, name string) (eddCode int, err error, so
 
 	if !filenameRegex.MatchString(fileName) || !extensionRegex.MatchString(fileExtension) {
 		return 404, errors.New("wrong name format"), nil
+	}
+
+	expectedHash := cdnclient.GetHash(
+		account.Name,
+		account.Password,
+		uuid,
+		format,
+		name,
+	)
+	if expectedHash != hash {
+		return 501, errors.New("wrong hash"), nil
 	}
 
 	originalPath := getFilePath(accountName, uuid, fileExtension)
@@ -200,6 +266,18 @@ func prepareAccountDirectories(name string) error {
 	if err != nil {
 		return fmt.Errorf("preparing cache dir for %s: %s", name, err)
 	}
+
+	err = os.MkdirAll(
+		fmt.Sprintf("%s/.pragocdn/deleted/%s",
+			homePath,
+			name,
+		),
+		0777,
+	)
+	if err != nil {
+		return fmt.Errorf("preparing deleted dir for %s: %s", name, err)
+	}
+
 	return nil
 }
 
@@ -222,12 +300,22 @@ func getFilePath(account, uuid, extension string) string {
 	)
 }
 
-func getCacheFilePath(account, uuid, format, extension string) string {
-	return fmt.Sprintf("%s/.pragocdn/cache/%s/%s_%s.%s",
+func getCacheDirectoryPath(account, uuid, format string) string {
+	firstPrefix := uuid[0:2]
+	secondPrefix := uuid[2:4]
+	return fmt.Sprintf("%s/.pragocdn/cache/%s/%s/%s/%s",
 		homePath,
 		account,
-		uuid,
 		format,
+		firstPrefix,
+		secondPrefix,
+	)
+}
+
+func getCacheFilePath(account, uuid, format, extension string) string {
+	return fmt.Sprintf("%s/%s.%s",
+		getCacheDirectoryPath(account, uuid, format),
+		uuid,
 		extension,
 	)
 }
@@ -257,23 +345,29 @@ func convertedFilePath(account, uuid, extension, format string) (string, error) 
 	}
 
 	originalPath := getFilePath(account, uuid, extension)
-	outputPath := getCacheFilePath(account, uuid, format, extension)
+	outputFilePath := getCacheFilePath(account, uuid, format, extension)
+	outputDirectoryPath := getCacheDirectoryPath(account, uuid, format)
 
 	if singleSizeRegexp.MatchString(format) {
-		return outputPath, vipsThumbnail(originalPath, outputPath, format, extension, false)
+		return outputFilePath, vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, format, extension, false)
 	}
 
 	if sizeRegexp.MatchString(format) {
-		return outputPath, vipsThumbnail(originalPath, outputPath, format, extension, true)
+		return outputFilePath, vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, format, extension, true)
 	}
 
 	return "", errors.New("wrong file convert format")
 }
 
-func vipsThumbnail(originalPath, outputPath, size, extension string, crop bool) error {
-	_, err := os.Open(outputPath)
+func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, extension string, crop bool) error {
+	_, err := os.Open(outputFilePath)
 	if err == nil {
 		return nil
+	}
+
+	err = os.MkdirAll(outputDirectoryPath, 0777)
+	if err != nil {
+		return err
 	}
 
 	outputParameters := "[strip]"
@@ -286,7 +380,7 @@ func vipsThumbnail(originalPath, outputPath, size, extension string, crop bool) 
 		"-s",
 		size,
 		"-o",
-		outputPath + outputParameters,
+		outputFilePath + outputParameters,
 	}
 
 	if config.Profile != "" {

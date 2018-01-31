@@ -1,6 +1,7 @@
 package cdnclient
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -34,16 +36,40 @@ func NewCDNAccount(url, account, password string) CDNAccount {
 	}
 }
 
+func GetHash(account, password, uuid, format, filename string) string {
+	h := sha256.New()
+	h.Write([]byte(account))
+	h.Write([]byte(password))
+	h.Write([]byte(uuid))
+	h.Write([]byte(format))
+	h.Write([]byte(filename))
+	return fmt.Sprintf("%x", h.Sum(nil)[0:5])
+}
+
+func (a CDNAccount) getHash(uuid, format, filename string) string {
+
+	return GetHash(
+		a.Account,
+		a.Password,
+		uuid,
+		format,
+		filename,
+	)
+}
+
 func (a CDNAccount) GetFileURL(uuid, filename string) string {
-	return fmt.Sprintf("%s/%s/%s/file/%s", a.URL, a.Account, uuid, filename)
+	hash := a.getHash(uuid, "file", filename)
+	return fmt.Sprintf("%s/%s/%s/file/%s/%s", a.URL, a.Account, uuid, hash, filename)
 }
 
 func (a CDNAccount) GetImageURL(uuid, filename string, size int) string {
-	return fmt.Sprintf("%s/%s/%s/%d/%s", a.URL, a.Account, uuid, size, filename)
+	hash := a.getHash(uuid, strconv.Itoa(size), filename)
+	return fmt.Sprintf("%s/%s/%s/%d/%s/%s", a.URL, a.Account, uuid, size, hash, filename)
 }
 
 func (a CDNAccount) GetImageCropURL(uuid, filename string, width, height int) string {
-	return fmt.Sprintf("%s/%s/%s/%dx%d/%s", a.URL, a.Account, uuid, width, height, filename)
+	hash := a.getHash(uuid, fmt.Sprintf("%dx%d", width, height), filename)
+	return fmt.Sprintf("%s/%s/%s/%dx%d/%s/%s", a.URL, a.Account, uuid, width, height, hash, filename)
 }
 
 func (a CDNAccount) UploadFileFromPath(filePath string) (*CDNUploadData, error) {

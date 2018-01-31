@@ -86,11 +86,6 @@ func uploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File,
 	}
 
 	file.UID = uploadData.UUID
-
-	//file.UID = shortuuid.UUID()
-
-	//folderPath, filePath := file.getPath(fileUploadPath + "original")
-	//prago.Must(loadFile(folderPath, filePath, fileHeader))
 	return file, nil
 }
 
@@ -100,9 +95,65 @@ func (f File) GetExtension() string {
 	return extension
 }
 
+func getOldRedirectParams(request prago.Request, admin *Admin) (uuid, name string, err error) {
+	name = request.Params().Get("name")
+	uuid = fmt.Sprintf("%s%s%s%s%s%s",
+		request.Params().Get("a"),
+		request.Params().Get("b"),
+		request.Params().Get("c"),
+		request.Params().Get("d"),
+		request.Params().Get("e"),
+		strings.Split(name, "-")[0],
+	)
+
+	var file File
+	err = admin.Query().WhereIs("uid", uuid).Get(&file)
+	if err != nil {
+		return
+	}
+	name = file.Name
+	return
+}
+
 //InitResource of file
 func (File) InitResource(a *Admin, resource *Resource) error {
 	initCDN(a)
+
+	a.App.MainController().Get("/files/thumb/:size/:a/:b/:c/:d/:e/:name", func(request prago.Request) {
+		uuid, name, err := getOldRedirectParams(request, a)
+		if err != nil {
+			panic(err)
+		}
+
+		var size int
+		switch request.Params().Get("size") {
+		case "large":
+			size = 1000
+		case "medium":
+			size = 400
+		case "small":
+			size = 200
+		default:
+			panic("wrong size")
+		}
+
+		prago.Redirect(request, filesCDN.GetImageURL(uuid, name, size))
+	}, func(params map[string]string) bool {
+		size := params["size"]
+		if size == "large" || size == "medium" || size == "small" {
+			return true
+		}
+		return false
+	})
+
+	a.App.MainController().Get("/files/original/:a/:b/:c/:d/:e/:name", func(request prago.Request) {
+		uuid, name, err := getOldRedirectParams(request, a)
+		if err != nil {
+			panic(err)
+		}
+
+		prago.Redirect(request, filesCDN.GetFileURL(uuid, name))
+	})
 
 	filesExportCommand := a.App.CreateCommand("files:export", "export all files")
 	a.App.AddCommand(filesExportCommand, func(app *prago.App) (err error) {
