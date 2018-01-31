@@ -35,7 +35,6 @@ func initCDN(a *Admin) {
 	cdnURL := a.App.Config.GetStringWithFallback("cdnURL", "https://prago-cdn.com")
 	cdnAccount := a.App.Config.GetStringWithFallback("cdnAccount", a.AppName)
 	cdnPassword := a.App.Config.GetStringWithFallback("cdnPassword", "")
-	fmt.Println("inited CDN", cdnURL, cdnAccount, cdnPassword)
 	filesCDN = cdnclient.NewCDNAccount(cdnURL, cdnAccount, cdnPassword)
 }
 
@@ -118,6 +117,22 @@ func getOldRedirectParams(request prago.Request, admin *Admin) (uuid, name strin
 //InitResource of file
 func (File) InitResource(a *Admin, resource *Resource) error {
 	initCDN(a)
+
+	resource.BeforeDelete = func(request prago.Request, idIface interface{}) bool {
+		id := idIface.(int)
+		var file File
+		err := a.Query().WhereIs("id", id).Get(&file)
+		if err != nil {
+			panic(err)
+		}
+
+		err = filesCDN.DeleteFile(file.UID)
+		if err != nil {
+			panic(err)
+		}
+
+		return true
+	}
 
 	a.App.MainController().Get("/files/thumb/:size/:a/:b/:c/:d/:e/:name", func(request prago.Request) {
 		uuid, name, err := getOldRedirectParams(request, a)

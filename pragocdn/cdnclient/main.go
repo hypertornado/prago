@@ -84,6 +84,30 @@ func (a CDNAccount) UploadFileFromPath(filePath string) (*CDNUploadData, error) 
 	return a.UploadFile(file, extension)
 }
 
+func (a CDNAccount) DeleteFile(uuid string) error {
+	u, err := url.Parse(fmt.Sprintf("%s/%s/%s", a.URL, a.Account, uuid))
+	if err != nil {
+		return fmt.Errorf("parsing url: %s", err)
+	}
+
+	req := &http.Request{}
+	req.Method = "DELETE"
+	req.URL = u
+	req.Header = map[string][]string{}
+	req.Header.Set("X-Authorization", a.Password)
+
+	response, err := a.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		return fmt.Errorf("wrong request with status code %d", response.StatusCode)
+	}
+	return nil
+}
+
 func (a CDNAccount) UploadFile(reader io.ReadCloser, extension string) (*CDNUploadData, error) {
 
 	u, err := url.Parse(fmt.Sprintf("%s/%s/upload/%s", a.URL, a.Account, extension))

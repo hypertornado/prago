@@ -171,14 +171,14 @@ func deleteFile(accountName, password, uuid string) error {
 	var name string
 	for _, v := range files {
 		fileName := v.Name()
-		if strings.HasPrefix(name, uuid+".") {
+		if strings.HasPrefix(fileName, uuid+".") {
 			name = fileName
 			break
 		}
 	}
 
 	if name == "" {
-		return errors.New("no file found")
+		return errors.New("no file found " + name)
 	}
 
 	filePath := fmt.Sprintf("%s/%s", dirPath, name)
