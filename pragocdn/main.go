@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compress/gzip"
 	"errors"
 	"fmt"
 	"github.com/hypertornado/prago"
@@ -9,6 +10,7 @@ import (
 	"github.com/hypertornado/prago/utils"
 	"io"
 	"io/ioutil"
+	"mime"
 	"net/http"
 	"os"
 	"os/exec"
@@ -108,7 +110,7 @@ func start(app *prago.App) {
 	})
 
 	app.MainController().Get("/:account/:uuid/:format/:hash/:name", func(request prago.Request) {
-		errCode, err, stream := getFile(
+		errCode, err, stream, mimeExtension, size := getFile(
 			request.Params().Get("account"),
 			request.Params().Get("uuid"),
 			request.Params().Get("format"),
@@ -116,21 +118,41 @@ func start(app *prago.App) {
 			request.Params().Get("name"),
 		)
 
-		if err != nil {
-			panic(err)
-		}
+		//https://gist.github.com/the42/1956518
 
 		switch errCode {
 		case 404:
 			render404(request)
 			return
+		case 498:
+			render498(request)
+			return
 		}
 
-		_, err = io.Copy(request.Response(), stream)
 		if err != nil {
 			panic(err)
 		}
-		return
+
+		request.SetProcessed()
+		request.Response().Header().Set("Cache-Control", "public, max-age=31536000")
+		request.Response().Header().Set("X-Content-Type-Options", "nosniff")
+		request.Response().Header().Set("Content-Type", mimeExtension)
+
+		if strings.HasPrefix(mimeExtension, "text/") && strings.Contains(request.Request().Header.Get("Accept-Encoding"), "gzip") {
+			request.Response().Header().Set("Content-Encoding", "gzip")
+			gz := gzip.NewWriter(request.Response())
+			_, err = io.Copy(gz, stream)
+			defer gz.Close()
+			if err != nil {
+				panic(err)
+			}
+		} else {
+			request.Response().Header().Set("Content-Length", fmt.Sprintf("%d", size))
+			_, err = io.Copy(request.Response(), stream)
+			if err != nil {
+				panic(err)
+			}
+		}
 	})
 
 	app.MainController().Delete("/:account/:uuid", func(request prago.Request) {
@@ -192,26 +214,27 @@ func deleteFile(accountName, password, uuid string) error {
 	return cmd.Run()
 }
 
-func getFile(accountName, uuid, format, hash, name string) (eddCode int, err error, source io.Reader) {
+func getFile(accountName, uuid, format, hash, name string) (eddCode int, err error, source io.Reader, mimeExtension string, size int64) {
 	account := accounts[accountName]
 	if account == nil {
-		return 404, errors.New("account not found"), nil
+		return 404, errors.New("account not found"), nil, "", -1
 	}
 
 	if !uuidRegex.MatchString(uuid) {
-		return 404, errors.New("wrongs uuid format: " + uuid), nil
+		return 404, errors.New("wrongs uuid format: " + uuid), nil, "", -1
 	}
 
 	splited := strings.Split(name, ".")
 	if len(splited) != 2 {
-		return 404, errors.New("wrong name format"), nil
+		return 404, errors.New("wrong name format"), nil, "", -1
 	}
 	fileName := splited[0]
 	fileExtension := splited[1]
 	fileExtension = normalizeExtension(fileExtension)
+	mimeExtension = mime.TypeByExtension("." + fileExtension)
 
 	if !filenameRegex.MatchString(fileName) || !extensionRegex.MatchString(fileExtension) {
-		return 404, errors.New("wrong name format"), nil
+		return 404, errors.New("wrong name format"), nil, "", -1
 	}
 
 	expectedHash := cdnclient.GetHash(
@@ -222,7 +245,7 @@ func getFile(accountName, uuid, format, hash, name string) (eddCode int, err err
 		name,
 	)
 	if expectedHash != hash {
-		return 501, errors.New("wrong hash"), nil
+		return 498, errors.New("wrong hash"), nil, "", -1
 	}
 
 	originalPath := getFilePath(accountName, uuid, fileExtension)
@@ -233,16 +256,21 @@ func getFile(accountName, uuid, format, hash, name string) (eddCode int, err err
 	} else {
 		path, err = convertedFilePath(accountName, uuid, fileExtension, format)
 		if err != nil {
-			return 404, err, nil
+			return 404, err, nil, "", -1
 		}
 	}
 
 	file, err := os.Open(path)
 	if err != nil {
-		return 500, err, nil
+		return 500, err, nil, "", -1
 	}
 
-	return 200, nil, file
+	stat, err := file.Stat()
+	if err != nil {
+		return 500, err, nil, "", -1
+	}
+
+	return 200, nil, file, mimeExtension, stat.Size()
 }
 
 func prepareAccountDirectories(name string) error {
@@ -400,6 +428,11 @@ func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, exte
 }
 
 func render404(request prago.Request) {
+	http.Error(request.Response(), "Not Found", 404)
 	request.SetProcessed()
-	http.NotFound(request.Response(), request.Request())
+}
+
+func render498(request prago.Request) {
+	http.Error(request.Response(), "Wrong Hash", 498)
+	request.SetProcessed()
 }
