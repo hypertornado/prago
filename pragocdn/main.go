@@ -118,6 +118,10 @@ func start(app *prago.App) {
 			request.Params().Get("name"),
 		)
 
+		if err != nil && app.DevelopmentMode {
+			panic(err)
+		}
+
 		//https://gist.github.com/the42/1956518
 
 		switch errCode {
