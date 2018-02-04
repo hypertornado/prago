@@ -18,7 +18,7 @@ import (
 	"strings"
 )
 
-const version = "1.0.3"
+const version = "1.0.4"
 
 var config CDNConfig
 
@@ -26,7 +26,7 @@ var accounts = map[string]*CDNConfigAccount{}
 var homePath = os.Getenv("HOME")
 
 var uuidRegex = regexp.MustCompile("^[a-zA-Z0-9]{10,}$")
-var filenameRegex = regexp.MustCompile("^[a-zA-Z0-9_-.]{1,50}$")
+var filenameRegex = regexp.MustCompile("^[a-zA-Z0-9_.-]{1,50}$")
 var extensionRegex = regexp.MustCompile("^[a-zA-Z0-9]{1,10}$")
 
 func main() {
