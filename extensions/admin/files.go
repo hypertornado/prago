@@ -188,7 +188,7 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 			_, path := v.getPath(fileUploadPath + "original")
 			fmt.Println(v.UID, path)
 
-			dirPath := fmt.Sprintf("%s/%s/%s", backupDir, v.UID[0:2], v.UID[2:4])
+			dirPath := fmt.Sprintf("%s/%s/%s", backupDir, strings.ToLower(v.UID[0:2]), strings.ToLower(v.UID[2:4]))
 			err = os.MkdirAll(dirPath, 0777)
 			if err != nil {
 				fmt.Println("mkdir error", err)

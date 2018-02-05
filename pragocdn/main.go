@@ -19,7 +19,7 @@ import (
 	"strings"
 )
 
-const version = "1.1.0"
+const version = "1.1.1"
 
 var config CDNConfig
 
@@ -334,8 +334,8 @@ func prepareAccountDirectories(name string) error {
 }
 
 func getFileDirectoryPath(account, uuid string) string {
-	firstPrefix := uuid[0:2]
-	secondPrefix := uuid[2:4]
+	firstPrefix := strings.ToLower(uuid[0:2])
+	secondPrefix := strings.ToLower(uuid[2:4])
 	return fmt.Sprintf("%s/.pragocdn/files/%s/%s/%s",
 		homePath,
 		account,
@@ -353,8 +353,8 @@ func getFilePath(account, uuid, extension string) string {
 }
 
 func getCacheDirectoryPath(account, uuid, format string) string {
-	firstPrefix := uuid[0:2]
-	secondPrefix := uuid[2:4]
+	firstPrefix := strings.ToLower(uuid[0:2])
+	secondPrefix := strings.ToLower(uuid[2:4])
 	return fmt.Sprintf("%s/.pragocdn/cache/%s/%s/%s/%s",
 		homePath,
 		account,
