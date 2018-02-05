@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -48,6 +49,29 @@ func main() {
 	app.AddMiddleware(extensions.BuildMiddleware{})
 	app.AddMiddleware(prago.MiddlewareServer{Fn: start})
 	prago.Must(app.Init())
+}
+
+func getNameAndExtension(filename string) (name, extension string, err error) {
+	extension = filepath.Ext(filename)
+	if extension == "" {
+		return "", "", errors.New("no extension")
+	}
+	extension = extension[1:]
+
+	name = filename[0 : len(filename)-len(extension)-1]
+
+	if !filenameRegex.MatchString(name) {
+		return "", "", errors.New("wrong name of file")
+	}
+
+	if !extensionRegex.MatchString(extension) {
+		fmt.Println(extension)
+		return "", "", errors.New("wrong extension of file")
+	}
+
+	extension = normalizeExtension(extension)
+
+	return name, extension, nil
 }
 
 func uploadFile(account CDNConfigAccount, extension string, inData io.Reader) (*cdnclient.CDNUploadData, error) {
@@ -228,18 +252,12 @@ func getFile(accountName, uuid, format, hash, name string) (eddCode int, err err
 		return 404, errors.New("wrongs uuid format: " + uuid), nil, "", -1
 	}
 
-	splited := strings.Split(name, ".")
-	if len(splited) != 2 {
-		return 404, errors.New("wrong name format"), nil, "", -1
+	_, fileExtension, err := getNameAndExtension(name)
+	if err != nil {
+		return 404, err, nil, "", -1
 	}
-	fileName := splited[0]
-	fileExtension := splited[1]
-	fileExtension = normalizeExtension(fileExtension)
-	mimeExtension = mime.TypeByExtension("." + fileExtension)
 
-	if !filenameRegex.MatchString(fileName) || !extensionRegex.MatchString(fileExtension) {
-		return 404, errors.New("wrong name format"), nil, "", -1
-	}
+	mimeExtension = mime.TypeByExtension("." + fileExtension)
 
 	expectedHash := cdnclient.GetHash(
 		account.Name,
