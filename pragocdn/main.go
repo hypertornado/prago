@@ -19,7 +19,7 @@ import (
 	"strings"
 )
 
-const version = "1.0.4"
+const version = "1.1.0"
 
 var config CDNConfig
 
