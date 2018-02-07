@@ -19,7 +19,7 @@ import (
 	"strings"
 )
 
-const version = "1.1.1"
+const version = "1.1.2"
 
 var config CDNConfig
 
@@ -142,8 +142,13 @@ func start(app *prago.App) {
 			request.Params().Get("name"),
 		)
 
-		if err != nil && app.DevelopmentMode {
-			panic(err)
+		if err != nil {
+			if app.DevelopmentMode {
+				panic(err)
+			} else {
+				fmt.Println(err)
+				return
+			}
 		}
 
 		//https://gist.github.com/the42/1956518
