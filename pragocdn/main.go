@@ -147,7 +147,6 @@ func start(app *prago.App) {
 				panic(err)
 			} else {
 				fmt.Println(err)
-				return
 			}
 		}
 

@@ -302,8 +302,11 @@ func (a *Admin) Init(app *prago.App) error {
 	})
 
 	a.AdminController.Get(a.Prefix, func(request prago.Request) {
+		user := GetUser(request)
 		request.SetData("home_data", a.GetHomeData(request))
-		request.SetData("snippets", a.snippets)
+		if user.IsAdmin {
+			request.SetData("snippets", a.snippets)
+		}
 		prago.Render(request, 200, "admin_layout")
 	})
 
