@@ -216,7 +216,7 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_item_submit"}}
-  <input type="submit" name="{{.Name}}" value="{{.NameHuman}}" class="btn"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="submit" name="{{.Name}}" value="{{.NameHuman}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_select"}}
@@ -392,7 +392,7 @@ const adminTemplates = `
 
         <div class="btngroup">
         {{range $item := .admin_list.Actions}}
-          <a href="{{$item.Url}}" class="btn">{{$item.Name}}</a>
+          <a href="{{$item.Url}}" class="btn btn-primary">{{$item.Name}}</a>
         {{end}}
         </div>
       </div>
@@ -1048,6 +1048,17 @@ a:hover {
   background-image: none;
   border-color: #d5d5d5;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+.btn-primary {
+  background-image: linear-gradient(-180deg, #1E90FF, #005A9C 90%);
+  color: white;
+  border-color: #1E90FF;
+}
+.btn-primary:hover {
+  background-image: linear-gradient(-180deg, #1E90FF, #005A9C 50%);
+}
+.btn-primary:active {
+  background-image: linear-gradient(-180deg, #1E90FF, #005A9C 0%);
 }
 .form_errors_error {
   border: 1px solid #dd2e4f;

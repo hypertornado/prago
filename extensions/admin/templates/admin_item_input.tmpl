@@ -80,7 +80,7 @@
 {{end}}
 
 {{define "admin_item_submit"}}
-  <input type="submit" name="{{.Name}}" value="{{.NameHuman}}" class="btn"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="submit" name="{{.Name}}" value="{{.NameHuman}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_select"}}
