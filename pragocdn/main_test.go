@@ -11,6 +11,7 @@ func TestNames(t *testing.T) {
 		{"hello.world", "hello", "world"},
 		{"a.b.c", "a.b", "c"},
 		{"aa.jpeg", "aa", "jpg"},
+		{"28dc80c83776a8d4b733d10b03d3-r16-9-w368-h206-gd468002e575111e5b3730025900fea04.jpg", "28dc80c83776a8d4b733d10b03d3-r16-9-w368-h206-gd468002e575111e5b3730025900fea04", "jpg"},
 	} {
 		name, ext, err := getNameAndExtension(v[0])
 		if err != nil {
