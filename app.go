@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Sirupsen/logrus"
+	"github.com/hypertornado/prago/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"io/ioutil"
 	"net/http"
@@ -208,8 +209,10 @@ func callRequestMiddlewares(request *Request, middlewares []requestMiddleware) {
 }
 
 func defaultRecovery(p *Request, recoveryData interface{}) {
+	uuid := utils.RandomString(10)
+
 	p.Response().WriteHeader(500)
-	p.Response().Write([]byte("500 Internal Server Error"))
-	p.Log().Errorln(fmt.Sprintf("500 Internal Server Error\n%s\nstack:\n", recoveryData))
+	p.Response().Write([]byte("500 Internal Server Error, errorid " + uuid))
+	p.Log().Errorln(fmt.Sprintf("500 Internal Server Error, errorid %s\n%s\nstack:\n", uuid, recoveryData))
 	p.Log().Errorln(string(debug.Stack()))
 }

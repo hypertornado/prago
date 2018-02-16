@@ -60,7 +60,6 @@ func DevelopmentRecovery(p *prago.Request, recoveryData interface{}) {
 		if err != nil {
 			panic(err)
 		}
-
 		byteData := fmt.Sprintf("%s", recoveryData)
 
 		buf := new(bytes.Buffer)
@@ -76,7 +75,6 @@ func DevelopmentRecovery(p *prago.Request, recoveryData interface{}) {
 		p.Response().Header().Add("Content-type", "text/html")
 		p.Response().WriteHeader(500)
 		p.Response().Write(buf.Bytes())
-
 	} else {
 		p.Response().WriteHeader(500)
 		p.Response().Write([]byte("We are sorry, some error occured. (500)"))

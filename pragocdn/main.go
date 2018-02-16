@@ -65,7 +65,6 @@ func getNameAndExtension(filename string) (name, extension string, err error) {
 	}
 
 	if !extensionRegex.MatchString(extension) {
-		fmt.Println(extension)
 		return "", "", errors.New("wrong extension of file")
 	}
 
