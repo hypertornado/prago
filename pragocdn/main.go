@@ -19,7 +19,7 @@ import (
 	"strings"
 )
 
-const version = "1.3.0"
+const version = "1.4.0"
 
 var config CDNConfig
 
@@ -432,6 +432,7 @@ func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, exte
 
 	cmdAr := []string{
 		originalPath,
+		"--rotate",
 		"-s",
 		size,
 		"-o",
