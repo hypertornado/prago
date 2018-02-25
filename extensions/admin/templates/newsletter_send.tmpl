@@ -5,10 +5,11 @@
 <h1>Odeslat newsletter - {{.title}}</h1>
 
 <b>Emailové adresy ({{.recipients_count}})</b>
-{{range $item := .recipients}}
-  <div>{{$item}}</div>
+{{if false}}
+  {{range $item := .recipients}}
+    <div>{{$item}}</div>
+  {{end}}
 {{end}}
-
 
 <input type="submit" class="btn" value="Odeslat newsletter">
 </form>

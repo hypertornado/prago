@@ -112,15 +112,16 @@ const newsletterTemplate = `
 var nmMiddleware *NewsletterMiddleware
 
 type NewsletterMiddleware struct {
-	Name           string
-	baseUrl        string
-	Admin          *administration.Admin
-	SenderEmail    string
-	SenderName     string
-	Randomness     string
-	SendgridKey    string
-	sendgridClient *sendgrid.SGClient
-	controller     *prago.Controller
+	Name            string
+	baseUrl         string
+	Admin           *administration.Admin
+	SenderEmail     string
+	SenderName      string
+	Randomness      string
+	SendgridKey     string
+	Authenticatizer administration.Authenticatizer
+	sendgridClient  *sendgrid.SGClient
+	controller      *prago.Controller
 }
 
 func (nm NewsletterMiddleware) Init(app *prago.App) error {
@@ -233,10 +234,11 @@ func (nm NewsletterMiddleware) Init(app *prago.App) error {
 		prago.Render(request, 200, "newsletter_layout")
 	})
 
-	_, err := nmMiddleware.Admin.CreateResource(Newsletter{})
+	newsletterResource, err := nmMiddleware.Admin.CreateResource(Newsletter{})
 	if err != nil {
 		return err
 	}
+	newsletterResource.Authenticate = nmMiddleware.Authenticatizer
 
 	_, err = nmMiddleware.Admin.CreateResource(NewsletterPersons{})
 	if err != nil {
@@ -420,7 +422,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 
 	sendAction := administration.ResourceAction{
 		Name: func(string) string { return "Odeslat" },
-		Auth: administration.AuthenticateSysadmin,
+		Auth: administration.AuthenticateAdmin,
 		Url:  "send",
 		Handler: func(admin *administration.Admin, resource *administration.Resource, request prago.Request) {
 			var newsletter Newsletter
@@ -459,10 +461,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 				panic(err)
 			}
 
-			err = nmMiddleware.SendEmails(newsletter, recipients)
-			if err != nil {
-				panic(err)
-			}
+			go nmMiddleware.SendEmails(newsletter, recipients)
 
 			request.SetData("recipients", recipients)
 			request.SetData("recipients_count", len(recipients))

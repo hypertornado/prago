@@ -36,6 +36,25 @@ function bindPlaces() {
       visible: visible
     });
 
+    var searchInput: HTMLInputElement = document.createElement("input");
+    searchInput.classList.add("input", "input-placesearch");
+    var searchBox = new google.maps.places.SearchBox(searchInput);
+    map.controls[google.maps.ControlPosition.LEFT_TOP].push(searchInput);
+    searchBox.addListener('places_changed', () => {
+      var places = searchBox.getPlaces();
+      if (places.length > 0) {
+        map.fitBounds(places[0].geometry.viewport);
+        marker.setPosition({lat: places[0].geometry.location.lat(), lng: places[0].geometry.location.lng()});
+        marker.setVisible(true);
+      }
+    });
+    searchInput.addEventListener("keydown", (e) => {
+      if(e.keyCode == 13) {
+        e.preventDefault();
+        return false;
+      }
+    })
+
     marker.addListener("position_changed", function () {
       var p = marker.getPosition();
       var str = stringifyPosition(p.lat(), p.lng());

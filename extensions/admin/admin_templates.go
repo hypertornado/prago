@@ -293,7 +293,7 @@ const adminTemplates = `
     {{range $javascript := .javascripts}}
         <script type="text/javascript" src="{{$javascript}}"></script>
     {{end}}
-    <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces&key={{.google}}" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces&libraries=places&key={{.google}}" async defer></script>
 
   </head>
   <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.admin_header.UrlPrefix}}"
@@ -665,10 +665,11 @@ const adminTemplates = `
 <h1>Odeslat newsletter - {{.title}}</h1>
 
 <b>Emailové adresy ({{.recipients_count}})</b>
-{{range $item := .recipients}}
-  <div>{{$item}}</div>
+{{if false}}
+  {{range $item := .recipients}}
+    <div>{{$item}}</div>
+  {{end}}
 {{end}}
-
 
 <input type="submit" class="btn" value="Odeslat newsletter">
 </form>
@@ -694,8 +695,10 @@ const adminTemplates = `
   <h1>Newsletter odeslán</h1>
 
   <b>Emailové adresy ({{.recipients_count}})</b>
-  {{range $item := .recipients}}
-    <div>{{$item}}</div>
+  {{if false}}
+    {{range $item := .recipients}}
+      <div>{{$item}}</div>
+    {{end}}
   {{end}}
   
 </div>
@@ -1104,6 +1107,10 @@ a:hover {
   width: 100%;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
   background-color: white;
+}
+.input-placesearch {
+  max-width: calc(100% - 200px);
+  margin-left: 10px;
 }
 select.input {
   -webkit-appearance: menulist-button;
@@ -2108,6 +2115,24 @@ function bindPlaces() {
             draggable: true,
             title: "",
             visible: visible
+        });
+        var searchInput = document.createElement("input");
+        searchInput.classList.add("input", "input-placesearch");
+        var searchBox = new google.maps.places.SearchBox(searchInput);
+        map.controls[google.maps.ControlPosition.LEFT_TOP].push(searchInput);
+        searchBox.addListener('places_changed', function () {
+            var places = searchBox.getPlaces();
+            if (places.length > 0) {
+                map.fitBounds(places[0].geometry.viewport);
+                marker.setPosition({ lat: places[0].geometry.location.lat(), lng: places[0].geometry.location.lng() });
+                marker.setVisible(true);
+            }
+        });
+        searchInput.addEventListener("keydown", function (e) {
+            if (e.keyCode == 13) {
+                e.preventDefault();
+                return false;
+            }
         });
         marker.addListener("position_changed", function () {
             var p = marker.getPosition();

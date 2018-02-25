@@ -258,7 +258,11 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 		form := NewForm()
 		form.Method = "POST"
 
-		fi := form.AddTextInput("Name", messages.Messages.Get(GetLocale(request), "Name"))
+		fi := form.AddTextInput("UUID", messages.Messages.Get(GetLocale(request), "UUID"))
+		fi.Readonly = true
+		fi.Value = file.UID
+
+		fi = form.AddTextInput("Name", messages.Messages.Get(GetLocale(request), "Name"))
 		fi.Readonly = true
 		fi.Value = file.Name
 
@@ -272,6 +276,15 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 		fi = form.AddTextInput("uploadedBy", messages.Messages.Get(GetLocale(request), "Uploaded By"))
 		fi.Readonly = true
 		fi.Value = fmt.Sprintf("%d", file.User)
+		var user User
+		err = a.Query().WhereIs("id", file.User).Get(&user)
+		if err == nil {
+			fi.Value = fmt.Sprintf("%s (%d)", user.Name, user.ID)
+		}
+
+		fi = form.AddTextInput("uploadedAt", messages.Messages.Get(GetLocale(request), "Uploaded At"))
+		fi.Readonly = true
+		fi.Value = file.UpdatedAt.Format("2006-01-02 15:04:05")
 
 		if file.IsImage() {
 			for _, v := range []string{"large", "medium", "small"} {
