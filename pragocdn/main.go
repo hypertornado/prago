@@ -19,7 +19,7 @@ import (
 	"strings"
 )
 
-const version = "1.4.0"
+const version = "1.5.0"
 
 var config CDNConfig
 
@@ -439,9 +439,12 @@ func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, exte
 		outputFilePath + outputParameters,
 	}
 
-	if config.Profile != "" {
-		cmdAr = append(cmdAr, "--delete", "--eprofile", config.Profile)
-	}
+	//TODO: make profile striping back
+	/*
+		if config.Profile != "" {
+			cmdAr = append(cmdAr, "--delete", "--eprofile", config.Profile)
+		}
+	*/
 
 	if crop {
 		cmdAr = append(cmdAr, "-m", "attention")

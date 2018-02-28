@@ -24,7 +24,7 @@ var (
 	ErrEmailAlreadyInList = errors.New("email already in newsletter list")
 )
 
-const newsletterTemplate = `
+const defaultNewsletterTemplate = `
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -119,6 +119,7 @@ type NewsletterMiddleware struct {
 	SenderName      string
 	Randomness      string
 	SendgridKey     string
+	Renderer        NewsletterRenderer
 	Authenticatizer administration.Authenticatizer
 	sendgridClient  *sendgrid.SGClient
 	controller      *prago.Controller
@@ -129,7 +130,6 @@ func (nm NewsletterMiddleware) Init(app *prago.App) error {
 		return errors.New("cant initialize more then one instance of newsletter")
 	}
 	nmMiddleware = &nm
-
 	nmMiddleware.controller = app.MainController().SubController()
 	nmMiddleware.baseUrl = app.Config.GetString("baseUrl")
 
@@ -530,22 +530,35 @@ func (nm *NewsletterMiddleware) SendEmails(n Newsletter, emails []string) error 
 }
 
 func (nm *NewsletterMiddleware) GetBody(n Newsletter, email string) (string, error) {
-	t, err := template.New("newsletter").Parse(newsletterTemplate)
-	if err != nil {
-		return "", err
-	}
-
 	content := markdown.New(markdown.HTML(true)).RenderToString([]byte(n.Body))
-
-	buf := new(bytes.Buffer)
-	err = t.ExecuteTemplate(buf, "newsletter", map[string]interface{}{
+	params := map[string]interface{}{
 		"id":          n.ID,
 		"baseUrl":     nm.baseUrl,
 		"site":        nm.Name,
 		"title":       n.Name,
 		"unsubscribe": nm.unsubscribeUrl(email),
 		"content":     template.HTML(content),
-	})
+		"preview":     n.Body,
+	}
+
+	if nm.Renderer != nil {
+		return nm.Renderer(params)
+	} else {
+		return defaultNewsletterRenderer(params)
+	}
+
+}
+
+type NewsletterRenderer func(map[string]interface{}) (string, error)
+
+func defaultNewsletterRenderer(params map[string]interface{}) (string, error) {
+	t, err := template.New("newsletter").Parse(defaultNewsletterTemplate)
+	if err != nil {
+		return "", err
+	}
+
+	buf := new(bytes.Buffer)
+	err = t.ExecuteTemplate(buf, "newsletter", params)
 	if err != nil {
 		return "", err
 	}

@@ -38,6 +38,19 @@ func initCDN(a *Admin) {
 	filesCDN = cdnclient.NewCDNAccount(cdnURL, cdnAccount, cdnPassword)
 }
 
+func (a *Admin) GetFiles(ids string) []*File {
+	var files []*File
+	idsAr := strings.Split(ids, ",")
+	for _, v := range idsAr {
+		var image File
+		err := a.Query().WhereIs("uid", v).Get(&image)
+		if err == nil {
+			files = append(files, &image)
+		}
+	}
+	return files
+}
+
 //File is structure representing files in admin
 type File struct {
 	ID          int64 `prago-order-desc:"true"`
