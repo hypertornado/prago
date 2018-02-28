@@ -30,6 +30,8 @@ var uuidRegex = regexp.MustCompile("^[a-zA-Z0-9]{10,}$")
 var filenameRegex = regexp.MustCompile("^[a-zA-Z0-9_.-]{1,150}$")
 var extensionRegex = regexp.MustCompile("^[a-zA-Z0-9]{1,10}$")
 
+var cmykProfilePath = os.Getenv("HOME") + "/.pragocdn/cmyk.icm"
+
 func main() {
 	var err error
 	config, err = loadCDNConfig()
@@ -414,7 +416,16 @@ func convertedFilePath(account, uuid, extension, format string) (string, error) 
 	return "", errors.New("wrong file convert format")
 }
 
+//CMYK: https://github.com/jcupitt/libvips/issues/630
 func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, extension string, crop bool) error {
+	err := vipsThumbnailProfile(originalPath, outputDirectoryPath, outputFilePath, size, extension, crop, false)
+	if err != nil {
+		err = vipsThumbnailProfile(originalPath, outputDirectoryPath, outputFilePath, size, extension, crop, true)
+	}
+	return err
+}
+
+func vipsThumbnailProfile(originalPath, outputDirectoryPath, outputFilePath, size, extension string, crop bool, cmyk bool) error {
 	_, err := os.Open(outputFilePath)
 	if err == nil {
 		return nil
@@ -439,12 +450,13 @@ func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, exte
 		outputFilePath + outputParameters,
 	}
 
-	//TODO: make profile striping back
-	/*
-		if config.Profile != "" {
-			cmdAr = append(cmdAr, "--delete", "--eprofile", config.Profile)
-		}
-	*/
+	if cmyk {
+		cmdAr = append(cmdAr, "-i", cmykProfilePath)
+	}
+
+	/*if config.Profile != "" {
+		cmdAr = append(cmdAr, "--delete", "--eprofile", config.Profile)
+	}*/
 
 	if crop {
 		cmdAr = append(cmdAr, "-m", "attention")
