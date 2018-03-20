@@ -1,0 +1,47 @@
+{{define "admin_view"}}
+
+<div class="admin_box">
+  <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
+
+  {{range $item := .view.Items}}
+    <div class="view_name">
+      {{$item.Name}}
+    </div>
+    <div class="view_content">
+      {{tmpl $item.Template $item.Value}}
+    </div>
+  {{end}}
+
+</div>
+
+{{end}}
+
+{{define "admin_item_view_text"}}
+  {{.}}
+{{end}}
+
+{{define "admin_item_view_boolean"}}
+  {{if .}}✅{{else}}-{{end}}
+{{end}}
+
+{{define "admin_item_view_markdown"}}
+  {{markdown .}}
+{{end}}
+
+{{define "admin_item_view_image"}}
+  <div class="admin_item_view_image_content" data-images="{{.}}">
+    <progress value="" max=""></progress>
+  </div>
+{{end}}
+
+{{define "admin_item_view_place"}}
+  <div class="admin_item_view_place" data-value="{{.}}">
+    <progress value="" max=""></progress>
+  </div>
+{{end}}
+
+{{define "admin_item_view_relation"}}
+  <div class="admin_item_view_relation" data-type="{{.Typ}}" data-id="{{.ID}}">
+    <progress value="" max=""></progress>
+  </div>
+{{end}}

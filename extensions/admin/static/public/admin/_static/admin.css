@@ -570,6 +570,20 @@ input[type=date].input {
 .ordered-desc:after {
   content: "↑";
 }
+.view_name {
+  font-weight: bold;
+  margin-left: 5px;
+  margin-top: 10px;
+}
+.view_content {
+  margin-bottom: 10px;
+  background-color: rgba(64, 120, 192, 0.1);
+  padding: 5px;
+  border-radius: 3px;
+}
+.admin_item_view_place {
+  height: 200px;
+}
 progress {
   padding: 8px;
   margin: 0px auto;
@@ -624,7 +638,7 @@ progress {
   text-decoration: none;
 }
 .admin_header a:hover {
-  background-color: #eee;
+  background-color: rgba(64, 120, 192, 0.1);
 }
 .admin_header_top_space {
   flex-grow: 2;
@@ -652,9 +666,6 @@ progress {
   margin-right: 2px;
   font-size: 12px;
   border-bottom: 2px solid none;
-}
-.admin_header_resource:hover {
-  background-color: #eee;
 }
 .admin_header_resource-active {
   font-weight: bold;

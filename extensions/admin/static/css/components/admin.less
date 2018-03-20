@@ -88,7 +88,7 @@ progress {
 }
 
 a {
-  color: #4078c0;
+  color: @baseColor;
 }
 
 a:hover {
@@ -334,7 +334,7 @@ input[type=date].input {
 .flash {
   text-align: center;
   padding: 5px;
-  background: #4078c0;
+  background: @baseColor;
 }
 
 .flash_message {
@@ -467,6 +467,23 @@ input[type=date].input {
 
 .ordered-desc:after {
   content: "↑";
+}
+
+.view_name {
+  font-weight: bold;
+  margin-left: 5px;
+  margin-top: 10px;
+}
+
+.view_content {
+  margin-bottom: 10px;
+  background-color: @baseColorBackground;
+  padding: 5px;
+  border-radius: 3px;
+}
+
+.admin_item_view_place {
+  height: 200px;
 }
 
 progress {

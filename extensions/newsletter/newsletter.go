@@ -10,6 +10,7 @@ import (
 	"github.com/golang-commonmark/markdown"
 	"github.com/hypertornado/prago"
 	administration "github.com/hypertornado/prago/extensions/admin"
+	"github.com/hypertornado/prago/utils"
 	"github.com/sendgrid/sendgrid-go"
 	"html/template"
 	"io"
@@ -538,7 +539,7 @@ func (nm *NewsletterMiddleware) GetBody(n Newsletter, email string) (string, err
 		"title":       n.Name,
 		"unsubscribe": nm.unsubscribeUrl(email),
 		"content":     template.HTML(content),
-		"preview":     n.Body,
+		"preview":     utils.CropMarkdown(n.Body, 200),
 	}
 
 	if nm.Renderer != nil {

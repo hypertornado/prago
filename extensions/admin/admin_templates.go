@@ -583,6 +583,52 @@ const adminTemplates = `
 </table>
 
 
+{{end}}{{define "admin_view"}}
+
+<div class="admin_box">
+  <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
+
+  {{range $item := .view.Items}}
+    <div class="view_name">
+      {{$item.Name}}
+    </div>
+    <div class="view_content">
+      {{tmpl $item.Template $item.Value}}
+    </div>
+  {{end}}
+
+</div>
+
+{{end}}
+
+{{define "admin_item_view_text"}}
+  {{.}}
+{{end}}
+
+{{define "admin_item_view_boolean"}}
+  {{if .}}✅{{else}}-{{end}}
+{{end}}
+
+{{define "admin_item_view_markdown"}}
+  {{markdown .}}
+{{end}}
+
+{{define "admin_item_view_image"}}
+  <div class="admin_item_view_image_content" data-images="{{.}}">
+    <progress value="" max=""></progress>
+  </div>
+{{end}}
+
+{{define "admin_item_view_place"}}
+  <div class="admin_item_view_place" data-value="{{.}}">
+    <progress value="" max=""></progress>
+  </div>
+{{end}}
+
+{{define "admin_item_view_relation"}}
+  <div class="admin_item_view_relation" data-type="{{.Typ}}" data-id="{{.ID}}">
+    <progress value="" max=""></progress>
+  </div>
 {{end}}{{define "elastic_index"}}
 <h1>Elastic Index</h1>
 
@@ -1298,6 +1344,17 @@ input[type=date].input {
 .ordered-desc:after {
   content: "↑";
 }
+.view_name {
+  font-weight: bold;
+  margin-left: 5px;
+  margin-top: 10px;
+}
+.view_content {
+  margin-bottom: 10px;
+  background-color: rgba(64, 120, 192, 0.1);
+  padding: 5px;
+  border-radius: 3px;
+}
 progress {
   padding: 8px;
   margin: 0px auto;
@@ -1352,7 +1409,7 @@ progress {
   text-decoration: none;
 }
 .admin_header a:hover {
-  background-color: #eee;
+  background-color: rgba(64, 120, 192, 0.1);
 }
 .admin_header_top_space {
   flex-grow: 2;
@@ -1380,9 +1437,6 @@ progress {
   margin-right: 2px;
   font-size: 12px;
   border-bottom: 2px solid none;
-}
-.admin_header_resource:hover {
-  background-color: #eee;
 }
 .admin_header_resource-active {
   font-weight: bold;
@@ -1414,6 +1468,38 @@ function DOMinsertChildAtIndex(parent, child, index) {
         parent.insertBefore(child, parent.children[index]);
     }
 }
+function bindImageViews() {
+    var els = document.querySelectorAll(".admin_item_view_image_content");
+    for (var i = 0; i < els.length; i++) {
+        new ImageView(els[i]);
+    }
+}
+var ImageView = (function () {
+    function ImageView(el) {
+        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
+        this.el = el;
+        var ids = el.getAttribute("data-images").split(",");
+        this.addImages(ids);
+    }
+    ImageView.prototype.addImages = function (ids) {
+        this.el.innerHTML = "";
+        for (var i = 0; i < ids.length; i++) {
+            this.addImage(ids[i]);
+        }
+    };
+    ImageView.prototype.addImage = function (id) {
+        var container = document.createElement("a");
+        container.classList.add("admin_images_image");
+        container.setAttribute("target", "_blank");
+        container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
+        var img = document.createElement("img");
+        img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
+        img.setAttribute("draggable", "false");
+        container.appendChild(img);
+        this.el.appendChild(container);
+    };
+    return ImageView;
+}());
 function bindImagePickers() {
     var els = document.querySelectorAll(".admin_images");
     for (var i = 0; i < els.length; i++) {
@@ -1607,8 +1693,16 @@ var List = (function () {
             _this.tbody.innerHTML = "";
             if (request.status == 200) {
                 _this.tbody.innerHTML = request.response;
-                var count = request.getResponseHeader("X-Total-Count");
-                _this.el.querySelector(".admin_table_count").textContent = count;
+                var count = request.getResponseHeader("X-Count");
+                var totalCount = request.getResponseHeader("X-Total-Count");
+                var countStr;
+                if (count != totalCount) {
+                    countStr = count + " / " + totalCount;
+                }
+                else {
+                    countStr = count + "";
+                }
+                _this.el.querySelector(".admin_table_count").textContent = countStr;
                 bindOrder();
                 bindDelete();
                 _this.bindPage();
@@ -2031,6 +2125,40 @@ function bindTimestamps() {
         bindTimestamp(el);
     });
 }
+function bindRelationsView() {
+    var els = document.querySelectorAll(".admin_item_view_relation");
+    for (var i = 0; i < els.length; i++) {
+        new RelationsView(els[i]);
+    }
+}
+var RelationsView = (function () {
+    function RelationsView(el) {
+        var idStr = el.getAttribute("data-id");
+        var typ = el.getAttribute("data-type");
+        var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        var request = new XMLHttpRequest();
+        request.open("GET", adminPrefix + "/_api/resource/" + typ + "/" + idStr, true);
+        request.addEventListener("load", function () {
+            el.innerHTML = "";
+            if (request.status == 200) {
+                var resp = JSON.parse(request.response);
+                var link = document.createElement("a");
+                link.setAttribute("href", adminPrefix + "/" + typ + "/" + idStr);
+                var name = resp.name;
+                if (name == "") {
+                    name += " ";
+                }
+                link.textContent = name;
+                el.appendChild(link);
+            }
+            else {
+                el.textContent = "Error while loading";
+            }
+        });
+        request.send();
+    }
+    return RelationsView;
+}());
 function bindRelations() {
     function bindRelation(el) {
         var input = el.getElementsByTagName("input")[0];
@@ -2084,6 +2212,17 @@ function bindRelations() {
         bindRelation(el);
     });
 }
+function bindPlacesView() {
+    var els = document.querySelectorAll(".admin_item_view_place");
+    for (var i = 0; i < els.length; i++) {
+        new PlacesView(els[i]);
+    }
+}
+var PlacesView = (function () {
+    function PlacesView(el) {
+    }
+    return PlacesView;
+}());
 function bindPlaces() {
     function bindPlace(el) {
         var mapEl = document.createElement("div");
@@ -2211,11 +2350,14 @@ var Form = (function () {
 document.addEventListener("DOMContentLoaded", function () {
     bindMarkdowns();
     bindTimestamps();
+    bindRelationsView();
     bindRelations();
     bindImagePickers();
     bindClickAndStay();
     bindLists();
     bindForm();
+    bindPlacesView();
+    bindImageViews();
 });
 function bindClickAndStay() {
     var els = document.getElementsByName("_submit_and_stay");

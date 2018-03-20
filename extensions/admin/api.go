@@ -55,6 +55,7 @@ func bindListAPI(a *Admin) {
 			panic(err)
 		}
 
+		request.Response().Header().Set("X-Count", fmt.Sprintf("%d", listData.Count))
 		request.Response().Header().Set("X-Total-Count", fmt.Sprintf("%d", listData.TotalCount))
 		request.SetData("admin_list", listData)
 		prago.Render(request, 200, "admin_list_cells")
@@ -114,6 +115,43 @@ func bindListResourceAPI(a *Admin) {
 				Name: name,
 			})
 		}
+
+		prago.WriteAPI(request, ret, 200)
+	})
+}
+
+func bindListResourceItemAPI(a *Admin) {
+	a.AdminController.Get(a.Prefix+"/_api/resource/:name/:id", func(request prago.Request) {
+		user := GetUser(request)
+		resourceName := request.Params().Get("name")
+		resource, found := a.resourceNameMap[resourceName]
+		if !found {
+			render404(request)
+			return
+		}
+
+		if !resource.Authenticate(user) {
+			render403(request)
+			return
+		}
+
+		idStr := request.Params().Get("id")
+
+		var item interface{}
+		resource.newItem(&item)
+		prago.Must(a.Query().WhereIs("id", idStr).Get(item))
+
+		ret := resourceItem{}
+
+		itemVal := reflect.ValueOf(item).Elem()
+
+		id := itemVal.FieldByName("ID").Int()
+
+		var name string
+		name = itemVal.FieldByName("Name").String()
+
+		ret.ID = id
+		ret.Name = name
 
 		prago.WriteAPI(request, ret, 200)
 	})

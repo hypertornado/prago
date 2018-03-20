@@ -20,6 +20,38 @@ function DOMinsertChildAtIndex(parent, child, index) {
         parent.insertBefore(child, parent.children[index]);
     }
 }
+function bindImageViews() {
+    var els = document.querySelectorAll(".admin_item_view_image_content");
+    for (var i = 0; i < els.length; i++) {
+        new ImageView(els[i]);
+    }
+}
+var ImageView = (function () {
+    function ImageView(el) {
+        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
+        this.el = el;
+        var ids = el.getAttribute("data-images").split(",");
+        this.addImages(ids);
+    }
+    ImageView.prototype.addImages = function (ids) {
+        this.el.innerHTML = "";
+        for (var i = 0; i < ids.length; i++) {
+            this.addImage(ids[i]);
+        }
+    };
+    ImageView.prototype.addImage = function (id) {
+        var container = document.createElement("a");
+        container.classList.add("admin_images_image");
+        container.setAttribute("target", "_blank");
+        container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
+        var img = document.createElement("img");
+        img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
+        img.setAttribute("draggable", "false");
+        container.appendChild(img);
+        this.el.appendChild(container);
+    };
+    return ImageView;
+}());
 function bindImagePickers() {
     var els = document.querySelectorAll(".admin_images");
     for (var i = 0; i < els.length; i++) {
@@ -213,8 +245,16 @@ var List = (function () {
             _this.tbody.innerHTML = "";
             if (request.status == 200) {
                 _this.tbody.innerHTML = request.response;
-                var count = request.getResponseHeader("X-Total-Count");
-                _this.el.querySelector(".admin_table_count").textContent = count;
+                var count = request.getResponseHeader("X-Count");
+                var totalCount = request.getResponseHeader("X-Total-Count");
+                var countStr;
+                if (count != totalCount) {
+                    countStr = count + " / " + totalCount;
+                }
+                else {
+                    countStr = count + "";
+                }
+                _this.el.querySelector(".admin_table_count").textContent = countStr;
                 bindOrder();
                 bindDelete();
                 _this.bindPage();
@@ -637,6 +677,40 @@ function bindTimestamps() {
         bindTimestamp(el);
     });
 }
+function bindRelationsView() {
+    var els = document.querySelectorAll(".admin_item_view_relation");
+    for (var i = 0; i < els.length; i++) {
+        new RelationsView(els[i]);
+    }
+}
+var RelationsView = (function () {
+    function RelationsView(el) {
+        var idStr = el.getAttribute("data-id");
+        var typ = el.getAttribute("data-type");
+        var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        var request = new XMLHttpRequest();
+        request.open("GET", adminPrefix + "/_api/resource/" + typ + "/" + idStr, true);
+        request.addEventListener("load", function () {
+            el.innerHTML = "";
+            if (request.status == 200) {
+                var resp = JSON.parse(request.response);
+                var link = document.createElement("a");
+                link.setAttribute("href", adminPrefix + "/" + typ + "/" + idStr);
+                var name = resp.name;
+                if (name == "") {
+                    name += " ";
+                }
+                link.textContent = name;
+                el.appendChild(link);
+            }
+            else {
+                el.textContent = "Error while loading";
+            }
+        });
+        request.send();
+    }
+    return RelationsView;
+}());
 function bindRelations() {
     function bindRelation(el) {
         var input = el.getElementsByTagName("input")[0];
@@ -690,7 +764,37 @@ function bindRelations() {
         bindRelation(el);
     });
 }
+function bindPlacesView() {
+    var els = document.querySelectorAll(".admin_item_view_place");
+    for (var i = 0; i < els.length; i++) {
+        new PlacesView(els[i]);
+    }
+}
+var PlacesView = (function () {
+    function PlacesView(el) {
+        var val = el.getAttribute("data-value");
+        el.innerText = "";
+        var coords = val.split(",");
+        if (coords.length != 2) {
+            return;
+        }
+        var position = { lat: parseFloat(coords[0]), lng: parseFloat(coords[1]) };
+        var zoom = 11;
+        var map = new google.maps.Map(el, {
+            center: position,
+            zoom: zoom
+        });
+        var marker = new google.maps.Marker({
+            position: position,
+            map: map,
+            draggable: true,
+            title: ""
+        });
+    }
+    return PlacesView;
+}());
 function bindPlaces() {
+    bindPlacesView();
     function bindPlace(el) {
         var mapEl = document.createElement("div");
         mapEl.classList.add("admin_place_map");
@@ -817,11 +921,13 @@ var Form = (function () {
 document.addEventListener("DOMContentLoaded", function () {
     bindMarkdowns();
     bindTimestamps();
+    bindRelationsView();
     bindRelations();
     bindImagePickers();
     bindClickAndStay();
     bindLists();
     bindForm();
+    bindImageViews();
 });
 function bindClickAndStay() {
     var els = document.getElementsByName("_submit_and_stay");

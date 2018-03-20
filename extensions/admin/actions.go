@@ -123,6 +123,26 @@ var ActionCreate = ResourceAction{
 	},
 }
 
+var ActionView = ResourceAction{
+	Url: "",
+	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
+
+		id, err := strconv.Atoi(request.Params().Get("id"))
+		prago.Must(err)
+
+		var item interface{}
+		resource.newItem(&item)
+		prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
+
+		view, err := resource.StructCache.getView(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
+		prago.Must(err)
+
+		request.SetData("view", view)
+		request.SetData("admin_yield", "admin_view")
+		prago.Render(request, 200, "admin_layout")
+	},
+}
+
 var ActionEdit = ResourceAction{
 	Url: "edit",
 	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
@@ -324,6 +344,8 @@ func InitResourceDefault(a *Admin, resource *Resource) error {
 		bindResourceAction(a, resource, ActionCreate)
 	}
 
+	bindResourceItemAction(a, resource, ActionView)
+
 	if resource.CanEdit {
 		bindResourceItemAction(a, resource, ActionEdit)
 		bindResourceItemAction(a, resource, ActionUpdate)
@@ -365,6 +387,12 @@ func (ar *Resource) ResourceItemActionsButtonData(user *User, id int64, admin *A
 	prefix := fmt.Sprintf("%s/%d", ar.ID, id)
 
 	ret := []ButtonData{}
+
+	ret = append(ret, ButtonData{
+		Name: messages.Messages.Get(user.Locale, "admin_view"),
+		Url:  prefix,
+	})
+
 	if ar.PreviewURLFunction != nil {
 		var item interface{}
 		ar.newItem(&item)
@@ -373,7 +401,7 @@ func (ar *Resource) ResourceItemActionsButtonData(user *User, id int64, admin *A
 			url := ar.PreviewURLFunction(item)
 			if url != "" {
 				ret = append(ret, ButtonData{
-					Name: messages.Messages.Get(user.Locale, "admin_view"),
+					Name: messages.Messages.Get(user.Locale, "admin_preview"),
 					Url:  url,
 					Params: map[string]string{
 						"target": "_blank",

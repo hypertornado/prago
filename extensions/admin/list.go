@@ -29,6 +29,7 @@ type listHeader struct {
 }
 
 type listContent struct {
+	Count      int64
 	TotalCount int64
 	Rows       []listRow
 	Pagination pagination
@@ -95,6 +96,12 @@ func (resource *Resource) getListHeader(admin *Admin, user *User) (list list, er
 			}
 
 			headerItem.FilterLayout = v.filterLayout()
+
+			if headerItem.FilterLayout == "filter_layout_relation" {
+				if v.Tags["prago-relation"] != "" {
+					headerItem.ColumnName = v.Tags["prago-relation"]
+				}
+			}
 
 			if v.CanOrder {
 				headerItem.CanOrder = true
@@ -178,7 +185,16 @@ func (resource *Resource) getListContent(admin *Admin, requestQuery *listRequest
 	if err != nil {
 		return
 	}
-	list.TotalCount = count
+	list.Count = count
+
+	var totalCount int64
+	resource.newItem(&item)
+	countQuery = admin.Query()
+	totalCount, err = countQuery.Count(item)
+	if err != nil {
+		return
+	}
+	list.TotalCount = totalCount
 
 	totalPages := (count / resource.Pagination)
 	if count%resource.Pagination != 0 {
@@ -246,7 +262,12 @@ func (resource *Resource) valueToCell(admin *Admin, field reflect.StructField, v
 	case int64:
 		cell.Value = fmt.Sprintf("%d", item.(int64))
 		if field.Tag.Get("prago-type") == "relation" {
-			relationResource := resource.admin.getResourceByName(field.Name)
+			resourceName := field.Name
+			if field.Tag.Get("prago-relation") != "" {
+				resourceName = field.Tag.Get("prago-relation")
+			}
+
+			relationResource := resource.admin.getResourceByName(resourceName)
 
 			var relationItem interface{}
 			relationResource.newItem(&relationItem)

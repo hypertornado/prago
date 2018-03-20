@@ -245,6 +245,7 @@ func (a *Admin) Init(app *prago.App) error {
 	bindMarkdownAPI(a)
 	bindListAPI(a)
 	bindListResourceAPI(a)
+	bindListResourceItemAPI(a)
 
 	var err error
 

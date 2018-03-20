@@ -12,6 +12,7 @@ import (
 )
 
 type FieldType struct {
+	ViewTemplate       string
 	FormSubTemplate    string
 	DBFieldDescription string
 	ValuesSource       *func() interface{}
@@ -183,6 +184,7 @@ func newStructField(field reflect.StructField, order int) *structField {
 		"prago-unique",
 		"prago-order",
 		"prago-order-desc",
+		"prago-relation",
 		"prago-preview-type",
 	} {
 		ret.Tags[v] = field.Tag.Get(v)
@@ -313,7 +315,11 @@ func (cache *structCache) GetForm(inValues interface{}, lang string, visible str
 				switch field.Tags["prago-type"] {
 				case "relation":
 					item.SubTemplate = "admin_item_relation"
-					item.Values = columnName(item.Name)
+					if field.Tags["prago-relation"] != "" {
+						item.Values = columnName(field.Tags["prago-relation"])
+					} else {
+						item.Values = columnName(item.Name)
+					}
 				}
 			case reflect.Float64:
 				item.Value = fmt.Sprintf("%f", ifaceVal.(float64))

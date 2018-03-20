@@ -2,12 +2,14 @@ document.addEventListener("DOMContentLoaded", () => {
   //bindOrder();
   bindMarkdowns();
   bindTimestamps();
+  bindRelationsView();
   bindRelations();
   bindImagePickers();
   //bindDelete();
   bindClickAndStay();
   bindLists();
   bindForm();
+  bindImageViews();
 });
 
 function bindClickAndStay() {
