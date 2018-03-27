@@ -707,36 +707,28 @@ const adminTemplates = `
 </html>
 
 {{end}}{{define "newsletter_send"}}
+  <form method="POST" action="send">
 
-<div class="admin_box">
-<form method="POST" action="send">
-<h1>Odeslat newsletter - {{.title}}</h1>
+    <div>
+      <b>Emailové adresy ({{.recipients_count}})</b>
+    </div>
+    {{if false}}
+      {{range $item := .recipients}}
+        <div>{{$item}}</div>
+      {{end}}
+    {{end}}
 
-<b>Emailové adresy ({{.recipients_count}})</b>
-{{if false}}
-  {{range $item := .recipients}}
-    <div>{{$item}}</div>
-  {{end}}
-{{end}}
-
-<input type="submit" class="btn" value="Odeslat newsletter">
-</form>
-</div>
-
+    <input type="submit" class="btn" value="Odeslat newsletter">
+  </form>
 {{end}}{{define "newsletter_send_preview"}}
-<div class="admin_box">
-<form method="POST" action="send-preview">
-<h1>Odeslat náhled newsletteru</h1>
-<label>
-  Seznam emailů na poslání preview (jeden email na řádek)
-  <textarea class="input" name="emails"></textarea>
-</label>
+  <form method="POST" action="send-preview">
+    <label>
+      Seznam emailů na poslání preview (jeden email na řádek)
+      <textarea class="input" name="emails"></textarea>
+    </label>
 
-<input type="submit" class="btn">
-</form>
-</div>
-
-
+    <input type="submit" class="btn">
+  </form>
 {{end}}{{define "newsletter_sent"}}
 
 <div class="admin_box">

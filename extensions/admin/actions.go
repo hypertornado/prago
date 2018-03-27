@@ -121,9 +121,7 @@ var ActionCreate = ResourceAction{
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
-
 		prago.Redirect(request, admin.GetItemURL(*resource, item, ""))
-		//prago.Redirect(request, admin.Prefix+"/"+resource.ID)
 	},
 }
 

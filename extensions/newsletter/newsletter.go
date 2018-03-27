@@ -397,15 +397,6 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 		},
 	}
 
-	sendPreviewAction := administration.ResourceAction{
-		Name: func(string) string { return "Odeslat náhled" },
-		Url:  "send-preview",
-		Handler: func(admin *administration.Admin, resource *administration.Resource, request prago.Request) {
-			request.SetData("admin_yield", "newsletter_send_preview")
-			prago.Render(request, 200, "admin_layout")
-		},
-	}
-
 	doSendPreviewAction := administration.ResourceAction{
 		Url:    "send-preview",
 		Method: "post",
@@ -425,7 +416,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 		},
 	}
 
-	sendAction := administration.ResourceAction{
+	/*sendAction := administration.ResourceAction{
 		Name: func(string) string { return "Odeslat" },
 		Auth: administration.AuthenticateAdmin,
 		Url:  "send",
@@ -447,7 +438,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 			request.SetData("admin_yield", "newsletter_send")
 			prago.Render(request, 200, "admin_layout")
 		},
-	}
+	}*/
 
 	doSendAction := administration.ResourceAction{
 		Url:    "send",
@@ -476,9 +467,30 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 	}
 
 	resource.AddResourceItemAction(previewAction)
-	resource.AddResourceItemAction(sendPreviewAction)
+	resource.AddResourceItemAction(
+		administration.CreateNavigationalAction(
+			"send-preview",
+			func(string) string { return "Odeslat náhled" },
+			"newsletter_send",
+			nil,
+		),
+	)
 	resource.AddResourceItemAction(doSendPreviewAction)
-	resource.AddResourceItemAction(sendAction)
+	resource.AddResourceItemAction(administration.CreateNavigationalAction(
+		"send",
+		func(string) string { return "Odeslat" },
+		"newsletter_send",
+		func(prago.Request) interface{} {
+			recipients, err := nmMiddleware.GetRecipients()
+			if err != nil {
+				panic(err)
+			}
+			return map[string]interface{}{
+				"recipients":       recipients,
+				"recipients_count": len(recipients),
+			}
+		},
+	))
 	resource.AddResourceItemAction(doSendAction)
 	return nil
 }

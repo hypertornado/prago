@@ -5,6 +5,7 @@ import (
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"reflect"
+	"strconv"
 )
 
 type AdminNavigationPage struct {
@@ -190,4 +191,35 @@ func trueIfEqual(a, b string) bool {
 		return true
 	}
 	return false
+}
+
+func createNavigationalHandler(action, templateName string, dataGenerator func(prago.Request) interface{}) func(*Admin, *Resource, prago.Request) {
+	return func(admin *Admin, resource *Resource, request prago.Request) {
+		id, err := strconv.Atoi(request.Params().Get("id"))
+		prago.Must(err)
+
+		var item interface{}
+		resource.newItem(&item)
+		prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
+
+		var data interface{}
+		if dataGenerator != nil {
+			data = dataGenerator(request)
+		}
+
+		user := request.GetData("currentuser").(*User)
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   admin.getItemNavigation(*resource, *user, item, id, action),
+			PageTemplate: templateName,
+			PageData:     data,
+		})
+	}
+}
+
+func CreateNavigationalAction(url string, name func(string) string, templateName string, dataGenerator func(prago.Request) interface{}) ResourceAction {
+	return ResourceAction{
+		Url:     url,
+		Name:    name,
+		Handler: createNavigationalHandler(url, templateName, dataGenerator),
+	}
 }
