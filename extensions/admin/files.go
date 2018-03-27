@@ -315,10 +315,11 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 		form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
 		AddCSRFToken(form, request)
 
-		request.SetData("admin_item", file)
-		request.SetData("admin_form", form)
-		request.SetData("admin_yield", "admin_edit")
-		prago.Render(request, 200, "admin_layout")
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   a.getItemNavigation(*resource, user, &file, id, "edit"),
+			PageTemplate: "admin_form",
+			PageData:     form,
+		})
 	})
 
 	return nil

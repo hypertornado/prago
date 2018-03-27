@@ -607,6 +607,56 @@ progress {
     transform: rotate(360deg);
   }
 }
+.admin_navigation_breadcrumbs {
+  display: flex;
+  margin-bottom: 5px;
+}
+.admin_navigation_breadcrumb:after {
+  content: ">";
+  color: #999;
+  color: #4078c0;
+  margin-right: 3px;
+  font-weight: bold;
+}
+.admin_box-navigation {
+  border-top-right-radius: 0px;
+  margin-top: 0px;
+}
+.admin_navigation_tabs {
+  border: 0px solid red;
+  margin: 0 auto;
+  margin-top: 5px;
+  max-width: 600px;
+  display: flex;
+  justify-content: flex-end;
+  vertical-align: bottom;
+}
+.admin_navigation_tab {
+  margin-top: 2px;
+  display: flex;
+  background-color: #fafafa;
+  border-bottom: none;
+  margin-left: 2px;
+  border-bottom: 1px solid #eee;
+}
+.admin_navigation_tab:hover a {
+  background-color: rgba(64, 120, 192, 0.1);
+}
+.admin_navigation_tab-selected {
+  margin-top: 0px;
+  background-color: #fff;
+  border-bottom: 1px solid #fff;
+  font-weight: bold;
+  border-top: 2px solid #4078c0;
+}
+.admin_navigation_tab-selected:hover a {
+  background-color: white;
+}
+.admin_navigation_tab a {
+  text-decoration: none;
+  padding: 7px 10px;
+  display: inline-block;
+}
 .admin_header {
   background: white;
   font-size: 14px;

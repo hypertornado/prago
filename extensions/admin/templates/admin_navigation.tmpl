@@ -1,0 +1,26 @@
+{{define "admin_navigation"}}
+  <div class="admin_navigation_tabs">
+    {{range $item := .Tabs}}
+      <div class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
+        <a href="{{$item.URL}}">{{$item.Name}}</a>
+      </div>
+    {{end}}
+  </div>
+
+  <div class="admin_box admin_box-navigation">
+    <div class="admin_navigation_breadcrumbs">
+    {{range $item := .Breadcrumbs}}
+      <div class="admin_navigation_breadcrumb">
+        <a href="{{$item.URL}}">{{$item.Name}}</a>
+      </div>
+    {{end}}
+    </div>
+
+    <h2>{{.Name}}</h2>
+{{end}}
+
+{{define "admin_navigation_page"}}
+    {{tmpl "admin_navigation" .admin_page.Navigation}}
+    {{tmpl .admin_page.PageTemplate .admin_page.PageData}}
+  </div>
+{{end}}

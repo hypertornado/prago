@@ -152,6 +152,7 @@ func (nm NewsletterMiddleware) Init(app *prago.App) error {
 		request.SetData("title", "Přihlásit se k odběru newsletteru")
 		request.SetData("csrf", nmMiddleware.CSFR(request))
 		request.SetData("yield", "newsletter_subscribe")
+		request.SetData("show_back_button", true)
 		prago.Render(request, 200, "newsletter_layout")
 	})
 
@@ -171,7 +172,7 @@ func (nm NewsletterMiddleware) Init(app *prago.App) error {
 			if err != nil {
 				panic(err)
 			}
-			message = "Ověřte prosím vaši emailovou adresu " + email
+			message = "Na váš email " + email + " potvrzovací email k odebírání newsletteru."
 		} else {
 			if err == ErrEmailAlreadyInList {
 				message = "Email se již nachází v naší emailové databázi"
@@ -180,6 +181,7 @@ func (nm NewsletterMiddleware) Init(app *prago.App) error {
 			}
 		}
 
+		request.SetData("show_back_button", true)
 		request.SetData("title", message)
 		request.SetData("yield", "newsletter_empty")
 		prago.Render(request, 200, "newsletter_layout")
@@ -205,6 +207,7 @@ func (nm NewsletterMiddleware) Init(app *prago.App) error {
 			panic(err)
 		}
 
+		request.SetData("show_back_button", true)
 		request.SetData("title", "Odběr newsletteru potvrzen")
 		request.SetData("yield", "newsletter_empty")
 		prago.Render(request, 200, "newsletter_layout")
@@ -230,6 +233,7 @@ func (nm NewsletterMiddleware) Init(app *prago.App) error {
 			panic(err)
 		}
 
+		request.SetData("show_back_button", true)
 		request.SetData("title", "Odhlášení z odebírání newsletteru proběhlo úspěšně.")
 		request.SetData("yield", "newsletter_empty")
 		prago.Render(request, 200, "newsletter_layout")

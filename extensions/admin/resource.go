@@ -47,7 +47,7 @@ type Resource struct {
 	EditabilityFilter   structFieldFilter
 	ResourceActions     []ResourceAction
 	ResourceItemActions []ResourceAction
-	CanCreate           bool
+	CanCreate           bool //TODO: should be based on user restrictions
 	CanEdit             bool
 
 	PreviewURLFunction func(interface{}) string

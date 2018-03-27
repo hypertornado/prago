@@ -36,6 +36,11 @@
       <a href="/">{{.site}}</a>
       <h1>{{.title}}</h1>
     {{tmpl .yield .}}
+
+    {{if .show_back_button}}
+      <br><br>
+      <a href="/">Vrátit se zpět na stránky {{.site}}</a>
+    {{end}}
     </div>
   </body>
 </html>

@@ -1,9 +1,5 @@
 {{define "admin_view"}}
-
-<div class="admin_box">
-  <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
-
-  {{range $item := .view.Items}}
+  {{range $item := .Items}}
     <div class="view_name">
       {{$item.Name}}
     </div>
@@ -11,9 +7,7 @@
       {{tmpl $item.Template $item.Value}}
     </div>
   {{end}}
-
-</div>
-
+  </div>
 {{end}}
 
 {{define "admin_item_view_text"}}

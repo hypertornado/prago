@@ -48,6 +48,7 @@ var ActionList = ResourceAction{
 				return
 			}
 		}
+
 		request.SetData("admin_title", resource.Name(GetLocale(request)))
 		request.SetData("admin_list", listData)
 		request.SetData("admin_yield", "admin_list")
@@ -79,11 +80,12 @@ var ActionNew = ResourceAction{
 			form = resource.AfterFormCreated(form, request, true)
 		}
 
-		request.SetData("admin_title", messages.Messages.Get(GetLocale(request), "admin_new")+" — "+resource.Name(GetLocale(request)))
-
-		request.SetData("admin_form", form)
-		request.SetData("admin_yield", "admin_new")
-		prago.Render(request, 200, "admin_layout")
+		user := request.GetData("currentuser").(*User)
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   admin.getResourceNavigation(*resource, *user, "new"),
+			PageTemplate: "admin_form",
+			PageData:     form,
+		})
 	},
 }
 
@@ -119,7 +121,9 @@ var ActionCreate = ResourceAction{
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
-		prago.Redirect(request, admin.Prefix+"/"+resource.ID)
+
+		prago.Redirect(request, admin.GetItemURL(*resource, item, ""))
+		//prago.Redirect(request, admin.Prefix+"/"+resource.ID)
 	},
 }
 
@@ -137,9 +141,12 @@ var ActionView = ResourceAction{
 		view, err := resource.StructCache.getView(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
 
-		request.SetData("view", view)
-		request.SetData("admin_yield", "admin_view")
-		prago.Render(request, 200, "admin_layout")
+		user := request.GetData("currentuser").(*User)
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   admin.getItemNavigation(*resource, *user, item, id, ""),
+			PageTemplate: "admin_view",
+			PageData:     view,
+		})
 	},
 }
 
@@ -173,11 +180,12 @@ var ActionEdit = ResourceAction{
 			}
 		}
 
-		request.SetData("admin_title", messages.Messages.Get(GetLocale(request), "admin_edit")+" — "+resource.Name(GetLocale(request)))
-		request.SetData("admin_item", item)
-		request.SetData("admin_form", form)
-		request.SetData("admin_yield", "admin_edit")
-		prago.Render(request, 200, "admin_layout")
+		user := request.GetData("currentuser").(*User)
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   admin.getItemNavigation(*resource, *user, item, id, "edit"),
+			PageTemplate: "admin_form",
+			PageData:     form,
+		})
 	},
 }
 
@@ -221,7 +229,7 @@ var ActionUpdate = ResourceAction{
 		if request.Params().Get("_submit_and_stay_clicked") == "true" {
 			prago.Redirect(request, request.Request().URL.RequestURI())
 		} else {
-			prago.Redirect(request, admin.Prefix+"/"+resource.ID)
+			prago.Redirect(request, admin.GetURL(resource, fmt.Sprintf("%d", id)))
 		}
 
 	},
@@ -294,7 +302,10 @@ func bindResourceItemAction(a *Admin, resource *Resource, action ResourceAction)
 func bindAction(a *Admin, resource *Resource, action ResourceAction, isItemAction bool) error {
 	var url string
 	if isItemAction {
-		url = a.GetItemURL(resource, action.Url)
+		url = a.Prefix + "/" + resource.ID + "/:id"
+		if len(action.Url) > 0 {
+			url += "/" + action.Url
+		}
 	} else {
 		url = a.GetURL(resource, action.Url)
 	}
@@ -384,7 +395,7 @@ func (ar *Resource) ResourceActionsButtonData(user *User, admin *Admin) []Button
 }
 
 func (ar *Resource) ResourceItemActionsButtonData(user *User, id int64, admin *Admin) []ButtonData {
-	prefix := fmt.Sprintf("%s/%d", ar.ID, id)
+	prefix := admin.GetURL(ar, fmt.Sprintf("%d", id))
 
 	ret := []ButtonData{}
 
@@ -447,7 +458,6 @@ func (ar *Resource) ResourceItemActionsButtonData(user *User, id int64, admin *A
 		}
 
 		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
-
 			if v.Auth == nil || v.Auth(user) {
 				ret = append(ret, ButtonData{
 					Name:   name,

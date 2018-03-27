@@ -428,8 +428,8 @@ func (a *Admin) GetURL(resource *Resource, suffix string) string {
 	return ret
 }
 
-func (a *Admin) GetItemURL(resource *Resource, suffix string) string {
-	ret := a.Prefix + "/" + resource.ID + "/:id"
+func (a *Admin) GetItemURL(resource Resource, item interface{}, suffix string) string {
+	ret := a.Prefix + "/" + resource.ID + "/" + fmt.Sprintf("%d", getItemID(item))
 	if len(suffix) > 0 {
 		ret += "/" + suffix
 	}

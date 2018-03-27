@@ -1,18 +1,6 @@
 package admin
 const adminTemplates = `
-{{define "admin_edit"}}
-
-<div class="admin_box">
-
-  <h2>{{.admin_title}}</h2>
-
-  <a href="../../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
-
-  {{tmpl "admin_form" .admin_form}}
-
-</div>
-
-{{end}}{{define "admin_flash"}}
+{{define "admin_flash"}}
   {{if .flash_messages}}
     <div class="flash">
       {{range $message := .flash_messages}}
@@ -505,16 +493,31 @@ const adminTemplates = `
 <div class="admin_box">
   <h1>{{.message}}</h1>
 </div>
-{{end}}{{define "admin_new"}}
+{{end}}{{define "admin_navigation"}}
+  <div class="admin_navigation_tabs">
+    {{range $item := .Tabs}}
+      <div class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
+        <a href="{{$item.URL}}">{{$item.Name}}</a>
+      </div>
+    {{end}}
+  </div>
 
-<div class="admin_box">
-  <h2>{{.admin_title}}</h2>
+  <div class="admin_box admin_box-navigation">
+    <div class="admin_navigation_breadcrumbs">
+    {{range $item := .Breadcrumbs}}
+      <div class="admin_navigation_breadcrumb">
+        <a href="{{$item.URL}}">{{$item.Name}}</a>
+      </div>
+    {{end}}
+    </div>
 
-  <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
+    <h2>{{.Name}}</h2>
+{{end}}
 
-  {{tmpl "admin_form" .admin_form}}
-</div>
-
+{{define "admin_navigation_page"}}
+    {{tmpl "admin_navigation" .admin_page.Navigation}}
+    {{tmpl .admin_page.PageTemplate .admin_page.PageData}}
+  </div>
 {{end}}{{define "admin_settings"}}
 
 <div class="admin_box">
@@ -584,11 +587,7 @@ const adminTemplates = `
 
 
 {{end}}{{define "admin_view"}}
-
-<div class="admin_box">
-  <a href="../{{.admin_resource.ID}}">{{message .locale "admin_back"}}</a>
-
-  {{range $item := .view.Items}}
+  {{range $item := .Items}}
     <div class="view_name">
       {{$item.Name}}
     </div>
@@ -596,9 +595,7 @@ const adminTemplates = `
       {{tmpl $item.Template $item.Value}}
     </div>
   {{end}}
-
-</div>
-
+  </div>
 {{end}}
 
 {{define "admin_item_view_text"}}
@@ -700,6 +697,11 @@ const adminTemplates = `
       <a href="/">{{.site}}</a>
       <h1>{{.title}}</h1>
     {{tmpl .yield .}}
+
+    {{if .show_back_button}}
+      <br><br>
+      <a href="/">Vrátit se zpět na stránky {{.site}}</a>
+    {{end}}
     </div>
   </body>
 </html>
@@ -1355,6 +1357,9 @@ input[type=date].input {
   padding: 5px;
   border-radius: 3px;
 }
+.admin_item_view_place {
+  height: 200px;
+}
 progress {
   padding: 8px;
   margin: 0px auto;
@@ -1377,6 +1382,56 @@ progress {
   100% {
     transform: rotate(360deg);
   }
+}
+.admin_navigation_breadcrumbs {
+  display: flex;
+  margin-bottom: 5px;
+}
+.admin_navigation_breadcrumb:after {
+  content: ">";
+  color: #999;
+  color: #4078c0;
+  margin-right: 3px;
+  font-weight: bold;
+}
+.admin_box-navigation {
+  border-top-right-radius: 0px;
+  margin-top: 0px;
+}
+.admin_navigation_tabs {
+  border: 0px solid red;
+  margin: 0 auto;
+  margin-top: 5px;
+  max-width: 600px;
+  display: flex;
+  justify-content: flex-end;
+  vertical-align: bottom;
+}
+.admin_navigation_tab {
+  margin-top: 2px;
+  display: flex;
+  background-color: #fafafa;
+  border-bottom: none;
+  margin-left: 2px;
+  border-bottom: 1px solid #eee;
+}
+.admin_navigation_tab:hover a {
+  background-color: rgba(64, 120, 192, 0.1);
+}
+.admin_navigation_tab-selected {
+  margin-top: 0px;
+  background-color: #fff;
+  border-bottom: 1px solid #fff;
+  font-weight: bold;
+  border-top: 2px solid #4078c0;
+}
+.admin_navigation_tab-selected:hover a {
+  background-color: white;
+}
+.admin_navigation_tab a {
+  text-decoration: none;
+  padding: 7px 10px;
+  display: inline-block;
 }
 .admin_header {
   background: white;
@@ -2220,10 +2275,29 @@ function bindPlacesView() {
 }
 var PlacesView = (function () {
     function PlacesView(el) {
+        var val = el.getAttribute("data-value");
+        el.innerText = "";
+        var coords = val.split(",");
+        if (coords.length != 2) {
+            return;
+        }
+        var position = { lat: parseFloat(coords[0]), lng: parseFloat(coords[1]) };
+        var zoom = 11;
+        var map = new google.maps.Map(el, {
+            center: position,
+            zoom: zoom
+        });
+        var marker = new google.maps.Marker({
+            position: position,
+            map: map,
+            draggable: true,
+            title: ""
+        });
     }
     return PlacesView;
 }());
 function bindPlaces() {
+    bindPlacesView();
     function bindPlace(el) {
         var mapEl = document.createElement("div");
         mapEl.classList.add("admin_place_map");
@@ -2356,7 +2430,6 @@ document.addEventListener("DOMContentLoaded", function () {
     bindClickAndStay();
     bindLists();
     bindForm();
-    bindPlacesView();
     bindImageViews();
 });
 function bindClickAndStay() {
