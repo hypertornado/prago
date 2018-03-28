@@ -61,6 +61,7 @@ func NewAdmin(prefix, name string) *Admin {
 	}
 	ret.CreateResource(User{})
 	ret.CreateResource(File{})
+	ret.CreateResource(ActivityLog{})
 
 	var fp = func() interface{} {
 

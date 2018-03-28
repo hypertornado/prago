@@ -1,0 +1,19 @@
+{{define "admin_history"}}
+
+  <table class="admin_table">
+    <tr>
+      <th>Typ Akce</th>
+      <th>Položka</th>
+      <th>Uživatel</th>
+      <th>Datum</th>
+    </tr>
+    {{range $item := .Items}}
+      <tr>
+        <td><a href="{{$item.ActivityURL}}">{{$item.ActionType}}</a></td>
+        <td><a href="{{$item.ItemURL}}">{{$item.ItemName}}</a></td>
+        <td><a href="{{$item.UserURL}}">{{$item.UserName}}</a></td>
+        <td>{{$item.CreatedAt}}</td>
+      </tr>
+    {{end}}
+  </table>
+{{end}}

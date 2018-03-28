@@ -14,6 +14,7 @@ var cs = map[string]string{
 	"admin_delete_confirmation":      "Opravdu chete položku smazat?",
 	"admin_back":                     "Zpět",
 	"admin_create":                   "Vytvořit",
+	"admin_history":                  "Editace",
 	"admin_login_name":               "Přihlášení do administrace",
 	"admin_email":                    "Email",
 	"admin_password":                 "Heslo",

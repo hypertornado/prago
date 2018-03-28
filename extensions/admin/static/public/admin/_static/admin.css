@@ -196,10 +196,10 @@ body {
   background-attachment: fixed;
 }
 .admin_nologin .admin_navigation_tabs {
-  margin-top: 20px;
+  margin-top: 50px;
 }
 .shadow {
-  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
 }
 code {
   background-color: #fafafa;
@@ -256,15 +256,21 @@ a {
 a:hover {
   text-decoration: none;
 }
+.admin_container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 .admin_content {
   padding: 5px;
+  flex-grow: 2;
 }
 .admin_box {
-  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
   margin: 5px auto;
   background-color: white;
   padding: 10px;
-  border-radius: 3px;
+  border-radius: 2px;
   max-width: 600px;
 }
 .admin_footer {
@@ -273,11 +279,13 @@ a:hover {
   border-top: 1px solid #e5e5e5;
   color: #888;
   text-align: center;
-  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 2;
   background-color: white;
   padding: 5px 20px;
+  flex-shrink: 0;
+  flex-grow: 0;
 }
 .btn {
   display: inline-block;
@@ -425,7 +433,7 @@ input[type=date].input {
 .admin_table-list {
   background-color: white;
   margin: 10px 0px;
-  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
 }
 .admin_table_listheader {
   display: flex;
@@ -583,6 +591,7 @@ input[type=date].input {
   background-color: rgba(64, 120, 192, 0.1);
   padding: 5px;
   border-radius: 3px;
+  word-wrap: break-word;
 }
 .admin_item_view_place {
   height: 200px;
@@ -635,12 +644,14 @@ progress {
   vertical-align: bottom;
 }
 .admin_navigation_tab {
-  margin-top: 2px;
+  margin-top: 3px;
   display: flex;
-  background-color: #fafafa;
+  background-color: rgba(255, 255, 255, 0.9);
   border-bottom: none;
-  margin-left: 2px;
+  margin-left: 1px;
   border-bottom: 1px solid #eee;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
 }
 .admin_navigation_tab:hover a {
   background-color: rgba(64, 120, 192, 0.1);
@@ -651,6 +662,7 @@ progress {
   border-bottom: 1px solid #fff;
   font-weight: bold;
   border-top: 2px solid #4078c0;
+  padding: 0px 10px;
 }
 .admin_navigation_tab-selected:hover a {
   background-color: white;
@@ -664,10 +676,12 @@ progress {
   background: white;
   font-size: 14px;
   padding-bottom: 0px;
-  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 2;
   line-height: 1.6em;
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 .admin_logo {
   width: 40px;
@@ -723,4 +737,5 @@ progress {
 .admin_header_resource-active {
   font-weight: bold;
   border-bottom: 2px solid #4078c0;
+  background-color: rgba(64, 120, 192, 0.1);
 }

@@ -77,6 +77,24 @@ const adminTemplates = `
 
 </div>
 
+{{end}}{{define "admin_history"}}
+
+  <table class="admin_table">
+    <tr>
+      <th>Typ Akce</th>
+      <th>Položka</th>
+      <th>Uživatel</th>
+      <th>Datum</th>
+    </tr>
+    {{range $item := .Items}}
+      <tr>
+        <td><a href="{{$item.ActivityURL}}">{{$item.ActionType}}</a></td>
+        <td><a href="{{$item.ItemURL}}">{{$item.ItemName}}</a></td>
+        <td><a href="{{$item.UserURL}}">{{$item.UserName}}</a></td>
+        <td>{{$item.CreatedAt}}</td>
+      </tr>
+    {{end}}
+  </table>
 {{end}}{{define "admin_home"}}
 
 <div class="admin_box">
@@ -276,48 +294,50 @@ const adminTemplates = `
   </head>
   <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.admin_header.UrlPrefix}}"
     {{if .admin_header.Background}}
-      style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255,255,255, 0.9) 100%), url('{{.admin_header.Background}}'); background-size: cover; background-attachment: fixed;" 
+      style="background: linear-gradient(180deg, rgba(0, 0, 0, 0.0), rgba(0,0,0, 0.6) 100%), url('{{.admin_header.Background}}'); background-size: cover; background-attachment: fixed;" 
     {{end}}
     >
     {{tmpl "admin_flash" .}}
-    <div class="admin_header">
-        <div class="admin_header_top">
-            <a href="{{.admin_header.UrlPrefix}}" class="admin_header_name admin_header_top_item">
-              {{if .admin_header.Logo}}
-                <div class="admin_logo" style="background-image: url('{{.admin_header.Logo}}');"></div>
-              {{end}}
-            {{message .locale "admin_admin"}} — {{.admin_header.Name}}</a>
-            <a href="/" class="admin_header_top_item">{{.admin_header.HomepageUrl}}</a>
-            <div class="admin_header_top_item admin_header_top_space"></div>
-            <div class="admin_header_top_item">{{.currentuser.Email}}</div>
-            <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_header_top_item">{{message .locale "admin_settings"}}</a>
-            <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
+    <div class="admin_container">
+        <div class="admin_header">
+            <div class="admin_header_top">
+                <a href="{{.admin_header.UrlPrefix}}" class="admin_header_name admin_header_top_item">
+                  {{if .admin_header.Logo}}
+                    <div class="admin_logo" style="background-image: url('{{.admin_header.Logo}}');"></div>
+                  {{end}}
+                {{message .locale "admin_admin"}} — {{.admin_header.Name}}</a>
+                <a href="/" class="admin_header_top_item">{{.admin_header.HomepageUrl}}</a>
+                <div class="admin_header_top_item admin_header_top_space"></div>
+                <div class="admin_header_top_item">{{.currentuser.Email}}</div>
+                <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_header_top_item">{{message .locale "admin_settings"}}</a>
+                <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
+            </div>
+
+
+            {{ $admin_resource := .admin_resource }}
+
+            <div class="admin_header_resources">
+                {{range $item := .admin_header.Items}}
+                    <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
+                {{end}}
+            </div>
         </div>
 
-
-        {{ $admin_resource := .admin_resource }}
-
-        <div class="admin_header_resources">
-            {{range $item := .admin_header.Items}}
-                <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
+        <div class="admin_content">
+            {{if .template_before}}
+                {{tmpl .template_before .}}
+            {{end}}
+            {{tmpl .admin_yield .}}
+            {{if .template_after}}
+                {{tmpl .template_after .}}
             {{end}}
         </div>
-    </div>
 
-    <div class="admin_content">
-
-    {{if .template_before}}{{tmpl .template_before .}}{{end}}
-
-    {{tmpl .admin_yield .}}
-
-    {{if .template_after}}{{tmpl .template_after .}}{{end}}
-
-    </div>
-
-    <div class="admin_footer">
-        {{range $item := .admin_footer}}
-            <a href="{{$item.Url}}" class="admin_footer_resource">{{$item.Name}}</a>
-        {{end}}
+        <div class="admin_footer">
+            {{range $item := .admin_footer}}
+                <a href="{{$item.Url}}" class="admin_footer_resource">{{$item.Name}}</a>
+            {{end}}
+        </div>
     </div>
   </body>
 </html>
@@ -336,10 +356,12 @@ const adminTemplates = `
   </head>
   <body class="admin_nologin"
     {{if .background}}
-      style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255,255,255, 0.9) 100%), url('{{.background}}'); background-size: cover; background-attachment: fixed;" 
+      style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.0), rgba(255,255,255, 0.0) 100%), url('{{.background}}'); background-size: cover; background-attachment: fixed;" 
     {{end}}
   >
     {{tmpl "admin_flash" .}}
+
+
     {{tmpl .admin_yield .}}
 
   </body>
@@ -936,10 +958,10 @@ body {
   background-attachment: fixed;
 }
 .admin_nologin .admin_navigation_tabs {
-  margin-top: 20px;
+  margin-top: 50px;
 }
 .shadow {
-  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
 }
 code {
   background-color: #fafafa;
@@ -996,15 +1018,21 @@ a {
 a:hover {
   text-decoration: none;
 }
+.admin_container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 .admin_content {
   padding: 5px;
+  flex-grow: 2;
 }
 .admin_box {
-  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
   margin: 5px auto;
   background-color: white;
   padding: 10px;
-  border-radius: 3px;
+  border-radius: 2px;
   max-width: 600px;
 }
 .admin_footer {
@@ -1013,11 +1041,13 @@ a:hover {
   border-top: 1px solid #e5e5e5;
   color: #888;
   text-align: center;
-  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 2;
   background-color: white;
   padding: 5px 20px;
+  flex-shrink: 0;
+  flex-grow: 0;
 }
 .btn {
   display: inline-block;
@@ -1074,6 +1104,9 @@ a:hover {
 }
 .btn-primary:active {
   background-image: linear-gradient(-180deg, #1E90FF, #005A9C 0%);
+}
+.form {
+  margin: 10px 0px;
 }
 .form_errors_error {
   border: 1px solid #dd2e4f;
@@ -1162,7 +1195,7 @@ input[type=date].input {
 .admin_table-list {
   background-color: white;
   margin: 10px 0px;
-  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
 }
 .admin_table_listheader {
   display: flex;
@@ -1320,6 +1353,7 @@ input[type=date].input {
   background-color: rgba(64, 120, 192, 0.1);
   padding: 5px;
   border-radius: 3px;
+  word-wrap: break-word;
 }
 .admin_item_view_place {
   height: 200px;
@@ -1372,12 +1406,14 @@ progress {
   vertical-align: bottom;
 }
 .admin_navigation_tab {
-  margin-top: 2px;
+  margin-top: 3px;
   display: flex;
-  background-color: #fafafa;
+  background-color: rgba(255, 255, 255, 0.9);
   border-bottom: none;
-  margin-left: 2px;
+  margin-left: 1px;
   border-bottom: 1px solid #eee;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
 }
 .admin_navigation_tab:hover a {
   background-color: rgba(64, 120, 192, 0.1);
@@ -1388,6 +1424,7 @@ progress {
   border-bottom: 1px solid #fff;
   font-weight: bold;
   border-top: 2px solid #4078c0;
+  padding: 0px 10px;
 }
 .admin_navigation_tab-selected:hover a {
   background-color: white;
@@ -1401,10 +1438,12 @@ progress {
   background: white;
   font-size: 14px;
   padding-bottom: 0px;
-  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 2;
   line-height: 1.6em;
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 .admin_logo {
   width: 40px;
@@ -1460,6 +1499,7 @@ progress {
 .admin_header_resource-active {
   font-weight: bold;
   border-bottom: 2px solid #4078c0;
+  background-color: rgba(64, 120, 192, 0.1);
 }
 `
 
@@ -1723,7 +1763,6 @@ var List = (function () {
                 }
                 _this.el.querySelector(".admin_table_count").textContent = countStr;
                 bindOrder();
-                bindDelete();
                 _this.bindPage();
             }
             else {

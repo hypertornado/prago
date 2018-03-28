@@ -21,11 +21,11 @@ body {
 }
 
 .admin_nologin .admin_navigation_tabs {
-  margin-top: 20px;
+  margin-top: 50px;
 }
 
 .shadow {
-  box-shadow: 0px 1px 4px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.1);
 }
 
 code {
@@ -95,9 +95,16 @@ a:hover {
   text-decoration: none;
 }
 
+.admin_container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 
 .admin_content {
   padding: 5px;
+  flex-grow: 2;
 }
 
 .admin_box {
@@ -105,7 +112,7 @@ a:hover {
   margin: 5px auto;
   background-color: white;
   padding: 10px;
-  border-radius: 3px;
+  border-radius: 2px;
   max-width: 600px;
 }
 
@@ -120,6 +127,8 @@ a:hover {
   z-index: 2;
   background-color: white;
   padding: 5px 20px;
+  flex-shrink: 0;
+  flex-grow: 0;
 }
 
 .btn {
@@ -484,6 +493,7 @@ input[type=date].input {
   background-color: @baseColorBackground;
   padding: 5px;
   border-radius: 3px;
+  word-wrap: break-word;
 }
 
 .admin_item_view_place {
@@ -541,12 +551,14 @@ progress {
 }
 
 .admin_navigation_tab {
-  margin-top: 2px;
+  margin-top: 3px;
   display: flex;
-  background-color: #fafafa;
+  background-color: rgba(255, 255, 255, .9);
   border-bottom: none;
-  margin-left: 2px;
+  margin-left: 1px;
   border-bottom: 1px solid #eee;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
 }
 
 .admin_navigation_tab:hover a {
@@ -559,6 +571,11 @@ progress {
   border-bottom: 1px solid #fff;
   font-weight: bold;
   border-top: 2px solid @baseColor;
+  padding: 0px 10px;
+}
+
+.admin_navigation_tab-selected a {
+  // /background-color: @baseColorBackground;
 }
 
 .admin_navigation_tab-selected:hover a  {

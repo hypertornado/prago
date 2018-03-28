@@ -50,6 +50,8 @@ type Resource struct {
 	CanCreate           bool //TODO: should be based on user restrictions
 	CanEdit             bool
 
+	ActivityLog bool
+
 	PreviewURLFunction func(interface{}) string
 
 	BeforeList   Action

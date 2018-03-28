@@ -12,10 +12,12 @@
   </head>
   <body class="admin_nologin"
     {{if .background}}
-      style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255,255,255, 0.9) 100%), url('{{.background}}'); background-size: cover; background-attachment: fixed;" 
+      style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.0), rgba(255,255,255, 0.0) 100%), url('{{.background}}'); background-size: cover; background-attachment: fixed;" 
     {{end}}
   >
     {{tmpl "admin_flash" .}}
+
+
     {{tmpl .admin_yield .}}
 
   </body>

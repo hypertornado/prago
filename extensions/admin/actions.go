@@ -114,6 +114,11 @@ var ActionCreate = ResourceAction{
 
 		prago.Must(admin.Create(item))
 
+		if resource.ActivityLog {
+			user := GetUser(request)
+			admin.createNewActivityLog(*resource, *user, item)
+		}
+
 		if resource.AfterCreate != nil {
 			if !resource.AfterCreate(request, item) {
 				return
@@ -220,6 +225,14 @@ var ActionUpdate = ResourceAction{
 			form = resource.AfterFormCreated(form, request, false)
 		}
 
+		var beforeData []byte
+		if resource.ActivityLog {
+			beforeData, err = json.Marshal(item)
+			if err != nil {
+				panic(err)
+			}
+		}
+
 		err = resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.getFilter())
 		prago.Must(err)
 
@@ -229,6 +242,17 @@ var ActionUpdate = ResourceAction{
 			}
 		}
 		prago.Must(admin.Save(item))
+
+		if resource.ActivityLog {
+			user := GetUser(request)
+
+			afterData, err := json.Marshal(item)
+			if err != nil {
+				panic(err)
+			}
+
+			admin.createEditActivityLog(*resource, *user, int64(id), beforeData, afterData)
+		}
 
 		if resource.AfterUpdate != nil {
 			if !resource.AfterUpdate(request, item) {
@@ -246,6 +270,56 @@ var ActionUpdate = ResourceAction{
 
 	},
 }
+
+var ActionHistory = ResourceAction{
+	Url: "history",
+	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
+		user := GetUser(request)
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   admin.getResourceNavigation(*resource, *user, "history"),
+			PageTemplate: "admin_history",
+			PageData:     admin.getHistory(resource, 0, 0),
+		})
+	},
+}
+
+var ActionItemHistory = ResourceAction{
+	Url: "history",
+	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
+		id, err := strconv.Atoi(request.Params().Get("id"))
+		prago.Must(err)
+
+		var item interface{}
+		resource.newItem(&item)
+		prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
+
+		user := GetUser(request)
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   admin.getItemNavigation(*resource, *user, item, id, "history"),
+			PageTemplate: "admin_history",
+			PageData:     admin.getHistory(resource, 0, int64(id)),
+		})
+	},
+}
+
+/*
+var ActionItemHistory = CreateNavigationalAction(
+	"history",
+	messages.Messages.GetNameFunction("admin_history"),
+	"admin_history",
+	func(request prago.Request) interface{} {
+		id, err := strconv.Atoi(request.Params().Get("id"))
+		prago.Must(err)
+
+		var item interface{}
+		resource.newItem(&item)
+		prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
+
+		user := GetUser(request)
+
+		return admin.getHistory(resource, 0, int64(id))
+	},
+)*/
 
 var ActionDelete = CreateNavigationalAction(
 	"delete",
@@ -284,6 +358,11 @@ var ActionDoDelete = ResourceAction{
 			if !resource.AfterDelete(request, id) {
 				return
 			}
+		}
+
+		if resource.ActivityLog {
+			user := GetUser(request)
+			admin.createDeleteActivityLog(*resource, *user, int64(id), item)
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_deleted"))
@@ -381,6 +460,10 @@ func InitResourceDefault(a *Admin, resource *Resource) error {
 	bindResourceAction(a, resource, ActionList)
 	bindResourceAction(a, resource, ActionOrder)
 
+	if resource.ActivityLog {
+		bindResourceAction(a, resource, ActionHistory)
+	}
+
 	if resource.CanCreate {
 		bindResourceAction(a, resource, ActionNew)
 		bindResourceAction(a, resource, ActionCreate)
@@ -395,6 +478,10 @@ func InitResourceDefault(a *Admin, resource *Resource) error {
 		bindResourceItemAction(a, resource, ActionDoDelete)
 	}
 
+	if resource.ActivityLog {
+		bindResourceItemAction(a, resource, ActionItemHistory)
+	}
+
 	return nil
 }
 
@@ -404,6 +491,13 @@ func (ar *Resource) ResourceActionsButtonData(user *User, admin *Admin) []Button
 		ret = append(ret, ButtonData{
 			Name: messages.Messages.Get(user.Locale, "admin_new"),
 			Url:  admin.GetURL(ar, "new"),
+		})
+	}
+
+	if ar.ActivityLog {
+		ret = append(ret, ButtonData{
+			Name: messages.Messages.Get(user.Locale, "admin_history"),
+			Url:  admin.GetURL(ar, "history"),
 		})
 	}
 
@@ -473,6 +567,13 @@ func (ar *Resource) ResourceItemActionsButtonData(user *User, id int64, admin *A
 				},
 			})
 		}
+	}
+
+	if ar.ActivityLog {
+		ret = append(ret, ButtonData{
+			Name: messages.Messages.Get(user.Locale, "admin_history"),
+			Url:  prefix + "/edit",
+		})
 	}
 
 	for _, v := range ar.ResourceItemActions {

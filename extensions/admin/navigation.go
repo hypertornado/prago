@@ -57,6 +57,14 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 		})
 	}
 
+	if resource.ActivityLog {
+		tabs = append(tabs, NavigationTab{
+			Name:     messages.Messages.Get(user.Locale, "admin_history"),
+			URL:      admin.GetURL(&resource, "history"),
+			Selected: trueIfEqual(code, "history"),
+		})
+	}
+
 	for _, v := range resource.ResourceActions {
 		if v.Url == "" {
 			continue
@@ -126,6 +134,14 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 			Name:     messages.Messages.Get(user.Locale, "admin_delete"),
 			URL:      prefix + "/delete",
 			Selected: trueIfEqual(code, "delete"),
+		})
+	}
+
+	if resource.ActivityLog {
+		tabs = append(tabs, NavigationTab{
+			Name:     messages.Messages.Get(user.Locale, "admin_history"),
+			URL:      prefix + "/history",
+			Selected: trueIfEqual(code, "history"),
 		})
 	}
 
@@ -249,16 +265,17 @@ func (admin *Admin) getNologinNavigation(language, code string) AdminItemNavigat
 }
 
 func getItemName(item interface{}, locale string) string {
-	if item == nil {
-		return ""
+	if item != nil {
+		itemsVal := reflect.ValueOf(item).Elem()
+		field := itemsVal.FieldByName("Name")
+		if field.IsValid() {
+			ret := field.String()
+			if ret != "" {
+				return ret
+			}
+		}
 	}
-
-	itemsVal := reflect.ValueOf(item).Elem()
-	field := itemsVal.FieldByName("Name")
-	if field.IsValid() {
-		return field.String()
-	}
-	return ""
+	return fmt.Sprintf("#%d", getItemID(item))
 }
 
 func getItemID(item interface{}) int64 {

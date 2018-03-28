@@ -367,6 +367,7 @@ type Newsletter struct {
 }
 
 func (Newsletter) InitResource(a *administration.Admin, resource *administration.Resource) error {
+	resource.ActivityLog = true
 	resource.AddSnippet("newsletter_snippet")
 
 	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
@@ -596,6 +597,11 @@ type NewsletterPersons struct {
 	Unsubscribed bool   `prago-preview:"true"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+}
+
+func (NewsletterPersons) InitResource(a *administration.Admin, resource *administration.Resource) error {
+	resource.ActivityLog = true
+	return nil
 }
 
 func (NewsletterPersons) Authenticate(u *administration.User) bool {
