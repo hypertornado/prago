@@ -245,17 +245,24 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 	}
 
 	renderLogin := func(request prago.Request, form *Form, locale string) {
-		title := fmt.Sprintf("%s — %s", messages.Messages.Get(locale, "admin_login_name"), a.AppName)
+		renderNavigationPageNoLogin(request, AdminNavigationPage{
+			Navigation:   a.getNologinNavigation(locale, "login"),
+			PageTemplate: "admin_form",
+			PageData:     form,
+		})
+
+		/*title := fmt.Sprintf("%s — %s", messages.Messages.Get(locale, "admin_login_name"), a.AppName)
 		request.SetData("bottom", fmt.Sprintf("<a href=\"registration\">%s</a><br><a href=\"forgot\">%s</a>",
 			messages.Messages.Get(locale, "admin_register"),
 			messages.Messages.Get(locale, "admin_forgoten"),
 		))
+
 		request.SetData("admin_header_prefix", a.Prefix)
 		request.SetData("admin_form", form)
 		request.SetData("title", title)
 
 		request.SetData("yield", "admin_login")
-		prago.Render(request, 200, "admin_layout_nologin")
+		prago.Render(request, 200, "admin_layout_nologin")*/
 	}
 
 	a.AdminAccessController.Get(a.GetURL(resource, "confirm_email"), func(request prago.Request) {
@@ -291,7 +298,14 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 	}
 
 	renderForgot := func(request prago.Request, form *Form, locale string) {
-		title := fmt.Sprintf("%s — %s", messages.Messages.Get(locale, "admin_forgotten_name"), a.AppName)
+
+		renderNavigationPageNoLogin(request, AdminNavigationPage{
+			Navigation:   a.getNologinNavigation(locale, "forgot"),
+			PageTemplate: "admin_form",
+			PageData:     form,
+		})
+
+		/*title := fmt.Sprintf("%s — %s", messages.Messages.Get(locale, "admin_forgotten_name"), a.AppName)
 		request.SetData("bottom", fmt.Sprintf("<a href=\"login\">%s</a>",
 			messages.Messages.Get(locale, "admin_login_action"),
 		))
@@ -300,7 +314,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		request.SetData("title", title)
 
 		request.SetData("yield", "admin_login")
-		prago.Render(request, 200, "admin_layout_nologin")
+		prago.Render(request, 200, "admin_layout_nologin")*/
 	}
 
 	a.AdminAccessController.Get(a.GetURL(resource, "forgot"), func(request prago.Request) {
@@ -313,26 +327,42 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		email := request.Params().Get("email")
 		email = fixEmail(email)
 
+		var reason = ""
+
 		var user User
 		err := a.Query().WhereIs("email", email).Get(&user)
 		if err == nil {
 			if user.emailConfirmed() {
+				fmt.Println("B")
 				if !time.Now().AddDate(0, 0, -1).Before(user.EmailRenewedAt) {
+					fmt.Println("C")
 					user.EmailRenewedAt = time.Now()
 					err = a.Save(&user)
 					if err == nil {
+						fmt.Println("D")
 						err = user.sendRenew(request, a)
 						if err == nil {
+							fmt.Println("E")
 							AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_forgoten_sent", user.Email))
 							prago.Redirect(request, a.Prefix+"/user/login")
 							return
+						} else {
+							reason = "can't send renew email"
 						}
+					} else {
+						reason = "unexpected error"
 					}
+				} else {
+					reason = "email already renewed within last day"
 				}
+			} else {
+				reason = "email not confirmed"
 			}
+		} else {
+			reason = "user not found"
 		}
 
-		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_forgoten_error", user.Email))
+		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_forgoten_error", user.Email)+" ("+reason+")")
 		prago.Redirect(request, a.Prefix+"/user/forgot")
 	})
 
@@ -348,7 +378,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 	}
 
 	renderRenew := func(request prago.Request, form *Form, locale string) {
-		email := request.Params().Get("email")
+		/*email := request.Params().Get("email")
 		email = fixEmail(email)
 		title := fmt.Sprintf("%s — %s", email, messages.Messages.Get(locale, "admin_forgoten_set"))
 		request.SetData("bottom", fmt.Sprintf("<a href=\"login\">%s</a>",
@@ -359,7 +389,13 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		request.SetData("title", title)
 
 		request.SetData("yield", "admin_login")
-		prago.Render(request, 200, "admin_layout_nologin")
+		prago.Render(request, 200, "admin_layout_nologin")*/
+
+		renderNavigationPageNoLogin(request, AdminNavigationPage{
+			Navigation:   a.getNologinNavigation(locale, "forgot"),
+			PageTemplate: "admin_form",
+			PageData:     form,
+		})
 	}
 
 	a.AdminAccessController.Get(a.GetURL(resource, "renew_password"), func(request prago.Request) {
@@ -478,16 +514,23 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 	}
 
 	renderRegistration := func(request prago.Request, form *Form, locale string) {
-		title := fmt.Sprintf("%s — %s", messages.Messages.Get(locale, "admin_register"), a.AppName)
-		request.SetData("bottom", fmt.Sprintf("<a href=\"login\">%s</a>",
-			messages.Messages.Get(locale, "admin_login_action"),
-		))
-		request.SetData("admin_header_prefix", a.Prefix)
-		request.SetData("admin_form", form)
-		request.SetData("title", title)
+		renderNavigationPageNoLogin(request, AdminNavigationPage{
+			Navigation:   a.getNologinNavigation(locale, "registration"),
+			PageTemplate: "admin_form",
+			PageData:     form,
+		})
 
-		request.SetData("yield", "admin_login")
-		prago.Render(request, 200, "admin_layout_nologin")
+		/*
+			title := fmt.Sprintf("%s — %s", messages.Messages.Get(locale, "admin_register"), a.AppName)
+			request.SetData("bottom", fmt.Sprintf("<a href=\"login\">%s</a>",
+				messages.Messages.Get(locale, "admin_login_action"),
+			))
+			request.SetData("admin_header_prefix", a.Prefix)
+			request.SetData("admin_form", form)
+			request.SetData("title", title)
+
+			request.SetData("yield", "admin_login")
+			prago.Render(request, 200, "admin_layout_nologin")*/
 	}
 
 	a.AdminAccessController.Get(a.GetURL(resource, "registration"), func(request prago.Request) {
@@ -552,19 +595,16 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		return form
 	}
 
-	renderSettings := func(request prago.Request, user *User, form *Form) {
-		request.SetData("admin_item", user)
-		request.SetData("admin_form", form)
-		request.SetData("admin_yield", "admin_settings")
-		prago.Render(request, 200, "admin_layout")
-	}
-
 	a.AdminController.Get(a.GetURL(resource, "settings"), func(request prago.Request) {
 		user := GetUser(request)
 		form := settingsForm(GetLocale(request), user)
 		AddCSRFToken(form, request)
-		request.SetData("admin_title", messages.Messages.Get(GetLocale(request), "admin_settings"))
-		renderSettings(request, user, form)
+
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   a.getSettingsNavigation(*user, "settings"),
+			PageTemplate: "admin_form",
+			PageData:     form,
+		})
 	})
 
 	a.AdminController.Post(a.GetURL(resource, "settings"), func(request prago.Request) {
@@ -580,7 +620,12 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 			prago.Redirect(request, a.GetURL(resource, "settings"))
 			return
 		}
-		renderSettings(request, user, form)
+
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   a.getSettingsNavigation(*user, "settings"),
+			PageTemplate: "admin_form",
+			PageData:     form,
+		})
 	})
 
 	changePasswordForm := func(request prago.Request) *Form {
@@ -608,10 +653,12 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 	}
 
 	renderPasswordForm := func(request prago.Request, form *Form) {
-		request.SetData("admin_title", messages.Messages.Get(GetLocale(request), "admin_password_change"))
-		request.SetData("admin_form", form)
-		request.SetData("admin_yield", "admin_form_view")
-		prago.Render(request, 200, "admin_layout")
+		user := GetUser(request)
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   a.getSettingsNavigation(*user, "password"),
+			PageTemplate: "admin_form",
+			PageData:     form,
+		})
 	}
 
 	a.AdminController.Get(a.GetURL(resource, "password"), func(request prago.Request) {
@@ -634,7 +681,6 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 			renderPasswordForm(request, form)
 		}
 	})
-
 	return nil
 }
 

@@ -228,6 +228,7 @@ func (a *Admin) Init(app *prago.App) error {
 
 	a.AdminAccessController = app.MainController().SubController()
 	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
+		request.SetData("admin_header_prefix", a.Prefix)
 		request.SetData("background", a.Background)
 		request.SetData("javascripts", a.javascripts)
 		request.SetData("css", a.css)

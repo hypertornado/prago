@@ -43,16 +43,6 @@ const adminTemplates = `
 {{end}}
 </form>
 
-{{end}}{{define "admin_form_view"}}
-
-<div class="admin_box">
-
-<h2>{{.admin_title}}</h2>
-
-{{tmpl "admin_form" .admin_form}}
-
-</div>
-
 {{end}}{{define "admin_help_markdown"}}
 
 <div class="admin_box">
@@ -338,7 +328,7 @@ const adminTemplates = `
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{.title}}</title>
+    <title>{{.admin_title}}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{.admin_header_prefix}}/normalize.css?v={{.version}}">
@@ -350,8 +340,7 @@ const adminTemplates = `
     {{end}}
   >
     {{tmpl "admin_flash" .}}
-
-    {{tmpl .yield .}}
+    {{tmpl .admin_yield .}}
 
   </body>
 </html>
@@ -476,19 +465,7 @@ const adminTemplates = `
   </tr>
 {{end}}
 {{end}}
-{{define "admin_login"}}
-<div class="admin_box">
-    <h2>{{.title}}</h2>
-
-    {{tmpl "admin_form" .admin_form}}
-
-    {{if .bottom}}
-    <div style="text-align: center">
-    {{HTML .bottom}}
-    </div>
-    {{end}}
-</div>
-{{end}}{{define "admin_message"}}
+{{define "admin_message"}}
 
 <div class="admin_box">
   <h1>{{.message}}</h1>
@@ -518,14 +495,9 @@ const adminTemplates = `
     {{tmpl "admin_navigation" .admin_page.Navigation}}
     {{tmpl .admin_page.PageTemplate .admin_page.PageData}}
   </div>
-{{end}}{{define "admin_settings"}}
+{{end}}{{define "admin_settings_OLD"}}
 
 <div class="admin_box">
-
-  <h2>{{.admin_title}}</h2>
-
-  <a href="password">{{message .locale "admin_password_change"}}</a>
-
   {{tmpl "admin_form" .admin_form}}
 </div>
 
@@ -962,9 +934,6 @@ body {
   background-color: #f3f3f3;
   background-size: cover;
   background-attachment: fixed;
-}
-.admin_nologin > .admin_box {
-  margin-top: 20px;
 }
 .shadow {
   box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);

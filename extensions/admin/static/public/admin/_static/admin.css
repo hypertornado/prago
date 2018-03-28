@@ -195,7 +195,7 @@ body {
   background-size: cover;
   background-attachment: fixed;
 }
-.admin_nologin > .admin_box {
+.admin_nologin .admin_navigation_tabs {
   margin-top: 20px;
 }
 .shadow {

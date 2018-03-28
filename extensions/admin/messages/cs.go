@@ -19,7 +19,7 @@ var cs = map[string]string{
 	"admin_password":                 "Heslo",
 	"admin_login_action":             "Přihlásit se",
 	"admin_save":                     "Uložit",
-	"admin_forgoten":                 "Zapomenuté heslo?",
+	"admin_forgotten":                "Zapomenuté heslo",
 	"admin_register":                 "Nový účet",
 	"admin_register_password":        "Heslo (alespoň 7 znaků)",
 	"admin_email_not_valid":          "Neplatný formát emailu.",

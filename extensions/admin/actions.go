@@ -322,11 +322,16 @@ func bindAction(a *Admin, resource *Resource, action ResourceAction, isItemActio
 		action.Handler(a, resource, request)
 	}
 
+	constraints := []prago.Constraint{}
+	if isItemAction {
+		constraints = []prago.Constraint{prago.ConstraintInt("id")}
+	}
+
 	switch method {
 	case "post":
-		controller.Post(url, fn)
+		controller.Post(url, fn, constraints...)
 	default:
-		controller.Get(url, fn)
+		controller.Get(url, fn, constraints...)
 	}
 	return nil
 }

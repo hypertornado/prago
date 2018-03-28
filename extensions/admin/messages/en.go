@@ -19,7 +19,7 @@ var en = map[string]string{
 	"admin_password":            "Password",
 	"admin_login_action":        "Log in",
 	"admin_save":                "Save",
-	"admin_forgoten":            "Forgot your password?",
+	"admin_forgotten":           "Forgotten password",
 	"admin_register":            "Create account",
 	"admin_register_password":   "Password (at least 7 characters)",
 	"admin_login_error":         "Wrong user email or password.",

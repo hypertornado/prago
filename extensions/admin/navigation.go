@@ -39,6 +39,13 @@ func renderNavigationPage(request prago.Request, page AdminNavigationPage) {
 	prago.Render(request, 200, "admin_layout")
 }
 
+func renderNavigationPageNoLogin(request prago.Request, page AdminNavigationPage) {
+	request.SetData("admin_title", page.Navigation.PageTitle)
+	request.SetData("admin_yield", "admin_navigation_page")
+	request.SetData("admin_page", page)
+	prago.Render(request, 200, "admin_layout_nologin")
+}
+
 func (admin *Admin) getResourceNavigation(resource Resource, user User, code string) AdminItemNavigation {
 	tabs := []NavigationTab{}
 
@@ -157,6 +164,75 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 		PageTitle:   name + " " + resource.Name(user.Locale),
 		Tabs:        tabs,
 		Breadcrumbs: breadcrumbs,
+	}
+}
+
+func (admin *Admin) getSettingsNavigation(user User, code string) AdminItemNavigation {
+
+	tabs := []NavigationTab{}
+
+	tabs = append(tabs, NavigationTab{
+		Name:     messages.Messages.Get(user.Locale, "admin_settings"),
+		URL:      admin.Prefix + "/user/settings",
+		Selected: trueIfEqual(code, "settings"),
+	})
+
+	tabs = append(tabs, NavigationTab{
+		Name:     messages.Messages.Get(user.Locale, "admin_password_change"),
+		URL:      admin.Prefix + "/user/password",
+		Selected: trueIfEqual(code, "password"),
+	})
+
+	var name string
+	for _, v := range tabs {
+		if v.Selected {
+			name = v.Name
+		}
+	}
+
+	return AdminItemNavigation{
+		Name:        name,
+		PageTitle:   name,
+		Tabs:        tabs,
+		Breadcrumbs: nil,
+	}
+}
+
+func (admin *Admin) getNologinNavigation(language, code string) AdminItemNavigation {
+	tabs := []NavigationTab{}
+
+	tabs = append(tabs, NavigationTab{
+		Name:     messages.Messages.Get(language, "admin_login_action"),
+		URL:      admin.Prefix + "/user/login",
+		Selected: trueIfEqual(code, "login"),
+	})
+
+	tabs = append(tabs, NavigationTab{
+		Name:     messages.Messages.Get(language, "admin_register"),
+		URL:      admin.Prefix + "/user/registration",
+		Selected: trueIfEqual(code, "registration"),
+	})
+
+	tabs = append(tabs, NavigationTab{
+		Name:     messages.Messages.Get(language, "admin_forgotten"),
+		URL:      admin.Prefix + "/user/forgot",
+		Selected: trueIfEqual(code, "forgot"),
+	})
+
+	var name string
+	for _, v := range tabs {
+		if v.Selected {
+			name = v.Name
+		}
+	}
+
+	return AdminItemNavigation{
+		Name:      name,
+		PageTitle: name,
+		Tabs:      tabs,
+		Breadcrumbs: []NavigationBreadcrumb{
+			{admin.AppName, "/"},
+		},
 	}
 }
 
