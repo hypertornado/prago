@@ -935,6 +935,9 @@ body {
   background-size: cover;
   background-attachment: fixed;
 }
+.admin_nologin .admin_navigation_tabs {
+  margin-top: 20px;
+}
 .shadow {
   box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
 }
@@ -2330,32 +2333,6 @@ function bindPlaces() {
     var elements = document.querySelectorAll(".admin_place");
     Array.prototype.forEach.call(elements, function (el, i) {
         bindPlace(el);
-    });
-}
-function bindDelete() {
-    var deleteButtons = document.querySelectorAll(".admin-action-delete");
-    for (var i = 0; i < deleteButtons.length; i++) {
-        bindDeleteButton(deleteButtons[i]);
-    }
-}
-function bindDeleteButton(btn) {
-    var csrfToken = document.body.getAttribute("data-csrf-token");
-    btn.addEventListener("click", function () {
-        var message = btn.getAttribute("data-confirm-message");
-        var url = btn.getAttribute("data-action") + csrfToken;
-        if (confirm(message)) {
-            var request = new XMLHttpRequest();
-            request.open("POST", url, true);
-            request.addEventListener("load", function () {
-                if (request.status == 200) {
-                    document.location.reload();
-                }
-                else {
-                    console.error("Error while deleting item");
-                }
-            });
-            request.send();
-        }
     });
 }
 function bindForm() {

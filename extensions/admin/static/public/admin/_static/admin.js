@@ -256,7 +256,6 @@ var List = (function () {
                 }
                 _this.el.querySelector(".admin_table_count").textContent = countStr;
                 bindOrder();
-                bindDelete();
                 _this.bindPage();
             }
             else {
@@ -866,32 +865,6 @@ function bindPlaces() {
     var elements = document.querySelectorAll(".admin_place");
     Array.prototype.forEach.call(elements, function (el, i) {
         bindPlace(el);
-    });
-}
-function bindDelete() {
-    var deleteButtons = document.querySelectorAll(".admin-action-delete");
-    for (var i = 0; i < deleteButtons.length; i++) {
-        bindDeleteButton(deleteButtons[i]);
-    }
-}
-function bindDeleteButton(btn) {
-    var csrfToken = document.body.getAttribute("data-csrf-token");
-    btn.addEventListener("click", function () {
-        var message = btn.getAttribute("data-confirm-message");
-        var url = btn.getAttribute("data-action") + csrfToken;
-        if (confirm(message)) {
-            var request = new XMLHttpRequest();
-            request.open("POST", url, true);
-            request.addEventListener("load", function () {
-                if (request.status == 200) {
-                    document.location.reload();
-                }
-                else {
-                    console.error("Error while deleting item");
-                }
-            });
-            request.send();
-        }
     });
 }
 function bindForm() {

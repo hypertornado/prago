@@ -1,4 +1,4 @@
-function bindDelete() {
+/*function bindDelete() {
   var deleteButtons = document.querySelectorAll(".admin-action-delete")
   for (var i = 0; i < deleteButtons.length; i++) {
     bindDeleteButton(<HTMLDivElement>deleteButtons[i]);
@@ -25,4 +25,4 @@ function bindDeleteButton(btn: HTMLDivElement) {
       request.send();
     }
   });
-}
+}*/

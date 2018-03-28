@@ -70,7 +70,7 @@ class List {
         }
         this.el.querySelector(".admin_table_count").textContent = countStr;
         bindOrder();
-        bindDelete();
+        //bindDelete();
         this.bindPage();
       } else {
         console.error("error while loading list");

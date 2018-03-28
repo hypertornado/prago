@@ -134,7 +134,14 @@ var ActionView = ResourceAction{
 
 		var item interface{}
 		resource.newItem(&item)
-		prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
+		err = admin.Query().WhereIs("id", int64(id)).Get(item)
+		if err != nil {
+			if err == ErrItemNotFound {
+				render404(request)
+				return
+			}
+			panic(err)
+		}
 
 		view, err := resource.StructCache.getView(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
@@ -156,7 +163,14 @@ var ActionEdit = ResourceAction{
 
 		var item interface{}
 		resource.newItem(&item)
-		prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
+		err = admin.Query().WhereIs("id", int64(id)).Get(item)
+		if err != nil {
+			if err == ErrItemNotFound {
+				render404(request)
+				return
+			}
+			panic(err)
+		}
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
@@ -233,7 +247,21 @@ var ActionUpdate = ResourceAction{
 	},
 }
 
-var ActionDelete = ResourceAction{
+var ActionDelete = CreateNavigationalAction(
+	"delete",
+	messages.Messages.GetNameFunction("admin_delete"),
+	"admin_form",
+	func(request prago.Request) interface{} {
+		user := GetUser(request)
+		form := NewForm()
+		form.Method = "POST"
+		AddCSRFToken(form, request)
+		form.AddSubmit("send", messages.Messages.Get(user.Locale, "admin_delete"))
+		return form
+	},
+)
+
+var ActionDoDelete = ResourceAction{
 	Url:    "delete",
 	Method: "post",
 	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
@@ -259,7 +287,7 @@ var ActionDelete = ResourceAction{
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_deleted"))
-		prago.WriteAPI(request, true, 200)
+		prago.Redirect(request, admin.GetURL(resource, ""))
 	},
 }
 
@@ -364,6 +392,7 @@ func InitResourceDefault(a *Admin, resource *Resource) error {
 		bindResourceItemAction(a, resource, ActionEdit)
 		bindResourceItemAction(a, resource, ActionUpdate)
 		bindResourceItemAction(a, resource, ActionDelete)
+		bindResourceItemAction(a, resource, ActionDoDelete)
 	}
 
 	return nil
@@ -432,12 +461,7 @@ func (ar *Resource) ResourceItemActionsButtonData(user *User, id int64, admin *A
 
 		ret = append(ret, ButtonData{
 			Name: messages.Messages.Get(user.Locale, "admin_delete"),
-			Url:  "",
-			Params: map[string]string{
-				"class":                "btn admin-action-delete",
-				"data-action":          fmt.Sprintf("%s/%d/delete?_csrfToken=", ar.ID, id),
-				"data-confirm-message": messages.Messages.Get(user.Locale, "admin_delete_confirmation"),
-			},
+			Url:  prefix + "/delete",
 		})
 
 		if ar.StructCache.OrderColumnName != "" {

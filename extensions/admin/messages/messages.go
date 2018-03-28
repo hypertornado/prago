@@ -47,3 +47,9 @@ func (m *messages) GetNullable(lang, id string, params ...interface{}) *string {
 	ret := fmt.Sprintf(str, params...)
 	return &ret
 }
+
+func (m *messages) GetNameFunction(id string, params ...interface{}) func(string) string {
+	return func(lang string) string {
+		return m.Get(lang, id, params...)
+	}
+}

@@ -121,6 +121,12 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 			URL:      prefix + "/edit",
 			Selected: trueIfEqual(code, "edit"),
 		})
+
+		tabs = append(tabs, NavigationTab{
+			Name:     messages.Messages.Get(user.Locale, "admin_delete"),
+			URL:      prefix + "/delete",
+			Selected: trueIfEqual(code, "delete"),
+		})
 	}
 
 	for _, v := range resource.ResourceItemActions {
@@ -159,9 +165,15 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 		}
 	}
 
+	title := name + " " + resource.Name(user.Locale)
+
+	if code == "delete" {
+		name = messages.Messages.Get(user.Locale, "admin_delete_confirmation")
+	}
+
 	return AdminItemNavigation{
 		Name:        name,
-		PageTitle:   name + " " + resource.Name(user.Locale),
+		PageTitle:   title,
 		Tabs:        tabs,
 		Breadcrumbs: breadcrumbs,
 	}
