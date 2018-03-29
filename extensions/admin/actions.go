@@ -34,6 +34,11 @@ func (ra *ResourceAction) GetName(language string) string {
 var ActionList = ResourceAction{
 	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
 		user := request.GetData("currentuser").(*User)
+
+		navigation := admin.getResourceNavigation(*resource, *user, "")
+		navigation.Wide = true
+		request.SetData("navigation", navigation)
+
 		listData, err := resource.getListHeader(admin, user)
 		if err != nil {
 			if err == ErrItemNotFound {
@@ -485,59 +490,36 @@ func InitResourceDefault(a *Admin, resource *Resource) error {
 	return nil
 }
 
-func (ar *Resource) ResourceActionsButtonData(user *User, admin *Admin) []ButtonData {
+func (resource *Resource) ResourceActionsButtonData(user *User, admin *Admin) []ButtonData {
 	ret := []ButtonData{}
-	if ar.CanCreate {
+	navigation := admin.getResourceNavigation(*resource, *user, "")
+	for _, v := range navigation.Tabs {
 		ret = append(ret, ButtonData{
-			Name: messages.Messages.Get(user.Locale, "admin_new"),
-			Url:  admin.GetURL(ar, "new"),
+			Name: v.Name,
+			Url:  v.URL,
 		})
-	}
-
-	if ar.ActivityLog {
-		ret = append(ret, ButtonData{
-			Name: messages.Messages.Get(user.Locale, "admin_history"),
-			Url:  admin.GetURL(ar, "history"),
-		})
-	}
-
-	for _, v := range ar.ResourceActions {
-		if v.Url == "" {
-			continue
-		}
-		name := v.Url
-		if v.Name != nil {
-			name = v.Name(user.Locale)
-		}
-
-		if v.Auth == nil || v.Auth(user) {
-			ret = append(ret, ButtonData{
-				Name: name,
-				Url:  admin.GetURL(ar, v.Url),
-			})
-		}
 	}
 	return ret
 }
 
-func (ar *Resource) ResourceItemActionsButtonData(user *User, id int64, admin *Admin) []ButtonData {
-	prefix := admin.GetURL(ar, fmt.Sprintf("%d", id))
+func (admin *Admin) getListItemActions(user User, id int64, resource Resource) listItemActions {
+	ret := listItemActions{}
 
-	ret := []ButtonData{}
+	prefix := admin.GetURL(&resource, fmt.Sprintf("%d", id))
 
-	ret = append(ret, ButtonData{
+	ret.VisibleButtons = append(ret.VisibleButtons, ButtonData{
 		Name: messages.Messages.Get(user.Locale, "admin_view"),
 		Url:  prefix,
 	})
 
-	if ar.PreviewURLFunction != nil {
+	if resource.PreviewURLFunction != nil {
 		var item interface{}
-		ar.newItem(&item)
+		resource.newItem(&item)
 		err := admin.Query().WhereIs("id", id).Get(item)
 		if err == nil {
-			url := ar.PreviewURLFunction(item)
+			url := resource.PreviewURLFunction(item)
 			if url != "" {
-				ret = append(ret, ButtonData{
+				ret.MenuButtons = append(ret.MenuButtons, ButtonData{
 					Name: messages.Messages.Get(user.Locale, "admin_preview"),
 					Url:  url,
 					Params: map[string]string{
@@ -547,36 +529,37 @@ func (ar *Resource) ResourceItemActionsButtonData(user *User, id int64, admin *A
 			}
 		}
 	}
-	if ar.CanEdit {
-		ret = append(ret, ButtonData{
+	if resource.CanEdit {
+		ret.MenuButtons = append(ret.MenuButtons, ButtonData{
 			Name: messages.Messages.Get(user.Locale, "admin_edit"),
 			Url:  prefix + "/edit",
 		})
 
-		ret = append(ret, ButtonData{
+		ret.MenuButtons = append(ret.MenuButtons, ButtonData{
 			Name: messages.Messages.Get(user.Locale, "admin_delete"),
 			Url:  prefix + "/delete",
 		})
 
-		if ar.StructCache.OrderColumnName != "" {
-			ret = append(ret, ButtonData{
+		if resource.ActivityLog {
+			ret.MenuButtons = append(ret.MenuButtons, ButtonData{
+				Name: messages.Messages.Get(user.Locale, "admin_history"),
+				Url:  prefix + "/edit",
+			})
+		}
+
+		if resource.StructCache.OrderColumnName != "" {
+			ret.ShowOrderButton = true
+			/*ret = append(ret, ButtonData{
 				Name: "☰",
 				Url:  "",
 				Params: map[string]string{
 					"class": "btn admin-action-order",
 				},
-			})
+			})*/
 		}
 	}
 
-	if ar.ActivityLog {
-		ret = append(ret, ButtonData{
-			Name: messages.Messages.Get(user.Locale, "admin_history"),
-			Url:  prefix + "/edit",
-		})
-	}
-
-	for _, v := range ar.ResourceItemActions {
+	for _, v := range resource.ResourceItemActions {
 		if v.Name == nil {
 			continue
 		}
@@ -586,8 +569,8 @@ func (ar *Resource) ResourceItemActionsButtonData(user *User, id int64, admin *A
 		}
 
 		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
-			if v.Auth == nil || v.Auth(user) {
-				ret = append(ret, ButtonData{
+			if v.Auth == nil || v.Auth(&user) {
+				ret.MenuButtons = append(ret.MenuButtons, ButtonData{
 					Name:   name,
 					Url:    prefix + "/" + v.Url,
 					Params: v.ButtonParams,

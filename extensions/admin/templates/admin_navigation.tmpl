@@ -1,5 +1,5 @@
 {{define "admin_navigation"}}
-  <div class="admin_navigation_tabs">
+  <div class="admin_navigation_tabs{{if .Wide}} admin_navigation_tabs-wide{{end}}">
     {{range $item := .Tabs}}
       <div class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
         <a href="{{$item.URL}}">{{$item.Name}}</a>
@@ -7,20 +7,29 @@
     {{end}}
   </div>
 
-  <div class="admin_box admin_box-navigation">
-    <div class="admin_navigation_breadcrumbs">
-    {{range $item := .Breadcrumbs}}
-      <div class="admin_navigation_breadcrumb">
-        <a href="{{$item.URL}}">{{$item.Name}}</a>
-      </div>
-    {{end}}
-    </div>
+  <div class="admin_box admin_box-navigation{{if .Wide}} admin_box-wide{{end}}">
+    <div class="admin_box_header">
+      {{if .Breadcrumbs}}
+        <div class="admin_navigation_breadcrumbs">
+        {{range $item := .Breadcrumbs}}
+          <div class="admin_navigation_breadcrumb">
+            <a href="{{$item.URL}}">{{$item.Name}}</a>
+          </div>
+        {{end}}
+        </div>
+      {{end}}
 
-    <h2>{{.Name}}</h2>
+      <h1>{{.Name}}</h1>
+    </div>
 {{end}}
 
 {{define "admin_navigation_page"}}
-    {{tmpl "admin_navigation" .admin_page.Navigation}}
-    {{tmpl .admin_page.PageTemplate .admin_page.PageData}}
+    {{tmpl "admin_navigation_page_content" .admin_page}}
+  </div>
+{{end}}
+
+{{define "admin_navigation_page_content"}}
+    {{tmpl "admin_navigation" .Navigation}}
+    {{tmpl .PageTemplate .PageData}}
   </div>
 {{end}}

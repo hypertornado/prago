@@ -9,10 +9,9 @@ import (
 )
 
 type list struct {
+	//ItemActions    listItemActions
 	Name           string
 	TypeID         string
-	Actions        []ButtonData
-	ItemActions    []ButtonData
 	Colspan        int64
 	Header         []listHeader
 	CanChangeOrder bool
@@ -38,14 +37,21 @@ type listContent struct {
 
 type listRow struct {
 	ID      int64
+	URL     string
 	Items   []listCell
-	Actions []ButtonData
+	Actions listItemActions
 }
 
 type listCell struct {
 	TemplateName string
 	Value        string
 	URL          string
+}
+
+type listItemActions struct {
+	VisibleButtons  []ButtonData
+	ShowOrderButton bool
+	MenuButtons     []ButtonData
 }
 
 type pagination struct {
@@ -69,7 +75,6 @@ func (resource *Resource) getListHeader(admin *Admin, user *User) (list list, er
 
 	list.Colspan = 1
 	list.TypeID = resource.ID
-	list.Actions = resource.ResourceActionsButtonData(user, admin)
 
 	list.OrderColumn = resource.OrderByColumn
 	list.OrderDesc = resource.OrderDesc
@@ -238,7 +243,8 @@ func (resource *Resource) getListContent(admin *Admin, requestQuery *listRequest
 		}
 
 		row.ID = itemVal.FieldByName("ID").Int()
-		row.Actions = resource.ResourceItemActionsButtonData(user, row.ID, admin)
+		row.URL = admin.GetURL(resource, fmt.Sprintf("%d", row.ID))
+		row.Actions = admin.getListItemActions(*user, row.ID, *resource)
 		list.Rows = append(list.Rows, row)
 		list.Colspan = int64(len(row.Items)) + 1
 	}

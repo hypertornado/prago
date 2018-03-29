@@ -1,36 +1,28 @@
 {{define "admin_home"}}
+  {{tmpl "admin_navigation_page_content" .navigation}}
 
-<div class="admin_box">
-
-  <h2>{{.admin_header.Name}}</h2>
-
-  <table class="admin_table">
-  <tr>
-    <th>Název</th>
-    <th>Počet položek</th>
-    <th>Akce</th>
-  </tr>
-  {{range $item := .home_data}}
-    <tr>
-      <td>
-        <a href="{{$item.URL}}">{{$item.Name}}</a>
-      </td>
-      <td>
-        {{$item.Count}}
-      </td>
-      <td>
-        {{range $action := $item.Actions}}
-          <a class="btn" href="{{$action.Url}}">{{$action.Name}}</a>
-        {{end}}
-      </td>
-    </tr>
+  {{$global := .}}
+  {{range $snippet := .snippets}}
+    {{tmpl $snippet.Template $global}}
   {{end}}
-  </table>
-</div>
-
-{{$global := .}}
-{{range $snippet := .snippets}}
-  {{tmpl $snippet.Template $global}}
 {{end}}
 
+
+{{define "admin_home_navigation"}}
+  <table class="admin_table">
+    {{range $item := .}}
+      <tr>
+        <td>
+          <b>{{$item.Name}}</b> ({{$item.Count}}x)
+        </td>
+        <td>
+          <div class="btngroup">
+            {{range $action := $item.Actions}}
+              <a class="btn" href="{{$action.Url}}">{{$action.Name}}</a>
+            {{end}}
+          </div>
+        </td>
+      </tr>
+    {{end}}
+  </table>
 {{end}}

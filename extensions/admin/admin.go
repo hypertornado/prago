@@ -305,11 +305,19 @@ func (a *Admin) Init(app *prago.App) error {
 	})
 
 	a.AdminController.Get(a.Prefix, func(request prago.Request) {
+		request.SetData("admin_header_home_selected", true)
 		user := GetUser(request)
-		request.SetData("home_data", a.GetHomeData(request))
+		request.SetData("navigation", AdminNavigationPage{
+			Navigation:   a.getAdminNavigation(*user, ""),
+			PageTemplate: "admin_home_navigation",
+			PageData:     a.GetHomeData(request),
+		})
+
 		if user.IsAdmin {
 			request.SetData("snippets", a.snippets)
 		}
+
+		request.SetData("admin_yield", "admin_home")
 		prago.Render(request, 200, "admin_layout")
 	})
 

@@ -140,7 +140,7 @@ func (sf *structField) fieldDescriptionMysql(fieldTypes map[string]FieldType) st
 }
 
 func (sf *structField) canShow() (show bool) {
-	if sf.Name == "ID" || sf.Name == "Name" {
+	if sf.Name == "Name" {
 		show = true
 	}
 	showTag := sf.Tags["prago-preview"]

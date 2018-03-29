@@ -81,6 +81,7 @@ const adminTemplates = `
 
   <table class="admin_table">
     <tr>
+      <th>#</th>
       <th>Typ Akce</th>
       <th>Položka</th>
       <th>Uživatel</th>
@@ -88,7 +89,8 @@ const adminTemplates = `
     </tr>
     {{range $item := .Items}}
       <tr>
-        <td><a href="{{$item.ActivityURL}}">{{$item.ActionType}}</a></td>
+        <td><a href="{{$item.ActivityURL}}">{{$item.ID}}</a></td>
+        <td>{{$item.ActionType}}</td>
         <td><a href="{{$item.ItemURL}}">{{$item.ItemName}}</a></td>
         <td><a href="{{$item.UserURL}}">{{$item.UserName}}</a></td>
         <td>{{$item.CreatedAt}}</td>
@@ -96,40 +98,32 @@ const adminTemplates = `
     {{end}}
   </table>
 {{end}}{{define "admin_home"}}
+  {{tmpl "admin_navigation_page_content" .navigation}}
 
-<div class="admin_box">
-
-  <h2>{{.admin_header.Name}}</h2>
-
-  <table class="admin_table">
-  <tr>
-    <th>Název</th>
-    <th>Počet položek</th>
-    <th>Akce</th>
-  </tr>
-  {{range $item := .home_data}}
-    <tr>
-      <td>
-        <a href="{{$item.URL}}">{{$item.Name}}</a>
-      </td>
-      <td>
-        {{$item.Count}}
-      </td>
-      <td>
-        {{range $action := $item.Actions}}
-          <a class="btn" href="{{$action.Url}}">{{$action.Name}}</a>
-        {{end}}
-      </td>
-    </tr>
+  {{$global := .}}
+  {{range $snippet := .snippets}}
+    {{tmpl $snippet.Template $global}}
   {{end}}
-  </table>
-</div>
-
-{{$global := .}}
-{{range $snippet := .snippets}}
-  {{tmpl $snippet.Template $global}}
 {{end}}
 
+
+{{define "admin_home_navigation"}}
+  <table class="admin_table">
+    {{range $item := .}}
+      <tr>
+        <td>
+          <b>{{$item.Name}}</b> ({{$item.Count}}x)
+        </td>
+        <td>
+          <div class="btngroup">
+            {{range $action := $item.Actions}}
+              <a class="btn" href="{{$action.Url}}">{{$action.Name}}</a>
+            {{end}}
+          </div>
+        </td>
+      </tr>
+    {{end}}
+  </table>
 {{end}}{{define "admin_item_input"}}
   <input name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
@@ -152,10 +146,10 @@ const adminTemplates = `
   <div class="admin_markdown">
 
     <div class="btngroup">
-      <div class="btn admin_markdown_command" data-cmd="b" title="ctrl+b">B</div>
-      <div class="btn admin_markdown_command" data-cmd="i" title="ctrl+i">I</div>
-      <div class="btn admin_markdown_command" data-cmd="a" title="ctrl+u">Odkaz</div>
-      <div class="btn admin_markdown_command" data-cmd="h2" title="ctrl+k">Nadpis</div>
+      <div class="btn btn-small admin_markdown_command" data-cmd="b" title="ctrl+b">B</div>
+      <div class="btn btn-small admin_markdown_command" data-cmd="i" title="ctrl+i">I</div>
+      <div class="btn btn-small admin_markdown_command" data-cmd="a" title="ctrl+u">Odkaz</div>
+      <div class="btn btn-small admin_markdown_command" data-cmd="h2" title="ctrl+k">Nadpis</div>
     </div>
 
     &nbsp;&nbsp;<a href="" target="_blank" class="admin_markdown_show_help">Zobrazit nápovědu</a>&nbsp;&nbsp;
@@ -301,7 +295,7 @@ const adminTemplates = `
     <div class="admin_container">
         <div class="admin_header">
             <div class="admin_header_top">
-                <a href="{{.admin_header.UrlPrefix}}" class="admin_header_name admin_header_top_item">
+                <a href="{{.admin_header.UrlPrefix}}" class="admin_header_name admin_header_top_item{{if .admin_header_home_selected}} admin_header_top_item-active{{end}}">
                   {{if .admin_header.Logo}}
                     <div class="admin_logo" style="background-image: url('{{.admin_header.Logo}}');"></div>
                   {{end}}
@@ -309,7 +303,10 @@ const adminTemplates = `
                 <a href="/" class="admin_header_top_item">{{.admin_header.HomepageUrl}}</a>
                 <div class="admin_header_top_item admin_header_top_space"></div>
                 <div class="admin_header_top_item">{{.currentuser.Email}}</div>
-                <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_header_top_item">{{message .locale "admin_settings"}}</a>
+                <a href="{{.admin_header.UrlPrefix}}/user/settings"
+                    class="admin_header_top_item{{if .admin_header_settings_selected}} admin_header_top_item-active{{end}}">
+                    {{message .locale "admin_settings"}}
+                </a>
                 <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
             </div>
 
@@ -369,7 +366,6 @@ const adminTemplates = `
 
 {{end}}{{define "admin_list"}}
 
-{{$adminResource := .admin_resource }}
 {{$locale := .locale}}
 
 {{$csrfToken := ._csrfToken}}
@@ -382,21 +378,10 @@ const adminTemplates = `
 
 {{$list := .admin_list}}
 
+
+{{tmpl "admin_navigation" .navigation}}
 <table class="admin_table admin_table-list {{if .admin_list.CanChangeOrder}} admin_table-order{{end}}" data-type="{{.admin_list.TypeID}}" data-order-column="{{.admin_list.OrderColumn}}" data-order-desc="{{.admin_list.OrderDesc}}">
   <thead>
-  <tr>
-    <td colspan="{{.admin_list.Colspan}}">
-      <div class="admin_table_listheader">
-        <h2>{{.admin_title}} (<span class="admin_table_count"></span>)</h2>
-
-        <div class="btngroup">
-        {{range $item := .admin_list.Actions}}
-          <a href="{{$item.Url}}" class="btn btn-primary">{{$item.Name}}</a>
-        {{end}}
-        </div>
-      </div>
-    </td>
-  </tr>
   <tr>
   {{range $item := .admin_list.Header}}
     <th>
@@ -409,7 +394,9 @@ const adminTemplates = `
       {{end}}
     </th>
   {{end}}
-  <th></th>
+  <th>
+    <span class="admin_table_count"></span>
+  </th>
   </tr>
   <tr>
     {{range $item := .admin_list.Header}}
@@ -426,24 +413,25 @@ const adminTemplates = `
   </thead>
   <tbody></tbody>
 </table>
+</div>
 {{end}}
 
 {{define "filter_layout_text"}}
-  <input class="input admin_table_filter_item" data-typ="{{.ColumnName}}">
+  <input class="input input-small admin_table_filter_item" data-typ="{{.ColumnName}}">
 {{end}}
 
 {{define "filter_layout_relation"}}
-  <select class="input admin_table_filter_item admin_table_filter_item-relations" data-typ="{{.ColumnName}}">
+  <select class="input input-small admin_table_filter_item admin_table_filter_item-relations" data-typ="{{.ColumnName}}">
     <option value="" selected=""></option>
   </select>
 {{end}}
 
 {{define "filter_layout_number"}}
-  <input class="input admin_table_filter_item" data-typ="{{.ColumnName}}">
+  <input class="input input-small admin_table_filter_item" data-typ="{{.ColumnName}}">
 {{end}}
 
 {{define "filter_layout_boolean"}}
-  <select class="input admin_table_filter_item" data-typ="{{.ColumnName}}">
+  <select class="input input-small admin_table_filter_item" data-typ="{{.ColumnName}}">
     <option value=""></option>
     <option value="true">✅</option>
     <option value="false">-</option>
@@ -451,41 +439,50 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_list_cells"}}
-{{range $item := .admin_list.Rows}}
-  <tr data-id="{{$item.ID}}" class="admin_table_row">
-    {{range $cell := $item.Items}}
-    <td>
-      {{ tmpl $cell.TemplateName $cell }}
-    </td>
-    {{end}}
-    <td nowrap class="center top">
-      <div class="btngroup">
-        {{range $action := $item.Actions}}
-          {{if $action.Url}}
-            <a href="{{$action.Url}}" class="btn"
+  {{range $item := .admin_list.Rows}}
+    <tr data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="admin_table_row">
+      {{range $cell := $item.Items}}
+      <td>
+        {{ tmpl $cell.TemplateName $cell }}
+      </td>
+      {{end}}
+      <td nowrap class="top align-right">
+        <div class="btngroup admin_list_buttons">
+          {{range $action := $item.Actions.VisibleButtons}}
+            <a href="{{$action.Url}}" class="btn btn-small"
               {{range $k, $v := $action.Params}} {{HTMLAttr $k}}="{{$v}}"{{end}}
             >{{$action.Name}}</a>
+          {{end}}
+          {{if $item.Actions.ShowOrderButton}}
+            <a href="" class="btn btn-small admin-action-order preventredirect">☰</a>
+          {{end}}
+          {{if $item.Actions.MenuButtons}}
+            <button class="btn preventredirect btn-small btn-more">
+              <div class="preventredirect">▼</div>
+              <div class="btn-more_content preventredirect">
+                {{range $action := $item.Actions.MenuButtons}}
+                  <a href="{{$action.Url}}" class="btn btn-small btn-more_content_item">{{$action.Name}}</a>
+                {{end}}
+              </div>
+            </button>
+          {{end}}
+        </div>
+      </td>
+    </tr>
+  {{end}}
+  {{if .admin_list.Pagination.Pages}}
+    <tr>
+      <td colspan="{{.admin_list.Colspan}}" class="pagination">
+        {{range $page := .admin_list.Pagination.Pages}}
+          {{if $page.Current}}
+            <span class="pagination_page_current">{{$page.Page}}</span>
           {{else}}
-            <div{{range $k, $v := $action.Params}} {{HTMLAttr $k}}="{{$v}}"{{end}}>{{$action.Name}}</div>
+            <a href="#" class="pagination_page" data-page="{{$page.Page}}">{{$page.Page}}</a>
           {{end}}
         {{end}}
-      </div>
-    </td>
-  </tr>
-{{end}}
-{{if .admin_list.Pagination.Pages}}
-  <tr>
-    <td colspan="{{.admin_list.Colspan}}" class="pagination">
-      {{range $page := .admin_list.Pagination.Pages}}
-        {{if $page.Current}}
-          <span class="pagination_page_current">{{$page.Page}}</span>
-        {{else}}
-          <a href="#" class="pagination_page" data-page="{{$page.Page}}">{{$page.Page}}</a>
-        {{end}}
-      {{end}}
-    </td>
-  </tr>
-{{end}}
+      </td>
+    </tr>
+  {{end}}
 {{end}}
 {{define "admin_message"}}
 
@@ -493,7 +490,7 @@ const adminTemplates = `
   <h1>{{.message}}</h1>
 </div>
 {{end}}{{define "admin_navigation"}}
-  <div class="admin_navigation_tabs">
+  <div class="admin_navigation_tabs{{if .Wide}} admin_navigation_tabs-wide{{end}}">
     {{range $item := .Tabs}}
       <div class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
         <a href="{{$item.URL}}">{{$item.Name}}</a>
@@ -501,21 +498,30 @@ const adminTemplates = `
     {{end}}
   </div>
 
-  <div class="admin_box admin_box-navigation">
-    <div class="admin_navigation_breadcrumbs">
-    {{range $item := .Breadcrumbs}}
-      <div class="admin_navigation_breadcrumb">
-        <a href="{{$item.URL}}">{{$item.Name}}</a>
-      </div>
-    {{end}}
-    </div>
+  <div class="admin_box admin_box-navigation{{if .Wide}} admin_box-wide{{end}}">
+    <div class="admin_box_header">
+      {{if .Breadcrumbs}}
+        <div class="admin_navigation_breadcrumbs">
+        {{range $item := .Breadcrumbs}}
+          <div class="admin_navigation_breadcrumb">
+            <a href="{{$item.URL}}">{{$item.Name}}</a>
+          </div>
+        {{end}}
+        </div>
+      {{end}}
 
-    <h2>{{.Name}}</h2>
+      <h1>{{.Name}}</h1>
+    </div>
 {{end}}
 
 {{define "admin_navigation_page"}}
-    {{tmpl "admin_navigation" .admin_page.Navigation}}
-    {{tmpl .admin_page.PageTemplate .admin_page.PageData}}
+    {{tmpl "admin_navigation_page_content" .admin_page}}
+  </div>
+{{end}}
+
+{{define "admin_navigation_page_content"}}
+    {{tmpl "admin_navigation" .Navigation}}
+    {{tmpl .PageTemplate .PageData}}
   </div>
 {{end}}{{define "admin_settings_OLD"}}
 
@@ -947,8 +953,8 @@ html {
 }
 html,
 body {
-  font-family: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Oxygen, Ubuntu, Cantarell, "Open Sans", sans-serif;
-  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 14px;
   line-height: 1.4em;
   color: #444;
 }
@@ -970,9 +976,9 @@ code {
   border: 1px solid #ddd;
 }
 h1 {
-  font-size: 1.5rem;
+  font-size: 2rem;
   line-height: 1.4em;
-  margin: 0.5em 0 0.2em 0;
+  margin: 0.2rem 0 0.2rem 0;
 }
 h2 {
   font-size: 1.4rem;
@@ -988,6 +994,9 @@ h4 {
   font-size: 1.2rem;
   line-height: 1.4em;
   margin: 0.5em 0 0.2em 0;
+}
+.align-right {
+  text-align: right;
 }
 .right {
   float: right;
@@ -1035,6 +1044,15 @@ a:hover {
   border-radius: 2px;
   max-width: 600px;
 }
+.admin_box-wide {
+  max-width: none;
+  width: 100%;
+  padding: 0px;
+}
+.admin_box-wide .admin_box_header {
+  padding: 10px;
+  padding-bottom: 0px;
+}
 .admin_footer {
   padding: 0px 10px;
   font-size: 0.9em;
@@ -1051,8 +1069,8 @@ a:hover {
 }
 .btn {
   display: inline-block;
-  padding: 3px 12px;
-  font-size: 0.9em;
+  padding: 6px 12px;
+  font-size: 14px;
   font-weight: bold;
   line-height: 1.2em;
   color: #333;
@@ -1072,15 +1090,19 @@ a:hover {
   outline: none;
   text-decoration: none;
 }
+.btn-small {
+  padding: 3px 12px;
+  font-size: 12px;
+}
 .btngroup {
   display: inline-flex;
 }
-.btngroup .btn:not(:last-child) {
+.btngroup > .btn:not(:last-child) {
   border-right: none;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
 }
-.btngroup .btn:not(:first-child) {
+.btngroup > .btn:not(:first-child) {
   border-top-left-radius: 0px;
   border-bottom-left-radius: 0px;
 }
@@ -1101,9 +1123,11 @@ a:hover {
 }
 .btn-primary:hover {
   background-image: linear-gradient(-180deg, #1E90FF, #005A9C 50%);
+  border-color: #1E90FF;
 }
 .btn-primary:active {
   background-image: linear-gradient(-180deg, #1E90FF, #005A9C 0%);
+  border-color: #005A9C;
 }
 .form {
   margin: 10px 0px;
@@ -1140,7 +1164,7 @@ a:hover {
 }
 .input {
   display: inline-block;
-  padding: 2px 2px;
+  padding: 8px 6px;
   line-height: 1.2em;
   color: #333;
   vertical-align: middle;
@@ -1151,7 +1175,10 @@ a:hover {
   line-height: 1.4rem;
   width: 100%;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
-  background-color: white;
+  background-color: #fafafa;
+}
+.input-small {
+  padding: 2px 6px;
 }
 .input-placesearch {
   max-width: calc(100% - 200px);
@@ -1190,18 +1217,8 @@ input[type=date].input {
   min-height: 150px;
 }
 .admin_table {
-  width: 100%;
-}
-.admin_table-list {
   background-color: white;
-  margin: 10px 0px;
-  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
-}
-.admin_table_listheader {
-  display: flex;
-  justify-content: space-between;
-  margin: 5px;
-  align-items: center;
+  width: 100%;
 }
 .admin_table thead {
   font-weight: bold;
@@ -1210,9 +1227,23 @@ input[type=date].input {
   padding: 2px;
   border: 1px solid #f1f1f1;
 }
+.admin_table-list {
+  margin-top: 10px;
+}
 .admin_table-list td {
   border-left: none;
   border-bottom: none;
+  border-top: none;
+}
+.admin_table_row:nth-child(even) {
+  background-color: #fafafa;
+}
+.admin_table_row:hover {
+  background-color: rgba(64, 120, 192, 0.1);
+  cursor: pointer;
+}
+.admin_table_row td {
+  padding: 2px 5px;
 }
 .admin_table-list tr td:last-child {
   border-right: none;
@@ -1231,6 +1262,12 @@ input[type=date].input {
 .admin_header_item-active a {
   font-weight: bold;
 }
+.admin_list_buttons {
+  opacity: 0;
+}
+.admin_table_row:hover .admin_list_buttons {
+  opacity: 1;
+}
 .flash {
   text-align: center;
   padding: 5px;
@@ -1243,9 +1280,30 @@ input[type=date].input {
 }
 .pagination {
   text-align: center;
+  background-color: white;
+}
+.pagination_page,
+.pagination_page_current {
+  color: #4078c0;
+  text-transform: uppercase;
+  padding: 5px;
+  margin: 0px;
+  margin-right: 1px;
+  font-size: 16px;
+  line-height: 1.4em;
+  display: inline-block;
+  border-bottom: 2px solid none;
+  text-decoration: none;
+}
+.pagination_page_current,
+.pagination_page:hover {
+  border-bottom: 2px solid #4078c0;
+  padding-bottom: 3px;
+  background-color: rgba(64, 120, 192, 0.1);
 }
 .pagination_page_current {
   font-weight: bold;
+  cursor: default;
 }
 /* images */
 .admin_images_preview {
@@ -1286,10 +1344,12 @@ input[type=date].input {
 .admin_images_fileinput {
   display: block;
   margin: 0px auto;
-  border: 3px dashed #eee;
+  border: 1px dashed #eee;
   padding: 3px;
   border-radius: 3px;
-  padding: 20px;
+  padding: 10px;
+  background-color: #fafafa;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
 }
 .admin_images_fileinput-droparea {
   border: 3px dashed #aaa;
@@ -1384,6 +1444,7 @@ progress {
 .admin_navigation_breadcrumbs {
   display: flex;
   margin-bottom: 5px;
+  font-size: 1.1rem;
 }
 .admin_navigation_breadcrumb:after {
   content: ">";
@@ -1404,6 +1465,9 @@ progress {
   display: flex;
   justify-content: flex-end;
   vertical-align: bottom;
+}
+.admin_navigation_tabs-wide {
+  max-width: none;
 }
 .admin_navigation_tab {
   margin-top: 3px;
@@ -1434,6 +1498,46 @@ progress {
   padding: 7px 10px;
   display: inline-block;
 }
+.btn-more {
+  position: relative;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #999;
+  font-weight: normal;
+}
+.btn-more_content {
+  border: 0px solid red;
+  display: none;
+  position: absolute;
+  right: -1px;
+  border-radius: 3px;
+  top: 21px;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  flex-flow: column;
+}
+.btn-more:hover {
+  color: #444;
+  border-bottom-right-radius: 0px;
+}
+.btn-more:hover .btn-more_content {
+  display: flex;
+}
+.btn-more_content_item {
+  display: block;
+}
+.btn-more_content_item:not(:last-child) {
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+.btn-more_content_item {
+  border-top: none;
+  border-top-right-radius: 0px;
+  border-top-left-radius: 0px;
+}
+.btn-more_content_item:hover {
+  background-color: rgba(64, 120, 192, 0.1);
+}
 .admin_header {
   background: white;
   font-size: 14px;
@@ -1463,6 +1567,12 @@ progress {
 .admin_header_top_item {
   padding: 5px;
 }
+.admin_header_top_item-active {
+  font-weight: bold;
+  border-bottom: 2px solid #4078c0;
+  background-color: rgba(64, 120, 192, 0.1);
+  padding-bottom: 3px;
+}
 .admin_header a {
   text-decoration: none;
 }
@@ -1483,22 +1593,21 @@ progress {
   padding: 0px;
   clear: both;
   display: flex;
-  margin-left: -2px;
-  font-size: 0px;
   padding-left: 5px;
   flex-wrap: wrap;
 }
 .admin_header_resource {
   text-transform: uppercase;
-  padding: 5px 5px;
+  padding: 5px;
   margin: 0px;
-  margin-right: 2px;
+  margin-right: 1px;
   font-size: 12px;
   border-bottom: 2px solid none;
 }
 .admin_header_resource-active {
   font-weight: bold;
   border-bottom: 2px solid #4078c0;
+  padding-bottom: 3px;
   background-color: rgba(64, 120, 192, 0.1);
 }
 `
@@ -1754,16 +1863,11 @@ var List = (function () {
                 _this.tbody.innerHTML = request.response;
                 var count = request.getResponseHeader("X-Count");
                 var totalCount = request.getResponseHeader("X-Total-Count");
-                var countStr;
-                if (count != totalCount) {
-                    countStr = count + " / " + totalCount;
-                }
-                else {
-                    countStr = count + "";
-                }
+                var countStr = count + " / " + totalCount;
                 _this.el.querySelector(".admin_table_count").textContent = countStr;
                 bindOrder();
-                _this.bindPage();
+                _this.bindPagination();
+                _this.bindClick();
             }
             else {
                 console.error("error while loading list");
@@ -1773,7 +1877,7 @@ var List = (function () {
         var requestData = this.getListRequest();
         request.send(JSON.stringify(requestData));
     };
-    List.prototype.bindPage = function () {
+    List.prototype.bindPagination = function () {
         var _this = this;
         var pages = this.el.querySelectorAll(".pagination_page");
         for (var i = 0; i < pages.length; i++) {
@@ -1785,6 +1889,22 @@ var List = (function () {
                 _this.load();
                 e.preventDefault();
                 return false;
+            });
+        }
+    };
+    List.prototype.bindClick = function () {
+        var rows = this.el.querySelectorAll(".admin_table_row");
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var id = row.getAttribute("data-id");
+            row.addEventListener("click", function (e) {
+                var target = e.target;
+                if (target.classList.contains("preventredirect")) {
+                    return;
+                }
+                var el = e.currentTarget;
+                var url = el.getAttribute("data-url");
+                window.location = url;
             });
         }
     };

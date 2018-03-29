@@ -6,6 +6,7 @@ var cs = map[string]string{
 
 	"admin_log_out":                  "Odhlásit se",
 	"admin_new":                      "Nová položka",
+	"admin_list":                     "Seznam",
 	"admin_edit":                     "Upravit",
 	"admin_edit_and_stay":            "Upravit a zůstat",
 	"admin_view":                     "Zobrazit",

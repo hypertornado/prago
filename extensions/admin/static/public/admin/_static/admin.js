@@ -247,16 +247,11 @@ var List = (function () {
                 _this.tbody.innerHTML = request.response;
                 var count = request.getResponseHeader("X-Count");
                 var totalCount = request.getResponseHeader("X-Total-Count");
-                var countStr;
-                if (count != totalCount) {
-                    countStr = count + " / " + totalCount;
-                }
-                else {
-                    countStr = count + "";
-                }
+                var countStr = count + " / " + totalCount;
                 _this.el.querySelector(".admin_table_count").textContent = countStr;
                 bindOrder();
-                _this.bindPage();
+                _this.bindPagination();
+                _this.bindClick();
             }
             else {
                 console.error("error while loading list");
@@ -266,7 +261,7 @@ var List = (function () {
         var requestData = this.getListRequest();
         request.send(JSON.stringify(requestData));
     };
-    List.prototype.bindPage = function () {
+    List.prototype.bindPagination = function () {
         var _this = this;
         var pages = this.el.querySelectorAll(".pagination_page");
         for (var i = 0; i < pages.length; i++) {
@@ -278,6 +273,22 @@ var List = (function () {
                 _this.load();
                 e.preventDefault();
                 return false;
+            });
+        }
+    };
+    List.prototype.bindClick = function () {
+        var rows = this.el.querySelectorAll(".admin_table_row");
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var id = row.getAttribute("data-id");
+            row.addEventListener("click", function (e) {
+                var target = e.target;
+                if (target.classList.contains("preventredirect")) {
+                    return;
+                }
+                var el = e.currentTarget;
+                var url = el.getAttribute("data-url");
+                window.location = url;
             });
         }
     };

@@ -19,7 +19,7 @@ import (
 //User represents admin user account
 type User struct {
 	ID                int64  `prago-preview:"false"`
-	Name              string `prago-preview:"false"`
+	Name              string `prago-preview:"true"`
 	Email             string `prago-unique:"true" prago-preview:"true" prago-order:"true"`
 	Role              string `prago-preview:"true" prago-type:"role" prago-description:"Role"`
 	Password          string
@@ -600,6 +600,8 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		form := settingsForm(GetLocale(request), user)
 		AddCSRFToken(form, request)
 
+		request.SetData("admin_header_settings_selected", true)
+
 		renderNavigationPage(request, AdminNavigationPage{
 			Navigation:   a.getSettingsNavigation(*user, "settings"),
 			PageTemplate: "admin_form",
@@ -662,6 +664,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 	}
 
 	a.AdminController.Get(a.GetURL(resource, "password"), func(request prago.Request) {
+		request.SetData("admin_header_settings_selected", true)
 		form := changePasswordForm(request)
 		renderPasswordForm(request, form)
 	})

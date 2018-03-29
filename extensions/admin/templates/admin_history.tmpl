@@ -2,6 +2,7 @@
 
   <table class="admin_table">
     <tr>
+      <th>#</th>
       <th>Typ Akce</th>
       <th>Položka</th>
       <th>Uživatel</th>
@@ -9,7 +10,8 @@
     </tr>
     {{range $item := .Items}}
       <tr>
-        <td><a href="{{$item.ActivityURL}}">{{$item.ActionType}}</a></td>
+        <td><a href="{{$item.ActivityURL}}">{{$item.ID}}</a></td>
+        <td>{{$item.ActionType}}</td>
         <td><a href="{{$item.ItemURL}}">{{$item.ItemName}}</a></td>
         <td><a href="{{$item.UserURL}}">{{$item.UserName}}</a></td>
         <td>{{$item.CreatedAt}}</td>

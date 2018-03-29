@@ -62,16 +62,12 @@ class List {
         this.tbody.innerHTML = request.response;
         var count = request.getResponseHeader("X-Count");
         var totalCount = request.getResponseHeader("X-Total-Count");
-        var countStr: string
-        if (count != totalCount) {
-          countStr = count + " / " + totalCount
-        } else {
-          countStr = count + "";
-        }
+        var countStr: string = count + " / " + totalCount;
         this.el.querySelector(".admin_table_count").textContent = countStr;
         bindOrder();
         //bindDelete();
-        this.bindPage();
+        this.bindPagination();
+        this.bindClick();
       } else {
         console.error("error while loading list");
       }
@@ -81,7 +77,7 @@ class List {
     request.send(JSON.stringify(requestData));
   }
 
-  bindPage() {
+  bindPagination() {
     var pages = this.el.querySelectorAll(".pagination_page");
     for (var i = 0; i < pages.length; i++) {
       var pageEl = <HTMLAnchorElement>pages[i];
@@ -92,6 +88,23 @@ class List {
         this.load();
         e.preventDefault();
         return false;
+      })
+    }
+  }
+
+  bindClick() {
+    var rows = this.el.querySelectorAll(".admin_table_row");
+    for (var i = 0; i < rows.length; i++) {
+      var row = <HTMLTableRowElement>rows[i];
+      var id = row.getAttribute("data-id");
+      row.addEventListener("click", (e) => {
+        var target = <HTMLElement>e.target;
+        if (target.classList.contains("preventredirect")) {
+          return;
+        }
+        var el = <HTMLDivElement>e.currentTarget;
+        var url = el.getAttribute("data-url");
+        window.location = url;
       })
     }
   }

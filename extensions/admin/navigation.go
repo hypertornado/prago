@@ -19,6 +19,7 @@ type AdminItemNavigation struct {
 	PageTitle   string
 	Tabs        []NavigationTab
 	Breadcrumbs []NavigationBreadcrumb
+	Wide        bool
 }
 
 type NavigationTab struct {
@@ -46,8 +47,33 @@ func renderNavigationPageNoLogin(request prago.Request, page AdminNavigationPage
 	prago.Render(request, 200, "admin_layout_nologin")
 }
 
+func (admin *Admin) getAdminNavigation(user User, code string) AdminItemNavigation {
+	tabs := []NavigationTab{
+		NavigationTab{
+			Name:     messages.Messages.Get(user.Locale, "admin_admin"),
+			URL:      admin.Prefix,
+			Selected: trueIfEqual(code, ""),
+		},
+	}
+
+	name := messages.Messages.Get(user.Locale, "admin_admin") + " – " + admin.AppName
+
+	return AdminItemNavigation{
+		Name:        name,
+		PageTitle:   name,
+		Tabs:        tabs,
+		Breadcrumbs: nil,
+	}
+}
+
 func (admin *Admin) getResourceNavigation(resource Resource, user User, code string) AdminItemNavigation {
-	tabs := []NavigationTab{}
+	tabs := []NavigationTab{
+		NavigationTab{
+			Name:     messages.Messages.Get(user.Locale, "admin_list"),
+			URL:      admin.GetURL(&resource, ""),
+			Selected: trueIfEqual(code, ""),
+		},
+	}
 
 	if resource.CanCreate {
 		tabs = append(tabs, NavigationTab{
@@ -84,7 +110,7 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 	}
 
 	breadcrumbs := []NavigationBreadcrumb{
-		{resource.Name(user.Locale), admin.GetURL(&resource, "")},
+		{messages.Messages.Get(user.Locale, "admin_admin"), admin.Prefix},
 	}
 
 	name := ""
@@ -94,9 +120,17 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 		}
 	}
 
+	title := name + " " + resource.Name(user.Locale)
+
+	if code != "" {
+		breadcrumbs = append(breadcrumbs, NavigationBreadcrumb{resource.Name(user.Locale), admin.GetURL(&resource, "")})
+	} else {
+		name = resource.Name(user.Locale)
+	}
+
 	return AdminItemNavigation{
 		Name:        name,
-		PageTitle:   name + " " + resource.Name(user.Locale),
+		PageTitle:   title,
 		Tabs:        tabs,
 		Breadcrumbs: breadcrumbs,
 	}
@@ -166,6 +200,7 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 	}
 
 	breadcrumbs := []NavigationBreadcrumb{
+		{messages.Messages.Get(user.Locale, "admin_admin"), admin.Prefix},
 		{resource.Name(user.Locale), admin.GetURL(&resource, "")},
 	}
 
@@ -197,6 +232,11 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 
 func (admin *Admin) getSettingsNavigation(user User, code string) AdminItemNavigation {
 
+	breadcrumbs := []NavigationBreadcrumb{
+		{messages.Messages.Get(user.Locale, "admin_admin"), admin.Prefix},
+		//{resource.Name(user.Locale), admin.GetURL(&resource, "")},
+	}
+
 	tabs := []NavigationTab{}
 
 	tabs = append(tabs, NavigationTab{
@@ -211,6 +251,12 @@ func (admin *Admin) getSettingsNavigation(user User, code string) AdminItemNavig
 		Selected: trueIfEqual(code, "password"),
 	})
 
+	if code == "password" {
+		breadcrumbs = append(breadcrumbs,
+			NavigationBreadcrumb{messages.Messages.Get(user.Locale, "admin_settings"), admin.Prefix + "/user/settings"},
+		)
+	}
+
 	var name string
 	for _, v := range tabs {
 		if v.Selected {
@@ -222,7 +268,7 @@ func (admin *Admin) getSettingsNavigation(user User, code string) AdminItemNavig
 		Name:        name,
 		PageTitle:   name,
 		Tabs:        tabs,
-		Breadcrumbs: nil,
+		Breadcrumbs: breadcrumbs,
 	}
 }
 

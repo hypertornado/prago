@@ -29,7 +29,7 @@
     <div class="admin_container">
         <div class="admin_header">
             <div class="admin_header_top">
-                <a href="{{.admin_header.UrlPrefix}}" class="admin_header_name admin_header_top_item">
+                <a href="{{.admin_header.UrlPrefix}}" class="admin_header_name admin_header_top_item{{if .admin_header_home_selected}} admin_header_top_item-active{{end}}">
                   {{if .admin_header.Logo}}
                     <div class="admin_logo" style="background-image: url('{{.admin_header.Logo}}');"></div>
                   {{end}}
@@ -37,7 +37,10 @@
                 <a href="/" class="admin_header_top_item">{{.admin_header.HomepageUrl}}</a>
                 <div class="admin_header_top_item admin_header_top_space"></div>
                 <div class="admin_header_top_item">{{.currentuser.Email}}</div>
-                <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_header_top_item">{{message .locale "admin_settings"}}</a>
+                <a href="{{.admin_header.UrlPrefix}}/user/settings"
+                    class="admin_header_top_item{{if .admin_header_settings_selected}} admin_header_top_item-active{{end}}">
+                    {{message .locale "admin_settings"}}
+                </a>
                 <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
             </div>
 

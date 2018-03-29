@@ -31,6 +31,13 @@
   padding: 5px;
 }
 
+.admin_header_top_item-active {
+  font-weight: bold;
+  border-bottom: 2px solid @baseColor;
+  background-color: @baseColorBackground;
+  padding-bottom: 3px;
+}
+
 .admin_header a {
   text-decoration: none;
 }
@@ -55,17 +62,15 @@
   padding: 0px;
   clear: both;
   display: flex;
-  margin-left: -2px;
-  font-size: 0px;
   padding-left: 5px;
   flex-wrap: wrap;
 }
 
 .admin_header_resource {
   text-transform: uppercase;
-  padding: 5px 5px;
+  padding: 5px;
   margin: 0px;
-  margin-right: 2px;
+  margin-right: 1px;
   font-size: 12px;
   border-bottom: 2px solid none;
 }
@@ -73,5 +78,6 @@
 .admin_header_resource-active {
   font-weight: bold;
   border-bottom: 2px solid @baseColor;
+  padding-bottom: 3px;
   background-color: @baseColorBackground;
 }

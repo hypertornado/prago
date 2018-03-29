@@ -11,6 +11,7 @@ type HistoryView struct {
 }
 
 type HistoryItemView struct {
+	ID          int64
 	ActionType  string
 	ActivityURL string
 	ItemName    string
@@ -54,10 +55,13 @@ func (admin *Admin) getHistory(resource *Resource, user int64, itemID int64) His
 
 		activityURL := fmt.Sprintf("%s/activitylog/%d", admin.Prefix, v.ID)
 
+		itemName := fmt.Sprintf("%s #%d", v.ResourceName, v.ID)
+
 		ret.Items = append(ret.Items, HistoryItemView{
+			ID:          v.ID,
 			ActivityURL: activityURL,
 			ActionType:  v.ActionType,
-			ItemName:    fmt.Sprintf("#%d", v.ID),
+			ItemName:    itemName,
 			ItemURL:     admin.GetURL(resource, fmt.Sprintf("%d", v.ItemID)),
 			UserName:    username,
 			UserURL:     userurl,
