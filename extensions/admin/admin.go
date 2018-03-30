@@ -178,8 +178,7 @@ type AdminHeaderItem struct {
 	Url  string
 }
 
-func (a *Admin) HeaderAndFooterData(request prago.Request) (headerData *AdminHeaderData,
-	footerData []AdminHeaderItem) {
+func (a *Admin) getHeaderData(request prago.Request) (headerData *AdminHeaderData) {
 
 	user := GetUser(request)
 	locale := GetLocale(request)
@@ -196,19 +195,11 @@ func (a *Admin) HeaderAndFooterData(request prago.Request) (headerData *AdminHea
 
 	for _, resource := range a.Resources {
 		if resource.HasView && resource.Authenticate(user) {
-			if resource.DisplayInFooter {
-				footerData = append(footerData, AdminHeaderItem{
-					Name: resource.Name(locale),
-					ID:   resource.ID,
-					Url:  a.Prefix + "/" + resource.ID,
-				})
-			} else {
-				headerData.Items = append(headerData.Items, AdminHeaderItem{
-					Name: resource.Name(locale),
-					ID:   resource.ID,
-					Url:  a.Prefix + "/" + resource.ID,
-				})
-			}
+			headerData.Items = append(headerData.Items, AdminHeaderItem{
+				Name: resource.Name(locale),
+				ID:   resource.ID,
+				Url:  a.Prefix + "/" + resource.ID,
+			})
 		}
 	}
 	return
@@ -297,9 +288,8 @@ func (a *Admin) Init(app *prago.App) error {
 		request.SetData("appCode", request.App().Data()["appName"].(string))
 		request.SetData("appVersion", request.App().Data()["version"].(string))
 
-		headerData, footerData := a.HeaderAndFooterData(request)
+		headerData := a.getHeaderData(request)
 		request.SetData("admin_header", headerData)
-		request.SetData("admin_footer", footerData)
 
 		next()
 	})

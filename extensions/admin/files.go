@@ -226,7 +226,6 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 		return nil
 	})
 
-	resource.DisplayInFooter = false
 	resource.Pagination = 100
 
 	fileUploadPath = a.App.Config.GetString("fileUploadPath")

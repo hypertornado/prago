@@ -37,7 +37,6 @@ type Resource struct {
 	OrderDesc           bool
 	HasModel            bool
 	HasView             bool
-	DisplayInFooter     bool
 	item                interface{}
 	admin               dbProvider
 	table               string

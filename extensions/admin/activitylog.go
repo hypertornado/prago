@@ -84,7 +84,6 @@ type ActivityLog struct {
 
 func (ActivityLog) InitResource(a *Admin, resource *Resource) error {
 	resource.OrderDesc = true
-	resource.DisplayInFooter = true
 	return nil
 }
 

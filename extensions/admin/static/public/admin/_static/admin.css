@@ -259,14 +259,9 @@ a {
 a:hover {
   text-decoration: none;
 }
-.admin_container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
 .admin_content {
   padding: 5px;
-  flex-grow: 2;
+  padding-bottom: 50px;
 }
 .admin_box {
   box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
@@ -284,20 +279,6 @@ a:hover {
 .admin_box-wide .admin_box_header {
   padding: 10px;
   padding-bottom: 0px;
-}
-.admin_footer {
-  padding: 0px 10px;
-  font-size: 0.9em;
-  border-top: 1px solid #e5e5e5;
-  color: #888;
-  text-align: center;
-  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
-  position: relative;
-  z-index: 2;
-  background-color: white;
-  padding: 5px 20px;
-  flex-shrink: 0;
-  flex-grow: 0;
 }
 .btn {
   display: inline-block;
@@ -378,8 +359,12 @@ a:hover {
 .form_label-required input {
   border-width: 2px;
 }
+.form_label_text {
+  font-weight: 600;
+  line-height: 2em;
+}
 .form_label-required .form_label_text {
-  font-weight: bold;
+  font-weight: 800;
 }
 .form_label-errors {
   color: #dd2e4f;

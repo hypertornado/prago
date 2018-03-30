@@ -292,49 +292,41 @@ const adminTemplates = `
     {{end}}
     >
     {{tmpl "admin_flash" .}}
-    <div class="admin_container">
-        <div class="admin_header">
-            <div class="admin_header_top">
-                <a href="{{.admin_header.UrlPrefix}}" class="admin_header_name admin_header_top_item{{if .admin_header_home_selected}} admin_header_top_item-active{{end}}">
-                  {{if .admin_header.Logo}}
-                    <div class="admin_logo" style="background-image: url('{{.admin_header.Logo}}');"></div>
-                  {{end}}
-                {{message .locale "admin_admin"}} — {{.admin_header.Name}}</a>
-                <a href="/" class="admin_header_top_item">{{.admin_header.HomepageUrl}}</a>
-                <div class="admin_header_top_item admin_header_top_space"></div>
-                <div class="admin_header_top_item">{{.currentuser.Email}}</div>
-                <a href="{{.admin_header.UrlPrefix}}/user/settings"
-                    class="admin_header_top_item{{if .admin_header_settings_selected}} admin_header_top_item-active{{end}}">
-                    {{message .locale "admin_settings"}}
-                </a>
-                <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
-            </div>
-
-
-            {{ $admin_resource := .admin_resource }}
-
-            <div class="admin_header_resources">
-                {{range $item := .admin_header.Items}}
-                    <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
-                {{end}}
-            </div>
+    <div class="admin_header">
+        <div class="admin_header_top">
+            <a href="{{.admin_header.UrlPrefix}}" class="admin_header_name admin_header_top_item{{if .admin_header_home_selected}} admin_header_top_item-active{{end}}">
+              {{if .admin_header.Logo}}
+                <div class="admin_logo" style="background-image: url('{{.admin_header.Logo}}');"></div>
+              {{end}}
+            {{message .locale "admin_admin"}} — {{.admin_header.Name}}</a>
+            <a href="/" class="admin_header_top_item">{{.admin_header.HomepageUrl}}</a>
+            <div class="admin_header_top_item admin_header_top_space"></div>
+            <div class="admin_header_top_item">{{.currentuser.Email}}</div>
+            <a href="{{.admin_header.UrlPrefix}}/user/settings"
+                class="admin_header_top_item{{if .admin_header_settings_selected}} admin_header_top_item-active{{end}}">
+                {{message .locale "admin_settings"}}
+            </a>
+            <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
         </div>
 
-        <div class="admin_content">
-            {{if .template_before}}
-                {{tmpl .template_before .}}
-            {{end}}
-            {{tmpl .admin_yield .}}
-            {{if .template_after}}
-                {{tmpl .template_after .}}
-            {{end}}
-        </div>
 
-        <div class="admin_footer">
-            {{range $item := .admin_footer}}
-                <a href="{{$item.Url}}" class="admin_footer_resource">{{$item.Name}}</a>
+        {{ $admin_resource := .admin_resource }}
+
+        <div class="admin_header_resources">
+            {{range $item := .admin_header.Items}}
+                <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
             {{end}}
         </div>
+    </div>
+
+    <div class="admin_content">
+        {{if .template_before}}
+            {{tmpl .template_before .}}
+        {{end}}
+        {{tmpl .admin_yield .}}
+        {{if .template_after}}
+            {{tmpl .template_after .}}
+        {{end}}
     </div>
   </body>
 </html>
@@ -1027,14 +1019,9 @@ a {
 a:hover {
   text-decoration: none;
 }
-.admin_container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
 .admin_content {
   padding: 5px;
-  flex-grow: 2;
+  padding-bottom: 50px;
 }
 .admin_box {
   box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
@@ -1052,20 +1039,6 @@ a:hover {
 .admin_box-wide .admin_box_header {
   padding: 10px;
   padding-bottom: 0px;
-}
-.admin_footer {
-  padding: 0px 10px;
-  font-size: 0.9em;
-  border-top: 1px solid #e5e5e5;
-  color: #888;
-  text-align: center;
-  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
-  position: relative;
-  z-index: 2;
-  background-color: white;
-  padding: 5px 20px;
-  flex-shrink: 0;
-  flex-grow: 0;
 }
 .btn {
   display: inline-block;
@@ -1130,7 +1103,7 @@ a:hover {
   border-color: #005A9C;
 }
 .form {
-  margin: 10px 0px;
+  margin-top: 10px;
 }
 .form_errors_error {
   border: 1px solid #dd2e4f;
@@ -1146,8 +1119,12 @@ a:hover {
 .form_label-required input {
   border-width: 2px;
 }
+.form_label_text {
+  font-weight: 600;
+  line-height: 2em;
+}
 .form_label-required .form_label_text {
-  font-weight: bold;
+  font-weight: 800;
 }
 .form_label-errors {
   color: #dd2e4f;

@@ -203,7 +203,6 @@ func (u User) sendRenew(request prago.Request, a *Admin) error {
 
 //InitResource for user
 func (User) InitResource(a *Admin, resource *Resource) error {
-	resource.DisplayInFooter = true
 
 	resource.AddResourceItemAction(
 		ResourceAction{
