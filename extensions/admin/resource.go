@@ -48,6 +48,7 @@ type Resource struct {
 	ResourceItemActions []ResourceAction
 	CanCreate           bool //TODO: should be based on user restrictions
 	CanEdit             bool
+	CanExport           bool
 
 	ActivityLog bool
 
@@ -87,6 +88,9 @@ func (a *Admin) CreateResource(item interface{}) (ret *Resource, err error) {
 		EditabilityFilter: defaultEditabilityFilter,
 		CanCreate:         true,
 		CanEdit:           true,
+		CanExport:         true,
+
+		ActivityLog: true,
 	}
 
 	ret.OrderByColumn, ret.OrderDesc = cache.GetDefaultOrder()

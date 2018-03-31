@@ -54,7 +54,7 @@ var ActionList = ResourceAction{
 			}
 		}
 
-		request.SetData("admin_title", resource.Name(GetLocale(request)))
+		request.SetData("admin_title", navigation.GetPageTitle())
 		request.SetData("admin_list", listData)
 		request.SetData("admin_yield", "admin_list")
 		prago.Render(request, 200, "admin_layout")
@@ -307,24 +307,17 @@ var ActionItemHistory = ResourceAction{
 	},
 }
 
-/*
-var ActionItemHistory = CreateNavigationalAction(
-	"history",
-	messages.Messages.GetNameFunction("admin_history"),
-	"admin_history",
-	func(request prago.Request) interface{} {
-		id, err := strconv.Atoi(request.Params().Get("id"))
-		prago.Must(err)
-
-		var item interface{}
-		resource.newItem(&item)
-		prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
-
+var ActionExport = ResourceAction{
+	Url: "export",
+	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
 		user := GetUser(request)
-
-		return admin.getHistory(resource, 0, int64(id))
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   admin.getResourceNavigation(*resource, *user, "export"),
+			PageTemplate: "admin_export",
+			PageData:     nil,
+		})
 	},
-)*/
+}
 
 var ActionDelete = CreateNavigationalAction(
 	"delete",
@@ -483,6 +476,10 @@ func InitResourceDefault(a *Admin, resource *Resource) error {
 		bindResourceItemAction(a, resource, ActionDoDelete)
 	}
 
+	if resource.CanExport {
+		bindResourceAction(a, resource, ActionExport)
+	}
+
 	if resource.ActivityLog {
 		bindResourceItemAction(a, resource, ActionItemHistory)
 	}
@@ -549,14 +546,14 @@ func (admin *Admin) getListItemActions(user User, id int64, resource Resource) l
 
 		if resource.StructCache.OrderColumnName != "" {
 			ret.ShowOrderButton = true
-			/*ret = append(ret, ButtonData{
-				Name: "☰",
-				Url:  "",
-				Params: map[string]string{
-					"class": "btn admin-action-order",
-				},
-			})*/
 		}
+	}
+
+	if resource.CanExport {
+		ret.MenuButtons = append(ret.MenuButtons, ButtonData{
+			Name: messages.Messages.Get(user.Locale, "admin_export"),
+			Url:  prefix + "/export",
+		})
 	}
 
 	for _, v := range resource.ResourceItemActions {

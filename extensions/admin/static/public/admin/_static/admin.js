@@ -912,6 +912,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindLists();
     bindForm();
     bindImageViews();
+    bindFlashMessages();
 });
 function bindClickAndStay() {
     var els = document.getElementsByName("_submit_and_stay");
@@ -919,6 +920,18 @@ function bindClickAndStay() {
     if (els.length == 1 && elsClicked.length == 1) {
         els[0].addEventListener("click", function () {
             elsClicked[0].value = "true";
+        });
+    }
+}
+function bindFlashMessages() {
+    var messages = document.querySelectorAll(".flash_message");
+    for (var i = 0; i < messages.length; i++) {
+        var message = messages[i];
+        message.addEventListener("click", function (e) {
+            var target = e.currentTarget;
+            if (target.classList.contains("flash_message_close")) {
+                target.classList.add("hidden");
+            }
         });
     }
 }

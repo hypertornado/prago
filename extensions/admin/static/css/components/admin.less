@@ -12,7 +12,7 @@ html, body{
   font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
   font-size: 14px;
   line-height: 1.4em;
-  color: #444;
+  color: @black;
 }
 
 body {
@@ -75,7 +75,7 @@ h4 {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .top {
@@ -269,10 +269,9 @@ a:hover {
 }
 
 select.input {
-  -webkit-appearance: menulist-button;
+  -webkit-appearance: none;
   -moz-appearance: none;
-  appearance: menulist-button;
-  height: 24px;
+  appearance: none;
 }
 
 select.admin_table_filter_item {
@@ -280,13 +279,16 @@ select.admin_table_filter_item {
 }
 
 input[type=date].input {
-  height: 24px;
+  //height: 24px;
 }
 
-.input[readonly], .textarea[readonly], .input[disabled], .textarea[disabled] {
+.input[readonly], .textarea[readonly], .input[disabled], .textarea[disabled],
+.input[readonly]:focus, .textarea[readonly]:focus, .input[disabled]:focus, .textarea[disabled]:focus
+{
   border-color: #eee;
   background: #fafafa;
-  color: #888;
+  //background: #eee;
+  color: #999;
   box-shadow: none;
 }
 
@@ -368,16 +370,55 @@ input[type=date].input {
   opacity: 1; 
 }
 
-.flash {
+.flash_messages {
   text-align: center;
-  padding: 5px;
-  background: @baseColor;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  z-index: 10;
+}
+
+@keyframes example {
+    from {opacity: 0;}
+    to {opacity: 1;}
 }
 
 .flash_message {
-  color: white;
   font-weight: bold;
+  color: @black;
   display: inline-block;
+  margin: 5px 10px;
+  .shadow;
+  border-radius: 3px;
+
+  animation-name: example;
+  animation-duration: 300ms;
+  animation-timing-function: ease-in;
+
+  background-color: @yellow;
+
+  display: inline-flex;
+  align-items: center;
+}
+
+.flash_message_content {
+  border-radius: 3px;
+  padding: 5px 20px;
+  flex-grow: 2;
+}
+
+.flash_message_close {
+  flex-shrink: 0;
+  padding: 5px;
+  font-weight: normal;
+  color: @baseColor;
+  opacity: .2;
+  cursor: pointer;
+}
+
+.flash_message:hover .flash_message_close {
+  opacity: 1;
 }
 
 .pagination {

@@ -15,6 +15,7 @@ var en = map[string]string{
 	"admin_delete_confirmation": "Really want to delete this item?",
 	"admin_back":                "Back",
 	"admin_create":              "Create",
+	"admin_export":              "Export",
 	"admin_history":             "Edits",
 	"admin_login_name":          "log into admin",
 	"admin_email":               "Email",

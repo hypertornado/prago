@@ -6,6 +6,7 @@ import (
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 type AdminNavigationPage struct {
@@ -16,7 +17,6 @@ type AdminNavigationPage struct {
 
 type AdminItemNavigation struct {
 	Name        string
-	PageTitle   string
 	Tabs        []NavigationTab
 	Breadcrumbs []NavigationBreadcrumb
 	Wide        bool
@@ -33,15 +33,24 @@ type NavigationBreadcrumb struct {
 	URL  string
 }
 
+func (navigation AdminItemNavigation) GetPageTitle() string {
+	ret := []string{}
+	for _, v := range navigation.Breadcrumbs {
+		ret = append([]string{v.Name}, ret...)
+	}
+	ret = append([]string{navigation.Name}, ret...)
+	return strings.Join(ret, " — ")
+}
+
 func renderNavigationPage(request prago.Request, page AdminNavigationPage) {
-	request.SetData("admin_title", page.Navigation.PageTitle)
+	request.SetData("admin_title", page.Navigation.GetPageTitle())
 	request.SetData("admin_yield", "admin_navigation_page")
 	request.SetData("admin_page", page)
 	prago.Render(request, 200, "admin_layout")
 }
 
 func renderNavigationPageNoLogin(request prago.Request, page AdminNavigationPage) {
-	request.SetData("admin_title", page.Navigation.PageTitle)
+	request.SetData("admin_title", page.Navigation.GetPageTitle())
 	request.SetData("admin_yield", "admin_navigation_page")
 	request.SetData("admin_page", page)
 	prago.Render(request, 200, "admin_layout_nologin")
@@ -64,7 +73,6 @@ func (admin *Admin) getAdminNavigation(user User, code string) AdminItemNavigati
 
 	return AdminItemNavigation{
 		Name:        name,
-		PageTitle:   name,
 		Tabs:        tabs,
 		Breadcrumbs: breadcrumbs,
 	}
@@ -84,6 +92,14 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 			Name:     messages.Messages.Get(user.Locale, "admin_new"),
 			URL:      admin.GetURL(&resource, "new"),
 			Selected: trueIfEqual(code, "new"),
+		})
+	}
+
+	if resource.ActivityLog {
+		tabs = append(tabs, NavigationTab{
+			Name:     messages.Messages.Get(user.Locale, "admin_export"),
+			URL:      admin.GetURL(&resource, "export"),
+			Selected: trueIfEqual(code, "export"),
 		})
 	}
 
@@ -125,8 +141,6 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 		}
 	}
 
-	title := name + " " + resource.Name(user.Locale)
-
 	if code != "" {
 		breadcrumbs = append(breadcrumbs, NavigationBreadcrumb{resource.Name(user.Locale), admin.GetURL(&resource, "")})
 	} else {
@@ -135,7 +149,6 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 
 	return AdminItemNavigation{
 		Name:        name,
-		PageTitle:   title,
 		Tabs:        tabs,
 		Breadcrumbs: breadcrumbs,
 	}
@@ -222,15 +235,12 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 		}
 	}
 
-	title := name + " " + resource.Name(user.Locale)
-
 	if code == "delete" {
 		name = messages.Messages.Get(user.Locale, "admin_delete_confirmation")
 	}
 
 	return AdminItemNavigation{
 		Name:        name,
-		PageTitle:   title,
 		Tabs:        tabs,
 		Breadcrumbs: breadcrumbs,
 	}
@@ -241,7 +251,6 @@ func (admin *Admin) getSettingsNavigation(user User, code string) AdminItemNavig
 	breadcrumbs := []NavigationBreadcrumb{
 		{admin.AppName, "/"},
 		{messages.Messages.Get(user.Locale, "admin_admin"), admin.Prefix},
-		//{resource.Name(user.Locale), admin.GetURL(&resource, "")},
 	}
 
 	tabs := []NavigationTab{}
@@ -273,7 +282,6 @@ func (admin *Admin) getSettingsNavigation(user User, code string) AdminItemNavig
 
 	return AdminItemNavigation{
 		Name:        name,
-		PageTitle:   name,
 		Tabs:        tabs,
 		Breadcrumbs: breadcrumbs,
 	}
@@ -308,9 +316,8 @@ func (admin *Admin) getNologinNavigation(language, code string) AdminItemNavigat
 	}
 
 	return AdminItemNavigation{
-		Name:      name,
-		PageTitle: name,
-		Tabs:      tabs,
+		Name: name,
+		Tabs: tabs,
 		Breadcrumbs: []NavigationBreadcrumb{
 			{admin.AppName, "/"},
 		},

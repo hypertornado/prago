@@ -1,10 +1,16 @@
 package admin
 const adminTemplates = `
+{{define "admin_export"}}
+  THIS IS EXPORT
+{{end}}
 {{define "admin_flash"}}
   {{if .flash_messages}}
-    <div class="flash">
+    <div class="flash_messages">
       {{range $message := .flash_messages}}
-        <div class="flash_message">{{$message}}</div>
+        <div class="flash_message">
+          <div class="flash_message_content">{{$message}}</div>
+          <div class="flash_message_close">✕</div>
+        </div>
       {{end}}
     </div>
   {{end}}
@@ -270,7 +276,7 @@ const adminTemplates = `
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{if .admin_title}}{{.admin_title}} — {{.appName}}{{else}}Admin — {{.appName}}{{end}}</title>
+    <title>{{.admin_title}}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -1000,7 +1006,7 @@ h4 {
   clear: both;
 }
 .hidden {
-  display: none;
+  display: none !important;
 }
 .top {
   vertical-align: top;
@@ -1162,24 +1168,24 @@ a:hover {
   margin-left: 10px;
 }
 select.input {
-  -webkit-appearance: menulist-button;
+  -webkit-appearance: none;
   -moz-appearance: none;
-  appearance: menulist-button;
-  height: 24px;
+  appearance: none;
 }
 select.admin_table_filter_item {
   width: auto;
 }
-input[type=date].input {
-  height: 24px;
-}
 .input[readonly],
 .textarea[readonly],
 .input[disabled],
-.textarea[disabled] {
+.textarea[disabled],
+.input[readonly]:focus,
+.textarea[readonly]:focus,
+.input[disabled]:focus,
+.textarea[disabled]:focus {
   border-color: #eee;
   background: #fafafa;
-  color: #888;
+  color: #999;
   box-shadow: none;
 }
 .input:focus,
@@ -1245,15 +1251,51 @@ input[type=date].input {
 .admin_table_row:hover .admin_list_buttons {
   opacity: 1;
 }
-.flash {
+.flash_messages {
   text-align: center;
-  padding: 5px;
-  background: #4078c0;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  z-index: 10;
+}
+@keyframes example {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 .flash_message {
-  color: white;
   font-weight: bold;
+  color: #444;
   display: inline-block;
+  margin: 5px 10px;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  animation-name: example;
+  animation-duration: 300ms;
+  animation-timing-function: ease-in;
+  background-color: #FFD800;
+  display: inline-flex;
+  align-items: center;
+}
+.flash_message_content {
+  border-radius: 3px;
+  padding: 5px 20px;
+  flex-grow: 2;
+}
+.flash_message_close {
+  flex-shrink: 0;
+  padding: 5px;
+  font-weight: normal;
+  color: #4078c0;
+  opacity: .2;
+  cursor: pointer;
+}
+.flash_message:hover .flash_message_close {
+  opacity: 1;
 }
 .pagination {
   text-align: center;
@@ -1570,8 +1612,9 @@ progress {
   padding: 0px;
   clear: both;
   display: flex;
-  padding-left: 5px;
+  padding: 0px 5px;
   flex-wrap: wrap;
+  overflow-x: auto;
 }
 .admin_header_resource {
   text-transform: uppercase;
@@ -1580,6 +1623,7 @@ progress {
   margin-right: 1px;
   font-size: 12px;
   border-bottom: 2px solid none;
+  flex-shrink: 0;
 }
 .admin_header_resource-active {
   font-weight: bold;
@@ -2505,6 +2549,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindLists();
     bindForm();
     bindImageViews();
+    bindFlashMessages();
 });
 function bindClickAndStay() {
     var els = document.getElementsByName("_submit_and_stay");
@@ -2512,6 +2557,18 @@ function bindClickAndStay() {
     if (els.length == 1 && elsClicked.length == 1) {
         els[0].addEventListener("click", function () {
             elsClicked[0].value = "true";
+        });
+    }
+}
+function bindFlashMessages() {
+    var messages = document.querySelectorAll(".flash_message");
+    for (var i = 0; i < messages.length; i++) {
+        var message = messages[i];
+        message.addEventListener("click", function (e) {
+            var target = e.currentTarget;
+            if (target.classList.contains("flash_message_close")) {
+                target.classList.add("hidden");
+            }
         });
     }
 }

@@ -295,6 +295,7 @@ func (a *Admin) Init(app *prago.App) error {
 	})
 
 	a.AdminController.Get(a.Prefix, func(request prago.Request) {
+		request.SetData("flash_messages", []string{"some message"})
 		request.SetData("admin_header_home_selected", true)
 		user := GetUser(request)
 		request.SetData("navigation", AdminNavigationPage{
