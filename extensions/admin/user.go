@@ -209,8 +209,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 			Name:   func(string) string { return "Přihlásit se jako" },
 			Url:    "loginas",
 			Method: "get",
-			Handler: func(admin *Admin, resource *Resource, request prago.Request) {
-				u := GetUser(request)
+			Handler: func(admin Admin, resource Resource, request prago.Request, u User) {
 				if !u.IsSysadmin {
 					panic("access denied")
 				}

@@ -20,7 +20,7 @@ type ResourceAction struct {
 	Auth         Authenticatizer
 	Method       string
 	Url          string
-	Handler      func(*Admin, *Resource, prago.Request)
+	Handler      func(Admin, Resource, prago.Request, User)
 	ButtonParams map[string]string
 }
 
@@ -32,10 +32,8 @@ func (ra *ResourceAction) GetName(language string) string {
 }
 
 var ActionList = ResourceAction{
-	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
-		user := request.GetData("currentuser").(*User)
-
-		navigation := admin.getResourceNavigation(*resource, *user, "")
+	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
+		navigation := admin.getResourceNavigation(resource, user, "")
 		navigation.Wide = true
 		request.SetData("navigation", navigation)
 
@@ -63,7 +61,7 @@ var ActionList = ResourceAction{
 
 var ActionNew = ResourceAction{
 	Url: "new",
-	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
+	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		var item interface{}
 		resource.newItem(&item)
 
@@ -85,9 +83,8 @@ var ActionNew = ResourceAction{
 			form = resource.AfterFormCreated(form, request, true)
 		}
 
-		user := request.GetData("currentuser").(*User)
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getResourceNavigation(*resource, *user, "new"),
+			Navigation:   admin.getResourceNavigation(resource, user, "new"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
@@ -97,7 +94,7 @@ var ActionNew = ResourceAction{
 var ActionCreate = ResourceAction{
 	Method: "post",
 	Url:    "",
-	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
+	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		ValidateCSRF(request)
 		var item interface{}
 		resource.newItem(&item)
@@ -120,8 +117,7 @@ var ActionCreate = ResourceAction{
 		prago.Must(admin.Create(item))
 
 		if resource.ActivityLog {
-			user := GetUser(request)
-			admin.createNewActivityLog(*resource, *user, item)
+			admin.createNewActivityLog(resource, user, item)
 		}
 
 		if resource.AfterCreate != nil {
@@ -131,13 +127,13 @@ var ActionCreate = ResourceAction{
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
-		prago.Redirect(request, admin.GetItemURL(*resource, item, ""))
+		prago.Redirect(request, admin.GetItemURL(resource, item, ""))
 	},
 }
 
 var ActionView = ResourceAction{
 	Url: "",
-	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
+	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
@@ -156,9 +152,8 @@ var ActionView = ResourceAction{
 		view, err := resource.StructCache.getView(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
 
-		user := request.GetData("currentuser").(*User)
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getItemNavigation(*resource, *user, item, id, ""),
+			Navigation:   admin.getItemNavigation(resource, user, item, id, ""),
 			PageTemplate: "admin_view",
 			PageData:     view,
 		})
@@ -167,7 +162,7 @@ var ActionView = ResourceAction{
 
 var ActionEdit = ResourceAction{
 	Url: "edit",
-	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
+	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
 
@@ -202,9 +197,8 @@ var ActionEdit = ResourceAction{
 			}
 		}
 
-		user := request.GetData("currentuser").(*User)
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getItemNavigation(*resource, *user, item, id, "edit"),
+			Navigation:   admin.getItemNavigation(resource, user, item, id, "edit"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
@@ -214,7 +208,7 @@ var ActionEdit = ResourceAction{
 var ActionUpdate = ResourceAction{
 	Url:    "edit",
 	Method: "post",
-	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
+	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		ValidateCSRF(request)
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
@@ -249,14 +243,12 @@ var ActionUpdate = ResourceAction{
 		prago.Must(admin.Save(item))
 
 		if resource.ActivityLog {
-			user := GetUser(request)
-
 			afterData, err := json.Marshal(item)
 			if err != nil {
 				panic(err)
 			}
 
-			admin.createEditActivityLog(*resource, *user, int64(id), beforeData, afterData)
+			admin.createEditActivityLog(resource, user, int64(id), beforeData, afterData)
 		}
 
 		if resource.AfterUpdate != nil {
@@ -270,7 +262,7 @@ var ActionUpdate = ResourceAction{
 		if request.Params().Get("_submit_and_stay_clicked") == "true" {
 			prago.Redirect(request, request.Request().URL.RequestURI())
 		} else {
-			prago.Redirect(request, admin.GetURL(resource, fmt.Sprintf("%d", id)))
+			prago.Redirect(request, admin.GetURL(&resource, fmt.Sprintf("%d", id)))
 		}
 
 	},
@@ -278,19 +270,18 @@ var ActionUpdate = ResourceAction{
 
 var ActionHistory = ResourceAction{
 	Url: "history",
-	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
-		user := GetUser(request)
+	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getResourceNavigation(*resource, *user, "history"),
+			Navigation:   admin.getResourceNavigation(resource, user, "history"),
 			PageTemplate: "admin_history",
-			PageData:     admin.getHistory(resource, 0, 0),
+			PageData:     admin.getHistory(&resource, 0, 0),
 		})
 	},
 }
 
 var ActionItemHistory = ResourceAction{
 	Url: "history",
-	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
+	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
 
@@ -298,33 +289,28 @@ var ActionItemHistory = ResourceAction{
 		resource.newItem(&item)
 		prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
 
-		user := GetUser(request)
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getItemNavigation(*resource, *user, item, id, "history"),
+			Navigation:   admin.getItemNavigation(resource, user, item, id, "history"),
 			PageTemplate: "admin_history",
-			PageData:     admin.getHistory(resource, 0, int64(id)),
+			PageData:     admin.getHistory(&resource, 0, int64(id)),
 		})
 	},
 }
 
-var ActionExport = ResourceAction{
-	Url: "export",
-	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
-		user := GetUser(request)
-		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getResourceNavigation(*resource, *user, "export"),
-			PageTemplate: "admin_export",
-			PageData:     nil,
-		})
+var ActionExport = CreateNavigationalAction(
+	"export",
+	messages.Messages.GetNameFunction("admin_export"),
+	"admin_export",
+	func(admin Admin, resource Resource, request prago.Request, user User) interface{} {
+		return nil
 	},
-}
+)
 
-var ActionDelete = CreateNavigationalAction(
+var ActionDelete = CreateNavigationalItemAction(
 	"delete",
 	messages.Messages.GetNameFunction("admin_delete"),
 	"admin_form",
-	func(request prago.Request) interface{} {
-		user := GetUser(request)
+	func(admin Admin, resource Resource, request prago.Request, user User) interface{} {
 		form := NewForm()
 		form.Method = "POST"
 		AddCSRFToken(form, request)
@@ -336,7 +322,7 @@ var ActionDelete = CreateNavigationalAction(
 var ActionDoDelete = ResourceAction{
 	Url:    "delete",
 	Method: "post",
-	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
+	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		ValidateCSRF(request)
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
@@ -359,19 +345,18 @@ var ActionDoDelete = ResourceAction{
 		}
 
 		if resource.ActivityLog {
-			user := GetUser(request)
-			admin.createDeleteActivityLog(*resource, *user, int64(id), item)
+			admin.createDeleteActivityLog(resource, user, int64(id), item)
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_deleted"))
-		prago.Redirect(request, admin.GetURL(resource, ""))
+		prago.Redirect(request, admin.GetURL(&resource, ""))
 	},
 }
 
 var ActionOrder = ResourceAction{
 	Url:    "order",
 	Method: "post",
-	Handler: func(admin *Admin, resource *Resource, request prago.Request) {
+	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		decoder := json.NewDecoder(request.Request().Body)
 		var t = map[string][]int{}
 		err := decoder.Decode(&t)
@@ -417,14 +402,14 @@ func bindAction(a *Admin, resource *Resource, action ResourceAction, isItemActio
 	controller := resource.ResourceController
 
 	var fn func(request prago.Request) = func(request prago.Request) {
+		user := request.GetData("currentuser").(*User)
 		if action.Auth != nil {
-			user := request.GetData("currentuser").(*User)
 			if !action.Auth(user) {
 				render403(request)
 				return
 			}
 		}
-		action.Handler(a, resource, request)
+		action.Handler(*a, *resource, request, *user)
 	}
 
 	constraints := []prago.Constraint{}

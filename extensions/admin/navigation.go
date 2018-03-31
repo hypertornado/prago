@@ -358,8 +358,8 @@ func trueIfEqual(a, b string) bool {
 	return false
 }
 
-func createNavigationalHandler(action, templateName string, dataGenerator func(prago.Request) interface{}) func(*Admin, *Resource, prago.Request) {
-	return func(admin *Admin, resource *Resource, request prago.Request) {
+func createNavigationalItemHandler(action, templateName string, dataGenerator func(Admin, Resource, prago.Request, User) interface{}) func(Admin, Resource, prago.Request, User) {
+	return func(admin Admin, resource Resource, request prago.Request, user User) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
 
@@ -369,19 +369,41 @@ func createNavigationalHandler(action, templateName string, dataGenerator func(p
 
 		var data interface{}
 		if dataGenerator != nil {
-			data = dataGenerator(request)
+			data = dataGenerator(admin, resource, request, user)
 		}
 
-		user := request.GetData("currentuser").(*User)
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getItemNavigation(*resource, *user, item, id, action),
+			Navigation:   admin.getItemNavigation(resource, user, item, id, action),
 			PageTemplate: templateName,
 			PageData:     data,
 		})
 	}
 }
 
-func CreateNavigationalAction(url string, name func(string) string, templateName string, dataGenerator func(prago.Request) interface{}) ResourceAction {
+func CreateNavigationalItemAction(url string, name func(string) string, templateName string, dataGenerator func(Admin, Resource, prago.Request, User) interface{}) ResourceAction {
+	return ResourceAction{
+		Url:     url,
+		Name:    name,
+		Handler: createNavigationalItemHandler(url, templateName, dataGenerator),
+	}
+}
+
+func createNavigationalHandler(action, templateName string, dataGenerator func(Admin, Resource, prago.Request, User) interface{}) func(Admin, Resource, prago.Request, User) {
+	return func(admin Admin, resource Resource, request prago.Request, user User) {
+		var data interface{}
+		if dataGenerator != nil {
+			data = dataGenerator(admin, resource, request, user)
+		}
+
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   admin.getResourceNavigation(resource, user, action),
+			PageTemplate: templateName,
+			PageData:     data,
+		})
+	}
+}
+
+func CreateNavigationalAction(url string, name func(string) string, templateName string, dataGenerator func(Admin, Resource, prago.Request, User) interface{}) ResourceAction {
 	return ResourceAction{
 		Url:     url,
 		Name:    name,

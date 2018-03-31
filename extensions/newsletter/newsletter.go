@@ -381,7 +381,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 	previewAction := administration.ResourceAction{
 		Name: func(string) string { return "Náhled" },
 		Url:  "preview",
-		Handler: func(admin *administration.Admin, resource *administration.Resource, request prago.Request) {
+		Handler: func(admin administration.Admin, resource administration.Resource, request prago.Request, user administration.User) {
 			var newsletter Newsletter
 			err := admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			if err != nil {
@@ -401,7 +401,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 	doSendPreviewAction := administration.ResourceAction{
 		Url:    "send-preview",
 		Method: "post",
-		Handler: func(admin *administration.Admin, resource *administration.Resource, request prago.Request) {
+		Handler: func(admin administration.Admin, resource administration.Resource, request prago.Request, user administration.User) {
 			var newsletter Newsletter
 			err := admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			if err != nil {
@@ -413,7 +413,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 			emails := parseEmails(request.Params().Get("emails"))
 			nmMiddleware.SendEmails(newsletter, emails)
 			administration.AddFlashMessage(request, "Náhled newsletteru odeslán.")
-			prago.Redirect(request, admin.GetURL(resource, ""))
+			prago.Redirect(request, admin.GetURL(&resource, ""))
 		},
 	}
 
@@ -444,7 +444,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 	doSendAction := administration.ResourceAction{
 		Url:    "send",
 		Method: "post",
-		Handler: func(admin *administration.Admin, resource *administration.Resource, request prago.Request) {
+		Handler: func(admin administration.Admin, resource administration.Resource, request prago.Request, user administration.User) {
 			var newsletter Newsletter
 			err := admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			if err != nil {
@@ -469,7 +469,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 
 	resource.AddResourceItemAction(previewAction)
 	resource.AddResourceItemAction(
-		administration.CreateNavigationalAction(
+		administration.CreateNavigationalItemAction(
 			"send-preview",
 			func(string) string { return "Odeslat náhled" },
 			"newsletter_send",
@@ -477,11 +477,11 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 		),
 	)
 	resource.AddResourceItemAction(doSendPreviewAction)
-	resource.AddResourceItemAction(administration.CreateNavigationalAction(
+	resource.AddResourceItemAction(administration.CreateNavigationalItemAction(
 		"send",
 		func(string) string { return "Odeslat" },
 		"newsletter_send",
-		func(prago.Request) interface{} {
+		func(administration.Admin, administration.Resource, prago.Request, administration.User) interface{} {
 			recipients, err := nmMiddleware.GetRecipients()
 			if err != nil {
 				panic(err)
