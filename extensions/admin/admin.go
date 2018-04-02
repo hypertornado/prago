@@ -35,7 +35,7 @@ type Admin struct {
 	AdminController       *prago.Controller
 	AdminAccessController *prago.Controller
 	App                   *prago.App
-	rootActions           []ResourceAction
+	rootActions           []Action
 	db                    *sql.DB
 	authData              map[string]string
 	sendgridClient        *sendgrid.SGClient
@@ -91,7 +91,7 @@ func (a *Admin) AddSnippet(name string) {
 	a.snippets = append(a.snippets, Snippet{name})
 }
 
-func (a *Admin) AddAction(action ResourceAction) {
+func (a *Admin) AddAction(action Action) {
 	a.rootActions = append(a.rootActions, action)
 }
 

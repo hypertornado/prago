@@ -371,7 +371,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 		request.SetData("recipients_count", ret)
 	})
 
-	previewAction := administration.ResourceAction{
+	previewAction := administration.Action{
 		Name: func(string) string { return "Náhled" },
 		Url:  "preview",
 		Handler: func(admin administration.Admin, resource administration.Resource, request prago.Request, user administration.User) {
@@ -391,7 +391,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 		},
 	}
 
-	doSendPreviewAction := administration.ResourceAction{
+	doSendPreviewAction := administration.Action{
 		Url:    "send-preview",
 		Method: "post",
 		Handler: func(admin administration.Admin, resource administration.Resource, request prago.Request, user administration.User) {
@@ -410,31 +410,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 		},
 	}
 
-	/*sendAction := administration.ResourceAction{
-		Name: func(string) string { return "Odeslat" },
-		Auth: administration.AuthenticateAdmin,
-		Url:  "send",
-		Handler: func(admin *administration.Admin, resource *administration.Resource, request prago.Request) {
-			var newsletter Newsletter
-			err := admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
-			if err != nil {
-				panic(err)
-			}
-
-			recipients, err := nmMiddleware.GetRecipients()
-			if err != nil {
-				panic(err)
-			}
-
-			request.SetData("title", newsletter.Name)
-			request.SetData("recipients", recipients)
-			request.SetData("recipients_count", len(recipients))
-			request.SetData("admin_yield", "newsletter_send")
-			prago.Render(request, 200, "admin_layout")
-		},
-	}*/
-
-	doSendAction := administration.ResourceAction{
+	doSendAction := administration.Action{
 		Url:    "send",
 		Method: "post",
 		Handler: func(admin administration.Admin, resource administration.Resource, request prago.Request, user administration.User) {
@@ -460,8 +436,8 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 		},
 	}
 
-	resource.AddResourceItemAction(previewAction)
-	resource.AddResourceItemAction(
+	resource.AddItemAction(previewAction)
+	resource.AddItemAction(
 		administration.CreateNavigationalItemAction(
 			"send-preview",
 			func(string) string { return "Odeslat náhled" },
@@ -469,8 +445,8 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 			nil,
 		),
 	)
-	resource.AddResourceItemAction(doSendPreviewAction)
-	resource.AddResourceItemAction(administration.CreateNavigationalItemAction(
+	resource.AddItemAction(doSendPreviewAction)
+	resource.AddItemAction(administration.CreateNavigationalItemAction(
 		"send",
 		func(string) string { return "Odeslat" },
 		"newsletter_send",
@@ -485,7 +461,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 			}
 		},
 	))
-	resource.AddResourceItemAction(doSendAction)
+	resource.AddItemAction(doSendAction)
 	return nil
 }
 

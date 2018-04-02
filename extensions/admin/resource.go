@@ -12,9 +12,6 @@ import (
 //ErrDontHaveModel is returned when item does not have a model
 var ErrDontHaveModel = errors.New("resource does not have model")
 
-//Action represents functions which can be added before or after admin operations
-type Action func(prago.Request, interface{}) bool
-
 type dbProvider interface {
 	getDB() *sql.DB
 	getResourceByName(string) *Resource
@@ -44,8 +41,8 @@ type Resource struct {
 	AfterFormCreated    func(f *Form, request prago.Request, newItem bool) *Form
 	VisibilityFilter    structFieldFilter
 	EditabilityFilter   structFieldFilter
-	ResourceActions     []ResourceAction
-	ResourceItemActions []ResourceAction
+	resourceActions     []Action
+	resourceItemActions []Action
 	CanCreate           bool //TODO: should be based on user restrictions
 	CanEdit             bool
 	CanExport           bool
@@ -53,16 +50,6 @@ type Resource struct {
 	ActivityLog bool
 
 	PreviewURLFunction func(interface{}) string
-
-	//BeforeList   Action
-	//BeforeNew    Action
-	/*BeforeCreate Action
-	AfterCreate  Action
-	BeforeDetail Action
-	BeforeUpdate Action
-	AfterUpdate  Action
-	BeforeDelete Action
-	AfterDelete  Action*/
 }
 
 //CreateResource creates new resource based on item

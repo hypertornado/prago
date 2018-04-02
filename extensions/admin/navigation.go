@@ -111,7 +111,7 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 		})
 	}
 
-	for _, v := range resource.ResourceActions {
+	for _, v := range resource.resourceActions {
 		if v.Url == "" {
 			continue
 		}
@@ -197,7 +197,7 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 		})
 	}
 
-	for _, v := range resource.ResourceItemActions {
+	for _, v := range resource.resourceItemActions {
 		if v.Name == nil {
 			continue
 		}
@@ -380,8 +380,8 @@ func createNavigationalItemHandler(action, templateName string, dataGenerator fu
 	}
 }
 
-func CreateNavigationalItemAction(url string, name func(string) string, templateName string, dataGenerator func(Admin, Resource, prago.Request, User) interface{}) ResourceAction {
-	return ResourceAction{
+func CreateNavigationalItemAction(url string, name func(string) string, templateName string, dataGenerator func(Admin, Resource, prago.Request, User) interface{}) Action {
+	return Action{
 		Url:     url,
 		Name:    name,
 		Handler: createNavigationalItemHandler(url, templateName, dataGenerator),
@@ -403,8 +403,8 @@ func createNavigationalHandler(action, templateName string, dataGenerator func(A
 	}
 }
 
-func CreateNavigationalAction(url string, name func(string) string, templateName string, dataGenerator func(Admin, Resource, prago.Request, User) interface{}) ResourceAction {
-	return ResourceAction{
+func CreateNavigationalAction(url string, name func(string) string, templateName string, dataGenerator func(Admin, Resource, prago.Request, User) interface{}) Action {
+	return Action{
 		Url:     url,
 		Name:    name,
 		Handler: createNavigationalHandler(url, templateName, dataGenerator),

@@ -15,7 +15,7 @@ type ButtonData struct {
 	Params map[string]string
 }
 
-type ResourceAction struct {
+type Action struct {
 	Name    func(string) string
 	Auth    Authenticatizer
 	Method  string
@@ -23,14 +23,14 @@ type ResourceAction struct {
 	Handler func(Admin, Resource, prago.Request, User)
 }
 
-func (ra *ResourceAction) GetName(language string) string {
+func (ra *Action) GetName(language string) string {
 	if ra.Name != nil {
 		return ra.Name(language)
 	}
 	return ra.Url
 }
 
-var ActionList = ResourceAction{
+var ActionList = Action{
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		navigation := admin.getResourceNavigation(resource, user, "")
 		navigation.Wide = true
@@ -52,7 +52,7 @@ var ActionList = ResourceAction{
 	},
 }
 
-var ActionNew = ResourceAction{
+var ActionNew = Action{
 	Url: "new",
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		var item interface{}
@@ -78,7 +78,7 @@ var ActionNew = ResourceAction{
 	},
 }
 
-var ActionCreate = ResourceAction{
+var ActionCreate = Action{
 	Method: "post",
 	Url:    "",
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
@@ -94,7 +94,6 @@ var ActionCreate = ResourceAction{
 		}
 
 		resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.getFilter())
-
 		prago.Must(admin.Create(item))
 
 		if resource.ActivityLog {
@@ -106,7 +105,7 @@ var ActionCreate = ResourceAction{
 	},
 }
 
-var ActionView = ResourceAction{
+var ActionView = Action{
 	Url: "",
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 
@@ -135,7 +134,7 @@ var ActionView = ResourceAction{
 	},
 }
 
-var ActionEdit = ResourceAction{
+var ActionEdit = Action{
 	Url: "edit",
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
@@ -174,7 +173,7 @@ var ActionEdit = ResourceAction{
 	},
 }
 
-var ActionUpdate = ResourceAction{
+var ActionUpdate = Action{
 	Url:    "edit",
 	Method: "post",
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
@@ -223,7 +222,7 @@ var ActionUpdate = ResourceAction{
 	},
 }
 
-var ActionHistory = ResourceAction{
+var ActionHistory = Action{
 	Url: "history",
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		renderNavigationPage(request, AdminNavigationPage{
@@ -234,7 +233,7 @@ var ActionHistory = ResourceAction{
 	},
 }
 
-var ActionItemHistory = ResourceAction{
+var ActionItemHistory = Action{
 	Url: "history",
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
@@ -261,7 +260,7 @@ var ActionExport = CreateNavigationalAction(
 	},
 )
 
-var ActionDoExport = ResourceAction{
+var ActionDoExport = Action{
 	Url:     "export",
 	Method:  "POST",
 	Handler: exportHandler,
@@ -280,7 +279,7 @@ var ActionDelete = CreateNavigationalItemAction(
 	},
 )
 
-var ActionDoDelete = ResourceAction{
+var ActionDoDelete = Action{
 	Url:    "delete",
 	Method: "post",
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
@@ -302,7 +301,7 @@ var ActionDoDelete = ResourceAction{
 	},
 }
 
-var ActionOrder = ResourceAction{
+var ActionOrder = Action{
 	Url:    "order",
 	Method: "post",
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
@@ -328,15 +327,15 @@ var ActionOrder = ResourceAction{
 	},
 }
 
-func bindResourceAction(a *Admin, resource *Resource, action ResourceAction) error {
+func bindResourceAction(a *Admin, resource *Resource, action Action) error {
 	return bindAction(a, resource, action, false)
 }
 
-func bindResourceItemAction(a *Admin, resource *Resource, action ResourceAction) error {
+func bindResourceItemAction(a *Admin, resource *Resource, action Action) error {
 	return bindAction(a, resource, action, true)
 }
 
-func bindAction(a *Admin, resource *Resource, action ResourceAction, isItemAction bool) error {
+func bindAction(a *Admin, resource *Resource, action Action, isItemAction bool) error {
 	var url string
 	if isItemAction {
 		url = a.Prefix + "/" + resource.ID + "/:id"
@@ -377,11 +376,11 @@ func bindAction(a *Admin, resource *Resource, action ResourceAction, isItemActio
 
 //InitResourceDefault is default resource initializer
 func InitResourceDefault(a *Admin, resource *Resource) error {
-	for _, v := range resource.ResourceActions {
+	for _, v := range resource.resourceActions {
 		bindResourceAction(a, resource, v)
 	}
 
-	for _, v := range resource.ResourceItemActions {
+	for _, v := range resource.resourceItemActions {
 		bindResourceItemAction(a, resource, v)
 	}
 
@@ -491,7 +490,7 @@ func (admin *Admin) getListItemActions(user User, id int64, resource Resource) l
 		})
 	}
 
-	for _, v := range resource.ResourceItemActions {
+	for _, v := range resource.resourceItemActions {
 		if v.Name == nil {
 			continue
 		}
@@ -513,10 +512,10 @@ func (admin *Admin) getListItemActions(user User, id int64, resource Resource) l
 	return ret
 }
 
-func (ar *Resource) AddResourceItemAction(action ResourceAction) {
-	ar.ResourceItemActions = append(ar.ResourceItemActions, action)
+func (ar *Resource) AddItemAction(action Action) {
+	ar.resourceItemActions = append(ar.resourceItemActions, action)
 }
 
-func (ar *Resource) AddResourceAction(action ResourceAction) {
-	ar.ResourceActions = append(ar.ResourceActions, action)
+func (ar *Resource) AddAction(action Action) {
+	ar.resourceActions = append(ar.resourceActions, action)
 }

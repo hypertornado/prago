@@ -204,8 +204,8 @@ func (u User) sendRenew(request prago.Request, a *Admin) error {
 //InitResource for user
 func (User) InitResource(a *Admin, resource *Resource) error {
 
-	resource.AddResourceItemAction(
-		ResourceAction{
+	resource.AddItemAction(
+		Action{
 			Name:   func(string) string { return "Přihlásit se jako" },
 			Url:    "loginas",
 			Method: "get",
