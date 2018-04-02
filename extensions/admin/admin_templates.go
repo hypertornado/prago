@@ -1,7 +1,39 @@
 package admin
 const adminTemplates = `
 {{define "admin_export"}}
-  THIS IS EXPORT
+  
+  <form method="POST" action="export">
+
+    <h2>Fields</h2>
+    {{range $field := .Fields}}
+      <label class="form_label">
+        <input type="checkbox" name="_field" value="{{$field.ColumnName}}" checked>
+        <span class="form_label_text-inline">{{$field.NameHuman}}</span>
+      </label>
+    {{end}}
+
+    <h2>Format</h2>
+    <select name="_format" class="input">
+    {{range $format := .Formats}}
+      <option value="{{$format}}">{{$format}}</option>
+    {{end}}
+    </select>
+
+
+    <h2>Limit</h2>
+    <input name="_limit" type="number" class="input">
+
+    <h2>Fields</h2>
+    {{range $field := .Fields}}
+      <label class="form_label">
+        <span class="form_label_text">{{$field.NameHuman}}</span>
+        <input name="{{$field.ColumnName}}" class="input">
+      </label>
+    {{end}}
+
+    <input type="submit" class="btn">
+
+  </form>
 {{end}}
 {{define "admin_flash"}}
   {{if .flash_messages}}
@@ -981,7 +1013,7 @@ h1 {
 h2 {
   font-size: 1.4rem;
   line-height: 1.4em;
-  margin: 0px;
+  margin: 1rem 0 0.2rem 0;
 }
 h3 {
   font-size: 1.3rem;

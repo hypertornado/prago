@@ -35,6 +35,7 @@ type Admin struct {
 	AdminController       *prago.Controller
 	AdminAccessController *prago.Controller
 	App                   *prago.App
+	rootActions           []ResourceAction
 	db                    *sql.DB
 	authData              map[string]string
 	sendgridClient        *sendgrid.SGClient
@@ -88,6 +89,10 @@ func NewAdmin(prefix, name string) *Admin {
 
 func (a *Admin) AddSnippet(name string) {
 	a.snippets = append(a.snippets, Snippet{name})
+}
+
+func (a *Admin) AddAction(action ResourceAction) {
+	a.rootActions = append(a.rootActions, action)
 }
 
 //UnsafeDropTables drop all tables, useful mainly in tests
@@ -295,11 +300,12 @@ func (a *Admin) Init(app *prago.App) error {
 	})
 
 	a.AdminController.Get(a.Prefix, func(request prago.Request) {
-		request.SetData("flash_messages", []string{"some message"})
+		//request.SetData("flash_messages", []string{"some message"})
 		request.SetData("admin_header_home_selected", true)
 		user := GetUser(request)
+		navigation := a.getAdminNavigation(*user, "")
 		request.SetData("navigation", AdminNavigationPage{
-			Navigation:   a.getAdminNavigation(*user, ""),
+			Navigation:   navigation,
 			PageTemplate: "admin_home_navigation",
 			PageData:     a.GetHomeData(request),
 		})
@@ -308,6 +314,7 @@ func (a *Admin) Init(app *prago.App) error {
 			request.SetData("snippets", a.snippets)
 		}
 
+		request.SetData("admin_title", navigation.GetPageTitle())
 		request.SetData("admin_yield", "admin_home")
 		prago.Render(request, 200, "admin_layout")
 	})

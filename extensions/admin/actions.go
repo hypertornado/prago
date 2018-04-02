@@ -16,12 +16,11 @@ type ButtonData struct {
 }
 
 type ResourceAction struct {
-	Name         func(string) string
-	Auth         Authenticatizer
-	Method       string
-	Url          string
-	Handler      func(Admin, Resource, prago.Request, User)
-	ButtonParams map[string]string
+	Name    func(string) string
+	Auth    Authenticatizer
+	Method  string
+	Url     string
+	Handler func(Admin, Resource, prago.Request, User)
 }
 
 func (ra *ResourceAction) GetName(language string) string {
@@ -46,12 +45,6 @@ var ActionList = ResourceAction{
 			panic(err)
 		}
 
-		if resource.BeforeList != nil {
-			if !resource.BeforeList(request, listData) {
-				return
-			}
-		}
-
 		request.SetData("admin_title", navigation.GetPageTitle())
 		request.SetData("admin_list", listData)
 		request.SetData("admin_yield", "admin_list")
@@ -64,12 +57,6 @@ var ActionNew = ResourceAction{
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		var item interface{}
 		resource.newItem(&item)
-
-		if resource.BeforeNew != nil {
-			if !resource.BeforeNew(request, item) {
-				return
-			}
-		}
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
 		prago.Must(err)
@@ -108,22 +95,10 @@ var ActionCreate = ResourceAction{
 
 		resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.getFilter())
 
-		if resource.BeforeCreate != nil {
-			if !resource.BeforeCreate(request, item) {
-				return
-			}
-		}
-
 		prago.Must(admin.Create(item))
 
 		if resource.ActivityLog {
 			admin.createNewActivityLog(resource, user, item)
-		}
-
-		if resource.AfterCreate != nil {
-			if !resource.AfterCreate(request, item) {
-				return
-			}
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
@@ -191,12 +166,6 @@ var ActionEdit = ResourceAction{
 			form = resource.AfterFormCreated(form, request, false)
 		}
 
-		if resource.BeforeDetail != nil {
-			if !resource.BeforeDetail(request, item) {
-				return
-			}
-		}
-
 		renderNavigationPage(request, AdminNavigationPage{
 			Navigation:   admin.getItemNavigation(resource, user, item, id, "edit"),
 			PageTemplate: "admin_form",
@@ -227,19 +196,11 @@ var ActionUpdate = ResourceAction{
 		var beforeData []byte
 		if resource.ActivityLog {
 			beforeData, err = json.Marshal(item)
-			if err != nil {
-				panic(err)
-			}
+			prago.Must(err)
 		}
 
 		err = resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.getFilter())
 		prago.Must(err)
-
-		if resource.BeforeUpdate != nil {
-			if !resource.BeforeUpdate(request, item) {
-				return
-			}
-		}
 		prago.Must(admin.Save(item))
 
 		if resource.ActivityLog {
@@ -249,12 +210,6 @@ var ActionUpdate = ResourceAction{
 			}
 
 			admin.createEditActivityLog(resource, user, int64(id), beforeData, afterData)
-		}
-
-		if resource.AfterUpdate != nil {
-			if !resource.AfterUpdate(request, item) {
-				return
-			}
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_edited"))
@@ -302,9 +257,15 @@ var ActionExport = CreateNavigationalAction(
 	messages.Messages.GetNameFunction("admin_export"),
 	"admin_export",
 	func(admin Admin, resource Resource, request prago.Request, user User) interface{} {
-		return nil
+		return resource.StructCache.getExportFormData(user, resource.VisibilityFilter)
 	},
 )
+
+var ActionDoExport = ResourceAction{
+	Url:     "export",
+	Method:  "POST",
+	Handler: exportHandler,
+}
 
 var ActionDelete = CreateNavigationalItemAction(
 	"delete",
@@ -327,22 +288,10 @@ var ActionDoDelete = ResourceAction{
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
 
-		if resource.BeforeDelete != nil {
-			if !resource.BeforeDelete(request, id) {
-				return
-			}
-		}
-
 		var item interface{}
 		resource.newItem(&item)
 		_, err = admin.Query().WhereIs("id", int64(id)).Delete(item)
 		prago.Must(err)
-
-		if resource.AfterDelete != nil {
-			if !resource.AfterDelete(request, id) {
-				return
-			}
-		}
 
 		if resource.ActivityLog {
 			admin.createDeleteActivityLog(resource, user, int64(id), item)
@@ -463,6 +412,7 @@ func InitResourceDefault(a *Admin, resource *Resource) error {
 
 	if resource.CanExport {
 		bindResourceAction(a, resource, ActionExport)
+		bindResourceAction(a, resource, ActionDoExport)
 	}
 
 	if resource.ActivityLog {
@@ -553,9 +503,8 @@ func (admin *Admin) getListItemActions(user User, id int64, resource Resource) l
 		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
 			if v.Auth == nil || v.Auth(&user) {
 				ret.MenuButtons = append(ret.MenuButtons, ButtonData{
-					Name:   name,
-					Url:    prefix + "/" + v.Url,
-					Params: v.ButtonParams,
+					Name: name,
+					Url:  prefix + "/" + v.Url,
 				})
 			}
 		}

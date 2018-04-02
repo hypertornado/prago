@@ -131,21 +131,22 @@ func getOldRedirectParams(request prago.Request, admin *Admin) (uuid, name strin
 func (File) InitResource(a *Admin, resource *Resource) error {
 	initCDN(a)
 
-	resource.BeforeDelete = func(request prago.Request, idIface interface{}) bool {
-		id := idIface.(int)
-		var file File
-		err := a.Query().WhereIs("id", id).Get(&file)
-		if err != nil {
-			panic(err)
+	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
+		fmt.Println(request.Request().Method)
+		fmt.Println(request.Request().URL.Path)
+		if request.Request().Method == "POST" && strings.HasSuffix(request.Request().URL.Path, "/delete") {
+			idStr := request.Params().Get("id")
+			id, err := strconv.Atoi(idStr)
+			if err == nil {
+				var file File
+				prago.Must(a.Query().WhereIs("id", id).Get(&file))
+				err = filesCDN.DeleteFile(file.UID)
+				if err != nil {
+					a.App.Log().Errorf("deleting CDN: %s", err)
+				}
+			}
 		}
-
-		err = filesCDN.DeleteFile(file.UID)
-		if err != nil {
-			panic(err)
-		}
-
-		return true
-	}
+	})
 
 	a.App.MainController().Get("/files/thumb/:size/:a/:b/:c/:d/:e/:name", func(request prago.Request) {
 		uuid, name, err := getOldRedirectParams(request, a)

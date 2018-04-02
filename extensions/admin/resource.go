@@ -54,27 +54,27 @@ type Resource struct {
 
 	PreviewURLFunction func(interface{}) string
 
-	BeforeList   Action
-	BeforeNew    Action
-	BeforeCreate Action
+	//BeforeList   Action
+	//BeforeNew    Action
+	/*BeforeCreate Action
 	AfterCreate  Action
 	BeforeDetail Action
 	BeforeUpdate Action
 	AfterUpdate  Action
 	BeforeDelete Action
-	AfterDelete  Action
+	AfterDelete  Action*/
 }
 
 //CreateResource creates new resource based on item
-func (a *Admin) CreateResource(item interface{}) (ret *Resource, err error) {
+func (a *Admin) CreateResource(item interface{}) {
 	cache, err := newStructCache(item, a.fieldTypes)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	typ := reflect.TypeOf(item)
 	defaultName := typ.Name()
-	ret = &Resource{
+	ret := &Resource{
 		Name:              func(string) string { return defaultName },
 		ID:                columnName(defaultName),
 		Typ:               typ,
@@ -137,14 +137,12 @@ func (a *Admin) CreateResource(item interface{}) (ret *Resource, err error) {
 	if ret.HasModel {
 		_, typFound := a.resourceMap[ret.Typ]
 		if typFound {
-			return nil, fmt.Errorf("resource with type %s already created", ret.Typ)
+			panic(fmt.Errorf("resource with type %s already created", ret.Typ))
 		}
 
 		a.resourceMap[ret.Typ] = ret
 		a.resourceNameMap[ret.ID] = ret
 	}
-
-	return ret, err
 }
 
 func (a *Admin) initResource(resource *Resource) error {

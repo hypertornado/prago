@@ -239,17 +239,8 @@ func (nm NewsletterMiddleware) Init(app *prago.App) error {
 		prago.Render(request, 200, "newsletter_layout")
 	})
 
-	newsletterResource, err := nmMiddleware.Admin.CreateResource(Newsletter{})
-	if err != nil {
-		return err
-	}
-	newsletterResource.Authenticate = nmMiddleware.Authenticatizer
-
-	_, err = nmMiddleware.Admin.CreateResource(NewsletterPersons{})
-	if err != nil {
-		return err
-	}
-
+	nmMiddleware.Admin.CreateResource(Newsletter{})
+	nmMiddleware.Admin.CreateResource(NewsletterPersons{})
 	return nil
 }
 
@@ -369,6 +360,8 @@ type Newsletter struct {
 func (Newsletter) InitResource(a *administration.Admin, resource *administration.Resource) error {
 	resource.ActivityLog = true
 	resource.AddSnippet("newsletter_snippet")
+
+	resource.Authenticate = nmMiddleware.Authenticatizer
 
 	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
 		ret, err := a.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&NewsletterPersons{})
