@@ -24,12 +24,9 @@
 {{end}}
 
 {{define "admin_navigation_page"}}
-    {{tmpl "admin_navigation_page_content" .admin_page}}
-  </div>
-{{end}}
-
-{{define "admin_navigation_page_content"}}
-    {{tmpl "admin_navigation" .Navigation}}
-    {{tmpl .PageTemplate .PageData}}
+    {{tmpl "admin_navigation" .admin_page.Navigation}}
+    <div class="admin_box_content">
+      {{tmpl .admin_page.PageTemplate .admin_page.PageData}}
+    </div>
   </div>
 {{end}}

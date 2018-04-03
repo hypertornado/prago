@@ -65,10 +65,28 @@ func (admin *Admin) getAdminNavigation(user User, code string) AdminItemNavigati
 		},
 	}
 
+	for _, v := range admin.rootActions {
+		tabs = append(tabs, NavigationTab{
+			Name:     v.GetName(user.Locale),
+			URL:      admin.Prefix + "/" + v.Url,
+			Selected: trueIfEqual(code, v.Url),
+		})
+	}
+
 	name := messages.Messages.Get(user.Locale, "admin_admin")
 
 	breadcrumbs := []NavigationBreadcrumb{
 		{admin.AppName, "/"},
+	}
+
+	for _, v := range tabs {
+		if v.Selected && v.URL != admin.Prefix {
+			name = v.Name
+			breadcrumbs = append(breadcrumbs, NavigationBreadcrumb{
+				Name: messages.Messages.Get(user.Locale, "admin_admin"),
+				URL:  admin.Prefix,
+			})
+		}
 	}
 
 	return AdminItemNavigation{
@@ -408,5 +426,28 @@ func CreateNavigationalAction(url string, name func(string) string, templateName
 		Url:     url,
 		Name:    name,
 		Handler: createNavigationalHandler(url, templateName, dataGenerator),
+	}
+}
+
+func createAdminHandler(action, templateName string, dataGenerator func(Admin, Resource, prago.Request, User) interface{}) func(Admin, Resource, prago.Request, User) {
+	return func(admin Admin, resource Resource, request prago.Request, user User) {
+		var data interface{}
+		if dataGenerator != nil {
+			data = dataGenerator(admin, resource, request, user)
+		}
+
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   admin.getAdminNavigation(user, action),
+			PageTemplate: templateName,
+			PageData:     data,
+		})
+	}
+}
+
+func CreateAdminAction(url string, name func(string) string, templateName string, dataGenerator func(Admin, Resource, prago.Request, User) interface{}) Action {
+	return Action{
+		Url:     url,
+		Name:    name,
+		Handler: createAdminHandler(url, templateName, dataGenerator),
 	}
 }

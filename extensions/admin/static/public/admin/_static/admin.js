@@ -928,9 +928,10 @@ function bindFlashMessages() {
     for (var i = 0; i < messages.length; i++) {
         var message = messages[i];
         message.addEventListener("click", function (e) {
-            var target = e.currentTarget;
+            var target = e.target;
             if (target.classList.contains("flash_message_close")) {
-                target.classList.add("hidden");
+                var current = e.currentTarget;
+                current.classList.add("hidden");
             }
         });
     }

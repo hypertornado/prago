@@ -270,6 +270,7 @@ a:hover {
   padding: 10px;
   border-radius: 2px;
   max-width: 600px;
+  width: 100%;
 }
 .admin_box-wide {
   max-width: none;
@@ -279,6 +280,9 @@ a:hover {
 .admin_box-wide .admin_box_header {
   padding: 10px;
   padding-bottom: 0px;
+}
+.admin_box_content {
+  overflow-x: auto;
 }
 .btn {
   display: inline-block;
@@ -492,6 +496,7 @@ select.admin_table_filter_item {
   left: 0px;
   right: 0px;
   z-index: 10;
+  pointer-events: none;
 }
 @keyframes example {
   from {
@@ -502,6 +507,7 @@ select.admin_table_filter_item {
   }
 }
 .flash_message {
+  pointer-events: auto;
   font-weight: bold;
   color: #444;
   display: inline-block;
@@ -514,6 +520,7 @@ select.admin_table_filter_item {
   background-color: #FFD800;
   display: inline-flex;
   align-items: center;
+  cursor: default;
 }
 .flash_message_content {
   border-radius: 3px;
@@ -696,6 +703,7 @@ progress {
 }
 .admin_navigation_breadcrumbs {
   display: flex;
+  flex-wrap: wrap;
   margin-bottom: 5px;
   font-size: 1.1rem;
 }

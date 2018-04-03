@@ -135,17 +135,7 @@ const adminTemplates = `
       </tr>
     {{end}}
   </table>
-{{end}}{{define "admin_home"}}
-  {{tmpl "admin_navigation_page_content" .navigation}}
-
-  {{$global := .}}
-  {{range $snippet := .snippets}}
-    {{tmpl $snippet.Template $global}}
-  {{end}}
-{{end}}
-
-
-{{define "admin_home_navigation"}}
+{{end}}{{define "admin_home_navigation"}}
   <table class="admin_table">
     {{range $item := .}}
       <tr>
@@ -395,55 +385,39 @@ const adminTemplates = `
 </html>
 
 {{end}}{{define "admin_list"}}
-
-{{$locale := .locale}}
-
-{{$csrfToken := ._csrfToken}}
-{{$table := .admin_list}}
-
-{{$global := .}}
-{{range $snippet := .admin_resource.Snippets}}
-  {{tmpl $snippet.Template $global}}
-{{end}}
-
-{{$list := .admin_list}}
-
-
-{{tmpl "admin_navigation" .navigation}}
-<table class="admin_table admin_table-list {{if .admin_list.CanChangeOrder}} admin_table-order{{end}}" data-type="{{.admin_list.TypeID}}" data-order-column="{{.admin_list.OrderColumn}}" data-order-desc="{{.admin_list.OrderDesc}}">
-  <thead>
-  <tr>
-  {{range $item := .admin_list.Header}}
-    <th>
-      {{if $item.CanOrder}}
-        <a href="#" class="admin_table_orderheader" data-name="{{$item.ColumnName}}">
-      {{- end -}}
-        {{- $item.NameHuman -}}
-      {{if $item.CanOrder -}}
-        </a>
-      {{end}}
-    </th>
-  {{end}}
-  <th>
-    <span class="admin_table_count"></span>
-  </th>
-  </tr>
-  <tr>
-    {{range $item := .admin_list.Header}}
+  <table class="admin_table admin_table-list {{if .CanChangeOrder}} admin_table-order{{end}}" data-type="{{.TypeID}}" data-order-column="{{.OrderColumn}}" data-order-desc="{{.OrderDesc}}">
+    <thead>
+    <tr>
+    {{range $item := .Header}}
       <th>
-        {{if $item.FilterLayout}}
-          {{tmpl $item.FilterLayout $item}}
+        {{if $item.CanOrder}}
+          <a href="#" class="admin_table_orderheader" data-name="{{$item.ColumnName}}">
+        {{- end -}}
+          {{- $item.NameHuman -}}
+        {{if $item.CanOrder -}}
+          </a>
         {{end}}
       </th>
     {{end}}
     <th>
-      <progress class="admin_table_progress"></progress>
+      <span class="admin_table_count"></span>
     </th>
-  </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-</div>
+    </tr>
+    <tr>
+      {{range $item := .Header}}
+        <th>
+          {{if $item.FilterLayout}}
+            {{tmpl $item.FilterLayout $item}}
+          {{end}}
+        </th>
+      {{end}}
+      <th>
+        <progress class="admin_table_progress"></progress>
+      </th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 {{end}}
 
 {{define "filter_layout_text"}}
@@ -545,13 +519,10 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_navigation_page"}}
-    {{tmpl "admin_navigation_page_content" .admin_page}}
-  </div>
-{{end}}
-
-{{define "admin_navigation_page_content"}}
-    {{tmpl "admin_navigation" .Navigation}}
-    {{tmpl .PageTemplate .PageData}}
+    {{tmpl "admin_navigation" .admin_page.Navigation}}
+    <div class="admin_box_content">
+      {{tmpl .admin_page.PageTemplate .admin_page.PageData}}
+    </div>
   </div>
 {{end}}{{define "admin_settings_OLD"}}
 
@@ -771,12 +742,6 @@ const adminTemplates = `
     {{end}}
   {{end}}
   
-</div>
-
-{{end}}{{define "newsletter_snippet"}}
-
-<div class="admin_box">
-Počet odběratelů newsletteru: {{.recipients_count}}
 </div>
 
 {{end}}{{define "newsletter_subscribe"}}
@@ -1068,6 +1033,8 @@ a:hover {
   padding: 10px;
   border-radius: 2px;
   max-width: 600px;
+  width: 100%;
+  overflow-x: auto;
 }
 .admin_box-wide {
   max-width: none;
@@ -1077,6 +1044,9 @@ a:hover {
 .admin_box-wide .admin_box_header {
   padding: 10px;
   padding-bottom: 0px;
+}
+.admin_box_content {
+  border: 1px solid red;
 }
 .btn {
   display: inline-block;
@@ -1494,6 +1464,7 @@ progress {
 }
 .admin_navigation_breadcrumbs {
   display: flex;
+  flex-wrap: wrap;
   margin-bottom: 5px;
   font-size: 1.1rem;
 }

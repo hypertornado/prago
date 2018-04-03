@@ -112,6 +112,7 @@ a:hover {
   padding: 10px;
   border-radius: 2px;
   max-width: 600px;
+  width: 100%;
 }
 
 .admin_box-wide {
@@ -123,6 +124,10 @@ a:hover {
 .admin_box-wide .admin_box_header {
   padding: 10px;
   padding-bottom: 0px;
+}
+
+.admin_box_content {
+  overflow-x: auto;
 }
 
 .btn {
@@ -377,6 +382,7 @@ input[type=date].input {
   left: 0px;
   right: 0px;
   z-index: 10;
+  pointer-events: none;
 }
 
 @keyframes example {
@@ -385,6 +391,7 @@ input[type=date].input {
 }
 
 .flash_message {
+  pointer-events: auto;
   font-weight: bold;
   color: @black;
   display: inline-block;
@@ -400,6 +407,7 @@ input[type=date].input {
 
   display: inline-flex;
   align-items: center;
+  cursor: default;
 }
 
 .flash_message_content {
@@ -612,6 +620,7 @@ progress {
 
 .admin_navigation_breadcrumbs {
   display: flex;
+  flex-wrap: wrap;
   margin-bottom: 5px;
   font-size: 1.1rem;
 }

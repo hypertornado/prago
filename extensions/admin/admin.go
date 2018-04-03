@@ -44,7 +44,6 @@ type Admin struct {
 	javascripts           []string
 	css                   []string
 	roles                 map[string]map[string]bool
-	snippets              []Snippet
 }
 
 //NewAdmin creates new administration on prefix url with name
@@ -58,7 +57,6 @@ func NewAdmin(prefix, name string) *Admin {
 		fieldTypes:      make(map[string]FieldType),
 		javascripts:     []string{},
 		css:             []string{},
-		snippets:        []Snippet{},
 	}
 	ret.CreateResource(User{})
 	ret.CreateResource(File{})
@@ -85,10 +83,6 @@ func NewAdmin(prefix, name string) *Admin {
 		ValuesSource:    &fp,
 	})
 	return ret
-}
-
-func (a *Admin) AddSnippet(name string) {
-	a.snippets = append(a.snippets, Snippet{name})
 }
 
 func (a *Admin) AddAction(action Action) {
@@ -265,9 +259,9 @@ func (a *Admin) Init(app *prago.App) error {
 		panic(err)
 	}
 
-	a.AdminController.AddAroundAction(func(request prago.Request, next func()) {
-		request.SetData("admin_yield", "admin_home")
+	a.initRootActions()
 
+	a.AdminController.AddAroundAction(func(request prago.Request, next func()) {
 		session := request.GetData("session").(*sessions.Session)
 		userID, ok := session.Values["user_id"].(int64)
 
@@ -302,21 +296,11 @@ func (a *Admin) Init(app *prago.App) error {
 	a.AdminController.Get(a.Prefix, func(request prago.Request) {
 		//request.SetData("flash_messages", []string{"some message"})
 		request.SetData("admin_header_home_selected", true)
-		user := GetUser(request)
-		navigation := a.getAdminNavigation(*user, "")
-		request.SetData("navigation", AdminNavigationPage{
-			Navigation:   navigation,
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   a.getAdminNavigation(*GetUser(request), ""),
 			PageTemplate: "admin_home_navigation",
 			PageData:     a.GetHomeData(request),
 		})
-
-		if user.IsAdmin {
-			request.SetData("snippets", a.snippets)
-		}
-
-		request.SetData("admin_title", navigation.GetPageTitle())
-		request.SetData("admin_yield", "admin_home")
-		prago.Render(request, 200, "admin_layout")
 	})
 
 	a.AdminController.Get(a.Prefix+"/_help/markdown", func(request prago.Request) {
@@ -351,6 +335,12 @@ func (a *Admin) Init(app *prago.App) error {
 	})
 
 	return nil
+}
+
+func (a *Admin) initRootActions() {
+	for _, v := range a.rootActions {
+		bindAction(a, nil, v, false)
+	}
 }
 
 func (a *Admin) bindAdminCommand(app *prago.App) error {

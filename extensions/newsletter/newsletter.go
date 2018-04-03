@@ -359,7 +359,6 @@ type Newsletter struct {
 
 func (Newsletter) InitResource(a *administration.Admin, resource *administration.Resource) error {
 	resource.ActivityLog = true
-	resource.AddSnippet("newsletter_snippet")
 
 	resource.Authenticate = nmMiddleware.Authenticatizer
 

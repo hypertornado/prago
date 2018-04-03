@@ -1,13 +1,3 @@
-{{define "admin_home"}}
-  {{tmpl "admin_navigation_page_content" .navigation}}
-
-  {{$global := .}}
-  {{range $snippet := .snippets}}
-    {{tmpl $snippet.Template $global}}
-  {{end}}
-{{end}}
-
-
 {{define "admin_home_navigation"}}
   <table class="admin_table">
     {{range $item := .}}

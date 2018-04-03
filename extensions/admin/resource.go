@@ -17,14 +17,9 @@ type dbProvider interface {
 	getResourceByName(string) *Resource
 }
 
-type Snippet struct {
-	Template string
-}
-
 //Resource is structure representing one item in admin menu or one table in database
 type Resource struct {
 	ID                  string
-	Snippets            []Snippet
 	Name                func(locale string) string
 	Typ                 reflect.Type
 	ResourceController  *prago.Controller
@@ -164,7 +159,7 @@ func (a *Admin) initResource(resource *Resource) error {
 			return err
 		}
 	}
-	return InitResourceDefault(a, resource)
+	return initResourceActions(a, resource)
 }
 
 func (a *Admin) getResourceByItem(item interface{}) (*Resource, error) {
@@ -182,10 +177,6 @@ func (ar *Resource) db() *sql.DB {
 
 func (ar *Resource) tableName() string {
 	return ar.table
-}
-
-func (ar *Resource) AddSnippet(template string) {
-	ar.Snippets = append(ar.Snippets, Snippet{template})
 }
 
 func (ar *Resource) unsafeDropTable() error {
