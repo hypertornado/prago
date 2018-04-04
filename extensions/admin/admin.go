@@ -227,6 +227,13 @@ func (a *Admin) Init(app *prago.App) error {
 
 	a.AdminController = a.AdminAccessController.SubController()
 
+	a.AdminController.AddAroundAction(
+		createSessionAroundAction(
+			app.GetAppName(),
+			app.Config.GetString("random"),
+		),
+	)
+
 	googleApiKey := app.Config.GetStringWithFallback("google", "")
 
 	a.AdminController.AddBeforeAction(func(request prago.Request) {

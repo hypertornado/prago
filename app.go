@@ -65,6 +65,8 @@ func NewApp(appName, version string) *App {
 	return app
 }
 
+func (app *App) GetAppName() string { return app.data["appName"].(string) }
+
 //Log returns logger structure
 func (app *App) Log() *logrus.Logger { return app.logger }
 
