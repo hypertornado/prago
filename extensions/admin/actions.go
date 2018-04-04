@@ -446,75 +446,27 @@ func (resource *Resource) ResourceActionsButtonData(user *User, admin *Admin) []
 	return ret
 }
 
-//TODO: remove this, it returns wrong buttons
-//use getItemNavigation
-func (admin *Admin) getListItemActions(user User, id int64, resource Resource) listItemActions {
+func (admin *Admin) getListItemActions(user User, item interface{}, id int64, resource Resource) listItemActions {
 	ret := listItemActions{}
-
-	prefix := admin.GetURL(&resource, fmt.Sprintf("%d", id))
 
 	ret.VisibleButtons = append(ret.VisibleButtons, ButtonData{
 		Name: messages.Messages.Get(user.Locale, "admin_view"),
-		Url:  prefix,
+		Url:  admin.GetURL(&resource, fmt.Sprintf("%d", id)),
 	})
 
-	if resource.PreviewURLFunction != nil {
-		var item interface{}
-		resource.newItem(&item)
-		err := admin.Query().WhereIs("id", id).Get(item)
-		if err == nil {
-			url := resource.PreviewURLFunction(item)
-			if url != "" {
-				ret.MenuButtons = append(ret.MenuButtons, ButtonData{
-					Name: messages.Messages.Get(user.Locale, "admin_preview"),
-					Url:  url,
-					Params: map[string]string{
-						"target": "_blank",
-					},
-				})
-			}
-		}
-	}
-	if resource.CanEdit {
-		ret.MenuButtons = append(ret.MenuButtons, ButtonData{
-			Name: messages.Messages.Get(user.Locale, "admin_edit"),
-			Url:  prefix + "/edit",
-		})
+	navigation := admin.getItemNavigation(resource, user, item, int(id), "")
 
-		ret.MenuButtons = append(ret.MenuButtons, ButtonData{
-			Name: messages.Messages.Get(user.Locale, "admin_delete"),
-			Url:  prefix + "/delete",
-		})
-
-		if resource.ActivityLog {
+	for _, v := range navigation.Tabs {
+		if !v.Selected {
 			ret.MenuButtons = append(ret.MenuButtons, ButtonData{
-				Name: messages.Messages.Get(user.Locale, "admin_history"),
-				Url:  prefix + "/edit",
+				Name: v.Name,
+				Url:  v.URL,
 			})
 		}
-
-		if resource.StructCache.OrderColumnName != "" {
-			ret.ShowOrderButton = true
-		}
 	}
 
-	for _, v := range resource.resourceItemActions {
-		if v.Name == nil {
-			continue
-		}
-		name := v.Url
-		if v.Name != nil {
-			name = v.Name(user.Locale)
-		}
-
-		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
-			if v.Auth == nil || v.Auth(&user) {
-				ret.MenuButtons = append(ret.MenuButtons, ButtonData{
-					Name: name,
-					Url:  prefix + "/" + v.Url,
-				})
-			}
-		}
+	if resource.CanEdit && resource.StructCache.OrderColumnName != "" {
+		ret.ShowOrderButton = true
 	}
 
 	return ret
