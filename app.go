@@ -25,7 +25,7 @@ type App struct {
 	DevelopmentMode    bool
 	Port               int
 	StartedAt          time.Time
-	Config             *config
+	Config             config
 	data               map[string]interface{}
 	requestMiddlewares []requestMiddleware
 	middlewares        []Middleware
@@ -53,8 +53,9 @@ func NewApp(appName, version string) *App {
 	app.data["version"] = version
 	app.cron = newCron()
 
+	app.Config = loadConfig(appName)
+
 	app.AddMiddleware(middlewareCmd{})
-	app.AddMiddleware(middlewareConfig{})
 	app.AddMiddleware(loggerMiddleware)
 	app.AddMiddleware(middlewareRemoveTrailingSlash)
 	app.AddMiddleware(middlewareStatic{})

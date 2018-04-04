@@ -9,36 +9,21 @@ import (
 	"sort"
 )
 
-type middlewareConfig struct{}
-
-func (m middlewareConfig) Init(app *App) error {
-	if app.Config != nil {
-		return nil
-	}
-
-	path := os.Getenv("HOME") + "/." + app.data["appName"].(string) + "/config.json"
+func loadConfig(appName string) config {
+	path := fmt.Sprintf("%s/.%s/config.json", os.Getenv("HOME"), appName)
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("error while opening file %s: %s", path, err)
+		panic(fmt.Sprintf("error while opening config file %s: %s", path, err))
 	}
 
 	kv := make(map[string]interface{})
 
 	err = json.Unmarshal(data, &kv)
 	if err != nil {
-		return err
+		panic(fmt.Sprintf("error while parsing config file: %s", err))
 	}
-	app.Config = &config{kv}
+	return config{kv}
 
-	configCommand := app.CreateCommand("config", "Print app configuration")
-	app.AddCommand(configCommand, func(app *App) error {
-		for k, v := range kv {
-			app.Log().Println(k, ":", v)
-		}
-		return nil
-	})
-
-	return nil
 }
 
 type config struct {
