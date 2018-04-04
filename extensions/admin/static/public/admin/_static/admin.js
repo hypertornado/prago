@@ -288,7 +288,7 @@ var List = (function () {
                 }
                 var el = e.currentTarget;
                 var url = el.getAttribute("data-url");
-                window.location = url;
+                window.location.href = url;
             });
         }
     };
@@ -367,6 +367,7 @@ var List = (function () {
         this.inputPeriodicListener();
     };
     List.prototype.inputListener = function (e) {
+        console.log("CHangeee");
         if (e.keyCode == 9 || e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
             return;
         }
@@ -902,6 +903,31 @@ var Form = (function () {
     }
     return Form;
 }());
+function bindFilter() {
+    var els = document.querySelectorAll(".admin_filter_layout_date");
+    for (var i = 0; i < els.length; i++) {
+        new FilterDate(els[i]);
+    }
+}
+var FilterDate = (function () {
+    function FilterDate(el) {
+        this.hidden = el.querySelector(".admin_table_filter_item");
+        this.from = el.querySelector(".admin_filter_layout_date_from");
+        this.to = el.querySelector(".admin_filter_layout_date_to");
+        this.from.addEventListener("input", this.changed.bind(this));
+        this.to.addEventListener("input", this.changed.bind(this));
+    }
+    FilterDate.prototype.changed = function () {
+        var val = "";
+        if (this.from.value && this.to.value) {
+            val = this.from.value + " - " + this.to.value;
+        }
+        this.hidden.value = val;
+        var event = new Event('change');
+        this.hidden.dispatchEvent(event);
+    };
+    return FilterDate;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     bindMarkdowns();
     bindTimestamps();
@@ -913,6 +939,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindForm();
     bindImageViews();
     bindFlashMessages();
+    bindFilter();
 });
 function bindClickAndStay() {
     var els = document.getElementsByName("_submit_and_stay");

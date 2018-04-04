@@ -446,6 +446,8 @@ func (resource *Resource) ResourceActionsButtonData(user *User, admin *Admin) []
 	return ret
 }
 
+//TODO: remove this, it returns wrong buttons
+//use getItemNavigation
 func (admin *Admin) getListItemActions(user User, id int64, resource Resource) listItemActions {
 	ret := listItemActions{}
 
@@ -494,13 +496,6 @@ func (admin *Admin) getListItemActions(user User, id int64, resource Resource) l
 		if resource.StructCache.OrderColumnName != "" {
 			ret.ShowOrderButton = true
 		}
-	}
-
-	if resource.CanExport {
-		ret.MenuButtons = append(ret.MenuButtons, ButtonData{
-			Name: messages.Messages.Get(user.Locale, "admin_export"),
-			Url:  prefix + "/export",
-		})
 	}
 
 	for _, v := range resource.resourceItemActions {

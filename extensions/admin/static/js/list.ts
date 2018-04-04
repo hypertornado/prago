@@ -104,7 +104,7 @@ class List {
         }
         var el = <HTMLDivElement>e.currentTarget;
         var url = el.getAttribute("data-url");
-        window.location = url;
+        window.location.href = url;
       })
     }
   }
@@ -186,6 +186,7 @@ class List {
   }
 
   inputListener(e: any) {
+    console.log("CHangeee");
     if (e.keyCode == 9 || e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
       return;
     }

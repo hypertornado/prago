@@ -137,6 +137,11 @@ func (sf *structField) filterLayout() string {
 	if sf.Typ.Kind() == reflect.Bool {
 		return "filter_layout_boolean"
 	}
+
+	if sf.Typ == reflect.TypeOf(time.Now()) {
+		return "filter_layout_date"
+	}
+
 	return ""
 }
 
@@ -154,19 +159,31 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 			v = "%" + v + "%"
 			k = strings.Replace(k, "`", "", -1)
 			str := fmt.Sprintf("`%s` LIKE ?", k)
-			q = q.Where(str, v)
+			q.Where(str, v)
 		case "filter_layout_number", "filter_layout_relation":
 			v = strings.Trim(v, " ")
 			numVal, err := strconv.Atoi(v)
 			if err == nil {
-				q = q.WhereIs(k, numVal)
+				q.WhereIs(k, numVal)
 			}
 		case "filter_layout_boolean":
 			switch v {
 			case "true":
-				q = q.WhereIs(k, true)
+				q.WhereIs(k, true)
 			case "false":
-				q = q.WhereIs(k, false)
+				q.WhereIs(k, false)
+			}
+		case "filter_layout_date":
+			fields := strings.Split(v, " - ")
+			k = strings.Replace(k, "`", "", -1)
+			if len(fields) == 2 {
+				var str string
+
+				str = fmt.Sprintf("`%s` >= ?", k)
+				q.Where(str, fields[0])
+
+				str = fmt.Sprintf("`%s` <= ?", k)
+				q.Where(str, fields[1])
 			}
 		}
 	}

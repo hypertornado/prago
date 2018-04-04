@@ -20,7 +20,7 @@ const adminTemplates = `
       {{end}}
     </select>
     <label class="form_label">
-      <input type="checkbox" name="_field" value="_desc"{{if .DefaultOrderDesc}} checked{{end}}>
+      <input type="checkbox" name="_desc" {{if .DefaultOrderDesc}} checked{{end}}>
       <span class="form_label_text-inline">Descending order</span>
     </label>
 
@@ -29,10 +29,14 @@ const adminTemplates = `
 
     <h2>Filter</h2>
     {{range $field := .Fields}}
-      <label class="form_label">
-        <span class="form_label_text">{{$field.NameHuman}}</span>
-        <input name="{{$field.ColumnName}}" class="input">
-      </label>
+      {{if $field.Layout}}
+        <label class="form_label">
+          <span class="form_label_text">{{$field.NameHuman}}</span>
+          <div>
+            {{tmpl $field.Layout $field}}
+          </div>
+        </label>
+      {{end}}
     {{end}}
 
     <input type="submit" class="btn">
@@ -424,25 +428,36 @@ const adminTemplates = `
 {{end}}
 
 {{define "filter_layout_text"}}
-  <input class="input input-small admin_table_filter_item" data-typ="{{.ColumnName}}">
+  <input class="input input-small admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
 {{end}}
 
 {{define "filter_layout_relation"}}
-  <select class="input input-small admin_table_filter_item admin_table_filter_item-relations" data-typ="{{.ColumnName}}">
+  <select class="input input-small admin_table_filter_item admin_table_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <option value="" selected=""></option>
   </select>
 {{end}}
 
 {{define "filter_layout_number"}}
-  <input class="input input-small admin_table_filter_item" data-typ="{{.ColumnName}}">
+  <input class="input input-small admin_table_filter_item" type="number" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
 {{end}}
 
 {{define "filter_layout_boolean"}}
-  <select class="input input-small admin_table_filter_item" data-typ="{{.ColumnName}}">
+  <select class="input input-small admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <option value=""></option>
     <option value="true">✅</option>
     <option value="false">-</option>
   </select>
+{{end}}
+
+{{define "filter_layout_date"}}
+  <div class="admin_filter_layout_date">
+    <input class="admin_table_filter_item admin_filter_layout_date_value" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+    <div class="admin_filter_layout_date_content">
+      <input type="date" class="input input-small admin_filter_layout_date_from">
+      <div class="admin_filter_layout_date_divider">–</div>
+      <input type="date" class="input input-small admin_filter_layout_date_to">
+    </div>
+  </div>
 {{end}}
 
 {{define "admin_list_cells"}}
@@ -1538,7 +1553,7 @@ progress {
   position: absolute;
   right: -1px;
   border-radius: 3px;
-  top: 21px;
+  top: 19px;
   box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
   z-index: 2;
   flex-flow: column;
@@ -1564,6 +1579,16 @@ progress {
 }
 .btn-more_content_item:hover {
   background-color: rgba(64, 120, 192, 0.1);
+}
+.admin_filter_layout_date_value {
+  width: 10px;
+  height: 10px;
+}
+.admin_filter_layout_date_content {
+  display: flex;
+}
+.admin_filter_layout_date_divider {
+  padding: 0px 5px;
 }
 .admin_header {
   background: white;
@@ -1933,7 +1958,7 @@ var List = (function () {
                 }
                 var el = e.currentTarget;
                 var url = el.getAttribute("data-url");
-                window.location = url;
+                window.location.href = url;
             });
         }
     };
@@ -2547,6 +2572,29 @@ var Form = (function () {
     }
     return Form;
 }());
+function bindFilter() {
+    var els = document.querySelectorAll(".admin_filter_layout_date");
+    for (var i = 0; i < els.length; i++) {
+        new FilterDate(els[i]);
+    }
+}
+var FilterDate = (function () {
+    function FilterDate(el) {
+        this.hidden = el.querySelector(".admin_table_filter_item");
+        this.from = el.querySelector(".admin_filter_layout_date_from");
+        this.to = el.querySelector(".admin_filter_layout_date_to");
+        this.from.addEventListener("input", this.changed.bind(this));
+        this.to.addEventListener("input", this.changed.bind(this));
+    }
+    FilterDate.prototype.changed = function () {
+        var val = "";
+        if (this.from.value && this.to.value) {
+            val = this.from.value + " - " + this.to.value;
+        }
+        this.hidden.value = val;
+    };
+    return FilterDate;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     bindMarkdowns();
     bindTimestamps();
@@ -2558,6 +2606,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindForm();
     bindImageViews();
     bindFlashMessages();
+    bindFilter();
 });
 function bindClickAndStay() {
     var els = document.getElementsByName("_submit_and_stay");

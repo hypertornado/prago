@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hypertornado/prago"
 	"reflect"
+	"strconv"
 	"time"
 )
 
@@ -19,6 +20,7 @@ type exportFormData struct {
 type exportFormDataField struct {
 	NameHuman  string
 	ColumnName string
+	Layout     string
 }
 
 func (resource Resource) getExportFormData(user User, visible structFieldFilter) exportFormData {
@@ -31,6 +33,7 @@ func (resource Resource) getExportFormData(user User, visible structFieldFilter)
 		field := exportFormDataField{
 			NameHuman:  v.humanName(user.Locale),
 			ColumnName: v.ColumnName,
+			Layout:     v.filterLayout(),
 		}
 		ret.Fields = append(ret.Fields, field)
 	}
@@ -62,8 +65,18 @@ func exportHandler(admin Admin, resource Resource, request prago.Request, user U
 	}
 
 	q := admin.Query()
-	//orderField := request.Params().Get("_order")
-	q = resource.addFilterToQuery(q, filter)
+	orderField := request.Request().PostForm.Get("_order")
+	if request.Request().PostForm.Get("_desc") == "on" {
+		q.OrderDesc(orderField)
+	} else {
+		q.Order(orderField)
+	}
+	resource.addFilterToQuery(q, filter)
+
+	limit, err := strconv.Atoi(request.Request().PostForm.Get("_limit"))
+	if err == nil && limit >= 0 {
+		q.Limit(int64(limit))
+	}
 
 	var rowItems interface{}
 	resource.newItems(&rowItems)
@@ -78,7 +91,7 @@ func exportHandler(admin Admin, resource Resource, request prago.Request, user U
 			header = append(header, field.Name)
 		}
 	}
-	err := writer.Write(header)
+	err = writer.Write(header)
 	if err != nil {
 		panic(err)
 	}

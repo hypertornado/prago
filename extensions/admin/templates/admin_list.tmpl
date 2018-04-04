@@ -35,25 +35,36 @@
 {{end}}
 
 {{define "filter_layout_text"}}
-  <input class="input input-small admin_table_filter_item" data-typ="{{.ColumnName}}">
+  <input class="input input-small admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
 {{end}}
 
 {{define "filter_layout_relation"}}
-  <select class="input input-small admin_table_filter_item admin_table_filter_item-relations" data-typ="{{.ColumnName}}">
+  <select class="input input-small admin_table_filter_item admin_table_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <option value="" selected=""></option>
   </select>
 {{end}}
 
 {{define "filter_layout_number"}}
-  <input class="input input-small admin_table_filter_item" data-typ="{{.ColumnName}}">
+  <input class="input input-small admin_table_filter_item" type="number" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
 {{end}}
 
 {{define "filter_layout_boolean"}}
-  <select class="input input-small admin_table_filter_item" data-typ="{{.ColumnName}}">
+  <select class="input input-small admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <option value=""></option>
     <option value="true">✅</option>
     <option value="false">-</option>
   </select>
+{{end}}
+
+{{define "filter_layout_date"}}
+  <div class="admin_filter_layout_date">
+    <input class="admin_table_filter_item admin_filter_layout_date_value" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+    <div class="admin_filter_layout_date_content">
+      <input type="date" class="input input-small admin_filter_layout_date_from">
+      <div class="admin_filter_layout_date_divider">–</div>
+      <input type="date" class="input input-small admin_filter_layout_date_to">
+    </div>
+  </div>
 {{end}}
 
 {{define "admin_list_cells"}}

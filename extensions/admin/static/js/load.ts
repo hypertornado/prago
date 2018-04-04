@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindForm();
   bindImageViews();
   bindFlashMessages();
+  bindFilter();
 });
 
 function bindClickAndStay() {

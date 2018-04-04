@@ -22,6 +22,7 @@
         "js/places.ts",
         "js/delete-action.ts",
         "js/form.ts",
+        "js/filter.ts",
         "js/load.ts"
     ]
 }
