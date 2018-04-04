@@ -1,13 +1,19 @@
 package admin
 
 import (
+	"encoding/csv"
 	"fmt"
 	"github.com/hypertornado/prago"
+	"reflect"
+	"time"
 )
 
 type exportFormData struct {
 	Formats []string
 	Fields  []exportFormDataField
+
+	DefaultOrderColumnName string
+	DefaultOrderDesc       bool
 }
 
 type exportFormDataField struct {
@@ -15,17 +21,17 @@ type exportFormDataField struct {
 	ColumnName string
 }
 
-func (cache structCache) getExportFormData(user User, visible structFieldFilter) exportFormData {
+func (resource Resource) getExportFormData(user User, visible structFieldFilter) exportFormData {
 	ret := exportFormData{
-		Formats: []string{"csv"},
+		DefaultOrderColumnName: resource.OrderByColumn,
+		DefaultOrderDesc:       resource.OrderDesc,
 	}
 
-	for _, v := range cache.fieldArrays {
+	for _, v := range resource.StructCache.fieldArrays {
 		field := exportFormDataField{
 			NameHuman:  v.humanName(user.Locale),
 			ColumnName: v.ColumnName,
 		}
-
 		ret.Fields = append(ret.Fields, field)
 	}
 
@@ -33,16 +39,7 @@ func (cache structCache) getExportFormData(user User, visible structFieldFilter)
 }
 
 func exportHandler(admin Admin, resource Resource, request prago.Request, user User) {
-
-	if request.Params().Get("_format") == "csv" {
-		exportHandlerCSV(admin, resource, request, user)
-		return
-	}
-	panic("wrong format of export")
-}
-
-func exportHandlerCSV(admin Admin, resource Resource, request prago.Request, user User) {
-	formData := resource.StructCache.getExportFormData(user, resource.VisibilityFilter)
+	formData := resource.getExportFormData(user, resource.VisibilityFilter)
 
 	allowedFields := map[string]bool{}
 	for _, v := range formData.Fields {
@@ -50,10 +47,12 @@ func exportHandlerCSV(admin Admin, resource Resource, request prago.Request, use
 	}
 
 	usedFields := []string{}
+	usedFieldsMap := map[string]bool{}
 	fields := request.Request().PostForm["_field"]
 	for _, v := range fields {
 		if allowedFields[v] {
 			usedFields = append(usedFields, v)
+			usedFieldsMap[v] = true
 		}
 	}
 
@@ -63,12 +62,63 @@ func exportHandlerCSV(admin Admin, resource Resource, request prago.Request, use
 	}
 
 	q := admin.Query()
+	//orderField := request.Params().Get("_order")
 	q = resource.addFilterToQuery(q, filter)
 
 	var rowItems interface{}
 	resource.newItems(&rowItems)
 	q.Get(rowItems)
 
-	fmt.Println(filter)
-	panic("EXPOOOOORT")
+	writer := csv.NewWriter(request.Response())
+	request.Response().Header().Set("Content-Type", "text/csv")
+
+	header := []string{}
+	for _, field := range resource.StructCache.fieldArrays {
+		if usedFieldsMap[field.ColumnName] {
+			header = append(header, field.Name)
+		}
+	}
+	err := writer.Write(header)
+	if err != nil {
+		panic(err)
+	}
+
+	val := reflect.ValueOf(rowItems).Elem()
+	for i := 0; i < val.Len(); i++ {
+		itemVal := val.Index(i).Elem()
+		row := []string{}
+		for _, field := range resource.StructCache.fieldArrays {
+			if usedFieldsMap[field.ColumnName] {
+				fieldVal := itemVal.FieldByName(field.Name)
+				row = append(row, exportFieldToString(fieldVal))
+			}
+		}
+
+		err := writer.Write(row)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	writer.Flush()
+	request.SetProcessed()
+}
+
+func exportFieldToString(value reflect.Value) string {
+	switch value.Kind() {
+	case reflect.String:
+		return value.String()
+	case reflect.Int, reflect.Int32, reflect.Int64:
+		return fmt.Sprintf("%v", value.Int())
+	case reflect.Float32, reflect.Float64:
+		return fmt.Sprintf("%v", value.Float())
+	case reflect.Bool:
+		return fmt.Sprintf("%v", value.Bool())
+	case reflect.Struct:
+		if value.Type() == reflect.TypeOf(time.Now()) {
+			tm := value.Interface().(time.Time)
+			return tm.Format("2006-01-02 15:04")
+		}
+	}
+	return "<undefined export>"
 }

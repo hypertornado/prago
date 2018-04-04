@@ -12,18 +12,22 @@ const adminTemplates = `
       </label>
     {{end}}
 
-    <h2>Format</h2>
-    <select name="_format" class="input">
-    {{range $format := .Formats}}
-      <option value="{{$format}}">{{$format}}</option>
-    {{end}}
+    <h2>Order By</h2>
+    <select name="_order" class="input">
+      {{$default := .DefaultOrderColumnName}}
+      {{range $field := .Fields}}
+        <option value="{{$field.ColumnName}}"{{if eq $field.ColumnName $default}} selected{{end}}>{{$field.NameHuman}}</option>
+      {{end}}
     </select>
-
+    <label class="form_label">
+      <input type="checkbox" name="_field" value="_desc"{{if .DefaultOrderDesc}} checked{{end}}>
+      <span class="form_label_text-inline">Descending order</span>
+    </label>
 
     <h2>Limit</h2>
     <input name="_limit" type="number" class="input">
 
-    <h2>Fields</h2>
+    <h2>Filter</h2>
     {{range $field := .Fields}}
       <label class="form_label">
         <span class="form_label_text">{{$field.NameHuman}}</span>
@@ -32,7 +36,6 @@ const adminTemplates = `
     {{end}}
 
     <input type="submit" class="btn">
-
   </form>
 {{end}}
 {{define "admin_flash"}}
@@ -1034,7 +1037,6 @@ a:hover {
   border-radius: 2px;
   max-width: 600px;
   width: 100%;
-  overflow-x: auto;
 }
 .admin_box-wide {
   max-width: none;
@@ -1046,7 +1048,7 @@ a:hover {
   padding-bottom: 0px;
 }
 .admin_box_content {
-  border: 1px solid red;
+  overflow-x: auto;
 }
 .btn {
   display: inline-block;
@@ -1260,6 +1262,7 @@ select.admin_table_filter_item {
   left: 0px;
   right: 0px;
   z-index: 10;
+  pointer-events: none;
 }
 @keyframes example {
   from {
@@ -1270,6 +1273,7 @@ select.admin_table_filter_item {
   }
 }
 .flash_message {
+  pointer-events: auto;
   font-weight: bold;
   color: #444;
   display: inline-block;
@@ -1282,6 +1286,7 @@ select.admin_table_filter_item {
   background-color: #FFD800;
   display: inline-flex;
   align-items: center;
+  cursor: default;
 }
 .flash_message_content {
   border-radius: 3px;
@@ -2568,9 +2573,10 @@ function bindFlashMessages() {
     for (var i = 0; i < messages.length; i++) {
         var message = messages[i];
         message.addEventListener("click", function (e) {
-            var target = e.currentTarget;
+            var target = e.target;
             if (target.classList.contains("flash_message_close")) {
-                target.classList.add("hidden");
+                var current = e.currentTarget;
+                current.classList.add("hidden");
             }
         });
     }

@@ -256,7 +256,7 @@ var actionExport = CreateNavigationalAction(
 	messages.Messages.GetNameFunction("admin_export"),
 	"admin_export",
 	func(admin Admin, resource Resource, request prago.Request, user User) interface{} {
-		return resource.StructCache.getExportFormData(user, resource.VisibilityFilter)
+		return resource.getExportFormData(user, resource.VisibilityFilter)
 	},
 )
 
