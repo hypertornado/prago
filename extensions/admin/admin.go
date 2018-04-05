@@ -89,8 +89,7 @@ func (a *Admin) AddAction(action Action) {
 	a.rootActions = append(a.rootActions, action)
 }
 
-//UnsafeDropTables drop all tables, useful mainly in tests
-func (a *Admin) UnsafeDropTables() error {
+func (a *Admin) unsafeDropTables() error {
 	for _, resource := range a.Resources {
 		if resource.HasModel {
 			err := resource.unsafeDropTable()
@@ -215,7 +214,16 @@ func (a *Admin) GetDB() *sql.DB {
 //Init admin middleware
 func (a *Admin) Init(app *prago.App) error {
 	a.App = app
-	a.db = app.Data()["db"].(*sql.DB)
+
+	var err error
+	a.db, err = connectMysql(
+		app.Config.GetString("dbUser"),
+		app.Config.GetString("dbPassword"),
+		app.Config.GetString("dbName"),
+	)
+	if err != nil {
+		return err
+	}
 
 	a.AdminAccessController = app.MainController().SubController()
 	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
@@ -225,14 +233,14 @@ func (a *Admin) Init(app *prago.App) error {
 		request.SetData("css", a.css)
 	})
 
-	a.AdminController = a.AdminAccessController.SubController()
-
-	a.AdminController.AddAroundAction(
+	a.AdminAccessController.AddAroundAction(
 		createSessionAroundAction(
 			app.GetAppName(),
 			app.Config.GetString("random"),
 		),
 	)
+
+	a.AdminController = a.AdminAccessController.SubController()
 
 	googleApiKey := app.Config.GetStringWithFallback("google", "")
 
@@ -245,8 +253,6 @@ func (a *Admin) Init(app *prago.App) error {
 	bindListAPI(a)
 	bindListResourceAPI(a)
 	bindListResourceItemAPI(a)
-
-	var err error
 
 	a.sendgridClient = sendgrid.NewSendGridClientWithApiKey(app.Config.GetStringWithFallback("sendgridApi", ""))
 	a.noReplyEmail = app.Config.GetStringWithFallback("noReplyEmail", "")
@@ -352,7 +358,6 @@ func (a *Admin) initRootActions() {
 
 func (a *Admin) bindAdminCommand(app *prago.App) error {
 	adminCommand := app.CreateCommand("admin", "Admin tasks (migrate|drop|thumbnails)")
-
 	adminSubcommand := adminCommand.Arg("admincommand", "").Required().String()
 
 	app.AddCommand(adminCommand, func(app *prago.App) error {
@@ -367,7 +372,7 @@ func (a *Admin) bindAdminCommand(app *prago.App) error {
 		case "drop":
 			if utils.ConsoleQuestion("Really want to drop table?") {
 				app.Log().Println("Dropping table")
-				return a.UnsafeDropTables()
+				return a.unsafeDropTables()
 			}
 			return nil
 		default:
@@ -489,7 +494,7 @@ func bindDBBackupCron(app *prago.App) {
 }
 
 //NewAdminMockup creates mockup of admin for testing purposes
-func NewAdminMockup(user, password, dbName string) (*Admin, error) {
+/*func NewAdminMockup(user, password, dbName string) (*Admin, error) {
 	db, err := extensions.ConnectMysql(user, password, dbName)
 	if err != nil {
 		return nil, err
@@ -497,7 +502,7 @@ func NewAdminMockup(user, password, dbName string) (*Admin, error) {
 	admin := NewAdmin("test", "test")
 	admin.db = db
 	return admin, nil
-}
+}*/
 
 func columnName(fieldName string) string {
 	return utils.PrettyURL(fieldName)

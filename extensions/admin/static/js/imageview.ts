@@ -26,7 +26,6 @@ class ImageView {
   addImage(id: string) {
     var container = document.createElement("a");
     container.classList.add("admin_images_image");
-    container.setAttribute("target", "_blank");
     container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
 
     var img = document.createElement("img");

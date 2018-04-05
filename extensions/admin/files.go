@@ -403,7 +403,7 @@ func bindImageAPI(a *Admin, fileDownloadPath string) {
 			panic(err)
 		}
 		prago.Redirect(request,
-			fmt.Sprintf("%s/file/%d/edit", a.Prefix, image.ID),
+			fmt.Sprintf("%s/file/%d", a.Prefix, image.ID),
 		)
 	})
 

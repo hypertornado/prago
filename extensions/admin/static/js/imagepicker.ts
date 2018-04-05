@@ -27,6 +27,15 @@ class ImagePicker {
 
     var ids = this.hiddenInput.value.split(",");
 
+    this.el.addEventListener("click", (e) => {
+      if (e.altKey) {
+        var ids = window.prompt("IDs of images", this.hiddenInput.value);
+        this.hiddenInput.value = ids;
+        e.preventDefault()
+        return false;
+      }
+    })
+
     this.fileInput.addEventListener("dragenter", (ev) => {
       this.fileInput.classList.add("admin_images_fileinput-droparea");
     });

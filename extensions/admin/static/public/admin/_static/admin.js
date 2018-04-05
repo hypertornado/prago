@@ -42,7 +42,6 @@ var ImageView = (function () {
     ImageView.prototype.addImage = function (id) {
         var container = document.createElement("a");
         container.classList.add("admin_images_image");
-        container.setAttribute("target", "_blank");
         container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
         var img = document.createElement("img");
         img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
@@ -70,6 +69,14 @@ var ImagePicker = (function () {
         this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
         this.hideProgress();
         var ids = this.hiddenInput.value.split(",");
+        this.el.addEventListener("click", function (e) {
+            if (e.altKey) {
+                var ids = window.prompt("IDs of images", _this.hiddenInput.value);
+                _this.hiddenInput.value = ids;
+                e.preventDefault();
+                return false;
+            }
+        });
         this.fileInput.addEventListener("dragenter", function (ev) {
             _this.fileInput.classList.add("admin_images_fileinput-droparea");
         });

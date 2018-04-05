@@ -423,8 +423,8 @@ func createNavigationalHandler(action, templateName string, dataGenerator func(A
 
 func CreateNavigationalAction(url string, name func(string) string, templateName string, dataGenerator func(Admin, Resource, prago.Request, User) interface{}) Action {
 	return Action{
-		Url:     url,
 		Name:    name,
+		Url:     url,
 		Handler: createNavigationalHandler(url, templateName, dataGenerator),
 	}
 }
@@ -446,8 +446,9 @@ func createAdminHandler(action, templateName string, dataGenerator func(Admin, R
 
 func CreateAdminAction(url string, name func(string) string, templateName string, dataGenerator func(Admin, Resource, prago.Request, User) interface{}) Action {
 	return Action{
-		Url:     url,
 		Name:    name,
+		Auth:    AuthenticateAdmin,
+		Url:     url,
 		Handler: createAdminHandler(url, templateName, dataGenerator),
 	}
 }
