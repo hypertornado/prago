@@ -82,7 +82,9 @@ const adminTemplates = `
           {{end}}
         </div>
       {{end}}
-      {{tmpl $item.SubTemplate $item}}
+      <div>
+        {{tmpl $item.SubTemplate $item}}
+      </div>
     </label>
   {{end}}
 {{end}}
@@ -147,7 +149,7 @@ const adminTemplates = `
     {{range $item := .}}
       <tr>
         <td>
-          <b>{{$item.Name}}</b> ({{$item.Count}}x)
+          <b><a href="{{$item.URL}}">{{$item.Name}}</a></b> ({{$item.Count}}x)
         </td>
         <td>
           <div class="btngroup">
@@ -1190,6 +1192,11 @@ select.input {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+  padding-right: 24px;
+  background: #fff url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAUCAMAAACzvE1FAAAADFBMVEUzMzMzMzMzMzMzMzMKAG/3AAAAA3RSTlMAf4C/aSLHAAAAPElEQVR42q3NMQ4AIAgEQTn//2cLdRKppSGzBYwzVXvznNWs8C58CiussPJj8h6NwgorrKRdTvuV9v16Afn0AYFOB7aYAAAAAElFTkSuQmCC") no-repeat right 8px center;
+  background-size: 8px 10px;
+  width: auto;
+  max-width: 100%;
 }
 select.admin_table_filter_item {
   width: auto;

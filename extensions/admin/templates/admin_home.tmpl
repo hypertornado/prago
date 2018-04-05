@@ -3,7 +3,7 @@
     {{range $item := .}}
       <tr>
         <td>
-          <b>{{$item.Name}}</b> ({{$item.Count}}x)
+          <b><a href="{{$item.URL}}">{{$item.Name}}</a></b> ({{$item.Count}}x)
         </td>
         <td>
           <div class="btngroup">
