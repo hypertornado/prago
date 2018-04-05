@@ -4,7 +4,7 @@ import (
 	"github.com/hypertornado/prago"
 )
 
-type HomeData struct {
+type homeData struct {
 	Name string
 	URL  string
 
@@ -13,13 +13,13 @@ type HomeData struct {
 	Actions []ButtonData
 }
 
-func (a *Admin) GetHomeData(request prago.Request) (ret []HomeData) {
+func (a *Admin) getHomeData(request prago.Request) (ret []homeData) {
 	user := GetUser(request)
 	locale := GetLocale(request)
 
 	for _, resource := range a.Resources {
 		if resource.HasView && resource.Authenticate(user) {
-			item := HomeData{
+			item := homeData{
 				Name: resource.Name(locale),
 				URL:  a.Prefix + "/" + resource.ID,
 			}

@@ -1581,8 +1581,11 @@ progress {
   background-color: rgba(64, 120, 192, 0.1);
 }
 .admin_filter_layout_date_value {
-  width: 10px;
-  height: 10px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  margin: 0px;
+  position: absolute;
 }
 .admin_filter_layout_date_content {
   display: flex;
@@ -1712,7 +1715,6 @@ var ImageView = (function () {
     ImageView.prototype.addImage = function (id) {
         var container = document.createElement("a");
         container.classList.add("admin_images_image");
-        container.setAttribute("target", "_blank");
         container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
         var img = document.createElement("img");
         img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
@@ -1740,6 +1742,14 @@ var ImagePicker = (function () {
         this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
         this.hideProgress();
         var ids = this.hiddenInput.value.split(",");
+        this.el.addEventListener("click", function (e) {
+            if (e.altKey) {
+                var ids = window.prompt("IDs of images", _this.hiddenInput.value);
+                _this.hiddenInput.value = ids;
+                e.preventDefault();
+                return false;
+            }
+        });
         this.fileInput.addEventListener("dragenter", function (ev) {
             _this.fileInput.classList.add("admin_images_fileinput-droparea");
         });
@@ -2037,6 +2047,7 @@ var List = (function () {
         this.inputPeriodicListener();
     };
     List.prototype.inputListener = function (e) {
+        console.log("CHangeee");
         if (e.keyCode == 9 || e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
             return;
         }
@@ -2592,6 +2603,8 @@ var FilterDate = (function () {
             val = this.from.value + " - " + this.to.value;
         }
         this.hidden.value = val;
+        var event = new Event('change');
+        this.hidden.dispatchEvent(event);
     };
     return FilterDate;
 }());

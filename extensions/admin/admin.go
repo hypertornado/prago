@@ -160,40 +160,40 @@ func GetUser(request prago.Request) *User {
 	return request.GetData("currentuser").(*User)
 }
 
-type AdminHeaderData struct {
+type adminHeaderData struct {
 	Name        string
 	Language    string
 	Logo        string
 	Background  string
 	UrlPrefix   string
 	HomepageUrl string
-	Items       []AdminHeaderItem
+	Items       []adminHeaderItem
 }
 
-type AdminHeaderItem struct {
+type adminHeaderItem struct {
 	Name string
 	ID   string
 	Url  string
 }
 
-func (a *Admin) getHeaderData(request prago.Request) (headerData *AdminHeaderData) {
+func (a *Admin) getHeaderData(request prago.Request) (headerData *adminHeaderData) {
 
 	user := GetUser(request)
 	locale := GetLocale(request)
 
-	headerData = &AdminHeaderData{
+	headerData = &adminHeaderData{
 		Name:        a.AppName,
 		Language:    locale,
 		Logo:        a.Logo,
 		Background:  a.Background,
 		UrlPrefix:   a.Prefix,
 		HomepageUrl: request.App().Config.GetStringWithFallback("baseUrl", request.Request().Host),
-		Items:       []AdminHeaderItem{},
+		Items:       []adminHeaderItem{},
 	}
 
 	for _, resource := range a.Resources {
 		if resource.HasView && resource.Authenticate(user) {
-			headerData.Items = append(headerData.Items, AdminHeaderItem{
+			headerData.Items = append(headerData.Items, adminHeaderItem{
 				Name: resource.Name(locale),
 				ID:   resource.ID,
 				Url:  a.Prefix + "/" + resource.ID,
@@ -312,7 +312,7 @@ func (a *Admin) Init(app *prago.App) error {
 		renderNavigationPage(request, AdminNavigationPage{
 			Navigation:   a.getAdminNavigation(*GetUser(request), ""),
 			PageTemplate: "admin_home_navigation",
-			PageData:     a.GetHomeData(request),
+			PageData:     a.getHomeData(request),
 		})
 	})
 
@@ -431,6 +431,10 @@ func (a *Admin) initTemplates(app *prago.App) error {
 
 //GetURL returns url for resource with given suffix
 func (a *Admin) GetURL(resource *Resource, suffix string) string {
+	return a.getURL(resource, suffix)
+}
+
+func (a *Admin) getURL(resource *Resource, suffix string) string {
 	ret := a.Prefix + "/" + resource.ID
 	if len(suffix) > 0 {
 		ret += "/" + suffix
@@ -438,7 +442,7 @@ func (a *Admin) GetURL(resource *Resource, suffix string) string {
 	return ret
 }
 
-func (a *Admin) GetItemURL(resource Resource, item interface{}, suffix string) string {
+func (a *Admin) getItemURL(resource Resource, item interface{}, suffix string) string {
 	ret := a.Prefix + "/" + resource.ID + "/" + fmt.Sprintf("%d", getItemID(item))
 	if len(suffix) > 0 {
 		ret += "/" + suffix

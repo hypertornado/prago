@@ -101,7 +101,7 @@ var actionCreate = Action{
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
-		prago.Redirect(request, admin.GetItemURL(resource, item, ""))
+		prago.Redirect(request, admin.getItemURL(resource, item, ""))
 	},
 }
 
@@ -216,7 +216,7 @@ var actionUpdate = Action{
 		if request.Params().Get("_submit_and_stay_clicked") == "true" {
 			prago.Redirect(request, request.Request().URL.RequestURI())
 		} else {
-			prago.Redirect(request, admin.GetURL(&resource, fmt.Sprintf("%d", id)))
+			prago.Redirect(request, admin.getURL(&resource, fmt.Sprintf("%d", id)))
 		}
 
 	},
@@ -297,7 +297,7 @@ var actionDoDelete = Action{
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_deleted"))
-		prago.Redirect(request, admin.GetURL(&resource, ""))
+		prago.Redirect(request, admin.getURL(&resource, ""))
 	},
 }
 
@@ -347,7 +347,7 @@ func bindAction(a *Admin, resource *Resource, action Action, isItemAction bool) 
 				url += "/" + action.Url
 			}
 		} else {
-			url = a.GetURL(resource, action.Url)
+			url = a.getURL(resource, action.Url)
 		}
 	}
 
@@ -451,7 +451,7 @@ func (admin *Admin) getListItemActions(user User, item interface{}, id int64, re
 
 	ret.VisibleButtons = append(ret.VisibleButtons, ButtonData{
 		Name: messages.Messages.Get(user.Locale, "admin_view"),
-		Url:  admin.GetURL(&resource, fmt.Sprintf("%d", id)),
+		Url:  admin.getURL(&resource, fmt.Sprintf("%d", id)),
 	})
 
 	navigation := admin.getItemNavigation(resource, user, item, int(id), "")

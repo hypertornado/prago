@@ -62,7 +62,7 @@ func (admin *Admin) getHistory(resource *Resource, user int64, itemID int64) His
 			ActivityURL: activityURL,
 			ActionType:  v.ActionType,
 			ItemName:    itemName,
-			ItemURL:     admin.GetURL(resource, fmt.Sprintf("%d", v.ItemID)),
+			ItemURL:     admin.getURL(resource, fmt.Sprintf("%d", v.ItemID)),
 			UserName:    username,
 			UserURL:     userurl,
 			CreatedAt:   v.CreatedAt.Format("2006-01-02 15:04:05"),

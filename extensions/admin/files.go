@@ -132,8 +132,6 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 	initCDN(a)
 
 	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
-		fmt.Println(request.Request().Method)
-		fmt.Println(request.Request().URL.Path)
 		if request.Request().Method == "POST" && strings.HasSuffix(request.Request().URL.Path, "/delete") {
 			idStr := request.Params().Get("id")
 			id, err := strconv.Atoi(idStr)
@@ -241,7 +239,7 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 
 	bindImageAPI(a, fileDownloadPath)
 
-	resource.ResourceController.Post(a.GetURL(resource, ""), func(request prago.Request) {
+	resource.ResourceController.Post(a.getURL(resource, ""), func(request prago.Request) {
 		ValidateCSRF(request)
 
 		multipartFiles := request.Request().MultipartForm.File["file"]
@@ -261,7 +259,7 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 
-	resource.ResourceController.Get(a.GetURL(resource, ":id/edit"), func(request prago.Request) {
+	resource.ResourceController.Get(a.getURL(resource, ":id/edit"), func(request prago.Request) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
 

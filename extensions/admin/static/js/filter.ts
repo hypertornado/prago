@@ -30,9 +30,6 @@ class FilterDate {
 
     var event = new Event('change');
     this.hidden.dispatchEvent(event);
-
-    //this.hidden.value = val;
-    //this.hidden.onchange();
   }
 
 }

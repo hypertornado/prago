@@ -263,7 +263,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		prago.Render(request, 200, "admin_layout_nologin")*/
 	}
 
-	a.AdminAccessController.Get(a.GetURL(resource, "confirm_email"), func(request prago.Request) {
+	a.AdminAccessController.Get(a.getURL(resource, "confirm_email"), func(request prago.Request) {
 		email := request.Params().Get("email")
 		token := request.Params().Get("token")
 
@@ -315,13 +315,13 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		prago.Render(request, 200, "admin_layout_nologin")*/
 	}
 
-	a.AdminAccessController.Get(a.GetURL(resource, "forgot"), func(request prago.Request) {
+	a.AdminAccessController.Get(a.getURL(resource, "forgot"), func(request prago.Request) {
 		locale := GetLocale(request)
 		form := forgotForm(locale)
 		renderForgot(request, form, locale)
 	})
 
-	a.AdminAccessController.Post(a.GetURL(resource, "forgot"), func(request prago.Request) {
+	a.AdminAccessController.Post(a.getURL(resource, "forgot"), func(request prago.Request) {
 		email := request.Params().Get("email")
 		email = fixEmail(email)
 
@@ -396,13 +396,13 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		})
 	}
 
-	a.AdminAccessController.Get(a.GetURL(resource, "renew_password"), func(request prago.Request) {
+	a.AdminAccessController.Get(a.getURL(resource, "renew_password"), func(request prago.Request) {
 		locale := GetLocale(request)
 		form := renewPasswordForm(locale)
 		renderRenew(request, form, locale)
 	})
 
-	a.AdminAccessController.Post(a.GetURL(resource, "renew_password"), func(request prago.Request) {
+	a.AdminAccessController.Post(a.getURL(resource, "renew_password"), func(request prago.Request) {
 		locale := GetLocale(request)
 
 		form := renewPasswordForm(locale)
@@ -438,13 +438,13 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		renderLogin(request, form, locale)
 	})
 
-	a.AdminAccessController.Get(a.GetURL(resource, "login"), func(request prago.Request) {
+	a.AdminAccessController.Get(a.getURL(resource, "login"), func(request prago.Request) {
 		locale := GetLocale(request)
 		form := loginForm(locale)
 		renderLogin(request, form, locale)
 	})
 
-	a.AdminAccessController.Post(a.GetURL(resource, "login"), func(request prago.Request) {
+	a.AdminAccessController.Post(a.getURL(resource, "login"), func(request prago.Request) {
 		email := request.Params().Get("email")
 		email = fixEmail(email)
 		password := request.Params().Get("password")
@@ -531,12 +531,12 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 			prago.Render(request, 200, "admin_layout_nologin")*/
 	}
 
-	a.AdminAccessController.Get(a.GetURL(resource, "registration"), func(request prago.Request) {
+	a.AdminAccessController.Get(a.getURL(resource, "registration"), func(request prago.Request) {
 		locale := GetLocale(request)
 		renderRegistration(request, newUserForm(locale), locale)
 	})
 
-	a.AdminAccessController.Post(a.GetURL(resource, "registration"), func(request prago.Request) {
+	a.AdminAccessController.Post(a.getURL(resource, "registration"), func(request prago.Request) {
 		locale := GetLocale(request)
 
 		form := newUserForm(locale)
@@ -577,7 +577,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		if err != nil {
 			panic(err)
 		}
-		prago.Redirect(request, a.GetURL(resource, "login"))
+		prago.Redirect(request, a.getURL(resource, "login"))
 	})
 
 	settingsForm := func(locale string, user *User) *Form {
@@ -593,7 +593,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		return form
 	}
 
-	a.AdminController.Get(a.GetURL(resource, "settings"), func(request prago.Request) {
+	a.AdminController.Get(a.getURL(resource, "settings"), func(request prago.Request) {
 		user := GetUser(request)
 		form := settingsForm(GetLocale(request), user)
 		AddCSRFToken(form, request)
@@ -607,7 +607,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		})
 	})
 
-	a.AdminController.Post(a.GetURL(resource, "settings"), func(request prago.Request) {
+	a.AdminController.Post(a.getURL(resource, "settings"), func(request prago.Request) {
 		ValidateCSRF(request)
 		user := GetUser(request)
 		form := settingsForm(GetLocale(request), user)
@@ -617,7 +617,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 			prago.Must(resource.StructCache.BindData(user, request.Params(), request.Request().MultipartForm, form.getFilter()))
 			prago.Must(a.Save(user))
 			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_settings_changed"))
-			prago.Redirect(request, a.GetURL(resource, "settings"))
+			prago.Redirect(request, a.getURL(resource, "settings"))
 			return
 		}
 
@@ -661,13 +661,13 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 		})
 	}
 
-	a.AdminController.Get(a.GetURL(resource, "password"), func(request prago.Request) {
+	a.AdminController.Get(a.getURL(resource, "password"), func(request prago.Request) {
 		request.SetData("admin_header_settings_selected", true)
 		form := changePasswordForm(request)
 		renderPasswordForm(request, form)
 	})
 
-	a.AdminController.Post(a.GetURL(resource, "password"), func(request prago.Request) {
+	a.AdminController.Post(a.getURL(resource, "password"), func(request prago.Request) {
 		form := changePasswordForm(request)
 		form.BindData(request.Params())
 		form.Validate()
@@ -677,7 +677,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 			prago.Must(user.newPassword(password))
 			prago.Must(a.Save(user))
 			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_password_changed"))
-			prago.Redirect(request, a.GetURL(resource, "settings"))
+			prago.Redirect(request, a.getURL(resource, "settings"))
 		} else {
 			renderPasswordForm(request, form)
 		}

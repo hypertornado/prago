@@ -66,11 +66,13 @@ func (admin *Admin) getAdminNavigation(user User, code string) AdminItemNavigati
 	}
 
 	for _, v := range admin.rootActions {
-		tabs = append(tabs, NavigationTab{
-			Name:     v.GetName(user.Locale),
-			URL:      admin.Prefix + "/" + v.Url,
-			Selected: trueIfEqual(code, v.Url),
-		})
+		if v.Auth(&user) {
+			tabs = append(tabs, NavigationTab{
+				Name:     v.GetName(user.Locale),
+				URL:      admin.Prefix + "/" + v.Url,
+				Selected: trueIfEqual(code, v.Url),
+			})
+		}
 	}
 
 	name := messages.Messages.Get(user.Locale, "admin_admin")
@@ -100,7 +102,7 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 	tabs := []NavigationTab{
 		NavigationTab{
 			Name:     messages.Messages.Get(user.Locale, "admin_list"),
-			URL:      admin.GetURL(&resource, ""),
+			URL:      admin.getURL(&resource, ""),
 			Selected: trueIfEqual(code, ""),
 		},
 	}
@@ -108,15 +110,15 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 	if resource.CanCreate {
 		tabs = append(tabs, NavigationTab{
 			Name:     messages.Messages.Get(user.Locale, "admin_new"),
-			URL:      admin.GetURL(&resource, "new"),
+			URL:      admin.getURL(&resource, "new"),
 			Selected: trueIfEqual(code, "new"),
 		})
 	}
 
-	if resource.ActivityLog {
+	if resource.CanExport {
 		tabs = append(tabs, NavigationTab{
 			Name:     messages.Messages.Get(user.Locale, "admin_export"),
-			URL:      admin.GetURL(&resource, "export"),
+			URL:      admin.getURL(&resource, "export"),
 			Selected: trueIfEqual(code, "export"),
 		})
 	}
@@ -124,7 +126,7 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 	if resource.ActivityLog {
 		tabs = append(tabs, NavigationTab{
 			Name:     messages.Messages.Get(user.Locale, "admin_history"),
-			URL:      admin.GetURL(&resource, "history"),
+			URL:      admin.getURL(&resource, "history"),
 			Selected: trueIfEqual(code, "history"),
 		})
 	}
@@ -141,7 +143,7 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 		if v.Auth == nil || v.Auth(&user) {
 			tabs = append(tabs, NavigationTab{
 				Name:     name,
-				URL:      admin.GetURL(&resource, v.Url),
+				URL:      admin.getURL(&resource, v.Url),
 				Selected: trueIfEqual(code, v.Url),
 			})
 		}
@@ -160,7 +162,7 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 	}
 
 	if code != "" {
-		breadcrumbs = append(breadcrumbs, NavigationBreadcrumb{resource.Name(user.Locale), admin.GetURL(&resource, "")})
+		breadcrumbs = append(breadcrumbs, NavigationBreadcrumb{resource.Name(user.Locale), admin.getURL(&resource, "")})
 	} else {
 		name = resource.Name(user.Locale)
 	}
@@ -173,7 +175,7 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 }
 
 func (admin *Admin) getItemNavigation(resource Resource, user User, item interface{}, itemID int, code string) AdminItemNavigation {
-	prefix := admin.GetURL(&resource, fmt.Sprintf("%d", itemID))
+	prefix := admin.getURL(&resource, fmt.Sprintf("%d", itemID))
 
 	tabs := []NavigationTab{}
 
@@ -238,7 +240,7 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 	breadcrumbs := []NavigationBreadcrumb{
 		{admin.AppName, "/"},
 		{messages.Messages.Get(user.Locale, "admin_admin"), admin.Prefix},
-		{resource.Name(user.Locale), admin.GetURL(&resource, "")},
+		{resource.Name(user.Locale), admin.getURL(&resource, "")},
 	}
 
 	name := getItemName(item, user.Locale)

@@ -405,7 +405,7 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 			emails := parseEmails(request.Params().Get("emails"))
 			nmMiddleware.SendEmails(newsletter, emails)
 			administration.AddFlashMessage(request, "Náhled newsletteru odeslán.")
-			prago.Redirect(request, admin.GetURL(&resource, ""))
+			prago.Redirect(request, admin.Prefix+"/newsletter")
 		},
 	}
 
