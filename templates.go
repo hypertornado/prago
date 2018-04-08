@@ -3,6 +3,7 @@ package prago
 import (
 	"bytes"
 	"html/template"
+	"io"
 )
 
 type templates struct {
@@ -54,4 +55,8 @@ func (app *App) LoadTemplateFromString(in string) (err error) {
 //AddTemplateFunction adds template function
 func (app *App) AddTemplateFunction(name string, f interface{}) {
 	app.templates.funcMap[name] = f
+}
+
+func (app *App) ExecuteTemplate(wr io.Writer, name string, data interface{}) error {
+	return app.templates.templates.ExecuteTemplate(wr, name, data)
 }

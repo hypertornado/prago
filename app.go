@@ -18,63 +18,57 @@ import (
 
 //App is main struct of prago application
 type App struct {
+	AppName         string
+	Version         string
 	DevelopmentMode bool
-	Port            int
-	StartedAt       time.Time
 	Config          config
-	data            map[string]interface{}
 	middlewares     []Middleware
 	staticHandler   staticFilesHandler
 	kingpin         *kingpin.Application
 	commands        map[*kingpin.CmdClause]func(app *App) error
 	logger          *logrus.Logger
-	dotPath         string
 	cron            *cron
 	templates       *templates
-	router          *router
 	mainController  *Controller
 }
 
 //NewApp creates App structure for prago app
-func NewApp(appName, version string) *App {
+func NewApp(appName, version string, initFunction func(*App)) {
 	app := &App{
-		data:        make(map[string]interface{}),
-		middlewares: []Middleware{},
-		dotPath:     os.Getenv("HOME") + "/." + appName,
-		templates:   newTemplates(),
-		router:      newRouter(),
-	}
-	app.mainController = newMainController(app)
+		AppName: appName,
+		Version: version,
 
-	app.data["appName"] = appName
-	app.data["version"] = version
-	app.cron = newCron()
+		Config: loadConfig(appName),
 
-	app.Config = loadConfig(appName)
-	app.logger = createLogger(app.dotPath, true)
-
-	paths, err := app.Config.Get("staticPaths")
-	if err == nil {
-		newPaths := []string{}
-		for _, p := range paths.([]interface{}) {
-			newPaths = append(newPaths, p.(string))
-		}
-		app.staticHandler = newStaticHandler(newPaths)
-	} else {
-		app.Log().Println("no staticPaths defined in log file")
+		cron:           newCron(),
+		templates:      newTemplates(),
+		mainController: newMainController(),
 	}
 
-	app.AddMiddleware(middlewareCmd{})
-	return app
+	app.logger = createLogger(app.DotPath(), true)
+	app.staticHandler = app.loadStaticHandler()
+	app.initKingpinCommand()
+
+	initFunction(app)
+	Must(app.init())
 }
 
-func (app *App) GetAppName() string { return app.data["appName"].(string) }
+func (app *App) loadStaticHandler() staticFilesHandler {
+	paths := []string{}
+	configValue, err := app.Config.Get("staticPaths")
+	if err == nil {
+		for _, path := range configValue.([]interface{}) {
+			paths = append(paths, path.(string))
+		}
+	}
+	return newStaticHandler(paths)
+}
 
 //Log returns logger structure
 func (app *App) Log() *logrus.Logger { return app.logger }
 
 //DotPath returns path to hidden directory with app configuration and data
-func (app *App) DotPath() string { return app.dotPath }
+func (app *App) DotPath() string { return os.Getenv("HOME") + "/." + app.AppName }
 
 //CreateCommand creates command for command line
 func (app *App) CreateCommand(name, description string) *kingpin.CmdClause {
@@ -91,11 +85,6 @@ func (app *App) AddMiddleware(m Middleware) {
 	app.middlewares = append(app.middlewares, m)
 }
 
-//Data returns map of all app data
-func (app *App) Data() map[string]interface{} {
-	return app.data
-}
-
 func (app *App) initMiddlewares() error {
 	for _, middleware := range app.middlewares {
 		if err := middleware.Init(app); err != nil {
@@ -106,7 +95,7 @@ func (app *App) initMiddlewares() error {
 }
 
 //Init runs all middleware init function
-func (app *App) Init() error {
+func (app *App) init() error {
 	err := app.initMiddlewares()
 	if err != nil {
 		return fmt.Errorf("initializating middlewares: %s", err)
@@ -130,18 +119,10 @@ func (app *App) Init() error {
 	return errors.New("command not found: " + commandName)
 }
 
-func (app *App) route(m method, path string, controller *Controller, routeAction func(p Request), constraints ...Constraint) error {
-	route := newRoute(m, path, controller, routeAction, constraints)
-	app.router.addRoute(route)
-	return nil
-}
-
 //ListenAndServe starts server on port
 func (app *App) ListenAndServe(port int, developmentMode bool) error {
 	app.DevelopmentMode = developmentMode
-	app.Port = port
-	app.StartedAt = time.Now()
-	app.logger = createLogger(app.dotPath, developmentMode)
+	app.logger = createLogger(app.DotPath(), developmentMode)
 
 	server := &http.Server{
 		Addr:           "0.0.0.0:" + strconv.Itoa(port),
@@ -151,7 +132,7 @@ func (app *App) ListenAndServe(port int, developmentMode bool) error {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	app.Log().WithField("port", app.Port).
+	app.Log().WithField("port", port).
 		WithField("pid", os.Getpid()).
 		WithField("development mode", app.DevelopmentMode).
 		Info("Server started")
@@ -183,7 +164,7 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !dispatchRequest(request, *app.router) {
+	if !app.mainController.dispatchRequest(request) {
 		request.Response().WriteHeader(http.StatusNotFound)
 		request.Response().Write([]byte("404 — not found"))
 	}

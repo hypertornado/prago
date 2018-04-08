@@ -6,7 +6,6 @@ import (
 	"os"
 	"runtime"
 	"strings"
-	"time"
 )
 
 func stats(request prago.Request) {
@@ -17,15 +16,15 @@ func stats(request prago.Request) {
 
 	stats := [][2]string{}
 
-	stats = append(stats, [2]string{"App name", request.App().Data()["appName"].(string)})
-	stats = append(stats, [2]string{"App version", request.App().Data()["version"].(string)})
+	stats = append(stats, [2]string{"App name", request.App().AppName})
+	stats = append(stats, [2]string{"App version", request.App().Version})
 
 	developmentModeStr := "false"
 	if request.App().DevelopmentMode {
 		developmentModeStr = "true"
 	}
 	stats = append(stats, [2]string{"Development mode", developmentModeStr})
-	stats = append(stats, [2]string{"Started at", request.App().StartedAt.Format(time.RFC3339)})
+	//stats = append(stats, [2]string{"Started at", request.App().StartedAt.Format(time.RFC3339)})
 
 	stats = append(stats, [2]string{"Go version", runtime.Version()})
 	stats = append(stats, [2]string{"Compiler", runtime.Compiler})

@@ -17,11 +17,6 @@ const (
 	any
 )
 
-func dispatchRequest(request Request, router router) bool {
-	parseRequest(request)
-	return router.process(request)
-}
-
 type router struct {
 	routes []*route
 }

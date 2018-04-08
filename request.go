@@ -68,11 +68,11 @@ func (request Request) writeAccessLog() {
 	}
 }
 
-func (p Request) removeTrailingSlash() bool {
-	path := p.Request().URL.Path
-	if p.Request().Method == "GET" && len(path) > 1 && path == p.Request().URL.String() && strings.HasSuffix(path, "/") {
-		Redirect(p, path[0:len(path)-1])
-		p.Response().WriteHeader(http.StatusMovedPermanently)
+func (request Request) removeTrailingSlash() bool {
+	path := request.Request().URL.Path
+	if request.Request().Method == "GET" && len(path) > 1 && path == request.Request().URL.String() && strings.HasSuffix(path, "/") {
+		request.Header().Set("Location", path[0:len(path)-1])
+		request.Response().WriteHeader(http.StatusMovedPermanently)
 		return true
 	}
 	return false

@@ -3,7 +3,7 @@ package prago
 //Controller struct
 type Controller struct {
 	parent        *Controller
-	app           *App
+	router        *router
 	aroundActions []func(p Request, next func())
 }
 
@@ -13,19 +13,24 @@ func (a *App) MainController() (ret *Controller) {
 	return a.mainController
 }
 
-func newMainController(app *App) *Controller {
+func newMainController() *Controller {
 	return &Controller{
 		parent:        nil,
-		app:           app,
+		router:        newRouter(),
 		aroundActions: []func(p Request, next func()){},
 	}
+}
+
+func (c *Controller) dispatchRequest(request Request) bool {
+	parseRequest(request)
+	return c.router.process(request)
 }
 
 //SubController returns subcontroller of controller
 func (c *Controller) SubController() *Controller {
 	return &Controller{
 		parent:        c,
-		app:           c.app,
+		router:        c.router,
 		aroundActions: []func(p Request, next func()){},
 	}
 }
@@ -74,22 +79,28 @@ func (c *Controller) callArounds(p Request, i int, finalFunc func(), down bool) 
 	}
 }
 
+func (router *router) route(m method, path string, controller *Controller, routeAction func(p Request), constraints ...Constraint) {
+	route := newRoute(m, path, controller, routeAction, constraints)
+	router.addRoute(route)
+
+}
+
 //Get creates new route for GET request
 func (c *Controller) Get(path string, action func(p Request), constraints ...Constraint) {
-	c.app.route(get, path, c, action, constraints...)
+	c.router.route(get, path, c, action, constraints...)
 }
 
 //Post creates new route for POST request
 func (c *Controller) Post(path string, action func(p Request), constraints ...Constraint) {
-	c.app.route(post, path, c, action, constraints...)
+	c.router.route(post, path, c, action, constraints...)
 }
 
 //Put creates new route for PUT request
 func (c *Controller) Put(path string, action func(p Request), constraints ...Constraint) {
-	c.app.route(put, path, c, action, constraints...)
+	c.router.route(put, path, c, action, constraints...)
 }
 
 //Delete creates new route for DELETE request
 func (c *Controller) Delete(path string, action func(p Request), constraints ...Constraint) {
-	c.app.route(del, path, c, action, constraints...)
+	c.router.route(del, path, c, action, constraints...)
 }

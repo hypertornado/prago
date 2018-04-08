@@ -46,7 +46,7 @@ type Admin struct {
 }
 
 //NewAdmin creates new administration on prefix url with name
-func NewAdmin(prefix, name string) *Admin {
+func NewAdmin(app *prago.App, prefix, name string, initFunction func(*Admin)) {
 	ret := &Admin{
 		Prefix:          prefix,
 		AppName:         name,
@@ -81,7 +81,12 @@ func NewAdmin(prefix, name string) *Admin {
 		FormSubTemplate: "admin_item_select",
 		ValuesSource:    &fp,
 	})
-	return ret
+
+	ret.App = app
+
+	ret.initAdmin()
+	initFunction(ret)
+	ret.afterInit()
 }
 
 func (a *Admin) AddAction(action Action) {
@@ -210,9 +215,8 @@ func (a *Admin) GetDB() *sql.DB {
 	return a.getDB()
 }
 
-//Init admin middleware
-func (a *Admin) Init(app *prago.App) error {
-	a.App = app
+func (a *Admin) initAdmin() {
+	app := a.App
 
 	var err error
 	a.db, err = connectMysql(
@@ -220,9 +224,7 @@ func (a *Admin) Init(app *prago.App) error {
 		app.Config.GetString("dbPassword"),
 		app.Config.GetString("dbName"),
 	)
-	if err != nil {
-		return err
-	}
+	prago.Must(err)
 
 	a.AdminAccessController = app.MainController().SubController()
 	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
@@ -234,7 +236,7 @@ func (a *Admin) Init(app *prago.App) error {
 
 	a.AdminAccessController.AddAroundAction(
 		createSessionAroundAction(
-			app.GetAppName(),
+			app.AppName,
 			app.Config.GetString("random"),
 		),
 	)
@@ -256,20 +258,9 @@ func (a *Admin) Init(app *prago.App) error {
 	a.sendgridClient = sendgrid.NewSendGridClientWithApiKey(app.Config.GetStringWithFallback("sendgridApi", ""))
 	a.noReplyEmail = app.Config.GetStringWithFallback("noReplyEmail", "")
 
-	err = a.bindAdminCommand(app)
-	if err != nil {
-		return err
-	}
-
-	err = a.initTemplates(app)
-	if err != nil {
-		return err
-	}
-
-	err = app.LoadTemplateFromString(adminTemplates)
-	if err != nil {
-		panic(err)
-	}
+	prago.Must(a.bindAdminCommand(app))
+	prago.Must(a.initTemplates(app))
+	prago.Must(app.LoadTemplateFromString(adminTemplates))
 
 	a.initRootActions()
 
@@ -296,8 +287,8 @@ func (a *Admin) Init(app *prago.App) error {
 		request.SetData("locale", GetLocale(request))
 
 		request.SetData("appName", a.AppName)
-		request.SetData("appCode", request.App().Data()["appName"].(string))
-		request.SetData("appVersion", request.App().Data()["version"].(string))
+		request.SetData("appCode", request.App().AppName)
+		request.SetData("appVersion", request.App().Version)
 
 		headerData := a.getHeaderData(request)
 		request.SetData("admin_header", headerData)
@@ -306,7 +297,6 @@ func (a *Admin) Init(app *prago.App) error {
 	})
 
 	a.AdminController.Get(a.Prefix, func(request prago.Request) {
-		//request.SetData("flash_messages", []string{"some message"})
 		request.SetData("admin_header_home_selected", true)
 		renderNavigationPage(request, AdminNavigationPage{
 			Navigation:   a.getAdminNavigation(*GetUser(request), ""),
@@ -331,20 +321,17 @@ func (a *Admin) Init(app *prago.App) error {
 		request.Response().WriteHeader(200)
 		request.Response().Write([]byte(adminCSS))
 	})
+}
 
+func (a *Admin) afterInit() {
 	for i := range a.Resources {
 		resource := a.Resources[i]
-		err = a.initResource(resource)
-		if err != nil {
-			return err
-		}
+		prago.Must(a.initResource(resource))
 	}
 
 	a.AdminController.Get(a.Prefix+"/*", func(request prago.Request) {
 		render404(request)
 	})
-
-	return nil
 }
 
 func (a *Admin) initRootActions() {

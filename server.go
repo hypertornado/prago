@@ -8,9 +8,7 @@ import (
 
 var defaultPort = 8585
 
-type middlewareCmd struct{}
-
-func (m middlewareCmd) Init(app *App) error {
+func (app *App) initKingpinCommand() {
 	app.kingpin = kingpin.New("", "")
 	app.commands = map[*kingpin.CmdClause]func(app *App) error{}
 
@@ -33,14 +31,4 @@ func (m middlewareCmd) Init(app *App) error {
 		}
 		return app.ListenAndServe(port, *developmentMode)
 	})
-	return nil
-}
-
-//MiddlewareServer adds user code into app
-type MiddlewareServer struct{ Fn func(*App) }
-
-//Init initializes MiddlewareServer
-func (mr MiddlewareServer) Init(app *App) error {
-	mr.Fn(app)
-	return nil
 }

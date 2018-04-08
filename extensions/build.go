@@ -20,8 +20,8 @@ type BuildMiddleware struct {
 //Init initializes build middleware
 func (b BuildMiddleware) Init(app *prago.App) error {
 
-	var version = app.Data()["version"].(string)
-	var appName = app.Data()["appName"].(string)
+	var version = app.Version
+	var appName = app.AppName
 
 	versionCommand := app.CreateCommand("version", "Print version")
 	app.AddCommand(versionCommand, func(app *prago.App) error {
@@ -112,7 +112,7 @@ func BackupApp(app *prago.App) error {
 
 	app.Log().Println("Creating backup")
 
-	var appName = app.Data()["appName"].(string)
+	var appName = app.AppName
 
 	dir, err := ioutil.TempDir("", "backup")
 	if err != nil {
