@@ -17,36 +17,9 @@ const (
 	any
 )
 
-type middlewareDispatcher struct {
-	router *router
-}
-
-func (m middlewareDispatcher) Init(app *App) error {
-	m.router = newRouter()
-	app.data["router"] = m.router
-	app.requestMiddlewares = append(app.requestMiddlewares, m.requestMiddlewareDispatcher)
-
-	routerCommand := app.CreateCommand("routes", "Show routes")
-	app.AddCommand(routerCommand, func(app *App) error {
-		m.router.print()
-		return nil
-	})
-
-	return nil
-}
-
-func (m middlewareDispatcher) requestMiddlewareDispatcher(p Request, next func()) {
-	if debugRequestMiddlewares {
-		fmt.Println("DISPATCHER")
-	}
-
-	if p.IsProcessed() {
-		return
-	}
-
-	m.router.process(p)
-
-	next()
+func dispatchRequest(request Request, router router) bool {
+	parseRequest(request)
+	return router.process(request)
 }
 
 type router struct {
@@ -61,7 +34,7 @@ func (r *router) addRoute(route *route) {
 	r.routes = append(r.routes, route)
 }
 
-func (r *router) process(request Request) {
+func (r *router) process(request Request) bool {
 	for _, route := range r.routes {
 		params, match := route.match(request.Request().Method, request.Request().URL.Path)
 		if match {
@@ -73,9 +46,10 @@ func (r *router) process(request Request) {
 				route.fn(request)
 			}, true)
 
-			return
+			return true
 		}
 	}
+	return false
 }
 
 func (r *router) print() {

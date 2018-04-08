@@ -2,48 +2,25 @@ package prago
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 )
 
 //ErrFileNotFound is returned when file is not found
 var ErrFileNotFound = errors.New("requested file is folder")
 
-type middlewareStatic struct {
-	staticDirPaths []string
+type staticFilesHandler struct {
+	paths []string
 }
 
-func (ms middlewareStatic) Init(app *App) error {
-	ms.staticDirPaths = []string{"public"}
-	paths, err := app.Config.Get("staticPaths")
-	if err == nil {
-		newPaths := []string{}
-		for _, p := range paths.([]interface{}) {
-			newPaths = append(newPaths, p.(string))
-		}
-		ms.staticDirPaths = newPaths
+func newStaticHandler(paths []string) staticFilesHandler {
+	return staticFilesHandler{
+		paths: paths,
 	}
-	app.requestMiddlewares = append(app.requestMiddlewares, ms.requestMiddlewareStatic)
-	return nil
 }
 
-func (ms middlewareStatic) requestMiddlewareStatic(p Request, next func()) {
-	if debugRequestMiddlewares {
-		fmt.Println("STATIC MIDDLEWARE")
-	}
-
-	if p.IsProcessed() {
-		return
-	}
-	if ms.serveStatic(p.Response(), p.Request()) {
-		p.SetProcessed()
-	}
-	next()
-}
-
-func (ms middlewareStatic) serveStatic(w http.ResponseWriter, r *http.Request) bool {
-	for _, v := range ms.staticDirPaths {
-		err := ms.serveFile(w, r, http.Dir(v), r.URL.Path)
+func (h staticFilesHandler) serveStatic(w http.ResponseWriter, r *http.Request) bool {
+	for _, v := range h.paths {
+		err := serveStaticFile(w, r, http.Dir(v), r.URL.Path)
 		if err == nil {
 			return true
 		}
@@ -51,7 +28,7 @@ func (ms middlewareStatic) serveStatic(w http.ResponseWriter, r *http.Request) b
 	return false
 }
 
-func (ms middlewareStatic) serveFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name string) (err error) {
+func serveStaticFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name string) (err error) {
 	f, err := fs.Open(name)
 	if err != nil {
 		return

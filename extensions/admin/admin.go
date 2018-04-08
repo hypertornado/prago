@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"bytes"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -326,13 +325,11 @@ func (a *Admin) Init(app *prago.App) error {
 		request.Response().Header().Set("Content-type", "text/javascript")
 		request.Response().WriteHeader(200)
 		request.Response().Write([]byte(adminJS))
-		request.SetProcessed()
 	})
 	a.App.MainController().Get(a.Prefix+"/_static/admin.css", func(request prago.Request) {
 		request.Response().Header().Set("Content-type", "text/css; charset=utf-8")
 		request.Response().WriteHeader(200)
 		request.Response().Write([]byte(adminCSS))
-		request.SetProcessed()
 	})
 
 	for i := range a.Resources {
@@ -385,17 +382,6 @@ func (a *Admin) bindAdminCommand(app *prago.App) error {
 }
 
 func (a *Admin) initTemplates(app *prago.App) error {
-	templates := app.Data()["templates"].(*template.Template)
-	if templates == nil {
-		return errors.New("Templates not initialized")
-	}
-
-	app.AddTemplateFunction("tmpl", func(templateName string, x interface{}) (template.HTML, error) {
-		var buf bytes.Buffer
-		err := templates.ExecuteTemplate(&buf, templateName, x)
-		return template.HTML(buf.String()), err
-	})
-
 	app.AddTemplateFunction("markdown", func(text string) template.HTML {
 		return template.HTML(markdown.New(markdown.Breaks(true)).RenderToString([]byte(text)))
 	})

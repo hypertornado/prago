@@ -16,13 +16,10 @@ func Must(err error) {
 func Redirect(request Request, url string) {
 	request.Header().Set("Location", url)
 	request.Response().WriteHeader(http.StatusFound)
-	request.SetProcessed()
 }
 
 //WriteAPI writes data as JSON response to request with http code
 func WriteAPI(request Request, data interface{}, code int) {
-	request.SetProcessed()
-
 	request.Response().Header().Add("Content-type", "application/json")
 
 	pretty := false

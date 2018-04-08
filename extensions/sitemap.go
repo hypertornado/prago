@@ -23,5 +23,4 @@ func Sitemap(request prago.Request, urls []string) {
 
 	after := `</urlset>`
 	request.Response().Write([]byte(after))
-	request.SetProcessed()
 }

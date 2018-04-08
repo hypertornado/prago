@@ -134,10 +134,6 @@ func (a *Admin) initResource(resource *Resource) error {
 	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
 		request.SetData("admin_resource", resource)
 		next()
-
-		if !request.IsProcessed() && request.GetData("statusCode") == nil {
-			prago.Render(request, 200, "admin_layout")
-		}
 	})
 
 	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {

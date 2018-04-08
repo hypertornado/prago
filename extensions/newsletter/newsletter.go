@@ -385,8 +385,8 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 				panic(err)
 			}
 
-			request.SetData("body", []byte(body))
-			request.SetData("statusCode", 200)
+			request.Response().WriteHeader(200)
+			request.Response().Write([]byte(body))
 		},
 	}
 

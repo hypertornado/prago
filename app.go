@@ -9,7 +9,6 @@ import (
 	"github.com/hypertornado/prago/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"html/template"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"runtime/debug"
@@ -17,34 +16,33 @@ import (
 	"time"
 )
 
-var debugRequestMiddlewares = true
-
 //App is main struct of prago application
 type App struct {
-	DevelopmentMode    bool
-	Port               int
-	StartedAt          time.Time
-	Config             config
-	data               map[string]interface{}
-	requestMiddlewares []requestMiddleware
-	middlewares        []Middleware
-	kingpin            *kingpin.Application
-	commands           map[*kingpin.CmdClause]func(app *App) error
-	logger             *logrus.Logger
-	dotPath            string
-	cron               *cron
-	mainController     *Controller
+	DevelopmentMode bool
+	Port            int
+	StartedAt       time.Time
+	Config          config
+	data            map[string]interface{}
+	middlewares     []Middleware
+	staticHandler   staticFilesHandler
+	kingpin         *kingpin.Application
+	commands        map[*kingpin.CmdClause]func(app *App) error
+	logger          *logrus.Logger
+	dotPath         string
+	cron            *cron
+	templates       *templates
+	router          *router
+	mainController  *Controller
 }
-
-type requestMiddleware func(Request, func())
 
 //NewApp creates App structure for prago app
 func NewApp(appName, version string) *App {
 	app := &App{
-		data:               make(map[string]interface{}),
-		requestMiddlewares: []requestMiddleware{},
-		middlewares:        []Middleware{},
-		dotPath:            os.Getenv("HOME") + "/." + appName,
+		data:        make(map[string]interface{}),
+		middlewares: []Middleware{},
+		dotPath:     os.Getenv("HOME") + "/." + appName,
+		templates:   newTemplates(),
+		router:      newRouter(),
 	}
 	app.mainController = newMainController(app)
 
@@ -55,12 +53,18 @@ func NewApp(appName, version string) *App {
 	app.Config = loadConfig(appName)
 	app.logger = createLogger(app.dotPath, true)
 
+	paths, err := app.Config.Get("staticPaths")
+	if err == nil {
+		newPaths := []string{}
+		for _, p := range paths.([]interface{}) {
+			newPaths = append(newPaths, p.(string))
+		}
+		app.staticHandler = newStaticHandler(newPaths)
+	} else {
+		app.Log().Println("no staticPaths defined in log file")
+	}
+
 	app.AddMiddleware(middlewareCmd{})
-	app.AddMiddleware(middlewareRemoveTrailingSlash)
-	app.AddMiddleware(middlewareStatic{})
-	app.AddMiddleware(middlewareParseRequest)
-	app.AddMiddleware(middlewareView{})
-	app.AddMiddleware(middlewareDispatcher{})
 	return app
 }
 
@@ -127,13 +131,8 @@ func (app *App) Init() error {
 }
 
 func (app *App) route(m method, path string, controller *Controller, routeAction func(p Request), constraints ...Constraint) error {
-	router := app.data["router"].(*router)
-	if router == nil {
-		return errors.New("couldnt find router")
-	}
-
 	route := newRoute(m, path, controller, routeAction, constraints)
-	router.addRoute(route)
+	app.router.addRoute(route)
 	return nil
 }
 
@@ -152,34 +151,16 @@ func (app *App) ListenAndServe(port int, developmentMode bool) error {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	app.writeStartInfo()
-	return server.ListenAndServe()
-}
-
-func (app *App) writeStartInfo() error {
-	pid := os.Getpid()
-
-	err := ioutil.WriteFile(
-		app.dotPath+"/last.pid",
-		[]byte(fmt.Sprintf("%d", pid)),
-		0777,
-	)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("Server started\nport: %d\npid: %d\ndevelopment mode: %t\n", app.Port, pid, app.DevelopmentMode)
-
 	app.Log().WithField("port", app.Port).
-		WithField("pid", pid).
+		WithField("pid", os.Getpid()).
 		WithField("development mode", app.DevelopmentMode).
 		Info("Server started")
 
-	return nil
+	return server.ListenAndServe()
 }
 
 func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	request := &Request{
+	request := Request{
 		w:    w,
 		r:    r,
 		app:  app,
@@ -192,26 +173,24 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	if r.Header.Get("X-Dont-Log") != "true" {
-		app.Log().Println(r.Method, r.URL.String())
+	request.writeAccessLog()
+
+	if request.removeTrailingSlash() {
+		return
 	}
 
-	callRequestMiddlewares(request, app.requestMiddlewares)
-}
-
-func callRequestMiddlewares(request *Request, middlewares []requestMiddleware) {
-	f := func() {}
-	for i := len(middlewares) - 1; i >= 0; i-- {
-		j := i
-		prevF := f
-		f = func() {
-			middlewares[j](*request, prevF)
-		}
+	if app.staticHandler.serveStatic(request.Response(), request.Request()) {
+		return
 	}
-	f()
+
+	if !dispatchRequest(request, *app.router) {
+		request.Response().WriteHeader(http.StatusNotFound)
+		request.Response().Write([]byte("404 — not found"))
+	}
+
 }
 
-func recoveryFunction(p *Request, recoveryData interface{}) {
+func recoveryFunction(p Request, recoveryData interface{}) {
 	uuid := utils.RandomString(10)
 
 	if p.App().DevelopmentMode {

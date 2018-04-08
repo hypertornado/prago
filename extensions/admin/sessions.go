@@ -8,11 +8,6 @@ import (
 func createSessionAroundAction(appName, random string) func(prago.Request, func()) {
 	cookieStore := sessions.NewCookieStore([]byte(random))
 	return func(request prago.Request, next func()) {
-		if request.IsProcessed() {
-			next()
-			return
-		}
-
 		session, err := cookieStore.Get(request.Request(), appName)
 		if err != nil {
 			request.Log().Errorln("Session not valid")

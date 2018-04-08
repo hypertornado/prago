@@ -114,7 +114,6 @@ func exportHandler(admin Admin, resource Resource, request prago.Request, user U
 	}
 
 	writer.Flush()
-	request.SetProcessed()
 }
 
 func exportFieldToString(value reflect.Value) string {
