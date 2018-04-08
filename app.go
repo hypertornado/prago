@@ -17,8 +17,7 @@ import (
 	"time"
 )
 
-//TODO: dont make it global
-var loggerMiddleware = &middlewareLogger{}
+var debugRequestMiddlewares = true
 
 //App is main struct of prago application
 type App struct {
@@ -54,9 +53,9 @@ func NewApp(appName, version string) *App {
 	app.cron = newCron()
 
 	app.Config = loadConfig(appName)
+	app.logger = createLogger(app.dotPath, true)
 
 	app.AddMiddleware(middlewareCmd{})
-	app.AddMiddleware(loggerMiddleware)
 	app.AddMiddleware(middlewareRemoveTrailingSlash)
 	app.AddMiddleware(middlewareStatic{})
 	app.AddMiddleware(middlewareParseRequest)
@@ -143,10 +142,7 @@ func (app *App) ListenAndServe(port int, developmentMode bool) error {
 	app.DevelopmentMode = developmentMode
 	app.Port = port
 	app.StartedAt = time.Now()
-
-	if developmentMode {
-		loggerMiddleware.setStdOut()
-	}
+	app.logger = createLogger(app.dotPath, developmentMode)
 
 	server := &http.Server{
 		Addr:           "0.0.0.0:" + strconv.Itoa(port),
@@ -196,6 +192,10 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
+	if r.Header.Get("X-Dont-Log") != "true" {
+		app.Log().Println(r.Method, r.URL.String())
+	}
+
 	callRequestMiddlewares(request, app.requestMiddlewares)
 }
 
@@ -209,15 +209,6 @@ func callRequestMiddlewares(request *Request, middlewares []requestMiddleware) {
 		}
 	}
 	f()
-}
-
-func defaultRecoveryOLD(p *Request, recoveryData interface{}) {
-	uuid := utils.RandomString(10)
-
-	p.Response().WriteHeader(500)
-	p.Response().Write([]byte("500 Internal Server Error, errorid " + uuid))
-	p.Log().Errorln(fmt.Sprintf("500 Internal Server Error, errorid %s\n%s\nstack:\n", uuid, recoveryData))
-	p.Log().Errorln(string(debug.Stack()))
 }
 
 func recoveryFunction(p *Request, recoveryData interface{}) {

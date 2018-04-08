@@ -36,6 +36,10 @@ func (m middlewareDispatcher) Init(app *App) error {
 }
 
 func (m middlewareDispatcher) requestMiddlewareDispatcher(p Request, next func()) {
+	if debugRequestMiddlewares {
+		fmt.Println("DISPATCHER")
+	}
+
 	if p.IsProcessed() {
 		return
 	}

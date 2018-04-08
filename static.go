@@ -2,6 +2,7 @@ package prago
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 )
 
@@ -27,6 +28,10 @@ func (ms middlewareStatic) Init(app *App) error {
 }
 
 func (ms middlewareStatic) requestMiddlewareStatic(p Request, next func()) {
+	if debugRequestMiddlewares {
+		fmt.Println("STATIC MIDDLEWARE")
+	}
+
 	if p.IsProcessed() {
 		return
 	}

@@ -3,6 +3,7 @@ package prago
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"html/template"
 	"net/http"
 )
@@ -60,6 +61,10 @@ func (m middlewareView) Init(app *App) error {
 }
 
 func requestMiddlewareView(p Request, next func()) {
+	if debugRequestMiddlewares {
+		fmt.Println("VIEW MIDDLEWARE")
+	}
+
 	next()
 
 	if p.IsProcessed() {

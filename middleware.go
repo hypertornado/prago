@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -25,6 +26,10 @@ func (m getMiddleware) Init(app *App) error {
 }
 
 func requestMiddlewareRemoveTrailingSlash(p Request, next func()) {
+	if debugRequestMiddlewares {
+		fmt.Println("REMOVE TRAILING SLASH")
+	}
+
 	path := p.Request().URL.Path
 	if p.Request().Method == "GET" && len(path) > 1 && path == p.Request().URL.String() && strings.HasSuffix(path, "/") {
 		Redirect(p, path[0:len(path)-1])
@@ -35,6 +40,9 @@ func requestMiddlewareRemoveTrailingSlash(p Request, next func()) {
 }
 
 func requestMiddlewareParseRequest(r Request, next func()) {
+	if debugRequestMiddlewares {
+		fmt.Println("PARSE REQUEST")
+	}
 
 	if !r.IsProcessed() {
 		contentType := r.Request().Header.Get("Content-Type")
