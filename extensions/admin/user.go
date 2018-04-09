@@ -142,9 +142,9 @@ func (u User) sendConfirmEmail(request prago.Request, a *Admin) error {
 	urlValues.Add("email", u.Email)
 	urlValues.Add("token", u.emailToken(a.App))
 
-	subject := messages.Messages.Get(locale, "admin_confirm_email_subject", a.AppName)
+	subject := messages.Messages.Get(locale, "admin_confirm_email_subject", a.HumanName)
 	link := request.App().Config.GetString("baseUrl") + a.Prefix + "/user/confirm_email?" + urlValues.Encode()
-	body := messages.Messages.Get(locale, "admin_confirm_email_body", link, link, a.AppName)
+	body := messages.Messages.Get(locale, "admin_confirm_email_body", link, link, a.HumanName)
 
 	message := sendgrid.NewMail()
 	message.SetFrom(a.noReplyEmail)
@@ -169,8 +169,8 @@ func (u User) sendAdminEmail(request prago.Request, a *Admin) error {
 		message.SetFrom(a.noReplyEmail)
 		message.AddTo(user.Email)
 		message.AddToName(user.Name)
-		message.SetSubject("New registration on " + a.AppName)
-		message.SetHTML(fmt.Sprintf("New user registered on %s: %s (%s)", a.AppName, u.Email, u.Name))
+		message.SetSubject("New registration on " + a.HumanName)
+		message.SetHTML(fmt.Sprintf("New user registered on %s: %s (%s)", a.HumanName, u.Email, u.Name))
 		err = a.sendgridClient.Send(message)
 		if err != nil {
 			return err
@@ -193,9 +193,9 @@ func (u User) sendRenew(request prago.Request, a *Admin) error {
 
 	locale := GetLocale(request)
 
-	subject := messages.Messages.Get(locale, "admin_forgotten_email_subject", a.AppName)
+	subject := messages.Messages.Get(locale, "admin_forgotten_email_subject", a.HumanName)
 	link := u.getRenewURL(request, a)
-	body := messages.Messages.Get(locale, "admin_forgotten_email_body", link, link, a.AppName)
+	body := messages.Messages.Get(locale, "admin_forgotten_email_body", link, link, a.HumanName)
 
 	message := sendgrid.NewMail()
 	message.SetFrom(a.noReplyEmail)

@@ -26,7 +26,7 @@ func (a *Admin) getHeaderData(request prago.Request) (headerData *adminHeaderDat
 	locale := GetLocale(request)
 
 	headerData = &adminHeaderData{
-		Name:        a.AppName,
+		Name:        a.HumanName,
 		Language:    locale,
 		Logo:        a.Logo,
 		Background:  a.Background,

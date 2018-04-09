@@ -33,7 +33,7 @@ var thumbnailSizes = map[string][2]uint{
 
 func initCDN(a *Admin) {
 	cdnURL := a.App.Config.GetStringWithFallback("cdnURL", "https://www.prago-cdn.com")
-	cdnAccount := a.App.Config.GetStringWithFallback("cdnAccount", a.AppName)
+	cdnAccount := a.App.Config.GetStringWithFallback("cdnAccount", a.HumanName)
 	cdnPassword := a.App.Config.GetStringWithFallback("cdnPassword", "")
 	filesCDN = cdnclient.NewCDNAccount(cdnURL, cdnAccount, cdnPassword)
 }
@@ -192,7 +192,7 @@ func initFilesResource(resource *Resource) {
 			return err
 		}
 
-		backupDir := fmt.Sprintf("%s/image-export-%s-%s", os.Getenv("HOME"), a.AppName, shortuuid.UUID())
+		backupDir := fmt.Sprintf("%s/image-export-%s-%s", os.Getenv("HOME"), a.App.AppName, shortuuid.UUID())
 
 		fmt.Println("Backing files to", backupDir)
 

@@ -78,7 +78,7 @@ func (admin *Admin) getAdminNavigation(user User, code string) AdminItemNavigati
 	name := messages.Messages.Get(user.Locale, "admin_admin")
 
 	breadcrumbs := []NavigationBreadcrumb{
-		{admin.AppName, "/"},
+		{admin.HumanName, "/"},
 	}
 
 	for _, v := range tabs {
@@ -150,7 +150,7 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 	}
 
 	breadcrumbs := []NavigationBreadcrumb{
-		{admin.AppName, "/"},
+		{admin.HumanName, "/"},
 		{messages.Messages.Get(user.Locale, "admin_admin"), admin.Prefix},
 	}
 
@@ -238,7 +238,7 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 	}
 
 	breadcrumbs := []NavigationBreadcrumb{
-		{admin.AppName, "/"},
+		{admin.HumanName, "/"},
 		{messages.Messages.Get(user.Locale, "admin_admin"), admin.Prefix},
 		{resource.Name(user.Locale), admin.getURL(&resource, "")},
 	}
@@ -269,7 +269,7 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 func (admin *Admin) getSettingsNavigation(user User, code string) AdminItemNavigation {
 
 	breadcrumbs := []NavigationBreadcrumb{
-		{admin.AppName, "/"},
+		{admin.HumanName, "/"},
 		{messages.Messages.Get(user.Locale, "admin_admin"), admin.Prefix},
 	}
 
@@ -339,7 +339,7 @@ func (admin *Admin) getNologinNavigation(language, code string) AdminItemNavigat
 		Name: name,
 		Tabs: tabs,
 		Breadcrumbs: []NavigationBreadcrumb{
-			{admin.AppName, "/"},
+			{admin.HumanName, "/"},
 		},
 	}
 }

@@ -27,7 +27,7 @@ type Admin struct {
 	Logo                  string
 	Background            string
 	Prefix                string
-	AppName               string
+	HumanName             string
 	Resources             []*Resource
 	resourceMap           map[reflect.Type]*Resource
 	resourceNameMap       map[string]*Resource
@@ -36,25 +36,32 @@ type Admin struct {
 	App                   *prago.App
 	rootActions           []Action
 	db                    *sql.DB
-	authData              map[string]string
-	sendgridClient        *sendgrid.SGClient
-	noReplyEmail          string
-	fieldTypes            map[string]FieldType
-	javascripts           []string
-	css                   []string
-	roles                 map[string]map[string]bool
+
+	sendgridClient *sendgrid.SGClient
+	noReplyEmail   string
+
+	fieldTypes  map[string]FieldType
+	javascripts []string
+	css         []string
+	roles       map[string]map[string]bool
 }
 
 //NewAdmin creates new administration on prefix url with name
-func NewAdmin(app *prago.App, prefix, name string, initFunction func(*Admin)) {
+func NewAdmin(app *prago.App, initFunction func(*Admin)) *Admin {
 	admin := &Admin{
-		Prefix:                prefix,
-		AppName:               name,
+		Prefix:                "/admin",
+		HumanName:             app.AppName,
 		Resources:             []*Resource{},
 		resourceMap:           make(map[reflect.Type]*Resource),
 		resourceNameMap:       make(map[string]*Resource),
 		AdminAccessController: app.MainController().SubController(),
-		App:         app,
+		App: app,
+
+		db: connectMysql(app),
+
+		sendgridClient: sendgrid.NewSendGridClientWithApiKey(app.Config.GetStringWithFallback("sendgridApi", "")),
+		noReplyEmail:   app.Config.GetStringWithFallback("noReplyEmail", ""),
+
 		fieldTypes:  make(map[string]FieldType),
 		javascripts: []string{},
 		css:         []string{},
@@ -68,8 +75,89 @@ func NewAdmin(app *prago.App, prefix, name string, initFunction func(*Admin)) {
 
 	admin.AddFieldType("role", admin.createRoleFieldType())
 
-	admin.initAdmin()
 	initFunction(admin)
+
+	admin.AdminAccessController.AddBeforeAction(func(request prago.Request) {
+		request.SetData("admin_header_prefix", admin.Prefix)
+		request.SetData("background", admin.Background)
+		request.SetData("javascripts", admin.javascripts)
+		request.SetData("css", admin.css)
+	})
+
+	admin.AdminAccessController.AddAroundAction(
+		createSessionAroundAction(
+			admin.App.AppName,
+			admin.App.Config.GetString("random"),
+		),
+	)
+
+	googleApiKey := admin.App.Config.GetStringWithFallback("google", "")
+	admin.AdminController.AddBeforeAction(func(request prago.Request) {
+		request.SetData("google", googleApiKey)
+	})
+
+	bindDBBackupCron(admin.App)
+	bindAPI(admin)
+
+	prago.Must(admin.bindAdminCommand(admin.App))
+	prago.Must(admin.initTemplates(admin.App))
+	prago.Must(admin.App.LoadTemplateFromString(adminTemplates))
+
+	admin.initRootActions()
+
+	admin.AdminController.AddAroundAction(func(request prago.Request, next func()) {
+		session := request.GetData("session").(*sessions.Session)
+		userID, ok := session.Values["user_id"].(int64)
+
+		if !ok {
+			prago.Redirect(request, admin.Prefix+"/user/login")
+			return
+		}
+
+		var user User
+		err := admin.Query().WhereIs("id", userID).Get(&user)
+		if err != nil {
+			prago.Redirect(request, admin.Prefix+"/user/login")
+			return
+
+		}
+
+		randomness := admin.App.Config.GetString("random")
+		request.SetData("_csrfToken", user.CSRFToken(randomness))
+		request.SetData("currentuser", &user)
+		request.SetData("locale", GetLocale(request))
+
+		headerData := admin.getHeaderData(request)
+		request.SetData("admin_header", headerData)
+
+		next()
+	})
+
+	admin.AdminController.Get(admin.Prefix, func(request prago.Request) {
+		request.SetData("admin_header_home_selected", true)
+		renderNavigationPage(request, AdminNavigationPage{
+			Navigation:   admin.getAdminNavigation(*GetUser(request), ""),
+			PageTemplate: "admin_home_navigation",
+			PageData:     admin.getHomeData(request),
+		})
+	})
+
+	admin.AdminController.Get(admin.Prefix+"/_help/markdown", func(request prago.Request) {
+		request.SetData("admin_yield", "admin_help_markdown")
+		prago.Render(request, 200, "admin_layout")
+	})
+
+	admin.AdminController.Get(admin.Prefix+"/_stats", stats)
+	admin.AdminController.Get(admin.Prefix+"/_static/admin.js", func(request prago.Request) {
+		request.Response().Header().Set("Content-type", "text/javascript")
+		request.Response().WriteHeader(200)
+		request.Response().Write([]byte(adminJS))
+	})
+	admin.App.MainController().Get(admin.Prefix+"/_static/admin.css", func(request prago.Request) {
+		request.Response().Header().Set("Content-type", "text/css; charset=utf-8")
+		request.Response().WriteHeader(200)
+		request.Response().Write([]byte(adminCSS))
+	})
 
 	for _, resource := range admin.Resources {
 		admin.initResource(resource)
@@ -79,6 +167,7 @@ func NewAdmin(app *prago.App, prefix, name string, initFunction func(*Admin)) {
 		render404(request)
 	})
 
+	return admin
 }
 
 func (a *Admin) AddAction(action Action) {
@@ -157,103 +246,6 @@ func (a *Admin) getDB() *sql.DB {
 
 func (a *Admin) GetDB() *sql.DB {
 	return a.getDB()
-}
-
-func (admin *Admin) initAdmin() {
-
-	var err error
-	admin.db, err = connectMysql(
-		admin.App.Config.GetString("dbUser"),
-		admin.App.Config.GetString("dbPassword"),
-		admin.App.Config.GetString("dbName"),
-	)
-	prago.Must(err)
-
-	admin.AdminAccessController.AddBeforeAction(func(request prago.Request) {
-		request.SetData("admin_header_prefix", admin.Prefix)
-		request.SetData("background", admin.Background)
-		request.SetData("javascripts", admin.javascripts)
-		request.SetData("css", admin.css)
-	})
-
-	admin.AdminAccessController.AddAroundAction(
-		createSessionAroundAction(
-			admin.App.AppName,
-			admin.App.Config.GetString("random"),
-		),
-	)
-
-	googleApiKey := admin.App.Config.GetStringWithFallback("google", "")
-
-	admin.AdminController.AddBeforeAction(func(request prago.Request) {
-		request.SetData("google", googleApiKey)
-	})
-
-	bindDBBackupCron(admin.App)
-	bindAPI(admin)
-
-	admin.sendgridClient = sendgrid.NewSendGridClientWithApiKey(admin.App.Config.GetStringWithFallback("sendgridApi", ""))
-	admin.noReplyEmail = admin.App.Config.GetStringWithFallback("noReplyEmail", "")
-
-	prago.Must(admin.bindAdminCommand(admin.App))
-	prago.Must(admin.initTemplates(admin.App))
-	prago.Must(admin.App.LoadTemplateFromString(adminTemplates))
-
-	admin.initRootActions()
-
-	admin.AdminController.AddAroundAction(func(request prago.Request, next func()) {
-		session := request.GetData("session").(*sessions.Session)
-		userID, ok := session.Values["user_id"].(int64)
-
-		if !ok {
-			prago.Redirect(request, admin.Prefix+"/user/login")
-			return
-		}
-
-		var user User
-		err := admin.Query().WhereIs("id", userID).Get(&user)
-		if err != nil {
-			prago.Redirect(request, admin.Prefix+"/user/login")
-			return
-
-		}
-
-		randomness := admin.App.Config.GetString("random")
-		request.SetData("_csrfToken", user.CSRFToken(randomness))
-		request.SetData("currentuser", &user)
-		request.SetData("locale", GetLocale(request))
-
-		headerData := admin.getHeaderData(request)
-		request.SetData("admin_header", headerData)
-
-		next()
-	})
-
-	admin.AdminController.Get(admin.Prefix, func(request prago.Request) {
-		request.SetData("admin_header_home_selected", true)
-		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getAdminNavigation(*GetUser(request), ""),
-			PageTemplate: "admin_home_navigation",
-			PageData:     admin.getHomeData(request),
-		})
-	})
-
-	admin.AdminController.Get(admin.Prefix+"/_help/markdown", func(request prago.Request) {
-		request.SetData("admin_yield", "admin_help_markdown")
-		prago.Render(request, 200, "admin_layout")
-	})
-
-	admin.AdminController.Get(admin.Prefix+"/_stats", stats)
-	admin.AdminController.Get(admin.Prefix+"/_static/admin.js", func(request prago.Request) {
-		request.Response().Header().Set("Content-type", "text/javascript")
-		request.Response().WriteHeader(200)
-		request.Response().Write([]byte(adminJS))
-	})
-	admin.App.MainController().Get(admin.Prefix+"/_static/admin.css", func(request prago.Request) {
-		request.Response().Header().Set("Content-type", "text/css; charset=utf-8")
-		request.Response().WriteHeader(200)
-		request.Response().Write([]byte(adminCSS))
-	})
 }
 
 func (a *Admin) initRootActions() {
