@@ -126,9 +126,10 @@ type NewsletterMiddleware struct {
 	controller      *prago.Controller
 }
 
-func (nm NewsletterMiddleware) Init(app *prago.App) error {
+func InitNewsletterHelper(app *prago.App, nm NewsletterMiddleware) {
 	if nmMiddleware != nil {
-		return errors.New("cant initialize more then one instance of newsletter")
+		app.Log().Errorf("cant initialize more then one instance of newsletter")
+		return
 	}
 	nmMiddleware = &nm
 	nmMiddleware.controller = app.MainController().SubController()
@@ -241,7 +242,6 @@ func (nm NewsletterMiddleware) Init(app *prago.App) error {
 
 	nmMiddleware.Admin.CreateResource(Newsletter{})
 	nmMiddleware.Admin.CreateResource(NewsletterPersons{})
-	return nil
 }
 
 func (nm NewsletterMiddleware) sendConfirmEmail(name, email string) error {

@@ -13,13 +13,12 @@ import (
 )
 
 //BuildMiddleware allows binary building and release
-type BuildMiddleware struct {
+type BuildSettings struct {
 	Copy [][2]string
 }
 
 //Init initializes build middleware
-func (b BuildMiddleware) Init(app *prago.App) error {
-
+func CreateBuildHelper(app *prago.App, b BuildSettings) {
 	var version = app.Version
 	var appName = app.AppName
 
@@ -63,13 +62,12 @@ func (b BuildMiddleware) Init(app *prago.App) error {
 		app.AddCommand(partyCommand, func(app *prago.App) error {
 			return b.party(appName, version, ssh)
 		})
-
+	} else {
+		app.Log().Errorf("cant get ssh value for build command: %s", err)
 	}
-
-	return nil
 }
 
-func (b BuildMiddleware) party(appName, version, ssh string) (err error) {
+func (b BuildSettings) party(appName, version, ssh string) (err error) {
 	if err = b.build(appName, version); err != nil {
 		return err
 	}
@@ -82,7 +80,7 @@ func (b BuildMiddleware) party(appName, version, ssh string) (err error) {
 	return nil
 }
 
-func (b BuildMiddleware) syncBackups(appName, ssh string) error {
+func (b BuildSettings) syncBackups(appName, ssh string) error {
 	to := filepath.Join(os.Getenv("HOME"), "."+appName, "serverbackups")
 	err := exec.Command("mkdir", "-p", to).Run()
 	if err != nil {
@@ -98,7 +96,7 @@ func (b BuildMiddleware) syncBackups(appName, ssh string) error {
 	return cmd.Run()
 }
 
-func (b BuildMiddleware) remote(appName, version, ssh string) error {
+func (b BuildSettings) remote(appName, version, ssh string) error {
 	cmdStr := fmt.Sprintf("cd ~/.%s/versions/%s.%s; ./%s.linux admin migrate; killall %s.linux; nohup ./%s.linux server >> app.log 2>&1 & exit;", appName, appName, version, appName, appName, appName)
 	println(cmdStr)
 	cmd := exec.Command("ssh", ssh, cmdStr)
@@ -181,7 +179,7 @@ func BackupApp(app *prago.App) error {
 	return copyFiles(dirPath, backupsPath)
 }
 
-func (b BuildMiddleware) release(appName, version, ssh string) error {
+func (b BuildSettings) release(appName, version, ssh string) error {
 	from := os.Getenv("HOME") + "/." + appName + "/versions/" + appName + "." + version
 	to := fmt.Sprintf("%s:~/.%s/versions", ssh, appName)
 
@@ -211,7 +209,7 @@ type buildFlag struct {
 var linuxBuild = buildFlag{"linux", "linux", "amd64"}
 var macBuild = buildFlag{"mac", "darwin", "amd64"}
 
-func (b BuildMiddleware) build(appName, version string) error {
+func (b BuildSettings) build(appName, version string) error {
 	fmt.Println(appName, version)
 	dir, err := ioutil.TempDir("", "build")
 	if err != nil {

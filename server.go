@@ -8,7 +8,7 @@ import (
 
 var defaultPort = 8585
 
-func (app *App) initKingpinCommand() {
+func initKingpinCommand(app *App) {
 	app.kingpin = kingpin.New("", "")
 	app.commands = map[*kingpin.CmdClause]func(app *App) error{}
 

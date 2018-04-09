@@ -18,27 +18,22 @@ type Less struct {
 	Target    string
 }
 
-type MiddlewareDevelopment struct {
-	Settings DevelopmentSettings
-}
-
-func (m MiddlewareDevelopment) Init(app *prago.App) error {
+func CreateDevelopmentHelper(app *prago.App, settings DevelopmentSettings) {
 	devCommand := app.CreateCommand("dev", "Development")
 	portFlag := devCommand.Flag("port", "server port").Short('p').Default("8585").Int()
 	developmentMode := devCommand.Flag("development", "Is in development mode").Default("t").Short('d').Bool()
 
 	app.AddCommand(devCommand, func(app *prago.App) error {
-		for _, v := range m.Settings.Less {
+		for _, v := range settings.Less {
 			go developmentLess(v.SourceDir, v.Target)
 		}
 
-		for _, v := range m.Settings.TypeScript {
+		for _, v := range settings.TypeScript {
 			go developmentTypescript(v)
 		}
 
 		return app.ListenAndServe(*portFlag, *developmentMode)
 	})
-	return nil
 }
 
 func developmentTypescript(path string) {

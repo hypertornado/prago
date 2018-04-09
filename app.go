@@ -16,7 +16,6 @@ type App struct {
 	Version         string
 	DevelopmentMode bool
 	Config          config
-	middlewares     []Middleware
 	staticHandler   staticFilesHandler
 	kingpin         *kingpin.Application
 	commands        map[*kingpin.CmdClause]func(app *App) error
@@ -42,15 +41,8 @@ func NewApp(appName, version string, initFunction func(*App)) {
 	app.logger = createLogger(app.DotPath(), true)
 	app.staticHandler = app.loadStaticHandler()
 
-	app.initKingpinCommand()
-
+	initKingpinCommand(app)
 	initFunction(app)
-
-	for _, middleware := range app.middlewares {
-		if err := middleware.Init(app); err != nil {
-			app.Log().Fatalf("initializating middleware: %s", err)
-		}
-	}
 
 	commandName, err := app.kingpin.Parse(os.Args[1:])
 	if err != nil {
@@ -94,11 +86,6 @@ func (app *App) CreateCommand(name, description string) *kingpin.CmdClause {
 //AddCommand adds function for command line command
 func (app *App) AddCommand(cmd *kingpin.CmdClause, fn func(a *App) error) {
 	app.commands[cmd] = fn
-}
-
-//AddMiddleware adds optional middlewares
-func (app *App) AddMiddleware(m Middleware) {
-	app.middlewares = append(app.middlewares, m)
 }
 
 //ListenAndServe starts server on port
