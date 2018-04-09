@@ -9,6 +9,13 @@ import (
 	"reflect"
 )
 
+func bindAPI(a *Admin) {
+	bindMarkdownAPI(a)
+	bindListAPI(a)
+	bindListResourceAPI(a)
+	bindListResourceItemAPI(a)
+}
+
 func bindMarkdownAPI(a *Admin) {
 	a.AdminController.Post(a.Prefix+"/_api/markdown", func(request prago.Request) {
 		data, err := ioutil.ReadAll(request.Request().Body)

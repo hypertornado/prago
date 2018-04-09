@@ -204,10 +204,7 @@ func (a *Admin) initAdmin() {
 	})
 
 	bindDBBackupCron(app)
-	bindMarkdownAPI(a)
-	bindListAPI(a)
-	bindListResourceAPI(a)
-	bindListResourceItemAPI(a)
+	bindAPI(app)
 
 	a.sendgridClient = sendgrid.NewSendGridClientWithApiKey(app.Config.GetStringWithFallback("sendgridApi", ""))
 	a.noReplyEmail = app.Config.GetStringWithFallback("noReplyEmail", "")
