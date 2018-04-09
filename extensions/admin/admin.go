@@ -47,7 +47,7 @@ type Admin struct {
 
 //NewAdmin creates new administration on prefix url with name
 func NewAdmin(app *prago.App, prefix, name string, initFunction func(*Admin)) {
-	ret := &Admin{
+	admin := &Admin{
 		Prefix:                prefix,
 		AppName:               name,
 		Resources:             []*Resource{},
@@ -58,38 +58,27 @@ func NewAdmin(app *prago.App, prefix, name string, initFunction func(*Admin)) {
 		fieldTypes:  make(map[string]FieldType),
 		javascripts: []string{},
 		css:         []string{},
+		roles:       make(map[string]map[string]bool),
 	}
 
-	ret.AdminController = ret.AdminAccessController.SubController()
+	admin.AdminController = admin.AdminAccessController.SubController()
+	admin.CreateResource(User{}, initUserResource)
+	admin.CreateResource(File{}, initFilesResource)
+	admin.CreateResource(ActivityLog{}, initActivityLog)
 
-	ret.CreateResource(User{}, initUserResource)
-	ret.CreateResource(File{}, initFilesResource)
-	ret.CreateResource(ActivityLog{}, initActivityLog)
+	admin.AddFieldType("role", admin.createRoleFieldType())
 
-	var fp = func() interface{} {
+	admin.initAdmin()
+	initFunction(admin)
 
-		roleNames := []string{""}
-		if ret.roles != nil {
-			for k, _ := range ret.roles {
-				roleNames = append(roleNames, k)
-			}
-		}
-
-		vals := [][2]string{}
-		for _, v := range roleNames {
-			vals = append(vals, [2]string{v, v})
-		}
-		return vals
+	for _, resource := range admin.Resources {
+		admin.initResource(resource)
 	}
 
-	ret.AddFieldType("role", FieldType{
-		FormSubTemplate: "admin_item_select",
-		ValuesSource:    &fp,
+	admin.AdminController.Get(admin.Prefix+"/*", func(request prago.Request) {
+		render404(request)
 	})
 
-	ret.initAdmin()
-	initFunction(ret)
-	ret.afterInit()
 }
 
 func (a *Admin) AddAction(action Action) {
@@ -170,114 +159,100 @@ func (a *Admin) GetDB() *sql.DB {
 	return a.getDB()
 }
 
-func (a *Admin) initAdmin() {
-	app := a.App
+func (admin *Admin) initAdmin() {
 
 	var err error
-	a.db, err = connectMysql(
-		app.Config.GetString("dbUser"),
-		app.Config.GetString("dbPassword"),
-		app.Config.GetString("dbName"),
+	admin.db, err = connectMysql(
+		admin.App.Config.GetString("dbUser"),
+		admin.App.Config.GetString("dbPassword"),
+		admin.App.Config.GetString("dbName"),
 	)
 	prago.Must(err)
 
-	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
-		request.SetData("admin_header_prefix", a.Prefix)
-		request.SetData("background", a.Background)
-		request.SetData("javascripts", a.javascripts)
-		request.SetData("css", a.css)
+	admin.AdminAccessController.AddBeforeAction(func(request prago.Request) {
+		request.SetData("admin_header_prefix", admin.Prefix)
+		request.SetData("background", admin.Background)
+		request.SetData("javascripts", admin.javascripts)
+		request.SetData("css", admin.css)
 	})
 
-	a.AdminAccessController.AddAroundAction(
+	admin.AdminAccessController.AddAroundAction(
 		createSessionAroundAction(
-			app.AppName,
-			app.Config.GetString("random"),
+			admin.App.AppName,
+			admin.App.Config.GetString("random"),
 		),
 	)
 
-	a.AdminController = a.AdminAccessController.SubController()
+	googleApiKey := admin.App.Config.GetStringWithFallback("google", "")
 
-	googleApiKey := app.Config.GetStringWithFallback("google", "")
-
-	a.AdminController.AddBeforeAction(func(request prago.Request) {
+	admin.AdminController.AddBeforeAction(func(request prago.Request) {
 		request.SetData("google", googleApiKey)
 	})
 
-	bindDBBackupCron(app)
-	bindAPI(app)
+	bindDBBackupCron(admin.App)
+	bindAPI(admin)
 
-	a.sendgridClient = sendgrid.NewSendGridClientWithApiKey(app.Config.GetStringWithFallback("sendgridApi", ""))
-	a.noReplyEmail = app.Config.GetStringWithFallback("noReplyEmail", "")
+	admin.sendgridClient = sendgrid.NewSendGridClientWithApiKey(admin.App.Config.GetStringWithFallback("sendgridApi", ""))
+	admin.noReplyEmail = admin.App.Config.GetStringWithFallback("noReplyEmail", "")
 
-	prago.Must(a.bindAdminCommand(app))
-	prago.Must(a.initTemplates(app))
-	prago.Must(app.LoadTemplateFromString(adminTemplates))
+	prago.Must(admin.bindAdminCommand(admin.App))
+	prago.Must(admin.initTemplates(admin.App))
+	prago.Must(admin.App.LoadTemplateFromString(adminTemplates))
 
-	a.initRootActions()
+	admin.initRootActions()
 
-	a.AdminController.AddAroundAction(func(request prago.Request, next func()) {
+	admin.AdminController.AddAroundAction(func(request prago.Request, next func()) {
 		session := request.GetData("session").(*sessions.Session)
 		userID, ok := session.Values["user_id"].(int64)
 
 		if !ok {
-			prago.Redirect(request, a.Prefix+"/user/login")
+			prago.Redirect(request, admin.Prefix+"/user/login")
 			return
 		}
 
 		var user User
-		err := a.Query().WhereIs("id", userID).Get(&user)
+		err := admin.Query().WhereIs("id", userID).Get(&user)
 		if err != nil {
-			prago.Redirect(request, a.Prefix+"/user/login")
+			prago.Redirect(request, admin.Prefix+"/user/login")
 			return
 
 		}
 
-		randomness := app.Config.GetString("random")
+		randomness := admin.App.Config.GetString("random")
 		request.SetData("_csrfToken", user.CSRFToken(randomness))
 		request.SetData("currentuser", &user)
 		request.SetData("locale", GetLocale(request))
 
-		headerData := a.getHeaderData(request)
+		headerData := admin.getHeaderData(request)
 		request.SetData("admin_header", headerData)
 
 		next()
 	})
 
-	a.AdminController.Get(a.Prefix, func(request prago.Request) {
+	admin.AdminController.Get(admin.Prefix, func(request prago.Request) {
 		request.SetData("admin_header_home_selected", true)
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   a.getAdminNavigation(*GetUser(request), ""),
+			Navigation:   admin.getAdminNavigation(*GetUser(request), ""),
 			PageTemplate: "admin_home_navigation",
-			PageData:     a.getHomeData(request),
+			PageData:     admin.getHomeData(request),
 		})
 	})
 
-	a.AdminController.Get(a.Prefix+"/_help/markdown", func(request prago.Request) {
+	admin.AdminController.Get(admin.Prefix+"/_help/markdown", func(request prago.Request) {
 		request.SetData("admin_yield", "admin_help_markdown")
 		prago.Render(request, 200, "admin_layout")
 	})
 
-	a.AdminController.Get(a.Prefix+"/_stats", stats)
-	a.AdminController.Get(a.Prefix+"/_static/admin.js", func(request prago.Request) {
+	admin.AdminController.Get(admin.Prefix+"/_stats", stats)
+	admin.AdminController.Get(admin.Prefix+"/_static/admin.js", func(request prago.Request) {
 		request.Response().Header().Set("Content-type", "text/javascript")
 		request.Response().WriteHeader(200)
 		request.Response().Write([]byte(adminJS))
 	})
-	a.App.MainController().Get(a.Prefix+"/_static/admin.css", func(request prago.Request) {
+	admin.App.MainController().Get(admin.Prefix+"/_static/admin.css", func(request prago.Request) {
 		request.Response().Header().Set("Content-type", "text/css; charset=utf-8")
 		request.Response().WriteHeader(200)
 		request.Response().Write([]byte(adminCSS))
-	})
-}
-
-func (a *Admin) afterInit() {
-	for i := range a.Resources {
-		resource := a.Resources[i]
-		prago.Must(a.initResource(resource))
-	}
-
-	a.AdminController.Get(a.Prefix+"/*", func(request prago.Request) {
-		render404(request)
 	})
 }
 
@@ -416,17 +391,6 @@ func bindDBBackupCron(app *prago.App) {
 		return t.Add(1 * time.Hour)
 	})
 }
-
-//NewAdminMockup creates mockup of admin for testing purposes
-/*func NewAdminMockup(user, password, dbName string) (*Admin, error) {
-	db, err := extensions.ConnectMysql(user, password, dbName)
-	if err != nil {
-		return nil, err
-	}
-	admin := NewAdmin("test", "test")
-	admin.db = db
-	return admin, nil
-}*/
 
 func columnName(fieldName string) string {
 	return utils.PrettyURL(fieldName)

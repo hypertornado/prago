@@ -22,10 +22,28 @@ func AuthenticateSysadmin(u *User) bool {
 	return false
 }
 
-func (a *Admin) AddAuthRole(roleName string, permissions []string) {
-	if a.roles == nil {
-		a.roles = make(map[string]map[string]bool)
+func (admin *Admin) createRoleFieldType() FieldType {
+	var fp = func() interface{} {
+		roleNames := []string{""}
+		if admin.roles != nil {
+			for k, _ := range admin.roles {
+				roleNames = append(roleNames, k)
+			}
+		}
+
+		vals := [][2]string{}
+		for _, v := range roleNames {
+			vals = append(vals, [2]string{v, v})
+		}
+		return vals
 	}
+	return FieldType{
+		FormSubTemplate: "admin_item_select",
+		ValuesSource:    &fp,
+	}
+}
+
+func (a *Admin) AddAuthRole(roleName string, permissions []string) {
 	perms := map[string]bool{}
 	for _, v := range permissions {
 		perms[v] = true

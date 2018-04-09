@@ -132,7 +132,7 @@ func (a *Admin) CreateResource(item interface{}, initFunction func(*Resource)) {
 	}
 }
 
-func (a *Admin) initResource(resource *Resource) error {
+func (a *Admin) initResource(resource *Resource) {
 	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
 		request.SetData("admin_resource", resource)
 		next()
@@ -158,7 +158,7 @@ func (a *Admin) initResource(resource *Resource) error {
 		}*/
 	}
 
-	return initResourceActions(a, resource)
+	initResourceActions(a, resource)
 }
 
 func (a *Admin) getResourceByItem(item interface{}) (*Resource, error) {

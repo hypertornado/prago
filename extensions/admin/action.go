@@ -388,7 +388,7 @@ func bindAction(a *Admin, resource *Resource, action Action, isItemAction bool) 
 	return nil
 }
 
-func initResourceActions(a *Admin, resource *Resource) error {
+func initResourceActions(a *Admin, resource *Resource) {
 	for _, v := range resource.resourceActions {
 		bindResourceAction(a, resource, v)
 	}
@@ -398,7 +398,7 @@ func initResourceActions(a *Admin, resource *Resource) error {
 	}
 
 	if !resource.HasModel || !resource.HasView {
-		return nil
+		return
 	}
 
 	bindResourceAction(a, resource, actionList)
@@ -431,7 +431,6 @@ func initResourceActions(a *Admin, resource *Resource) error {
 		bindResourceItemAction(a, resource, actionItemHistory)
 	}
 
-	return nil
 }
 
 func (resource *Resource) ResourceActionsButtonData(user *User, admin *Admin) []ButtonData {
