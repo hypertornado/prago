@@ -12,13 +12,14 @@ import (
 //ErrDontHaveModel is returned when item does not have a model
 var ErrDontHaveModel = errors.New("resource does not have model")
 
-type dbProvider interface {
+/*type dbProvider interface {
 	getDB() *sql.DB
 	getResourceByName(string) *Resource
-}
+}*/
 
 //Resource is structure representing one item in admin menu or one table in database
 type Resource struct {
+	Admin               *Admin
 	ID                  string
 	Name                func(locale string) string
 	Typ                 reflect.Type
@@ -30,7 +31,6 @@ type Resource struct {
 	HasModel            bool
 	HasView             bool
 	item                interface{}
-	admin               dbProvider
 	table               string
 	StructCache         *structCache
 	AfterFormCreated    func(f *Form, request prago.Request, newItem bool) *Form
@@ -48,7 +48,7 @@ type Resource struct {
 }
 
 //CreateResource creates new resource based on item
-func (a *Admin) CreateResource(item interface{}) {
+func (a *Admin) CreateResource(item interface{}, initFunction func(*Resource)) {
 	cache, err := newStructCache(item, a.fieldTypes)
 	if err != nil {
 		panic(err)
@@ -57,20 +57,22 @@ func (a *Admin) CreateResource(item interface{}) {
 	typ := reflect.TypeOf(item)
 	defaultName := typ.Name()
 	ret := &Resource{
-		Name:              func(string) string { return defaultName },
-		ID:                columnName(defaultName),
-		Typ:               typ,
-		Authenticate:      AuthenticateAdmin,
-		Pagination:        1000,
-		HasModel:          true,
-		HasView:           true,
-		item:              item,
-		StructCache:       cache,
-		VisibilityFilter:  defaultVisibilityFilter,
-		EditabilityFilter: defaultEditabilityFilter,
-		CanCreate:         true,
-		CanEdit:           true,
-		CanExport:         true,
+		Admin:              a,
+		Name:               func(string) string { return defaultName },
+		ID:                 columnName(defaultName),
+		Typ:                typ,
+		ResourceController: a.AdminController.SubController(),
+		Authenticate:       AuthenticateAdmin,
+		Pagination:         1000,
+		HasModel:           true,
+		HasView:            true,
+		item:               item,
+		StructCache:        cache,
+		VisibilityFilter:   defaultVisibilityFilter,
+		EditabilityFilter:  defaultEditabilityFilter,
+		CanCreate:          true,
+		CanEdit:            true,
+		CanExport:          true,
 
 		ActivityLog: true,
 	}
@@ -114,7 +116,6 @@ func (a *Admin) CreateResource(item interface{}) {
 		ret.AfterFormCreated = ifaceAdminAfterFormCreated.AdminAfterFormCreated
 	}
 
-	ret.admin = a
 	a.Resources = append(a.Resources, ret)
 	if ret.HasModel {
 		_, typFound := a.resourceMap[ret.Typ]
@@ -125,12 +126,13 @@ func (a *Admin) CreateResource(item interface{}) {
 		a.resourceMap[ret.Typ] = ret
 		a.resourceNameMap[ret.ID] = ret
 	}
+
+	if initFunction != nil {
+		initFunction(ret)
+	}
 }
 
 func (a *Admin) initResource(resource *Resource) error {
-
-	resource.ResourceController = a.AdminController.SubController()
-
 	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
 		request.SetData("admin_resource", resource)
 		next()
@@ -145,16 +147,17 @@ func (a *Admin) initResource(resource *Resource) error {
 		}
 	})
 
-	init, ok := resource.item.(interface {
+	_, ok := resource.item.(interface {
 		InitResource(*Admin, *Resource) error
 	})
-
 	if ok {
-		err := init.InitResource(a, resource)
+		panic("use of deprecated API InitResource, " + resource.table)
+		/*err := init.InitResource(a, resource)
 		if err != nil {
 			return err
-		}
+		}*/
 	}
+
 	return initResourceActions(a, resource)
 }
 
@@ -168,7 +171,7 @@ func (a *Admin) getResourceByItem(item interface{}) (*Resource, error) {
 }
 
 func (ar *Resource) db() *sql.DB {
-	return ar.admin.getDB()
+	return ar.Admin.getDB()
 }
 
 func (ar *Resource) tableName() string {

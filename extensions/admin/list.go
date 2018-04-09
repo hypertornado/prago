@@ -291,7 +291,7 @@ func (resource *Resource) valueToCell(admin *Admin, field reflect.StructField, v
 				resourceName = field.Tag.Get("prago-relation")
 			}
 
-			relationResource := resource.admin.getResourceByName(resourceName)
+			relationResource := resource.Admin.getResourceByName(resourceName)
 
 			var relationItem interface{}
 			relationResource.newItem(&relationItem)

@@ -36,6 +36,11 @@ type User struct {
 	UpdatedAt         time.Time
 }
 
+//GetUser returns currently logged in user
+func GetUser(request prago.Request) *User {
+	return request.GetData("currentuser").(*User)
+}
+
 //AdminName is name in admin for user
 func (User) AdminName(lang string) string { return messages.Messages.Get(lang, "admin_users") }
 
@@ -201,8 +206,8 @@ func (u User) sendRenew(request prago.Request, a *Admin) error {
 	return a.sendgridClient.Send(message)
 }
 
-//InitResource for user
-func (User) InitResource(a *Admin, resource *Resource) error {
+func initUserResource(resource *Resource) {
+	a := resource.Admin
 
 	resource.AddItemAction(
 		Action{
@@ -682,7 +687,7 @@ func (User) InitResource(a *Admin, resource *Resource) error {
 			renderPasswordForm(request, form)
 		}
 	})
-	return nil
+
 }
 
 func fixEmail(in string) string {

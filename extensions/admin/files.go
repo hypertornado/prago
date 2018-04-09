@@ -127,8 +127,8 @@ func getOldRedirectParams(request prago.Request, admin *Admin) (uuid, name strin
 	return
 }
 
-//InitResource of file
-func (File) InitResource(a *Admin, resource *Resource) error {
+func initFilesResource(resource *Resource) {
+	a := resource.Admin
 	initCDN(a)
 
 	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
@@ -320,7 +320,6 @@ func (File) InitResource(a *Admin, resource *Resource) error {
 		})
 	})
 
-	return nil
 }
 
 func (f *File) getPath(prefix string) (folder, file string) {

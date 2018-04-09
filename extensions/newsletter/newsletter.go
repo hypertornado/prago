@@ -240,8 +240,8 @@ func InitNewsletterHelper(app *prago.App, nm NewsletterMiddleware) {
 		prago.Render(request, 200, "newsletter_layout")
 	})
 
-	nmMiddleware.Admin.CreateResource(Newsletter{})
-	nmMiddleware.Admin.CreateResource(NewsletterPersons{})
+	nmMiddleware.Admin.CreateResource(Newsletter{}, initNewsletterResource)
+	nmMiddleware.Admin.CreateResource(NewsletterPersons{}, initNewsletterPersonsResource)
 }
 
 func (nm NewsletterMiddleware) sendConfirmEmail(name, email string) error {
@@ -357,7 +357,8 @@ type Newsletter struct {
 	UpdatedAt     time.Time
 }
 
-func (Newsletter) InitResource(a *administration.Admin, resource *administration.Resource) error {
+func initNewsletterResource(resource *administration.Resource) {
+	a := resource.Admin
 	resource.ActivityLog = true
 
 	resource.Authenticate = nmMiddleware.Authenticatizer
@@ -461,7 +462,6 @@ func (Newsletter) InitResource(a *administration.Admin, resource *administration
 		},
 	))
 	resource.AddItemAction(doSendAction)
-	return nil
 }
 
 func parseEmails(emails string) []string {
@@ -567,9 +567,8 @@ type NewsletterPersons struct {
 	UpdatedAt    time.Time
 }
 
-func (NewsletterPersons) InitResource(a *administration.Admin, resource *administration.Resource) error {
+func initNewsletterPersonsResource(resource *administration.Resource) {
 	resource.ActivityLog = true
-	return nil
 }
 
 func (NewsletterPersons) Authenticate(u *administration.User) bool {

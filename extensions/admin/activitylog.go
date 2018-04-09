@@ -82,9 +82,8 @@ type ActivityLog struct {
 	CreatedAt     time.Time `prago-preview:"true"`
 }
 
-func (ActivityLog) InitResource(a *Admin, resource *Resource) error {
+func initActivityLog(resource *Resource) {
 	resource.OrderDesc = true
-	return nil
 }
 
 func (ActivityLog) Authenticate(u *User) bool {

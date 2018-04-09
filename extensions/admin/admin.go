@@ -48,18 +48,23 @@ type Admin struct {
 //NewAdmin creates new administration on prefix url with name
 func NewAdmin(app *prago.App, prefix, name string, initFunction func(*Admin)) {
 	ret := &Admin{
-		Prefix:          prefix,
-		AppName:         name,
-		Resources:       []*Resource{},
-		resourceMap:     make(map[reflect.Type]*Resource),
-		resourceNameMap: make(map[string]*Resource),
-		fieldTypes:      make(map[string]FieldType),
-		javascripts:     []string{},
-		css:             []string{},
+		Prefix:                prefix,
+		AppName:               name,
+		Resources:             []*Resource{},
+		resourceMap:           make(map[reflect.Type]*Resource),
+		resourceNameMap:       make(map[string]*Resource),
+		AdminAccessController: app.MainController().SubController(),
+		App:         app,
+		fieldTypes:  make(map[string]FieldType),
+		javascripts: []string{},
+		css:         []string{},
 	}
-	ret.CreateResource(User{})
-	ret.CreateResource(File{})
-	ret.CreateResource(ActivityLog{})
+
+	ret.AdminController = ret.AdminAccessController.SubController()
+
+	ret.CreateResource(User{}, initUserResource)
+	ret.CreateResource(File{}, initFilesResource)
+	ret.CreateResource(ActivityLog{}, initActivityLog)
 
 	var fp = func() interface{} {
 
@@ -81,8 +86,6 @@ func NewAdmin(app *prago.App, prefix, name string, initFunction func(*Admin)) {
 		FormSubTemplate: "admin_item_select",
 		ValuesSource:    &fp,
 	})
-
-	ret.App = app
 
 	ret.initAdmin()
 	initFunction(ret)
@@ -159,54 +162,6 @@ func (a *Admin) getResourceByName(name string) *Resource {
 	return a.resourceNameMap[columnName(name)]
 }
 
-//GetUser returns currently logged in user
-func GetUser(request prago.Request) *User {
-	return request.GetData("currentuser").(*User)
-}
-
-type adminHeaderData struct {
-	Name        string
-	Language    string
-	Logo        string
-	Background  string
-	UrlPrefix   string
-	HomepageUrl string
-	Items       []adminHeaderItem
-}
-
-type adminHeaderItem struct {
-	Name string
-	ID   string
-	Url  string
-}
-
-func (a *Admin) getHeaderData(request prago.Request) (headerData *adminHeaderData) {
-
-	user := GetUser(request)
-	locale := GetLocale(request)
-
-	headerData = &adminHeaderData{
-		Name:        a.AppName,
-		Language:    locale,
-		Logo:        a.Logo,
-		Background:  a.Background,
-		UrlPrefix:   a.Prefix,
-		HomepageUrl: request.App().Config.GetStringWithFallback("baseUrl", request.Request().Host),
-		Items:       []adminHeaderItem{},
-	}
-
-	for _, resource := range a.Resources {
-		if resource.HasView && resource.Authenticate(user) {
-			headerData.Items = append(headerData.Items, adminHeaderItem{
-				Name: resource.Name(locale),
-				ID:   resource.ID,
-				Url:  a.Prefix + "/" + resource.ID,
-			})
-		}
-	}
-	return
-}
-
 func (a *Admin) getDB() *sql.DB {
 	return a.db
 }
@@ -226,7 +181,6 @@ func (a *Admin) initAdmin() {
 	)
 	prago.Must(err)
 
-	a.AdminAccessController = app.MainController().SubController()
 	a.AdminAccessController.AddBeforeAction(func(request prago.Request) {
 		request.SetData("admin_header_prefix", a.Prefix)
 		request.SetData("background", a.Background)

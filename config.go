@@ -22,8 +22,8 @@ func loadConfig(appName string) config {
 	if err != nil {
 		panic(fmt.Sprintf("error while parsing config file: %s", err))
 	}
-	return config{kv}
 
+	return config{kv}
 }
 
 type config struct {
