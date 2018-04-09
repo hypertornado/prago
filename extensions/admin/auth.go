@@ -33,7 +33,7 @@ func (a *Admin) AddAuthRole(roleName string, permissions []string) {
 	a.roles[roleName] = perms
 }
 
-func AuthenticatePermission(a *Admin, role string) Authenticatizer {
+func (a *Admin) AuthenticatePermission(permission string) Authenticatizer {
 	return func(u *User) bool {
 		if u.IsSysadmin {
 			return true
@@ -47,6 +47,6 @@ func AuthenticatePermission(a *Admin, role string) Authenticatizer {
 		if a.roles[u.Role] == nil {
 			return false
 		}
-		return a.roles[u.Role][role]
+		return a.roles[u.Role][permission]
 	}
 }
