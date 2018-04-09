@@ -286,10 +286,6 @@ func (a *Admin) initAdmin() {
 		request.SetData("currentuser", &user)
 		request.SetData("locale", GetLocale(request))
 
-		request.SetData("appName", a.AppName)
-		request.SetData("appCode", request.App().AppName)
-		request.SetData("appVersion", request.App().Version)
-
 		headerData := a.getHeaderData(request)
 		request.SetData("admin_header", headerData)
 

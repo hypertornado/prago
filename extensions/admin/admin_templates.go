@@ -328,7 +328,7 @@ const adminTemplates = `
       style="background: linear-gradient(180deg, rgba(0, 0, 0, 0.0), rgba(0,0,0, 0.6) 100%), url('{{.admin_header.Background}}'); background-size: cover; background-attachment: fixed;" 
     {{end}}
     >
-    {{tmpl "admin_flash" .}}
+    {{template "admin_flash" .}}
     <div class="admin_header">
         <div class="admin_header_top">
             <a href="{{.admin_header.UrlPrefix}}" class="admin_header_name admin_header_top_item{{if .admin_header_home_selected}} admin_header_top_item-active{{end}}">
@@ -357,13 +357,7 @@ const adminTemplates = `
     </div>
 
     <div class="admin_content">
-        {{if .template_before}}
-            {{tmpl .template_before .}}
-        {{end}}
         {{tmpl .admin_yield .}}
-        {{if .template_after}}
-            {{tmpl .template_after .}}
-        {{end}}
     </div>
   </body>
 </html>
@@ -509,7 +503,6 @@ const adminTemplates = `
   {{end}}
 {{end}}
 {{define "admin_message"}}
-
 <div class="admin_box">
   <h1>{{.message}}</h1>
 </div>
