@@ -3,6 +3,7 @@ package prago
 
 import (
 	"github.com/Sirupsen/logrus"
+	"github.com/hypertornado/prago/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"net/http"
 	"os"
@@ -91,7 +92,9 @@ func (app *App) AddCommand(cmd *kingpin.CmdClause, fn func(a *App) error) {
 //ListenAndServe starts server on port
 func (app *App) ListenAndServe(port int, developmentMode bool) error {
 	app.DevelopmentMode = developmentMode
-	app.logger = createLogger(app.DotPath(), developmentMode)
+	if !developmentMode {
+		app.logger = createLogger(app.DotPath(), developmentMode)
+	}
 
 	server := &http.Server{
 		Addr:           "0.0.0.0:" + strconv.Itoa(port),
@@ -111,11 +114,14 @@ func (app *App) ListenAndServe(port int, developmentMode bool) error {
 
 func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	request := Request{
-		w:    w,
-		r:    r,
-		app:  app,
-		data: make(map[string]interface{}),
+		uuid:       utils.RandomString(10),
+		receivedAt: time.Now(),
+		w:          w,
+		r:          r,
+		app:        app,
+		data:       nil,
 	}
+	w.Header().Set("X-Prago-Request", request.uuid)
 
 	defer func() {
 		if recoveryData := recover(); recoveryData != nil {
@@ -123,7 +129,9 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	request.writeAccessLog()
+	defer func() {
+		request.writeAfterLog()
+	}()
 
 	if request.removeTrailingSlash() {
 		return

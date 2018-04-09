@@ -5,14 +5,17 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 //Request represents structure for http request
 type Request struct {
-	w    http.ResponseWriter
-	r    *http.Request
-	data map[string]interface{}
-	app  *App
+	uuid       string
+	receivedAt time.Time
+	w          http.ResponseWriter
+	r          *http.Request
+	data       map[string]interface{}
+	app        *App
 }
 
 //Log returns logger
@@ -59,12 +62,23 @@ func Render(request Request, statusCode int, viewName string) {
 	)
 }
 
-func (request Request) writeAccessLog() {
+/*func (request Request) writeAccessLog() {
 	if request.Request().Header.Get("X-Dont-Log") != "true" {
 		request.Log().Println(
 			request.Request().Method,
 			request.Request().URL.String(),
 		)
+	}
+}*/
+
+func (request Request) writeAfterLog() {
+	if request.Request().Header.Get("X-Dont-Log") != "true" {
+		duration := time.Now().Sub(request.receivedAt)
+		request.Log().WithField("uuid", request.uuid).WithField("took", duration).
+			Println(
+				request.Request().Method,
+				request.Request().URL.String(),
+			)
 	}
 }
 

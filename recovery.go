@@ -3,13 +3,13 @@ package prago
 import (
 	"bytes"
 	"fmt"
-	"github.com/hypertornado/prago/utils"
 	"html/template"
 	"runtime/debug"
+	"time"
 )
 
 func recoveryFunction(p Request, recoveryData interface{}) {
-	uuid := utils.RandomString(10)
+	duration := time.Now().Sub(p.receivedAt)
 
 	if p.App().DevelopmentMode {
 		temp, err := template.New("development_error").Parse(recoveryTmpl)
@@ -21,7 +21,7 @@ func recoveryFunction(p Request, recoveryData interface{}) {
 		buf := new(bytes.Buffer)
 		err = temp.ExecuteTemplate(buf, "development_error", map[string]interface{}{
 			"name":    byteData,
-			"subname": fmt.Sprintf("500 Internal Server Error (errorid %s)", uuid),
+			"subname": fmt.Sprintf("500 Internal Server Error (errorid %s)", p.uuid),
 			"stack":   string(debug.Stack()),
 		})
 		if err != nil {
@@ -33,12 +33,14 @@ func recoveryFunction(p Request, recoveryData interface{}) {
 		p.Response().Write(buf.Bytes())
 	} else {
 		p.Response().WriteHeader(500)
-		p.Response().Write([]byte(fmt.Sprintf("We are sorry, some error occured. (errorid %s)", uuid)))
+		p.Response().Write([]byte(fmt.Sprintf("We are sorry, some error occured. (errorid %s)", p.uuid)))
 	}
 
-	p.Log().Errorln(fmt.Sprintf("500 - errorid %s\n%s\nstack:\n", uuid, recoveryData))
-	p.Log().Errorln(string(debug.Stack()))
-
+	p.Log().WithField("uuid", p.uuid).
+		WithField("message", recoveryData).
+		WithField("stack", "\n"+string(debug.Stack())).
+		WithField("took", duration).
+		Errorln("500 - application error")
 }
 
 const recoveryTmpl = `
