@@ -28,7 +28,8 @@ func CreateBuildHelper(app *prago.App, b BuildSettings) {
 
 	ssh := app.Config.GetStringWithFallback("ssh", "")
 	if ssh == "" {
-		app.Log().Fatal("no ssh value set in config file")
+		app.Log().Error("no ssh value set in config file")
+		return
 	}
 
 	releaseCommand := app.CreateCommand("release", "Release cmd")

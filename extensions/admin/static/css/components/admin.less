@@ -652,6 +652,9 @@ progress {
   display: flex;
   justify-content: flex-end;
   vertical-align: bottom;
+  align-items: flex-end;
+  //flex-wrap: wrap;
+  //overflow-x: scroll;
 }
 
 .admin_navigation_tabs-wide {
@@ -659,6 +662,11 @@ progress {
 }
 
 .admin_navigation_tab {
+  text-overflow: ellipsis;
+  /* Required for text-overflow to do anything */
+  white-space: nowrap;
+  overflow: hidden;
+
   margin-top: 3px;
   display: flex;
   background-color: rgba(255, 255, 255, .9);
@@ -667,6 +675,10 @@ progress {
   border-bottom: 1px solid #eee;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
+}
+
+.admin_navigation_tab:hover {
+  flex-shrink: 0;
 }
 
 .admin_navigation_tab:hover a {

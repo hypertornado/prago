@@ -149,7 +149,7 @@ const adminTemplates = `
     {{range $item := .}}
       <tr>
         <td>
-          <b><a href="{{$item.URL}}">{{$item.Name}}</a></b> ({{$item.Count}}x)
+          <b><a href="{{$item.URL}}">{{$item.Name}}</a></b>
         </td>
         <td>
           <div class="btngroup">
@@ -1507,11 +1507,16 @@ progress {
   display: flex;
   justify-content: flex-end;
   vertical-align: bottom;
+  align-items: flex-end;
 }
 .admin_navigation_tabs-wide {
   max-width: none;
 }
 .admin_navigation_tab {
+  text-overflow: ellipsis;
+  /* Required for text-overflow to do anything */
+  white-space: nowrap;
+  overflow: hidden;
   margin-top: 3px;
   display: flex;
   background-color: rgba(255, 255, 255, 0.9);
@@ -1520,6 +1525,9 @@ progress {
   border-bottom: 1px solid #eee;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
+}
+.admin_navigation_tab:hover {
+  flex-shrink: 0;
 }
 .admin_navigation_tab:hover a {
   background-color: rgba(64, 120, 192, 0.1);

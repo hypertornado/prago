@@ -24,10 +24,7 @@ func (a *Admin) getHomeData(request prago.Request) (ret []homeData) {
 				URL:  a.Prefix + "/" + resource.ID,
 			}
 
-			if resource.HasModel {
-				var ifaceItem interface{}
-				resource.newItem(&ifaceItem)
-				item.Count, _ = a.Query().Count(ifaceItem)
+			if resource.HasView {
 				item.Actions = resource.ResourceActionsButtonData(user, a)
 			}
 			ret = append(ret, item)

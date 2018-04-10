@@ -101,7 +101,7 @@ func (admin *Admin) getAdminNavigation(user User, code string) AdminItemNavigati
 func (admin *Admin) getResourceNavigation(resource Resource, user User, code string) AdminItemNavigation {
 	tabs := []NavigationTab{
 		NavigationTab{
-			Name:     messages.Messages.Get(user.Locale, "admin_list"),
+			Name:     resource.Name(user.Locale),
 			URL:      admin.getURL(&resource, ""),
 			Selected: trueIfEqual(code, ""),
 		},
@@ -179,8 +179,10 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 
 	tabs := []NavigationTab{}
 
+	name := getItemName(item, user.Locale)
+
 	tabs = append(tabs, NavigationTab{
-		Name:     messages.Messages.Get(user.Locale, "admin_view"),
+		Name:     name,
 		URL:      prefix,
 		Selected: trueIfEqual(code, ""),
 	})
@@ -242,8 +244,6 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 		{messages.Messages.Get(user.Locale, "admin_admin"), admin.Prefix},
 		{resource.Name(user.Locale), admin.getURL(&resource, "")},
 	}
-
-	name := getItemName(item, user.Locale)
 
 	if code != "" {
 		breadcrumbs = append(breadcrumbs,
