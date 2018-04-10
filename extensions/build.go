@@ -22,49 +22,42 @@ func CreateBuildHelper(app *prago.App, b BuildSettings) {
 	var version = app.Version
 	var appName = app.AppName
 
-	versionCommand := app.CreateCommand("version", "Print version")
-	app.AddCommand(versionCommand, func(app *prago.App) error {
-		app.Log().Println(appName, version)
-		return nil
+	app.AddCommand(app.CreateCommand("build", "Build cmd"), func(*prago.App) {
+		b.build(appName, version)
 	})
 
-	buildCommand := app.CreateCommand("build", "Build cmd")
-	app.AddCommand(buildCommand, func(app *prago.App) error {
-		return b.build(appName, version)
-	})
-
-	sshVal, err := app.Config.Get("ssh")
-
-	if err == nil {
-		ssh := sshVal.(string)
-
-		releaseCommand := app.CreateCommand("release", "Release cmd")
-		releaseCommandVersion := releaseCommand.Arg("version", "").Default(version).String()
-		app.AddCommand(releaseCommand, func(app *prago.App) error {
-			return b.release(appName, *releaseCommandVersion, ssh)
-		})
-
-		remoteCommand := app.CreateCommand("remote", "Remote")
-		remoteCommandVersion := remoteCommand.Arg("version", "").Default(version).String()
-		app.AddCommand(remoteCommand, func(app *prago.App) error {
-			return b.remote(appName, *remoteCommandVersion, ssh)
-		})
-
-		backupCommand := app.CreateCommand("backup", "Backup")
-		app.AddCommand(backupCommand, BackupApp)
-
-		syncBackupCommand := app.CreateCommand("syncbackups", "Sync backups from server")
-		app.AddCommand(syncBackupCommand, func(app *prago.App) error {
-			return b.syncBackups(appName, ssh)
-		})
-
-		partyCommand := app.CreateCommand("party", "release and run current version")
-		app.AddCommand(partyCommand, func(app *prago.App) error {
-			return b.party(appName, version, ssh)
-		})
-	} else {
-		app.Log().Errorf("cant get ssh value for build command: %s", err)
+	ssh := app.Config.GetStringWithFallback("ssh", "")
+	if ssh == "" {
+		app.Log().Fatal("no ssh value set in config file")
 	}
+
+	releaseCommand := app.CreateCommand("release", "Release cmd")
+	releaseCommandVersion := releaseCommand.Arg("version", "").Default(version).String()
+	app.AddCommand(releaseCommand, func(app *prago.App) {
+		prago.Must(b.release(appName, *releaseCommandVersion, ssh))
+	})
+
+	remoteCommand := app.CreateCommand("remote", "Remote")
+	remoteCommandVersion := remoteCommand.Arg("version", "").Default(version).String()
+	app.AddCommand(remoteCommand, func(app *prago.App) {
+		prago.Must(b.remote(appName, *remoteCommandVersion, ssh))
+	})
+
+	backupCommand := app.CreateCommand("backup", "Backup")
+	app.AddCommand(backupCommand, func(app *prago.App) {
+		prago.Must(BackupApp(app))
+	})
+
+	syncBackupCommand := app.CreateCommand("syncbackups", "Sync backups from server")
+	app.AddCommand(syncBackupCommand, func(app *prago.App) {
+		prago.Must(b.syncBackups(appName, ssh))
+	})
+
+	partyCommand := app.CreateCommand("party", "release and run current version")
+	app.AddCommand(partyCommand, func(app *prago.App) {
+		prago.Must(b.party(appName, version, ssh))
+	})
+
 }
 
 func (b BuildSettings) party(appName, version, ssh string) (err error) {

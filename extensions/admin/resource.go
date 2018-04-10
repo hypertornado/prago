@@ -12,11 +12,6 @@ import (
 //ErrDontHaveModel is returned when item does not have a model
 var ErrDontHaveModel = errors.New("resource does not have model")
 
-/*type dbProvider interface {
-	getDB() *sql.DB
-	getResourceByName(string) *Resource
-}*/
-
 //Resource is structure representing one item in admin menu or one table in database
 type Resource struct {
 	Admin               *Admin
@@ -31,9 +26,9 @@ type Resource struct {
 	HasModel            bool
 	HasView             bool
 	item                interface{}
-	table               string
+	TableName           string
 	StructCache         *structCache
-	AfterFormCreated    func(f *Form, request prago.Request, newItem bool) *Form
+	AfterFormCreated    func(f *Form, request prago.Request, newItem bool) *Form //TODO: remove this
 	VisibilityFilter    structFieldFilter
 	EditabilityFilter   structFieldFilter
 	resourceActions     []Action
@@ -41,6 +36,8 @@ type Resource struct {
 	CanCreate           bool //TODO: should be based on user restrictions
 	CanEdit             bool
 	CanExport           bool
+
+	relations []relation
 
 	ActivityLog bool
 
@@ -67,6 +64,7 @@ func (a *Admin) CreateResource(item interface{}, initFunction func(*Resource)) {
 		HasModel:           true,
 		HasView:            true,
 		item:               item,
+		TableName:          columnName(defaultName),
 		StructCache:        cache,
 		VisibilityFilter:   defaultVisibilityFilter,
 		EditabilityFilter:  defaultEditabilityFilter,
@@ -79,42 +77,7 @@ func (a *Admin) CreateResource(item interface{}, initFunction func(*Resource)) {
 
 	ret.OrderByColumn, ret.OrderDesc = cache.GetDefaultOrder()
 
-	ifaceName, ok := item.(interface {
-		AdminName(string) string
-	})
-	if ok {
-		ret.Name = ifaceName.AdminName
-	}
-
-	ifaceID, ok := item.(interface {
-		AdminID() string
-	})
-	if ok {
-		ret.ID = ifaceID.AdminID()
-	}
-
-	ifaceHasAuthenticate, ok := item.(interface {
-		Authenticate(*User) bool
-	})
-	if ok {
-		ret.Authenticate = ifaceHasAuthenticate.Authenticate
-	}
-
-	ifaceHasTableName, ok := item.(interface {
-		AdminHasTableName() string
-	})
-	if ok {
-		ret.table = ifaceHasTableName.AdminHasTableName()
-	} else {
-		ret.table = ret.ID
-	}
-
-	ifaceAdminAfterFormCreated, ok := item.(interface {
-		AdminAfterFormCreated(*Form, prago.Request, bool) *Form
-	})
-	if ok {
-		ret.AfterFormCreated = ifaceAdminAfterFormCreated.AdminAfterFormCreated
-	}
+	detectDeprecatedAPIs(item, ret.TableName)
 
 	a.Resources = append(a.Resources, ret)
 	if ret.HasModel {
@@ -147,17 +110,6 @@ func (a *Admin) initResource(resource *Resource) {
 		}
 	})
 
-	_, ok := resource.item.(interface {
-		InitResource(*Admin, *Resource) error
-	})
-	if ok {
-		panic("use of deprecated API InitResource, " + resource.table)
-		/*err := init.InitResource(a, resource)
-		if err != nil {
-			return err
-		}*/
-	}
-
 	initResourceActions(a, resource)
 }
 
@@ -174,20 +126,16 @@ func (ar *Resource) db() *sql.DB {
 	return ar.Admin.getDB()
 }
 
-func (ar *Resource) tableName() string {
-	return ar.table
-}
-
 func (ar *Resource) unsafeDropTable() error {
-	return dropTable(ar.db(), ar.tableName())
+	return dropTable(ar.db(), ar.TableName)
 }
 
 func (ar *Resource) migrate(verbose bool) error {
-	_, err := getTableDescription(ar.db(), ar.tableName())
+	_, err := getTableDescription(ar.db(), ar.TableName)
 	if err == nil {
-		return migrateTable(ar.db(), ar.tableName(), ar.StructCache, verbose)
+		return migrateTable(ar.db(), ar.TableName, ar.StructCache, verbose)
 	}
-	return createTable(ar.db(), ar.tableName(), ar.StructCache, verbose)
+	return createTable(ar.db(), ar.TableName, ar.StructCache, verbose)
 }
 
 func (ar *Resource) saveWithDBIface(item interface{}, db dbIface) error {
@@ -202,7 +150,7 @@ func (ar *Resource) saveWithDBIface(item interface{}, db dbIface) error {
 		val.FieldByName(fn).Set(timeVal)
 	}
 
-	return ar.StructCache.saveItem(db, ar.tableName(), item)
+	return ar.StructCache.saveItem(db, ar.TableName, item)
 }
 
 func (ar *Resource) createWithDBIface(item interface{}, db dbIface) error {
@@ -222,7 +170,7 @@ func (ar *Resource) createWithDBIface(item interface{}, db dbIface) error {
 			}
 		}
 	}
-	return ar.StructCache.createItem(db, ar.tableName(), item)
+	return ar.StructCache.createItem(db, ar.TableName, item)
 }
 
 func (ar *Resource) newItem(item interface{}) {
@@ -231,4 +179,48 @@ func (ar *Resource) newItem(item interface{}) {
 
 func (ar *Resource) newItems(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(reflect.SliceOf(reflect.PtrTo(ar.Typ))))
+}
+
+func detectDeprecatedAPIs(item interface{}, tableName string) {
+	_, ok := item.(interface {
+		AdminName(string) string
+	})
+	if ok {
+		panic("use of deprecated API AdminName, " + tableName)
+	}
+
+	_, ok = item.(interface {
+		AdminID() string
+	})
+	if ok {
+		panic("use of deprecated API AdminID, " + tableName)
+	}
+
+	_, ok = item.(interface {
+		Authenticate(*User) bool
+	})
+	if ok {
+		panic("use of deprecated API Authenticate, " + tableName)
+	}
+
+	_, ok = item.(interface {
+		AdminHasTableName() string
+	})
+	if ok {
+		panic("use of deprecated API AdminHasTableName, " + tableName)
+	}
+
+	_, ok = item.(interface {
+		AdminAfterFormCreated(*Form, prago.Request, bool) *Form
+	})
+	if ok {
+		panic("use of deprecated API AdminAfterFormCreated, " + tableName)
+	}
+
+	_, ok = item.(interface {
+		InitResource(*Admin, *Resource) error
+	})
+	if ok {
+		panic("use of deprecated API InitResource, " + tableName)
+	}
 }

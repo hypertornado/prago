@@ -7,11 +7,9 @@ import (
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 	"github.com/hypertornado/prago/utils"
-	"github.com/renstrom/shortuuid"
 	"io"
 	"mime/multipart"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -62,11 +60,7 @@ type File struct {
 	UpdatedAt   time.Time
 }
 
-//AdminName returns file admin name
-func (File) AdminName(lang string) string { return messages.Messages.Get(lang, "admin_files") }
-
-//AdminAfterFormCreated creates form for file upload
-func (File) AdminAfterFormCreated(f *Form, request prago.Request, newItem bool) *Form {
+func fileAfterFormCreated(f *Form, request prago.Request, newItem bool) *Form {
 	newForm := NewForm()
 	newForm.Method = f.Method
 	newForm.Action = f.Action
@@ -130,6 +124,8 @@ func getOldRedirectParams(request prago.Request, admin *Admin) (uuid, name strin
 func initFilesResource(resource *Resource) {
 	a := resource.Admin
 	initCDN(a)
+	resource.AfterFormCreated = fileAfterFormCreated
+	resource.Name = messages.Messages.GetNameFunction("admin_files")
 
 	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
 		if request.Request().Method == "POST" && strings.HasSuffix(request.Request().URL.Path, "/delete") {
@@ -182,8 +178,8 @@ func initFilesResource(resource *Resource) {
 		prago.Redirect(request, filesCDN.GetFileURL(uuid, name))
 	})
 
-	filesExportCommand := a.App.CreateCommand("files:export", "export all files")
-	a.App.AddCommand(filesExportCommand, func(app *prago.App) (err error) {
+	/*filesExportCommand := a.App.CreateCommand("files:export", "export all files")
+	a.App.AddCommand(filesExportCommand, func(app *prago.App) {
 		fmt.Println("EXPORT COMMAND")
 
 		var files []*File
@@ -223,7 +219,7 @@ func initFilesResource(resource *Resource) {
 		fmt.Println("Backed files to", backupDir)
 
 		return nil
-	})
+	})*/
 
 	resource.Pagination = 100
 

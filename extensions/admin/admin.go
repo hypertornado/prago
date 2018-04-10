@@ -99,7 +99,7 @@ func NewAdmin(app *prago.App, initFunction func(*Admin)) *Admin {
 	bindDBBackupCron(admin.App)
 	bindAPI(admin)
 
-	prago.Must(admin.bindAdminCommand(admin.App))
+	admin.bindAdminCommand(admin.App)
 	prago.Must(admin.initTemplates(admin.App))
 	prago.Must(admin.App.LoadTemplateFromString(adminTemplates))
 
@@ -206,7 +206,7 @@ func (a *Admin) Migrate(verbose bool) error {
 	}
 	for _, resource := range a.Resources {
 		if resource.HasModel {
-			tables[resource.tableName()] = false
+			tables[resource.TableName] = false
 			err := resource.migrate(verbose)
 			if err != nil {
 				return err
@@ -254,32 +254,32 @@ func (a *Admin) initRootActions() {
 	}
 }
 
-func (a *Admin) bindAdminCommand(app *prago.App) error {
+func (a *Admin) bindAdminCommand(app *prago.App) {
 	adminCommand := app.CreateCommand("admin", "Admin tasks (migrate|drop|thumbnails)")
 	adminSubcommand := adminCommand.Arg("admincommand", "").Required().String()
 
-	app.AddCommand(adminCommand, func(app *prago.App) error {
+	app.AddCommand(adminCommand, func(app *prago.App) {
 		switch *adminSubcommand {
 		case "migrate":
 			app.Log().Println("Migrating database")
 			err := a.Migrate(true)
 			if err == nil {
 				app.Log().Println("Migrate done")
+			} else {
+				app.Log().Fatal(err)
 			}
-			return err
 		case "drop":
 			if utils.ConsoleQuestion("Really want to drop table?") {
 				app.Log().Println("Dropping table")
-				return a.unsafeDropTables()
+				err := a.unsafeDropTables()
+				if err != nil {
+					app.Log().Fatal(err)
+				}
 			}
-			return nil
 		default:
 			app.Log().Println("unknown admin subcommand " + *adminSubcommand)
 		}
-		return nil
 	})
-
-	return nil
 }
 
 func (a *Admin) initTemplates(app *prago.App) error {
@@ -386,4 +386,10 @@ func bindDBBackupCron(app *prago.App) {
 
 func columnName(fieldName string) string {
 	return utils.PrettyURL(fieldName)
+}
+
+func Unlocalized(name string) func(string) string {
+	return func(string) string {
+		return name
+	}
 }

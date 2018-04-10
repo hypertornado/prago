@@ -41,17 +41,9 @@ func GetUser(request prago.Request) *User {
 	return request.GetData("currentuser").(*User)
 }
 
-//AdminName is name in admin for user
-func (User) AdminName(lang string) string { return messages.Messages.Get(lang, "admin_users") }
-
 //AdminItemName represents item name for resource ajax api
 func (u *User) AdminItemName(lang string) string {
 	return u.Email
-}
-
-//Authenticate is default authentication for resource
-func (User) Authenticate(u *User) bool {
-	return AuthenticateSysadmin(u)
 }
 
 func (u *User) isPassword(password string) bool {
@@ -122,9 +114,6 @@ func ValidateCSRF(request prago.Request) {
 		panic("Wrong CSRF token")
 	}
 }
-
-//AdminTableName for user
-func (User) AdminTableName() string { return "admin_user" }
 
 func (u User) sendConfirmEmail(request prago.Request, a *Admin) error {
 
@@ -208,6 +197,9 @@ func (u User) sendRenew(request prago.Request, a *Admin) error {
 
 func initUserResource(resource *Resource) {
 	a := resource.Admin
+
+	resource.Name = messages.Messages.GetNameFunction("admin_users")
+	resource.Authenticate = AuthenticateSysadmin
 
 	resource.AddItemAction(
 		Action{

@@ -83,11 +83,8 @@ type ActivityLog struct {
 }
 
 func initActivityLog(resource *Resource) {
+	resource.Authenticate = AuthenticateSysadmin
 	resource.OrderDesc = true
-}
-
-func (ActivityLog) Authenticate(u *User) bool {
-	return AuthenticateSysadmin(u)
 }
 
 func (admin Admin) createNewActivityLog(resource Resource, user User, item interface{}) error {

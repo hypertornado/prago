@@ -3,7 +3,6 @@ package newsletter
 import (
 	"bytes"
 	"crypto/md5"
-	"encoding/csv"
 	"errors"
 	"fmt"
 	"github.com/chris-ramon/douceur/inliner"
@@ -14,7 +13,6 @@ import (
 	"github.com/sendgrid/sendgrid-go"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"net/mail"
 	"net/url"
 	"strings"
@@ -138,12 +136,6 @@ func InitNewsletterHelper(app *prago.App, nm NewsletterMiddleware) {
 	nmMiddleware.sendgridClient = sendgrid.NewSendGridClientWithApiKey(
 		app.Config.GetString("sendgridApi"),
 	)
-
-	newsletterImportCommand := app.CreateCommand("newsletter:import", "Import newsletter list csv")
-	path := newsletterImportCommand.Arg("path", "").Required().String()
-	app.AddCommand(newsletterImportCommand, func(app *prago.App) (err error) {
-		return nmMiddleware.importMailchimpList(*path)
-	})
 
 	nmMiddleware.controller.AddBeforeAction(func(request prago.Request) {
 		request.SetData("site", nmMiddleware.Name)
@@ -298,35 +290,6 @@ func (nm NewsletterMiddleware) CSFR(request prago.Request) string {
 	io.WriteString(h, fmt.Sprintf("%s%s", nm.Randomness, request.Request().UserAgent()))
 	return fmt.Sprintf("%x", h.Sum(nil))
 
-}
-
-func (nm NewsletterMiddleware) importMailchimpList(path string) error {
-	fmt.Println("Importing mailchimp list from", path)
-
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		return err
-	}
-
-	r := csv.NewReader(strings.NewReader(string(data)))
-	records, err := r.ReadAll()
-	if err != nil {
-		return err
-	}
-	for _, record := range records {
-		if len(record) < 3 {
-			continue
-		}
-		email := strings.Trim(record[0], " ")
-		name := strings.Trim(record[1]+" "+record[2], " ")
-		err := nm.AddEmail(email, name, true)
-		if err != nil {
-			fmt.Println("Error while importing", email, name)
-			fmt.Println(err)
-		}
-	}
-
-	return nil
 }
 
 func (nm NewsletterMiddleware) AddEmail(email, name string, confirm bool) error {
@@ -568,9 +531,6 @@ type NewsletterPersons struct {
 }
 
 func initNewsletterPersonsResource(resource *administration.Resource) {
+	resource.Authenticate = administration.AuthenticateSysadmin
 	resource.ActivityLog = true
-}
-
-func (NewsletterPersons) Authenticate(u *administration.User) bool {
-	return administration.AuthenticateSysadmin(u)
 }

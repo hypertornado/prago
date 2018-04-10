@@ -19,7 +19,7 @@ type App struct {
 	Config          config
 	staticHandler   staticFilesHandler
 	kingpin         *kingpin.Application
-	commands        map[*kingpin.CmdClause]func(app *App) error
+	commands        map[*kingpin.CmdClause]func(app *App)
 	logger          *logrus.Logger
 	cron            *cron
 	templates       *templates
@@ -52,10 +52,7 @@ func NewApp(appName, version string, initFunction func(*App)) {
 
 	for command, fn := range app.commands {
 		if command.FullCommand() == commandName {
-			err := fn(app)
-			if err != nil {
-				app.Log().Fatalf("error while running command name %s: %s", commandName, err)
-			}
+			fn(app)
 			return
 		}
 	}
@@ -85,7 +82,7 @@ func (app *App) CreateCommand(name, description string) *kingpin.CmdClause {
 }
 
 //AddCommand adds function for command line command
-func (app *App) AddCommand(cmd *kingpin.CmdClause, fn func(a *App) error) {
+func (app *App) AddCommand(cmd *kingpin.CmdClause, fn func(a *App)) {
 	app.commands[cmd] = fn
 }
 

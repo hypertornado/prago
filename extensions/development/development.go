@@ -23,7 +23,7 @@ func CreateDevelopmentHelper(app *prago.App, settings DevelopmentSettings) {
 	portFlag := devCommand.Flag("port", "server port").Short('p').Default("8585").Int()
 	developmentMode := devCommand.Flag("development", "Is in development mode").Default("t").Short('d').Bool()
 
-	app.AddCommand(devCommand, func(app *prago.App) error {
+	app.AddCommand(devCommand, func(app *prago.App) {
 		for _, v := range settings.Less {
 			go developmentLess(v.SourceDir, v.Target)
 		}
@@ -32,7 +32,7 @@ func CreateDevelopmentHelper(app *prago.App, settings DevelopmentSettings) {
 			go developmentTypescript(v)
 		}
 
-		return app.ListenAndServe(*portFlag, *developmentMode)
+		prago.Must(app.ListenAndServe(*portFlag, *developmentMode))
 	})
 }
 
