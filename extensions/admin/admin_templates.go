@@ -388,7 +388,13 @@ const adminTemplates = `
 </html>
 
 {{end}}{{define "admin_list"}}
-  <table class="admin_table admin_table-list {{if .CanChangeOrder}} admin_table-order{{end}}" data-type="{{.TypeID}}" data-order-column="{{.OrderColumn}}" data-order-desc="{{.OrderDesc}}">
+  <table class="admin_table admin_table-list {{if .CanChangeOrder}} admin_table-order{{end}}"
+  data-type="{{.TypeID}}"
+  data-order-column="{{.OrderColumn}}"
+  data-order-desc="{{.OrderDesc}}"
+  data-prefilter-field="{{.PrefilterField}}"
+  data-prefilter-value="{{.PrefilterValue}}"
+  >
     <thead>
     <tr>
     {{range $item := .Header}}
@@ -1914,6 +1920,9 @@ var List = (function () {
         this.tbody.textContent = "";
         this.bindFilter();
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
+        this.prefilterField = el.getAttribute("data-prefilter-field");
+        this.prefilterField = el.getAttribute("data-prefilter-value");
+        console.log(this.prefilterField, this.prefilterValue);
         this.orderColumn = el.getAttribute("data-order-column");
         if (el.getAttribute("data-order-desc") == "true") {
             this.orderDesc = true;
@@ -2403,7 +2412,7 @@ var RelationsView = (function () {
                 el.appendChild(link);
             }
             else {
-                el.textContent = "Error while loading";
+                el.textContent = "-";
             }
         });
         request.send();
@@ -2475,10 +2484,12 @@ var PlacesView = (function () {
         el.innerText = "";
         var coords = val.split(",");
         if (coords.length != 2) {
+            el.innerText = "-";
+            el.classList.remove("admin_item_view_place");
             return;
         }
         var position = { lat: parseFloat(coords[0]), lng: parseFloat(coords[1]) };
-        var zoom = 11;
+        var zoom = 18;
         var map = new google.maps.Map(el, {
             center: position,
             zoom: zoom

@@ -32,7 +32,7 @@ class RelationsView {
 
         el.appendChild(link);
       } else {
-        el.textContent = "Error while loading";
+        el.textContent = "-";
       }
     })
     request.send();

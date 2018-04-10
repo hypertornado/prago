@@ -45,7 +45,7 @@ type Resource struct {
 }
 
 //CreateResource creates new resource based on item
-func (a *Admin) CreateResource(item interface{}, initFunction func(*Resource)) {
+func (a *Admin) CreateResource(item interface{}, initFunction func(*Resource)) *Resource {
 	cache, err := newStructCache(item, a.fieldTypes)
 	if err != nil {
 		panic(err)
@@ -93,6 +93,8 @@ func (a *Admin) CreateResource(item interface{}, initFunction func(*Resource)) {
 	if initFunction != nil {
 		initFunction(ret)
 	}
+
+	return ret
 }
 
 func (a *Admin) initResource(resource *Resource) {

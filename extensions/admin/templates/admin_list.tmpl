@@ -1,5 +1,11 @@
 {{define "admin_list"}}
-  <table class="admin_table admin_table-list {{if .CanChangeOrder}} admin_table-order{{end}}" data-type="{{.TypeID}}" data-order-column="{{.OrderColumn}}" data-order-desc="{{.OrderDesc}}">
+  <table class="admin_table admin_table-list {{if .CanChangeOrder}} admin_table-order{{end}}"
+  data-type="{{.TypeID}}"
+  data-order-column="{{.OrderColumn}}"
+  data-order-desc="{{.OrderDesc}}"
+  data-prefilter-field="{{.PrefilterField}}"
+  data-prefilter-value="{{.PrefilterValue}}"
+  >
     <thead>
     <tr>
     {{range $item := .Header}}

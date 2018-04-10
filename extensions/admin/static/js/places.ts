@@ -30,6 +30,7 @@ function bindPlaces() {
       zoom: zoom
     });
 
+
     var marker = new google.maps.Marker({
       position: position,
       map: map,

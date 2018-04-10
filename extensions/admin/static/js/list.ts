@@ -19,6 +19,9 @@ class List {
   orderDesc: boolean;
   page: number;
 
+  prefilterField: string;
+  prefilterValue: string;
+
   progress: HTMLProgressElement;
 
   constructor(el: HTMLTableElement) {
@@ -39,6 +42,8 @@ class List {
     this.bindFilter();
 
     this.adminPrefix = document.body.getAttribute("data-admin-prefix");
+    this.prefilterField = el.getAttribute("data-prefilter-field");
+    this.prefilterValue = el.getAttribute("data-prefilter-value");
 
     this.orderColumn = el.getAttribute("data-order-column");
     if (el.getAttribute("data-order-desc") == "true") {
@@ -157,6 +162,8 @@ class List {
     ret.OrderBy = this.orderColumn;
     ret.OrderDesc = this.orderDesc;
     ret.Filter = this.getFilterData();
+    ret.PrefilterField = this.prefilterField;
+    ret.PrefilterValue = this.prefilterValue;
     return ret;
   }
 

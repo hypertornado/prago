@@ -389,6 +389,10 @@ func bindAction(a *Admin, resource *Resource, action Action, isItemAction bool) 
 }
 
 func initResourceActions(a *Admin, resource *Resource) {
+	for _, v := range resource.relations {
+		resource.bindRelationActions(v)
+	}
+
 	for _, v := range resource.resourceActions {
 		bindResourceAction(a, resource, v)
 	}
