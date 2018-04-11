@@ -142,5 +142,11 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		request.Response().WriteHeader(http.StatusNotFound)
 		request.Response().Write([]byte("404 — not found"))
 	}
+}
 
+//Must panics when error is not nil
+func Must(err error) {
+	if err != nil {
+		panic(err)
+	}
 }

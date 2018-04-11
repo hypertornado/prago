@@ -337,7 +337,7 @@ func writeFileResponse(request prago.Request, files []*File) {
 
 		responseData = append(responseData, ir)
 	}
-	prago.WriteAPI(request, responseData, 200)
+	request.RenderJSON(responseData)
 }
 
 //GetLarge file path

@@ -88,7 +88,7 @@ func bindMarkdownAPI(admin *Admin) {
 		if err != nil {
 			panic(err)
 		}
-		prago.WriteAPI(request, markdown.New(markdown.HTML(true), markdown.Breaks(true)).RenderToString(data), 200)
+		request.RenderJSON(markdown.New(markdown.HTML(true), markdown.Breaks(true)).RenderToString(data))
 	})
 }
 
@@ -156,7 +156,7 @@ func bindListResourceAPI(admin *Admin) {
 		c, err := admin.Query().Count(item)
 		prago.Must(err)
 		if c == 0 {
-			prago.WriteAPI(request, []string{}, 200)
+			request.RenderJSON([]string{})
 			return
 		}
 
@@ -188,8 +188,7 @@ func bindListResourceAPI(admin *Admin) {
 				Name: name,
 			})
 		}
-
-		prago.WriteAPI(request, ret, 200)
+		request.RenderJSON(ret)
 	})
 }
 
@@ -222,10 +221,9 @@ func bindListResourceItemAPI(admin *Admin) {
 
 		var name string
 		name = itemVal.FieldByName("Name").String()
-
 		ret.ID = id
 		ret.Name = name
 
-		prago.WriteAPI(request, ret, 200)
+		request.RenderJSON(ret)
 	})
 }

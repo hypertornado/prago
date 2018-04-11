@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"encoding/json"
 	"github.com/Sirupsen/logrus"
 	"net/http"
 	"net/url"
@@ -60,6 +61,41 @@ func Render(request Request, statusCode int, viewName string) {
 			request.AllRequestData(),
 		),
 	)
+}
+
+func (request Request) RenderJSON(data interface{}) {
+	request.RenderJSONWithCode(data, 200)
+}
+
+func (request Request) RenderJSONWithCode(data interface{}, code int) {
+	request.Response().Header().Add("Content-type", "application/json")
+
+	pretty := false
+	if request.Params().Get("pretty") == "true" {
+		pretty = true
+	}
+
+	var responseToWrite interface{}
+	if code >= 400 {
+		responseToWrite = map[string]interface{}{"error": data, "errorCode": code}
+	} else {
+		responseToWrite = data
+	}
+
+	var result []byte
+	var e error
+
+	if pretty == true {
+		result, e = json.MarshalIndent(responseToWrite, "", "  ")
+	} else {
+		result, e = json.Marshal(responseToWrite)
+	}
+
+	if e != nil {
+		panic("error while generating JSON output")
+	}
+	request.Response().WriteHeader(code)
+	request.Response().Write(result)
 }
 
 //Redirect redirects request to new url

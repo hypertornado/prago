@@ -322,8 +322,7 @@ var actionOrder = Action{
 			prago.Must(resource.StructCache.BindOrder(item, int64(i)))
 			prago.Must(admin.Save(item))
 		}
-
-		prago.WriteAPI(request, true, 200)
+		request.RenderJSON(true)
 	},
 }
 
