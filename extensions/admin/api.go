@@ -7,6 +7,7 @@ import (
 	"github.com/hypertornado/prago"
 	"io/ioutil"
 	"reflect"
+	"strings"
 )
 
 func bindAPI(a *Admin) {
@@ -16,8 +17,75 @@ func bindAPI(a *Admin) {
 	bindListResourceItemAPI(a)
 }
 
-func bindMarkdownAPI(a *Admin) {
-	a.AdminController.Post(a.Prefix+"/_api/markdown", func(request prago.Request) {
+func bindImageAPI(admin *Admin, fileDownloadPath string) {
+	admin.AdminController.Get(admin.GetURL("file/uuid/:uuid"), func(request prago.Request) {
+		var image File
+		err := admin.Query().WhereIs("uid", request.Params().Get("uuid")).Get(&image)
+		if err != nil {
+			panic(err)
+		}
+		prago.Redirect(request,
+			fmt.Sprintf("%s/file/%d", admin.Prefix, image.ID),
+		)
+	})
+
+	admin.AdminController.Get(admin.GetURL("_api/image/thumb/:id"), func(request prago.Request) {
+		var image File
+		prago.Must(admin.Query().WhereIs("uid", request.Params().Get("id")).Get(&image))
+		prago.Redirect(request, image.GetMedium())
+	})
+
+	admin.AdminController.Get(admin.GetURL("_api/image/list"), func(request prago.Request) {
+		var images []*File
+
+		if len(request.Params().Get("ids")) > 0 {
+			ids := strings.Split(request.Params().Get("ids"), ",")
+			for _, v := range ids {
+				var image File
+				err := admin.Query().WhereIs("uid", v).Get(&image)
+				if err == nil {
+					images = append(images, &image)
+				} else {
+					if err != ErrItemNotFound {
+						panic(err)
+					}
+				}
+			}
+		} else {
+			filter := "%" + request.Params().Get("q") + "%"
+			q := admin.Query().WhereIs("filetype", "image").OrderDesc("createdat").Limit(10)
+			if len(request.Params().Get("q")) > 0 {
+				q = q.Where("name LIKE ? OR description LIKE ?", filter, filter)
+			}
+			prago.Must(q.Get(&images))
+		}
+		writeFileResponse(request, images)
+	})
+
+	admin.AdminController.Post(admin.GetURL("_api/image/upload"), func(request prago.Request) {
+		multipartFiles := request.Request().MultipartForm.File["file"]
+
+		description := request.Params().Get("description")
+
+		files := []*File{}
+
+		for _, v := range multipartFiles {
+			file, err := uploadFile(v, fileUploadPath)
+			if err != nil {
+				panic(err)
+			}
+			file.User = GetUser(request).ID
+			file.Description = description
+			prago.Must(admin.Create(file))
+			files = append(files, file)
+		}
+
+		writeFileResponse(request, files)
+	})
+}
+
+func bindMarkdownAPI(admin *Admin) {
+	admin.AdminController.Post(admin.GetURL("_api/markdown"), func(request prago.Request) {
 		data, err := ioutil.ReadAll(request.Request().Body)
 		if err != nil {
 			panic(err)
@@ -31,11 +99,11 @@ type resourceItem struct {
 	Name string `json:"name"`
 }
 
-func bindListAPI(a *Admin) {
-	a.AdminController.Post(a.Prefix+"/_api/list/:name", func(request prago.Request) {
+func bindListAPI(admin *Admin) {
+	admin.AdminController.Post(admin.GetURL("_api/list/:name"), func(request prago.Request) {
 		user := GetUser(request)
 		name := request.Params().Get("name")
-		resource, found := a.resourceNameMap[name]
+		resource, found := admin.resourceNameMap[name]
 		if !found {
 			render404(request)
 			return
@@ -57,7 +125,7 @@ func bindListAPI(a *Admin) {
 			panic(err)
 		}
 
-		listData, err := resource.getListContent(a, &req, user)
+		listData, err := resource.getListContent(admin, &req, user)
 		if err != nil {
 			panic(err)
 		}
@@ -69,12 +137,12 @@ func bindListAPI(a *Admin) {
 	})
 }
 
-func bindListResourceAPI(a *Admin) {
-	a.AdminController.Get(a.Prefix+"/_api/resource/:name", func(request prago.Request) {
+func bindListResourceAPI(admin *Admin) {
+	admin.AdminController.Get(admin.GetURL("_api/resource/:name"), func(request prago.Request) {
 		locale := GetLocale(request)
 		user := GetUser(request)
 		name := request.Params().Get("name")
-		resource, found := a.resourceNameMap[name]
+		resource, found := admin.resourceNameMap[name]
 		if !found {
 			render404(request)
 			return
@@ -87,7 +155,7 @@ func bindListResourceAPI(a *Admin) {
 
 		var item interface{}
 		resource.newItem(&item)
-		c, err := a.Query().Count(item)
+		c, err := admin.Query().Count(item)
 		prago.Must(err)
 		if c == 0 {
 			prago.WriteAPI(request, []string{}, 200)
@@ -98,7 +166,7 @@ func bindListResourceAPI(a *Admin) {
 
 		var items interface{}
 		resource.newItems(&items)
-		prago.Must(a.Query().Get(items))
+		prago.Must(admin.Query().Get(items))
 
 		itemsVal := reflect.ValueOf(items).Elem()
 
@@ -127,11 +195,11 @@ func bindListResourceAPI(a *Admin) {
 	})
 }
 
-func bindListResourceItemAPI(a *Admin) {
-	a.AdminController.Get(a.Prefix+"/_api/resource/:name/:id", func(request prago.Request) {
+func bindListResourceItemAPI(admin *Admin) {
+	admin.AdminController.Get(admin.GetURL("_api/resource/:name/:id"), func(request prago.Request) {
 		user := GetUser(request)
 		resourceName := request.Params().Get("name")
-		resource, found := a.resourceNameMap[resourceName]
+		resource, found := admin.resourceNameMap[resourceName]
 		if !found {
 			render404(request)
 			return
@@ -146,7 +214,7 @@ func bindListResourceItemAPI(a *Admin) {
 
 		var item interface{}
 		resource.newItem(&item)
-		prago.Must(a.Query().WhereIs("id", idStr).Get(item))
+		prago.Must(admin.Query().WhereIs("id", idStr).Get(item))
 
 		ret := resourceItem{}
 

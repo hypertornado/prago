@@ -373,19 +373,6 @@ func initUserResource(resource *Resource) {
 	}
 
 	renderRenew := func(request prago.Request, form *Form, locale string) {
-		/*email := request.Params().Get("email")
-		email = fixEmail(email)
-		title := fmt.Sprintf("%s — %s", email, messages.Messages.Get(locale, "admin_forgoten_set"))
-		request.SetData("bottom", fmt.Sprintf("<a href=\"login\">%s</a>",
-			messages.Messages.Get(locale, "admin_login_action"),
-		))
-		request.SetData("admin_header_prefix", a.Prefix)
-		request.SetData("admin_form", form)
-		request.SetData("title", title)
-
-		request.SetData("yield", "admin_login")
-		prago.Render(request, 200, "admin_layout_nologin")*/
-
 		renderNavigationPageNoLogin(request, AdminNavigationPage{
 			Navigation:   a.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",

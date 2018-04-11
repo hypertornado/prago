@@ -335,19 +335,20 @@ func bindResourceItemAction(a *Admin, resource *Resource, action Action) error {
 	return bindAction(a, resource, action, true)
 }
 
-func bindAction(a *Admin, resource *Resource, action Action, isItemAction bool) error {
+func bindAction(admin *Admin, resource *Resource, action Action, isItemAction bool) error {
 	if strings.HasPrefix(action.Url, "/") {
 		return nil
 	}
 
 	var url string
 	if resource == nil {
-		url = a.Prefix + "/" + action.Url
+		url = admin.GetURL(action.Url)
 	} else {
 		if isItemAction {
-			url = a.Prefix + "/" + resource.ID + "/:id"
-			if len(action.Url) > 0 {
-				url += "/" + action.Url
+			if action.Url != "" {
+				url = resource.GetURL(":id/" + action.Url)
+			} else {
+				url = resource.GetURL(":id")
 			}
 		} else {
 			url = resource.GetURL(action.Url)
@@ -359,7 +360,7 @@ func bindAction(a *Admin, resource *Resource, action Action, isItemAction bool) 
 	if resource != nil {
 		controller = resource.ResourceController
 	} else {
-		controller = a.AdminController
+		controller = admin.AdminController
 	}
 
 	var fn func(request prago.Request) = func(request prago.Request) {
@@ -371,9 +372,9 @@ func bindAction(a *Admin, resource *Resource, action Action, isItemAction bool) 
 			}
 		}
 		if resource != nil {
-			action.Handler(*a, *resource, request, *user)
+			action.Handler(*admin, *resource, request, *user)
 		} else {
-			action.Handler(*a, Resource{}, request, *user)
+			action.Handler(*admin, Resource{}, request, *user)
 		}
 	}
 

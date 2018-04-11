@@ -178,49 +178,6 @@ func initFilesResource(resource *Resource) {
 		prago.Redirect(request, filesCDN.GetFileURL(uuid, name))
 	})
 
-	/*filesExportCommand := a.App.CreateCommand("files:export", "export all files")
-	a.App.AddCommand(filesExportCommand, func(app *prago.App) {
-		fmt.Println("EXPORT COMMAND")
-
-		var files []*File
-		err = a.Query().Get(&files)
-		if err != nil {
-			return err
-		}
-
-		backupDir := fmt.Sprintf("%s/image-export-%s-%s", os.Getenv("HOME"), a.App.AppName, shortuuid.UUID())
-
-		fmt.Println("Backing files to", backupDir)
-
-		for _, v := range files {
-			_, path := v.getPath(fileUploadPath + "original")
-			fmt.Println(v.UID, path)
-
-			dirPath := fmt.Sprintf("%s/%s/%s", backupDir, strings.ToLower(v.UID[0:2]), strings.ToLower(v.UID[2:4]))
-			err = os.MkdirAll(dirPath, 0777)
-			if err != nil {
-				fmt.Println("mkdir error", err)
-				continue
-			}
-
-			extension := filepath.Ext(v.Name)
-			filePath := fmt.Sprintf("%s/%s%s", dirPath, v.UID, extension)
-
-			cmd := exec.Command("cp", path, filePath)
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			err = cmd.Run()
-			if err != nil {
-				fmt.Println("cp error", err)
-				continue
-			}
-		}
-
-		fmt.Println("Backed files to", backupDir)
-
-		return nil
-	})*/
-
 	resource.Pagination = 100
 
 	fileUploadPath = a.App.Config.GetString("fileUploadPath")
@@ -252,7 +209,7 @@ func initFilesResource(resource *Resource) {
 		prago.Must(a.Create(file))
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
-		prago.Redirect(request, a.Prefix+"/"+resource.ID)
+		prago.Redirect(request, resource.GetURL(""))
 	})
 
 	resource.ResourceController.Get(resource.GetURL(":id/edit"), func(request prago.Request) {
@@ -386,76 +343,6 @@ func writeFileResponse(request prago.Request, files []*File) {
 		responseData = append(responseData, ir)
 	}
 	prago.WriteAPI(request, responseData, 200)
-}
-
-func bindImageAPI(a *Admin, fileDownloadPath string) {
-	a.App.MainController().Get(a.Prefix+"/file/uuid/:uuid", func(request prago.Request) {
-		var image File
-		err := a.Query().WhereIs("uid", request.Params().Get("uuid")).Get(&image)
-		if err != nil {
-			panic(err)
-		}
-		prago.Redirect(request,
-			fmt.Sprintf("%s/file/%d", a.Prefix, image.ID),
-		)
-	})
-
-	a.App.MainController().Get(a.Prefix+"/_api/image/thumb/:id", func(request prago.Request) {
-		var image File
-		err := a.Query().WhereIs("uid", request.Params().Get("id")).Get(&image)
-		if err != nil {
-			panic(err)
-		}
-		prago.Redirect(request, image.GetMedium())
-	})
-
-	a.App.MainController().Get(a.Prefix+"/_api/image/list", func(request prago.Request) {
-		var images []*File
-
-		if len(request.Params().Get("ids")) > 0 {
-			ids := strings.Split(request.Params().Get("ids"), ",")
-			for _, v := range ids {
-				var image File
-				err := a.Query().WhereIs("uid", v).Get(&image)
-				if err == nil {
-					images = append(images, &image)
-				} else {
-					if err != ErrItemNotFound {
-						panic(err)
-					}
-				}
-			}
-		} else {
-			filter := "%" + request.Params().Get("q") + "%"
-			q := a.Query().WhereIs("filetype", "image").OrderDesc("createdat").Limit(10)
-			if len(request.Params().Get("q")) > 0 {
-				q = q.Where("name LIKE ? OR description LIKE ?", filter, filter)
-			}
-			prago.Must(q.Get(&images))
-		}
-		writeFileResponse(request, images)
-	})
-
-	a.AdminController.Post(a.Prefix+"/_api/image/upload", func(request prago.Request) {
-		multipartFiles := request.Request().MultipartForm.File["file"]
-
-		description := request.Params().Get("description")
-
-		files := []*File{}
-
-		for _, v := range multipartFiles {
-			file, err := uploadFile(v, fileUploadPath)
-			if err != nil {
-				panic(err)
-			}
-			file.User = GetUser(request).ID
-			file.Description = description
-			prago.Must(a.Create(file))
-			files = append(files, file)
-		}
-
-		writeFileResponse(request, files)
-	})
 }
 
 //GetLarge file path

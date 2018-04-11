@@ -110,14 +110,14 @@ func NewAdmin(app *prago.App, initFunction func(*Admin)) *Admin {
 		userID, ok := session.Values["user_id"].(int64)
 
 		if !ok {
-			prago.Redirect(request, admin.Prefix+"/user/login")
+			prago.Redirect(request, admin.GetURL("user/login"))
 			return
 		}
 
 		var user User
 		err := admin.Query().WhereIs("id", userID).Get(&user)
 		if err != nil {
-			prago.Redirect(request, admin.Prefix+"/user/login")
+			prago.Redirect(request, admin.GetURL("user/login"))
 			return
 
 		}
@@ -133,7 +133,7 @@ func NewAdmin(app *prago.App, initFunction func(*Admin)) *Admin {
 		next()
 	})
 
-	admin.AdminController.Get(admin.Prefix, func(request prago.Request) {
+	admin.AdminController.Get(admin.GetURL(""), func(request prago.Request) {
 		request.SetData("admin_header_home_selected", true)
 		renderNavigationPage(request, AdminNavigationPage{
 			Navigation:   admin.getAdminNavigation(*GetUser(request), ""),
@@ -142,18 +142,18 @@ func NewAdmin(app *prago.App, initFunction func(*Admin)) *Admin {
 		})
 	})
 
-	admin.AdminController.Get(admin.Prefix+"/_help/markdown", func(request prago.Request) {
+	admin.AdminController.Get(admin.GetURL("_help/markdown"), func(request prago.Request) {
 		request.SetData("admin_yield", "admin_help_markdown")
 		prago.Render(request, 200, "admin_layout")
 	})
 
-	admin.AdminController.Get(admin.Prefix+"/_stats", stats)
-	admin.AdminController.Get(admin.Prefix+"/_static/admin.js", func(request prago.Request) {
+	admin.AdminController.Get(admin.GetURL("_stats"), stats)
+	admin.AdminController.Get(admin.GetURL("_static/admin.js"), func(request prago.Request) {
 		request.Response().Header().Set("Content-type", "text/javascript")
 		request.Response().WriteHeader(200)
 		request.Response().Write([]byte(adminJS))
 	})
-	admin.App.MainController().Get(admin.Prefix+"/_static/admin.css", func(request prago.Request) {
+	admin.App.MainController().Get(admin.GetURL("_static/admin.css"), func(request prago.Request) {
 		request.Response().Header().Set("Content-type", "text/css; charset=utf-8")
 		request.Response().WriteHeader(200)
 		request.Response().Write([]byte(adminCSS))
@@ -163,11 +163,19 @@ func NewAdmin(app *prago.App, initFunction func(*Admin)) *Admin {
 		admin.initResource(resource)
 	}
 
-	admin.AdminController.Get(admin.Prefix+"/*", func(request prago.Request) {
+	admin.AdminController.Get(admin.GetURL("*"), func(request prago.Request) {
 		render404(request)
 	})
 
 	return admin
+}
+
+func (a Admin) GetURL(suffix string) string {
+	ret := a.Prefix
+	if len(suffix) > 0 {
+		ret += "/" + suffix
+	}
+	return ret
 }
 
 func (a *Admin) AddAction(action Action) {
@@ -315,11 +323,6 @@ func (a *Admin) initTemplates(app *prago.App) error {
 
 	return nil
 }
-
-//GetURL returns url for resource with given suffix
-/*func (a *Admin) GetURL(resource *Resource, suffix string) string {
-	return a.getURL(resource, suffix)
-}*/
 
 func (a *Admin) getItemURL(resource Resource, item interface{}, suffix string) string {
 	ret := a.Prefix + "/" + resource.ID + "/" + fmt.Sprintf("%d", getItemID(item))
