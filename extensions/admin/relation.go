@@ -8,10 +8,11 @@ import (
 type relation struct {
 	resource *Resource
 	field    string
+	addName  func(string) string
 }
 
-func (r *Resource) AddRelation(r2 *Resource, field string) {
-	r.relations = append(r.relations, relation{r2, field})
+func (r *Resource) AddRelation(r2 *Resource, field string, addName func(string) string) {
+	r.relations = append(r.relations, relation{r2, field, addName})
 }
 
 func (resource *Resource) bindRelationActions(r relation) {
@@ -50,4 +51,18 @@ func (resource *Resource) bindRelationActions(r relation) {
 		},
 	}
 	resource.AddItemAction(action)
+
+	if r.addName == nil {
+		return
+	}
+
+	addAction := Action{
+		Name: r.addName,
+		Url:  "add-" + r.resource.ID,
+		Auth: r.resource.Authenticate,
+		Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
+			prago.Redirect(request, resource.GetURL("new"))
+		},
+	}
+	resource.AddItemAction(addAction)
 }

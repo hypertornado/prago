@@ -235,7 +235,7 @@ func initFilesResource(resource *Resource) {
 
 	bindImageAPI(a, fileDownloadPath)
 
-	resource.ResourceController.Post(a.getURL(resource, ""), func(request prago.Request) {
+	resource.ResourceController.Post(resource.GetURL(""), func(request prago.Request) {
 		ValidateCSRF(request)
 
 		multipartFiles := request.Request().MultipartForm.File["file"]
@@ -255,7 +255,7 @@ func initFilesResource(resource *Resource) {
 		prago.Redirect(request, a.Prefix+"/"+resource.ID)
 	})
 
-	resource.ResourceController.Get(a.getURL(resource, ":id/edit"), func(request prago.Request) {
+	resource.ResourceController.Get(resource.GetURL(":id/edit"), func(request prago.Request) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		prago.Must(err)
 

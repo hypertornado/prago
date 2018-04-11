@@ -317,17 +317,9 @@ func (a *Admin) initTemplates(app *prago.App) error {
 }
 
 //GetURL returns url for resource with given suffix
-func (a *Admin) GetURL(resource *Resource, suffix string) string {
+/*func (a *Admin) GetURL(resource *Resource, suffix string) string {
 	return a.getURL(resource, suffix)
-}
-
-func (a *Admin) getURL(resource *Resource, suffix string) string {
-	ret := a.Prefix + "/" + resource.ID
-	if len(suffix) > 0 {
-		ret += "/" + suffix
-	}
-	return ret
-}
+}*/
 
 func (a *Admin) getItemURL(resource Resource, item interface{}, suffix string) string {
 	ret := a.Prefix + "/" + resource.ID + "/" + fmt.Sprintf("%d", getItemID(item))

@@ -271,7 +271,7 @@ func (resource *Resource) getListContent(admin *Admin, requestQuery *listRequest
 		}
 
 		row.ID = itemVal.FieldByName("ID").Int()
-		row.URL = admin.getURL(resource, fmt.Sprintf("%d", row.ID))
+		row.URL = resource.GetURL(fmt.Sprintf("%d", row.ID))
 
 		row.Actions = admin.getListItemActions(*user, val.Index(i).Interface(), row.ID, *resource)
 		list.Rows = append(list.Rows, row)

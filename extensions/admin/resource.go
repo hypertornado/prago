@@ -44,6 +44,14 @@ type Resource struct {
 	PreviewURLFunction func(interface{}) string
 }
 
+func (resource Resource) GetURL(suffix string) string {
+	ret := resource.Admin.Prefix + "/" + resource.ID
+	if len(suffix) > 0 {
+		ret += "/" + suffix
+	}
+	return ret
+}
+
 //CreateResource creates new resource based on item
 func (a *Admin) CreateResource(item interface{}, initFunction func(*Resource)) *Resource {
 	cache, err := newStructCache(item, a.fieldTypes)
