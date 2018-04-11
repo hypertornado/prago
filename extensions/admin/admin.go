@@ -110,14 +110,14 @@ func NewAdmin(app *prago.App, initFunction func(*Admin)) *Admin {
 		userID, ok := session.Values["user_id"].(int64)
 
 		if !ok {
-			prago.Redirect(request, admin.GetURL("user/login"))
+			request.Redirect(admin.GetURL("user/login"))
 			return
 		}
 
 		var user User
 		err := admin.Query().WhereIs("id", userID).Get(&user)
 		if err != nil {
-			prago.Redirect(request, admin.GetURL("user/login"))
+			request.Redirect(admin.GetURL("user/login"))
 			return
 
 		}

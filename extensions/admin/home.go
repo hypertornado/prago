@@ -21,7 +21,7 @@ func (a *Admin) getHomeData(request prago.Request) (ret []homeData) {
 		if resource.HasView && resource.Authenticate(user) {
 			item := homeData{
 				Name: resource.Name(locale),
-				URL:  a.Prefix + "/" + resource.ID,
+				URL:  resource.GetURL(""),
 			}
 
 			if resource.HasView {

@@ -359,17 +359,14 @@ func initNewsletterResource(resource *administration.Resource) {
 		Method: "post",
 		Handler: func(admin administration.Admin, resource administration.Resource, request prago.Request, user administration.User) {
 			var newsletter Newsletter
-			err := admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
-			if err != nil {
-				panic(err)
-			}
+			prago.Must(admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
 			newsletter.PreviewSentAt = time.Now()
-			admin.Save(&newsletter)
+			prago.Must(admin.Save(&newsletter))
 
 			emails := parseEmails(request.Params().Get("emails"))
 			nmMiddleware.SendEmails(newsletter, emails)
 			administration.AddFlashMessage(request, "Náhled newsletteru odeslán.")
-			prago.Redirect(request, admin.Prefix+"/newsletter")
+			request.Redirect(resource.GetURL(""))
 		},
 	}
 

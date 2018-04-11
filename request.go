@@ -62,14 +62,11 @@ func Render(request Request, statusCode int, viewName string) {
 	)
 }
 
-/*func (request Request) writeAccessLog() {
-	if request.Request().Header.Get("X-Dont-Log") != "true" {
-		request.Log().Println(
-			request.Request().Method,
-			request.Request().URL.String(),
-		)
-	}
-}*/
+//Redirect redirects request to new url
+func (request Request) Redirect(url string) {
+	request.Header().Set("Location", url)
+	request.Response().WriteHeader(http.StatusFound)
+}
 
 func (request Request) writeAfterLog() {
 	if request.Request().Header.Get("X-Dont-Log") != "true" {

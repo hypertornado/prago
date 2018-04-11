@@ -2,7 +2,6 @@ package prago
 
 import (
 	"encoding/json"
-	"net/http"
 )
 
 //Must panics when error is not nil
@@ -10,12 +9,6 @@ func Must(err error) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-//Redirect redirects request to new url
-func Redirect(request Request, url string) {
-	request.Header().Set("Location", url)
-	request.Response().WriteHeader(http.StatusFound)
 }
 
 //WriteAPI writes data as JSON response to request with http code

@@ -61,7 +61,7 @@ func (resource *Resource) bindRelationActions(r relation) {
 		Url:  "add-" + r.resource.ID,
 		Auth: r.resource.Authenticate,
 		Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
-			prago.Redirect(request, resource.GetURL("new"))
+			request.Redirect(resource.GetURL("new"))
 		},
 	}
 	resource.AddItemAction(addAction)

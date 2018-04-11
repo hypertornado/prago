@@ -24,15 +24,13 @@ func bindImageAPI(admin *Admin, fileDownloadPath string) {
 		if err != nil {
 			panic(err)
 		}
-		prago.Redirect(request,
-			fmt.Sprintf("%s/file/%d", admin.Prefix, image.ID),
-		)
+		request.Redirect(admin.GetURL(fmt.Sprintf("file/%d", image.ID)))
 	})
 
 	admin.AdminController.Get(admin.GetURL("_api/image/thumb/:id"), func(request prago.Request) {
 		var image File
 		prago.Must(admin.Query().WhereIs("uid", request.Params().Get("id")).Get(&image))
-		prago.Redirect(request, image.GetMedium())
+		request.Redirect(image.GetMedium())
 	})
 
 	admin.AdminController.Get(admin.GetURL("_api/image/list"), func(request prago.Request) {

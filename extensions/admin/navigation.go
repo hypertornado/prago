@@ -60,7 +60,7 @@ func (admin *Admin) getAdminNavigation(user User, code string) AdminItemNavigati
 	tabs := []NavigationTab{
 		NavigationTab{
 			Name:     messages.Messages.Get(user.Locale, "admin_admin"),
-			URL:      admin.Prefix,
+			URL:      admin.GetURL(""),
 			Selected: trueIfEqual(code, ""),
 		},
 	}
@@ -69,7 +69,7 @@ func (admin *Admin) getAdminNavigation(user User, code string) AdminItemNavigati
 		if v.Auth(&user) {
 			tabs = append(tabs, NavigationTab{
 				Name:     v.GetName(user.Locale),
-				URL:      admin.Prefix + "/" + v.Url,
+				URL:      admin.GetURL(v.Url),
 				Selected: trueIfEqual(code, v.Url),
 			})
 		}
@@ -86,7 +86,7 @@ func (admin *Admin) getAdminNavigation(user User, code string) AdminItemNavigati
 			name = v.Name
 			breadcrumbs = append(breadcrumbs, NavigationBreadcrumb{
 				Name: messages.Messages.Get(user.Locale, "admin_admin"),
-				URL:  admin.Prefix,
+				URL:  admin.GetURL(""),
 			})
 		}
 	}
@@ -232,7 +232,7 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 			if v.Auth == nil || v.Auth(&user) {
 				tabs = append(tabs, NavigationTab{
 					Name:     name,
-					URL:      prefix + "/" + v.Url,
+					URL:      admin.GetURL(v.Url),
 					Selected: trueIfEqual(code, v.Url),
 				})
 			}
@@ -277,19 +277,19 @@ func (admin *Admin) getSettingsNavigation(user User, code string) AdminItemNavig
 
 	tabs = append(tabs, NavigationTab{
 		Name:     messages.Messages.Get(user.Locale, "admin_settings"),
-		URL:      admin.Prefix + "/user/settings",
+		URL:      admin.GetURL("user/settings"),
 		Selected: trueIfEqual(code, "settings"),
 	})
 
 	tabs = append(tabs, NavigationTab{
 		Name:     messages.Messages.Get(user.Locale, "admin_password_change"),
-		URL:      admin.Prefix + "/user/password",
+		URL:      admin.GetURL("user/password"),
 		Selected: trueIfEqual(code, "password"),
 	})
 
 	if code == "password" {
 		breadcrumbs = append(breadcrumbs,
-			NavigationBreadcrumb{messages.Messages.Get(user.Locale, "admin_settings"), admin.Prefix + "/user/settings"},
+			NavigationBreadcrumb{messages.Messages.Get(user.Locale, "admin_settings"), admin.GetURL("/user/settings")},
 		)
 	}
 
@@ -312,19 +312,19 @@ func (admin *Admin) getNologinNavigation(language, code string) AdminItemNavigat
 
 	tabs = append(tabs, NavigationTab{
 		Name:     messages.Messages.Get(language, "admin_login_action"),
-		URL:      admin.Prefix + "/user/login",
+		URL:      admin.GetURL("user/login"),
 		Selected: trueIfEqual(code, "login"),
 	})
 
 	tabs = append(tabs, NavigationTab{
 		Name:     messages.Messages.Get(language, "admin_register"),
-		URL:      admin.Prefix + "/user/registration",
+		URL:      admin.GetURL("user/registration"),
 		Selected: trueIfEqual(code, "registration"),
 	})
 
 	tabs = append(tabs, NavigationTab{
 		Name:     messages.Messages.Get(language, "admin_forgotten"),
-		URL:      admin.Prefix + "/user/forgot",
+		URL:      admin.GetURL("user/forgot"),
 		Selected: trueIfEqual(code, "forgot"),
 	})
 

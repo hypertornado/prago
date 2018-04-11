@@ -101,7 +101,7 @@ var actionCreate = Action{
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
-		prago.Redirect(request, admin.getItemURL(resource, item, ""))
+		request.Redirect(admin.getItemURL(resource, item, ""))
 	},
 }
 
@@ -214,9 +214,9 @@ var actionUpdate = Action{
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_edited"))
 
 		if request.Params().Get("_submit_and_stay_clicked") == "true" {
-			prago.Redirect(request, request.Request().URL.RequestURI())
+			request.Redirect(request.Request().URL.RequestURI())
 		} else {
-			prago.Redirect(request, resource.GetURL(fmt.Sprintf("%d", id)))
+			request.Redirect(resource.GetURL(fmt.Sprintf("%d", id)))
 		}
 
 	},
@@ -297,7 +297,7 @@ var actionDoDelete = Action{
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_deleted"))
-		prago.Redirect(request, resource.GetURL(""))
+		request.Redirect(resource.GetURL(""))
 	},
 }
 

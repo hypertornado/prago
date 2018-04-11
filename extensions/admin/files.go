@@ -160,7 +160,7 @@ func initFilesResource(resource *Resource) {
 			panic("wrong size")
 		}
 
-		prago.Redirect(request, filesCDN.GetImageURL(uuid, name, size))
+		request.Redirect(filesCDN.GetImageURL(uuid, name, size))
 	}, func(params map[string]string) bool {
 		size := params["size"]
 		if size == "large" || size == "medium" || size == "small" {
@@ -171,11 +171,8 @@ func initFilesResource(resource *Resource) {
 
 	a.App.MainController().Get("/files/original/:a/:b/:c/:d/:e/:name", func(request prago.Request) {
 		uuid, name, err := getOldRedirectParams(request, a)
-		if err != nil {
-			panic(err)
-		}
-
-		prago.Redirect(request, filesCDN.GetFileURL(uuid, name))
+		prago.Must(err)
+		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
 	resource.Pagination = 100
@@ -201,15 +198,13 @@ func initFilesResource(resource *Resource) {
 		}
 
 		file, err := uploadFile(multipartFiles[0], fileUploadPath)
-		if err != nil {
-			panic(err)
-		}
+		prago.Must(err)
 		file.User = GetUser(request).ID
 		file.Description = request.Params().Get("Description")
 		prago.Must(a.Create(file))
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
-		prago.Redirect(request, resource.GetURL(""))
+		request.Redirect(resource.GetURL(""))
 	})
 
 	resource.ResourceController.Get(resource.GetURL(":id/edit"), func(request prago.Request) {

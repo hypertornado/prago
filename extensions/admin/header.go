@@ -20,27 +20,27 @@ type adminHeaderItem struct {
 	Url  string
 }
 
-func (a *Admin) getHeaderData(request prago.Request) (headerData *adminHeaderData) {
+func (admin *Admin) getHeaderData(request prago.Request) (headerData *adminHeaderData) {
 
 	user := GetUser(request)
 	locale := GetLocale(request)
 
 	headerData = &adminHeaderData{
-		Name:        a.HumanName,
+		Name:        admin.HumanName,
 		Language:    locale,
-		Logo:        a.Logo,
-		Background:  a.Background,
-		UrlPrefix:   a.Prefix,
+		Logo:        admin.Logo,
+		Background:  admin.Background,
+		UrlPrefix:   admin.Prefix,
 		HomepageUrl: request.App().Config.GetStringWithFallback("baseUrl", request.Request().Host),
 		Items:       []adminHeaderItem{},
 	}
 
-	for _, resource := range a.Resources {
+	for _, resource := range admin.Resources {
 		if resource.HasView && resource.Authenticate(user) {
 			headerData.Items = append(headerData.Items, adminHeaderItem{
 				Name: resource.Name(locale),
 				ID:   resource.ID,
-				Url:  a.Prefix + "/" + resource.ID,
+				Url:  admin.GetURL(resource.ID),
 			})
 		}
 	}
