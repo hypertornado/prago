@@ -50,8 +50,11 @@ func (p *Request) App() *App { return p.app }
 //Header returns request header
 func (p *Request) Header() http.Header { return p.w.Header() }
 
-//Render outputs view of viewName with statusCode to request
-func Render(request Request, statusCode int, viewName string) {
+func (request Request) RenderView(viewName string) {
+	request.RenderViewWithCode(viewName, 200)
+}
+
+func (request Request) RenderViewWithCode(viewName string, statusCode int) {
 	request.Header().Add("Content-Type", "text/html")
 	request.Response().WriteHeader(statusCode)
 	Must(

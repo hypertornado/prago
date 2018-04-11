@@ -144,7 +144,7 @@ func NewAdmin(app *prago.App, initFunction func(*Admin)) *Admin {
 
 	admin.AdminController.Get(admin.GetURL("_help/markdown"), func(request prago.Request) {
 		request.SetData("admin_yield", "admin_help_markdown")
-		prago.Render(request, 200, "admin_layout")
+		request.RenderView("admin_layout")
 	})
 
 	admin.AdminController.Get(admin.GetURL("_stats"), stats)
@@ -324,9 +324,9 @@ func (a *Admin) initTemplates(app *prago.App) error {
 	return nil
 }
 
-func (a *Admin) getItemURL(resource Resource, item interface{}, suffix string) string {
-	ret := a.Prefix + "/" + resource.ID + "/" + fmt.Sprintf("%d", getItemID(item))
-	if len(suffix) > 0 {
+func (resource Resource) GetItemURL(item interface{}, suffix string) string {
+	ret := resource.GetURL(fmt.Sprintf("%d", getItemID(item)))
+	if suffix != "" {
 		ret += "/" + suffix
 	}
 	return ret
@@ -335,13 +335,13 @@ func (a *Admin) getItemURL(resource Resource, item interface{}, suffix string) s
 func render403(request prago.Request) {
 	request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_403"))
 	request.SetData("admin_yield", "admin_message")
-	prago.Render(request, 403, "admin_layout")
+	request.RenderViewWithCode("admin_layout", 403)
 }
 
 func render404(request prago.Request) {
 	request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_404"))
 	request.SetData("admin_yield", "admin_message")
-	prago.Render(request, 404, "admin_layout")
+	request.RenderViewWithCode("admin_layout", 404)
 }
 
 func bindDBBackupCron(app *prago.App) {

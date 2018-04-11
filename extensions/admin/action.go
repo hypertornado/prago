@@ -101,7 +101,7 @@ var actionCreate = Action{
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
-		request.Redirect(admin.getItemURL(resource, item, ""))
+		request.Redirect(resource.GetItemURL(item, ""))
 	},
 }
 
@@ -127,7 +127,7 @@ var actionView = Action{
 		prago.Must(err)
 
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getItemNavigation(resource, user, item, id, ""),
+			Navigation:   admin.getItemNavigation(resource, user, item, ""),
 			PageTemplate: "admin_view",
 			PageData:     view,
 		})
@@ -166,7 +166,7 @@ var actionEdit = Action{
 		}
 
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getItemNavigation(resource, user, item, id, "edit"),
+			Navigation:   admin.getItemNavigation(resource, user, item, "edit"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
@@ -244,7 +244,7 @@ var actionItemHistory = Action{
 		prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
 
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getItemNavigation(resource, user, item, id, "history"),
+			Navigation:   admin.getItemNavigation(resource, user, item, "history"),
 			PageTemplate: "admin_history",
 			PageData:     admin.getHistory(&resource, 0, int64(id)),
 		})
@@ -460,7 +460,7 @@ func (admin *Admin) getListItemActions(user User, item interface{}, id int64, re
 		Url:  resource.GetURL(fmt.Sprintf("%d", id)),
 	})
 
-	navigation := admin.getItemNavigation(resource, user, item, int(id), "")
+	navigation := admin.getItemNavigation(resource, user, item, "")
 
 	for _, v := range navigation.Tabs {
 		if !v.Selected {

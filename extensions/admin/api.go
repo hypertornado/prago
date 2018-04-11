@@ -131,7 +131,7 @@ func bindListAPI(admin *Admin) {
 		request.Response().Header().Set("X-Count", fmt.Sprintf("%d", listData.Count))
 		request.Response().Header().Set("X-Total-Count", fmt.Sprintf("%d", listData.TotalCount))
 		request.SetData("admin_list", listData)
-		prago.Render(request, 200, "admin_list_cells")
+		request.RenderView("admin_list_cells")
 	})
 }
 

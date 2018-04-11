@@ -87,5 +87,5 @@ func stats(request prago.Request) {
 	request.SetData("memStats", memStats)
 	request.SetData("environmentStats", environmentStats)
 	request.SetData("admin_yield", "admin_stats")
-	prago.Render(request, 200, "admin_layout")
+	request.RenderView("admin_layout")
 }

@@ -46,14 +46,14 @@ func renderNavigationPage(request prago.Request, page AdminNavigationPage) {
 	request.SetData("admin_title", page.Navigation.GetPageTitle())
 	request.SetData("admin_yield", "admin_navigation_page")
 	request.SetData("admin_page", page)
-	prago.Render(request, 200, "admin_layout")
+	request.RenderView("admin_layout")
 }
 
 func renderNavigationPageNoLogin(request prago.Request, page AdminNavigationPage) {
 	request.SetData("admin_title", page.Navigation.GetPageTitle())
 	request.SetData("admin_yield", "admin_navigation_page")
 	request.SetData("admin_page", page)
-	prago.Render(request, 200, "admin_layout_nologin")
+	request.RenderView("admin_layout_nologin")
 }
 
 func (admin *Admin) getAdminNavigation(user User, code string) AdminItemNavigation {
@@ -174,16 +174,13 @@ func (admin *Admin) getResourceNavigation(resource Resource, user User, code str
 	}
 }
 
-func (admin *Admin) getItemNavigation(resource Resource, user User, item interface{}, itemID int, code string) AdminItemNavigation {
-	prefix := resource.GetURL(fmt.Sprintf("%d", itemID))
-
+func (admin *Admin) getItemNavigation(resource Resource, user User, item interface{}, code string) AdminItemNavigation {
 	tabs := []NavigationTab{}
-
 	name := getItemName(item, user.Locale)
 
 	tabs = append(tabs, NavigationTab{
 		Name:     name,
-		URL:      prefix,
+		URL:      resource.GetItemURL(item, ""),
 		Selected: trueIfEqual(code, ""),
 	})
 
@@ -200,13 +197,13 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 	if resource.CanEdit {
 		tabs = append(tabs, NavigationTab{
 			Name:     messages.Messages.Get(user.Locale, "admin_edit"),
-			URL:      prefix + "/edit",
+			URL:      resource.GetItemURL(item, "edit"),
 			Selected: trueIfEqual(code, "edit"),
 		})
 
 		tabs = append(tabs, NavigationTab{
 			Name:     messages.Messages.Get(user.Locale, "admin_delete"),
-			URL:      prefix + "/delete",
+			URL:      resource.GetItemURL(item, "delete"),
 			Selected: trueIfEqual(code, "delete"),
 		})
 	}
@@ -214,7 +211,7 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 	if resource.ActivityLog {
 		tabs = append(tabs, NavigationTab{
 			Name:     messages.Messages.Get(user.Locale, "admin_history"),
-			URL:      prefix + "/history",
+			URL:      resource.GetItemURL(item, "history"),
 			Selected: trueIfEqual(code, "history"),
 		})
 	}
@@ -232,7 +229,7 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 			if v.Auth == nil || v.Auth(&user) {
 				tabs = append(tabs, NavigationTab{
 					Name:     name,
-					URL:      admin.GetURL(v.Url),
+					URL:      resource.GetItemURL(item, v.Url),
 					Selected: trueIfEqual(code, v.Url),
 				})
 			}
@@ -247,7 +244,7 @@ func (admin *Admin) getItemNavigation(resource Resource, user User, item interfa
 
 	if code != "" {
 		breadcrumbs = append(breadcrumbs,
-			NavigationBreadcrumb{name, prefix})
+			NavigationBreadcrumb{name, resource.GetItemURL(item, "")})
 		for _, v := range tabs {
 			if v.Selected {
 				name = v.Name
@@ -393,7 +390,7 @@ func createNavigationalItemHandler(action, templateName string, dataGenerator fu
 		}
 
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getItemNavigation(resource, user, item, id, action),
+			Navigation:   admin.getItemNavigation(resource, user, item, action),
 			PageTemplate: templateName,
 			PageData:     data,
 		})

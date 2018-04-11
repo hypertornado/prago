@@ -262,7 +262,7 @@ func initFilesResource(resource *Resource) {
 		AddCSRFToken(form, request)
 
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   a.getItemNavigation(*resource, user, &file, id, "edit"),
+			Navigation:   a.getItemNavigation(*resource, user, &file, "edit"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})

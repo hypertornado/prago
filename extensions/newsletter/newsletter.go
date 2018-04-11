@@ -146,7 +146,7 @@ func InitNewsletterHelper(app *prago.App, nm NewsletterMiddleware) {
 		request.SetData("csrf", nmMiddleware.CSFR(request))
 		request.SetData("yield", "newsletter_subscribe")
 		request.SetData("show_back_button", true)
-		prago.Render(request, 200, "newsletter_layout")
+		request.RenderView("newsletter_layout")
 	})
 
 	nmMiddleware.controller.Post("/newsletter-subscribe", func(request prago.Request) {
@@ -177,7 +177,7 @@ func InitNewsletterHelper(app *prago.App, nm NewsletterMiddleware) {
 		request.SetData("show_back_button", true)
 		request.SetData("title", message)
 		request.SetData("yield", "newsletter_empty")
-		prago.Render(request, 200, "newsletter_layout")
+		request.RenderView("newsletter_layout")
 	})
 
 	nmMiddleware.controller.Get("/newsletter-confirm", func(request prago.Request) {
@@ -203,7 +203,7 @@ func InitNewsletterHelper(app *prago.App, nm NewsletterMiddleware) {
 		request.SetData("show_back_button", true)
 		request.SetData("title", "Odběr newsletteru potvrzen")
 		request.SetData("yield", "newsletter_empty")
-		prago.Render(request, 200, "newsletter_layout")
+		request.RenderView("newsletter_layout")
 	})
 
 	nmMiddleware.controller.Get("/newsletter-unsubscribe", func(request prago.Request) {
@@ -229,7 +229,7 @@ func InitNewsletterHelper(app *prago.App, nm NewsletterMiddleware) {
 		request.SetData("show_back_button", true)
 		request.SetData("title", "Odhlášení z odebírání newsletteru proběhlo úspěšně.")
 		request.SetData("yield", "newsletter_empty")
-		prago.Render(request, 200, "newsletter_layout")
+		request.RenderView("newsletter_layout")
 	})
 
 	nmMiddleware.Admin.CreateResource(Newsletter{}, initNewsletterResource)
@@ -392,7 +392,7 @@ func initNewsletterResource(resource *administration.Resource) {
 			request.SetData("recipients", recipients)
 			request.SetData("recipients_count", len(recipients))
 			request.SetData("admin_yield", "newsletter_sent")
-			prago.Render(request, 200, "admin_layout")
+			request.RenderView("admin_layout")
 		},
 	}
 
