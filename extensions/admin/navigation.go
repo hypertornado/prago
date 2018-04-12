@@ -378,11 +378,11 @@ func trueIfEqual(a, b string) bool {
 func createNavigationalItemHandler(action, templateName string, dataGenerator func(Admin, Resource, prago.Request, User) interface{}) func(Admin, Resource, prago.Request, User) {
 	return func(admin Admin, resource Resource, request prago.Request, user User) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
-		prago.Must(err)
+		must(err)
 
 		var item interface{}
 		resource.newItem(&item)
-		prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
+		must(admin.Query().WhereIs("id", int64(id)).Get(item))
 
 		var data interface{}
 		if dataGenerator != nil {

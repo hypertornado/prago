@@ -17,6 +17,12 @@ type BuildSettings struct {
 	Copy [][2]string
 }
 
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 //Init initializes build middleware
 func CreateBuildHelper(app *prago.App, b BuildSettings) {
 	var version = app.Version
@@ -35,28 +41,28 @@ func CreateBuildHelper(app *prago.App, b BuildSettings) {
 	releaseCommand := app.CreateCommand("release", "Release cmd")
 	releaseCommandVersion := releaseCommand.Arg("version", "").Default(version).String()
 	app.AddCommand(releaseCommand, func(app *prago.App) {
-		prago.Must(b.release(appName, *releaseCommandVersion, ssh))
+		must(b.release(appName, *releaseCommandVersion, ssh))
 	})
 
 	remoteCommand := app.CreateCommand("remote", "Remote")
 	remoteCommandVersion := remoteCommand.Arg("version", "").Default(version).String()
 	app.AddCommand(remoteCommand, func(app *prago.App) {
-		prago.Must(b.remote(appName, *remoteCommandVersion, ssh))
+		must(b.remote(appName, *remoteCommandVersion, ssh))
 	})
 
 	backupCommand := app.CreateCommand("backup", "Backup")
 	app.AddCommand(backupCommand, func(app *prago.App) {
-		prago.Must(BackupApp(app))
+		must(BackupApp(app))
 	})
 
 	syncBackupCommand := app.CreateCommand("syncbackups", "Sync backups from server")
 	app.AddCommand(syncBackupCommand, func(app *prago.App) {
-		prago.Must(b.syncBackups(appName, ssh))
+		must(b.syncBackups(appName, ssh))
 	})
 
 	partyCommand := app.CreateCommand("party", "release and run current version")
 	app.AddCommand(partyCommand, func(app *prago.App) {
-		prago.Must(b.party(appName, version, ssh))
+		must(b.party(appName, version, ssh))
 	})
 
 }

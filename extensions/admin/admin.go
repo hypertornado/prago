@@ -100,8 +100,8 @@ func NewAdmin(app *prago.App, initFunction func(*Admin)) *Admin {
 	bindAPI(admin)
 
 	admin.bindAdminCommand(admin.App)
-	prago.Must(admin.initTemplates(admin.App))
-	prago.Must(admin.App.LoadTemplateFromString(adminTemplates))
+	must(admin.initTemplates(admin.App))
+	must(admin.App.LoadTemplateFromString(adminTemplates))
 
 	admin.initRootActions()
 
@@ -241,7 +241,7 @@ func (a *Admin) Migrate(verbose bool) error {
 func AddFlashMessage(request prago.Request, message string) {
 	session := request.GetData("session").(*sessions.Session)
 	session.AddFlash(message)
-	prago.Must(session.Save(request.Request(), request.Response()))
+	must(session.Save(request.Request(), request.Response()))
 }
 
 func (a *Admin) getResourceByName(name string) *Resource {

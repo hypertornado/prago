@@ -59,7 +59,7 @@ var actionNew = Action{
 		resource.newItem(&item)
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
-		prago.Must(err)
+		must(err)
 
 		form.Classes = append(form.Classes, "form_leavealert")
 		form.Action = "../" + resource.ID
@@ -87,14 +87,14 @@ var actionCreate = Action{
 		resource.newItem(&item)
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
-		prago.Must(err)
+		must(err)
 
 		if resource.AfterFormCreated != nil {
 			form = resource.AfterFormCreated(form, request, true)
 		}
 
 		resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.getFilter())
-		prago.Must(admin.Create(item))
+		must(admin.Create(item))
 
 		if resource.ActivityLog {
 			admin.createNewActivityLog(resource, user, item)
@@ -110,7 +110,7 @@ var actionView = Action{
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 
 		id, err := strconv.Atoi(request.Params().Get("id"))
-		prago.Must(err)
+		must(err)
 
 		var item interface{}
 		resource.newItem(&item)
@@ -124,7 +124,7 @@ var actionView = Action{
 		}
 
 		view, err := resource.StructCache.getView(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
-		prago.Must(err)
+		must(err)
 
 		renderNavigationPage(request, AdminNavigationPage{
 			Navigation:   admin.getItemNavigation(resource, user, item, ""),
@@ -138,7 +138,7 @@ var actionEdit = Action{
 	Url: "edit",
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
-		prago.Must(err)
+		must(err)
 
 		var item interface{}
 		resource.newItem(&item)
@@ -152,7 +152,7 @@ var actionEdit = Action{
 		}
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
-		prago.Must(err)
+		must(err)
 
 		form.Classes = append(form.Classes, "form_leavealert")
 		form.Action = "edit"
@@ -179,14 +179,14 @@ var actionUpdate = Action{
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		ValidateCSRF(request)
 		id, err := strconv.Atoi(request.Params().Get("id"))
-		prago.Must(err)
+		must(err)
 
 		var item interface{}
 		resource.newItem(&item)
-		prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
+		must(admin.Query().WhereIs("id", int64(id)).Get(item))
 
 		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
-		prago.Must(err)
+		must(err)
 
 		if resource.AfterFormCreated != nil {
 			form = resource.AfterFormCreated(form, request, false)
@@ -195,12 +195,15 @@ var actionUpdate = Action{
 		var beforeData []byte
 		if resource.ActivityLog {
 			beforeData, err = json.Marshal(item)
-			prago.Must(err)
+			must(err)
 		}
 
-		err = resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.getFilter())
-		prago.Must(err)
-		prago.Must(admin.Save(item))
+		must(
+			resource.StructCache.BindData(
+				item, request.Params(), request.Request().MultipartForm, form.getFilter(),
+			),
+		)
+		must(admin.Save(item))
 
 		if resource.ActivityLog {
 			afterData, err := json.Marshal(item)
@@ -237,11 +240,11 @@ var actionItemHistory = Action{
 	Url: "history",
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
-		prago.Must(err)
+		must(err)
 
 		var item interface{}
 		resource.newItem(&item)
-		prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
+		must(admin.Query().WhereIs("id", int64(id)).Get(item))
 
 		renderNavigationPage(request, AdminNavigationPage{
 			Navigation:   admin.getItemNavigation(resource, user, item, "history"),
@@ -285,12 +288,12 @@ var actionDoDelete = Action{
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		ValidateCSRF(request)
 		id, err := strconv.Atoi(request.Params().Get("id"))
-		prago.Must(err)
+		must(err)
 
 		var item interface{}
 		resource.newItem(&item)
 		_, err = admin.Query().WhereIs("id", int64(id)).Delete(item)
-		prago.Must(err)
+		must(err)
 
 		if resource.ActivityLog {
 			admin.createDeleteActivityLog(resource, user, int64(id), item)
@@ -307,8 +310,7 @@ var actionOrder = Action{
 	Handler: func(admin Admin, resource Resource, request prago.Request, user User) {
 		decoder := json.NewDecoder(request.Request().Body)
 		var t = map[string][]int{}
-		err := decoder.Decode(&t)
-		prago.Must(err)
+		must(decoder.Decode(&t))
 
 		order, ok := t["order"]
 		if !ok {
@@ -318,9 +320,9 @@ var actionOrder = Action{
 		for i, id := range order {
 			var item interface{}
 			resource.newItem(&item)
-			prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
-			prago.Must(resource.StructCache.BindOrder(item, int64(i)))
-			prago.Must(admin.Save(item))
+			must(admin.Query().WhereIs("id", int64(id)).Get(item))
+			must(resource.StructCache.BindOrder(item, int64(i)))
+			must(admin.Save(item))
 		}
 		request.RenderJSON(true)
 	},

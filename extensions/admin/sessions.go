@@ -18,7 +18,7 @@ func createSessionAroundAction(appName, random string) func(prago.Request, func(
 		flashes := session.Flashes()
 		if len(flashes) > 0 {
 			request.SetData("flash_messages", flashes)
-			prago.Must(session.Save(request.Request(), request.Response()))
+			must(session.Save(request.Request(), request.Response()))
 		}
 
 		request.SetData("session", session)

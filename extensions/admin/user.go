@@ -217,11 +217,11 @@ func initUserResource(resource *Resource) {
 				}
 
 				var user User
-				prago.Must(admin.Query().WhereIs("id", id).Get(&user))
+				must(admin.Query().WhereIs("id", id).Get(&user))
 
 				session := request.GetData("session").(*sessions.Session)
 				session.Values["user_id"] = user.ID
-				prago.Must(session.Save(request.Request(), request.Response()))
+				must(session.Save(request.Request(), request.Response()))
 				request.Redirect(admin.GetURL(""))
 			},
 		})
@@ -415,7 +415,7 @@ func initUserResource(resource *Resource) {
 		err := admin.Query().WhereIs("email", email).Get(&user)
 		if err != nil {
 			if err == ErrItemNotFound {
-				prago.Must(session.Save(request.Request(), request.Response()))
+				must(session.Save(request.Request(), request.Response()))
 				renderLogin(request, form, locale)
 				return
 			}
@@ -431,11 +431,11 @@ func initUserResource(resource *Resource) {
 		user.LoggedInUseragent = request.Request().UserAgent()
 		user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
 
-		prago.Must(admin.Save(&user))
+		must(admin.Save(&user))
 
 		session.Values["user_id"] = user.ID
 		session.AddFlash(messages.Messages.Get(locale, "admin_login_ok"))
-		prago.Must(session.Save(request.Request(), request.Response()))
+		must(session.Save(request.Request(), request.Response()))
 		request.Redirect(admin.GetURL(""))
 	})
 
@@ -495,13 +495,13 @@ func initUserResource(resource *Resource) {
 			user.Name = request.Params().Get("name")
 			user.IsActive = true
 			user.Locale = locale
-			prago.Must(user.newPassword(request.Params().Get("password")))
-			prago.Must(user.sendConfirmEmail(request, admin))
+			must(user.newPassword(request.Params().Get("password")))
+			must(user.sendConfirmEmail(request, admin))
 			err := user.sendAdminEmail(request, admin)
 			if err != nil {
 				request.App().Log().Println(err)
 			}
-			prago.Must(admin.Create(user))
+			must(admin.Create(user))
 
 			AddFlashMessage(request, messages.Messages.Get(locale, "admin_confirm_email_send", user.Email))
 			request.Redirect(admin.GetURL("user/login"))
@@ -516,13 +516,13 @@ func initUserResource(resource *Resource) {
 		session := request.GetData("session").(*sessions.Session)
 		delete(session.Values, "user_id")
 		session.AddFlash(messages.Messages.Get(GetLocale(request), "admin_logout_ok"))
-		prago.Must(session.Save(request.Request(), request.Response()))
+		must(session.Save(request.Request(), request.Response()))
 		request.Redirect(resource.GetURL("login"))
 	})
 
 	settingsForm := func(locale string, user *User) *Form {
 		form, err := resource.StructCache.GetForm(user, locale, whiteListFilter("Name", "Email"), whiteListFilter("Name", "Locale"))
-		prago.Must(err)
+		must(err)
 
 		sel := form.AddSelect("Locale", messages.Messages.Get(locale, "admin_locale"), availableLocales)
 		sel.Value = user.Locale
@@ -552,8 +552,8 @@ func initUserResource(resource *Resource) {
 		AddCSRFToken(form, request)
 		form.Validate()
 		if form.Valid {
-			prago.Must(resource.StructCache.BindData(user, request.Params(), request.Request().MultipartForm, form.getFilter()))
-			prago.Must(admin.Save(user))
+			must(resource.StructCache.BindData(user, request.Params(), request.Request().MultipartForm, form.getFilter()))
+			must(admin.Save(user))
 			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_settings_changed"))
 			request.Redirect(resource.GetURL("settings"))
 			return
@@ -612,8 +612,8 @@ func initUserResource(resource *Resource) {
 		if form.Valid {
 			password := request.Params().Get("newpassword")
 			user := GetUser(request)
-			prago.Must(user.newPassword(password))
-			prago.Must(admin.Save(user))
+			must(user.newPassword(password))
+			must(admin.Save(user))
 			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_password_changed"))
 			request.Redirect(resource.GetURL("settings"))
 		} else {

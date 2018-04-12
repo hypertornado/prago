@@ -85,8 +85,6 @@ func (a *Admin) CreateResource(item interface{}, initFunction func(*Resource)) *
 
 	ret.OrderByColumn, ret.OrderDesc = cache.GetDefaultOrder()
 
-	detectDeprecatedAPIs(item, ret.TableName)
-
 	a.Resources = append(a.Resources, ret)
 	if ret.HasModel {
 		_, typFound := a.resourceMap[ret.Typ]
@@ -189,48 +187,4 @@ func (ar *Resource) newItem(item interface{}) {
 
 func (ar *Resource) newItems(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(reflect.SliceOf(reflect.PtrTo(ar.Typ))))
-}
-
-func detectDeprecatedAPIs(item interface{}, tableName string) {
-	_, ok := item.(interface {
-		AdminName(string) string
-	})
-	if ok {
-		panic("use of deprecated API AdminName, " + tableName)
-	}
-
-	_, ok = item.(interface {
-		AdminID() string
-	})
-	if ok {
-		panic("use of deprecated API AdminID, " + tableName)
-	}
-
-	_, ok = item.(interface {
-		Authenticate(*User) bool
-	})
-	if ok {
-		panic("use of deprecated API Authenticate, " + tableName)
-	}
-
-	_, ok = item.(interface {
-		AdminHasTableName() string
-	})
-	if ok {
-		panic("use of deprecated API AdminHasTableName, " + tableName)
-	}
-
-	_, ok = item.(interface {
-		AdminAfterFormCreated(*Form, prago.Request, bool) *Form
-	})
-	if ok {
-		panic("use of deprecated API AdminAfterFormCreated, " + tableName)
-	}
-
-	_, ok = item.(interface {
-		InitResource(*Admin, *Resource) error
-	})
-	if ok {
-		panic("use of deprecated API InitResource, " + tableName)
-	}
 }

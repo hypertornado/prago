@@ -57,7 +57,7 @@ func (request Request) RenderView(viewName string) {
 func (request Request) RenderViewWithCode(viewName string, statusCode int) {
 	request.Header().Add("Content-Type", "text/html")
 	request.Response().WriteHeader(statusCode)
-	Must(
+	must(
 		request.app.templates.templates.ExecuteTemplate(
 			request.Response(),
 			viewName,

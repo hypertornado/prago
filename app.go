@@ -56,7 +56,7 @@ func NewApp(appName, version string, initFunction func(*App)) {
 			return
 		}
 	}
-	app.Log().Fatalf("command not found: " + commandName)
+	app.Log().Fatalf("command not found: %s", commandName)
 }
 
 func (app *App) loadStaticHandler() staticFilesHandler {
@@ -144,8 +144,7 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//Must panics when error is not nil
-func Must(err error) {
+func must(err error) {
 	if err != nil {
 		panic(err)
 	}

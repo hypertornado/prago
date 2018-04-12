@@ -32,7 +32,10 @@ func CreateDevelopmentHelper(app *prago.App, settings DevelopmentSettings) {
 			go developmentTypescript(v)
 		}
 
-		prago.Must(app.ListenAndServe(*portFlag, *developmentMode))
+		err := app.ListenAndServe(*portFlag, *developmentMode)
+		if err != nil {
+			panic(err)
+		}
 	})
 }
 

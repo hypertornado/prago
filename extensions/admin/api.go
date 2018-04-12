@@ -29,7 +29,7 @@ func bindImageAPI(admin *Admin, fileDownloadPath string) {
 
 	admin.AdminController.Get(admin.GetURL("_api/image/thumb/:id"), func(request prago.Request) {
 		var image File
-		prago.Must(admin.Query().WhereIs("uid", request.Params().Get("id")).Get(&image))
+		must(admin.Query().WhereIs("uid", request.Params().Get("id")).Get(&image))
 		request.Redirect(image.GetMedium())
 	})
 
@@ -55,7 +55,7 @@ func bindImageAPI(admin *Admin, fileDownloadPath string) {
 			if len(request.Params().Get("q")) > 0 {
 				q = q.Where("name LIKE ? OR description LIKE ?", filter, filter)
 			}
-			prago.Must(q.Get(&images))
+			must(q.Get(&images))
 		}
 		writeFileResponse(request, images)
 	})
@@ -74,7 +74,7 @@ func bindImageAPI(admin *Admin, fileDownloadPath string) {
 			}
 			file.User = GetUser(request).ID
 			file.Description = description
-			prago.Must(admin.Create(file))
+			must(admin.Create(file))
 			files = append(files, file)
 		}
 
@@ -154,7 +154,7 @@ func bindListResourceAPI(admin *Admin) {
 		var item interface{}
 		resource.newItem(&item)
 		c, err := admin.Query().Count(item)
-		prago.Must(err)
+		must(err)
 		if c == 0 {
 			request.RenderJSON([]string{})
 			return
@@ -164,7 +164,7 @@ func bindListResourceAPI(admin *Admin) {
 
 		var items interface{}
 		resource.newItems(&items)
-		prago.Must(admin.Query().Get(items))
+		must(admin.Query().Get(items))
 
 		itemsVal := reflect.ValueOf(items).Elem()
 
@@ -211,7 +211,7 @@ func bindListResourceItemAPI(admin *Admin) {
 
 		var item interface{}
 		resource.newItem(&item)
-		prago.Must(admin.Query().WhereIs("id", idStr).Get(item))
+		must(admin.Query().WhereIs("id", idStr).Get(item))
 
 		ret := resourceItem{}
 

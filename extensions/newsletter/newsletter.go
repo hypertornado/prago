@@ -124,6 +124,12 @@ type NewsletterMiddleware struct {
 	controller      *prago.Controller
 }
 
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func InitNewsletterHelper(app *prago.App, nm NewsletterMiddleware) {
 	if nmMiddleware != nil {
 		app.Log().Errorf("cant initialize more then one instance of newsletter")
@@ -359,9 +365,9 @@ func initNewsletterResource(resource *administration.Resource) {
 		Method: "post",
 		Handler: func(admin administration.Admin, resource administration.Resource, request prago.Request, user administration.User) {
 			var newsletter Newsletter
-			prago.Must(admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
+			must(admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
 			newsletter.PreviewSentAt = time.Now()
-			prago.Must(admin.Save(&newsletter))
+			must(admin.Save(&newsletter))
 
 			emails := parseEmails(request.Params().Get("emails"))
 			nmMiddleware.SendEmails(newsletter, emails)

@@ -133,7 +133,7 @@ func initFilesResource(resource *Resource) {
 			id, err := strconv.Atoi(idStr)
 			if err == nil {
 				var file File
-				prago.Must(a.Query().WhereIs("id", id).Get(&file))
+				must(a.Query().WhereIs("id", id).Get(&file))
 				err = filesCDN.DeleteFile(file.UID)
 				if err != nil {
 					a.App.Log().Errorf("deleting CDN: %s", err)
@@ -171,7 +171,7 @@ func initFilesResource(resource *Resource) {
 
 	a.App.MainController().Get("/files/original/:a/:b/:c/:d/:e/:name", func(request prago.Request) {
 		uuid, name, err := getOldRedirectParams(request, a)
-		prago.Must(err)
+		must(err)
 		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
@@ -198,10 +198,10 @@ func initFilesResource(resource *Resource) {
 		}
 
 		file, err := uploadFile(multipartFiles[0], fileUploadPath)
-		prago.Must(err)
+		must(err)
 		file.User = GetUser(request).ID
 		file.Description = request.Params().Get("Description")
-		prago.Must(a.Create(file))
+		must(a.Create(file))
 
 		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
 		request.Redirect(resource.GetURL(""))
@@ -209,10 +209,10 @@ func initFilesResource(resource *Resource) {
 
 	resource.ResourceController.Get(resource.GetURL(":id/edit"), func(request prago.Request) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
-		prago.Must(err)
+		must(err)
 
 		var file File
-		prago.Must(a.Query().WhereIs("id", int64(id)).Get(&file))
+		must(a.Query().WhereIs("id", int64(id)).Get(&file))
 
 		form := NewForm()
 		form.Method = "POST"

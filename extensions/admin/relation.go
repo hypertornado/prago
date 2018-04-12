@@ -33,14 +33,14 @@ func (resource *Resource) bindRelationActions(r relation) {
 			}
 
 			id, err := strconv.Atoi(request.Params().Get("id"))
-			prago.Must(err)
+			must(err)
 
 			listData.PrefilterField = r.field
 			listData.PrefilterValue = request.Params().Get("id")
 
 			var item interface{}
 			resource.newItem(&item)
-			prago.Must(admin.Query().WhereIs("id", int64(id)).Get(item))
+			must(admin.Query().WhereIs("id", int64(id)).Get(item))
 
 			navigation := admin.getItemNavigation(resource, user, item, r.resource.ID)
 			navigation.Wide = true
