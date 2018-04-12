@@ -8,7 +8,7 @@ import (
 	"github.com/chris-ramon/douceur/inliner"
 	"github.com/golang-commonmark/markdown"
 	"github.com/hypertornado/prago"
-	administration "github.com/hypertornado/prago/extensions/admin"
+	"github.com/hypertornado/prago/administration"
 	"github.com/hypertornado/prago/utils"
 	"github.com/sendgrid/sendgrid-go"
 	"html/template"
@@ -113,7 +113,7 @@ var nmMiddleware *NewsletterMiddleware
 type NewsletterMiddleware struct {
 	Name            string
 	baseUrl         string
-	Admin           *administration.Admin
+	Admin           *administration.Administration
 	SenderEmail     string
 	SenderName      string
 	Randomness      string
@@ -343,7 +343,7 @@ func initNewsletterResource(resource *administration.Resource) {
 	previewAction := administration.Action{
 		Name: func(string) string { return "Náhled" },
 		Url:  "preview",
-		Handler: func(admin administration.Admin, resource administration.Resource, request prago.Request, user administration.User) {
+		Handler: func(admin administration.Administration, resource administration.Resource, request prago.Request, user administration.User) {
 			var newsletter Newsletter
 			err := admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			if err != nil {
@@ -363,7 +363,7 @@ func initNewsletterResource(resource *administration.Resource) {
 	doSendPreviewAction := administration.Action{
 		Url:    "send-preview",
 		Method: "post",
-		Handler: func(admin administration.Admin, resource administration.Resource, request prago.Request, user administration.User) {
+		Handler: func(admin administration.Administration, resource administration.Resource, request prago.Request, user administration.User) {
 			var newsletter Newsletter
 			must(admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
 			newsletter.PreviewSentAt = time.Now()
@@ -379,7 +379,7 @@ func initNewsletterResource(resource *administration.Resource) {
 	doSendAction := administration.Action{
 		Url:    "send",
 		Method: "post",
-		Handler: func(admin administration.Admin, resource administration.Resource, request prago.Request, user administration.User) {
+		Handler: func(admin administration.Administration, resource administration.Resource, request prago.Request, user administration.User) {
 			var newsletter Newsletter
 			err := admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			if err != nil {
@@ -416,7 +416,7 @@ func initNewsletterResource(resource *administration.Resource) {
 		"send",
 		func(string) string { return "Odeslat" },
 		"newsletter_send",
-		func(administration.Admin, administration.Resource, prago.Request, administration.User) interface{} {
+		func(administration.Administration, administration.Resource, prago.Request, administration.User) interface{} {
 			recipients, err := nmMiddleware.GetRecipients()
 			if err != nil {
 				panic(err)
