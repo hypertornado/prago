@@ -7,7 +7,7 @@ import (
 	"github.com/golang-commonmark/markdown"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
-	"github.com/hypertornado/prago/extensions"
+	"github.com/hypertornado/prago/build"
 	"github.com/hypertornado/prago/extensions/admin/messages"
 	"github.com/hypertornado/prago/utils"
 	"github.com/sendgrid/sendgrid-go"
@@ -346,7 +346,7 @@ func render404(request prago.Request) {
 
 func bindDBBackupCron(app *prago.App) {
 	app.AddCronTask("backup db", func() {
-		err := extensions.BackupApp(app)
+		err := build.BackupApp(app)
 		if err != nil {
 			app.Log().Error("Error while creating backup:", err)
 		}
