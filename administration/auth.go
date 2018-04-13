@@ -4,19 +4,19 @@ package administration
 type Authenticatizer func(*User) bool
 
 //AuthenticateAdmin authenticaticatizer for admin
-func AuthenticateAdmin(u *User) bool {
-	if u.IsSysadmin {
+func AuthenticateAdmin(user *User) bool {
+	if user.IsSysadmin {
 		return true
 	}
-	if u.IsAdmin {
+	if user.IsAdmin {
 		return true
 	}
 	return false
 }
 
 //AuthenticateSysadmin authenticaticatizer for sysadmin
-func AuthenticateSysadmin(u *User) bool {
-	if u.IsSysadmin {
+func AuthenticateSysadmin(user *User) bool {
+	if user.IsSysadmin {
 		return true
 	}
 	return false
@@ -25,10 +25,8 @@ func AuthenticateSysadmin(u *User) bool {
 func (admin *Administration) createRoleFieldType() FieldType {
 	var fp = func() interface{} {
 		roleNames := []string{""}
-		if admin.roles != nil {
-			for k, _ := range admin.roles {
-				roleNames = append(roleNames, k)
-			}
+		for k, _ := range admin.roles {
+			roleNames = append(roleNames, k)
 		}
 
 		vals := [][2]string{}
@@ -43,15 +41,15 @@ func (admin *Administration) createRoleFieldType() FieldType {
 	}
 }
 
-func (a *Administration) AddAuthRole(roleName string, permissions []string) {
+func (admin *Administration) AddAuthRole(role string, permissions []string) {
 	perms := map[string]bool{}
 	for _, v := range permissions {
 		perms[v] = true
 	}
-	a.roles[roleName] = perms
+	admin.roles[role] = perms
 }
 
-func (a *Administration) AuthenticatePermission(permission string) Authenticatizer {
+func (admin *Administration) AuthenticatePermission(permission string) Authenticatizer {
 	return func(u *User) bool {
 		if u.IsSysadmin {
 			return true
@@ -59,12 +57,12 @@ func (a *Administration) AuthenticatePermission(permission string) Authenticatiz
 		if !u.IsAdmin {
 			return false
 		}
-		if a.roles == nil {
+		if admin.roles == nil {
 			return false
 		}
-		if a.roles[u.Role] == nil {
+		if admin.roles[u.Role] == nil {
 			return false
 		}
-		return a.roles[u.Role][permission]
+		return admin.roles[u.Role][permission]
 	}
 }

@@ -30,10 +30,6 @@ type config struct {
 	v map[string]interface{}
 }
 
-/*func (c *config) Set(k string, val interface{}) {
-	c.v[k] = val
-}*/
-
 //Export outputs config data in human readable form
 func (c config) Export() [][2]string {
 	keys := []string{}

@@ -2,6 +2,7 @@ package prago
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"net/http"
 	"net/url"
@@ -49,7 +50,9 @@ func (request Request) App() App { return request.app }
 
 //RenderView with HTTP 200 code
 func (request Request) RenderView(viewName string) {
+	timestampLog(request, "before render view")
 	request.RenderViewWithCode(viewName, 200)
+	timestampLog(request, "after render view")
 }
 
 //RenderViewWithCode renders view with HTTP code
@@ -109,14 +112,12 @@ func (request Request) Redirect(url string) {
 }
 
 func (request Request) writeAfterLog() {
-	if request.Request().Header.Get("X-Dont-Log") != "true" {
-		duration := time.Now().Sub(request.receivedAt)
-		request.Log().WithField("uuid", request.uuid).WithField("took", duration).
-			Println(
-				request.Request().Method,
-				request.Request().URL.String(),
-			)
-	}
+	timestampLog(request,
+		fmt.Sprintf("%s %s",
+			request.Request().Method,
+			request.Request().URL.String(),
+		),
+	)
 }
 
 func (request Request) removeTrailingSlash() bool {

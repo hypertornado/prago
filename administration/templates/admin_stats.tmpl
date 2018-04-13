@@ -1,5 +1,19 @@
 {{define "admin_stats"}}
 
+<h2>Auth roles</h2>
+
+<table class="admin_table">
+{{range $role, $permissions := .roles}}
+  <tr>
+    <td>{{$role}}</td>
+    <td>{{range $permission, $_ := $permissions}} {{$permission}}{{end}}</td>
+  </tr>
+{{end}}
+</table>
+
+
+<h2>Base stats</h2>
+
 <table class="admin_table">
 {{range $item := .stats}}
   <tr>

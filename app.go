@@ -4,7 +4,6 @@ package prago
 import (
 	"github.com/Sirupsen/logrus"
 	"github.com/hypertornado/prago/utils"
-	"gopkg.in/alecthomas/kingpin.v2"
 	"net/http"
 	"os"
 	"strconv"
@@ -18,7 +17,6 @@ type App struct {
 	DevelopmentMode bool
 	Config          config
 	staticHandler   staticFilesHandler
-	kingpin         *kingpin.Application
 	commands        []*command
 	logger          *logrus.Logger
 	cron            *cron
@@ -42,10 +40,7 @@ func NewApp(appName, version string, initFunction func(*App)) {
 	app.logger = createLogger(app.DotPath(), true)
 	app.staticHandler = app.loadStaticHandler()
 
-	initCommands(app)
-
 	initFunction(app)
-
 	app.parseCommands()
 }
 
@@ -68,28 +63,34 @@ func (app *App) DotPath() string { return os.Getenv("HOME") + "/." + app.AppName
 
 //ListenAndServe starts server on port
 func (app *App) ListenAndServe(port int, developmentMode bool) error {
-	app.DevelopmentMode = developmentMode
-	if !developmentMode {
-		app.logger = createLogger(app.DotPath(), developmentMode)
-	}
-
-	server := &http.Server{
-		Addr:           "0.0.0.0:" + strconv.Itoa(port),
-		Handler:        app,
-		ReadTimeout:    2 * time.Minute,
-		WriteTimeout:   2 * time.Minute,
-		MaxHeaderBytes: 1 << 20,
-	}
-
 	app.Log().WithField("port", port).
 		WithField("pid", os.Getpid()).
 		WithField("development mode", app.DevelopmentMode).
 		Info("Server started")
 
-	return server.ListenAndServe()
+	app.DevelopmentMode = developmentMode
+	if !developmentMode {
+		app.logger = createLogger(app.DotPath(), developmentMode)
+	}
+
+	return (&http.Server{
+		Addr:           "0.0.0.0:" + strconv.Itoa(port),
+		Handler:        server{*app},
+		ReadTimeout:    2 * time.Minute,
+		WriteTimeout:   2 * time.Minute,
+		MaxHeaderBytes: 1 << 20,
+	}).ListenAndServe()
 }
 
-func (app App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+type server struct {
+	app App
+}
+
+func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.app.serveHTTP(w, r)
+}
+
+func (app App) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	request := Request{
 		uuid:       utils.RandomString(10),
 		receivedAt: time.Now(),
@@ -118,9 +119,14 @@ func (app App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	request.Log().
+		WithField("uuid", request.uuid).
+		WithField("took", time.Now().Sub(request.receivedAt)).
+		Println("before dispatch")
+
 	if !app.mainController.dispatchRequest(request) {
 		request.Response().WriteHeader(http.StatusNotFound)
-		request.Response().Write([]byte("404 — not found"))
+		request.Response().Write([]byte("404 — page not found (prago framework)"))
 	}
 }
 

@@ -24,18 +24,18 @@ var ErrItemNotFound = errors.New("item not found")
 
 //Admin is struct representing admin extension
 type Administration struct {
-	Logo                  string
-	Background            string
-	Prefix                string
-	HumanName             string
-	Resources             []*Resource
-	resourceMap           map[reflect.Type]*Resource
-	resourceNameMap       map[string]*Resource
-	AdminController       *prago.Controller
-	AdminAccessController *prago.Controller
-	App                   *prago.App
-	rootActions           []Action
-	db                    *sql.DB
+	App              *prago.App
+	Logo             string
+	Background       string
+	Prefix           string
+	HumanName        string
+	Resources        []*Resource
+	resourceMap      map[reflect.Type]*Resource
+	resourceNameMap  map[string]*Resource
+	accessController *prago.Controller
+	AdminController  *prago.Controller
+	rootActions      []Action
+	db               *sql.DB
 
 	sendgridClient *sendgrid.SGClient
 	noReplyEmail   string
@@ -49,13 +49,13 @@ type Administration struct {
 //NewAdmin creates new administration on prefix url with name
 func NewAdministration(app *prago.App, initFunction func(*Administration)) *Administration {
 	admin := &Administration{
-		Prefix:                "/admin",
-		HumanName:             app.AppName,
-		Resources:             []*Resource{},
-		resourceMap:           make(map[reflect.Type]*Resource),
-		resourceNameMap:       make(map[string]*Resource),
-		AdminAccessController: app.MainController().SubController(),
-		App: app,
+		App:              app,
+		Prefix:           "/admin",
+		HumanName:        app.AppName,
+		Resources:        []*Resource{},
+		resourceMap:      make(map[reflect.Type]*Resource),
+		resourceNameMap:  make(map[string]*Resource),
+		accessController: app.MainController().SubController(),
 
 		db: connectMysql(app),
 
@@ -68,7 +68,8 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		roles:       make(map[string]map[string]bool),
 	}
 
-	admin.AdminController = admin.AdminAccessController.SubController()
+	admin.AdminController = admin.accessController.SubController()
+
 	admin.CreateResource(User{}, initUserResource)
 	admin.CreateResource(File{}, initFilesResource)
 	admin.CreateResource(activityLog{}, initActivityLog)
@@ -77,14 +78,14 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 
 	initFunction(admin)
 
-	admin.AdminAccessController.AddBeforeAction(func(request prago.Request) {
+	admin.accessController.AddBeforeAction(func(request prago.Request) {
 		request.SetData("admin_header_prefix", admin.Prefix)
 		request.SetData("background", admin.Background)
 		request.SetData("javascripts", admin.javascripts)
 		request.SetData("css", admin.css)
 	})
 
-	admin.AdminAccessController.AddAroundAction(
+	admin.accessController.AddAroundAction(
 		createSessionAroundAction(
 			admin.App.AppName,
 			admin.App.Config.GetString("random"),

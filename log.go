@@ -3,6 +3,7 @@ package prago
 import (
 	"github.com/Sirupsen/logrus"
 	"os"
+	"time"
 )
 
 func createLogger(dotPath string, developmentMode bool) *logrus.Logger {
@@ -22,4 +23,13 @@ func createLogger(dotPath string, developmentMode bool) *logrus.Logger {
 		logger.Out = file
 	}
 	return logger
+}
+
+func timestampLog(request Request, text string) {
+	if request.Request().Header.Get("X-Dont-Log") != "true" {
+		duration := time.Now().Sub(request.receivedAt)
+		request.Log().WithField("uuid", request.uuid).WithField("took", duration).
+			Println(text)
+	}
+
 }

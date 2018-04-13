@@ -10,7 +10,7 @@ import (
 
 var defaultPort = 8585
 
-func initCommands(app *App) {
+func addServerCommand(app *App) {
 	var port int
 	var developmentMode bool
 	app.AddCommand("server").
@@ -211,6 +211,7 @@ func (f *flag) setValue(value string) error {
 }
 
 func (app *App) parseCommands() {
+	addServerCommand(app)
 	args := os.Args[1:]
 	for _, command := range app.commands {
 		matched, err := command.match(args)

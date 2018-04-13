@@ -226,7 +226,7 @@ func initUserResource(resource *Resource) {
 			},
 		})
 
-	admin.AdminAccessController.AddBeforeAction(func(request prago.Request) {
+	admin.accessController.AddBeforeAction(func(request prago.Request) {
 		request.SetData("locale", GetLocale(request))
 	})
 
@@ -247,7 +247,7 @@ func initUserResource(resource *Resource) {
 		})
 	}
 
-	admin.AdminAccessController.Get(resource.GetURL("confirm_email"), func(request prago.Request) {
+	admin.accessController.Get(resource.GetURL("confirm_email"), func(request prago.Request) {
 		email := request.Params().Get("email")
 		token := request.Params().Get("token")
 
@@ -287,19 +287,17 @@ func initUserResource(resource *Resource) {
 		})
 	}
 
-	admin.AdminAccessController.Get(resource.GetURL("forgot"), func(request prago.Request) {
+	admin.accessController.Get(resource.GetURL("forgot"), func(request prago.Request) {
 		locale := GetLocale(request)
-		form := forgotForm(locale)
-		renderForgot(request, form, locale)
+		renderForgot(request, forgotForm(locale), locale)
 	})
 
-	admin.AdminAccessController.Post(resource.GetURL("forgot"), func(request prago.Request) {
-		email := request.Params().Get("email")
-		email = fixEmail(email)
+	admin.accessController.Post(resource.GetURL("forgot"), func(request prago.Request) {
+		email := fixEmail(request.Params().Get("email"))
 
 		var reason = ""
-
 		var user User
+
 		err := admin.Query().WhereIs("email", email).Get(&user)
 		if err == nil {
 			if user.emailConfirmed() {
@@ -351,13 +349,13 @@ func initUserResource(resource *Resource) {
 		})
 	}
 
-	admin.AdminAccessController.Get(resource.GetURL("renew_password"), func(request prago.Request) {
+	admin.accessController.Get(resource.GetURL("renew_password"), func(request prago.Request) {
 		locale := GetLocale(request)
 		form := renewPasswordForm(locale)
 		renderRenew(request, form, locale)
 	})
 
-	admin.AdminAccessController.Post(resource.GetURL("renew_password"), func(request prago.Request) {
+	admin.accessController.Post(resource.GetURL("renew_password"), func(request prago.Request) {
 		locale := GetLocale(request)
 
 		form := renewPasswordForm(locale)
@@ -393,13 +391,13 @@ func initUserResource(resource *Resource) {
 		renderLogin(request, form, locale)
 	})
 
-	admin.AdminAccessController.Get(resource.GetURL("login"), func(request prago.Request) {
+	admin.accessController.Get(resource.GetURL("login"), func(request prago.Request) {
 		locale := GetLocale(request)
 		form := loginForm(locale)
 		renderLogin(request, form, locale)
 	})
 
-	admin.AdminAccessController.Post(resource.GetURL("login"), func(request prago.Request) {
+	admin.accessController.Post(resource.GetURL("login"), func(request prago.Request) {
 		email := request.Params().Get("email")
 		email = fixEmail(email)
 		password := request.Params().Get("password")
@@ -474,12 +472,12 @@ func initUserResource(resource *Resource) {
 		})
 	}
 
-	admin.AdminAccessController.Get(resource.GetURL("registration"), func(request prago.Request) {
+	admin.accessController.Get(resource.GetURL("registration"), func(request prago.Request) {
 		locale := GetLocale(request)
 		renderRegistration(request, newUserForm(locale), locale)
 	})
 
-	admin.AdminAccessController.Post(resource.GetURL("registration"), func(request prago.Request) {
+	admin.accessController.Post(resource.GetURL("registration"), func(request prago.Request) {
 		locale := GetLocale(request)
 
 		form := newUserForm(locale)

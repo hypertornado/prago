@@ -19,18 +19,13 @@ type Less struct {
 }
 
 func CreateDevelopmentHelper(app *prago.App, settings DevelopmentSettings) {
-	var port int
-	var developmentMode bool
+	var port int = 8585
 	app.AddCommand("dev").
 		Description("Development command").
 		Flag(
 			prago.NewFlag("port", "server port").
 				Alias("p").
 				Int(&port),
-		).
-		Flag(
-			prago.NewFlag("d", "development mode").
-				Bool(&developmentMode),
 		).
 		Callback(
 			func() {
@@ -42,7 +37,7 @@ func CreateDevelopmentHelper(app *prago.App, settings DevelopmentSettings) {
 					go developmentTypescript(v)
 				}
 
-				err := app.ListenAndServe(port, developmentMode)
+				err := app.ListenAndServe(port, true)
 				if err != nil {
 					panic(err)
 				}

@@ -86,6 +86,7 @@ func bindStats(admin *Administration) {
 
 			ret := map[string]interface{}{}
 
+			ret["roles"] = admin.roles
 			ret["stats"] = stats
 			ret["configStats"] = configStats
 			ret["osStats"] = osStats
