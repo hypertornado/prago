@@ -2,7 +2,6 @@ package prago
 
 import (
 	"fmt"
-	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 	"reflect"
 	"strconv"
@@ -11,46 +10,33 @@ import (
 
 var defaultPort = 8585
 
-func initKingpinCommand(app *App) {
-	app.kingpin = kingpin.New("", "")
-	app.commands = map[*kingpin.CmdClause]func(app *App){}
-
+func initCommands(app *App) {
 	var port int
-	var name string
-	var truth bool
-	var argument string
-	app.AddCommand2("server").
-		Flag(NewFlag("port", "port of server").Alias("p").Int(&port)).
-		Flag(NewFlag("name", "port of server").String(&name)).
-		Flag(NewFlag("truth", "port of server").Bool(&truth)).
-		StringArgument(&argument).
+	var developmentMode bool
+	app.AddCommand("server").
+		Flag(
+			NewFlag("port", "port of server").Alias("p").Int(&port),
+		).
+		Flag(
+			NewFlag("development", "development mode").Alias("d").Bool(&developmentMode),
+		).
 		Callback(func() {
-			fmt.Printf("Data: %d %s %v, argument: %s", port, name, truth, argument)
-			println()
-		})
-
-	serverCommand := app.CreateCommand("server", "Run server")
-	portFlag := serverCommand.Flag("port", "server port").Short('p').Int()
-	developmentMode := serverCommand.Flag("development", "Is in development mode").Default("false").Short('d').Bool()
-
-	app.AddCommand(serverCommand, func(app *App) {
-		var port = defaultPort
-		if portFlag != nil && *portFlag > 0 {
-			port = *portFlag
-		} else {
-			configPort, err := app.Config.Get("port")
-			if err == nil {
-				port, err = strconv.Atoi(configPort.(string))
-				if err != nil {
-					app.Log().Fatalf("wrong format of 'port' entry in config file, should be int")
+			if port <= 0 {
+				configPort, err := app.Config.Get("port")
+				switch configPort.(type) {
+				case string:
+					port, err = strconv.Atoi(configPort.(string))
+					if err != nil {
+						app.Log().Fatalf("wrong format of 'port' entry in config file, should be int")
+					}
+				case float64:
+					port = int(configPort.(float64))
+				default:
+					port = defaultPort
 				}
 			}
-		}
-		err := app.ListenAndServe(port, *developmentMode)
-		if err != nil {
-			app.Log().Fatal(err)
-		}
-	})
+			must(app.ListenAndServe(port, developmentMode))
+		})
 }
 
 type flagType int
@@ -64,6 +50,7 @@ const (
 
 type command struct {
 	actions        []string
+	description    string
 	flags          map[string]*flag
 	callback       func()
 	stringArgument *string
@@ -77,15 +64,12 @@ type flag struct {
 	value       interface{}
 }
 
-type cmdArgument struct {
-}
-
-func (app *App) AddCommand2(commands ...string) *command {
+func (app *App) AddCommand(commands ...string) *command {
 	ret := &command{
 		actions: commands,
 		flags:   map[string]*flag{},
 	}
-	app.commands2 = append(app.commands2, ret)
+	app.commands = append(app.commands, ret)
 	return ret
 }
 
@@ -94,7 +78,15 @@ func (c *command) Callback(callback func()) *command {
 	return c
 }
 
+func (c *command) Description(description string) *command {
+	c.description = description
+	return c
+}
+
 func (c *command) Flag(flag *flag) *command {
+	if flag.typ == noType {
+		panic("no type of flag set")
+	}
 	c.flags[flag.name] = flag
 	for _, v := range flag.aliases {
 		c.flags[v] = flag
@@ -175,13 +167,13 @@ func parseFlags(flags map[string]*flag, fields []string) (argsX []string, err er
 	for k, flag := range fields {
 		if currentFlag == nil {
 			if !strings.HasPrefix(flag, "-") {
-				return fields[k:], fmt.Errorf("unknown parameter %s", flag)
+				return fields[k:], fmt.Errorf("unknown parameter '%s'", flag)
 			}
 			flag = strings.TrimPrefix(flag, "-")
 			flag = strings.TrimPrefix(flag, "-")
 			f := flags[flag]
 			if f == nil {
-				return fields[k:], fmt.Errorf("unknown flag %s", flag)
+				return fields[k:], fmt.Errorf("unknown flag '%s'", flag)
 			}
 			if f.typ == boolFlag {
 				f.setValue("")
@@ -209,7 +201,7 @@ func (f *flag) setValue(value string) error {
 	case intFlag:
 		i, err := strconv.Atoi(value)
 		if err != nil {
-			return fmt.Errorf("expected integer value for flag %s, got %s", f.name, value)
+			return fmt.Errorf("expected integer value for flag '%s', got '%s'", f.name, value)
 		}
 		val.SetInt(int64(i))
 	default:
@@ -220,13 +212,46 @@ func (f *flag) setValue(value string) error {
 
 func (app *App) parseCommands() {
 	args := os.Args[1:]
-	for _, command := range app.commands2 {
+	for _, command := range app.commands {
 		matched, err := command.match(args)
 		if matched {
 			if err != nil {
-				app.Log().Fatalln(err)
+				fmt.Println(err)
+				app.usage()
+			} else {
+				command.callback()
 			}
-			command.callback()
+			return
 		}
 	}
+	fmt.Println("no command found")
+	app.usage()
+}
+
+func (app *App) usage() {
+	fmt.Printf("%s, version %s, usage:\n", app.AppName, app.Version)
+	for _, v := range app.commands {
+		fmt.Print("  " + strings.Join(v.actions, " "))
+		if len(v.flags) > 0 {
+			fmt.Print(" <flags>")
+		}
+		if v.stringArgument != nil {
+			fmt.Print(" <argument>")
+		}
+		fmt.Println()
+		for k, flag := range v.flags {
+			//is alias
+			if k != flag.name {
+				continue
+			}
+
+			fmt.Printf("    -%s", flag.name)
+			for _, alias := range flag.aliases {
+				fmt.Printf(" -%s", alias)
+			}
+			fmt.Println()
+			fmt.Println("      " + flag.description)
+		}
+	}
+
 }

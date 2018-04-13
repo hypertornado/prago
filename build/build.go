@@ -28,7 +28,7 @@ func CreateBuildHelper(app *prago.App, b BuildSettings) {
 	var version = app.Version
 	var appName = app.AppName
 
-	app.AddCommand(app.CreateCommand("build", "Build cmd"), func(*prago.App) {
+	app.AddCommand("build").Callback(func() {
 		b.build(appName, version)
 	})
 
@@ -38,30 +38,15 @@ func CreateBuildHelper(app *prago.App, b BuildSettings) {
 		return
 	}
 
-	releaseCommand := app.CreateCommand("release", "Release cmd")
-	releaseCommandVersion := releaseCommand.Arg("version", "").Default(version).String()
-	app.AddCommand(releaseCommand, func(app *prago.App) {
-		must(b.release(appName, *releaseCommandVersion, ssh))
-	})
-
-	remoteCommand := app.CreateCommand("remote", "Remote")
-	remoteCommandVersion := remoteCommand.Arg("version", "").Default(version).String()
-	app.AddCommand(remoteCommand, func(app *prago.App) {
-		must(b.remote(appName, *remoteCommandVersion, ssh))
-	})
-
-	backupCommand := app.CreateCommand("backup", "Backup")
-	app.AddCommand(backupCommand, func(app *prago.App) {
+	app.AddCommand("backup").Callback(func() {
 		must(BackupApp(app))
 	})
 
-	syncBackupCommand := app.CreateCommand("syncbackups", "Sync backups from server")
-	app.AddCommand(syncBackupCommand, func(app *prago.App) {
+	app.AddCommand("syncbackups").Callback(func() {
 		must(b.syncBackups(appName, ssh))
 	})
 
-	partyCommand := app.CreateCommand("party", "release and run current version")
-	app.AddCommand(partyCommand, func(app *prago.App) {
+	app.AddCommand("party").Callback(func() {
 		must(b.party(appName, version, ssh))
 	})
 

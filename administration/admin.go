@@ -263,12 +263,8 @@ func (a *Administration) initRootActions() {
 }
 
 func (a *Administration) bindAdminCommand(app *prago.App) {
-	adminCommand := app.CreateCommand("admin", "Admin tasks (migrate|drop|thumbnails)")
-	adminSubcommand := adminCommand.Arg("admincommand", "").Required().String()
-
-	app.AddCommand(adminCommand, func(app *prago.App) {
-		switch *adminSubcommand {
-		case "migrate":
+	app.AddCommand("admin", "migrate").Description("migrate database").
+		Callback(func() {
 			app.Log().Println("Migrating database")
 			err := a.Migrate(true)
 			if err == nil {
@@ -276,18 +272,7 @@ func (a *Administration) bindAdminCommand(app *prago.App) {
 			} else {
 				app.Log().Fatal(err)
 			}
-		case "drop":
-			if utils.ConsoleQuestion("Really want to drop table?") {
-				app.Log().Println("Dropping table")
-				err := a.unsafeDropTables()
-				if err != nil {
-					app.Log().Fatal(err)
-				}
-			}
-		default:
-			app.Log().Println("unknown admin subcommand " + *adminSubcommand)
-		}
-	})
+		})
 }
 
 func (a *Administration) initTemplates(app *prago.App) error {

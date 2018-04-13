@@ -19,8 +19,7 @@ type App struct {
 	Config          config
 	staticHandler   staticFilesHandler
 	kingpin         *kingpin.Application
-	commands        map[*kingpin.CmdClause]func(app *App)
-	commands2       []*command
+	commands        []*command
 	logger          *logrus.Logger
 	cron            *cron
 	templates       *templates
@@ -43,24 +42,11 @@ func NewApp(appName, version string, initFunction func(*App)) {
 	app.logger = createLogger(app.DotPath(), true)
 	app.staticHandler = app.loadStaticHandler()
 
-	initKingpinCommand(app)
+	initCommands(app)
+
 	initFunction(app)
 
 	app.parseCommands()
-	return
-
-	commandName, err := app.kingpin.Parse(os.Args[1:])
-	if err != nil {
-		app.Log().Fatalf("cannot parse command name: %s", err)
-	}
-
-	for command, fn := range app.commands {
-		if command.FullCommand() == commandName {
-			fn(app)
-			return
-		}
-	}
-	app.Log().Fatalf("command not found: %s", commandName)
 }
 
 func (app *App) loadStaticHandler() staticFilesHandler {
@@ -79,16 +65,6 @@ func (app App) Log() *logrus.Logger { return app.logger }
 
 //DotPath returns path to hidden directory with app configuration and data
 func (app *App) DotPath() string { return os.Getenv("HOME") + "/." + app.AppName }
-
-//CreateCommand creates command for command line
-func (app *App) CreateCommand(name, description string) *kingpin.CmdClause {
-	return app.kingpin.Command(name, description)
-}
-
-//AddCommand adds function for command line command
-func (app *App) AddCommand(cmd *kingpin.CmdClause, fn func(a *App)) {
-	app.commands[cmd] = fn
-}
 
 //ListenAndServe starts server on port
 func (app *App) ListenAndServe(port int, developmentMode bool) error {

@@ -19,24 +19,34 @@ type Less struct {
 }
 
 func CreateDevelopmentHelper(app *prago.App, settings DevelopmentSettings) {
-	devCommand := app.CreateCommand("dev", "Development")
-	portFlag := devCommand.Flag("port", "server port").Short('p').Default("8585").Int()
-	developmentMode := devCommand.Flag("development", "Is in development mode").Default("t").Short('d').Bool()
+	var port int
+	var developmentMode bool
+	app.AddCommand("dev").
+		Description("Development command").
+		Flag(
+			prago.NewFlag("port", "server port").
+				Alias("p").
+				Int(&port),
+		).
+		Flag(
+			prago.NewFlag("d", "development mode").
+				Bool(&developmentMode),
+		).
+		Callback(
+			func() {
+				for _, v := range settings.Less {
+					go developmentLess(v.SourceDir, v.Target)
+				}
 
-	app.AddCommand(devCommand, func(app *prago.App) {
-		for _, v := range settings.Less {
-			go developmentLess(v.SourceDir, v.Target)
-		}
+				for _, v := range settings.TypeScript {
+					go developmentTypescript(v)
+				}
 
-		for _, v := range settings.TypeScript {
-			go developmentTypescript(v)
-		}
-
-		err := app.ListenAndServe(*portFlag, *developmentMode)
-		if err != nil {
-			panic(err)
-		}
-	})
+				err := app.ListenAndServe(port, developmentMode)
+				if err != nil {
+					panic(err)
+				}
+			})
 }
 
 func developmentTypescript(path string) {
