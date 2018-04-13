@@ -1,11 +1,12 @@
 package prago
 
 import (
+	"github.com/hypertornado/prago/utils"
 	"testing"
 )
 
 func TestRouterNormal(t *testing.T) {
-	r := newRoute(post, "/a/:id/:name/aa", nil, nil, []Constraint{})
+	r := newRoute(post, "/a/:id/:name/aa", nil, nil, nil)
 	params, ok := r.match("POST", "/a/123/ondra/aa")
 	if ok != true {
 		t.Fatal(ok)
@@ -20,7 +21,7 @@ func TestRouterNormal(t *testing.T) {
 		t.Fatal(len(params))
 	}
 
-	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []Constraint{})
+	r = newRoute(get, "/a/:id/:name/aa", nil, nil, nil)
 	_, ok = r.match("POST", "/a/123/ondra/aa")
 	if ok != false {
 		t.Fatal(ok)
@@ -47,7 +48,7 @@ func TestRouterNormal(t *testing.T) {
 		return true
 	}
 
-	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []Constraint{constraint})
+	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []func(map[string]string) bool{constraint})
 
 	_, ok = r.match("GET", "/a/123/ondra/aa")
 	if ok != true {
@@ -58,8 +59,8 @@ func TestRouterNormal(t *testing.T) {
 		t.Fatal(ok)
 	}
 
-	constraint = ConstraintInt("id")
-	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []Constraint{constraint})
+	constraint = utils.ConstraintInt("id")
+	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []func(map[string]string) bool{constraint})
 	_, ok = r.match("GET", "/a/123/ondra/aa")
 	if ok != true {
 		t.Fatal(ok)
@@ -73,8 +74,8 @@ func TestRouterNormal(t *testing.T) {
 		t.Fatal(ok)
 	}
 
-	constraint = ConstraintWhitelist("name", []string{"ondra", "pepa"})
-	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []Constraint{constraint})
+	constraint = utils.ConstraintWhitelist("name", []string{"ondra", "pepa"})
+	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []func(map[string]string) bool{constraint})
 
 	_, ok = r.match("GET", "/a/123/ondra/aa")
 	if ok != true {
@@ -87,7 +88,7 @@ func TestRouterNormal(t *testing.T) {
 }
 
 func TestRouterFallback(t *testing.T) {
-	r := newRoute(get, "*some", nil, nil, []Constraint{})
+	r := newRoute(get, "*some", nil, nil, nil)
 	params, ok := r.match("GET", "/XXX")
 	if ok != true {
 		t.Fatal(ok)
@@ -96,7 +97,7 @@ func TestRouterFallback(t *testing.T) {
 		t.Fatal(params["some"])
 	}
 
-	r = newRoute(get, "/a/b/*some", nil, nil, []Constraint{})
+	r = newRoute(get, "/a/b/*some", nil, nil, nil)
 	params, ok = r.match("GET", "/a/b/c/d")
 	if ok != true {
 		t.Fatal(ok)
@@ -108,7 +109,7 @@ func TestRouterFallback(t *testing.T) {
 }
 
 func TestRouterAny(t *testing.T) {
-	r := newRoute(any, "/hello", nil, nil, []Constraint{})
+	r := newRoute(any, "/hello", nil, nil, nil)
 	_, ok := r.match("GET", "/hello")
 	if ok != true {
 		t.Fatal(ok)
