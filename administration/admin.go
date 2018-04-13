@@ -71,7 +71,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	admin.AdminController = admin.AdminAccessController.SubController()
 	admin.CreateResource(User{}, initUserResource)
 	admin.CreateResource(File{}, initFilesResource)
-	admin.CreateResource(ActivityLog{}, initActivityLog)
+	admin.CreateResource(activityLog{}, initActivityLog)
 
 	admin.AddFieldType("role", admin.createRoleFieldType())
 
@@ -102,6 +102,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	admin.bindAdminCommand(admin.App)
 	must(admin.initTemplates(admin.App))
 	must(admin.App.LoadTemplateFromString(adminTemplates))
+	bindStats(admin)
 
 	admin.initRootActions()
 
@@ -147,7 +148,6 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		request.RenderView("admin_layout")
 	})
 
-	admin.AdminController.Get(admin.GetURL("_stats"), stats)
 	admin.AdminController.Get(admin.GetURL("_static/admin.js"), func(request prago.Request) {
 		request.Response().Header().Set("Content-type", "text/javascript")
 		request.Response().WriteHeader(200)

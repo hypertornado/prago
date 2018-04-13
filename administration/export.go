@@ -79,7 +79,7 @@ func exportHandler(admin Administration, resource Resource, request prago.Reques
 	}
 
 	var rowItems interface{}
-	resource.newItems(&rowItems)
+	resource.newArrayOfItems(&rowItems)
 	q.Get(rowItems)
 
 	writer := csv.NewWriter(request.Response())

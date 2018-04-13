@@ -342,7 +342,7 @@ func initNewsletterResource(resource *administration.Resource) {
 
 	previewAction := administration.Action{
 		Name: func(string) string { return "Náhled" },
-		Url:  "preview",
+		URL:  "preview",
 		Handler: func(admin administration.Administration, resource administration.Resource, request prago.Request, user administration.User) {
 			var newsletter Newsletter
 			err := admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
@@ -361,7 +361,7 @@ func initNewsletterResource(resource *administration.Resource) {
 	}
 
 	doSendPreviewAction := administration.Action{
-		Url:    "send-preview",
+		URL:    "send-preview",
 		Method: "post",
 		Handler: func(admin administration.Administration, resource administration.Resource, request prago.Request, user administration.User) {
 			var newsletter Newsletter
@@ -377,7 +377,7 @@ func initNewsletterResource(resource *administration.Resource) {
 	}
 
 	doSendAction := administration.Action{
-		Url:    "send",
+		URL:    "send",
 		Method: "post",
 		Handler: func(admin administration.Administration, resource administration.Resource, request prago.Request, user administration.User) {
 			var newsletter Newsletter

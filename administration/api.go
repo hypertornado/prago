@@ -163,7 +163,7 @@ func bindListResourceAPI(admin *Administration) {
 		ret := []resourceItem{}
 
 		var items interface{}
-		resource.newItems(&items)
+		resource.newArrayOfItems(&items)
 		must(admin.Query().Get(items))
 
 		itemsVal := reflect.ValueOf(items).Elem()

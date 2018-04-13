@@ -16,60 +16,61 @@ type Request struct {
 	w          http.ResponseWriter
 	r          *http.Request
 	data       map[string]interface{}
-	app        *App
+	app        App
 }
 
 //Log returns logger
-func (p *Request) Log() *logrus.Logger {
-	return p.App().Log()
+func (request Request) Log() *logrus.Logger {
+	return request.App().Log()
 }
 
 //Request returns underlying http.Request
-func (p *Request) Request() (r *http.Request) { return p.r }
+func (request Request) Request() *http.Request { return request.r }
 
 //Response returns underlying http.ResponseWriter
-func (p *Request) Response() (w http.ResponseWriter) { return p.w }
+func (request Request) Response() http.ResponseWriter { return request.w }
 
 //Params returns url.Values of request
-func (p *Request) Params() url.Values {
-	return p.Request().Form
+func (request Request) Params() url.Values {
+	return request.Request().Form
 }
 
 //SetData sets request data
-func (p *Request) SetData(k string, v interface{}) { p.data[k] = v }
+func (request Request) SetData(k string, v interface{}) { request.data[k] = v }
 
 //GetData returns request data
-func (p *Request) GetData(k string) interface{} { return p.data[k] }
+func (request Request) GetData(k string) interface{} { return request.data[k] }
 
-//AllRequestData returns all
-func (p *Request) AllRequestData() map[string]interface{} { return p.data }
+//GetAllData returns all
+func (request Request) GetAllData() map[string]interface{} { return request.data }
 
 //App returns related app
-func (p *Request) App() *App { return p.app }
+func (request Request) App() App { return request.app }
 
-//Header returns request header
-func (p *Request) Header() http.Header { return p.w.Header() }
-
+//RenderView with HTTP 200 code
 func (request Request) RenderView(viewName string) {
 	request.RenderViewWithCode(viewName, 200)
 }
 
+//RenderViewWithCode renders view with HTTP code
 func (request Request) RenderViewWithCode(viewName string, statusCode int) {
-	request.Header().Add("Content-Type", "text/html")
+	request.Response().Header().Add("Content-Type", "text/html")
 	request.Response().WriteHeader(statusCode)
 	must(
 		request.app.templates.templates.ExecuteTemplate(
 			request.Response(),
 			viewName,
-			request.AllRequestData(),
+			request.GetAllData(),
 		),
 	)
 }
 
+//RenderJSON renders JSON with HTTP 200 code
 func (request Request) RenderJSON(data interface{}) {
 	request.RenderJSONWithCode(data, 200)
 }
 
+//RenderJSONWithCode renders JSON with HTTP code
 func (request Request) RenderJSONWithCode(data interface{}, code int) {
 	request.Response().Header().Add("Content-type", "application/json")
 
@@ -103,7 +104,7 @@ func (request Request) RenderJSONWithCode(data interface{}, code int) {
 
 //Redirect redirects request to new url
 func (request Request) Redirect(url string) {
-	request.Header().Set("Location", url)
+	request.Response().Header().Set("Location", url)
 	request.Response().WriteHeader(http.StatusFound)
 }
 
@@ -121,7 +122,7 @@ func (request Request) writeAfterLog() {
 func (request Request) removeTrailingSlash() bool {
 	path := request.Request().URL.Path
 	if request.Request().Method == "GET" && len(path) > 1 && path == request.Request().URL.String() && strings.HasSuffix(path, "/") {
-		request.Header().Set("Location", path[0:len(path)-1])
+		request.Response().Header().Set("Location", path[0:len(path)-1])
 		request.Response().WriteHeader(http.StatusMovedPermanently)
 		return true
 	}

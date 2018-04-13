@@ -57,8 +57,8 @@
 {{define "filter_layout_boolean"}}
   <select class="input input-small admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <option value=""></option>
-    <option value="true">✅</option>
-    <option value="false">-</option>
+    <option value="true">{{index .FilterData 0}}</option>
+    <option value="false">{{index .FilterData 1}}</option>
   </select>
 {{end}}
 
@@ -84,7 +84,7 @@
       <td nowrap class="top align-right">
         <div class="btngroup admin_list_buttons">
           {{range $action := $item.Actions.VisibleButtons}}
-            <a href="{{$action.Url}}" class="btn btn-small"
+            <a href="{{$action.URL}}" class="btn btn-small"
               {{range $k, $v := $action.Params}} {{HTMLAttr $k}}="{{$v}}"{{end}}
             >{{$action.Name}}</a>
           {{end}}
@@ -96,7 +96,7 @@
               <div class="preventredirect">▼</div>
               <div class="btn-more_content preventredirect">
                 {{range $action := $item.Actions.MenuButtons}}
-                  <a href="{{$action.Url}}" class="btn btn-small btn-more_content_item">{{$action.Name}}</a>
+                  <a href="{{$action.URL}}" class="btn btn-small btn-more_content_item">{{$action.Name}}</a>
                 {{end}}
               </div>
             </button>

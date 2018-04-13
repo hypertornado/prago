@@ -2,27 +2,28 @@ package administration
 
 import (
 	"fmt"
+	"github.com/hypertornado/prago/administration/messages"
 	"reflect"
 	"time"
 )
 
-type View struct {
-	Items []ViewData
+type view struct {
+	Items []viewData
 }
 
-type ViewData struct {
+type viewData struct {
 	Name     string
 	Template string
 	Value    interface{}
 }
 
-type ViewRelationData struct {
+type viewRelationData struct {
 	Typ string
 	ID  int64
 }
 
-func (cache *structCache) getView(inValues interface{}, lang string, visible structFieldFilter, editable structFieldFilter) (*View, error) {
-	ret := View{}
+func (cache *structCache) getView(inValues interface{}, lang string, visible structFieldFilter, editable structFieldFilter) (*view, error) {
+	ret := view{}
 
 	itemVal := reflect.ValueOf(inValues).Elem()
 
@@ -37,7 +38,7 @@ func (cache *structCache) getView(inValues interface{}, lang string, visible str
 			itemVal.Field(i),
 		)
 
-		item := ViewData{
+		item := viewData{
 			Name:     field.Name,
 			Template: "admin_item_view_text",
 			Value:    ifaceVal,
@@ -58,7 +59,11 @@ func (cache *structCache) getView(inValues interface{}, lang string, visible str
 					}
 				}
 			case reflect.Bool:
-				item.Template = "admin_item_view_boolean"
+				if ifaceVal.(bool) {
+					item.Value = messages.Messages.Get(lang, "yes")
+				} else {
+					item.Value = messages.Messages.Get(lang, "no")
+				}
 			case reflect.String:
 				switch field.Tags["prago-type"] {
 				case "markdown":
@@ -72,7 +77,7 @@ func (cache *structCache) getView(inValues interface{}, lang string, visible str
 				switch field.Tags["prago-type"] {
 				case "relation":
 					item.Template = "admin_item_view_relation"
-					var val = ViewRelationData{}
+					var val = viewRelationData{}
 					if field.Tags["prago-relation"] != "" {
 						val.Typ = columnName(field.Tags["prago-relation"])
 					} else {

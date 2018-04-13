@@ -56,14 +56,14 @@ func newCron() *cron {
 
 //AddCronTask ads task function with name, which is executed regularly
 //timer functions returns next execution time
-func (a *App) AddCronTask(name string, task func(), timer func(time.Time) time.Time) {
-	a.cron.mutex.Lock()
+func (app *App) AddCronTask(name string, task func(), timer func(time.Time) time.Time) {
+	app.cron.mutex.Lock()
 	ct := &cronTask{
 		name:      name,
 		task:      task,
 		timer:     timer,
 		scheduled: timer(time.Now()),
 	}
-	a.cron.tasks[name] = ct
-	a.cron.mutex.Unlock()
+	app.cron.tasks[name] = ct
+	app.cron.mutex.Unlock()
 }

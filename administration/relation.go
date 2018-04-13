@@ -20,7 +20,7 @@ func (r *Resource) AddRelation(r2 *Resource, field string, addName func(string) 
 func (resource *Resource) bindRelationActions(r relation) {
 	action := Action{
 		Name: r.resource.Name,
-		Url:  r.resource.ID,
+		URL:  r.resource.ID,
 		Auth: r.resource.Authenticate,
 		Handler: func(admin Administration, resource Resource, request prago.Request, user User) {
 			listData, err := r.resource.getListHeader(admin, user)
@@ -56,7 +56,7 @@ func (resource *Resource) bindRelationActions(r relation) {
 
 	addAction := Action{
 		Name: r.addName,
-		Url:  "add-" + r.resource.ID,
+		URL:  "add-" + r.resource.ID,
 		Auth: r.resource.Authenticate,
 		Handler: func(admin Administration, resource Resource, request prago.Request, user User) {
 			values := make(url.Values)

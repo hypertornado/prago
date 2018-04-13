@@ -154,7 +154,7 @@ const adminTemplates = `
         <td>
           <div class="btngroup">
             {{range $action := $item.Actions}}
-              <a class="btn" href="{{$action.Url}}">{{$action.Name}}</a>
+              <a class="btn" href="{{$action.URL}}">{{$action.Name}}</a>
             {{end}}
           </div>
         </td>
@@ -446,8 +446,8 @@ const adminTemplates = `
 {{define "filter_layout_boolean"}}
   <select class="input input-small admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <option value=""></option>
-    <option value="true">✅</option>
-    <option value="false">-</option>
+    <option value="true">{{index .FilterData 0}}</option>
+    <option value="false">{{index .FilterData 1}}</option>
   </select>
 {{end}}
 
@@ -473,7 +473,7 @@ const adminTemplates = `
       <td nowrap class="top align-right">
         <div class="btngroup admin_list_buttons">
           {{range $action := $item.Actions.VisibleButtons}}
-            <a href="{{$action.Url}}" class="btn btn-small"
+            <a href="{{$action.URL}}" class="btn btn-small"
               {{range $k, $v := $action.Params}} {{HTMLAttr $k}}="{{$v}}"{{end}}
             >{{$action.Name}}</a>
           {{end}}
@@ -485,7 +485,7 @@ const adminTemplates = `
               <div class="preventredirect">▼</div>
               <div class="btn-more_content preventredirect">
                 {{range $action := $item.Actions.MenuButtons}}
-                  <a href="{{$action.Url}}" class="btn btn-small btn-more_content_item">{{$action.Name}}</a>
+                  <a href="{{$action.URL}}" class="btn btn-small btn-more_content_item">{{$action.Name}}</a>
                 {{end}}
               </div>
             </button>
@@ -550,7 +550,6 @@ const adminTemplates = `
 </div>
 
 {{end}}{{define "admin_stats"}}
-<h1>Stats</h1>
 
 <table class="admin_table">
 {{range $item := .stats}}
@@ -622,10 +621,6 @@ const adminTemplates = `
   {{.}}
 {{end}}
 
-{{define "admin_item_view_boolean"}}
-  {{if .}}✅{{else}}-{{end}}
-{{end}}
-
 {{define "admin_item_view_markdown"}}
   {{markdown .}}
 {{end}}
@@ -646,39 +641,6 @@ const adminTemplates = `
   <div class="admin_item_view_relation" data-type="{{.Typ}}" data-id="{{.ID}}">
     <progress value="" max=""></progress>
   </div>
-{{end}}{{define "elastic_index"}}
-<h1>Elastic Index</h1>
-
-<h2>Global Stats</h2>
-  <ul>
-    {{range $url := .urls}}
-    <li><a href="{{index $url 0}}">{{index $url 1}}</a></li>
-    {{end}}
-  </ul>
-
-<h2>Indexes</h2>
-  <ul>
-    {{range $index := .indexes}}
-    <li><a href="elastic/index/{{$index}}">{{$index}}</a></li>
-    {{end}}
-  </ul>
-
-{{end}}
-
-{{define "elastic_pre"}}
-<h1>{{.admin_title}}</h1>
-  <pre>
-    {{.data}}
-  </pre>
-{{end}}
-
-{{define "elastic_detail"}}
-  <h1>Index {{.index_name}}</h1>
-  
-  <h2>Field stats</h2>
-
-  {{.fieldStats}}
-
 {{end}}{{define "newsletter_empty"}}{{end}}{{define "newsletter_layout"}}
 <!doctype html>
 <html>

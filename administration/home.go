@@ -10,7 +10,7 @@ type homeData struct {
 
 	Count int64
 
-	Actions []ButtonData
+	Actions []buttonData
 }
 
 func (a *Administration) getHomeData(request prago.Request) (ret []homeData) {
@@ -25,7 +25,7 @@ func (a *Administration) getHomeData(request prago.Request) (ret []homeData) {
 			}
 
 			if resource.HasView {
-				item.Actions = resource.ResourceActionsButtonData(user, a)
+				item.Actions = resource.getResourceActionsButtonData(user, a)
 			}
 			ret = append(ret, item)
 		}

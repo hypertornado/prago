@@ -2,6 +2,7 @@ package administration
 
 import (
 	"fmt"
+	"github.com/hypertornado/prago/administration/messages"
 	"reflect"
 	"strconv"
 	"strings"
@@ -26,6 +27,7 @@ type listHeader struct {
 	ColumnName   string
 	CanOrder     bool
 	FilterLayout string
+	FilterData   interface{}
 }
 
 type listContent struct {
@@ -50,9 +52,9 @@ type listCell struct {
 }
 
 type listItemActions struct {
-	VisibleButtons  []ButtonData
+	VisibleButtons  []buttonData
 	ShowOrderButton bool
-	MenuButtons     []ButtonData
+	MenuButtons     []buttonData
 }
 
 type pagination struct {
@@ -108,6 +110,13 @@ func (resource *Resource) getListHeader(admin Administration, user User) (list l
 			if headerItem.FilterLayout == "filter_layout_relation" {
 				if v.Tags["prago-relation"] != "" {
 					headerItem.ColumnName = v.Tags["prago-relation"]
+				}
+			}
+
+			if headerItem.FilterLayout == "filter_layout_boolean" {
+				headerItem.FilterData = []string{
+					messages.Messages.Get(lang, "yes"),
+					messages.Messages.Get(lang, "no"),
 				}
 			}
 
@@ -254,7 +263,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	q = q.Limit(resource.Pagination)
 
 	var rowItems interface{}
-	resource.newItems(&rowItems)
+	resource.newArrayOfItems(&rowItems)
 	q.Get(rowItems)
 
 	val := reflect.ValueOf(rowItems).Elem()

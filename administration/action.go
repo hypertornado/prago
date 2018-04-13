@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/administration/messages"
+	"github.com/hypertornado/prago/utils"
 	"strconv"
 	"strings"
 )
 
-type ButtonData struct {
+type buttonData struct {
 	Name   string
-	Url    string
+	URL    string
 	Params map[string]string
 }
 
@@ -19,7 +20,7 @@ type Action struct {
 	Name    func(string) string
 	Auth    Authenticatizer
 	Method  string
-	Url     string
+	URL     string
 	Handler func(Administration, Resource, prago.Request, User)
 }
 
@@ -27,7 +28,7 @@ func (ra *Action) GetName(language string) string {
 	if ra.Name != nil {
 		return ra.Name(language)
 	}
-	return ra.Url
+	return ra.URL
 }
 
 var actionList = Action{
@@ -53,7 +54,7 @@ var actionList = Action{
 }
 
 var actionNew = Action{
-	Url: "new",
+	URL: "new",
 	Handler: func(admin Administration, resource Resource, request prago.Request, user User) {
 		var item interface{}
 		resource.newItem(&item)
@@ -80,7 +81,7 @@ var actionNew = Action{
 
 var actionCreate = Action{
 	Method: "post",
-	Url:    "",
+	URL:    "",
 	Handler: func(admin Administration, resource Resource, request prago.Request, user User) {
 		ValidateCSRF(request)
 		var item interface{}
@@ -106,7 +107,7 @@ var actionCreate = Action{
 }
 
 var actionView = Action{
-	Url: "",
+	URL: "",
 	Handler: func(admin Administration, resource Resource, request prago.Request, user User) {
 
 		id, err := strconv.Atoi(request.Params().Get("id"))
@@ -135,7 +136,7 @@ var actionView = Action{
 }
 
 var actionEdit = Action{
-	Url: "edit",
+	URL: "edit",
 	Handler: func(admin Administration, resource Resource, request prago.Request, user User) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		must(err)
@@ -174,7 +175,7 @@ var actionEdit = Action{
 }
 
 var actionUpdate = Action{
-	Url:    "edit",
+	URL:    "edit",
 	Method: "post",
 	Handler: func(admin Administration, resource Resource, request prago.Request, user User) {
 		ValidateCSRF(request)
@@ -226,7 +227,7 @@ var actionUpdate = Action{
 }
 
 var actionHistory = Action{
-	Url: "history",
+	URL: "history",
 	Handler: func(admin Administration, resource Resource, request prago.Request, user User) {
 		renderNavigationPage(request, AdminNavigationPage{
 			Navigation:   admin.getResourceNavigation(resource, user, "history"),
@@ -237,7 +238,7 @@ var actionHistory = Action{
 }
 
 var actionItemHistory = Action{
-	Url: "history",
+	URL: "history",
 	Handler: func(admin Administration, resource Resource, request prago.Request, user User) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		must(err)
@@ -264,7 +265,7 @@ var actionExport = CreateNavigationalAction(
 )
 
 var actionDoExport = Action{
-	Url:     "export",
+	URL:     "export",
 	Method:  "POST",
 	Handler: exportHandler,
 }
@@ -283,7 +284,7 @@ var actionDelete = CreateNavigationalItemAction(
 )
 
 var actionDoDelete = Action{
-	Url:    "delete",
+	URL:    "delete",
 	Method: "post",
 	Handler: func(admin Administration, resource Resource, request prago.Request, user User) {
 		ValidateCSRF(request)
@@ -305,7 +306,7 @@ var actionDoDelete = Action{
 }
 
 var actionOrder = Action{
-	Url:    "order",
+	URL:    "order",
 	Method: "post",
 	Handler: func(admin Administration, resource Resource, request prago.Request, user User) {
 		decoder := json.NewDecoder(request.Request().Body)
@@ -337,22 +338,22 @@ func bindResourceItemAction(admin *Administration, resource *Resource, action Ac
 }
 
 func bindAction(admin *Administration, resource *Resource, action Action, isItemAction bool) error {
-	if strings.HasPrefix(action.Url, "/") {
+	if strings.HasPrefix(action.URL, "/") {
 		return nil
 	}
 
 	var url string
 	if resource == nil {
-		url = admin.GetURL(action.Url)
+		url = admin.GetURL(action.URL)
 	} else {
 		if isItemAction {
-			if action.Url != "" {
-				url = resource.GetURL(":id/" + action.Url)
+			if action.URL != "" {
+				url = resource.GetURL(":id/" + action.URL)
 			} else {
 				url = resource.GetURL(":id")
 			}
 		} else {
-			url = resource.GetURL(action.Url)
+			url = resource.GetURL(action.URL)
 		}
 	}
 
@@ -379,9 +380,9 @@ func bindAction(admin *Administration, resource *Resource, action Action, isItem
 		}
 	}
 
-	constraints := []prago.Constraint{}
+	constraints := []func(map[string]string) bool{}
 	if isItemAction {
-		constraints = []prago.Constraint{prago.ConstraintInt("id")}
+		constraints = append(constraints, utils.ConstraintInt("id"))
 	}
 
 	switch method {
@@ -442,33 +443,32 @@ func initResourceActions(a *Administration, resource *Resource) {
 
 }
 
-func (resource *Resource) ResourceActionsButtonData(user *User, admin *Administration) []ButtonData {
-	ret := []ButtonData{}
+func (resource *Resource) getResourceActionsButtonData(user *User, admin *Administration) (ret []buttonData) {
 	navigation := admin.getResourceNavigation(*resource, *user, "")
 	for _, v := range navigation.Tabs {
-		ret = append(ret, ButtonData{
+		ret = append(ret, buttonData{
 			Name: v.Name,
-			Url:  v.URL,
+			URL:  v.URL,
 		})
 	}
-	return ret
+	return
 }
 
 func (admin *Administration) getListItemActions(user User, item interface{}, id int64, resource Resource) listItemActions {
 	ret := listItemActions{}
 
-	ret.VisibleButtons = append(ret.VisibleButtons, ButtonData{
+	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{
 		Name: messages.Messages.Get(user.Locale, "admin_view"),
-		Url:  resource.GetURL(fmt.Sprintf("%d", id)),
+		URL:  resource.GetURL(fmt.Sprintf("%d", id)),
 	})
 
 	navigation := admin.getItemNavigation(resource, user, item, "")
 
 	for _, v := range navigation.Tabs {
 		if !v.Selected {
-			ret.MenuButtons = append(ret.MenuButtons, ButtonData{
+			ret.MenuButtons = append(ret.MenuButtons, buttonData{
 				Name: v.Name,
-				Url:  v.URL,
+				URL:  v.URL,
 			})
 		}
 	}

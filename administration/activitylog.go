@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-type HistoryView struct {
-	Items []HistoryItemView
+type historyView struct {
+	Items []historyItemView
 }
 
-type HistoryItemView struct {
+type historyItemView struct {
 	ID          int64
 	ActionType  string
 	ActivityURL string
@@ -21,8 +21,8 @@ type HistoryItemView struct {
 	CreatedAt   string
 }
 
-func (admin *Administration) getHistory(resource *Resource, user int64, itemID int64) HistoryView {
-	ret := HistoryView{}
+func (admin *Administration) getHistory(resource *Resource, user int64, itemID int64) historyView {
+	ret := historyView{}
 
 	q := admin.Query()
 	if resource != nil {
@@ -37,7 +37,7 @@ func (admin *Administration) getHistory(resource *Resource, user int64, itemID i
 	q.Limit(250)
 	q.OrderDesc("ID")
 
-	var items []*ActivityLog
+	var items []*activityLog
 	err := q.Get(&items)
 	if err != nil {
 		panic(err)
@@ -56,7 +56,7 @@ func (admin *Administration) getHistory(resource *Resource, user int64, itemID i
 		activityURL := admin.GetURL(fmt.Sprintf("activitylog/%d", v.ID))
 		itemName := fmt.Sprintf("%s #%d", v.ResourceName, v.ID)
 
-		ret.Items = append(ret.Items, HistoryItemView{
+		ret.Items = append(ret.Items, historyItemView{
 			ID:          v.ID,
 			ActivityURL: activityURL,
 			ActionType:  v.ActionType,
@@ -70,7 +70,7 @@ func (admin *Administration) getHistory(resource *Resource, user int64, itemID i
 	return ret
 }
 
-type ActivityLog struct {
+type activityLog struct {
 	ID            int64
 	ResourceName  string    `prago-preview:"true"`
 	ItemID        int64     `prago-preview:"true"`
@@ -92,7 +92,7 @@ func (admin Administration) createNewActivityLog(resource Resource, user User, i
 		return err
 	}
 
-	log := ActivityLog{
+	log := activityLog{
 		ResourceName: resource.ID,
 		ItemID:       getItemID(item),
 		ActionType:   "new",
@@ -103,7 +103,7 @@ func (admin Administration) createNewActivityLog(resource Resource, user User, i
 }
 
 func (admin Administration) createEditActivityLog(resource Resource, user User, itemID int64, before, after []byte) error {
-	log := ActivityLog{
+	log := activityLog{
 		ResourceName:  resource.ID,
 		ItemID:        itemID,
 		ActionType:    "edit",
@@ -120,7 +120,7 @@ func (admin Administration) createDeleteActivityLog(resource Resource, user User
 		return err
 	}
 
-	log := ActivityLog{
+	log := activityLog{
 		ResourceName:  resource.ID,
 		ItemID:        itemID,
 		ActionType:    "delete",

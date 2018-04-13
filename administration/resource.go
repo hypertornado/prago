@@ -1,7 +1,6 @@
 package administration
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/hypertornado/prago"
@@ -130,24 +129,20 @@ func (a *Administration) getResourceByItem(item interface{}) (*Resource, error) 
 	return resource, nil
 }
 
-func (ar *Resource) db() *sql.DB {
-	return ar.Admin.getDB()
+func (resource *Resource) unsafeDropTable() error {
+	return dropTable(resource.Admin.db, resource.TableName)
 }
 
-func (ar *Resource) unsafeDropTable() error {
-	return dropTable(ar.db(), ar.TableName)
-}
-
-func (ar *Resource) migrate(verbose bool) error {
-	_, err := getTableDescription(ar.db(), ar.TableName)
+func (resource *Resource) migrate(verbose bool) error {
+	_, err := getTableDescription(resource.Admin.db, resource.TableName)
 	if err == nil {
-		return migrateTable(ar.db(), ar.TableName, ar.StructCache, verbose)
+		return migrateTable(resource.Admin.db, resource.TableName, resource.StructCache, verbose)
 	}
-	return createTable(ar.db(), ar.TableName, ar.StructCache, verbose)
+	return createTable(resource.Admin.db, resource.TableName, resource.StructCache, verbose)
 }
 
-func (ar *Resource) saveWithDBIface(item interface{}, db dbIface) error {
-	if !ar.HasModel {
+func (resource *Resource) saveWithDBIface(item interface{}, db dbIface) error {
+	if !resource.HasModel {
 		return ErrDontHaveModel
 	}
 
@@ -158,11 +153,11 @@ func (ar *Resource) saveWithDBIface(item interface{}, db dbIface) error {
 		val.FieldByName(fn).Set(timeVal)
 	}
 
-	return ar.StructCache.saveItem(db, ar.TableName, item)
+	return resource.StructCache.saveItem(db, resource.TableName, item)
 }
 
-func (ar *Resource) createWithDBIface(item interface{}, db dbIface) error {
-	if !ar.HasModel {
+func (resource *Resource) createWithDBIface(item interface{}, db dbIface) error {
+	if !resource.HasModel {
 		return ErrDontHaveModel
 	}
 
@@ -178,13 +173,13 @@ func (ar *Resource) createWithDBIface(item interface{}, db dbIface) error {
 			}
 		}
 	}
-	return ar.StructCache.createItem(db, ar.TableName, item)
+	return resource.StructCache.createItem(db, resource.TableName, item)
 }
 
-func (ar *Resource) newItem(item interface{}) {
-	reflect.ValueOf(item).Elem().Set(reflect.New(ar.Typ))
+func (resource *Resource) newItem(item interface{}) {
+	reflect.ValueOf(item).Elem().Set(reflect.New(resource.Typ))
 }
 
-func (ar *Resource) newItems(item interface{}) {
-	reflect.ValueOf(item).Elem().Set(reflect.New(reflect.SliceOf(reflect.PtrTo(ar.Typ))))
+func (resource *Resource) newArrayOfItems(item interface{}) {
+	reflect.ValueOf(item).Elem().Set(reflect.New(reflect.SliceOf(reflect.PtrTo(resource.Typ))))
 }

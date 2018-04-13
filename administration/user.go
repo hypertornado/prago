@@ -74,7 +74,7 @@ func (u *User) newPassword(password string) error {
 	return nil
 }
 
-func (u User) emailToken(app *prago.App) string {
+func (u User) emailToken(app prago.App) string {
 	randomness := app.Config.GetString("random")
 	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%s%s", u.Email, randomness))
@@ -129,7 +129,7 @@ func (u User) sendConfirmEmail(request prago.Request, a *Administration) error {
 
 	urlValues := make(url.Values)
 	urlValues.Add("email", u.Email)
-	urlValues.Add("token", u.emailToken(a.App))
+	urlValues.Add("token", u.emailToken(*a.App))
 
 	subject := messages.Messages.Get(locale, "admin_confirm_email_subject", a.HumanName)
 	link := request.App().Config.GetString("baseUrl") + a.Prefix + "/user/confirm_email?" + urlValues.Encode()
@@ -171,7 +171,7 @@ func (u User) sendAdminEmail(request prago.Request, a *Administration) error {
 func (u User) getRenewURL(request prago.Request, a *Administration) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", u.Email)
-	urlValues.Add("token", u.emailToken(a.App))
+	urlValues.Add("token", u.emailToken(*a.App))
 	return request.App().Config.GetString("baseUrl") + a.Prefix + "/user/renew_password?" + urlValues.Encode()
 }
 
@@ -204,7 +204,7 @@ func initUserResource(resource *Resource) {
 	resource.AddItemAction(
 		Action{
 			Name:   func(string) string { return "Přihlásit se jako" },
-			Url:    "loginas",
+			URL:    "loginas",
 			Method: "get",
 			Handler: func(admin Administration, resource Resource, request prago.Request, u User) {
 				if !u.IsSysadmin {

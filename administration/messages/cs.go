@@ -1,6 +1,9 @@
 package messages
 
 var cs = map[string]string{
+	"yes": "ano",
+	"no":  "ne",
+
 	"admin_error": "Nastala chyba",
 	"admin_admin": "Administrace",
 

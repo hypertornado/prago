@@ -20,6 +20,7 @@ type App struct {
 	staticHandler   staticFilesHandler
 	kingpin         *kingpin.Application
 	commands        map[*kingpin.CmdClause]func(app *App)
+	commands2       []*command
 	logger          *logrus.Logger
 	cron            *cron
 	templates       *templates
@@ -44,6 +45,9 @@ func NewApp(appName, version string, initFunction func(*App)) {
 
 	initKingpinCommand(app)
 	initFunction(app)
+
+	app.parseCommands()
+	return
 
 	commandName, err := app.kingpin.Parse(os.Args[1:])
 	if err != nil {
@@ -71,7 +75,7 @@ func (app *App) loadStaticHandler() staticFilesHandler {
 }
 
 //Log returns logger structure
-func (app *App) Log() *logrus.Logger { return app.logger }
+func (app App) Log() *logrus.Logger { return app.logger }
 
 //DotPath returns path to hidden directory with app configuration and data
 func (app *App) DotPath() string { return os.Getenv("HOME") + "/." + app.AppName }
@@ -109,7 +113,7 @@ func (app *App) ListenAndServe(port int, developmentMode bool) error {
 	return server.ListenAndServe()
 }
 
-func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (app App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	request := Request{
 		uuid:       utils.RandomString(10),
 		receivedAt: time.Now(),

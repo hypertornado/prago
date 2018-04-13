@@ -5,8 +5,7 @@ import (
 	"net/http"
 )
 
-//ErrFileNotFound is returned when file is not found
-var ErrFileNotFound = errors.New("requested file is folder")
+var errFileNotFound = errors.New("requested file is folder")
 
 type staticFilesHandler struct {
 	paths []string
@@ -37,7 +36,7 @@ func serveStaticFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem,
 
 	d, err := f.Stat()
 	if err != nil {
-		return ErrFileNotFound
+		return errFileNotFound
 	}
 
 	if d.IsDir() {
@@ -49,11 +48,11 @@ func serveStaticFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem,
 
 		d, err = f.Stat()
 		if err != nil {
-			return ErrFileNotFound
+			return errFileNotFound
 		}
 
 		if d.IsDir() {
-			return ErrFileNotFound
+			return errFileNotFound
 		}
 	}
 

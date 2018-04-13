@@ -57,6 +57,7 @@ func (app *App) AddTemplateFunction(name string, f interface{}) {
 	app.templates.funcMap[name] = f
 }
 
+//ExecuteTemplate executes template
 func (app *App) ExecuteTemplate(wr io.Writer, name string, data interface{}) error {
 	return app.templates.templates.ExecuteTemplate(wr, name, data)
 }

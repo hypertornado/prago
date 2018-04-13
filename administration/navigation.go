@@ -69,8 +69,8 @@ func (admin *Administration) getAdminNavigation(user User, code string) AdminIte
 		if v.Auth(&user) {
 			tabs = append(tabs, NavigationTab{
 				Name:     v.GetName(user.Locale),
-				URL:      admin.GetURL(v.Url),
-				Selected: trueIfEqual(code, v.Url),
+				URL:      admin.GetURL(v.URL),
+				Selected: trueIfEqual(code, v.URL),
 			})
 		}
 	}
@@ -132,10 +132,10 @@ func (admin *Administration) getResourceNavigation(resource Resource, user User,
 	}
 
 	for _, v := range resource.resourceActions {
-		if v.Url == "" {
+		if v.URL == "" {
 			continue
 		}
-		name := v.Url
+		name := v.URL
 		if v.Name != nil {
 			name = v.Name(user.Locale)
 		}
@@ -143,8 +143,8 @@ func (admin *Administration) getResourceNavigation(resource Resource, user User,
 		if v.Auth == nil || v.Auth(&user) {
 			tabs = append(tabs, NavigationTab{
 				Name:     name,
-				URL:      resource.GetURL(v.Url),
-				Selected: trueIfEqual(code, v.Url),
+				URL:      resource.GetURL(v.URL),
+				Selected: trueIfEqual(code, v.URL),
 			})
 		}
 	}
@@ -220,7 +220,7 @@ func (admin *Administration) getItemNavigation(resource Resource, user User, ite
 		if v.Name == nil {
 			continue
 		}
-		name := v.Url
+		name := v.URL
 		if v.Name != nil {
 			name = v.Name(user.Locale)
 		}
@@ -229,8 +229,8 @@ func (admin *Administration) getItemNavigation(resource Resource, user User, ite
 			if v.Auth == nil || v.Auth(&user) {
 				tabs = append(tabs, NavigationTab{
 					Name:     name,
-					URL:      resource.GetItemURL(item, v.Url),
-					Selected: trueIfEqual(code, v.Url),
+					URL:      resource.GetItemURL(item, v.URL),
+					Selected: trueIfEqual(code, v.URL),
 				})
 			}
 		}
@@ -399,7 +399,7 @@ func createNavigationalItemHandler(action, templateName string, dataGenerator fu
 
 func CreateNavigationalItemAction(url string, name func(string) string, templateName string, dataGenerator func(Administration, Resource, prago.Request, User) interface{}) Action {
 	return Action{
-		Url:     url,
+		URL:     url,
 		Name:    name,
 		Handler: createNavigationalItemHandler(url, templateName, dataGenerator),
 	}
@@ -423,7 +423,7 @@ func createNavigationalHandler(action, templateName string, dataGenerator func(A
 func CreateNavigationalAction(url string, name func(string) string, templateName string, dataGenerator func(Administration, Resource, prago.Request, User) interface{}) Action {
 	return Action{
 		Name:    name,
-		Url:     url,
+		URL:     url,
 		Handler: createNavigationalHandler(url, templateName, dataGenerator),
 	}
 }
@@ -447,7 +447,7 @@ func CreateAdminAction(url string, name func(string) string, templateName string
 	return Action{
 		Name:    name,
 		Auth:    AuthenticateAdmin,
-		Url:     url,
+		URL:     url,
 		Handler: createAdminHandler(url, templateName, dataGenerator),
 	}
 }
