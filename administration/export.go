@@ -41,7 +41,7 @@ func (resource Resource) getExportFormData(user User, visible structFieldFilter)
 	return ret
 }
 
-func exportHandler(admin Administration, resource Resource, request prago.Request, user User) {
+func exportHandler(resource Resource, request prago.Request, user User) {
 	formData := resource.getExportFormData(user, resource.VisibilityFilter)
 
 	allowedFields := map[string]bool{}
@@ -64,7 +64,7 @@ func exportHandler(admin Administration, resource Resource, request prago.Reques
 		filter[k] = request.Request().PostForm.Get(k)
 	}
 
-	q := admin.Query()
+	q := resource.Admin.Query()
 	orderField := request.Request().PostForm.Get("_order")
 	if request.Request().PostForm.Get("_desc") == "on" {
 		q.OrderDesc(orderField)

@@ -13,17 +13,16 @@ var ErrDontHaveModel = errors.New("resource does not have model")
 
 //Resource is structure representing one item in admin menu or one table in database
 type Resource struct {
-	Admin               *Administration
-	ID                  string
-	Name                func(locale string) string
-	Typ                 reflect.Type
-	ResourceController  *prago.Controller
-	Authenticate        Authenticatizer
+	Admin              *Administration
+	ID                 string
+	Name               func(locale string) string
+	Typ                reflect.Type
+	ResourceController *prago.Controller
+	//Authenticate        Authenticatizer
 	Pagination          int64
 	OrderByColumn       string
 	OrderDesc           bool
 	HasModel            bool
-	HasView             bool
 	item                interface{}
 	TableName           string
 	StructCache         *structCache
@@ -32,9 +31,12 @@ type Resource struct {
 	EditabilityFilter   structFieldFilter
 	resourceActions     []Action
 	resourceItemActions []Action
-	CanCreate           bool //TODO: should be based on user restrictions
-	CanEdit             bool
-	CanExport           bool
+
+	CanView   Permission
+	CanCreate Permission
+	CanEdit   Permission
+	CanDelete Permission
+	CanExport Permission
 
 	relations []relation
 
@@ -49,6 +51,11 @@ func (resource Resource) GetURL(suffix string) string {
 		ret += "/" + suffix
 	}
 	return ret
+}
+
+//TODO: remove this
+func (resource Resource) Authenticate2(user *User) bool {
+	return resource.Admin.Authorize(*user, resource.CanView)
 }
 
 //CreateResource creates new resource based on item
@@ -66,18 +73,19 @@ func (a *Administration) CreateResource(item interface{}, initFunction func(*Res
 		ID:                 columnName(defaultName),
 		Typ:                typ,
 		ResourceController: a.AdminController.SubController(),
-		Authenticate:       AuthenticateAdmin,
 		Pagination:         1000,
 		HasModel:           true,
-		HasView:            true,
 		item:               item,
 		TableName:          columnName(defaultName),
 		StructCache:        cache,
 		VisibilityFilter:   defaultVisibilityFilter,
 		EditabilityFilter:  defaultEditabilityFilter,
-		CanCreate:          true,
-		CanEdit:            true,
-		CanExport:          true,
+
+		CanView:   permissionEverybody,
+		CanCreate: permissionEverybody,
+		CanEdit:   permissionEverybody,
+		CanDelete: permissionEverybody,
+		CanExport: permissionEverybody,
 
 		ActivityLog: true,
 	}
@@ -102,22 +110,22 @@ func (a *Administration) CreateResource(item interface{}, initFunction func(*Res
 	return ret
 }
 
-func (a *Administration) initResource(resource *Resource) {
+func (admin *Administration) initResource(resource *Resource) {
 	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
 		request.SetData("admin_resource", resource)
 		next()
 	})
 
 	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
-		user := request.GetData("currentuser").(*User)
-		if !resource.Authenticate(user) {
+		user := GetUser(request)
+		if !admin.Authorize(*user, resource.CanView) {
 			render403(request)
 		} else {
 			next()
 		}
 	})
 
-	initResourceActions(a, resource)
+	initResourceActions(admin, resource)
 }
 
 func (a *Administration) getResourceByItem(item interface{}) (*Resource, error) {

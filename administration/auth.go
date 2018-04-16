@@ -1,7 +1,39 @@
 package administration
 
+import (
+	"fmt"
+)
+
+var permissionEverybody Permission = "__everybody"
+var permissionSysadmin Permission = "sysadmin"
+var permissionNobody Permission = ""
+
+type Permission string
+
+func authNobody(p Permission) bool {
+	if p == "" {
+		return true
+	}
+	return false
+}
+
 //Authenticatizer is function for user authenticatication
 type Authenticatizer func(*User) bool
+
+func (admin Administration) getAllPermissions() []string {
+	m := map[string]bool{}
+	for _, v1 := range admin.roles {
+		for v2, _ := range v1 {
+			m[v2] = true
+		}
+	}
+	m[string(permissionSysadmin)] = true
+	var ret []string
+	for k, _ := range m {
+		ret = append(ret, k)
+	}
+	return ret
+}
 
 //AuthenticateAdmin authenticaticatizer for admin
 func AuthenticateAdmin(user *User) bool {
@@ -41,12 +73,39 @@ func (admin *Administration) createRoleFieldType() FieldType {
 	}
 }
 
-func (admin *Administration) AddAuthRole(role string, permissions []string) {
+func (admin *Administration) AddRole(role string, permissions []string) {
 	perms := map[string]bool{}
 	for _, v := range permissions {
 		perms[v] = true
 	}
+	_, ok := admin.roles[role]
+	if ok {
+		panic(fmt.Sprintf("role '%s' already added", role))
+	}
 	admin.roles[role] = perms
+}
+
+func (admin *Administration) Authorize(user User, permission Permission) bool {
+	if !user.IsAdmin {
+		return false
+	}
+	if authNobody(permission) {
+		return false
+	}
+	if permission == permissionEverybody {
+		return true
+	}
+	if user.IsSysadmin {
+		return true
+	}
+
+	if admin.roles == nil {
+		return false
+	}
+	if admin.roles[user.Role] == nil {
+		return false
+	}
+	return admin.roles[user.Role][string(permission)]
 }
 
 func (admin *Administration) AuthenticatePermission(permission string) Authenticatizer {

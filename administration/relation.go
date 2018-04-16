@@ -19,11 +19,11 @@ func (r *Resource) AddRelation(r2 *Resource, field string, addName func(string) 
 
 func (resource *Resource) bindRelationActions(r relation) {
 	action := Action{
-		Name: r.resource.Name,
-		URL:  r.resource.ID,
-		Auth: r.resource.Authenticate,
-		Handler: func(admin Administration, resource Resource, request prago.Request, user User) {
-			listData, err := r.resource.getListHeader(admin, user)
+		Name:       r.resource.Name,
+		URL:        r.resource.ID,
+		Permission: r.resource.CanView,
+		Handler: func(resource Resource, request prago.Request, user User) {
+			listData, err := r.resource.getListHeader(user)
 			if err != nil {
 				if err == ErrItemNotFound {
 					render404(request)
@@ -40,9 +40,9 @@ func (resource *Resource) bindRelationActions(r relation) {
 
 			var item interface{}
 			resource.newItem(&item)
-			must(admin.Query().WhereIs("id", int64(id)).Get(item))
+			must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
 
-			navigation := admin.getItemNavigation(resource, user, item, r.resource.ID)
+			navigation := resource.Admin.getItemNavigation(resource, user, item, r.resource.ID)
 			navigation.Wide = true
 
 			renderNavigationPage(request, AdminNavigationPage{
@@ -55,10 +55,10 @@ func (resource *Resource) bindRelationActions(r relation) {
 	resource.AddItemAction(action)
 
 	addAction := Action{
-		Name: r.addName,
-		URL:  "add-" + r.resource.ID,
-		Auth: r.resource.Authenticate,
-		Handler: func(admin Administration, resource Resource, request prago.Request, user User) {
+		Name:       r.addName,
+		URL:        "add-" + r.resource.ID,
+		Permission: r.resource.CanView,
+		Handler: func(resource Resource, request prago.Request, user User) {
 			values := make(url.Values)
 			values.Set(r.field, request.Params().Get("id"))
 			request.Redirect(resource.GetURL("new"))

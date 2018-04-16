@@ -82,7 +82,7 @@ type activityLog struct {
 }
 
 func initActivityLog(resource *Resource) {
-	resource.Authenticate = AuthenticateSysadmin
+	resource.CanView = permissionSysadmin
 	resource.OrderDesc = true
 }
 

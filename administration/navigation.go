@@ -66,7 +66,7 @@ func (admin *Administration) getAdminNavigation(user User, code string) AdminIte
 	}
 
 	for _, v := range admin.rootActions {
-		if v.Auth(&user) {
+		if admin.Authorize(user, v.Permission) {
 			tabs = append(tabs, NavigationTab{
 				Name:     v.GetName(user.Locale),
 				URL:      admin.GetURL(v.URL),
@@ -107,7 +107,7 @@ func (admin *Administration) getResourceNavigation(resource Resource, user User,
 		},
 	}
 
-	if resource.CanCreate {
+	if admin.Authorize(user, resource.CanCreate) {
 		tabs = append(tabs, NavigationTab{
 			Name:     messages.Messages.Get(user.Locale, "admin_new"),
 			URL:      resource.GetURL("new"),
@@ -115,7 +115,7 @@ func (admin *Administration) getResourceNavigation(resource Resource, user User,
 		})
 	}
 
-	if resource.CanExport {
+	if admin.Authorize(user, resource.CanExport) {
 		tabs = append(tabs, NavigationTab{
 			Name:     messages.Messages.Get(user.Locale, "admin_export"),
 			URL:      resource.GetURL("export"),
@@ -140,7 +140,7 @@ func (admin *Administration) getResourceNavigation(resource Resource, user User,
 			name = v.Name(user.Locale)
 		}
 
-		if v.Auth == nil || v.Auth(&user) {
+		if admin.Authorize(user, v.Permission) {
 			tabs = append(tabs, NavigationTab{
 				Name:     name,
 				URL:      resource.GetURL(v.URL),
@@ -194,18 +194,20 @@ func (admin *Administration) getItemNavigation(resource Resource, user User, ite
 		}
 	}
 
-	if resource.CanEdit {
+	if admin.Authorize(user, resource.CanEdit) {
 		tabs = append(tabs, NavigationTab{
 			Name:     messages.Messages.Get(user.Locale, "admin_edit"),
 			URL:      resource.GetItemURL(item, "edit"),
 			Selected: trueIfEqual(code, "edit"),
 		})
 
-		tabs = append(tabs, NavigationTab{
-			Name:     messages.Messages.Get(user.Locale, "admin_delete"),
-			URL:      resource.GetItemURL(item, "delete"),
-			Selected: trueIfEqual(code, "delete"),
-		})
+		if admin.Authorize(user, resource.CanDelete) {
+			tabs = append(tabs, NavigationTab{
+				Name:     messages.Messages.Get(user.Locale, "admin_delete"),
+				URL:      resource.GetItemURL(item, "delete"),
+				Selected: trueIfEqual(code, "delete"),
+			})
+		}
 	}
 
 	if resource.ActivityLog {
@@ -226,7 +228,7 @@ func (admin *Administration) getItemNavigation(resource Resource, user User, ite
 		}
 
 		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
-			if v.Auth == nil || v.Auth(&user) {
+			if admin.Authorize(user, v.Permission) {
 				tabs = append(tabs, NavigationTab{
 					Name:     name,
 					URL:      resource.GetItemURL(item, v.URL),
@@ -375,29 +377,29 @@ func trueIfEqual(a, b string) bool {
 	return false
 }
 
-func createNavigationalItemHandler(action, templateName string, dataGenerator func(Administration, Resource, prago.Request, User) interface{}) func(Administration, Resource, prago.Request, User) {
-	return func(admin Administration, resource Resource, request prago.Request, user User) {
+func createNavigationalItemHandler(action, templateName string, dataGenerator func(Resource, prago.Request, User) interface{}) func(Resource, prago.Request, User) {
+	return func(resource Resource, request prago.Request, user User) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		must(err)
 
 		var item interface{}
 		resource.newItem(&item)
-		must(admin.Query().WhereIs("id", int64(id)).Get(item))
+		must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
 
 		var data interface{}
 		if dataGenerator != nil {
-			data = dataGenerator(admin, resource, request, user)
+			data = dataGenerator(resource, request, user)
 		}
 
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getItemNavigation(resource, user, item, action),
+			Navigation:   resource.Admin.getItemNavigation(resource, user, item, action),
 			PageTemplate: templateName,
 			PageData:     data,
 		})
 	}
 }
 
-func CreateNavigationalItemAction(url string, name func(string) string, templateName string, dataGenerator func(Administration, Resource, prago.Request, User) interface{}) Action {
+func CreateNavigationalItemAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, prago.Request, User) interface{}) Action {
 	return Action{
 		URL:     url,
 		Name:    name,
@@ -405,49 +407,50 @@ func CreateNavigationalItemAction(url string, name func(string) string, template
 	}
 }
 
-func createNavigationalHandler(action, templateName string, dataGenerator func(Administration, Resource, prago.Request, User) interface{}) func(Administration, Resource, prago.Request, User) {
-	return func(admin Administration, resource Resource, request prago.Request, user User) {
+func createNavigationalHandler(action, templateName string, dataGenerator func(Resource, prago.Request, User) interface{}) func(Resource, prago.Request, User) {
+	return func(resource Resource, request prago.Request, user User) {
 		var data interface{}
 		if dataGenerator != nil {
-			data = dataGenerator(admin, resource, request, user)
+			data = dataGenerator(resource, request, user)
 		}
 
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getResourceNavigation(resource, user, action),
+			Navigation:   resource.Admin.getResourceNavigation(resource, user, action),
 			PageTemplate: templateName,
 			PageData:     data,
 		})
 	}
 }
 
-func CreateNavigationalAction(url string, name func(string) string, templateName string, dataGenerator func(Administration, Resource, prago.Request, User) interface{}) Action {
+func CreateNavigationalAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, prago.Request, User) interface{}) Action {
 	return Action{
-		Name:    name,
-		URL:     url,
-		Handler: createNavigationalHandler(url, templateName, dataGenerator),
+		Name:       name,
+		URL:        url,
+		Permission: permissionEverybody,
+		Handler:    createNavigationalHandler(url, templateName, dataGenerator),
 	}
 }
 
-func createAdminHandler(action, templateName string, dataGenerator func(Administration, Resource, prago.Request, User) interface{}) func(Administration, Resource, prago.Request, User) {
-	return func(admin Administration, resource Resource, request prago.Request, user User) {
+func createAdminHandler(action, templateName string, dataGenerator func(Resource, prago.Request, User) interface{}) func(Resource, prago.Request, User) {
+	return func(resource Resource, request prago.Request, user User) {
 		var data interface{}
 		if dataGenerator != nil {
-			data = dataGenerator(admin, resource, request, user)
+			data = dataGenerator(resource, request, user)
 		}
 
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getAdminNavigation(user, action),
+			Navigation:   resource.Admin.getAdminNavigation(user, action),
 			PageTemplate: templateName,
 			PageData:     data,
 		})
 	}
 }
 
-func CreateAdminAction(url string, name func(string) string, templateName string, dataGenerator func(Administration, Resource, prago.Request, User) interface{}) Action {
+func CreateAdminAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, prago.Request, User) interface{}) Action {
 	return Action{
-		Name:    name,
-		Auth:    AuthenticateAdmin,
-		URL:     url,
-		Handler: createAdminHandler(url, templateName, dataGenerator),
+		Name:       name,
+		URL:        url,
+		Permission: permissionEverybody,
+		Handler:    createAdminHandler(url, templateName, dataGenerator),
 	}
 }

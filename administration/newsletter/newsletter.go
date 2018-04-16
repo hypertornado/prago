@@ -119,7 +119,7 @@ type NewsletterMiddleware struct {
 	Randomness      string
 	SendgridKey     string
 	Renderer        NewsletterRenderer
-	Authenticatizer administration.Authenticatizer
+	Authenticatizer administration.Permission
 	sendgridClient  *sendgrid.SGClient
 	controller      *prago.Controller
 }
@@ -329,8 +329,7 @@ type Newsletter struct {
 func initNewsletterResource(resource *administration.Resource) {
 	a := resource.Admin
 	resource.ActivityLog = true
-
-	resource.Authenticate = nmMiddleware.Authenticatizer
+	resource.CanView = nmMiddleware.Authenticatizer
 
 	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
 		ret, err := a.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&NewsletterPersons{})
@@ -343,9 +342,9 @@ func initNewsletterResource(resource *administration.Resource) {
 	previewAction := administration.Action{
 		Name: func(string) string { return "Náhled" },
 		URL:  "preview",
-		Handler: func(admin administration.Administration, resource administration.Resource, request prago.Request, user administration.User) {
+		Handler: func(resource administration.Resource, request prago.Request, user administration.User) {
 			var newsletter Newsletter
-			err := admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
+			err := resource.Admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			if err != nil {
 				panic(err)
 			}
@@ -363,11 +362,11 @@ func initNewsletterResource(resource *administration.Resource) {
 	doSendPreviewAction := administration.Action{
 		URL:    "send-preview",
 		Method: "post",
-		Handler: func(admin administration.Administration, resource administration.Resource, request prago.Request, user administration.User) {
+		Handler: func(resource administration.Resource, request prago.Request, user administration.User) {
 			var newsletter Newsletter
-			must(admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
+			must(resource.Admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
 			newsletter.PreviewSentAt = time.Now()
-			must(admin.Save(&newsletter))
+			must(resource.Admin.Save(&newsletter))
 
 			emails := parseEmails(request.Params().Get("emails"))
 			nmMiddleware.SendEmails(newsletter, emails)
@@ -379,14 +378,14 @@ func initNewsletterResource(resource *administration.Resource) {
 	doSendAction := administration.Action{
 		URL:    "send",
 		Method: "post",
-		Handler: func(admin administration.Administration, resource administration.Resource, request prago.Request, user administration.User) {
+		Handler: func(resource administration.Resource, request prago.Request, user administration.User) {
 			var newsletter Newsletter
-			err := admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
+			err := resource.Admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			if err != nil {
 				panic(err)
 			}
 			newsletter.SentAt = time.Now()
-			admin.Save(&newsletter)
+			resource.Admin.Save(&newsletter)
 
 			recipients, err := nmMiddleware.GetRecipients()
 			if err != nil {
@@ -416,7 +415,7 @@ func initNewsletterResource(resource *administration.Resource) {
 		"send",
 		func(string) string { return "Odeslat" },
 		"newsletter_send",
-		func(administration.Administration, administration.Resource, prago.Request, administration.User) interface{} {
+		func(administration.Resource, prago.Request, administration.User) interface{} {
 			recipients, err := nmMiddleware.GetRecipients()
 			if err != nil {
 				panic(err)
@@ -534,6 +533,6 @@ type NewsletterPersons struct {
 }
 
 func initNewsletterPersonsResource(resource *administration.Resource) {
-	resource.Authenticate = administration.AuthenticateSysadmin
+	resource.CanView = "sysadmin"
 	resource.ActivityLog = true
 }

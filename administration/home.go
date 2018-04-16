@@ -13,20 +13,17 @@ type homeData struct {
 	Actions []buttonData
 }
 
-func (a *Administration) getHomeData(request prago.Request) (ret []homeData) {
+func (admin *Administration) getHomeData(request prago.Request) (ret []homeData) {
 	user := GetUser(request)
 	locale := GetLocale(request)
 
-	for _, resource := range a.Resources {
-		if resource.HasView && resource.Authenticate(user) {
+	for _, resource := range admin.Resources {
+		if admin.Authorize(*user, resource.CanView) {
 			item := homeData{
 				Name: resource.Name(locale),
 				URL:  resource.GetURL(""),
 			}
-
-			if resource.HasView {
-				item.Actions = resource.getResourceActionsButtonData(user, a)
-			}
+			item.Actions = resource.getResourceActionsButtonData(user, admin)
 			ret = append(ret, item)
 		}
 	}

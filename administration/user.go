@@ -199,14 +199,14 @@ func initUserResource(resource *Resource) {
 	admin := resource.Admin
 
 	resource.Name = messages.Messages.GetNameFunction("admin_users")
-	resource.Authenticate = AuthenticateSysadmin
+	resource.CanView = permissionSysadmin
 
 	resource.AddItemAction(
 		Action{
 			Name:   func(string) string { return "Přihlásit se jako" },
 			URL:    "loginas",
 			Method: "get",
-			Handler: func(admin Administration, resource Resource, request prago.Request, u User) {
+			Handler: func(resource Resource, request prago.Request, u User) {
 				if !u.IsSysadmin {
 					panic("access denied")
 				}
@@ -217,7 +217,7 @@ func initUserResource(resource *Resource) {
 				}
 
 				var user User
-				must(admin.Query().WhereIs("id", id).Get(&user))
+				must(resource.Admin.Query().WhereIs("id", id).Get(&user))
 
 				session := request.GetData("session").(*sessions.Session)
 				session.Values["user_id"] = user.ID

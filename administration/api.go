@@ -107,7 +107,7 @@ func bindListAPI(admin *Administration) {
 			return
 		}
 
-		if !resource.Authenticate(user) {
+		if !admin.Authorize(*user, resource.CanView) {
 			render403(request)
 			return
 		}
@@ -146,7 +146,7 @@ func bindListResourceAPI(admin *Administration) {
 			return
 		}
 
-		if !resource.Authenticate(user) {
+		if !admin.Authorize(*user, resource.CanView) {
 			render403(request)
 			return
 		}
@@ -202,7 +202,7 @@ func bindListResourceItemAPI(admin *Administration) {
 			return
 		}
 
-		if !resource.Authenticate(user) {
+		if !admin.Authorize(*user, resource.CanView) {
 			render403(request)
 			return
 		}

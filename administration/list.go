@@ -75,7 +75,7 @@ type listRequest struct {
 	Filter         map[string]string
 }
 
-func (resource *Resource) getListHeader(admin Administration, user User) (list list, err error) {
+func (resource *Resource) getListHeader(user User) (list list, err error) {
 	lang := user.Locale
 
 	list.Colspan = 1

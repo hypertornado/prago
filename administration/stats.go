@@ -16,7 +16,7 @@ func bindStats(admin *Administration) {
 		"_stats",
 		func(string) string { return "Stats" },
 		"admin_stats",
-		func(admin Administration, resource Resource, request prago.Request, user User) interface{} {
+		func(resource Resource, request prago.Request, user User) interface{} {
 
 			stats := [][2]string{}
 			stats = append(stats, [2]string{"App name", request.App().AppName})
@@ -96,6 +96,6 @@ func bindStats(admin *Administration) {
 		},
 	)
 
-	action.Auth = AuthenticateSysadmin
+	action.Permission = permissionSysadmin
 	admin.AddAction(action)
 }
