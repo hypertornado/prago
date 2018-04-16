@@ -551,6 +551,27 @@ const adminTemplates = `
 
 {{end}}{{define "admin_stats"}}
 
+<h2>Access view</h2>
+
+<table class="admin_table">
+  <tr>
+    <td></td>
+    {{range $role := .accessView.Roles}}
+      <td>{{$role}}</td>
+    {{end}}
+  </tr>
+
+  {{range $resource := .accessView.Resources}}
+    <tr>
+      <td>{{$resource.Name}}</td>
+      {{range $role := $resource.Roles}}
+        <td style="font-family: monospace;" nowrap>{{$role.Value}}</td>
+      {{end}}
+    </tr>
+  {{end}}
+
+</table>
+
 <h2>Auth roles</h2>
 
 <table class="admin_table">

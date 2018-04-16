@@ -5,6 +5,7 @@ import (
 	"github.com/hypertornado/prago"
 	"os"
 	"runtime"
+	"sort"
 	"strings"
 	"time"
 )
@@ -92,10 +93,76 @@ func bindStats(admin *Administration) {
 			ret["osStats"] = osStats
 			ret["memStats"] = memStats
 			ret["environmentStats"] = environmentStats
+			ret["accessView"] = getResourceAccessView(admin)
 			return ret
 		},
 	)
 
 	action.Permission = permissionSysadmin
 	admin.AddAction(action)
+}
+
+type accessView struct {
+	Roles     []string
+	Resources []accessViewResource
+}
+
+type accessViewResource struct {
+	Name  string
+	Roles []accessViewRole
+}
+
+type accessViewRole struct {
+	Value string
+}
+
+func getResourceAccessView(admin *Administration) accessView {
+	ret := accessView{}
+	for k, _ := range admin.roles {
+		ret.Roles = append(ret.Roles, k)
+	}
+
+	sort.Strings(ret.Roles)
+
+	for _, resource := range admin.Resources {
+		viewResource := accessViewResource{
+			Name: resource.TableName,
+		}
+		for _, v := range ret.Roles {
+			yeah := "+"
+			no := "-"
+			s := ""
+			user := User{Role: v, IsAdmin: true}
+			if admin.Authorize(user, resource.CanView) {
+				s += yeah
+			} else {
+				yeah = no
+				s += no
+			}
+			if admin.Authorize(user, resource.CanEdit) {
+				s += yeah
+			} else {
+				s += no
+			}
+			if admin.Authorize(user, resource.CanCreate) {
+				s += yeah
+			} else {
+				s += no
+			}
+			if admin.Authorize(user, resource.CanDelete) {
+				s += yeah
+			} else {
+				s += yeah
+			}
+			if admin.Authorize(user, resource.CanExport) {
+				s += yeah
+			} else {
+				s += no
+			}
+			viewResource.Roles = append(viewResource.Roles, accessViewRole{s})
+		}
+		ret.Resources = append(ret.Resources, viewResource)
+	}
+
+	return ret
 }
