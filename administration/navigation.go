@@ -99,53 +99,20 @@ func (admin *Administration) getAdminNavigation(user User, code string) AdminIte
 }
 
 func (admin *Administration) getResourceNavigation(resource Resource, user User, code string) AdminItemNavigation {
-	tabs := []NavigationTab{
-		NavigationTab{
-			Name:     resource.Name(user.Locale),
-			URL:      resource.GetURL(""),
-			Selected: trueIfEqual(code, ""),
-		},
-	}
-
-	if admin.Authorize(user, resource.CanCreate) {
-		tabs = append(tabs, NavigationTab{
-			Name:     messages.Messages.Get(user.Locale, "admin_new"),
-			URL:      resource.GetURL("new"),
-			Selected: trueIfEqual(code, "new"),
-		})
-	}
-
-	if admin.Authorize(user, resource.CanExport) {
-		tabs = append(tabs, NavigationTab{
-			Name:     messages.Messages.Get(user.Locale, "admin_export"),
-			URL:      resource.GetURL("export"),
-			Selected: trueIfEqual(code, "export"),
-		})
-	}
-
-	if resource.ActivityLog {
-		tabs = append(tabs, NavigationTab{
-			Name:     messages.Messages.Get(user.Locale, "admin_history"),
-			URL:      resource.GetURL("history"),
-			Selected: trueIfEqual(code, "history"),
-		})
-	}
-
+	var tabs []NavigationTab
 	for _, v := range resource.resourceActions {
-		if v.URL == "" {
-			continue
-		}
-		name := v.URL
-		if v.Name != nil {
-			name = v.Name(user.Locale)
-		}
-
-		if admin.Authorize(user, v.Permission) {
-			tabs = append(tabs, NavigationTab{
-				Name:     name,
-				URL:      resource.GetURL(v.URL),
-				Selected: trueIfEqual(code, v.URL),
-			})
+		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
+			if admin.Authorize(user, v.Permission) {
+				name := v.URL
+				if v.Name != nil {
+					name = v.Name(user.Locale)
+				}
+				tabs = append(tabs, NavigationTab{
+					Name:     name,
+					URL:      resource.GetURL(v.URL),
+					Selected: trueIfEqual(code, v.URL),
+				})
+			}
 		}
 	}
 
@@ -175,59 +142,16 @@ func (admin *Administration) getResourceNavigation(resource Resource, user User,
 }
 
 func (admin *Administration) getItemNavigation(resource Resource, user User, item interface{}, code string) AdminItemNavigation {
-	tabs := []NavigationTab{}
-	name := getItemName(item, user.Locale)
-
-	tabs = append(tabs, NavigationTab{
-		Name:     name,
-		URL:      resource.GetItemURL(item, ""),
-		Selected: trueIfEqual(code, ""),
-	})
-
-	if resource.PreviewURLFunction != nil {
-		url := resource.PreviewURLFunction(item)
-		if url != "" {
-			tabs = append(tabs, NavigationTab{
-				Name: messages.Messages.Get(user.Locale, "admin_preview"),
-				URL:  url,
-			})
-		}
-	}
-
-	if admin.Authorize(user, resource.CanEdit) {
-		tabs = append(tabs, NavigationTab{
-			Name:     messages.Messages.Get(user.Locale, "admin_edit"),
-			URL:      resource.GetItemURL(item, "edit"),
-			Selected: trueIfEqual(code, "edit"),
-		})
-
-		if admin.Authorize(user, resource.CanDelete) {
-			tabs = append(tabs, NavigationTab{
-				Name:     messages.Messages.Get(user.Locale, "admin_delete"),
-				URL:      resource.GetItemURL(item, "delete"),
-				Selected: trueIfEqual(code, "delete"),
-			})
-		}
-	}
-
-	if resource.ActivityLog {
-		tabs = append(tabs, NavigationTab{
-			Name:     messages.Messages.Get(user.Locale, "admin_history"),
-			URL:      resource.GetItemURL(item, "history"),
-			Selected: trueIfEqual(code, "history"),
-		})
-	}
-
+	var tabs []NavigationTab
 	for _, v := range resource.resourceItemActions {
-		if v.Name == nil {
-			continue
-		}
-		name := v.URL
-		if v.Name != nil {
-			name = v.Name(user.Locale)
-		}
-
 		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
+			name := v.URL
+			if v.URL == "" {
+				name = getItemName(item, user.Locale)
+			}
+			if v.Name != nil {
+				name = v.Name(user.Locale)
+			}
 			if admin.Authorize(user, v.Permission) {
 				tabs = append(tabs, NavigationTab{
 					Name:     name,
@@ -244,6 +168,7 @@ func (admin *Administration) getItemNavigation(resource Resource, user User, ite
 		{resource.Name(user.Locale), resource.GetURL("")},
 	}
 
+	name := getItemName(item, user.Locale)
 	if code != "" {
 		breadcrumbs = append(breadcrumbs,
 			NavigationBreadcrumb{name, resource.GetItemURL(item, "")})
@@ -424,10 +349,9 @@ func createNavigationalHandler(action, templateName string, dataGenerator func(R
 
 func CreateNavigationalAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, prago.Request, User) interface{}) Action {
 	return Action{
-		Name:       name,
-		URL:        url,
-		Permission: permissionEverybody,
-		Handler:    createNavigationalHandler(url, templateName, dataGenerator),
+		Name:    name,
+		URL:     url,
+		Handler: createNavigationalHandler(url, templateName, dataGenerator),
 	}
 }
 
@@ -448,9 +372,8 @@ func createAdminHandler(action, templateName string, dataGenerator func(Resource
 
 func CreateAdminAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, prago.Request, User) interface{}) Action {
 	return Action{
-		Name:       name,
-		URL:        url,
-		Permission: permissionEverybody,
-		Handler:    createAdminHandler(url, templateName, dataGenerator),
+		Name:    name,
+		URL:     url,
+		Handler: createAdminHandler(url, templateName, dataGenerator),
 	}
 }

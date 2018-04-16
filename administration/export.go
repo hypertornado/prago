@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/administration/messages"
 	"reflect"
 	"strconv"
 	"time"
@@ -21,6 +22,7 @@ type exportFormDataField struct {
 	NameHuman  string
 	ColumnName string
 	Layout     string
+	FilterData interface{} //remove this
 }
 
 func (resource Resource) getExportFormData(user User, visible structFieldFilter) exportFormData {
@@ -34,6 +36,10 @@ func (resource Resource) getExportFormData(user User, visible structFieldFilter)
 			NameHuman:  v.humanName(user.Locale),
 			ColumnName: v.ColumnName,
 			Layout:     v.filterLayout(),
+		}
+		field.FilterData = []string{
+			messages.Messages.Get(user.Locale, "yes"),
+			messages.Messages.Get(user.Locale, "no"),
 		}
 		ret.Fields = append(ret.Fields, field)
 	}

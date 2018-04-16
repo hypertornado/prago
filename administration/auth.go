@@ -4,21 +4,10 @@ import (
 	"fmt"
 )
 
-var permissionEverybody Permission = "__everybody"
 var permissionSysadmin Permission = "sysadmin"
 var permissionNobody Permission = ""
 
 type Permission string
-
-func authNobody(p Permission) bool {
-	if p == "" {
-		return true
-	}
-	return false
-}
-
-//Authenticatizer is function for user authenticatication
-type Authenticatizer func(*User) bool
 
 func (admin Administration) getAllPermissions() []string {
 	m := map[string]bool{}
@@ -33,25 +22,6 @@ func (admin Administration) getAllPermissions() []string {
 		ret = append(ret, k)
 	}
 	return ret
-}
-
-//AuthenticateAdmin authenticaticatizer for admin
-func AuthenticateAdmin(user *User) bool {
-	if user.IsSysadmin {
-		return true
-	}
-	if user.IsAdmin {
-		return true
-	}
-	return false
-}
-
-//AuthenticateSysadmin authenticaticatizer for sysadmin
-func AuthenticateSysadmin(user *User) bool {
-	if user.IsSysadmin {
-		return true
-	}
-	return false
 }
 
 func (admin *Administration) createRoleFieldType() FieldType {
@@ -89,39 +59,11 @@ func (admin *Administration) Authorize(user User, permission Permission) bool {
 	if !user.IsAdmin {
 		return false
 	}
-	if authNobody(permission) {
-		return false
-	}
-	if permission == permissionEverybody {
+	if permission == "" {
 		return true
 	}
 	if user.IsSysadmin {
 		return true
 	}
-
-	if admin.roles == nil {
-		return false
-	}
-	if admin.roles[user.Role] == nil {
-		return false
-	}
 	return admin.roles[user.Role][string(permission)]
-}
-
-func (admin *Administration) AuthenticatePermission(permission string) Authenticatizer {
-	return func(u *User) bool {
-		if u.IsSysadmin {
-			return true
-		}
-		if !u.IsAdmin {
-			return false
-		}
-		if admin.roles == nil {
-			return false
-		}
-		if admin.roles[u.Role] == nil {
-			return false
-		}
-		return admin.roles[u.Role][permission]
-	}
 }

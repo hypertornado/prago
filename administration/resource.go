@@ -13,12 +13,11 @@ var ErrDontHaveModel = errors.New("resource does not have model")
 
 //Resource is structure representing one item in admin menu or one table in database
 type Resource struct {
-	Admin              *Administration
-	ID                 string
-	Name               func(locale string) string
-	Typ                reflect.Type
-	ResourceController *prago.Controller
-	//Authenticate        Authenticatizer
+	Admin               *Administration
+	ID                  string
+	Name                func(locale string) string
+	Typ                 reflect.Type
+	ResourceController  *prago.Controller
 	Pagination          int64
 	OrderByColumn       string
 	OrderDesc           bool
@@ -33,8 +32,8 @@ type Resource struct {
 	resourceItemActions []Action
 
 	CanView   Permission
-	CanCreate Permission
 	CanEdit   Permission
+	CanCreate Permission
 	CanDelete Permission
 	CanExport Permission
 
@@ -51,11 +50,6 @@ func (resource Resource) GetURL(suffix string) string {
 		ret += "/" + suffix
 	}
 	return ret
-}
-
-//TODO: remove this
-func (resource Resource) Authenticate2(user *User) bool {
-	return resource.Admin.Authorize(*user, resource.CanView)
 }
 
 //CreateResource creates new resource based on item
@@ -81,11 +75,11 @@ func (a *Administration) CreateResource(item interface{}, initFunction func(*Res
 		VisibilityFilter:   defaultVisibilityFilter,
 		EditabilityFilter:  defaultEditabilityFilter,
 
-		CanView:   permissionEverybody,
-		CanCreate: permissionEverybody,
-		CanEdit:   permissionEverybody,
-		CanDelete: permissionEverybody,
-		CanExport: permissionEverybody,
+		CanView:   "",
+		CanEdit:   "",
+		CanCreate: "",
+		CanDelete: "",
+		CanExport: "",
 
 		ActivityLog: true,
 	}

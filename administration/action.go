@@ -31,302 +31,361 @@ func (ra *Action) GetName(language string) string {
 	return ra.URL
 }
 
-var actionList = Action{
-	Handler: func(resource Resource, request prago.Request, user User) {
-		listData, err := resource.getListHeader(user)
-		if err != nil {
-			if err == ErrItemNotFound {
-				render404(request)
-				return
-			}
-			panic(err)
-		}
-
-		navigation := resource.Admin.getResourceNavigation(resource, user, "")
-		navigation.Wide = true
-
-		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   navigation,
-			PageTemplate: "admin_list",
-			PageData:     listData,
-		})
-	},
-}
-
-var actionNew = Action{
-	URL: "new",
-	Handler: func(resource Resource, request prago.Request, user User) {
-		var item interface{}
-		resource.newItem(&item)
-
-		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
-		must(err)
-
-		form.Classes = append(form.Classes, "form_leavealert")
-		form.Action = "../" + resource.ID
-		form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_create"))
-		AddCSRFToken(form, request)
-
-		if resource.AfterFormCreated != nil {
-			form = resource.AfterFormCreated(form, request, true)
-		}
-
-		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   resource.Admin.getResourceNavigation(resource, user, "new"),
-			PageTemplate: "admin_form",
-			PageData:     form,
-		})
-	},
-}
-
-var actionCreate = Action{
-	Method: "post",
-	URL:    "",
-	Handler: func(resource Resource, request prago.Request, user User) {
-		ValidateCSRF(request)
-		var item interface{}
-		resource.newItem(&item)
-
-		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
-		must(err)
-
-		if resource.AfterFormCreated != nil {
-			form = resource.AfterFormCreated(form, request, true)
-		}
-
-		resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.getFilter())
-		must(resource.Admin.Create(item))
-
-		if resource.ActivityLog {
-			resource.Admin.createNewActivityLog(resource, user, item)
-		}
-
-		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
-		request.Redirect(resource.GetItemURL(item, ""))
-	},
-}
-
-var actionView = Action{
-	URL: "",
-	Handler: func(resource Resource, request prago.Request, user User) {
-
-		id, err := strconv.Atoi(request.Params().Get("id"))
-		must(err)
-
-		var item interface{}
-		resource.newItem(&item)
-		err = resource.Admin.Query().WhereIs("id", int64(id)).Get(item)
-		if err != nil {
-			if err == ErrItemNotFound {
-				render404(request)
-				return
-			}
-			panic(err)
-		}
-
-		view, err := resource.StructCache.getView(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
-		must(err)
-
-		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   resource.Admin.getItemNavigation(resource, user, item, ""),
-			PageTemplate: "admin_view",
-			PageData:     view,
-		})
-	},
-}
-
-var actionEdit = Action{
-	URL: "edit",
-	Handler: func(resource Resource, request prago.Request, user User) {
-		id, err := strconv.Atoi(request.Params().Get("id"))
-		must(err)
-
-		var item interface{}
-		resource.newItem(&item)
-		err = resource.Admin.Query().WhereIs("id", int64(id)).Get(item)
-		if err != nil {
-			if err == ErrItemNotFound {
-				render404(request)
-				return
-			}
-			panic(err)
-		}
-
-		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
-		must(err)
-
-		form.Classes = append(form.Classes, "form_leavealert")
-		form.Action = "edit"
-		form.AddHidden("_submit_and_stay_clicked")
-		form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
-		form.AddSubmit("_submit_and_stay", messages.Messages.Get(GetLocale(request), "admin_edit_and_stay"))
-		AddCSRFToken(form, request)
-
-		if resource.AfterFormCreated != nil {
-			form = resource.AfterFormCreated(form, request, false)
-		}
-
-		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   resource.Admin.getItemNavigation(resource, user, item, "edit"),
-			PageTemplate: "admin_form",
-			PageData:     form,
-		})
-	},
-}
-
-var actionUpdate = Action{
-	URL:    "edit",
-	Method: "post",
-	Handler: func(resource Resource, request prago.Request, user User) {
-		ValidateCSRF(request)
-		id, err := strconv.Atoi(request.Params().Get("id"))
-		must(err)
-
-		var item interface{}
-		resource.newItem(&item)
-		must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
-
-		form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
-		must(err)
-
-		if resource.AfterFormCreated != nil {
-			form = resource.AfterFormCreated(form, request, false)
-		}
-
-		var beforeData []byte
-		if resource.ActivityLog {
-			beforeData, err = json.Marshal(item)
-			must(err)
-		}
-
-		must(
-			resource.StructCache.BindData(
-				item, request.Params(), request.Request().MultipartForm, form.getFilter(),
-			),
-		)
-		must(resource.Admin.Save(item))
-
-		if resource.ActivityLog {
-			afterData, err := json.Marshal(item)
+func actionList(permission Permission) Action {
+	return Action{
+		Permission: permission,
+		Handler: func(resource Resource, request prago.Request, user User) {
+			listData, err := resource.getListHeader(user)
 			if err != nil {
+				if err == ErrItemNotFound {
+					render404(request)
+					return
+				}
 				panic(err)
 			}
 
-			resource.Admin.createEditActivityLog(resource, user, int64(id), beforeData, afterData)
-		}
+			navigation := resource.Admin.getResourceNavigation(resource, user, "")
+			navigation.Wide = true
 
-		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_edited"))
-
-		if request.Params().Get("_submit_and_stay_clicked") == "true" {
-			request.Redirect(request.Request().URL.RequestURI())
-		} else {
-			request.Redirect(resource.GetURL(fmt.Sprintf("%d", id)))
-		}
-
-	},
+			renderNavigationPage(request, AdminNavigationPage{
+				Navigation:   navigation,
+				PageTemplate: "admin_list",
+				PageData:     listData,
+			})
+		},
+	}
 }
 
-var actionHistory = Action{
-	URL: "history",
-	Handler: func(resource Resource, request prago.Request, user User) {
-		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   resource.Admin.getResourceNavigation(resource, user, "history"),
-			PageTemplate: "admin_history",
-			PageData:     resource.Admin.getHistory(&resource, 0, 0),
-		})
-	},
+func actionNew(permission Permission) Action {
+	return Action{
+		Name: messages.Messages.GetNameFunction("admin_new"),
+		URL:  "new",
+		Handler: func(resource Resource, request prago.Request, user User) {
+			var item interface{}
+			resource.newItem(&item)
+
+			form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
+			must(err)
+
+			form.Classes = append(form.Classes, "form_leavealert")
+			form.Action = "../" + resource.ID
+			form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_create"))
+			AddCSRFToken(form, request)
+
+			if resource.AfterFormCreated != nil {
+				form = resource.AfterFormCreated(form, request, true)
+			}
+
+			renderNavigationPage(request, AdminNavigationPage{
+				Navigation:   resource.Admin.getResourceNavigation(resource, user, "new"),
+				PageTemplate: "admin_form",
+				PageData:     form,
+			})
+		},
+	}
 }
 
-var actionItemHistory = Action{
-	URL: "history",
-	Handler: func(resource Resource, request prago.Request, user User) {
-		id, err := strconv.Atoi(request.Params().Get("id"))
-		must(err)
+func actionCreate(permission Permission) Action {
+	return Action{Method: "post",
+		Permission: permission,
+		URL:        "",
+		Handler: func(resource Resource, request prago.Request, user User) {
+			ValidateCSRF(request)
+			var item interface{}
+			resource.newItem(&item)
 
-		var item interface{}
-		resource.newItem(&item)
-		must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
+			form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
+			must(err)
 
-		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   resource.Admin.getItemNavigation(resource, user, item, "history"),
-			PageTemplate: "admin_history",
-			PageData:     resource.Admin.getHistory(&resource, 0, int64(id)),
-		})
-	},
+			if resource.AfterFormCreated != nil {
+				form = resource.AfterFormCreated(form, request, true)
+			}
+
+			resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.getFilter())
+			must(resource.Admin.Create(item))
+
+			if resource.ActivityLog {
+				resource.Admin.createNewActivityLog(resource, user, item)
+			}
+
+			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
+			request.Redirect(resource.GetItemURL(item, ""))
+		},
+	}
 }
 
-var actionExport = CreateNavigationalAction(
-	"export",
-	messages.Messages.GetNameFunction("admin_export"),
-	"admin_export",
-	func(resource Resource, request prago.Request, user User) interface{} {
-		return resource.getExportFormData(user, resource.VisibilityFilter)
-	},
-)
+func actionView(permission Permission) Action {
+	return Action{
+		Permission: permission,
+		URL:        "",
+		Handler: func(resource Resource, request prago.Request, user User) {
 
-var actionDoExport = Action{
-	URL:     "export",
-	Method:  "POST",
-	Handler: exportHandler,
+			id, err := strconv.Atoi(request.Params().Get("id"))
+			must(err)
+
+			var item interface{}
+			resource.newItem(&item)
+			err = resource.Admin.Query().WhereIs("id", int64(id)).Get(item)
+			if err != nil {
+				if err == ErrItemNotFound {
+					render404(request)
+					return
+				}
+				panic(err)
+			}
+
+			view, err := resource.StructCache.getView(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
+			must(err)
+
+			renderNavigationPage(request, AdminNavigationPage{
+				Navigation:   resource.Admin.getItemNavigation(resource, user, item, ""),
+				PageTemplate: "admin_view",
+				PageData:     view,
+			})
+		},
+	}
 }
 
-var actionDelete = CreateNavigationalItemAction(
-	"delete",
-	messages.Messages.GetNameFunction("admin_delete"),
-	"admin_form",
-	func(resource Resource, request prago.Request, user User) interface{} {
-		form := NewForm()
-		form.Method = "POST"
-		AddCSRFToken(form, request)
-		form.AddSubmit("send", messages.Messages.Get(user.Locale, "admin_delete"))
-		return form
-	},
-)
+func actionEdit(permission Permission) Action {
+	return Action{
+		Name:       messages.Messages.GetNameFunction("admin_edit"),
+		Permission: permission,
+		URL:        "edit",
+		Handler: func(resource Resource, request prago.Request, user User) {
+			id, err := strconv.Atoi(request.Params().Get("id"))
+			must(err)
 
-var actionDoDelete = Action{
-	URL:    "delete",
-	Method: "post",
-	Handler: func(resource Resource, request prago.Request, user User) {
-		ValidateCSRF(request)
-		id, err := strconv.Atoi(request.Params().Get("id"))
-		must(err)
+			var item interface{}
+			resource.newItem(&item)
+			err = resource.Admin.Query().WhereIs("id", int64(id)).Get(item)
+			if err != nil {
+				if err == ErrItemNotFound {
+					render404(request)
+					return
+				}
+				panic(err)
+			}
 
-		var item interface{}
-		resource.newItem(&item)
-		_, err = resource.Admin.Query().WhereIs("id", int64(id)).Delete(item)
-		must(err)
+			form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
+			must(err)
 
-		if resource.ActivityLog {
-			resource.Admin.createDeleteActivityLog(resource, user, int64(id), item)
-		}
+			form.Classes = append(form.Classes, "form_leavealert")
+			form.Action = "edit"
+			form.AddHidden("_submit_and_stay_clicked")
+			form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
+			form.AddSubmit("_submit_and_stay", messages.Messages.Get(GetLocale(request), "admin_edit_and_stay"))
+			AddCSRFToken(form, request)
 
-		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_deleted"))
-		request.Redirect(resource.GetURL(""))
-	},
+			if resource.AfterFormCreated != nil {
+				form = resource.AfterFormCreated(form, request, false)
+			}
+
+			renderNavigationPage(request, AdminNavigationPage{
+				Navigation:   resource.Admin.getItemNavigation(resource, user, item, "edit"),
+				PageTemplate: "admin_form",
+				PageData:     form,
+			})
+		},
+	}
 }
 
-var actionOrder = Action{
-	URL:    "order",
-	Method: "post",
-	Handler: func(resource Resource, request prago.Request, user User) {
-		decoder := json.NewDecoder(request.Request().Body)
-		var t = map[string][]int{}
-		must(decoder.Decode(&t))
+func actionUpdate(permission Permission) Action {
+	return Action{
+		Permission: permission,
+		URL:        "edit",
+		Method:     "post",
+		Handler: func(resource Resource, request prago.Request, user User) {
+			ValidateCSRF(request)
+			id, err := strconv.Atoi(request.Params().Get("id"))
+			must(err)
 
-		order, ok := t["order"]
-		if !ok {
-			panic("wrong format")
-		}
-
-		for i, id := range order {
 			var item interface{}
 			resource.newItem(&item)
 			must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
-			must(resource.StructCache.BindOrder(item, int64(i)))
+
+			form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
+			must(err)
+
+			if resource.AfterFormCreated != nil {
+				form = resource.AfterFormCreated(form, request, false)
+			}
+
+			var beforeData []byte
+			if resource.ActivityLog {
+				beforeData, err = json.Marshal(item)
+				must(err)
+			}
+
+			must(
+				resource.StructCache.BindData(
+					item, request.Params(), request.Request().MultipartForm, form.getFilter(),
+				),
+			)
 			must(resource.Admin.Save(item))
-		}
-		request.RenderJSON(true)
-	},
+
+			if resource.ActivityLog {
+				afterData, err := json.Marshal(item)
+				if err != nil {
+					panic(err)
+				}
+
+				resource.Admin.createEditActivityLog(resource, user, int64(id), beforeData, afterData)
+			}
+
+			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_edited"))
+
+			if request.Params().Get("_submit_and_stay_clicked") == "true" {
+				request.Redirect(request.Request().URL.RequestURI())
+			} else {
+				request.Redirect(resource.GetURL(fmt.Sprintf("%d", id)))
+			}
+
+		},
+	}
+}
+
+func actionHistory(permission Permission) Action {
+	return Action{
+		Name:       messages.Messages.GetNameFunction("admin_history"),
+		Permission: permission,
+		URL:        "history",
+		Handler: func(resource Resource, request prago.Request, user User) {
+			renderNavigationPage(request, AdminNavigationPage{
+				Navigation:   resource.Admin.getResourceNavigation(resource, user, "history"),
+				PageTemplate: "admin_history",
+				PageData:     resource.Admin.getHistory(&resource, 0, 0),
+			})
+		},
+	}
+}
+
+func actionItemHistory(permission Permission) Action {
+	return Action{
+		Name:       messages.Messages.GetNameFunction("admin_history"),
+		Permission: permission,
+		URL:        "history",
+		Handler: func(resource Resource, request prago.Request, user User) {
+			id, err := strconv.Atoi(request.Params().Get("id"))
+			must(err)
+
+			var item interface{}
+			resource.newItem(&item)
+			must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
+
+			renderNavigationPage(request, AdminNavigationPage{
+				Navigation:   resource.Admin.getItemNavigation(resource, user, item, "history"),
+				PageTemplate: "admin_history",
+				PageData:     resource.Admin.getHistory(&resource, 0, int64(id)),
+			})
+		},
+	}
+}
+
+func actionExport(permission Permission) Action {
+	ret := CreateNavigationalAction(
+		"export",
+		messages.Messages.GetNameFunction("admin_export"),
+		"admin_export",
+		func(resource Resource, request prago.Request, user User) interface{} {
+			return resource.getExportFormData(user, resource.VisibilityFilter)
+		},
+	)
+	ret.Permission = permission
+	return ret
+}
+
+func actionDoExport(permission Permission) Action {
+	return Action{
+		Permission: permission,
+		URL:        "export",
+		Method:     "POST",
+		Handler:    exportHandler,
+	}
+}
+
+func actionDelete(permission Permission) Action {
+	ret := CreateNavigationalItemAction(
+		"delete",
+		messages.Messages.GetNameFunction("admin_delete"),
+		"admin_form",
+		func(resource Resource, request prago.Request, user User) interface{} {
+			form := NewForm()
+			form.Method = "POST"
+			AddCSRFToken(form, request)
+			form.AddSubmit("send", messages.Messages.Get(user.Locale, "admin_delete"))
+			return form
+		},
+	)
+	ret.Permission = permission
+	return ret
+}
+
+func actionDoDelete(permission Permission) Action {
+	return Action{
+		Permission: permission,
+		URL:        "delete",
+		Method:     "post",
+		Handler: func(resource Resource, request prago.Request, user User) {
+			ValidateCSRF(request)
+			id, err := strconv.Atoi(request.Params().Get("id"))
+			must(err)
+
+			var item interface{}
+			resource.newItem(&item)
+			_, err = resource.Admin.Query().WhereIs("id", int64(id)).Delete(item)
+			must(err)
+
+			if resource.ActivityLog {
+				resource.Admin.createDeleteActivityLog(resource, user, int64(id), item)
+			}
+
+			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_deleted"))
+			request.Redirect(resource.GetURL(""))
+		},
+	}
+}
+
+func actionOrder(permission Permission) Action {
+	return Action{
+		Permission: permission,
+		URL:        "order",
+		Method:     "post",
+		Handler: func(resource Resource, request prago.Request, user User) {
+			decoder := json.NewDecoder(request.Request().Body)
+			var t = map[string][]int{}
+			must(decoder.Decode(&t))
+
+			order, ok := t["order"]
+			if !ok {
+				panic("wrong format")
+			}
+
+			for i, id := range order {
+				var item interface{}
+				resource.newItem(&item)
+				must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
+				must(resource.StructCache.BindOrder(item, int64(i)))
+				must(resource.Admin.Save(item))
+			}
+			request.RenderJSON(true)
+		},
+	}
+}
+
+func actionPreview(permission Permission) Action {
+	return Action{
+		Name:       messages.Messages.GetNameFunction("admin_preview"),
+		Permission: permission,
+		URL:        "preview",
+		Handler: func(resource Resource, request prago.Request, user User) {
+			var item interface{}
+			resource.newItem(&item)
+			must(resource.Admin.Query().WhereIs("id", request.Params().Get("id")).Get(item))
+			request.Redirect(
+				resource.PreviewURLFunction(item),
+			)
+		},
+	}
 }
 
 func bindResourceAction(admin *Administration, resource *Resource, action Action) error {
@@ -393,52 +452,59 @@ func bindAction(admin *Administration, resource *Resource, action Action, isItem
 }
 
 func initResourceActions(a *Administration, resource *Resource) {
+	if !resource.HasModel {
+		return
+	}
+
+	if resource.CanCreate == "" {
+		resource.CanCreate = resource.CanEdit
+	}
+	if resource.CanDelete == "" {
+		resource.CanDelete = resource.CanEdit
+	}
+
+	resourceActions := []Action{
+		actionList(resource.CanView),
+		actionOrder(resource.CanEdit),
+		actionNew(resource.CanCreate),
+		actionCreate(resource.CanCreate),
+		actionExport(resource.CanExport),
+		actionDoExport(resource.CanExport),
+	}
+	resourceActions[0].Name = resource.Name
+	if resource.ActivityLog {
+		resourceActions = append(resourceActions, actionHistory(resource.CanView))
+	}
 	for _, v := range resource.relations {
 		resource.bindRelationActions(v)
 	}
-
+	resource.resourceActions = append(resourceActions, resource.resourceActions...)
 	for _, v := range resource.resourceActions {
 		bindResourceAction(a, resource, v)
 	}
 
+	itemActions := []Action{
+		actionView(resource.CanView),
+	}
+
+	if resource.PreviewURLFunction != nil {
+		itemActions = append(itemActions, actionPreview(resource.CanView))
+	}
+
+	itemActions = append(itemActions,
+		actionEdit(resource.CanEdit),
+		actionUpdate(resource.CanEdit),
+		actionDelete(resource.CanDelete),
+		actionDoDelete(resource.CanDelete),
+	)
+	if resource.ActivityLog {
+		itemActions = append(itemActions, actionItemHistory(resource.CanView))
+	}
+	resource.resourceItemActions = append(itemActions, resource.resourceItemActions...)
+
 	for _, v := range resource.resourceItemActions {
 		bindResourceItemAction(a, resource, v)
 	}
-
-	if !resource.HasModel || authNobody(resource.CanView) {
-		return
-	}
-
-	bindResourceAction(a, resource, actionList)
-	bindResourceAction(a, resource, actionOrder)
-
-	if resource.ActivityLog {
-		bindResourceAction(a, resource, actionHistory)
-	}
-
-	if resource.CanCreate != permissionNobody {
-		bindResourceAction(a, resource, actionNew)
-		bindResourceAction(a, resource, actionCreate)
-	}
-
-	bindResourceItemAction(a, resource, actionView)
-
-	if resource.CanEdit != permissionNobody {
-		bindResourceItemAction(a, resource, actionEdit)
-		bindResourceItemAction(a, resource, actionUpdate)
-		bindResourceItemAction(a, resource, actionDelete)
-		bindResourceItemAction(a, resource, actionDoDelete)
-	}
-
-	if resource.CanExport != permissionNobody {
-		bindResourceAction(a, resource, actionExport)
-		bindResourceAction(a, resource, actionDoExport)
-	}
-
-	if resource.ActivityLog {
-		bindResourceItemAction(a, resource, actionItemHistory)
-	}
-
 }
 
 func (resource *Resource) getResourceActionsButtonData(user *User, admin *Administration) (ret []buttonData) {
