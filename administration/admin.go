@@ -168,7 +168,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		render404(request)
 	})
 
-	admin.AddRole("sysadmin", admin.getAllPermissions())
+	admin.AddRole("sysadmin", admin.getSysadminPermissions())
 
 	return admin
 }

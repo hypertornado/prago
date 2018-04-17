@@ -277,7 +277,16 @@ func (cache *structCache) GetForm(inValues interface{}, lang string, visible str
 			if t.ValuesSource != nil {
 				item.Values = (*t.ValuesSource)()
 			}
-			item.Value = ifaceVal.(string)
+
+			switch ifaceVal.(type) {
+			case string:
+				item.Value = ifaceVal.(string)
+			case int64:
+				item.Value = fmt.Sprintf("%d", ifaceVal.(int64))
+			default:
+				panic("unknown typ")
+			}
+
 		} else {
 			switch field.Typ.Kind() {
 			case reflect.Struct:

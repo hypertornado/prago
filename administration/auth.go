@@ -9,7 +9,7 @@ var permissionNobody Permission = ""
 
 type Permission string
 
-func (admin Administration) getAllPermissions() []string {
+func (admin Administration) getSysadminPermissions() []string {
 	m := map[string]bool{}
 	for _, v1 := range admin.roles {
 		for v2, _ := range v1 {
@@ -62,8 +62,11 @@ func (admin *Administration) Authorize(user User, permission Permission) bool {
 	if permission == "" {
 		return true
 	}
-	if user.IsSysadmin {
-		return true
+
+	//TODO: remove issysadmin after fixed this
+	if user.IsSysadmin && user.Role == "" {
+		user.Role = "sysadmin"
 	}
+
 	return admin.roles[user.Role][string(permission)]
 }
