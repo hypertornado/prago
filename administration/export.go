@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"github.com/hypertornado/prago"
-	"github.com/hypertornado/prago/administration/messages"
 	"reflect"
 	"strconv"
 	"time"
@@ -12,17 +11,10 @@ import (
 
 type exportFormData struct {
 	Formats []string
-	Fields  []exportFormDataField
+	Fields  []listHeaderItem
 
 	DefaultOrderColumnName string
 	DefaultOrderDesc       bool
-}
-
-type exportFormDataField struct {
-	NameHuman  string
-	ColumnName string
-	Layout     string
-	FilterData interface{} //remove this
 }
 
 func (resource Resource) getExportFormData(user User, visible structFieldFilter) exportFormData {
@@ -32,16 +24,7 @@ func (resource Resource) getExportFormData(user User, visible structFieldFilter)
 	}
 
 	for _, v := range resource.StructCache.fieldArrays {
-		field := exportFormDataField{
-			NameHuman:  v.humanName(user.Locale),
-			ColumnName: v.ColumnName,
-			Layout:     v.filterLayout(),
-		}
-		field.FilterData = []string{
-			messages.Messages.Get(user.Locale, "yes"),
-			messages.Messages.Get(user.Locale, "no"),
-		}
-		ret.Fields = append(ret.Fields, field)
+		ret.Fields = append(ret.Fields, getListHeaderItem(*v, user))
 	}
 
 	return ret
@@ -49,11 +32,12 @@ func (resource Resource) getExportFormData(user User, visible structFieldFilter)
 
 func exportHandler(resource Resource, request prago.Request, user User) {
 	formData := resource.getExportFormData(user, resource.VisibilityFilter)
-
 	allowedFields := map[string]bool{}
 	for _, v := range formData.Fields {
 		allowedFields[v.ColumnName] = true
 	}
+
+	resource.Admin.createExportActivityLog(resource, user, formData)
 
 	usedFields := []string{}
 	usedFieldsMap := map[string]bool{}
@@ -118,7 +102,6 @@ func exportHandler(resource Resource, request prago.Request, user User) {
 			panic(err)
 		}
 	}
-
 	writer.Flush()
 }
 

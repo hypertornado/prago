@@ -13,7 +13,7 @@ type list struct {
 	Name           string
 	TypeID         string
 	Colspan        int64
-	Header         []listHeader
+	Header         []listHeaderItem
 	CanChangeOrder bool
 	OrderColumn    string
 	OrderDesc      bool
@@ -21,11 +21,12 @@ type list struct {
 	PrefilterValue string
 }
 
-type listHeader struct {
+type listHeaderItem struct {
 	Name         string
 	NameHuman    string
 	ColumnName   string
 	CanOrder     bool
+	ShouldShow   bool
 	FilterLayout string
 	FilterData   interface{}
 }
@@ -97,37 +98,43 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 	}
 
 	for _, v := range resource.StructCache.fieldArrays {
-		if v.canShow() {
+		headerItem := getListHeaderItem(*v, user)
+		if headerItem.ShouldShow {
 			list.Colspan++
-			headerItem := listHeader{
-				Name:       v.Name,
-				NameHuman:  v.humanName(lang),
-				ColumnName: v.ColumnName,
-			}
+		}
+		list.Header = append(list.Header, headerItem)
+	}
+	return
+}
 
-			headerItem.FilterLayout = v.filterLayout()
+func getListHeaderItem(v structField, user User) listHeaderItem {
+	headerItem := listHeaderItem{
+		Name:       v.Name,
+		NameHuman:  v.humanName(user.Locale),
+		ColumnName: v.ColumnName,
+		ShouldShow: v.canShow(),
+	}
 
-			if headerItem.FilterLayout == "filter_layout_relation" {
-				if v.Tags["prago-relation"] != "" {
-					headerItem.ColumnName = v.Tags["prago-relation"]
-				}
-			}
+	headerItem.FilterLayout = v.filterLayout()
 
-			if headerItem.FilterLayout == "filter_layout_boolean" {
-				headerItem.FilterData = []string{
-					messages.Messages.Get(lang, "yes"),
-					messages.Messages.Get(lang, "no"),
-				}
-			}
-
-			if v.CanOrder {
-				headerItem.CanOrder = true
-			}
-			list.Header = append(list.Header, headerItem)
+	if headerItem.FilterLayout == "filter_layout_relation" {
+		if v.Tags["prago-relation"] != "" {
+			headerItem.ColumnName = v.Tags["prago-relation"]
 		}
 	}
 
-	return
+	if headerItem.FilterLayout == "filter_layout_boolean" {
+		headerItem.FilterData = []string{
+			messages.Messages.Get(user.Locale, "yes"),
+			messages.Messages.Get(user.Locale, "no"),
+		}
+	}
+
+	if v.CanOrder {
+		headerItem.CanOrder = true
+	}
+
+	return headerItem
 }
 
 func (sf *structField) filterLayout() string {
@@ -328,9 +335,10 @@ func (resource *Resource) valueToCell(admin *Administration, field reflect.Struc
 				AdminItemName(string) string
 			})
 			if ok {
+				//TODO: localize
 				cell.Value = ifaceItemName.AdminItemName("cs")
 				cell.TemplateName = "admin_link"
-				cell.URL = fmt.Sprintf("%s/%d/edit", relationResource.ID, item.(int64))
+				cell.URL = fmt.Sprintf("%s/%d", relationResource.ID, item.(int64))
 				return
 			}
 

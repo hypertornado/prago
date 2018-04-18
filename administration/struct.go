@@ -10,13 +10,6 @@ import (
 	"time"
 )
 
-type FieldType struct {
-	ViewTemplate       string
-	FormSubTemplate    string
-	DBFieldDescription string
-	ValuesSource       *func() interface{}
-}
-
 type structCache struct {
 	typ             reflect.Type
 	fieldArrays     []*structField
@@ -165,6 +158,7 @@ func (sf *structField) humanName(lang string) (ret string) {
 }
 
 func newStructField(field reflect.StructField, order int) *structField {
+	//fmt.Println(getDefaultField(field.Type))
 	ret := &structField{
 		Name:       field.Name,
 		ColumnName: columnName(field.Name),

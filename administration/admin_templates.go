@@ -29,11 +29,11 @@ const adminTemplates = `
 
     <h2>Filter</h2>
     {{range $field := .Fields}}
-      {{if $field.Layout}}
+      {{if $field.FilterLayout}}
         <label class="form_label">
           <span class="form_label_text">{{$field.NameHuman}}</span>
           <div>
-            {{tmpl $field.Layout $field}}
+            {{tmpl $field.FilterLayout $field}}
           </div>
         </label>
       {{end}}
@@ -397,28 +397,32 @@ const adminTemplates = `
   >
     <thead>
     <tr>
-    {{range $item := .Header}}
-      <th>
-        {{if $item.CanOrder}}
-          <a href="#" class="admin_table_orderheader" data-name="{{$item.ColumnName}}">
-        {{- end -}}
-          {{- $item.NameHuman -}}
-        {{if $item.CanOrder -}}
-          </a>
+      {{range $item := .Header}}
+        {{if $item.ShouldShow}}
+          <th>
+            {{if $item.CanOrder}}
+              <a href="#" class="admin_table_orderheader" data-name="{{$item.ColumnName}}">
+            {{- end -}}
+              {{- $item.NameHuman -}}
+            {{if $item.CanOrder -}}
+              </a>
+            {{end}}
+          </th>
         {{end}}
+      {{end}}
+      <th>
+        <span class="admin_table_count"></span>
       </th>
-    {{end}}
-    <th>
-      <span class="admin_table_count"></span>
-    </th>
     </tr>
     <tr>
       {{range $item := .Header}}
-        <th>
-          {{if $item.FilterLayout}}
-            {{tmpl $item.FilterLayout $item}}
-          {{end}}
-        </th>
+        {{if $item.ShouldShow}}
+          <th>
+            {{if $item.FilterLayout}}
+              {{tmpl $item.FilterLayout $item}}
+            {{end}}
+          </th>
+        {{end}}
       {{end}}
       <th>
         <progress class="admin_table_progress"></progress>

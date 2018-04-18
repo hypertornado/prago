@@ -129,3 +129,18 @@ func (admin Administration) createDeleteActivityLog(resource Resource, user User
 	}
 	return admin.Create(&log)
 }
+
+func (admin Administration) createExportActivityLog(resource Resource, user User, item exportFormData) error {
+	data, err := json.Marshal(item)
+	if err != nil {
+		return err
+	}
+
+	log := activityLog{
+		ResourceName:  resource.ID,
+		ActionType:    "export",
+		User:          user.ID,
+		ContentBefore: string(data),
+	}
+	return admin.Create(&log)
+}

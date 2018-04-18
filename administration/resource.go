@@ -55,9 +55,7 @@ func (resource Resource) GetURL(suffix string) string {
 //CreateResource creates new resource based on item
 func (a *Administration) CreateResource(item interface{}, initFunction func(*Resource)) *Resource {
 	cache, err := newStructCache(item, a.fieldTypes)
-	if err != nil {
-		panic(err)
-	}
+	must(err)
 
 	typ := reflect.TypeOf(item)
 	defaultName := typ.Name()
