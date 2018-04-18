@@ -426,14 +426,15 @@ func bindAction(admin *Administration, resource *Resource, action Action, isItem
 
 	var fn func(request prago.Request) = func(request prago.Request) {
 		user := GetUser(request)
-		if !admin.Authorize(*user, action.Permission) {
+		if !admin.Authorize(user, action.Permission) {
 			render403(request)
 			return
 		}
 		if resource != nil {
-			action.Handler(*resource, request, *user)
+			action.Handler(*resource, request, user)
 		} else {
-			action.Handler(Resource{Admin: admin}, request, *user)
+			//TODO: ugly hack
+			action.Handler(Resource{Admin: admin}, request, user)
 		}
 	}
 
@@ -507,8 +508,8 @@ func initResourceActions(a *Administration, resource *Resource) {
 	}
 }
 
-func (resource *Resource) getResourceActionsButtonData(user *User, admin *Administration) (ret []buttonData) {
-	navigation := admin.getResourceNavigation(*resource, *user, "")
+func (resource *Resource) getResourceActionsButtonData(user User, admin *Administration) (ret []buttonData) {
+	navigation := admin.getResourceNavigation(*resource, user, "")
 	for _, v := range navigation.Tabs {
 		ret = append(ret, buttonData{
 			Name: v.Name,

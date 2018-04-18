@@ -37,8 +37,12 @@ type User struct {
 }
 
 //GetUser returns currently logged in user
-func GetUser(request prago.Request) *User {
-	return request.GetData("currentuser").(*User)
+func GetUser(request prago.Request) User {
+	u := request.GetData("currentuser").(*User)
+	if u == nil {
+		panic("no user found")
+	}
+	return *u
 }
 
 //AdminItemName represents item name for resource ajax api
@@ -518,7 +522,7 @@ func initUserResource(resource *Resource) {
 		request.Redirect(resource.GetURL("login"))
 	})
 
-	settingsForm := func(locale string, user *User) *Form {
+	settingsForm := func(locale string, user User) *Form {
 		form, err := resource.StructCache.GetForm(user, locale, whiteListFilter("Name", "Email"), whiteListFilter("Name", "Locale"))
 		must(err)
 
@@ -537,7 +541,7 @@ func initUserResource(resource *Resource) {
 		request.SetData("admin_header_settings_selected", true)
 
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getSettingsNavigation(*user, "settings"),
+			Navigation:   admin.getSettingsNavigation(user, "settings"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
@@ -558,7 +562,7 @@ func initUserResource(resource *Resource) {
 		}
 
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getSettingsNavigation(*user, "settings"),
+			Navigation:   admin.getSettingsNavigation(user, "settings"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
@@ -591,7 +595,7 @@ func initUserResource(resource *Resource) {
 	renderPasswordForm := func(request prago.Request, form *Form) {
 		user := GetUser(request)
 		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   admin.getSettingsNavigation(*user, "password"),
+			Navigation:   admin.getSettingsNavigation(user, "password"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})

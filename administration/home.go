@@ -18,7 +18,7 @@ func (admin *Administration) getHomeData(request prago.Request) (ret []homeData)
 	locale := GetLocale(request)
 
 	for _, resource := range admin.Resources {
-		if admin.Authorize(*user, resource.CanView) {
+		if admin.Authorize(user, resource.CanView) {
 			item := homeData{
 				Name: resource.Name(locale),
 				URL:  resource.GetURL(""),

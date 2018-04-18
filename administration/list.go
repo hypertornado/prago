@@ -217,7 +217,7 @@ func (admin *Administration) prefilterQuery(field, value string) Query {
 	return ret
 }
 
-func (resource *Resource) getListContent(admin *Administration, requestQuery *listRequest, user *User) (list listContent, err error) {
+func (resource *Resource) getListContent(admin *Administration, requestQuery *listRequest, user User) (list listContent, err error) {
 	q := admin.prefilterQuery(requestQuery.PrefilterField, requestQuery.PrefilterValue)
 	if requestQuery.OrderDesc {
 		q = q.OrderDesc(requestQuery.OrderBy)
@@ -289,7 +289,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 		row.ID = itemVal.FieldByName("ID").Int()
 		row.URL = resource.GetURL(fmt.Sprintf("%d", row.ID))
 
-		row.Actions = admin.getListItemActions(*user, val.Index(i).Interface(), row.ID, *resource)
+		row.Actions = admin.getListItemActions(user, val.Index(i).Interface(), row.ID, *resource)
 		list.Rows = append(list.Rows, row)
 		list.Colspan = int64(len(row.Items)) + 1
 	}

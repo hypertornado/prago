@@ -110,7 +110,7 @@ func (admin *Administration) initResource(resource *Resource) {
 
 	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
 		user := GetUser(request)
-		if !admin.Authorize(*user, resource.CanView) {
+		if !admin.Authorize(user, resource.CanView) {
 			render403(request)
 		} else {
 			next()
