@@ -26,8 +26,8 @@ type Resource struct {
 	TableName           string
 	StructCache         *structCache
 	AfterFormCreated    func(f *Form, request prago.Request, newItem bool) *Form //TODO: remove this
-	VisibilityFilter    structFieldFilter
-	EditabilityFilter   structFieldFilter
+	visibilityFilter    structFieldFilter
+	editabilityFilter   structFieldFilter
 	resourceActions     []Action
 	resourceItemActions []Action
 
@@ -70,8 +70,8 @@ func (a *Administration) CreateResource(item interface{}, initFunction func(*Res
 		item:               item,
 		TableName:          columnName(defaultName),
 		StructCache:        cache,
-		VisibilityFilter:   defaultVisibilityFilter,
-		EditabilityFilter:  defaultEditabilityFilter,
+		visibilityFilter:   defaultVisibilityFilter,
+		editabilityFilter:  defaultEditabilityFilter,
 
 		CanView:   "",
 		CanEdit:   "",

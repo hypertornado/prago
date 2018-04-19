@@ -282,7 +282,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 			if v.canShow() {
 				structField, _ := resource.Typ.FieldByName(v.Name)
 				fieldVal := itemVal.FieldByName(v.Name)
-				row.Items = append(row.Items, resource.valueToCell(admin, structField, fieldVal))
+				row.Items = append(row.Items, resource.valueToCell(user, structField, fieldVal))
 			}
 		}
 
@@ -297,7 +297,8 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	return
 }
 
-func (resource *Resource) valueToCell(admin *Administration, field reflect.StructField, val reflect.Value) (cell listCell) {
+func (resource Resource) valueToCell(user User, field reflect.StructField, val reflect.Value) (cell listCell) {
+	admin := resource.Admin
 	cell.TemplateName = "admin_string"
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
@@ -306,9 +307,10 @@ func (resource *Resource) valueToCell(admin *Administration, field reflect.Struc
 	case string:
 		cell.Value = item.(string)
 	case bool:
-		cell.TemplateName = "admin_cell_checkbox"
 		if item.(bool) {
-			cell.Value = "true"
+			cell.Value = messages.Messages.Get(user.Locale, "yes")
+		} else {
+			cell.Value = messages.Messages.Get(user.Locale, "no")
 		}
 	case int64:
 		cell.Value = fmt.Sprintf("%d", item.(int64))
@@ -335,8 +337,7 @@ func (resource *Resource) valueToCell(admin *Administration, field reflect.Struc
 				AdminItemName(string) string
 			})
 			if ok {
-				//TODO: localize
-				cell.Value = ifaceItemName.AdminItemName("cs")
+				cell.Value = ifaceItemName.AdminItemName(user.Locale)
 				cell.TemplateName = "admin_link"
 				cell.URL = fmt.Sprintf("%s/%d", relationResource.ID, item.(int64))
 				return
@@ -364,6 +365,5 @@ func (resource *Resource) valueToCell(admin *Administration, field reflect.Struc
 	if len(field.Tag.Get("prago-preview-type")) > 0 {
 		cell.TemplateName = field.Tag.Get("prago-preview-type")
 	}
-
 	return
 }

@@ -63,13 +63,15 @@ func actionNew(permission Permission) Action {
 		Handler: func(resource Resource, request prago.Request, user User) {
 			var item interface{}
 			resource.newItem(&item)
+			resource.BindData(&item, user, request.Request().URL.Query(), resource.editabilityFilter)
 
-			form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
+			form, err := resource.GetForm(item, user,
+				resource.visibilityFilter, resource.editabilityFilter)
 			must(err)
 
 			form.Classes = append(form.Classes, "form_leavealert")
 			form.Action = "../" + resource.ID
-			form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_create"))
+			form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_create"))
 			AddCSRFToken(form, request)
 
 			if resource.AfterFormCreated != nil {
@@ -94,14 +96,15 @@ func actionCreate(permission Permission) Action {
 			var item interface{}
 			resource.newItem(&item)
 
-			form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
+			form, err := resource.GetForm(item, user,
+				resource.visibilityFilter, resource.editabilityFilter)
 			must(err)
 
 			if resource.AfterFormCreated != nil {
 				form = resource.AfterFormCreated(form, request, true)
 			}
 
-			resource.StructCache.BindData(item, request.Params(), request.Request().MultipartForm, form.getFilter())
+			resource.BindData(item, user, request.Params(), form.getFilter())
 			must(resource.Admin.Create(item))
 
 			if resource.ActivityLog {
@@ -134,13 +137,10 @@ func actionView(permission Permission) Action {
 				panic(err)
 			}
 
-			view, err := resource.StructCache.getView(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
-			must(err)
-
 			renderNavigationPage(request, AdminNavigationPage{
 				Navigation:   resource.Admin.getItemNavigation(resource, user, item, ""),
 				PageTemplate: "admin_view",
-				PageData:     view,
+				PageData:     resource.getView(item, GetUser(request), resource.visibilityFilter),
 			})
 		},
 	}
@@ -166,7 +166,9 @@ func actionEdit(permission Permission) Action {
 				panic(err)
 			}
 
-			form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
+			form, err := resource.GetForm(item, user,
+				resource.visibilityFilter,
+				resource.editabilityFilter)
 			must(err)
 
 			form.Classes = append(form.Classes, "form_leavealert")
@@ -203,7 +205,9 @@ func actionUpdate(permission Permission) Action {
 			resource.newItem(&item)
 			must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
 
-			form, err := resource.StructCache.GetForm(item, GetLocale(request), resource.VisibilityFilter, resource.EditabilityFilter)
+			form, err := resource.GetForm(item, user,
+				resource.visibilityFilter,
+				resource.editabilityFilter)
 			must(err)
 
 			if resource.AfterFormCreated != nil {
@@ -217,8 +221,8 @@ func actionUpdate(permission Permission) Action {
 			}
 
 			must(
-				resource.StructCache.BindData(
-					item, request.Params(), request.Request().MultipartForm, form.getFilter(),
+				resource.BindData(
+					item, user, request.Params(), form.getFilter(),
 				),
 			)
 			must(resource.Admin.Save(item))
@@ -287,7 +291,7 @@ func actionExport(permission Permission) Action {
 		messages.Messages.GetNameFunction("admin_export"),
 		"admin_export",
 		func(resource Resource, request prago.Request, user User) interface{} {
-			return resource.getExportFormData(user, resource.VisibilityFilter)
+			return resource.getExportFormData(user, resource.visibilityFilter)
 		},
 	)
 	ret.Permission = permission

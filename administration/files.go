@@ -55,7 +55,7 @@ type File struct {
 	Name        string
 	Description string `prago-type:"text" prago-preview:"true"`
 	UID         string `prago-unique:"true" prago-preview:"true" prago-preview-type:"admin_image"`
-	User        int64
+	User        int64  `prago-type:"relation"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

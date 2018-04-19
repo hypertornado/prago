@@ -55,7 +55,7 @@ func (admin *Administration) AddRole(role string, permissions []string) {
 	admin.roles[role] = perms
 }
 
-func (admin *Administration) Authorize(user User, permission Permission) bool {
+func (admin Administration) Authorize(user User, permission Permission) bool {
 	if !user.IsAdmin {
 		return false
 	}

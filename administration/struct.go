@@ -86,7 +86,7 @@ type structField struct {
 	CanOrder   bool
 }
 
-func (sf *structField) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {
+func (sf structField) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {
 	var fieldDescription string
 
 	t, found := fieldTypes[sf.Tags["prago-type"]]
@@ -131,7 +131,7 @@ func (sf *structField) fieldDescriptionMysql(fieldTypes map[string]FieldType) st
 	return fmt.Sprintf("%s %s %s", sf.ColumnName, fieldDescription, additional)
 }
 
-func (sf *structField) canShow() (show bool) {
+func (sf structField) canShow() (show bool) {
 	if sf.Name == "Name" {
 		show = true
 	}
@@ -145,7 +145,7 @@ func (sf *structField) canShow() (show bool) {
 	return
 }
 
-func (sf *structField) humanName(lang string) (ret string) {
+func (sf structField) humanName(lang string) string {
 	description := sf.Tags["prago-description"]
 	if len(description) > 0 {
 		return description
@@ -158,7 +158,6 @@ func (sf *structField) humanName(lang string) (ret string) {
 }
 
 func newStructField(field reflect.StructField, order int) *structField {
-	//fmt.Println(getDefaultField(field.Type))
 	ret := &structField{
 		Name:       field.Name,
 		ColumnName: columnName(field.Name),
@@ -169,6 +168,9 @@ func newStructField(field reflect.StructField, order int) *structField {
 	}
 
 	for _, v := range []string{
+		"prago-edit",
+		"prago-view",
+
 		"prago-type",
 		"prago-description",
 		"prago-visible",
@@ -190,9 +192,14 @@ func newStructField(field reflect.StructField, order int) *structField {
 	return ret
 }
 
-type structFieldFilter func(field *structField) bool
+type structFieldFilter func(resource Resource, user User, field structField) bool
 
-func defaultVisibilityFilter(field *structField) bool {
+func defaultVisibilityFilter(resource Resource, user User, field structField) bool {
+	permission := field.Tags["prago-view"]
+	if permission != "" {
+		return resource.Admin.Authorize(user, Permission(permission))
+	}
+
 	visible := true
 	if field.Name == "ID" {
 		visible = false
@@ -212,7 +219,16 @@ func defaultVisibilityFilter(field *structField) bool {
 	return visible
 }
 
-func defaultEditabilityFilter(field *structField) bool {
+func defaultEditabilityFilter(resource Resource, user User, field structField) bool {
+	if !defaultVisibilityFilter(resource, user, field) {
+		return false
+	}
+
+	permission := field.Tags["prago-edit"]
+	if permission != "" {
+		return resource.Admin.Authorize(user, Permission(permission))
+	}
+
 	editable := true
 	if field.Name == "CreatedAt" || field.Name == "UpdatedAt" {
 		editable = false
@@ -233,19 +249,23 @@ func whiteListFilter(in ...string) structFieldFilter {
 	for _, v := range in {
 		m[v] = true
 	}
-	return func(field *structField) bool {
+	return func(resource Resource, user User, field structField) bool {
 		return m[field.Name]
 	}
 }
 
-func (cache *structCache) GetForm(inValues interface{}, lang string, visible structFieldFilter, editable structFieldFilter) (*Form, error) {
+func (resource Resource) GetForm(inValues interface{}, user User, visible structFieldFilter, editable structFieldFilter) (*Form, error) {
+	cache := resource.StructCache
 	form := NewForm()
 
 	form.Method = "POST"
 	itemVal := reflect.ValueOf(inValues).Elem()
 
 	for i, field := range cache.fieldArrays {
-		if !visible(field) {
+		if !visible(resource, user, *field) {
+			continue
+		}
+		if !editable(resource, user, *field) {
 			continue
 		}
 
@@ -255,10 +275,6 @@ func (cache *structCache) GetForm(inValues interface{}, lang string, visible str
 			Name:        field.Name,
 			NameHuman:   field.Name,
 			SubTemplate: "admin_item_input",
-		}
-
-		if !editable(field) {
-			item.Readonly = true
 		}
 
 		reflect.ValueOf(&ifaceVal).Elem().Set(
@@ -330,7 +346,7 @@ func (cache *structCache) GetForm(inValues interface{}, lang string, visible str
 			}
 		}
 
-		item.NameHuman = field.humanName(lang)
+		item.NameHuman = field.humanName(user.Locale)
 
 		form.AddItem(item)
 	}

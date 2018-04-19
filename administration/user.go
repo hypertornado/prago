@@ -18,11 +18,11 @@ import (
 
 //User represents admin user account
 type User struct {
-	ID                int64  `prago-preview:"false"`
+	ID                int64
 	Name              string `prago-preview:"true"`
 	Email             string `prago-unique:"true" prago-preview:"true" prago-order:"true"`
 	Role              string `prago-preview:"true" prago-type:"role" prago-description:"Role"`
-	Password          string
+	Password          string `prago-view:"___"`
 	Locale            string
 	IsSysadmin        bool `prago-preview:"true" prago-description:"Sysadmin"`
 	IsAdmin           bool `prago-preview:"true" prago-description:"Admin"`
@@ -523,7 +523,7 @@ func initUserResource(resource *Resource) {
 	})
 
 	settingsForm := func(locale string, user User) *Form {
-		form, err := resource.StructCache.GetForm(user, locale, whiteListFilter("Name", "Email"), whiteListFilter("Name", "Locale"))
+		form, err := resource.GetForm(&user, user, whiteListFilter("Name", "Email"), whiteListFilter("Name", "Locale"))
 		must(err)
 
 		sel := form.AddSelect("Locale", messages.Messages.Get(locale, "admin_locale"), availableLocales)
@@ -554,8 +554,8 @@ func initUserResource(resource *Resource) {
 		AddCSRFToken(form, request)
 		form.Validate()
 		if form.Valid {
-			must(resource.StructCache.BindData(user, request.Params(), request.Request().MultipartForm, form.getFilter()))
-			must(admin.Save(user))
+			must(resource.BindData(&user, user, request.Params(), form.getFilter()))
+			must(admin.Save(&user))
 			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_settings_changed"))
 			request.Redirect(resource.GetURL("settings"))
 			return

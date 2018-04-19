@@ -406,7 +406,7 @@ func initNewsletterResource(resource *administration.Resource) {
 		administration.CreateNavigationalItemAction(
 			"send-preview",
 			func(string) string { return "Odeslat náhled" },
-			"newsletter_send",
+			"newsletter_send_preview",
 			nil,
 		),
 	)

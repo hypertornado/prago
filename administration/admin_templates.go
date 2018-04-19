@@ -289,17 +289,7 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_string"}}
-{{.Value}}
-{{end}}
-
-{{define "admin_cell_checkbox"}}
-<div class="center">
-  {{if .Value}}
-    ✅
-  {{else}}
-    -
-  {{end}}
-</div>
+  {{.Value}}
 {{end}}
 {{define "admin_layout"}}
 <!doctype html>

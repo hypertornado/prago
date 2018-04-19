@@ -2,6 +2,7 @@ package messages
 
 import (
 	"fmt"
+	"time"
 )
 
 var (
@@ -20,6 +21,13 @@ func init() {
 
 type messages struct {
 	m map[string]map[string]string
+}
+
+func (m *messages) Timestamp(lang string, t time.Time) string {
+	if lang == "cs" {
+		return t.Format("2. 1. 2006 15:04")
+	}
+	return t.Format("2006-01-02 15:04")
 }
 
 func (m *messages) Get(lang, id string, params ...interface{}) string {

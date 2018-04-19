@@ -13,7 +13,6 @@ type relation struct {
 }
 
 func (r *Resource) AddRelation(r2 *Resource, field string, addName func(string) string) {
-	field = columnName(field)
 	r.relations = append(r.relations, relation{r2, field, addName})
 }
 
@@ -61,7 +60,7 @@ func (resource *Resource) bindRelationActions(r relation) {
 		Handler: func(resource Resource, request prago.Request, user User) {
 			values := make(url.Values)
 			values.Set(r.field, request.Params().Get("id"))
-			request.Redirect(resource.GetURL("new"))
+			request.Redirect(r.resource.GetURL("new") + "?" + values.Encode())
 		},
 	}
 	resource.AddItemAction(addAction)

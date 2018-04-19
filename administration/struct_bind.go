@@ -1,7 +1,6 @@
 package administration
 
 import (
-	"mime/multipart"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -23,7 +22,7 @@ func (cache *structCache) BindOrder(item interface{}, order int64) error {
 	return nil
 }
 
-func (cache *structCache) BindData(item interface{}, params url.Values, multiForm *multipart.Form, bindDataFilter structFieldFilter) error {
+func (resource Resource) BindData(item interface{}, user User, params url.Values, bindDataFilter structFieldFilter) error {
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
 		if value.Kind() == reflect.Struct {
@@ -32,13 +31,12 @@ func (cache *structCache) BindData(item interface{}, params url.Values, multiFor
 		value = value.Elem()
 	}
 
-	for _, field := range cache.fieldArrays {
-		if !bindDataFilter(field) {
+	for _, field := range resource.StructCache.fieldArrays {
+		if !bindDataFilter(resource, user, *field) {
 			continue
 		}
 
 		val := value.FieldByName(field.Name)
-
 		urlValue := params.Get(field.Name)
 		switch field.Typ.Kind() {
 		case reflect.Struct:
