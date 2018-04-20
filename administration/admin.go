@@ -187,11 +187,9 @@ func (a *Administration) AddAction(action Action) {
 
 func (a *Administration) unsafeDropTables() error {
 	for _, resource := range a.Resources {
-		if resource.HasModel {
-			err := resource.unsafeDropTable()
-			if err != nil {
-				return err
-			}
+		err := resource.unsafeDropTable()
+		if err != nil {
+			return err
 		}
 	}
 	return nil
@@ -216,12 +214,10 @@ func (a *Administration) Migrate(verbose bool) error {
 		return err
 	}
 	for _, resource := range a.Resources {
-		if resource.HasModel {
-			tables[resource.TableName] = false
-			err := resource.migrate(verbose)
-			if err != nil {
-				return err
-			}
+		tables[resource.TableName] = false
+		err := resource.migrate(verbose)
+		if err != nil {
+			return err
 		}
 	}
 

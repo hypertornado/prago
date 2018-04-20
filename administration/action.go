@@ -369,7 +369,7 @@ func actionOrder(permission Permission) Action {
 				var item interface{}
 				resource.newItem(&item)
 				must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
-				must(resource.StructCache.BindOrder(item, int64(i)))
+				must(resource.StructCache.SetOrderPosition(item, int64(i)))
 				must(resource.Admin.Save(item))
 			}
 			request.RenderJSON(true)
@@ -458,10 +458,6 @@ func bindAction(admin *Administration, resource *Resource, action Action, isItem
 }
 
 func initResourceActions(a *Administration, resource *Resource) {
-	if !resource.HasModel {
-		return
-	}
-
 	if resource.CanCreate == "" {
 		resource.CanCreate = resource.CanEdit
 	}

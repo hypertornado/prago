@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (cache *structCache) BindOrder(item interface{}, order int64) error {
+func (cache *structCache) SetOrderPosition(item interface{}, order int64) error {
 	value := reflect.ValueOf(item)
 
 	for i := 0; i < 10; i++ {
