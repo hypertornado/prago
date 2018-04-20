@@ -473,15 +473,15 @@ func initResourceActions(a *Administration, resource *Resource) {
 		actionExport(resource.CanExport),
 		actionDoExport(resource.CanExport),
 	}
-	resourceActions[0].Name = resource.Name
+	resourceActions[0].Name = resource.HumanName
 	if resource.ActivityLog {
 		resourceActions = append(resourceActions, actionHistory(resource.CanEdit))
 	}
 	for _, v := range resource.relations {
 		resource.bindRelationActions(v)
 	}
-	resource.resourceActions = append(resourceActions, resource.resourceActions...)
-	for _, v := range resource.resourceActions {
+	resource.actions = append(resourceActions, resource.actions...)
+	for _, v := range resource.actions {
 		bindResourceAction(a, resource, v)
 	}
 
@@ -502,9 +502,9 @@ func initResourceActions(a *Administration, resource *Resource) {
 	if resource.ActivityLog {
 		itemActions = append(itemActions, actionItemHistory(resource.CanView))
 	}
-	resource.resourceItemActions = append(itemActions, resource.resourceItemActions...)
+	resource.itemActions = append(itemActions, resource.itemActions...)
 
-	for _, v := range resource.resourceItemActions {
+	for _, v := range resource.itemActions {
 		bindResourceItemAction(a, resource, v)
 	}
 }
@@ -547,9 +547,9 @@ func (admin *Administration) getListItemActions(user User, item interface{}, id 
 }
 
 func (resource *Resource) AddItemAction(action Action) {
-	resource.resourceItemActions = append(resource.resourceItemActions, action)
+	resource.itemActions = append(resource.itemActions, action)
 }
 
 func (resource *Resource) AddAction(action Action) {
-	resource.resourceActions = append(resource.resourceActions, action)
+	resource.actions = append(resource.actions, action)
 }

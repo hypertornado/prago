@@ -20,7 +20,7 @@ func (admin *Administration) getHomeData(request prago.Request) (ret []homeData)
 	for _, resource := range admin.Resources {
 		if admin.Authorize(user, resource.CanView) {
 			item := homeData{
-				Name: resource.Name(locale),
+				Name: resource.HumanName(locale),
 				URL:  resource.GetURL(""),
 			}
 			item.Actions = resource.getResourceActionsButtonData(user, admin)

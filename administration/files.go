@@ -125,7 +125,7 @@ func initFilesResource(resource *Resource) {
 	a := resource.Admin
 	initCDN(a)
 	resource.AfterFormCreated = fileAfterFormCreated
-	resource.Name = messages.Messages.GetNameFunction("admin_files")
+	resource.HumanName = messages.Messages.GetNameFunction("admin_files")
 
 	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
 		if request.Request().Method == "POST" && strings.HasSuffix(request.Request().URL.Path, "/delete") {
@@ -175,7 +175,7 @@ func initFilesResource(resource *Resource) {
 		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
-	resource.Pagination = 100
+	resource.ItemsPerPage = 100
 
 	fileUploadPath = a.App.Config.GetString("fileUploadPath")
 	fileDownloadPath = a.App.Config.GetString("fileDownloadPath")

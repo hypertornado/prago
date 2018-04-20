@@ -38,7 +38,7 @@ func (admin *Administration) getHeaderData(request prago.Request) (headerData *a
 	for _, resource := range admin.Resources {
 		if admin.Authorize(user, resource.CanView) {
 			headerData.Items = append(headerData.Items, adminHeaderItem{
-				Name: resource.Name(locale),
+				Name: resource.HumanName(locale),
 				ID:   resource.ID,
 				Url:  admin.GetURL(resource.ID),
 			})

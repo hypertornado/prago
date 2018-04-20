@@ -18,7 +18,7 @@ func (r *Resource) AddRelation(r2 *Resource, field string, addName func(string) 
 
 func (resource *Resource) bindRelationActions(r relation) {
 	action := Action{
-		Name:       r.resource.Name,
+		Name:       r.resource.HumanName,
 		URL:        r.resource.ID,
 		Permission: r.resource.CanView,
 		Handler: func(resource Resource, request prago.Request, user User) {

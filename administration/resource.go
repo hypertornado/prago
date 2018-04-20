@@ -9,30 +9,28 @@ import (
 
 //Resource is structure representing one item in admin menu or one table in database
 type Resource struct {
-	Admin               *Administration
-	ID                  string
-	Name                func(locale string) string
-	Typ                 reflect.Type
-	ResourceController  *prago.Controller
-	Pagination          int64
-	OrderByColumn       string
-	OrderDesc           bool
-	item                interface{}
-	TableName           string
-	StructCache         *structCache
-	AfterFormCreated    func(f *Form, request prago.Request, newItem bool) *Form //TODO: remove this
-	visibilityFilter    structFieldFilter
-	editabilityFilter   structFieldFilter
-	resourceActions     []Action
-	resourceItemActions []Action
+	Admin              *Administration
+	ID                 string
+	HumanName          func(locale string) string
+	Typ                reflect.Type
+	ResourceController *prago.Controller
+	ItemsPerPage       int64
+	OrderByColumn      string
+	OrderDesc          bool
+	TableName          string
+	StructCache        *structCache
+	AfterFormCreated   func(f *Form, request prago.Request, newItem bool) *Form //TODO: remove this
+	visibilityFilter   structFieldFilter
+	editabilityFilter  structFieldFilter
+	actions            []Action
+	itemActions        []Action
+	relations          []relation
 
 	CanView   Permission
 	CanEdit   Permission
 	CanCreate Permission
 	CanDelete Permission
 	CanExport Permission
-
-	relations []relation
 
 	ActivityLog bool
 
@@ -55,20 +53,19 @@ func (resource Resource) GetURL(suffix string) string {
 }
 
 //CreateResource creates new resource based on item
-func (a *Administration) CreateResource(item interface{}, initFunction func(*Resource)) *Resource {
-	cache, err := newStructCache(item, a.fieldTypes)
+func (admin *Administration) CreateResource(item interface{}, initFunction func(*Resource)) *Resource {
+	cache, err := newStructCache(item, admin.fieldTypes)
 	must(err)
 
 	typ := reflect.TypeOf(item)
 	defaultName := typ.Name()
 	ret := &Resource{
-		Admin:              a,
-		Name:               func(string) string { return defaultName },
+		Admin:              admin,
+		HumanName:          Unlocalized(defaultName),
 		ID:                 columnName(defaultName),
 		Typ:                typ,
-		ResourceController: a.AdminController.SubController(),
-		Pagination:         1000,
-		item:               item,
+		ResourceController: admin.AdminController.SubController(),
+		ItemsPerPage:       200,
 		TableName:          columnName(defaultName),
 		StructCache:        cache,
 		visibilityFilter:   defaultVisibilityFilter,
@@ -85,14 +82,14 @@ func (a *Administration) CreateResource(item interface{}, initFunction func(*Res
 
 	ret.OrderByColumn, ret.OrderDesc = cache.GetDefaultOrder()
 
-	a.Resources = append(a.Resources, ret)
-	_, typFound := a.resourceMap[ret.Typ]
+	admin.Resources = append(admin.Resources, ret)
+	_, typFound := admin.resourceMap[ret.Typ]
 	if typFound {
 		panic(fmt.Errorf("resource with type %s already created", ret.Typ))
 	}
 
-	a.resourceMap[ret.Typ] = ret
-	a.resourceNameMap[ret.ID] = ret
+	admin.resourceMap[ret.Typ] = ret
+	admin.resourceNameMap[ret.ID] = ret
 
 	if initFunction != nil {
 		initFunction(ret)

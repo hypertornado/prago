@@ -202,7 +202,7 @@ func (u User) sendRenew(request prago.Request, a *Administration) error {
 func initUserResource(resource *Resource) {
 	admin := resource.Admin
 
-	resource.Name = messages.Messages.GetNameFunction("admin_users")
+	resource.HumanName = messages.Messages.GetNameFunction("admin_users")
 	resource.CanEdit = permissionSysadmin
 
 	resource.AddItemAction(

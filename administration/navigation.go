@@ -100,7 +100,7 @@ func (admin *Administration) getAdminNavigation(user User, code string) AdminIte
 
 func (admin *Administration) getResourceNavigation(resource Resource, user User, code string) AdminItemNavigation {
 	var tabs []NavigationTab
-	for _, v := range resource.resourceActions {
+	for _, v := range resource.actions {
 		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
 			if admin.Authorize(user, v.Permission) {
 				name := v.URL
@@ -129,9 +129,9 @@ func (admin *Administration) getResourceNavigation(resource Resource, user User,
 	}
 
 	if code != "" {
-		breadcrumbs = append(breadcrumbs, NavigationBreadcrumb{resource.Name(user.Locale), resource.GetURL("")})
+		breadcrumbs = append(breadcrumbs, NavigationBreadcrumb{resource.HumanName(user.Locale), resource.GetURL("")})
 	} else {
-		name = resource.Name(user.Locale)
+		name = resource.HumanName(user.Locale)
 	}
 
 	return AdminItemNavigation{
@@ -143,7 +143,7 @@ func (admin *Administration) getResourceNavigation(resource Resource, user User,
 
 func (admin *Administration) getItemNavigation(resource Resource, user User, item interface{}, code string) AdminItemNavigation {
 	var tabs []NavigationTab
-	for _, v := range resource.resourceItemActions {
+	for _, v := range resource.itemActions {
 		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
 			name := v.URL
 			if v.URL == "" {
@@ -165,7 +165,7 @@ func (admin *Administration) getItemNavigation(resource Resource, user User, ite
 	breadcrumbs := []NavigationBreadcrumb{
 		{admin.HumanName, "/"},
 		{messages.Messages.Get(user.Locale, "admin_admin"), admin.Prefix},
-		{resource.Name(user.Locale), resource.GetURL("")},
+		{resource.HumanName(user.Locale), resource.GetURL("")},
 	}
 
 	name := getItemName(item, user.Locale)

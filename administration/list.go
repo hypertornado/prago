@@ -91,7 +91,7 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 		return
 	}
 
-	list.Name = resource.Name(lang)
+	list.Name = resource.HumanName(lang)
 
 	if resource.StructCache.OrderColumnName == list.OrderColumn && !list.OrderDesc {
 		list.CanChangeOrder = true
@@ -245,8 +245,8 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	}
 	list.TotalCount = totalCount
 
-	totalPages := (count / resource.Pagination)
-	if count%resource.Pagination != 0 {
+	totalPages := (count / resource.ItemsPerPage)
+	if count%resource.ItemsPerPage != 0 {
 		totalPages += +1
 	}
 
@@ -266,8 +266,8 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	}
 
 	q = resource.addFilterToQuery(q, requestQuery.Filter)
-	q = q.Offset((currentPage - 1) * resource.Pagination)
-	q = q.Limit(resource.Pagination)
+	q = q.Offset((currentPage - 1) * resource.ItemsPerPage)
+	q = q.Limit(resource.ItemsPerPage)
 
 	var rowItems interface{}
 	resource.newArrayOfItems(&rowItems)
