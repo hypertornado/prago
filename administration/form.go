@@ -84,8 +84,8 @@ func (f *Form) getFilter() structFieldFilter {
 			allowed[v.Name] = true
 		}
 	}
-	return func(resource Resource, user User, field structField) bool {
-		return allowed[field.Name]
+	return func(resource Resource, user User, ff field) bool {
+		return allowed[ff.Name]
 	}
 }
 

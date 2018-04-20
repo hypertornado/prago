@@ -38,10 +38,7 @@ func (admin *Administration) getHistory(resource *Resource, user int64, itemID i
 	q.OrderDesc("ID")
 
 	var items []*activityLog
-	err := q.Get(&items)
-	if err != nil {
-		panic(err)
-	}
+	must(q.Get(&items))
 
 	for _, v := range items {
 		var username, userurl string

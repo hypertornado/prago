@@ -41,20 +41,20 @@ func (resource Resource) getView(inValues interface{}, user User, visible struct
 	return ret
 }
 
-func getViewField(cache *structCache, user User, field structField, ifaceVal interface{}) viewField {
+func getViewField(cache *structCache, user User, f field, ifaceVal interface{}) viewField {
 	item := viewField{
-		Name:     field.Name,
+		Name:     f.Name,
 		Template: "admin_item_view_text",
 		Value:    ifaceVal,
 	}
 
-	t, found := cache.fieldTypes[field.Tags["prago-type"]]
+	t, found := cache.fieldTypes[f.Tags["prago-type"]]
 	if found && t.ViewTemplate != "" {
 		item.Template = t.ViewTemplate
 	} else {
-		switch field.Typ.Kind() {
+		switch f.Typ.Kind() {
 		case reflect.Struct:
-			if field.Typ == reflect.TypeOf(time.Now()) {
+			if f.Typ == reflect.TypeOf(time.Now()) {
 				item.Value = messages.Messages.Timestamp(
 					user.Locale,
 					ifaceVal.(time.Time),
@@ -67,7 +67,7 @@ func getViewField(cache *structCache, user User, field structField, ifaceVal int
 				item.Value = messages.Messages.Get(user.Locale, "no")
 			}
 		case reflect.String:
-			switch field.Tags["prago-type"] {
+			switch f.Tags["prago-type"] {
 			case "markdown":
 				item.Template = "admin_item_view_markdown"
 			case "image":
@@ -76,12 +76,12 @@ func getViewField(cache *structCache, user User, field structField, ifaceVal int
 				item.Template = "admin_item_view_place"
 			}
 		case reflect.Int64:
-			switch field.Tags["prago-type"] {
+			switch f.Tags["prago-type"] {
 			case "relation":
 				item.Template = "admin_item_view_relation"
 				var val = viewRelationData{}
-				if field.Tags["prago-relation"] != "" {
-					val.Typ = columnName(field.Tags["prago-relation"])
+				if f.Tags["prago-relation"] != "" {
+					val.Typ = columnName(f.Tags["prago-relation"])
 				} else {
 					val.Typ = columnName(item.Name)
 				}
@@ -91,10 +91,10 @@ func getViewField(cache *structCache, user User, field structField, ifaceVal int
 		case reflect.Float64:
 			item.Value = fmt.Sprintf("%f", ifaceVal.(float64))
 		default:
-			panic("Wrong type" + field.Typ.Kind().String())
+			panic("Wrong type" + f.Typ.Kind().String())
 		}
 	}
 
-	item.Name = field.humanName(user.Locale)
+	item.Name = f.HumanName(user.Locale)
 	return item
 }

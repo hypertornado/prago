@@ -51,10 +51,10 @@ func (a *Administration) GetFiles(ids string) []*File {
 
 //File is structure representing files in admin
 type File struct {
-	ID          int64 `prago-order-desc:"true"`
+	UID         string `prago-unique:"true" prago-preview:"true" prago-preview-type:"admin_image"`
+	ID          int64  `prago-order-desc:"true"`
 	Name        string
 	Description string `prago-type:"text" prago-preview:"true"`
-	UID         string `prago-unique:"true" prago-preview:"true" prago-preview-type:"admin_image"`
 	User        int64  `prago-type:"relation"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

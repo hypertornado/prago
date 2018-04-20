@@ -58,8 +58,9 @@ func actionList(permission Permission) Action {
 
 func actionNew(permission Permission) Action {
 	return Action{
-		Name: messages.Messages.GetNameFunction("admin_new"),
-		URL:  "new",
+		Permission: permission,
+		Name:       messages.Messages.GetNameFunction("admin_new"),
+		URL:        "new",
 		Handler: func(resource Resource, request prago.Request, user User) {
 			var item interface{}
 			resource.newItem(&item)
@@ -478,7 +479,7 @@ func initResourceActions(a *Administration, resource *Resource) {
 	}
 	resourceActions[0].Name = resource.Name
 	if resource.ActivityLog {
-		resourceActions = append(resourceActions, actionHistory(resource.CanView))
+		resourceActions = append(resourceActions, actionHistory(resource.CanEdit))
 	}
 	for _, v := range resource.relations {
 		resource.bindRelationActions(v)

@@ -44,6 +44,13 @@ type Resource struct {
 	PreviewURLFunction func(interface{}) string
 }
 
+func (resource Resource) Field(name string) *field {
+	if resource.StructCache == nil {
+		return nil
+	}
+	return resource.StructCache.fieldMap[name]
+}
+
 func (resource Resource) GetURL(suffix string) string {
 	ret := resource.Admin.Prefix + "/" + resource.ID
 	if len(suffix) > 0 {

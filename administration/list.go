@@ -98,7 +98,7 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 	}
 
 	for _, v := range resource.StructCache.fieldArrays {
-		headerItem := getListHeaderItem(*v, user)
+		headerItem := (*v).getListHeaderItem(user)
 		if headerItem.ShouldShow {
 			list.Colspan++
 		}
@@ -107,10 +107,10 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 	return
 }
 
-func getListHeaderItem(v structField, user User) listHeaderItem {
+func (v field) getListHeaderItem(user User) listHeaderItem {
 	headerItem := listHeaderItem{
 		Name:       v.Name,
-		NameHuman:  v.humanName(user.Locale),
+		NameHuman:  v.HumanName(user.Locale),
 		ColumnName: v.ColumnName,
 		ShouldShow: v.canShow(),
 	}
@@ -137,7 +137,7 @@ func getListHeaderItem(v structField, user User) listHeaderItem {
 	return headerItem
 }
 
-func (sf *structField) filterLayout() string {
+func (sf *field) filterLayout() string {
 	if sf == nil {
 		return ""
 	}

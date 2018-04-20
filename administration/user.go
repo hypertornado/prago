@@ -22,18 +22,18 @@ type User struct {
 	Name              string `prago-preview:"true"`
 	Email             string `prago-unique:"true" prago-preview:"true" prago-order:"true"`
 	Role              string `prago-preview:"true" prago-type:"role" prago-description:"Role"`
-	Password          string `prago-view:"___"`
+	Password          string `prago-view:"_"`
 	Locale            string
 	IsSysadmin        bool `prago-preview:"true" prago-description:"Sysadmin"`
 	IsAdmin           bool `prago-preview:"true" prago-description:"Admin"`
 	IsActive          bool
-	LoggedInIP        string
-	LoggedInUseragent string
-	LoggedInTime      time.Time
-	EmailConfirmedAt  time.Time
-	EmailRenewedAt    time.Time
+	LoggedInIP        string    `prago-view:"sysadmin"`
+	LoggedInUseragent string    `prago-view:"sysadmin"`
+	LoggedInTime      time.Time `prago-view:"sysadmin"`
+	EmailConfirmedAt  time.Time `prago-view:"sysadmin"`
+	EmailRenewedAt    time.Time `prago-view:"sysadmin"`
 	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	UpdatedAt         time.Time `prago-view:"sysadmin"`
 }
 
 //GetUser returns currently logged in user
@@ -203,7 +203,7 @@ func initUserResource(resource *Resource) {
 	admin := resource.Admin
 
 	resource.Name = messages.Messages.GetNameFunction("admin_users")
-	resource.CanView = permissionSysadmin
+	resource.CanEdit = permissionSysadmin
 
 	resource.AddItemAction(
 		Action{

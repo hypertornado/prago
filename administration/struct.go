@@ -1,10 +1,8 @@
 package administration
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/hypertornado/prago/administration/messages"
 	"go/ast"
 	"reflect"
 	"time"
@@ -12,8 +10,8 @@ import (
 
 type structCache struct {
 	typ             reflect.Type
-	fieldArrays     []*structField
-	fieldMap        map[string]*structField
+	fieldArrays     []*field
+	fieldMap        map[string]*field
 	fieldTypes      map[string]FieldType
 	OrderFieldName  string
 	OrderColumnName string
@@ -22,18 +20,18 @@ type structCache struct {
 func newStructCache(item interface{}, fieldTypes map[string]FieldType) (ret *structCache, err error) {
 	typ := reflect.TypeOf(item)
 	if typ.Kind() != reflect.Struct {
-		return nil, errors.New("item is not a structure")
+		return nil, errors.New("item is not a structure, but " + typ.Kind().String())
 	}
 
 	ret = &structCache{
 		typ:        typ,
-		fieldMap:   make(map[string]*structField),
+		fieldMap:   make(map[string]*field),
 		fieldTypes: fieldTypes,
 	}
 
 	for i := 0; i < typ.NumField(); i++ {
 		if ast.IsExported(typ.Field(i).Name) {
-			field := newStructField(typ.Field(i), i)
+			field := newField(typ.Field(i), i)
 			if field.Tags["prago-type"] == "order" {
 				ret.OrderFieldName = field.Name
 				ret.OrderColumnName = field.ColumnName
@@ -73,185 +71,6 @@ func (cache *structCache) GetDefaultOrder() (column string, desc bool) {
 		}
 	}
 	return
-}
-
-type structField struct {
-	Name       string
-	ColumnName string
-	Typ        reflect.Type
-	Tags       map[string]string
-	Order      int
-	Unique     bool
-	Scanner    sql.Scanner
-	CanOrder   bool
-}
-
-func (sf structField) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {
-	var fieldDescription string
-
-	t, found := fieldTypes[sf.Tags["prago-type"]]
-	if found && t.DBFieldDescription != "" {
-		fieldDescription = t.DBFieldDescription
-	} else {
-		switch sf.Typ.Kind() {
-		case reflect.Struct:
-			dateType := reflect.TypeOf(time.Now())
-			if sf.Typ == dateType {
-				if sf.Tags["prago-type"] == "date" {
-					fieldDescription = "date"
-				} else {
-					fieldDescription = "datetime"
-				}
-			}
-		case reflect.Bool:
-			fieldDescription = "bool NOT NULL"
-		case reflect.Float64:
-			fieldDescription = "double"
-		case reflect.Int64:
-			fieldDescription = "bigint(20)"
-		case reflect.String:
-			if sf.Tags["prago-type"] == "text" || sf.Tags["prago-type"] == "image" || sf.Tags["prago-type"] == "markdown" {
-				fieldDescription = "text"
-			} else {
-				fieldDescription = "varchar(255)"
-			}
-		default:
-			panic("non supported type " + sf.Typ.Kind().String())
-		}
-	}
-
-	additional := ""
-	if sf.ColumnName == "id" {
-		additional = "NOT NULL AUTO_INCREMENT PRIMARY KEY"
-	} else {
-		if sf.Unique {
-			additional = "UNIQUE"
-		}
-	}
-	return fmt.Sprintf("%s %s %s", sf.ColumnName, fieldDescription, additional)
-}
-
-func (sf structField) canShow() (show bool) {
-	if sf.Name == "Name" {
-		show = true
-	}
-	showTag := sf.Tags["prago-preview"]
-	if showTag == "true" {
-		show = true
-	}
-	if showTag == "false" {
-		show = false
-	}
-	return
-}
-
-func (sf structField) humanName(lang string) string {
-	description := sf.Tags["prago-description"]
-	if len(description) > 0 {
-		return description
-	}
-	translatedName := messages.Messages.GetNullable(lang, sf.Name)
-	if translatedName == nil {
-		return sf.Name
-	}
-	return *translatedName
-}
-
-func newStructField(field reflect.StructField, order int) *structField {
-	ret := &structField{
-		Name:       field.Name,
-		ColumnName: columnName(field.Name),
-		Typ:        field.Type,
-		Tags:       make(map[string]string),
-		Order:      order,
-		CanOrder:   true,
-	}
-
-	for _, v := range []string{
-		"prago-edit",
-		"prago-view",
-
-		"prago-type",
-		"prago-description",
-		"prago-visible",
-		"prago-editable",
-		"prago-preview",
-		"prago-unique",
-		"prago-order",
-		"prago-order-desc",
-		"prago-relation",
-		"prago-preview-type",
-	} {
-		ret.Tags[v] = field.Tag.Get(v)
-	}
-
-	if ret.Tags["prago-unique"] == "true" {
-		ret.Unique = true
-	}
-
-	return ret
-}
-
-type structFieldFilter func(resource Resource, user User, field structField) bool
-
-func defaultVisibilityFilter(resource Resource, user User, field structField) bool {
-	permission := field.Tags["prago-view"]
-	if permission != "" {
-		return resource.Admin.Authorize(user, Permission(permission))
-	}
-
-	visible := true
-	if field.Name == "ID" {
-		visible = false
-	}
-
-	if field.Tags["prago-type"] == "order" {
-		visible = false
-	}
-
-	visibleTag := field.Tags["prago-visible"]
-	if visibleTag == "true" {
-		visible = true
-	}
-	if visibleTag == "false" {
-		visible = false
-	}
-	return visible
-}
-
-func defaultEditabilityFilter(resource Resource, user User, field structField) bool {
-	if !defaultVisibilityFilter(resource, user, field) {
-		return false
-	}
-
-	permission := field.Tags["prago-edit"]
-	if permission != "" {
-		return resource.Admin.Authorize(user, Permission(permission))
-	}
-
-	editable := true
-	if field.Name == "CreatedAt" || field.Name == "UpdatedAt" {
-		editable = false
-	}
-
-	editableTag := field.Tags["prago-editable"]
-	if editableTag == "true" {
-		editable = true
-	}
-	if editableTag == "false" {
-		editable = false
-	}
-	return editable
-}
-
-func whiteListFilter(in ...string) structFieldFilter {
-	m := make(map[string]bool)
-	for _, v := range in {
-		m[v] = true
-	}
-	return func(resource Resource, user User, field structField) bool {
-		return m[field.Name]
-	}
 }
 
 func (resource Resource) GetForm(inValues interface{}, user User, visible structFieldFilter, editable structFieldFilter) (*Form, error) {
@@ -346,7 +165,7 @@ func (resource Resource) GetForm(inValues interface{}, user User, visible struct
 			}
 		}
 
-		item.NameHuman = field.humanName(user.Locale)
+		item.NameHuman = field.HumanName(user.Locale)
 
 		form.AddItem(item)
 	}

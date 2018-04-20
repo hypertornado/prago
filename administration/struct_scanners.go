@@ -31,7 +31,7 @@ func (s *structCache) getStructScanners(value reflect.Value) (names []string, sc
 		}
 		if use {
 			names = append(names, v.ColumnName)
-			scanners = append(scanners, &scanner{value.Field(v.Order)})
+			scanners = append(scanners, &scanner{value.Field(v.fieldOrder)})
 		}
 	}
 	return

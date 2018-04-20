@@ -24,7 +24,9 @@ func (resource Resource) getExportFormData(user User, visible structFieldFilter)
 	}
 
 	for _, v := range resource.StructCache.fieldArrays {
-		ret.Fields = append(ret.Fields, getListHeaderItem(*v, user))
+		if visible(resource, user, *v) {
+			ret.Fields = append(ret.Fields, (*v).getListHeaderItem(user))
+		}
 	}
 
 	return ret
