@@ -112,7 +112,7 @@ func (v field) getListHeaderItem(user User) listHeaderItem {
 		Name:       v.Name,
 		NameHuman:  v.HumanName(user.Locale),
 		ColumnName: v.ColumnName,
-		ShouldShow: v.canShow(),
+		ShouldShow: v.shouldShow(),
 	}
 
 	headerItem.FilterLayout = v.filterLayout()
@@ -279,7 +279,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 		itemVal := val.Index(i).Elem()
 
 		for _, v := range resource.StructCache.fieldArrays {
-			if v.canShow() {
+			if v.shouldShow() {
 				structField, _ := resource.Typ.FieldByName(v.Name)
 				fieldVal := itemVal.FieldByName(v.Name)
 				row.Items = append(row.Items, resource.valueToCell(user, structField, fieldVal))

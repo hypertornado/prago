@@ -112,7 +112,7 @@ func (sf field) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {
 	return fmt.Sprintf("%s %s %s", sf.ColumnName, fieldDescription, additional)
 }
 
-func (sf field) canShow() (show bool) {
+func (sf field) shouldShow() (show bool) {
 	if sf.Name == "Name" {
 		show = true
 	}
