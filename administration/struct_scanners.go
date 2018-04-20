@@ -8,13 +8,13 @@ import (
 	"time"
 )
 
-func (s *structCache) getStructScanners(value reflect.Value) (names []string, scanners []interface{}, err error) {
-	if value.Type() != s.typ {
+func (resource Resource) getStructScanners(value reflect.Value) (names []string, scanners []interface{}, err error) {
+	if value.Type() != resource.Typ {
 		err = errors.New("Types dont match")
 		return
 	}
 
-	for _, v := range s.fieldArrays {
+	for _, v := range resource.fieldArrays {
 		use := true
 
 		switch v.Typ.Kind() {

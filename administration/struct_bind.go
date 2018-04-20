@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (cache *structCache) SetOrderPosition(item interface{}, order int64) error {
+func (resource *Resource) SetOrderPosition(item interface{}, order int64) error {
 	value := reflect.ValueOf(item)
 
 	for i := 0; i < 10; i++ {
@@ -17,7 +17,7 @@ func (cache *structCache) SetOrderPosition(item interface{}, order int64) error 
 		value = value.Elem()
 	}
 
-	val := value.FieldByName(cache.OrderFieldName)
+	val := value.FieldByName(resource.OrderFieldName)
 	val.SetInt(order)
 	return nil
 }
@@ -31,7 +31,7 @@ func (resource Resource) BindData(item interface{}, user User, params url.Values
 		value = value.Elem()
 	}
 
-	for _, field := range resource.StructCache.fieldArrays {
+	for _, field := range resource.fieldArrays {
 		if !bindDataFilter(resource, user, *field) {
 			continue
 		}

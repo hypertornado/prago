@@ -24,7 +24,7 @@ type viewRelationData struct {
 
 func (resource Resource) getView(inValues interface{}, user User, visible structFieldFilter) view {
 	ret := view{}
-	for i, field := range resource.StructCache.fieldArrays {
+	for i, field := range resource.fieldArrays {
 		if !visible(resource, user, *field) {
 			continue
 		}
@@ -35,20 +35,20 @@ func (resource Resource) getView(inValues interface{}, user User, visible struct
 		)
 
 		ret.Items = append(ret.Items,
-			getViewField(resource.StructCache, user, *field, ifaceVal),
+			getViewField(resource, user, *field, ifaceVal),
 		)
 	}
 	return ret
 }
 
-func getViewField(cache *structCache, user User, f field, ifaceVal interface{}) viewField {
+func getViewField(resource Resource, user User, f field, ifaceVal interface{}) viewField {
 	item := viewField{
 		Name:     f.Name,
 		Template: "admin_item_view_text",
 		Value:    ifaceVal,
 	}
 
-	t, found := cache.fieldTypes[f.Tags["prago-type"]]
+	t, found := resource.fieldTypes[f.Tags["prago-type"]]
 	if found && t.ViewTemplate != "" {
 		item.Template = t.ViewTemplate
 	} else {

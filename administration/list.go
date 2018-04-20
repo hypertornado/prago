@@ -85,7 +85,7 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 	list.OrderColumn = resource.OrderByColumn
 	list.OrderDesc = resource.OrderDesc
 
-	orderField, ok := resource.StructCache.fieldMap[resource.OrderByColumn]
+	orderField, ok := resource.fieldMap[resource.OrderByColumn]
 	if !ok || !orderField.CanOrder {
 		err = ErrItemNotFound
 		return
@@ -93,11 +93,11 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 
 	list.Name = resource.HumanName(lang)
 
-	if resource.StructCache.OrderColumnName == list.OrderColumn && !list.OrderDesc {
+	if resource.OrderColumnName == list.OrderColumn && !list.OrderDesc {
 		list.CanChangeOrder = true
 	}
 
-	for _, v := range resource.StructCache.fieldArrays {
+	for _, v := range resource.fieldArrays {
 		headerItem := (*v).getListHeaderItem(user)
 		if headerItem.ShouldShow {
 			list.Colspan++
@@ -166,7 +166,7 @@ func (sf *field) filterLayout() string {
 
 func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Query {
 	for k, v := range filter {
-		field := resource.StructCache.fieldMap[k]
+		field := resource.fieldMap[k]
 		if field == nil {
 			continue
 		}
@@ -278,7 +278,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 		row := listRow{}
 		itemVal := val.Index(i).Elem()
 
-		for _, v := range resource.StructCache.fieldArrays {
+		for _, v := range resource.fieldArrays {
 			if v.shouldShow() {
 				structField, _ := resource.Typ.FieldByName(v.Name)
 				fieldVal := itemVal.FieldByName(v.Name)

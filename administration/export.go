@@ -23,7 +23,7 @@ func (resource Resource) getExportFormData(user User, visible structFieldFilter)
 		DefaultOrderDesc:       resource.OrderDesc,
 	}
 
-	for _, v := range resource.StructCache.fieldArrays {
+	for _, v := range resource.fieldArrays {
 		if visible(resource, user, *v) {
 			ret.Fields = append(ret.Fields, (*v).getListHeaderItem(user))
 		}
@@ -78,7 +78,7 @@ func exportHandler(resource Resource, request prago.Request, user User) {
 	request.Response().Header().Set("Content-Type", "text/csv")
 
 	header := []string{}
-	for _, field := range resource.StructCache.fieldArrays {
+	for _, field := range resource.fieldArrays {
 		if usedFieldsMap[field.ColumnName] {
 			header = append(header, field.Name)
 		}
@@ -92,7 +92,7 @@ func exportHandler(resource Resource, request prago.Request, user User) {
 	for i := 0; i < val.Len(); i++ {
 		itemVal := val.Index(i).Elem()
 		row := []string{}
-		for _, field := range resource.StructCache.fieldArrays {
+		for _, field := range resource.fieldArrays {
 			if usedFieldsMap[field.ColumnName] {
 				fieldVal := itemVal.FieldByName(field.Name)
 				row = append(row, exportFieldToString(fieldVal))

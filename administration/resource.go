@@ -18,7 +18,6 @@ type Resource struct {
 	OrderByColumn      string
 	OrderDesc          bool
 	TableName          string
-	StructCache        *structCache
 	AfterFormCreated   func(f *Form, request prago.Request, newItem bool) *Form //TODO: remove this
 	visibilityFilter   structFieldFilter
 	editabilityFilter  structFieldFilter
@@ -35,13 +34,16 @@ type Resource struct {
 	ActivityLog bool
 
 	PreviewURLFunction func(interface{}) string
+
+	fieldArrays     []*field
+	fieldMap        map[string]*field
+	fieldTypes      map[string]FieldType
+	OrderFieldName  string
+	OrderColumnName string
 }
 
 func (resource Resource) Field(name string) *field {
-	if resource.StructCache == nil {
-		return nil
-	}
-	return resource.StructCache.fieldMap[name]
+	return resource.fieldMap[name]
 }
 
 func (resource Resource) GetURL(suffix string) string {
@@ -54,9 +56,6 @@ func (resource Resource) GetURL(suffix string) string {
 
 //CreateResource creates new resource based on item
 func (admin *Administration) CreateResource(item interface{}, initFunction func(*Resource)) *Resource {
-	cache, err := newStructCache(item, admin.fieldTypes)
-	must(err)
-
 	typ := reflect.TypeOf(item)
 	defaultName := typ.Name()
 	ret := &Resource{
@@ -67,7 +66,6 @@ func (admin *Administration) CreateResource(item interface{}, initFunction func(
 		ResourceController: admin.AdminController.SubController(),
 		ItemsPerPage:       200,
 		TableName:          columnName(defaultName),
-		StructCache:        cache,
 		visibilityFilter:   defaultVisibilityFilter,
 		editabilityFilter:  defaultEditabilityFilter,
 
@@ -80,7 +78,8 @@ func (admin *Administration) CreateResource(item interface{}, initFunction func(
 		ActivityLog: true,
 	}
 
-	ret.OrderByColumn, ret.OrderDesc = cache.GetDefaultOrder()
+	must(ret.newStructCache(item, admin.fieldTypes))
+	ret.OrderByColumn, ret.OrderDesc = ret.GetDefaultOrder()
 
 	admin.Resources = append(admin.Resources, ret)
 	_, typFound := admin.resourceMap[ret.Typ]
@@ -128,12 +127,12 @@ func (resource *Resource) unsafeDropTable() error {
 func (resource *Resource) migrate(verbose bool) error {
 	_, err := getTableDescription(resource.Admin.db, resource.TableName)
 	if err == nil {
-		return migrateTable(resource.Admin.db, resource.TableName, resource.StructCache, verbose)
+		return migrateTable(resource.Admin.db, resource.TableName, *resource, verbose)
 	}
-	return createTable(resource.Admin.db, resource.TableName, resource.StructCache, verbose)
+	return createTable(resource.Admin.db, resource.TableName, *resource, verbose)
 }
 
-func (resource *Resource) saveWithDBIface(item interface{}, db dbIface) error {
+func (resource Resource) saveWithDBIface(item interface{}, db dbIface) error {
 	val := reflect.ValueOf(item).Elem()
 	timeVal := reflect.ValueOf(time.Now())
 	fn := "UpdatedAt"
@@ -141,10 +140,10 @@ func (resource *Resource) saveWithDBIface(item interface{}, db dbIface) error {
 		val.FieldByName(fn).Set(timeVal)
 	}
 
-	return resource.StructCache.saveItem(db, resource.TableName, item)
+	return resource.saveItem(db, resource.TableName, item)
 }
 
-func (resource *Resource) createWithDBIface(item interface{}, db dbIface) error {
+func (resource Resource) createWithDBIface(item interface{}, db dbIface) error {
 	val := reflect.ValueOf(item).Elem()
 	timeVal := reflect.ValueOf(time.Now())
 	var t time.Time
@@ -157,13 +156,13 @@ func (resource *Resource) createWithDBIface(item interface{}, db dbIface) error 
 			}
 		}
 	}
-	return resource.StructCache.createItem(db, resource.TableName, item)
+	return resource.createItem(db, resource.TableName, item)
 }
 
-func (resource *Resource) newItem(item interface{}) {
+func (resource Resource) newItem(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(resource.Typ))
 }
 
-func (resource *Resource) newArrayOfItems(item interface{}) {
+func (resource Resource) newArrayOfItems(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(reflect.SliceOf(reflect.PtrTo(resource.Typ))))
 }

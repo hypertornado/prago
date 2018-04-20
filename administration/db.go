@@ -119,13 +119,13 @@ func listTables(db dbIface) (ret map[string]bool, err error) {
 	return
 }
 
-func createTable(db dbIface, tableName string, adminStruct *structCache, verbose bool) (err error) {
+func createTable(db dbIface, tableName string, resource Resource, verbose bool) (err error) {
 	if verbose {
 		fmt.Printf("Creating table '%s'\n", tableName)
 	}
 	items := []string{}
-	for _, v := range adminStruct.fieldArrays {
-		items = append(items, v.fieldDescriptionMysql(adminStruct.fieldTypes))
+	for _, v := range resource.fieldArrays {
+		items = append(items, v.fieldDescriptionMysql(resource.fieldTypes))
 	}
 	q := fmt.Sprintf("CREATE TABLE %s (%s);", tableName, strings.Join(items, ", "))
 	if verbose || Debug {
@@ -135,7 +135,7 @@ func createTable(db dbIface, tableName string, adminStruct *structCache, verbose
 	return err
 }
 
-func migrateTable(db dbIface, tableName string, adminStruct *structCache, verbose bool) error {
+func migrateTable(db dbIface, tableName string, resource Resource, verbose bool) error {
 	if verbose {
 		fmt.Printf("Migrating table '%s'\n", tableName)
 	}
@@ -151,9 +151,9 @@ func migrateTable(db dbIface, tableName string, adminStruct *structCache, verbos
 
 	items := []string{}
 
-	for _, v := range adminStruct.fieldArrays {
+	for _, v := range resource.fieldArrays {
 		if !tableDescriptionMap[v.ColumnName] {
-			items = append(items, fmt.Sprintf("ADD COLUMN %s", v.fieldDescriptionMysql(adminStruct.fieldTypes)))
+			items = append(items, fmt.Sprintf("ADD COLUMN %s", v.fieldDescriptionMysql(resource.fieldTypes)))
 		} else {
 			tableDescriptionMap[v.ColumnName] = false
 		}
@@ -208,9 +208,9 @@ func getTableDescription(db dbIface, tableName string) (map[string]*mysqlColumn,
 	return columns, nil
 }
 
-func (sc *structCache) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
+func (resource Resource) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
 
-	for _, field := range sc.fieldArrays {
+	for _, field := range resource.fieldArrays {
 		val := value.FieldByName(field.Name)
 
 		if field.Name == "ID" {
@@ -248,10 +248,10 @@ func (sc *structCache) prepareValues(value reflect.Value) (names []string, quest
 	return
 }
 
-func (sc *structCache) saveItem(db dbIface, tableName string, item interface{}) error {
+func (resource Resource) saveItem(db dbIface, tableName string, item interface{}) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	value := reflect.ValueOf(item).Elem()
-	names, _, values, err := sc.prepareValues(value)
+	names, _, values, err := resource.prepareValues(value)
 	if err != nil {
 		return err
 	}
@@ -277,10 +277,10 @@ func (sc *structCache) saveItem(db dbIface, tableName string, item interface{}) 
 	return nil
 }
 
-func (sc *structCache) createItem(db dbIface, tableName string, item interface{}) error {
+func (resource Resource) createItem(db dbIface, tableName string, item interface{}) error {
 	value := reflect.ValueOf(item).Elem()
 
-	names, questionMarks, values, err := sc.prepareValues(value)
+	names, questionMarks, values, err := resource.prepareValues(value)
 	if err != nil {
 		return err
 	}
@@ -371,9 +371,9 @@ func countItems(db dbIface, tableName string, query *listQuery) (int64, error) {
 	return i, err
 }
 
-func getFirstItem(cache *structCache, db dbIface, tableName string, item interface{}, query *listQuery) error {
+func getFirstItem(resource Resource, db dbIface, tableName string, item interface{}, query *listQuery) error {
 	var items interface{}
-	err := listItems(cache, db, tableName, &items, query)
+	err := listItems(resource, db, tableName, &items, query)
 	if err != nil {
 		return err
 	}
@@ -387,14 +387,14 @@ func getFirstItem(cache *structCache, db dbIface, tableName string, item interfa
 	return ErrItemNotFound
 }
 
-func listItems(cache *structCache, db dbIface, tableName string, items interface{}, query *listQuery) error {
-	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(cache.typ))).Elem()
+func listItems(resource Resource, db dbIface, tableName string, items interface{}, query *listQuery) error {
+	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(resource.Typ))).Elem()
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.whereString)
 
-	newValue := reflect.New(cache.typ).Elem()
-	names, scanners, err := cache.getStructScanners(newValue)
+	newValue := reflect.New(resource.Typ).Elem()
+	names, scanners, err := resource.getStructScanners(newValue)
 	if err != nil {
 		return err
 	}
@@ -409,8 +409,8 @@ func listItems(cache *structCache, db dbIface, tableName string, items interface
 	}
 	defer rows.Close()
 	for rows.Next() {
-		newValue = reflect.New(cache.typ)
-		names, scanners, err = cache.getStructScanners(newValue.Elem())
+		newValue = reflect.New(resource.Typ)
+		names, scanners, err = resource.getStructScanners(newValue.Elem())
 		if err != nil {
 			return err
 		}

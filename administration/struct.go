@@ -17,34 +17,31 @@ type structCache struct {
 	OrderColumnName string
 }
 
-func newStructCache(item interface{}, fieldTypes map[string]FieldType) (ret *structCache, err error) {
+func (resource *Resource) newStructCache(item interface{}, fieldTypes map[string]FieldType) error {
 	typ := reflect.TypeOf(item)
 	if typ.Kind() != reflect.Struct {
-		return nil, errors.New("item is not a structure, but " + typ.Kind().String())
+		return errors.New("item is not a structure, but " + typ.Kind().String())
 	}
 
-	ret = &structCache{
-		typ:        typ,
-		fieldMap:   make(map[string]*field),
-		fieldTypes: fieldTypes,
-	}
+	resource.fieldMap = make(map[string]*field)
+	resource.fieldTypes = fieldTypes
 
 	for i := 0; i < typ.NumField(); i++ {
 		if ast.IsExported(typ.Field(i).Name) {
 			field := newField(typ.Field(i), i)
 			if field.Tags["prago-type"] == "order" {
-				ret.OrderFieldName = field.Name
-				ret.OrderColumnName = field.ColumnName
+				resource.OrderFieldName = field.Name
+				resource.OrderColumnName = field.ColumnName
 			}
-			ret.fieldArrays = append(ret.fieldArrays, field)
-			ret.fieldMap[field.ColumnName] = field
+			resource.fieldArrays = append(resource.fieldArrays, field)
+			resource.fieldMap[field.ColumnName] = field
 		}
 	}
-	return
+	return nil
 }
 
-func (cache *structCache) GetDefaultOrder() (column string, desc bool) {
-	for _, v := range cache.fieldArrays {
+func (resource Resource) GetDefaultOrder() (column string, desc bool) {
+	for _, v := range resource.fieldArrays {
 		add := false
 		if v.ColumnName == "id" {
 			add = true
@@ -74,13 +71,12 @@ func (cache *structCache) GetDefaultOrder() (column string, desc bool) {
 }
 
 func (resource Resource) GetForm(inValues interface{}, user User, visible structFieldFilter, editable structFieldFilter) (*Form, error) {
-	cache := resource.StructCache
 	form := NewForm()
 
 	form.Method = "POST"
 	itemVal := reflect.ValueOf(inValues).Elem()
 
-	for i, field := range cache.fieldArrays {
+	for i, field := range resource.fieldArrays {
 		if !visible(resource, user, *field) {
 			continue
 		}
@@ -100,7 +96,7 @@ func (resource Resource) GetForm(inValues interface{}, user User, visible struct
 			itemVal.Field(i),
 		)
 
-		t, found := cache.fieldTypes[field.Tags["prago-type"]]
+		t, found := resource.fieldTypes[field.Tags["prago-type"]]
 		if found {
 			item.SubTemplate = t.FormSubTemplate
 			if t.ValuesSource != nil {

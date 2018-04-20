@@ -369,7 +369,7 @@ func actionOrder(permission Permission) Action {
 				var item interface{}
 				resource.newItem(&item)
 				must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
-				must(resource.StructCache.SetOrderPosition(item, int64(i)))
+				must(resource.SetOrderPosition(item, int64(i)))
 				must(resource.Admin.Save(item))
 			}
 			request.RenderJSON(true)
@@ -539,7 +539,7 @@ func (admin *Administration) getListItemActions(user User, item interface{}, id 
 		}
 	}
 
-	if admin.Authorize(user, resource.CanEdit) && resource.StructCache.OrderColumnName != "" {
+	if admin.Authorize(user, resource.CanEdit) && resource.OrderColumnName != "" {
 		ret.ShowOrderButton = true
 	}
 

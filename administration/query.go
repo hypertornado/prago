@@ -100,13 +100,13 @@ func (q Query) Get(item interface{}) error {
 
 	var newItem interface{}
 	if slice {
-		err = listItems(resource.StructCache, q.db, resource.TableName, &newItem, q.query)
+		err = listItems(*resource, q.db, resource.TableName, &newItem, q.query)
 		if err != nil {
 			return err
 		}
 		reflect.ValueOf(item).Elem().Set(reflect.ValueOf(newItem))
 	} else {
-		err = getFirstItem(resource.StructCache, q.db, resource.TableName, &newItem, q.query)
+		err = getFirstItem(*resource, q.db, resource.TableName, &newItem, q.query)
 		if err != nil {
 			return err
 		}
