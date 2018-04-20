@@ -121,7 +121,8 @@ func (a *Administration) getResourceByItem(item interface{}) (*Resource, error) 
 }
 
 func (resource *Resource) unsafeDropTable() error {
-	return dropTable(resource.Admin.db, resource.TableName)
+	_, err := resource.Admin.db.Exec(fmt.Sprintf("drop table `%s`;", resource.TableName))
+	return err
 }
 
 func (resource *Resource) migrate(verbose bool) error {

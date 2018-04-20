@@ -94,11 +94,6 @@ func (q *listQuery) addOrder(name string, desc bool) {
 	q.order = append(q.order, listQueryOrder{name: name, desc: desc})
 }
 
-func dropTable(db dbIface, tableName string) error {
-	_, err := db.Exec(fmt.Sprintf("drop table `%s`;", tableName))
-	return err
-}
-
 func listTables(db dbIface) (ret map[string]bool, err error) {
 	ret = make(map[string]bool)
 	var rows *sql.Rows
