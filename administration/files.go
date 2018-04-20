@@ -230,7 +230,7 @@ func initFilesResource(resource *Resource) {
 		fi = form.AddTextInput("url", messages.Messages.Get(GetLocale(request), "Url"))
 		fi.Readonly = true
 		fi.Value = fileURL
-		fi.SubTemplate = "admin_item_link"
+		fi.Template = "admin_item_link"
 
 		fi = form.AddTextInput("uploadedBy", messages.Messages.Get(GetLocale(request), "Uploaded By"))
 		fi.Readonly = true
@@ -251,7 +251,7 @@ func initFilesResource(resource *Resource) {
 				fi.Readonly = true
 				_, path := file.getPath(fileDownloadPath + "thumb/" + v)
 				fi.Value = path
-				fi.SubTemplate = "admin_item_link"
+				fi.Template = "admin_item_link"
 			}
 		}
 

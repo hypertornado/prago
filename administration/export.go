@@ -17,7 +17,8 @@ type exportFormData struct {
 	DefaultOrderDesc       bool
 }
 
-func (resource Resource) getExportFormData(user User, visible structFieldFilter) exportFormData {
+func (resource Resource) getExportFormData(user User) exportFormData {
+	visible := defaultVisibilityFilter
 	ret := exportFormData{
 		DefaultOrderColumnName: resource.OrderByColumn,
 		DefaultOrderDesc:       resource.OrderDesc,
@@ -33,7 +34,7 @@ func (resource Resource) getExportFormData(user User, visible structFieldFilter)
 }
 
 func exportHandler(resource Resource, request prago.Request, user User) {
-	formData := resource.getExportFormData(user, resource.visibilityFilter)
+	formData := resource.getExportFormData(user)
 	allowedFields := map[string]bool{}
 	for _, v := range formData.Fields {
 		allowedFields[v.ColumnName] = true

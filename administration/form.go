@@ -2,6 +2,7 @@ package administration
 
 import (
 	"github.com/asaskevich/govalidator"
+	"github.com/hypertornado/prago/utils"
 	"net/url"
 )
 
@@ -22,19 +23,19 @@ type ItemValidator interface {
 
 //FormItem represents item of form
 type FormItem struct {
-	Name        string
-	NameHuman   string
-	Required    bool
-	Focused     bool
-	Readonly    bool
-	HiddenName  bool
-	SubTemplate string
-	Template    string
-	Errors      []string
-	Value       string
-	Values      interface{}
-	form        *Form
-	validators  []ItemValidator
+	Name       string
+	NameHuman  string
+	Required   bool
+	Focused    bool
+	Readonly   bool
+	HiddenName bool
+	Template   string
+	Errors     []string
+	Value      string
+	Data       interface{}
+	UUID       string
+	form       *Form
+	validators []ItemValidator
 }
 
 //Validate form
@@ -77,7 +78,7 @@ func (f *Form) BindData(params url.Values) {
 }
 
 //GetFilter returns struct filter
-func (f *Form) getFilter() structFieldFilter {
+func (f *Form) getFilter() fieldFilter {
 	allowed := make(map[string]bool)
 	for _, v := range f.Items {
 		if !v.Readonly {
@@ -91,10 +92,11 @@ func (f *Form) getFilter() structFieldFilter {
 
 func (f *Form) addInput(name, description, template string, validators []ItemValidator) *FormItem {
 	item := &FormItem{
-		Name:        name,
-		SubTemplate: template,
-		NameHuman:   description,
+		Name:      name,
+		Template:  template,
+		NameHuman: description,
 	}
+	item.AddUUID()
 	item.validators = validators
 	f.AddItem(item)
 	return item
@@ -128,6 +130,7 @@ func (f *Form) AddFileInput(name, description string, validators ...ItemValidato
 //AddSubmit to form
 func (f *Form) AddSubmit(name, description string, validators ...ItemValidator) *FormItem {
 	input := f.addInput(name, description, "", validators)
+	input.HiddenName = true
 	input.Template = "admin_item_submit"
 	return input
 }
@@ -149,7 +152,7 @@ func (f *Form) AddHidden(name string, validators ...ItemValidator) *FormItem {
 //AddSelect to form
 func (f *Form) AddSelect(name, description string, values [][2]string, validators ...ItemValidator) *FormItem {
 	input := f.addInput(name, description, "admin_item_select", validators)
-	input.Values = values
+	input.Data = values
 	return input
 }
 
@@ -157,6 +160,11 @@ func (f *Form) AddSelect(name, description string, values [][2]string, validator
 func (f *FormItem) AddError(err string) {
 	f.Errors = append(f.Errors, err)
 	f.form.Valid = false
+}
+
+//AddError to form
+func (f *FormItem) AddUUID() {
+	f.UUID = "id-" + utils.RandomString(5)
 }
 
 //NewValidator creates new item validator with error message

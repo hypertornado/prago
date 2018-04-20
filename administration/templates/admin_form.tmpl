@@ -11,26 +11,21 @@
 {{end}}
 
 {{range $item := .Items}}
-
-  {{if $item.Template}}
-    {{tmpl $item.Template $item}}
-  {{else}}
-    <label class="form_label{{if .Errors}} form_label-errors{{end}}{{if .Required}} form_label-required{{end}}">
-      {{if eq .HiddenName false}}
-        <span class="form_label_text">{{.NameHuman}}</span>
-      {{end}}
-      {{if .Errors}}
-        <div class="form_label_errors">
-          {{range $error := .Errors}}
-            <div class="form_label_errors_error">{{$error}}</div>
-          {{end}}
-        </div>
-      {{end}}
-      <div>
-        {{tmpl $item.SubTemplate $item}}
+  <div class="form_label{{if .Errors}} form_label-errors{{end}}{{if .Required}} form_label-required{{end}}">
+    {{if eq .HiddenName false}}
+      <label for="{{.UUID}}" class="form_label_text">{{.NameHuman}}</label>
+    {{end}}
+    {{if .Errors}}
+      <div class="form_label_errors">
+        {{range $error := .Errors}}
+          <div class="form_label_errors_error">{{$error}}</div>
+        {{end}}
       </div>
-    </label>
-  {{end}}
+    {{end}}
+    <div>
+      {{tmpl $item.Template $item}}
+    </div>
+  </div>
 {{end}}
 </form>
 

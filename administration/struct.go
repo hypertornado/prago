@@ -2,10 +2,8 @@ package administration
 
 import (
 	"errors"
-	"fmt"
 	"go/ast"
 	"reflect"
-	"time"
 )
 
 type structCache struct {
@@ -28,7 +26,7 @@ func (resource *Resource) newStructCache(item interface{}, fieldTypes map[string
 
 	for i := 0; i < typ.NumField(); i++ {
 		if ast.IsExported(typ.Field(i).Name) {
-			field := newField(typ.Field(i), i)
+			field := newField(typ.Field(i), i, fieldTypes)
 			if field.Tags["prago-type"] == "order" {
 				resource.OrderFieldName = field.Name
 				resource.OrderColumnName = field.ColumnName
@@ -70,97 +68,39 @@ func (resource Resource) GetDefaultOrder() (column string, desc bool) {
 	return
 }
 
-func (resource Resource) GetForm(inValues interface{}, user User, visible structFieldFilter, editable structFieldFilter) (*Form, error) {
+func (resource Resource) GetForm(inValues interface{}, user User, filters ...fieldFilter) (*Form, error) {
+	filters = append(filters, defaultVisibilityFilter)
+	filters = append(filters, defaultEditabilityFilter)
 	form := NewForm()
-
 	form.Method = "POST"
 	itemVal := reflect.ValueOf(inValues).Elem()
 
+fields:
 	for i, field := range resource.fieldArrays {
-		if !visible(resource, user, *field) {
-			continue
-		}
-		if !editable(resource, user, *field) {
-			continue
+		for _, filter := range filters {
+			if !filter(resource, user, *field) {
+				continue fields
+			}
 		}
 
 		var ifaceVal interface{}
-
-		item := &FormItem{
-			Name:        field.Name,
-			NameHuman:   field.Name,
-			SubTemplate: "admin_item_input",
-		}
-
 		reflect.ValueOf(&ifaceVal).Elem().Set(
 			itemVal.Field(i),
 		)
 
-		t, found := resource.fieldTypes[field.Tags["prago-type"]]
-		if found {
-			item.SubTemplate = t.FormSubTemplate
-			if t.ValuesSource != nil {
-				item.Values = (*t.ValuesSource)()
-			}
-
-			switch ifaceVal.(type) {
-			case string:
-				item.Value = ifaceVal.(string)
-			case int64:
-				item.Value = fmt.Sprintf("%d", ifaceVal.(int64))
-			default:
-				panic("unknown typ")
-			}
-
-		} else {
-			switch field.Typ.Kind() {
-			case reflect.Struct:
-				if field.Typ == reflect.TypeOf(time.Now()) {
-					tm := ifaceVal.(time.Time)
-					if field.Tags["prago-type"] == "timestamp" {
-						item.SubTemplate = "admin_item_timestamp"
-						item.Value = tm.Format("2006-01-02 15:04")
-					} else {
-						item.SubTemplate = "admin_item_date"
-						item.Value = tm.Format("2006-01-02")
-					}
-				}
-			case reflect.Bool:
-				item.SubTemplate = "admin_item_checkbox"
-				if ifaceVal.(bool) {
-					item.Value = "on"
-				}
-				item.HiddenName = true
-			case reflect.String:
-				item.Value = ifaceVal.(string)
-				switch field.Tags["prago-type"] {
-				case "text":
-					item.SubTemplate = "admin_item_textarea"
-				case "markdown":
-					item.Template = "admin_item_markdown"
-				case "image":
-					item.SubTemplate = "admin_item_image"
-				case "place":
-					item.SubTemplate = "admin_item_place"
-				}
-			case reflect.Int64:
-				item.Value = fmt.Sprintf("%d", ifaceVal.(int64))
-				switch field.Tags["prago-type"] {
-				case "relation":
-					item.SubTemplate = "admin_item_relation"
-					if field.Tags["prago-relation"] != "" {
-						item.Values = columnName(field.Tags["prago-relation"])
-					} else {
-						item.Values = columnName(item.Name)
-					}
-				}
-			case reflect.Float64:
-				item.Value = fmt.Sprintf("%f", ifaceVal.(float64))
-			default:
-				panic("Wrong type" + field.Typ.Kind().String())
-			}
+		item := &FormItem{
+			Name:      field.Name,
+			NameHuman: field.Name,
+			Template:  field.fieldType.FormTemplate,
 		}
+		item.AddUUID()
 
+		//fmt.Println(field.Name, field.fieldType.FormHideLabel)
+
+		if field.fieldType.FormHideLabel {
+			item.HiddenName = true
+		}
+		item.Value = field.fieldType.FormStringer(ifaceVal)
 		item.NameHuman = field.HumanName(user.Locale)
 
 		form.AddItem(item)

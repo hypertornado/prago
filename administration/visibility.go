@@ -1,6 +1,6 @@
 package administration
 
-type structFieldFilter func(Resource, User, field) bool
+type fieldFilter func(Resource, User, field) bool
 
 func defaultVisibilityFilter(resource Resource, user User, f field) bool {
 	permission := f.Tags["prago-view"]
@@ -52,7 +52,7 @@ func defaultEditabilityFilter(resource Resource, user User, f field) bool {
 	return editable
 }
 
-func whiteListFilter(in ...string) structFieldFilter {
+func whiteListFilter(in ...string) fieldFilter {
 	m := make(map[string]bool)
 	for _, v := range in {
 		m[v] = true

@@ -22,7 +22,8 @@ type viewRelationData struct {
 	ID  int64
 }
 
-func (resource Resource) getView(inValues interface{}, user User, visible structFieldFilter) view {
+func (resource Resource) getView(inValues interface{}, user User) view {
+	visible := defaultVisibilityFilter
 	ret := view{}
 	for i, field := range resource.fieldArrays {
 		if !visible(resource, user, *field) {

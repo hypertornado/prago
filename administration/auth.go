@@ -25,7 +25,7 @@ func (admin Administration) getSysadminPermissions() []string {
 }
 
 func (admin *Administration) createRoleFieldType() FieldType {
-	var fp = func() interface{} {
+	var fp = func(field, User) interface{} {
 		roleNames := []string{""}
 		for k, _ := range admin.roles {
 			roleNames = append(roleNames, k)
@@ -38,8 +38,8 @@ func (admin *Administration) createRoleFieldType() FieldType {
 		return vals
 	}
 	return FieldType{
-		FormSubTemplate: "admin_item_select",
-		ValuesSource:    &fp,
+		FormTemplate:   "admin_item_select",
+		FormDataSource: fp,
 	}
 }
 

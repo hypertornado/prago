@@ -74,7 +74,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	admin.CreateResource(File{}, initFilesResource)
 	admin.CreateResource(activityLog{}, initActivityLog)
 
-	admin.AddFieldType("role", admin.createRoleFieldType())
+	admin.addDefaultFieldTypes()
 
 	initFunction(admin)
 

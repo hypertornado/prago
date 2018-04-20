@@ -523,7 +523,7 @@ func initUserResource(resource *Resource) {
 	})
 
 	settingsForm := func(locale string, user User) *Form {
-		form, err := resource.GetForm(&user, user, whiteListFilter("Name", "Email"), whiteListFilter("Name", "Locale"))
+		form, err := resource.GetForm(&user, user, whiteListFilter("Name", "Locale"))
 		must(err)
 
 		sel := form.AddSelect("Locale", messages.Messages.Get(locale, "admin_locale"), availableLocales)

@@ -67,26 +67,21 @@ const adminTemplates = `
 {{end}}
 
 {{range $item := .Items}}
-
-  {{if $item.Template}}
-    {{tmpl $item.Template $item}}
-  {{else}}
-    <label class="form_label{{if .Errors}} form_label-errors{{end}}{{if .Required}} form_label-required{{end}}">
-      {{if eq .HiddenName false}}
-        <span class="form_label_text">{{.NameHuman}}</span>
-      {{end}}
-      {{if .Errors}}
-        <div class="form_label_errors">
-          {{range $error := .Errors}}
-            <div class="form_label_errors_error">{{$error}}</div>
-          {{end}}
-        </div>
-      {{end}}
-      <div>
-        {{tmpl $item.SubTemplate $item}}
+  <div class="form_label{{if .Errors}} form_label-errors{{end}}{{if .Required}} form_label-required{{end}}">
+    {{if eq .HiddenName false}}
+      <label for="{{.UUID}}" class="form_label_text">{{.NameHuman}}</label>
+    {{end}}
+    {{if .Errors}}
+      <div class="form_label_errors">
+        {{range $error := .Errors}}
+          <div class="form_label_errors_error">{{$error}}</div>
+        {{end}}
       </div>
-    </label>
-  {{end}}
+    {{end}}
+    <div>
+      {{tmpl $item.Template $item}}
+    </div>
+  </div>
 {{end}}
 </form>
 
@@ -162,7 +157,7 @@ const adminTemplates = `
     {{end}}
   </table>
 {{end}}{{define "admin_item_input"}}
-  <input name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_email"}}
@@ -174,14 +169,11 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_item_textarea"}}
-  <textarea name="{{.Name}}" class="input form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
+  <textarea name="{{.Name}}" id="{{.UUID}}" class="input form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
 {{end}}
 
 {{define "admin_item_markdown"}}
-<div class="form_label">
-  <span class="form_label_text">{{.NameHuman}}</span>
   <div class="admin_markdown">
-
     <div class="btngroup">
       <div class="btn btn-small admin_markdown_command" data-cmd="b" title="ctrl+b">B</div>
       <div class="btn btn-small admin_markdown_command" data-cmd="i" title="ctrl+i">I</div>
@@ -195,19 +187,20 @@ const adminTemplates = `
       <input type="checkbox" class="admin_markdown_preview_show"> Zobrazit náhled
     </label>
 
-    <textarea name="{{.Name}}" class="input form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
+    <textarea name="{{.Name}}" id="{{.UUID}}" class="input form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
     <div class="admin_markdown_preview hidden"></div>
   </div>
-</div>
 {{end}}
 
 {{define "admin_item_checkbox"}}
-  <input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
-  <span class="form_label_text-inline">{{.NameHuman}}</span>
+  <label>
+    <input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+    <span class="form_label_text-inline">{{.NameHuman}}</span>
+  </label>
 {{end}}
 
 {{define "admin_item_date"}}
-  <input type="date" name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="date" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_timestamp"}}
@@ -215,7 +208,7 @@ const adminTemplates = `
     <input name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}} readonly>
   {{else}}
     <div class="admin_timestamp">
-      <input type="hidden" name="{{.Name}}" value="{{.Value}}">
+      <input type="hidden" id="{{.UUID}}" name="{{.Name}}" value="{{.Value}}">
 
       <input type="date" name="_admin_timestamp_hidden" class="input form_input admin_timestamp_date"{{if .Focused}} autofocus{{end}}>
 
@@ -231,7 +224,7 @@ const adminTemplates = `
   <div class="admin_images">
     <input name="{{.Name}}" value="{{.Value}}" type="hidden" class="admin_images_hidden">
     <div class="admin_images_loaded hidden">
-      <input type="file" accept=".jpg,.jpeg,.png" multiple class="admin_images_fileinput">
+      <input type="file" id="{{.UUID}}" accept=".jpg,.jpeg,.png" multiple class="admin_images_fileinput">
       <div class="admin_images_preview"></div>
     </div>
     <progress></progress>
@@ -239,17 +232,17 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_item_file"}}
-  <input type="file" name="{{.Name}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_submit"}}
-  <input type="submit" name="{{.Name}}" value="{{.NameHuman}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="submit" id="{{.UUID}}" name="{{.Name}}" value="{{.NameHuman}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_select"}}
-  <select name="{{.Name}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <select name="{{.Name}}" id="{{.UUID}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
     {{$val := .Value}}
-    {{range $value := .Values}}
+    {{range $value := .Data}}
       <option value="{{index $value 0}}"{{if eq $val (index $value 0)}} selected{{end}}>{{index $value 1}}</option>
     {{end}}
   </select>
@@ -273,7 +266,7 @@ const adminTemplates = `
 
 {{define "admin_item_relation"}}
 <div class="admin_item_relation">
-  <input type="hidden" name="{{.Name}}" value="{{.Value}}" data-relation="{{.Values}}">
+  <input type="hidden" name="{{.Name}}" value="{{.Value}}" data-relation="{{.Data}}">
   <progress></progress>
 </div>
 {{end}}

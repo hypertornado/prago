@@ -66,8 +66,7 @@ func actionNew(permission Permission) Action {
 			resource.newItem(&item)
 			resource.BindData(&item, user, request.Request().URL.Query(), resource.editabilityFilter)
 
-			form, err := resource.GetForm(item, user,
-				resource.visibilityFilter, resource.editabilityFilter)
+			form, err := resource.GetForm(item, user)
 			must(err)
 
 			form.Classes = append(form.Classes, "form_leavealert")
@@ -97,8 +96,7 @@ func actionCreate(permission Permission) Action {
 			var item interface{}
 			resource.newItem(&item)
 
-			form, err := resource.GetForm(item, user,
-				resource.visibilityFilter, resource.editabilityFilter)
+			form, err := resource.GetForm(item, user)
 			must(err)
 
 			if resource.AfterFormCreated != nil {
@@ -141,7 +139,7 @@ func actionView(permission Permission) Action {
 			renderNavigationPage(request, AdminNavigationPage{
 				Navigation:   resource.Admin.getItemNavigation(resource, user, item, ""),
 				PageTemplate: "admin_view",
-				PageData:     resource.getView(item, GetUser(request), resource.visibilityFilter),
+				PageData:     resource.getView(item, GetUser(request)),
 			})
 		},
 	}
@@ -167,9 +165,7 @@ func actionEdit(permission Permission) Action {
 				panic(err)
 			}
 
-			form, err := resource.GetForm(item, user,
-				resource.visibilityFilter,
-				resource.editabilityFilter)
+			form, err := resource.GetForm(item, user)
 			must(err)
 
 			form.Classes = append(form.Classes, "form_leavealert")
@@ -206,9 +202,7 @@ func actionUpdate(permission Permission) Action {
 			resource.newItem(&item)
 			must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
 
-			form, err := resource.GetForm(item, user,
-				resource.visibilityFilter,
-				resource.editabilityFilter)
+			form, err := resource.GetForm(item, user)
 			must(err)
 
 			if resource.AfterFormCreated != nil {
@@ -292,7 +286,7 @@ func actionExport(permission Permission) Action {
 		messages.Messages.GetNameFunction("admin_export"),
 		"admin_export",
 		func(resource Resource, request prago.Request, user User) interface{} {
-			return resource.getExportFormData(user, resource.visibilityFilter)
+			return resource.getExportFormData(user)
 		},
 	)
 	ret.Permission = permission
