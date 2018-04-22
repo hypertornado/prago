@@ -220,6 +220,7 @@ func (app *App) parseCommands() {
 				fmt.Println(err)
 				app.usage()
 			} else {
+				app.commands = nil
 				command.callback()
 			}
 			return

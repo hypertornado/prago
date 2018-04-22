@@ -79,6 +79,8 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	initFunction(admin)
 
 	admin.accessController.AddBeforeAction(func(request prago.Request) {
+		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
+
 		request.SetData("admin_header_prefix", admin.Prefix)
 		request.SetData("background", admin.Background)
 		request.SetData("javascripts", admin.javascripts)

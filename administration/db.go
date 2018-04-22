@@ -355,10 +355,10 @@ func countItems(db dbIface, tableName string, query *listQuery) (int64, error) {
 		fmt.Println(q, query.whereParams)
 	}
 	rows, err := db.Query(q, query.whereParams...)
+	defer rows.Close()
 	if err != nil {
 		return -1, err
 	}
-	defer rows.Close()
 	rows.Next()
 
 	var i int64
@@ -399,10 +399,10 @@ func listItems(resource Resource, db dbIface, tableName string, items interface{
 		fmt.Println(q, query.whereParams)
 	}
 	rows, err := db.Query(q, query.whereParams...)
+	defer rows.Close()
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
 	for rows.Next() {
 		newValue = reflect.New(resource.Typ)
 		names, scanners, err = resource.getStructScanners(newValue.Elem())

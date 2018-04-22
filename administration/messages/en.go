@@ -11,7 +11,6 @@ var en = map[string]string{
 	"admin_new":                 "New item",
 	"admin_list":                "List",
 	"admin_edit":                "Edit",
-	"admin_edit_and_stay":       "Edit and stay",
 	"admin_view":                "View",
 	"admin_preview":             "Preview",
 	"admin_delete":              "Delete",

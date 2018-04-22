@@ -170,9 +170,7 @@ func actionEdit(permission Permission) Action {
 
 			form.Classes = append(form.Classes, "form_leavealert")
 			form.Action = "edit"
-			form.AddHidden("_submit_and_stay_clicked")
 			form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
-			form.AddSubmit("_submit_and_stay", messages.Messages.Get(GetLocale(request), "admin_edit_and_stay"))
 			AddCSRFToken(form, request)
 
 			if resource.AfterFormCreated != nil {
@@ -232,13 +230,7 @@ func actionUpdate(permission Permission) Action {
 			}
 
 			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_edited"))
-
-			if request.Params().Get("_submit_and_stay_clicked") == "true" {
-				request.Redirect(request.Request().URL.RequestURI())
-			} else {
-				request.Redirect(resource.GetURL(fmt.Sprintf("%d", id)))
-			}
-
+			request.Redirect(resource.GetURL(fmt.Sprintf("%d", id)))
 		},
 	}
 }
