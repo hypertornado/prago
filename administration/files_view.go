@@ -14,7 +14,7 @@ type filesViewDataPath struct {
 	URL  string
 }
 
-func filesViewDataSource(resource Resource, user User, f field, value interface{}) interface{} {
+func filesViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
 	ret := filesViewData{}
 
 	var file File

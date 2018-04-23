@@ -197,6 +197,10 @@ func (a *Administration) unsafeDropTables() error {
 }
 
 func (a *Administration) AddFieldType(name string, fieldType FieldType) {
+	_, exist := a.fieldTypes[name]
+	if exist {
+		panic(fmt.Sprintf("field type '%s' already set", name))
+	}
 	a.fieldTypes[name] = fieldType
 }
 

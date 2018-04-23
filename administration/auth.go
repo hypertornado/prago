@@ -25,7 +25,7 @@ func (admin Administration) getSysadminPermissions() []string {
 }
 
 func (admin *Administration) createRoleFieldType() FieldType {
-	var fp = func(field, User) interface{} {
+	var fp = func(Field, User) interface{} {
 		roleNames := []string{""}
 		for k, _ := range admin.roles {
 			roleNames = append(roleNames, k)

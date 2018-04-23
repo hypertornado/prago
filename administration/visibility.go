@@ -1,8 +1,8 @@
 package administration
 
-type fieldFilter func(Resource, User, field) bool
+type fieldFilter func(Resource, User, Field) bool
 
-func defaultVisibilityFilter(resource Resource, user User, f field) bool {
+func defaultVisibilityFilter(resource Resource, user User, f Field) bool {
 	permission := f.Tags["prago-view"]
 	if permission != "" {
 		return resource.Admin.Authorize(user, Permission(permission))
@@ -27,7 +27,7 @@ func defaultVisibilityFilter(resource Resource, user User, f field) bool {
 	return visible
 }
 
-func defaultEditabilityFilter(resource Resource, user User, f field) bool {
+func defaultEditabilityFilter(resource Resource, user User, f Field) bool {
 	if !defaultVisibilityFilter(resource, user, f) {
 		return false
 	}
@@ -57,7 +57,7 @@ func whiteListFilter(in ...string) fieldFilter {
 	for _, v := range in {
 		m[v] = true
 	}
-	return func(resource Resource, user User, f field) bool {
+	return func(resource Resource, user User, f Field) bool {
 		return m[f.Name]
 	}
 }

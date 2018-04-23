@@ -157,19 +157,19 @@ const adminTemplates = `
     {{end}}
   </table>
 {{end}}{{define "admin_item_input"}}
-  <input name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_email"}}
-  <input name="{{.Name}}" value="{{.Value}}" type="email" class="input form_input" spellcheck="false"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input name="{{.Name}}" value="{{.Value}}" type="email" class="input form_watcher form_input" spellcheck="false"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_password"}}
-  <input name="{{.Name}}" value="{{.Value}}" type="password" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input name="{{.Name}}" value="{{.Value}}" type="password" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_textarea"}}
-  <textarea name="{{.Name}}" id="{{.UUID}}" class="input form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
+  <textarea name="{{.Name}}" id="{{.UUID}}" class="input form_watcher form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
 {{end}}
 
 {{define "admin_item_markdown"}}
@@ -187,20 +187,20 @@ const adminTemplates = `
       <input type="checkbox" class="admin_markdown_preview_show"> Zobrazit náhled
     </label>
 
-    <textarea name="{{.Name}}" id="{{.UUID}}" class="input form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
+    <textarea name="{{.Name}}" id="{{.UUID}}" class="input form_watcher form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
     <div class="admin_markdown_preview hidden"></div>
   </div>
 {{end}}
 
 {{define "admin_item_checkbox"}}
   <label>
-    <input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+    <input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}} class="form_watcher">
     <span class="form_label_text-inline">{{.NameHuman}}</span>
   </label>
 {{end}}
 
 {{define "admin_item_date"}}
-  <input type="date" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="date" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_timestamp"}}
@@ -212,9 +212,9 @@ const adminTemplates = `
 
       <input type="date" name="_admin_timestamp_hidden" class="input form_input admin_timestamp_date"{{if .Focused}} autofocus{{end}}>
 
-      <select class="input form_input admin_timestamp_hour"></select>
+      <select class="input form_watcher form_input admin_timestamp_hour"></select>
       <span class="admin_timestamp_divider">:</span>
-      <select class="input form_input admin_timestamp_minute"></select>
+      <select class="input form_watcher form_input admin_timestamp_minute"></select>
 
     </div>
   {{end}}
@@ -222,9 +222,9 @@ const adminTemplates = `
 
 {{define "admin_item_image"}}
   <div class="admin_images">
-    <input name="{{.Name}}" value="{{.Value}}" type="hidden" class="admin_images_hidden">
+    <input name="{{.Name}}" value="{{.Value}}" type="hidden" class="admin_images_hidden form_watcher">
     <div class="admin_images_loaded hidden">
-      <input type="file" id="{{.UUID}}" accept=".jpg,.jpeg,.png" multiple class="admin_images_fileinput">
+      <input type="file" id="{{.UUID}}" accept=".jpg,.jpeg,.png" multiple class="admin_images_fileinput form_watcher">
       <div class="admin_images_preview"></div>
     </div>
     <progress></progress>
@@ -232,14 +232,14 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_item_file"}}
-  <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_file"}}
   {{if .Value}}
-    {{thumb .Value}}
+    <img src="{{thumb .Value}}">
   {{else}}
-    <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+    <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
   {{end}}
 {{end}}
 
@@ -248,7 +248,7 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_item_select"}}
-  <select name="{{.Name}}" id="{{.UUID}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <select name="{{.Name}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
     {{$val := .Value}}
     {{range $value := .Data}}
       <option value="{{index $value 0}}"{{if eq $val (index $value 0)}} selected{{end}}>{{index $value 1}}</option>
@@ -2565,17 +2565,26 @@ function bindForm() {
 var Form = (function () {
     function Form(el) {
         var _this = this;
-        this.allow = false;
+        this.dirty = false;
         el.addEventListener("submit", function () {
-            _this.allow = true;
+            _this.dirty = false;
         });
+        var els = el.querySelectorAll(".form_watcher");
+        for (var i = 0; i < els.length; i++) {
+            var input = els[i];
+            input.addEventListener("input", function () {
+                _this.dirty = true;
+            });
+            input.addEventListener("change", function () {
+                _this.dirty = true;
+            });
+        }
         window.addEventListener("beforeunload", function (e) {
-            if (_this.allow) {
-                return;
+            if (_this.dirty) {
+                var confirmationMessage = "Chcete opustit stránku bez uložení změn?";
+                e.returnValue = confirmationMessage;
+                return confirmationMessage;
             }
-            var confirmationMessage = "Chcete opustit stránku bez uložení změn?";
-            e.returnValue = confirmationMessage;
-            return confirmationMessage;
         });
     }
     return Form;

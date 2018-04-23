@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type field struct {
+type Field struct {
 	Name       string
 	ColumnName string
 	HumanName  func(string) string
@@ -22,8 +22,8 @@ type field struct {
 	fieldType FieldType
 }
 
-func newField(f reflect.StructField, order int, fieldTypes map[string]FieldType) *field {
-	ret := &field{
+func newField(f reflect.StructField, order int, fieldTypes map[string]FieldType) *Field {
+	ret := &Field{
 		Name:       f.Name,
 		ColumnName: columnName(f.Name),
 		HumanName:  Unlocalized(f.Name),
@@ -119,7 +119,7 @@ func getDefaultFormTemplate(t reflect.Type) string {
 	panic("unknown default form for " + t.String())
 }
 
-func (f *field) initFieldType(fieldTypes map[string]FieldType) {
+func (f *Field) initFieldType(fieldTypes map[string]FieldType) {
 	fieldTypeName := f.Tags["prago-type"]
 
 	ret, found := fieldTypes[fieldTypeName]
@@ -153,7 +153,7 @@ func (f *field) initFieldType(fieldTypes map[string]FieldType) {
 	f.fieldType = ret
 }
 
-func (sf field) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {
+func (sf Field) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {
 	var fieldDescription string
 
 	t, found := fieldTypes[sf.Tags["prago-type"]]
@@ -198,7 +198,7 @@ func (sf field) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {
 	return fmt.Sprintf("%s %s %s", sf.ColumnName, fieldDescription, additional)
 }
 
-func (sf field) shouldShow() (show bool) {
+func (sf Field) shouldShow() (show bool) {
 	if sf.Name == "Name" {
 		show = true
 	}

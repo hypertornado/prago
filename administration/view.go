@@ -51,7 +51,7 @@ func getDefaultViewTemplate(t reflect.Type) string {
 	return "admin_item_view_text"
 }
 
-func getDefaultViewDataSource(t reflect.Type) func(resource Resource, user User, f field, value interface{}) interface{} {
+func getDefaultViewDataSource(t reflect.Type) func(resource Resource, user User, f Field, value interface{}) interface{} {
 	if t == reflect.TypeOf(time.Now()) {
 		return timestampViewDataSource
 	}
@@ -63,18 +63,18 @@ func getDefaultViewDataSource(t reflect.Type) func(resource Resource, user User,
 	}
 }
 
-func defaultViewDataSource(resource Resource, user User, f field, value interface{}) interface{} {
+func defaultViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
 	return value
 }
 
-func timestampViewDataSource(resource Resource, user User, f field, value interface{}) interface{} {
+func timestampViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
 	return messages.Messages.Timestamp(
 		user.Locale,
 		value.(time.Time),
 	)
 }
 
-func boolViewDataSource(resource Resource, user User, f field, value interface{}) interface{} {
+func boolViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
 	if value.(bool) {
 		return messages.Messages.Get(user.Locale, "yes")
 	} else {
@@ -82,7 +82,7 @@ func boolViewDataSource(resource Resource, user User, f field, value interface{}
 	}
 }
 
-func getRelationViewData(resource Resource, user User, f field, value interface{}) interface{} {
+func getRelationViewData(resource Resource, user User, f Field, value interface{}) interface{} {
 	var val viewRelationData
 	var relationName string
 	if f.Tags["prago-relation"] != "" {

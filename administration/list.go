@@ -106,7 +106,7 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 	return
 }
 
-func (v field) getListHeaderItem(user User) listHeaderItem {
+func (v Field) getListHeaderItem(user User) listHeaderItem {
 	headerItem := listHeaderItem{
 		Name:       v.Name,
 		NameHuman:  v.HumanName(user.Locale),
@@ -136,7 +136,7 @@ func (v field) getListHeaderItem(user User) listHeaderItem {
 	return headerItem
 }
 
-func (sf *field) filterLayout() string {
+func (sf *Field) filterLayout() string {
 	if sf == nil {
 		return ""
 	}
@@ -296,7 +296,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	return
 }
 
-func (resource Resource) valueToCell(user User, f field, val reflect.Value) listCell {
+func (resource Resource) valueToCell(user User, f Field, val reflect.Value) listCell {
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
 

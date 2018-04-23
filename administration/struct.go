@@ -12,7 +12,7 @@ func (resource *Resource) newStructCache(item interface{}, fieldTypes map[string
 		return errors.New("item is not a structure, but " + typ.Kind().String())
 	}
 
-	resource.fieldMap = make(map[string]*field)
+	resource.fieldMap = make(map[string]*Field)
 	resource.fieldTypes = fieldTypes
 
 	for i := 0; i < typ.NumField(); i++ {

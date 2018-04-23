@@ -867,17 +867,26 @@ function bindForm() {
 var Form = (function () {
     function Form(el) {
         var _this = this;
-        this.allow = false;
+        this.dirty = false;
         el.addEventListener("submit", function () {
-            _this.allow = true;
+            _this.dirty = false;
         });
+        var els = el.querySelectorAll(".form_watcher");
+        for (var i = 0; i < els.length; i++) {
+            var input = els[i];
+            input.addEventListener("input", function () {
+                _this.dirty = true;
+            });
+            input.addEventListener("change", function () {
+                _this.dirty = true;
+            });
+        }
         window.addEventListener("beforeunload", function (e) {
-            if (_this.allow) {
-                return;
+            if (_this.dirty) {
+                var confirmationMessage = "Chcete opustit stránku bez uložení změn?";
+                e.returnValue = confirmationMessage;
+                return confirmationMessage;
             }
-            var confirmationMessage = "Chcete opustit stránku bez uložení změn?";
-            e.returnValue = confirmationMessage;
-            return confirmationMessage;
         });
     }
     return Form;

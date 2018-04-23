@@ -522,20 +522,25 @@ func initUserResource(resource *Resource) {
 		request.Redirect(resource.GetURL("login"))
 	})
 
-	settingsForm := func(locale string, user User) *Form {
-		form, err := resource.GetForm(&user, user, whiteListFilter("Name", "Locale"))
-		must(err)
+	settingsForm := func(user User) *Form {
+		form := NewForm()
+		form.Method = "POST"
+		form.Action = "settings"
 
-		sel := form.AddSelect("Locale", messages.Messages.Get(locale, "admin_locale"), availableLocales)
+		name := form.AddTextInput("Name", "")
+		name.NameHuman = messages.Messages.Get(user.Locale, "Name")
+		name.Value = user.Name
+
+		sel := form.AddSelect("Locale", messages.Messages.Get(user.Locale, "admin_locale"), availableLocales)
 		sel.Value = user.Locale
 
-		form.AddSubmit("_submit", messages.Messages.Get(locale, "admin_edit"))
+		form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_edit"))
 		return form
 	}
 
 	admin.AdminController.Get(resource.GetURL("settings"), func(request prago.Request) {
 		user := GetUser(request)
-		form := settingsForm(GetLocale(request), user)
+		form := settingsForm(user)
 		AddCSRFToken(form, request)
 
 		request.SetData("admin_header_settings_selected", true)
@@ -550,7 +555,7 @@ func initUserResource(resource *Resource) {
 	admin.AdminController.Post(resource.GetURL("settings"), func(request prago.Request) {
 		ValidateCSRF(request)
 		user := GetUser(request)
-		form := settingsForm(GetLocale(request), user)
+		form := settingsForm(user)
 		AddCSRFToken(form, request)
 		form.Validate()
 		if form.Valid {

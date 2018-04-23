@@ -6,13 +6,13 @@ import (
 
 type FieldType struct {
 	ViewTemplate   string
-	ViewDataSource func(Resource, User, field, interface{}) interface{}
+	ViewDataSource func(Resource, User, Field, interface{}) interface{}
 
 	DBFieldDescription string
 
 	FormHideLabel  bool
 	FormTemplate   string
-	FormDataSource func(field, User) interface{}
+	FormDataSource func(Field, User) interface{}
 	FormStringer   func(interface{}) string
 
 	ListCellTemplate string
@@ -36,7 +36,6 @@ func (admin *Administration) addDefaultFieldTypes() {
 		ListCellTemplate: "admin_item_view_file_cell",
 	})
 
-	admin.AddFieldType("timestamp", FieldType{FormTemplate: "admin_item_textarea"})
 	admin.AddFieldType("markdown", FieldType{
 		ViewTemplate: "admin_item_view_markdown",
 		FormTemplate: "admin_item_markdown",
@@ -56,7 +55,7 @@ func (admin *Administration) addDefaultFieldTypes() {
 		ViewDataSource: getRelationViewData,
 
 		FormTemplate: "admin_item_relation",
-		FormDataSource: func(f field, u User) interface{} {
+		FormDataSource: func(f Field, u User) interface{} {
 			if f.Tags["prago-relation"] != "" {
 				return columnName(f.Tags["prago-relation"])
 			} else {

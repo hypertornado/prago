@@ -35,14 +35,14 @@ type Resource struct {
 
 	PreviewURLFunction func(interface{}) string
 
-	fieldArrays     []*field
-	fieldMap        map[string]*field
+	fieldArrays     []*Field
+	fieldMap        map[string]*Field
 	fieldTypes      map[string]FieldType
 	OrderFieldName  string
 	OrderColumnName string
 }
 
-func (resource Resource) Field(name string) *field {
+func (resource Resource) Field(name string) *Field {
 	return resource.fieldMap[name]
 }
 
