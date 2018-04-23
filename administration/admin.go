@@ -69,12 +69,11 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	}
 
 	admin.AdminController = admin.accessController.SubController()
+	admin.addDefaultFieldTypes()
 
 	admin.CreateResource(User{}, initUserResource)
 	admin.CreateResource(File{}, initFilesResource)
 	admin.CreateResource(activityLog{}, initActivityLog)
-
-	admin.addDefaultFieldTypes()
 
 	initFunction(admin)
 

@@ -47,9 +47,8 @@ type listRow struct {
 }
 
 type listCell struct {
-	TemplateName string
-	Value        string
-	URL          string
+	Template string
+	Value    interface{}
 }
 
 type listItemActions struct {
@@ -280,9 +279,9 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 
 		for _, v := range resource.fieldArrays {
 			if v.shouldShow() {
-				structField, _ := resource.Typ.FieldByName(v.Name)
+				//structField, _ := resource.Typ.FieldByName(v.Name)
 				fieldVal := itemVal.FieldByName(v.Name)
-				row.Items = append(row.Items, resource.valueToCell(user, structField, fieldVal))
+				row.Items = append(row.Items, resource.valueToCell(user, *v, fieldVal))
 			}
 		}
 
@@ -297,73 +296,12 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	return
 }
 
-func (resource Resource) valueToCell(user User, field reflect.StructField, val reflect.Value) (cell listCell) {
-	admin := resource.Admin
-	cell.TemplateName = "admin_string"
+func (resource Resource) valueToCell(user User, f field, val reflect.Value) listCell {
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
 
-	switch item.(type) {
-	case string:
-		cell.Value = item.(string)
-	case bool:
-		if item.(bool) {
-			cell.Value = messages.Messages.Get(user.Locale, "yes")
-		} else {
-			cell.Value = messages.Messages.Get(user.Locale, "no")
-		}
-	case int64:
-		cell.Value = fmt.Sprintf("%d", item.(int64))
-		if field.Tag.Get("prago-type") == "relation" {
-			resourceName := field.Name
-			if field.Tag.Get("prago-relation") != "" {
-				resourceName = field.Tag.Get("prago-relation")
-			}
-
-			relationResource := resource.Admin.getResourceByName(resourceName)
-
-			var relationItem interface{}
-			relationResource.newItem(&relationItem)
-			err := admin.Query().WhereIs("id", item.(int64)).Get(relationItem)
-			if err != nil {
-				if err == ErrItemNotFound {
-					cell.Value = ""
-					return
-				}
-				panic(err)
-			}
-
-			ifaceItemName, ok := relationItem.(interface {
-				AdminItemName(string) string
-			})
-			if ok {
-				cell.Value = ifaceItemName.AdminItemName(user.Locale)
-				cell.TemplateName = "admin_link"
-				cell.URL = fmt.Sprintf("%s/%d", relationResource.ID, item.(int64))
-				return
-			}
-
-			nameField := reflect.ValueOf(relationItem).Elem().FieldByName("Name")
-
-			cell.Value = nameField.String()
-			cell.TemplateName = "admin_link"
-			cell.URL = fmt.Sprintf("%s/%d/edit", relationResource.ID, item.(int64))
-			return
-		}
-	}
-
-	if field.Tag.Get("prago-type") == "image" {
-		cell.TemplateName = "admin_image"
-	}
-
-	if val.Type() == reflect.TypeOf(time.Now()) {
-		var tm time.Time
-		reflect.ValueOf(&tm).Elem().Set(val)
-		cell.Value = tm.Format("2006-01-02 15:04:05")
-	}
-
-	if len(field.Tag.Get("prago-preview-type")) > 0 {
-		cell.TemplateName = field.Tag.Get("prago-preview-type")
-	}
-	return
+	var cell listCell
+	cell.Template = f.fieldType.ListCellTemplate
+	cell.Value = f.fieldType.ViewDataSource(resource, user, f, item)
+	return cell
 }

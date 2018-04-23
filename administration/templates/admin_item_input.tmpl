@@ -77,6 +77,14 @@
   <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
+{{define "admin_file"}}
+  {{if .Value}}
+    {{thumb .Value}}
+  {{else}}
+    <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  {{end}}
+{{end}}
+
 {{define "admin_item_submit"}}
   <input type="submit" id="{{.UUID}}" name="{{.Name}}" value="{{.NameHuman}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
@@ -113,16 +121,8 @@
 </div>
 {{end}}
 
-{{define "admin_image"}}
+{{define "admin_list_image"}}
   <div class="admin_thumb">
-    <img src="{{thumb .Value}}">
+    <img src="{{thumb .}}">
   </div>
-{{end}}
-
-{{define "admin_link"}}
-  <a href="{{.URL}}">{{.Value}}</a>
-{{end}}
-
-{{define "admin_string"}}
-  {{.Value}}
 {{end}}

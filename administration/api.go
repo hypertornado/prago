@@ -14,7 +14,6 @@ func bindAPI(a *Administration) {
 	bindMarkdownAPI(a)
 	bindListAPI(a)
 	bindListResourceAPI(a)
-	//bindListResourceItemAPI(a)
 }
 
 func bindImageAPI(admin *Administration, fileDownloadPath string) {

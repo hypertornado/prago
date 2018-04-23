@@ -46,7 +46,6 @@ func newField(f reflect.StructField, order int, fieldTypes map[string]FieldType)
 		"prago-order",
 		"prago-order-desc",
 		"prago-relation",
-		"prago-preview-type",
 	} {
 		ret.Tags[v] = f.Tag.Get(v)
 	}
@@ -121,7 +120,12 @@ func getDefaultFormTemplate(t reflect.Type) string {
 }
 
 func (f *field) initFieldType(fieldTypes map[string]FieldType) {
-	ret := fieldTypes[f.Tags["prago-type"]]
+	fieldTypeName := f.Tags["prago-type"]
+
+	ret, found := fieldTypes[fieldTypeName]
+	if !found && fieldTypeName != "" {
+		panic(fmt.Sprintf("Field type '%s' not found", fieldTypeName))
+	}
 
 	if ret.ViewTemplate == "" {
 		ret.ViewTemplate = getDefaultViewTemplate(f.Typ)
@@ -142,46 +146,11 @@ func (f *field) initFieldType(fieldTypes map[string]FieldType) {
 		ret.FormHideLabel = true
 	}
 
+	if ret.ListCellTemplate == "" {
+		ret.ListCellTemplate = ret.ViewTemplate
+	}
+
 	f.fieldType = ret
-}
-
-func (admin *Administration) addDefaultFieldTypes() {
-	admin.AddFieldType("role", admin.createRoleFieldType())
-
-	admin.AddFieldType("timestamp", FieldType{FormTemplate: "admin_item_textarea"})
-	admin.AddFieldType("markdown", FieldType{
-		ViewTemplate: "admin_item_view_markdown",
-		FormTemplate: "admin_item_markdown",
-	})
-	admin.AddFieldType("image", FieldType{
-		ViewTemplate: "admin_item_view_image",
-		FormTemplate: "admin_item_image",
-	})
-	admin.AddFieldType("place", FieldType{
-		ViewTemplate: "admin_item_view_place",
-		FormTemplate: "admin_item_place",
-	})
-
-	admin.AddFieldType("relation", FieldType{
-		ViewTemplate:   "admin_item_view_relation",
-		ViewDataSource: getRelationViewData,
-
-		FormTemplate: "admin_item_relation",
-		FormDataSource: func(f field, u User) interface{} {
-			if f.Tags["prago-relation"] != "" {
-				return columnName(f.Tags["prago-relation"])
-			} else {
-				return columnName(f.Name)
-			}
-		},
-	})
-
-	admin.AddFieldType("timestamp", FieldType{
-		FormTemplate: "admin_item_timestamp",
-		FormStringer: func(i interface{}) string {
-			return i.(time.Time).Format("2006-01-02 15:04")
-		},
-	})
 }
 
 func (sf field) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {

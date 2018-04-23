@@ -51,16 +51,16 @@ func (a *Administration) GetFiles(ids string) []*File {
 
 //File is structure representing files in admin
 type File struct {
-	UID         string `prago-unique:"true" prago-preview:"true" prago-preview-type:"admin_image"`
+	UID         string `prago-unique:"true" prago-preview:"true" prago-type:"file" prago-description:"File"`
 	ID          int64  `prago-order-desc:"true"`
-	Name        string
+	Name        string `prago-edit:"_"`
 	Description string `prago-type:"text" prago-preview:"true"`
-	User        int64  `prago-type:"relation"`
+	User        int64  `prago-type:"relation" prago-edit:"_"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
 
-func fileAfterFormCreated(f *Form, request prago.Request, newItem bool) *Form {
+/*func fileAfterFormCreated(f *Form, request prago.Request, newItem bool) *Form {
 	newForm := NewForm()
 	newForm.Method = f.Method
 	newForm.Action = f.Action
@@ -73,7 +73,7 @@ func fileAfterFormCreated(f *Form, request prago.Request, newItem bool) *Form {
 	}
 	AddCSRFToken(newForm, request)
 	return newForm
-}
+}*/
 
 func uploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File, error) {
 	fileName := utils.PrettyFilename(fileHeader.Filename)
@@ -124,7 +124,7 @@ func getOldRedirectParams(request prago.Request, admin *Administration) (uuid, n
 func initFilesResource(resource *Resource) {
 	a := resource.Admin
 	initCDN(a)
-	resource.AfterFormCreated = fileAfterFormCreated
+	//resource.AfterFormCreated = fileAfterFormCreated
 	resource.HumanName = messages.Messages.GetNameFunction("admin_files")
 
 	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
@@ -207,7 +207,7 @@ func initFilesResource(resource *Resource) {
 		request.Redirect(resource.GetURL(""))
 	})
 
-	resource.ResourceController.Get(resource.GetURL(":id/edit"), func(request prago.Request) {
+	resource.ResourceController.Get(resource.GetURL(":id/edit_old"), func(request prago.Request) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
 		must(err)
 

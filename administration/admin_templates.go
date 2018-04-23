@@ -235,6 +235,14 @@ const adminTemplates = `
   <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
+{{define "admin_file"}}
+  {{if .Value}}
+    {{thumb .Value}}
+  {{else}}
+    <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  {{end}}
+{{end}}
+
 {{define "admin_item_submit"}}
   <input type="submit" id="{{.UUID}}" name="{{.Name}}" value="{{.NameHuman}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
@@ -271,18 +279,10 @@ const adminTemplates = `
 </div>
 {{end}}
 
-{{define "admin_image"}}
+{{define "admin_list_image"}}
   <div class="admin_thumb">
-    <img src="{{thumb .Value}}">
+    <img src="{{thumb .}}">
   </div>
-{{end}}
-
-{{define "admin_link"}}
-  <a href="{{.URL}}">{{.Value}}</a>
-{{end}}
-
-{{define "admin_string"}}
-  {{.Value}}
 {{end}}
 {{define "admin_layout"}}
 <!doctype html>
@@ -454,7 +454,7 @@ const adminTemplates = `
     <tr data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="admin_table_row">
       {{range $cell := $item.Items}}
       <td>
-        {{ tmpl $cell.TemplateName $cell }}
+        {{tmpl $cell.Template $cell.Value}}
       </td>
       {{end}}
       <td nowrap class="top align-right">
@@ -645,6 +645,29 @@ const adminTemplates = `
 
 {{define "admin_item_view_markdown"}}
   {{markdown .}}
+{{end}}
+
+{{define "admin_item_view_file"}}
+  {{if .MediumURL}}
+    <div>
+      <a href="{{.OriginalURL}}"><img src="{{.MediumURL}}"></a>
+    </div>
+  {{end}}
+  <div>
+    Download:
+    {{range $path := .Paths}}
+      <a href="{{$path.URL}}">{{$path.Name}}</a>
+    {{end}}
+  </div>
+  <div>UUID: {{.UUID}}</div>
+{{end}}
+
+{{define "admin_item_view_file_cell"}}
+  {{if .SmallURL}}
+    <div class="admin_thumb">
+      <img src="{{.SmallURL}}">
+    </div>
+  {{end}}
 {{end}}
 
 {{define "admin_item_view_image"}}

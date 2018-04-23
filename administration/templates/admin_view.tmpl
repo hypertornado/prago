@@ -18,6 +18,29 @@
   {{markdown .}}
 {{end}}
 
+{{define "admin_item_view_file"}}
+  {{if .MediumURL}}
+    <div>
+      <a href="{{.OriginalURL}}"><img src="{{.MediumURL}}"></a>
+    </div>
+  {{end}}
+  <div>
+    Download:
+    {{range $path := .Paths}}
+      <a href="{{$path.URL}}">{{$path.Name}}</a>
+    {{end}}
+  </div>
+  <div>UUID: {{.UUID}}</div>
+{{end}}
+
+{{define "admin_item_view_file_cell"}}
+  {{if .SmallURL}}
+    <div class="admin_thumb">
+      <img src="{{.SmallURL}}">
+    </div>
+  {{end}}
+{{end}}
+
 {{define "admin_item_view_image"}}
   <div class="admin_item_view_image_content" data-images="{{.}}">
     <progress value="" max=""></progress>
