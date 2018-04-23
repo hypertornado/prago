@@ -51,13 +51,3 @@ func defaultEditabilityFilter(resource Resource, user User, f Field) bool {
 	}
 	return editable
 }
-
-func whiteListFilter(in ...string) fieldFilter {
-	m := make(map[string]bool)
-	for _, v := range in {
-		m[v] = true
-	}
-	return func(resource Resource, user User, f Field) bool {
-		return m[f.Name]
-	}
-}

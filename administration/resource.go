@@ -18,12 +18,9 @@ type Resource struct {
 	OrderByColumn      string
 	OrderDesc          bool
 	TableName          string
-	AfterFormCreated   func(f *Form, request prago.Request, newItem bool) *Form //TODO: remove this
-	//visibilityFilter   structFieldFilter
-	editabilityFilter fieldFilter
-	actions           []Action
-	itemActions       []Action
-	relations         []relation
+	actions            []Action
+	itemActions        []Action
+	relations          []relation
 
 	CanView   Permission
 	CanEdit   Permission
@@ -40,10 +37,6 @@ type Resource struct {
 	fieldTypes      map[string]FieldType
 	OrderFieldName  string
 	OrderColumnName string
-}
-
-func (resource Resource) Field(name string) *Field {
-	return resource.fieldMap[name]
 }
 
 func (resource Resource) GetURL(suffix string) string {
@@ -66,7 +59,6 @@ func (admin *Administration) CreateResource(item interface{}, initFunction func(
 		ResourceController: admin.AdminController.SubController(),
 		ItemsPerPage:       200,
 		TableName:          columnName(defaultName),
-		editabilityFilter:  defaultEditabilityFilter,
 
 		CanView:   "",
 		CanEdit:   "",

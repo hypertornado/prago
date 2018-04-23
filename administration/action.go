@@ -64,7 +64,7 @@ func actionNew(permission Permission) Action {
 		Handler: func(resource Resource, request prago.Request, user User) {
 			var item interface{}
 			resource.newItem(&item)
-			resource.BindData(&item, user, request.Request().URL.Query(), resource.editabilityFilter)
+			resource.BindData(&item, user, request.Request().URL.Query(), defaultEditabilityFilter)
 
 			form, err := resource.GetForm(item, user)
 			must(err)
@@ -73,10 +73,6 @@ func actionNew(permission Permission) Action {
 			form.Action = "../" + resource.ID
 			form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_create"))
 			AddCSRFToken(form, request)
-
-			if resource.AfterFormCreated != nil {
-				form = resource.AfterFormCreated(form, request, true)
-			}
 
 			renderNavigationPage(request, AdminNavigationPage{
 				Navigation:   resource.Admin.getResourceNavigation(resource, user, "new"),
@@ -98,10 +94,6 @@ func actionCreate(permission Permission) Action {
 
 			form, err := resource.GetForm(item, user)
 			must(err)
-
-			if resource.AfterFormCreated != nil {
-				form = resource.AfterFormCreated(form, request, true)
-			}
 
 			resource.BindData(item, user, request.Params(), form.getFilter())
 			must(resource.Admin.Create(item))
@@ -173,10 +165,6 @@ func actionEdit(permission Permission) Action {
 			form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
 			AddCSRFToken(form, request)
 
-			if resource.AfterFormCreated != nil {
-				form = resource.AfterFormCreated(form, request, false)
-			}
-
 			renderNavigationPage(request, AdminNavigationPage{
 				Navigation:   resource.Admin.getItemNavigation(resource, user, item, "edit"),
 				PageTemplate: "admin_form",
@@ -202,10 +190,6 @@ func actionUpdate(permission Permission) Action {
 
 			form, err := resource.GetForm(item, user)
 			must(err)
-
-			if resource.AfterFormCreated != nil {
-				form = resource.AfterFormCreated(form, request, false)
-			}
 
 			var beforeData []byte
 			if resource.ActivityLog {
