@@ -6,15 +6,6 @@ import (
 	"reflect"
 )
 
-type structCache struct {
-	typ             reflect.Type
-	fieldArrays     []*field
-	fieldMap        map[string]*field
-	fieldTypes      map[string]FieldType
-	OrderFieldName  string
-	OrderColumnName string
-}
-
 func (resource *Resource) newStructCache(item interface{}, fieldTypes map[string]FieldType) error {
 	typ := reflect.TypeOf(item)
 	if typ.Kind() != reflect.Struct {
@@ -94,8 +85,6 @@ fields:
 			Template:  field.fieldType.FormTemplate,
 		}
 		item.AddUUID()
-
-		//fmt.Println(field.Name, field.fieldType.FormHideLabel)
 
 		if field.fieldType.FormHideLabel {
 			item.HiddenName = true
