@@ -24,7 +24,7 @@ type Action struct {
 	Handler    func(Resource, prago.Request, User)
 }
 
-func (ra *Action) GetName(language string) string {
+func (ra *Action) getName(language string) string {
 	if ra.Name != nil {
 		return ra.Name(language)
 	}
@@ -102,7 +102,7 @@ func actionCreate(permission Permission) Action {
 				resource.Admin.createNewActivityLog(resource, user, item)
 			}
 
-			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
+			AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_item_created"))
 			request.Redirect(resource.GetItemURL(item, ""))
 		},
 	}
@@ -162,7 +162,7 @@ func actionEdit(permission Permission) Action {
 
 			form.Classes = append(form.Classes, "form_leavealert")
 			form.Action = "edit"
-			form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
+			form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_edit"))
 			AddCSRFToken(form, request)
 
 			renderNavigationPage(request, AdminNavigationPage{
@@ -213,7 +213,7 @@ func actionUpdate(permission Permission) Action {
 				resource.Admin.createEditActivityLog(resource, user, int64(id), beforeData, afterData)
 			}
 
-			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_edited"))
+			AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_item_edited"))
 			request.Redirect(resource.GetURL(fmt.Sprintf("%d", id)))
 		},
 	}
@@ -314,7 +314,7 @@ func actionDoDelete(permission Permission) Action {
 				resource.Admin.createDeleteActivityLog(resource, user, int64(id), item)
 			}
 
-			AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_deleted"))
+			AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_item_deleted"))
 			request.Redirect(resource.GetURL(""))
 		},
 	}

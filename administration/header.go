@@ -21,13 +21,11 @@ type adminHeaderItem struct {
 }
 
 func (admin *Administration) getHeaderData(request prago.Request) (headerData *adminHeaderData) {
-
 	user := GetUser(request)
-	locale := GetLocale(request)
 
 	headerData = &adminHeaderData{
 		Name:        admin.HumanName,
-		Language:    locale,
+		Language:    user.Locale,
 		Logo:        admin.Logo,
 		Background:  admin.Background,
 		UrlPrefix:   admin.Prefix,
@@ -38,7 +36,7 @@ func (admin *Administration) getHeaderData(request prago.Request) (headerData *a
 	for _, resource := range admin.Resources {
 		if admin.Authorize(user, resource.CanView) {
 			headerData.Items = append(headerData.Items, adminHeaderItem{
-				Name: resource.HumanName(locale),
+				Name: resource.HumanName(user.Locale),
 				ID:   resource.ID,
 				Url:  admin.GetURL(resource.ID),
 			})

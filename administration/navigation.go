@@ -33,7 +33,7 @@ type NavigationBreadcrumb struct {
 	URL  string
 }
 
-func (navigation AdminItemNavigation) GetPageTitle() string {
+func (navigation AdminItemNavigation) getPageTitle() string {
 	ret := []string{}
 	for _, v := range navigation.Breadcrumbs {
 		ret = append([]string{v.Name}, ret...)
@@ -43,14 +43,14 @@ func (navigation AdminItemNavigation) GetPageTitle() string {
 }
 
 func renderNavigationPage(request prago.Request, page AdminNavigationPage) {
-	request.SetData("admin_title", page.Navigation.GetPageTitle())
+	request.SetData("admin_title", page.Navigation.getPageTitle())
 	request.SetData("admin_yield", "admin_navigation_page")
 	request.SetData("admin_page", page)
 	request.RenderView("admin_layout")
 }
 
 func renderNavigationPageNoLogin(request prago.Request, page AdminNavigationPage) {
-	request.SetData("admin_title", page.Navigation.GetPageTitle())
+	request.SetData("admin_title", page.Navigation.getPageTitle())
 	request.SetData("admin_yield", "admin_navigation_page")
 	request.SetData("admin_page", page)
 	request.RenderView("admin_layout_nologin")
@@ -68,7 +68,7 @@ func (admin *Administration) getAdminNavigation(user User, code string) AdminIte
 	for _, v := range admin.rootActions {
 		if admin.Authorize(user, v.Permission) {
 			tabs = append(tabs, NavigationTab{
-				Name:     v.GetName(user.Locale),
+				Name:     v.getName(user.Locale),
 				URL:      admin.GetURL(v.URL),
 				Selected: trueIfEqual(code, v.URL),
 			})

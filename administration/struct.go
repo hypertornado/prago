@@ -1,33 +1,8 @@
 package administration
 
 import (
-	"errors"
-	"go/ast"
 	"reflect"
 )
-
-func (resource *Resource) newStructCache(item interface{}, fieldTypes map[string]FieldType) error {
-	typ := reflect.TypeOf(item)
-	if typ.Kind() != reflect.Struct {
-		return errors.New("item is not a structure, but " + typ.Kind().String())
-	}
-
-	resource.fieldMap = make(map[string]*Field)
-	resource.fieldTypes = fieldTypes
-
-	for i := 0; i < typ.NumField(); i++ {
-		if ast.IsExported(typ.Field(i).Name) {
-			field := newField(typ.Field(i), i, fieldTypes)
-			if field.Tags["prago-type"] == "order" {
-				resource.OrderFieldName = field.Name
-				resource.OrderColumnName = field.ColumnName
-			}
-			resource.fieldArrays = append(resource.fieldArrays, field)
-			resource.fieldMap[field.ColumnName] = field
-		}
-	}
-	return nil
-}
 
 func (resource Resource) GetDefaultOrder() (column string, desc bool) {
 	for _, v := range resource.fieldArrays {

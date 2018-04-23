@@ -41,9 +41,6 @@ func (request Request) SetData(k string, v interface{}) { request.data[k] = v }
 //GetData returns request data
 func (request Request) GetData(k string) interface{} { return request.data[k] }
 
-//GetAllData returns all
-func (request Request) GetAllData() map[string]interface{} { return request.data }
-
 //App returns related app
 func (request Request) App() App { return request.app }
 
@@ -60,7 +57,7 @@ func (request Request) RenderViewWithCode(viewName string, statusCode int) {
 		request.app.templates.templates.ExecuteTemplate(
 			request.Response(),
 			viewName,
-			request.GetAllData(),
+			request.data,
 		),
 	)
 }

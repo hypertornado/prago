@@ -14,29 +14,29 @@ type Query struct {
 }
 
 //Create item in db
-func (a *Administration) Create(item interface{}) error {
-	resource, err := a.getResourceByItem(item)
+func (admin *Administration) Create(item interface{}) error {
+	resource, err := admin.getResourceByItem(item)
 	if err != nil {
 		return err
 	}
-	return resource.createWithDBIface(item, a.getDB())
+	return resource.createWithDBIface(item, admin.getDB())
 }
 
 //Save item to db
-func (a *Administration) Save(item interface{}) error {
-	resource, err := a.getResourceByItem(item)
+func (admin *Administration) Save(item interface{}) error {
+	resource, err := admin.getResourceByItem(item)
 	if err != nil {
 		return err
 	}
-	return resource.saveWithDBIface(item, a.getDB())
+	return resource.saveWithDBIface(item, admin.getDB())
 }
 
 //Query item from db
-func (a *Administration) Query() Query {
+func (admin *Administration) Query() Query {
 	return Query{
 		query: &listQuery{},
-		admin: a,
-		db:    a.getDB(),
+		admin: admin,
+		db:    admin.getDB(),
 	}
 }
 

@@ -12,8 +12,8 @@ type Transaction struct {
 }
 
 //Transaction creates transaction
-func (a *Administration) Transaction() (t *Transaction) {
-	tx, err := a.getDB().Begin()
+func (admin *Administration) Transaction() (t *Transaction) {
+	tx, err := admin.getDB().Begin()
 	t = &Transaction{
 		err: err,
 	}
@@ -22,7 +22,7 @@ func (a *Administration) Transaction() (t *Transaction) {
 	}
 
 	t.tx = tx
-	t.admin = a
+	t.admin = admin
 	return
 }
 

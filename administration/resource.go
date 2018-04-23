@@ -3,6 +3,7 @@ package administration
 import (
 	"fmt"
 	"github.com/hypertornado/prago"
+	"go/ast"
 	"reflect"
 	"time"
 )
@@ -39,17 +40,14 @@ type Resource struct {
 	OrderColumnName string
 }
 
-func (resource Resource) GetURL(suffix string) string {
-	ret := resource.Admin.Prefix + "/" + resource.ID
-	if len(suffix) > 0 {
-		ret += "/" + suffix
-	}
-	return ret
-}
-
 //CreateResource creates new resource based on item
 func (admin *Administration) CreateResource(item interface{}, initFunction func(*Resource)) *Resource {
 	typ := reflect.TypeOf(item)
+
+	if typ.Kind() != reflect.Struct {
+		panic(fmt.Sprintf("item is not a structure, but " + typ.Kind().String()))
+	}
+
 	defaultName := typ.Name()
 	ret := &Resource{
 		Admin:              admin,
@@ -67,9 +65,23 @@ func (admin *Administration) CreateResource(item interface{}, initFunction func(
 		CanExport: "",
 
 		ActivityLog: true,
+
+		fieldMap:   make(map[string]*Field),
+		fieldTypes: admin.fieldTypes,
 	}
 
-	must(ret.newStructCache(item, admin.fieldTypes))
+	for i := 0; i < typ.NumField(); i++ {
+		if ast.IsExported(typ.Field(i).Name) {
+			field := newField(typ.Field(i), i, ret.fieldTypes)
+			if field.Tags["prago-type"] == "order" {
+				ret.OrderFieldName = field.Name
+				ret.OrderColumnName = field.ColumnName
+			}
+			ret.fieldArrays = append(ret.fieldArrays, field)
+			ret.fieldMap[field.ColumnName] = field
+		}
+	}
+
 	ret.OrderByColumn, ret.OrderDesc = ret.GetDefaultOrder()
 
 	admin.Resources = append(admin.Resources, ret)
@@ -102,6 +114,14 @@ func (admin *Administration) initResource(resource *Resource) {
 	initResourceActions(admin, resource)
 }
 
+func (resource Resource) GetURL(suffix string) string {
+	ret := resource.Admin.Prefix + "/" + resource.ID
+	if len(suffix) > 0 {
+		ret += "/" + suffix
+	}
+	return ret
+}
+
 func (a *Administration) getResourceByItem(item interface{}) (*Resource, error) {
 	typ := reflect.TypeOf(item).Elem()
 	resource, ok := a.resourceMap[typ]
@@ -111,27 +131,15 @@ func (a *Administration) getResourceByItem(item interface{}) (*Resource, error) 
 	return resource, nil
 }
 
-func (resource *Resource) unsafeDropTable() error {
-	_, err := resource.Admin.db.Exec(fmt.Sprintf("drop table `%s`;", resource.TableName))
-	return err
-}
-
-func (resource *Resource) migrate(verbose bool) error {
-	_, err := getTableDescription(resource.Admin.db, resource.TableName)
-	if err == nil {
-		return migrateTable(resource.Admin.db, resource.TableName, *resource, verbose)
-	}
-	return createTable(resource.Admin.db, resource.TableName, *resource, verbose)
-}
-
 func (resource Resource) saveWithDBIface(item interface{}, db dbIface) error {
 	val := reflect.ValueOf(item).Elem()
 	timeVal := reflect.ValueOf(time.Now())
 	fn := "UpdatedAt"
-	if val.FieldByName(fn).IsValid() && val.FieldByName(fn).CanSet() && val.FieldByName(fn).Type() == timeVal.Type() {
+	if val.FieldByName(fn).IsValid() &&
+		val.FieldByName(fn).CanSet() &&
+		val.FieldByName(fn).Type() == timeVal.Type() {
 		val.FieldByName(fn).Set(timeVal)
 	}
-
 	return resource.saveItem(db, resource.TableName, item)
 }
 

@@ -101,11 +101,10 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	bindDBBackupCron(admin.App)
 	bindAPI(admin)
 
-	admin.bindAdminCommand(admin.App)
-	must(admin.initTemplates(admin.App))
+	admin.bindMigrationCommand(admin.App)
+	admin.initTemplates(admin.App)
 	must(admin.App.LoadTemplateFromString(adminTemplates))
 	bindStats(admin)
-
 	admin.initRootActions()
 
 	admin.AdminController.AddAroundAction(func(request prago.Request, next func()) {
@@ -128,7 +127,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		randomness := admin.App.Config.GetString("random")
 		request.SetData("_csrfToken", user.CSRFToken(randomness))
 		request.SetData("currentuser", &user)
-		request.SetData("locale", GetLocale(request))
+		request.SetData("locale", user.Locale)
 
 		headerData := admin.getHeaderData(request)
 		request.SetData("admin_header", headerData)
@@ -170,75 +169,35 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	})
 
 	admin.AddRole("sysadmin", admin.getSysadminPermissions())
-
 	return admin
 }
 
-func (a Administration) GetURL(suffix string) string {
-	ret := a.Prefix
+func (admin Administration) GetURL(suffix string) string {
+	ret := admin.Prefix
 	if len(suffix) > 0 {
 		ret += "/" + suffix
 	}
 	return ret
 }
 
-func (a *Administration) AddAction(action Action) {
-	a.rootActions = append(a.rootActions, action)
+func (admin *Administration) AddAction(action Action) {
+	admin.rootActions = append(admin.rootActions, action)
 }
 
-func (a *Administration) unsafeDropTables() error {
-	for _, resource := range a.Resources {
-		err := resource.unsafeDropTable()
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (a *Administration) AddFieldType(name string, fieldType FieldType) {
-	_, exist := a.fieldTypes[name]
+func (admin *Administration) AddFieldType(name string, fieldType FieldType) {
+	_, exist := admin.fieldTypes[name]
 	if exist {
 		panic(fmt.Sprintf("field type '%s' already set", name))
 	}
-	a.fieldTypes[name] = fieldType
+	admin.fieldTypes[name] = fieldType
 }
 
-func (a *Administration) AddJavascript(url string) {
-	a.javascripts = append(a.javascripts, url)
+func (admin *Administration) AddJavascript(url string) {
+	admin.javascripts = append(admin.javascripts, url)
 }
 
-func (a *Administration) AddCSS(url string) {
-	a.css = append(a.css, url)
-}
-
-//Migrate migrates all resource's tables
-func (a *Administration) Migrate(verbose bool) error {
-	tables, err := listTables(a.db)
-	if err != nil {
-		return err
-	}
-	for _, resource := range a.Resources {
-		tables[resource.TableName] = false
-		err := resource.migrate(verbose)
-		if err != nil {
-			return err
-		}
-	}
-
-	if verbose {
-		unusedTables := []string{}
-		for k, v := range tables {
-			if v == true {
-				unusedTables = append(unusedTables, k)
-			}
-		}
-		if len(unusedTables) > 0 {
-			fmt.Printf("Unused tables: %s\n", strings.Join(unusedTables, ", "))
-		}
-	}
-
-	return nil
+func (admin *Administration) AddCSS(url string) {
+	admin.css = append(admin.css, url)
 }
 
 //AddFlashMessage adds flash message to request
@@ -248,38 +207,25 @@ func AddFlashMessage(request prago.Request, message string) {
 	must(session.Save(request.Request(), request.Response()))
 }
 
-func (a *Administration) getResourceByName(name string) *Resource {
-	return a.resourceNameMap[columnName(name)]
+func (admin *Administration) getResourceByName(name string) *Resource {
+	return admin.resourceNameMap[columnName(name)]
 }
 
-func (a *Administration) getDB() *sql.DB {
-	return a.db
+func (admin *Administration) getDB() *sql.DB {
+	return admin.db
 }
 
-func (a *Administration) GetDB() *sql.DB {
-	return a.getDB()
+func (admin *Administration) GetDB() *sql.DB {
+	return admin.getDB()
 }
 
-func (a *Administration) initRootActions() {
-	for _, v := range a.rootActions {
-		bindAction(a, nil, v, false)
+func (admin *Administration) initRootActions() {
+	for _, v := range admin.rootActions {
+		bindAction(admin, nil, v, false)
 	}
 }
 
-func (a *Administration) bindAdminCommand(app *prago.App) {
-	app.AddCommand("admin", "migrate").Description("migrate database").
-		Callback(func() {
-			app.Log().Println("Migrating database")
-			err := a.Migrate(true)
-			if err == nil {
-				app.Log().Println("Migrate done")
-			} else {
-				app.Log().Fatal(err)
-			}
-		})
-}
-
-func (a *Administration) initTemplates(app *prago.App) error {
+func (a *Administration) initTemplates(app *prago.App) {
 	app.AddTemplateFunction("markdown", func(text string) template.HTML {
 		return template.HTML(markdown.New(markdown.Breaks(true)).RenderToString([]byte(text)))
 	})
@@ -309,8 +255,6 @@ func (a *Administration) initTemplates(app *prago.App) error {
 		}
 		return ""
 	})
-
-	return nil
 }
 
 func (resource Resource) GetItemURL(item interface{}, suffix string) string {
@@ -322,13 +266,13 @@ func (resource Resource) GetItemURL(item interface{}, suffix string) string {
 }
 
 func render403(request prago.Request) {
-	request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_403"))
+	request.SetData("message", messages.Messages.Get(getLocale(request), "admin_403"))
 	request.SetData("admin_yield", "admin_message")
 	request.RenderViewWithCode("admin_layout", 403)
 }
 
 func render404(request prago.Request) {
-	request.SetData("message", messages.Messages.Get(GetLocale(request), "admin_404"))
+	request.SetData("message", messages.Messages.Get(getLocale(request), "admin_404"))
 	request.SetData("admin_yield", "admin_message")
 	request.RenderViewWithCode("admin_layout", 404)
 }

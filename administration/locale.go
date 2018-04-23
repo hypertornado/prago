@@ -16,7 +16,7 @@ var (
 )
 
 //GetLocale from request
-func GetLocale(request prago.Request) string {
+func getLocale(request prago.Request) string {
 	user, hasUser := request.GetData("currentuser").(*User)
 	if hasUser {
 		if validLocale(user.Locale) {

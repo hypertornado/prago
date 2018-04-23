@@ -15,12 +15,11 @@ type homeData struct {
 
 func (admin *Administration) getHomeData(request prago.Request) (ret []homeData) {
 	user := GetUser(request)
-	locale := GetLocale(request)
 
 	for _, resource := range admin.Resources {
 		if admin.Authorize(user, resource.CanView) {
 			item := homeData{
-				Name: resource.HumanName(locale),
+				Name: resource.HumanName(user.Locale),
 				URL:  resource.GetURL(""),
 			}
 			item.Actions = resource.getResourceActionsButtonData(user, admin)

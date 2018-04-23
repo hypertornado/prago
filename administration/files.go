@@ -36,12 +36,12 @@ func initCDN(a *Administration) {
 	filesCDN = cdnclient.NewCDNAccount(cdnURL, cdnAccount, cdnPassword)
 }
 
-func (a *Administration) GetFiles(ids string) []*File {
+func (admin *Administration) GetFiles(ids string) []*File {
 	var files []*File
 	idsAr := strings.Split(ids, ",")
 	for _, v := range idsAr {
 		var image File
-		err := a.Query().WhereIs("uid", v).Get(&image)
+		err := admin.Query().WhereIs("uid", v).Get(&image)
 		if err == nil {
 			files = append(files, &image)
 		}
@@ -59,21 +59,6 @@ type File struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
-
-/*func fileAfterFormCreated(f *Form, request prago.Request, newItem bool) *Form {
-	newForm := NewForm()
-	newForm.Method = f.Method
-	newForm.Action = f.Action
-	if newItem {
-		newForm.AddFileInput("file", messages.Messages.Get(GetLocale(request), "admin_file"))
-		newForm.AddTextareaInput("Description", messages.Messages.Get(GetLocale(request), "Description"))
-		newForm.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_create"))
-	} else {
-		newForm.AddTextareaInput("Description", messages.Messages.Get(GetLocale(request), "Description"))
-	}
-	AddCSRFToken(newForm, request)
-	return newForm
-}*/
 
 func uploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File, error) {
 	fileName := utils.PrettyFilename(fileHeader.Filename)
@@ -189,6 +174,7 @@ func initFilesResource(resource *Resource) {
 
 	bindImageAPI(a, fileDownloadPath)
 
+	//TODO: authorize
 	resource.ResourceController.Post(resource.GetURL(""), func(request prago.Request) {
 		ValidateCSRF(request)
 
@@ -203,71 +189,9 @@ func initFilesResource(resource *Resource) {
 		file.Description = request.Params().Get("Description")
 		must(a.Create(file))
 
-		AddFlashMessage(request, messages.Messages.Get(GetLocale(request), "admin_item_created"))
+		AddFlashMessage(request, messages.Messages.Get(getLocale(request), "admin_item_created"))
 		request.Redirect(resource.GetURL(""))
 	})
-
-	resource.ResourceController.Get(resource.GetURL(":id/edit_old"), func(request prago.Request) {
-		id, err := strconv.Atoi(request.Params().Get("id"))
-		must(err)
-
-		var file File
-		must(a.Query().WhereIs("id", int64(id)).Get(&file))
-
-		form := NewForm()
-		form.Method = "POST"
-
-		fi := form.AddTextInput("UUID", messages.Messages.Get(GetLocale(request), "UUID"))
-		fi.Readonly = true
-		fi.Value = file.UID
-
-		fi = form.AddTextInput("Name", messages.Messages.Get(GetLocale(request), "Name"))
-		fi.Readonly = true
-		fi.Value = file.Name
-
-		_, fileURL := file.getPath(fileDownloadPath + "original")
-
-		fi = form.AddTextInput("url", messages.Messages.Get(GetLocale(request), "Url"))
-		fi.Readonly = true
-		fi.Value = fileURL
-		fi.Template = "admin_item_link"
-
-		fi = form.AddTextInput("uploadedBy", messages.Messages.Get(GetLocale(request), "Uploaded By"))
-		fi.Readonly = true
-		fi.Value = fmt.Sprintf("%d", file.User)
-		var user User
-		err = a.Query().WhereIs("id", file.User).Get(&user)
-		if err == nil {
-			fi.Value = fmt.Sprintf("%s (%d)", user.Name, user.ID)
-		}
-
-		fi = form.AddTextInput("uploadedAt", messages.Messages.Get(GetLocale(request), "Uploaded At"))
-		fi.Readonly = true
-		fi.Value = file.UpdatedAt.Format("2006-01-02 15:04:05")
-
-		if file.IsImage() {
-			for _, v := range []string{"large", "medium", "small"} {
-				fi = form.AddTextInput("thumb"+v, messages.Messages.Get(GetLocale(request), v))
-				fi.Readonly = true
-				_, path := file.getPath(fileDownloadPath + "thumb/" + v)
-				fi.Value = path
-				fi.Template = "admin_item_link"
-			}
-		}
-
-		fi = form.AddTextareaInput("Description", messages.Messages.Get(GetLocale(request), "Description"))
-		fi.Value = file.Description
-		fi.Focused = true
-		form.AddSubmit("_submit", messages.Messages.Get(GetLocale(request), "admin_edit"))
-		AddCSRFToken(form, request)
-
-		renderNavigationPage(request, AdminNavigationPage{
-			Navigation:   a.getItemNavigation(*resource, user, &file, "edit"),
-			PageTemplate: "admin_form",
-			PageData:     form,
-		})
-	})
-
 }
 
 func (f *File) getPath(prefix string) (folder, file string) {

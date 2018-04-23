@@ -136,7 +136,7 @@ func bindListAPI(admin *Administration) {
 
 func bindListResourceAPI(admin *Administration) {
 	admin.AdminController.Get(admin.GetURL("_api/resource/:name"), func(request prago.Request) {
-		locale := GetLocale(request)
+		locale := getLocale(request)
 		user := GetUser(request)
 		name := request.Params().Get("name")
 		resource, found := admin.resourceNameMap[name]
