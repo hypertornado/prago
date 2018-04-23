@@ -557,7 +557,7 @@ func initUserResource(resource *Resource) {
 		AddCSRFToken(form, request)
 		form.Validate()
 		if form.Valid {
-			must(resource.BindData(&user, user, request.Params(), form.getFilter()))
+			must(resource.bindData(&user, user, request.Params(), form.getFilter()))
 			must(admin.Save(&user))
 			AddFlashMessage(request, messages.Messages.Get(getLocale(request), "admin_settings_changed"))
 			request.Redirect(resource.GetURL("settings"))

@@ -4,7 +4,7 @@ import (
 	"reflect"
 )
 
-func (resource Resource) GetDefaultOrder() (column string, desc bool) {
+func (resource Resource) getDefaultOrder() (column string, desc bool) {
 	for _, v := range resource.fieldArrays {
 		add := false
 		if v.ColumnName == "id" {
@@ -34,7 +34,7 @@ func (resource Resource) GetDefaultOrder() (column string, desc bool) {
 	return
 }
 
-func (resource Resource) GetForm(inValues interface{}, user User, filters ...fieldFilter) (*Form, error) {
+func (resource Resource) getForm(inValues interface{}, user User, filters ...fieldFilter) (*Form, error) {
 	filters = append(filters, defaultVisibilityFilter)
 	filters = append(filters, defaultEditabilityFilter)
 	form := NewForm()

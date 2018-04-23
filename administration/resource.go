@@ -82,7 +82,7 @@ func (admin *Administration) CreateResource(item interface{}, initFunction func(
 		}
 	}
 
-	ret.OrderByColumn, ret.OrderDesc = ret.GetDefaultOrder()
+	ret.OrderByColumn, ret.OrderDesc = ret.getDefaultOrder()
 
 	admin.Resources = append(admin.Resources, ret)
 	_, typFound := admin.resourceMap[ret.Typ]

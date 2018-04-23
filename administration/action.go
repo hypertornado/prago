@@ -64,9 +64,9 @@ func actionNew(permission Permission) Action {
 		Handler: func(resource Resource, request prago.Request, user User) {
 			var item interface{}
 			resource.newItem(&item)
-			resource.BindData(&item, user, request.Request().URL.Query(), defaultEditabilityFilter)
+			resource.bindData(&item, user, request.Request().URL.Query(), defaultEditabilityFilter)
 
-			form, err := resource.GetForm(item, user)
+			form, err := resource.getForm(item, user)
 			must(err)
 
 			form.Classes = append(form.Classes, "form_leavealert")
@@ -92,10 +92,10 @@ func actionCreate(permission Permission) Action {
 			var item interface{}
 			resource.newItem(&item)
 
-			form, err := resource.GetForm(item, user)
+			form, err := resource.getForm(item, user)
 			must(err)
 
-			resource.BindData(item, user, request.Params(), form.getFilter())
+			resource.bindData(item, user, request.Params(), form.getFilter())
 			must(resource.Admin.Create(item))
 
 			if resource.ActivityLog {
@@ -157,7 +157,7 @@ func actionEdit(permission Permission) Action {
 				panic(err)
 			}
 
-			form, err := resource.GetForm(item, user)
+			form, err := resource.getForm(item, user)
 			must(err)
 
 			form.Classes = append(form.Classes, "form_leavealert")
@@ -188,7 +188,7 @@ func actionUpdate(permission Permission) Action {
 			resource.newItem(&item)
 			must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
 
-			form, err := resource.GetForm(item, user)
+			form, err := resource.getForm(item, user)
 			must(err)
 
 			var beforeData []byte
@@ -198,7 +198,7 @@ func actionUpdate(permission Permission) Action {
 			}
 
 			must(
-				resource.BindData(
+				resource.bindData(
 					item, user, request.Params(), form.getFilter(),
 				),
 			)
@@ -339,7 +339,7 @@ func actionOrder(permission Permission) Action {
 				var item interface{}
 				resource.newItem(&item)
 				must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
-				must(resource.SetOrderPosition(item, int64(i)))
+				must(resource.setOrderPosition(item, int64(i)))
 				must(resource.Admin.Save(item))
 			}
 			request.RenderJSON(true)
