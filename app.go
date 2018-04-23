@@ -2,8 +2,8 @@
 package prago
 
 import (
-	"github.com/Sirupsen/logrus"
 	"github.com/hypertornado/prago/utils"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -18,7 +18,7 @@ type App struct {
 	Config          config
 	staticHandler   staticFilesHandler
 	commands        []*command
-	logger          *logrus.Logger
+	logger          *log.Logger
 	cron            *cron
 	templates       *templates
 	mainController  *Controller
@@ -32,12 +32,12 @@ func NewApp(appName, version string, initFunction func(*App)) {
 
 		Config: loadConfig(appName),
 
+		logger:         log.New(os.Stdout, "", log.LstdFlags),
 		cron:           newCron(),
 		templates:      newTemplates(),
 		mainController: newMainController(),
 	}
 
-	app.logger = createLogger(app.DotPath(), true)
 	app.staticHandler = app.loadStaticHandler()
 
 	initFunction(app)
@@ -56,21 +56,21 @@ func (app *App) loadStaticHandler() staticFilesHandler {
 }
 
 //Log returns logger structure
-func (app App) Log() *logrus.Logger { return app.logger }
+func (app App) Log() *log.Logger { return app.logger }
 
 //DotPath returns path to hidden directory with app configuration and data
 func (app *App) DotPath() string { return os.Getenv("HOME") + "/." + app.AppName }
 
 //ListenAndServe starts server on port
 func (app *App) ListenAndServe(port int, developmentMode bool) error {
-	app.Log().WithField("port", port).
-		WithField("pid", os.Getpid()).
-		WithField("development mode", app.DevelopmentMode).
-		Info("Server started")
+	app.Log().Printf("Server started: port=%d, pid=%d, developmentMode=%v\n", port, os.Getpid(), app.DevelopmentMode)
 
 	app.DevelopmentMode = developmentMode
 	if !developmentMode {
-		app.logger = createLogger(app.DotPath(), developmentMode)
+		file, err := os.OpenFile(app.DotPath()+"/prago.log",
+			os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
+		must(err)
+		app.logger.SetOutput(file)
 	}
 
 	return (&http.Server{

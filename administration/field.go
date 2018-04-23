@@ -20,11 +20,6 @@ type field struct {
 	CanOrder   bool
 
 	fieldType FieldType
-
-	/*FormHideLabel  bool
-	FormTemplate   string
-	FormDataSource *func(User) interface{}
-	FormStringer   func(interface{}) string*/
 }
 
 func newField(f reflect.StructField, order int, fieldTypes map[string]FieldType) *field {
@@ -128,6 +123,13 @@ func getDefaultFormTemplate(t reflect.Type) string {
 func (f *field) initFieldType(fieldTypes map[string]FieldType) {
 	ret := fieldTypes[f.Tags["prago-type"]]
 
+	if ret.ViewTemplate == "" {
+		ret.ViewTemplate = getDefaultViewTemplate(f.Typ)
+	}
+	if ret.ViewDataSource == nil {
+		ret.ViewDataSource = getDefaultViewDataSource(f.Typ)
+	}
+
 	if ret.FormTemplate == "" {
 		ret.FormTemplate = getDefaultFormTemplate(f.Typ)
 	}
@@ -141,66 +143,29 @@ func (f *field) initFieldType(fieldTypes map[string]FieldType) {
 	}
 
 	f.fieldType = ret
-
-	/*
-		switch f.Typ.Kind() {
-		case reflect.Struct:
-			if f.Typ == reflect.TypeOf(time.Now()) {
-				tm := ifaceVal.(time.Time)
-				if f.Tags["prago-type"] == "timestamp" {
-					item.SubTemplate = "admin_item_timestamp"
-					item.Value = tm.Format("2006-01-02 15:04")
-				} else {
-					item.SubTemplate = "admin_item_date"
-					item.Value = tm.Format("2006-01-02")
-				}
-			}
-		case reflect.Bool:
-			item.SubTemplate = "admin_item_checkbox"
-			if ifaceVal.(bool) {
-				item.Value = "on"
-			}
-			item.HiddenName = true
-		case reflect.String:
-			item.Value = ifaceVal.(string)
-			switch f.Tags["prago-type"] {
-			case "text":
-				item.SubTemplate = "admin_item_textarea"
-			case "markdown":
-				item.Template = "admin_item_markdown"
-			case "image":
-				item.SubTemplate = "admin_item_image"
-			case "place":
-				item.SubTemplate = "admin_item_place"
-			}
-		case reflect.Int64:
-			item.Value = fmt.Sprintf("%d", ifaceVal.(int64))
-			switch f.Tags["prago-type"] {
-			case "relation":
-				item.SubTemplate = "admin_item_relation"
-				if f.Tags["prago-relation"] != "" {
-					item.Data = columnName(f.Tags["prago-relation"])
-				} else {
-					item.Data = columnName(item.Name)
-				}
-			}
-		case reflect.Float64:
-			item.Value = fmt.Sprintf("%f", ifaceVal.(float64))
-		default:
-			panic("Wrong type" + f.Typ.Kind().String())
-		}
-	*/
 }
 
 func (admin *Administration) addDefaultFieldTypes() {
 	admin.AddFieldType("role", admin.createRoleFieldType())
 
 	admin.AddFieldType("timestamp", FieldType{FormTemplate: "admin_item_textarea"})
-	admin.AddFieldType("markdown", FieldType{FormTemplate: "admin_item_markdown"})
-	admin.AddFieldType("image", FieldType{FormTemplate: "admin_item_image"})
-	admin.AddFieldType("place", FieldType{FormTemplate: "admin_item_place"})
+	admin.AddFieldType("markdown", FieldType{
+		ViewTemplate: "admin_item_view_markdown",
+		FormTemplate: "admin_item_markdown",
+	})
+	admin.AddFieldType("image", FieldType{
+		ViewTemplate: "admin_item_view_image",
+		FormTemplate: "admin_item_image",
+	})
+	admin.AddFieldType("place", FieldType{
+		ViewTemplate: "admin_item_view_place",
+		FormTemplate: "admin_item_place",
+	})
 
 	admin.AddFieldType("relation", FieldType{
+		ViewTemplate:   "admin_item_view_relation",
+		ViewDataSource: getRelationViewData,
+
 		FormTemplate: "admin_item_relation",
 		FormDataSource: func(f field, u User) interface{} {
 			if f.Tags["prago-relation"] != "" {

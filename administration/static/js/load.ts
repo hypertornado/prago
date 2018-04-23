@@ -1,11 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
-  //bindOrder();
   bindMarkdowns();
   bindTimestamps();
-  bindRelationsView();
   bindRelations();
   bindImagePickers();
-  //bindDelete();
   bindLists();
   bindForm();
   bindImageViews();

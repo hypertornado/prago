@@ -2,8 +2,7 @@ package prago
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/Sirupsen/logrus"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -21,7 +20,7 @@ type Request struct {
 }
 
 //Log returns logger
-func (request Request) Log() *logrus.Logger {
+func (request Request) Log() *log.Logger {
 	return request.App().Log()
 }
 
@@ -110,12 +109,17 @@ func (request Request) Redirect(url string) {
 }
 
 func (request Request) writeAfterLog() {
-	timestampLog(request,
-		fmt.Sprintf("%s %s",
-			request.Request().Method,
-			request.Request().URL.String(),
-		),
-	)
+	if request.Request().Header.Get("X-Dont-Log") != "true" {
+		request.Log().Printf("id=%s %s %s took=%v", request.uuid,
+			request.Request().Method, request.Request().URL.String(),
+			time.Now().Sub(request.receivedAt))
+	}
+}
+
+func timestampLog(request Request, text string) {
+	if request.Request().Header.Get("X-Dont-Log") != "true" {
+		request.Log().Printf("id=%s %s took=%v", request.uuid, text, time.Now().Sub(request.receivedAt))
+	}
 }
 
 func (request Request) removeTrailingSlash() bool {

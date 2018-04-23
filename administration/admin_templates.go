@@ -660,8 +660,12 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_item_view_relation"}}
-  <div class="admin_item_view_relation" data-type="{{.Typ}}" data-id="{{.ID}}">
-    <progress value="" max=""></progress>
+  <div class="admin_item_view_relation">
+    {{if .URL}}
+      <a href="{{.URL}}">{{.Name}}</a>
+    {{else}}
+      {{.Name}}
+    {{end}}
   </div>
 {{end}}{{define "newsletter_empty"}}{{end}}{{define "newsletter_layout"}}
 <!doctype html>
@@ -2370,40 +2374,6 @@ function bindTimestamps() {
         bindTimestamp(el);
     });
 }
-function bindRelationsView() {
-    var els = document.querySelectorAll(".admin_item_view_relation");
-    for (var i = 0; i < els.length; i++) {
-        new RelationsView(els[i]);
-    }
-}
-var RelationsView = (function () {
-    function RelationsView(el) {
-        var idStr = el.getAttribute("data-id");
-        var typ = el.getAttribute("data-type");
-        var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        var request = new XMLHttpRequest();
-        request.open("GET", adminPrefix + "/_api/resource/" + typ + "/" + idStr, true);
-        request.addEventListener("load", function () {
-            el.innerHTML = "";
-            if (request.status == 200) {
-                var resp = JSON.parse(request.response);
-                var link = document.createElement("a");
-                link.setAttribute("href", adminPrefix + "/" + typ + "/" + idStr);
-                var name = resp.name;
-                if (name == "") {
-                    name += " ";
-                }
-                link.textContent = name;
-                el.appendChild(link);
-            }
-            else {
-                el.textContent = "-";
-            }
-        });
-        request.send();
-    }
-    return RelationsView;
-}());
 function bindRelations() {
     function bindRelation(el) {
         var input = el.getElementsByTagName("input")[0];
@@ -2615,25 +2585,14 @@ var FilterDate = (function () {
 document.addEventListener("DOMContentLoaded", function () {
     bindMarkdowns();
     bindTimestamps();
-    bindRelationsView();
     bindRelations();
     bindImagePickers();
-    bindClickAndStay();
     bindLists();
     bindForm();
     bindImageViews();
     bindFlashMessages();
     bindFilter();
 });
-function bindClickAndStay() {
-    var els = document.getElementsByName("_submit_and_stay");
-    var elsClicked = document.getElementsByName("_submit_and_stay_clicked");
-    if (els.length == 1 && elsClicked.length == 1) {
-        els[0].addEventListener("click", function () {
-            elsClicked[0].value = "true";
-        });
-    }
-}
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");
     for (var i = 0; i < messages.length; i++) {

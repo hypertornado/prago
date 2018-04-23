@@ -103,6 +103,10 @@ fields:
 		item.Value = field.fieldType.FormStringer(ifaceVal)
 		item.NameHuman = field.HumanName(user.Locale)
 
+		if field.fieldType.FormDataSource != nil {
+			item.Data = field.fieldType.FormDataSource(*field, user)
+		}
+
 		form.AddItem(item)
 	}
 

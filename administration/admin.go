@@ -334,7 +334,7 @@ func bindDBBackupCron(app *prago.App) {
 	app.AddCronTask("backup db", func() {
 		err := build.BackupApp(app)
 		if err != nil {
-			app.Log().Error("Error while creating backup:", err)
+			app.Log().Println("Error while creating backup:", err)
 		}
 	}, func(t time.Time) time.Time {
 		return t.AddDate(0, 0, 1)

@@ -18,15 +18,15 @@ type viewField struct {
 }
 
 type viewRelationData struct {
-	Typ string
-	ID  int64
+	URL  string
+	Name string
 }
 
 func (resource Resource) getView(inValues interface{}, user User) view {
 	visible := defaultVisibilityFilter
 	ret := view{}
-	for i, field := range resource.fieldArrays {
-		if !visible(resource, user, *field) {
+	for i, f := range resource.fieldArrays {
+		if !visible(resource, user, *f) {
 			continue
 		}
 
@@ -35,67 +35,82 @@ func (resource Resource) getView(inValues interface{}, user User) view {
 			reflect.ValueOf(inValues).Elem().Field(i),
 		)
 
-		ret.Items = append(ret.Items,
-			getViewField(resource, user, *field, ifaceVal),
+		ret.Items = append(
+			ret.Items,
+			viewField{
+				Name:     f.HumanName(user.Locale),
+				Template: f.fieldType.ViewTemplate,
+				Value:    f.fieldType.ViewDataSource(resource, user, *f, ifaceVal),
+			},
 		)
 	}
 	return ret
 }
 
-func getViewField(resource Resource, user User, f field, ifaceVal interface{}) viewField {
-	item := viewField{
-		Name:     f.Name,
-		Template: "admin_item_view_text",
-		Value:    ifaceVal,
-	}
+func getDefaultViewTemplate(t reflect.Type) string {
+	return "admin_item_view_text"
+}
 
-	t, found := resource.fieldTypes[f.Tags["prago-type"]]
-	if found && t.ViewTemplate != "" {
-		item.Template = t.ViewTemplate
+func getDefaultViewDataSource(t reflect.Type) func(resource Resource, user User, f field, value interface{}) interface{} {
+	if t == reflect.TypeOf(time.Now()) {
+		return timestampViewDataSource
+	}
+	switch t.Kind() {
+	case reflect.Bool:
+		return boolViewDataSource
+	default:
+		return defaultViewDataSource
+	}
+}
+
+func defaultViewDataSource(resource Resource, user User, f field, value interface{}) interface{} {
+	return value
+}
+
+func timestampViewDataSource(resource Resource, user User, f field, value interface{}) interface{} {
+	return messages.Messages.Timestamp(
+		user.Locale,
+		value.(time.Time),
+	)
+}
+
+func boolViewDataSource(resource Resource, user User, f field, value interface{}) interface{} {
+	if value.(bool) {
+		return messages.Messages.Get(user.Locale, "yes")
 	} else {
-		switch f.Typ.Kind() {
-		case reflect.Struct:
-			if f.Typ == reflect.TypeOf(time.Now()) {
-				item.Value = messages.Messages.Timestamp(
-					user.Locale,
-					ifaceVal.(time.Time),
-				)
-			}
-		case reflect.Bool:
-			if ifaceVal.(bool) {
-				item.Value = messages.Messages.Get(user.Locale, "yes")
-			} else {
-				item.Value = messages.Messages.Get(user.Locale, "no")
-			}
-		case reflect.String:
-			switch f.Tags["prago-type"] {
-			case "markdown":
-				item.Template = "admin_item_view_markdown"
-			case "image":
-				item.Template = "admin_item_view_image"
-			case "place":
-				item.Template = "admin_item_view_place"
-			}
-		case reflect.Int64:
-			switch f.Tags["prago-type"] {
-			case "relation":
-				item.Template = "admin_item_view_relation"
-				var val = viewRelationData{}
-				if f.Tags["prago-relation"] != "" {
-					val.Typ = columnName(f.Tags["prago-relation"])
-				} else {
-					val.Typ = columnName(item.Name)
-				}
-				val.ID = ifaceVal.(int64)
-				item.Value = val
-			}
-		case reflect.Float64:
-			item.Value = fmt.Sprintf("%f", ifaceVal.(float64))
-		default:
-			panic("Wrong type" + f.Typ.Kind().String())
-		}
+		return messages.Messages.Get(user.Locale, "no")
+	}
+}
+
+func getRelationViewData(resource Resource, user User, f field, value interface{}) interface{} {
+	var val viewRelationData
+	var relationName string
+	if f.Tags["prago-relation"] != "" {
+		relationName = f.Tags["prago-relation"]
+	} else {
+		relationName = f.Name
 	}
 
-	item.Name = f.HumanName(user.Locale)
-	return item
+	r2 := resource.Admin.getResourceByName(relationName)
+	if r2 == nil {
+		val.Name = fmt.Sprintf("Resource '%s' not found", relationName)
+		return val
+	}
+
+	if !resource.Admin.Authorize(user, r2.CanView) {
+		val.Name = fmt.Sprintf("User is not authorized to view this item")
+		return val
+	}
+
+	var item interface{}
+	r2.newItem(&item)
+	err := resource.Admin.Query().WhereIs("id", value.(int64)).Get(item)
+	if err != nil {
+		val.Name = fmt.Sprintf("Can't find this item")
+		return val
+	}
+
+	val.Name = getItemName(item, user.Locale)
+	val.URL = r2.GetItemURL(item, "")
+	return val
 }

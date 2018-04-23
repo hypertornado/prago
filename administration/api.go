@@ -14,7 +14,7 @@ func bindAPI(a *Administration) {
 	bindMarkdownAPI(a)
 	bindListAPI(a)
 	bindListResourceAPI(a)
-	bindListResourceItemAPI(a)
+	//bindListResourceItemAPI(a)
 }
 
 func bindImageAPI(admin *Administration, fileDownloadPath string) {
@@ -192,6 +192,7 @@ func bindListResourceAPI(admin *Administration) {
 	})
 }
 
+/*
 func bindListResourceItemAPI(admin *Administration) {
 	admin.AdminController.Get(admin.GetURL("_api/resource/:name/:id"), func(request prago.Request) {
 		user := GetUser(request)
@@ -227,3 +228,4 @@ func bindListResourceItemAPI(admin *Administration) {
 		request.RenderJSON(ret)
 	})
 }
+*/

@@ -10,7 +10,7 @@ func createSessionAroundAction(appName, random string) func(prago.Request, func(
 	return func(request prago.Request, next func()) {
 		session, err := cookieStore.Get(request.Request(), appName)
 		if err != nil {
-			request.Log().Errorln("Session not valid")
+			request.Log().Println("Session not valid")
 			request.Response().Header().Set("Set-Cookie", appName+"=; expires=Thu, 01 Jan 1970 00:00:01 GMT;")
 			panic(err)
 		}

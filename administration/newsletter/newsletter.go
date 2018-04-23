@@ -132,7 +132,7 @@ func must(err error) {
 
 func InitNewsletterHelper(app *prago.App, nm NewsletterMiddleware) {
 	if nmMiddleware != nil {
-		app.Log().Errorf("cant initialize more then one instance of newsletter")
+		app.Log().Println("cant initialize more then one instance of newsletter")
 		return
 	}
 	nmMiddleware = &nm

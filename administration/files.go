@@ -136,7 +136,7 @@ func initFilesResource(resource *Resource) {
 				must(a.Query().WhereIs("id", id).Get(&file))
 				err = filesCDN.DeleteFile(file.UID)
 				if err != nil {
-					a.App.Log().Errorf("deleting CDN: %s", err)
+					a.App.Log().Printf("deleting CDN: %s\n", err)
 				}
 			}
 		}

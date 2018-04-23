@@ -31,7 +31,11 @@
 {{end}}
 
 {{define "admin_item_view_relation"}}
-  <div class="admin_item_view_relation" data-type="{{.Typ}}" data-id="{{.ID}}">
-    <progress value="" max=""></progress>
+  <div class="admin_item_view_relation">
+    {{if .URL}}
+      <a href="{{.URL}}">{{.Name}}</a>
+    {{else}}
+      {{.Name}}
+    {{end}}
   </div>
 {{end}}
