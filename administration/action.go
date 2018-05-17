@@ -47,7 +47,7 @@ func actionList(permission Permission) Action {
 			navigation := resource.Admin.getResourceNavigation(resource, user, "")
 			navigation.Wide = true
 
-			renderNavigationPage(request, AdminNavigationPage{
+			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   navigation,
 				PageTemplate: "admin_list",
 				PageData:     listData,
@@ -74,7 +74,7 @@ func actionNew(permission Permission) Action {
 			form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_create"))
 			AddCSRFToken(form, request)
 
-			renderNavigationPage(request, AdminNavigationPage{
+			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   resource.Admin.getResourceNavigation(resource, user, "new"),
 				PageTemplate: "admin_form",
 				PageData:     form,
@@ -128,7 +128,7 @@ func actionView(permission Permission) Action {
 				panic(err)
 			}
 
-			renderNavigationPage(request, AdminNavigationPage{
+			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   resource.Admin.getItemNavigation(resource, user, item, ""),
 				PageTemplate: "admin_view",
 				PageData:     resource.getView(item, GetUser(request)),
@@ -165,7 +165,7 @@ func actionEdit(permission Permission) Action {
 			form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_edit"))
 			AddCSRFToken(form, request)
 
-			renderNavigationPage(request, AdminNavigationPage{
+			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   resource.Admin.getItemNavigation(resource, user, item, "edit"),
 				PageTemplate: "admin_form",
 				PageData:     form,
@@ -225,7 +225,7 @@ func actionHistory(permission Permission) Action {
 		Permission: permission,
 		URL:        "history",
 		Handler: func(resource Resource, request prago.Request, user User) {
-			renderNavigationPage(request, AdminNavigationPage{
+			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   resource.Admin.getResourceNavigation(resource, user, "history"),
 				PageTemplate: "admin_history",
 				PageData:     resource.Admin.getHistory(&resource, 0, 0),
@@ -247,7 +247,7 @@ func actionItemHistory(permission Permission) Action {
 			resource.newItem(&item)
 			must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
 
-			renderNavigationPage(request, AdminNavigationPage{
+			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   resource.Admin.getItemNavigation(resource, user, item, "history"),
 				PageTemplate: "admin_history",
 				PageData:     resource.Admin.getHistory(&resource, 0, int64(id)),

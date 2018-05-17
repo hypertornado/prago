@@ -242,7 +242,7 @@ func initUserResource(resource *Resource) {
 	}
 
 	renderLogin := func(request prago.Request, form *Form, locale string) {
-		renderNavigationPageNoLogin(request, AdminNavigationPage{
+		renderNavigationPageNoLogin(request, adminNavigationPage{
 			Navigation:   admin.getNologinNavigation(locale, "login"),
 			PageTemplate: "admin_form",
 			PageData:     form,
@@ -282,7 +282,7 @@ func initUserResource(resource *Resource) {
 	}
 
 	renderForgot := func(request prago.Request, form *Form, locale string) {
-		renderNavigationPageNoLogin(request, AdminNavigationPage{
+		renderNavigationPageNoLogin(request, adminNavigationPage{
 			Navigation:   admin.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
 			PageData:     form,
@@ -344,7 +344,7 @@ func initUserResource(resource *Resource) {
 	}
 
 	renderRenew := func(request prago.Request, form *Form, locale string) {
-		renderNavigationPageNoLogin(request, AdminNavigationPage{
+		renderNavigationPageNoLogin(request, adminNavigationPage{
 			Navigation:   admin.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
 			PageData:     form,
@@ -467,7 +467,7 @@ func initUserResource(resource *Resource) {
 	}
 
 	renderRegistration := func(request prago.Request, form *Form, locale string) {
-		renderNavigationPageNoLogin(request, AdminNavigationPage{
+		renderNavigationPageNoLogin(request, adminNavigationPage{
 			Navigation:   admin.getNologinNavigation(locale, "registration"),
 			PageTemplate: "admin_form",
 			PageData:     form,
@@ -543,7 +543,7 @@ func initUserResource(resource *Resource) {
 
 		request.SetData("admin_header_settings_selected", true)
 
-		renderNavigationPage(request, AdminNavigationPage{
+		renderNavigationPage(request, adminNavigationPage{
 			Navigation:   admin.getSettingsNavigation(user, "settings"),
 			PageTemplate: "admin_form",
 			PageData:     form,
@@ -564,7 +564,7 @@ func initUserResource(resource *Resource) {
 			return
 		}
 
-		renderNavigationPage(request, AdminNavigationPage{
+		renderNavigationPage(request, adminNavigationPage{
 			Navigation:   admin.getSettingsNavigation(user, "settings"),
 			PageTemplate: "admin_form",
 			PageData:     form,
@@ -597,7 +597,7 @@ func initUserResource(resource *Resource) {
 
 	renderPasswordForm := func(request prago.Request, form *Form) {
 		user := GetUser(request)
-		renderNavigationPage(request, AdminNavigationPage{
+		renderNavigationPage(request, adminNavigationPage{
 			Navigation:   admin.getSettingsNavigation(user, "password"),
 			PageTemplate: "admin_form",
 			PageData:     form,

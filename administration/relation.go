@@ -12,8 +12,8 @@ type relation struct {
 	addName  func(string) string
 }
 
-func (r *Resource) AddRelation(r2 *Resource, field string, addName func(string) string) {
-	r.relations = append(r.relations, relation{r2, field, addName})
+func (resource *Resource) AddRelation(relatedResource *Resource, field string, addName func(string) string) {
+	resource.relations = append(resource.relations, relation{relatedResource, field, addName})
 }
 
 func (resource *Resource) bindRelationActions(r relation) {
@@ -44,7 +44,7 @@ func (resource *Resource) bindRelationActions(r relation) {
 			navigation := resource.Admin.getItemNavigation(resource, user, item, r.resource.ID)
 			navigation.Wide = true
 
-			renderNavigationPage(request, AdminNavigationPage{
+			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   navigation,
 				PageTemplate: "admin_list",
 				PageData:     listData,

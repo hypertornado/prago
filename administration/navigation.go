@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-type AdminNavigationPage struct {
+type adminNavigationPage struct {
 	Navigation   adminItemNavigation
 	PageTemplate string
 	PageData     interface{}
@@ -42,14 +42,14 @@ func (navigation adminItemNavigation) getPageTitle() string {
 	return strings.Join(ret, " — ")
 }
 
-func renderNavigationPage(request prago.Request, page AdminNavigationPage) {
+func renderNavigationPage(request prago.Request, page adminNavigationPage) {
 	request.SetData("admin_title", page.Navigation.getPageTitle())
 	request.SetData("admin_yield", "admin_navigation_page")
 	request.SetData("admin_page", page)
 	request.RenderView("admin_layout")
 }
 
-func renderNavigationPageNoLogin(request prago.Request, page AdminNavigationPage) {
+func renderNavigationPageNoLogin(request prago.Request, page adminNavigationPage) {
 	request.SetData("admin_title", page.Navigation.getPageTitle())
 	request.SetData("admin_yield", "admin_navigation_page")
 	request.SetData("admin_page", page)
@@ -315,7 +315,7 @@ func createNavigationalItemHandler(action, templateName string, dataGenerator fu
 			data = dataGenerator(resource, request, user)
 		}
 
-		renderNavigationPage(request, AdminNavigationPage{
+		renderNavigationPage(request, adminNavigationPage{
 			Navigation:   resource.Admin.getItemNavigation(resource, user, item, action),
 			PageTemplate: templateName,
 			PageData:     data,
@@ -338,7 +338,7 @@ func createNavigationalHandler(action, templateName string, dataGenerator func(R
 			data = dataGenerator(resource, request, user)
 		}
 
-		renderNavigationPage(request, AdminNavigationPage{
+		renderNavigationPage(request, adminNavigationPage{
 			Navigation:   resource.Admin.getResourceNavigation(resource, user, action),
 			PageTemplate: templateName,
 			PageData:     data,
@@ -361,7 +361,7 @@ func createAdminHandler(action, templateName string, dataGenerator func(Resource
 			data = dataGenerator(resource, request, user)
 		}
 
-		renderNavigationPage(request, AdminNavigationPage{
+		renderNavigationPage(request, adminNavigationPage{
 			Navigation:   resource.Admin.getAdminNavigation(user, action),
 			PageTemplate: templateName,
 			PageData:     data,

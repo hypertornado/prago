@@ -6,6 +6,7 @@ import (
 	"github.com/hypertornado/prago"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -96,7 +97,7 @@ func exportHandler(resource Resource, request prago.Request, user User) {
 		for _, field := range resource.fieldArrays {
 			if usedFieldsMap[field.ColumnName] {
 				fieldVal := itemVal.FieldByName(field.Name)
-				row = append(row, exportFieldToString(fieldVal))
+				row = append(row, removeLines(exportFieldToString(fieldVal)))
 			}
 		}
 
@@ -125,4 +126,10 @@ func exportFieldToString(value reflect.Value) string {
 		}
 	}
 	return "<undefined export>"
+}
+
+func removeLines(in string) string {
+	ret := strings.Replace(in, "\r\n", " ", -1)
+	ret = strings.Replace(ret, "\n", " ", -1)
+	return ret
 }
