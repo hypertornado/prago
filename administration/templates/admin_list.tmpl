@@ -96,14 +96,14 @@
             <a href="" class="btn btn-small admin-action-order preventredirect">☰</a>
           {{end}}
           {{if $item.Actions.MenuButtons}}
-            <button class="btn preventredirect btn-small btn-more">
+            <div class="btn preventredirect btn-small btn-more">
               <div class="preventredirect">▼</div>
               <div class="btn-more_content preventredirect">
                 {{range $action := $item.Actions.MenuButtons}}
                   <a href="{{$action.URL}}" class="btn btn-small btn-more_content_item">{{$action.Name}}</a>
                 {{end}}
               </div>
-            </button>
+            </div>
           {{end}}
         </div>
       </td>

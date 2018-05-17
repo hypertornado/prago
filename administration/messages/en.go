@@ -1,7 +1,7 @@
 package messages
 
 var en = map[string]string{
-	"yes": "yes",
+	"yes": "✅ yes",
 	"no":  "no",
 
 	"admin_error": "Error happened",

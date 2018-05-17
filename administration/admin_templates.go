@@ -468,14 +468,14 @@ const adminTemplates = `
             <a href="" class="btn btn-small admin-action-order preventredirect">☰</a>
           {{end}}
           {{if $item.Actions.MenuButtons}}
-            <button class="btn preventredirect btn-small btn-more">
+            <div class="btn preventredirect btn-small btn-more">
               <div class="preventredirect">▼</div>
               <div class="btn-more_content preventredirect">
                 {{range $action := $item.Actions.MenuButtons}}
                   <a href="{{$action.URL}}" class="btn btn-small btn-more_content_item">{{$action.Name}}</a>
                 {{end}}
               </div>
-            </button>
+            </div>
           {{end}}
         </div>
       </td>
@@ -1586,8 +1586,10 @@ progress {
 .btn-more:hover {
   color: #444;
   border-bottom-right-radius: 0px;
+  display: inline-block;
 }
-.btn-more:hover .btn-more_content {
+.btn-more:hover .btn-more_content,
+.btn-more:active .btn-more_content {
   display: flex;
 }
 .btn-more_content_item {
