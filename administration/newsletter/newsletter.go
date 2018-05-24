@@ -317,7 +317,7 @@ func (nm NewsletterMiddleware) AddEmail(email, name string, confirm bool) error 
 }
 
 type Newsletter struct {
-	ID            int64     `prago-order-desc:"true"`
+	ID            int64     `prago-preview:"true" prago-order-desc:"true"`
 	Name          string    `prago-preview:"true" prago-description:"Jméno newsletteru"`
 	Body          string    `prago-type:"markdown"`
 	PreviewSentAt time.Time `prago-preview:"true"`
