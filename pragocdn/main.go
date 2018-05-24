@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hypertornado/prago"
-	"github.com/hypertornado/prago/extensions"
+	"github.com/hypertornado/prago/build"
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 	"github.com/hypertornado/prago/utils"
 	"io"
@@ -47,10 +47,11 @@ func main() {
 		accounts[v.Name] = &config.Accounts[k]
 	}
 
-	app := prago.NewApp("pragocdn", version)
-	app.AddMiddleware(extensions.BuildMiddleware{})
-	app.AddMiddleware(prago.MiddlewareServer{Fn: start})
-	prago.Must(app.Init())
+	prago.NewApp("pragocdn", version, func(app *prago.App) {
+		build.CreateBuildHelper(app, build.BuildSettings{})
+		//app.AddMiddleware(prago.MiddlewareServer{Fn: start})
+		start(app)
+	})
 }
 
 func getNameAndExtension(filename string) (name, extension string, err error) {
@@ -106,7 +107,6 @@ func start(app *prago.App) {
 	app.MainController().Get("/", func(request prago.Request) {
 		out := fmt.Sprintf("Prago CDN\nhttps://www.prago-cdn.com\nversion %s\nadmin Ondřej Odcházel, https//www.odchazel.com", version)
 		http.Error(request.Response(), out, 200)
-		request.SetProcessed()
 	})
 
 	app.MainController().Post("/:account/upload/:extension", func(request prago.Request) {
@@ -131,7 +131,8 @@ func start(app *prago.App) {
 		if err != nil {
 			panic(err)
 		}
-		prago.WriteAPI(request, data, 200)
+
+		request.RenderJSON(data)
 	})
 
 	app.MainController().Get("/:account/:uuid/:format/:hash/:name", func(request prago.Request) {
@@ -166,7 +167,6 @@ func start(app *prago.App) {
 			panic(err)
 		}
 
-		request.SetProcessed()
 		request.Response().Header().Set("Cache-Control", "public, max-age=31536000")
 		request.Response().Header().Set("X-Content-Type-Options", "nosniff")
 		request.Response().Header().Set("Content-Type", mimeExtension)
@@ -197,7 +197,7 @@ func start(app *prago.App) {
 		if err != nil {
 			panic(err)
 		}
-		prago.WriteAPI(request, true, 200)
+		request.RenderJSON(true)
 	})
 }
 
@@ -470,10 +470,8 @@ func vipsThumbnailProfile(originalPath, outputDirectoryPath, outputFilePath, siz
 
 func render404(request prago.Request) {
 	http.Error(request.Response(), "Not Found", 404)
-	request.SetProcessed()
 }
 
 func render498(request prago.Request) {
 	http.Error(request.Response(), "Wrong Hash", 498)
-	request.SetProcessed()
 }

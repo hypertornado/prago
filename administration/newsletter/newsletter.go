@@ -317,11 +317,11 @@ func (nm NewsletterMiddleware) AddEmail(email, name string, confirm bool) error 
 }
 
 type Newsletter struct {
-	ID            int64
-	Name          string `prago-preview:"true" prago-description:"Jméno newsletteru"`
-	Body          string `prago-type:"markdown"`
-	PreviewSentAt time.Time
-	SentAt        time.Time
+	ID            int64     `prago-order-desc:"true"`
+	Name          string    `prago-preview:"true" prago-description:"Jméno newsletteru"`
+	Body          string    `prago-type:"markdown"`
+	PreviewSentAt time.Time `prago-preview:"true"`
+	SentAt        time.Time `prago-preview:"true"`
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 }
