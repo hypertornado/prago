@@ -163,7 +163,8 @@ func bindListResourceAPI(admin *Administration) {
 
 		var items interface{}
 		resource.newArrayOfItems(&items)
-		must(admin.Query().Get(items))
+		//TODO: remove limit
+		must(admin.Query().Limit(1000).Get(items))
 
 		itemsVal := reflect.ValueOf(items).Elem()
 

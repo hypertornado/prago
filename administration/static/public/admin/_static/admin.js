@@ -261,6 +261,7 @@ var List = (function () {
                 bindOrder();
                 _this.bindPagination();
                 _this.bindClick();
+                _this.tbody.classList.remove("admin_table_loading");
             }
             else {
                 console.error("error while loading list");
@@ -372,16 +373,15 @@ var List = (function () {
         this.filterInputs = this.el.querySelectorAll(".admin_table_filter_item");
         for (var i = 0; i < this.filterInputs.length; i++) {
             var input = this.filterInputs[i];
-            input.addEventListener("change", this.inputListener.bind(this));
-            input.addEventListener("keyup", this.inputListener.bind(this));
+            input.addEventListener("input", this.inputListener.bind(this));
         }
         this.inputPeriodicListener();
     };
     List.prototype.inputListener = function (e) {
-        console.log("CHangeee");
         if (e.keyCode == 9 || e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
             return;
         }
+        this.tbody.classList.add("admin_table_loading");
         this.page = 1;
         this.changed = true;
         this.changedTimestamp = Date.now();

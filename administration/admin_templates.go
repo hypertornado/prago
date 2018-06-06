@@ -58,6 +58,10 @@ const adminTemplates = `
 
 <form method="{{.Method}}" action="{{.Action}}" class="form{{range $class := .Classes}} {{$class}}{{end}}" enctype="multipart/form-data" novalidate>
 
+{{if .CSRFToken}}
+  <input type="hidden" name="_csrfToken" value="{{.CSRFToken}}">
+{{end}}
+
 {{if .Errors}}
   <div class="form_errors">
     {{range $error := .Errors}}
@@ -1202,8 +1206,8 @@ select.input {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  padding-right: 24px;
-  background: #fff url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAUCAMAAACzvE1FAAAADFBMVEUzMzMzMzMzMzMzMzMKAG/3AAAAA3RSTlMAf4C/aSLHAAAAPElEQVR42q3NMQ4AIAgEQTn//2cLdRKppSGzBYwzVXvznNWs8C58CiussPJj8h6NwgorrKRdTvuV9v16Afn0AYFOB7aYAAAAAElFTkSuQmCC") no-repeat right 8px center;
+  padding-right: 240px;
+  background: #fafafa url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAUCAMAAACzvE1FAAAADFBMVEUzMzMzMzMzMzMzMzMKAG/3AAAAA3RSTlMAf4C/aSLHAAAAPElEQVR42q3NMQ4AIAgEQTn//2cLdRKppSGzBYwzVXvznNWs8C58CiussPJj8h6NwgorrKRdTvuV9v16Afn0AYFOB7aYAAAAAElFTkSuQmCC") no-repeat right 8px center;
   background-size: 8px 10px;
   width: auto;
   max-width: 100%;
@@ -1277,6 +1281,9 @@ select.admin_table_filter_item {
 }
 .admin_table th a {
   display: block;
+}
+.admin_table_loading {
+  opacity: .4;
 }
 .admin_header_item-active a {
   font-weight: bold;
@@ -1520,14 +1527,16 @@ progress {
   border: 0px solid red;
   margin: 0 auto;
   margin-top: 5px;
-  max-width: 600px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   vertical-align: bottom;
-  align-items: flex-end;
+  flex-wrap: wrap;
 }
 .admin_navigation_tabs-wide {
   max-width: none;
+}
+.admin_navigation_tabs-wide {
+  justify-content: flex-end;
 }
 .admin_navigation_tab {
   text-overflow: ellipsis;
@@ -1961,6 +1970,7 @@ var List = (function () {
                 bindOrder();
                 _this.bindPagination();
                 _this.bindClick();
+                _this.tbody.classList.remove("admin_table_loading");
             }
             else {
                 console.error("error while loading list");
@@ -2072,16 +2082,15 @@ var List = (function () {
         this.filterInputs = this.el.querySelectorAll(".admin_table_filter_item");
         for (var i = 0; i < this.filterInputs.length; i++) {
             var input = this.filterInputs[i];
-            input.addEventListener("change", this.inputListener.bind(this));
-            input.addEventListener("keyup", this.inputListener.bind(this));
+            input.addEventListener("input", this.inputListener.bind(this));
         }
         this.inputPeriodicListener();
     };
     List.prototype.inputListener = function (e) {
-        console.log("CHangeee");
         if (e.keyCode == 9 || e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
             return;
         }
+        this.tbody.classList.add("admin_table_loading");
         this.page = 1;
         this.changed = true;
         this.changedTimestamp = Date.now();

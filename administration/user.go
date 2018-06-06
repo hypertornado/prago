@@ -103,8 +103,9 @@ func CSRFToken(request prago.Request) string {
 
 //AddCSRFToken adds csrf token to form
 func AddCSRFToken(form *Form, request prago.Request) {
-	formItem := form.AddHidden("_csrfToken")
-	formItem.Value = CSRFToken(request)
+	form.CSRFToken = CSRFToken(request)
+	//formItem := form.AddHidden("_csrfToken")
+	//formItem.Value = CSRFToken(request)
 }
 
 //ValidateCSRF validates csrf token for request

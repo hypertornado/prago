@@ -104,7 +104,13 @@ func getRelationViewData(resource Resource, user User, f Field, value interface{
 
 	var item interface{}
 	r2.newItem(&item)
-	err := resource.Admin.Query().WhereIs("id", value.(int64)).Get(item)
+
+	intVal := value.(int64)
+	if intVal <= 0 {
+		val.Name = "–"
+		return val
+	}
+	err := resource.Admin.Query().WhereIs("id", intVal).Get(item)
 	if err != nil {
 		val.Name = fmt.Sprintf("Can't find this item")
 		return val

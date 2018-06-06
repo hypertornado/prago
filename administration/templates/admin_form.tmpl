@@ -2,6 +2,10 @@
 
 <form method="{{.Method}}" action="{{.Action}}" class="form{{range $class := .Classes}} {{$class}}{{end}}" enctype="multipart/form-data" novalidate>
 
+{{if .CSRFToken}}
+  <input type="hidden" name="_csrfToken" value="{{.CSRFToken}}">
+{{end}}
+
 {{if .Errors}}
   <div class="form_errors">
     {{range $error := .Errors}}

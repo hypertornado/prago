@@ -8,12 +8,13 @@ import (
 
 //Form represents admin form
 type Form struct {
-	Method  string
-	Action  string
-	Items   []*FormItem
-	Errors  []string
-	Valid   bool
-	Classes []string
+	Method    string
+	Action    string
+	Items     []*FormItem
+	Errors    []string
+	Valid     bool
+	Classes   []string
+	CSRFToken string
 }
 
 //ItemValidator represents validator for form item
