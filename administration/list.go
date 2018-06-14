@@ -37,6 +37,7 @@ type listContent struct {
 	Rows       []listRow
 	Pagination pagination
 	Colspan    int64
+	Message    string
 }
 
 type listRow struct {
@@ -279,7 +280,6 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 
 		for _, v := range resource.fieldArrays {
 			if v.shouldShow() {
-				//structField, _ := resource.Typ.FieldByName(v.Name)
 				fieldVal := itemVal.FieldByName(v.Name)
 				row.Items = append(row.Items, resource.valueToCell(user, *v, fieldVal))
 			}
@@ -290,7 +290,17 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 
 		row.Actions = admin.getListItemActions(user, val.Index(i).Interface(), row.ID, *resource)
 		list.Rows = append(list.Rows, row)
-		list.Colspan = int64(len(row.Items)) + 1
+	}
+
+	list.Colspan = 1
+	for _, v := range resource.fieldArrays {
+		if v.shouldShow() {
+			list.Colspan += 1
+		}
+	}
+
+	if list.Count == 0 {
+		list.Message = messages.Messages.Get(user.Locale, "admin_list_empty")
 	}
 
 	return

@@ -36,6 +36,17 @@ func initCDN(a *Administration) {
 	filesCDN = cdnclient.NewCDNAccount(cdnURL, cdnAccount, cdnPassword)
 }
 
+func (admin *Administration) thumb(ids string) string {
+	for _, v := range strings.Split(ids, ",") {
+		var image File
+		err := admin.Query().WhereIs("uid", v).Get(&image)
+		if err == nil && image.IsImage() {
+			return image.GetSmall()
+		}
+	}
+	return ""
+}
+
 func (admin *Administration) GetFiles(ids string) []*File {
 	var files []*File
 	idsAr := strings.Split(ids, ",")

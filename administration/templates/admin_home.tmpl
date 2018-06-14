@@ -1,18 +1,11 @@
 {{define "admin_home_navigation"}}
-  <table class="admin_table">
-    {{range $item := .}}
-      <tr>
-        <td>
-          <b><a href="{{$item.URL}}">{{$item.Name}}</a></b>
-        </td>
-        <td>
-          <div class="btngroup">
-            {{range $action := $item.Actions}}
-              <a class="btn" href="{{$action.URL}}">{{$action.Name}}</a>
-            {{end}}
-          </div>
-        </td>
-      </tr>
-    {{end}}
-  </table>
+  
+  {{range $item := .}}
+    <h2><a href="{{$item.URL}}">{{$item.Name}}</a></h2>
+    <ul>
+      {{range $action := $item.Actions}}
+        <li><a href="{{$action.URL}}">{{$action.Name}}</a></li>
+      {{end}}
+    </ul>
+  {{end}}
 {{end}}

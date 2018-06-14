@@ -109,6 +109,13 @@
       </td>
     </tr>
   {{end}}
+  {{if .admin_list.Message}}
+    <tr>
+      <td colspan="{{.admin_list.Colspan}}" class="admin_list_message">
+        {{.admin_list.Message}}
+      </td>
+    </tr>
+  {{end}}
   {{if .admin_list.Pagination.Pages}}
     <tr>
       <td colspan="{{.admin_list.Colspan}}" class="pagination">

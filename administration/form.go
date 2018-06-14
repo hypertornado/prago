@@ -136,6 +136,14 @@ func (f *Form) AddSubmit(name, description string, validators ...ItemValidator) 
 	return input
 }
 
+//AddDeleteSubmit to form
+func (f *Form) AddDeleteSubmit(name, description string, validators ...ItemValidator) *FormItem {
+	input := f.addInput(name, description, "", validators)
+	input.HiddenName = true
+	input.Template = "admin_item_delete"
+	return input
+}
+
 //AddCheckbox to form
 func (f *Form) AddCheckbox(name, description string, validators ...ItemValidator) *FormItem {
 	input := f.addInput(name, description, "admin_item_checkbox", validators)

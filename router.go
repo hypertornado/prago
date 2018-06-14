@@ -13,7 +13,6 @@ const (
 	post
 	put
 	del
-	any
 )
 
 type router struct {
@@ -128,7 +127,6 @@ func newRoute(m method, path string, controller *Controller, fn func(p Request),
 		post: "POST",
 		put:  "PUT",
 		del:  "DELETE",
-		any:  "ANY",
 	}
 
 	ret = &route{
@@ -173,7 +171,7 @@ func (r *route) match(method, path string) (map[string]string, bool) {
 }
 
 func methodMatch(m1, m2 string) bool {
-	if m1 != "ANY" && len(m1) > 0 && m1 != m2 {
+	if len(m1) > 0 && m1 != m2 {
 		return false
 	}
 	return true

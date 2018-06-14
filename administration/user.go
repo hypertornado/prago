@@ -542,8 +542,6 @@ func initUserResource(resource *Resource) {
 		form := settingsForm(user)
 		AddCSRFToken(form, request)
 
-		request.SetData("admin_header_settings_selected", true)
-
 		renderNavigationPage(request, adminNavigationPage{
 			Navigation:   admin.getSettingsNavigation(user, "settings"),
 			PageTemplate: "admin_form",
@@ -606,7 +604,6 @@ func initUserResource(resource *Resource) {
 	}
 
 	admin.AdminController.Get(resource.GetURL("password"), func(request prago.Request) {
-		request.SetData("admin_header_settings_selected", true)
 		form := changePasswordForm(request)
 		renderPasswordForm(request, form)
 	})

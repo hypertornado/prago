@@ -136,7 +136,6 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	})
 
 	admin.AdminController.Get(admin.GetURL(""), func(request prago.Request) {
-		request.SetData("admin_header_home_selected", true)
 		renderNavigationPage(request, adminNavigationPage{
 			Navigation:   admin.getAdminNavigation(GetUser(request), ""),
 			PageTemplate: "admin_home_navigation",
@@ -235,14 +234,7 @@ func (a *Administration) initTemplates(app *prago.App) {
 	})
 
 	app.AddTemplateFunction("thumb", func(ids string) string {
-		for _, v := range strings.Split(ids, ",") {
-			var image File
-			err := a.Query().WhereIs("uid", v).Get(&image)
-			if err == nil && image.IsImage() {
-				return image.GetSmall()
-			}
-		}
-		return ""
+		return a.thumb(ids)
 	})
 
 	app.AddTemplateFunction("img", func(ids string) string {

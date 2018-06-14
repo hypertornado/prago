@@ -34,6 +34,7 @@ func (ra *Action) getName(language string) string {
 func actionList(permission Permission) Action {
 	return Action{
 		Permission: permission,
+		Name:       messages.Messages.GetNameFunction("admin_list"),
 		Handler: func(resource Resource, request prago.Request, user User) {
 			listData, err := resource.getListHeader(user)
 			if err != nil {
@@ -111,6 +112,7 @@ func actionCreate(permission Permission) Action {
 func actionView(permission Permission) Action {
 	return Action{
 		Permission: permission,
+		Name:       messages.Messages.GetNameFunction("admin_view"),
 		URL:        "",
 		Handler: func(resource Resource, request prago.Request, user User) {
 
@@ -282,13 +284,15 @@ func actionDelete(permission Permission) Action {
 	ret := CreateNavigationalItemAction(
 		"delete",
 		messages.Messages.GetNameFunction("admin_delete"),
-		"admin_form",
+		"admin_delete",
 		func(resource Resource, request prago.Request, user User) interface{} {
+			ret := map[string]interface{}{}
 			form := NewForm()
 			form.Method = "POST"
 			AddCSRFToken(form, request)
-			form.AddSubmit("send", messages.Messages.Get(user.Locale, "admin_delete"))
-			return form
+			form.AddDeleteSubmit("send", messages.Messages.Get(user.Locale, "admin_delete"))
+			ret["form"] = form
+			return ret
 		},
 	)
 	ret.Permission = permission
@@ -443,7 +447,6 @@ func initResourceActions(a *Administration, resource *Resource) {
 		actionExport(resource.CanExport),
 		actionDoExport(resource.CanExport),
 	}
-	resourceActions[0].Name = resource.HumanName
 	if resource.ActivityLog {
 		resourceActions = append(resourceActions, actionHistory(resource.CanEdit))
 	}

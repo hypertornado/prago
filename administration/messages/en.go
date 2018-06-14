@@ -4,8 +4,9 @@ var en = map[string]string{
 	"yes": "✅ yes",
 	"no":  "no",
 
-	"admin_error": "Error happened",
-	"admin_admin": "Administration",
+	"admin_error":    "Error happened",
+	"admin_admin":    "Administration",
+	"admin_signpost": "Signpost",
 
 	"admin_log_out":             "Log out",
 	"admin_new":                 "New item",
@@ -35,6 +36,8 @@ var en = map[string]string{
 	"admin_item_created":        "Item created",
 	"admin_item_edited":         "Item edited",
 	"admin_item_deleted":        "Item deleted",
+
+	"admin_list_empty": "No items found",
 
 	"admin_settings":         "Settings",
 	"admin_settings_changed": "Settings changed",

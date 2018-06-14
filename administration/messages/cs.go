@@ -4,8 +4,9 @@ var cs = map[string]string{
 	"yes": "✅ ano",
 	"no":  "ne",
 
-	"admin_error": "Nastala chyba",
-	"admin_admin": "Administrace",
+	"admin_error":    "Nastala chyba",
+	"admin_admin":    "Administrace",
+	"admin_signpost": "Rozcestník",
 
 	"admin_log_out":                  "Odhlásit se",
 	"admin_new":                      "Nová položka",
@@ -44,6 +45,8 @@ var cs = map[string]string{
 	"Hidden":                         "Skrytá položka",
 	"CreatedAt":                      "Vytvořeno",
 	"UpdatedAt":                      "Aktualizováno",
+
+	"admin_list_empty": "Nic nebylo nalezeno.",
 
 	"admin_settings":         "Nastavení",
 	"admin_settings_changed": "Nastavení změněno",

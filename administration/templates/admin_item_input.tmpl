@@ -86,7 +86,13 @@
 {{end}}
 
 {{define "admin_item_submit"}}
-  <input type="submit" id="{{.UUID}}" name="{{.Name}}" value="{{.NameHuman}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <div class="primarybtncontainer">
+    <button id="{{.UUID}}" name="{{.Name}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.NameHuman}}</button>
+  </div>
+{{end}}
+
+{{define "admin_item_delete"}}
+  <button id="{{.UUID}}" name="{{.Name}}" class="btn btn-primary btn-delete"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.NameHuman}}</button>
 {{end}}
 
 {{define "admin_item_select"}}

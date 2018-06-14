@@ -107,16 +107,3 @@ func TestRouterFallback(t *testing.T) {
 	}
 
 }
-
-func TestRouterAny(t *testing.T) {
-	r := newRoute(any, "/hello", nil, nil, nil)
-	_, ok := r.match("GET", "/hello")
-	if ok != true {
-		t.Fatal(ok)
-	}
-
-	_, ok = r.match("POST", "/hello")
-	if ok != true {
-		t.Fatal(ok)
-	}
-}
