@@ -7,6 +7,7 @@ import (
 	"github.com/hypertornado/prago"
 	"io/ioutil"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -14,6 +15,7 @@ func bindAPI(a *Administration) {
 	bindMarkdownAPI(a)
 	bindListAPI(a)
 	bindListResourceAPI(a)
+	bindRelationAPI(a)
 }
 
 func bindImageAPI(admin *Administration, fileDownloadPath string) {
@@ -91,6 +93,7 @@ func bindMarkdownAPI(admin *Administration) {
 	})
 }
 
+//TODO: remove this
 type resourceItem struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
@@ -131,6 +134,88 @@ func bindListAPI(admin *Administration) {
 		request.Response().Header().Set("X-Total-Count", fmt.Sprintf("%d", listData.TotalCount))
 		request.SetData("admin_list", listData)
 		request.RenderView("admin_list_cells")
+	})
+}
+
+func bindRelationAPI(admin *Administration) {
+	admin.AdminController.Get(admin.GetURL("_api/preview/:resourceName/:id"), func(request prago.Request) {
+		user := GetUser(request)
+		resourceName := request.Params().Get("resourceName")
+		idStr := request.Params().Get("id")
+
+		resource, found := admin.resourceNameMap[resourceName]
+		if !found {
+			render404(request)
+			return
+		}
+
+		if !admin.Authorize(user, resource.CanView) {
+			render403(request)
+			return
+		}
+
+		var item interface{}
+		resource.newItem(&item)
+		must(admin.Query().WhereIs("id", idStr).Get(item))
+
+		relationItem := resource.itemToRelationData(user, item)
+		request.RenderJSON(relationItem)
+	})
+
+	admin.AdminController.Get(admin.GetURL("_api/search/:resourceName"), func(request prago.Request) {
+		user := GetUser(request)
+		resourceName := request.Params().Get("resourceName")
+		q := request.Params().Get("q")
+
+		resource, found := admin.resourceNameMap[resourceName]
+		if !found {
+			render404(request)
+			return
+		}
+
+		if !admin.Authorize(user, resource.CanView) {
+			render403(request)
+			return
+		}
+
+		ret := []viewRelationData{}
+
+		id, err := strconv.Atoi(q)
+		if err == nil {
+			var item interface{}
+			resource.newItem(&item)
+			err := admin.Query().WhereIs("id", id).Get(item)
+			if err == nil {
+				relationItem := resource.itemToRelationData(user, item)
+				if relationItem != nil {
+					ret = append(ret, *relationItem)
+				}
+			}
+		}
+
+		filter := "%" + q + "%"
+		for _, v := range []string{"name", "description"} {
+			var items interface{}
+			resource.newArrayOfItems(&items)
+			err := admin.Query().Limit(5).Where(v+" LIKE ?", filter).Get(items)
+			if err == nil {
+				itemsVal := reflect.ValueOf(items).Elem()
+				for i := 0; i < itemsVal.Len(); i++ {
+					var item interface{}
+					item = itemsVal.Index(i).Interface()
+					viewItem := resource.itemToRelationData(user, item)
+					if viewItem != nil {
+						ret = append(ret, *viewItem)
+					}
+				}
+			}
+		}
+
+		if len(ret) > 5 {
+			ret = ret[0:5]
+		}
+
+		request.RenderJSON(ret)
 	})
 }
 

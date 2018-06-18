@@ -1,10 +1,8 @@
 package administration
 
 import (
-	"fmt"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/administration/messages"
-	"reflect"
 	"strconv"
 	"strings"
 )
@@ -258,44 +256,6 @@ func (admin *Administration) getNologinNavigation(language, code string) adminIt
 		Tabs:        tabs,
 		Breadcrumbs: []navigationBreadcrumb{breadcrumbs[0]},
 	}
-}
-
-func (admin *Administration) getItemImage(item interface{}) string {
-	if item != nil {
-		itemsVal := reflect.ValueOf(item).Elem()
-		field := itemsVal.FieldByName("Image")
-		if field.IsValid() {
-			return admin.thumb(field.String())
-		}
-	}
-	return ""
-}
-
-func getItemName(item interface{}, locale string) string {
-	if item != nil {
-		itemsVal := reflect.ValueOf(item).Elem()
-		field := itemsVal.FieldByName("Name")
-		if field.IsValid() {
-			ret := field.String()
-			if ret != "" {
-				return ret
-			}
-		}
-	}
-	return fmt.Sprintf("#%d", getItemID(item))
-}
-
-func getItemID(item interface{}) int64 {
-	if item == nil {
-		return 0
-	}
-
-	itemsVal := reflect.ValueOf(item).Elem()
-	field := itemsVal.FieldByName("ID")
-	if field.IsValid() {
-		return field.Int()
-	}
-	return 0
 }
 
 func trueIfEqual(a, b string) bool {

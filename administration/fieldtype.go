@@ -51,8 +51,9 @@ func (admin *Administration) addDefaultFieldTypes() {
 	})
 
 	admin.AddFieldType("relation", FieldType{
-		ViewTemplate:   "admin_item_view_relation",
-		ViewDataSource: getRelationViewData,
+		ViewTemplate:     "admin_item_view_relation",
+		ListCellTemplate: "admin_item_view_relation_cell",
+		ViewDataSource:   getRelationViewData,
 
 		FormTemplate: "admin_item_relation",
 		FormDataSource: func(f Field, u User) interface{} {

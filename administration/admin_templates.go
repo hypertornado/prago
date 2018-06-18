@@ -149,15 +149,16 @@ const adminTemplates = `
     {{end}}
   </table>
 {{end}}{{define "admin_home_navigation"}}
-  
-  {{range $item := .}}
-    <h2><a href="{{$item.URL}}">{{$item.Name}}</a></h2>
-    <ul>
-      {{range $action := $item.Actions}}
-        <li><a href="{{$action.URL}}">{{$action.Name}}</a></li>
-      {{end}}
-    </ul>
-  {{end}}
+  <div class="admin_box_padding">  
+    {{range $item := .}}
+      <h2><a href="{{$item.URL}}">{{$item.Name}}</a></h2>
+      <ul>
+        {{range $action := $item.Actions}}
+          <li><a href="{{$action.URL}}">{{$action.Name}}</a></li>
+        {{end}}
+      </ul>
+    {{end}}
+  </div>
 {{end}}{{define "admin_item_input"}}
   <input name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
@@ -281,9 +282,21 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_item_relation"}}
-<div class="admin_item_relation">
-  <input type="hidden" name="{{.Name}}" value="{{.Value}}" data-relation="{{.Data}}">
+<div class="admin_item_relation" data-relation="{{.Data}}">
+  <input type="hidden" name="{{.Name}}" value="{{.Value}}">
   <progress></progress>
+  <div class="admin_item_relation_preview hidden"></div>
+  <div class="admin_item_relation_change hidden">
+    <div class="btn btn-small admin_item_relation_change_btn">×</div>
+  </div>
+  <div class="admin_item_relation_picker hidden">
+    <input class="input">
+    <div class="admin_item_relation_picker_suggestions">
+      <div class="admin_item_relation_picker_suggestions_content">
+
+      </div>
+    </div>
+  </div>
 </div>
 {{end}}
 
@@ -530,9 +543,7 @@ const adminTemplates = `
 
 {{define "admin_navigation_page"}}
     {{tmpl "admin_navigation" .admin_page.Navigation}}
-    <div class="admin_box_content">
-      {{tmpl .admin_page.PageTemplate .admin_page.PageData}}
-    </div>
+    {{tmpl .admin_page.PageTemplate .admin_page.PageData}}
   </div>
 {{end}}{{define "admin_settings_OLD"}}
 
@@ -637,7 +648,7 @@ const adminTemplates = `
       {{$item.Name}}
     </div>
     <div class="view_content">
-      {{tmpl $item.Template $item.Value}}
+      {{- tmpl $item.Template $item.Value -}}
     </div>
   {{end}}
   </div>
@@ -688,12 +699,27 @@ const adminTemplates = `
 
 {{define "admin_item_view_relation"}}
   <div class="admin_item_view_relation">
-    {{if .URL}}
-      <a href="{{.URL}}">{{.Name}}</a>
+    {{if .}}
+      <a class="admin_preview" href="{{.URL}}">
+        <div class="admin_preview_image" style="background-image: url('{{CSS .Image}}') ;"></div>
+        <div class="admin_preview_right">
+          <div class="admin_preview_name">{{.Name}}</div>
+          <div class="admin_preview_description">{{.Description}}</div>
+        </div>
+      </a>
     {{else}}
-      {{.Name}}
+      –
     {{end}}
   </div>
+{{end}}
+
+
+{{define "admin_item_view_relation_cell"}}
+  {{if .}}
+    {{.Name}}
+  {{else}}
+    –
+  {{end}}
 {{end}}{{define "newsletter_empty"}}{{end}}{{define "newsletter_layout"}}
 <!doctype html>
 <html>
@@ -3106,7 +3132,7 @@ body {
   background-attachment: fixed;
 }
 .shadow {
-  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
 code {
   background-color: #fafafa;
@@ -3185,13 +3211,15 @@ ul {
   box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
   margin: 5px auto;
   background-color: white;
-  padding: 10px;
   border-radius: 2px;
   max-width: 600px;
   width: 100%;
   margin-bottom: 20px;
   background-color: #fff;
   border-radius: 3px;
+}
+.admin_box_padding {
+  padding: 10px;
 }
 .admin_box-wide {
   box-shadow: none;
@@ -3200,9 +3228,6 @@ ul {
   padding: 0px;
   margin-top: 0px;
   background-color: rgba(0, 0, 0, 0);
-}
-.admin_box_content {
-  overflow-x: auto;
 }
 .btn {
   display: inline-block;
@@ -3285,6 +3310,9 @@ ul {
 .btn-delete:active {
   background: linear-gradient(red, red);
 }
+.form {
+  padding: 10px;
+}
 .form_errors_error {
   border: 1px solid #dd2e4f;
   color: #dd2e4f;
@@ -3321,20 +3349,33 @@ ul {
 .form_label_text-checkbox {
   padding: 0px 5px;
 }
-.input {
-  display: inline-block;
-  padding: 8px 6px;
-  line-height: 1.2em;
-  color: #333;
-  vertical-align: middle;
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  outline: none;
-  font-size: 0.9rem;
-  line-height: 1.4rem;
-  width: 100%;
+.inputzone {
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
   background-color: #fafafa;
+  outline: none;
+  border: 1px solid #ddd;
+  padding: 8px 6px;
+  display: inline-block;
+  border-radius: 3px;
+  font-size: 0.9rem;
+  line-height: 1.4rem;
+  color: #333;
+  vertical-align: middle;
+  width: 100%;
+}
+.input {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+  background-color: #fafafa;
+  outline: none;
+  border: 1px solid #ddd;
+  padding: 8px 6px;
+  display: inline-block;
+  border-radius: 3px;
+  font-size: 0.9rem;
+  line-height: 1.4rem;
+  color: #333;
+  vertical-align: middle;
+  width: 100%;
 }
 .input-small {
   padding: 2px 6px;
@@ -3455,7 +3496,7 @@ select.admin_table_filter_item {
   color: #444;
   display: inline-block;
   margin: 5px 10px;
-  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
   border-radius: 3px;
   animation-name: example;
   animation-duration: 300ms;
@@ -3516,13 +3557,19 @@ td.pagination {
 }
 .admin_images_image {
   padding: 3px;
-  border: 1px solid #eee;
   border-radius: 3px;
   margin: 2px;
   display: inline-block;
   text-align: center;
   vertical-align: middle;
   position: relative;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+}
+.admin_images_image:hover {
+  background-color: rgba(64, 120, 192, 0.1);
+}
+.admin_images_image:hover .admin_images_image_delete {
+  background-color: #eee;
 }
 .admin_images_image_delete {
   position: absolute;
@@ -3534,6 +3581,10 @@ td.pagination {
   font-size: 17px;
   border-bottom-left-radius: 3px;
 }
+.admin_images_image_delete:hover {
+  color: white;
+  background: red !important;
+}
 .admin_images_image img {
   max-height: 150px;
   max-width: 150px;
@@ -3544,12 +3595,16 @@ td.pagination {
 .admin_images_fileinput {
   display: block;
   margin: 0px auto;
-  border: 1px dashed #eee;
+  margin-bottom: 10px;
   padding: 3px;
   border-radius: 3px;
   padding: 10px;
-  background-color: #fafafa;
-  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+.admin_images_fileinput:hover {
+  background-color: rgba(64, 120, 192, 0.1);
 }
 .admin_images_fileinput-droparea {
   border: 3px dashed #aaa;
@@ -3619,16 +3674,21 @@ select.admin_timestamp_minute {
   content: " ↑";
 }
 .view_name {
-  font-size: 1.1rem;
-  margin-left: 5px;
-  margin-top: 10px;
+  font-size: 1.2rem;
+  margin-left: 0px;
+  padding: 10px 10px 5px 10px;
+  border-top: 1px solid rgba(64, 120, 192, 0.1);
+  border-top: 2px solid #fafafa;
+}
+.view_name:first-child {
+  border-top: none;
 }
 .view_content {
   margin-bottom: 10px;
-  background-color: rgba(64, 120, 192, 0.05);
-  padding: 5px;
+  padding: 5px 10px;
   border-radius: 3px;
   word-wrap: break-word;
+  color: #888;
 }
 .admin_item_view_place {
   height: 200px;
@@ -3659,7 +3719,7 @@ progress {
 .admin_navigation_breadcrumbs {
   display: flex;
   flex-wrap: wrap;
-  margin: 10px 5px;
+  margin: 10px 10px;
   font-size: 1.1rem;
   align-items: center;
 }
@@ -3670,30 +3730,33 @@ progress {
   align-items: center;
   line-height: 30px;
   padding-left: 5px;
+  padding: 0px 5px 0px 5px;
 }
 .admin_navigation_breadcrumb_image {
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-  width: 20px;
-  height: 20px;
-  margin: 3px 5px 3px 0px;
+  width: 30px;
+  height: 30px;
+  margin: 3px 10px 3px 0px;
   display: inline-block;
   border-radius: 300px;
   background-color: white;
-  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
 .admin_navigation_breadcrumb_image-logo {
   background-size: contain;
 }
+.admin_navigation_breadcrumb_divider {
+  font-size: 1.4rem;
+  vertical-align: center;
+  display: inline-flex;
+  color: #4078c0;
+  margin: 0px 0px 0px 10px;
+  font-weight: 100;
+}
 .admin_navigation_breadcrumb_divider:after {
   content: ">";
-  color: #4078c0;
-  margin: 0px 5px;
-  font-weight: bold;
-  font-weight: 100;
-  font-size: 1.4rem;
-  padding: 2px 0px;
 }
 .admin_navigation_tabs {
   display: flex;
@@ -3746,9 +3809,10 @@ progress {
   right: -1px;
   border-radius: 3px;
   top: 19px;
-  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
   z-index: 2;
   flex-flow: column;
+  background-color: white;
 }
 .btn-more:hover {
   color: #444;
@@ -3761,6 +3825,7 @@ progress {
 }
 .btn-more_content_item {
   display: block;
+  background: none;
 }
 .btn-more_content_item:not(:last-child) {
   border-bottom-right-radius: 0px;
@@ -3793,6 +3858,100 @@ td.admin_list_message {
   font-size: 1.3rem;
   color: #999;
 }
+@media (max-width: 600px) {
+  .admin_box {
+    box-shadow: none;
+    margin-bottom: 0px;
+    padding-bottom: 20px;
+  }
+  .admin_header {
+    position: relative !important;
+  }
+}
+.admin_preview {
+  padding: 5px;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  text-decoration: none;
+  color: #444;
+  display: inline-block;
+  margin: 5px 0px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: flex-start;
+}
+.admin_preview_image {
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
+  border-radius: 300px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-color: #eee;
+}
+.admin_preview_right {
+  flex-grow: 2;
+  flex-shrink: 2;
+}
+.admin_preview_description {
+  font-size: .9rem;
+  line-height: 1.2em;
+  color: #888;
+}
+.admin_item_relation {
+  display: flex;
+  align-items: center;
+}
+.admin_item_relation_change {
+  margin: 10px 0px;
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+.admin_item_relation_change_btn {
+  display: inline-block;
+  width: 40px;
+  text-align: center;
+  margin: 0px 20px;
+  font-size: 1.2rem;
+  line-height: 1.2em;
+}
+.admin_item_relation_picker {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 2;
+}
+.admin_item_relation_picker_suggestions {
+  position: relative;
+}
+.admin_item_relation_picker_suggestions_content {
+  position: absolute;
+  top: 0px;
+  z-index: 20;
+  background-color: white;
+  margin-bottom: 10px;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+  width: 400px;
+}
+.admin_item_relation_picker_suggestion {
+  box-shadow: none;
+  margin: 0px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  border-radius: 0px;
+}
+.admin_item_relation_picker_suggestion:last-child {
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+  border-bottom: none;
+}
+.admin_item_relation_picker_suggestion-selected {
+  background-color: rgba(64, 120, 192, 0.05);
+}
 .admin_header {
   background: white;
   padding-bottom: 0px;
@@ -3822,6 +3981,8 @@ td.admin_list_message {
   flex-wrap: wrap;
   align-items: center;
   padding: 5px 10px;
+  background-color: #fafafa;
+  background: linear-gradient(#fafafa, #fff);
 }
 .admin_header_name {
   font-size: 1.4rem;
@@ -3829,7 +3990,6 @@ td.admin_list_message {
   line-height: 1.2em;
 }
 .admin_header_resources {
-  border-top: 1px solid rgba(64, 120, 192, 0.1);
   margin: 0px;
   padding: 0px;
   clear: both;
@@ -3840,8 +4000,8 @@ td.admin_list_message {
 }
 .admin_header_resource {
   text-transform: uppercase;
-  padding: 0px 10px;
-  margin: 3px 1px;
+  padding: 3px 10px;
+  margin: 0px;
   font-size: .9rem;
   border-bottom: 2px solid none;
   flex-shrink: 0;
@@ -4561,6 +4721,187 @@ function bindTimestamps() {
     });
 }
 function bindRelations() {
+    var elements = document.querySelectorAll(".admin_item_relation");
+    Array.prototype.forEach.call(elements, function (el, i) {
+        new RelationPicker(el);
+    });
+}
+var RelationPicker = (function () {
+    function RelationPicker(el) {
+        var _this = this;
+        this.selectedClass = "admin_item_relation_picker_suggestion-selected";
+        this.input = el.getElementsByTagName("input")[0];
+        this.previewContainer = el.querySelector(".admin_item_relation_preview");
+        this.relationName = el.getAttribute("data-relation");
+        this.progress = el.querySelector("progress");
+        this.changeSection = el.querySelector(".admin_item_relation_change");
+        this.changeButton = el.querySelector(".admin_item_relation_change_btn");
+        this.changeButton.addEventListener("click", function () {
+            _this.showSearch();
+            _this.pickerInput.focus();
+        });
+        this.suggestionsEl = el.querySelector(".admin_item_relation_picker_suggestions_content");
+        this.suggestions = [];
+        this.picker = el.querySelector(".admin_item_relation_picker");
+        this.pickerInput = this.picker.querySelector("input");
+        this.pickerInput.addEventListener("input", function () {
+            _this.getSuggestions(_this.pickerInput.value);
+        });
+        this.pickerInput.addEventListener("blur", function () {
+            _this.suggestionsEl.classList.add("hidden");
+        });
+        this.pickerInput.addEventListener("focus", function () {
+            _this.suggestionsEl.classList.remove("hidden");
+        });
+        this.pickerInput.addEventListener("keydown", this.suggestionInput.bind(this));
+        this.getData();
+    }
+    RelationPicker.prototype.getData = function () {
+        var _this = this;
+        var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        var request = new XMLHttpRequest();
+        request.open("GET", adminPrefix + "/_api/preview/" + this.relationName + "/" + this.input.value, true);
+        request.addEventListener("load", function () {
+            _this.progress.classList.add("hidden");
+            if (request.status == 200) {
+                _this.showPreview(JSON.parse(request.response));
+            }
+            else {
+                _this.showSearch();
+            }
+        });
+        request.send();
+    };
+    RelationPicker.prototype.showPreview = function (data) {
+        this.previewContainer.textContent = "";
+        this.input.value = data.ID;
+        var el = this.createPreview(data);
+        this.previewContainer.appendChild(el);
+        this.previewContainer.classList.remove("hidden");
+        this.changeSection.classList.remove("hidden");
+        this.picker.classList.add("hidden");
+    };
+    RelationPicker.prototype.showSearch = function () {
+        this.previewContainer.classList.add("hidden");
+        this.changeSection.classList.add("hidden");
+        this.picker.classList.remove("hidden");
+        this.suggestions = [];
+        this.suggestionsEl.innerText = "";
+        this.pickerInput.value = "";
+    };
+    RelationPicker.prototype.getSuggestions = function (q) {
+        var _this = this;
+        var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        var request = new XMLHttpRequest();
+        request.open("GET", adminPrefix + "/_api/search/" + this.relationName + "?q=" + encodeURIComponent(q), true);
+        request.addEventListener("load", function () {
+            if (request.status == 200) {
+                if (q != _this.pickerInput.value) {
+                    return;
+                }
+                var data = JSON.parse(request.response);
+                _this.suggestions = data;
+                _this.suggestionsEl.innerText = "";
+                for (var i = 0; i < data.length; i++) {
+                    var item = data[i];
+                    var el = _this.createPreview(item);
+                    el.classList.add("admin_item_relation_picker_suggestion");
+                    el.setAttribute("data-position", i + "");
+                    el.addEventListener("mousedown", _this.suggestionClick.bind(_this));
+                    el.addEventListener("mouseenter", _this.suggestionSelect.bind(_this));
+                    _this.suggestionsEl.appendChild(el);
+                }
+            }
+            else {
+                console.log("Error while searching");
+            }
+        });
+        request.send();
+    };
+    RelationPicker.prototype.suggestionClick = function () {
+        var selected = this.getSelected();
+        if (selected >= 0) {
+            this.showPreview(this.suggestions[selected]);
+        }
+    };
+    RelationPicker.prototype.suggestionSelect = function (e) {
+        var target = e.currentTarget;
+        var position = parseInt(target.getAttribute("data-position"));
+        this.select(position);
+    };
+    RelationPicker.prototype.getSelected = function () {
+        var selected = this.suggestionsEl.querySelector("." + this.selectedClass);
+        if (!selected) {
+            return -1;
+        }
+        return parseInt(selected.getAttribute("data-position"));
+    };
+    RelationPicker.prototype.unselect = function () {
+        var selected = this.suggestionsEl.querySelector("." + this.selectedClass);
+        if (!selected) {
+            return -1;
+        }
+        selected.classList.remove(this.selectedClass);
+        return parseInt(selected.getAttribute("data-position"));
+    };
+    RelationPicker.prototype.select = function (i) {
+        this.unselect();
+        this.suggestionsEl.querySelectorAll(".admin_preview")[i].classList.add(this.selectedClass);
+    };
+    RelationPicker.prototype.suggestionInput = function (e) {
+        switch (e.keyCode) {
+            case 13:
+                this.suggestionClick();
+                e.preventDefault();
+                return true;
+            case 38:
+                var i = this.getSelected();
+                if (i < 1) {
+                    i = this.suggestions.length - 1;
+                }
+                else {
+                    i = i - 1;
+                }
+                this.select(i);
+                e.preventDefault();
+                return false;
+            case 40:
+                var i = this.getSelected();
+                if (i >= 0) {
+                    i += 1;
+                    i = i % this.suggestions.length;
+                }
+                else {
+                    i = 0;
+                }
+                this.select(i);
+                e.preventDefault();
+                return false;
+        }
+    };
+    RelationPicker.prototype.createPreview = function (data) {
+        var ret = document.createElement("div");
+        ret.classList.add("admin_preview");
+        var image = document.createElement("div");
+        image.classList.add("admin_preview_image");
+        image.setAttribute("style", "background-image: url('" + data.Image + "');");
+        var right = document.createElement("div");
+        right.classList.add("admin_preview_right");
+        var name = document.createElement("div");
+        name.classList.add("admin_preview_name");
+        name.textContent = data.Name;
+        var description = document.createElement("description");
+        description.classList.add("admin_preview_description");
+        description.textContent = data.Description;
+        ret.appendChild(image);
+        right.appendChild(name);
+        right.appendChild(description);
+        ret.appendChild(right);
+        return ret;
+    };
+    return RelationPicker;
+}());
+function bindRelationsOLD() {
     function bindRelation(el) {
         var input = el.getElementsByTagName("input")[0];
         var relationName = input.getAttribute("data-relation");

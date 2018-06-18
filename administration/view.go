@@ -1,7 +1,6 @@
 package administration
 
 import (
-	"fmt"
 	"github.com/hypertornado/prago/administration/messages"
 	"reflect"
 	"time"
@@ -15,11 +14,6 @@ type viewField struct {
 	Name     string
 	Template string
 	Value    interface{}
-}
-
-type viewRelationData struct {
-	URL  string
-	Name string
 }
 
 func (resource Resource) getView(inValues interface{}, user User) view {
@@ -80,43 +74,4 @@ func boolViewDataSource(resource Resource, user User, f Field, value interface{}
 	} else {
 		return messages.Messages.Get(user.Locale, "no")
 	}
-}
-
-func getRelationViewData(resource Resource, user User, f Field, value interface{}) interface{} {
-	var val viewRelationData
-	var relationName string
-	if f.Tags["prago-relation"] != "" {
-		relationName = f.Tags["prago-relation"]
-	} else {
-		relationName = f.Name
-	}
-
-	r2 := resource.Admin.getResourceByName(relationName)
-	if r2 == nil {
-		val.Name = fmt.Sprintf("Resource '%s' not found", relationName)
-		return val
-	}
-
-	if !resource.Admin.Authorize(user, r2.CanView) {
-		val.Name = fmt.Sprintf("User is not authorized to view this item")
-		return val
-	}
-
-	var item interface{}
-	r2.newItem(&item)
-
-	intVal := value.(int64)
-	if intVal <= 0 {
-		val.Name = "–"
-		return val
-	}
-	err := resource.Admin.Query().WhereIs("id", intVal).Get(item)
-	if err != nil {
-		val.Name = fmt.Sprintf("Can't find this item")
-		return val
-	}
-
-	val.Name = getItemName(item, user.Locale)
-	val.URL = r2.GetItemURL(item, "")
-	return val
 }

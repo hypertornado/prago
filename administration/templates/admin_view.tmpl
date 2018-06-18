@@ -4,7 +4,7 @@
       {{$item.Name}}
     </div>
     <div class="view_content">
-      {{tmpl $item.Template $item.Value}}
+      {{- tmpl $item.Template $item.Value -}}
     </div>
   {{end}}
   </div>
@@ -55,10 +55,25 @@
 
 {{define "admin_item_view_relation"}}
   <div class="admin_item_view_relation">
-    {{if .URL}}
-      <a href="{{.URL}}">{{.Name}}</a>
+    {{if .}}
+      <a class="admin_preview" href="{{.URL}}">
+        <div class="admin_preview_image" style="background-image: url('{{CSS .Image}}') ;"></div>
+        <div class="admin_preview_right">
+          <div class="admin_preview_name">{{.Name}}</div>
+          <div class="admin_preview_description">{{.Description}}</div>
+        </div>
+      </a>
     {{else}}
-      {{.Name}}
+      –
     {{end}}
   </div>
+{{end}}
+
+
+{{define "admin_item_view_relation_cell"}}
+  {{if .}}
+    {{.Name}}
+  {{else}}
+    –
+  {{end}}
 {{end}}

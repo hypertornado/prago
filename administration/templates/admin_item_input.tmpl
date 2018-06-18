@@ -121,9 +121,21 @@
 {{end}}
 
 {{define "admin_item_relation"}}
-<div class="admin_item_relation">
-  <input type="hidden" name="{{.Name}}" value="{{.Value}}" data-relation="{{.Data}}">
+<div class="admin_item_relation" data-relation="{{.Data}}">
+  <input type="hidden" name="{{.Name}}" value="{{.Value}}">
   <progress></progress>
+  <div class="admin_item_relation_preview hidden"></div>
+  <div class="admin_item_relation_change hidden">
+    <div class="btn btn-small admin_item_relation_change_btn">×</div>
+  </div>
+  <div class="admin_item_relation_picker hidden">
+    <input class="input">
+    <div class="admin_item_relation_picker_suggestions">
+      <div class="admin_item_relation_picker_suggestions_content">
+
+      </div>
+    </div>
+  </div>
 </div>
 {{end}}
 
