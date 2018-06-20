@@ -25,7 +25,7 @@ func (admin *Administration) addDefaultFieldTypes() {
 
 	admin.AddFieldType("text", FieldType{
 		FormTemplate:       "admin_item_textarea",
-		ListCellDataSource: markdownListDataSource,
+		ListCellDataSource: textListDataSource,
 	})
 	admin.AddFieldType("order", FieldType{})
 	admin.AddFieldType("date", FieldType{})
@@ -78,8 +78,10 @@ func (admin *Administration) addDefaultFieldTypes() {
 	})
 }
 
+func textListDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
+	return utils.Crop(value.(string), 100)
+}
+
 func markdownListDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
-	text := value.(string)
-	text = utils.CropMarkdown(text, 100)
-	return text
+	return utils.CropMarkdown(value.(string), 100)
 }
