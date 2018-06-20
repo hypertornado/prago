@@ -24,12 +24,18 @@
     {{template "admin_flash" .}}
     <div class="admin_header">
         <div class="admin_header_top">
-            <a href="{{.admin_header.UrlPrefix}}" class="admin_header_top_item admin_header_name">
+            <a href="{{.admin_header.UrlPrefix}}" class="
+                admin_header_top_item admin_header_name
+                {{if .admin_navigation_logo_selected}}admin_header_top_item-selected{{end}}
+            ">
                 {{message .locale "admin_admin"}} – {{.admin_header.Name}}
             </a>
             <div class="admin_header_top_item admin_header_top_space"></div>
             <div class="admin_header_top_item">{{.currentuser.Email}}</div>
-            <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_header_top_item">
+            <a href="{{.admin_header.UrlPrefix}}/user/settings" class="
+                admin_header_top_item
+                {{if .admin_navigation_settings_selected}}admin_header_top_item-selected{{end}}
+            ">
                 {{message .locale "admin_settings"}}
             </a>
             <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>

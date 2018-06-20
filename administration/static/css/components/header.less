@@ -1,16 +1,17 @@
 .admin_header {
-  background: white;
   padding-bottom: 0px;
   position: relative;
   z-index: 2;
   line-height: 1.6em;
   flex-grow: 0;
   flex-shrink: 0;
+  background: white;
 
+  position: -webkit-sticky;
   position: sticky;
   top: 0px;
-
-
+}
+.admin_header-scrolled {
   box-shadow: 0px 2px 3px rgba(0,0,0,0.05);
 }
 
@@ -19,6 +20,10 @@
   padding: 2px 5px;
   margin: 2px 2px;
   font-size: 1.1rem;
+}
+
+.admin_header_top_item-selected {
+  background-color: @baseColorBackgroundLighter;
 }
 
 .admin_header a {

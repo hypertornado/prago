@@ -146,6 +146,9 @@ func (f *Field) initFieldType(fieldTypes map[string]FieldType) {
 		ret.FormHideLabel = true
 	}
 
+	if ret.ListCellDataSource == nil {
+		ret.ListCellDataSource = ret.ViewDataSource
+	}
 	if ret.ListCellTemplate == "" {
 		ret.ListCellTemplate = ret.ViewTemplate
 	}

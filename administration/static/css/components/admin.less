@@ -118,7 +118,7 @@ ul {
   border-radius: 2px;
   max-width: 600px;
   width: 100%;
-  margin-bottom: 33vh;
+  margin-bottom: 100px;
   background-color: #fff;
   border-radius: 3px;
 }
@@ -199,10 +199,12 @@ ul {
   background: linear-gradient(#42a1ec, #0070c9);
   color: white;
   border-color: #1E90FF;
+  font-weight: bold;
 }
 
 .btn-primary:after {
   content: " >";
+  font-weight: normal;
 }
 
 .btn-primary:hover {
@@ -258,7 +260,10 @@ ul {
 }
 
 .form_label_text {
-  line-height: 2em;
+  font-size: 1.2rem;
+  line-height: 1.2em;
+  margin: 5px 0px;
+  display: inline-block;
 }
 
 .form_label-errors {
@@ -279,7 +284,7 @@ ul {
 
 .inputzone {
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.075);
-  background-color: #fafafa;
+  background-color: #fcfcfc;
   outline: none;
   border: 1px solid #ddd;
   padding: 8px 6px;
@@ -660,11 +665,13 @@ select.admin_timestamp_minute {
 }
 
 .view_content {
-  margin-bottom: 10px;
-  padding: 5px 10px;
-  border-radius: 3px;
+  padding: 0px 10px 10px 10px;
   word-wrap: break-word;
   color: #888;
+}
+
+.view_content:empty {
+  display: none;
 }
 
 .admin_item_view_place {
@@ -874,13 +881,14 @@ td.admin_list_message {
 
 .admin_preview {
   padding: 5px;
-  .shadow;
+  //.shadow;
   border-radius: 5px;
   text-decoration: none;
-  color: #444;
+  color: #888;
   display: inline-block;
   margin: 5px 0px;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  line-height: 1.4em;
 
   display: flex;
   align-items: flex-start;
@@ -906,13 +914,14 @@ td.admin_list_message {
 
 .admin_preview_description {
   font-size: .9rem;
-  line-height: 1.2em;
-  color: #888;
+  line-height: 1.4em;
+  color: #aaa;
 }
 
 .admin_item_relation {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .admin_item_relation_change {

@@ -1,7 +1,7 @@
 function bindRelations() {
   var elements = document.querySelectorAll(".admin_item_relation");
   Array.prototype.forEach.call(elements, function(el: HTMLElement, i: number){
-    new RelationPicker(el);
+    new RelationPicker(<HTMLDivElement>el);
   });
 }
 
@@ -25,21 +25,21 @@ class RelationPicker {
   
   constructor(el: HTMLDivElement) {
     this.input = <HTMLInputElement>el.getElementsByTagName("input")[0];
-    this.previewContainer = el.querySelector(".admin_item_relation_preview");
+    this.previewContainer = <HTMLDivElement>el.querySelector(".admin_item_relation_preview");
     this.relationName = el.getAttribute("data-relation");
     this.progress = el.querySelector("progress");
 
-    this.changeSection = el.querySelector(".admin_item_relation_change");
-    this.changeButton = el.querySelector(".admin_item_relation_change_btn");
+    this.changeSection = <HTMLDivElement>el.querySelector(".admin_item_relation_change");
+    this.changeButton = <HTMLDivElement>el.querySelector(".admin_item_relation_change_btn");
     this.changeButton.addEventListener("click", () => {
       this.showSearch();
       this.pickerInput.focus();
     });
 
-    this.suggestionsEl = el.querySelector(".admin_item_relation_picker_suggestions_content");
+    this.suggestionsEl = <HTMLDivElement>el.querySelector(".admin_item_relation_picker_suggestions_content");
     this.suggestions = [];
     
-    this.picker = el.querySelector(".admin_item_relation_picker");
+    this.picker = <HTMLDivElement>el.querySelector(".admin_item_relation_picker");
     this.pickerInput = this.picker.querySelector("input");
     this.pickerInput.addEventListener("input", () => {
       this.getSuggestions(this.pickerInput.value);
@@ -49,6 +49,7 @@ class RelationPicker {
     });
     this.pickerInput.addEventListener("focus", () => {
       this.suggestionsEl.classList.remove("hidden");
+      this.getSuggestions(this.pickerInput.value);
     });
     this.pickerInput.addEventListener("keydown", this.suggestionInput.bind(this));
 

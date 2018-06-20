@@ -1,6 +1,7 @@
 package administration
 
 import (
+	"github.com/hypertornado/prago/utils"
 	"time"
 )
 
@@ -15,14 +16,16 @@ type FieldType struct {
 	FormDataSource func(Field, User) interface{}
 	FormStringer   func(interface{}) string
 
-	ListCellTemplate string
+	ListCellDataSource func(Resource, User, Field, interface{}) interface{}
+	ListCellTemplate   string
 }
 
 func (admin *Administration) addDefaultFieldTypes() {
 	admin.AddFieldType("role", admin.createRoleFieldType())
 
 	admin.AddFieldType("text", FieldType{
-		FormTemplate: "admin_item_textarea",
+		FormTemplate:       "admin_item_textarea",
+		ListCellDataSource: markdownListDataSource,
 	})
 	admin.AddFieldType("order", FieldType{})
 	admin.AddFieldType("date", FieldType{})
@@ -37,8 +40,10 @@ func (admin *Administration) addDefaultFieldTypes() {
 	})
 
 	admin.AddFieldType("markdown", FieldType{
-		ViewTemplate: "admin_item_view_markdown",
-		FormTemplate: "admin_item_markdown",
+		ViewTemplate:       "admin_item_view_markdown",
+		FormTemplate:       "admin_item_markdown",
+		ListCellDataSource: markdownListDataSource,
+		ListCellTemplate:   "admin_item_view_text",
 	})
 	admin.AddFieldType("image", FieldType{
 		ViewTemplate:     "admin_item_view_image",
@@ -71,4 +76,10 @@ func (admin *Administration) addDefaultFieldTypes() {
 			return i.(time.Time).Format("2006-01-02 15:04")
 		},
 	})
+}
+
+func markdownListDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
+	text := value.(string)
+	text = utils.CropMarkdown(text, 100)
+	return text
 }

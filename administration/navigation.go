@@ -189,7 +189,7 @@ func (admin *Administration) getSettingsNavigation(user User, code string) admin
 	breadcrumbs = append(breadcrumbs,
 		navigationBreadcrumb{
 			Name: messages.Messages.Get(user.Locale, "admin_settings"),
-			URL:  admin.GetURL("/user/settings"),
+			URL:  admin.GetURL("user/settings"),
 		},
 	)
 
@@ -325,6 +325,7 @@ func createAdminHandler(action, templateName string, dataGenerator func(Resource
 			data = dataGenerator(resource, request, user)
 		}
 
+		request.SetData("admin_navigation_logo_selected", true)
 		renderNavigationPage(request, adminNavigationPage{
 			Navigation:   resource.Admin.getAdminNavigation(user, action),
 			PageTemplate: templateName,

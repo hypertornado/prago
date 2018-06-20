@@ -312,6 +312,6 @@ func (resource Resource) valueToCell(user User, f Field, val reflect.Value) list
 
 	var cell listCell
 	cell.Template = f.fieldType.ListCellTemplate
-	cell.Value = f.fieldType.ViewDataSource(resource, user, f, item)
+	cell.Value = f.fieldType.ListCellDataSource(resource, user, f, item)
 	return cell
 }

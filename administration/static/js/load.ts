@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindImageViews();
   bindFlashMessages();
   bindFilter();
+  bindScrolled();
 });
 
 function bindFlashMessages() {
@@ -22,4 +23,21 @@ function bindFlashMessages() {
       }
     })
   }
+}
+
+function bindScrolled() {
+  var lastScrollPosition = 0;
+  var header = <HTMLDivElement>document.querySelector(".admin_header");
+  document.addEventListener("scroll", (event) => {
+    if (document.body.clientWidth < 1100) {
+      return;
+    }
+    var scrollPosition = window.scrollY;
+    if (scrollPosition > 0 /*&& scrollPosition > lastScrollPosition*/) {
+      header.classList.add("admin_header-scrolled");
+    } else {
+      header.classList.remove("admin_header-scrolled");
+    }
+    lastScrollPosition = scrollPosition;
+  });
 }

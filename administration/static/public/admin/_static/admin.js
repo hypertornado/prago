@@ -731,6 +731,7 @@ var RelationPicker = (function () {
         });
         this.pickerInput.addEventListener("focus", function () {
             _this.suggestionsEl.classList.remove("hidden");
+            _this.getSuggestions(_this.pickerInput.value);
         });
         this.pickerInput.addEventListener("keydown", this.suggestionInput.bind(this));
         this.getData();
@@ -1107,6 +1108,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindImageViews();
     bindFlashMessages();
     bindFilter();
+    bindScrolled();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");
@@ -1120,4 +1122,21 @@ function bindFlashMessages() {
             }
         });
     }
+}
+function bindScrolled() {
+    var lastScrollPosition = 0;
+    var header = document.querySelector(".admin_header");
+    document.addEventListener("scroll", function (event) {
+        if (document.body.clientWidth < 1100) {
+            return;
+        }
+        var scrollPosition = window.scrollY;
+        if (scrollPosition > 0) {
+            header.classList.add("admin_header-scrolled");
+        }
+        else {
+            header.classList.remove("admin_header-scrolled");
+        }
+        lastScrollPosition = scrollPosition;
+    });
 }

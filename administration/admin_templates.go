@@ -5,7 +5,7 @@ const adminTemplates = `
   {{template "admin_form" .form}}
 {{end}}{{define "admin_export"}}
   
-  <form method="POST" action="export">
+  <form method="POST" action="export" class="form">
 
     <h2>Fields</h2>
     {{range $field := .Fields}}
@@ -331,12 +331,18 @@ const adminTemplates = `
     {{template "admin_flash" .}}
     <div class="admin_header">
         <div class="admin_header_top">
-            <a href="{{.admin_header.UrlPrefix}}" class="admin_header_top_item admin_header_name">
+            <a href="{{.admin_header.UrlPrefix}}" class="
+                admin_header_top_item admin_header_name
+                {{if .admin_navigation_logo_selected}}admin_header_top_item-selected{{end}}
+            ">
                 {{message .locale "admin_admin"}} – {{.admin_header.Name}}
             </a>
             <div class="admin_header_top_item admin_header_top_space"></div>
             <div class="admin_header_top_item">{{.currentuser.Email}}</div>
-            <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_header_top_item">
+            <a href="{{.admin_header.UrlPrefix}}/user/settings" class="
+                admin_header_top_item
+                {{if .admin_navigation_settings_selected}}admin_header_top_item-selected{{end}}
+            ">
                 {{message .locale "admin_settings"}}
             </a>
             <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
@@ -655,11 +661,11 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_item_view_text"}}
-  {{.}}
+  {{- . -}}
 {{end}}
 
 {{define "admin_item_view_markdown"}}
-  {{markdown .}}
+  {{- markdown . -}}
 {{end}}
 
 {{define "admin_item_view_file"}}
@@ -3214,12 +3220,12 @@ ul {
   border-radius: 2px;
   max-width: 600px;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 100px;
   background-color: #fff;
   border-radius: 3px;
 }
 .admin_box_padding {
-  padding: 10px;
+  padding: 1px 10px;
 }
 .admin_box-wide {
   box-shadow: none;
@@ -3284,9 +3290,11 @@ ul {
   background: linear-gradient(#42a1ec, #0070c9);
   color: white;
   border-color: #1E90FF;
+  font-weight: bold;
 }
 .btn-primary:after {
   content: " >";
+  font-weight: normal;
 }
 .btn-primary:hover {
   background-color: #147bcd;
@@ -3334,7 +3342,10 @@ ul {
   border-width: 2px;
 }
 .form_label_text {
-  line-height: 2em;
+  font-size: 1.2rem;
+  line-height: 1.2em;
+  margin: 5px 0px;
+  display: inline-block;
 }
 .form_label-errors {
   color: #dd2e4f;
@@ -3351,7 +3362,7 @@ ul {
 }
 .inputzone {
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
-  background-color: #fafafa;
+  background-color: #fcfcfc;
   outline: none;
   border: 1px solid #ddd;
   padding: 8px 6px;
@@ -3365,7 +3376,7 @@ ul {
 }
 .input {
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
-  background-color: #fafafa;
+  background-color: #fcfcfc;
   outline: none;
   border: 1px solid #ddd;
   padding: 8px 6px;
@@ -3684,11 +3695,12 @@ select.admin_timestamp_minute {
   border-top: none;
 }
 .view_content {
-  margin-bottom: 10px;
-  padding: 5px 10px;
-  border-radius: 3px;
+  padding: 0px 10px 10px 10px;
   word-wrap: break-word;
   color: #888;
+}
+.view_content:empty {
+  display: none;
 }
 .admin_item_view_place {
   height: 200px;
@@ -3870,13 +3882,13 @@ td.admin_list_message {
 }
 .admin_preview {
   padding: 5px;
-  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
   text-decoration: none;
-  color: #444;
+  color: #888;
   display: inline-block;
   margin: 5px 0px;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  line-height: 1.4em;
   display: flex;
   align-items: flex-start;
 }
@@ -3898,12 +3910,13 @@ td.admin_list_message {
 }
 .admin_preview_description {
   font-size: .9rem;
-  line-height: 1.2em;
-  color: #888;
+  line-height: 1.4em;
+  color: #aaa;
 }
 .admin_item_relation {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 .admin_item_relation_change {
   margin: 10px 0px;
@@ -3953,15 +3966,18 @@ td.admin_list_message {
   background-color: rgba(64, 120, 192, 0.05);
 }
 .admin_header {
-  background: white;
   padding-bottom: 0px;
   position: relative;
   z-index: 2;
   line-height: 1.6em;
   flex-grow: 0;
   flex-shrink: 0;
+  background: white;
+  position: -webkit-sticky;
   position: sticky;
   top: 0px;
+}
+.admin_header-scrolled {
   box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
 }
 .admin_header_top_item {
@@ -3969,6 +3985,9 @@ td.admin_list_message {
   padding: 2px 5px;
   margin: 2px 2px;
   font-size: 1.1rem;
+}
+.admin_header_top_item-selected {
+  background-color: rgba(64, 120, 192, 0.05);
 }
 .admin_header a {
   text-decoration: none;
@@ -4752,6 +4771,7 @@ var RelationPicker = (function () {
         });
         this.pickerInput.addEventListener("focus", function () {
             _this.suggestionsEl.classList.remove("hidden");
+            _this.getSuggestions(_this.pickerInput.value);
         });
         this.pickerInput.addEventListener("keydown", this.suggestionInput.bind(this));
         this.getData();
@@ -5128,6 +5148,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindImageViews();
     bindFlashMessages();
     bindFilter();
+    bindScrolled();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");
@@ -5141,6 +5162,23 @@ function bindFlashMessages() {
             }
         });
     }
+}
+function bindScrolled() {
+    var lastScrollPosition = 0;
+    var header = document.querySelector(".admin_header");
+    document.addEventListener("scroll", function (event) {
+        if (document.body.clientWidth < 1100) {
+            return;
+        }
+        var scrollPosition = window.scrollY;
+        if (scrollPosition > 0) {
+            header.classList.add("admin_header-scrolled");
+        }
+        else {
+            header.classList.remove("admin_header-scrolled");
+        }
+        lastScrollPosition = scrollPosition;
+    });
 }
 `
 

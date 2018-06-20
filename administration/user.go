@@ -542,6 +542,7 @@ func initUserResource(resource *Resource) {
 		form := settingsForm(user)
 		AddCSRFToken(form, request)
 
+		request.SetData("admin_navigation_settings_selected", true)
 		renderNavigationPage(request, adminNavigationPage{
 			Navigation:   admin.getSettingsNavigation(user, "settings"),
 			PageTemplate: "admin_form",
@@ -563,6 +564,7 @@ func initUserResource(resource *Resource) {
 			return
 		}
 
+		request.SetData("admin_navigation_settings_selected", true)
 		renderNavigationPage(request, adminNavigationPage{
 			Navigation:   admin.getSettingsNavigation(user, "settings"),
 			PageTemplate: "admin_form",
@@ -571,6 +573,7 @@ func initUserResource(resource *Resource) {
 	})
 
 	changePasswordForm := func(request prago.Request) *Form {
+		request.SetData("admin_navigation_settings_selected", true)
 		user := GetUser(request)
 		locale := getLocale(request)
 		oldValidator := NewValidator(func(field *FormItem) bool {
