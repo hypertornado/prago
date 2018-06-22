@@ -1,14 +1,12 @@
 class Autoresize {
     constructor(el) {
-        return;
-    }
-    delayedResize() {
-        var self = this;
-        setTimeout(function () { self.resizeIt(); }, 0);
+        this.el = el;
+        this.el.addEventListener('input', this.resizeIt.bind(this));
+        this.resizeIt();
     }
     resizeIt() {
-        this.el.style.height = 'auto';
-        this.el.style.height = this.el.scrollHeight + 'px';
+        var height = this.el.scrollHeight + 2;
+        this.el.style.height = height + 'px';
     }
 }
 function DOMinsertChildAtIndex(parent, child, index) {
