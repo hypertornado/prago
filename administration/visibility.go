@@ -9,9 +9,9 @@ func defaultVisibilityFilter(resource Resource, user User, f Field) bool {
 	}
 
 	visible := true
-	if f.Name == "ID" {
+	/*if f.Name == "ID" {
 		visible = false
-	}
+	}*/
 
 	if f.Tags["prago-type"] == "order" {
 		visible = false
@@ -38,6 +38,9 @@ func defaultEditabilityFilter(resource Resource, user User, f Field) bool {
 	}
 
 	editable := true
+	if f.Name == "ID" {
+		editable = false
+	}
 	if f.Name == "CreatedAt" || f.Name == "UpdatedAt" {
 		editable = false
 	}

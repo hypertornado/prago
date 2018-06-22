@@ -75,7 +75,7 @@ class RelationPicker {
   showPreview(data: any) {
     this.previewContainer.textContent = "";
     this.input.value = data.ID;
-    var el = this.createPreview(data);
+    var el = this.createPreview(data, true);
     this.previewContainer.appendChild(el);
 
     this.previewContainer.classList.remove("hidden");
@@ -107,7 +107,7 @@ class RelationPicker {
         this.suggestionsEl.innerText = "";
         for (var i = 0; i < data.length; i++) {
           var item = data[i];
-          var el = this.createPreview(item);
+          var el = this.createPreview(item, false);
           el.classList.add("admin_item_relation_picker_suggestion")
           el.setAttribute("data-position", i + "");
           el.addEventListener("mousedown", this.suggestionClick.bind(this));
@@ -189,9 +189,13 @@ class RelationPicker {
     }
   }
 
-  createPreview(data: any): HTMLDivElement {
+  createPreview(data: any, anchor: boolean): HTMLDivElement {
     var ret = document.createElement("div");
+    if (anchor) {
+      ret = <any>document.createElement("a");
+    }
     ret.classList.add("admin_preview");
+    ret.setAttribute("href", data.URL);
 
     var image = document.createElement("div");
     image.classList.add("admin_preview_image");

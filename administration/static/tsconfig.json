@@ -4,6 +4,7 @@
         "removeComments": true,
         "preserveConstEnums": true,
         "sourceMap": false,
+        "target": "es6",
         "outFile": "public/admin/_static/admin.js"
     },
     "files": [

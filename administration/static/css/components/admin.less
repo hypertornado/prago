@@ -891,7 +891,7 @@ td.admin_list_message {
   line-height: 1.4em;
 
   display: flex;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .admin_preview_image {
@@ -905,6 +905,7 @@ td.admin_list_message {
   background-size: cover;
   background-position: center;
   background-color: #eee;
+  align-self: flex-start;
 }
 
 .admin_preview_right {
@@ -922,6 +923,10 @@ td.admin_list_message {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.admin_item_relation .admin_item_relation_preview {
+  flex-grow: 2;
 }
 
 .admin_item_relation_change {
