@@ -33,22 +33,22 @@ const defaultNewsletterTemplate = `
 
 <style type="text/css">
   body {
-  	background-color: #edfaff;
-  	font-style: normal;
-  	font-size: 15px;
-  	line-height: 1.5em;
-  	font-weight: 400;
-  	color: #01354a;
-  	font-family: Arial, sans-serif !important;
+    background-color: #edfaff;
+    font-style: normal;
+    font-size: 15px;
+    line-height: 1.5em;
+    font-weight: 400;
+    color: #01354a;
+    font-family: Arial, sans-serif !important;
   }
 
   .middle {
-  	background-color: #fff;
-  	padding: 10px;
+    background-color: #fff;
+    padding: 10px;
   }
 
   img {
-  	max-width: 100%;
+    max-width: 100%;
   }
 
   a {
@@ -60,29 +60,29 @@ const defaultNewsletterTemplate = `
   }
 
   .unsubscribe {
-  	color: #999;
-  	display: block;
-  	text-align: center;
-  	font-size: 11px;
+    color: #999;
+    display: block;
+    text-align: center;
+    font-size: 11px;
   }
 
   h1 {
-  	text-align: center;
-  	line-height: 1.2em;
+    text-align: center;
+    line-height: 1.2em;
   }
 
   hr {
-  	border-top: 1px solid #009ee0;
-  	border-bottom: none;
+    border-top: 1px solid #009ee0;
+    border-bottom: none;
   }
 
   table {
-  	margin-top: 5px;
+    margin-top: 5px;
   }
 
   td {
-  	padding: 0px 5px;
-  	vertical-align: top;
+    padding: 0px 5px;
+    vertical-align: top;
   }
 
 </style>
@@ -91,17 +91,17 @@ const defaultNewsletterTemplate = `
 <body>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0"><tr><td width="100%" align="center">
-	<table width="450" border="0" align="center" cellpadding="0" cellspacing="0">
-		<tr><td width="450" align="left" class="middle">
-        	<div class="middle_header">
-        		<a href="{{.baseUrl}}/?utm_source=newsletter&utm_medium=prago&utm_campaign={{.id}}">{{.site}}</a>
-        		<h1>{{.title}}</h1>
-        	</div>
-        	{{.content}}
+  <table width="450" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr><td width="450" align="left" class="middle">
+          <div class="middle_header">
+            <a href="{{.baseUrl}}/?utm_source=newsletter&utm_medium=prago&utm_campaign={{.id}}">{{.site}}</a>
+            <h1>{{.title}}</h1>
+          </div>
+          {{.content}}
 
-        	<a href="{{.unsubscribe}}" class="unsubscribe">Odhlásit odběr novinek</a>
+          <a href="{{.unsubscribe}}" class="unsubscribe">Odhlásit odběr novinek</a>
     </td></tr>
-	</table>
+  </table>
 </td></tr></table>
 
 </body>
