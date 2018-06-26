@@ -28,7 +28,7 @@
 {{end}}
 
 {{define "admin_navigation_page"}}
-    {{tmpl "admin_navigation" .admin_page.Navigation}}
+    {{template "admin_navigation" .admin_page.Navigation}}
     {{tmpl .admin_page.PageTemplate .admin_page.PageData}}
   </div>
 {{end}}

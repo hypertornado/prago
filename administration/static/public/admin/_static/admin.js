@@ -413,18 +413,6 @@ class List {
         }, 200);
     }
 }
-const getParams = (query) => {
-    if (!query) {
-        return {};
-    }
-    return (/^[?#]/.test(query) ? query.slice(1) : query)
-        .split('&')
-        .reduce((params, param) => {
-        let [key, value] = param.split('=');
-        params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
-        return params;
-    }, {});
-};
 function bindOrder() {
     function orderTable(el) {
         var rows = el.getElementsByClassName("admin_table_row");
@@ -952,7 +940,7 @@ function bindPlaces() {
         var mapEl = document.createElement("div");
         mapEl.classList.add("admin_place_map");
         el.appendChild(mapEl);
-        var position = { lat: 50.0796284, lng: 14.4292577 };
+        var position = { lat: 0, lng: 0 };
         var zoom = 1;
         var visible = false;
         var input = el.getElementsByTagName("input")[0];

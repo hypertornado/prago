@@ -195,6 +195,10 @@ func bindRelationAPI(admin *Administration) {
 
 		filter := "%" + q + "%"
 		for _, v := range []string{"name", "description"} {
+			field := resource.fieldMap[v]
+			if field == nil {
+				continue
+			}
 			var items interface{}
 			resource.newArrayOfItems(&items)
 			err := admin.Query().Limit(5).Where(v+" LIKE ?", filter).Get(items)

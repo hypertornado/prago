@@ -8,7 +8,6 @@ function bindForm() {
 //TODO: does not work with image picker and other hidden elements
 class Form {
   dirty: boolean = false;
-
   constructor(el: HTMLFormElement) {
     el.addEventListener("submit", () => {
       this.dirty = false;

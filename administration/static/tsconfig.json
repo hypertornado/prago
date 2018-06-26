@@ -20,7 +20,6 @@
         "js/relations.ts",
         "js/placesview.ts",
         "js/places.ts",
-        "js/delete-action.ts",
         "js/form.ts",
         "js/filter.ts",
         "js/load.ts"

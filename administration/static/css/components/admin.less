@@ -199,7 +199,7 @@ ul {
   background: linear-gradient(#42a1ec, #0070c9);
   color: white;
   border-color: #1E90FF;
-  font-weight: bold;
+  font-weight: 500;
 }
 
 .btn-primary:after {
@@ -374,8 +374,12 @@ select.admin_table_filter_item {
 }
 
 .admin_table_row:hover {
-  background-color: @baseColorBackground;
+  background-color: @baseColorBackgroundLighter;
   cursor: pointer;
+}
+
+.admin_table_row:active {
+  background-color: @baseColorBackground;
 }
 
 .admin_table_row td {

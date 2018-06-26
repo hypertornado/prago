@@ -6,7 +6,7 @@ function bindPlaces() {
     mapEl.classList.add("admin_place_map");
     el.appendChild(mapEl);
 
-    var position = {lat: 50.0796284, lng: 14.4292577};
+    var position = {lat: 0, lng: 0};
     var zoom = 1;
     var visible = false;
 

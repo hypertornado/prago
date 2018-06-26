@@ -188,8 +188,6 @@ class List {
     for (var i = 0; i < this.filterInputs.length; i++) {
       var input: HTMLInputElement = <HTMLInputElement>this.filterInputs[i];
       input.addEventListener("input", this.inputListener.bind(this));
-      //input.addEventListener("change", this.inputListener.bind(this));
-      //input.addEventListener("keyup", this.inputListener.bind(this));
     }
     this.inputPeriodicListener();
   }
@@ -244,17 +242,3 @@ class List {
     }, 200);
   }
 }
-
-const getParams = (query: string) => {
-  if (!query) {
-    return { };
-  }
-
-  return (/^[?#]/.test(query) ? query.slice(1) : query)
-    .split('&')
-    .reduce((params: any, param: any) => {
-      let [ key, value ] = param.split('=');
-      params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
-      return params;
-    }, { });
-};

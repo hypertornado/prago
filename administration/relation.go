@@ -3,6 +3,7 @@ package administration
 import (
 	"fmt"
 	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/administration/messages"
 	"github.com/hypertornado/prago/utils"
 	"net/url"
 	"reflect"
@@ -181,10 +182,43 @@ func (resource *Resource) bindRelationActions(r relation) {
 		URL:        "add-" + r.resource.ID,
 		Permission: r.resource.CanView,
 		Handler: func(resource Resource, request prago.Request, user User) {
-			values := make(url.Values)
+			relatedResource := *r.resource
+
+			id, err := strconv.Atoi(request.Params().Get("id"))
+			must(err)
+			var item interface{}
+			resource.newItem(&item)
+			err = resource.Admin.Query().WhereIs("id", int64(id)).Get(item)
+			if err != nil {
+				if err == ErrItemNotFound {
+					render404(request)
+					return
+				}
+				panic(err)
+			}
+
+			var values = make(url.Values)
 			values.Set(r.field, request.Params().Get("id"))
-			request.Redirect(r.resource.GetURL("new") + "?" + values.Encode())
+
+			var newItem interface{}
+			relatedResource.newItem(&newItem)
+			relatedResource.bindData(&newItem, user, values, defaultEditabilityFilter)
+			form, err := relatedResource.getForm(newItem, user)
+			must(err)
+
+			form.Classes = append(form.Classes, "form_leavealert")
+			form.Action = "../" + r.resource.ID
+			form.Action = resource.Admin.Prefix + "/" + r.resource.ID
+			form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_create"))
+			AddCSRFToken(form, request)
+
+			renderNavigationPage(request, adminNavigationPage{
+				Navigation:   resource.Admin.getItemNavigation(resource, user, item, "add-"+r.resource.ID),
+				PageTemplate: "admin_form",
+				PageData:     form,
+			})
 		},
 	}
+
 	resource.AddItemAction(addAction)
 }

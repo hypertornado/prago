@@ -33,7 +33,7 @@ function bindScrolled() {
       return;
     }
     var scrollPosition = window.scrollY;
-    if (scrollPosition > 0 /*&& scrollPosition > lastScrollPosition*/) {
+    if (scrollPosition > 0) {
       header.classList.add("admin_header-scrolled");
     } else {
       header.classList.remove("admin_header-scrolled");

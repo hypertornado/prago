@@ -2461,7 +2461,7 @@ ul {
   background: linear-gradient(#42a1ec, #0070c9);
   color: white;
   border-color: #1E90FF;
-  font-weight: bold;
+  font-weight: 500;
 }
 .btn-primary:after {
   content: " >";
@@ -2625,8 +2625,11 @@ select.admin_table_filter_item {
   background-color: #fafafa;
 }
 .admin_table_row:hover {
-  background-color: rgba(64, 120, 192, 0.1);
+  background-color: rgba(64, 120, 192, 0.05);
   cursor: pointer;
+}
+.admin_table_row:active {
+  background-color: rgba(64, 120, 192, 0.1);
 }
 .admin_table_row td {
   padding: 2px 5px;
