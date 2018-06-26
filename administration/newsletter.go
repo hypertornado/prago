@@ -107,8 +107,6 @@ const defaultNewsletterTemplate = `
 </html>
 `
 
-var nmMiddleware *NewsletterMiddleware
-
 type NewsletterMiddleware struct {
 	Name            string
 	baseUrl         string
@@ -123,12 +121,17 @@ type NewsletterMiddleware struct {
 	controller      *prago.Controller
 }
 
-func InitNewsletterHelper(app *prago.App, nm NewsletterMiddleware) {
-	if nmMiddleware != nil {
+func (admin *Administration) InitNewsletterHelper(nm NewsletterMiddleware) {
+	/*if nmMiddleware != nil {
 		app.Log().Println("cant initialize more then one instance of newsletter")
 		return
-	}
-	nmMiddleware = &nm
+	}*/
+
+	admin.Newsletter = &nm
+
+	app := nm.Admin.App
+
+	nmMiddleware := &nm
 	nmMiddleware.controller = app.MainController().SubController()
 	nmMiddleware.baseUrl = app.Config.GetString("baseUrl")
 
@@ -320,9 +323,12 @@ type Newsletter struct {
 }
 
 func initNewsletterResource(resource *Resource) {
+	nmMiddleware := resource.Admin.Newsletter
+
 	a := resource.Admin
 	resource.ActivityLog = true
-	resource.CanView = nmMiddleware.Authenticatizer
+
+	resource.CanView = resource.Admin.Newsletter.Authenticatizer
 
 	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
 		ret, err := a.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&NewsletterPersons{})

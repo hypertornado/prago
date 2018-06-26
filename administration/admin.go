@@ -40,6 +40,8 @@ type Administration struct {
 	sendgridClient *sendgrid.SGClient
 	noReplyEmail   string
 
+	Newsletter *NewsletterMiddleware
+
 	fieldTypes  map[string]FieldType
 	javascripts []string
 	css         []string
