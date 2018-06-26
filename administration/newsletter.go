@@ -108,24 +108,23 @@ const defaultNewsletterTemplate = `
 `
 
 type NewsletterMiddleware struct {
-	Name    string
-	baseUrl string
-	//Admin           *Administration
-	SenderEmail     string
-	SenderName      string
-	Randomness      string
-	SendgridKey     string
+	Name        string
+	baseUrl     string
+	SenderEmail string
+	SenderName  string
+	//Randomness  string
+	//SendgridKey     string
 	Renderer        NewsletterRenderer
 	Authenticatizer Permission
-	sendgridClient  *sendgrid.SGClient
 	controller      *prago.Controller
+
+	admin      *Administration
+	randomness string
 }
 
 func (admin *Administration) InitNewsletterHelper(nm NewsletterMiddleware) {
-	/*if nmMiddleware != nil {
-		app.Log().Println("cant initialize more then one instance of newsletter")
-		return
-	}*/
+	nm.admin = admin
+	nm.randomness = admin.App.Config.GetString("random")
 
 	admin.Newsletter = &nm
 
@@ -134,10 +133,6 @@ func (admin *Administration) InitNewsletterHelper(nm NewsletterMiddleware) {
 	nmMiddleware := &nm
 	nmMiddleware.controller = app.MainController().SubController()
 	nmMiddleware.baseUrl = app.Config.GetString("baseUrl")
-
-	nmMiddleware.sendgridClient = sendgrid.NewSendGridClientWithApiKey(
-		app.Config.GetString("sendgridApi"),
-	)
 
 	nmMiddleware.controller.AddBeforeAction(func(request prago.Request) {
 		request.SetData("site", nmMiddleware.Name)
@@ -163,7 +158,7 @@ func (admin *Administration) InitNewsletterHelper(nm NewsletterMiddleware) {
 		var message string
 		err := admin.AddEmail(email, name, false)
 		if err == nil {
-			err := nmMiddleware.sendConfirmEmail(name, email)
+			err := admin.sendConfirmEmail(name, email)
 			if err != nil {
 				panic(err)
 			}
@@ -238,20 +233,20 @@ func (admin *Administration) InitNewsletterHelper(nm NewsletterMiddleware) {
 	admin.CreateResource(NewsletterPersons{}, initNewsletterPersonsResource)
 }
 
-func (nm NewsletterMiddleware) sendConfirmEmail(name, email string) error {
+func (admin Administration) sendConfirmEmail(name, email string) error {
 	message := sendgrid.NewMail()
 
 	address := mail.Address{
-		Name:    nm.SenderName,
-		Address: nm.SenderEmail,
+		Name:    admin.Newsletter.SenderName,
+		Address: admin.Newsletter.SenderEmail,
 	}
 
 	message.SetFromEmail(&address)
 	message.AddTo(email)
 	message.AddToName(name)
-	message.SetSubject("Potvrďte prosím odběr newsletteru " + nm.Name)
-	message.SetText(nm.confirmEmailBody(name, email))
-	return nm.sendgridClient.Send(message)
+	message.SetSubject("Potvrďte prosím odběr newsletteru " + admin.Newsletter.Name)
+	message.SetText(admin.Newsletter.confirmEmailBody(name, email))
+	return admin.sendgridClient.Send(message)
 }
 
 func (nm NewsletterMiddleware) confirmEmailBody(name, email string) string {
@@ -283,13 +278,14 @@ func (nm NewsletterMiddleware) unsubscribeUrl(email string) string {
 
 func (nm NewsletterMiddleware) secret(email string) string {
 	h := md5.New()
-	io.WriteString(h, fmt.Sprintf("secret%s%s", nm.Randomness, email))
+
+	io.WriteString(h, fmt.Sprintf("secret%s%s", nm.randomness, email))
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 func (nm NewsletterMiddleware) CSFR(request prago.Request) string {
 	h := md5.New()
-	io.WriteString(h, fmt.Sprintf("%s%s", nm.Randomness, request.Request().UserAgent()))
+	io.WriteString(h, fmt.Sprintf("%s%s", nm.randomness, request.Request().UserAgent()))
 	return fmt.Sprintf("%x", h.Sum(nil))
 
 }
@@ -323,15 +319,11 @@ type Newsletter struct {
 }
 
 func initNewsletterResource(resource *Resource) {
-	nmMiddleware := resource.Admin.Newsletter
-
-	a := resource.Admin
 	resource.ActivityLog = true
-
 	resource.CanView = resource.Admin.Newsletter.Authenticatizer
 
 	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
-		ret, err := a.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&NewsletterPersons{})
+		ret, err := resource.Admin.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&NewsletterPersons{})
 		if err != nil {
 			panic(err)
 		}
@@ -348,7 +340,7 @@ func initNewsletterResource(resource *Resource) {
 				panic(err)
 			}
 
-			body, err := nmMiddleware.GetBody(newsletter, "")
+			body, err := resource.Admin.Newsletter.GetBody(newsletter, "")
 			if err != nil {
 				panic(err)
 			}
@@ -368,7 +360,7 @@ func initNewsletterResource(resource *Resource) {
 			must(resource.Admin.Save(&newsletter))
 
 			emails := parseEmails(request.Params().Get("emails"))
-			nmMiddleware.SendEmails(newsletter, emails)
+			resource.Admin.sendEmails(newsletter, emails)
 			AddFlashMessage(request, "Náhled newsletteru odeslán.")
 			request.Redirect(resource.GetURL(""))
 		},
@@ -391,7 +383,7 @@ func initNewsletterResource(resource *Resource) {
 				panic(err)
 			}
 
-			go nmMiddleware.SendEmails(newsletter, recipients)
+			go resource.Admin.sendEmails(newsletter, recipients)
 
 			request.SetData("recipients", recipients)
 			request.SetData("recipients_count", len(recipients))
@@ -455,22 +447,22 @@ func (admin *Administration) getNewsletterRecipients() ([]string, error) {
 	return ret, nil
 }
 
-func (nm *NewsletterMiddleware) SendEmails(n Newsletter, emails []string) error {
+func (admin *Administration) sendEmails(n Newsletter, emails []string) error {
 	for _, v := range emails {
-		body, err := nm.GetBody(n, v)
+		body, err := admin.Newsletter.GetBody(n, v)
 		if err == nil {
 			message := sendgrid.NewMail()
 
 			address := mail.Address{
-				Name:    nm.SenderName,
-				Address: nm.SenderEmail,
+				Name:    admin.Newsletter.SenderName,
+				Address: admin.Newsletter.SenderEmail,
 			}
 			message.SetFromEmail(&address)
 
 			message.AddTo(v)
 			message.SetSubject(n.Name)
 			message.SetHTML(body)
-			err = nm.sendgridClient.Send(message)
+			err = admin.sendgridClient.Send(message)
 		}
 		if err != nil {
 			fmt.Println("ERROR", err.Error())

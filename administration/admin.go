@@ -123,7 +123,6 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		if err != nil {
 			request.Redirect(admin.GetURL("user/login"))
 			return
-
 		}
 
 		randomness := admin.App.Config.GetString("random")
