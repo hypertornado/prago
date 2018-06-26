@@ -108,46 +108,36 @@ const defaultNewsletterTemplate = `
 `
 
 type NewsletterMiddleware struct {
-	Name        string
-	baseUrl     string
-	SenderEmail string
-	SenderName  string
-	//Randomness  string
-	//SendgridKey     string
-	Renderer        NewsletterRenderer
-	Authenticatizer Permission
-	controller      *prago.Controller
-
+	baseUrl    string
+	renderer   NewsletterRenderer
 	admin      *Administration
 	randomness string
 }
 
-func (admin *Administration) InitNewsletterHelper(nm NewsletterMiddleware) {
-	nm.admin = admin
-	nm.randomness = admin.App.Config.GetString("random")
+func (admin *Administration) InitNewsletter(renderer NewsletterRenderer) {
+	admin.Newsletter = &NewsletterMiddleware{
+		baseUrl:  admin.App.Config.GetString("baseUrl"),
+		renderer: renderer,
 
-	admin.Newsletter = &nm
+		admin:      admin,
+		randomness: admin.App.Config.GetString("random"),
+	}
 
-	app := admin.App
-
-	nmMiddleware := &nm
-	nmMiddleware.controller = app.MainController().SubController()
-	nmMiddleware.baseUrl = app.Config.GetString("baseUrl")
-
-	nmMiddleware.controller.AddBeforeAction(func(request prago.Request) {
-		request.SetData("site", nmMiddleware.Name)
+	controller := admin.App.MainController().SubController()
+	controller.AddBeforeAction(func(request prago.Request) {
+		request.SetData("site", admin.HumanName)
 	})
 
-	nmMiddleware.controller.Get("/newsletter-subscribe", func(request prago.Request) {
+	controller.Get("/newsletter-subscribe", func(request prago.Request) {
 		request.SetData("title", "Přihlásit se k odběru newsletteru")
-		request.SetData("csrf", nmMiddleware.CSFR(request))
+		request.SetData("csrf", admin.Newsletter.CSFR(request))
 		request.SetData("yield", "newsletter_subscribe")
 		request.SetData("show_back_button", true)
 		request.RenderView("newsletter_layout")
 	})
 
-	nmMiddleware.controller.Post("/newsletter-subscribe", func(request prago.Request) {
-		if nmMiddleware.CSFR(request) != request.Params().Get("csrf") {
+	controller.Post("/newsletter-subscribe", func(request prago.Request) {
+		if admin.Newsletter.CSFR(request) != request.Params().Get("csrf") {
 			panic("wrong csrf")
 		}
 
@@ -177,11 +167,11 @@ func (admin *Administration) InitNewsletterHelper(nm NewsletterMiddleware) {
 		request.RenderView("newsletter_layout")
 	})
 
-	nmMiddleware.controller.Get("/newsletter-confirm", func(request prago.Request) {
+	controller.Get("/newsletter-confirm", func(request prago.Request) {
 		email := request.Params().Get("email")
 		secret := request.Params().Get("secret")
 
-		if nmMiddleware.secret(email) != secret {
+		if admin.Newsletter.secret(email) != secret {
 			panic("wrong secret")
 		}
 
@@ -203,11 +193,11 @@ func (admin *Administration) InitNewsletterHelper(nm NewsletterMiddleware) {
 		request.RenderView("newsletter_layout")
 	})
 
-	nmMiddleware.controller.Get("/newsletter-unsubscribe", func(request prago.Request) {
+	controller.Get("/newsletter-unsubscribe", func(request prago.Request) {
 		email := request.Params().Get("email")
 		secret := request.Params().Get("secret")
 
-		if nmMiddleware.secret(email) != secret {
+		if admin.Newsletter.secret(email) != secret {
 			panic("wrong secret")
 		}
 
@@ -229,22 +219,25 @@ func (admin *Administration) InitNewsletterHelper(nm NewsletterMiddleware) {
 		request.RenderView("newsletter_layout")
 	})
 
-	admin.CreateResource(Newsletter{}, initNewsletterResource)
+	newsletterResource := admin.CreateResource(Newsletter{}, initNewsletterResource)
+	newsletterSectionResource := admin.CreateResource(NewsletterSection{}, initNewsletterSection)
 	admin.CreateResource(NewsletterPersons{}, initNewsletterPersonsResource)
+
+	newsletterResource.AddRelation(newsletterSectionResource, "Newsletter", Unlocalized("Přidat sekci"))
 }
 
 func (admin Administration) sendConfirmEmail(name, email string) error {
 	message := sendgrid.NewMail()
 
 	address := mail.Address{
-		Name:    admin.Newsletter.SenderName,
-		Address: admin.Newsletter.SenderEmail,
+		Name:    admin.HumanName,
+		Address: admin.noReplyEmail,
 	}
 
 	message.SetFromEmail(&address)
 	message.AddTo(email)
 	message.AddToName(name)
-	message.SetSubject("Potvrďte prosím odběr newsletteru " + admin.Newsletter.Name)
+	message.SetSubject("Potvrďte prosím odběr newsletteru " + admin.HumanName)
 	message.SetText(admin.Newsletter.confirmEmailBody(name, email))
 	return admin.sendgridClient.Send(message)
 }
@@ -260,7 +253,7 @@ func (nm NewsletterMiddleware) confirmEmailBody(name, email string) string {
 	)
 
 	return fmt.Sprintf("Potvrďte prosím odběr newsletteru z webu %s kliknutím na adresu:\n\n%s",
-		nm.Name,
+		nm.admin.HumanName,
 		u,
 	)
 }
@@ -320,7 +313,7 @@ type Newsletter struct {
 
 func initNewsletterResource(resource *Resource) {
 	resource.ActivityLog = true
-	resource.CanView = resource.Admin.Newsletter.Authenticatizer
+	resource.CanView = "newsletter"
 
 	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
 		ret, err := resource.Admin.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&NewsletterPersons{})
@@ -392,6 +385,31 @@ func initNewsletterResource(resource *Resource) {
 		},
 	}
 
+	doDuplicateAction := Action{
+		URL:    "duplicate",
+		Method: "post",
+		Handler: func(resource Resource, request prago.Request, user User) {
+			var newsletter Newsletter
+			must(resource.Admin.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
+
+			var sections []*NewsletterSection
+			err := resource.Admin.Query().WhereIs("newsletter", newsletter.ID).Order("orderposition").Get(&sections)
+
+			newsletter.ID = 0
+			must(resource.Admin.Create(&newsletter))
+
+			if err == nil {
+				for _, v := range sections {
+					section := *v
+					section.ID = 0
+					section.Newsletter = newsletter.ID
+					must(resource.Admin.Create(&section))
+				}
+			}
+			request.Redirect(resource.GetItemURL(&newsletter, "edit"))
+		},
+	}
+
 	resource.AddItemAction(previewAction)
 	resource.AddItemAction(
 		CreateNavigationalItemAction(
@@ -417,6 +435,15 @@ func initNewsletterResource(resource *Resource) {
 			}
 		},
 	))
+	resource.AddItemAction(CreateNavigationalItemAction(
+		"duplicate",
+		func(string) string { return "Duplikovat" },
+		"newsletter_duplicate",
+		func(Resource, prago.Request, User) interface{} {
+			return nil
+		},
+	))
+	resource.AddItemAction(doDuplicateAction)
 	resource.AddItemAction(doSendAction)
 }
 
@@ -454,8 +481,8 @@ func (admin *Administration) sendEmails(n Newsletter, emails []string) error {
 			message := sendgrid.NewMail()
 
 			address := mail.Address{
-				Name:    admin.Newsletter.SenderName,
-				Address: admin.Newsletter.SenderEmail,
+				Name:    admin.HumanName,
+				Address: admin.noReplyEmail,
 			}
 			message.SetFromEmail(&address)
 
@@ -476,15 +503,16 @@ func (nm *NewsletterMiddleware) GetBody(n Newsletter, email string) (string, err
 	params := map[string]interface{}{
 		"id":          n.ID,
 		"baseUrl":     nm.baseUrl,
-		"site":        nm.Name,
+		"site":        nm.admin.HumanName,
 		"title":       n.Name,
 		"unsubscribe": nm.unsubscribeUrl(email),
 		"content":     template.HTML(content),
 		"preview":     utils.CropMarkdown(n.Body, 200),
+		"sections":    nm.getNewsletterSectionData(n),
 	}
 
-	if nm.Renderer != nil {
-		return nm.Renderer(params)
+	if nm.renderer != nil {
+		return nm.renderer(params)
 	} else {
 		return defaultNewsletterRenderer(params)
 	}
@@ -513,6 +541,23 @@ func defaultNewsletterRenderer(params map[string]interface{}) (string, error) {
 	return ret, nil
 }
 
+type NewsletterSection struct {
+	ID            int64
+	Newsletter    int64  `prago-type:"relation" prago-preview:"true"`
+	Name          string `prago-description:"Jméno sekce"`
+	Text          string `prago-type:"text"`
+	Button        string `prago-description:"Tlačítko"`
+	URL           string `prago-description:"Odkaz"`
+	Image         string `prago-type:"image" prago-preview:"true"`
+	OrderPosition int64  `prago-type:"order"`
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
+func initNewsletterSection(resource *Resource) {
+	resource.CanView = "newsletter"
+}
+
 type NewsletterPersons struct {
 	ID           int64
 	Name         string `prago-preview:"true" prago-description:"Jméno příjemce"`
@@ -526,4 +571,49 @@ type NewsletterPersons struct {
 func initNewsletterPersonsResource(resource *Resource) {
 	resource.CanView = "sysadmin"
 	resource.ActivityLog = true
+}
+
+type NewsletterSectionData struct {
+	Name   string
+	Text   string
+	Button string
+	URL    string
+	Image  string
+}
+
+func (nm *NewsletterMiddleware) getNewsletterSectionData(n Newsletter) []NewsletterSectionData {
+	var sections []*NewsletterSection
+	err := nm.admin.Query().WhereIs("newsletter", n.ID).Order("orderposition").Get(&sections)
+	if err != nil {
+		return nil
+	}
+
+	var ret []NewsletterSectionData
+
+	for _, v := range sections {
+		button := "Zjistit více"
+		if v.Button != "" {
+			button = v.Button
+		}
+
+		url := nm.baseUrl
+		if v.URL != "" {
+			url = v.URL
+		}
+
+		image := ""
+		files := nm.admin.GetFiles(v.Image)
+		if len(files) > 0 {
+			image = files[0].GetMedium()
+		}
+
+		ret = append(ret, NewsletterSectionData{
+			Name:   v.Name,
+			Text:   v.Text,
+			Button: button,
+			URL:    url,
+			Image:  image,
+		})
+	}
+	return ret
 }
