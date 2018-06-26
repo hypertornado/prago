@@ -3,8 +3,20 @@ package administration
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hypertornado/prago/administration/messages"
 	"time"
 )
+
+type activityLog struct {
+	ID            int64
+	ResourceName  string    `prago-preview:"true"`
+	ItemID        int64     `prago-preview:"true"`
+	ActionType    string    `prago-preview:"true"`
+	User          int64     `prago-type:"relation" prago-preview:"true"`
+	ContentBefore string    `prago-type:"text"`
+	ContentAfter  string    `prago-type:"text"`
+	CreatedAt     time.Time `prago-preview:"true"`
+}
 
 type historyView struct {
 	Items []historyItemView
@@ -21,15 +33,12 @@ type historyItemView struct {
 	CreatedAt   string
 }
 
-func (admin *Administration) getHistory(resource *Resource, user int64, itemID int64) historyView {
+func (admin *Administration) getHistory(resource *Resource, itemID int64) historyView {
 	ret := historyView{}
 
 	q := admin.Query()
 	if resource != nil {
 		q.WhereIs("ResourceName", resource.ID)
-	}
-	if user < 0 {
-		q.WhereIs("User", user)
 	}
 	if itemID > 0 {
 		q.WhereIs("ItemID", itemID)
@@ -38,7 +47,9 @@ func (admin *Administration) getHistory(resource *Resource, user int64, itemID i
 	q.OrderDesc("ID")
 
 	var items []*activityLog
+	Debug = true
 	must(q.Get(&items))
+	Debug = false
 
 	for _, v := range items {
 		var username, userurl string
@@ -67,20 +78,10 @@ func (admin *Administration) getHistory(resource *Resource, user int64, itemID i
 	return ret
 }
 
-type activityLog struct {
-	ID            int64
-	ResourceName  string    `prago-preview:"true"`
-	ItemID        int64     `prago-preview:"true"`
-	ActionType    string    `prago-preview:"true"`
-	User          int64     `prago-type:"relation" prago-preview:"true"`
-	ContentBefore string    `prago-type:"text"`
-	ContentAfter  string    `prago-type:"text"`
-	CreatedAt     time.Time `prago-preview:"true"`
-}
-
 func initActivityLog(resource *Resource) {
 	resource.CanView = permissionSysadmin
 	resource.OrderDesc = true
+	resource.HumanName = messages.Messages.GetNameFunction("admin_history")
 }
 
 func (admin Administration) createNewActivityLog(resource Resource, user User, item interface{}) error {

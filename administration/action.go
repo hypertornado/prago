@@ -230,7 +230,7 @@ func actionHistory(permission Permission) Action {
 			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   resource.Admin.getResourceNavigation(resource, user, "history"),
 				PageTemplate: "admin_history",
-				PageData:     resource.Admin.getHistory(&resource, 0, 0),
+				PageData:     resource.Admin.getHistory(&resource, 0),
 			})
 		},
 	}
@@ -252,7 +252,7 @@ func actionItemHistory(permission Permission) Action {
 			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   resource.Admin.getItemNavigation(resource, user, item, "history"),
 				PageTemplate: "admin_history",
-				PageData:     resource.Admin.getHistory(&resource, 0, int64(id)),
+				PageData:     resource.Admin.getHistory(&resource, int64(id)),
 			})
 		},
 	}
