@@ -108,9 +108,9 @@ const defaultNewsletterTemplate = `
 `
 
 type NewsletterMiddleware struct {
-	Name            string
-	baseUrl         string
-	Admin           *Administration
+	Name    string
+	baseUrl string
+	//Admin           *Administration
 	SenderEmail     string
 	SenderName      string
 	Randomness      string
@@ -129,7 +129,7 @@ func (admin *Administration) InitNewsletterHelper(nm NewsletterMiddleware) {
 
 	admin.Newsletter = &nm
 
-	app := nm.Admin.App
+	app := admin.App
 
 	nmMiddleware := &nm
 	nmMiddleware.controller = app.MainController().SubController()
@@ -161,7 +161,7 @@ func (admin *Administration) InitNewsletterHelper(nm NewsletterMiddleware) {
 		name := request.Params().Get("name")
 
 		var message string
-		err := nmMiddleware.AddEmail(email, name, false)
+		err := admin.AddEmail(email, name, false)
 		if err == nil {
 			err := nmMiddleware.sendConfirmEmail(name, email)
 			if err != nil {
@@ -191,13 +191,13 @@ func (admin *Administration) InitNewsletterHelper(nm NewsletterMiddleware) {
 		}
 
 		var person NewsletterPersons
-		err := nmMiddleware.Admin.Query().WhereIs("email", email).Get(&person)
+		err := admin.Query().WhereIs("email", email).Get(&person)
 		if err != nil {
 			panic("can't find user")
 		}
 
 		person.Confirmed = true
-		err = nmMiddleware.Admin.Save(&person)
+		err = admin.Save(&person)
 		if err != nil {
 			panic(err)
 		}
@@ -217,13 +217,13 @@ func (admin *Administration) InitNewsletterHelper(nm NewsletterMiddleware) {
 		}
 
 		var person NewsletterPersons
-		err := nmMiddleware.Admin.Query().WhereIs("email", email).Get(&person)
+		err := admin.Query().WhereIs("email", email).Get(&person)
 		if err != nil {
 			panic("can't find user")
 		}
 
 		person.Unsubscribed = true
-		err = nmMiddleware.Admin.Save(&person)
+		err = admin.Save(&person)
 		if err != nil {
 			panic(err)
 		}
@@ -234,8 +234,8 @@ func (admin *Administration) InitNewsletterHelper(nm NewsletterMiddleware) {
 		request.RenderView("newsletter_layout")
 	})
 
-	nmMiddleware.Admin.CreateResource(Newsletter{}, initNewsletterResource)
-	nmMiddleware.Admin.CreateResource(NewsletterPersons{}, initNewsletterPersonsResource)
+	admin.CreateResource(Newsletter{}, initNewsletterResource)
+	admin.CreateResource(NewsletterPersons{}, initNewsletterPersonsResource)
 }
 
 func (nm NewsletterMiddleware) sendConfirmEmail(name, email string) error {
@@ -294,12 +294,12 @@ func (nm NewsletterMiddleware) CSFR(request prago.Request) string {
 
 }
 
-func (nm NewsletterMiddleware) AddEmail(email, name string, confirm bool) error {
+func (admin *Administration) AddEmail(email, name string, confirm bool) error {
 	if !strings.Contains(email, "@") {
 		return errors.New("Wrong email format")
 	}
 
-	err := nm.Admin.Query().WhereIs("email", email).Get(&NewsletterPersons{})
+	err := admin.Query().WhereIs("email", email).Get(&NewsletterPersons{})
 	if err == nil {
 		return ErrEmailAlreadyInList
 	}
@@ -309,7 +309,7 @@ func (nm NewsletterMiddleware) AddEmail(email, name string, confirm bool) error 
 		Email:     email,
 		Confirmed: confirm,
 	}
-	return nm.Admin.Create(&person)
+	return admin.Create(&person)
 }
 
 type Newsletter struct {
@@ -386,7 +386,7 @@ func initNewsletterResource(resource *Resource) {
 			newsletter.SentAt = time.Now()
 			resource.Admin.Save(&newsletter)
 
-			recipients, err := nmMiddleware.GetRecipients()
+			recipients, err := resource.Admin.getNewsletterRecipients()
 			if err != nil {
 				panic(err)
 			}
@@ -415,7 +415,7 @@ func initNewsletterResource(resource *Resource) {
 		func(string) string { return "Odeslat" },
 		"newsletter_send",
 		func(Resource, prago.Request, User) interface{} {
-			recipients, err := nmMiddleware.GetRecipients()
+			recipients, err := resource.Admin.getNewsletterRecipients()
 			if err != nil {
 				panic(err)
 			}
@@ -440,11 +440,11 @@ func parseEmails(emails string) []string {
 	return ret
 }
 
-func (nm *NewsletterMiddleware) GetRecipients() ([]string, error) {
+func (admin *Administration) getNewsletterRecipients() ([]string, error) {
 	ret := []string{}
 
 	var persons []*NewsletterPersons
-	err := nm.Admin.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Get(&persons)
+	err := admin.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Get(&persons)
 	if err != nil {
 		return nil, err
 	}
