@@ -12,8 +12,10 @@ import (
 	"github.com/sendgrid/sendgrid-go"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"net/mail"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 )
@@ -37,6 +39,31 @@ func (admin *Administration) InitNewsletter(renderer NewsletterRenderer) {
 		admin:      admin,
 		randomness: admin.App.Config.GetString("random"),
 	}
+
+	var importPath string
+	admin.App.AddCommand("newsletter", "import").StringArgument(&importPath).Callback(func() {
+		file, err := os.Open(importPath)
+		must(err)
+
+		data, err := ioutil.ReadAll(file)
+		must(err)
+
+		lines := []string{string(data)}
+		for _, sep := range []string{"\r\n", "\r", "\n"} {
+			l2 := []string{}
+			for _, v := range lines {
+				l2 = append(l2, strings.Split(v, sep)...)
+			}
+			lines = l2
+		}
+
+		for _, v := range lines {
+			err := admin.AddEmail(v, "", true)
+			if err != nil {
+				fmt.Printf("error while importing %s: %s\n", v, err)
+			}
+		}
+	})
 
 	controller := admin.App.MainController().SubController()
 	controller.AddBeforeAction(func(request prago.Request) {
