@@ -16,7 +16,14 @@ func main() {
 
 	for _, v := range config.Servers {
 		configMap[v.Name] = v
+		server := NewServer(v)
+		server.Start()
 	}
+
+	/*port, err := Freeport()
+	if err != nil {
+		panic(err)
+	}*/
 
 	err = (&http.Server{
 		Addr:           "0.0.0.0:80",

@@ -240,6 +240,7 @@ const adminTemplates = `
 
 {{define "admin_file"}}
   {{if .Value}}
+    <input type="hidden" id="{{.UUID}}" name="{{.Name}}" value="{{.Value}}">
     <img src="{{thumb .Value}}">
   {{else}}
     <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
