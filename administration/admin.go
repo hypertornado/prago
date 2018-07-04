@@ -106,7 +106,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	admin.bindMigrationCommand(admin.App)
 	admin.initTemplates(admin.App)
 	must(admin.App.LoadTemplateFromString(adminTemplates))
-	bindStats(admin)
+	bindSystemstats(admin)
 	admin.initRootActions()
 
 	admin.AdminController.AddAroundAction(func(request prago.Request, next func()) {

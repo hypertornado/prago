@@ -1,92 +1,10 @@
 {{define "admin_stats"}}
-
-<h2>Access view</h2>
-
-<table class="admin_table">
-  <tr>
-    <td></td>
-    {{range $role := .accessView.Roles}}
-      <td>{{$role}}</td>
-    {{end}}
-  </tr>
-
-  {{range $resource := .accessView.Resources}}
-    <tr>
-      <td>{{$resource.Name}}</td>
-      {{range $role := $resource.Roles}}
-        <td style="font-family: monospace;" nowrap>{{$role.Value}}</td>
-      {{end}}
-    </tr>
+  {{range $item := .Table}}
+    <div class="view_name">
+      {{index $item 0}}
+    </div>
+    <div class="view_content">
+      {{index $item 1}}
+    </div>
   {{end}}
-
-</table>
-
-<h2>Auth roles</h2>
-
-<table class="admin_table">
-{{range $role, $permissions := .roles}}
-  <tr>
-    <td>{{$role}}</td>
-    <td>{{range $permission, $_ := $permissions}} {{$permission}}{{end}}</td>
-  </tr>
-{{end}}
-</table>
-
-
-<h2>Base stats</h2>
-
-<table class="admin_table">
-{{range $item := .stats}}
-  <tr>
-    <td>{{index $item 0}}</td>
-    <td>{{index $item 1}}</td>
-  </tr>
-{{end}}
-</table>
-
-<h2>Configuration</h2>
-
-<table class="admin_table">
-{{range $item := .configStats}}
-  <tr>
-    <td>{{index $item 0}}</td>
-    <td>{{index $item 1}}</td>
-  </tr>
-{{end}}
-</table>
-
-<h2>OS</h2>
-
-<table class="admin_table">
-{{range $item := .osStats}}
-  <tr>
-    <td>{{index $item 0}}</td>
-    <td>{{index $item 1}}</td>
-  </tr>
-{{end}}
-</table>
-
-<h2>Memory</h2>
-
-<table class="admin_table">
-{{range $item := .memStats}}
-  <tr>
-    <td>{{index $item 0}}</td>
-    <td>{{index $item 1}}</td>
-  </tr>
-{{end}}
-</table>
-
-<h2>Environment</h2>
-
-<table class="admin_table">
-{{range $item := .environmentStats}}
-  <tr>
-    <td>{{index $item 0}}</td>
-    <td>{{index $item 1}}</td>
-  </tr>
-{{end}}
-</table>
-
-
 {{end}}

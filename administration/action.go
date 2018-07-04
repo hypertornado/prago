@@ -271,6 +271,19 @@ func actionExport(permission Permission) Action {
 	return ret
 }
 
+func actionStats(permission Permission) Action {
+	ret := CreateNavigationalAction(
+		"stats",
+		messages.Messages.GetNameFunction("admin_stats"),
+		"admin_stats",
+		func(resource Resource, request prago.Request, user User) interface{} {
+			return resource.getStats(user)
+		},
+	)
+	ret.Permission = permission
+	return ret
+}
+
 func actionDoExport(permission Permission) Action {
 	return Action{
 		Permission: permission,
@@ -444,6 +457,7 @@ func initResourceActions(a *Administration, resource *Resource) {
 		actionOrder(resource.CanEdit),
 		actionNew(resource.CanCreate),
 		actionCreate(resource.CanCreate),
+		actionStats(resource.CanView),
 		actionExport(resource.CanExport),
 		actionDoExport(resource.CanExport),
 	}

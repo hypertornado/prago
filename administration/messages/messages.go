@@ -121,6 +121,10 @@ var m = map[string]map[string]string{
 		"en": "Export",
 		"cs": "Export",
 	},
+	"admin_stats": {
+		"en": "Stats",
+		"cs": "Statistiky",
+	},
 	"admin_history": {
 		"en": "Edits",
 		"cs": "Editace",

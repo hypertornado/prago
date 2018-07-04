@@ -8,6 +8,7 @@
         "outFile": "public/admin/_static/admin.js"
     },
     "files": [
+        "js/Chart.d.ts",
         "js/google_maps.d.ts",
         "js/autoresize.ts",
         "js/utils.ts",

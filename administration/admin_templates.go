@@ -321,6 +321,7 @@ const adminTemplates = `
         <link rel="stylesheet" href="{{$c}}">
     {{end}}
 
+    <script type="text/javascript" src="{{.admin_header.UrlPrefix}}/_static/Chart.min.js?v={{.version}}"></script>
     <script type="text/javascript" src="{{.admin_header.UrlPrefix}}/_static/admin.js?v={{.version}}"></script>
     {{range $javascript := .javascripts}}
         <script type="text/javascript" src="{{$javascript}}"></script>
@@ -559,6 +560,16 @@ const adminTemplates = `
 </div>
 
 {{end}}{{define "admin_stats"}}
+
+  <table class="admin_table">
+    {{range $item := .Table}}
+      <tr>
+        <td>{{index $item 0}}</td>
+        <td>{{index $item 1}}</td>
+      </tr>
+    {{end}}
+  </table>
+{{end}}{{define "admin_systemstats"}}
 
 <h2>Access view</h2>
 
