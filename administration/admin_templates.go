@@ -560,15 +560,14 @@ const adminTemplates = `
 </div>
 
 {{end}}{{define "admin_stats"}}
-
-  <table class="admin_table">
-    {{range $item := .Table}}
-      <tr>
-        <td>{{index $item 0}}</td>
-        <td>{{index $item 1}}</td>
-      </tr>
-    {{end}}
-  </table>
+  {{range $item := .Table}}
+    <div class="view_name">
+      {{index $item 0}}
+    </div>
+    <div class="view_content">
+      {{index $item 1}}
+    </div>
+  {{end}}
 {{end}}{{define "admin_systemstats"}}
 
 <h2>Access view</h2>

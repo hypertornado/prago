@@ -482,7 +482,6 @@ func initUserResource(resource *Resource) {
 
 	admin.accessController.Post(resource.GetURL("registration"), func(request prago.Request) {
 		locale := getLocale(request)
-
 		form := newUserForm(locale)
 
 		form.BindData(request.Params())

@@ -173,8 +173,8 @@ func initFilesResource(resource *Resource) {
 
 	resource.ItemsPerPage = 100
 
-	fileUploadPath = a.App.Config.GetString("fileUploadPath")
-	fileDownloadPath = a.App.Config.GetString("fileDownloadPath")
+	fileUploadPath = a.App.Config.GetStringWithFallback("fileUploadPath", "")
+	fileDownloadPath = a.App.Config.GetStringWithFallback("fileDownloadPath", "")
 
 	if !strings.HasSuffix(fileUploadPath, "/") {
 		fileUploadPath += "/"

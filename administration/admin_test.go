@@ -1,6 +1,7 @@
 package administration
 
 import (
+	"github.com/hypertornado/prago"
 	"strings"
 	"testing"
 	"time"
@@ -20,30 +21,23 @@ type ResourceStruct struct {
 	UpdatedAt   time.Time
 }
 
-func prepareResource() (*Admin, *Resource) {
-	admin := NewAdmin("admin", "AAA")
-	admin.db = db
-	resource, err := admin.CreateResource(ResourceStruct{})
-	if err != nil {
-		panic(err)
-	}
-	admin.UnsafeDropTables()
-	admin.Migrate(false)
+func prepareResource() (*Administration, *Resource) {
+	app := prago.NewTestingApp()
+	admin := NewAdministration(app, nil)
+	resource := admin.CreateResource(ResourceStruct{}, nil)
+	admin.unsafeDropTables()
+	admin.migrate(false)
 	return admin, resource
 }
 
 func TestAdminQuery(t *testing.T) {
-	var err error
 	var item ResourceStruct
 	var createdItem interface{}
 	var resource *Resource
 
 	admin, resource := prepareResource()
 
-	admin.UnsafeDropTables()
-	admin.Migrate(false)
-
-	err = admin.Create(&ResourceStruct{Name: "A", Floating: 3.14})
+	err := admin.Create(&ResourceStruct{Name: "A", Floating: 3.14})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -126,8 +120,7 @@ func TestAdminQuery(t *testing.T) {
 
 func TestResource(t *testing.T) {
 	admin, resource := prepareResource()
-
-	items, err := resource.getListContent(admin, &listRequest{OrderBy: "id"}, &User{})
+	items, err := resource.getListContent(admin, &listRequest{OrderBy: "id"}, User{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -142,7 +135,10 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	admin.Create(&ResourceStruct{Name: "First", CreatedAt: time.Now()})
+	err = admin.Create(&ResourceStruct{Name: "First", CreatedAt: time.Now()})
+	if err != nil {
+		t.Fatal(err)
+	}
 	admin.Create(&ResourceStruct{Name: "Second", Showing: "show"})
 
 	count, err = admin.Query().Count(item)
@@ -154,17 +150,14 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	items, _ = resource.getListContent(admin, &listRequest{OrderBy: "id", Page: 1}, &User{})
+	items, _ = resource.getListContent(admin, &listRequest{OrderBy: "id", Page: 1}, User{})
 
-	t.Log(items)
-	t.Log(items.Rows)
-
-	if len(items.Rows[0].Items) != 3 {
+	if len(items.Rows[0].Items) != 2 {
 		t.Fatal("wrong length")
 	}
 
-	if items.Rows[1].Items[2].Value != "show" {
-		t.Fatal(items.Rows[1].Items[2].Value)
+	if items.Rows[1].Items[1].Value != "show" {
+		t.Fatal(items.Rows[1].Items[1].Value)
 	}
 }
 
@@ -175,9 +168,9 @@ func TestResourceUnique(t *testing.T) {
 	}
 
 	admin, _ := prepareResource()
-	resource, _ := admin.CreateResource(ResourceStructUnique{})
-	admin.UnsafeDropTables()
-	admin.Migrate(false)
+	resource := admin.CreateResource(ResourceStructUnique{}, nil)
+	admin.unsafeDropTables()
+	admin.migrate(false)
 
 	admin.Create(&ResourceStructUnique{Name: "A"})
 	admin.Create(&ResourceStructUnique{Name: "B"})
@@ -285,23 +278,6 @@ func TestShouldNotSaveWithZeroID(t *testing.T) {
 		t.Fatal("should not be nil")
 	}
 
-}
-
-func TestShouldNotCreateResourceWithPointer(t *testing.T) {
-	var err error
-	admin, _ := prepareResource()
-	_, err = admin.CreateResource(ResourceStruct{})
-	if err == nil {
-		t.Fatal("Should have non nil error")
-	}
-	_, err = admin.CreateResource(&ResourceStruct{})
-	if err == nil {
-		t.Fatal("Should have non nil error")
-	}
-	_, err = admin.CreateResource(85)
-	if err == nil {
-		t.Fatal("Should have non nil error")
-	}
 }
 
 func TestLongSaveText(t *testing.T) {

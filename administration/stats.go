@@ -45,23 +45,31 @@ func (f Field) getStats(resource Resource, user User) (ret [][2]string) {
 		return f.getStatsInt(resource, user)
 	case "string":
 		return f.getStatsString(resource, user)
+	case "bool":
+		return f.getStatsBool(resource, user)
 	}
-
 	return nil
 }
 
 func (f Field) getStatsRelation(resource Resource, user User) (ret [][2]string) {
 	var item interface{}
 	resource.newItem(&item)
-	zeroCount, _ := resource.Admin.Query().WhereIs(f.ColumnName, 0).Count(item)
-	return [][2]string{{f.Name, fmt.Sprintf("empty: %v, nonempty: %v", zeroCount, (resource.count() - zeroCount))}}
+	zeroCount, _ := resource.Admin.Query().Where(fmt.Sprintf("`%s` is null or `%s` = 0", f.ColumnName, f.ColumnName)).Count(item)
+	return [][2]string{{f.HumanName(user.Locale), fmt.Sprintf("empty: %v, nonempty: %v", zeroCount, (resource.count() - zeroCount))}}
 }
 
 func (f Field) getStatsString(resource Resource, user User) (ret [][2]string) {
 	var item interface{}
 	resource.newItem(&item)
-	zeroCount, _ := resource.Admin.Query().WhereIs(f.ColumnName, "").Count(item)
-	return [][2]string{{f.Name, fmt.Sprintf("empty: %v, nonempty: %v", zeroCount, (resource.count() - zeroCount))}}
+	zeroCount, _ := resource.Admin.Query().Where(fmt.Sprintf("`%s` is null or `%s` = \"\"", f.ColumnName, f.ColumnName)).Count(item)
+	return [][2]string{{f.HumanName(user.Locale), fmt.Sprintf("empty: %v, nonempty: %v", zeroCount, (resource.count() - zeroCount))}}
+}
+
+func (f Field) getStatsBool(resource Resource, user User) (ret [][2]string) {
+	var item interface{}
+	resource.newItem(&item)
+	zeroCount, _ := resource.Admin.Query().Where(fmt.Sprintf("`%s` is null or `%s` = 0", f.ColumnName, f.ColumnName)).Count(item)
+	return [][2]string{{f.HumanName(user.Locale), fmt.Sprintf("false: %v, true: %v", zeroCount, (resource.count() - zeroCount))}}
 }
 
 func (f Field) getStatsInt(resource Resource, user User) (ret [][2]string) {

@@ -290,7 +290,11 @@ func listItems(resource Resource, db dbIface, tableName string, items interface{
 		fmt.Println(q, query.whereParams)
 	}
 	rows, err := db.Query(q, query.whereParams...)
-	defer rows.Close()
+	defer func() {
+		if rows != nil {
+			rows.Close()
+		}
+	}()
 	if err != nil {
 		return err
 	}

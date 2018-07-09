@@ -24,8 +24,11 @@ type App struct {
 	mainController  *Controller
 }
 
-//NewApp creates App structure for prago app
-func NewApp(appName, version string, initFunction func(*App)) {
+func NewTestingApp() *App {
+	return createApp("prago_test_app", "0.0", nil)
+}
+
+func createApp(appName, version string, initFunction func(*App)) *App {
 	app := &App{
 		AppName: appName,
 		Version: version,
@@ -39,8 +42,15 @@ func NewApp(appName, version string, initFunction func(*App)) {
 	}
 
 	app.staticHandler = app.loadStaticHandler()
+	if initFunction != nil {
+		initFunction(app)
+	}
+	return app
+}
 
-	initFunction(app)
+//NewApp creates App structure for prago app
+func NewApp(appName, version string, initFunction func(*App)) {
+	app := createApp(appName, version, initFunction)
 	app.parseCommands()
 }
 

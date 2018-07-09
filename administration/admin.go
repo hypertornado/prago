@@ -59,8 +59,6 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		resourceNameMap:  make(map[string]*Resource),
 		accessController: app.MainController().SubController(),
 
-		db: connectMysql(app),
-
 		sendgridClient: sendgrid.NewSendGridClientWithApiKey(app.Config.GetStringWithFallback("sendgridApi", "")),
 		noReplyEmail:   app.Config.GetStringWithFallback("noReplyEmail", ""),
 
@@ -70,6 +68,16 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		roles:       make(map[string]map[string]bool),
 	}
 
+	db, err := connectMysql(
+		app.Config.GetStringWithFallback("dbUser", ""),
+		app.Config.GetStringWithFallback("dbPassword", ""),
+		app.Config.GetStringWithFallback("dbName", ""),
+	)
+	if err != nil {
+		panic(err)
+	}
+	admin.db = db
+
 	admin.AdminController = admin.accessController.SubController()
 	admin.addDefaultFieldTypes()
 
@@ -77,7 +85,9 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	admin.CreateResource(File{}, initFilesResource)
 	admin.CreateResource(activityLog{}, initActivityLog)
 
-	initFunction(admin)
+	if initFunction != nil {
+		initFunction(admin)
+	}
 
 	admin.accessController.AddBeforeAction(func(request prago.Request) {
 		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
