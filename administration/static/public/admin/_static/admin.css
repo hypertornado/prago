@@ -3144,6 +3144,9 @@ td.admin_list_message {
 .admin_item_relation_picker_suggestion-selected {
   background-color: rgba(64, 120, 192, 0.05);
 }
+.admin_stats_pie canvas {
+  margin: 0 auto;
+}
 .admin_header {
   padding-bottom: 0px;
   position: relative;

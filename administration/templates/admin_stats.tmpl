@@ -1,10 +1,26 @@
 {{define "admin_stats"}}
-  {{range $item := .Table}}
+  {{range $item := .Fields}}
     <div class="view_name">
-      {{index $item 0}}
+      {{$item.Name}}
     </div>
     <div class="view_content">
-      {{index $item 1}}
+      {{tmpl $item.Template $item.Data}}
     </div>
   {{end}}
+{{end}}
+
+{{define "admin_stats_text"}}
+  {{.}}
+{{end}}
+
+{{define "admin_stats_pie"}}
+  <div class="admin_stats_pie" data-label-a="{{.LabelA}}" data-label-b="{{.LabelB}}" data-value-a="{{.ValueA}}" data-value-b="{{.ValueB}}" height="50px">
+    <canvas></canvas>
+  </div>
+{{end}}
+
+{{define "admin_stats_timeline"}}
+  <div class="admin_stats_timeline" data-field="{{.Field}}" data-resource="{{.Resource}}">
+    <canvas></canvas>
+  </div>
 {{end}}

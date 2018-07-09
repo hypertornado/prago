@@ -63,6 +63,14 @@ var m = map[string]map[string]string{
 		"en": "no",
 		"cs": "ne",
 	},
+	"empty": {
+		"en": "empty",
+		"cs": "prázdné",
+	},
+	"nonempty": {
+		"en": "nonempty",
+		"cs": "neprázdné",
+	},
 
 	"admin_error": {
 		"en": "Error happened",

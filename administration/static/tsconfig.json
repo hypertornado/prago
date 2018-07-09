@@ -10,6 +10,7 @@
     "files": [
         "js/Chart.d.ts",
         "js/google_maps.d.ts",
+        "js/stats.ts",
         "js/autoresize.ts",
         "js/utils.ts",
         "js/imageview.ts",

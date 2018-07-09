@@ -560,14 +560,30 @@ const adminTemplates = `
 </div>
 
 {{end}}{{define "admin_stats"}}
-  {{range $item := .Table}}
+  {{range $item := .Fields}}
     <div class="view_name">
-      {{index $item 0}}
+      {{$item.Name}}
     </div>
     <div class="view_content">
-      {{index $item 1}}
+      {{tmpl $item.Template $item.Data}}
     </div>
   {{end}}
+{{end}}
+
+{{define "admin_stats_text"}}
+  {{.}}
+{{end}}
+
+{{define "admin_stats_pie"}}
+  <div class="admin_stats_pie" data-label-a="{{.LabelA}}" data-label-b="{{.LabelB}}" data-value-a="{{.ValueA}}" data-value-b="{{.ValueB}}" height="50px">
+    <canvas></canvas>
+  </div>
+{{end}}
+
+{{define "admin_stats_timeline"}}
+  <div class="admin_stats_timeline" data-field="{{.Field}}" data-resource="{{.Resource}}">
+    <canvas></canvas>
+  </div>
 {{end}}{{define "admin_systemstats"}}
 
 <h2>Access view</h2>
@@ -3992,6 +4008,9 @@ td.admin_list_message {
 .admin_item_relation_picker_suggestion-selected {
   background-color: rgba(64, 120, 192, 0.05);
 }
+.admin_stats_pie canvas {
+  margin: 0 auto;
+}
 .admin_header {
   padding-bottom: 0px;
   position: relative;
@@ -4065,6 +4084,40 @@ td.admin_list_message {
 
 
 const adminJS = `
+function bindStats() {
+    var elements = document.querySelectorAll(".admin_stats_pie");
+    Array.prototype.forEach.call(elements, function (el, i) {
+        new PieChart(el);
+    });
+}
+class PieChart {
+    constructor(el) {
+        console.log(el);
+        var canvas = el.querySelector("canvas");
+        var ctx = canvas.getContext('2d');
+        var labelA = el.getAttribute("data-label-a");
+        var labelB = el.getAttribute("data-label-b");
+        var valueA = parseInt(el.getAttribute("data-value-a"));
+        var valueB = parseInt(el.getAttribute("data-value-b"));
+        var data = {
+            datasets: [{
+                    data: [valueA, valueB],
+                    backgroundColor: ["#4078c0", "#eee"]
+                }],
+            labels: [
+                labelA,
+                labelB
+            ]
+        };
+        var myChart = new Chart(ctx, {
+            type: "pie",
+            data: data,
+            options: {
+                "responsive": false
+            }
+        });
+    }
+}
 class Autoresize {
     constructor(el) {
         this.el = el;
@@ -5132,6 +5185,7 @@ class FilterDate {
     }
 }
 document.addEventListener("DOMContentLoaded", () => {
+    bindStats();
     bindMarkdowns();
     bindTimestamps();
     bindRelations();

@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  bindStats();
   bindMarkdowns();
   bindTimestamps();
   bindRelations();
