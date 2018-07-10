@@ -37,19 +37,54 @@ class PieChart {
 }
 class Timeline {
     constructor(el) {
-        return;
+        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
+        var resource = el.getAttribute("data-resource");
+        var field = el.getAttribute("data-field");
         var canvas = el.querySelector("canvas");
-        var ctx = canvas.getContext('2d');
+        this.ctx = canvas.getContext('2d');
+        this.loadData(resource, field);
+    }
+    loadData(resource, field) {
         var data = {
-            labels: ["January", "February", "March"],
+            resource: resource,
+            field: field
+        };
+        var request = new XMLHttpRequest();
+        request.open("POST", this.adminPrefix + "/_api/stats", true);
+        request.addEventListener("load", () => {
+            if (request.status == 200) {
+                var parsed = JSON.parse(request.responseText);
+                this.createChart(parsed.labels, parsed.values);
+            }
+            else {
+                console.error("error while loading list");
+            }
+        });
+        request.send(JSON.stringify(data));
+    }
+    createChart(labels, values) {
+        var data = {
+            labels: labels,
             datasets: [{
                     backgroundColor: '#4078c0',
-                    data: [20, 30, 40]
+                    data: values
                 }]
         };
-        var myChart = new Chart(ctx, {
+        var myChart = new Chart(this.ctx, {
             type: "bar",
-            data: data
+            data: data,
+            options: {
+                legend: {
+                    display: false
+                },
+                scales: {
+                    yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                }
+            }
         });
     }
 }

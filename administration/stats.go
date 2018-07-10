@@ -72,7 +72,7 @@ func (f Field) getStats(resource Resource, user User) *StatsField {
 			Template: "admin_stats_timeline",
 			Data: StatsDataTimeline{
 				Resource: resource.TableName,
-				Field:    f.Name,
+				Field:    f.ColumnName,
 			},
 		}
 	}

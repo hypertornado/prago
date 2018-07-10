@@ -12,6 +12,7 @@ import (
 )
 
 func bindAPI(a *Administration) {
+	bindStatsAPI(a)
 	bindMarkdownAPI(a)
 	bindListAPI(a)
 	bindListResourceAPI(a)
