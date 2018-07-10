@@ -24,6 +24,8 @@ type StatsAPIResult struct {
 func bindStatsAPI(admin *Administration) {
 	admin.AdminController.Post(admin.GetURL("_api/stats"), func(request prago.Request) {
 
+		user := GetUser(request)
+
 		b, err := ioutil.ReadAll(request.Request().Body)
 		if err != nil {
 			panic(err)
@@ -38,6 +40,11 @@ func bindStatsAPI(admin *Administration) {
 		resource := admin.getResourceByName(data.Resource)
 		if resource == nil {
 			panic("can't find resource")
+		}
+
+		if !admin.Authorize(user, resource.CanView) {
+			render403(request)
+			return
 		}
 
 		field := resource.fieldMap[data.Field]

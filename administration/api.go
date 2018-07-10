@@ -35,6 +35,7 @@ func bindImageAPI(admin *Administration, fileDownloadPath string) {
 		request.Redirect(image.GetMedium())
 	})
 
+	//TODO: authorize
 	admin.AdminController.Get(admin.GetURL("_api/image/list"), func(request prago.Request) {
 		var images []*File
 
@@ -62,6 +63,7 @@ func bindImageAPI(admin *Administration, fileDownloadPath string) {
 		writeFileResponse(request, images)
 	})
 
+	//TODO: authorize
 	admin.AdminController.Post(admin.GetURL("_api/image/upload"), func(request prago.Request) {
 		multipartFiles := request.Request().MultipartForm.File["file"]
 
