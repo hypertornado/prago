@@ -16,4 +16,10 @@ cat static/public/admin/_static/admin.js >> admin_templates.go
 echo "\`
 " >> admin_templates.go
 
+echo "
+const chartJS = \`" >> admin_templates.go
+cat static/public/admin/_static/Chart.min.js >> admin_templates.go
+echo "\`
+" >> admin_templates.go
+
 
