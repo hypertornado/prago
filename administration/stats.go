@@ -127,7 +127,7 @@ func (f Field) getStatsInt(resource Resource, user User) *StatsField {
 	var max, min, sum, avg float64
 
 	q := fmt.Sprintf("SELECT max(%s), min(%s), sum(%s), avg(%s) FROM %s", f.ColumnName, f.ColumnName, f.ColumnName, f.ColumnName, resource.TableName)
-	must(db.QueryRow(q).Scan(&max, &min, &sum, &avg))
+	db.QueryRow(q).Scan(&max, &min, &sum, &avg)
 	return f.getStatsText(fmt.Sprintf("max: %v, min: %v, sum: %v, avg: %v", max, min, sum, avg), user.Locale)
 }
 
