@@ -85,7 +85,8 @@ func actionNew(permission Permission) Action {
 }
 
 func actionCreate(permission Permission) Action {
-	return Action{Method: "post",
+	return Action{
+		Method:     "post",
 		Permission: permission,
 		URL:        "",
 		Handler: func(resource Resource, request prago.Request, user User) {
@@ -97,6 +98,9 @@ func actionCreate(permission Permission) Action {
 			must(err)
 
 			resource.bindData(item, user, request.Params(), form.getFilter())
+			if resource.OrderFieldName != "" {
+				resource.setOrderPosition(&item, resource.count()+1)
+			}
 			must(resource.Admin.Create(item))
 
 			if resource.ActivityLog {
