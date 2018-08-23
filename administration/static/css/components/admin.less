@@ -379,11 +379,23 @@ select.admin_table_filter_item {
 }
 
 .admin_table_row:active {
-  background-color: @baseColorBackground;
+  //background-color: @baseColorBackground;
+}
+
+.admin_table-dragging .admin_table_row:active {
+  //pointer-events: none;
+  //background-color: red !important;
 }
 
 .admin_table_row td {
   padding: 2px 5px;
+}
+
+.admin_table_row-selected {
+  background-color: @baseColorBackground !important;
+  border-top: 1px solid #777;
+  border-bottom: 1px solid #777;
+  border-left: 10px solid #000;
 }
 
 .admin_table-list tr:last-child td {

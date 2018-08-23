@@ -29,6 +29,37 @@ func bindImageAPI(admin *Administration, fileDownloadPath string) {
 		request.Redirect(admin.GetURL(fmt.Sprintf("file/%d", image.ID)))
 	})
 
+	admin.AdminController.Post(admin.GetURL("_api/order/:resourceName"), func(request prago.Request) {
+		resource := admin.getResourceByName(request.Params().Get("resourceName"))
+		user := GetUser(request)
+
+		if !admin.Authorize(user, resource.CanEdit) {
+			panic("access denied")
+		}
+
+		if resource.OrderFieldName == "" {
+			panic("can't order")
+		}
+
+		decoder := json.NewDecoder(request.Request().Body)
+		var t = map[string][]int{}
+		must(decoder.Decode(&t))
+
+		order, ok := t["order"]
+		if !ok {
+			panic("wrong format")
+		}
+
+		for i, id := range order {
+			var item interface{}
+			resource.newItem(&item)
+			must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
+			must(resource.setOrderPosition(item, int64(i)))
+			must(resource.Admin.Save(item))
+		}
+		request.RenderJSON(true)
+	})
+
 	admin.AdminController.Get(admin.GetURL("_api/image/thumb/:id"), func(request prago.Request) {
 		var image File
 		must(admin.Query().WhereIs("uid", request.Params().Get("id")).Get(&image))

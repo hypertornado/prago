@@ -341,33 +341,6 @@ func actionDoDelete(permission Permission) Action {
 	}
 }
 
-func actionOrder(permission Permission) Action {
-	return Action{
-		Permission: permission,
-		URL:        "order",
-		Method:     "post",
-		Handler: func(resource Resource, request prago.Request, user User) {
-			decoder := json.NewDecoder(request.Request().Body)
-			var t = map[string][]int{}
-			must(decoder.Decode(&t))
-
-			order, ok := t["order"]
-			if !ok {
-				panic("wrong format")
-			}
-
-			for i, id := range order {
-				var item interface{}
-				resource.newItem(&item)
-				must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
-				must(resource.setOrderPosition(item, int64(i)))
-				must(resource.Admin.Save(item))
-			}
-			request.RenderJSON(true)
-		},
-	}
-}
-
 func actionPreview(permission Permission) Action {
 	return Action{
 		Name:       messages.Messages.GetNameFunction("admin_preview"),
@@ -458,7 +431,6 @@ func initResourceActions(a *Administration, resource *Resource) {
 
 	resourceActions := []Action{
 		actionList(resource.CanView),
-		actionOrder(resource.CanEdit),
 		actionNew(resource.CanCreate),
 		actionCreate(resource.CanCreate),
 		actionStats(resource.CanView),

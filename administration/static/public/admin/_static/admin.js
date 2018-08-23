@@ -513,10 +513,15 @@ function bindOrder() {
         function bindDraggable(row) {
             row.setAttribute("draggable", "true");
             row.addEventListener("dragstart", function (ev) {
+                row.classList.add("admin_table_row-selected");
                 draggedElement = this;
                 ev.dataTransfer.setData('text/plain', '');
+                ev.dataTransfer.effectAllowed = "move";
+                var d = document.createElement("div");
+                d.style.display = "none";
+                ev.dataTransfer.setDragImage(d, 0, 0);
             });
-            row.addEventListener("drop", function (ev) {
+            row.addEventListener("dragenter", function (ev) {
                 var targetEl = this;
                 if (this != draggedElement) {
                     var draggedIndex = -1;
@@ -533,8 +538,12 @@ function bindOrder() {
                         thisIndex += 1;
                     }
                     DOMinsertChildAtIndex(targetEl.parentElement, draggedElement, thisIndex);
-                    saveOrder();
                 }
+                return false;
+            });
+            row.addEventListener("drop", function (ev) {
+                saveOrder();
+                row.classList.remove("admin_table_row-selected");
                 return false;
             });
             row.addEventListener("dragover", function (ev) {
@@ -542,7 +551,9 @@ function bindOrder() {
             });
         }
         function saveOrder() {
-            var ajaxPath = document.location.pathname + "/order";
+            var adminPrefix = document.body.getAttribute("data-admin-prefix");
+            var typ = document.querySelector(".admin_table-order").getAttribute("data-type");
+            var ajaxPath = adminPrefix + "/_api/order/" + typ;
             var order = [];
             var rows = el.getElementsByClassName("admin_table_row");
             Array.prototype.forEach.call(rows, function (item, i) {
