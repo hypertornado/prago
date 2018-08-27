@@ -28,9 +28,7 @@ class PlacesView {
 
     var marker = new google.maps.Marker({
       position: position,
-      map: map,
-      draggable: true,
-      title: ""
+      map: map
     });
 
   }

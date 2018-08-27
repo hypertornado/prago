@@ -140,6 +140,21 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		request.SetData("currentuser", &user)
 		request.SetData("locale", user.Locale)
 
+		if !user.emailConfirmed() {
+			addCurrentFlashMessage(request, messages.Messages.Get(user.Locale, "admin_flash_not_confirmed"))
+		}
+
+		if !user.IsAdmin {
+			var sysadmin User
+			err := admin.Query().WhereIs("IsSysadmin", true).Get(&sysadmin)
+			var sysadminEmail string
+			if err == nil {
+				sysadminEmail = sysadmin.Email
+			}
+
+			addCurrentFlashMessage(request, messages.Messages.Get(user.Locale, "admin_flash_not_approved", sysadminEmail))
+		}
+
 		headerData := admin.getHeaderData(request)
 		request.SetData("admin_header", headerData)
 
@@ -221,6 +236,13 @@ func AddFlashMessage(request prago.Request, message string) {
 	session := request.GetData("session").(*sessions.Session)
 	session.AddFlash(message)
 	must(session.Save(request.Request(), request.Response()))
+}
+
+func addCurrentFlashMessage(request prago.Request, message string) {
+	data := request.GetData("flash_messages")
+	messages, _ := data.([]interface{})
+	messages = append(messages, message)
+	request.SetData("flash_messages", messages)
 }
 
 func (admin *Administration) getResourceByName(name string) *Resource {

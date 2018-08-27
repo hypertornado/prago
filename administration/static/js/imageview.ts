@@ -13,13 +13,15 @@ class ImageView {
     this.adminPrefix = document.body.getAttribute("data-admin-prefix");
     this.el = el;
     var ids = el.getAttribute("data-images").split(",");
-    this.addImages(ids)
+    this.addImages(ids);
   }
 
   addImages(ids: any) {
     this.el.innerHTML = "";
     for (var i = 0; i < ids.length; i++) {
-      this.addImage(<string>ids[i]);
+      if (<string>ids[i] != "") {
+        this.addImage(<string>ids[i]);
+      }
     }
   }
 

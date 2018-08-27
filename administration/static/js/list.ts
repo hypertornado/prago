@@ -104,6 +104,7 @@ class List {
       var row = <HTMLTableRowElement>rows[i];
       var id = row.getAttribute("data-id");
       row.addEventListener("click", (e) => {
+        console.log("ROOOOW");
         var target = <HTMLElement>e.target;
         if (target.classList.contains("preventredirect")) {
           return;
@@ -111,6 +112,17 @@ class List {
         var el = <HTMLDivElement>e.currentTarget;
         var url = el.getAttribute("data-url");
         window.location.href = url;
+      });
+
+      var buttons = row.querySelector(".admin_list_buttons");
+      buttons.addEventListener("click", (e) => {
+        var url = (<HTMLDivElement>e.target).getAttribute("href");
+        if (url != "") {
+          window.location.href = url;
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
       })
     }
   }

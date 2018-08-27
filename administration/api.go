@@ -201,6 +201,8 @@ func bindRelationAPI(admin *Administration) {
 		resourceName := request.Params().Get("resourceName")
 		q := request.Params().Get("q")
 
+		usedIDs := map[int64]bool{}
+
 		resource, found := admin.resourceNameMap[resourceName]
 		if !found {
 			render404(request)
@@ -222,6 +224,7 @@ func bindRelationAPI(admin *Administration) {
 			if err == nil {
 				relationItem := resource.itemToRelationData(user, item)
 				if relationItem != nil {
+					usedIDs[relationItem.ID] = true
 					ret = append(ret, *relationItem)
 				}
 			}
@@ -242,7 +245,8 @@ func bindRelationAPI(admin *Administration) {
 					var item interface{}
 					item = itemsVal.Index(i).Interface()
 					viewItem := resource.itemToRelationData(user, item)
-					if viewItem != nil {
+					if viewItem != nil && usedIDs[viewItem.ID] == false {
+						usedIDs[viewItem.ID] = true
 						ret = append(ret, *viewItem)
 					}
 				}

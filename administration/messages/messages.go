@@ -339,6 +339,15 @@ var m = map[string]map[string]string{
 		"cs": "Registrace hotova. Potvrďte prosím svůj email %s",
 	},
 
+	"admin_flash_not_confirmed": {
+		"en": "Your email is not confirmed. You can confirm it by clicking on link in your inbox.",
+		"cs": "Váš email není potvrzen. Můžete ho potvrdit kliknutím na odkaz v emailu, který jsme vám poslali",
+	},
+	"admin_flash_not_approved": {
+		"en": "Your account is not approved. Ask admin %s to be approved.",
+		"cs": "Váš účet není potvrzen. Požádejte prosím administrátora %s, aby vám ho schválil.",
+	},
+
 	"admin_files": {
 		"en": "Files",
 		"cs": "Soubory",
