@@ -32,6 +32,7 @@ class RelationPicker {
     this.changeSection = <HTMLDivElement>el.querySelector(".admin_item_relation_change");
     this.changeButton = <HTMLDivElement>el.querySelector(".admin_item_relation_change_btn");
     this.changeButton.addEventListener("click", () => {
+      this.input.value = 0;
       this.showSearch();
       this.pickerInput.focus();
     });

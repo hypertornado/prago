@@ -3535,6 +3535,9 @@ select.admin_table_filter_item {
   right: 0px;
   z-index: 10;
   pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 @keyframes example {
   from {
@@ -4063,6 +4066,7 @@ td.admin_list_message {
   clear: both;
   display: flex;
   padding: 0px 5px;
+  padding-bottom: 5px;
   flex-wrap: wrap;
   overflow-x: auto;
 }
@@ -4212,7 +4216,9 @@ class ImageView {
     addImages(ids) {
         this.el.innerHTML = "";
         for (var i = 0; i < ids.length; i++) {
-            this.addImage(ids[i]);
+            if (ids[i] != "") {
+                this.addImage(ids[i]);
+            }
         }
     }
     addImage(id) {
@@ -4462,6 +4468,7 @@ class List {
             var row = rows[i];
             var id = row.getAttribute("data-id");
             row.addEventListener("click", (e) => {
+                console.log("ROOOOW");
                 var target = e.target;
                 if (target.classList.contains("preventredirect")) {
                     return;
@@ -4469,6 +4476,16 @@ class List {
                 var el = e.currentTarget;
                 var url = el.getAttribute("data-url");
                 window.location.href = url;
+            });
+            var buttons = row.querySelector(".admin_list_buttons");
+            buttons.addEventListener("click", (e) => {
+                var url = e.target.getAttribute("href");
+                if (url != "") {
+                    window.location.href = url;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
             });
         }
     }
@@ -4875,6 +4892,7 @@ class RelationPicker {
         this.changeSection = el.querySelector(".admin_item_relation_change");
         this.changeButton = el.querySelector(".admin_item_relation_change_btn");
         this.changeButton.addEventListener("click", () => {
+            this.input.value = 0;
             this.showSearch();
             this.pickerInput.focus();
         });
@@ -5118,9 +5136,7 @@ class PlacesView {
         });
         var marker = new google.maps.Marker({
             position: position,
-            map: map,
-            draggable: true,
-            title: ""
+            map: map
         });
     }
 }
