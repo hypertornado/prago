@@ -3,7 +3,7 @@ package utils
 import (
 	"bufio"
 	"fmt"
-	"github.com/Machiel/slugify"
+	"github.com/gosimple/slug"
 	"math/rand"
 	"os"
 	"strings"
@@ -24,7 +24,7 @@ func PrettyFilename(s string) string {
 
 //PrettyURL converts string to url-friendly form
 func PrettyURL(s string) string {
-	return slugify.Slugify(s)
+	return slug.Make(s)
 }
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
