@@ -19,6 +19,7 @@ type list struct {
 	OrderDesc      bool
 	PrefilterField string
 	PrefilterValue string
+	Locale         string
 }
 
 type listHeaderItem struct {
@@ -26,8 +27,9 @@ type listHeaderItem struct {
 	NameHuman    string
 	ColumnName   string
 	CanOrder     bool
-	ShouldShow   bool
+	DefaultShow  bool
 	FilterLayout string
+	Field        Field
 	FilterData   interface{}
 }
 
@@ -74,6 +76,7 @@ type listRequest struct {
 	PrefilterField string
 	PrefilterValue string
 	Filter         map[string]string
+	Columns        map[string]bool
 }
 
 func (resource *Resource) getListHeader(user User) (list list, err error) {
@@ -84,6 +87,7 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 
 	list.OrderColumn = resource.OrderByColumn
 	list.OrderDesc = resource.OrderDesc
+	list.Locale = user.Locale
 
 	orderField, ok := resource.fieldMap[resource.OrderByColumn]
 	if !ok || !orderField.CanOrder {
@@ -98,21 +102,24 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 	}
 
 	for _, v := range resource.fieldArrays {
-		headerItem := (*v).getListHeaderItem(user)
-		if headerItem.ShouldShow {
-			list.Colspan++
+		if defaultVisibilityFilter(*resource, user, *v) {
+			headerItem := (*v).getListHeaderItem(user)
+			if headerItem.DefaultShow {
+				list.Colspan++
+			}
+			list.Header = append(list.Header, headerItem)
 		}
-		list.Header = append(list.Header, headerItem)
 	}
 	return
 }
 
 func (v Field) getListHeaderItem(user User) listHeaderItem {
 	headerItem := listHeaderItem{
-		Name:       v.Name,
-		NameHuman:  v.HumanName(user.Locale),
-		ColumnName: v.ColumnName,
-		ShouldShow: v.shouldShow(),
+		Name:        v.Name,
+		NameHuman:   v.HumanName(user.Locale),
+		ColumnName:  v.ColumnName,
+		DefaultShow: v.shouldShow(),
+		Field:       v,
 	}
 
 	headerItem.FilterLayout = v.filterLayout()
@@ -217,7 +224,13 @@ func (admin *Administration) prefilterQuery(field, value string) Query {
 	return ret
 }
 
-func (resource *Resource) getListContent(admin *Administration, requestQuery *listRequest, user User) (list listContent, err error) {
+func (resource *Resource) getListContent(admin *Administration, requestQuery *listRequest, user User) (ret listContent, err error) {
+	var listHeader list
+	listHeader, err = resource.getListHeader(user)
+	if err != nil {
+		return
+	}
+
 	q := admin.prefilterQuery(requestQuery.PrefilterField, requestQuery.PrefilterValue)
 	if requestQuery.OrderDesc {
 		q = q.OrderDesc(requestQuery.OrderBy)
@@ -234,7 +247,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	if err != nil {
 		return
 	}
-	list.Count = count
+	ret.Count = count
 
 	var totalCount int64
 	resource.newItem(&item)
@@ -243,7 +256,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	if err != nil {
 		return
 	}
-	list.TotalCount = totalCount
+	ret.TotalCount = totalCount
 
 	totalPages := (count / resource.ItemsPerPage)
 	if count%resource.ItemsPerPage != 0 {
@@ -261,7 +274,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 				p.Current = true
 			}
 
-			list.Pagination.Pages = append(list.Pagination.Pages, p)
+			ret.Pagination.Pages = append(ret.Pagination.Pages, p)
 		}
 	}
 
@@ -278,10 +291,10 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 		row := listRow{}
 		itemVal := val.Index(i).Elem()
 
-		for _, v := range resource.fieldArrays {
-			if v.shouldShow() {
+		for _, v := range listHeader.Header {
+			if requestQuery.Columns[v.ColumnName] {
 				fieldVal := itemVal.FieldByName(v.Name)
-				row.Items = append(row.Items, resource.valueToCell(user, *v, fieldVal))
+				row.Items = append(row.Items, resource.valueToCell(user, v.Field, fieldVal))
 			}
 		}
 
@@ -289,19 +302,13 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 		row.URL = resource.GetURL(fmt.Sprintf("%d", row.ID))
 
 		row.Actions = admin.getListItemActions(user, val.Index(i).Interface(), row.ID, *resource)
-		list.Rows = append(list.Rows, row)
+		ret.Rows = append(ret.Rows, row)
 	}
 
-	list.Colspan = 1
-	for _, v := range resource.fieldArrays {
-		if v.shouldShow() {
-			list.Colspan += 1
-		}
+	if ret.Count == 0 {
+		ret.Message = messages.Messages.Get(user.Locale, "admin_list_empty")
 	}
-
-	if list.Count == 0 {
-		list.Message = messages.Messages.Get(user.Locale, "admin_list_empty")
-	}
+	ret.Colspan = int64(len(requestQuery.Columns)) + 1
 
 	return
 }

@@ -300,14 +300,17 @@ class ImagePicker {
     }
 }
 function bindLists() {
-    var els = document.getElementsByClassName("admin_table-list");
+    var els = document.getElementsByClassName("admin_list");
     for (var i = 0; i < els.length; i++) {
-        new List(els[i]);
+        new List(els[i], document.querySelector(".admin_tablesettings_buttons"));
     }
 }
 class List {
-    constructor(el) {
+    constructor(el, openbutton) {
         this.el = el;
+        this.openbutton = openbutton;
+        this.closebutton = this.el.querySelector(".admin_tablesettings_close");
+        this.settingsEl = this.el.querySelector(".admin_tablesettings");
         this.page = 1;
         this.typeName = el.getAttribute("data-type");
         if (!this.typeName) {
@@ -327,8 +330,14 @@ class List {
         else {
             this.orderDesc = false;
         }
+        this.openbutton.addEventListener("click", this.toggleShowHide.bind(this));
+        this.closebutton.addEventListener("click", this.toggleShowHide.bind(this));
+        this.bindOptions();
         this.bindOrder();
-        this.load();
+    }
+    toggleShowHide() {
+        this.settingsEl.classList.toggle("hidden");
+        this.openbutton.classList.toggle("hidden");
     }
     load() {
         this.progress.classList.remove("hidden");
@@ -355,6 +364,39 @@ class List {
         var requestData = this.getListRequest();
         request.send(JSON.stringify(requestData));
     }
+    bindOptions() {
+        var columns = this.el.querySelectorAll(".admin_tablesettings_column");
+        for (var i = 0; i < columns.length; i++) {
+            columns[i].addEventListener("change", () => {
+                this.changedOptions();
+            });
+        }
+        this.changedOptions();
+    }
+    changedOptions() {
+        var columns = this.getSelectedColumns();
+        var headers = this.el.querySelectorAll(".admin_list_orderitem");
+        for (var i = 0; i < headers.length; i++) {
+            var name = headers[i].getAttribute("data-name");
+            if (columns[name]) {
+                headers[i].classList.remove("hidden");
+            }
+            else {
+                headers[i].classList.add("hidden");
+            }
+        }
+        var filters = this.el.querySelectorAll(".admin_list_filteritem");
+        for (var i = 0; i < filters.length; i++) {
+            var name = filters[i].getAttribute("data-name");
+            if (columns[name]) {
+                filters[i].classList.remove("hidden");
+            }
+            else {
+                filters[i].classList.add("hidden");
+            }
+        }
+        this.load();
+    }
     bindPagination() {
         var pages = this.el.querySelectorAll(".pagination_page");
         for (var i = 0; i < pages.length; i++) {
@@ -375,7 +417,6 @@ class List {
             var row = rows[i];
             var id = row.getAttribute("data-id");
             row.addEventListener("click", (e) => {
-                console.log("ROOOOW");
                 var target = e.target;
                 if (target.classList.contains("preventredirect")) {
                     return;
@@ -438,6 +479,14 @@ class List {
             }
         }
     }
+    getSelectedColumns() {
+        var columns = {};
+        var checked = this.el.querySelectorAll(".admin_tablesettings_column:checked");
+        for (var i = 0; i < checked.length; i++) {
+            columns[checked[i].getAttribute("data-column-name")] = true;
+        }
+        return columns;
+    }
     getListRequest() {
         var ret = {};
         ret.Page = this.page;
@@ -446,6 +495,7 @@ class List {
         ret.Filter = this.getFilterData();
         ret.PrefilterField = this.prefilterField;
         ret.PrefilterValue = this.prefilterValue;
+        ret.Columns = this.getSelectedColumns();
         return ret;
     }
     getFilterData() {

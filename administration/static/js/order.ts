@@ -40,7 +40,6 @@ function bindOrder() {
             thisIndex += 1;
           }
           DOMinsertChildAtIndex(targetEl.parentElement, draggedElement, thisIndex);
-          //saveOrder();
         }
         return false;
       });

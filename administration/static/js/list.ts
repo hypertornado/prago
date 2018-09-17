@@ -1,7 +1,7 @@
 function bindLists() {
-  var els = document.getElementsByClassName("admin_table-list");
+  var els = document.getElementsByClassName("admin_list");
   for (var i = 0; i < els.length; i++) {
-    new List(<HTMLTableElement>els[i]);
+    new List(<HTMLDivElement>els[i], <HTMLButtonElement>document.querySelector(".admin_tablesettings_buttons"));
   }
 }
 
@@ -10,7 +10,7 @@ class List {
   typeName: string;
 
   tbody: HTMLElement;
-  el: HTMLTableElement;
+  el: HTMLDivElement;
   filterInputs: NodeListOf<Element>;
   changed: boolean;
   changedTimestamp: number;
@@ -24,8 +24,15 @@ class List {
 
   progress: HTMLProgressElement;
 
-  constructor(el: HTMLTableElement) {
+  settingsEl: HTMLDivElement;
+  openbutton: HTMLButtonElement;
+  closebutton: HTMLButtonElement;
+
+  constructor(el: HTMLDivElement, openbutton: HTMLButtonElement) {
     this.el = el;
+    this.openbutton = openbutton;
+    this.closebutton = this.el.querySelector(".admin_tablesettings_close");
+    this.settingsEl = this.el.querySelector(".admin_tablesettings");
 
     this.page = 1;
 
@@ -52,9 +59,15 @@ class List {
       this.orderDesc = false;
     }
 
+    this.openbutton.addEventListener("click", this.toggleShowHide.bind(this));
+    this.closebutton.addEventListener("click", this.toggleShowHide.bind(this));
+    this.bindOptions();
     this.bindOrder();
+  }
 
-    this.load();
+  toggleShowHide() {
+    this.settingsEl.classList.toggle("hidden");
+    this.openbutton.classList.toggle("hidden");
   }
 
   load() {
@@ -83,6 +96,42 @@ class List {
     request.send(JSON.stringify(requestData));
   }
 
+  bindOptions() {
+    var columns: NodeListOf<HTMLInputElement> = this.el.querySelectorAll(".admin_tablesettings_column");
+    for (var i = 0; i < columns.length; i++) {
+      columns[i].addEventListener("change", () => {
+        this.changedOptions();
+      });
+    }
+    this.changedOptions();
+  }
+
+  changedOptions() {
+    var columns: any = this.getSelectedColumns();
+
+    var headers: NodeListOf<HTMLDivElement> = this.el.querySelectorAll(".admin_list_orderitem");
+    for (var i = 0; i < headers.length; i++) {
+      var name = headers[i].getAttribute("data-name");
+      if (columns[name]) {
+        headers[i].classList.remove("hidden");
+      } else {
+        headers[i].classList.add("hidden");
+      }
+    }
+
+    var filters: NodeListOf<HTMLDivElement> = this.el.querySelectorAll(".admin_list_filteritem");
+    for (var i = 0; i < filters.length; i++) {
+      var name = filters[i].getAttribute("data-name");
+      if (columns[name]) {
+        filters[i].classList.remove("hidden");
+      } else {
+        filters[i].classList.add("hidden");
+      }
+    }
+
+    this.load();
+  }
+
   bindPagination() {
     var pages = this.el.querySelectorAll(".pagination_page");
     for (var i = 0; i < pages.length; i++) {
@@ -104,7 +153,6 @@ class List {
       var row = <HTMLTableRowElement>rows[i];
       var id = row.getAttribute("data-id");
       row.addEventListener("click", (e) => {
-        console.log("ROOOOW");
         var target = <HTMLElement>e.target;
         if (target.classList.contains("preventredirect")) {
           return;
@@ -169,7 +217,17 @@ class List {
     }
   }
 
+  getSelectedColumns(): any {
+    var columns: any = {};
+    var checked: NodeListOf<HTMLInputElement> = this.el.querySelectorAll(".admin_tablesettings_column:checked");
+    for (var i = 0; i < checked.length; i++) {
+      columns[checked[i].getAttribute("data-column-name")] = true;
+    }
+    return columns;
+  }
+
   getListRequest(): any {
+
     var ret: any = {};
     ret.Page = this.page;
     ret.OrderBy = this.orderColumn;
@@ -177,6 +235,7 @@ class List {
     ret.Filter = this.getFilterData();
     ret.PrefilterField = this.prefilterField;
     ret.PrefilterValue = this.prefilterValue;
+    ret.Columns = this.getSelectedColumns();
     return ret;
   }
 

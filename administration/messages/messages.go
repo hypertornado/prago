@@ -252,6 +252,14 @@ var m = map[string]map[string]string{
 		"en": "Settings",
 		"cs": "Nastavení",
 	},
+	"admin_options": {
+		"en": "Options",
+		"cs": "Možnosti",
+	},
+	"admin_options_visible": {
+		"en": "Visible columns",
+		"cs": "Viditelné sloupce",
+	},
 	"admin_settings_changed": {
 		"en": "Settings changed",
 		"cs": "Nastavení změněno",

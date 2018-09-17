@@ -385,27 +385,42 @@ const adminTemplates = `
 </html>
 
 {{end}}{{define "admin_list"}}
-  <table class="admin_table admin_table-list {{if .CanChangeOrder}} admin_table-order{{end}}"
+<div class="admin_list {{if .CanChangeOrder}} admin_list-order{{end}}"
   data-type="{{.TypeID}}"
   data-order-column="{{.OrderColumn}}"
   data-order-desc="{{.OrderDesc}}"
   data-prefilter-field="{{.PrefilterField}}"
   data-prefilter-value="{{.PrefilterValue}}"
-  >
+>
+  <div class="admin_tablesettings hidden">
+    <button class="admin_tablesettings_close btn btn-small">✕</button>
+
+    <h2>{{message .Locale "admin_options"}}</h2>
+
+    <h3>{{message .Locale "admin_options_visible"}}</h3>
+
+    {{range $item := .Header}}
+      <label class="admin_tablesettings_label"><input type="checkbox"{{if .DefaultShow}}checked{{end}} class="admin_tablesettings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
+    {{end}}
+  </div>
+
+  <div class="admin_tablesettings_buttons">
+    <div class="admin_tablesettingsbutton btn btn-small">{{message .Locale "admin_options"}}</div>
+  </div>
+
+  <table class="admin_table admin_list_table">
     <thead>
     <tr>
       {{range $item := .Header}}
-        {{if $item.ShouldShow}}
-          <th>
-            {{if $item.CanOrder}}
-              <a href="#" class="admin_table_orderheader" data-name="{{$item.ColumnName}}">
-            {{- end -}}
-              {{- $item.NameHuman -}}
-            {{if $item.CanOrder -}}
-              </a>
-            {{end}}
-          </th>
-        {{end}}
+        <th class="admin_list_orderitem" data-name="{{$item.ColumnName}}">
+          {{if $item.CanOrder}}
+            <a href="#" class="admin_table_orderheader" data-name="{{$item.ColumnName}}">
+          {{- end -}}
+            {{- $item.NameHuman -}}
+          {{if $item.CanOrder -}}
+            </a>
+          {{end}}
+        </th>
       {{end}}
       <th>
         <span class="admin_table_count"></span>
@@ -413,13 +428,11 @@ const adminTemplates = `
     </tr>
     <tr>
       {{range $item := .Header}}
-        {{if $item.ShouldShow}}
-          <th>
-            {{if $item.FilterLayout}}
-              {{tmpl $item.FilterLayout $item}}
-            {{end}}
-          </th>
-        {{end}}
+        <th class="admin_list_filteritem" data-name="{{$item.ColumnName}}">
+          {{if $item.FilterLayout}}
+            {{tmpl $item.FilterLayout $item}}
+          {{end}}
+        </th>
       {{end}}
       <th>
         <progress class="admin_table_progress"></progress>
@@ -515,6 +528,7 @@ const adminTemplates = `
       </td>
     </tr>
   {{end}}
+</div>
 {{end}}
 {{define "admin_message"}}
 <div class="admin_box">
@@ -3480,10 +3494,11 @@ select.admin_table_filter_item {
   padding: 2px;
   border: 1px solid #f1f1f1;
 }
-.admin_table-list td {
+.admin_list_table td {
   border-left: none;
   border-bottom: none;
   border-top: none;
+  font-size: .9rem;
 }
 .admin_table_row:nth-child(odd) {
   background-color: #fafafa;
@@ -3501,11 +3516,11 @@ select.admin_table_filter_item {
   border-bottom: 1px solid #777;
   border-left: 10px solid #000;
 }
-.admin_table-list tr:last-child td {
+.admin_list_table tr:last-child td {
   border-bottom: 1px solid #f1f1f1;
 }
-.admin_table-list tr td:first-child,
-.admin_table-list tr th:first-child {
+.aadmin_list_table tr td:first-child,
+.admin_list_table tr th:first-child {
   border-left: 1px solid #f1f1f1;
 }
 .admin_table th {
@@ -4017,6 +4032,35 @@ td.admin_list_message {
 .admin_stats_pie canvas {
   margin: 0 auto;
 }
+.admin_tablesettings {
+  border: 1px solid #eee;
+  background: white;
+  padding: 10px 10px;
+  border-radius: 3px;
+  margin: 10px 200px;
+}
+.admin_tablesettings_close {
+  float: right;
+}
+.admin_tablesettings h2 {
+  margin-top: 0px;
+}
+.admin_tablesettings_label {
+  font-size: .8rem;
+  display: inline-block;
+  padding: 2px 5px;
+  background-color: #fafafa;
+  margin: 3px 1px;
+  border-radius: 3px;
+  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
+}
+.admin_tablesettings_buttons {
+  text-align: right;
+  padding: 5px;
+}
+.admin_tablesettings_close {
+  float: right;
+}
 .admin_header {
   padding-bottom: 0px;
   position: relative;
@@ -4393,14 +4437,17 @@ class ImagePicker {
     }
 }
 function bindLists() {
-    var els = document.getElementsByClassName("admin_table-list");
+    var els = document.getElementsByClassName("admin_list");
     for (var i = 0; i < els.length; i++) {
-        new List(els[i]);
+        new List(els[i], document.querySelector(".admin_tablesettings_buttons"));
     }
 }
 class List {
-    constructor(el) {
+    constructor(el, openbutton) {
         this.el = el;
+        this.openbutton = openbutton;
+        this.closebutton = this.el.querySelector(".admin_tablesettings_close");
+        this.settingsEl = this.el.querySelector(".admin_tablesettings");
         this.page = 1;
         this.typeName = el.getAttribute("data-type");
         if (!this.typeName) {
@@ -4420,8 +4467,14 @@ class List {
         else {
             this.orderDesc = false;
         }
+        this.openbutton.addEventListener("click", this.toggleShowHide.bind(this));
+        this.closebutton.addEventListener("click", this.toggleShowHide.bind(this));
+        this.bindOptions();
         this.bindOrder();
-        this.load();
+    }
+    toggleShowHide() {
+        this.settingsEl.classList.toggle("hidden");
+        this.openbutton.classList.toggle("hidden");
     }
     load() {
         this.progress.classList.remove("hidden");
@@ -4448,6 +4501,39 @@ class List {
         var requestData = this.getListRequest();
         request.send(JSON.stringify(requestData));
     }
+    bindOptions() {
+        var columns = this.el.querySelectorAll(".admin_tablesettings_column");
+        for (var i = 0; i < columns.length; i++) {
+            columns[i].addEventListener("change", () => {
+                this.changedOptions();
+            });
+        }
+        this.changedOptions();
+    }
+    changedOptions() {
+        var columns = this.getSelectedColumns();
+        var headers = this.el.querySelectorAll(".admin_list_orderitem");
+        for (var i = 0; i < headers.length; i++) {
+            var name = headers[i].getAttribute("data-name");
+            if (columns[name]) {
+                headers[i].classList.remove("hidden");
+            }
+            else {
+                headers[i].classList.add("hidden");
+            }
+        }
+        var filters = this.el.querySelectorAll(".admin_list_filteritem");
+        for (var i = 0; i < filters.length; i++) {
+            var name = filters[i].getAttribute("data-name");
+            if (columns[name]) {
+                filters[i].classList.remove("hidden");
+            }
+            else {
+                filters[i].classList.add("hidden");
+            }
+        }
+        this.load();
+    }
     bindPagination() {
         var pages = this.el.querySelectorAll(".pagination_page");
         for (var i = 0; i < pages.length; i++) {
@@ -4468,7 +4554,6 @@ class List {
             var row = rows[i];
             var id = row.getAttribute("data-id");
             row.addEventListener("click", (e) => {
-                console.log("ROOOOW");
                 var target = e.target;
                 if (target.classList.contains("preventredirect")) {
                     return;
@@ -4531,6 +4616,14 @@ class List {
             }
         }
     }
+    getSelectedColumns() {
+        var columns = {};
+        var checked = this.el.querySelectorAll(".admin_tablesettings_column:checked");
+        for (var i = 0; i < checked.length; i++) {
+            columns[checked[i].getAttribute("data-column-name")] = true;
+        }
+        return columns;
+    }
     getListRequest() {
         var ret = {};
         ret.Page = this.page;
@@ -4539,6 +4632,7 @@ class List {
         ret.Filter = this.getFilterData();
         ret.PrefilterField = this.prefilterField;
         ret.PrefilterValue = this.prefilterValue;
+        ret.Columns = this.getSelectedColumns();
         return ret;
     }
     getFilterData() {

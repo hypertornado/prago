@@ -2616,10 +2616,11 @@ select.admin_table_filter_item {
   padding: 2px;
   border: 1px solid #f1f1f1;
 }
-.admin_table-list td {
+.admin_list_table td {
   border-left: none;
   border-bottom: none;
   border-top: none;
+  font-size: .9rem;
 }
 .admin_table_row:nth-child(odd) {
   background-color: #fafafa;
@@ -2637,11 +2638,11 @@ select.admin_table_filter_item {
   border-bottom: 1px solid #777;
   border-left: 10px solid #000;
 }
-.admin_table-list tr:last-child td {
+.admin_list_table tr:last-child td {
   border-bottom: 1px solid #f1f1f1;
 }
-.admin_table-list tr td:first-child,
-.admin_table-list tr th:first-child {
+.aadmin_list_table tr td:first-child,
+.admin_list_table tr th:first-child {
   border-left: 1px solid #f1f1f1;
 }
 .admin_table th {
@@ -3152,6 +3153,35 @@ td.admin_list_message {
 }
 .admin_stats_pie canvas {
   margin: 0 auto;
+}
+.admin_tablesettings {
+  border: 1px solid #eee;
+  background: white;
+  padding: 10px 10px;
+  border-radius: 3px;
+  margin: 10px 200px;
+}
+.admin_tablesettings_close {
+  float: right;
+}
+.admin_tablesettings h2 {
+  margin-top: 0px;
+}
+.admin_tablesettings_label {
+  font-size: .8rem;
+  display: inline-block;
+  padding: 2px 5px;
+  background-color: #fafafa;
+  margin: 3px 1px;
+  border-radius: 3px;
+  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
+}
+.admin_tablesettings_buttons {
+  text-align: right;
+  padding: 5px;
+}
+.admin_tablesettings_close {
+  float: right;
 }
 .admin_header {
   padding-bottom: 0px;
