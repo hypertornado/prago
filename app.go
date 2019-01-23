@@ -2,12 +2,13 @@
 package prago
 
 import (
-	"github.com/hypertornado/prago/utils"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/hypertornado/prago/utils"
 )
 
 //App is main struct of prago application

@@ -246,7 +246,11 @@ func countItems(db dbIface, tableName string, query *listQuery) (int64, error) {
 		fmt.Println(q, query.whereParams)
 	}
 	rows, err := db.Query(q, query.whereParams...)
-	defer rows.Close()
+	defer func() {
+		if rows != nil {
+			rows.Close()
+		}
+	}()
 	if err != nil {
 		return -1, err
 	}

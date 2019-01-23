@@ -4,19 +4,20 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/golang-commonmark/markdown"
-	"github.com/gorilla/sessions"
-	"github.com/hypertornado/prago"
-	"github.com/hypertornado/prago/administration/messages"
-	"github.com/hypertornado/prago/build"
-	"github.com/hypertornado/prago/utils"
-	"github.com/sendgrid/sendgrid-go"
 	"html/template"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/golang-commonmark/markdown"
+	"github.com/gorilla/sessions"
+	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/administration/messages"
+	"github.com/hypertornado/prago/build"
+	"github.com/hypertornado/prago/utils"
+	sendgrid "github.com/sendgrid/sendgrid-go"
 )
 
 //ErrItemNotFound is returned when no item is found
@@ -140,7 +141,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		request.SetData("currentuser", &user)
 		request.SetData("locale", user.Locale)
 
-		if !user.emailConfirmed() {
+		if !user.IsAdmin && !user.emailConfirmed() {
 			addCurrentFlashMessage(request, messages.Messages.Get(user.Locale, "admin_flash_not_confirmed"))
 		}
 
