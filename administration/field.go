@@ -3,9 +3,10 @@ package administration
 import (
 	"database/sql"
 	"fmt"
-	"github.com/hypertornado/prago/administration/messages"
 	"reflect"
 	"time"
+
+	"github.com/hypertornado/prago/administration/messages"
 )
 
 type Field struct {
@@ -112,9 +113,9 @@ func getDefaultFormTemplate(t reflect.Type) string {
 	case reflect.Bool:
 		return "admin_item_checkbox"
 	case reflect.Int64:
-		return "admin_item_input"
+		return "admin_item_input_int"
 	case reflect.Float64:
-		return "admin_item_input"
+		return "admin_item_input_float"
 	}
 	panic("unknown default form for " + t.String())
 }

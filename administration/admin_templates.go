@@ -163,6 +163,14 @@ const adminTemplates = `
   <input name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
+{{define "admin_item_input_int"}}
+  <input type="number" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-int"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+{{end}}
+
+{{define "admin_item_input_float"}}
+  <input type="number" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-float"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+{{end}}
+
 {{define "admin_item_email"}}
   <input name="{{.Name}}" value="{{.Value}}" type="email" class="input form_watcher form_input" spellcheck="false"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
