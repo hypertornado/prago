@@ -4,10 +4,7 @@ import (
 	"compress/gzip"
 	"errors"
 	"fmt"
-	"github.com/hypertornado/prago"
-	"github.com/hypertornado/prago/build"
-	"github.com/hypertornado/prago/pragocdn/cdnclient"
-	"github.com/hypertornado/prago/utils"
+	"image"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -17,6 +14,14 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	_ "image/jpeg"
+	_ "image/png"
+
+	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/build"
+	"github.com/hypertornado/prago/pragocdn/cdnclient"
+	"github.com/hypertornado/prago/utils"
 )
 
 const version = "1.6.0"
@@ -76,7 +81,7 @@ func getNameAndExtension(filename string) (name, extension string, err error) {
 	return name, extension, nil
 }
 
-func uploadFile(account CDNConfigAccount, extension string, inData io.Reader) (*cdnclient.CDNUploadData, error) {
+func uploadFile(account CDNConfigAccount, extension string, inData io.Reader) (*cdnclient.CDNFileData, error) {
 	uuid := utils.RandomString(20)
 	dirPath := getFileDirectoryPath(account.Name, uuid)
 
@@ -91,16 +96,14 @@ func uploadFile(account CDNConfigAccount, extension string, inData io.Reader) (*
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
 	_, err = io.Copy(file, inData)
 	if err != nil {
 		return nil, err
 	}
 
-	return &cdnclient.CDNUploadData{
-		UUID:      uuid,
-		Extension: extension,
-	}, nil
+	return getMetadata(account.Name, uuid)
 }
 
 func start(app *prago.App) {
@@ -133,6 +136,17 @@ func start(app *prago.App) {
 		}
 
 		request.RenderJSON(data)
+	})
+
+	app.MainController().Get("/:account/:uuid/metadata", func(request prago.Request) {
+		metadata, err := getMetadata(
+			request.Params().Get("account"),
+			request.Params().Get("uuid"),
+		)
+		if err != nil {
+			panic(err)
+		}
+		request.RenderJSON(metadata)
 	})
 
 	app.MainController().Get("/:account/:uuid/:format/:hash/:name", func(request prago.Request) {
@@ -219,32 +233,75 @@ func deleteFile(accountName, password, uuid string) error {
 		return errors.New("wrong password")
 	}
 
-	dirPath := getFileDirectoryPath(accountName, uuid)
-	files, err := ioutil.ReadDir(dirPath)
+	filePath, _, err := getFilePathFromUUID(accountName, uuid)
 	if err != nil {
 		return err
 	}
 
-	var name string
-	for _, v := range files {
-		fileName := v.Name()
-		if strings.HasPrefix(fileName, uuid+".") {
-			name = fileName
-			break
-		}
-	}
-
-	if name == "" {
-		return errors.New("no file found " + name)
-	}
-
-	filePath := fmt.Sprintf("%s/%s", dirPath, name)
 	deletedDir := fmt.Sprintf("%s/.pragocdn/deleted/%s", homePath, accountName)
 
 	cmd := exec.Command("mv", filePath, deletedDir)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
+}
+
+func getFilePathFromUUID(accountName, uuid string) (filePath, extension string, err error) {
+	dirPath := getFileDirectoryPath(accountName, uuid)
+	files, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		return "", "", err
+	}
+
+	var name string
+	for _, v := range files {
+		fileName := v.Name()
+		if strings.HasPrefix(fileName, uuid+".") {
+			_, extension, _ = getNameAndExtension(fileName)
+			name = fileName
+			break
+		}
+	}
+
+	if name == "" {
+		return "", "", errors.New("no file found for uuid: " + uuid)
+	}
+
+	return fmt.Sprintf("%s/%s", dirPath, name), extension, nil
+}
+
+func getMetadata(accountName, uuid string) (*cdnclient.CDNFileData, error) {
+	filePath, extension, err := getFilePathFromUUID(accountName, uuid)
+	if err != nil {
+		return nil, err
+	}
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	i, _, err := image.Decode(file)
+	if err != nil {
+		return nil, err
+	}
+
+	bounds := i.Bounds()
+	width := bounds.Max.X
+	height := bounds.Max.Y
+
+	filestat, _ := file.Stat()
+	//filestat
+
+	return &cdnclient.CDNFileData{
+		UUID:      uuid,
+		Extension: extension,
+		IsImage:   isImageExtension(extension),
+		Filesize:  filestat.Size(),
+		Width:     int64(width),
+		Height:    int64(height),
+	}, nil
+
 }
 
 func getFile(accountName, uuid, format, hash, name string) (eddCode int, err error, source io.Reader, mimeExtension string, size int64) {

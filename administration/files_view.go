@@ -39,6 +39,7 @@ func filesViewDataSource(resource Resource, user User, f Field, value interface{
 			filesViewDataPath{"large", file.GetLarge()},
 			filesViewDataPath{"medium", file.GetMedium()},
 			filesViewDataPath{"small", file.GetSmall()},
+			filesViewDataPath{"metadata", file.GetMetadataPath()},
 		)
 	}
 

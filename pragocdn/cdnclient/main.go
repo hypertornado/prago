@@ -14,10 +14,13 @@ import (
 	"strings"
 )
 
-type CDNUploadData struct {
+type CDNFileData struct {
 	UUID      string
 	Extension string
 	IsImage   bool
+	Filesize  int64
+	Width     int64
+	Height    int64
 }
 
 type CDNAccount struct {
@@ -72,7 +75,7 @@ func (a CDNAccount) GetImageCropURL(uuid, filename string, width, height int) st
 	return fmt.Sprintf("%s/%s/%s/%dx%d/%s/%s", a.URL, a.Account, uuid, width, height, hash, filename)
 }
 
-func (a CDNAccount) UploadFileFromPath(filePath string) (*CDNUploadData, error) {
+func (a CDNAccount) UploadFileFromPath(filePath string) (*CDNFileData, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("opening file: %s", err)
@@ -108,8 +111,7 @@ func (a CDNAccount) DeleteFile(uuid string) error {
 	return nil
 }
 
-func (a CDNAccount) UploadFile(reader io.ReadCloser, extension string) (*CDNUploadData, error) {
-
+func (a CDNAccount) UploadFile(reader io.ReadCloser, extension string) (*CDNFileData, error) {
 	u, err := url.Parse(fmt.Sprintf("%s/%s/upload/%s", a.URL, a.Account, extension))
 	if err != nil {
 		return nil, fmt.Errorf("parsing url: %s", err)
@@ -137,11 +139,48 @@ func (a CDNAccount) UploadFile(reader io.ReadCloser, extension string) (*CDNUplo
 		return nil, fmt.Errorf("wrong status code %d: %s", response.StatusCode, string(data))
 	}
 
-	var ret CDNUploadData
+	var ret CDNFileData
 	err = json.Unmarshal(data, &ret)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshalling file: %s", err)
 	}
 
 	return &ret, nil
+}
+
+func (a CDNAccount) GetMetadata(uuid string) (*CDNFileData, error) {
+	u, err := url.Parse(a.MetadataPath(uuid))
+	if err != nil {
+		return nil, fmt.Errorf("parsing url: %s", err)
+	}
+
+	req := &http.Request{}
+	req.URL = u
+
+	response, err := a.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("opening file: %s", err)
+	}
+	defer response.Body.Close()
+
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("reading response data: %s", err)
+	}
+
+	if response.StatusCode != 200 {
+		return nil, fmt.Errorf("wrong status code %d: %s", response.StatusCode, string(data))
+	}
+
+	var ret CDNFileData
+	err = json.Unmarshal(data, &ret)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshalling file: %s", err)
+	}
+
+	return &ret, nil
+}
+
+func (a CDNAccount) MetadataPath(uuid string) string {
+	return fmt.Sprintf("%s/%s/%s/metadata", a.URL, a.Account, uuid)
 }

@@ -1,19 +1,17 @@
 package administration
 
 import (
-	"errors"
 	"fmt"
-	"github.com/hypertornado/prago"
-	"github.com/hypertornado/prago/administration/messages"
-	"github.com/hypertornado/prago/pragocdn/cdnclient"
-	"github.com/hypertornado/prago/utils"
-	"io"
 	"mime/multipart"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/administration/messages"
+	"github.com/hypertornado/prago/pragocdn/cdnclient"
+	"github.com/hypertornado/prago/utils"
 )
 
 var (
@@ -62,11 +60,13 @@ func (admin *Administration) GetFiles(ids string) []*File {
 
 //File is structure representing files in admin
 type File struct {
+	ID          int64  `prago-order-desc:"true" prago-preview:"true"`
 	UID         string `prago-unique:"true" prago-preview:"true" prago-type:"file" prago-description:"File"`
-	ID          int64  `prago-order-desc:"true"`
 	Name        string `prago-edit:"_"`
 	Description string `prago-type:"text" prago-preview:"true"`
 	User        int64  `prago-type:"relation" prago-edit:"_"`
+	Width       int64
+	Height      int64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
@@ -87,8 +87,21 @@ func uploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File,
 		return nil, fmt.Errorf("uploading multipart file: %s", err)
 	}
 
+	file.Width = uploadData.Width
+	file.Height = uploadData.Height
+
 	file.UID = uploadData.UUID
 	return file, nil
+}
+
+func (f File) UpdateMetadata() error {
+	metadata, err := filesCDN.GetMetadata(f.UID)
+	if err != nil {
+		return err
+	}
+	f.Width = metadata.Width
+	f.Height = metadata.Height
+	return nil
 }
 
 func (f File) GetExtension() string {
@@ -122,6 +135,27 @@ func initFilesResource(resource *Resource) {
 	initCDN(a)
 	//resource.AfterFormCreated = fileAfterFormCreated
 	resource.HumanName = messages.Messages.GetNameFunction("admin_files")
+
+	app := resource.Admin.App
+
+	app.AddCommand("files", "metadata").
+		Callback(func() {
+			var files []*File
+			must(a.Query().Get(&files))
+			for _, v := range files {
+				err := v.UpdateMetadata()
+				if err != nil {
+					fmt.Println("error while updating metadata: ", v.ID)
+					continue
+				}
+				file := *v
+				err = a.Save(&file)
+				if err != nil {
+					fmt.Println("error while saving file: ", v.ID)
+				}
+				fmt.Println("saved ok: ", v.ID)
+			}
+		})
 
 	resource.ResourceController.AddBeforeAction(func(request prago.Request) {
 		if request.Request().Method == "POST" && strings.HasSuffix(request.Request().URL.Path, "/delete") {
@@ -224,7 +258,7 @@ func (f *File) getPath(prefix string) (folder, file string) {
 	return
 }
 
-func loadFile(folder, path string, header *multipart.FileHeader) error {
+/*func loadFile(folder, path string, header *multipart.FileHeader) error {
 	if !strings.HasPrefix(path, folder) {
 		return errors.New("folder path should be prefix of path")
 	}
@@ -247,7 +281,7 @@ func loadFile(folder, path string, header *multipart.FileHeader) error {
 	defer outFile.Close()
 	defer inFile.Close()
 	return nil
-}
+}*/
 
 type imageResponse struct {
 	ID          int64
@@ -293,6 +327,10 @@ func (f *File) GetSmall() string {
 //GetOriginal file path
 func (f *File) GetOriginal() string {
 	return filesCDN.GetFileURL(f.UID, f.Name)
+}
+
+func (f *File) GetMetadataPath() string {
+	return filesCDN.MetadataPath(f.UID)
 }
 
 func (f *File) IsImage() bool {
