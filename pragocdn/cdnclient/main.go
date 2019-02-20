@@ -149,26 +149,6 @@ func (a CDNAccount) UploadFile(reader io.ReadCloser, extension string) (*CDNFile
 	return &ret, nil
 }
 
-func TestResponse() {
-	//http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	u, err := url.Parse("https://www.prago-cdn.com/lazne/r3uimJ0D5HcEhmvbye1T/metadata")
-	if err != nil {
-		panic(err)
-	}
-
-	req := &http.Request{}
-	req.Method = "GET"
-	req.URL = u
-
-	client := http.Client{}
-
-	response, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer response.Body.Close()
-}
-
 func (a CDNAccount) GetMetadata(uuid string) (*CDNFileData, error) {
 	u, err := url.Parse(a.MetadataPath(uuid))
 	if err != nil {

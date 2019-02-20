@@ -94,11 +94,12 @@ func uploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File,
 	return file, nil
 }
 
-func (f File) UpdateMetadata() error {
+func (f *File) UpdateMetadata() error {
 	metadata, err := filesCDN.GetMetadata(f.UID)
 	if err != nil {
 		return err
 	}
+
 	f.Width = metadata.Width
 	f.Height = metadata.Height
 	return nil
@@ -135,9 +136,6 @@ func initFilesResource(resource *Resource) {
 	initCDN(a)
 	//resource.AfterFormCreated = fileAfterFormCreated
 	resource.HumanName = messages.Messages.GetNameFunction("admin_files")
-
-	cdnclient.TestResponse()
-
 	app := resource.Admin.App
 
 	app.AddCommand("files", "metadata").
@@ -154,8 +152,9 @@ func initFilesResource(resource *Resource) {
 				err = a.Save(&file)
 				if err != nil {
 					fmt.Println("error while saving file: ", v.ID)
+				} else {
+					fmt.Println("saved ok: ", v.ID, v.Width, v.Height)
 				}
-				fmt.Println("saved ok: ", v.ID)
 			}
 		})
 
