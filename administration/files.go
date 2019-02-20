@@ -136,6 +136,8 @@ func initFilesResource(resource *Resource) {
 	//resource.AfterFormCreated = fileAfterFormCreated
 	resource.HumanName = messages.Messages.GetNameFunction("admin_files")
 
+	cdnclient.TestResponse()
+
 	app := resource.Admin.App
 
 	app.AddCommand("files", "metadata").
@@ -145,7 +147,7 @@ func initFilesResource(resource *Resource) {
 			for _, v := range files {
 				err := v.UpdateMetadata()
 				if err != nil {
-					fmt.Println("error while updating metadata: ", v.ID)
+					fmt.Println("error while updating metadata: ", v.ID, err)
 					continue
 				}
 				file := *v
