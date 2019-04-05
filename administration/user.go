@@ -1,19 +1,20 @@
 package administration
 
 import (
-	"code.google.com/p/go.crypto/bcrypt"
 	"crypto/md5"
 	"errors"
 	"fmt"
-	"github.com/gorilla/sessions"
-	"github.com/hypertornado/prago"
-	"github.com/hypertornado/prago/administration/messages"
-	"github.com/sendgrid/sendgrid-go"
 	"io"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	"code.google.com/p/go.crypto/bcrypt"
+	"github.com/gorilla/sessions"
+	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/administration/messages"
+	sendgrid "github.com/sendgrid/sendgrid-go"
 )
 
 //User represents admin user account
@@ -618,7 +619,7 @@ func initUserResource(resource *Resource) {
 			password := request.Params().Get("newpassword")
 			user := GetUser(request)
 			must(user.newPassword(password))
-			must(admin.Save(user))
+			must(admin.Save(&user))
 			AddFlashMessage(request, messages.Messages.Get(getLocale(request), "admin_password_changed"))
 			request.Redirect(resource.GetURL("settings"))
 		} else {
