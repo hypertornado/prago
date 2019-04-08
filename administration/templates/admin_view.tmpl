@@ -1,6 +1,9 @@
 {{define "admin_view"}}
   {{range $item := .Items}}
     <div class="view_name">
+      {{if $item.Button}}
+        <a href="{{$item.Button.URL}}" class="btn view_button">{{$item.Button.Name}}</a>
+      {{end}}
       {{$item.Name}}
     </div>
     <div class="view_content">
@@ -67,6 +70,16 @@
       –
     {{end}}
   </div>
+{{end}}
+
+{{define "admin_item_view_relations"}}
+  {{if not .}}
+    —
+  {{else}}
+    {{range $item := .}}
+      {{template "admin_item_view_relation" $item}}
+    {{end}}
+  {{end}}
 {{end}}
 
 

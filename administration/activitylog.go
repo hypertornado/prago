@@ -3,8 +3,9 @@ package administration
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hypertornado/prago/administration/messages"
 	"time"
+
+	"github.com/hypertornado/prago/administration/messages"
 )
 
 type activityLog struct {
@@ -47,9 +48,7 @@ func (admin *Administration) getHistory(resource *Resource, itemID int64) histor
 	q.OrderDesc("ID")
 
 	var items []*activityLog
-	Debug = true
 	must(q.Get(&items))
-	Debug = false
 
 	for _, v := range items {
 		var username, userurl string

@@ -3,11 +3,12 @@ package administration
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/administration/messages"
 	"github.com/hypertornado/prago/utils"
-	"strconv"
-	"strings"
 )
 
 type buttonData struct {
@@ -137,7 +138,7 @@ func actionView(permission Permission) Action {
 			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   resource.Admin.getItemNavigation(resource, user, item, ""),
 				PageTemplate: "admin_view",
-				PageData:     resource.getView(item, GetUser(request)),
+				PageData:     resource.getView(id, item, GetUser(request)),
 			})
 		},
 	}

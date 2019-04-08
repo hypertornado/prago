@@ -135,7 +135,15 @@ var m = map[string]map[string]string{
 	},
 	"admin_history": {
 		"en": "Edits",
-		"cs": "Editace",
+		"cs": "Úpravy",
+	},
+	"admin_history_count": {
+		"en": "Number of edits",
+		"cs": "Počet úprav",
+	},
+	"admin_history_last": {
+		"en": "Last edited by",
+		"cs": "Naposledy upraveno uživatelem",
 	},
 	"admin_login_name": {
 		"en": "Log into admin",

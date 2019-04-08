@@ -700,6 +700,9 @@ const adminTemplates = `
 {{end}}{{define "admin_view"}}
   {{range $item := .Items}}
     <div class="view_name">
+      {{if $item.Button}}
+        <a href="{{$item.Button.URL}}" class="btn view_button">{{$item.Button.Name}}</a>
+      {{end}}
       {{$item.Name}}
     </div>
     <div class="view_content">
@@ -766,6 +769,16 @@ const adminTemplates = `
       –
     {{end}}
   </div>
+{{end}}
+
+{{define "admin_item_view_relations"}}
+  {{if not .}}
+    —
+  {{else}}
+    {{range $item := .}}
+      {{template "admin_item_view_relation" $item}}
+    {{end}}
+  {{end}}
 {{end}}
 
 
@@ -3762,7 +3775,11 @@ select.admin_timestamp_minute {
 .view_name:first-child {
   border-top: none;
 }
+.view_button {
+  float: right;
+}
 .view_content {
+  clear: both;
   padding: 0px 10px 10px 10px;
   word-wrap: break-word;
   color: #888;

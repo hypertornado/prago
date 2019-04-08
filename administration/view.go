@@ -1,9 +1,11 @@
 package administration
 
 import (
-	"github.com/hypertornado/prago/administration/messages"
+	"fmt"
 	"reflect"
 	"time"
+
+	"github.com/hypertornado/prago/administration/messages"
 )
 
 type view struct {
@@ -12,11 +14,17 @@ type view struct {
 
 type viewField struct {
 	Name     string
+	Button   *viewFieldAction
 	Template string
 	Value    interface{}
 }
 
-func (resource Resource) getView(inValues interface{}, user User) view {
+type viewFieldAction struct {
+	Name string
+	URL  string
+}
+
+func (resource Resource) getView(id int, inValues interface{}, user User) view {
 	visible := defaultVisibilityFilter
 	ret := view{}
 	for i, f := range resource.fieldArrays {
@@ -38,6 +46,75 @@ func (resource Resource) getView(inValues interface{}, user User) view {
 			},
 		)
 	}
+
+	historyView := resource.Admin.getHistory(&resource, int64(id))
+
+	if len(historyView.Items) > 0 {
+		ret.Items = append(
+			ret.Items,
+			viewField{
+				Name:     messages.Messages.Get(user.Locale, "admin_history_last"),
+				Template: "admin_item_view_text",
+				Value:    historyView.Items[0].UserName,
+			},
+		)
+
+		ret.Items = append(
+			ret.Items,
+			viewField{
+				Name: messages.Messages.Get(user.Locale, "admin_history_count"),
+				Button: &viewFieldAction{
+					Name: messages.Messages.Get(user.Locale, "admin_history"),
+					URL:  resource.GetURL(fmt.Sprintf("%d/history", id)),
+				},
+				Template: "admin_item_view_text",
+				Value:    fmt.Sprintf("%d", len(historyView.Items)),
+			},
+		)
+
+	}
+
+	for _, v := range resource.relations {
+		q := resource.Admin.prefilterQuery(v.field, fmt.Sprintf("%d", id))
+		if v.resource.OrderDesc {
+			q = q.OrderDesc(v.resource.OrderByColumn)
+		} else {
+			q = q.Order(v.resource.OrderByColumn)
+		}
+
+		q = q.Limit(resource.ItemsPerPage)
+
+		var rowItems interface{}
+
+		v.resource.newArrayOfItems(&rowItems)
+		q.Get(rowItems)
+
+		vv := reflect.ValueOf(rowItems).Elem()
+		var data []interface{}
+		for i := 0; i < vv.Len(); i++ {
+			data = append(
+				data,
+				v.resource.itemToRelationData(user, vv.Index(i).Interface()),
+			)
+		}
+
+		addURL := resource.GetURL(fmt.Sprintf("%d/%s", id, v.addURL()))
+
+		name := v.resource.HumanName(user.Locale)
+		ret.Items = append(
+			ret.Items,
+			viewField{
+				Name: name,
+				Button: &viewFieldAction{
+					Name: v.addName(user.Locale),
+					URL:  addURL,
+				},
+				Template: "admin_item_view_relations",
+				Value:    data,
+			},
+		)
+	}
+
 	return ret
 }
 

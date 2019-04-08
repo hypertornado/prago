@@ -2,10 +2,11 @@ package administration
 
 import (
 	"fmt"
-	"github.com/hypertornado/prago"
 	"go/ast"
 	"reflect"
 	"time"
+
+	"github.com/hypertornado/prago"
 )
 
 //Resource is structure representing one item in admin menu or one table in database

@@ -2,12 +2,13 @@ package administration
 
 import (
 	"fmt"
-	"github.com/hypertornado/prago"
-	"github.com/hypertornado/prago/administration/messages"
-	"github.com/hypertornado/prago/utils"
 	"net/url"
 	"reflect"
 	"strconv"
+
+	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/administration/messages"
+	"github.com/hypertornado/prago/utils"
 )
 
 type relation struct {
@@ -179,7 +180,7 @@ func (resource *Resource) bindRelationActions(r relation) {
 
 	addAction := Action{
 		Name:       r.addName,
-		URL:        "add-" + r.resource.ID,
+		URL:        r.addURL(),
 		Permission: r.resource.CanView,
 		Handler: func(resource Resource, request prago.Request, user User) {
 			relatedResource := *r.resource
@@ -213,7 +214,7 @@ func (resource *Resource) bindRelationActions(r relation) {
 			AddCSRFToken(form, request)
 
 			renderNavigationPage(request, adminNavigationPage{
-				Navigation:   resource.Admin.getItemNavigation(resource, user, item, "add-"+r.resource.ID),
+				Navigation:   resource.Admin.getItemNavigation(resource, user, item, r.addURL()),
 				PageTemplate: "admin_form",
 				PageData:     form,
 			})
@@ -221,4 +222,8 @@ func (resource *Resource) bindRelationActions(r relation) {
 	}
 
 	resource.AddItemAction(addAction)
+}
+
+func (r relation) addURL() string {
+	return "add-" + r.resource.ID
 }
