@@ -186,6 +186,11 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		request.Response().WriteHeader(200)
 		request.Response().Write([]byte(chartJS))
 	})
+	admin.AdminController.Get(admin.GetURL("_static/pikaday.js"), func(request prago.Request) {
+		request.Response().Header().Set("Content-type", "text/javascript")
+		request.Response().WriteHeader(200)
+		request.Response().Write([]byte(pikadayJS))
+	})
 	admin.App.MainController().Get(admin.GetURL("_static/admin.css"), func(request prago.Request) {
 		request.Response().Header().Set("Content-type", "text/css; charset=utf-8")
 		request.Response().WriteHeader(200)

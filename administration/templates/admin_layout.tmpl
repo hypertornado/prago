@@ -14,6 +14,7 @@
     {{end}}
 
     <script type="text/javascript" src="{{.admin_header.UrlPrefix}}/_static/Chart.min.js?v={{.version}}"></script>
+    <script type="text/javascript" src="{{.admin_header.UrlPrefix}}/_static/pikaday.js?v={{.version}}"></script>
     <script type="text/javascript" src="{{.admin_header.UrlPrefix}}/_static/admin.js?v={{.version}}"></script>
     {{range $javascript := .javascripts}}
         <script type="text/javascript" src="{{$javascript}}"></script>

@@ -2627,6 +2627,8 @@ select.admin_table_filter_item {
 }
 .admin_table_row:hover {
   background-color: rgba(64, 120, 192, 0.05);
+  background-color: #4078c0;
+  color: white;
   cursor: pointer;
 }
 .admin_table_row td {
@@ -2888,6 +2890,9 @@ select.admin_timestamp_minute {
 .view_content:empty {
   display: none;
 }
+.admin_item_view_textarea {
+  white-space: pre;
+}
 .admin_item_view_place {
   height: 200px;
 }
@@ -2938,9 +2943,8 @@ progress {
   height: 30px;
   margin: 3px 10px 3px 0px;
   display: inline-block;
-  border-radius: 300px;
+  border-radius: 5px;
   background-color: white;
-  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
 .admin_navigation_breadcrumb_image-logo {
   background-size: contain;

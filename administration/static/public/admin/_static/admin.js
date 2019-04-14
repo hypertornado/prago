@@ -8,8 +8,8 @@ function bindStats() {
         new Timeline(el);
     });
 }
-class PieChart {
-    constructor(el) {
+var PieChart = (function () {
+    function PieChart(el) {
         var canvas = el.querySelector("canvas");
         var ctx = canvas.getContext('2d');
         var labelA = el.getAttribute("data-label-a");
@@ -34,9 +34,10 @@ class PieChart {
             }
         });
     }
-}
-class Timeline {
-    constructor(el) {
+    return PieChart;
+}());
+var Timeline = (function () {
+    function Timeline(el) {
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         var resource = el.getAttribute("data-resource");
         var field = el.getAttribute("data-field");
@@ -44,25 +45,26 @@ class Timeline {
         this.ctx = canvas.getContext('2d');
         this.loadData(resource, field);
     }
-    loadData(resource, field) {
+    Timeline.prototype.loadData = function (resource, field) {
+        var _this = this;
         var data = {
             resource: resource,
             field: field
         };
         var request = new XMLHttpRequest();
         request.open("POST", this.adminPrefix + "/_api/stats", true);
-        request.addEventListener("load", () => {
+        request.addEventListener("load", function () {
             if (request.status == 200) {
                 var parsed = JSON.parse(request.responseText);
-                this.createChart(parsed.labels, parsed.values);
+                _this.createChart(parsed.labels, parsed.values);
             }
             else {
                 console.error("error while loading list");
             }
         });
         request.send(JSON.stringify(data));
-    }
-    createChart(labels, values) {
+    };
+    Timeline.prototype.createChart = function (labels, values) {
         var data = {
             labels: labels,
             datasets: [{
@@ -86,19 +88,21 @@ class Timeline {
                 }
             }
         });
-    }
-}
-class Autoresize {
-    constructor(el) {
+    };
+    return Timeline;
+}());
+var Autoresize = (function () {
+    function Autoresize(el) {
         this.el = el;
         this.el.addEventListener('input', this.resizeIt.bind(this));
         this.resizeIt();
     }
-    resizeIt() {
+    Autoresize.prototype.resizeIt = function () {
         var height = this.el.scrollHeight + 2;
         this.el.style.height = height + 'px';
-    }
-}
+    };
+    return Autoresize;
+}());
 function DOMinsertChildAtIndex(parent, child, index) {
     if (index >= parent.children.length) {
         parent.appendChild(child);
@@ -113,22 +117,22 @@ function bindImageViews() {
         new ImageView(els[i]);
     }
 }
-class ImageView {
-    constructor(el) {
+var ImageView = (function () {
+    function ImageView(el) {
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.el = el;
         var ids = el.getAttribute("data-images").split(",");
         this.addImages(ids);
     }
-    addImages(ids) {
+    ImageView.prototype.addImages = function (ids) {
         this.el.innerHTML = "";
         for (var i = 0; i < ids.length; i++) {
             if (ids[i] != "") {
                 this.addImage(ids[i]);
             }
         }
-    }
-    addImage(id) {
+    };
+    ImageView.prototype.addImage = function (id) {
         var container = document.createElement("a");
         container.classList.add("admin_images_image");
         container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
@@ -137,16 +141,18 @@ class ImageView {
         img.setAttribute("draggable", "false");
         container.appendChild(img);
         this.el.appendChild(container);
-    }
-}
+    };
+    return ImageView;
+}());
 function bindImagePickers() {
     var els = document.querySelectorAll(".admin_images");
     for (var i = 0; i < els.length; i++) {
         new ImagePicker(els[i]);
     }
 }
-class ImagePicker {
-    constructor(el) {
+var ImagePicker = (function () {
+    function ImagePicker(el) {
+        var _this = this;
         this.el = el;
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.hiddenInput = el.querySelector(".admin_images_hidden");
@@ -156,24 +162,24 @@ class ImagePicker {
         this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
         this.hideProgress();
         var ids = this.hiddenInput.value.split(",");
-        this.el.addEventListener("click", (e) => {
+        this.el.addEventListener("click", function (e) {
             if (e.altKey) {
-                var ids = window.prompt("IDs of images", this.hiddenInput.value);
-                this.hiddenInput.value = ids;
+                var ids = window.prompt("IDs of images", _this.hiddenInput.value);
+                _this.hiddenInput.value = ids;
                 e.preventDefault();
                 return false;
             }
         });
-        this.fileInput.addEventListener("dragenter", (ev) => {
-            this.fileInput.classList.add("admin_images_fileinput-droparea");
+        this.fileInput.addEventListener("dragenter", function (ev) {
+            _this.fileInput.classList.add("admin_images_fileinput-droparea");
         });
-        this.fileInput.addEventListener("dragleave", (ev) => {
-            this.fileInput.classList.remove("admin_images_fileinput-droparea");
+        this.fileInput.addEventListener("dragleave", function (ev) {
+            _this.fileInput.classList.remove("admin_images_fileinput-droparea");
         });
-        this.fileInput.addEventListener("dragover", (ev) => {
+        this.fileInput.addEventListener("dragover", function (ev) {
             ev.preventDefault();
         });
-        this.fileInput.addEventListener("drop", (ev) => {
+        this.fileInput.addEventListener("drop", function (ev) {
             var text = ev.dataTransfer.getData('Text');
             return;
         });
@@ -183,8 +189,8 @@ class ImagePicker {
                 this.addImage(id);
             }
         }
-        this.fileInput.addEventListener("change", () => {
-            var files = this.fileInput.files;
+        this.fileInput.addEventListener("change", function () {
+            var files = _this.fileInput.files;
             var formData = new FormData();
             if (files.length == 0) {
                 return;
@@ -193,13 +199,13 @@ class ImagePicker {
                 formData.append("file", files[i]);
             }
             var request = new XMLHttpRequest();
-            request.open("POST", this.adminPrefix + "/_api/image/upload");
-            request.addEventListener("load", (e) => {
-                this.hideProgress();
+            request.open("POST", _this.adminPrefix + "/_api/image/upload");
+            request.addEventListener("load", function (e) {
+                _this.hideProgress();
                 if (request.status == 200) {
                     var data = JSON.parse(request.response);
                     for (var i = 0; i < data.length; i++) {
-                        this.addImage(data[i].UID);
+                        _this.addImage(data[i].UID);
                     }
                 }
                 else {
@@ -207,13 +213,13 @@ class ImagePicker {
                     console.error("Error while loading item.");
                 }
             });
-            this.fileInput.type = "";
-            this.fileInput.type = "file";
-            this.showProgress();
+            _this.fileInput.type = "";
+            _this.fileInput.type = "file";
+            _this.showProgress();
             request.send(formData);
         });
     }
-    updateHiddenData() {
+    ImagePicker.prototype.updateHiddenData = function () {
         var ids = [];
         for (var i = 0; i < this.preview.children.length; i++) {
             var item = this.preview.children[i];
@@ -221,18 +227,19 @@ class ImagePicker {
             ids.push(uuid);
         }
         this.hiddenInput.value = ids.join(",");
-    }
-    addImage(id) {
+    };
+    ImagePicker.prototype.addImage = function (id) {
+        var _this = this;
         var container = document.createElement("a");
         container.classList.add("admin_images_image");
         container.setAttribute("data-uuid", id);
         container.setAttribute("draggable", "true");
         container.setAttribute("target", "_blank");
         container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
-        container.addEventListener("dragstart", (e) => {
-            this.draggedElement = e.target;
+        container.addEventListener("dragstart", function (e) {
+            _this.draggedElement = e.target;
         });
-        container.addEventListener("drop", (e) => {
+        container.addEventListener("drop", function (e) {
             var droppedElement = e.toElement;
             if (!droppedElement) {
                 droppedElement = e.originalTarget;
@@ -247,10 +254,10 @@ class ImagePicker {
             }
             var draggedIndex = -1;
             var droppedIndex = -1;
-            var parent = this.draggedElement.parentElement;
+            var parent = _this.draggedElement.parentElement;
             for (var i = 0; i < parent.children.length; i++) {
                 var child = parent.children[i];
-                if (child == this.draggedElement) {
+                if (child == _this.draggedElement) {
                     draggedIndex = i;
                 }
                 if (child == droppedElement) {
@@ -263,20 +270,20 @@ class ImagePicker {
             if (draggedIndex <= droppedIndex) {
                 droppedIndex += 1;
             }
-            DOMinsertChildAtIndex(parent, this.draggedElement, droppedIndex);
-            this.updateHiddenData();
+            DOMinsertChildAtIndex(parent, _this.draggedElement, droppedIndex);
+            _this.updateHiddenData();
             e.preventDefault();
             return false;
         });
-        container.addEventListener("dragover", (e) => {
+        container.addEventListener("dragover", function (e) {
             e.preventDefault();
         });
-        container.addEventListener("click", (e) => {
+        container.addEventListener("click", function (e) {
             var target = e.target;
             if (target.classList.contains("admin_images_image_delete")) {
                 var parent = e.currentTarget.parentNode;
                 parent.removeChild(e.currentTarget);
-                this.updateHiddenData();
+                _this.updateHiddenData();
                 e.preventDefault();
                 return false;
             }
@@ -291,22 +298,23 @@ class ImagePicker {
         container.appendChild(del);
         this.preview.appendChild(container);
         this.updateHiddenData();
-    }
-    hideProgress() {
+    };
+    ImagePicker.prototype.hideProgress = function () {
         this.progress.classList.add("hidden");
-    }
-    showProgress() {
+    };
+    ImagePicker.prototype.showProgress = function () {
         this.progress.classList.remove("hidden");
-    }
-}
+    };
+    return ImagePicker;
+}());
 function bindLists() {
     var els = document.getElementsByClassName("admin_list");
     for (var i = 0; i < els.length; i++) {
         new List(els[i], document.querySelector(".admin_tablesettings_buttons"));
     }
 }
-class List {
-    constructor(el, openbutton) {
+var List = (function () {
+    function List(el, openbutton) {
         this.el = el;
         this.openbutton = openbutton;
         this.closebutton = this.el.querySelector(".admin_tablesettings_close");
@@ -335,45 +343,47 @@ class List {
         this.bindOptions();
         this.bindOrder();
     }
-    toggleShowHide() {
+    List.prototype.toggleShowHide = function () {
         this.settingsEl.classList.toggle("hidden");
         this.openbutton.classList.toggle("hidden");
-    }
-    load() {
+    };
+    List.prototype.load = function () {
+        var _this = this;
         this.progress.classList.remove("hidden");
         var request = new XMLHttpRequest();
         request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + document.location.search, true);
-        request.addEventListener("load", () => {
-            this.tbody.innerHTML = "";
+        request.addEventListener("load", function () {
+            _this.tbody.innerHTML = "";
             if (request.status == 200) {
-                this.tbody.innerHTML = request.response;
+                _this.tbody.innerHTML = request.response;
                 var count = request.getResponseHeader("X-Count");
                 var totalCount = request.getResponseHeader("X-Total-Count");
                 var countStr = count + " / " + totalCount;
-                this.el.querySelector(".admin_table_count").textContent = countStr;
+                _this.el.querySelector(".admin_table_count").textContent = countStr;
                 bindOrder();
-                this.bindPagination();
-                this.bindClick();
-                this.tbody.classList.remove("admin_table_loading");
+                _this.bindPagination();
+                _this.bindClick();
+                _this.tbody.classList.remove("admin_table_loading");
             }
             else {
                 console.error("error while loading list");
             }
-            this.progress.classList.add("hidden");
+            _this.progress.classList.add("hidden");
         });
         var requestData = this.getListRequest();
         request.send(JSON.stringify(requestData));
-    }
-    bindOptions() {
+    };
+    List.prototype.bindOptions = function () {
+        var _this = this;
         var columns = this.el.querySelectorAll(".admin_tablesettings_column");
         for (var i = 0; i < columns.length; i++) {
-            columns[i].addEventListener("change", () => {
-                this.changedOptions();
+            columns[i].addEventListener("change", function () {
+                _this.changedOptions();
             });
         }
         this.changedOptions();
-    }
-    changedOptions() {
+    };
+    List.prototype.changedOptions = function () {
         var columns = this.getSelectedColumns();
         var headers = this.el.querySelectorAll(".admin_list_orderitem");
         for (var i = 0; i < headers.length; i++) {
@@ -396,37 +406,44 @@ class List {
             }
         }
         this.load();
-    }
-    bindPagination() {
+    };
+    List.prototype.bindPagination = function () {
+        var _this = this;
         var pages = this.el.querySelectorAll(".pagination_page");
         for (var i = 0; i < pages.length; i++) {
             var pageEl = pages[i];
-            pageEl.addEventListener("click", (e) => {
+            pageEl.addEventListener("click", function (e) {
                 var el = e.target;
                 var page = parseInt(el.getAttribute("data-page"));
-                this.page = page;
-                this.load();
+                _this.page = page;
+                _this.load();
                 e.preventDefault();
                 return false;
             });
         }
-    }
-    bindClick() {
+    };
+    List.prototype.bindClick = function () {
         var rows = this.el.querySelectorAll(".admin_table_row");
         for (var i = 0; i < rows.length; i++) {
             var row = rows[i];
             var id = row.getAttribute("data-id");
-            row.addEventListener("click", (e) => {
+            row.addEventListener("click", function (e) {
                 var target = e.target;
                 if (target.classList.contains("preventredirect")) {
                     return;
                 }
                 var el = e.currentTarget;
                 var url = el.getAttribute("data-url");
+                if (e.shiftKey || e.metaKey || e.ctrlKey) {
+                    var openedWindow = window.open(url, "newwindow");
+                    console.log(openedWindow);
+                    openedWindow.focus();
+                    return;
+                }
                 window.location.href = url;
             });
             var buttons = row.querySelector(".admin_list_buttons");
-            buttons.addEventListener("click", (e) => {
+            buttons.addEventListener("click", function (e) {
                 var url = e.target.getAttribute("href");
                 if (url != "") {
                     window.location.href = url;
@@ -436,35 +453,36 @@ class List {
                 }
             });
         }
-    }
-    bindOrder() {
+    };
+    List.prototype.bindOrder = function () {
+        var _this = this;
         this.renderOrder();
         var headers = this.el.querySelectorAll(".admin_table_orderheader");
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
-            header.addEventListener("click", (e) => {
+            header.addEventListener("click", function (e) {
                 var el = e.target;
                 var name = el.getAttribute("data-name");
-                if (name == this.orderColumn) {
-                    if (this.orderDesc) {
-                        this.orderDesc = false;
+                if (name == _this.orderColumn) {
+                    if (_this.orderDesc) {
+                        _this.orderDesc = false;
                     }
                     else {
-                        this.orderDesc = true;
+                        _this.orderDesc = true;
                     }
                 }
                 else {
-                    this.orderColumn = name;
-                    this.orderDesc = false;
+                    _this.orderColumn = name;
+                    _this.orderDesc = false;
                 }
-                this.renderOrder();
-                this.load();
+                _this.renderOrder();
+                _this.load();
                 e.preventDefault();
                 return false;
             });
         }
-    }
-    renderOrder() {
+    };
+    List.prototype.renderOrder = function () {
         var headers = this.el.querySelectorAll(".admin_table_orderheader");
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
@@ -478,16 +496,16 @@ class List {
                 }
             }
         }
-    }
-    getSelectedColumns() {
+    };
+    List.prototype.getSelectedColumns = function () {
         var columns = {};
         var checked = this.el.querySelectorAll(".admin_tablesettings_column:checked");
         for (var i = 0; i < checked.length; i++) {
             columns[checked[i].getAttribute("data-column-name")] = true;
         }
         return columns;
-    }
-    getListRequest() {
+    };
+    List.prototype.getListRequest = function () {
         var ret = {};
         ret.Page = this.page;
         ret.OrderBy = this.orderColumn;
@@ -497,8 +515,8 @@ class List {
         ret.PrefilterValue = this.prefilterValue;
         ret.Columns = this.getSelectedColumns();
         return ret;
-    }
-    getFilterData() {
+    };
+    List.prototype.getFilterData = function () {
         var ret = {};
         var items = this.el.querySelectorAll(".admin_table_filter_item");
         for (var i = 0; i < items.length; i++) {
@@ -510,8 +528,8 @@ class List {
             }
         }
         return ret;
-    }
-    bindFilter() {
+    };
+    List.prototype.bindFilter = function () {
         this.bindFilterRelations();
         this.filterInputs = this.el.querySelectorAll(".admin_table_filter_item");
         for (var i = 0; i < this.filterInputs.length; i++) {
@@ -519,8 +537,8 @@ class List {
             input.addEventListener("input", this.inputListener.bind(this));
         }
         this.inputPeriodicListener();
-    }
-    inputListener(e) {
+    };
+    List.prototype.inputListener = function (e) {
         if (e.keyCode == 9 || e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
             return;
         }
@@ -529,22 +547,23 @@ class List {
         this.changed = true;
         this.changedTimestamp = Date.now();
         this.progress.classList.remove("hidden");
-    }
-    bindFilterRelations() {
+    };
+    List.prototype.bindFilterRelations = function () {
         var els = this.el.querySelectorAll(".admin_table_filter_item-relations");
         for (var i = 0; i < els.length; i++) {
             this.bindFilterRelation(els[i]);
         }
-    }
-    bindFilterRelation(select) {
+    };
+    List.prototype.bindFilterRelation = function (select) {
         var typ = select.getAttribute("data-typ");
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
         var request = new XMLHttpRequest();
         request.open("GET", adminPrefix + "/_api/resource/" + typ, true);
-        request.addEventListener("load", () => {
+        request.addEventListener("load", function () {
             if (request.status == 200) {
                 var resp = JSON.parse(request.response);
-                for (var item of resp) {
+                for (var _i = 0, resp_1 = resp; _i < resp_1.length; _i++) {
+                    var item = resp_1[_i];
                     var option = document.createElement("option");
                     option.setAttribute("value", item.id);
                     option.innerText = item.name;
@@ -556,16 +575,18 @@ class List {
             }
         });
         request.send();
-    }
-    inputPeriodicListener() {
-        setInterval(() => {
-            if (this.changed == true && Date.now() - this.changedTimestamp > 500) {
-                this.changed = false;
-                this.load();
+    };
+    List.prototype.inputPeriodicListener = function () {
+        var _this = this;
+        setInterval(function () {
+            if (_this.changed == true && Date.now() - _this.changedTimestamp > 500) {
+                _this.changed = false;
+                _this.load();
             }
         }, 200);
-    }
-}
+    };
+    return List;
+}());
 function bindOrder() {
     function orderTable(el) {
         var rows = el.getElementsByClassName("admin_table_row");
@@ -624,7 +645,7 @@ function bindOrder() {
             });
             var request = new XMLHttpRequest();
             request.open("POST", ajaxPath, true);
-            request.addEventListener("load", () => {
+            request.addEventListener("load", function () {
                 if (request.status != 200) {
                     console.error("Error while saving order.");
                 }
@@ -643,8 +664,9 @@ function bindMarkdowns() {
         new MarkdownEditor(el);
     });
 }
-class MarkdownEditor {
-    constructor(el) {
+var MarkdownEditor = (function () {
+    function MarkdownEditor(el) {
+        var _this = this;
         this.el = el;
         this.textarea = el.querySelector(".textarea");
         this.preview = el.querySelector(".admin_markdown_preview");
@@ -654,13 +676,13 @@ class MarkdownEditor {
         helpLink.setAttribute("href", prefix + "/_help/markdown");
         this.lastChanged = Date.now();
         this.changed = false;
-        let showChange = el.querySelector(".admin_markdown_preview_show");
-        showChange.addEventListener("change", () => {
-            this.preview.classList.toggle("hidden");
+        var showChange = el.querySelector(".admin_markdown_preview_show");
+        showChange.addEventListener("change", function () {
+            _this.preview.classList.toggle("hidden");
         });
-        setInterval(() => {
-            if (this.changed && (Date.now() - this.lastChanged > 500)) {
-                this.loadPreview();
+        setInterval(function () {
+            if (_this.changed && (Date.now() - _this.lastChanged > 500)) {
+                _this.loadPreview();
             }
         }, 100);
         this.textarea.addEventListener("change", this.textareaChanged.bind(this));
@@ -669,39 +691,41 @@ class MarkdownEditor {
         this.bindCommands();
         this.bindShortcuts();
     }
-    bindCommands() {
+    MarkdownEditor.prototype.bindCommands = function () {
+        var _this = this;
         var btns = this.el.querySelectorAll(".admin_markdown_command");
         for (var i = 0; i < btns.length; i++) {
-            btns[i].addEventListener("mousedown", (e) => {
+            btns[i].addEventListener("mousedown", function (e) {
                 var cmd = e.target.getAttribute("data-cmd");
-                this.executeCommand(cmd);
+                _this.executeCommand(cmd);
                 e.preventDefault();
                 return false;
             });
         }
-    }
-    bindShortcuts() {
-        this.textarea.addEventListener("keydown", (e) => {
+    };
+    MarkdownEditor.prototype.bindShortcuts = function () {
+        var _this = this;
+        this.textarea.addEventListener("keydown", function (e) {
             if (e.metaKey == false && e.ctrlKey == false) {
                 return;
             }
             switch (e.keyCode) {
                 case 66:
-                    this.executeCommand("b");
+                    _this.executeCommand("b");
                     break;
                 case 73:
-                    this.executeCommand("i");
+                    _this.executeCommand("i");
                     break;
                 case 75:
-                    this.executeCommand("h2");
+                    _this.executeCommand("h2");
                     break;
                 case 85:
-                    this.executeCommand("a");
+                    _this.executeCommand("a");
                     break;
             }
         });
-    }
-    executeCommand(commandName) {
+    };
+    MarkdownEditor.prototype.executeCommand = function (commandName) {
         switch (commandName) {
             case "b":
                 this.setAroundMarkdown("**", "**");
@@ -729,8 +753,8 @@ class MarkdownEditor {
                 break;
         }
         this.textareaChanged();
-    }
-    setAroundMarkdown(before, after) {
+    };
+    MarkdownEditor.prototype.setAroundMarkdown = function (before, after) {
         var text = this.textarea.value;
         var selected = text.substr(this.textarea.selectionStart, this.textarea.selectionEnd - this.textarea.selectionStart);
         var newText = text.substr(0, this.textarea.selectionStart);
@@ -744,26 +768,28 @@ class MarkdownEditor {
         this.textarea.selectionStart = newStart;
         this.textarea.selectionEnd = newEnd;
         this.textarea.focus();
-    }
-    textareaChanged() {
+    };
+    MarkdownEditor.prototype.textareaChanged = function () {
         this.changed = true;
         this.lastChanged = Date.now();
-    }
-    loadPreview() {
+    };
+    MarkdownEditor.prototype.loadPreview = function () {
+        var _this = this;
         this.changed = false;
         var request = new XMLHttpRequest();
         request.open("POST", document.body.getAttribute("data-admin-prefix") + "/_api/markdown", true);
-        request.addEventListener("load", () => {
+        request.addEventListener("load", function () {
             if (request.status == 200) {
-                this.preview.innerHTML = JSON.parse(request.response);
+                _this.preview.innerHTML = JSON.parse(request.response);
             }
             else {
                 console.error("Error while loading markdown preview.");
             }
         });
         request.send(this.textarea.value);
-    }
-}
+    };
+    return MarkdownEditor;
+}());
 function bindTimestamps() {
     function bindTimestamp(el) {
         var hidden = el.getElementsByTagName("input")[0];
@@ -839,8 +865,9 @@ function bindRelations() {
         new RelationPicker(el);
     });
 }
-class RelationPicker {
-    constructor(el) {
+var RelationPicker = (function () {
+    function RelationPicker(el) {
+        var _this = this;
         this.selectedClass = "admin_item_relation_picker_suggestion-selected";
         this.input = el.getElementsByTagName("input")[0];
         this.previewContainer = el.querySelector(".admin_item_relation_preview");
@@ -848,44 +875,45 @@ class RelationPicker {
         this.progress = el.querySelector("progress");
         this.changeSection = el.querySelector(".admin_item_relation_change");
         this.changeButton = el.querySelector(".admin_item_relation_change_btn");
-        this.changeButton.addEventListener("click", () => {
-            this.input.value = 0;
-            this.showSearch();
-            this.pickerInput.focus();
+        this.changeButton.addEventListener("click", function () {
+            _this.input.value = "0";
+            _this.showSearch();
+            _this.pickerInput.focus();
         });
         this.suggestionsEl = el.querySelector(".admin_item_relation_picker_suggestions_content");
         this.suggestions = [];
         this.picker = el.querySelector(".admin_item_relation_picker");
         this.pickerInput = this.picker.querySelector("input");
-        this.pickerInput.addEventListener("input", () => {
-            this.getSuggestions(this.pickerInput.value);
+        this.pickerInput.addEventListener("input", function () {
+            _this.getSuggestions(_this.pickerInput.value);
         });
-        this.pickerInput.addEventListener("blur", () => {
-            this.suggestionsEl.classList.add("hidden");
+        this.pickerInput.addEventListener("blur", function () {
+            _this.suggestionsEl.classList.add("hidden");
         });
-        this.pickerInput.addEventListener("focus", () => {
-            this.suggestionsEl.classList.remove("hidden");
-            this.getSuggestions(this.pickerInput.value);
+        this.pickerInput.addEventListener("focus", function () {
+            _this.suggestionsEl.classList.remove("hidden");
+            _this.getSuggestions(_this.pickerInput.value);
         });
         this.pickerInput.addEventListener("keydown", this.suggestionInput.bind(this));
         this.getData();
     }
-    getData() {
+    RelationPicker.prototype.getData = function () {
+        var _this = this;
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
         var request = new XMLHttpRequest();
         request.open("GET", adminPrefix + "/_api/preview/" + this.relationName + "/" + this.input.value, true);
-        request.addEventListener("load", () => {
-            this.progress.classList.add("hidden");
+        request.addEventListener("load", function () {
+            _this.progress.classList.add("hidden");
             if (request.status == 200) {
-                this.showPreview(JSON.parse(request.response));
+                _this.showPreview(JSON.parse(request.response));
             }
             else {
-                this.showSearch();
+                _this.showSearch();
             }
         });
         request.send();
-    }
-    showPreview(data) {
+    };
+    RelationPicker.prototype.showPreview = function (data) {
         this.previewContainer.textContent = "";
         this.input.value = data.ID;
         var el = this.createPreview(data, true);
@@ -893,35 +921,36 @@ class RelationPicker {
         this.previewContainer.classList.remove("hidden");
         this.changeSection.classList.remove("hidden");
         this.picker.classList.add("hidden");
-    }
-    showSearch() {
+    };
+    RelationPicker.prototype.showSearch = function () {
         this.previewContainer.classList.add("hidden");
         this.changeSection.classList.add("hidden");
         this.picker.classList.remove("hidden");
         this.suggestions = [];
         this.suggestionsEl.innerText = "";
         this.pickerInput.value = "";
-    }
-    getSuggestions(q) {
+    };
+    RelationPicker.prototype.getSuggestions = function (q) {
+        var _this = this;
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
         var request = new XMLHttpRequest();
         request.open("GET", adminPrefix + "/_api/search/" + this.relationName + "?q=" + encodeURIComponent(q), true);
-        request.addEventListener("load", () => {
+        request.addEventListener("load", function () {
             if (request.status == 200) {
-                if (q != this.pickerInput.value) {
+                if (q != _this.pickerInput.value) {
                     return;
                 }
                 var data = JSON.parse(request.response);
-                this.suggestions = data;
-                this.suggestionsEl.innerText = "";
+                _this.suggestions = data;
+                _this.suggestionsEl.innerText = "";
                 for (var i = 0; i < data.length; i++) {
                     var item = data[i];
-                    var el = this.createPreview(item, false);
+                    var el = _this.createPreview(item, false);
                     el.classList.add("admin_item_relation_picker_suggestion");
                     el.setAttribute("data-position", i + "");
-                    el.addEventListener("mousedown", this.suggestionClick.bind(this));
-                    el.addEventListener("mouseenter", this.suggestionSelect.bind(this));
-                    this.suggestionsEl.appendChild(el);
+                    el.addEventListener("mousedown", _this.suggestionClick.bind(_this));
+                    el.addEventListener("mouseenter", _this.suggestionSelect.bind(_this));
+                    _this.suggestionsEl.appendChild(el);
                 }
             }
             else {
@@ -929,38 +958,38 @@ class RelationPicker {
             }
         });
         request.send();
-    }
-    suggestionClick() {
+    };
+    RelationPicker.prototype.suggestionClick = function () {
         var selected = this.getSelected();
         if (selected >= 0) {
             this.showPreview(this.suggestions[selected]);
         }
-    }
-    suggestionSelect(e) {
+    };
+    RelationPicker.prototype.suggestionSelect = function (e) {
         var target = e.currentTarget;
         var position = parseInt(target.getAttribute("data-position"));
         this.select(position);
-    }
-    getSelected() {
+    };
+    RelationPicker.prototype.getSelected = function () {
         var selected = this.suggestionsEl.querySelector("." + this.selectedClass);
         if (!selected) {
             return -1;
         }
         return parseInt(selected.getAttribute("data-position"));
-    }
-    unselect() {
+    };
+    RelationPicker.prototype.unselect = function () {
         var selected = this.suggestionsEl.querySelector("." + this.selectedClass);
         if (!selected) {
             return -1;
         }
         selected.classList.remove(this.selectedClass);
         return parseInt(selected.getAttribute("data-position"));
-    }
-    select(i) {
+    };
+    RelationPicker.prototype.select = function (i) {
         this.unselect();
         this.suggestionsEl.querySelectorAll(".admin_preview")[i].classList.add(this.selectedClass);
-    }
-    suggestionInput(e) {
+    };
+    RelationPicker.prototype.suggestionInput = function (e) {
         switch (e.keyCode) {
             case 13:
                 this.suggestionClick();
@@ -990,8 +1019,8 @@ class RelationPicker {
                 e.preventDefault();
                 return false;
         }
-    }
-    createPreview(data, anchor) {
+    };
+    RelationPicker.prototype.createPreview = function (data, anchor) {
         var ret = document.createElement("div");
         if (anchor) {
             ret = document.createElement("a");
@@ -1014,8 +1043,9 @@ class RelationPicker {
         right.appendChild(description);
         ret.appendChild(right);
         return ret;
-    }
-}
+    };
+    return RelationPicker;
+}());
 function bindRelationsOLD() {
     function bindRelation(el) {
         var input = el.getElementsByTagName("input")[0];
@@ -1031,7 +1061,7 @@ function bindRelationsOLD() {
         var request = new XMLHttpRequest();
         request.open("GET", adminPrefix + "/_api/resource/" + relationName, true);
         var progress = el.getElementsByTagName("progress")[0];
-        request.addEventListener("load", () => {
+        request.addEventListener("load", function () {
             if (request.status >= 200 && request.status < 400) {
                 var resp = JSON.parse(request.response);
                 addOption(select, "0", "", false);
@@ -1075,8 +1105,8 @@ function bindPlacesView() {
         new PlacesView(els[i]);
     }
 }
-class PlacesView {
-    constructor(el) {
+var PlacesView = (function () {
+    function PlacesView(el) {
         var val = el.getAttribute("data-value");
         el.innerText = "";
         var coords = val.split(",");
@@ -1096,7 +1126,8 @@ class PlacesView {
             map: map
         });
     }
-}
+    return PlacesView;
+}());
 function bindPlaces() {
     bindPlacesView();
     function bindPlace(el) {
@@ -1134,7 +1165,7 @@ function bindPlaces() {
         searchInput.classList.add("input", "input-placesearch");
         var searchBox = new google.maps.places.SearchBox(searchInput);
         map.controls[google.maps.ControlPosition.LEFT_TOP].push(searchInput);
-        searchBox.addListener('places_changed', () => {
+        searchBox.addListener('places_changed', function () {
             var places = searchBox.getPlaces();
             if (places.length > 0) {
                 map.fitBounds(places[0].geometry.viewport);
@@ -1142,7 +1173,7 @@ function bindPlaces() {
                 marker.setVisible(true);
             }
         });
-        searchInput.addEventListener("keydown", (e) => {
+        searchInput.addEventListener("keydown", function (e) {
             if (e.keyCode == 13) {
                 e.preventDefault();
                 return false;
@@ -1178,46 +1209,48 @@ function bindForm() {
         new Form(els[i]);
     }
 }
-class Form {
-    constructor(el) {
+var Form = (function () {
+    function Form(el) {
+        var _this = this;
         this.dirty = false;
-        el.addEventListener("submit", () => {
-            this.dirty = false;
+        el.addEventListener("submit", function () {
+            _this.dirty = false;
         });
-        let els = el.querySelectorAll(".form_watcher");
+        var els = el.querySelectorAll(".form_watcher");
         for (var i = 0; i < els.length; i++) {
             var input = els[i];
-            input.addEventListener("input", () => {
-                this.dirty = true;
+            input.addEventListener("input", function () {
+                _this.dirty = true;
             });
-            input.addEventListener("change", () => {
-                this.dirty = true;
+            input.addEventListener("change", function () {
+                _this.dirty = true;
             });
         }
-        window.addEventListener("beforeunload", (e) => {
-            if (this.dirty) {
+        window.addEventListener("beforeunload", function (e) {
+            if (_this.dirty) {
                 var confirmationMessage = "Chcete opustit stránku bez uložení změn?";
                 e.returnValue = confirmationMessage;
                 return confirmationMessage;
             }
         });
     }
-}
+    return Form;
+}());
 function bindFilter() {
     var els = document.querySelectorAll(".admin_filter_layout_date");
     for (var i = 0; i < els.length; i++) {
         new FilterDate(els[i]);
     }
 }
-class FilterDate {
-    constructor(el) {
+var FilterDate = (function () {
+    function FilterDate(el) {
         this.hidden = el.querySelector(".admin_table_filter_item");
         this.from = el.querySelector(".admin_filter_layout_date_from");
         this.to = el.querySelector(".admin_filter_layout_date_to");
         this.from.addEventListener("input", this.changed.bind(this));
         this.to.addEventListener("input", this.changed.bind(this));
     }
-    changed() {
+    FilterDate.prototype.changed = function () {
         var val = "";
         if (this.from.value && this.to.value) {
             val = this.from.value + " - " + this.to.value;
@@ -1225,9 +1258,10 @@ class FilterDate {
         this.hidden.value = val;
         var event = new Event('change');
         this.hidden.dispatchEvent(event);
-    }
-}
-document.addEventListener("DOMContentLoaded", () => {
+    };
+    return FilterDate;
+}());
+document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();
     bindTimestamps();
@@ -1244,7 +1278,7 @@ function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");
     for (var i = 0; i < messages.length; i++) {
         var message = messages[i];
-        message.addEventListener("click", (e) => {
+        message.addEventListener("click", function (e) {
             var target = e.target;
             if (target.classList.contains("flash_message_close")) {
                 var current = e.currentTarget;
@@ -1256,7 +1290,7 @@ function bindFlashMessages() {
 function bindScrolled() {
     var lastScrollPosition = 0;
     var header = document.querySelector(".admin_header");
-    document.addEventListener("scroll", (event) => {
+    document.addEventListener("scroll", function (event) {
         if (document.body.clientWidth < 1100) {
             return;
         }

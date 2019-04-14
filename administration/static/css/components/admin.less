@@ -376,6 +376,8 @@ select.admin_table_filter_item {
 
 .admin_table_row:hover {
   background-color: @baseColorBackgroundLighter;
+  background-color: @baseColor;
+  color: white;
   cursor: pointer;
 }
 
@@ -700,6 +702,11 @@ select.admin_timestamp_minute {
   display: none;
 }
 
+.admin_item_view_textarea {
+  //border: 1px solid red;
+  white-space: pre;
+}
+
 .admin_item_view_place {
   height: 200px;
 }
@@ -752,9 +759,9 @@ progress {
   height: 30px;
   margin: 3px 10px 3px 0px;
   display: inline-block;
-  border-radius: 300px;
+  border-radius: 5px;
   background-color: white;
-  .shadow;
+  //.shadow;
 }
 
 .admin_navigation_breadcrumb_image-logo {

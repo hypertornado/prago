@@ -159,6 +159,13 @@ class List {
         }
         var el = <HTMLDivElement>e.currentTarget;
         var url = el.getAttribute("data-url");
+
+        if (e.shiftKey || e.metaKey || e.ctrlKey) {
+          var openedWindow = window.open(url, "newwindow");
+          console.log(openedWindow);
+          openedWindow.focus();
+          return;
+        }
         window.location.href = url;
       });
 

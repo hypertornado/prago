@@ -1,8 +1,9 @@
 package administration
 
 import (
-	"github.com/hypertornado/prago/utils"
 	"time"
+
+	"github.com/hypertornado/prago/utils"
 )
 
 type FieldType struct {
@@ -24,6 +25,7 @@ func (admin *Administration) addDefaultFieldTypes() {
 	admin.AddFieldType("role", admin.createRoleFieldType())
 
 	admin.AddFieldType("text", FieldType{
+		ViewTemplate:       "admin_item_view_textarea",
 		FormTemplate:       "admin_item_textarea",
 		ListCellDataSource: textListDataSource,
 	})
