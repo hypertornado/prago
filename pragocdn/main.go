@@ -126,9 +126,10 @@ func start(app *prago.App) {
 		}
 
 		extension := normalizeExtension(request.Params().Get("extension"))
-		if !extensionRegex.MatchString(extension) {
+		//should load all files, not just images
+		/*if !extensionRegex.MatchString(extension) {
 			panic("wrong extension")
-		}
+		}*/
 
 		data, err := uploadFile(*account, extension, request.Request().Body)
 		if err != nil {
@@ -273,25 +274,28 @@ func getFilePathFromUUID(accountName, uuid string) (filePath, extension string, 
 func getMetadata(accountName, uuid string) (*cdnclient.CDNFileData, error) {
 	filePath, extension, err := getFilePathFromUUID(accountName, uuid)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("getting file path from uuid: %s", err)
 	}
 
 	file, err := os.Open(filePath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("opening file: %s", err)
 	}
 
-	i, _, err := image.Decode(file)
-	if err != nil {
-		return nil, err
-	}
+	var width, height int
 
-	bounds := i.Bounds()
-	width := bounds.Max.X
-	height := bounds.Max.Y
+	if isImageExtension(extension) {
+		i, _, err := image.Decode(file)
+		if err != nil {
+			return nil, fmt.Errorf("decoding: %s", err)
+		}
+
+		bounds := i.Bounds()
+		width = bounds.Max.X
+		height = bounds.Max.Y
+	}
 
 	filestat, _ := file.Stat()
-	//filestat
 
 	return &cdnclient.CDNFileData{
 		UUID:      uuid,

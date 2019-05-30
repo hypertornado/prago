@@ -211,7 +211,7 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_item_date"}}
-  <input type="date" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="date" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-date"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_timestamp"}}
@@ -221,7 +221,7 @@ const adminTemplates = `
     <div class="admin_timestamp">
       <input type="hidden" id="{{.UUID}}" name="{{.Name}}" value="{{.Value}}">
 
-      <input type="date" name="_admin_timestamp_hidden" class="input form_input admin_timestamp_date"{{if .Focused}} autofocus{{end}}>
+      <input type="date" name="_admin_timestamp_hidden" class="input form_input form_input-date admin_timestamp_date"{{if .Focused}} autofocus{{end}}>
 
       <select class="input form_watcher form_input admin_timestamp_hour"></select>
       <span class="admin_timestamp_divider">:</span>
@@ -5432,6 +5432,70 @@ var FilterDate = (function () {
     };
     return FilterDate;
 }());
+function bindDatePicker() {
+    var dates = document.querySelectorAll(".form_input-date");
+    for (var i = 0; i < dates.length; i++) {
+        var dateEl = dates[i];
+        new DatePicker(dateEl);
+    }
+}
+var DatePicker = (function () {
+    function DatePicker(el) {
+        console.log(el);
+        var language = "cs";
+        var i18n = {
+            previousMonth: 'Previous Month',
+            nextMonth: 'Next Month',
+            months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+            weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            weekdaysShort: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+        };
+        if (language == "de") {
+            i18n = {
+                previousMonth: 'Vorheriger Monat',
+                nextMonth: 'Nächsten Monat',
+                months: ["Januar", "Februar", "März", "April", "Kann", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+                weekdays: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
+                weekdaysShort: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
+            };
+        }
+        if (language == "ru") {
+            var i18n = {
+                previousMonth: 'Предыдущий месяц',
+                nextMonth: 'В следующем месяце',
+                months: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+                weekdays: ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"],
+                weekdaysShort: ['Во', 'По', 'Вт', 'Ср', 'Че', 'Пя', 'Су']
+            };
+        }
+        if (language == "cs") {
+            i18n = {
+                previousMonth: 'Předchozí měsíc',
+                nextMonth: 'Další měsíc',
+                months: ["Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"],
+                weekdays: ['Neděle', 'Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota'],
+                weekdaysShort: ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So']
+            };
+        }
+        var self = this;
+        var pd = new Pikaday({
+            field: el,
+            format: 'D MMM YYYY',
+            firstDay: 1,
+            i18n: i18n
+        }, toString(date, any, format, any), string, {
+            "return": prettyDate(date)
+        });
+    }
+    ;
+    return DatePicker;
+}());
+function prettyDate(date) {
+    var day = date.getDate();
+    var month = date.getMonth() + 1;
+    var year = date.getFullYear();
+    return day + ". " + month + ". " + year;
+}
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();
@@ -5444,6 +5508,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindFlashMessages();
     bindFilter();
     bindScrolled();
+    bindDatePicker();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");

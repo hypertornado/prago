@@ -3,12 +3,13 @@ package administration
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/golang-commonmark/markdown"
-	"github.com/hypertornado/prago"
 	"io/ioutil"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/golang-commonmark/markdown"
+	"github.com/hypertornado/prago"
 )
 
 func bindAPI(a *Administration) {
@@ -190,7 +191,14 @@ func bindRelationAPI(admin *Administration) {
 
 		var item interface{}
 		resource.newItem(&item)
-		must(admin.Query().WhereIs("id", idStr).Get(item))
+		err := admin.Query().WhereIs("id", idStr).Get(item)
+		if err == ErrItemNotFound {
+			render404(request)
+			return
+		}
+		if err != nil {
+			panic(err)
+		}
 
 		relationItem := resource.itemToRelationData(user, item)
 		request.RenderJSON(relationItem)

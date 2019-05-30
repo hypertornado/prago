@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindFlashMessages();
   bindFilter();
   bindScrolled();
+  bindDatePicker();
 });
 
 function bindFlashMessages() {

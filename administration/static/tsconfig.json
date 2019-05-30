@@ -24,6 +24,7 @@
         "js/places.ts",
         "js/form.ts",
         "js/filter.ts",
+        "js/datepicker.ts",
         "js/load.ts"
     ]
 }
