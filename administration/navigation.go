@@ -1,10 +1,11 @@
 package administration
 
 import (
-	"github.com/hypertornado/prago"
-	"github.com/hypertornado/prago/administration/messages"
 	"strconv"
 	"strings"
+
+	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/administration/messages"
 )
 
 type adminNavigationPage struct {

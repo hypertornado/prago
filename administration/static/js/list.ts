@@ -25,13 +25,13 @@ class List {
   progress: HTMLProgressElement;
 
   settingsEl: HTMLDivElement;
-  openbutton: HTMLButtonElement;
-  closebutton: HTMLButtonElement;
+  //openbutton: HTMLButtonElement;
+  //closebutton: HTMLButtonElement;
 
   constructor(el: HTMLDivElement, openbutton: HTMLButtonElement) {
     this.el = el;
-    this.openbutton = openbutton;
-    this.closebutton = this.el.querySelector(".admin_tablesettings_close");
+    //this.openbutton = openbutton;
+    //this.closebutton = this.el.querySelector(".admin_tablesettings_close");
     this.settingsEl = this.el.querySelector(".admin_tablesettings");
 
     this.page = 1;
@@ -59,8 +59,8 @@ class List {
       this.orderDesc = false;
     }
 
-    this.openbutton.addEventListener("click", this.toggleShowHide.bind(this));
-    this.closebutton.addEventListener("click", this.toggleShowHide.bind(this));
+    //this.openbutton.addEventListener("click", this.toggleShowHide.bind(this));
+    //this.closebutton.addEventListener("click", this.toggleShowHide.bind(this));
     this.bindOptions();
     this.bindOrder();
   }

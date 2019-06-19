@@ -1,0 +1,18 @@
+{{define "admin_breadcrumbs"}}
+  <div class="admin_navigation_breadcrumbs">
+    {{range $item := .}}
+      <a href="{{$item.URL}}" class="admin_navigation_breadcrumb">
+        {{- if $item.Logo -}}
+          <div style="background-image: url('{{CSS $item.Logo}}');"
+          class="admin_navigation_breadcrumb_image admin_navigation_breadcrumb_image-logo"></div>
+        {{- end -}}
+        {{- if $item.Image -}}
+          <div style="background-image: url('{{CSS $item.Image}}');"
+          class="admin_navigation_breadcrumb_image"></div>
+        {{- end -}}
+        {{- $item.Name -}}
+        <div class="admin_navigation_breadcrumb_divider"></div>
+      </a>
+    {{end}}
+  </div>
+{{end}}

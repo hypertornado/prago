@@ -24,37 +24,52 @@
   </head>
   <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.admin_header.UrlPrefix}}">
     {{template "admin_flash" .}}
-    <div class="admin_header">
-        <div class="admin_header_top">
-            <a href="{{.admin_header.UrlPrefix}}" class="
-                admin_header_top_item admin_header_name
-                {{if .admin_navigation_logo_selected}}admin_header_top_item-selected{{end}}
-            ">
-                {{message .locale "admin_admin"}} – {{.admin_header.Name}}
-            </a>
-            <div class="admin_header_top_item admin_header_top_space"></div>
-            <div class="admin_header_top_item">{{.currentuser.Email}}</div>
-            <a href="{{.admin_header.UrlPrefix}}/user/settings" class="
-                admin_header_top_item
-                {{if .admin_navigation_settings_selected}}admin_header_top_item-selected{{end}}
-            ">
-                {{message .locale "admin_settings"}}
-            </a>
-            <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
-        </div>
+    <div class="admin_layout">
+        <div class="admin_header">
+            <div class="admin_header_top">
+                {{if .admin_page}}
+                    {{template "admin_breadcrumbs" .admin_page.Navigation.Breadcrumbs}}
+                {{else}}
+                    <a href="{{.admin_header.UrlPrefix}}" class="
+                        admin_header_top_item admin_header_name
+                        {{if .admin_navigation_logo_selected}}admin_header_top_item-selected{{end}}
+                    ">
+                        {{message .locale "admin_admin"}} – {{.admin_header.Name}}
+                    </a>
+                {{end}}
+                <div class="admin_header_top_item admin_header_top_space"></div>
+                <div class="admin_header_top_item">{{.currentuser.Email}}</div>
+                <a href="{{.admin_header.UrlPrefix}}/user/settings" class="
+                    admin_header_top_item
+                    {{if .admin_navigation_settings_selected}}admin_header_top_item-selected{{end}}
+                ">
+                    {{message .locale "admin_settings"}}
+                </a>
+                <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
+            </div>
 
-
-        {{ $admin_resource := .admin_resource }}
-
-        <div class="admin_header_resources">
-            {{range $item := .admin_header.Items}}
-                <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
+            {{if .admin_page}}
+            <div class="admin_navigation_tabs">
+                {{range $item := .admin_page.Navigation.Tabs}}
+                    <a href="{{$item.URL}}" class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
+                        {{$item.Name}}
+                    </a>
+                {{end}}
+            </div>
             {{end}}
         </div>
-    </div>
 
-    <div class="admin_content">
-        {{tmpl .admin_yield .}}
+        <div class="admin_bottom">
+            {{ $admin_resource := .admin_resource}}
+            <div class="admin_header_resources">
+                {{range $item := .admin_header.Items}}
+                    <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
+                {{end}}
+            </div>
+            <div class="admin_content">
+                {{tmpl .admin_yield .}}
+            </div>
+        </div>
     </div>
   </body>
 </html>

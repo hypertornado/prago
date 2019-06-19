@@ -2386,15 +2386,15 @@ ul {
   margin-bottom: 1rem;
 }
 .admin_box {
-  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
-  margin: 5px auto;
+  border: 1px solid #eee;
+  margin: 20px auto;
   background-color: white;
   border-radius: 2px;
   max-width: 600px;
   width: 100%;
   margin-bottom: 100px;
   background-color: #fff;
-  border-radius: 3px;
+  border-radius: 5px;
 }
 .admin_box_padding {
   padding: 1px 10px;
@@ -2405,6 +2405,7 @@ ul {
   width: 100%;
   padding: 0px;
   margin-top: 0px;
+  border: none;
   background-color: rgba(0, 0, 0, 0);
 }
 .btn {
@@ -2608,7 +2609,7 @@ select.admin_table_filter_item {
 .admin_table {
   background-color: white;
   min-width: 100%;
-  margin: 0 auto;
+  margin: 0px auto;
 }
 .admin_table_orderheader {
   text-decoration: none;
@@ -2628,9 +2629,10 @@ select.admin_table_filter_item {
 }
 .admin_table_row:hover {
   background-color: rgba(64, 120, 192, 0.05);
-  background-color: #4078c0;
-  color: white;
   cursor: pointer;
+}
+.admin_table_row:active {
+  background-color: rgba(64, 120, 192, 0.1);
 }
 .admin_table_row td {
   padding: 2px 5px;
@@ -2644,10 +2646,9 @@ select.admin_table_filter_item {
 .admin_list_table tr:last-child td {
   border-bottom: 1px solid #f1f1f1;
 }
-.aadmin_list_table tr td:first-child,
-.admin_list_table tr th:first-child {
+/*.aadmin_list_table tr td:first-child, .admin_list_table tr th:first-child {
   border-left: 1px solid #f1f1f1;
-}
+}*/
 .admin_table th {
   padding: 5px;
   vertical-align: bottom;
@@ -2857,6 +2858,8 @@ select.admin_timestamp_minute {
 .ordered,
 .ordered:hover {
   background-color: rgba(64, 120, 192, 0.1);
+  background: #4078c0;
+  color: white;
   border-radius: 3px;
 }
 .ordered:after,
@@ -2923,13 +2926,13 @@ progress {
 .admin_navigation_breadcrumbs {
   display: flex;
   flex-wrap: wrap;
-  margin: 10px 10px;
-  font-size: 1.1rem;
+  margin: 0px 0px;
+  font-size: 1rem;
   align-items: center;
+  align-items: stretch;
 }
 .admin_navigation_breadcrumb {
   text-decoration: none;
-  border-radius: 3px;
   display: flex;
   align-items: center;
   line-height: 30px;
@@ -2944,8 +2947,9 @@ progress {
   height: 30px;
   margin: 3px 10px 3px 0px;
   display: inline-block;
-  border-radius: 5px;
+  border-radius: 300px;
   background-color: white;
+  border: 1px solid #eee;
 }
 .admin_navigation_breadcrumb_image-logo {
   background-size: contain;
@@ -2955,18 +2959,22 @@ progress {
   vertical-align: center;
   display: inline-flex;
   color: #4078c0;
-  margin: 0px 0px 0px 10px;
+  margin: 0px 0px 0px 5px;
   font-weight: 100;
+  color: #999;
 }
 .admin_navigation_breadcrumb_divider:after {
-  content: ">";
+  content: "⇢";
 }
 .admin_navigation_tabs {
   display: flex;
   justify-content: center;
   vertical-align: bottom;
   flex-wrap: wrap;
-  margin: 10px 5px 20px 5px;
+  margin: 5px 5px 10px 5px;
+}
+.admin_header .admin_navigation_tabs {
+  margin-left: 205px;
 }
 .admin_navigation_tab {
   white-space: nowrap;
@@ -2974,9 +2982,9 @@ progress {
   margin: 0px;
   display: flex;
   border-bottom: none;
-  font-size: 1rem;
+  font-size: .9rem;
   text-decoration: none;
-  padding: 3px 10px;
+  padding: 1px 10px;
   display: inline-block;
   background-color: white;
   border-top: 1px solid #4078c0;
@@ -3006,7 +3014,6 @@ progress {
   font-weight: normal;
 }
 .btn-more_content {
-  border: 0px solid red;
   display: none;
   position: absolute;
   right: -1px;
@@ -3164,33 +3171,26 @@ td.admin_list_message {
   margin: 0 auto;
 }
 .admin_tablesettings {
-  border: 1px solid #eee;
-  background: white;
-  padding: 10px 10px;
-  border-radius: 3px;
-  margin: 10px 200px;
+  padding: 30px 5px 10px 5px;
 }
-.admin_tablesettings_close {
-  float: right;
+.admin_tablesettings_name {
+  display: inline-block;
+  display: block;
+  display: none;
+  font-size: .8rem;
 }
-.admin_tablesettings h2 {
-  margin-top: 0px;
+.admin_tablesettings_name:after {
+  content: ":";
 }
 .admin_tablesettings_label {
   font-size: .8rem;
   display: inline-block;
-  padding: 2px 5px;
-  background-color: #fafafa;
-  margin: 3px 1px;
-  border-radius: 3px;
-  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
+  padding: 2px 2px;
 }
-.admin_tablesettings_buttons {
-  text-align: right;
-  padding: 5px;
-}
-.admin_tablesettings_close {
-  float: right;
+.admin_layout {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 .admin_header {
   padding-bottom: 0px;
@@ -3198,11 +3198,16 @@ td.admin_list_message {
   z-index: 2;
   line-height: 1.6em;
   flex-grow: 0;
-  flex-shrink: 0;
   background: white;
   position: -webkit-sticky;
   position: sticky;
   top: 0px;
+  flex-shrink: 0;
+  box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
+}
+.admin_bottom {
+  flex-grow: 1000;
+  display: flex;
 }
 .admin_header-scrolled {
   box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
@@ -3211,7 +3216,7 @@ td.admin_list_message {
   border-radius: 3px;
   padding: 2px 5px;
   margin: 2px 2px;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 .admin_header_top_item-selected {
   background-color: rgba(64, 120, 192, 0.05);
@@ -3226,7 +3231,7 @@ td.admin_list_message {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  padding: 5px 10px;
+  padding: 0px 5px;
   background-color: #fafafa;
   background: linear-gradient(#fafafa, #fff);
 }
@@ -3237,30 +3242,59 @@ td.admin_list_message {
 }
 .admin_header_resources {
   margin: 0px;
-  padding: 0px;
   clear: both;
   display: flex;
-  padding: 0px 5px;
-  padding-bottom: 5px;
+  padding: 5px 0px;
   flex-wrap: wrap;
   overflow-x: auto;
+  background-color: white;
+  width: 200px;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+  border-right: 1px solid #f1f1f1;
 }
-.admin_header_resource {
+a.admin_header_resource {
   text-transform: uppercase;
   padding: 3px 10px;
   margin: 0px;
   font-size: .9rem;
   border-bottom: 2px solid none;
   flex-shrink: 0;
-  border-radius: 3px;
+  text-decoration: none;
+  color: #999;
+  color: #444;
+}
+a.admin_header_resource:hover {
+  color: #444;
 }
 .admin_header_resource-active,
 .admin_header_resource-active:hover {
   background-color: #4078c0;
-  color: white;
+  color: white !important;
 }
 .admin_header_sitename {
   font-size: .9rem;
+}
+.admin_content {
+  flex-grow: 100;
+  overflow-y: auto;
+}
+@media (max-width: 800px) {
+  .admin_bottom {
+    flex-direction: column;
+  }
+  .admin_header_resources {
+    flex-direction: row;
+    width: 100%;
+  }
+  .admin_header_resource {
+    padding: 5px 10px;
+    margin: 2px 5px;
+  }
+  .admin_header .admin_navigation_tabs {
+    margin-left: 5px;
+  }
 }
 /*!
  * Pikaday

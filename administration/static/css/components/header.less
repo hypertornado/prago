@@ -1,3 +1,10 @@
+.admin_layout {
+  width: 100%;
+  //height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .admin_header {
   padding-bottom: 0px;
   position: relative;
@@ -10,7 +17,20 @@
   position: -webkit-sticky;
   position: sticky;
   top: 0px;
+
+  //border: 1px solid blue;
+  flex-shrink: 0;
+  //border-bottom: 1px solid #f1f1f1;
+  //border: 1px solid red;
+  box-shadow: 0px 2px 3px rgba(0,0,0,0.05);
 }
+
+.admin_bottom {
+  //border: 1px solid yellow;
+  flex-grow: 1000;
+  display: flex;
+}
+
 .admin_header-scrolled {
   box-shadow: 0px 2px 3px rgba(0,0,0,0.05);
 }
@@ -19,7 +39,7 @@
   border-radius: 3px;
   padding: 2px 5px;
   margin: 2px 2px;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .admin_header_top_item-selected {
@@ -38,7 +58,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  padding: 5px 10px;
+  padding: 0px 5px;
   background-color: #fafafa;
   background: linear-gradient(#fafafa, #fff);
 }
@@ -51,30 +71,68 @@
 
 .admin_header_resources {
   margin: 0px;
-  padding: 0px;
   clear: both;
   display: flex;
-  padding: 0px 5px;
-  padding-bottom: 5px;
+  padding: 5px 0px;
+  //padding-bottom: 5px;
   flex-wrap: wrap;
   overflow-x: auto;
+  //border: 1px solid red;
+  background-color: white;
+  width: 200px;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+  border-right: 1px solid #f1f1f1;
 }
 
-.admin_header_resource {
+a.admin_header_resource {
   text-transform: uppercase;
   padding: 3px 10px;
   margin: 0px;
   font-size: .9rem;
   border-bottom: 2px solid none;
   flex-shrink: 0;
-  border-radius: 3px;
+  //border-radius: 3px;
+  text-decoration: none;
+  color: @gray;
+  color: @black;
+}
+
+a.admin_header_resource:hover {
+  color: @black;
 }
 
 .admin_header_resource-active, .admin_header_resource-active:hover {
   background-color: @baseColor;
-  color: white;
+  color: white !important;
 }
 
 .admin_header_sitename {
   font-size: .9rem;
+}
+
+.admin_content {
+  flex-grow: 100;
+  overflow-y: auto;
+}
+
+@media (max-width: 800px) {
+  .admin_bottom {
+    flex-direction: column;
+  }
+
+  .admin_header_resources {
+    flex-direction: row;
+    width: 100%;
+  }
+  
+  .admin_header_resource {
+    padding: 5px 10px;
+    margin: 2px 5px;
+  }
+
+  .admin_header .admin_navigation_tabs {
+    margin-left: 5px;
+  }
 }

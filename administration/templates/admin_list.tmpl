@@ -6,20 +6,12 @@
   data-prefilter-field="{{.PrefilterField}}"
   data-prefilter-value="{{.PrefilterValue}}"
 >
-  <div class="admin_tablesettings hidden">
-    <button class="admin_tablesettings_close btn btn-small">✕</button>
-
-    <h2>{{message .Locale "admin_options"}}</h2>
-
-    <h3>{{message .Locale "admin_options_visible"}}</h3>
+  <div class="admin_tablesettings">
+    <div class="admin_tablesettings_name">{{message .Locale "admin_options_visible"}}</div>
 
     {{range $item := .Header}}
       <label class="admin_tablesettings_label"><input type="checkbox"{{if .DefaultShow}}checked{{end}} class="admin_tablesettings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
     {{end}}
-  </div>
-
-  <div class="admin_tablesettings_buttons">
-    <div class="admin_tablesettingsbutton btn btn-small">{{message .Locale "admin_options"}}</div>
   </div>
 
   <table class="admin_table admin_list_table">

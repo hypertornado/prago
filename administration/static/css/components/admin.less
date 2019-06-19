@@ -112,15 +112,16 @@ ul {
 }
 
 .admin_box {
-  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
-  margin: 5px auto;
+  //box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #eee;
+  margin: 20px auto;
   background-color: white;
   border-radius: 2px;
   max-width: 600px;
   width: 100%;
   margin-bottom: 100px;
   background-color: #fff;
-  border-radius: 3px;
+  border-radius: 5px;
 }
 
 .admin_box_padding {
@@ -133,6 +134,7 @@ ul {
   width: 100%;
   padding: 0px;
   margin-top: 0px;
+  border: none;
   background-color: rgba(0,0,0,0);
 }
 
@@ -355,7 +357,7 @@ select.admin_table_filter_item {
 .admin_table {
   background-color: white;
   min-width: 100%;
-  margin: 0 auto;
+  margin: 0px auto;
 }
 
 .admin_table_orderheader {
@@ -380,13 +382,13 @@ select.admin_table_filter_item {
 
 .admin_table_row:hover {
   background-color: @baseColorBackgroundLighter;
-  background-color: @baseColor;
-  color: white;
+  //background-color: @baseColor;
+  //color: white;
   cursor: pointer;
 }
 
 .admin_table_row:active {
-  //background-color: @baseColorBackground;
+  background-color: @baseColorBackground;
 }
 
 .admin_table-dragging .admin_table_row:active {
@@ -409,9 +411,9 @@ select.admin_table_filter_item {
   border-bottom: 1px solid #f1f1f1;
 }
 
-.aadmin_list_table tr td:first-child, .admin_list_table tr th:first-child {
+/*.aadmin_list_table tr td:first-child, .admin_list_table tr th:first-child {
   border-left: 1px solid #f1f1f1;
-}
+}*/
 
 .admin_table th {
   padding: 5px;
@@ -663,6 +665,8 @@ select.admin_timestamp_minute {
 
 .ordered, .ordered:hover {
   background-color: @baseColorBackground;
+  background: @baseColor;
+  color: white;
   border-radius: 3px;
 }
 
@@ -739,14 +743,15 @@ progress {
 .admin_navigation_breadcrumbs {
   display: flex;
   flex-wrap: wrap;
-  margin: 10px 10px;
-  font-size: 1.1rem;
+  margin: 0px 0px;
+  font-size: 1rem;
   align-items: center;
+  align-items: stretch;
 }
 
 .admin_navigation_breadcrumb {
   text-decoration: none;
-  border-radius: 3px;
+  //border-radius: 3px;
   display: flex;
   align-items: center;
   line-height: 30px;
@@ -762,9 +767,10 @@ progress {
   height: 30px;
   margin: 3px 10px 3px 0px;
   display: inline-block;
-  border-radius: 5px;
+  border-radius: 300px;
   background-color: white;
   //.shadow;
+  border: 1px solid #eee;
 }
 
 .admin_navigation_breadcrumb_image-logo {
@@ -777,12 +783,13 @@ progress {
   display: inline-flex;
 
   color: @baseColor;
-  margin: 0px 0px 0px 10px;
+  margin: 0px 0px 0px 5px;
   font-weight: 100;
+  color: @gray;
 }
 
 .admin_navigation_breadcrumb_divider:after {
-  content: ">";
+  content: "⇢";
 }
 
 .admin_navigation_tabs {
@@ -790,7 +797,11 @@ progress {
   justify-content: center;
   vertical-align: bottom;
   flex-wrap: wrap;
-  margin: 10px 5px 20px 5px;
+  margin: 5px 5px 10px 5px;
+}
+
+.admin_header .admin_navigation_tabs {
+  margin-left: 205px;
 }
 
 .admin_navigation_tab {
@@ -799,10 +810,10 @@ progress {
   margin: 0px;
   display: flex;
   border-bottom: none;
-  font-size: 1rem;
+  font-size: .9rem;
 
   text-decoration: none;
-  padding: 3px 10px;
+  padding: 1px 10px;
   display: inline-block;
 
   background-color: white;
@@ -837,7 +848,6 @@ progress {
 }
 
 .btn-more_content {
-  border: 0px solid red;
   display: none;
   position: absolute;
   right: -1px;
@@ -1026,38 +1036,36 @@ td.admin_list_message {
 }
 
 .admin_tablesettings {
-  border: 1px solid #eee;
-  background: white;
-  padding: 10px 10px;
-  border-radius: 3px;
-  margin: 10px 200px;
+  //border: 1px solid #eee;
+  //background: white;
+  padding: 30px 5px 10px 5px;
+  //border-radius: 3px;
+  //text-align: center;
+  //margin: 10px 10px;
+  //background: white;
+  //border-top: 1px solid #eee;
 }
 
-.admin_tablesettings_close {
-  float: right;
+.admin_tablesettings_name {
+  display: inline-block;
+  display: block;
+  display: none;
+  //font-weight: 500;
+  font-size: .8rem;
 }
 
-.admin_tablesettings h2 {
-  margin-top: 0px;
+.admin_tablesettings_name:after {
+  content: ":";
 }
 
 .admin_tablesettings_label {
   font-size: .8rem;
   display: inline-block;
   //display: block;
-  padding: 2px 5px;
-  background-color: #fafafa;
-  margin: 3px 1px;
-  border-radius: 3px;
-  box-shadow: 0px 0px 2px rgba(0,0,0,0.2);
-}
-
-.admin_tablesettings_buttons {
-  text-align: right;
-  padding: 5px;
-}
-
-.admin_tablesettings_close {
-  float: right;
+  padding: 2px 2px;
+  //background-color: #fafafa;
+  //margin: 3px 1px;
+  //border-radius: 3px;
+  //box-shadow: 0px 0px 2px rgba(0,0,0,0.2);
 }
 

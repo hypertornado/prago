@@ -1,6 +1,23 @@
 package administration
 const adminTemplates = `
-{{define "admin_delete"}}
+{{define "admin_breadcrumbs"}}
+  <div class="admin_navigation_breadcrumbs">
+    {{range $item := .}}
+      <a href="{{$item.URL}}" class="admin_navigation_breadcrumb">
+        {{- if $item.Logo -}}
+          <div style="background-image: url('{{CSS $item.Logo}}');"
+          class="admin_navigation_breadcrumb_image admin_navigation_breadcrumb_image-logo"></div>
+        {{- end -}}
+        {{- if $item.Image -}}
+          <div style="background-image: url('{{CSS $item.Image}}');"
+          class="admin_navigation_breadcrumb_image"></div>
+        {{- end -}}
+        {{- $item.Name -}}
+        <div class="admin_navigation_breadcrumb_divider"></div>
+      </a>
+    {{end}}
+  </div>
+{{end}}{{define "admin_delete"}}
   <h1>Chcete smazat tuto položku?</h1>
   {{template "admin_form" .form}}
 {{end}}{{define "admin_export"}}
@@ -151,7 +168,7 @@ const adminTemplates = `
 {{end}}{{define "admin_home_navigation"}}
   <div class="admin_box_padding">  
     {{range $item := .}}
-      <h2><a href="{{$item.URL}}">{{$item.Name}}</a></h2>
+      <a href="{{$item.URL}}">{{$item.Name}}</a>
       <ul>
         {{range $action := $item.Actions}}
           <li><a href="{{$action.URL}}">{{$action.Name}}</a></li>
@@ -340,37 +357,52 @@ const adminTemplates = `
   </head>
   <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.admin_header.UrlPrefix}}">
     {{template "admin_flash" .}}
-    <div class="admin_header">
-        <div class="admin_header_top">
-            <a href="{{.admin_header.UrlPrefix}}" class="
-                admin_header_top_item admin_header_name
-                {{if .admin_navigation_logo_selected}}admin_header_top_item-selected{{end}}
-            ">
-                {{message .locale "admin_admin"}} – {{.admin_header.Name}}
-            </a>
-            <div class="admin_header_top_item admin_header_top_space"></div>
-            <div class="admin_header_top_item">{{.currentuser.Email}}</div>
-            <a href="{{.admin_header.UrlPrefix}}/user/settings" class="
-                admin_header_top_item
-                {{if .admin_navigation_settings_selected}}admin_header_top_item-selected{{end}}
-            ">
-                {{message .locale "admin_settings"}}
-            </a>
-            <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
-        </div>
+    <div class="admin_layout">
+        <div class="admin_header">
+            <div class="admin_header_top">
+                {{if .admin_page}}
+                    {{template "admin_breadcrumbs" .admin_page.Navigation.Breadcrumbs}}
+                {{else}}
+                    <a href="{{.admin_header.UrlPrefix}}" class="
+                        admin_header_top_item admin_header_name
+                        {{if .admin_navigation_logo_selected}}admin_header_top_item-selected{{end}}
+                    ">
+                        {{message .locale "admin_admin"}} – {{.admin_header.Name}}
+                    </a>
+                {{end}}
+                <div class="admin_header_top_item admin_header_top_space"></div>
+                <div class="admin_header_top_item">{{.currentuser.Email}}</div>
+                <a href="{{.admin_header.UrlPrefix}}/user/settings" class="
+                    admin_header_top_item
+                    {{if .admin_navigation_settings_selected}}admin_header_top_item-selected{{end}}
+                ">
+                    {{message .locale "admin_settings"}}
+                </a>
+                <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
+            </div>
 
-
-        {{ $admin_resource := .admin_resource }}
-
-        <div class="admin_header_resources">
-            {{range $item := .admin_header.Items}}
-                <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
+            {{if .admin_page}}
+            <div class="admin_navigation_tabs">
+                {{range $item := .admin_page.Navigation.Tabs}}
+                    <a href="{{$item.URL}}" class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
+                        {{$item.Name}}
+                    </a>
+                {{end}}
+            </div>
             {{end}}
         </div>
-    </div>
 
-    <div class="admin_content">
-        {{tmpl .admin_yield .}}
+        <div class="admin_bottom">
+            {{ $admin_resource := .admin_resource}}
+            <div class="admin_header_resources">
+                {{range $item := .admin_header.Items}}
+                    <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
+                {{end}}
+            </div>
+            <div class="admin_content">
+                {{tmpl .admin_yield .}}
+            </div>
+        </div>
     </div>
   </body>
 </html>
@@ -401,20 +433,12 @@ const adminTemplates = `
   data-prefilter-field="{{.PrefilterField}}"
   data-prefilter-value="{{.PrefilterValue}}"
 >
-  <div class="admin_tablesettings hidden">
-    <button class="admin_tablesettings_close btn btn-small">✕</button>
-
-    <h2>{{message .Locale "admin_options"}}</h2>
-
-    <h3>{{message .Locale "admin_options_visible"}}</h3>
+  <div class="admin_tablesettings">
+    <div class="admin_tablesettings_name">{{message .Locale "admin_options_visible"}}</div>
 
     {{range $item := .Header}}
       <label class="admin_tablesettings_label"><input type="checkbox"{{if .DefaultShow}}checked{{end}} class="admin_tablesettings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
     {{end}}
-  </div>
-
-  <div class="admin_tablesettings_buttons">
-    <div class="admin_tablesettingsbutton btn btn-small">{{message .Locale "admin_options"}}</div>
   </div>
 
   <table class="admin_table admin_list_table">
@@ -544,31 +568,6 @@ const adminTemplates = `
   <h1>{{.message}}</h1>
 </div>
 {{end}}{{define "admin_navigation"}}
-  <div class="admin_navigation_breadcrumbs">
-    {{range $item := .Breadcrumbs}}
-      <a href="{{$item.URL}}" class="admin_navigation_breadcrumb">
-        {{- if $item.Logo -}}
-          <div style="background-image: url('{{CSS $item.Logo}}');"
-          class="admin_navigation_breadcrumb_image admin_navigation_breadcrumb_image-logo"></div>
-        {{- end -}}
-        {{- if $item.Image -}}
-          <div style="background-image: url('{{CSS $item.Image}}');"
-          class="admin_navigation_breadcrumb_image"></div>
-        {{- end -}}
-        {{- $item.Name -}}
-        <div class="admin_navigation_breadcrumb_divider"></div>
-      </a>
-    {{end}}
-  </div>
-
-  <div class="admin_navigation_tabs">
-    {{range $item := .Tabs}}
-      <a href="{{$item.URL}}" class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
-        {{$item.Name}}
-      </a>
-    {{end}}
-  </div>
-
   <div class="admin_box{{if .Wide}} admin_box-wide{{end}}">
 {{end}}
 
@@ -902,6 +901,7 @@ const adminTemplates = `
 
 
 const adminCSS = `
+@charset "UTF-8";
 @font-face {
   font-family: 'Glyphicons Regular';
   src: url('/fonts/glyphicons-regular.woff2') format('woff2'), url('/fonts/glyphicons-regular.woff') format('woff');
@@ -3289,15 +3289,15 @@ ul {
   margin-bottom: 1rem;
 }
 .admin_box {
-  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
-  margin: 5px auto;
+  border: 1px solid #eee;
+  margin: 20px auto;
   background-color: white;
   border-radius: 2px;
   max-width: 600px;
   width: 100%;
   margin-bottom: 100px;
   background-color: #fff;
-  border-radius: 3px;
+  border-radius: 5px;
 }
 .admin_box_padding {
   padding: 1px 10px;
@@ -3308,6 +3308,7 @@ ul {
   width: 100%;
   padding: 0px;
   margin-top: 0px;
+  border: none;
   background-color: rgba(0, 0, 0, 0);
 }
 .btn {
@@ -3511,7 +3512,7 @@ select.admin_table_filter_item {
 .admin_table {
   background-color: white;
   min-width: 100%;
-  margin: 0 auto;
+  margin: 0px auto;
 }
 .admin_table_orderheader {
   text-decoration: none;
@@ -3531,9 +3532,10 @@ select.admin_table_filter_item {
 }
 .admin_table_row:hover {
   background-color: rgba(64, 120, 192, 0.05);
-  background-color: #4078c0;
-  color: white;
   cursor: pointer;
+}
+.admin_table_row:active {
+  background-color: rgba(64, 120, 192, 0.1);
 }
 .admin_table_row td {
   padding: 2px 5px;
@@ -3547,10 +3549,9 @@ select.admin_table_filter_item {
 .admin_list_table tr:last-child td {
   border-bottom: 1px solid #f1f1f1;
 }
-.aadmin_list_table tr td:first-child,
-.admin_list_table tr th:first-child {
+/*.aadmin_list_table tr td:first-child, .admin_list_table tr th:first-child {
   border-left: 1px solid #f1f1f1;
-}
+}*/
 .admin_table th {
   padding: 5px;
   vertical-align: bottom;
@@ -3760,6 +3761,8 @@ select.admin_timestamp_minute {
 .ordered,
 .ordered:hover {
   background-color: rgba(64, 120, 192, 0.1);
+  background: #4078c0;
+  color: white;
   border-radius: 3px;
 }
 .ordered:after,
@@ -3826,13 +3829,13 @@ progress {
 .admin_navigation_breadcrumbs {
   display: flex;
   flex-wrap: wrap;
-  margin: 10px 10px;
-  font-size: 1.1rem;
+  margin: 0px 0px;
+  font-size: 1rem;
   align-items: center;
+  align-items: stretch;
 }
 .admin_navigation_breadcrumb {
   text-decoration: none;
-  border-radius: 3px;
   display: flex;
   align-items: center;
   line-height: 30px;
@@ -3847,8 +3850,9 @@ progress {
   height: 30px;
   margin: 3px 10px 3px 0px;
   display: inline-block;
-  border-radius: 5px;
+  border-radius: 300px;
   background-color: white;
+  border: 1px solid #eee;
 }
 .admin_navigation_breadcrumb_image-logo {
   background-size: contain;
@@ -3858,18 +3862,22 @@ progress {
   vertical-align: center;
   display: inline-flex;
   color: #4078c0;
-  margin: 0px 0px 0px 10px;
+  margin: 0px 0px 0px 5px;
   font-weight: 100;
+  color: #999;
 }
 .admin_navigation_breadcrumb_divider:after {
-  content: ">";
+  content: "⇢";
 }
 .admin_navigation_tabs {
   display: flex;
   justify-content: center;
   vertical-align: bottom;
   flex-wrap: wrap;
-  margin: 10px 5px 20px 5px;
+  margin: 5px 5px 10px 5px;
+}
+.admin_header .admin_navigation_tabs {
+  margin-left: 205px;
 }
 .admin_navigation_tab {
   white-space: nowrap;
@@ -3877,9 +3885,9 @@ progress {
   margin: 0px;
   display: flex;
   border-bottom: none;
-  font-size: 1rem;
+  font-size: .9rem;
   text-decoration: none;
-  padding: 3px 10px;
+  padding: 1px 10px;
   display: inline-block;
   background-color: white;
   border-top: 1px solid #4078c0;
@@ -3909,7 +3917,6 @@ progress {
   font-weight: normal;
 }
 .btn-more_content {
-  border: 0px solid red;
   display: none;
   position: absolute;
   right: -1px;
@@ -4067,33 +4074,26 @@ td.admin_list_message {
   margin: 0 auto;
 }
 .admin_tablesettings {
-  border: 1px solid #eee;
-  background: white;
-  padding: 10px 10px;
-  border-radius: 3px;
-  margin: 10px 200px;
+  padding: 30px 5px 10px 5px;
 }
-.admin_tablesettings_close {
-  float: right;
+.admin_tablesettings_name {
+  display: inline-block;
+  display: block;
+  display: none;
+  font-size: .8rem;
 }
-.admin_tablesettings h2 {
-  margin-top: 0px;
+.admin_tablesettings_name:after {
+  content: ":";
 }
 .admin_tablesettings_label {
   font-size: .8rem;
   display: inline-block;
-  padding: 2px 5px;
-  background-color: #fafafa;
-  margin: 3px 1px;
-  border-radius: 3px;
-  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
+  padding: 2px 2px;
 }
-.admin_tablesettings_buttons {
-  text-align: right;
-  padding: 5px;
-}
-.admin_tablesettings_close {
-  float: right;
+.admin_layout {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 .admin_header {
   padding-bottom: 0px;
@@ -4101,11 +4101,16 @@ td.admin_list_message {
   z-index: 2;
   line-height: 1.6em;
   flex-grow: 0;
-  flex-shrink: 0;
   background: white;
   position: -webkit-sticky;
   position: sticky;
   top: 0px;
+  flex-shrink: 0;
+  box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
+}
+.admin_bottom {
+  flex-grow: 1000;
+  display: flex;
 }
 .admin_header-scrolled {
   box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
@@ -4114,7 +4119,7 @@ td.admin_list_message {
   border-radius: 3px;
   padding: 2px 5px;
   margin: 2px 2px;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 .admin_header_top_item-selected {
   background-color: rgba(64, 120, 192, 0.05);
@@ -4129,7 +4134,7 @@ td.admin_list_message {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  padding: 5px 10px;
+  padding: 0px 5px;
   background-color: #fafafa;
   background: linear-gradient(#fafafa, #fff);
 }
@@ -4140,30 +4145,270 @@ td.admin_list_message {
 }
 .admin_header_resources {
   margin: 0px;
-  padding: 0px;
   clear: both;
   display: flex;
-  padding: 0px 5px;
-  padding-bottom: 5px;
+  padding: 5px 0px;
   flex-wrap: wrap;
   overflow-x: auto;
+  background-color: white;
+  width: 200px;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+  border-right: 1px solid #f1f1f1;
 }
-.admin_header_resource {
+a.admin_header_resource {
   text-transform: uppercase;
   padding: 3px 10px;
   margin: 0px;
   font-size: .9rem;
   border-bottom: 2px solid none;
   flex-shrink: 0;
-  border-radius: 3px;
+  text-decoration: none;
+  color: #999;
+  color: #444;
+}
+a.admin_header_resource:hover {
+  color: #444;
 }
 .admin_header_resource-active,
 .admin_header_resource-active:hover {
   background-color: #4078c0;
-  color: white;
+  color: white !important;
 }
 .admin_header_sitename {
   font-size: .9rem;
+}
+.admin_content {
+  flex-grow: 100;
+  overflow-y: auto;
+}
+@media (max-width: 800px) {
+  .admin_bottom {
+    flex-direction: column;
+  }
+  .admin_header_resources {
+    flex-direction: row;
+    width: 100%;
+  }
+  .admin_header_resource {
+    padding: 5px 10px;
+    margin: 2px 5px;
+  }
+  .admin_header .admin_navigation_tabs {
+    margin-left: 5px;
+  }
+}
+/*!
+ * Pikaday
+ * Copyright © 2014 David Bushell | BSD & MIT license | http://dbushell.com/
+ */
+.pika-single {
+  z-index: 9999;
+  display: block;
+  position: relative;
+  color: #333;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-bottom-color: #bbb;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+/*
+clear child float (pika-lendar), using the famous micro clearfix hack
+http://nicolasgallagher.com/micro-clearfix-hack/
+*/
+.pika-single:before,
+.pika-single:after {
+  content: " ";
+  display: table;
+}
+.pika-single:after {
+  clear: both;
+}
+.pika-single {
+  *zoom: 1;
+}
+.pika-single.is-hidden {
+  display: none;
+}
+.pika-single.is-bound {
+  position: absolute;
+  box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
+}
+.pika-lendar {
+  float: left;
+  width: 240px;
+  margin: 8px;
+}
+.pika-title {
+  position: relative;
+  text-align: center;
+}
+.pika-label {
+  display: inline-block;
+  *display: inline;
+  position: relative;
+  z-index: 9999;
+  overflow: hidden;
+  margin: 0;
+  padding: 5px 3px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: bold;
+  background-color: #fff;
+}
+.pika-title select {
+  cursor: pointer;
+  position: absolute;
+  z-index: 9998;
+  margin: 0;
+  left: 0;
+  top: 5px;
+  filter: alpha(opacity=0);
+  opacity: 0;
+}
+.pika-prev,
+.pika-next {
+  display: block;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+  border: 0;
+  padding: 0;
+  width: 20px;
+  height: 30px;
+  /* hide text using text-indent trick, using width value (it's enough) */
+  text-indent: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  background-color: transparent;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 75% 75%;
+  opacity: .5;
+  *position: absolute;
+  *top: 0;
+}
+.pika-prev:hover,
+.pika-next:hover {
+  opacity: 1;
+}
+.pika-prev,
+.is-rtl .pika-next {
+  float: left;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAeCAYAAAAsEj5rAAAAUklEQVR42u3VMQoAIBADQf8Pgj+OD9hG2CtONJB2ymQkKe0HbwAP0xucDiQWARITIDEBEnMgMQ8S8+AqBIl6kKgHiXqQqAeJepBo/z38J/U0uAHlaBkBl9I4GwAAAABJRU5ErkJggg==');
+  *left: 0;
+}
+.pika-next,
+.is-rtl .pika-prev {
+  float: right;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAeCAYAAAAsEj5rAAAAU0lEQVR42u3VOwoAMAgE0dwfAnNjU26bYkBCFGwfiL9VVWoO+BJ4Gf3gtsEKKoFBNTCoCAYVwaAiGNQGMUHMkjGbgjk2mIONuXo0nC8XnCf1JXgArVIZAQh5TKYAAAAASUVORK5CYII=');
+  *right: 0;
+}
+.pika-prev.is-disabled,
+.pika-next.is-disabled {
+  cursor: default;
+  opacity: .2;
+}
+.pika-select {
+  display: inline-block;
+  *display: inline;
+}
+.pika-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: 0;
+}
+.pika-table th,
+.pika-table td {
+  width: 14.285714285714286%;
+  padding: 0;
+}
+.pika-table th {
+  color: #999;
+  font-size: 12px;
+  line-height: 25px;
+  font-weight: bold;
+  text-align: center;
+}
+.pika-button {
+  cursor: pointer;
+  display: block;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  outline: none;
+  border: 0;
+  margin: 0;
+  width: 100%;
+  padding: 5px;
+  color: #666;
+  font-size: 12px;
+  line-height: 15px;
+  text-align: right;
+  background: #f5f5f5;
+}
+.pika-week {
+  font-size: 11px;
+  color: #999;
+}
+.is-today .pika-button {
+  color: #33aaff;
+  font-weight: bold;
+}
+.is-selected .pika-button,
+.has-event .pika-button {
+  color: #fff;
+  font-weight: bold;
+  background: #33aaff;
+  box-shadow: inset 0 1px 3px #178fe5;
+  border-radius: 3px;
+}
+.has-event .pika-button {
+  background: #005da9;
+  box-shadow: inset 0 1px 3px #0076c9;
+}
+.is-disabled .pika-button,
+.is-inrange .pika-button {
+  background: #D5E9F7;
+}
+.is-startrange .pika-button {
+  color: #fff;
+  background: #6CB31D;
+  box-shadow: none;
+  border-radius: 3px;
+}
+.is-endrange .pika-button {
+  color: #fff;
+  background: #33aaff;
+  box-shadow: none;
+  border-radius: 3px;
+}
+.is-disabled .pika-button {
+  pointer-events: none;
+  cursor: default;
+  color: #999;
+  opacity: .3;
+}
+.is-outside-current-month .pika-button {
+  color: #999;
+  opacity: .3;
+}
+.is-selection-disabled {
+  pointer-events: none;
+  cursor: default;
+}
+.pika-button:hover,
+.pika-row.pick-whole-week:hover .pika-button {
+  color: #fff;
+  background: #ff8000;
+  box-shadow: none;
+  border-radius: 3px;
+}
+/* styling for abbr */
+.pika-table abbr {
+  border-bottom: none;
+  cursor: help;
 }
 `
 
@@ -4487,8 +4732,6 @@ function bindLists() {
 var List = (function () {
     function List(el, openbutton) {
         this.el = el;
-        this.openbutton = openbutton;
-        this.closebutton = this.el.querySelector(".admin_tablesettings_close");
         this.settingsEl = this.el.querySelector(".admin_tablesettings");
         this.page = 1;
         this.typeName = el.getAttribute("data-type");
@@ -4509,8 +4752,6 @@ var List = (function () {
         else {
             this.orderDesc = false;
         }
-        this.openbutton.addEventListener("click", this.toggleShowHide.bind(this));
-        this.closebutton.addEventListener("click", this.toggleShowHide.bind(this));
         this.bindOptions();
         this.bindOrder();
     }
@@ -5441,7 +5682,6 @@ function bindDatePicker() {
 }
 var DatePicker = (function () {
     function DatePicker(el) {
-        console.log(el);
         var language = "cs";
         var i18n = {
             previousMonth: 'Previous Month',
@@ -5480,14 +5720,29 @@ var DatePicker = (function () {
         var self = this;
         var pd = new Pikaday({
             field: el,
-            format: 'D MMM YYYY',
-            firstDay: 1,
-            i18n: i18n
-        }, toString(date, any, format, any), string, {
-            "return": prettyDate(date)
+            format: 'DD MM YYYY',
+            defaultDate: new Date(),
+            i18n: i18n,
+            onSelect: function (date) {
+                el.value = pd.toString();
+            },
+            toString: function (date) {
+                var day = date.getDate();
+                var dayStr = "" + day;
+                if (day < 10) {
+                    dayStr = "0" + dayStr;
+                }
+                var month = date.getMonth() + 1;
+                var monthStr = "" + month;
+                if (month < 10) {
+                    monthStr = "0" + monthStr;
+                }
+                var year = date.getFullYear();
+                var ret = year + "-" + monthStr + "-" + dayStr;
+                return ret;
+            }
         });
     }
-    ;
     return DatePicker;
 }());
 function prettyDate(date) {

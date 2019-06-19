@@ -316,8 +316,6 @@ function bindLists() {
 var List = (function () {
     function List(el, openbutton) {
         this.el = el;
-        this.openbutton = openbutton;
-        this.closebutton = this.el.querySelector(".admin_tablesettings_close");
         this.settingsEl = this.el.querySelector(".admin_tablesettings");
         this.page = 1;
         this.typeName = el.getAttribute("data-type");
@@ -338,8 +336,6 @@ var List = (function () {
         else {
             this.orderDesc = false;
         }
-        this.openbutton.addEventListener("click", this.toggleShowHide.bind(this));
-        this.closebutton.addEventListener("click", this.toggleShowHide.bind(this));
         this.bindOptions();
         this.bindOrder();
     }
