@@ -1,0 +1,9 @@
+{{define "admin_tabs"}}
+  <div class="admin_navigation_tabs">
+    {{range $item := .}}
+        <a href="{{$item.URL}}" class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
+            {{$item.Name}}
+        </a>
+    {{end}}
+  </div>
+{{end}}

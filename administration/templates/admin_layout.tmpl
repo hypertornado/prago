@@ -49,13 +49,7 @@
             </div>
 
             {{if .admin_page}}
-            <div class="admin_navigation_tabs">
-                {{range $item := .admin_page.Navigation.Tabs}}
-                    <a href="{{$item.URL}}" class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
-                        {{$item.Name}}
-                    </a>
-                {{end}}
-            </div>
+                {{template "admin_tabs" .admin_page.Navigation.Tabs}}
             {{end}}
         </div>
 

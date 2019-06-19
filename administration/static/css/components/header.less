@@ -78,12 +78,13 @@
   flex-wrap: wrap;
   overflow-x: auto;
   //border: 1px solid red;
-  background-color: white;
+  background-color: #fafafa;
   width: 200px;
   flex-direction: column;
   overflow-y: auto;
   flex-shrink: 0;
-  border-right: 1px solid #f1f1f1;
+  //padding-right: 5px;
+  //border-right: 1px solid #f1f1f1;
 }
 
 a.admin_header_resource {
@@ -93,14 +94,15 @@ a.admin_header_resource {
   font-size: .9rem;
   border-bottom: 2px solid none;
   flex-shrink: 0;
-  //border-radius: 3px;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
   text-decoration: none;
-  color: @gray;
-  color: @black;
+  //color: @gray;
+  //color: @black;
 }
 
 a.admin_header_resource:hover {
-  color: @black;
+  //color: @black;
 }
 
 .admin_header_resource-active, .admin_header_resource-active:hover {

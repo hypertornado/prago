@@ -245,6 +245,7 @@ func initUserResource(resource *Resource) {
 
 	renderLogin := func(request prago.Request, form *Form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
+			Admin:        admin,
 			Navigation:   admin.getNologinNavigation(locale, "login"),
 			PageTemplate: "admin_form",
 			PageData:     form,
@@ -285,6 +286,7 @@ func initUserResource(resource *Resource) {
 
 	renderForgot := func(request prago.Request, form *Form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
+			Admin:        admin,
 			Navigation:   admin.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
 			PageData:     form,
@@ -347,6 +349,7 @@ func initUserResource(resource *Resource) {
 
 	renderRenew := func(request prago.Request, form *Form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
+			Admin:        admin,
 			Navigation:   admin.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
 			PageData:     form,
@@ -470,6 +473,7 @@ func initUserResource(resource *Resource) {
 
 	renderRegistration := func(request prago.Request, form *Form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
+			Admin:        admin,
 			Navigation:   admin.getNologinNavigation(locale, "registration"),
 			PageTemplate: "admin_form",
 			PageData:     form,

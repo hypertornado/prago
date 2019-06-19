@@ -9,6 +9,7 @@ import (
 )
 
 type adminNavigationPage struct {
+	Admin        *Administration
 	Navigation   adminItemNavigation
 	PageTemplate string
 	PageData     interface{}
@@ -281,6 +282,7 @@ func createNavigationalItemHandler(action, templateName string, dataGenerator fu
 		}
 
 		renderNavigationPage(request, adminNavigationPage{
+			Admin:        resource.Admin,
 			Navigation:   resource.Admin.getItemNavigation(resource, user, item, action),
 			PageTemplate: templateName,
 			PageData:     data,
@@ -304,6 +306,7 @@ func createNavigationalHandler(action, templateName string, dataGenerator func(R
 		}
 
 		renderNavigationPage(request, adminNavigationPage{
+			Admin:        resource.Admin,
 			Navigation:   resource.Admin.getResourceNavigation(resource, user, action),
 			PageTemplate: templateName,
 			PageData:     data,
@@ -328,6 +331,7 @@ func createAdminHandler(action, templateName string, dataGenerator func(Resource
 
 		request.SetData("admin_navigation_logo_selected", true)
 		renderNavigationPage(request, adminNavigationPage{
+			Admin:        resource.Admin,
 			Navigation:   resource.Admin.getAdminNavigation(user, action),
 			PageTemplate: templateName,
 			PageData:     data,

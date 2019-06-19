@@ -382,13 +382,7 @@ const adminTemplates = `
             </div>
 
             {{if .admin_page}}
-            <div class="admin_navigation_tabs">
-                {{range $item := .admin_page.Navigation.Tabs}}
-                    <a href="{{$item.URL}}" class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
-                        {{$item.Name}}
-                    </a>
-                {{end}}
-            </div>
+                {{template "admin_tabs" .admin_page.Navigation.Tabs}}
             {{end}}
         </div>
 
@@ -420,6 +414,15 @@ const adminTemplates = `
     <link rel="stylesheet" href="{{.admin_header_prefix}}/_static/admin.css?v={{.version}}">
   </head>
   <body class="admin_nologin">
+
+    {{if .admin_page.Admin.Logo}}
+      <div class="admin_nologin_logo" style="background-image: url('{{CSS .admin_page.Admin.Logo}}');"></div>
+    {{end}}
+
+    {{if .admin_page}}
+      {{template "admin_tabs" .admin_page.Navigation.Tabs}}
+    {{end}}
+
     {{template "admin_flash" .}}
     {{tmpl .admin_yield .}}
   </body>
@@ -697,6 +700,14 @@ const adminTemplates = `
 </table>
 
 
+{{end}}{{define "admin_tabs"}}
+  <div class="admin_navigation_tabs">
+    {{range $item := .}}
+        <a href="{{$item.URL}}" class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
+            {{$item.Name}}
+        </a>
+    {{end}}
+  </div>
 {{end}}{{define "admin_view"}}
   {{range $item := .Items}}
     <div class="view_name">
@@ -3515,20 +3526,25 @@ select.admin_table_filter_item {
   margin: 0px auto;
 }
 .admin_table_orderheader {
+  font-size: .9rem;
+  font-weight: 500;
   text-decoration: none;
 }
 .admin_table td {
   padding: 2px;
   border: 1px solid #f1f1f1;
 }
+.admin_table_count {
+  font-size: .9rem;
+  color: #999;
+}
 .admin_list_table td {
-  border-left: none;
   border-bottom: none;
   border-top: none;
   font-size: .9rem;
 }
-.admin_table_row:nth-child(odd) {
-  background-color: #fafafa;
+.admin_table_row td {
+  border-bottom: 1px solid #eee;
 }
 .admin_table_row:hover {
   background-color: rgba(64, 120, 192, 0.05);
@@ -3557,7 +3573,6 @@ select.admin_table_filter_item {
   vertical-align: bottom;
   font-weight: normal;
   border: 1px solid #f1f1f1;
-  border-left: none;
 }
 .admin_table th a {
   display: block;
@@ -4074,7 +4089,7 @@ td.admin_list_message {
   margin: 0 auto;
 }
 .admin_tablesettings {
-  padding: 30px 5px 10px 5px;
+  padding: 10px 5px 10px 5px;
 }
 .admin_tablesettings_name {
   display: inline-block;
@@ -4089,6 +4104,15 @@ td.admin_list_message {
   font-size: .8rem;
   display: inline-block;
   padding: 2px 2px;
+}
+.admin_nologin_logo {
+  border: 0px solid red;
+  width: 100px;
+  height: 100px;
+  margin: 10px auto;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 .admin_layout {
   width: 100%;
@@ -4150,12 +4174,11 @@ td.admin_list_message {
   padding: 5px 0px;
   flex-wrap: wrap;
   overflow-x: auto;
-  background-color: white;
+  background-color: #fafafa;
   width: 200px;
   flex-direction: column;
   overflow-y: auto;
   flex-shrink: 0;
-  border-right: 1px solid #f1f1f1;
 }
 a.admin_header_resource {
   text-transform: uppercase;
@@ -4164,12 +4187,9 @@ a.admin_header_resource {
   font-size: .9rem;
   border-bottom: 2px solid none;
   flex-shrink: 0;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
   text-decoration: none;
-  color: #999;
-  color: #444;
-}
-a.admin_header_resource:hover {
-  color: #444;
 }
 .admin_header_resource-active,
 .admin_header_resource-active:hover {

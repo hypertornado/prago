@@ -11,6 +11,15 @@
     <link rel="stylesheet" href="{{.admin_header_prefix}}/_static/admin.css?v={{.version}}">
   </head>
   <body class="admin_nologin">
+
+    {{if .admin_page.Admin.Logo}}
+      <div class="admin_nologin_logo" style="background-image: url('{{CSS .admin_page.Admin.Logo}}');"></div>
+    {{end}}
+
+    {{if .admin_page}}
+      {{template "admin_tabs" .admin_page.Navigation.Tabs}}
+    {{end}}
+
     {{template "admin_flash" .}}
     {{tmpl .admin_yield .}}
   </body>

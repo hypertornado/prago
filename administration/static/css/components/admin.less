@@ -361,6 +361,8 @@ select.admin_table_filter_item {
 }
 
 .admin_table_orderheader {
+  font-size: .9rem;
+  font-weight: 500;
   text-decoration: none;
 }
 
@@ -369,15 +371,24 @@ select.admin_table_filter_item {
   border: 1px solid #f1f1f1;
 }
 
+.admin_table_count {
+  font-size: .9rem;
+  color: @gray;
+}
+
 .admin_list_table td {
-  border-left: none;
+  //border-left: none;
   border-bottom: none;
   border-top: none;
   font-size: .9rem;
 }
 
 .admin_table_row:nth-child(odd) {
-  background-color: #fafafa;
+  //background-color: #fafafa;
+}
+
+.admin_table_row td {
+  border-bottom: 1px solid #eee;
 }
 
 .admin_table_row:hover {
@@ -420,7 +431,7 @@ select.admin_table_filter_item {
   vertical-align: bottom;
   font-weight: normal;
   border: 1px solid #f1f1f1;
-  border-left: none;
+  //border-left: none;
 }
 
 .admin_table th a {
@@ -1038,7 +1049,7 @@ td.admin_list_message {
 .admin_tablesettings {
   //border: 1px solid #eee;
   //background: white;
-  padding: 30px 5px 10px 5px;
+  padding: 10px 5px 10px 5px;
   //border-radius: 3px;
   //text-align: center;
   //margin: 10px 10px;
@@ -1069,3 +1080,12 @@ td.admin_list_message {
   //box-shadow: 0px 0px 2px rgba(0,0,0,0.2);
 }
 
+.admin_nologin_logo {
+  border: 0px solid red;
+  width: 100px;
+  height: 100px;
+  margin: 10px auto;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
