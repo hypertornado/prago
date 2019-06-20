@@ -339,10 +339,6 @@ var List = (function () {
         this.bindOptions();
         this.bindOrder();
     }
-    List.prototype.toggleShowHide = function () {
-        this.settingsEl.classList.toggle("hidden");
-        this.openbutton.classList.toggle("hidden");
-    };
     List.prototype.load = function () {
         var _this = this;
         this.progress.classList.remove("hidden");

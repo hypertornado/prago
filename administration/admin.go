@@ -158,6 +158,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 
 		headerData := admin.getHeaderData(request)
 		request.SetData("admin_header", headerData)
+		request.SetData("admin_default_breadcrumbs", admin.createBreadcrumbs(user.Locale))
 
 		next()
 	})
@@ -200,6 +201,8 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	for _, resource := range admin.Resources {
 		admin.initResource(resource)
 	}
+
+	bindSearch(admin)
 
 	admin.AdminController.Get(admin.GetURL("*"), func(request prago.Request) {
 		render404(request)

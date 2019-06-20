@@ -200,7 +200,7 @@ func bindRelationAPI(admin *Administration) {
 			panic(err)
 		}
 
-		relationItem := resource.itemToRelationData(user, item)
+		relationItem := resource.itemToRelationData(item)
 		request.RenderJSON(relationItem)
 	})
 
@@ -230,7 +230,7 @@ func bindRelationAPI(admin *Administration) {
 			resource.newItem(&item)
 			err := admin.Query().WhereIs("id", id).Get(item)
 			if err == nil {
-				relationItem := resource.itemToRelationData(user, item)
+				relationItem := resource.itemToRelationData(item)
 				if relationItem != nil {
 					usedIDs[relationItem.ID] = true
 					ret = append(ret, *relationItem)
@@ -252,7 +252,7 @@ func bindRelationAPI(admin *Administration) {
 				for i := 0; i < itemsVal.Len(); i++ {
 					var item interface{}
 					item = itemsVal.Index(i).Interface()
-					viewItem := resource.itemToRelationData(user, item)
+					viewItem := resource.itemToRelationData(item)
 					if viewItem != nil && usedIDs[viewItem.ID] == false {
 						usedIDs[viewItem.ID] = true
 						ret = append(ret, *viewItem)

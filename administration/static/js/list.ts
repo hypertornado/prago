@@ -65,10 +65,10 @@ class List {
     this.bindOrder();
   }
 
-  toggleShowHide() {
+  /*toggleShowHide() {
     this.settingsEl.classList.toggle("hidden");
     this.openbutton.classList.toggle("hidden");
-  }
+  }*/
 
   load() {
     this.progress.classList.remove("hidden");

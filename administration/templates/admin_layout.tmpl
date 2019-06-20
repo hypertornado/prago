@@ -30,14 +30,12 @@
                 {{if .admin_page}}
                     {{template "admin_breadcrumbs" .admin_page.Navigation.Breadcrumbs}}
                 {{else}}
-                    <a href="{{.admin_header.UrlPrefix}}" class="
-                        admin_header_top_item admin_header_name
-                        {{if .admin_navigation_logo_selected}}admin_header_top_item-selected{{end}}
-                    ">
-                        {{message .locale "admin_admin"}} – {{.admin_header.Name}}
-                    </a>
+                    {{template "admin_breadcrumbs" .admin_default_breadcrumbs}}
                 {{end}}
                 <div class="admin_header_top_item admin_header_top_space"></div>
+                <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
+                    <input class="input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}">
+                </form>
                 <div class="admin_header_top_item">{{.currentuser.Email}}</div>
                 <a href="{{.admin_header.UrlPrefix}}/user/settings" class="
                     admin_header_top_item

@@ -61,13 +61,13 @@ func getRelationData(resource Resource, user User, f Field, value interface{}) *
 		return nil
 	}
 
-	return r2.itemToRelationData(user, item)
+	return r2.itemToRelationData(item)
 }
 
-func (resource *Resource) itemToRelationData(user User, item interface{}) *viewRelationData {
+func (resource *Resource) itemToRelationData(item interface{}) *viewRelationData {
 	var ret viewRelationData
 	ret.ID = getItemID(item)
-	ret.Name = getItemName(item, user.Locale)
+	ret.Name = getItemName(item)
 	ret.URL = resource.GetItemURL(item, "")
 
 	ret.Image = resource.Admin.getItemImage(item)
@@ -98,7 +98,7 @@ func (admin *Administration) itemHasImage(item interface{}) bool {
 	return false
 }
 
-func getItemName(item interface{}, locale string) string {
+func getItemName(item interface{}) string {
 	if item != nil {
 		itemsVal := reflect.ValueOf(item).Elem()
 		field := itemsVal.FieldByName("Name")

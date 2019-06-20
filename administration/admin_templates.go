@@ -166,7 +166,7 @@ const adminTemplates = `
     {{end}}
   </table>
 {{end}}{{define "admin_home_navigation"}}
-  <div class="admin_box_padding">  
+  <div class="admin_box_padding">
     {{range $item := .}}
       <a href="{{$item.URL}}">{{$item.Name}}</a>
       <ul>
@@ -363,14 +363,12 @@ const adminTemplates = `
                 {{if .admin_page}}
                     {{template "admin_breadcrumbs" .admin_page.Navigation.Breadcrumbs}}
                 {{else}}
-                    <a href="{{.admin_header.UrlPrefix}}" class="
-                        admin_header_top_item admin_header_name
-                        {{if .admin_navigation_logo_selected}}admin_header_top_item-selected{{end}}
-                    ">
-                        {{message .locale "admin_admin"}} – {{.admin_header.Name}}
-                    </a>
+                    {{template "admin_breadcrumbs" .admin_default_breadcrumbs}}
                 {{end}}
                 <div class="admin_header_top_item admin_header_top_space"></div>
+                <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
+                    <input class="input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}">
+                </form>
                 <div class="admin_header_top_item">{{.currentuser.Email}}</div>
                 <a href="{{.admin_header.UrlPrefix}}/user/settings" class="
                     admin_header_top_item
@@ -577,6 +575,18 @@ const adminTemplates = `
 {{define "admin_navigation_page"}}
     {{template "admin_navigation" .admin_page.Navigation}}
     {{tmpl .admin_page.PageTemplate .admin_page.PageData}}
+  </div>
+{{end}}{{define "admin_search"}}
+  <div class="admin_box">
+    <div class="admin_box_padding">
+      <h1>Vyhledávání</h1>
+
+      {{range $result := .search_results}}
+        <div>
+          <a href="{{$result.URL}}">{{$result.Name}}</a>
+        </div>
+      {{end}}
+    </div>
   </div>
 {{end}}{{define "admin_settings_OLD"}}
 
@@ -3794,8 +3804,7 @@ select.admin_timestamp_minute {
   font-size: 1.2rem;
   margin-left: 0px;
   padding: 10px 10px 5px 10px;
-  border-top: 1px solid rgba(64, 120, 192, 0.1);
-  border-top: 2px solid #fafafa;
+  border-top: 1px solid #eee;
 }
 .view_name:first-child {
   border-top: none;
@@ -4162,11 +4171,6 @@ td.admin_list_message {
   background-color: #fafafa;
   background: linear-gradient(#fafafa, #fff);
 }
-.admin_header_name {
-  font-size: 1.4rem;
-  font-weight: 500;
-  line-height: 1.2em;
-}
 .admin_header_resources {
   margin: 0px;
   clear: both;
@@ -4202,6 +4206,14 @@ a.admin_header_resource {
 .admin_content {
   flex-grow: 100;
   overflow-y: auto;
+}
+.admin_header_search {
+  display: flex;
+  padding: 5px 0px;
+}
+.admin_header_search .input {
+  border-radius: 100px;
+  padding: 3px 10px;
 }
 @media (max-width: 800px) {
   .admin_bottom {
@@ -4775,10 +4787,6 @@ var List = (function () {
         this.bindOptions();
         this.bindOrder();
     }
-    List.prototype.toggleShowHide = function () {
-        this.settingsEl.classList.toggle("hidden");
-        this.openbutton.classList.toggle("hidden");
-    };
     List.prototype.load = function () {
         var _this = this;
         this.progress.classList.remove("hidden");

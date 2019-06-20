@@ -94,7 +94,7 @@ func (resource Resource) getView(id int, inValues interface{}, user User) view {
 		for i := 0; i < vv.Len(); i++ {
 			data = append(
 				data,
-				v.resource.itemToRelationData(user, vv.Index(i).Interface()),
+				v.resource.itemToRelationData(vv.Index(i).Interface()),
 			)
 		}
 

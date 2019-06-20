@@ -144,7 +144,7 @@ func (admin *Administration) getItemNavigation(resource Resource, user User, ite
 		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
 			name := v.URL
 			if v.URL == "" {
-				name = getItemName(item, user.Locale)
+				name = getItemName(item)
 			}
 			if v.Name != nil {
 				name = v.Name(user.Locale)
@@ -166,7 +166,7 @@ func (admin *Administration) getItemNavigation(resource Resource, user User, ite
 			URL:  resource.GetURL(""),
 		})
 
-	name := getItemName(item, user.Locale)
+	name := getItemName(item)
 	breadcrumbs = append(breadcrumbs,
 		navigationBreadcrumb{Name: name, URL: resource.GetItemURL(item, ""), Image: admin.getItemImage(item)})
 	for _, v := range tabs {

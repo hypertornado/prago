@@ -63,12 +63,6 @@
   background: linear-gradient(#fafafa, #fff);
 }
 
-.admin_header_name {
-  font-size: 1.4rem;
-  font-weight: 500;
-  line-height: 1.2em;
-}
-
 .admin_header_resources {
   margin: 0px;
   clear: both;
@@ -117,6 +111,17 @@ a.admin_header_resource:hover {
 .admin_content {
   flex-grow: 100;
   overflow-y: auto;
+}
+
+.admin_header_search {
+  //border: 1px solid red;
+  display: flex;
+  padding: 5px 0px;
+}
+
+.admin_header_search .input {
+  border-radius: 100px;
+  padding: 3px 10px;
 }
 
 @media (max-width: 800px) {

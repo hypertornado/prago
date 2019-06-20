@@ -1,0 +1,13 @@
+{{define "admin_search"}}
+  <div class="admin_box">
+    <div class="admin_box_padding">
+      <h1>Vyhledávání</h1>
+
+      {{range $result := .search_results}}
+        <div>
+          <a href="{{$result.URL}}">{{$result.Name}}</a>
+        </div>
+      {{end}}
+    </div>
+  </div>
+{{end}}

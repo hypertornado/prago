@@ -2880,8 +2880,7 @@ select.admin_timestamp_minute {
   font-size: 1.2rem;
   margin-left: 0px;
   padding: 10px 10px 5px 10px;
-  border-top: 1px solid rgba(64, 120, 192, 0.1);
-  border-top: 2px solid #fafafa;
+  border-top: 1px solid #eee;
 }
 .view_name:first-child {
   border-top: none;
@@ -3248,11 +3247,6 @@ td.admin_list_message {
   background-color: #fafafa;
   background: linear-gradient(#fafafa, #fff);
 }
-.admin_header_name {
-  font-size: 1.4rem;
-  font-weight: 500;
-  line-height: 1.2em;
-}
 .admin_header_resources {
   margin: 0px;
   clear: both;
@@ -3288,6 +3282,14 @@ a.admin_header_resource {
 .admin_content {
   flex-grow: 100;
   overflow-y: auto;
+}
+.admin_header_search {
+  display: flex;
+  padding: 5px 0px;
+}
+.admin_header_search .input {
+  border-radius: 100px;
+  padding: 3px 10px;
 }
 @media (max-width: 800px) {
   .admin_bottom {

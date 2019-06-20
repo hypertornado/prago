@@ -57,12 +57,12 @@ class DatePicker {
       //firstDay: 1,
       defaultDate: new Date(),
       i18n: i18n,
-      onSelect: (date) => {
+      onSelect: (date: any) => {
         el.value = pd.toString();
         //el.value = "2019-11-10";
         //console.log("SELECT");
       },
-      toString: (date) => {
+      toString: (date: any) => {
         const day = date.getDate();
         var dayStr = "" + day;
         if (day < 10) {
