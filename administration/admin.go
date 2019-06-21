@@ -43,6 +43,8 @@ type Administration struct {
 
 	Newsletter *NewsletterMiddleware
 
+	search *adminSearch
+
 	fieldTypes  map[string]FieldType
 	javascripts []string
 	css         []string

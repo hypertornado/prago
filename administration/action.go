@@ -104,6 +104,11 @@ func actionCreate(permission Permission) Action {
 			}
 			must(resource.Admin.Create(item))
 
+			if resource.Admin.search != nil {
+				must(resource.Admin.search.saveItem(&resource, item))
+				resource.Admin.search.Flush()
+			}
+
 			if resource.ActivityLog {
 				resource.Admin.createNewActivityLog(resource, user, item)
 			}
@@ -210,6 +215,11 @@ func actionUpdate(permission Permission) Action {
 				),
 			)
 			must(resource.Admin.Save(item))
+
+			if resource.Admin.search != nil {
+				must(resource.Admin.search.saveItem(&resource, item))
+				resource.Admin.search.Flush()
+			}
 
 			if resource.ActivityLog {
 				afterData, err := json.Marshal(item)
@@ -331,6 +341,11 @@ func actionDoDelete(permission Permission) Action {
 			resource.newItem(&item)
 			_, err = resource.Admin.Query().WhereIs("id", int64(id)).Delete(item)
 			must(err)
+
+			if resource.Admin.search != nil {
+				must(resource.Admin.search.deleteItem(&resource, int64(id)))
+				resource.Admin.search.Flush()
+			}
 
 			if resource.ActivityLog {
 				resource.Admin.createDeleteActivityLog(resource, user, int64(id), item)

@@ -33,9 +33,11 @@
                     {{template "admin_breadcrumbs" .admin_default_breadcrumbs}}
                 {{end}}
                 <div class="admin_header_top_item admin_header_top_space"></div>
-                <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
-                    <input class="input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}">
-                </form>
+                {{if .admin_header.HasSearch}}
+                    <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
+                        <input class="input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}">
+                    </form>
+                {{end}}
                 <div class="admin_header_top_item">{{.currentuser.Email}}</div>
                 <a href="{{.admin_header.UrlPrefix}}/user/settings" class="
                     admin_header_top_item

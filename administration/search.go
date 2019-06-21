@@ -2,6 +2,7 @@ package administration
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -14,6 +15,8 @@ import (
 )
 
 const searchPageSize int = 10
+
+const searchType string = "items"
 
 type SearchItem struct {
 	ID          string   `json:"id"`
@@ -119,7 +122,7 @@ func (e *adminSearch) createSearchIndex() error {
 
 func (e *adminSearch) AddItem(item *SearchItem, weight int) error {
 	var suggest = parseSuggestions(item.Name)
-	_, err := e.client.Index().Index(e.indexName).Type("items").BodyJson(map[string]interface{}{
+	_, err := e.client.Index().Index(e.indexName).Type(searchType).BodyJson(map[string]interface{}{
 		"suggest": map[string]interface{}{
 			"input":  suggest,
 			"weight": weight,
@@ -154,9 +157,8 @@ func (e *adminSearch) Search(q string, role string, page int) ([]*SearchItem, in
 
 	searchResult, err := e.client.Search().
 		Index(e.indexName).
-		Type("items").
+		Type(searchType).
 		Query(bq).
-		//Query(mq).
 		From(page * searchPageSize).
 		Size(searchPageSize).
 		Do(context.Background())
@@ -183,7 +185,7 @@ func (e *adminSearch) Suggest(q string) ([]*SearchItem, error) {
 
 	searchResult, err := e.client.Search().
 		Index(e.indexName).
-		Type("items").
+		Type(searchType).
 		Suggester(cs).
 		Pretty(true).
 		Do(context.Background())
@@ -227,8 +229,6 @@ func (e *adminSearch) Flush() error {
 
 func (e *adminSearch) searchImport() error {
 	fmt.Println("Importing admin search...")
-	//searchImportMutex.Lock()
-	//defer searchImportMutex.Unlock()
 	var err error
 
 	err = e.createSearchIndex()
@@ -244,42 +244,10 @@ func (e *adminSearch) searchImport() error {
 	}
 	e.Flush()
 
-	/*
-		var categories []*PackageCategory
-		must(admin.Query().WhereIs("language", "cs").WhereIs("hidden", false).Get(&categories))
-		i := 0
-		for _, v := range categories {
-			err := client.AddItem(&SearchItem{
-				ID:          int64(i),
-				Typ:         "package-list",
-				Name:        v.Name,
-				Description: v.Description,
-				Url:         v.getNavTab("", "").URL,
-			}, 10)
-			i++
-			if err != nil {
-				return err
-			}
-		}*/
-
-	//lastSearchImport = time.Now()
-
 	return nil
 }
 
-//func importResource()
-
-/*func SearchCronTask() {
-	if time.Now().Add(-23 * time.Hour).Before(lastSearchImport) {
-		if time.Now().Hour() == 3 {
-			searchImport()
-		}
-	}
-}*/
-
 func (e *adminSearch) importResource(resource *Resource) error {
-	fmt.Printf("importing %s\n", resource.HumanName("cs"))
-
 	var item interface{}
 	resource.newItem(&item)
 	c, _ := e.admin.Query().Count(item)
@@ -287,6 +255,16 @@ func (e *adminSearch) importResource(resource *Resource) error {
 	if c > 100 {
 		return nil
 	}
+
+	roles := resource.Admin.getResourceViewRoles(*resource)
+
+	var resourceSearchItem = SearchItem{
+		ID:    "resource_" + resource.ID,
+		Name:  resource.HumanName("cs"),
+		URL:   resource.GetURL(""),
+		Roles: roles,
+	}
+	e.AddItem(&resourceSearchItem, 200)
 
 	var items interface{}
 	resource.newArrayOfItems(&items)
@@ -296,31 +274,45 @@ func (e *adminSearch) importResource(resource *Resource) error {
 		for i := 0; i < itemsVal.Len(); i++ {
 			var item2 interface{}
 			item2 = itemsVal.Index(i).Interface()
-			relData := resource.itemToRelationData(item2)
-			if relData == nil {
-				continue
-			}
-			searchItem := relationDataToSearchItem(resource, *relData)
-			e.AddItem(&searchItem, 100)
-			if false {
-				fmt.Println(searchItem)
-			}
+			e.saveItemWithRoles(resource, item2, roles)
 		}
 	}
 
 	return nil
 }
 
+func (e *adminSearch) saveItem(resource *Resource, item interface{}) error {
+	roles := resource.Admin.getResourceViewRoles(*resource)
+	return e.saveItemWithRoles(resource, item, roles)
+}
+
+func (e *adminSearch) saveItemWithRoles(resource *Resource, item interface{}, roles []string) error {
+	relData := resource.itemToRelationData(item)
+	if relData == nil {
+		return errors.New("wrong item to relation data conversion")
+	}
+	searchItem := relationDataToSearchItem(resource, *relData)
+	searchItem.Roles = roles
+	return e.AddItem(&searchItem, 100)
+}
+
+func (e *adminSearch) deleteItem(resource *Resource, id int64) error {
+	_, err := e.client.Delete().Index(e.indexName).Type(searchType).Id(searchID(resource, id)).Do(context.Background())
+	return err
+}
+
+func searchID(resource *Resource, id int64) string {
+	return fmt.Sprintf("%s-%d", resource.ID, id)
+}
+
 func relationDataToSearchItem(resource *Resource, data viewRelationData) SearchItem {
-	id := fmt.Sprintf("%s-%d", resource.ID, data.ID)
 	return SearchItem{
-		ID:          id,
+		ID:          searchID(resource, data.ID),
 		Category:    resource.HumanName("cs"),
 		Name:        data.Name,
 		Description: data.Description,
 		Image:       data.Image,
 		URL:         data.URL,
-		Roles:       resource.Admin.getResourceViewRoles(*resource),
 	}
 
 }
@@ -329,18 +321,12 @@ func bindSearch(admin *Administration) {
 	var err error
 
 	adminSearch, err := NewAdminSearch(admin)
-
-	//elasticClient, err = NewClient(elasticsearchIndexName)
 	if err != nil {
 		admin.App.Log().Println(err)
 		return
+	} else {
+		admin.search = adminSearch
 	}
-
-	/*admin.App.AddCronTask("index search", SearchCronTask, func(in time.Time) time.Time {
-		return in.Add(30 * time.Minute)
-	})
-
-	admin.App.AddCommand("indexsearch").Callback(SearchCronTask)*/
 
 	go func() {
 		err := adminSearch.searchImport()
@@ -363,19 +349,12 @@ func bindSearch(admin *Administration) {
 			}
 		}
 
-		fmt.Println("ROLE", GetUser(request).GetRole())
-
 		result, hits, err := adminSearch.Search(q, GetUser(request).GetRole(), page-1)
 		must(err)
 
 		var pages int = int(hits) / searchPageSize
 		if hits > 0 {
 			pages++
-		}
-
-		if page <= 0 || page > pages {
-			render404(request)
-			return
 		}
 
 		var searchPages []SearchPage
@@ -416,25 +395,7 @@ func bindSearch(admin *Administration) {
 		request.SetData("items", results)
 		request.RenderView("suggest")
 	})
-
-	mainController.Get("/hledej", func(request prago.Request) {
-		q := request.Params().Get("q")
-		results, err := elasticClient.Search(q, 100)
-		if err != nil {
-			panic(err)
-		}
-
-		request.SetData("name", "Vyhledávání "+q)
-		request.SetData("description", fmt.Sprintf("Počet výsledků: %d", len(results)))
-		request.SetData("content_after", "search")
-		request.SetData("q", q)
-
-		request.SetData("Items", results)
-		request.SetData("content_after", "list")
-
-		request.SetData("dont_show_endorsement", true)
-		pageYield(request)
-	})*/
+	*/
 }
 
 func parseSuggestions(in string) []string {

@@ -11,6 +11,7 @@ type adminHeaderData struct {
 	Background  string
 	UrlPrefix   string
 	HomepageUrl string
+	HasSearch   bool
 	Items       []adminHeaderItem
 }
 
@@ -23,6 +24,11 @@ type adminHeaderItem struct {
 func (admin *Administration) getHeaderData(request prago.Request) (headerData *adminHeaderData) {
 	user := GetUser(request)
 
+	var hasSearch bool
+	if admin.search != nil {
+		hasSearch = true
+	}
+
 	headerData = &adminHeaderData{
 		Name:        admin.HumanName,
 		Language:    user.Locale,
@@ -30,6 +36,7 @@ func (admin *Administration) getHeaderData(request prago.Request) (headerData *a
 		Background:  admin.Background,
 		UrlPrefix:   admin.Prefix,
 		HomepageUrl: request.App().Config.GetStringWithFallback("baseUrl", request.Request().Host),
+		HasSearch:   hasSearch,
 		Items:       []adminHeaderItem{},
 	}
 

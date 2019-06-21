@@ -80,6 +80,5 @@ func (admin Administration) getResourceViewRoles(resource Resource) []string {
 			}
 		}
 	}
-	fmt.Println(ret)
 	return ret
 }

@@ -366,9 +366,11 @@ const adminTemplates = `
                     {{template "admin_breadcrumbs" .admin_default_breadcrumbs}}
                 {{end}}
                 <div class="admin_header_top_item admin_header_top_space"></div>
-                <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
-                    <input class="input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}">
-                </form>
+                {{if .admin_header.HasSearch}}
+                    <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
+                        <input class="input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}">
+                    </form>
+                {{end}}
                 <div class="admin_header_top_item">{{.currentuser.Email}}</div>
                 <a href="{{.admin_header.UrlPrefix}}/user/settings" class="
                     admin_header_top_item
@@ -582,9 +584,10 @@ const adminTemplates = `
 
     {{range $result := .search_results}}
       <a href="{{$result.URL}}" class="search">
-        <div class="search_icon"></div>
+        <div class="search_icon"
+          {{if $result.Image}} style="background-image: url('{{CSS $result.Image}}');"{{end}}></div>
         <div class="search_right">
-          <div class="search_category">{{$result.Category}} - {{$result.Roles}}</div>
+          <div class="search_category">{{$result.Category}}</div>
           <div class="search_name">{{$result.Name}}</div>
           <div class="search_description">{{$result.Description}}</div>
         </div>
@@ -4468,6 +4471,8 @@ a.search {
   flex-shrink: 0;
   border-radius: 100px;
   margin-right: 10px;
+  background-position: center;
+  background-size: cover;
 }
 .search_category {
   color: #999;

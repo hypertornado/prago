@@ -4,9 +4,10 @@
 
     {{range $result := .search_results}}
       <a href="{{$result.URL}}" class="search">
-        <div class="search_icon"></div>
+        <div class="search_icon"
+          {{if $result.Image}} style="background-image: url('{{CSS $result.Image}}');"{{end}}></div>
         <div class="search_right">
-          <div class="search_category">{{$result.Category}} - {{$result.Roles}}</div>
+          <div class="search_category">{{$result.Category}}</div>
           <div class="search_name">{{$result.Name}}</div>
           <div class="search_description">{{$result.Description}}</div>
         </div>
