@@ -578,13 +578,22 @@ const adminTemplates = `
   </div>
 {{end}}{{define "admin_search"}}
   <div class="admin_box">
-    <div class="admin_box_padding">
-      <h1>Vyhledávání</h1>
+    <h1>{{.admin_title}}</h1>
 
-      {{range $result := .search_results}}
-        <div>
-          <a href="{{$result.URL}}">{{$result.Name}}</a>
+    {{range $result := .search_results}}
+      <a href="{{$result.URL}}" class="search">
+        <div class="search_icon"></div>
+        <div class="search_right">
+          <div class="search_category">{{$result.Category}} - {{$result.Roles}}</div>
+          <div class="search_name">{{$result.Name}}</div>
+          <div class="search_description">{{$result.Description}}</div>
         </div>
+      </a>
+    {{end}}
+
+    <div class="search_pagination">
+      {{range $page := .search_pages}}
+        <a href="{{$page.URL}}" class="search_pagination_page{{if $page.Selected}} search_pagination_page-selected{{end}}">{{$page.Title}}</a>
       {{end}}
     </div>
   </div>
@@ -3320,6 +3329,10 @@ ul {
   background-color: #fff;
   border-radius: 5px;
 }
+.admin_box h1 {
+  text-align: center;
+  padding: 5px 10px;
+}
 .admin_box_padding {
   padding: 1px 10px;
 }
@@ -4441,6 +4454,50 @@ http://nicolasgallagher.com/micro-clearfix-hack/
 .pika-table abbr {
   border-bottom: none;
   cursor: help;
+}
+a.search {
+  border-top: 1px solid #eee;
+  display: flex;
+  padding: 10px 5px;
+  text-decoration: none;
+}
+.search_icon {
+  background: #fafafa;
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  border-radius: 100px;
+  margin-right: 10px;
+}
+.search_category {
+  color: #999;
+  font-size: .8rem;
+  text-transform: uppercase;
+}
+.search_name {
+  font-size: 1.1rem;
+}
+.search_description {
+  font-size: .9rem;
+  color: #999;
+}
+.search_pagination {
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 10px 0px;
+}
+a.search_pagination_page {
+  padding: 5px 10px;
+  font-size: 1.1rem;
+  text-decoration: none;
+  border-radius: 3px;
+}
+a.search_pagination_page-selected {
+  font-weight: bold;
+  text-decoration: none;
+  color: #444;
 }
 `
 

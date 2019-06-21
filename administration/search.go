@@ -3,7 +3,9 @@ package administration
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/hypertornado/prago"
@@ -11,12 +13,22 @@ import (
 	"golang.org/x/net/context"
 )
 
+const searchPageSize int = 10
+
 type SearchItem struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Image       string `json:"image"`
-	URL         string `json:"url"`
+	ID          string   `json:"id"`
+	Category    string   `json:"category"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Image       string   `json:"image"`
+	URL         string   `json:"url"`
+	Roles       []string `json:"roles"`
+}
+
+type SearchPage struct {
+	Title    int
+	Selected bool
+	URL      string
 }
 
 type adminSearch struct {
@@ -92,7 +104,8 @@ func (e *adminSearch) createSearchIndex() error {
             "name": {"type": "text", "analyzer": "cesky"},
             "description": {"type": "text", "analyzer": "cesky"},
             "image": {"type": "text"},
-            "url": {"type": "text"}
+						"url": {"type": "text"},
+						"roles": {"type": "text"}
           }
         }
       }
@@ -111,10 +124,12 @@ func (e *adminSearch) AddItem(item *SearchItem, weight int) error {
 			"input":  suggest,
 			"weight": weight,
 		},
+		"category":    item.Category,
 		"name":        item.Name,
 		"description": item.Description,
 		"image":       item.Image,
 		"url":         item.URL,
+		"roles":       item.Roles,
 	}).Id(item.ID).Do(context.Background())
 	return err
 }
@@ -124,23 +139,29 @@ func (e *adminSearch) DeleteIndex() error {
 	return err
 }
 
-func (e *adminSearch) Search(q string, limit int) ([]*SearchItem, error) {
+func (e *adminSearch) Search(q string, role string, page int) ([]*SearchItem, int64, error) {
 	var ret []*SearchItem
 
 	mq := elastic.NewMultiMatchQuery(q)
 	mq.FieldWithBoost("name", 3)
 	mq.FieldWithBoost("description", 2)
-	mq.FieldWithBoost("text", 1)
+
+	bq := elastic.NewBoolQuery()
+	bq.Must(
+		elastic.NewTermsQuery("roles", role),
+	)
+	bq.Must(mq)
 
 	searchResult, err := e.client.Search().
 		Index(e.indexName).
 		Type("items").
-		Query(mq).
-		From(0).
-		Size(limit).
+		Query(bq).
+		//Query(mq).
+		From(page * searchPageSize).
+		Size(searchPageSize).
 		Do(context.Background())
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	var item SearchItem
@@ -150,7 +171,7 @@ func (e *adminSearch) Search(q string, limit int) ([]*SearchItem, error) {
 		}
 	}
 
-	return ret, nil
+	return ret, searchResult.TotalHits(), nil
 }
 
 func (e *adminSearch) Suggest(q string) ([]*SearchItem, error) {
@@ -281,8 +302,6 @@ func (e *adminSearch) importResource(resource *Resource) error {
 			}
 			searchItem := relationDataToSearchItem(resource, *relData)
 			e.AddItem(&searchItem, 100)
-			//err := e.AddItem(&searchItem, 100)
-			//must(err)
 			if false {
 				fmt.Println(searchItem)
 			}
@@ -296,10 +315,12 @@ func relationDataToSearchItem(resource *Resource, data viewRelationData) SearchI
 	id := fmt.Sprintf("%s-%d", resource.ID, data.ID)
 	return SearchItem{
 		ID:          id,
+		Category:    resource.HumanName("cs"),
 		Name:        data.Name,
 		Description: data.Description,
 		Image:       data.Image,
 		URL:         data.URL,
+		Roles:       resource.Admin.getResourceViewRoles(*resource),
 	}
 
 }
@@ -330,13 +351,57 @@ func bindSearch(admin *Administration) {
 
 	admin.AdminController.Get(admin.GetURL("_search"), func(request prago.Request) {
 		q := request.Params().Get("q")
+		pageStr := request.Params().Get("page")
 
-		result, err := adminSearch.Search(q, 10)
+		var page int = 1
+		if pageStr != "" {
+			var err error
+			page, err = strconv.Atoi(pageStr)
+			if err != nil {
+				render404(request)
+				return
+			}
+		}
+
+		fmt.Println("ROLE", GetUser(request).GetRole())
+
+		result, hits, err := adminSearch.Search(q, GetUser(request).GetRole(), page-1)
 		must(err)
 
+		var pages int = int(hits) / searchPageSize
+		if hits > 0 {
+			pages++
+		}
+
+		if page <= 0 || page > pages {
+			render404(request)
+			return
+		}
+
+		var searchPages []SearchPage
+		for i := 1; i <= pages; i++ {
+			var selected bool
+			if page == i {
+				selected = true
+			}
+			values := make(url.Values)
+			values.Add("q", q)
+			if i > 0 {
+				values.Add("page", strconv.Itoa(i))
+			}
+			searchPages = append(searchPages, SearchPage{
+				Title:    i,
+				Selected: selected,
+				URL:      "_search?" + values.Encode(),
+			})
+		}
+
+		title := fmt.Sprintf("Vyhledávání – \"%s\" – %d výsledků", q, hits)
+
 		request.SetData("search_q", q)
-		request.SetData("admin_title", q)
+		request.SetData("admin_title", title)
 		request.SetData("search_results", result)
+		request.SetData("search_pages", searchPages)
 
 		request.SetData("admin_yield", "admin_search")
 		request.RenderView("admin_layout")

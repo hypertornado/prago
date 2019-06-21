@@ -70,3 +70,16 @@ func (admin Administration) Authorize(user User, permission Permission) bool {
 
 	return admin.roles[user.Role][string(permission)]
 }
+
+func (admin Administration) getResourceViewRoles(resource Resource) []string {
+	var ret []string
+	for roleName, permissions := range admin.roles {
+		for permission := range permissions {
+			if permission == string(resource.CanView) {
+				ret = append(ret, roleName)
+			}
+		}
+	}
+	fmt.Println(ret)
+	return ret
+}

@@ -46,6 +46,13 @@ func GetUser(request prago.Request) User {
 	return *u
 }
 
+func (u User) GetRole() string {
+	if u.IsSysadmin {
+		return string(permissionSysadmin)
+	}
+	return u.Role
+}
+
 //AdminItemName represents item name for resource ajax api
 func (u *User) AdminItemName(lang string) string {
 	return u.Email

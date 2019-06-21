@@ -2396,6 +2396,10 @@ ul {
   background-color: #fff;
   border-radius: 5px;
 }
+.admin_box h1 {
+  text-align: center;
+  padding: 5px 10px;
+}
 .admin_box_padding {
   padding: 1px 10px;
 }
@@ -3517,4 +3521,48 @@ http://nicolasgallagher.com/micro-clearfix-hack/
 .pika-table abbr {
   border-bottom: none;
   cursor: help;
+}
+a.search {
+  border-top: 1px solid #eee;
+  display: flex;
+  padding: 10px 5px;
+  text-decoration: none;
+}
+.search_icon {
+  background: #fafafa;
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  border-radius: 100px;
+  margin-right: 10px;
+}
+.search_category {
+  color: #999;
+  font-size: .8rem;
+  text-transform: uppercase;
+}
+.search_name {
+  font-size: 1.1rem;
+}
+.search_description {
+  font-size: .9rem;
+  color: #999;
+}
+.search_pagination {
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 10px 0px;
+}
+a.search_pagination_page {
+  padding: 5px 10px;
+  font-size: 1.1rem;
+  text-decoration: none;
+  border-radius: 3px;
+}
+a.search_pagination_page-selected {
+  font-weight: bold;
+  text-decoration: none;
+  color: #444;
 }
