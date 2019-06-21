@@ -248,16 +248,8 @@ func (e *adminSearch) searchImport() error {
 }
 
 func (e *adminSearch) importResource(resource *Resource) error {
-	var item interface{}
-	resource.newItem(&item)
-	c, _ := e.admin.Query().Count(item)
-
-	if c > 100 {
-		return nil
-	}
 
 	roles := resource.Admin.getResourceViewRoles(*resource)
-
 	var resourceSearchItem = SearchItem{
 		ID:    "resource_" + resource.ID,
 		Name:  resource.HumanName("cs"),
@@ -265,6 +257,13 @@ func (e *adminSearch) importResource(resource *Resource) error {
 		Roles: roles,
 	}
 	e.AddItem(&resourceSearchItem, 200)
+
+	var item interface{}
+	resource.newItem(&item)
+	c, _ := e.admin.Query().Count(item)
+	if c > 10000 {
+		return nil
+	}
 
 	var items interface{}
 	resource.newArrayOfItems(&items)
