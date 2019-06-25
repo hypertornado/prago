@@ -18,14 +18,8 @@
     <thead>
     <tr>
       {{range $item := .Header}}
-        <th class="admin_list_orderitem" data-name="{{$item.ColumnName}}">
-          {{if $item.CanOrder}}
-            <a href="#" class="admin_table_orderheader" data-name="{{$item.ColumnName}}">
-          {{- end -}}
-            {{- $item.NameHuman -}}
-          {{if $item.CanOrder -}}
-            </a>
-          {{end}}
+        <th class="admin_list_orderitem{{if $item.CanOrder}} admin_list_orderitem-canorder{{end}}" data-name="{{$item.ColumnName}}">
+          {{- $item.NameHuman -}}
         </th>
       {{end}}
       <th>
@@ -86,9 +80,9 @@
   {{range $item := .admin_list.Rows}}
     <tr data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="admin_table_row">
       {{range $cell := $item.Items}}
-      <td>
-        {{tmpl $cell.Template $cell.Value}}
-      </td>
+        <td{{if $cell.OrderedBy}} class="admin_table_cell-orderedby"{{end}}>
+          {{tmpl $cell.Template $cell.Value}}
+        </td>
       {{end}}
       <td nowrap class="top align-right">
         <div class="btngroup admin_list_buttons">

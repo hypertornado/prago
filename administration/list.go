@@ -2,11 +2,12 @@ package administration
 
 import (
 	"fmt"
-	"github.com/hypertornado/prago/administration/messages"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hypertornado/prago/administration/messages"
 )
 
 type list struct {
@@ -50,8 +51,9 @@ type listRow struct {
 }
 
 type listCell struct {
-	Template string
-	Value    interface{}
+	OrderedBy bool
+	Template  string
+	Value     interface{}
 }
 
 type listItemActions struct {
@@ -294,7 +296,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 		for _, v := range listHeader.Header {
 			if requestQuery.Columns[v.ColumnName] {
 				fieldVal := itemVal.FieldByName(v.Name)
-				row.Items = append(row.Items, resource.valueToCell(user, v.Field, fieldVal))
+				row.Items = append(row.Items, resource.valueToCell(user, v.Field, fieldVal, requestQuery))
 			}
 		}
 
@@ -313,12 +315,15 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	return
 }
 
-func (resource Resource) valueToCell(user User, f Field, val reflect.Value) listCell {
+func (resource Resource) valueToCell(user User, f Field, val reflect.Value, requestQuery *listRequest) listCell {
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
 
 	var cell listCell
 	cell.Template = f.fieldType.ListCellTemplate
 	cell.Value = f.fieldType.ListCellDataSource(resource, user, f, item)
+	if requestQuery.OrderBy == strings.ToLower(f.Name) {
+		cell.OrderedBy = true
+	}
 	return cell
 }

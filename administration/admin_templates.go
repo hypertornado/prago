@@ -228,7 +228,7 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_item_date"}}
-  <input type="date" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-date"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="text" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-date"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_timestamp"}}
@@ -238,7 +238,7 @@ const adminTemplates = `
     <div class="admin_timestamp">
       <input type="hidden" id="{{.UUID}}" name="{{.Name}}" value="{{.Value}}">
 
-      <input type="date" name="_admin_timestamp_hidden" class="input form_input form_input-date admin_timestamp_date"{{if .Focused}} autofocus{{end}}>
+      <input type="text" name="_admin_timestamp_hidden" class="input form_input form_input-date admin_timestamp_date"{{if .Focused}} autofocus{{end}}>
 
       <select class="input form_watcher form_input admin_timestamp_hour"></select>
       <span class="admin_timestamp_divider">:</span>
@@ -371,14 +371,18 @@ const adminTemplates = `
                         <input class="input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}">
                     </form>
                 {{end}}
-                <div class="admin_header_top_item">{{.currentuser.Email}}</div>
-                <a href="{{.admin_header.UrlPrefix}}/user/settings" class="
-                    admin_header_top_item
-                    {{if .admin_navigation_settings_selected}}admin_header_top_item-selected{{end}}
-                ">
-                    {{message .locale "admin_settings"}}
-                </a>
-                <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_header_top_item">{{message .locale "admin_log_out"}}</a>
+                <div class="admin_avatar admin_dropdown" tabindex="-1">
+                    <div class="admin_avatar_icon" style="background-image: url('{{.gravatar}}');"></div>
+                    <div class="admin_dropdown_content">
+                        <div class="admin_dropdown_item">{{.currentuser.Email}}</div>
+                        <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_dropdown_item">
+                            {{message .locale "admin_settings"}}
+                        </a>
+                        <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_dropdown_item">
+                            {{message .locale "admin_log_out"}}
+                        </a>
+                    </div>
+                </div>
             </div>
 
             {{if .admin_page}}
@@ -448,14 +452,8 @@ const adminTemplates = `
     <thead>
     <tr>
       {{range $item := .Header}}
-        <th class="admin_list_orderitem" data-name="{{$item.ColumnName}}">
-          {{if $item.CanOrder}}
-            <a href="#" class="admin_table_orderheader" data-name="{{$item.ColumnName}}">
-          {{- end -}}
-            {{- $item.NameHuman -}}
-          {{if $item.CanOrder -}}
-            </a>
-          {{end}}
+        <th class="admin_list_orderitem{{if $item.CanOrder}} admin_list_orderitem-canorder{{end}}" data-name="{{$item.ColumnName}}">
+          {{- $item.NameHuman -}}
         </th>
       {{end}}
       <th>
@@ -516,9 +514,9 @@ const adminTemplates = `
   {{range $item := .admin_list.Rows}}
     <tr data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="admin_table_row">
       {{range $cell := $item.Items}}
-      <td>
-        {{tmpl $cell.Template $cell.Value}}
-      </td>
+        <td{{if $cell.OrderedBy}} class="admin_table_cell-orderedby"{{end}}>
+          {{tmpl $cell.Template $cell.Value}}
+        </td>
       {{end}}
       <td nowrap class="top align-right">
         <div class="btngroup admin_list_buttons">
@@ -3536,7 +3534,6 @@ select.admin_table_filter_item {
 }
 .input:focus,
 .btn:focus {
-  border-color: #009ee0;
   background-color: white;
   outline: none;
   border-color: #51a7e8;
@@ -3572,9 +3569,12 @@ select.admin_table_filter_item {
 .admin_table_row td {
   border-bottom: 1px solid #eee;
 }
-.admin_table_row:hover {
-  background-color: rgba(64, 120, 192, 0.05);
+.admin_table_row:hover td {
+  background: rgba(64, 120, 192, 0.05);
   cursor: pointer;
+}
+.admin_table_cell-orderedby {
+  background-color: #fcfcfc;
 }
 .admin_table_row:active {
   background-color: rgba(64, 120, 192, 0.1);
@@ -3595,13 +3595,27 @@ select.admin_table_filter_item {
   border-left: 1px solid #f1f1f1;
 }*/
 .admin_table th {
-  padding: 5px;
   vertical-align: bottom;
   font-weight: normal;
   border: 1px solid #f1f1f1;
 }
-.admin_table th a {
-  display: block;
+th.admin_list_orderitem {
+  padding: 3px 3px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.admin_list_orderitem-canorder {
+  cursor: pointer;
+  color: #4078c0;
+}
+.admin_list_orderitem-canorder:hover {
+  background-color: rgba(64, 120, 192, 0.05);
+}
+.admin_list_orderitem-canorder:active {
+  background-color: rgba(64, 120, 192, 0.1);
+}
+.admin_list_filteritem {
+  padding: 5px;
 }
 .admin_table_loading {
   opacity: .4;
@@ -3801,10 +3815,8 @@ select.admin_timestamp_minute {
 }
 .ordered,
 .ordered:hover {
-  background-color: rgba(64, 120, 192, 0.1);
   background: #4078c0;
   color: white;
-  border-radius: 3px;
 }
 .ordered:after,
 .ordered-desc:after {
@@ -3838,7 +3850,7 @@ select.admin_timestamp_minute {
   display: none;
 }
 .admin_item_view_textarea {
-  white-space: pre;
+  white-space: pre-wrap;
 }
 .admin_item_view_place {
   height: 200px;
@@ -4199,6 +4211,7 @@ td.admin_list_message {
   flex-direction: column;
   overflow-y: auto;
   flex-shrink: 0;
+  margin-right: 10px;
 }
 a.admin_header_resource {
   text-transform: uppercase;
@@ -4231,6 +4244,63 @@ a.admin_header_resource {
   border-radius: 100px;
   padding: 3px 10px;
 }
+.admin_avatar {
+  margin: 10px 10px 10px 10px;
+}
+.admin_avatar_icon {
+  border: 1px solid #eee;
+  width: 25px;
+  height: 25px;
+  border-radius: 100px;
+  display: inline-block;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+}
+.admin_avatar_icon:hover {
+  border-color: #ddd;
+}
+.admin_avatar:focus .admin_avatar_icon {
+  border: 1px solid #51a7e8;
+}
+.admin_dropdown {
+  position: relative;
+  display: flex;
+  outline: none;
+}
+.admin_dropdown_content {
+  border: 1px solid #eee;
+  position: absolute;
+  right: 0px;
+  top: 25px;
+  background: white;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+.admin_dropdown:focus .admin_dropdown_content,
+.admin_dropdown:focus-within .admin_dropdown_content {
+  display: block;
+}
+div.admin_dropdown_item {
+  cursor: default;
+}
+.admin_dropdown_item {
+  display: block;
+  padding: 5px 10px;
+  border-bottom: 1px solid #eee;
+}
+.admin_dropdown_content,
+.admin_dropdown_item:last-child {
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  border: none;
+}
+.admin_dropdown_content,
+.admin_dropdown_item:first-child {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
 @media (max-width: 800px) {
   .admin_bottom {
     flex-direction: column;
@@ -4238,6 +4308,7 @@ a.admin_header_resource {
   .admin_header_resources {
     flex-direction: row;
     width: 100%;
+    margin-right: 0px;
   }
   .admin_header_resource {
     padding: 5px 10px;
@@ -4959,7 +5030,7 @@ var List = (function () {
     List.prototype.bindOrder = function () {
         var _this = this;
         this.renderOrder();
-        var headers = this.el.querySelectorAll(".admin_table_orderheader");
+        var headers = this.el.querySelectorAll(".admin_list_orderitem-canorder");
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
             header.addEventListener("click", function (e) {
@@ -4985,7 +5056,7 @@ var List = (function () {
         }
     };
     List.prototype.renderOrder = function () {
-        var headers = this.el.querySelectorAll(".admin_table_orderheader");
+        var headers = this.el.querySelectorAll(".admin_list_orderitem-canorder");
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
             header.classList.remove("ordered");

@@ -343,7 +343,7 @@ select.admin_table_filter_item {
 }
 
 .input:focus, .btn:focus {
-  border-color: #009ee0;
+  //border-color: #009ee0;
   background-color: white;
   outline: none;
   border-color: #51a7e8;
@@ -396,11 +396,14 @@ select.admin_table_filter_item {
   border-bottom: 1px solid #eee;
 }
 
-.admin_table_row:hover {
-  background-color: @baseColorBackgroundLighter;
-  //background-color: @baseColor;
-  //color: white;
+.admin_table_row:hover td {
+  background: @baseColorBackgroundLighter;
   cursor: pointer;
+}
+
+.admin_table_cell-orderedby {
+  background-color: #fcfcfc;
+  //background-color: #eee;
 }
 
 .admin_table_row:active {
@@ -432,15 +435,33 @@ select.admin_table_filter_item {
 }*/
 
 .admin_table th {
-  padding: 5px;
   vertical-align: bottom;
   font-weight: normal;
   border: 1px solid #f1f1f1;
-  //border-left: none;
 }
 
-.admin_table th a {
-  display: block;
+th.admin_list_orderitem {
+  padding: 3px 3px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.admin_list_orderitem-canorder {
+  cursor: pointer;
+  color: @baseColor;
+
+}
+
+.admin_list_orderitem-canorder:hover {
+  background-color: @baseColorBackgroundLighter;
+}
+
+.admin_list_orderitem-canorder:active {
+  background-color: @baseColorBackground;
+}
+
+.admin_list_filteritem {
+  padding: 5px;
 }
 
 .admin_table_loading {
@@ -680,10 +701,8 @@ select.admin_timestamp_minute {
 }
 
 .ordered, .ordered:hover {
-  background-color: @baseColorBackground;
   background: @baseColor;
   color: white;
-  border-radius: 3px;
 }
 
 .ordered:after, .ordered-desc:after {
@@ -726,7 +745,7 @@ select.admin_timestamp_minute {
 }
 
 .admin_item_view_textarea {
-  white-space: pre;
+  white-space: pre-wrap;
 }
 
 .admin_item_view_place {

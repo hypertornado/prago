@@ -142,6 +142,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		request.SetData("_csrfToken", user.CSRFToken(randomness))
 		request.SetData("currentuser", &user)
 		request.SetData("locale", user.Locale)
+		request.SetData("gravatar", user.GravatarURL())
 
 		if !user.IsAdmin && !user.emailConfirmed() {
 			addCurrentFlashMessage(request, messages.Messages.Get(user.Locale, "admin_flash_not_confirmed"))

@@ -449,7 +449,7 @@ var List = (function () {
     List.prototype.bindOrder = function () {
         var _this = this;
         this.renderOrder();
-        var headers = this.el.querySelectorAll(".admin_table_orderheader");
+        var headers = this.el.querySelectorAll(".admin_list_orderitem-canorder");
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
             header.addEventListener("click", function (e) {
@@ -475,7 +475,7 @@ var List = (function () {
         }
     };
     List.prototype.renderOrder = function () {
-        var headers = this.el.querySelectorAll(".admin_table_orderheader");
+        var headers = this.el.querySelectorAll(".admin_list_orderitem-canorder");
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
             header.classList.remove("ordered");

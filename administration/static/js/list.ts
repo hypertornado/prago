@@ -184,7 +184,7 @@ class List {
 
   bindOrder() {
     this.renderOrder();
-    var headers = this.el.querySelectorAll(".admin_table_orderheader");
+    var headers = this.el.querySelectorAll(".admin_list_orderitem-canorder");
     for (var i = 0; i < headers.length; i++) {
       var header = <HTMLAnchorElement>headers[i];
       header.addEventListener("click", (e) => {
@@ -209,7 +209,7 @@ class List {
   }
 
   renderOrder() {
-    var headers = this.el.querySelectorAll(".admin_table_orderheader");
+    var headers = this.el.querySelectorAll(".admin_list_orderitem-canorder");
     for (var i = 0; i < headers.length; i++) {
       var header = <HTMLAnchorElement>headers[i];
       header.classList.remove("ordered");

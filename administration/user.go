@@ -46,6 +46,14 @@ func GetUser(request prago.Request) User {
 	return *u
 }
 
+func (user User) GravatarURL() string {
+	h := md5.New()
+	io.WriteString(h, user.Email)
+	return fmt.Sprintf("https://www.gravatar.com/avatar/%ss.jpg?s=50&d=mp",
+		fmt.Sprintf("%x", h.Sum(nil)),
+	)
+}
+
 func (u User) GetRole() string {
 	if u.IsSysadmin {
 		return string(permissionSysadmin)

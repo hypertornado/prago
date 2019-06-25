@@ -77,6 +77,7 @@
   flex-direction: column;
   overflow-y: auto;
   flex-shrink: 0;
+  margin-right: 10px;
   //padding-right: 5px;
   //border-right: 1px solid #f1f1f1;
 }
@@ -124,6 +125,76 @@ a.admin_header_resource:hover {
   padding: 3px 10px;
 }
 
+.admin_avatar {
+  //border: 1px solid red;
+  margin: 10px 10px 10px 10px;
+}
+
+.admin_avatar_icon {
+  border: 1px solid #eee;
+  width: 25px;
+  height: 25px;
+  border-radius: 100px;
+  display: inline-block;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+}
+
+.admin_avatar_icon:hover {
+  border-color: #ddd;
+}
+
+.admin_avatar:focus .admin_avatar_icon {
+  border: 1px solid #51a7e8;
+}
+
+.admin_dropdown {
+  position: relative;
+  display: flex;
+  outline: none;
+}
+
+.admin_dropdown:focus, .admin_dropdown:focus-within {
+  //.shadow();
+}
+
+.admin_dropdown_content {
+  border: 1px solid #eee;
+  position: absolute;
+  right: 0px;
+  top: 25px;
+  background: white;
+  .shadow();
+  display: none;
+}
+
+.admin_dropdown:focus .admin_dropdown_content, .admin_dropdown:focus-within .admin_dropdown_content {
+  display: block;
+}
+
+div.admin_dropdown_item {
+  cursor: default;
+}
+
+.admin_dropdown_item {
+  display: block;
+  padding: 5px 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.admin_dropdown_content, .admin_dropdown_item:last-child {
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  border: none;
+}
+
+.admin_dropdown_content, .admin_dropdown_item:first-child {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
 @media (max-width: 800px) {
   .admin_bottom {
     flex-direction: column;
@@ -132,6 +203,7 @@ a.admin_header_resource:hover {
   .admin_header_resources {
     flex-direction: row;
     width: 100%;
+    margin-right: 0px;
   }
   
   .admin_header_resource {

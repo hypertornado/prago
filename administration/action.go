@@ -449,7 +449,7 @@ func initResourceActions(a *Administration, resource *Resource) {
 		actionList(resource.CanView),
 		actionNew(resource.CanCreate),
 		actionCreate(resource.CanCreate),
-		actionStats(resource.CanView),
+		//actionStats(resource.CanView),
 		actionExport(resource.CanExport),
 		actionDoExport(resource.CanExport),
 	}
