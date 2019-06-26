@@ -428,7 +428,6 @@ var List = (function () {
                 var url = el.getAttribute("data-url");
                 if (e.shiftKey || e.metaKey || e.ctrlKey) {
                     var openedWindow = window.open(url, "newwindow");
-                    console.log(openedWindow);
                     openedWindow.focus();
                     return;
                 }
@@ -527,6 +526,7 @@ var List = (function () {
         for (var i = 0; i < this.filterInputs.length; i++) {
             var input = this.filterInputs[i];
             input.addEventListener("input", this.inputListener.bind(this));
+            input.addEventListener("change", this.inputListener.bind(this));
         }
         this.inputPeriodicListener();
     };
@@ -1240,12 +1240,14 @@ var FilterDate = (function () {
         this.from = el.querySelector(".admin_filter_layout_date_from");
         this.to = el.querySelector(".admin_filter_layout_date_to");
         this.from.addEventListener("input", this.changed.bind(this));
+        this.from.addEventListener("change", this.changed.bind(this));
         this.to.addEventListener("input", this.changed.bind(this));
+        this.to.addEventListener("change", this.changed.bind(this));
     }
     FilterDate.prototype.changed = function () {
         var val = "";
-        if (this.from.value && this.to.value) {
-            val = this.from.value + " - " + this.to.value;
+        if (this.from.value || this.to.value) {
+            val = this.from.value + "," + this.to.value;
         }
         this.hidden.value = val;
         var event = new Event('change');
@@ -1331,6 +1333,26 @@ function prettyDate(date) {
     var year = date.getFullYear();
     return day + ". " + month + ". " + year;
 }
+function bindDropdowns() {
+    var els = document.querySelectorAll(".admin_dropdown");
+    for (var i = 0; i < els.length; i++) {
+        new Dropdown(els[i]);
+    }
+}
+var Dropdown = (function () {
+    function Dropdown(el) {
+        this.targetEl = el.querySelector(".admin_dropdown_target");
+        this.contentEl = el.querySelector(".admin_dropdown_content");
+        this.targetEl.addEventListener("mousedown", function (e) {
+            if (document.activeElement == el) {
+                el.blur();
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+    return Dropdown;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();
@@ -1344,6 +1366,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindFilter();
     bindScrolled();
     bindDatePicker();
+    bindDropdowns();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");

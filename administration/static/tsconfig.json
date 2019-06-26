@@ -25,6 +25,7 @@
         "js/form.ts",
         "js/filter.ts",
         "js/datepicker.ts",
+        "js/dropdown.ts",
         "js/load.ts"
     ]
 }

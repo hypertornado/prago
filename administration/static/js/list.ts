@@ -162,7 +162,6 @@ class List {
 
         if (e.shiftKey || e.metaKey || e.ctrlKey) {
           var openedWindow = window.open(url, "newwindow");
-          console.log(openedWindow);
           openedWindow.focus();
           return;
         }
@@ -234,7 +233,6 @@ class List {
   }
 
   getListRequest(): any {
-
     var ret: any = {};
     ret.Page = this.page;
     ret.OrderBy = this.orderColumn;
@@ -266,6 +264,7 @@ class List {
     for (var i = 0; i < this.filterInputs.length; i++) {
       var input: HTMLInputElement = <HTMLInputElement>this.filterInputs[i];
       input.addEventListener("input", this.inputListener.bind(this));
+      input.addEventListener("change", this.inputListener.bind(this));
     }
     this.inputPeriodicListener();
   }

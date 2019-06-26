@@ -26,7 +26,7 @@
         <span class="admin_table_count"></span>
       </th>
     </tr>
-    <tr>
+    <tr class="admin_list_filterrow">
       {{range $item := .Header}}
         <th class="admin_list_filteritem" data-name="{{$item.ColumnName}}">
           {{if $item.FilterLayout}}
@@ -69,9 +69,15 @@
   <div class="admin_filter_layout_date">
     <input class="admin_table_filter_item admin_filter_layout_date_value" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <div class="admin_filter_layout_date_content">
-      <input type="date" class="input input-small admin_filter_layout_date_from">
+      <input type="text"
+        class="input input-small admin_filter_layout_date_from form_input-date"
+        placeholder="Od"
+      >
       <div class="admin_filter_layout_date_divider">–</div>
-      <input type="date" class="input input-small admin_filter_layout_date_to">
+      <input type="text"
+        class="input input-small admin_filter_layout_date_to form_input-date"
+        placeholder="Do"
+      >
     </div>
   </div>
 {{end}}

@@ -39,7 +39,7 @@
                     </form>
                 {{end}}
                 <div class="admin_avatar admin_dropdown" tabindex="-1">
-                    <div class="admin_avatar_icon" style="background-image: url('{{.gravatar}}');"></div>
+                    <div class="admin_dropdown_target admin_avatar_icon" style="background-image: url('{{.gravatar}}');"></div>
                     <div class="admin_dropdown_content">
                         <div class="admin_dropdown_item">{{.currentuser.Email}}</div>
                         <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_dropdown_item">

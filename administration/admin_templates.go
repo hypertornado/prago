@@ -372,7 +372,7 @@ const adminTemplates = `
                     </form>
                 {{end}}
                 <div class="admin_avatar admin_dropdown" tabindex="-1">
-                    <div class="admin_avatar_icon" style="background-image: url('{{.gravatar}}');"></div>
+                    <div class="admin_dropdown_target admin_avatar_icon" style="background-image: url('{{.gravatar}}');"></div>
                     <div class="admin_dropdown_content">
                         <div class="admin_dropdown_item">{{.currentuser.Email}}</div>
                         <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_dropdown_item">
@@ -460,7 +460,7 @@ const adminTemplates = `
         <span class="admin_table_count"></span>
       </th>
     </tr>
-    <tr>
+    <tr class="admin_list_filterrow">
       {{range $item := .Header}}
         <th class="admin_list_filteritem" data-name="{{$item.ColumnName}}">
           {{if $item.FilterLayout}}
@@ -503,9 +503,15 @@ const adminTemplates = `
   <div class="admin_filter_layout_date">
     <input class="admin_table_filter_item admin_filter_layout_date_value" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <div class="admin_filter_layout_date_content">
-      <input type="date" class="input input-small admin_filter_layout_date_from">
+      <input type="text"
+        class="input input-small admin_filter_layout_date_from form_input-date"
+        placeholder="Od"
+      >
       <div class="admin_filter_layout_date_divider">–</div>
-      <input type="date" class="input input-small admin_filter_layout_date_to">
+      <input type="text"
+        class="input input-small admin_filter_layout_date_to form_input-date"
+        placeholder="Do"
+      >
     </div>
   </div>
 {{end}}
@@ -3320,15 +3326,14 @@ ul {
   margin-bottom: 1rem;
 }
 .admin_box {
-  border: 1px solid #eee;
-  margin: 20px auto;
+  margin: 0px auto;
   background-color: white;
   border-radius: 2px;
   max-width: 600px;
   width: 100%;
-  margin-bottom: 100px;
+  margin-bottom: 20px;
   background-color: #fff;
-  border-radius: 5px;
+  border-top: none;
 }
 .admin_box h1 {
   text-align: center;
@@ -3348,8 +3353,8 @@ ul {
 }
 .btn {
   display: inline-block;
-  padding: 5px 30px;
-  font-size: 1.1rem;
+  padding: 3px 30px;
+  font-size: .9rem;
   line-height: 1.2em;
   color: #333;
   white-space: nowrap;
@@ -3404,7 +3409,6 @@ ul {
   font-weight: 500;
 }
 .btn-primary:after {
-  content: " >";
   font-weight: normal;
 }
 .btn-primary:hover {
@@ -3453,7 +3457,7 @@ ul {
   border-width: 2px;
 }
 .form_label_text {
-  font-size: 1.2rem;
+  font-size: 1rem;
   line-height: 1.2em;
   margin: 5px 0px;
   display: inline-block;
@@ -3501,6 +3505,9 @@ ul {
 }
 .input-small {
   padding: 2px 6px;
+  box-shadow: none;
+  border-radius: 100px;
+  border: 1px solid #eee;
 }
 .input-placesearch {
   max-width: calc(100% - 200px);
@@ -3755,7 +3762,8 @@ td.pagination {
   border-radius: 3px;
   padding: 10px;
   background-color: #fff;
-  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+  border: 1px solid #eee;
+  background: #fafafa;
   cursor: pointer;
 }
 .admin_images_fileinput:hover {
@@ -3829,7 +3837,7 @@ select.admin_timestamp_minute {
   content: " ↑";
 }
 .view_name {
-  font-size: 1.2rem;
+  font-size: 1rem;
   margin-left: 0px;
   padding: 10px 10px 5px 10px;
   border-top: 1px solid #eee;
@@ -3893,6 +3901,8 @@ progress {
   line-height: 30px;
   padding-left: 5px;
   padding: 0px 5px 0px 5px;
+  color: #444;
+  font-weight: 500;
 }
 .admin_navigation_breadcrumb_image {
   background-repeat: no-repeat;
@@ -3913,20 +3923,18 @@ progress {
   font-size: 1.4rem;
   vertical-align: center;
   display: inline-flex;
-  color: #4078c0;
   margin: 0px 0px 0px 5px;
-  font-weight: 100;
-  color: #999;
 }
 .admin_navigation_breadcrumb_divider:after {
   content: "⇢";
+  content: "→";
 }
 .admin_navigation_tabs {
   display: flex;
   justify-content: center;
   vertical-align: bottom;
   flex-wrap: wrap;
-  margin: 5px 5px 10px 5px;
+  margin: 2px 5px 7px 5px;
 }
 .admin_header .admin_navigation_tabs {
   margin-left: 205px;
@@ -4015,7 +4023,12 @@ progress {
   display: flex;
 }
 .admin_filter_layout_date_divider {
-  padding: 0px 5px;
+  padding: 0px 2px;
+  color: #eee;
+}
+.admin_filter_layout_date_from,
+.admin_filter_layout_date_to {
+  width: 90px;
 }
 td.admin_list_message {
   padding: 20px 5px;
@@ -4037,7 +4050,6 @@ td.admin_list_message {
   padding: 5px;
   border-radius: 5px;
   text-decoration: none;
-  color: #888;
   display: inline-block;
   margin: 5px 0px;
   font-size: 1rem;
@@ -4048,14 +4060,15 @@ td.admin_list_message {
 .admin_preview_image {
   flex-grow: 0;
   flex-shrink: 0;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   margin-right: 10px;
   border-radius: 300px;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-  background-color: #eee;
+  background-color: #fafafa;
+  border: 1px solid #eee;
   align-self: flex-start;
 }
 .admin_preview_right {
@@ -4083,10 +4096,23 @@ td.admin_list_message {
 .admin_item_relation_change_btn {
   display: inline-block;
   width: 40px;
-  text-align: center;
   margin: 0px 20px;
   font-size: 1.2rem;
-  line-height: 1.2em;
+  line-height: 30px;
+  text-align: center;
+  padding: 0px;
+  background: white;
+  border: 1px solid white;
+  color: #cb2431;
+  width: 30px;
+  height: 30px;
+  border-radius: 300px;
+  font-weight: bold;
+}
+.admin_item_relation_change_btn:hover {
+  background: #cb2431;
+  color: white;
+  border: none;
 }
 .admin_item_relation_picker {
   display: flex;
@@ -4126,7 +4152,11 @@ td.admin_list_message {
   margin: 0 auto;
 }
 .admin_tablesettings {
+  border: 1px solid #eee;
   padding: 10px 5px 10px 5px;
+  background: white;
+  border-top: none;
+  border-bottom: none;
 }
 .admin_tablesettings_name {
   display: inline-block;
@@ -4153,6 +4183,7 @@ td.admin_list_message {
 }
 .admin_layout {
   width: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
 }
@@ -4170,8 +4201,10 @@ td.admin_list_message {
   box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
 }
 .admin_bottom {
-  flex-grow: 1000;
   display: flex;
+  flex-shrink: 10;
+  flex-grow: 0;
+  flex-grow: 400;
 }
 .admin_header-scrolled {
   box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
@@ -4204,17 +4237,16 @@ td.admin_list_message {
   clear: both;
   display: flex;
   padding: 5px 0px;
-  flex-wrap: wrap;
-  overflow-x: auto;
+  height: 100%;
   background-color: #fafafa;
   width: 200px;
   flex-direction: column;
-  overflow-y: auto;
+  overflow-y: scroll;
   flex-shrink: 0;
-  margin-right: 10px;
+  padding-right: 10px;
 }
 a.admin_header_resource {
-  text-transform: uppercase;
+  font-weight: 500;
   padding: 3px 10px;
   margin: 0px;
   font-size: .9rem;
@@ -4223,6 +4255,8 @@ a.admin_header_resource {
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
   text-decoration: none;
+  color: #999;
+  color: #444;
 }
 .admin_header_resource-active,
 .admin_header_resource-active:hover {
@@ -4233,8 +4267,11 @@ a.admin_header_resource {
   font-size: .9rem;
 }
 .admin_content {
-  flex-grow: 100;
+  flex-grow: 10;
+  flex-shrink: 0;
   overflow-y: auto;
+  overflow-x: auto;
+  width: 10px;
 }
 .admin_header_search {
   display: flex;
@@ -4245,7 +4282,7 @@ a.admin_header_resource {
   padding: 3px 10px;
 }
 .admin_avatar {
-  margin: 10px 10px 10px 10px;
+  margin: 5px 10px 5px 10px;
 }
 .admin_avatar_icon {
   border: 1px solid #eee;
@@ -4309,6 +4346,8 @@ div.admin_dropdown_item {
     flex-direction: row;
     width: 100%;
     margin-right: 0px;
+    padding-right: 10px;
+    flex-wrap: wrap;
   }
   .admin_header_resource {
     padding: 5px 10px;
@@ -5009,7 +5048,6 @@ var List = (function () {
                 var url = el.getAttribute("data-url");
                 if (e.shiftKey || e.metaKey || e.ctrlKey) {
                     var openedWindow = window.open(url, "newwindow");
-                    console.log(openedWindow);
                     openedWindow.focus();
                     return;
                 }
@@ -5108,6 +5146,7 @@ var List = (function () {
         for (var i = 0; i < this.filterInputs.length; i++) {
             var input = this.filterInputs[i];
             input.addEventListener("input", this.inputListener.bind(this));
+            input.addEventListener("change", this.inputListener.bind(this));
         }
         this.inputPeriodicListener();
     };
@@ -5821,12 +5860,14 @@ var FilterDate = (function () {
         this.from = el.querySelector(".admin_filter_layout_date_from");
         this.to = el.querySelector(".admin_filter_layout_date_to");
         this.from.addEventListener("input", this.changed.bind(this));
+        this.from.addEventListener("change", this.changed.bind(this));
         this.to.addEventListener("input", this.changed.bind(this));
+        this.to.addEventListener("change", this.changed.bind(this));
     }
     FilterDate.prototype.changed = function () {
         var val = "";
-        if (this.from.value && this.to.value) {
-            val = this.from.value + " - " + this.to.value;
+        if (this.from.value || this.to.value) {
+            val = this.from.value + "," + this.to.value;
         }
         this.hidden.value = val;
         var event = new Event('change');
@@ -5912,6 +5953,26 @@ function prettyDate(date) {
     var year = date.getFullYear();
     return day + ". " + month + ". " + year;
 }
+function bindDropdowns() {
+    var els = document.querySelectorAll(".admin_dropdown");
+    for (var i = 0; i < els.length; i++) {
+        new Dropdown(els[i]);
+    }
+}
+var Dropdown = (function () {
+    function Dropdown(el) {
+        this.targetEl = el.querySelector(".admin_dropdown_target");
+        this.contentEl = el.querySelector(".admin_dropdown_content");
+        this.targetEl.addEventListener("mousedown", function (e) {
+            if (document.activeElement == el) {
+                el.blur();
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+    return Dropdown;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();
@@ -5925,6 +5986,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindFilter();
     bindScrolled();
     bindDatePicker();
+    bindDropdowns();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");

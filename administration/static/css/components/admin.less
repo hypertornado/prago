@@ -113,15 +113,16 @@ ul {
 
 .admin_box {
   //box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
-  border: 1px solid #eee;
-  margin: 20px auto;
+  //border: 1px solid #eee;
+  margin: 0px auto;
   background-color: white;
   border-radius: 2px;
   max-width: 600px;
   width: 100%;
-  margin-bottom: 100px;
+  margin-bottom: 20px;
   background-color: #fff;
-  border-radius: 5px;
+  border-top: none;
+  // /border-radius: 5px;
 }
 
 .admin_box h1 {
@@ -145,8 +146,8 @@ ul {
 
 .btn {
   display: inline-block;
-  padding: 5px 30px;
-  font-size: 1.1rem;
+  padding: 3px 30px;
+  font-size: .9rem;
   line-height: 1.2em;
   color: #333;
   white-space: nowrap;
@@ -210,7 +211,7 @@ ul {
 }
 
 .btn-primary:after {
-  content: " >";
+  //content: " >";
   font-weight: normal;
 }
 
@@ -267,7 +268,7 @@ ul {
 }
 
 .form_label_text {
-  font-size: 1.2rem;
+  font-size: 1rem;
   line-height: 1.2em;
   margin: 5px 0px;
   display: inline-block;
@@ -310,6 +311,10 @@ ul {
 
 .input-small {
   padding: 2px 6px;
+  //background: #fafafa;
+  box-shadow: none;
+  border-radius: 100px;
+  border: 1px solid #eee;
 }
 
 .input-placesearch {
@@ -458,6 +463,10 @@ th.admin_list_orderitem {
 
 .admin_list_orderitem-canorder:active {
   background-color: @baseColorBackground;
+}
+
+.admin_list_filterrow th {
+  //border-bottom: 1px solid black;
 }
 
 .admin_list_filteritem {
@@ -627,7 +636,9 @@ td.pagination {
   border-radius: 3px;
   padding: 10px;
   background-color: #fff;
-  .shadow;
+  //.shadow;
+  border: 1px solid #eee;
+  background: #fafafa;
   cursor: pointer;
 }
 
@@ -719,7 +730,7 @@ select.admin_timestamp_minute {
 }
 
 .view_name {
-  font-size: 1.2rem;
+  font-size: 1rem;
   margin-left: 0px;
   padding: 10px 10px 5px 10px;
   border-top: 1px solid #eee;
@@ -791,6 +802,8 @@ progress {
   line-height: 30px;
   padding-left: 5px;
   padding: 0px 5px 0px 5px;
+  color: @black;
+  font-weight: 500;
 }
 
 .admin_navigation_breadcrumb_image {
@@ -816,14 +829,15 @@ progress {
   vertical-align: center;
   display: inline-flex;
 
-  color: @baseColor;
+  //color: @baseColor;
   margin: 0px 0px 0px 5px;
-  font-weight: 100;
-  color: @gray;
+  //font-weight: 100;
+  //color: @gray;
 }
 
 .admin_navigation_breadcrumb_divider:after {
   content: "⇢";
+  content: "→";
 }
 
 .admin_navigation_tabs {
@@ -831,7 +845,7 @@ progress {
   justify-content: center;
   vertical-align: bottom;
   flex-wrap: wrap;
-  margin: 5px 5px 10px 5px;
+  margin: 2px 5px 7px 5px;
 }
 
 .admin_header .admin_navigation_tabs {
@@ -937,7 +951,12 @@ progress {
 }
 
 .admin_filter_layout_date_divider {
-  padding: 0px 5px;
+  padding: 0px 2px;
+  color: #eee;
+}
+
+.admin_filter_layout_date_from, .admin_filter_layout_date_to {
+  width: 90px;
 }
 
 td.admin_list_message {
@@ -964,7 +983,7 @@ td.admin_list_message {
   //.shadow;
   border-radius: 5px;
   text-decoration: none;
-  color: #888;
+  //color: #888;
   display: inline-block;
   margin: 5px 0px;
   font-size: 1rem;
@@ -972,19 +991,22 @@ td.admin_list_message {
 
   display: flex;
   align-items: center;
+  //border: 1px solid #eee;
+  //.shadow;
 }
 
 .admin_preview_image {
   flex-grow: 0;
   flex-shrink: 0;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   margin-right: 10px;
   border-radius: 300px;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-  background-color: #eee;
+  background-color: #fafafa;
+  border: 1px solid #eee;
   align-self: flex-start;
 }
 
@@ -1021,8 +1043,23 @@ td.admin_list_message {
   text-align: center;
   margin: 0px 20px;
   font-size: 1.2rem;
-  line-height: 1.2em;
+  line-height: 30px;
+  text-align: center;
+  padding: 0px;
+  background: white;
+  border: 1px solid white;
+  color: @red;
+  width: 30px;
+  height: 30px;
+  border-radius: 300px;
+  font-weight: bold;
   //padding: 0px;
+}
+
+.admin_item_relation_change_btn:hover {
+  background: @red;
+  color: white;
+  border: none;
 }
 
 .admin_item_relation_picker {
@@ -1070,14 +1107,15 @@ td.admin_list_message {
 }
 
 .admin_tablesettings {
-  //border: 1px solid #eee;
+  border: 1px solid #eee;
   //background: white;
   padding: 10px 5px 10px 5px;
   //border-radius: 3px;
   //text-align: center;
   //margin: 10px 10px;
-  //background: white;
-  //border-top: 1px solid #eee;
+  background: white;
+  border-top: none;
+  border-bottom: none;
 }
 
 .admin_tablesettings_name {

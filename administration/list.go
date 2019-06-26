@@ -202,16 +202,32 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 				q.WhereIs(k, false)
 			}
 		case "filter_layout_date":
-			fields := strings.Split(v, " - ")
-			k = strings.Replace(k, "`", "", -1)
+			v = strings.Trim(v, " ")
+			var fromStr, toStr string
+			fields := strings.Split(v, ",")
+			if len(fields) == 1 {
+				if strings.HasPrefix(v, ",") {
+					toStr = fields[0]
+				} else {
+					fromStr = fields[0]
+				}
+			}
+
 			if len(fields) == 2 {
+				fromStr = fields[0]
+				toStr = fields[1]
+			}
+
+			k = strings.Replace(k, "`", "", -1)
+			if fromStr != "" {
 				var str string
-
 				str = fmt.Sprintf("`%s` >= ?", k)
-				q.Where(str, fields[0])
-
+				q.Where(str, fromStr)
+			}
+			if toStr != "" {
+				var str string
 				str = fmt.Sprintf("`%s` <= ?", k)
-				q.Where(str, fields[1])
+				q.Where(str, toStr)
 			}
 		}
 	}

@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindFilter();
   bindScrolled();
   bindDatePicker();
+  bindDropdowns();
 });
 
 function bindFlashMessages() {

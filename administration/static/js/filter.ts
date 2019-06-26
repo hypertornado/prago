@@ -17,14 +17,16 @@ class FilterDate {
     this.to = <HTMLInputElement>el.querySelector(".admin_filter_layout_date_to");
 
     this.from.addEventListener("input", this.changed.bind(this));
+    this.from.addEventListener("change", this.changed.bind(this));
     this.to.addEventListener("input", this.changed.bind(this));
+    this.to.addEventListener("change", this.changed.bind(this));
 
   }
 
   changed() {
     var val = "";
-    if (this.from.value && this.to.value) {
-      val = this.from.value + " - " + this.to.value;
+    if (this.from.value || this.to.value) {
+      val = this.from.value + "," + this.to.value;
     }
     this.hidden.value = val;
 
