@@ -365,6 +365,9 @@ const adminTemplates = `
                 {{else}}
                     {{template "admin_breadcrumbs" .admin_default_breadcrumbs}}
                 {{end}}
+                {{if .admin_page}}
+                    {{template "admin_tabs" .admin_page.Navigation}}
+                {{end}}
                 <div class="admin_header_top_item admin_header_top_space"></div>
                 {{if .admin_header.HasSearch}}
                     <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
@@ -384,10 +387,6 @@ const adminTemplates = `
                     </div>
                 </div>
             </div>
-
-            {{if .admin_page}}
-                {{template "admin_tabs" .admin_page.Navigation.Tabs}}
-            {{end}}
         </div>
 
         <div class="admin_bottom">
@@ -728,11 +727,17 @@ const adminTemplates = `
 
 {{end}}{{define "admin_tabs"}}
   <div class="admin_navigation_tabs">
-    {{range $item := .}}
+    <div class="admin_navigation_tabs_content">
+    {{$navigation := .}}
+    {{range $i, $item := .Tabs}}
+        {{if ne $i 0}}
+          <div class="admin_navigation_tabdivider{{if $navigation.IsVisible $i}} admin_navigation_tabdivider-visible{{end}}"></div>
+        {{end}}
         <a href="{{$item.URL}}" class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
             {{$item.Name}}
         </a>
     {{end}}
+    </div>
   </div>
 {{end}}{{define "admin_view"}}
   {{range $item := .Items}}
@@ -3900,9 +3905,10 @@ progress {
   align-items: center;
   line-height: 30px;
   padding-left: 5px;
-  padding: 0px 5px 0px 5px;
+  padding: 0px 3px 0px 3px;
   color: #444;
   font-weight: 500;
+  border-radius: 5px;
 }
 .admin_navigation_breadcrumb_image {
   background-repeat: no-repeat;
@@ -3912,7 +3918,7 @@ progress {
   height: 30px;
   margin: 3px 10px 3px 0px;
   display: inline-block;
-  border-radius: 300px;
+  border-radius: 5px;
   background-color: white;
   border: 1px solid #eee;
 }
@@ -3923,7 +3929,7 @@ progress {
   font-size: 1.4rem;
   vertical-align: center;
   display: inline-flex;
-  margin: 0px 0px 0px 5px;
+  margin: 0px 0px 0px 3px;
 }
 .admin_navigation_breadcrumb_divider:after {
   content: "⇢";
@@ -3934,30 +3940,37 @@ progress {
   justify-content: center;
   vertical-align: bottom;
   flex-wrap: wrap;
-  margin: 2px 5px 7px 5px;
+  margin: 7px 5px 7px 5px;
 }
-.admin_header .admin_navigation_tabs {
-  margin-left: 205px;
+.admin_navigation_tabs_content {
+  display: flex;
+  flex-wrap: wrap;
+  border-radius: 5px;
+  background: rgba(64, 120, 192, 0.1);
+  padding: 0px 4px;
 }
 .admin_navigation_tab {
   white-space: nowrap;
   overflow: hidden;
-  margin: 0px;
+  margin: 4px 0px;
   display: flex;
   border-bottom: none;
   font-size: .9rem;
+  line-height: 1.8em;
   text-decoration: none;
-  padding: 1px 10px;
+  padding: 1px 20px;
   display: inline-block;
-  background-color: white;
-  border-top: 1px solid #4078c0;
-  border-bottom: 1px solid #4078c0;
-  border-right: 1px solid #4078c0;
+  border-radius: 5px;
+  color: #444;
+  font-weight: 500;
 }
-.admin_navigation_tab:first-of-type {
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-  border-left: 1px solid #4078c0;
+.admin_navigation_tabdivider {
+  border-left: 1px solid #aaa;
+  margin: 7px 4px;
+}
+.admin_navigation_tab:hover {
+  color: black;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
 .admin_navigation_tab:last-of-type {
   border-top-right-radius: 5px;
@@ -3968,6 +3981,7 @@ progress {
   background-color: #4078c0;
   color: white;
   box-shadow: none;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
 .btn-more {
   position: relative;
@@ -4199,6 +4213,7 @@ td.admin_list_message {
   top: 0px;
   flex-shrink: 0;
   box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
+  padding: 5px 5px;
 }
 .admin_bottom {
   display: flex;
@@ -4280,12 +4295,13 @@ a.admin_header_resource {
 .admin_header_search .input {
   border-radius: 100px;
   padding: 3px 10px;
+  font-weight: 500;
 }
 .admin_avatar {
   margin: 5px 10px 5px 10px;
 }
 .admin_avatar_icon {
-  border: 1px solid #eee;
+  border: 1px solid #999;
   width: 25px;
   height: 25px;
   border-radius: 100px;

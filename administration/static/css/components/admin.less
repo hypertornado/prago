@@ -801,9 +801,11 @@ progress {
   align-items: center;
   line-height: 30px;
   padding-left: 5px;
-  padding: 0px 5px 0px 5px;
+  padding: 0px 3px 0px 3px;
   color: @black;
   font-weight: 500;
+  //border: 1px solid red;
+  border-radius: 5px;
 }
 
 .admin_navigation_breadcrumb_image {
@@ -814,7 +816,7 @@ progress {
   height: 30px;
   margin: 3px 10px 3px 0px;
   display: inline-block;
-  border-radius: 300px;
+  border-radius: 5px;
   background-color: white;
   //.shadow;
   border: 1px solid #eee;
@@ -830,7 +832,7 @@ progress {
   display: inline-flex;
 
   //color: @baseColor;
-  margin: 0px 0px 0px 5px;
+  margin: 0px 0px 0px 3px;
   //font-weight: 100;
   //color: @gray;
 }
@@ -845,35 +847,66 @@ progress {
   justify-content: center;
   vertical-align: bottom;
   flex-wrap: wrap;
-  margin: 2px 5px 7px 5px;
+  margin: 7px 5px 7px 5px;
+}
+
+.admin_navigation_tabs_content {
+  //border: 1px solid red;
+  display: flex;
+  flex-wrap: wrap;
+  border-radius: 5px;
+  background: @baseColorBackground;
+  padding: 0px 4px;
+  //border: 3px solid rgba(0,0,0,0);
+  //.shadow;
 }
 
 .admin_header .admin_navigation_tabs {
-  margin-left: 205px;
+  //margin-left: 205px;
 }
 
 .admin_navigation_tab {
   white-space: nowrap;
   overflow: hidden;
-  margin: 0px;
+  margin: 4px 0px;
   display: flex;
   border-bottom: none;
   font-size: .9rem;
+  line-height: 1.8em;
 
   text-decoration: none;
-  padding: 1px 10px;
+  padding: 1px 20px;
   display: inline-block;
 
-  background-color: white;
-  border-top: 1px solid @baseColor;
-  border-bottom: 1px solid @baseColor;
-  border-right: 1px solid @baseColor;
+  border-radius: 5px;
+  color: @black;
+  font-weight: 500;
+
+  //border-top: 1px solid @baseColor;
+  //border-bottom: 1px solid @baseColor;
+  //border-right: 1px solid @baseColor;
+}
+
+.admin_navigation_tabdivider {
+  border-left: 1px solid rgba(0,0,0,0);
+  //border-left: 1px solid @baseColor;
+  margin: 7px 4px;
+}
+
+.admin_navigation_tabdivider-visible {
+  border-color: #ddd;
+}
+
+.admin_navigation_tab:hover {
+  //background: white;
+  color: black;
+  .shadow;
 }
 
 .admin_navigation_tab:first-of-type {
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-  border-left: 1px solid @baseColor;
+  //border-top-left-radius: 5px;
+  //border-bottom-left-radius: 5px;
+  //border-left: 1px solid @baseColor;
 }
 
 .admin_navigation_tab:last-of-type {
@@ -885,6 +918,7 @@ progress {
   background-color: @baseColor;
   color: white;
   box-shadow: none;
+  .shadow;
 }
 
 .btn-more {

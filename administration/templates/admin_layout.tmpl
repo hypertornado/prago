@@ -32,6 +32,9 @@
                 {{else}}
                     {{template "admin_breadcrumbs" .admin_default_breadcrumbs}}
                 {{end}}
+                {{if .admin_page}}
+                    {{template "admin_tabs" .admin_page.Navigation}}
+                {{end}}
                 <div class="admin_header_top_item admin_header_top_space"></div>
                 {{if .admin_header.HasSearch}}
                     <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
@@ -51,10 +54,6 @@
                     </div>
                 </div>
             </div>
-
-            {{if .admin_page}}
-                {{template "admin_tabs" .admin_page.Navigation.Tabs}}
-            {{end}}
         </div>
 
         <div class="admin_bottom">

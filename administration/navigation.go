@@ -36,6 +36,16 @@ type navigationBreadcrumb struct {
 	Image string
 }
 
+func (n adminItemNavigation) IsVisible(pos int) bool {
+	if n.Tabs[pos-1].Selected {
+		return false
+	}
+	if n.Tabs[pos].Selected {
+		return false
+	}
+	return true
+}
+
 func (admin *Administration) createBreadcrumbs(locale string) []navigationBreadcrumb {
 	return []navigationBreadcrumb{
 		{Name: admin.HumanName, URL: "/", Logo: admin.Logo},
