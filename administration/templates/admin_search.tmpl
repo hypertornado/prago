@@ -21,3 +21,20 @@
     </div>
   </div>
 {{end}}
+
+
+{{define "admin_search_suggest"}}
+  <div class="admin_search_suggestions_content">
+    {{range $item := .items}}
+      <a href="{{$item.URL}}" class="admin_search_suggestion">
+        <div class="admin_search_suggestion_left"
+          {{if $item.Image}} style="background-image: url('{{CSS $item.Image}}');"{{end}}></div>
+        <div class="admin_search_suggestion_right">
+          <div class="admin_search_suggestion_category">{{$item.Category}}</div>
+          <div class="admin_search_suggestion_name">{{$item.Name}}</div>
+          <div class="admin_search_suggestion_description">{{$item.Description}}</div>
+        </div>
+      </a>
+    {{end}}
+  </div>
+{{end}}

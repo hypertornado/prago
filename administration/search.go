@@ -328,6 +328,7 @@ func bindSearch(admin *Administration) {
 	}
 
 	go func() {
+		return
 		err := adminSearch.searchImport()
 		if err != nil {
 			admin.App.Log().Println(fmt.Errorf("%s", err))
@@ -338,7 +339,7 @@ func bindSearch(admin *Administration) {
 		q := request.Params().Get("q")
 		pageStr := request.Params().Get("page")
 
-		var page int = 1
+		var page = 1
 		if pageStr != "" {
 			var err error
 			page, err = strconv.Atoi(pageStr)
@@ -385,16 +386,19 @@ func bindSearch(admin *Administration) {
 		request.RenderView("admin_layout")
 	})
 
-	/*mainController.Get("/suggest", func(request prago.Request) {
-		results, err := elasticClient.Suggest(request.Params().Get("q"))
+	admin.AdminController.Get(admin.GetURL("_search_suggest"), func(request prago.Request) {
+		results, err := adminSearch.Suggest(request.Params().Get("q"))
 		if err != nil {
 			request.Log().Println(err)
 		}
 
+		if len(results) == 0 {
+			request.RenderJSONWithCode(nil, 404)
+		}
+
 		request.SetData("items", results)
-		request.RenderView("suggest")
+		request.RenderView("admin_search_suggest")
 	})
-	*/
 }
 
 func parseSuggestions(in string) []string {

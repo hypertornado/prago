@@ -39,12 +39,12 @@ func getRelationData(resource Resource, user User, f Field, value interface{}) *
 
 	r2 := resource.Admin.getResourceByName(relationName)
 	if r2 == nil {
-		fmt.Errorf("Resource '%s' not found", relationName)
+		fmt.Printf("Resource '%s' not found\n", relationName)
 		return nil
 	}
 
 	if !resource.Admin.Authorize(user, r2.CanView) {
-		fmt.Errorf("User is not authorized to view this item")
+		fmt.Printf("User is not authorized to view this item\n")
 		return nil
 	}
 
@@ -57,7 +57,7 @@ func getRelationData(resource Resource, user User, f Field, value interface{}) *
 	}
 	err := resource.Admin.Query().WhereIs("id", intVal).Get(item)
 	if err != nil {
-		fmt.Errorf("Can't find this item")
+		fmt.Printf("Can't find this item\n")
 		return nil
 	}
 

@@ -2,12 +2,13 @@ package administration
 
 import (
 	"fmt"
-	"github.com/hypertornado/prago"
 	"os"
 	"runtime"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/hypertornado/prago"
 )
 
 func bindSystemstats(admin *Administration) {
@@ -118,7 +119,7 @@ type accessViewRole struct {
 
 func getResourceAccessView(admin *Administration) accessView {
 	ret := accessView{}
-	for k, _ := range admin.roles {
+	for k := range admin.roles {
 		ret.Roles = append(ret.Roles, k)
 	}
 

@@ -2386,14 +2386,15 @@ ul {
   margin-bottom: 1rem;
 }
 .admin_box {
-  margin: 0px auto;
+  border: 1px solid #eee;
+  margin: 20px auto;
   background-color: white;
   border-radius: 2px;
   max-width: 600px;
   width: 100%;
   margin-bottom: 20px;
   background-color: #fff;
-  border-top: none;
+  border-radius: 5px;
 }
 .admin_box h1 {
   text-align: center;
@@ -2432,6 +2433,8 @@ ul {
   -webkit-appearance: none;
   outline: none;
   text-decoration: none;
+  font-weight: 500;
+  border-radius: 5px;
 }
 .btn-small {
   padding: 3px 12px;
@@ -3302,8 +3305,6 @@ td.admin_list_message {
   flex-wrap: wrap;
   align-items: center;
   padding: 0px 5px;
-  background-color: #fafafa;
-  background: linear-gradient(#fafafa, #fff);
 }
 .admin_header_resources {
   margin: 0px;
@@ -3325,8 +3326,8 @@ a.admin_header_resource {
   font-size: .9rem;
   border-bottom: 2px solid none;
   flex-shrink: 0;
-  border-top-right-radius: 3px;
-  border-bottom-right-radius: 3px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
   text-decoration: none;
   color: #999;
   color: #444;
@@ -3345,15 +3346,6 @@ a.admin_header_resource {
   overflow-y: auto;
   overflow-x: auto;
   width: 10px;
-}
-.admin_header_search {
-  display: flex;
-  padding: 5px 0px;
-}
-.admin_header_search .input {
-  border-radius: 100px;
-  padding: 3px 10px;
-  font-weight: 500;
 }
 .admin_avatar {
   margin: 5px 10px 5px 10px;
@@ -3413,8 +3405,12 @@ div.admin_dropdown_item {
   border-top-right-radius: 5px;
 }
 @media (max-width: 800px) {
+  .admin_layout {
+    height: auto;
+  }
   .admin_bottom {
     flex-direction: column;
+    flex-grow: 10;
   }
   .admin_header_resources {
     flex-direction: row;
@@ -3422,10 +3418,17 @@ div.admin_dropdown_item {
     margin-right: 0px;
     padding-right: 10px;
     flex-wrap: wrap;
+    flex-grow: 0;
+    align-items: center;
+    padding: 5px;
   }
-  .admin_header_resource {
-    padding: 5px 10px;
-    margin: 2px 5px;
+  a.admin_header_resource {
+    padding: 3px 3px;
+    margin: 2px 3px;
+    border-radius: 3px;
+  }
+  .admin_content {
+    width: auto;
   }
   .admin_header .admin_navigation_tabs {
     margin-left: 5px;
@@ -3687,4 +3690,67 @@ a.search_pagination_page-selected {
   font-weight: bold;
   text-decoration: none;
   color: #444;
+}
+.admin_header_search {
+  display: flex;
+  padding: 5px 0px;
+  position: relative;
+}
+.admin_header_search_suggestions {
+  min-height: 20px;
+  background: white;
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 32px;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
+.admin_header_search .input {
+  border-radius: 100px;
+  padding: 3px 10px;
+  font-weight: 500;
+}
+.admin_search_suggestion {
+  display: flex;
+  border-bottom: 1px solid #eee;
+  font-size: .8rem;
+  line-height: 1.3em;
+}
+.admin_search_suggestion:last-child {
+  border-bottom: none;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+.admin_search_suggestion:first-child {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+.admin_search_suggestion_left {
+  border: 1px solid #eee;
+  border-radius: 100px;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  background: #fafafa;
+  margin: 5px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.admin_search_suggestion_right {
+  flex-grow: 2;
+  padding: 5px;
+}
+.admin_search_suggestion_category {
+  text-transform: uppercase;
+  color: #444;
+  font-size: .7rem;
+}
+.admin_search_suggestion_name {
+  font-size: .9rem;
+  line-height: 1.3em;
+}
+.admin_search_suggestion_description {
+  color: #999;
 }

@@ -371,7 +371,8 @@ const adminTemplates = `
                 <div class="admin_header_top_item admin_header_top_space"></div>
                 {{if .admin_header.HasSearch}}
                     <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
-                        <input class="input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}">
+                        <input class="input admin_header_search_input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                        <div class="admin_header_search_suggestions hidden"></div>
                     </form>
                 {{end}}
                 <div class="admin_avatar admin_dropdown" tabindex="-1">
@@ -602,6 +603,23 @@ const adminTemplates = `
         <a href="{{$page.URL}}" class="search_pagination_page{{if $page.Selected}} search_pagination_page-selected{{end}}">{{$page.Title}}</a>
       {{end}}
     </div>
+  </div>
+{{end}}
+
+
+{{define "admin_search_suggest"}}
+  <div class="admin_search_suggestions_content">
+    {{range $item := .items}}
+      <a href="{{$item.URL}}" class="admin_search_suggestion">
+        <div class="admin_search_suggestion_left"
+          {{if $item.Image}} style="background-image: url('{{CSS $item.Image}}');"{{end}}></div>
+        <div class="admin_search_suggestion_right">
+          <div class="admin_search_suggestion_category">{{$item.Category}}</div>
+          <div class="admin_search_suggestion_name">{{$item.Name}}</div>
+          <div class="admin_search_suggestion_description">{{$item.Description}}</div>
+        </div>
+      </a>
+    {{end}}
   </div>
 {{end}}{{define "admin_settings_OLD"}}
 
@@ -3331,14 +3349,15 @@ ul {
   margin-bottom: 1rem;
 }
 .admin_box {
-  margin: 0px auto;
+  border: 1px solid #eee;
+  margin: 20px auto;
   background-color: white;
   border-radius: 2px;
   max-width: 600px;
   width: 100%;
   margin-bottom: 20px;
   background-color: #fff;
-  border-top: none;
+  border-radius: 5px;
 }
 .admin_box h1 {
   text-align: center;
@@ -3377,6 +3396,8 @@ ul {
   -webkit-appearance: none;
   outline: none;
   text-decoration: none;
+  font-weight: 500;
+  border-radius: 5px;
 }
 .btn-small {
   padding: 3px 12px;
@@ -3965,8 +3986,11 @@ progress {
   font-weight: 500;
 }
 .admin_navigation_tabdivider {
-  border-left: 1px solid #aaa;
+  border-left: 1px solid rgba(0, 0, 0, 0);
   margin: 7px 4px;
+}
+.admin_navigation_tabdivider-visible {
+  border-color: #ddd;
 }
 .admin_navigation_tab:hover {
   color: black;
@@ -4244,8 +4268,6 @@ td.admin_list_message {
   flex-wrap: wrap;
   align-items: center;
   padding: 0px 5px;
-  background-color: #fafafa;
-  background: linear-gradient(#fafafa, #fff);
 }
 .admin_header_resources {
   margin: 0px;
@@ -4267,8 +4289,8 @@ a.admin_header_resource {
   font-size: .9rem;
   border-bottom: 2px solid none;
   flex-shrink: 0;
-  border-top-right-radius: 3px;
-  border-bottom-right-radius: 3px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
   text-decoration: none;
   color: #999;
   color: #444;
@@ -4287,15 +4309,6 @@ a.admin_header_resource {
   overflow-y: auto;
   overflow-x: auto;
   width: 10px;
-}
-.admin_header_search {
-  display: flex;
-  padding: 5px 0px;
-}
-.admin_header_search .input {
-  border-radius: 100px;
-  padding: 3px 10px;
-  font-weight: 500;
 }
 .admin_avatar {
   margin: 5px 10px 5px 10px;
@@ -4355,8 +4368,12 @@ div.admin_dropdown_item {
   border-top-right-radius: 5px;
 }
 @media (max-width: 800px) {
+  .admin_layout {
+    height: auto;
+  }
   .admin_bottom {
     flex-direction: column;
+    flex-grow: 10;
   }
   .admin_header_resources {
     flex-direction: row;
@@ -4364,10 +4381,17 @@ div.admin_dropdown_item {
     margin-right: 0px;
     padding-right: 10px;
     flex-wrap: wrap;
+    flex-grow: 0;
+    align-items: center;
+    padding: 5px;
   }
-  .admin_header_resource {
-    padding: 5px 10px;
-    margin: 2px 5px;
+  a.admin_header_resource {
+    padding: 3px 3px;
+    margin: 2px 3px;
+    border-radius: 3px;
+  }
+  .admin_content {
+    width: auto;
   }
   .admin_header .admin_navigation_tabs {
     margin-left: 5px;
@@ -4629,6 +4653,61 @@ a.search_pagination_page-selected {
   font-weight: bold;
   text-decoration: none;
   color: #444;
+}
+.admin_header_search {
+  display: flex;
+  padding: 5px 0px;
+  position: relative;
+}
+.admin_header_search_suggestions {
+  border: 1px solid #eee;
+  min-height: 20px;
+  background: white;
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 32px;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
+.admin_header_search .input {
+  border-radius: 100px;
+  padding: 3px 10px;
+  font-weight: 500;
+}
+.admin_search_suggestion {
+  display: flex;
+  border-bottom: 1px solid #eee;
+  font-size: .8rem;
+  line-height: 1.3em;
+}
+.admin_search_suggestion_left {
+  border: 1px solid #eee;
+  border-radius: 100px;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  background: #fafafa;
+  margin: 5px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.admin_search_suggestion_right {
+  flex-grow: 2;
+  padding: 5px;
+}
+.admin_search_suggestion_category {
+  text-transform: uppercase;
+  color: #444;
+  font-size: .7rem;
+}
+.admin_search_suggestion_name {
+  font-size: .9rem;
+  line-height: 1.3em;
+}
+.admin_search_suggestion_description {
+  color: #999;
 }
 `
 
@@ -5989,6 +6068,228 @@ var Dropdown = (function () {
     }
     return Dropdown;
 }());
+function bindSearch() {
+    var els = document.querySelectorAll(".admin_header_search");
+    for (var i = 0; i < els.length; i++) {
+        new SearchForm(els[i]);
+    }
+}
+var SearchForm = (function () {
+    function SearchForm(el) {
+        var _this = this;
+        this.searchInput = el.querySelector(".admin_header_search_input");
+        this.suggestionsEl = el.querySelector(".admin_header_search_suggestions");
+        this.searchInput.addEventListener("input", function () {
+            _this.suggestions = [];
+            _this.dirty = true;
+            _this.lastChanged = Date.now();
+            return false;
+        });
+        this.searchInput.addEventListener("blur", function () {
+            _this.suggestionsEl.classList.add("hidden");
+        });
+        window.setInterval(function () {
+            if (_this.dirty && Date.now() - _this.lastChanged > 100) {
+                _this.loadSuggestions();
+            }
+        }, 30);
+    }
+    SearchForm.prototype.loadSuggestions = function () {
+        var _this = this;
+        this.dirty = false;
+        var suggestText = this.searchInput.value;
+        var request = new XMLHttpRequest();
+        var url = "/admin/_search_suggest" + encodeParams({ "q": this.searchInput.value });
+        request.open("GET", url);
+        request.addEventListener("load", function () {
+            if (suggestText != _this.searchInput.value) {
+                return;
+            }
+            console.log(request.response);
+            if (request.status == 200) {
+                _this.addSuggestions(request.response);
+            }
+            else {
+                _this.suggestionsEl.classList.add("hidden");
+                console.error("Error while loading item.");
+            }
+        });
+        request.send();
+    };
+    SearchForm.prototype.addSuggestions = function (content) {
+        console.log(content);
+        this.suggestionsEl.innerHTML = content;
+        this.suggestionsEl.classList.remove("hidden");
+    };
+    return SearchForm;
+}());
+var SearchLAZNE = (function () {
+    function SearchLAZNE() {
+        var _this = this;
+        this.searchForm = document.querySelector("form.head_search");
+        this.searchInput = document.querySelector(".head_search_input");
+        if (!this.searchInput) {
+            return;
+        }
+        this.searchForm.addEventListener("submit", function (e) {
+            if (_this.searchInput.value == "") {
+                _this.searchInput.focus();
+                e.preventDefault();
+                return false;
+            }
+        });
+        this.searchInput.addEventListener("input", function (e) {
+            _this.suggestions = [];
+            _this.dirty = true;
+            _this.lastChanged = Date.now();
+            return false;
+        });
+        this.searchInput.addEventListener("focus", function () {
+            _this.searchForm.classList.add("head_search-focused");
+        });
+        this.searchSuggestions = document.querySelector(".head_search_suggestions");
+        window.setInterval(function () {
+            if (_this.dirty && Date.now() - _this.lastChanged > 100) {
+                _this.loadSuggestions();
+            }
+        }, 30);
+        this.searchInput.addEventListener("keydown", function (e) {
+            switch (e.keyCode) {
+                case 13:
+                    var i = _this.getSelected();
+                    if (i >= 0) {
+                        var child = _this.suggestions[i];
+                        if (child) {
+                            _this.logClick();
+                            window.location.href = child.getAttribute("href");
+                        }
+                        e.preventDefault();
+                        return true;
+                    }
+                    return false;
+                case 38:
+                    var i = _this.getSelected();
+                    if (i < 1) {
+                        i = _this.suggestions.length - 1;
+                    }
+                    else {
+                        i = i - 1;
+                    }
+                    _this.setSelected(i);
+                    e.preventDefault();
+                    return false;
+                case 40:
+                    var i = _this.getSelected();
+                    if (i >= 0) {
+                        i += 1;
+                        i = i % _this.suggestions.length;
+                    }
+                    else {
+                        i = 0;
+                    }
+                    _this.setSelected(i);
+                    e.preventDefault();
+                    return false;
+            }
+        });
+    }
+    SearchLAZNE.prototype.logClick = function () {
+        var selected = this.getSelected();
+        if (selected >= 0) {
+            var suggestion = this.suggestions[selected];
+            var text = this.searchInput.value + " – " + suggestion.getAttribute("data-position") + " - " + suggestion.getAttribute("data-name");
+        }
+    };
+    SearchLAZNE.prototype.loadSuggestions = function () {
+        var _this = this;
+        this.dirty = false;
+        var suggestText = this.searchInput.value;
+        var request = new XMLHttpRequest();
+        var url = "/suggest" + encodeParams({ "q": this.searchInput.value });
+        request.open("GET", url);
+        request.addEventListener("load", function () {
+            if (suggestText != _this.searchInput.value) {
+                return;
+            }
+            if (request.status == 200) {
+                _this.addSuggestions(request.response);
+            }
+            else {
+                _this.dismissSuggestions();
+                console.error("Error while loading item.");
+            }
+        });
+        request.send();
+    };
+    SearchLAZNE.prototype.dismissSuggestions = function () {
+        this.searchForm.classList.remove("head_search-suggestion");
+        this.searchSuggestions.innerHTML = "";
+    };
+    SearchLAZNE.prototype.addSuggestions = function (content) {
+        var _this = this;
+        this.searchSuggestions.innerHTML = content;
+        this.suggestions = this.searchSuggestions.querySelectorAll(".head_search_suggestion");
+        if (this.suggestions.length > 0) {
+            this.searchForm.classList.add("head_search-suggestion");
+        }
+        else {
+            this.searchForm.classList.remove("head_search-suggestion");
+        }
+        for (var i = 0; i < this.suggestions.length; i++) {
+            var suggestion = this.suggestions[i];
+            suggestion.addEventListener("touchend", function (e) {
+                var el = e.currentTarget;
+                window.location.href = el.getAttribute("href");
+            });
+            suggestion.addEventListener("click", function (e) {
+                _this.logClick();
+                return false;
+            });
+            suggestion.addEventListener("mouseenter", function (e) {
+                _this.deselect();
+                var el = e.currentTarget;
+                _this.setSelected(parseInt(el.getAttribute("data-position")));
+            });
+        }
+    };
+    SearchLAZNE.prototype.deselect = function () {
+        var el = this.searchSuggestions.querySelector(".head_search_suggestion-selected");
+        if (el) {
+            el.classList.remove("head_search_suggestion-selected");
+        }
+    };
+    SearchLAZNE.prototype.getSelected = function () {
+        var el = this.searchSuggestions.querySelector(".head_search_suggestion-selected");
+        if (el) {
+            return parseInt(el.getAttribute("data-position"));
+        }
+        return -1;
+    };
+    SearchLAZNE.prototype.setSelected = function (position) {
+        this.deselect();
+        if (position >= 0) {
+            var els = this.searchSuggestions.querySelectorAll(".head_search_suggestion");
+            els[position].classList.add("head_search_suggestion-selected");
+        }
+    };
+    return SearchLAZNE;
+}());
+function encodeParams(data) {
+    var ret = "";
+    for (var k in data) {
+        if (!data[k]) {
+            continue;
+        }
+        if (ret != "") {
+            ret += "&";
+        }
+        ret += encodeURIComponent(k) + "=" + encodeURIComponent(data[k]);
+    }
+    if (ret != "") {
+        ret = "?" + ret;
+    }
+    return ret;
+}
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();
@@ -6003,6 +6304,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindScrolled();
     bindDatePicker();
     bindDropdowns();
+    bindSearch();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");

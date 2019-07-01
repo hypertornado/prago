@@ -38,7 +38,8 @@
                 <div class="admin_header_top_item admin_header_top_space"></div>
                 {{if .admin_header.HasSearch}}
                     <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
-                        <input class="input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}">
+                        <input class="input admin_header_search_input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                        <div class="admin_header_search_suggestions hidden"></div>
                     </form>
                 {{end}}
                 <div class="admin_avatar admin_dropdown" tabindex="-1">

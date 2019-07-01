@@ -1353,6 +1353,227 @@ var Dropdown = (function () {
     }
     return Dropdown;
 }());
+function bindSearch() {
+    var els = document.querySelectorAll(".admin_header_search");
+    for (var i = 0; i < els.length; i++) {
+        new SearchForm(els[i]);
+    }
+}
+var SearchForm = (function () {
+    function SearchForm(el) {
+        var _this = this;
+        this.searchInput = el.querySelector(".admin_header_search_input");
+        this.suggestionsEl = el.querySelector(".admin_header_search_suggestions");
+        this.searchInput.addEventListener("input", function () {
+            _this.suggestions = [];
+            _this.dirty = true;
+            _this.lastChanged = Date.now();
+            return false;
+        });
+        this.searchInput.addEventListener("blur", function () {
+        });
+        window.setInterval(function () {
+            if (_this.dirty && Date.now() - _this.lastChanged > 100) {
+                _this.loadSuggestions();
+            }
+        }, 30);
+    }
+    SearchForm.prototype.loadSuggestions = function () {
+        var _this = this;
+        this.dirty = false;
+        var suggestText = this.searchInput.value;
+        var request = new XMLHttpRequest();
+        var url = "/admin/_search_suggest" + encodeParams({ "q": this.searchInput.value });
+        request.open("GET", url);
+        request.addEventListener("load", function () {
+            if (suggestText != _this.searchInput.value) {
+                return;
+            }
+            console.log(request.response);
+            if (request.status == 200) {
+                _this.addSuggestions(request.response);
+            }
+            else {
+                _this.suggestionsEl.classList.add("hidden");
+                console.error("Error while loading item.");
+            }
+        });
+        request.send();
+    };
+    SearchForm.prototype.addSuggestions = function (content) {
+        console.log(content);
+        this.suggestionsEl.innerHTML = content;
+        this.suggestionsEl.classList.remove("hidden");
+    };
+    return SearchForm;
+}());
+var SearchLAZNE = (function () {
+    function SearchLAZNE() {
+        var _this = this;
+        this.searchForm = document.querySelector("form.head_search");
+        this.searchInput = document.querySelector(".head_search_input");
+        if (!this.searchInput) {
+            return;
+        }
+        this.searchForm.addEventListener("submit", function (e) {
+            if (_this.searchInput.value == "") {
+                _this.searchInput.focus();
+                e.preventDefault();
+                return false;
+            }
+        });
+        this.searchInput.addEventListener("input", function (e) {
+            _this.suggestions = [];
+            _this.dirty = true;
+            _this.lastChanged = Date.now();
+            return false;
+        });
+        this.searchInput.addEventListener("focus", function () {
+            _this.searchForm.classList.add("head_search-focused");
+        });
+        this.searchSuggestions = document.querySelector(".head_search_suggestions");
+        window.setInterval(function () {
+            if (_this.dirty && Date.now() - _this.lastChanged > 100) {
+                _this.loadSuggestions();
+            }
+        }, 30);
+        this.searchInput.addEventListener("keydown", function (e) {
+            switch (e.keyCode) {
+                case 13:
+                    var i = _this.getSelected();
+                    if (i >= 0) {
+                        var child = _this.suggestions[i];
+                        if (child) {
+                            _this.logClick();
+                            window.location.href = child.getAttribute("href");
+                        }
+                        e.preventDefault();
+                        return true;
+                    }
+                    return false;
+                case 38:
+                    var i = _this.getSelected();
+                    if (i < 1) {
+                        i = _this.suggestions.length - 1;
+                    }
+                    else {
+                        i = i - 1;
+                    }
+                    _this.setSelected(i);
+                    e.preventDefault();
+                    return false;
+                case 40:
+                    var i = _this.getSelected();
+                    if (i >= 0) {
+                        i += 1;
+                        i = i % _this.suggestions.length;
+                    }
+                    else {
+                        i = 0;
+                    }
+                    _this.setSelected(i);
+                    e.preventDefault();
+                    return false;
+            }
+        });
+    }
+    SearchLAZNE.prototype.logClick = function () {
+        var selected = this.getSelected();
+        if (selected >= 0) {
+            var suggestion = this.suggestions[selected];
+            var text = this.searchInput.value + " – " + suggestion.getAttribute("data-position") + " - " + suggestion.getAttribute("data-name");
+        }
+    };
+    SearchLAZNE.prototype.loadSuggestions = function () {
+        var _this = this;
+        this.dirty = false;
+        var suggestText = this.searchInput.value;
+        var request = new XMLHttpRequest();
+        var url = "/suggest" + encodeParams({ "q": this.searchInput.value });
+        request.open("GET", url);
+        request.addEventListener("load", function () {
+            if (suggestText != _this.searchInput.value) {
+                return;
+            }
+            if (request.status == 200) {
+                _this.addSuggestions(request.response);
+            }
+            else {
+                _this.dismissSuggestions();
+                console.error("Error while loading item.");
+            }
+        });
+        request.send();
+    };
+    SearchLAZNE.prototype.dismissSuggestions = function () {
+        this.searchForm.classList.remove("head_search-suggestion");
+        this.searchSuggestions.innerHTML = "";
+    };
+    SearchLAZNE.prototype.addSuggestions = function (content) {
+        var _this = this;
+        this.searchSuggestions.innerHTML = content;
+        this.suggestions = this.searchSuggestions.querySelectorAll(".head_search_suggestion");
+        if (this.suggestions.length > 0) {
+            this.searchForm.classList.add("head_search-suggestion");
+        }
+        else {
+            this.searchForm.classList.remove("head_search-suggestion");
+        }
+        for (var i = 0; i < this.suggestions.length; i++) {
+            var suggestion = this.suggestions[i];
+            suggestion.addEventListener("touchend", function (e) {
+                var el = e.currentTarget;
+                window.location.href = el.getAttribute("href");
+            });
+            suggestion.addEventListener("click", function (e) {
+                _this.logClick();
+                return false;
+            });
+            suggestion.addEventListener("mouseenter", function (e) {
+                _this.deselect();
+                var el = e.currentTarget;
+                _this.setSelected(parseInt(el.getAttribute("data-position")));
+            });
+        }
+    };
+    SearchLAZNE.prototype.deselect = function () {
+        var el = this.searchSuggestions.querySelector(".head_search_suggestion-selected");
+        if (el) {
+            el.classList.remove("head_search_suggestion-selected");
+        }
+    };
+    SearchLAZNE.prototype.getSelected = function () {
+        var el = this.searchSuggestions.querySelector(".head_search_suggestion-selected");
+        if (el) {
+            return parseInt(el.getAttribute("data-position"));
+        }
+        return -1;
+    };
+    SearchLAZNE.prototype.setSelected = function (position) {
+        this.deselect();
+        if (position >= 0) {
+            var els = this.searchSuggestions.querySelectorAll(".head_search_suggestion");
+            els[position].classList.add("head_search_suggestion-selected");
+        }
+    };
+    return SearchLAZNE;
+}());
+function encodeParams(data) {
+    var ret = "";
+    for (var k in data) {
+        if (!data[k]) {
+            continue;
+        }
+        if (ret != "") {
+            ret += "&";
+        }
+        ret += encodeURIComponent(k) + "=" + encodeURIComponent(data[k]);
+    }
+    if (ret != "") {
+        ret = "?" + ret;
+    }
+    return ret;
+}
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();
@@ -1367,6 +1588,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindScrolled();
     bindDatePicker();
     bindDropdowns();
+    bindSearch();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");

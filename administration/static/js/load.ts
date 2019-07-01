@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindScrolled();
   bindDatePicker();
   bindDropdowns();
+  bindSearch();
 });
 
 function bindFlashMessages() {
