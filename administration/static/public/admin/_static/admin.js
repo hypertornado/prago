@@ -349,11 +349,22 @@ var List = (function () {
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.prefilterField = el.getAttribute("data-prefilter-field");
         this.prefilterValue = el.getAttribute("data-prefilter-value");
-        this.orderColumn = el.getAttribute("data-order-column");
+        this.defaultOrderColumn = el.getAttribute("data-order-column");
         if (el.getAttribute("data-order-desc") == "true") {
-            this.orderDesc = true;
+            this.defaultOrderDesc = true;
         }
         else {
+            this.defaultOrderDesc = false;
+        }
+        this.orderColumn = this.defaultOrderColumn;
+        this.orderDesc = this.defaultOrderDesc;
+        if (urlParams.get("_order")) {
+            this.orderColumn = urlParams.get("_order");
+        }
+        if (urlParams.get("_desc") == "true") {
+            this.orderDesc = true;
+        }
+        if (urlParams.get("_desc") == "false") {
             this.orderDesc = false;
         }
         this.bindOptions();
@@ -366,6 +377,12 @@ var List = (function () {
         var params = {};
         if (this.page > 1) {
             params["_page"] = this.page;
+        }
+        if (this.orderColumn != this.defaultOrderColumn) {
+            params["_order"] = this.orderColumn;
+        }
+        if (this.orderDesc != this.defaultOrderDesc) {
+            params["_desc"] = this.orderDesc;
         }
         var encoded = encodeParams(params);
         window.history.replaceState(null, null, document.location.pathname + encoded);
@@ -524,7 +541,6 @@ var List = (function () {
     };
     List.prototype.getListRequest = function () {
         var ret = {};
-        ret.Page = this.page;
         ret.OrderBy = this.orderColumn;
         ret.OrderDesc = this.orderDesc;
         ret.Filter = this.getFilterData();

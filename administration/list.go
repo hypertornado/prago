@@ -74,8 +74,8 @@ type page struct {
 
 type listRequest struct {
 	//Page           int64
-	OrderBy        string
-	OrderDesc      bool
+	//OrderBy        string
+	//OrderDesc      bool
 	PrefilterField string
 	PrefilterValue string
 	Filter         map[string]string
@@ -250,12 +250,25 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 		return
 	}
 
-	q := admin.prefilterQuery(requestQuery.PrefilterField, requestQuery.PrefilterValue)
-	if requestQuery.OrderDesc {
-		q = q.OrderDesc(requestQuery.OrderBy)
-	} else {
-		q = q.Order(requestQuery.OrderBy)
+	orderBy := resource.OrderByColumn
+	if params.Get("_order") != "" {
+		orderBy = params.Get("_order")
 	}
+	orderDesc := resource.OrderDesc
+	if params.Get("_desc") == "true" {
+		orderDesc = true
+	}
+	if params.Get("_desc") == "false" {
+		orderDesc = false
+	}
+
+	q := admin.prefilterQuery(requestQuery.PrefilterField, requestQuery.PrefilterValue)
+	if orderDesc {
+		q = q.OrderDesc(orderBy)
+	} else {
+		q = q.Order(orderBy)
+	}
+	fmt.Println(orderBy, orderDesc)
 
 	var count int64
 	var item interface{}
@@ -318,7 +331,11 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 		for _, v := range listHeader.Header {
 			if requestQuery.Columns[v.ColumnName] {
 				fieldVal := itemVal.FieldByName(v.Name)
-				row.Items = append(row.Items, resource.valueToCell(user, v.Field, fieldVal, requestQuery))
+				var isOrderedBy bool
+				if v.ColumnName == orderBy {
+					isOrderedBy = true
+				}
+				row.Items = append(row.Items, resource.valueToCell(user, v.Field, fieldVal, isOrderedBy))
 			}
 		}
 
@@ -337,15 +354,13 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	return
 }
 
-func (resource Resource) valueToCell(user User, f Field, val reflect.Value, requestQuery *listRequest) listCell {
+func (resource Resource) valueToCell(user User, f Field, val reflect.Value, isOrderedBy bool) listCell {
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
 
 	var cell listCell
 	cell.Template = f.fieldType.ListCellTemplate
 	cell.Value = f.fieldType.ListCellDataSource(resource, user, f, item)
-	if requestQuery.OrderBy == strings.ToLower(f.Name) {
-		cell.OrderedBy = true
-	}
+	cell.OrderedBy = isOrderedBy
 	return cell
 }

@@ -15,7 +15,9 @@ class List {
   changed: boolean;
   changedTimestamp: number;
   
+  defaultOrderColumn: string;
   orderColumn: string;
+  defaultOrderDesc: boolean;
   orderDesc: boolean;
   page: number;
 
@@ -57,12 +59,25 @@ class List {
     this.prefilterField = el.getAttribute("data-prefilter-field");
     this.prefilterValue = el.getAttribute("data-prefilter-value");
 
-    this.orderColumn = el.getAttribute("data-order-column");
+    this.defaultOrderColumn = el.getAttribute("data-order-column");
     if (el.getAttribute("data-order-desc") == "true") {
-      this.orderDesc = true;
+      this.defaultOrderDesc = true;
     } else {
-      this.orderDesc = false;
+      this.defaultOrderDesc = false;
     }
+    this.orderColumn = this.defaultOrderColumn;
+    this.orderDesc = this.defaultOrderDesc;
+
+    if (urlParams.get("_order")) {
+      this.orderColumn = urlParams.get("_order");
+    }
+    if (urlParams.get("_desc") == "true") {
+      this.orderDesc = true
+    }
+    if (urlParams.get("_desc") == "false") {
+      this.orderDesc = false
+    }
+
     this.bindOptions();
     this.bindOrder();
   }
@@ -73,6 +88,12 @@ class List {
     var params: any = {};
     if (this.page > 1) {
       params["_page"] = this.page;
+    }
+    if (this.orderColumn != this.defaultOrderColumn) {
+      params["_order"] = this.orderColumn;
+    }
+    if (this.orderDesc != this.defaultOrderDesc) {
+      params["_desc"] = this.orderDesc;
     }
     let encoded = encodeParams(params);
     window.history.replaceState(null, null, document.location.pathname + encoded);
@@ -237,7 +258,6 @@ class List {
 
   getListRequest(): any {
     var ret: any = {};
-    ret.Page = this.page;
     ret.OrderBy = this.orderColumn;
     ret.OrderDesc = this.orderDesc;
     ret.Filter = this.getFilterData();
