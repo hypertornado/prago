@@ -1362,6 +1362,7 @@ function bindSearch() {
 var SearchForm = (function () {
     function SearchForm(el) {
         var _this = this;
+        this.searchForm = el;
         this.searchInput = el.querySelector(".admin_header_search_input");
         this.suggestionsEl = el.querySelector(".admin_header_search_suggestions");
         this.searchInput.addEventListener("input", function () {
@@ -1377,74 +1378,16 @@ var SearchForm = (function () {
                 _this.loadSuggestions();
             }
         }, 30);
-    }
-    SearchForm.prototype.loadSuggestions = function () {
-        var _this = this;
-        this.dirty = false;
-        var suggestText = this.searchInput.value;
-        var request = new XMLHttpRequest();
-        var url = "/admin/_search_suggest" + encodeParams({ "q": this.searchInput.value });
-        request.open("GET", url);
-        request.addEventListener("load", function () {
-            if (suggestText != _this.searchInput.value) {
+        this.searchInput.addEventListener("keydown", function (e) {
+            if (!_this.suggestions || _this.suggestions.length == 0) {
                 return;
             }
-            console.log(request.response);
-            if (request.status == 200) {
-                _this.addSuggestions(request.response);
-            }
-            else {
-                _this.suggestionsEl.classList.add("hidden");
-                console.error("Error while loading item.");
-            }
-        });
-        request.send();
-    };
-    SearchForm.prototype.addSuggestions = function (content) {
-        console.log(content);
-        this.suggestionsEl.innerHTML = content;
-        this.suggestionsEl.classList.remove("hidden");
-    };
-    return SearchForm;
-}());
-var SearchLAZNE = (function () {
-    function SearchLAZNE() {
-        var _this = this;
-        this.searchForm = document.querySelector("form.head_search");
-        this.searchInput = document.querySelector(".head_search_input");
-        if (!this.searchInput) {
-            return;
-        }
-        this.searchForm.addEventListener("submit", function (e) {
-            if (_this.searchInput.value == "") {
-                _this.searchInput.focus();
-                e.preventDefault();
-                return false;
-            }
-        });
-        this.searchInput.addEventListener("input", function (e) {
-            _this.suggestions = [];
-            _this.dirty = true;
-            _this.lastChanged = Date.now();
-            return false;
-        });
-        this.searchInput.addEventListener("focus", function () {
-            _this.searchForm.classList.add("head_search-focused");
-        });
-        this.searchSuggestions = document.querySelector(".head_search_suggestions");
-        window.setInterval(function () {
-            if (_this.dirty && Date.now() - _this.lastChanged > 100) {
-                _this.loadSuggestions();
-            }
-        }, 30);
-        this.searchInput.addEventListener("keydown", function (e) {
             switch (e.keyCode) {
                 case 13:
                     var i = _this.getSelected();
                     if (i >= 0) {
                         var child = _this.suggestions[i];
                         if (child) {
-                            _this.logClick();
                             window.location.href = child.getAttribute("href");
                         }
                         e.preventDefault();
@@ -1477,19 +1420,13 @@ var SearchLAZNE = (function () {
             }
         });
     }
-    SearchLAZNE.prototype.logClick = function () {
-        var selected = this.getSelected();
-        if (selected >= 0) {
-            var suggestion = this.suggestions[selected];
-            var text = this.searchInput.value + " – " + suggestion.getAttribute("data-position") + " - " + suggestion.getAttribute("data-name");
-        }
-    };
-    SearchLAZNE.prototype.loadSuggestions = function () {
+    SearchForm.prototype.loadSuggestions = function () {
         var _this = this;
         this.dirty = false;
         var suggestText = this.searchInput.value;
         var request = new XMLHttpRequest();
-        var url = "/suggest" + encodeParams({ "q": this.searchInput.value });
+        var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        var url = adminPrefix + "/_search_suggest" + encodeParams({ "q": this.searchInput.value });
         request.open("GET", url);
         request.addEventListener("load", function () {
             if (suggestText != _this.searchInput.value) {
@@ -1499,26 +1436,17 @@ var SearchLAZNE = (function () {
                 _this.addSuggestions(request.response);
             }
             else {
-                _this.dismissSuggestions();
+                _this.suggestionsEl.classList.add("hidden");
                 console.error("Error while loading item.");
             }
         });
         request.send();
     };
-    SearchLAZNE.prototype.dismissSuggestions = function () {
-        this.searchForm.classList.remove("head_search-suggestion");
-        this.searchSuggestions.innerHTML = "";
-    };
-    SearchLAZNE.prototype.addSuggestions = function (content) {
+    SearchForm.prototype.addSuggestions = function (content) {
         var _this = this;
-        this.searchSuggestions.innerHTML = content;
-        this.suggestions = this.searchSuggestions.querySelectorAll(".head_search_suggestion");
-        if (this.suggestions.length > 0) {
-            this.searchForm.classList.add("head_search-suggestion");
-        }
-        else {
-            this.searchForm.classList.remove("head_search-suggestion");
-        }
+        this.suggestionsEl.innerHTML = content;
+        this.suggestionsEl.classList.remove("hidden");
+        this.suggestions = this.suggestionsEl.querySelectorAll(".admin_search_suggestion");
         for (var i = 0; i < this.suggestions.length; i++) {
             var suggestion = this.suggestions[i];
             suggestion.addEventListener("touchend", function (e) {
@@ -1526,7 +1454,6 @@ var SearchLAZNE = (function () {
                 window.location.href = el.getAttribute("href");
             });
             suggestion.addEventListener("click", function (e) {
-                _this.logClick();
                 return false;
             });
             suggestion.addEventListener("mouseenter", function (e) {
@@ -1536,27 +1463,27 @@ var SearchLAZNE = (function () {
             });
         }
     };
-    SearchLAZNE.prototype.deselect = function () {
-        var el = this.searchSuggestions.querySelector(".head_search_suggestion-selected");
+    SearchForm.prototype.deselect = function () {
+        var el = this.suggestionsEl.querySelector(".admin_search_suggestion-selected");
         if (el) {
-            el.classList.remove("head_search_suggestion-selected");
+            el.classList.remove("admin_search_suggestion-selected");
         }
     };
-    SearchLAZNE.prototype.getSelected = function () {
-        var el = this.searchSuggestions.querySelector(".head_search_suggestion-selected");
+    SearchForm.prototype.getSelected = function () {
+        var el = this.suggestionsEl.querySelector(".admin_search_suggestion-selected");
         if (el) {
             return parseInt(el.getAttribute("data-position"));
         }
         return -1;
     };
-    SearchLAZNE.prototype.setSelected = function (position) {
+    SearchForm.prototype.setSelected = function (position) {
         this.deselect();
         if (position >= 0) {
-            var els = this.searchSuggestions.querySelectorAll(".head_search_suggestion");
-            els[position].classList.add("head_search_suggestion-selected");
+            var els = this.suggestionsEl.querySelectorAll(".admin_search_suggestion");
+            els[position].classList.add("admin_search_suggestion-selected");
         }
     };
-    return SearchLAZNE;
+    return SearchForm;
 }());
 function encodeParams(data) {
     var ret = "";

@@ -359,7 +359,7 @@ const adminTemplates = `
     {{template "admin_flash" .}}
     <div class="admin_layout">
         <div class="admin_header">
-            <div class="admin_header_top">
+            <div class="admin_header_left">
                 {{if .admin_page}}
                     {{template "admin_breadcrumbs" .admin_page.Navigation.Breadcrumbs}}
                 {{else}}
@@ -369,6 +369,8 @@ const adminTemplates = `
                     {{template "admin_tabs" .admin_page.Navigation}}
                 {{end}}
                 <div class="admin_header_top_item admin_header_top_space"></div>
+            </div>
+            <div class="admin_header_right">
                 {{if .admin_header.HasSearch}}
                     <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
                         <input class="input admin_header_search_input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
@@ -424,7 +426,7 @@ const adminTemplates = `
     {{end}}
 
     {{if .admin_page}}
-      {{template "admin_tabs" .admin_page.Navigation.Tabs}}
+      {{template "admin_tabs" .admin_page.Navigation}}
     {{end}}
 
     {{template "admin_flash" .}}
@@ -609,8 +611,8 @@ const adminTemplates = `
 
 {{define "admin_search_suggest"}}
   <div class="admin_search_suggestions_content">
-    {{range $item := .items}}
-      <a href="{{$item.URL}}" class="admin_search_suggestion">
+    {{range $i, $item := .items}}
+      <a href="{{$item.URL}}" class="admin_search_suggestion" data-position="{{$i}}">
         <div class="admin_search_suggestion_left"
           {{if $item.Image}} style="background-image: url('{{CSS $item.Image}}');"{{end}}></div>
         <div class="admin_search_suggestion_right">
@@ -3260,6 +3262,11 @@ html {
 *:after {
   box-sizing: inherit;
 }
+::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #999;
+  opacity: 1;
+}
 html,
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -4237,7 +4244,22 @@ td.admin_list_message {
   top: 0px;
   flex-shrink: 0;
   box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
-  padding: 5px 5px;
+  padding: 0px 0px 0px 0px;
+  display: flex;
+  align-items: flex-start;
+}
+.admin_header_left {
+  display: flex;
+  border: 0px solid red;
+  flex-wrap: wrap;
+  flex-grow: 1;
+  padding: 3px 5px;
+}
+.admin_header_right {
+  display: flex;
+  flex-shrink: 0;
+  border: 0px solid blue;
+  padding: 8px 5px;
 }
 .admin_bottom {
   display: flex;
@@ -4263,12 +4285,12 @@ td.admin_list_message {
 .admin_header_top_space {
   flex-grow: 2;
 }
-.admin_header_top {
+/*.admin_header_top {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   padding: 0px 5px;
-}
+}*/
 .admin_header_resources {
   margin: 0px;
   clear: both;
@@ -4368,6 +4390,14 @@ div.admin_dropdown_item {
   border-top-right-radius: 5px;
 }
 @media (max-width: 800px) {
+  .admin_header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .admin_header_right {
+    width: 100%;
+    padding: 0px 5px 3px 5px;
+  }
   .admin_layout {
     height: auto;
   }
@@ -4660,7 +4690,6 @@ a.search_pagination_page-selected {
   position: relative;
 }
 .admin_header_search_suggestions {
-  border: 1px solid #eee;
   min-height: 20px;
   background: white;
   position: absolute;
@@ -4669,9 +4698,14 @@ a.search_pagination_page-selected {
   top: 32px;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
+  display: none;
 }
-.admin_header_search .input {
+.admin_header_search:focus-within .admin_header_search_suggestions {
+  display: block;
+}
+.admin_header_search_input {
   border-radius: 100px;
+  width: 200px;
   padding: 3px 10px;
   font-weight: 500;
 }
@@ -4680,6 +4714,23 @@ a.search_pagination_page-selected {
   border-bottom: 1px solid #eee;
   font-size: .8rem;
   line-height: 1.3em;
+  max-height: 100px;
+  overflow: hidden;
+}
+a.admin_search_suggestion-selected {
+  background: rgba(64, 120, 192, 0.05);
+}
+a.admin_search_suggestion-selected:active {
+  background: rgba(64, 120, 192, 0.1);
+}
+.admin_search_suggestion:last-child {
+  border-bottom: none;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+.admin_search_suggestion:first-child {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 }
 .admin_search_suggestion_left {
   border: 1px solid #eee;
@@ -4708,6 +4759,14 @@ a.search_pagination_page-selected {
 }
 .admin_search_suggestion_description {
   color: #999;
+}
+@media (max-width: 800px) {
+  .admin_header_search {
+    flex-grow: 2;
+  }
+  .admin_header_search_input {
+    flex-grow: 2;
+  }
 }
 `
 
@@ -6077,6 +6136,7 @@ function bindSearch() {
 var SearchForm = (function () {
     function SearchForm(el) {
         var _this = this;
+        this.searchForm = el;
         this.searchInput = el.querySelector(".admin_header_search_input");
         this.suggestionsEl = el.querySelector(".admin_header_search_suggestions");
         this.searchInput.addEventListener("input", function () {
@@ -6086,81 +6146,22 @@ var SearchForm = (function () {
             return false;
         });
         this.searchInput.addEventListener("blur", function () {
-            _this.suggestionsEl.classList.add("hidden");
         });
-        window.setInterval(function () {
-            if (_this.dirty && Date.now() - _this.lastChanged > 100) {
-                _this.loadSuggestions();
-            }
-        }, 30);
-    }
-    SearchForm.prototype.loadSuggestions = function () {
-        var _this = this;
-        this.dirty = false;
-        var suggestText = this.searchInput.value;
-        var request = new XMLHttpRequest();
-        var url = "/admin/_search_suggest" + encodeParams({ "q": this.searchInput.value });
-        request.open("GET", url);
-        request.addEventListener("load", function () {
-            if (suggestText != _this.searchInput.value) {
-                return;
-            }
-            console.log(request.response);
-            if (request.status == 200) {
-                _this.addSuggestions(request.response);
-            }
-            else {
-                _this.suggestionsEl.classList.add("hidden");
-                console.error("Error while loading item.");
-            }
-        });
-        request.send();
-    };
-    SearchForm.prototype.addSuggestions = function (content) {
-        console.log(content);
-        this.suggestionsEl.innerHTML = content;
-        this.suggestionsEl.classList.remove("hidden");
-    };
-    return SearchForm;
-}());
-var SearchLAZNE = (function () {
-    function SearchLAZNE() {
-        var _this = this;
-        this.searchForm = document.querySelector("form.head_search");
-        this.searchInput = document.querySelector(".head_search_input");
-        if (!this.searchInput) {
-            return;
-        }
-        this.searchForm.addEventListener("submit", function (e) {
-            if (_this.searchInput.value == "") {
-                _this.searchInput.focus();
-                e.preventDefault();
-                return false;
-            }
-        });
-        this.searchInput.addEventListener("input", function (e) {
-            _this.suggestions = [];
-            _this.dirty = true;
-            _this.lastChanged = Date.now();
-            return false;
-        });
-        this.searchInput.addEventListener("focus", function () {
-            _this.searchForm.classList.add("head_search-focused");
-        });
-        this.searchSuggestions = document.querySelector(".head_search_suggestions");
         window.setInterval(function () {
             if (_this.dirty && Date.now() - _this.lastChanged > 100) {
                 _this.loadSuggestions();
             }
         }, 30);
         this.searchInput.addEventListener("keydown", function (e) {
+            if (!_this.suggestions || _this.suggestions.length == 0) {
+                return;
+            }
             switch (e.keyCode) {
                 case 13:
                     var i = _this.getSelected();
                     if (i >= 0) {
                         var child = _this.suggestions[i];
                         if (child) {
-                            _this.logClick();
                             window.location.href = child.getAttribute("href");
                         }
                         e.preventDefault();
@@ -6193,19 +6194,13 @@ var SearchLAZNE = (function () {
             }
         });
     }
-    SearchLAZNE.prototype.logClick = function () {
-        var selected = this.getSelected();
-        if (selected >= 0) {
-            var suggestion = this.suggestions[selected];
-            var text = this.searchInput.value + " – " + suggestion.getAttribute("data-position") + " - " + suggestion.getAttribute("data-name");
-        }
-    };
-    SearchLAZNE.prototype.loadSuggestions = function () {
+    SearchForm.prototype.loadSuggestions = function () {
         var _this = this;
         this.dirty = false;
         var suggestText = this.searchInput.value;
         var request = new XMLHttpRequest();
-        var url = "/suggest" + encodeParams({ "q": this.searchInput.value });
+        var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        var url = adminPrefix + "/_search_suggest" + encodeParams({ "q": this.searchInput.value });
         request.open("GET", url);
         request.addEventListener("load", function () {
             if (suggestText != _this.searchInput.value) {
@@ -6215,26 +6210,17 @@ var SearchLAZNE = (function () {
                 _this.addSuggestions(request.response);
             }
             else {
-                _this.dismissSuggestions();
+                _this.suggestionsEl.classList.add("hidden");
                 console.error("Error while loading item.");
             }
         });
         request.send();
     };
-    SearchLAZNE.prototype.dismissSuggestions = function () {
-        this.searchForm.classList.remove("head_search-suggestion");
-        this.searchSuggestions.innerHTML = "";
-    };
-    SearchLAZNE.prototype.addSuggestions = function (content) {
+    SearchForm.prototype.addSuggestions = function (content) {
         var _this = this;
-        this.searchSuggestions.innerHTML = content;
-        this.suggestions = this.searchSuggestions.querySelectorAll(".head_search_suggestion");
-        if (this.suggestions.length > 0) {
-            this.searchForm.classList.add("head_search-suggestion");
-        }
-        else {
-            this.searchForm.classList.remove("head_search-suggestion");
-        }
+        this.suggestionsEl.innerHTML = content;
+        this.suggestionsEl.classList.remove("hidden");
+        this.suggestions = this.suggestionsEl.querySelectorAll(".admin_search_suggestion");
         for (var i = 0; i < this.suggestions.length; i++) {
             var suggestion = this.suggestions[i];
             suggestion.addEventListener("touchend", function (e) {
@@ -6242,7 +6228,6 @@ var SearchLAZNE = (function () {
                 window.location.href = el.getAttribute("href");
             });
             suggestion.addEventListener("click", function (e) {
-                _this.logClick();
                 return false;
             });
             suggestion.addEventListener("mouseenter", function (e) {
@@ -6252,27 +6237,27 @@ var SearchLAZNE = (function () {
             });
         }
     };
-    SearchLAZNE.prototype.deselect = function () {
-        var el = this.searchSuggestions.querySelector(".head_search_suggestion-selected");
+    SearchForm.prototype.deselect = function () {
+        var el = this.suggestionsEl.querySelector(".admin_search_suggestion-selected");
         if (el) {
-            el.classList.remove("head_search_suggestion-selected");
+            el.classList.remove("admin_search_suggestion-selected");
         }
     };
-    SearchLAZNE.prototype.getSelected = function () {
-        var el = this.searchSuggestions.querySelector(".head_search_suggestion-selected");
+    SearchForm.prototype.getSelected = function () {
+        var el = this.suggestionsEl.querySelector(".admin_search_suggestion-selected");
         if (el) {
             return parseInt(el.getAttribute("data-position"));
         }
         return -1;
     };
-    SearchLAZNE.prototype.setSelected = function (position) {
+    SearchForm.prototype.setSelected = function (position) {
         this.deselect();
         if (position >= 0) {
-            var els = this.searchSuggestions.querySelectorAll(".head_search_suggestion");
-            els[position].classList.add("head_search_suggestion-selected");
+            var els = this.suggestionsEl.querySelectorAll(".admin_search_suggestion");
+            els[position].classList.add("admin_search_suggestion-selected");
         }
     };
-    return SearchLAZNE;
+    return SearchForm;
 }());
 function encodeParams(data) {
     var ret = "";

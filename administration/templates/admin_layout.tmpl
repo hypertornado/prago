@@ -26,7 +26,7 @@
     {{template "admin_flash" .}}
     <div class="admin_layout">
         <div class="admin_header">
-            <div class="admin_header_top">
+            <div class="admin_header_left">
                 {{if .admin_page}}
                     {{template "admin_breadcrumbs" .admin_page.Navigation.Breadcrumbs}}
                 {{else}}
@@ -36,6 +36,8 @@
                     {{template "admin_tabs" .admin_page.Navigation}}
                 {{end}}
                 <div class="admin_header_top_item admin_header_top_space"></div>
+            </div>
+            <div class="admin_header_right">
                 {{if .admin_header.HasSearch}}
                     <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
                         <input class="input admin_header_search_input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">

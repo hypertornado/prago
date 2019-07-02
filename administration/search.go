@@ -328,7 +328,6 @@ func bindSearch(admin *Administration) {
 	}
 
 	go func() {
-		return
 		err := adminSearch.searchImport()
 		if err != nil {
 			admin.App.Log().Println(fmt.Errorf("%s", err))
@@ -393,7 +392,8 @@ func bindSearch(admin *Administration) {
 		}
 
 		if len(results) == 0 {
-			request.RenderJSONWithCode(nil, 404)
+			request.RenderJSONWithCode(nil, 204)
+			return
 		}
 
 		request.SetData("items", results)

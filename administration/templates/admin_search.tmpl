@@ -25,8 +25,8 @@
 
 {{define "admin_search_suggest"}}
   <div class="admin_search_suggestions_content">
-    {{range $item := .items}}
-      <a href="{{$item.URL}}" class="admin_search_suggestion">
+    {{range $i, $item := .items}}
+      <a href="{{$item.URL}}" class="admin_search_suggestion" data-position="{{$i}}">
         <div class="admin_search_suggestion_left"
           {{if $item.Image}} style="background-image: url('{{CSS $item.Image}}');"{{end}}></div>
         <div class="admin_search_suggestion_right">
