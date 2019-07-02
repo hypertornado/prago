@@ -5,3 +5,20 @@ function DOMinsertChildAtIndex(parent: HTMLElement, child: HTMLElement, index: n
     parent.insertBefore(child, parent.children[index]);
   }
 }
+
+function encodeParams(data: any) {
+  var ret = "";
+  for (var k in data) {
+    if (!data[k]) {
+      continue;
+    }
+    if (ret != "") {
+      ret += "&";
+    }
+    ret += encodeURIComponent(k) + "=" + encodeURIComponent(data[k]);
+  }
+  if (ret != "") {
+    ret = "?" + ret;
+  }
+  return ret;
+}

@@ -160,7 +160,7 @@ func bindListAPI(admin *Administration) {
 			panic(err)
 		}
 
-		listData, err := resource.getListContent(admin, &req, user)
+		listData, err := resource.getListContent(admin, &req, user, request.Request().URL.Query())
 		if err != nil {
 			panic(err)
 		}

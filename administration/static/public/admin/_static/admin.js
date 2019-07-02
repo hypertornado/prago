@@ -111,6 +111,22 @@ function DOMinsertChildAtIndex(parent, child, index) {
         parent.insertBefore(child, parent.children[index]);
     }
 }
+function encodeParams(data) {
+    var ret = "";
+    for (var k in data) {
+        if (!data[k]) {
+            continue;
+        }
+        if (ret != "") {
+            ret += "&";
+        }
+        ret += encodeURIComponent(k) + "=" + encodeURIComponent(data[k]);
+    }
+    if (ret != "") {
+        ret = "?" + ret;
+    }
+    return ret;
+}
 function bindImageViews() {
     var els = document.querySelectorAll(".admin_item_view_image_content");
     for (var i = 0; i < els.length; i++) {
@@ -317,7 +333,11 @@ var List = (function () {
     function List(el, openbutton) {
         this.el = el;
         this.settingsEl = this.el.querySelector(".admin_tablesettings");
-        this.page = 1;
+        var urlParams = new URLSearchParams(window.location.search);
+        this.page = parseInt(urlParams.get("_page"));
+        if (!this.page) {
+            this.page = 1;
+        }
         this.typeName = el.getAttribute("data-type");
         if (!this.typeName) {
             return;
@@ -343,7 +363,13 @@ var List = (function () {
         var _this = this;
         this.progress.classList.remove("hidden");
         var request = new XMLHttpRequest();
-        request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + document.location.search, true);
+        var params = {};
+        if (this.page > 1) {
+            params["_page"] = this.page;
+        }
+        var encoded = encodeParams(params);
+        window.history.replaceState(null, null, document.location.pathname + encoded);
+        request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + encoded, true);
         request.addEventListener("load", function () {
             _this.tbody.innerHTML = "";
             if (request.status == 200) {
@@ -1485,22 +1511,6 @@ var SearchForm = (function () {
     };
     return SearchForm;
 }());
-function encodeParams(data) {
-    var ret = "";
-    for (var k in data) {
-        if (!data[k]) {
-            continue;
-        }
-        if (ret != "") {
-            ret += "&";
-        }
-        ret += encodeURIComponent(k) + "=" + encodeURIComponent(data[k]);
-    }
-    if (ret != "") {
-        ret = "?" + ret;
-    }
-    return ret;
-}
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();

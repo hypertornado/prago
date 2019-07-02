@@ -2,6 +2,7 @@ package administration
 
 import (
 	"fmt"
+	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
@@ -72,7 +73,7 @@ type page struct {
 }
 
 type listRequest struct {
-	Page           int64
+	//Page           int64
 	OrderBy        string
 	OrderDesc      bool
 	PrefilterField string
@@ -242,7 +243,7 @@ func (admin *Administration) prefilterQuery(field, value string) Query {
 	return ret
 }
 
-func (resource *Resource) getListContent(admin *Administration, requestQuery *listRequest, user User) (ret listContent, err error) {
+func (resource *Resource) getListContent(admin *Administration, requestQuery *listRequest, user User, params url.Values) (ret listContent, err error) {
 	var listHeader list
 	listHeader, err = resource.getListHeader(user)
 	if err != nil {
@@ -281,14 +282,19 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 		totalPages += +1
 	}
 
-	var currentPage int64 = requestQuery.Page
+	currentPage, _ := strconv.Atoi(params.Get("_page"))
+	if currentPage < 1 {
+		currentPage = 1
+	}
+
+	//var currentPage int64 = requestQuery.Page
 
 	if totalPages > 1 {
 		for i := int64(1); i <= totalPages; i++ {
 			p := page{
 				Page: i,
 			}
-			if i == currentPage {
+			if i == int64(currentPage) {
 				p.Current = true
 			}
 
@@ -297,7 +303,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	}
 
 	q = resource.addFilterToQuery(q, requestQuery.Filter)
-	q = q.Offset((currentPage - 1) * resource.ItemsPerPage)
+	q = q.Offset((int64(currentPage) - 1) * resource.ItemsPerPage)
 	q = q.Limit(resource.ItemsPerPage)
 
 	var rowItems interface{}

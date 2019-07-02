@@ -34,7 +34,12 @@ class List {
     //this.closebutton = this.el.querySelector(".admin_tablesettings_close");
     this.settingsEl = this.el.querySelector(".admin_tablesettings");
 
-    this.page = 1;
+    let urlParams = new URLSearchParams(window.location.search);
+
+    this.page = parseInt(urlParams.get("_page"));
+    if (!this.page) {
+      this.page = 1;
+    }
 
     this.typeName = el.getAttribute("data-type");
     if (!this.typeName) {
@@ -58,22 +63,20 @@ class List {
     } else {
       this.orderDesc = false;
     }
-
-    //this.openbutton.addEventListener("click", this.toggleShowHide.bind(this));
-    //this.closebutton.addEventListener("click", this.toggleShowHide.bind(this));
     this.bindOptions();
     this.bindOrder();
   }
 
-  /*toggleShowHide() {
-    this.settingsEl.classList.toggle("hidden");
-    this.openbutton.classList.toggle("hidden");
-  }*/
-
   load() {
     this.progress.classList.remove("hidden");
     var request = new XMLHttpRequest();
-    request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + document.location.search, true);
+    var params: any = {};
+    if (this.page > 1) {
+      params["_page"] = this.page;
+    }
+    let encoded = encodeParams(params);
+    window.history.replaceState(null, null, document.location.pathname + encoded);
+    request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + encoded, true);
     request.addEventListener("load", () => {
       this.tbody.innerHTML = "";
       if (request.status == 200) {
