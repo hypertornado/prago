@@ -367,8 +367,17 @@ var List = (function () {
         if (urlParams.get("_desc") == "false") {
             this.orderDesc = false;
         }
-        this.defaultColumns = this.getSelectedColumnsStr();
-        this.bindOptions();
+        this.defaultVisibleColumnsStr = el.getAttribute("data-visible-columns");
+        var visibleColumnsStr = this.defaultVisibleColumnsStr;
+        if (urlParams.get("_columns")) {
+            visibleColumnsStr = urlParams.get("_columns");
+        }
+        var visibleColumnsArr = visibleColumnsStr.split(",");
+        var visibleColumnsMap = {};
+        for (var i = 0; i < visibleColumnsArr.length; i++) {
+            visibleColumnsMap[visibleColumnsArr[i]] = true;
+        }
+        this.bindOptions(visibleColumnsMap);
         this.bindOrder();
     }
     List.prototype.load = function () {
@@ -383,15 +392,19 @@ var List = (function () {
             params["_order"] = this.orderColumn;
         }
         if (this.orderDesc != this.defaultOrderDesc) {
-            params["_desc"] = this.orderDesc;
+            params["_desc"] = this.orderDesc + "";
         }
         var columns = this.getSelectedColumnsStr();
-        if (columns != this.defaultColumns) {
+        if (columns != this.defaultVisibleColumnsStr) {
             params["_columns"] = columns;
         }
         var encoded = encodeParams(params);
         window.history.replaceState(null, null, document.location.pathname + encoded);
-        request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + encoded, true);
+        if (this.prefilterField != "") {
+            params["_prefilter_field"] = this.prefilterField;
+            params["_prefilter_value"] = this.prefilterValue;
+        }
+        request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + encodeParams(params), true);
         request.addEventListener("load", function () {
             _this.tbody.innerHTML = "";
             if (request.status == 200) {
@@ -413,10 +426,14 @@ var List = (function () {
         var requestData = this.getListRequest();
         request.send(JSON.stringify(requestData));
     };
-    List.prototype.bindOptions = function () {
+    List.prototype.bindOptions = function (visibleColumnsMap) {
         var _this = this;
         var columns = this.el.querySelectorAll(".admin_tablesettings_column");
         for (var i = 0; i < columns.length; i++) {
+            var columnName = columns[i].getAttribute("data-column-name");
+            if (visibleColumnsMap[columnName]) {
+                columns[i].checked = true;
+            }
             columns[i].addEventListener("change", function () {
                 _this.changedOptions();
             });
@@ -424,7 +441,7 @@ var List = (function () {
         this.changedOptions();
     };
     List.prototype.changedOptions = function () {
-        var columns = this.getSelectedColumns();
+        var columns = this.getSelectedColumnsMap();
         var headers = this.el.querySelectorAll(".admin_list_orderitem");
         for (var i = 0; i < headers.length; i++) {
             var name = headers[i].getAttribute("data-name");
@@ -544,7 +561,7 @@ var List = (function () {
         }
         return ret.join(",");
     };
-    List.prototype.getSelectedColumns = function () {
+    List.prototype.getSelectedColumnsMap = function () {
         var columns = {};
         var checked = this.el.querySelectorAll(".admin_tablesettings_column:checked");
         for (var i = 0; i < checked.length; i++) {
@@ -559,7 +576,6 @@ var List = (function () {
         ret.Filter = this.getFilterData();
         ret.PrefilterField = this.prefilterField;
         ret.PrefilterValue = this.prefilterValue;
-        ret.Columns = this.getSelectedColumns();
         return ret;
     };
     List.prototype.getFilterData = function () {

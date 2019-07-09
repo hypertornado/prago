@@ -21,7 +21,8 @@ class List {
   orderDesc: boolean;
   page: number;
 
-  defaultColumns: string;
+  defaultVisibleColumnsStr: string;
+  //visibleColumnsMap: any;
 
   prefilterField: string;
   prefilterValue: string;
@@ -80,9 +81,19 @@ class List {
       this.orderDesc = false
     }
 
-    this.defaultColumns = this.getSelectedColumnsStr();
+    this.defaultVisibleColumnsStr = el.getAttribute("data-visible-columns");
+    var visibleColumnsStr = this.defaultVisibleColumnsStr;
+    if (urlParams.get("_columns")) {
+      visibleColumnsStr = urlParams.get("_columns");
+    }
 
-    this.bindOptions();
+    let visibleColumnsArr = visibleColumnsStr.split(",");
+    let visibleColumnsMap: any = {};
+    for (var i = 0; i < visibleColumnsArr.length; i++) {
+      visibleColumnsMap[visibleColumnsArr[i]] = true;
+    }
+
+    this.bindOptions(visibleColumnsMap);
     this.bindOrder();
   }
 
@@ -97,16 +108,23 @@ class List {
       params["_order"] = this.orderColumn;
     }
     if (this.orderDesc != this.defaultOrderDesc) {
-      params["_desc"] = this.orderDesc;
+
+      params["_desc"] = this.orderDesc + "";
     }
     var columns = this.getSelectedColumnsStr();
-    if (columns != this.defaultColumns) {
+    if (columns != this.defaultVisibleColumnsStr) {
       params["_columns"] = columns;
     }
 
     let encoded = encodeParams(params);
     window.history.replaceState(null, null, document.location.pathname + encoded);
-    request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + encoded, true);
+
+    if (this.prefilterField != "") {
+      params["_prefilter_field"] = this.prefilterField;
+      params["_prefilter_value"] = this.prefilterValue;
+    }
+
+    request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + encodeParams(params), true);
     request.addEventListener("load", () => {
       this.tbody.innerHTML = "";
       if (request.status == 200) {
@@ -129,9 +147,13 @@ class List {
     request.send(JSON.stringify(requestData));
   }
 
-  bindOptions() {
+  bindOptions(visibleColumnsMap: any) {
     var columns: NodeListOf<HTMLInputElement> = this.el.querySelectorAll(".admin_tablesettings_column");
     for (var i = 0; i < columns.length; i++) {
+      let columnName = columns[i].getAttribute("data-column-name");
+      if (visibleColumnsMap[columnName]) {
+        columns[i].checked = true;
+      }
       columns[i].addEventListener("change", () => {
         this.changedOptions();
       });
@@ -140,7 +162,7 @@ class List {
   }
 
   changedOptions() {
-    var columns: any = this.getSelectedColumns();
+    var columns: any = this.getSelectedColumnsMap();
 
     var headers: NodeListOf<HTMLDivElement> = this.el.querySelectorAll(".admin_list_orderitem");
     for (var i = 0; i < headers.length; i++) {
@@ -265,7 +287,7 @@ class List {
     return ret.join(",");
   }
 
-  getSelectedColumns(): any {
+  getSelectedColumnsMap(): any {
     var columns: any = {};
     var checked: NodeListOf<HTMLInputElement> = this.el.querySelectorAll(".admin_tablesettings_column:checked");
     for (var i = 0; i < checked.length; i++) {
@@ -281,7 +303,7 @@ class List {
     ret.Filter = this.getFilterData();
     ret.PrefilterField = this.prefilterField;
     ret.PrefilterValue = this.prefilterValue;
-    ret.Columns = this.getSelectedColumns();
+    //ret.Columns = this.getSelectedColumns();
     return ret;
   }
 

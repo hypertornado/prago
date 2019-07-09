@@ -5,12 +5,13 @@
   data-order-desc="{{.OrderDesc}}"
   data-prefilter-field="{{.PrefilterField}}"
   data-prefilter-value="{{.PrefilterValue}}"
+  data-visible-columns="{{.VisibleColumns}}"
 >
   <div class="admin_tablesettings">
     <div class="admin_tablesettings_name">{{message .Locale "admin_options_visible"}}</div>
 
     {{range $item := .Header}}
-      <label class="admin_tablesettings_label"><input type="checkbox"{{if .DefaultShow}}checked{{end}} class="admin_tablesettings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
+      <label class="admin_tablesettings_label"><input type="checkbox" class="admin_tablesettings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
     {{end}}
   </div>
 

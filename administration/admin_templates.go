@@ -441,12 +441,13 @@ const adminTemplates = `
   data-order-desc="{{.OrderDesc}}"
   data-prefilter-field="{{.PrefilterField}}"
   data-prefilter-value="{{.PrefilterValue}}"
+  data-visible-columns="{{.VisibleColumns}}"
 >
   <div class="admin_tablesettings">
     <div class="admin_tablesettings_name">{{message .Locale "admin_options_visible"}}</div>
 
     {{range $item := .Header}}
-      <label class="admin_tablesettings_label"><input type="checkbox"{{if .DefaultShow}}checked{{end}} class="admin_tablesettings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
+      <label class="admin_tablesettings_label"><input type="checkbox" class="admin_tablesettings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
     {{end}}
   </div>
 
@@ -4885,6 +4886,22 @@ function DOMinsertChildAtIndex(parent, child, index) {
         parent.insertBefore(child, parent.children[index]);
     }
 }
+function encodeParams(data) {
+    var ret = "";
+    for (var k in data) {
+        if (!data[k]) {
+            continue;
+        }
+        if (ret != "") {
+            ret += "&";
+        }
+        ret += encodeURIComponent(k) + "=" + encodeURIComponent(data[k]);
+    }
+    if (ret != "") {
+        ret = "?" + ret;
+    }
+    return ret;
+}
 function bindImageViews() {
     var els = document.querySelectorAll(".admin_item_view_image_content");
     for (var i = 0; i < els.length; i++) {
@@ -5091,7 +5108,11 @@ var List = (function () {
     function List(el, openbutton) {
         this.el = el;
         this.settingsEl = this.el.querySelector(".admin_tablesettings");
-        this.page = 1;
+        var urlParams = new URLSearchParams(window.location.search);
+        this.page = parseInt(urlParams.get("_page"));
+        if (!this.page) {
+            this.page = 1;
+        }
         this.typeName = el.getAttribute("data-type");
         if (!this.typeName) {
             return;
@@ -5103,21 +5124,62 @@ var List = (function () {
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.prefilterField = el.getAttribute("data-prefilter-field");
         this.prefilterValue = el.getAttribute("data-prefilter-value");
-        this.orderColumn = el.getAttribute("data-order-column");
+        this.defaultOrderColumn = el.getAttribute("data-order-column");
         if (el.getAttribute("data-order-desc") == "true") {
-            this.orderDesc = true;
+            this.defaultOrderDesc = true;
         }
         else {
+            this.defaultOrderDesc = false;
+        }
+        this.orderColumn = this.defaultOrderColumn;
+        this.orderDesc = this.defaultOrderDesc;
+        if (urlParams.get("_order")) {
+            this.orderColumn = urlParams.get("_order");
+        }
+        if (urlParams.get("_desc") == "true") {
+            this.orderDesc = true;
+        }
+        if (urlParams.get("_desc") == "false") {
             this.orderDesc = false;
         }
-        this.bindOptions();
+        this.defaultVisibleColumnsStr = el.getAttribute("data-visible-columns");
+        var visibleColumnsStr = this.defaultVisibleColumnsStr;
+        if (urlParams.get("_columns")) {
+            visibleColumnsStr = urlParams.get("_columns");
+        }
+        var visibleColumnsArr = visibleColumnsStr.split(",");
+        var visibleColumnsMap = {};
+        for (var i = 0; i < visibleColumnsArr.length; i++) {
+            visibleColumnsMap[visibleColumnsArr[i]] = true;
+        }
+        this.bindOptions(visibleColumnsMap);
         this.bindOrder();
     }
     List.prototype.load = function () {
         var _this = this;
         this.progress.classList.remove("hidden");
         var request = new XMLHttpRequest();
-        request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + document.location.search, true);
+        var params = {};
+        if (this.page > 1) {
+            params["_page"] = this.page;
+        }
+        if (this.orderColumn != this.defaultOrderColumn) {
+            params["_order"] = this.orderColumn;
+        }
+        if (this.orderDesc != this.defaultOrderDesc) {
+            params["_desc"] = this.orderDesc + "";
+        }
+        var columns = this.getSelectedColumnsStr();
+        if (columns != this.defaultVisibleColumnsStr) {
+            params["_columns"] = columns;
+        }
+        var encoded = encodeParams(params);
+        window.history.replaceState(null, null, document.location.pathname + encoded);
+        if (this.prefilterField != "") {
+            params["_prefilter_field"] = this.prefilterField;
+            params["_prefilter_value"] = this.prefilterValue;
+        }
+        request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + encodeParams(params), true);
         request.addEventListener("load", function () {
             _this.tbody.innerHTML = "";
             if (request.status == 200) {
@@ -5139,10 +5201,14 @@ var List = (function () {
         var requestData = this.getListRequest();
         request.send(JSON.stringify(requestData));
     };
-    List.prototype.bindOptions = function () {
+    List.prototype.bindOptions = function (visibleColumnsMap) {
         var _this = this;
         var columns = this.el.querySelectorAll(".admin_tablesettings_column");
         for (var i = 0; i < columns.length; i++) {
+            var columnName = columns[i].getAttribute("data-column-name");
+            if (visibleColumnsMap[columnName]) {
+                columns[i].checked = true;
+            }
             columns[i].addEventListener("change", function () {
                 _this.changedOptions();
             });
@@ -5150,7 +5216,7 @@ var List = (function () {
         this.changedOptions();
     };
     List.prototype.changedOptions = function () {
-        var columns = this.getSelectedColumns();
+        var columns = this.getSelectedColumnsMap();
         var headers = this.el.querySelectorAll(".admin_list_orderitem");
         for (var i = 0; i < headers.length; i++) {
             var name = headers[i].getAttribute("data-name");
@@ -5262,7 +5328,15 @@ var List = (function () {
             }
         }
     };
-    List.prototype.getSelectedColumns = function () {
+    List.prototype.getSelectedColumnsStr = function () {
+        var ret = [];
+        var checked = this.el.querySelectorAll(".admin_tablesettings_column:checked");
+        for (var i = 0; i < checked.length; i++) {
+            ret.push(checked[i].getAttribute("data-column-name"));
+        }
+        return ret.join(",");
+    };
+    List.prototype.getSelectedColumnsMap = function () {
         var columns = {};
         var checked = this.el.querySelectorAll(".admin_tablesettings_column:checked");
         for (var i = 0; i < checked.length; i++) {
@@ -5272,13 +5346,11 @@ var List = (function () {
     };
     List.prototype.getListRequest = function () {
         var ret = {};
-        ret.Page = this.page;
         ret.OrderBy = this.orderColumn;
         ret.OrderDesc = this.orderDesc;
         ret.Filter = this.getFilterData();
         ret.PrefilterField = this.prefilterField;
         ret.PrefilterValue = this.prefilterValue;
-        ret.Columns = this.getSelectedColumns();
         return ret;
     };
     List.prototype.getFilterData = function () {
@@ -6259,22 +6331,6 @@ var SearchForm = (function () {
     };
     return SearchForm;
 }());
-function encodeParams(data) {
-    var ret = "";
-    for (var k in data) {
-        if (!data[k]) {
-            continue;
-        }
-        if (ret != "") {
-            ret += "&";
-        }
-        ret += encodeURIComponent(k) + "=" + encodeURIComponent(data[k]);
-    }
-    if (ret != "") {
-        ret = "?" + ret;
-    }
-    return ret;
-}
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();

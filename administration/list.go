@@ -16,6 +16,7 @@ type list struct {
 	TypeID         string
 	Colspan        int64
 	Header         []listHeaderItem
+	VisibleColumns string
 	CanChangeOrder bool
 	OrderColumn    string
 	OrderDesc      bool
@@ -76,9 +77,9 @@ type listRequest struct {
 	//Page           int64
 	//OrderBy        string
 	//OrderDesc      bool
-	PrefilterField string
-	PrefilterValue string
-	Filter         map[string]string
+	//PrefilterField string
+	//PrefilterValue string
+	Filter map[string]string
 	//Columns        map[string]bool
 }
 
@@ -87,6 +88,7 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 
 	list.Colspan = 1
 	list.TypeID = resource.ID
+	list.VisibleColumns = resource.defaultVisibleFieldsStr()
 
 	list.OrderColumn = resource.OrderByColumn
 	list.OrderDesc = resource.OrderDesc
@@ -283,7 +285,10 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 		orderDesc = false
 	}
 
-	q := admin.prefilterQuery(requestQuery.PrefilterField, requestQuery.PrefilterValue)
+	prefilterField := params.Get("_prefilter_field")
+	prefilterValue := params.Get("_prefilter_value")
+
+	q := admin.prefilterQuery(prefilterField, prefilterValue)
 	if orderDesc {
 		q = q.OrderDesc(orderBy)
 	} else {
@@ -293,7 +298,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	var count int64
 	var item interface{}
 	resource.newItem(&item)
-	countQuery := admin.prefilterQuery(requestQuery.PrefilterField, requestQuery.PrefilterValue)
+	countQuery := admin.prefilterQuery(prefilterField, prefilterValue)
 	countQuery = resource.addFilterToQuery(countQuery, requestQuery.Filter)
 	count, err = countQuery.Count(item)
 	if err != nil {
@@ -303,7 +308,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 
 	var totalCount int64
 	resource.newItem(&item)
-	countQuery = admin.prefilterQuery(requestQuery.PrefilterField, requestQuery.PrefilterValue)
+	countQuery = admin.prefilterQuery(prefilterField, prefilterValue)
 	totalCount, err = countQuery.Count(item)
 	if err != nil {
 		return
