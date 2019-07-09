@@ -367,6 +367,7 @@ var List = (function () {
         if (urlParams.get("_desc") == "false") {
             this.orderDesc = false;
         }
+        this.defaultColumns = this.getSelectedColumnsStr();
         this.bindOptions();
         this.bindOrder();
     }
@@ -383,6 +384,10 @@ var List = (function () {
         }
         if (this.orderDesc != this.defaultOrderDesc) {
             params["_desc"] = this.orderDesc;
+        }
+        var columns = this.getSelectedColumnsStr();
+        if (columns != this.defaultColumns) {
+            params["_columns"] = columns;
         }
         var encoded = encodeParams(params);
         window.history.replaceState(null, null, document.location.pathname + encoded);
@@ -530,6 +535,14 @@ var List = (function () {
                 }
             }
         }
+    };
+    List.prototype.getSelectedColumnsStr = function () {
+        var ret = [];
+        var checked = this.el.querySelectorAll(".admin_tablesettings_column:checked");
+        for (var i = 0; i < checked.length; i++) {
+            ret.push(checked[i].getAttribute("data-column-name"));
+        }
+        return ret.join(",");
     };
     List.prototype.getSelectedColumns = function () {
         var columns = {};

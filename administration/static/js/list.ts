@@ -21,6 +21,8 @@ class List {
   orderDesc: boolean;
   page: number;
 
+  defaultColumns: string;
+
   prefilterField: string;
   prefilterValue: string;
 
@@ -78,6 +80,8 @@ class List {
       this.orderDesc = false
     }
 
+    this.defaultColumns = this.getSelectedColumnsStr();
+
     this.bindOptions();
     this.bindOrder();
   }
@@ -95,6 +99,11 @@ class List {
     if (this.orderDesc != this.defaultOrderDesc) {
       params["_desc"] = this.orderDesc;
     }
+    var columns = this.getSelectedColumnsStr();
+    if (columns != this.defaultColumns) {
+      params["_columns"] = columns;
+    }
+
     let encoded = encodeParams(params);
     window.history.replaceState(null, null, document.location.pathname + encoded);
     request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + encoded, true);
@@ -245,6 +254,15 @@ class List {
         }
       }
     }
+  }
+
+  getSelectedColumnsStr(): string {
+    var ret = [];
+    var checked: NodeListOf<HTMLInputElement> = this.el.querySelectorAll(".admin_tablesettings_column:checked");
+    for (var i = 0; i < checked.length; i++) {
+      ret.push(checked[i].getAttribute("data-column-name"));
+    }
+    return ret.join(",");
   }
 
   getSelectedColumns(): any {

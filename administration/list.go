@@ -79,7 +79,7 @@ type listRequest struct {
 	PrefilterField string
 	PrefilterValue string
 	Filter         map[string]string
-	Columns        map[string]bool
+	//Columns        map[string]bool
 }
 
 func (resource *Resource) getListHeader(user User) (list list, err error) {
@@ -114,6 +114,16 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 		}
 	}
 	return
+}
+
+func (resource *Resource) defaultVisibleFieldsStr() string {
+	ret := []string{}
+	for _, v := range resource.fieldArrays {
+		if v.shouldShow() {
+			ret = append(ret, v.ColumnName)
+		}
+	}
+	return strings.Join(ret, ",")
 }
 
 func (v Field) getListHeaderItem(user User) listHeaderItem {
@@ -250,6 +260,17 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 		return
 	}
 
+	columnsStr := params.Get("_columns")
+	if columnsStr == "" {
+		columnsStr = resource.defaultVisibleFieldsStr()
+	}
+
+	columnsAr := strings.Split(columnsStr, ",")
+	columnsMap := map[string]bool{}
+	for _, v := range columnsAr {
+		columnsMap[v] = true
+	}
+
 	orderBy := resource.OrderByColumn
 	if params.Get("_order") != "" {
 		orderBy = params.Get("_order")
@@ -268,7 +289,6 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	} else {
 		q = q.Order(orderBy)
 	}
-	fmt.Println(orderBy, orderDesc)
 
 	var count int64
 	var item interface{}
@@ -329,7 +349,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 		itemVal := val.Index(i).Elem()
 
 		for _, v := range listHeader.Header {
-			if requestQuery.Columns[v.ColumnName] {
+			if columnsMap[v.ColumnName] {
 				fieldVal := itemVal.FieldByName(v.Name)
 				var isOrderedBy bool
 				if v.ColumnName == orderBy {
@@ -349,7 +369,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	if ret.Count == 0 {
 		ret.Message = messages.Messages.Get(user.Locale, "admin_list_empty")
 	}
-	ret.Colspan = int64(len(requestQuery.Columns)) + 1
+	ret.Colspan = int64(len(columnsMap)) + 1
 
 	return
 }
