@@ -5,6 +5,7 @@
   data-order-desc="{{.OrderDesc}}"
   data-prefilter-field="{{.PrefilterField}}"
   data-prefilter-value="{{.PrefilterValue}}"
+  data-columns="{{.Columns}}"
   data-visible-columns="{{.VisibleColumns}}"
 >
   <div class="admin_tablesettings">
@@ -29,7 +30,7 @@
     </tr>
     <tr class="admin_list_filterrow">
       {{range $item := .Header}}
-        <th class="admin_list_filteritem" data-name="{{$item.ColumnName}}">
+        <th class="admin_list_filteritem" data-name="{{$item.ColumnName}}" data-filter-layout="{{$item.FilterLayout}}">
           {{if $item.FilterLayout}}
             {{tmpl $item.FilterLayout $item}}
           {{end}}

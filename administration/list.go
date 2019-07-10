@@ -17,6 +17,7 @@ type list struct {
 	Colspan        int64
 	Header         []listHeaderItem
 	VisibleColumns string
+	Columns        string
 	CanChangeOrder bool
 	OrderColumn    string
 	OrderDesc      bool
@@ -79,7 +80,7 @@ type listRequest struct {
 	//OrderDesc      bool
 	//PrefilterField string
 	//PrefilterValue string
-	Filter map[string]string
+	//Filter map[string]string
 	//Columns        map[string]bool
 }
 
@@ -89,6 +90,7 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 	list.Colspan = 1
 	list.TypeID = resource.ID
 	list.VisibleColumns = resource.defaultVisibleFieldsStr()
+	list.Columns = resource.fieldsStr()
 
 	list.OrderColumn = resource.OrderByColumn
 	list.OrderDesc = resource.OrderDesc
@@ -124,6 +126,14 @@ func (resource *Resource) defaultVisibleFieldsStr() string {
 		if v.shouldShow() {
 			ret = append(ret, v.ColumnName)
 		}
+	}
+	return strings.Join(ret, ",")
+}
+
+func (resource *Resource) fieldsStr() string {
+	ret := []string{}
+	for _, v := range resource.fieldArrays {
+		ret = append(ret, v.ColumnName)
 	}
 	return strings.Join(ret, ",")
 }
@@ -184,6 +194,16 @@ func (sf *Field) filterLayout() string {
 	}
 
 	return ""
+}
+
+func (resource *Resource) addFilterParamsToQuery(q Query, params url.Values) Query {
+	filter := map[string]string{}
+	for _, v := range resource.fieldMap {
+		key := v.ColumnName
+		val := params.Get(key)
+		filter[key] = val
+	}
+	return resource.addFilterToQuery(q, filter)
 }
 
 func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Query {
@@ -255,7 +275,7 @@ func (admin *Administration) prefilterQuery(field, value string) Query {
 	return ret
 }
 
-func (resource *Resource) getListContent(admin *Administration, requestQuery *listRequest, user User, params url.Values) (ret listContent, err error) {
+func (resource *Resource) getListContent(admin *Administration, user User, params url.Values) (ret listContent, err error) {
 	var listHeader list
 	listHeader, err = resource.getListHeader(user)
 	if err != nil {
@@ -299,7 +319,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 	var item interface{}
 	resource.newItem(&item)
 	countQuery := admin.prefilterQuery(prefilterField, prefilterValue)
-	countQuery = resource.addFilterToQuery(countQuery, requestQuery.Filter)
+	countQuery = resource.addFilterParamsToQuery(countQuery, params)
 	count, err = countQuery.Count(item)
 	if err != nil {
 		return
@@ -340,7 +360,7 @@ func (resource *Resource) getListContent(admin *Administration, requestQuery *li
 		}
 	}
 
-	q = resource.addFilterToQuery(q, requestQuery.Filter)
+	q = resource.addFilterParamsToQuery(q, params)
 	q = q.Offset((int64(currentPage) - 1) * resource.ItemsPerPage)
 	q = q.Limit(resource.ItemsPerPage)
 

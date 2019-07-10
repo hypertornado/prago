@@ -11,7 +11,7 @@ class List {
 
   tbody: HTMLElement;
   el: HTMLDivElement;
-  filterInputs: NodeListOf<Element>;
+  //filterInputs: NodeListOf<Element>;
   changed: boolean;
   changedTimestamp: number;
   
@@ -33,6 +33,7 @@ class List {
   //openbutton: HTMLButtonElement;
   //closebutton: HTMLButtonElement;
 
+  //TODO: get filter params from URL
   constructor(el: HTMLDivElement, openbutton: HTMLButtonElement) {
     this.el = el;
     //this.openbutton = openbutton;
@@ -56,7 +57,7 @@ class List {
     this.tbody = <HTMLElement>el.querySelector("tbody");
     this.tbody.textContent = "";
 
-    this.bindFilter();
+    this.bindFilter(urlParams);
 
     this.adminPrefix = document.body.getAttribute("data-admin-prefix");
     this.prefilterField = el.getAttribute("data-prefilter-field");
@@ -116,7 +117,12 @@ class List {
       params["_columns"] = columns;
     }
 
-    let encoded = encodeParams(params);
+    let filterData = this.getFilterData();
+    for (var k in filterData) {
+      params[k] = filterData[k];
+    }
+
+    var encoded = encodeParams(params);
     window.history.replaceState(null, null, document.location.pathname + encoded);
 
     if (this.prefilterField != "") {
@@ -124,7 +130,10 @@ class List {
       params["_prefilter_value"] = this.prefilterValue;
     }
 
-    request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + encodeParams(params), true);
+    params["_format"] = "json";
+    encoded = encodeParams(params);
+
+    request.open("GET", this.adminPrefix + "/" + this.typeName + encoded, true);
     request.addEventListener("load", () => {
       this.tbody.innerHTML = "";
       if (request.status == 200) {
@@ -143,8 +152,8 @@ class List {
       }
       this.progress.classList.add("hidden");
     });
-    var requestData = this.getListRequest();
-    request.send(JSON.stringify(requestData));
+    //var requestData = this.getListRequest();
+    request.send(JSON.stringify({}));
   }
 
   bindOptions(visibleColumnsMap: any) {
@@ -296,17 +305,6 @@ class List {
     return columns;
   }
 
-  getListRequest(): any {
-    var ret: any = {};
-    ret.OrderBy = this.orderColumn;
-    ret.OrderDesc = this.orderDesc;
-    ret.Filter = this.getFilterData();
-    ret.PrefilterField = this.prefilterField;
-    ret.PrefilterValue = this.prefilterValue;
-    //ret.Columns = this.getSelectedColumns();
-    return ret;
-  }
-
   getFilterData(): any {
     var ret: any = {};
     var items = this.el.querySelectorAll(".admin_table_filter_item");
@@ -321,13 +319,38 @@ class List {
     return ret;
   }
 
-  bindFilter() {
-    this.bindFilterRelations();
-    this.filterInputs = this.el.querySelectorAll(".admin_table_filter_item");
-    for (var i = 0; i < this.filterInputs.length; i++) {
-      var input: HTMLInputElement = <HTMLInputElement>this.filterInputs[i];
-      input.addEventListener("input", this.inputListener.bind(this));
-      input.addEventListener("change", this.inputListener.bind(this));
+  bindFilter(params: any) {
+    var filterFields = this.el.querySelectorAll(".admin_list_filteritem");
+    for (var i = 0; i < filterFields.length; i++) {
+      var field: HTMLDivElement = <HTMLDivElement>filterFields[i];
+      var fieldName = field.getAttribute("data-name");
+      var fieldLayout = field.getAttribute("data-filter-layout");
+      var fieldInput = field.querySelector("input");
+      var fieldSelect = field.querySelector("select");
+      var fieldValue = params.get(fieldName);
+
+      if (fieldValue) {
+        if (fieldInput) {
+          fieldInput.value = fieldValue;
+        }
+        if (fieldSelect) {
+          fieldSelect.value = fieldValue;
+        }
+      }
+
+      if (fieldInput) {
+        fieldInput.addEventListener("input", this.inputListener.bind(this));
+        fieldInput.addEventListener("change", this.inputListener.bind(this));
+      }
+
+      if (fieldSelect) {
+        fieldSelect.addEventListener("input", this.inputListener.bind(this));
+        fieldSelect.addEventListener("change", this.inputListener.bind(this));
+      }
+
+      if (fieldLayout == "filter_layout_relation") {
+        this.bindFilterRelation(fieldSelect, fieldValue);
+      }
     }
     this.inputPeriodicListener();
   }
@@ -336,6 +359,10 @@ class List {
     if (e.keyCode == 9 || e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
       return;
     }
+    this.filterChanged();
+  }
+
+  filterChanged() {
     this.tbody.classList.add("admin_table_loading");
     this.page = 1;
     this.changed = true;
@@ -343,14 +370,7 @@ class List {
     this.progress.classList.remove("hidden");
   }
 
-  bindFilterRelations() {
-    var els = this.el.querySelectorAll(".admin_table_filter_item-relations");
-    for (var i = 0; i < els.length; i++) {
-      this.bindFilterRelation(<HTMLSelectElement>els[i]);
-    }
-  }
-
-  bindFilterRelation(select: HTMLSelectElement) {
+  bindFilterRelation(select: HTMLSelectElement, value: any) {
     var typ = select.getAttribute("data-typ");
 
     var adminPrefix = document.body.getAttribute("data-admin-prefix");
@@ -365,6 +385,8 @@ class List {
           option.setAttribute("value", item.id);
           option.innerText = item.name;
           select.appendChild(option);
+          select.value = value;
+          this.filterChanged();
         }
       } else {
         console.error("Error wile loading relation " + typ + ".");

@@ -441,6 +441,7 @@ const adminTemplates = `
   data-order-desc="{{.OrderDesc}}"
   data-prefilter-field="{{.PrefilterField}}"
   data-prefilter-value="{{.PrefilterValue}}"
+  data-columns="{{.Columns}}"
   data-visible-columns="{{.VisibleColumns}}"
 >
   <div class="admin_tablesettings">
@@ -465,7 +466,7 @@ const adminTemplates = `
     </tr>
     <tr class="admin_list_filterrow">
       {{range $item := .Header}}
-        <th class="admin_list_filteritem" data-name="{{$item.ColumnName}}">
+        <th class="admin_list_filteritem" data-name="{{$item.ColumnName}}" data-filter-layout="{{$item.FilterLayout}}">
           {{if $item.FilterLayout}}
             {{tmpl $item.FilterLayout $item}}
           {{end}}
@@ -5120,7 +5121,7 @@ var List = (function () {
         this.progress = el.querySelector(".admin_table_progress");
         this.tbody = el.querySelector("tbody");
         this.tbody.textContent = "";
-        this.bindFilter();
+        this.bindFilter(urlParams);
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.prefilterField = el.getAttribute("data-prefilter-field");
         this.prefilterValue = el.getAttribute("data-prefilter-value");
@@ -5173,13 +5174,19 @@ var List = (function () {
         if (columns != this.defaultVisibleColumnsStr) {
             params["_columns"] = columns;
         }
+        var filterData = this.getFilterData();
+        for (var k in filterData) {
+            params[k] = filterData[k];
+        }
         var encoded = encodeParams(params);
         window.history.replaceState(null, null, document.location.pathname + encoded);
         if (this.prefilterField != "") {
             params["_prefilter_field"] = this.prefilterField;
             params["_prefilter_value"] = this.prefilterValue;
         }
-        request.open("POST", this.adminPrefix + "/_api/list/" + this.typeName + encodeParams(params), true);
+        params["_format"] = "json";
+        encoded = encodeParams(params);
+        request.open("GET", this.adminPrefix + "/" + this.typeName + encoded, true);
         request.addEventListener("load", function () {
             _this.tbody.innerHTML = "";
             if (request.status == 200) {
@@ -5198,8 +5205,7 @@ var List = (function () {
             }
             _this.progress.classList.add("hidden");
         });
-        var requestData = this.getListRequest();
-        request.send(JSON.stringify(requestData));
+        request.send(JSON.stringify({}));
     };
     List.prototype.bindOptions = function (visibleColumnsMap) {
         var _this = this;
@@ -5344,15 +5350,6 @@ var List = (function () {
         }
         return columns;
     };
-    List.prototype.getListRequest = function () {
-        var ret = {};
-        ret.OrderBy = this.orderColumn;
-        ret.OrderDesc = this.orderDesc;
-        ret.Filter = this.getFilterData();
-        ret.PrefilterField = this.prefilterField;
-        ret.PrefilterValue = this.prefilterValue;
-        return ret;
-    };
     List.prototype.getFilterData = function () {
         var ret = {};
         var items = this.el.querySelectorAll(".admin_table_filter_item");
@@ -5366,13 +5363,34 @@ var List = (function () {
         }
         return ret;
     };
-    List.prototype.bindFilter = function () {
-        this.bindFilterRelations();
-        this.filterInputs = this.el.querySelectorAll(".admin_table_filter_item");
-        for (var i = 0; i < this.filterInputs.length; i++) {
-            var input = this.filterInputs[i];
-            input.addEventListener("input", this.inputListener.bind(this));
-            input.addEventListener("change", this.inputListener.bind(this));
+    List.prototype.bindFilter = function (params) {
+        var filterFields = this.el.querySelectorAll(".admin_list_filteritem");
+        for (var i = 0; i < filterFields.length; i++) {
+            var field = filterFields[i];
+            var fieldName = field.getAttribute("data-name");
+            var fieldLayout = field.getAttribute("data-filter-layout");
+            var fieldInput = field.querySelector("input");
+            var fieldSelect = field.querySelector("select");
+            var fieldValue = params.get(fieldName);
+            if (fieldValue) {
+                if (fieldInput) {
+                    fieldInput.value = fieldValue;
+                }
+                if (fieldSelect) {
+                    fieldSelect.value = fieldValue;
+                }
+            }
+            if (fieldInput) {
+                fieldInput.addEventListener("input", this.inputListener.bind(this));
+                fieldInput.addEventListener("change", this.inputListener.bind(this));
+            }
+            if (fieldSelect) {
+                fieldSelect.addEventListener("input", this.inputListener.bind(this));
+                fieldSelect.addEventListener("change", this.inputListener.bind(this));
+            }
+            if (fieldLayout == "filter_layout_relation") {
+                this.bindFilterRelation(fieldSelect, fieldValue);
+            }
         }
         this.inputPeriodicListener();
     };
@@ -5380,19 +5398,17 @@ var List = (function () {
         if (e.keyCode == 9 || e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
             return;
         }
+        this.filterChanged();
+    };
+    List.prototype.filterChanged = function () {
         this.tbody.classList.add("admin_table_loading");
         this.page = 1;
         this.changed = true;
         this.changedTimestamp = Date.now();
         this.progress.classList.remove("hidden");
     };
-    List.prototype.bindFilterRelations = function () {
-        var els = this.el.querySelectorAll(".admin_table_filter_item-relations");
-        for (var i = 0; i < els.length; i++) {
-            this.bindFilterRelation(els[i]);
-        }
-    };
-    List.prototype.bindFilterRelation = function (select) {
+    List.prototype.bindFilterRelation = function (select, value) {
+        var _this = this;
         var typ = select.getAttribute("data-typ");
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
         var request = new XMLHttpRequest();
@@ -5406,6 +5422,8 @@ var List = (function () {
                     option.setAttribute("value", item.id);
                     option.innerText = item.name;
                     select.appendChild(option);
+                    select.value = value;
+                    _this.filterChanged();
                 }
             }
             else {

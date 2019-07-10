@@ -37,6 +37,19 @@ func actionList(permission Permission) Action {
 		Permission: permission,
 		Name:       messages.Messages.GetNameFunction("admin_list"),
 		Handler: func(resource Resource, request prago.Request, user User) {
+			if request.Request().URL.Query().Get("_format") == "json" {
+				listData, err := resource.getListContent(resource.Admin, user, request.Request().URL.Query())
+				if err != nil {
+					panic(err)
+				}
+
+				request.Response().Header().Set("X-Count", fmt.Sprintf("%d", listData.Count))
+				request.Response().Header().Set("X-Total-Count", fmt.Sprintf("%d", listData.TotalCount))
+				request.SetData("admin_list", listData)
+				request.RenderView("admin_list_cells")
+				return
+			}
+
 			listData, err := resource.getListHeader(user)
 			if err != nil {
 				if err == ErrItemNotFound {

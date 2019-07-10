@@ -15,7 +15,7 @@ import (
 func bindAPI(a *Administration) {
 	bindStatsAPI(a)
 	bindMarkdownAPI(a)
-	bindListAPI(a)
+	//bindListAPI(a)
 	bindListResourceAPI(a)
 	bindRelationAPI(a)
 }
@@ -134,7 +134,7 @@ type resourceItem struct {
 	Name string `json:"name"`
 }
 
-func bindListAPI(admin *Administration) {
+/*func bindListAPI(admin *Administration) {
 	admin.AdminController.Post(admin.GetURL("_api/list/:name"), func(request prago.Request) {
 		user := GetUser(request)
 		name := request.Params().Get("name")
@@ -149,18 +149,7 @@ func bindListAPI(admin *Administration) {
 			return
 		}
 
-		data, err := ioutil.ReadAll(request.Request().Body)
-		if err != nil {
-			panic(err)
-		}
-
-		var req listRequest
-		err = json.Unmarshal(data, &req)
-		if err != nil {
-			panic(err)
-		}
-
-		listData, err := resource.getListContent(admin, &req, user, request.Request().URL.Query())
+		listData, err := resource.getListContent(admin, user, request.Request().URL.Query())
 		if err != nil {
 			panic(err)
 		}
@@ -170,7 +159,7 @@ func bindListAPI(admin *Administration) {
 		request.SetData("admin_list", listData)
 		request.RenderView("admin_list_cells")
 	})
-}
+}*/
 
 func bindRelationAPI(admin *Administration) {
 	admin.AdminController.Get(admin.GetURL("_api/preview/:resourceName/:id"), func(request prago.Request) {
