@@ -11,6 +11,7 @@ class List {
 
   tbody: HTMLElement;
   el: HTMLDivElement;
+  exportButton: HTMLAnchorElement;
   //filterInputs: NodeListOf<Element>;
   changed: boolean;
   changedTimestamp: number;
@@ -39,6 +40,8 @@ class List {
     //this.openbutton = openbutton;
     //this.closebutton = this.el.querySelector(".admin_tablesettings_close");
     this.settingsEl = this.el.querySelector(".admin_tablesettings");
+
+    this.exportButton = this.el.querySelector(".admin_exportbutton");
 
     let urlParams = new URLSearchParams(window.location.search);
 
@@ -129,6 +132,9 @@ class List {
       params["_prefilter_field"] = this.prefilterField;
       params["_prefilter_value"] = this.prefilterValue;
     }
+
+    params["_format"] = "xlsx";
+    this.exportButton.setAttribute("href", this.adminPrefix + "/" + this.typeName + encodeParams(params));
 
     params["_format"] = "json";
     encoded = encodeParams(params);

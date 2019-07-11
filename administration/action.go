@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/tealeg/xlsx"
+
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/administration/messages"
 	"github.com/hypertornado/prago/utils"
@@ -47,6 +49,27 @@ func actionList(permission Permission) Action {
 				request.Response().Header().Set("X-Total-Count", fmt.Sprintf("%d", listData.TotalCount))
 				request.SetData("admin_list", listData)
 				request.RenderView("admin_list_cells")
+				return
+			}
+
+			if request.Request().URL.Query().Get("_format") == "xlsx" {
+				listData, err := resource.getListContent(resource.Admin, user, request.Request().URL.Query())
+				if err != nil {
+					panic(err)
+				}
+
+				file := xlsx.NewFile()
+				sheet, err := file.AddSheet("List 1")
+				must(err)
+				for _, v1 := range listData.Rows {
+					row := sheet.AddRow()
+					for _, v2 := range v1.Items {
+						cell := row.AddCell()
+						cell.SetValue(v2.OriginalValue)
+					}
+				}
+				//request.Response().Header().Set("Content-Disposition", "Content-Disposition: attachment; filename=\"export.xlsx\"")
+				file.Write(request.Response())
 				return
 			}
 

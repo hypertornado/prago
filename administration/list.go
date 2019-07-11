@@ -54,9 +54,10 @@ type listRow struct {
 }
 
 type listCell struct {
-	OrderedBy bool
-	Template  string
-	Value     interface{}
+	OrderedBy     bool
+	Template      string
+	Value         interface{}
+	OriginalValue interface{}
 }
 
 type listItemActions struct {
@@ -201,7 +202,9 @@ func (resource *Resource) addFilterParamsToQuery(q Query, params url.Values) Que
 	for _, v := range resource.fieldMap {
 		key := v.ColumnName
 		val := params.Get(key)
-		filter[key] = val
+		if val != "" {
+			filter[key] = val
+		}
 	}
 	return resource.addFilterToQuery(q, filter)
 }
@@ -347,7 +350,7 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 
 	//var currentPage int64 = requestQuery.Page
 
-	if totalPages > 1 {
+	if totalPages >= 1 {
 		for i := int64(1); i <= totalPages; i++ {
 			p := page{
 				Page: i,
@@ -406,6 +409,7 @@ func (resource Resource) valueToCell(user User, f Field, val reflect.Value, isOr
 	var cell listCell
 	cell.Template = f.fieldType.ListCellTemplate
 	cell.Value = f.fieldType.ListCellDataSource(resource, user, f, item)
+	cell.OriginalValue = val
 	cell.OrderedBy = isOrderedBy
 	return cell
 }

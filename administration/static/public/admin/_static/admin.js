@@ -333,6 +333,7 @@ var List = (function () {
     function List(el, openbutton) {
         this.el = el;
         this.settingsEl = this.el.querySelector(".admin_tablesettings");
+        this.exportButton = this.el.querySelector(".admin_exportbutton");
         var urlParams = new URLSearchParams(window.location.search);
         this.page = parseInt(urlParams.get("_page"));
         if (!this.page) {
@@ -408,6 +409,8 @@ var List = (function () {
             params["_prefilter_field"] = this.prefilterField;
             params["_prefilter_value"] = this.prefilterValue;
         }
+        params["_format"] = "xlsx";
+        this.exportButton.setAttribute("href", this.adminPrefix + "/" + this.typeName + encodeParams(params));
         params["_format"] = "json";
         encoded = encodeParams(params);
         request.open("GET", this.adminPrefix + "/" + this.typeName + encoded, true);

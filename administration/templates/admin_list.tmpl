@@ -14,6 +14,8 @@
     {{range $item := .Header}}
       <label class="admin_tablesettings_label"><input type="checkbox" class="admin_tablesettings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
     {{end}}
+
+    <a href="#" class="btn admin_exportbutton" download="export.xlsx">Exportovat</a>
   </div>
 
   <table class="admin_table admin_list_table">
