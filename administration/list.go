@@ -409,7 +409,7 @@ func (resource Resource) valueToCell(user User, f Field, val reflect.Value, isOr
 	var cell listCell
 	cell.Template = f.fieldType.ListCellTemplate
 	cell.Value = f.fieldType.ListCellDataSource(resource, user, f, item)
-	cell.OriginalValue = val
+	cell.OriginalValue = val.Interface()
 	cell.OrderedBy = isOrderedBy
 	return cell
 }

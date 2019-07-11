@@ -61,10 +61,25 @@ func actionList(permission Permission) Action {
 				file := xlsx.NewFile()
 				sheet, err := file.AddSheet("List 1")
 				must(err)
+
+				row := sheet.AddRow()
+				columnsStr := request.Request().URL.Query().Get("_columns")
+				if columnsStr == "" {
+					columnsStr = resource.defaultVisibleFieldsStr()
+				}
+				columnsAr := strings.Split(columnsStr, ",")
+				for _, v := range columnsAr {
+					cell := row.AddCell()
+					cell.SetValue(v)
+				}
+
 				for _, v1 := range listData.Rows {
 					row := sheet.AddRow()
 					for _, v2 := range v1.Items {
 						cell := row.AddCell()
+
+						//fmt.Println(reflect.TypeOf(v2.OriginalValue))
+
 						cell.SetValue(v2.OriginalValue)
 					}
 				}
@@ -486,8 +501,8 @@ func initResourceActions(a *Administration, resource *Resource) {
 		actionNew(resource.CanCreate),
 		actionCreate(resource.CanCreate),
 		//actionStats(resource.CanView),
-		actionExport(resource.CanExport),
-		actionDoExport(resource.CanExport),
+		//actionExport(resource.CanExport),
+		//actionDoExport(resource.CanExport),
 	}
 	if resource.ActivityLog {
 		resourceActions = append(resourceActions, actionHistory(resource.CanEdit))
