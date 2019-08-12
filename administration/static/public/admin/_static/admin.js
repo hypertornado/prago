@@ -323,6 +323,128 @@ var ImagePicker = (function () {
     };
     return ImagePicker;
 }());
+var ListFilterRelations = (function () {
+    function ListFilterRelations(el, value, list) {
+        var _this = this;
+        this.valueInput = el.querySelector(".filter_relations_hidden");
+        this.input = el.querySelector(".filter_relations_search_input");
+        this.search = el.querySelector(".filter_relations_search");
+        this.suggestions = el.querySelector(".filter_relations_suggestions");
+        this.preview = el.querySelector(".filter_relations_preview");
+        this.previewName = el.querySelector(".filter_relations_preview_name");
+        this.previewClose = el.querySelector(".filter_relations_preview_close");
+        this.previewClose.addEventListener("click", this.closePreview.bind(this));
+        this.preview.classList.add("hidden");
+        var hiddenEl = el.querySelector("input");
+        this.resourceName = el.getAttribute("data-name");
+        this.input.addEventListener("input", function () {
+            _this.dirty = true;
+            _this.lastChanged = Date.now();
+            return false;
+        });
+        window.setInterval(function () {
+            if (_this.dirty && Date.now() - _this.lastChanged > 100) {
+                _this.loadSuggestions();
+            }
+        }, 30);
+        if (this.valueInput.value) {
+            this.loadPreview(this.valueInput.value);
+        }
+    }
+    ListFilterRelations.prototype.loadPreview = function (value) {
+        var _this = this;
+        var request = new XMLHttpRequest();
+        var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        request.open("GET", adminPrefix + "/_api/preview/" + this.resourceName + "/" + value, true);
+        request.addEventListener("load", function () {
+            if (request.status == 200) {
+                _this.renderPreview(JSON.parse(request.response));
+            }
+            else {
+                console.error("not found");
+            }
+        });
+        request.send();
+    };
+    ListFilterRelations.prototype.renderPreview = function (item) {
+        this.valueInput.value = item.ID;
+        this.preview.classList.remove("hidden");
+        this.search.classList.add("hidden");
+        this.previewName.textContent = item.Name;
+        this.dispatchChange();
+    };
+    ListFilterRelations.prototype.dispatchChange = function () {
+        var event = new Event('change');
+        this.valueInput.dispatchEvent(event);
+    };
+    ListFilterRelations.prototype.closePreview = function () {
+        this.valueInput.value = "";
+        this.preview.classList.add("hidden");
+        this.search.classList.remove("hidden");
+        this.input.value = "";
+        this.suggestions.innerHTML = "";
+        this.dispatchChange();
+        this.input.focus();
+    };
+    ListFilterRelations.prototype.loadSuggestions = function () {
+        this.getSuggestions(this.input.value);
+        this.dirty = false;
+    };
+    ListFilterRelations.prototype.getSuggestions = function (q) {
+        var _this = this;
+        var request = new XMLHttpRequest();
+        var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        request.open("GET", adminPrefix + "/_api/search/" + this.resourceName + "?q=" + encodeURIComponent(q), true);
+        request.addEventListener("load", function () {
+            if (request.status == 200) {
+                _this.renderSuggestions(JSON.parse(request.response));
+            }
+            else {
+                console.error("not found");
+            }
+        });
+        request.send();
+    };
+    ListFilterRelations.prototype.renderSuggestions = function (data) {
+        var _this = this;
+        this.suggestions.innerHTML = "";
+        var _loop_1 = function () {
+            var item = data[i];
+            var el = this_1.renderSuggestion(item);
+            this_1.suggestions.appendChild(el);
+            var index = i;
+            el.addEventListener("click", function (e) {
+                _this.renderPreview(item);
+            });
+        };
+        var this_1 = this;
+        for (var i = 0; i < data.length; i++) {
+            _loop_1();
+        }
+    };
+    ListFilterRelations.prototype.renderSuggestion = function (data) {
+        var ret = document.createElement("div");
+        ret.classList.add("list_filter_suggestion");
+        ret.setAttribute("href", data.URL);
+        var image = document.createElement("div");
+        image.classList.add("list_filter_suggestion_image");
+        image.setAttribute("style", "background-image: url('" + data.Image + "');");
+        var right = document.createElement("div");
+        right.classList.add("list_filter_suggestion_right");
+        var name = document.createElement("div");
+        name.classList.add("list_filter_suggestion_name");
+        name.textContent = data.Name;
+        var description = document.createElement("div");
+        description.classList.add("list_filter_suggestion_description");
+        description.textContent = data.Description;
+        ret.appendChild(image);
+        right.appendChild(name);
+        right.appendChild(description);
+        ret.appendChild(right);
+        return ret;
+    };
+    return ListFilterRelations;
+}());
 function bindLists() {
     var els = document.getElementsByClassName("admin_list");
     for (var i = 0; i < els.length; i++) {
@@ -583,9 +705,15 @@ var List = (function () {
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
             var typ = item.getAttribute("data-typ");
-            var val = item.value.trim();
-            if (val) {
-                ret[typ] = val;
+            var layout = item.getAttribute("data-filter-layout");
+            if (item.classList.contains("admin_table_filter_item-relations")) {
+                ret[typ] = item.querySelector("input").value;
+            }
+            else {
+                var val = item.value.trim();
+                if (val) {
+                    ret[typ] = val;
+                }
             }
         }
         return ret;
@@ -616,7 +744,7 @@ var List = (function () {
                 fieldSelect.addEventListener("change", this.inputListener.bind(this));
             }
             if (fieldLayout == "filter_layout_relation") {
-                this.bindFilterRelation(fieldSelect, fieldValue);
+                this.bindFilterRelation(field, fieldValue);
             }
         }
         this.inputPeriodicListener();
@@ -634,7 +762,10 @@ var List = (function () {
         this.changedTimestamp = Date.now();
         this.progress.classList.remove("hidden");
     };
-    List.prototype.bindFilterRelation = function (select, value) {
+    List.prototype.bindFilterRelation = function (el, value) {
+        new ListFilterRelations(el, value, this);
+    };
+    List.prototype.bindFilterRelationOLD = function (select, value) {
         var _this = this;
         var typ = select.getAttribute("data-typ");
         var adminPrefix = document.body.getAttribute("data-admin-prefix");

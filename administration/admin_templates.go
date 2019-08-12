@@ -488,9 +488,24 @@ const adminTemplates = `
 {{end}}
 
 {{define "filter_layout_relation"}}
+  <div class="filter_relations admin_table_filter_item admin_table_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+    <input type="hidden" class="filter_relations_hidden">
+    <div class="filter_relations_preview">
+      <div class="filter_relations_preview_close"></div>
+      <div class="filter_relations_preview_image"></div>
+      <div class="filter_relations_preview_name"></div>
+      <div class="filter_relations_clear"></div>
+    </div>
+    <div class="filter_relations_search">
+      <input class="input input-small filter_relations_search_input">
+      <div class="filter_relations_suggestions"></div>
+    </div>
+  </div>
+ <!--
   <select class="input input-small admin_table_filter_item admin_table_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <option value="" selected=""></option>
   </select>
+-->
 {{end}}
 
 {{define "filter_layout_number"}}
@@ -4772,6 +4787,75 @@ a.admin_search_suggestion-selected:active {
     flex-grow: 2;
   }
 }
+.filter_relations {
+  position: relative;
+}
+.filter_relations_suggestions {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  background: white;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+}
+.filter_relations_preview {
+  border: 1px solid green;
+}
+.filter_relations_preview_close {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 100px;
+  background: #eee;
+  padding-left: 3px;
+  padding-top: 1px;
+  float: right;
+}
+.filter_relations_preview_close::after {
+  content: "✖︎";
+  text-align: center;
+}
+.filter_relations_clear {
+  clear: both;
+}
+.list_filter_suggestion {
+  padding: 5px;
+  border-radius: 5px;
+  text-decoration: none;
+  display: inline-block;
+  margin: 5px 0px;
+  font-size: 1rem;
+  line-height: 1.4em;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.list_filter_suggestion_image {
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  border-radius: 300px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-color: #fafafa;
+  border: 1px solid #eee;
+  align-self: flex-start;
+}
+.list_filter_suggestion_right {
+  flex-grow: 2;
+  flex-shrink: 2;
+  text-align: left;
+  font-size: .8rem;
+  line-height: 1.4em;
+}
+.list_filter_suggestion_description {
+  color: #aaa;
+}
 `
 
 
@@ -5101,6 +5185,108 @@ var ImagePicker = (function () {
     };
     return ImagePicker;
 }());
+var ListFilterRelations = (function () {
+    function ListFilterRelations(el, value, list) {
+        var _this = this;
+        this.input = el.querySelector(".filter_relations_search_input");
+        this.search = el.querySelector(".filter_relations_search");
+        this.suggestions = el.querySelector(".filter_relations_suggestions");
+        this.preview = el.querySelector(".filter_relations_preview");
+        this.previewName = el.querySelector(".filter_relations_preview_name");
+        this.preview.classList.add("hidden");
+        var hiddenEl = el.querySelector("input");
+        this.resourceName = el.getAttribute("data-name");
+        this.input.addEventListener("input", function () {
+            _this.dirty = true;
+            _this.lastChanged = Date.now();
+            return false;
+        });
+        window.setInterval(function () {
+            if (_this.dirty && Date.now() - _this.lastChanged > 100) {
+                _this.loadSuggestions();
+            }
+        }, 30);
+        this.loadPreview("16");
+    }
+    ListFilterRelations.prototype.loadPreview = function (value) {
+        var _this = this;
+        var request = new XMLHttpRequest();
+        var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        request.open("GET", adminPrefix + "/_api/preview/" + this.resourceName + "/" + value, true);
+        request.addEventListener("load", function () {
+            if (request.status == 200) {
+                _this.renderPreview(JSON.parse(request.response));
+            }
+            else {
+                console.error("not found");
+            }
+        });
+        request.send();
+    };
+    ListFilterRelations.prototype.renderPreview = function (item) {
+        this.preview.classList.remove("hidden");
+        this.search.classList.add("hidden");
+        this.previewName.textContent = item.Name;
+    };
+    ListFilterRelations.prototype.loadSuggestions = function () {
+        this.getSuggestions(this.input.value);
+        this.dirty = false;
+    };
+    ListFilterRelations.prototype.getSuggestions = function (q) {
+        var _this = this;
+        var request = new XMLHttpRequest();
+        var adminPrefix = document.body.getAttribute("data-admin-prefix");
+        request.open("GET", adminPrefix + "/_api/search/" + this.resourceName + "?q=" + encodeURIComponent(q), true);
+        request.addEventListener("load", function () {
+            if (request.status == 200) {
+                _this.renderSuggestions(JSON.parse(request.response));
+            }
+            else {
+                console.error("not found");
+            }
+        });
+        request.send();
+    };
+    ListFilterRelations.prototype.renderSuggestions = function (data) {
+        this.suggestions.innerHTML = "";
+        var _loop_1 = function () {
+            item = data[i];
+            var el = this_1.renderSuggestion(data[i]);
+            this_1.suggestions.appendChild(el);
+            var index = i;
+            el.addEventListener("click", function (e) {
+                console.log(e.currentTarget);
+                console.log(index);
+            });
+        };
+        var this_1 = this, item;
+        for (var i = 0; i < data.length; i++) {
+            _loop_1();
+        }
+    };
+    ListFilterRelations.prototype.renderSuggestion = function (data) {
+        var ret = document.createElement("div");
+        ret.classList.add("list_filter_suggestion");
+        ret.setAttribute("href", data.URL);
+        var image = document.createElement("div");
+        image.classList.add("list_filter_suggestion_image");
+        image.setAttribute("style", "background-image: url('" + data.Image + "');");
+        var right = document.createElement("div");
+        right.classList.add("list_filter_suggestion_right");
+        var name = document.createElement("div");
+        name.classList.add("list_filter_suggestion_name");
+        name.textContent = data.Name;
+        var description = document.createElement("div");
+        description.classList.add("list_filter_suggestion_description");
+        description.textContent = data.Description;
+        ret.appendChild(image);
+        right.appendChild(name);
+        right.appendChild(description);
+        ret.appendChild(right);
+        return ret;
+    };
+    return ListFilterRelations;
+}());
 function bindLists() {
     var els = document.getElementsByClassName("admin_list");
     for (var i = 0; i < els.length; i++) {
@@ -5361,9 +5547,15 @@ var List = (function () {
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
             var typ = item.getAttribute("data-typ");
-            var val = item.value.trim();
-            if (val) {
-                ret[typ] = val;
+            var layout = item.getAttribute("data-filter-layout");
+            if (item.classList.contains("admin_table_filter_item-relations")) {
+                ret[typ] = item.querySelector("input").value;
+            }
+            else {
+                var val = item.value.trim();
+                if (val) {
+                    ret[typ] = val;
+                }
             }
         }
         return ret;
@@ -5394,7 +5586,7 @@ var List = (function () {
                 fieldSelect.addEventListener("change", this.inputListener.bind(this));
             }
             if (fieldLayout == "filter_layout_relation") {
-                this.bindFilterRelation(fieldSelect, fieldValue);
+                this.bindFilterRelation(field, fieldValue);
             }
         }
         this.inputPeriodicListener();
@@ -5412,7 +5604,10 @@ var List = (function () {
         this.changedTimestamp = Date.now();
         this.progress.classList.remove("hidden");
     };
-    List.prototype.bindFilterRelation = function (select, value) {
+    List.prototype.bindFilterRelation = function (el, value) {
+        new ListFilterRelations(el, value, this);
+    };
+    List.prototype.bindFilterRelationOLD = function (select, value) {
         var _this = this;
         var typ = select.getAttribute("data-typ");
         var adminPrefix = document.body.getAttribute("data-admin-prefix");

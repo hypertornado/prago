@@ -317,9 +317,14 @@ class List {
     for (var i = 0; i < items.length; i++) {
       var item = <HTMLInputElement>items[i];
       var typ = item.getAttribute("data-typ");
-      var val = item.value.trim();
-      if (val) {
-        ret[typ] = val;
+      var layout = item.getAttribute("data-filter-layout");
+      if (item.classList.contains("admin_table_filter_item-relations")) {
+        ret[typ] = item.querySelector("input").value;
+      } else {
+        var val = item.value.trim();
+        if (val) {
+          ret[typ] = val;
+        }
       }
     }
     return ret;
@@ -355,7 +360,7 @@ class List {
       }
 
       if (fieldLayout == "filter_layout_relation") {
-        this.bindFilterRelation(fieldSelect, fieldValue);
+        this.bindFilterRelation(field, fieldValue);
       }
     }
     this.inputPeriodicListener();
@@ -376,7 +381,11 @@ class List {
     this.progress.classList.remove("hidden");
   }
 
-  bindFilterRelation(select: HTMLSelectElement, value: any) {
+  bindFilterRelation(el: HTMLDivElement, value: any) {
+    new ListFilterRelations(el, value, this);
+  }
+
+  bindFilterRelationOLD(select: HTMLSelectElement, value: any) {
     var typ = select.getAttribute("data-typ");
 
     var adminPrefix = document.body.getAttribute("data-admin-prefix");

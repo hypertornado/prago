@@ -156,7 +156,10 @@ func actionCreate(permission Permission) Action {
 			must(resource.Admin.Create(item))
 
 			if resource.Admin.search != nil {
-				must(resource.Admin.search.saveItem(&resource, item))
+				err = resource.Admin.search.saveItem(&resource, item)
+				if err != nil {
+					fmt.Errorf("%s", err)
+				}
 				resource.Admin.search.Flush()
 			}
 
@@ -268,7 +271,10 @@ func actionUpdate(permission Permission) Action {
 			must(resource.Admin.Save(item))
 
 			if resource.Admin.search != nil {
-				must(resource.Admin.search.saveItem(&resource, item))
+				err = resource.Admin.search.saveItem(&resource, item)
+				if err != nil {
+					fmt.Errorf("%s", err)
+				}
 				resource.Admin.search.Flush()
 			}
 
@@ -394,7 +400,10 @@ func actionDoDelete(permission Permission) Action {
 			must(err)
 
 			if resource.Admin.search != nil {
-				must(resource.Admin.search.deleteItem(&resource, int64(id)))
+				err = resource.Admin.search.deleteItem(&resource, int64(id))
+				if err != nil {
+					fmt.Errorf("%s", err)
+				}
 				resource.Admin.search.Flush()
 			}
 

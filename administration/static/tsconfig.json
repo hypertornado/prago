@@ -15,6 +15,7 @@
         "js/utils.ts",
         "js/imageview.ts",
         "js/imagepicker.ts",
+        "js/list_filter_relations.ts",
         "js/list.ts",
         "js/order.ts",
         "js/markdown.ts",

@@ -52,9 +52,24 @@
 {{end}}
 
 {{define "filter_layout_relation"}}
+  <div class="filter_relations admin_table_filter_item admin_table_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+    <input type="hidden" class="filter_relations_hidden">
+    <div class="filter_relations_preview">
+      <div class="filter_relations_preview_close"></div>
+      <div class="filter_relations_preview_image"></div>
+      <div class="filter_relations_preview_name"></div>
+      <div class="filter_relations_clear"></div>
+    </div>
+    <div class="filter_relations_search">
+      <input class="input input-small filter_relations_search_input">
+      <div class="filter_relations_suggestions"></div>
+    </div>
+  </div>
+ <!--
   <select class="input input-small admin_table_filter_item admin_table_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <option value="" selected=""></option>
   </select>
+-->
 {{end}}
 
 {{define "filter_layout_number"}}
