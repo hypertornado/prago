@@ -3697,7 +3697,6 @@ th.admin_list_orderitem {
   text-align: center;
   position: fixed;
   top: 0px;
-  left: 0px;
   right: 0px;
   z-index: 10;
   pointer-events: none;
