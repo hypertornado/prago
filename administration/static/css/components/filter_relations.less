@@ -15,7 +15,7 @@
 .filter_relations_preview {
   //border: 1px solid green;
   font-size: .9rem;
-  background: #fafafa;
+  background: #fcfcfc;
   border: 1px solid #eee;
   border-radius: 300px;
   padding: 3px;
@@ -30,19 +30,21 @@
   text-align: center;
   border-radius: 100px;
   background: #eee;
-  padding-left: 3px;
-  padding-top: 1px;
+  padding-left: 2.5px;
+  padding-top: 0px;
   float: right;
   margin: 0px 0px 0px 3px;
   cursor: pointer;
+  background: @baseColorBackground;
+  border: 1px solid #eee;
 }
 
 .filter_relations_preview_close:hover {
-  background-color: #ddd;
+  background-color: @baseColorBackgroundLighter;
 }
 
 .filter_relations_preview_close:active {
-  background-color: #ccc;
+  background-color: @baseColor;
 }
 
 .filter_relations_preview_close::after {

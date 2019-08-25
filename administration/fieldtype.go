@@ -19,6 +19,9 @@ type FieldType struct {
 
 	ListCellDataSource func(Resource, User, Field, interface{}) interface{}
 	ListCellTemplate   string
+
+	FilterLayoutTemplate   string
+	FilterLayoutDataSource func(User, Field) interface{}
 }
 
 func (admin *Administration) addDefaultFieldTypes() {

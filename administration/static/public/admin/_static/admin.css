@@ -3815,7 +3815,7 @@ a.admin_search_suggestion-selected:active {
 }
 .filter_relations_preview {
   font-size: .9rem;
-  background: #fafafa;
+  background: #fcfcfc;
   border: 1px solid #eee;
   border-radius: 300px;
   padding: 3px;
@@ -3829,17 +3829,19 @@ a.admin_search_suggestion-selected:active {
   text-align: center;
   border-radius: 100px;
   background: #eee;
-  padding-left: 3px;
-  padding-top: 1px;
+  padding-left: 2.5px;
+  padding-top: 0px;
   float: right;
   margin: 0px 0px 0px 3px;
   cursor: pointer;
+  background: rgba(64, 120, 192, 0.1);
+  border: 1px solid #eee;
 }
 .filter_relations_preview_close:hover {
-  background-color: #ddd;
+  background-color: rgba(64, 120, 192, 0.05);
 }
 .filter_relations_preview_close:active {
-  background-color: #ccc;
+  background-color: #4078c0;
 }
 .filter_relations_preview_close::after {
   content: "✖︎";

@@ -163,6 +163,14 @@ func (v Field) getListHeaderItem(user User) listHeaderItem {
 		}
 	}
 
+	if headerItem.FilterLayout == "filter_layout_select" {
+		headerItem.FilterData = headerItem.Field.fieldType.FilterLayoutDataSource(user, v)
+		/*headerItem.FilterData = [][2]string{
+			{"A", "B"},
+			{"C", "D"},
+		}*/
+	}
+
 	if v.CanOrder {
 		headerItem.CanOrder = true
 	}
@@ -174,6 +182,11 @@ func (sf *Field) filterLayout() string {
 	if sf == nil {
 		return ""
 	}
+
+	if sf.fieldType.FilterLayoutTemplate != "" {
+		return sf.fieldType.FilterLayoutTemplate
+	}
+
 	if sf.Typ.Kind() == reflect.String &&
 		(sf.Tags["prago-type"] == "" || sf.Tags["prago-type"] == "text" || sf.Tags["prago-type"] == "markdown") {
 		return "filter_layout_text"
@@ -236,6 +249,10 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 				q.WhereIs(k, true)
 			case "false":
 				q.WhereIs(k, false)
+			}
+		case "filter_layout_select":
+			if v != "" {
+				q.WhereIs(k, v)
 			}
 		case "filter_layout_date":
 			v = strings.Trim(v, " ")

@@ -520,6 +520,14 @@ const adminTemplates = `
   </select>
 {{end}}
 
+{{define "filter_layout_select"}}
+  <select class="input input-small admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+    {{range $item := .FilterData}}
+      <option value="{{index $item 0}}">{{index $item 1}}</option>
+    {{end}}
+  </select>
+{{end}}
+
 {{define "filter_layout_date"}}
   <div class="admin_filter_layout_date">
     <input class="admin_table_filter_item admin_filter_layout_date_value" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
@@ -4798,7 +4806,11 @@ a.admin_search_suggestion-selected:active {
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
 .filter_relations_preview {
-  border: 1px solid green;
+  font-size: .9rem;
+  background: #fcfcfc;
+  border: 1px solid #eee;
+  border-radius: 300px;
+  padding: 3px;
 }
 .filter_relations_preview_close {
   display: inline-block;
@@ -4809,9 +4821,19 @@ a.admin_search_suggestion-selected:active {
   text-align: center;
   border-radius: 100px;
   background: #eee;
-  padding-left: 3px;
-  padding-top: 1px;
+  padding-left: 2.5px;
+  padding-top: 0px;
   float: right;
+  margin: 0px 0px 0px 3px;
+  cursor: pointer;
+  background: rgba(64, 120, 192, 0.1);
+  border: 1px solid #eee;
+}
+.filter_relations_preview_close:hover {
+  background-color: rgba(64, 120, 192, 0.05);
+}
+.filter_relations_preview_close:active {
+  background-color: #4078c0;
 }
 .filter_relations_preview_close::after {
   content: "✖︎";
@@ -4831,6 +4853,12 @@ a.admin_search_suggestion-selected:active {
   display: flex;
   align-items: center;
   cursor: pointer;
+}
+.list_filter_suggestion:hover {
+  background: #fafafa;
+}
+.list_filter_suggestion:active {
+  background: #eee;
 }
 .list_filter_suggestion_image {
   flex-grow: 0;
@@ -5188,11 +5216,14 @@ var ImagePicker = (function () {
 var ListFilterRelations = (function () {
     function ListFilterRelations(el, value, list) {
         var _this = this;
+        this.valueInput = el.querySelector(".filter_relations_hidden");
         this.input = el.querySelector(".filter_relations_search_input");
         this.search = el.querySelector(".filter_relations_search");
         this.suggestions = el.querySelector(".filter_relations_suggestions");
         this.preview = el.querySelector(".filter_relations_preview");
         this.previewName = el.querySelector(".filter_relations_preview_name");
+        this.previewClose = el.querySelector(".filter_relations_preview_close");
+        this.previewClose.addEventListener("click", this.closePreview.bind(this));
         this.preview.classList.add("hidden");
         var hiddenEl = el.querySelector("input");
         this.resourceName = el.getAttribute("data-name");
@@ -5206,7 +5237,9 @@ var ListFilterRelations = (function () {
                 _this.loadSuggestions();
             }
         }, 30);
-        this.loadPreview("16");
+        if (this.valueInput.value) {
+            this.loadPreview(this.valueInput.value);
+        }
     }
     ListFilterRelations.prototype.loadPreview = function (value) {
         var _this = this;
@@ -5224,9 +5257,24 @@ var ListFilterRelations = (function () {
         request.send();
     };
     ListFilterRelations.prototype.renderPreview = function (item) {
+        this.valueInput.value = item.ID;
         this.preview.classList.remove("hidden");
         this.search.classList.add("hidden");
         this.previewName.textContent = item.Name;
+        this.dispatchChange();
+    };
+    ListFilterRelations.prototype.dispatchChange = function () {
+        var event = new Event('change');
+        this.valueInput.dispatchEvent(event);
+    };
+    ListFilterRelations.prototype.closePreview = function () {
+        this.valueInput.value = "";
+        this.preview.classList.add("hidden");
+        this.search.classList.remove("hidden");
+        this.input.value = "";
+        this.suggestions.innerHTML = "";
+        this.dispatchChange();
+        this.input.focus();
     };
     ListFilterRelations.prototype.loadSuggestions = function () {
         this.getSuggestions(this.input.value);
@@ -5248,18 +5296,18 @@ var ListFilterRelations = (function () {
         request.send();
     };
     ListFilterRelations.prototype.renderSuggestions = function (data) {
+        var _this = this;
         this.suggestions.innerHTML = "";
         var _loop_1 = function () {
-            item = data[i];
-            var el = this_1.renderSuggestion(data[i]);
+            var item = data[i];
+            var el = this_1.renderSuggestion(item);
             this_1.suggestions.appendChild(el);
             var index = i;
             el.addEventListener("click", function (e) {
-                console.log(e.currentTarget);
-                console.log(index);
+                _this.renderPreview(item);
             });
         };
-        var this_1 = this, item;
+        var this_1 = this;
         for (var i = 0; i < data.length; i++) {
             _loop_1();
         }

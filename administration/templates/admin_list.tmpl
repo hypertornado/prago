@@ -84,6 +84,14 @@
   </select>
 {{end}}
 
+{{define "filter_layout_select"}}
+  <select class="input input-small admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+    {{range $item := .FilterData}}
+      <option value="{{index $item 0}}">{{index $item 1}}</option>
+    {{end}}
+  </select>
+{{end}}
+
 {{define "filter_layout_date"}}
   <div class="admin_filter_layout_date">
     <input class="admin_table_filter_item admin_filter_layout_date_value" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
