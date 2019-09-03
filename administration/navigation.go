@@ -13,6 +13,7 @@ type adminNavigationPage struct {
 	Navigation   adminItemNavigation
 	PageTemplate string
 	PageData     interface{}
+	HideBox      bool
 }
 
 type adminItemNavigation struct {
@@ -36,11 +37,11 @@ type navigationBreadcrumb struct {
 	Image string
 }
 
-func (n adminItemNavigation) IsVisible(pos int) bool {
-	if n.Tabs[pos-1].Selected {
+func IsTabVisible(tabs []navigationTab, pos int) bool {
+	if tabs[pos-1].Selected {
 		return false
 	}
-	if n.Tabs[pos].Selected {
+	if tabs[pos].Selected {
 		return false
 	}
 	return true

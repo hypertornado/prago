@@ -53,14 +53,13 @@ class DatePicker {
     //@ts-ignore
     var pd = new Pikaday({
       field: el,
-      format: 'DD MM YYYY',
+      //format: 'YYYY-MM-DD',
       //firstDay: 1,
-      defaultDate: new Date(),
+      //defaultDate: new Date(),
+      setDefaultDate: false,
       i18n: i18n,
       onSelect: (date: any) => {
         el.value = pd.toString();
-        //el.value = "2019-11-10";
-        //console.log("SELECT");
       },
       toString: (date: any) => {
         const day = date.getDate();

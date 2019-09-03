@@ -2903,6 +2903,35 @@ select.admin_timestamp_minute {
 .ordered-desc:after {
   content: " ↑";
 }
+.view_header {
+  margin: 0 auto;
+  max-width: 600px;
+  margin-top: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+.view_header_name {
+  font-weight: 500;
+  flex-grow: 10;
+}
+.view_header_subname {
+  color: #999;
+}
+.view_header_tabs {
+  float: right;
+  margin-right: 0px;
+  flex-shrink: 0;
+}
+.view_header_tabs .admin_navigation_tabs {
+  margin-bottom: 0px;
+}
+.admin_box-view {
+  margin-top: 0px;
+}
 .view_name {
   font-size: 1rem;
   margin-left: 0px;
@@ -2911,9 +2940,6 @@ select.admin_timestamp_minute {
 }
 .view_name:first-child {
   border-top: none;
-}
-.view_button {
-  float: right;
 }
 .view_content {
   clear: both;
@@ -2983,6 +3009,8 @@ progress {
   border-radius: 5px;
   background-color: white;
   border: 1px solid #eee;
+  border: 1px solid #444;
+  border: 1px solid #999;
 }
 .admin_navigation_breadcrumb_image-logo {
   background-size: contain;
@@ -3002,7 +3030,8 @@ progress {
   justify-content: center;
   vertical-align: bottom;
   flex-wrap: wrap;
-  margin: 7px 5px 7px 5px;
+  width: 100%;
+  margin: 5px;
 }
 .admin_navigation_tabs_content {
   display: flex;
@@ -3010,6 +3039,10 @@ progress {
   border-radius: 5px;
   background: rgba(64, 120, 192, 0.1);
   padding: 0px 4px;
+}
+.admin_header .admin_navigation_tabs {
+  margin: 0px 5px 5px 0px;
+  padding-left: 200px;
 }
 .admin_navigation_tab {
   white-space: nowrap;
@@ -3272,15 +3305,14 @@ td.admin_list_message {
   z-index: 2;
   line-height: 1.6em;
   flex-grow: 0;
-  background: white;
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0px;
   flex-shrink: 0;
+  background: white;
   box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
   padding: 0px 0px 0px 0px;
+  display: block;
+}
+.admin_header_top {
   display: flex;
-  align-items: flex-start;
 }
 .admin_header_left {
   display: flex;
@@ -3298,7 +3330,6 @@ td.admin_list_message {
 .admin_bottom {
   display: flex;
   flex-shrink: 10;
-  flex-grow: 0;
   flex-grow: 400;
 }
 .admin_header-scrolled {
@@ -3327,10 +3358,9 @@ td.admin_list_message {
 }*/
 .admin_header_resources {
   margin: 0px;
-  clear: both;
   display: flex;
   padding: 5px 0px;
-  height: 100%;
+  max-height: 100%;
   background-color: #fafafa;
   width: 200px;
   flex-direction: column;
@@ -3424,7 +3454,7 @@ div.admin_dropdown_item {
   border-top-right-radius: 5px;
 }
 @media (max-width: 800px) {
-  .admin_header {
+  .admin_header_top {
     flex-direction: column;
     align-items: stretch;
   }
@@ -3459,6 +3489,7 @@ div.admin_dropdown_item {
   }
   .admin_header .admin_navigation_tabs {
     margin-left: 5px;
+    padding-left: 0px;
   }
 }
 /*!

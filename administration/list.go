@@ -75,16 +75,6 @@ type page struct {
 	Current bool
 }
 
-type listRequest struct {
-	//Page           int64
-	//OrderBy        string
-	//OrderDesc      bool
-	//PrefilterField string
-	//PrefilterValue string
-	//Filter map[string]string
-	//Columns        map[string]bool
-}
-
 func (resource *Resource) getListHeader(user User) (list list, err error) {
 	lang := user.Locale
 
@@ -164,11 +154,11 @@ func (v Field) getListHeaderItem(user User) listHeaderItem {
 	}
 
 	if headerItem.FilterLayout == "filter_layout_select" {
-		headerItem.FilterData = headerItem.Field.fieldType.FilterLayoutDataSource(user, v)
-		/*headerItem.FilterData = [][2]string{
-			{"A", "B"},
-			{"C", "D"},
-		}*/
+		fn := headerItem.Field.fieldType.FilterLayoutDataSource
+		if fn == nil {
+			fn = headerItem.Field.fieldType.FormDataSource
+		}
+		headerItem.FilterData = fn(v, user)
 	}
 
 	if v.CanOrder {
@@ -251,6 +241,15 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 				q.WhereIs(k, false)
 			}
 		case "filter_layout_select":
+			if field.Tags["prago-type"] == "file" || field.Tags["prago-type"] == "image" {
+				if v == "true" {
+					q.Where(fmt.Sprintf("%s !=''", field.ColumnName))
+				}
+				if v == "false" {
+					q.Where(fmt.Sprintf("%s =''", field.ColumnName))
+				}
+				continue
+			}
 			if v != "" {
 				q.WhereIs(k, v)
 			}

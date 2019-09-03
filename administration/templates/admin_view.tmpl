@@ -1,4 +1,26 @@
+{{define "admin_views"}}
+  {{range $item := .}}
+    {{template "admin_view" $item}}
+  {{end}}
+{{end}}
+
 {{define "admin_view"}}
+  <div class="view_header">
+    {{if .Name}}
+      <span class="view_header_name">
+        {{.Name}}
+        {{if .Subname}}
+          <span class="view_header_subname">
+            {{.Subname}}
+          </span>
+        {{end}}
+      </span>
+    {{end}}
+    <div class="view_header_tabs">
+      {{template "admin_tabs" .Navigation}}
+    </div>
+  </div>
+  <div class="admin_box admin_box-view">
   {{range $item := .Items}}
     <div class="view_name">
       {{if $item.Button}}

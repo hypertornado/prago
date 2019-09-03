@@ -117,6 +117,7 @@ func actionNew(permission Permission) Action {
 		Handler: func(resource Resource, request prago.Request, user User) {
 			var item interface{}
 			resource.newItem(&item)
+
 			resource.bindData(&item, user, request.Request().URL.Query(), defaultEditabilityFilter)
 
 			form, err := resource.getForm(item, user)
@@ -196,8 +197,9 @@ func actionView(permission Permission) Action {
 
 			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   resource.Admin.getItemNavigation(resource, user, item, ""),
-				PageTemplate: "admin_view",
-				PageData:     resource.getView(id, item, GetUser(request)),
+				PageTemplate: "admin_views",
+				PageData:     resource.getViews(id, item, GetUser(request)),
+				HideBox:      true,
 			})
 		},
 	}
@@ -516,9 +518,9 @@ func initResourceActions(a *Administration, resource *Resource) {
 	if resource.ActivityLog {
 		resourceActions = append(resourceActions, actionHistory(resource.CanEdit))
 	}
-	for _, v := range resource.relations {
+	/*for _, v := range resource.relations {
 		resource.bindRelationActions(v)
-	}
+	}*/
 	resource.actions = append(resourceActions, resource.actions...)
 	for _, v := range resource.actions {
 		bindResourceAction(a, resource, v)

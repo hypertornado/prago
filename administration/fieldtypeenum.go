@@ -47,7 +47,7 @@ func (admin *Administration) AddEnumFieldTypeLocalized(name string, items []Fiel
 		},
 
 		FilterLayoutTemplate: "filter_layout_select",
-		FilterLayoutDataSource: func(user User, f Field) interface{} {
+		FilterLayoutDataSource: func(f Field, user User) interface{} {
 			var ret [][2]string
 			if len(items) == 0 || items[0].ID != "" {
 				ret = append(ret, [2]string{"", ""})

@@ -71,10 +71,25 @@ func newField(f reflect.StructField, order int, fieldTypes map[string]FieldType)
 	return ret
 }
 
+/*
+if ret.Tags["prago-type"] == "relation" {
+			relationID := ret.Name
+			ret.Tags["prago-relation"] != "" {
+				relationID = ret.Tags["prago-relation"]
+			}
+			referenceResource
+		}
+
+*/
+
 func getDefaultStringer(t reflect.Type) func(interface{}) string {
 	if reflect.TypeOf(time.Now()) == t {
 		return func(i interface{}) string {
-			return i.(time.Time).Format("2006-01-02")
+			tm := i.(time.Time)
+			if tm.IsZero() {
+				return ""
+			}
+			return tm.Format("2006-01-02")
 		}
 	}
 

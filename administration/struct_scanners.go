@@ -3,9 +3,10 @@ package administration
 import (
 	"database/sql"
 	"errors"
-	"github.com/go-sql-driver/mysql"
 	"reflect"
 	"time"
+
+	"github.com/go-sql-driver/mysql"
 )
 
 func (resource Resource) getStructScanners(value reflect.Value) (names []string, scanners []interface{}, err error) {

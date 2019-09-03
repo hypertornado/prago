@@ -9,22 +9,31 @@ import (
 )
 
 type view struct {
-	Items []viewField
+	Name       string
+	Subname    string
+	Navigation []navigationTab
+	Items      []viewField
 }
 
 type viewField struct {
 	Name     string
-	Button   *viewFieldAction
+	Button   *viewAction
 	Template string
 	Value    interface{}
 }
 
-type viewFieldAction struct {
+type viewAction struct {
 	Name string
 	URL  string
 }
 
-func (resource Resource) getView(id int, inValues interface{}, user User) view {
+func (resource Resource) getViews(id int, inValues interface{}, user User) (ret []view) {
+	ret = append(ret, resource.getBasicView(id, inValues, user))
+	ret = append(ret, resource.getAutoRelationsView(id, inValues, user)...)
+	return ret
+}
+
+func (resource Resource) getBasicView(id int, inValues interface{}, user User) view {
 	visible := defaultVisibilityFilter
 	ret := view{}
 	for i, f := range resource.fieldArrays {
@@ -63,7 +72,7 @@ func (resource Resource) getView(id int, inValues interface{}, user User) view {
 			ret.Items,
 			viewField{
 				Name: messages.Messages.Get(user.Locale, "admin_history_count"),
-				Button: &viewFieldAction{
+				Button: &viewAction{
 					Name: messages.Messages.Get(user.Locale, "admin_history"),
 					URL:  resource.GetURL(fmt.Sprintf("%d/history", id)),
 				},
@@ -74,7 +83,29 @@ func (resource Resource) getView(id int, inValues interface{}, user User) view {
 
 	}
 
-	for _, v := range resource.relations {
+	return ret
+}
+
+func (resource Resource) getAutoRelationsView(id int, inValues interface{}, user User) (ret []view) {
+	return resource.relationsToView(resource.autoRelations, id, inValues, user)
+}
+
+func (resource Resource) relationsToView(relations []relation, id int, inValues interface{}, user User) (ret []view) {
+	for _, v := range relations {
+		if !resource.Admin.Authorize(user, v.resource.CanView) {
+			continue
+		}
+
+		var rowItem interface{}
+		v.resource.newItem(&rowItem)
+
+		totalCount, err := resource.Admin.Query().Count(rowItem)
+		must(err)
+
+		var rowItems interface{}
+		v.resource.newArrayOfItems(&rowItems)
+
+		var vi = view{}
 		q := resource.Admin.prefilterQuery(v.field, fmt.Sprintf("%d", id))
 		if v.resource.OrderDesc {
 			q = q.OrderDesc(v.resource.OrderByColumn)
@@ -82,11 +113,15 @@ func (resource Resource) getView(id int, inValues interface{}, user User) view {
 			q = q.Order(v.resource.OrderByColumn)
 		}
 
-		q = q.Limit(resource.ItemsPerPage)
+		filteredCount, err := q.Count(rowItem)
+		must(err)
 
-		var rowItems interface{}
+		limit := resource.ItemsPerPage
+		if limit > 10 {
+			limit = 10
+		}
 
-		v.resource.newArrayOfItems(&rowItems)
+		q = q.Limit(limit)
 		q.Get(rowItems)
 
 		vv := reflect.ValueOf(rowItems).Elem()
@@ -98,23 +133,31 @@ func (resource Resource) getView(id int, inValues interface{}, user User) view {
 			)
 		}
 
-		addURL := resource.GetURL(fmt.Sprintf("%d/%s", id, v.addURL()))
+		name := v.listName(user.Locale)
+		vi.Name = name
+		vi.Subname = fmt.Sprintf("(%d / %d / %d)", len(data), filteredCount, totalCount)
 
-		name := v.resource.HumanName(user.Locale)
-		ret.Items = append(
-			ret.Items,
+		vi.Navigation = append(vi.Navigation, navigationTab{
+			Name: messages.Messages.GetNameFunction("admin_list")(user.Locale),
+			URL:  v.listURL(int64(id)),
+		})
+
+		if resource.Admin.Authorize(user, v.resource.CanEdit) {
+			vi.Navigation = append(vi.Navigation, navigationTab{
+				Name: messages.Messages.GetNameFunction("admin_new")(user.Locale),
+				URL:  v.addURL(int64(id)),
+			})
+		}
+
+		vi.Items = append(
+			vi.Items,
 			viewField{
-				Name: name,
-				Button: &viewFieldAction{
-					Name: v.addName(user.Locale),
-					URL:  addURL,
-				},
 				Template: "admin_item_view_relations",
 				Value:    data,
 			},
 		)
+		ret = append(ret, vi)
 	}
-
 	return ret
 }
 

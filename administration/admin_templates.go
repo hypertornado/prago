@@ -359,37 +359,39 @@ const adminTemplates = `
     {{template "admin_flash" .}}
     <div class="admin_layout">
         <div class="admin_header">
-            <div class="admin_header_left">
-                {{if .admin_page}}
-                    {{template "admin_breadcrumbs" .admin_page.Navigation.Breadcrumbs}}
-                {{else}}
-                    {{template "admin_breadcrumbs" .admin_default_breadcrumbs}}
-                {{end}}
-                {{if .admin_page}}
-                    {{template "admin_tabs" .admin_page.Navigation}}
-                {{end}}
-                <div class="admin_header_top_item admin_header_top_space"></div>
-            </div>
-            <div class="admin_header_right">
-                {{if .admin_header.HasSearch}}
-                    <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
-                        <input class="input admin_header_search_input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-                        <div class="admin_header_search_suggestions hidden"></div>
-                    </form>
-                {{end}}
-                <div class="admin_avatar admin_dropdown" tabindex="-1">
-                    <div class="admin_dropdown_target admin_avatar_icon" style="background-image: url('{{.gravatar}}');"></div>
-                    <div class="admin_dropdown_content">
-                        <div class="admin_dropdown_item">{{.currentuser.Email}}</div>
-                        <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_dropdown_item">
-                            {{message .locale "admin_settings"}}
-                        </a>
-                        <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_dropdown_item">
-                            {{message .locale "admin_log_out"}}
-                        </a>
+            <div class="admin_header_top">
+                <div class="admin_header_left">
+                    {{if .admin_page}}
+                        {{template "admin_breadcrumbs" .admin_page.Navigation.Breadcrumbs}}
+                    {{else}}
+                        {{template "admin_breadcrumbs" .admin_default_breadcrumbs}}
+                    {{end}}
+                    <div class="admin_header_top_item admin_header_top_space"></div>
+                </div>
+                <div class="admin_header_right">
+                    {{if .admin_header.HasSearch}}
+                        <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
+                            <input class="input admin_header_search_input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <div class="admin_header_search_suggestions hidden"></div>
+                        </form>
+                    {{end}}
+                    <div class="admin_avatar admin_dropdown" tabindex="-1">
+                        <div class="admin_dropdown_target admin_avatar_icon" style="background-image: url('{{.gravatar}}');"></div>
+                        <div class="admin_dropdown_content">
+                            <div class="admin_dropdown_item">{{.currentuser.Email}}</div>
+                            <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_dropdown_item">
+                                {{message .locale "admin_settings"}}
+                            </a>
+                            <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_dropdown_item">
+                                {{message .locale "admin_log_out"}}
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
+            {{if .admin_page}}
+                {{template "admin_tabs" .admin_page.Navigation.Tabs}}
+            {{end}}
         </div>
 
         <div class="admin_bottom">
@@ -608,9 +610,13 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_navigation_page"}}
-    {{template "admin_navigation" .admin_page.Navigation}}
+    {{if not .admin_page.HideBox}}
+      {{template "admin_navigation" .admin_page.Navigation}}
+    {{end}}
     {{tmpl .admin_page.PageTemplate .admin_page.PageData}}
-  </div>
+    {{if not .admin_page.HideBox}}
+      </div>
+    {{end}}
 {{end}}{{define "admin_search"}}
   <div class="admin_box">
     <h1>{{.admin_title}}</h1>
@@ -775,10 +781,10 @@ const adminTemplates = `
 {{end}}{{define "admin_tabs"}}
   <div class="admin_navigation_tabs">
     <div class="admin_navigation_tabs_content">
-    {{$navigation := .}}
-    {{range $i, $item := .Tabs}}
+    {{$tabs := .}}
+    {{range $i, $item := .}}
         {{if ne $i 0}}
-          <div class="admin_navigation_tabdivider{{if $navigation.IsVisible $i}} admin_navigation_tabdivider-visible{{end}}"></div>
+          <div class="admin_navigation_tabdivider{{if (istabvisible $tabs $i)}} admin_navigation_tabdivider-visible{{end}}"></div>
         {{end}}
         <a href="{{$item.URL}}" class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
             {{$item.Name}}
@@ -786,7 +792,29 @@ const adminTemplates = `
     {{end}}
     </div>
   </div>
-{{end}}{{define "admin_view"}}
+{{end}}{{define "admin_views"}}
+  {{range $item := .}}
+    {{template "admin_view" $item}}
+  {{end}}
+{{end}}
+
+{{define "admin_view"}}
+  <div class="view_header">
+    {{if .Name}}
+      <span class="view_header_name">
+        {{.Name}}
+        {{if .Subname}}
+          <span class="view_header_subname">
+            {{.Subname}}
+          </span>
+        {{end}}
+      </span>
+    {{end}}
+    <div class="view_header_tabs">
+      {{template "admin_tabs" .Navigation}}
+    </div>
+  </div>
+  <div class="admin_box admin_box-view">
   {{range $item := .Items}}
     <div class="view_name">
       {{if $item.Button}}
@@ -3895,6 +3923,35 @@ select.admin_timestamp_minute {
 .ordered-desc:after {
   content: " ↑";
 }
+.view_header {
+  margin: 0 auto;
+  max-width: 600px;
+  margin-top: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+.view_header_name {
+  font-weight: 500;
+  flex-grow: 10;
+}
+.view_header_subname {
+  color: #eee;
+}
+.view_header_tabs {
+  float: right;
+  margin-right: 0px;
+  flex-shrink: 0;
+}
+.view_header_tabs .admin_navigation_tabs {
+  margin-bottom: 0px;
+}
+.admin_box-view {
+  margin-top: 0px;
+}
 .view_name {
   font-size: 1rem;
   margin-left: 0px;
@@ -3903,9 +3960,6 @@ select.admin_timestamp_minute {
 }
 .view_name:first-child {
   border-top: none;
-}
-.view_button {
-  float: right;
 }
 .view_content {
   clear: both;
@@ -3975,6 +4029,8 @@ progress {
   border-radius: 5px;
   background-color: white;
   border: 1px solid #eee;
+  border: 1px solid #444;
+  border: 1px solid #999;
 }
 .admin_navigation_breadcrumb_image-logo {
   background-size: contain;
@@ -3994,7 +4050,8 @@ progress {
   justify-content: center;
   vertical-align: bottom;
   flex-wrap: wrap;
-  margin: 7px 5px 7px 5px;
+  width: 100%;
+  margin: 5px;
 }
 .admin_navigation_tabs_content {
   display: flex;
@@ -4002,6 +4059,10 @@ progress {
   border-radius: 5px;
   background: rgba(64, 120, 192, 0.1);
   padding: 0px 4px;
+}
+.admin_header .admin_navigation_tabs {
+  margin: 0px 5px 5px 0px;
+  padding-left: 200px;
 }
 .admin_navigation_tab {
   white-space: nowrap;
@@ -4273,6 +4334,10 @@ td.admin_list_message {
   padding: 0px 0px 0px 0px;
   display: flex;
   align-items: flex-start;
+  display: block;
+}
+.admin_header_top {
+  display: flex;
 }
 .admin_header_left {
   display: flex;
@@ -4416,7 +4481,7 @@ div.admin_dropdown_item {
   border-top-right-radius: 5px;
 }
 @media (max-width: 800px) {
-  .admin_header {
+  .admin_header_top {
     flex-direction: column;
     align-items: stretch;
   }
@@ -4451,6 +4516,7 @@ div.admin_dropdown_item {
   }
   .admin_header .admin_navigation_tabs {
     margin-left: 5px;
+    padding-left: 0px;
   }
 }
 /*!
@@ -5511,7 +5577,7 @@ var List = (function () {
                 var el = e.currentTarget;
                 var url = el.getAttribute("data-url");
                 if (e.shiftKey || e.metaKey || e.ctrlKey) {
-                    var openedWindow = window.open(url, "newwindow");
+                    var openedWindow = window.open(url, "newwindow" + (new Date()));
                     openedWindow.focus();
                     return;
                 }
@@ -6413,8 +6479,7 @@ var DatePicker = (function () {
         var self = this;
         var pd = new Pikaday({
             field: el,
-            format: 'DD MM YYYY',
-            defaultDate: new Date(),
+            setDefaultDate: false,
             i18n: i18n,
             onSelect: function (date) {
                 el.value = pd.toString();

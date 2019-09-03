@@ -1,10 +1,11 @@
 package administration
 
 import (
-	"github.com/hypertornado/prago"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/hypertornado/prago"
 )
 
 type ResourceStruct struct {
@@ -120,7 +121,9 @@ func TestAdminQuery(t *testing.T) {
 
 func TestResource(t *testing.T) {
 	admin, resource := prepareResource()
-	items, err := resource.getListContent(admin, &listRequest{OrderBy: "id"}, User{})
+	items, err := resource.getListContent(admin, User{}, map[string][]string{
+		"_order": {"id"},
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -150,7 +153,10 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	items, _ = resource.getListContent(admin, &listRequest{OrderBy: "id", Page: 1}, User{})
+	items, _ = resource.getListContent(admin, User{}, map[string][]string{
+		"_order": {"id"},
+		"_page":  {"1"},
+	})
 
 	if len(items.Rows[0].Items) != 2 {
 		t.Fatal("wrong length")

@@ -37,7 +37,7 @@ func (resource Resource) bindData(item interface{}, user User, params url.Values
 		}
 
 		val := value.FieldByName(field.Name)
-		urlValue := params.Get(field.Name)
+		urlValue := params.Get(field.ColumnName)
 		switch field.Typ.Kind() {
 		case reflect.Struct:
 			if field.Typ == reflect.TypeOf(time.Now()) {

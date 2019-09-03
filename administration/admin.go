@@ -121,6 +121,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	must(admin.App.LoadTemplateFromString(adminTemplates))
 	bindSystemstats(admin)
 	admin.initRootActions()
+	admin.initAutoRelations()
 
 	admin.AdminController.AddAroundAction(func(request prago.Request, next func()) {
 		session := request.GetData("session").(*sessions.Session)
@@ -275,6 +276,12 @@ func (admin *Administration) initRootActions() {
 	}
 }
 
+func (admin *Administration) initAutoRelations() {
+	for _, v := range admin.Resources {
+		v.initAutoRelations()
+	}
+}
+
 func (a *Administration) initTemplates(app *prago.App) {
 	app.AddTemplateFunction("markdown", func(text string) template.HTML {
 		return template.HTML(markdown.New(markdown.Breaks(true)).RenderToString([]byte(text)))
@@ -298,6 +305,8 @@ func (a *Administration) initTemplates(app *prago.App) {
 		}
 		return ""
 	})
+
+	app.AddTemplateFunction("istabvisible", IsTabVisible)
 }
 
 func (resource Resource) GetItemURL(item interface{}, suffix string) string {

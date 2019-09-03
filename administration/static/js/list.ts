@@ -231,7 +231,7 @@ class List {
         var url = el.getAttribute("data-url");
 
         if (e.shiftKey || e.metaKey || e.ctrlKey) {
-          var openedWindow = window.open(url, "newwindow");
+          var openedWindow = window.open(url, "newwindow" + (new Date()));
           openedWindow.focus();
           return;
         }

@@ -23,6 +23,7 @@ type Resource struct {
 	actions            []Action
 	itemActions        []Action
 	relations          []relation
+	autoRelations      []relation
 
 	CanView   Permission
 	CanEdit   Permission

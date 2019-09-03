@@ -5,11 +5,6 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
-	"github.com/chris-ramon/douceur/inliner"
-	"github.com/golang-commonmark/markdown"
-	"github.com/hypertornado/prago"
-	"github.com/hypertornado/prago/utils"
-	"github.com/sendgrid/sendgrid-go"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -18,6 +13,12 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/chris-ramon/douceur/inliner"
+	"github.com/golang-commonmark/markdown"
+	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/utils"
+	sendgrid "github.com/sendgrid/sendgrid-go"
 )
 
 var (
@@ -161,11 +162,11 @@ func (admin *Administration) InitNewsletter(renderer NewsletterRenderer) {
 		request.RenderView("newsletter_layout")
 	})
 
-	newsletterResource := admin.CreateResource(Newsletter{}, initNewsletterResource)
-	newsletterSectionResource := admin.CreateResource(NewsletterSection{}, initNewsletterSection)
+	admin.CreateResource(Newsletter{}, initNewsletterResource)
+	admin.CreateResource(NewsletterSection{}, initNewsletterSection)
 	admin.CreateResource(NewsletterPersons{}, initNewsletterPersonsResource)
 
-	newsletterResource.AddRelation(newsletterSectionResource, "Newsletter", Unlocalized("Přidat sekci"))
+	//newsletterResource.AddRelation(newsletterSectionResource, "Newsletter", Unlocalized("Přidat sekci"))
 }
 
 func (admin Administration) sendConfirmEmail(name, email string) error {

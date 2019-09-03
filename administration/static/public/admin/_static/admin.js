@@ -622,7 +622,7 @@ var List = (function () {
                 var el = e.currentTarget;
                 var url = el.getAttribute("data-url");
                 if (e.shiftKey || e.metaKey || e.ctrlKey) {
-                    var openedWindow = window.open(url, "newwindow");
+                    var openedWindow = window.open(url, "newwindow" + (new Date()));
                     openedWindow.focus();
                     return;
                 }
@@ -1524,8 +1524,7 @@ var DatePicker = (function () {
         var self = this;
         var pd = new Pikaday({
             field: el,
-            format: 'DD MM YYYY',
-            defaultDate: new Date(),
+            setDefaultDate: false,
             i18n: i18n,
             onSelect: function (date) {
                 el.value = pd.toString();

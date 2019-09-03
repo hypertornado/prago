@@ -1,10 +1,10 @@
 {{define "admin_tabs"}}
   <div class="admin_navigation_tabs">
     <div class="admin_navigation_tabs_content">
-    {{$navigation := .}}
-    {{range $i, $item := .Tabs}}
+    {{$tabs := .}}
+    {{range $i, $item := .}}
         {{if ne $i 0}}
-          <div class="admin_navigation_tabdivider{{if $navigation.IsVisible $i}} admin_navigation_tabdivider-visible{{end}}"></div>
+          <div class="admin_navigation_tabdivider{{if (istabvisible $tabs $i)}} admin_navigation_tabdivider-visible{{end}}"></div>
         {{end}}
         <a href="{{$item.URL}}" class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
             {{$item.Name}}

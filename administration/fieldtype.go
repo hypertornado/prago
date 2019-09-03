@@ -3,6 +3,7 @@ package administration
 import (
 	"time"
 
+	"github.com/hypertornado/prago/administration/messages"
 	"github.com/hypertornado/prago/utils"
 )
 
@@ -21,7 +22,7 @@ type FieldType struct {
 	ListCellTemplate   string
 
 	FilterLayoutTemplate   string
-	FilterLayoutDataSource func(User, Field) interface{}
+	FilterLayoutDataSource func(Field, User) interface{}
 }
 
 func (admin *Administration) addDefaultFieldTypes() {
@@ -42,6 +43,9 @@ func (admin *Administration) addDefaultFieldTypes() {
 		FormTemplate: "admin_file",
 
 		ListCellTemplate: "admin_item_view_file_cell",
+
+		FilterLayoutTemplate:   "filter_layout_select",
+		FilterLayoutDataSource: boolFilterLayoutDataSource,
 	})
 
 	admin.AddFieldType("markdown", FieldType{
@@ -54,6 +58,9 @@ func (admin *Administration) addDefaultFieldTypes() {
 		ViewTemplate:     "admin_item_view_image",
 		FormTemplate:     "admin_item_image",
 		ListCellTemplate: "admin_list_image",
+
+		FilterLayoutTemplate:   "filter_layout_select",
+		FilterLayoutDataSource: boolFilterLayoutDataSource,
 	})
 	admin.AddFieldType("place", FieldType{
 		ViewTemplate: "admin_item_view_place",
@@ -81,6 +88,14 @@ func (admin *Administration) addDefaultFieldTypes() {
 			return i.(time.Time).Format("2006-01-02 15:04")
 		},
 	})
+}
+
+func boolFilterLayoutDataSource(field Field, user User) interface{} {
+	return [][2]string{
+		{"", ""},
+		{"true", messages.Messages.Get(user.Locale, "yes")},
+		{"false", messages.Messages.Get(user.Locale, "no")},
+	}
 }
 
 func textListDataSource(resource Resource, user User, f Field, value interface{}) interface{} {

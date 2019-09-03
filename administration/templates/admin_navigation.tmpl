@@ -3,7 +3,11 @@
 {{end}}
 
 {{define "admin_navigation_page"}}
-    {{template "admin_navigation" .admin_page.Navigation}}
+    {{if not .admin_page.HideBox}}
+      {{template "admin_navigation" .admin_page.Navigation}}
+    {{end}}
     {{tmpl .admin_page.PageTemplate .admin_page.PageData}}
-  </div>
+    {{if not .admin_page.HideBox}}
+      </div>
+    {{end}}
 {{end}}
