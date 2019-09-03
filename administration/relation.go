@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
+	"strings"
 
 	"github.com/hypertornado/prago/utils"
 )
@@ -113,17 +114,17 @@ func getRelationData(resource Resource, user User, f Field, value interface{}) *
 		return nil
 	}
 
-	return r2.itemToRelationData(item)
+	return r2.itemToRelationData(item, user)
 }
 
-func (resource *Resource) itemToRelationData(item interface{}) *viewRelationData {
+func (resource *Resource) itemToRelationData(item interface{}, user User) *viewRelationData {
 	var ret viewRelationData
 	ret.ID = getItemID(item)
 	ret.Name = getItemName(item)
 	ret.URL = resource.GetItemURL(item, "")
 
 	ret.Image = resource.Admin.getItemImage(item)
-	ret.Description = getItemDescription(item)
+	ret.Description = resource.getItemDescription(item, user)
 	return &ret
 }
 
@@ -164,16 +165,33 @@ func getItemName(item interface{}) string {
 	return fmt.Sprintf("#%d", getItemID(item))
 }
 
-func getItemDescription(item interface{}) string {
+func (resource *Resource) getItemDescription(item interface{}, user User) string {
+	var items []string
+
+	itemsVal := reflect.ValueOf(item).Elem()
+
 	if item != nil {
-		itemsVal := reflect.ValueOf(item).Elem()
 		field := itemsVal.FieldByName("Description")
 		if field.IsValid() {
 			ret := field.String()
-			return utils.CropMarkdown(ret, 200)
+			croped := utils.CropMarkdown(ret, 200)
+			if croped != "" {
+				items = append(items, croped)
+			}
 		}
 	}
-	return ""
+
+	//TODO: can shouw field? add access system for fields
+	for _, v := range resource.fieldArrays {
+		if v.Name == "ID" || v.Name == "Name" || v.Name == "Description" {
+			continue
+		}
+
+		field := itemsVal.FieldByName(v.Name)
+		items = append(items, fmt.Sprintf("%s: %s", v.HumanName(user.Locale), exportFieldToString(field)))
+	}
+	ret := strings.Join(items, " · ")
+	return utils.CropMarkdown(ret, 500)
 }
 
 func getItemID(item interface{}) int64 {

@@ -129,7 +129,7 @@ func (resource Resource) relationsToView(relations []relation, id int, inValues 
 		for i := 0; i < vv.Len(); i++ {
 			data = append(
 				data,
-				v.resource.itemToRelationData(vv.Index(i).Interface()),
+				v.resource.itemToRelationData(vv.Index(i).Interface(), user),
 			)
 		}
 
