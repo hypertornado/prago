@@ -55,8 +55,8 @@ fields:
 		)
 
 		item := &FormItem{
-			Name:      field.Name,
-			NameHuman: field.Name,
+			Name:      field.ColumnName,
+			NameHuman: field.HumanName(user.Locale),
 			Template:  field.fieldType.FormTemplate,
 		}
 		item.AddUUID()
@@ -65,7 +65,7 @@ fields:
 			item.HiddenName = true
 		}
 		item.Value = field.fieldType.FormStringer(ifaceVal)
-		item.NameHuman = field.HumanName(user.Locale)
+		//item.NameHuman = field.HumanName(user.Locale)
 
 		if field.fieldType.FormDataSource != nil {
 			item.Data = field.fieldType.FormDataSource(*field, user)

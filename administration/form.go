@@ -1,9 +1,10 @@
 package administration
 
 import (
+	"net/url"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/hypertornado/prago/utils"
-	"net/url"
 )
 
 //Form represents admin form
@@ -87,7 +88,7 @@ func (f *Form) getFilter() fieldFilter {
 		}
 	}
 	return func(resource Resource, user User, field Field) bool {
-		return allowed[field.Name]
+		return allowed[field.ColumnName]
 	}
 }
 

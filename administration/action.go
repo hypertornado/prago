@@ -77,9 +77,6 @@ func actionList(permission Permission) Action {
 					row := sheet.AddRow()
 					for _, v2 := range v1.Items {
 						cell := row.AddCell()
-
-						//fmt.Println(reflect.TypeOf(v2.OriginalValue))
-
 						cell.SetValue(v2.OriginalValue)
 					}
 				}

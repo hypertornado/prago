@@ -428,7 +428,7 @@ const adminTemplates = `
     {{end}}
 
     {{if .admin_page}}
-      {{template "admin_tabs" .admin_page.Navigation}}
+      {{template "admin_tabs" .admin_page.Navigation.Tabs}}
     {{end}}
 
     {{template "admin_flash" .}}
@@ -3939,7 +3939,7 @@ select.admin_timestamp_minute {
   flex-grow: 10;
 }
 .view_header_subname {
-  color: #eee;
+  color: #999;
 }
 .view_header_tabs {
   float: right;
@@ -4325,15 +4325,10 @@ td.admin_list_message {
   z-index: 2;
   line-height: 1.6em;
   flex-grow: 0;
-  background: white;
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0px;
   flex-shrink: 0;
+  background: white;
   box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
   padding: 0px 0px 0px 0px;
-  display: flex;
-  align-items: flex-start;
   display: block;
 }
 .admin_header_top {
@@ -4355,7 +4350,6 @@ td.admin_list_message {
 .admin_bottom {
   display: flex;
   flex-shrink: 10;
-  flex-grow: 0;
   flex-grow: 400;
 }
 .admin_header-scrolled {
@@ -4384,10 +4378,9 @@ td.admin_list_message {
 }*/
 .admin_header_resources {
   margin: 0px;
-  clear: both;
   display: flex;
   padding: 5px 0px;
-  height: 100%;
+  max-height: 100%;
   background-color: #fafafa;
   width: 200px;
   flex-direction: column;
