@@ -5,7 +5,9 @@ import (
 	"net/url"
 	"reflect"
 	"strings"
+	"time"
 
+	"github.com/hypertornado/prago/administration/messages"
 	"github.com/hypertornado/prago/utils"
 )
 
@@ -83,16 +85,9 @@ func getRelationViewData(resource Resource, user User, f Field, value interface{
 }
 
 func getRelationData(resource Resource, user User, f Field, value interface{}) *viewRelationData {
-	var relationName string
-	if f.Tags["prago-relation"] != "" {
-		relationName = f.Tags["prago-relation"]
-	} else {
-		relationName = f.Name
-	}
-
-	r2 := resource.Admin.getResourceByName(relationName)
+	r2 := f.getRelatedResource(*resource.Admin)
 	if r2 == nil {
-		fmt.Printf("Resource '%s' not found\n", relationName)
+		fmt.Printf("Resource not found: %s\n", f.Name)
 		return nil
 	}
 
@@ -114,17 +109,17 @@ func getRelationData(resource Resource, user User, f Field, value interface{}) *
 		return nil
 	}
 
-	return r2.itemToRelationData(item, user)
+	return r2.itemToRelationData(item, user, nil)
 }
 
-func (resource *Resource) itemToRelationData(item interface{}, user User) *viewRelationData {
+func (resource *Resource) itemToRelationData(item interface{}, user User, relatedResource *Resource) *viewRelationData {
 	var ret viewRelationData
 	ret.ID = getItemID(item)
 	ret.Name = getItemName(item)
 	ret.URL = resource.GetItemURL(item, "")
 
 	ret.Image = resource.Admin.getItemImage(item)
-	ret.Description = resource.getItemDescription(item, user)
+	ret.Description = resource.getItemDescription(item, user, relatedResource)
 	return &ret
 }
 
@@ -165,7 +160,7 @@ func getItemName(item interface{}) string {
 	return fmt.Sprintf("#%d", getItemID(item))
 }
 
-func (resource *Resource) getItemDescription(item interface{}, user User) string {
+func (resource *Resource) getItemDescription(item interface{}, user User, relatedResource *Resource) string {
 	var items []string
 
 	itemsVal := reflect.ValueOf(item).Elem()
@@ -183,15 +178,60 @@ func (resource *Resource) getItemDescription(item interface{}, user User) string
 
 	//TODO: can shouw field? add access system for fields
 	for _, v := range resource.fieldArrays {
-		if v.Name == "ID" || v.Name == "Name" || v.Name == "Description" {
+		if v.Name == "ID" || v.Name == "Name" || v.Name == "Description" || v.Name == "OrderPosition" {
+			continue
+		}
+
+		rr := v.getRelatedResource(*resource.Admin)
+		if rr != nil && relatedResource != nil && rr.TableName == relatedResource.TableName {
 			continue
 		}
 
 		field := itemsVal.FieldByName(v.Name)
-		items = append(items, fmt.Sprintf("%s: %s", v.HumanName(user.Locale), exportFieldToString(field)))
+		stringed := resource.Admin.relationStringer(*v, field, user)
+		if stringed != "" {
+			items = append(items, fmt.Sprintf("%s: %s", v.HumanName(user.Locale), stringed))
+		}
 	}
 	ret := strings.Join(items, " · ")
 	return utils.CropMarkdown(ret, 500)
+}
+
+func (admin Administration) relationStringer(field Field, value reflect.Value, user User) string {
+	switch value.Kind() {
+	case reflect.String:
+		return value.String()
+	case reflect.Int, reflect.Int32, reflect.Int64:
+		if field.Tags["prago-type"] == "relation" {
+			if value.Int() <= 0 {
+				return ""
+			}
+			rr := field.getRelatedResource(admin)
+
+			var item interface{}
+			rr.newItem(&item)
+			err := rr.Admin.Query().WhereIs("id", int64(value.Int())).Get(item)
+			if err != nil {
+				return fmt.Sprintf("%d", value.Int())
+			}
+			return getItemName(item)
+		}
+		return fmt.Sprintf("%v", value.Int())
+	case reflect.Float32, reflect.Float64:
+		return fmt.Sprintf("%v", value.Float())
+	case reflect.Bool:
+		if value.Bool() {
+			return messages.Messages.Get(user.Locale, "yes")
+		} else {
+			return messages.Messages.Get(user.Locale, "no")
+		}
+	case reflect.Struct:
+		if value.Type() == reflect.TypeOf(time.Now()) {
+			tm := value.Interface().(time.Time)
+			return messages.Messages.Timestamp(user.Locale, tm)
+		}
+	}
+	return ""
 }
 
 func getItemID(item interface{}) int64 {

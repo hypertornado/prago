@@ -177,7 +177,6 @@ func actionView(permission Permission) Action {
 		Name:       messages.Messages.GetNameFunction("admin_view"),
 		URL:        "",
 		Handler: func(resource Resource, request prago.Request, user User) {
-
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 

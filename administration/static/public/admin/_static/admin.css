@@ -2914,6 +2914,9 @@ select.admin_timestamp_minute {
   flex-wrap: wrap;
   align-items: flex-end;
 }
+.view_button {
+  float: right;
+}
 .view_header_name {
   font-weight: 500;
   flex-grow: 10;

@@ -230,3 +230,16 @@ func (sf Field) shouldShow() (show bool) {
 	}
 	return
 }
+
+func (f Field) getRelatedResource(admin Administration) *Resource {
+	if f.Tags["prago-type"] != "relation" {
+		return nil
+	}
+	var relationName string
+	if f.Tags["prago-relation"] != "" {
+		relationName = f.Tags["prago-relation"]
+	} else {
+		relationName = f.Name
+	}
+	return admin.getResourceByName(relationName)
+}

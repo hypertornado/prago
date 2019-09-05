@@ -364,8 +364,6 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 		currentPage = 1
 	}
 
-	//var currentPage int64 = requestQuery.Page
-
 	if totalPages >= 1 {
 		for i := int64(1); i <= totalPages; i++ {
 			p := page{

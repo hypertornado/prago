@@ -86,12 +86,12 @@ func (resource Resource) getBasicView(id int, inValues interface{}, user User) v
 	return ret
 }
 
-func (resource Resource) getAutoRelationsView(id int, inValues interface{}, user User) (ret []view) {
+/*func (resource Resource) getAutoRelationsView(id int, inValues interface{}, user User) (ret []view) {
 	return resource.relationsToView(resource.autoRelations, id, inValues, user)
-}
+}*/
 
-func (resource Resource) relationsToView(relations []relation, id int, inValues interface{}, user User) (ret []view) {
-	for _, v := range relations {
+func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, user User) (ret []view) {
+	for _, v := range resource.autoRelations {
 		if !resource.Admin.Authorize(user, v.resource.CanView) {
 			continue
 		}
@@ -129,7 +129,7 @@ func (resource Resource) relationsToView(relations []relation, id int, inValues 
 		for i := 0; i < vv.Len(); i++ {
 			data = append(
 				data,
-				v.resource.itemToRelationData(vv.Index(i).Interface(), user),
+				v.resource.itemToRelationData(vv.Index(i).Interface(), user, resource),
 			)
 		}
 
