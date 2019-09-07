@@ -65,6 +65,8 @@ func (admin *Administration) addDefaultFieldTypes() {
 	admin.AddFieldType("place", FieldType{
 		ViewTemplate: "admin_item_view_place",
 		FormTemplate: "admin_item_place",
+
+		ListCellTemplate: "admin_item_view_text",
 	})
 
 	admin.AddFieldType("relation", FieldType{

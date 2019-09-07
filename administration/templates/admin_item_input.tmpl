@@ -149,7 +149,5 @@
 {{end}}
 
 {{define "admin_list_image"}}
-  <div class="admin_thumb">
-    <img src="{{thumb .}}">
-  </div>
+  <div class="admin_list_image" style="background-image: url('{{CSS (thumb .)}}');"></div>
 {{end}}

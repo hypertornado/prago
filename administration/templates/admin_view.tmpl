@@ -22,12 +22,14 @@
   </div>
   <div class="admin_box admin_box-view">
   {{range $item := .Items}}
-    <div class="view_name">
-      {{if $item.Button}}
-        <a href="{{$item.Button.URL}}" class="btn view_button">{{$item.Button.Name}}</a>
-      {{end}}
-      {{$item.Name}}
-    </div>
+    {{if $item.Name}}
+      <div class="view_name">
+        {{if $item.Button}}
+          <a href="{{$item.Button.URL}}" class="btn view_button">{{$item.Button.Name}}</a>
+        {{end}}
+        {{$item.Name}}
+      </div>
+    {{end}}
     <div class="view_content">
       {{- tmpl $item.Template $item.Value -}}
     </div>
@@ -64,9 +66,7 @@
 
 {{define "admin_item_view_file_cell"}}
   {{if .SmallURL}}
-    <div class="admin_thumb">
-      <img src="{{.SmallURL}}">
-    </div>
+    <div class="admin_list_image" style="background-image: url('{{CSS .SmallURL}}');"></div>
   {{end}}
 {{end}}
 
@@ -111,8 +111,6 @@
 
 {{define "admin_item_view_relation_cell"}}
   {{if .}}
-    {{.Name}}
-  {{else}}
-    –
+    <span class="admin_list_relation_cell_image" style="background-image: url('{{.Image}}');"></span>{{.Name}}
   {{end}}
 {{end}}

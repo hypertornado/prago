@@ -327,9 +327,7 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_list_image"}}
-  <div class="admin_thumb">
-    <img src="{{thumb .}}">
-  </div>
+  <div class="admin_list_image" style="background-image: url('{{CSS (thumb .)}}');"></div>
 {{end}}
 {{define "admin_layout"}}
 <!doctype html>
@@ -500,7 +498,7 @@ const adminTemplates = `
       <div class="filter_relations_clear"></div>
     </div>
     <div class="filter_relations_search">
-      <input class="input input-small filter_relations_search_input">
+      <input class="input input-small filter_relations_search_input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       <div class="filter_relations_suggestions"></div>
     </div>
   </div>
@@ -817,12 +815,14 @@ const adminTemplates = `
   </div>
   <div class="admin_box admin_box-view">
   {{range $item := .Items}}
-    <div class="view_name">
-      {{if $item.Button}}
-        <a href="{{$item.Button.URL}}" class="btn view_button">{{$item.Button.Name}}</a>
-      {{end}}
-      {{$item.Name}}
-    </div>
+    {{if $item.Name}}
+      <div class="view_name">
+        {{if $item.Button}}
+          <a href="{{$item.Button.URL}}" class="btn view_button">{{$item.Button.Name}}</a>
+        {{end}}
+        {{$item.Name}}
+      </div>
+    {{end}}
     <div class="view_content">
       {{- tmpl $item.Template $item.Value -}}
     </div>
@@ -859,9 +859,7 @@ const adminTemplates = `
 
 {{define "admin_item_view_file_cell"}}
   {{if .SmallURL}}
-    <div class="admin_thumb">
-      <img src="{{.SmallURL}}">
-    </div>
+    <div class="admin_list_image" style="background-image: url('{{CSS .SmallURL}}');"></div>
   {{end}}
 {{end}}
 
@@ -906,9 +904,7 @@ const adminTemplates = `
 
 {{define "admin_item_view_relation_cell"}}
   {{if .}}
-    {{.Name}}
-  {{else}}
-    –
+    <span class="admin_list_relation_cell_image" style="background-image: url('{{.Image}}');"></span>{{.Name}}
   {{end}}
 {{end}}{{define "newsletter_duplicate"}}
 
@@ -3320,7 +3316,7 @@ html {
 }
 ::placeholder {
   /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: #999;
+  color: #888;
   opacity: 1;
 }
 html,
@@ -3655,7 +3651,7 @@ select.admin_table_filter_item {
 }
 .admin_table_count {
   font-size: .9rem;
-  color: #999;
+  color: #888;
 }
 .admin_list_table td {
   border-bottom: none;
@@ -3881,11 +3877,15 @@ td.pagination {
   border-bottom-right-radius: 3px;
   overflow: auto;
 }
-.admin_thumb {
-  text-align: center;
-}
-.admin_thumb img {
-  max-height: 30px;
+.admin_list_image {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  background-size: cover;
+  background-position: center;
+  margin: 0 auto;
+  background-color: #fafafa;
 }
 .admin_timestamp {
   display: inline-flex;
@@ -3943,7 +3943,7 @@ select.admin_timestamp_minute {
   flex-grow: 10;
 }
 .view_header_subname {
-  color: #999;
+  color: #888;
 }
 .view_header_tabs {
   float: right;
@@ -4033,8 +4033,6 @@ progress {
   border-radius: 5px;
   background-color: white;
   border: 1px solid #eee;
-  border: 1px solid #444;
-  border: 1px solid #999;
 }
 .admin_navigation_breadcrumb_image-logo {
   background-size: contain;
@@ -4199,7 +4197,7 @@ td.admin_list_message {
   width: 40px;
   height: 40px;
   margin-right: 10px;
-  border-radius: 300px;
+  border-radius: 5px;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -4214,7 +4212,7 @@ td.admin_list_message {
 .admin_preview_description {
   font-size: .9rem;
   line-height: 1.4em;
-  color: #aaa;
+  color: #888;
 }
 .admin_item_relation {
   display: flex;
@@ -4283,6 +4281,18 @@ td.admin_list_message {
 }
 .admin_item_relation_picker_suggestion-selected {
   background-color: rgba(64, 120, 192, 0.05);
+}
+.admin_list_relation_cell_image {
+  border: 1px solid #eee;
+  background-color: #fafafa;
+  border-radius: 3px;
+  width: 15px;
+  height: 15px;
+  margin-right: 5px;
+  margin-bottom: -3px;
+  display: inline-block;
+  background-size: cover;
+  background-position: center;
 }
 .admin_stats_pie canvas {
   margin: 0 auto;
@@ -4358,6 +4368,7 @@ td.admin_list_message {
   display: flex;
   flex-shrink: 10;
   flex-grow: 400;
+  min-height: 0px;
 }
 .admin_header-scrolled {
   box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
@@ -4405,7 +4416,7 @@ a.admin_header_resource {
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
   text-decoration: none;
-  color: #999;
+  color: #888;
   color: #444;
 }
 .admin_header_resource-active,
@@ -4427,7 +4438,7 @@ a.admin_header_resource {
   margin: 5px 10px 5px 10px;
 }
 .admin_avatar_icon {
-  border: 1px solid #999;
+  border: 1px solid #888;
   width: 25px;
   height: 25px;
   border-radius: 100px;
@@ -4747,7 +4758,7 @@ a.search {
   background-size: cover;
 }
 .search_category {
-  color: #999;
+  color: #888;
   font-size: .8rem;
   text-transform: uppercase;
 }
@@ -4756,7 +4767,7 @@ a.search {
 }
 .search_description {
   font-size: .9rem;
-  color: #999;
+  color: #888;
 }
 .search_pagination {
   border-top: 1px solid #eee;
@@ -4850,7 +4861,7 @@ a.admin_search_suggestion-selected:active {
   line-height: 1.3em;
 }
 .admin_search_suggestion_description {
-  color: #999;
+  color: #888;
 }
 @media (max-width: 800px) {
   .admin_header_search {
@@ -6059,7 +6070,13 @@ var RelationPicker = (function () {
             _this.getSuggestions(_this.pickerInput.value);
         });
         this.pickerInput.addEventListener("keydown", this.suggestionInput.bind(this));
-        this.getData();
+        if (this.input.value != "0") {
+            this.getData();
+        }
+        else {
+            this.progress.classList.add("hidden");
+            this.showSearch();
+        }
     }
     RelationPicker.prototype.getData = function () {
         var _this = this;

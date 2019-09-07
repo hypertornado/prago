@@ -526,16 +526,17 @@ func initResourceActions(a *Administration, resource *Resource) {
 		actionView(resource.CanView),
 	}
 
-	if resource.PreviewURLFunction != nil {
-		itemActions = append(itemActions, actionPreview(resource.CanView))
-	}
-
 	itemActions = append(itemActions,
 		actionEdit(resource.CanEdit),
 		actionUpdate(resource.CanEdit),
 		actionDelete(resource.CanDelete),
 		actionDoDelete(resource.CanDelete),
 	)
+
+	if resource.PreviewURLFunction != nil {
+		itemActions = append(itemActions, actionPreview(resource.CanView))
+	}
+
 	if resource.ActivityLog {
 		itemActions = append(itemActions, actionItemHistory(resource.CanView))
 	}

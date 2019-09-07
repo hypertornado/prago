@@ -1104,7 +1104,13 @@ var RelationPicker = (function () {
             _this.getSuggestions(_this.pickerInput.value);
         });
         this.pickerInput.addEventListener("keydown", this.suggestionInput.bind(this));
-        this.getData();
+        if (this.input.value != "0") {
+            this.getData();
+        }
+        else {
+            this.progress.classList.add("hidden");
+            this.showSearch();
+        }
     }
     RelationPicker.prototype.getData = function () {
         var _this = this;

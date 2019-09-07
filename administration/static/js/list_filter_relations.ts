@@ -34,6 +34,16 @@ class ListFilterRelations {
       return false;
     });
 
+    /*this.input.addEventListener("blur", () => {
+      window.setInterval(() => {
+        this.suggestions.classList.add("hidden");
+      }, 1000);
+    })
+
+    this.input.addEventListener("focus", () => {
+      this.suggestions.classList.remove("hidden");
+    })*/
+
     window.setInterval(() => {
       if (this.dirty && Date.now() - this.lastChanged > 100) {
         this.loadSuggestions();
@@ -45,11 +55,6 @@ class ListFilterRelations {
       this.loadPreview(this.valueInput.value);
     }
     
-    //this.loadPreview("16");
-    //this.search("swingem");
-
-    //console.log(value);
-    //console.log(hiddenEl);
   }
 
   loadPreview(value: string) {

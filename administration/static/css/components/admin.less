@@ -684,12 +684,18 @@ td.pagination {
   overflow: auto;
 }
 
-.admin_thumb {
-  text-align: center;
-}
-
-.admin_thumb img {
-  max-height: 30px;
+.admin_list_image {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  background-size: cover;
+  background-position: center;
+  margin: 0 auto;
+  //margin-top: -3px;
+  //margin-bottom: -3px;
+  //.shadow();
+  background-color: #fafafa;
 }
 
 .admin_timestamp {
@@ -791,7 +797,7 @@ select.admin_timestamp_minute {
   clear: both;
   padding: 0px 10px 10px 10px;
   word-wrap: break-word;
-  color: #888;
+  color: @gray;
 }
 
 .view_content:empty {
@@ -863,8 +869,8 @@ progress {
   background-color: white;
   //.shadow;
   border: 1px solid #eee;
-  border: 1px solid #444;
-  border: 1px solid #999;
+  //border: 1px solid #444;
+  //border: 1px solid #999;
 }
 
 .admin_navigation_breadcrumb_image-logo {
@@ -1060,10 +1066,8 @@ td.admin_list_message {
 
 .admin_preview {
   padding: 5px;
-  //.shadow;
   border-radius: 5px;
   text-decoration: none;
-  //color: #888;
   display: inline-block;
   margin: 5px 0px;
   font-size: 1rem;
@@ -1081,7 +1085,7 @@ td.admin_list_message {
   width: 40px;
   height: 40px;
   margin-right: 10px;
-  border-radius: 300px;
+  border-radius: 5px;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -1098,7 +1102,7 @@ td.admin_list_message {
 .admin_preview_description {
   font-size: .9rem;
   line-height: 1.4em;
-  color: #aaa;
+  color: @gray;
 }
 
 .admin_item_relation {
@@ -1180,6 +1184,19 @@ td.admin_list_message {
 
 .admin_item_relation_picker_suggestion-selected {
   background-color: @baseColorBackgroundLighter;
+}
+
+.admin_list_relation_cell_image {
+  border: 1px solid #eee;
+  background-color: #fafafa;
+  border-radius: 3px;
+  width: 15px;
+  height: 15px;
+  margin-right: 5px;
+  margin-bottom: -3px;
+  display: inline-block;
+  background-size: cover;
+  background-position: center;
 }
 
 .admin_stats_pie canvas {
