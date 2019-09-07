@@ -165,9 +165,13 @@ func getDefaultViewTemplate(t reflect.Type) string {
 	return "admin_item_view_text"
 }
 
-func getDefaultViewDataSource(t reflect.Type) func(resource Resource, user User, f Field, value interface{}) interface{} {
+func getDefaultViewDataSource(f *Field) func(resource Resource, user User, f Field, value interface{}) interface{} {
+	t := f.Typ
 	if t == reflect.TypeOf(time.Now()) {
-		return timestampViewDataSource
+		if f.Tags["prago-type"] == "timestamp" || f.Name == "CreatedAt" || f.Name == "UpdatedAt" {
+			return timestampViewDataSource
+		}
+		return timeViewDataSource
 	}
 	switch t.Kind() {
 	case reflect.Bool:
@@ -181,10 +185,19 @@ func defaultViewDataSource(resource Resource, user User, f Field, value interfac
 	return value
 }
 
+func timeViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
+	return messages.Messages.Timestamp(
+		user.Locale,
+		value.(time.Time),
+		false,
+	)
+}
+
 func timestampViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
 	return messages.Messages.Timestamp(
 		user.Locale,
 		value.(time.Time),
+		true,
 	)
 }
 

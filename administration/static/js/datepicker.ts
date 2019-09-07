@@ -8,7 +8,7 @@ function bindDatePicker() {
 
 class DatePicker {
 
-  constructor(el: HTMLInputElement) { 
+  constructor(el: HTMLInputElement) {
     var language = "cs" //el.getAttribute("data-language");
     var i18n = {
       previousMonth : 'Previous Month',

@@ -227,7 +227,28 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 			k = strings.Replace(k, "`", "", -1)
 			str := fmt.Sprintf("`%s` LIKE ?", k)
 			q.Where(str, v)
-		case "filter_layout_number", "filter_layout_relation":
+		case "filter_layout_number":
+			var hasPrefix string
+			v = strings.Replace(v, " ", "", -1)
+			for _, prefix := range []string{">=", "<=", ">", "<"} {
+				if strings.HasPrefix(v, prefix) {
+					v = v[len(prefix):]
+					hasPrefix = prefix
+					break
+				}
+			}
+			numVal, err := strconv.Atoi(v)
+			if err == nil {
+				if hasPrefix == "" {
+					q.WhereIs(k, numVal)
+				} else {
+					q.Where(
+						fmt.Sprintf("%s %s ?", field.ColumnName, hasPrefix),
+						numVal,
+					)
+				}
+			}
+		case "filter_layout_relation":
 			v = strings.Trim(v, " ")
 			numVal, err := strconv.Atoi(v)
 			if err == nil {

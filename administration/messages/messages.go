@@ -15,11 +15,38 @@ type messages struct {
 	m map[string]map[string]string
 }
 
-func (*messages) Timestamp(lang string, t time.Time) string {
-	if lang == "cs" {
-		return t.Format("2. 1. 2006 15:04")
+func (*messages) Timestamp(lang string, t time.Time, showTime bool) string {
+	if t.IsZero() {
+		return ""
 	}
-	return t.Format("2006-01-02 15:04")
+	var ret string
+	if lang == "cs" {
+		ret = t.Format("2. ") + czechMonth(t) + t.Format(" 2006")
+	} else {
+		ret = t.Format("2006-01-02")
+	}
+	if showTime {
+		ret += " " + t.Format("15:04")
+	}
+	return ret
+}
+
+func czechMonth(date time.Time) string {
+	months := []string{
+		"ledna",
+		"února",
+		"března",
+		"dubna",
+		"května",
+		"června",
+		"července",
+		"srpna",
+		"září",
+		"října",
+		"listopadu",
+		"prosince",
+	}
+	return months[date.Month()-1]
 }
 
 func (m *messages) Get(lang, id string, params ...interface{}) string {
@@ -60,6 +87,14 @@ var m = map[string]map[string]string{
 		"cs": "✅ ano",
 	},
 	"no": {
+		"en": "no",
+		"cs": "ne",
+	},
+	"yes_plain": {
+		"en": "yes",
+		"cs": "ano",
+	},
+	"no_plain": {
 		"en": "no",
 		"cs": "ne",
 	},

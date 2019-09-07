@@ -3282,6 +3282,9 @@ td.admin_list_message {
 .admin_tablesettings_name:after {
   content: ":";
 }
+.admin_exportbutton {
+  float: right;
+}
 .admin_tablesettings_label {
   font-size: .8rem;
   display: inline-block;

@@ -11,11 +11,12 @@
   <div class="admin_tablesettings">
     <div class="admin_tablesettings_name">{{message .Locale "admin_options_visible"}}</div>
 
+    <a href="#" class="btn admin_exportbutton" download="export.xlsx">Exportovat</a>
+
     {{range $item := .Header}}
       <label class="admin_tablesettings_label"><input type="checkbox" class="admin_tablesettings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
     {{end}}
-
-    <a href="#" class="btn admin_exportbutton" download="export.xlsx">Exportovat</a>
+    <div class="clear"></div>
   </div>
 
   <table class="admin_table admin_list_table">
@@ -73,7 +74,7 @@
 {{end}}
 
 {{define "filter_layout_number"}}
-  <input class="input input-small admin_table_filter_item" type="number" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+  <input class="input input-small admin_table_filter_item" type="text" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
 {{end}}
 
 {{define "filter_layout_boolean"}}

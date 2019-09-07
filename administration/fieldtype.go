@@ -85,7 +85,14 @@ func (admin *Administration) addDefaultFieldTypes() {
 	admin.AddFieldType("timestamp", FieldType{
 		FormTemplate: "admin_item_timestamp",
 		FormStringer: func(i interface{}) string {
-			return i.(time.Time).Format("2006-01-02 15:04")
+			tm := i.(time.Time)
+			if tm.IsZero() {
+				return ""
+			}
+			/*if isZeroTime(tm) {
+				return ""
+			}*/
+			return tm.Format("2006-01-02 15:04")
 		},
 	})
 }

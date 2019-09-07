@@ -50,7 +50,7 @@
 {{end}}
 
 {{define "admin_item_date"}}
-  <input type="text" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-date"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="text" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-date"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}} autocomplete="off">
 {{end}}
 
 {{define "admin_item_timestamp"}}
@@ -60,7 +60,7 @@
     <div class="admin_timestamp">
       <input type="hidden" id="{{.UUID}}" name="{{.Name}}" value="{{.Value}}">
 
-      <input type="text" name="_admin_timestamp_hidden" class="input form_input form_input-date admin_timestamp_date"{{if .Focused}} autofocus{{end}}>
+      <input type="text" name="_admin_timestamp_hidden" class="input form_input form_input-date admin_timestamp_date"{{if .Focused}} autofocus{{end}} autocomplete="off">
 
       <select class="input form_watcher form_input admin_timestamp_hour"></select>
       <span class="admin_timestamp_divider">:</span>

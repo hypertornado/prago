@@ -200,6 +200,9 @@ func (resource *Resource) getItemDescription(item interface{}, user User, relate
 func (admin Administration) relationStringer(field Field, value reflect.Value, user User) string {
 	switch value.Kind() {
 	case reflect.String:
+		if field.Tags["prago-type"] == "image" || field.Tags["prago-type"] == "file" {
+			return fmt.Sprintf("%dx", len(strings.Split(value.String(), ",")))
+		}
 		return value.String()
 	case reflect.Int, reflect.Int32, reflect.Int64:
 		if field.Tags["prago-type"] == "relation" {
@@ -221,14 +224,18 @@ func (admin Administration) relationStringer(field Field, value reflect.Value, u
 		return fmt.Sprintf("%v", value.Float())
 	case reflect.Bool:
 		if value.Bool() {
-			return messages.Messages.Get(user.Locale, "yes")
+			return messages.Messages.Get(user.Locale, "yes_plain")
 		} else {
-			return messages.Messages.Get(user.Locale, "no")
+			return messages.Messages.Get(user.Locale, "no_plain")
 		}
 	case reflect.Struct:
 		if value.Type() == reflect.TypeOf(time.Now()) {
 			tm := value.Interface().(time.Time)
-			return messages.Messages.Timestamp(user.Locale, tm)
+			showTime := false
+			if field.Tags["prago-type"] == "timestamp" {
+				showTime = true
+			}
+			return messages.Messages.Timestamp(user.Locale, tm, showTime)
 		}
 	}
 	return ""
@@ -236,7 +243,7 @@ func (admin Administration) relationStringer(field Field, value reflect.Value, u
 
 func getItemID(item interface{}) int64 {
 	if item == nil {
-		return 0
+		return -1
 	}
 
 	itemsVal := reflect.ValueOf(item).Elem()
@@ -244,5 +251,5 @@ func getItemID(item interface{}) int64 {
 	if field.IsValid() {
 		return field.Int()
 	}
-	return 0
+	return -1
 }

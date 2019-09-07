@@ -1,9 +1,28 @@
 function bindTimestamps() {
-  function bindTimestamp(el: HTMLElement) {
-    var hidden = el.getElementsByTagName("input")[0];
-    var v = hidden.value;
+  var elements = document.querySelectorAll(".admin_timestamp");
+  Array.prototype.forEach.call(elements, function(el: HTMLElement, i: number){
+    new Timestamp(el);
+  });
+}
 
-    if (v == "0001-01-01 00:00") {
+class Timestamp {
+
+  elTsInput: HTMLInputElement;
+  elTsDate: HTMLInputElement;
+  elTsHour: HTMLInputElement;
+  elTsMinute: HTMLInputElement;
+
+  constructor(el: HTMLElement) {
+    this.elTsInput = <HTMLInputElement>el.getElementsByTagName("input")[0];
+    this.elTsDate = <HTMLInputElement>el.getElementsByClassName("admin_timestamp_date")[0];
+    this.elTsHour = <HTMLInputElement>el.getElementsByClassName("admin_timestamp_hour")[0];
+    this.elTsMinute = <HTMLInputElement>el.getElementsByClassName("admin_timestamp_minute")[0];
+
+    this.initClock();
+
+    var v = this.elTsInput.value;
+
+    /*if (v == "0001-01-01 00:00") {
       var d = new Date();
       var month = d.getMonth() + 1;
       var monthStr = String(month);
@@ -18,16 +37,35 @@ function bindTimestamps() {
       }
 
       v = d.getFullYear() + "-" + monthStr + "-" + dayStr + " " + d.getHours() + ":" + d.getMinutes();
-    }
+    }*/
 
+    this.setTimestamp(v);
+
+    this.elTsDate.addEventListener("change", this.saveValue.bind(this));
+    this.elTsHour.addEventListener("change", this.saveValue.bind(this));
+    this.elTsMinute.addEventListener("change", this.saveValue.bind(this));
+
+    this.saveValue();
+  }
+
+  setTimestamp(v: string) {
+    if (v == "") {
+      return
+    }
     var date = v.split(" ")[0];
     var hour = parseInt(v.split(" ")[1].split(":")[0]);
     var minute = parseInt(v.split(" ")[1].split(":")[1]);
 
-    var timestampEl = <HTMLInputElement>el.getElementsByClassName("admin_timestamp_date")[0];
-    timestampEl.value = date;
+    this.elTsDate.value = date;
 
-    var hourEl = el.getElementsByClassName("admin_timestamp_hour")[0];
+    var minuteOption: HTMLOptionElement = <HTMLOptionElement>this.elTsMinute.children[minute];
+    minuteOption.selected = true;
+
+    var hourOption: HTMLOptionElement = <HTMLOptionElement>this.elTsHour.children[hour];
+    hourOption.selected = true;
+  }
+
+  initClock() {
     for (var i = 0; i < 24; i++) {
       var newEl = document.createElement("option");
       var addVal = "" + i;
@@ -36,14 +74,9 @@ function bindTimestamps() {
       }
       newEl.innerText = addVal;
       newEl.setAttribute("value", addVal);
-
-      if (hour == i) {
-        newEl.setAttribute("selected","selected");
-      }
-      hourEl.appendChild(newEl);
+      this.elTsHour.appendChild(newEl);
     }
 
-    var minEl = el.getElementsByClassName("admin_timestamp_minute")[0];
     for (var i = 0; i < 60; i++) {
       var newEl = document.createElement("option");
       var addVal = "" + i;
@@ -52,32 +85,15 @@ function bindTimestamps() {
       }
       newEl.innerText = addVal;
       newEl.setAttribute("value", addVal);
-
-
-      if (minute == i) {
-        newEl.setAttribute("selected","selected");
-      }
-      minEl.appendChild(newEl);
+      this.elTsMinute.appendChild(newEl);
     }
-
-    var elTsDate = <HTMLInputElement>el.getElementsByClassName("admin_timestamp_date")[0];
-    var elTsHour = <HTMLInputElement>el.getElementsByClassName("admin_timestamp_hour")[0];
-    var elTsMinute = <HTMLInputElement>el.getElementsByClassName("admin_timestamp_minute")[0];
-    var elTsInput = <HTMLInputElement>el.getElementsByTagName("input")[0];
-
-    function saveValue() {
-      var str = elTsDate.value + " " + elTsHour.value + ":" + elTsMinute.value;
-      elTsInput.value = str;
-    }
-    saveValue();
-
-    elTsDate.addEventListener("change", saveValue);
-    elTsHour.addEventListener("change", saveValue);
-    elTsMinute.addEventListener("change", saveValue);
   }
 
-  var elements = document.querySelectorAll(".admin_timestamp");
-  Array.prototype.forEach.call(elements, function(el: HTMLElement, i: number){
-    bindTimestamp(el);
-  });
+  saveValue() {
+    var str = this.elTsDate.value + " " + this.elTsHour.value + ":" + this.elTsMinute.value;
+    if (this.elTsDate.value == "") {
+      str = "";
+    }
+    this.elTsInput.value = str;
+  }
 }

@@ -147,7 +147,7 @@ func (f *Field) initFieldType(fieldTypes map[string]FieldType) {
 		ret.ViewTemplate = getDefaultViewTemplate(f.Typ)
 	}
 	if ret.ViewDataSource == nil {
-		ret.ViewDataSource = getDefaultViewDataSource(f.Typ)
+		ret.ViewDataSource = getDefaultViewDataSource(f)
 	}
 
 	if ret.FormTemplate == "" {

@@ -49,10 +49,17 @@ func (s *scanner) Scan(src interface{}) error {
 	case reflect.Struct:
 		nt := mysql.NullTime{}
 		err := nt.Scan(src)
+
+		//fmt.Println("SCAAAN Time")
+
 		if err != nil {
 			return err
 		}
-		s.value.Set(reflect.ValueOf(nt.Time))
+		tm := nt.Time
+		if tm.Year() == 1 {
+			tm = time.Time{}
+		}
+		s.value.Set(reflect.ValueOf(tm))
 	case reflect.Bool:
 		nb := sql.NullBool{}
 		err := nb.Scan(src)

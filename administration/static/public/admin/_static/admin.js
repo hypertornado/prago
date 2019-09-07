@@ -1005,29 +1005,39 @@ var MarkdownEditor = (function () {
     return MarkdownEditor;
 }());
 function bindTimestamps() {
-    function bindTimestamp(el) {
-        var hidden = el.getElementsByTagName("input")[0];
-        var v = hidden.value;
-        if (v == "0001-01-01 00:00") {
-            var d = new Date();
-            var month = d.getMonth() + 1;
-            var monthStr = String(month);
-            if (month < 10) {
-                monthStr = "0" + monthStr;
-            }
-            var day = d.getUTCDate();
-            var dayStr = String(day);
-            if (day < 10) {
-                dayStr = "0" + dayStr;
-            }
-            v = d.getFullYear() + "-" + monthStr + "-" + dayStr + " " + d.getHours() + ":" + d.getMinutes();
+    var elements = document.querySelectorAll(".admin_timestamp");
+    Array.prototype.forEach.call(elements, function (el, i) {
+        new Timestamp(el);
+    });
+}
+var Timestamp = (function () {
+    function Timestamp(el) {
+        this.elTsInput = el.getElementsByTagName("input")[0];
+        this.elTsDate = el.getElementsByClassName("admin_timestamp_date")[0];
+        this.elTsHour = el.getElementsByClassName("admin_timestamp_hour")[0];
+        this.elTsMinute = el.getElementsByClassName("admin_timestamp_minute")[0];
+        this.initClock();
+        var v = this.elTsInput.value;
+        this.setTimestamp(v);
+        this.elTsDate.addEventListener("change", this.saveValue.bind(this));
+        this.elTsHour.addEventListener("change", this.saveValue.bind(this));
+        this.elTsMinute.addEventListener("change", this.saveValue.bind(this));
+        this.saveValue();
+    }
+    Timestamp.prototype.setTimestamp = function (v) {
+        if (v == "") {
+            return;
         }
         var date = v.split(" ")[0];
         var hour = parseInt(v.split(" ")[1].split(":")[0]);
         var minute = parseInt(v.split(" ")[1].split(":")[1]);
-        var timestampEl = el.getElementsByClassName("admin_timestamp_date")[0];
-        timestampEl.value = date;
-        var hourEl = el.getElementsByClassName("admin_timestamp_hour")[0];
+        this.elTsDate.value = date;
+        var minuteOption = this.elTsMinute.children[minute];
+        minuteOption.selected = true;
+        var hourOption = this.elTsHour.children[hour];
+        hourOption.selected = true;
+    };
+    Timestamp.prototype.initClock = function () {
         for (var i = 0; i < 24; i++) {
             var newEl = document.createElement("option");
             var addVal = "" + i;
@@ -1036,12 +1046,8 @@ function bindTimestamps() {
             }
             newEl.innerText = addVal;
             newEl.setAttribute("value", addVal);
-            if (hour == i) {
-                newEl.setAttribute("selected", "selected");
-            }
-            hourEl.appendChild(newEl);
+            this.elTsHour.appendChild(newEl);
         }
-        var minEl = el.getElementsByClassName("admin_timestamp_minute")[0];
         for (var i = 0; i < 60; i++) {
             var newEl = document.createElement("option");
             var addVal = "" + i;
@@ -1050,29 +1056,18 @@ function bindTimestamps() {
             }
             newEl.innerText = addVal;
             newEl.setAttribute("value", addVal);
-            if (minute == i) {
-                newEl.setAttribute("selected", "selected");
-            }
-            minEl.appendChild(newEl);
+            this.elTsMinute.appendChild(newEl);
         }
-        var elTsDate = el.getElementsByClassName("admin_timestamp_date")[0];
-        var elTsHour = el.getElementsByClassName("admin_timestamp_hour")[0];
-        var elTsMinute = el.getElementsByClassName("admin_timestamp_minute")[0];
-        var elTsInput = el.getElementsByTagName("input")[0];
-        function saveValue() {
-            var str = elTsDate.value + " " + elTsHour.value + ":" + elTsMinute.value;
-            elTsInput.value = str;
+    };
+    Timestamp.prototype.saveValue = function () {
+        var str = this.elTsDate.value + " " + this.elTsHour.value + ":" + this.elTsMinute.value;
+        if (this.elTsDate.value == "") {
+            str = "";
         }
-        saveValue();
-        elTsDate.addEventListener("change", saveValue);
-        elTsHour.addEventListener("change", saveValue);
-        elTsMinute.addEventListener("change", saveValue);
-    }
-    var elements = document.querySelectorAll(".admin_timestamp");
-    Array.prototype.forEach.call(elements, function (el, i) {
-        bindTimestamp(el);
-    });
-}
+        this.elTsInput.value = str;
+    };
+    return Timestamp;
+}());
 function bindRelations() {
     var elements = document.querySelectorAll(".admin_item_relation");
     Array.prototype.forEach.call(elements, function (el, i) {
@@ -1325,7 +1320,6 @@ var PlacesView = (function () {
         el.innerText = "";
         var coords = val.split(",");
         if (coords.length != 2) {
-            el.innerText = "-";
             el.classList.remove("admin_item_view_place");
             return;
         }
