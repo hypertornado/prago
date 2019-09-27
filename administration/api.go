@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hypertornado/prago/utils"
+
 	"github.com/golang-commonmark/markdown"
 	"github.com/hypertornado/prago"
 )
@@ -221,6 +223,7 @@ func bindRelationAPI(admin *Administration) {
 			if err == nil {
 				relationItem := resource.itemToRelationData(item, user, nil)
 				if relationItem != nil {
+					relationItem.Description = utils.Crop(relationItem.Description, 200)
 					usedIDs[relationItem.ID] = true
 					ret = append(ret, *relationItem)
 				}

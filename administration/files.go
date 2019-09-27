@@ -224,7 +224,7 @@ func initFilesResource(resource *Resource) {
 	resource.ResourceController.Post(resource.GetURL(""), func(request prago.Request) {
 		ValidateCSRF(request)
 
-		multipartFiles := request.Request().MultipartForm.File["UID"]
+		multipartFiles := request.Request().MultipartForm.File["uid"]
 		if len(multipartFiles) != 1 {
 			panic("must have 1 file selected")
 		}

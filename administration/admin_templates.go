@@ -387,6 +387,11 @@ const adminTemplates = `
                     </div>
                 </div>
             </div>
+            <!--
+            <div class="admin_header_wrong_version">
+                Používáte starou nekompatibilní verzi prohlížeče.
+            </div>
+            -->
             {{if .admin_page}}
                 {{template "admin_tabs" .admin_page.Navigation.Tabs}}
             {{end}}
@@ -4880,6 +4885,10 @@ a.admin_search_suggestion-selected:active {
   right: 0px;
   background: white;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+.filter_relations_search:focus-within .filter_relations_suggestions {
+  display: inline-block;
 }
 .filter_relations_preview {
   font-size: .9rem;
