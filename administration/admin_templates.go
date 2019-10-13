@@ -252,8 +252,11 @@ const adminTemplates = `
   <div class="admin_images">
     <input name="{{.Name}}" value="{{.Value}}" type="hidden" class="admin_images_hidden form_watcher">
     <div class="admin_images_loaded hidden">
-      <input type="file" id="{{.UUID}}" accept=".jpg,.jpeg,.png" multiple class="admin_images_fileinput form_watcher">
       <div class="admin_images_preview"></div>
+      <label class="admin_images_fileinput">
+        <div class="admin_images_fileinput_plus"></div>
+        <input type="file" id="{{.UUID}}" accept=".jpg,.jpeg,.png" multiple class="form_watcher">
+      </label>
     </div>
     <progress></progress>
   </div>
@@ -3801,59 +3804,84 @@ td.pagination {
   cursor: default;
 }
 /* images */
+.admin_images_loaded {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
 .admin_images_preview {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
 }
 .admin_images_image {
   padding: 3px;
   border-radius: 3px;
-  margin: 2px;
+  margin: 5px;
   display: inline-block;
   text-align: center;
   vertical-align: middle;
   position: relative;
+  width: 100px;
+  height: 100px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
 .admin_images_image:hover {
   background-color: rgba(64, 120, 192, 0.1);
 }
-.admin_images_image:hover .admin_images_image_delete {
-  background-color: #eee;
-}
 .admin_images_image_delete {
   position: absolute;
-  top: 1px;
+  top: 0px;
   right: 0px;
   background-color: white;
   width: 20px;
   height: 20px;
-  font-size: 17px;
+  font-size: 20px;
   border-bottom-left-radius: 3px;
+  border-top-right-radius: 3px;
 }
 .admin_images_image_delete:hover {
   color: white;
   background: red !important;
 }
-.admin_images_image img {
+/*.admin_images_image img {
   max-height: 150px;
   max-width: 150px;
   margin: 0 auto;
   vertical-align: middle;
   display: inline-block;
-}
+}*/
 .admin_images_fileinput {
-  display: block;
-  margin: 0px auto;
-  margin-bottom: 10px;
+  display: inline-block;
   padding: 3px;
-  border-radius: 3px;
+  border-radius: 5px;
   padding: 10px;
   background-color: #fff;
-  border: 1px solid #eee;
-  background: #fafafa;
+  background-color: rgba(64, 120, 192, 0.05);
   cursor: pointer;
+  margin: 5px;
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(64, 120, 192, 0.05);
+  border: 1px solid #eee;
+}
+.admin_images_fileinput_plus {
+  font-size: 30px;
+}
+.admin_images_fileinput_plus::after {
+  content: "+";
+}
+.admin_images_fileinput input {
+  opacity: 0;
+  position: absolute;
+  top: -10px;
 }
 .admin_images_fileinput:hover {
   background-color: rgba(64, 120, 192, 0.1);
@@ -5127,10 +5155,10 @@ var ImageView = (function () {
         var container = document.createElement("a");
         container.classList.add("admin_images_image");
         container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
-        var img = document.createElement("img");
+        container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/_api/image/thumb/" + id + "');");
+        var img = document.createElement("div");
         img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
         img.setAttribute("draggable", "false");
-        container.appendChild(img);
         this.el.appendChild(container);
     };
     return ImageView;
@@ -5227,6 +5255,7 @@ var ImagePicker = (function () {
         container.setAttribute("draggable", "true");
         container.setAttribute("target", "_blank");
         container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
+        container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/_api/image/thumb/" + id + "');");
         container.addEventListener("dragstart", function (e) {
             _this.draggedElement = e.target;
         });
@@ -5279,10 +5308,6 @@ var ImagePicker = (function () {
                 return false;
             }
         });
-        var img = document.createElement("img");
-        img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
-        img.setAttribute("draggable", "false");
-        container.appendChild(img);
         var del = document.createElement("div");
         del.textContent = "×";
         del.classList.add("admin_images_image_delete");

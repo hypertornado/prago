@@ -74,8 +74,11 @@
   <div class="admin_images">
     <input name="{{.Name}}" value="{{.Value}}" type="hidden" class="admin_images_hidden form_watcher">
     <div class="admin_images_loaded hidden">
-      <input type="file" id="{{.UUID}}" accept=".jpg,.jpeg,.png" multiple class="admin_images_fileinput form_watcher">
       <div class="admin_images_preview"></div>
+      <label class="admin_images_fileinput">
+        <div class="admin_images_fileinput_plus"></div>
+        <input type="file" id="{{.UUID}}" accept=".jpg,.jpeg,.png" multiple class="form_watcher">
+      </label>
     </div>
     <progress></progress>
   </div>

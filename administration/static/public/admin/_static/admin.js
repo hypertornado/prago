@@ -152,10 +152,10 @@ var ImageView = (function () {
         var container = document.createElement("a");
         container.classList.add("admin_images_image");
         container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
-        var img = document.createElement("img");
+        container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/_api/image/thumb/" + id + "');");
+        var img = document.createElement("div");
         img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
         img.setAttribute("draggable", "false");
-        container.appendChild(img);
         this.el.appendChild(container);
     };
     return ImageView;
@@ -252,6 +252,7 @@ var ImagePicker = (function () {
         container.setAttribute("draggable", "true");
         container.setAttribute("target", "_blank");
         container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
+        container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/_api/image/thumb/" + id + "');");
         container.addEventListener("dragstart", function (e) {
             _this.draggedElement = e.target;
         });
@@ -304,10 +305,6 @@ var ImagePicker = (function () {
                 return false;
             }
         });
-        var img = document.createElement("img");
-        img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
-        img.setAttribute("draggable", "false");
-        container.appendChild(img);
         var del = document.createElement("div");
         del.textContent = "×";
         del.classList.add("admin_images_image_delete");

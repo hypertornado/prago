@@ -29,11 +29,13 @@ class ImageView {
     var container = document.createElement("a");
     container.classList.add("admin_images_image");
     container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
+    container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/_api/image/thumb/" + id + "');");
 
-    var img = document.createElement("img");
+    var img = document.createElement("div");
+    //img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
     img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
     img.setAttribute("draggable", "false");
-    container.appendChild(img);
+    //container.appendChild(img);
 
     this.el.appendChild(container);
   }

@@ -315,6 +315,11 @@ func (f *File) GetLarge() string {
 	return filesCDN.GetImageURL(f.UID, f.Name, 1000)
 }
 
+//GetGiant file path
+func (f *File) GetGiant() string {
+	return filesCDN.GetImageURL(f.UID, f.Name, 2500)
+}
+
 //GetMedium file path
 func (f *File) GetMedium() string {
 	return filesCDN.GetImageURL(f.UID, f.Name, 400)

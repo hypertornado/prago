@@ -50,8 +50,6 @@ func (s *scanner) Scan(src interface{}) error {
 		nt := mysql.NullTime{}
 		err := nt.Scan(src)
 
-		//fmt.Println("SCAAAN Time")
-
 		if err != nil {
 			return err
 		}

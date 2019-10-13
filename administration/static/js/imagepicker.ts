@@ -111,6 +111,7 @@ class ImagePicker {
     container.setAttribute("draggable", "true");
     container.setAttribute("target", "_blank");
     container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
+    container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/_api/image/thumb/" + id + "');");
 
 
     container.addEventListener("dragstart", (e) => {
@@ -177,10 +178,10 @@ class ImagePicker {
       }
     })
 
-    var img = document.createElement("img");
+    /*var img = document.createElement("img");
     img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
     img.setAttribute("draggable", "false");
-    container.appendChild(img);
+    container.appendChild(img);*/
 
     var del = document.createElement("div");
     del.textContent = "×";
