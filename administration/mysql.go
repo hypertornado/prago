@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" //use mysql
 )
 
 func connectMysql(dbUser, dbPassword, dbName string) (*sql.DB, error) {

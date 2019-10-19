@@ -11,10 +11,11 @@
   background: white;
   .shadow;
   display: none;
+  //border: 1px solid red;
 }
 
 .filter_relations_search:focus-within .filter_relations_suggestions {
-  display: inline-block;
+  display: block;
 }
 
 .filter_relations_preview {
@@ -45,7 +46,7 @@
 }
 
 .filter_relations_preview_close:hover {
-  background-color: @baseColorBackgroundLighter;
+  background-color: @baseColorBackground;
 }
 
 .filter_relations_preview_close:active {
@@ -68,23 +69,21 @@
   text-decoration: none;
   //color: #888;
   display: inline-block;
-  margin: 5px 0px;
+  margin: 0px 0px;
   font-size: 1rem;
   line-height: 1.4em;
 
   display: flex;
   align-items: center;
   cursor: pointer;
-  //border: 1px solid #eee;
-  //.shadow;
 }
 
 .list_filter_suggestion:hover {
-  background: #fafafa;
+  background: @baseColorBackgroundLighter;
 }
 
 .list_filter_suggestion:active {
-  background: #eee;
+  background: @baseColorBackground;
 }
 
 .list_filter_suggestion_image {

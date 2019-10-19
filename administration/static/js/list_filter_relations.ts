@@ -127,7 +127,7 @@ class ListFilterRelations {
       let el = this.renderSuggestion(item);
       this.suggestions.appendChild(el);
       let index = i;
-      el.addEventListener("click", (e) => {
+      el.addEventListener("mousedown", (e) => {
         this.renderPreview(item);
       })
       //console.log(item);

@@ -3,11 +3,12 @@ package utils
 import (
 	"bufio"
 	"fmt"
-	"github.com/gosimple/slug"
 	"math/rand"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/gosimple/slug"
 )
 
 //PrettyFilename converts filename to url-friendly form with regard to extension
@@ -59,6 +60,9 @@ func ConsoleQuestion(question string) bool {
 func Crop(in string, cropLength int) string {
 	if cropLength < 0 {
 		return in
+	}
+	if in == "" {
+		return ""
 	}
 	inRune := []rune(in)
 	if len(inRune) < cropLength {

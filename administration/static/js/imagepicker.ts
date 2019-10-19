@@ -19,7 +19,7 @@ class ImagePicker {
     this.adminPrefix = document.body.getAttribute("data-admin-prefix");
     this.hiddenInput = <HTMLInputElement>el.querySelector(".admin_images_hidden");
     this.preview = <HTMLDivElement>el.querySelector(".admin_images_preview");
-    this.fileInput = <HTMLInputElement>this.el.querySelector(".admin_images_fileinput");
+    this.fileInput = <HTMLInputElement>this.el.querySelector(".admin_images_fileinput input");
     this.progress = <HTMLProgressElement>this.el.querySelector("progress");
 
     this.el.querySelector(".admin_images_loaded").classList.remove("hidden");

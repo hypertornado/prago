@@ -46,7 +46,7 @@ func GetUser(request prago.Request) User {
 	return *u
 }
 
-func (user User) GravatarURL() string {
+func (user User) gravatarURL() string {
 	h := md5.New()
 	io.WriteString(h, user.Email)
 	return fmt.Sprintf("https://www.gravatar.com/avatar/%ss.jpg?s=50&d=mp",
@@ -54,20 +54,20 @@ func (user User) GravatarURL() string {
 	)
 }
 
-func (u User) GetRole() string {
-	if u.IsSysadmin {
+func (user User) getRole() string {
+	if user.IsSysadmin {
 		return string(permissionSysadmin)
 	}
-	return u.Role
+	return user.Role
 }
 
 //AdminItemName represents item name for resource ajax api
-func (u *User) AdminItemName(lang string) string {
-	return u.Email
+func (user *User) AdminItemName(lang string) string {
+	return user.Email
 }
 
-func (u *User) isPassword(password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+func (user *User) isPassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		return false
 	}
@@ -75,14 +75,14 @@ func (u *User) isPassword(password string) bool {
 }
 
 //TODO: better comparison
-func (u *User) emailConfirmed() bool {
-	if u.EmailConfirmedAt.Before(time.Now().AddDate(-1000, 0, 0)) {
+func (user *User) emailConfirmed() bool {
+	if user.EmailConfirmedAt.Before(time.Now().AddDate(-1000, 0, 0)) {
 		return false
 	}
 	return true
 }
 
-func (u *User) newPassword(password string) error {
+func (user *User) newPassword(password string) error {
 	if len(password) < 7 {
 		return errors.New("short password")
 	}
@@ -90,25 +90,25 @@ func (u *User) newPassword(password string) error {
 	if err != nil {
 		return err
 	}
-	u.Password = string(passwordHash)
+	user.Password = string(passwordHash)
 	return nil
 }
 
-func (u User) emailToken(app prago.App) string {
+func (user User) emailToken(app prago.App) string {
 	randomness := app.Config.GetString("random")
 	h := md5.New()
-	io.WriteString(h, fmt.Sprintf("%s%s", u.Email, randomness))
+	io.WriteString(h, fmt.Sprintf("%s%s", user.Email, randomness))
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 //CSRFToken generates csrf token for user
-func (u *User) CSRFToken(randomness string) string {
+func (user *User) CSRFToken(randomness string) string {
 	if len(randomness) <= 0 {
 		panic("randomness too short")
 	}
 
 	h := md5.New()
-	io.WriteString(h, fmt.Sprintf("%d%s%s", u.ID, randomness, u.LoggedInTime))
+	io.WriteString(h, fmt.Sprintf("%d%s%s", user.ID, randomness, user.LoggedInTime))
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
@@ -136,9 +136,9 @@ func ValidateCSRF(request prago.Request) {
 	}
 }
 
-func (u User) sendConfirmEmail(request prago.Request, a *Administration) error {
+func (user User) sendConfirmEmail(request prago.Request, a *Administration) error {
 
-	if u.emailConfirmed() {
+	if user.emailConfirmed() {
 		return errors.New("email already confirmed")
 	}
 
@@ -149,8 +149,8 @@ func (u User) sendConfirmEmail(request prago.Request, a *Administration) error {
 	locale := getLocale(request)
 
 	urlValues := make(url.Values)
-	urlValues.Add("email", u.Email)
-	urlValues.Add("token", u.emailToken(*a.App))
+	urlValues.Add("email", user.Email)
+	urlValues.Add("token", user.emailToken(*a.App))
 
 	subject := messages.Messages.Get(locale, "admin_confirm_email_subject", a.HumanName)
 	link := request.App().Config.GetString("baseUrl") + a.Prefix + "/user/confirm_email?" + urlValues.Encode()
@@ -158,14 +158,14 @@ func (u User) sendConfirmEmail(request prago.Request, a *Administration) error {
 
 	message := sendgrid.NewMail()
 	message.SetFrom(a.noReplyEmail)
-	message.AddTo(u.Email)
-	message.AddToName(u.Name)
+	message.AddTo(user.Email)
+	message.AddToName(user.Name)
 	message.SetSubject(subject)
 	message.SetHTML(body)
 	return a.sendgridClient.Send(message)
 }
 
-func (u User) sendAdminEmail(request prago.Request, a *Administration) error {
+func (user User) sendAdminEmail(request prago.Request, a *Administration) error {
 	if a.noReplyEmail == "" {
 		return errors.New("no reply email empty")
 	}
@@ -174,13 +174,13 @@ func (u User) sendAdminEmail(request prago.Request, a *Administration) error {
 	if err != nil {
 		return err
 	}
-	for _, user := range users {
+	for _, receiver := range users {
 		message := sendgrid.NewMail()
 		message.SetFrom(a.noReplyEmail)
-		message.AddTo(user.Email)
-		message.AddToName(user.Name)
+		message.AddTo(receiver.Email)
+		message.AddToName(receiver.Name)
 		message.SetSubject("New registration on " + a.HumanName)
-		message.SetHTML(fmt.Sprintf("New user registered on %s: %s (%s)", a.HumanName, u.Email, u.Name))
+		message.SetHTML(fmt.Sprintf("New user registered on %s: %s (%s)", a.HumanName, user.Email, user.Name))
 		err = a.sendgridClient.Send(message)
 		if err != nil {
 			return err
@@ -189,10 +189,10 @@ func (u User) sendAdminEmail(request prago.Request, a *Administration) error {
 	return nil
 }
 
-func (u User) getRenewURL(request prago.Request, a *Administration) string {
+func (user User) getRenewURL(request prago.Request, a *Administration) string {
 	urlValues := make(url.Values)
-	urlValues.Add("email", u.Email)
-	urlValues.Add("token", u.emailToken(*a.App))
+	urlValues.Add("email", user.Email)
+	urlValues.Add("token", user.emailToken(*a.App))
 	return request.App().Config.GetString("baseUrl") + a.Prefix + "/user/renew_password?" + urlValues.Encode()
 }
 
@@ -331,9 +331,8 @@ func initUserResource(resource *Resource) {
 							AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_forgoten_sent", user.Email))
 							request.Redirect(admin.GetURL("/user/login"))
 							return
-						} else {
-							reason = "can't send renew email"
 						}
+						reason = "can't send renew email"
 					} else {
 						reason = "unexpected error"
 					}

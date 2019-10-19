@@ -3891,7 +3891,7 @@ a.admin_search_suggestion-selected:active {
   display: none;
 }
 .filter_relations_search:focus-within .filter_relations_suggestions {
-  display: inline-block;
+  display: block;
 }
 .filter_relations_preview {
   font-size: .9rem;
@@ -3918,7 +3918,7 @@ a.admin_search_suggestion-selected:active {
   border: 1px solid #eee;
 }
 .filter_relations_preview_close:hover {
-  background-color: rgba(64, 120, 192, 0.05);
+  background-color: rgba(64, 120, 192, 0.1);
 }
 .filter_relations_preview_close:active {
   background-color: #4078c0;
@@ -3935,7 +3935,7 @@ a.admin_search_suggestion-selected:active {
   border-radius: 5px;
   text-decoration: none;
   display: inline-block;
-  margin: 5px 0px;
+  margin: 0px 0px;
   font-size: 1rem;
   line-height: 1.4em;
   display: flex;
@@ -3943,10 +3943,10 @@ a.admin_search_suggestion-selected:active {
   cursor: pointer;
 }
 .list_filter_suggestion:hover {
-  background: #fafafa;
+  background: rgba(64, 120, 192, 0.05);
 }
 .list_filter_suggestion:active {
-  background: #eee;
+  background: rgba(64, 120, 192, 0.1);
 }
 .list_filter_suggestion_image {
   flex-grow: 0;

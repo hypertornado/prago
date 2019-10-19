@@ -223,7 +223,7 @@ func bindRelationAPI(admin *Administration) {
 			if err == nil {
 				relationItem := resource.itemToRelationData(item, user, nil)
 				if relationItem != nil {
-					relationItem.Description = utils.Crop(relationItem.Description, 200)
+					//relationItem.Description = utils.Crop(relationItem.Description, 200)
 					usedIDs[relationItem.ID] = true
 					ret = append(ret, *relationItem)
 				}
@@ -255,6 +255,10 @@ func bindRelationAPI(admin *Administration) {
 
 		if len(ret) > 5 {
 			ret = ret[0:5]
+		}
+
+		for k := range ret {
+			ret[k].Description = utils.Crop(ret[k].Description, 100)
 		}
 
 		request.RenderJSON(ret)

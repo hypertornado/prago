@@ -1,5 +1,6 @@
 package administration
 
+/*
 import (
 	"encoding/csv"
 	"fmt"
@@ -132,4 +133,4 @@ func removeLines(in string) string {
 	ret := strings.Replace(in, "\r\n", " ", -1)
 	ret = strings.Replace(ret, "\n", " ", -1)
 	return ret
-}
+}*/

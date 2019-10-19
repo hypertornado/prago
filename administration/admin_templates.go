@@ -5176,7 +5176,7 @@ var ImagePicker = (function () {
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.hiddenInput = el.querySelector(".admin_images_hidden");
         this.preview = el.querySelector(".admin_images_preview");
-        this.fileInput = this.el.querySelector(".admin_images_fileinput");
+        this.fileInput = this.el.querySelector(".admin_images_fileinput input");
         this.progress = this.el.querySelector("progress");
         this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
         this.hideProgress();

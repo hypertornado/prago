@@ -19,6 +19,7 @@ type buttonData struct {
 	Params map[string]string
 }
 
+//Action represents action
 type Action struct {
 	Name       func(string) string
 	Permission Permission
@@ -328,7 +329,7 @@ func actionItemHistory(permission Permission) Action {
 	}
 }
 
-func actionExport(permission Permission) Action {
+/*func actionExport(permission Permission) Action {
 	ret := CreateNavigationalAction(
 		"export",
 		messages.Messages.GetNameFunction("admin_export"),
@@ -339,9 +340,9 @@ func actionExport(permission Permission) Action {
 	)
 	ret.Permission = permission
 	return ret
-}
+}*/
 
-func actionStats(permission Permission) Action {
+/*func actionStats(permission Permission) Action {
 	ret := CreateNavigationalAction(
 		"stats",
 		messages.Messages.GetNameFunction("admin_stats"),
@@ -352,16 +353,16 @@ func actionStats(permission Permission) Action {
 	)
 	ret.Permission = permission
 	return ret
-}
+}*/
 
-func actionDoExport(permission Permission) Action {
+/*func actionDoExport(permission Permission) Action {
 	return Action{
 		Permission: permission,
 		URL:        "export",
 		Method:     "POST",
 		Handler:    exportHandler,
 	}
-}
+}*/
 
 func actionDelete(permission Permission) Action {
 	ret := CreateNavigationalItemAction(

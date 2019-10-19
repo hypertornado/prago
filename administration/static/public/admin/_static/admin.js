@@ -173,7 +173,7 @@ var ImagePicker = (function () {
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.hiddenInput = el.querySelector(".admin_images_hidden");
         this.preview = el.querySelector(".admin_images_preview");
-        this.fileInput = this.el.querySelector(".admin_images_fileinput");
+        this.fileInput = this.el.querySelector(".admin_images_fileinput input");
         this.progress = this.el.querySelector("progress");
         this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
         this.hideProgress();
@@ -410,7 +410,7 @@ var ListFilterRelations = (function () {
             var el = this_1.renderSuggestion(item);
             this_1.suggestions.appendChild(el);
             var index = i;
-            el.addEventListener("click", function (e) {
+            el.addEventListener("mousedown", function (e) {
                 _this.renderPreview(item);
             });
         };

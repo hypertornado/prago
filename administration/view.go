@@ -204,7 +204,6 @@ func timestampViewDataSource(resource Resource, user User, f Field, value interf
 func boolViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
 	if value.(bool) {
 		return messages.Messages.Get(user.Locale, "yes")
-	} else {
-		return messages.Messages.Get(user.Locale, "no")
 	}
+	return messages.Messages.Get(user.Locale, "no")
 }
