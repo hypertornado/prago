@@ -168,3 +168,10 @@ func (resource Resource) newItem(item interface{}) {
 func (resource Resource) newArrayOfItems(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(reflect.SliceOf(reflect.PtrTo(resource.Typ))))
 }
+
+func (resource Resource) count() int64 {
+	var item interface{}
+	resource.newItem(&item)
+	count, _ := resource.Admin.Query().Count(item)
+	return count
+}
