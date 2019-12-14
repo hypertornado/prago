@@ -23,7 +23,7 @@ import (
 //ErrItemNotFound is returned when no item is found
 var ErrItemNotFound = errors.New("item not found")
 
-//Admin is struct representing admin extension
+//Administration is struct representing admin extension
 type Administration struct {
 	App              *prago.App
 	Logo             string
@@ -51,7 +51,7 @@ type Administration struct {
 	roles       map[string]map[string]bool
 }
 
-//NewAdmin creates new administration on prefix url with name
+//NewAdministration creates new administration on prefix url with name
 func NewAdministration(app *prago.App, initFunction func(*Administration)) *Administration {
 	admin := &Administration{
 		App:              app,
@@ -108,9 +108,9 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		),
 	)
 
-	googleApiKey := admin.App.Config.GetStringWithFallback("google", "")
+	googleAPIKey := admin.App.Config.GetStringWithFallback("google", "")
 	admin.AdminController.AddBeforeAction(func(request prago.Request) {
-		request.SetData("google", googleApiKey)
+		request.SetData("google", googleAPIKey)
 	})
 
 	bindDBBackupCron(admin.App)
@@ -216,6 +216,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	return admin
 }
 
+//GetURL gets url
 func (admin Administration) GetURL(suffix string) string {
 	ret := admin.Prefix
 	if len(suffix) > 0 {
@@ -224,10 +225,12 @@ func (admin Administration) GetURL(suffix string) string {
 	return ret
 }
 
+//AddAction adds action
 func (admin *Administration) AddAction(action Action) {
 	admin.rootActions = append(admin.rootActions, action)
 }
 
+//AddFieldType adds field type
 func (admin *Administration) AddFieldType(name string, fieldType FieldType) {
 	_, exist := admin.fieldTypes[name]
 	if exist {
@@ -236,10 +239,12 @@ func (admin *Administration) AddFieldType(name string, fieldType FieldType) {
 	admin.fieldTypes[name] = fieldType
 }
 
+//AddJavascript adds javascript
 func (admin *Administration) AddJavascript(url string) {
 	admin.javascripts = append(admin.javascripts, url)
 }
 
+//AddCSS adds CSS
 func (admin *Administration) AddCSS(url string) {
 	admin.css = append(admin.css, url)
 }
@@ -266,6 +271,7 @@ func (admin *Administration) getDB() *sql.DB {
 	return admin.db
 }
 
+//GetDB gets DB
 func (admin *Administration) GetDB() *sql.DB {
 	return admin.getDB()
 }
@@ -282,7 +288,7 @@ func (admin *Administration) initAutoRelations() {
 	}
 }
 
-func (a *Administration) initTemplates(app *prago.App) {
+func (admin *Administration) initTemplates(app *prago.App) {
 	app.AddTemplateFunction("markdown", func(text string) template.HTML {
 		return template.HTML(markdown.New(markdown.Breaks(true)).RenderToString([]byte(text)))
 	})
@@ -292,13 +298,13 @@ func (a *Administration) initTemplates(app *prago.App) {
 	})
 
 	app.AddTemplateFunction("thumb", func(ids string) string {
-		return a.thumb(ids)
+		return admin.thumb(ids)
 	})
 
 	app.AddTemplateFunction("img", func(ids string) string {
 		for _, v := range strings.Split(ids, ",") {
 			var image File
-			err := a.Query().WhereIs("uid", v).Get(&image)
+			err := admin.Query().WhereIs("uid", v).Get(&image)
 			if err == nil && image.IsImage() {
 				return image.GetLarge()
 			}
@@ -309,6 +315,7 @@ func (a *Administration) initTemplates(app *prago.App) {
 	app.AddTemplateFunction("istabvisible", IsTabVisible)
 }
 
+//GetItemURL gets item url
 func (resource Resource) GetItemURL(item interface{}, suffix string) string {
 	ret := resource.GetURL(fmt.Sprintf("%d", getItemID(item)))
 	if suffix != "" {
@@ -368,6 +375,7 @@ func columnName(fieldName string) string {
 	return utils.PrettyURL(fieldName)
 }
 
+//Unlocalized creates non localized name
 func Unlocalized(name string) func(string) string {
 	return func(string) string {
 		return name

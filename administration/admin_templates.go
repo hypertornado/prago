@@ -147,7 +147,7 @@ const adminTemplates = `
 
 {{end}}{{define "admin_history"}}
 
-  <table class="admin_table">
+  <table class="admin_table admin_history">
     <tr>
       <th>#</th>
       <th>Typ Akce</th>
@@ -451,6 +451,7 @@ const adminTemplates = `
   data-prefilter-value="{{.PrefilterValue}}"
   data-columns="{{.Columns}}"
   data-visible-columns="{{.VisibleColumns}}"
+  data-items-per-page="{{.ItemsPerPage}}"
 >
   <div class="admin_tablesettings">
     <div class="admin_tablesettings_name">{{message .Locale "admin_options_visible"}}</div>
@@ -460,6 +461,11 @@ const adminTemplates = `
     {{range $item := .Header}}
       <label class="admin_tablesettings_label"><input type="checkbox" class="admin_tablesettings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
     {{end}}
+    <select class="admin_tablesettings_pages input">
+      {{range $item := .PaginationData}}
+        <option value="{{$item.Value}}"{{if $item.Selected}} selected{{end}}>{{$item.Name}}</option>
+      {{end}}
+    </select>
     <div class="clear"></div>
   </div>
 
@@ -4354,6 +4360,11 @@ td.admin_list_message {
   display: inline-block;
   padding: 2px 2px;
 }
+.admin_tablesettings_pages {
+  padding: 1px 3px;
+  display: block;
+  margin: 5px 0px;
+}
 .admin_nologin_logo {
   border: 0px solid red;
   width: 100px;
@@ -4362,6 +4373,18 @@ td.admin_list_message {
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat;
+}
+.admin_history th {
+  border-top: none;
+}
+.admin_history tr:last-child td {
+  border-bottom: none;
+}
+.admin_history tr td:last-child {
+  border-right: none;
+}
+.admin_history tr td:first-child {
+  border-left: none;
 }
 .admin_layout {
   width: 100%;
@@ -4916,7 +4939,7 @@ a.admin_search_suggestion-selected:active {
   display: none;
 }
 .filter_relations_search:focus-within .filter_relations_suggestions {
-  display: inline-block;
+  display: block;
 }
 .filter_relations_preview {
   font-size: .9rem;
@@ -4943,7 +4966,7 @@ a.admin_search_suggestion-selected:active {
   border: 1px solid #eee;
 }
 .filter_relations_preview_close:hover {
-  background-color: rgba(64, 120, 192, 0.05);
+  background-color: rgba(64, 120, 192, 0.1);
 }
 .filter_relations_preview_close:active {
   background-color: #4078c0;
@@ -4960,7 +4983,7 @@ a.admin_search_suggestion-selected:active {
   border-radius: 5px;
   text-decoration: none;
   display: inline-block;
-  margin: 5px 0px;
+  margin: 0px 0px;
   font-size: 1rem;
   line-height: 1.4em;
   display: flex;
@@ -4968,10 +4991,10 @@ a.admin_search_suggestion-selected:active {
   cursor: pointer;
 }
 .list_filter_suggestion:hover {
-  background: #fafafa;
+  background: rgba(64, 120, 192, 0.05);
 }
 .list_filter_suggestion:active {
-  background: #eee;
+  background: rgba(64, 120, 192, 0.1);
 }
 .list_filter_suggestion_image {
   flex-grow: 0;
@@ -5413,7 +5436,7 @@ var ListFilterRelations = (function () {
             var el = this_1.renderSuggestion(item);
             this_1.suggestions.appendChild(el);
             var index = i;
-            el.addEventListener("click", function (e) {
+            el.addEventListener("mousedown", function (e) {
                 _this.renderPreview(item);
             });
         };
@@ -5500,6 +5523,9 @@ var List = (function () {
         for (var i = 0; i < visibleColumnsArr.length; i++) {
             visibleColumnsMap[visibleColumnsArr[i]] = true;
         }
+        this.itemsPerPage = parseInt(el.getAttribute("data-items-per-page"));
+        this.paginationSelect = el.querySelector(".admin_tablesettings_pages");
+        this.paginationSelect.addEventListener("change", this.load.bind(this));
         this.bindOptions(visibleColumnsMap);
         this.bindOrder();
     }
@@ -5524,6 +5550,10 @@ var List = (function () {
         var filterData = this.getFilterData();
         for (var k in filterData) {
             params[k] = filterData[k];
+        }
+        var selectedPages = parseInt(this.paginationSelect.value);
+        if (selectedPages != this.itemsPerPage) {
+            params["_pagesize"] = selectedPages;
         }
         var encoded = encodeParams(params);
         window.history.replaceState(null, null, document.location.pathname + encoded);

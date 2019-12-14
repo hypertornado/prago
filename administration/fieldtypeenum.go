@@ -1,12 +1,12 @@
 package administration
 
+//FieldTypeEnum enum type of field
 type FieldTypeEnum struct {
 	ID   string
 	Name func(string) string
 }
 
-//func(string) string
-
+//AddEnumFieldType adds enum field type
 func (admin *Administration) AddEnumFieldType(name string, items [][2]string) {
 	var arr []FieldTypeEnum
 	for _, v := range items {
@@ -21,6 +21,7 @@ func (admin *Administration) AddEnumFieldType(name string, items [][2]string) {
 	admin.AddEnumFieldTypeLocalized(name, arr)
 }
 
+//AddEnumFieldTypeLocalized adds localized enum field
 func (admin *Administration) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 	admin.AddFieldType(name, FieldType{
 		ViewDataSource: func(resource Resource, user User, f Field, value interface{}) interface{} {

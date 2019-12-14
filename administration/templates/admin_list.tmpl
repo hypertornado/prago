@@ -7,6 +7,7 @@
   data-prefilter-value="{{.PrefilterValue}}"
   data-columns="{{.Columns}}"
   data-visible-columns="{{.VisibleColumns}}"
+  data-items-per-page="{{.ItemsPerPage}}"
 >
   <div class="admin_tablesettings">
     <div class="admin_tablesettings_name">{{message .Locale "admin_options_visible"}}</div>
@@ -16,6 +17,11 @@
     {{range $item := .Header}}
       <label class="admin_tablesettings_label"><input type="checkbox" class="admin_tablesettings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
     {{end}}
+    <select class="admin_tablesettings_pages input">
+      {{range $item := .PaginationData}}
+        <option value="{{$item.Value}}"{{if $item.Selected}} selected{{end}}>{{$item.Name}}</option>
+      {{end}}
+    </select>
     <div class="clear"></div>
   </div>
 

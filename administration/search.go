@@ -40,7 +40,7 @@ type adminSearch struct {
 	indexName string
 }
 
-func NewAdminSearch(admin *Administration) (*adminSearch, error) {
+func newAdminSearch(admin *Administration) (*adminSearch, error) {
 	client, err := elastic.NewClient()
 	if err != nil {
 		return nil, err
@@ -319,13 +319,12 @@ func relationDataToSearchItem(resource *Resource, data viewRelationData) SearchI
 func bindSearch(admin *Administration) {
 	var err error
 
-	adminSearch, err := NewAdminSearch(admin)
+	adminSearch, err := newAdminSearch(admin)
 	if err != nil {
 		admin.App.Log().Println(err)
 		return
-	} else {
-		admin.search = adminSearch
 	}
+	admin.search = adminSearch
 
 	go func() {
 		err := adminSearch.searchImport()
@@ -351,7 +350,7 @@ func bindSearch(admin *Administration) {
 		result, hits, err := adminSearch.Search(q, GetUser(request).getRole(), page-1)
 		must(err)
 
-		var pages int = int(hits) / searchPageSize
+		var pages = int(hits) / searchPageSize
 		if hits > 0 {
 			pages++
 		}

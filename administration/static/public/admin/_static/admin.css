@@ -3329,6 +3329,11 @@ td.admin_list_message {
   display: inline-block;
   padding: 2px 2px;
 }
+.admin_tablesettings_pages {
+  padding: 1px 3px;
+  display: block;
+  margin: 5px 0px;
+}
 .admin_nologin_logo {
   border: 0px solid red;
   width: 100px;
@@ -3337,6 +3342,18 @@ td.admin_list_message {
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat;
+}
+.admin_history th {
+  border-top: none;
+}
+.admin_history tr:last-child td {
+  border-bottom: none;
+}
+.admin_history tr td:last-child {
+  border-right: none;
+}
+.admin_history tr td:first-child {
+  border-left: none;
 }
 .admin_layout {
   width: 100%;

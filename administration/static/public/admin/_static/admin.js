@@ -497,6 +497,9 @@ var List = (function () {
         for (var i = 0; i < visibleColumnsArr.length; i++) {
             visibleColumnsMap[visibleColumnsArr[i]] = true;
         }
+        this.itemsPerPage = parseInt(el.getAttribute("data-items-per-page"));
+        this.paginationSelect = el.querySelector(".admin_tablesettings_pages");
+        this.paginationSelect.addEventListener("change", this.load.bind(this));
         this.bindOptions(visibleColumnsMap);
         this.bindOrder();
     }
@@ -521,6 +524,10 @@ var List = (function () {
         var filterData = this.getFilterData();
         for (var k in filterData) {
             params[k] = filterData[k];
+        }
+        var selectedPages = parseInt(this.paginationSelect.value);
+        if (selectedPages != this.itemsPerPage) {
+            params["_pagesize"] = selectedPages;
         }
         var encoded = encodeParams(params);
         window.history.replaceState(null, null, document.location.pathname + encoded);

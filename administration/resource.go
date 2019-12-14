@@ -116,6 +116,7 @@ func (admin *Administration) initResource(resource *Resource) {
 	initResourceActions(admin, resource)
 }
 
+//GetURL returns resource url
 func (resource Resource) GetURL(suffix string) string {
 	ret := resource.Admin.Prefix + "/" + resource.ID
 	if len(suffix) > 0 {
@@ -124,9 +125,9 @@ func (resource Resource) GetURL(suffix string) string {
 	return ret
 }
 
-func (a *Administration) getResourceByItem(item interface{}) (*Resource, error) {
+func (admin *Administration) getResourceByItem(item interface{}) (*Resource, error) {
 	typ := reflect.TypeOf(item).Elem()
-	resource, ok := a.resourceMap[typ]
+	resource, ok := admin.resourceMap[typ]
 	if !ok {
 		return nil, fmt.Errorf("Can't find resource with type %s.", typ)
 	}
@@ -174,4 +175,36 @@ func (resource Resource) count() int64 {
 	resource.newItem(&item)
 	count, _ := resource.Admin.Query().Count(item)
 	return count
+}
+
+func (resource Resource) getPaginationData() (ret []ListPaginationData) {
+	var ints []int64
+	var used bool
+
+	for _, v := range []int64{10, 20, 100, 200, 500, 1000, 2000, 5000, 10000} {
+		if !used {
+			if v == resource.ItemsPerPage {
+				used = true
+			}
+			if resource.ItemsPerPage < v {
+				used = true
+				ints = append(ints, resource.ItemsPerPage)
+			}
+		}
+		ints = append(ints, v)
+	}
+
+	for _, v := range ints {
+		var selected bool
+		if v == resource.ItemsPerPage {
+			selected = true
+		}
+		ret = append(ret, ListPaginationData{
+			Name:     fmt.Sprintf("%d položek na stránku", v),
+			Value:    v,
+			Selected: selected,
+		})
+	}
+
+	return
 }

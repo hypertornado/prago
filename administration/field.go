@@ -9,6 +9,7 @@ import (
 	"github.com/hypertornado/prago/administration/messages"
 )
 
+//Field of resource
 type Field struct {
 	Name       string
 	ColumnName string
@@ -135,8 +136,8 @@ func getDefaultFormTemplate(t reflect.Type) string {
 	panic("unknown default form for " + t.String())
 }
 
-func (f *Field) initFieldType(fieldTypes map[string]FieldType) {
-	fieldTypeName := f.Tags["prago-type"]
+func (field *Field) initFieldType(fieldTypes map[string]FieldType) {
+	fieldTypeName := field.Tags["prago-type"]
 
 	ret, found := fieldTypes[fieldTypeName]
 	if !found && fieldTypeName != "" {
@@ -144,18 +145,18 @@ func (f *Field) initFieldType(fieldTypes map[string]FieldType) {
 	}
 
 	if ret.ViewTemplate == "" {
-		ret.ViewTemplate = getDefaultViewTemplate(f.Typ)
+		ret.ViewTemplate = getDefaultViewTemplate(field.Typ)
 	}
 	if ret.ViewDataSource == nil {
-		ret.ViewDataSource = getDefaultViewDataSource(f)
+		ret.ViewDataSource = getDefaultViewDataSource(field)
 	}
 
 	if ret.FormTemplate == "" {
-		ret.FormTemplate = getDefaultFormTemplate(f.Typ)
+		ret.FormTemplate = getDefaultFormTemplate(field.Typ)
 	}
 
 	if ret.FormStringer == nil {
-		ret.FormStringer = getDefaultStringer(f.Typ)
+		ret.FormStringer = getDefaultStringer(field.Typ)
 	}
 
 	if ret.FormTemplate == "admin_item_checkbox" {
@@ -169,21 +170,21 @@ func (f *Field) initFieldType(fieldTypes map[string]FieldType) {
 		ret.ListCellTemplate = ret.ViewTemplate
 	}
 
-	f.fieldType = ret
+	field.fieldType = ret
 }
 
-func (sf Field) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {
+func (field Field) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {
 	var fieldDescription string
 
-	t, found := fieldTypes[sf.Tags["prago-type"]]
+	t, found := fieldTypes[field.Tags["prago-type"]]
 	if found && t.DBFieldDescription != "" {
 		fieldDescription = t.DBFieldDescription
 	} else {
-		switch sf.Typ.Kind() {
+		switch field.Typ.Kind() {
 		case reflect.Struct:
 			dateType := reflect.TypeOf(time.Now())
-			if sf.Typ == dateType {
-				if sf.Tags["prago-type"] == "date" {
+			if field.Typ == dateType {
+				if field.Tags["prago-type"] == "date" {
 					fieldDescription = "date"
 				} else {
 					fieldDescription = "datetime"
@@ -196,32 +197,32 @@ func (sf Field) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {
 		case reflect.Int64:
 			fieldDescription = "bigint(20)"
 		case reflect.String:
-			if sf.Tags["prago-type"] == "text" || sf.Tags["prago-type"] == "image" || sf.Tags["prago-type"] == "markdown" {
+			if field.Tags["prago-type"] == "text" || field.Tags["prago-type"] == "image" || field.Tags["prago-type"] == "markdown" {
 				fieldDescription = "text"
 			} else {
 				fieldDescription = "varchar(255)"
 			}
 		default:
-			panic("non supported type " + sf.Typ.Kind().String())
+			panic("non supported type " + field.Typ.Kind().String())
 		}
 	}
 
 	additional := ""
-	if sf.ColumnName == "id" {
+	if field.ColumnName == "id" {
 		additional = "NOT NULL AUTO_INCREMENT PRIMARY KEY"
 	} else {
-		if sf.Unique {
+		if field.Unique {
 			additional = "UNIQUE"
 		}
 	}
-	return fmt.Sprintf("%s %s %s", sf.ColumnName, fieldDescription, additional)
+	return fmt.Sprintf("%s %s %s", field.ColumnName, fieldDescription, additional)
 }
 
-func (sf Field) shouldShow() (show bool) {
-	if sf.Name == "Name" {
+func (field Field) shouldShow() (show bool) {
+	if field.Name == "Name" {
 		show = true
 	}
-	showTag := sf.Tags["prago-preview"]
+	showTag := field.Tags["prago-preview"]
 	if showTag == "true" {
 		show = true
 	}
@@ -231,15 +232,15 @@ func (sf Field) shouldShow() (show bool) {
 	return
 }
 
-func (f Field) getRelatedResource(admin Administration) *Resource {
-	if f.Tags["prago-type"] != "relation" {
+func (field Field) getRelatedResource(admin Administration) *Resource {
+	if field.Tags["prago-type"] != "relation" {
 		return nil
 	}
 	var relationName string
-	if f.Tags["prago-relation"] != "" {
-		relationName = f.Tags["prago-relation"]
+	if field.Tags["prago-relation"] != "" {
+		relationName = field.Tags["prago-relation"]
 	} else {
-		relationName = f.Name
+		relationName = field.Name
 	}
 	return admin.getResourceByName(relationName)
 }

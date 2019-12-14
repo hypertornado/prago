@@ -329,41 +329,6 @@ func actionItemHistory(permission Permission) Action {
 	}
 }
 
-/*func actionExport(permission Permission) Action {
-	ret := CreateNavigationalAction(
-		"export",
-		messages.Messages.GetNameFunction("admin_export"),
-		"admin_export",
-		func(resource Resource, request prago.Request, user User) interface{} {
-			return resource.getExportFormData(user)
-		},
-	)
-	ret.Permission = permission
-	return ret
-}*/
-
-/*func actionStats(permission Permission) Action {
-	ret := CreateNavigationalAction(
-		"stats",
-		messages.Messages.GetNameFunction("admin_stats"),
-		"admin_stats",
-		func(resource Resource, request prago.Request, user User) interface{} {
-			return resource.getStats(user)
-		},
-	)
-	ret.Permission = permission
-	return ret
-}*/
-
-/*func actionDoExport(permission Permission) Action {
-	return Action{
-		Permission: permission,
-		URL:        "export",
-		Method:     "POST",
-		Handler:    exportHandler,
-	}
-}*/
-
 func actionDelete(permission Permission) Action {
 	ret := CreateNavigationalItemAction(
 		"delete",
@@ -468,7 +433,7 @@ func bindAction(admin *Administration, resource *Resource, action Action, isItem
 		controller = admin.AdminController
 	}
 
-	var fn func(request prago.Request) = func(request prago.Request) {
+	var fn = func(request prago.Request) {
 		user := GetUser(request)
 		if !admin.Authorize(user, action.Permission) {
 			render403(request)
@@ -585,10 +550,12 @@ func (admin *Administration) getListItemActions(user User, item interface{}, id 
 	return ret
 }
 
+//AddItemAction adds item action
 func (resource *Resource) AddItemAction(action Action) {
 	resource.itemActions = append(resource.itemActions, action)
 }
 
+//AddAction adds action
 func (resource *Resource) AddAction(action Action) {
 	resource.actions = append(resource.actions, action)
 }

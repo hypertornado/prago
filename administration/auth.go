@@ -5,20 +5,20 @@ import (
 )
 
 var permissionSysadmin Permission = "sysadmin"
-var permissionNobody Permission = ""
 
+//Permission for access
 type Permission string
 
 func (admin Administration) getSysadminPermissions() []string {
 	m := map[string]bool{}
 	for _, v1 := range admin.roles {
-		for v2, _ := range v1 {
+		for v2 := range v1 {
 			m[v2] = true
 		}
 	}
 	m[string(permissionSysadmin)] = true
 	var ret []string
-	for k, _ := range m {
+	for k := range m {
 		ret = append(ret, k)
 	}
 	return ret
@@ -26,7 +26,7 @@ func (admin Administration) getSysadminPermissions() []string {
 
 func (admin *Administration) getRoleFieldTypeData() [][2]string {
 	roleNames := []string{""}
-	for k, _ := range admin.roles {
+	for k := range admin.roles {
 		roleNames = append(roleNames, k)
 	}
 
@@ -40,7 +40,7 @@ func (admin *Administration) getRoleFieldTypeData() [][2]string {
 func (admin *Administration) createRoleFieldType() FieldType {
 	var fp = func(Field, User) interface{} {
 		roleNames := []string{""}
-		for k, _ := range admin.roles {
+		for k := range admin.roles {
 			roleNames = append(roleNames, k)
 		}
 
@@ -58,6 +58,7 @@ func (admin *Administration) createRoleFieldType() FieldType {
 	}
 }
 
+//AddRole adds role to admin
 func (admin *Administration) AddRole(role string, permissions []string) {
 	perms := map[string]bool{}
 	for _, v := range permissions {
@@ -70,6 +71,7 @@ func (admin *Administration) AddRole(role string, permissions []string) {
 	admin.roles[role] = perms
 }
 
+//Authorize user for task
 func (admin Administration) Authorize(user User, permission Permission) bool {
 	if !user.IsAdmin {
 		return false

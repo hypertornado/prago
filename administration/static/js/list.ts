@@ -31,6 +31,10 @@ class List {
   progress: HTMLProgressElement;
 
   settingsEl: HTMLDivElement;
+
+  itemsPerPage: number;
+  paginationSelect: HTMLSelectElement;
+
   //openbutton: HTMLButtonElement;
   //closebutton: HTMLButtonElement;
 
@@ -97,6 +101,10 @@ class List {
       visibleColumnsMap[visibleColumnsArr[i]] = true;
     }
 
+    this.itemsPerPage = parseInt(el.getAttribute("data-items-per-page"));
+    this.paginationSelect = <HTMLSelectElement>el.querySelector(".admin_tablesettings_pages");
+    this.paginationSelect.addEventListener("change", this.load.bind(this));
+
     this.bindOptions(visibleColumnsMap);
     this.bindOrder();
   }
@@ -123,6 +131,11 @@ class List {
     let filterData = this.getFilterData();
     for (var k in filterData) {
       params[k] = filterData[k];
+    }
+
+    let selectedPages = parseInt(this.paginationSelect.value);
+    if (selectedPages != this.itemsPerPage) {
+      params["_pagesize"] = selectedPages;
     }
 
     var encoded = encodeParams(params);

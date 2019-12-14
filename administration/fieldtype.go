@@ -7,6 +7,7 @@ import (
 	"github.com/hypertornado/prago/utils"
 )
 
+//FieldType defines type of field
 type FieldType struct {
 	ViewTemplate   string
 	ViewDataSource func(Resource, User, Field, interface{}) interface{}
@@ -78,9 +79,8 @@ func (admin *Administration) addDefaultFieldTypes() {
 		FormDataSource: func(f Field, u User) interface{} {
 			if f.Tags["prago-relation"] != "" {
 				return columnName(f.Tags["prago-relation"])
-			} else {
-				return columnName(f.Name)
 			}
+			return columnName(f.Name)
 		},
 	})
 

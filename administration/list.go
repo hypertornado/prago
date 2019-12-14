@@ -24,6 +24,14 @@ type list struct {
 	PrefilterField string
 	PrefilterValue string
 	Locale         string
+	ItemsPerPage   int64
+	PaginationData []ListPaginationData
+}
+
+type ListPaginationData struct {
+	Name     string
+	Value    int64
+	Selected bool
 }
 
 type listHeaderItem struct {
@@ -87,6 +95,9 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 	list.OrderDesc = resource.OrderDesc
 	list.Locale = user.Locale
 
+	list.ItemsPerPage = resource.ItemsPerPage
+	list.PaginationData = resource.getPaginationData()
+
 	orderField, ok := resource.fieldMap[resource.OrderByColumn]
 	if !ok || !orderField.CanOrder {
 		err = ErrItemNotFound
@@ -129,20 +140,20 @@ func (resource *Resource) fieldsStr() string {
 	return strings.Join(ret, ",")
 }
 
-func (v Field) getListHeaderItem(user User) listHeaderItem {
+func (field Field) getListHeaderItem(user User) listHeaderItem {
 	headerItem := listHeaderItem{
-		Name:        v.Name,
-		NameHuman:   v.HumanName(user.Locale),
-		ColumnName:  v.ColumnName,
-		DefaultShow: v.shouldShow(),
-		Field:       v,
+		Name:        field.Name,
+		NameHuman:   field.HumanName(user.Locale),
+		ColumnName:  field.ColumnName,
+		DefaultShow: field.shouldShow(),
+		Field:       field,
 	}
 
-	headerItem.FilterLayout = v.filterLayout()
+	headerItem.FilterLayout = field.filterLayout()
 
 	if headerItem.FilterLayout == "filter_layout_relation" {
-		if v.Tags["prago-relation"] != "" {
-			headerItem.ColumnName = v.Tags["prago-relation"]
+		if field.Tags["prago-relation"] != "" {
+			headerItem.ColumnName = field.Tags["prago-relation"]
 		}
 	}
 
@@ -158,42 +169,42 @@ func (v Field) getListHeaderItem(user User) listHeaderItem {
 		if fn == nil {
 			fn = headerItem.Field.fieldType.FormDataSource
 		}
-		headerItem.FilterData = fn(v, user)
+		headerItem.FilterData = fn(field, user)
 	}
 
-	if v.CanOrder {
+	if field.CanOrder {
 		headerItem.CanOrder = true
 	}
 
 	return headerItem
 }
 
-func (sf *Field) filterLayout() string {
-	if sf == nil {
+func (field *Field) filterLayout() string {
+	if field == nil {
 		return ""
 	}
 
-	if sf.fieldType.FilterLayoutTemplate != "" {
-		return sf.fieldType.FilterLayoutTemplate
+	if field.fieldType.FilterLayoutTemplate != "" {
+		return field.fieldType.FilterLayoutTemplate
 	}
 
-	if sf.Typ.Kind() == reflect.String &&
-		(sf.Tags["prago-type"] == "" || sf.Tags["prago-type"] == "text" || sf.Tags["prago-type"] == "markdown") {
+	if field.Typ.Kind() == reflect.String &&
+		(field.Tags["prago-type"] == "" || field.Tags["prago-type"] == "text" || field.Tags["prago-type"] == "markdown") {
 		return "filter_layout_text"
 	}
 
-	if sf.Typ.Kind() == reflect.Int64 || sf.Typ.Kind() == reflect.Int {
-		if sf.Tags["prago-type"] == "relation" {
+	if field.Typ.Kind() == reflect.Int64 || field.Typ.Kind() == reflect.Int {
+		if field.Tags["prago-type"] == "relation" {
 			return "filter_layout_relation"
 		}
 		return "filter_layout_number"
 	}
 
-	if sf.Typ.Kind() == reflect.Bool {
+	if field.Typ.Kind() == reflect.Bool {
 		return "filter_layout_boolean"
 	}
 
-	if sf.Typ == reflect.TypeOf(time.Now()) {
+	if field.Typ == reflect.TypeOf(time.Now()) {
 		return "filter_layout_date"
 	}
 
@@ -375,8 +386,16 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 	}
 	ret.TotalCount = totalCount
 
-	totalPages := (count / resource.ItemsPerPage)
-	if count%resource.ItemsPerPage != 0 {
+	var itemsPerPage = resource.ItemsPerPage
+	if params.Get("_pagesize") != "" {
+		pageSize, err := strconv.Atoi(params.Get("_pagesize"))
+		if err == nil && pageSize > 0 && pageSize <= 100000 {
+			itemsPerPage = int64(pageSize)
+		}
+	}
+
+	totalPages := (count / itemsPerPage)
+	if count%itemsPerPage != 0 {
 		totalPages += +1
 	}
 
@@ -399,8 +418,8 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 	}
 
 	q = resource.addFilterParamsToQuery(q, params)
-	q = q.Offset((int64(currentPage) - 1) * resource.ItemsPerPage)
-	q = q.Limit(resource.ItemsPerPage)
+	q = q.Offset((int64(currentPage) - 1) * itemsPerPage)
+	q = q.Limit(itemsPerPage)
 
 	var rowItems interface{}
 	resource.newArrayOfItems(&rowItems)
