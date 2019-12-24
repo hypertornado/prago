@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/hypertornado/prago"
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 	"golang.org/x/net/context"
 )
 
@@ -212,7 +212,7 @@ func (e *adminSearch) Suggest(q string) ([]*SearchItem, error) {
 	for _, v := range res.Docs {
 		if v.Source != nil {
 			var item SearchItem
-			err = json.Unmarshal(*v.Source, &item)
+			err = json.Unmarshal(v.Source, &item)
 			if err == nil {
 				ret = append(ret, &item)
 			}

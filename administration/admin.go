@@ -17,7 +17,6 @@ import (
 	"github.com/hypertornado/prago/administration/messages"
 	"github.com/hypertornado/prago/build"
 	"github.com/hypertornado/prago/utils"
-	sendgrid "github.com/sendgrid/sendgrid-go"
 )
 
 //ErrItemNotFound is returned when no item is found
@@ -38,8 +37,9 @@ type Administration struct {
 	rootActions      []Action
 	db               *sql.DB
 
-	sendgridClient *sendgrid.SGClient
-	noReplyEmail   string
+	//sendgridClient *sendgrid.Client
+	sendgridKey  string
+	noReplyEmail string
 
 	Newsletter *NewsletterMiddleware
 
@@ -62,8 +62,8 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		resourceNameMap:  make(map[string]*Resource),
 		accessController: app.MainController().SubController(),
 
-		sendgridClient: sendgrid.NewSendGridClientWithApiKey(app.Config.GetStringWithFallback("sendgridApi", "")),
-		noReplyEmail:   app.Config.GetStringWithFallback("noReplyEmail", ""),
+		sendgridKey:  app.Config.GetStringWithFallback("sendgridApi", ""),
+		noReplyEmail: app.Config.GetStringWithFallback("noReplyEmail", ""),
 
 		fieldTypes:  make(map[string]FieldType),
 		javascripts: []string{},

@@ -10,11 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"code.google.com/p/go.crypto/bcrypt"
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/administration/messages"
-	sendgrid "github.com/sendgrid/sendgrid-go"
+	"golang.org/x/crypto/bcrypt"
 )
 
 //User represents admin user account
@@ -156,13 +155,21 @@ func (user User) sendConfirmEmail(request prago.Request, a *Administration) erro
 	link := request.App().Config.GetString("baseUrl") + a.Prefix + "/user/confirm_email?" + urlValues.Encode()
 	body := messages.Messages.Get(locale, "admin_confirm_email_body", link, link, a.HumanName)
 
-	message := sendgrid.NewMail()
+	return a.SendEmail(
+		user.Name,
+		user.Email,
+		subject,
+		body,
+		body,
+	)
+
+	/*message := sendgrid.NewMail()
 	message.SetFrom(a.noReplyEmail)
 	message.AddTo(user.Email)
 	message.AddToName(user.Name)
 	message.SetSubject(subject)
 	message.SetHTML(body)
-	return a.sendgridClient.Send(message)
+	return a.sendgridClient.Send(message)*/
 }
 
 func (user User) sendAdminEmail(request prago.Request, a *Administration) error {
@@ -175,13 +182,24 @@ func (user User) sendAdminEmail(request prago.Request, a *Administration) error 
 		return err
 	}
 	for _, receiver := range users {
-		message := sendgrid.NewMail()
+
+		body := fmt.Sprintf("New user registered on %s: %s (%s)", a.HumanName, user.Email, user.Name)
+
+		err = a.SendEmail(
+			receiver.Name,
+			receiver.Email,
+			"New registration on "+a.HumanName,
+			body,
+			body,
+		)
+
+		/*message := sendgrid.NewMail()
 		message.SetFrom(a.noReplyEmail)
 		message.AddTo(receiver.Email)
 		message.AddToName(receiver.Name)
 		message.SetSubject("New registration on " + a.HumanName)
 		message.SetHTML(fmt.Sprintf("New user registered on %s: %s (%s)", a.HumanName, user.Email, user.Name))
-		err = a.sendgridClient.Send(message)
+		err = a.sendgridClient.Send(message)*/
 		if err != nil {
 			return err
 		}
@@ -205,13 +223,21 @@ func (user User) sendRenew(request prago.Request, admin *Administration) error {
 	link := user.getRenewURL(request, admin)
 	body := messages.Messages.Get(user.Locale, "admin_forgotten_email_body", link, link, admin.HumanName)
 
-	message := sendgrid.NewMail()
+	return admin.SendEmail(
+		user.Name,
+		user.Email,
+		subject,
+		body,
+		body,
+	)
+
+	/*message := sendgrid.NewMail()
 	message.SetFrom(admin.noReplyEmail)
 	message.AddTo(user.Email)
 	message.AddToName(user.Name)
 	message.SetSubject(subject)
 	message.SetHTML(body)
-	return admin.sendgridClient.Send(message)
+	return admin.sendgridClient.Send(message)*/
 }
 
 func initUserResource(resource *Resource) {

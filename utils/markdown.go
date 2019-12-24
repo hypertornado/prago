@@ -1,13 +1,14 @@
 package utils
 
 import (
-	"bytes"
-	"github.com/russross/blackfriday"
-	"strings"
+	stripmd "github.com/writeas/go-strip-markdown"
 )
 
 func filterMarkdown(in string) string {
-	ret := string(blackfriday.Markdown(
+
+	return stripmd.Strip(in)
+
+	/*ret := string(blackfriday.Markdown(
 		[]byte(in),
 		NewPlaintextRenderer(),
 		0,
@@ -16,7 +17,7 @@ func filterMarkdown(in string) string {
 	ret = strings.Replace(ret, "\n", " ", -1)
 	ret = strings.Replace(ret, "---", "—", -1)
 	ret = strings.Replace(ret, "--", "–", -1)
-	return ret
+	return ret*/
 }
 
 //CropMarkdown remove all markdown special characters
@@ -25,8 +26,9 @@ func CropMarkdown(text string, count int) string {
 	return Crop(text, count)
 }
 
-func NewPlaintextRenderer() blackfriday.Renderer {
+/*func NewPlaintextRenderer() blackfriday.Renderer {
 	return PlaintextRendered{}
+	//return blackfriday.PlainText{}
 }
 
 type PlaintextRendered struct{}
@@ -129,4 +131,4 @@ func (PlaintextRendered) TitleBlock(out *bytes.Buffer, text []byte) {
 
 func (PlaintextRendered) TripleEmphasis(out *bytes.Buffer, text []byte) {
 	out.Write(text)
-}
+}*/

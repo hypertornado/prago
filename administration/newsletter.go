@@ -8,7 +8,6 @@ import (
 	"html/template"
 	"io"
 	"io/ioutil"
-	"net/mail"
 	"net/url"
 	"os"
 	"strings"
@@ -18,7 +17,6 @@ import (
 	"github.com/golang-commonmark/markdown"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/utils"
-	sendgrid "github.com/sendgrid/sendgrid-go"
 )
 
 var (
@@ -170,7 +168,18 @@ func (admin *Administration) InitNewsletter(renderer NewsletterRenderer) {
 }
 
 func (admin Administration) sendConfirmEmail(name, email string) error {
-	message := sendgrid.NewMail()
+
+	text := admin.Newsletter.confirmEmailBody(name, email)
+
+	return admin.SendEmail(
+		name,
+		email,
+		"Potvrďte prosím odběr newsletteru "+admin.HumanName,
+		text,
+		text,
+	)
+
+	/*message := sendgrid.NewMail()
 
 	address := mail.Address{
 		Name:    admin.HumanName,
@@ -182,7 +191,7 @@ func (admin Administration) sendConfirmEmail(name, email string) error {
 	message.AddToName(name)
 	message.SetSubject("Potvrďte prosím odběr newsletteru " + admin.HumanName)
 	message.SetText(admin.Newsletter.confirmEmailBody(name, email))
-	return admin.sendgridClient.Send(message)
+	return admin.sendgridClient.Send(message)*/
 }
 
 func (nm NewsletterMiddleware) confirmEmailBody(name, email string) string {
@@ -421,7 +430,16 @@ func (admin *Administration) sendEmails(n Newsletter, emails []string) error {
 	for _, v := range emails {
 		body, err := admin.Newsletter.GetBody(n, v)
 		if err == nil {
-			message := sendgrid.NewMail()
+
+			err = admin.SendEmail(
+				"",
+				v,
+				n.Name,
+				body,
+				body,
+			)
+
+			/*message := sendgrid.NewMail()
 
 			address := mail.Address{
 				Name:    admin.HumanName,
@@ -432,7 +450,7 @@ func (admin *Administration) sendEmails(n Newsletter, emails []string) error {
 			message.AddTo(v)
 			message.SetSubject(n.Name)
 			message.SetHTML(body)
-			err = admin.sendgridClient.Send(message)
+			err = admin.sendgridClient.Send(message)*/
 		}
 		if err != nil {
 			fmt.Println("ERROR", err.Error())
