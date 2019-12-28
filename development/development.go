@@ -29,6 +29,7 @@ func CreateDevelopmentHelper(app *prago.App, settings DevelopmentSettings) {
 		).
 		Callback(
 			func() {
+				app.DevelopmentMode = true
 				for _, v := range settings.Less {
 					go developmentLess(v.SourceDir, v.Target)
 				}

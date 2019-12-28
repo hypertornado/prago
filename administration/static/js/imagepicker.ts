@@ -120,6 +120,7 @@ class ImagePicker {
     });
 
     container.addEventListener("drop", (e) => {
+      //@ts-ignore
       var droppedElement: Element = e.toElement;
 
       //firefox dont have toElement, but have originalTarget

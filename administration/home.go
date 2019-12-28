@@ -1,7 +1,11 @@
 package administration
 
 import (
+	"sort"
+
 	"github.com/hypertornado/prago"
+	"golang.org/x/text/collate"
+	"golang.org/x/text/language"
 )
 
 type homeData struct {
@@ -16,7 +20,7 @@ type homeData struct {
 func (admin *Administration) getHomeData(request prago.Request) (ret []homeData) {
 	user := GetUser(request)
 
-	for _, resource := range admin.Resources {
+	for _, resource := range admin.getSortedResources(user.Locale) {
 		if admin.Authorize(user, resource.CanView) {
 			item := homeData{
 				Name: resource.HumanName(user.Locale),
@@ -26,5 +30,22 @@ func (admin *Administration) getHomeData(request prago.Request) (ret []homeData)
 			ret = append(ret, item)
 		}
 	}
+	return
+}
+
+func (admin *Administration) getSortedResources(locale string) (ret []*Resource) {
+	collator := collate.New(language.Czech)
+
+	ret = admin.Resources
+	sort.SliceStable(ret, func(i, j int) bool {
+		a := ret[i]
+		b := ret[j]
+
+		//collator.CompareString()
+		if collator.CompareString(a.HumanName(locale), b.HumanName(locale)) <= 0 {
+			return true
+		}
+		return false
+	})
 	return
 }
