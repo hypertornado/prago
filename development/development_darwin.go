@@ -2,7 +2,7 @@ package development
 
 import (
 	"fmt"
-	"github.com/dshills/goauto"
+	//"github.com/dshills/goauto"
 	"io"
 	"os"
 	"os/exec"
@@ -11,6 +11,10 @@ import (
 )
 
 func developmentLess(sourcePath, targetPath string) {
+	compileLess(filepath.Join(sourcePath, "index.less"), targetPath)
+}
+
+/*func developmentLess(sourcePath, targetPath string) {
 
 	p := goauto.NewPipeline("Less Pipeline", goauto.Verbose)
 	defer p.Stop()
@@ -55,16 +59,16 @@ func NewTaskCmd(command string, args []string) goauto.Tasker {
 type TaskCmd struct {
 	cmd  string
 	args []string
-}
+}*/
 
-func (st TaskCmd) Run(info *goauto.TaskInfo) (err error) {
+/*func (st TaskCmd) Run(info *goauto.TaskInfo) (err error) {
 	fmt.Println("Running command", st.cmd, strings.Join(st.args, " "))
 	cmd := exec.Command(st.cmd, st.args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Start()
 	return nil
-}
+}*/
 
 func compileLess(from, to string) error {
 	outfile, err := os.Create(to)
