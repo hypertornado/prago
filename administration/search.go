@@ -16,7 +16,7 @@ import (
 
 const searchPageSize int = 10
 
-const searchType string = "items"
+//const searchType string = "items"
 
 type SearchItem struct {
 	ID          string   `json:"id"`
@@ -96,21 +96,18 @@ func (e *adminSearch) createSearchIndex() error {
           }
         },
       "mappings": {
-        "items": {
-          "_all": {},
-          "properties": {
-          	"suggest": {
-          		"type": "completion",
-          		"analyzer": "cesky_suggest",
-          		"preserve_separators": true
-          	},
-            "name": {"type": "text", "analyzer": "cesky"},
-            "description": {"type": "text", "analyzer": "cesky"},
-            "image": {"type": "text"},
-						"url": {"type": "text"},
-						"roles": {"type": "text"}
-          }
-        }
+		"properties": {
+		"suggest": {
+			"type": "completion",
+			"analyzer": "cesky_suggest",
+			"preserve_separators": true
+		},
+		"name": {"type": "text", "analyzer": "cesky"},
+		"description": {"type": "text", "analyzer": "cesky"},
+		"image": {"type": "text"},
+					"url": {"type": "text"},
+					"roles": {"type": "text"}
+		}
       }
     }
 		`).Do(context.Background())
@@ -122,7 +119,7 @@ func (e *adminSearch) createSearchIndex() error {
 
 func (e *adminSearch) AddItem(item *SearchItem, weight int) error {
 	var suggest = parseSuggestions(item.Name)
-	_, err := e.client.Index().Index(e.indexName).Type(searchType).BodyJson(map[string]interface{}{
+	_, err := e.client.Index().Index(e.indexName).BodyJson(map[string]interface{}{
 		"suggest": map[string]interface{}{
 			"input":  suggest,
 			"weight": weight,
@@ -157,7 +154,6 @@ func (e *adminSearch) Search(q string, role string, page int) ([]*SearchItem, in
 
 	searchResult, err := e.client.Search().
 		Index(e.indexName).
-		Type(searchType).
 		Query(bq).
 		From(page * searchPageSize).
 		Size(searchPageSize).
@@ -185,7 +181,6 @@ func (e *adminSearch) Suggest(q string) ([]*SearchItem, error) {
 
 	searchResult, err := e.client.Search().
 		Index(e.indexName).
-		Type(searchType).
 		Suggester(cs).
 		Pretty(true).
 		Do(context.Background())
@@ -296,7 +291,7 @@ func (e *adminSearch) saveItemWithRoles(resource *Resource, item interface{}, ro
 }
 
 func (e *adminSearch) deleteItem(resource *Resource, id int64) error {
-	_, err := e.client.Delete().Index(e.indexName).Type(searchType).Id(searchID(resource, id)).Do(context.Background())
+	_, err := e.client.Delete().Index(e.indexName).Id(searchID(resource, id)).Do(context.Background())
 	return err
 }
 

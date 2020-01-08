@@ -3355,6 +3355,20 @@ td.admin_list_message {
 .admin_history tr td:first-child {
   border-left: none;
 }
+@media print {
+  .admin_header {
+    display: none !important;
+  }
+  .admin_header_resources {
+    display: none !important;
+  }
+  .admin_tablesettings {
+    display: none !important;
+  }
+  .admin_list_filterrow {
+    display: none !important;
+  }
+}
 .admin_layout {
   width: 100%;
   height: 100vh;

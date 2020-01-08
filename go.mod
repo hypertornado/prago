@@ -19,6 +19,7 @@ require (
 	github.com/mailru/easyjson v0.7.0 // indirect
 	github.com/olivere/elastic v6.2.26+incompatible
 	github.com/olivere/elastic/v7 v7.0.9
+	github.com/radovskyb/watcher v1.0.7
 	github.com/russross/blackfriday v2.0.0+incompatible
 	github.com/sendgrid/rest v2.4.1+incompatible // indirect
 	github.com/sendgrid/sendgrid-go v3.5.0+incompatible

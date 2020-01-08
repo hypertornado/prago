@@ -3451,7 +3451,7 @@ ul {
 .btn {
   display: inline-block;
   padding: 3px 30px;
-  font-size: .9rem;
+  font-size: 0.9rem;
   line-height: 1.2em;
   color: #333;
   white-space: nowrap;
@@ -3655,7 +3655,7 @@ select.admin_table_filter_item {
   margin: 0px auto;
 }
 .admin_table_orderheader {
-  font-size: .9rem;
+  font-size: 0.9rem;
   font-weight: 500;
   text-decoration: none;
 }
@@ -3664,13 +3664,13 @@ select.admin_table_filter_item {
   border: 1px solid #f1f1f1;
 }
 .admin_table_count {
-  font-size: .9rem;
+  font-size: 0.9rem;
   color: #888;
 }
 .admin_list_table td {
   border-bottom: none;
   border-top: none;
-  font-size: .9rem;
+  font-size: 0.9rem;
 }
 .admin_table_row td {
   border-bottom: 1px solid #eee;
@@ -3724,7 +3724,7 @@ th.admin_list_orderitem {
   padding: 5px;
 }
 .admin_table_loading {
-  opacity: .4;
+  opacity: 0.4;
 }
 .admin_list_buttons {
   opacity: 0;
@@ -3775,7 +3775,7 @@ th.admin_list_orderitem {
   flex-shrink: 0;
   padding: 5px;
   color: #4078c0;
-  opacity: .2;
+  opacity: 0.2;
   cursor: pointer;
 }
 .flash_message:hover .flash_message_close {
@@ -4111,7 +4111,7 @@ progress {
   margin: 4px 0px;
   display: flex;
   border-bottom: none;
-  font-size: .9rem;
+  font-size: 0.9rem;
   line-height: 1.8em;
   text-decoration: none;
   padding: 1px 20px;
@@ -4249,7 +4249,7 @@ td.admin_list_message {
   flex-shrink: 2;
 }
 .admin_preview_description {
-  font-size: .9rem;
+  font-size: 0.9rem;
   line-height: 1.4em;
   color: #888;
 }
@@ -4347,7 +4347,7 @@ td.admin_list_message {
   display: inline-block;
   display: block;
   display: none;
-  font-size: .8rem;
+  font-size: 0.8rem;
 }
 .admin_tablesettings_name:after {
   content: ":";
@@ -4356,7 +4356,7 @@ td.admin_list_message {
   float: right;
 }
 .admin_tablesettings_label {
-  font-size: .8rem;
+  font-size: 0.8rem;
   display: inline-block;
   padding: 2px 2px;
 }
@@ -4385,6 +4385,20 @@ td.admin_list_message {
 }
 .admin_history tr td:first-child {
   border-left: none;
+}
+@media print {
+  .admin_header {
+    display: none !important;
+  }
+  .admin_header_resources {
+    display: none !important;
+  }
+  .admin_tablesettings {
+    display: none !important;
+  }
+  .admin_list_filterrow {
+    display: none !important;
+  }
 }
 .admin_layout {
   width: 100%;
@@ -4466,7 +4480,7 @@ a.admin_header_resource {
   font-weight: 500;
   padding: 3px 10px;
   margin: 0px;
-  font-size: .9rem;
+  font-size: 0.9rem;
   border-bottom: 2px solid none;
   flex-shrink: 0;
   border-top-right-radius: 5px;
@@ -4481,7 +4495,7 @@ a.admin_header_resource {
   color: white !important;
 }
 .admin_header_sitename {
-  font-size: .9rem;
+  font-size: 0.9rem;
 }
 .admin_content {
   flex-grow: 10;
@@ -4672,7 +4686,7 @@ http://nicolasgallagher.com/micro-clearfix-hack/
   background-position: center center;
   background-repeat: no-repeat;
   background-size: 75% 75%;
-  opacity: .5;
+  opacity: 0.5;
   *position: absolute;
   *top: 0;
 }
@@ -4695,7 +4709,7 @@ http://nicolasgallagher.com/micro-clearfix-hack/
 .pika-prev.is-disabled,
 .pika-next.is-disabled {
   cursor: default;
-  opacity: .2;
+  opacity: 0.2;
 }
 .pika-select {
   display: inline-block;
@@ -4709,7 +4723,7 @@ http://nicolasgallagher.com/micro-clearfix-hack/
 }
 .pika-table th,
 .pika-table td {
-  width: 14.285714285714286%;
+  width: 14.28571429%;
   padding: 0;
 }
 .pika-table th {
@@ -4775,11 +4789,11 @@ http://nicolasgallagher.com/micro-clearfix-hack/
   pointer-events: none;
   cursor: default;
   color: #999;
-  opacity: .3;
+  opacity: 0.3;
 }
 .is-outside-current-month .pika-button {
   color: #999;
-  opacity: .3;
+  opacity: 0.3;
 }
 .is-selection-disabled {
   pointer-events: none;
@@ -4815,14 +4829,14 @@ a.search {
 }
 .search_category {
   color: #888;
-  font-size: .8rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
 }
 .search_name {
   font-size: 1.1rem;
 }
 .search_description {
-  font-size: .9rem;
+  font-size: 0.9rem;
   color: #888;
 }
 .search_pagination {
@@ -4871,7 +4885,7 @@ a.search_pagination_page-selected {
 .admin_search_suggestion {
   display: flex;
   border-bottom: 1px solid #eee;
-  font-size: .8rem;
+  font-size: 0.8rem;
   line-height: 1.3em;
   max-height: 100px;
   overflow: hidden;
@@ -4910,10 +4924,10 @@ a.admin_search_suggestion-selected:active {
 .admin_search_suggestion_category {
   text-transform: uppercase;
   color: #444;
-  font-size: .7rem;
+  font-size: 0.7rem;
 }
 .admin_search_suggestion_name {
-  font-size: .9rem;
+  font-size: 0.9rem;
   line-height: 1.3em;
 }
 .admin_search_suggestion_description {
@@ -4942,7 +4956,7 @@ a.admin_search_suggestion-selected:active {
   display: block;
 }
 .filter_relations_preview {
-  font-size: .9rem;
+  font-size: 0.9rem;
   background: #fcfcfc;
   border: 1px solid #eee;
   border-radius: 300px;
@@ -5014,7 +5028,7 @@ a.admin_search_suggestion-selected:active {
   flex-grow: 2;
   flex-shrink: 2;
   text-align: left;
-  font-size: .8rem;
+  font-size: 0.8rem;
   line-height: 1.4em;
 }
 .list_filter_suggestion_description {
