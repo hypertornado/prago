@@ -28,21 +28,10 @@ class ListFilterRelations {
     this.resourceName = el.getAttribute("data-name");
 
     this.input.addEventListener("input", () => {
-      //this.suggestions = [];
       this.dirty = true;
       this.lastChanged = Date.now();
       return false;
     });
-
-    /*this.input.addEventListener("blur", () => {
-      window.setInterval(() => {
-        this.suggestions.classList.add("hidden");
-      }, 1000);
-    })
-
-    this.input.addEventListener("focus", () => {
-      this.suggestions.classList.remove("hidden");
-    })*/
 
     window.setInterval(() => {
       if (this.dirty && Date.now() - this.lastChanged > 100) {
@@ -63,9 +52,7 @@ class ListFilterRelations {
     request.open("GET", adminPrefix + "/_api/preview/" + this.resourceName + "/" + value, true);
 
     request.addEventListener("load", () => {
-      //this.progress.classList.add("hidden");
       if (request.status == 200) {
-        //console.log(request.response);
         this.renderPreview(JSON.parse(request.response));
       } else {
         console.error("not found");
@@ -93,6 +80,7 @@ class ListFilterRelations {
     this.search.classList.remove("hidden");
     this.input.value = "";
     this.suggestions.innerHTML = "";
+    this.suggestions.classList.add("filter_relations_suggestions-empty");
     this.dispatchChange();
     this.input.focus();
   }
@@ -108,31 +96,28 @@ class ListFilterRelations {
     request.open("GET", adminPrefix + "/_api/search/" + this.resourceName + "?q=" + encodeURIComponent(q), true);
 
     request.addEventListener("load", () => {
-      //this.progress.classList.add("hidden");
       if (request.status == 200) {
         this.renderSuggestions(JSON.parse(request.response));
       } else {
         console.error("not found");
-        //this.showSearch();
       }
     })
     request.send();
   }
 
   renderSuggestions(data: any) {
-    //console.log(data);
     this.suggestions.innerHTML = "";
+    this.suggestions.classList.add("filter_relations_suggestions-empty");
     for (var i = 0; i < data.length; i++) {
+      this.suggestions.classList.remove("filter_relations_suggestions-empty");
       let item = data[i];
       let el = this.renderSuggestion(item);
       this.suggestions.appendChild(el);
       let index = i;
       el.addEventListener("mousedown", (e) => {
         this.renderPreview(item);
-      })
-      //console.log(item);
+      });
     }
-    //this.suggestions = data;
   }
 
   renderSuggestion(data: any): HTMLDivElement {

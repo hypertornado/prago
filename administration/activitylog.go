@@ -8,7 +8,7 @@ import (
 	"github.com/hypertornado/prago/administration/messages"
 )
 
-type activityLog struct {
+type ActivityLog struct {
 	ID            int64
 	ResourceName  string    `prago-preview:"true"`
 	ItemID        int64     `prago-preview:"true"`
@@ -34,6 +34,20 @@ type historyItemView struct {
 	CreatedAt   string
 }
 
+func (admin *Administration) ListenActivityLog(handler func(logItem ActivityLog)) {
+	admin.activityListeners = append(admin.activityListeners, handler)
+}
+
+func (admin *Administration) createActivityLog(log ActivityLog) error {
+	err := admin.Create(&log)
+	if err == nil {
+		for _, v := range admin.activityListeners {
+			v(log)
+		}
+	}
+	return err
+}
+
 func (admin *Administration) getHistory(resource *Resource, itemID int64) historyView {
 	ret := historyView{}
 
@@ -47,7 +61,7 @@ func (admin *Administration) getHistory(resource *Resource, itemID int64) histor
 	q.Limit(250)
 	q.OrderDesc("ID")
 
-	var items []*activityLog
+	var items []*ActivityLog
 	must(q.Get(&items))
 
 	for _, v := range items {
@@ -90,26 +104,24 @@ func (admin Administration) createNewActivityLog(resource Resource, user User, i
 		return err
 	}
 
-	log := activityLog{
+	return admin.createActivityLog(ActivityLog{
 		ResourceName: resource.ID,
 		ItemID:       getItemID(item),
 		ActionType:   "new",
 		User:         user.ID,
 		ContentAfter: string(data),
-	}
-	return admin.Create(&log)
+	})
 }
 
 func (admin Administration) createEditActivityLog(resource Resource, user User, itemID int64, before, after []byte) error {
-	log := activityLog{
+	return admin.createActivityLog(ActivityLog{
 		ResourceName:  resource.ID,
 		ItemID:        itemID,
 		ActionType:    "edit",
 		User:          user.ID,
 		ContentBefore: string(before),
 		ContentAfter:  string(after),
-	}
-	return admin.Create(&log)
+	})
 }
 
 func (admin Administration) createDeleteActivityLog(resource Resource, user User, itemID int64, item interface{}) error {
@@ -118,12 +130,11 @@ func (admin Administration) createDeleteActivityLog(resource Resource, user User
 		return err
 	}
 
-	log := activityLog{
+	return admin.createActivityLog(ActivityLog{
 		ResourceName:  resource.ID,
 		ItemID:        itemID,
 		ActionType:    "delete",
 		User:          user.ID,
 		ContentBefore: string(data),
-	}
-	return admin.Create(&log)
+	})
 }

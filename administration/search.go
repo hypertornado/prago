@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/utils"
 	"github.com/olivere/elastic/v7"
 	"golang.org/x/net/context"
 )
@@ -38,6 +39,10 @@ type adminSearch struct {
 	client    *elastic.Client
 	admin     *Administration
 	indexName string
+}
+
+func (si SearchItem) CroppedDescription() string {
+	return utils.Crop(si.Description, 100)
 }
 
 func newAdminSearch(admin *Administration) (*adminSearch, error) {

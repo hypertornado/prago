@@ -2317,6 +2317,9 @@ body {
 .shadow {
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
+.shadowLarge {
+  box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
+}
 code {
   background-color: #fafafa;
   padding: 0px 3px;
@@ -2691,6 +2694,9 @@ th.admin_list_orderitem {
 }
 .admin_list_filteritem {
   padding: 5px;
+}
+.admin_list_filteritem-colored {
+  background-color: #4078c0;
 }
 .admin_table_loading {
   opacity: 0.4;
@@ -3856,14 +3862,11 @@ a.search_pagination_page-selected {
   border-bottom: 1px solid #eee;
   font-size: 0.8rem;
   line-height: 1.3em;
-  max-height: 100px;
   overflow: hidden;
 }
-a.admin_search_suggestion-selected {
-  background: rgba(64, 120, 192, 0.05);
-}
+a.admin_search_suggestion-selected,
 a.admin_search_suggestion-selected:active {
-  background: rgba(64, 120, 192, 0.1);
+  background: rgba(64, 120, 192, 0.1) !important;
 }
 .admin_search_suggestion:last-child {
   border-bottom: none;
@@ -3896,7 +3899,7 @@ a.admin_search_suggestion-selected:active {
   font-size: 0.7rem;
 }
 .admin_search_suggestion_name {
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 1.3em;
 }
 .admin_search_suggestion_description {
@@ -3913,13 +3916,22 @@ a.admin_search_suggestion-selected:active {
 .filter_relations {
   position: relative;
 }
+.filter_relations_search_input {
+  position: relative;
+  z-index: 2;
+}
 .filter_relations_suggestions {
   position: absolute;
   left: 0px;
-  right: 0px;
   background: white;
-  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
   display: none;
+  min-width: 300px;
+  max-width: 400px;
+  z-index: 0;
+}
+.filter_relations_suggestions-empty {
+  box-shadow: none;
 }
 .filter_relations_search:focus-within .filter_relations_suggestions {
   display: block;
@@ -3928,35 +3940,38 @@ a.admin_search_suggestion-selected:active {
   font-size: 0.9rem;
   background: #fcfcfc;
   border: 1px solid #eee;
-  border-radius: 300px;
+  border-radius: 15px;
   padding: 3px;
 }
 .filter_relations_preview_close {
   display: inline-block;
   width: 20px;
   height: 20px;
-  line-height: 20px;
+  font-size: 10px;
+  line-height: 18px;
   font-weight: bold;
-  text-align: center;
   border-radius: 100px;
   background: #eee;
-  padding-left: 2.5px;
+  padding-left: 0px;
   padding-top: 0px;
+  padding-bottom: 0px;
   float: right;
   margin: 0px 0px 0px 3px;
   cursor: pointer;
   background: rgba(64, 120, 192, 0.1);
+  background: #4078c0;
+  color: white;
   border: 1px solid #eee;
+  text-align: center;
 }
 .filter_relations_preview_close:hover {
-  background-color: rgba(64, 120, 192, 0.1);
+  opacity: 0.9;
 }
 .filter_relations_preview_close:active {
-  background-color: #4078c0;
+  opacity: 0.8;
 }
 .filter_relations_preview_close::after {
-  content: "✖︎";
-  text-align: center;
+  content: "✕";
 }
 .filter_relations_clear {
   clear: both;
@@ -3982,10 +3997,11 @@ a.admin_search_suggestion-selected:active {
 .list_filter_suggestion_image {
   flex-grow: 0;
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   margin-right: 10px;
-  border-radius: 300px;
+  border-radius: 5px;
+  margin-top: 5px;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -3997,9 +4013,9 @@ a.admin_search_suggestion-selected:active {
   flex-grow: 2;
   flex-shrink: 2;
   text-align: left;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   line-height: 1.4em;
 }
 .list_filter_suggestion_description {
-  color: #aaa;
+  color: #888;
 }

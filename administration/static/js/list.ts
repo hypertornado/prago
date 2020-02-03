@@ -12,7 +12,6 @@ class List {
   tbody: HTMLElement;
   el: HTMLDivElement;
   exportButton: HTMLAnchorElement;
-  //filterInputs: NodeListOf<Element>;
   changed: boolean;
   changedTimestamp: number;
   
@@ -23,7 +22,6 @@ class List {
   page: number;
 
   defaultVisibleColumnsStr: string;
-  //visibleColumnsMap: any;
 
   prefilterField: string;
   prefilterValue: string;
@@ -35,14 +33,9 @@ class List {
   itemsPerPage: number;
   paginationSelect: HTMLSelectElement;
 
-  //openbutton: HTMLButtonElement;
-  //closebutton: HTMLButtonElement;
-
   //TODO: get filter params from URL
   constructor(el: HTMLDivElement, openbutton: HTMLButtonElement) {
     this.el = el;
-    //this.openbutton = openbutton;
-    //this.closebutton = this.el.querySelector(".admin_tablesettings_close");
     this.settingsEl = this.el.querySelector(".admin_tablesettings");
 
     this.exportButton = this.el.querySelector(".admin_exportbutton");
@@ -132,6 +125,7 @@ class List {
     for (var k in filterData) {
       params[k] = filterData[k];
     }
+    this.colorActiveFilterItems();
 
     let selectedPages = parseInt(this.paginationSelect.value);
     if (selectedPages != this.itemsPerPage) {
@@ -213,6 +207,20 @@ class List {
     }
 
     this.load();
+  }
+
+  colorActiveFilterItems() {
+    let itemsToColor = this.getFilterData();
+    var filterItems: NodeListOf<HTMLDivElement> = this.el.querySelectorAll(".admin_list_filteritem");
+    for (var i = 0; i < filterItems.length; i++) {
+      var item = filterItems[i];
+      let name = item.getAttribute("data-name");
+      if (itemsToColor[name]) {
+        item.classList.add("admin_list_filteritem-colored");
+      } else {
+        item.classList.remove("admin_list_filteritem-colored");
+      }
+    }
   }
 
   bindPagination() {
@@ -387,6 +395,7 @@ class List {
   }
 
   filterChanged() {
+    this.colorActiveFilterItems();
     this.tbody.classList.add("admin_table_loading");
     this.page = 1;
     this.changed = true;
@@ -398,30 +407,6 @@ class List {
     new ListFilterRelations(el, value, this);
   }
 
-  bindFilterRelationOLD(select: HTMLSelectElement, value: any) {
-    var typ = select.getAttribute("data-typ");
-
-    var adminPrefix = document.body.getAttribute("data-admin-prefix");
-    var request = new XMLHttpRequest();
-    request.open("GET", adminPrefix + "/_api/resource/" + typ, true);
-
-    request.addEventListener("load", () => {
-      if (request.status == 200) {
-        var resp = JSON.parse(request.response);
-        for (var item of resp) {
-          var option = document.createElement("option");
-          option.setAttribute("value", item.id);
-          option.innerText = item.name;
-          select.appendChild(option);
-          select.value = value;
-          this.filterChanged();
-        }
-      } else {
-        console.error("Error wile loading relation " + typ + ".");
-      }
-    });
-    request.send();
-  }
 
   inputPeriodicListener() {
     setInterval(() =>{

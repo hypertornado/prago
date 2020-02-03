@@ -49,6 +49,8 @@ type Administration struct {
 	javascripts []string
 	css         []string
 	roles       map[string]map[string]bool
+
+	activityListeners []func(ActivityLog)
 }
 
 //NewAdministration creates new administration on prefix url with name
@@ -86,7 +88,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 
 	admin.CreateResource(User{}, initUserResource)
 	admin.CreateResource(File{}, initFilesResource)
-	admin.CreateResource(activityLog{}, initActivityLog)
+	admin.CreateResource(ActivityLog{}, initActivityLog)
 
 	if initFunction != nil {
 		initFunction(admin)

@@ -3,15 +3,24 @@
   position: relative;
 }
 
+.filter_relations_search_input {
+  position: relative;
+  z-index: 2;
+}
+
 .filter_relations_suggestions {
-  //border: 1px solid blue;
   position: absolute;
   left: 0px;
-  right: 0px;
   background: white;
-  .shadow;
+  .shadowLarge;
   display: none;
-  //border: 1px solid red;
+  min-width: 300px;
+  max-width: 400px;
+  z-index: 0;
+}
+
+.filter_relations_suggestions-empty {
+  box-shadow: none;
 }
 
 .filter_relations_search:focus-within .filter_relations_suggestions {
@@ -23,7 +32,7 @@
   font-size: .9rem;
   background: #fcfcfc;
   border: 1px solid #eee;
-  border-radius: 300px;
+  border-radius: 15px;
   padding: 3px;
 }
 
@@ -31,31 +40,39 @@
   display: inline-block;
   width: 20px;
   height: 20px;
-  line-height: 20px;
+  font-size: 10px;
+  line-height: 18px;
   font-weight: bold;
   text-align: center;
   border-radius: 100px;
   background: #eee;
-  padding-left: 2.5px;
+  padding-left: 0px;
   padding-top: 0px;
+  padding-bottom: 0px;
   float: right;
   margin: 0px 0px 0px 3px;
   cursor: pointer;
   background: @baseColorBackground;
+  background: @baseColor;
+  color: white;
+
   border: 1px solid #eee;
+
+  text-align: center;
+
+  //color: blue;
 }
 
 .filter_relations_preview_close:hover {
-  background-color: @baseColorBackground;
+  opacity: 0.9;
 }
 
 .filter_relations_preview_close:active {
-  background-color: @baseColor;
+  opacity: 0.8;
 }
 
 .filter_relations_preview_close::after {
-  content: "✖︎";
-  text-align: center;
+  content: "✕";
 }
 
 .filter_relations_clear {
@@ -64,10 +81,8 @@
 
 .list_filter_suggestion {
   padding: 5px;
-  //.shadow;
   border-radius: 5px;
   text-decoration: none;
-  //color: #888;
   display: inline-block;
   margin: 0px 0px;
   font-size: 1rem;
@@ -89,10 +104,11 @@
 .list_filter_suggestion_image {
   flex-grow: 0;
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   margin-right: 10px;
-  border-radius: 300px;
+  border-radius: 5px;
+  margin-top: 5px;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -105,12 +121,12 @@
   flex-grow: 2;
   flex-shrink: 2;
   text-align: left;
-  font-size: .8rem;
+  font-size: .9rem;
   line-height: 1.4em;
 }
 
 .list_filter_suggestion_description {
   //font-size: .9rem;
   //line-height: 1.4em;
-  color: #aaa;
+  color: @gray;
 }

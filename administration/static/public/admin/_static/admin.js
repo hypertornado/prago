@@ -380,6 +380,7 @@ var ListFilterRelations = (function () {
         this.search.classList.remove("hidden");
         this.input.value = "";
         this.suggestions.innerHTML = "";
+        this.suggestions.classList.add("filter_relations_suggestions-empty");
         this.dispatchChange();
         this.input.focus();
     };
@@ -405,7 +406,9 @@ var ListFilterRelations = (function () {
     ListFilterRelations.prototype.renderSuggestions = function (data) {
         var _this = this;
         this.suggestions.innerHTML = "";
+        this.suggestions.classList.add("filter_relations_suggestions-empty");
         var _loop_1 = function () {
+            this_1.suggestions.classList.remove("filter_relations_suggestions-empty");
             var item = data[i];
             var el = this_1.renderSuggestion(item);
             this_1.suggestions.appendChild(el);
@@ -525,6 +528,7 @@ var List = (function () {
         for (var k in filterData) {
             params[k] = filterData[k];
         }
+        this.colorActiveFilterItems();
         var selectedPages = parseInt(this.paginationSelect.value);
         if (selectedPages != this.itemsPerPage) {
             params["_pagesize"] = selectedPages;
@@ -597,6 +601,20 @@ var List = (function () {
             }
         }
         this.load();
+    };
+    List.prototype.colorActiveFilterItems = function () {
+        var itemsToColor = this.getFilterData();
+        var filterItems = this.el.querySelectorAll(".admin_list_filteritem");
+        for (var i = 0; i < filterItems.length; i++) {
+            var item = filterItems[i];
+            var name_1 = item.getAttribute("data-name");
+            if (itemsToColor[name_1]) {
+                item.classList.add("admin_list_filteritem-colored");
+            }
+            else {
+                item.classList.remove("admin_list_filteritem-colored");
+            }
+        }
     };
     List.prototype.bindPagination = function () {
         var _this = this;
@@ -760,6 +778,7 @@ var List = (function () {
         this.filterChanged();
     };
     List.prototype.filterChanged = function () {
+        this.colorActiveFilterItems();
         this.tbody.classList.add("admin_table_loading");
         this.page = 1;
         this.changed = true;
@@ -768,31 +787,6 @@ var List = (function () {
     };
     List.prototype.bindFilterRelation = function (el, value) {
         new ListFilterRelations(el, value, this);
-    };
-    List.prototype.bindFilterRelationOLD = function (select, value) {
-        var _this = this;
-        var typ = select.getAttribute("data-typ");
-        var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        var request = new XMLHttpRequest();
-        request.open("GET", adminPrefix + "/_api/resource/" + typ, true);
-        request.addEventListener("load", function () {
-            if (request.status == 200) {
-                var resp = JSON.parse(request.response);
-                for (var _i = 0, resp_1 = resp; _i < resp_1.length; _i++) {
-                    var item = resp_1[_i];
-                    var option = document.createElement("option");
-                    option.setAttribute("value", item.id);
-                    option.innerText = item.name;
-                    select.appendChild(option);
-                    select.value = value;
-                    _this.filterChanged();
-                }
-            }
-            else {
-                console.error("Error wile loading relation " + typ + ".");
-            }
-        });
-        request.send();
     };
     List.prototype.inputPeriodicListener = function () {
         var _this = this;

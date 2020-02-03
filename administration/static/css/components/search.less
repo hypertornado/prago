@@ -89,16 +89,12 @@ a.search_pagination_page-selected {
   border-bottom: 1px solid #eee;
   font-size: .8rem;
   line-height: 1.3em;
-  max-height: 100px;
+  //max-height: 100px;
   overflow: hidden;
 }
 
-a.admin_search_suggestion-selected {
-  background: @baseColorBackgroundLighter;
-}
-
-a.admin_search_suggestion-selected:active {
-  background: @baseColorBackground;
+a.admin_search_suggestion-selected, a.admin_search_suggestion-selected:active {
+  background: @baseColorBackground !important;
 }
 
 .admin_search_suggestion:last-child {
@@ -138,7 +134,7 @@ a.admin_search_suggestion-selected:active {
 }
 
 .admin_search_suggestion_name {
-  font-size: .9rem;
+  font-size: 1rem;
   line-height: 1.3em;
 }
 

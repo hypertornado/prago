@@ -516,11 +516,6 @@ const adminTemplates = `
       <div class="filter_relations_suggestions"></div>
     </div>
   </div>
- <!--
-  <select class="input input-small admin_table_filter_item admin_table_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
-    <option value="" selected=""></option>
-  </select>
--->
 {{end}}
 
 {{define "filter_layout_number"}}
@@ -664,7 +659,7 @@ const adminTemplates = `
         <div class="admin_search_suggestion_right">
           <div class="admin_search_suggestion_category">{{$item.Category}}</div>
           <div class="admin_search_suggestion_name">{{$item.Name}}</div>
-          <div class="admin_search_suggestion_description">{{$item.Description}}</div>
+          <div class="admin_search_suggestion_description">{{$item.CroppedDescription}}</div>
         </div>
       </a>
     {{end}}
@@ -3348,6 +3343,9 @@ body {
 .shadow {
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
+.shadowLarge {
+  box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
+}
 code {
   background-color: #fafafa;
   padding: 0px 3px;
@@ -3722,6 +3720,9 @@ th.admin_list_orderitem {
 }
 .admin_list_filteritem {
   padding: 5px;
+}
+.admin_list_filteritem-colored {
+  background-color: #4078c0;
 }
 .admin_table_loading {
   opacity: 0.4;
@@ -4887,14 +4888,11 @@ a.search_pagination_page-selected {
   border-bottom: 1px solid #eee;
   font-size: 0.8rem;
   line-height: 1.3em;
-  max-height: 100px;
   overflow: hidden;
 }
-a.admin_search_suggestion-selected {
-  background: rgba(64, 120, 192, 0.05);
-}
+a.admin_search_suggestion-selected,
 a.admin_search_suggestion-selected:active {
-  background: rgba(64, 120, 192, 0.1);
+  background: rgba(64, 120, 192, 0.1) !important;
 }
 .admin_search_suggestion:last-child {
   border-bottom: none;
@@ -4927,7 +4925,7 @@ a.admin_search_suggestion-selected:active {
   font-size: 0.7rem;
 }
 .admin_search_suggestion_name {
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 1.3em;
 }
 .admin_search_suggestion_description {
@@ -4944,13 +4942,22 @@ a.admin_search_suggestion-selected:active {
 .filter_relations {
   position: relative;
 }
+.filter_relations_search_input {
+  position: relative;
+  z-index: 2;
+}
 .filter_relations_suggestions {
   position: absolute;
   left: 0px;
-  right: 0px;
   background: white;
-  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
   display: none;
+  min-width: 300px;
+  max-width: 400px;
+  z-index: 0;
+}
+.filter_relations_suggestions-empty {
+  box-shadow: none;
 }
 .filter_relations_search:focus-within .filter_relations_suggestions {
   display: block;
@@ -4959,35 +4966,38 @@ a.admin_search_suggestion-selected:active {
   font-size: 0.9rem;
   background: #fcfcfc;
   border: 1px solid #eee;
-  border-radius: 300px;
+  border-radius: 15px;
   padding: 3px;
 }
 .filter_relations_preview_close {
   display: inline-block;
   width: 20px;
   height: 20px;
-  line-height: 20px;
+  font-size: 10px;
+  line-height: 18px;
   font-weight: bold;
-  text-align: center;
   border-radius: 100px;
   background: #eee;
-  padding-left: 2.5px;
+  padding-left: 0px;
   padding-top: 0px;
+  padding-bottom: 0px;
   float: right;
   margin: 0px 0px 0px 3px;
   cursor: pointer;
   background: rgba(64, 120, 192, 0.1);
+  background: #4078c0;
+  color: white;
   border: 1px solid #eee;
+  text-align: center;
 }
 .filter_relations_preview_close:hover {
-  background-color: rgba(64, 120, 192, 0.1);
+  opacity: 0.9;
 }
 .filter_relations_preview_close:active {
-  background-color: #4078c0;
+  opacity: 0.8;
 }
 .filter_relations_preview_close::after {
-  content: "✖︎";
-  text-align: center;
+  content: "✕";
 }
 .filter_relations_clear {
   clear: both;
@@ -5013,10 +5023,11 @@ a.admin_search_suggestion-selected:active {
 .list_filter_suggestion_image {
   flex-grow: 0;
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   margin-right: 10px;
-  border-radius: 300px;
+  border-radius: 5px;
+  margin-top: 5px;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -5028,11 +5039,11 @@ a.admin_search_suggestion-selected:active {
   flex-grow: 2;
   flex-shrink: 2;
   text-align: left;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   line-height: 1.4em;
 }
 .list_filter_suggestion_description {
-  color: #aaa;
+  color: #888;
 }
 `
 
@@ -5420,6 +5431,7 @@ var ListFilterRelations = (function () {
         this.search.classList.remove("hidden");
         this.input.value = "";
         this.suggestions.innerHTML = "";
+        this.suggestions.classList.add("filter_relations_suggestions-empty");
         this.dispatchChange();
         this.input.focus();
     };
@@ -5445,7 +5457,9 @@ var ListFilterRelations = (function () {
     ListFilterRelations.prototype.renderSuggestions = function (data) {
         var _this = this;
         this.suggestions.innerHTML = "";
+        this.suggestions.classList.add("filter_relations_suggestions-empty");
         var _loop_1 = function () {
+            this_1.suggestions.classList.remove("filter_relations_suggestions-empty");
             var item = data[i];
             var el = this_1.renderSuggestion(item);
             this_1.suggestions.appendChild(el);
@@ -5565,6 +5579,7 @@ var List = (function () {
         for (var k in filterData) {
             params[k] = filterData[k];
         }
+        this.colorActiveFilterItems();
         var selectedPages = parseInt(this.paginationSelect.value);
         if (selectedPages != this.itemsPerPage) {
             params["_pagesize"] = selectedPages;
@@ -5637,6 +5652,20 @@ var List = (function () {
             }
         }
         this.load();
+    };
+    List.prototype.colorActiveFilterItems = function () {
+        var itemsToColor = this.getFilterData();
+        var filterItems = this.el.querySelectorAll(".admin_list_filteritem");
+        for (var i = 0; i < filterItems.length; i++) {
+            var item = filterItems[i];
+            var name_1 = item.getAttribute("data-name");
+            if (itemsToColor[name_1]) {
+                item.classList.add("admin_list_filteritem-colored");
+            }
+            else {
+                item.classList.remove("admin_list_filteritem-colored");
+            }
+        }
     };
     List.prototype.bindPagination = function () {
         var _this = this;
@@ -5800,6 +5829,7 @@ var List = (function () {
         this.filterChanged();
     };
     List.prototype.filterChanged = function () {
+        this.colorActiveFilterItems();
         this.tbody.classList.add("admin_table_loading");
         this.page = 1;
         this.changed = true;
@@ -5808,31 +5838,6 @@ var List = (function () {
     };
     List.prototype.bindFilterRelation = function (el, value) {
         new ListFilterRelations(el, value, this);
-    };
-    List.prototype.bindFilterRelationOLD = function (select, value) {
-        var _this = this;
-        var typ = select.getAttribute("data-typ");
-        var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        var request = new XMLHttpRequest();
-        request.open("GET", adminPrefix + "/_api/resource/" + typ, true);
-        request.addEventListener("load", function () {
-            if (request.status == 200) {
-                var resp = JSON.parse(request.response);
-                for (var _i = 0, resp_1 = resp; _i < resp_1.length; _i++) {
-                    var item = resp_1[_i];
-                    var option = document.createElement("option");
-                    option.setAttribute("value", item.id);
-                    option.innerText = item.name;
-                    select.appendChild(option);
-                    select.value = value;
-                    _this.filterChanged();
-                }
-            }
-            else {
-                console.error("Error wile loading relation " + typ + ".");
-            }
-        });
-        request.send();
     };
     List.prototype.inputPeriodicListener = function () {
         var _this = this;
