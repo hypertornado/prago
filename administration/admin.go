@@ -36,6 +36,7 @@ type Administration struct {
 	AdminController  *prago.Controller
 	rootActions      []Action
 	db               *sql.DB
+	resourcesInited  bool
 
 	//sendgridClient *sendgrid.Client
 	sendgridKey  string
@@ -215,6 +216,8 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	})
 
 	admin.AddRole("sysadmin", admin.getSysadminPermissions())
+
+	admin.resourcesInited = true
 	return admin
 }
 

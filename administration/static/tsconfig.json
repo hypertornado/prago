@@ -28,6 +28,7 @@
         "js/datepicker.ts",
         "js/dropdown.ts",
         "js/search.ts",
+        "js/eshop_control.ts",
         "js/load.ts"
     ]
 }

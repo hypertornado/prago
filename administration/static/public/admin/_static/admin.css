@@ -3913,6 +3913,13 @@ a.admin_search_suggestion-selected:active {
     flex-grow: 2;
   }
 }
+.eshop_control_video {
+  border: 1px solid blue;
+  display: none;
+}
+.eshop_control_canvas {
+  max-width: 100%;
+}
 .filter_relations {
   position: relative;
 }

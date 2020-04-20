@@ -44,6 +44,10 @@ type Resource struct {
 
 //CreateResource creates new resource based on item
 func (admin *Administration) CreateResource(item interface{}, initFunction func(*Resource)) *Resource {
+	if admin.resourcesInited {
+		panic("can't create new resource, resources already initiated")
+	}
+
 	typ := reflect.TypeOf(item)
 
 	if typ.Kind() != reflect.Struct {

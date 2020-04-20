@@ -1704,6 +1704,54 @@ var SearchForm = (function () {
     };
     return SearchForm;
 }());
+function bindEshopControl() {
+    var el = document.querySelector(".eshop_control");
+    if (el) {
+        new EshopControl(el);
+    }
+}
+var EshopControl = (function () {
+    function EshopControl(el) {
+        this.canvas = el.querySelector(".eshop_control_canvas");
+        this.video = el.querySelector(".eshop_control_video");
+        this.context = this.canvas.getContext('2d');
+        console.log(this.canvas);
+        console.log(this.video);
+        this.initCamera();
+        this.captureImage();
+    }
+    EshopControl.prototype.initCamera = function () {
+        var _this = this;
+        console.log(navigator.mediaDevices);
+        console.log(navigator.mediaDevices.getUserMedia({ video: true, audio: false }));
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+            .then(function (stream) {
+            _this.video.srcObject = stream;
+            _this.video.play();
+        });
+    };
+    EshopControl.prototype.captureImage = function () {
+        var w = this.video.videoWidth;
+        var h = this.video.videoHeight;
+        this.canvas.width = w;
+        this.canvas.height = h;
+        this.context.drawImage(this.video, 0, 0, w, h);
+        if (w > 0 && h > 0) {
+            var imageData = this.context.getImageData(0, 0, w, h);
+            try {
+                var code = jsQR(imageData.data, w, h);
+                if (code) {
+                    console.log(code.data);
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }
+        requestAnimationFrame(this.captureImage.bind(this));
+    };
+    return EshopControl;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();
@@ -1719,6 +1767,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindDatePicker();
     bindDropdowns();
     bindSearch();
+    bindEshopControl();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");
