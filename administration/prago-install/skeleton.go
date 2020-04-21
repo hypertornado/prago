@@ -102,14 +102,14 @@ func main() {
 
 		app.MainController().Get("/", func(request prago.Request) {
 			request.SetData("app_name", appName)
-			request.SetData("version", version)
+			request.SetData("version", appVersion)
 			request.SetData("yield", "index")
 			request.RenderView("layout")
 		})
 
 		app.MainController().Get("/", func(request prago.Request) {
 			request.SetData("app_name", appName)
-			request.SetData("version", version)
+			request.SetData("version", appVersion)
 			request.SetData("yield", "404")
 			request.RenderViewWithCode("layout", 404)
 		})

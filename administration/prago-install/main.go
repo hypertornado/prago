@@ -79,9 +79,10 @@ func createConfigFiles(projectName string) {
 	conf.SSH = getValue("SSH path:", "")
 
 	conf.BaseURL = getValue("BaseURL:", "http://localhost:8585")
-
 	conf.Random = randomPassword()
-	conf.SendgridAPI = getValue("SendgridAPI:", "noreply@"+projectName+".com")
+
+	conf.SendgridAPI = getValue("SendgridAPI:", "")
+	conf.NoReplyEmail = getValue("NoReplyEmail:", "noreply@"+projectName+".com")
 
 	conf.Google = getValue("Google API:", "")
 

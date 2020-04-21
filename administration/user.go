@@ -546,6 +546,13 @@ func initUserResource(resource *Resource) {
 			if err != nil {
 				request.App().Log().Println(err)
 			}
+
+			count, err := admin.Query().Count(&User{})
+			if err == nil && count == 0 {
+				user.IsAdmin = true
+				user.Role = "sysadmin"
+			}
+
 			must(admin.Create(user))
 
 			AddFlashMessage(request, messages.Messages.Get(locale, "admin_confirm_email_send", user.Email))
