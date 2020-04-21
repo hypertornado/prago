@@ -1,4 +1,4 @@
-package main
+package setup
 
 import (
 	"bufio"
@@ -15,17 +15,19 @@ import (
 	_ "github.com/go-sql-driver/mysql" //use mysql
 )
 
-func main() {
-	fmt.Println("Prago project installer")
+func StartSetup(projectName string) {
+	fmt.Println("Prago project setup")
 
 	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println("Installation directory:", wd)
+	fmt.Println("Setup directory:", wd)
 
-	_, projectName := path.Split(wd)
+	if projectName == "" {
+		_, projectName = path.Split(wd)
+	}
 
 	fmt.Println("Project name:", projectName)
 
@@ -78,6 +80,8 @@ func createConfigFiles(projectName string) {
 
 	conf.SSH = getValue("SSH path:", "")
 
+	conf.Port = getValue("Port number:", "8585")
+
 	conf.BaseURL = getValue("BaseURL:", "http://localhost:8585")
 	conf.Random = randomPassword()
 
@@ -99,6 +103,8 @@ func createConfigFiles(projectName string) {
 type Config struct {
 	StaticPaths []string `json:"staticPaths"`
 	SSH         string   `json:"ssh"`
+
+	Port string `json:"port"`
 
 	DBUser     string `json:"dbUser"`
 	DBName     string `json:"dbName"`

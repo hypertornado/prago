@@ -10,20 +10,31 @@ import (
 )
 
 func loadConfig(appName string) config {
-	path := fmt.Sprintf("%s/.%s/config.json", os.Getenv("HOME"), appName)
+	path := getConfigPath(appName)
+
+	kv := make(map[string]interface{})
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(fmt.Sprintf("error while opening config file %s: %s", path, err))
 	}
 
-	kv := make(map[string]interface{})
-
 	err = json.Unmarshal(data, &kv)
 	if err != nil {
 		panic(fmt.Sprintf("error while parsing config file: %s", err))
 	}
-
 	return config{kv}
+}
+
+func getConfigPath(appName string) string {
+	return fmt.Sprintf("%s/.%s/config.json", os.Getenv("HOME"), appName)
+}
+
+func configExists(appName string) bool {
+	_, err := os.Open(getConfigPath(appName))
+	if err == nil {
+		return true
+	}
+	return false
 }
 
 type config struct {

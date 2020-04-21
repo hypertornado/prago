@@ -3,13 +3,16 @@ package build
 import (
 	"errors"
 	"fmt"
-	"github.com/hypertornado/prago"
-	"github.com/hypertornado/prago/utils"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
+
+	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/utils"
+
+	setup "github.com/hypertornado/prago/prago-setup/lib"
 )
 
 //BuildMiddleware allows binary building and release
@@ -48,6 +51,10 @@ func CreateBuildHelper(app *prago.App, b BuildSettings) {
 
 	app.AddCommand("party").Callback(func() {
 		must(b.party(appName, version, ssh))
+	})
+
+	app.AddCommand("setup").Callback(func() {
+		setup.StartSetup(app.AppName)
 	})
 
 }

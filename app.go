@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	setup "github.com/hypertornado/prago/prago-setup/lib"
 	"github.com/hypertornado/prago/utils"
 )
 
@@ -30,6 +31,12 @@ func NewTestingApp() *App {
 }
 
 func createApp(appName, version string, initFunction func(*App)) *App {
+	if !configExists(appName) {
+		if utils.ConsoleQuestion("File config.json does not exist. Can't start app. Would you like to start setup?") {
+			setup.StartSetup(appName)
+		}
+	}
+
 	app := &App{
 		AppName: appName,
 		Version: version,

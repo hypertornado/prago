@@ -1,4 +1,4 @@
-package main
+package setup
 
 import (
 	"fmt"
@@ -107,7 +107,7 @@ func main() {
 			request.RenderView("layout")
 		})
 
-		app.MainController().Get("/", func(request prago.Request) {
+		app.MainController().Get("*", func(request prago.Request) {
 			request.SetData("app_name", appName)
 			request.SetData("version", appVersion)
 			request.SetData("yield", "404")
