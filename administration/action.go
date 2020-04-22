@@ -123,7 +123,7 @@ func actionNew(permission Permission) Action {
 
 			form.Classes = append(form.Classes, "form_leavealert")
 			form.Action = "../" + resource.ID
-			form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_create"))
+			form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_save"))
 			AddCSRFToken(form, request)
 
 			renderNavigationPage(request, adminNavigationPage{
@@ -157,7 +157,7 @@ func actionCreate(permission Permission) Action {
 			if resource.Admin.search != nil {
 				err = resource.Admin.search.saveItem(&resource, item)
 				if err != nil {
-					fmt.Errorf("%s", err)
+					request.Log().Println(fmt.Errorf("%s", err))
 				}
 				resource.Admin.search.Flush()
 			}
@@ -227,7 +227,7 @@ func actionEdit(permission Permission) Action {
 
 			form.Classes = append(form.Classes, "form_leavealert")
 			form.Action = "edit"
-			form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_edit"))
+			form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_save"))
 			AddCSRFToken(form, request)
 
 			renderNavigationPage(request, adminNavigationPage{
@@ -272,7 +272,7 @@ func actionUpdate(permission Permission) Action {
 			if resource.Admin.search != nil {
 				err = resource.Admin.search.saveItem(&resource, item)
 				if err != nil {
-					fmt.Errorf("%s", err)
+					request.Log().Println(fmt.Errorf("%s", err))
 				}
 				resource.Admin.search.Flush()
 			}
@@ -366,7 +366,7 @@ func actionDoDelete(permission Permission) Action {
 			if resource.Admin.search != nil {
 				err = resource.Admin.search.deleteItem(&resource, int64(id))
 				if err != nil {
-					fmt.Errorf("%s", err)
+					request.Log().Println(fmt.Errorf("%s", err))
 				}
 				resource.Admin.search.Flush()
 			}

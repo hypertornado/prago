@@ -12,6 +12,9 @@ const adminTemplates = `
           <div style="background-image: url('{{CSS $item.Image}}');"
           class="admin_navigation_breadcrumb_image"></div>
         {{- end -}}
+        {{- if $item.NoImage -}}
+          <div class="admin_navigation_breadcrumb_image"></div>
+        {{- end -}}
         {{- $item.Name -}}
         <div class="admin_navigation_breadcrumb_divider"></div>
       </a>
@@ -166,14 +169,16 @@ const adminTemplates = `
     {{end}}
   </table>
 {{end}}{{define "admin_home_navigation"}}
-  <div class="admin_box_padding">
+  <div class="admin_home">
     {{range $item := .}}
-      <a href="{{$item.URL}}">{{$item.Name}}</a>
+      <a href="{{$item.URL}}" class="admin_home_item">{{$item.Name}}</a>
+      {{if false}}
       <ul>
         {{range $action := $item.Actions}}
           <li><a href="{{$action.URL}}">{{$action.Name}}</a></li>
         {{end}}
       </ul>
+      {{end}}
     {{end}}
   </div>
 {{end}}{{define "admin_item_input"}}
@@ -13402,6 +13407,13 @@ body {
   line-height: 1.4em;
   color: #444;
 }
+@media (max-width: 800px) {
+  html,
+  body {
+    font-size: 16px;
+    line-height: 1.4em;
+  }
+}
 body {
   background-color: #fafafa;
   background-size: cover;
@@ -13500,9 +13512,6 @@ ul {
 .admin_box h1 {
   text-align: center;
   padding: 5px 10px;
-}
-.admin_box_padding {
-  padding: 1px 10px;
 }
 .admin_box-wide {
   box-shadow: none;
@@ -13647,7 +13656,7 @@ ul {
   padding: 8px 6px;
   display: inline-block;
   border-radius: 3px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 1.4rem;
   color: #333;
   vertical-align: middle;
@@ -13661,7 +13670,7 @@ ul {
   padding: 8px 6px;
   display: inline-block;
   border-radius: 3px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 1.4rem;
   color: #333;
   vertical-align: middle;
@@ -13739,16 +13748,10 @@ select.admin_table_filter_item {
 }
 .admin_table_row td {
   border-bottom: 1px solid #eee;
-}
-.admin_table_row:hover td {
-  background: rgba(64, 120, 192, 0.05);
   cursor: pointer;
 }
 .admin_table_cell-orderedby {
   background-color: #fcfcfc;
-}
-.admin_table_row:active {
-  background-color: rgba(64, 120, 192, 0.1);
 }
 .admin_table_row td {
   padding: 2px 5px;
@@ -13797,8 +13800,16 @@ th.admin_list_orderitem {
 .admin_list_buttons {
   opacity: 0;
 }
-.admin_table_row:hover .admin_list_buttons {
-  opacity: 1;
+@media (hover: hover) {
+  .admin_table_row:hover td {
+    background: rgba(64, 120, 192, 0.05);
+  }
+  .admin_table_row:active {
+    background-color: rgba(64, 120, 192, 0.1);
+  }
+  .admin_table_row:hover .admin_list_buttons {
+    opacity: 1;
+  }
 }
 .flash_messages {
   text-align: center;
@@ -14118,6 +14129,11 @@ progress {
   align-items: center;
   align-items: stretch;
 }
+@media (max-width: 800px) {
+  .admin_navigation_breadcrumbs {
+    flex-direction: column;
+  }
+}
 .admin_navigation_breadcrumb {
   text-decoration: none;
   display: flex;
@@ -14168,8 +14184,9 @@ progress {
   border-radius: 5px;
   background: rgba(64, 120, 192, 0.1);
   padding: 0px 4px;
+  justify-content: center;
 }
-.admin_header .admin_navigation_tabs {
+.admin_navigation_tabs {
   margin: 0px 5px 5px 0px;
   padding-left: 200px;
 }
@@ -14209,6 +14226,23 @@ progress {
   color: white;
   box-shadow: none;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+}
+@media (max-width: 800px) {
+  .admin_navigation_tabs {
+    margin: 0px;
+    padding: 0px;
+    background: none;
+    align-content: stretch;
+  }
+  .admin_navigation_tabs_content {
+    border-radius: 0px;
+    width: 100%;
+    align-content: stretch;
+  }
+  .admin_navigation_tabdivider {
+    border: none;
+    margin: 0px 1px;
+  }
 }
 .btn-more {
   position: relative;
@@ -14280,8 +14314,9 @@ td.admin_list_message {
 @media (max-width: 600px) {
   .admin_box {
     box-shadow: none;
-    margin-bottom: 0px;
-    padding-bottom: 20px;
+    border: none;
+    margin-top: 0px;
+    border-radius: 0px;
   }
   .admin_header {
     position: relative !important;
@@ -14630,12 +14665,14 @@ div.admin_dropdown_item {
   border-top-right-radius: 5px;
 }
 @media (max-width: 800px) {
+  .admin_header {
+    box-shadow: none;
+    background: none;
+  }
   .admin_header_top {
-    flex-direction: column;
     align-items: stretch;
   }
   .admin_header_right {
-    width: 100%;
     padding: 0px 5px 3px 5px;
   }
   .admin_layout {
@@ -14654,6 +14691,7 @@ div.admin_dropdown_item {
     flex-grow: 0;
     align-items: center;
     padding: 5px;
+    display: none;
   }
   a.admin_header_resource {
     padding: 3px 3px;
@@ -14662,10 +14700,6 @@ div.admin_dropdown_item {
   }
   .admin_content {
     width: auto;
-  }
-  .admin_header .admin_navigation_tabs {
-    margin-left: 5px;
-    padding-left: 0px;
   }
 }
 /*!
@@ -15118,6 +15152,21 @@ a.admin_search_suggestion-selected:active {
 }
 .list_filter_suggestion_description {
   color: #888;
+}
+.admin_home {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  padding: 10px 5px;
+}
+.admin_home_item {
+  margin: 3px;
+  padding: 5px 10px;
+  border-radius: 2px;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+}
+a.admin_home_item {
+  text-decoration: none;
 }
 `
 

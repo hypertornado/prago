@@ -204,13 +204,18 @@ div.admin_dropdown_item {
 
 @media (max-width: 800px) {
 
+  .admin_header {
+    box-shadow: none;
+    background: none;
+  }
+
   .admin_header_top {
-    flex-direction: column;
+    //flex-direction: column;
     align-items: stretch;
   }
 
   .admin_header_right {
-    width: 100%;
+    //width: 100%;
     //border: 1px solid red;
     padding: 0px 5px 3px 5px;
   }
@@ -234,6 +239,8 @@ div.admin_dropdown_item {
     flex-grow: 0;
     align-items: center;
     padding: 5px;
+
+    display: none;
     //border: 1px solid green;
   }
   
@@ -250,10 +257,5 @@ div.admin_dropdown_item {
 
   .admin_content {
     width: auto;
-  }
-
-  .admin_header .admin_navigation_tabs {
-    margin-left: 5px;
-    padding-left: 0px;
   }
 }

@@ -13,11 +13,17 @@ html {
 }
 
 html, body{
-
   font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
   font-size: 14px;
   line-height: 1.4em;
   color: @black;
+}
+
+@media (max-width: 800px) {
+  html, body {
+    font-size: 16px;
+    line-height: 1.4em;
+  }
 }
 
 body {
@@ -139,8 +145,10 @@ ul {
   padding: 5px 10px;
 }
 
-.admin_box_padding {
-  padding: 1px 10px;
+@media (max-width: 800px) {
+  .admin_box {
+    //margin-top: 0px;
+  }
 }
 
 .admin_box-wide {
@@ -309,7 +317,7 @@ ul {
   padding: 8px 6px;
   display: inline-block;
   border-radius: 3px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 1.4rem;
   color: #333;
   vertical-align: middle;
@@ -410,25 +418,12 @@ select.admin_table_filter_item {
 
 .admin_table_row td {
   border-bottom: 1px solid #eee;
-}
-
-.admin_table_row:hover td {
-  background: @baseColorBackgroundLighter;
   cursor: pointer;
 }
 
 .admin_table_cell-orderedby {
   background-color: #fcfcfc;
   //background-color: #eee;
-}
-
-.admin_table_row:active {
-  background-color: @baseColorBackground;
-}
-
-.admin_table-dragging .admin_table_row:active {
-  //pointer-events: none;
-  //background-color: red !important;
 }
 
 .admin_table_row td {
@@ -497,8 +492,23 @@ th.admin_list_orderitem {
   opacity: 0;
 }
 
-.admin_table_row:hover .admin_list_buttons {
-  opacity: 1;
+@media (hover: hover) {
+  .admin_table_row:hover td {
+    background: @baseColorBackgroundLighter;
+  }
+  
+  .admin_table_row:active {
+    background-color: @baseColorBackground;
+  }
+  
+  .admin_table-dragging .admin_table_row:active {
+    //pointer-events: none;
+    //background-color: red !important;
+  }
+
+  .admin_table_row:hover .admin_list_buttons {
+    opacity: 1;
+  }
 }
 
 .flash_messages {
@@ -895,6 +905,12 @@ progress {
   align-items: stretch;
 }
 
+@media (max-width: 800px) {
+  .admin_navigation_breadcrumbs {
+    flex-direction: column;
+  }
+}
+
 .admin_navigation_breadcrumb {
   text-decoration: none;
   //border-radius: 3px;
@@ -961,9 +977,11 @@ progress {
   border-radius: 5px;
   background: @baseColorBackground;
   padding: 0px 4px;
+
+  justify-content: center;
 }
 
-.admin_header .admin_navigation_tabs {
+.admin_navigation_tabs {
   //margin-left: 205px;
   margin: 0px 5px 5px 0px;
   padding-left: 200px;
@@ -1023,6 +1041,27 @@ progress {
   color: white;
   box-shadow: none;
   .shadow;
+}
+
+@media (max-width: 800px) {
+  .admin_navigation_tabs {
+    margin: 0px;
+    padding: 0px;
+    background: none;
+    align-content: stretch;
+  }
+
+  .admin_navigation_tabs_content {
+    //background: none;
+    border-radius: 0px;
+    width: 100%;
+    align-content: stretch;
+  }
+
+  .admin_navigation_tabdivider {
+    border: none;
+    margin: 0px 1px;
+  }
 }
 
 .btn-more {
@@ -1107,8 +1146,11 @@ td.admin_list_message {
 @media (max-width: 600px) {
   .admin_box {
     box-shadow: none;
-    margin-bottom: 0px;
-    padding-bottom: 20px;
+    //margin-bottom: 0px;
+    //padding-bottom: 20px;
+    border: none;
+    margin-top: 0px;
+    border-radius: 0px;
   }
 
   .admin_header {

@@ -37,6 +37,13 @@ type navigationBreadcrumb struct {
 	Image string
 }
 
+func (bc navigationBreadcrumb) NoImage() bool {
+	if bc.Logo == "" && bc.Icon == "" && bc.Image == "" {
+		return true
+	}
+	return false
+}
+
 func IsTabVisible(tabs []navigationTab, pos int) bool {
 	if tabs[pos-1].Selected {
 		return false
@@ -79,7 +86,7 @@ func renderNavigationPageNoLogin(request prago.Request, page adminNavigationPage
 
 func (admin *Administration) getAdminNavigation(user User, code string) adminItemNavigation {
 	tabs := []navigationTab{
-		navigationTab{
+		{
 			Name:     messages.Messages.Get(user.Locale, "admin_signpost"),
 			URL:      admin.GetURL(""),
 			Selected: trueIfEqual(code, ""),

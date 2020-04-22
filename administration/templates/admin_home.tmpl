@@ -1,12 +1,14 @@
 {{define "admin_home_navigation"}}
-  <div class="admin_box_padding">
+  <div class="admin_home">
     {{range $item := .}}
-      <a href="{{$item.URL}}">{{$item.Name}}</a>
+      <a href="{{$item.URL}}" class="admin_home_item">{{$item.Name}}</a>
+      {{if false}}
       <ul>
         {{range $action := $item.Actions}}
           <li><a href="{{$action.URL}}">{{$action.Name}}</a></li>
         {{end}}
       </ul>
+      {{end}}
     {{end}}
   </div>
 {{end}}
