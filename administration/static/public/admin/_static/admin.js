@@ -169,6 +169,7 @@ function bindImagePickers() {
 var ImagePicker = (function () {
     function ImagePicker(el) {
         var _this = this;
+        console.log("image picker");
         this.el = el;
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.hiddenInput = el.querySelector(".admin_images_hidden");
@@ -205,7 +206,7 @@ var ImagePicker = (function () {
                 this.addImage(id);
             }
         }
-        this.fileInput.addEventListener("change", function () {
+        this.fileInput.addEventListener("change", function (e) {
             var files = _this.fileInput.files;
             var formData = new FormData();
             if (files.length == 0) {
@@ -229,8 +230,6 @@ var ImagePicker = (function () {
                     console.error("Error while loading item.");
                 }
             });
-            _this.fileInput.type = "";
-            _this.fileInput.type = "file";
             _this.showProgress();
             request.send(formData);
         });

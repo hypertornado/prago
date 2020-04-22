@@ -15,6 +15,7 @@ class ImagePicker {
   draggedElement: HTMLAnchorElement;
 
   constructor(el: HTMLDivElement) {
+    console.log("image picker");
     this.el = el;
     this.adminPrefix = document.body.getAttribute("data-admin-prefix");
     this.hiddenInput = <HTMLInputElement>el.querySelector(".admin_images_hidden");
@@ -60,7 +61,7 @@ class ImagePicker {
       }
     }
 
-    this.fileInput.addEventListener("change", () => {
+    this.fileInput.addEventListener("change", (e) => {
       var files = this.fileInput.files
       var formData = new FormData();
       if (files.length == 0) {
@@ -87,8 +88,6 @@ class ImagePicker {
         }
       })
 
-      this.fileInput.type = "";
-      this.fileInput.type = "file";
       this.showProgress();
       request.send(formData);
     })
