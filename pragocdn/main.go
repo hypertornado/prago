@@ -15,18 +15,20 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	_ "image/jpeg"
 	_ "image/png"
 
+	"github.com/disintegration/imaging"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/build"
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 	"github.com/hypertornado/prago/utils"
 )
 
-const version = "2020.2"
+const version = "2020.3"
 
 var config CDNConfig
 
@@ -203,6 +205,7 @@ func start(app *prago.App) {
 		} else {
 			request.Response().Header().Set("Content-Length", fmt.Sprintf("%d", size))
 			_, err = io.Copy(request.Response(), stream)
+			//defer request.Response().Close()
 			if err != nil {
 				panic(err)
 			}
@@ -489,6 +492,16 @@ func getTempFilePath(extension string) string {
 	return path.Join(dir, fileName)
 }
 
+func imagingThumbnail(originalPath string, destPath string, size int) error {
+	src, err := imaging.Open(originalPath)
+	if err != nil {
+		return fmt.Errorf("failed to open image: %v", err)
+	}
+	destImage := imaging.Fit(src, size, size, imaging.Lanczos)
+
+	return imaging.Save(destImage, destPath)
+}
+
 //CMYK: https://github.com/jcupitt/libvips/issues/630
 func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, extension string, crop bool) error {
 	//tempPath := getTempFilePath()
@@ -504,6 +517,13 @@ func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, exte
 	if err != nil {
 		return fmt.Errorf("error while creating mkdirall %s: %s", outputDirectoryPath, err)
 	}
+
+	sizeInt, err := strconv.Atoi(size)
+	if err != nil {
+		return fmt.Errorf("wrong size format: %s", size)
+	}
+
+	return imagingThumbnail(originalPath, outputFilePath, sizeInt)
 
 	tempPath := getTempFilePath(extension)
 	defer os.Remove(tempPath)

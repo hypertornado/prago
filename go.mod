@@ -9,6 +9,7 @@ require (
 	github.com/chris-ramon/douceur v0.2.0
 	github.com/dghubble/go-twitter v0.0.0-20190719072343-39e5462e111f
 	github.com/dghubble/oauth1 v0.6.0
+	github.com/disintegration/imaging v1.6.2
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang-commonmark/html v0.0.0-20180910111043-7d7c804e1d46 // indirect
 	github.com/golang-commonmark/linkify v0.0.0-20180910111149-f05efb453a0e // indirect
