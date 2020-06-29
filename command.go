@@ -21,6 +21,7 @@ func addServerCommand(app *App) {
 			NewFlag("development", "development mode").Alias("d").Bool(&developmentMode),
 		).
 		Callback(func() {
+			app.DevelopmentMode = developmentMode
 			if port <= 0 {
 				configPort, err := app.Config.Get("port")
 				switch configPort.(type) {
@@ -35,7 +36,7 @@ func addServerCommand(app *App) {
 					port = defaultPort
 				}
 			}
-			must(app.ListenAndServe(port, developmentMode))
+			must(app.ListenAndServe(port))
 		})
 }
 

@@ -26,7 +26,7 @@ import (
 	"github.com/hypertornado/prago/utils"
 )
 
-const version = "2020.1"
+const version = "2020.2"
 
 var config CDNConfig
 
@@ -95,10 +95,10 @@ func uploadFile(account CDNConfigAccount, extension string, inData io.Reader) (*
 	filePath := getFilePath(account.Name, uuid, extension)
 
 	file, err := os.Create(filePath)
+	defer file.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
 
 	_, err = io.Copy(file, inData)
 	if err != nil {
@@ -160,6 +160,9 @@ func start(app *prago.App) {
 			request.Params().Get("hash"),
 			request.Params().Get("name"),
 		)
+		if stream != nil {
+			defer stream.Close()
+		}
 
 		if err != nil {
 			if app.DevelopmentMode {
@@ -311,7 +314,7 @@ func getMetadata(accountName, uuid string) (*cdnclient.CDNFileData, error) {
 
 }
 
-func getFile(accountName, uuid, format, hash, name string) (eddCode int, err error, source io.Reader, mimeExtension string, size int64) {
+func getFile(accountName, uuid, format, hash, name string) (eddCode int, err error, source io.ReadCloser, mimeExtension string, size int64) {
 	account := accounts[accountName]
 	if account == nil {
 		return 404, errors.New("account not found"), nil, "", -1
@@ -491,7 +494,13 @@ func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, exte
 	//tempPath := getTempFilePath()
 	//defer os.Remove(tempPath)
 
-	err := os.MkdirAll(outputDirectoryPath, 0777)
+	f, err := os.Open(outputFilePath)
+	if err == nil {
+		f.Close()
+		return nil
+	}
+
+	err = os.MkdirAll(outputDirectoryPath, 0777)
 	if err != nil {
 		return fmt.Errorf("error while creating mkdirall %s: %s", outputDirectoryPath, err)
 	}
@@ -516,11 +525,6 @@ func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, exte
 }
 
 func vipsThumbnailProfile(originalPath, outputFilePath, size, extension string, crop bool, cmyk bool) error {
-	_, err := os.Open(outputFilePath)
-	if err == nil {
-		return nil
-	}
-
 	outputParameters := "[strip]"
 	if extension == "jpg" {
 		outputParameters = "[optimize_coding,strip]"

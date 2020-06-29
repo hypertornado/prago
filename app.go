@@ -80,11 +80,10 @@ func (app App) Log() *log.Logger { return app.logger }
 func (app *App) DotPath() string { return os.Getenv("HOME") + "/." + app.AppName }
 
 //ListenAndServe starts server on port
-func (app *App) ListenAndServe(port int, developmentMode bool) error {
+func (app *App) ListenAndServe(port int) error {
 	app.Log().Printf("Server started: port=%d, pid=%d, developmentMode=%v\n", port, os.Getpid(), app.DevelopmentMode)
 
-	app.DevelopmentMode = developmentMode
-	if !developmentMode {
+	if !app.DevelopmentMode {
 		file, err := os.OpenFile(app.DotPath()+"/prago.log",
 			os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
 		must(err)

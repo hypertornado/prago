@@ -1,9 +1,10 @@
 package development
 
 import (
-	"github.com/hypertornado/prago"
 	"os"
 	"os/exec"
+
+	"github.com/hypertornado/prago"
 )
 
 var defaultPort = 8585
@@ -38,7 +39,7 @@ func CreateDevelopmentHelper(app *prago.App, settings DevelopmentSettings) {
 					go developmentTypescript(v)
 				}
 
-				err := app.ListenAndServe(port, true)
+				err := app.ListenAndServe(port)
 				if err != nil {
 					panic(err)
 				}
