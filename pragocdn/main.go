@@ -2,6 +2,7 @@ package main
 
 import (
 	"compress/gzip"
+	"context"
 	"errors"
 	"fmt"
 	"image"
@@ -26,9 +27,11 @@ import (
 	"github.com/hypertornado/prago/build"
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 	"github.com/hypertornado/prago/utils"
+
+	"golang.org/x/sync/semaphore"
 )
 
-const version = "2020.3"
+const version = "2020.4"
 
 var config CDNConfig
 
@@ -41,7 +44,11 @@ var extensionRegex = regexp.MustCompile("^[a-zA-Z0-9]{1,10}$")
 
 var cmykProfilePath = os.Getenv("HOME") + "/.pragocdn/cmyk.icm"
 
+var sem = semaphore.NewWeighted(10)
+var semCtx = context.Background()
+
 func main() {
+
 	var err error
 	config, err = loadCDNConfig()
 	if err != nil {
@@ -493,6 +500,8 @@ func getTempFilePath(extension string) string {
 }
 
 func imagingThumbnail(originalPath string, destPath string, size int) error {
+	sem.Acquire(semCtx, 1)
+	defer sem.Release(1)
 	src, err := imaging.Open(originalPath)
 	if err != nil {
 		return fmt.Errorf("failed to open image: %v", err)
