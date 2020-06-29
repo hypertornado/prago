@@ -3,25 +3,31 @@
   data-type="{{.TypeID}}"
   data-order-column="{{.OrderColumn}}"
   data-order-desc="{{.OrderDesc}}"
-  data-prefilter-field="{{.PrefilterField}}"
-  data-prefilter-value="{{.PrefilterValue}}"
   data-columns="{{.Columns}}"
   data-visible-columns="{{.VisibleColumns}}"
   data-items-per-page="{{.ItemsPerPage}}"
 >
   <div class="admin_tablesettings">
-    <div class="admin_tablesettings_name">{{message .Locale "admin_options_visible"}}</div>
-
-    <a href="#" class="btn admin_exportbutton" download="export.xlsx">Exportovat</a>
-
+    <h2>Možnosti</h2>
+    <h3>{{message .Locale "admin_options_visible"}}</h3>
     {{range $item := .Header}}
       <label class="admin_tablesettings_label"><input type="checkbox" class="admin_tablesettings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
     {{end}}
+
+    <h3>Exportovat tabulku do Excelu</h3>
+    <a href="#" class="btn admin_exportbutton" download="export.xlsx">Exportovat</a>
+
+    <h3>Počet položek na stránce</h3>
     <select class="admin_tablesettings_pages input">
       {{range $item := .PaginationData}}
         <option value="{{$item.Value}}"{{if $item.Selected}} selected{{end}}>{{$item.Name}}</option>
       {{end}}
     </select>
+
+    <h3>Statistiky</h3>
+    <label>
+      <input type="checkbox" class="admin_tablesettings_stats"> Zobrazit statistiky
+    </label>
     <div class="clear"></div>
   </div>
 
@@ -47,6 +53,7 @@
       {{end}}
       <th>
         <progress class="admin_table_progress"></progress>
+        <label><input type="checkbox" class="admin_list_showmore"> Více možností</label>
       </th>
     </tr>
     </thead>
@@ -112,6 +119,14 @@
 {{end}}
 
 {{define "admin_list_cells"}}
+  {{if .admin_list.Stats}}
+    <tr>
+      <td colspan="{{.admin_list.Colspan}}" class="list_stats">
+        {{template "admin_stats" .admin_list.Stats}}
+      </td>
+    </tr>
+  {{end}}
+
   {{range $item := .admin_list.Rows}}
     <tr data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="admin_table_row">
       {{range $cell := $item.Items}}

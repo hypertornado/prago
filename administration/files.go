@@ -65,8 +65,8 @@ type File struct {
 	Name        string `prago-edit:"_"`
 	Description string `prago-type:"text" prago-preview:"true"`
 	User        int64  `prago-type:"relation" prago-edit:"_"`
-	Width       int64
-	Height      int64
+	Width       int64  `prago-edit:"_"`
+	Height      int64  `prago-edit:"_"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
@@ -179,14 +179,14 @@ func initFilesResource(resource *Resource) {
 			panic(err)
 		}
 
-		var size int
+		var size string
 		switch request.Params().Get("size") {
 		case "large":
-			size = 1000
+			size = "1000"
 		case "medium":
-			size = 400
+			size = "400"
 		case "small":
-			size = 200
+			size = "200"
 		default:
 			panic("wrong size")
 		}
@@ -237,6 +237,25 @@ func initFilesResource(resource *Resource) {
 
 		AddFlashMessage(request, messages.Messages.Get(getLocale(request), "admin_item_created"))
 		request.Redirect(resource.GetURL(""))
+	})
+
+	resource.AddAction(Action{
+		Method: "POST",
+		URL:    "getcdnurl",
+		Handler: func(resource Resource, request prago.Request, user User) {
+			uuid := request.Params().Get("uuid")
+			size := request.Params().Get("size")
+
+			files := resource.Admin.GetFiles(uuid)
+			if len(files) == 0 {
+				panic("can't find file")
+			}
+			file := files[0]
+
+			redirectURL := filesCDN.GetImageURL(uuid, file.Name, size)
+			request.Redirect(redirectURL)
+			//panic("OOOO")
+		},
 	})
 }
 
@@ -312,22 +331,22 @@ func writeFileResponse(request prago.Request, files []*File) {
 
 //GetLarge file path
 func (f *File) GetLarge() string {
-	return filesCDN.GetImageURL(f.UID, f.Name, 1000)
+	return filesCDN.GetImageURL(f.UID, f.Name, "1000")
 }
 
 //GetGiant file path
 func (f *File) GetGiant() string {
-	return filesCDN.GetImageURL(f.UID, f.Name, 2500)
+	return filesCDN.GetImageURL(f.UID, f.Name, "2500")
 }
 
 //GetMedium file path
 func (f *File) GetMedium() string {
-	return filesCDN.GetImageURL(f.UID, f.Name, 400)
+	return filesCDN.GetImageURL(f.UID, f.Name, "400")
 }
 
 //GetSmall file path
 func (f *File) GetSmall() string {
-	return filesCDN.GetImageURL(f.UID, f.Name, 200)
+	return filesCDN.GetImageURL(f.UID, f.Name, "200")
 }
 
 //GetOriginal file path

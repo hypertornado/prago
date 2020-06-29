@@ -106,7 +106,10 @@ func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, use
 		v.resource.newArrayOfItems(&rowItems)
 
 		var vi = view{}
-		q := resource.Admin.prefilterQuery(v.field, fmt.Sprintf("%d", id))
+		q := resource.Admin.Query()
+		q = q.WhereIs(v.field, fmt.Sprintf("%d", id))
+		//q = q.
+		//q := resource.Admin.prefilterQuery(v.field, fmt.Sprintf("%d", id))
 		if v.resource.OrderDesc {
 			q = q.OrderDesc(v.resource.OrderByColumn)
 		} else {

@@ -7,10 +7,12 @@ import (
 	"image"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"mime"
 	"net/http"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -24,7 +26,7 @@ import (
 	"github.com/hypertornado/prago/utils"
 )
 
-const version = "1.8.0"
+const version = "2020.1"
 
 var config CDNConfig
 
@@ -163,7 +165,8 @@ func start(app *prago.App) {
 			if app.DevelopmentMode {
 				panic(err)
 			} else {
-				fmt.Println(err)
+				path := request.Request().URL.Path
+				fmt.Println(fmt.Sprintf("%s - %s", path, err))
 			}
 		}
 
@@ -477,24 +480,45 @@ func convertedFilePath(account, uuid, extension, format string) (string, error) 
 	return "", errors.New("wrong file convert format")
 }
 
-//CMYK: https://github.com/jcupitt/libvips/issues/630
-func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, extension string, crop bool) error {
-	err := vipsThumbnailProfile(originalPath, outputDirectoryPath, outputFilePath, size, extension, crop, false)
-	if err != nil {
-		err = vipsThumbnailProfile(originalPath, outputDirectoryPath, outputFilePath, size, extension, crop, true)
-	}
-	return err
+func getTempFilePath(extension string) string {
+	dir := os.TempDir()
+	fileName := fmt.Sprintf("pragocdn-%d.%s", rand.Int(), extension)
+	return path.Join(dir, fileName)
 }
 
-func vipsThumbnailProfile(originalPath, outputDirectoryPath, outputFilePath, size, extension string, crop bool, cmyk bool) error {
+//CMYK: https://github.com/jcupitt/libvips/issues/630
+func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, extension string, crop bool) error {
+	//tempPath := getTempFilePath()
+	//defer os.Remove(tempPath)
+
+	err := os.MkdirAll(outputDirectoryPath, 0777)
+	if err != nil {
+		return fmt.Errorf("error while creating mkdirall %s: %s", outputDirectoryPath, err)
+	}
+
+	tempPath := getTempFilePath(extension)
+	defer os.Remove(tempPath)
+
+	err = vipsThumbnailProfile(originalPath, tempPath, size, extension, crop, false)
+	if err != nil {
+		err = vipsThumbnailProfile(originalPath, tempPath, size, extension, crop, true)
+	}
+	if err != nil {
+		return fmt.Errorf("vipsThumbnailProfile: %s", err)
+	}
+
+	err = os.Rename(tempPath, outputFilePath)
+	if err != nil {
+		return fmt.Errorf("moving file from %s to %s: %s", tempPath, outputFilePath, err)
+	}
+
+	return nil
+}
+
+func vipsThumbnailProfile(originalPath, outputFilePath, size, extension string, crop bool, cmyk bool) error {
 	_, err := os.Open(outputFilePath)
 	if err == nil {
 		return nil
-	}
-
-	err = os.MkdirAll(outputDirectoryPath, 0777)
-	if err != nil {
-		return err
 	}
 
 	outputParameters := "[strip]"

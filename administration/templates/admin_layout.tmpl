@@ -23,7 +23,6 @@
 
   </head>
   <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.admin_header.UrlPrefix}}">
-    {{template "admin_flash" .}}
     <div class="admin_layout">
         <div class="admin_header">
             <div class="admin_header_top">
@@ -73,6 +72,7 @@
                     <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
                 {{end}}
             </div>
+            {{template "admin_flash" .}}
             <div class="admin_content">
                 {{tmpl .admin_yield .}}
             </div>

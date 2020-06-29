@@ -1,96 +1,5 @@
 function bindStats() {
-    var elements = document.querySelectorAll(".admin_stats_pie");
-    Array.prototype.forEach.call(elements, function (el, i) {
-        new PieChart(el);
-    });
-    var elements = document.querySelectorAll(".admin_stats_timeline");
-    Array.prototype.forEach.call(elements, function (el, i) {
-        new Timeline(el);
-    });
 }
-var PieChart = (function () {
-    function PieChart(el) {
-        var canvas = el.querySelector("canvas");
-        var ctx = canvas.getContext('2d');
-        var labelA = el.getAttribute("data-label-a");
-        var labelB = el.getAttribute("data-label-b");
-        var valueA = parseInt(el.getAttribute("data-value-a"));
-        var valueB = parseInt(el.getAttribute("data-value-b"));
-        var data = {
-            datasets: [{
-                    data: [valueA, valueB],
-                    backgroundColor: ["#4078c0", "#eee"]
-                }],
-            labels: [
-                labelA,
-                labelB
-            ]
-        };
-        var myChart = new Chart(ctx, {
-            type: "pie",
-            data: data,
-            options: {
-                "responsive": false
-            }
-        });
-    }
-    return PieChart;
-}());
-var Timeline = (function () {
-    function Timeline(el) {
-        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
-        var resource = el.getAttribute("data-resource");
-        var field = el.getAttribute("data-field");
-        var canvas = el.querySelector("canvas");
-        this.ctx = canvas.getContext('2d');
-        this.loadData(resource, field);
-    }
-    Timeline.prototype.loadData = function (resource, field) {
-        var _this = this;
-        var data = {
-            resource: resource,
-            field: field
-        };
-        var request = new XMLHttpRequest();
-        request.open("POST", this.adminPrefix + "/_api/stats", true);
-        request.addEventListener("load", function () {
-            if (request.status == 200) {
-                var parsed = JSON.parse(request.responseText);
-                _this.createChart(parsed.labels, parsed.values);
-            }
-            else {
-                console.error("error while loading list");
-            }
-        });
-        request.send(JSON.stringify(data));
-    };
-    Timeline.prototype.createChart = function (labels, values) {
-        var data = {
-            labels: labels,
-            datasets: [{
-                    backgroundColor: '#4078c0',
-                    data: values
-                }]
-        };
-        var myChart = new Chart(this.ctx, {
-            type: "bar",
-            data: data,
-            options: {
-                legend: {
-                    display: false
-                },
-                scales: {
-                    yAxes: [{
-                            ticks: {
-                                beginAtZero: true
-                            }
-                        }]
-                }
-            }
-        });
-    };
-    return Timeline;
-}());
 var Autoresize = (function () {
     function Autoresize(el) {
         this.el = el;
@@ -452,8 +361,18 @@ function bindLists() {
 }
 var List = (function () {
     function List(el, openbutton) {
+        var _this = this;
         this.el = el;
         this.settingsEl = this.el.querySelector(".admin_tablesettings");
+        this.settingsCheckbox = this.el.querySelector(".admin_list_showmore");
+        this.settingsCheckbox.addEventListener("change", function () {
+            if (_this.settingsCheckbox.checked) {
+                _this.settingsEl.classList.add("admin_tablesettings-visible");
+            }
+            else {
+                _this.settingsEl.classList.remove("admin_tablesettings-visible");
+            }
+        });
         this.exportButton = this.el.querySelector(".admin_exportbutton");
         var urlParams = new URLSearchParams(window.location.search);
         this.page = parseInt(urlParams.get("_page"));
@@ -469,8 +388,6 @@ var List = (function () {
         this.tbody.textContent = "";
         this.bindFilter(urlParams);
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
-        this.prefilterField = el.getAttribute("data-prefilter-field");
-        this.prefilterValue = el.getAttribute("data-prefilter-value");
         this.defaultOrderColumn = el.getAttribute("data-order-column");
         if (el.getAttribute("data-order-desc") == "true") {
             this.defaultOrderDesc = true;
@@ -502,6 +419,10 @@ var List = (function () {
         this.itemsPerPage = parseInt(el.getAttribute("data-items-per-page"));
         this.paginationSelect = el.querySelector(".admin_tablesettings_pages");
         this.paginationSelect.addEventListener("change", this.load.bind(this));
+        this.statsCheckbox = el.querySelector(".admin_tablesettings_stats");
+        this.statsCheckbox.addEventListener("change", function () {
+            _this.filterChanged();
+        });
         this.bindOptions(visibleColumnsMap);
         this.bindOrder();
     }
@@ -534,9 +455,8 @@ var List = (function () {
         }
         var encoded = encodeParams(params);
         window.history.replaceState(null, null, document.location.pathname + encoded);
-        if (this.prefilterField != "") {
-            params["_prefilter_field"] = this.prefilterField;
-            params["_prefilter_value"] = this.prefilterValue;
+        if (this.statsCheckbox.checked) {
+            params["_stats"] = "true";
         }
         params["_format"] = "xlsx";
         this.exportButton.setAttribute("href", this.adminPrefix + "/" + this.typeName + encodeParams(params));

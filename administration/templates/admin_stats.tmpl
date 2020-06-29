@@ -1,26 +1,27 @@
 {{define "admin_stats"}}
-  {{range $item := .Fields}}
-    <div class="view_name">
-      {{$item.Name}}
+  <div class="admin_stats">
+    <h2>Statistika</h2>
+
+    <div class="admin_stats_sections">
+      {{range $section := .Sections}}
+        <div class="admin_stats_section">
+          <div class="admin_stats_section_name">{{$section.Name}}</div>
+          <div class="admin_stats_section_table">
+            {{range $row := $section.Table}}
+              <div class="admin_stats_section_row" title="{{$row.Name}} - {{$row.Description.Count}} ({{$row.Description.Percent}})">
+                <div class="admin_stats_section_row_name">{{$row.Name}}</div>
+                <div class="admin_stats_section_row_graph">
+                  <div class="admin_stats_section_row_graph_content" style="width: {{$row.Description.PercentCSS}};"></div>
+                </div>
+                <div class="admin_stats_section_row_description">
+                  <div class="admin_stats_section_row_description_count">{{$row.Description.Count}}</div>
+                  <div class="admin_stats_section_row_description_percent">{{$row.Description.Percent}}</div>
+                </div>
+              </div>
+            {{end}}
+          </div>
+        </div>
+      {{end}}
     </div>
-    <div class="view_content">
-      {{tmpl $item.Template $item.Data}}
-    </div>
-  {{end}}
-{{end}}
-
-{{define "admin_stats_text"}}
-  {{.}}
-{{end}}
-
-{{define "admin_stats_pie"}}
-  <div class="admin_stats_pie" data-label-a="{{.LabelA}}" data-label-b="{{.LabelB}}" data-value-a="{{.ValueA}}" data-value-b="{{.ValueB}}" height="50px">
-    <canvas></canvas>
-  </div>
-{{end}}
-
-{{define "admin_stats_timeline"}}
-  <div class="admin_stats_timeline" data-field="{{.Field}}" data-resource="{{.Resource}}">
-    <canvas></canvas>
   </div>
 {{end}}

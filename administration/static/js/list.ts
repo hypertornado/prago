@@ -23,20 +23,28 @@ class List {
 
   defaultVisibleColumnsStr: string;
 
-  prefilterField: string;
-  prefilterValue: string;
-
   progress: HTMLProgressElement;
 
   settingsEl: HTMLDivElement;
+  settingsCheckbox: HTMLInputElement;
 
   itemsPerPage: number;
   paginationSelect: HTMLSelectElement;
+
+  statsCheckbox: HTMLInputElement;
 
   //TODO: get filter params from URL
   constructor(el: HTMLDivElement, openbutton: HTMLButtonElement) {
     this.el = el;
     this.settingsEl = this.el.querySelector(".admin_tablesettings");
+    this.settingsCheckbox = this.el.querySelector(".admin_list_showmore");
+    this.settingsCheckbox.addEventListener("change", () => {
+      if (this.settingsCheckbox.checked) {
+        this.settingsEl.classList.add("admin_tablesettings-visible");
+      } else {
+        this.settingsEl.classList.remove("admin_tablesettings-visible");
+      }
+    });
 
     this.exportButton = this.el.querySelector(".admin_exportbutton");
 
@@ -60,8 +68,6 @@ class List {
     this.bindFilter(urlParams);
 
     this.adminPrefix = document.body.getAttribute("data-admin-prefix");
-    this.prefilterField = el.getAttribute("data-prefilter-field");
-    this.prefilterValue = el.getAttribute("data-prefilter-value");
 
     this.defaultOrderColumn = el.getAttribute("data-order-column");
     if (el.getAttribute("data-order-desc") == "true") {
@@ -97,6 +103,11 @@ class List {
     this.itemsPerPage = parseInt(el.getAttribute("data-items-per-page"));
     this.paginationSelect = <HTMLSelectElement>el.querySelector(".admin_tablesettings_pages");
     this.paginationSelect.addEventListener("change", this.load.bind(this));
+
+    this.statsCheckbox = el.querySelector(".admin_tablesettings_stats");
+    this.statsCheckbox.addEventListener("change", () => {
+      this.filterChanged();
+    })
 
     this.bindOptions(visibleColumnsMap);
     this.bindOrder();
@@ -135,9 +146,8 @@ class List {
     var encoded = encodeParams(params);
     window.history.replaceState(null, null, document.location.pathname + encoded);
 
-    if (this.prefilterField != "") {
-      params["_prefilter_field"] = this.prefilterField;
-      params["_prefilter_value"] = this.prefilterValue;
+    if (this.statsCheckbox.checked) {
+      params["_stats"] = "true";
     }
 
     params["_format"] = "xlsx";

@@ -61,6 +61,14 @@
       <a href="{{$path.URL}}">{{$path.Name}}</a>
     {{end}}
   </div>
+  <div>
+    <form action="getcdnurl" method="POST">
+      Získat zmenšeninu:
+      <input type="hidden" name="uuid" value="{{.UUID}}">
+      <input name="size" value="" placeholder="Velikost">
+      <input type="submit" class="btn" name="Zmenšit">
+    </form>
+  </div>
   <div>UUID: {{.UUID}}</div>
 {{end}}
 

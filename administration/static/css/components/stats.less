@@ -1,0 +1,90 @@
+.list_stats {
+    background: #fafafa;
+    box-shadow: inset 0px 0px 10px #ddd;
+    //padding: 5px 10px;
+}
+
+.admin_stats {
+    padding: 5px 10px;
+}
+
+.admin_stats_sections {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    align-items: stretch;
+
+}
+
+.admin_stats_section {
+    background: white;
+    margin: 0px 10px 10px 0px;
+    box-shadow: 0px 0px 10px #ddd;
+    padding: 3px 5px;
+    border-radius: 3px;
+}
+
+.admin_stats_section_name {
+    font-weight: bold;
+    text-align: center;
+} 
+
+.admin_stats_section_row {
+    display: flex;
+    width: 100%;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.admin_stats_section_row:hover {
+    background-color: #fafafa;
+}
+
+.admin_stats_section_row_name {
+    text-align: right;
+    padding: 0px 3px;
+    width: 100px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.admin_stats_section_row_graph {
+    //border: 1px solid green;
+    background-color: #eee;
+    height: 7px;
+
+    flex-grow: 10;
+    min-width: 100px;
+    border-radius: 3px;
+    display: flex;
+    align-items: stretch;
+    margin: 0px 3px;
+}
+
+.admin_stats_section_row_graph_content {
+    width: 34%;
+    //background-color: blue;
+    border-radius: 3px;
+    background-color: #ccc;
+    //background-color: @baseColorBackground;
+}
+
+
+.admin_stats_section_row_description {
+    padding: 0px 3px;
+    //border: 1px solid blue;
+    width: 100px;
+    text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    display: flex;
+    justify-content: space-between;
+}
+
+.admin_stats_section_row_description_percent {
+    color: #aaa;
+    font-size: .8rem;
+    margin-left: 5px;
+}

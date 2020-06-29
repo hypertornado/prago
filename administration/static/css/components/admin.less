@@ -310,6 +310,10 @@ ul {
 }
 
 .inputzone {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.075);
   background-color: #fcfcfc;
   outline: none;
@@ -514,7 +518,7 @@ th.admin_list_orderitem {
 .flash_messages {
   text-align: center;
   position: fixed;
-  top: 0px;
+  //top: 100px;
   //bottom: 0px;
   //left: 0px;
   right: 0px;
@@ -523,6 +527,8 @@ th.admin_list_orderitem {
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  //border: 1px solid red;
 }
 
 @keyframes example {
@@ -534,9 +540,10 @@ th.admin_list_orderitem {
   pointer-events: auto;
   color: @black;
   display: inline-block;
-  margin: 5px 10px;
+  margin: 5px 5px;
   .shadow;
   border-radius: 3px;
+  min-width: 200px;
 
   animation-name: example;
   animation-duration: 300ms;
@@ -547,6 +554,9 @@ th.admin_list_orderitem {
   display: inline-flex;
   align-items: center;
   cursor: default;
+  .animated;
+  .slideInRight;
+  animation-iteration-count: 1;
 }
 
 .flash_message_content {
@@ -984,6 +994,9 @@ progress {
 .admin_navigation_tabs {
   //margin-left: 205px;
   margin: 0px 5px 5px 0px;
+}
+
+.admin_header .admin_navigation_tabs {
   padding-left: 200px;
 }
 
@@ -1049,6 +1062,7 @@ progress {
     padding: 0px;
     background: none;
     align-content: stretch;
+    padding-left: 0px !important;
   }
 
   .admin_navigation_tabs_content {
@@ -1300,13 +1314,23 @@ td.admin_list_message {
 .admin_tablesettings {
   border: 1px solid #eee;
   //background: white;
-  padding: 10px 5px 10px 5px;
+  padding: 0px 5px 10px 5px;
   //border-radius: 3px;
   //text-align: center;
   //margin: 10px 10px;
-  background: white;
+  background: #fafafa;
   border-top: none;
   border-bottom: none;
+  display: none;
+}
+
+.admin_tablesettings-visible {
+  display: block;
+  .animated;
+  .fadeInDown;
+  animation-duration: 100ms;
+  animation-iteration-count: 1;
+
 }
 
 .admin_tablesettings_name {
@@ -1322,7 +1346,7 @@ td.admin_list_message {
 }
 
 .admin_exportbutton {
-  float: right;
+  //float: right;
 }
 
 .admin_tablesettings_label {
@@ -1352,6 +1376,10 @@ td.admin_list_message {
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat;
+
+  .animated;
+  .flipInX;
+  animation-iteration-count: 1;
 }
 
 .admin_history {

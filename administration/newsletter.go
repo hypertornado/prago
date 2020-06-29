@@ -93,7 +93,7 @@ func (admin *Administration) InitNewsletter(renderer NewsletterRenderer) {
 			if err != nil {
 				panic(err)
 			}
-			message = "Na váš email " + email + " potvrzovací email k odebírání newsletteru."
+			message = "Na váš email " + email + " jsme odeslali potvrzovací email k odebírání newsletteru."
 		} else {
 			if err == ErrEmailAlreadyInList {
 				message = "Email se již nachází v naší emailové databázi"

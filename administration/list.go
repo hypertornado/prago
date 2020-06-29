@@ -21,8 +21,6 @@ type list struct {
 	CanChangeOrder bool
 	OrderColumn    string
 	OrderDesc      bool
-	PrefilterField string
-	PrefilterValue string
 	Locale         string
 	ItemsPerPage   int64
 	PaginationData []ListPaginationData
@@ -51,6 +49,7 @@ type listContent struct {
 	Rows       []listRow
 	Pagination pagination
 	Colspan    int64
+	Stats      *ListStats
 	Message    string
 }
 
@@ -318,14 +317,6 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 	return q
 }
 
-func (admin *Administration) prefilterQuery(field, value string) Query {
-	ret := admin.Query()
-	if field != "" {
-		ret = ret.WhereIs(field, value)
-	}
-	return ret
-}
-
 func (resource *Resource) getListContent(admin *Administration, user User, params url.Values) (ret listContent, err error) {
 	var listHeader list
 	listHeader, err = resource.getListHeader(user)
@@ -356,10 +347,7 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 		orderDesc = false
 	}
 
-	prefilterField := params.Get("_prefilter_field")
-	prefilterValue := params.Get("_prefilter_value")
-
-	q := admin.prefilterQuery(prefilterField, prefilterValue)
+	q := admin.Query()
 	if orderDesc {
 		q = q.OrderDesc(orderBy)
 	} else {
@@ -369,7 +357,7 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 	var count int64
 	var item interface{}
 	resource.newItem(&item)
-	countQuery := admin.prefilterQuery(prefilterField, prefilterValue)
+	countQuery := admin.Query()
 	countQuery = resource.addFilterParamsToQuery(countQuery, params)
 	count, err = countQuery.Count(item)
 	if err != nil {
@@ -379,7 +367,7 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 
 	var totalCount int64
 	resource.newItem(&item)
-	countQuery = admin.prefilterQuery(prefilterField, prefilterValue)
+	countQuery = admin.Query()
 	totalCount, err = countQuery.Count(item)
 	if err != nil {
 		return
@@ -452,6 +440,10 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 		ret.Message = messages.Messages.Get(user.Locale, "admin_list_empty")
 	}
 	ret.Colspan = int64(len(columnsMap)) + 1
+
+	if params.Get("_stats") == "true" {
+		ret.Stats = getListStats(resource, admin, user, params)
+	}
 
 	return
 }

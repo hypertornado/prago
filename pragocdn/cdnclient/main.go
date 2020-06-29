@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	//a "github.com/hypertornado/daft"
 )
@@ -66,9 +65,9 @@ func (a CDNAccount) GetFileURL(uuid, filename string) string {
 	return fmt.Sprintf("%s/%s/%s/file/%s/%s", a.URL, a.Account, uuid, hash, filename)
 }
 
-func (a CDNAccount) GetImageURL(uuid, filename string, size int) string {
-	hash := a.getHash(uuid, strconv.Itoa(size), filename)
-	return fmt.Sprintf("%s/%s/%s/%d/%s/%s", a.URL, a.Account, uuid, size, hash, filename)
+func (a CDNAccount) GetImageURL(uuid, filename string, size string) string {
+	hash := a.getHash(uuid, size, filename)
+	return fmt.Sprintf("%s/%s/%s/%s/%s/%s", a.URL, a.Account, uuid, size, hash, filename)
 }
 
 func (a CDNAccount) GetImageCropURL(uuid, filename string, width, height int) string {
