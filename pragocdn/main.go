@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"compress/gzip"
 	"context"
 	"errors"
@@ -16,13 +17,11 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 
 	_ "image/jpeg"
 	_ "image/png"
 
-	"github.com/disintegration/imaging"
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/build"
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
@@ -31,7 +30,7 @@ import (
 	"golang.org/x/sync/semaphore"
 )
 
-const version = "2020.4"
+const version = "2020.5"
 
 var config CDNConfig
 
@@ -178,7 +177,8 @@ func start(app *prago.App) {
 				panic(err)
 			} else {
 				path := request.Request().URL.Path
-				fmt.Println(fmt.Sprintf("%s - %s", path, err))
+				fmt.Println(fmt.Sprintf("getFile error on path %s: %s", path, err))
+				return
 			}
 		}
 
@@ -325,6 +325,8 @@ func getMetadata(accountName, uuid string) (*cdnclient.CDNFileData, error) {
 }
 
 func getFile(accountName, uuid, format, hash, name string) (eddCode int, err error, source io.ReadCloser, mimeExtension string, size int64) {
+	//fmt.Println("GETTING FILE", accountName, uuid, format, hash, name)
+
 	account := accounts[accountName]
 	if account == nil {
 		return 404, errors.New("account not found"), nil, "", -1
@@ -499,18 +501,6 @@ func getTempFilePath(extension string) string {
 	return path.Join(dir, fileName)
 }
 
-func imagingThumbnail(originalPath string, destPath string, size int) error {
-	sem.Acquire(semCtx, 1)
-	defer sem.Release(1)
-	src, err := imaging.Open(originalPath)
-	if err != nil {
-		return fmt.Errorf("failed to open image: %v", err)
-	}
-	destImage := imaging.Fit(src, size, size, imaging.Lanczos)
-
-	return imaging.Save(destImage, destPath)
-}
-
 //CMYK: https://github.com/jcupitt/libvips/issues/630
 func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, extension string, crop bool) error {
 	//tempPath := getTempFilePath()
@@ -527,12 +517,12 @@ func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, exte
 		return fmt.Errorf("error while creating mkdirall %s: %s", outputDirectoryPath, err)
 	}
 
-	sizeInt, err := strconv.Atoi(size)
+	/*sizeInt, err := strconv.Atoi(size)
 	if err != nil {
 		return fmt.Errorf("wrong size format: %s", size)
-	}
+	}*/
 
-	return imagingThumbnail(originalPath, outputFilePath, sizeInt)
+	//return imagingThumbnail(originalPath, outputFilePath, sizeInt)
 
 	tempPath := getTempFilePath(extension)
 	defer os.Remove(tempPath)
@@ -580,10 +570,17 @@ func vipsThumbnailProfile(originalPath, outputFilePath, size, extension string, 
 		cmdAr = append(cmdAr, "-m", "attention")
 	}
 
+	var b bytes.Buffer
+
 	cmd := exec.Command("vipsthumbnail", cmdAr...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	cmd.Stdout = &b
+	cmd.Stderr = &b
+
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("vips exited with error: %s, output: %s;", err, string(b.Bytes()))
+	}
+	return nil
 }
 
 func render404(request prago.Request) {
