@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
   bindForm();
   bindImageViews();
   bindFlashMessages();
-  bindFilter();
   bindScrolled();
   bindDatePicker();
   bindDropdowns();

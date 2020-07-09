@@ -393,6 +393,11 @@ class List {
       if (fieldLayout == "filter_layout_relation") {
         this.bindFilterRelation(field, fieldValue);
       }
+
+      if (fieldLayout == "filter_layout_date") {
+        this.bindFilterDate(field, fieldValue);
+      }
+
     }
     this.inputPeriodicListener();
   }
@@ -415,6 +420,10 @@ class List {
 
   bindFilterRelation(el: HTMLDivElement, value: any) {
     new ListFilterRelations(el, value, this);
+  }
+
+  bindFilterDate(el: HTMLDivElement, value: any) {
+    new ListFilterDate(el, value);
   }
 
 

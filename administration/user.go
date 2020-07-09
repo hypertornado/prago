@@ -541,8 +541,11 @@ func initUserResource(resource *Resource) {
 			user.IsActive = true
 			user.Locale = locale
 			must(user.newPassword(request.Params().Get("password")))
-			must(user.sendConfirmEmail(request, admin))
-			err := user.sendAdminEmail(request, admin)
+			err := user.sendConfirmEmail(request, admin)
+			if err != nil {
+				request.App().Log().Println(err)
+			}
+			err = user.sendAdminEmail(request, admin)
 			if err != nil {
 				request.App().Log().Println(err)
 			}

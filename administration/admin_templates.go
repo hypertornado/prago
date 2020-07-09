@@ -19066,6 +19066,9 @@ var List = (function () {
             if (fieldLayout == "filter_layout_relation") {
                 this.bindFilterRelation(field, fieldValue);
             }
+            if (fieldLayout == "filter_layout_date") {
+                this.bindFilterDate(field, fieldValue);
+            }
         }
         this.inputPeriodicListener();
     };
@@ -19085,6 +19088,9 @@ var List = (function () {
     };
     List.prototype.bindFilterRelation = function (el, value) {
         new ListFilterRelations(el, value, this);
+    };
+    List.prototype.bindFilterDate = function (el, value) {
+        new ListFilterDate(el, value);
     };
     List.prototype.inputPeriodicListener = function () {
         var _this = this;
@@ -19746,14 +19752,8 @@ var Form = (function () {
     }
     return Form;
 }());
-function bindFilter() {
-    var els = document.querySelectorAll(".admin_filter_layout_date");
-    for (var i = 0; i < els.length; i++) {
-        new FilterDate(els[i]);
-    }
-}
-var FilterDate = (function () {
-    function FilterDate(el) {
+var ListFilterDate = (function () {
+    function ListFilterDate(el, value) {
         this.hidden = el.querySelector(".admin_table_filter_item");
         this.from = el.querySelector(".admin_filter_layout_date_from");
         this.to = el.querySelector(".admin_filter_layout_date_to");
@@ -19761,8 +19761,20 @@ var FilterDate = (function () {
         this.from.addEventListener("change", this.changed.bind(this));
         this.to.addEventListener("input", this.changed.bind(this));
         this.to.addEventListener("change", this.changed.bind(this));
+        this.setValue(value);
     }
-    FilterDate.prototype.changed = function () {
+    ListFilterDate.prototype.setValue = function (value) {
+        if (!value) {
+            return;
+        }
+        var splited = value.split(",");
+        if (splited.length == 2) {
+            this.from.value = splited[0];
+            this.to.value = splited[1];
+        }
+        this.hidden.value = value;
+    };
+    ListFilterDate.prototype.changed = function () {
         var val = "";
         if (this.from.value || this.to.value) {
             val = this.from.value + "," + this.to.value;
@@ -19771,7 +19783,7 @@ var FilterDate = (function () {
         var event = new Event('change');
         this.hidden.dispatchEvent(event);
     };
-    return FilterDate;
+    return ListFilterDate;
 }());
 function bindDatePicker() {
     var dates = document.querySelectorAll(".form_input-date");
@@ -20060,7 +20072,6 @@ document.addEventListener("DOMContentLoaded", function () {
     bindForm();
     bindImageViews();
     bindFlashMessages();
-    bindFilter();
     bindScrolled();
     bindDatePicker();
     bindDropdowns();
