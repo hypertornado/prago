@@ -46,9 +46,11 @@ func actionList(permission Permission) Action {
 					panic(err)
 				}
 
-				request.Response().Header().Set("X-Count", fmt.Sprintf("%d", listData.Count))
-				request.Response().Header().Set("X-Total-Count", fmt.Sprintf("%d", listData.TotalCount))
+				request.Response().Header().Set("X-Count-Str", listData.TotalCountStr)
+				//request.Response().Header().Set("Content-Type", "text/html; charset=utf-8")
+				//request.Response().Header().Set("X-Total-Count", fmt.Sprintf("%d", listData.TotalCount))
 				request.SetData("admin_list", listData)
+
 				request.RenderView("admin_list_cells")
 				return
 			}

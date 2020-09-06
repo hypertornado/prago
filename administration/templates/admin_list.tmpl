@@ -39,8 +39,10 @@
           {{- $item.NameHuman -}}
         </th>
       {{end}}
-      <th>
+      <th rowspan="2" class="admin_list_lastheadercell">
         <span class="admin_table_count"></span>
+        <progress class="admin_table_progress"></progress>
+        <label class="admin_list_showmore_label"><input type="checkbox" class="admin_list_showmore">Možnosti</label>
       </th>
     </tr>
     <tr class="admin_list_filterrow">
@@ -51,10 +53,6 @@
           {{end}}
         </th>
       {{end}}
-      <th>
-        <progress class="admin_table_progress"></progress>
-        <label><input type="checkbox" class="admin_list_showmore"> Více možností</label>
-      </th>
     </tr>
     </thead>
     <tbody></tbody>

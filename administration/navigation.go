@@ -77,6 +77,13 @@ func renderNavigationPage(request prago.Request, page adminNavigationPage) {
 	request.RenderView("admin_layout")
 }
 
+/*func renderNavigationPageEmpty(request prago.Request, page adminNavigationPage) {
+	request.SetData("admin_title", page.Navigation.getPageTitle())
+	request.SetData("admin_yield", "admin_navigation_page_empty")
+	request.SetData("admin_page", page)
+	request.RenderView("admin_layout")
+}*/
+
 func renderNavigationPageNoLogin(request prago.Request, page adminNavigationPage) {
 	request.SetData("admin_title", page.Navigation.getPageTitle())
 	request.SetData("admin_yield", "admin_navigation_page")
@@ -94,12 +101,14 @@ func (admin *Administration) getAdminNavigation(user User, code string) adminIte
 	}
 
 	for _, v := range admin.rootActions {
-		if admin.Authorize(user, v.Permission) {
-			tabs = append(tabs, navigationTab{
-				Name:     v.getName(user.Locale),
-				URL:      admin.GetURL(v.URL),
-				Selected: trueIfEqual(code, v.URL),
-			})
+		if v.Method == "" || v.Method == "GET" {
+			if admin.Authorize(user, v.Permission) {
+				tabs = append(tabs, navigationTab{
+					Name:     v.getName(user.Locale),
+					URL:      admin.GetURL(v.URL),
+					Selected: trueIfEqual(code, v.URL),
+				})
+			}
 		}
 	}
 
@@ -340,19 +349,19 @@ func CreateNavigationalAction(url string, name func(string) string, templateName
 	}
 }
 
-func createAdminHandler(action, templateName string, dataGenerator func(Resource, prago.Request, User) interface{}) func(Resource, prago.Request, User) {
+func createAdminHandler(action, templateName string, dataGenerator func(Resource, prago.Request, User) interface{}, empty bool) func(Resource, prago.Request, User) {
 	return func(resource Resource, request prago.Request, user User) {
 		var data interface{}
 		if dataGenerator != nil {
 			data = dataGenerator(resource, request, user)
 		}
 
-		request.SetData("admin_navigation_logo_selected", true)
 		renderNavigationPage(request, adminNavigationPage{
 			Admin:        resource.Admin,
 			Navigation:   resource.Admin.getAdminNavigation(user, action),
 			PageTemplate: templateName,
 			PageData:     data,
+			HideBox:      empty,
 		})
 	}
 }
@@ -361,6 +370,14 @@ func CreateAdminAction(url string, name func(string) string, templateName string
 	return Action{
 		Name:    name,
 		URL:     url,
-		Handler: createAdminHandler(url, templateName, dataGenerator),
+		Handler: createAdminHandler(url, templateName, dataGenerator, false),
+	}
+}
+
+func CreateAdminEmptyAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, prago.Request, User) interface{}) Action {
+	return Action{
+		Name:    name,
+		URL:     url,
+		Handler: createAdminHandler(url, templateName, dataGenerator, true),
 	}
 }

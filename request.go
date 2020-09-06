@@ -51,7 +51,7 @@ func (request Request) RenderView(viewName string) {
 
 //RenderViewWithCode renders view with HTTP code
 func (request Request) RenderViewWithCode(viewName string, statusCode int) {
-	request.Response().Header().Add("Content-Type", "text/html")
+	request.Response().Header().Add("Content-Type", "text/html; charset=utf-8")
 	request.Response().WriteHeader(statusCode)
 	must(
 		request.app.templates.templates.ExecuteTemplate(

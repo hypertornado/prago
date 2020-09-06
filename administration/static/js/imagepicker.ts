@@ -83,10 +83,10 @@ class ImagePicker {
             this.addImage(data[i].UID);
           }
         } else {
-          alert("Error while uploading image.");
+          alert("Chyba při nahrávání souboru.");
           console.error("Error while loading item.");
         }
-      })
+      });
 
       this.showProgress();
       request.send(formData);
@@ -112,6 +112,22 @@ class ImagePicker {
     container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
     container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/_api/image/thumb/" + id + "');");
 
+    var descriptionEl = document.createElement("div");
+    descriptionEl.classList.add("admin_images_image_description")
+    container.appendChild(descriptionEl);
+
+    var request = new XMLHttpRequest();
+    request.open("GET", this.adminPrefix + "/_api/imagedata/" + id);
+    request.addEventListener("load", (e) => {
+      if (request.status == 200) {
+        var data = JSON.parse(request.response);
+        descriptionEl.innerText = data["Name"];
+        container.setAttribute("title", data["Name"])
+      } else {
+        console.error("Error while loading file metadata.");
+      }
+    })
+    request.send();
 
     container.addEventListener("dragstart", (e) => {
       this.draggedElement = <HTMLAnchorElement>e.target;

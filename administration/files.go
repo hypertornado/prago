@@ -14,18 +14,7 @@ import (
 	"github.com/hypertornado/prago/utils"
 )
 
-var (
-	fileUploadPath   = ""
-	fileDownloadPath = ""
-)
-
 var filesCDN cdnclient.CDNAccount
-
-var thumbnailSizes = map[string][2]uint{
-	"large":  {1000, 1000},
-	"medium": {400, 400},
-	"small":  {200, 200},
-}
 
 func initCDN(a *Administration) {
 	cdnURL := a.App.Config.GetStringWithFallback("cdnURL", "https://www.prago-cdn.com")
@@ -61,7 +50,7 @@ func (admin *Administration) GetFiles(ids string) []*File {
 //File is structure representing files in admin
 type File struct {
 	ID          int64  `prago-order-desc:"true" prago-preview:"true"`
-	UID         string `prago-unique:"true" prago-preview:"true" prago-type:"file" prago-description:"File"`
+	UID         string `prago-unique:"true" prago-preview:"true" prago-type:"cdnfile" prago-description:"File"`
 	Name        string `prago-edit:"_"`
 	Description string `prago-type:"text" prago-preview:"true"`
 	User        int64  `prago-type:"relation" prago-edit:"_"`
@@ -71,9 +60,9 @@ type File struct {
 	UpdatedAt   time.Time
 }
 
-func uploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File, error) {
+func (admin *Administration) UploadFile(fileHeader *multipart.FileHeader, user *User, description string) (*File, error) {
 	fileName := utils.PrettyFilename(fileHeader.Filename)
-	file := &File{}
+	file := File{}
 	file.Name = fileName
 
 	openedFile, err := fileHeader.Open()
@@ -91,7 +80,17 @@ func uploadFile(fileHeader *multipart.FileHeader, fileUploadPath string) (*File,
 	file.Height = uploadData.Height
 
 	file.UID = uploadData.UUID
-	return file, nil
+
+	if user != nil {
+		file.User = user.ID
+	}
+	file.Description = description
+	err = admin.Create(&file)
+	if err != nil {
+		return nil, fmt.Errorf("saving file: %s", err)
+	}
+
+	return &file, nil
 }
 
 func (f *File) UpdateMetadata() error {
@@ -134,7 +133,6 @@ func getOldRedirectParams(request prago.Request, admin *Administration) (uuid, n
 func initFilesResource(resource *Resource) {
 	a := resource.Admin
 	initCDN(a)
-	//resource.AfterFormCreated = fileAfterFormCreated
 	resource.HumanName = messages.Messages.GetNameFunction("admin_files")
 	app := resource.Admin.App
 
@@ -208,17 +206,7 @@ func initFilesResource(resource *Resource) {
 
 	resource.ItemsPerPage = 100
 
-	fileUploadPath = a.App.Config.GetStringWithFallback("fileUploadPath", "")
-	fileDownloadPath = a.App.Config.GetStringWithFallback("fileDownloadPath", "")
-
-	if !strings.HasSuffix(fileUploadPath, "/") {
-		fileUploadPath += "/"
-	}
-	if !strings.HasSuffix(fileDownloadPath, "/") {
-		fileDownloadPath += "/"
-	}
-
-	bindImageAPI(a, fileDownloadPath)
+	bindImageAPI(a)
 
 	//TODO: authorize
 	resource.ResourceController.Post(resource.GetURL(""), func(request prago.Request) {
@@ -229,12 +217,10 @@ func initFilesResource(resource *Resource) {
 			panic("must have 1 file selected")
 		}
 
-		file, err := uploadFile(multipartFiles[0], fileUploadPath)
-		must(err)
-		file.User = GetUser(request).ID
-		file.Description = request.Params().Get("Description")
-		must(a.Create(file))
+		user := GetUser(request)
 
+		_, err := resource.Admin.UploadFile(multipartFiles[0], &user, request.Params().Get("Description"))
+		must(err)
 		AddFlashMessage(request, messages.Messages.Get(getLocale(request), "admin_item_created"))
 		request.Redirect(resource.GetURL(""))
 	})
@@ -254,7 +240,6 @@ func initFilesResource(resource *Resource) {
 
 			redirectURL := filesCDN.GetImageURL(uuid, file.Name, size)
 			request.Redirect(redirectURL)
-			//panic("OOOO")
 		},
 	})
 }
@@ -278,31 +263,6 @@ func (f *File) getPath(prefix string) (folder, file string) {
 	return
 }
 
-/*func loadFile(folder, path string, header *multipart.FileHeader) error {
-	if !strings.HasPrefix(path, folder) {
-		return errors.New("folder path should be prefix of path")
-	}
-	err := os.MkdirAll(folder, 0777)
-	if err != nil {
-		return fmt.Errorf("mkdirall : %s", err)
-	}
-
-	inFile, err := header.Open()
-	if err != nil {
-		return fmt.Errorf("opening header: %s", err)
-	}
-
-	outFile, err := os.Create(path)
-	if err != nil {
-		return fmt.Errorf("creating file: %s", err)
-	}
-
-	io.Copy(outFile, inFile)
-	defer outFile.Close()
-	defer inFile.Close()
-	return nil
-}*/
-
 type imageResponse struct {
 	ID          int64
 	UID         string
@@ -321,8 +281,10 @@ func writeFileResponse(request prago.Request, files []*File) {
 			Description: v.Description,
 		}
 
-		_, fileURL := v.getPath(fileDownloadPath + "thumb/small")
-		ir.Thumb = fileURL
+		//v.GetMedium()
+
+		//_, fileURL := v.getPath(fileDownloadPath + "thumb/small")
+		ir.Thumb = v.GetMedium()
 
 		responseData = append(responseData, ir)
 	}

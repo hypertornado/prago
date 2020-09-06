@@ -114,7 +114,7 @@ class List {
   }
 
   load() {
-    this.progress.classList.remove("hidden");
+    this.progress.classList.remove("admin_table_progress-inactive");
     var request = new XMLHttpRequest();
     var params: any = {};
     if (this.page > 1) {
@@ -157,13 +157,16 @@ class List {
     encoded = encodeParams(params);
 
     request.open("GET", this.adminPrefix + "/" + this.typeName + encoded, true);
+    //request.overrideMimeType('text/html; charset=iso-8859-1');
     request.addEventListener("load", () => {
       this.tbody.innerHTML = "";
       if (request.status == 200) {
         this.tbody.innerHTML = request.response;
-        var count = request.getResponseHeader("X-Count");
-        var totalCount = request.getResponseHeader("X-Total-Count");
-        var countStr: string = count + " / " + totalCount;
+        var countStr = request.getResponseHeader("X-Count-Str");
+        //console.log(request.getAllResponseHeaders());
+        //console.log(countStr);
+        //var totalCount = request.getResponseHeader("X-Total-Count");
+        //var countStr: string = count + " / " + totalCount;
         this.el.querySelector(".admin_table_count").textContent = countStr;
         bindOrder();
         //bindDelete();
@@ -173,7 +176,7 @@ class List {
       } else {
         console.error("error while loading list");
       }
-      this.progress.classList.add("hidden");
+      this.progress.classList.add("admin_table_progress-inactive");
     });
     //var requestData = this.getListRequest();
     request.send(JSON.stringify({}));
@@ -415,7 +418,7 @@ class List {
     this.page = 1;
     this.changed = true;
     this.changedTimestamp = Date.now();
-    this.progress.classList.remove("hidden");
+    this.progress.classList.remove("admin_table_progress-inactive");
   }
 
   bindFilterRelation(el: HTMLDivElement, value: any) {

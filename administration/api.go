@@ -22,7 +22,7 @@ func bindAPI(a *Administration) {
 	bindRelationAPI(a)
 }
 
-func bindImageAPI(admin *Administration, fileDownloadPath string) {
+func bindImageAPI(admin *Administration) {
 	admin.AdminController.Get(admin.GetURL("file/uuid/:uuid"), func(request prago.Request) {
 		var image File
 		err := admin.Query().WhereIs("uid", request.Params().Get("uuid")).Get(&image)
@@ -97,6 +97,15 @@ func bindImageAPI(admin *Administration, fileDownloadPath string) {
 		writeFileResponse(request, images)
 	})
 
+	admin.AdminController.Get(admin.GetURL("_api/imagedata/:uid"), func(request prago.Request) {
+		var file File
+		err := admin.Query().WhereIs("uid", request.Params().Get("uid")).Get(&file)
+		if err != nil {
+			panic(err)
+		}
+		request.RenderJSON(file)
+	})
+
 	//TODO: authorize
 	admin.AdminController.Post(admin.GetURL("_api/image/upload"), func(request prago.Request) {
 		multipartFiles := request.Request().MultipartForm.File["file"]
@@ -106,13 +115,12 @@ func bindImageAPI(admin *Administration, fileDownloadPath string) {
 		files := []*File{}
 
 		for _, v := range multipartFiles {
-			file, err := uploadFile(v, fileUploadPath)
+			user := GetUser(request)
+
+			file, err := admin.UploadFile(v, &user, description)
 			if err != nil {
 				panic(err)
 			}
-			file.User = GetUser(request).ID
-			file.Description = description
-			must(admin.Create(file))
 			files = append(files, file)
 		}
 
@@ -135,33 +143,6 @@ type resourceItem struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
 }
-
-/*func bindListAPI(admin *Administration) {
-	admin.AdminController.Post(admin.GetURL("_api/list/:name"), func(request prago.Request) {
-		user := GetUser(request)
-		name := request.Params().Get("name")
-		resource, found := admin.resourceNameMap[name]
-		if !found {
-			render404(request)
-			return
-		}
-
-		if !admin.Authorize(user, resource.CanView) {
-			render403(request)
-			return
-		}
-
-		listData, err := resource.getListContent(admin, user, request.Request().URL.Query())
-		if err != nil {
-			panic(err)
-		}
-
-		request.Response().Header().Set("X-Count", fmt.Sprintf("%d", listData.Count))
-		request.Response().Header().Set("X-Total-Count", fmt.Sprintf("%d", listData.TotalCount))
-		request.SetData("admin_list", listData)
-		request.RenderView("admin_list_cells")
-	})
-}*/
 
 func bindRelationAPI(admin *Administration) {
 	admin.AdminController.Get(admin.GetURL("_api/preview/:resourceName/:id"), func(request prago.Request) {

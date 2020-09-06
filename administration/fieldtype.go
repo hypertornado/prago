@@ -37,13 +37,31 @@ func (admin *Administration) addDefaultFieldTypes() {
 	admin.AddFieldType("order", FieldType{})
 	admin.AddFieldType("date", FieldType{})
 
-	admin.AddFieldType("file", FieldType{
-		ViewTemplate:   "admin_item_view_file",
-		ViewDataSource: filesViewDataSource,
-
-		FormTemplate: "admin_file",
-
+	admin.AddFieldType("cdnfile", FieldType{
+		ViewTemplate:     "admin_item_view_file",
+		ViewDataSource:   filesViewDataSource,
+		FormTemplate:     "admin_file",
 		ListCellTemplate: "admin_item_view_file_cell",
+
+		FilterLayoutTemplate:   "filter_layout_select",
+		FilterLayoutDataSource: boolFilterLayoutDataSource,
+	})
+
+	admin.AddFieldType("file", FieldType{
+		ViewTemplate:     "admin_item_view_image",
+		FormTemplate:     "admin_item_image",
+		FormDataSource:   createFilesEditDataSource(""),
+		ListCellTemplate: "admin_list_image",
+
+		FilterLayoutTemplate:   "filter_layout_select",
+		FilterLayoutDataSource: boolFilterLayoutDataSource,
+	})
+
+	admin.AddFieldType("image", FieldType{
+		ViewTemplate:     "admin_item_view_image",
+		FormTemplate:     "admin_item_image",
+		FormDataSource:   createFilesEditDataSource(".jpg,.jpeg,.png"),
+		ListCellTemplate: "admin_list_image",
 
 		FilterLayoutTemplate:   "filter_layout_select",
 		FilterLayoutDataSource: boolFilterLayoutDataSource,
@@ -54,14 +72,6 @@ func (admin *Administration) addDefaultFieldTypes() {
 		FormTemplate:       "admin_item_markdown",
 		ListCellDataSource: markdownListDataSource,
 		ListCellTemplate:   "admin_item_view_text",
-	})
-	admin.AddFieldType("image", FieldType{
-		ViewTemplate:     "admin_item_view_image",
-		FormTemplate:     "admin_item_image",
-		ListCellTemplate: "admin_list_image",
-
-		FilterLayoutTemplate:   "filter_layout_select",
-		FilterLayoutDataSource: boolFilterLayoutDataSource,
 	})
 	admin.AddFieldType("place", FieldType{
 		ViewTemplate: "admin_item_view_place",
@@ -109,6 +119,12 @@ func boolFilterLayoutDataSource(field Field, user User) interface{} {
 
 func textListDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
 	return utils.Crop(value.(string), 100)
+}
+
+func createFilesEditDataSource(mimeTypes string) func(f Field, u User) interface{} {
+	return func(f Field, u User) interface{} {
+		return mimeTypes
+	}
 }
 
 func markdownListDataSource(resource Resource, user User, f Field, value interface{}) interface{} {

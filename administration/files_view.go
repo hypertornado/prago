@@ -1,12 +1,21 @@
 package administration
 
+import (
+	"fmt"
+	"strings"
+)
+
 type filesViewData struct {
 	Error       string
 	UUID        string
+	Filename    string
+	Filesize    int64
 	OriginalURL string
 	MediumURL   string
 	SmallURL    string
+	IsImage     bool
 	Paths       []filesViewDataPath
+	CDNFileURL  string
 }
 
 type filesViewDataPath struct {
@@ -14,17 +23,22 @@ type filesViewDataPath struct {
 	URL  string
 }
 
-func filesViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
-	ret := filesViewData{}
-
+func getFilesViewData(admin *Administration, uid string) (ret filesViewData) {
 	var file File
-	err := resource.Admin.Query().WhereIs("UID", value.(string)).Get(&file)
+	err := admin.Query().WhereIs("UID", uid).Get(&file)
 	if err != nil {
 		ret.Error = "Can't find file."
 		return ret
 	}
 
+	metadata, err := filesCDN.GetMetadata(uid)
+	if err != nil {
+		ret.Error = "Can't get medtadata"
+		return ret
+	}
+
 	ret.UUID = file.UID
+	ret.Filesize = metadata.Filesize
 
 	ret.Paths = []filesViewDataPath{
 		{"original", file.GetOriginal()},
@@ -41,7 +55,21 @@ func filesViewDataSource(resource Resource, user User, f Field, value interface{
 			filesViewDataPath{"small", file.GetSmall()},
 			filesViewDataPath{"metadata", file.GetMetadataPath()},
 		)
+		ret.IsImage = true
 	}
 
+	ret.CDNFileURL = admin.GetURL(fmt.Sprintf("file/cdnfile/%s", uid))
+
+	return ret
+
+}
+
+func filesViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
+	var ret []filesViewData
+	ar := strings.Split(value.(string), ",")
+	for _, v := range ar {
+		item := getFilesViewData(resource.Admin, v)
+		ret = append(ret, item)
+	}
 	return ret
 }

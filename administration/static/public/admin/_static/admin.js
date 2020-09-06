@@ -65,6 +65,22 @@ var ImageView = (function () {
         var img = document.createElement("div");
         img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
         img.setAttribute("draggable", "false");
+        var descriptionEl = document.createElement("div");
+        descriptionEl.classList.add("admin_images_image_description");
+        container.appendChild(descriptionEl);
+        var request = new XMLHttpRequest();
+        request.open("GET", this.adminPrefix + "/_api/imagedata/" + id);
+        request.addEventListener("load", function (e) {
+            if (request.status == 200) {
+                var data = JSON.parse(request.response);
+                descriptionEl.innerText = data["Name"];
+                container.setAttribute("title", data["Name"]);
+            }
+            else {
+                console.error("Error while loading file metadata.");
+            }
+        });
+        request.send();
         this.el.appendChild(container);
     };
     return ImageView;
@@ -135,7 +151,7 @@ var ImagePicker = (function () {
                     }
                 }
                 else {
-                    alert("Error while uploading image.");
+                    alert("Chyba při nahrávání souboru.");
                     console.error("Error while loading item.");
                 }
             });
@@ -161,6 +177,22 @@ var ImagePicker = (function () {
         container.setAttribute("target", "_blank");
         container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
         container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/_api/image/thumb/" + id + "');");
+        var descriptionEl = document.createElement("div");
+        descriptionEl.classList.add("admin_images_image_description");
+        container.appendChild(descriptionEl);
+        var request = new XMLHttpRequest();
+        request.open("GET", this.adminPrefix + "/_api/imagedata/" + id);
+        request.addEventListener("load", function (e) {
+            if (request.status == 200) {
+                var data = JSON.parse(request.response);
+                descriptionEl.innerText = data["Name"];
+                container.setAttribute("title", data["Name"]);
+            }
+            else {
+                console.error("Error while loading file metadata.");
+            }
+        });
+        request.send();
         container.addEventListener("dragstart", function (e) {
             _this.draggedElement = e.target;
         });
@@ -353,6 +385,39 @@ var ListFilterRelations = (function () {
     };
     return ListFilterRelations;
 }());
+var ListFilterDate = (function () {
+    function ListFilterDate(el, value) {
+        this.hidden = el.querySelector(".admin_table_filter_item");
+        this.from = el.querySelector(".admin_filter_layout_date_from");
+        this.to = el.querySelector(".admin_filter_layout_date_to");
+        this.from.addEventListener("input", this.changed.bind(this));
+        this.from.addEventListener("change", this.changed.bind(this));
+        this.to.addEventListener("input", this.changed.bind(this));
+        this.to.addEventListener("change", this.changed.bind(this));
+        this.setValue(value);
+    }
+    ListFilterDate.prototype.setValue = function (value) {
+        if (!value) {
+            return;
+        }
+        var splited = value.split(",");
+        if (splited.length == 2) {
+            this.from.value = splited[0];
+            this.to.value = splited[1];
+        }
+        this.hidden.value = value;
+    };
+    ListFilterDate.prototype.changed = function () {
+        var val = "";
+        if (this.from.value || this.to.value) {
+            val = this.from.value + "," + this.to.value;
+        }
+        this.hidden.value = val;
+        var event = new Event('change');
+        this.hidden.dispatchEvent(event);
+    };
+    return ListFilterDate;
+}());
 function bindLists() {
     var els = document.getElementsByClassName("admin_list");
     for (var i = 0; i < els.length; i++) {
@@ -428,7 +493,7 @@ var List = (function () {
     }
     List.prototype.load = function () {
         var _this = this;
-        this.progress.classList.remove("hidden");
+        this.progress.classList.remove("admin_table_progress-inactive");
         var request = new XMLHttpRequest();
         var params = {};
         if (this.page > 1) {
@@ -467,9 +532,7 @@ var List = (function () {
             _this.tbody.innerHTML = "";
             if (request.status == 200) {
                 _this.tbody.innerHTML = request.response;
-                var count = request.getResponseHeader("X-Count");
-                var totalCount = request.getResponseHeader("X-Total-Count");
-                var countStr = count + " / " + totalCount;
+                var countStr = request.getResponseHeader("X-Count-Str");
                 _this.el.querySelector(".admin_table_count").textContent = countStr;
                 bindOrder();
                 _this.bindPagination();
@@ -479,7 +542,7 @@ var List = (function () {
             else {
                 console.error("error while loading list");
             }
-            _this.progress.classList.add("hidden");
+            _this.progress.classList.add("admin_table_progress-inactive");
         });
         request.send(JSON.stringify({}));
     };
@@ -705,7 +768,7 @@ var List = (function () {
         this.page = 1;
         this.changed = true;
         this.changedTimestamp = Date.now();
-        this.progress.classList.remove("hidden");
+        this.progress.classList.remove("admin_table_progress-inactive");
     };
     List.prototype.bindFilterRelation = function (el, value) {
         new ListFilterRelations(el, value, this);
@@ -1372,39 +1435,6 @@ var Form = (function () {
         });
     }
     return Form;
-}());
-var ListFilterDate = (function () {
-    function ListFilterDate(el, value) {
-        this.hidden = el.querySelector(".admin_table_filter_item");
-        this.from = el.querySelector(".admin_filter_layout_date_from");
-        this.to = el.querySelector(".admin_filter_layout_date_to");
-        this.from.addEventListener("input", this.changed.bind(this));
-        this.from.addEventListener("change", this.changed.bind(this));
-        this.to.addEventListener("input", this.changed.bind(this));
-        this.to.addEventListener("change", this.changed.bind(this));
-        this.setValue(value);
-    }
-    ListFilterDate.prototype.setValue = function (value) {
-        if (!value) {
-            return;
-        }
-        var splited = value.split(",");
-        if (splited.length == 2) {
-            this.from.value = splited[0];
-            this.to.value = splited[1];
-        }
-        this.hidden.value = value;
-    };
-    ListFilterDate.prototype.changed = function () {
-        var val = "";
-        if (this.from.value || this.to.value) {
-            val = this.from.value + "," + this.to.value;
-        }
-        this.hidden.value = val;
-        var event = new Event('change');
-        this.hidden.dispatchEvent(event);
-    };
-    return ListFilterDate;
 }());
 function bindDatePicker() {
     var dates = document.querySelectorAll(".form_input-date");

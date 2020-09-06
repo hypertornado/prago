@@ -77,7 +77,7 @@
       <div class="admin_images_preview"></div>
       <label class="admin_images_fileinput">
         <div class="admin_images_fileinput_plus"></div>
-        <input type="file" id="{{.UUID}}" accept=".jpg,.jpeg,.png" multiple class="form_watcher">
+        <input type="file" id="{{.UUID}}" accept="{{.Data}}" multiple class="form_watcher">
       </label>
     </div>
     <progress></progress>
@@ -93,7 +93,7 @@
     <input type="hidden" id="{{.UUID}}" name="{{.Name}}" value="{{.Value}}">
     <img src="{{thumb .Value}}">
   {{else}}
-    <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+    <input type="file" multiple id="{{.UUID}}" name="{{.Name}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
   {{end}}
 {{end}}
 

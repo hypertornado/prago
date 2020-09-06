@@ -260,7 +260,7 @@ const adminTemplates = `
       <div class="admin_images_preview"></div>
       <label class="admin_images_fileinput">
         <div class="admin_images_fileinput_plus"></div>
-        <input type="file" id="{{.UUID}}" accept=".jpg,.jpeg,.png" multiple class="form_watcher">
+        <input type="file" id="{{.UUID}}" accept="{{.Data}}" multiple class="form_watcher">
       </label>
     </div>
     <progress></progress>
@@ -276,7 +276,7 @@ const adminTemplates = `
     <input type="hidden" id="{{.UUID}}" name="{{.Name}}" value="{{.Value}}">
     <img src="{{thumb .Value}}">
   {{else}}
-    <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+    <input type="file" multiple id="{{.UUID}}" name="{{.Name}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
   {{end}}
 {{end}}
 
@@ -488,8 +488,10 @@ const adminTemplates = `
           {{- $item.NameHuman -}}
         </th>
       {{end}}
-      <th>
+      <th rowspan="2" class="admin_list_lastheadercell">
         <span class="admin_table_count"></span>
+        <progress class="admin_table_progress"></progress>
+        <label class="admin_list_showmore_label"><input type="checkbox" class="admin_list_showmore">Možnosti</label>
       </th>
     </tr>
     <tr class="admin_list_filterrow">
@@ -500,10 +502,6 @@ const adminTemplates = `
           {{end}}
         </th>
       {{end}}
-      <th>
-        <progress class="admin_table_progress"></progress>
-        <label><input type="checkbox" class="admin_list_showmore"> Více možností</label>
-      </th>
     </tr>
     </thead>
     <tbody></tbody>
@@ -873,6 +871,12 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_item_view_file"}}
+  {{range $item := .}}
+    {{template "admin_item_view_file_single" $item}}
+  {{end}}
+{{end}}
+
+{{define "admin_item_view_file_single"}}
   {{if .MediumURL}}
     <div>
       <a href="{{.OriginalURL}}"><img src="{{.MediumURL}}"></a>
@@ -884,20 +888,25 @@ const adminTemplates = `
       <a href="{{$path.URL}}">{{$path.Name}}</a>
     {{end}}
   </div>
-  <div>
-    <form action="getcdnurl" method="POST">
-      Získat zmenšeninu:
-      <input type="hidden" name="uuid" value="{{.UUID}}">
-      <input name="size" value="" placeholder="Velikost">
-      <input type="submit" class="btn" name="Zmenšit">
-    </form>
-  </div>
-  <div>UUID: {{.UUID}}</div>
+  {{if .IsImage}}
+    <div>
+      <form action="getcdnurl" method="POST">
+        Získat zmenšeninu:
+        <input type="hidden" name="uuid" value="{{.UUID}}">
+        <input name="size" value="" placeholder="Velikost">
+        <input type="submit" class="btn" name="Zmenšit">
+      </form>
+    </div>
+  {{end}}
+  <div>UUID: <a href="{{.CDNFileURL}}">{{.UUID}}</a></div>
 {{end}}
 
 {{define "admin_item_view_file_cell"}}
-  {{if .SmallURL}}
-    <div class="admin_list_image" style="background-image: url('{{CSS .SmallURL}}');"></div>
+  {{if .}}
+    {{$item := index . 0}}
+    {{if $item.SmallURL}}
+      <div class="admin_list_image" style="background-image: url('{{CSS $item.SmallURL}}');"></div>
+    {{end}}
   {{end}}
 {{end}}
 
@@ -16814,6 +16823,12 @@ select.admin_table_filter_item {
   font-weight: 500;
   text-decoration: none;
 }
+th.admin_list_lastheadercell {
+  vertical-align: middle !important;
+}
+.admin_table_progress-inactive {
+  opacity: 0;
+}
 .admin_table td {
   padding: 2px;
   border: 1px solid #f1f1f1;
@@ -16821,6 +16836,15 @@ select.admin_table_filter_item {
 .admin_table_count {
   font-size: 0.9rem;
   color: #888;
+}
+.admin_list_showmore {
+  margin-right: 5px;
+}
+.admin_list_showmore_label {
+  font-size: 0.9rem;
+  line-height: 1.3em;
+  color: #888;
+  display: block;
 }
 .admin_list_table td {
   border-bottom: none;
@@ -16952,35 +16976,6 @@ th.admin_list_orderitem {
 .flash_message:hover .flash_message_close {
   opacity: 1;
 }
-td.pagination {
-  text-align: center;
-  background-color: white;
-  padding: 10px 5px;
-}
-.pagination_page,
-.pagination_page_current {
-  color: #4078c0;
-  padding: 2px 10px;
-  margin: 0px;
-  margin-right: 1px;
-  font-size: 16px;
-  line-height: 1.4em;
-  display: inline-block;
-  text-decoration: none;
-  border-radius: 3px;
-}
-.pagination_page:hover {
-  background-color: rgba(64, 120, 192, 0.1);
-}
-.pagination_page_current,
-.pagination_page_current:hover {
-  background-color: #4078c0;
-  color: white;
-}
-.pagination_page_current {
-  cursor: default;
-}
-/* images */
 .admin_images_loaded {
   display: inline-flex;
   flex-wrap: wrap;
@@ -17004,7 +16999,19 @@ td.pagination {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+  overflow: hidden;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+}
+.admin_images_image_description {
+  font-size: 0.7rem;
+  line-height: 1.3em;
+  position: absolute;
+  color: #333;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 3px;
+  bottom: 3px;
+  right: 3px;
+  left: 3px;
 }
 .admin_images_image:hover {
   background-color: rgba(64, 120, 192, 0.1);
@@ -17191,7 +17198,7 @@ select.admin_timestamp_minute {
   height: 200px;
 }
 progress {
-  padding: 8px;
+  padding: 4px;
   margin: 0px auto;
   line-height: 100px;
   display: block;
@@ -17201,8 +17208,8 @@ progress {
   border: 4px solid #4078c0;
   border-top: 4px solid rgba(64, 120, 192, 0.1);
   border-radius: 50%;
-  width: 5px;
-  height: 5px;
+  width: 0px;
+  height: 0px;
   animation: spin 800ms linear infinite;
 }
 @keyframes spin {
@@ -17211,132 +17218,6 @@ progress {
   }
   100% {
     transform: rotate(360deg);
-  }
-}
-.admin_navigation_breadcrumbs {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0px 0px;
-  font-size: 1rem;
-  align-items: center;
-  align-items: stretch;
-}
-@media (max-width: 800px) {
-  .admin_navigation_breadcrumbs {
-    flex-direction: column;
-  }
-}
-.admin_navigation_breadcrumb {
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  line-height: 30px;
-  padding-left: 5px;
-  padding: 0px 3px 0px 3px;
-  color: #444;
-  font-weight: 500;
-  border-radius: 5px;
-}
-.admin_navigation_breadcrumb_image {
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  width: 30px;
-  height: 30px;
-  margin: 3px 10px 3px 0px;
-  display: inline-block;
-  border-radius: 5px;
-  background-color: white;
-  border: 1px solid #eee;
-}
-.admin_navigation_breadcrumb_image-logo {
-  background-size: contain;
-}
-.admin_navigation_breadcrumb_divider {
-  font-size: 1.4rem;
-  vertical-align: center;
-  display: inline-flex;
-  margin: 0px 0px 0px 3px;
-}
-.admin_navigation_breadcrumb_divider:after {
-  content: "⇢";
-  content: "→";
-}
-.admin_navigation_tabs {
-  display: flex;
-  justify-content: center;
-  vertical-align: bottom;
-  flex-wrap: wrap;
-  width: 100%;
-  margin: 5px;
-}
-.admin_navigation_tabs_content {
-  display: flex;
-  flex-wrap: wrap;
-  border-radius: 5px;
-  background: rgba(64, 120, 192, 0.1);
-  padding: 0px 4px;
-  justify-content: center;
-}
-.admin_navigation_tabs {
-  margin: 0px 5px 5px 0px;
-}
-.admin_header .admin_navigation_tabs {
-  padding-left: 200px;
-}
-.admin_navigation_tab {
-  white-space: nowrap;
-  overflow: hidden;
-  margin: 4px 0px;
-  display: flex;
-  border-bottom: none;
-  font-size: 0.9rem;
-  line-height: 1.8em;
-  text-decoration: none;
-  padding: 1px 20px;
-  display: inline-block;
-  border-radius: 5px;
-  color: #444;
-  font-weight: 500;
-}
-.admin_navigation_tabdivider {
-  border-left: 1px solid rgba(0, 0, 0, 0);
-  margin: 7px 4px;
-}
-.admin_navigation_tabdivider-visible {
-  border-color: #ddd;
-}
-.admin_navigation_tab:hover {
-  color: black;
-  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
-}
-.admin_navigation_tab:last-of-type {
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
-}
-.admin_navigation_tab-selected,
-.admin_navigation_tab-selected:hover {
-  background-color: #4078c0;
-  color: white;
-  box-shadow: none;
-  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
-}
-@media (max-width: 800px) {
-  .admin_navigation_tabs {
-    margin: 0px;
-    padding: 0px;
-    background: none;
-    align-content: stretch;
-    padding-left: 0px !important;
-  }
-  .admin_navigation_tabs_content {
-    border-radius: 0px;
-    width: 100%;
-    align-content: stretch;
-  }
-  .admin_navigation_tabdivider {
-    border: none;
-    margin: 0px 1px;
   }
 }
 .btn-more {
@@ -18373,6 +18254,161 @@ a.admin_home_item {
   font-size: 0.8rem;
   margin-left: 5px;
 }
+td.pagination {
+  text-align: center;
+  background-color: white;
+  padding: 10px 5px;
+  background: rgba(64, 120, 192, 0.1);
+}
+.pagination_page,
+.pagination_page_current {
+  color: #4078c0;
+  padding: 2px 10px;
+  margin: 0px;
+  margin-right: 1px;
+  font-size: 1rem;
+  line-height: 1.4em;
+  display: inline-block;
+  text-decoration: none;
+  border-radius: 3px;
+}
+.pagination_page:hover {
+  background-color: rgba(64, 120, 192, 0.1);
+}
+.pagination_page_current,
+.pagination_page_current:hover {
+  background-color: #4078c0;
+  color: white;
+}
+.pagination_page_current {
+  cursor: default;
+}
+.admin_navigation_breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0px 0px;
+  font-size: 1rem;
+  align-items: center;
+  align-items: stretch;
+}
+@media (max-width: 800px) {
+  .admin_navigation_breadcrumbs {
+    flex-direction: column;
+  }
+}
+.admin_navigation_breadcrumb {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  line-height: 30px;
+  padding-left: 5px;
+  padding: 0px 3px 0px 3px;
+  color: #444;
+  font-weight: 500;
+  border-radius: 5px;
+}
+.admin_navigation_breadcrumb_image {
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  width: 30px;
+  height: 30px;
+  margin: 3px 10px 3px 0px;
+  display: inline-block;
+  border-radius: 5px;
+  background-color: white;
+  border: 1px solid #eee;
+}
+.admin_navigation_breadcrumb_image-logo {
+  background-size: contain;
+}
+.admin_navigation_breadcrumb_divider {
+  font-size: 1.4rem;
+  vertical-align: center;
+  display: inline-flex;
+  margin: 0px 0px 0px 3px;
+}
+.admin_navigation_breadcrumb_divider:after {
+  content: "⇢";
+  content: "→";
+}
+.admin_navigation_tabs {
+  display: flex;
+  justify-content: center;
+  vertical-align: bottom;
+  flex-wrap: wrap;
+  width: 100%;
+  margin: 5px;
+}
+.admin_navigation_tabs_content {
+  display: flex;
+  flex-wrap: wrap;
+  border-radius: 5px;
+  background: rgba(64, 120, 192, 0.1);
+  padding: 0px 4px;
+  justify-content: center;
+}
+.admin_navigation_tabs {
+  margin: 0px 5px 5px 0px;
+}
+.admin_header .admin_navigation_tabs {
+  padding-left: 200px;
+}
+.admin_navigation_tab {
+  white-space: nowrap;
+  overflow: hidden;
+  margin: 4px 0px;
+  display: flex;
+  border-bottom: none;
+  font-size: 0.9rem;
+  line-height: 1.8em;
+  text-decoration: none;
+  padding: 1px 20px;
+  display: inline-block;
+  border-radius: 5px;
+  color: #444;
+  font-weight: 500;
+}
+.admin_navigation_tabdivider {
+  border-left: 1px solid rgba(0, 0, 0, 0);
+  margin: 7px 4px;
+}
+.admin_navigation_tabdivider-visible {
+  border-color: #ddd;
+}
+.admin_navigation_tab:hover {
+  color: black;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+}
+.admin_navigation_tab:last-of-type {
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+.admin_navigation_tab-selected,
+.admin_navigation_tab-selected:hover {
+  background-color: #4078c0;
+  color: white;
+  box-shadow: none;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+}
+@media (max-width: 800px) {
+  .admin_navigation_tabs {
+    margin: 0px;
+    padding: 0px;
+    background: none;
+    align-content: stretch;
+    padding-left: 0px !important;
+  }
+  .admin_navigation_tabs_content {
+    border-radius: 0px;
+    width: 100%;
+    align-content: stretch;
+  }
+  .admin_navigation_tabdivider {
+    border: none;
+    margin: 0px 1px;
+  }
+}
 `
 
 
@@ -18444,6 +18480,22 @@ var ImageView = (function () {
         var img = document.createElement("div");
         img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
         img.setAttribute("draggable", "false");
+        var descriptionEl = document.createElement("div");
+        descriptionEl.classList.add("admin_images_image_description");
+        container.appendChild(descriptionEl);
+        var request = new XMLHttpRequest();
+        request.open("GET", this.adminPrefix + "/_api/imagedata/" + id);
+        request.addEventListener("load", function (e) {
+            if (request.status == 200) {
+                var data = JSON.parse(request.response);
+                descriptionEl.innerText = data["Name"];
+                container.setAttribute("title", data["Name"]);
+            }
+            else {
+                console.error("Error while loading file metadata.");
+            }
+        });
+        request.send();
         this.el.appendChild(container);
     };
     return ImageView;
@@ -18514,7 +18566,7 @@ var ImagePicker = (function () {
                     }
                 }
                 else {
-                    alert("Error while uploading image.");
+                    alert("Chyba při nahrávání souboru.");
                     console.error("Error while loading item.");
                 }
             });
@@ -18540,6 +18592,22 @@ var ImagePicker = (function () {
         container.setAttribute("target", "_blank");
         container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
         container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/_api/image/thumb/" + id + "');");
+        var descriptionEl = document.createElement("div");
+        descriptionEl.classList.add("admin_images_image_description");
+        container.appendChild(descriptionEl);
+        var request = new XMLHttpRequest();
+        request.open("GET", this.adminPrefix + "/_api/imagedata/" + id);
+        request.addEventListener("load", function (e) {
+            if (request.status == 200) {
+                var data = JSON.parse(request.response);
+                descriptionEl.innerText = data["Name"];
+                container.setAttribute("title", data["Name"]);
+            }
+            else {
+                console.error("Error while loading file metadata.");
+            }
+        });
+        request.send();
         container.addEventListener("dragstart", function (e) {
             _this.draggedElement = e.target;
         });
@@ -18732,6 +18800,39 @@ var ListFilterRelations = (function () {
     };
     return ListFilterRelations;
 }());
+var ListFilterDate = (function () {
+    function ListFilterDate(el, value) {
+        this.hidden = el.querySelector(".admin_table_filter_item");
+        this.from = el.querySelector(".admin_filter_layout_date_from");
+        this.to = el.querySelector(".admin_filter_layout_date_to");
+        this.from.addEventListener("input", this.changed.bind(this));
+        this.from.addEventListener("change", this.changed.bind(this));
+        this.to.addEventListener("input", this.changed.bind(this));
+        this.to.addEventListener("change", this.changed.bind(this));
+        this.setValue(value);
+    }
+    ListFilterDate.prototype.setValue = function (value) {
+        if (!value) {
+            return;
+        }
+        var splited = value.split(",");
+        if (splited.length == 2) {
+            this.from.value = splited[0];
+            this.to.value = splited[1];
+        }
+        this.hidden.value = value;
+    };
+    ListFilterDate.prototype.changed = function () {
+        var val = "";
+        if (this.from.value || this.to.value) {
+            val = this.from.value + "," + this.to.value;
+        }
+        this.hidden.value = val;
+        var event = new Event('change');
+        this.hidden.dispatchEvent(event);
+    };
+    return ListFilterDate;
+}());
 function bindLists() {
     var els = document.getElementsByClassName("admin_list");
     for (var i = 0; i < els.length; i++) {
@@ -18807,7 +18908,7 @@ var List = (function () {
     }
     List.prototype.load = function () {
         var _this = this;
-        this.progress.classList.remove("hidden");
+        this.progress.classList.remove("admin_table_progress-inactive");
         var request = new XMLHttpRequest();
         var params = {};
         if (this.page > 1) {
@@ -18846,9 +18947,7 @@ var List = (function () {
             _this.tbody.innerHTML = "";
             if (request.status == 200) {
                 _this.tbody.innerHTML = request.response;
-                var count = request.getResponseHeader("X-Count");
-                var totalCount = request.getResponseHeader("X-Total-Count");
-                var countStr = count + " / " + totalCount;
+                var countStr = request.getResponseHeader("X-Count-Str");
                 _this.el.querySelector(".admin_table_count").textContent = countStr;
                 bindOrder();
                 _this.bindPagination();
@@ -18858,7 +18957,7 @@ var List = (function () {
             else {
                 console.error("error while loading list");
             }
-            _this.progress.classList.add("hidden");
+            _this.progress.classList.add("admin_table_progress-inactive");
         });
         request.send(JSON.stringify({}));
     };
@@ -19084,7 +19183,7 @@ var List = (function () {
         this.page = 1;
         this.changed = true;
         this.changedTimestamp = Date.now();
-        this.progress.classList.remove("hidden");
+        this.progress.classList.remove("admin_table_progress-inactive");
     };
     List.prototype.bindFilterRelation = function (el, value) {
         new ListFilterRelations(el, value, this);
@@ -19751,39 +19850,6 @@ var Form = (function () {
         });
     }
     return Form;
-}());
-var ListFilterDate = (function () {
-    function ListFilterDate(el, value) {
-        this.hidden = el.querySelector(".admin_table_filter_item");
-        this.from = el.querySelector(".admin_filter_layout_date_from");
-        this.to = el.querySelector(".admin_filter_layout_date_to");
-        this.from.addEventListener("input", this.changed.bind(this));
-        this.from.addEventListener("change", this.changed.bind(this));
-        this.to.addEventListener("input", this.changed.bind(this));
-        this.to.addEventListener("change", this.changed.bind(this));
-        this.setValue(value);
-    }
-    ListFilterDate.prototype.setValue = function (value) {
-        if (!value) {
-            return;
-        }
-        var splited = value.split(",");
-        if (splited.length == 2) {
-            this.from.value = splited[0];
-            this.to.value = splited[1];
-        }
-        this.hidden.value = value;
-    };
-    ListFilterDate.prototype.changed = function () {
-        var val = "";
-        if (this.from.value || this.to.value) {
-            val = this.from.value + "," + this.to.value;
-        }
-        this.hidden.value = val;
-        var event = new Event('change');
-        this.hidden.dispatchEvent(event);
-    };
-    return ListFilterDate;
 }());
 function bindDatePicker() {
     var dates = document.querySelectorAll(".form_input-date");

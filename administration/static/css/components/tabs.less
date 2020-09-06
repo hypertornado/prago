@@ -1,0 +1,106 @@
+.admin_navigation_tabs {
+    display: flex;
+    justify-content: center;
+    vertical-align: bottom;
+    flex-wrap: wrap;
+    width: 100%;
+    margin: 5px;
+  }
+  
+  .admin_navigation_tabs_content {
+    //border: 1px solid red;
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 5px;
+    background: @baseColorBackground;
+    padding: 0px 4px;
+  
+    justify-content: center;
+  }
+  
+  .admin_navigation_tabs {
+    //margin-left: 205px;
+    margin: 0px 5px 5px 0px;
+  }
+  
+  .admin_header .admin_navigation_tabs {
+    padding-left: 200px;
+  }
+  
+  .admin_navigation_tab {
+    white-space: nowrap;
+    overflow: hidden;
+    margin: 4px 0px;
+    display: flex;
+    border-bottom: none;
+    font-size: .9rem;
+    line-height: 1.8em;
+  
+    text-decoration: none;
+    padding: 1px 20px;
+    display: inline-block;
+  
+    border-radius: 5px;
+    color: @black;
+    font-weight: 500;
+  
+    //border-top: 1px solid @baseColor;
+    //border-bottom: 1px solid @baseColor;
+    //border-right: 1px solid @baseColor;
+  }
+  
+  .admin_navigation_tabdivider {
+    border-left: 1px solid rgba(0,0,0,0);
+    //border-left: 1px solid @baseColor;
+    margin: 7px 4px;
+  }
+  
+  .admin_navigation_tabdivider-visible {
+    border-color: #ddd;
+  }
+  
+  .admin_navigation_tab:hover {
+    //background: white;
+    color: black;
+    .shadow;
+  }
+  
+  .admin_navigation_tab:first-of-type {
+    //border-top-left-radius: 5px;
+    //border-bottom-left-radius: 5px;
+    //border-left: 1px solid @baseColor;
+  }
+  
+  .admin_navigation_tab:last-of-type {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+  
+  .admin_navigation_tab-selected, .admin_navigation_tab-selected:hover {
+    background-color: @baseColor;
+    color: white;
+    box-shadow: none;
+    .shadow;
+  }
+  
+  @media (max-width: 800px) {
+    .admin_navigation_tabs {
+      margin: 0px;
+      padding: 0px;
+      background: none;
+      align-content: stretch;
+      padding-left: 0px !important;
+    }
+  
+    .admin_navigation_tabs_content {
+      //background: none;
+      border-radius: 0px;
+      width: 100%;
+      align-content: stretch;
+    }
+  
+    .admin_navigation_tabdivider {
+      border: none;
+      margin: 0px 1px;
+    }
+  }

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hypertornado/prago/administration/messages"
+	"github.com/hypertornado/prago/utils"
 )
 
 type list struct {
@@ -44,13 +45,14 @@ type listHeaderItem struct {
 }
 
 type listContent struct {
-	Count      int64
-	TotalCount int64
-	Rows       []listRow
-	Pagination pagination
-	Colspan    int64
-	Stats      *ListStats
-	Message    string
+	//Count         int64
+	//TotalCount    int64
+	TotalCountStr string
+	Rows          []listRow
+	Pagination    pagination
+	Colspan       int64
+	Stats         *ListStats
+	Message       string
 }
 
 type listRow struct {
@@ -272,7 +274,7 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 				q.WhereIs(k, false)
 			}
 		case "filter_layout_select":
-			if field.Tags["prago-type"] == "file" || field.Tags["prago-type"] == "image" {
+			if field.Tags["prago-type"] == "file" || field.Tags["prago-type"] == "image" || field.Tags["prago-type"] == "cdnfile" {
 				if v == "true" {
 					q.Where(fmt.Sprintf("%s !=''", field.ColumnName))
 				}
@@ -363,7 +365,7 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 	if err != nil {
 		return
 	}
-	ret.Count = count
+	//ret.Count = count
 
 	var totalCount int64
 	resource.newItem(&item)
@@ -372,7 +374,13 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 	if err != nil {
 		return
 	}
-	ret.TotalCount = totalCount
+	//ret.TotalCount = totalCount
+
+	if count == totalCount {
+		ret.TotalCountStr = utils.HumanizeNumber(count)
+	} else {
+		ret.TotalCountStr = fmt.Sprintf("%s z %s", utils.HumanizeNumber(count), utils.HumanizeNumber(totalCount))
+	}
 
 	var itemsPerPage = resource.ItemsPerPage
 	if params.Get("_pagesize") != "" {
@@ -436,7 +444,7 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 		ret.Rows = append(ret.Rows, row)
 	}
 
-	if ret.Count == 0 {
+	if count == 0 {
 		ret.Message = messages.Messages.Get(user.Locale, "admin_list_empty")
 	}
 	ret.Colspan = int64(len(columnsMap)) + 1

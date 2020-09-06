@@ -50,6 +50,12 @@
 {{end}}
 
 {{define "admin_item_view_file"}}
+  {{range $item := .}}
+    {{template "admin_item_view_file_single" $item}}
+  {{end}}
+{{end}}
+
+{{define "admin_item_view_file_single"}}
   {{if .MediumURL}}
     <div>
       <a href="{{.OriginalURL}}"><img src="{{.MediumURL}}"></a>
@@ -61,20 +67,25 @@
       <a href="{{$path.URL}}">{{$path.Name}}</a>
     {{end}}
   </div>
-  <div>
-    <form action="getcdnurl" method="POST">
-      Získat zmenšeninu:
-      <input type="hidden" name="uuid" value="{{.UUID}}">
-      <input name="size" value="" placeholder="Velikost">
-      <input type="submit" class="btn" name="Zmenšit">
-    </form>
-  </div>
-  <div>UUID: {{.UUID}}</div>
+  {{if .IsImage}}
+    <div>
+      <form action="getcdnurl" method="POST">
+        Získat zmenšeninu:
+        <input type="hidden" name="uuid" value="{{.UUID}}">
+        <input name="size" value="" placeholder="Velikost">
+        <input type="submit" class="btn" name="Zmenšit">
+      </form>
+    </div>
+  {{end}}
+  <div>UUID: <a href="{{.CDNFileURL}}">{{.UUID}}</a></div>
 {{end}}
 
 {{define "admin_item_view_file_cell"}}
-  {{if .SmallURL}}
-    <div class="admin_list_image" style="background-image: url('{{CSS .SmallURL}}');"></div>
+  {{if .}}
+    {{$item := index . 0}}
+    {{if $item.SmallURL}}
+      <div class="admin_list_image" style="background-image: url('{{CSS $item.SmallURL}}');"></div>
+    {{end}}
   {{end}}
 {{end}}
 

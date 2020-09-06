@@ -32,10 +32,26 @@ class ImageView {
     container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/_api/image/thumb/" + id + "');");
 
     var img = document.createElement("div");
-    //img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
     img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
     img.setAttribute("draggable", "false");
-    //container.appendChild(img);
+
+
+    var descriptionEl = document.createElement("div");
+    descriptionEl.classList.add("admin_images_image_description")
+    container.appendChild(descriptionEl);
+
+    var request = new XMLHttpRequest();
+    request.open("GET", this.adminPrefix + "/_api/imagedata/" + id);
+    request.addEventListener("load", (e) => {
+      if (request.status == 200) {
+        var data = JSON.parse(request.response);
+        descriptionEl.innerText = data["Name"];
+        container.setAttribute("title", data["Name"])
+      } else {
+        console.error("Error while loading file metadata.");
+      }
+    })
+    request.send();
 
     this.el.appendChild(container);
   }
