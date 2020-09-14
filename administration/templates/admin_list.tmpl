@@ -132,7 +132,7 @@
           {{tmpl $cell.Template $cell.Value}}
         </td>
       {{end}}
-      <td nowrap class="top align-right">
+      <td nowrap class="top align-right admin_table_row_lastcell">
         <div class="btngroup admin_list_buttons">
           {{range $action := $item.Actions.VisibleButtons}}
             <a href="{{$action.URL}}" class="btn btn-small"

@@ -1,0 +1,25 @@
+{{define "admin_mainmenu"}}
+    <div class="mainmenu">
+    {{if .Logo}}
+        <a href="{{.AdminHomepageURL}}" class="mainmenu_logo" style="background-image: url('{{CSS .Logo}}');"></a>
+    {{end}}
+
+    {{if .HasSearch}}
+        <form class="admin_header_search" action="{{.AdminHomepageURL}}/_search">
+            <input class="input admin_header_search_input" type="search" placeholder="Vyhledávání" name="q" value="{{.SearchQuery}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <div class="admin_header_search_suggestions hidden"></div>
+        </form>
+    {{end}}
+
+    {{range $section := .Sections}}
+        <div class="mainmenu_section">
+            <div class="mainmenu_section_name">{{$section.Name}}</div>
+            <div class="mainmenu_section_content">
+                {{range $item := $section.Items}}
+                    <a href="{{$item.URL}}" class="mainmenu_section_item{{if $item.Selected}} mainmenu_section_item-selected{{end}}">{{$item.Name}}</a>        
+                {{end}}
+            </div>        
+        </div>
+    {{end}}
+    </div>
+{{end}}

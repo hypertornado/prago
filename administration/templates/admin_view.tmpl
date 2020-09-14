@@ -24,9 +24,6 @@
   {{range $item := .Items}}
     {{if $item.Name}}
       <div class="view_name">
-        {{if $item.Button}}
-          <a href="{{$item.Button.URL}}" class="btn view_button">{{$item.Button.Name}}</a>
-        {{end}}
         {{$item.Name}}
       </div>
     {{end}}
@@ -39,6 +36,10 @@
 
 {{define "admin_item_view_text"}}
   {{- . -}}
+{{end}}
+
+{{define "admin_item_view_url"}}
+  <a href="{{index . 0}}">{{index . 1}}</a>
 {{end}}
 
 {{define "admin_item_view_textarea"}}

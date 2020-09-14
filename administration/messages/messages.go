@@ -119,6 +119,10 @@ var m = map[string]map[string]string{
 		"en": "Signpost",
 		"cs": "Rozcestník",
 	},
+	"admin_homepage": {
+		"en": "Homepage",
+		"cs": "Homepage",
+	},
 
 	"admin_log_out": {
 		"en": "Log out",
@@ -289,6 +293,14 @@ var m = map[string]map[string]string{
 	"admin_list_empty": {
 		"en": "No items found",
 		"cs": "Nic nebylo nalezeno.",
+	},
+	"admin_tables": {
+		"en": "Tables",
+		"cs": "Tabulky",
+	},
+	"admin_table": {
+		"en": "Table",
+		"cs": "Tabulka",
 	},
 
 	"admin_settings": {

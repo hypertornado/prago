@@ -15,10 +15,7 @@ import (
 )
 
 func bindAPI(a *Administration) {
-	//bindStatsAPI(a)
 	bindMarkdownAPI(a)
-	//bindListAPI(a)
-	bindListResourceAPI(a)
 	bindRelationAPI(a)
 }
 
@@ -71,8 +68,8 @@ func bindImageAPI(admin *Administration) {
 
 	//TODO: authorize
 	admin.AdminController.Get(admin.GetURL("_api/image/list"), func(request prago.Request) {
+		GetUser(request)
 		var images []*File
-
 		if len(request.Params().Get("ids")) > 0 {
 			ids := strings.Split(request.Params().Get("ids"), ",")
 			for _, v := range ids {
@@ -98,6 +95,7 @@ func bindImageAPI(admin *Administration) {
 	})
 
 	admin.AdminController.Get(admin.GetURL("_api/imagedata/:uid"), func(request prago.Request) {
+		GetUser(request)
 		var file File
 		err := admin.Query().WhereIs("uid", request.Params().Get("uid")).Get(&file)
 		if err != nil {
@@ -108,6 +106,7 @@ func bindImageAPI(admin *Administration) {
 
 	//TODO: authorize
 	admin.AdminController.Post(admin.GetURL("_api/image/upload"), func(request prago.Request) {
+		GetUser(request)
 		multipartFiles := request.Request().MultipartForm.File["file"]
 
 		description := request.Params().Get("description")
@@ -130,18 +129,13 @@ func bindImageAPI(admin *Administration) {
 
 func bindMarkdownAPI(admin *Administration) {
 	admin.AdminController.Post(admin.GetURL("_api/markdown"), func(request prago.Request) {
+		GetUser(request)
 		data, err := ioutil.ReadAll(request.Request().Body)
 		if err != nil {
 			panic(err)
 		}
 		request.RenderJSON(markdown.New(markdown.HTML(true), markdown.Breaks(true)).RenderToString(data))
 	})
-}
-
-//TODO: remove this
-type resourceItem struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
 }
 
 func bindRelationAPI(admin *Administration) {
@@ -245,99 +239,3 @@ func bindRelationAPI(admin *Administration) {
 		request.RenderJSON(ret)
 	})
 }
-
-func bindListResourceAPI(admin *Administration) {
-	admin.AdminController.Get(admin.GetURL("_api/resource/:name"), func(request prago.Request) {
-		locale := getLocale(request)
-		user := GetUser(request)
-		name := request.Params().Get("name")
-		resource, found := admin.resourceNameMap[name]
-		if !found {
-			render404(request)
-			return
-		}
-
-		if !admin.Authorize(user, resource.CanView) {
-			render403(request)
-			return
-		}
-
-		var item interface{}
-		resource.newItem(&item)
-		c, err := admin.Query().Count(item)
-		must(err)
-		if c == 0 {
-			request.RenderJSON([]string{})
-			return
-		}
-
-		ret := []resourceItem{}
-
-		var items interface{}
-		resource.newArrayOfItems(&items)
-		//TODO: remove limit
-		must(admin.Query().Limit(1000).Get(items))
-
-		itemsVal := reflect.ValueOf(items).Elem()
-
-		for i := 0; i < itemsVal.Len(); i++ {
-			item := itemsVal.Index(i)
-
-			id := item.Elem().FieldByName("ID").Int()
-
-			var name string
-			ifaceItemName, ok := item.Interface().(interface {
-				AdminItemName(string) string
-			})
-			if ok {
-				name = ifaceItemName.AdminItemName(locale)
-			} else {
-				name = item.Elem().FieldByName("Name").String()
-			}
-
-			ret = append(ret, resourceItem{
-				ID:   id,
-				Name: name,
-			})
-		}
-		request.RenderJSON(ret)
-	})
-}
-
-/*
-func bindListResourceItemAPI(admin *Administration) {
-	admin.AdminController.Get(admin.GetURL("_api/resource/:name/:id"), func(request prago.Request) {
-		user := GetUser(request)
-		resourceName := request.Params().Get("name")
-		resource, found := admin.resourceNameMap[resourceName]
-		if !found {
-			render404(request)
-			return
-		}
-
-		if !admin.Authorize(user, resource.CanView) {
-			render403(request)
-			return
-		}
-
-		idStr := request.Params().Get("id")
-
-		var item interface{}
-		resource.newItem(&item)
-		must(admin.Query().WhereIs("id", idStr).Get(item))
-
-		ret := resourceItem{}
-
-		itemVal := reflect.ValueOf(item).Elem()
-
-		id := itemVal.FieldByName("ID").Int()
-
-		var name string
-		name = itemVal.FieldByName("Name").String()
-		ret.ID = id
-		ret.Name = name
-
-		request.RenderJSON(ret)
-	})
-}
-*/

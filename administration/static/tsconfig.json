@@ -29,6 +29,7 @@
         "js/dropdown.ts",
         "js/search.ts",
         "js/eshop_control.ts",
+        "js/mainmenu.ts",
         "js/load.ts"
     ]
 }

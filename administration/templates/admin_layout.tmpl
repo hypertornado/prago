@@ -24,57 +24,64 @@
   </head>
   <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.admin_header.UrlPrefix}}">
     <div class="admin_layout">
-        <div class="admin_header">
-            <div class="admin_header_top">
-                <div class="admin_header_left">
-                    {{if .admin_page}}
-                        {{template "admin_breadcrumbs" .admin_page.Navigation.Breadcrumbs}}
-                    {{else}}
-                        {{template "admin_breadcrumbs" .admin_default_breadcrumbs}}
-                    {{end}}
-                    <div class="admin_header_top_item admin_header_top_space"></div>
-                </div>
-                <div class="admin_header_right">
-                    {{if .admin_header.HasSearch}}
-                        <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
-                            <input class="input admin_header_search_input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-                            <div class="admin_header_search_suggestions hidden"></div>
-                        </form>
-                    {{end}}
-                    <div class="admin_avatar admin_dropdown" tabindex="-1">
-                        <div class="admin_dropdown_target admin_avatar_icon" style="background-image: url('{{.gravatar}}');"></div>
-                        <div class="admin_dropdown_content">
-                            <div class="admin_dropdown_item">{{.currentuser.Email}}</div>
-                            <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_dropdown_item">
-                                {{message .locale "admin_settings"}}
-                            </a>
-                            <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_dropdown_item">
-                                {{message .locale "admin_log_out"}}
-                            </a>
+        <div class="admin_layout_left">
+            {{template "admin_mainmenu" .main_menu}}
+        </div>
+        <div class="admin_layout_right">
+            <div class="admin_header">
+                <div class="admin_header_top">
+                    <div class="admin_header_left">
+                        {{if .admin_page}}
+                            {{template "admin_breadcrumbs" .admin_page.Navigation.Breadcrumbs}}
+                        {{else}}
+                            {{template "admin_breadcrumbs" .admin_default_breadcrumbs}}
+                        {{end}}
+                        <div class="admin_header_top_item admin_header_top_space"></div>
+                    </div>
+                    <div class="admin_header_right">
+                        {{if .admin_header.HasSearch}}
+                            <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
+                                <input class="input admin_header_search_input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                                <div class="admin_header_search_suggestions hidden"></div>
+                            </form>
+                        {{end}}
+                        <div class="admin_avatar admin_dropdown" tabindex="-1">
+                            <div class="admin_dropdown_target admin_avatar_icon" style="background-image: url('{{.gravatar}}');"></div>
+                            <div class="admin_dropdown_content">
+                                <div class="admin_dropdown_item">{{.currentuser.Email}}</div>
+                                <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_dropdown_item">
+                                    {{message .locale "admin_settings"}}
+                                </a>
+                                <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_dropdown_item">
+                                    {{message .locale "admin_log_out"}}
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <div class="admin_header_container">
+                    <div class="admin_header_container_left">
+                        <div class="admin_header_container_menu btn">Menu</div>
+                    </div>
+                    {{if .admin_page}}
+                        {{template "admin_tabs" .admin_page.Navigation.Tabs}}
+                    {{end}}
+                </div>
             </div>
-            <!--
-            <div class="admin_header_wrong_version">
-                Používáte starou nekompatibilní verzi prohlížeče.
-            </div>
-            -->
-            {{if .admin_page}}
-                {{template "admin_tabs" .admin_page.Navigation.Tabs}}
-            {{end}}
-        </div>
 
-        <div class="admin_bottom">
-            {{ $admin_resource := .admin_resource}}
-            <div class="admin_header_resources">
-                {{range $item := .admin_header.Items}}
-                    <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
+            <div class="admin_bottom">
+                {{if false}}
+                    {{ $admin_resource := .admin_resource}}
+                    <div class="admin_header_resources">
+                        {{range $item := .admin_header.Items}}
+                            <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
+                        {{end}}
+                    </div>
                 {{end}}
-            </div>
-            {{template "admin_flash" .}}
-            <div class="admin_content">
-                {{tmpl .admin_yield .}}
+                {{template "admin_flash" .}}
+                <div class="admin_content">
+                    {{tmpl .admin_yield .}}
+                </div>
             </div>
         </div>
     </div>

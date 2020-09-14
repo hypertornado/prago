@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hypertornado/prago/administration/messages"
+	"github.com/hypertornado/prago/utils"
 )
 
 type view struct {
@@ -16,8 +17,8 @@ type view struct {
 }
 
 type viewField struct {
-	Name     string
-	Button   *viewAction
+	Name string
+	//Button   *viewAction
 	Template string
 	Value    interface{}
 }
@@ -36,6 +37,19 @@ func (resource Resource) getViews(id int, inValues interface{}, user User) (ret 
 func (resource Resource) getBasicView(id int, inValues interface{}, user User) view {
 	visible := defaultVisibilityFilter
 	ret := view{}
+
+	ret.Items = append(
+		ret.Items,
+		viewField{
+			Name:     messages.Messages.Get(user.Locale, "admin_table"),
+			Template: "admin_item_view_url",
+			Value: [2]string{
+				resource.GetURL(""),
+				resource.HumanName(user.Locale),
+			},
+		},
+	)
+
 	for i, f := range resource.fieldArrays {
 		if !visible(resource, user, *f) {
 			continue
@@ -63,21 +77,25 @@ func (resource Resource) getBasicView(id int, inValues interface{}, user User) v
 			ret.Items,
 			viewField{
 				Name:     messages.Messages.Get(user.Locale, "admin_history_last"),
-				Template: "admin_item_view_text",
-				Value:    historyView.Items[0].UserName,
+				Template: "admin_item_view_url",
+				Value: [2]string{
+					historyView.Items[0].UserURL,
+					historyView.Items[0].UserName,
+				},
 			},
 		)
+
+		//historyView.Items[0].UserURL
 
 		ret.Items = append(
 			ret.Items,
 			viewField{
-				Name: messages.Messages.Get(user.Locale, "admin_history_count"),
-				Button: &viewAction{
-					Name: messages.Messages.Get(user.Locale, "admin_history"),
-					URL:  resource.GetURL(fmt.Sprintf("%d/history", id)),
+				Name:     messages.Messages.Get(user.Locale, "admin_history_count"),
+				Template: "admin_item_view_url",
+				Value: [2]string{
+					resource.GetURL(fmt.Sprintf("%d/history", id)),
+					fmt.Sprintf("%d", len(historyView.Items)),
 				},
-				Template: "admin_item_view_text",
-				Value:    fmt.Sprintf("%d", len(historyView.Items)),
 			},
 		)
 
@@ -179,12 +197,27 @@ func getDefaultViewDataSource(f *Field) func(resource Resource, user User, f Fie
 	switch t.Kind() {
 	case reflect.Bool:
 		return boolViewDataSource
+	case reflect.Int:
+		return numberViewDataSource
+	case reflect.Int64:
+		return numberViewDataSource
 	default:
 		return defaultViewDataSource
 	}
 }
 
 func defaultViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
+	return value
+}
+
+func numberViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
+	switch f.Typ.Kind() {
+	case reflect.Int:
+		return utils.HumanizeNumber(int64(value.(int)))
+	case reflect.Int64:
+		return utils.HumanizeNumber(value.(int64))
+	}
+
 	return value
 }
 

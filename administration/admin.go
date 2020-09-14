@@ -165,6 +165,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 
 		headerData := admin.getHeaderData(request)
 		request.SetData("admin_header", headerData)
+		request.SetData("main_menu", admin.getMainMenu(request))
 		request.SetData("admin_default_breadcrumbs", admin.createBreadcrumbs(user.Locale))
 
 		next()

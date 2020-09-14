@@ -363,57 +363,64 @@ const adminTemplates = `
   </head>
   <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.admin_header.UrlPrefix}}">
     <div class="admin_layout">
-        <div class="admin_header">
-            <div class="admin_header_top">
-                <div class="admin_header_left">
-                    {{if .admin_page}}
-                        {{template "admin_breadcrumbs" .admin_page.Navigation.Breadcrumbs}}
-                    {{else}}
-                        {{template "admin_breadcrumbs" .admin_default_breadcrumbs}}
-                    {{end}}
-                    <div class="admin_header_top_item admin_header_top_space"></div>
-                </div>
-                <div class="admin_header_right">
-                    {{if .admin_header.HasSearch}}
-                        <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
-                            <input class="input admin_header_search_input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-                            <div class="admin_header_search_suggestions hidden"></div>
-                        </form>
-                    {{end}}
-                    <div class="admin_avatar admin_dropdown" tabindex="-1">
-                        <div class="admin_dropdown_target admin_avatar_icon" style="background-image: url('{{.gravatar}}');"></div>
-                        <div class="admin_dropdown_content">
-                            <div class="admin_dropdown_item">{{.currentuser.Email}}</div>
-                            <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_dropdown_item">
-                                {{message .locale "admin_settings"}}
-                            </a>
-                            <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_dropdown_item">
-                                {{message .locale "admin_log_out"}}
-                            </a>
+        <div class="admin_layout_left">
+            {{template "admin_mainmenu" .main_menu}}
+        </div>
+        <div class="admin_layout_right">
+            <div class="admin_header">
+                <div class="admin_header_top">
+                    <div class="admin_header_left">
+                        {{if .admin_page}}
+                            {{template "admin_breadcrumbs" .admin_page.Navigation.Breadcrumbs}}
+                        {{else}}
+                            {{template "admin_breadcrumbs" .admin_default_breadcrumbs}}
+                        {{end}}
+                        <div class="admin_header_top_item admin_header_top_space"></div>
+                    </div>
+                    <div class="admin_header_right">
+                        {{if .admin_header.HasSearch}}
+                            <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
+                                <input class="input admin_header_search_input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                                <div class="admin_header_search_suggestions hidden"></div>
+                            </form>
+                        {{end}}
+                        <div class="admin_avatar admin_dropdown" tabindex="-1">
+                            <div class="admin_dropdown_target admin_avatar_icon" style="background-image: url('{{.gravatar}}');"></div>
+                            <div class="admin_dropdown_content">
+                                <div class="admin_dropdown_item">{{.currentuser.Email}}</div>
+                                <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_dropdown_item">
+                                    {{message .locale "admin_settings"}}
+                                </a>
+                                <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_dropdown_item">
+                                    {{message .locale "admin_log_out"}}
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <div class="admin_header_container">
+                    <div class="admin_header_container_left">
+                        <div class="admin_header_container_menu btn">Menu</div>
+                    </div>
+                    {{if .admin_page}}
+                        {{template "admin_tabs" .admin_page.Navigation.Tabs}}
+                    {{end}}
+                </div>
             </div>
-            <!--
-            <div class="admin_header_wrong_version">
-                Používáte starou nekompatibilní verzi prohlížeče.
-            </div>
-            -->
-            {{if .admin_page}}
-                {{template "admin_tabs" .admin_page.Navigation.Tabs}}
-            {{end}}
-        </div>
 
-        <div class="admin_bottom">
-            {{ $admin_resource := .admin_resource}}
-            <div class="admin_header_resources">
-                {{range $item := .admin_header.Items}}
-                    <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
+            <div class="admin_bottom">
+                {{if false}}
+                    {{ $admin_resource := .admin_resource}}
+                    <div class="admin_header_resources">
+                        {{range $item := .admin_header.Items}}
+                            <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
+                        {{end}}
+                    </div>
                 {{end}}
-            </div>
-            {{template "admin_flash" .}}
-            <div class="admin_content">
-                {{tmpl .admin_yield .}}
+                {{template "admin_flash" .}}
+                <div class="admin_content">
+                    {{tmpl .admin_yield .}}
+                </div>
             </div>
         </div>
     </div>
@@ -581,7 +588,7 @@ const adminTemplates = `
           {{tmpl $cell.Template $cell.Value}}
         </td>
       {{end}}
-      <td nowrap class="top align-right">
+      <td nowrap class="top align-right admin_table_row_lastcell">
         <div class="btngroup admin_list_buttons">
           {{range $action := $item.Actions.VisibleButtons}}
             <a href="{{$action.URL}}" class="btn btn-small"
@@ -627,7 +634,31 @@ const adminTemplates = `
   {{end}}
 </div>
 {{end}}
-{{define "admin_message"}}
+{{define "admin_mainmenu"}}
+    <div class="mainmenu">
+    {{if .Logo}}
+        <a href="{{.AdminHomepageURL}}" class="mainmenu_logo" style="background-image: url('{{CSS .Logo}}');"></a>
+    {{end}}
+
+    {{if .HasSearch}}
+        <form class="admin_header_search" action="{{.AdminHomepageURL}}/_search">
+            <input class="input admin_header_search_input" type="search" placeholder="Vyhledávání" name="q" value="{{.SearchQuery}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <div class="admin_header_search_suggestions hidden"></div>
+        </form>
+    {{end}}
+
+    {{range $section := .Sections}}
+        <div class="mainmenu_section">
+            <div class="mainmenu_section_name">{{$section.Name}}</div>
+            <div class="mainmenu_section_content">
+                {{range $item := $section.Items}}
+                    <a href="{{$item.URL}}" class="mainmenu_section_item{{if $item.Selected}} mainmenu_section_item-selected{{end}}">{{$item.Name}}</a>        
+                {{end}}
+            </div>        
+        </div>
+    {{end}}
+    </div>
+{{end}}{{define "admin_message"}}
 <div class="admin_box">
   <h1>{{.message}}</h1>
 </div>
@@ -845,9 +876,6 @@ const adminTemplates = `
   {{range $item := .Items}}
     {{if $item.Name}}
       <div class="view_name">
-        {{if $item.Button}}
-          <a href="{{$item.Button.URL}}" class="btn view_button">{{$item.Button.Name}}</a>
-        {{end}}
         {{$item.Name}}
       </div>
     {{end}}
@@ -860,6 +888,10 @@ const adminTemplates = `
 
 {{define "admin_item_view_text"}}
   {{- . -}}
+{{end}}
+
+{{define "admin_item_view_url"}}
+  <a href="{{index . 0}}">{{index . 1}}</a>
 {{end}}
 
 {{define "admin_item_view_textarea"}}
@@ -16499,7 +16531,6 @@ body {
   }
 }
 body {
-  background-color: #fafafa;
   background-size: cover;
   background-attachment: fixed;
 }
@@ -16867,6 +16898,9 @@ th.admin_list_lastheadercell {
   border-bottom: 1px solid #777;
   border-left: 10px solid #000;
 }
+.admin_table_row_lastcell {
+  border-bottom: 1px solid #fff !important;
+}
 .admin_list_table tr:last-child td {
   border-bottom: 1px solid #f1f1f1;
 }
@@ -16989,7 +17023,7 @@ th.admin_list_orderitem {
 .admin_images_image {
   padding: 3px;
   border-radius: 3px;
-  margin: 5px;
+  margin: 0px 10px 10px 0px;
   display: inline-block;
   text-align: center;
   vertical-align: middle;
@@ -17152,15 +17186,17 @@ select.admin_timestamp_minute {
   flex-wrap: wrap;
   align-items: flex-end;
 }
-.view_button {
-  float: right;
-}
 .view_header_name {
   font-weight: 500;
   flex-grow: 10;
+  font-size: 1.5rem;
+  line-height: 1.3em;
 }
 .view_header_subname {
+  font-size: 1rem;
+  line-height: 1.3em;
   color: #888;
+  display: block;
 }
 .view_header_tabs {
   float: right;
@@ -17177,7 +17213,6 @@ select.admin_timestamp_minute {
   font-size: 1rem;
   margin-left: 0px;
   padding: 10px 10px 5px 10px;
-  border-top: 1px solid #eee;
 }
 .view_name:first-child {
   border-top: none;
@@ -17492,6 +17527,9 @@ td.admin_list_message {
   border-left: none;
 }
 @media print {
+  .admin_layout_left {
+    display: none !important;
+  }
   .admin_header {
     display: none !important;
   }
@@ -17509,6 +17547,15 @@ td.admin_list_message {
   width: 100%;
   height: 100vh;
   display: flex;
+}
+.admin_layout_left {
+  overflow: auto;
+  width: 300px;
+}
+.admin_layout_right {
+  width: 100%;
+  height: 100vh;
+  display: flex;
   flex-direction: column;
 }
 .admin_header {
@@ -17519,13 +17566,13 @@ td.admin_list_message {
   flex-grow: 0;
   flex-shrink: 0;
   background: white;
-  box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
-  padding: 0px 0px 0px 0px;
+  padding: 5px 0px 0px 0px;
   display: block;
 }
 .admin_header_top {
   display: flex;
   align-items: flex-start;
+  display: none;
 }
 .admin_header_left {
   display: flex;
@@ -17539,6 +17586,13 @@ td.admin_list_message {
   flex-shrink: 0;
   border: 0px solid blue;
   padding: 3px 5px;
+}
+.admin_header_container {
+  display: flex;
+}
+.admin_header_container_left {
+  padding: 0px 5px;
+  display: none;
 }
 .admin_bottom {
   display: flex;
@@ -17961,19 +18015,19 @@ a.search_pagination_page-selected {
 }
 .admin_header_search {
   display: flex;
-  padding: 5px 0px;
+  padding: 5px 10px;
   position: relative;
 }
 .admin_header_search_suggestions {
   min-height: 20px;
   background: white;
   position: absolute;
-  left: 0px;
-  right: 0px;
+  left: 10px;
+  right: 10px;
   top: 32px;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
-  min-width: 170px;
+  padding: 3px;
   display: none;
 }
 .admin_header_search:focus-within .admin_header_search_suggestions {
@@ -17981,7 +18035,6 @@ a.search_pagination_page-selected {
 }
 .admin_header_search_input {
   border-radius: 100px;
-  width: 200px;
   padding: 3px 10px;
   font-weight: 500;
 }
@@ -17991,6 +18044,7 @@ a.search_pagination_page-selected {
   font-size: 0.8rem;
   line-height: 1.3em;
   overflow: hidden;
+  text-decoration: none;
 }
 a.admin_search_suggestion-selected,
 a.admin_search_suggestion-selected:active {
@@ -18258,7 +18312,6 @@ td.pagination {
   text-align: center;
   background-color: white;
   padding: 10px 5px;
-  background: rgba(64, 120, 192, 0.1);
 }
 .pagination_page,
 .pagination_page_current {
@@ -18274,11 +18327,13 @@ td.pagination {
 }
 .pagination_page:hover {
   background-color: rgba(64, 120, 192, 0.1);
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
 .pagination_page_current,
 .pagination_page_current:hover {
   background-color: #4078c0;
   color: white;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
 .pagination_page_current {
   cursor: default;
@@ -18351,9 +18406,6 @@ td.pagination {
 .admin_navigation_tabs {
   margin: 0px 5px 5px 0px;
 }
-.admin_header .admin_navigation_tabs {
-  padding-left: 200px;
-}
 .admin_navigation_tab {
   white-space: nowrap;
   overflow: hidden;
@@ -18407,6 +18459,70 @@ td.pagination {
   .admin_navigation_tabdivider {
     border: none;
     margin: 0px 1px;
+  }
+}
+.mainmenu {
+  padding: 0px 0px;
+}
+.mainmenu_logo {
+  height: 50px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: block;
+  margin: 10px 0px;
+}
+.mainmenu_section {
+  padding: 10px 5px;
+}
+.mainmenu_section_name {
+  font-weight: 500;
+  padding: 3px 15px;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  line-height: 1.3em;
+}
+.mainmenu_section_content {
+  padding: 5px;
+  background-color: rgba(64, 120, 192, 0.1);
+  border-radius: 5px;
+}
+.mainmenu_section_item {
+  font-weight: 500;
+  padding: 3px 10px;
+  margin: 0px;
+  font-size: 0.9rem;
+  border-bottom: 2px solid none;
+  flex-shrink: 0;
+  border-radius: 5px;
+  text-decoration: none;
+  color: #888;
+  color: #444;
+  display: block;
+}
+.mainmenu_section_item-selected,
+.mainmenu_section_item-selected:hover {
+  background-color: #4078c0;
+  color: white !important;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+}
+@media (max-width: 1000px) {
+  .admin_layout_left {
+    position: absolute;
+    right: 0px;
+    left: 0px;
+    bottom: 0px;
+    top: 42px;
+    background-color: white;
+    z-index: 200;
+    box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+    display: none;
+  }
+  .admin_layout_left-visible {
+    display: block;
+  }
+  .admin_header_container_left {
+    display: block;
   }
 }
 `
@@ -19662,59 +19778,6 @@ var RelationPicker = (function () {
     };
     return RelationPicker;
 }());
-function bindRelationsOLD() {
-    function bindRelation(el) {
-        var input = el.getElementsByTagName("input")[0];
-        var relationName = input.getAttribute("data-relation");
-        var originalValue = input.value;
-        var select = document.createElement("select");
-        select.classList.add("input");
-        select.classList.add("form_input");
-        select.addEventListener("change", function () {
-            input.value = select.value;
-        });
-        var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        var request = new XMLHttpRequest();
-        request.open("GET", adminPrefix + "/_api/resource/" + relationName, true);
-        var progress = el.getElementsByTagName("progress")[0];
-        request.addEventListener("load", function () {
-            if (request.status >= 200 && request.status < 400) {
-                var resp = JSON.parse(request.response);
-                addOption(select, "0", "", false);
-                Array.prototype.forEach.call(resp, function (item, i) {
-                    var selected = false;
-                    if (originalValue == item["id"]) {
-                        selected = true;
-                    }
-                    addOption(select, item["id"], item["name"], selected);
-                });
-                el.appendChild(select);
-            }
-            else {
-                console.error("Error wile loading relation " + relationName + ".");
-            }
-            progress.style.display = 'none';
-        });
-        request.onerror = function () {
-            console.error("Error wile loading relation " + relationName + ".");
-            progress.style.display = 'none';
-        };
-        request.send();
-    }
-    function addOption(select, value, description, selected) {
-        var option = document.createElement("option");
-        if (selected) {
-            option.setAttribute("selected", "selected");
-        }
-        option.setAttribute("value", value);
-        option.innerText = description;
-        select.appendChild(option);
-    }
-    var elements = document.querySelectorAll(".admin_item_relation");
-    Array.prototype.forEach.call(elements, function (el, i) {
-        bindRelation(el);
-    });
-}
 function bindPlacesView() {
     var els = document.querySelectorAll(".admin_item_view_place");
     for (var i = 0; i < els.length; i++) {
@@ -20128,6 +20191,41 @@ var EshopControl = (function () {
     };
     return EshopControl;
 }());
+function bindMainMenu() {
+    var el = document.querySelector(".admin_layout_left");
+    if (el) {
+        new MainMenu(el);
+    }
+}
+var MainMenu = (function () {
+    function MainMenu(leftEl) {
+        this.leftEl = leftEl;
+        this.menuEl = document.querySelector(".admin_header_container_menu");
+        this.menuEl.addEventListener("click", this.menuClick.bind(this));
+        this.scrollTo(this.loadFromStorage());
+        this.leftEl.addEventListener("scroll", this.scrollHandler.bind(this));
+    }
+    MainMenu.prototype.scrollHandler = function () {
+        this.saveToStorage(this.leftEl.scrollTop);
+    };
+    MainMenu.prototype.saveToStorage = function (position) {
+        window.localStorage["left_menu_position"] = position;
+    };
+    MainMenu.prototype.menuClick = function () {
+        this.leftEl.classList.toggle("admin_layout_left-visible");
+    };
+    MainMenu.prototype.loadFromStorage = function () {
+        var pos = window.localStorage["left_menu_position"];
+        if (pos) {
+            return parseInt(pos);
+        }
+        return 0;
+    };
+    MainMenu.prototype.scrollTo = function (position) {
+        this.leftEl.scrollTo(0, position);
+    };
+    return MainMenu;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();
@@ -20143,6 +20241,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindDropdowns();
     bindSearch();
     bindEshopControl();
+    bindMainMenu();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");

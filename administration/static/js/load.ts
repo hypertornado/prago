@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindDropdowns();
   bindSearch();
   bindEshopControl();
+  bindMainMenu();
 });
 
 function bindFlashMessages() {

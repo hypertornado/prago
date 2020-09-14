@@ -1247,59 +1247,6 @@ var RelationPicker = (function () {
     };
     return RelationPicker;
 }());
-function bindRelationsOLD() {
-    function bindRelation(el) {
-        var input = el.getElementsByTagName("input")[0];
-        var relationName = input.getAttribute("data-relation");
-        var originalValue = input.value;
-        var select = document.createElement("select");
-        select.classList.add("input");
-        select.classList.add("form_input");
-        select.addEventListener("change", function () {
-            input.value = select.value;
-        });
-        var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        var request = new XMLHttpRequest();
-        request.open("GET", adminPrefix + "/_api/resource/" + relationName, true);
-        var progress = el.getElementsByTagName("progress")[0];
-        request.addEventListener("load", function () {
-            if (request.status >= 200 && request.status < 400) {
-                var resp = JSON.parse(request.response);
-                addOption(select, "0", "", false);
-                Array.prototype.forEach.call(resp, function (item, i) {
-                    var selected = false;
-                    if (originalValue == item["id"]) {
-                        selected = true;
-                    }
-                    addOption(select, item["id"], item["name"], selected);
-                });
-                el.appendChild(select);
-            }
-            else {
-                console.error("Error wile loading relation " + relationName + ".");
-            }
-            progress.style.display = 'none';
-        });
-        request.onerror = function () {
-            console.error("Error wile loading relation " + relationName + ".");
-            progress.style.display = 'none';
-        };
-        request.send();
-    }
-    function addOption(select, value, description, selected) {
-        var option = document.createElement("option");
-        if (selected) {
-            option.setAttribute("selected", "selected");
-        }
-        option.setAttribute("value", value);
-        option.innerText = description;
-        select.appendChild(option);
-    }
-    var elements = document.querySelectorAll(".admin_item_relation");
-    Array.prototype.forEach.call(elements, function (el, i) {
-        bindRelation(el);
-    });
-}
 function bindPlacesView() {
     var els = document.querySelectorAll(".admin_item_view_place");
     for (var i = 0; i < els.length; i++) {
@@ -1713,6 +1660,41 @@ var EshopControl = (function () {
     };
     return EshopControl;
 }());
+function bindMainMenu() {
+    var el = document.querySelector(".admin_layout_left");
+    if (el) {
+        new MainMenu(el);
+    }
+}
+var MainMenu = (function () {
+    function MainMenu(leftEl) {
+        this.leftEl = leftEl;
+        this.menuEl = document.querySelector(".admin_header_container_menu");
+        this.menuEl.addEventListener("click", this.menuClick.bind(this));
+        this.scrollTo(this.loadFromStorage());
+        this.leftEl.addEventListener("scroll", this.scrollHandler.bind(this));
+    }
+    MainMenu.prototype.scrollHandler = function () {
+        this.saveToStorage(this.leftEl.scrollTop);
+    };
+    MainMenu.prototype.saveToStorage = function (position) {
+        window.localStorage["left_menu_position"] = position;
+    };
+    MainMenu.prototype.menuClick = function () {
+        this.leftEl.classList.toggle("admin_layout_left-visible");
+    };
+    MainMenu.prototype.loadFromStorage = function () {
+        var pos = window.localStorage["left_menu_position"];
+        if (pos) {
+            return parseInt(pos);
+        }
+        return 0;
+    };
+    MainMenu.prototype.scrollTo = function (position) {
+        this.leftEl.scrollTo(0, position);
+    };
+    return MainMenu;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();
@@ -1728,6 +1710,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindDropdowns();
     bindSearch();
     bindEshopControl();
+    bindMainMenu();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");

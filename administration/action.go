@@ -35,10 +35,10 @@ func (ra *Action) getName(language string) string {
 	return ra.URL
 }
 
-func actionList(permission Permission) Action {
+func actionList(resource *Resource) Action {
 	return Action{
-		Permission: permission,
-		Name:       messages.Messages.GetNameFunction("admin_list"),
+		Permission: resource.CanView,
+		Name:       resource.HumanName,
 		Handler: func(resource Resource, request prago.Request, user User) {
 			if request.Request().URL.Query().Get("_format") == "json" {
 				listData, err := resource.getListContent(resource.Admin, user, request.Request().URL.Query())
@@ -174,11 +174,11 @@ func actionCreate(permission Permission) Action {
 	}
 }
 
-func actionView(permission Permission) Action {
+func actionView(resource *Resource) Action {
 	return Action{
-		Permission: permission,
-		Name:       messages.Messages.GetNameFunction("admin_view"),
-		URL:        "",
+		Permission: resource.CanView,
+		//Name:       messages.Messages.GetNameFunction("admin_view"),
+		URL: "",
 		Handler: func(resource Resource, request prago.Request, user User) {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
@@ -472,7 +472,7 @@ func initResourceActions(a *Administration, resource *Resource) {
 	}
 
 	resourceActions := []Action{
-		actionList(resource.CanView),
+		actionList(resource),
 		actionNew(resource.CanCreate),
 		actionCreate(resource.CanCreate),
 		//actionStats(resource.CanView),
@@ -491,7 +491,7 @@ func initResourceActions(a *Administration, resource *Resource) {
 	}
 
 	itemActions := []Action{
-		actionView(resource.CanView),
+		actionView(resource),
 	}
 
 	itemActions = append(itemActions,

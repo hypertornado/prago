@@ -62,9 +62,21 @@ func (admin *Administration) createBreadcrumbs(locale string) []navigationBreadc
 }
 
 func (navigation adminItemNavigation) getPageTitle() string {
+	if len(navigation.Breadcrumbs) == 0 {
+		return ""
+	}
+
+	return navigation.Breadcrumbs[len(navigation.Breadcrumbs)-1].Name
+
+	prev := ""
 	ret := []string{}
 	for _, v := range navigation.Breadcrumbs {
+		if v.Name == prev {
+			continue
+		}
+		continue
 		ret = append([]string{v.Name}, ret...)
+		prev = v.Name
 	}
 	ret = append([]string{navigation.Name}, ret...)
 	return strings.Join(ret, " — ")

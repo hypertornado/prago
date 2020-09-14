@@ -27,7 +27,7 @@ html, body{
 }
 
 body {
-  background-color: #fafafa;
+  //background-color: #fafafa;
   background-size: cover;
   background-attachment: fixed;
 }
@@ -466,6 +466,10 @@ th.admin_list_lastheadercell {
   border-left: 10px solid #000;
 }
 
+.admin_table_row_lastcell {
+  border-bottom: 1px solid #fff !important;
+}
+
 .admin_list_table tr:last-child td {
   border-bottom: 1px solid #f1f1f1;
 }
@@ -622,7 +626,7 @@ th.admin_list_orderitem {
 .admin_images_image {
   padding: 3px;
   border-radius: 3px;
-  margin: 5px;
+  margin: 0px 10px 10px 0px;
   display: inline-block;
   text-align: center;
   vertical-align: middle;
@@ -825,17 +829,18 @@ select.admin_timestamp_minute {
   align-items: flex-end;
 }
 
-.view_button {
-  float: right;
-}
-
 .view_header_name {
   font-weight: 500;
   flex-grow: 10;
+  font-size: 1.5rem;
+  line-height: 1.3em;
 }
 
 .view_header_subname {
+  font-size: 1rem;
+  line-height: 1.3em;
   color: @gray;
+  display: block;
 }
 
 .view_header_tabs {
@@ -856,7 +861,7 @@ select.admin_timestamp_minute {
   font-size: 1rem;
   margin-left: 0px;
   padding: 10px 10px 5px 10px;
-  border-top: 1px solid #eee;
+  //border-top: 1px solid #eee;
 }
 
 .view_name:first-child {
@@ -1229,6 +1234,11 @@ td.admin_list_message {
 }
 
 @media print {
+
+  .admin_layout_left {
+    display: none !important;
+  }
+
   .admin_header {
     display: none !important;
   }
@@ -1244,6 +1254,8 @@ td.admin_list_message {
   .admin_list_filterrow {
     display: none !important;
   }
+
+
 
 }
 

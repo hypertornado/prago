@@ -16,7 +16,7 @@ func bindSystemstats(admin *Administration) {
 
 	action := CreateAdminAction(
 		"_stats",
-		func(string) string { return "Stats" },
+		func(string) string { return "Prago Stats" },
 		"admin_systemstats",
 		func(resource Resource, request prago.Request, user User) interface{} {
 
