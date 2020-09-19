@@ -198,6 +198,10 @@ func (resource Resource) getPaginationData() (ret []ListPaginationData) {
 		ints = append(ints, v)
 	}
 
+	if resource.ItemsPerPage > ints[len(ints)-1] {
+		ints = append(ints, resource.ItemsPerPage)
+	}
+
 	for _, v := range ints {
 		var selected bool
 		if v == resource.ItemsPerPage {

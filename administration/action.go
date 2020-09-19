@@ -343,6 +343,15 @@ func actionDelete(permission Permission) Action {
 			AddCSRFToken(form, request)
 			form.AddDeleteSubmit("send", messages.Messages.Get(user.Locale, "admin_delete"))
 			ret["form"] = form
+
+			var item interface{}
+			resource.newItem(&item)
+			must(resource.Admin.Query().WhereIs("id", request.Params().Get("id")).Get(item))
+			itemName := getItemName(item)
+			ret["delete_title"] = fmt.Sprintf("Chcete smazat položku %s?", itemName)
+			ret["delete_title"] = messages.Messages.Get(user.Locale, "admin_delete_confirmation_name", itemName)
+			fmt.Println(itemName)
+
 			return ret
 		},
 	)

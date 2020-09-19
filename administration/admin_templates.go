@@ -21,7 +21,7 @@ const adminTemplates = `
     {{end}}
   </div>
 {{end}}{{define "admin_delete"}}
-  <h1>Chcete smazat tuto položku?</h1>
+  <h1>{{.delete_title}}</h1>
   {{template "admin_form" .form}}
 {{end}}{{define "admin_export"}}
   
@@ -280,6 +280,10 @@ const adminTemplates = `
   {{end}}
 {{end}}
 
+{{define "admin_item_captcha"}}
+  <input type="number" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-int"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+{{end}}
+
 {{define "admin_item_submit"}}
   <div class="primarybtncontainer">
     <button id="{{.UUID}}" name="{{.Name}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.NameHuman}}</button>
@@ -361,7 +365,7 @@ const adminTemplates = `
     <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces&libraries=places&key={{.google}}" async defer></script>
 
   </head>
-  <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.admin_header.UrlPrefix}}">
+  <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.admin_header.UrlPrefix}}" data-search-query="{{.search_q}}">
     <div class="admin_layout">
         <div class="admin_layout_left">
             {{template "admin_mainmenu" .main_menu}}
@@ -619,7 +623,7 @@ const adminTemplates = `
       </td>
     </tr>
   {{end}}
-  {{if .admin_list.Pagination.Pages}}
+  {{if not .admin_list.Pagination.IsEmpty}}
     <tr>
       <td colspan="{{.admin_list.Colspan}}" class="pagination">
         {{range $page := .admin_list.Pagination.Pages}}
@@ -16625,7 +16629,6 @@ ul {
   border-radius: 5px;
 }
 .admin_box h1 {
-  text-align: center;
   padding: 5px 10px;
 }
 .admin_box-wide {
@@ -16695,6 +16698,10 @@ ul {
   color: white;
   border-color: #1E90FF;
   font-weight: 500;
+  display: block;
+  font-size: 1rem;
+  line-height: 1.9em;
+  width: 100%;
 }
 .btn-primary:after {
   font-weight: normal;
@@ -16716,6 +16723,7 @@ ul {
 .btn-delete:active {
   border: 1px solid red;
   background: linear-gradient(#dd2e4f, #dd2e4f);
+  background: linear-gradient(#dd2e4f, red);
 }
 .btn-delete:hover,
 .btn-delete:active {
@@ -16951,14 +16959,13 @@ th.admin_list_orderitem {
   }
 }
 .flash_messages {
-  text-align: center;
+  text-align: right;
   position: fixed;
   right: 0px;
   z-index: 10;
   pointer-events: none;
   display: flex;
   flex-direction: column;
-  align-items: center;
 }
 @keyframes example {
   from {
@@ -17080,7 +17087,7 @@ th.admin_list_orderitem {
   background-color: #fff;
   background-color: rgba(64, 120, 192, 0.05);
   cursor: pointer;
-  margin: 5px;
+  margin: 0px 10px 10px 0px;
   width: 100px;
   height: 100px;
   overflow: hidden;
@@ -17162,8 +17169,7 @@ select.admin_timestamp_minute {
 }
 .ordered,
 .ordered:hover {
-  background: #4078c0;
-  color: white;
+  background: rgba(64, 120, 192, 0.1);
 }
 .ordered:after,
 .ordered-desc:after {
@@ -17179,8 +17185,6 @@ select.admin_timestamp_minute {
   margin: 0 auto;
   max-width: 600px;
   margin-top: 20px;
-  padding-left: 10px;
-  padding-right: 10px;
   padding-bottom: 5px;
   display: flex;
   flex-wrap: wrap;
@@ -17219,7 +17223,7 @@ select.admin_timestamp_minute {
 }
 .view_content {
   clear: both;
-  padding: 0px 10px 10px 10px;
+  padding: 0px 10px 0px 10px;
   word-wrap: break-word;
   color: #888;
 }
@@ -17315,6 +17319,7 @@ progress {
 .admin_filter_layout_date_from,
 .admin_filter_layout_date_to {
   width: 90px;
+  flex-grow: 10;
 }
 td.admin_list_message {
   padding: 20px 5px;
@@ -17334,11 +17339,11 @@ td.admin_list_message {
   }
 }
 .admin_preview {
-  padding: 5px;
+  padding: 10px;
   border-radius: 5px;
   text-decoration: none;
   display: inline-block;
-  margin: 5px 0px;
+  margin: 0px -10px;
   font-size: 1rem;
   line-height: 1.4em;
   display: flex;
@@ -17366,6 +17371,7 @@ td.admin_list_message {
   font-size: 0.9rem;
   line-height: 1.4em;
   color: #888;
+  overflow-wrap: anywhere;
 }
 .admin_item_relation {
   display: flex;
@@ -17379,15 +17385,16 @@ td.admin_list_message {
   margin: 10px 0px;
   flex-grow: 0;
   flex-shrink: 0;
+  align-self: flex-start;
 }
 .admin_item_relation_change_btn {
   display: inline-block;
   width: 40px;
-  margin: 0px 20px;
+  margin: 10px 10px;
   font-size: 1.2rem;
   line-height: 30px;
   text-align: center;
-  padding: 0px;
+  padding: 0px 0px;
   background: white;
   border: 1px solid white;
   color: #cb2431;
@@ -17551,6 +17558,7 @@ td.admin_list_message {
 .admin_layout_left {
   overflow: auto;
   width: 300px;
+  box-shadow: inset -10px -10px 30px rgba(0, 0, 0, 0.05);
 }
 .admin_layout_right {
   width: 100%;
@@ -18037,6 +18045,7 @@ a.search_pagination_page-selected {
   border-radius: 100px;
   padding: 3px 10px;
   font-weight: 500;
+  -webkit-appearance: textfield;
 }
 .admin_search_suggestion {
   display: flex;
@@ -20023,6 +20032,7 @@ var SearchForm = (function () {
         this.searchForm = el;
         this.searchInput = el.querySelector(".admin_header_search_input");
         this.suggestionsEl = el.querySelector(".admin_header_search_suggestions");
+        this.searchInput.value = document.body.getAttribute("data-search-query");
         this.searchInput.addEventListener("input", function () {
             _this.suggestions = [];
             _this.dirty = true;

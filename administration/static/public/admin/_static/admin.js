@@ -1492,6 +1492,7 @@ var SearchForm = (function () {
         this.searchForm = el;
         this.searchInput = el.querySelector(".admin_header_search_input");
         this.suggestionsEl = el.querySelector(".admin_header_search_suggestions");
+        this.searchInput.value = document.body.getAttribute("data-search-query");
         this.searchInput.addEventListener("input", function () {
             _this.suggestions = [];
             _this.dirty = true;

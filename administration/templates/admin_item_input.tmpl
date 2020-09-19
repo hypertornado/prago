@@ -97,6 +97,10 @@
   {{end}}
 {{end}}
 
+{{define "admin_item_captcha"}}
+  <input type="number" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-int"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+{{end}}
+
 {{define "admin_item_submit"}}
   <div class="primarybtncontainer">
     <button id="{{.UUID}}" name="{{.Name}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.NameHuman}}</button>

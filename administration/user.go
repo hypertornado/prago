@@ -507,6 +507,7 @@ func initUserResource(resource *Resource) {
 		form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_register_password"),
 			MinLengthValidator("", 7),
 		)
+		form.AddCAPTCHAInput("captcha", "4 + 5 =", ValueValidator("9", "Špatná hodnota"))
 		form.AddSubmit("send", messages.Messages.Get(locale, "admin_register"))
 		return form
 	}

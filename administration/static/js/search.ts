@@ -18,6 +18,8 @@ class SearchForm {
     this.searchInput = <HTMLInputElement>el.querySelector(".admin_header_search_input");
     this.suggestionsEl = <HTMLDivElement>el.querySelector(".admin_header_search_suggestions");
 
+    this.searchInput.value = document.body.getAttribute("data-search-query");
+
     this.searchInput.addEventListener("input", () => {
       this.suggestions = [];
       this.dirty = true;

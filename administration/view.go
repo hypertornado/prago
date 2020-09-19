@@ -157,9 +157,10 @@ func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, use
 		name := v.listName(user.Locale)
 		vi.Name = name
 		vi.Subname = fmt.Sprintf("(%d / %d / %d)", len(data), filteredCount, totalCount)
+		vi.Subname = messages.Messages.ItemsCount(filteredCount, user.Locale)
 
 		vi.Navigation = append(vi.Navigation, navigationTab{
-			Name: messages.Messages.GetNameFunction("admin_list")(user.Locale),
+			Name: messages.Messages.GetNameFunction("admin_table")(user.Locale),
 			URL:  v.listURL(int64(id)),
 		})
 

@@ -79,6 +79,13 @@ type pagination struct {
 	Pages []page
 }
 
+func (p pagination) IsEmpty() bool {
+	if len(p.Pages) <= 1 {
+		return true
+	}
+	return false
+}
+
 type page struct {
 	Page    int64
 	Current bool
@@ -130,7 +137,8 @@ func (resource *Resource) defaultVisibleFieldsStr() string {
 			ret = append(ret, v.ColumnName)
 		}
 	}
-	return strings.Join(ret, ",")
+	r := strings.Join(ret, ",")
+	return r
 }
 
 func (resource *Resource) fieldsStr() string {
@@ -151,12 +159,6 @@ func (field Field) getListHeaderItem(user User) listHeaderItem {
 	}
 
 	headerItem.FilterLayout = field.filterLayout()
-
-	if headerItem.FilterLayout == "filter_layout_relation" {
-		if field.Tags["prago-relation"] != "" {
-			headerItem.ColumnName = field.Tags["prago-relation"]
-		}
-	}
 
 	if headerItem.FilterLayout == "filter_layout_boolean" {
 		headerItem.FilterData = []string{

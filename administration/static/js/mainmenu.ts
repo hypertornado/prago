@@ -17,7 +17,7 @@ class MainMenu {
         this.menuEl.addEventListener("click", this.menuClick.bind(this));
 
         this.scrollTo(this.loadFromStorage());
-        this.leftEl.addEventListener("scroll", this.scrollHandler.bind(this))
+        this.leftEl.addEventListener("scroll", this.scrollHandler.bind(this));
     }
 
     scrollHandler() {

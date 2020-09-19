@@ -141,7 +141,7 @@ ul {
 }
 
 .admin_box h1 {
-  text-align: center;
+  //text-align: center;
   padding: 5px 10px;
 }
 
@@ -227,6 +227,10 @@ ul {
   color: white;
   border-color: #1E90FF;
   font-weight: 500;
+  display: block;
+  font-size: 1rem;
+  line-height: 1.9em;
+  width: 100%;
 }
 
 .btn-primary:after {
@@ -251,6 +255,7 @@ ul {
 .btn-delete, .btn-delete:hover, .btn-delete:active {
   border: 1px solid red;
   background: linear-gradient(#dd2e4f, #dd2e4f);
+  background: linear-gradient(#dd2e4f, red);
 }
 
 .btn-delete:hover, .btn-delete:active {
@@ -545,7 +550,7 @@ th.admin_list_orderitem {
 }
 
 .flash_messages {
-  text-align: center;
+  text-align: right;
   position: fixed;
   //top: 100px;
   //bottom: 0px;
@@ -555,7 +560,7 @@ th.admin_list_orderitem {
   pointer-events: none;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  //align-items: center;
 
   //border: 1px solid red;
 }
@@ -566,6 +571,7 @@ th.admin_list_orderitem {
 }
 
 .flash_message {
+  //text-align: center;
   pointer-events: auto;
   color: @black;
   display: inline-block;
@@ -698,7 +704,7 @@ th.admin_list_orderitem {
   //background: #fafafa;
   background-color: @baseColorBackgroundLighter;
   cursor: pointer;
-  margin: 5px;
+  margin: 0px 10px 10px 0px;
   width: 100px;
   height: 100px;
   //.shadow;
@@ -800,8 +806,8 @@ select.admin_timestamp_minute {
 }
 
 .ordered, .ordered:hover {
-  background: @baseColor;
-  color: white;
+  background: @baseColorBackground;
+  //color: white;
 }
 
 .ordered:after, .ordered-desc:after {
@@ -821,8 +827,8 @@ select.admin_timestamp_minute {
   margin: 0 auto;
   max-width: 600px;
   margin-top: 20px;
-  padding-left: 10px;
-  padding-right: 10px;
+  //padding-left: 10px;
+  //padding-right: 10px;
   padding-bottom: 5px;
   display: flex;
   flex-wrap: wrap;
@@ -870,7 +876,7 @@ select.admin_timestamp_minute {
 
 .view_content {
   clear: both;
-  padding: 0px 10px 10px 10px;
+  padding: 0px 10px 0px 10px;
   word-wrap: break-word;
   color: @gray;
 }
@@ -979,6 +985,7 @@ progress {
 
 .admin_filter_layout_date_from, .admin_filter_layout_date_to {
   width: 90px;
+  flex-grow: 10;
 }
 
 td.admin_list_message {
@@ -1004,11 +1011,11 @@ td.admin_list_message {
 }
 
 .admin_preview {
-  padding: 5px;
+  padding: 10px;
   border-radius: 5px;
   text-decoration: none;
   display: inline-block;
-  margin: 5px 0px;
+  margin: 0px -10px;
   font-size: 1rem;
   line-height: 1.4em;
 
@@ -1042,6 +1049,8 @@ td.admin_list_message {
   font-size: .9rem;
   line-height: 1.4em;
   color: @gray;
+  //word-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 
 .admin_item_relation {
@@ -1058,17 +1067,18 @@ td.admin_list_message {
   margin: 10px 0px;
   flex-grow: 0;
   flex-shrink: 0;
+  align-self: flex-start;
 }
 
 .admin_item_relation_change_btn {
   display: inline-block;
   width: 40px;
   text-align: center;
-  margin: 0px 20px;
+  margin: 10px 10px;
   font-size: 1.2rem;
   line-height: 30px;
   text-align: center;
-  padding: 0px;
+  padding: 0px 0px;
   background: white;
   border: 1px solid white;
   color: @red;
@@ -1076,6 +1086,8 @@ td.admin_list_message {
   height: 30px;
   border-radius: 300px;
   font-weight: bold;
+  //border: 1px solid #eee;
+  //align-self: flex-start;
   //padding: 0px;
 }
 

@@ -3,6 +3,8 @@ package messages
 import (
 	"fmt"
 	"time"
+
+	"github.com/hypertornado/prago/utils"
 )
 
 var (
@@ -13,6 +15,31 @@ var (
 
 type messages struct {
 	m map[string]map[string]string
+}
+
+func (*messages) ItemsCount(i int64, locale string) (ret string) {
+	if locale == "cs" {
+		return itemsCountCS(i)
+	}
+
+	return itemsCountEN(i)
+}
+
+func itemsCountCS(i int64) (ret string) {
+	if i == 1 {
+		return fmt.Sprintf("%s položka", utils.HumanizeNumber(i))
+	}
+	if i >= 2 && i <= 4 {
+		return fmt.Sprintf("%s položky", utils.HumanizeNumber(i))
+	}
+	return fmt.Sprintf("%s položek", utils.HumanizeNumber(i))
+}
+
+func itemsCountEN(i int64) (ret string) {
+	if i == 1 {
+		return fmt.Sprintf("%s item", utils.HumanizeNumber(i))
+	}
+	return fmt.Sprintf("%s items", utils.HumanizeNumber(i))
 }
 
 func (*messages) Timestamp(lang string, t time.Time, showTime bool) string {
@@ -155,6 +182,10 @@ var m = map[string]map[string]string{
 	"admin_delete_confirmation": {
 		"en": "Really want to delete this item?",
 		"cs": "Opravdu chcete položku smazat?",
+	},
+	"admin_delete_confirmation_name": {
+		"en": "Really want to delete item %s?",
+		"cs": "Opravdu chcete smazat položku %s?",
 	},
 	"admin_back": {
 		"en": "Back",
