@@ -374,11 +374,6 @@ const adminTemplates = `
             <div class="admin_header">
                 <div class="admin_header_top">
                     <div class="admin_header_left">
-                        {{if .admin_page}}
-                            {{template "admin_breadcrumbs" .admin_page.Navigation.Breadcrumbs}}
-                        {{else}}
-                            {{template "admin_breadcrumbs" .admin_default_breadcrumbs}}
-                        {{end}}
                         <div class="admin_header_top_item admin_header_top_space"></div>
                     </div>
                     <div class="admin_header_right">

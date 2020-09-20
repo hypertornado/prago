@@ -2,7 +2,6 @@ package administration
 
 import (
 	"strconv"
-	"strings"
 
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/administration/messages"
@@ -17,10 +16,10 @@ type adminNavigationPage struct {
 }
 
 type adminItemNavigation struct {
-	Name        string
-	Tabs        []navigationTab
-	Breadcrumbs []navigationBreadcrumb
-	Wide        bool
+	Name string
+	Tabs []navigationTab
+	//Breadcrumbs []navigationBreadcrumb
+	Wide bool
 }
 
 type navigationTab struct {
@@ -29,20 +28,20 @@ type navigationTab struct {
 	Selected bool
 }
 
-type navigationBreadcrumb struct {
+/*type navigationBreadcrumb struct {
 	Name  string
 	URL   string
 	Logo  string
 	Icon  string
 	Image string
-}
+}*/
 
-func (bc navigationBreadcrumb) NoImage() bool {
+/*func (bc navigationBreadcrumb) NoImage() bool {
 	if bc.Logo == "" && bc.Icon == "" && bc.Image == "" {
 		return true
 	}
 	return false
-}
+}*/
 
 func IsTabVisible(tabs []navigationTab, pos int) bool {
 	if tabs[pos-1].Selected {
@@ -54,14 +53,14 @@ func IsTabVisible(tabs []navigationTab, pos int) bool {
 	return true
 }
 
-func (admin *Administration) createBreadcrumbs(locale string) []navigationBreadcrumb {
+/*func (admin *Administration) createBreadcrumbs(locale string) []navigationBreadcrumb {
 	return []navigationBreadcrumb{
 		{Name: admin.HumanName, URL: "/", Logo: admin.Logo},
 		{Name: messages.Messages.Get(locale, "admin_admin"), URL: admin.Prefix},
 	}
-}
+}*/
 
-func (navigation adminItemNavigation) getPageTitle() string {
+/*func (navigation adminItemNavigation) getPageTitle() string {
 	if len(navigation.Breadcrumbs) == 0 {
 		return ""
 	}
@@ -80,10 +79,10 @@ func (navigation adminItemNavigation) getPageTitle() string {
 	}
 	ret = append([]string{navigation.Name}, ret...)
 	return strings.Join(ret, " — ")
-}
+}*/
 
 func renderNavigationPage(request prago.Request, page adminNavigationPage) {
-	request.SetData("admin_title", page.Navigation.getPageTitle())
+	request.SetData("admin_title", page.Navigation.Name)
 	request.SetData("admin_yield", "admin_navigation_page")
 	request.SetData("admin_page", page)
 	request.RenderView("admin_layout")
@@ -97,7 +96,7 @@ func renderNavigationPage(request prago.Request, page adminNavigationPage) {
 }*/
 
 func renderNavigationPageNoLogin(request prago.Request, page adminNavigationPage) {
-	request.SetData("admin_title", page.Navigation.getPageTitle())
+	request.SetData("admin_title", page.Navigation.Name)
 	request.SetData("admin_yield", "admin_navigation_page")
 	request.SetData("admin_page", page)
 	request.RenderView("admin_layout_nologin")
@@ -126,7 +125,7 @@ func (admin *Administration) getAdminNavigation(user User, code string) adminIte
 
 	name := messages.Messages.Get(user.Locale, "admin_signpost")
 
-	breadcrumbs := admin.createBreadcrumbs(user.Locale)
+	//breadcrumbs := admin.createBreadcrumbs(user.Locale)
 
 	for _, v := range tabs {
 		if v.Selected && v.URL != admin.Prefix {
@@ -135,9 +134,9 @@ func (admin *Administration) getAdminNavigation(user User, code string) adminIte
 	}
 
 	return adminItemNavigation{
-		Name:        name,
-		Tabs:        tabs,
-		Breadcrumbs: breadcrumbs,
+		Name: name,
+		Tabs: tabs,
+		//Breadcrumbs: breadcrumbs,
 	}
 }
 
@@ -159,7 +158,7 @@ func (admin *Administration) getResourceNavigation(resource Resource, user User,
 		}
 	}
 
-	breadcrumbs := admin.createBreadcrumbs(user.Locale)
+	//breadcrumbs := admin.createBreadcrumbs(user.Locale)
 
 	name := ""
 	for _, v := range tabs {
@@ -168,12 +167,12 @@ func (admin *Administration) getResourceNavigation(resource Resource, user User,
 		}
 	}
 
-	breadcrumbs = append(breadcrumbs, navigationBreadcrumb{Name: resource.HumanName(user.Locale), URL: resource.GetURL("")})
+	//breadcrumbs = append(breadcrumbs, navigationBreadcrumb{Name: resource.HumanName(user.Locale), URL: resource.GetURL("")})
 
 	return adminItemNavigation{
-		Name:        name,
-		Tabs:        tabs,
-		Breadcrumbs: breadcrumbs,
+		Name: name,
+		Tabs: tabs,
+		//Breadcrumbs: breadcrumbs,
 	}
 }
 
@@ -198,16 +197,16 @@ func (admin *Administration) getItemNavigation(resource Resource, user User, ite
 		}
 	}
 
-	breadcrumbs := admin.createBreadcrumbs(user.Locale)
+	/*breadcrumbs := admin.createBreadcrumbs(user.Locale)
 	breadcrumbs = append(breadcrumbs,
 		navigationBreadcrumb{
 			Name: resource.HumanName(user.Locale),
 			URL:  resource.GetURL(""),
 		})
-
+	*/
 	name := getItemName(item)
-	breadcrumbs = append(breadcrumbs,
-		navigationBreadcrumb{Name: name, URL: resource.GetItemURL(item, ""), Image: admin.getItemImage(item)})
+	/*breadcrumbs = append(breadcrumbs,
+	navigationBreadcrumb{Name: name, URL: resource.GetItemURL(item, ""), Image: admin.getItemImage(item)})*/
 	for _, v := range tabs {
 		if v.Selected {
 			name = v.Name
@@ -219,20 +218,20 @@ func (admin *Administration) getItemNavigation(resource Resource, user User, ite
 	}
 
 	return adminItemNavigation{
-		Name:        name,
-		Tabs:        tabs,
-		Breadcrumbs: breadcrumbs,
+		Name: name,
+		Tabs: tabs,
+		//Breadcrumbs: breadcrumbs,
 	}
 }
 
 func (admin *Administration) getSettingsNavigation(user User, code string) adminItemNavigation {
-	breadcrumbs := admin.createBreadcrumbs(user.Locale)
+	/*breadcrumbs := admin.createBreadcrumbs(user.Locale)
 	breadcrumbs = append(breadcrumbs,
 		navigationBreadcrumb{
 			Name: messages.Messages.Get(user.Locale, "admin_settings"),
 			URL:  admin.GetURL("user/settings"),
 		},
-	)
+	)*/
 
 	tabs := []navigationTab{}
 
@@ -256,9 +255,9 @@ func (admin *Administration) getSettingsNavigation(user User, code string) admin
 	}
 
 	return adminItemNavigation{
-		Name:        name,
-		Tabs:        tabs,
-		Breadcrumbs: breadcrumbs,
+		Name: name,
+		Tabs: tabs,
+		//Breadcrumbs: breadcrumbs,
 	}
 }
 
@@ -290,12 +289,12 @@ func (admin *Administration) getNologinNavigation(language, code string) adminIt
 		}
 	}
 
-	breadcrumbs := admin.createBreadcrumbs(language)
+	//breadcrumbs := admin.createBreadcrumbs(language)
 
 	return adminItemNavigation{
-		Name:        name,
-		Tabs:        tabs,
-		Breadcrumbs: []navigationBreadcrumb{breadcrumbs[0]},
+		Name: name,
+		Tabs: tabs,
+		//Breadcrumbs: []navigationBreadcrumb{breadcrumbs[0]},
 	}
 }
 
