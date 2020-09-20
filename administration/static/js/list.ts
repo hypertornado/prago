@@ -161,8 +161,13 @@ class List {
     request.addEventListener("load", () => {
       this.tbody.innerHTML = "";
       if (request.status == 200) {
-        this.tbody.innerHTML = request.response;
-        var countStr = request.getResponseHeader("X-Count-Str");
+        var response = JSON.parse(request.response);
+
+        //this.tbody.innerHTML = request.response;
+        this.tbody.innerHTML = response.Content;
+        //var countStr = request.getResponseHeader("X-Count-Str");
+        var countStr = response.CountStr;
+
         //console.log(request.getAllResponseHeaders());
         //console.log(countStr);
         //var totalCount = request.getResponseHeader("X-Total-Count");

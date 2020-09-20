@@ -41,17 +41,28 @@ func actionList(resource *Resource) Action {
 		Name:       resource.HumanName,
 		Handler: func(resource Resource, request prago.Request, user User) {
 			if request.Request().URL.Query().Get("_format") == "json" {
-				listData, err := resource.getListContent(resource.Admin, user, request.Request().URL.Query())
+				listDataJSON, err := resource.getListContentJSON(resource.Admin, user, request.Request().URL.Query())
+				if err != nil {
+					panic(err)
+				}
+				request.RenderJSON(listDataJSON)
+
+				//request.Response().Header().Set("X-Count-Str", listData.TotalCountStr)
+
+				/*buf := new(bytes.Buffer)
+				err = resource.Admin.App.ExecuteTemplate(buf, "admin_list_cells", map[string]interface{}{
+					"admin_list": listData,
+				})
 				if err != nil {
 					panic(err)
 				}
 
-				request.Response().Header().Set("X-Count-Str", listData.TotalCountStr)
-				//request.Response().Header().Set("Content-Type", "text/html; charset=utf-8")
-				//request.Response().Header().Set("X-Total-Count", fmt.Sprintf("%d", listData.TotalCount))
-				request.SetData("admin_list", listData)
+				ret := map[string]interface{}{
+					"Content": string(buf.Bytes()),
+				}
 
-				request.RenderView("admin_list_cells")
+				request.RenderJSON(ret)*/
+
 				return
 			}
 
@@ -83,7 +94,6 @@ func actionList(resource *Resource) Action {
 						cell.SetValue(v2.OriginalValue)
 					}
 				}
-				//request.Response().Header().Set("Content-Disposition", "Content-Disposition: attachment; filename=\"export.xlsx\"")
 				file.Write(request.Response())
 				return
 			}

@@ -18895,8 +18895,9 @@ var List = (function () {
         request.addEventListener("load", function () {
             _this.tbody.innerHTML = "";
             if (request.status == 200) {
-                _this.tbody.innerHTML = request.response;
-                var countStr = request.getResponseHeader("X-Count-Str");
+                var response = JSON.parse(request.response);
+                _this.tbody.innerHTML = response.Content;
+                var countStr = response.CountStr;
                 _this.el.querySelector(".admin_table_count").textContent = countStr;
                 bindOrder();
                 _this.bindPagination();

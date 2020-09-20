@@ -1,6 +1,7 @@
 package administration
 
 import (
+	"bytes"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -379,9 +380,9 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 	//ret.TotalCount = totalCount
 
 	if count == totalCount {
-		ret.TotalCountStr = utils.HumanizeNumber(count)
+		ret.TotalCountStr = messages.Messages.ItemsCount(count, user.Locale)
 	} else {
-		ret.TotalCountStr = fmt.Sprintf("%s z %s", utils.HumanizeNumber(count), utils.HumanizeNumber(totalCount))
+		ret.TotalCountStr = fmt.Sprintf("%s z %s", utils.HumanizeNumber(count), messages.Messages.ItemsCount(totalCount, user.Locale))
 	}
 
 	var itemsPerPage = resource.ItemsPerPage
@@ -456,6 +457,31 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 	}
 
 	return
+}
+
+type ListContentJSON struct {
+	Content  string
+	CountStr string
+}
+
+func (resource *Resource) getListContentJSON(admin *Administration, user User, params url.Values) (ret *ListContentJSON, err error) {
+	listData, err := resource.getListContent(admin, user, params)
+	if err != nil {
+		return nil, err
+	}
+
+	buf := new(bytes.Buffer)
+	err = resource.Admin.App.ExecuteTemplate(buf, "admin_list_cells", map[string]interface{}{
+		"admin_list": listData,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &ListContentJSON{
+		Content:  string(buf.Bytes()),
+		CountStr: listData.TotalCountStr,
+	}, nil
+
 }
 
 func (resource Resource) valueToCell(user User, f Field, val reflect.Value, isOrderedBy bool) listCell {
