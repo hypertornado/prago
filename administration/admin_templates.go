@@ -1,26 +1,6 @@
 package administration
 const adminTemplates = `
-{{define "admin_breadcrumbs"}}
-  <div class="admin_navigation_breadcrumbs">
-    {{range $item := .}}
-      <a href="{{$item.URL}}" class="admin_navigation_breadcrumb">
-        {{- if $item.Logo -}}
-          <div style="background-image: url('{{CSS $item.Logo}}');"
-          class="admin_navigation_breadcrumb_image admin_navigation_breadcrumb_image-logo"></div>
-        {{- end -}}
-        {{- if $item.Image -}}
-          <div style="background-image: url('{{CSS $item.Image}}');"
-          class="admin_navigation_breadcrumb_image"></div>
-        {{- end -}}
-        {{- if $item.NoImage -}}
-          <div class="admin_navigation_breadcrumb_image"></div>
-        {{- end -}}
-        {{- $item.Name -}}
-        <div class="admin_navigation_breadcrumb_divider"></div>
-      </a>
-    {{end}}
-  </div>
-{{end}}{{define "admin_delete"}}
+{{define "admin_delete"}}
   <h1>{{.delete_title}}</h1>
   {{template "admin_form" .form}}
 {{end}}{{define "admin_export"}}
@@ -372,31 +352,6 @@ const adminTemplates = `
         </div>
         <div class="admin_layout_right">
             <div class="admin_header">
-                <div class="admin_header_top">
-                    <div class="admin_header_left">
-                        <div class="admin_header_top_item admin_header_top_space"></div>
-                    </div>
-                    <div class="admin_header_right">
-                        {{if .admin_header.HasSearch}}
-                            <form class="admin_header_search" action="{{.admin_header.UrlPrefix}}/_search">
-                                <input class="input admin_header_search_input" type="search" placeholder="Vyhledávání" name="q" value="{{.search_q}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-                                <div class="admin_header_search_suggestions hidden"></div>
-                            </form>
-                        {{end}}
-                        <div class="admin_avatar admin_dropdown" tabindex="-1">
-                            <div class="admin_dropdown_target admin_avatar_icon" style="background-image: url('{{.gravatar}}');"></div>
-                            <div class="admin_dropdown_content">
-                                <div class="admin_dropdown_item">{{.currentuser.Email}}</div>
-                                <a href="{{.admin_header.UrlPrefix}}/user/settings" class="admin_dropdown_item">
-                                    {{message .locale "admin_settings"}}
-                                </a>
-                                <a href="{{.admin_header.UrlPrefix}}/logout?_csrfToken={{._csrfToken}}" class="admin_dropdown_item">
-                                    {{message .locale "admin_log_out"}}
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <div class="admin_header_container">
                     <div class="admin_header_container_left">
                         <div class="admin_header_container_menu btn">Menu</div>
@@ -408,14 +363,6 @@ const adminTemplates = `
             </div>
 
             <div class="admin_bottom">
-                {{if false}}
-                    {{ $admin_resource := .admin_resource}}
-                    <div class="admin_header_resources">
-                        {{range $item := .admin_header.Items}}
-                            <a href="{{$item.Url}}" class="admin_header_resource {{if $admin_resource}}{{ if eq $admin_resource.ID $item.ID }}admin_header_resource-active{{end}}{{end}}">{{$item.Name}}</a>
-                        {{end}}
-                    </div>
-                {{end}}
                 {{template "admin_flash" .}}
                 <div class="admin_content">
                     {{tmpl .admin_yield .}}
@@ -17572,24 +17519,6 @@ td.admin_list_message {
   padding: 5px 0px 0px 0px;
   display: block;
 }
-.admin_header_top {
-  display: flex;
-  align-items: flex-start;
-  display: none;
-}
-.admin_header_left {
-  display: flex;
-  border: 0px solid red;
-  flex-wrap: wrap;
-  flex-grow: 1;
-  padding: 3px 5px;
-}
-.admin_header_right {
-  display: flex;
-  flex-shrink: 0;
-  border: 0px solid blue;
-  padding: 3px 5px;
-}
 .admin_header_container {
   display: flex;
 }
@@ -17606,59 +17535,8 @@ td.admin_list_message {
 .admin_header-scrolled {
   box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
 }
-.admin_header_top_item {
-  border-radius: 3px;
-  padding: 2px 5px;
-  margin: 2px 2px;
-  font-size: 1rem;
-}
-.admin_header_top_item-selected {
-  background-color: rgba(64, 120, 192, 0.05);
-}
 .admin_header a {
   text-decoration: none;
-}
-.admin_header_top_space {
-  flex-grow: 2;
-}
-/*.admin_header_top {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  padding: 0px 5px;
-}*/
-.admin_header_resources {
-  margin: 0px;
-  display: flex;
-  padding: 5px 0px;
-  max-height: 100%;
-  background-color: #fafafa;
-  width: 200px;
-  flex-direction: column;
-  overflow-y: scroll;
-  flex-shrink: 0;
-  padding-right: 10px;
-}
-a.admin_header_resource {
-  font-weight: 500;
-  padding: 3px 10px;
-  margin: 0px;
-  font-size: 0.9rem;
-  border-bottom: 2px solid none;
-  flex-shrink: 0;
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
-  text-decoration: none;
-  color: #888;
-  color: #444;
-}
-.admin_header_resource-active,
-.admin_header_resource-active:hover {
-  background-color: #4078c0;
-  color: white !important;
-}
-.admin_header_sitename {
-  font-size: 0.9rem;
 }
 .admin_content {
   flex-grow: 10;
@@ -18341,55 +18219,6 @@ td.pagination {
 }
 .pagination_page_current {
   cursor: default;
-}
-.admin_navigation_breadcrumbs {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0px 0px;
-  font-size: 1rem;
-  align-items: center;
-  align-items: stretch;
-}
-@media (max-width: 800px) {
-  .admin_navigation_breadcrumbs {
-    flex-direction: column;
-  }
-}
-.admin_navigation_breadcrumb {
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  line-height: 30px;
-  padding-left: 5px;
-  padding: 0px 3px 0px 3px;
-  color: #444;
-  font-weight: 500;
-  border-radius: 5px;
-}
-.admin_navigation_breadcrumb_image {
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  width: 30px;
-  height: 30px;
-  margin: 3px 10px 3px 0px;
-  display: inline-block;
-  border-radius: 5px;
-  background-color: white;
-  border: 1px solid #eee;
-}
-.admin_navigation_breadcrumb_image-logo {
-  background-size: contain;
-}
-.admin_navigation_breadcrumb_divider {
-  font-size: 1.4rem;
-  vertical-align: center;
-  display: inline-flex;
-  margin: 0px 0px 0px 3px;
-}
-.admin_navigation_breadcrumb_divider:after {
-  content: "⇢";
-  content: "→";
 }
 .admin_navigation_tabs {
   display: flex;

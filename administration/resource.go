@@ -108,7 +108,6 @@ func (admin *Administration) CreateResource(item interface{}, initFunction func(
 
 func (admin *Administration) initResource(resource *Resource) {
 	resource.ResourceController.AddAroundAction(func(request prago.Request, next func()) {
-		request.SetData("admin_resource", resource)
 		user := GetUser(request)
 		if !admin.Authorize(user, resource.CanView) {
 			render403(request)
