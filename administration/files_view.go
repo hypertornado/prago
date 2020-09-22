@@ -1,7 +1,6 @@
 package administration
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -15,7 +14,6 @@ type filesViewData struct {
 	SmallURL    string
 	IsImage     bool
 	Paths       []filesViewDataPath
-	CDNFileURL  string
 }
 
 type filesViewDataPath struct {
@@ -57,8 +55,6 @@ func getFilesViewData(admin *Administration, uid string) (ret filesViewData) {
 		)
 		ret.IsImage = true
 	}
-
-	ret.CDNFileURL = admin.GetURL(fmt.Sprintf("file/cdnfile/%s", uid))
 
 	return ret
 

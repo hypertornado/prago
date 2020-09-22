@@ -105,7 +105,7 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 	list.Locale = user.Locale
 
 	list.ItemsPerPage = resource.ItemsPerPage
-	list.PaginationData = resource.getPaginationData()
+	list.PaginationData = resource.getPaginationData(user)
 
 	orderField, ok := resource.fieldMap[resource.OrderByColumn]
 	if !ok || !orderField.CanOrder {
@@ -462,6 +462,7 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 type ListContentJSON struct {
 	Content  string
 	CountStr string
+	StatsStr string
 }
 
 func (resource *Resource) getListContentJSON(admin *Administration, user User, params url.Values) (ret *ListContentJSON, err error) {
@@ -477,9 +478,21 @@ func (resource *Resource) getListContentJSON(admin *Administration, user User, p
 	if err != nil {
 		return nil, err
 	}
+
+	var statsStr string
+	if listData.Stats != nil {
+		bufStats := new(bytes.Buffer)
+		err = resource.Admin.App.ExecuteTemplate(bufStats, "admin_stats", listData.Stats)
+		if err != nil {
+			return nil, err
+		}
+		statsStr = string(bufStats.Bytes())
+	}
+
 	return &ListContentJSON{
 		Content:  string(buf.Bytes()),
 		CountStr: listData.TotalCountStr,
+		StatsStr: statsStr,
 	}, nil
 
 }

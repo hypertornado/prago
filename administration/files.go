@@ -136,6 +136,10 @@ func initFilesResource(resource *Resource) {
 	resource.HumanName = messages.Messages.GetNameFunction("admin_files")
 	app := resource.Admin.App
 
+	resource.fieldMap["uid"].HumanName = messages.Messages.GetNameFunction("admin_file")
+	resource.fieldMap["width"].HumanName = messages.Messages.GetNameFunction("width")
+	resource.fieldMap["height"].HumanName = messages.Messages.GetNameFunction("height")
+
 	app.AddCommand("files", "metadata").
 		Callback(func() {
 			var files []*File

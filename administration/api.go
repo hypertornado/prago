@@ -66,9 +66,8 @@ func bindImageAPI(admin *Administration) {
 		request.Redirect(image.GetMedium())
 	})
 
-	//TODO: authorize
 	admin.AdminController.Get(admin.GetURL("_api/image/list"), func(request prago.Request) {
-		GetUser(request)
+		basicUserAuthorize(request)
 		var images []*File
 		if len(request.Params().Get("ids")) > 0 {
 			ids := strings.Split(request.Params().Get("ids"), ",")
@@ -95,7 +94,7 @@ func bindImageAPI(admin *Administration) {
 	})
 
 	admin.AdminController.Get(admin.GetURL("_api/imagedata/:uid"), func(request prago.Request) {
-		GetUser(request)
+		basicUserAuthorize(request)
 		var file File
 		err := admin.Query().WhereIs("uid", request.Params().Get("uid")).Get(&file)
 		if err != nil {
@@ -104,9 +103,8 @@ func bindImageAPI(admin *Administration) {
 		request.RenderJSON(file)
 	})
 
-	//TODO: authorize
 	admin.AdminController.Post(admin.GetURL("_api/image/upload"), func(request prago.Request) {
-		GetUser(request)
+		basicUserAuthorize(request)
 		multipartFiles := request.Request().MultipartForm.File["file"]
 
 		description := request.Params().Get("description")
@@ -129,7 +127,7 @@ func bindImageAPI(admin *Administration) {
 
 func bindMarkdownAPI(admin *Administration) {
 	admin.AdminController.Post(admin.GetURL("_api/markdown"), func(request prago.Request) {
-		GetUser(request)
+		basicUserAuthorize(request)
 		data, err := ioutil.ReadAll(request.Request().Body)
 		if err != nil {
 			panic(err)
@@ -140,9 +138,10 @@ func bindMarkdownAPI(admin *Administration) {
 
 func bindRelationAPI(admin *Administration) {
 	admin.AdminController.Get(admin.GetURL("_api/preview/:resourceName/:id"), func(request prago.Request) {
-		user := GetUser(request)
 		resourceName := request.Params().Get("resourceName")
 		idStr := request.Params().Get("id")
+
+		user := GetUser(request)
 
 		resource, found := admin.resourceNameMap[resourceName]
 		if !found {

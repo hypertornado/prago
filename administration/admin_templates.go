@@ -412,9 +412,11 @@ const adminTemplates = `
   <div class="admin_tablesettings">
     <h2>Možnosti</h2>
     <h3>{{message .Locale "admin_options_visible"}}</h3>
+    <div class="admin_tablesettings_labels">
     {{range $item := .Header}}
       <label class="admin_tablesettings_label"><input type="checkbox" class="admin_tablesettings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
     {{end}}
+    </div>
 
     <h3>Exportovat tabulku do Excelu</h3>
     <a href="#" class="btn admin_exportbutton" download="export.xlsx">Exportovat</a>
@@ -430,6 +432,7 @@ const adminTemplates = `
     <label>
       <input type="checkbox" class="admin_tablesettings_stats"> Zobrazit statistiky
     </label>
+    <div class="admin_tablesettings_stats_container"></div>
     <div class="clear"></div>
   </div>
 
@@ -519,14 +522,6 @@ const adminTemplates = `
 {{end}}
 
 {{define "admin_list_cells"}}
-  {{if .admin_list.Stats}}
-    <tr>
-      <td colspan="{{.admin_list.Colspan}}" class="list_stats">
-        {{template "admin_stats" .admin_list.Stats}}
-      </td>
-    </tr>
-  {{end}}
-
   {{range $item := .admin_list.Rows}}
     <tr data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="admin_table_row">
       {{range $cell := $item.Items}}
@@ -667,8 +662,6 @@ const adminTemplates = `
 
 {{end}}{{define "admin_stats"}}
   <div class="admin_stats">
-    <h2>Statistika</h2>
-
     <div class="admin_stats_sections">
       {{range $section := .Sections}}
         <div class="admin_stats_section">
@@ -876,7 +869,7 @@ const adminTemplates = `
       </form>
     </div>
   {{end}}
-  <div>UUID: <a href="{{.CDNFileURL}}">{{.UUID}}</a></div>
+  <div>UUID: {{.UUID}}</div>
 {{end}}
 
 {{define "admin_item_view_file_cell"}}
@@ -16817,6 +16810,7 @@ th.admin_list_lastheadercell {
 .admin_table_count {
   font-size: 0.9rem;
   color: #888;
+  white-space: nowrap;
 }
 .admin_list_showmore {
   margin-right: 5px;
@@ -16997,6 +16991,9 @@ th.admin_list_orderitem {
   left: 3px;
 }
 .admin_images_image:hover {
+  background-color: rgba(64, 120, 192, 0.05);
+}
+.admin_images_image:active {
   background-color: rgba(64, 120, 192, 0.1);
 }
 .admin_images_image_delete {
@@ -17128,6 +17125,7 @@ select.admin_timestamp_minute {
   max-width: 600px;
   margin-top: 20px;
   padding-bottom: 5px;
+  padding-left: 15px;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -17401,26 +17399,17 @@ td.admin_list_message {
 }
 .admin_tablesettings {
   border: 1px solid #eee;
-  padding: 0px 5px 10px 5px;
-  background: #fafafa;
+  padding: 0px 10px 10px 10px;
   border-top: none;
   border-bottom: none;
   display: none;
 }
 .admin_tablesettings-visible {
   display: block;
-  -webkit-animation-timing-function: ease-in-out;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  -webkit-animation-iteration-count: infinite;
-  -webkit-animation-duration: 1s;
-  animation-duration: 1s;
-  -webkit-animation-fill-mode: both;
-  animation-fill-mode: both;
-  -webkit-animation-name: fadeInDown;
-  animation-name: fadeInDown;
+  /*.animated;
+  .fadeInDown;
   animation-duration: 100ms;
-  animation-iteration-count: 1;
+  animation-iteration-count: 1;*/
 }
 .admin_tablesettings_name {
   display: inline-block;
@@ -17431,10 +17420,18 @@ td.admin_list_message {
 .admin_tablesettings_name:after {
   content: ":";
 }
+.admin_tablesettings_labels {
+  display: flex;
+  flex-wrap: wrap;
+}
 .admin_tablesettings_label {
   font-size: 0.8rem;
   display: inline-block;
   padding: 2px 2px;
+  width: 200px;
+  margin-right: 10px;
+  flex-shrink: 0;
+  flex-grow: 0;
 }
 .admin_tablesettings_pages {
   padding: 1px 3px;
@@ -17501,6 +17498,7 @@ td.admin_list_message {
   overflow: auto;
   width: 300px;
   box-shadow: inset -10px -10px 30px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
 }
 .admin_layout_right {
   width: 100%;
@@ -18124,7 +18122,7 @@ a.admin_home_item {
   box-shadow: inset 0px 0px 10px #ddd;
 }
 .admin_stats {
-  padding: 5px 10px;
+  padding: 5px 0px;
 }
 .admin_stats_sections {
   display: flex;
@@ -18135,12 +18133,12 @@ a.admin_home_item {
 .admin_stats_section {
   background: white;
   margin: 0px 10px 10px 0px;
-  box-shadow: 0px 0px 10px #ddd;
+  border: 1px solid #eee;
   padding: 3px 5px;
   border-radius: 3px;
 }
 .admin_stats_section_name {
-  font-weight: bold;
+  font-weight: 500;
   text-align: center;
 }
 .admin_stats_section_row {
@@ -18151,6 +18149,7 @@ a.admin_home_item {
 }
 .admin_stats_section_row:hover {
   background-color: #fafafa;
+  background-color: rgba(64, 120, 192, 0.05);
 }
 .admin_stats_section_row_name {
   text-align: right;
@@ -18174,6 +18173,8 @@ a.admin_home_item {
   width: 34%;
   border-radius: 3px;
   background-color: #ccc;
+  background-color: rgba(64, 120, 192, 0.1);
+  background-color: #4078c0;
 }
 .admin_stats_section_row_description {
   padding: 0px 3px;
@@ -18276,24 +18277,29 @@ td.pagination {
   box-shadow: none;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
-@media (max-width: 800px) {
-  .admin_navigation_tabs {
-    margin: 0px;
-    padding: 0px;
-    background: none;
-    align-content: stretch;
-    padding-left: 0px !important;
+/*
+  @media (max-width: 800px) {
+    .admin_navigation_tabs {
+      margin: 0px;
+      padding: 0px;
+      background: none;
+      align-content: stretch;
+      padding-left: 0px !important;
+    }
+  
+    .admin_navigation_tabs_content {
+      //background: none;
+      border-radius: 0px;
+      width: 100%;
+      align-content: stretch;
+    }
+  
+    .admin_navigation_tabdivider {
+      border: none;
+      margin: 0px 1px;
+    }
   }
-  .admin_navigation_tabs_content {
-    border-radius: 0px;
-    width: 100%;
-    align-content: stretch;
-  }
-  .admin_navigation_tabdivider {
-    border: none;
-    margin: 0px 1px;
-  }
-}
+*/
 .mainmenu {
   padding: 0px 0px;
 }
@@ -18852,6 +18858,7 @@ var List = (function () {
         this.statsCheckbox.addEventListener("change", function () {
             _this.filterChanged();
         });
+        this.statsContainer = el.querySelector(".admin_tablesettings_stats_container");
         this.bindOptions(visibleColumnsMap);
         this.bindOrder();
     }
@@ -18899,6 +18906,7 @@ var List = (function () {
                 _this.tbody.innerHTML = response.Content;
                 var countStr = response.CountStr;
                 _this.el.querySelector(".admin_table_count").textContent = countStr;
+                _this.statsContainer.innerHTML = response.StatsStr;
                 bindOrder();
                 _this.bindPagination();
                 _this.bindClick();

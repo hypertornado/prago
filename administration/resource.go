@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/administration/messages"
 )
 
 //Resource is structure representing one item in admin menu or one table in database
@@ -180,7 +181,7 @@ func (resource Resource) count() int64 {
 	return count
 }
 
-func (resource Resource) getPaginationData() (ret []ListPaginationData) {
+func (resource Resource) getPaginationData(user User) (ret []ListPaginationData) {
 	var ints []int64
 	var used bool
 
@@ -206,8 +207,9 @@ func (resource Resource) getPaginationData() (ret []ListPaginationData) {
 		if v == resource.ItemsPerPage {
 			selected = true
 		}
+
 		ret = append(ret, ListPaginationData{
-			Name:     fmt.Sprintf("%d položek na stránku", v),
+			Name:     messages.Messages.ItemsCount(v, user.Locale),
 			Value:    v,
 			Selected: selected,
 		})

@@ -176,7 +176,7 @@ func (resource *Resource) getItemDescription(item interface{}, user User, relate
 		}
 	}
 
-	//TODO: can shouw field? add access system for fields
+	//TODO: can show field? add access system for fields
 	for _, v := range resource.fieldArrays {
 		if v.Name == "ID" || v.Name == "Name" || v.Name == "Description" || v.Name == "OrderPosition" {
 			continue

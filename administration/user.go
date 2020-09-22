@@ -45,6 +45,13 @@ func GetUser(request prago.Request) User {
 	return *u
 }
 
+func basicUserAuthorize(request prago.Request) {
+	user := GetUser(request)
+	if !user.IsAdmin {
+		panic("can't authorize, user is not admin")
+	}
+}
+
 func (user User) gravatarURL() string {
 	h := md5.New()
 	io.WriteString(h, user.Email)

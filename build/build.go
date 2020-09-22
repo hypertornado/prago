@@ -143,25 +143,6 @@ func BackupApp(app *prago.App) error {
 		return fmt.Errorf("dumping cmd: %s", err)
 	}
 
-	//TODO: enable backup of static resources
-	//paths, err := app.Config.Get("staticPaths")
-	/*if err == nil {
-		for k, v := range paths.([]interface{}) {
-
-			staticPath := filepath.Join(dirPath, "static", fmt.Sprintf("%d", k))
-
-			err = exec.Command("mkdir", "-p", staticPath).Run()
-			if err != nil {
-				return fmt.Errorf("mkdir for static paths backup: %s", err)
-			}
-
-			err = copyFiles(v.(string), staticPath)
-			if err != nil {
-				return fmt.Errorf("copying backup files: %s", err)
-			}
-		}
-	}*/
-
 	backupsPath := filepath.Join(os.Getenv("HOME"), "."+appName, "backups")
 	err = exec.Command("mkdir", "-p", backupsPath).Run()
 	if err != nil {

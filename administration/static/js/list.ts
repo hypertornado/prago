@@ -32,6 +32,7 @@ class List {
   paginationSelect: HTMLSelectElement;
 
   statsCheckbox: HTMLInputElement;
+  statsContainer: HTMLDivElement;
 
   //TODO: get filter params from URL
   constructor(el: HTMLDivElement, openbutton: HTMLButtonElement) {
@@ -107,7 +108,9 @@ class List {
     this.statsCheckbox = el.querySelector(".admin_tablesettings_stats");
     this.statsCheckbox.addEventListener("change", () => {
       this.filterChanged();
-    })
+    });
+
+    this.statsContainer = el.querySelector(".admin_tablesettings_stats_container");
 
     this.bindOptions(visibleColumnsMap);
     this.bindOrder();
@@ -173,6 +176,7 @@ class List {
         //var totalCount = request.getResponseHeader("X-Total-Count");
         //var countStr: string = count + " / " + totalCount;
         this.el.querySelector(".admin_table_count").textContent = countStr;
+        this.statsContainer.innerHTML = response.StatsStr;
         bindOrder();
         //bindDelete();
         this.bindPagination();

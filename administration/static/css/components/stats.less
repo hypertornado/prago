@@ -5,7 +5,7 @@
 }
 
 .admin_stats {
-    padding: 5px 10px;
+    padding: 5px 0px;
 }
 
 .admin_stats_sections {
@@ -19,13 +19,14 @@
 .admin_stats_section {
     background: white;
     margin: 0px 10px 10px 0px;
-    box-shadow: 0px 0px 10px #ddd;
+    //box-shadow: 0px 0px 10px #ddd;
+    border: 1px solid #eee;
     padding: 3px 5px;
     border-radius: 3px;
 }
 
 .admin_stats_section_name {
-    font-weight: bold;
+    font-weight: 500;
     text-align: center;
 } 
 
@@ -38,6 +39,7 @@
 
 .admin_stats_section_row:hover {
     background-color: #fafafa;
+    background-color: @baseColorBackgroundLighter;
 }
 
 .admin_stats_section_row_name {
@@ -67,7 +69,8 @@
     //background-color: blue;
     border-radius: 3px;
     background-color: #ccc;
-    //background-color: @baseColorBackground;
+    background-color: @baseColorBackground;
+    background-color: @baseColor;
 }
 
 

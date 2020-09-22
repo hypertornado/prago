@@ -450,4 +450,12 @@ var m = map[string]map[string]string{
 		"en": "File",
 		"cs": "Soubor",
 	},
+	"width": {
+		"en": "Width",
+		"cs": "Šířka",
+	},
+	"height": {
+		"en": "Height",
+		"cs": "Výška",
+	},
 }

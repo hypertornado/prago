@@ -425,6 +425,7 @@ th.admin_list_lastheadercell {
 .admin_table_count {
   font-size: .9rem;
   color: @gray;
+  white-space: nowrap;
 }
 
 .admin_list_showmore {
@@ -659,6 +660,10 @@ th.admin_list_orderitem {
 }
 
 .admin_images_image:hover {
+  background-color: @baseColorBackgroundLighter;
+}
+
+.admin_images_image:active {
   background-color: @baseColorBackground;
 }
 
@@ -830,6 +835,7 @@ select.admin_timestamp_minute {
   //padding-left: 10px;
   //padding-right: 10px;
   padding-bottom: 5px;
+  padding-left: 15px;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -1157,11 +1163,11 @@ td.admin_list_message {
 .admin_tablesettings {
   border: 1px solid #eee;
   //background: white;
-  padding: 0px 5px 10px 5px;
+  padding: 0px 10px 10px 10px;
   //border-radius: 3px;
   //text-align: center;
   //margin: 10px 10px;
-  background: #fafafa;
+  //background: #fafafa;
   border-top: none;
   border-bottom: none;
   display: none;
@@ -1169,11 +1175,10 @@ td.admin_list_message {
 
 .admin_tablesettings-visible {
   display: block;
-  .animated;
+  /*.animated;
   .fadeInDown;
   animation-duration: 100ms;
-  animation-iteration-count: 1;
-
+  animation-iteration-count: 1;*/
 }
 
 .admin_tablesettings_name {
@@ -1192,11 +1197,21 @@ td.admin_list_message {
   //float: right;
 }
 
+.admin_tablesettings_labels {
+  display: flex;
+  flex-wrap: wrap;
+
+}
+
 .admin_tablesettings_label {
   font-size: .8rem;
   display: inline-block;
   //display: block;
   padding: 2px 2px;
+  width: 200px;
+  margin-right: 10px;
+  flex-shrink: 0;
+  flex-grow: 0;
   //background-color: #fafafa;
   //margin: 3px 1px;
   //border-radius: 3px;

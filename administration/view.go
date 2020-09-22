@@ -85,8 +85,6 @@ func (resource Resource) getBasicView(id int, inValues interface{}, user User) v
 			},
 		)
 
-		//historyView.Items[0].UserURL
-
 		ret.Items = append(
 			ret.Items,
 			viewField{
@@ -103,10 +101,6 @@ func (resource Resource) getBasicView(id int, inValues interface{}, user User) v
 
 	return ret
 }
-
-/*func (resource Resource) getAutoRelationsView(id int, inValues interface{}, user User) (ret []view) {
-	return resource.relationsToView(resource.autoRelations, id, inValues, user)
-}*/
 
 func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, user User) (ret []view) {
 	for _, v := range resource.autoRelations {
@@ -126,8 +120,6 @@ func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, use
 		var vi = view{}
 		q := resource.Admin.Query()
 		q = q.WhereIs(v.field, fmt.Sprintf("%d", id))
-		//q = q.
-		//q := resource.Admin.prefilterQuery(v.field, fmt.Sprintf("%d", id))
 		if v.resource.OrderDesc {
 			q = q.OrderDesc(v.resource.OrderByColumn)
 		} else {

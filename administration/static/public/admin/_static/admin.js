@@ -488,6 +488,7 @@ var List = (function () {
         this.statsCheckbox.addEventListener("change", function () {
             _this.filterChanged();
         });
+        this.statsContainer = el.querySelector(".admin_tablesettings_stats_container");
         this.bindOptions(visibleColumnsMap);
         this.bindOrder();
     }
@@ -535,6 +536,7 @@ var List = (function () {
                 _this.tbody.innerHTML = response.Content;
                 var countStr = response.CountStr;
                 _this.el.querySelector(".admin_table_count").textContent = countStr;
+                _this.statsContainer.innerHTML = response.StatsStr;
                 bindOrder();
                 _this.bindPagination();
                 _this.bindClick();
