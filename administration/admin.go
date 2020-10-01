@@ -16,6 +16,7 @@ import (
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/administration/messages"
 	"github.com/hypertornado/prago/build"
+	"github.com/hypertornado/prago/cachelib"
 	"github.com/hypertornado/prago/utils"
 )
 
@@ -52,6 +53,8 @@ type Administration struct {
 	roles       map[string]map[string]bool
 
 	activityListeners []func(ActivityLog)
+
+	cache *cachelib.Cache
 }
 
 //NewAdministration creates new administration on prefix url with name
@@ -72,6 +75,8 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		javascripts: []string{},
 		css:         []string{},
 		roles:       make(map[string]map[string]bool),
+
+		cache: cachelib.NewCache(),
 	}
 
 	db, err := connectMysql(

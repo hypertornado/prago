@@ -182,7 +182,9 @@ func (resource Resource) count() int64 {
 }
 
 func (resource Resource) getCachedCount() int64 {
-	return resource.count()
+	return resource.Admin.cache.Load(fmt.Sprintf("resource_count-%s", resource.ID), func() interface{} {
+		return resource.count()
+	}).(int64)
 }
 
 func (resource Resource) getPaginationData(user User) (ret []ListPaginationData) {
