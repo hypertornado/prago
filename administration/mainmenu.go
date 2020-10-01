@@ -5,6 +5,7 @@ import (
 
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/administration/messages"
+	"github.com/hypertornado/prago/utils"
 )
 
 type MainMenu struct {
@@ -22,6 +23,7 @@ type MainMenuSection struct {
 
 type MainMenuItem struct {
 	Name     string
+	Subname  string
 	URL      string
 	Selected bool
 }
@@ -102,11 +104,13 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 
 			resourceSection.Items = append(resourceSection.Items, MainMenuItem{
 				Name:     resource.HumanName(user.Locale),
+				Subname:  utils.HumanizeNumber(resource.getCachedCount()),
 				URL:      resourceURL,
 				Selected: selected,
 			})
 		}
 	}
+
 	ret.Sections = append(ret.Sections, resourceSection)
 
 	ret.Logo = admin.Logo

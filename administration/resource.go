@@ -181,6 +181,10 @@ func (resource Resource) count() int64 {
 	return count
 }
 
+func (resource Resource) getCachedCount() int64 {
+	return resource.count()
+}
+
 func (resource Resource) getPaginationData(user User) (ret []ListPaginationData) {
 	var ints []int64
 	var used bool

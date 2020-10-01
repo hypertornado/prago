@@ -593,7 +593,12 @@ const adminTemplates = `
             <div class="mainmenu_section_name">{{$section.Name}}</div>
             <div class="mainmenu_section_content">
                 {{range $item := $section.Items}}
-                    <a href="{{$item.URL}}" class="mainmenu_section_item{{if $item.Selected}} mainmenu_section_item-selected{{end}}">{{$item.Name}}</a>        
+                    <a href="{{$item.URL}}" class="mainmenu_section_item{{if $item.Selected}} mainmenu_section_item-selected{{end}}">
+                        <div class="mainmenu_section_item_left">{{$item.Name}}</div>
+                        {{if $item.Subname}}
+                            <div class="mainmenu_section_item_right">{{$item.Subname}}</div>
+                        {{end}}
+                    </a>
                 {{end}}
             </div>        
         </div>
@@ -16755,7 +16760,7 @@ select.input {
   -moz-appearance: none;
   appearance: none;
   padding-right: 24px;
-  background: #fafafa url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAUCAMAAACzvE1FAAAADFBMVEUzMzMzMzMzMzMzMzMKAG/3AAAAA3RSTlMAf4C/aSLHAAAAPElEQVR42q3NMQ4AIAgEQTn//2cLdRKppSGzBYwzVXvznNWs8C58CiussPJj8h6NwgorrKRdTvuV9v16Afn0AYFOB7aYAAAAAElFTkSuQmCC") no-repeat right 8px center;
+  background: #fcfcfc url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAUCAMAAACzvE1FAAAADFBMVEUzMzMzMzMzMzMzMzMKAG/3AAAAA3RSTlMAf4C/aSLHAAAAPElEQVR42q3NMQ4AIAgEQTn//2cLdRKppSGzBYwzVXvznNWs8C58CiussPJj8h6NwgorrKRdTvuV9v16Afn0AYFOB7aYAAAAAElFTkSuQmCC") no-repeat right 8px center;
   background-size: 8px 10px;
   width: auto;
   max-width: 100%;
@@ -16772,7 +16777,7 @@ select.admin_table_filter_item {
 .input[disabled]:focus,
 .textarea[disabled]:focus {
   border-color: #eee;
-  background: #fafafa;
+  background: #fcfcfc;
   color: #999;
   box-shadow: none;
 }
@@ -16875,7 +16880,7 @@ th.admin_list_orderitem {
   padding: 5px;
 }
 .admin_list_filteritem-colored {
-  background-color: #4078c0;
+  background-color: rgba(64, 120, 192, 0.1);
 }
 .admin_table_loading {
   opacity: 0.4;
@@ -18102,16 +18107,6 @@ a.admin_search_suggestion-selected:active {
   padding: 5px 10px;
   border-radius: 2px;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
-  -webkit-animation-timing-function: ease-in-out;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  -webkit-animation-iteration-count: infinite;
-  -webkit-animation-duration: 1s;
-  animation-duration: 1s;
-  -webkit-animation-fill-mode: both;
-  animation-fill-mode: both;
-  -webkit-animation-name: fadeIn;
-  animation-name: fadeIn;
   animation-iteration-count: 1;
 }
 a.admin_home_item {
@@ -18338,6 +18333,18 @@ td.pagination {
   color: #888;
   color: #444;
   display: block;
+  display: flex;
+}
+.mainmenu_section_item_left {
+  flex-grow: 10;
+  flex-shrink: 0;
+}
+.mainmenu_section_item_right {
+  padding-left: 10px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  font-weight: normal;
+  color: #999;
 }
 .mainmenu_section_item-selected,
 .mainmenu_section_item-selected:hover {

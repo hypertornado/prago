@@ -16,7 +16,12 @@
             <div class="mainmenu_section_name">{{$section.Name}}</div>
             <div class="mainmenu_section_content">
                 {{range $item := $section.Items}}
-                    <a href="{{$item.URL}}" class="mainmenu_section_item{{if $item.Selected}} mainmenu_section_item-selected{{end}}">{{$item.Name}}</a>        
+                    <a href="{{$item.URL}}" class="mainmenu_section_item{{if $item.Selected}} mainmenu_section_item-selected{{end}}">
+                        <div class="mainmenu_section_item_left">{{$item.Name}}</div>
+                        {{if $item.Subname}}
+                            <div class="mainmenu_section_item_right">{{$item.Subname}}</div>
+                        {{end}}
+                    </a>
                 {{end}}
             </div>        
         </div>

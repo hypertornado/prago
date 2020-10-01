@@ -47,6 +47,22 @@
     color: @gray;
     color: @black;
     display: block;
+    display: flex;
+}
+
+.mainmenu_section_item_left {
+    //border: 1px solid red;
+    flex-grow: 10;
+    flex-shrink: 0;
+}
+
+.mainmenu_section_item_right {
+    //border: 1px solid blue;
+    padding-left: 10px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    font-weight: normal;
+    color: #999;
 }
 
 .mainmenu_section_item-selected, .mainmenu_section_item-selected:hover {
