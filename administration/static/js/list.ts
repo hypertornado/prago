@@ -39,13 +39,8 @@ class List {
     this.el = el;
     this.settingsEl = this.el.querySelector(".admin_tablesettings");
     this.settingsCheckbox = this.el.querySelector(".admin_list_showmore");
-    this.settingsCheckbox.addEventListener("change", () => {
-      if (this.settingsCheckbox.checked) {
-        this.settingsEl.classList.add("admin_tablesettings-visible");
-      } else {
-        this.settingsEl.classList.remove("admin_tablesettings-visible");
-      }
-    });
+    this.settingsCheckbox.addEventListener("change", this.settingsCheckboxChange.bind(this));
+    this.settingsCheckboxChange();
 
     this.exportButton = this.el.querySelector(".admin_exportbutton");
 
@@ -114,6 +109,14 @@ class List {
 
     this.bindOptions(visibleColumnsMap);
     this.bindOrder();
+  }
+
+  settingsCheckboxChange() {
+    if (this.settingsCheckbox.checked) {
+      this.settingsEl.classList.add("admin_tablesettings-visible");
+    } else {
+      this.settingsEl.classList.remove("admin_tablesettings-visible");
+    }
   }
 
   load() {

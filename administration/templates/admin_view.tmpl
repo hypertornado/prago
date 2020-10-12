@@ -21,6 +21,11 @@
     </div>
   </div>
   <div class="admin_box admin_box-view">
+  {{if .Relation}}
+    {{template "admin_item_view_relationlist" .Relation}}
+  {{end}}
+
+
   {{range $item := .Items}}
     {{if $item.Name}}
       <div class="view_name">
@@ -118,7 +123,36 @@
   </div>
 {{end}}
 
+{{define "admin_item_view_relationlist"}}
+  <div class="admin_relationlist"
+    data-source-resource="{{.SourceResource}}"
+    data-target-resource="{{.TargetResource}}"
+    data-target-field="{{.TargetField}}"
+    data-id-value="{{.IDValue}}"
+    data-count="{{.Count}}"
+  >
+    <div class="admin_relationlist_target">
+    </div>
+    <div class="admin_relationlist_loading hidden">
+      <progress class="admin_table_progress"></progress>
+    </div>
+    <div class="admin_relationlist_more hidden">
+      <div class="btn">Nahrát více</div>
+    </div>
+  </div>
+{{end}}
+
+{{define "admin_item_view_relationlist_response"}}
+  {{range $item := .data}}
+      {{template "admin_item_view_relation" $item}}
+  {{end}}
+{{end}}
+
 {{define "admin_item_view_relations"}}
+  {{.}}
+{{end}}
+
+{{define "admin_item_view_relations_OLD"}}
   {{if not .}}
     —
   {{else}}

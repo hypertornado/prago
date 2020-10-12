@@ -17,6 +17,7 @@ import (
 func bindAPI(a *Administration) {
 	bindMarkdownAPI(a)
 	bindRelationAPI(a)
+	bindRelationListAPI(a)
 }
 
 func bindImageAPI(admin *Administration) {
@@ -237,4 +238,8 @@ func bindRelationAPI(admin *Administration) {
 
 		request.RenderJSON(ret)
 	})
+}
+
+func bindRelationListAPI(admin *Administration) {
+	admin.AdminController.Post(admin.GetURL("_api/relationlist"), generateRelationListAPIHandler(admin))
 }

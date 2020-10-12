@@ -30,6 +30,7 @@
         "js/search.ts",
         "js/eshop_control.ts",
         "js/mainmenu.ts",
+        "js/relationlist.ts",
         "js/load.ts"
     ]
 }

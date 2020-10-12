@@ -7199,6 +7199,9 @@ td.pagination {
   display: block;
   margin: 10px 0px;
 }
+a.mainmenu_logo:hover {
+  background-color: initial;
+}
 .mainmenu_section {
   padding: 10px 5px;
 }
@@ -7245,6 +7248,9 @@ td.pagination {
   color: white !important;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
+.mainmenu_section_item-selected .mainmenu_section_item_right {
+  color: #eee;
+}
 @media (max-width: 1000px) {
   .admin_layout_left {
     position: absolute;
@@ -7263,4 +7269,14 @@ td.pagination {
   .admin_header_container_left {
     display: block;
   }
+}
+.admin_relationlist_target {
+  padding: 0px 10px;
+}
+.admin_relationlist_loading,
+.admin_relationlist_more {
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

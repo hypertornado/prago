@@ -14,11 +14,11 @@ type view struct {
 	Subname    string
 	Navigation []navigationTab
 	Items      []viewField
+	Relation   *viewRelation
 }
 
 type viewField struct {
-	Name string
-	//Button   *viewAction
+	Name     string
 	Template string
 	Value    interface{}
 }
@@ -99,79 +99,6 @@ func (resource Resource) getBasicView(id int, inValues interface{}, user User) v
 
 	}
 
-	return ret
-}
-
-func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, user User) (ret []view) {
-	for _, v := range resource.autoRelations {
-		if !resource.Admin.Authorize(user, v.resource.CanView) {
-			continue
-		}
-
-		var rowItem interface{}
-		v.resource.newItem(&rowItem)
-
-		totalCount, err := resource.Admin.Query().Count(rowItem)
-		must(err)
-
-		var rowItems interface{}
-		v.resource.newArrayOfItems(&rowItems)
-
-		var vi = view{}
-		q := resource.Admin.Query()
-		q = q.WhereIs(v.field, fmt.Sprintf("%d", id))
-		if v.resource.OrderDesc {
-			q = q.OrderDesc(v.resource.OrderByColumn)
-		} else {
-			q = q.Order(v.resource.OrderByColumn)
-		}
-
-		filteredCount, err := q.Count(rowItem)
-		must(err)
-
-		limit := resource.ItemsPerPage
-		if limit > 10 {
-			limit = 10
-		}
-
-		q = q.Limit(limit)
-		q.Get(rowItems)
-
-		vv := reflect.ValueOf(rowItems).Elem()
-		var data []interface{}
-		for i := 0; i < vv.Len(); i++ {
-			data = append(
-				data,
-				v.resource.itemToRelationData(vv.Index(i).Interface(), user, resource),
-			)
-		}
-
-		name := v.listName(user.Locale)
-		vi.Name = name
-		vi.Subname = fmt.Sprintf("(%d / %d / %d)", len(data), filteredCount, totalCount)
-		vi.Subname = messages.Messages.ItemsCount(filteredCount, user.Locale)
-
-		vi.Navigation = append(vi.Navigation, navigationTab{
-			Name: messages.Messages.GetNameFunction("admin_table")(user.Locale),
-			URL:  v.listURL(int64(id)),
-		})
-
-		if resource.Admin.Authorize(user, v.resource.CanEdit) {
-			vi.Navigation = append(vi.Navigation, navigationTab{
-				Name: messages.Messages.GetNameFunction("admin_new")(user.Locale),
-				URL:  v.addURL(int64(id)),
-			})
-		}
-
-		vi.Items = append(
-			vi.Items,
-			viewField{
-				Template: "admin_item_view_relations",
-				Value:    data,
-			},
-		)
-		ret = append(ret, vi)
-	}
 	return ret
 }
 

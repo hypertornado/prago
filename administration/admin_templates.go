@@ -817,6 +817,11 @@ const adminTemplates = `
     </div>
   </div>
   <div class="admin_box admin_box-view">
+  {{if .Relation}}
+    {{template "admin_item_view_relationlist" .Relation}}
+  {{end}}
+
+
   {{range $item := .Items}}
     {{if $item.Name}}
       <div class="view_name">
@@ -914,7 +919,36 @@ const adminTemplates = `
   </div>
 {{end}}
 
+{{define "admin_item_view_relationlist"}}
+  <div class="admin_relationlist"
+    data-source-resource="{{.SourceResource}}"
+    data-target-resource="{{.TargetResource}}"
+    data-target-field="{{.TargetField}}"
+    data-id-value="{{.IDValue}}"
+    data-count="{{.Count}}"
+  >
+    <div class="admin_relationlist_target">
+    </div>
+    <div class="admin_relationlist_loading hidden">
+      <progress class="admin_table_progress"></progress>
+    </div>
+    <div class="admin_relationlist_more hidden">
+      <div class="btn">Nahrát více</div>
+    </div>
+  </div>
+{{end}}
+
+{{define "admin_item_view_relationlist_response"}}
+  {{range $item := .data}}
+      {{template "admin_item_view_relation" $item}}
+  {{end}}
+{{end}}
+
 {{define "admin_item_view_relations"}}
+  {{.}}
+{{end}}
+
+{{define "admin_item_view_relations_OLD"}}
   {{if not .}}
     —
   {{else}}
@@ -18306,6 +18340,9 @@ td.pagination {
   display: block;
   margin: 10px 0px;
 }
+a.mainmenu_logo:hover {
+  background-color: initial;
+}
 .mainmenu_section {
   padding: 10px 5px;
 }
@@ -18352,6 +18389,9 @@ td.pagination {
   color: white !important;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
+.mainmenu_section_item-selected .mainmenu_section_item_right {
+  color: #eee;
+}
 @media (max-width: 1000px) {
   .admin_layout_left {
     position: absolute;
@@ -18370,6 +18410,16 @@ td.pagination {
   .admin_header_container_left {
     display: block;
   }
+}
+.admin_relationlist_target {
+  padding: 0px 10px;
+}
+.admin_relationlist_loading,
+.admin_relationlist_more {
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 `
 
@@ -18807,14 +18857,8 @@ var List = (function () {
         this.el = el;
         this.settingsEl = this.el.querySelector(".admin_tablesettings");
         this.settingsCheckbox = this.el.querySelector(".admin_list_showmore");
-        this.settingsCheckbox.addEventListener("change", function () {
-            if (_this.settingsCheckbox.checked) {
-                _this.settingsEl.classList.add("admin_tablesettings-visible");
-            }
-            else {
-                _this.settingsEl.classList.remove("admin_tablesettings-visible");
-            }
-        });
+        this.settingsCheckbox.addEventListener("change", this.settingsCheckboxChange.bind(this));
+        this.settingsCheckboxChange();
         this.exportButton = this.el.querySelector(".admin_exportbutton");
         var urlParams = new URLSearchParams(window.location.search);
         this.page = parseInt(urlParams.get("_page"));
@@ -18869,6 +18913,14 @@ var List = (function () {
         this.bindOptions(visibleColumnsMap);
         this.bindOrder();
     }
+    List.prototype.settingsCheckboxChange = function () {
+        if (this.settingsCheckbox.checked) {
+            this.settingsEl.classList.add("admin_tablesettings-visible");
+        }
+        else {
+            this.settingsEl.classList.remove("admin_tablesettings-visible");
+        }
+    };
     List.prototype.load = function () {
         var _this = this;
         this.progress.classList.remove("admin_table_progress-inactive");
@@ -20076,6 +20128,66 @@ var MainMenu = (function () {
     };
     return MainMenu;
 }());
+function bindRelationList() {
+    var els = document.getElementsByClassName("admin_relationlist");
+    for (var i = 0; i < els.length; i++) {
+        new RelationList(els[i]);
+    }
+}
+var RelationList = (function () {
+    function RelationList(el) {
+        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
+        this.targetEl = el.querySelector(".admin_relationlist_target");
+        this.sourceResource = el.getAttribute("data-source-resource");
+        this.targetResource = el.getAttribute("data-target-resource");
+        this.targetField = el.getAttribute("data-target-field");
+        this.idValue = parseInt(el.getAttribute("data-id-value"));
+        this.count = parseInt(el.getAttribute("data-count"));
+        this.offset = 0;
+        this.loadingEl = el.querySelector(".admin_relationlist_loading");
+        this.moreEl = el.querySelector(".admin_relationlist_more");
+        this.moreButton = el.querySelector(".admin_relationlist_more .btn");
+        this.moreButton.addEventListener("click", this.load.bind(this));
+        this.load();
+    }
+    RelationList.prototype.load = function () {
+        var _this = this;
+        this.loadingEl.classList.remove("hidden");
+        this.moreEl.classList.add("hidden");
+        var request = new XMLHttpRequest();
+        request.open("POST", this.adminPrefix + "/_api/relationlist", true);
+        request.addEventListener("load", function () {
+            _this.loadingEl.classList.add("hidden");
+            if (request.status == 200) {
+                _this.offset += 10;
+                var parentEl = document.createElement("div");
+                parentEl.innerHTML = request.response;
+                var parentAr = [];
+                for (var i = 0; i < parentEl.children.length; i++) {
+                    parentAr.push(parentEl.children[i]);
+                }
+                for (var i = 0; i < parentAr.length; i++) {
+                    _this.targetEl.appendChild(parentAr[i]);
+                }
+                if (_this.offset < _this.count) {
+                    _this.moreEl.classList.remove("hidden");
+                }
+            }
+            else {
+                console.error("Error while RelationList request");
+            }
+        });
+        request.send(JSON.stringify({
+            SourceResource: this.sourceResource,
+            TargetResource: this.targetResource,
+            TargetField: this.targetField,
+            IDValue: this.idValue,
+            Offset: this.offset,
+            Count: 10
+        }));
+    };
+    return RelationList;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();
@@ -20092,6 +20204,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindSearch();
     bindEshopControl();
     bindMainMenu();
+    bindRelationList();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");
