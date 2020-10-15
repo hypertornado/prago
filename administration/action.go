@@ -3,8 +3,10 @@ package administration
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/tealeg/xlsx"
 
@@ -91,7 +93,12 @@ func actionList(resource *Resource) Action {
 					row := sheet.AddRow()
 					for _, v2 := range v1.Items {
 						cell := row.AddCell()
-						cell.SetValue(v2.OriginalValue)
+						if reflect.TypeOf(v2.OriginalValue) == reflect.TypeOf(time.Now()) {
+							t := v2.OriginalValue.(time.Time)
+							cell.SetString(t.Format("2006-01-02"))
+						} else {
+							cell.SetValue(v2.OriginalValue)
+						}
 					}
 				}
 				file.Write(request.Response())
