@@ -6,8 +6,17 @@
           <div class="admin_stats_section_name">{{$section.Name}}</div>
           <div class="admin_stats_section_table">
             {{range $row := $section.Table}}
-              <div class="admin_stats_section_row" title="{{$row.Name}} - {{$row.Description.Count}} ({{$row.Description.Percent}})">
-                <div class="admin_stats_section_row_name">{{$row.Name}}</div>
+              {{if $row.URL}}
+                <a href="{{$row.URL}}" class="admin_stats_section_row" title="{{$row.Name}} - {{$row.Description.Count}} ({{$row.Description.Percent}})">
+              {{else}}
+                <div class="admin_stats_section_row" title="{{$row.Name}} - {{$row.Description.Count}} ({{$row.Description.Percent}})">
+              {{end}}
+                <div class="admin_stats_section_row_name">
+                  {{if $row.Image}}
+                    <div class="admin_stats_section_row_image" style="background-url: url('{{$row.Image}}');"></div>
+                  {{end}}
+                  {{$row.Name}}
+                </div>
                 <div class="admin_stats_section_row_graph">
                   <div class="admin_stats_section_row_graph_content" style="width: {{$row.Description.PercentCSS}};"></div>
                 </div>
@@ -15,7 +24,11 @@
                   <div class="admin_stats_section_row_description_count">{{$row.Description.Count}}</div>
                   <div class="admin_stats_section_row_description_percent">{{$row.Description.Percent}}</div>
                 </div>
-              </div>
+              {{if $row.URL}}
+                </a>
+              {{else}}
+                </div>
+              {{end}}
             {{end}}
           </div>
         </div>

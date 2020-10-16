@@ -81,19 +81,18 @@ func createRelationNamingFunction(field Field, resource Resource, referenceResou
 }
 
 func getRelationViewData(resource Resource, user User, f Field, value interface{}) interface{} {
-	return getRelationData(resource, user, f, value)
+	ret, _ := getRelationData(resource, user, f, value)
+	return ret
 }
 
-func getRelationData(resource Resource, user User, f Field, value interface{}) *viewRelationData {
+func getRelationData(resource Resource, user User, f Field, value interface{}) (*viewRelationData, error) {
 	r2 := f.getRelatedResource(*resource.Admin)
 	if r2 == nil {
-		fmt.Printf("Resource not found: %s\n", f.Name)
-		return nil
+		return nil, fmt.Errorf("Resource not found: %s\n", f.Name)
 	}
 
 	if !resource.Admin.Authorize(user, r2.CanView) {
-		fmt.Printf("User is not authorized to view this item\n")
-		return nil
+		return nil, fmt.Errorf("User is not authorized to view this item\n")
 	}
 
 	var item interface{}
@@ -101,15 +100,14 @@ func getRelationData(resource Resource, user User, f Field, value interface{}) *
 
 	intVal := value.(int64)
 	if intVal <= 0 {
-		return nil
+		return nil, fmt.Errorf("Wrong value\n")
 	}
 	err := resource.Admin.Query().WhereIs("id", intVal).Get(item)
 	if err != nil {
-		fmt.Printf("Can't find this item\n")
-		return nil
+		return nil, fmt.Errorf("Can't find this item\n")
 	}
 
-	return r2.itemToRelationData(item, user, nil)
+	return r2.itemToRelationData(item, user, nil), nil
 }
 
 func (resource *Resource) itemToRelationData(item interface{}, user User, relatedResource *Resource) *viewRelationData {

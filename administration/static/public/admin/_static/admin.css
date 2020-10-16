@@ -6336,6 +6336,11 @@ td.admin_list_message {
   display: block;
   margin: 5px 0px;
 }
+.admin_tablesettings_stats_limit {
+  padding: 1px 3px;
+  display: block;
+  margin: 5px 0px;
+}
 .admin_nologin_logo {
   border: 0px solid red;
   width: 100px;
@@ -7022,8 +7027,7 @@ a.admin_home_item {
   background: white;
   margin: 0px 10px 10px 0px;
   border: 1px solid #eee;
-  padding: 3px 5px;
-  border-radius: 3px;
+  padding: 3px 0px;
 }
 .admin_stats_section_name {
   font-weight: 500;
@@ -7034,6 +7038,7 @@ a.admin_home_item {
   width: 100%;
   flex-wrap: nowrap;
   align-items: center;
+  padding: 0px 5px;
 }
 .admin_stats_section_row:hover {
   background-color: #fafafa;
@@ -7041,11 +7046,21 @@ a.admin_home_item {
 }
 .admin_stats_section_row_name {
   text-align: right;
+  text-align: left;
   padding: 0px 3px;
   width: 100px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+}
+.admin_stats_section_row_image {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  background-color: #eee;
+  background-size: cover;
+  background-position: center;
 }
 .admin_stats_section_row_graph {
   background-color: #eee;
@@ -7058,7 +7073,6 @@ a.admin_home_item {
   margin: 0px 3px;
 }
 .admin_stats_section_row_graph_content {
-  width: 34%;
   border-radius: 3px;
   background-color: #ccc;
   background-color: rgba(64, 120, 192, 0.1);
@@ -7074,10 +7088,17 @@ a.admin_home_item {
   display: flex;
   justify-content: space-between;
 }
+.admin_stats_section_row_description_count {
+  color: #444;
+}
 .admin_stats_section_row_description_percent {
   color: #aaa;
   font-size: 0.8rem;
   margin-left: 5px;
+  text-decoration: none;
+}
+a.admin_stats_section_row {
+  text-decoration: none;
 }
 td.pagination {
   text-align: center;

@@ -45,8 +45,12 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 		}
 	}
 
+	adminSectionName := admin.HumanName
+	if admin.Logo != "" {
+		adminSectionName = ""
+	}
 	adminSection := MainMenuSection{
-		Name: admin.HumanName,
+		Name: adminSectionName,
 		Items: []MainMenuItem{
 			{
 				Name:     messages.Messages.Get(user.Locale, "admin_signpost"),
@@ -61,6 +65,31 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 	}
 
 	ret.Sections = append(ret.Sections, adminSection)
+
+	resourceSection := MainMenuSection{
+		Name: messages.Messages.Get(user.Locale, "admin_tables"),
+	}
+	for _, resource := range admin.getSortedResources(user.Locale) {
+		if admin.Authorize(user, resource.CanView) {
+			resourceURL := admin.GetURL(resource.ID)
+
+			var selected bool
+			if request.Request().URL.Path == resourceURL {
+				selected = true
+			}
+			if strings.HasPrefix(request.Request().URL.Path, resourceURL+"/") {
+				selected = true
+			}
+
+			resourceSection.Items = append(resourceSection.Items, MainMenuItem{
+				Name:     resource.HumanName(user.Locale),
+				Subname:  utils.HumanizeNumber(resource.getCachedCount()),
+				URL:      resourceURL,
+				Selected: selected,
+			})
+		}
+	}
+	ret.Sections = append(ret.Sections, resourceSection)
 
 	var userSettingsSection bool
 	if request.Request().URL.Path == admin.GetURL("user/settings") || request.Request().URL.Path == admin.GetURL("user/password") {
@@ -86,32 +115,6 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 		},
 	}
 	ret.Sections = append(ret.Sections, userSection)
-
-	resourceSection := MainMenuSection{
-		Name: messages.Messages.Get(user.Locale, "admin_tables"),
-	}
-	for _, resource := range admin.getSortedResources(user.Locale) {
-		if admin.Authorize(user, resource.CanView) {
-			resourceURL := admin.GetURL(resource.ID)
-
-			var selected bool
-			if request.Request().URL.Path == resourceURL {
-				selected = true
-			}
-			if strings.HasPrefix(request.Request().URL.Path, resourceURL+"/") {
-				selected = true
-			}
-
-			resourceSection.Items = append(resourceSection.Items, MainMenuItem{
-				Name:     resource.HumanName(user.Locale),
-				Subname:  utils.HumanizeNumber(resource.getCachedCount()),
-				URL:      resourceURL,
-				Selected: selected,
-			})
-		}
-	}
-
-	ret.Sections = append(ret.Sections, resourceSection)
 
 	ret.Logo = admin.Logo
 	ret.AdminHomepageURL = admin.GetURL("")

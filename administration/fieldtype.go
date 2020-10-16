@@ -26,6 +26,13 @@ type FieldType struct {
 	FilterLayoutDataSource func(Field, User) interface{}
 }
 
+func (f FieldType) IsRelation() bool {
+	if f.ViewTemplate == "admin_item_view_relation" {
+		return true
+	}
+	return false
+}
+
 func (admin *Administration) addDefaultFieldTypes() {
 	admin.AddFieldType("role", admin.createRoleFieldType())
 

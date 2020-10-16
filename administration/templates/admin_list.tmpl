@@ -30,6 +30,14 @@
     <label>
       <input type="checkbox" class="admin_tablesettings_stats"> Zobrazit statistiky
     </label>
+    <br>
+    <label>
+      <select class="admin_tablesettings_stats_limit input">
+        {{range $item := .StatsLimitSelectData}}
+          <option value="{{$item.Value}}"{{if $item.Selected}} selected{{end}}>{{$item.Name}}</option>
+        {{end}}
+      </select>
+    </label>
     <div class="admin_tablesettings_stats_container"></div>
     <div class="clear"></div>
   </div>

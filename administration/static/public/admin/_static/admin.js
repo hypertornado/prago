@@ -482,6 +482,10 @@ var List = (function () {
         this.statsCheckbox.addEventListener("change", function () {
             _this.filterChanged();
         });
+        this.statsCheckboxSelectCount = el.querySelector(".admin_tablesettings_stats_limit");
+        this.statsCheckboxSelectCount.addEventListener("change", function () {
+            _this.filterChanged();
+        });
         this.statsContainer = el.querySelector(".admin_tablesettings_stats_container");
         this.bindOptions(visibleColumnsMap);
         this.bindOrder();
@@ -525,6 +529,7 @@ var List = (function () {
         window.history.replaceState(null, null, document.location.pathname + encoded);
         if (this.statsCheckbox.checked) {
             params["_stats"] = "true";
+            params["_statslimit"] = this.statsCheckboxSelectCount.value;
         }
         params["_format"] = "xlsx";
         this.exportButton.setAttribute("href", this.adminPrefix + "/" + this.typeName + encodeParams(params));

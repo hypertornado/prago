@@ -14,18 +14,19 @@ import (
 )
 
 type list struct {
-	Name           string
-	TypeID         string
-	Colspan        int64
-	Header         []listHeaderItem
-	VisibleColumns string
-	Columns        string
-	CanChangeOrder bool
-	OrderColumn    string
-	OrderDesc      bool
-	Locale         string
-	ItemsPerPage   int64
-	PaginationData []ListPaginationData
+	Name                 string
+	TypeID               string
+	Colspan              int64
+	Header               []listHeaderItem
+	VisibleColumns       string
+	Columns              string
+	CanChangeOrder       bool
+	OrderColumn          string
+	OrderDesc            bool
+	Locale               string
+	ItemsPerPage         int64
+	PaginationData       []ListPaginationData
+	StatsLimitSelectData []ListPaginationData
 }
 
 type ListPaginationData struct {
@@ -106,6 +107,8 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 
 	list.ItemsPerPage = resource.ItemsPerPage
 	list.PaginationData = resource.getPaginationData(user)
+
+	list.StatsLimitSelectData = getStatsLimitSelectData(user.Locale)
 
 	orderField, ok := resource.fieldMap[resource.OrderByColumn]
 	if !ok || !orderField.CanOrder {
@@ -453,7 +456,7 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 	ret.Colspan = int64(len(columnsMap)) + 1
 
 	if params.Get("_stats") == "true" {
-		ret.Stats = getListStats(resource, admin, user, params)
+		ret.Stats = getListStats(resource, user, params)
 	}
 
 	return
@@ -500,7 +503,6 @@ func (resource *Resource) getListContentJSON(admin *Administration, user User, p
 func (resource Resource) valueToCell(user User, f Field, val reflect.Value, isOrderedBy bool) listCell {
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
-
 	var cell listCell
 	cell.Template = f.fieldType.ListCellTemplate
 	cell.Value = f.fieldType.ListCellDataSource(resource, user, f, item)

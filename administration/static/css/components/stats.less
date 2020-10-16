@@ -21,8 +21,8 @@
     margin: 0px 10px 10px 0px;
     //box-shadow: 0px 0px 10px #ddd;
     border: 1px solid #eee;
-    padding: 3px 5px;
-    border-radius: 3px;
+    padding: 3px 0px;
+    //border-radius: 3px;
 }
 
 .admin_stats_section_name {
@@ -35,6 +35,7 @@
     width: 100%;
     flex-wrap: nowrap;
     align-items: center;
+    padding: 0px 5px;
 }
 
 .admin_stats_section_row:hover {
@@ -44,11 +45,22 @@
 
 .admin_stats_section_row_name {
     text-align: right;
+    text-align: left;
     padding: 0px 3px;
     width: 100px;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+}
+
+.admin_stats_section_row_image {
+    display: inline-block;
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    background-color: #eee;
+    background-size: cover;
+    background-position: center;
 }
 
 .admin_stats_section_row_graph {
@@ -65,7 +77,7 @@
 }
 
 .admin_stats_section_row_graph_content {
-    width: 34%;
+    //width: 34%;
     //background-color: blue;
     border-radius: 3px;
     background-color: #ccc;
@@ -86,8 +98,17 @@
     justify-content: space-between;
 }
 
+.admin_stats_section_row_description_count {
+    color: @black;
+}
+
 .admin_stats_section_row_description_percent {
     color: #aaa;
     font-size: .8rem;
     margin-left: 5px;
+    text-decoration: none;
+}
+
+a.admin_stats_section_row {
+    text-decoration: none;
 }

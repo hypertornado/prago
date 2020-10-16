@@ -32,6 +32,7 @@ class List {
   paginationSelect: HTMLSelectElement;
 
   statsCheckbox: HTMLInputElement;
+  statsCheckboxSelectCount: HTMLSelectElement;
   statsContainer: HTMLDivElement;
 
   //TODO: get filter params from URL
@@ -105,6 +106,15 @@ class List {
       this.filterChanged();
     });
 
+    //this.settingsCheckbox.checked = true;
+    //this.settingsCheckboxChange();
+    //this.statsCheckbox.checked = true;
+
+    this.statsCheckboxSelectCount = el.querySelector(".admin_tablesettings_stats_limit");
+    this.statsCheckboxSelectCount.addEventListener("change", () => {
+      this.filterChanged();
+    });
+
     this.statsContainer = el.querySelector(".admin_tablesettings_stats_container");
 
     this.bindOptions(visibleColumnsMap);
@@ -154,6 +164,7 @@ class List {
 
     if (this.statsCheckbox.checked) {
       params["_stats"] = "true";
+      params["_statslimit"] = this.statsCheckboxSelectCount.value;
     }
 
     params["_format"] = "xlsx";

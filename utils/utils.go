@@ -124,3 +124,7 @@ func numberToString(n int, sep rune) string {
 func HumanizeNumber(i int64) (ret string) {
 	return numberToString(int(i), ' ')
 }
+
+/*func HumanizeFloat(i float64, locale string) (ret string) {
+	return numberToString(int(i), ' ')
+}*/

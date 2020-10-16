@@ -432,6 +432,14 @@ const adminTemplates = `
     <label>
       <input type="checkbox" class="admin_tablesettings_stats"> Zobrazit statistiky
     </label>
+    <br>
+    <label>
+      <select class="admin_tablesettings_stats_limit input">
+        {{range $item := .StatsLimitSelectData}}
+          <option value="{{$item.Value}}"{{if $item.Selected}} selected{{end}}>{{$item.Name}}</option>
+        {{end}}
+      </select>
+    </label>
     <div class="admin_tablesettings_stats_container"></div>
     <div class="clear"></div>
   </div>
@@ -673,8 +681,17 @@ const adminTemplates = `
           <div class="admin_stats_section_name">{{$section.Name}}</div>
           <div class="admin_stats_section_table">
             {{range $row := $section.Table}}
-              <div class="admin_stats_section_row" title="{{$row.Name}} - {{$row.Description.Count}} ({{$row.Description.Percent}})">
-                <div class="admin_stats_section_row_name">{{$row.Name}}</div>
+              {{if $row.URL}}
+                <a href="{{$row.URL}}" class="admin_stats_section_row" title="{{$row.Name}} - {{$row.Description.Count}} ({{$row.Description.Percent}})">
+              {{else}}
+                <div class="admin_stats_section_row" title="{{$row.Name}} - {{$row.Description.Count}} ({{$row.Description.Percent}})">
+              {{end}}
+                <div class="admin_stats_section_row_name">
+                  {{if $row.Image}}
+                    <div class="admin_stats_section_row_image" style="background-url: url('{{$row.Image}}');"></div>
+                  {{end}}
+                  {{$row.Name}}
+                </div>
                 <div class="admin_stats_section_row_graph">
                   <div class="admin_stats_section_row_graph_content" style="width: {{$row.Description.PercentCSS}};"></div>
                 </div>
@@ -682,7 +699,11 @@ const adminTemplates = `
                   <div class="admin_stats_section_row_description_count">{{$row.Description.Count}}</div>
                   <div class="admin_stats_section_row_description_percent">{{$row.Description.Percent}}</div>
                 </div>
-              </div>
+              {{if $row.URL}}
+                </a>
+              {{else}}
+                </div>
+              {{end}}
             {{end}}
           </div>
         </div>
@@ -17477,6 +17498,11 @@ td.admin_list_message {
   display: block;
   margin: 5px 0px;
 }
+.admin_tablesettings_stats_limit {
+  padding: 1px 3px;
+  display: block;
+  margin: 5px 0px;
+}
 .admin_nologin_logo {
   border: 0px solid red;
   width: 100px;
@@ -18163,8 +18189,7 @@ a.admin_home_item {
   background: white;
   margin: 0px 10px 10px 0px;
   border: 1px solid #eee;
-  padding: 3px 5px;
-  border-radius: 3px;
+  padding: 3px 0px;
 }
 .admin_stats_section_name {
   font-weight: 500;
@@ -18175,6 +18200,7 @@ a.admin_home_item {
   width: 100%;
   flex-wrap: nowrap;
   align-items: center;
+  padding: 0px 5px;
 }
 .admin_stats_section_row:hover {
   background-color: #fafafa;
@@ -18182,11 +18208,21 @@ a.admin_home_item {
 }
 .admin_stats_section_row_name {
   text-align: right;
+  text-align: left;
   padding: 0px 3px;
   width: 100px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+}
+.admin_stats_section_row_image {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  background-color: #eee;
+  background-size: cover;
+  background-position: center;
 }
 .admin_stats_section_row_graph {
   background-color: #eee;
@@ -18199,7 +18235,6 @@ a.admin_home_item {
   margin: 0px 3px;
 }
 .admin_stats_section_row_graph_content {
-  width: 34%;
   border-radius: 3px;
   background-color: #ccc;
   background-color: rgba(64, 120, 192, 0.1);
@@ -18215,10 +18250,17 @@ a.admin_home_item {
   display: flex;
   justify-content: space-between;
 }
+.admin_stats_section_row_description_count {
+  color: #444;
+}
 .admin_stats_section_row_description_percent {
   color: #aaa;
   font-size: 0.8rem;
   margin-left: 5px;
+  text-decoration: none;
+}
+a.admin_stats_section_row {
+  text-decoration: none;
 }
 td.pagination {
   text-align: center;
@@ -18909,6 +18951,10 @@ var List = (function () {
         this.statsCheckbox.addEventListener("change", function () {
             _this.filterChanged();
         });
+        this.statsCheckboxSelectCount = el.querySelector(".admin_tablesettings_stats_limit");
+        this.statsCheckboxSelectCount.addEventListener("change", function () {
+            _this.filterChanged();
+        });
         this.statsContainer = el.querySelector(".admin_tablesettings_stats_container");
         this.bindOptions(visibleColumnsMap);
         this.bindOrder();
@@ -18952,6 +18998,7 @@ var List = (function () {
         window.history.replaceState(null, null, document.location.pathname + encoded);
         if (this.statsCheckbox.checked) {
             params["_stats"] = "true";
+            params["_statslimit"] = this.statsCheckboxSelectCount.value;
         }
         params["_format"] = "xlsx";
         this.exportButton.setAttribute("href", this.adminPrefix + "/" + this.typeName + encodeParams(params));
