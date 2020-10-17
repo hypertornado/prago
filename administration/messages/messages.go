@@ -147,8 +147,8 @@ var m = map[string]map[string]string{
 		"cs": "Rozcestník",
 	},
 	"admin_homepage": {
-		"en": "Homepage",
-		"cs": "Homepage",
+		"en": "Go to homepage",
+		"cs": "Přejít na homepage",
 	},
 
 	"admin_log_out": {

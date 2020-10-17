@@ -35,15 +35,6 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 	if request.Request().URL.Path == admin.GetURL("") {
 		selectedAdminSection = true
 	}
-	for _, v := range admin.rootActions {
-		if v.Method == "" || v.Method == "GET" {
-			if admin.Authorize(user, v.Permission) {
-				if request.Request().URL.Path == admin.GetURL(v.URL) {
-					selectedAdminSection = true
-				}
-			}
-		}
-	}
 
 	adminSectionName := admin.HumanName
 	if admin.Logo != "" {
@@ -57,11 +48,21 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 				URL:      admin.GetURL(""),
 				Selected: selectedAdminSection,
 			},
-			{
-				Name: messages.Messages.Get(user.Locale, "admin_homepage"),
-				URL:  "/",
-			},
 		},
+	}
+
+	for _, v := range admin.rootActions {
+		var selected bool
+		fullURL := admin.GetURL(v.URL)
+		if request.Request().URL.Path == fullURL {
+			selected = true
+		}
+
+		adminSection.Items = append(adminSection.Items, MainMenuItem{
+			Name:     v.Name(user.Locale),
+			URL:      fullURL,
+			Selected: selected,
+		})
 	}
 
 	ret.Sections = append(ret.Sections, adminSection)
@@ -107,6 +108,10 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 				Name:     messages.Messages.Get(user.Locale, "admin_settings"),
 				URL:      admin.GetURL("user/settings"),
 				Selected: userSettingsSection,
+			},
+			{
+				Name: messages.Messages.Get(user.Locale, "admin_homepage"),
+				URL:  "/",
 			},
 			{
 				Name: messages.Messages.Get(user.Locale, "admin_log_out"),

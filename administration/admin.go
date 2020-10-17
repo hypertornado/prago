@@ -178,7 +178,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 
 	admin.AdminController.Get(admin.GetURL(""), func(request prago.Request) {
 		renderNavigationPage(request, adminNavigationPage{
-			Navigation:   admin.getAdminNavigation(GetUser(request), ""),
+			//Navigation:   admin.getAdminNavigation(GetUser(request), ""),
 			PageTemplate: "admin_home_navigation",
 			PageData:     admin.getHomeData(request),
 		})

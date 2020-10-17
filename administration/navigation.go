@@ -250,8 +250,8 @@ func createAdminHandler(action, templateName string, dataGenerator func(Resource
 		}
 
 		renderNavigationPage(request, adminNavigationPage{
-			Admin:        resource.Admin,
-			Navigation:   resource.Admin.getAdminNavigation(user, action),
+			Admin: resource.Admin,
+			//Navigation:   resource.Admin.getAdminNavigation(user, action),
 			PageTemplate: templateName,
 			PageData:     data,
 			HideBox:      empty,
