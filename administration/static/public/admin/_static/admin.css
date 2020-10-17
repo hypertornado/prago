@@ -7072,6 +7072,9 @@ a.admin_home_item {
   align-items: stretch;
   margin: 0px 3px;
 }
+.admin_stats_section_row_graph-empty {
+  opacity: 0;
+}
 .admin_stats_section_row_graph_content {
   border-radius: 3px;
   background-color: #ccc;

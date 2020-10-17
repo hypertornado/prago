@@ -121,6 +121,8 @@ func getDefaultViewDataSource(f *Field) func(resource Resource, user User, f Fie
 		return numberViewDataSource
 	case reflect.Int64:
 		return numberViewDataSource
+	case reflect.Float64:
+		return floatViewDataSource
 	default:
 		return defaultViewDataSource
 	}
@@ -139,6 +141,10 @@ func numberViewDataSource(resource Resource, user User, f Field, value interface
 	}
 
 	return value
+}
+
+func floatViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
+	return utils.HumanizeFloat(value.(float64), user.Locale)
 }
 
 func timeViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {

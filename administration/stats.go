@@ -3,10 +3,12 @@ package administration
 import (
 	"fmt"
 	"html/template"
+	"math"
 	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hypertornado/prago/administration/messages"
 	"github.com/hypertornado/prago/utils"
@@ -75,8 +77,11 @@ func getListStats(resource *Resource, user User, params url.Values) *ListStats {
 	}
 
 	for _, v := range columnsAr {
-
 		field := resource.fieldMap[v]
+
+		if field.Typ == reflect.TypeOf(time.Now()) {
+			ret.Sections = append(ret.Sections, resource.getListStatsDateSections(field, user, params, total, limit)...)
+		}
 
 		table := resource.getListStatsTable(field, user, params, total, limit)
 
@@ -91,6 +96,136 @@ func getListStats(resource *Resource, user User, params url.Values) *ListStats {
 	}
 
 	return ret
+}
+
+func (resource *Resource) getListStatsDateSections(field *Field, user User, params url.Values, total, limit int64) (ret []ListStatsSection) {
+	ret = append(ret, resource.getListStatsDateSectionDay(field, user, params, total, limit))
+	ret = append(ret, resource.getListStatsDateSectionMonth(field, user, params, total, limit))
+	ret = append(ret, resource.getListStatsDateSectionYear(field, user, params, total, limit))
+	return
+}
+
+func (resource *Resource) getListStatsDateSectionDay(field *Field, user User, params url.Values, total, limit int64) (ret ListStatsSection) {
+	query := resource.addFilterParamsToQuery(resource.Admin.Query(), params)
+	whereParams := query.query.whereParams
+	q := fmt.Sprintf("SELECT DAY(%s), MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY DAY(%s), MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
+		field.ColumnName,
+		field.ColumnName,
+		field.ColumnName,
+		resource.TableName,
+		buildWhereString(query.query.whereString),
+		field.ColumnName,
+		field.ColumnName,
+		field.ColumnName,
+		limit,
+	)
+	rows, err := resource.Admin.db.Query(q, whereParams...)
+	if err != nil {
+		panic(err)
+	}
+	ret = ListStatsSection{
+		Name: fmt.Sprintf("%s – dny", field.HumanName(user.Locale)),
+	}
+	var counted int64
+	for rows.Next() {
+		var day int64
+		var month int64
+		var year int64
+		var count int64
+		rows.Scan(&day, &month, &year, &count)
+		counted += count
+
+		ret.Table = append(ret.Table, ListStatsRow{
+			Name:        fmt.Sprintf("%d. %d. %d", day, month, year),
+			Description: statsCountDescription(count, total),
+		})
+	}
+	if counted < total {
+		ret.Table = append(ret.Table, ListStatsRow{
+			Name:        "ostatní",
+			Description: statsCountDescription(total-counted, total),
+		})
+	}
+	return
+}
+
+func (resource *Resource) getListStatsDateSectionMonth(field *Field, user User, params url.Values, total, limit int64) (ret ListStatsSection) {
+	query := resource.addFilterParamsToQuery(resource.Admin.Query(), params)
+	whereParams := query.query.whereParams
+	q := fmt.Sprintf("SELECT MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
+		field.ColumnName,
+		field.ColumnName,
+		resource.TableName,
+		buildWhereString(query.query.whereString),
+		field.ColumnName,
+		field.ColumnName,
+		limit,
+	)
+	rows, err := resource.Admin.db.Query(q, whereParams...)
+	if err != nil {
+		panic(err)
+	}
+	ret = ListStatsSection{
+		Name: fmt.Sprintf("%s – měsíce", field.HumanName(user.Locale)),
+	}
+	var counted int64
+	for rows.Next() {
+		var month int64
+		var year int64
+		var count int64
+		rows.Scan(&month, &year, &count)
+		counted += count
+
+		ret.Table = append(ret.Table, ListStatsRow{
+			Name:        fmt.Sprintf("%s %d", utils.MonthName(month, user.Locale), year),
+			Description: statsCountDescription(count, total),
+		})
+	}
+	if counted < total {
+		ret.Table = append(ret.Table, ListStatsRow{
+			Name:        "ostatní",
+			Description: statsCountDescription(total-counted, total),
+		})
+	}
+	return
+}
+
+func (resource *Resource) getListStatsDateSectionYear(field *Field, user User, params url.Values, total, limit int64) (ret ListStatsSection) {
+	query := resource.addFilterParamsToQuery(resource.Admin.Query(), params)
+	whereParams := query.query.whereParams
+	q := fmt.Sprintf("SELECT YEAR(%s), COUNT(id) FROM %s %s GROUP BY YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
+		field.ColumnName,
+		resource.TableName,
+		buildWhereString(query.query.whereString),
+		field.ColumnName,
+		limit,
+	)
+	rows, err := resource.Admin.db.Query(q, whereParams...)
+	if err != nil {
+		panic(err)
+	}
+	ret = ListStatsSection{
+		Name: fmt.Sprintf("%s – roky", field.HumanName(user.Locale)),
+	}
+	var counted int64
+	for rows.Next() {
+		var year int64
+		var count int64
+		rows.Scan(&year, &count)
+		counted += count
+
+		ret.Table = append(ret.Table, ListStatsRow{
+			Name:        fmt.Sprintf("%d", year),
+			Description: statsCountDescription(count, total),
+		})
+	}
+	if counted < total {
+		ret.Table = append(ret.Table, ListStatsRow{
+			Name:        "ostatní",
+			Description: statsCountDescription(total-counted, total),
+		})
+	}
+	return
 }
 
 func (resource *Resource) getListStatsTable(field *Field, user User, params url.Values, total, limit int64) (table []ListStatsRow) {
@@ -123,7 +258,6 @@ func (resource *Resource) getListStatsTable(field *Field, user User, params url.
 	}
 
 	if field.Typ.Kind() == reflect.Int64 {
-
 		if field.fieldType.IsRelation() {
 			for rows.Next() {
 				var count int64
@@ -151,30 +285,14 @@ func (resource *Resource) getListStatsTable(field *Field, user User, params url.
 			}
 
 		} else {
-
 			table = resource.getListStatsTableInt(field, user, params, total)
-
 			counted = total
-
-			/*for rows.Next() {
-				q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.ColumnName, resource.TableName, buildWhereString(query.query.whereString), field.ColumnName, limit)
-
-				rows, err := resource.Admin.db.Query(q, whereParams...)
-				if err != nil {
-					panic(err)
-				}
-
-				var count int64
-				var v int64
-				rows.Scan(&v, &count)
-				counted += count
-
-				table = append(table, ListStatsRow{
-					Name:        fmt.Sprintf("%d", v),
-					Description: statsCountDescription(count, total),
-				})
-			}*/
 		}
+	}
+
+	if field.Typ.Kind() == reflect.Float64 {
+		table = resource.getListStatsTableInt(field, user, params, total)
+		counted = total
 	}
 
 	if field.Typ.Kind() == reflect.Bool {
@@ -235,33 +353,54 @@ func (resource *Resource) getListStatsTableInt(field *Field, user User, params u
 		panic(err)
 	}
 
-	var max int64
-	var min int64
+	var max float64
+	var min float64
 	var avg float64
 
 	for rows.Next() {
 		rows.Scan(&max, &min, &avg)
-		//counted += count
 	}
 
 	table = append(table, ListStatsRow{
 		Name: "minimum",
 		Description: ListStatsDescription{
-			Count: utils.HumanizeNumber(min),
+			Count: utils.HumanizeFloat(min, user.Locale),
 		},
 	})
 
 	table = append(table, ListStatsRow{
 		Name: "průměr",
 		Description: ListStatsDescription{
-			Count: fmt.Sprintf("%.2f", avg),
+			Count: utils.HumanizeFloat(avg, user.Locale),
+		},
+	})
+
+	medianItem := int64(math.Floor(float64(total) / 2))
+	q = fmt.Sprintf("SELECT %s FROM %s %s LIMIT 1 OFFSET %d;",
+		field.ColumnName,
+		resource.TableName,
+		buildWhereString(query.query.whereString),
+		medianItem,
+	)
+	rows, err = resource.Admin.db.Query(q, whereParams...)
+	if err != nil {
+		panic(err)
+	}
+	var median float64
+	for rows.Next() {
+		rows.Scan(&median)
+	}
+	table = append(table, ListStatsRow{
+		Name: "medián",
+		Description: ListStatsDescription{
+			Count: utils.HumanizeFloat(median, user.Locale),
 		},
 	})
 
 	table = append(table, ListStatsRow{
 		Name: "maximum",
 		Description: ListStatsDescription{
-			Count: utils.HumanizeNumber(max),
+			Count: utils.HumanizeFloat(max, user.Locale),
 		},
 	})
 

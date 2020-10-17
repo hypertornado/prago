@@ -17,7 +17,7 @@
                   {{end}}
                   {{$row.Name}}
                 </div>
-                <div class="admin_stats_section_row_graph">
+                <div class="admin_stats_section_row_graph{{if eq $row.Description.Percent ""}} admin_stats_section_row_graph-empty{{end}}">
                   <div class="admin_stats_section_row_graph_content" style="width: {{$row.Description.PercentCSS}};"></div>
                 </div>
                 <div class="admin_stats_section_row_description">

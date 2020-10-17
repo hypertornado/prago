@@ -692,7 +692,7 @@ const adminTemplates = `
                   {{end}}
                   {{$row.Name}}
                 </div>
-                <div class="admin_stats_section_row_graph">
+                <div class="admin_stats_section_row_graph{{if eq $row.Description.Percent ""}} admin_stats_section_row_graph-empty{{end}}">
                   <div class="admin_stats_section_row_graph_content" style="width: {{$row.Description.PercentCSS}};"></div>
                 </div>
                 <div class="admin_stats_section_row_description">
@@ -18233,6 +18233,9 @@ a.admin_home_item {
   display: flex;
   align-items: stretch;
   margin: 0px 3px;
+}
+.admin_stats_section_row_graph-empty {
+  opacity: 0;
 }
 .admin_stats_section_row_graph_content {
   border-radius: 3px;

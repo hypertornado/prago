@@ -67,7 +67,7 @@ func Crop(in string, cropLength int) string {
 		return ""
 	}
 	inRune := []rune(in)
-	if len(inRune) < cropLength {
+	if len(inRune) <= cropLength {
 		return in
 	} else {
 		inRune = inRune[:cropLength]
@@ -125,6 +125,36 @@ func HumanizeNumber(i int64) (ret string) {
 	return numberToString(int(i), ' ')
 }
 
-/*func HumanizeFloat(i float64, locale string) (ret string) {
-	return numberToString(int(i), ' ')
-}*/
+func HumanizeFloat(i float64, locale string) string {
+	ret := HumanizeNumber(int64(i))
+
+	defaultStr := fmt.Sprintf("%g", i)
+
+	if strings.Contains(defaultStr, ".") {
+		items := strings.Split(defaultStr, ".")
+		switch locale {
+		case "cs":
+			ret += ","
+		default:
+			ret += "."
+		}
+		ret += items[1]
+	}
+
+	return ret
+}
+
+var monthsCS = []string{"Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"}
+var monthsEN = []string{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}
+
+func MonthName(order int64, locale string) string {
+	if order < 1 || order > 12 {
+		return ""
+	}
+	switch locale {
+	case "cs":
+		return monthsCS[order-1]
+	default:
+		return monthsEN[order-1]
+	}
+}

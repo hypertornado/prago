@@ -1,12 +1,20 @@
 package utils
 
 import (
+	"strings"
+
 	stripmd "github.com/writeas/go-strip-markdown"
 )
 
 func filterMarkdown(in string) string {
 
-	return stripmd.Strip(in)
+	//in = strings.Replace(in, "\n", " ", -1)
+
+	in = stripmd.Strip(in)
+
+	in = strings.Replace(in, "\n", " ", -1)
+
+	return in
 
 	/*ret := string(blackfriday.Markdown(
 		[]byte(in),
