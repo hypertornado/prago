@@ -409,6 +409,41 @@ const adminTemplates = `
   data-visible-columns="{{.VisibleColumns}}"
   data-items-per-page="{{.ItemsPerPage}}"
 >
+
+  <table class="admin_table admin_list_table">
+    <thead>
+    <tr>
+      {{range $item := .Header}}
+        <th class="admin_list_orderitem{{if $item.CanOrder}} admin_list_orderitem-canorder{{end}}" data-name="{{$item.ColumnName}}">
+          {{- $item.NameHuman -}}
+        </th>
+      {{end}}
+      <th rowspan="2" class="admin_list_lastheadercell">
+        <span class="admin_table_count"></span>
+        <progress class="admin_table_progress"></progress>
+        <label class="admin_list_showmore_label"><input type="checkbox" class="admin_list_showmore">Možnosti</label>
+      </th>
+    </tr>
+    <tr class="admin_list_filterrow">
+      {{range $item := .Header}}
+        <th class="admin_list_filteritem" data-name="{{$item.ColumnName}}" data-filter-layout="{{$item.FilterLayout}}">
+          {{if $item.FilterLayout}}
+            {{tmpl $item.FilterLayout $item}}
+          {{end}}
+        </th>
+      {{end}}
+    </tr>
+    <tr class="admin_list_settingsrow">
+      <td class="admin_list_settingsrow_column">
+        {{template "admin_list_settings" .}}
+      </td>
+    </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+{{end}}
+
+{{define "admin_list_settings"}}
   <div class="admin_tablesettings">
     <h2>Možnosti</h2>
     <h3>{{message .Locale "admin_options_visible"}}</h3>
@@ -444,32 +479,6 @@ const adminTemplates = `
     <div class="clear"></div>
   </div>
 
-  <table class="admin_table admin_list_table">
-    <thead>
-    <tr>
-      {{range $item := .Header}}
-        <th class="admin_list_orderitem{{if $item.CanOrder}} admin_list_orderitem-canorder{{end}}" data-name="{{$item.ColumnName}}">
-          {{- $item.NameHuman -}}
-        </th>
-      {{end}}
-      <th rowspan="2" class="admin_list_lastheadercell">
-        <span class="admin_table_count"></span>
-        <progress class="admin_table_progress"></progress>
-        <label class="admin_list_showmore_label"><input type="checkbox" class="admin_list_showmore">Možnosti</label>
-      </th>
-    </tr>
-    <tr class="admin_list_filterrow">
-      {{range $item := .Header}}
-        <th class="admin_list_filteritem" data-name="{{$item.ColumnName}}" data-filter-layout="{{$item.FilterLayout}}">
-          {{if $item.FilterLayout}}
-            {{tmpl $item.FilterLayout $item}}
-          {{end}}
-        </th>
-      {{end}}
-    </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
 {{end}}
 
 {{define "filter_layout_text"}}
@@ -17457,19 +17466,16 @@ td.admin_list_message {
 .admin_stats_pie canvas {
   margin: 0 auto;
 }
+.admin_list_settingsrow {
+  display: none;
+}
+.admin_list_settingsrow-visible {
+  display: table-row;
+}
 .admin_tablesettings {
-  border: 1px solid #eee;
   padding: 0px 10px 10px 10px;
   border-top: none;
   border-bottom: none;
-  display: none;
-}
-.admin_tablesettings-visible {
-  display: block;
-  /*.animated;
-  .fadeInDown;
-  animation-duration: 100ms;
-  animation-iteration-count: 1;*/
 }
 .admin_tablesettings_name {
   display: inline-block;
@@ -18900,6 +18906,8 @@ var List = (function () {
     function List(el, openbutton) {
         var _this = this;
         this.el = el;
+        this.settingsRow = this.el.querySelector(".admin_list_settingsrow");
+        this.settingsRowColumn = this.el.querySelector(".admin_list_settingsrow_column");
         this.settingsEl = this.el.querySelector(".admin_tablesettings");
         this.settingsCheckbox = this.el.querySelector(".admin_list_showmore");
         this.settingsCheckbox.addEventListener("change", this.settingsCheckboxChange.bind(this));
@@ -18964,10 +18972,10 @@ var List = (function () {
     }
     List.prototype.settingsCheckboxChange = function () {
         if (this.settingsCheckbox.checked) {
-            this.settingsEl.classList.add("admin_tablesettings-visible");
+            this.settingsRow.classList.add("admin_list_settingsrow-visible");
         }
         else {
-            this.settingsEl.classList.remove("admin_tablesettings-visible");
+            this.settingsRow.classList.remove("admin_list_settingsrow-visible");
         }
     };
     List.prototype.load = function () {
@@ -19064,6 +19072,8 @@ var List = (function () {
                 filters[i].classList.add("hidden");
             }
         }
+        console.log(columns.entries);
+        this.settingsRowColumn.setAttribute("colspan", Object.keys(columns).length + "");
         this.load();
     };
     List.prototype.colorActiveFilterItems = function () {

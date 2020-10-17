@@ -6295,19 +6295,16 @@ td.admin_list_message {
 .admin_stats_pie canvas {
   margin: 0 auto;
 }
+.admin_list_settingsrow {
+  display: none;
+}
+.admin_list_settingsrow-visible {
+  display: table-row;
+}
 .admin_tablesettings {
-  border: 1px solid #eee;
   padding: 0px 10px 10px 10px;
   border-top: none;
   border-bottom: none;
-  display: none;
-}
-.admin_tablesettings-visible {
-  display: block;
-  /*.animated;
-  .fadeInDown;
-  animation-duration: 100ms;
-  animation-iteration-count: 1;*/
 }
 .admin_tablesettings_name {
   display: inline-block;

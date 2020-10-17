@@ -25,6 +25,8 @@ class List {
 
   progress: HTMLProgressElement;
 
+  settingsRow: HTMLTableRowElement;
+  settingsRowColumn: HTMLTableElement;
   settingsEl: HTMLDivElement;
   settingsCheckbox: HTMLInputElement;
 
@@ -38,6 +40,9 @@ class List {
   //TODO: get filter params from URL
   constructor(el: HTMLDivElement, openbutton: HTMLButtonElement) {
     this.el = el;
+
+    this.settingsRow = this.el.querySelector(".admin_list_settingsrow");
+    this.settingsRowColumn = this.el.querySelector(".admin_list_settingsrow_column");
     this.settingsEl = this.el.querySelector(".admin_tablesettings");
     this.settingsCheckbox = this.el.querySelector(".admin_list_showmore");
     this.settingsCheckbox.addEventListener("change", this.settingsCheckboxChange.bind(this));
@@ -123,9 +128,9 @@ class List {
 
   settingsCheckboxChange() {
     if (this.settingsCheckbox.checked) {
-      this.settingsEl.classList.add("admin_tablesettings-visible");
+      this.settingsRow.classList.add("admin_list_settingsrow-visible");
     } else {
-      this.settingsEl.classList.remove("admin_tablesettings-visible");
+      this.settingsRow.classList.remove("admin_list_settingsrow-visible");
     }
   }
 
@@ -241,6 +246,10 @@ class List {
         filters[i].classList.add("hidden");
       }
     }
+
+    console.log(columns.entries);
+
+    this.settingsRowColumn.setAttribute("colspan", Object.keys(columns).length + "");
 
     this.load();
   }

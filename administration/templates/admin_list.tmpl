@@ -7,6 +7,41 @@
   data-visible-columns="{{.VisibleColumns}}"
   data-items-per-page="{{.ItemsPerPage}}"
 >
+
+  <table class="admin_table admin_list_table">
+    <thead>
+    <tr>
+      {{range $item := .Header}}
+        <th class="admin_list_orderitem{{if $item.CanOrder}} admin_list_orderitem-canorder{{end}}" data-name="{{$item.ColumnName}}">
+          {{- $item.NameHuman -}}
+        </th>
+      {{end}}
+      <th rowspan="2" class="admin_list_lastheadercell">
+        <span class="admin_table_count"></span>
+        <progress class="admin_table_progress"></progress>
+        <label class="admin_list_showmore_label"><input type="checkbox" class="admin_list_showmore">Možnosti</label>
+      </th>
+    </tr>
+    <tr class="admin_list_filterrow">
+      {{range $item := .Header}}
+        <th class="admin_list_filteritem" data-name="{{$item.ColumnName}}" data-filter-layout="{{$item.FilterLayout}}">
+          {{if $item.FilterLayout}}
+            {{tmpl $item.FilterLayout $item}}
+          {{end}}
+        </th>
+      {{end}}
+    </tr>
+    <tr class="admin_list_settingsrow">
+      <td class="admin_list_settingsrow_column">
+        {{template "admin_list_settings" .}}
+      </td>
+    </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+{{end}}
+
+{{define "admin_list_settings"}}
   <div class="admin_tablesettings">
     <h2>Možnosti</h2>
     <h3>{{message .Locale "admin_options_visible"}}</h3>
@@ -42,32 +77,6 @@
     <div class="clear"></div>
   </div>
 
-  <table class="admin_table admin_list_table">
-    <thead>
-    <tr>
-      {{range $item := .Header}}
-        <th class="admin_list_orderitem{{if $item.CanOrder}} admin_list_orderitem-canorder{{end}}" data-name="{{$item.ColumnName}}">
-          {{- $item.NameHuman -}}
-        </th>
-      {{end}}
-      <th rowspan="2" class="admin_list_lastheadercell">
-        <span class="admin_table_count"></span>
-        <progress class="admin_table_progress"></progress>
-        <label class="admin_list_showmore_label"><input type="checkbox" class="admin_list_showmore">Možnosti</label>
-      </th>
-    </tr>
-    <tr class="admin_list_filterrow">
-      {{range $item := .Header}}
-        <th class="admin_list_filteritem" data-name="{{$item.ColumnName}}" data-filter-layout="{{$item.FilterLayout}}">
-          {{if $item.FilterLayout}}
-            {{tmpl $item.FilterLayout $item}}
-          {{end}}
-        </th>
-      {{end}}
-    </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
 {{end}}
 
 {{define "filter_layout_text"}}

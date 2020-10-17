@@ -428,6 +428,8 @@ var List = (function () {
     function List(el, openbutton) {
         var _this = this;
         this.el = el;
+        this.settingsRow = this.el.querySelector(".admin_list_settingsrow");
+        this.settingsRowColumn = this.el.querySelector(".admin_list_settingsrow_column");
         this.settingsEl = this.el.querySelector(".admin_tablesettings");
         this.settingsCheckbox = this.el.querySelector(".admin_list_showmore");
         this.settingsCheckbox.addEventListener("change", this.settingsCheckboxChange.bind(this));
@@ -492,10 +494,10 @@ var List = (function () {
     }
     List.prototype.settingsCheckboxChange = function () {
         if (this.settingsCheckbox.checked) {
-            this.settingsEl.classList.add("admin_tablesettings-visible");
+            this.settingsRow.classList.add("admin_list_settingsrow-visible");
         }
         else {
-            this.settingsEl.classList.remove("admin_tablesettings-visible");
+            this.settingsRow.classList.remove("admin_list_settingsrow-visible");
         }
     };
     List.prototype.load = function () {
@@ -592,6 +594,8 @@ var List = (function () {
                 filters[i].classList.add("hidden");
             }
         }
+        console.log(columns.entries);
+        this.settingsRowColumn.setAttribute("colspan", Object.keys(columns).length + "");
         this.load();
     };
     List.prototype.colorActiveFilterItems = function () {
