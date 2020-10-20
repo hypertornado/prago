@@ -52,6 +52,10 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 	}
 
 	for _, v := range admin.rootActions {
+		if v.Method != "GET" && v.Method != "" {
+			continue
+		}
+
 		var selected bool
 		fullURL := admin.GetURL(v.URL)
 		if request.Request().URL.Path == fullURL {
@@ -59,7 +63,7 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 		}
 
 		adminSection.Items = append(adminSection.Items, MainMenuItem{
-			Name:     v.Name(user.Locale),
+			Name:     v.getName(user.Locale),
 			URL:      fullURL,
 			Selected: selected,
 		})

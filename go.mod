@@ -6,6 +6,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.5.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/aymerick/douceur v0.2.0 // indirect
+	github.com/chonla/roman-number-go v0.0.0-20181101035413-6768129de021 // indirect
 	github.com/chris-ramon/douceur v0.2.0
 	github.com/dghubble/go-twitter v0.0.0-20190719072343-39e5462e111f
 	github.com/dghubble/oauth1 v0.6.0

@@ -5,12 +5,13 @@ class ListFilterRelations {
   previewName: HTMLDivElement;
   previewClose: HTMLDivElement;
   search: HTMLDivElement;
-  suggestions: HTMLDivElement
-  resourceName: string
+  suggestions: HTMLDivElement;
+  relatedResourceName: string;
   dirty: boolean;
   lastChanged: number;
 
   constructor(el: HTMLDivElement, value: any, list: List) {
+    console.log(el);
     this.valueInput = el.querySelector(".filter_relations_hidden");
     this.input = el.querySelector(".filter_relations_search_input");
     this.search = el.querySelector(".filter_relations_search");
@@ -25,7 +26,8 @@ class ListFilterRelations {
     this.preview.classList.add("hidden");
 
     let hiddenEl: HTMLInputElement = el.querySelector("input");
-    this.resourceName = el.getAttribute("data-name");
+
+    this.relatedResourceName = el.querySelector(".admin_table_filter_item-relations").getAttribute("data-related-resource");
 
     this.input.addEventListener("input", () => {
       this.dirty = true;
@@ -49,7 +51,7 @@ class ListFilterRelations {
   loadPreview(value: string) {
     var request = new XMLHttpRequest();
     var adminPrefix = document.body.getAttribute("data-admin-prefix");
-    request.open("GET", adminPrefix + "/_api/preview/" + this.resourceName + "/" + value, true);
+    request.open("GET", adminPrefix + "/_api/preview/" + this.relatedResourceName + "/" + value, true);
 
     request.addEventListener("load", () => {
       if (request.status == 200) {
@@ -93,7 +95,7 @@ class ListFilterRelations {
   getSuggestions(q: string) {
     var request = new XMLHttpRequest();
     var adminPrefix = document.body.getAttribute("data-admin-prefix");
-    request.open("GET", adminPrefix + "/_api/search/" + this.resourceName + "?q=" + encodeURIComponent(q), true);
+    request.open("GET", adminPrefix + "/_api/search/" + this.relatedResourceName + "?q=" + encodeURIComponent(q), true);
 
     request.addEventListener("load", () => {
       if (request.status == 200) {

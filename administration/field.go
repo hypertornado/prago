@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/hypertornado/prago/administration/messages"
@@ -22,6 +23,16 @@ type Field struct {
 	CanOrder   bool
 
 	fieldType FieldType
+}
+
+func (f Field) GetRelatedResourceName() string {
+	relatedTag := f.Tags["prago-relation"]
+	if relatedTag != "" {
+		return strings.ToLower(relatedTag)
+	} else {
+		return f.ColumnName
+	}
+
 }
 
 func newField(f reflect.StructField, order int, fieldTypes map[string]FieldType) *Field {

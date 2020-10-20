@@ -486,7 +486,7 @@ const adminTemplates = `
 {{end}}
 
 {{define "filter_layout_relation"}}
-  <div class="filter_relations admin_table_filter_item admin_table_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+  <div class="filter_relations admin_table_filter_item admin_table_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}" data-related-resource="{{.Field.GetRelatedResourceName}}">
     <input type="hidden" class="filter_relations_hidden">
     <div class="filter_relations_preview">
       <div class="filter_relations_preview_close"></div>
@@ -18741,6 +18741,7 @@ var ImagePicker = (function () {
 var ListFilterRelations = (function () {
     function ListFilterRelations(el, value, list) {
         var _this = this;
+        console.log(el);
         this.valueInput = el.querySelector(".filter_relations_hidden");
         this.input = el.querySelector(".filter_relations_search_input");
         this.search = el.querySelector(".filter_relations_search");
@@ -18751,7 +18752,7 @@ var ListFilterRelations = (function () {
         this.previewClose.addEventListener("click", this.closePreview.bind(this));
         this.preview.classList.add("hidden");
         var hiddenEl = el.querySelector("input");
-        this.resourceName = el.getAttribute("data-name");
+        this.relatedResourceName = el.querySelector(".admin_table_filter_item-relations").getAttribute("data-related-resource");
         this.input.addEventListener("input", function () {
             _this.dirty = true;
             _this.lastChanged = Date.now();
@@ -18770,7 +18771,7 @@ var ListFilterRelations = (function () {
         var _this = this;
         var request = new XMLHttpRequest();
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        request.open("GET", adminPrefix + "/_api/preview/" + this.resourceName + "/" + value, true);
+        request.open("GET", adminPrefix + "/_api/preview/" + this.relatedResourceName + "/" + value, true);
         request.addEventListener("load", function () {
             if (request.status == 200) {
                 _this.renderPreview(JSON.parse(request.response));
@@ -18810,7 +18811,7 @@ var ListFilterRelations = (function () {
         var _this = this;
         var request = new XMLHttpRequest();
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        request.open("GET", adminPrefix + "/_api/search/" + this.resourceName + "?q=" + encodeURIComponent(q), true);
+        request.open("GET", adminPrefix + "/_api/search/" + this.relatedResourceName + "?q=" + encodeURIComponent(q), true);
         request.addEventListener("load", function () {
             if (request.status == 200) {
                 _this.renderSuggestions(JSON.parse(request.response));

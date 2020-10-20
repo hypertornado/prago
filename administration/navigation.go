@@ -8,6 +8,7 @@ import (
 )
 
 type adminNavigationPage struct {
+	Name         string
 	Admin        *Administration
 	Navigation   adminItemNavigation
 	PageTemplate string
@@ -47,6 +48,7 @@ func renderNavigationPageNoLogin(request prago.Request, page adminNavigationPage
 func renderNavigation(request prago.Request, page adminNavigationPage, viewName string) {
 
 	var name string
+	name = page.Name
 	for _, v := range page.Navigation.Tabs {
 		if v.Selected {
 			name = v.Name
@@ -249,7 +251,16 @@ func createAdminHandler(action, templateName string, dataGenerator func(Resource
 			data = dataGenerator(resource, request, user)
 		}
 
+		adminNavigation := resource.Admin.getAdminNavigation(user, action)
+		var name string
+		for _, v := range adminNavigation.Tabs {
+			if v.Selected {
+				name = v.Name
+			}
+		}
+
 		renderNavigationPage(request, adminNavigationPage{
+			Name:  name,
 			Admin: resource.Admin,
 			//Navigation:   resource.Admin.getAdminNavigation(user, action),
 			PageTemplate: templateName,
