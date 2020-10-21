@@ -28,6 +28,17 @@ type MainMenuItem struct {
 	Selected bool
 }
 
+func (menu MainMenu) GetTitle() string {
+	for _, v := range menu.Sections {
+		for _, v2 := range v.Items {
+			if v2.Selected {
+				return v2.Name
+			}
+		}
+	}
+	return ""
+}
+
 func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 	user := GetUser(request)
 

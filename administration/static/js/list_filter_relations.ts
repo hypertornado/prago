@@ -11,7 +11,6 @@ class ListFilterRelations {
   lastChanged: number;
 
   constructor(el: HTMLDivElement, value: any, list: List) {
-    console.log(el);
     this.valueInput = el.querySelector(".filter_relations_hidden");
     this.input = el.querySelector(".filter_relations_search_input");
     this.search = el.querySelector(".filter_relations_search");

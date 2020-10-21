@@ -55,6 +55,11 @@ func renderNavigation(request prago.Request, page adminNavigationPage, viewName 
 		}
 	}
 
+	if name == "" {
+		mainMenu := request.GetData("main_menu").(MainMenu)
+		name = mainMenu.GetTitle()
+	}
+
 	request.SetData("admin_title", name)
 	request.SetData("admin_yield", "admin_navigation_page")
 	request.SetData("admin_page", page)

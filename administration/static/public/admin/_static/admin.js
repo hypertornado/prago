@@ -263,7 +263,6 @@ var ImagePicker = (function () {
 var ListFilterRelations = (function () {
     function ListFilterRelations(el, value, list) {
         var _this = this;
-        console.log(el);
         this.valueInput = el.querySelector(".filter_relations_hidden");
         this.input = el.querySelector(".filter_relations_search_input");
         this.search = el.querySelector(".filter_relations_search");
