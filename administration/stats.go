@@ -340,7 +340,8 @@ func (resource *Resource) getListStatsTableInt(field *Field, user User, params u
 
 	whereParams := query.query.whereParams
 
-	q := fmt.Sprintf("SELECT MAX(%s), MIN(%s), AVG(%s) FROM %s %s;",
+	q := fmt.Sprintf("SELECT MAX(%s), MIN(%s), AVG(%s), SUM(%s) FROM %s %s;",
+		field.ColumnName,
 		field.ColumnName,
 		field.ColumnName,
 		field.ColumnName,
@@ -356,9 +357,10 @@ func (resource *Resource) getListStatsTableInt(field *Field, user User, params u
 	var max float64
 	var min float64
 	var avg float64
+	var sum float64
 
 	for rows.Next() {
-		rows.Scan(&max, &min, &avg)
+		rows.Scan(&max, &min, &avg, &sum)
 	}
 
 	table = append(table, ListStatsRow{
@@ -396,11 +398,16 @@ func (resource *Resource) getListStatsTableInt(field *Field, user User, params u
 			Count: utils.HumanizeFloat(median, user.Locale),
 		},
 	})
-
 	table = append(table, ListStatsRow{
 		Name: "maximum",
 		Description: ListStatsDescription{
 			Count: utils.HumanizeFloat(max, user.Locale),
+		},
+	})
+	table = append(table, ListStatsRow{
+		Name: "součet",
+		Description: ListStatsDescription{
+			Count: utils.HumanizeFloat(sum, user.Locale),
 		},
 	})
 
