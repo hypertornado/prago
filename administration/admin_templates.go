@@ -811,19 +811,21 @@ const adminTemplates = `
 
 
 {{end}}{{define "admin_tabs"}}
-  <div class="admin_navigation_tabs">
-    <div class="admin_navigation_tabs_content">
-    {{$tabs := .}}
-    {{range $i, $item := .}}
-        {{if ne $i 0}}
-          <div class="admin_navigation_tabdivider{{if (istabvisible $tabs $i)}} admin_navigation_tabdivider-visible{{end}}"></div>
-        {{end}}
-        <a href="{{$item.URL}}" class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
-            {{$item.Name}}
-        </a>
-    {{end}}
+  {{$tabs := .}}
+  {{if gt (len $tabs) 0}}
+    <div class="admin_navigation_tabs">
+      <div class="admin_navigation_tabs_content">
+      {{range $i, $item := .}}
+          {{if ne $i 0}}
+            <div class="admin_navigation_tabdivider{{if (istabvisible $tabs $i)}} admin_navigation_tabdivider-visible{{end}}"></div>
+          {{end}}
+          <a href="{{$item.URL}}" class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
+              {{$item.Name}}
+          </a>
+      {{end}}
+      </div>
     </div>
-  </div>
+  {{end}}
 {{end}}{{define "admin_views"}}
   {{range $item := .}}
     {{template "admin_view" $item}}
@@ -18317,9 +18319,6 @@ td.pagination {
   padding: 0px 4px;
   justify-content: center;
 }
-.admin_navigation_tabs {
-  margin: 0px 5px 5px 0px;
-}
 .admin_navigation_tab {
   white-space: nowrap;
   overflow: hidden;
@@ -18741,7 +18740,6 @@ var ImagePicker = (function () {
 var ListFilterRelations = (function () {
     function ListFilterRelations(el, value, list) {
         var _this = this;
-        console.log(el);
         this.valueInput = el.querySelector(".filter_relations_hidden");
         this.input = el.querySelector(".filter_relations_search_input");
         this.search = el.querySelector(".filter_relations_search");

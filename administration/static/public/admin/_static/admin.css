@@ -7146,9 +7146,6 @@ td.pagination {
   padding: 0px 4px;
   justify-content: center;
 }
-.admin_navigation_tabs {
-  margin: 0px 5px 5px 0px;
-}
 .admin_navigation_tab {
   white-space: nowrap;
   overflow: hidden;
