@@ -51,10 +51,10 @@ type listContent struct {
 	//TotalCount    int64
 	TotalCountStr string
 	Rows          []listRow
-	Pagination    pagination
 	Colspan       int64
 	Stats         *ListStats
 	Message       string
+	Pagination    Pagination
 }
 
 type listRow struct {
@@ -77,16 +77,21 @@ type listItemActions struct {
 	MenuButtons     []buttonData
 }
 
-type pagination struct {
-	Pages []page
+type Pagination struct {
+	TotalPages   int64
+	SelectedPage int64
 }
 
-func (p pagination) IsEmpty() bool {
+/*type pagination struct {
+	Pages []page
+}*/
+
+/*func (p pagination) IsEmpty() bool {
 	if len(p.Pages) <= 1 {
 		return true
 	}
 	return false
-}
+}*/
 
 type page struct {
 	Page    int64
@@ -406,7 +411,12 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 		currentPage = 1
 	}
 
-	if totalPages >= 1 {
+	ret.Pagination = Pagination{
+		TotalPages:   totalPages,
+		SelectedPage: int64(currentPage),
+	}
+
+	/*if totalPages >= 1 {
 		for i := int64(1); i <= totalPages; i++ {
 			p := page{
 				Page: i,
@@ -417,7 +427,7 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 
 			ret.Pagination.Pages = append(ret.Pagination.Pages, p)
 		}
-	}
+	}*/
 
 	q = resource.addFilterParamsToQuery(q, params)
 	q = q.Offset((int64(currentPage) - 1) * itemsPerPage)

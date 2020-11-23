@@ -361,7 +361,6 @@ const adminTemplates = `
                     {{end}}
                 </div>
             </div>
-
             <div class="admin_bottom">
                 {{template "admin_flash" .}}
                 <div class="admin_content">
@@ -577,19 +576,21 @@ const adminTemplates = `
       </td>
     </tr>
   {{end}}
-  {{if not .admin_list.Pagination.IsEmpty}}
-    <tr>
-      <td colspan="{{.admin_list.Colspan}}" class="pagination">
-        {{range $page := .admin_list.Pagination.Pages}}
-          {{if $page.Current}}
-            <span class="pagination_page_current">{{$page.Page}}</span>
-          {{else}}
-            <a href="#" class="pagination_page" data-page="{{$page.Page}}">{{$page.Page}}</a>
-          {{end}}
+  <tr>
+    <td colspan="{{.admin_list.Colspan}}" class="pagination" data-total="{{.admin_list.Pagination.TotalPages}}" data-selected="{{.admin_list.Pagination.SelectedPage}}">
+
+      {{if false}}
+      {{range $page := .admin_list.Pagination.Pages}}
+        {{if $page.Current}}
+          <span class="pagination_page_current">{{$page.Page}}</span>
+        {{else}}
+          <a href="#" class="pagination_page" data-page="{{$page.Page}}">{{$page.Page}}</a>
         {{end}}
-      </td>
-    </tr>
-  {{end}}
+      {{end}}
+      {{end}}
+
+    </td>
+  </tr>
 </div>
 {{end}}
 {{define "admin_mainmenu"}}
@@ -17587,7 +17588,6 @@ td.admin_list_message {
   flex-grow: 0;
   flex-shrink: 0;
   background: white;
-  padding: 5px 0px 0px 0px;
   display: block;
 }
 .admin_header_container {

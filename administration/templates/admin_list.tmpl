@@ -175,18 +175,9 @@
       </td>
     </tr>
   {{end}}
-  {{if not .admin_list.Pagination.IsEmpty}}
-    <tr>
-      <td colspan="{{.admin_list.Colspan}}" class="pagination">
-        {{range $page := .admin_list.Pagination.Pages}}
-          {{if $page.Current}}
-            <span class="pagination_page_current">{{$page.Page}}</span>
-          {{else}}
-            <a href="#" class="pagination_page" data-page="{{$page.Page}}">{{$page.Page}}</a>
-          {{end}}
-        {{end}}
-      </td>
-    </tr>
-  {{end}}
+  <tr>
+    <td colspan="{{.admin_list.Colspan}}" class="pagination" data-total="{{.admin_list.Pagination.TotalPages}}" data-selected="{{.admin_list.Pagination.SelectedPage}}">
+    </td>
+  </tr>
 </div>
 {{end}}
