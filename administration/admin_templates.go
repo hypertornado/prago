@@ -578,17 +578,6 @@ const adminTemplates = `
   {{end}}
   <tr>
     <td colspan="{{.admin_list.Colspan}}" class="pagination" data-total="{{.admin_list.Pagination.TotalPages}}" data-selected="{{.admin_list.Pagination.SelectedPage}}">
-
-      {{if false}}
-      {{range $page := .admin_list.Pagination.Pages}}
-        {{if $page.Current}}
-          <span class="pagination_page_current">{{$page.Page}}</span>
-        {{else}}
-          <a href="#" class="pagination_page" data-page="{{$page.Page}}">{{$page.Page}}</a>
-        {{end}}
-      {{end}}
-      {{end}}
-
     </td>
   </tr>
 </div>
@@ -19089,7 +19078,35 @@ var List = (function () {
             }
         }
     };
+    List.prototype.paginationChange = function (e) {
+        var el = e.target;
+        var page = parseInt(el.getAttribute("data-page"));
+        this.page = page;
+        this.load();
+        e.preventDefault();
+        return false;
+    };
     List.prototype.bindPagination = function () {
+        var paginationEl = this.el.querySelector(".pagination");
+        console.log(paginationEl);
+        var totalPages = parseInt(paginationEl.getAttribute("data-total"));
+        var selectedPage = parseInt(paginationEl.getAttribute("data-selected"));
+        for (var i = 1; i <= totalPages; i++) {
+            var pEl = document.createElement("a");
+            pEl.setAttribute("href", "#");
+            pEl.textContent = i + "";
+            if (i == selectedPage) {
+                pEl.classList.add("pagination_page_current");
+            }
+            else {
+                pEl.classList.add("pagination_page");
+                pEl.setAttribute("data-page", i + "");
+                pEl.addEventListener("click", this.paginationChange.bind(this));
+            }
+            paginationEl.appendChild(pEl);
+        }
+    };
+    List.prototype.bindPaginationOLD = function () {
         var _this = this;
         var pages = this.el.querySelectorAll(".pagination_page");
         for (var i = 0; i < pages.length; i++) {
