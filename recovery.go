@@ -42,12 +42,6 @@ func recoveryFunction(p Request, recoveryData interface{}) {
 		duration,
 		string(debug.Stack()),
 	)
-
-	/*p.Log().WithField("uuid", p.uuid).
-	WithField("message", recoveryData).
-	WithField("stack", "\n"+string(debug.Stack())).
-	WithField("took", duration).
-	Errorln("500 - application error")*/
 }
 
 const recoveryTmpl = `

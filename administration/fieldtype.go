@@ -108,9 +108,6 @@ func (admin *Administration) addDefaultFieldTypes() {
 			if tm.IsZero() {
 				return ""
 			}
-			/*if isZeroTime(tm) {
-				return ""
-			}*/
 			return tm.Format("2006-01-02 15:04")
 		},
 	})

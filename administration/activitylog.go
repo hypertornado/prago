@@ -85,8 +85,7 @@ func (admin *Administration) getHistory(resource *Resource, itemID int64) histor
 			ItemURL:     resource.GetURL(fmt.Sprintf("%d", v.ItemID)),
 			UserName:    username,
 			UserURL:     userurl,
-			//CreatedAt:   v.CreatedAt.Format("2006-01-02 15:04:05"),
-			CreatedAt: messages.Messages.Timestamp(user.Locale, v.CreatedAt, true),
+			CreatedAt:   messages.Messages.Timestamp(user.Locale, v.CreatedAt, true),
 		})
 	}
 	return ret

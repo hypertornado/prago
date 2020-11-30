@@ -486,16 +486,10 @@ func initResourceActions(a *Administration, resource *Resource) {
 		actionList(resource),
 		actionNew(resource.CanCreate),
 		actionCreate(resource.CanCreate),
-		//actionStats(resource.CanView),
-		//actionExport(resource.CanExport),
-		//actionDoExport(resource.CanExport),
 	}
 	if resource.ActivityLog {
 		resourceActions = append(resourceActions, actionHistory(resource.CanEdit))
 	}
-	/*for _, v := range resource.relations {
-		resource.bindRelationActions(v)
-	}*/
 	resource.actions = append(resourceActions, resource.actions...)
 	for _, v := range resource.actions {
 		bindResourceAction(a, resource, v)
