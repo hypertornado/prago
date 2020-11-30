@@ -376,16 +376,9 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 	if err != nil {
 		return
 	}
-	//ret.Count = count
 
-	var totalCount int64
-	resource.newItem(&item)
-	countQuery = admin.Query()
-	totalCount, err = countQuery.Count(item)
-	if err != nil {
-		return
-	}
-	//ret.TotalCount = totalCount
+	var totalCount int64 = resource.count()
+	must(resource.updateCachedCount())
 
 	if count == totalCount {
 		ret.TotalCountStr = messages.Messages.ItemsCount(count, user.Locale)
@@ -396,7 +389,7 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 	var itemsPerPage = resource.ItemsPerPage
 	if params.Get("_pagesize") != "" {
 		pageSize, err := strconv.Atoi(params.Get("_pagesize"))
-		if err == nil && pageSize > 0 && pageSize <= 100000 {
+		if err == nil && pageSize > 0 && pageSize <= 1000000 {
 			itemsPerPage = int64(pageSize)
 		}
 	}

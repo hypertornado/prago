@@ -48,23 +48,6 @@ func actionList(resource *Resource) Action {
 					panic(err)
 				}
 				request.RenderJSON(listDataJSON)
-
-				//request.Response().Header().Set("X-Count-Str", listData.TotalCountStr)
-
-				/*buf := new(bytes.Buffer)
-				err = resource.Admin.App.ExecuteTemplate(buf, "admin_list_cells", map[string]interface{}{
-					"admin_list": listData,
-				})
-				if err != nil {
-					panic(err)
-				}
-
-				ret := map[string]interface{}{
-					"Content": string(buf.Bytes()),
-				}
-
-				request.RenderJSON(ret)*/
-
 				return
 			}
 
@@ -185,6 +168,7 @@ func actionCreate(permission Permission) Action {
 				resource.Admin.createNewActivityLog(resource, user, item)
 			}
 
+			must(resource.updateCachedCount())
 			AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_item_created"))
 			request.Redirect(resource.GetItemURL(item, ""))
 		},
@@ -403,6 +387,7 @@ func actionDoDelete(permission Permission) Action {
 				resource.Admin.createDeleteActivityLog(resource, user, int64(id), item)
 			}
 
+			must(resource.updateCachedCount())
 			AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_item_deleted"))
 			request.Redirect(resource.GetURL(""))
 		},

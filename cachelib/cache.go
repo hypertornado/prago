@@ -1,6 +1,7 @@
 package cachelib
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -14,7 +15,6 @@ type Cache struct {
 }
 
 type cacheItem struct {
-	id        string
 	updatedAt time.Time
 	updating  bool
 	value     interface{}
@@ -42,6 +42,13 @@ func (ci cacheItem) getValue() interface{} {
 	ci.mutex.RLock()
 	defer ci.mutex.RUnlock()
 	return ci.value
+}
+
+func (ci cacheItem) setValue(val interface{}) {
+	ci.mutex.Lock()
+	defer ci.mutex.Unlock()
+	ci.value = val
+	ci.updatedAt = time.Now()
 }
 
 func (ci *cacheItem) reloadValue() {
@@ -80,7 +87,7 @@ func (c *Cache) getItem(name string) *cacheItem {
 
 func (c *Cache) putItem(name string, createFn func() interface{}) *cacheItem {
 	item := &cacheItem{
-		id:        name,
+		//id:        name,
 		updatedAt: time.Now(),
 		value:     createFn(),
 		createFn:  createFn,
@@ -107,6 +114,18 @@ func (c *Cache) Load(cacheName string, createFn func() interface{}) interface{} 
 		return item.getValue()
 	}
 	return item.getValue()
+}
+
+func (c *Cache) Set(cacheName string, value interface{}) error {
+	item := c.getItem(cacheName)
+	if item == nil {
+		return errors.New("can't find item in cache")
+	}
+	item.mutex.Lock()
+	defer item.mutex.Unlock()
+	item.value = value
+	item.updatedAt = time.Now()
+	return nil
 }
 
 func (c *Cache) Clear() {

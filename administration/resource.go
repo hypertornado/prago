@@ -181,17 +181,29 @@ func (resource Resource) count() int64 {
 	return count
 }
 
+func (resource Resource) cachedCountName() string {
+	return fmt.Sprintf("resource_count-%s", resource.ID)
+}
+
 func (resource Resource) getCachedCount() int64 {
-	return resource.Admin.cache.Load(fmt.Sprintf("resource_count-%s", resource.ID), func() interface{} {
+	return resource.Admin.cache.Load(resource.cachedCountName(), func() interface{} {
 		return resource.count()
 	}).(int64)
+}
+
+func (resource Resource) setCachedCount(value int64) error {
+	return resource.Admin.cache.Set(resource.cachedCountName(), value)
+}
+
+func (resource Resource) updateCachedCount() error {
+	return resource.Admin.cache.Set(resource.cachedCountName(), resource.count())
 }
 
 func (resource Resource) getPaginationData(user User) (ret []ListPaginationData) {
 	var ints []int64
 	var used bool
 
-	for _, v := range []int64{10, 20, 100, 200, 500, 1000, 2000, 5000, 10000} {
+	for _, v := range []int64{10, 20, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000} {
 		if !used {
 			if v == resource.ItemsPerPage {
 				used = true
