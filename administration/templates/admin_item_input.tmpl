@@ -80,7 +80,7 @@
         <input type="file" id="{{.UUID}}" accept="{{.Data}}" multiple class="form_watcher">
       </label>
     </div>
-    <progress></progress>
+    <progress class="progress"></progress>
   </div>
 {{end}}
 
@@ -139,7 +139,7 @@
 {{define "admin_item_relation"}}
 <div class="admin_item_relation" data-relation="{{.Data}}">
   <input type="hidden" name="{{.Name}}" value="{{.Value}}">
-  <progress></progress>
+  <progress class="progress"></progress>
   <div class="admin_item_relation_preview hidden"></div>
   <div class="admin_item_relation_change hidden">
     <div class="btn btn-small admin_item_relation_change_btn">×</div>

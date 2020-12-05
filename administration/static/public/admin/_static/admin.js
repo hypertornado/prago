@@ -1798,6 +1798,34 @@ var RelationList = (function () {
     };
     return RelationList;
 }());
+function bindTaskMonitor() {
+    var el = document.querySelector(".taskmonitorcontainer");
+    if (el) {
+        new TaskMonitor(el);
+    }
+}
+var TaskMonitor = (function () {
+    function TaskMonitor(el) {
+        this.el = el;
+        window.setInterval(this.load.bind(this), 1000);
+    }
+    TaskMonitor.prototype.load = function () {
+        var _this = this;
+        var request = new XMLHttpRequest();
+        request.open("GET", "/admin/_tasks/running", true);
+        request.addEventListener("load", function () {
+            _this.el.innerHTML = "";
+            if (request.status == 200) {
+                _this.el.innerHTML = request.response;
+            }
+            else {
+                console.error("error while loading list");
+            }
+        });
+        request.send();
+    };
+    return TaskMonitor;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();
@@ -1815,6 +1843,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindEshopControl();
     bindMainMenu();
     bindRelationList();
+    bindTaskMonitor();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");

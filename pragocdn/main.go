@@ -183,7 +183,6 @@ func start(app *prago.App) {
 		}
 
 		//https://gist.github.com/the42/1956518
-
 		switch errCode {
 		case 404:
 			render404(request)

@@ -1,0 +1,29 @@
+{{define "taskmonitor"}}
+    <div class="taskmonitor">
+        {{range $item := .taskmonitor.Items}}
+            <div class="taskmonitor_task">
+                <div class="taskmonitor_task_name">
+                    {{if $item.IsDone}}<span class="taskmonitor_task_done">✅</span>{{end}}
+                    {{$item.TaskName}}
+                    <span class="taskmonitor_task_uuid">{{$item.UUID}}</span>
+                </div>
+                {{if not $item.IsDone}}
+                    <div class="taskmonitor_task_progress">
+                        <progress {{if $item.ProgressDescription}}value="{{$item.Progress}}" max="100"{{end}}></progress> {{$item.ProgressDescription}}
+                    </div>
+                {{end}}
+                <div class="taskmonitor_task_status">
+                    {{if $item.StartedStr}}
+                        Zahájeno: {{$item.StartedStr}},
+                    {{end}}
+                    {{if $item.EndedStr}}
+                        Dokončeno: {{$item.EndedStr}},
+                    {{end}}
+                    {{if $item.Status}}
+                        Status: {{$item.Status}}
+                    {{end}}
+                </div>
+            </div>
+        {{end}}
+    </div>
+{{end}}

@@ -3,8 +3,9 @@ package administration
 import (
 	"database/sql"
 	"fmt"
-	"github.com/hypertornado/prago"
 	"strings"
+
+	"github.com/hypertornado/prago"
 )
 
 func (a *Administration) bindMigrationCommand(app *prago.App) {
@@ -25,7 +26,7 @@ func (a *Administration) migrate(verbose bool) error {
 	if err != nil {
 		return err
 	}
-	for _, resource := range a.Resources {
+	for _, resource := range a.resources {
 		tables[resource.TableName] = false
 		err := resource.migrate(verbose)
 		if err != nil {
@@ -171,7 +172,7 @@ func getTableDescription(db dbIface, tableName string) (map[string]*mysqlColumn,
 }
 
 func (admin *Administration) unsafeDropTables() error {
-	for _, resource := range admin.Resources {
+	for _, resource := range admin.resources {
 		err := resource.unsafeDropTable()
 		if err != nil {
 			return err

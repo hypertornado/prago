@@ -5431,7 +5431,7 @@ p {
   margin: 0px;
   margin-bottom: 0.5em;
 }
-progress {
+.progress {
   display: block;
   margin: 5px auto;
 }
@@ -6074,7 +6074,7 @@ select.admin_timestamp_minute {
 .admin_item_view_place {
   height: 200px;
 }
-progress {
+.progress {
   padding: 4px;
   margin: 0px auto;
   line-height: 100px;
@@ -7296,4 +7296,27 @@ a.mainmenu_logo:hover {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.taskmonitor_task {
+  border-bottom: 1px solid #eee;
+  padding: 10px 5px;
+}
+.taskmonitor_task_name {
+  font-size: 1.2rem;
+  line-height: 1.3em;
+}
+.taskmonitor_task_uuid {
+  font-size: 0.9rem;
+  line-height: 1.3em;
+  color: #aaa;
+}
+.taskmonitor_task_progress {
+  font-size: 0.9rem;
+  line-height: 1.3em;
+  color: #333;
+}
+.taskmonitor_task_status {
+  font-size: 0.9rem;
+  line-height: 1.3em;
+  color: #333;
 }

@@ -16,7 +16,6 @@ import (
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/administration/messages"
 	"github.com/hypertornado/prago/build"
-	"github.com/hypertornado/prago/cachelib"
 	"github.com/hypertornado/prago/utils"
 )
 
@@ -27,10 +26,9 @@ var ErrItemNotFound = errors.New("item not found")
 type Administration struct {
 	App              *prago.App
 	Logo             string
-	Background       string
-	Prefix           string
+	prefix           string
 	HumanName        string
-	Resources        []*Resource
+	resources        []*Resource
 	resourceMap      map[reflect.Type]*Resource
 	resourceNameMap  map[string]*Resource
 	accessController *prago.Controller
@@ -39,7 +37,6 @@ type Administration struct {
 	db               *sql.DB
 	resourcesInited  bool
 
-	//sendgridClient *sendgrid.Client
 	sendgridKey  string
 	noReplyEmail string
 
@@ -53,17 +50,15 @@ type Administration struct {
 	roles       map[string]map[string]bool
 
 	activityListeners []func(ActivityLog)
-
-	cache *cachelib.Cache
+	taskManager       *taskManager
 }
 
 //NewAdministration creates new administration on prefix url with name
 func NewAdministration(app *prago.App, initFunction func(*Administration)) *Administration {
 	admin := &Administration{
 		App:              app,
-		Prefix:           "/admin",
 		HumanName:        app.AppName,
-		Resources:        []*Resource{},
+		prefix:           "/admin",
 		resourceMap:      make(map[reflect.Type]*Resource),
 		resourceNameMap:  make(map[string]*Resource),
 		accessController: app.MainController().SubController(),
@@ -71,13 +66,11 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		sendgridKey:  app.Config.GetStringWithFallback("sendgridApi", ""),
 		noReplyEmail: app.Config.GetStringWithFallback("noReplyEmail", ""),
 
-		fieldTypes:  make(map[string]FieldType),
-		javascripts: []string{},
-		css:         []string{},
-		roles:       make(map[string]map[string]bool),
-
-		cache: cachelib.NewCache(),
+		fieldTypes: make(map[string]FieldType),
+		roles:      make(map[string]map[string]bool),
 	}
+
+	admin.taskManager = newTaskManager(admin)
 
 	db, err := connectMysql(
 		app.Config.GetStringWithFallback("dbUser", ""),
@@ -103,8 +96,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	admin.accessController.AddBeforeAction(func(request prago.Request) {
 		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
 
-		request.SetData("admin_header_prefix", admin.Prefix)
-		request.SetData("background", admin.Background)
+		request.SetData("admin_header_prefix", admin.prefix)
 		request.SetData("javascripts", admin.javascripts)
 		request.SetData("css", admin.css)
 	})
@@ -121,15 +113,14 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		request.SetData("google", googleAPIKey)
 	})
 
-	bindDBBackupCron(admin.App)
 	bindAPI(admin)
-
 	admin.bindMigrationCommand(admin.App)
 	admin.initTemplates(admin.App)
 	must(admin.App.LoadTemplateFromString(adminTemplates))
 	bindSystemstats(admin)
 	admin.initRootActions()
 	admin.initAutoRelations()
+	bindDBBackupCron(admin)
 
 	admin.AdminController.AddAroundAction(func(request prago.Request, next func()) {
 		session := request.GetData("session").(*sessions.Session)
@@ -210,7 +201,10 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 		request.Response().Write([]byte(adminCSS))
 	})
 
-	for _, resource := range admin.Resources {
+	admin.taskManager.init()
+	admin.taskManager.startCRON()
+
+	for _, resource := range admin.resources {
 		admin.initResource(resource)
 	}
 
@@ -228,7 +222,7 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 
 //GetURL gets url
 func (admin Administration) GetURL(suffix string) string {
-	ret := admin.Prefix
+	ret := admin.prefix
 	if len(suffix) > 0 {
 		ret += "/" + suffix
 	}
@@ -293,7 +287,7 @@ func (admin *Administration) initRootActions() {
 }
 
 func (admin *Administration) initAutoRelations() {
-	for _, v := range admin.Resources {
+	for _, v := range admin.resources {
 		v.initAutoRelations()
 	}
 }
@@ -346,39 +340,41 @@ func render404(request prago.Request) {
 	request.RenderViewWithCode("admin_layout", 404)
 }
 
-func bindDBBackupCron(app *prago.App) {
-	app.AddCronTask("backup db", func() {
-		err := build.BackupApp(app)
-		if err != nil {
-			app.Log().Println("Error while creating backup:", err)
-		}
-	}, func(t time.Time) time.Time {
-		return t.AddDate(0, 0, 1)
-	})
+func bindDBBackupCron(admin *Administration) {
+	app := admin.App
 
-	app.AddCronTask("remove old backups", func() {
-		app.Log().Println("Removing old backups")
-		deadline := time.Now().AddDate(0, 0, -7)
-		backupPath := app.DotPath() + "/backups"
-		files, err := ioutil.ReadDir(backupPath)
-		if err != nil {
-			app.Log().Println("error while removing old backups:", err)
-			return
-		}
+	admin.NewTask("backup_db").SetHandler(
+		func(tr *TaskActivity) {
+			err := build.BackupApp(app)
+			if err != nil {
+				app.Log().Println("Error while creating backup:", err)
+			}
+		}).RepeatEvery(24 * time.Hour)
 
-		for _, file := range files {
-			if file.ModTime().Before(deadline) {
-				removePath := backupPath + "/" + file.Name()
-				err := os.RemoveAll(removePath)
-				if err != nil {
-					app.Log().Println("Error while removing old backup file:", err)
+	admin.NewTask("remove_old_backups").SetHandler(
+		func(tr *TaskActivity) {
+			app.Log().Println("Removing old backups")
+			deadline := time.Now().AddDate(0, 0, -7)
+			backupPath := app.DotPath() + "/backups"
+			files, err := ioutil.ReadDir(backupPath)
+			if err != nil {
+				app.Log().Println("error while removing old backups:", err)
+				return
+			}
+
+			for _, file := range files {
+				if file.ModTime().Before(deadline) {
+					removePath := backupPath + "/" + file.Name()
+					err := os.RemoveAll(removePath)
+					if err != nil {
+						app.Log().Println("Error while removing old backup file:", err)
+					}
 				}
 			}
-		}
-		app.Log().Println("Old backups removed")
-	}, func(t time.Time) time.Time {
-		return t.Add(1 * time.Hour)
-	})
+			app.Log().Println("Old backups removed")
+
+		}).RepeatEvery(1 * time.Hour)
+
 }
 
 func columnName(fieldName string) string {

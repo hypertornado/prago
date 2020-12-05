@@ -243,7 +243,7 @@ const adminTemplates = `
         <input type="file" id="{{.UUID}}" accept="{{.Data}}" multiple class="form_watcher">
       </label>
     </div>
-    <progress></progress>
+    <progress class="progress"></progress>
   </div>
 {{end}}
 
@@ -302,7 +302,7 @@ const adminTemplates = `
 {{define "admin_item_relation"}}
 <div class="admin_item_relation" data-relation="{{.Data}}">
   <input type="hidden" name="{{.Name}}" value="{{.Value}}">
-  <progress></progress>
+  <progress class="progress"></progress>
   <div class="admin_item_relation_preview hidden"></div>
   <div class="admin_item_relation_change hidden">
     <div class="btn btn-small admin_item_relation_change_btn">×</div>
@@ -419,7 +419,7 @@ const adminTemplates = `
       {{end}}
       <th rowspan="2" class="admin_list_lastheadercell">
         <span class="admin_table_count"></span>
-        <progress class="admin_table_progress"></progress>
+        <progress class="progress admin_table_progress"></progress>
         <label class="admin_list_showmore_label"><input type="checkbox" class="admin_list_showmore">Možnosti</label>
       </th>
     </tr>
@@ -816,6 +816,26 @@ const adminTemplates = `
       </div>
     </div>
   {{end}}
+{{end}}{{define "admin_tasks"}}
+    <div class="admin_box">        
+        <h1>{{message .currentuser.Locale "tasks"}}</h1>
+        <h2>Spuštěné úlohy</h2>
+
+        <div class="taskmonitorcontainer">{{template "taskmonitor" .}}</div>
+
+        {{$token := ._csrfToken}}
+
+        <h2>Spustit úlohu</h2>
+        {{range $task := .tasks}}
+            <form method="POST" action="_tasks/runtask">
+                <input type="hidden" name="id" value="{{$task.ID}}">
+                <input type="hidden" name="csrf" value="{{$token}}">
+                <input type="submit" value="{{$task.Name}}" class="btn">
+            </form>
+            <br>
+        {{end}}
+
+    </div>
 {{end}}{{define "admin_views"}}
   {{range $item := .}}
     {{template "admin_view" $item}}
@@ -915,13 +935,13 @@ const adminTemplates = `
 
 {{define "admin_item_view_image"}}
   <div class="admin_item_view_image_content" data-images="{{.}}">
-    <progress value="" max=""></progress>
+    <progress class="progress" value="" max=""></progress>
   </div>
 {{end}}
 
 {{define "admin_item_view_place"}}
   <div class="admin_item_view_place" data-value="{{.}}">
-    <progress value="" max=""></progress>
+    <progress class="progress" value="" max=""></progress>
   </div>
 {{end}}
 
@@ -952,7 +972,7 @@ const adminTemplates = `
     <div class="admin_relationlist_target">
     </div>
     <div class="admin_relationlist_loading hidden">
-      <progress class="admin_table_progress"></progress>
+      <progress class="progress admin_table_progress"></progress>
     </div>
     <div class="admin_relationlist_more hidden">
       <div class="btn">Nahrát více</div>
@@ -11157,6 +11177,34 @@ exports.locate = locate;
 <input type="submit" value="Přihlásit se k odběru newsletteru">
 <input type="hidden" name="csrf" value="{{.csrf}}">
 </form>
+{{end}}{{define "taskmonitor"}}
+    <div class="taskmonitor">
+        {{range $item := .taskmonitor.Items}}
+            <div class="taskmonitor_task">
+                <div class="taskmonitor_task_name">
+                    {{if $item.IsDone}}<span class="taskmonitor_task_done">✅</span>{{end}}
+                    {{$item.TaskName}}
+                    <span class="taskmonitor_task_uuid">{{$item.UUID}}</span>
+                </div>
+                {{if not $item.IsDone}}
+                    <div class="taskmonitor_task_progress">
+                        <progress {{if $item.ProgressDescription}}value="{{$item.Progress}}" max="100"{{end}}></progress> {{$item.ProgressDescription}}
+                    </div>
+                {{end}}
+                <div class="taskmonitor_task_status">
+                    {{if $item.StartedStr}}
+                        Zahájeno: {{$item.StartedStr}},
+                    {{end}}
+                    {{if $item.EndedStr}}
+                        Dokončeno: {{$item.EndedStr}},
+                    {{end}}
+                    {{if $item.Status}}
+                        Status: {{$item.Status}}
+                    {{end}}
+                </div>
+            </div>
+        {{end}}
+    </div>
 {{end}}`
 
 
@@ -16594,7 +16642,7 @@ p {
   margin: 0px;
   margin-bottom: 0.5em;
 }
-progress {
+.progress {
   display: block;
   margin: 5px auto;
 }
@@ -17237,7 +17285,7 @@ select.admin_timestamp_minute {
 .admin_item_view_place {
   height: 200px;
 }
-progress {
+.progress {
   padding: 4px;
   margin: 0px auto;
   line-height: 100px;
@@ -18459,6 +18507,29 @@ a.mainmenu_logo:hover {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.taskmonitor_task {
+  border-bottom: 1px solid #eee;
+  padding: 10px 5px;
+}
+.taskmonitor_task_name {
+  font-size: 1.2rem;
+  line-height: 1.3em;
+}
+.taskmonitor_task_uuid {
+  font-size: 0.9rem;
+  line-height: 1.3em;
+  color: #aaa;
+}
+.taskmonitor_task_progress {
+  font-size: 0.9rem;
+  line-height: 1.3em;
+  color: #333;
+}
+.taskmonitor_task_status {
+  font-size: 0.9rem;
+  line-height: 1.3em;
+  color: #333;
 }
 `
 
@@ -20264,6 +20335,34 @@ var RelationList = (function () {
     };
     return RelationList;
 }());
+function bindTaskMonitor() {
+    var el = document.querySelector(".taskmonitorcontainer");
+    if (el) {
+        new TaskMonitor(el);
+    }
+}
+var TaskMonitor = (function () {
+    function TaskMonitor(el) {
+        this.el = el;
+        window.setInterval(this.load.bind(this), 1000);
+    }
+    TaskMonitor.prototype.load = function () {
+        var _this = this;
+        var request = new XMLHttpRequest();
+        request.open("GET", "/admin/_tasks/running", true);
+        request.addEventListener("load", function () {
+            _this.el.innerHTML = "";
+            if (request.status == 200) {
+                _this.el.innerHTML = request.response;
+            }
+            else {
+                console.error("error while loading list");
+            }
+        });
+        request.send();
+    };
+    return TaskMonitor;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();
@@ -20281,6 +20380,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindEshopControl();
     bindMainMenu();
     bindRelationList();
+    bindTaskMonitor();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");

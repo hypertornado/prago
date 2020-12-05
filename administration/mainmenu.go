@@ -62,6 +62,16 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 		},
 	}
 
+	var selectedTasks bool
+	if request.Request().URL.Path == admin.GetURL("_tasks") {
+		selectedTasks = true
+	}
+	adminSection.Items = append(adminSection.Items, MainMenuItem{
+		Name:     messages.Messages.Get(user.Locale, "tasks"),
+		URL:      admin.GetURL("_tasks"),
+		Selected: selectedTasks,
+	})
+
 	for _, v := range admin.rootActions {
 		if v.Method != "GET" && v.Method != "" {
 			continue

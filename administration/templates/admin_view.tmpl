@@ -97,13 +97,13 @@
 
 {{define "admin_item_view_image"}}
   <div class="admin_item_view_image_content" data-images="{{.}}">
-    <progress value="" max=""></progress>
+    <progress class="progress" value="" max=""></progress>
   </div>
 {{end}}
 
 {{define "admin_item_view_place"}}
   <div class="admin_item_view_place" data-value="{{.}}">
-    <progress value="" max=""></progress>
+    <progress class="progress" value="" max=""></progress>
   </div>
 {{end}}
 
@@ -134,7 +134,7 @@
     <div class="admin_relationlist_target">
     </div>
     <div class="admin_relationlist_loading hidden">
-      <progress class="admin_table_progress"></progress>
+      <progress class="progress admin_table_progress"></progress>
     </div>
     <div class="admin_relationlist_more hidden">
       <div class="btn">Nahrát více</div>

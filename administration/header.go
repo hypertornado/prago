@@ -8,7 +8,6 @@ type adminHeaderData struct {
 	Name        string
 	Language    string
 	Logo        string
-	Background  string
 	UrlPrefix   string
 	HomepageUrl string
 	HasSearch   bool
@@ -33,8 +32,7 @@ func (admin *Administration) getHeaderData(request prago.Request) (headerData *a
 		Name:        admin.HumanName,
 		Language:    user.Locale,
 		Logo:        admin.Logo,
-		Background:  admin.Background,
-		UrlPrefix:   admin.Prefix,
+		UrlPrefix:   admin.prefix,
 		HomepageUrl: request.App().Config.GetStringWithFallback("baseUrl", request.Request().Host),
 		HasSearch:   hasSearch,
 		Items:       []adminHeaderItem{},

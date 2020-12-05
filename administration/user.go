@@ -159,7 +159,7 @@ func (user User) sendConfirmEmail(request prago.Request, a *Administration) erro
 	urlValues.Add("token", user.emailToken(*a.App))
 
 	subject := messages.Messages.Get(locale, "admin_confirm_email_subject", a.HumanName)
-	link := request.App().Config.GetString("baseUrl") + a.Prefix + "/user/confirm_email?" + urlValues.Encode()
+	link := request.App().Config.GetString("baseUrl") + a.prefix + "/user/confirm_email?" + urlValues.Encode()
 	body := messages.Messages.Get(locale, "admin_confirm_email_body", link, link, a.HumanName)
 
 	return a.SendEmail(
@@ -170,13 +170,6 @@ func (user User) sendConfirmEmail(request prago.Request, a *Administration) erro
 		body,
 	)
 
-	/*message := sendgrid.NewMail()
-	message.SetFrom(a.noReplyEmail)
-	message.AddTo(user.Email)
-	message.AddToName(user.Name)
-	message.SetSubject(subject)
-	message.SetHTML(body)
-	return a.sendgridClient.Send(message)*/
 }
 
 func (user User) sendAdminEmail(request prago.Request, a *Administration) error {
@@ -200,13 +193,6 @@ func (user User) sendAdminEmail(request prago.Request, a *Administration) error 
 			body,
 		)
 
-		/*message := sendgrid.NewMail()
-		message.SetFrom(a.noReplyEmail)
-		message.AddTo(receiver.Email)
-		message.AddToName(receiver.Name)
-		message.SetSubject("New registration on " + a.HumanName)
-		message.SetHTML(fmt.Sprintf("New user registered on %s: %s (%s)", a.HumanName, user.Email, user.Name))
-		err = a.sendgridClient.Send(message)*/
 		if err != nil {
 			return err
 		}
@@ -218,7 +204,7 @@ func (user User) getRenewURL(request prago.Request, a *Administration) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)
 	urlValues.Add("token", user.emailToken(*a.App))
-	return request.App().Config.GetString("baseUrl") + a.Prefix + "/user/renew_password?" + urlValues.Encode()
+	return request.App().Config.GetString("baseUrl") + a.prefix + "/user/renew_password?" + urlValues.Encode()
 }
 
 func (user User) sendRenew(request prago.Request, admin *Administration) error {
@@ -237,14 +223,6 @@ func (user User) sendRenew(request prago.Request, admin *Administration) error {
 		body,
 		body,
 	)
-
-	/*message := sendgrid.NewMail()
-	message.SetFrom(admin.noReplyEmail)
-	message.AddTo(user.Email)
-	message.AddToName(user.Name)
-	message.SetSubject(subject)
-	message.SetHTML(body)
-	return admin.sendgridClient.Send(message)*/
 }
 
 func initUserResource(resource *Resource) {

@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hypertornado/prago/cachelib"
 	setup "github.com/hypertornado/prago/prago-setup/lib"
 	"github.com/hypertornado/prago/utils"
 )
@@ -21,16 +22,17 @@ type App struct {
 	staticHandler   staticFilesHandler
 	commands        []*command
 	logger          *log.Logger
-	cron            *cron
-	templates       *templates
-	mainController  *Controller
+	//cron            *cron
+	templates      *templates
+	mainController *Controller
+	Cache          *cachelib.Cache
 }
 
 func NewTestingApp() *App {
 	return createApp("prago_test_app", "0.0", nil)
 }
 
-func createApp(appName, version string, initFunction func(*App)) *App {
+func createApp(appName string, version string, initFunction func(*App)) *App {
 	if !configExists(appName) {
 		if utils.ConsoleQuestion("File config.json does not exist. Can't start app. Would you like to start setup?") {
 			setup.StartSetup(appName)
@@ -44,9 +46,9 @@ func createApp(appName, version string, initFunction func(*App)) *App {
 		Config: loadConfig(appName),
 
 		logger:         log.New(os.Stdout, "", log.LstdFlags),
-		cron:           newCron(),
 		templates:      newTemplates(),
 		mainController: newMainController(),
+		Cache:          cachelib.NewCache(),
 	}
 
 	app.staticHandler = app.loadStaticHandler()

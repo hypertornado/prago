@@ -236,7 +236,7 @@ func (e *adminSearch) searchImport() error {
 		return fmt.Errorf("while creating index: %s", err)
 	}
 
-	for _, v := range e.admin.Resources {
+	for _, v := range e.admin.resources {
 		err = e.importResource(v)
 		if err != nil {
 			return fmt.Errorf("while importing resource %s: %s", v.TableName, err)

@@ -91,7 +91,7 @@ func (admin *Administration) CreateResource(item interface{}, initFunction func(
 
 	ret.OrderByColumn, ret.OrderDesc = ret.getDefaultOrder()
 
-	admin.Resources = append(admin.Resources, ret)
+	admin.resources = append(admin.resources, ret)
 	_, typFound := admin.resourceMap[ret.Typ]
 	if typFound {
 		panic(fmt.Errorf("resource with type %s already created", ret.Typ))
@@ -122,11 +122,11 @@ func (admin *Administration) initResource(resource *Resource) {
 
 //GetURL returns resource url
 func (resource Resource) GetURL(suffix string) string {
-	ret := resource.Admin.Prefix + "/" + resource.ID
+	url := resource.ID
 	if len(suffix) > 0 {
-		ret += "/" + suffix
+		url += "/" + suffix
 	}
-	return ret
+	return resource.Admin.GetURL(url)
 }
 
 func (admin *Administration) getResourceByItem(item interface{}) (*Resource, error) {
@@ -186,17 +186,17 @@ func (resource Resource) cachedCountName() string {
 }
 
 func (resource Resource) getCachedCount() int64 {
-	return resource.Admin.cache.Load(resource.cachedCountName(), func() interface{} {
+	return resource.Admin.App.Cache.Load(resource.cachedCountName(), func() interface{} {
 		return resource.count()
 	}).(int64)
 }
 
 func (resource Resource) setCachedCount(value int64) error {
-	return resource.Admin.cache.Set(resource.cachedCountName(), value)
+	return resource.Admin.App.Cache.Set(resource.cachedCountName(), value)
 }
 
 func (resource Resource) updateCachedCount() error {
-	return resource.Admin.cache.Set(resource.cachedCountName(), resource.count())
+	return resource.Admin.App.Cache.Set(resource.cachedCountName(), resource.count())
 }
 
 func (resource Resource) getPaginationData(user User) (ret []ListPaginationData) {

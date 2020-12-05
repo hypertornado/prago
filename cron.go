@@ -1,11 +1,6 @@
 package prago
 
-import (
-	"fmt"
-	"sync"
-	"time"
-)
-
+/*
 type cron struct {
 	mutex sync.Mutex
 	tasks map[string]*cronTask
@@ -56,7 +51,7 @@ func newCron() *cron {
 
 //AddCronTask ads task function with name, which is executed regularly
 //timer functions returns next execution time
-func (app *App) AddCronTask(name string, task func(), timer func(time.Time) time.Time) {
+func (app *App) AddCronTaskOLD(name string, task func(), timer func(time.Time) time.Time) {
 	app.cron.mutex.Lock()
 	ct := &cronTask{
 		name:      name,
@@ -66,4 +61,4 @@ func (app *App) AddCronTask(name string, task func(), timer func(time.Time) time
 	}
 	app.cron.tasks[name] = ct
 	app.cron.mutex.Unlock()
-}
+}*/

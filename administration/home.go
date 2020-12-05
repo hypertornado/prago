@@ -36,12 +36,11 @@ func (admin *Administration) getHomeData(request prago.Request) (ret []homeData)
 func (admin *Administration) getSortedResources(locale string) (ret []*Resource) {
 	collator := collate.New(language.Czech)
 
-	ret = admin.Resources
+	ret = admin.resources
 	sort.SliceStable(ret, func(i, j int) bool {
 		a := ret[i]
 		b := ret[j]
 
-		//collator.CompareString()
 		if collator.CompareString(a.HumanName(locale), b.HumanName(locale)) <= 0 {
 			return true
 		}

@@ -31,6 +31,7 @@
         "js/eshop_control.ts",
         "js/mainmenu.ts",
         "js/relationlist.ts",
+        "js/taskmonitor.ts",
         "js/load.ts"
     ]
 }

@@ -125,7 +125,7 @@ func getResourceAccessView(admin *Administration) accessView {
 
 	sort.Strings(ret.Roles)
 
-	for _, resource := range admin.Resources {
+	for _, resource := range admin.resources {
 		viewResource := accessViewResource{
 			Name: resource.TableName,
 		}

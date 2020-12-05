@@ -116,9 +116,9 @@ func BackupApp(app *prago.App) error {
 	}
 	defer os.RemoveAll(dir)
 
-	user := app.Config.GetString("dbUser")
-	dbName := app.Config.GetString("dbName")
-	password := app.Config.GetString("dbPassword")
+	user := app.Config.GetStringWithFallback("dbUser", "")
+	dbName := app.Config.GetStringWithFallback("dbName", "")
+	password := app.Config.GetStringWithFallback("dbPassword", "")
 
 	var dumpCmd *exec.Cmd
 

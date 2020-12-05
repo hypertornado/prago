@@ -458,4 +458,8 @@ var m = map[string]map[string]string{
 		"en": "Height",
 		"cs": "Výška",
 	},
+	"tasks": {
+		"en": "Tasks",
+		"cs": "Úlohy",
+	},
 }
