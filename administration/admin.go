@@ -202,7 +202,6 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	})
 
 	admin.taskManager.init()
-	admin.taskManager.startCRON()
 
 	for _, resource := range admin.resources {
 		admin.initResource(resource)

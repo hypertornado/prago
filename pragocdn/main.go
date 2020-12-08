@@ -30,7 +30,7 @@ import (
 	"golang.org/x/sync/semaphore"
 )
 
-const version = "2020.5"
+const version = "2020.6"
 
 var config CDNConfig
 
@@ -296,6 +296,7 @@ func getMetadata(accountName, uuid string) (*cdnclient.CDNFileData, error) {
 	if err != nil {
 		return nil, fmt.Errorf("opening file: %s", err)
 	}
+	defer file.Close()
 
 	var width, height int
 

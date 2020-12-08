@@ -7,7 +7,10 @@ import (
 	"time"
 
 	"github.com/hypertornado/prago"
+	"github.com/hypertornado/prago/administration/messages"
 	"github.com/hypertornado/prago/utils"
+	"golang.org/x/text/collate"
+	"golang.org/x/text/language"
 )
 
 type taskManager struct {
@@ -20,7 +23,7 @@ type taskManager struct {
 }
 
 func newTaskManager(admin *Administration) *taskManager {
-	ret := &taskManager{
+	tm := &taskManager{
 		admin:         admin,
 		tasksMap:      make(map[string]*Task),
 		activities:    make(map[string]*TaskActivity),
@@ -28,7 +31,7 @@ func newTaskManager(admin *Administration) *taskManager {
 		startedAt:     time.Now(),
 	}
 
-	return ret
+	return tm
 }
 
 func (tm *taskManager) startCRON() {
@@ -46,11 +49,43 @@ func (tm *taskManager) startCRON() {
 	}()
 }
 
+func (tm *taskManager) oldTasksRemover() {
+	for {
+		time.Sleep(1 * time.Second)
+		for _, v := range tm.getOldActivities() {
+			tm.deleteActivity(v)
+		}
+	}
+
+}
+
+func (tm *taskManager) getOldActivities() (ret []string) {
+	tm.activityMutex.RLock()
+	defer tm.activityMutex.RUnlock()
+	for k, v := range tm.activities {
+		if v.ended && v.endedAt.Add(1*time.Hour).Before(time.Now()) {
+			ret = append(ret, k)
+		}
+	}
+	return ret
+}
+
+func (tm *taskManager) deleteActivity(id string) {
+	tm.activityMutex.Lock()
+	defer tm.activityMutex.Unlock()
+	delete(tm.activities, id)
+}
+
 func (tm *taskManager) init() {
+	//go tm.oldTasksRemover()
+	go tm.startCRON()
+
 	tm.admin.AdminController.Get(tm.admin.GetURL("_tasks"), func(request prago.Request) {
-		request.SetData("tasks", tm.getTasks(GetUser(request)))
-		request.SetData("taskmonitor", tm.getTaskMonitor(GetUser(request)))
+		user := GetUser(request)
+		request.SetData("tasks", tm.getTasks(user))
+		request.SetData("taskmonitor", tm.getTaskMonitor(user))
 		request.SetData("admin_yield", "admin_tasks")
+		request.SetData("admin_title", messages.Messages.Get(user.Locale, "tasks"))
 		request.RenderView("admin_layout")
 	})
 
@@ -73,12 +108,12 @@ func (tm *taskManager) init() {
 		request.Redirect(tm.admin.GetURL("_tasks"))
 	})
 
-	tm.admin.NewTask("hello").SetHandler(func(t *TaskActivity) {
+	tm.admin.NewTask("example").SetHandler(func(t *TaskActivity) {
 		var progress float64
 		for {
 			time.Sleep(1 * time.Second)
-			t.SetStatus(progress, "tttt")
-			progress += 0.1
+			t.SetStatus(progress, "example status")
+			progress += 0.2
 			if progress >= 1 {
 				return
 			}
@@ -107,6 +142,14 @@ func (tm *taskManager) getTasks(user User) (ret []TaskView) {
 			ret = append(ret, v.taskView())
 		}
 	}
+
+	sort.SliceStable(ret, func(i, j int) bool {
+		if collate.New(language.Czech).CompareString(ret[i].ID, ret[j].ID) <= 0 {
+			return true
+		}
+		return false
+	})
+
 	return
 }
 
@@ -230,12 +273,6 @@ type TaskMonitor struct {
 	Items []TaskActivityView
 }
 
-type TaskActivityViews []TaskActivityView
-
-func (a TaskActivityViews) Len() int           { return len(a) }
-func (a TaskActivityViews) Less(i, j int) bool { return a[j].StartedAt.Before(a[i].StartedAt) }
-func (a TaskActivityViews) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-
 func (tm *taskManager) getTaskMonitor(user User) (ret *TaskMonitor) {
 	tm.activityMutex.RLock()
 	defer tm.activityMutex.RUnlock()
@@ -243,6 +280,9 @@ func (tm *taskManager) getTaskMonitor(user User) (ret *TaskMonitor) {
 	ret = &TaskMonitor{}
 
 	for _, v := range tm.activities {
+		if v.user == nil {
+			continue
+		}
 		if v.user.ID == user.ID {
 			format := "15:04:05"
 			startedStr := v.startedAt.Format(format)
@@ -263,7 +303,14 @@ func (tm *taskManager) getTaskMonitor(user User) (ret *TaskMonitor) {
 			})
 		}
 	}
-	sort.Sort(TaskActivityViews(ret.Items))
+
+	sort.SliceStable(ret.Items, func(i, j int) bool {
+		if ret.Items[i].StartedAt.Before(ret.Items[j].StartedAt) {
+			return false
+		}
+		return true
+	})
+
 	return
 }
 
