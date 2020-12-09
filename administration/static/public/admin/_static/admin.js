@@ -594,7 +594,6 @@ var List = (function () {
                 filters[i].classList.add("hidden");
             }
         }
-        console.log(columns.entries);
         this.settingsRowColumn.setAttribute("colspan", Object.keys(columns).length + "");
         this.load();
     };
@@ -622,7 +621,6 @@ var List = (function () {
     };
     List.prototype.bindPagination = function () {
         var paginationEl = this.el.querySelector(".pagination");
-        console.log(paginationEl);
         var totalPages = parseInt(paginationEl.getAttribute("data-total"));
         var selectedPage = parseInt(paginationEl.getAttribute("data-selected"));
         for (var i = 1; i <= totalPages; i++) {

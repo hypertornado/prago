@@ -256,7 +256,7 @@ const adminTemplates = `
     <input type="hidden" id="{{.UUID}}" name="{{.Name}}" value="{{.Value}}">
     <img src="{{thumb .Value}}">
   {{else}}
-    <input type="file" multiple id="{{.UUID}}" name="{{.Name}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+    <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
   {{end}}
 {{end}}
 
@@ -922,15 +922,6 @@ const adminTemplates = `
     </div>
   {{end}}
   <div>UUID: {{.UUID}}</div>
-{{end}}
-
-{{define "admin_item_view_file_cell"}}
-  {{if .}}
-    {{$item := index . 0}}
-    {{if $item.SmallURL}}
-      <div class="admin_list_image" style="background-image: url('{{CSS $item.SmallURL}}');"></div>
-    {{end}}
-  {{end}}
 {{end}}
 
 {{define "admin_item_view_image"}}
@@ -17512,6 +17503,9 @@ td.admin_list_message {
 .admin_list_settingsrow-visible {
   display: table-row;
 }
+.admin_list_settingsrow_column {
+  background: rgba(64, 120, 192, 0.1);
+}
 .admin_tablesettings {
   padding: 0px 10px 10px 10px;
   border-top: none;
@@ -19131,7 +19125,6 @@ var List = (function () {
                 filters[i].classList.add("hidden");
             }
         }
-        console.log(columns.entries);
         this.settingsRowColumn.setAttribute("colspan", Object.keys(columns).length + "");
         this.load();
     };
@@ -19159,7 +19152,6 @@ var List = (function () {
     };
     List.prototype.bindPagination = function () {
         var paginationEl = this.el.querySelector(".pagination");
-        console.log(paginationEl);
         var totalPages = parseInt(paginationEl.getAttribute("data-total"));
         var selectedPage = parseInt(paginationEl.getAttribute("data-selected"));
         for (var i = 1; i <= totalPages; i++) {

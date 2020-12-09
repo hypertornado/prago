@@ -148,6 +148,7 @@ func (a CDNAccount) UploadFile(reader io.ReadCloser, extension string) (*CDNFile
 	return &ret, nil
 }
 
+//don't call while not needed or call multiple at once
 func (a CDNAccount) GetMetadata(uuid string) (*CDNFileData, error) {
 	u, err := url.Parse(a.MetadataPath(uuid))
 	if err != nil {

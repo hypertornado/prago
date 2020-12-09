@@ -86,15 +86,6 @@
   <div>UUID: {{.UUID}}</div>
 {{end}}
 
-{{define "admin_item_view_file_cell"}}
-  {{if .}}
-    {{$item := index . 0}}
-    {{if $item.SmallURL}}
-      <div class="admin_list_image" style="background-image: url('{{CSS $item.SmallURL}}');"></div>
-    {{end}}
-  {{end}}
-{{end}}
-
 {{define "admin_item_view_image"}}
   <div class="admin_item_view_image_content" data-images="{{.}}">
     <progress class="progress" value="" max=""></progress>

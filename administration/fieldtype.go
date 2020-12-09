@@ -48,7 +48,9 @@ func (admin *Administration) addDefaultFieldTypes() {
 		ViewTemplate:     "admin_item_view_file",
 		ViewDataSource:   filesViewDataSource,
 		FormTemplate:     "admin_file",
-		ListCellTemplate: "admin_item_view_file_cell",
+		//ListCellTemplate: "admin_item_view_file_cell",
+		ListCellTemplate: "admin_list_image",
+		ListCellDataSource: defaultViewDataSource,
 
 		FilterLayoutTemplate:   "filter_layout_select",
 		FilterLayoutDataSource: boolFilterLayoutDataSource,

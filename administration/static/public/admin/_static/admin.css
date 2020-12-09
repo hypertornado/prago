@@ -6301,6 +6301,9 @@ td.admin_list_message {
 .admin_list_settingsrow-visible {
   display: table-row;
 }
+.admin_list_settingsrow_column {
+  background: rgba(64, 120, 192, 0.1);
+}
 .admin_tablesettings {
   padding: 0px 10px 10px 10px;
   border-top: none;

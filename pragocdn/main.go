@@ -286,6 +286,7 @@ func getFilePathFromUUID(accountName, uuid string) (filePath, extension string, 
 	return fmt.Sprintf("%s/%s", dirPath, name), extension, nil
 }
 
+//TODO: cache somewhere
 func getMetadata(accountName, uuid string) (*cdnclient.CDNFileData, error) {
 	filePath, extension, err := getFilePathFromUUID(accountName, uuid)
 	if err != nil {
