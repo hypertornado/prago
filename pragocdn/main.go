@@ -326,8 +326,6 @@ func getMetadata(accountName, uuid string) (*cdnclient.CDNFileData, error) {
 }
 
 func getFile(accountName, uuid, format, hash, name string) (eddCode int, err error, source io.ReadCloser, mimeExtension string, size int64) {
-	//fmt.Println("GETTING FILE", accountName, uuid, format, hash, name)
-
 	account := accounts[accountName]
 	if account == nil {
 		return 404, errors.New("account not found"), nil, "", -1

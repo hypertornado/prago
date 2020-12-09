@@ -17,12 +17,6 @@ echo "\`
 " >> admin_templates.go
 
 echo "
-const chartJS = \`" >> admin_templates.go
-cat static/public/admin/_static/Chart.min.js >> admin_templates.go
-echo "\`
-" >> admin_templates.go
-
-echo "
 const pikadayJS = \`" >> admin_templates.go
 cat static/public/admin/_static/pikaday.js >> admin_templates.go
 echo "\`

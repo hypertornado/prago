@@ -228,7 +228,6 @@ func (e *adminSearch) Flush() error {
 }
 
 func (e *adminSearch) searchImport() error {
-	//fmt.Println("Importing admin search...")
 	var err error
 
 	err = e.createSearchIndex()

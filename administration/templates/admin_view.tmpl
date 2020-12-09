@@ -143,17 +143,6 @@
   {{.}}
 {{end}}
 
-{{define "admin_item_view_relations_OLD"}}
-  {{if not .}}
-    —
-  {{else}}
-    {{range $item := .}}
-      {{template "admin_item_view_relation" $item}}
-    {{end}}
-  {{end}}
-{{end}}
-
-
 {{define "admin_item_view_relation_cell"}}
   {{if .}}
     <span class="admin_list_relation_cell_image" style="background-image: url('{{.Image}}');"></span>{{.Name}}

@@ -52,7 +52,6 @@ func (server *Server) Start() error {
 		panic(err)
 	}
 
-	//fmt.Println(dirPath, executablePath)
 	return nil
 }
 

@@ -53,9 +53,6 @@ class DatePicker {
     //@ts-ignore
     var pd = new Pikaday({
       field: el,
-      //format: 'YYYY-MM-DD',
-      //firstDay: 1,
-      //defaultDate: new Date(),
       setDefaultDate: false,
       i18n: i18n,
       onSelect: (date: any) => {
@@ -80,22 +77,6 @@ class DatePicker {
   }
 }
 
-/*
-onSelect: (date) => {
-  //$(el).dispatchEvent(new Event("changed_value"));
-  dispatchEventHack(el, "changed_value");
-  if (this.nights > 0 && this.related && this.related.value == "") {
-    var newDate = addDays(date, this.nights);
-    self.related.value = prettyDate(newDate);
-  }
-},
-//@ts-ignore
-toString(date: any, format: any): string {
-    return prettyDate(date);
-}
-
-*/
-
 
 function prettyDate(date: any): string {
   const day = date.getDate();
@@ -103,7 +84,3 @@ function prettyDate(date: any): string {
   const year = date.getFullYear();
   return `${day}. ${month}. ${year}`;
 }
-
-/*function addDays(theDate: any, days: number) {
-  return new Date(theDate.getTime() + days*24*60*60*1000);
-}*/
