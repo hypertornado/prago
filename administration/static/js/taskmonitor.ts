@@ -20,7 +20,6 @@ class TaskMonitor {
         request.addEventListener("load", () => {
             this.el.innerHTML = "";
             if (request.status == 200) {
-                //console.log(request.response);
                 this.el.innerHTML = request.response;
             } else {
                 console.error("error while loading list");

@@ -15,7 +15,6 @@ class ImagePicker {
   draggedElement: HTMLAnchorElement;
 
   constructor(el: HTMLDivElement) {
-    console.log("image picker");
     this.el = el;
     this.adminPrefix = document.body.getAttribute("data-admin-prefix");
     this.hiddenInput = <HTMLInputElement>el.querySelector(".admin_images_hidden");

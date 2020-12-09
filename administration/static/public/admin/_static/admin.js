@@ -94,7 +94,6 @@ function bindImagePickers() {
 var ImagePicker = (function () {
     function ImagePicker(el) {
         var _this = this;
-        console.log("image picker");
         this.el = el;
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.hiddenInput = el.querySelector(".admin_images_hidden");
@@ -636,21 +635,6 @@ var List = (function () {
                 pEl.addEventListener("click", this.paginationChange.bind(this));
             }
             paginationEl.appendChild(pEl);
-        }
-    };
-    List.prototype.bindPaginationOLD = function () {
-        var _this = this;
-        var pages = this.el.querySelectorAll(".pagination_page");
-        for (var i = 0; i < pages.length; i++) {
-            var pageEl = pages[i];
-            pageEl.addEventListener("click", function (e) {
-                var el = e.target;
-                var page = parseInt(el.getAttribute("data-page"));
-                _this.page = page;
-                _this.load();
-                e.preventDefault();
-                return false;
-            });
         }
     };
     List.prototype.bindClick = function () {
@@ -1664,15 +1648,11 @@ var EshopControl = (function () {
         this.canvas = el.querySelector(".eshop_control_canvas");
         this.video = el.querySelector(".eshop_control_video");
         this.context = this.canvas.getContext('2d');
-        console.log(this.canvas);
-        console.log(this.video);
         this.initCamera();
         this.captureImage();
     }
     EshopControl.prototype.initCamera = function () {
         var _this = this;
-        console.log(navigator.mediaDevices);
-        console.log(navigator.mediaDevices.getUserMedia({ video: true, audio: false }));
         navigator.mediaDevices.getUserMedia({ video: true, audio: false })
             .then(function (stream) {
             _this.video.srcObject = stream;

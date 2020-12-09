@@ -17,15 +17,11 @@ class EshopControl {
         this.video = el.querySelector(".eshop_control_video");
         this.context = this.canvas.getContext('2d');
 
-        console.log(this.canvas);
-        console.log(this.video);
         this.initCamera();
         this.captureImage();
     }
 
     initCamera() {
-        console.log(navigator.mediaDevices);
-        console.log(navigator.mediaDevices.getUserMedia({ video: true, audio: false }));
         navigator.mediaDevices.getUserMedia({ video: true, audio: false })
         .then(
             (stream: MediaStream) => {
@@ -36,20 +32,8 @@ class EshopControl {
     }
 
     captureImage() {
-
-        /*this.canvas.width = this.width;
-        this.canvas.height = this.height;
-
-        var pixelRatio = window.devicePixelRatio;
-        var canvasWidth = Math.floor(this.width / pixelRatio);
-        var canvasHeight = Math.floor(this.height / pixelRatio);
-
-        this.canvas.setAttribute("style", "width: " + canvasWidth + "px; height: " + canvasHeight + "px;");*/
-
-
         var w = this.video.videoWidth;
         var h = this.video.videoHeight;
-        //console.log(this.video.videoWidth, this.video.videoHeight)
 
         this.canvas.width = w;
         this.canvas.height = h;
@@ -59,9 +43,6 @@ class EshopControl {
         if (w > 0 && h > 0) {
             var imageData = this.context.getImageData(0, 0, w, h);
             try {
-                //console.log(imageData);
-                //console.log(w, h);
-
                 //@ts-ignore
                 var code = jsQR(imageData.data, w, h);
                 if (code) {

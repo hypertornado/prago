@@ -111,10 +111,6 @@ class List {
       this.filterChanged();
     });
 
-    //this.settingsCheckbox.checked = true;
-    //this.settingsCheckboxChange();
-    //this.statsCheckbox.checked = true;
-
     this.statsCheckboxSelectCount = el.querySelector(".admin_tablesettings_stats_limit");
     this.statsCheckboxSelectCount.addEventListener("change", () => {
       this.filterChanged();
@@ -179,25 +175,17 @@ class List {
     encoded = encodeParams(params);
 
     request.open("GET", this.adminPrefix + "/" + this.typeName + encoded, true);
-    //request.overrideMimeType('text/html; charset=iso-8859-1');
     request.addEventListener("load", () => {
       this.tbody.innerHTML = "";
       if (request.status == 200) {
         var response = JSON.parse(request.response);
 
-        //this.tbody.innerHTML = request.response;
         this.tbody.innerHTML = response.Content;
-        //var countStr = request.getResponseHeader("X-Count-Str");
         var countStr = response.CountStr;
 
-        //console.log(request.getAllResponseHeaders());
-        //console.log(countStr);
-        //var totalCount = request.getResponseHeader("X-Total-Count");
-        //var countStr: string = count + " / " + totalCount;
         this.el.querySelector(".admin_table_count").textContent = countStr;
         this.statsContainer.innerHTML = response.StatsStr;
         bindOrder();
-        //bindDelete();
         this.bindPagination();
         this.bindClick();
         this.tbody.classList.remove("admin_table_loading");
@@ -206,7 +194,6 @@ class List {
       }
       this.progress.classList.add("admin_table_progress-inactive");
     });
-    //var requestData = this.getListRequest();
     request.send(JSON.stringify({}));
   }
 
@@ -293,21 +280,6 @@ class List {
       paginationEl.appendChild(pEl);
     }
 
-  }
-
-  bindPaginationOLD() {
-    var pages = this.el.querySelectorAll(".pagination_page");
-    for (var i = 0; i < pages.length; i++) {
-      var pageEl = <HTMLAnchorElement>pages[i];
-      pageEl.addEventListener("click", (e) => {
-        var el = <HTMLAnchorElement>e.target;
-        var page = parseInt(el.getAttribute("data-page"));
-        this.page = page;
-        this.load();
-        e.preventDefault();
-        return false;
-      })
-    }
   }
 
   bindClick() {
