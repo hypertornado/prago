@@ -49,6 +49,10 @@ const (
 	intFlag
 )
 
+type commands struct {
+	commands []*command
+}
+
 type command struct {
 	actions        []string
 	description    string
@@ -70,7 +74,7 @@ func (app *App) AddCommand(commands ...string) *command {
 		actions: commands,
 		flags:   map[string]*flag{},
 	}
-	app.commands = append(app.commands, ret)
+	app.commands.commands = append(app.commands.commands, ret)
 	return ret
 }
 
@@ -214,7 +218,7 @@ func (f *flag) setValue(value string) error {
 func (app *App) parseCommands() {
 	addServerCommand(app)
 	args := os.Args[1:]
-	for _, command := range app.commands {
+	for _, command := range app.commands.commands {
 		matched, err := command.match(args)
 		if matched {
 			if err != nil {
@@ -233,7 +237,7 @@ func (app *App) parseCommands() {
 
 func (app *App) usage() {
 	fmt.Printf("%s, version %s, usage:\n", app.AppName, app.Version)
-	for _, v := range app.commands {
+	for _, v := range app.commands.commands {
 		fmt.Print("  " + strings.Join(v.actions, " "))
 		if len(v.flags) > 0 {
 			fmt.Print(" <flags>")

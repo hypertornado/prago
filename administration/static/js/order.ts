@@ -10,8 +10,6 @@ function bindOrder() {
       row.setAttribute("draggable", "true");
 
       row.addEventListener("dragstart", function(ev){
-        //el.classList.add("admin_table-dragging");
-
         row.classList.add("admin_table_row-selected");
 
         draggedElement = this;

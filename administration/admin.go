@@ -310,7 +310,7 @@ func (admin *Administration) initTemplates(app *prago.App) {
 		return ""
 	})
 
-	app.AddTemplateFunction("istabvisible", IsTabVisible)
+	app.AddTemplateFunction("istabvisible", isTabVisible)
 }
 
 //GetItemURL gets item url
@@ -336,37 +336,35 @@ func render404(request prago.Request) {
 
 func bindDBBackupCron(admin *Administration) {
 	app := admin.App
-
 	admin.NewTask("backup_db").SetHandler(
-		func(tr *TaskActivity) {
+		func(tr *TaskActivity) error {
 			err := build.BackupApp(app)
 			if err != nil {
-				app.Log().Println("Error while creating backup:", err)
+				return fmt.Errorf("Error while creating backup: %s", err)
 			}
+			return nil
 		}).RepeatEvery(24 * time.Hour)
 
 	admin.NewTask("remove_old_backups").SetHandler(
-		func(tr *TaskActivity) {
-			app.Log().Println("Removing old backups")
+		func(tr *TaskActivity) error {
+			tr.SetStatus(0, fmt.Sprintf("Removing old backups"))
 			deadline := time.Now().AddDate(0, 0, -7)
 			backupPath := app.DotPath() + "/backups"
 			files, err := ioutil.ReadDir(backupPath)
 			if err != nil {
-				app.Log().Println("error while removing old backups:", err)
-				return
+				return fmt.Errorf("Error while removing old backups: %s", err)
 			}
-
 			for _, file := range files {
 				if file.ModTime().Before(deadline) {
 					removePath := backupPath + "/" + file.Name()
 					err := os.RemoveAll(removePath)
 					if err != nil {
-						app.Log().Println("Error while removing old backup file:", err)
+						return fmt.Errorf("Error while removing old backup file: %s", err)
 					}
 				}
 			}
 			app.Log().Println("Old backups removed")
-
+			return nil
 		}).RepeatEvery(1 * time.Hour)
 
 }

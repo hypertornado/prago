@@ -8,27 +8,27 @@ import (
 	"github.com/hypertornado/prago/utils"
 )
 
-type MainMenu struct {
+type mainMenu struct {
 	Logo             string
 	AdminHomepageURL string
 	SearchQuery      string
-	Sections         []MainMenuSection
+	Sections         []mainMenuSection
 	HasSearch        bool
 }
 
-type MainMenuSection struct {
+type mainMenuSection struct {
 	Name  string
-	Items []MainMenuItem
+	Items []mainMenuItem
 }
 
-type MainMenuItem struct {
+type mainMenuItem struct {
 	Name     string
 	Subname  string
 	URL      string
 	Selected bool
 }
 
-func (menu MainMenu) GetTitle() string {
+func (menu mainMenu) GetTitle() string {
 	for _, v := range menu.Sections {
 		for _, v2 := range v.Items {
 			if v2.Selected {
@@ -39,7 +39,7 @@ func (menu MainMenu) GetTitle() string {
 	return ""
 }
 
-func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
+func (admin *Administration) getMainMenu(request prago.Request) (ret mainMenu) {
 	user := GetUser(request)
 
 	var selectedAdminSection bool
@@ -51,9 +51,9 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 	if admin.Logo != "" {
 		adminSectionName = ""
 	}
-	adminSection := MainMenuSection{
+	adminSection := mainMenuSection{
 		Name: adminSectionName,
-		Items: []MainMenuItem{
+		Items: []mainMenuItem{
 			{
 				Name:     messages.Messages.Get(user.Locale, "admin_signpost"),
 				URL:      admin.GetURL(""),
@@ -66,7 +66,7 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 	if request.Request().URL.Path == admin.GetURL("_tasks") {
 		selectedTasks = true
 	}
-	adminSection.Items = append(adminSection.Items, MainMenuItem{
+	adminSection.Items = append(adminSection.Items, mainMenuItem{
 		Name:     messages.Messages.Get(user.Locale, "tasks"),
 		URL:      admin.GetURL("_tasks"),
 		Selected: selectedTasks,
@@ -83,7 +83,7 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 			selected = true
 		}
 
-		adminSection.Items = append(adminSection.Items, MainMenuItem{
+		adminSection.Items = append(adminSection.Items, mainMenuItem{
 			Name:     v.getName(user.Locale),
 			URL:      fullURL,
 			Selected: selected,
@@ -92,7 +92,7 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 
 	ret.Sections = append(ret.Sections, adminSection)
 
-	resourceSection := MainMenuSection{
+	resourceSection := mainMenuSection{
 		Name: messages.Messages.Get(user.Locale, "admin_tables"),
 	}
 	for _, resource := range admin.getSortedResources(user.Locale) {
@@ -107,7 +107,7 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 				selected = true
 			}
 
-			resourceSection.Items = append(resourceSection.Items, MainMenuItem{
+			resourceSection.Items = append(resourceSection.Items, mainMenuItem{
 				Name:     resource.HumanName(user.Locale),
 				Subname:  utils.HumanizeNumber(resource.getCachedCount()),
 				URL:      resourceURL,
@@ -126,9 +126,9 @@ func (admin *Administration) getMainMenu(request prago.Request) (ret MainMenu) {
 		userName = user.Email
 	}
 	randomness := admin.App.Config.GetString("random")
-	userSection := MainMenuSection{
+	userSection := mainMenuSection{
 		Name: userName,
-		Items: []MainMenuItem{
+		Items: []mainMenuItem{
 			{
 				Name:     messages.Messages.Get(user.Locale, "admin_settings"),
 				URL:      admin.GetURL("user/settings"),

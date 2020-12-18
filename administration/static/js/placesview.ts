@@ -12,7 +12,6 @@ class PlacesView {
 
     var coords = val.split(",");
     if (coords.length != 2) {
-      //el.innerText = "-";
       el.classList.remove("admin_item_view_place");
       return
     }

@@ -462,4 +462,16 @@ var m = map[string]map[string]string{
 		"en": "Tasks",
 		"cs": "Úlohy",
 	},
+	"tasks_run": {
+		"en": "Run tasks",
+		"cs": "Spustit úlohy",
+	},
+	"tasks_runned": {
+		"en": "Runned tasks",
+		"cs": "Spuštěné úlohy",
+	},
+	"run": {
+		"en": "Run",
+		"cs": "Spustit",
+	},
 }

@@ -27,7 +27,7 @@ type navigationTab struct {
 	Selected bool
 }
 
-func IsTabVisible(tabs []navigationTab, pos int) bool {
+func isTabVisible(tabs []navigationTab, pos int) bool {
 	if tabs[pos-1].Selected {
 		return false
 	}
@@ -56,7 +56,7 @@ func renderNavigation(request prago.Request, page adminNavigationPage, viewName 
 	}
 
 	if name == "" {
-		mainMenu := request.GetData("main_menu").(MainMenu)
+		mainMenu := request.GetData("main_menu").(mainMenu)
 		name = mainMenu.GetTitle()
 	}
 

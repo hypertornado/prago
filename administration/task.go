@@ -63,7 +63,7 @@ func (tm *taskManager) getOldActivities() (ret []string) {
 	tm.activityMutex.RLock()
 	defer tm.activityMutex.RUnlock()
 	for k, v := range tm.activities {
-		if v.ended && v.endedAt.Add(1*time.Hour).Before(time.Now()) {
+		if v.ended && v.endedAt.Add(24*time.Hour).Before(time.Now()) {
 			ret = append(ret, k)
 		}
 	}
@@ -77,7 +77,7 @@ func (tm *taskManager) deleteActivity(id string) {
 }
 
 func (tm *taskManager) init() {
-	//go tm.oldTasksRemover()
+	go tm.oldTasksRemover()
 	go tm.startCRON()
 
 	tm.admin.AdminController.Get(tm.admin.GetURL("_tasks"), func(request prago.Request) {
@@ -104,25 +104,59 @@ func (tm *taskManager) init() {
 			panic("wrong token")
 		}
 
-		must(tm.runTask(id, user))
+		must(tm.startTask(id, user))
 		request.Redirect(tm.admin.GetURL("_tasks"))
 	})
 
-	tm.admin.NewTask("example").SetHandler(func(t *TaskActivity) {
+	tm.admin.AdminController.Get(tm.admin.GetURL("_tasks/stoptask"), func(request prago.Request) {
+		uuid := request.Request().FormValue("uuid")
+		csrf := request.Request().FormValue("csrf")
+		user := GetUser(request)
+
+		expectedToken := request.GetData("_csrfToken").(string)
+		if expectedToken != csrf {
+			panic("wrong token")
+		}
+
+		must(tm.stopTask(uuid, user))
+		request.Redirect(tm.admin.GetURL("_tasks"))
+	})
+
+	tm.admin.AdminController.Get(tm.admin.GetURL("_tasks/deletetask"), func(request prago.Request) {
+		uuid := request.Request().FormValue("uuid")
+		csrf := request.Request().FormValue("csrf")
+		user := GetUser(request)
+
+		expectedToken := request.GetData("_csrfToken").(string)
+		if expectedToken != csrf {
+			panic("wrong token")
+		}
+
+		must(tm.deleteTask(uuid, user))
+		request.Redirect(tm.admin.GetURL("_tasks"))
+	})
+
+	grp := tm.admin.NewTaskGroup(Unlocalized("example"))
+
+	tm.admin.NewTask("example_fail").SetGroup(grp).SetHandler(func(t *TaskActivity) error {
+		return fmt.Errorf("example error")
+	})
+
+	tm.admin.NewTask("example").SetGroup(grp).SetHandler(func(t *TaskActivity) error {
+		t.IsStopped()
 		var progress float64
 		for {
 			time.Sleep(1 * time.Second)
 			t.SetStatus(progress, "example status")
 			progress += 0.2
 			if progress >= 1 {
-				return
+				return nil
 			}
-			fmt.Println(progress)
 		}
 	})
 }
 
-func (tm *taskManager) runTask(id string, user User) error {
+func (tm *taskManager) startTask(id string, user User) error {
 	task, ok := tm.tasksMap[id]
 	if !ok {
 		return fmt.Errorf("Can't find task %s", id)
@@ -136,30 +170,39 @@ func (tm *taskManager) runTask(id string, user User) error {
 	}
 }
 
-func (tm *taskManager) getTasks(user User) (ret []TaskView) {
-	for _, v := range tm.tasks {
-		if tm.admin.Authorize(user, v.permission) {
-			ret = append(ret, v.taskView())
-		}
+func (tm *taskManager) stopTask(uuid string, user User) error {
+	tm.activityMutex.Lock()
+	defer tm.activityMutex.Unlock()
+
+	activity := tm.activities[uuid]
+	if activity.user.ID != user.ID {
+		return fmt.Errorf("Wrong user")
 	}
-
-	sort.SliceStable(ret, func(i, j int) bool {
-		if collate.New(language.Czech).CompareString(ret[i].ID, ret[j].ID) <= 0 {
-			return true
-		}
-		return false
-	})
-
-	return
+	activity.stopped = true
+	return nil
 }
 
-type Task struct {
-	id          string
-	permission  Permission
-	handler     func(*TaskActivity)
-	cron        time.Duration
-	lastStarted time.Time
-	manager     *taskManager
+func (tm *taskManager) deleteTask(uuid string, user User) error {
+	tm.activityMutex.Lock()
+	defer tm.activityMutex.Unlock()
+
+	activity := tm.activities[uuid]
+	if activity.user.ID != user.ID {
+		return fmt.Errorf("Wrong user")
+	}
+
+	delete(tm.activities, uuid)
+	return nil
+}
+
+type TaskViewGroup struct {
+	Name  string
+	Tasks []TaskView
+}
+
+type TaskView struct {
+	ID   string
+	Name string
 }
 
 func (t *Task) taskView() TaskView {
@@ -169,12 +212,67 @@ func (t *Task) taskView() TaskView {
 	}
 }
 
-type TaskView struct {
-	ID   string
-	Name string
+func (tm *taskManager) getTasks(user User) (ret []TaskViewGroup) {
+
+	var tasks []*Task
+	for _, v := range tm.tasks {
+		if tm.admin.Authorize(user, v.permission) {
+			tasks = append(tasks, v)
+		}
+	}
+
+	sort.SliceStable(tasks, func(i, j int) bool {
+		t1 := tasks[i]
+		t2 := tasks[j]
+
+		compareGroup := collate.New(language.Czech).CompareString(
+			t1.group.Name(user.Locale),
+			t2.group.Name(user.Locale),
+		)
+		if compareGroup < 0 {
+			return true
+		}
+		if compareGroup > 0 {
+			return false
+		}
+
+		compareID := collate.New(language.Czech).CompareString(t1.id, t2.id)
+		if compareID < 0 {
+			return true
+		}
+		return false
+	})
+
+	var lastGroup *taskGroup
+	for _, v := range tasks {
+		if v.group != lastGroup {
+			ret = append(ret, TaskViewGroup{Name: v.group.Name(user.Locale)})
+		}
+
+		ret[len(ret)-1].Tasks = append(ret[len(ret)-1].Tasks, v.taskView())
+		lastGroup = v.group
+	}
+
+	return ret
 }
 
+type Task struct {
+	id          string
+	group       *taskGroup
+	permission  Permission
+	handler     func(*TaskActivity) error
+	cron        time.Duration
+	lastStarted time.Time
+	manager     *taskManager
+}
+
+var defaultGroup *taskGroup
+
 func (admin *Administration) NewTask(id string) *Task {
+	if defaultGroup == nil {
+		defaultGroup = admin.NewTaskGroup(Unlocalized("Other"))
+	}
+
 	_, ok := admin.taskManager.tasksMap[id]
 	if ok {
 		panic(fmt.Sprintf("Task '%s' already added.", id))
@@ -183,15 +281,20 @@ func (admin *Administration) NewTask(id string) *Task {
 	task := &Task{
 		id:      id,
 		manager: admin.taskManager,
+		group:   defaultGroup,
 	}
 
 	task.manager.tasks = append(admin.taskManager.tasks, task)
 	task.manager.tasksMap[task.id] = task
 
+	admin.App.AddCommand("task", id).Callback(func() {
+		admin.taskManager.run(task, nil, "command")
+	})
+
 	return task
 }
 
-func (t *Task) SetHandler(fn func(*TaskActivity)) *Task {
+func (t *Task) SetHandler(fn func(*TaskActivity) error) *Task {
 	t.handler = fn
 	return t
 }
@@ -203,6 +306,21 @@ func (t *Task) SetPermission(permission string) *Task {
 
 func (t *Task) RepeatEvery(duration time.Duration) *Task {
 	t.cron = duration
+	return t
+}
+
+type taskGroup struct {
+	Name func(string) string
+}
+
+func (admin *Administration) NewTaskGroup(name func(string) string) *taskGroup {
+	return &taskGroup{name}
+}
+
+func (t *Task) SetGroup(group *taskGroup) *Task {
+	if group != nil {
+		t.group = group
+	}
 	return t
 }
 
@@ -227,99 +345,9 @@ func (tm *taskManager) run(t *Task, user *User, starterTyp string) *TaskActivity
 			activity.endedAt = time.Now()
 		}()
 		if t.handler != nil {
-			t.handler(activity)
+			activity.error = t.handler(activity)
 		}
 	}()
 
 	return activity
-}
-
-type TaskActivity struct {
-	uuid      string
-	task      *Task
-	user      *User
-	typ       string
-	progress  float64
-	status    string
-	ended     bool
-	startedAt time.Time
-	endedAt   time.Time
-}
-
-func (ta *TaskActivity) SetStatus(progress float64, status string) {
-	ta.progress = progress
-	ta.status = status
-}
-
-type TaskActivityView struct {
-	UUID                string
-	TaskName            string
-	Status              string
-	IsDone              bool
-	Progress            string
-	ProgressDescription string
-	StartedAt           time.Time
-	StartedStr          string
-	EndedStr            string
-}
-
-func (tm *taskManager) addActivity(activity *TaskActivity) {
-	tm.activityMutex.Lock()
-	defer tm.activityMutex.Unlock()
-	tm.activities[activity.uuid] = activity
-}
-
-type TaskMonitor struct {
-	Items []TaskActivityView
-}
-
-func (tm *taskManager) getTaskMonitor(user User) (ret *TaskMonitor) {
-	tm.activityMutex.RLock()
-	defer tm.activityMutex.RUnlock()
-
-	ret = &TaskMonitor{}
-
-	for _, v := range tm.activities {
-		if v.user == nil {
-			continue
-		}
-		if v.user.ID == user.ID {
-			format := "15:04:05"
-			startedStr := v.startedAt.Format(format)
-			var endedStr string
-			if v.ended {
-				endedStr = v.endedAt.Format(format)
-			}
-			ret.Items = append(ret.Items, TaskActivityView{
-				UUID:                v.uuid,
-				TaskName:            v.task.id,
-				Status:              v.status,
-				IsDone:              v.ended,
-				Progress:            fmt.Sprintf("%v", v.progress*100),
-				ProgressDescription: taskProgressHuman(v.progress),
-				StartedAt:           v.startedAt,
-				StartedStr:          startedStr,
-				EndedStr:            endedStr,
-			})
-		}
-	}
-
-	sort.SliceStable(ret.Items, func(i, j int) bool {
-		if ret.Items[i].StartedAt.Before(ret.Items[j].StartedAt) {
-			return false
-		}
-		return true
-	})
-
-	return
-}
-
-func taskProgressHuman(in float64) string {
-	if in <= 0 {
-		return ""
-	}
-	if in > 1 {
-		return ""
-	}
-	return fmt.Sprintf("%.2f %%", in*100)
 }

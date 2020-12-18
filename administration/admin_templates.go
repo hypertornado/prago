@@ -810,24 +810,28 @@ const adminTemplates = `
     </div>
   {{end}}
 {{end}}{{define "admin_tasks"}}
-    <div class="admin_box">        
+    <div class="admin_box">
         <h1>{{message .currentuser.Locale "tasks"}}</h1>
-        <h2>Spuštěné úlohy</h2>
+        <div class="admin_box_content">
+            <div class="taskmonitorcontainer">{{template "taskmonitor" .}}</div>
 
-        <div class="taskmonitorcontainer">{{template "taskmonitor" .}}</div>
+            {{$token := ._csrfToken}}
+            {{$locale := .currentuser.Locale}}
 
-        {{$token := ._csrfToken}}
+            <h2>{{message .currentuser.Locale "tasks_run"}}</h2>
 
-        <h2>Spustit úlohu</h2>
-        {{range $task := .tasks}}
-            <form method="POST" action="_tasks/runtask">
-                <input type="hidden" name="id" value="{{$task.ID}}">
-                <input type="hidden" name="csrf" value="{{$token}}">
-                <input type="submit" value="{{$task.Name}}" class="btn">
-            </form>
-            <br>
-        {{end}}
-
+            {{range $group := .tasks}}
+                <h3>{{$group.Name}}</h3>
+                {{range $task := $group.Tasks}}
+                    <div class="task_name">{{$task.Name}}</div>
+                    <form method="POST" action="_tasks/runtask">
+                        <input type="hidden" name="id" value="{{$task.ID}}">
+                        <input type="hidden" name="csrf" value="{{$token}}">
+                        <input type="submit" value="▶" class="btn btn-small">
+                    </form>
+                {{end}}
+            {{end}}
+        </div>
     </div>
 {{end}}{{define "admin_views"}}
   {{range $item := .}}
@@ -11152,29 +11156,58 @@ exports.locate = locate;
 </form>
 {{end}}{{define "taskmonitor"}}
     <div class="taskmonitor">
+        {{if .taskmonitor.Name}}
+            <h2>Spuštěné úlohy</h2>
+        {{end}}
+
         {{range $item := .taskmonitor.Items}}
             <div class="taskmonitor_task">
-                <div class="taskmonitor_task_name">
-                    {{if $item.IsDone}}<span class="taskmonitor_task_done">✅</span>{{end}}
-                    {{$item.TaskName}}
-                    <span class="taskmonitor_task_uuid">{{$item.UUID}}</span>
-                </div>
-                {{if not $item.IsDone}}
+                <div class="taskmonitor_task_left">
+                    <div class="taskmonitor_task_left_status">
+                        {{if $item.IsDone}}
+                            {{if $item.IsError}}
+                                <span class="taskmonitor_task_done">💥</span>
+                            {{else}}
+                                {{if $item.IsStopped}}
+                                    <span class="taskmonitor_task_done">🛑</span>
+                                {{else}}
+                                    <span class="taskmonitor_task_done">✅</span>
+                                {{end}}
+                            {{end}}
+                        {{else if $item.IsStopped}}
+                            <span class="taskmonitor_task_done">🛑</span>
+                        {{end}}
+                    </div>
                     <div class="taskmonitor_task_progress">
-                        <progress {{if $item.ProgressDescription}}value="{{$item.Progress}}" max="100"{{end}}></progress> {{$item.ProgressDescription}}
+                        {{if not $item.IsDone}}
+                            <progress {{if $item.ProgressDescription}}value="{{$item.Progress}}" max="100" title="{{$item.ProgressDescription}}"{{end}}></progress>
+                        {{end}}
+                    </div>
+                </div>
+                <div class="taskmonitor_task_middle">
+                    <div class="taskmonitor_task_name">
+                        {{$item.TaskName}}
+                        <span class="taskmonitor_task_uuid">{{$item.UUID}}</span>
+                    </div>
+                    <div class="taskmonitor_task_status">
+                        {{if $item.StartedStr}}
+                            Zahájeno: {{$item.StartedStr}},
+                        {{end}}
+                        {{if $item.EndedStr}}
+                            Dokončeno: {{$item.EndedStr}},
+                        {{end}}
+                        {{if $item.Status}}
+                            Status: {{$item.Status}}
+                        {{end}}
+                    </div>
+                </div>
+                {{if $item.Actions}}
+                    <div class="taskmonitor_task_right">
+                        {{range $item := $item.Actions}}
+                            <a href="{{$item.URL}}" class="btn btn-small">{{$item.Name}}</a>
+                        {{end}}
                     </div>
                 {{end}}
-                <div class="taskmonitor_task_status">
-                    {{if $item.StartedStr}}
-                        Zahájeno: {{$item.StartedStr}},
-                    {{end}}
-                    {{if $item.EndedStr}}
-                        Dokončeno: {{$item.EndedStr}},
-                    {{end}}
-                    {{if $item.Status}}
-                        Status: {{$item.Status}}
-                    {{end}}
-                </div>
             </div>
         {{end}}
     </div>
@@ -16645,6 +16678,9 @@ ul {
   background-color: #fff;
   border-radius: 5px;
 }
+.admin_box_content {
+  padding: 0px 5px 5px 5px;
+}
 .admin_box h1 {
   padding: 5px 10px;
 }
@@ -18487,10 +18523,35 @@ a.mainmenu_logo:hover {
 .taskmonitor_task {
   border-bottom: 1px solid #eee;
   padding: 10px 5px;
+  display: flex;
 }
-.taskmonitor_task_name {
+.taskmonitor_task_left {
+  border: 1px solid red;
+  background-color: #fafafa;
+  border: 1px solid #eee;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  margin-right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.taskmonitor_task_progress progress {
+  width: 30px;
+}
+.taskmonitor_task_middle {
   font-size: 1.2rem;
   line-height: 1.3em;
+  flex-grow: 10;
+}
+.taskmonitor_task_right {
+  margin-left: 10px;
+  align-self: center;
+}
+.taskmonitor_task_done {
+  color: #aaa;
 }
 .taskmonitor_task_uuid {
   font-size: 0.9rem;
@@ -18506,6 +18567,10 @@ a.mainmenu_logo:hover {
   font-size: 0.9rem;
   line-height: 1.3em;
   color: #333;
+}
+.task_name {
+  line-height: 1.3em;
+  margin: 10px 0px 5px 0px;
 }
 `
 

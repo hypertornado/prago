@@ -20,12 +20,11 @@ type App struct {
 	DevelopmentMode bool
 	Config          config
 	staticHandler   staticFilesHandler
-	commands        []*command
+	commands        *commands
 	logger          *log.Logger
-	//cron            *cron
-	templates      *templates
-	mainController *Controller
-	Cache          *cachelib.Cache
+	templates       *templates
+	mainController  *Controller
+	Cache           *cachelib.Cache
 }
 
 func NewTestingApp() *App {
@@ -43,7 +42,8 @@ func createApp(appName string, version string, initFunction func(*App)) *App {
 		AppName: appName,
 		Version: version,
 
-		Config: loadConfig(appName),
+		Config:   loadConfig(appName),
+		commands: &commands{},
 
 		logger:         log.New(os.Stdout, "", log.LstdFlags),
 		templates:      newTemplates(),

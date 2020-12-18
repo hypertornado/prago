@@ -1,21 +1,25 @@
 {{define "admin_tasks"}}
-    <div class="admin_box">        
+    <div class="admin_box">
         <h1>{{message .currentuser.Locale "tasks"}}</h1>
-        <h2>Spuštěné úlohy</h2>
+        <div class="admin_box_content">
+            <div class="taskmonitorcontainer">{{template "taskmonitor" .}}</div>
 
-        <div class="taskmonitorcontainer">{{template "taskmonitor" .}}</div>
+            {{$token := ._csrfToken}}
+            {{$locale := .currentuser.Locale}}
 
-        {{$token := ._csrfToken}}
+            <h2>{{message .currentuser.Locale "tasks_run"}}</h2>
 
-        <h2>Spustit úlohu</h2>
-        {{range $task := .tasks}}
-            <form method="POST" action="_tasks/runtask">
-                <input type="hidden" name="id" value="{{$task.ID}}">
-                <input type="hidden" name="csrf" value="{{$token}}">
-                <input type="submit" value="{{$task.Name}}" class="btn">
-            </form>
-            <br>
-        {{end}}
-
+            {{range $group := .tasks}}
+                <h3>{{$group.Name}}</h3>
+                {{range $task := $group.Tasks}}
+                    <div class="task_name">{{$task.Name}}</div>
+                    <form method="POST" action="_tasks/runtask">
+                        <input type="hidden" name="id" value="{{$task.ID}}">
+                        <input type="hidden" name="csrf" value="{{$token}}">
+                        <input type="submit" value="▶" class="btn btn-small">
+                    </form>
+                {{end}}
+            {{end}}
+        </div>
     </div>
 {{end}}
