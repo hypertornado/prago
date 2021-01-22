@@ -16609,22 +16609,22 @@ code {
   border: 1px solid #ddd;
 }
 h1 {
-  font-size: 2rem;
+  font-size: 2.5rem;
   line-height: 1.4em;
-  margin: 0.2rem 0 0.2rem 0;
+  margin: 0.5em 0 0.2em 0;
 }
 h2 {
-  font-size: 1.4rem;
+  font-size: 1.8rem;
   line-height: 1.4em;
-  margin: 1rem 0 0.2rem 0;
+  margin: 0.5em 0 0.2em 0;
 }
 h3 {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   line-height: 1.4em;
   margin: 0.5em 0 0.2em 0;
 }
 h4 {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   line-height: 1.4em;
   margin: 0.5em 0 0.2em 0;
 }
@@ -16632,7 +16632,7 @@ h1,
 h2,
 h3,
 h4 {
-  font-weight: normal;
+  font-weight: 500;
 }
 .align-right {
   text-align: right;
@@ -18585,7 +18585,6 @@ a.mainmenu_logo:hover {
   top: 10px;
   right: 10px;
   width: 250px;
-  display: none;
 }
 .notification {
   box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
@@ -20468,6 +20467,7 @@ var NotificationCenter = (function () {
     }
     NotificationCenter.prototype.loadNotifications = function () {
         var _this = this;
+        return;
         var request = new XMLHttpRequest();
         request.open("GET", this.adminPrefix + "/_api/notifications", true);
         request.addEventListener("load", function () {
@@ -20493,7 +20493,6 @@ var NotificationCenter = (function () {
 var NotificationItem = (function () {
     function NotificationItem(data) {
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
-        console.log(data);
         this.createElement(data);
     }
     NotificationItem.prototype.createElement = function (data) {
