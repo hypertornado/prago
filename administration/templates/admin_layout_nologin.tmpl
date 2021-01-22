@@ -20,6 +20,7 @@
       {{template "admin_tabs" .admin_page.Navigation.Tabs}}
     {{end}}
 
+    {{template "notification_center" .}}
     {{template "admin_flash" .}}
     {{tmpl .admin_yield .}}
   </body>

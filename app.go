@@ -28,11 +28,11 @@ type App struct {
 }
 
 func NewTestingApp() *App {
-	return createApp("prago_test_app", "0.0", nil)
+	return createApp("__prago_test_app", "0.0", nil)
 }
 
 func createApp(appName string, version string, initFunction func(*App)) *App {
-	if !configExists(appName) {
+	if appName != "__prago_test_app" && !configExists(appName) {
 		if utils.ConsoleQuestion("File config.json does not exist. Can't start app. Would you like to start setup?") {
 			setup.StartSetup(appName)
 		}

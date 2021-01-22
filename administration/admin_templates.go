@@ -361,6 +361,7 @@ const adminTemplates = `
                 </div>
             </div>
             <div class="admin_bottom">
+                {{template "notification_center" .}}
                 {{template "admin_flash" .}}
                 <div class="admin_content">
                     {{tmpl .admin_yield .}}
@@ -393,6 +394,7 @@ const adminTemplates = `
       {{template "admin_tabs" .admin_page.Navigation.Tabs}}
     {{end}}
 
+    {{template "notification_center" .}}
     {{template "admin_flash" .}}
     {{tmpl .admin_yield .}}
   </body>
@@ -11154,6 +11156,12 @@ exports.locate = locate;
 <input type="submit" value="Přihlásit se k odběru newsletteru">
 <input type="hidden" name="csrf" value="{{.csrf}}">
 </form>
+{{end}}{{define "notification_center"}}
+
+<div class="notification_center">
+
+</div>
+
 {{end}}{{define "taskmonitor"}}
     <div class="taskmonitor">
         {{if .taskmonitor.Name}}
@@ -18572,6 +18580,61 @@ a.mainmenu_logo:hover {
   line-height: 1.3em;
   margin: 10px 0px 5px 0px;
 }
+.notification_center {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 250px;
+  display: none;
+}
+.notification {
+  box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  display: flex;
+  position: relative;
+}
+.notification-closed {
+  display: none;
+}
+.notification_close {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: inline-block;
+  border: 1px solid #eee;
+  width: 20px;
+  height: 20px;
+  line-height: 15px;
+  text-align: center;
+  border-radius: 10px;
+  background-color: white;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+.notification_close:hover {
+  background-color: #eee;
+}
+.notification_close:active {
+  background-color: #ddd;
+}
+.notification_close::after {
+  content: "×";
+}
+.notification_left {
+  border: 1px solid #eee;
+  border-radius: 5px;
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  margin: 5px;
+}
+.notification_right {
+  flex-grow: 10;
+  margin: 5px;
+  margin-left: 0px;
+}
 `
 
 
@@ -18613,6 +18676,17 @@ function encodeParams(data) {
         ret = "?" + ret;
     }
     return ret;
+}
+function e(str) {
+    return escapeHTML(str);
+}
+function escapeHTML(str) {
+    str = str.split("&").join("&amp;");
+    str = str.split("<").join("&lt;");
+    str = str.split(">").join("&gt;");
+    str = str.split("\"").join("&quot;");
+    str = str.split("'").join("&#39;");
+    return str;
 }
 function bindImageViews() {
     var els = document.querySelectorAll(".admin_item_view_image_content");
@@ -20382,6 +20456,61 @@ var TaskMonitor = (function () {
     };
     return TaskMonitor;
 }());
+function bindNotifications() {
+    new NotificationCenter(document.querySelector(".notification_center"));
+}
+var NotificationCenter = (function () {
+    function NotificationCenter(el) {
+        this.el = el;
+        this.notifications = Array();
+        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
+        this.loadNotifications();
+    }
+    NotificationCenter.prototype.loadNotifications = function () {
+        var _this = this;
+        var request = new XMLHttpRequest();
+        request.open("GET", this.adminPrefix + "/_api/notifications", true);
+        request.addEventListener("load", function () {
+            if (request.status == 200) {
+                var notifications = JSON.parse(request.response);
+                notifications.Views.forEach(function (item) {
+                    var notification = _this.createNotification(item);
+                    _this.notifications.push(notification);
+                    _this.el.appendChild(notification.el);
+                });
+            }
+            else {
+                console.log("failed to load notifications");
+            }
+        });
+        request.send();
+    };
+    NotificationCenter.prototype.createNotification = function (data) {
+        return new NotificationItem(data);
+    };
+    return NotificationCenter;
+}());
+var NotificationItem = (function () {
+    function NotificationItem(data) {
+        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
+        console.log(data);
+        this.createElement(data);
+    }
+    NotificationItem.prototype.createElement = function (data) {
+        var ret;
+        ret = document.createElement("div");
+        ret.innerHTML = "\n            <div class=\"notification\">\n                <div class=\"notification_close\"></div>\n                <div class=\"notification_left\"></div>\n                <div class=\"notification_right\">\n                    <div class=\"notification_name\">" + e(data.Name) + "</div>\n                </div>\n            </div>        \n        ";
+        this.el = ret.children[0];
+        this.el.querySelector(".notification_close").addEventListener("click", this.closeNotification.bind(this));
+    };
+    NotificationItem.prototype.closeNotification = function () {
+        this.el.classList.add("notification-closed");
+        fetch(this.adminPrefix + "/_api/notification/" + this.uuid, { method: "DELETE" }).then(console.log).then(function (e) {
+            console.log(e);
+        });
+    };
+    return NotificationItem;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();
@@ -20400,6 +20529,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindMainMenu();
     bindRelationList();
     bindTaskMonitor();
+    bindNotifications();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");

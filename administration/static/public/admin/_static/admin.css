@@ -5384,22 +5384,22 @@ code {
   border: 1px solid #ddd;
 }
 h1 {
-  font-size: 2rem;
+  font-size: 2.5rem;
   line-height: 1.4em;
-  margin: 0.2rem 0 0.2rem 0;
+  margin: 0.5em 0 0.2em 0;
 }
 h2 {
-  font-size: 1.4rem;
+  font-size: 1.8rem;
   line-height: 1.4em;
-  margin: 1rem 0 0.2rem 0;
+  margin: 0.5em 0 0.2em 0;
 }
 h3 {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   line-height: 1.4em;
   margin: 0.5em 0 0.2em 0;
 }
 h4 {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   line-height: 1.4em;
   margin: 0.5em 0 0.2em 0;
 }
@@ -5407,7 +5407,7 @@ h1,
 h2,
 h3,
 h4 {
-  font-weight: normal;
+  font-weight: 500;
 }
 .align-right {
   text-align: right;
@@ -7354,4 +7354,58 @@ a.mainmenu_logo:hover {
 .task_name {
   line-height: 1.3em;
   margin: 10px 0px 5px 0px;
+}
+.notification_center {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 250px;
+}
+.notification {
+  box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  display: flex;
+  position: relative;
+}
+.notification-closed {
+  display: none;
+}
+.notification_close {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: inline-block;
+  border: 1px solid #eee;
+  width: 20px;
+  height: 20px;
+  line-height: 15px;
+  text-align: center;
+  border-radius: 10px;
+  background-color: white;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+.notification_close:hover {
+  background-color: #eee;
+}
+.notification_close:active {
+  background-color: #ddd;
+}
+.notification_close::after {
+  content: "×";
+}
+.notification_left {
+  border: 1px solid #eee;
+  border-radius: 5px;
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  margin: 5px;
+}
+.notification_right {
+  flex-grow: 10;
+  margin: 5px;
+  margin-left: 0px;
 }

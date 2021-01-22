@@ -36,6 +36,17 @@ function encodeParams(data) {
     }
     return ret;
 }
+function e(str) {
+    return escapeHTML(str);
+}
+function escapeHTML(str) {
+    str = str.split("&").join("&amp;");
+    str = str.split("<").join("&lt;");
+    str = str.split(">").join("&gt;");
+    str = str.split("\"").join("&quot;");
+    str = str.split("'").join("&#39;");
+    return str;
+}
 function bindImageViews() {
     var els = document.querySelectorAll(".admin_item_view_image_content");
     for (var i = 0; i < els.length; i++) {
@@ -1804,6 +1815,61 @@ var TaskMonitor = (function () {
     };
     return TaskMonitor;
 }());
+function bindNotifications() {
+    new NotificationCenter(document.querySelector(".notification_center"));
+}
+var NotificationCenter = (function () {
+    function NotificationCenter(el) {
+        this.el = el;
+        this.notifications = Array();
+        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
+        this.loadNotifications();
+    }
+    NotificationCenter.prototype.loadNotifications = function () {
+        var _this = this;
+        return;
+        var request = new XMLHttpRequest();
+        request.open("GET", this.adminPrefix + "/_api/notifications", true);
+        request.addEventListener("load", function () {
+            if (request.status == 200) {
+                var notifications = JSON.parse(request.response);
+                notifications.Views.forEach(function (item) {
+                    var notification = _this.createNotification(item);
+                    _this.notifications.push(notification);
+                    _this.el.appendChild(notification.el);
+                });
+            }
+            else {
+                console.log("failed to load notifications");
+            }
+        });
+        request.send();
+    };
+    NotificationCenter.prototype.createNotification = function (data) {
+        return new NotificationItem(data);
+    };
+    return NotificationCenter;
+}());
+var NotificationItem = (function () {
+    function NotificationItem(data) {
+        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
+        this.createElement(data);
+    }
+    NotificationItem.prototype.createElement = function (data) {
+        var ret;
+        ret = document.createElement("div");
+        ret.innerHTML = "\n            <div class=\"notification\">\n                <div class=\"notification_close\"></div>\n                <div class=\"notification_left\"></div>\n                <div class=\"notification_right\">\n                    <div class=\"notification_name\">" + e(data.Name) + "</div>\n                </div>\n            </div>        \n        ";
+        this.el = ret.children[0];
+        this.el.querySelector(".notification_close").addEventListener("click", this.closeNotification.bind(this));
+    };
+    NotificationItem.prototype.closeNotification = function () {
+        this.el.classList.add("notification-closed");
+        fetch(this.adminPrefix + "/_api/notification/" + this.uuid, { method: "DELETE" }).then(console.log).then(function (e) {
+            console.log(e);
+        });
+    };
+    return NotificationItem;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     bindStats();
     bindMarkdowns();
@@ -1822,6 +1888,7 @@ document.addEventListener("DOMContentLoaded", function () {
     bindMainMenu();
     bindRelationList();
     bindTaskMonitor();
+    bindNotifications();
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");

@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindMainMenu();
   bindRelationList();
   bindTaskMonitor();
+  bindNotifications();
 });
 
 function bindFlashMessages() {

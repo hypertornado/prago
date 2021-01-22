@@ -22,3 +22,18 @@ function encodeParams(data: any) {
   }
   return ret;
 }
+
+function e(str: String): String {
+  return escapeHTML(str);
+}
+
+function escapeHTML(str: String): String {
+  str = str.split("&").join("&amp;");
+  str = str.split("<").join("&lt;");
+  str = str.split(">").join("&gt;");
+  str = str.split("\"").join("&quot;");
+  str = str.split("'").join("&#39;");
+  //str = str.split("&").join("&amp;");
+  //str = str.replaceAll("&", "&amp;");
+  return str;
+}

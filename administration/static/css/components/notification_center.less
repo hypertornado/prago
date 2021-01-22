@@ -1,0 +1,74 @@
+.notification_center {
+    //border: 1px solid red;
+
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 250px;
+    //height: 100px;
+    //display: flex;
+    //flex-direction: row;
+
+    //display: none;
+}
+
+
+.notification {
+    .shadowLarge;
+    background-color: white;
+    border-radius: 5px;
+    //min-height: 100px;
+    margin-bottom: 10px;
+    display: flex;
+    position: relative;
+}
+
+.notification-closed {
+    display: none;
+}
+
+.notification_close {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    //border: 1px solid red;
+    display: inline-block;
+    border: 1px solid #eee;
+    width: 20px;
+    height: 20px;
+    line-height: 15px;
+    text-align: center;
+    border-radius: 10px;
+    background-color: white;
+    .shadow;
+    cursor: pointer;
+}
+
+.notification_close:hover {
+    background-color: #eee;
+}
+
+.notification_close:active {
+    background-color: #ddd;
+}
+
+.notification_close::after {
+    content: "×";
+}
+
+.notification_left {
+    border: 1px solid #eee;
+    border-radius: 5px;
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    margin: 5px;
+}
+
+.notification_right {
+    flex-grow: 10;
+    //border: 1px solid red;
+    margin: 5px;
+    margin-left: 0px;
+
+}

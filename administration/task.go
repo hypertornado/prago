@@ -343,6 +343,12 @@ func (tm *taskManager) run(t *Task, user *User, starterTyp string) *TaskActivity
 			}
 			activity.ended = true
 			activity.endedAt = time.Now()
+			if user != nil {
+				err := tm.admin.Notification(*user, "Task finished").Create()
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
 		}()
 		if t.handler != nil {
 			activity.error = t.handler(activity)
