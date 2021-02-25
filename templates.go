@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"html/template"
 	"io"
+	"io/fs"
 )
 
 type templates struct {
@@ -49,6 +50,12 @@ func (app *App) LoadTemplatePath(pattern string) (err error) {
 //LoadTemplateFromString loads app's html templates from string
 func (app *App) LoadTemplateFromString(in string) (err error) {
 	app.templates.templates, err = app.templates.templates.Funcs(app.templates.funcMap).Parse(in)
+	return
+}
+
+//LoadTemplateFromFS loads app's html templates from file system
+func (app *App) LoadTemplateFromFS(fsys fs.FS, patterns ...string) (err error) {
+	app.templates.templates, err = app.templates.templates.Funcs(app.templates.funcMap).ParseFS(fsys, patterns...)
 	return
 }
 

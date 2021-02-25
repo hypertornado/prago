@@ -2,6 +2,7 @@ package administration
 
 import (
 	"database/sql"
+	"embed"
 	"errors"
 	"fmt"
 	"html/template"
@@ -10,6 +11,8 @@ import (
 	"reflect"
 	"strings"
 	"time"
+
+	_ "embed"
 
 	"github.com/golang-commonmark/markdown"
 	"github.com/gorilla/sessions"
@@ -21,6 +24,18 @@ import (
 
 //ErrItemNotFound is returned when no item is found
 var ErrItemNotFound = errors.New("item not found")
+
+//go:embed static/public/admin/_static/admin.js
+var staticAdminJS []byte
+
+//go:embed static/public/admin/_static/admin.css
+var staticAdminCSS []byte
+
+//go:embed static/public/admin/_static/pikaday.js
+var staticPikadayJS []byte
+
+//go:embed templates
+var templatesFS embed.FS
 
 //Administration is struct representing admin extension
 type Administration struct {
@@ -117,7 +132,9 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	bindAPI(admin)
 	admin.bindMigrationCommand(admin.App)
 	admin.initTemplates(admin.App)
-	must(admin.App.LoadTemplateFromString(adminTemplates))
+
+	must(admin.App.LoadTemplateFromFS(templatesFS, "templates/*.tmpl"))
+	//must(admin.App.LoadTemplateFromString(adminTemplates))
 	bindSystemstats(admin)
 	admin.initRootActions()
 	admin.initAutoRelations()
@@ -184,17 +201,17 @@ func NewAdministration(app *prago.App, initFunction func(*Administration)) *Admi
 	admin.AdminController.Get(admin.GetURL("_static/admin.js"), func(request prago.Request) {
 		request.Response().Header().Set("Content-type", "text/javascript")
 		request.Response().WriteHeader(200)
-		request.Response().Write([]byte(adminJS))
+		request.Response().Write([]byte(staticAdminJS))
 	})
 	admin.AdminController.Get(admin.GetURL("_static/pikaday.js"), func(request prago.Request) {
 		request.Response().Header().Set("Content-type", "text/javascript")
 		request.Response().WriteHeader(200)
-		request.Response().Write([]byte(pikadayJS))
+		request.Response().Write([]byte(staticPikadayJS))
 	})
 	admin.App.MainController().Get(admin.GetURL("_static/admin.css"), func(request prago.Request) {
 		request.Response().Header().Set("Content-type", "text/css; charset=utf-8")
 		request.Response().WriteHeader(200)
-		request.Response().Write([]byte(adminCSS))
+		request.Response().Write([]byte(staticAdminCSS))
 	})
 
 	admin.taskManager.init()
