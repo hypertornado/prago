@@ -55,6 +55,7 @@ func (app *App) LoadTemplateFromString(in string) (err error) {
 
 //LoadTemplateFromFS loads app's html templates from file system
 func (app *App) LoadTemplateFromFS(fsys fs.FS, patterns ...string) (err error) {
+	//fmt.Println("DEV MODE", app.DevelopmentMode)
 	app.templates.templates, err = app.templates.templates.Funcs(app.templates.funcMap).ParseFS(fsys, patterns...)
 	return
 }

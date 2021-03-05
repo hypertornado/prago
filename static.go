@@ -2,10 +2,15 @@ package prago
 
 import (
 	"errors"
+	"io/fs"
 	"net/http"
 )
 
 var errFileNotFound = errors.New("requested file is folder")
+
+type staticFilesHandlerNew struct {
+	filesystems []fs.FS
+}
 
 type staticFilesHandler struct {
 	paths []string
@@ -13,7 +18,7 @@ type staticFilesHandler struct {
 
 func newStaticHandler(paths []string) staticFilesHandler {
 	return staticFilesHandler{
-		paths: paths,
+		paths,
 	}
 }
 
