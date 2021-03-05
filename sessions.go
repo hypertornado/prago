@@ -4,13 +4,13 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-func createSessionAroundAction(appName, random string) func(Request, func()) {
+func (app App) createSessionAroundAction(random string) func(Request, func()) {
 	cookieStore := sessions.NewCookieStore([]byte(random))
 	return func(request Request, next func()) {
-		session, err := cookieStore.Get(request.Request(), appName)
+		session, err := cookieStore.Get(request.Request(), app.AppName)
 		if err != nil {
-			request.Log().Println("Session not valid")
-			request.Response().Header().Set("Set-Cookie", appName+"=; expires=Thu, 01 Jan 1970 00:00:01 GMT;")
+			app.Log().Println("Session not valid")
+			request.Response().Header().Set("Set-Cookie", app.AppName+"=; expires=Thu, 01 Jan 1970 00:00:01 GMT;")
 			panic(err)
 		}
 

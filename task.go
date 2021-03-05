@@ -21,16 +21,17 @@ type taskManager struct {
 	startedAt     time.Time
 }
 
-func newTaskManager(admin *App) *taskManager {
+func (app *App) initTaskManager() {
 	tm := &taskManager{
-		admin:         admin,
+		admin:         app,
 		tasksMap:      make(map[string]*Task),
 		activities:    make(map[string]*TaskActivity),
 		activityMutex: &sync.RWMutex{},
 		startedAt:     time.Now(),
 	}
 
-	return tm
+	app.taskManager = tm
+	app.taskManager.init()
 }
 
 func (tm *taskManager) startCRON() {

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func bindSystemstats(admin *App) {
+func (admin *App) initSystemStats() {
 	startedAt := time.Now()
 
 	action := CreateAdminAction(
@@ -19,11 +19,11 @@ func bindSystemstats(admin *App) {
 		func(resource Resource, request Request, user User) interface{} {
 
 			stats := [][2]string{}
-			stats = append(stats, [2]string{"App name", request.App().AppName})
-			stats = append(stats, [2]string{"App version", request.App().Version})
+			stats = append(stats, [2]string{"App name", admin.AppName})
+			stats = append(stats, [2]string{"App version", admin.Version})
 
 			developmentModeStr := "false"
-			if request.App().DevelopmentMode {
+			if admin.DevelopmentMode {
 				developmentModeStr = "true"
 			}
 			stats = append(stats, [2]string{"Development mode", developmentModeStr})
@@ -35,7 +35,7 @@ func bindSystemstats(admin *App) {
 			stats = append(stats, [2]string{"GOOS", runtime.GOOS})
 			stats = append(stats, [2]string{"GOMAXPROCS", fmt.Sprintf("%d", runtime.GOMAXPROCS(-1))})
 
-			configStats := request.App().Config.Export()
+			configStats := admin.Config.Export()
 
 			osStats := [][2]string{}
 			osStats = append(osStats, [2]string{"EGID", fmt.Sprintf("%d", os.Getegid())})

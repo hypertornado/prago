@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (app *App) bindMigrationCommand() {
+func (app *App) initMigrationCommand() {
 	app.AddCommand("admin", "migrate").Description("migrate database").
 		Callback(func() {
 			app.Log().Println("Migrating database")

@@ -99,7 +99,7 @@ func (user *User) newPassword(password string) error {
 	return nil
 }
 
-func (user User) emailToken(app App) string {
+func (user User) emailToken(app *App) string {
 	randomness := app.Config.GetString("random")
 	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%s%s", user.Email, randomness))
@@ -141,13 +141,13 @@ func ValidateCSRF(request Request) {
 	}
 }
 
-func (user User) sendConfirmEmail(request Request, a *App) error {
+func (user User) sendConfirmEmail(request Request, app *App) error {
 
 	if user.emailConfirmed() {
 		return errors.New("email already confirmed")
 	}
 
-	if a.noReplyEmail == "" {
+	if app.noReplyEmail == "" {
 		return errors.New("no reply email empty")
 	}
 
@@ -155,13 +155,13 @@ func (user User) sendConfirmEmail(request Request, a *App) error {
 
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)
-	urlValues.Add("token", user.emailToken(*a))
+	urlValues.Add("token", user.emailToken(app))
 
-	subject := messages.Messages.Get(locale, "admin_confirm_email_subject", a.HumanName)
-	link := request.App().Config.GetString("baseUrl") + a.prefix + "/user/confirm_email?" + urlValues.Encode()
-	body := messages.Messages.Get(locale, "admin_confirm_email_body", link, link, a.HumanName)
+	subject := messages.Messages.Get(locale, "admin_confirm_email_subject", app.HumanName)
+	link := app.Config.GetString("baseUrl") + app.prefix + "/user/confirm_email?" + urlValues.Encode()
+	body := messages.Messages.Get(locale, "admin_confirm_email_body", link, link, app.HumanName)
 
-	return a.SendEmail(
+	return app.SendEmail(
 		user.Name,
 		user.Email,
 		subject,
@@ -199,11 +199,11 @@ func (user User) sendAdminEmail(request Request, a *App) error {
 	return nil
 }
 
-func (user User) getRenewURL(request Request, a *App) string {
+func (user User) getRenewURL(request Request, app *App) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)
-	urlValues.Add("token", user.emailToken(*a))
-	return request.App().Config.GetString("baseUrl") + a.prefix + "/user/renew_password?" + urlValues.Encode()
+	urlValues.Add("token", user.emailToken(app))
+	return app.Config.GetString("baseUrl") + app.prefix + "/user/renew_password?" + urlValues.Encode()
 }
 
 func (user User) sendRenew(request Request, admin *App) error {
@@ -283,7 +283,7 @@ func initUserResource(resource *Resource) {
 		err := resource.App.Query().WhereIs("email", email).Get(&user)
 		if err == nil {
 			if !user.emailConfirmed() {
-				if token == user.emailToken(request.App()) {
+				if token == user.emailToken(resource.App) {
 					user.EmailConfirmedAt = time.Now()
 					err = resource.App.Save(&user)
 					if err == nil {
@@ -401,7 +401,7 @@ func initUserResource(resource *Resource) {
 		var user User
 		err := resource.App.Query().WhereIs("email", email).Get(&user)
 		if err == nil {
-			if token == user.emailToken(request.App()) {
+			if token == user.emailToken(resource.App) {
 				if form.Valid {
 					err = user.newPassword(request.Params().Get("password"))
 					if err == nil {
@@ -526,11 +526,11 @@ func initUserResource(resource *Resource) {
 			must(user.newPassword(request.Params().Get("password")))
 			err := user.sendConfirmEmail(request, resource.App)
 			if err != nil {
-				request.App().Log().Println(err)
+				resource.App.Log().Println(err)
 			}
 			err = user.sendAdminEmail(request, resource.App)
 			if err != nil {
-				request.App().Log().Println(err)
+				resource.App.Log().Println(err)
 			}
 
 			count, err := resource.App.Query().Count(&User{})

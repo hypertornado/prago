@@ -29,7 +29,7 @@ func (admin *App) getHeaderData(request Request) (headerData *adminHeaderData) {
 		Language:    user.Locale,
 		Logo:        admin.Logo,
 		UrlPrefix:   admin.prefix,
-		HomepageUrl: request.App().Config.GetStringWithFallback("baseUrl", request.Request().Host),
+		HomepageUrl: admin.Config.GetStringWithFallback("baseUrl", request.Request().Host),
 		HasSearch:   hasSearch,
 		Items:       []adminHeaderItem{},
 	}

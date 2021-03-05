@@ -2,7 +2,6 @@ package prago
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -17,11 +16,6 @@ type Request struct {
 	r          *http.Request
 	data       map[string]interface{}
 	app        App
-}
-
-//Log returns logger
-func (request Request) Log() *log.Logger {
-	return request.App().Log()
 }
 
 //Request returns underlying http.Request
@@ -40,9 +34,6 @@ func (request Request) SetData(k string, v interface{}) { request.data[k] = v }
 
 //GetData returns request data
 func (request Request) GetData(k string) interface{} { return request.data[k] }
-
-//App returns related app
-func (request Request) App() App { return request.app }
 
 //RenderView with HTTP 200 code
 func (request Request) RenderView(viewName string) {
@@ -105,17 +96,17 @@ func (request Request) Redirect(url string) {
 	request.Response().WriteHeader(http.StatusFound)
 }
 
-func (request Request) writeAfterLog() {
+func (app App) writeAfterLog(request Request) {
 	if request.Request().Header.Get("X-Dont-Log") != "true" {
-		request.Log().Printf("id=%s %s %s took=%v", request.uuid,
+		app.Log().Printf("id=%s %s %s took=%v", request.uuid,
 			request.Request().Method, request.Request().URL.String(),
 			time.Now().Sub(request.receivedAt))
 	}
 }
 
-func timestampLog(request Request, text string) {
+func (app App) timestampLog(request Request, text string) {
 	if request.Request().Header.Get("X-Dont-Log") != "true" {
-		request.Log().Printf("id=%s %s took=%v", request.uuid, text, time.Now().Sub(request.receivedAt))
+		app.Log().Printf("id=%s %s took=%v", request.uuid, text, time.Now().Sub(request.receivedAt))
 	}
 }
 

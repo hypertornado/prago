@@ -16,36 +16,54 @@ const (
 )
 
 type router struct {
-	routes []*route
+	priorityRoutes []*route
+	routes         []*route
 }
 
 func newRouter() *router {
-	return &router{[]*route{}}
+	return &router{
+		[]*route{},
+		[]*route{},
+	}
 }
 
 func (r *router) addRoute(route *route) {
-	r.routes = append(r.routes, route)
+	if route.controller.priorityRouter {
+		r.priorityRoutes = append(r.priorityRoutes, route)
+	} else {
+		r.routes = append(r.routes, route)
+	}
 }
 
 func (r *router) process(request Request) bool {
-	for _, route := range r.routes {
-		params, match := route.match(request.Request().Method, request.Request().URL.Path)
-		if match {
-			for k, v := range params {
-				request.Params().Add(k, v)
+	for _, routes := range [][]*route{
+		r.priorityRoutes,
+		r.routes,
+	} {
+		for _, route := range routes {
+			params, match := route.match(request.Request().Method, request.Request().URL.Path)
+			if match {
+				for k, v := range params {
+					request.Params().Add(k, v)
+				}
+
+				route.controller.callArounds(request, 0, func() {
+					route.fn(request)
+				}, true)
+
+				return true
 			}
-
-			route.controller.callArounds(request, 0, func() {
-				route.fn(request)
-			}, true)
-
-			return true
 		}
 	}
 	return false
 }
 
 func (r *router) print() {
+	fmt.Println("PRIORITY ROUTES")
+	for _, v := range r.priorityRoutes {
+		fmt.Printf("%s %s\n", v.method, v.path)
+	}
+	fmt.Println("NORMAL ROUTES")
 	for _, v := range r.routes {
 		fmt.Printf("%s %s\n", v.method, v.path)
 	}

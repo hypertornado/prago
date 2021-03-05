@@ -10,23 +10,25 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago/cachelib"
+	"github.com/hypertornado/prago/messages"
 	setup "github.com/hypertornado/prago/prago-setup/lib"
 	"github.com/hypertornado/prago/utils"
 )
 
 //App is main struct of prago application
 type App struct {
-	AppName         string
-	Version         string
-	DevelopmentMode bool
-	Config          config
-	staticHandler   staticFilesHandler
-	commands        *commands
-	logger          *log.Logger
-	templates       *templates
-	mainController  *Controller
-	Cache           *cachelib.Cache
+	AppName            string
+	Version            string
+	DevelopmentMode    bool
+	Config             config
+	staticFilesHandler staticFilesHandler
+	commands           *commands
+	logger             *log.Logger
+	templates          *templates
+	mainController     *Controller
+	Cache              *cachelib.Cache
 
 	//App              *App
 	Logo             string
@@ -76,15 +78,160 @@ func createApp(appName string, version string, initFunction func(*App)) *App {
 		commands: &commands{},
 
 		logger:         log.New(os.Stdout, "", log.LstdFlags),
-		templates:      newTemplates(),
 		mainController: newMainController(),
 		Cache:          cachelib.NewCache(),
 	}
 
-	app.staticHandler = app.loadStaticHandler()
+	app.initStaticFilesHandler()
+
+	app.HumanName = app.AppName
+	app.prefix = "/admin"
+	app.resourceMap = make(map[reflect.Type]*Resource)
+	app.resourceNameMap = make(map[string]*Resource)
+	app.accessController = app.MainController().SubController()
+	app.accessController.priorityRouter = true
+
+	app.sendgridKey = app.Config.GetStringWithFallback("sendgridApi", "")
+	app.noReplyEmail = app.Config.GetStringWithFallback("noReplyEmail", "")
+	app.fieldTypes = make(map[string]FieldType)
+	app.roles = make(map[string]map[string]bool)
+
+	db, err := connectMysql(
+		app.Config.GetStringWithFallback("dbUser", ""),
+		app.Config.GetStringWithFallback("dbPassword", ""),
+		app.Config.GetStringWithFallback("dbName", ""),
+	)
+	if err != nil {
+		panic(err)
+	}
+	app.db = db
+
+	app.AdminController = app.accessController.SubController()
+	app.initDefaultFieldTypes()
+
+	app.initTaskManager()
+
+	app.CreateResource(User{}, initUserResource)
+	app.CreateResource(Notification{}, initNotificationResource)
+	app.CreateResource(File{}, initFilesResource)
+	app.CreateResource(ActivityLog{}, initActivityLog)
+
+	app.accessController.AddBeforeAction(func(request Request) {
+		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
+
+		request.SetData("admin_header_prefix", app.prefix)
+		request.SetData("javascripts", app.javascripts)
+		request.SetData("css", app.css)
+	})
+
+	app.accessController.AddAroundAction(
+		app.createSessionAroundAction(
+			app.Config.GetString("random"),
+		),
+	)
+
+	googleAPIKey := app.Config.GetStringWithFallback("google", "")
+	app.AdminController.AddBeforeAction(func(request Request) {
+		request.SetData("google", googleAPIKey)
+	})
+
+	app.initAPI()
+	app.initMigrationCommand()
+	app.initTemplates()
+
+	must(app.LoadTemplateFromFS(templatesFS, "templates/*.tmpl"))
+	app.initSystemStats()
+	app.initBackupCRON()
+
+	app.AdminController.AddAroundAction(func(request Request, next func()) {
+		session := request.GetData("session").(*sessions.Session)
+		userID, ok := session.Values["user_id"].(int64)
+
+		if !ok {
+			request.Redirect(app.GetURL("user/login"))
+			return
+		}
+
+		var user User
+		err := app.Query().WhereIs("id", userID).Get(&user)
+		if err != nil {
+			request.Redirect(app.GetURL("user/login"))
+			return
+		}
+
+		randomness := app.Config.GetString("random")
+		request.SetData("_csrfToken", user.CSRFToken(randomness))
+		request.SetData("currentuser", &user)
+		request.SetData("locale", user.Locale)
+		request.SetData("gravatar", user.gravatarURL())
+
+		if !user.IsAdmin && !user.emailConfirmed() {
+			addCurrentFlashMessage(request, messages.Messages.Get(user.Locale, "admin_flash_not_confirmed"))
+		}
+
+		if !user.IsAdmin {
+			var sysadmin User
+			err := app.Query().WhereIs("IsSysadmin", true).Get(&sysadmin)
+			var sysadminEmail string
+			if err == nil {
+				sysadminEmail = sysadmin.Email
+			}
+
+			addCurrentFlashMessage(request, messages.Messages.Get(user.Locale, "admin_flash_not_approved", sysadminEmail))
+		}
+
+		headerData := app.getHeaderData(request)
+		request.SetData("admin_header", headerData)
+		request.SetData("main_menu", app.getMainMenu(request))
+
+		next()
+	})
+
+	app.AdminController.Get(app.GetURL(""), func(request Request) {
+		renderNavigationPage(request, adminNavigationPage{
+			PageTemplate: "admin_home_navigation",
+			PageData:     app.getHomeData(request),
+		})
+	})
+
+	app.AdminController.Get(app.GetURL("_help/markdown"), func(request Request) {
+		request.SetData("admin_yield", "admin_help_markdown")
+		request.RenderView("admin_layout")
+	})
+
+	app.AdminController.Get(app.GetURL("_static/admin.js"), func(request Request) {
+		request.Response().Header().Set("Content-type", "text/javascript")
+		request.Response().WriteHeader(200)
+		request.Response().Write([]byte(staticAdminJS))
+	})
+	app.AdminController.Get(app.GetURL("_static/pikaday.js"), func(request Request) {
+		request.Response().Header().Set("Content-type", "text/javascript")
+		request.Response().WriteHeader(200)
+		request.Response().Write([]byte(staticPikadayJS))
+	})
+	app.MainController().Get(app.GetURL("_static/admin.css"), func(request Request) {
+		request.Response().Header().Set("Content-type", "text/css; charset=utf-8")
+		request.Response().WriteHeader(200)
+		request.Response().Write([]byte(staticAdminCSS))
+	})
+
+	app.initSearch()
+
 	if initFunction != nil {
 		initFunction(app)
 	}
+
+	app.AdminController.Get(app.GetURL("*"), func(request Request) {
+		render404(request)
+	})
+
+	app.AddRole("sysadmin", app.getSysadminPermissions())
+
+	//app.taskManager.init()
+
+	app.initAutoRelations()
+
+	app.resourcesInited = true
 	return app
 }
 
@@ -94,7 +241,7 @@ func NewApp(appName, version string, initFunction func(*App)) {
 	app.parseCommands()
 }
 
-func (app *App) loadStaticHandler() staticFilesHandler {
+func (app *App) initStaticFilesHandler() {
 	paths := []string{}
 	configValue, err := app.Config.Get("staticPaths")
 	if err == nil {
@@ -102,21 +249,21 @@ func (app *App) loadStaticHandler() staticFilesHandler {
 			paths = append(paths, path.(string))
 		}
 	}
-	return newStaticHandler(paths)
+	app.staticFilesHandler = newStaticHandler(paths)
 }
 
 //Log returns logger structure
 func (app App) Log() *log.Logger { return app.logger }
 
 //DotPath returns path to hidden directory with app configuration and data
-func (app *App) DotPath() string { return os.Getenv("HOME") + "/." + app.AppName }
+func (app *App) dotPath() string { return os.Getenv("HOME") + "/." + app.AppName }
 
 //ListenAndServe starts server on port
 func (app *App) ListenAndServe(port int) error {
 	app.Log().Printf("Server started: port=%d, pid=%d, developmentMode=%v\n", port, os.Getpid(), app.DevelopmentMode)
 
 	if !app.DevelopmentMode {
-		file, err := os.OpenFile(app.DotPath()+"/prago.log",
+		file, err := os.OpenFile(app.dotPath()+"/prago.log",
 			os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
 		must(err)
 		app.logger.SetOutput(file)
@@ -152,19 +299,19 @@ func (app App) serveHTTP(w http.ResponseWriter, r *http.Request) {
 
 	defer func() {
 		if recoveryData := recover(); recoveryData != nil {
-			recoveryFunction(request, recoveryData)
+			app.recoveryFunction(request, recoveryData)
 		}
 	}()
 
 	defer func() {
-		request.writeAfterLog()
+		app.writeAfterLog(request)
 	}()
 
 	if request.removeTrailingSlash() {
 		return
 	}
 
-	if app.staticHandler.serveStatic(request.Response(), request.Request()) {
+	if app.staticFilesHandler.serveStatic(request.Response(), request.Request()) {
 		return
 	}
 

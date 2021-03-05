@@ -33,7 +33,7 @@ func (f FieldType) IsRelation() bool {
 	return false
 }
 
-func (admin *App) addDefaultFieldTypes() {
+func (admin *App) initDefaultFieldTypes() {
 	admin.AddFieldType("role", admin.createRoleFieldType())
 
 	admin.AddFieldType("text", FieldType{

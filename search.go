@@ -314,7 +314,7 @@ func relationDataToSearchItem(resource *Resource, data viewRelationData) SearchI
 
 }
 
-func bindSearch(admin *App) {
+func (admin *App) initSearch() {
 	var err error
 
 	adminSearch, err := newAdminSearch(admin)
@@ -385,7 +385,7 @@ func bindSearch(admin *App) {
 	admin.AdminController.Get(admin.GetURL("_search_suggest"), func(request Request) {
 		results, err := adminSearch.Suggest(request.Params().Get("q"))
 		if err != nil {
-			request.Log().Println(err)
+			admin.Log().Println(err)
 		}
 
 		if len(results) == 0 {

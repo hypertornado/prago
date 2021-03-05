@@ -103,10 +103,13 @@ func (app *App) CreateResource(item interface{}, initFunction func(*Resource)) *
 		initFunction(ret)
 	}
 
+	app.initResource(ret)
+
 	return ret
 }
 
 func (admin *App) initResource(resource *Resource) {
+
 	resource.ResourceController.AddAroundAction(func(request Request, next func()) {
 		user := GetUser(request)
 		if !admin.Authorize(user, resource.CanView) {

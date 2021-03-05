@@ -158,7 +158,7 @@ func actionCreate(permission Permission) Action {
 			if resource.App.search != nil {
 				err = resource.App.search.saveItem(&resource, item)
 				if err != nil {
-					request.Log().Println(fmt.Errorf("%s", err))
+					resource.App.Log().Println(fmt.Errorf("%s", err))
 				}
 				resource.App.search.Flush()
 			}
@@ -274,7 +274,7 @@ func actionUpdate(permission Permission) Action {
 			if resource.App.search != nil {
 				err = resource.App.search.saveItem(&resource, item)
 				if err != nil {
-					request.Log().Println(fmt.Errorf("%s", err))
+					resource.App.Log().Println(fmt.Errorf("%s", err))
 				}
 				resource.App.search.Flush()
 			}
@@ -377,7 +377,7 @@ func actionDoDelete(permission Permission) Action {
 			if resource.App.search != nil {
 				err = resource.App.search.deleteItem(&resource, int64(id))
 				if err != nil {
-					request.Log().Println(fmt.Errorf("%s", err))
+					resource.App.Log().Println(fmt.Errorf("%s", err))
 				}
 				resource.App.search.Flush()
 			}

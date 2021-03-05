@@ -5,6 +5,10 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
+	"strings"
+
+	"github.com/golang-commonmark/markdown"
+	"github.com/hypertornado/prago/messages"
 )
 
 type templates struct {
@@ -12,29 +16,54 @@ type templates struct {
 	funcMap   template.FuncMap
 }
 
-func newTemplates() (ret *templates) {
-	ret = &templates{
+func (app *App) initTemplates() {
+	app.templates = &templates{
 		templates: template.New(""),
 		funcMap:   map[string]interface{}{},
 	}
 
-	ret.funcMap["HTML"] = func(data string) template.HTML {
+	app.AddTemplateFunction("HTML", func(data string) template.HTML {
 		return template.HTML(data)
-	}
+	})
 
-	ret.funcMap["HTMLAttr"] = func(data string) template.HTMLAttr {
+	app.AddTemplateFunction("HTMLAttr", func(data string) template.HTMLAttr {
 		return template.HTMLAttr(data)
-	}
+	})
 
-	ret.funcMap["CSS"] = func(data string) template.CSS {
+	app.AddTemplateFunction("CSS", func(data string) template.CSS {
 		return template.CSS(data)
-	}
+	})
 
-	ret.funcMap["tmpl"] = func(templateName string, x interface{}) (template.HTML, error) {
+	app.AddTemplateFunction("tmpl", func(templateName string, x interface{}) (template.HTML, error) {
 		var buf bytes.Buffer
-		err := ret.templates.ExecuteTemplate(&buf, templateName, x)
+		err := app.templates.templates.ExecuteTemplate(&buf, templateName, x)
 		return template.HTML(buf.String()), err
-	}
+	})
+
+	app.AddTemplateFunction("markdown", func(text string) template.HTML {
+		return template.HTML(markdown.New(markdown.Breaks(true)).RenderToString([]byte(text)))
+	})
+
+	app.AddTemplateFunction("message", func(language, id string) template.HTML {
+		return template.HTML(messages.Messages.Get(language, id))
+	})
+
+	app.AddTemplateFunction("thumb", func(ids string) string {
+		return app.thumb(ids)
+	})
+
+	app.AddTemplateFunction("img", func(ids string) string {
+		for _, v := range strings.Split(ids, ",") {
+			var image File
+			err := app.Query().WhereIs("uid", v).Get(&image)
+			if err == nil && image.IsImage() {
+				return image.GetLarge()
+			}
+		}
+		return ""
+	})
+
+	app.AddTemplateFunction("istabvisible", isTabVisible)
 
 	return
 }
@@ -55,7 +84,6 @@ func (app *App) LoadTemplateFromString(in string) (err error) {
 
 //LoadTemplateFromFS loads app's html templates from file system
 func (app *App) LoadTemplateFromFS(fsys fs.FS, patterns ...string) (err error) {
-	//fmt.Println("DEV MODE", app.DevelopmentMode)
 	app.templates.templates, err = app.templates.templates.Funcs(app.templates.funcMap).ParseFS(fsys, patterns...)
 	return
 }

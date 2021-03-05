@@ -8,10 +8,10 @@ import (
 	"time"
 )
 
-func recoveryFunction(p Request, recoveryData interface{}) {
+func (app App) recoveryFunction(p Request, recoveryData interface{}) {
 	duration := time.Now().Sub(p.receivedAt)
 
-	if p.App().DevelopmentMode {
+	if app.DevelopmentMode {
 		temp, err := template.New("development_error").Parse(recoveryTmpl)
 		if err != nil {
 			panic(err)
@@ -36,7 +36,7 @@ func recoveryFunction(p Request, recoveryData interface{}) {
 		p.Response().Write([]byte(fmt.Sprintf("We are sorry, some error occured. (errorid %s)", p.uuid)))
 	}
 
-	p.Log().Printf("500 - application error\nmessage=%s\nuuid=%s\ntook=%v\n%s",
+	app.Log().Printf("500 - application error\nmessage=%s\nuuid=%s\ntook=%v\n%s",
 		recoveryData,
 		p.uuid,
 		duration,

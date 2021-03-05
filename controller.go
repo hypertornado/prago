@@ -2,9 +2,10 @@ package prago
 
 //Controller struct
 type Controller struct {
-	parent        *Controller
-	router        *router
-	aroundActions []func(p Request, next func())
+	parent         *Controller
+	router         *router
+	priorityRouter bool
+	aroundActions  []func(p Request, next func())
 }
 
 //MainController returns main controller of application
@@ -30,9 +31,10 @@ func (c *Controller) dispatchRequest(request Request) bool {
 //SubController returns subcontroller of controller
 func (c *Controller) SubController() *Controller {
 	return &Controller{
-		parent:        c,
-		router:        c.router,
-		aroundActions: []func(p Request, next func()){},
+		parent:         c,
+		router:         c.router,
+		priorityRouter: c.priorityRouter,
+		aroundActions:  []func(p Request, next func()){},
 	}
 }
 
