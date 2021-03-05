@@ -91,11 +91,11 @@ func (admin *App) getAdminNavigation(user User, code string) adminItemNavigation
 	}
 }
 
-func (admin *App) getResourceNavigation(resource Resource, user User, code string) adminItemNavigation {
+func (resource Resource) getNavigation(user User, code string) adminItemNavigation {
 	var tabs []navigationTab
 	for _, v := range resource.actions {
 		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
-			if admin.Authorize(user, v.Permission) {
+			if resource.App.Authorize(user, v.Permission) {
 				name := v.URL
 				if v.Name != nil {
 					name = v.Name(user.Locale)
@@ -114,7 +114,7 @@ func (admin *App) getResourceNavigation(resource Resource, user User, code strin
 	}
 }
 
-func (admin *App) getItemNavigation(resource Resource, user User, item interface{}, code string) adminItemNavigation {
+func (resource Resource) getItemNavigation(user User, item interface{}, code string) adminItemNavigation {
 	var tabs []navigationTab
 	for _, v := range resource.itemActions {
 		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
@@ -125,7 +125,7 @@ func (admin *App) getItemNavigation(resource Resource, user User, item interface
 			if v.Name != nil {
 				name = v.Name(user.Locale)
 			}
-			if admin.Authorize(user, v.Permission) {
+			if resource.App.Authorize(user, v.Permission) {
 				tabs = append(tabs, navigationTab{
 					Name:     name,
 					URL:      resource.GetItemURL(item, v.URL),
@@ -209,7 +209,7 @@ func createNavigationalItemHandler(action, templateName string, dataGenerator fu
 
 		renderNavigationPage(request, adminNavigationPage{
 			Admin:        resource.App,
-			Navigation:   resource.App.getItemNavigation(resource, user, item, action),
+			Navigation:   resource.getItemNavigation(user, item, action),
 			PageTemplate: templateName,
 			PageData:     data,
 		})
@@ -233,7 +233,7 @@ func createNavigationalHandler(action, templateName string, dataGenerator func(R
 
 		renderNavigationPage(request, adminNavigationPage{
 			Admin:        resource.App,
-			Navigation:   resource.App.getResourceNavigation(resource, user, action),
+			Navigation:   resource.getNavigation(user, action),
 			PageTemplate: templateName,
 			PageData:     data,
 		})

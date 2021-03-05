@@ -96,7 +96,7 @@ func actionList(resource *Resource) Action {
 				panic(err)
 			}
 
-			navigation := resource.App.getResourceNavigation(resource, user, "")
+			navigation := resource.getNavigation(user, "")
 			navigation.Wide = true
 
 			renderNavigationPage(request, adminNavigationPage{
@@ -128,7 +128,7 @@ func actionNew(permission Permission) Action {
 			AddCSRFToken(form, request)
 
 			renderNavigationPage(request, adminNavigationPage{
-				Navigation:   resource.App.getResourceNavigation(resource, user, "new"),
+				Navigation:   resource.getNavigation(user, "new"),
 				PageTemplate: "admin_form",
 				PageData:     form,
 			})
@@ -195,7 +195,7 @@ func actionView(resource *Resource) Action {
 			}
 
 			renderNavigationPage(request, adminNavigationPage{
-				Navigation:   resource.App.getItemNavigation(resource, user, item, ""),
+				Navigation:   resource.getItemNavigation(user, item, ""),
 				PageTemplate: "admin_views",
 				PageData:     resource.getViews(id, item, GetUser(request)),
 				HideBox:      true,
@@ -233,7 +233,7 @@ func actionEdit(permission Permission) Action {
 			AddCSRFToken(form, request)
 
 			renderNavigationPage(request, adminNavigationPage{
-				Navigation:   resource.App.getItemNavigation(resource, user, item, "edit"),
+				Navigation:   resource.getItemNavigation(user, item, "edit"),
 				PageTemplate: "admin_form",
 				PageData:     form,
 			})
@@ -301,7 +301,7 @@ func actionHistory(permission Permission) Action {
 		URL:        "history",
 		Handler: func(resource Resource, request Request, user User) {
 			renderNavigationPage(request, adminNavigationPage{
-				Navigation:   resource.App.getResourceNavigation(resource, user, "history"),
+				Navigation:   resource.getNavigation(user, "history"),
 				PageTemplate: "admin_history",
 				PageData:     resource.App.getHistory(&resource, 0),
 			})
@@ -323,7 +323,7 @@ func actionItemHistory(permission Permission) Action {
 			must(resource.App.Query().WhereIs("id", int64(id)).Get(item))
 
 			renderNavigationPage(request, adminNavigationPage{
-				Navigation:   resource.App.getItemNavigation(resource, user, item, "history"),
+				Navigation:   resource.getItemNavigation(user, item, "history"),
 				PageTemplate: "admin_history",
 				PageData:     resource.App.getHistory(&resource, int64(id)),
 			})
@@ -520,7 +520,7 @@ func initResourceActions(a *App, resource *Resource) {
 }
 
 func (resource *Resource) getResourceActionsButtonData(user User, admin *App) (ret []buttonData) {
-	navigation := admin.getResourceNavigation(*resource, user, "")
+	navigation := resource.getNavigation(user, "")
 	for _, v := range navigation.Tabs {
 		ret = append(ret, buttonData{
 			Name: v.Name,
@@ -538,7 +538,7 @@ func (admin *App) getListItemActions(user User, item interface{}, id int64, reso
 		URL:  resource.GetURL(fmt.Sprintf("%d", id)),
 	})
 
-	navigation := admin.getItemNavigation(resource, user, item, "")
+	navigation := resource.getItemNavigation(user, item, "")
 
 	for _, v := range navigation.Tabs {
 		if !v.Selected {
