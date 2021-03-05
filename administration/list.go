@@ -378,7 +378,7 @@ func (resource *Resource) getListContent(admin *Administration, user User, param
 	}
 
 	var totalCount int64 = resource.count()
-	must(resource.updateCachedCount())
+	resource.updateCachedCount()
 
 	if count == totalCount {
 		ret.TotalCountStr = messages.Messages.ItemsCount(count, user.Locale)

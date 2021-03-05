@@ -191,10 +191,6 @@ func (resource Resource) getCachedCount() int64 {
 	}).(int64)
 }
 
-func (resource Resource) setCachedCount(value int64) error {
-	return resource.Admin.App.Cache.Set(resource.cachedCountName(), value)
-}
-
 func (resource Resource) updateCachedCount() error {
 	return resource.Admin.App.Cache.Set(resource.cachedCountName(), resource.count())
 }

@@ -119,7 +119,7 @@ func (c *Cache) Load(cacheName string, createFn func() interface{}) interface{} 
 func (c *Cache) Set(cacheName string, value interface{}) error {
 	item := c.getItem(cacheName)
 	if item == nil {
-		return errors.New("can't find item in cache")
+		return errors.New("can't find item in cache: " + cacheName)
 	}
 	item.mutex.Lock()
 	defer item.mutex.Unlock()

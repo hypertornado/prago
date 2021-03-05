@@ -1,7 +1,6 @@
 package administration
 
 import (
-	"strings"
 	"testing"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 type ResourceStruct struct {
 	ID          int64
 	Name        string
+	Text        string `prago-type:"text"`
 	Other       string
 	Showing     string `prago-preview:"true"`
 	IsSomething bool
@@ -22,10 +22,15 @@ type ResourceStruct struct {
 	UpdatedAt   time.Time
 }
 
-func prepareResource() (*Administration, *Resource) {
+func prepareResource(initFns ...func(admin *Administration)) (*Administration, *Resource) {
 	app := prago.NewTestingApp()
-	admin := NewAdministration(app, nil)
-	resource := admin.CreateResource(ResourceStruct{}, nil)
+	var resource *Resource
+	admin := NewAdministration(app, func(admin *Administration) {
+		resource = admin.CreateResource(ResourceStruct{}, nil)
+		for _, v := range initFns {
+			v(admin)
+		}
+	})
 	admin.unsafeDropTables()
 	admin.migrate(false)
 	return admin, resource
@@ -173,8 +178,10 @@ func TestResourceUnique(t *testing.T) {
 		Name string `prago-unique:"true"`
 	}
 
-	admin, _ := prepareResource()
-	resource := admin.CreateResource(ResourceStructUnique{}, nil)
+	var resource *Resource
+	admin, _ := prepareResource(func(a *Administration) {
+		resource = a.CreateResource(ResourceStructUnique{}, nil)
+	})
 	admin.unsafeDropTables()
 	admin.migrate(false)
 
@@ -286,18 +293,18 @@ func TestShouldNotSaveWithZeroID(t *testing.T) {
 
 }
 
+/*
 func TestLongSaveText(t *testing.T) {
 	text := "some" + string(make([]byte, 100000))
 	admin, _ := prepareResource()
-	err := admin.Create(&ResourceStruct{Name: text})
+	err := admin.Create(&ResourceStruct{Text: text})
 	if err != nil {
 		t.Fatal(err)
 	}
 	var item ResourceStruct
 	admin.Query().WhereIs("id", 1).Get(&item)
 
-	if !strings.HasPrefix(item.Name, "some") {
-		t.Fatal(item.Name)
+	if !strings.HasPrefix(item.Text, "some") {
+		t.Fatal(item.Text)
 	}
-
-}
+}*/
