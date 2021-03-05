@@ -200,7 +200,7 @@ func createNavigationalItemHandler(action, templateName string, dataGenerator fu
 
 		var item interface{}
 		resource.newItem(&item)
-		must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
+		must(resource.App.Query().WhereIs("id", int64(id)).Get(item))
 
 		var data interface{}
 		if dataGenerator != nil {
@@ -208,8 +208,8 @@ func createNavigationalItemHandler(action, templateName string, dataGenerator fu
 		}
 
 		renderNavigationPage(request, adminNavigationPage{
-			Admin:        resource.Admin,
-			Navigation:   resource.Admin.getItemNavigation(resource, user, item, action),
+			Admin:        resource.App,
+			Navigation:   resource.App.getItemNavigation(resource, user, item, action),
 			PageTemplate: templateName,
 			PageData:     data,
 		})
@@ -232,8 +232,8 @@ func createNavigationalHandler(action, templateName string, dataGenerator func(R
 		}
 
 		renderNavigationPage(request, adminNavigationPage{
-			Admin:        resource.Admin,
-			Navigation:   resource.Admin.getResourceNavigation(resource, user, action),
+			Admin:        resource.App,
+			Navigation:   resource.App.getResourceNavigation(resource, user, action),
 			PageTemplate: templateName,
 			PageData:     data,
 		})
@@ -255,7 +255,7 @@ func createAdminHandler(action, templateName string, dataGenerator func(Resource
 			data = dataGenerator(resource, request, user)
 		}
 
-		adminNavigation := resource.Admin.getAdminNavigation(user, action)
+		adminNavigation := resource.App.getAdminNavigation(user, action)
 		var name string
 		for _, v := range adminNavigation.Tabs {
 			if v.Selected {
@@ -265,7 +265,7 @@ func createAdminHandler(action, templateName string, dataGenerator func(Resource
 
 		renderNavigationPage(request, adminNavigationPage{
 			Name:  name,
-			Admin: resource.Admin,
+			Admin: resource.App,
 			//Navigation:   resource.Admin.getAdminNavigation(user, action),
 			PageTemplate: templateName,
 			PageData:     data,

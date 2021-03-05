@@ -130,7 +130,7 @@ func getOldRedirectParams(request Request, admin *App) (uuid, name string, err e
 }
 
 func initFilesResource(resource *Resource) {
-	app := resource.Admin
+	app := resource.App
 	initCDN(app)
 	resource.HumanName = messages.Messages.GetNameFunction("admin_files")
 
@@ -221,7 +221,7 @@ func initFilesResource(resource *Resource) {
 
 		user := GetUser(request)
 
-		_, err := resource.Admin.UploadFile(multipartFiles[0], &user, request.Params().Get("Description"))
+		_, err := resource.App.UploadFile(multipartFiles[0], &user, request.Params().Get("Description"))
 		must(err)
 		AddFlashMessage(request, messages.Messages.Get(getLocale(request), "admin_item_created"))
 		request.Redirect(resource.GetURL(""))
@@ -234,7 +234,7 @@ func initFilesResource(resource *Resource) {
 			uuid := request.Params().Get("uuid")
 			size := request.Params().Get("size")
 
-			files := resource.Admin.GetFiles(uuid)
+			files := resource.App.GetFiles(uuid)
 			if len(files) == 0 {
 				panic("can't find file")
 			}

@@ -77,7 +77,7 @@ func initEshopProduct(resource *prago.Resource) {
 			}
 
 			var product EshopProduct
-			err = resource.Admin.Query().WhereIs("id", request.Params().Get("id")).Get(&product)
+			err = resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(&product)
 			if err != nil {
 				panic(err)
 			}
@@ -89,7 +89,7 @@ func initEshopProduct(resource *prago.Resource) {
 			var order EshopOrder
 			order.User = user.ID
 
-			err = resource.Admin.Create(&order)
+			err = resource.App.Create(&order)
 			if err != nil {
 				panic(err)
 			}
@@ -100,14 +100,14 @@ func initEshopProduct(resource *prago.Resource) {
 				ticket.EshopProduct = product.ID
 				ticket.Price = product.Price
 				ticket.Secret = getTicketSecret()
-				err = resource.Admin.Create(&ticket)
+				err = resource.App.Create(&ticket)
 				if err != nil {
 					panic(err)
 				}
 			}
 
 			prago.AddFlashMessage(request, "Vstupy vygenerovány")
-			redirectURL := resource.Admin.GetURL(fmt.Sprintf("eshoporder/%d", order.ID))
+			redirectURL := resource.App.GetURL(fmt.Sprintf("eshoporder/%d", order.ID))
 			request.Redirect(redirectURL)
 		},
 	})
@@ -141,13 +141,13 @@ func initEshopTicket(resource *prago.Resource) {
 		URL:        "vstupenka.pdf",
 		Handler: func(resource prago.Resource, request prago.Request, user prago.User) {
 			var ticket EshopTicket
-			err := resource.Admin.Query().WhereIs("id", request.Params().Get("id")).Get(&ticket)
+			err := resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(&ticket)
 			if err != nil {
 				panic(err)
 			}
 
 			var product EshopProduct
-			err = resource.Admin.Query().WhereIs("id", ticket.EshopProduct).Get(&product)
+			err = resource.App.Query().WhereIs("id", ticket.EshopProduct).Get(&product)
 
 			qrCode := fmt.Sprintf("%s/vstupenka/%d/%s", eshopInstance.Configuration.BaseURL, ticket.PublicID(), ticket.Secret)
 

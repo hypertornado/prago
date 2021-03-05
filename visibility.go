@@ -5,7 +5,7 @@ type fieldFilter func(Resource, User, Field) bool
 func defaultVisibilityFilter(resource Resource, user User, f Field) bool {
 	permission := f.Tags["prago-view"]
 	if permission != "" {
-		return resource.Admin.Authorize(user, Permission(permission))
+		return resource.App.Authorize(user, Permission(permission))
 	}
 
 	visible := true
@@ -34,7 +34,7 @@ func defaultEditabilityFilter(resource Resource, user User, f Field) bool {
 
 	permission := f.Tags["prago-edit"]
 	if permission != "" {
-		return resource.Admin.Authorize(user, Permission(permission))
+		return resource.App.Authorize(user, Permission(permission))
 	}
 
 	editable := true

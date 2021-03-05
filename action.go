@@ -42,7 +42,7 @@ func actionList(resource *Resource) Action {
 		Name:       resource.HumanName,
 		Handler: func(resource Resource, request Request, user User) {
 			if request.Request().URL.Query().Get("_format") == "json" {
-				listDataJSON, err := resource.getListContentJSON(resource.Admin, user, request.Request().URL.Query())
+				listDataJSON, err := resource.getListContentJSON(resource.App, user, request.Request().URL.Query())
 				if err != nil {
 					panic(err)
 				}
@@ -51,7 +51,7 @@ func actionList(resource *Resource) Action {
 			}
 
 			if request.Request().URL.Query().Get("_format") == "xlsx" {
-				listData, err := resource.getListContent(resource.Admin, user, request.Request().URL.Query())
+				listData, err := resource.getListContent(resource.App, user, request.Request().URL.Query())
 				if err != nil {
 					panic(err)
 				}
@@ -96,7 +96,7 @@ func actionList(resource *Resource) Action {
 				panic(err)
 			}
 
-			navigation := resource.Admin.getResourceNavigation(resource, user, "")
+			navigation := resource.App.getResourceNavigation(resource, user, "")
 			navigation.Wide = true
 
 			renderNavigationPage(request, adminNavigationPage{
@@ -128,7 +128,7 @@ func actionNew(permission Permission) Action {
 			AddCSRFToken(form, request)
 
 			renderNavigationPage(request, adminNavigationPage{
-				Navigation:   resource.Admin.getResourceNavigation(resource, user, "new"),
+				Navigation:   resource.App.getResourceNavigation(resource, user, "new"),
 				PageTemplate: "admin_form",
 				PageData:     form,
 			})
@@ -153,18 +153,18 @@ func actionCreate(permission Permission) Action {
 			if resource.OrderFieldName != "" {
 				resource.setOrderPosition(&item, resource.count()+1)
 			}
-			must(resource.Admin.Create(item))
+			must(resource.App.Create(item))
 
-			if resource.Admin.search != nil {
-				err = resource.Admin.search.saveItem(&resource, item)
+			if resource.App.search != nil {
+				err = resource.App.search.saveItem(&resource, item)
 				if err != nil {
 					request.Log().Println(fmt.Errorf("%s", err))
 				}
-				resource.Admin.search.Flush()
+				resource.App.search.Flush()
 			}
 
 			if resource.ActivityLog {
-				resource.Admin.createNewActivityLog(resource, user, item)
+				resource.App.createNewActivityLog(resource, user, item)
 			}
 
 			must(resource.updateCachedCount())
@@ -185,7 +185,7 @@ func actionView(resource *Resource) Action {
 
 			var item interface{}
 			resource.newItem(&item)
-			err = resource.Admin.Query().WhereIs("id", int64(id)).Get(item)
+			err = resource.App.Query().WhereIs("id", int64(id)).Get(item)
 			if err != nil {
 				if err == ErrItemNotFound {
 					render404(request)
@@ -195,7 +195,7 @@ func actionView(resource *Resource) Action {
 			}
 
 			renderNavigationPage(request, adminNavigationPage{
-				Navigation:   resource.Admin.getItemNavigation(resource, user, item, ""),
+				Navigation:   resource.App.getItemNavigation(resource, user, item, ""),
 				PageTemplate: "admin_views",
 				PageData:     resource.getViews(id, item, GetUser(request)),
 				HideBox:      true,
@@ -215,7 +215,7 @@ func actionEdit(permission Permission) Action {
 
 			var item interface{}
 			resource.newItem(&item)
-			err = resource.Admin.Query().WhereIs("id", int64(id)).Get(item)
+			err = resource.App.Query().WhereIs("id", int64(id)).Get(item)
 			if err != nil {
 				if err == ErrItemNotFound {
 					render404(request)
@@ -233,7 +233,7 @@ func actionEdit(permission Permission) Action {
 			AddCSRFToken(form, request)
 
 			renderNavigationPage(request, adminNavigationPage{
-				Navigation:   resource.Admin.getItemNavigation(resource, user, item, "edit"),
+				Navigation:   resource.App.getItemNavigation(resource, user, item, "edit"),
 				PageTemplate: "admin_form",
 				PageData:     form,
 			})
@@ -253,7 +253,7 @@ func actionUpdate(permission Permission) Action {
 
 			var item interface{}
 			resource.newItem(&item)
-			must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
+			must(resource.App.Query().WhereIs("id", int64(id)).Get(item))
 
 			form, err := resource.getForm(item, user)
 			must(err)
@@ -269,14 +269,14 @@ func actionUpdate(permission Permission) Action {
 					item, user, request.Params(), form.getFilter(),
 				),
 			)
-			must(resource.Admin.Save(item))
+			must(resource.App.Save(item))
 
-			if resource.Admin.search != nil {
-				err = resource.Admin.search.saveItem(&resource, item)
+			if resource.App.search != nil {
+				err = resource.App.search.saveItem(&resource, item)
 				if err != nil {
 					request.Log().Println(fmt.Errorf("%s", err))
 				}
-				resource.Admin.search.Flush()
+				resource.App.search.Flush()
 			}
 
 			if resource.ActivityLog {
@@ -285,7 +285,7 @@ func actionUpdate(permission Permission) Action {
 					panic(err)
 				}
 
-				resource.Admin.createEditActivityLog(resource, user, int64(id), beforeData, afterData)
+				resource.App.createEditActivityLog(resource, user, int64(id), beforeData, afterData)
 			}
 
 			AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_item_edited"))
@@ -301,9 +301,9 @@ func actionHistory(permission Permission) Action {
 		URL:        "history",
 		Handler: func(resource Resource, request Request, user User) {
 			renderNavigationPage(request, adminNavigationPage{
-				Navigation:   resource.Admin.getResourceNavigation(resource, user, "history"),
+				Navigation:   resource.App.getResourceNavigation(resource, user, "history"),
 				PageTemplate: "admin_history",
-				PageData:     resource.Admin.getHistory(&resource, 0),
+				PageData:     resource.App.getHistory(&resource, 0),
 			})
 		},
 	}
@@ -320,12 +320,12 @@ func actionItemHistory(permission Permission) Action {
 
 			var item interface{}
 			resource.newItem(&item)
-			must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
+			must(resource.App.Query().WhereIs("id", int64(id)).Get(item))
 
 			renderNavigationPage(request, adminNavigationPage{
-				Navigation:   resource.Admin.getItemNavigation(resource, user, item, "history"),
+				Navigation:   resource.App.getItemNavigation(resource, user, item, "history"),
 				PageTemplate: "admin_history",
-				PageData:     resource.Admin.getHistory(&resource, int64(id)),
+				PageData:     resource.App.getHistory(&resource, int64(id)),
 			})
 		},
 	}
@@ -346,7 +346,7 @@ func actionDelete(permission Permission) Action {
 
 			var item interface{}
 			resource.newItem(&item)
-			must(resource.Admin.Query().WhereIs("id", request.Params().Get("id")).Get(item))
+			must(resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(item))
 			itemName := getItemName(item)
 			ret["delete_title"] = fmt.Sprintf("Chcete smazat položku %s?", itemName)
 			ret["delete_title"] = messages.Messages.Get(user.Locale, "admin_delete_confirmation_name", itemName)
@@ -371,19 +371,19 @@ func actionDoDelete(permission Permission) Action {
 
 			var item interface{}
 			resource.newItem(&item)
-			_, err = resource.Admin.Query().WhereIs("id", int64(id)).Delete(item)
+			_, err = resource.App.Query().WhereIs("id", int64(id)).Delete(item)
 			must(err)
 
-			if resource.Admin.search != nil {
-				err = resource.Admin.search.deleteItem(&resource, int64(id))
+			if resource.App.search != nil {
+				err = resource.App.search.deleteItem(&resource, int64(id))
 				if err != nil {
 					request.Log().Println(fmt.Errorf("%s", err))
 				}
-				resource.Admin.search.Flush()
+				resource.App.search.Flush()
 			}
 
 			if resource.ActivityLog {
-				resource.Admin.createDeleteActivityLog(resource, user, int64(id), item)
+				resource.App.createDeleteActivityLog(resource, user, int64(id), item)
 			}
 
 			must(resource.updateCachedCount())
@@ -401,7 +401,7 @@ func actionPreview(permission Permission) Action {
 		Handler: func(resource Resource, request Request, user User) {
 			var item interface{}
 			resource.newItem(&item)
-			must(resource.Admin.Query().WhereIs("id", request.Params().Get("id")).Get(item))
+			must(resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(item))
 			request.Redirect(
 				resource.PreviewURLFunction(item),
 			)
@@ -455,7 +455,7 @@ func bindAction(admin *App, resource *Resource, action Action, isItemAction bool
 			action.Handler(*resource, request, user)
 		} else {
 			//TODO: ugly hack
-			action.Handler(Resource{Admin: admin}, request, user)
+			action.Handler(Resource{App: admin}, request, user)
 		}
 	}
 

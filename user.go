@@ -225,8 +225,6 @@ func (user User) sendRenew(request Request, admin *App) error {
 }
 
 func initUserResource(resource *Resource) {
-	admin := resource.Admin
-
 	resource.HumanName = messages.Messages.GetNameFunction("admin_users")
 	resource.CanEdit = permissionSysadmin
 
@@ -246,16 +244,16 @@ func initUserResource(resource *Resource) {
 				}
 
 				var user User
-				must(resource.Admin.Query().WhereIs("id", id).Get(&user))
+				must(resource.App.Query().WhereIs("id", id).Get(&user))
 
 				session := request.GetData("session").(*sessions.Session)
 				session.Values["user_id"] = user.ID
 				must(session.Save(request.Request(), request.Response()))
-				request.Redirect(admin.GetURL(""))
+				request.Redirect(resource.App.GetURL(""))
 			},
 		})
 
-	admin.accessController.AddBeforeAction(func(request Request) {
+	resource.App.accessController.AddBeforeAction(func(request Request) {
 		request.SetData("locale", getLocale(request))
 	})
 
@@ -270,27 +268,27 @@ func initUserResource(resource *Resource) {
 
 	renderLogin := func(request Request, form *Form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
-			Admin:        admin,
-			Navigation:   admin.getNologinNavigation(locale, "login"),
+			Admin:        resource.App,
+			Navigation:   resource.App.getNologinNavigation(locale, "login"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
 	}
 
-	admin.accessController.Get(resource.GetURL("confirm_email"), func(request Request) {
+	resource.App.accessController.Get(resource.GetURL("confirm_email"), func(request Request) {
 		email := request.Params().Get("email")
 		token := request.Params().Get("token")
 
 		var user User
-		err := admin.Query().WhereIs("email", email).Get(&user)
+		err := resource.App.Query().WhereIs("email", email).Get(&user)
 		if err == nil {
 			if !user.emailConfirmed() {
 				if token == user.emailToken(request.App()) {
 					user.EmailConfirmedAt = time.Now()
-					err = admin.Save(&user)
+					err = resource.App.Save(&user)
 					if err == nil {
 						AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_confirm_email_ok"))
-						request.Redirect(admin.GetURL("user/login"))
+						request.Redirect(resource.App.GetURL("user/login"))
 						return
 					}
 				}
@@ -298,7 +296,7 @@ func initUserResource(resource *Resource) {
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_confirm_email_fail"))
-		request.Redirect(admin.GetURL("user/login"))
+		request.Redirect(resource.App.GetURL("user/login"))
 	})
 
 	forgotForm := func(locale string) *Form {
@@ -311,35 +309,35 @@ func initUserResource(resource *Resource) {
 
 	renderForgot := func(request Request, form *Form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
-			Admin:        admin,
-			Navigation:   admin.getNologinNavigation(locale, "forgot"),
+			Admin:        resource.App,
+			Navigation:   resource.App.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
 	}
 
-	admin.accessController.Get(resource.GetURL("forgot"), func(request Request) {
+	resource.App.accessController.Get(resource.GetURL("forgot"), func(request Request) {
 		locale := getLocale(request)
 		renderForgot(request, forgotForm(locale), locale)
 	})
 
-	admin.accessController.Post(resource.GetURL("forgot"), func(request Request) {
+	resource.App.accessController.Post(resource.GetURL("forgot"), func(request Request) {
 		email := fixEmail(request.Params().Get("email"))
 
 		var reason = ""
 		var user User
 
-		err := admin.Query().WhereIs("email", email).Get(&user)
+		err := resource.App.Query().WhereIs("email", email).Get(&user)
 		if err == nil {
 			if user.emailConfirmed() {
 				if !time.Now().AddDate(0, 0, -1).Before(user.EmailRenewedAt) {
 					user.EmailRenewedAt = time.Now()
-					err = admin.Save(&user)
+					err = resource.App.Save(&user)
 					if err == nil {
-						err = user.sendRenew(request, admin)
+						err = user.sendRenew(request, resource.App)
 						if err == nil {
 							AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_forgoten_sent", user.Email))
-							request.Redirect(admin.GetURL("/user/login"))
+							request.Redirect(resource.App.GetURL("/user/login"))
 							return
 						}
 						reason = "can't send renew email"
@@ -357,7 +355,7 @@ func initUserResource(resource *Resource) {
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_forgoten_error", user.Email)+" ("+reason+")")
-		request.Redirect(admin.GetURL("user/forgot"))
+		request.Redirect(resource.App.GetURL("user/forgot"))
 	})
 
 	renewPasswordForm := func(locale string) (form *Form) {
@@ -373,20 +371,20 @@ func initUserResource(resource *Resource) {
 
 	renderRenew := func(request Request, form *Form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
-			Admin:        admin,
-			Navigation:   admin.getNologinNavigation(locale, "forgot"),
+			Admin:        resource.App,
+			Navigation:   resource.App.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
 	}
 
-	admin.accessController.Get(resource.GetURL("renew_password"), func(request Request) {
+	resource.App.accessController.Get(resource.GetURL("renew_password"), func(request Request) {
 		locale := getLocale(request)
 		form := renewPasswordForm(locale)
 		renderRenew(request, form, locale)
 	})
 
-	admin.accessController.Post(resource.GetURL("renew_password"), func(request Request) {
+	resource.App.accessController.Post(resource.GetURL("renew_password"), func(request Request) {
 		locale := getLocale(request)
 
 		form := renewPasswordForm(locale)
@@ -401,16 +399,16 @@ func initUserResource(resource *Resource) {
 		errStr := messages.Messages.Get(locale, "admin_error")
 
 		var user User
-		err := admin.Query().WhereIs("email", email).Get(&user)
+		err := resource.App.Query().WhereIs("email", email).Get(&user)
 		if err == nil {
 			if token == user.emailToken(request.App()) {
 				if form.Valid {
 					err = user.newPassword(request.Params().Get("password"))
 					if err == nil {
-						err = admin.Save(&user)
+						err = resource.App.Save(&user)
 						if err == nil {
 							AddFlashMessage(request, messages.Messages.Get(locale, "admin_password_changed"))
-							request.Redirect(admin.GetURL("user/login"))
+							request.Redirect(resource.App.GetURL("user/login"))
 							return
 						}
 					}
@@ -422,13 +420,13 @@ func initUserResource(resource *Resource) {
 		renderLogin(request, form, locale)
 	})
 
-	admin.accessController.Get(resource.GetURL("login"), func(request Request) {
+	resource.App.accessController.Get(resource.GetURL("login"), func(request Request) {
 		locale := getLocale(request)
 		form := loginForm(locale)
 		renderLogin(request, form, locale)
 	})
 
-	admin.accessController.Post(resource.GetURL("login"), func(request Request) {
+	resource.App.accessController.Post(resource.GetURL("login"), func(request Request) {
 		email := request.Params().Get("email")
 		email = fixEmail(email)
 		password := request.Params().Get("password")
@@ -441,7 +439,7 @@ func initUserResource(resource *Resource) {
 		form.Errors = []string{messages.Messages.Get(locale, "admin_login_error")}
 
 		var user User
-		err := admin.Query().WhereIs("email", email).Get(&user)
+		err := resource.App.Query().WhereIs("email", email).Get(&user)
 		if err != nil {
 			if err == ErrItemNotFound {
 				must(session.Save(request.Request(), request.Response()))
@@ -460,12 +458,12 @@ func initUserResource(resource *Resource) {
 		user.LoggedInUseragent = request.Request().UserAgent()
 		user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
 
-		must(admin.Save(&user))
+		must(resource.App.Save(&user))
 
 		session.Values["user_id"] = user.ID
 		session.AddFlash(messages.Messages.Get(locale, "admin_login_ok"))
 		must(session.Save(request.Request(), request.Response()))
-		request.Redirect(admin.GetURL(""))
+		request.Redirect(resource.App.GetURL(""))
 	})
 
 	newUserForm := func(locale string) *Form {
@@ -481,7 +479,7 @@ func initUserResource(resource *Resource) {
 					return true
 				}
 				var user User
-				admin.Query().WhereIs("email", field.Value).Get(&user)
+				resource.App.Query().WhereIs("email", field.Value).Get(&user)
 				if user.Email == field.Value {
 					return false
 				}
@@ -498,19 +496,19 @@ func initUserResource(resource *Resource) {
 
 	renderRegistration := func(request Request, form *Form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
-			Admin:        admin,
-			Navigation:   admin.getNologinNavigation(locale, "registration"),
+			Admin:        resource.App,
+			Navigation:   resource.App.getNologinNavigation(locale, "registration"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
 	}
 
-	admin.accessController.Get(resource.GetURL("registration"), func(request Request) {
+	resource.App.accessController.Get(resource.GetURL("registration"), func(request Request) {
 		locale := getLocale(request)
 		renderRegistration(request, newUserForm(locale), locale)
 	})
 
-	admin.accessController.Post(resource.GetURL("registration"), func(request Request) {
+	resource.App.accessController.Post(resource.GetURL("registration"), func(request Request) {
 		locale := getLocale(request)
 		form := newUserForm(locale)
 
@@ -526,32 +524,32 @@ func initUserResource(resource *Resource) {
 			user.IsActive = true
 			user.Locale = locale
 			must(user.newPassword(request.Params().Get("password")))
-			err := user.sendConfirmEmail(request, admin)
+			err := user.sendConfirmEmail(request, resource.App)
 			if err != nil {
 				request.App().Log().Println(err)
 			}
-			err = user.sendAdminEmail(request, admin)
+			err = user.sendAdminEmail(request, resource.App)
 			if err != nil {
 				request.App().Log().Println(err)
 			}
 
-			count, err := admin.Query().Count(&User{})
+			count, err := resource.App.Query().Count(&User{})
 			if err == nil && count == 0 {
 				user.IsAdmin = true
 				user.Role = "sysadmin"
 			}
 
-			must(admin.Create(user))
+			must(resource.App.Create(user))
 
 			AddFlashMessage(request, messages.Messages.Get(locale, "admin_confirm_email_send", user.Email))
-			request.Redirect(admin.GetURL("user/login"))
+			request.Redirect(resource.App.GetURL("user/login"))
 		} else {
 			form.GetItemByName("password").Value = ""
 			renderRegistration(request, form, locale)
 		}
 	})
 
-	admin.AdminController.Get(admin.GetURL("logout"), func(request Request) {
+	resource.App.AdminController.Get(resource.App.GetURL("logout"), func(request Request) {
 		ValidateCSRF(request)
 		session := request.GetData("session").(*sessions.Session)
 		delete(session.Values, "user_id")
@@ -576,20 +574,20 @@ func initUserResource(resource *Resource) {
 		return form
 	}
 
-	admin.AdminController.Get(resource.GetURL("settings"), func(request Request) {
+	resource.App.AdminController.Get(resource.GetURL("settings"), func(request Request) {
 		user := GetUser(request)
 		form := settingsForm(user)
 		AddCSRFToken(form, request)
 
 		request.SetData("admin_navigation_settings_selected", true)
 		renderNavigationPage(request, adminNavigationPage{
-			Navigation:   admin.getSettingsNavigation(user, "settings"),
+			Navigation:   resource.App.getSettingsNavigation(user, "settings"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
 	})
 
-	admin.AdminController.Post(resource.GetURL("settings"), func(request Request) {
+	resource.App.AdminController.Post(resource.GetURL("settings"), func(request Request) {
 		ValidateCSRF(request)
 		user := GetUser(request)
 		form := settingsForm(user)
@@ -597,7 +595,7 @@ func initUserResource(resource *Resource) {
 		form.Validate()
 		if form.Valid {
 			must(resource.bindData(&user, user, request.Params(), form.getFilter()))
-			must(admin.Save(&user))
+			must(resource.App.Save(&user))
 			AddFlashMessage(request, messages.Messages.Get(getLocale(request), "admin_settings_changed"))
 			request.Redirect(resource.GetURL("settings"))
 			return
@@ -605,7 +603,7 @@ func initUserResource(resource *Resource) {
 
 		request.SetData("admin_navigation_settings_selected", true)
 		renderNavigationPage(request, adminNavigationPage{
-			Navigation:   admin.getSettingsNavigation(user, "settings"),
+			Navigation:   resource.App.getSettingsNavigation(user, "settings"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
@@ -639,18 +637,18 @@ func initUserResource(resource *Resource) {
 	renderPasswordForm := func(request Request, form *Form) {
 		user := GetUser(request)
 		renderNavigationPage(request, adminNavigationPage{
-			Navigation:   admin.getSettingsNavigation(user, "password"),
+			Navigation:   resource.App.getSettingsNavigation(user, "password"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
 	}
 
-	admin.AdminController.Get(resource.GetURL("password"), func(request Request) {
+	resource.App.AdminController.Get(resource.GetURL("password"), func(request Request) {
 		form := changePasswordForm(request)
 		renderPasswordForm(request, form)
 	})
 
-	admin.AdminController.Post(resource.GetURL("password"), func(request Request) {
+	resource.App.AdminController.Post(resource.GetURL("password"), func(request Request) {
 		form := changePasswordForm(request)
 		form.BindData(request.Params())
 		form.Validate()
@@ -658,7 +656,7 @@ func initUserResource(resource *Resource) {
 			password := request.Params().Get("newpassword")
 			user := GetUser(request)
 			must(user.newPassword(password))
-			must(admin.Save(&user))
+			must(resource.App.Save(&user))
 			AddFlashMessage(request, messages.Messages.Get(getLocale(request), "admin_password_changed"))
 			request.Redirect(resource.GetURL("settings"))
 		} else {

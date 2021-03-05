@@ -53,9 +53,9 @@ func bindImageAPI(admin *App) {
 		for i, id := range order {
 			var item interface{}
 			resource.newItem(&item)
-			must(resource.Admin.Query().WhereIs("id", int64(id)).Get(item))
+			must(resource.App.Query().WhereIs("id", int64(id)).Get(item))
 			must(resource.setOrderPosition(item, int64(i)))
-			must(resource.Admin.Save(item))
+			must(resource.App.Save(item))
 		}
 		request.RenderJSON(true)
 	})

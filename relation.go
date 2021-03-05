@@ -35,7 +35,7 @@ func (resource *Resource) initAutoRelations() {
 			if relationFieldName != "" {
 				referenceName = relationFieldName
 			}
-			referenceResource := resource.Admin.getResourceByName(referenceName)
+			referenceResource := resource.App.getResourceByName(referenceName)
 
 			if v.Tags["prago-description"] == "" {
 				v.HumanName = (*referenceResource).HumanName
@@ -86,12 +86,12 @@ func getRelationViewData(resource Resource, user User, f Field, value interface{
 }
 
 func getRelationData(resource Resource, user User, f Field, value interface{}) (*viewRelationData, error) {
-	r2 := f.getRelatedResource(*resource.Admin)
+	r2 := f.getRelatedResource(*resource.App)
 	if r2 == nil {
 		return nil, fmt.Errorf("Resource not found: %s\n", f.Name)
 	}
 
-	if !resource.Admin.Authorize(user, r2.CanView) {
+	if !resource.App.Authorize(user, r2.CanView) {
 		return nil, fmt.Errorf("User is not authorized to view this item\n")
 	}
 
@@ -102,7 +102,7 @@ func getRelationData(resource Resource, user User, f Field, value interface{}) (
 	if intVal <= 0 {
 		return nil, fmt.Errorf("Wrong value\n")
 	}
-	err := resource.Admin.Query().WhereIs("id", intVal).Get(item)
+	err := resource.App.Query().WhereIs("id", intVal).Get(item)
 	if err != nil {
 		return nil, fmt.Errorf("Can't find this item\n")
 	}
@@ -116,7 +116,7 @@ func (resource *Resource) itemToRelationData(item interface{}, user User, relate
 	ret.Name = getItemName(item)
 	ret.URL = resource.GetItemURL(item, "")
 
-	ret.Image = resource.Admin.getItemImage(item)
+	ret.Image = resource.App.getItemImage(item)
 	ret.Description = resource.getItemDescription(item, user, relatedResource)
 	return &ret
 }
@@ -180,13 +180,13 @@ func (resource *Resource) getItemDescription(item interface{}, user User, relate
 			continue
 		}
 
-		rr := v.getRelatedResource(*resource.Admin)
+		rr := v.getRelatedResource(*resource.App)
 		if rr != nil && relatedResource != nil && rr.TableName == relatedResource.TableName {
 			continue
 		}
 
 		field := itemsVal.FieldByName(v.Name)
-		stringed := resource.Admin.relationStringer(*v, field, user)
+		stringed := resource.App.relationStringer(*v, field, user)
 		if stringed != "" {
 			items = append(items, fmt.Sprintf("%s: %s", v.HumanName(user.Locale), stringed))
 		}
@@ -211,7 +211,7 @@ func (admin App) relationStringer(field Field, value reflect.Value, user User) s
 
 			var item interface{}
 			rr.newItem(&item)
-			err := rr.Admin.Query().WhereIs("id", int64(value.Int())).Get(item)
+			err := rr.App.Query().WhereIs("id", int64(value.Int())).Get(item)
 			if err != nil {
 				return fmt.Sprintf("%d", value.Int())
 			}

@@ -11,7 +11,7 @@ import (
 
 //Resource is structure representing one item in admin menu or one table in database
 type Resource struct {
-	Admin              *App
+	App                *App
 	ID                 string
 	HumanName          func(locale string) string
 	Typ                reflect.Type
@@ -43,8 +43,8 @@ type Resource struct {
 }
 
 //CreateResource creates new resource based on item
-func (admin *App) CreateResource(item interface{}, initFunction func(*Resource)) *Resource {
-	if admin.resourcesInited {
+func (app *App) CreateResource(item interface{}, initFunction func(*Resource)) *Resource {
+	if app.resourcesInited {
 		panic("can't create new resource, resources already initiated")
 	}
 
@@ -56,11 +56,11 @@ func (admin *App) CreateResource(item interface{}, initFunction func(*Resource))
 
 	defaultName := typ.Name()
 	ret := &Resource{
-		Admin:              admin,
+		App:                app,
 		HumanName:          Unlocalized(defaultName),
 		ID:                 columnName(defaultName),
 		Typ:                typ,
-		ResourceController: admin.AdminController.SubController(),
+		ResourceController: app.AdminController.SubController(),
 		ItemsPerPage:       200,
 		TableName:          columnName(defaultName),
 
@@ -73,7 +73,7 @@ func (admin *App) CreateResource(item interface{}, initFunction func(*Resource))
 		ActivityLog: true,
 
 		fieldMap:   make(map[string]*Field),
-		fieldTypes: admin.fieldTypes,
+		fieldTypes: app.fieldTypes,
 	}
 
 	for i := 0; i < typ.NumField(); i++ {
@@ -90,14 +90,14 @@ func (admin *App) CreateResource(item interface{}, initFunction func(*Resource))
 
 	ret.OrderByColumn, ret.OrderDesc = ret.getDefaultOrder()
 
-	admin.resources = append(admin.resources, ret)
-	_, typFound := admin.resourceMap[ret.Typ]
+	app.resources = append(app.resources, ret)
+	_, typFound := app.resourceMap[ret.Typ]
 	if typFound {
 		panic(fmt.Errorf("resource with type %s already created", ret.Typ))
 	}
 
-	admin.resourceMap[ret.Typ] = ret
-	admin.resourceNameMap[ret.ID] = ret
+	app.resourceMap[ret.Typ] = ret
+	app.resourceNameMap[ret.ID] = ret
 
 	if initFunction != nil {
 		initFunction(ret)
@@ -125,7 +125,7 @@ func (resource Resource) GetURL(suffix string) string {
 	if len(suffix) > 0 {
 		url += "/" + suffix
 	}
-	return resource.Admin.GetURL(url)
+	return resource.App.GetURL(url)
 }
 
 func (admin *App) getResourceByItem(item interface{}) (*Resource, error) {
@@ -176,7 +176,7 @@ func (resource Resource) newArrayOfItems(item interface{}) {
 func (resource Resource) count() int64 {
 	var item interface{}
 	resource.newItem(&item)
-	count, _ := resource.Admin.Query().Count(item)
+	count, _ := resource.App.Query().Count(item)
 	return count
 }
 
@@ -185,13 +185,13 @@ func (resource Resource) cachedCountName() string {
 }
 
 func (resource Resource) getCachedCount() int64 {
-	return resource.Admin.Cache.Load(resource.cachedCountName(), func() interface{} {
+	return resource.App.Cache.Load(resource.cachedCountName(), func() interface{} {
 		return resource.count()
 	}).(int64)
 }
 
 func (resource Resource) updateCachedCount() error {
-	return resource.Admin.Cache.Set(resource.cachedCountName(), resource.count())
+	return resource.App.Cache.Set(resource.cachedCountName(), resource.count())
 }
 
 func (resource Resource) getPaginationData(user User) (ret []ListPaginationData) {

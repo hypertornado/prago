@@ -20,25 +20,25 @@ type Notification struct {
 
 func initNotificationResource(resource *Resource) {
 
-	resource.Admin.AdminController.Get(resource.Admin.GetURL("_api/notifications"), func(request Request) {
+	resource.App.AdminController.Get(resource.App.GetURL("_api/notifications"), func(request Request) {
 		user := GetUser(request)
-		notifications, err := resource.Admin.getNotificationViews(user)
+		notifications, err := resource.App.getNotificationViews(user)
 		if err != nil {
 			panic(err)
 		}
 		request.RenderJSON(notifications)
 	})
 
-	resource.Admin.AdminController.Delete(resource.Admin.GetURL("_api/notification/:uuid"), func(request Request) {
+	resource.App.AdminController.Delete(resource.App.GetURL("_api/notification/:uuid"), func(request Request) {
 		uuid := request.Params().Get("uuid")
 		if uuid == "" {
 			panic("wrong length of uuid param")
 		}
 		var notification Notification
-		err := resource.Admin.Query().WhereIs("uuid", request.Params().Get("uuid")).Get(&notification)
+		err := resource.App.Query().WhereIs("uuid", request.Params().Get("uuid")).Get(&notification)
 		must(err)
 		notification.IsDismissed = true
-		must(resource.Admin.Save(&notification))
+		must(resource.App.Save(&notification))
 		request.RenderJSON(true)
 	})
 

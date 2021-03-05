@@ -61,7 +61,7 @@ func getListStats(resource *Resource, user User, params url.Values) *ListStats {
 	}
 	columnsAr := strings.Split(columnsStr, ",")
 
-	query := resource.addFilterParamsToQuery(resource.Admin.Query(), params)
+	query := resource.addFilterParamsToQuery(resource.App.Query(), params)
 
 	var item interface{}
 	resource.newItem(&item)
@@ -106,7 +106,7 @@ func (resource *Resource) getListStatsDateSections(field *Field, user User, para
 }
 
 func (resource *Resource) getListStatsDateSectionDay(field *Field, user User, params url.Values, total, limit int64) (ret ListStatsSection) {
-	query := resource.addFilterParamsToQuery(resource.Admin.Query(), params)
+	query := resource.addFilterParamsToQuery(resource.App.Query(), params)
 	whereParams := query.query.whereParams
 	q := fmt.Sprintf("SELECT DAY(%s), MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY DAY(%s), MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.ColumnName,
@@ -119,7 +119,7 @@ func (resource *Resource) getListStatsDateSectionDay(field *Field, user User, pa
 		field.ColumnName,
 		limit,
 	)
-	rows, err := resource.Admin.db.Query(q, whereParams...)
+	rows, err := resource.App.db.Query(q, whereParams...)
 	if err != nil {
 		panic(err)
 	}
@@ -150,7 +150,7 @@ func (resource *Resource) getListStatsDateSectionDay(field *Field, user User, pa
 }
 
 func (resource *Resource) getListStatsDateSectionMonth(field *Field, user User, params url.Values, total, limit int64) (ret ListStatsSection) {
-	query := resource.addFilterParamsToQuery(resource.Admin.Query(), params)
+	query := resource.addFilterParamsToQuery(resource.App.Query(), params)
 	whereParams := query.query.whereParams
 	q := fmt.Sprintf("SELECT MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.ColumnName,
@@ -161,7 +161,7 @@ func (resource *Resource) getListStatsDateSectionMonth(field *Field, user User, 
 		field.ColumnName,
 		limit,
 	)
-	rows, err := resource.Admin.db.Query(q, whereParams...)
+	rows, err := resource.App.db.Query(q, whereParams...)
 	if err != nil {
 		panic(err)
 	}
@@ -191,7 +191,7 @@ func (resource *Resource) getListStatsDateSectionMonth(field *Field, user User, 
 }
 
 func (resource *Resource) getListStatsDateSectionYear(field *Field, user User, params url.Values, total, limit int64) (ret ListStatsSection) {
-	query := resource.addFilterParamsToQuery(resource.Admin.Query(), params)
+	query := resource.addFilterParamsToQuery(resource.App.Query(), params)
 	whereParams := query.query.whereParams
 	q := fmt.Sprintf("SELECT YEAR(%s), COUNT(id) FROM %s %s GROUP BY YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.ColumnName,
@@ -200,7 +200,7 @@ func (resource *Resource) getListStatsDateSectionYear(field *Field, user User, p
 		field.ColumnName,
 		limit,
 	)
-	rows, err := resource.Admin.db.Query(q, whereParams...)
+	rows, err := resource.App.db.Query(q, whereParams...)
 	if err != nil {
 		panic(err)
 	}
@@ -230,13 +230,13 @@ func (resource *Resource) getListStatsDateSectionYear(field *Field, user User, p
 
 func (resource *Resource) getListStatsTable(field *Field, user User, params url.Values, total, limit int64) (table []ListStatsRow) {
 
-	query := resource.addFilterParamsToQuery(resource.Admin.Query(), params)
+	query := resource.addFilterParamsToQuery(resource.App.Query(), params)
 
 	whereParams := query.query.whereParams
 
 	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.ColumnName, resource.TableName, buildWhereString(query.query.whereString), field.ColumnName, limit)
 
-	rows, err := resource.Admin.db.Query(q, whereParams...)
+	rows, err := resource.App.db.Query(q, whereParams...)
 	if err != nil {
 		panic(err)
 	}
@@ -336,7 +336,7 @@ func (resource *Resource) getListStatsTableInt(field *Field, user User, params u
 		return
 	}
 
-	query := resource.addFilterParamsToQuery(resource.Admin.Query(), params)
+	query := resource.addFilterParamsToQuery(resource.App.Query(), params)
 
 	whereParams := query.query.whereParams
 
@@ -349,7 +349,7 @@ func (resource *Resource) getListStatsTableInt(field *Field, user User, params u
 		buildWhereString(query.query.whereString),
 	)
 
-	rows, err := resource.Admin.db.Query(q, whereParams...)
+	rows, err := resource.App.db.Query(q, whereParams...)
 	if err != nil {
 		panic(err)
 	}
@@ -384,7 +384,7 @@ func (resource *Resource) getListStatsTableInt(field *Field, user User, params u
 		buildWhereString(query.query.whereString),
 		medianItem,
 	)
-	rows, err = resource.Admin.db.Query(q, whereParams...)
+	rows, err = resource.App.db.Query(q, whereParams...)
 	if err != nil {
 		panic(err)
 	}

@@ -70,7 +70,7 @@ func (resource Resource) getBasicView(id int, inValues interface{}, user User) v
 		)
 	}
 
-	historyView := resource.Admin.getHistory(&resource, int64(id))
+	historyView := resource.App.getHistory(&resource, int64(id))
 
 	if len(historyView.Items) > 0 {
 		ret.Items = append(

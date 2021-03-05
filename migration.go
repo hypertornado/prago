@@ -48,16 +48,16 @@ func (a *App) migrate(verbose bool) error {
 }
 
 func (resource *Resource) unsafeDropTable() error {
-	_, err := resource.Admin.db.Exec(fmt.Sprintf("drop table `%s`;", resource.TableName))
+	_, err := resource.App.db.Exec(fmt.Sprintf("drop table `%s`;", resource.TableName))
 	return err
 }
 
 func (resource *Resource) migrate(verbose bool) error {
-	_, err := getTableDescription(resource.Admin.db, resource.TableName)
+	_, err := getTableDescription(resource.App.db, resource.TableName)
 	if err == nil {
-		return migrateTable(resource.Admin.db, resource.TableName, *resource, verbose)
+		return migrateTable(resource.App.db, resource.TableName, *resource, verbose)
 	}
-	return createTable(resource.Admin.db, resource.TableName, *resource, verbose)
+	return createTable(resource.App.db, resource.TableName, *resource, verbose)
 }
 
 func listTables(db dbIface) (ret map[string]bool, err error) {

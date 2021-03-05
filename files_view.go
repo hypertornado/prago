@@ -64,7 +64,7 @@ func filesViewDataSource(resource Resource, user User, f Field, value interface{
 	var ret []filesViewData
 	ar := strings.Split(value.(string), ",")
 	for _, v := range ar {
-		item := getFilesViewData(resource.Admin, v)
+		item := getFilesViewData(resource.App, v)
 		ret = append(ret, item)
 	}
 	return ret
