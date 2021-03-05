@@ -71,7 +71,6 @@ package main
 
 import (
 	"github.com/hypertornado/prago"
-	"github.com/hypertornado/prago/administration"
 	"github.com/hypertornado/prago/build"
 	"github.com/hypertornado/prago/development"
 )
