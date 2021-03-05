@@ -16,7 +16,7 @@ type homeData struct {
 	Actions []buttonData
 }
 
-func (admin *Administration) getHomeData(request Request) (ret []homeData) {
+func (admin *App) getHomeData(request Request) (ret []homeData) {
 	user := GetUser(request)
 
 	for _, resource := range admin.getSortedResources(user.Locale) {
@@ -32,7 +32,7 @@ func (admin *Administration) getHomeData(request Request) (ret []homeData) {
 	return
 }
 
-func (admin *Administration) getSortedResources(locale string) (ret []*Resource) {
+func (admin *App) getSortedResources(locale string) (ret []*Resource) {
 	collator := collate.New(language.Czech)
 
 	ret = admin.resources

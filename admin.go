@@ -36,7 +36,7 @@ var staticPikadayJS []byte
 var templatesFS embed.FS
 
 //Administration is struct representing admin extension
-type Administration struct {
+type AdministrationOLD struct {
 	App              *App
 	Logo             string
 	prefix           string
@@ -67,21 +67,24 @@ type Administration struct {
 }
 
 //NewAdministration creates new administration on prefix url with name
-func NewAdministration(app *App, initFunction func(*Administration)) *Administration {
-	admin := &Administration{
-		App:              app,
-		HumanName:        app.AppName,
-		prefix:           "/admin",
-		resourceMap:      make(map[reflect.Type]*Resource),
-		resourceNameMap:  make(map[string]*Resource),
-		accessController: app.MainController().SubController(),
+func NewAdministration(app *App, initFunction func(*App)) *App {
+	admin := app
+	app.HumanName = app.AppName
+	app.prefix = "/admin"
+	app.resourceMap =
+		make(map[reflect.Type]*Resource)
+	app.resourceNameMap =
+		make(map[string]*Resource)
+	app.accessController =
+		app.MainController().SubController()
 
-		sendgridKey:  app.Config.GetStringWithFallback("sendgridApi", ""),
-		noReplyEmail: app.Config.GetStringWithFallback("noReplyEmail", ""),
+	app.sendgridKey =
+		app.Config.GetStringWithFallback("sendgridApi", "")
+	app.noReplyEmail =
+		app.Config.GetStringWithFallback("noReplyEmail", "")
 
-		fieldTypes: make(map[string]FieldType),
-		roles:      make(map[string]map[string]bool),
-	}
+	app.fieldTypes = make(map[string]FieldType)
+	app.roles = make(map[string]map[string]bool)
 
 	admin.taskManager = newTaskManager(admin)
 
@@ -117,22 +120,21 @@ func NewAdministration(app *App, initFunction func(*Administration)) *Administra
 
 	admin.accessController.AddAroundAction(
 		createSessionAroundAction(
-			admin.App.AppName,
-			admin.App.Config.GetString("random"),
+			admin.AppName,
+			admin.Config.GetString("random"),
 		),
 	)
 
-	googleAPIKey := admin.App.Config.GetStringWithFallback("google", "")
+	googleAPIKey := admin.Config.GetStringWithFallback("google", "")
 	admin.AdminController.AddBeforeAction(func(request Request) {
 		request.SetData("google", googleAPIKey)
 	})
 
 	bindAPI(admin)
-	admin.bindMigrationCommand(admin.App)
-	admin.initTemplates(admin.App)
+	admin.bindMigrationCommand()
+	admin.initTemplates()
 
-	must(admin.App.LoadTemplateFromFS(templatesFS, "templates/*.tmpl"))
-	//must(admin.App.LoadTemplateFromString(adminTemplates))
+	must(admin.LoadTemplateFromFS(templatesFS, "templates/*.tmpl"))
 	bindSystemstats(admin)
 	admin.initRootActions()
 	admin.initAutoRelations()
@@ -154,7 +156,7 @@ func NewAdministration(app *App, initFunction func(*Administration)) *Administra
 			return
 		}
 
-		randomness := admin.App.Config.GetString("random")
+		randomness := admin.Config.GetString("random")
 		request.SetData("_csrfToken", user.CSRFToken(randomness))
 		request.SetData("currentuser", &user)
 		request.SetData("locale", user.Locale)
@@ -206,7 +208,7 @@ func NewAdministration(app *App, initFunction func(*Administration)) *Administra
 		request.Response().WriteHeader(200)
 		request.Response().Write([]byte(staticPikadayJS))
 	})
-	admin.App.MainController().Get(admin.GetURL("_static/admin.css"), func(request Request) {
+	admin.MainController().Get(admin.GetURL("_static/admin.css"), func(request Request) {
 		request.Response().Header().Set("Content-type", "text/css; charset=utf-8")
 		request.Response().WriteHeader(200)
 		request.Response().Write([]byte(staticAdminCSS))
@@ -231,8 +233,8 @@ func NewAdministration(app *App, initFunction func(*Administration)) *Administra
 }
 
 //GetURL gets url
-func (admin Administration) GetURL(suffix string) string {
-	ret := admin.prefix
+func (app App) GetURL(suffix string) string {
+	ret := app.prefix
 	if len(suffix) > 0 {
 		ret += "/" + suffix
 	}
@@ -240,12 +242,12 @@ func (admin Administration) GetURL(suffix string) string {
 }
 
 //AddAction adds action
-func (admin *Administration) AddAction(action Action) {
+func (admin *App) AddAction(action Action) {
 	admin.rootActions = append(admin.rootActions, action)
 }
 
 //AddFieldType adds field type
-func (admin *Administration) AddFieldType(name string, fieldType FieldType) {
+func (admin *App) AddFieldType(name string, fieldType FieldType) {
 	_, exist := admin.fieldTypes[name]
 	if exist {
 		panic(fmt.Sprintf("field type '%s' already set", name))
@@ -254,12 +256,12 @@ func (admin *Administration) AddFieldType(name string, fieldType FieldType) {
 }
 
 //AddJavascript adds javascript
-func (admin *Administration) AddJavascript(url string) {
+func (admin *App) AddJavascript(url string) {
 	admin.javascripts = append(admin.javascripts, url)
 }
 
 //AddCSS adds CSS
-func (admin *Administration) AddCSS(url string) {
+func (admin *App) AddCSS(url string) {
 	admin.css = append(admin.css, url)
 }
 
@@ -277,32 +279,32 @@ func addCurrentFlashMessage(request Request, message string) {
 	request.SetData("flash_messages", messages)
 }
 
-func (admin *Administration) getResourceByName(name string) *Resource {
+func (admin *App) getResourceByName(name string) *Resource {
 	return admin.resourceNameMap[columnName(name)]
 }
 
-func (admin *Administration) getDB() *sql.DB {
+func (admin *App) getDB() *sql.DB {
 	return admin.db
 }
 
 //GetDB gets DB
-func (admin *Administration) GetDB() *sql.DB {
+func (admin *App) GetDB() *sql.DB {
 	return admin.getDB()
 }
 
-func (admin *Administration) initRootActions() {
+func (admin *App) initRootActions() {
 	for _, v := range admin.rootActions {
 		bindAction(admin, nil, v, false)
 	}
 }
 
-func (admin *Administration) initAutoRelations() {
+func (admin *App) initAutoRelations() {
 	for _, v := range admin.resources {
 		v.initAutoRelations()
 	}
 }
 
-func (admin *Administration) initTemplates(app *App) {
+func (app *App) initTemplates() {
 	app.AddTemplateFunction("markdown", func(text string) template.HTML {
 		return template.HTML(markdown.New(markdown.Breaks(true)).RenderToString([]byte(text)))
 	})
@@ -312,13 +314,13 @@ func (admin *Administration) initTemplates(app *App) {
 	})
 
 	app.AddTemplateFunction("thumb", func(ids string) string {
-		return admin.thumb(ids)
+		return app.thumb(ids)
 	})
 
 	app.AddTemplateFunction("img", func(ids string) string {
 		for _, v := range strings.Split(ids, ",") {
 			var image File
-			err := admin.Query().WhereIs("uid", v).Get(&image)
+			err := app.Query().WhereIs("uid", v).Get(&image)
 			if err == nil && image.IsImage() {
 				return image.GetLarge()
 			}
@@ -350,9 +352,8 @@ func render404(request Request) {
 	request.RenderViewWithCode("admin_layout", 404)
 }
 
-func bindDBBackupCron(admin *Administration) {
-	app := admin.App
-	admin.NewTask("backup_db").SetHandler(
+func bindDBBackupCron(app *App) {
+	app.NewTask("backup_db").SetHandler(
 		func(tr *TaskActivity) error {
 			err := BackupApp(app)
 			if err != nil {
@@ -361,7 +362,7 @@ func bindDBBackupCron(admin *Administration) {
 			return nil
 		}).RepeatEvery(24 * time.Hour)
 
-	admin.NewTask("remove_old_backups").SetHandler(
+	app.NewTask("remove_old_backups").SetHandler(
 		func(tr *TaskActivity) error {
 			tr.SetStatus(0, fmt.Sprintf("Removing old backups"))
 			deadline := time.Now().AddDate(0, 0, -7)

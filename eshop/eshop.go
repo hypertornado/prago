@@ -23,7 +23,7 @@ type EshopConfiguration struct {
 	IDsPrefix int64
 }
 
-func InitEshop(admin *prago.Administration, config EshopConfiguration) (eshop *Eshop, err error) {
+func InitEshop(admin *prago.App, config EshopConfiguration) (eshop *Eshop, err error) {
 	if config.BaseURL == "" {
 		panic("base url can't be empty")
 	}

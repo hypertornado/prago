@@ -2,9 +2,11 @@
 package prago
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -25,6 +27,34 @@ type App struct {
 	templates       *templates
 	mainController  *Controller
 	Cache           *cachelib.Cache
+
+	//App              *App
+	Logo             string
+	prefix           string
+	HumanName        string
+	resources        []*Resource
+	resourceMap      map[reflect.Type]*Resource
+	resourceNameMap  map[string]*Resource
+	accessController *Controller
+	AdminController  *Controller
+	rootActions      []Action
+	db               *sql.DB
+	resourcesInited  bool
+
+	sendgridKey  string
+	noReplyEmail string
+
+	Newsletter *NewsletterMiddleware
+
+	search *adminSearch
+
+	fieldTypes  map[string]FieldType
+	javascripts []string
+	css         []string
+	roles       map[string]map[string]bool
+
+	activityListeners []func(ActivityLog)
+	taskManager       *taskManager
 }
 
 func NewTestingApp() *App {

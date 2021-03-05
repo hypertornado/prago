@@ -38,7 +38,7 @@ func (menu mainMenu) GetTitle() string {
 	return ""
 }
 
-func (admin *Administration) getMainMenu(request Request) (ret mainMenu) {
+func (admin *App) getMainMenu(request Request) (ret mainMenu) {
 	user := GetUser(request)
 
 	var selectedAdminSection bool
@@ -124,7 +124,7 @@ func (admin *Administration) getMainMenu(request Request) (ret mainMenu) {
 	if userName == "" {
 		userName = user.Email
 	}
-	randomness := admin.App.Config.GetString("random")
+	randomness := admin.Config.GetString("random")
 	userSection := mainMenuSection{
 		Name: userName,
 		Items: []mainMenuItem{

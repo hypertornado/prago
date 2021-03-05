@@ -7,7 +7,7 @@ type FieldTypeEnum struct {
 }
 
 //AddEnumFieldType adds enum field type
-func (admin *Administration) AddEnumFieldType(name string, items [][2]string) {
+func (admin *App) AddEnumFieldType(name string, items [][2]string) {
 	var arr []FieldTypeEnum
 	for _, v := range items {
 		var itemName = v[1]
@@ -22,7 +22,7 @@ func (admin *Administration) AddEnumFieldType(name string, items [][2]string) {
 }
 
 //AddEnumFieldTypeLocalized adds localized enum field
-func (admin *Administration) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
+func (admin *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 	admin.AddFieldType(name, FieldType{
 		ViewDataSource: func(resource Resource, user User, f Field, value interface{}) interface{} {
 			str := value.(string)

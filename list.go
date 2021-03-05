@@ -330,7 +330,7 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 	return q
 }
 
-func (resource *Resource) getListContent(admin *Administration, user User, params url.Values) (ret listContent, err error) {
+func (resource *Resource) getListContent(admin *App, user User, params url.Values) (ret listContent, err error) {
 	var listHeader list
 	listHeader, err = resource.getListHeader(user)
 	if err != nil {
@@ -471,14 +471,14 @@ type ListContentJSON struct {
 	StatsStr string
 }
 
-func (resource *Resource) getListContentJSON(admin *Administration, user User, params url.Values) (ret *ListContentJSON, err error) {
+func (resource *Resource) getListContentJSON(admin *App, user User, params url.Values) (ret *ListContentJSON, err error) {
 	listData, err := resource.getListContent(admin, user, params)
 	if err != nil {
 		return nil, err
 	}
 
 	buf := new(bytes.Buffer)
-	err = resource.Admin.App.ExecuteTemplate(buf, "admin_list_cells", map[string]interface{}{
+	err = resource.Admin.ExecuteTemplate(buf, "admin_list_cells", map[string]interface{}{
 		"admin_list": listData,
 	})
 	if err != nil {
@@ -488,7 +488,7 @@ func (resource *Resource) getListContentJSON(admin *Administration, user User, p
 	var statsStr string
 	if listData.Stats != nil {
 		bufStats := new(bytes.Buffer)
-		err = resource.Admin.App.ExecuteTemplate(bufStats, "admin_stats", listData.Stats)
+		err = resource.Admin.ExecuteTemplate(bufStats, "admin_stats", listData.Stats)
 		if err != nil {
 			return nil, err
 		}

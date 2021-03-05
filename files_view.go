@@ -21,7 +21,7 @@ type filesViewDataPath struct {
 	URL  string
 }
 
-func getFilesViewData(admin *Administration, uid string) (ret filesViewData) {
+func getFilesViewData(admin *App, uid string) (ret filesViewData) {
 	var file File
 	err := admin.Query().WhereIs("UID", uid).Get(&file)
 	if err != nil {

@@ -25,21 +25,21 @@ var (
 type NewsletterMiddleware struct {
 	baseUrl    string
 	renderer   NewsletterRenderer
-	admin      *Administration
+	admin      *App
 	randomness string
 }
 
-func (admin *Administration) InitNewsletter(renderer NewsletterRenderer) {
+func (admin *App) InitNewsletter(renderer NewsletterRenderer) {
 	admin.Newsletter = &NewsletterMiddleware{
-		baseUrl:  admin.App.Config.GetString("baseUrl"),
+		baseUrl:  admin.Config.GetString("baseUrl"),
 		renderer: renderer,
 
 		admin:      admin,
-		randomness: admin.App.Config.GetString("random"),
+		randomness: admin.Config.GetString("random"),
 	}
 
 	var importPath string
-	admin.App.AddCommand("newsletter", "import").StringArgument(&importPath).Callback(func() {
+	admin.AddCommand("newsletter", "import").StringArgument(&importPath).Callback(func() {
 		file, err := os.Open(importPath)
 		must(err)
 
@@ -63,7 +63,7 @@ func (admin *Administration) InitNewsletter(renderer NewsletterRenderer) {
 		}
 	})
 
-	controller := admin.App.MainController().SubController()
+	controller := admin.MainController().SubController()
 	controller.AddBeforeAction(func(request Request) {
 		request.SetData("site", admin.HumanName)
 	})
@@ -166,7 +166,7 @@ func (admin *Administration) InitNewsletter(renderer NewsletterRenderer) {
 	//newsletterResource.AddRelation(newsletterSectionResource, "Newsletter", Unlocalized("Přidat sekci"))
 }
 
-func (admin Administration) sendConfirmEmail(name, email string) error {
+func (admin App) sendConfirmEmail(name, email string) error {
 
 	text := admin.Newsletter.confirmEmailBody(name, email)
 
@@ -234,7 +234,7 @@ func (nm NewsletterMiddleware) CSFR(request Request) string {
 
 }
 
-func (admin *Administration) AddEmail(email, name string, confirm bool) error {
+func (admin *App) AddEmail(email, name string, confirm bool) error {
 	if !strings.Contains(email, "@") {
 		return errors.New("Wrong email format")
 	}
@@ -410,7 +410,7 @@ func parseEmails(emails string) []string {
 	return ret
 }
 
-func (admin *Administration) getNewsletterRecipients() ([]string, error) {
+func (admin *App) getNewsletterRecipients() ([]string, error) {
 	ret := []string{}
 
 	var persons []*NewsletterPersons
@@ -425,7 +425,7 @@ func (admin *Administration) getNewsletterRecipients() ([]string, error) {
 	return ret, nil
 }
 
-func (admin *Administration) sendEmails(n Newsletter, emails []string) error {
+func (admin *App) sendEmails(n Newsletter, emails []string) error {
 	for _, v := range emails {
 		body, err := admin.Newsletter.GetBody(n, v)
 		if err == nil {

@@ -6,11 +6,11 @@ import (
 	"strings"
 )
 
-func (a *Administration) bindMigrationCommand(app *App) {
+func (app *App) bindMigrationCommand() {
 	app.AddCommand("admin", "migrate").Description("migrate database").
 		Callback(func() {
 			app.Log().Println("Migrating database")
-			err := a.migrate(true)
+			err := app.migrate(true)
 			if err == nil {
 				app.Log().Println("Migrate done")
 			} else {
@@ -19,7 +19,7 @@ func (a *Administration) bindMigrationCommand(app *App) {
 		})
 }
 
-func (a *Administration) migrate(verbose bool) error {
+func (a *App) migrate(verbose bool) error {
 	tables, err := listTables(a.db)
 	if err != nil {
 		return err
@@ -169,7 +169,7 @@ func getTableDescription(db dbIface, tableName string) (map[string]*mysqlColumn,
 	return columns, nil
 }
 
-func (admin *Administration) unsafeDropTables() error {
+func (admin *App) unsafeDropTables() error {
 	for _, resource := range admin.resources {
 		err := resource.unsafeDropTable()
 		if err != nil {

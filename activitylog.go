@@ -34,11 +34,11 @@ type historyItemView struct {
 	CreatedAt   string
 }
 
-func (admin *Administration) ListenActivityLog(handler func(logItem ActivityLog)) {
+func (admin *App) ListenActivityLog(handler func(logItem ActivityLog)) {
 	admin.activityListeners = append(admin.activityListeners, handler)
 }
 
-func (admin *Administration) createActivityLog(log ActivityLog) error {
+func (admin *App) createActivityLog(log ActivityLog) error {
 	err := admin.Create(&log)
 	if err == nil {
 		for _, v := range admin.activityListeners {
@@ -48,7 +48,7 @@ func (admin *Administration) createActivityLog(log ActivityLog) error {
 	return err
 }
 
-func (admin *Administration) getHistory(resource *Resource, itemID int64) historyView {
+func (admin *App) getHistory(resource *Resource, itemID int64) historyView {
 	ret := historyView{}
 
 	q := admin.Query()
@@ -97,7 +97,7 @@ func initActivityLog(resource *Resource) {
 	resource.HumanName = messages.Messages.GetNameFunction("admin_history")
 }
 
-func (admin Administration) createNewActivityLog(resource Resource, user User, item interface{}) error {
+func (admin App) createNewActivityLog(resource Resource, user User, item interface{}) error {
 	data, err := json.Marshal(item)
 	if err != nil {
 		return err
@@ -112,7 +112,7 @@ func (admin Administration) createNewActivityLog(resource Resource, user User, i
 	})
 }
 
-func (admin Administration) createEditActivityLog(resource Resource, user User, itemID int64, before, after []byte) error {
+func (admin App) createEditActivityLog(resource Resource, user User, itemID int64, before, after []byte) error {
 	return admin.createActivityLog(ActivityLog{
 		ResourceName:  resource.ID,
 		ItemID:        itemID,
@@ -123,7 +123,7 @@ func (admin Administration) createEditActivityLog(resource Resource, user User, 
 	})
 }
 
-func (admin Administration) createDeleteActivityLog(resource Resource, user User, itemID int64, item interface{}) error {
+func (admin App) createDeleteActivityLog(resource Resource, user User, itemID int64, item interface{}) error {
 	data, err := json.Marshal(item)
 	if err != nil {
 		return err

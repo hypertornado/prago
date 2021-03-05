@@ -33,7 +33,7 @@ func (f FieldType) IsRelation() bool {
 	return false
 }
 
-func (admin *Administration) addDefaultFieldTypes() {
+func (admin *App) addDefaultFieldTypes() {
 	admin.AddFieldType("role", admin.createRoleFieldType())
 
 	admin.AddFieldType("text", FieldType{
@@ -45,11 +45,11 @@ func (admin *Administration) addDefaultFieldTypes() {
 	admin.AddFieldType("date", FieldType{})
 
 	admin.AddFieldType("cdnfile", FieldType{
-		ViewTemplate:     "admin_item_view_file",
-		ViewDataSource:   filesViewDataSource,
-		FormTemplate:     "admin_file",
+		ViewTemplate:   "admin_item_view_file",
+		ViewDataSource: filesViewDataSource,
+		FormTemplate:   "admin_file",
 		//ListCellTemplate: "admin_item_view_file_cell",
-		ListCellTemplate: "admin_list_image",
+		ListCellTemplate:   "admin_list_image",
 		ListCellDataSource: defaultViewDataSource,
 
 		FilterLayoutTemplate:   "filter_layout_select",

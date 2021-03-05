@@ -15,14 +15,14 @@ import (
 
 var filesCDN cdnclient.CDNAccount
 
-func initCDN(a *Administration) {
-	cdnURL := a.App.Config.GetStringWithFallback("cdnURL", "https://www.prago-cdn.com")
-	cdnAccount := a.App.Config.GetStringWithFallback("cdnAccount", a.HumanName)
-	cdnPassword := a.App.Config.GetStringWithFallback("cdnPassword", "")
+func initCDN(app *App) {
+	cdnURL := app.Config.GetStringWithFallback("cdnURL", "https://www.prago-cdn.com")
+	cdnAccount := app.Config.GetStringWithFallback("cdnAccount", app.HumanName)
+	cdnPassword := app.Config.GetStringWithFallback("cdnPassword", "")
 	filesCDN = cdnclient.NewCDNAccount(cdnURL, cdnAccount, cdnPassword)
 }
 
-func (admin *Administration) thumb(ids string) string {
+func (admin *App) thumb(ids string) string {
 	for _, v := range strings.Split(ids, ",") {
 		var image File
 		err := admin.Query().WhereIs("uid", v).Get(&image)
@@ -33,7 +33,7 @@ func (admin *Administration) thumb(ids string) string {
 	return ""
 }
 
-func (admin *Administration) GetFiles(ids string) []*File {
+func (admin *App) GetFiles(ids string) []*File {
 	var files []*File
 	idsAr := strings.Split(ids, ",")
 	for _, v := range idsAr {
@@ -59,7 +59,7 @@ type File struct {
 	UpdatedAt   time.Time
 }
 
-func (admin *Administration) UploadFile(fileHeader *multipart.FileHeader, user *User, description string) (*File, error) {
+func (admin *App) UploadFile(fileHeader *multipart.FileHeader, user *User, description string) (*File, error) {
 	fileName := utils.PrettyFilename(fileHeader.Filename)
 	file := File{}
 	file.Name = fileName
@@ -109,7 +109,7 @@ func (f File) GetExtension() string {
 	return extension
 }
 
-func getOldRedirectParams(request Request, admin *Administration) (uuid, name string, err error) {
+func getOldRedirectParams(request Request, admin *App) (uuid, name string, err error) {
 	name = request.Params().Get("name")
 	uuid = fmt.Sprintf("%s%s%s%s%s%s",
 		request.Params().Get("a"),
@@ -130,10 +130,9 @@ func getOldRedirectParams(request Request, admin *Administration) (uuid, name st
 }
 
 func initFilesResource(resource *Resource) {
-	a := resource.Admin
-	initCDN(a)
+	app := resource.Admin
+	initCDN(app)
 	resource.HumanName = messages.Messages.GetNameFunction("admin_files")
-	app := resource.Admin.App
 
 	resource.fieldMap["uid"].HumanName = messages.Messages.GetNameFunction("admin_file")
 	resource.fieldMap["width"].HumanName = messages.Messages.GetNameFunction("width")
@@ -142,7 +141,7 @@ func initFilesResource(resource *Resource) {
 	app.AddCommand("files", "metadata").
 		Callback(func() {
 			var files []*File
-			must(a.Query().Get(&files))
+			must(app.Query().Get(&files))
 			for _, v := range files {
 				err := v.UpdateMetadata()
 				if err != nil {
@@ -150,7 +149,7 @@ func initFilesResource(resource *Resource) {
 					continue
 				}
 				file := *v
-				err = a.Save(&file)
+				err = app.Save(&file)
 				if err != nil {
 					fmt.Println("error while saving file: ", v.ID)
 				} else {
@@ -165,17 +164,17 @@ func initFilesResource(resource *Resource) {
 			id, err := strconv.Atoi(idStr)
 			if err == nil {
 				var file File
-				must(a.Query().WhereIs("id", id).Get(&file))
+				must(app.Query().WhereIs("id", id).Get(&file))
 				err = filesCDN.DeleteFile(file.UID)
 				if err != nil {
-					a.App.Log().Printf("deleting CDN: %s\n", err)
+					app.Log().Printf("deleting CDN: %s\n", err)
 				}
 			}
 		}
 	})
 
-	a.App.MainController().Get("/files/thumb/:size/:a/:b/:c/:d/:e/:name", func(request Request) {
-		uuid, name, err := getOldRedirectParams(request, a)
+	app.MainController().Get("/files/thumb/:size/:a/:b/:c/:d/:e/:name", func(request Request) {
+		uuid, name, err := getOldRedirectParams(request, app)
 		if err != nil {
 			panic(err)
 		}
@@ -201,15 +200,15 @@ func initFilesResource(resource *Resource) {
 		return false
 	})
 
-	a.App.MainController().Get("/files/original/:a/:b/:c/:d/:e/:name", func(request Request) {
-		uuid, name, err := getOldRedirectParams(request, a)
+	app.MainController().Get("/files/original/:a/:b/:c/:d/:e/:name", func(request Request) {
+		uuid, name, err := getOldRedirectParams(request, app)
 		must(err)
 		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
 	resource.ItemsPerPage = 100
 
-	bindImageAPI(a)
+	bindImageAPI(app)
 
 	//TODO: authorize
 	resource.ResourceController.Post(resource.GetURL(""), func(request Request) {

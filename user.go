@@ -141,7 +141,7 @@ func ValidateCSRF(request Request) {
 	}
 }
 
-func (user User) sendConfirmEmail(request Request, a *Administration) error {
+func (user User) sendConfirmEmail(request Request, a *App) error {
 
 	if user.emailConfirmed() {
 		return errors.New("email already confirmed")
@@ -155,7 +155,7 @@ func (user User) sendConfirmEmail(request Request, a *Administration) error {
 
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)
-	urlValues.Add("token", user.emailToken(*a.App))
+	urlValues.Add("token", user.emailToken(*a))
 
 	subject := messages.Messages.Get(locale, "admin_confirm_email_subject", a.HumanName)
 	link := request.App().Config.GetString("baseUrl") + a.prefix + "/user/confirm_email?" + urlValues.Encode()
@@ -171,7 +171,7 @@ func (user User) sendConfirmEmail(request Request, a *Administration) error {
 
 }
 
-func (user User) sendAdminEmail(request Request, a *Administration) error {
+func (user User) sendAdminEmail(request Request, a *App) error {
 	if a.noReplyEmail == "" {
 		return errors.New("no reply email empty")
 	}
@@ -199,14 +199,14 @@ func (user User) sendAdminEmail(request Request, a *Administration) error {
 	return nil
 }
 
-func (user User) getRenewURL(request Request, a *Administration) string {
+func (user User) getRenewURL(request Request, a *App) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)
-	urlValues.Add("token", user.emailToken(*a.App))
+	urlValues.Add("token", user.emailToken(*a))
 	return request.App().Config.GetString("baseUrl") + a.prefix + "/user/renew_password?" + urlValues.Encode()
 }
 
-func (user User) sendRenew(request Request, admin *Administration) error {
+func (user User) sendRenew(request Request, admin *App) error {
 	if admin.noReplyEmail == "" {
 		return errors.New("no reply email empty")
 	}

@@ -7,12 +7,12 @@ import (
 //Transaction represents sql transaction
 type Transaction struct {
 	tx    *sql.Tx
-	admin *Administration
+	admin *App
 	err   error
 }
 
 //Transaction creates transaction
-func (admin *Administration) Transaction() (t *Transaction) {
+func (admin *App) Transaction() (t *Transaction) {
 	tx, err := admin.getDB().Begin()
 	t = &Transaction{
 		err: err,

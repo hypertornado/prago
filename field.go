@@ -243,7 +243,7 @@ func (field Field) shouldShow() (show bool) {
 	return
 }
 
-func (field Field) getRelatedResource(admin Administration) *Resource {
+func (field Field) getRelatedResource(admin App) *Resource {
 	if field.Tags["prago-type"] != "relation" {
 		return nil
 	}

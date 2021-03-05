@@ -36,7 +36,7 @@ type SearchPage struct {
 
 type adminSearch struct {
 	client    *elastic.Client
-	admin     *Administration
+	admin     *App
 	indexName string
 }
 
@@ -44,7 +44,7 @@ func (si SearchItem) CroppedDescription() string {
 	return utils.Crop(si.Description, 100)
 }
 
-func newAdminSearch(admin *Administration) (*adminSearch, error) {
+func newAdminSearch(admin *App) (*adminSearch, error) {
 	client, err := elastic.NewClient()
 	if err != nil {
 		return nil, err
@@ -314,12 +314,12 @@ func relationDataToSearchItem(resource *Resource, data viewRelationData) SearchI
 
 }
 
-func bindSearch(admin *Administration) {
+func bindSearch(admin *App) {
 	var err error
 
 	adminSearch, err := newAdminSearch(admin)
 	if err != nil {
-		admin.App.Log().Println(err)
+		admin.Log().Println(err)
 		return
 	}
 	admin.search = adminSearch
@@ -327,7 +327,7 @@ func bindSearch(admin *Administration) {
 	go func() {
 		err := adminSearch.searchImport()
 		if err != nil {
-			admin.App.Log().Println(fmt.Errorf("%s", err))
+			admin.Log().Println(fmt.Errorf("%s", err))
 		}
 	}()
 

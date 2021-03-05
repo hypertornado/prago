@@ -8,7 +8,7 @@ import (
 
 type adminNavigationPage struct {
 	Name         string
-	Admin        *Administration
+	Admin        *App
 	Navigation   adminItemNavigation
 	PageTemplate string
 	PageData     interface{}
@@ -65,7 +65,7 @@ func renderNavigation(request Request, page adminNavigationPage, viewName string
 	request.RenderView(viewName)
 }
 
-func (admin *Administration) getAdminNavigation(user User, code string) adminItemNavigation {
+func (admin *App) getAdminNavigation(user User, code string) adminItemNavigation {
 	tabs := []navigationTab{
 		{
 			Name:     messages.Messages.Get(user.Locale, "admin_signpost"),
@@ -91,7 +91,7 @@ func (admin *Administration) getAdminNavigation(user User, code string) adminIte
 	}
 }
 
-func (admin *Administration) getResourceNavigation(resource Resource, user User, code string) adminItemNavigation {
+func (admin *App) getResourceNavigation(resource Resource, user User, code string) adminItemNavigation {
 	var tabs []navigationTab
 	for _, v := range resource.actions {
 		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
@@ -114,7 +114,7 @@ func (admin *Administration) getResourceNavigation(resource Resource, user User,
 	}
 }
 
-func (admin *Administration) getItemNavigation(resource Resource, user User, item interface{}, code string) adminItemNavigation {
+func (admin *App) getItemNavigation(resource Resource, user User, item interface{}, code string) adminItemNavigation {
 	var tabs []navigationTab
 	for _, v := range resource.itemActions {
 		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
@@ -140,7 +140,7 @@ func (admin *Administration) getItemNavigation(resource Resource, user User, ite
 	}
 }
 
-func (admin *Administration) getSettingsNavigation(user User, code string) adminItemNavigation {
+func (admin *App) getSettingsNavigation(user User, code string) adminItemNavigation {
 	var tabs []navigationTab
 
 	tabs = append(tabs, navigationTab{
@@ -160,7 +160,7 @@ func (admin *Administration) getSettingsNavigation(user User, code string) admin
 	}
 }
 
-func (admin *Administration) getNologinNavigation(language, code string) adminItemNavigation {
+func (admin *App) getNologinNavigation(language, code string) adminItemNavigation {
 	tabs := []navigationTab{}
 
 	tabs = append(tabs, navigationTab{

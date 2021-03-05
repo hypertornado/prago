@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func bindSystemstats(admin *Administration) {
+func bindSystemstats(admin *App) {
 	startedAt := time.Now()
 
 	action := CreateAdminAction(
@@ -115,7 +115,7 @@ type accessViewRole struct {
 	Value string
 }
 
-func getResourceAccessView(admin *Administration) accessView {
+func getResourceAccessView(admin *App) accessView {
 	ret := accessView{}
 	for k := range admin.roles {
 		ret.Roles = append(ret.Roles, k)

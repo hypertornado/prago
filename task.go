@@ -13,7 +13,7 @@ import (
 )
 
 type taskManager struct {
-	admin         *Administration
+	admin         *App
 	tasks         []*Task
 	tasksMap      map[string]*Task
 	activities    map[string]*TaskActivity
@@ -21,7 +21,7 @@ type taskManager struct {
 	startedAt     time.Time
 }
 
-func newTaskManager(admin *Administration) *taskManager {
+func newTaskManager(admin *App) *taskManager {
 	tm := &taskManager{
 		admin:         admin,
 		tasksMap:      make(map[string]*Task),
@@ -267,7 +267,7 @@ type Task struct {
 
 var defaultGroup *taskGroup
 
-func (admin *Administration) NewTask(id string) *Task {
+func (admin *App) NewTask(id string) *Task {
 	if defaultGroup == nil {
 		defaultGroup = admin.NewTaskGroup(Unlocalized("Other"))
 	}
@@ -286,7 +286,7 @@ func (admin *Administration) NewTask(id string) *Task {
 	task.manager.tasks = append(admin.taskManager.tasks, task)
 	task.manager.tasksMap[task.id] = task
 
-	admin.App.AddCommand("task", id).Callback(func() {
+	admin.AddCommand("task", id).Callback(func() {
 		admin.taskManager.run(task, nil, "command")
 	})
 
@@ -312,7 +312,7 @@ type taskGroup struct {
 	Name func(string) string
 }
 
-func (admin *Administration) NewTaskGroup(name func(string) string) *taskGroup {
+func (admin *App) NewTaskGroup(name func(string) string) *taskGroup {
 	return &taskGroup{name}
 }
 

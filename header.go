@@ -16,7 +16,7 @@ type adminHeaderItem struct {
 	Url  string
 }
 
-func (admin *Administration) getHeaderData(request Request) (headerData *adminHeaderData) {
+func (admin *App) getHeaderData(request Request) (headerData *adminHeaderData) {
 	user := GetUser(request)
 
 	var hasSearch bool

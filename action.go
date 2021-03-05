@@ -409,15 +409,15 @@ func actionPreview(permission Permission) Action {
 	}
 }
 
-func bindResourceAction(admin *Administration, resource *Resource, action Action) error {
+func bindResourceAction(admin *App, resource *Resource, action Action) error {
 	return bindAction(admin, resource, action, false)
 }
 
-func bindResourceItemAction(admin *Administration, resource *Resource, action Action) error {
+func bindResourceItemAction(admin *App, resource *Resource, action Action) error {
 	return bindAction(admin, resource, action, true)
 }
 
-func bindAction(admin *Administration, resource *Resource, action Action, isItemAction bool) error {
+func bindAction(admin *App, resource *Resource, action Action, isItemAction bool) error {
 	if strings.HasPrefix(action.URL, "/") {
 		return nil
 	}
@@ -473,7 +473,7 @@ func bindAction(admin *Administration, resource *Resource, action Action, isItem
 	return nil
 }
 
-func initResourceActions(a *Administration, resource *Resource) {
+func initResourceActions(a *App, resource *Resource) {
 	if resource.CanCreate == "" {
 		resource.CanCreate = resource.CanEdit
 	}
@@ -519,7 +519,7 @@ func initResourceActions(a *Administration, resource *Resource) {
 	}
 }
 
-func (resource *Resource) getResourceActionsButtonData(user User, admin *Administration) (ret []buttonData) {
+func (resource *Resource) getResourceActionsButtonData(user User, admin *App) (ret []buttonData) {
 	navigation := admin.getResourceNavigation(*resource, user, "")
 	for _, v := range navigation.Tabs {
 		ret = append(ret, buttonData{
@@ -530,7 +530,7 @@ func (resource *Resource) getResourceActionsButtonData(user User, admin *Adminis
 	return
 }
 
-func (admin *Administration) getListItemActions(user User, item interface{}, id int64, resource Resource) listItemActions {
+func (admin *App) getListItemActions(user User, item interface{}, id int64, resource Resource) listItemActions {
 	ret := listItemActions{}
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{

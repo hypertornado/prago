@@ -20,10 +20,10 @@ type ResourceStruct struct {
 	UpdatedAt   time.Time
 }
 
-func prepareResource(initFns ...func(admin *Administration)) (*Administration, *Resource) {
+func prepareResource(initFns ...func(admin *App)) (*App, *Resource) {
 	app := prago.NewTestingApp()
 	var resource *Resource
-	admin := NewAdministration(app, func(admin *Administration) {
+	admin := NewAdministration(app, func(admin *App) {
 		resource = admin.CreateResource(ResourceStruct{}, nil)
 		for _, v := range initFns {
 			v(admin)
@@ -177,7 +177,7 @@ func TestResourceUnique(t *testing.T) {
 	}
 
 	var resource *Resource
-	admin, _ := prepareResource(func(a *Administration) {
+	admin, _ := prepareResource(func(a *App) {
 		resource = a.CreateResource(ResourceStructUnique{}, nil)
 	})
 	admin.unsafeDropTables()

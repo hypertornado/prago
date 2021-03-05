@@ -73,7 +73,7 @@ type RelationListRequest struct {
 	Count          int64
 }
 
-func generateRelationListAPIHandler(admin *Administration) func(Request) {
+func generateRelationListAPIHandler(admin *App) func(Request) {
 	return func(request Request) {
 
 		user := GetUser(request)

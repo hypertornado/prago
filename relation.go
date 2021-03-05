@@ -121,7 +121,7 @@ func (resource *Resource) itemToRelationData(item interface{}, user User, relate
 	return &ret
 }
 
-func (admin *Administration) getItemImage(item interface{}) string {
+func (admin *App) getItemImage(item interface{}) string {
 	if item != nil {
 		itemsVal := reflect.ValueOf(item).Elem()
 		field := itemsVal.FieldByName("Image")
@@ -132,7 +132,7 @@ func (admin *Administration) getItemImage(item interface{}) string {
 	return ""
 }
 
-func (admin *Administration) itemHasImage(item interface{}) bool {
+func (admin *App) itemHasImage(item interface{}) bool {
 	if item == nil {
 		return false
 	}
@@ -195,7 +195,7 @@ func (resource *Resource) getItemDescription(item interface{}, user User, relate
 	return utils.CropMarkdown(ret, 500)
 }
 
-func (admin Administration) relationStringer(field Field, value reflect.Value, user User) string {
+func (admin App) relationStringer(field Field, value reflect.Value, user User) string {
 	switch value.Kind() {
 	case reflect.String:
 		if field.Tags["prago-type"] == "image" || field.Tags["prago-type"] == "file" {

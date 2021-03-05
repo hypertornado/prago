@@ -47,14 +47,14 @@ func initNotificationResource(resource *Resource) {
 }
 
 type notification struct {
-	admin       *Administration
+	admin       *App
 	user        User
 	name        string
 	description string
 	typ         string
 }
 
-func (admin *Administration) Notification(user User, name string) *notification {
+func (admin *App) Notification(user User, name string) *notification {
 	return &notification{
 		admin: admin,
 		user:  user,

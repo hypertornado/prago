@@ -8,13 +8,13 @@ import (
 //Query represents query to db
 type Query struct {
 	query *listQuery
-	admin *Administration
+	admin *App
 	db    dbIface
 	err   error
 }
 
 //Create item in db
-func (admin *Administration) Create(item interface{}) error {
+func (admin *App) Create(item interface{}) error {
 	resource, err := admin.getResourceByItem(item)
 	if err != nil {
 		return err
@@ -23,7 +23,7 @@ func (admin *Administration) Create(item interface{}) error {
 }
 
 //Save item to db
-func (admin *Administration) Save(item interface{}) error {
+func (admin *App) Save(item interface{}) error {
 	resource, err := admin.getResourceByItem(item)
 	if err != nil {
 		return err
@@ -32,7 +32,7 @@ func (admin *Administration) Save(item interface{}) error {
 }
 
 //Query item from db
-func (admin *Administration) Query() Query {
+func (admin *App) Query() Query {
 	return Query{
 		query: &listQuery{},
 		admin: admin,

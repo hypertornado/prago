@@ -13,13 +13,13 @@ import (
 	"github.com/golang-commonmark/markdown"
 )
 
-func bindAPI(a *Administration) {
+func bindAPI(a *App) {
 	bindMarkdownAPI(a)
 	bindRelationAPI(a)
 	bindRelationListAPI(a)
 }
 
-func bindImageAPI(admin *Administration) {
+func bindImageAPI(admin *App) {
 	admin.AdminController.Get(admin.GetURL("file/uuid/:uuid"), func(request Request) {
 		var image File
 		err := admin.Query().WhereIs("uid", request.Params().Get("uuid")).Get(&image)
@@ -125,7 +125,7 @@ func bindImageAPI(admin *Administration) {
 	})
 }
 
-func bindMarkdownAPI(admin *Administration) {
+func bindMarkdownAPI(admin *App) {
 	admin.AdminController.Post(admin.GetURL("_api/markdown"), func(request Request) {
 		basicUserAuthorize(request)
 		data, err := ioutil.ReadAll(request.Request().Body)
@@ -136,7 +136,7 @@ func bindMarkdownAPI(admin *Administration) {
 	})
 }
 
-func bindRelationAPI(admin *Administration) {
+func bindRelationAPI(admin *App) {
 	admin.AdminController.Get(admin.GetURL("_api/preview/:resourceName/:id"), func(request Request) {
 		resourceName := request.Params().Get("resourceName")
 		idStr := request.Params().Get("id")
@@ -239,6 +239,6 @@ func bindRelationAPI(admin *Administration) {
 	})
 }
 
-func bindRelationListAPI(admin *Administration) {
+func bindRelationListAPI(admin *App) {
 	admin.AdminController.Post(admin.GetURL("_api/relationlist"), generateRelationListAPIHandler(admin))
 }

@@ -11,7 +11,7 @@ import (
 
 //Resource is structure representing one item in admin menu or one table in database
 type Resource struct {
-	Admin              *Administration
+	Admin              *App
 	ID                 string
 	HumanName          func(locale string) string
 	Typ                reflect.Type
@@ -43,7 +43,7 @@ type Resource struct {
 }
 
 //CreateResource creates new resource based on item
-func (admin *Administration) CreateResource(item interface{}, initFunction func(*Resource)) *Resource {
+func (admin *App) CreateResource(item interface{}, initFunction func(*Resource)) *Resource {
 	if admin.resourcesInited {
 		panic("can't create new resource, resources already initiated")
 	}
@@ -106,7 +106,7 @@ func (admin *Administration) CreateResource(item interface{}, initFunction func(
 	return ret
 }
 
-func (admin *Administration) initResource(resource *Resource) {
+func (admin *App) initResource(resource *Resource) {
 	resource.ResourceController.AddAroundAction(func(request Request, next func()) {
 		user := GetUser(request)
 		if !admin.Authorize(user, resource.CanView) {
@@ -128,7 +128,7 @@ func (resource Resource) GetURL(suffix string) string {
 	return resource.Admin.GetURL(url)
 }
 
-func (admin *Administration) getResourceByItem(item interface{}) (*Resource, error) {
+func (admin *App) getResourceByItem(item interface{}) (*Resource, error) {
 	typ := reflect.TypeOf(item).Elem()
 	resource, ok := admin.resourceMap[typ]
 	if !ok {
@@ -185,13 +185,13 @@ func (resource Resource) cachedCountName() string {
 }
 
 func (resource Resource) getCachedCount() int64 {
-	return resource.Admin.App.Cache.Load(resource.cachedCountName(), func() interface{} {
+	return resource.Admin.Cache.Load(resource.cachedCountName(), func() interface{} {
 		return resource.count()
 	}).(int64)
 }
 
 func (resource Resource) updateCachedCount() error {
-	return resource.Admin.App.Cache.Set(resource.cachedCountName(), resource.count())
+	return resource.Admin.Cache.Set(resource.cachedCountName(), resource.count())
 }
 
 func (resource Resource) getPaginationData(user User) (ret []ListPaginationData) {
