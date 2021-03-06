@@ -21,17 +21,17 @@ type ResourceStruct struct {
 }
 
 func prepareResource(initFns ...func(app *App)) (*App, *Resource) {
-	app := prago.NewTestingApp()
+	//app := NewTestingApp()
 	var resource *Resource
-	admin := NewAdministration(app, func(app *App) {
-		resource = admin.CreateResource(ResourceStruct{}, nil)
+	app := NewTestingApp(func(app *App) {
+		resource = app.CreateResource(ResourceStruct{}, nil)
 		for _, v := range initFns {
-			v(admin)
+			v(app)
 		}
 	})
-	admin.unsafeDropTables()
-	admin.migrate(false)
-	return admin, resource
+	app.unsafeDropTables()
+	app.migrate(false)
+	return app, resource
 }
 
 func TestAdminQuery(t *testing.T) {
