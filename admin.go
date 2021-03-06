@@ -2,7 +2,6 @@ package prago
 
 import (
 	"errors"
-	"fmt"
 
 	_ "embed"
 
@@ -22,8 +21,109 @@ var staticAdminCSS []byte
 //go:embed static/public/admin/_static/pikaday.js
 var staticPikadayJS []byte
 
+func (app *App) initAdminActions() {
+
+	app.accessController.AddBeforeAction(func(request Request) {
+		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
+
+		request.SetData("locale", getLocale(request))
+
+		request.SetData("admin_header_prefix", app.prefix)
+		request.SetData("javascripts", app.javascripts)
+		request.SetData("css", app.css)
+	})
+
+	app.accessController.AddAroundAction(
+		app.createSessionAroundAction(
+			app.Config.GetString("random"),
+		),
+	)
+
+	googleAPIKey := app.Config.GetStringWithFallback("google", "")
+	app.AdminController.AddBeforeAction(func(request Request) {
+		request.SetData("google", googleAPIKey)
+	})
+
+	app.AdminController.AddAroundAction(func(request Request, next func()) {
+		session := request.GetData("session").(*sessions.Session)
+		userID, ok := session.Values["user_id"].(int64)
+
+		if !ok {
+			request.Redirect(app.GetAdminURL("user/login"))
+			return
+		}
+
+		var user User
+		err := app.Query().WhereIs("id", userID).Get(&user)
+		if err != nil {
+			request.Redirect(app.GetAdminURL("user/login"))
+			return
+		}
+
+		randomness := app.Config.GetString("random")
+		request.SetData("_csrfToken", user.CSRFToken(randomness))
+		request.SetData("currentuser", &user)
+		request.SetData("locale", user.Locale)
+		request.SetData("gravatar", user.gravatarURL())
+
+		if !user.IsAdmin && !user.emailConfirmed() {
+			addCurrentFlashMessage(request, messages.Messages.Get(user.Locale, "admin_flash_not_confirmed"))
+		}
+
+		if !user.IsAdmin {
+			var sysadmin User
+			err := app.Query().WhereIs("IsSysadmin", true).Get(&sysadmin)
+			var sysadminEmail string
+			if err == nil {
+				sysadminEmail = sysadmin.Email
+			}
+
+			addCurrentFlashMessage(request, messages.Messages.Get(user.Locale, "admin_flash_not_approved", sysadminEmail))
+		}
+
+		headerData := app.getHeaderData(request)
+		request.SetData("admin_header", headerData)
+		request.SetData("main_menu", app.getMainMenu(request))
+
+		next()
+	})
+
+	app.AdminController.Get(app.GetAdminURL(""), func(request Request) {
+		renderNavigationPage(request, adminNavigationPage{
+			PageTemplate: "admin_home_navigation",
+			PageData:     app.getHomeData(request),
+		})
+	})
+
+	app.AdminController.Get(app.GetAdminURL("_help/markdown"), func(request Request) {
+		request.SetData("admin_yield", "admin_help_markdown")
+		request.RenderView("admin_layout")
+	})
+
+	app.AdminController.Get(app.GetAdminURL("_static/admin.js"), func(request Request) {
+		request.Response().Header().Set("Content-type", "text/javascript")
+		request.Response().WriteHeader(200)
+		request.Response().Write([]byte(staticAdminJS))
+	})
+	app.AdminController.Get(app.GetAdminURL("_static/pikaday.js"), func(request Request) {
+		request.Response().Header().Set("Content-type", "text/javascript")
+		request.Response().WriteHeader(200)
+		request.Response().Write([]byte(staticPikadayJS))
+	})
+	app.MainController().Get(app.GetAdminURL("_static/admin.css"), func(request Request) {
+		request.Response().Header().Set("Content-type", "text/css; charset=utf-8")
+		request.Response().WriteHeader(200)
+		request.Response().Write([]byte(staticAdminCSS))
+	})
+
+}
+
+func (app *App) initAdminNotFoundAction() {
+	app.AdminController.Get(app.GetAdminURL("*"), render404)
+}
+
 //GetURL gets url
-func (app App) GetURL(suffix string) string {
+func (app App) GetAdminURL(suffix string) string {
 	ret := app.prefix
 	if len(suffix) > 0 {
 		ret += "/" + suffix
@@ -35,15 +135,6 @@ func (app App) GetURL(suffix string) string {
 func (app *App) AddAction(action Action) {
 	bindAction(app, nil, action, false)
 	app.rootActions = append(app.rootActions, action)
-}
-
-//AddFieldType adds field type
-func (app *App) AddFieldType(name string, fieldType FieldType) {
-	_, exist := app.fieldTypes[name]
-	if exist {
-		panic(fmt.Sprintf("field type '%s' already set", name))
-	}
-	app.fieldTypes[name] = fieldType
 }
 
 //AddJavascript adds javascript
@@ -68,15 +159,6 @@ func addCurrentFlashMessage(request Request, message string) {
 	messages, _ := data.([]interface{})
 	messages = append(messages, message)
 	request.SetData("flash_messages", messages)
-}
-
-//GetItemURL gets item url
-func (resource Resource) GetItemURL(item interface{}, suffix string) string {
-	ret := resource.GetURL(fmt.Sprintf("%d", getItemID(item)))
-	if suffix != "" {
-		ret += "/" + suffix
-	}
-	return ret
 }
 
 func render403(request Request) {

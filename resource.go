@@ -104,6 +104,15 @@ func (app *App) CreateResource(item interface{}, initFunction func(*Resource)) *
 	return ret
 }
 
+//GetItemURL gets item url
+func (resource Resource) GetItemURL(item interface{}, suffix string) string {
+	ret := resource.GetURL(fmt.Sprintf("%d", getItemID(item)))
+	if suffix != "" {
+		ret += "/" + suffix
+	}
+	return ret
+}
+
 func (admin *App) getResourceByName(name string) *Resource {
 	return admin.resourceNameMap[columnName(name)]
 }
@@ -128,7 +137,7 @@ func (resource Resource) GetURL(suffix string) string {
 	if len(suffix) > 0 {
 		url += "/" + suffix
 	}
-	return resource.App.GetURL(url)
+	return resource.App.GetAdminURL(url)
 }
 
 func (admin *App) getResourceByItem(item interface{}) (*Resource, error) {

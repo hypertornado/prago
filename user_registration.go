@@ -24,7 +24,7 @@ func initUserRegistration(resource *Resource) {
 					err = resource.App.Save(&user)
 					if err == nil {
 						AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_confirm_email_ok"))
-						request.Redirect(resource.App.GetURL("user/login"))
+						request.Redirect(resource.App.GetAdminURL("user/login"))
 						return
 					}
 				}
@@ -32,7 +32,7 @@ func initUserRegistration(resource *Resource) {
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_confirm_email_fail"))
-		request.Redirect(resource.App.GetURL("user/login"))
+		request.Redirect(resource.App.GetAdminURL("user/login"))
 	})
 
 	newUserForm := func(locale string) *Form {
@@ -110,7 +110,7 @@ func initUserRegistration(resource *Resource) {
 			must(resource.App.Create(user))
 
 			AddFlashMessage(request, messages.Messages.Get(locale, "admin_confirm_email_send", user.Email))
-			request.Redirect(resource.App.GetURL("user/login"))
+			request.Redirect(resource.App.GetAdminURL("user/login"))
 		} else {
 			form.GetItemByName("password").Value = ""
 			renderRegistration(request, form, locale)

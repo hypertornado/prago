@@ -48,7 +48,7 @@ func initUserRenew(resource *Resource) {
 						err = user.sendRenew(request, resource.App)
 						if err == nil {
 							AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_forgoten_sent", user.Email))
-							request.Redirect(resource.App.GetURL("/user/login"))
+							request.Redirect(resource.App.GetAdminURL("/user/login"))
 							return
 						}
 						reason = "can't send renew email"
@@ -66,7 +66,7 @@ func initUserRenew(resource *Resource) {
 		}
 
 		AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_forgoten_error", user.Email)+" ("+reason+")")
-		request.Redirect(resource.App.GetURL("user/forgot"))
+		request.Redirect(resource.App.GetAdminURL("user/forgot"))
 	})
 
 	renewPasswordForm := func(locale string) (form *Form) {
@@ -119,7 +119,7 @@ func initUserRenew(resource *Resource) {
 						err = resource.App.Save(&user)
 						if err == nil {
 							AddFlashMessage(request, messages.Messages.Get(locale, "admin_password_changed"))
-							request.Redirect(resource.App.GetURL("user/login"))
+							request.Redirect(resource.App.GetAdminURL("user/login"))
 							return
 						}
 					}
@@ -127,7 +127,7 @@ func initUserRenew(resource *Resource) {
 			}
 		}
 		AddFlashMessage(request, errStr)
-		request.Redirect(resource.App.GetURL("user/login"))
+		request.Redirect(resource.App.GetAdminURL("user/login"))
 		//form.GetItemByName("password").Value = ""
 		//renderLogin(request, form, locale)
 	})

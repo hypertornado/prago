@@ -107,7 +107,7 @@ func initEshopProduct(resource *prago.Resource) {
 			}
 
 			prago.AddFlashMessage(request, "Vstupy vygenerovány")
-			redirectURL := resource.App.GetURL(fmt.Sprintf("eshoporder/%d", order.ID))
+			redirectURL := resource.App.GetAdminURL(fmt.Sprintf("eshoporder/%d", order.ID))
 			request.Redirect(redirectURL)
 		},
 	})

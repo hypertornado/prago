@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/hypertornado/prago/messages"
@@ -24,6 +25,15 @@ type FieldType struct {
 
 	FilterLayoutTemplate   string
 	FilterLayoutDataSource func(Field, User) interface{}
+}
+
+//AddFieldType adds field type
+func (app *App) AddFieldType(name string, fieldType FieldType) {
+	_, exist := app.fieldTypes[name]
+	if exist {
+		panic(fmt.Sprintf("field type '%s' already set", name))
+	}
+	app.fieldTypes[name] = fieldType
 }
 
 func (f FieldType) IsRelation() bool {

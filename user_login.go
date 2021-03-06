@@ -31,7 +31,7 @@ func initUserLogin(resource *Resource) {
 				session := request.GetData("session").(*sessions.Session)
 				session.Values["user_id"] = user.ID
 				must(session.Save(request.Request(), request.Response()))
-				request.Redirect(resource.App.GetURL(""))
+				request.Redirect(resource.App.GetAdminURL(""))
 			},
 		})
 
@@ -96,10 +96,10 @@ func initUserLogin(resource *Resource) {
 		session.Values["user_id"] = user.ID
 		session.AddFlash(messages.Messages.Get(locale, "admin_login_ok"))
 		must(session.Save(request.Request(), request.Response()))
-		request.Redirect(resource.App.GetURL(""))
+		request.Redirect(resource.App.GetAdminURL(""))
 	})
 
-	resource.App.AdminController.Get(resource.App.GetURL("logout"), func(request Request) {
+	resource.App.AdminController.Get(resource.App.GetAdminURL("logout"), func(request Request) {
 		ValidateCSRF(request)
 		session := request.GetData("session").(*sessions.Session)
 		delete(session.Values, "user_id")

@@ -42,7 +42,7 @@ func (admin *App) getMainMenu(request Request) (ret mainMenu) {
 	user := GetUser(request)
 
 	var selectedAdminSection bool
-	if request.Request().URL.Path == admin.GetURL("") {
+	if request.Request().URL.Path == admin.GetAdminURL("") {
 		selectedAdminSection = true
 	}
 
@@ -55,19 +55,19 @@ func (admin *App) getMainMenu(request Request) (ret mainMenu) {
 		Items: []mainMenuItem{
 			{
 				Name:     messages.Messages.Get(user.Locale, "admin_signpost"),
-				URL:      admin.GetURL(""),
+				URL:      admin.GetAdminURL(""),
 				Selected: selectedAdminSection,
 			},
 		},
 	}
 
 	var selectedTasks bool
-	if request.Request().URL.Path == admin.GetURL("_tasks") {
+	if request.Request().URL.Path == admin.GetAdminURL("_tasks") {
 		selectedTasks = true
 	}
 	adminSection.Items = append(adminSection.Items, mainMenuItem{
 		Name:     messages.Messages.Get(user.Locale, "tasks"),
-		URL:      admin.GetURL("_tasks"),
+		URL:      admin.GetAdminURL("_tasks"),
 		Selected: selectedTasks,
 	})
 
@@ -77,7 +77,7 @@ func (admin *App) getMainMenu(request Request) (ret mainMenu) {
 		}
 
 		var selected bool
-		fullURL := admin.GetURL(v.URL)
+		fullURL := admin.GetAdminURL(v.URL)
 		if request.Request().URL.Path == fullURL {
 			selected = true
 		}
@@ -96,7 +96,7 @@ func (admin *App) getMainMenu(request Request) (ret mainMenu) {
 	}
 	for _, resource := range admin.getSortedResources(user.Locale) {
 		if admin.Authorize(user, resource.CanView) {
-			resourceURL := admin.GetURL(resource.ID)
+			resourceURL := admin.GetAdminURL(resource.ID)
 
 			var selected bool
 			if request.Request().URL.Path == resourceURL {
@@ -117,7 +117,7 @@ func (admin *App) getMainMenu(request Request) (ret mainMenu) {
 	ret.Sections = append(ret.Sections, resourceSection)
 
 	var userSettingsSection bool
-	if request.Request().URL.Path == admin.GetURL("user/settings") || request.Request().URL.Path == admin.GetURL("user/password") {
+	if request.Request().URL.Path == admin.GetAdminURL("user/settings") || request.Request().URL.Path == admin.GetAdminURL("user/password") {
 		userSettingsSection = true
 	}
 	userName := user.Name
@@ -130,7 +130,7 @@ func (admin *App) getMainMenu(request Request) (ret mainMenu) {
 		Items: []mainMenuItem{
 			{
 				Name:     messages.Messages.Get(user.Locale, "admin_settings"),
-				URL:      admin.GetURL("user/settings"),
+				URL:      admin.GetAdminURL("user/settings"),
 				Selected: userSettingsSection,
 			},
 			{
@@ -139,14 +139,14 @@ func (admin *App) getMainMenu(request Request) (ret mainMenu) {
 			},
 			{
 				Name: messages.Messages.Get(user.Locale, "admin_log_out"),
-				URL:  admin.GetURL("logout") + "?_csrfToken=" + user.CSRFToken(randomness),
+				URL:  admin.GetAdminURL("logout") + "?_csrfToken=" + user.CSRFToken(randomness),
 			},
 		},
 	}
 	ret.Sections = append(ret.Sections, userSection)
 
 	ret.Logo = admin.Logo
-	ret.AdminHomepageURL = admin.GetURL("")
+	ret.AdminHomepageURL = admin.GetAdminURL("")
 
 	if admin.search != nil {
 		ret.HasSearch = true

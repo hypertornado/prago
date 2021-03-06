@@ -10,9 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago/cachelib"
-	"github.com/hypertornado/prago/messages"
 	setup "github.com/hypertornado/prago/prago-setup/lib"
 	"github.com/hypertornado/prago/utils"
 )
@@ -30,7 +28,6 @@ type App struct {
 	mainController     *Controller
 	Cache              *cachelib.Cache
 
-	//App              *App
 	Logo             string
 	prefix           string
 	HumanName        string
@@ -107,7 +104,6 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 
 	app.AdminController = app.accessController.SubController()
 	app.initDefaultFieldTypes()
-
 	app.initTaskManager()
 
 	app.CreateResource(User{}, initUserResource)
@@ -115,114 +111,19 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	app.CreateResource(File{}, initFilesResource)
 	app.CreateResource(ActivityLog{}, initActivityLog)
 
-	app.accessController.AddBeforeAction(func(request Request) {
-		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
-
-		request.SetData("locale", getLocale(request))
-
-		request.SetData("admin_header_prefix", app.prefix)
-		request.SetData("javascripts", app.javascripts)
-		request.SetData("css", app.css)
-	})
-
-	app.accessController.AddAroundAction(
-		app.createSessionAroundAction(
-			app.Config.GetString("random"),
-		),
-	)
-
-	googleAPIKey := app.Config.GetStringWithFallback("google", "")
-	app.AdminController.AddBeforeAction(func(request Request) {
-		request.SetData("google", googleAPIKey)
-	})
-
 	app.initAPI()
 	app.initMigrationCommand()
 	app.initTemplates()
-
 	app.initSystemStats()
 	app.initBackupCRON()
-
-	app.AdminController.AddAroundAction(func(request Request, next func()) {
-		session := request.GetData("session").(*sessions.Session)
-		userID, ok := session.Values["user_id"].(int64)
-
-		if !ok {
-			request.Redirect(app.GetURL("user/login"))
-			return
-		}
-
-		var user User
-		err := app.Query().WhereIs("id", userID).Get(&user)
-		if err != nil {
-			request.Redirect(app.GetURL("user/login"))
-			return
-		}
-
-		randomness := app.Config.GetString("random")
-		request.SetData("_csrfToken", user.CSRFToken(randomness))
-		request.SetData("currentuser", &user)
-		request.SetData("locale", user.Locale)
-		request.SetData("gravatar", user.gravatarURL())
-
-		if !user.IsAdmin && !user.emailConfirmed() {
-			addCurrentFlashMessage(request, messages.Messages.Get(user.Locale, "admin_flash_not_confirmed"))
-		}
-
-		if !user.IsAdmin {
-			var sysadmin User
-			err := app.Query().WhereIs("IsSysadmin", true).Get(&sysadmin)
-			var sysadminEmail string
-			if err == nil {
-				sysadminEmail = sysadmin.Email
-			}
-
-			addCurrentFlashMessage(request, messages.Messages.Get(user.Locale, "admin_flash_not_approved", sysadminEmail))
-		}
-
-		headerData := app.getHeaderData(request)
-		request.SetData("admin_header", headerData)
-		request.SetData("main_menu", app.getMainMenu(request))
-
-		next()
-	})
-
-	app.AdminController.Get(app.GetURL(""), func(request Request) {
-		renderNavigationPage(request, adminNavigationPage{
-			PageTemplate: "admin_home_navigation",
-			PageData:     app.getHomeData(request),
-		})
-	})
-
-	app.AdminController.Get(app.GetURL("_help/markdown"), func(request Request) {
-		request.SetData("admin_yield", "admin_help_markdown")
-		request.RenderView("admin_layout")
-	})
-
-	app.AdminController.Get(app.GetURL("_static/admin.js"), func(request Request) {
-		request.Response().Header().Set("Content-type", "text/javascript")
-		request.Response().WriteHeader(200)
-		request.Response().Write([]byte(staticAdminJS))
-	})
-	app.AdminController.Get(app.GetURL("_static/pikaday.js"), func(request Request) {
-		request.Response().Header().Set("Content-type", "text/javascript")
-		request.Response().WriteHeader(200)
-		request.Response().Write([]byte(staticPikadayJS))
-	})
-	app.MainController().Get(app.GetURL("_static/admin.css"), func(request Request) {
-		request.Response().Header().Set("Content-type", "text/css; charset=utf-8")
-		request.Response().WriteHeader(200)
-		request.Response().Write([]byte(staticAdminCSS))
-	})
-
 	app.initSearch()
+	app.initAdminActions()
 
 	if initFunction != nil {
 		initFunction(app)
 	}
 
-	app.AdminController.Get(app.GetURL("*"), render404)
-
+	app.initAdminNotFoundAction()
 	app.initSysadminPermissions()
 	app.initAllAutoRelations()
 

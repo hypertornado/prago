@@ -423,7 +423,7 @@ func bindAction(admin *App, resource *Resource, action Action, isItemAction bool
 
 	var url string
 	if resource == nil {
-		url = admin.GetURL(action.URL)
+		url = admin.GetAdminURL(action.URL)
 	} else {
 		if isItemAction {
 			if action.URL != "" {

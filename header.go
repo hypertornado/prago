@@ -39,7 +39,7 @@ func (admin *App) getHeaderData(request Request) (headerData *adminHeaderData) {
 			headerData.Items = append(headerData.Items, adminHeaderItem{
 				Name: resource.HumanName(user.Locale),
 				ID:   resource.ID,
-				Url:  admin.GetURL(resource.ID),
+				Url:  admin.GetAdminURL(resource.ID),
 			})
 		}
 	}

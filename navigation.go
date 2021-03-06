@@ -69,7 +69,7 @@ func (admin *App) getAdminNavigation(user User, code string) adminItemNavigation
 	tabs := []navigationTab{
 		{
 			Name:     messages.Messages.Get(user.Locale, "admin_signpost"),
-			URL:      admin.GetURL(""),
+			URL:      admin.GetAdminURL(""),
 			Selected: trueIfEqual(code, ""),
 		},
 	}
@@ -79,7 +79,7 @@ func (admin *App) getAdminNavigation(user User, code string) adminItemNavigation
 			if admin.Authorize(user, v.Permission) {
 				tabs = append(tabs, navigationTab{
 					Name:     v.getName(user.Locale),
-					URL:      admin.GetURL(v.URL),
+					URL:      admin.GetAdminURL(v.URL),
 					Selected: trueIfEqual(code, v.URL),
 				})
 			}
@@ -145,13 +145,13 @@ func (admin *App) getSettingsNavigation(user User, code string) adminItemNavigat
 
 	tabs = append(tabs, navigationTab{
 		Name:     messages.Messages.Get(user.Locale, "admin_settings"),
-		URL:      admin.GetURL("user/settings"),
+		URL:      admin.GetAdminURL("user/settings"),
 		Selected: trueIfEqual(code, "settings"),
 	})
 
 	tabs = append(tabs, navigationTab{
 		Name:     messages.Messages.Get(user.Locale, "admin_password_change"),
-		URL:      admin.GetURL("user/password"),
+		URL:      admin.GetAdminURL("user/password"),
 		Selected: trueIfEqual(code, "password"),
 	})
 
@@ -165,19 +165,19 @@ func (admin *App) getNologinNavigation(language, code string) adminItemNavigatio
 
 	tabs = append(tabs, navigationTab{
 		Name:     messages.Messages.Get(language, "admin_login_action"),
-		URL:      admin.GetURL("user/login"),
+		URL:      admin.GetAdminURL("user/login"),
 		Selected: trueIfEqual(code, "login"),
 	})
 
 	tabs = append(tabs, navigationTab{
 		Name:     messages.Messages.Get(language, "admin_register"),
-		URL:      admin.GetURL("user/registration"),
+		URL:      admin.GetAdminURL("user/registration"),
 		Selected: trueIfEqual(code, "registration"),
 	})
 
 	tabs = append(tabs, navigationTab{
 		Name:     messages.Messages.Get(language, "admin_forgotten"),
-		URL:      admin.GetURL("user/forgot"),
+		URL:      admin.GetAdminURL("user/forgot"),
 		Selected: trueIfEqual(code, "forgot"),
 	})
 
