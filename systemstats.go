@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (admin *App) initSystemStats() {
+func (app *App) initSystemStats() {
 	startedAt := time.Now()
 
 	action := CreateAdminAction(
@@ -19,11 +19,11 @@ func (admin *App) initSystemStats() {
 		func(resource Resource, request Request, user User) interface{} {
 
 			stats := [][2]string{}
-			stats = append(stats, [2]string{"App name", admin.codeName})
-			stats = append(stats, [2]string{"App version", admin.version})
+			stats = append(stats, [2]string{"App name", app.codeName})
+			stats = append(stats, [2]string{"App version", app.version})
 
 			developmentModeStr := "false"
-			if admin.DevelopmentMode {
+			if app.DevelopmentMode {
 				developmentModeStr = "true"
 			}
 			stats = append(stats, [2]string{"Development mode", developmentModeStr})
@@ -35,7 +35,7 @@ func (admin *App) initSystemStats() {
 			stats = append(stats, [2]string{"GOOS", runtime.GOOS})
 			stats = append(stats, [2]string{"GOMAXPROCS", fmt.Sprintf("%d", runtime.GOMAXPROCS(-1))})
 
-			configStats := admin.Config.Export()
+			configStats := app.Config.Export()
 
 			osStats := [][2]string{}
 			osStats = append(osStats, [2]string{"EGID", fmt.Sprintf("%d", os.Getegid())})
@@ -86,19 +86,19 @@ func (admin *App) initSystemStats() {
 
 			ret := map[string]interface{}{}
 
-			ret["roles"] = admin.roles
+			ret["roles"] = app.roles
 			ret["stats"] = stats
 			ret["configStats"] = configStats
 			ret["osStats"] = osStats
 			ret["memStats"] = memStats
 			ret["environmentStats"] = environmentStats
-			ret["accessView"] = getResourceAccessView(admin)
+			ret["accessView"] = getResourceAccessView(app)
 			return ret
 		},
 	)
 
 	action.Permission = permissionSysadmin
-	admin.AddAction(action)
+	app.AddAction(action)
 }
 
 type accessView struct {
@@ -115,15 +115,15 @@ type accessViewRole struct {
 	Value string
 }
 
-func getResourceAccessView(admin *App) accessView {
+func getResourceAccessView(app *App) accessView {
 	ret := accessView{}
-	for k := range admin.roles {
+	for k := range app.roles {
 		ret.Roles = append(ret.Roles, k)
 	}
 
 	sort.Strings(ret.Roles)
 
-	for _, resource := range admin.resources {
+	for _, resource := range app.resources {
 		viewResource := accessViewResource{
 			Name: resource.TableName,
 		}
@@ -132,28 +132,28 @@ func getResourceAccessView(admin *App) accessView {
 			no := "-"
 			s := ""
 			user := User{Role: v, IsAdmin: true}
-			if admin.Authorize(user, resource.CanView) {
+			if app.Authorize(user, resource.CanView) {
 				s += yeah
 			} else {
 				yeah = no
 				s += no
 			}
-			if admin.Authorize(user, resource.CanEdit) {
+			if app.Authorize(user, resource.CanEdit) {
 				s += yeah
 			} else {
 				s += no
 			}
-			if admin.Authorize(user, resource.CanCreate) {
+			if app.Authorize(user, resource.CanCreate) {
 				s += yeah
 			} else {
 				s += no
 			}
-			if admin.Authorize(user, resource.CanDelete) {
+			if app.Authorize(user, resource.CanDelete) {
 				s += yeah
 			} else {
 				s += yeah
 			}
-			if admin.Authorize(user, resource.CanExport) {
+			if app.Authorize(user, resource.CanExport) {
 				s += yeah
 			} else {
 				s += no

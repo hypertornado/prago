@@ -42,6 +42,9 @@ func (resource *Resource) initAutoRelations() {
 				referenceName = relationFieldName
 			}
 			referenceResource := resource.App.getResourceByName(referenceName)
+			if referenceResource == nil {
+				panic("can't find reference resource: " + referenceName)
+			}
 
 			if v.Tags["prago-description"] == "" {
 				v.HumanName = (*referenceResource).HumanName
@@ -127,18 +130,18 @@ func (resource *Resource) itemToRelationData(item interface{}, user User, relate
 	return &ret
 }
 
-func (admin *App) getItemImage(item interface{}) string {
+func (app *App) getItemImage(item interface{}) string {
 	if item != nil {
 		itemsVal := reflect.ValueOf(item).Elem()
 		field := itemsVal.FieldByName("Image")
 		if field.IsValid() {
-			return admin.thumb(field.String())
+			return app.thumb(field.String())
 		}
 	}
 	return ""
 }
 
-func (admin *App) itemHasImage(item interface{}) bool {
+func (app *App) itemHasImage(item interface{}) bool {
 	if item == nil {
 		return false
 	}
@@ -201,7 +204,7 @@ func (resource *Resource) getItemDescription(item interface{}, user User, relate
 	return utils.CropMarkdown(ret, 500)
 }
 
-func (admin App) relationStringer(field Field, value reflect.Value, user User) string {
+func (app App) relationStringer(field Field, value reflect.Value, user User) string {
 	switch value.Kind() {
 	case reflect.String:
 		if field.Tags["prago-type"] == "image" || field.Tags["prago-type"] == "file" {
@@ -213,7 +216,7 @@ func (admin App) relationStringer(field Field, value reflect.Value, user User) s
 			if value.Int() <= 0 {
 				return ""
 			}
-			rr := field.getRelatedResource(admin)
+			rr := field.getRelatedResource(app)
 
 			var item interface{}
 			rr.newItem(&item)

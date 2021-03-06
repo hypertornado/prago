@@ -47,18 +47,18 @@ func initNotificationResource(resource *Resource) {
 }
 
 type notification struct {
-	admin       *App
+	app         *App
 	user        User
 	name        string
 	description string
 	typ         string
 }
 
-func (admin *App) Notification(user User, name string) *notification {
+func (app *App) Notification(user User, name string) *notification {
 	return &notification{
-		admin: admin,
-		user:  user,
-		name:  name,
+		app:  app,
+		user: user,
+		name: name,
 	}
 }
 
@@ -85,5 +85,5 @@ func (n *notification) Create() error {
 		NotificationTyp: n.typ,
 		User:            n.user.ID,
 	}
-	return n.admin.Create(&item)
+	return n.app.Create(&item)
 }

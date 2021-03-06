@@ -16,13 +16,13 @@ var ErrWrongWhereFormat = errors.New("wrong where format")
 //Debug enables logging of all sql queries
 var Debug = false
 
-func (admin *App) getDB() *sql.DB {
-	return admin.db
+func (app *App) getDB() *sql.DB {
+	return app.db
 }
 
 //GetDB gets DB
-func (admin *App) GetDB() *sql.DB {
-	return admin.getDB()
+func (app *App) GetDB() *sql.DB {
+	return app.getDB()
 }
 
 type mysqlColumn struct {

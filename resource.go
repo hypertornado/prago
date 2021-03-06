@@ -113,22 +113,22 @@ func (resource Resource) GetItemURL(item interface{}, suffix string) string {
 	return ret
 }
 
-func (admin *App) getResourceByName(name string) *Resource {
-	return admin.resourceNameMap[columnName(name)]
+func (app *App) getResourceByName(name string) *Resource {
+	return app.resourceNameMap[columnName(name)]
 }
 
-func (admin *App) initResource(resource *Resource) {
+func (app *App) initResource(resource *Resource) {
 
 	resource.ResourceController.AddAroundAction(func(request Request, next func()) {
 		user := GetUser(request)
-		if !admin.Authorize(user, resource.CanView) {
+		if !app.Authorize(user, resource.CanView) {
 			render403(request)
 		} else {
 			next()
 		}
 	})
 
-	initResourceActions(admin, resource)
+	initResourceActions(app, resource)
 }
 
 //GetURL returns resource url
@@ -140,11 +140,11 @@ func (resource Resource) GetURL(suffix string) string {
 	return resource.App.GetAdminURL(url)
 }
 
-func (admin *App) getResourceByItem(item interface{}) (*Resource, error) {
+func (app *App) getResourceByItem(item interface{}) (*Resource, error) {
 	typ := reflect.TypeOf(item).Elem()
-	resource, ok := admin.resourceMap[typ]
+	resource, ok := app.resourceMap[typ]
 	if !ok {
-		return nil, fmt.Errorf("Can't find resource with type %s.", typ)
+		return nil, fmt.Errorf("can't find resource with type %s", typ)
 	}
 	return resource, nil
 }

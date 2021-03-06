@@ -16,30 +16,30 @@ type adminHeaderItem struct {
 	Url  string
 }
 
-func (admin *App) getHeaderData(request Request) (headerData *adminHeaderData) {
+func (app *App) getHeaderData(request Request) (headerData *adminHeaderData) {
 	user := GetUser(request)
 
 	var hasSearch bool
-	if admin.search != nil {
+	if app.search != nil {
 		hasSearch = true
 	}
 
 	headerData = &adminHeaderData{
-		Name:        admin.HumanName,
+		Name:        app.HumanName,
 		Language:    user.Locale,
-		Logo:        admin.Logo,
-		UrlPrefix:   admin.prefix,
-		HomepageUrl: admin.Config.GetStringWithFallback("baseUrl", request.Request().Host),
+		Logo:        app.Logo,
+		UrlPrefix:   app.prefix,
+		HomepageUrl: app.Config.GetStringWithFallback("baseUrl", request.Request().Host),
 		HasSearch:   hasSearch,
 		Items:       []adminHeaderItem{},
 	}
 
-	for _, resource := range admin.getSortedResources(user.Locale) {
-		if admin.Authorize(user, resource.CanView) {
+	for _, resource := range app.getSortedResources(user.Locale) {
+		if app.Authorize(user, resource.CanView) {
 			headerData.Items = append(headerData.Items, adminHeaderItem{
 				Name: resource.HumanName(user.Locale),
 				ID:   resource.ID,
-				Url:  admin.GetAdminURL(resource.ID),
+				Url:  app.GetAdminURL(resource.ID),
 			})
 		}
 	}

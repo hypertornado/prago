@@ -20,7 +20,7 @@ func initUserRenew(resource *Resource) {
 
 	renderForgot := func(request Request, form *Form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
-			Admin:        resource.App,
+			App:          resource.App,
 			Navigation:   resource.App.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
 			PageData:     form,
@@ -82,7 +82,7 @@ func initUserRenew(resource *Resource) {
 
 	renderRenew := func(request Request, form *Form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
-			Admin:        resource.App,
+			App:          resource.App,
 			Navigation:   resource.App.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
 			PageData:     form,

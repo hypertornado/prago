@@ -25,21 +25,21 @@ var (
 type NewsletterMiddleware struct {
 	baseUrl    string
 	renderer   NewsletterRenderer
-	admin      *App
+	app        *App
 	randomness string
 }
 
-func (admin *App) InitNewsletter(renderer NewsletterRenderer) {
-	admin.Newsletter = &NewsletterMiddleware{
-		baseUrl:  admin.Config.GetString("baseUrl"),
+func (app *App) InitNewsletter(renderer NewsletterRenderer) {
+	app.Newsletter = &NewsletterMiddleware{
+		baseUrl:  app.Config.GetString("baseUrl"),
 		renderer: renderer,
 
-		admin:      admin,
-		randomness: admin.Config.GetString("random"),
+		app:        app,
+		randomness: app.Config.GetString("random"),
 	}
 
 	var importPath string
-	admin.AddCommand("newsletter", "import").StringArgument(&importPath).Callback(func() {
+	app.AddCommand("newsletter", "import").StringArgument(&importPath).Callback(func() {
 		file, err := os.Open(importPath)
 		must(err)
 
@@ -56,28 +56,28 @@ func (admin *App) InitNewsletter(renderer NewsletterRenderer) {
 		}
 
 		for _, v := range lines {
-			err := admin.AddEmail(v, "", true)
+			err := app.AddEmail(v, "", true)
 			if err != nil {
 				fmt.Printf("error while importing %s: %s\n", v, err)
 			}
 		}
 	})
 
-	controller := admin.MainController().SubController()
+	controller := app.MainController().SubController()
 	controller.AddBeforeAction(func(request Request) {
-		request.SetData("site", admin.HumanName)
+		request.SetData("site", app.HumanName)
 	})
 
 	controller.Get("/newsletter-subscribe", func(request Request) {
 		request.SetData("title", "Přihlásit se k odběru newsletteru")
-		request.SetData("csrf", admin.Newsletter.CSFR(request))
+		request.SetData("csrf", app.Newsletter.CSFR(request))
 		request.SetData("yield", "newsletter_subscribe")
 		request.SetData("show_back_button", true)
 		request.RenderView("newsletter_layout")
 	})
 
 	controller.Post("/newsletter-subscribe", func(request Request) {
-		if admin.Newsletter.CSFR(request) != request.Params().Get("csrf") {
+		if app.Newsletter.CSFR(request) != request.Params().Get("csrf") {
 			panic("wrong csrf")
 		}
 
@@ -86,9 +86,9 @@ func (admin *App) InitNewsletter(renderer NewsletterRenderer) {
 		name := request.Params().Get("name")
 
 		var message string
-		err := admin.AddEmail(email, name, false)
+		err := app.AddEmail(email, name, false)
 		if err == nil {
-			err := admin.sendConfirmEmail(name, email)
+			err := app.sendConfirmEmail(name, email)
 			if err != nil {
 				panic(err)
 			}
@@ -111,18 +111,18 @@ func (admin *App) InitNewsletter(renderer NewsletterRenderer) {
 		email := request.Params().Get("email")
 		secret := request.Params().Get("secret")
 
-		if admin.Newsletter.secret(email) != secret {
+		if app.Newsletter.secret(email) != secret {
 			panic("wrong secret")
 		}
 
 		var person NewsletterPersons
-		err := admin.Query().WhereIs("email", email).Get(&person)
+		err := app.Query().WhereIs("email", email).Get(&person)
 		if err != nil {
 			panic("can't find user")
 		}
 
 		person.Confirmed = true
-		err = admin.Save(&person)
+		err = app.Save(&person)
 		if err != nil {
 			panic(err)
 		}
@@ -137,18 +137,18 @@ func (admin *App) InitNewsletter(renderer NewsletterRenderer) {
 		email := request.Params().Get("email")
 		secret := request.Params().Get("secret")
 
-		if admin.Newsletter.secret(email) != secret {
+		if app.Newsletter.secret(email) != secret {
 			panic("wrong secret")
 		}
 
 		var person NewsletterPersons
-		err := admin.Query().WhereIs("email", email).Get(&person)
+		err := app.Query().WhereIs("email", email).Get(&person)
 		if err != nil {
 			panic("can't find user")
 		}
 
 		person.Unsubscribed = true
-		err = admin.Save(&person)
+		err = app.Save(&person)
 		if err != nil {
 			panic(err)
 		}
@@ -159,38 +159,24 @@ func (admin *App) InitNewsletter(renderer NewsletterRenderer) {
 		request.RenderView("newsletter_layout")
 	})
 
-	admin.CreateResource(Newsletter{}, initNewsletterResource)
-	admin.CreateResource(NewsletterSection{}, initNewsletterSection)
-	admin.CreateResource(NewsletterPersons{}, initNewsletterPersonsResource)
+	app.CreateResource(Newsletter{}, initNewsletterResource)
+	app.CreateResource(NewsletterSection{}, initNewsletterSection)
+	app.CreateResource(NewsletterPersons{}, initNewsletterPersonsResource)
 
 	//newsletterResource.AddRelation(newsletterSectionResource, "Newsletter", Unlocalized("Přidat sekci"))
 }
 
-func (admin App) sendConfirmEmail(name, email string) error {
+func (app App) sendConfirmEmail(name, email string) error {
 
-	text := admin.Newsletter.confirmEmailBody(name, email)
+	text := app.Newsletter.confirmEmailBody(name, email)
 
-	return admin.SendEmail(
+	return app.SendEmail(
 		name,
 		email,
-		"Potvrďte prosím odběr newsletteru "+admin.HumanName,
+		"Potvrďte prosím odběr newsletteru "+app.HumanName,
 		text,
 		text,
 	)
-
-	/*message := sendgrid.NewMail()
-
-	address := mail.Address{
-		Name:    admin.HumanName,
-		Address: admin.noReplyEmail,
-	}
-
-	message.SetFromEmail(&address)
-	message.AddTo(email)
-	message.AddToName(name)
-	message.SetSubject("Potvrďte prosím odběr newsletteru " + admin.HumanName)
-	message.SetText(admin.Newsletter.confirmEmailBody(name, email))
-	return admin.sendgridClient.Send(message)*/
 }
 
 func (nm NewsletterMiddleware) confirmEmailBody(name, email string) string {
@@ -204,7 +190,7 @@ func (nm NewsletterMiddleware) confirmEmailBody(name, email string) string {
 	)
 
 	return fmt.Sprintf("Potvrďte prosím odběr newsletteru z webu %s kliknutím na adresu:\n\n%s",
-		nm.admin.HumanName,
+		nm.app.HumanName,
 		u,
 	)
 }
@@ -234,12 +220,12 @@ func (nm NewsletterMiddleware) CSFR(request Request) string {
 
 }
 
-func (admin *App) AddEmail(email, name string, confirm bool) error {
+func (app *App) AddEmail(email, name string, confirm bool) error {
 	if !strings.Contains(email, "@") {
 		return errors.New("Wrong email format")
 	}
 
-	err := admin.Query().WhereIs("email", email).Get(&NewsletterPersons{})
+	err := app.Query().WhereIs("email", email).Get(&NewsletterPersons{})
 	if err == nil {
 		return ErrEmailAlreadyInList
 	}
@@ -249,7 +235,7 @@ func (admin *App) AddEmail(email, name string, confirm bool) error {
 		Email:     email,
 		Confirmed: confirm,
 	}
-	return admin.Create(&person)
+	return app.Create(&person)
 }
 
 type Newsletter struct {
@@ -410,11 +396,11 @@ func parseEmails(emails string) []string {
 	return ret
 }
 
-func (admin *App) getNewsletterRecipients() ([]string, error) {
+func (app *App) getNewsletterRecipients() ([]string, error) {
 	ret := []string{}
 
 	var persons []*NewsletterPersons
-	err := admin.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Get(&persons)
+	err := app.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Get(&persons)
 	if err != nil {
 		return nil, err
 	}
@@ -425,31 +411,18 @@ func (admin *App) getNewsletterRecipients() ([]string, error) {
 	return ret, nil
 }
 
-func (admin *App) sendEmails(n Newsletter, emails []string) error {
+func (app *App) sendEmails(n Newsletter, emails []string) error {
 	for _, v := range emails {
-		body, err := admin.Newsletter.GetBody(n, v)
+		body, err := app.Newsletter.GetBody(n, v)
 		if err == nil {
 
-			err = admin.SendEmail(
+			err = app.SendEmail(
 				"",
 				v,
 				n.Name,
 				body,
 				body,
 			)
-
-			/*message := sendgrid.NewMail()
-
-			address := mail.Address{
-				Name:    admin.HumanName,
-				Address: admin.noReplyEmail,
-			}
-			message.SetFromEmail(&address)
-
-			message.AddTo(v)
-			message.SetSubject(n.Name)
-			message.SetHTML(body)
-			err = admin.sendgridClient.Send(message)*/
 		}
 		if err != nil {
 			fmt.Println("ERROR", err.Error())
@@ -463,7 +436,7 @@ func (nm *NewsletterMiddleware) GetBody(n Newsletter, email string) (string, err
 	params := map[string]interface{}{
 		"id":          n.ID,
 		"baseUrl":     nm.baseUrl,
-		"site":        nm.admin.HumanName,
+		"site":        nm.app.HumanName,
 		"title":       n.Name,
 		"unsubscribe": nm.unsubscribeUrl(email),
 		"content":     template.HTML(content),
@@ -543,7 +516,7 @@ type NewsletterSectionData struct {
 
 func (nm *NewsletterMiddleware) getNewsletterSectionData(n Newsletter) []NewsletterSectionData {
 	var sections []*NewsletterSection
-	err := nm.admin.Query().WhereIs("newsletter", n.ID).Order("orderposition").Get(&sections)
+	err := nm.app.Query().WhereIs("newsletter", n.ID).Order("orderposition").Get(&sections)
 	if err != nil {
 		return nil
 	}
@@ -562,7 +535,7 @@ func (nm *NewsletterMiddleware) getNewsletterSectionData(n Newsletter) []Newslet
 		}
 
 		image := ""
-		files := nm.admin.GetFiles(v.Image)
+		files := nm.app.GetFiles(v.Image)
 		if len(files) > 0 {
 			image = files[0].GetMedium()
 		}

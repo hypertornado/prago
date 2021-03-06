@@ -20,10 +20,10 @@ type ResourceStruct struct {
 	UpdatedAt   time.Time
 }
 
-func prepareResource(initFns ...func(admin *App)) (*App, *Resource) {
+func prepareResource(initFns ...func(app *App)) (*App, *Resource) {
 	app := prago.NewTestingApp()
 	var resource *Resource
-	admin := NewAdministration(app, func(admin *App) {
+	admin := NewAdministration(app, func(app *App) {
 		resource = admin.CreateResource(ResourceStruct{}, nil)
 		for _, v := range initFns {
 			v(admin)

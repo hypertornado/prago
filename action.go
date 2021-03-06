@@ -408,22 +408,22 @@ func actionPreview(permission Permission) Action {
 	}
 }
 
-func bindResourceAction(admin *App, resource *Resource, action Action) error {
-	return bindAction(admin, resource, action, false)
+func bindResourceAction(app *App, resource *Resource, action Action) error {
+	return bindAction(app, resource, action, false)
 }
 
-func bindResourceItemAction(admin *App, resource *Resource, action Action) error {
-	return bindAction(admin, resource, action, true)
+func bindResourceItemAction(app *App, resource *Resource, action Action) error {
+	return bindAction(app, resource, action, true)
 }
 
-func bindAction(admin *App, resource *Resource, action Action, isItemAction bool) error {
+func bindAction(app *App, resource *Resource, action Action, isItemAction bool) error {
 	if strings.HasPrefix(action.URL, "/") {
 		return nil
 	}
 
 	var url string
 	if resource == nil {
-		url = admin.GetAdminURL(action.URL)
+		url = app.GetAdminURL(action.URL)
 	} else {
 		if isItemAction {
 			if action.URL != "" {
@@ -441,12 +441,12 @@ func bindAction(admin *App, resource *Resource, action Action, isItemAction bool
 	if resource != nil {
 		controller = resource.ResourceController
 	} else {
-		controller = admin.AdminController
+		controller = app.AdminController
 	}
 
 	var fn = func(request Request) {
 		user := GetUser(request)
-		if !admin.Authorize(user, action.Permission) {
+		if !app.Authorize(user, action.Permission) {
 			render403(request)
 			return
 		}
@@ -454,7 +454,7 @@ func bindAction(admin *App, resource *Resource, action Action, isItemAction bool
 			action.Handler(*resource, request, user)
 		} else {
 			//TODO: ugly hack
-			action.Handler(Resource{App: admin}, request, user)
+			action.Handler(Resource{App: app}, request, user)
 		}
 	}
 
@@ -529,7 +529,7 @@ func (resource *Resource) getResourceActionsButtonData(user User, admin *App) (r
 	return
 }
 
-func (admin *App) getListItemActions(user User, item interface{}, id int64, resource Resource) listItemActions {
+func (app *App) getListItemActions(user User, item interface{}, id int64, resource Resource) listItemActions {
 	ret := listItemActions{}
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{
@@ -548,7 +548,7 @@ func (admin *App) getListItemActions(user User, item interface{}, id int64, reso
 		}
 	}
 
-	if admin.Authorize(user, resource.CanEdit) && resource.OrderColumnName != "" {
+	if app.Authorize(user, resource.CanEdit) && resource.OrderColumnName != "" {
 		ret.ShowOrderButton = true
 	}
 

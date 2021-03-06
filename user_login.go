@@ -46,7 +46,7 @@ func initUserLogin(resource *Resource) {
 
 	renderLogin := func(request Request, form *Form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
-			Admin:        resource.App,
+			App:          resource.App,
 			Navigation:   resource.App.getNologinNavigation(locale, "login"),
 			PageTemplate: "admin_form",
 			PageData:     form,

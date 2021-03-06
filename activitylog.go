@@ -34,24 +34,24 @@ type historyItemView struct {
 	CreatedAt   string
 }
 
-func (admin *App) ListenActivityLog(handler func(logItem ActivityLog)) {
-	admin.activityListeners = append(admin.activityListeners, handler)
+func (app *App) ListenActivityLog(handler func(logItem ActivityLog)) {
+	app.activityListeners = append(app.activityListeners, handler)
 }
 
-func (admin *App) createActivityLog(log ActivityLog) error {
-	err := admin.Create(&log)
+func (app *App) createActivityLog(log ActivityLog) error {
+	err := app.Create(&log)
 	if err == nil {
-		for _, v := range admin.activityListeners {
+		for _, v := range app.activityListeners {
 			v(log)
 		}
 	}
 	return err
 }
 
-func (admin *App) getHistory(resource *Resource, itemID int64) historyView {
+func (app *App) getHistory(resource *Resource, itemID int64) historyView {
 	ret := historyView{}
 
-	q := admin.Query()
+	q := app.Query()
 	if resource != nil {
 		q.WhereIs("ResourceName", resource.ID)
 	}
@@ -68,13 +68,13 @@ func (admin *App) getHistory(resource *Resource, itemID int64) historyView {
 		var username, userurl string
 
 		var user User
-		err := admin.Query().WhereIs("id", v.User).Get(&user)
+		err := app.Query().WhereIs("id", v.User).Get(&user)
 		if err == nil {
 			username = user.Name
-			userurl = admin.GetAdminURL(fmt.Sprintf("user/%d", user.ID))
+			userurl = app.GetAdminURL(fmt.Sprintf("user/%d", user.ID))
 		}
 
-		activityURL := admin.GetAdminURL(fmt.Sprintf("activitylog/%d", v.ID))
+		activityURL := app.GetAdminURL(fmt.Sprintf("activitylog/%d", v.ID))
 		itemName := fmt.Sprintf("%s #%d", v.ResourceName, v.ID)
 
 		ret.Items = append(ret.Items, historyItemView{
@@ -97,13 +97,13 @@ func initActivityLog(resource *Resource) {
 	resource.HumanName = messages.Messages.GetNameFunction("admin_history")
 }
 
-func (admin App) createNewActivityLog(resource Resource, user User, item interface{}) error {
+func (app App) createNewActivityLog(resource Resource, user User, item interface{}) error {
 	data, err := json.Marshal(item)
 	if err != nil {
 		return err
 	}
 
-	return admin.createActivityLog(ActivityLog{
+	return app.createActivityLog(ActivityLog{
 		ResourceName: resource.ID,
 		ItemID:       getItemID(item),
 		ActionType:   "new",
@@ -112,8 +112,8 @@ func (admin App) createNewActivityLog(resource Resource, user User, item interfa
 	})
 }
 
-func (admin App) createEditActivityLog(resource Resource, user User, itemID int64, before, after []byte) error {
-	return admin.createActivityLog(ActivityLog{
+func (app App) createEditActivityLog(resource Resource, user User, itemID int64, before, after []byte) error {
+	return app.createActivityLog(ActivityLog{
 		ResourceName:  resource.ID,
 		ItemID:        itemID,
 		ActionType:    "edit",
@@ -123,13 +123,13 @@ func (admin App) createEditActivityLog(resource Resource, user User, itemID int6
 	})
 }
 
-func (admin App) createDeleteActivityLog(resource Resource, user User, itemID int64, item interface{}) error {
+func (app App) createDeleteActivityLog(resource Resource, user User, itemID int64, item interface{}) error {
 	data, err := json.Marshal(item)
 	if err != nil {
 		return err
 	}
 
-	return admin.createActivityLog(ActivityLog{
+	return app.createActivityLog(ActivityLog{
 		ResourceName:  resource.ID,
 		ItemID:        itemID,
 		ActionType:    "delete",

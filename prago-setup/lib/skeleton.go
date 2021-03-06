@@ -80,10 +80,7 @@ var appVersion = "0.0.1"
 
 func main() {
 	prago.NewApp(appName, appVersion, func(app *prago.App) {
-		administration.NewAdministration(app, func(admin *administration.Administration) {
-
-		})
-
+		
 		app.LoadTemplatePath("templates/*")
 
 		build.CreateBuildHelper(app, build.BuildSettings{

@@ -8,35 +8,35 @@ import (
 //Query represents query to db
 type Query struct {
 	query *listQuery
-	admin *App
+	app   *App
 	db    dbIface
 	err   error
 }
 
 //Create item in db
-func (admin *App) Create(item interface{}) error {
-	resource, err := admin.getResourceByItem(item)
+func (app *App) Create(item interface{}) error {
+	resource, err := app.getResourceByItem(item)
 	if err != nil {
 		return err
 	}
-	return resource.createWithDBIface(item, admin.getDB())
+	return resource.createWithDBIface(item, app.getDB())
 }
 
 //Save item to db
-func (admin *App) Save(item interface{}) error {
-	resource, err := admin.getResourceByItem(item)
+func (app *App) Save(item interface{}) error {
+	resource, err := app.getResourceByItem(item)
 	if err != nil {
 		return err
 	}
-	return resource.saveWithDBIface(item, admin.getDB())
+	return resource.saveWithDBIface(item, app.getDB())
 }
 
 //Query item from db
-func (admin *App) Query() Query {
+func (app *App) Query() Query {
 	return Query{
 		query: &listQuery{},
-		admin: admin,
-		db:    admin.getDB(),
+		app:   app,
+		db:    app.getDB(),
 	}
 }
 
@@ -93,7 +93,7 @@ func (q Query) Get(item interface{}) error {
 		typ = typ.Elem().Elem()
 	}
 
-	resource, ok := q.admin.resourceMap[typ]
+	resource, ok := q.app.resourceMap[typ]
 	if !ok {
 		return fmt.Errorf("Can't find resource with type %s.", typ)
 	}
@@ -117,7 +117,7 @@ func (q Query) Get(item interface{}) error {
 
 //Count items with query
 func (q Query) Count(item interface{}) (int64, error) {
-	resource, err := q.admin.getResourceByItem(item)
+	resource, err := q.app.getResourceByItem(item)
 	if err != nil {
 		return -1, err
 	}
@@ -126,7 +126,7 @@ func (q Query) Count(item interface{}) (int64, error) {
 
 //Delete item with query
 func (q Query) Delete(item interface{}) (int64, error) {
-	resource, err := q.admin.getResourceByItem(item)
+	resource, err := q.app.getResourceByItem(item)
 	if err != nil {
 		return -1, err
 	}

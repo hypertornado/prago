@@ -13,9 +13,9 @@ func (app *App) initSysadminPermissions() {
 	app.AddRole("sysadmin", app.getSysadminPermissions())
 }
 
-func (admin App) getSysadminPermissions() []string {
+func (app App) getSysadminPermissions() []string {
 	m := map[string]bool{}
-	for _, v1 := range admin.roles {
+	for _, v1 := range app.roles {
 		for v2 := range v1 {
 			m[v2] = true
 		}
@@ -28,9 +28,9 @@ func (admin App) getSysadminPermissions() []string {
 	return ret
 }
 
-func (admin *App) getRoleFieldTypeData() [][2]string {
+func (app *App) getRoleFieldTypeData() [][2]string {
 	roleNames := []string{""}
-	for k := range admin.roles {
+	for k := range app.roles {
 		roleNames = append(roleNames, k)
 	}
 
@@ -41,10 +41,10 @@ func (admin *App) getRoleFieldTypeData() [][2]string {
 	return vals
 }
 
-func (admin *App) createRoleFieldType() FieldType {
+func (app *App) createRoleFieldType() FieldType {
 	var fp = func(Field, User) interface{} {
 		roleNames := []string{""}
-		for k := range admin.roles {
+		for k := range app.roles {
 			roleNames = append(roleNames, k)
 		}
 
@@ -63,20 +63,20 @@ func (admin *App) createRoleFieldType() FieldType {
 }
 
 //AddRole adds role to admin
-func (admin *App) AddRole(role string, permissions []string) {
+func (app *App) AddRole(role string, permissions []string) {
 	perms := map[string]bool{}
 	for _, v := range permissions {
 		perms[v] = true
 	}
-	_, ok := admin.roles[role]
+	_, ok := app.roles[role]
 	if ok {
 		panic(fmt.Sprintf("role '%s' already added", role))
 	}
-	admin.roles[role] = perms
+	app.roles[role] = perms
 }
 
 //Authorize user for task
-func (admin App) Authorize(user User, permission Permission) bool {
+func (app App) Authorize(user User, permission Permission) bool {
 	if !user.IsAdmin {
 		return false
 	}
@@ -89,12 +89,12 @@ func (admin App) Authorize(user User, permission Permission) bool {
 		user.Role = "sysadmin"
 	}
 
-	return admin.roles[user.Role][string(permission)]
+	return app.roles[user.Role][string(permission)]
 }
 
-func (admin App) getResourceViewRoles(resource Resource) []string {
+func (app App) getResourceViewRoles(resource Resource) []string {
 	var ret []string
-	for roleName, permissions := range admin.roles {
+	for roleName, permissions := range app.roles {
 		for permission := range permissions {
 			if permission == string(resource.CanView) {
 				ret = append(ret, roleName)

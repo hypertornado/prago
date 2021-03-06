@@ -36,7 +36,7 @@ type SearchPage struct {
 
 type adminSearch struct {
 	client    *elastic.Client
-	admin     *App
+	app       *App
 	indexName string
 }
 
@@ -44,14 +44,14 @@ func (si SearchItem) CroppedDescription() string {
 	return utils.Crop(si.Description, 100)
 }
 
-func newAdminSearch(admin *App) (*adminSearch, error) {
+func newAdminSearch(app *App) (*adminSearch, error) {
 	client, err := elastic.NewClient()
 	if err != nil {
 		return nil, err
 	}
 	return &adminSearch{
 		client:    client,
-		admin:     admin,
+		app:       app,
 		indexName: "prago_admin",
 	}, nil
 }
@@ -234,7 +234,7 @@ func (e *adminSearch) searchImport() error {
 		return fmt.Errorf("while creating index: %s", err)
 	}
 
-	for _, v := range e.admin.resources {
+	for _, v := range e.app.resources {
 		err = e.importResource(v)
 		if err != nil {
 			return fmt.Errorf("while importing resource %s: %s", v.TableName, err)
@@ -258,14 +258,14 @@ func (e *adminSearch) importResource(resource *Resource) error {
 
 	var item interface{}
 	resource.newItem(&item)
-	c, _ := e.admin.Query().Count(item)
+	c, _ := e.app.Query().Count(item)
 	if c > 10000 {
 		return nil
 	}
 
 	var items interface{}
 	resource.newArrayOfItems(&items)
-	err := e.admin.Query().Get(items)
+	err := e.app.Query().Get(items)
 	if err == nil {
 		itemsVal := reflect.ValueOf(items).Elem()
 		for i := 0; i < itemsVal.Len(); i++ {
@@ -314,24 +314,24 @@ func relationDataToSearchItem(resource *Resource, data viewRelationData) SearchI
 
 }
 
-func (admin *App) initSearch() {
+func (app *App) initSearch() {
 	var err error
 
-	adminSearch, err := newAdminSearch(admin)
+	adminSearch, err := newAdminSearch(app)
 	if err != nil {
-		admin.Log().Println(err)
+		app.Log().Println(err)
 		return
 	}
-	admin.search = adminSearch
+	app.search = adminSearch
 
 	go func() {
 		err := adminSearch.searchImport()
 		if err != nil {
-			admin.Log().Println(fmt.Errorf("%s", err))
+			app.Log().Println(fmt.Errorf("%s", err))
 		}
 	}()
 
-	admin.AdminController.Get(admin.GetAdminURL("_search"), func(request Request) {
+	app.AdminController.Get(app.GetAdminURL("_search"), func(request Request) {
 		q := request.Params().Get("q")
 		pageStr := request.Params().Get("page")
 
@@ -382,10 +382,10 @@ func (admin *App) initSearch() {
 		request.RenderView("admin_layout")
 	})
 
-	admin.AdminController.Get(admin.GetAdminURL("_search_suggest"), func(request Request) {
+	app.AdminController.Get(app.GetAdminURL("_search_suggest"), func(request Request) {
 		results, err := adminSearch.Suggest(request.Params().Get("q"))
 		if err != nil {
-			admin.Log().Println(err)
+			app.Log().Println(err)
 		}
 
 		if len(results) == 0 {

@@ -6,14 +6,14 @@ import (
 
 //Transaction represents sql transaction
 type Transaction struct {
-	tx    *sql.Tx
-	admin *App
-	err   error
+	tx  *sql.Tx
+	app *App
+	err error
 }
 
 //Transaction creates transaction
-func (admin *App) Transaction() (t *Transaction) {
-	tx, err := admin.getDB().Begin()
+func (app *App) Transaction() (t *Transaction) {
+	tx, err := app.getDB().Begin()
 	t = &Transaction{
 		err: err,
 	}
@@ -22,13 +22,13 @@ func (admin *App) Transaction() (t *Transaction) {
 	}
 
 	t.tx = tx
-	t.admin = admin
+	t.app = app
 	return
 }
 
 //Create transaction
 func (t *Transaction) Create(item interface{}) error {
-	resource, err := t.admin.getResourceByItem(item)
+	resource, err := t.app.getResourceByItem(item)
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func (t *Transaction) Create(item interface{}) error {
 
 //Save transaction
 func (t *Transaction) Save(item interface{}) error {
-	resource, err := t.admin.getResourceByItem(item)
+	resource, err := t.app.getResourceByItem(item)
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func (t *Transaction) Query() *Query {
 	}
 	return &Query{
 		query: &listQuery{},
-		admin: t.admin,
+		app:   t.app,
 		db:    t.tx,
 	}
 }

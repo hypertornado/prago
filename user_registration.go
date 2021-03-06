@@ -65,7 +65,7 @@ func initUserRegistration(resource *Resource) {
 
 	renderRegistration := func(request Request, form *Form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
-			Admin:        resource.App,
+			App:          resource.App,
 			Navigation:   resource.App.getNologinNavigation(locale, "registration"),
 			PageTemplate: "admin_form",
 			PageData:     form,

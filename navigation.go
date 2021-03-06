@@ -8,7 +8,7 @@ import (
 
 type adminNavigationPage struct {
 	Name         string
-	Admin        *App
+	App          *App
 	Navigation   adminItemNavigation
 	PageTemplate string
 	PageData     interface{}
@@ -65,21 +65,21 @@ func renderNavigation(request Request, page adminNavigationPage, viewName string
 	request.RenderView(viewName)
 }
 
-func (admin *App) getAdminNavigation(user User, code string) adminItemNavigation {
+func (app *App) getAdminNavigation(user User, code string) adminItemNavigation {
 	tabs := []navigationTab{
 		{
 			Name:     messages.Messages.Get(user.Locale, "admin_signpost"),
-			URL:      admin.GetAdminURL(""),
+			URL:      app.GetAdminURL(""),
 			Selected: trueIfEqual(code, ""),
 		},
 	}
 
-	for _, v := range admin.rootActions {
+	for _, v := range app.rootActions {
 		if v.Method == "" || v.Method == "GET" {
-			if admin.Authorize(user, v.Permission) {
+			if app.Authorize(user, v.Permission) {
 				tabs = append(tabs, navigationTab{
 					Name:     v.getName(user.Locale),
-					URL:      admin.GetAdminURL(v.URL),
+					URL:      app.GetAdminURL(v.URL),
 					Selected: trueIfEqual(code, v.URL),
 				})
 			}
@@ -140,18 +140,18 @@ func (resource Resource) getItemNavigation(user User, item interface{}, code str
 	}
 }
 
-func (admin *App) getSettingsNavigation(user User, code string) adminItemNavigation {
+func (app *App) getSettingsNavigation(user User, code string) adminItemNavigation {
 	var tabs []navigationTab
 
 	tabs = append(tabs, navigationTab{
 		Name:     messages.Messages.Get(user.Locale, "admin_settings"),
-		URL:      admin.GetAdminURL("user/settings"),
+		URL:      app.GetAdminURL("user/settings"),
 		Selected: trueIfEqual(code, "settings"),
 	})
 
 	tabs = append(tabs, navigationTab{
 		Name:     messages.Messages.Get(user.Locale, "admin_password_change"),
-		URL:      admin.GetAdminURL("user/password"),
+		URL:      app.GetAdminURL("user/password"),
 		Selected: trueIfEqual(code, "password"),
 	})
 
@@ -160,24 +160,24 @@ func (admin *App) getSettingsNavigation(user User, code string) adminItemNavigat
 	}
 }
 
-func (admin *App) getNologinNavigation(language, code string) adminItemNavigation {
+func (app *App) getNologinNavigation(language, code string) adminItemNavigation {
 	tabs := []navigationTab{}
 
 	tabs = append(tabs, navigationTab{
 		Name:     messages.Messages.Get(language, "admin_login_action"),
-		URL:      admin.GetAdminURL("user/login"),
+		URL:      app.GetAdminURL("user/login"),
 		Selected: trueIfEqual(code, "login"),
 	})
 
 	tabs = append(tabs, navigationTab{
 		Name:     messages.Messages.Get(language, "admin_register"),
-		URL:      admin.GetAdminURL("user/registration"),
+		URL:      app.GetAdminURL("user/registration"),
 		Selected: trueIfEqual(code, "registration"),
 	})
 
 	tabs = append(tabs, navigationTab{
 		Name:     messages.Messages.Get(language, "admin_forgotten"),
-		URL:      admin.GetAdminURL("user/forgot"),
+		URL:      app.GetAdminURL("user/forgot"),
 		Selected: trueIfEqual(code, "forgot"),
 	})
 
@@ -208,7 +208,7 @@ func createNavigationalItemHandler(action, templateName string, dataGenerator fu
 		}
 
 		renderNavigationPage(request, adminNavigationPage{
-			Admin:        resource.App,
+			App:          resource.App,
 			Navigation:   resource.getItemNavigation(user, item, action),
 			PageTemplate: templateName,
 			PageData:     data,
@@ -232,7 +232,7 @@ func createNavigationalHandler(action, templateName string, dataGenerator func(R
 		}
 
 		renderNavigationPage(request, adminNavigationPage{
-			Admin:        resource.App,
+			App:          resource.App,
 			Navigation:   resource.getNavigation(user, action),
 			PageTemplate: templateName,
 			PageData:     data,
@@ -264,9 +264,8 @@ func createAdminHandler(action, templateName string, dataGenerator func(Resource
 		}
 
 		renderNavigationPage(request, adminNavigationPage{
-			Name:  name,
-			Admin: resource.App,
-			//Navigation:   resource.Admin.getAdminNavigation(user, action),
+			Name:         name,
+			App:          resource.App,
 			PageTemplate: templateName,
 			PageData:     data,
 			HideBox:      empty,

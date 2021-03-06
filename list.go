@@ -330,7 +330,7 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 	return q
 }
 
-func (resource *Resource) getListContent(admin *App, user User, params url.Values) (ret listContent, err error) {
+func (resource *Resource) getListContent(app *App, user User, params url.Values) (ret listContent, err error) {
 	var listHeader list
 	listHeader, err = resource.getListHeader(user)
 	if err != nil {
@@ -360,7 +360,7 @@ func (resource *Resource) getListContent(admin *App, user User, params url.Value
 		orderDesc = false
 	}
 
-	q := admin.Query()
+	q := app.Query()
 	if orderDesc {
 		q = q.OrderDesc(orderBy)
 	} else {
@@ -370,7 +370,7 @@ func (resource *Resource) getListContent(admin *App, user User, params url.Value
 	var count int64
 	var item interface{}
 	resource.newItem(&item)
-	countQuery := admin.Query()
+	countQuery := app.Query()
 	countQuery = resource.addFilterParamsToQuery(countQuery, params)
 	count, err = countQuery.Count(item)
 	if err != nil {
@@ -449,7 +449,7 @@ func (resource *Resource) getListContent(admin *App, user User, params url.Value
 		row.ID = itemVal.FieldByName("ID").Int()
 		row.URL = resource.GetURL(fmt.Sprintf("%d", row.ID))
 
-		row.Actions = admin.getListItemActions(user, val.Index(i).Interface(), row.ID, *resource)
+		row.Actions = app.getListItemActions(user, val.Index(i).Interface(), row.ID, *resource)
 		ret.Rows = append(ret.Rows, row)
 	}
 
@@ -471,8 +471,8 @@ type ListContentJSON struct {
 	StatsStr string
 }
 
-func (resource *Resource) getListContentJSON(admin *App, user User, params url.Values) (ret *ListContentJSON, err error) {
-	listData, err := resource.getListContent(admin, user, params)
+func (resource *Resource) getListContentJSON(app *App, user User, params url.Values) (ret *ListContentJSON, err error) {
+	listData, err := resource.getListContent(app, user, params)
 	if err != nil {
 		return nil, err
 	}

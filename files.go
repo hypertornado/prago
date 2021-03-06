@@ -22,10 +22,10 @@ func initCDN(app *App) {
 	filesCDN = cdnclient.NewCDNAccount(cdnURL, cdnAccount, cdnPassword)
 }
 
-func (admin *App) thumb(ids string) string {
+func (app *App) thumb(ids string) string {
 	for _, v := range strings.Split(ids, ",") {
 		var image File
-		err := admin.Query().WhereIs("uid", v).Get(&image)
+		err := app.Query().WhereIs("uid", v).Get(&image)
 		if err == nil && image.IsImage() {
 			return image.GetSmall()
 		}
@@ -33,12 +33,12 @@ func (admin *App) thumb(ids string) string {
 	return ""
 }
 
-func (admin *App) GetFiles(ids string) []*File {
+func (app *App) GetFiles(ids string) []*File {
 	var files []*File
 	idsAr := strings.Split(ids, ",")
 	for _, v := range idsAr {
 		var image File
-		err := admin.Query().WhereIs("uid", v).Get(&image)
+		err := app.Query().WhereIs("uid", v).Get(&image)
 		if err == nil {
 			files = append(files, &image)
 		}
@@ -59,7 +59,7 @@ type File struct {
 	UpdatedAt   time.Time
 }
 
-func (admin *App) UploadFile(fileHeader *multipart.FileHeader, user *User, description string) (*File, error) {
+func (app *App) UploadFile(fileHeader *multipart.FileHeader, user *User, description string) (*File, error) {
 	fileName := utils.PrettyFilename(fileHeader.Filename)
 	file := File{}
 	file.Name = fileName
@@ -84,7 +84,7 @@ func (admin *App) UploadFile(fileHeader *multipart.FileHeader, user *User, descr
 		file.User = user.ID
 	}
 	file.Description = description
-	err = admin.Create(&file)
+	err = app.Create(&file)
 	if err != nil {
 		return nil, fmt.Errorf("saving file: %s", err)
 	}
@@ -109,7 +109,7 @@ func (f File) GetExtension() string {
 	return extension
 }
 
-func getOldRedirectParams(request Request, admin *App) (uuid, name string, err error) {
+func getOldRedirectParams(request Request, app *App) (uuid, name string, err error) {
 	name = request.Params().Get("name")
 	uuid = fmt.Sprintf("%s%s%s%s%s%s",
 		request.Params().Get("a"),
@@ -121,7 +121,7 @@ func getOldRedirectParams(request Request, admin *App) (uuid, name string, err e
 	)
 
 	var file File
-	err = admin.Query().WhereIs("uid", uuid).Get(&file)
+	err = app.Query().WhereIs("uid", uuid).Get(&file)
 	if err != nil {
 		return
 	}

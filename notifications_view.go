@@ -17,9 +17,9 @@ func notificationToNotificationView(n Notification) NotificationView {
 	return ret
 }
 
-func (admin *App) getNotificationViews(user User) (*NotificationViews, error) {
+func (app *App) getNotificationViews(user User) (*NotificationViews, error) {
 	var notifications []*Notification
-	err := admin.Query().WhereIs("IsDismissed", false).WhereIs("User", user.ID).OrderDesc("ID").Get(&notifications)
+	err := app.Query().WhereIs("IsDismissed", false).WhereIs("User", user.ID).OrderDesc("ID").Get(&notifications)
 	if err != nil {
 		return nil, err
 	}

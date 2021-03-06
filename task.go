@@ -13,7 +13,7 @@ import (
 )
 
 type taskManager struct {
-	admin         *App
+	app           *App
 	tasks         []*Task
 	tasksMap      map[string]*Task
 	activities    map[string]*TaskActivity
@@ -23,7 +23,7 @@ type taskManager struct {
 
 func (app *App) initTaskManager() {
 	tm := &taskManager{
-		admin:         app,
+		app:           app,
 		tasksMap:      make(map[string]*Task),
 		activities:    make(map[string]*TaskActivity),
 		activityMutex: &sync.RWMutex{},
@@ -80,7 +80,7 @@ func (tm *taskManager) init() {
 	go tm.oldTasksRemover()
 	go tm.startCRON()
 
-	tm.admin.AdminController.Get(tm.admin.GetAdminURL("_tasks"), func(request Request) {
+	tm.app.AdminController.Get(tm.app.GetAdminURL("_tasks"), func(request Request) {
 		user := GetUser(request)
 		request.SetData("tasks", tm.getTasks(user))
 		request.SetData("taskmonitor", tm.getTaskMonitor(user))
@@ -89,12 +89,12 @@ func (tm *taskManager) init() {
 		request.RenderView("admin_layout")
 	})
 
-	tm.admin.AdminController.Get(tm.admin.GetAdminURL("_tasks/running"), func(request Request) {
+	tm.app.AdminController.Get(tm.app.GetAdminURL("_tasks/running"), func(request Request) {
 		request.SetData("taskmonitor", tm.getTaskMonitor(GetUser(request)))
 		request.RenderView("taskmonitor")
 	})
 
-	tm.admin.AdminController.Post(tm.admin.GetAdminURL("_tasks/runtask"), func(request Request) {
+	tm.app.AdminController.Post(tm.app.GetAdminURL("_tasks/runtask"), func(request Request) {
 		id := request.Request().FormValue("id")
 		csrf := request.Request().FormValue("csrf")
 		user := GetUser(request)
@@ -105,10 +105,10 @@ func (tm *taskManager) init() {
 		}
 
 		must(tm.startTask(id, user))
-		request.Redirect(tm.admin.GetAdminURL("_tasks"))
+		request.Redirect(tm.app.GetAdminURL("_tasks"))
 	})
 
-	tm.admin.AdminController.Get(tm.admin.GetAdminURL("_tasks/stoptask"), func(request Request) {
+	tm.app.AdminController.Get(tm.app.GetAdminURL("_tasks/stoptask"), func(request Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
 		user := GetUser(request)
@@ -119,10 +119,10 @@ func (tm *taskManager) init() {
 		}
 
 		must(tm.stopTask(uuid, user))
-		request.Redirect(tm.admin.GetAdminURL("_tasks"))
+		request.Redirect(tm.app.GetAdminURL("_tasks"))
 	})
 
-	tm.admin.AdminController.Get(tm.admin.GetAdminURL("_tasks/deletetask"), func(request Request) {
+	tm.app.AdminController.Get(tm.app.GetAdminURL("_tasks/deletetask"), func(request Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
 		user := GetUser(request)
@@ -133,16 +133,16 @@ func (tm *taskManager) init() {
 		}
 
 		must(tm.deleteTask(uuid, user))
-		request.Redirect(tm.admin.GetAdminURL("_tasks"))
+		request.Redirect(tm.app.GetAdminURL("_tasks"))
 	})
 
-	grp := tm.admin.NewTaskGroup(Unlocalized("example"))
+	grp := tm.app.NewTaskGroup(Unlocalized("example"))
 
-	tm.admin.NewTask("example_fail").SetGroup(grp).SetHandler(func(t *TaskActivity) error {
+	tm.app.NewTask("example_fail").SetGroup(grp).SetHandler(func(t *TaskActivity) error {
 		return fmt.Errorf("example error")
 	})
 
-	tm.admin.NewTask("example").SetGroup(grp).SetHandler(func(t *TaskActivity) error {
+	tm.app.NewTask("example").SetGroup(grp).SetHandler(func(t *TaskActivity) error {
 		t.IsStopped()
 		var progress float64
 		for {
@@ -162,7 +162,7 @@ func (tm *taskManager) startTask(id string, user User) error {
 		return fmt.Errorf("Can't find task %s", id)
 	}
 
-	if tm.admin.Authorize(user, task.permission) {
+	if tm.app.Authorize(user, task.permission) {
 		tm.run(task, &user, "button")
 		return nil
 	} else {
@@ -216,7 +216,7 @@ func (tm *taskManager) getTasks(user User) (ret []TaskViewGroup) {
 
 	var tasks []*Task
 	for _, v := range tm.tasks {
-		if tm.admin.Authorize(user, v.permission) {
+		if tm.app.Authorize(user, v.permission) {
 			tasks = append(tasks, v)
 		}
 	}
@@ -268,27 +268,27 @@ type Task struct {
 
 var defaultGroup *taskGroup
 
-func (admin *App) NewTask(id string) *Task {
+func (app *App) NewTask(id string) *Task {
 	if defaultGroup == nil {
-		defaultGroup = admin.NewTaskGroup(Unlocalized("Other"))
+		defaultGroup = app.NewTaskGroup(Unlocalized("Other"))
 	}
 
-	_, ok := admin.taskManager.tasksMap[id]
+	_, ok := app.taskManager.tasksMap[id]
 	if ok {
 		panic(fmt.Sprintf("Task '%s' already added.", id))
 	}
 
 	task := &Task{
 		id:      id,
-		manager: admin.taskManager,
+		manager: app.taskManager,
 		group:   defaultGroup,
 	}
 
-	task.manager.tasks = append(admin.taskManager.tasks, task)
+	task.manager.tasks = append(app.taskManager.tasks, task)
 	task.manager.tasksMap[task.id] = task
 
-	admin.AddCommand("task", id).Callback(func() {
-		admin.taskManager.run(task, nil, "command")
+	app.AddCommand("task", id).Callback(func() {
+		app.taskManager.run(task, nil, "command")
 	})
 
 	return task
@@ -313,7 +313,7 @@ type taskGroup struct {
 	Name func(string) string
 }
 
-func (admin *App) NewTaskGroup(name func(string) string) *taskGroup {
+func (app *App) NewTaskGroup(name func(string) string) *taskGroup {
 	return &taskGroup{name}
 }
 
@@ -344,7 +344,7 @@ func (tm *taskManager) run(t *Task, user *User, starterTyp string) *TaskActivity
 			activity.ended = true
 			activity.endedAt = time.Now()
 			if user != nil {
-				err := tm.admin.Notification(*user, "Task finished").Create()
+				err := tm.app.Notification(*user, "Task finished").Create()
 				if err != nil {
 					fmt.Println(err)
 				}

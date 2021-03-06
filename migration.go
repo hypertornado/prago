@@ -169,8 +169,8 @@ func getTableDescription(db dbIface, tableName string) (map[string]*mysqlColumn,
 	return columns, nil
 }
 
-func (admin *App) unsafeDropTables() error {
-	for _, resource := range admin.resources {
+func (app *App) unsafeDropTables() error {
+	for _, resource := range app.resources {
 		err := resource.unsafeDropTable()
 		if err != nil {
 			return err

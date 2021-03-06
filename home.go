@@ -16,26 +16,26 @@ type homeData struct {
 	Actions []buttonData
 }
 
-func (admin *App) getHomeData(request Request) (ret []homeData) {
+func (app *App) getHomeData(request Request) (ret []homeData) {
 	user := GetUser(request)
 
-	for _, resource := range admin.getSortedResources(user.Locale) {
-		if admin.Authorize(user, resource.CanView) {
+	for _, resource := range app.getSortedResources(user.Locale) {
+		if app.Authorize(user, resource.CanView) {
 			item := homeData{
 				Name: resource.HumanName(user.Locale),
 				URL:  resource.GetURL(""),
 			}
-			item.Actions = resource.getResourceActionsButtonData(user, admin)
+			item.Actions = resource.getResourceActionsButtonData(user, app)
 			ret = append(ret, item)
 		}
 	}
 	return
 }
 
-func (admin *App) getSortedResources(locale string) (ret []*Resource) {
+func (app *App) getSortedResources(locale string) (ret []*Resource) {
 	collator := collate.New(language.Czech)
 
-	ret = admin.resources
+	ret = app.resources
 	sort.SliceStable(ret, func(i, j int) bool {
 		a := ret[i]
 		b := ret[j]

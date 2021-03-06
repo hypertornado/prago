@@ -73,7 +73,7 @@ type RelationListRequest struct {
 	Count          int64
 }
 
-func generateRelationListAPIHandler(admin *App) func(Request) {
+func generateRelationListAPIHandler(app *App) func(Request) {
 	return func(request Request) {
 
 		user := GetUser(request)
@@ -91,20 +91,20 @@ func generateRelationListAPIHandler(admin *App) func(Request) {
 			panic("Unmarshalling " + err.Error())
 		}
 
-		sourceResource := admin.getResourceByName(listRequest.SourceResource)
-		if !admin.Authorize(user, sourceResource.CanView) {
+		sourceResource := app.getResourceByName(listRequest.SourceResource)
+		if !app.Authorize(user, sourceResource.CanView) {
 			panic("cant authorize source resource")
 		}
 
-		targetResource := admin.getResourceByName(listRequest.TargetResource)
-		if !admin.Authorize(user, targetResource.CanView) {
+		targetResource := app.getResourceByName(listRequest.TargetResource)
+		if !app.Authorize(user, targetResource.CanView) {
 			panic("cant authorize target resource")
 		}
 
 		var rowItems interface{}
 		targetResource.newArrayOfItems(&rowItems)
 
-		q := admin.Query()
+		q := app.Query()
 		q = q.WhereIs(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
 		if targetResource.OrderDesc {
 			q = q.OrderDesc(targetResource.OrderByColumn)
