@@ -2,6 +2,7 @@ package prago
 
 import (
 	"bytes"
+	"embed"
 	"html/template"
 	"io"
 	"io/fs"
@@ -10,6 +11,9 @@ import (
 	"github.com/golang-commonmark/markdown"
 	"github.com/hypertornado/prago/messages"
 )
+
+//go:embed templates
+var templatesFS embed.FS
 
 type templates struct {
 	templates *template.Template
@@ -64,6 +68,8 @@ func (app *App) initTemplates() {
 	})
 
 	app.AddTemplateFunction("istabvisible", isTabVisible)
+
+	must(app.LoadTemplateFromFS(templatesFS, "templates/*.tmpl"))
 
 	return
 }

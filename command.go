@@ -15,10 +15,10 @@ func addServerCommand(app *App) {
 	var developmentMode bool
 	app.AddCommand("server").
 		Flag(
-			NewFlag("port", "port of server").Alias("p").Int(&port),
+			NewCommandFlag("port", "port of server").Alias("p").Int(&port),
 		).
 		Flag(
-			NewFlag("development", "development mode").Alias("d").Bool(&developmentMode),
+			NewCommandFlag("development", "development mode").Alias("d").Bool(&developmentMode),
 		).
 		Callback(func() {
 			app.DevelopmentMode = developmentMode
@@ -104,7 +104,7 @@ func (c *command) StringArgument(arg *string) *command {
 	return c
 }
 
-func NewFlag(name, description string) *flag {
+func NewCommandFlag(name, description string) *flag {
 	return &flag{
 		name:        name,
 		description: description,
@@ -236,7 +236,7 @@ func (app *App) parseCommands() {
 }
 
 func (app *App) usage() {
-	fmt.Printf("%s, version %s, usage:\n", app.AppName, app.Version)
+	fmt.Printf("%s, version %s, usage:\n", app.codeName, app.version)
 	for _, v := range app.commands.commands {
 		fmt.Print("  " + strings.Join(v.actions, " "))
 		if len(v.flags) > 0 {

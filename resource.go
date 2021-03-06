@@ -44,10 +44,6 @@ type Resource struct {
 
 //CreateResource creates new resource based on item
 func (app *App) CreateResource(item interface{}, initFunction func(*Resource)) *Resource {
-	if app.resourcesInited {
-		panic("can't create new resource, resources already initiated")
-	}
-
 	typ := reflect.TypeOf(item)
 
 	if typ.Kind() != reflect.Struct {
@@ -106,6 +102,10 @@ func (app *App) CreateResource(item interface{}, initFunction func(*Resource)) *
 	app.initResource(ret)
 
 	return ret
+}
+
+func (admin *App) getResourceByName(name string) *Resource {
+	return admin.resourceNameMap[columnName(name)]
 }
 
 func (admin *App) initResource(resource *Resource) {

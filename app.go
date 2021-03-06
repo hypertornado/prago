@@ -19,8 +19,8 @@ import (
 
 //App is main struct of prago application
 type App struct {
-	AppName            string
-	Version            string
+	codeName           string
+	version            string
 	DevelopmentMode    bool
 	Config             config
 	staticFilesHandler staticFilesHandler
@@ -41,7 +41,6 @@ type App struct {
 	AdminController  *Controller
 	rootActions      []Action
 	db               *sql.DB
-	resourcesInited  bool
 
 	sendgridKey  string
 	noReplyEmail string
@@ -63,18 +62,18 @@ func NewTestingApp() *App {
 	return createApp("__prago_test_app", "0.0", nil)
 }
 
-func createApp(appName string, version string, initFunction func(*App)) *App {
-	if appName != "__prago_test_app" && !configExists(appName) {
+func createApp(codeName string, version string, initFunction func(*App)) *App {
+	if codeName != "__prago_test_app" && !configExists(codeName) {
 		if utils.ConsoleQuestion("File config.json does not exist. Can't start app. Would you like to start setup?") {
-			setup.StartSetup(appName)
+			setup.StartSetup(codeName)
 		}
 	}
 
 	app := &App{
-		AppName: appName,
-		Version: version,
+		codeName: codeName,
+		version:  version,
 
-		Config:   loadConfig(appName),
+		Config:   loadConfig(codeName),
 		commands: &commands{},
 
 		logger:         log.New(os.Stdout, "", log.LstdFlags),
@@ -84,7 +83,7 @@ func createApp(appName string, version string, initFunction func(*App)) *App {
 
 	app.initStaticFilesHandler()
 
-	app.HumanName = app.AppName
+	app.HumanName = app.codeName
 	app.prefix = "/admin"
 	app.resourceMap = make(map[reflect.Type]*Resource)
 	app.resourceNameMap = make(map[string]*Resource)
@@ -119,6 +118,8 @@ func createApp(appName string, version string, initFunction func(*App)) *App {
 	app.accessController.AddBeforeAction(func(request Request) {
 		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
 
+		request.SetData("locale", getLocale(request))
+
 		request.SetData("admin_header_prefix", app.prefix)
 		request.SetData("javascripts", app.javascripts)
 		request.SetData("css", app.css)
@@ -139,7 +140,6 @@ func createApp(appName string, version string, initFunction func(*App)) *App {
 	app.initMigrationCommand()
 	app.initTemplates()
 
-	must(app.LoadTemplateFromFS(templatesFS, "templates/*.tmpl"))
 	app.initSystemStats()
 	app.initBackupCRON()
 
@@ -221,17 +221,11 @@ func createApp(appName string, version string, initFunction func(*App)) *App {
 		initFunction(app)
 	}
 
-	app.AdminController.Get(app.GetURL("*"), func(request Request) {
-		render404(request)
-	})
+	app.AdminController.Get(app.GetURL("*"), render404)
 
-	app.AddRole("sysadmin", app.getSysadminPermissions())
+	app.initSysadminPermissions()
+	app.initAllAutoRelations()
 
-	//app.taskManager.init()
-
-	app.initAutoRelations()
-
-	app.resourcesInited = true
 	return app
 }
 
@@ -256,7 +250,7 @@ func (app *App) initStaticFilesHandler() {
 func (app App) Log() *log.Logger { return app.logger }
 
 //DotPath returns path to hidden directory with app configuration and data
-func (app *App) dotPath() string { return os.Getenv("HOME") + "/." + app.AppName }
+func (app *App) dotPath() string { return os.Getenv("HOME") + "/." + app.codeName }
 
 //ListenAndServe starts server on port
 func (app *App) ListenAndServe(port int) error {
@@ -319,6 +313,10 @@ func (app App) serveHTTP(w http.ResponseWriter, r *http.Request) {
 		request.Response().WriteHeader(http.StatusNotFound)
 		request.Response().Write([]byte("404 — page not found (prago framework)"))
 	}
+}
+
+func columnName(fieldName string) string {
+	return utils.PrettyURL(fieldName)
 }
 
 func must(err error) {

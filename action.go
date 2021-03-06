@@ -125,7 +125,7 @@ func actionNew(permission Permission) Action {
 			form.Classes = append(form.Classes, "form_leavealert")
 			form.Action = "../" + resource.ID
 			form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_save"))
-			AddCSRFToken(form, request)
+			form.AddCSRFToken(request)
 
 			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   resource.getNavigation(user, "new"),
@@ -230,7 +230,7 @@ func actionEdit(permission Permission) Action {
 			form.Classes = append(form.Classes, "form_leavealert")
 			form.Action = "edit"
 			form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_save"))
-			AddCSRFToken(form, request)
+			form.AddCSRFToken(request)
 
 			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   resource.getItemNavigation(user, item, "edit"),
@@ -340,7 +340,7 @@ func actionDelete(permission Permission) Action {
 			ret := map[string]interface{}{}
 			form := NewForm()
 			form.Method = "POST"
-			AddCSRFToken(form, request)
+			form.AddCSRFToken(request)
 			form.AddDeleteSubmit("send", messages.Messages.Get(user.Locale, "admin_delete"))
 			ret["form"] = form
 
@@ -350,7 +350,6 @@ func actionDelete(permission Permission) Action {
 			itemName := getItemName(item)
 			ret["delete_title"] = fmt.Sprintf("Chcete smazat položku %s?", itemName)
 			ret["delete_title"] = messages.Messages.Get(user.Locale, "admin_delete_confirmation_name", itemName)
-			fmt.Println(itemName)
 
 			return ret
 		},

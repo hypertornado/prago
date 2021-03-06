@@ -9,6 +9,10 @@ var permissionSysadmin Permission = "sysadmin"
 //Permission for access
 type Permission string
 
+func (app *App) initSysadminPermissions() {
+	app.AddRole("sysadmin", app.getSysadminPermissions())
+}
+
 func (admin App) getSysadminPermissions() []string {
 	m := map[string]bool{}
 	for _, v1 := range admin.roles {

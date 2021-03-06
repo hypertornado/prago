@@ -24,7 +24,7 @@ func CreateDevelopmentHelper(app *prago.App, settings DevelopmentSettings) {
 	app.AddCommand("dev").
 		Description("Development command").
 		Flag(
-			prago.NewFlag("port", "server port").
+			prago.NewCommandFlag("port", "server port").
 				Alias("p").
 				Int(&port),
 		).

@@ -1,8 +1,6 @@
 package prago
 
 import (
-	"database/sql"
-	"embed"
 	"errors"
 	"fmt"
 
@@ -10,7 +8,6 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/hypertornado/prago/messages"
-	"github.com/hypertornado/prago/utils"
 )
 
 //ErrItemNotFound is returned when no item is found
@@ -25,9 +22,6 @@ var staticAdminCSS []byte
 //go:embed static/public/admin/_static/pikaday.js
 var staticPikadayJS []byte
 
-//go:embed templates
-var templatesFS embed.FS
-
 //GetURL gets url
 func (app App) GetURL(suffix string) string {
 	ret := app.prefix
@@ -38,28 +32,28 @@ func (app App) GetURL(suffix string) string {
 }
 
 //AddAction adds action
-func (admin *App) AddAction(action Action) {
-	bindAction(admin, nil, action, false)
-	admin.rootActions = append(admin.rootActions, action)
+func (app *App) AddAction(action Action) {
+	bindAction(app, nil, action, false)
+	app.rootActions = append(app.rootActions, action)
 }
 
 //AddFieldType adds field type
-func (admin *App) AddFieldType(name string, fieldType FieldType) {
-	_, exist := admin.fieldTypes[name]
+func (app *App) AddFieldType(name string, fieldType FieldType) {
+	_, exist := app.fieldTypes[name]
 	if exist {
 		panic(fmt.Sprintf("field type '%s' already set", name))
 	}
-	admin.fieldTypes[name] = fieldType
+	app.fieldTypes[name] = fieldType
 }
 
 //AddJavascript adds javascript
-func (admin *App) AddJavascript(url string) {
-	admin.javascripts = append(admin.javascripts, url)
+func (app *App) AddJavascript(url string) {
+	app.javascripts = append(app.javascripts, url)
 }
 
 //AddCSS adds CSS
-func (admin *App) AddCSS(url string) {
-	admin.css = append(admin.css, url)
+func (app *App) AddCSS(url string) {
+	app.css = append(app.css, url)
 }
 
 //AddFlashMessage adds flash message to request
@@ -74,25 +68,6 @@ func addCurrentFlashMessage(request Request, message string) {
 	messages, _ := data.([]interface{})
 	messages = append(messages, message)
 	request.SetData("flash_messages", messages)
-}
-
-func (admin *App) getResourceByName(name string) *Resource {
-	return admin.resourceNameMap[columnName(name)]
-}
-
-func (admin *App) getDB() *sql.DB {
-	return admin.db
-}
-
-//GetDB gets DB
-func (admin *App) GetDB() *sql.DB {
-	return admin.getDB()
-}
-
-func (admin *App) initAutoRelations() {
-	for _, v := range admin.resources {
-		v.initAutoRelations()
-	}
 }
 
 //GetItemURL gets item url
@@ -114,8 +89,4 @@ func render404(request Request) {
 	request.SetData("message", messages.Messages.Get(getLocale(request), "admin_404"))
 	request.SetData("admin_yield", "admin_message")
 	request.RenderViewWithCode("admin_layout", 404)
-}
-
-func columnName(fieldName string) string {
-	return utils.PrettyURL(fieldName)
 }

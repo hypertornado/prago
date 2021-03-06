@@ -41,12 +41,14 @@ type FormItem struct {
 }
 
 //Validate form
-func (f *Form) Validate() {
+func (f *Form) Validate() bool {
+	f.Valid = true
 	for _, item := range f.Items {
 		for _, validator := range item.validators {
 			validator.Validate(item)
 		}
 	}
+	return f.Valid
 }
 
 //NewForm creates new form

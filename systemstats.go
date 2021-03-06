@@ -19,8 +19,8 @@ func (admin *App) initSystemStats() {
 		func(resource Resource, request Request, user User) interface{} {
 
 			stats := [][2]string{}
-			stats = append(stats, [2]string{"App name", admin.AppName})
-			stats = append(stats, [2]string{"App version", admin.Version})
+			stats = append(stats, [2]string{"App name", admin.codeName})
+			stats = append(stats, [2]string{"App version", admin.version})
 
 			developmentModeStr := "false"
 			if admin.DevelopmentMode {

@@ -21,8 +21,8 @@ type BuildSettings struct {
 
 //Init initializes build middleware
 func CreateBuildHelper(app *App, b BuildSettings) {
-	var version = app.Version
-	var appName = app.AppName
+	var version = app.version
+	var appName = app.codeName
 
 	app.AddCommand("build").Callback(func() {
 		b.build(appName, version)
@@ -47,7 +47,7 @@ func CreateBuildHelper(app *App, b BuildSettings) {
 	})
 
 	app.AddCommand("setup").Callback(func() {
-		setup.StartSetup(app.AppName)
+		setup.StartSetup(app.codeName)
 	})
 
 }
@@ -95,7 +95,7 @@ func BackupApp(app *App) error {
 
 	app.Log().Println("Creating backup")
 
-	var appName = app.AppName
+	var appName = app.codeName
 
 	dir, err := ioutil.TempDir("", "backup")
 	if err != nil {

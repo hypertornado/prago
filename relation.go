@@ -27,6 +27,12 @@ type viewRelationData struct {
 	Description string
 }
 
+func (app *App) initAllAutoRelations() {
+	for _, v := range app.resources {
+		v.initAutoRelations()
+	}
+}
+
 func (resource *Resource) initAutoRelations() {
 	for _, v := range resource.fieldArrays {
 		if v.Tags["prago-type"] == "relation" {
