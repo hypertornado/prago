@@ -21,7 +21,6 @@ type ResourceStruct struct {
 }
 
 func prepareResource(initFns ...func(app *App)) (*App, *Resource) {
-	//app := NewTestingApp()
 	var resource *Resource
 	app := NewTestingApp(func(app *App) {
 		resource = app.CreateResource(ResourceStruct{}, nil)
@@ -34,21 +33,21 @@ func prepareResource(initFns ...func(app *App)) (*App, *Resource) {
 	return app, resource
 }
 
-func TestAdminQuery(t *testing.T) {
+func TestQuery(t *testing.T) {
 	var item ResourceStruct
 	var createdItem interface{}
 	var resource *Resource
 
-	admin, resource := prepareResource()
+	app, resource := prepareResource()
 
-	err := admin.Create(&ResourceStruct{Name: "A", Floating: 3.14})
+	err := app.Create(&ResourceStruct{Name: "A", Floating: 3.14})
 	if err != nil {
 		t.Fatal(err)
 	}
-	admin.Create(&ResourceStruct{Name: "C"})
-	admin.Create(&ResourceStruct{Name: "B"})
+	app.Create(&ResourceStruct{Name: "C"})
+	app.Create(&ResourceStruct{Name: "B"})
 
-	err = admin.Query().Where(2).Get(&item)
+	err = app.Query().Where(2).Get(&item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,7 +56,7 @@ func TestAdminQuery(t *testing.T) {
 	}
 
 	resource.newItem(&createdItem)
-	err = admin.Query().Where(2).Get(createdItem)
+	err = app.Query().Where(2).Get(createdItem)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +64,7 @@ func TestAdminQuery(t *testing.T) {
 		t.Fatal(createdItem.(*ResourceStruct).Name)
 	}
 
-	err = admin.Query().Where("id=?", 2).Get(&item)
+	err = app.Query().Where("id=?", 2).Get(&item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +72,7 @@ func TestAdminQuery(t *testing.T) {
 		t.Fatal(item.Name)
 	}
 
-	admin.Query().Get(&item)
+	app.Query().Get(&item)
 	if item.Name != "A" {
 		t.Fatal(item.Name)
 	}
@@ -83,7 +82,7 @@ func TestAdminQuery(t *testing.T) {
 	}
 
 	var list []*ResourceStruct
-	err = admin.Query().Get(&list)
+	err = app.Query().Get(&list)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +95,7 @@ func TestAdminQuery(t *testing.T) {
 		t.Fatal(list[2].Name)
 	}
 
-	count, err := admin.Query().Count(&ResourceStruct{})
+	count, err := app.Query().Count(&ResourceStruct{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +103,7 @@ func TestAdminQuery(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	admin.Query().Limit(1).Offset(1).Limit(1).Get(&list)
+	app.Query().Limit(1).Offset(1).Limit(1).Get(&list)
 	if len(list) != 1 {
 		t.Fatal(len(list))
 	}
@@ -112,19 +111,19 @@ func TestAdminQuery(t *testing.T) {
 		t.Fatal(list[0].Name)
 	}
 
-	if count, _ = admin.Query().WhereIs("name", "A").Delete(&ResourceStruct{}); count != 1 {
+	if count, _ = app.Query().WhereIs("name", "A").Delete(&ResourceStruct{}); count != 1 {
 		t.Fatal(count)
 	}
 
-	if count, _ = admin.Query().Count(&ResourceStruct{}); count != 2 {
+	if count, _ = app.Query().Count(&ResourceStruct{}); count != 2 {
 		t.Fatal(count)
 	}
 
 }
 
 func TestResource(t *testing.T) {
-	admin, resource := prepareResource()
-	items, err := resource.getListContent(admin, User{}, map[string][]string{
+	app, resource := prepareResource()
+	items, err := resource.getListContent(app, User{}, map[string][]string{
 		"_order": {"id"},
 	})
 	if err != nil {
@@ -133,7 +132,7 @@ func TestResource(t *testing.T) {
 
 	var item interface{}
 	resource.newItem(&item)
-	count, err := admin.Query().Count(item)
+	count, err := app.Query().Count(item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,13 +140,13 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	err = admin.Create(&ResourceStruct{Name: "First", CreatedAt: time.Now()})
+	err = app.Create(&ResourceStruct{Name: "First", CreatedAt: time.Now()})
 	if err != nil {
 		t.Fatal(err)
 	}
-	admin.Create(&ResourceStruct{Name: "Second", Showing: "show"})
+	app.Create(&ResourceStruct{Name: "Second", Showing: "show"})
 
-	count, err = admin.Query().Count(item)
+	count, err = app.Query().Count(item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,7 +155,7 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	items, _ = resource.getListContent(admin, User{}, map[string][]string{
+	items, _ = resource.getListContent(app, User{}, map[string][]string{
 		"_order": {"id"},
 		"_page":  {"1"},
 	})
@@ -177,19 +176,19 @@ func TestResourceUnique(t *testing.T) {
 	}
 
 	var resource *Resource
-	admin, _ := prepareResource(func(a *App) {
+	app, _ := prepareResource(func(a *App) {
 		resource = a.CreateResource(ResourceStructUnique{}, nil)
 	})
-	admin.unsafeDropTables()
-	admin.migrate(false)
+	app.unsafeDropTables()
+	app.migrate(false)
 
-	admin.Create(&ResourceStructUnique{Name: "A"})
-	admin.Create(&ResourceStructUnique{Name: "B"})
-	admin.Create(&ResourceStructUnique{Name: "A"})
+	app.Create(&ResourceStructUnique{Name: "A"})
+	app.Create(&ResourceStructUnique{Name: "B"})
+	app.Create(&ResourceStructUnique{Name: "A"})
 
 	var item interface{}
 	resource.newItem(&item)
-	count, err := admin.Query().Count(item)
+	count, err := app.Query().Count(item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,29 +199,29 @@ func TestResourceUnique(t *testing.T) {
 }
 
 func TestResourceDate(t *testing.T) {
-	admin, resource := prepareResource()
+	app, resource := prepareResource()
 	tm := time.Now()
 
-	admin.Create(&ResourceStruct{Date: tm})
+	app.Create(&ResourceStruct{Date: tm})
 
 	var item interface{}
 	resource.newItem(&item)
-	err := admin.Query().WhereIs("date", tm.Format("2006-01-02")).Get(item)
+	err := app.Query().WhereIs("date", tm.Format("2006-01-02")).Get(item)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestResourceTimestamps(t *testing.T) {
-	admin, resource := prepareResource()
+	app, resource := prepareResource()
 
 	testStartTime := time.Now().Truncate(time.Second)
 
-	admin.Create(&ResourceStruct{Name: "A"})
+	app.Create(&ResourceStruct{Name: "A"})
 
 	var itemIface interface{}
 	resource.newItem(&itemIface)
-	err := admin.Query().WhereIs("id", 1).Get(itemIface)
+	err := app.Query().WhereIs("id", 1).Get(itemIface)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -239,14 +238,14 @@ func TestResourceTimestamps(t *testing.T) {
 }
 
 func TestResourceBool(t *testing.T) {
-	admin, resource := prepareResource()
+	app, resource := prepareResource()
 
-	admin.Create(&ResourceStruct{Name: "A", IsSomething: false})
-	admin.Create(&ResourceStruct{Name: "B", IsSomething: true})
+	app.Create(&ResourceStruct{Name: "A", IsSomething: false})
+	app.Create(&ResourceStruct{Name: "B", IsSomething: true})
 
 	var itemIface interface{}
 	resource.newItem(&itemIface)
-	err := admin.Query().WhereIs("issomething", true).Get(itemIface)
+	err := app.Query().WhereIs("issomething", true).Get(itemIface)
 
 	if err != nil {
 		t.Fatal(err)
@@ -257,7 +256,7 @@ func TestResourceBool(t *testing.T) {
 		t.Fatal(item)
 	}
 
-	err = admin.Query().WhereIs("issomething", false).Get(itemIface)
+	err = app.Query().WhereIs("issomething", false).Get(itemIface)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -269,13 +268,13 @@ func TestResourceBool(t *testing.T) {
 }
 
 func TestResourceCreateWithID(t *testing.T) {
-	admin, resource := prepareResource()
-	admin.Create(&ResourceStruct{ID: 85, Name: "A"})
+	app, resource := prepareResource()
+	app.Create(&ResourceStruct{ID: 85, Name: "A"})
 
 	var item interface{}
 	resource.newItem(&item)
 
-	admin.Query().Get(item)
+	app.Query().Get(item)
 	id := item.(*ResourceStruct).ID
 	if id != 85 {
 		t.Fatal(id)
@@ -283,8 +282,8 @@ func TestResourceCreateWithID(t *testing.T) {
 }
 
 func TestShouldNotSaveWithZeroID(t *testing.T) {
-	admin, _ := prepareResource()
-	err := admin.Save(&ResourceStruct{})
+	app, _ := prepareResource()
+	err := app.Save(&ResourceStruct{})
 	if err == nil {
 		t.Fatal("should not be nil")
 	}
@@ -294,13 +293,13 @@ func TestShouldNotSaveWithZeroID(t *testing.T) {
 /*
 func TestLongSaveText(t *testing.T) {
 	text := "some" + string(make([]byte, 100000))
-	admin, _ := prepareResource()
-	err := admin.Create(&ResourceStruct{Text: text})
+	app, _ := prepareResource()
+	err := app.Create(&ResourceStruct{Text: text})
 	if err != nil {
 		t.Fatal(err)
 	}
 	var item ResourceStruct
-	admin.Query().WhereIs("id", 1).Get(&item)
+	app.Query().WhereIs("id", 1).Get(&item)
 
 	if !strings.HasPrefix(item.Text, "some") {
 		t.Fatal(item.Text)
