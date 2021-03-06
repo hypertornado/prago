@@ -1,13 +1,9 @@
-package development
+package prago
 
 import (
 	"os"
 	"os/exec"
-
-	"github.com/hypertornado/prago"
 )
-
-var defaultPort = 8585
 
 type DevelopmentSettings struct {
 	Less       []Less
@@ -19,12 +15,12 @@ type Less struct {
 	Target    string
 }
 
-func CreateDevelopmentHelper(app *prago.App, settings DevelopmentSettings) {
+func (app *App) InitDevelopment(settings DevelopmentSettings) {
 	var port int = 8585
 	app.AddCommand("dev").
 		Description("Development command").
 		Flag(
-			prago.NewCommandFlag("port", "server port").
+			NewCommandFlag("port", "server port").
 				Alias("p").
 				Int(&port),
 		).

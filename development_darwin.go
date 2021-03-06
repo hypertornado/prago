@@ -1,16 +1,17 @@
-package development
+package prago
 
 import (
 
 	//"github.com/dshills/goauto"
 	"fmt"
-	"github.com/radovskyb/watcher"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
+
+	"github.com/radovskyb/watcher"
 )
 
 func developmentLess(sourcePath, targetPath string) {
@@ -41,8 +42,6 @@ func developmentLess(sourcePath, targetPath string) {
 
 	compileLess(filepath.Join(sourcePath, "index.less"), targetPath)
 }
-
-
 
 func compileLess(from, to string) error {
 	outfile, err := os.Create(to)
