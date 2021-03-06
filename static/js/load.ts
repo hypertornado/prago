@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
   bindDatePicker();
   bindDropdowns();
   bindSearch();
-  bindEshopControl();
   bindMainMenu();
   bindRelationList();
   bindTaskMonitor();
