@@ -1,15 +1,10 @@
 package prago
 
 import (
-	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"time"
-
-	"github.com/radovskyb/watcher"
 )
 
 type DevelopmentSettings struct {
@@ -56,37 +51,11 @@ func developmentTypescript(path string) {
 	cmd.Start()
 }
 
-func (app *App) fileWatcher(path string, handler func()) {
-	w := watcher.New()
-	w.SetMaxEvents(1)
-
-	go func() {
-		for {
-			select {
-			case event := <-w.Event:
-				fmt.Println(event) // Print the event's info.
-				handler()
-			case err := <-w.Error:
-				log.Fatalln(err)
-			case <-w.Closed:
-				return
-			}
-		}
-	}()
-
-	if err := w.AddRecursive(path); err != nil {
-		log.Fatalln(err)
-	}
-
-	if err := w.Start(time.Millisecond * 100); err != nil {
-		panic(err)
-	}
-}
-
 func (app *App) developmentLess(sourcePath, targetPath string) {
-	compileLess(filepath.Join(sourcePath, "index.less"), targetPath)
-	app.fileWatcher(sourcePath, func() {
-		compileLess(filepath.Join(sourcePath, "index.less"), targetPath)
+	indexPath := filepath.Join(sourcePath, "index.less")
+	compileLess(indexPath, targetPath)
+	app.watchPath(sourcePath, func() {
+		compileLess(indexPath, targetPath)
 	})
 }
 
