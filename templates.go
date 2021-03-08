@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/fs"
 	"strings"
+	"sync"
 
 	"github.com/golang-commonmark/markdown"
 	"github.com/hypertornado/prago/messages"
@@ -16,14 +17,23 @@ import (
 var templatesFS embed.FS
 
 type templates struct {
-	templates *template.Template
-	funcMap   template.FuncMap
+	templates      *template.Template
+	funcMap        template.FuncMap
+	templatesMutex *sync.RWMutex
+	fileSystems    []*templateFS
+}
+
+type templateFS struct {
+	fs       fs.FS
+	patterns []string
 }
 
 func (app *App) initTemplates() {
 	app.templates = &templates{
-		templates: template.New(""),
-		funcMap:   map[string]interface{}{},
+		//templates:      template.New(""),
+		funcMap:        map[string]interface{}{},
+		templatesMutex: &sync.RWMutex{},
+		fileSystems:    []*templateFS{},
 	}
 
 	app.AddTemplateFunction("HTML", func(data string) template.HTML {
@@ -69,35 +79,48 @@ func (app *App) initTemplates() {
 
 	app.AddTemplateFunction("istabvisible", isTabVisible)
 
-	must(app.LoadTemplateFromFS(templatesFS, "templates/*.tmpl"))
-
+	must(app.AddTemplates(templatesFS, "templates/*.tmpl"))
 	return
 }
-
-//LoadTemplatePath loads app's html templates from path pattern
-/*func (app *App) LoadTemplatePath(pattern string) (err error) {
-	app.templates.templates, err = app.templates.templates.Funcs(
-		app.templates.funcMap,
-	).ParseGlob(pattern)
-	return
-}*/
 
 //LoadTemplateFromFS loads app's html templates from file system
-func (app *App) LoadTemplateFromFS(fsys fs.FS, patterns ...string) (err error) {
-	app.templates.templates, err = app.templates.templates.Funcs(app.templates.funcMap).ParseFS(fsys, patterns...)
-	return
+func (app *App) AddTemplates(fsys fs.FS, patterns ...string) error {
+	app.templates.templatesMutex.Lock()
+	defer app.templates.templatesMutex.Unlock()
+
+	tempFS := &templateFS{
+		fs:       fsys,
+		patterns: patterns,
+	}
+
+	app.templates.fileSystems = append(app.templates.fileSystems, tempFS)
+	return app.parseTemplates()
 }
 
-//func (app *App) LoadTemplateFromFS(fsys fs.FS, patterns ...string) (err error) {
-
-//}
+func (app *App) parseTemplates() error {
+	t := template.New("")
+	t = t.Funcs(app.templates.funcMap)
+	for _, v := range app.templates.fileSystems {
+		var err error
+		t, err = t.ParseFS(v.fs, v.patterns...)
+		if err != nil {
+			return err
+		}
+	}
+	app.templates.templates = t
+	return nil
+}
 
 //AddTemplateFunction adds template function
 func (app *App) AddTemplateFunction(name string, f interface{}) {
+	app.templates.templatesMutex.Lock()
+	defer app.templates.templatesMutex.Unlock()
 	app.templates.funcMap[name] = f
 }
 
 //ExecuteTemplate executes template
 func (app *App) ExecuteTemplate(wr io.Writer, name string, data interface{}) error {
+	app.templates.templatesMutex.RLock()
+	defer app.templates.templatesMutex.RUnlock()
 	return app.templates.templates.ExecuteTemplate(wr, name, data)
 }

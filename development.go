@@ -17,15 +17,17 @@ type Less struct {
 	Target    string
 }
 
-type development struct {
-	app        *App
-	Less       []Less
-	TypeScript []string
+type developmentTemplatePath struct {
+	Path     string
+	Patterns []string
 }
 
-//func (app *App) (settings DevelopmentSettings) {
-
-//}
+type development struct {
+	app           *App
+	Less          []Less
+	TypeScript    []string
+	templatePaths []developmentTemplatePath
+}
 
 func (app *App) initDevelopment() {
 	var dev = &development{
@@ -59,25 +61,12 @@ func (app *App) AddLessDevelopmentPaths(sourcePath, targetPath string) {
 	app.development.Less = append(app.development.Less, Less{sourcePath, targetPath})
 }
 
-/*
-func (app *App) InitDevelopment(settings DevelopmentSettings) {
-	var port int = 8585
-	app.AddCommand("dev").
-		Description("Development command").
-		Flag(
-			NewCommandFlag("port", "server port").
-				Alias("p").
-				Int(&port),
-		).
-		Callback(
-			func() {
-				app.startDevelopment(settings)
-				err := app.ListenAndServe(port)
-				if err != nil {
-					panic(err)
-				}
-			})
-}*/
+func (app *App) AddTemplatesDevelopmentPath(path string, patterns ...string) {
+	app.development.templatePaths = append(app.development.templatePaths, developmentTemplatePath{
+		Path:     path,
+		Patterns: patterns,
+	})
+}
 
 func (app *App) startDevelopment() {
 	app.DevelopmentMode = true
@@ -87,6 +76,10 @@ func (app *App) startDevelopment() {
 
 	for _, v := range app.development.TypeScript {
 		go developmentTypescript(v)
+	}
+
+	for _, v := range app.development.templatePaths {
+		go app.developmentTemplate(v)
 	}
 }
 
@@ -102,6 +95,20 @@ func (app *App) developmentLess(sourcePath, targetPath string) {
 	compileLess(indexPath, targetPath)
 	app.watchPath(sourcePath, func() {
 		compileLess(indexPath, targetPath)
+	})
+}
+
+func (app *App) developmentTemplate(path developmentTemplatePath) {
+	must(app.AddTemplates(os.DirFS(path.Path), path.Patterns...))
+
+	app.watchPath(path.Path, func() {
+		app.Log().Printf("Compiling changed templates from path: %s", path.Path)
+		err := app.parseTemplates()
+		if err != nil {
+			app.Log().Printf("Error while compiling templates in development mode from path '%s': %s", path.Path, err)
+		} else {
+			app.Log().Println("Compiling OK.")
+		}
 	})
 }
 
