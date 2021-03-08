@@ -96,9 +96,9 @@ func (request Request) Redirect(url string) {
 	request.Response().WriteHeader(http.StatusFound)
 }
 
-func (app App) writeAfterLog(request Request) {
+func (request Request) writeAfterLog() {
 	if request.Request().Header.Get("X-Dont-Log") != "true" {
-		app.Log().Printf("id=%s %s %s took=%v", request.uuid,
+		request.app.Log().Printf("id=%s %s %s took=%v", request.uuid,
 			request.Request().Method, request.Request().URL.String(),
 			time.Now().Sub(request.receivedAt))
 	}

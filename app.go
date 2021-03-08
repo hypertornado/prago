@@ -4,11 +4,8 @@ package prago
 import (
 	"database/sql"
 	"log"
-	"net/http"
 	"os"
 	"reflect"
-	"strconv"
-	"time"
 
 	"github.com/hypertornado/prago/cachelib"
 	setup "github.com/hypertornado/prago/prago-setup/lib"
@@ -17,17 +14,17 @@ import (
 
 //App is main struct of prago application
 type App struct {
-	codeName           string
-	version            string
-	development        *development
-	DevelopmentMode    bool
-	Config             config
-	staticFilesHandler staticFilesHandler
-	commands           *commands
-	logger             *log.Logger
-	templates          *templates
-	mainController     *Controller
-	Cache              *cachelib.Cache
+	codeName        string
+	version         string
+	development     *development
+	DevelopmentMode bool
+	Config          config
+	staticFiles     staticFiles
+	commands        *commands
+	logger          *log.Logger
+	templates       *templates
+	mainController  *Controller
+	Cache           *cachelib.Cache
 
 	Logo             string
 	prefix           string
@@ -98,9 +95,7 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 		app.Config.GetStringWithFallback("dbPassword", ""),
 		app.Config.GetStringWithFallback("dbName", ""),
 	)
-	if err != nil {
-		panic(err)
-	}
+	must(err)
 	app.db = db
 
 	app.AdminController = app.accessController.SubController()
@@ -128,7 +123,6 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	app.initAdminNotFoundAction()
 	app.initSysadminPermissions()
 	app.initAllAutoRelations()
-
 	return app
 }
 
@@ -138,85 +132,11 @@ func NewApp(appName, version string, initFunction func(*App)) {
 	app.parseCommands()
 }
 
-func (app *App) initStaticFilesHandler() {
-	paths := []string{}
-	configValue, err := app.Config.Get("staticPaths")
-	if err == nil {
-		for _, path := range configValue.([]interface{}) {
-			paths = append(paths, path.(string))
-		}
-	}
-	app.staticFilesHandler = newStaticHandler(paths)
-}
-
 //Log returns logger structure
 func (app App) Log() *log.Logger { return app.logger }
 
 //DotPath returns path to hidden directory with app configuration and data
 func (app *App) dotPath() string { return os.Getenv("HOME") + "/." + app.codeName }
-
-//ListenAndServe starts server on port
-func (app *App) ListenAndServe(port int) error {
-	app.Log().Printf("Server started: port=%d, pid=%d, developmentMode=%v\n", port, os.Getpid(), app.DevelopmentMode)
-
-	if !app.DevelopmentMode {
-		file, err := os.OpenFile(app.dotPath()+"/prago.log",
-			os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
-		must(err)
-		app.logger.SetOutput(file)
-	}
-
-	return (&http.Server{
-		Addr:           "0.0.0.0:" + strconv.Itoa(port),
-		Handler:        server{*app},
-		ReadTimeout:    2 * time.Minute,
-		WriteTimeout:   2 * time.Minute,
-		MaxHeaderBytes: 1 << 20,
-	}).ListenAndServe()
-}
-
-type server struct {
-	app App
-}
-
-func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.app.serveHTTP(w, r)
-}
-
-func (app App) serveHTTP(w http.ResponseWriter, r *http.Request) {
-	request := Request{
-		uuid:       utils.RandomString(10),
-		receivedAt: time.Now(),
-		w:          w,
-		r:          r,
-		app:        app,
-		data:       nil,
-	}
-	w.Header().Set("X-Prago-Request", request.uuid)
-
-	defer func() {
-		if recoveryData := recover(); recoveryData != nil {
-			app.recoveryFunction(request, recoveryData)
-		}
-	}()
-
-	defer func() {
-		app.writeAfterLog(request)
-	}()
-
-	if request.removeTrailingSlash() {
-		return
-	}
-
-	if app.staticFilesHandler.serveStatic(request.Response(), request.Request()) {
-		return
-	}
-
-	if !app.mainController.dispatchRequest(request) {
-		request.Response().WriteHeader(http.StatusNotFound)
-		request.Response().Write([]byte("404 — page not found (prago framework)"))
-	}
-}
 
 func columnName(fieldName string) string {
 	return utils.PrettyURL(fieldName)

@@ -12,22 +12,11 @@ import (
 //ErrItemNotFound is returned when no item is found
 var ErrItemNotFound = errors.New("item not found")
 
-//go:embed static/public/admin/_static/admin.js
-var staticAdminJS []byte
-
-//go:embed static/public/admin/_static/admin.css
-var staticAdminCSS []byte
-
-//go:embed static/public/admin/_static/pikaday.js
-var staticPikadayJS []byte
-
 func (app *App) initAdminActions() {
 
 	app.accessController.AddBeforeAction(func(request Request) {
 		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
-
 		request.SetData("locale", getLocale(request))
-
 		request.SetData("admin_header_prefix", app.prefix)
 		request.SetData("javascripts", app.javascripts)
 		request.SetData("css", app.css)
@@ -84,7 +73,6 @@ func (app *App) initAdminActions() {
 		headerData := app.getHeaderData(request)
 		request.SetData("admin_header", headerData)
 		request.SetData("main_menu", app.getMainMenu(request))
-
 		next()
 	})
 
@@ -100,29 +88,13 @@ func (app *App) initAdminActions() {
 		request.RenderView("admin_layout")
 	})
 
-	app.AdminController.Get(app.GetAdminURL("_static/admin.js"), func(request Request) {
-		request.Response().Header().Set("Content-type", "text/javascript")
-		request.Response().WriteHeader(200)
-		request.Response().Write([]byte(staticAdminJS))
-	})
-	app.AdminController.Get(app.GetAdminURL("_static/pikaday.js"), func(request Request) {
-		request.Response().Header().Set("Content-type", "text/javascript")
-		request.Response().WriteHeader(200)
-		request.Response().Write([]byte(staticPikadayJS))
-	})
-	app.MainController().Get(app.GetAdminURL("_static/admin.css"), func(request Request) {
-		request.Response().Header().Set("Content-type", "text/css; charset=utf-8")
-		request.Response().WriteHeader(200)
-		request.Response().Write([]byte(staticAdminCSS))
-	})
-
 }
 
 func (app *App) initAdminNotFoundAction() {
 	app.AdminController.Get(app.GetAdminURL("*"), render404)
 }
 
-//GetURL gets url
+//GetAdminURL gets url
 func (app App) GetAdminURL(suffix string) string {
 	ret := app.prefix
 	if len(suffix) > 0 {

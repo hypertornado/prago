@@ -1,30 +1,63 @@
 package prago
 
 import (
+	"bytes"
+	"embed"
 	"errors"
 	"io/fs"
+	"io/ioutil"
 	"net/http"
+	"os"
+	"path"
 )
 
 var errFileNotFound = errors.New("requested file is folder")
 
-type staticFilesHandlerNew struct {
-	filesystems []fs.FS
+//go:embed public
+var staticAdminFS embed.FS
+
+func (app *App) initStaticFilesHandler() {
+	app.staticFiles = staticFiles{}
+	app.AddStaticFiles(staticAdminFS, "public")
 }
 
-type staticFilesHandler struct {
-	paths []string
+func (app *App) AddStaticFiles(f fs.FS, pathPrefix string) {
+	app.staticFiles.filesystems = append(app.staticFiles.filesystems, staticFS{
+		fs:         f,
+		pathPrefix: pathPrefix,
+	})
 }
 
-func newStaticHandler(paths []string) staticFilesHandler {
-	return staticFilesHandler{
-		paths,
+func (app *App) AddDevStaticFiles(path string) {
+	app.staticFiles.devFilesystems = append(app.staticFiles.devFilesystems, path)
+}
+
+type staticFiles struct {
+	devFilesystems []string
+	filesystems    []staticFS
+}
+
+type staticFS struct {
+	fs         fs.FS
+	path       string
+	pathPrefix string
+}
+
+func (request Request) serveStatic() bool {
+	if request.app.DevelopmentMode {
+		for _, v := range request.app.staticFiles.devFilesystems {
+			filesystem := os.DirFS(v)
+			filePath := path.Join("", request.r.URL.Path[1:])
+			err := request.serveStaticFile(filesystem, filePath)
+			if err == nil {
+				return true
+			}
+		}
 	}
-}
 
-func (h staticFilesHandler) serveStatic(w http.ResponseWriter, r *http.Request) bool {
-	for _, v := range h.paths {
-		err := serveStaticFile(w, r, http.Dir(v), r.URL.Path)
+	for _, v := range request.app.staticFiles.filesystems {
+		filePath := path.Join(v.pathPrefix, request.r.URL.Path)
+		err := request.serveStaticFile(v.fs, filePath)
 		if err == nil {
 			return true
 		}
@@ -32,8 +65,8 @@ func (h staticFilesHandler) serveStatic(w http.ResponseWriter, r *http.Request) 
 	return false
 }
 
-func serveStaticFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name string) (err error) {
-	f, err := fs.Open(name)
+func (request Request) serveStaticFile(filesystem fs.FS, name string) (err error) {
+	f, err := filesystem.Open(name)
 	if err != nil {
 		return
 	}
@@ -46,7 +79,7 @@ func serveStaticFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem,
 
 	if d.IsDir() {
 		f.Close()
-		f, err = fs.Open(name + "/index.html")
+		f, err = filesystem.Open(name + "/index.html")
 		if err != nil {
 			return
 		}
@@ -61,6 +94,9 @@ func serveStaticFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem,
 		}
 	}
 
-	http.ServeContent(w, r, d.Name(), d.ModTime(), f)
+	b, _ := ioutil.ReadAll(f)
+	reader := bytes.NewReader(b)
+
+	http.ServeContent(request.w, request.r, d.Name(), d.ModTime(), reader)
 	return nil
 }
