@@ -13,18 +13,13 @@ import (
 	setup "github.com/hypertornado/prago/prago-setup/lib"
 )
 
-//BuildMiddleware allows binary building and release
-type BuildSettings struct {
-	//Copy [][2]string
-}
-
 //Init initializes build middleware
-func CreateBuildHelper(app *App, b BuildSettings) {
+func initBuild(app *App) {
 	var version = app.version
 	var appName = app.codeName
 
 	app.AddCommand("build").Callback(func() {
-		b.build(appName, version)
+		build(appName, version)
 	})
 
 	ssh := app.Config.GetStringWithFallback("ssh", "")
@@ -34,15 +29,15 @@ func CreateBuildHelper(app *App, b BuildSettings) {
 	}
 
 	app.AddCommand("backup").Callback(func() {
-		must(BackupApp(app))
+		must(backupApp(app))
 	})
 
 	app.AddCommand("syncbackups").Callback(func() {
-		must(b.syncBackups(appName, ssh))
+		must(syncBackups(appName, ssh))
 	})
 
 	app.AddCommand("party").Callback(func() {
-		must(b.party(appName, version, ssh))
+		must(party(appName, version, ssh))
 	})
 
 	app.AddCommand("setup").Callback(func() {
@@ -51,20 +46,20 @@ func CreateBuildHelper(app *App, b BuildSettings) {
 
 }
 
-func (b BuildSettings) party(appName, version, ssh string) (err error) {
-	if err = b.build(appName, version); err != nil {
+func party(appName, version, ssh string) (err error) {
+	if err = build(appName, version); err != nil {
 		return err
 	}
-	if err = b.release(appName, version, ssh); err != nil {
+	if err = release(appName, version, ssh); err != nil {
 		return err
 	}
-	if err = b.remote(appName, version, ssh); err != nil {
+	if err = remote(appName, version, ssh); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (b BuildSettings) remote(appName, version, ssh string) error {
+func remote(appName, version, ssh string) error {
 	cmdStr := fmt.Sprintf("cd ~/.%s/versions/%s.%s; ./%s.linux admin migrate; killall %s.linux; nohup ./%s.linux server >> app.log 2>&1 & exit;", appName, appName, version, appName, appName, appName)
 	println(cmdStr)
 	cmd := exec.Command("ssh", ssh, cmdStr)
@@ -73,7 +68,7 @@ func (b BuildSettings) remote(appName, version, ssh string) error {
 	return cmd.Run()
 }
 
-func (b BuildSettings) release(appName, version, ssh string) error {
+func release(appName, version, ssh string) error {
 	from := os.Getenv("HOME") + "/." + appName + "/versions/" + appName + "." + version
 	to := fmt.Sprintf("%s:~/.%s/versions", ssh, appName)
 
@@ -103,7 +98,7 @@ type buildFlag struct {
 var linuxBuild = buildFlag{"linux", "linux", "amd64"}
 var macBuild = buildFlag{"mac", "darwin", "amd64"}
 
-func (b BuildSettings) build(appName, version string) error {
+func build(appName, version string) error {
 	fmt.Println(appName, version)
 	dir, err := ioutil.TempDir("", "build")
 	if err != nil {

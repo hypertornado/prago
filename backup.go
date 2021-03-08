@@ -12,7 +12,7 @@ import (
 func (app *App) initBackupCRON() {
 	app.NewTask("backup_db").SetHandler(
 		func(tr *TaskActivity) error {
-			err := BackupApp(app)
+			err := backupApp(app)
 			if err != nil {
 				return fmt.Errorf("Error while creating backup: %s", err)
 			}
@@ -43,8 +43,7 @@ func (app *App) initBackupCRON() {
 
 }
 
-//BackupApp backups whole app
-func BackupApp(app *App) error {
+func backupApp(app *App) error {
 
 	app.Log().Println("Creating backup")
 
@@ -98,7 +97,7 @@ func BackupApp(app *App) error {
 	return copyFiles(dirPath, backupsPath)
 }
 
-func (b BuildSettings) syncBackups(appName, ssh string) error {
+func syncBackups(appName, ssh string) error {
 	to := filepath.Join(os.Getenv("HOME"), "."+appName, "serverbackups")
 	err := exec.Command("mkdir", "-p", to).Run()
 	if err != nil {
