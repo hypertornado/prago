@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"time"
 
 	"github.com/hypertornado/prago/utils"
 
@@ -16,7 +15,7 @@ import (
 
 //BuildMiddleware allows binary building and release
 type BuildSettings struct {
-	Copy [][2]string
+	//Copy [][2]string
 }
 
 //Init initializes build middleware
@@ -65,22 +64,6 @@ func (b BuildSettings) party(appName, version, ssh string) (err error) {
 	return nil
 }
 
-func (b BuildSettings) syncBackups(appName, ssh string) error {
-	to := filepath.Join(os.Getenv("HOME"), "."+appName, "serverbackups")
-	err := exec.Command("mkdir", "-p", to).Run()
-	if err != nil {
-		return err
-	}
-
-	from := fmt.Sprintf("%s:~/.%s/backups/*", ssh, appName)
-
-	fmt.Println("scp", "-r", from, to)
-	cmd := exec.Command("scp", "-r", from, to)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
-
 func (b BuildSettings) remote(appName, version, ssh string) error {
 	cmdStr := fmt.Sprintf("cd ~/.%s/versions/%s.%s; ./%s.linux admin migrate; killall %s.linux; nohup ./%s.linux server >> app.log 2>&1 & exit;", appName, appName, version, appName, appName, appName)
 	println(cmdStr)
@@ -88,61 +71,6 @@ func (b BuildSettings) remote(appName, version, ssh string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
-}
-
-//BackupApp backups whole app
-func BackupApp(app *App) error {
-
-	app.Log().Println("Creating backup")
-
-	var appName = app.codeName
-
-	dir, err := ioutil.TempDir("", "backup")
-	if err != nil {
-		return fmt.Errorf("creating backup tmp dir: %s", err)
-	}
-
-	dirPath := filepath.Join(dir, time.Now().Format("2006-01-02_15:04:05"))
-	err = os.Mkdir(dirPath, 0777)
-	if err != nil {
-		return fmt.Errorf("creating backup tmp dir with date: %s", err)
-	}
-	defer os.RemoveAll(dir)
-
-	user := app.Config.GetStringWithFallback("dbUser", "")
-	dbName := app.Config.GetStringWithFallback("dbName", "")
-	password := app.Config.GetStringWithFallback("dbPassword", "")
-
-	var dumpCmd *exec.Cmd
-
-	if password == "" {
-		dumpCmd = exec.Command("mysqldump", "-u"+user, dbName)
-	} else {
-		dumpCmd = exec.Command("mysqldump", "-u"+user, "-p"+password, dbName)
-	}
-
-	dbFilePath := filepath.Join(dirPath, "db.sql")
-
-	dbFile, err := os.Create(dbFilePath)
-	defer dbFile.Close()
-	if err != nil {
-		return fmt.Errorf("creating backup db file: %s", err)
-	}
-
-	dumpCmd.Stdout = dbFile
-
-	err = dumpCmd.Run()
-	if err != nil {
-		return fmt.Errorf("dumping cmd: %s", err)
-	}
-
-	backupsPath := filepath.Join(os.Getenv("HOME"), "."+appName, "backups")
-	err = exec.Command("mkdir", "-p", backupsPath).Run()
-	if err != nil {
-		return fmt.Errorf("making dir for backup files: %s", err)
-	}
-
-	return copyFiles(dirPath, backupsPath)
 }
 
 func (b BuildSettings) release(appName, version, ssh string) error {
@@ -198,10 +126,11 @@ func (b BuildSettings) build(appName, version string) error {
 		}
 	}
 
-	for _, v := range b.Copy {
-		copyPath := filepath.Join(dirPath, v[1])
-		copyFiles(v[0], copyPath)
-	}
+	/*
+		for _, v := range b.Copy {
+			copyPath := filepath.Join(dirPath, v[1])
+			copyFiles(v[0], copyPath)
+		}*/
 
 	buildPath := os.Getenv("HOME") + "/." + appName + "/versions"
 	os.Mkdir(buildPath, 0777)
