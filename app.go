@@ -19,6 +19,7 @@ import (
 type App struct {
 	codeName           string
 	version            string
+	development        *development
 	DevelopmentMode    bool
 	Config             config
 	staticFilesHandler staticFilesHandler
@@ -112,6 +113,7 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	app.CreateResource(ActivityLog{}, initActivityLog)
 
 	app.initAPI()
+	app.initDevelopment()
 	app.initMigrationCommand()
 	app.initTemplates()
 	app.initSystemStats()

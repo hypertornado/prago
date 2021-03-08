@@ -141,16 +141,16 @@ func (user User) getRenewURL(request Request, app *App) string {
 	return app.Config.GetString("baseUrl") + app.prefix + "/user/renew_password?" + urlValues.Encode()
 }
 
-func (user User) sendRenew(request Request, admin *App) error {
-	if admin.noReplyEmail == "" {
+func (user User) sendRenew(request Request, app *App) error {
+	if app.noReplyEmail == "" {
 		return errors.New("no reply email empty")
 	}
 
-	subject := messages.Messages.Get(user.Locale, "admin_forgotten_email_subject", admin.HumanName)
-	link := user.getRenewURL(request, admin)
-	body := messages.Messages.Get(user.Locale, "admin_forgotten_email_body", link, link, admin.HumanName)
+	subject := messages.Messages.Get(user.Locale, "admin_forgotten_email_subject", app.HumanName)
+	link := user.getRenewURL(request, app)
+	body := messages.Messages.Get(user.Locale, "admin_forgotten_email_body", link, link, app.HumanName)
 
-	return admin.SendEmail(
+	return app.SendEmail(
 		user.Name,
 		user.Email,
 		subject,

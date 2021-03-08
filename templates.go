@@ -88,6 +88,10 @@ func (app *App) LoadTemplateFromFS(fsys fs.FS, patterns ...string) (err error) {
 	return
 }
 
+//func (app *App) LoadTemplateFromFS(fsys fs.FS, patterns ...string) (err error) {
+
+//}
+
 //AddTemplateFunction adds template function
 func (app *App) AddTemplateFunction(name string, f interface{}) {
 	app.templates.funcMap[name] = f

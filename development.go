@@ -17,6 +17,49 @@ type Less struct {
 	Target    string
 }
 
+type development struct {
+	app        *App
+	Less       []Less
+	TypeScript []string
+}
+
+//func (app *App) (settings DevelopmentSettings) {
+
+//}
+
+func (app *App) initDevelopment() {
+	var dev = &development{
+		app: app,
+	}
+	app.development = dev
+
+	var port int = defaultPort
+	app.AddCommand("dev").
+		Description("Development command").
+		Flag(
+			NewCommandFlag("port", "server port").
+				Alias("p").
+				Int(&port),
+		).
+		Callback(
+			func() {
+				app.startDevelopment()
+				err := app.ListenAndServe(port)
+				if err != nil {
+					panic(err)
+				}
+			})
+}
+
+func (app *App) AddTypeScriptDevelopmentPath(path string) {
+	app.development.TypeScript = append(app.development.TypeScript, path)
+}
+
+func (app *App) AddLessDevelopmentPaths(sourcePath, targetPath string) {
+	app.development.Less = append(app.development.Less, Less{sourcePath, targetPath})
+}
+
+/*
 func (app *App) InitDevelopment(settings DevelopmentSettings) {
 	var port int = 8585
 	app.AddCommand("dev").
@@ -28,20 +71,23 @@ func (app *App) InitDevelopment(settings DevelopmentSettings) {
 		).
 		Callback(
 			func() {
-				app.DevelopmentMode = true
-				for _, v := range settings.Less {
-					go app.developmentLess(v.SourceDir, v.Target)
-				}
-
-				for _, v := range settings.TypeScript {
-					go developmentTypescript(v)
-				}
-
+				app.startDevelopment(settings)
 				err := app.ListenAndServe(port)
 				if err != nil {
 					panic(err)
 				}
 			})
+}*/
+
+func (app *App) startDevelopment() {
+	app.DevelopmentMode = true
+	for _, v := range app.development.Less {
+		go app.developmentLess(v.SourceDir, v.Target)
+	}
+
+	for _, v := range app.development.TypeScript {
+		go developmentTypescript(v)
+	}
 }
 
 func developmentTypescript(path string) {
