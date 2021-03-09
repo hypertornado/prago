@@ -21,7 +21,7 @@ func initUserSettings(resource *Resource) {
 	}
 
 	resource.App.AdminController.Get(resource.GetURL("settings"), func(request Request) {
-		user := GetUser(request)
+		user := request.GetUser()
 		form := settingsForm(user).AddCSRFToken(request)
 
 		request.SetData("admin_navigation_settings_selected", true)
@@ -34,7 +34,7 @@ func initUserSettings(resource *Resource) {
 
 	resource.App.AdminController.Post(resource.GetURL("settings"), func(request Request) {
 		ValidateCSRF(request)
-		user := GetUser(request)
+		user := request.GetUser()
 		form := settingsForm(user).AddCSRFToken(request)
 		if form.Validate() {
 			must(resource.bindData(&user, user, request.Params(), form.getFilter()))
@@ -54,7 +54,7 @@ func initUserSettings(resource *Resource) {
 
 	changePasswordForm := func(request Request) *Form {
 		request.SetData("admin_navigation_settings_selected", true)
-		user := GetUser(request)
+		user := request.GetUser()
 		locale := getLocale(request)
 		oldValidator := NewValidator(func(field *FormItem) bool {
 			if !user.isPassword(field.Value) {
@@ -78,7 +78,7 @@ func initUserSettings(resource *Resource) {
 	}
 
 	renderPasswordForm := func(request Request, form *Form) {
-		user := GetUser(request)
+		user := request.GetUser()
 		renderNavigationPage(request, adminNavigationPage{
 			Navigation:   resource.App.getSettingsNavigation(user, "password"),
 			PageTemplate: "admin_form",
@@ -97,7 +97,7 @@ func initUserSettings(resource *Resource) {
 		form.Validate()
 		if form.Valid {
 			password := request.Params().Get("newpassword")
-			user := GetUser(request)
+			user := request.GetUser()
 			must(user.newPassword(password))
 			must(resource.App.Save(&user))
 			AddFlashMessage(request, messages.Messages.Get(getLocale(request), "admin_password_changed"))

@@ -81,7 +81,7 @@ func (tm *taskManager) init() {
 	go tm.startCRON()
 
 	tm.app.AdminController.Get(tm.app.GetAdminURL("_tasks"), func(request Request) {
-		user := GetUser(request)
+		user := request.GetUser()
 		request.SetData("tasks", tm.getTasks(user))
 		request.SetData("taskmonitor", tm.getTaskMonitor(user))
 		request.SetData("admin_yield", "admin_tasks")
@@ -90,14 +90,14 @@ func (tm *taskManager) init() {
 	})
 
 	tm.app.AdminController.Get(tm.app.GetAdminURL("_tasks/running"), func(request Request) {
-		request.SetData("taskmonitor", tm.getTaskMonitor(GetUser(request)))
+		request.SetData("taskmonitor", tm.getTaskMonitor(request.GetUser()))
 		request.RenderView("taskmonitor")
 	})
 
 	tm.app.AdminController.Post(tm.app.GetAdminURL("_tasks/runtask"), func(request Request) {
 		id := request.Request().FormValue("id")
 		csrf := request.Request().FormValue("csrf")
-		user := GetUser(request)
+		user := request.GetUser()
 
 		expectedToken := request.GetData("_csrfToken").(string)
 		if expectedToken != csrf {
@@ -111,7 +111,7 @@ func (tm *taskManager) init() {
 	tm.app.AdminController.Get(tm.app.GetAdminURL("_tasks/stoptask"), func(request Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
-		user := GetUser(request)
+		user := request.GetUser()
 
 		expectedToken := request.GetData("_csrfToken").(string)
 		if expectedToken != csrf {
@@ -125,7 +125,7 @@ func (tm *taskManager) init() {
 	tm.app.AdminController.Get(tm.app.GetAdminURL("_tasks/deletetask"), func(request Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
-		user := GetUser(request)
+		user := request.GetUser()
 
 		expectedToken := request.GetData("_csrfToken").(string)
 		if expectedToken != csrf {

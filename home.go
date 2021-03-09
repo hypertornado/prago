@@ -17,7 +17,7 @@ type homeData struct {
 }
 
 func (app *App) getHomeData(request Request) (ret []homeData) {
-	user := GetUser(request)
+	user := request.GetUser()
 
 	for _, resource := range app.getSortedResources(user.Locale) {
 		if app.Authorize(user, resource.CanView) {

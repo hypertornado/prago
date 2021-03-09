@@ -32,7 +32,7 @@ func bindImageAPI(app *App) {
 
 	app.AdminController.Post(app.GetAdminURL("_api/order/:resourceName"), func(request Request) {
 		resource := app.getResourceByName(request.Params().Get("resourceName"))
-		user := GetUser(request)
+		user := request.GetUser()
 
 		if !app.Authorize(user, resource.CanEdit) {
 			panic("access denied")
@@ -113,7 +113,7 @@ func bindImageAPI(app *App) {
 		files := []*File{}
 
 		for _, v := range multipartFiles {
-			user := GetUser(request)
+			user := request.GetUser()
 
 			file, err := app.UploadFile(v, &user, description)
 			if err != nil {
@@ -142,7 +142,7 @@ func bindRelationAPI(app *App) {
 		resourceName := request.Params().Get("resourceName")
 		idStr := request.Params().Get("id")
 
-		user := GetUser(request)
+		user := request.GetUser()
 
 		resource, found := app.resourceNameMap[resourceName]
 		if !found {
@@ -171,7 +171,7 @@ func bindRelationAPI(app *App) {
 	})
 
 	app.AdminController.Get(app.GetAdminURL("_api/search/:resourceName"), func(request Request) {
-		user := GetUser(request)
+		user := request.GetUser()
 		resourceName := request.Params().Get("resourceName")
 		q := request.Params().Get("q")
 

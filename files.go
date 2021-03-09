@@ -217,7 +217,7 @@ func initFilesResource(resource *Resource) {
 			panic("must have 1 file selected")
 		}
 
-		user := GetUser(request)
+		user := request.GetUser()
 
 		_, err := resource.App.UploadFile(multipartFiles[0], &user, request.Params().Get("Description"))
 		must(err)

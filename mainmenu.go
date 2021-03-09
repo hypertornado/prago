@@ -41,7 +41,7 @@ func (menu mainMenu) GetTitle() string {
 }
 
 func (app *App) getMainMenu(request Request) (ret mainMenu) {
-	user := GetUser(request)
+	user := request.GetUser()
 
 	var selectedAdminSection bool
 	if request.Request().URL.Path == app.GetAdminURL("") {

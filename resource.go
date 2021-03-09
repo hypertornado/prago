@@ -120,7 +120,7 @@ func (app *App) getResourceByName(name string) *Resource {
 func (app *App) initResource(resource *Resource) {
 
 	resource.ResourceController.AddAroundAction(func(request Request, next func()) {
-		user := GetUser(request)
+		user := request.GetUser()
 		if !app.Authorize(user, resource.CanView) {
 			render403(request)
 		} else {

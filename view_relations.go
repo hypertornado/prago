@@ -76,7 +76,7 @@ type RelationListRequest struct {
 func generateRelationListAPIHandler(app *App) func(Request) {
 	return func(request Request) {
 
-		user := GetUser(request)
+		user := request.GetUser()
 
 		defer request.Request().Body.Close()
 

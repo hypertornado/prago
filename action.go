@@ -197,7 +197,7 @@ func actionView(resource *Resource) Action {
 			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   resource.getItemNavigation(user, item, ""),
 				PageTemplate: "admin_views",
-				PageData:     resource.getViews(id, item, GetUser(request)),
+				PageData:     resource.getViews(id, item, request.GetUser()),
 				HideBox:      true,
 			})
 		},
@@ -445,7 +445,7 @@ func bindAction(app *App, resource *Resource, action Action, isItemAction bool) 
 	}
 
 	var fn = func(request Request) {
-		user := GetUser(request)
+		user := request.GetUser()
 		if !app.Authorize(user, action.Permission) {
 			render403(request)
 			return

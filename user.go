@@ -32,8 +32,8 @@ type User struct {
 	UpdatedAt         time.Time `prago-view:"sysadmin"`
 }
 
-//GetUser returns currently logged in user
-func GetUser(request Request) User {
+//GetUser returns currently logged in user, it panics when there is no user
+func (request Request) GetUser() User {
 	u := request.GetData("currentuser").(*User)
 	if u == nil {
 		panic("no user found")
@@ -42,7 +42,7 @@ func GetUser(request Request) User {
 }
 
 func basicUserAuthorize(request Request) {
-	user := GetUser(request)
+	user := request.GetUser()
 	if !user.IsAdmin {
 		panic("can't authorize, user is not admin")
 	}

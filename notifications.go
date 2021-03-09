@@ -21,7 +21,7 @@ type Notification struct {
 func initNotificationResource(resource *Resource) {
 
 	resource.App.AdminController.Get(resource.App.GetAdminURL("_api/notifications"), func(request Request) {
-		user := GetUser(request)
+		user := request.GetUser()
 		notifications, err := resource.App.getNotificationViews(user)
 		if err != nil {
 			panic(err)
@@ -41,9 +41,6 @@ func initNotificationResource(resource *Resource) {
 		must(resource.App.Save(&notification))
 		request.RenderJSON(true)
 	})
-
-	//resource.CanView = permissionSysadmin
-
 }
 
 type notification struct {
