@@ -13,10 +13,11 @@ import (
 	"github.com/golang-commonmark/markdown"
 )
 
-func (a *App) initAPI() {
-	bindMarkdownAPI(a)
-	bindRelationAPI(a)
-	bindRelationListAPI(a)
+func (app *App) initAPI() {
+	bindMarkdownAPI(app)
+	bindRelationAPI(app)
+	bindRelationListAPI(app)
+	bindImageAPI(app)
 }
 
 func bindImageAPI(app *App) {

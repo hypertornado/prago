@@ -16,6 +16,10 @@ import (
 
 const searchPageSize int = 10
 
+func (app *App) initSearch() {
+	go app.initSearchInner()
+}
+
 //const searchType string = "items"
 
 type SearchItem struct {
@@ -314,7 +318,7 @@ func relationDataToSearchItem(resource *Resource, data viewRelationData) SearchI
 
 }
 
-func (app *App) initSearch() {
+func (app *App) initSearchInner() {
 	var err error
 
 	adminSearch, err := newAdminSearch(app)

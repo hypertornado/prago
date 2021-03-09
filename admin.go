@@ -12,12 +12,14 @@ import (
 //ErrItemNotFound is returned when no item is found
 var ErrItemNotFound = errors.New("item not found")
 
+const adminPathPrefix = "/admin"
+
 func (app *App) initAdminActions() {
 
 	app.accessController.AddBeforeAction(func(request Request) {
 		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
 		request.SetData("locale", getLocale(request))
-		request.SetData("admin_header_prefix", app.prefix)
+		request.SetData("admin_header_prefix", adminPathPrefix)
 		request.SetData("javascripts", app.javascripts)
 		request.SetData("css", app.css)
 	})
@@ -33,7 +35,7 @@ func (app *App) initAdminActions() {
 		request.SetData("google", googleAPIKey)
 	})
 
-	app.AdminController.AddAroundAction(func(request Request, next func()) {
+	app.AdminController.AddBeforeAction(func(request Request) {
 		session := request.GetData("session").(*sessions.Session)
 		userID, ok := session.Values["user_id"].(int64)
 
@@ -70,10 +72,7 @@ func (app *App) initAdminActions() {
 			addCurrentFlashMessage(request, messages.Messages.Get(user.Locale, "admin_flash_not_approved", sysadminEmail))
 		}
 
-		headerData := app.getHeaderData(request)
-		request.SetData("admin_header", headerData)
 		request.SetData("main_menu", app.getMainMenu(request))
-		next()
 	})
 
 	app.AdminController.Get(app.GetAdminURL(""), func(request Request) {
@@ -96,7 +95,7 @@ func (app *App) initAdminNotFoundAction() {
 
 //GetAdminURL gets url
 func (app App) GetAdminURL(suffix string) string {
-	ret := app.prefix
+	ret := adminPathPrefix
 	if len(suffix) > 0 {
 		ret += "/" + suffix
 	}

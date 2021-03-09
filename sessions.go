@@ -4,6 +4,10 @@ import (
 	"github.com/gorilla/sessions"
 )
 
+func (app App) initSessions() {
+
+}
+
 func (app App) createSessionAroundAction(random string) func(Request, func()) {
 	cookieStore := sessions.NewCookieStore([]byte(random))
 	return func(request Request, next func()) {

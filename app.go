@@ -27,7 +27,6 @@ type App struct {
 	Cache           *cachelib.Cache
 
 	Logo             string
-	prefix           string
 	HumanName        string
 	resources        []*Resource
 	resourceMap      map[reflect.Type]*Resource
@@ -79,7 +78,6 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	app.initStaticFilesHandler()
 
 	app.HumanName = app.codeName
-	app.prefix = "/admin"
 	app.resourceMap = make(map[reflect.Type]*Resource)
 	app.resourceNameMap = make(map[string]*Resource)
 	app.accessController = app.MainController().SubController()
@@ -90,13 +88,11 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	app.fieldTypes = make(map[string]FieldType)
 	app.roles = make(map[string]map[string]bool)
 
-	db, err := connectMysql(
+	app.db = mustConnectDatabase(
 		app.Config.GetStringWithFallback("dbUser", ""),
 		app.Config.GetStringWithFallback("dbPassword", ""),
 		app.Config.GetStringWithFallback("dbName", ""),
 	)
-	must(err)
-	app.db = db
 
 	app.AdminController = app.accessController.SubController()
 	app.initDefaultFieldTypes()
@@ -123,6 +119,7 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	app.initAdminNotFoundAction()
 	app.initSysadminPermissions()
 	app.initAllAutoRelations()
+
 	return app
 }
 

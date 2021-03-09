@@ -13,7 +13,6 @@ import (
 	setup "github.com/hypertornado/prago/prago-setup/lib"
 )
 
-//Init initializes build middleware
 func initBuild(app *App) {
 	var version = app.version
 	var appName = app.codeName
@@ -121,12 +120,6 @@ func build(appName, version string) error {
 		}
 	}
 
-	/*
-		for _, v := range b.Copy {
-			copyPath := filepath.Join(dirPath, v[1])
-			copyFiles(v[0], copyPath)
-		}*/
-
 	buildPath := os.Getenv("HOME") + "/." + appName + "/versions"
 	os.Mkdir(buildPath, 0777)
 	buildDir := buildPath + "/" + dirName
@@ -138,7 +131,7 @@ func build(appName, version string) error {
 			fmt.Println("Deleting " + buildDir)
 			os.RemoveAll(buildDir)
 		} else {
-			return errors.New("Have not deleted old version.")
+			return errors.New("Have not deleted old version")
 		}
 	}
 	return copyFiles(dirPath, buildPath)

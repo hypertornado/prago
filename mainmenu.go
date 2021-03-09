@@ -9,6 +9,8 @@ import (
 
 type mainMenu struct {
 	Logo             string
+	Language         string
+	URLPrefix        string
 	AdminHomepageURL string
 	SearchQuery      string
 	Sections         []mainMenuSection
@@ -146,6 +148,8 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 	ret.Sections = append(ret.Sections, userSection)
 
 	ret.Logo = app.Logo
+	ret.URLPrefix = adminPathPrefix
+	ret.Language = user.Locale
 	ret.AdminHomepageURL = app.GetAdminURL("")
 
 	if app.search != nil {

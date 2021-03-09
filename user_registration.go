@@ -136,7 +136,7 @@ func (user User) sendConfirmEmail(request Request, app *App) error {
 	urlValues.Add("token", user.emailToken(app))
 
 	subject := messages.Messages.Get(locale, "admin_confirm_email_subject", app.HumanName)
-	link := app.Config.GetString("baseUrl") + app.prefix + "/user/confirm_email?" + urlValues.Encode()
+	link := app.Config.GetString("baseUrl") + app.GetAdminURL("/user/confirm_email") + "?" + urlValues.Encode()
 	body := messages.Messages.Get(locale, "admin_confirm_email_body", link, link, app.HumanName)
 
 	return app.SendEmail(

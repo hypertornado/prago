@@ -1,6 +1,6 @@
 {{define "admin_layout"}}
 <!doctype html>
-<html lang="{{.admin_header.Language}}">
+<html lang="{{.main_menu.Language}}">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -21,7 +21,7 @@
     <script src="https://maps.googleapis.com/maps/api/js?callback=bindPlaces&libraries=places&key={{.google}}" async defer></script>
 
   </head>
-  <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.admin_header.UrlPrefix}}" data-search-query="{{.search_q}}">
+  <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.main_menu.URLPrefix}}" data-search-query="{{.search_q}}">
     <div class="admin_layout">
         <div class="admin_layout_left">
             {{template "admin_mainmenu" .main_menu}}

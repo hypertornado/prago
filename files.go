@@ -208,8 +208,6 @@ func initFilesResource(resource *Resource) {
 
 	resource.ItemsPerPage = 100
 
-	bindImageAPI(app)
-
 	//TODO: authorize
 	resource.ResourceController.Post(resource.GetURL(""), func(request Request) {
 		ValidateCSRF(request)
@@ -283,9 +281,6 @@ func writeFileResponse(request Request, files []*File) {
 			Description: v.Description,
 		}
 
-		//v.GetMedium()
-
-		//_, fileURL := v.getPath(fileDownloadPath + "thumb/small")
 		ir.Thumb = v.GetMedium()
 
 		responseData = append(responseData, ir)
