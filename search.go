@@ -20,9 +20,7 @@ func (app *App) initSearch() {
 	go app.initSearchInner()
 }
 
-//const searchType string = "items"
-
-type SearchItem struct {
+type searchItem struct {
 	ID          string   `json:"id"`
 	Category    string   `json:"category"`
 	Name        string   `json:"name"`
@@ -32,7 +30,7 @@ type SearchItem struct {
 	Roles       []string `json:"roles"`
 }
 
-type SearchPage struct {
+type searchPage struct {
 	Title    int
 	Selected bool
 	URL      string
@@ -44,7 +42,7 @@ type adminSearch struct {
 	indexName string
 }
 
-func (si SearchItem) CroppedDescription() string {
+func (si searchItem) CroppedDescription() string {
 	return utils.Crop(si.Description, 100)
 }
 
@@ -62,7 +60,7 @@ func newAdminSearch(app *App) (*adminSearch, error) {
 
 func (e *adminSearch) createSearchIndex() error {
 	e.client.DeleteIndex(e.indexName).Do(context.Background())
-	e.Flush()
+	e.flush()
 
 	_, err := e.client.CreateIndex(e.indexName).BodyString(`
     {
@@ -125,7 +123,7 @@ func (e *adminSearch) createSearchIndex() error {
 	return nil
 }
 
-func (e *adminSearch) AddItem(item *SearchItem, weight int) error {
+func (e *adminSearch) addItem(item *searchItem, weight int) error {
 	var suggest = parseSuggestions(item.Name)
 	_, err := e.client.Index().Index(e.indexName).BodyJson(map[string]interface{}{
 		"suggest": map[string]interface{}{
@@ -147,8 +145,8 @@ func (e *adminSearch) DeleteIndex() error {
 	return err
 }
 
-func (e *adminSearch) Search(q string, role string, page int) ([]*SearchItem, int64, error) {
-	var ret []*SearchItem
+func (e *adminSearch) Search(q string, role string, page int) ([]*searchItem, int64, error) {
+	var ret []*searchItem
 
 	mq := elastic.NewMultiMatchQuery(q)
 	mq.FieldWithBoost("name", 3)
@@ -170,9 +168,9 @@ func (e *adminSearch) Search(q string, role string, page int) ([]*SearchItem, in
 		return nil, 0, err
 	}
 
-	var item SearchItem
+	var item searchItem
 	for _, item := range searchResult.Each(reflect.TypeOf(item)) {
-		if t, ok := item.(SearchItem); ok {
+		if t, ok := item.(searchItem); ok {
 			ret = append(ret, &t)
 		}
 	}
@@ -180,7 +178,7 @@ func (e *adminSearch) Search(q string, role string, page int) ([]*SearchItem, in
 	return ret, searchResult.TotalHits(), nil
 }
 
-func (e *adminSearch) Suggest(q string) ([]*SearchItem, error) {
+func (e *adminSearch) Suggest(q string) ([]*searchItem, error) {
 	suggesterName := "completion_suggester"
 	cs := elastic.NewCompletionSuggester(suggesterName)
 	cs = cs.Field("suggest")
@@ -198,7 +196,7 @@ func (e *adminSearch) Suggest(q string) ([]*SearchItem, error) {
 
 	suggestions := searchResult.Suggest[suggesterName]
 
-	var ret []*SearchItem
+	var ret []*searchItem
 
 	multi := e.client.MultiGet()
 	for _, v := range suggestions {
@@ -214,7 +212,7 @@ func (e *adminSearch) Suggest(q string) ([]*SearchItem, error) {
 	}
 	for _, v := range res.Docs {
 		if v.Source != nil {
-			var item SearchItem
+			var item searchItem
 			err = json.Unmarshal(v.Source, &item)
 			if err == nil {
 				ret = append(ret, &item)
@@ -225,7 +223,7 @@ func (e *adminSearch) Suggest(q string) ([]*SearchItem, error) {
 	return ret, nil
 }
 
-func (e *adminSearch) Flush() error {
+func (e *adminSearch) flush() error {
 	_, err := e.client.Flush().Do(context.Background())
 	return err
 }
@@ -244,7 +242,7 @@ func (e *adminSearch) searchImport() error {
 			return fmt.Errorf("while importing resource %s: %s", v.TableName, err)
 		}
 	}
-	e.Flush()
+	e.flush()
 
 	return nil
 }
@@ -252,13 +250,13 @@ func (e *adminSearch) searchImport() error {
 func (e *adminSearch) importResource(resource *Resource) error {
 
 	roles := resource.App.getResourceViewRoles(*resource)
-	var resourceSearchItem = SearchItem{
+	var resourceSearchItem = searchItem{
 		ID:    "resource_" + resource.ID,
 		Name:  resource.HumanName("cs"),
 		URL:   resource.GetURL(""),
 		Roles: roles,
 	}
-	e.AddItem(&resourceSearchItem, 200)
+	e.addItem(&resourceSearchItem, 200)
 
 	var item interface{}
 	resource.newItem(&item)
@@ -294,7 +292,7 @@ func (e *adminSearch) saveItemWithRoles(resource *Resource, item interface{}, ro
 	}
 	searchItem := relationDataToSearchItem(resource, *relData)
 	searchItem.Roles = roles
-	return e.AddItem(&searchItem, 100)
+	return e.addItem(&searchItem, 100)
 }
 
 func (e *adminSearch) deleteItem(resource *Resource, id int64) error {
@@ -306,8 +304,8 @@ func searchID(resource *Resource, id int64) string {
 	return fmt.Sprintf("%s-%d", resource.ID, id)
 }
 
-func relationDataToSearchItem(resource *Resource, data viewRelationData) SearchItem {
-	return SearchItem{
+func relationDataToSearchItem(resource *Resource, data viewRelationData) searchItem {
+	return searchItem{
 		ID:          searchID(resource, data.ID),
 		Category:    resource.HumanName("cs"),
 		Name:        data.Name,
@@ -323,9 +321,10 @@ func (app *App) initSearchInner() {
 
 	adminSearch, err := newAdminSearch(app)
 	if err != nil {
-		app.Log().Println(err)
+		app.Log().Println("admin search not initialized: " + err.Error())
 		return
 	}
+	app.Log().Println("admin search initialized")
 	app.search = adminSearch
 
 	go func() {
@@ -357,7 +356,7 @@ func (app *App) initSearchInner() {
 			pages++
 		}
 
-		var searchPages []SearchPage
+		var searchPages []searchPage
 		for i := 1; i <= pages; i++ {
 			var selected bool
 			if page == i {
@@ -368,7 +367,7 @@ func (app *App) initSearchInner() {
 			if i > 0 {
 				values.Add("page", strconv.Itoa(i))
 			}
-			searchPages = append(searchPages, SearchPage{
+			searchPages = append(searchPages, searchPage{
 				Title:    i,
 				Selected: selected,
 				URL:      "_search?" + values.Encode(),

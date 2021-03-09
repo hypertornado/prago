@@ -7,12 +7,14 @@ import (
 	"path/filepath"
 )
 
-type DevelopmentSettings struct {
-	Less       []Less
-	TypeScript []string
+type development struct {
+	app           *App
+	less          []less
+	typeScript    []string
+	templatePaths []developmentTemplatePath
 }
 
-type Less struct {
+type less struct {
 	SourceDir string
 	Target    string
 }
@@ -20,13 +22,6 @@ type Less struct {
 type developmentTemplatePath struct {
 	Path     string
 	Patterns []string
-}
-
-type development struct {
-	app           *App
-	Less          []Less
-	TypeScript    []string
-	templatePaths []developmentTemplatePath
 }
 
 func (app *App) initDevelopment() {
@@ -53,14 +48,17 @@ func (app *App) initDevelopment() {
 			})
 }
 
+//AddTypeScriptDevelopmentPath automatically runs compilation of .tsc file in development mode
 func (app *App) AddTypeScriptDevelopmentPath(path string) {
-	app.development.TypeScript = append(app.development.TypeScript, path)
+	app.development.typeScript = append(app.development.typeScript, path)
 }
 
+//AddLessDevelopmentPaths compiles less files in sourcePath into targetPath in development mode
 func (app *App) AddLessDevelopmentPaths(sourcePath, targetPath string) {
-	app.development.Less = append(app.development.Less, Less{sourcePath, targetPath})
+	app.development.less = append(app.development.less, less{sourcePath, targetPath})
 }
 
+//AddTemplatesDevelopmentPath automatically compiles templates from path in development mode
 func (app *App) AddTemplatesDevelopmentPath(path string, patterns ...string) {
 	app.development.templatePaths = append(app.development.templatePaths, developmentTemplatePath{
 		Path:     path,
@@ -70,11 +68,11 @@ func (app *App) AddTemplatesDevelopmentPath(path string, patterns ...string) {
 
 func (app *App) startDevelopment() {
 	app.DevelopmentMode = true
-	for _, v := range app.development.Less {
+	for _, v := range app.development.less {
 		go app.developmentLess(v.SourceDir, v.Target)
 	}
 
-	for _, v := range app.development.TypeScript {
+	for _, v := range app.development.typeScript {
 		go developmentTypescript(v)
 	}
 

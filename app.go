@@ -52,7 +52,7 @@ type App struct {
 	taskManager       *taskManager
 }
 
-func NewTestingApp(initFunc func(*App)) *App {
+func newTestingApp(initFunc func(*App)) *App {
 	return createApp("__prago_test_app", "0.0", initFunc)
 }
 

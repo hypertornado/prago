@@ -22,7 +22,7 @@ type ResourceStruct struct {
 
 func prepareResource(initFns ...func(app *App)) (*App, *Resource) {
 	var resource *Resource
-	app := NewTestingApp(func(app *App) {
+	app := newTestingApp(func(app *App) {
 		resource = app.CreateResource(ResourceStruct{}, nil)
 		for _, v := range initFns {
 			v(app)

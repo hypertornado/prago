@@ -1,17 +1,16 @@
 function bindStats() {
 }
-var Autoresize = (function () {
-    function Autoresize(el) {
+class Autoresize {
+    constructor(el) {
         this.el = el;
         this.el.addEventListener('input', this.resizeIt.bind(this));
         this.resizeIt();
     }
-    Autoresize.prototype.resizeIt = function () {
+    resizeIt() {
         var height = this.el.scrollHeight + 2;
         this.el.style.height = height + 'px';
-    };
-    return Autoresize;
-}());
+    }
+}
 function DOMinsertChildAtIndex(parent, child, index) {
     if (index >= parent.children.length) {
         parent.appendChild(child);
@@ -53,22 +52,22 @@ function bindImageViews() {
         new ImageView(els[i]);
     }
 }
-var ImageView = (function () {
-    function ImageView(el) {
+class ImageView {
+    constructor(el) {
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.el = el;
         var ids = el.getAttribute("data-images").split(",");
         this.addImages(ids);
     }
-    ImageView.prototype.addImages = function (ids) {
+    addImages(ids) {
         this.el.innerHTML = "";
         for (var i = 0; i < ids.length; i++) {
             if (ids[i] != "") {
                 this.addImage(ids[i]);
             }
         }
-    };
-    ImageView.prototype.addImage = function (id) {
+    }
+    addImage(id) {
         var container = document.createElement("a");
         container.classList.add("admin_images_image");
         container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
@@ -81,7 +80,7 @@ var ImageView = (function () {
         container.appendChild(descriptionEl);
         var request = new XMLHttpRequest();
         request.open("GET", this.adminPrefix + "/_api/imagedata/" + id);
-        request.addEventListener("load", function (e) {
+        request.addEventListener("load", (e) => {
             if (request.status == 200) {
                 var data = JSON.parse(request.response);
                 descriptionEl.innerText = data["Name"];
@@ -93,18 +92,16 @@ var ImageView = (function () {
         });
         request.send();
         this.el.appendChild(container);
-    };
-    return ImageView;
-}());
+    }
+}
 function bindImagePickers() {
     var els = document.querySelectorAll(".admin_images");
     for (var i = 0; i < els.length; i++) {
         new ImagePicker(els[i]);
     }
 }
-var ImagePicker = (function () {
-    function ImagePicker(el) {
-        var _this = this;
+class ImagePicker {
+    constructor(el) {
         this.el = el;
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.hiddenInput = el.querySelector(".admin_images_hidden");
@@ -114,24 +111,24 @@ var ImagePicker = (function () {
         this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
         this.hideProgress();
         var ids = this.hiddenInput.value.split(",");
-        this.el.addEventListener("click", function (e) {
+        this.el.addEventListener("click", (e) => {
             if (e.altKey) {
-                var ids = window.prompt("IDs of images", _this.hiddenInput.value);
-                _this.hiddenInput.value = ids;
+                var ids = window.prompt("IDs of images", this.hiddenInput.value);
+                this.hiddenInput.value = ids;
                 e.preventDefault();
                 return false;
             }
         });
-        this.fileInput.addEventListener("dragenter", function (ev) {
-            _this.fileInput.classList.add("admin_images_fileinput-droparea");
+        this.fileInput.addEventListener("dragenter", (ev) => {
+            this.fileInput.classList.add("admin_images_fileinput-droparea");
         });
-        this.fileInput.addEventListener("dragleave", function (ev) {
-            _this.fileInput.classList.remove("admin_images_fileinput-droparea");
+        this.fileInput.addEventListener("dragleave", (ev) => {
+            this.fileInput.classList.remove("admin_images_fileinput-droparea");
         });
-        this.fileInput.addEventListener("dragover", function (ev) {
+        this.fileInput.addEventListener("dragover", (ev) => {
             ev.preventDefault();
         });
-        this.fileInput.addEventListener("drop", function (ev) {
+        this.fileInput.addEventListener("drop", (ev) => {
             var text = ev.dataTransfer.getData('Text');
             return;
         });
@@ -141,8 +138,8 @@ var ImagePicker = (function () {
                 this.addImage(id);
             }
         }
-        this.fileInput.addEventListener("change", function (e) {
-            var files = _this.fileInput.files;
+        this.fileInput.addEventListener("change", (e) => {
+            var files = this.fileInput.files;
             var formData = new FormData();
             if (files.length == 0) {
                 return;
@@ -151,13 +148,13 @@ var ImagePicker = (function () {
                 formData.append("file", files[i]);
             }
             var request = new XMLHttpRequest();
-            request.open("POST", _this.adminPrefix + "/_api/image/upload");
-            request.addEventListener("load", function (e) {
-                _this.hideProgress();
+            request.open("POST", this.adminPrefix + "/_api/image/upload");
+            request.addEventListener("load", (e) => {
+                this.hideProgress();
                 if (request.status == 200) {
                     var data = JSON.parse(request.response);
                     for (var i = 0; i < data.length; i++) {
-                        _this.addImage(data[i].UID);
+                        this.addImage(data[i].UID);
                     }
                 }
                 else {
@@ -165,11 +162,11 @@ var ImagePicker = (function () {
                     console.error("Error while loading item.");
                 }
             });
-            _this.showProgress();
+            this.showProgress();
             request.send(formData);
         });
     }
-    ImagePicker.prototype.updateHiddenData = function () {
+    updateHiddenData() {
         var ids = [];
         for (var i = 0; i < this.preview.children.length; i++) {
             var item = this.preview.children[i];
@@ -177,9 +174,8 @@ var ImagePicker = (function () {
             ids.push(uuid);
         }
         this.hiddenInput.value = ids.join(",");
-    };
-    ImagePicker.prototype.addImage = function (id) {
-        var _this = this;
+    }
+    addImage(id) {
         var container = document.createElement("a");
         container.classList.add("admin_images_image");
         container.setAttribute("data-uuid", id);
@@ -192,7 +188,7 @@ var ImagePicker = (function () {
         container.appendChild(descriptionEl);
         var request = new XMLHttpRequest();
         request.open("GET", this.adminPrefix + "/_api/imagedata/" + id);
-        request.addEventListener("load", function (e) {
+        request.addEventListener("load", (e) => {
             if (request.status == 200) {
                 var data = JSON.parse(request.response);
                 descriptionEl.innerText = data["Name"];
@@ -203,10 +199,10 @@ var ImagePicker = (function () {
             }
         });
         request.send();
-        container.addEventListener("dragstart", function (e) {
-            _this.draggedElement = e.target;
+        container.addEventListener("dragstart", (e) => {
+            this.draggedElement = e.target;
         });
-        container.addEventListener("drop", function (e) {
+        container.addEventListener("drop", (e) => {
             var droppedElement = e.toElement;
             if (!droppedElement) {
                 droppedElement = e.originalTarget;
@@ -221,10 +217,10 @@ var ImagePicker = (function () {
             }
             var draggedIndex = -1;
             var droppedIndex = -1;
-            var parent = _this.draggedElement.parentElement;
+            var parent = this.draggedElement.parentElement;
             for (var i = 0; i < parent.children.length; i++) {
                 var child = parent.children[i];
-                if (child == _this.draggedElement) {
+                if (child == this.draggedElement) {
                     draggedIndex = i;
                 }
                 if (child == droppedElement) {
@@ -237,20 +233,20 @@ var ImagePicker = (function () {
             if (draggedIndex <= droppedIndex) {
                 droppedIndex += 1;
             }
-            DOMinsertChildAtIndex(parent, _this.draggedElement, droppedIndex);
-            _this.updateHiddenData();
+            DOMinsertChildAtIndex(parent, this.draggedElement, droppedIndex);
+            this.updateHiddenData();
             e.preventDefault();
             return false;
         });
-        container.addEventListener("dragover", function (e) {
+        container.addEventListener("dragover", (e) => {
             e.preventDefault();
         });
-        container.addEventListener("click", function (e) {
+        container.addEventListener("click", (e) => {
             var target = e.target;
             if (target.classList.contains("admin_images_image_delete")) {
                 var parent = e.currentTarget.parentNode;
                 parent.removeChild(e.currentTarget);
-                _this.updateHiddenData();
+                this.updateHiddenData();
                 e.preventDefault();
                 return false;
             }
@@ -261,18 +257,16 @@ var ImagePicker = (function () {
         container.appendChild(del);
         this.preview.appendChild(container);
         this.updateHiddenData();
-    };
-    ImagePicker.prototype.hideProgress = function () {
+    }
+    hideProgress() {
         this.progress.classList.add("hidden");
-    };
-    ImagePicker.prototype.showProgress = function () {
+    }
+    showProgress() {
         this.progress.classList.remove("hidden");
-    };
-    return ImagePicker;
-}());
-var ListFilterRelations = (function () {
-    function ListFilterRelations(el, value, list) {
-        var _this = this;
+    }
+}
+class ListFilterRelations {
+    constructor(el, value, list) {
         this.valueInput = el.querySelector(".filter_relations_hidden");
         this.input = el.querySelector(".filter_relations_search_input");
         this.search = el.querySelector(".filter_relations_search");
@@ -282,49 +276,48 @@ var ListFilterRelations = (function () {
         this.previewClose = el.querySelector(".filter_relations_preview_close");
         this.previewClose.addEventListener("click", this.closePreview.bind(this));
         this.preview.classList.add("hidden");
-        var hiddenEl = el.querySelector("input");
+        let hiddenEl = el.querySelector("input");
         this.relatedResourceName = el.querySelector(".admin_table_filter_item-relations").getAttribute("data-related-resource");
-        this.input.addEventListener("input", function () {
-            _this.dirty = true;
-            _this.lastChanged = Date.now();
+        this.input.addEventListener("input", () => {
+            this.dirty = true;
+            this.lastChanged = Date.now();
             return false;
         });
-        window.setInterval(function () {
-            if (_this.dirty && Date.now() - _this.lastChanged > 100) {
-                _this.loadSuggestions();
+        window.setInterval(() => {
+            if (this.dirty && Date.now() - this.lastChanged > 100) {
+                this.loadSuggestions();
             }
         }, 30);
         if (this.valueInput.value) {
             this.loadPreview(this.valueInput.value);
         }
     }
-    ListFilterRelations.prototype.loadPreview = function (value) {
-        var _this = this;
+    loadPreview(value) {
         var request = new XMLHttpRequest();
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
         request.open("GET", adminPrefix + "/_api/preview/" + this.relatedResourceName + "/" + value, true);
-        request.addEventListener("load", function () {
+        request.addEventListener("load", () => {
             if (request.status == 200) {
-                _this.renderPreview(JSON.parse(request.response));
+                this.renderPreview(JSON.parse(request.response));
             }
             else {
                 console.error("not found");
             }
         });
         request.send();
-    };
-    ListFilterRelations.prototype.renderPreview = function (item) {
+    }
+    renderPreview(item) {
         this.valueInput.value = item.ID;
         this.preview.classList.remove("hidden");
         this.search.classList.add("hidden");
         this.previewName.textContent = item.Name;
         this.dispatchChange();
-    };
-    ListFilterRelations.prototype.dispatchChange = function () {
+    }
+    dispatchChange() {
         var event = new Event('change');
         this.valueInput.dispatchEvent(event);
-    };
-    ListFilterRelations.prototype.closePreview = function () {
+    }
+    closePreview() {
         this.valueInput.value = "";
         this.preview.classList.add("hidden");
         this.search.classList.remove("hidden");
@@ -333,46 +326,40 @@ var ListFilterRelations = (function () {
         this.suggestions.classList.add("filter_relations_suggestions-empty");
         this.dispatchChange();
         this.input.focus();
-    };
-    ListFilterRelations.prototype.loadSuggestions = function () {
+    }
+    loadSuggestions() {
         this.getSuggestions(this.input.value);
         this.dirty = false;
-    };
-    ListFilterRelations.prototype.getSuggestions = function (q) {
-        var _this = this;
+    }
+    getSuggestions(q) {
         var request = new XMLHttpRequest();
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
         request.open("GET", adminPrefix + "/_api/search/" + this.relatedResourceName + "?q=" + encodeURIComponent(q), true);
-        request.addEventListener("load", function () {
+        request.addEventListener("load", () => {
             if (request.status == 200) {
-                _this.renderSuggestions(JSON.parse(request.response));
+                this.renderSuggestions(JSON.parse(request.response));
             }
             else {
                 console.error("not found");
             }
         });
         request.send();
-    };
-    ListFilterRelations.prototype.renderSuggestions = function (data) {
-        var _this = this;
+    }
+    renderSuggestions(data) {
         this.suggestions.innerHTML = "";
         this.suggestions.classList.add("filter_relations_suggestions-empty");
-        var _loop_1 = function () {
-            this_1.suggestions.classList.remove("filter_relations_suggestions-empty");
-            var item = data[i];
-            var el = this_1.renderSuggestion(item);
-            this_1.suggestions.appendChild(el);
-            var index = i;
-            el.addEventListener("mousedown", function (e) {
-                _this.renderPreview(item);
-            });
-        };
-        var this_1 = this;
         for (var i = 0; i < data.length; i++) {
-            _loop_1();
+            this.suggestions.classList.remove("filter_relations_suggestions-empty");
+            let item = data[i];
+            let el = this.renderSuggestion(item);
+            this.suggestions.appendChild(el);
+            let index = i;
+            el.addEventListener("mousedown", (e) => {
+                this.renderPreview(item);
+            });
         }
-    };
-    ListFilterRelations.prototype.renderSuggestion = function (data) {
+    }
+    renderSuggestion(data) {
         var ret = document.createElement("div");
         ret.classList.add("list_filter_suggestion");
         ret.setAttribute("href", data.URL);
@@ -392,11 +379,10 @@ var ListFilterRelations = (function () {
         right.appendChild(description);
         ret.appendChild(right);
         return ret;
-    };
-    return ListFilterRelations;
-}());
-var ListFilterDate = (function () {
-    function ListFilterDate(el, value) {
+    }
+}
+class ListFilterDate {
+    constructor(el, value) {
         this.hidden = el.querySelector(".admin_table_filter_item");
         this.from = el.querySelector(".admin_filter_layout_date_from");
         this.to = el.querySelector(".admin_filter_layout_date_to");
@@ -406,7 +392,7 @@ var ListFilterDate = (function () {
         this.to.addEventListener("change", this.changed.bind(this));
         this.setValue(value);
     }
-    ListFilterDate.prototype.setValue = function (value) {
+    setValue(value) {
         if (!value) {
             return;
         }
@@ -416,8 +402,8 @@ var ListFilterDate = (function () {
             this.to.value = splited[1];
         }
         this.hidden.value = value;
-    };
-    ListFilterDate.prototype.changed = function () {
+    }
+    changed() {
         var val = "";
         if (this.from.value || this.to.value) {
             val = this.from.value + "," + this.to.value;
@@ -425,18 +411,16 @@ var ListFilterDate = (function () {
         this.hidden.value = val;
         var event = new Event('change');
         this.hidden.dispatchEvent(event);
-    };
-    return ListFilterDate;
-}());
+    }
+}
 function bindLists() {
     var els = document.getElementsByClassName("admin_list");
     for (var i = 0; i < els.length; i++) {
         new List(els[i], document.querySelector(".admin_tablesettings_buttons"));
     }
 }
-var List = (function () {
-    function List(el, openbutton) {
-        var _this = this;
+class List {
+    constructor(el, openbutton) {
         this.el = el;
         this.settingsRow = this.el.querySelector(".admin_list_settingsrow");
         this.settingsRowColumn = this.el.querySelector(".admin_list_settingsrow_column");
@@ -445,7 +429,7 @@ var List = (function () {
         this.settingsCheckbox.addEventListener("change", this.settingsCheckboxChange.bind(this));
         this.settingsCheckboxChange();
         this.exportButton = this.el.querySelector(".admin_exportbutton");
-        var urlParams = new URLSearchParams(window.location.search);
+        let urlParams = new URLSearchParams(window.location.search);
         this.page = parseInt(urlParams.get("_page"));
         if (!this.page) {
             this.page = 1;
@@ -482,8 +466,8 @@ var List = (function () {
         if (urlParams.get("_columns")) {
             visibleColumnsStr = urlParams.get("_columns");
         }
-        var visibleColumnsArr = visibleColumnsStr.split(",");
-        var visibleColumnsMap = {};
+        let visibleColumnsArr = visibleColumnsStr.split(",");
+        let visibleColumnsMap = {};
         for (var i = 0; i < visibleColumnsArr.length; i++) {
             visibleColumnsMap[visibleColumnsArr[i]] = true;
         }
@@ -491,27 +475,26 @@ var List = (function () {
         this.paginationSelect = el.querySelector(".admin_tablesettings_pages");
         this.paginationSelect.addEventListener("change", this.load.bind(this));
         this.statsCheckbox = el.querySelector(".admin_tablesettings_stats");
-        this.statsCheckbox.addEventListener("change", function () {
-            _this.filterChanged();
+        this.statsCheckbox.addEventListener("change", () => {
+            this.filterChanged();
         });
         this.statsCheckboxSelectCount = el.querySelector(".admin_tablesettings_stats_limit");
-        this.statsCheckboxSelectCount.addEventListener("change", function () {
-            _this.filterChanged();
+        this.statsCheckboxSelectCount.addEventListener("change", () => {
+            this.filterChanged();
         });
         this.statsContainer = el.querySelector(".admin_tablesettings_stats_container");
         this.bindOptions(visibleColumnsMap);
         this.bindOrder();
     }
-    List.prototype.settingsCheckboxChange = function () {
+    settingsCheckboxChange() {
         if (this.settingsCheckbox.checked) {
             this.settingsRow.classList.add("admin_list_settingsrow-visible");
         }
         else {
             this.settingsRow.classList.remove("admin_list_settingsrow-visible");
         }
-    };
-    List.prototype.load = function () {
-        var _this = this;
+    }
+    load() {
         this.progress.classList.remove("admin_table_progress-inactive");
         var request = new XMLHttpRequest();
         var params = {};
@@ -528,12 +511,12 @@ var List = (function () {
         if (columns != this.defaultVisibleColumnsStr) {
             params["_columns"] = columns;
         }
-        var filterData = this.getFilterData();
+        let filterData = this.getFilterData();
         for (var k in filterData) {
             params[k] = filterData[k];
         }
         this.colorActiveFilterItems();
-        var selectedPages = parseInt(this.paginationSelect.value);
+        let selectedPages = parseInt(this.paginationSelect.value);
         if (selectedPages != this.itemsPerPage) {
             params["_pagesize"] = selectedPages;
         }
@@ -548,41 +531,40 @@ var List = (function () {
         params["_format"] = "json";
         encoded = encodeParams(params);
         request.open("GET", this.adminPrefix + "/" + this.typeName + encoded, true);
-        request.addEventListener("load", function () {
-            _this.tbody.innerHTML = "";
+        request.addEventListener("load", () => {
+            this.tbody.innerHTML = "";
             if (request.status == 200) {
                 var response = JSON.parse(request.response);
-                _this.tbody.innerHTML = response.Content;
+                this.tbody.innerHTML = response.Content;
                 var countStr = response.CountStr;
-                _this.el.querySelector(".admin_table_count").textContent = countStr;
-                _this.statsContainer.innerHTML = response.StatsStr;
+                this.el.querySelector(".admin_table_count").textContent = countStr;
+                this.statsContainer.innerHTML = response.StatsStr;
                 bindOrder();
-                _this.bindPagination();
-                _this.bindClick();
-                _this.tbody.classList.remove("admin_table_loading");
+                this.bindPagination();
+                this.bindClick();
+                this.tbody.classList.remove("admin_table_loading");
             }
             else {
                 console.error("error while loading list");
             }
-            _this.progress.classList.add("admin_table_progress-inactive");
+            this.progress.classList.add("admin_table_progress-inactive");
         });
         request.send(JSON.stringify({}));
-    };
-    List.prototype.bindOptions = function (visibleColumnsMap) {
-        var _this = this;
+    }
+    bindOptions(visibleColumnsMap) {
         var columns = this.el.querySelectorAll(".admin_tablesettings_column");
         for (var i = 0; i < columns.length; i++) {
-            var columnName = columns[i].getAttribute("data-column-name");
+            let columnName = columns[i].getAttribute("data-column-name");
             if (visibleColumnsMap[columnName]) {
                 columns[i].checked = true;
             }
-            columns[i].addEventListener("change", function () {
-                _this.changedOptions();
+            columns[i].addEventListener("change", () => {
+                this.changedOptions();
             });
         }
         this.changedOptions();
-    };
-    List.prototype.changedOptions = function () {
+    }
+    changedOptions() {
         var columns = this.getSelectedColumnsMap();
         var headers = this.el.querySelectorAll(".admin_list_orderitem");
         for (var i = 0; i < headers.length; i++) {
@@ -606,30 +588,30 @@ var List = (function () {
         }
         this.settingsRowColumn.setAttribute("colspan", Object.keys(columns).length + "");
         this.load();
-    };
-    List.prototype.colorActiveFilterItems = function () {
-        var itemsToColor = this.getFilterData();
+    }
+    colorActiveFilterItems() {
+        let itemsToColor = this.getFilterData();
         var filterItems = this.el.querySelectorAll(".admin_list_filteritem");
         for (var i = 0; i < filterItems.length; i++) {
             var item = filterItems[i];
-            var name_1 = item.getAttribute("data-name");
-            if (itemsToColor[name_1]) {
+            let name = item.getAttribute("data-name");
+            if (itemsToColor[name]) {
                 item.classList.add("admin_list_filteritem-colored");
             }
             else {
                 item.classList.remove("admin_list_filteritem-colored");
             }
         }
-    };
-    List.prototype.paginationChange = function (e) {
+    }
+    paginationChange(e) {
         var el = e.target;
         var page = parseInt(el.getAttribute("data-page"));
         this.page = page;
         this.load();
         e.preventDefault();
         return false;
-    };
-    List.prototype.bindPagination = function () {
+    }
+    bindPagination() {
         var paginationEl = this.el.querySelector(".pagination");
         var totalPages = parseInt(paginationEl.getAttribute("data-total"));
         var selectedPage = parseInt(paginationEl.getAttribute("data-selected"));
@@ -647,13 +629,13 @@ var List = (function () {
             }
             paginationEl.appendChild(pEl);
         }
-    };
-    List.prototype.bindClick = function () {
+    }
+    bindClick() {
         var rows = this.el.querySelectorAll(".admin_table_row");
         for (var i = 0; i < rows.length; i++) {
             var row = rows[i];
             var id = row.getAttribute("data-id");
-            row.addEventListener("click", function (e) {
+            row.addEventListener("click", (e) => {
                 var target = e.target;
                 if (target.classList.contains("preventredirect")) {
                     return;
@@ -668,7 +650,7 @@ var List = (function () {
                 window.location.href = url;
             });
             var buttons = row.querySelector(".admin_list_buttons");
-            buttons.addEventListener("click", function (e) {
+            buttons.addEventListener("click", (e) => {
                 var url = e.target.getAttribute("href");
                 if (url != "") {
                     window.location.href = url;
@@ -678,36 +660,35 @@ var List = (function () {
                 }
             });
         }
-    };
-    List.prototype.bindOrder = function () {
-        var _this = this;
+    }
+    bindOrder() {
         this.renderOrder();
         var headers = this.el.querySelectorAll(".admin_list_orderitem-canorder");
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
-            header.addEventListener("click", function (e) {
+            header.addEventListener("click", (e) => {
                 var el = e.target;
                 var name = el.getAttribute("data-name");
-                if (name == _this.orderColumn) {
-                    if (_this.orderDesc) {
-                        _this.orderDesc = false;
+                if (name == this.orderColumn) {
+                    if (this.orderDesc) {
+                        this.orderDesc = false;
                     }
                     else {
-                        _this.orderDesc = true;
+                        this.orderDesc = true;
                     }
                 }
                 else {
-                    _this.orderColumn = name;
-                    _this.orderDesc = false;
+                    this.orderColumn = name;
+                    this.orderDesc = false;
                 }
-                _this.renderOrder();
-                _this.load();
+                this.renderOrder();
+                this.load();
                 e.preventDefault();
                 return false;
             });
         }
-    };
-    List.prototype.renderOrder = function () {
+    }
+    renderOrder() {
         var headers = this.el.querySelectorAll(".admin_list_orderitem-canorder");
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
@@ -721,24 +702,24 @@ var List = (function () {
                 }
             }
         }
-    };
-    List.prototype.getSelectedColumnsStr = function () {
+    }
+    getSelectedColumnsStr() {
         var ret = [];
         var checked = this.el.querySelectorAll(".admin_tablesettings_column:checked");
         for (var i = 0; i < checked.length; i++) {
             ret.push(checked[i].getAttribute("data-column-name"));
         }
         return ret.join(",");
-    };
-    List.prototype.getSelectedColumnsMap = function () {
+    }
+    getSelectedColumnsMap() {
         var columns = {};
         var checked = this.el.querySelectorAll(".admin_tablesettings_column:checked");
         for (var i = 0; i < checked.length; i++) {
             columns[checked[i].getAttribute("data-column-name")] = true;
         }
         return columns;
-    };
-    List.prototype.getFilterData = function () {
+    }
+    getFilterData() {
         var ret = {};
         var items = this.el.querySelectorAll(".admin_table_filter_item");
         for (var i = 0; i < items.length; i++) {
@@ -756,8 +737,8 @@ var List = (function () {
             }
         }
         return ret;
-    };
-    List.prototype.bindFilter = function (params) {
+    }
+    bindFilter(params) {
         var filterFields = this.el.querySelectorAll(".admin_list_filteritem");
         for (var i = 0; i < filterFields.length; i++) {
             var field = filterFields[i];
@@ -790,38 +771,36 @@ var List = (function () {
             }
         }
         this.inputPeriodicListener();
-    };
-    List.prototype.inputListener = function (e) {
+    }
+    inputListener(e) {
         if (e.keyCode == 9 || e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
             return;
         }
         this.filterChanged();
-    };
-    List.prototype.filterChanged = function () {
+    }
+    filterChanged() {
         this.colorActiveFilterItems();
         this.tbody.classList.add("admin_table_loading");
         this.page = 1;
         this.changed = true;
         this.changedTimestamp = Date.now();
         this.progress.classList.remove("admin_table_progress-inactive");
-    };
-    List.prototype.bindFilterRelation = function (el, value) {
+    }
+    bindFilterRelation(el, value) {
         new ListFilterRelations(el, value, this);
-    };
-    List.prototype.bindFilterDate = function (el, value) {
+    }
+    bindFilterDate(el, value) {
         new ListFilterDate(el, value);
-    };
-    List.prototype.inputPeriodicListener = function () {
-        var _this = this;
-        setInterval(function () {
-            if (_this.changed == true && Date.now() - _this.changedTimestamp > 500) {
-                _this.changed = false;
-                _this.load();
+    }
+    inputPeriodicListener() {
+        setInterval(() => {
+            if (this.changed == true && Date.now() - this.changedTimestamp > 500) {
+                this.changed = false;
+                this.load();
             }
         }, 200);
-    };
-    return List;
-}());
+    }
+}
 function bindOrder() {
     function orderTable(el) {
         var rows = el.getElementsByClassName("admin_table_row");
@@ -880,7 +859,7 @@ function bindOrder() {
             });
             var request = new XMLHttpRequest();
             request.open("POST", ajaxPath, true);
-            request.addEventListener("load", function () {
+            request.addEventListener("load", () => {
                 if (request.status != 200) {
                     console.error("Error while saving order.");
                 }
@@ -899,9 +878,8 @@ function bindMarkdowns() {
         new MarkdownEditor(el);
     });
 }
-var MarkdownEditor = (function () {
-    function MarkdownEditor(el) {
-        var _this = this;
+class MarkdownEditor {
+    constructor(el) {
         this.el = el;
         this.textarea = el.querySelector(".textarea");
         this.preview = el.querySelector(".admin_markdown_preview");
@@ -911,13 +889,13 @@ var MarkdownEditor = (function () {
         helpLink.setAttribute("href", prefix + "/_help/markdown");
         this.lastChanged = Date.now();
         this.changed = false;
-        var showChange = el.querySelector(".admin_markdown_preview_show");
-        showChange.addEventListener("change", function () {
-            _this.preview.classList.toggle("hidden");
+        let showChange = el.querySelector(".admin_markdown_preview_show");
+        showChange.addEventListener("change", () => {
+            this.preview.classList.toggle("hidden");
         });
-        setInterval(function () {
-            if (_this.changed && (Date.now() - _this.lastChanged > 500)) {
-                _this.loadPreview();
+        setInterval(() => {
+            if (this.changed && (Date.now() - this.lastChanged > 500)) {
+                this.loadPreview();
             }
         }, 100);
         this.textarea.addEventListener("change", this.textareaChanged.bind(this));
@@ -926,41 +904,39 @@ var MarkdownEditor = (function () {
         this.bindCommands();
         this.bindShortcuts();
     }
-    MarkdownEditor.prototype.bindCommands = function () {
-        var _this = this;
+    bindCommands() {
         var btns = this.el.querySelectorAll(".admin_markdown_command");
         for (var i = 0; i < btns.length; i++) {
-            btns[i].addEventListener("mousedown", function (e) {
+            btns[i].addEventListener("mousedown", (e) => {
                 var cmd = e.target.getAttribute("data-cmd");
-                _this.executeCommand(cmd);
+                this.executeCommand(cmd);
                 e.preventDefault();
                 return false;
             });
         }
-    };
-    MarkdownEditor.prototype.bindShortcuts = function () {
-        var _this = this;
-        this.textarea.addEventListener("keydown", function (e) {
+    }
+    bindShortcuts() {
+        this.textarea.addEventListener("keydown", (e) => {
             if (e.metaKey == false && e.ctrlKey == false) {
                 return;
             }
             switch (e.keyCode) {
                 case 66:
-                    _this.executeCommand("b");
+                    this.executeCommand("b");
                     break;
                 case 73:
-                    _this.executeCommand("i");
+                    this.executeCommand("i");
                     break;
                 case 75:
-                    _this.executeCommand("h2");
+                    this.executeCommand("h2");
                     break;
                 case 85:
-                    _this.executeCommand("a");
+                    this.executeCommand("a");
                     break;
             }
         });
-    };
-    MarkdownEditor.prototype.executeCommand = function (commandName) {
+    }
+    executeCommand(commandName) {
         switch (commandName) {
             case "b":
                 this.setAroundMarkdown("**", "**");
@@ -988,8 +964,8 @@ var MarkdownEditor = (function () {
                 break;
         }
         this.textareaChanged();
-    };
-    MarkdownEditor.prototype.setAroundMarkdown = function (before, after) {
+    }
+    setAroundMarkdown(before, after) {
         var text = this.textarea.value;
         var selected = text.substr(this.textarea.selectionStart, this.textarea.selectionEnd - this.textarea.selectionStart);
         var newText = text.substr(0, this.textarea.selectionStart);
@@ -1003,36 +979,34 @@ var MarkdownEditor = (function () {
         this.textarea.selectionStart = newStart;
         this.textarea.selectionEnd = newEnd;
         this.textarea.focus();
-    };
-    MarkdownEditor.prototype.textareaChanged = function () {
+    }
+    textareaChanged() {
         this.changed = true;
         this.lastChanged = Date.now();
-    };
-    MarkdownEditor.prototype.loadPreview = function () {
-        var _this = this;
+    }
+    loadPreview() {
         this.changed = false;
         var request = new XMLHttpRequest();
         request.open("POST", document.body.getAttribute("data-admin-prefix") + "/_api/markdown", true);
-        request.addEventListener("load", function () {
+        request.addEventListener("load", () => {
             if (request.status == 200) {
-                _this.preview.innerHTML = JSON.parse(request.response);
+                this.preview.innerHTML = JSON.parse(request.response);
             }
             else {
                 console.error("Error while loading markdown preview.");
             }
         });
         request.send(this.textarea.value);
-    };
-    return MarkdownEditor;
-}());
+    }
+}
 function bindTimestamps() {
     var elements = document.querySelectorAll(".admin_timestamp");
     Array.prototype.forEach.call(elements, function (el, i) {
         new Timestamp(el);
     });
 }
-var Timestamp = (function () {
-    function Timestamp(el) {
+class Timestamp {
+    constructor(el) {
         this.elTsInput = el.getElementsByTagName("input")[0];
         this.elTsDate = el.getElementsByClassName("admin_timestamp_date")[0];
         this.elTsHour = el.getElementsByClassName("admin_timestamp_hour")[0];
@@ -1045,7 +1019,7 @@ var Timestamp = (function () {
         this.elTsMinute.addEventListener("change", this.saveValue.bind(this));
         this.saveValue();
     }
-    Timestamp.prototype.setTimestamp = function (v) {
+    setTimestamp(v) {
         if (v == "") {
             return;
         }
@@ -1057,8 +1031,8 @@ var Timestamp = (function () {
         minuteOption.selected = true;
         var hourOption = this.elTsHour.children[hour];
         hourOption.selected = true;
-    };
-    Timestamp.prototype.initClock = function () {
+    }
+    initClock() {
         for (var i = 0; i < 24; i++) {
             var newEl = document.createElement("option");
             var addVal = "" + i;
@@ -1079,25 +1053,23 @@ var Timestamp = (function () {
             newEl.setAttribute("value", addVal);
             this.elTsMinute.appendChild(newEl);
         }
-    };
-    Timestamp.prototype.saveValue = function () {
+    }
+    saveValue() {
         var str = this.elTsDate.value + " " + this.elTsHour.value + ":" + this.elTsMinute.value;
         if (this.elTsDate.value == "") {
             str = "";
         }
         this.elTsInput.value = str;
-    };
-    return Timestamp;
-}());
+    }
+}
 function bindRelations() {
     var elements = document.querySelectorAll(".admin_item_relation");
     Array.prototype.forEach.call(elements, function (el, i) {
         new RelationPicker(el);
     });
 }
-var RelationPicker = (function () {
-    function RelationPicker(el) {
-        var _this = this;
+class RelationPicker {
+    constructor(el) {
         this.selectedClass = "admin_item_relation_picker_suggestion-selected";
         this.input = el.getElementsByTagName("input")[0];
         this.previewContainer = el.querySelector(".admin_item_relation_preview");
@@ -1105,24 +1077,24 @@ var RelationPicker = (function () {
         this.progress = el.querySelector("progress");
         this.changeSection = el.querySelector(".admin_item_relation_change");
         this.changeButton = el.querySelector(".admin_item_relation_change_btn");
-        this.changeButton.addEventListener("click", function () {
-            _this.input.value = "0";
-            _this.showSearch();
-            _this.pickerInput.focus();
+        this.changeButton.addEventListener("click", () => {
+            this.input.value = "0";
+            this.showSearch();
+            this.pickerInput.focus();
         });
         this.suggestionsEl = el.querySelector(".admin_item_relation_picker_suggestions_content");
         this.suggestions = [];
         this.picker = el.querySelector(".admin_item_relation_picker");
         this.pickerInput = this.picker.querySelector("input");
-        this.pickerInput.addEventListener("input", function () {
-            _this.getSuggestions(_this.pickerInput.value);
+        this.pickerInput.addEventListener("input", () => {
+            this.getSuggestions(this.pickerInput.value);
         });
-        this.pickerInput.addEventListener("blur", function () {
-            _this.suggestionsEl.classList.add("hidden");
+        this.pickerInput.addEventListener("blur", () => {
+            this.suggestionsEl.classList.add("hidden");
         });
-        this.pickerInput.addEventListener("focus", function () {
-            _this.suggestionsEl.classList.remove("hidden");
-            _this.getSuggestions(_this.pickerInput.value);
+        this.pickerInput.addEventListener("focus", () => {
+            this.suggestionsEl.classList.remove("hidden");
+            this.getSuggestions(this.pickerInput.value);
         });
         this.pickerInput.addEventListener("keydown", this.suggestionInput.bind(this));
         if (this.input.value != "0") {
@@ -1133,23 +1105,22 @@ var RelationPicker = (function () {
             this.showSearch();
         }
     }
-    RelationPicker.prototype.getData = function () {
-        var _this = this;
+    getData() {
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
         var request = new XMLHttpRequest();
         request.open("GET", adminPrefix + "/_api/preview/" + this.relationName + "/" + this.input.value, true);
-        request.addEventListener("load", function () {
-            _this.progress.classList.add("hidden");
+        request.addEventListener("load", () => {
+            this.progress.classList.add("hidden");
             if (request.status == 200) {
-                _this.showPreview(JSON.parse(request.response));
+                this.showPreview(JSON.parse(request.response));
             }
             else {
-                _this.showSearch();
+                this.showSearch();
             }
         });
         request.send();
-    };
-    RelationPicker.prototype.showPreview = function (data) {
+    }
+    showPreview(data) {
         this.previewContainer.textContent = "";
         this.input.value = data.ID;
         var el = this.createPreview(data, true);
@@ -1157,36 +1128,35 @@ var RelationPicker = (function () {
         this.previewContainer.classList.remove("hidden");
         this.changeSection.classList.remove("hidden");
         this.picker.classList.add("hidden");
-    };
-    RelationPicker.prototype.showSearch = function () {
+    }
+    showSearch() {
         this.previewContainer.classList.add("hidden");
         this.changeSection.classList.add("hidden");
         this.picker.classList.remove("hidden");
         this.suggestions = [];
         this.suggestionsEl.innerText = "";
         this.pickerInput.value = "";
-    };
-    RelationPicker.prototype.getSuggestions = function (q) {
-        var _this = this;
+    }
+    getSuggestions(q) {
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
         var request = new XMLHttpRequest();
         request.open("GET", adminPrefix + "/_api/search/" + this.relationName + "?q=" + encodeURIComponent(q), true);
-        request.addEventListener("load", function () {
+        request.addEventListener("load", () => {
             if (request.status == 200) {
-                if (q != _this.pickerInput.value) {
+                if (q != this.pickerInput.value) {
                     return;
                 }
                 var data = JSON.parse(request.response);
-                _this.suggestions = data;
-                _this.suggestionsEl.innerText = "";
+                this.suggestions = data;
+                this.suggestionsEl.innerText = "";
                 for (var i = 0; i < data.length; i++) {
                     var item = data[i];
-                    var el = _this.createPreview(item, false);
+                    var el = this.createPreview(item, false);
                     el.classList.add("admin_item_relation_picker_suggestion");
                     el.setAttribute("data-position", i + "");
-                    el.addEventListener("mousedown", _this.suggestionClick.bind(_this));
-                    el.addEventListener("mouseenter", _this.suggestionSelect.bind(_this));
-                    _this.suggestionsEl.appendChild(el);
+                    el.addEventListener("mousedown", this.suggestionClick.bind(this));
+                    el.addEventListener("mouseenter", this.suggestionSelect.bind(this));
+                    this.suggestionsEl.appendChild(el);
                 }
             }
             else {
@@ -1194,38 +1164,38 @@ var RelationPicker = (function () {
             }
         });
         request.send();
-    };
-    RelationPicker.prototype.suggestionClick = function () {
+    }
+    suggestionClick() {
         var selected = this.getSelected();
         if (selected >= 0) {
             this.showPreview(this.suggestions[selected]);
         }
-    };
-    RelationPicker.prototype.suggestionSelect = function (e) {
+    }
+    suggestionSelect(e) {
         var target = e.currentTarget;
         var position = parseInt(target.getAttribute("data-position"));
         this.select(position);
-    };
-    RelationPicker.prototype.getSelected = function () {
+    }
+    getSelected() {
         var selected = this.suggestionsEl.querySelector("." + this.selectedClass);
         if (!selected) {
             return -1;
         }
         return parseInt(selected.getAttribute("data-position"));
-    };
-    RelationPicker.prototype.unselect = function () {
+    }
+    unselect() {
         var selected = this.suggestionsEl.querySelector("." + this.selectedClass);
         if (!selected) {
             return -1;
         }
         selected.classList.remove(this.selectedClass);
         return parseInt(selected.getAttribute("data-position"));
-    };
-    RelationPicker.prototype.select = function (i) {
+    }
+    select(i) {
         this.unselect();
         this.suggestionsEl.querySelectorAll(".admin_preview")[i].classList.add(this.selectedClass);
-    };
-    RelationPicker.prototype.suggestionInput = function (e) {
+    }
+    suggestionInput(e) {
         switch (e.keyCode) {
             case 13:
                 this.suggestionClick();
@@ -1255,8 +1225,8 @@ var RelationPicker = (function () {
                 e.preventDefault();
                 return false;
         }
-    };
-    RelationPicker.prototype.createPreview = function (data, anchor) {
+    }
+    createPreview(data, anchor) {
         var ret = document.createElement("div");
         if (anchor) {
             ret = document.createElement("a");
@@ -1279,17 +1249,16 @@ var RelationPicker = (function () {
         right.appendChild(description);
         ret.appendChild(right);
         return ret;
-    };
-    return RelationPicker;
-}());
+    }
+}
 function bindPlacesView() {
     var els = document.querySelectorAll(".admin_item_view_place");
     for (var i = 0; i < els.length; i++) {
         new PlacesView(els[i]);
     }
 }
-var PlacesView = (function () {
-    function PlacesView(el) {
+class PlacesView {
+    constructor(el) {
         var val = el.getAttribute("data-value");
         el.innerText = "";
         var coords = val.split(",");
@@ -1308,8 +1277,7 @@ var PlacesView = (function () {
             map: map
         });
     }
-    return PlacesView;
-}());
+}
 function bindPlaces() {
     bindPlacesView();
     function bindPlace(el) {
@@ -1347,7 +1315,7 @@ function bindPlaces() {
         searchInput.classList.add("input", "input-placesearch");
         var searchBox = new google.maps.places.SearchBox(searchInput);
         map.controls[google.maps.ControlPosition.LEFT_TOP].push(searchInput);
-        searchBox.addListener('places_changed', function () {
+        searchBox.addListener('places_changed', () => {
             var places = searchBox.getPlaces();
             if (places.length > 0) {
                 map.fitBounds(places[0].geometry.viewport);
@@ -1355,7 +1323,7 @@ function bindPlaces() {
                 marker.setVisible(true);
             }
         });
-        searchInput.addEventListener("keydown", function (e) {
+        searchInput.addEventListener("keydown", (e) => {
             if (e.keyCode == 13) {
                 e.preventDefault();
                 return false;
@@ -1391,33 +1359,31 @@ function bindForm() {
         new Form(els[i]);
     }
 }
-var Form = (function () {
-    function Form(el) {
-        var _this = this;
+class Form {
+    constructor(el) {
         this.dirty = false;
-        el.addEventListener("submit", function () {
-            _this.dirty = false;
+        el.addEventListener("submit", () => {
+            this.dirty = false;
         });
-        var els = el.querySelectorAll(".form_watcher");
+        let els = el.querySelectorAll(".form_watcher");
         for (var i = 0; i < els.length; i++) {
             var input = els[i];
-            input.addEventListener("input", function () {
-                _this.dirty = true;
+            input.addEventListener("input", () => {
+                this.dirty = true;
             });
-            input.addEventListener("change", function () {
-                _this.dirty = true;
+            input.addEventListener("change", () => {
+                this.dirty = true;
             });
         }
-        window.addEventListener("beforeunload", function (e) {
-            if (_this.dirty) {
+        window.addEventListener("beforeunload", (e) => {
+            if (this.dirty) {
                 var confirmationMessage = "Chcete opustit stránku bez uložení změn?";
                 e.returnValue = confirmationMessage;
                 return confirmationMessage;
             }
         });
     }
-    return Form;
-}());
+}
 function bindDatePicker() {
     var dates = document.querySelectorAll(".form_input-date");
     for (var i = 0; i < dates.length; i++) {
@@ -1425,8 +1391,8 @@ function bindDatePicker() {
         new DatePicker(dateEl);
     }
 }
-var DatePicker = (function () {
-    function DatePicker(el) {
+class DatePicker {
+    constructor(el) {
         var language = "cs";
         var i18n = {
             previousMonth: 'Previous Month',
@@ -1467,33 +1433,32 @@ var DatePicker = (function () {
             field: el,
             setDefaultDate: false,
             i18n: i18n,
-            onSelect: function (date) {
+            onSelect: (date) => {
                 el.value = pd.toString();
             },
-            toString: function (date) {
-                var day = date.getDate();
+            toString: (date) => {
+                const day = date.getDate();
                 var dayStr = "" + day;
                 if (day < 10) {
                     dayStr = "0" + dayStr;
                 }
-                var month = date.getMonth() + 1;
+                const month = date.getMonth() + 1;
                 var monthStr = "" + month;
                 if (month < 10) {
                     monthStr = "0" + monthStr;
                 }
-                var year = date.getFullYear();
-                var ret = year + "-" + monthStr + "-" + dayStr;
+                const year = date.getFullYear();
+                var ret = `${year}-${monthStr}-${dayStr}`;
                 return ret;
             }
         });
     }
-    return DatePicker;
-}());
+}
 function prettyDate(date) {
-    var day = date.getDate();
-    var month = date.getMonth() + 1;
-    var year = date.getFullYear();
-    return day + ". " + month + ". " + year;
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    return `${day}. ${month}. ${year}`;
 }
 function bindDropdowns() {
     var els = document.querySelectorAll(".admin_dropdown");
@@ -1501,11 +1466,11 @@ function bindDropdowns() {
         new Dropdown(els[i]);
     }
 }
-var Dropdown = (function () {
-    function Dropdown(el) {
+class Dropdown {
+    constructor(el) {
         this.targetEl = el.querySelector(".admin_dropdown_target");
         this.contentEl = el.querySelector(".admin_dropdown_content");
-        this.targetEl.addEventListener("mousedown", function (e) {
+        this.targetEl.addEventListener("mousedown", (e) => {
             if (document.activeElement == el) {
                 el.blur();
                 e.preventDefault();
@@ -1513,43 +1478,41 @@ var Dropdown = (function () {
             }
         });
     }
-    return Dropdown;
-}());
+}
 function bindSearch() {
     var els = document.querySelectorAll(".admin_header_search");
     for (var i = 0; i < els.length; i++) {
         new SearchForm(els[i]);
     }
 }
-var SearchForm = (function () {
-    function SearchForm(el) {
-        var _this = this;
+class SearchForm {
+    constructor(el) {
         this.searchForm = el;
         this.searchInput = el.querySelector(".admin_header_search_input");
         this.suggestionsEl = el.querySelector(".admin_header_search_suggestions");
         this.searchInput.value = document.body.getAttribute("data-search-query");
-        this.searchInput.addEventListener("input", function () {
-            _this.suggestions = [];
-            _this.dirty = true;
-            _this.lastChanged = Date.now();
+        this.searchInput.addEventListener("input", () => {
+            this.suggestions = [];
+            this.dirty = true;
+            this.lastChanged = Date.now();
             return false;
         });
-        this.searchInput.addEventListener("blur", function () {
+        this.searchInput.addEventListener("blur", () => {
         });
-        window.setInterval(function () {
-            if (_this.dirty && Date.now() - _this.lastChanged > 100) {
-                _this.loadSuggestions();
+        window.setInterval(() => {
+            if (this.dirty && Date.now() - this.lastChanged > 100) {
+                this.loadSuggestions();
             }
         }, 30);
-        this.searchInput.addEventListener("keydown", function (e) {
-            if (!_this.suggestions || _this.suggestions.length == 0) {
+        this.searchInput.addEventListener("keydown", (e) => {
+            if (!this.suggestions || this.suggestions.length == 0) {
                 return;
             }
             switch (e.keyCode) {
                 case 13:
-                    var i = _this.getSelected();
+                    var i = this.getSelected();
                     if (i >= 0) {
-                        var child = _this.suggestions[i];
+                        var child = this.suggestions[i];
                         if (child) {
                             window.location.href = child.getAttribute("href");
                         }
@@ -1558,139 +1521,135 @@ var SearchForm = (function () {
                     }
                     return false;
                 case 38:
-                    var i = _this.getSelected();
+                    var i = this.getSelected();
                     if (i < 1) {
-                        i = _this.suggestions.length - 1;
+                        i = this.suggestions.length - 1;
                     }
                     else {
                         i = i - 1;
                     }
-                    _this.setSelected(i);
+                    this.setSelected(i);
                     e.preventDefault();
                     return false;
                 case 40:
-                    var i = _this.getSelected();
+                    var i = this.getSelected();
                     if (i >= 0) {
                         i += 1;
-                        i = i % _this.suggestions.length;
+                        i = i % this.suggestions.length;
                     }
                     else {
                         i = 0;
                     }
-                    _this.setSelected(i);
+                    this.setSelected(i);
                     e.preventDefault();
                     return false;
             }
         });
     }
-    SearchForm.prototype.loadSuggestions = function () {
-        var _this = this;
+    loadSuggestions() {
         this.dirty = false;
         var suggestText = this.searchInput.value;
         var request = new XMLHttpRequest();
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
         var url = adminPrefix + "/_search_suggest" + encodeParams({ "q": this.searchInput.value });
         request.open("GET", url);
-        request.addEventListener("load", function () {
-            if (suggestText != _this.searchInput.value) {
+        request.addEventListener("load", () => {
+            if (suggestText != this.searchInput.value) {
                 return;
             }
             if (request.status == 200) {
-                _this.addSuggestions(request.response);
+                this.addSuggestions(request.response);
             }
             else {
-                _this.suggestionsEl.classList.add("hidden");
+                this.suggestionsEl.classList.add("hidden");
                 console.error("Error while loading item.");
             }
         });
         request.send();
-    };
-    SearchForm.prototype.addSuggestions = function (content) {
-        var _this = this;
+    }
+    addSuggestions(content) {
         this.suggestionsEl.innerHTML = content;
         this.suggestionsEl.classList.remove("hidden");
         this.suggestions = this.suggestionsEl.querySelectorAll(".admin_search_suggestion");
         for (var i = 0; i < this.suggestions.length; i++) {
             var suggestion = this.suggestions[i];
-            suggestion.addEventListener("touchend", function (e) {
+            suggestion.addEventListener("touchend", (e) => {
                 var el = e.currentTarget;
                 window.location.href = el.getAttribute("href");
             });
-            suggestion.addEventListener("click", function (e) {
+            suggestion.addEventListener("click", (e) => {
                 return false;
             });
-            suggestion.addEventListener("mouseenter", function (e) {
-                _this.deselect();
+            suggestion.addEventListener("mouseenter", (e) => {
+                this.deselect();
                 var el = e.currentTarget;
-                _this.setSelected(parseInt(el.getAttribute("data-position")));
+                this.setSelected(parseInt(el.getAttribute("data-position")));
             });
         }
-    };
-    SearchForm.prototype.deselect = function () {
+    }
+    deselect() {
         var el = this.suggestionsEl.querySelector(".admin_search_suggestion-selected");
         if (el) {
             el.classList.remove("admin_search_suggestion-selected");
         }
-    };
-    SearchForm.prototype.getSelected = function () {
+    }
+    getSelected() {
         var el = this.suggestionsEl.querySelector(".admin_search_suggestion-selected");
         if (el) {
             return parseInt(el.getAttribute("data-position"));
         }
         return -1;
-    };
-    SearchForm.prototype.setSelected = function (position) {
+    }
+    setSelected(position) {
         this.deselect();
         if (position >= 0) {
             var els = this.suggestionsEl.querySelectorAll(".admin_search_suggestion");
             els[position].classList.add("admin_search_suggestion-selected");
         }
-    };
-    return SearchForm;
-}());
+    }
+}
 function bindMainMenu() {
     var el = document.querySelector(".admin_layout_left");
     if (el) {
         new MainMenu(el);
     }
 }
-var MainMenu = (function () {
-    function MainMenu(leftEl) {
+class MainMenu {
+    constructor(leftEl) {
         this.leftEl = leftEl;
         this.menuEl = document.querySelector(".admin_header_container_menu");
         this.menuEl.addEventListener("click", this.menuClick.bind(this));
         this.scrollTo(this.loadFromStorage());
         this.leftEl.addEventListener("scroll", this.scrollHandler.bind(this));
     }
-    MainMenu.prototype.scrollHandler = function () {
+    scrollHandler() {
         this.saveToStorage(this.leftEl.scrollTop);
-    };
-    MainMenu.prototype.saveToStorage = function (position) {
+    }
+    saveToStorage(position) {
         window.localStorage["left_menu_position"] = position;
-    };
-    MainMenu.prototype.menuClick = function () {
+    }
+    menuClick() {
         this.leftEl.classList.toggle("admin_layout_left-visible");
-    };
-    MainMenu.prototype.loadFromStorage = function () {
+    }
+    loadFromStorage() {
         var pos = window.localStorage["left_menu_position"];
         if (pos) {
             return parseInt(pos);
         }
         return 0;
-    };
-    MainMenu.prototype.scrollTo = function (position) {
+    }
+    scrollTo(position) {
         this.leftEl.scrollTo(0, position);
-    };
-    return MainMenu;
-}());
+    }
+}
 function bindRelationList() {
     var els = document.getElementsByClassName("admin_relationlist");
     for (var i = 0; i < els.length; i++) {
         new RelationList(els[i]);
     }
 }
-var RelationList = (function () {
-    function RelationList(el) {
+class RelationList {
+    constructor(el) {
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.targetEl = el.querySelector(".admin_relationlist_target");
         this.sourceResource = el.getAttribute("data-source-resource");
@@ -1705,16 +1664,15 @@ var RelationList = (function () {
         this.moreButton.addEventListener("click", this.load.bind(this));
         this.load();
     }
-    RelationList.prototype.load = function () {
-        var _this = this;
+    load() {
         this.loadingEl.classList.remove("hidden");
         this.moreEl.classList.add("hidden");
         var request = new XMLHttpRequest();
         request.open("POST", this.adminPrefix + "/_api/relationlist", true);
-        request.addEventListener("load", function () {
-            _this.loadingEl.classList.add("hidden");
+        request.addEventListener("load", () => {
+            this.loadingEl.classList.add("hidden");
             if (request.status == 200) {
-                _this.offset += 10;
+                this.offset += 10;
                 var parentEl = document.createElement("div");
                 parentEl.innerHTML = request.response;
                 var parentAr = [];
@@ -1722,10 +1680,10 @@ var RelationList = (function () {
                     parentAr.push(parentEl.children[i]);
                 }
                 for (var i = 0; i < parentAr.length; i++) {
-                    _this.targetEl.appendChild(parentAr[i]);
+                    this.targetEl.appendChild(parentAr[i]);
                 }
-                if (_this.offset < _this.count) {
-                    _this.moreEl.classList.remove("hidden");
+                if (this.offset < this.count) {
+                    this.moreEl.classList.remove("hidden");
                 }
             }
             else {
@@ -1738,61 +1696,57 @@ var RelationList = (function () {
             TargetField: this.targetField,
             IDValue: this.idValue,
             Offset: this.offset,
-            Count: 10
+            Count: 10,
         }));
-    };
-    return RelationList;
-}());
+    }
+}
 function bindTaskMonitor() {
     var el = document.querySelector(".taskmonitorcontainer");
     if (el) {
         new TaskMonitor(el);
     }
 }
-var TaskMonitor = (function () {
-    function TaskMonitor(el) {
+class TaskMonitor {
+    constructor(el) {
         this.el = el;
         window.setInterval(this.load.bind(this), 1000);
     }
-    TaskMonitor.prototype.load = function () {
-        var _this = this;
+    load() {
         var request = new XMLHttpRequest();
         request.open("GET", "/admin/_tasks/running", true);
-        request.addEventListener("load", function () {
-            _this.el.innerHTML = "";
+        request.addEventListener("load", () => {
+            this.el.innerHTML = "";
             if (request.status == 200) {
-                _this.el.innerHTML = request.response;
+                this.el.innerHTML = request.response;
             }
             else {
                 console.error("error while loading list");
             }
         });
         request.send();
-    };
-    return TaskMonitor;
-}());
+    }
+}
 function bindNotifications() {
     new NotificationCenter(document.querySelector(".notification_center"));
 }
-var NotificationCenter = (function () {
-    function NotificationCenter(el) {
+class NotificationCenter {
+    constructor(el) {
         this.el = el;
         this.notifications = Array();
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.loadNotifications();
     }
-    NotificationCenter.prototype.loadNotifications = function () {
-        var _this = this;
+    loadNotifications() {
         return;
         var request = new XMLHttpRequest();
         request.open("GET", this.adminPrefix + "/_api/notifications", true);
-        request.addEventListener("load", function () {
+        request.addEventListener("load", () => {
             if (request.status == 200) {
                 var notifications = JSON.parse(request.response);
-                notifications.Views.forEach(function (item) {
-                    var notification = _this.createNotification(item);
-                    _this.notifications.push(notification);
-                    _this.el.appendChild(notification.el);
+                notifications.Views.forEach((item) => {
+                    var notification = this.createNotification(item);
+                    this.notifications.push(notification);
+                    this.el.appendChild(notification.el);
                 });
             }
             else {
@@ -1800,33 +1754,39 @@ var NotificationCenter = (function () {
             }
         });
         request.send();
-    };
-    NotificationCenter.prototype.createNotification = function (data) {
+    }
+    createNotification(data) {
         return new NotificationItem(data);
-    };
-    return NotificationCenter;
-}());
-var NotificationItem = (function () {
-    function NotificationItem(data) {
+    }
+}
+class NotificationItem {
+    constructor(data) {
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.createElement(data);
     }
-    NotificationItem.prototype.createElement = function (data) {
+    createElement(data) {
         var ret;
         ret = document.createElement("div");
-        ret.innerHTML = "\n            <div class=\"notification\">\n                <div class=\"notification_close\"></div>\n                <div class=\"notification_left\"></div>\n                <div class=\"notification_right\">\n                    <div class=\"notification_name\">" + e(data.Name) + "</div>\n                </div>\n            </div>        \n        ";
+        ret.innerHTML = `
+            <div class="notification">
+                <div class="notification_close"></div>
+                <div class="notification_left"></div>
+                <div class="notification_right">
+                    <div class="notification_name">${e(data.Name)}</div>
+                </div>
+            </div>        
+        `;
         this.el = ret.children[0];
         this.el.querySelector(".notification_close").addEventListener("click", this.closeNotification.bind(this));
-    };
-    NotificationItem.prototype.closeNotification = function () {
+    }
+    closeNotification() {
         this.el.classList.add("notification-closed");
-        fetch(this.adminPrefix + "/_api/notification/" + this.uuid, { method: "DELETE" }).then(console.log).then(function (e) {
+        fetch(this.adminPrefix + "/_api/notification/" + this.uuid, { method: "DELETE" }).then(console.log).then((e) => {
             console.log(e);
         });
-    };
-    return NotificationItem;
-}());
-document.addEventListener("DOMContentLoaded", function () {
+    }
+}
+document.addEventListener("DOMContentLoaded", () => {
     bindStats();
     bindMarkdowns();
     bindTimestamps();
@@ -1849,7 +1809,7 @@ function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");
     for (var i = 0; i < messages.length; i++) {
         var message = messages[i];
-        message.addEventListener("click", function (e) {
+        message.addEventListener("click", (e) => {
             var target = e.target;
             if (target.classList.contains("flash_message_close")) {
                 var current = e.currentTarget;
@@ -1861,7 +1821,7 @@ function bindFlashMessages() {
 function bindScrolled() {
     var lastScrollPosition = 0;
     var header = document.querySelector(".admin_header");
-    document.addEventListener("scroll", function (event) {
+    document.addEventListener("scroll", (event) => {
         if (document.body.clientWidth < 1100) {
             return;
         }

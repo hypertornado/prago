@@ -160,7 +160,7 @@ func actionCreate(permission Permission) Action {
 				if err != nil {
 					resource.App.Log().Println(fmt.Errorf("%s", err))
 				}
-				resource.App.search.Flush()
+				resource.App.search.flush()
 			}
 
 			if resource.ActivityLog {
@@ -276,7 +276,7 @@ func actionUpdate(permission Permission) Action {
 				if err != nil {
 					resource.App.Log().Println(fmt.Errorf("%s", err))
 				}
-				resource.App.search.Flush()
+				resource.App.search.flush()
 			}
 
 			if resource.ActivityLog {
@@ -378,7 +378,7 @@ func actionDoDelete(permission Permission) Action {
 				if err != nil {
 					resource.App.Log().Println(fmt.Errorf("%s", err))
 				}
-				resource.App.search.Flush()
+				resource.App.search.flush()
 			}
 
 			if resource.ActivityLog {
