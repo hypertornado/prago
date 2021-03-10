@@ -142,7 +142,7 @@ func actionCreate(permission Permission) Action {
 		Permission: permission,
 		URL:        "",
 		Handler: func(resource Resource, request Request, user User) {
-			ValidateCSRF(request)
+			validateCSRF(request)
 			var item interface{}
 			resource.newItem(&item)
 
@@ -247,7 +247,7 @@ func actionUpdate(permission Permission) Action {
 		URL:        "edit",
 		Method:     "post",
 		Handler: func(resource Resource, request Request, user User) {
-			ValidateCSRF(request)
+			validateCSRF(request)
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
@@ -338,7 +338,7 @@ func actionDelete(permission Permission) Action {
 		"admin_delete",
 		func(resource Resource, request Request, user User) interface{} {
 			ret := map[string]interface{}{}
-			form := NewForm()
+			form := newForm()
 			form.Method = "POST"
 			form.AddCSRFToken(request)
 			form.AddDeleteSubmit("send", messages.Messages.Get(user.Locale, "admin_delete"))
@@ -364,7 +364,7 @@ func actionDoDelete(permission Permission) Action {
 		URL:        "delete",
 		Method:     "post",
 		Handler: func(resource Resource, request Request, user User) {
-			ValidateCSRF(request)
+			validateCSRF(request)
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 

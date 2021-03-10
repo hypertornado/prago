@@ -35,8 +35,8 @@ func initUserLogin(resource *Resource) {
 			},
 		})
 
-	loginForm := func(locale string) *Form {
-		form := NewForm()
+	loginForm := func(locale string) *form {
+		form := newForm()
 		form.Method = "POST"
 		form.AddEmailInput("email", messages.Messages.Get(locale, "admin_email")).Focused = true
 		form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_password"))
@@ -44,7 +44,7 @@ func initUserLogin(resource *Resource) {
 		return form
 	}
 
-	renderLogin := func(request Request, form *Form, locale string) {
+	renderLogin := func(request Request, form *form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
 			App:          resource.App,
 			Navigation:   resource.App.getNologinNavigation(locale, "login"),
@@ -100,7 +100,7 @@ func initUserLogin(resource *Resource) {
 	})
 
 	resource.App.AdminController.Get(resource.App.GetAdminURL("logout"), func(request Request) {
-		ValidateCSRF(request)
+		validateCSRF(request)
 		session := request.GetData("session").(*sessions.Session)
 		delete(session.Values, "user_id")
 		session.AddFlash(messages.Messages.Get(getLocale(request), "admin_logout_ok"))

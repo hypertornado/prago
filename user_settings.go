@@ -4,8 +4,8 @@ import "github.com/hypertornado/prago/messages"
 
 func initUserSettings(resource *Resource) {
 
-	settingsForm := func(user User) *Form {
-		form := NewForm()
+	settingsForm := func(user User) *form {
+		form := newForm()
 		form.Method = "POST"
 		form.Action = "settings"
 
@@ -33,7 +33,7 @@ func initUserSettings(resource *Resource) {
 	})
 
 	resource.App.AdminController.Post(resource.GetURL("settings"), func(request Request) {
-		ValidateCSRF(request)
+		validateCSRF(request)
 		user := request.GetUser()
 		form := settingsForm(user).AddCSRFToken(request)
 		if form.Validate() {
@@ -52,18 +52,18 @@ func initUserSettings(resource *Resource) {
 		})
 	})
 
-	changePasswordForm := func(request Request) *Form {
+	changePasswordForm := func(request Request) *form {
 		request.SetData("admin_navigation_settings_selected", true)
 		user := request.GetUser()
 		locale := getLocale(request)
-		oldValidator := NewValidator(func(field *FormItem) bool {
+		oldValidator := newValidator(func(field *formItem) bool {
 			if !user.isPassword(field.Value) {
 				return false
 			}
 			return true
 		}, messages.Messages.Get(locale, "admin_password_wrong"))
 
-		form := NewForm()
+		form := newForm()
 		form.Method = "POST"
 		form.AddPasswordInput("oldpassword",
 			messages.Messages.Get(locale, "admin_password_old"),
@@ -71,13 +71,13 @@ func initUserSettings(resource *Resource) {
 		)
 		form.AddPasswordInput("newpassword",
 			messages.Messages.Get(locale, "admin_password_new"),
-			MinLengthValidator(messages.Messages.Get(locale, "admin_password_length"), 7),
+			minLengthValidator(messages.Messages.Get(locale, "admin_password_length"), 7),
 		)
 		form.AddSubmit("_submit", messages.Messages.Get(locale, "admin_save"))
 		return form
 	}
 
-	renderPasswordForm := func(request Request, form *Form) {
+	renderPasswordForm := func(request Request, form *form) {
 		user := request.GetUser()
 		renderNavigationPage(request, adminNavigationPage{
 			Navigation:   resource.App.getSettingsNavigation(user, "password"),

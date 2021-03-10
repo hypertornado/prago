@@ -53,7 +53,7 @@ func (app *App) initAdminActions() {
 		}
 
 		randomness := app.Config.GetString("random")
-		request.SetData("_csrfToken", user.CSRFToken(randomness))
+		request.SetData("_csrfToken", user.csrfToken(randomness))
 		request.SetData("currentuser", &user)
 		request.SetData("locale", user.Locale)
 		request.SetData("gravatar", user.gravatarURL())

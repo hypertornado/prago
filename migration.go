@@ -12,7 +12,7 @@ func (app *App) initMigrationCommand() {
 			app.Log().Println("Migrating database")
 			err := app.migrate(true)
 			if err == nil {
-				app.Log().Println("Migrate done")
+				app.Log().Println("Migration done")
 			} else {
 				app.Log().Fatal(err)
 			}

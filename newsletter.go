@@ -18,10 +18,8 @@ import (
 	"github.com/hypertornado/prago/utils"
 )
 
-var (
-	//ErrEmailAlreadyInList is returned when user is already in newsletter list
-	ErrEmailAlreadyInList = errors.New("email already in newsletter list")
-)
+//ErrEmailAlreadyInList is returned when user is already in newsletter list
+var ErrEmailAlreadyInList = errors.New("email already in newsletter list")
 
 //NewsletterMiddleware represents users newsletter
 type NewsletterMiddleware struct {

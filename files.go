@@ -26,7 +26,7 @@ func (app *App) thumb(ids string) string {
 	for _, v := range strings.Split(ids, ",") {
 		var image File
 		err := app.Query().WhereIs("uid", v).Get(&image)
-		if err == nil && image.IsImage() {
+		if err == nil && image.isImage() {
 			return image.GetSmall()
 		}
 	}
@@ -214,7 +214,7 @@ func initFilesResource(resource *Resource) {
 
 	//TODO: authorize
 	resource.ResourceController.Post(resource.GetURL(""), func(request Request) {
-		ValidateCSRF(request)
+		validateCSRF(request)
 
 		multipartFiles := request.Request().MultipartForm.File["uid"]
 		if len(multipartFiles) != 1 {
@@ -324,6 +324,10 @@ func (f *File) GetMetadataPath() string {
 
 //IsImage detects if file is image
 func (f *File) IsImage() bool {
+	return f.isImage()
+}
+
+func (f *File) isImage() bool {
 	if strings.HasSuffix(f.Name, ".jpg") || strings.HasSuffix(f.Name, ".jpeg") || strings.HasSuffix(f.Name, ".png") {
 		return true
 	}

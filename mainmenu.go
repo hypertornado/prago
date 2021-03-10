@@ -141,7 +141,7 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 			},
 			{
 				Name: messages.Messages.Get(user.Locale, "admin_log_out"),
-				URL:  app.GetAdminURL("logout") + "?_csrfToken=" + user.CSRFToken(randomness),
+				URL:  app.GetAdminURL("logout") + "?_csrfToken=" + user.csrfToken(randomness),
 			},
 		},
 	}

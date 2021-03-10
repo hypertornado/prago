@@ -53,7 +53,7 @@ func (tm *taskManager) getTaskMonitor(user User) (ret *taskMonitor) {
 				var u url.Values = map[string][]string{}
 				u.Add("uuid", v.uuid)
 				randomness := tm.app.Config.GetString("random")
-				u.Add("csrf", user.CSRFToken(randomness))
+				u.Add("csrf", user.csrfToken(randomness))
 				actions = append(actions, taskActivityViewAction{"◼", "_tasks/stoptask?" + u.Encode()})
 			}
 
@@ -61,7 +61,7 @@ func (tm *taskManager) getTaskMonitor(user User) (ret *taskMonitor) {
 				var u url.Values = map[string][]string{}
 				u.Add("uuid", v.uuid)
 				randomness := tm.app.Config.GetString("random")
-				u.Add("csrf", user.CSRFToken(randomness))
+				u.Add("csrf", user.csrfToken(randomness))
 				actions = append(actions, taskActivityViewAction{"✘", "_tasks/deletetask?" + u.Encode()})
 			}
 

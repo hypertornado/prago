@@ -30,7 +30,6 @@ type templateFS struct {
 
 func (app *App) initTemplates() {
 	app.templates = &templates{
-		//templates:      template.New(""),
 		funcMap:        map[string]interface{}{},
 		templatesMutex: &sync.RWMutex{},
 		fileSystems:    []*templateFS{},
@@ -70,7 +69,7 @@ func (app *App) initTemplates() {
 		for _, v := range strings.Split(ids, ",") {
 			var image File
 			err := app.Query().WhereIs("uid", v).Get(&image)
-			if err == nil && image.IsImage() {
+			if err == nil && image.isImage() {
 				return image.GetLarge()
 			}
 		}

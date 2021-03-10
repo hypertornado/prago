@@ -35,15 +35,15 @@ func initUserRegistration(resource *Resource) {
 		request.Redirect(resource.App.GetAdminURL("user/login"))
 	})
 
-	newUserForm := func(locale string) *Form {
-		form := NewForm()
+	newUserForm := func(locale string) *form {
+		form := newForm()
 		form.Method = "POST"
 		form.AddTextInput("name", messages.Messages.Get(locale, "Name"),
-			NonEmptyValidator(messages.Messages.Get(locale, "admin_user_name_not_empty")),
+			nonEmptyValidator(messages.Messages.Get(locale, "admin_user_name_not_empty")),
 		)
 		form.AddEmailInput("email", messages.Messages.Get(locale, "admin_email"),
-			EmailValidator(messages.Messages.Get(locale, "admin_email_not_valid")),
-			NewValidator(func(field *FormItem) bool {
+			emailValidator(messages.Messages.Get(locale, "admin_email_not_valid")),
+			newValidator(func(field *formItem) bool {
 				if len(field.Errors) != 0 {
 					return true
 				}
@@ -56,14 +56,14 @@ func initUserRegistration(resource *Resource) {
 			}, messages.Messages.Get(locale, "admin_email_already_registered")),
 		)
 		form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_register_password"),
-			MinLengthValidator("", 7),
+			minLengthValidator("", 7),
 		)
-		form.AddCAPTCHAInput("captcha", "4 + 5 =", ValueValidator("9", "Špatná hodnota"))
+		form.AddCAPTCHAInput("captcha", "4 + 5 =", valueValidator("9", "Špatná hodnota"))
 		form.AddSubmit("send", messages.Messages.Get(locale, "admin_register"))
 		return form
 	}
 
-	renderRegistration := func(request Request, form *Form, locale string) {
+	renderRegistration := func(request Request, form *form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
 			App:          resource.App,
 			Navigation:   resource.App.getNologinNavigation(locale, "registration"),

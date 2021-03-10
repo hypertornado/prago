@@ -7,7 +7,7 @@ import (
 )
 
 //CSRFToken generates csrf token for user
-func (user *User) CSRFToken(randomness string) string {
+func (user *User) csrfToken(randomness string) string {
 	if len(randomness) <= 0 {
 		panic("randomness too short")
 	}
@@ -18,19 +18,19 @@ func (user *User) CSRFToken(randomness string) string {
 }
 
 //CSRFToken returns csrf token from request
-func CSRFToken(request Request) string {
+func csrfToken(request Request) string {
 	return request.GetData("_csrfToken").(string)
 }
 
 //AddCSRFToken adds csrf token to form
-func (form *Form) AddCSRFToken(request Request) *Form {
-	form.CSRFToken = CSRFToken(request)
+func (form *form) AddCSRFToken(request Request) *form {
+	form.CSRFToken = csrfToken(request)
 	return form
 }
 
 //ValidateCSRF validates csrf token for request
-func ValidateCSRF(request Request) {
-	token := CSRFToken(request)
+func validateCSRF(request Request) {
+	token := csrfToken(request)
 	if len(token) == 0 {
 		panic("token not set")
 	}
