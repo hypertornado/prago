@@ -71,7 +71,8 @@ func (q *listQuery) where(data ...interface{}) error {
 			return ErrWrongWhereFormat
 		}
 		whereString = first
-		whereParams = data[1:len(data)]
+		//whereParams = data[1:len(data)]
+		whereParams = data[1:]
 	}
 
 	if len(q.whereString) > 0 {
@@ -167,7 +168,7 @@ func (resource Resource) saveItem(db dbIface, tableName string, item interface{}
 		return err
 	}
 	if affected == 0 {
-		return errors.New("Zero rows affected by save operation.")
+		return errors.New("Zero rows affected by save operation")
 	}
 	return nil
 }

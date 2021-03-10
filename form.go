@@ -131,7 +131,7 @@ func (f *Form) AddFileInput(name, description string, validators ...ItemValidato
 	return f.addInput(name, description, "admin_item_file", validators)
 }
 
-//AddCAPTCHA to form
+//AddCAPTCHAInput to form
 func (f *Form) AddCAPTCHAInput(name, description string, validators ...ItemValidator) *FormItem {
 	return f.addInput(name, description, "admin_item_captcha", validators)
 }
@@ -179,7 +179,7 @@ func (f *FormItem) AddError(err string) {
 	f.form.Valid = false
 }
 
-//AddError to form
+//AddUUID to form
 func (f *FormItem) AddUUID() {
 	f.UUID = "id-" + utils.RandomString(5)
 }
@@ -213,7 +213,7 @@ func EmailValidator(Error string) ItemValidator {
 	}, Error)
 }
 
-//EmailValidator for validation of email inputs
+//ValueValidator for validation field value
 func ValueValidator(ExpectedValue, Error string) ItemValidator {
 	return NewValidator(func(field *FormItem) bool {
 		if field.Value != ExpectedValue {

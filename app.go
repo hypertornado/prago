@@ -12,6 +12,8 @@ import (
 	"github.com/hypertornado/prago/utils"
 )
 
+//TODO: stats of sql connection
+
 //App is main struct of prago application
 type App struct {
 	codeName        string

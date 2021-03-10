@@ -321,10 +321,14 @@ func (app *App) initSearchInner() {
 
 	adminSearch, err := newAdminSearch(app)
 	if err != nil {
-		app.Log().Println("admin search not initialized: " + err.Error())
+		if app.DevelopmentMode {
+			app.Log().Println("admin search not initialized: " + err.Error())
+		}
 		return
 	}
-	app.Log().Println("admin search initialized")
+	if app.DevelopmentMode {
+		app.Log().Println("admin search initialized")
+	}
 	app.search = adminSearch
 
 	go func() {

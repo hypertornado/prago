@@ -37,6 +37,18 @@ func (app *App) initSystemStats() {
 
 			configStats := app.Config.Export()
 
+			databaseStats := [][2]string{}
+			dbStats := app.db.Stats()
+			databaseStats = append(databaseStats, [2]string{"MaxOpenConnections", fmt.Sprintf("%d", dbStats.MaxOpenConnections)})
+			databaseStats = append(databaseStats, [2]string{"OpenConnections", fmt.Sprintf("%d", dbStats.OpenConnections)})
+			databaseStats = append(databaseStats, [2]string{"InUse", fmt.Sprintf("%d", dbStats.InUse)})
+			databaseStats = append(databaseStats, [2]string{"Idle", fmt.Sprintf("%d", dbStats.Idle)})
+			databaseStats = append(databaseStats, [2]string{"WaitCount", fmt.Sprintf("%d", dbStats.WaitCount)})
+			databaseStats = append(databaseStats, [2]string{"WaitDuration", fmt.Sprintf("%v", dbStats.WaitDuration)})
+			databaseStats = append(databaseStats, [2]string{"MaxIdleClosed", fmt.Sprintf("%d", dbStats.MaxIdleClosed)})
+			databaseStats = append(databaseStats, [2]string{"MaxIdleTimeClosed", fmt.Sprintf("%d", dbStats.MaxIdleTimeClosed)})
+			databaseStats = append(databaseStats, [2]string{"MaxLifetimeClosed", fmt.Sprintf("%d", dbStats.MaxLifetimeClosed)})
+
 			osStats := [][2]string{}
 			osStats = append(osStats, [2]string{"EGID", fmt.Sprintf("%d", os.Getegid())})
 			osStats = append(osStats, [2]string{"EUID", fmt.Sprintf("%d", os.Geteuid())})
@@ -89,6 +101,7 @@ func (app *App) initSystemStats() {
 			ret["roles"] = app.roles
 			ret["stats"] = stats
 			ret["configStats"] = configStats
+			ret["databaseStats"] = databaseStats
 			ret["osStats"] = osStats
 			ret["memStats"] = memStats
 			ret["environmentStats"] = environmentStats

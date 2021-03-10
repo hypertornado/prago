@@ -95,7 +95,7 @@ func (q Query) Get(item interface{}) error {
 
 	resource, ok := q.app.resourceMap[typ]
 	if !ok {
-		return fmt.Errorf("Can't find resource with type %s.", typ)
+		return fmt.Errorf("Can't find resource with type %s", typ)
 	}
 
 	var newItem interface{}
