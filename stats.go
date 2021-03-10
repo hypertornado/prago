@@ -14,23 +14,23 @@ import (
 	"github.com/hypertornado/prago/utils"
 )
 
-type ListStats struct {
-	Sections []ListStatsSection
+type listStats struct {
+	Sections []listStatsSection
 }
 
-type ListStatsSection struct {
+type listStatsSection struct {
 	Name  string
-	Table []ListStatsRow
+	Table []listStatsRow
 }
 
-type ListStatsRow struct {
+type listStatsRow struct {
 	Name        string
 	Image       string
 	URL         string
-	Description ListStatsDescription
+	Description listStatsDescription
 }
 
-type ListStatsDescription struct {
+type listStatsDescription struct {
 	Count      string
 	PercentCSS template.HTML
 	Percent    string
@@ -43,17 +43,17 @@ func statsCountPercent(count, total int64) template.HTML {
 	return template.HTML(fmt.Sprintf("%.2f%%", (100*float64(count))/float64(total)))
 }
 
-func statsCountDescription(count, total int64) ListStatsDescription {
+func statsCountDescription(count, total int64) listStatsDescription {
 	percentStr := statsCountPercent(count, total)
-	return ListStatsDescription{
+	return listStatsDescription{
 		Count:      utils.HumanizeNumber(count),
 		PercentCSS: percentStr,
 		Percent:    string(percentStr),
 	}
 }
 
-func getListStats(resource *Resource, user User, params url.Values) *ListStats {
-	ret := &ListStats{}
+func getListStats(resource *Resource, user User, params url.Values) *listStats {
+	ret := &listStats{}
 
 	columnsStr := params.Get("_columns")
 	if columnsStr == "" {
@@ -89,7 +89,7 @@ func getListStats(resource *Resource, user User, params url.Values) *ListStats {
 			continue
 		}
 
-		ret.Sections = append(ret.Sections, ListStatsSection{
+		ret.Sections = append(ret.Sections, listStatsSection{
 			Name:  field.HumanName(user.Locale),
 			Table: table,
 		})
@@ -98,14 +98,14 @@ func getListStats(resource *Resource, user User, params url.Values) *ListStats {
 	return ret
 }
 
-func (resource *Resource) getListStatsDateSections(field *Field, user User, params url.Values, total, limit int64) (ret []ListStatsSection) {
+func (resource *Resource) getListStatsDateSections(field *Field, user User, params url.Values, total, limit int64) (ret []listStatsSection) {
 	ret = append(ret, resource.getListStatsDateSectionDay(field, user, params, total, limit))
 	ret = append(ret, resource.getListStatsDateSectionMonth(field, user, params, total, limit))
 	ret = append(ret, resource.getListStatsDateSectionYear(field, user, params, total, limit))
 	return
 }
 
-func (resource *Resource) getListStatsDateSectionDay(field *Field, user User, params url.Values, total, limit int64) (ret ListStatsSection) {
+func (resource *Resource) getListStatsDateSectionDay(field *Field, user User, params url.Values, total, limit int64) (ret listStatsSection) {
 	query := resource.addFilterParamsToQuery(resource.App.Query(), params)
 	whereParams := query.query.whereParams
 	q := fmt.Sprintf("SELECT DAY(%s), MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY DAY(%s), MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
@@ -123,7 +123,7 @@ func (resource *Resource) getListStatsDateSectionDay(field *Field, user User, pa
 	if err != nil {
 		panic(err)
 	}
-	ret = ListStatsSection{
+	ret = listStatsSection{
 		Name: fmt.Sprintf("%s – dny", field.HumanName(user.Locale)),
 	}
 	var counted int64
@@ -135,13 +135,13 @@ func (resource *Resource) getListStatsDateSectionDay(field *Field, user User, pa
 		rows.Scan(&day, &month, &year, &count)
 		counted += count
 
-		ret.Table = append(ret.Table, ListStatsRow{
+		ret.Table = append(ret.Table, listStatsRow{
 			Name:        fmt.Sprintf("%d. %d. %d", day, month, year),
 			Description: statsCountDescription(count, total),
 		})
 	}
 	if counted < total {
-		ret.Table = append(ret.Table, ListStatsRow{
+		ret.Table = append(ret.Table, listStatsRow{
 			Name:        "ostatní",
 			Description: statsCountDescription(total-counted, total),
 		})
@@ -149,7 +149,7 @@ func (resource *Resource) getListStatsDateSectionDay(field *Field, user User, pa
 	return
 }
 
-func (resource *Resource) getListStatsDateSectionMonth(field *Field, user User, params url.Values, total, limit int64) (ret ListStatsSection) {
+func (resource *Resource) getListStatsDateSectionMonth(field *Field, user User, params url.Values, total, limit int64) (ret listStatsSection) {
 	query := resource.addFilterParamsToQuery(resource.App.Query(), params)
 	whereParams := query.query.whereParams
 	q := fmt.Sprintf("SELECT MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
@@ -165,7 +165,7 @@ func (resource *Resource) getListStatsDateSectionMonth(field *Field, user User, 
 	if err != nil {
 		panic(err)
 	}
-	ret = ListStatsSection{
+	ret = listStatsSection{
 		Name: fmt.Sprintf("%s – měsíce", field.HumanName(user.Locale)),
 	}
 	var counted int64
@@ -176,13 +176,13 @@ func (resource *Resource) getListStatsDateSectionMonth(field *Field, user User, 
 		rows.Scan(&month, &year, &count)
 		counted += count
 
-		ret.Table = append(ret.Table, ListStatsRow{
+		ret.Table = append(ret.Table, listStatsRow{
 			Name:        fmt.Sprintf("%s %d", utils.MonthName(month, user.Locale), year),
 			Description: statsCountDescription(count, total),
 		})
 	}
 	if counted < total {
-		ret.Table = append(ret.Table, ListStatsRow{
+		ret.Table = append(ret.Table, listStatsRow{
 			Name:        "ostatní",
 			Description: statsCountDescription(total-counted, total),
 		})
@@ -190,7 +190,7 @@ func (resource *Resource) getListStatsDateSectionMonth(field *Field, user User, 
 	return
 }
 
-func (resource *Resource) getListStatsDateSectionYear(field *Field, user User, params url.Values, total, limit int64) (ret ListStatsSection) {
+func (resource *Resource) getListStatsDateSectionYear(field *Field, user User, params url.Values, total, limit int64) (ret listStatsSection) {
 	query := resource.addFilterParamsToQuery(resource.App.Query(), params)
 	whereParams := query.query.whereParams
 	q := fmt.Sprintf("SELECT YEAR(%s), COUNT(id) FROM %s %s GROUP BY YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
@@ -204,7 +204,7 @@ func (resource *Resource) getListStatsDateSectionYear(field *Field, user User, p
 	if err != nil {
 		panic(err)
 	}
-	ret = ListStatsSection{
+	ret = listStatsSection{
 		Name: fmt.Sprintf("%s – roky", field.HumanName(user.Locale)),
 	}
 	var counted int64
@@ -214,13 +214,13 @@ func (resource *Resource) getListStatsDateSectionYear(field *Field, user User, p
 		rows.Scan(&year, &count)
 		counted += count
 
-		ret.Table = append(ret.Table, ListStatsRow{
+		ret.Table = append(ret.Table, listStatsRow{
 			Name:        fmt.Sprintf("%d", year),
 			Description: statsCountDescription(count, total),
 		})
 	}
 	if counted < total {
-		ret.Table = append(ret.Table, ListStatsRow{
+		ret.Table = append(ret.Table, listStatsRow{
 			Name:        "ostatní",
 			Description: statsCountDescription(total-counted, total),
 		})
@@ -228,7 +228,7 @@ func (resource *Resource) getListStatsDateSectionYear(field *Field, user User, p
 	return
 }
 
-func (resource *Resource) getListStatsTable(field *Field, user User, params url.Values, total, limit int64) (table []ListStatsRow) {
+func (resource *Resource) getListStatsTable(field *Field, user User, params url.Values, total, limit int64) (table []listStatsRow) {
 
 	query := resource.addFilterParamsToQuery(resource.App.Query(), params)
 
@@ -250,7 +250,7 @@ func (resource *Resource) getListStatsTable(field *Field, user User, params url.
 			rows.Scan(&v, &count)
 			counted += count
 
-			table = append(table, ListStatsRow{
+			table = append(table, listStatsRow{
 				Name:        v,
 				Description: statsCountDescription(count, total),
 			})
@@ -265,7 +265,7 @@ func (resource *Resource) getListStatsTable(field *Field, user User, params url.
 				rows.Scan(&v, &count)
 				counted += count
 
-				row := ListStatsRow{
+				row := listStatsRow{
 					Name:        fmt.Sprintf("#%d", v),
 					Description: statsCountDescription(count, total),
 				}
@@ -312,18 +312,18 @@ func (resource *Resource) getListStatsTable(field *Field, user User, params url.
 
 		}
 
-		table = append(table, ListStatsRow{
+		table = append(table, listStatsRow{
 			Name:        "ano",
 			Description: statsCountDescription(countTrue, total),
 		})
-		table = append(table, ListStatsRow{
+		table = append(table, listStatsRow{
 			Name:        "ne",
 			Description: statsCountDescription(countFalse, total),
 		})
 	}
 
 	if counted < total && len(table) > 0 {
-		table = append(table, ListStatsRow{
+		table = append(table, listStatsRow{
 			Name:        "ostatní",
 			Description: statsCountDescription(total-counted, total),
 		})
@@ -331,7 +331,7 @@ func (resource *Resource) getListStatsTable(field *Field, user User, params url.
 	return
 }
 
-func (resource *Resource) getListStatsTableInt(field *Field, user User, params url.Values, total int64) (table []ListStatsRow) {
+func (resource *Resource) getListStatsTableInt(field *Field, user User, params url.Values, total int64) (table []listStatsRow) {
 	if total <= 0 {
 		return
 	}
@@ -363,16 +363,16 @@ func (resource *Resource) getListStatsTableInt(field *Field, user User, params u
 		rows.Scan(&max, &min, &avg, &sum)
 	}
 
-	table = append(table, ListStatsRow{
+	table = append(table, listStatsRow{
 		Name: "minimum",
-		Description: ListStatsDescription{
+		Description: listStatsDescription{
 			Count: utils.HumanizeFloat(min, user.Locale),
 		},
 	})
 
-	table = append(table, ListStatsRow{
+	table = append(table, listStatsRow{
 		Name: "průměr",
-		Description: ListStatsDescription{
+		Description: listStatsDescription{
 			Count: utils.HumanizeFloat(avg, user.Locale),
 		},
 	})
@@ -392,21 +392,21 @@ func (resource *Resource) getListStatsTableInt(field *Field, user User, params u
 	for rows.Next() {
 		rows.Scan(&median)
 	}
-	table = append(table, ListStatsRow{
+	table = append(table, listStatsRow{
 		Name: "medián",
-		Description: ListStatsDescription{
+		Description: listStatsDescription{
 			Count: utils.HumanizeFloat(median, user.Locale),
 		},
 	})
-	table = append(table, ListStatsRow{
+	table = append(table, listStatsRow{
 		Name: "maximum",
-		Description: ListStatsDescription{
+		Description: listStatsDescription{
 			Count: utils.HumanizeFloat(max, user.Locale),
 		},
 	})
-	table = append(table, ListStatsRow{
+	table = append(table, listStatsRow{
 		Name: "součet",
-		Description: ListStatsDescription{
+		Description: listStatsDescription{
 			Count: utils.HumanizeFloat(sum, user.Locale),
 		},
 	})
@@ -414,11 +414,11 @@ func (resource *Resource) getListStatsTableInt(field *Field, user User, params u
 	return table
 }
 
-func getStatsLimitSelectData(locale string) (ret []ListPaginationData) {
-	var ints []int64 = []int64{5, 10, 20, 100, 200, 500, 1000, 2000, 5000, 10000}
+func getStatsLimitSelectData(locale string) (ret []listPaginationData) {
+	var ints = []int64{5, 10, 20, 100, 200, 500, 1000, 2000, 5000, 10000}
 
 	for _, v := range ints {
-		ret = append(ret, ListPaginationData{
+		ret = append(ret, listPaginationData{
 			Name:  messages.Messages.ItemsCount(v, locale),
 			Value: v,
 		})

@@ -83,7 +83,7 @@ func (app *App) initTemplates() {
 	return
 }
 
-//LoadTemplateFromFS loads app's html templates from file system
+//AddTemplates loads app's html templates from file system
 func (app *App) AddTemplates(fsys fs.FS, patterns ...string) error {
 	app.templates.templatesMutex.Lock()
 	defer app.templates.templatesMutex.Unlock()

@@ -8,6 +8,7 @@ import (
 	"github.com/hypertornado/prago/messages"
 )
 
+//ActivityLog logs all user admin activity
 type ActivityLog struct {
 	ID            int64
 	ResourceName  string    `prago-preview:"true"`
@@ -34,6 +35,7 @@ type historyItemView struct {
 	CreatedAt   string
 }
 
+//ListenActivityLog listens to all changes in app's administration
 func (app *App) ListenActivityLog(handler func(logItem ActivityLog)) {
 	app.activityListeners = append(app.activityListeners, handler)
 }

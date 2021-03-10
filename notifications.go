@@ -6,6 +6,7 @@ import (
 	"github.com/hypertornado/prago/utils"
 )
 
+//Notification represents user notification
 type Notification struct {
 	ID              int64
 	UUID            string `prago-type:"text"`
@@ -23,9 +24,7 @@ func initNotificationResource(resource *Resource) {
 	resource.App.AdminController.Get(resource.App.GetAdminURL("_api/notifications"), func(request Request) {
 		user := request.GetUser()
 		notifications, err := resource.App.getNotificationViews(user)
-		if err != nil {
-			panic(err)
-		}
+		must(err)
 		request.RenderJSON(notifications)
 	})
 
@@ -43,7 +42,8 @@ func initNotificationResource(resource *Resource) {
 	})
 }
 
-type notification struct {
+//NotificationItem represents item for notification
+type NotificationItem struct {
 	app         *App
 	user        User
 	name        string
@@ -51,30 +51,35 @@ type notification struct {
 	typ         string
 }
 
-func (app *App) Notification(user User, name string) *notification {
-	return &notification{
+//Notification creates notification
+func (app *App) Notification(user User, name string) *NotificationItem {
+	return &NotificationItem{
 		app:  app,
 		user: user,
 		name: name,
 	}
 }
 
-func (n *notification) SetDescription(description string) *notification {
+//SetDescription sets description to notification item
+func (n *NotificationItem) SetDescription(description string) *NotificationItem {
 	n.description = description
 	return n
 }
 
-func (n *notification) SetTypeSuccess() *notification {
+//SetTypeSuccess sets notification item type to success
+func (n *NotificationItem) SetTypeSuccess() *NotificationItem {
 	n.typ = "success"
 	return n
 }
 
-func (n *notification) SetTypeFail() *notification {
+//SetTypeFail sets notification item type to fail
+func (n *NotificationItem) SetTypeFail() *NotificationItem {
 	n.typ = "fail"
 	return n
 }
 
-func (n *notification) Create() error {
+//Create creates notification
+func (n *NotificationItem) Create() error {
 	item := Notification{
 		UUID:            utils.RandomString(10),
 		Name:            n.name,

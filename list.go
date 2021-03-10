@@ -25,11 +25,11 @@ type list struct {
 	OrderDesc            bool
 	Locale               string
 	ItemsPerPage         int64
-	PaginationData       []ListPaginationData
-	StatsLimitSelectData []ListPaginationData
+	PaginationData       []listPaginationData
+	StatsLimitSelectData []listPaginationData
 }
 
-type ListPaginationData struct {
+type listPaginationData struct {
 	Name     string
 	Value    int64
 	Selected bool
@@ -52,9 +52,9 @@ type listContent struct {
 	TotalCountStr string
 	Rows          []listRow
 	Colspan       int64
-	Stats         *ListStats
+	Stats         *listStats
 	Message       string
-	Pagination    Pagination
+	Pagination    pagination
 }
 
 type listRow struct {
@@ -77,21 +77,10 @@ type listItemActions struct {
 	MenuButtons     []buttonData
 }
 
-type Pagination struct {
+type pagination struct {
 	TotalPages   int64
 	SelectedPage int64
 }
-
-/*type pagination struct {
-	Pages []page
-}*/
-
-/*func (p pagination) IsEmpty() bool {
-	if len(p.Pages) <= 1 {
-		return true
-	}
-	return false
-}*/
 
 type page struct {
 	Page    int64
@@ -377,7 +366,7 @@ func (resource *Resource) getListContent(app *App, user User, params url.Values)
 		return
 	}
 
-	var totalCount int64 = resource.count()
+	var totalCount = resource.count()
 	resource.updateCachedCount()
 
 	if count == totalCount {
@@ -404,23 +393,10 @@ func (resource *Resource) getListContent(app *App, user User, params url.Values)
 		currentPage = 1
 	}
 
-	ret.Pagination = Pagination{
+	ret.Pagination = pagination{
 		TotalPages:   totalPages,
 		SelectedPage: int64(currentPage),
 	}
-
-	/*if totalPages >= 1 {
-		for i := int64(1); i <= totalPages; i++ {
-			p := page{
-				Page: i,
-			}
-			if i == int64(currentPage) {
-				p.Current = true
-			}
-
-			ret.Pagination.Pages = append(ret.Pagination.Pages, p)
-		}
-	}*/
 
 	q = resource.addFilterParamsToQuery(q, params)
 	q = q.Offset((int64(currentPage) - 1) * itemsPerPage)
@@ -465,13 +441,13 @@ func (resource *Resource) getListContent(app *App, user User, params url.Values)
 	return
 }
 
-type ListContentJSON struct {
+type listContentJSON struct {
 	Content  string
 	CountStr string
 	StatsStr string
 }
 
-func (resource *Resource) getListContentJSON(app *App, user User, params url.Values) (ret *ListContentJSON, err error) {
+func (resource *Resource) getListContentJSON(app *App, user User, params url.Values) (ret *listContentJSON, err error) {
 	listData, err := resource.getListContent(app, user, params)
 	if err != nil {
 		return nil, err
@@ -495,7 +471,7 @@ func (resource *Resource) getListContentJSON(app *App, user User, params url.Val
 		statsStr = string(bufStats.Bytes())
 	}
 
-	return &ListContentJSON{
+	return &listContentJSON{
 		Content:  string(buf.Bytes()),
 		CountStr: listData.TotalCountStr,
 		StatsStr: statsStr,

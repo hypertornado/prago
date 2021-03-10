@@ -25,14 +25,13 @@ type Field struct {
 	fieldType FieldType
 }
 
-func (f Field) GetRelatedResourceName() string {
-	relatedTag := f.Tags["prago-relation"]
+//GetRelatedResourceName gets related resource name
+func (field Field) GetRelatedResourceName() string {
+	relatedTag := field.Tags["prago-relation"]
 	if relatedTag != "" {
 		return strings.ToLower(relatedTag)
-	} else {
-		return f.ColumnName
 	}
-
+	return field.ColumnName
 }
 
 func newField(f reflect.StructField, order int, fieldTypes map[string]FieldType) *Field {

@@ -216,6 +216,7 @@ func createNavigationalItemHandler(action, templateName string, dataGenerator fu
 	}
 }
 
+//CreateNavigationalItemAction creates navigational item action
 func CreateNavigationalItemAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
 	return Action{
 		URL:     url,
@@ -240,6 +241,7 @@ func createNavigationalHandler(action, templateName string, dataGenerator func(R
 	}
 }
 
+//CreateNavigationalAction creates navigational action
 func CreateNavigationalAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
 	return Action{
 		Name:    name,
@@ -273,6 +275,7 @@ func createAdminHandler(action, templateName string, dataGenerator func(Resource
 	}
 }
 
+//CreateAdminAction creates admin action
 func CreateAdminAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
 	return Action{
 		Name:    name,
@@ -281,6 +284,7 @@ func CreateAdminAction(url string, name func(string) string, templateName string
 	}
 }
 
+//CreateAdminEmptyAction creates admin empty action
 func CreateAdminEmptyAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
 	return Action{
 		Name:    name,

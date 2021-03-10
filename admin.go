@@ -3,6 +3,7 @@ package prago
 import (
 	"errors"
 
+	//embed
 	_ "embed"
 
 	"github.com/gorilla/sessions"

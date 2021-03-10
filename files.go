@@ -33,6 +33,7 @@ func (app *App) thumb(ids string) string {
 	return ""
 }
 
+//GetFiles gets files from app
 func (app *App) GetFiles(ids string) []*File {
 	var files []*File
 	idsAr := strings.Split(ids, ",")
@@ -59,6 +60,7 @@ type File struct {
 	UpdatedAt   time.Time
 }
 
+//UploadFile uploads files to app
 func (app *App) UploadFile(fileHeader *multipart.FileHeader, user *User, description string) (*File, error) {
 	fileName := utils.PrettyFilename(fileHeader.Filename)
 	file := File{}
@@ -92,6 +94,7 @@ func (app *App) UploadFile(fileHeader *multipart.FileHeader, user *User, descrip
 	return &file, nil
 }
 
+//UpdateMetadata updates metadata of file
 func (f *File) UpdateMetadata() error {
 	metadata, err := filesCDN.GetMetadata(f.UID)
 	if err != nil {
@@ -103,6 +106,7 @@ func (f *File) UpdateMetadata() error {
 	return nil
 }
 
+//GetExtension gets file extension
 func (f File) GetExtension() string {
 	extension := filepath.Ext(f.Name)
 	extension = strings.Replace(extension, ".", "", -1)
@@ -313,10 +317,12 @@ func (f *File) GetOriginal() string {
 	return filesCDN.GetFileURL(f.UID, f.Name)
 }
 
+//GetMetadataPath gets metadada file path
 func (f *File) GetMetadataPath() string {
 	return filesCDN.MetadataPath(f.UID)
 }
 
+//IsImage detects if file is image
 func (f *File) IsImage() bool {
 	if strings.HasSuffix(f.Name, ".jpg") || strings.HasSuffix(f.Name, ".jpeg") || strings.HasSuffix(f.Name, ".png") {
 		return true

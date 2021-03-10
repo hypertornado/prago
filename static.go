@@ -21,6 +21,7 @@ func (app *App) initStaticFilesHandler() {
 	app.AddStaticFiles(staticAdminFS, "public")
 }
 
+//AddStaticFiles add filesystem of public files and publish them in server's root
 func (app *App) AddStaticFiles(f fs.FS, pathPrefix string) {
 	app.staticFiles.filesystems = append(app.staticFiles.filesystems, staticFS{
 		fs:         f,
@@ -28,6 +29,7 @@ func (app *App) AddStaticFiles(f fs.FS, pathPrefix string) {
 	})
 }
 
+//AddDevStaticFiles adds path for public files for development and publish them in server's root
 func (app *App) AddDevStaticFiles(path string) {
 	app.staticFiles.devFilesystems = append(app.staticFiles.devFilesystems, path)
 }

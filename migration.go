@@ -19,12 +19,12 @@ func (app *App) initMigrationCommand() {
 		})
 }
 
-func (a *App) migrate(verbose bool) error {
-	tables, err := listTables(a.db)
+func (app *App) migrate(verbose bool) error {
+	tables, err := listTables(app.db)
 	if err != nil {
 		return err
 	}
-	for _, resource := range a.resources {
+	for _, resource := range app.resources {
 		tables[resource.TableName] = false
 		err := resource.migrate(verbose)
 		if err != nil {

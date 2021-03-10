@@ -36,6 +36,7 @@ func (app *App) AddFieldType(name string, fieldType FieldType) {
 	app.fieldTypes[name] = fieldType
 }
 
+//IsRelation detects if field type is relation type
 func (f FieldType) IsRelation() bool {
 	if f.ViewTemplate == "admin_item_view_relation" {
 		return true

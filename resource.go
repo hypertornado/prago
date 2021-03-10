@@ -206,7 +206,7 @@ func (resource Resource) updateCachedCount() error {
 	return resource.App.Cache.Set(resource.cachedCountName(), resource.count())
 }
 
-func (resource Resource) getPaginationData(user User) (ret []ListPaginationData) {
+func (resource Resource) getPaginationData(user User) (ret []listPaginationData) {
 	var ints []int64
 	var used bool
 
@@ -233,7 +233,7 @@ func (resource Resource) getPaginationData(user User) (ret []ListPaginationData)
 			selected = true
 		}
 
-		ret = append(ret, ListPaginationData{
+		ret = append(ret, listPaginationData{
 			Name:     messages.Messages.ItemsCount(v, user.Locale),
 			Value:    v,
 			Selected: selected,

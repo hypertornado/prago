@@ -50,18 +50,20 @@ const (
 )
 
 type commands struct {
-	commands []*command
+	commands []*Command
 }
 
-type command struct {
+//Command represents command-line command
+type Command struct {
 	actions        []string
 	description    string
-	flags          map[string]*flag
+	flags          map[string]*CommandFlag
 	callback       func()
 	stringArgument *string
 }
 
-type flag struct {
+//CommandFlag represents command-line flag
+type CommandFlag struct {
 	name        string
 	description string
 	typ         flagType
@@ -69,26 +71,30 @@ type flag struct {
 	value       interface{}
 }
 
-func (app *App) AddCommand(commands ...string) *command {
-	ret := &command{
+//AddCommand adds command to app
+func (app *App) AddCommand(commands ...string) *Command {
+	ret := &Command{
 		actions: commands,
-		flags:   map[string]*flag{},
+		flags:   map[string]*CommandFlag{},
 	}
 	app.commands.commands = append(app.commands.commands, ret)
 	return ret
 }
 
-func (c *command) Callback(callback func()) *command {
+//Callback sets command callback
+func (c *Command) Callback(callback func()) *Command {
 	c.callback = callback
 	return c
 }
 
-func (c *command) Description(description string) *command {
+//Description sets description to command
+func (c *Command) Description(description string) *Command {
 	c.description = description
 	return c
 }
 
-func (c *command) Flag(flag *flag) *command {
+//Flag adds flag to command
+func (c *Command) Flag(flag *CommandFlag) *Command {
 	if flag.typ == noType {
 		panic("no type of flag set")
 	}
@@ -99,24 +105,28 @@ func (c *command) Flag(flag *flag) *command {
 	return c
 }
 
-func (c *command) StringArgument(arg *string) *command {
+//StringArgument sets command argument
+func (c *Command) StringArgument(arg *string) *Command {
 	c.stringArgument = arg
 	return c
 }
 
-func NewCommandFlag(name, description string) *flag {
-	return &flag{
+//NewCommandFlag creates new command flag
+func NewCommandFlag(name, description string) *CommandFlag {
+	return &CommandFlag{
 		name:        name,
 		description: description,
 	}
 }
 
-func (f *flag) Alias(alias string) *flag {
+//Alias sets flag alias
+func (f *CommandFlag) Alias(alias string) *CommandFlag {
 	f.aliases = append(f.aliases, alias)
 	return f
 }
 
-func (f *flag) String(value *string) *flag {
+//String sets flag type to string
+func (f *CommandFlag) String(value *string) *CommandFlag {
 	if f.typ != noType {
 		panic("type of flag already set")
 	}
@@ -125,7 +135,8 @@ func (f *flag) String(value *string) *flag {
 	return f
 }
 
-func (f *flag) Int(value *int) *flag {
+//Int sets flag type to int
+func (f *CommandFlag) Int(value *int) *CommandFlag {
 	if f.typ != noType {
 		panic("type of flag already set")
 	}
@@ -134,7 +145,8 @@ func (f *flag) Int(value *int) *flag {
 	return f
 }
 
-func (f *flag) Bool(value *bool) *flag {
+//Bool sets flag type to boolean
+func (f *CommandFlag) Bool(value *bool) *CommandFlag {
 	if f.typ != noType {
 		panic("type of flag already set")
 	}
@@ -143,7 +155,7 @@ func (f *flag) Bool(value *bool) *flag {
 	return f
 }
 
-func (c *command) match(fields []string) (bool, error) {
+func (c *Command) match(fields []string) (bool, error) {
 	if len(c.actions) > len(fields) {
 		return false, nil
 	}
@@ -162,13 +174,13 @@ func (c *command) match(fields []string) (bool, error) {
 
 	if err != nil {
 		return true, fmt.Errorf("error while parsing command '%s': %s", strings.Join(c.actions, " "), err)
-	} else {
-		return true, nil
 	}
+
+	return true, nil
 }
 
-func parseFlags(flags map[string]*flag, fields []string) (argsX []string, err error) {
-	var currentFlag *flag
+func parseFlags(flags map[string]*CommandFlag, fields []string) (argsX []string, err error) {
+	var currentFlag *CommandFlag
 	for k, flag := range fields {
 		if currentFlag == nil {
 			if !strings.HasPrefix(flag, "-") {
@@ -196,7 +208,7 @@ func parseFlags(flags map[string]*flag, fields []string) (argsX []string, err er
 	return nil, nil
 }
 
-func (f *flag) setValue(value string) error {
+func (f *CommandFlag) setValue(value string) error {
 	val := reflect.ValueOf(f.value).Elem()
 	switch f.typ {
 	case boolFlag:

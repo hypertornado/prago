@@ -165,9 +165,8 @@ func (tm *taskManager) startTask(id string, user User) error {
 	if tm.app.Authorize(user, task.permission) {
 		tm.run(task, &user, "button")
 		return nil
-	} else {
-		return fmt.Errorf("User is not authorized to run this task")
 	}
+	return fmt.Errorf("User is not authorized to run this task")
 }
 
 func (tm *taskManager) stopTask(uuid string, user User) error {
@@ -195,11 +194,13 @@ func (tm *taskManager) deleteTask(uuid string, user User) error {
 	return nil
 }
 
+//TaskViewGroup groups task views
 type TaskViewGroup struct {
 	Name  string
 	Tasks []TaskView
 }
 
+//TaskView is task viewer
 type TaskView struct {
 	ID   string
 	Name string
@@ -243,7 +244,7 @@ func (tm *taskManager) getTasks(user User) (ret []TaskViewGroup) {
 		return false
 	})
 
-	var lastGroup *taskGroup
+	var lastGroup *TaskGroup
 	for _, v := range tasks {
 		if v.group != lastGroup {
 			ret = append(ret, TaskViewGroup{Name: v.group.Name(user.Locale)})
@@ -256,9 +257,10 @@ func (tm *taskManager) getTasks(user User) (ret []TaskViewGroup) {
 	return ret
 }
 
+//Task represent some user task
 type Task struct {
 	id          string
-	group       *taskGroup
+	group       *TaskGroup
 	permission  Permission
 	handler     func(*TaskActivity) error
 	cron        time.Duration
@@ -266,8 +268,9 @@ type Task struct {
 	manager     *taskManager
 }
 
-var defaultGroup *taskGroup
+var defaultGroup *TaskGroup
 
+//NewTask creates task
 func (app *App) NewTask(id string) *Task {
 	if defaultGroup == nil {
 		defaultGroup = app.NewTaskGroup(Unlocalized("Other"))
@@ -294,30 +297,36 @@ func (app *App) NewTask(id string) *Task {
 	return task
 }
 
+//SetHandler sets handler to task
 func (t *Task) SetHandler(fn func(*TaskActivity) error) *Task {
 	t.handler = fn
 	return t
 }
 
+//SetPermission set permission to task
 func (t *Task) SetPermission(permission string) *Task {
 	t.permission = Permission(permission)
 	return t
 }
 
+//RepeatEvery sets cron to task
 func (t *Task) RepeatEvery(duration time.Duration) *Task {
 	t.cron = duration
 	return t
 }
 
-type taskGroup struct {
+//TaskGroup represent group of tasks
+type TaskGroup struct {
 	Name func(string) string
 }
 
-func (app *App) NewTaskGroup(name func(string) string) *taskGroup {
-	return &taskGroup{name}
+//NewTaskGroup creates new task group
+func (app *App) NewTaskGroup(name func(string) string) *TaskGroup {
+	return &TaskGroup{name}
 }
 
-func (t *Task) SetGroup(group *taskGroup) *Task {
+//SetGroup sets group task
+func (t *Task) SetGroup(group *TaskGroup) *Task {
 	if group != nil {
 		t.group = group
 	}

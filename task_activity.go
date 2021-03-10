@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+//TaskActivity represents task activity
 type TaskActivity struct {
 	uuid      string
 	task      *Task
@@ -19,11 +20,13 @@ type TaskActivity struct {
 	endedAt   time.Time
 }
 
+//SetStatus sets progress and status for task activity
 func (ta *TaskActivity) SetStatus(progress float64, status string) {
 	ta.progress = progress
 	ta.status = status
 }
 
+//IsStopped checks if activity is stopped
 func (ta *TaskActivity) IsStopped() bool {
 	ta.stoppable = true
 	return ta.stopped

@@ -52,10 +52,7 @@ func party(appName, version, ssh string) (err error) {
 	if err = release(appName, version, ssh); err != nil {
 		return err
 	}
-	if err = remote(appName, version, ssh); err != nil {
-		return err
-	}
-	return nil
+	return remote(appName, version, ssh)
 }
 
 func remote(appName, version, ssh string) error {

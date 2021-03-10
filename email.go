@@ -5,6 +5,7 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
+//SendEmail from app
 func (a App) SendEmail(name, email, subject, contentText, contentHTML string) error {
 	from := mail.NewEmail(a.HumanName, a.noReplyEmail)
 	to := mail.NewEmail(name, email)
@@ -14,6 +15,7 @@ func (a App) SendEmail(name, email, subject, contentText, contentHTML string) er
 	return err
 }
 
+//SendEmailFromTo send email with from data
 func (a App) SendEmailFromTo(fromEmail, toEmail, subject, contentText, contentHTML string) error {
 	from := mail.NewEmail("", fromEmail)
 	to := mail.NewEmail("", toEmail)

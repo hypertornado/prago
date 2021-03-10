@@ -19,19 +19,22 @@ import (
 )
 
 var (
+	//ErrEmailAlreadyInList is returned when user is already in newsletter list
 	ErrEmailAlreadyInList = errors.New("email already in newsletter list")
 )
 
+//NewsletterMiddleware represents users newsletter
 type NewsletterMiddleware struct {
-	baseUrl    string
+	baseURL    string
 	renderer   NewsletterRenderer
 	app        *App
 	randomness string
 }
 
+//InitNewsletter inits apps newsletter function
 func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 	app.Newsletter = &NewsletterMiddleware{
-		baseUrl:  app.Config.GetString("baseUrl"),
+		baseURL:  app.Config.GetString("baseUrl"),
 		renderer: renderer,
 
 		app:        app,
@@ -185,7 +188,7 @@ func (nm NewsletterMiddleware) confirmEmailBody(name, email string) string {
 	values.Set("secret", nm.secret(email))
 
 	u := fmt.Sprintf("%s/newsletter-confirm?%s",
-		nm.baseUrl,
+		nm.baseURL,
 		values.Encode(),
 	)
 
@@ -195,13 +198,13 @@ func (nm NewsletterMiddleware) confirmEmailBody(name, email string) string {
 	)
 }
 
-func (nm NewsletterMiddleware) unsubscribeUrl(email string) string {
+func (nm NewsletterMiddleware) unsubscribeURL(email string) string {
 	values := make(url.Values)
 	values.Set("email", email)
 	values.Set("secret", nm.secret(email))
 
 	return fmt.Sprintf("%s/newsletter-unsubscribe?%s",
-		nm.baseUrl,
+		nm.baseURL,
 		values.Encode(),
 	)
 }
@@ -213,6 +216,7 @@ func (nm NewsletterMiddleware) secret(email string) string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
+//CSFR returns csrf token for newsletter
 func (nm NewsletterMiddleware) CSFR(request Request) string {
 	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%s%s", nm.randomness, request.Request().UserAgent()))
@@ -220,6 +224,7 @@ func (nm NewsletterMiddleware) CSFR(request Request) string {
 
 }
 
+//AddEmail adds email to newsletter
 func (app *App) AddEmail(email, name string, confirm bool) error {
 	if !strings.Contains(email, "@") {
 		return errors.New("Wrong email format")
@@ -238,6 +243,7 @@ func (app *App) AddEmail(email, name string, confirm bool) error {
 	return app.Create(&person)
 }
 
+//Newsletter represents newsletter
 type Newsletter struct {
 	ID            int64     `prago-preview:"true" prago-order-desc:"true"`
 	Name          string    `prago-preview:"true" prago-description:"Jméno newsletteru"`
@@ -431,14 +437,15 @@ func (app *App) sendEmails(n Newsletter, emails []string) error {
 	return nil
 }
 
+//GetBody gets body of newsletter
 func (nm *NewsletterMiddleware) GetBody(n Newsletter, email string) (string, error) {
 	content := markdown.New(markdown.HTML(true)).RenderToString([]byte(n.Body))
 	params := map[string]interface{}{
 		"id":          n.ID,
-		"baseUrl":     nm.baseUrl,
+		"baseUrl":     nm.baseURL,
 		"site":        nm.app.HumanName,
 		"title":       n.Name,
-		"unsubscribe": nm.unsubscribeUrl(email),
+		"unsubscribe": nm.unsubscribeURL(email),
 		"content":     template.HTML(content),
 		"preview":     utils.CropMarkdown(n.Body, 200),
 		"sections":    nm.getNewsletterSectionData(n),
@@ -446,12 +453,11 @@ func (nm *NewsletterMiddleware) GetBody(n Newsletter, email string) (string, err
 
 	if nm.renderer != nil {
 		return nm.renderer(params)
-	} else {
-		return defaultNewsletterRenderer(params)
 	}
-
+	return defaultNewsletterRenderer(params)
 }
 
+//NewsletterRenderer represent newsletter renderer
 type NewsletterRenderer func(map[string]interface{}) (string, error)
 
 func defaultNewsletterRenderer(params map[string]interface{}) (string, error) {
@@ -474,6 +480,7 @@ func defaultNewsletterRenderer(params map[string]interface{}) (string, error) {
 	return ret, nil
 }
 
+//NewsletterSection represents section of newsletter
 type NewsletterSection struct {
 	ID            int64
 	Newsletter    int64  `prago-type:"relation" prago-preview:"true"`
@@ -491,6 +498,7 @@ func initNewsletterSection(resource *Resource) {
 	resource.CanView = "newsletter"
 }
 
+//NewsletterPersons represents person of newsletter
 type NewsletterPersons struct {
 	ID           int64
 	Name         string `prago-preview:"true" prago-description:"Jméno příjemce"`
@@ -506,6 +514,7 @@ func initNewsletterPersonsResource(resource *Resource) {
 	resource.ActivityLog = true
 }
 
+//NewsletterSectionData represents data of newsletter section
 type NewsletterSectionData struct {
 	Name   string
 	Text   string
@@ -529,7 +538,7 @@ func (nm *NewsletterMiddleware) getNewsletterSectionData(n Newsletter) []Newslet
 			button = v.Button
 		}
 
-		url := nm.baseUrl
+		url := nm.baseURL
 		if v.URL != "" {
 			url = v.URL
 		}

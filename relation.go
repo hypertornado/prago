@@ -97,11 +97,11 @@ func getRelationViewData(resource Resource, user User, f Field, value interface{
 func getRelationData(resource Resource, user User, f Field, value interface{}) (*viewRelationData, error) {
 	r2 := f.getRelatedResource(*resource.App)
 	if r2 == nil {
-		return nil, fmt.Errorf("Resource not found: %s\n", f.Name)
+		return nil, fmt.Errorf("resource not found: %s", f.Name)
 	}
 
 	if !resource.App.Authorize(user, r2.CanView) {
-		return nil, fmt.Errorf("User is not authorized to view this item\n")
+		return nil, fmt.Errorf("user is not authorized to view this item")
 	}
 
 	var item interface{}
@@ -109,11 +109,11 @@ func getRelationData(resource Resource, user User, f Field, value interface{}) (
 
 	intVal := value.(int64)
 	if intVal <= 0 {
-		return nil, fmt.Errorf("Wrong value\n")
+		return nil, fmt.Errorf("wrong value")
 	}
 	err := resource.App.Query().WhereIs("id", intVal).Get(item)
 	if err != nil {
-		return nil, fmt.Errorf("Can't find this item\n")
+		return nil, fmt.Errorf("can't find this item")
 	}
 
 	return r2.itemToRelationData(item, user, nil), nil
@@ -232,9 +232,8 @@ func (app App) relationStringer(field Field, value reflect.Value, user User) str
 	case reflect.Bool:
 		if value.Bool() {
 			return messages.Messages.Get(user.Locale, "yes_plain")
-		} else {
-			return messages.Messages.Get(user.Locale, "no_plain")
 		}
+		return messages.Messages.Get(user.Locale, "no_plain")
 	case reflect.Struct:
 		if value.Type() == reflect.TypeOf(time.Now()) {
 			tm := value.Interface().(time.Time)

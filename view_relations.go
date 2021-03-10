@@ -64,7 +64,7 @@ func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, use
 	return
 }
 
-type RelationListRequest struct {
+type relationListRequest struct {
 	SourceResource string
 	TargetResource string
 	TargetField    string
@@ -85,7 +85,7 @@ func generateRelationListAPIHandler(app *App) func(Request) {
 			panic("relationListAPIHandler parsing json request: " + err.Error())
 		}
 
-		var listRequest RelationListRequest
+		var listRequest relationListRequest
 		err = json.Unmarshal(reqData, &listRequest)
 		if err != nil {
 			panic("Unmarshalling " + err.Error())
@@ -138,8 +138,6 @@ func generateRelationListAPIHandler(app *App) func(Request) {
 		request.RenderView("admin_item_view_relationlist_response")
 	}
 }
-
-//func relationListRequest()
 
 func (resource *Resource) getAutoRelationsViewOLD(id int, inValues interface{}, user User) (ret []view) {
 	for _, v := range resource.autoRelations {
