@@ -13,7 +13,7 @@ type Transaction struct {
 
 //Transaction creates transaction
 func (app *App) Transaction() (t *Transaction) {
-	tx, err := app.getDB().Begin()
+	tx, err := app.db.Begin()
 	t = &Transaction{
 		err: err,
 	}

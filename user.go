@@ -67,11 +67,6 @@ func (user User) getRole() string {
 	return user.Role
 }
 
-//AdminItemName represents item name for resource ajax api
-func (user *User) AdminItemName(lang string) string {
-	return user.Email
-}
-
 func (user *User) isPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {

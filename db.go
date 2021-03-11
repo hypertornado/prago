@@ -16,13 +16,9 @@ var ErrWrongWhereFormat = errors.New("wrong where format")
 //Debug enables logging of all sql queries
 var Debug = false
 
-func (app *App) getDB() *sql.DB {
-	return app.db
-}
-
 //GetDB gets DB
 func (app *App) GetDB() *sql.DB {
-	return app.getDB()
+	return app.db
 }
 
 type mysqlColumn struct {
@@ -71,7 +67,6 @@ func (q *listQuery) where(data ...interface{}) error {
 			return ErrWrongWhereFormat
 		}
 		whereString = first
-		//whereParams = data[1:len(data)]
 		whereParams = data[1:]
 	}
 

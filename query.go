@@ -9,8 +9,8 @@ import (
 type Query struct {
 	query *listQuery
 	app   *App
-	db    dbIface
 	err   error
+	db    dbIface
 }
 
 //Create item in db
@@ -19,7 +19,7 @@ func (app *App) Create(item interface{}) error {
 	if err != nil {
 		return err
 	}
-	return resource.createWithDBIface(item, app.getDB())
+	return resource.createWithDBIface(item, app.db)
 }
 
 //Save item to db
@@ -28,7 +28,7 @@ func (app *App) Save(item interface{}) error {
 	if err != nil {
 		return err
 	}
-	return resource.saveWithDBIface(item, app.getDB())
+	return resource.saveWithDBIface(item, app.db)
 }
 
 //Query item from db
@@ -36,7 +36,7 @@ func (app *App) Query() Query {
 	return Query{
 		query: &listQuery{},
 		app:   app,
-		db:    app.getDB(),
+		db:    app.db,
 	}
 }
 
