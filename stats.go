@@ -228,9 +228,7 @@ func (resource *Resource) getListStatsDateSectionYear(field *Field, user User, p
 }
 
 func (resource *Resource) getListStatsTable(field *Field, user User, params url.Values, total, limit int64) (table []listStatsRow) {
-
 	query := resource.addFilterParamsToQuery(resource.App.Query(), params)
-
 	whereParams := query.query.whereParams
 
 	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.ColumnName, resource.TableName, buildWhereString(query.query.whereString), field.ColumnName, limit)

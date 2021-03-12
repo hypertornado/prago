@@ -42,24 +42,12 @@ func (menu mainMenu) GetTitle() string {
 func (app *App) getMainMenu(request Request) (ret mainMenu) {
 	user := request.GetUser()
 
-	var selectedAdminSection bool
-	if request.Request().URL.Path == app.GetAdminURL("") {
-		selectedAdminSection = true
-	}
-
 	adminSectionName := app.HumanName
 	if app.Logo != "" {
 		adminSectionName = ""
 	}
 	adminSection := mainMenuSection{
 		Name: adminSectionName,
-		Items: []mainMenuItem{
-			{
-				Name:     messages.Get(user.Locale, "admin_signpost"),
-				URL:      app.GetAdminURL(""),
-				Selected: selectedAdminSection,
-			},
-		},
 	}
 
 	var selectedTasks bool
@@ -74,6 +62,9 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 
 	for _, v := range app.rootActions {
 		if v.method != "GET" {
+			continue
+		}
+		if v.isUserMenu {
 			continue
 		}
 
@@ -117,32 +108,38 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 	}
 	ret.Sections = append(ret.Sections, resourceSection)
 
-	var userSettingsSection bool
-	if request.Request().URL.Path == app.GetAdminURL("settings") || request.Request().URL.Path == app.GetAdminURL("password") {
-		userSettingsSection = true
-	}
 	userName := user.Name
 	if userName == "" {
 		userName = user.Email
 	}
 	randomness := app.Config.GetString("random")
 	userSection := mainMenuSection{
-		Name: userName,
-		Items: []mainMenuItem{
-			{
-				Name:     messages.Get(user.Locale, "admin_settings"),
-				URL:      app.GetAdminURL("settings"),
-				Selected: userSettingsSection,
-			},
-			{
-				Name: messages.Get(user.Locale, "admin_homepage"),
-				URL:  "/",
-			},
-			{
-				Name: messages.Get(user.Locale, "admin_log_out"),
-				URL:  app.GetAdminURL("logout") + "?_csrfToken=" + user.csrfToken(randomness),
-			},
-		},
+		Name:  userName,
+		Items: []mainMenuItem{},
+	}
+	for _, v := range app.rootActions {
+		if v.method != "GET" {
+			continue
+		}
+		if !v.isUserMenu {
+			continue
+		}
+
+		var selected bool
+		fullURL := app.GetAdminURL(v.url)
+		if request.Request().URL.Path == fullURL {
+			selected = true
+		}
+
+		if v.url == "logout" {
+			fullURL += "?_csrfToken=" + user.csrfToken(randomness)
+		}
+
+		userSection.Items = append(userSection.Items, mainMenuItem{
+			Name:     v.name(user.Locale),
+			URL:      fullURL,
+			Selected: selected,
+		})
 	}
 	ret.Sections = append(ret.Sections, userSection)
 

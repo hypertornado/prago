@@ -94,14 +94,4 @@ func initUserLogin(resource *Resource) {
 		must(session.Save(request.Request(), request.Response()))
 		request.Redirect(resource.App.GetAdminURL(""))
 	})
-
-	resource.App.AdminController.Get(resource.App.GetAdminURL("logout"), func(request Request) {
-		validateCSRF(request)
-		session := request.GetData("session").(*sessions.Session)
-		delete(session.Values, "user_id")
-		session.AddFlash(messages.Get(getLocale(request), "admin_logout_ok"))
-		must(session.Save(request.Request(), request.Response()))
-		request.Redirect(resource.getURL("login"))
-	})
-
 }

@@ -98,21 +98,21 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 
 	app.AdminController = app.accessController.SubController()
 	app.initDefaultFieldTypes()
-	app.initTaskManager()
 
 	app.CreateResource(User{}, initUserResource)
 	app.CreateResource(Notification{}, initNotificationResource)
 	app.CreateResource(File{}, initFilesResource)
 	app.CreateResource(ActivityLog{}, initActivityLog)
 
+	app.initAdminActions()
 	app.initAPI()
 	app.initDevelopment()
 	app.initMigrationCommand()
 	app.initTemplates()
+	app.initSearch()
+	app.initTaskManager()
 	app.initSystemStats()
 	app.initBackupCRON()
-	app.initSearch()
-	app.initAdminActions()
 
 	if initFunction != nil {
 		initFunction(app)

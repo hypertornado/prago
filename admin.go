@@ -75,12 +75,7 @@ func (app *App) initAdminActions() {
 		request.SetData("main_menu", app.getMainMenu(request))
 	})
 
-	app.AdminController.Get(app.GetAdminURL(""), func(request Request) {
-		renderNavigationPage(request, adminNavigationPage{
-			PageTemplate: "admin_home_navigation",
-			PageData:     app.getHomeData(request),
-		})
-	})
+	app.AddAction("").Name(messages.GetNameFunction("admin_signpost")).Template("admin_home_navigation").DataSource(app.getHomeData)
 
 	app.AdminController.Get(app.GetAdminURL("_help/markdown"), func(request Request) {
 		request.SetData("admin_yield", "admin_help_markdown")

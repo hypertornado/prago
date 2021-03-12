@@ -58,32 +58,6 @@ func renderNavigation(request Request, page adminNavigationPage, viewName string
 	request.RenderView(viewName)
 }
 
-func (app *App) getAdminNavigation(user User, code string) adminItemNavigation {
-	tabs := []navigationTab{
-		{
-			Name:     messages.Get(user.Locale, "admin_signpost"),
-			URL:      app.GetAdminURL(""),
-			Selected: trueIfEqual(code, ""),
-		},
-	}
-
-	for _, v := range app.rootActions {
-		if v.method == "GET" {
-			if app.Authorize(user, v.permission) {
-				tabs = append(tabs, navigationTab{
-					Name:     v.name(user.Locale),
-					URL:      app.GetAdminURL(v.url),
-					Selected: trueIfEqual(code, v.url),
-				})
-			}
-		}
-	}
-
-	return adminItemNavigation{
-		Tabs: tabs,
-	}
-}
-
 func (resource Resource) getNavigation(user User, code string) adminItemNavigation {
 	var tabs []navigationTab
 	for _, v := range resource.actions {
@@ -134,26 +108,6 @@ func (resource Resource) getItemNavigation(user User, item interface{}, code str
 	}
 }
 
-func (app *App) getSettingsNavigation(user User, code string) adminItemNavigation {
-	var tabs []navigationTab
-
-	tabs = append(tabs, navigationTab{
-		Name:     messages.Get(user.Locale, "admin_settings"),
-		URL:      app.GetAdminURL("settings"),
-		Selected: trueIfEqual(code, "settings"),
-	})
-
-	tabs = append(tabs, navigationTab{
-		Name:     messages.Get(user.Locale, "admin_password_change"),
-		URL:      app.GetAdminURL("password"),
-		Selected: trueIfEqual(code, "password"),
-	})
-
-	return adminItemNavigation{
-		Tabs: tabs,
-	}
-}
-
 func (app *App) getNologinNavigation(language, code string) adminItemNavigation {
 	tabs := []navigationTab{}
 
@@ -186,78 +140,3 @@ func trueIfEqual(a, b string) bool {
 	}
 	return false
 }
-
-/*
-func createNavigationalItemHandler(action, templateName string, dataGenerator func(Resource, Request, User) interface{}) func(Resource, Request, User) {
-	return func(resource Resource, request Request, user User) {
-		id, err := strconv.Atoi(request.Params().Get("id"))
-		must(err)
-
-		var item interface{}
-		resource.newItem(&item)
-		must(resource.App.Query().WhereIs("id", int64(id)).Get(item))
-
-		var data interface{}
-		if dataGenerator != nil {
-			data = dataGenerator(resource, request, user)
-		}
-
-		renderNavigationPage(request, adminNavigationPage{
-			App:          resource.App,
-			Navigation:   resource.getItemNavigation(user, item, action),
-			PageTemplate: templateName,
-			PageData:     data,
-		})
-	}
-}*/
-
-//CreateNavigationalItemAction creates navigational item action
-/*func createNavigationalItemAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
-	return Action{
-		URL:     url,
-		Name:    name,
-		Handler: createNavigationalItemHandler(url, templateName, dataGenerator),
-	}
-}*/
-
-/*
-func createNavigationalHandler(action, templateName string, dataGenerator func(Resource, Request, User) interface{}) func(Resource, Request, User) {
-	return func(resource Resource, request Request, user User) {
-		var data interface{}
-		if dataGenerator != nil {
-			data = dataGenerator(resource, request, user)
-		}
-
-		renderNavigationPage(request, adminNavigationPage{
-			App:          resource.App,
-			Navigation:   resource.getNavigation(user, action),
-			PageTemplate: templateName,
-			PageData:     data,
-		})
-	}
-}
-
-func createAdminHandler(action, templateName string, dataGenerator func(Request) interface{}, empty bool) func(Resource, Request, User) {
-	return func(resource Resource, request Request, user User) {
-		var data interface{}
-		if dataGenerator != nil {
-			data = dataGenerator(request)
-		}
-
-		adminNavigation := resource.App.getAdminNavigation(user, action)
-		var name string
-		for _, v := range adminNavigation.Tabs {
-			if v.Selected {
-				name = v.Name
-			}
-		}
-
-		renderNavigationPage(request, adminNavigationPage{
-			Name:         name,
-			App:          resource.App,
-			PageTemplate: templateName,
-			PageData:     data,
-			HideBox:      empty,
-		})
-	}
-}*/

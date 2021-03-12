@@ -1,5 +1,7 @@
 package prago
 
+import "github.com/gorilla/sessions"
+
 func (app *App) initUserSettings() {
 
 	settingsForm := func(user User) *form {
@@ -18,44 +20,32 @@ func (app *App) initUserSettings() {
 		return form
 	}
 
-	app.AdminController.Get(app.GetAdminURL("settings"), func(request Request) {
-		user := request.GetUser()
-		form := settingsForm(user).AddCSRFToken(request)
+	app.AddAction("settings").Name(messages.GetNameFunction("admin_settings")).userMenu().Template("admin_form").DataSource(
+		func(request Request) interface{} {
+			return settingsForm(request.GetUser()).AddCSRFToken(request)
+		},
+	)
 
-		request.SetData("admin_navigation_settings_selected", true)
-		renderNavigationPage(request, adminNavigationPage{
-			Navigation:   app.getSettingsNavigation(user, "settings"),
-			PageTemplate: "admin_form",
-			PageData:     form,
-		})
-	})
-
-	app.AdminController.Post(app.GetAdminURL("settings"), func(request Request) {
-		validateCSRF(request)
-		user := request.GetUser()
-		form := settingsForm(user).AddCSRFToken(request)
-		if form.Validate() {
-			userResource, err := app.getResourceByItem(User{})
-			if err != nil {
-				panic(err)
+	app.AddAction("settings").Method("POST").Handler(
+		func(request Request) {
+			validateCSRF(request)
+			user := request.GetUser()
+			form := settingsForm(user).AddCSRFToken(request)
+			if form.Validate() {
+				userResource, err := app.getResourceByItem(&user)
+				if err != nil {
+					panic(err)
+				}
+				must(userResource.bindData(&user, user, request.Params(), form.getFilter()))
+				must(app.Save(&user))
+				request.AddFlashMessage(messages.Get(getLocale(request), "admin_settings_changed"))
+				request.Redirect(app.GetAdminURL("settings"))
+			} else {
+				panic("can't validate settings form")
 			}
-			must(userResource.bindData(&user, user, request.Params(), form.getFilter()))
-			must(app.Save(&user))
-			request.AddFlashMessage(messages.Get(getLocale(request), "admin_settings_changed"))
-			request.Redirect(app.GetAdminURL("settings"))
-			return
-		}
-
-		request.SetData("admin_navigation_settings_selected", true)
-		renderNavigationPage(request, adminNavigationPage{
-			Navigation:   app.getSettingsNavigation(user, "settings"),
-			PageTemplate: "admin_form",
-			PageData:     form,
 		})
-	})
 
 	changePasswordForm := func(request Request) *form {
-		request.SetData("admin_navigation_settings_selected", true)
 		user := request.GetUser()
 		locale := getLocale(request)
 		oldValidator := newValidator(func(field *formItem) bool {
@@ -80,20 +70,17 @@ func (app *App) initUserSettings() {
 	}
 
 	renderPasswordForm := func(request Request, form *form) {
-		user := request.GetUser()
 		renderNavigationPage(request, adminNavigationPage{
-			Navigation:   app.getSettingsNavigation(user, "password"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
 	}
 
-	app.AdminController.Get(app.GetAdminURL("password"), func(request Request) {
-		form := changePasswordForm(request)
-		renderPasswordForm(request, form)
+	app.AddAction("password").Name(messages.GetNameFunction("admin_password_change")).userMenu().Handler(func(request Request) {
+		renderPasswordForm(request, changePasswordForm(request))
 	})
 
-	app.AdminController.Post(app.GetAdminURL("password"), func(request Request) {
+	app.AddAction("password").Method("POST").Handler(func(request Request) {
 		form := changePasswordForm(request)
 		form.BindData(request.Params())
 		form.Validate()
@@ -107,6 +94,19 @@ func (app *App) initUserSettings() {
 		} else {
 			renderPasswordForm(request, form)
 		}
+	})
+
+	app.AddAction("redirect-to-homepage").Name(messages.GetNameFunction("admin_homepage")).userMenu().Handler(func(request Request) {
+		request.Redirect("/")
+	})
+
+	app.AddAction("logout").Name(messages.GetNameFunction("admin_log_out")).userMenu().Handler(func(request Request) {
+		validateCSRF(request)
+		session := request.GetData("session").(*sessions.Session)
+		delete(session.Values, "user_id")
+		session.AddFlash(messages.Get(getLocale(request), "admin_logout_ok"))
+		must(session.Save(request.Request(), request.Response()))
+		request.Redirect(app.GetAdminURL("login"))
 	})
 
 }

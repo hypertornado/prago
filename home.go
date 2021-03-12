@@ -16,8 +16,10 @@ type homeData struct {
 	Actions []buttonData
 }
 
-func (app *App) getHomeData(request Request) (ret []homeData) {
+func (app *App) getHomeData(request Request) interface{} {
 	user := request.GetUser()
+
+	ret := []homeData{}
 
 	for _, resource := range app.getSortedResources(user.Locale) {
 		if app.Authorize(user, resource.CanView) {
@@ -29,7 +31,7 @@ func (app *App) getHomeData(request Request) (ret []homeData) {
 			ret = append(ret, item)
 		}
 	}
-	return
+	return ret
 }
 
 func (app *App) getSortedResources(locale string) (ret []*Resource) {
