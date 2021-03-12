@@ -67,12 +67,14 @@ func newAction(app *App, url string) *Action {
 	}
 }
 
+//AddAction adds action to root
 func (app *App) AddAction(url string) *Action {
 	action := newAction(app, url)
 	app.rootActions = append(app.rootActions, action)
 	return action
 }
 
+//AddAction adds action to resource
 func (resource *Resource) AddAction(url string) *Action {
 	action := newAction(resource.App, url)
 	action.resource = resource
@@ -81,6 +83,7 @@ func (resource *Resource) AddAction(url string) *Action {
 	return action
 }
 
+//AddItemAction adds action to resource item
 func (resource *Resource) AddItemAction(url string) *Action {
 	action := newAction(resource.App, url)
 	action.resource = resource
@@ -90,36 +93,47 @@ func (resource *Resource) AddItemAction(url string) *Action {
 	return action
 }
 
+//Name sets action name
 func (action *Action) Name(name func(string) string) *Action {
 	action.name = name
 	return action
 }
 
+//Permission sets action permission
 func (action *Action) Permission(permission Permission) *Action {
 	action.permission = permission
 	return action
 }
 
+//Method sets action method (GET, POST, PUT or DELETE)
 func (action *Action) Method(method string) *Action {
-	action.method = strings.ToUpper(method)
+	method = strings.ToUpper(method)
+	if method != "GET" && method != "POST" && method != "PUT" && method != "DELETE" {
+		panic("unsupported method for action: " + method)
+	}
+	action.method = method
 	return action
 }
 
+//Template sets action template
 func (action *Action) Template(template string) *Action {
 	action.template = template
 	return action
 }
 
+//Handler sets action handler
 func (action *Action) Handler(handler func(Request)) *Action {
 	action.handler = handler
 	return action
 }
 
+//DataSource sets action data source, which is used to render template
 func (action *Action) DataSource(dataSource func(Request) interface{}) *Action {
 	action.dataSource = dataSource
 	return action
 }
 
+//IsWide sets rendering to fill whole realestate of page, no box is rendered
 func (action *Action) IsWide() *Action {
 	action.isWide = true
 	return action
@@ -130,14 +144,6 @@ func (action *Action) userMenu() *Action {
 	return action
 }
 
-/*
-func (ra *Action) getName(language string) string {
-	if ra.Name != nil {
-		return ra.Name(language)
-	}
-	return ra.URL
-}*/
-
 func (action *Action) getnavigation(request Request) adminItemNavigation {
 	if action.resource != nil {
 		user := request.GetUser()
@@ -147,9 +153,8 @@ func (action *Action) getnavigation(request Request) adminItemNavigation {
 			action.resource.newItem(&item)
 			must(action.resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(item))
 			return action.resource.getItemNavigation(user, item, code)
-		} else {
-			return action.resource.getNavigation(user, code)
 		}
+		return action.resource.getNavigation(user, code)
 	}
 	return adminItemNavigation{}
 
