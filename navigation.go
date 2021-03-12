@@ -1,9 +1,5 @@
 package prago
 
-import (
-	"strconv"
-)
-
 type adminNavigationPage struct {
 	Name         string
 	App          *App
@@ -43,7 +39,6 @@ func renderNavigationPageNoLogin(request Request, page adminNavigationPage) {
 }
 
 func renderNavigation(request Request, page adminNavigationPage, viewName string) {
-
 	var name string
 	name = page.Name
 	for _, v := range page.Navigation.Tabs {
@@ -192,6 +187,7 @@ func trueIfEqual(a, b string) bool {
 	return false
 }
 
+/*
 func createNavigationalItemHandler(action, templateName string, dataGenerator func(Resource, Request, User) interface{}) func(Resource, Request, User) {
 	return func(resource Resource, request Request, user User) {
 		id, err := strconv.Atoi(request.Params().Get("id"))
@@ -213,7 +209,7 @@ func createNavigationalItemHandler(action, templateName string, dataGenerator fu
 			PageData:     data,
 		})
 	}
-}
+}*/
 
 //CreateNavigationalItemAction creates navigational item action
 /*func createNavigationalItemAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
@@ -224,6 +220,7 @@ func createNavigationalItemHandler(action, templateName string, dataGenerator fu
 	}
 }*/
 
+/*
 func createNavigationalHandler(action, templateName string, dataGenerator func(Resource, Request, User) interface{}) func(Resource, Request, User) {
 	return func(resource Resource, request Request, user User) {
 		var data interface{}
@@ -239,15 +236,6 @@ func createNavigationalHandler(action, templateName string, dataGenerator func(R
 		})
 	}
 }
-
-//CreateNavigationalAction creates navigational action
-/*func createNavigationalAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
-	return Action{
-		Name:    name,
-		URL:     url,
-		Handler: createNavigationalHandler(url, templateName, dataGenerator),
-	}
-}*/
 
 func createAdminHandler(action, templateName string, dataGenerator func(Request) interface{}, empty bool) func(Resource, Request, User) {
 	return func(resource Resource, request Request, user User) {
@@ -271,24 +259,5 @@ func createAdminHandler(action, templateName string, dataGenerator func(Request)
 			PageData:     data,
 			HideBox:      empty,
 		})
-	}
-}
-
-//CreateAdminAction creates admin action
-/*
-func createAdminAction(url string, name func(string) string, templateName string, dataGenerator func(Request) interface{}) Action {
-	return Action{
-		Name:    name,
-		URL:     url,
-		Handler: createAdminHandler(url, templateName, dataGenerator, false),
-	}
-}*/
-
-/*
-func createAdminEmptyAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
-	return Action{
-		Name:    name,
-		URL:     url,
-		Handler: createAdminHandler(url, templateName, dataGenerator, true),
 	}
 }*/
