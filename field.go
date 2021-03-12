@@ -6,8 +6,6 @@ import (
 	"reflect"
 	"strings"
 	"time"
-
-	"github.com/hypertornado/prago/messages"
 )
 
 //Field of resource
@@ -70,8 +68,8 @@ func newField(f reflect.StructField, order int, fieldTypes map[string]FieldType)
 	if len(description) > 0 {
 		ret.HumanName = Unlocalized(description)
 	} else {
-		messages.Messages.GetNameFunction(ret.Name)
-		nameFunction := messages.Messages.GetNameFunction(ret.Name)
+		messages.GetNameFunction(ret.Name)
+		nameFunction := messages.GetNameFunction(ret.Name)
 		if nameFunction != nil {
 			ret.HumanName = nameFunction
 		}

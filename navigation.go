@@ -2,8 +2,6 @@ package prago
 
 import (
 	"strconv"
-
-	"github.com/hypertornado/prago/messages"
 )
 
 type adminNavigationPage struct {
@@ -68,19 +66,19 @@ func renderNavigation(request Request, page adminNavigationPage, viewName string
 func (app *App) getAdminNavigation(user User, code string) adminItemNavigation {
 	tabs := []navigationTab{
 		{
-			Name:     messages.Messages.Get(user.Locale, "admin_signpost"),
+			Name:     messages.Get(user.Locale, "admin_signpost"),
 			URL:      app.GetAdminURL(""),
 			Selected: trueIfEqual(code, ""),
 		},
 	}
 
 	for _, v := range app.rootActions {
-		if v.Method == "" || v.Method == "GET" {
-			if app.Authorize(user, v.Permission) {
+		if v.method == "GET" {
+			if app.Authorize(user, v.permission) {
 				tabs = append(tabs, navigationTab{
-					Name:     v.getName(user.Locale),
-					URL:      app.GetAdminURL(v.URL),
-					Selected: trueIfEqual(code, v.URL),
+					Name:     v.name(user.Locale),
+					URL:      app.GetAdminURL(v.url),
+					Selected: trueIfEqual(code, v.url),
 				})
 			}
 		}
@@ -94,16 +92,16 @@ func (app *App) getAdminNavigation(user User, code string) adminItemNavigation {
 func (resource Resource) getNavigation(user User, code string) adminItemNavigation {
 	var tabs []navigationTab
 	for _, v := range resource.actions {
-		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
-			if resource.App.Authorize(user, v.Permission) {
-				name := v.URL
-				if v.Name != nil {
-					name = v.Name(user.Locale)
+		if v.method == "GET" {
+			if resource.App.Authorize(user, v.permission) {
+				name := v.url
+				if v.name != nil {
+					name = v.name(user.Locale)
 				}
 				tabs = append(tabs, navigationTab{
 					Name:     name,
-					URL:      resource.GetURL(v.URL),
-					Selected: trueIfEqual(code, v.URL),
+					URL:      resource.getURL(v.url),
+					Selected: trueIfEqual(code, v.url),
 				})
 			}
 		}
@@ -117,19 +115,20 @@ func (resource Resource) getNavigation(user User, code string) adminItemNavigati
 func (resource Resource) getItemNavigation(user User, item interface{}, code string) adminItemNavigation {
 	var tabs []navigationTab
 	for _, v := range resource.itemActions {
-		if v.Method == "" || v.Method == "get" || v.Method == "GET" {
-			name := v.URL
-			if v.URL == "" {
+		if v.method == "GET" {
+			name := v.url
+			if v.url == "" {
 				name = getItemName(item)
+			} else {
+				if v.name != nil {
+					name = v.name(user.Locale)
+				}
 			}
-			if v.Name != nil {
-				name = v.Name(user.Locale)
-			}
-			if resource.App.Authorize(user, v.Permission) {
+			if resource.App.Authorize(user, v.permission) {
 				tabs = append(tabs, navigationTab{
 					Name:     name,
-					URL:      resource.GetItemURL(item, v.URL),
-					Selected: trueIfEqual(code, v.URL),
+					URL:      resource.GetItemURL(item, v.url),
+					Selected: trueIfEqual(code, v.url),
 				})
 			}
 		}
@@ -144,14 +143,14 @@ func (app *App) getSettingsNavigation(user User, code string) adminItemNavigatio
 	var tabs []navigationTab
 
 	tabs = append(tabs, navigationTab{
-		Name:     messages.Messages.Get(user.Locale, "admin_settings"),
-		URL:      app.GetAdminURL("user/settings"),
+		Name:     messages.Get(user.Locale, "admin_settings"),
+		URL:      app.GetAdminURL("settings"),
 		Selected: trueIfEqual(code, "settings"),
 	})
 
 	tabs = append(tabs, navigationTab{
-		Name:     messages.Messages.Get(user.Locale, "admin_password_change"),
-		URL:      app.GetAdminURL("user/password"),
+		Name:     messages.Get(user.Locale, "admin_password_change"),
+		URL:      app.GetAdminURL("password"),
 		Selected: trueIfEqual(code, "password"),
 	})
 
@@ -164,19 +163,19 @@ func (app *App) getNologinNavigation(language, code string) adminItemNavigation 
 	tabs := []navigationTab{}
 
 	tabs = append(tabs, navigationTab{
-		Name:     messages.Messages.Get(language, "admin_login_action"),
+		Name:     messages.Get(language, "admin_login_action"),
 		URL:      app.GetAdminURL("user/login"),
 		Selected: trueIfEqual(code, "login"),
 	})
 
 	tabs = append(tabs, navigationTab{
-		Name:     messages.Messages.Get(language, "admin_register"),
+		Name:     messages.Get(language, "admin_register"),
 		URL:      app.GetAdminURL("user/registration"),
 		Selected: trueIfEqual(code, "registration"),
 	})
 
 	tabs = append(tabs, navigationTab{
-		Name:     messages.Messages.Get(language, "admin_forgotten"),
+		Name:     messages.Get(language, "admin_forgotten"),
 		URL:      app.GetAdminURL("user/forgot"),
 		Selected: trueIfEqual(code, "forgot"),
 	})
@@ -217,13 +216,13 @@ func createNavigationalItemHandler(action, templateName string, dataGenerator fu
 }
 
 //CreateNavigationalItemAction creates navigational item action
-func CreateNavigationalItemAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
+/*func createNavigationalItemAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
 	return Action{
 		URL:     url,
 		Name:    name,
 		Handler: createNavigationalItemHandler(url, templateName, dataGenerator),
 	}
-}
+}*/
 
 func createNavigationalHandler(action, templateName string, dataGenerator func(Resource, Request, User) interface{}) func(Resource, Request, User) {
 	return func(resource Resource, request Request, user User) {
@@ -242,19 +241,19 @@ func createNavigationalHandler(action, templateName string, dataGenerator func(R
 }
 
 //CreateNavigationalAction creates navigational action
-func CreateNavigationalAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
+/*func createNavigationalAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
 	return Action{
 		Name:    name,
 		URL:     url,
 		Handler: createNavigationalHandler(url, templateName, dataGenerator),
 	}
-}
+}*/
 
-func createAdminHandler(action, templateName string, dataGenerator func(Resource, Request, User) interface{}, empty bool) func(Resource, Request, User) {
+func createAdminHandler(action, templateName string, dataGenerator func(Request) interface{}, empty bool) func(Resource, Request, User) {
 	return func(resource Resource, request Request, user User) {
 		var data interface{}
 		if dataGenerator != nil {
-			data = dataGenerator(resource, request, user)
+			data = dataGenerator(request)
 		}
 
 		adminNavigation := resource.App.getAdminNavigation(user, action)
@@ -276,19 +275,20 @@ func createAdminHandler(action, templateName string, dataGenerator func(Resource
 }
 
 //CreateAdminAction creates admin action
-func CreateAdminAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
+/*
+func createAdminAction(url string, name func(string) string, templateName string, dataGenerator func(Request) interface{}) Action {
 	return Action{
 		Name:    name,
 		URL:     url,
 		Handler: createAdminHandler(url, templateName, dataGenerator, false),
 	}
-}
+}*/
 
-//CreateAdminEmptyAction creates admin empty action
-func CreateAdminEmptyAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
+/*
+func createAdminEmptyAction(url string, name func(string) string, templateName string, dataGenerator func(Resource, Request, User) interface{}) Action {
 	return Action{
 		Name:    name,
 		URL:     url,
 		Handler: createAdminHandler(url, templateName, dataGenerator, true),
 	}
-}
+}*/

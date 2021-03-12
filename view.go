@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/hypertornado/prago/messages"
 	"github.com/hypertornado/prago/utils"
 )
 
@@ -41,10 +40,10 @@ func (resource Resource) getBasicView(id int, inValues interface{}, user User) v
 	ret.Items = append(
 		ret.Items,
 		viewField{
-			Name:     messages.Messages.Get(user.Locale, "admin_table"),
+			Name:     messages.Get(user.Locale, "admin_table"),
 			Template: "admin_item_view_url",
 			Value: [2]string{
-				resource.GetURL(""),
+				resource.getURL(""),
 				resource.HumanName(user.Locale),
 			},
 		},
@@ -76,7 +75,7 @@ func (resource Resource) getBasicView(id int, inValues interface{}, user User) v
 		ret.Items = append(
 			ret.Items,
 			viewField{
-				Name:     messages.Messages.Get(user.Locale, "admin_history_last"),
+				Name:     messages.Get(user.Locale, "admin_history_last"),
 				Template: "admin_item_view_url",
 				Value: [2]string{
 					historyView.Items[0].UserURL,
@@ -88,10 +87,10 @@ func (resource Resource) getBasicView(id int, inValues interface{}, user User) v
 		ret.Items = append(
 			ret.Items,
 			viewField{
-				Name:     messages.Messages.Get(user.Locale, "admin_history_count"),
+				Name:     messages.Get(user.Locale, "admin_history_count"),
 				Template: "admin_item_view_url",
 				Value: [2]string{
-					resource.GetURL(fmt.Sprintf("%d/history", id)),
+					resource.getURL(fmt.Sprintf("%d/history", id)),
 					fmt.Sprintf("%d", len(historyView.Items)),
 				},
 			},
@@ -148,7 +147,7 @@ func floatViewDataSource(resource Resource, user User, f Field, value interface{
 }
 
 func timeViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
-	return messages.Messages.Timestamp(
+	return messages.Timestamp(
 		user.Locale,
 		value.(time.Time),
 		false,
@@ -156,7 +155,7 @@ func timeViewDataSource(resource Resource, user User, f Field, value interface{}
 }
 
 func timestampViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
-	return messages.Messages.Timestamp(
+	return messages.Timestamp(
 		user.Locale,
 		value.(time.Time),
 		true,
@@ -165,7 +164,7 @@ func timestampViewDataSource(resource Resource, user User, f Field, value interf
 
 func boolViewDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
 	if value.(bool) {
-		return messages.Messages.Get(user.Locale, "yes")
+		return messages.Get(user.Locale, "yes")
 	}
-	return messages.Messages.Get(user.Locale, "no")
+	return messages.Get(user.Locale, "no")
 }

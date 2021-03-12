@@ -7,7 +7,6 @@ import (
 	_ "embed"
 
 	"github.com/gorilla/sessions"
-	"github.com/hypertornado/prago/messages"
 )
 
 //ErrItemNotFound is returned when no item is found
@@ -59,7 +58,7 @@ func (app *App) initAdminActions() {
 		request.SetData("gravatar", user.gravatarURL())
 
 		if !user.IsAdmin && !user.emailConfirmed() {
-			addCurrentFlashMessage(request, messages.Messages.Get(user.Locale, "admin_flash_not_confirmed"))
+			addCurrentFlashMessage(request, messages.Get(user.Locale, "admin_flash_not_confirmed"))
 		}
 
 		if !user.IsAdmin {
@@ -70,7 +69,7 @@ func (app *App) initAdminActions() {
 				sysadminEmail = sysadmin.Email
 			}
 
-			addCurrentFlashMessage(request, messages.Messages.Get(user.Locale, "admin_flash_not_approved", sysadminEmail))
+			addCurrentFlashMessage(request, messages.Get(user.Locale, "admin_flash_not_approved", sysadminEmail))
 		}
 
 		request.SetData("main_menu", app.getMainMenu(request))
@@ -103,12 +102,6 @@ func (app App) GetAdminURL(suffix string) string {
 	return ret
 }
 
-//AddAction adds action
-func (app *App) AddAction(action Action) {
-	bindAction(app, nil, action, false)
-	app.rootActions = append(app.rootActions, action)
-}
-
 //AddJavascript adds javascript
 func (app *App) AddJavascript(url string) {
 	app.javascripts = append(app.javascripts, url)
@@ -119,13 +112,6 @@ func (app *App) AddCSS(url string) {
 	app.css = append(app.css, url)
 }
 
-//AddFlashMessage adds flash message to request
-func AddFlashMessage(request Request, message string) {
-	session := request.GetData("session").(*sessions.Session)
-	session.AddFlash(message)
-	must(session.Save(request.Request(), request.Response()))
-}
-
 func addCurrentFlashMessage(request Request, message string) {
 	data := request.GetData("flash_messages")
 	messages, _ := data.([]interface{})
@@ -134,13 +120,13 @@ func addCurrentFlashMessage(request Request, message string) {
 }
 
 func render403(request Request) {
-	request.SetData("message", messages.Messages.Get(getLocale(request), "admin_403"))
+	request.SetData("message", messages.Get(getLocale(request), "admin_403"))
 	request.SetData("admin_yield", "admin_message")
 	request.RenderViewWithCode("admin_layout", 403)
 }
 
 func render404(request Request) {
-	request.SetData("message", messages.Messages.Get(getLocale(request), "admin_404"))
+	request.SetData("message", messages.Get(getLocale(request), "admin_404"))
 	request.SetData("admin_yield", "admin_message")
 	request.RenderViewWithCode("admin_layout", 404)
 }

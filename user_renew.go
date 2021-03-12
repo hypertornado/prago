@@ -4,8 +4,6 @@ import (
 	"errors"
 	"net/url"
 	"time"
-
-	"github.com/hypertornado/prago/messages"
 )
 
 func initUserRenew(resource *Resource) {
@@ -13,8 +11,8 @@ func initUserRenew(resource *Resource) {
 	forgottenPasswordForm := func(locale string) *form {
 		form := newForm()
 		form.Method = "POST"
-		form.AddEmailInput("email", messages.Messages.Get(locale, "admin_email")).Focused = true
-		form.AddSubmit("send", messages.Messages.Get(locale, "admin_forgotten_submit"))
+		form.AddEmailInput("email", messages.Get(locale, "admin_email")).Focused = true
+		form.AddSubmit("send", messages.Get(locale, "admin_forgotten_submit"))
 		return form
 	}
 
@@ -27,12 +25,12 @@ func initUserRenew(resource *Resource) {
 		})
 	}
 
-	resource.App.accessController.Get(resource.GetURL("forgot"), func(request Request) {
+	resource.App.accessController.Get(resource.getURL("forgot"), func(request Request) {
 		locale := getLocale(request)
 		renderForgot(request, forgottenPasswordForm(locale), locale)
 	})
 
-	resource.App.accessController.Post(resource.GetURL("forgot"), func(request Request) {
+	resource.App.accessController.Post(resource.getURL("forgot"), func(request Request) {
 		email := fixEmail(request.Params().Get("email"))
 
 		var reason = ""
@@ -47,7 +45,7 @@ func initUserRenew(resource *Resource) {
 					if err == nil {
 						err = user.sendRenew(request, resource.App)
 						if err == nil {
-							AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_forgoten_sent", user.Email))
+							request.AddFlashMessage(messages.Get(user.Locale, "admin_forgoten_sent", user.Email))
 							request.Redirect(resource.App.GetAdminURL("/user/login"))
 							return
 						}
@@ -65,7 +63,7 @@ func initUserRenew(resource *Resource) {
 			reason = "user not found"
 		}
 
-		AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_forgoten_error", user.Email)+" ("+reason+")")
+		request.AddFlashMessage(messages.Get(user.Locale, "admin_forgoten_error", user.Email) + " (" + reason + ")")
 		request.Redirect(resource.App.GetAdminURL("user/forgot"))
 	})
 
@@ -73,10 +71,10 @@ func initUserRenew(resource *Resource) {
 		form = newForm()
 		form.Method = "POST"
 
-		passwordInput := form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_password_new"),
-			minLengthValidator(messages.Messages.Get(locale, "admin_password_length"), 7))
+		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "admin_password_new"),
+			minLengthValidator(messages.Get(locale, "admin_password_length"), 7))
 		passwordInput.Focused = true
-		form.AddSubmit("send", messages.Messages.Get(locale, "admin_forgoten_set"))
+		form.AddSubmit("send", messages.Get(locale, "admin_forgoten_set"))
 		return
 	}
 
@@ -89,13 +87,13 @@ func initUserRenew(resource *Resource) {
 		})
 	}
 
-	resource.App.accessController.Get(resource.GetURL("renew_password"), func(request Request) {
+	resource.App.accessController.Get(resource.getURL("renew_password"), func(request Request) {
 		locale := getLocale(request)
 		form := renewPasswordForm(locale)
 		renderRenew(request, form, locale)
 	})
 
-	resource.App.accessController.Post(resource.GetURL("renew_password"), func(request Request) {
+	resource.App.accessController.Post(resource.getURL("renew_password"), func(request Request) {
 		locale := getLocale(request)
 
 		form := renewPasswordForm(locale)
@@ -107,7 +105,7 @@ func initUserRenew(resource *Resource) {
 		email = fixEmail(email)
 		token := request.Params().Get("token")
 
-		errStr := messages.Messages.Get(locale, "admin_error")
+		errStr := messages.Get(locale, "admin_error")
 
 		var user User
 		err := resource.App.Query().WhereIs("email", email).Get(&user)
@@ -118,7 +116,7 @@ func initUserRenew(resource *Resource) {
 					if err == nil {
 						err = resource.App.Save(&user)
 						if err == nil {
-							AddFlashMessage(request, messages.Messages.Get(locale, "admin_password_changed"))
+							request.AddFlashMessage(messages.Get(locale, "admin_password_changed"))
 							request.Redirect(resource.App.GetAdminURL("user/login"))
 							return
 						}
@@ -126,10 +124,8 @@ func initUserRenew(resource *Resource) {
 				}
 			}
 		}
-		AddFlashMessage(request, errStr)
+		request.AddFlashMessage(errStr)
 		request.Redirect(resource.App.GetAdminURL("user/login"))
-		//form.GetItemByName("password").Value = ""
-		//renderLogin(request, form, locale)
 	})
 
 }
@@ -146,9 +142,9 @@ func (user User) sendRenew(request Request, app *App) error {
 		return errors.New("no reply email empty")
 	}
 
-	subject := messages.Messages.Get(user.Locale, "admin_forgotten_email_subject", app.HumanName)
+	subject := messages.Get(user.Locale, "admin_forgotten_email_subject", app.HumanName)
 	link := user.getRenewURL(request, app)
-	body := messages.Messages.Get(user.Locale, "admin_forgotten_email_body", link, link, app.HumanName)
+	body := messages.Get(user.Locale, "admin_forgotten_email_body", link, link, app.HumanName)
 
 	return app.SendEmail(
 		user.Name,

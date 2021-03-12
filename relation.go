@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hypertornado/prago/messages"
 	"github.com/hypertornado/prago/utils"
 )
 
@@ -65,7 +64,7 @@ func createRelationAddURL(resource Resource, field Field) func(int64) string {
 	return func(id int64) string {
 		values := url.Values{}
 		values.Add(field.ColumnName, fmt.Sprintf("%d", id))
-		return resource.GetURL("new?" + values.Encode())
+		return resource.getURL("new?" + values.Encode())
 	}
 }
 
@@ -73,7 +72,7 @@ func createRelationListURL(resource Resource, field Field) func(int64) string {
 	return func(id int64) string {
 		values := url.Values{}
 		values.Add(field.ColumnName, fmt.Sprintf("%d", id))
-		return resource.GetURL("") + "?" + values.Encode()
+		return resource.getURL("") + "?" + values.Encode()
 	}
 }
 
@@ -231,9 +230,9 @@ func (app App) relationStringer(field Field, value reflect.Value, user User) str
 		return fmt.Sprintf("%v", value.Float())
 	case reflect.Bool:
 		if value.Bool() {
-			return messages.Messages.Get(user.Locale, "yes_plain")
+			return messages.Get(user.Locale, "yes_plain")
 		}
-		return messages.Messages.Get(user.Locale, "no_plain")
+		return messages.Get(user.Locale, "no_plain")
 	case reflect.Struct:
 		if value.Type() == reflect.TypeOf(time.Now()) {
 			tm := value.Interface().(time.Time)
@@ -241,7 +240,7 @@ func (app App) relationStringer(field Field, value reflect.Value, user User) str
 			if field.Tags["prago-type"] == "timestamp" {
 				showTime = true
 			}
-			return messages.Messages.Timestamp(user.Locale, tm, showTime)
+			return messages.Timestamp(user.Locale, tm, showTime)
 		}
 	}
 	return ""

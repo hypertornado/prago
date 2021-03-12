@@ -5,8 +5,6 @@ import (
 	"net/url"
 	"sort"
 	"time"
-
-	"github.com/hypertornado/prago/messages"
 )
 
 type taskActivityView struct {
@@ -98,7 +96,7 @@ func (tm *taskManager) getTaskMonitor(user User) (ret *taskMonitor) {
 	})
 
 	if len(ret.Items) > 0 {
-		ret.Name = messages.Messages.Get(user.Locale, "tasks_runned")
+		ret.Name = messages.Get(user.Locale, "tasks_runned")
 	}
 
 	return

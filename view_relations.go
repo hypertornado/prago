@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"reflect"
-
-	"github.com/hypertornado/prago/messages"
 )
 
 type viewRelation struct {
@@ -37,16 +35,16 @@ func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, use
 
 		name := v.listName(user.Locale)
 		vi.Name = name
-		vi.Subname = messages.Messages.ItemsCount(filteredCount, user.Locale)
+		vi.Subname = messages.ItemsCount(filteredCount, user.Locale)
 
 		vi.Navigation = append(vi.Navigation, navigationTab{
-			Name: messages.Messages.GetNameFunction("admin_table")(user.Locale),
+			Name: messages.GetNameFunction("admin_table")(user.Locale),
 			URL:  v.listURL(int64(id)),
 		})
 
 		if resource.App.Authorize(user, v.resource.CanEdit) {
 			vi.Navigation = append(vi.Navigation, navigationTab{
-				Name: messages.Messages.GetNameFunction("admin_new")(user.Locale),
+				Name: messages.GetNameFunction("admin_new")(user.Locale),
 				URL:  v.addURL(int64(id)),
 			})
 		}
@@ -186,16 +184,16 @@ func (resource *Resource) getAutoRelationsViewOLD(id int, inValues interface{}, 
 		name := v.listName(user.Locale)
 		vi.Name = name
 		vi.Subname = fmt.Sprintf("(%d / %d / %d)", len(data), filteredCount, totalCount)
-		vi.Subname = messages.Messages.ItemsCount(filteredCount, user.Locale)
+		vi.Subname = messages.ItemsCount(filteredCount, user.Locale)
 
 		vi.Navigation = append(vi.Navigation, navigationTab{
-			Name: messages.Messages.GetNameFunction("admin_table")(user.Locale),
+			Name: messages.GetNameFunction("admin_table")(user.Locale),
 			URL:  v.listURL(int64(id)),
 		})
 
 		if resource.App.Authorize(user, v.resource.CanEdit) {
 			vi.Navigation = append(vi.Navigation, navigationTab{
-				Name: messages.Messages.GetNameFunction("admin_new")(user.Locale),
+				Name: messages.GetNameFunction("admin_new")(user.Locale),
 				URL:  v.addURL(int64(id)),
 			})
 		}

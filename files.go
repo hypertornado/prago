@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hypertornado/prago/messages"
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 	"github.com/hypertornado/prago/utils"
 )
@@ -95,7 +94,7 @@ func (app *App) UploadFile(fileHeader *multipart.FileHeader, user *User, descrip
 }
 
 //UpdateMetadata updates metadata of file
-func (f *File) UpdateMetadata() error {
+func (f *File) updateMetadata() error {
 	metadata, err := filesCDN.GetMetadata(f.UID)
 	if err != nil {
 		return err
@@ -136,18 +135,18 @@ func getOldRedirectParams(request Request, app *App) (uuid, name string, err err
 func initFilesResource(resource *Resource) {
 	app := resource.App
 	initCDN(app)
-	resource.HumanName = messages.Messages.GetNameFunction("admin_files")
+	resource.HumanName = messages.GetNameFunction("admin_files")
 
-	resource.fieldMap["uid"].HumanName = messages.Messages.GetNameFunction("admin_file")
-	resource.fieldMap["width"].HumanName = messages.Messages.GetNameFunction("width")
-	resource.fieldMap["height"].HumanName = messages.Messages.GetNameFunction("height")
+	resource.fieldMap["uid"].HumanName = messages.GetNameFunction("admin_file")
+	resource.fieldMap["width"].HumanName = messages.GetNameFunction("width")
+	resource.fieldMap["height"].HumanName = messages.GetNameFunction("height")
 
 	app.AddCommand("files", "metadata").
 		Callback(func() {
 			var files []*File
 			must(app.Query().Get(&files))
 			for _, v := range files {
-				err := v.UpdateMetadata()
+				err := v.updateMetadata()
 				if err != nil {
 					fmt.Println("error while updating metadata: ", v.ID, err)
 					continue
@@ -213,7 +212,7 @@ func initFilesResource(resource *Resource) {
 	resource.ItemsPerPage = 100
 
 	//TODO: authorize
-	resource.ResourceController.Post(resource.GetURL(""), func(request Request) {
+	resource.ResourceController.Post(resource.getURL(""), func(request Request) {
 		validateCSRF(request)
 
 		multipartFiles := request.Request().MultipartForm.File["uid"]
@@ -225,14 +224,12 @@ func initFilesResource(resource *Resource) {
 
 		_, err := resource.App.UploadFile(multipartFiles[0], &user, request.Params().Get("Description"))
 		must(err)
-		AddFlashMessage(request, messages.Messages.Get(getLocale(request), "admin_item_created"))
-		request.Redirect(resource.GetURL(""))
+		request.AddFlashMessage(messages.Get(getLocale(request), "admin_item_created"))
+		request.Redirect(resource.getURL(""))
 	})
 
-	resource.AddAction(Action{
-		Method: "POST",
-		URL:    "getcdnurl",
-		Handler: func(resource Resource, request Request, user User) {
+	resource.AddAction("getcdnurl").Method("POST").Handler(
+		func(request Request) {
 			uuid := request.Params().Get("uuid")
 			size := request.Params().Get("size")
 
@@ -245,7 +242,7 @@ func initFilesResource(resource *Resource) {
 			redirectURL := filesCDN.GetImageURL(uuid, file.Name, size)
 			request.Redirect(redirectURL)
 		},
-	})
+	)
 }
 
 func (f *File) getPath(prefix string) (folder, file string) {

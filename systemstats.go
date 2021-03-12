@@ -12,11 +12,8 @@ import (
 func (app *App) initSystemStats() {
 	startedAt := time.Now()
 
-	action := CreateAdminAction(
-		"_stats",
-		func(string) string { return "Prago Stats" },
-		"admin_systemstats",
-		func(resource Resource, request Request, user User) interface{} {
+	app.AddAction("_stats").Name(Unlocalized("Prago Stats")).Permission(permissionSysadmin).Template("admin_systemstats").DataSource(
+		func(request Request) interface{} {
 
 			stats := [][2]string{}
 			stats = append(stats, [2]string{"App name", app.codeName})
@@ -109,9 +106,6 @@ func (app *App) initSystemStats() {
 			return ret
 		},
 	)
-
-	action.Permission = permissionSysadmin
-	app.AddAction(action)
 }
 
 type accessView struct {

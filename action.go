@@ -2,16 +2,15 @@ package prago
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/tealeg/xlsx"
-
-	"github.com/hypertornado/prago/messages"
 	"github.com/hypertornado/prago/utils"
+	"github.com/tealeg/xlsx"
 )
 
 type buttonData struct {
@@ -22,25 +21,127 @@ type buttonData struct {
 
 //Action represents action
 type Action struct {
-	Name       func(string) string
-	Permission Permission
-	Method     string
-	URL        string
-	Handler    func(Resource, Request, User)
+	name       func(string) string
+	permission Permission
+	method     string
+	url        string
+	handler    func(Request)
+	template   string
+	dataSource func(Request) interface{}
+
+	app          *App
+	resource     *Resource
+	isItemAction bool
+	isWide       bool
 }
 
+func (app *App) bindAllActions() {
+	for _, v := range app.rootActions {
+		err := v.bindAction()
+		if err != nil {
+			panic(fmt.Sprintf("error while binding root action %s %s: %s", v.method, v.name("en"), err))
+		}
+	}
+
+	for _, resource := range app.resources {
+		for _, v := range resource.actions {
+			err := v.bindAction()
+			if err != nil {
+				panic(fmt.Sprintf("error while binding resource %s action %s %s: %s", resource.ID, v.method, v.name("en"), err))
+			}
+		}
+		for _, v := range resource.itemActions {
+			err := v.bindAction()
+			if err != nil {
+				panic(fmt.Sprintf("error while binding item resource %s action %s %s: %s", resource.ID, v.method, v.name("en"), err))
+			}
+		}
+
+	}
+
+}
+
+func newAction(app *App, url string) *Action {
+	return &Action{
+		name:       Unlocalized(url),
+		permission: "",
+		method:     "GET",
+		url:        url,
+		app:        app,
+	}
+}
+
+func (app *App) AddAction(url string) *Action {
+	action := newAction(app, url)
+	app.rootActions = append(app.rootActions, action)
+	return action
+}
+
+func (resource *Resource) AddAction(url string) *Action {
+	action := newAction(resource.App, url)
+	action.resource = resource
+	action.permission = resource.CanView
+	resource.actions = append(resource.actions, action)
+	return action
+}
+
+func (resource *Resource) AddItemAction(url string) *Action {
+	action := newAction(resource.App, url)
+	action.resource = resource
+	action.isItemAction = true
+	action.permission = resource.CanView
+	resource.itemActions = append(resource.itemActions, action)
+	return action
+}
+
+func (action *Action) Name(name func(string) string) *Action {
+	action.name = name
+	return action
+}
+
+func (action *Action) Permission(permission Permission) *Action {
+	action.permission = permission
+	return action
+}
+
+func (action *Action) Method(method string) *Action {
+	action.method = strings.ToUpper(method)
+	return action
+}
+
+func (action *Action) Template(template string) *Action {
+	action.template = template
+	return action
+}
+
+func (action *Action) Handler(handler func(Request)) *Action {
+	action.handler = handler
+	return action
+}
+
+func (action *Action) DataSource(dataSource func(Request) interface{}) *Action {
+	action.dataSource = dataSource
+	return action
+}
+
+func (action *Action) IsWide() *Action {
+	action.isWide = true
+	return action
+}
+
+/*
 func (ra *Action) getName(language string) string {
 	if ra.Name != nil {
 		return ra.Name(language)
 	}
 	return ra.URL
-}
+}*/
 
-func actionList(resource *Resource) Action {
-	return Action{
-		Permission: resource.CanView,
-		Name:       resource.HumanName,
-		Handler: func(resource Resource, request Request, user User) {
+func actionList(resource *Resource) *Action {
+
+	return resource.AddAction("").Permission(resource.CanView).Name(resource.HumanName).Handler(
+		func(request Request) {
+			user := request.GetUser()
 			if request.Request().URL.Query().Get("_format") == "json" {
 				listDataJSON, err := resource.getListContentJSON(resource.App, user, request.Request().URL.Query())
 				if err != nil {
@@ -105,15 +206,14 @@ func actionList(resource *Resource) Action {
 				PageData:     listData,
 			})
 		},
-	}
+	)
+
 }
 
-func actionNew(permission Permission) Action {
-	return Action{
-		Permission: permission,
-		Name:       messages.Messages.GetNameFunction("admin_new"),
-		URL:        "new",
-		Handler: func(resource Resource, request Request, user User) {
+func actionNew(resource *Resource, permission Permission) *Action {
+	return resource.AddAction("new").Permission(permission).Name(messages.GetNameFunction("admin_new")).Handler(
+		func(request Request) {
+			user := request.GetUser()
 			var item interface{}
 			resource.newItem(&item)
 
@@ -124,7 +224,7 @@ func actionNew(permission Permission) Action {
 
 			form.Classes = append(form.Classes, "form_leavealert")
 			form.Action = "../" + resource.ID
-			form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_save"))
+			form.AddSubmit("_submit", messages.Get(user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
 
 			renderNavigationPage(request, adminNavigationPage{
@@ -133,15 +233,14 @@ func actionNew(permission Permission) Action {
 				PageData:     form,
 			})
 		},
-	}
+	)
 }
 
-func actionCreate(permission Permission) Action {
-	return Action{
-		Method:     "post",
-		Permission: permission,
-		URL:        "",
-		Handler: func(resource Resource, request Request, user User) {
+func actionCreate(resource *Resource, permission Permission) *Action {
+
+	return resource.AddAction("").Method("POST").Permission(permission).Handler(
+		func(request Request) {
+			user := request.GetUser()
 			validateCSRF(request)
 			var item interface{}
 			resource.newItem(&item)
@@ -156,7 +255,7 @@ func actionCreate(permission Permission) Action {
 			must(resource.App.Create(item))
 
 			if resource.App.search != nil {
-				err = resource.App.search.saveItem(&resource, item)
+				err = resource.App.search.saveItem(resource, item)
 				if err != nil {
 					resource.App.Log().Println(fmt.Errorf("%s", err))
 				}
@@ -164,22 +263,21 @@ func actionCreate(permission Permission) Action {
 			}
 
 			if resource.ActivityLog {
-				resource.App.createNewActivityLog(resource, user, item)
+				resource.App.createNewActivityLog(*resource, user, item)
 			}
 
 			must(resource.updateCachedCount())
-			AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_item_created"))
+			request.AddFlashMessage(messages.Get(user.Locale, "admin_item_created"))
 			request.Redirect(resource.GetItemURL(item, ""))
 		},
-	}
+	)
+
 }
 
-func actionView(resource *Resource) Action {
-	return Action{
-		Permission: resource.CanView,
-		//Name:       messages.Messages.GetNameFunction("admin_view"),
-		URL: "",
-		Handler: func(resource Resource, request Request, user User) {
+func actionView(resource *Resource) *Action {
+
+	return resource.AddItemAction("").IsWide().Template("admin_views").Permission(resource.CanView).DataSource(
+		func(request Request) interface{} {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
@@ -189,64 +287,47 @@ func actionView(resource *Resource) Action {
 			if err != nil {
 				if err == ErrItemNotFound {
 					render404(request)
-					return
+					return nil
 				}
 				panic(err)
 			}
 
-			renderNavigationPage(request, adminNavigationPage{
-				Navigation:   resource.getItemNavigation(user, item, ""),
-				PageTemplate: "admin_views",
-				PageData:     resource.getViews(id, item, request.GetUser()),
-				HideBox:      true,
-			})
+			return resource.getViews(id, item, request.GetUser())
 		},
-	}
+	)
 }
 
-func actionEdit(permission Permission) Action {
-	return Action{
-		Name:       messages.Messages.GetNameFunction("admin_edit"),
-		Permission: permission,
-		URL:        "edit",
-		Handler: func(resource Resource, request Request, user User) {
+func actionEdit(resource *Resource, permission Permission) *Action {
+
+	return resource.AddItemAction("edit").Name(messages.GetNameFunction("admin_edit")).Permission(permission).Template("admin_form").DataSource(
+		func(request Request) interface{} {
+			user := request.GetUser()
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
 			var item interface{}
 			resource.newItem(&item)
 			err = resource.App.Query().WhereIs("id", int64(id)).Get(item)
-			if err != nil {
-				if err == ErrItemNotFound {
-					render404(request)
-					return
-				}
-				panic(err)
-			}
+			must(err)
 
 			form, err := resource.getForm(item, user)
 			must(err)
 
 			form.Classes = append(form.Classes, "form_leavealert")
 			form.Action = "edit"
-			form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_save"))
+			form.AddSubmit("_submit", messages.Get(user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
-
-			renderNavigationPage(request, adminNavigationPage{
-				Navigation:   resource.getItemNavigation(user, item, "edit"),
-				PageTemplate: "admin_form",
-				PageData:     form,
-			})
+			return form
 		},
-	}
+	)
+
 }
 
-func actionUpdate(permission Permission) Action {
-	return Action{
-		Permission: permission,
-		URL:        "edit",
-		Method:     "post",
-		Handler: func(resource Resource, request Request, user User) {
+func actionUpdate(resource *Resource, permission Permission) *Action {
+
+	return resource.AddItemAction("edit").Method("POST").Permission(permission).Handler(
+		func(request Request) {
+			user := request.GetUser()
 			validateCSRF(request)
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
@@ -272,7 +353,7 @@ func actionUpdate(permission Permission) Action {
 			must(resource.App.Save(item))
 
 			if resource.App.search != nil {
-				err = resource.App.search.saveItem(&resource, item)
+				err = resource.App.search.saveItem(resource, item)
 				if err != nil {
 					resource.App.Log().Println(fmt.Errorf("%s", err))
 				}
@@ -285,36 +366,33 @@ func actionUpdate(permission Permission) Action {
 					panic(err)
 				}
 
-				resource.App.createEditActivityLog(resource, user, int64(id), beforeData, afterData)
+				resource.App.createEditActivityLog(*resource, user, int64(id), beforeData, afterData)
 			}
 
-			AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_item_edited"))
-			request.Redirect(resource.GetURL(fmt.Sprintf("%d", id)))
+			request.AddFlashMessage(messages.Get(user.Locale, "admin_item_edited"))
+			request.Redirect(resource.getURL(fmt.Sprintf("%d", id)))
 		},
-	}
+	)
+
 }
 
-func actionHistory(permission Permission) Action {
-	return Action{
-		Name:       messages.Messages.GetNameFunction("admin_history"),
-		Permission: permission,
-		URL:        "history",
-		Handler: func(resource Resource, request Request, user User) {
+func actionHistory(resource *Resource, permission Permission) *Action {
+
+	return resource.AddAction("history").Name(messages.GetNameFunction("admin_history")).Permission(permission).Handler(
+		func(request Request) {
+			user := request.GetUser()
 			renderNavigationPage(request, adminNavigationPage{
 				Navigation:   resource.getNavigation(user, "history"),
 				PageTemplate: "admin_history",
-				PageData:     resource.App.getHistory(&resource, 0),
+				PageData:     resource.App.getHistory(resource, 0),
 			})
 		},
-	}
+	)
 }
 
-func actionItemHistory(permission Permission) Action {
-	return Action{
-		Name:       messages.Messages.GetNameFunction("admin_history"),
-		Permission: permission,
-		URL:        "history",
-		Handler: func(resource Resource, request Request, user User) {
+func actionItemHistory(resource *Resource, permission Permission) *Action {
+	return resource.AddItemAction("history").Name(messages.GetNameFunction("admin_history")).Permission(permission).Template("admin_history").DataSource(
+		func(request Request) interface{} {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
@@ -322,26 +400,20 @@ func actionItemHistory(permission Permission) Action {
 			resource.newItem(&item)
 			must(resource.App.Query().WhereIs("id", int64(id)).Get(item))
 
-			renderNavigationPage(request, adminNavigationPage{
-				Navigation:   resource.getItemNavigation(user, item, "history"),
-				PageTemplate: "admin_history",
-				PageData:     resource.App.getHistory(&resource, int64(id)),
-			})
+			return resource.App.getHistory(resource, int64(id))
 		},
-	}
+	)
 }
 
-func actionDelete(permission Permission) Action {
-	ret := CreateNavigationalItemAction(
-		"delete",
-		messages.Messages.GetNameFunction("admin_delete"),
-		"admin_delete",
-		func(resource Resource, request Request, user User) interface{} {
+func actionDelete(resource *Resource, permission Permission) *Action {
+	return resource.AddItemAction("delete").Permission(permission).Name(messages.GetNameFunction("admin_delete")).Template("admin_delete").DataSource(
+		func(request Request) interface{} {
+			user := request.GetUser()
 			ret := map[string]interface{}{}
 			form := newForm()
 			form.Method = "POST"
 			form.AddCSRFToken(request)
-			form.AddDeleteSubmit("send", messages.Messages.Get(user.Locale, "admin_delete"))
+			form.AddDeleteSubmit("send", messages.Get(user.Locale, "admin_delete"))
 			ret["form"] = form
 
 			var item interface{}
@@ -349,21 +421,17 @@ func actionDelete(permission Permission) Action {
 			must(resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(item))
 			itemName := getItemName(item)
 			ret["delete_title"] = fmt.Sprintf("Chcete smazat položku %s?", itemName)
-			ret["delete_title"] = messages.Messages.Get(user.Locale, "admin_delete_confirmation_name", itemName)
-
+			ret["delete_title"] = messages.Get(user.Locale, "admin_delete_confirmation_name", itemName)
 			return ret
 		},
 	)
-	ret.Permission = permission
-	return ret
+
 }
 
-func actionDoDelete(permission Permission) Action {
-	return Action{
-		Permission: permission,
-		URL:        "delete",
-		Method:     "post",
-		Handler: func(resource Resource, request Request, user User) {
+func actionDoDelete(resource *Resource, permission Permission) *Action {
+	return resource.AddItemAction("delete").Permission(permission).Method("POST").Handler(
+		func(request Request) {
+			user := request.GetUser()
 			validateCSRF(request)
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
@@ -374,7 +442,7 @@ func actionDoDelete(permission Permission) Action {
 			must(err)
 
 			if resource.App.search != nil {
-				err = resource.App.search.deleteItem(&resource, int64(id))
+				err = resource.App.search.deleteItem(resource, int64(id))
 				if err != nil {
 					resource.App.Log().Println(fmt.Errorf("%s", err))
 				}
@@ -382,22 +450,19 @@ func actionDoDelete(permission Permission) Action {
 			}
 
 			if resource.ActivityLog {
-				resource.App.createDeleteActivityLog(resource, user, int64(id), item)
+				resource.App.createDeleteActivityLog(*resource, user, int64(id), item)
 			}
 
 			must(resource.updateCachedCount())
-			AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_item_deleted"))
-			request.Redirect(resource.GetURL(""))
+			request.AddFlashMessage(messages.Get(user.Locale, "admin_item_deleted"))
+			request.Redirect(resource.getURL(""))
 		},
-	}
+	)
 }
 
-func actionPreview(permission Permission) Action {
-	return Action{
-		Name:       messages.Messages.GetNameFunction("admin_preview"),
-		Permission: permission,
-		URL:        "preview",
-		Handler: func(resource Resource, request Request, user User) {
+func actionPreview(resource *Resource, permission Permission) *Action {
+	return resource.AddItemAction("preview").Name(messages.GetNameFunction("admin_preview")).Permission(permission).Handler(
+		func(request Request) {
 			var item interface{}
 			resource.newItem(&item)
 			must(resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(item))
@@ -405,69 +470,93 @@ func actionPreview(permission Permission) Action {
 				resource.PreviewURLFunction(item),
 			)
 		},
+	)
+}
+
+func (action *Action) getnavigation(request Request) adminItemNavigation {
+	if action.resource != nil {
+		user := request.GetUser()
+		code := action.url
+		if action.isItemAction {
+			var item interface{}
+			action.resource.newItem(&item)
+			must(action.resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(item))
+			return action.resource.getItemNavigation(user, item, code)
+		} else {
+			return action.resource.getNavigation(user, code)
+		}
 	}
+	return adminItemNavigation{}
+
 }
 
-func bindResourceAction(app *App, resource *Resource, action Action) error {
-	return bindAction(app, resource, action, false)
-}
-
-func bindResourceItemAction(app *App, resource *Resource, action Action) error {
-	return bindAction(app, resource, action, true)
-}
-
-func bindAction(app *App, resource *Resource, action Action, isItemAction bool) error {
-	if strings.HasPrefix(action.URL, "/") {
-		return nil
+func (action *Action) bindAction() error {
+	app := action.app
+	if strings.HasPrefix(action.url, "/") {
+		return errors.New("url can't start with / character")
 	}
 
 	var url string
-	if resource == nil {
-		url = app.GetAdminURL(action.URL)
+	if action.resource == nil {
+		url = app.GetAdminURL(action.url)
 	} else {
-		if isItemAction {
-			if action.URL != "" {
-				url = resource.GetURL(":id/" + action.URL)
+		resource := action.resource
+		if action.isItemAction {
+			if action.url != "" {
+				url = resource.getURL(":id/" + action.url)
 			} else {
-				url = resource.GetURL(":id")
+				url = resource.getURL(":id")
 			}
 		} else {
-			url = resource.GetURL(action.URL)
+			url = resource.getURL(action.url)
 		}
 	}
 
-	method := strings.ToLower(action.Method)
 	var controller *Controller
-	if resource != nil {
-		controller = resource.ResourceController
+	if action.resource != nil {
+		controller = action.resource.ResourceController
 	} else {
 		controller = app.AdminController
 	}
 
 	var fn = func(request Request) {
 		user := request.GetUser()
-		if !app.Authorize(user, action.Permission) {
+		if !app.Authorize(user, action.permission) {
 			render403(request)
 			return
 		}
-		if resource != nil {
-			action.Handler(*resource, request, user)
+		if action.handler != nil {
+			action.handler(request)
 		} else {
-			//TODO: ugly hack
-			action.Handler(Resource{App: app}, request, user)
+			var data interface{}
+			if action.dataSource != nil {
+				data = action.dataSource(request)
+			}
+			renderNavigationPage(request, adminNavigationPage{
+				App:          app,
+				Navigation:   action.getnavigation(request),
+				PageTemplate: action.template,
+				PageData:     data,
+			})
 		}
 	}
 
 	constraints := []func(map[string]string) bool{}
-	if isItemAction {
+	if action.isItemAction {
 		constraints = append(constraints, utils.ConstraintInt("id"))
 	}
 
-	switch method {
-	case "post":
+	switch action.method {
+	case "POST":
 		controller.Post(url, fn, constraints...)
-	default:
+	case "GET":
 		controller.Get(url, fn, constraints...)
+	case "PUT":
+		controller.Put(url, fn, constraints...)
+	case "DELETE":
+		controller.Delete(url, fn, constraints...)
+	default:
+		return fmt.Errorf("unknown method %s", action.method)
 	}
 	return nil
 }
@@ -480,42 +569,34 @@ func initResourceActions(a *App, resource *Resource) {
 		resource.CanDelete = resource.CanEdit
 	}
 
-	resourceActions := []Action{
+	resourceActions := []*Action{
 		actionList(resource),
-		actionNew(resource.CanCreate),
-		actionCreate(resource.CanCreate),
+		actionNew(resource, resource.CanCreate),
+		actionCreate(resource, resource.CanCreate),
 	}
 	if resource.ActivityLog {
-		resourceActions = append(resourceActions, actionHistory(resource.CanEdit))
-	}
-	resource.actions = append(resourceActions, resource.actions...)
-	for _, v := range resource.actions {
-		bindResourceAction(a, resource, v)
+		resourceActions = append(resourceActions, actionHistory(resource, resource.CanEdit))
 	}
 
-	itemActions := []Action{
+	itemActions := []*Action{
 		actionView(resource),
 	}
 
 	itemActions = append(itemActions,
-		actionEdit(resource.CanEdit),
-		actionUpdate(resource.CanEdit),
-		actionDelete(resource.CanDelete),
-		actionDoDelete(resource.CanDelete),
+		actionEdit(resource, resource.CanEdit),
+		actionUpdate(resource, resource.CanEdit),
+		actionDelete(resource, resource.CanDelete),
+		actionDoDelete(resource, resource.CanDelete),
 	)
 
 	if resource.PreviewURLFunction != nil {
-		itemActions = append(itemActions, actionPreview(resource.CanView))
+		itemActions = append(itemActions, actionPreview(resource, resource.CanView))
 	}
 
 	if resource.ActivityLog {
-		itemActions = append(itemActions, actionItemHistory(resource.CanView))
+		itemActions = append(itemActions, actionItemHistory(resource, resource.CanView))
 	}
-	resource.itemActions = append(itemActions, resource.itemActions...)
 
-	for _, v := range resource.itemActions {
-		bindResourceItemAction(a, resource, v)
-	}
 }
 
 func (resource *Resource) getResourceActionsButtonData(user User, admin *App) (ret []buttonData) {
@@ -533,8 +614,8 @@ func (app *App) getListItemActions(user User, item interface{}, id int64, resour
 	ret := listItemActions{}
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{
-		Name: messages.Messages.Get(user.Locale, "admin_view"),
-		URL:  resource.GetURL(fmt.Sprintf("%d", id)),
+		Name: messages.Get(user.Locale, "admin_view"),
+		URL:  resource.getURL(fmt.Sprintf("%d", id)),
 	})
 
 	navigation := resource.getItemNavigation(user, item, "")
@@ -555,12 +636,30 @@ func (app *App) getListItemActions(user User, item interface{}, id int64, resour
 	return ret
 }
 
+/*
 //AddItemAction adds item action
-func (resource *Resource) AddItemAction(action Action) {
+func (resource *Resource) AddItemAction(url string, name func(string) string, templateName string, dataGenerator func(Request) interface{}) {
+	action := Action{
+		Name:    name,
+		URL:     url,
+		Handler: createAdminHandler(url, templateName, dataGenerator, false),
+	}
+	resource.itemActions = append(resource.itemActions, action)
+}
+
+//AddItemAction adds item action
+func (resource *Resource) AddItemPOSTAction(url string, handler func(Request)) {
+	action := Action{
+		Method: "post",
+		URL:    url,
+		Handler: func(resource Resource, request Request, user User) {
+			handler(request)
+		},
+	}
 	resource.itemActions = append(resource.itemActions, action)
 }
 
 //AddAction adds action
 func (resource *Resource) AddAction(action Action) {
 	resource.actions = append(resource.actions, action)
-}
+}*/

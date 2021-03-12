@@ -1,8 +1,6 @@
 package prago
 
-import "github.com/hypertornado/prago/messages"
-
-func initUserSettings(resource *Resource) {
+func (app *App) initUserSettings() {
 
 	settingsForm := func(user User) *form {
 		form := newForm()
@@ -10,43 +8,47 @@ func initUserSettings(resource *Resource) {
 		form.Action = "settings"
 
 		name := form.AddTextInput("name", "")
-		name.NameHuman = messages.Messages.Get(user.Locale, "Name")
+		name.NameHuman = messages.Get(user.Locale, "Name")
 		name.Value = user.Name
 
-		sel := form.AddSelect("locale", messages.Messages.Get(user.Locale, "admin_locale"), availableLocales)
+		sel := form.AddSelect("locale", messages.Get(user.Locale, "admin_locale"), availableLocales)
 		sel.Value = user.Locale
 
-		form.AddSubmit("_submit", messages.Messages.Get(user.Locale, "admin_edit"))
+		form.AddSubmit("_submit", messages.Get(user.Locale, "admin_edit"))
 		return form
 	}
 
-	resource.App.AdminController.Get(resource.GetURL("settings"), func(request Request) {
+	app.AdminController.Get(app.GetAdminURL("settings"), func(request Request) {
 		user := request.GetUser()
 		form := settingsForm(user).AddCSRFToken(request)
 
 		request.SetData("admin_navigation_settings_selected", true)
 		renderNavigationPage(request, adminNavigationPage{
-			Navigation:   resource.App.getSettingsNavigation(user, "settings"),
+			Navigation:   app.getSettingsNavigation(user, "settings"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
 	})
 
-	resource.App.AdminController.Post(resource.GetURL("settings"), func(request Request) {
+	app.AdminController.Post(app.GetAdminURL("settings"), func(request Request) {
 		validateCSRF(request)
 		user := request.GetUser()
 		form := settingsForm(user).AddCSRFToken(request)
 		if form.Validate() {
-			must(resource.bindData(&user, user, request.Params(), form.getFilter()))
-			must(resource.App.Save(&user))
-			AddFlashMessage(request, messages.Messages.Get(getLocale(request), "admin_settings_changed"))
-			request.Redirect(resource.GetURL("settings"))
+			userResource, err := app.getResourceByItem(User{})
+			if err != nil {
+				panic(err)
+			}
+			must(userResource.bindData(&user, user, request.Params(), form.getFilter()))
+			must(app.Save(&user))
+			request.AddFlashMessage(messages.Get(getLocale(request), "admin_settings_changed"))
+			request.Redirect(app.GetAdminURL("settings"))
 			return
 		}
 
 		request.SetData("admin_navigation_settings_selected", true)
 		renderNavigationPage(request, adminNavigationPage{
-			Navigation:   resource.App.getSettingsNavigation(user, "settings"),
+			Navigation:   app.getSettingsNavigation(user, "settings"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
@@ -61,37 +63,37 @@ func initUserSettings(resource *Resource) {
 				return false
 			}
 			return true
-		}, messages.Messages.Get(locale, "admin_password_wrong"))
+		}, messages.Get(locale, "admin_password_wrong"))
 
 		form := newForm()
 		form.Method = "POST"
 		form.AddPasswordInput("oldpassword",
-			messages.Messages.Get(locale, "admin_password_old"),
+			messages.Get(locale, "admin_password_old"),
 			oldValidator,
 		)
 		form.AddPasswordInput("newpassword",
-			messages.Messages.Get(locale, "admin_password_new"),
-			minLengthValidator(messages.Messages.Get(locale, "admin_password_length"), 7),
+			messages.Get(locale, "admin_password_new"),
+			minLengthValidator(messages.Get(locale, "admin_password_length"), 7),
 		)
-		form.AddSubmit("_submit", messages.Messages.Get(locale, "admin_save"))
+		form.AddSubmit("_submit", messages.Get(locale, "admin_save"))
 		return form
 	}
 
 	renderPasswordForm := func(request Request, form *form) {
 		user := request.GetUser()
 		renderNavigationPage(request, adminNavigationPage{
-			Navigation:   resource.App.getSettingsNavigation(user, "password"),
+			Navigation:   app.getSettingsNavigation(user, "password"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
 	}
 
-	resource.App.AdminController.Get(resource.GetURL("password"), func(request Request) {
+	app.AdminController.Get(app.GetAdminURL("password"), func(request Request) {
 		form := changePasswordForm(request)
 		renderPasswordForm(request, form)
 	})
 
-	resource.App.AdminController.Post(resource.GetURL("password"), func(request Request) {
+	app.AdminController.Post(app.GetAdminURL("password"), func(request Request) {
 		form := changePasswordForm(request)
 		form.BindData(request.Params())
 		form.Validate()
@@ -99,9 +101,9 @@ func initUserSettings(resource *Resource) {
 			password := request.Params().Get("newpassword")
 			user := request.GetUser()
 			must(user.newPassword(password))
-			must(resource.App.Save(&user))
-			AddFlashMessage(request, messages.Messages.Get(getLocale(request), "admin_password_changed"))
-			request.Redirect(resource.GetURL("settings"))
+			must(app.Save(&user))
+			request.AddFlashMessage(messages.Get(getLocale(request), "admin_password_changed"))
+			request.Redirect(app.GetAdminURL("settings"))
 		} else {
 			renderPasswordForm(request, form)
 		}

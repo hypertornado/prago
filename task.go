@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hypertornado/prago/messages"
 	"github.com/hypertornado/prago/utils"
 	"golang.org/x/text/collate"
 	"golang.org/x/text/language"
@@ -85,7 +84,7 @@ func (tm *taskManager) init() {
 		request.SetData("tasks", tm.getTasks(user))
 		request.SetData("taskmonitor", tm.getTaskMonitor(user))
 		request.SetData("admin_yield", "admin_tasks")
-		request.SetData("admin_title", messages.Messages.Get(user.Locale, "tasks"))
+		request.SetData("admin_title", messages.Get(user.Locale, "tasks"))
 		request.RenderView("admin_layout")
 	})
 
@@ -194,26 +193,24 @@ func (tm *taskManager) deleteTask(uuid string, user User) error {
 	return nil
 }
 
-//TaskViewGroup groups task views
-type TaskViewGroup struct {
+type taskViewGroup struct {
 	Name  string
-	Tasks []TaskView
+	Tasks []taskView
 }
 
-//TaskView is task viewer
-type TaskView struct {
+type taskView struct {
 	ID   string
 	Name string
 }
 
-func (t *Task) taskView() TaskView {
-	return TaskView{
+func (t *Task) taskView() taskView {
+	return taskView{
 		ID:   t.id,
 		Name: t.id,
 	}
 }
 
-func (tm *taskManager) getTasks(user User) (ret []TaskViewGroup) {
+func (tm *taskManager) getTasks(user User) (ret []taskViewGroup) {
 
 	var tasks []*Task
 	for _, v := range tm.tasks {
@@ -247,7 +244,7 @@ func (tm *taskManager) getTasks(user User) (ret []TaskViewGroup) {
 	var lastGroup *TaskGroup
 	for _, v := range tasks {
 		if v.group != lastGroup {
-			ret = append(ret, TaskViewGroup{Name: v.group.Name(user.Locale)})
+			ret = append(ret, taskViewGroup{Name: v.group.Name(user.Locale)})
 		}
 
 		ret[len(ret)-1].Tasks = append(ret[len(ret)-1].Tasks, v.taskView())

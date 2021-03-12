@@ -23,7 +23,7 @@ func (app *App) getHomeData(request Request) (ret []homeData) {
 		if app.Authorize(user, resource.CanView) {
 			item := homeData{
 				Name: resource.HumanName(user.Locale),
-				URL:  resource.GetURL(""),
+				URL:  resource.getURL(""),
 			}
 			item.Actions = resource.getResourceActionsButtonData(user, app)
 			ret = append(ret, item)

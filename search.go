@@ -253,7 +253,7 @@ func (e *adminSearch) importResource(resource *Resource) error {
 	var resourceSearchItem = searchItem{
 		ID:    "resource_" + resource.ID,
 		Name:  resource.HumanName("cs"),
-		URL:   resource.GetURL(""),
+		URL:   resource.getURL(""),
 		Roles: roles,
 	}
 	e.addItem(&resourceSearchItem, 200)

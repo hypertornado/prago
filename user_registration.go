@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"net/url"
 	"time"
-
-	"github.com/hypertornado/prago/messages"
 )
 
 func initUserRegistration(resource *Resource) {
 
-	resource.App.accessController.Get(resource.GetURL("confirm_email"), func(request Request) {
+	resource.App.accessController.Get(resource.getURL("confirm_email"), func(request Request) {
 		email := request.Params().Get("email")
 		token := request.Params().Get("token")
 
@@ -23,7 +21,7 @@ func initUserRegistration(resource *Resource) {
 					user.EmailConfirmedAt = time.Now()
 					err = resource.App.Save(&user)
 					if err == nil {
-						AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_confirm_email_ok"))
+						request.AddFlashMessage(messages.Get(user.Locale, "admin_confirm_email_ok"))
 						request.Redirect(resource.App.GetAdminURL("user/login"))
 						return
 					}
@@ -31,18 +29,18 @@ func initUserRegistration(resource *Resource) {
 			}
 		}
 
-		AddFlashMessage(request, messages.Messages.Get(user.Locale, "admin_confirm_email_fail"))
+		request.AddFlashMessage(messages.Get(user.Locale, "admin_confirm_email_fail"))
 		request.Redirect(resource.App.GetAdminURL("user/login"))
 	})
 
 	newUserForm := func(locale string) *form {
 		form := newForm()
 		form.Method = "POST"
-		form.AddTextInput("name", messages.Messages.Get(locale, "Name"),
-			nonEmptyValidator(messages.Messages.Get(locale, "admin_user_name_not_empty")),
+		form.AddTextInput("name", messages.Get(locale, "Name"),
+			nonEmptyValidator(messages.Get(locale, "admin_user_name_not_empty")),
 		)
-		form.AddEmailInput("email", messages.Messages.Get(locale, "admin_email"),
-			emailValidator(messages.Messages.Get(locale, "admin_email_not_valid")),
+		form.AddEmailInput("email", messages.Get(locale, "admin_email"),
+			emailValidator(messages.Get(locale, "admin_email_not_valid")),
 			newValidator(func(field *formItem) bool {
 				if len(field.Errors) != 0 {
 					return true
@@ -53,13 +51,13 @@ func initUserRegistration(resource *Resource) {
 					return false
 				}
 				return true
-			}, messages.Messages.Get(locale, "admin_email_already_registered")),
+			}, messages.Get(locale, "admin_email_already_registered")),
 		)
-		form.AddPasswordInput("password", messages.Messages.Get(locale, "admin_register_password"),
+		form.AddPasswordInput("password", messages.Get(locale, "admin_register_password"),
 			minLengthValidator("", 7),
 		)
 		form.AddCAPTCHAInput("captcha", "4 + 5 =", valueValidator("9", "Špatná hodnota"))
-		form.AddSubmit("send", messages.Messages.Get(locale, "admin_register"))
+		form.AddSubmit("send", messages.Get(locale, "admin_register"))
 		return form
 	}
 
@@ -72,12 +70,12 @@ func initUserRegistration(resource *Resource) {
 		})
 	}
 
-	resource.App.accessController.Get(resource.GetURL("registration"), func(request Request) {
+	resource.App.accessController.Get(resource.getURL("registration"), func(request Request) {
 		locale := getLocale(request)
 		renderRegistration(request, newUserForm(locale), locale)
 	})
 
-	resource.App.accessController.Post(resource.GetURL("registration"), func(request Request) {
+	resource.App.accessController.Post(resource.getURL("registration"), func(request Request) {
 		locale := getLocale(request)
 		form := newUserForm(locale)
 
@@ -109,7 +107,7 @@ func initUserRegistration(resource *Resource) {
 
 			must(resource.App.Create(user))
 
-			AddFlashMessage(request, messages.Messages.Get(locale, "admin_confirm_email_send", user.Email))
+			request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", user.Email))
 			request.Redirect(resource.App.GetAdminURL("user/login"))
 		} else {
 			form.GetItemByName("password").Value = ""
@@ -135,9 +133,9 @@ func (user User) sendConfirmEmail(request Request, app *App) error {
 	urlValues.Add("email", user.Email)
 	urlValues.Add("token", user.emailToken(app))
 
-	subject := messages.Messages.Get(locale, "admin_confirm_email_subject", app.HumanName)
+	subject := messages.Get(locale, "admin_confirm_email_subject", app.HumanName)
 	link := app.Config.GetString("baseUrl") + app.GetAdminURL("/user/confirm_email") + "?" + urlValues.Encode()
-	body := messages.Messages.Get(locale, "admin_confirm_email_body", link, link, app.HumanName)
+	body := messages.Get(locale, "admin_confirm_email_body", link, link, app.HumanName)
 
 	return app.SendEmail(
 		user.Name,

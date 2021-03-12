@@ -3,7 +3,6 @@ package prago
 import (
 	"strings"
 
-	"github.com/hypertornado/prago/messages"
 	"github.com/hypertornado/prago/utils"
 )
 
@@ -56,7 +55,7 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 		Name: adminSectionName,
 		Items: []mainMenuItem{
 			{
-				Name:     messages.Messages.Get(user.Locale, "admin_signpost"),
+				Name:     messages.Get(user.Locale, "admin_signpost"),
 				URL:      app.GetAdminURL(""),
 				Selected: selectedAdminSection,
 			},
@@ -68,24 +67,24 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 		selectedTasks = true
 	}
 	adminSection.Items = append(adminSection.Items, mainMenuItem{
-		Name:     messages.Messages.Get(user.Locale, "tasks"),
+		Name:     messages.Get(user.Locale, "tasks"),
 		URL:      app.GetAdminURL("_tasks"),
 		Selected: selectedTasks,
 	})
 
 	for _, v := range app.rootActions {
-		if v.Method != "GET" && v.Method != "" {
+		if v.method != "GET" {
 			continue
 		}
 
 		var selected bool
-		fullURL := app.GetAdminURL(v.URL)
+		fullURL := app.GetAdminURL(v.url)
 		if request.Request().URL.Path == fullURL {
 			selected = true
 		}
 
 		adminSection.Items = append(adminSection.Items, mainMenuItem{
-			Name:     v.getName(user.Locale),
+			Name:     v.name(user.Locale),
 			URL:      fullURL,
 			Selected: selected,
 		})
@@ -94,7 +93,7 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 	ret.Sections = append(ret.Sections, adminSection)
 
 	resourceSection := mainMenuSection{
-		Name: messages.Messages.Get(user.Locale, "admin_tables"),
+		Name: messages.Get(user.Locale, "admin_tables"),
 	}
 	for _, resource := range app.getSortedResources(user.Locale) {
 		if app.Authorize(user, resource.CanView) {
@@ -119,7 +118,7 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 	ret.Sections = append(ret.Sections, resourceSection)
 
 	var userSettingsSection bool
-	if request.Request().URL.Path == app.GetAdminURL("user/settings") || request.Request().URL.Path == app.GetAdminURL("user/password") {
+	if request.Request().URL.Path == app.GetAdminURL("settings") || request.Request().URL.Path == app.GetAdminURL("password") {
 		userSettingsSection = true
 	}
 	userName := user.Name
@@ -131,16 +130,16 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 		Name: userName,
 		Items: []mainMenuItem{
 			{
-				Name:     messages.Messages.Get(user.Locale, "admin_settings"),
-				URL:      app.GetAdminURL("user/settings"),
+				Name:     messages.Get(user.Locale, "admin_settings"),
+				URL:      app.GetAdminURL("settings"),
 				Selected: userSettingsSection,
 			},
 			{
-				Name: messages.Messages.Get(user.Locale, "admin_homepage"),
+				Name: messages.Get(user.Locale, "admin_homepage"),
 				URL:  "/",
 			},
 			{
-				Name: messages.Messages.Get(user.Locale, "admin_log_out"),
+				Name: messages.Get(user.Locale, "admin_log_out"),
 				URL:  app.GetAdminURL("logout") + "?_csrfToken=" + user.csrfToken(randomness),
 			},
 		},

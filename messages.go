@@ -1,4 +1,4 @@
-package messages
+package prago
 
 import (
 	"fmt"
@@ -8,16 +8,15 @@ import (
 )
 
 var (
-	//Messages is singleton for admin translated messages
-	Messages         *messages = &messages{m}
-	fallbackLanguage           = "en"
+	messages         *messagesStruct = &messagesStruct{m}
+	fallbackLanguage                 = "en"
 )
 
-type messages struct {
+type messagesStruct struct {
 	m map[string]map[string]string
 }
 
-func (*messages) ItemsCount(i int64, locale string) (ret string) {
+func (*messagesStruct) ItemsCount(i int64, locale string) (ret string) {
 	if locale == "cs" {
 		return itemsCountCS(i)
 	}
@@ -42,7 +41,7 @@ func itemsCountEN(i int64) (ret string) {
 	return fmt.Sprintf("%s items", utils.HumanizeNumber(i))
 }
 
-func (*messages) Timestamp(lang string, t time.Time, showTime bool) string {
+func (*messagesStruct) Timestamp(lang string, t time.Time, showTime bool) string {
 	if t.IsZero() {
 		return ""
 	}
@@ -76,7 +75,7 @@ func czechMonth(date time.Time) string {
 	return months[date.Month()-1]
 }
 
-func (m *messages) Get(lang, id string, params ...interface{}) string {
+func (m *messagesStruct) Get(lang, id string, params ...interface{}) string {
 	ret := m.GetNullable(lang, id, params...)
 	if ret == nil {
 		ret = m.GetNullable(fallbackLanguage, id, params...)
@@ -87,7 +86,7 @@ func (m *messages) Get(lang, id string, params ...interface{}) string {
 	return *ret
 }
 
-func (m *messages) GetNullable(lang, id string, params ...interface{}) *string {
+func (m *messagesStruct) GetNullable(lang, id string, params ...interface{}) *string {
 	loc, ok := m.m[id]
 	if !ok {
 		return nil
@@ -102,7 +101,7 @@ func (m *messages) GetNullable(lang, id string, params ...interface{}) *string {
 	return &ret
 }
 
-func (m *messages) GetNameFunction(id string, params ...interface{}) func(string) string {
+func (m *messagesStruct) GetNameFunction(id string, params ...interface{}) func(string) string {
 	return func(lang string) string {
 		return m.Get(lang, id, params...)
 	}

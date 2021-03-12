@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hypertornado/prago/messages"
 	"github.com/hypertornado/prago/utils"
 )
 
@@ -419,7 +418,7 @@ func getStatsLimitSelectData(locale string) (ret []listPaginationData) {
 
 	for _, v := range ints {
 		ret = append(ret, listPaginationData{
-			Name:  messages.Messages.ItemsCount(v, locale),
+			Name:  messages.ItemsCount(v, locale),
 			Value: v,
 		})
 	}

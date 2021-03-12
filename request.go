@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/gorilla/sessions"
 )
 
 //Request represents structure for http request
@@ -38,6 +40,13 @@ func (request Request) GetData(k string) interface{} { return request.data[k] }
 //RenderView with HTTP 200 code
 func (request Request) RenderView(viewName string) {
 	request.RenderViewWithCode(viewName, 200)
+}
+
+//AddFlashMessage adds flash message to request
+func (request Request) AddFlashMessage(message string) {
+	session := request.GetData("session").(*sessions.Session)
+	session.AddFlash(message)
+	must(session.Save(request.Request(), request.Response()))
 }
 
 //RenderViewWithCode renders view with HTTP code

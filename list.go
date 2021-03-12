@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hypertornado/prago/messages"
 	"github.com/hypertornado/prago/utils"
 )
 
@@ -160,8 +159,8 @@ func (field Field) getListHeaderItem(user User) listHeaderItem {
 
 	if headerItem.FilterLayout == "filter_layout_boolean" {
 		headerItem.FilterData = []string{
-			messages.Messages.Get(user.Locale, "yes"),
-			messages.Messages.Get(user.Locale, "no"),
+			messages.Get(user.Locale, "yes"),
+			messages.Get(user.Locale, "no"),
 		}
 	}
 
@@ -370,9 +369,9 @@ func (resource *Resource) getListContent(app *App, user User, params url.Values)
 	resource.updateCachedCount()
 
 	if count == totalCount {
-		ret.TotalCountStr = messages.Messages.ItemsCount(count, user.Locale)
+		ret.TotalCountStr = messages.ItemsCount(count, user.Locale)
 	} else {
-		ret.TotalCountStr = fmt.Sprintf("%s z %s", utils.HumanizeNumber(count), messages.Messages.ItemsCount(totalCount, user.Locale))
+		ret.TotalCountStr = fmt.Sprintf("%s z %s", utils.HumanizeNumber(count), messages.ItemsCount(totalCount, user.Locale))
 	}
 
 	var itemsPerPage = resource.ItemsPerPage
@@ -423,14 +422,14 @@ func (resource *Resource) getListContent(app *App, user User, params url.Values)
 		}
 
 		row.ID = itemVal.FieldByName("ID").Int()
-		row.URL = resource.GetURL(fmt.Sprintf("%d", row.ID))
+		row.URL = resource.getURL(fmt.Sprintf("%d", row.ID))
 
 		row.Actions = app.getListItemActions(user, val.Index(i).Interface(), row.ID, *resource)
 		ret.Rows = append(ret.Rows, row)
 	}
 
 	if count == 0 {
-		ret.Message = messages.Messages.Get(user.Locale, "admin_list_empty")
+		ret.Message = messages.Get(user.Locale, "admin_list_empty")
 	}
 	ret.Colspan = int64(len(columnsMap)) + 1
 

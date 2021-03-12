@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	"github.com/golang-commonmark/markdown"
-	"github.com/hypertornado/prago/messages"
 )
 
 //go:embed templates
@@ -58,7 +57,7 @@ func (app *App) initTemplates() {
 	})
 
 	app.AddTemplateFunction("message", func(language, id string) template.HTML {
-		return template.HTML(messages.Messages.Get(language, id))
+		return template.HTML(messages.Get(language, id))
 	})
 
 	app.AddTemplateFunction("thumb", func(ids string) string {

@@ -35,7 +35,7 @@ type App struct {
 	resourceNameMap  map[string]*Resource
 	accessController *Controller
 	AdminController  *Controller
-	rootActions      []Action
+	rootActions      []*Action
 	db               *sql.DB
 
 	sendgridKey  string
@@ -118,6 +118,7 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 		initFunction(app)
 	}
 
+	app.bindAllActions()
 	app.initAdminNotFoundAction()
 	app.initSysadminPermissions()
 	app.initAllAutoRelations()

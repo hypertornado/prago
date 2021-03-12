@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-
-	"github.com/hypertornado/prago/messages"
 )
 
 //ActivityLog logs all user admin activity
@@ -84,10 +82,10 @@ func (app *App) getHistory(resource *Resource, itemID int64) historyView {
 			ActivityURL: activityURL,
 			ActionType:  v.ActionType,
 			ItemName:    itemName,
-			ItemURL:     resource.GetURL(fmt.Sprintf("%d", v.ItemID)),
+			ItemURL:     resource.getURL(fmt.Sprintf("%d", v.ItemID)),
 			UserName:    username,
 			UserURL:     userurl,
-			CreatedAt:   messages.Messages.Timestamp(user.Locale, v.CreatedAt, true),
+			CreatedAt:   messages.Timestamp(user.Locale, v.CreatedAt, true),
 		})
 	}
 	return ret
@@ -96,7 +94,7 @@ func (app *App) getHistory(resource *Resource, itemID int64) historyView {
 func initActivityLog(resource *Resource) {
 	resource.CanView = permissionSysadmin
 	resource.OrderDesc = true
-	resource.HumanName = messages.Messages.GetNameFunction("admin_history")
+	resource.HumanName = messages.GetNameFunction("admin_history")
 }
 
 func (app App) createNewActivityLog(resource Resource, user User, item interface{}) error {

@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hypertornado/prago/messages"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -103,11 +102,11 @@ func (user User) emailToken(app *App) string {
 }
 
 func initUserResource(resource *Resource) {
-	resource.HumanName = messages.Messages.GetNameFunction("admin_users")
+	resource.HumanName = messages.GetNameFunction("admin_users")
 	resource.CanEdit = permissionSysadmin
 
 	initUserRegistration(resource)
 	initUserLogin(resource)
-	initUserSettings(resource)
+	resource.App.initUserSettings()
 	initUserRenew(resource)
 }

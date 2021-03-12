@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hypertornado/prago/messages"
 	"github.com/hypertornado/prago/utils"
 )
 
@@ -129,8 +128,8 @@ func (app *App) initDefaultFieldTypes() {
 func boolFilterLayoutDataSource(field Field, user User) interface{} {
 	return [][2]string{
 		{"", ""},
-		{"true", messages.Messages.Get(user.Locale, "yes")},
-		{"false", messages.Messages.Get(user.Locale, "no")},
+		{"true", messages.Get(user.Locale, "yes")},
+		{"false", messages.Get(user.Locale, "no")},
 	}
 }
 

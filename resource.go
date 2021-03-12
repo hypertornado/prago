@@ -5,8 +5,6 @@ import (
 	"go/ast"
 	"reflect"
 	"time"
-
-	"github.com/hypertornado/prago/messages"
 )
 
 //Resource is structure representing one item in admin menu or one table in database
@@ -20,8 +18,8 @@ type Resource struct {
 	OrderByColumn      string
 	OrderDesc          bool
 	TableName          string
-	actions            []Action
-	itemActions        []Action
+	actions            []*Action
+	itemActions        []*Action
 	relations          []relation
 	autoRelations      []relation
 
@@ -106,7 +104,7 @@ func (app *App) CreateResource(item interface{}, initFunction func(*Resource)) *
 
 //GetItemURL gets item url
 func (resource Resource) GetItemURL(item interface{}, suffix string) string {
-	ret := resource.GetURL(fmt.Sprintf("%d", getItemID(item)))
+	ret := resource.getURL(fmt.Sprintf("%d", getItemID(item)))
 	if suffix != "" {
 		ret += "/" + suffix
 	}
@@ -131,8 +129,7 @@ func (app *App) initResource(resource *Resource) {
 	initResourceActions(app, resource)
 }
 
-//GetURL returns resource url
-func (resource Resource) GetURL(suffix string) string {
+func (resource Resource) getURL(suffix string) string {
 	url := resource.ID
 	if len(suffix) > 0 {
 		url += "/" + suffix
@@ -234,7 +231,7 @@ func (resource Resource) getPaginationData(user User) (ret []listPaginationData)
 		}
 
 		ret = append(ret, listPaginationData{
-			Name:     messages.Messages.ItemsCount(v, user.Locale),
+			Name:     messages.ItemsCount(v, user.Locale),
 			Value:    v,
 			Selected: selected,
 		})

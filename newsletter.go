@@ -264,30 +264,43 @@ func initNewsletterResource(resource *Resource) {
 		request.SetData("recipients_count", ret)
 	})
 
-	previewAction := Action{
-		Name: func(string) string { return "Náhled" },
-		URL:  "preview",
-		Handler: func(resource Resource, request Request, user User) {
+	/*
+		previewAction := Action{
+			Name: func(string) string { return "Náhled" },
+			URL:  "preview",
+			Handler: func(resource Resource, request Request, user User) {
+				var newsletter Newsletter
+				err := resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
+				if err != nil {
+					panic(err)
+				}
+
+				body, err := resource.App.Newsletter.GetBody(newsletter, "")
+				if err != nil {
+					panic(err)
+				}
+
+				request.Response().WriteHeader(200)
+				request.Response().Write([]byte(body))
+			},
+		}*/
+	resource.AddItemAction("preview").Name(Unlocalized("Náhled")).Handler(
+		func(request Request) {
 			var newsletter Newsletter
 			err := resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
-			if err != nil {
-				panic(err)
-			}
+			must(err)
 
 			body, err := resource.App.Newsletter.GetBody(newsletter, "")
-			if err != nil {
-				panic(err)
-			}
+			must(err)
 
 			request.Response().WriteHeader(200)
 			request.Response().Write([]byte(body))
+			return
 		},
-	}
+	)
 
-	doSendPreviewAction := Action{
-		URL:    "send-preview",
-		Method: "post",
-		Handler: func(resource Resource, request Request, user User) {
+	resource.AddItemAction("send-preview").Method("POST").Handler(
+		func(request Request) {
 			var newsletter Newsletter
 			must(resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
 			newsletter.PreviewSentAt = time.Now()
@@ -295,15 +308,13 @@ func initNewsletterResource(resource *Resource) {
 
 			emails := parseEmails(request.Params().Get("emails"))
 			resource.App.sendEmails(newsletter, emails)
-			AddFlashMessage(request, "Náhled newsletteru odeslán.")
-			request.Redirect(resource.GetURL(""))
+			request.AddFlashMessage("Náhled newsletteru odeslán.")
+			request.Redirect(resource.getURL(""))
 		},
-	}
+	)
 
-	doSendAction := Action{
-		URL:    "send",
-		Method: "post",
-		Handler: func(resource Resource, request Request, user User) {
+	resource.AddItemAction("send").Method("POST").Handler(
+		func(request Request) {
 			var newsletter Newsletter
 			err := resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			if err != nil {
@@ -324,12 +335,10 @@ func initNewsletterResource(resource *Resource) {
 			request.SetData("admin_yield", "newsletter_sent")
 			request.RenderView("admin_layout")
 		},
-	}
+	)
 
-	doDuplicateAction := Action{
-		URL:    "duplicate",
-		Method: "post",
-		Handler: func(resource Resource, request Request, user User) {
+	resource.AddItemAction("duplicate").Method("POST").Handler(
+		func(request Request) {
 			var newsletter Newsletter
 			must(resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
 
@@ -349,23 +358,12 @@ func initNewsletterResource(resource *Resource) {
 			}
 			request.Redirect(resource.GetItemURL(&newsletter, "edit"))
 		},
-	}
-
-	resource.AddItemAction(previewAction)
-	resource.AddItemAction(
-		CreateNavigationalItemAction(
-			"send-preview",
-			func(string) string { return "Odeslat náhled" },
-			"newsletter_send_preview",
-			nil,
-		),
 	)
-	resource.AddItemAction(doSendPreviewAction)
-	resource.AddItemAction(CreateNavigationalItemAction(
-		"send",
-		func(string) string { return "Odeslat" },
-		"newsletter_send",
-		func(Resource, Request, User) interface{} {
+
+	resource.AddItemAction("send-preview").Name(Unlocalized("Odeslat náhled")).Template("newsletter_send_preview")
+
+	resource.AddItemAction("send").Name(Unlocalized("Odeslat")).Template("newsletter_send").DataSource(
+		func(Request) interface{} {
 			recipients, err := resource.App.getNewsletterRecipients()
 			if err != nil {
 				panic(err)
@@ -375,17 +373,10 @@ func initNewsletterResource(resource *Resource) {
 				"recipients_count": len(recipients),
 			}
 		},
-	))
-	resource.AddItemAction(CreateNavigationalItemAction(
-		"duplicate",
-		func(string) string { return "Duplikovat" },
-		"newsletter_duplicate",
-		func(Resource, Request, User) interface{} {
-			return nil
-		},
-	))
-	resource.AddItemAction(doDuplicateAction)
-	resource.AddItemAction(doSendAction)
+	)
+
+	resource.AddItemAction("duplicate").Name(Unlocalized("Duplikovat")).Template("newsletter_duplicate")
+
 }
 
 func parseEmails(emails string) []string {
