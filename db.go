@@ -283,12 +283,12 @@ func getFirstItem(resource Resource, db dbIface, tableName string, item interfac
 }
 
 func listItems(resource Resource, db dbIface, tableName string, items interface{}, query *listQuery) error {
-	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(resource.Typ))).Elem()
+	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(resource.typ))).Elem()
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.whereString)
 
-	newValue := reflect.New(resource.Typ).Elem()
+	newValue := reflect.New(resource.typ).Elem()
 	names, scanners, err := resource.getStructScanners(newValue)
 	if err != nil {
 		return err
@@ -308,7 +308,7 @@ func listItems(resource Resource, db dbIface, tableName string, items interface{
 		return err
 	}
 	for rows.Next() {
-		newValue = reflect.New(resource.Typ)
+		newValue = reflect.New(resource.typ)
 		names, scanners, err = resource.getStructScanners(newValue.Elem())
 		if err != nil {
 			return err

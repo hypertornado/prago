@@ -84,7 +84,7 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	app.HumanName = app.codeName
 	app.resourceMap = make(map[reflect.Type]*Resource)
 	app.resourceNameMap = make(map[string]*Resource)
-	app.accessController = app.MainController().SubController()
+	app.accessController = app.MainController().subController()
 	app.accessController.priorityRouter = true
 
 	app.sendgridKey = app.Config.GetStringWithFallback("sendgridApi", "")
@@ -98,7 +98,7 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 		app.Config.GetStringWithFallback("dbName", ""),
 	)
 
-	app.AdminController = app.accessController.SubController()
+	app.AdminController = app.accessController.subController()
 	app.initDefaultFieldTypes()
 
 	app.CreateResource(User{}, initUserResource)

@@ -88,7 +88,7 @@ func (app *App) initAPIs() {
 func (api *API) initAPI() error {
 	var controller *Controller
 	if api.resource != nil {
-		controller = api.resource.ResourceController
+		controller = api.resource.resourceController
 	} else {
 		controller = api.app.AdminController
 	}

@@ -64,7 +64,7 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 		}
 	})
 
-	controller := app.MainController().SubController()
+	controller := app.MainController().subController()
 	controller.AddBeforeAction(func(request Request) {
 		request.SetData("site", app.HumanName)
 	})
@@ -256,7 +256,7 @@ func initNewsletterResource(resource *Resource) {
 	resource.ActivityLog = true
 	resource.CanView = "newsletter"
 
-	resource.ResourceController.AddBeforeAction(func(request Request) {
+	resource.resourceController.AddBeforeAction(func(request Request) {
 		ret, err := resource.app.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&NewsletterPersons{})
 		if err != nil {
 			panic(err)

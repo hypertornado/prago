@@ -88,8 +88,7 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 	}
 	for _, resource := range app.getSortedResources(user.Locale) {
 		if app.Authorize(user, resource.CanView) {
-			resourceURL := app.GetAdminURL(resource.ID)
-
+			resourceURL := resource.getURL("")
 			var selected bool
 			if request.Request().URL.Path == resourceURL {
 				selected = true

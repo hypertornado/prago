@@ -161,7 +161,7 @@ func initFilesResource(resource *Resource) {
 			}
 		})
 
-	resource.ResourceController.AddBeforeAction(func(request Request) {
+	resource.resourceController.AddBeforeAction(func(request Request) {
 		if request.Request().Method == "POST" && strings.HasSuffix(request.Request().URL.Path, "/delete") {
 			idStr := request.Params().Get("id")
 			id, err := strconv.Atoi(idStr)
@@ -212,7 +212,7 @@ func initFilesResource(resource *Resource) {
 	resource.ItemsPerPage = 100
 
 	//TODO: authorize
-	resource.ResourceController.Post(resource.getURL(""), func(request Request) {
+	resource.resourceController.Post(resource.getURL(""), func(request Request) {
 		validateCSRF(request)
 
 		multipartFiles := request.Request().MultipartForm.File["uid"]

@@ -53,7 +53,7 @@ func (app *App) getHistory(resource *Resource, itemID int64) historyView {
 
 	q := app.Query()
 	if resource != nil {
-		q.WhereIs("ResourceName", resource.ID)
+		q.WhereIs("ResourceName", resource.id)
 	}
 	if itemID > 0 {
 		q.WhereIs("ItemID", itemID)
@@ -104,7 +104,7 @@ func (app App) createNewActivityLog(resource Resource, user User, item interface
 	}
 
 	return app.createActivityLog(ActivityLog{
-		ResourceName: resource.ID,
+		ResourceName: resource.id,
 		ItemID:       getItemID(item),
 		ActionType:   "new",
 		User:         user.ID,
@@ -114,7 +114,7 @@ func (app App) createNewActivityLog(resource Resource, user User, item interface
 
 func (app App) createEditActivityLog(resource Resource, user User, itemID int64, before, after []byte) error {
 	return app.createActivityLog(ActivityLog{
-		ResourceName:  resource.ID,
+		ResourceName:  resource.id,
 		ItemID:        itemID,
 		ActionType:    "edit",
 		User:          user.ID,
@@ -130,7 +130,7 @@ func (app App) createDeleteActivityLog(resource Resource, user User, itemID int6
 	}
 
 	return app.createActivityLog(ActivityLog{
-		ResourceName:  resource.ID,
+		ResourceName:  resource.id,
 		ItemID:        itemID,
 		ActionType:    "delete",
 		User:          user.ID,

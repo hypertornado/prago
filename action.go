@@ -43,13 +43,13 @@ func (app *App) bindAllActions() {
 		for _, v := range resource.actions {
 			err := v.bindAction()
 			if err != nil {
-				panic(fmt.Sprintf("error while binding resource %s action %s %s: %s", resource.ID, v.method, v.name("en"), err))
+				panic(fmt.Sprintf("error while binding resource %s action %s %s: %s", resource.id, v.method, v.name("en"), err))
 			}
 		}
 		for _, v := range resource.itemActions {
 			err := v.bindAction()
 			if err != nil {
-				panic(fmt.Sprintf("error while binding item resource %s action %s %s: %s", resource.ID, v.method, v.name("en"), err))
+				panic(fmt.Sprintf("error while binding item resource %s action %s %s: %s", resource.id, v.method, v.name("en"), err))
 			}
 		}
 
@@ -196,7 +196,7 @@ func (action *Action) bindAction() error {
 
 	var controller *Controller
 	if action.resource != nil {
-		controller = action.resource.ResourceController
+		controller = action.resource.resourceController
 	} else {
 		controller = app.AdminController
 	}

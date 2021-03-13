@@ -98,7 +98,7 @@ func initResourceActions(resource *Resource) {
 			must(err)
 
 			form.Classes = append(form.Classes, "form_leavealert")
-			form.Action = "../" + resource.ID
+			form.Action = "../" + resource.id
 			form.AddSubmit("_submit", messages.Get(user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
 			return form

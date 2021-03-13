@@ -90,7 +90,7 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 	lang := user.Locale
 
 	list.Colspan = 1
-	list.TypeID = resource.ID
+	list.TypeID = resource.id
 	list.VisibleColumns = resource.defaultVisibleFieldsStr()
 	list.Columns = resource.fieldsStr()
 

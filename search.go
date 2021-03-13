@@ -239,7 +239,7 @@ func (e *adminSearch) searchImport() error {
 	for _, v := range e.app.resources {
 		err = e.importResource(v)
 		if err != nil {
-			return fmt.Errorf("while importing resource %s: %s", v.TableName, err)
+			return fmt.Errorf("while importing resource %s: %s", v.id, err)
 		}
 	}
 	e.flush()
@@ -251,7 +251,7 @@ func (e *adminSearch) importResource(resource *Resource) error {
 
 	roles := resource.app.getResourceViewRoles(*resource)
 	var resourceSearchItem = searchItem{
-		ID:    "resource_" + resource.ID,
+		ID:    "resource_" + resource.id,
 		Name:  resource.HumanName("cs"),
 		URL:   resource.getURL(""),
 		Roles: roles,
@@ -301,7 +301,7 @@ func (e *adminSearch) deleteItem(resource *Resource, id int64) error {
 }
 
 func searchID(resource *Resource, id int64) string {
-	return fmt.Sprintf("%s-%d", resource.ID, id)
+	return fmt.Sprintf("%s-%d", resource.id, id)
 }
 
 func relationDataToSearchItem(resource *Resource, data viewRelationData) searchItem {

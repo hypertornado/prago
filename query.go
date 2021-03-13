@@ -100,13 +100,13 @@ func (q Query) Get(item interface{}) error {
 
 	var newItem interface{}
 	if slice {
-		err = listItems(*resource, q.db, resource.TableName, &newItem, q.query)
+		err = listItems(*resource, q.db, resource.id, &newItem, q.query)
 		if err != nil {
 			return err
 		}
 		reflect.ValueOf(item).Elem().Set(reflect.ValueOf(newItem))
 	} else {
-		err = getFirstItem(*resource, q.db, resource.TableName, &newItem, q.query)
+		err = getFirstItem(*resource, q.db, resource.id, &newItem, q.query)
 		if err != nil {
 			return err
 		}
@@ -121,7 +121,7 @@ func (q Query) Count(item interface{}) (int64, error) {
 	if err != nil {
 		return -1, err
 	}
-	return countItems(q.db, resource.TableName, q.query)
+	return countItems(q.db, resource.id, q.query)
 }
 
 //Delete item with query
@@ -130,5 +130,5 @@ func (q Query) Delete(item interface{}) (int64, error) {
 	if err != nil {
 		return -1, err
 	}
-	return deleteItems(q.db, resource.TableName, q.query)
+	return deleteItems(q.db, resource.id, q.query)
 }

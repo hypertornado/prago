@@ -29,7 +29,7 @@ func (c *Controller) dispatchRequest(request Request) bool {
 }
 
 //SubController returns subcontroller of controller
-func (c *Controller) SubController() *Controller {
+func (c *Controller) subController() *Controller {
 	return &Controller{
 		parent:         c,
 		router:         c.router,

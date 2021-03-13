@@ -111,7 +111,7 @@ func (resource *Resource) getListStatsDateSectionDay(field *Field, user User, pa
 		field.ColumnName,
 		field.ColumnName,
 		field.ColumnName,
-		resource.TableName,
+		resource.id,
 		buildWhereString(query.query.whereString),
 		field.ColumnName,
 		field.ColumnName,
@@ -154,7 +154,7 @@ func (resource *Resource) getListStatsDateSectionMonth(field *Field, user User, 
 	q := fmt.Sprintf("SELECT MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.ColumnName,
 		field.ColumnName,
-		resource.TableName,
+		resource.id,
 		buildWhereString(query.query.whereString),
 		field.ColumnName,
 		field.ColumnName,
@@ -194,7 +194,7 @@ func (resource *Resource) getListStatsDateSectionYear(field *Field, user User, p
 	whereParams := query.query.whereParams
 	q := fmt.Sprintf("SELECT YEAR(%s), COUNT(id) FROM %s %s GROUP BY YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.ColumnName,
-		resource.TableName,
+		resource.id,
 		buildWhereString(query.query.whereString),
 		field.ColumnName,
 		limit,
@@ -231,7 +231,7 @@ func (resource *Resource) getListStatsTable(field *Field, user User, params url.
 	query := resource.addFilterParamsToQuery(resource.app.Query(), params)
 	whereParams := query.query.whereParams
 
-	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.ColumnName, resource.TableName, buildWhereString(query.query.whereString), field.ColumnName, limit)
+	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.ColumnName, resource.id, buildWhereString(query.query.whereString), field.ColumnName, limit)
 
 	rows, err := resource.app.db.Query(q, whereParams...)
 	if err != nil {
@@ -342,7 +342,7 @@ func (resource *Resource) getListStatsTableInt(field *Field, user User, params u
 		field.ColumnName,
 		field.ColumnName,
 		field.ColumnName,
-		resource.TableName,
+		resource.id,
 		buildWhereString(query.query.whereString),
 	)
 
@@ -377,7 +377,7 @@ func (resource *Resource) getListStatsTableInt(field *Field, user User, params u
 	medianItem := int64(math.Floor(float64(total) / 2))
 	q = fmt.Sprintf("SELECT %s FROM %s %s LIMIT 1 OFFSET %d;",
 		field.ColumnName,
-		resource.TableName,
+		resource.id,
 		buildWhereString(query.query.whereString),
 		medianItem,
 	)

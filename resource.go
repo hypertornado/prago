@@ -10,18 +10,18 @@ import (
 //Resource is structure representing one item in admin menu or one table in database
 type Resource struct {
 	app                *App
-	ID                 string
+	id                 string
 	HumanName          func(locale string) string
-	Typ                reflect.Type
-	ResourceController *Controller
+	typ                reflect.Type
+	resourceController *Controller
 	ItemsPerPage       int64
 	OrderByColumn      string
 	OrderDesc          bool
-	TableName          string
-	actions            []*Action
-	itemActions        []*Action
-	relations          []relation
-	autoRelations      []relation
+	//TableName          string
+	actions       []*Action
+	itemActions   []*Action
+	relations     []relation
+	autoRelations []relation
 
 	CanView   Permission
 	CanEdit   Permission
@@ -53,11 +53,11 @@ func (app *App) CreateResource(item interface{}, initFunction func(*Resource)) *
 	ret := &Resource{
 		app:                app,
 		HumanName:          Unlocalized(defaultName),
-		ID:                 columnName(defaultName),
-		Typ:                typ,
-		ResourceController: app.AdminController.SubController(),
+		id:                 columnName(defaultName),
+		typ:                typ,
+		resourceController: app.AdminController.subController(),
 		ItemsPerPage:       200,
-		TableName:          columnName(defaultName),
+		//TableName:          columnName(defaultName),
 
 		CanView:   "",
 		CanEdit:   "",
@@ -86,13 +86,13 @@ func (app *App) CreateResource(item interface{}, initFunction func(*Resource)) *
 	ret.OrderByColumn, ret.OrderDesc = ret.getDefaultOrder()
 
 	app.resources = append(app.resources, ret)
-	_, typFound := app.resourceMap[ret.Typ]
+	_, typFound := app.resourceMap[ret.typ]
 	if typFound {
-		panic(fmt.Errorf("resource with type %s already created", ret.Typ))
+		panic(fmt.Errorf("resource with type %s already created", ret.typ))
 	}
 
-	app.resourceMap[ret.Typ] = ret
-	app.resourceNameMap[ret.ID] = ret
+	app.resourceMap[ret.typ] = ret
+	app.resourceNameMap[ret.id] = ret
 
 	if initFunction != nil {
 		initFunction(ret)
@@ -118,7 +118,7 @@ func (app *App) getResourceByName(name string) *Resource {
 
 func (app *App) initResource(resource *Resource) {
 
-	resource.ResourceController.AddAroundAction(func(request Request, next func()) {
+	resource.resourceController.AddAroundAction(func(request Request, next func()) {
 		user := request.GetUser()
 		if !app.Authorize(user, resource.CanView) {
 			render403(request)
@@ -132,7 +132,7 @@ func (app *App) initResource(resource *Resource) {
 }
 
 func (resource Resource) getURL(suffix string) string {
-	url := resource.ID
+	url := resource.id
 	if len(suffix) > 0 {
 		url += "/" + suffix
 	}
@@ -157,7 +157,7 @@ func (resource Resource) saveWithDBIface(item interface{}, db dbIface) error {
 		val.FieldByName(fn).Type() == timeVal.Type() {
 		val.FieldByName(fn).Set(timeVal)
 	}
-	return resource.saveItem(db, resource.TableName, item)
+	return resource.saveItem(db, resource.id, item)
 }
 
 func (resource Resource) createWithDBIface(item interface{}, db dbIface) error {
@@ -173,15 +173,15 @@ func (resource Resource) createWithDBIface(item interface{}, db dbIface) error {
 			}
 		}
 	}
-	return resource.createItem(db, resource.TableName, item)
+	return resource.createItem(db, resource.id, item)
 }
 
 func (resource Resource) newItem(item interface{}) {
-	reflect.ValueOf(item).Elem().Set(reflect.New(resource.Typ))
+	reflect.ValueOf(item).Elem().Set(reflect.New(resource.typ))
 }
 
 func (resource Resource) newArrayOfItems(item interface{}) {
-	reflect.ValueOf(item).Elem().Set(reflect.New(reflect.SliceOf(reflect.PtrTo(resource.Typ))))
+	reflect.ValueOf(item).Elem().Set(reflect.New(reflect.SliceOf(reflect.PtrTo(resource.typ))))
 }
 
 func (resource Resource) count() int64 {
@@ -192,7 +192,7 @@ func (resource Resource) count() int64 {
 }
 
 func (resource Resource) cachedCountName() string {
-	return fmt.Sprintf("resource_count-%s", resource.ID)
+	return fmt.Sprintf("resource_count-%s", resource.id)
 }
 
 func (resource Resource) getCachedCount() int64 {

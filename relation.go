@@ -189,7 +189,7 @@ func (resource *Resource) getItemDescription(item interface{}, user User, relate
 		}
 
 		rr := v.getRelatedResource(*resource.app)
-		if rr != nil && relatedResource != nil && rr.TableName == relatedResource.TableName {
+		if rr != nil && relatedResource != nil && rr.id == relatedResource.id {
 			continue
 		}
 
