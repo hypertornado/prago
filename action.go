@@ -76,7 +76,7 @@ func (app *App) AddAction(url string) *Action {
 
 //AddAction adds action to resource
 func (resource *Resource) AddAction(url string) *Action {
-	action := newAction(resource.App, url)
+	action := newAction(resource.app, url)
 	action.resource = resource
 	action.permission = resource.CanView
 	resource.actions = append(resource.actions, action)
@@ -85,7 +85,7 @@ func (resource *Resource) AddAction(url string) *Action {
 
 //AddItemAction adds action to resource item
 func (resource *Resource) AddItemAction(url string) *Action {
-	action := newAction(resource.App, url)
+	action := newAction(resource.app, url)
 	action.resource = resource
 	action.isItemAction = true
 	action.permission = resource.CanView
@@ -115,20 +115,32 @@ func (action *Action) Method(method string) *Action {
 	return action
 }
 
-//Template sets action template
-func (action *Action) Template(template string) *Action {
-	action.template = template
+//Handler sets action handler
+func (action *Action) Handler(handler func(Request)) *Action {
+	if action.template != "" {
+		panic("can't set both action handler and template")
+	}
+	if action.dataSource != nil {
+		panic("can't set both action handler and dataSource")
+	}
+	action.handler = handler
 	return action
 }
 
-//Handler sets action handler
-func (action *Action) Handler(handler func(Request)) *Action {
-	action.handler = handler
+//Template sets action template
+func (action *Action) Template(template string) *Action {
+	if action.handler != nil {
+		panic("can't set both action handler and template")
+	}
+	action.template = template
 	return action
 }
 
 //DataSource sets action data source, which is used to render template
 func (action *Action) DataSource(dataSource func(Request) interface{}) *Action {
+	if action.handler != nil {
+		panic("can't set both action handler and dataSource")
+	}
 	action.dataSource = dataSource
 	return action
 }
@@ -151,7 +163,7 @@ func (action *Action) getnavigation(request Request) adminItemNavigation {
 		if action.isItemAction {
 			var item interface{}
 			action.resource.newItem(&item)
-			must(action.resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(item))
+			must(action.resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(item))
 			return action.resource.getItemNavigation(user, item, code)
 		}
 		return action.resource.getNavigation(user, code)

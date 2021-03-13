@@ -22,12 +22,12 @@ func initUserLogin(resource *Resource) {
 			}
 
 			var user User
-			must(resource.App.Query().WhereIs("id", id).Get(&user))
+			must(resource.app.Query().WhereIs("id", id).Get(&user))
 
 			session := request.GetData("session").(*sessions.Session)
 			session.Values["user_id"] = user.ID
 			must(session.Save(request.Request(), request.Response()))
-			request.Redirect(resource.App.GetAdminURL(""))
+			request.Redirect(resource.app.GetAdminURL(""))
 		},
 	)
 
@@ -42,20 +42,20 @@ func initUserLogin(resource *Resource) {
 
 	renderLogin := func(request Request, form *form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
-			App:          resource.App,
-			Navigation:   resource.App.getNologinNavigation(locale, "login"),
+			App:          resource.app,
+			Navigation:   resource.app.getNologinNavigation(locale, "login"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
 	}
 
-	resource.App.accessController.Get(resource.getURL("login"), func(request Request) {
+	resource.app.accessController.Get(resource.getURL("login"), func(request Request) {
 		locale := getLocale(request)
 		form := loginForm(locale)
 		renderLogin(request, form, locale)
 	})
 
-	resource.App.accessController.Post(resource.getURL("login"), func(request Request) {
+	resource.app.accessController.Post(resource.getURL("login"), func(request Request) {
 		email := request.Params().Get("email")
 		email = fixEmail(email)
 		password := request.Params().Get("password")
@@ -68,7 +68,7 @@ func initUserLogin(resource *Resource) {
 		form.Errors = []string{messages.Get(locale, "admin_login_error")}
 
 		var user User
-		err := resource.App.Query().WhereIs("email", email).Get(&user)
+		err := resource.app.Query().WhereIs("email", email).Get(&user)
 		if err != nil {
 			if err == ErrItemNotFound {
 				must(session.Save(request.Request(), request.Response()))
@@ -87,11 +87,11 @@ func initUserLogin(resource *Resource) {
 		user.LoggedInUseragent = request.Request().UserAgent()
 		user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
 
-		must(resource.App.Save(&user))
+		must(resource.app.Save(&user))
 
 		session.Values["user_id"] = user.ID
 		session.AddFlash(messages.Get(locale, "admin_login_ok"))
 		must(session.Save(request.Request(), request.Response()))
-		request.Redirect(resource.App.GetAdminURL(""))
+		request.Redirect(resource.app.GetAdminURL(""))
 	})
 }

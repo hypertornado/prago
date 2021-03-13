@@ -11,7 +11,8 @@ import (
 	"github.com/tealeg/xlsx"
 )
 
-func initResourceActions(a *App, resource *Resource) {
+func initResourceActions(resource *Resource) {
+	app := resource.app
 	if resource.CanCreate == "" {
 		resource.CanCreate = resource.CanEdit
 	}
@@ -24,19 +25,15 @@ func initResourceActions(a *App, resource *Resource) {
 		func(request Request) {
 			user := request.GetUser()
 			if request.Request().URL.Query().Get("_format") == "json" {
-				listDataJSON, err := resource.getListContentJSON(resource.App, user, request.Request().URL.Query())
-				if err != nil {
-					panic(err)
-				}
+				listDataJSON, err := resource.getListContentJSON(app, user, request.Request().URL.Query())
+				must(err)
 				request.RenderJSON(listDataJSON)
 				return
 			}
 
 			if request.Request().URL.Query().Get("_format") == "xlsx" {
-				listData, err := resource.getListContent(resource.App, user, request.Request().URL.Query())
-				if err != nil {
-					panic(err)
-				}
+				listData, err := resource.getListContent(app, user, request.Request().URL.Query())
+				must(err)
 
 				file := xlsx.NewFile()
 				sheet, err := file.AddSheet("List 1")
@@ -121,18 +118,18 @@ func initResourceActions(a *App, resource *Resource) {
 			if resource.OrderFieldName != "" {
 				resource.setOrderPosition(&item, resource.count()+1)
 			}
-			must(resource.App.Create(item))
+			must(app.Create(item))
 
-			if resource.App.search != nil {
-				err = resource.App.search.saveItem(resource, item)
+			if app.search != nil {
+				err = app.search.saveItem(resource, item)
 				if err != nil {
-					resource.App.Log().Println(fmt.Errorf("%s", err))
+					app.Log().Println(fmt.Errorf("%s", err))
 				}
-				resource.App.search.flush()
+				app.search.flush()
 			}
 
 			if resource.ActivityLog {
-				resource.App.createNewActivityLog(*resource, user, item)
+				app.createNewActivityLog(*resource, user, item)
 			}
 
 			must(resource.updateCachedCount())
@@ -148,7 +145,7 @@ func initResourceActions(a *App, resource *Resource) {
 
 			var item interface{}
 			resource.newItem(&item)
-			err = resource.App.Query().WhereIs("id", int64(id)).Get(item)
+			err = app.Query().WhereIs("id", int64(id)).Get(item)
 			if err != nil {
 				if err == ErrItemNotFound {
 					render404(request)
@@ -169,7 +166,7 @@ func initResourceActions(a *App, resource *Resource) {
 
 			var item interface{}
 			resource.newItem(&item)
-			err = resource.App.Query().WhereIs("id", int64(id)).Get(item)
+			err = app.Query().WhereIs("id", int64(id)).Get(item)
 			must(err)
 
 			form, err := resource.getForm(item, user)
@@ -192,7 +189,7 @@ func initResourceActions(a *App, resource *Resource) {
 
 			var item interface{}
 			resource.newItem(&item)
-			must(resource.App.Query().WhereIs("id", int64(id)).Get(item))
+			must(app.Query().WhereIs("id", int64(id)).Get(item))
 
 			form, err := resource.getForm(item, user)
 			must(err)
@@ -208,14 +205,14 @@ func initResourceActions(a *App, resource *Resource) {
 					item, user, request.Params(), form.getFilter(),
 				),
 			)
-			must(resource.App.Save(item))
+			must(app.Save(item))
 
-			if resource.App.search != nil {
-				err = resource.App.search.saveItem(resource, item)
+			if app.search != nil {
+				err = app.search.saveItem(resource, item)
 				if err != nil {
-					resource.App.Log().Println(fmt.Errorf("%s", err))
+					app.Log().Println(fmt.Errorf("%s", err))
 				}
-				resource.App.search.flush()
+				app.search.flush()
 			}
 
 			if resource.ActivityLog {
@@ -224,7 +221,7 @@ func initResourceActions(a *App, resource *Resource) {
 					panic(err)
 				}
 
-				resource.App.createEditActivityLog(*resource, user, int64(id), beforeData, afterData)
+				app.createEditActivityLog(*resource, user, int64(id), beforeData, afterData)
 			}
 
 			request.AddFlashMessage(messages.Get(user.Locale, "admin_item_edited"))
@@ -244,7 +241,7 @@ func initResourceActions(a *App, resource *Resource) {
 
 			var item interface{}
 			resource.newItem(&item)
-			must(resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(item))
+			must(app.Query().WhereIs("id", request.Params().Get("id")).Get(item))
 			itemName := getItemName(item)
 			ret["delete_title"] = fmt.Sprintf("Chcete smazat položku %s?", itemName)
 			ret["delete_title"] = messages.Get(user.Locale, "admin_delete_confirmation_name", itemName)
@@ -261,19 +258,19 @@ func initResourceActions(a *App, resource *Resource) {
 
 			var item interface{}
 			resource.newItem(&item)
-			_, err = resource.App.Query().WhereIs("id", int64(id)).Delete(item)
+			_, err = app.Query().WhereIs("id", int64(id)).Delete(item)
 			must(err)
 
-			if resource.App.search != nil {
-				err = resource.App.search.deleteItem(resource, int64(id))
+			if app.search != nil {
+				err = app.search.deleteItem(resource, int64(id))
 				if err != nil {
-					resource.App.Log().Println(fmt.Errorf("%s", err))
+					app.Log().Println(fmt.Errorf("%s", err))
 				}
-				resource.App.search.flush()
+				app.search.flush()
 			}
 
 			if resource.ActivityLog {
-				resource.App.createDeleteActivityLog(*resource, user, int64(id), item)
+				app.createDeleteActivityLog(*resource, user, int64(id), item)
 			}
 
 			must(resource.updateCachedCount())
@@ -287,7 +284,7 @@ func initResourceActions(a *App, resource *Resource) {
 			func(request Request) {
 				var item interface{}
 				resource.newItem(&item)
-				must(resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(item))
+				must(app.Query().WhereIs("id", request.Params().Get("id")).Get(item))
 				request.Redirect(
 					resource.PreviewURLFunction(item),
 				)
@@ -296,14 +293,9 @@ func initResourceActions(a *App, resource *Resource) {
 	}
 
 	if resource.ActivityLog {
-		resource.AddAction("history").Name(messages.GetNameFunction("admin_history")).Permission(resource.CanEdit).Handler(
-			func(request Request) {
-				user := request.GetUser()
-				renderNavigationPage(request, adminNavigationPage{
-					Navigation:   resource.getNavigation(user, "history"),
-					PageTemplate: "admin_history",
-					PageData:     resource.App.getHistory(resource, 0),
-				})
+		resource.AddAction("history").Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resource.CanEdit).DataSource(
+			func(request Request) interface{} {
+				return app.getHistory(resource, 0)
 			},
 		)
 
@@ -314,9 +306,9 @@ func initResourceActions(a *App, resource *Resource) {
 
 				var item interface{}
 				resource.newItem(&item)
-				must(resource.App.Query().WhereIs("id", int64(id)).Get(item))
+				must(app.Query().WhereIs("id", int64(id)).Get(item))
 
-				return resource.App.getHistory(resource, int64(id))
+				return app.getHistory(resource, int64(id))
 			},
 		)
 

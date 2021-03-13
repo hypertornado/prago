@@ -50,6 +50,8 @@ type App struct {
 	css         []string
 	roles       map[string]map[string]bool
 
+	apis []*API
+
 	activityListeners []func(ActivityLog)
 	taskManager       *taskManager
 }
@@ -119,6 +121,7 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	}
 
 	app.bindAllActions()
+	app.initAPIs()
 	app.initAdminNotFoundAction()
 	app.initSysadminPermissions()
 	app.initAllAutoRelations()

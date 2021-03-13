@@ -107,6 +107,6 @@ func initUserResource(resource *Resource) {
 
 	initUserRegistration(resource)
 	initUserLogin(resource)
-	resource.App.initUserSettings()
+	resource.app.initUserSettings()
 	initUserRenew(resource)
 }

@@ -9,7 +9,7 @@ import (
 
 //Resource is structure representing one item in admin menu or one table in database
 type Resource struct {
-	App                *App
+	app                *App
 	ID                 string
 	HumanName          func(locale string) string
 	Typ                reflect.Type
@@ -33,9 +33,10 @@ type Resource struct {
 
 	PreviewURLFunction func(interface{}) string
 
-	fieldArrays     []*Field
-	fieldMap        map[string]*Field
-	fieldTypes      map[string]FieldType
+	fieldArrays []*Field
+	fieldMap    map[string]*Field
+	fieldTypes  map[string]FieldType
+
 	OrderFieldName  string
 	OrderColumnName string
 }
@@ -50,7 +51,7 @@ func (app *App) CreateResource(item interface{}, initFunction func(*Resource)) *
 
 	defaultName := typ.Name()
 	ret := &Resource{
-		App:                app,
+		app:                app,
 		HumanName:          Unlocalized(defaultName),
 		ID:                 columnName(defaultName),
 		Typ:                typ,
@@ -126,7 +127,8 @@ func (app *App) initResource(resource *Resource) {
 		}
 	})
 
-	initResourceActions(app, resource)
+	initResourceActions(resource)
+	initResourceAPIs(resource)
 }
 
 func (resource Resource) getURL(suffix string) string {
@@ -134,7 +136,7 @@ func (resource Resource) getURL(suffix string) string {
 	if len(suffix) > 0 {
 		url += "/" + suffix
 	}
-	return resource.App.GetAdminURL(url)
+	return resource.app.GetAdminURL(url)
 }
 
 func (app *App) getResourceByItem(item interface{}) (*Resource, error) {
@@ -185,7 +187,7 @@ func (resource Resource) newArrayOfItems(item interface{}) {
 func (resource Resource) count() int64 {
 	var item interface{}
 	resource.newItem(&item)
-	count, _ := resource.App.Query().Count(item)
+	count, _ := resource.app.Query().Count(item)
 	return count
 }
 
@@ -194,13 +196,13 @@ func (resource Resource) cachedCountName() string {
 }
 
 func (resource Resource) getCachedCount() int64 {
-	return resource.App.Cache.Load(resource.cachedCountName(), func() interface{} {
+	return resource.app.Cache.Load(resource.cachedCountName(), func() interface{} {
 		return resource.count()
 	}).(int64)
 }
 
 func (resource Resource) updateCachedCount() error {
-	return resource.App.Cache.Set(resource.cachedCountName(), resource.count())
+	return resource.app.Cache.Set(resource.cachedCountName(), resource.count())
 }
 
 func (resource Resource) getPaginationData(user User) (ret []listPaginationData) {

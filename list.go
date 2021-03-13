@@ -453,7 +453,7 @@ func (resource *Resource) getListContentJSON(app *App, user User, params url.Val
 	}
 
 	buf := new(bytes.Buffer)
-	err = resource.App.ExecuteTemplate(buf, "admin_list_cells", map[string]interface{}{
+	err = resource.app.ExecuteTemplate(buf, "admin_list_cells", map[string]interface{}{
 		"admin_list": listData,
 	})
 	if err != nil {
@@ -463,7 +463,7 @@ func (resource *Resource) getListContentJSON(app *App, user User, params url.Val
 	var statsStr string
 	if listData.Stats != nil {
 		bufStats := new(bytes.Buffer)
-		err = resource.App.ExecuteTemplate(bufStats, "admin_stats", listData.Stats)
+		err = resource.app.ExecuteTemplate(bufStats, "admin_stats", listData.Stats)
 		if err != nil {
 			return nil, err
 		}

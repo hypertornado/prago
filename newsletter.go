@@ -257,7 +257,7 @@ func initNewsletterResource(resource *Resource) {
 	resource.CanView = "newsletter"
 
 	resource.ResourceController.AddBeforeAction(func(request Request) {
-		ret, err := resource.App.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&NewsletterPersons{})
+		ret, err := resource.app.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&NewsletterPersons{})
 		if err != nil {
 			panic(err)
 		}
@@ -287,10 +287,10 @@ func initNewsletterResource(resource *Resource) {
 	resource.AddItemAction("preview").Name(Unlocalized("Náhled")).Handler(
 		func(request Request) {
 			var newsletter Newsletter
-			err := resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
+			err := resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			must(err)
 
-			body, err := resource.App.Newsletter.GetBody(newsletter, "")
+			body, err := resource.app.Newsletter.GetBody(newsletter, "")
 			must(err)
 
 			request.Response().WriteHeader(200)
@@ -302,12 +302,12 @@ func initNewsletterResource(resource *Resource) {
 	resource.AddItemAction("send-preview").Method("POST").Handler(
 		func(request Request) {
 			var newsletter Newsletter
-			must(resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
+			must(resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
 			newsletter.PreviewSentAt = time.Now()
-			must(resource.App.Save(&newsletter))
+			must(resource.app.Save(&newsletter))
 
 			emails := parseEmails(request.Params().Get("emails"))
-			resource.App.sendEmails(newsletter, emails)
+			resource.app.sendEmails(newsletter, emails)
 			request.AddFlashMessage("Náhled newsletteru odeslán.")
 			request.Redirect(resource.getURL(""))
 		},
@@ -316,19 +316,19 @@ func initNewsletterResource(resource *Resource) {
 	resource.AddItemAction("send").Method("POST").Handler(
 		func(request Request) {
 			var newsletter Newsletter
-			err := resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
+			err := resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			if err != nil {
 				panic(err)
 			}
 			newsletter.SentAt = time.Now()
-			resource.App.Save(&newsletter)
+			resource.app.Save(&newsletter)
 
-			recipients, err := resource.App.getNewsletterRecipients()
+			recipients, err := resource.app.getNewsletterRecipients()
 			if err != nil {
 				panic(err)
 			}
 
-			go resource.App.sendEmails(newsletter, recipients)
+			go resource.app.sendEmails(newsletter, recipients)
 
 			request.SetData("recipients", recipients)
 			request.SetData("recipients_count", len(recipients))
@@ -340,20 +340,20 @@ func initNewsletterResource(resource *Resource) {
 	resource.AddItemAction("duplicate").Method("POST").Handler(
 		func(request Request) {
 			var newsletter Newsletter
-			must(resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
+			must(resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
 
 			var sections []*NewsletterSection
-			err := resource.App.Query().WhereIs("newsletter", newsletter.ID).Order("orderposition").Get(&sections)
+			err := resource.app.Query().WhereIs("newsletter", newsletter.ID).Order("orderposition").Get(&sections)
 
 			newsletter.ID = 0
-			must(resource.App.Create(&newsletter))
+			must(resource.app.Create(&newsletter))
 
 			if err == nil {
 				for _, v := range sections {
 					section := *v
 					section.ID = 0
 					section.Newsletter = newsletter.ID
-					must(resource.App.Create(&section))
+					must(resource.app.Create(&section))
 				}
 			}
 			request.Redirect(resource.GetItemURL(&newsletter, "edit"))
@@ -364,7 +364,7 @@ func initNewsletterResource(resource *Resource) {
 
 	resource.AddItemAction("send").Name(Unlocalized("Odeslat")).Template("newsletter_send").DataSource(
 		func(Request) interface{} {
-			recipients, err := resource.App.getNewsletterRecipients()
+			recipients, err := resource.app.getNewsletterRecipients()
 			if err != nil {
 				panic(err)
 			}

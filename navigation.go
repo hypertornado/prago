@@ -62,7 +62,7 @@ func (resource Resource) getNavigation(user User, code string) adminItemNavigati
 	var tabs []navigationTab
 	for _, v := range resource.actions {
 		if v.method == "GET" {
-			if resource.App.Authorize(user, v.permission) {
+			if resource.app.Authorize(user, v.permission) {
 				name := v.url
 				if v.name != nil {
 					name = v.name(user.Locale)
@@ -93,7 +93,7 @@ func (resource Resource) getItemNavigation(user User, item interface{}, code str
 					name = v.name(user.Locale)
 				}
 			}
-			if resource.App.Authorize(user, v.permission) {
+			if resource.app.Authorize(user, v.permission) {
 				tabs = append(tabs, navigationTab{
 					Name:     name,
 					URL:      resource.GetItemURL(item, v.url),

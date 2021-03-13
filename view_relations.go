@@ -18,14 +18,14 @@ type viewRelation struct {
 func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, user User) (ret []view) {
 
 	for _, v := range resource.autoRelations {
-		if !resource.App.Authorize(user, v.resource.CanView) {
+		if !resource.app.Authorize(user, v.resource.CanView) {
 			continue
 		}
 
 		var rowItem interface{}
 		v.resource.newItem(&rowItem)
 
-		q := resource.App.Query()
+		q := resource.app.Query()
 		q = q.WhereIs(v.field, fmt.Sprintf("%d", id))
 
 		filteredCount, err := q.Count(rowItem)
@@ -42,7 +42,7 @@ func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, use
 			URL:  v.listURL(int64(id)),
 		})
 
-		if resource.App.Authorize(user, v.resource.CanEdit) {
+		if resource.app.Authorize(user, v.resource.CanEdit) {
 			vi.Navigation = append(vi.Navigation, navigationTab{
 				Name: messages.GetNameFunction("admin_new")(user.Locale),
 				URL:  v.addURL(int64(id)),
@@ -139,21 +139,21 @@ func generateRelationListAPIHandler(app *App) func(Request) {
 
 func (resource *Resource) getAutoRelationsViewOLD(id int, inValues interface{}, user User) (ret []view) {
 	for _, v := range resource.autoRelations {
-		if !resource.App.Authorize(user, v.resource.CanView) {
+		if !resource.app.Authorize(user, v.resource.CanView) {
 			continue
 		}
 
 		var rowItem interface{}
 		v.resource.newItem(&rowItem)
 
-		totalCount, err := resource.App.Query().Count(rowItem)
+		totalCount, err := resource.app.Query().Count(rowItem)
 		must(err)
 
 		var rowItems interface{}
 		v.resource.newArrayOfItems(&rowItems)
 
 		var vi = view{}
-		q := resource.App.Query()
+		q := resource.app.Query()
 		q = q.WhereIs(v.field, fmt.Sprintf("%d", id))
 		if v.resource.OrderDesc {
 			q = q.OrderDesc(v.resource.OrderByColumn)
@@ -191,7 +191,7 @@ func (resource *Resource) getAutoRelationsViewOLD(id int, inValues interface{}, 
 			URL:  v.listURL(int64(id)),
 		})
 
-		if resource.App.Authorize(user, v.resource.CanEdit) {
+		if resource.app.Authorize(user, v.resource.CanEdit) {
 			vi.Navigation = append(vi.Navigation, navigationTab{
 				Name: messages.GetNameFunction("admin_new")(user.Locale),
 				URL:  v.addURL(int64(id)),

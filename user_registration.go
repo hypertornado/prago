@@ -8,21 +8,22 @@ import (
 )
 
 func initUserRegistration(resource *Resource) {
+	app := resource.app
 
-	resource.App.accessController.Get(resource.getURL("confirm_email"), func(request Request) {
+	app.accessController.Get(resource.getURL("confirm_email"), func(request Request) {
 		email := request.Params().Get("email")
 		token := request.Params().Get("token")
 
 		var user User
-		err := resource.App.Query().WhereIs("email", email).Get(&user)
+		err := app.Query().WhereIs("email", email).Get(&user)
 		if err == nil {
 			if !user.emailConfirmed() {
-				if token == user.emailToken(resource.App) {
+				if token == user.emailToken(app) {
 					user.EmailConfirmedAt = time.Now()
-					err = resource.App.Save(&user)
+					err = app.Save(&user)
 					if err == nil {
 						request.AddFlashMessage(messages.Get(user.Locale, "admin_confirm_email_ok"))
-						request.Redirect(resource.App.GetAdminURL("user/login"))
+						request.Redirect(app.GetAdminURL("user/login"))
 						return
 					}
 				}
@@ -30,7 +31,7 @@ func initUserRegistration(resource *Resource) {
 		}
 
 		request.AddFlashMessage(messages.Get(user.Locale, "admin_confirm_email_fail"))
-		request.Redirect(resource.App.GetAdminURL("user/login"))
+		request.Redirect(app.GetAdminURL("user/login"))
 	})
 
 	newUserForm := func(locale string) *form {
@@ -46,7 +47,7 @@ func initUserRegistration(resource *Resource) {
 					return true
 				}
 				var user User
-				resource.App.Query().WhereIs("email", field.Value).Get(&user)
+				app.Query().WhereIs("email", field.Value).Get(&user)
 				if user.Email == field.Value {
 					return false
 				}
@@ -63,19 +64,19 @@ func initUserRegistration(resource *Resource) {
 
 	renderRegistration := func(request Request, form *form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
-			App:          resource.App,
-			Navigation:   resource.App.getNologinNavigation(locale, "registration"),
+			App:          app,
+			Navigation:   app.getNologinNavigation(locale, "registration"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
 	}
 
-	resource.App.accessController.Get(resource.getURL("registration"), func(request Request) {
+	app.accessController.Get(resource.getURL("registration"), func(request Request) {
 		locale := getLocale(request)
 		renderRegistration(request, newUserForm(locale), locale)
 	})
 
-	resource.App.accessController.Post(resource.getURL("registration"), func(request Request) {
+	app.accessController.Post(resource.getURL("registration"), func(request Request) {
 		locale := getLocale(request)
 		form := newUserForm(locale)
 
@@ -90,25 +91,25 @@ func initUserRegistration(resource *Resource) {
 			user.IsActive = true
 			user.Locale = locale
 			must(user.newPassword(request.Params().Get("password")))
-			err := user.sendConfirmEmail(request, resource.App)
+			err := user.sendConfirmEmail(request, app)
 			if err != nil {
-				resource.App.Log().Println(err)
+				app.Log().Println(err)
 			}
-			err = user.sendAdminEmail(request, resource.App)
+			err = user.sendAdminEmail(request, app)
 			if err != nil {
-				resource.App.Log().Println(err)
+				app.Log().Println(err)
 			}
 
-			count, err := resource.App.Query().Count(&User{})
+			count, err := app.Query().Count(&User{})
 			if err == nil && count == 0 {
 				user.IsAdmin = true
 				user.Role = "sysadmin"
 			}
 
-			must(resource.App.Create(user))
+			must(app.Create(user))
 
 			request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", user.Email))
-			request.Redirect(resource.App.GetAdminURL("user/login"))
+			request.Redirect(app.GetAdminURL("user/login"))
 		} else {
 			form.GetItemByName("password").Value = ""
 			renderRegistration(request, form, locale)

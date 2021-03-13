@@ -8,6 +8,8 @@ import (
 
 func initUserRenew(resource *Resource) {
 
+	app := resource.app
+
 	forgottenPasswordForm := func(locale string) *form {
 		form := newForm()
 		form.Method = "POST"
@@ -18,35 +20,35 @@ func initUserRenew(resource *Resource) {
 
 	renderForgot := func(request Request, form *form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
-			App:          resource.App,
-			Navigation:   resource.App.getNologinNavigation(locale, "forgot"),
+			App:          app,
+			Navigation:   app.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
 	}
 
-	resource.App.accessController.Get(resource.getURL("forgot"), func(request Request) {
+	app.accessController.Get(resource.getURL("forgot"), func(request Request) {
 		locale := getLocale(request)
 		renderForgot(request, forgottenPasswordForm(locale), locale)
 	})
 
-	resource.App.accessController.Post(resource.getURL("forgot"), func(request Request) {
+	app.accessController.Post(resource.getURL("forgot"), func(request Request) {
 		email := fixEmail(request.Params().Get("email"))
 
 		var reason = ""
 		var user User
 
-		err := resource.App.Query().WhereIs("email", email).Get(&user)
+		err := app.Query().WhereIs("email", email).Get(&user)
 		if err == nil {
 			if user.emailConfirmed() {
 				if !time.Now().AddDate(0, 0, -1).Before(user.EmailRenewedAt) {
 					user.EmailRenewedAt = time.Now()
-					err = resource.App.Save(&user)
+					err = app.Save(&user)
 					if err == nil {
-						err = user.sendRenew(request, resource.App)
+						err = user.sendRenew(request, app)
 						if err == nil {
 							request.AddFlashMessage(messages.Get(user.Locale, "admin_forgoten_sent", user.Email))
-							request.Redirect(resource.App.GetAdminURL("/user/login"))
+							request.Redirect(app.GetAdminURL("/user/login"))
 							return
 						}
 						reason = "can't send renew email"
@@ -64,7 +66,7 @@ func initUserRenew(resource *Resource) {
 		}
 
 		request.AddFlashMessage(messages.Get(user.Locale, "admin_forgoten_error", user.Email) + " (" + reason + ")")
-		request.Redirect(resource.App.GetAdminURL("user/forgot"))
+		request.Redirect(app.GetAdminURL("user/forgot"))
 	})
 
 	renewPasswordForm := func(locale string) (form *form) {
@@ -80,20 +82,20 @@ func initUserRenew(resource *Resource) {
 
 	renderRenew := func(request Request, form *form, locale string) {
 		renderNavigationPageNoLogin(request, adminNavigationPage{
-			App:          resource.App,
-			Navigation:   resource.App.getNologinNavigation(locale, "forgot"),
+			App:          app,
+			Navigation:   app.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
 	}
 
-	resource.App.accessController.Get(resource.getURL("renew_password"), func(request Request) {
+	app.accessController.Get(resource.getURL("renew_password"), func(request Request) {
 		locale := getLocale(request)
 		form := renewPasswordForm(locale)
 		renderRenew(request, form, locale)
 	})
 
-	resource.App.accessController.Post(resource.getURL("renew_password"), func(request Request) {
+	app.accessController.Post(resource.getURL("renew_password"), func(request Request) {
 		locale := getLocale(request)
 
 		form := renewPasswordForm(locale)
@@ -108,16 +110,16 @@ func initUserRenew(resource *Resource) {
 		errStr := messages.Get(locale, "admin_error")
 
 		var user User
-		err := resource.App.Query().WhereIs("email", email).Get(&user)
+		err := app.Query().WhereIs("email", email).Get(&user)
 		if err == nil {
-			if token == user.emailToken(resource.App) {
+			if token == user.emailToken(app) {
 				if form.Valid {
 					err = user.newPassword(request.Params().Get("password"))
 					if err == nil {
-						err = resource.App.Save(&user)
+						err = app.Save(&user)
 						if err == nil {
 							request.AddFlashMessage(messages.Get(locale, "admin_password_changed"))
-							request.Redirect(resource.App.GetAdminURL("user/login"))
+							request.Redirect(app.GetAdminURL("user/login"))
 							return
 						}
 					}
@@ -125,7 +127,7 @@ func initUserRenew(resource *Resource) {
 			}
 		}
 		request.AddFlashMessage(errStr)
-		request.Redirect(resource.App.GetAdminURL("user/login"))
+		request.Redirect(app.GetAdminURL("user/login"))
 	})
 
 }
