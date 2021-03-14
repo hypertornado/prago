@@ -198,7 +198,7 @@ func (action *Action) bindAction() error {
 	if action.resource != nil {
 		controller = action.resource.resourceController
 	} else {
-		controller = app.AdminController
+		controller = app.adminController
 	}
 
 	var fn = func(request Request) {

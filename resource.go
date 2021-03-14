@@ -55,7 +55,7 @@ func (app *App) CreateResource(item interface{}, initFunction func(*Resource)) *
 		HumanName:          Unlocalized(defaultName),
 		id:                 columnName(defaultName),
 		typ:                typ,
-		resourceController: app.AdminController.subController(),
+		resourceController: app.adminController.subController(),
 		ItemsPerPage:       200,
 		//TableName:          columnName(defaultName),
 

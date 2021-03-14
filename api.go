@@ -21,7 +21,7 @@ func (app *App) initAPI() {
 }
 
 func bindImageAPI(app *App) {
-	app.AdminController.Get(app.GetAdminURL("file/uuid/:uuid"), func(request Request) {
+	app.adminController.Get(app.GetAdminURL("file/uuid/:uuid"), func(request Request) {
 		var image File
 		err := app.Query().WhereIs("uid", request.Params().Get("uuid")).Get(&image)
 		if err != nil {
@@ -30,7 +30,7 @@ func bindImageAPI(app *App) {
 		request.Redirect(app.GetAdminURL(fmt.Sprintf("file/%d", image.ID)))
 	})
 
-	app.AdminController.Post(app.GetAdminURL("_api/order/:resourceName"), func(request Request) {
+	app.adminController.Post(app.GetAdminURL("_api/order/:resourceName"), func(request Request) {
 		resource := app.getResourceByName(request.Params().Get("resourceName"))
 		user := request.GetUser()
 
@@ -61,13 +61,13 @@ func bindImageAPI(app *App) {
 		request.RenderJSON(true)
 	})
 
-	app.AdminController.Get(app.GetAdminURL("_api/image/thumb/:id"), func(request Request) {
+	app.adminController.Get(app.GetAdminURL("_api/image/thumb/:id"), func(request Request) {
 		var image File
 		must(app.Query().WhereIs("uid", request.Params().Get("id")).Get(&image))
 		request.Redirect(image.GetMedium())
 	})
 
-	app.AdminController.Get(app.GetAdminURL("_api/image/list"), func(request Request) {
+	app.adminController.Get(app.GetAdminURL("_api/image/list"), func(request Request) {
 		basicUserAuthorize(request)
 		var images []*File
 		if len(request.Params().Get("ids")) > 0 {
@@ -94,7 +94,7 @@ func bindImageAPI(app *App) {
 		writeFileResponse(request, images)
 	})
 
-	app.AdminController.Get(app.GetAdminURL("_api/imagedata/:uid"), func(request Request) {
+	app.adminController.Get(app.GetAdminURL("_api/imagedata/:uid"), func(request Request) {
 		basicUserAuthorize(request)
 		var file File
 		err := app.Query().WhereIs("uid", request.Params().Get("uid")).Get(&file)
@@ -104,7 +104,7 @@ func bindImageAPI(app *App) {
 		request.RenderJSON(file)
 	})
 
-	app.AdminController.Post(app.GetAdminURL("_api/image/upload"), func(request Request) {
+	app.adminController.Post(app.GetAdminURL("_api/image/upload"), func(request Request) {
 		basicUserAuthorize(request)
 		multipartFiles := request.Request().MultipartForm.File["file"]
 
@@ -127,7 +127,7 @@ func bindImageAPI(app *App) {
 }
 
 func bindMarkdownAPI(app *App) {
-	app.AdminController.Post(app.GetAdminURL("_api/markdown"), func(request Request) {
+	app.adminController.Post(app.GetAdminURL("_api/markdown"), func(request Request) {
 		basicUserAuthorize(request)
 		data, err := ioutil.ReadAll(request.Request().Body)
 		if err != nil {
@@ -138,7 +138,7 @@ func bindMarkdownAPI(app *App) {
 }
 
 func bindRelationAPI(app *App) {
-	app.AdminController.Get(app.GetAdminURL("_api/preview/:resourceName/:id"), func(request Request) {
+	app.adminController.Get(app.GetAdminURL("_api/preview/:resourceName/:id"), func(request Request) {
 		resourceName := request.Params().Get("resourceName")
 		idStr := request.Params().Get("id")
 
@@ -170,7 +170,7 @@ func bindRelationAPI(app *App) {
 		request.RenderJSON(relationItem)
 	})
 
-	app.AdminController.Get(app.GetAdminURL("_api/search/:resourceName"), func(request Request) {
+	app.adminController.Get(app.GetAdminURL("_api/search/:resourceName"), func(request Request) {
 		user := request.GetUser()
 		resourceName := request.Params().Get("resourceName")
 		q := request.Params().Get("q")
@@ -241,5 +241,5 @@ func bindRelationAPI(app *App) {
 }
 
 func bindRelationListAPI(app *App) {
-	app.AdminController.Post(app.GetAdminURL("_api/relationlist"), generateRelationListAPIHandler(app))
+	app.adminController.Post(app.GetAdminURL("_api/relationlist"), generateRelationListAPIHandler(app))
 }

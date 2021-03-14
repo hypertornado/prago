@@ -34,7 +34,7 @@ type App struct {
 	resourceMap      map[reflect.Type]*Resource
 	resourceNameMap  map[string]*Resource
 	accessController *Controller
-	AdminController  *Controller
+	adminController  *Controller
 	rootActions      []*Action
 	db               *sql.DB
 
@@ -98,7 +98,7 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 		app.Config.GetStringWithFallback("dbName", ""),
 	)
 
-	app.AdminController = app.accessController.subController()
+	app.adminController = app.accessController.subController()
 	app.initDefaultFieldTypes()
 
 	app.CreateResource(User{}, initUserResource)

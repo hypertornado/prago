@@ -21,14 +21,14 @@ type Notification struct {
 
 func initNotificationResource(resource *Resource) {
 
-	resource.app.AdminController.Get(resource.app.GetAdminURL("_api/notifications"), func(request Request) {
+	resource.app.adminController.Get(resource.app.GetAdminURL("_api/notifications"), func(request Request) {
 		user := request.GetUser()
 		notifications, err := resource.app.getNotificationViews(user)
 		must(err)
 		request.RenderJSON(notifications)
 	})
 
-	resource.app.AdminController.Delete(resource.app.GetAdminURL("_api/notification/:uuid"), func(request Request) {
+	resource.app.adminController.Delete(resource.app.GetAdminURL("_api/notification/:uuid"), func(request Request) {
 		uuid := request.Params().Get("uuid")
 		if uuid == "" {
 			panic("wrong length of uuid param")

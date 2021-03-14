@@ -338,7 +338,7 @@ func (app *App) initSearchInner() {
 		}
 	}()
 
-	app.AdminController.Get(app.GetAdminURL("_search"), func(request Request) {
+	app.adminController.Get(app.GetAdminURL("_search"), func(request Request) {
 		q := request.Params().Get("q")
 		pageStr := request.Params().Get("page")
 
@@ -389,7 +389,7 @@ func (app *App) initSearchInner() {
 		request.RenderView("admin_layout")
 	})
 
-	app.AdminController.Get(app.GetAdminURL("_search_suggest"), func(request Request) {
+	app.adminController.Get(app.GetAdminURL("_search_suggest"), func(request Request) {
 		results, err := adminSearch.Suggest(request.Params().Get("q"))
 		if err != nil {
 			app.Log().Println(err)

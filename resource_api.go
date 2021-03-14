@@ -79,10 +79,10 @@ func (app *App) initAPIs() {
 	}
 
 	//TODO: support ANY
-	app.AdminController.Get(app.GetAdminURL("api/*"), renderAPINotFound)
-	app.AdminController.Post(app.GetAdminURL("api/*"), renderAPINotFound)
-	app.AdminController.Delete(app.GetAdminURL("api/*"), renderAPINotFound)
-	app.AdminController.Put(app.GetAdminURL("api/*"), renderAPINotFound)
+	app.adminController.Get(app.GetAdminURL("api/*"), renderAPINotFound)
+	app.adminController.Post(app.GetAdminURL("api/*"), renderAPINotFound)
+	app.adminController.Delete(app.GetAdminURL("api/*"), renderAPINotFound)
+	app.adminController.Put(app.GetAdminURL("api/*"), renderAPINotFound)
 }
 
 func (api *API) initAPI() error {
@@ -90,7 +90,7 @@ func (api *API) initAPI() error {
 	if api.resource != nil {
 		controller = api.resource.resourceController
 	} else {
-		controller = api.app.AdminController
+		controller = api.app.adminController
 	}
 
 	var url string

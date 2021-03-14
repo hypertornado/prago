@@ -31,11 +31,11 @@ func (app *App) initAdminActions() {
 	)
 
 	googleAPIKey := app.Config.GetStringWithFallback("google", "")
-	app.AdminController.AddBeforeAction(func(request Request) {
+	app.adminController.AddBeforeAction(func(request Request) {
 		request.SetData("google", googleAPIKey)
 	})
 
-	app.AdminController.AddBeforeAction(func(request Request) {
+	app.adminController.AddBeforeAction(func(request Request) {
 		session := request.GetData("session").(*sessions.Session)
 		userID, ok := session.Values["user_id"].(int64)
 
@@ -77,7 +77,7 @@ func (app *App) initAdminActions() {
 
 	app.AddAction("").Name(messages.GetNameFunction("admin_signpost")).Template("admin_home_navigation").DataSource(app.getHomeData)
 
-	app.AdminController.Get(app.GetAdminURL("_help/markdown"), func(request Request) {
+	app.adminController.Get(app.GetAdminURL("_help/markdown"), func(request Request) {
 		request.SetData("admin_yield", "admin_help_markdown")
 		request.RenderView("admin_layout")
 	})
@@ -85,7 +85,7 @@ func (app *App) initAdminActions() {
 }
 
 func (app *App) initAdminNotFoundAction() {
-	app.AdminController.Get(app.GetAdminURL("*"), render404)
+	app.adminController.Get(app.GetAdminURL("*"), render404)
 }
 
 //GetAdminURL gets url
