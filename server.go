@@ -11,9 +11,9 @@ import (
 
 //ListenAndServe starts server on port
 func (app *App) ListenAndServe(port int) error {
-	app.Log().Printf("Server started: port=%d, pid=%d, developmentMode=%v\n", port, os.Getpid(), app.DevelopmentMode)
+	app.Log().Printf("Server started: port=%d, pid=%d, developmentMode=%v\n", port, os.Getpid(), app.developmentMode)
 
-	if !app.DevelopmentMode {
+	if !app.developmentMode {
 		file, err := os.OpenFile(app.dotPath()+"/prago.log",
 			os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
 		must(err)

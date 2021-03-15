@@ -13,7 +13,7 @@ import (
 	setup "github.com/hypertornado/prago/prago-setup/lib"
 )
 
-func initBuild(app *App) {
+func (app *App) initBuild() {
 	var version = app.version
 	var appName = app.codeName
 
@@ -21,7 +21,7 @@ func initBuild(app *App) {
 		build(appName, version)
 	})
 
-	ssh := app.Config.GetStringWithFallback("ssh", "")
+	ssh := app.ConfigurationGetStringWithFallback("ssh", "")
 	if ssh == "" {
 		app.Log().Println("no ssh value set in config file")
 		return

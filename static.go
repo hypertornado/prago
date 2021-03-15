@@ -46,7 +46,7 @@ type staticFS struct {
 }
 
 func (request Request) serveStatic() bool {
-	if request.app.DevelopmentMode {
+	if request.app.developmentMode {
 		for _, v := range request.app.staticFiles.devFilesystems {
 			filesystem := os.DirFS(v)
 			filePath := path.Join("", request.r.URL.Path[1:])

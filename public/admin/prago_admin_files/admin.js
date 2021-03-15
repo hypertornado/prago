@@ -527,10 +527,10 @@ class List {
             params["_statslimit"] = this.statsCheckboxSelectCount.value;
         }
         params["_format"] = "xlsx";
-        this.exportButton.setAttribute("href", this.adminPrefix + "/" + this.typeName + encodeParams(params));
+        this.exportButton.setAttribute("href", this.adminPrefix + "/" + this.typeName + "/api/list" + encodeParams(params));
         params["_format"] = "json";
         encoded = encodeParams(params);
-        request.open("GET", this.adminPrefix + "/" + this.typeName + encoded, true);
+        request.open("GET", this.adminPrefix + "/" + this.typeName + "/api/list" + encoded, true);
         request.addEventListener("load", () => {
             this.tbody.innerHTML = "";
             if (request.status == 200) {
@@ -886,7 +886,7 @@ class MarkdownEditor {
         new Autoresize(this.textarea);
         var prefix = document.body.getAttribute("data-admin-prefix");
         var helpLink = el.querySelector(".admin_markdown_show_help");
-        helpLink.setAttribute("href", prefix + "/_help/markdown");
+        helpLink.setAttribute("href", prefix + "/markdown");
         this.lastChanged = Date.now();
         this.changed = false;
         let showChange = el.querySelector(".admin_markdown_preview_show");

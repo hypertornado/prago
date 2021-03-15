@@ -9,8 +9,8 @@ import (
 	"sort"
 )
 
-func loadConfig(appName string) config {
-	path := getConfigPath(appName)
+func (app *App) initConfig() {
+	path := getConfigPath(app.codeName)
 
 	kv := make(map[string]interface{})
 	data, err := ioutil.ReadFile(path)
@@ -22,7 +22,7 @@ func loadConfig(appName string) config {
 	if err != nil {
 		panic(fmt.Sprintf("error while parsing config file: %s", err))
 	}
-	return config{kv}
+	app.config = config{kv}
 }
 
 func getConfigPath(appName string) string {
@@ -59,7 +59,8 @@ func (c config) Export() [][2]string {
 }
 
 //Get returns config item
-func (c config) Get(name string) (interface{}, error) {
+func (app *App) ConfigurationGetItem(name string) (interface{}, error) {
+	c := app.config
 	val, ok := c.v[name]
 	if ok {
 		return val, nil
@@ -69,8 +70,8 @@ func (c config) Get(name string) (interface{}, error) {
 
 //GetString returns config string item
 //panics when item is not set or not a string
-func (c config) GetString(name string) string {
-	item, err := c.Get(name)
+func (app *App) ConfigurationGetString(name string) string {
+	item, err := app.ConfigurationGetItem(name)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting '%s': %s", name, err.Error()))
 	}
@@ -82,8 +83,8 @@ func (c config) GetString(name string) string {
 }
 
 //GetStringWithFallback returns config string with default fallback value
-func (c config) GetStringWithFallback(name, fallback string) string {
-	item, err := c.Get(name)
+func (app *App) ConfigurationGetStringWithFallback(name, fallback string) string {
+	item, err := app.ConfigurationGetItem(name)
 	if err != nil {
 		return fallback
 	}

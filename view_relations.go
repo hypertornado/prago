@@ -18,7 +18,7 @@ type viewRelation struct {
 func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, user User) (ret []view) {
 
 	for _, v := range resource.autoRelations {
-		if !resource.app.Authorize(user, v.resource.CanView) {
+		if !resource.app.Authorize(user, v.resource.canView) {
 			continue
 		}
 
@@ -37,13 +37,13 @@ func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, use
 		vi.Name = name
 		vi.Subname = messages.ItemsCount(filteredCount, user.Locale)
 
-		vi.Navigation = append(vi.Navigation, navigationTab{
+		vi.Navigation = append(vi.Navigation, tab{
 			Name: messages.GetNameFunction("admin_table")(user.Locale),
 			URL:  v.listURL(int64(id)),
 		})
 
-		if resource.app.Authorize(user, v.resource.CanEdit) {
-			vi.Navigation = append(vi.Navigation, navigationTab{
+		if resource.app.Authorize(user, v.resource.canEdit) {
+			vi.Navigation = append(vi.Navigation, tab{
 				Name: messages.GetNameFunction("admin_new")(user.Locale),
 				URL:  v.addURL(int64(id)),
 			})
@@ -90,12 +90,12 @@ func generateRelationListAPIHandler(app *App) func(Request) {
 		}
 
 		sourceResource := app.getResourceByName(listRequest.SourceResource)
-		if !app.Authorize(user, sourceResource.CanView) {
+		if !app.Authorize(user, sourceResource.canView) {
 			panic("cant authorize source resource")
 		}
 
 		targetResource := app.getResourceByName(listRequest.TargetResource)
-		if !app.Authorize(user, targetResource.CanView) {
+		if !app.Authorize(user, targetResource.canView) {
 			panic("cant authorize target resource")
 		}
 
@@ -104,10 +104,10 @@ func generateRelationListAPIHandler(app *App) func(Request) {
 
 		q := app.Query()
 		q = q.WhereIs(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
-		if targetResource.OrderDesc {
-			q = q.OrderDesc(targetResource.OrderByColumn)
+		if targetResource.orderDesc {
+			q = q.OrderDesc(targetResource.orderByColumn)
 		} else {
-			q = q.Order(targetResource.OrderByColumn)
+			q = q.Order(targetResource.orderByColumn)
 		}
 
 		limit := listRequest.Count

@@ -10,7 +10,7 @@ import (
 func initUserRegistration(resource *Resource) {
 	app := resource.app
 
-	app.accessController.Get(resource.getURL("confirm_email"), func(request Request) {
+	app.accessController.get(resource.getURL("confirm_email"), func(request Request) {
 		email := request.Params().Get("email")
 		token := request.Params().Get("token")
 
@@ -63,7 +63,7 @@ func initUserRegistration(resource *Resource) {
 	}
 
 	renderRegistration := func(request Request, form *form, locale string) {
-		renderNavigationPageNoLogin(request, adminNavigationPage{
+		renderNavigationPageNoLogin(request, page{
 			App:          app,
 			Navigation:   app.getNologinNavigation(locale, "registration"),
 			PageTemplate: "admin_form",
@@ -71,12 +71,12 @@ func initUserRegistration(resource *Resource) {
 		})
 	}
 
-	app.accessController.Get(resource.getURL("registration"), func(request Request) {
+	app.accessController.get(resource.getURL("registration"), func(request Request) {
 		locale := getLocale(request)
 		renderRegistration(request, newUserForm(locale), locale)
 	})
 
-	app.accessController.Post(resource.getURL("registration"), func(request Request) {
+	app.accessController.post(resource.getURL("registration"), func(request Request) {
 		locale := getLocale(request)
 		form := newUserForm(locale)
 
@@ -134,9 +134,9 @@ func (user User) sendConfirmEmail(request Request, app *App) error {
 	urlValues.Add("email", user.Email)
 	urlValues.Add("token", user.emailToken(app))
 
-	subject := messages.Get(locale, "admin_confirm_email_subject", app.HumanName)
-	link := app.Config.GetString("baseUrl") + app.GetAdminURL("/user/confirm_email") + "?" + urlValues.Encode()
-	body := messages.Get(locale, "admin_confirm_email_body", link, link, app.HumanName)
+	subject := messages.Get(locale, "admin_confirm_email_subject", app.name(user.Locale))
+	link := app.ConfigurationGetString("baseUrl") + app.GetAdminURL("/user/confirm_email") + "?" + urlValues.Encode()
+	body := messages.Get(locale, "admin_confirm_email_body", link, link, app.name(user.Locale))
 
 	return app.SendEmail(
 		user.Name,
@@ -159,12 +159,12 @@ func (user User) sendAdminEmail(request Request, a *App) error {
 	}
 	for _, receiver := range users {
 
-		body := fmt.Sprintf("New user registered on %s: %s (%s)", a.HumanName, user.Email, user.Name)
+		body := fmt.Sprintf("New user registered on %s: %s (%s)", a.name(user.Locale), user.Email, user.Name)
 
 		err = a.SendEmail(
 			receiver.Name,
 			receiver.Email,
-			"New registration on "+a.HumanName,
+			"New registration on "+a.name(user.Locale),
 			body,
 			body,
 		)

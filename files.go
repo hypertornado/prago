@@ -15,9 +15,9 @@ import (
 var filesCDN cdnclient.CDNAccount
 
 func initCDN(app *App) {
-	cdnURL := app.Config.GetStringWithFallback("cdnURL", "https://www.prago-cdn.com")
-	cdnAccount := app.Config.GetStringWithFallback("cdnAccount", app.HumanName)
-	cdnPassword := app.Config.GetStringWithFallback("cdnPassword", "")
+	cdnURL := app.ConfigurationGetStringWithFallback("cdnURL", "https://www.prago-cdn.com")
+	cdnAccount := app.ConfigurationGetStringWithFallback("cdnAccount", app.codeName)
+	cdnPassword := app.ConfigurationGetStringWithFallback("cdnPassword", "")
 	filesCDN = cdnclient.NewCDNAccount(cdnURL, cdnAccount, cdnPassword)
 }
 
@@ -135,7 +135,7 @@ func getOldRedirectParams(request Request, app *App) (uuid, name string, err err
 func initFilesResource(resource *Resource) {
 	app := resource.app
 	initCDN(app)
-	resource.HumanName = messages.GetNameFunction("admin_files")
+	resource.name = messages.GetNameFunction("admin_files")
 
 	resource.fieldMap["uid"].HumanName = messages.GetNameFunction("admin_file")
 	resource.fieldMap["width"].HumanName = messages.GetNameFunction("width")
@@ -161,7 +161,7 @@ func initFilesResource(resource *Resource) {
 			}
 		})
 
-	resource.resourceController.AddBeforeAction(func(request Request) {
+	resource.resourceController.addBeforeAction(func(request Request) {
 		if request.Request().Method == "POST" && strings.HasSuffix(request.Request().URL.Path, "/delete") {
 			idStr := request.Params().Get("id")
 			id, err := strconv.Atoi(idStr)
@@ -176,7 +176,7 @@ func initFilesResource(resource *Resource) {
 		}
 	})
 
-	app.MainController().Get("/files/thumb/:size/:a/:b/:c/:d/:e/:name", func(request Request) {
+	app.mainController.get("/files/thumb/:size/:a/:b/:c/:d/:e/:name", func(request Request) {
 		uuid, name, err := getOldRedirectParams(request, app)
 		if err != nil {
 			panic(err)
@@ -203,16 +203,16 @@ func initFilesResource(resource *Resource) {
 		return false
 	})
 
-	app.MainController().Get("/files/original/:a/:b/:c/:d/:e/:name", func(request Request) {
+	app.mainController.get("/files/original/:a/:b/:c/:d/:e/:name", func(request Request) {
 		uuid, name, err := getOldRedirectParams(request, app)
 		must(err)
 		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
-	resource.ItemsPerPage = 100
+	resource.defaultItemsPerPage = 100
 
 	//TODO: authorize
-	resource.resourceController.Post(resource.getURL(""), func(request Request) {
+	resource.resourceController.post(resource.getURL(""), func(request Request) {
 		validateCSRF(request)
 
 		multipartFiles := request.Request().MultipartForm.File["uid"]

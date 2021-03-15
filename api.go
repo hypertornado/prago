@@ -1,245 +1,151 @@
 package prago
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
-	"io/ioutil"
-	"reflect"
-	"strconv"
 	"strings"
-
-	"github.com/hypertornado/prago/utils"
-
-	"github.com/golang-commonmark/markdown"
 )
 
-func (app *App) initAPI() {
-	bindMarkdownAPI(app)
-	bindRelationAPI(app)
-	bindRelationListAPI(app)
-	bindImageAPI(app)
+type API struct {
+	app         *App
+	method      string
+	url         string
+	permission  Permission
+	resource    *Resource
+	handler     func(Request)
+	handlerJSON func(Request) interface{}
 }
 
-func bindImageAPI(app *App) {
-	app.adminController.Get(app.GetAdminURL("file/uuid/:uuid"), func(request Request) {
-		var image File
-		err := app.Query().WhereIs("uid", request.Params().Get("uuid")).Get(&image)
-		if err != nil {
-			panic(err)
-		}
-		request.Redirect(app.GetAdminURL(fmt.Sprintf("file/%d", image.ID)))
-	})
+func newAPI(app *App, url string) *API {
+	api := &API{
+		app:    app,
+		method: "GET",
+		url:    url,
+	}
+	app.apis = append(app.apis, api)
+	return api
+}
 
-	app.adminController.Post(app.GetAdminURL("_api/order/:resourceName"), func(request Request) {
-		resource := app.getResourceByName(request.Params().Get("resourceName"))
+func (app *App) AddAPI(url string) *API {
+	api := newAPI(app, url)
+	return api
+}
+
+func (resource *Resource) AddAPI(url string) *API {
+	api := newAPI(resource.app, url)
+	api.resource = resource
+	api.permission = resource.canView
+	return api
+}
+
+func (api *API) Method(method string) *API {
+	method = strings.ToUpper(method)
+	if method != "GET" && method != "POST" && method != "PUT" && method != "DELETE" {
+		panic("unsupported method for action: " + method)
+	}
+	api.method = method
+	return api
+}
+
+func (api *API) Permission(permission Permission) *API {
+	api.permission = permission
+	return api
+}
+
+func (api *API) Handler(handler func(Request)) *API {
+	api.handler = handler
+	return api
+}
+
+func (api *API) HandlerJSON(handler func(Request) interface{}) *API {
+	api.handlerJSON = handler
+	return api
+}
+
+func (app *App) initAPIs() {
+	for _, v := range app.apis {
+		err := v.initAPI()
+		if err != nil {
+			panic(fmt.Sprintf("error while initializing api %s: %s", v.url, err))
+		}
+	}
+
+	//TODO: support ANY
+	app.adminController.get(app.GetAdminURL("api/*"), renderAPINotFound)
+	app.adminController.post(app.GetAdminURL("api/*"), renderAPINotFound)
+	app.adminController.delete(app.GetAdminURL("api/*"), renderAPINotFound)
+	app.adminController.put(app.GetAdminURL("api/*"), renderAPINotFound)
+}
+
+func (api *API) initAPI() error {
+	var controller *Controller
+	if api.resource != nil {
+		controller = api.resource.resourceController
+	} else {
+		controller = api.app.adminController
+	}
+
+	var url string
+	if api.resource == nil {
+		url = api.app.GetAdminURL("api/" + api.url)
+	} else {
+		url = api.resource.getURL("api/" + api.url)
+	}
+
+	if api.handler == nil && api.handlerJSON == nil {
+		return errors.New("no handler for API set")
+	}
+
+	var fn = func(request Request) {
 		user := request.GetUser()
-
-		if !app.Authorize(user, resource.CanEdit) {
-			panic("access denied")
+		if !api.app.Authorize(user, api.permission) {
+			renderAPINotAuthorized(request)
+			return
 		}
-
-		if resource.OrderFieldName == "" {
-			panic("can't order")
+		if api.handlerJSON != nil {
+			data := api.handlerJSON(request)
+			request.RenderJSON(data)
+			return
 		}
-
-		decoder := json.NewDecoder(request.Request().Body)
-		var t = map[string][]int{}
-		must(decoder.Decode(&t))
-
-		order, ok := t["order"]
-		if !ok {
-			panic("wrong format")
+		if api.handler != nil {
+			api.handler(request)
+			return
 		}
+	}
 
-		for i, id := range order {
-			var item interface{}
-			resource.newItem(&item)
-			must(resource.app.Query().WhereIs("id", int64(id)).Get(item))
-			must(resource.setOrderPosition(item, int64(i)))
-			must(resource.app.Save(item))
-		}
-		request.RenderJSON(true)
-	})
-
-	app.adminController.Get(app.GetAdminURL("_api/image/thumb/:id"), func(request Request) {
-		var image File
-		must(app.Query().WhereIs("uid", request.Params().Get("id")).Get(&image))
-		request.Redirect(image.GetMedium())
-	})
-
-	app.adminController.Get(app.GetAdminURL("_api/image/list"), func(request Request) {
-		basicUserAuthorize(request)
-		var images []*File
-		if len(request.Params().Get("ids")) > 0 {
-			ids := strings.Split(request.Params().Get("ids"), ",")
-			for _, v := range ids {
-				var image File
-				err := app.Query().WhereIs("uid", v).Get(&image)
-				if err == nil {
-					images = append(images, &image)
-				} else {
-					if err != ErrItemNotFound {
-						panic(err)
-					}
-				}
-			}
-		} else {
-			filter := "%" + request.Params().Get("q") + "%"
-			q := app.Query().WhereIs("filetype", "image").OrderDesc("createdat").Limit(10)
-			if len(request.Params().Get("q")) > 0 {
-				q = q.Where("name LIKE ? OR description LIKE ?", filter, filter)
-			}
-			must(q.Get(&images))
-		}
-		writeFileResponse(request, images)
-	})
-
-	app.adminController.Get(app.GetAdminURL("_api/imagedata/:uid"), func(request Request) {
-		basicUserAuthorize(request)
-		var file File
-		err := app.Query().WhereIs("uid", request.Params().Get("uid")).Get(&file)
-		if err != nil {
-			panic(err)
-		}
-		request.RenderJSON(file)
-	})
-
-	app.adminController.Post(app.GetAdminURL("_api/image/upload"), func(request Request) {
-		basicUserAuthorize(request)
-		multipartFiles := request.Request().MultipartForm.File["file"]
-
-		description := request.Params().Get("description")
-
-		files := []*File{}
-
-		for _, v := range multipartFiles {
-			user := request.GetUser()
-
-			file, err := app.UploadFile(v, &user, description)
-			if err != nil {
-				panic(err)
-			}
-			files = append(files, file)
-		}
-
-		writeFileResponse(request, files)
-	})
+	switch api.method {
+	case "POST":
+		controller.post(url, fn)
+	case "GET":
+		controller.get(url, fn)
+	case "PUT":
+		controller.put(url, fn)
+	case "DELETE":
+		controller.delete(url, fn)
+	default:
+		return fmt.Errorf("unknown method %s", api.method)
+	}
+	return nil
 }
 
-func bindMarkdownAPI(app *App) {
-	app.adminController.Post(app.GetAdminURL("_api/markdown"), func(request Request) {
-		basicUserAuthorize(request)
-		data, err := ioutil.ReadAll(request.Request().Body)
-		if err != nil {
-			panic(err)
-		}
-		request.RenderJSON(markdown.New(markdown.HTML(true), markdown.Breaks(true)).RenderToString(data))
-	})
+func renderAPINotAuthorized(request Request) {
+	renderAPICode(request, 403)
 }
 
-func bindRelationAPI(app *App) {
-	app.adminController.Get(app.GetAdminURL("_api/preview/:resourceName/:id"), func(request Request) {
-		resourceName := request.Params().Get("resourceName")
-		idStr := request.Params().Get("id")
-
-		user := request.GetUser()
-
-		resource, found := app.resourceNameMap[resourceName]
-		if !found {
-			render404(request)
-			return
-		}
-
-		if !app.Authorize(user, resource.CanView) {
-			render403(request)
-			return
-		}
-
-		var item interface{}
-		resource.newItem(&item)
-		err := app.Query().WhereIs("id", idStr).Get(item)
-		if err == ErrItemNotFound {
-			render404(request)
-			return
-		}
-		if err != nil {
-			panic(err)
-		}
-
-		relationItem := resource.itemToRelationData(item, user, nil)
-		request.RenderJSON(relationItem)
-	})
-
-	app.adminController.Get(app.GetAdminURL("_api/search/:resourceName"), func(request Request) {
-		user := request.GetUser()
-		resourceName := request.Params().Get("resourceName")
-		q := request.Params().Get("q")
-
-		usedIDs := map[int64]bool{}
-
-		resource, found := app.resourceNameMap[resourceName]
-		if !found {
-			render404(request)
-			return
-		}
-
-		if !app.Authorize(user, resource.CanView) {
-			render403(request)
-			return
-		}
-
-		ret := []viewRelationData{}
-
-		id, err := strconv.Atoi(q)
-		if err == nil {
-			var item interface{}
-			resource.newItem(&item)
-			err := app.Query().WhereIs("id", id).Get(item)
-			if err == nil {
-				relationItem := resource.itemToRelationData(item, user, nil)
-				if relationItem != nil {
-					//relationItem.Description = utils.Crop(relationItem.Description, 200)
-					usedIDs[relationItem.ID] = true
-					ret = append(ret, *relationItem)
-				}
-			}
-		}
-
-		filter := "%" + q + "%"
-		for _, v := range []string{"name", "description"} {
-			field := resource.fieldMap[v]
-			if field == nil {
-				continue
-			}
-			var items interface{}
-			resource.newArrayOfItems(&items)
-			err := app.Query().Limit(5).Where(v+" LIKE ?", filter).Get(items)
-			if err == nil {
-				itemsVal := reflect.ValueOf(items).Elem()
-				for i := 0; i < itemsVal.Len(); i++ {
-					var item interface{}
-					item = itemsVal.Index(i).Interface()
-					viewItem := resource.itemToRelationData(item, user, nil)
-					if viewItem != nil && usedIDs[viewItem.ID] == false {
-						usedIDs[viewItem.ID] = true
-						ret = append(ret, *viewItem)
-					}
-				}
-			}
-		}
-
-		if len(ret) > 5 {
-			ret = ret[0:5]
-		}
-
-		for k := range ret {
-			ret[k].Description = utils.Crop(ret[k].Description, 100)
-		}
-
-		request.RenderJSON(ret)
-	})
+func renderAPINotFound(request Request) {
+	renderAPICode(request, 404)
 }
 
-func bindRelationListAPI(app *App) {
-	app.adminController.Post(app.GetAdminURL("_api/relationlist"), generateRelationListAPIHandler(app))
+func renderAPICode(request Request, code int) {
+	var message string
+	switch code {
+	case 403:
+		message = "Forbidden"
+	case 404:
+		message = "Not found"
+	}
+
+	request.Response().WriteHeader(code)
+	request.Response().Write([]byte(fmt.Sprintf("%d - %s", code, message)))
+
 }

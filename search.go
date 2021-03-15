@@ -252,7 +252,7 @@ func (e *adminSearch) importResource(resource *Resource) error {
 	roles := resource.app.getResourceViewRoles(*resource)
 	var resourceSearchItem = searchItem{
 		ID:    "resource_" + resource.id,
-		Name:  resource.HumanName("cs"),
+		Name:  resource.name("cs"),
 		URL:   resource.getURL(""),
 		Roles: roles,
 	}
@@ -307,7 +307,7 @@ func searchID(resource *Resource, id int64) string {
 func relationDataToSearchItem(resource *Resource, data viewRelationData) searchItem {
 	return searchItem{
 		ID:          searchID(resource, data.ID),
-		Category:    resource.HumanName("cs"),
+		Category:    resource.name("cs"),
 		Name:        data.Name,
 		Description: data.Description,
 		Image:       data.Image,
@@ -321,12 +321,12 @@ func (app *App) initSearchInner() {
 
 	adminSearch, err := newAdminSearch(app)
 	if err != nil {
-		if app.DevelopmentMode {
+		if app.developmentMode {
 			app.Log().Println("admin search not initialized: " + err.Error())
 		}
 		return
 	}
-	if app.DevelopmentMode {
+	if app.developmentMode {
 		app.Log().Println("admin search initialized")
 	}
 	app.search = adminSearch
@@ -338,58 +338,62 @@ func (app *App) initSearchInner() {
 		}
 	}()
 
-	app.adminController.Get(app.GetAdminURL("_search"), func(request Request) {
-		q := request.Params().Get("q")
-		pageStr := request.Params().Get("page")
+	app.AddAction("_search").Name(Unlocalized("Vyhledávání")).Template("admin_search").IsWide().hiddenMenu().DataSource(
+		func(request Request) interface{} {
+			q := request.Params().Get("q")
+			pageStr := request.Params().Get("page")
 
-		var page = 1
-		if pageStr != "" {
-			var err error
-			page, err = strconv.Atoi(pageStr)
-			if err != nil {
-				render404(request)
-				return
+			var page = 1
+			if pageStr != "" {
+				var err error
+				page, err = strconv.Atoi(pageStr)
+				if err != nil {
+					panic("no search parameter")
+				}
 			}
-		}
 
-		result, hits, err := adminSearch.Search(q, request.GetUser().getRole(), page-1)
-		must(err)
+			result, hits, err := adminSearch.Search(q, request.GetUser().getRole(), page-1)
+			must(err)
 
-		var pages = int(hits) / searchPageSize
-		if hits > 0 {
-			pages++
-		}
-
-		var searchPages []searchPage
-		for i := 1; i <= pages; i++ {
-			var selected bool
-			if page == i {
-				selected = true
+			var pages = int(hits) / searchPageSize
+			if hits > 0 {
+				pages++
 			}
-			values := make(url.Values)
-			values.Add("q", q)
-			if i > 0 {
-				values.Add("page", strconv.Itoa(i))
+
+			var searchPages []searchPage
+			for i := 1; i <= pages; i++ {
+				var selected bool
+				if page == i {
+					selected = true
+				}
+				values := make(url.Values)
+				values.Add("q", q)
+				if i > 0 {
+					values.Add("page", strconv.Itoa(i))
+				}
+				searchPages = append(searchPages, searchPage{
+					Title:    i,
+					Selected: selected,
+					URL:      "_search?" + values.Encode(),
+				})
 			}
-			searchPages = append(searchPages, searchPage{
-				Title:    i,
-				Selected: selected,
-				URL:      "_search?" + values.Encode(),
-			})
-		}
 
-		title := fmt.Sprintf("Vyhledávání – \"%s\" – %d výsledků", q, hits)
+			title := fmt.Sprintf("Vyhledávání – \"%s\" – %d výsledků", q, hits)
 
-		request.SetData("search_q", q)
-		request.SetData("admin_title", title)
-		request.SetData("search_results", result)
-		request.SetData("search_pages", searchPages)
+			var ret = map[string]interface{}{}
 
-		request.SetData("admin_yield", "admin_search")
-		request.RenderView("admin_layout")
-	})
+			request.SetData("search_q", q)
 
-	app.adminController.Get(app.GetAdminURL("_search_suggest"), func(request Request) {
+			ret["search_q"] = q
+			ret["admin_title"] = title
+			ret["search_results"] = result
+			ret["search_pages"] = searchPages
+
+			return ret
+		},
+	)
+
+	app.adminController.get(app.GetAdminURL("_search_suggest"), func(request Request) {
 		results, err := adminSearch.Suggest(request.Params().Get("q"))
 		if err != nil {
 			app.Log().Println(err)

@@ -95,15 +95,15 @@ func (user *User) newPassword(password string) error {
 }
 
 func (user User) emailToken(app *App) string {
-	randomness := app.Config.GetString("random")
+	randomness := app.ConfigurationGetString("random")
 	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%s%s", user.Email, randomness))
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 func initUserResource(resource *Resource) {
-	resource.HumanName = messages.GetNameFunction("admin_users")
-	resource.CanEdit = permissionSysadmin
+	resource.name = messages.GetNameFunction("admin_users")
+	resource.canEdit = permissionSysadmin
 
 	initUserRegistration(resource)
 	initUserLogin(resource)

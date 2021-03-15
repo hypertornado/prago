@@ -16,7 +16,7 @@ const adminPathPrefix = "/admin"
 
 func (app *App) initAdminActions() {
 
-	app.accessController.AddBeforeAction(func(request Request) {
+	app.accessController.addBeforeAction(func(request Request) {
 		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
 		request.SetData("locale", getLocale(request))
 		request.SetData("admin_header_prefix", adminPathPrefix)
@@ -24,18 +24,18 @@ func (app *App) initAdminActions() {
 		request.SetData("css", app.css)
 	})
 
-	app.accessController.AddAroundAction(
+	app.accessController.addAroundAction(
 		app.createSessionAroundAction(
-			app.Config.GetString("random"),
+			app.ConfigurationGetString("random"),
 		),
 	)
 
-	googleAPIKey := app.Config.GetStringWithFallback("google", "")
-	app.adminController.AddBeforeAction(func(request Request) {
+	googleAPIKey := app.ConfigurationGetStringWithFallback("google", "")
+	app.adminController.addBeforeAction(func(request Request) {
 		request.SetData("google", googleAPIKey)
 	})
 
-	app.adminController.AddBeforeAction(func(request Request) {
+	app.adminController.addBeforeAction(func(request Request) {
 		session := request.GetData("session").(*sessions.Session)
 		userID, ok := session.Values["user_id"].(int64)
 
@@ -51,7 +51,7 @@ func (app *App) initAdminActions() {
 			return
 		}
 
-		randomness := app.Config.GetString("random")
+		randomness := app.ConfigurationGetString("random")
 		request.SetData("_csrfToken", user.csrfToken(randomness))
 		request.SetData("currentuser", &user)
 		request.SetData("locale", user.Locale)
@@ -76,16 +76,11 @@ func (app *App) initAdminActions() {
 	})
 
 	app.AddAction("").Name(messages.GetNameFunction("admin_signpost")).Template("admin_home_navigation").DataSource(app.getHomeData)
-
-	app.adminController.Get(app.GetAdminURL("_help/markdown"), func(request Request) {
-		request.SetData("admin_yield", "admin_help_markdown")
-		request.RenderView("admin_layout")
-	})
-
+	app.AddAction("markdown").Name(Unlocalized("Nápověda markdown")).hiddenMenu().Template("admin_help_markdown").IsWide()
 }
 
 func (app *App) initAdminNotFoundAction() {
-	app.adminController.Get(app.GetAdminURL("*"), render404)
+	app.adminController.get(app.GetAdminURL("*"), render404)
 }
 
 //GetAdminURL gets url

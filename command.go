@@ -21,9 +21,9 @@ func addServerCommand(app *App) {
 			NewCommandFlag("development", "development mode").Alias("d").Bool(&developmentMode),
 		).
 		Callback(func() {
-			app.DevelopmentMode = developmentMode
+			app.developmentMode = developmentMode
 			if port <= 0 {
-				configPort, err := app.Config.Get("port")
+				configPort, err := app.ConfigurationGetItem("port")
 				switch configPort.(type) {
 				case string:
 					port, err = strconv.Atoi(configPort.(string))

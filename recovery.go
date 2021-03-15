@@ -11,7 +11,7 @@ import (
 func (app App) recoveryFunction(p Request, recoveryData interface{}) {
 	duration := time.Now().Sub(p.receivedAt)
 
-	if app.DevelopmentMode {
+	if app.developmentMode {
 		temp, err := template.New("development_error").Parse(recoveryTmpl)
 		if err != nil {
 			panic(err)

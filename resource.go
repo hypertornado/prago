@@ -9,36 +9,38 @@ import (
 
 //Resource is structure representing one item in admin menu or one table in database
 type Resource struct {
-	app                *App
-	id                 string
-	HumanName          func(locale string) string
-	typ                reflect.Type
-	resourceController *Controller
-	ItemsPerPage       int64
-	OrderByColumn      string
-	OrderDesc          bool
+	app                 *App
+	id                  string
+	name                func(locale string) string
+	typ                 reflect.Type
+	resourceController  *Controller
+	defaultItemsPerPage int64
+
+	orderByColumn string
+	orderDesc     bool
+
 	//TableName          string
 	actions       []*Action
 	itemActions   []*Action
 	relations     []relation
 	autoRelations []relation
 
-	CanView   Permission
-	CanEdit   Permission
-	CanCreate Permission
-	CanDelete Permission
-	CanExport Permission
+	canView   Permission
+	canEdit   Permission
+	canCreate Permission
+	canDelete Permission
+	canExport Permission
 
-	ActivityLog bool
+	activityLog bool
 
-	PreviewURLFunction func(interface{}) string
+	previewURL func(interface{}) string
 
 	fieldArrays []*Field
 	fieldMap    map[string]*Field
 	fieldTypes  map[string]FieldType
 
-	OrderFieldName  string
-	OrderColumnName string
+	orderFieldName  string
+	orderColumnName string
 }
 
 //CreateResource creates new resource based on item
@@ -51,21 +53,20 @@ func (app *App) CreateResource(item interface{}, initFunction func(*Resource)) *
 
 	defaultName := typ.Name()
 	ret := &Resource{
-		app:                app,
-		HumanName:          Unlocalized(defaultName),
-		id:                 columnName(defaultName),
-		typ:                typ,
-		resourceController: app.adminController.subController(),
-		ItemsPerPage:       200,
-		//TableName:          columnName(defaultName),
+		app:                 app,
+		name:                Unlocalized(defaultName),
+		id:                  columnName(defaultName),
+		typ:                 typ,
+		resourceController:  app.adminController.subController(),
+		defaultItemsPerPage: 200,
 
-		CanView:   "",
-		CanEdit:   "",
-		CanCreate: "",
-		CanDelete: "",
-		CanExport: "",
+		canView:   "",
+		canEdit:   "",
+		canCreate: "",
+		canDelete: "",
+		canExport: "",
 
-		ActivityLog: true,
+		activityLog: true,
 
 		fieldMap:   make(map[string]*Field),
 		fieldTypes: app.fieldTypes,
@@ -75,15 +76,15 @@ func (app *App) CreateResource(item interface{}, initFunction func(*Resource)) *
 		if ast.IsExported(typ.Field(i).Name) {
 			field := newField(typ.Field(i), i, ret.fieldTypes)
 			if field.Tags["prago-type"] == "order" {
-				ret.OrderFieldName = field.Name
-				ret.OrderColumnName = field.ColumnName
+				ret.orderFieldName = field.Name
+				ret.orderColumnName = field.ColumnName
 			}
 			ret.fieldArrays = append(ret.fieldArrays, field)
 			ret.fieldMap[field.ColumnName] = field
 		}
 	}
 
-	ret.OrderByColumn, ret.OrderDesc = ret.getDefaultOrder()
+	ret.orderByColumn, ret.orderDesc = ret.getDefaultOrder()
 
 	app.resources = append(app.resources, ret)
 	_, typFound := app.resourceMap[ret.typ]
@@ -112,15 +113,58 @@ func (resource Resource) GetItemURL(item interface{}, suffix string) string {
 	return ret
 }
 
+//Name sets human name for resource
+func (resource *Resource) Name(name func(string) string) *Resource {
+	resource.name = name
+	return resource
+}
+
+//PreviewURLFunction sets function to generate representation of resource item in app
+func (resource *Resource) PreviewURLFunction(fn func(interface{}) string) *Resource {
+	resource.previewURL = fn
+	return resource
+}
+
+//ItemsPerPage sets default display value of items per page
+func (resource *Resource) ItemsPerPage(itemsPerPage int64) *Resource {
+	resource.defaultItemsPerPage = itemsPerPage
+	return resource
+}
+
+func (resource *Resource) ViewPermission(permission Permission) *Resource {
+	resource.canView = permission
+	return resource
+}
+
+func (resource *Resource) EditPermission(permission Permission) *Resource {
+	resource.canEdit = permission
+	return resource
+}
+
+func (resource *Resource) CreatePermission(permission Permission) *Resource {
+	resource.canCreate = permission
+	return resource
+}
+
+func (resource *Resource) DeletePermission(permission Permission) *Resource {
+	resource.canDelete = permission
+	return resource
+}
+
+func (resource *Resource) ExportPermission(permission Permission) *Resource {
+	resource.canExport = permission
+	return resource
+}
+
 func (app *App) getResourceByName(name string) *Resource {
 	return app.resourceNameMap[columnName(name)]
 }
 
 func (app *App) initResource(resource *Resource) {
 
-	resource.resourceController.AddAroundAction(func(request Request, next func()) {
+	resource.resourceController.addAroundAction(func(request Request, next func()) {
 		user := request.GetUser()
-		if !app.Authorize(user, resource.CanView) {
+		if !app.Authorize(user, resource.canView) {
 			render403(request)
 		} else {
 			next()
@@ -196,13 +240,13 @@ func (resource Resource) cachedCountName() string {
 }
 
 func (resource Resource) getCachedCount() int64 {
-	return resource.app.Cache.Load(resource.cachedCountName(), func() interface{} {
+	return resource.app.cache.Load(resource.cachedCountName(), func() interface{} {
 		return resource.count()
 	}).(int64)
 }
 
 func (resource Resource) updateCachedCount() error {
-	return resource.app.Cache.Set(resource.cachedCountName(), resource.count())
+	return resource.app.cache.Set(resource.cachedCountName(), resource.count())
 }
 
 func (resource Resource) getPaginationData(user User) (ret []listPaginationData) {
@@ -211,24 +255,24 @@ func (resource Resource) getPaginationData(user User) (ret []listPaginationData)
 
 	for _, v := range []int64{10, 20, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000} {
 		if !used {
-			if v == resource.ItemsPerPage {
+			if v == resource.defaultItemsPerPage {
 				used = true
 			}
-			if resource.ItemsPerPage < v {
+			if resource.defaultItemsPerPage < v {
 				used = true
-				ints = append(ints, resource.ItemsPerPage)
+				ints = append(ints, resource.defaultItemsPerPage)
 			}
 		}
 		ints = append(ints, v)
 	}
 
-	if resource.ItemsPerPage > ints[len(ints)-1] {
-		ints = append(ints, resource.ItemsPerPage)
+	if resource.defaultItemsPerPage > ints[len(ints)-1] {
+		ints = append(ints, resource.defaultItemsPerPage)
 	}
 
 	for _, v := range ints {
 		var selected bool
-		if v == resource.ItemsPerPage {
+		if v == resource.defaultItemsPerPage {
 			selected = true
 		}
 

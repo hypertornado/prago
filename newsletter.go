@@ -22,7 +22,7 @@ import (
 var ErrEmailAlreadyInList = errors.New("email already in newsletter list")
 
 //NewsletterMiddleware represents users newsletter
-type NewsletterMiddleware struct {
+type newsletterMiddleware struct {
 	baseURL    string
 	renderer   NewsletterRenderer
 	app        *App
@@ -31,12 +31,15 @@ type NewsletterMiddleware struct {
 
 //InitNewsletter inits apps newsletter function
 func (app *App) InitNewsletter(renderer NewsletterRenderer) {
-	app.Newsletter = &NewsletterMiddleware{
-		baseURL:  app.Config.GetString("baseUrl"),
+	if app.newsletter != nil {
+		panic("newsletter already initialized")
+	}
+	app.newsletter = &newsletterMiddleware{
+		baseURL:  app.ConfigurationGetString("baseUrl"),
 		renderer: renderer,
 
 		app:        app,
-		randomness: app.Config.GetString("random"),
+		randomness: app.ConfigurationGetString("random"),
 	}
 
 	var importPath string
@@ -64,21 +67,21 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 		}
 	})
 
-	controller := app.MainController().subController()
-	controller.AddBeforeAction(func(request Request) {
-		request.SetData("site", app.HumanName)
+	controller := app.mainController.subController()
+	controller.addBeforeAction(func(request Request) {
+		request.SetData("site", app.name("en"))
 	})
 
-	controller.Get("/newsletter-subscribe", func(request Request) {
+	controller.get("/newsletter-subscribe", func(request Request) {
 		request.SetData("title", "Přihlásit se k odběru newsletteru")
-		request.SetData("csrf", app.Newsletter.CSFR(request))
+		request.SetData("csrf", app.newsletter.CSFR(request))
 		request.SetData("yield", "newsletter_subscribe")
 		request.SetData("show_back_button", true)
 		request.RenderView("newsletter_layout")
 	})
 
-	controller.Post("/newsletter-subscribe", func(request Request) {
-		if app.Newsletter.CSFR(request) != request.Params().Get("csrf") {
+	controller.post("/newsletter-subscribe", func(request Request) {
+		if app.newsletter.CSFR(request) != request.Params().Get("csrf") {
 			panic("wrong csrf")
 		}
 
@@ -108,15 +111,15 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 		request.RenderView("newsletter_layout")
 	})
 
-	controller.Get("/newsletter-confirm", func(request Request) {
+	controller.get("/newsletter-confirm", func(request Request) {
 		email := request.Params().Get("email")
 		secret := request.Params().Get("secret")
 
-		if app.Newsletter.secret(email) != secret {
+		if app.newsletter.secret(email) != secret {
 			panic("wrong secret")
 		}
 
-		var person NewsletterPersons
+		var person newsletterPersons
 		err := app.Query().WhereIs("email", email).Get(&person)
 		if err != nil {
 			panic("can't find user")
@@ -134,15 +137,15 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 		request.RenderView("newsletter_layout")
 	})
 
-	controller.Get("/newsletter-unsubscribe", func(request Request) {
+	controller.get("/newsletter-unsubscribe", func(request Request) {
 		email := request.Params().Get("email")
 		secret := request.Params().Get("secret")
 
-		if app.Newsletter.secret(email) != secret {
+		if app.newsletter.secret(email) != secret {
 			panic("wrong secret")
 		}
 
-		var person NewsletterPersons
+		var person newsletterPersons
 		err := app.Query().WhereIs("email", email).Get(&person)
 		if err != nil {
 			panic("can't find user")
@@ -160,27 +163,31 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 		request.RenderView("newsletter_layout")
 	})
 
-	app.CreateResource(Newsletter{}, initNewsletterResource)
-	app.CreateResource(NewsletterSection{}, initNewsletterSection)
-	app.CreateResource(NewsletterPersons{}, initNewsletterPersonsResource)
+	app.CreateResource(newsletter{}, initNewsletterResource)
+	app.CreateResource(newsletterSection{}, initNewsletterSection)
+	app.CreateResource(newsletterPersons{}, initNewsletterPersonsResource)
 
 	//newsletterResource.AddRelation(newsletterSectionResource, "Newsletter", Unlocalized("Přidat sekci"))
 }
 
+func (app *App) NewsletterCSRF(request Request) string {
+	return app.newsletter.CSFR(request)
+}
+
 func (app App) sendConfirmEmail(name, email string) error {
 
-	text := app.Newsletter.confirmEmailBody(name, email)
+	text := app.newsletter.confirmEmailBody(name, email)
 
 	return app.SendEmail(
 		name,
 		email,
-		"Potvrďte prosím odběr newsletteru "+app.HumanName,
+		"Potvrďte prosím odběr newsletteru "+app.name("en"),
 		text,
 		text,
 	)
 }
 
-func (nm NewsletterMiddleware) confirmEmailBody(name, email string) string {
+func (nm newsletterMiddleware) confirmEmailBody(name, email string) string {
 	values := make(url.Values)
 	values.Set("email", email)
 	values.Set("secret", nm.secret(email))
@@ -191,12 +198,12 @@ func (nm NewsletterMiddleware) confirmEmailBody(name, email string) string {
 	)
 
 	return fmt.Sprintf("Potvrďte prosím odběr newsletteru z webu %s kliknutím na adresu:\n\n%s",
-		nm.app.HumanName,
+		nm.app.name("en"),
 		u,
 	)
 }
 
-func (nm NewsletterMiddleware) unsubscribeURL(email string) string {
+func (nm newsletterMiddleware) unsubscribeURL(email string) string {
 	values := make(url.Values)
 	values.Set("email", email)
 	values.Set("secret", nm.secret(email))
@@ -207,7 +214,7 @@ func (nm NewsletterMiddleware) unsubscribeURL(email string) string {
 	)
 }
 
-func (nm NewsletterMiddleware) secret(email string) string {
+func (nm newsletterMiddleware) secret(email string) string {
 	h := md5.New()
 
 	io.WriteString(h, fmt.Sprintf("secret%s%s", nm.randomness, email))
@@ -215,7 +222,7 @@ func (nm NewsletterMiddleware) secret(email string) string {
 }
 
 //CSFR returns csrf token for newsletter
-func (nm NewsletterMiddleware) CSFR(request Request) string {
+func (nm newsletterMiddleware) CSFR(request Request) string {
 	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%s%s", nm.randomness, request.Request().UserAgent()))
 	return fmt.Sprintf("%x", h.Sum(nil))
@@ -228,12 +235,12 @@ func (app *App) AddEmail(email, name string, confirm bool) error {
 		return errors.New("Wrong email format")
 	}
 
-	err := app.Query().WhereIs("email", email).Get(&NewsletterPersons{})
+	err := app.Query().WhereIs("email", email).Get(&newsletterPersons{})
 	if err == nil {
 		return ErrEmailAlreadyInList
 	}
 
-	person := NewsletterPersons{
+	person := newsletterPersons{
 		Name:      name,
 		Email:     email,
 		Confirmed: confirm,
@@ -242,7 +249,7 @@ func (app *App) AddEmail(email, name string, confirm bool) error {
 }
 
 //Newsletter represents newsletter
-type Newsletter struct {
+type newsletter struct {
 	ID            int64     `prago-preview:"true" prago-order-desc:"true"`
 	Name          string    `prago-preview:"true" prago-description:"Jméno newsletteru"`
 	Body          string    `prago-type:"markdown"`
@@ -253,11 +260,10 @@ type Newsletter struct {
 }
 
 func initNewsletterResource(resource *Resource) {
-	resource.ActivityLog = true
-	resource.CanView = "newsletter"
+	resource.canView = "newsletter"
 
-	resource.resourceController.AddBeforeAction(func(request Request) {
-		ret, err := resource.app.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&NewsletterPersons{})
+	resource.resourceController.addBeforeAction(func(request Request) {
+		ret, err := resource.app.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&newsletterPersons{})
 		if err != nil {
 			panic(err)
 		}
@@ -286,11 +292,11 @@ func initNewsletterResource(resource *Resource) {
 		}*/
 	resource.AddItemAction("preview").Name(Unlocalized("Náhled")).Handler(
 		func(request Request) {
-			var newsletter Newsletter
+			var newsletter newsletter
 			err := resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			must(err)
 
-			body, err := resource.app.Newsletter.GetBody(newsletter, "")
+			body, err := resource.app.newsletter.GetBody(newsletter, "")
 			must(err)
 
 			request.Response().WriteHeader(200)
@@ -301,7 +307,7 @@ func initNewsletterResource(resource *Resource) {
 
 	resource.AddItemAction("send-preview").Method("POST").Handler(
 		func(request Request) {
-			var newsletter Newsletter
+			var newsletter newsletter
 			must(resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
 			newsletter.PreviewSentAt = time.Now()
 			must(resource.app.Save(&newsletter))
@@ -313,9 +319,9 @@ func initNewsletterResource(resource *Resource) {
 		},
 	)
 
-	resource.AddItemAction("send").Method("POST").Handler(
-		func(request Request) {
-			var newsletter Newsletter
+	resource.AddItemAction("send").Method("POST").Template("newsletter_sent").DataSource(
+		func(request Request) interface{} {
+			var newsletter newsletter
 			err := resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			if err != nil {
 				panic(err)
@@ -330,19 +336,21 @@ func initNewsletterResource(resource *Resource) {
 
 			go resource.app.sendEmails(newsletter, recipients)
 
-			request.SetData("recipients", recipients)
-			request.SetData("recipients_count", len(recipients))
-			request.SetData("admin_yield", "newsletter_sent")
-			request.RenderView("admin_layout")
+			var ret = map[string]interface{}{}
+
+			ret["recipients"] = recipients
+			ret["recipients_count"] = len(recipients)
+
+			return ret
 		},
 	)
 
 	resource.AddItemAction("duplicate").Method("POST").Handler(
 		func(request Request) {
-			var newsletter Newsletter
+			var newsletter newsletter
 			must(resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
 
-			var sections []*NewsletterSection
+			var sections []*newsletterSection
 			err := resource.app.Query().WhereIs("newsletter", newsletter.ID).Order("orderposition").Get(&sections)
 
 			newsletter.ID = 0
@@ -394,7 +402,7 @@ func parseEmails(emails string) []string {
 func (app *App) getNewsletterRecipients() ([]string, error) {
 	ret := []string{}
 
-	var persons []*NewsletterPersons
+	var persons []*newsletterPersons
 	err := app.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Get(&persons)
 	if err != nil {
 		return nil, err
@@ -406,9 +414,9 @@ func (app *App) getNewsletterRecipients() ([]string, error) {
 	return ret, nil
 }
 
-func (app *App) sendEmails(n Newsletter, emails []string) error {
+func (app *App) sendEmails(n newsletter, emails []string) error {
 	for _, v := range emails {
-		body, err := app.Newsletter.GetBody(n, v)
+		body, err := app.newsletter.GetBody(n, v)
 		if err == nil {
 
 			err = app.SendEmail(
@@ -427,12 +435,12 @@ func (app *App) sendEmails(n Newsletter, emails []string) error {
 }
 
 //GetBody gets body of newsletter
-func (nm *NewsletterMiddleware) GetBody(n Newsletter, email string) (string, error) {
+func (nm *newsletterMiddleware) GetBody(n newsletter, email string) (string, error) {
 	content := markdown.New(markdown.HTML(true)).RenderToString([]byte(n.Body))
 	params := map[string]interface{}{
 		"id":          n.ID,
 		"baseUrl":     nm.baseURL,
-		"site":        nm.app.HumanName,
+		"site":        nm.app.name("en"),
 		"title":       n.Name,
 		"unsubscribe": nm.unsubscribeURL(email),
 		"content":     template.HTML(content),
@@ -470,7 +478,7 @@ func defaultNewsletterRenderer(params map[string]interface{}) (string, error) {
 }
 
 //NewsletterSection represents section of newsletter
-type NewsletterSection struct {
+type newsletterSection struct {
 	ID            int64
 	Newsletter    int64  `prago-type:"relation" prago-preview:"true"`
 	Name          string `prago-description:"Jméno sekce"`
@@ -484,11 +492,11 @@ type NewsletterSection struct {
 }
 
 func initNewsletterSection(resource *Resource) {
-	resource.CanView = "newsletter"
+	resource.canView = "newsletter"
 }
 
 //NewsletterPersons represents person of newsletter
-type NewsletterPersons struct {
+type newsletterPersons struct {
 	ID           int64
 	Name         string `prago-preview:"true" prago-description:"Jméno příjemce"`
 	Email        string `prago-preview:"true"`
@@ -499,12 +507,11 @@ type NewsletterPersons struct {
 }
 
 func initNewsletterPersonsResource(resource *Resource) {
-	resource.CanView = "sysadmin"
-	resource.ActivityLog = true
+	resource.canView = "sysadmin"
 }
 
 //NewsletterSectionData represents data of newsletter section
-type NewsletterSectionData struct {
+type newsletterSectionData struct {
 	Name   string
 	Text   string
 	Button string
@@ -512,14 +519,14 @@ type NewsletterSectionData struct {
 	Image  string
 }
 
-func (nm *NewsletterMiddleware) getNewsletterSectionData(n Newsletter) []NewsletterSectionData {
-	var sections []*NewsletterSection
+func (nm *newsletterMiddleware) getNewsletterSectionData(n newsletter) []newsletterSectionData {
+	var sections []*newsletterSection
 	err := nm.app.Query().WhereIs("newsletter", n.ID).Order("orderposition").Get(&sections)
 	if err != nil {
 		return nil
 	}
 
-	var ret []NewsletterSectionData
+	var ret []newsletterSectionData
 
 	for _, v := range sections {
 		button := "Zjistit více"
@@ -538,7 +545,7 @@ func (nm *NewsletterMiddleware) getNewsletterSectionData(n Newsletter) []Newslet
 			image = files[0].GetMedium()
 		}
 
-		ret = append(ret, NewsletterSectionData{
+		ret = append(ret, newsletterSectionData{
 			Name:   v.Name,
 			Text:   v.Text,
 			Button: button,

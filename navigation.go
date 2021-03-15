@@ -1,26 +1,30 @@
 package prago
 
-type adminNavigationPage struct {
+type page struct {
 	Name         string
 	App          *App
-	Navigation   adminItemNavigation
+	Navigation   navigation
 	PageTemplate string
 	PageData     interface{}
 	HideBox      bool
 }
 
-type adminItemNavigation struct {
-	Tabs []navigationTab
+type navigation struct {
+	Tabs []tab
 	Wide bool
 }
 
-type navigationTab struct {
+type tab struct {
 	Name     string
 	URL      string
 	Selected bool
 }
 
-func isTabVisible(tabs []navigationTab, pos int) bool {
+func (nav page) Logo() string {
+	return nav.App.logo
+}
+
+func isTabVisible(tabs []tab, pos int) bool {
 	if tabs[pos-1].Selected {
 		return false
 	}
@@ -30,15 +34,15 @@ func isTabVisible(tabs []navigationTab, pos int) bool {
 	return true
 }
 
-func renderNavigationPage(request Request, page adminNavigationPage) {
+func renderNavigationPage(request Request, page page) {
 	renderNavigation(request, page, "admin_layout")
 }
 
-func renderNavigationPageNoLogin(request Request, page adminNavigationPage) {
+func renderNavigationPageNoLogin(request Request, page page) {
 	renderNavigation(request, page, "admin_layout_nologin")
 }
 
-func renderNavigation(request Request, page adminNavigationPage, viewName string) {
+func renderNavigation(request Request, page page, viewName string) {
 	var name string
 	name = page.Name
 	for _, v := range page.Navigation.Tabs {
@@ -58,8 +62,8 @@ func renderNavigation(request Request, page adminNavigationPage, viewName string
 	request.RenderView(viewName)
 }
 
-func (resource Resource) getNavigation(user User, code string) adminItemNavigation {
-	var tabs []navigationTab
+func (resource Resource) getNavigation(user User, code string) navigation {
+	var tabs []tab
 	for _, v := range resource.actions {
 		if v.method == "GET" {
 			if resource.app.Authorize(user, v.permission) {
@@ -67,7 +71,7 @@ func (resource Resource) getNavigation(user User, code string) adminItemNavigati
 				if v.name != nil {
 					name = v.name(user.Locale)
 				}
-				tabs = append(tabs, navigationTab{
+				tabs = append(tabs, tab{
 					Name:     name,
 					URL:      resource.getURL(v.url),
 					Selected: trueIfEqual(code, v.url),
@@ -76,13 +80,13 @@ func (resource Resource) getNavigation(user User, code string) adminItemNavigati
 		}
 	}
 
-	return adminItemNavigation{
+	return navigation{
 		Tabs: tabs,
 	}
 }
 
-func (resource Resource) getItemNavigation(user User, item interface{}, code string) adminItemNavigation {
-	var tabs []navigationTab
+func (resource Resource) getItemNavigation(user User, item interface{}, code string) navigation {
+	var tabs []tab
 	for _, v := range resource.itemActions {
 		if v.method == "GET" {
 			name := v.url
@@ -94,7 +98,7 @@ func (resource Resource) getItemNavigation(user User, item interface{}, code str
 				}
 			}
 			if resource.app.Authorize(user, v.permission) {
-				tabs = append(tabs, navigationTab{
+				tabs = append(tabs, tab{
 					Name:     name,
 					URL:      resource.GetItemURL(item, v.url),
 					Selected: trueIfEqual(code, v.url),
@@ -103,33 +107,33 @@ func (resource Resource) getItemNavigation(user User, item interface{}, code str
 		}
 	}
 
-	return adminItemNavigation{
+	return navigation{
 		Tabs: tabs,
 	}
 }
 
-func (app *App) getNologinNavigation(language, code string) adminItemNavigation {
-	tabs := []navigationTab{}
+func (app *App) getNologinNavigation(language, code string) navigation {
+	tabs := []tab{}
 
-	tabs = append(tabs, navigationTab{
+	tabs = append(tabs, tab{
 		Name:     messages.Get(language, "admin_login_action"),
 		URL:      app.GetAdminURL("user/login"),
 		Selected: trueIfEqual(code, "login"),
 	})
 
-	tabs = append(tabs, navigationTab{
+	tabs = append(tabs, tab{
 		Name:     messages.Get(language, "admin_register"),
 		URL:      app.GetAdminURL("user/registration"),
 		Selected: trueIfEqual(code, "registration"),
 	})
 
-	tabs = append(tabs, navigationTab{
+	tabs = append(tabs, tab{
 		Name:     messages.Get(language, "admin_forgotten"),
 		URL:      app.GetAdminURL("user/forgot"),
 		Selected: trueIfEqual(code, "forgot"),
 	})
 
-	return adminItemNavigation{
+	return navigation{
 		Tabs: tabs,
 	}
 }

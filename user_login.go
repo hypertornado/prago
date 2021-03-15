@@ -41,7 +41,7 @@ func initUserLogin(resource *Resource) {
 	}
 
 	renderLogin := func(request Request, form *form, locale string) {
-		renderNavigationPageNoLogin(request, adminNavigationPage{
+		renderNavigationPageNoLogin(request, page{
 			App:          resource.app,
 			Navigation:   resource.app.getNologinNavigation(locale, "login"),
 			PageTemplate: "admin_form",
@@ -49,13 +49,13 @@ func initUserLogin(resource *Resource) {
 		})
 	}
 
-	resource.app.accessController.Get(resource.getURL("login"), func(request Request) {
+	resource.app.accessController.get(resource.getURL("login"), func(request Request) {
 		locale := getLocale(request)
 		form := loginForm(locale)
 		renderLogin(request, form, locale)
 	})
 
-	resource.app.accessController.Post(resource.getURL("login"), func(request Request) {
+	resource.app.accessController.post(resource.getURL("login"), func(request Request) {
 		email := request.Params().Get("email")
 		email = fixEmail(email)
 		password := request.Params().Get("password")

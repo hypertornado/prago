@@ -10,9 +10,8 @@
     <link rel="stylesheet" href="/admin/prago_admin_files/admin.css?v={{.version}}">
   </head>
   <body class="admin_nologin">
-
-    {{if .admin_page.App.Logo}}
-      <div class="admin_nologin_logo" style="background-image: url('{{CSS .admin_page.App.Logo}}');"></div>
+    {{if .admin_page.Logo}}
+      <div class="admin_nologin_logo" style="background-image: url('{{CSS .admin_page.Logo}}');"></div>
     {{end}}
 
     {{if .admin_page}}

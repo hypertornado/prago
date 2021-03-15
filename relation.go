@@ -46,7 +46,7 @@ func (resource *Resource) initAutoRelations() {
 			}
 
 			if v.Tags["prago-description"] == "" {
-				v.HumanName = (*referenceResource).HumanName
+				v.HumanName = (*referenceResource).name
 			}
 
 			referenceResource.autoRelations = append(referenceResource.autoRelations, relation{
@@ -78,9 +78,9 @@ func createRelationListURL(resource Resource, field Field) func(int64) string {
 
 func createRelationNamingFunction(field Field, resource Resource, referenceResource Resource) func(string) string {
 	return func(lang string) string {
-		ret := resource.HumanName(lang)
+		ret := resource.name(lang)
 		fieldName := field.HumanName(lang)
-		referenceName := referenceResource.HumanName(lang)
+		referenceName := referenceResource.name(lang)
 		if fieldName != referenceName {
 			ret += " – " + fieldName
 		}
@@ -99,7 +99,7 @@ func getRelationData(resource Resource, user User, f Field, value interface{}) (
 		return nil, fmt.Errorf("resource not found: %s", f.Name)
 	}
 
-	if !resource.app.Authorize(user, r2.CanView) {
+	if !resource.app.Authorize(user, r2.canView) {
 		return nil, fmt.Errorf("user is not authorized to view this item")
 	}
 

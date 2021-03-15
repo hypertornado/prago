@@ -81,11 +81,6 @@ type pagination struct {
 	SelectedPage int64
 }
 
-type page struct {
-	Page    int64
-	Current bool
-}
-
 func (resource *Resource) getListHeader(user User) (list list, err error) {
 	lang := user.Locale
 
@@ -94,24 +89,24 @@ func (resource *Resource) getListHeader(user User) (list list, err error) {
 	list.VisibleColumns = resource.defaultVisibleFieldsStr()
 	list.Columns = resource.fieldsStr()
 
-	list.OrderColumn = resource.OrderByColumn
-	list.OrderDesc = resource.OrderDesc
+	list.OrderColumn = resource.orderByColumn
+	list.OrderDesc = resource.orderDesc
 	list.Locale = user.Locale
 
-	list.ItemsPerPage = resource.ItemsPerPage
+	list.ItemsPerPage = resource.defaultItemsPerPage
 	list.PaginationData = resource.getPaginationData(user)
 
 	list.StatsLimitSelectData = getStatsLimitSelectData(user.Locale)
 
-	orderField, ok := resource.fieldMap[resource.OrderByColumn]
+	orderField, ok := resource.fieldMap[resource.orderByColumn]
 	if !ok || !orderField.CanOrder {
 		err = ErrItemNotFound
 		return
 	}
 
-	list.Name = resource.HumanName(lang)
+	list.Name = resource.name(lang)
 
-	if resource.OrderColumnName == list.OrderColumn && !list.OrderDesc {
+	if resource.orderColumnName == list.OrderColumn && !list.OrderDesc {
 		list.CanChangeOrder = true
 	}
 
@@ -318,7 +313,7 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 	return q
 }
 
-func (resource *Resource) getListContent(app *App, user User, params url.Values) (ret listContent, err error) {
+func (resource *Resource) getListContent(user User, params url.Values) (ret listContent, err error) {
 	var listHeader list
 	listHeader, err = resource.getListHeader(user)
 	if err != nil {
@@ -336,11 +331,11 @@ func (resource *Resource) getListContent(app *App, user User, params url.Values)
 		columnsMap[v] = true
 	}
 
-	orderBy := resource.OrderByColumn
+	orderBy := resource.orderByColumn
 	if params.Get("_order") != "" {
 		orderBy = params.Get("_order")
 	}
-	orderDesc := resource.OrderDesc
+	orderDesc := resource.orderDesc
 	if params.Get("_desc") == "true" {
 		orderDesc = true
 	}
@@ -348,7 +343,7 @@ func (resource *Resource) getListContent(app *App, user User, params url.Values)
 		orderDesc = false
 	}
 
-	q := app.Query()
+	q := resource.app.Query()
 	if orderDesc {
 		q = q.OrderDesc(orderBy)
 	} else {
@@ -358,7 +353,7 @@ func (resource *Resource) getListContent(app *App, user User, params url.Values)
 	var count int64
 	var item interface{}
 	resource.newItem(&item)
-	countQuery := app.Query()
+	countQuery := resource.app.Query()
 	countQuery = resource.addFilterParamsToQuery(countQuery, params)
 	count, err = countQuery.Count(item)
 	if err != nil {
@@ -374,7 +369,7 @@ func (resource *Resource) getListContent(app *App, user User, params url.Values)
 		ret.TotalCountStr = fmt.Sprintf("%s z %s", utils.HumanizeNumber(count), messages.ItemsCount(totalCount, user.Locale))
 	}
 
-	var itemsPerPage = resource.ItemsPerPage
+	var itemsPerPage = resource.defaultItemsPerPage
 	if params.Get("_pagesize") != "" {
 		pageSize, err := strconv.Atoi(params.Get("_pagesize"))
 		if err == nil && pageSize > 0 && pageSize <= 1000000 {
@@ -424,7 +419,7 @@ func (resource *Resource) getListContent(app *App, user User, params url.Values)
 		row.ID = itemVal.FieldByName("ID").Int()
 		row.URL = resource.getURL(fmt.Sprintf("%d", row.ID))
 
-		row.Actions = app.getListItemActions(user, val.Index(i).Interface(), row.ID, *resource)
+		row.Actions = resource.app.getListItemActions(user, val.Index(i).Interface(), row.ID, *resource)
 		ret.Rows = append(ret.Rows, row)
 	}
 
@@ -446,8 +441,8 @@ type listContentJSON struct {
 	StatsStr string
 }
 
-func (resource *Resource) getListContentJSON(app *App, user User, params url.Values) (ret *listContentJSON, err error) {
-	listData, err := resource.getListContent(app, user, params)
+func (resource *Resource) getListContentJSON(user User, params url.Values) (ret *listContentJSON, err error) {
+	listData, err := resource.getListContent(user, params)
 	if err != nil {
 		return nil, err
 	}

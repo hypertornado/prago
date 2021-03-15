@@ -7,7 +7,7 @@ import (
 
 //SendEmail from app
 func (a App) SendEmail(name, email, subject, contentText, contentHTML string) error {
-	from := mail.NewEmail(a.HumanName, a.noReplyEmail)
+	from := mail.NewEmail(a.name("en"), a.noReplyEmail)
 	to := mail.NewEmail(name, email)
 	message := mail.NewSingleEmail(from, subject, to, contentText, contentHTML)
 	client := sendgrid.NewSendClient(a.sendgridKey)

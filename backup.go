@@ -61,9 +61,9 @@ func backupApp(app *App) error {
 	}
 	defer os.RemoveAll(dir)
 
-	user := app.Config.GetStringWithFallback("dbUser", "")
-	dbName := app.Config.GetStringWithFallback("dbName", "")
-	password := app.Config.GetStringWithFallback("dbPassword", "")
+	user := app.ConfigurationGetStringWithFallback("dbUser", "")
+	dbName := app.ConfigurationGetStringWithFallback("dbName", "")
+	password := app.ConfigurationGetStringWithFallback("dbPassword", "")
 
 	var dumpCmd *exec.Cmd
 

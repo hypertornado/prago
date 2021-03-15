@@ -19,7 +19,7 @@ func initUserRenew(resource *Resource) {
 	}
 
 	renderForgot := func(request Request, form *form, locale string) {
-		renderNavigationPageNoLogin(request, adminNavigationPage{
+		renderNavigationPageNoLogin(request, page{
 			App:          app,
 			Navigation:   app.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
@@ -27,12 +27,12 @@ func initUserRenew(resource *Resource) {
 		})
 	}
 
-	app.accessController.Get(resource.getURL("forgot"), func(request Request) {
+	app.accessController.get(resource.getURL("forgot"), func(request Request) {
 		locale := getLocale(request)
 		renderForgot(request, forgottenPasswordForm(locale), locale)
 	})
 
-	app.accessController.Post(resource.getURL("forgot"), func(request Request) {
+	app.accessController.post(resource.getURL("forgot"), func(request Request) {
 		email := fixEmail(request.Params().Get("email"))
 
 		var reason = ""
@@ -81,7 +81,7 @@ func initUserRenew(resource *Resource) {
 	}
 
 	renderRenew := func(request Request, form *form, locale string) {
-		renderNavigationPageNoLogin(request, adminNavigationPage{
+		renderNavigationPageNoLogin(request, page{
 			App:          app,
 			Navigation:   app.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
@@ -89,13 +89,13 @@ func initUserRenew(resource *Resource) {
 		})
 	}
 
-	app.accessController.Get(resource.getURL("renew_password"), func(request Request) {
+	app.accessController.get(resource.getURL("renew_password"), func(request Request) {
 		locale := getLocale(request)
 		form := renewPasswordForm(locale)
 		renderRenew(request, form, locale)
 	})
 
-	app.accessController.Post(resource.getURL("renew_password"), func(request Request) {
+	app.accessController.post(resource.getURL("renew_password"), func(request Request) {
 		locale := getLocale(request)
 
 		form := renewPasswordForm(locale)
@@ -136,7 +136,7 @@ func (user User) getRenewURL(request Request, app *App) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)
 	urlValues.Add("token", user.emailToken(app))
-	return app.Config.GetString("baseUrl") + app.GetAdminURL("/user/renew_password") + "?" + urlValues.Encode()
+	return app.ConfigurationGetString("baseUrl") + app.GetAdminURL("/user/renew_password") + "?" + urlValues.Encode()
 }
 
 func (user User) sendRenew(request Request, app *App) error {
@@ -144,9 +144,9 @@ func (user User) sendRenew(request Request, app *App) error {
 		return errors.New("no reply email empty")
 	}
 
-	subject := messages.Get(user.Locale, "admin_forgotten_email_subject", app.HumanName)
+	subject := messages.Get(user.Locale, "admin_forgotten_email_subject", app.name(user.Locale))
 	link := user.getRenewURL(request, app)
-	body := messages.Get(user.Locale, "admin_forgotten_email_body", link, link, app.HumanName)
+	body := messages.Get(user.Locale, "admin_forgotten_email_body", link, link, app.name(user.Locale))
 
 	return app.SendEmail(
 		user.Name,

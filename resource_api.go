@@ -1,159 +1,62 @@
 package prago
 
 import (
-	"errors"
-	"fmt"
+	"reflect"
 	"strings"
+	"time"
+
+	"github.com/tealeg/xlsx"
 )
 
 func initResourceAPIs(resource *Resource) {
-	/*resource.AddAPI("test").HandlerJSON(
-		func(request Request) interface{} {
-			return "ok"
+	resource.AddAPI("list").Handler(
+		func(request Request) {
+			user := request.GetUser()
+			if request.Request().URL.Query().Get("_format") == "json" {
+				listDataJSON, err := resource.getListContentJSON(user, request.Request().URL.Query())
+				must(err)
+				request.RenderJSON(listDataJSON)
+				return
+			}
+			if request.Request().URL.Query().Get("_format") == "xlsx" {
+				if !resource.app.Authorize(user, resource.canExport) {
+					render403(request)
+					return
+				}
+				listData, err := resource.getListContent(user, request.Request().URL.Query())
+				must(err)
+
+				file := xlsx.NewFile()
+				sheet, err := file.AddSheet("List 1")
+				must(err)
+
+				row := sheet.AddRow()
+				columnsStr := request.Request().URL.Query().Get("_columns")
+				if columnsStr == "" {
+					columnsStr = resource.defaultVisibleFieldsStr()
+				}
+				columnsAr := strings.Split(columnsStr, ",")
+				for _, v := range columnsAr {
+					cell := row.AddCell()
+					cell.SetValue(v)
+				}
+
+				for _, v1 := range listData.Rows {
+					row := sheet.AddRow()
+					for _, v2 := range v1.Items {
+						cell := row.AddCell()
+						if reflect.TypeOf(v2.OriginalValue) == reflect.TypeOf(time.Now()) {
+							t := v2.OriginalValue.(time.Time)
+							cell.SetString(t.Format("2006-01-02"))
+						} else {
+							cell.SetValue(v2.OriginalValue)
+						}
+					}
+				}
+				file.Write(request.Response())
+				return
+			}
+			panic("unkown format")
 		},
-	)*/
-}
-
-type API struct {
-	app         *App
-	method      string
-	url         string
-	permission  Permission
-	resource    *Resource
-	handler     func(Request)
-	handlerJSON func(Request) interface{}
-}
-
-func newAPI(app *App, url string) *API {
-	api := &API{
-		app:    app,
-		method: "GET",
-		url:    url,
-	}
-	app.apis = append(app.apis, api)
-	return api
-}
-
-func (app *App) AddAPI(url string) *API {
-	api := newAPI(app, url)
-	return api
-}
-
-func (resource *Resource) AddAPI(url string) *API {
-	api := newAPI(resource.app, url)
-	api.resource = resource
-	api.permission = resource.CanView
-	return api
-}
-
-func (api *API) Method(method string) *API {
-	method = strings.ToUpper(method)
-	if method != "GET" && method != "POST" && method != "PUT" && method != "DELETE" {
-		panic("unsupported method for action: " + method)
-	}
-	api.method = method
-	return api
-}
-
-func (api *API) Permission(permission Permission) *API {
-	api.permission = permission
-	return api
-}
-
-func (api *API) Handler(handler func(Request)) *API {
-	api.handler = handler
-	return api
-}
-
-func (api *API) HandlerJSON(handler func(Request) interface{}) *API {
-	api.handlerJSON = handler
-	return api
-}
-
-func (app *App) initAPIs() {
-	for _, v := range app.apis {
-		err := v.initAPI()
-		if err != nil {
-			panic(fmt.Sprintf("error while initializing api %s: %s", v.url, err))
-		}
-	}
-
-	//TODO: support ANY
-	app.adminController.Get(app.GetAdminURL("api/*"), renderAPINotFound)
-	app.adminController.Post(app.GetAdminURL("api/*"), renderAPINotFound)
-	app.adminController.Delete(app.GetAdminURL("api/*"), renderAPINotFound)
-	app.adminController.Put(app.GetAdminURL("api/*"), renderAPINotFound)
-}
-
-func (api *API) initAPI() error {
-	var controller *Controller
-	if api.resource != nil {
-		controller = api.resource.resourceController
-	} else {
-		controller = api.app.adminController
-	}
-
-	var url string
-	if api.resource == nil {
-		url = api.app.GetAdminURL("api/" + api.url)
-	} else {
-		url = api.resource.getURL("api/" + api.url)
-	}
-
-	if api.handler == nil && api.handlerJSON == nil {
-		return errors.New("no handler for API set")
-	}
-
-	var fn = func(request Request) {
-		user := request.GetUser()
-		if !api.app.Authorize(user, api.permission) {
-			renderAPINotAuthorized(request)
-			return
-		}
-		if api.handlerJSON != nil {
-			data := api.handlerJSON(request)
-			request.RenderJSON(data)
-			return
-		}
-		if api.handler != nil {
-			api.handler(request)
-			return
-		}
-	}
-
-	switch api.method {
-	case "POST":
-		controller.Post(url, fn)
-	case "GET":
-		controller.Get(url, fn)
-	case "PUT":
-		controller.Put(url, fn)
-	case "DELETE":
-		controller.Delete(url, fn)
-	default:
-		return fmt.Errorf("unknown method %s", api.method)
-	}
-	return nil
-}
-
-func renderAPINotAuthorized(request Request) {
-	renderAPICode(request, 403)
-}
-
-func renderAPINotFound(request Request) {
-	renderAPICode(request, 404)
-}
-
-func renderAPICode(request Request, code int) {
-	var message string
-	switch code {
-	case 403:
-		message = "Forbidden"
-	case 404:
-		message = "Not found"
-	}
-
-	request.Response().WriteHeader(code)
-	request.Response().Write([]byte(fmt.Sprintf("%d - %s", code, message)))
-
+	)
 }

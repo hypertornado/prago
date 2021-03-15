@@ -12,36 +12,37 @@ import (
 	"github.com/hypertornado/prago/utils"
 )
 
-//TODO: stats of sql connection
-
 //App is main struct of prago application
 type App struct {
 	codeName        string
 	version         string
 	development     *development
-	DevelopmentMode bool
-	Config          config
+	developmentMode bool
+	config          config
 	staticFiles     staticFiles
 	commands        *commands
 	logger          *log.Logger
 	templates       *templates
-	mainController  *Controller
-	Cache           *cachelib.Cache
+	cache           *cachelib.Cache
 
-	Logo             string
-	HumanName        string
-	resources        []*Resource
-	resourceMap      map[reflect.Type]*Resource
-	resourceNameMap  map[string]*Resource
+	logo            string
+	name            func(string) string
+	resources       []*Resource
+	resourceMap     map[reflect.Type]*Resource
+	resourceNameMap map[string]*Resource
+
+	mainController   *Controller
+	appController    *Controller
 	accessController *Controller
 	adminController  *Controller
-	rootActions      []*Action
-	db               *sql.DB
+
+	rootActions []*Action
+	db          *sql.DB
 
 	sendgridKey  string
 	noReplyEmail string
 
-	Newsletter *NewsletterMiddleware
+	newsletter *newsletterMiddleware
 
 	search *adminSearch
 
@@ -71,31 +72,34 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 		codeName: codeName,
 		version:  version,
 
-		Config:   loadConfig(codeName),
 		commands: &commands{},
 
 		logger:         log.New(os.Stdout, "", log.LstdFlags),
 		mainController: newMainController(),
-		Cache:          cachelib.NewCache(),
+		cache:          cachelib.NewCache(),
 	}
 
+	app.initConfig()
 	app.initStaticFilesHandler()
 
-	app.HumanName = app.codeName
+	app.name = Unlocalized(app.codeName)
 	app.resourceMap = make(map[reflect.Type]*Resource)
 	app.resourceNameMap = make(map[string]*Resource)
-	app.accessController = app.MainController().subController()
+
+	app.appController = app.mainController.subController()
+
+	app.accessController = app.mainController.subController()
 	app.accessController.priorityRouter = true
 
-	app.sendgridKey = app.Config.GetStringWithFallback("sendgridApi", "")
-	app.noReplyEmail = app.Config.GetStringWithFallback("noReplyEmail", "")
+	app.sendgridKey = app.ConfigurationGetStringWithFallback("sendgridApi", "")
+	app.noReplyEmail = app.ConfigurationGetStringWithFallback("noReplyEmail", "")
 	app.fieldTypes = make(map[string]FieldType)
 	app.roles = make(map[string]map[string]bool)
 
 	app.db = mustConnectDatabase(
-		app.Config.GetStringWithFallback("dbUser", ""),
-		app.Config.GetStringWithFallback("dbPassword", ""),
-		app.Config.GetStringWithFallback("dbName", ""),
+		app.ConfigurationGetStringWithFallback("dbUser", ""),
+		app.ConfigurationGetStringWithFallback("dbPassword", ""),
+		app.ConfigurationGetStringWithFallback("dbName", ""),
 	)
 
 	app.adminController = app.accessController.subController()
@@ -107,6 +111,7 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	app.CreateResource(ActivityLog{}, initActivityLog)
 
 	app.initAdminActions()
+	app.initBuild()
 	app.initAPI()
 	app.initDevelopment()
 	app.initMigrationCommand()
@@ -120,8 +125,8 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 		initFunction(app)
 	}
 
-	app.bindAllActions()
 	app.initAPIs()
+	app.bindAllActions()
 	app.initAdminNotFoundAction()
 	app.initSysadminPermissions()
 	app.initAllAutoRelations()
@@ -136,7 +141,16 @@ func NewApp(appName, version string, initFunction func(*App)) {
 }
 
 //Log returns logger structure
-func (app App) Log() *log.Logger { return app.logger }
+func (app *App) Log() *log.Logger { return app.logger }
+
+//DevelopmentMode returns if app is running in development mode
+func (app *App) DevelopmentMode() bool { return app.developmentMode }
+
+//SetName sets localized human name to app
+func (app *App) SetName(name func(string) string) { app.name = name }
+
+//SetLogoPath sets application public path to logo
+func (app *App) SetLogoPath(logo string) { app.logo = logo }
 
 //DotPath returns path to hidden directory with app configuration and data
 func (app *App) dotPath() string { return os.Getenv("HOME") + "/." + app.codeName }

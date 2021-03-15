@@ -29,6 +29,7 @@ type Action struct {
 	isItemAction bool
 	isWide       bool
 	isUserMenu   bool
+	isHiddenMenu bool
 }
 
 func (app *App) bindAllActions() {
@@ -78,7 +79,7 @@ func (app *App) AddAction(url string) *Action {
 func (resource *Resource) AddAction(url string) *Action {
 	action := newAction(resource.app, url)
 	action.resource = resource
-	action.permission = resource.CanView
+	action.permission = resource.canView
 	resource.actions = append(resource.actions, action)
 	return action
 }
@@ -88,7 +89,7 @@ func (resource *Resource) AddItemAction(url string) *Action {
 	action := newAction(resource.app, url)
 	action.resource = resource
 	action.isItemAction = true
-	action.permission = resource.CanView
+	action.permission = resource.canView
 	resource.itemActions = append(resource.itemActions, action)
 	return action
 }
@@ -156,7 +157,12 @@ func (action *Action) userMenu() *Action {
 	return action
 }
 
-func (action *Action) getnavigation(request Request) adminItemNavigation {
+func (action *Action) hiddenMenu() *Action {
+	action.isHiddenMenu = true
+	return action
+}
+
+func (action *Action) getnavigation(request Request) navigation {
 	if action.resource != nil {
 		user := request.GetUser()
 		code := action.url
@@ -168,7 +174,7 @@ func (action *Action) getnavigation(request Request) adminItemNavigation {
 		}
 		return action.resource.getNavigation(user, code)
 	}
-	return adminItemNavigation{}
+	return navigation{}
 
 }
 
@@ -218,7 +224,7 @@ func (action *Action) bindAction() error {
 			if action.isWide {
 				hideBox = true
 			}
-			renderNavigationPage(request, adminNavigationPage{
+			renderNavigationPage(request, page{
 				App:          app,
 				Navigation:   action.getnavigation(request),
 				PageTemplate: action.template,
@@ -235,13 +241,13 @@ func (action *Action) bindAction() error {
 
 	switch action.method {
 	case "POST":
-		controller.Post(url, fn, constraints...)
+		controller.post(url, fn, constraints...)
 	case "GET":
-		controller.Get(url, fn, constraints...)
+		controller.get(url, fn, constraints...)
 	case "PUT":
-		controller.Put(url, fn, constraints...)
+		controller.put(url, fn, constraints...)
 	case "DELETE":
-		controller.Delete(url, fn, constraints...)
+		controller.delete(url, fn, constraints...)
 	default:
 		return fmt.Errorf("unknown method %s", action.method)
 	}
@@ -278,7 +284,7 @@ func (app *App) getListItemActions(user User, item interface{}, id int64, resour
 		}
 	}
 
-	if app.Authorize(user, resource.CanEdit) && resource.OrderColumnName != "" {
+	if app.Authorize(user, resource.canEdit) && resource.orderColumnName != "" {
 		ret.ShowOrderButton = true
 	}
 

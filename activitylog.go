@@ -92,9 +92,9 @@ func (app *App) getHistory(resource *Resource, itemID int64) historyView {
 }
 
 func initActivityLog(resource *Resource) {
-	resource.CanView = permissionSysadmin
-	resource.OrderDesc = true
-	resource.HumanName = messages.GetNameFunction("admin_history")
+	resource.canView = permissionSysadmin
+	resource.orderDesc = true
+	resource.name = messages.GetNameFunction("admin_history")
 }
 
 func (app App) createNewActivityLog(resource Resource, user User, item interface{}) error {

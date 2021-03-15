@@ -67,7 +67,7 @@ func (app *App) AddTemplatesDevelopmentPath(path string, patterns ...string) {
 }
 
 func (app *App) startDevelopment() {
-	app.DevelopmentMode = true
+	app.developmentMode = true
 	for _, v := range app.development.less {
 		go app.developmentLess(v.SourceDir, v.Target)
 	}

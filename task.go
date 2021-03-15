@@ -79,21 +79,24 @@ func (tm *taskManager) init() {
 	go tm.oldTasksRemover()
 	go tm.startCRON()
 
-	tm.app.adminController.Get(tm.app.GetAdminURL("_tasks"), func(request Request) {
-		user := request.GetUser()
-		request.SetData("tasks", tm.getTasks(user))
-		request.SetData("taskmonitor", tm.getTaskMonitor(user))
-		request.SetData("admin_yield", "admin_tasks")
-		request.SetData("admin_title", messages.Get(user.Locale, "tasks"))
-		request.RenderView("admin_layout")
-	})
+	tm.app.AddAction("_tasks").Name(messages.GetNameFunction("tasks")).Template("admin_tasks").DataSource(
+		func(request Request) interface{} {
+			var ret = map[string]interface{}{}
+			user := request.GetUser()
+			ret["currentuser"] = user
+			ret["tasks"] = tm.getTasks(user)
+			ret["taskmonitor"] = tm.getTaskMonitor(user)
+			ret["admin_title"] = messages.Get(user.Locale, "tasks")
+			return ret
+		},
+	)
 
-	tm.app.adminController.Get(tm.app.GetAdminURL("_tasks/running"), func(request Request) {
+	tm.app.adminController.get(tm.app.GetAdminURL("_tasks/running"), func(request Request) {
 		request.SetData("taskmonitor", tm.getTaskMonitor(request.GetUser()))
 		request.RenderView("taskmonitor")
 	})
 
-	tm.app.adminController.Post(tm.app.GetAdminURL("_tasks/runtask"), func(request Request) {
+	tm.app.adminController.post(tm.app.GetAdminURL("_tasks/runtask"), func(request Request) {
 		id := request.Request().FormValue("id")
 		csrf := request.Request().FormValue("csrf")
 		user := request.GetUser()
@@ -107,7 +110,7 @@ func (tm *taskManager) init() {
 		request.Redirect(tm.app.GetAdminURL("_tasks"))
 	})
 
-	tm.app.adminController.Get(tm.app.GetAdminURL("_tasks/stoptask"), func(request Request) {
+	tm.app.adminController.get(tm.app.GetAdminURL("_tasks/stoptask"), func(request Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
 		user := request.GetUser()
@@ -121,7 +124,7 @@ func (tm *taskManager) init() {
 		request.Redirect(tm.app.GetAdminURL("_tasks"))
 	})
 
-	tm.app.adminController.Get(tm.app.GetAdminURL("_tasks/deletetask"), func(request Request) {
+	tm.app.adminController.get(tm.app.GetAdminURL("_tasks/deletetask"), func(request Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
 		user := request.GetUser()

@@ -11,7 +11,7 @@ import (
 type view struct {
 	Name       string
 	Subname    string
-	Navigation []navigationTab
+	Navigation []tab
 	Items      []viewField
 	Relation   *viewRelation
 }
@@ -44,7 +44,7 @@ func (resource Resource) getBasicView(id int, inValues interface{}, user User) v
 			Template: "admin_item_view_url",
 			Value: [2]string{
 				resource.getURL(""),
-				resource.HumanName(user.Locale),
+				resource.name(user.Locale),
 			},
 		},
 	)

@@ -42,29 +42,22 @@ func (menu mainMenu) GetTitle() string {
 func (app *App) getMainMenu(request Request) (ret mainMenu) {
 	user := request.GetUser()
 
-	adminSectionName := app.HumanName
-	if app.Logo != "" {
+	adminSectionName := app.name(user.Locale)
+	if app.logo != "" {
 		adminSectionName = ""
 	}
 	adminSection := mainMenuSection{
 		Name: adminSectionName,
 	}
 
-	var selectedTasks bool
-	if request.Request().URL.Path == app.GetAdminURL("_tasks") {
-		selectedTasks = true
-	}
-	adminSection.Items = append(adminSection.Items, mainMenuItem{
-		Name:     messages.Get(user.Locale, "tasks"),
-		URL:      app.GetAdminURL("_tasks"),
-		Selected: selectedTasks,
-	})
-
 	for _, v := range app.rootActions {
 		if v.method != "GET" {
 			continue
 		}
 		if v.isUserMenu {
+			continue
+		}
+		if v.isHiddenMenu {
 			continue
 		}
 
@@ -87,7 +80,7 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 		Name: messages.Get(user.Locale, "admin_tables"),
 	}
 	for _, resource := range app.getSortedResources(user.Locale) {
-		if app.Authorize(user, resource.CanView) {
+		if app.Authorize(user, resource.canView) {
 			resourceURL := resource.getURL("")
 			var selected bool
 			if request.Request().URL.Path == resourceURL {
@@ -98,7 +91,7 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 			}
 
 			resourceSection.Items = append(resourceSection.Items, mainMenuItem{
-				Name:     resource.HumanName(user.Locale),
+				Name:     resource.name(user.Locale),
 				Subname:  utils.HumanizeNumber(resource.getCachedCount()),
 				URL:      resourceURL,
 				Selected: selected,
@@ -111,7 +104,7 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 	if userName == "" {
 		userName = user.Email
 	}
-	randomness := app.Config.GetString("random")
+	randomness := app.ConfigurationGetString("random")
 	userSection := mainMenuSection{
 		Name:  userName,
 		Items: []mainMenuItem{},
@@ -121,6 +114,9 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 			continue
 		}
 		if !v.isUserMenu {
+			continue
+		}
+		if v.isHiddenMenu {
 			continue
 		}
 
@@ -142,7 +138,7 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 	}
 	ret.Sections = append(ret.Sections, userSection)
 
-	ret.Logo = app.Logo
+	ret.Logo = app.logo
 	ret.URLPrefix = adminPathPrefix
 	ret.Language = user.Locale
 	ret.AdminHomepageURL = app.GetAdminURL("")

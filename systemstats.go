@@ -20,7 +20,7 @@ func (app *App) initSystemStats() {
 			stats = append(stats, [2]string{"App version", app.version})
 
 			developmentModeStr := "false"
-			if app.DevelopmentMode {
+			if app.developmentMode {
 				developmentModeStr = "true"
 			}
 			stats = append(stats, [2]string{"Development mode", developmentModeStr})
@@ -32,7 +32,7 @@ func (app *App) initSystemStats() {
 			stats = append(stats, [2]string{"GOOS", runtime.GOOS})
 			stats = append(stats, [2]string{"GOMAXPROCS", fmt.Sprintf("%d", runtime.GOMAXPROCS(-1))})
 
-			configStats := app.Config.Export()
+			configStats := app.config.Export()
 
 			databaseStats := [][2]string{}
 			dbStats := app.db.Stats()
@@ -139,28 +139,28 @@ func getResourceAccessView(app *App) accessView {
 			no := "-"
 			s := ""
 			user := User{Role: v, IsAdmin: true}
-			if app.Authorize(user, resource.CanView) {
+			if app.Authorize(user, resource.canView) {
 				s += yeah
 			} else {
 				yeah = no
 				s += no
 			}
-			if app.Authorize(user, resource.CanEdit) {
+			if app.Authorize(user, resource.canEdit) {
 				s += yeah
 			} else {
 				s += no
 			}
-			if app.Authorize(user, resource.CanCreate) {
+			if app.Authorize(user, resource.canCreate) {
 				s += yeah
 			} else {
 				s += no
 			}
-			if app.Authorize(user, resource.CanDelete) {
+			if app.Authorize(user, resource.canDelete) {
 				s += yeah
 			} else {
 				s += yeah
 			}
-			if app.Authorize(user, resource.CanExport) {
+			if app.Authorize(user, resource.canExport) {
 				s += yeah
 			} else {
 				s += no

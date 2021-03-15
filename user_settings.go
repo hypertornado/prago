@@ -69,16 +69,11 @@ func (app *App) initUserSettings() {
 		return form
 	}
 
-	renderPasswordForm := func(request Request, form *form) {
-		renderNavigationPage(request, adminNavigationPage{
-			PageTemplate: "admin_form",
-			PageData:     form,
-		})
-	}
-
-	app.AddAction("password").Name(messages.GetNameFunction("admin_password_change")).userMenu().Handler(func(request Request) {
-		renderPasswordForm(request, changePasswordForm(request))
-	})
+	app.AddAction("password").Name(messages.GetNameFunction("admin_password_change")).userMenu().Template("admin_form").DataSource(
+		func(request Request) interface{} {
+			return changePasswordForm(request)
+		},
+	)
 
 	app.AddAction("password").Method("POST").Handler(func(request Request) {
 		form := changePasswordForm(request)
@@ -90,9 +85,15 @@ func (app *App) initUserSettings() {
 			must(user.newPassword(password))
 			must(app.Save(&user))
 			request.AddFlashMessage(messages.Get(getLocale(request), "admin_password_changed"))
-			request.Redirect(app.GetAdminURL("settings"))
+			request.Redirect(app.GetAdminURL(""))
 		} else {
-			renderPasswordForm(request, form)
+			//TODO: better validation and UI of errors
+			for _, v := range form.Items {
+				for _, e := range v.Errors {
+					request.AddFlashMessage(e)
+				}
+			}
+			request.Redirect(app.GetAdminURL("password"))
 		}
 	})
 

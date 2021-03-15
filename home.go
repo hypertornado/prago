@@ -22,9 +22,9 @@ func (app *App) getHomeData(request Request) interface{} {
 	ret := []homeData{}
 
 	for _, resource := range app.getSortedResources(user.Locale) {
-		if app.Authorize(user, resource.CanView) {
+		if app.Authorize(user, resource.canView) {
 			item := homeData{
-				Name: resource.HumanName(user.Locale),
+				Name: resource.name(user.Locale),
 				URL:  resource.getURL(""),
 			}
 			item.Actions = resource.getResourceActionsButtonData(user, app)
@@ -42,7 +42,7 @@ func (app *App) getSortedResources(locale string) (ret []*Resource) {
 		a := ret[i]
 		b := ret[j]
 
-		if collator.CompareString(a.HumanName(locale), b.HumanName(locale)) <= 0 {
+		if collator.CompareString(a.name(locale), b.name(locale)) <= 0 {
 			return true
 		}
 		return false

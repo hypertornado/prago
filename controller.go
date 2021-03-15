@@ -10,9 +10,9 @@ type Controller struct {
 
 //MainController returns main controller of application
 //all controllers in app are children of this controller
-func (app *App) MainController() (ret *Controller) {
+/*func (app *App) MainController() (ret *Controller) {
 	return app.mainController
-}
+}*/
 
 func newMainController() *Controller {
 	return &Controller{
@@ -39,16 +39,16 @@ func (c *Controller) subController() *Controller {
 }
 
 //AddBeforeAction adds action which is executed before main router action is called
-func (c *Controller) AddBeforeAction(fn func(p Request)) {
-	c.AddAroundAction(func(p Request, next func()) {
+func (c *Controller) addBeforeAction(fn func(p Request)) {
+	c.addAroundAction(func(p Request, next func()) {
 		fn(p)
 		next()
 	})
 }
 
 //AddAfterAction adds action which is executed after main router action is called
-func (c *Controller) AddAfterAction(fn func(p Request)) {
-	c.AddAroundAction(func(p Request, next func()) {
+func (c *Controller) addAfterAction(fn func(p Request)) {
+	c.addAroundAction(func(p Request, next func()) {
 		next()
 		fn(p)
 	})
@@ -56,7 +56,7 @@ func (c *Controller) AddAfterAction(fn func(p Request)) {
 
 //AddAroundAction adds action which is executed before and after action
 //next function needs to be called in fn function
-func (c *Controller) AddAroundAction(fn func(p Request, next func())) {
+func (c *Controller) addAroundAction(fn func(p Request, next func())) {
 	c.aroundActions = append(c.aroundActions, fn)
 }
 
@@ -88,21 +88,51 @@ func (router *router) route(m method, path string, controller *Controller, route
 }
 
 //Get creates new route for GET request
-func (c *Controller) Get(path string, action func(p Request), constraints ...func(map[string]string) bool) {
+func (c *Controller) get(path string, action func(p Request), constraints ...func(map[string]string) bool) {
 	c.router.route(get, path, c, action, constraints...)
 }
 
 //Post creates new route for POST request
-func (c *Controller) Post(path string, action func(p Request), constraints ...func(map[string]string) bool) {
+func (c *Controller) post(path string, action func(p Request), constraints ...func(map[string]string) bool) {
 	c.router.route(post, path, c, action, constraints...)
 }
 
 //Put creates new route for PUT request
-func (c *Controller) Put(path string, action func(p Request), constraints ...func(map[string]string) bool) {
+func (c *Controller) put(path string, action func(p Request), constraints ...func(map[string]string) bool) {
 	c.router.route(put, path, c, action, constraints...)
 }
 
 //Delete creates new route for DELETE request
-func (c *Controller) Delete(path string, action func(p Request), constraints ...func(map[string]string) bool) {
+func (c *Controller) delete(path string, action func(p Request), constraints ...func(map[string]string) bool) {
 	c.router.route(del, path, c, action, constraints...)
+}
+
+//Get creates new route for GET request
+func (app *App) GET(path string, action func(p Request), constraints ...func(map[string]string) bool) {
+	app.appController.get(path, action, constraints...)
+}
+
+//Post creates new route for POST request
+func (app *App) POST(path string, action func(p Request), constraints ...func(map[string]string) bool) {
+	app.appController.post(path, action, constraints...)
+}
+
+//Put creates new route for PUT request
+func (app *App) PUT(path string, action func(p Request), constraints ...func(map[string]string) bool) {
+	app.appController.put(path, action, constraints...)
+}
+
+//Delete creates new route for DELETE request
+func (app *App) DELETE(path string, action func(p Request), constraints ...func(map[string]string) bool) {
+	app.appController.delete(path, action, constraints...)
+}
+
+//AddBeforeAction adds action which is executed before main router action is called
+func (app *App) AddBeforeAction(fn func(p Request)) {
+	app.appController.addBeforeAction(fn)
+}
+
+//AddAfterAction adds action which is executed after main router action is called
+func (app *App) AddAfterAction(fn func(p Request)) {
+	app.appController.addAfterAction(fn)
 }

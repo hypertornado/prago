@@ -169,12 +169,12 @@ class List {
     }
 
     params["_format"] = "xlsx";
-    this.exportButton.setAttribute("href", this.adminPrefix + "/" + this.typeName + encodeParams(params));
+    this.exportButton.setAttribute("href", this.adminPrefix + "/" + this.typeName + "/api/list" + encodeParams(params));
 
     params["_format"] = "json";
     encoded = encodeParams(params);
 
-    request.open("GET", this.adminPrefix + "/" + this.typeName + encoded, true);
+    request.open("GET", this.adminPrefix + "/" + this.typeName + "/api/list" + encoded, true);
     request.addEventListener("load", () => {
       this.tbody.innerHTML = "";
       if (request.status == 200) {
