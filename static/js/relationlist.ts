@@ -1,4 +1,4 @@
-function bindRelationList() {
+function bindRelationList() {   
     var els = document.getElementsByClassName("admin_relationlist");
     for (var i = 0; i < els.length; i++) {
         new RelationList(<HTMLDivElement>els[i]);
@@ -49,7 +49,7 @@ class RelationList {
         this.moreEl.classList.add("hidden");
 
         var request = new XMLHttpRequest();
-        request.open("POST", this.adminPrefix + "/_api/relationlist", true);
+        request.open("POST", this.adminPrefix + "/api/relationlist", true);
         request.addEventListener("load", () => {
             this.loadingEl.classList.add("hidden");
             if (request.status == 200) {

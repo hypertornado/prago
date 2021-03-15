@@ -40,14 +40,14 @@ func (app *App) initAdminActions() {
 		userID, ok := session.Values["user_id"].(int64)
 
 		if !ok {
-			request.Redirect(app.GetAdminURL("user/login"))
+			request.Redirect(app.getAdminURL("user/login"))
 			return
 		}
 
 		var user User
 		err := app.Query().WhereIs("id", userID).Get(&user)
 		if err != nil {
-			request.Redirect(app.GetAdminURL("user/login"))
+			request.Redirect(app.getAdminURL("user/login"))
 			return
 		}
 
@@ -75,16 +75,15 @@ func (app *App) initAdminActions() {
 		request.SetData("main_menu", app.getMainMenu(request))
 	})
 
-	app.AddAction("").Name(messages.GetNameFunction("admin_signpost")).Template("admin_home_navigation").DataSource(app.getHomeData)
-	app.AddAction("markdown").Name(Unlocalized("Nápověda markdown")).hiddenMenu().Template("admin_help_markdown").IsWide()
+	app.Action("").Name(messages.GetNameFunction("admin_signpost")).Template("admin_home_navigation").DataSource(app.getHomeData)
+	app.Action("markdown").Name(Unlocalized("Nápověda markdown")).hiddenMenu().Template("admin_help_markdown").IsWide()
 }
 
 func (app *App) initAdminNotFoundAction() {
-	app.adminController.get(app.GetAdminURL("*"), render404)
+	app.adminController.get(app.getAdminURL("*"), render404)
 }
 
-//GetAdminURL gets url
-func (app App) GetAdminURL(suffix string) string {
+func (app App) getAdminURL(suffix string) string {
 	ret := adminPathPrefix
 	if len(suffix) > 0 {
 		ret += "/" + suffix

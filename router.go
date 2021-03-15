@@ -74,7 +74,7 @@ type route struct {
 	path        string
 	constraints []func(map[string]string) bool
 	pathMatcher pathMatcherFn
-	controller  *Controller
+	controller  *controller
 	fn          func(p Request)
 }
 
@@ -138,7 +138,7 @@ func matcherStarMiddle(route string) pathMatcherFn {
 	}
 }
 
-func newRoute(m method, path string, controller *Controller, fn func(p Request), constraints []func(map[string]string) bool) (ret *route) {
+func newRoute(m method, path string, controller *controller, fn func(p Request), constraints []func(map[string]string) bool) (ret *route) {
 	methodName := map[method]string{
 		get:  "GET",
 		head: "HEAD",

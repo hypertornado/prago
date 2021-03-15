@@ -1,8 +1,8 @@
 package prago
 
 //Controller struct
-type Controller struct {
-	parent         *Controller
+type controller struct {
+	parent         *controller
 	router         *router
 	priorityRouter bool
 	aroundActions  []func(p Request, next func())
@@ -14,23 +14,23 @@ type Controller struct {
 	return app.mainController
 }*/
 
-func newMainController() *Controller {
-	return &Controller{
+func newMainController() *controller {
+	return &controller{
 		parent:        nil,
 		router:        newRouter(),
 		aroundActions: []func(p Request, next func()){},
 	}
 }
 
-func (c *Controller) dispatchRequest(request Request) bool {
+func (c *controller) dispatchRequest(request Request) bool {
 	request.data = make(map[string]interface{})
 	parseRequest(request)
 	return c.router.process(request)
 }
 
 //SubController returns subcontroller of controller
-func (c *Controller) subController() *Controller {
-	return &Controller{
+func (c *controller) subController() *controller {
+	return &controller{
 		parent:         c,
 		router:         c.router,
 		priorityRouter: c.priorityRouter,
@@ -39,7 +39,7 @@ func (c *Controller) subController() *Controller {
 }
 
 //AddBeforeAction adds action which is executed before main router action is called
-func (c *Controller) addBeforeAction(fn func(p Request)) {
+func (c *controller) addBeforeAction(fn func(p Request)) {
 	c.addAroundAction(func(p Request, next func()) {
 		fn(p)
 		next()
@@ -47,7 +47,7 @@ func (c *Controller) addBeforeAction(fn func(p Request)) {
 }
 
 //AddAfterAction adds action which is executed after main router action is called
-func (c *Controller) addAfterAction(fn func(p Request)) {
+func (c *controller) addAfterAction(fn func(p Request)) {
 	c.addAroundAction(func(p Request, next func()) {
 		next()
 		fn(p)
@@ -56,11 +56,11 @@ func (c *Controller) addAfterAction(fn func(p Request)) {
 
 //AddAroundAction adds action which is executed before and after action
 //next function needs to be called in fn function
-func (c *Controller) addAroundAction(fn func(p Request, next func())) {
+func (c *controller) addAroundAction(fn func(p Request, next func())) {
 	c.aroundActions = append(c.aroundActions, fn)
 }
 
-func (c *Controller) callArounds(p Request, i int, finalFunc func(), down bool) {
+func (c *controller) callArounds(p Request, i int, finalFunc func(), down bool) {
 	if down {
 		if c.parent != nil {
 			c.parent.callArounds(p, 0, func() {
@@ -81,29 +81,29 @@ func (c *Controller) callArounds(p Request, i int, finalFunc func(), down bool) 
 	}
 }
 
-func (router *router) route(m method, path string, controller *Controller, routeAction func(p Request), constraints ...func(map[string]string) bool) {
+func (router *router) route(m method, path string, controller *controller, routeAction func(p Request), constraints ...func(map[string]string) bool) {
 	route := newRoute(m, path, controller, routeAction, constraints)
 	router.addRoute(route)
 
 }
 
 //Get creates new route for GET request
-func (c *Controller) get(path string, action func(p Request), constraints ...func(map[string]string) bool) {
+func (c *controller) get(path string, action func(p Request), constraints ...func(map[string]string) bool) {
 	c.router.route(get, path, c, action, constraints...)
 }
 
 //Post creates new route for POST request
-func (c *Controller) post(path string, action func(p Request), constraints ...func(map[string]string) bool) {
+func (c *controller) post(path string, action func(p Request), constraints ...func(map[string]string) bool) {
 	c.router.route(post, path, c, action, constraints...)
 }
 
 //Put creates new route for PUT request
-func (c *Controller) put(path string, action func(p Request), constraints ...func(map[string]string) bool) {
+func (c *controller) put(path string, action func(p Request), constraints ...func(map[string]string) bool) {
 	c.router.route(put, path, c, action, constraints...)
 }
 
 //Delete creates new route for DELETE request
-func (c *Controller) delete(path string, action func(p Request), constraints ...func(map[string]string) bool) {
+func (c *controller) delete(path string, action func(p Request), constraints ...func(map[string]string) bool) {
 	c.router.route(del, path, c, action, constraints...)
 }
 

@@ -79,7 +79,7 @@ func (tm *taskManager) init() {
 	go tm.oldTasksRemover()
 	go tm.startCRON()
 
-	tm.app.AddAction("_tasks").Name(messages.GetNameFunction("tasks")).Template("admin_tasks").DataSource(
+	tm.app.Action("_tasks").Name(messages.GetNameFunction("tasks")).Template("admin_tasks").DataSource(
 		func(request Request) interface{} {
 			var ret = map[string]interface{}{}
 			user := request.GetUser()
@@ -91,12 +91,12 @@ func (tm *taskManager) init() {
 		},
 	)
 
-	tm.app.adminController.get(tm.app.GetAdminURL("_tasks/running"), func(request Request) {
+	tm.app.adminController.get(tm.app.getAdminURL("_tasks/running"), func(request Request) {
 		request.SetData("taskmonitor", tm.getTaskMonitor(request.GetUser()))
 		request.RenderView("taskmonitor")
 	})
 
-	tm.app.adminController.post(tm.app.GetAdminURL("_tasks/runtask"), func(request Request) {
+	tm.app.adminController.post(tm.app.getAdminURL("_tasks/runtask"), func(request Request) {
 		id := request.Request().FormValue("id")
 		csrf := request.Request().FormValue("csrf")
 		user := request.GetUser()
@@ -107,10 +107,10 @@ func (tm *taskManager) init() {
 		}
 
 		must(tm.startTask(id, user))
-		request.Redirect(tm.app.GetAdminURL("_tasks"))
+		request.Redirect(tm.app.getAdminURL("_tasks"))
 	})
 
-	tm.app.adminController.get(tm.app.GetAdminURL("_tasks/stoptask"), func(request Request) {
+	tm.app.adminController.get(tm.app.getAdminURL("_tasks/stoptask"), func(request Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
 		user := request.GetUser()
@@ -121,10 +121,10 @@ func (tm *taskManager) init() {
 		}
 
 		must(tm.stopTask(uuid, user))
-		request.Redirect(tm.app.GetAdminURL("_tasks"))
+		request.Redirect(tm.app.getAdminURL("_tasks"))
 	})
 
-	tm.app.adminController.get(tm.app.GetAdminURL("_tasks/deletetask"), func(request Request) {
+	tm.app.adminController.get(tm.app.getAdminURL("_tasks/deletetask"), func(request Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
 		user := request.GetUser()
@@ -135,7 +135,7 @@ func (tm *taskManager) init() {
 		}
 
 		must(tm.deleteTask(uuid, user))
-		request.Redirect(tm.app.GetAdminURL("_tasks"))
+		request.Redirect(tm.app.getAdminURL("_tasks"))
 	})
 
 	grp := tm.app.NewTaskGroup(Unlocalized("example"))

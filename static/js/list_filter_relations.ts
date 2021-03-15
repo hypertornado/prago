@@ -50,7 +50,8 @@ class ListFilterRelations {
   loadPreview(value: string) {
     var request = new XMLHttpRequest();
     var adminPrefix = document.body.getAttribute("data-admin-prefix");
-    request.open("GET", adminPrefix + "/_api/preview/" + this.relatedResourceName + "/" + value, true);
+    //request.open("GET", adminPrefix + "/api/preview-relation/" + this.relatedResourceName + "/" + value, true);
+    request.open("GET", adminPrefix + "/api/" + this.relatedResourceName + "/preview-relation/" + value, true);
 
     request.addEventListener("load", () => {
       if (request.status == 200) {

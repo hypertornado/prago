@@ -14,11 +14,11 @@ func addServerCommand(app *App) {
 	var port int
 	var developmentMode bool
 	app.AddCommand("server").
-		Flag(
-			NewCommandFlag("port", "port of server").Alias("p").Int(&port),
+		flag(
+			newCommandFlag("port", "port of server").Alias("p").Int(&port),
 		).
-		Flag(
-			NewCommandFlag("development", "development mode").Alias("d").Bool(&developmentMode),
+		flag(
+			newCommandFlag("development", "development mode").Alias("d").Bool(&developmentMode),
 		).
 		Callback(func() {
 			app.developmentMode = developmentMode
@@ -36,7 +36,7 @@ func addServerCommand(app *App) {
 					port = defaultPort
 				}
 			}
-			must(app.ListenAndServe(port))
+			must(app.listenAndServe(port))
 		})
 }
 
@@ -57,13 +57,13 @@ type commands struct {
 type Command struct {
 	actions        []string
 	description    string
-	flags          map[string]*CommandFlag
+	flags          map[string]*commandFlag
 	callback       func()
 	stringArgument *string
 }
 
 //CommandFlag represents command-line flag
-type CommandFlag struct {
+type commandFlag struct {
 	name        string
 	description string
 	typ         flagType
@@ -75,7 +75,7 @@ type CommandFlag struct {
 func (app *App) AddCommand(commands ...string) *Command {
 	ret := &Command{
 		actions: commands,
-		flags:   map[string]*CommandFlag{},
+		flags:   map[string]*commandFlag{},
 	}
 	app.commands.commands = append(app.commands.commands, ret)
 	return ret
@@ -94,7 +94,7 @@ func (c *Command) Description(description string) *Command {
 }
 
 //Flag adds flag to command
-func (c *Command) Flag(flag *CommandFlag) *Command {
+func (c *Command) flag(flag *commandFlag) *Command {
 	if flag.typ == noType {
 		panic("no type of flag set")
 	}
@@ -112,21 +112,21 @@ func (c *Command) StringArgument(arg *string) *Command {
 }
 
 //NewCommandFlag creates new command flag
-func NewCommandFlag(name, description string) *CommandFlag {
-	return &CommandFlag{
+func newCommandFlag(name, description string) *commandFlag {
+	return &commandFlag{
 		name:        name,
 		description: description,
 	}
 }
 
 //Alias sets flag alias
-func (f *CommandFlag) Alias(alias string) *CommandFlag {
+func (f *commandFlag) Alias(alias string) *commandFlag {
 	f.aliases = append(f.aliases, alias)
 	return f
 }
 
 //String sets flag type to string
-func (f *CommandFlag) String(value *string) *CommandFlag {
+func (f *commandFlag) String(value *string) *commandFlag {
 	if f.typ != noType {
 		panic("type of flag already set")
 	}
@@ -136,7 +136,7 @@ func (f *CommandFlag) String(value *string) *CommandFlag {
 }
 
 //Int sets flag type to int
-func (f *CommandFlag) Int(value *int) *CommandFlag {
+func (f *commandFlag) Int(value *int) *commandFlag {
 	if f.typ != noType {
 		panic("type of flag already set")
 	}
@@ -146,7 +146,7 @@ func (f *CommandFlag) Int(value *int) *CommandFlag {
 }
 
 //Bool sets flag type to boolean
-func (f *CommandFlag) Bool(value *bool) *CommandFlag {
+func (f *commandFlag) Bool(value *bool) *commandFlag {
 	if f.typ != noType {
 		panic("type of flag already set")
 	}
@@ -179,8 +179,8 @@ func (c *Command) match(fields []string) (bool, error) {
 	return true, nil
 }
 
-func parseFlags(flags map[string]*CommandFlag, fields []string) (argsX []string, err error) {
-	var currentFlag *CommandFlag
+func parseFlags(flags map[string]*commandFlag, fields []string) (argsX []string, err error) {
+	var currentFlag *commandFlag
 	for k, flag := range fields {
 		if currentFlag == nil {
 			if !strings.HasPrefix(flag, "-") {
@@ -208,7 +208,7 @@ func parseFlags(flags map[string]*CommandFlag, fields []string) (argsX []string,
 	return nil, nil
 }
 
-func (f *CommandFlag) setValue(value string) error {
+func (f *commandFlag) setValue(value string) error {
 	val := reflect.ValueOf(f.value).Elem()
 	switch f.typ {
 	case boolFlag:

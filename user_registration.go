@@ -23,7 +23,7 @@ func initUserRegistration(resource *Resource) {
 					err = app.Save(&user)
 					if err == nil {
 						request.AddFlashMessage(messages.Get(user.Locale, "admin_confirm_email_ok"))
-						request.Redirect(app.GetAdminURL("user/login"))
+						request.Redirect(app.getAdminURL("user/login"))
 						return
 					}
 				}
@@ -31,7 +31,7 @@ func initUserRegistration(resource *Resource) {
 		}
 
 		request.AddFlashMessage(messages.Get(user.Locale, "admin_confirm_email_fail"))
-		request.Redirect(app.GetAdminURL("user/login"))
+		request.Redirect(app.getAdminURL("user/login"))
 	})
 
 	newUserForm := func(locale string) *form {
@@ -109,7 +109,7 @@ func initUserRegistration(resource *Resource) {
 			must(app.Create(user))
 
 			request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", user.Email))
-			request.Redirect(app.GetAdminURL("user/login"))
+			request.Redirect(app.getAdminURL("user/login"))
 		} else {
 			form.GetItemByName("password").Value = ""
 			renderRegistration(request, form, locale)
@@ -135,7 +135,7 @@ func (user User) sendConfirmEmail(request Request, app *App) error {
 	urlValues.Add("token", user.emailToken(app))
 
 	subject := messages.Get(locale, "admin_confirm_email_subject", app.name(user.Locale))
-	link := app.ConfigurationGetString("baseUrl") + app.GetAdminURL("/user/confirm_email") + "?" + urlValues.Encode()
+	link := app.ConfigurationGetString("baseUrl") + app.getAdminURL("/user/confirm_email") + "?" + urlValues.Encode()
 	body := messages.Get(locale, "admin_confirm_email_body", link, link, app.name(user.Locale))
 
 	return app.SendEmail(

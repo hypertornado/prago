@@ -48,7 +48,7 @@ func initUserRenew(resource *Resource) {
 						err = user.sendRenew(request, app)
 						if err == nil {
 							request.AddFlashMessage(messages.Get(user.Locale, "admin_forgoten_sent", user.Email))
-							request.Redirect(app.GetAdminURL("/user/login"))
+							request.Redirect(app.getAdminURL("/user/login"))
 							return
 						}
 						reason = "can't send renew email"
@@ -66,7 +66,7 @@ func initUserRenew(resource *Resource) {
 		}
 
 		request.AddFlashMessage(messages.Get(user.Locale, "admin_forgoten_error", user.Email) + " (" + reason + ")")
-		request.Redirect(app.GetAdminURL("user/forgot"))
+		request.Redirect(app.getAdminURL("user/forgot"))
 	})
 
 	renewPasswordForm := func(locale string) (form *form) {
@@ -119,7 +119,7 @@ func initUserRenew(resource *Resource) {
 						err = app.Save(&user)
 						if err == nil {
 							request.AddFlashMessage(messages.Get(locale, "admin_password_changed"))
-							request.Redirect(app.GetAdminURL("user/login"))
+							request.Redirect(app.getAdminURL("user/login"))
 							return
 						}
 					}
@@ -127,7 +127,7 @@ func initUserRenew(resource *Resource) {
 			}
 		}
 		request.AddFlashMessage(errStr)
-		request.Redirect(app.GetAdminURL("user/login"))
+		request.Redirect(app.getAdminURL("user/login"))
 	})
 
 }
@@ -136,7 +136,7 @@ func (user User) getRenewURL(request Request, app *App) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)
 	urlValues.Add("token", user.emailToken(app))
-	return app.ConfigurationGetString("baseUrl") + app.GetAdminURL("/user/renew_password") + "?" + urlValues.Encode()
+	return app.ConfigurationGetString("baseUrl") + app.getAdminURL("/user/renew_password") + "?" + urlValues.Encode()
 }
 
 func (user User) sendRenew(request Request, app *App) error {

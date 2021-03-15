@@ -23,7 +23,7 @@ type ResourceStruct struct {
 func prepareResource(initFns ...func(app *App)) (*App, *Resource) {
 	var resource *Resource
 	app := newTestingApp(func(app *App) {
-		resource = app.CreateResource(ResourceStruct{}, nil)
+		resource = app.Resource(ResourceStruct{})
 		for _, v := range initFns {
 			v(app)
 		}
@@ -177,7 +177,7 @@ func TestResourceUnique(t *testing.T) {
 
 	var resource *Resource
 	app, _ := prepareResource(func(a *App) {
-		resource = a.CreateResource(ResourceStructUnique{}, nil)
+		resource = a.Resource(ResourceStructUnique{})
 	})
 	app.unsafeDropTables()
 	app.migrate(false)

@@ -338,7 +338,7 @@ func (app *App) initSearchInner() {
 		}
 	}()
 
-	app.AddAction("_search").Name(Unlocalized("Vyhledávání")).Template("admin_search").IsWide().hiddenMenu().DataSource(
+	app.Action("_search").Name(Unlocalized("Vyhledávání")).Template("admin_search").IsWide().hiddenMenu().DataSource(
 		func(request Request) interface{} {
 			q := request.Params().Get("q")
 			pageStr := request.Params().Get("page")
@@ -393,20 +393,24 @@ func (app *App) initSearchInner() {
 		},
 	)
 
-	app.adminController.get(app.GetAdminURL("_search_suggest"), func(request Request) {
-		results, err := adminSearch.Suggest(request.Params().Get("q"))
-		if err != nil {
-			app.Log().Println(err)
-		}
+	app.API("search-suggest").Handler(
+		func(request Request) {
+			results, err := adminSearch.Suggest(request.Params().Get("q"))
+			if err != nil {
+				app.Log().Println(err)
+			}
 
-		if len(results) == 0 {
-			request.RenderJSONWithCode(nil, 204)
-			return
-		}
+			if len(results) == 0 {
+				request.RenderJSONWithCode(nil, 204)
+				return
+			}
 
-		request.SetData("items", results)
-		request.RenderView("admin_search_suggest")
-	})
+			request.SetData("items", results)
+			request.RenderView("admin_search_suggest")
+		},
+	)
+
+	//app.adminController.get(app.getAdminURL("search-suggest"), f)
 }
 
 func parseSuggestions(in string) []string {

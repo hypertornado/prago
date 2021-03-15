@@ -12,7 +12,7 @@ import (
 func (app *App) initSystemStats() {
 	startedAt := time.Now()
 
-	app.AddAction("_stats").Name(Unlocalized("Prago Stats")).Permission(permissionSysadmin).Template("admin_systemstats").DataSource(
+	app.Action("_stats").Name(Unlocalized("Prago Stats")).Permission(permissionSysadmin).Template("admin_systemstats").DataSource(
 		func(request Request) interface{} {
 
 			stats := [][2]string{}

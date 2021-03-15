@@ -33,15 +33,15 @@ func (app *App) initDevelopment() {
 	var port = defaultPort
 	app.AddCommand("dev").
 		Description("Development command").
-		Flag(
-			NewCommandFlag("port", "server port").
+		flag(
+			newCommandFlag("port", "server port").
 				Alias("p").
 				Int(&port),
 		).
 		Callback(
 			func() {
 				app.startDevelopment()
-				err := app.ListenAndServe(port)
+				err := app.listenAndServe(port)
 				if err != nil {
 					panic(err)
 				}

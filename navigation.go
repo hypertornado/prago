@@ -117,19 +117,19 @@ func (app *App) getNologinNavigation(language, code string) navigation {
 
 	tabs = append(tabs, tab{
 		Name:     messages.Get(language, "admin_login_action"),
-		URL:      app.GetAdminURL("user/login"),
+		URL:      app.getAdminURL("user/login"),
 		Selected: trueIfEqual(code, "login"),
 	})
 
 	tabs = append(tabs, tab{
 		Name:     messages.Get(language, "admin_register"),
-		URL:      app.GetAdminURL("user/registration"),
+		URL:      app.getAdminURL("user/registration"),
 		Selected: trueIfEqual(code, "registration"),
 	})
 
 	tabs = append(tabs, tab{
 		Name:     messages.Get(language, "admin_forgotten"),
-		URL:      app.GetAdminURL("user/forgot"),
+		URL:      app.getAdminURL("user/forgot"),
 		Selected: trueIfEqual(code, "forgot"),
 	})
 

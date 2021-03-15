@@ -69,14 +69,14 @@ func newAction(app *App, url string) *Action {
 }
 
 //AddAction adds action to root
-func (app *App) AddAction(url string) *Action {
+func (app *App) Action(url string) *Action {
 	action := newAction(app, url)
 	app.rootActions = append(app.rootActions, action)
 	return action
 }
 
 //AddAction adds action to resource
-func (resource *Resource) AddAction(url string) *Action {
+func (resource *Resource) Action(url string) *Action {
 	action := newAction(resource.app, url)
 	action.resource = resource
 	action.permission = resource.canView
@@ -85,7 +85,7 @@ func (resource *Resource) AddAction(url string) *Action {
 }
 
 //AddItemAction adds action to resource item
-func (resource *Resource) AddItemAction(url string) *Action {
+func (resource *Resource) ItemAction(url string) *Action {
 	action := newAction(resource.app, url)
 	action.resource = resource
 	action.isItemAction = true
@@ -186,7 +186,7 @@ func (action *Action) bindAction() error {
 
 	var url string
 	if action.resource == nil {
-		url = app.GetAdminURL(action.url)
+		url = app.getAdminURL(action.url)
 	} else {
 		resource := action.resource
 		if action.isItemAction {
@@ -200,7 +200,7 @@ func (action *Action) bindAction() error {
 		}
 	}
 
-	var controller *Controller
+	var controller *controller
 	if action.resource != nil {
 		controller = action.resource.resourceController
 	} else {

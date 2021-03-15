@@ -9,7 +9,7 @@ import (
 
 func initUserLogin(resource *Resource) {
 
-	resource.AddItemAction("loginas").Name(Unlocalized("Přihlásit se jako")).Permission(permissionSysadmin).Handler(
+	resource.ItemAction("loginas").Name(Unlocalized("Přihlásit se jako")).Permission(permissionSysadmin).Handler(
 		func(request Request) {
 			u := request.GetUser()
 			if !u.IsSysadmin {
@@ -27,7 +27,7 @@ func initUserLogin(resource *Resource) {
 			session := request.GetData("session").(*sessions.Session)
 			session.Values["user_id"] = user.ID
 			must(session.Save(request.Request(), request.Response()))
-			request.Redirect(resource.app.GetAdminURL(""))
+			request.Redirect(resource.app.getAdminURL(""))
 		},
 	)
 
@@ -92,6 +92,6 @@ func initUserLogin(resource *Resource) {
 		session.Values["user_id"] = user.ID
 		session.AddFlash(messages.Get(locale, "admin_login_ok"))
 		must(session.Save(request.Request(), request.Response()))
-		request.Redirect(resource.app.GetAdminURL(""))
+		request.Redirect(resource.app.getAdminURL(""))
 	})
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func initResourceAPIs(resource *Resource) {
-	resource.AddAPI("list").Handler(
+	resource.API("list").Handler(
 		func(request Request) {
 			user := request.GetUser()
 			if request.Request().URL.Query().Get("_format") == "json" {
@@ -57,6 +57,28 @@ func initResourceAPIs(resource *Resource) {
 				return
 			}
 			panic("unkown format")
+		},
+	)
+
+	resource.API("preview-relation/:id").Handler(
+		func(request Request) {
+
+			user := request.GetUser()
+
+			var item interface{}
+			resource.newItem(&item)
+			err := resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(item)
+			if err == ErrItemNotFound {
+				render404(request)
+				return
+			}
+			if err != nil {
+				panic(err)
+			}
+
+			request.RenderJSON(
+				resource.itemToRelationData(item, user, nil),
+			)
 		},
 	)
 }

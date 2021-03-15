@@ -13,16 +13,14 @@ type Resource struct {
 	id                  string
 	name                func(locale string) string
 	typ                 reflect.Type
-	resourceController  *Controller
+	resourceController  *controller
 	defaultItemsPerPage int64
 
 	orderByColumn string
 	orderDesc     bool
 
-	//TableName          string
 	actions       []*Action
 	itemActions   []*Action
-	relations     []relation
 	autoRelations []relation
 
 	canView   Permission
@@ -43,7 +41,7 @@ type Resource struct {
 	orderColumnName string
 }
 
-//CreateResource creates new resource based on item
+//Resource creates new resource based on item
 func (app *App) Resource(item interface{} /*, initFunction func(*Resource)*/) *Resource {
 	typ := reflect.TypeOf(item)
 
@@ -184,7 +182,7 @@ func (resource Resource) getURL(suffix string) string {
 	if len(suffix) > 0 {
 		url += "/" + suffix
 	}
-	return resource.app.GetAdminURL(url)
+	return resource.app.getAdminURL(url)
 }
 
 func (app *App) getResourceByItem(item interface{}) (*Resource, error) {

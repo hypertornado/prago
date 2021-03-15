@@ -295,7 +295,7 @@ class ListFilterRelations {
     loadPreview(value) {
         var request = new XMLHttpRequest();
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        request.open("GET", adminPrefix + "/_api/preview/" + this.relatedResourceName + "/" + value, true);
+        request.open("GET", adminPrefix + "/api/" + this.relatedResourceName + "/preview-relation/" + value, true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
                 this.renderPreview(JSON.parse(request.response));
@@ -987,7 +987,7 @@ class MarkdownEditor {
     loadPreview() {
         this.changed = false;
         var request = new XMLHttpRequest();
-        request.open("POST", document.body.getAttribute("data-admin-prefix") + "/_api/markdown", true);
+        request.open("POST", document.body.getAttribute("data-admin-prefix") + "/api/markdown", true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
                 this.preview.innerHTML = JSON.parse(request.response);
@@ -1108,7 +1108,7 @@ class RelationPicker {
     getData() {
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
         var request = new XMLHttpRequest();
-        request.open("GET", adminPrefix + "/_api/preview/" + this.relationName + "/" + this.input.value, true);
+        request.open("GET", adminPrefix + "/api/" + this.relationName + "/preview-relation/" + this.input.value, true);
         request.addEventListener("load", () => {
             this.progress.classList.add("hidden");
             if (request.status == 200) {
@@ -1551,7 +1551,7 @@ class SearchForm {
         var suggestText = this.searchInput.value;
         var request = new XMLHttpRequest();
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        var url = adminPrefix + "/_search_suggest" + encodeParams({ "q": this.searchInput.value });
+        var url = adminPrefix + "/api/search-suggest" + encodeParams({ "q": this.searchInput.value });
         request.open("GET", url);
         request.addEventListener("load", () => {
             if (suggestText != this.searchInput.value) {
@@ -1668,7 +1668,7 @@ class RelationList {
         this.loadingEl.classList.remove("hidden");
         this.moreEl.classList.add("hidden");
         var request = new XMLHttpRequest();
-        request.open("POST", this.adminPrefix + "/_api/relationlist", true);
+        request.open("POST", this.adminPrefix + "/api/relationlist", true);
         request.addEventListener("load", () => {
             this.loadingEl.classList.add("hidden");
             if (request.status == 200) {

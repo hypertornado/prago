@@ -228,7 +228,7 @@ func initFilesResource(resource *Resource) {
 		request.Redirect(resource.getURL(""))
 	})
 
-	resource.AddAction("getcdnurl").Method("POST").Handler(
+	resource.Action("getcdnurl").Method("POST").Handler(
 		func(request Request) {
 			uuid := request.Params().Get("uuid")
 			size := request.Params().Get("size")

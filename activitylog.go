@@ -71,10 +71,10 @@ func (app *App) getHistory(resource *Resource, itemID int64) historyView {
 		err := app.Query().WhereIs("id", v.User).Get(&user)
 		if err == nil {
 			username = user.Name
-			userurl = app.GetAdminURL(fmt.Sprintf("user/%d", user.ID))
+			userurl = app.getAdminURL(fmt.Sprintf("user/%d", user.ID))
 		}
 
-		activityURL := app.GetAdminURL(fmt.Sprintf("activitylog/%d", v.ID))
+		activityURL := app.getAdminURL(fmt.Sprintf("activitylog/%d", v.ID))
 		itemName := fmt.Sprintf("%s #%d", v.ResourceName, v.ID)
 
 		ret.Items = append(ret.Items, historyItemView{

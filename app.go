@@ -31,10 +31,10 @@ type App struct {
 	resourceMap     map[reflect.Type]*Resource
 	resourceNameMap map[string]*Resource
 
-	mainController   *Controller
-	appController    *Controller
-	accessController *Controller
-	adminController  *Controller
+	mainController   *controller
+	appController    *controller
+	accessController *controller
+	adminController  *controller
 
 	rootActions []*Action
 	db          *sql.DB
@@ -135,8 +135,8 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	return app
 }
 
-//NewApp creates App structure for prago app
-func NewApp(appName, version string, initFunction func(*App)) {
+//Application creates App structure for prago app
+func Application(appName, version string, initFunction func(*App)) {
 	app := createApp(appName, version, initFunction)
 	app.parseCommands()
 }

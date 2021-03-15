@@ -8,29 +8,38 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hypertornado/prago/utils"
-
 	"github.com/golang-commonmark/markdown"
+	"github.com/hypertornado/prago/utils"
 )
 
 func (app *App) initAPI() {
-	bindMarkdownAPI(app)
+	app.API("markdown").Method("POST").Handler(
+		func(request Request) {
+			basicUserAuthorize(request)
+			data, err := ioutil.ReadAll(request.Request().Body)
+			if err != nil {
+				panic(err)
+			}
+			request.RenderJSON(markdown.New(markdown.HTML(true), markdown.Breaks(true)).RenderToString(data))
+		},
+	)
+
 	bindRelationAPI(app)
 	bindRelationListAPI(app)
 	bindImageAPI(app)
 }
 
 func bindImageAPI(app *App) {
-	app.adminController.get(app.GetAdminURL("file/uuid/:uuid"), func(request Request) {
+	app.adminController.get(app.getAdminURL("file/uuid/:uuid"), func(request Request) {
 		var image File
 		err := app.Query().WhereIs("uid", request.Params().Get("uuid")).Get(&image)
 		if err != nil {
 			panic(err)
 		}
-		request.Redirect(app.GetAdminURL(fmt.Sprintf("file/%d", image.ID)))
+		request.Redirect(app.getAdminURL(fmt.Sprintf("file/%d", image.ID)))
 	})
 
-	app.adminController.post(app.GetAdminURL("_api/order/:resourceName"), func(request Request) {
+	app.adminController.post(app.getAdminURL("_api/order/:resourceName"), func(request Request) {
 		resource := app.getResourceByName(request.Params().Get("resourceName"))
 		user := request.GetUser()
 
@@ -61,13 +70,13 @@ func bindImageAPI(app *App) {
 		request.RenderJSON(true)
 	})
 
-	app.adminController.get(app.GetAdminURL("_api/image/thumb/:id"), func(request Request) {
+	app.adminController.get(app.getAdminURL("_api/image/thumb/:id"), func(request Request) {
 		var image File
 		must(app.Query().WhereIs("uid", request.Params().Get("id")).Get(&image))
 		request.Redirect(image.GetMedium())
 	})
 
-	app.adminController.get(app.GetAdminURL("_api/image/list"), func(request Request) {
+	app.adminController.get(app.getAdminURL("_api/image/list"), func(request Request) {
 		basicUserAuthorize(request)
 		var images []*File
 		if len(request.Params().Get("ids")) > 0 {
@@ -94,7 +103,7 @@ func bindImageAPI(app *App) {
 		writeFileResponse(request, images)
 	})
 
-	app.adminController.get(app.GetAdminURL("_api/imagedata/:uid"), func(request Request) {
+	app.adminController.get(app.getAdminURL("_api/imagedata/:uid"), func(request Request) {
 		basicUserAuthorize(request)
 		var file File
 		err := app.Query().WhereIs("uid", request.Params().Get("uid")).Get(&file)
@@ -104,7 +113,7 @@ func bindImageAPI(app *App) {
 		request.RenderJSON(file)
 	})
 
-	app.adminController.post(app.GetAdminURL("_api/image/upload"), func(request Request) {
+	app.adminController.post(app.getAdminURL("_api/image/upload"), func(request Request) {
 		basicUserAuthorize(request)
 		multipartFiles := request.Request().MultipartForm.File["file"]
 
@@ -126,51 +135,9 @@ func bindImageAPI(app *App) {
 	})
 }
 
-func bindMarkdownAPI(app *App) {
-	app.adminController.post(app.GetAdminURL("_api/markdown"), func(request Request) {
-		basicUserAuthorize(request)
-		data, err := ioutil.ReadAll(request.Request().Body)
-		if err != nil {
-			panic(err)
-		}
-		request.RenderJSON(markdown.New(markdown.HTML(true), markdown.Breaks(true)).RenderToString(data))
-	})
-}
-
 func bindRelationAPI(app *App) {
-	app.adminController.get(app.GetAdminURL("_api/preview/:resourceName/:id"), func(request Request) {
-		resourceName := request.Params().Get("resourceName")
-		idStr := request.Params().Get("id")
 
-		user := request.GetUser()
-
-		resource, found := app.resourceNameMap[resourceName]
-		if !found {
-			render404(request)
-			return
-		}
-
-		if !app.Authorize(user, resource.canView) {
-			render403(request)
-			return
-		}
-
-		var item interface{}
-		resource.newItem(&item)
-		err := app.Query().WhereIs("id", idStr).Get(item)
-		if err == ErrItemNotFound {
-			render404(request)
-			return
-		}
-		if err != nil {
-			panic(err)
-		}
-
-		relationItem := resource.itemToRelationData(item, user, nil)
-		request.RenderJSON(relationItem)
-	})
-
-	app.adminController.get(app.GetAdminURL("_api/search/:resourceName"), func(request Request) {
+	app.adminController.get(app.getAdminURL("_api/search/:resourceName"), func(request Request) {
 		user := request.GetUser()
 		resourceName := request.Params().Get("resourceName")
 		q := request.Params().Get("q")
@@ -241,5 +208,5 @@ func bindRelationAPI(app *App) {
 }
 
 func bindRelationListAPI(app *App) {
-	app.adminController.post(app.GetAdminURL("_api/relationlist"), generateRelationListAPIHandler(app))
+	app.API("relationlist").Method("POST").Handler(generateRelationListAPIHandler(app))
 }

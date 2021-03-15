@@ -62,7 +62,7 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 		}
 
 		var selected bool
-		fullURL := app.GetAdminURL(v.url)
+		fullURL := app.getAdminURL(v.url)
 		if request.Request().URL.Path == fullURL {
 			selected = true
 		}
@@ -121,7 +121,7 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 		}
 
 		var selected bool
-		fullURL := app.GetAdminURL(v.url)
+		fullURL := app.getAdminURL(v.url)
 		if request.Request().URL.Path == fullURL {
 			selected = true
 		}
@@ -141,7 +141,7 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 	ret.Logo = app.logo
 	ret.URLPrefix = adminPathPrefix
 	ret.Language = user.Locale
-	ret.AdminHomepageURL = app.GetAdminURL("")
+	ret.AdminHomepageURL = app.getAdminURL("")
 
 	if app.search != nil {
 		ret.HasSearch = true

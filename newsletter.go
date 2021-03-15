@@ -290,7 +290,7 @@ func initNewsletterResource(resource *Resource) {
 				request.Response().Write([]byte(body))
 			},
 		}*/
-	resource.AddItemAction("preview").Name(Unlocalized("Náhled")).Handler(
+	resource.ItemAction("preview").Name(Unlocalized("Náhled")).Handler(
 		func(request Request) {
 			var newsletter newsletter
 			err := resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
@@ -305,7 +305,7 @@ func initNewsletterResource(resource *Resource) {
 		},
 	)
 
-	resource.AddItemAction("send-preview").Method("POST").Handler(
+	resource.ItemAction("send-preview").Method("POST").Handler(
 		func(request Request) {
 			var newsletter newsletter
 			must(resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
@@ -319,7 +319,7 @@ func initNewsletterResource(resource *Resource) {
 		},
 	)
 
-	resource.AddItemAction("send").Method("POST").Template("newsletter_sent").DataSource(
+	resource.ItemAction("send").Method("POST").Template("newsletter_sent").DataSource(
 		func(request Request) interface{} {
 			var newsletter newsletter
 			err := resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
@@ -345,7 +345,7 @@ func initNewsletterResource(resource *Resource) {
 		},
 	)
 
-	resource.AddItemAction("duplicate").Method("POST").Handler(
+	resource.ItemAction("duplicate").Method("POST").Handler(
 		func(request Request) {
 			var newsletter newsletter
 			must(resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
@@ -368,9 +368,9 @@ func initNewsletterResource(resource *Resource) {
 		},
 	)
 
-	resource.AddItemAction("send-preview").Name(Unlocalized("Odeslat náhled")).Template("newsletter_send_preview")
+	resource.ItemAction("send-preview").Name(Unlocalized("Odeslat náhled")).Template("newsletter_send_preview")
 
-	resource.AddItemAction("send").Name(Unlocalized("Odeslat")).Template("newsletter_send").DataSource(
+	resource.ItemAction("send").Name(Unlocalized("Odeslat")).Template("newsletter_send").DataSource(
 		func(Request) interface{} {
 			recipients, err := resource.app.getNewsletterRecipients()
 			if err != nil {
@@ -383,7 +383,7 @@ func initNewsletterResource(resource *Resource) {
 		},
 	)
 
-	resource.AddItemAction("duplicate").Name(Unlocalized("Duplikovat")).Template("newsletter_duplicate")
+	resource.ItemAction("duplicate").Name(Unlocalized("Duplikovat")).Template("newsletter_duplicate")
 
 }
 

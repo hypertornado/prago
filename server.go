@@ -9,8 +9,7 @@ import (
 	"github.com/hypertornado/prago/utils"
 )
 
-//ListenAndServe starts server on port
-func (app *App) ListenAndServe(port int) error {
+func (app *App) listenAndServe(port int) error {
 	app.Log().Printf("Server started: port=%d, pid=%d, developmentMode=%v\n", port, os.Getpid(), app.developmentMode)
 
 	if !app.developmentMode {

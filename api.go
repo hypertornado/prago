@@ -26,12 +26,12 @@ func newAPI(app *App, url string) *API {
 	return api
 }
 
-func (app *App) AddAPI(url string) *API {
+func (app *App) API(url string) *API {
 	api := newAPI(app, url)
 	return api
 }
 
-func (resource *Resource) AddAPI(url string) *API {
+func (resource *Resource) API(url string) *API {
 	api := newAPI(resource.app, url)
 	api.resource = resource
 	api.permission = resource.canView
@@ -71,14 +71,14 @@ func (app *App) initAPIs() {
 	}
 
 	//TODO: support ANY
-	app.adminController.get(app.GetAdminURL("api/*"), renderAPINotFound)
-	app.adminController.post(app.GetAdminURL("api/*"), renderAPINotFound)
-	app.adminController.delete(app.GetAdminURL("api/*"), renderAPINotFound)
-	app.adminController.put(app.GetAdminURL("api/*"), renderAPINotFound)
+	app.adminController.get(app.getAdminURL("api/*"), renderAPINotFound)
+	app.adminController.post(app.getAdminURL("api/*"), renderAPINotFound)
+	app.adminController.delete(app.getAdminURL("api/*"), renderAPINotFound)
+	app.adminController.put(app.getAdminURL("api/*"), renderAPINotFound)
 }
 
 func (api *API) initAPI() error {
-	var controller *Controller
+	var controller *controller
 	if api.resource != nil {
 		controller = api.resource.resourceController
 	} else {
@@ -87,7 +87,7 @@ func (api *API) initAPI() error {
 
 	var url string
 	if api.resource == nil {
-		url = api.app.GetAdminURL("api/" + api.url)
+		url = api.app.getAdminURL("api/" + api.url)
 	} else {
 		url = api.resource.getURL("api/" + api.url)
 	}

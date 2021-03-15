@@ -20,13 +20,13 @@ func (app *App) initUserSettings() {
 		return form
 	}
 
-	app.AddAction("settings").Name(messages.GetNameFunction("admin_settings")).userMenu().Template("admin_form").DataSource(
+	app.Action("settings").Name(messages.GetNameFunction("admin_settings")).userMenu().Template("admin_form").DataSource(
 		func(request Request) interface{} {
 			return settingsForm(request.GetUser()).AddCSRFToken(request)
 		},
 	)
 
-	app.AddAction("settings").Method("POST").Handler(
+	app.Action("settings").Method("POST").Handler(
 		func(request Request) {
 			validateCSRF(request)
 			user := request.GetUser()
@@ -39,7 +39,7 @@ func (app *App) initUserSettings() {
 				must(userResource.bindData(&user, user, request.Params(), form.getFilter()))
 				must(app.Save(&user))
 				request.AddFlashMessage(messages.Get(getLocale(request), "admin_settings_changed"))
-				request.Redirect(app.GetAdminURL("settings"))
+				request.Redirect(app.getAdminURL("settings"))
 			} else {
 				panic("can't validate settings form")
 			}
@@ -69,13 +69,13 @@ func (app *App) initUserSettings() {
 		return form
 	}
 
-	app.AddAction("password").Name(messages.GetNameFunction("admin_password_change")).userMenu().Template("admin_form").DataSource(
+	app.Action("password").Name(messages.GetNameFunction("admin_password_change")).userMenu().Template("admin_form").DataSource(
 		func(request Request) interface{} {
 			return changePasswordForm(request)
 		},
 	)
 
-	app.AddAction("password").Method("POST").Handler(func(request Request) {
+	app.Action("password").Method("POST").Handler(func(request Request) {
 		form := changePasswordForm(request)
 		form.BindData(request.Params())
 		form.Validate()
@@ -85,7 +85,7 @@ func (app *App) initUserSettings() {
 			must(user.newPassword(password))
 			must(app.Save(&user))
 			request.AddFlashMessage(messages.Get(getLocale(request), "admin_password_changed"))
-			request.Redirect(app.GetAdminURL(""))
+			request.Redirect(app.getAdminURL(""))
 		} else {
 			//TODO: better validation and UI of errors
 			for _, v := range form.Items {
@@ -93,21 +93,21 @@ func (app *App) initUserSettings() {
 					request.AddFlashMessage(e)
 				}
 			}
-			request.Redirect(app.GetAdminURL("password"))
+			request.Redirect(app.getAdminURL("password"))
 		}
 	})
 
-	app.AddAction("redirect-to-homepage").Name(messages.GetNameFunction("admin_homepage")).userMenu().Handler(func(request Request) {
+	app.Action("redirect-to-homepage").Name(messages.GetNameFunction("admin_homepage")).userMenu().Handler(func(request Request) {
 		request.Redirect("/")
 	})
 
-	app.AddAction("logout").Name(messages.GetNameFunction("admin_log_out")).userMenu().Handler(func(request Request) {
+	app.Action("logout").Name(messages.GetNameFunction("admin_log_out")).userMenu().Handler(func(request Request) {
 		validateCSRF(request)
 		session := request.GetData("session").(*sessions.Session)
 		delete(session.Values, "user_id")
 		session.AddFlash(messages.Get(getLocale(request), "admin_logout_ok"))
 		must(session.Save(request.Request(), request.Response()))
-		request.Redirect(app.GetAdminURL("login"))
+		request.Redirect(app.getAdminURL("login"))
 	})
 
 }
