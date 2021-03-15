@@ -44,7 +44,7 @@ type Resource struct {
 }
 
 //CreateResource creates new resource based on item
-func (app *App) CreateResource(item interface{}, initFunction func(*Resource)) *Resource {
+func (app *App) Resource(item interface{} /*, initFunction func(*Resource)*/) *Resource {
 	typ := reflect.TypeOf(item)
 
 	if typ.Kind() != reflect.Struct {
@@ -95,11 +95,9 @@ func (app *App) CreateResource(item interface{}, initFunction func(*Resource)) *
 	app.resourceMap[ret.typ] = ret
 	app.resourceNameMap[ret.id] = ret
 
-	if initFunction != nil {
+	/*if initFunction != nil {
 		initFunction(ret)
-	}
-
-	app.initResource(ret)
+	}*/
 
 	return ret
 }
@@ -160,8 +158,14 @@ func (app *App) getResourceByName(name string) *Resource {
 	return app.resourceNameMap[columnName(name)]
 }
 
-func (app *App) initResource(resource *Resource) {
+func (app *App) initResources() {
+	for _, v := range app.resources {
+		app.initResource(v)
+	}
 
+}
+
+func (app *App) initResource(resource *Resource) {
 	resource.resourceController.addAroundAction(func(request Request, next func()) {
 		user := request.GetUser()
 		if !app.Authorize(user, resource.canView) {

@@ -163,9 +163,9 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 		request.RenderView("newsletter_layout")
 	})
 
-	app.CreateResource(newsletter{}, initNewsletterResource)
-	app.CreateResource(newsletterSection{}, initNewsletterSection)
-	app.CreateResource(newsletterPersons{}, initNewsletterPersonsResource)
+	initNewsletterResource(app.Resource(newsletter{}))
+	initNewsletterSection(app.Resource(newsletterSection{}))
+	initNewsletterPersonsResource(app.Resource(newsletterPersons{}))
 
 	//newsletterResource.AddRelation(newsletterSectionResource, "Newsletter", Unlocalized("Přidat sekci"))
 }

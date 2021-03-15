@@ -105,10 +105,10 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	app.adminController = app.accessController.subController()
 	app.initDefaultFieldTypes()
 
-	app.CreateResource(User{}, initUserResource)
-	app.CreateResource(Notification{}, initNotificationResource)
-	app.CreateResource(File{}, initFilesResource)
-	app.CreateResource(ActivityLog{}, initActivityLog)
+	initUserResource(app.Resource(User{}))
+	initNotificationResource(app.Resource(Notification{}))
+	initFilesResource(app.Resource(File{}))
+	initActivityLog(app.Resource(ActivityLog{}))
 
 	app.initAdminActions()
 	app.initBuild()
@@ -125,6 +125,7 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 		initFunction(app)
 	}
 
+	app.initResources()
 	app.initAPIs()
 	app.bindAllActions()
 	app.initAdminNotFoundAction()
