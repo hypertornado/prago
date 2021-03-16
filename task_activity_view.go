@@ -50,16 +50,14 @@ func (tm *taskManager) getTaskMonitor(user User) (ret *taskMonitor) {
 			if !v.ended && v.stoppable && !v.stopped {
 				var u url.Values = map[string][]string{}
 				u.Add("uuid", v.uuid)
-				randomness := tm.app.ConfigurationGetString("random")
-				u.Add("csrf", user.csrfToken(randomness))
+				u.Add("csrf", tm.app.generateCSRFToken(&user))
 				actions = append(actions, taskActivityViewAction{"◼", "_tasks/stoptask?" + u.Encode()})
 			}
 
 			if v.ended {
 				var u url.Values = map[string][]string{}
 				u.Add("uuid", v.uuid)
-				randomness := tm.app.ConfigurationGetString("random")
-				u.Add("csrf", user.csrfToken(randomness))
+				u.Add("csrf", tm.app.generateCSRFToken(&user))
 				actions = append(actions, taskActivityViewAction{"✘", "_tasks/deletetask?" + u.Encode()})
 			}
 

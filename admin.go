@@ -51,8 +51,7 @@ func (app *App) initAdminActions() {
 			return
 		}
 
-		randomness := app.ConfigurationGetString("random")
-		request.SetData("_csrfToken", user.csrfToken(randomness))
+		request.SetData("_csrfToken", app.generateCSRFToken(&user))
 		request.SetData("currentuser", &user)
 		request.SetData("locale", user.Locale)
 		request.SetData("gravatar", user.gravatarURL())
@@ -74,8 +73,6 @@ func (app *App) initAdminActions() {
 
 		request.SetData("main_menu", app.getMainMenu(request))
 	})
-
-	app.Action("").Name(messages.GetNameFunction("admin_signpost")).Template("admin_home_navigation").DataSource(app.getHomeData)
 	app.Action("markdown").Name(Unlocalized("Nápověda markdown")).hiddenMenu().Template("admin_help_markdown").IsWide()
 }
 

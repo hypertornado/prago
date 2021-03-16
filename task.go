@@ -13,31 +13,113 @@ import (
 
 type taskManager struct {
 	app           *App
-	tasks         []*Task
+	taskGroups    []*TaskGroup
 	tasksMap      map[string]*Task
 	activities    map[string]*TaskActivity
 	activityMutex *sync.RWMutex
 	startedAt     time.Time
+	defaultGroup  *TaskGroup
 }
 
 func (app *App) initTaskManager() {
-	tm := &taskManager{
+
+	app.taskManager = &taskManager{
 		app:           app,
 		tasksMap:      make(map[string]*Task),
 		activities:    make(map[string]*TaskActivity),
 		activityMutex: &sync.RWMutex{},
 		startedAt:     time.Now(),
 	}
+	app.taskManager.defaultGroup = app.TaskGroup(Unlocalized("Other"))
 
-	app.taskManager = tm
-	app.taskManager.init()
+	go app.taskManager.oldTasksRemover()
+	go app.taskManager.startCRON()
+
+	app.Action("_tasks").Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(
+		func(request Request) interface{} {
+			var ret = map[string]interface{}{}
+			user := request.GetUser()
+			ret["currentuser"] = user
+			ret["csrf_token"] = app.generateCSRFToken(&user)
+			ret["tasks"] = app.taskManager.getTasks(user)
+			ret["taskmonitor"] = app.taskManager.getTaskMonitor(user)
+			ret["admin_title"] = messages.Get(user.Locale, "tasks")
+			return ret
+		},
+	)
+
+	app.adminController.get(app.getAdminURL("_tasks/running"), func(request Request) {
+		request.SetData("taskmonitor", app.taskManager.getTaskMonitor(request.GetUser()))
+		request.RenderView("taskmonitor")
+	})
+
+	app.adminController.post(app.getAdminURL("_tasks/runtask"), func(request Request) {
+		id := request.Request().FormValue("id")
+		csrf := request.Request().FormValue("csrf")
+		user := request.GetUser()
+
+		expectedToken := request.GetData("_csrfToken").(string)
+		if expectedToken != csrf {
+			panic("wrong token")
+		}
+
+		must(app.taskManager.startTask(id, user))
+		request.Redirect(app.getAdminURL("_tasks"))
+	})
+
+	app.adminController.get(app.getAdminURL("_tasks/stoptask"), func(request Request) {
+		uuid := request.Request().FormValue("uuid")
+		csrf := request.Request().FormValue("csrf")
+		user := request.GetUser()
+
+		expectedToken := request.GetData("_csrfToken").(string)
+		if expectedToken != csrf {
+			panic("wrong token")
+		}
+
+		must(app.taskManager.stopTask(uuid, user))
+		request.Redirect(app.getAdminURL("_tasks"))
+	})
+
+	app.adminController.get(app.getAdminURL("_tasks/deletetask"), func(request Request) {
+		uuid := request.Request().FormValue("uuid")
+		csrf := request.Request().FormValue("csrf")
+		user := request.GetUser()
+
+		expectedToken := request.GetData("_csrfToken").(string)
+		if expectedToken != csrf {
+			panic("wrong token")
+		}
+
+		must(app.taskManager.deleteTask(uuid, user))
+		request.Redirect(app.getAdminURL("_tasks"))
+	})
+
+	grp := app.TaskGroup(Unlocalized("example"))
+
+	grp.Task("example_fail").SetHandler(func(t *TaskActivity) error {
+		return fmt.Errorf("example error")
+	})
+
+	grp.Task("example").SetHandler(func(t *TaskActivity) error {
+		t.IsStopped()
+		var progress float64
+		for {
+			time.Sleep(1 * time.Second)
+			t.SetStatus(progress, "example status")
+			progress += 0.2
+			if progress >= 1 {
+				return nil
+			}
+		}
+	})
 }
 
 func (tm *taskManager) startCRON() {
 	go func() {
 		for {
 			time.Sleep(1 * time.Second)
-			for _, v := range tm.tasks {
+			for _, v := range tm.tasksMap {
 				if v.cron > 0 {
 					if tm.startedAt.Add(v.cron).Before(time.Now()) && v.lastStarted.Add(v.cron).Before(time.Now()) {
 						tm.run(v, nil, "cron")
@@ -73,89 +155,6 @@ func (tm *taskManager) deleteActivity(id string) {
 	tm.activityMutex.Lock()
 	defer tm.activityMutex.Unlock()
 	delete(tm.activities, id)
-}
-
-func (tm *taskManager) init() {
-	go tm.oldTasksRemover()
-	go tm.startCRON()
-
-	tm.app.Action("_tasks").Name(messages.GetNameFunction("tasks")).Template("admin_tasks").DataSource(
-		func(request Request) interface{} {
-			var ret = map[string]interface{}{}
-			user := request.GetUser()
-			ret["currentuser"] = user
-			ret["tasks"] = tm.getTasks(user)
-			ret["taskmonitor"] = tm.getTaskMonitor(user)
-			ret["admin_title"] = messages.Get(user.Locale, "tasks")
-			return ret
-		},
-	)
-
-	tm.app.adminController.get(tm.app.getAdminURL("_tasks/running"), func(request Request) {
-		request.SetData("taskmonitor", tm.getTaskMonitor(request.GetUser()))
-		request.RenderView("taskmonitor")
-	})
-
-	tm.app.adminController.post(tm.app.getAdminURL("_tasks/runtask"), func(request Request) {
-		id := request.Request().FormValue("id")
-		csrf := request.Request().FormValue("csrf")
-		user := request.GetUser()
-
-		expectedToken := request.GetData("_csrfToken").(string)
-		if expectedToken != csrf {
-			panic("wrong token")
-		}
-
-		must(tm.startTask(id, user))
-		request.Redirect(tm.app.getAdminURL("_tasks"))
-	})
-
-	tm.app.adminController.get(tm.app.getAdminURL("_tasks/stoptask"), func(request Request) {
-		uuid := request.Request().FormValue("uuid")
-		csrf := request.Request().FormValue("csrf")
-		user := request.GetUser()
-
-		expectedToken := request.GetData("_csrfToken").(string)
-		if expectedToken != csrf {
-			panic("wrong token")
-		}
-
-		must(tm.stopTask(uuid, user))
-		request.Redirect(tm.app.getAdminURL("_tasks"))
-	})
-
-	tm.app.adminController.get(tm.app.getAdminURL("_tasks/deletetask"), func(request Request) {
-		uuid := request.Request().FormValue("uuid")
-		csrf := request.Request().FormValue("csrf")
-		user := request.GetUser()
-
-		expectedToken := request.GetData("_csrfToken").(string)
-		if expectedToken != csrf {
-			panic("wrong token")
-		}
-
-		must(tm.deleteTask(uuid, user))
-		request.Redirect(tm.app.getAdminURL("_tasks"))
-	})
-
-	grp := tm.app.NewTaskGroup(Unlocalized("example"))
-
-	tm.app.NewTask("example_fail").SetGroup(grp).SetHandler(func(t *TaskActivity) error {
-		return fmt.Errorf("example error")
-	})
-
-	tm.app.NewTask("example").SetGroup(grp).SetHandler(func(t *TaskActivity) error {
-		t.IsStopped()
-		var progress float64
-		for {
-			time.Sleep(1 * time.Second)
-			t.SetStatus(progress, "example status")
-			progress += 0.2
-			if progress >= 1 {
-				return nil
-			}
-		}
-	})
 }
 
 func (tm *taskManager) startTask(id string, user User) error {
@@ -216,7 +215,7 @@ func (t *Task) taskView() taskView {
 func (tm *taskManager) getTasks(user User) (ret []taskViewGroup) {
 
 	var tasks []*Task
-	for _, v := range tm.tasks {
+	for _, v := range tm.tasksMap {
 		if tm.app.Authorize(user, v.permission) {
 			tasks = append(tasks, v)
 		}
@@ -227,8 +226,8 @@ func (tm *taskManager) getTasks(user User) (ret []taskViewGroup) {
 		t2 := tasks[j]
 
 		compareGroup := collate.New(language.Czech).CompareString(
-			t1.group.Name(user.Locale),
-			t2.group.Name(user.Locale),
+			t1.group.name(user.Locale),
+			t2.group.name(user.Locale),
 		)
 		if compareGroup < 0 {
 			return true
@@ -247,7 +246,7 @@ func (tm *taskManager) getTasks(user User) (ret []taskViewGroup) {
 	var lastGroup *TaskGroup
 	for _, v := range tasks {
 		if v.group != lastGroup {
-			ret = append(ret, taskViewGroup{Name: v.group.Name(user.Locale)})
+			ret = append(ret, taskViewGroup{Name: v.group.name(user.Locale)})
 		}
 
 		ret[len(ret)-1].Tasks = append(ret[len(ret)-1].Tasks, v.taskView())
@@ -265,33 +264,29 @@ type Task struct {
 	handler     func(*TaskActivity) error
 	cron        time.Duration
 	lastStarted time.Time
-	manager     *taskManager
+	//manager     *taskManager
 }
 
 var defaultGroup *TaskGroup
 
-//NewTask creates task
-func (app *App) NewTask(id string) *Task {
-	if defaultGroup == nil {
-		defaultGroup = app.NewTaskGroup(Unlocalized("Other"))
-	}
+//Task creates task
+func (tg *TaskGroup) Task(id string) *Task {
+	_, ok := tg.manager.tasksMap[id]
 
-	_, ok := app.taskManager.tasksMap[id]
 	if ok {
 		panic(fmt.Sprintf("Task '%s' already added.", id))
 	}
 
 	task := &Task{
-		id:      id,
-		manager: app.taskManager,
-		group:   defaultGroup,
+		id:    id,
+		group: tg,
 	}
 
-	task.manager.tasks = append(app.taskManager.tasks, task)
-	task.manager.tasksMap[task.id] = task
+	tg.tasks = append(tg.tasks, task)
+	tg.manager.tasksMap[task.id] = task
 
-	app.AddCommand("task", id).Callback(func() {
-		app.taskManager.run(task, nil, "command")
+	tg.manager.app.AddCommand("task", id).Callback(func() {
+		tg.manager.run(task, nil, "command")
 	})
 
 	return task
@@ -317,21 +312,26 @@ func (t *Task) RepeatEvery(duration time.Duration) *Task {
 
 //TaskGroup represent group of tasks
 type TaskGroup struct {
-	Name func(string) string
+	name    func(string) string
+	manager *taskManager
+	tasks   []*Task
 }
 
 //NewTaskGroup creates new task group
-func (app *App) NewTaskGroup(name func(string) string) *TaskGroup {
-	return &TaskGroup{name}
+func (app *App) TaskGroup(name func(string) string) *TaskGroup {
+	return &TaskGroup{
+		name:    name,
+		manager: app.taskManager,
+	}
 }
 
 //SetGroup sets group task
-func (t *Task) SetGroup(group *TaskGroup) *Task {
+/*func (t *Task) SetGroup(group *TaskGroup) *Task {
 	if group != nil {
 		t.group = group
 	}
 	return t
-}
+}*/
 
 func (tm *taskManager) run(t *Task, user *User, starterTyp string) *TaskActivity {
 	activity := &TaskActivity{

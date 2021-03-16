@@ -104,7 +104,6 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 	if userName == "" {
 		userName = user.Email
 	}
-	randomness := app.ConfigurationGetString("random")
 	userSection := mainMenuSection{
 		Name:  userName,
 		Items: []mainMenuItem{},
@@ -127,7 +126,7 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 		}
 
 		if v.url == "logout" {
-			fullURL += "?_csrfToken=" + user.csrfToken(randomness)
+			fullURL += "?_csrfToken=" + app.generateCSRFToken(&user)
 		}
 
 		userSection.Items = append(userSection.Items, mainMenuItem{

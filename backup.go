@@ -10,16 +10,20 @@ import (
 )
 
 func (app *App) initBackupCRON() {
-	app.NewTask("backup_db").SetHandler(
-		func(tr *TaskActivity) error {
-			err := backupApp(app)
-			if err != nil {
-				return fmt.Errorf("Error while creating backup: %s", err)
-			}
-			return nil
-		}).RepeatEvery(24 * time.Hour)
+	app.
+		taskManager.
+		defaultGroup.
+		Task("backup_db").
+		SetHandler(
+			func(tr *TaskActivity) error {
+				err := backupApp(app)
+				if err != nil {
+					return fmt.Errorf("Error while creating backup: %s", err)
+				}
+				return nil
+			}).RepeatEvery(24 * time.Hour)
 
-	app.NewTask("remove_old_backups").SetHandler(
+	app.taskManager.defaultGroup.Task("remove_old_backups").SetHandler(
 		func(tr *TaskActivity) error {
 			tr.SetStatus(0, fmt.Sprintf("Removing old backups"))
 			deadline := time.Now().AddDate(0, 0, -7)

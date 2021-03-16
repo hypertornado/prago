@@ -4,7 +4,7 @@
         <div class="admin_box_content">
             <div class="taskmonitorcontainer">{{template "taskmonitor" .}}</div>
 
-            {{$token := ._csrfToken}}
+            {{$token := .csrf_token}}
             {{$locale := .currentuser.Locale}}
 
             <h2>{{message .currentuser.Locale "tasks_run"}}</h2>

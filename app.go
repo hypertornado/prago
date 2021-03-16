@@ -110,6 +110,8 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	initFilesResource(app.Resource(File{}))
 	initActivityLog(app.Resource(ActivityLog{}))
 
+	app.initHome()
+	app.initTaskManager()
 	app.initAdminActions()
 	app.initBuild()
 	app.initAPI()
@@ -117,7 +119,6 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	app.initMigrationCommand()
 	app.initTemplates()
 	app.initSearch()
-	app.initTaskManager()
 	app.initSystemStats()
 	app.initBackupCRON()
 

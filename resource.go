@@ -100,8 +100,7 @@ func (app *App) Resource(item interface{} /*, initFunction func(*Resource)*/) *R
 	return ret
 }
 
-//GetItemURL gets item url
-func (resource Resource) GetItemURL(item interface{}, suffix string) string {
+func (resource Resource) getItemURL(item interface{}, suffix string) string {
 	ret := resource.getURL(fmt.Sprintf("%d", getItemID(item)))
 	if suffix != "" {
 		ret += "/" + suffix
@@ -127,27 +126,27 @@ func (resource *Resource) ItemsPerPage(itemsPerPage int64) *Resource {
 	return resource
 }
 
-func (resource *Resource) ViewPermission(permission Permission) *Resource {
+func (resource *Resource) PermissionView(permission Permission) *Resource {
 	resource.canView = permission
 	return resource
 }
 
-func (resource *Resource) EditPermission(permission Permission) *Resource {
+func (resource *Resource) PermissionEdit(permission Permission) *Resource {
 	resource.canEdit = permission
 	return resource
 }
 
-func (resource *Resource) CreatePermission(permission Permission) *Resource {
+func (resource *Resource) PermissionCreate(permission Permission) *Resource {
 	resource.canCreate = permission
 	return resource
 }
 
-func (resource *Resource) DeletePermission(permission Permission) *Resource {
+func (resource *Resource) PermissionDelete(permission Permission) *Resource {
 	resource.canDelete = permission
 	return resource
 }
 
-func (resource *Resource) ExportPermission(permission Permission) *Resource {
+func (resource *Resource) PermissionExport(permission Permission) *Resource {
 	resource.canExport = permission
 	return resource
 }

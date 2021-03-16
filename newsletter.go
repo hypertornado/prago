@@ -364,7 +364,7 @@ func initNewsletterResource(resource *Resource) {
 					must(resource.app.Create(&section))
 				}
 			}
-			request.Redirect(resource.GetItemURL(&newsletter, "edit"))
+			request.Redirect(resource.getItemURL(&newsletter, "edit"))
 		},
 	)
 

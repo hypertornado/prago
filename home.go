@@ -7,6 +7,10 @@ import (
 	"golang.org/x/text/language"
 )
 
+func (app *App) initHome() {
+	app.Action("").Name(messages.GetNameFunction("admin_signpost")).Template("admin_home_navigation").DataSource(app.getHomeData)
+}
+
 type homeData struct {
 	Name string
 	URL  string

@@ -72,7 +72,7 @@ func initResourceActions(resource *Resource) {
 
 			must(resource.updateCachedCount())
 			request.AddFlashMessage(messages.Get(user.Locale, "admin_item_created"))
-			request.Redirect(resource.GetItemURL(item, ""))
+			request.Redirect(resource.getItemURL(item, ""))
 		},
 	)
 

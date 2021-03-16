@@ -100,7 +100,7 @@ func (resource Resource) getItemNavigation(user User, item interface{}, code str
 			if resource.app.Authorize(user, v.permission) {
 				tabs = append(tabs, tab{
 					Name:     name,
-					URL:      resource.GetItemURL(item, v.url),
+					URL:      resource.getItemURL(item, v.url),
 					Selected: trueIfEqual(code, v.url),
 				})
 			}

@@ -122,7 +122,7 @@ func (resource *Resource) itemToRelationData(item interface{}, user User, relate
 	var ret viewRelationData
 	ret.ID = getItemID(item)
 	ret.Name = getItemName(item)
-	ret.URL = resource.GetItemURL(item, "")
+	ret.URL = resource.getItemURL(item, "")
 
 	ret.Image = resource.app.getItemImage(item)
 	ret.Description = resource.getItemDescription(item, user, relatedResource)
