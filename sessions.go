@@ -6,9 +6,13 @@ type sessionsManager struct {
 	cookieStore *sessions.CookieStore
 }
 
-/*type session struct {
+type session struct {
 	session *sessions.Session
-}*/
+}
+
+func initRequestWithSession(request *Request) {
+
+}
 
 func (app *App) initSessions() {
 	random := app.ConfigurationGetString("random")

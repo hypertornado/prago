@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"encoding/json"
 	"reflect"
 	"strconv"
 	"strings"
@@ -80,6 +81,32 @@ func initResourceAPIs(resource *Resource) {
 			request.RenderJSON(
 				resource.itemToRelationData(item, user, nil),
 			)
+		},
+	)
+
+	resource.API("set-order").Permission(resource.canEdit).Method("POST").Handler(
+		func(request Request) {
+			if resource.orderFieldName == "" {
+				panic("can't order")
+			}
+
+			decoder := json.NewDecoder(request.Request().Body)
+			var t = map[string][]int{}
+			must(decoder.Decode(&t))
+
+			order, ok := t["order"]
+			if !ok {
+				panic("wrong format")
+			}
+
+			for i, id := range order {
+				var item interface{}
+				resource.newItem(&item)
+				must(resource.app.Query().WhereIs("id", int64(id)).Get(item))
+				must(resource.setOrderPosition(item, int64(i)))
+				must(resource.app.Save(item))
+			}
+			request.RenderJSON(true)
 		},
 	)
 

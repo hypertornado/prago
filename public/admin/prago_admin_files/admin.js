@@ -851,7 +851,7 @@ function bindOrder() {
         function saveOrder() {
             var adminPrefix = document.body.getAttribute("data-admin-prefix");
             var typ = document.querySelector(".admin_list-order").getAttribute("data-type");
-            var ajaxPath = adminPrefix + "/_api/order/" + typ;
+            var ajaxPath = adminPrefix + "/" + typ + "/api/set-order";
             var order = [];
             var rows = el.getElementsByClassName("admin_table_row");
             Array.prototype.forEach.call(rows, function (item, i) {

@@ -103,6 +103,7 @@ func (app *App) initSystemStats() {
 			ret["memStats"] = memStats
 			ret["environmentStats"] = environmentStats
 			ret["accessView"] = getResourceAccessView(app)
+			ret["routes"] = app.mainController.router.export()
 			return ret
 		},
 	)

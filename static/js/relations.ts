@@ -103,7 +103,6 @@ class RelationPicker {
   getSuggestions(q: string) {
     var adminPrefix = document.body.getAttribute("data-admin-prefix");
     var request = new XMLHttpRequest();
-    //request.open("GET", adminPrefix + "/_api/search/" + this.relationName + "?q=" + encodeURIComponent(q), true);
     request.open("GET", adminPrefix + "/" + this.relationName + "/api/searchresource" + "?q=" + encodeURIComponent(q), true);
     request.addEventListener("load", () => {
       if (request.status == 200) {

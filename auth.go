@@ -42,7 +42,7 @@ func (app *App) getRoleFieldTypeData() [][2]string {
 }
 
 func (app *App) createRoleFieldType() FieldType {
-	var fp = func(Field, User) interface{} {
+	var fp = func(field, User) interface{} {
 		roleNames := []string{""}
 		for k := range app.roles {
 			roleNames = append(roleNames, k)

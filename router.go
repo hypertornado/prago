@@ -69,6 +69,19 @@ func (r *router) print() {
 	}
 }
 
+func (r *router) export() (ret [][2]string) {
+	ret = append(ret, [2]string{"PRIORITY ROUTES", ""})
+	for _, v := range r.priorityRoutes {
+		ret = append(ret, [2]string{v.method, v.path})
+	}
+
+	ret = append(ret, [2]string{"NORMAL ROUTES", ""})
+	for _, v := range r.routes {
+		ret = append(ret, [2]string{v.method, v.path})
+	}
+	return
+}
+
 type route struct {
 	method      string
 	path        string

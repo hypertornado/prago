@@ -41,7 +41,7 @@ type listHeaderItem struct {
 	CanOrder     bool
 	DefaultShow  bool
 	FilterLayout string
-	Field        Field
+	Field        field
 	FilterData   interface{}
 }
 
@@ -141,7 +141,7 @@ func (resource *Resource) fieldsStr() string {
 	return strings.Join(ret, ",")
 }
 
-func (field Field) getListHeaderItem(user User) listHeaderItem {
+func (field field) getListHeaderItem(user User) listHeaderItem {
 	headerItem := listHeaderItem{
 		Name:        field.Name,
 		NameHuman:   field.HumanName(user.Locale),
@@ -174,7 +174,7 @@ func (field Field) getListHeaderItem(user User) listHeaderItem {
 	return headerItem
 }
 
-func (field *Field) filterLayout() string {
+func (field *field) filterLayout() string {
 	if field == nil {
 		return ""
 	}
@@ -473,7 +473,7 @@ func (resource *Resource) getListContentJSON(user User, params url.Values) (ret 
 
 }
 
-func (resource Resource) valueToCell(user User, f Field, val reflect.Value, isOrderedBy bool) listCell {
+func (resource Resource) valueToCell(user User, f field, val reflect.Value, isOrderedBy bool) listCell {
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
 	var cell listCell

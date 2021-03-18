@@ -10,20 +10,20 @@ import (
 //FieldType defines type of field
 type FieldType struct {
 	ViewTemplate   string
-	ViewDataSource func(Resource, User, Field, interface{}) interface{}
+	ViewDataSource func(Resource, User, field, interface{}) interface{}
 
 	DBFieldDescription string
 
 	FormHideLabel  bool
 	FormTemplate   string
-	FormDataSource func(Field, User) interface{}
+	FormDataSource func(field, User) interface{}
 	FormStringer   func(interface{}) string
 
-	ListCellDataSource func(Resource, User, Field, interface{}) interface{}
+	ListCellDataSource func(Resource, User, field, interface{}) interface{}
 	ListCellTemplate   string
 
 	FilterLayoutTemplate   string
-	FilterLayoutDataSource func(Field, User) interface{}
+	FilterLayoutDataSource func(field, User) interface{}
 }
 
 //AddFieldType adds field type
@@ -105,7 +105,7 @@ func (app *App) initDefaultFieldTypes() {
 		ViewDataSource:   getRelationViewData,
 
 		FormTemplate: "admin_item_relation",
-		FormDataSource: func(f Field, u User) interface{} {
+		FormDataSource: func(f field, u User) interface{} {
 			if f.Tags["prago-relation"] != "" {
 				return columnName(f.Tags["prago-relation"])
 			}
@@ -125,7 +125,7 @@ func (app *App) initDefaultFieldTypes() {
 	})
 }
 
-func boolFilterLayoutDataSource(field Field, user User) interface{} {
+func boolFilterLayoutDataSource(field field, user User) interface{} {
 	return [][2]string{
 		{"", ""},
 		{"true", messages.Get(user.Locale, "yes")},
@@ -133,16 +133,16 @@ func boolFilterLayoutDataSource(field Field, user User) interface{} {
 	}
 }
 
-func textListDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
+func textListDataSource(resource Resource, user User, f field, value interface{}) interface{} {
 	return utils.Crop(value.(string), 100)
 }
 
-func createFilesEditDataSource(mimeTypes string) func(f Field, u User) interface{} {
-	return func(f Field, u User) interface{} {
+func createFilesEditDataSource(mimeTypes string) func(f field, u User) interface{} {
+	return func(f field, u User) interface{} {
 		return mimeTypes
 	}
 }
 
-func markdownListDataSource(resource Resource, user User, f Field, value interface{}) interface{} {
+func markdownListDataSource(resource Resource, user User, f field, value interface{}) interface{} {
 	return utils.CropMarkdown(value.(string), 100)
 }

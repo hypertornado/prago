@@ -127,8 +127,7 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 		initFunction(app)
 	}
 
-	app.initResources()
-	app.initAPIs()
+	app.bindAPIs()
 	app.bindAllActions()
 	app.initAdminNotFoundAction()
 	app.initSysadminPermissions()

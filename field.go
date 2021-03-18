@@ -8,8 +8,7 @@ import (
 	"time"
 )
 
-//Field of resource
-type Field struct {
+type field struct {
 	Name       string
 	ColumnName string
 	HumanName  func(string) string
@@ -24,7 +23,7 @@ type Field struct {
 }
 
 //GetRelatedResourceName gets related resource name
-func (field Field) GetRelatedResourceName() string {
+func (field field) GetRelatedResourceName() string {
 	relatedTag := field.Tags["prago-relation"]
 	if relatedTag != "" {
 		return strings.ToLower(relatedTag)
@@ -32,8 +31,8 @@ func (field Field) GetRelatedResourceName() string {
 	return field.ColumnName
 }
 
-func newField(f reflect.StructField, order int, fieldTypes map[string]FieldType) *Field {
-	ret := &Field{
+func newField(f reflect.StructField, order int, fieldTypes map[string]FieldType) *field {
+	ret := &field{
 		Name:       f.Name,
 		ColumnName: columnName(f.Name),
 		HumanName:  Unlocalized(f.Name),
@@ -144,7 +143,7 @@ func getDefaultFormTemplate(t reflect.Type) string {
 	panic("unknown default form for " + t.String())
 }
 
-func (field *Field) initFieldType(fieldTypes map[string]FieldType) {
+func (field *field) initFieldType(fieldTypes map[string]FieldType) {
 	fieldTypeName := field.Tags["prago-type"]
 
 	ret, found := fieldTypes[fieldTypeName]
@@ -181,7 +180,7 @@ func (field *Field) initFieldType(fieldTypes map[string]FieldType) {
 	field.fieldType = ret
 }
 
-func (field Field) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {
+func (field field) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {
 	var fieldDescription string
 
 	t, found := fieldTypes[field.Tags["prago-type"]]
@@ -226,7 +225,7 @@ func (field Field) fieldDescriptionMysql(fieldTypes map[string]FieldType) string
 	return fmt.Sprintf("%s %s %s", field.ColumnName, fieldDescription, additional)
 }
 
-func (field Field) shouldShow() (show bool) {
+func (field field) shouldShow() (show bool) {
 	if field.Name == "Name" {
 		show = true
 	}
@@ -240,7 +239,7 @@ func (field Field) shouldShow() (show bool) {
 	return
 }
 
-func (field Field) getRelatedResource(app App) *Resource {
+func (field field) getRelatedResource(app App) *Resource {
 	if field.Tags["prago-type"] != "relation" {
 		return nil
 	}

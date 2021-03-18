@@ -33,8 +33,8 @@ type Resource struct {
 
 	previewURL func(interface{}) string
 
-	fieldArrays []*Field
-	fieldMap    map[string]*Field
+	fieldArrays []*field
+	fieldMap    map[string]*field
 	fieldTypes  map[string]FieldType
 
 	orderFieldName  string
@@ -42,7 +42,7 @@ type Resource struct {
 }
 
 //Resource creates new resource based on item
-func (app *App) Resource(item interface{} /*, initFunction func(*Resource)*/) *Resource {
+func (app *App) Resource(item interface{}) *Resource {
 	typ := reflect.TypeOf(item)
 
 	if typ.Kind() != reflect.Struct {
@@ -66,7 +66,7 @@ func (app *App) Resource(item interface{} /*, initFunction func(*Resource)*/) *R
 
 		activityLog: true,
 
-		fieldMap:   make(map[string]*Field),
+		fieldMap:   make(map[string]*field),
 		fieldTypes: app.fieldTypes,
 	}
 
@@ -92,6 +92,8 @@ func (app *App) Resource(item interface{} /*, initFunction func(*Resource)*/) *R
 
 	app.resourceMap[ret.typ] = ret
 	app.resourceNameMap[ret.id] = ret
+
+	app.initResource(ret)
 
 	/*if initFunction != nil {
 		initFunction(ret)
@@ -153,13 +155,6 @@ func (resource *Resource) PermissionExport(permission Permission) *Resource {
 
 func (app *App) getResourceByName(name string) *Resource {
 	return app.resourceNameMap[columnName(name)]
-}
-
-func (app *App) initResources() {
-	for _, v := range app.resources {
-		app.initResource(v)
-	}
-
 }
 
 func (app *App) initResource(resource *Resource) {

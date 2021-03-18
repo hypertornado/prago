@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -33,37 +32,6 @@ func bindImageAPI(app *App) {
 			panic(err)
 		}
 		request.Redirect(app.getAdminURL(fmt.Sprintf("file/%d", image.ID)))
-	})
-
-	app.adminController.post(app.getAdminURL("_api/order/:resourceName"), func(request Request) {
-		resource := app.getResourceByName(request.Params().Get("resourceName"))
-		user := request.getUser()
-
-		if !app.authorize(user, resource.canEdit) {
-			panic("access denied")
-		}
-
-		if resource.orderFieldName == "" {
-			panic("can't order")
-		}
-
-		decoder := json.NewDecoder(request.Request().Body)
-		var t = map[string][]int{}
-		must(decoder.Decode(&t))
-
-		order, ok := t["order"]
-		if !ok {
-			panic("wrong format")
-		}
-
-		for i, id := range order {
-			var item interface{}
-			resource.newItem(&item)
-			must(resource.app.Query().WhereIs("id", int64(id)).Get(item))
-			must(resource.setOrderPosition(item, int64(i)))
-			must(resource.app.Save(item))
-		}
-		request.RenderJSON(true)
 	})
 
 	app.adminController.get(app.getAdminURL("_api/image/thumb/:id"), func(request Request) {

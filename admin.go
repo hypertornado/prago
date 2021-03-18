@@ -27,11 +27,8 @@ func (app *App) initAdminActions() {
 	app.initSessions()
 
 	googleAPIKey := app.ConfigurationGetStringWithFallback("google", "")
-	app.adminController.addBeforeAction(func(request Request) {
-		request.SetData("google", googleAPIKey)
-	})
 
-	app.adminController.addBeforeAction(func(request Request) {
+	app.adminController.addAroundAction(func(request Request, next func()) {
 		session := request.GetData("session").(*sessions.Session)
 		userID, ok := session.Values["user_id"].(int64)
 
@@ -68,7 +65,12 @@ func (app *App) initAdminActions() {
 		}
 
 		request.SetData("main_menu", app.getMainMenu(request))
+
+		request.SetData("google", googleAPIKey)
+
+		next()
 	})
+
 	app.Action("markdown").Name(Unlocalized("Nápověda markdown")).hiddenMenu().Template("admin_help_markdown").IsWide()
 }
 
