@@ -14,7 +14,7 @@ func (app *App) initBackupCRON() {
 		taskManager.
 		defaultGroup.
 		Task("backup_db").
-		SetHandler(
+		Handler(
 			func(tr *TaskActivity) error {
 				err := backupApp(app)
 				if err != nil {
@@ -23,7 +23,7 @@ func (app *App) initBackupCRON() {
 				return nil
 			}).RepeatEvery(24 * time.Hour)
 
-	app.taskManager.defaultGroup.Task("remove_old_backups").SetHandler(
+	app.taskManager.defaultGroup.Task("remove_old_backups").Handler(
 		func(tr *TaskActivity) error {
 			tr.SetStatus(0, fmt.Sprintf("Removing old backups"))
 			deadline := time.Now().AddDate(0, 0, -7)

@@ -295,7 +295,7 @@ class ListFilterRelations {
     loadPreview(value) {
         var request = new XMLHttpRequest();
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        request.open("GET", adminPrefix + "/api/" + this.relatedResourceName + "/preview-relation/" + value, true);
+        request.open("GET", adminPrefix + "/" + this.relatedResourceName + "/api/preview-relation/" + value, true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
                 this.renderPreview(JSON.parse(request.response));
@@ -334,7 +334,7 @@ class ListFilterRelations {
     getSuggestions(q) {
         var request = new XMLHttpRequest();
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        request.open("GET", adminPrefix + "/_api/search/" + this.relatedResourceName + "?q=" + encodeURIComponent(q), true);
+        request.open("GET", adminPrefix + "/" + this.relatedResourceName + "/api/searchresource" + "?q=" + encodeURIComponent(q), true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
                 this.renderSuggestions(JSON.parse(request.response));
@@ -1108,7 +1108,7 @@ class RelationPicker {
     getData() {
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
         var request = new XMLHttpRequest();
-        request.open("GET", adminPrefix + "/api/" + this.relationName + "/preview-relation/" + this.input.value, true);
+        request.open("GET", adminPrefix + "/" + this.relationName + "/api/preview-relation/" + this.input.value, true);
         request.addEventListener("load", () => {
             this.progress.classList.add("hidden");
             if (request.status == 200) {
@@ -1140,7 +1140,7 @@ class RelationPicker {
     getSuggestions(q) {
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
         var request = new XMLHttpRequest();
-        request.open("GET", adminPrefix + "/_api/search/" + this.relationName + "?q=" + encodeURIComponent(q), true);
+        request.open("GET", adminPrefix + "/" + this.relationName + "/api/searchresource" + "?q=" + encodeURIComponent(q), true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
                 if (q != this.pickerInput.value) {

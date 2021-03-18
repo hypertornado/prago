@@ -13,7 +13,7 @@ var defaultPort = 8585
 func addServerCommand(app *App) {
 	var port int
 	var developmentMode bool
-	app.AddCommand("server").
+	app.addCommand("server").
 		flag(
 			newCommandFlag("port", "port of server").Alias("p").Int(&port),
 		).
@@ -50,11 +50,10 @@ const (
 )
 
 type commands struct {
-	commands []*Command
+	commands []*command
 }
 
-//Command represents command-line command
-type Command struct {
+type command struct {
 	actions        []string
 	description    string
 	flags          map[string]*commandFlag
@@ -72,8 +71,8 @@ type commandFlag struct {
 }
 
 //AddCommand adds command to app
-func (app *App) AddCommand(commands ...string) *Command {
-	ret := &Command{
+func (app *App) addCommand(commands ...string) *command {
+	ret := &command{
 		actions: commands,
 		flags:   map[string]*commandFlag{},
 	}
@@ -82,19 +81,19 @@ func (app *App) AddCommand(commands ...string) *Command {
 }
 
 //Callback sets command callback
-func (c *Command) Callback(callback func()) *Command {
+func (c *command) Callback(callback func()) *command {
 	c.callback = callback
 	return c
 }
 
 //Description sets description to command
-func (c *Command) Description(description string) *Command {
+func (c *command) Description(description string) *command {
 	c.description = description
 	return c
 }
 
 //Flag adds flag to command
-func (c *Command) flag(flag *commandFlag) *Command {
+func (c *command) flag(flag *commandFlag) *command {
 	if flag.typ == noType {
 		panic("no type of flag set")
 	}
@@ -106,7 +105,7 @@ func (c *Command) flag(flag *commandFlag) *Command {
 }
 
 //StringArgument sets command argument
-func (c *Command) StringArgument(arg *string) *Command {
+func (c *command) StringArgument(arg *string) *command {
 	c.stringArgument = arg
 	return c
 }
@@ -155,7 +154,7 @@ func (f *commandFlag) Bool(value *bool) *commandFlag {
 	return f
 }
 
-func (c *Command) match(fields []string) (bool, error) {
+func (c *command) match(fields []string) (bool, error) {
 	if len(c.actions) > len(fields) {
 		return false, nil
 	}

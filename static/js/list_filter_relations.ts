@@ -50,8 +50,7 @@ class ListFilterRelations {
   loadPreview(value: string) {
     var request = new XMLHttpRequest();
     var adminPrefix = document.body.getAttribute("data-admin-prefix");
-    //request.open("GET", adminPrefix + "/api/preview-relation/" + this.relatedResourceName + "/" + value, true);
-    request.open("GET", adminPrefix + "/api/" + this.relatedResourceName + "/preview-relation/" + value, true);
+    request.open("GET", adminPrefix + "/" + this.relatedResourceName + "/api/preview-relation/" + value, true);
 
     request.addEventListener("load", () => {
       if (request.status == 200) {
@@ -95,7 +94,7 @@ class ListFilterRelations {
   getSuggestions(q: string) {
     var request = new XMLHttpRequest();
     var adminPrefix = document.body.getAttribute("data-admin-prefix");
-    request.open("GET", adminPrefix + "/_api/search/" + this.relatedResourceName + "?q=" + encodeURIComponent(q), true);
+    request.open("GET", adminPrefix + "/" + this.relatedResourceName + "/api/searchresource" + "?q=" + encodeURIComponent(q), true);
 
     request.addEventListener("load", () => {
       if (request.status == 200) {

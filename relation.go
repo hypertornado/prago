@@ -99,7 +99,7 @@ func getRelationData(resource Resource, user User, f Field, value interface{}) (
 		return nil, fmt.Errorf("resource not found: %s", f.Name)
 	}
 
-	if !resource.app.Authorize(user, r2.canView) {
+	if !resource.app.authorize(user, r2.canView) {
 		return nil, fmt.Errorf("user is not authorized to view this item")
 	}
 

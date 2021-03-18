@@ -17,7 +17,7 @@ func (app *App) initBuild() {
 	var version = app.version
 	var appName = app.codeName
 
-	app.AddCommand("build").Callback(func() {
+	app.addCommand("build").Callback(func() {
 		build(appName, version)
 	})
 
@@ -27,19 +27,19 @@ func (app *App) initBuild() {
 		return
 	}
 
-	app.AddCommand("backup").Callback(func() {
+	app.addCommand("backup").Callback(func() {
 		must(backupApp(app))
 	})
 
-	app.AddCommand("syncbackups").Callback(func() {
+	app.addCommand("syncbackups").Callback(func() {
 		must(syncBackups(appName, ssh))
 	})
 
-	app.AddCommand("party").Callback(func() {
+	app.addCommand("party").Callback(func() {
 		must(party(appName, version, ssh))
 	})
 
-	app.AddCommand("setup").Callback(func() {
+	app.addCommand("setup").Callback(func() {
 		setup.StartSetup(app.codeName)
 	})
 

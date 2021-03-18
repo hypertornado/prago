@@ -38,7 +38,7 @@ func (app *App) initTaskManager() {
 	app.Action("_tasks").Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(
 		func(request Request) interface{} {
 			var ret = map[string]interface{}{}
-			user := request.GetUser()
+			user := request.getUser()
 			ret["currentuser"] = user
 			ret["csrf_token"] = app.generateCSRFToken(&user)
 			ret["tasks"] = app.taskManager.getTasks(user)
@@ -49,14 +49,14 @@ func (app *App) initTaskManager() {
 	)
 
 	app.adminController.get(app.getAdminURL("_tasks/running"), func(request Request) {
-		request.SetData("taskmonitor", app.taskManager.getTaskMonitor(request.GetUser()))
+		request.SetData("taskmonitor", app.taskManager.getTaskMonitor(request.getUser()))
 		request.RenderView("taskmonitor")
 	})
 
 	app.adminController.post(app.getAdminURL("_tasks/runtask"), func(request Request) {
 		id := request.Request().FormValue("id")
 		csrf := request.Request().FormValue("csrf")
-		user := request.GetUser()
+		user := request.getUser()
 
 		expectedToken := request.GetData("_csrfToken").(string)
 		if expectedToken != csrf {
@@ -70,7 +70,7 @@ func (app *App) initTaskManager() {
 	app.adminController.get(app.getAdminURL("_tasks/stoptask"), func(request Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
-		user := request.GetUser()
+		user := request.getUser()
 
 		expectedToken := request.GetData("_csrfToken").(string)
 		if expectedToken != csrf {
@@ -84,7 +84,7 @@ func (app *App) initTaskManager() {
 	app.adminController.get(app.getAdminURL("_tasks/deletetask"), func(request Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
-		user := request.GetUser()
+		user := request.getUser()
 
 		expectedToken := request.GetData("_csrfToken").(string)
 		if expectedToken != csrf {
@@ -97,11 +97,11 @@ func (app *App) initTaskManager() {
 
 	grp := app.TaskGroup(Unlocalized("example"))
 
-	grp.Task("example_fail").SetHandler(func(t *TaskActivity) error {
+	grp.Task("example_fail").Handler(func(t *TaskActivity) error {
 		return fmt.Errorf("example error")
 	})
 
-	grp.Task("example").SetHandler(func(t *TaskActivity) error {
+	grp.Task("example").Handler(func(t *TaskActivity) error {
 		t.IsStopped()
 		var progress float64
 		for {
@@ -163,7 +163,7 @@ func (tm *taskManager) startTask(id string, user User) error {
 		return fmt.Errorf("Can't find task %s", id)
 	}
 
-	if tm.app.Authorize(user, task.permission) {
+	if tm.app.authorize(user, task.permission) {
 		tm.run(task, &user, "button")
 		return nil
 	}
@@ -216,7 +216,7 @@ func (tm *taskManager) getTasks(user User) (ret []taskViewGroup) {
 
 	var tasks []*Task
 	for _, v := range tm.tasksMap {
-		if tm.app.Authorize(user, v.permission) {
+		if tm.app.authorize(user, v.permission) {
 			tasks = append(tasks, v)
 		}
 	}
@@ -285,21 +285,21 @@ func (tg *TaskGroup) Task(id string) *Task {
 	tg.tasks = append(tg.tasks, task)
 	tg.manager.tasksMap[task.id] = task
 
-	tg.manager.app.AddCommand("task", id).Callback(func() {
+	tg.manager.app.addCommand("task", id).Callback(func() {
 		tg.manager.run(task, nil, "command")
 	})
 
 	return task
 }
 
-//SetHandler sets handler to task
-func (t *Task) SetHandler(fn func(*TaskActivity) error) *Task {
+//Handler sets handler to task
+func (t *Task) Handler(fn func(*TaskActivity) error) *Task {
 	t.handler = fn
 	return t
 }
 
 //SetPermission set permission to task
-func (t *Task) SetPermission(permission string) *Task {
+func (t *Task) Permission(permission string) *Task {
 	t.permission = Permission(permission)
 	return t
 }

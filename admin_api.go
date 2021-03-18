@@ -4,12 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/golang-commonmark/markdown"
-	"github.com/hypertornado/prago/utils"
 )
 
 func (app *App) initAPI() {
@@ -24,7 +21,6 @@ func (app *App) initAPI() {
 		},
 	)
 
-	bindRelationAPI(app)
 	bindRelationListAPI(app)
 	bindImageAPI(app)
 }
@@ -41,9 +37,9 @@ func bindImageAPI(app *App) {
 
 	app.adminController.post(app.getAdminURL("_api/order/:resourceName"), func(request Request) {
 		resource := app.getResourceByName(request.Params().Get("resourceName"))
-		user := request.GetUser()
+		user := request.getUser()
 
-		if !app.Authorize(user, resource.canEdit) {
+		if !app.authorize(user, resource.canEdit) {
 			panic("access denied")
 		}
 
@@ -122,7 +118,7 @@ func bindImageAPI(app *App) {
 		files := []*File{}
 
 		for _, v := range multipartFiles {
-			user := request.GetUser()
+			user := request.getUser()
 
 			file, err := app.UploadFile(v, &user, description)
 			if err != nil {
@@ -132,78 +128,6 @@ func bindImageAPI(app *App) {
 		}
 
 		writeFileResponse(request, files)
-	})
-}
-
-func bindRelationAPI(app *App) {
-
-	app.adminController.get(app.getAdminURL("_api/search/:resourceName"), func(request Request) {
-		user := request.GetUser()
-		resourceName := request.Params().Get("resourceName")
-		q := request.Params().Get("q")
-
-		usedIDs := map[int64]bool{}
-
-		resource, found := app.resourceNameMap[resourceName]
-		if !found {
-			render404(request)
-			return
-		}
-
-		if !app.Authorize(user, resource.canView) {
-			render403(request)
-			return
-		}
-
-		ret := []viewRelationData{}
-
-		id, err := strconv.Atoi(q)
-		if err == nil {
-			var item interface{}
-			resource.newItem(&item)
-			err := app.Query().WhereIs("id", id).Get(item)
-			if err == nil {
-				relationItem := resource.itemToRelationData(item, user, nil)
-				if relationItem != nil {
-					//relationItem.Description = utils.Crop(relationItem.Description, 200)
-					usedIDs[relationItem.ID] = true
-					ret = append(ret, *relationItem)
-				}
-			}
-		}
-
-		filter := "%" + q + "%"
-		for _, v := range []string{"name", "description"} {
-			field := resource.fieldMap[v]
-			if field == nil {
-				continue
-			}
-			var items interface{}
-			resource.newArrayOfItems(&items)
-			err := app.Query().Limit(5).Where(v+" LIKE ?", filter).Get(items)
-			if err == nil {
-				itemsVal := reflect.ValueOf(items).Elem()
-				for i := 0; i < itemsVal.Len(); i++ {
-					var item interface{}
-					item = itemsVal.Index(i).Interface()
-					viewItem := resource.itemToRelationData(item, user, nil)
-					if viewItem != nil && usedIDs[viewItem.ID] == false {
-						usedIDs[viewItem.ID] = true
-						ret = append(ret, *viewItem)
-					}
-				}
-			}
-		}
-
-		if len(ret) > 5 {
-			ret = ret[0:5]
-		}
-
-		for k := range ret {
-			ret[k].Description = utils.Crop(ret[k].Description, 100)
-		}
-
-		request.RenderJSON(ret)
 	})
 }
 

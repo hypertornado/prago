@@ -31,7 +31,7 @@ func (app *App) initDevelopment() {
 	app.development = dev
 
 	var port = defaultPort
-	app.AddCommand("dev").
+	app.addCommand("dev").
 		Description("Development command").
 		flag(
 			newCommandFlag("port", "server port").

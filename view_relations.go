@@ -18,7 +18,7 @@ type viewRelation struct {
 func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, user User) (ret []view) {
 
 	for _, v := range resource.autoRelations {
-		if !resource.app.Authorize(user, v.resource.canView) {
+		if !resource.app.authorize(user, v.resource.canView) {
 			continue
 		}
 
@@ -42,7 +42,7 @@ func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, use
 			URL:  v.listURL(int64(id)),
 		})
 
-		if resource.app.Authorize(user, v.resource.canEdit) {
+		if resource.app.authorize(user, v.resource.canEdit) {
 			vi.Navigation = append(vi.Navigation, tab{
 				Name: messages.GetNameFunction("admin_new")(user.Locale),
 				URL:  v.addURL(int64(id)),
@@ -74,7 +74,7 @@ type relationListRequest struct {
 func generateRelationListAPIHandler(app *App) func(Request) {
 	return func(request Request) {
 
-		user := request.GetUser()
+		user := request.getUser()
 
 		defer request.Request().Body.Close()
 
@@ -90,12 +90,12 @@ func generateRelationListAPIHandler(app *App) func(Request) {
 		}
 
 		sourceResource := app.getResourceByName(listRequest.SourceResource)
-		if !app.Authorize(user, sourceResource.canView) {
+		if !app.authorize(user, sourceResource.canView) {
 			panic("cant authorize source resource")
 		}
 
 		targetResource := app.getResourceByName(listRequest.TargetResource)
-		if !app.Authorize(user, targetResource.canView) {
+		if !app.authorize(user, targetResource.canView) {
 			panic("cant authorize target resource")
 		}
 

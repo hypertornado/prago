@@ -43,7 +43,7 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 	}
 
 	var importPath string
-	app.AddCommand("newsletter", "import").StringArgument(&importPath).Callback(func() {
+	app.addCommand("newsletter", "import").StringArgument(&importPath).Callback(func() {
 		file, err := os.Open(importPath)
 		must(err)
 

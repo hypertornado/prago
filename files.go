@@ -59,7 +59,6 @@ type File struct {
 	UpdatedAt   time.Time
 }
 
-//UploadFile uploads files to app
 func (app *App) UploadFile(fileHeader *multipart.FileHeader, user *User, description string) (*File, error) {
 	fileName := utils.PrettyFilename(fileHeader.Filename)
 	file := File{}
@@ -141,7 +140,7 @@ func initFilesResource(resource *Resource) {
 	resource.fieldMap["width"].HumanName = messages.GetNameFunction("width")
 	resource.fieldMap["height"].HumanName = messages.GetNameFunction("height")
 
-	app.AddCommand("files", "metadata").
+	app.addCommand("files", "metadata").
 		Callback(func() {
 			var files []*File
 			must(app.Query().Get(&files))
@@ -220,7 +219,7 @@ func initFilesResource(resource *Resource) {
 			panic("must have 1 file selected")
 		}
 
-		user := request.GetUser()
+		user := request.getUser()
 
 		_, err := resource.app.UploadFile(multipartFiles[0], &user, request.Params().Get("Description"))
 		must(err)

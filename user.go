@@ -32,7 +32,7 @@ type User struct {
 }
 
 //GetUser returns currently logged in user, it panics when there is no user
-func (request Request) GetUser() User {
+func (request Request) getUser() User {
 	u := request.GetData("currentuser").(*User)
 	if u == nil {
 		panic("no user found")
@@ -41,7 +41,7 @@ func (request Request) GetUser() User {
 }
 
 func basicUserAuthorize(request Request) {
-	user := request.GetUser()
+	user := request.getUser()
 	if !user.IsAdmin {
 		panic("can't authorize, user is not admin")
 	}

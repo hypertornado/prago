@@ -352,7 +352,7 @@ func (app *App) initSearchInner() {
 				}
 			}
 
-			result, hits, err := adminSearch.Search(q, request.GetUser().getRole(), page-1)
+			result, hits, err := adminSearch.Search(q, request.getUser().getRole(), page-1)
 			must(err)
 
 			var pages = int(hits) / searchPageSize

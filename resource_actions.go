@@ -18,7 +18,7 @@ func initResourceActions(resource *Resource) {
 	//list action
 	resource.Action("").Permission(resource.canView).Name(resource.name).IsWide().Template("admin_list").DataSource(
 		func(request Request) interface{} {
-			listData, err := resource.getListHeader(request.GetUser())
+			listData, err := resource.getListHeader(request.getUser())
 			must(err)
 			return listData
 		},
@@ -26,7 +26,7 @@ func initResourceActions(resource *Resource) {
 
 	resource.Action("new").Permission(resource.canCreate).Template("admin_form").Name(messages.GetNameFunction("admin_new")).DataSource(
 		func(request Request) interface{} {
-			user := request.GetUser()
+			user := request.getUser()
 			var item interface{}
 			resource.newItem(&item)
 
@@ -44,7 +44,7 @@ func initResourceActions(resource *Resource) {
 	)
 	resource.Action("").Method("POST").Permission(resource.canCreate).Handler(
 		func(request Request) {
-			user := request.GetUser()
+			user := request.getUser()
 			validateCSRF(request)
 			var item interface{}
 			resource.newItem(&item)
@@ -92,13 +92,13 @@ func initResourceActions(resource *Resource) {
 				panic(err)
 			}
 
-			return resource.getViews(id, item, request.GetUser())
+			return resource.getViews(id, item, request.getUser())
 		},
 	)
 
 	resource.ItemAction("edit").Name(messages.GetNameFunction("admin_edit")).Permission(resource.canEdit).Template("admin_form").DataSource(
 		func(request Request) interface{} {
-			user := request.GetUser()
+			user := request.getUser()
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
@@ -120,7 +120,7 @@ func initResourceActions(resource *Resource) {
 
 	resource.ItemAction("edit").Method("POST").Permission(resource.canEdit).Handler(
 		func(request Request) {
-			user := request.GetUser()
+			user := request.getUser()
 			validateCSRF(request)
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
@@ -169,7 +169,7 @@ func initResourceActions(resource *Resource) {
 
 	resource.ItemAction("delete").Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete")).Template("admin_delete").DataSource(
 		func(request Request) interface{} {
-			user := request.GetUser()
+			user := request.getUser()
 			ret := map[string]interface{}{}
 			form := newForm()
 			form.Method = "POST"
@@ -188,7 +188,7 @@ func initResourceActions(resource *Resource) {
 
 	resource.ItemAction("delete").Permission(resource.canDelete).Method("POST").Handler(
 		func(request Request) {
-			user := request.GetUser()
+			user := request.getUser()
 			validateCSRF(request)
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)

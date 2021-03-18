@@ -22,14 +22,14 @@ func (app *App) initUserSettings() {
 
 	app.Action("settings").Name(messages.GetNameFunction("admin_settings")).userMenu().Template("admin_form").DataSource(
 		func(request Request) interface{} {
-			return settingsForm(request.GetUser()).AddCSRFToken(request)
+			return settingsForm(request.getUser()).AddCSRFToken(request)
 		},
 	)
 
 	app.Action("settings").Method("POST").Handler(
 		func(request Request) {
 			validateCSRF(request)
-			user := request.GetUser()
+			user := request.getUser()
 			form := settingsForm(user).AddCSRFToken(request)
 			if form.Validate() {
 				userResource, err := app.getResourceByItem(&user)
@@ -46,7 +46,7 @@ func (app *App) initUserSettings() {
 		})
 
 	changePasswordForm := func(request Request) *form {
-		user := request.GetUser()
+		user := request.getUser()
 		locale := getLocale(request)
 		oldValidator := newValidator(func(field *formItem) bool {
 			if !user.isPassword(field.Value) {
@@ -81,7 +81,7 @@ func (app *App) initUserSettings() {
 		form.Validate()
 		if form.Valid {
 			password := request.Params().Get("newpassword")
-			user := request.GetUser()
+			user := request.getUser()
 			must(user.newPassword(password))
 			must(app.Save(&user))
 			request.AddFlashMessage(messages.Get(getLocale(request), "admin_password_changed"))

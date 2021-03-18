@@ -24,6 +24,7 @@ type App struct {
 	logger          *log.Logger
 	templates       *templates
 	cache           *cachelib.Cache
+	sessionsManager *sessionsManager
 
 	logo            string
 	name            func(string) string

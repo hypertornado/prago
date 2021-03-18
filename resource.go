@@ -164,8 +164,8 @@ func (app *App) initResources() {
 
 func (app *App) initResource(resource *Resource) {
 	resource.resourceController.addAroundAction(func(request Request, next func()) {
-		user := request.GetUser()
-		if !app.Authorize(user, resource.canView) {
+		user := request.getUser()
+		if !app.authorize(user, resource.canView) {
 			render403(request)
 		} else {
 			next()

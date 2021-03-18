@@ -21,12 +21,12 @@ type homeData struct {
 }
 
 func (app *App) getHomeData(request Request) interface{} {
-	user := request.GetUser()
+	user := request.getUser()
 
 	ret := []homeData{}
 
 	for _, resource := range app.getSortedResources(user.Locale) {
-		if app.Authorize(user, resource.canView) {
+		if app.authorize(user, resource.canView) {
 			item := homeData{
 				Name: resource.name(user.Locale),
 				URL:  resource.getURL(""),

@@ -97,8 +97,8 @@ func (api *API) initAPI() error {
 	}
 
 	var fn = func(request Request) {
-		user := request.GetUser()
-		if !api.app.Authorize(user, api.permission) {
+		user := request.getUser()
+		if !api.app.authorize(user, api.permission) {
 			renderAPINotAuthorized(request)
 			return
 		}

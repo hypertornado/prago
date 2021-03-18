@@ -11,7 +11,7 @@ func initUserLogin(resource *Resource) {
 
 	resource.ItemAction("loginas").Name(Unlocalized("Přihlásit se jako")).Permission(permissionSysadmin).Handler(
 		func(request Request) {
-			u := request.GetUser()
+			u := request.getUser()
 			if !u.IsSysadmin {
 				panic("access denied")
 			}

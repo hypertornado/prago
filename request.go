@@ -18,6 +18,7 @@ type Request struct {
 	r          *http.Request
 	data       map[string]interface{}
 	app        App
+	session    *session
 }
 
 //Request returns underlying http.Request
@@ -38,8 +39,8 @@ func (request Request) SetData(k string, v interface{}) { request.data[k] = v }
 func (request Request) GetData(k string) interface{} { return request.data[k] }
 
 //RenderView with HTTP 200 code
-func (request Request) RenderView(viewName string) {
-	request.RenderViewWithCode(viewName, 200)
+func (request Request) RenderView(templateName string) {
+	request.RenderViewWithCode(templateName, 200)
 }
 
 //AddFlashMessage adds flash message to request
@@ -50,13 +51,13 @@ func (request Request) AddFlashMessage(message string) {
 }
 
 //RenderViewWithCode renders view with HTTP code
-func (request Request) RenderViewWithCode(viewName string, statusCode int) {
+func (request Request) RenderViewWithCode(templateName string, statusCode int) {
 	request.Response().Header().Add("Content-Type", "text/html; charset=utf-8")
 	request.Response().WriteHeader(statusCode)
 	must(
 		request.app.templates.templates.ExecuteTemplate(
 			request.Response(),
-			viewName,
+			templateName,
 			request.data,
 		),
 	)

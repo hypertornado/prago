@@ -164,7 +164,7 @@ func (action *Action) hiddenMenu() *Action {
 
 func (action *Action) getnavigation(request Request) navigation {
 	if action.resource != nil {
-		user := request.GetUser()
+		user := request.getUser()
 		code := action.url
 		if action.isItemAction {
 			var item interface{}
@@ -208,8 +208,8 @@ func (action *Action) bindAction() error {
 	}
 
 	var fn = func(request Request) {
-		user := request.GetUser()
-		if !app.Authorize(user, action.permission) {
+		user := request.getUser()
+		if !app.authorize(user, action.permission) {
 			render403(request)
 			return
 		}
@@ -284,7 +284,7 @@ func (app *App) getListItemActions(user User, item interface{}, id int64, resour
 		}
 	}
 
-	if app.Authorize(user, resource.canEdit) && resource.orderColumnName != "" {
+	if app.authorize(user, resource.canEdit) && resource.orderColumnName != "" {
 		ret.ShowOrderButton = true
 	}
 

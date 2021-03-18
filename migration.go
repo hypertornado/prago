@@ -7,7 +7,7 @@ import (
 )
 
 func (app *App) initMigrationCommand() {
-	app.AddCommand("admin", "migrate").Description("migrate database").
+	app.addCommand("admin", "migrate").Description("migrate database").
 		Callback(func() {
 			app.Log().Println("Migrating database")
 			err := app.migrate(true)

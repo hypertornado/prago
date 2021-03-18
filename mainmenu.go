@@ -40,7 +40,7 @@ func (menu mainMenu) GetTitle() string {
 }
 
 func (app *App) getMainMenu(request Request) (ret mainMenu) {
-	user := request.GetUser()
+	user := request.getUser()
 
 	adminSectionName := app.name(user.Locale)
 	if app.logo != "" {
@@ -80,7 +80,7 @@ func (app *App) getMainMenu(request Request) (ret mainMenu) {
 		Name: messages.Get(user.Locale, "admin_tables"),
 	}
 	for _, resource := range app.getSortedResources(user.Locale) {
-		if app.Authorize(user, resource.canView) {
+		if app.authorize(user, resource.canView) {
 			resourceURL := resource.getURL("")
 			var selected bool
 			if request.Request().URL.Path == resourceURL {

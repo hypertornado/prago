@@ -76,7 +76,7 @@ func (app *App) AddRole(role string, permissions []string) {
 }
 
 //Authorize user for task
-func (app App) Authorize(user User, permission Permission) bool {
+func (app App) authorize(user User, permission Permission) bool {
 	if !user.IsAdmin {
 		return false
 	}

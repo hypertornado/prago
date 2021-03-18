@@ -128,11 +128,11 @@ func (app *App) DELETE(path string, action func(p Request), constraints ...func(
 }
 
 //AddBeforeAction adds action which is executed before main router action is called
-func (app *App) AddBeforeAction(fn func(p Request)) {
+func (app *App) BeforeAction(fn func(p Request)) {
 	app.appController.addBeforeAction(fn)
 }
 
 //AddAfterAction adds action which is executed after main router action is called
-func (app *App) AddAfterAction(fn func(p Request)) {
+func (app *App) AfterAction(fn func(p Request)) {
 	app.appController.addAfterAction(fn)
 }

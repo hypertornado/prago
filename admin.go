@@ -24,11 +24,7 @@ func (app *App) initAdminActions() {
 		request.SetData("css", app.css)
 	})
 
-	app.accessController.addAroundAction(
-		app.createSessionAroundAction(
-			app.ConfigurationGetString("random"),
-		),
-	)
+	app.initSessions()
 
 	googleAPIKey := app.ConfigurationGetStringWithFallback("google", "")
 	app.adminController.addBeforeAction(func(request Request) {
