@@ -14,19 +14,18 @@ import (
 func initResourceAPIs(resource *Resource) {
 	resource.API("list").Handler(
 		func(request *Request) {
-			user := request.getUser()
 			if request.Request().URL.Query().Get("_format") == "json" {
-				listDataJSON, err := resource.getListContentJSON(user, request.Request().URL.Query())
+				listDataJSON, err := resource.getListContentJSON(request.user, request.Request().URL.Query())
 				must(err)
 				request.RenderJSON(listDataJSON)
 				return
 			}
 			if request.Request().URL.Query().Get("_format") == "xlsx" {
-				if !resource.app.authorize(user, resource.canExport) {
+				if !resource.app.authorize(request.user, resource.canExport) {
 					render403(request)
 					return
 				}
-				listData, err := resource.getListContent(user, request.Request().URL.Query())
+				listData, err := resource.getListContent(request.user, request.Request().URL.Query())
 				must(err)
 
 				file := xlsx.NewFile()
@@ -65,8 +64,6 @@ func initResourceAPIs(resource *Resource) {
 
 	resource.API("preview-relation/:id").Handler(
 		func(request *Request) {
-			user := request.getUser()
-
 			var item interface{}
 			resource.newItem(&item)
 			err := resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(item)
@@ -79,7 +76,7 @@ func initResourceAPIs(resource *Resource) {
 			}
 
 			request.RenderJSON(
-				resource.itemToRelationData(item, user, nil),
+				resource.itemToRelationData(item, request.user, nil),
 			)
 		},
 	)
@@ -112,7 +109,6 @@ func initResourceAPIs(resource *Resource) {
 
 	resource.API("searchresource").Handler(
 		func(request *Request) {
-			user := request.getUser()
 			q := request.Params().Get("q")
 
 			usedIDs := map[int64]bool{}
@@ -125,7 +121,7 @@ func initResourceAPIs(resource *Resource) {
 				resource.newItem(&item)
 				err := resource.app.Query().WhereIs("id", id).Get(item)
 				if err == nil {
-					relationItem := resource.itemToRelationData(item, user, nil)
+					relationItem := resource.itemToRelationData(item, request.user, nil)
 					if relationItem != nil {
 						usedIDs[relationItem.ID] = true
 						ret = append(ret, *relationItem)
@@ -147,7 +143,7 @@ func initResourceAPIs(resource *Resource) {
 					for i := 0; i < itemsVal.Len(); i++ {
 						var item interface{}
 						item = itemsVal.Index(i).Interface()
-						viewItem := resource.itemToRelationData(item, user, nil)
+						viewItem := resource.itemToRelationData(item, request.user, nil)
 						if viewItem != nil && usedIDs[viewItem.ID] == false {
 							usedIDs[viewItem.ID] = true
 							ret = append(ret, *viewItem)

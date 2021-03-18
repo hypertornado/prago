@@ -38,9 +38,9 @@ func (app *App) initTaskManager() {
 	app.Action("_tasks").Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(
 		func(request *Request) interface{} {
 			var ret = map[string]interface{}{}
-			user := request.getUser()
-			ret["currentuser"] = user
-			ret["csrf_token"] = app.generateCSRFToken(&user)
+			user := request.user
+			ret["locale"] = user.Locale
+			ret["csrf_token"] = app.generateCSRFToken(user)
 			ret["tasks"] = app.taskManager.getTasks(user)
 			ret["taskmonitor"] = app.taskManager.getTaskMonitor(user)
 			ret["admin_title"] = messages.Get(user.Locale, "tasks")
@@ -49,49 +49,46 @@ func (app *App) initTaskManager() {
 	)
 
 	app.adminController.get(app.getAdminURL("_tasks/running"), func(request *Request) {
-		request.SetData("taskmonitor", app.taskManager.getTaskMonitor(request.getUser()))
+		request.SetData("taskmonitor", app.taskManager.getTaskMonitor(request.user))
 		request.RenderView("taskmonitor")
 	})
 
 	app.adminController.post(app.getAdminURL("_tasks/runtask"), func(request *Request) {
 		id := request.Request().FormValue("id")
 		csrf := request.Request().FormValue("csrf")
-		user := request.getUser()
 
 		expectedToken := request.GetData("_csrfToken").(string)
 		if expectedToken != csrf {
 			panic("wrong token")
 		}
 
-		must(app.taskManager.startTask(id, user))
+		must(app.taskManager.startTask(id, request.user))
 		request.Redirect(app.getAdminURL("_tasks"))
 	})
 
 	app.adminController.get(app.getAdminURL("_tasks/stoptask"), func(request *Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
-		user := request.getUser()
 
 		expectedToken := request.GetData("_csrfToken").(string)
 		if expectedToken != csrf {
 			panic("wrong token")
 		}
 
-		must(app.taskManager.stopTask(uuid, user))
+		must(app.taskManager.stopTask(uuid, request.user))
 		request.Redirect(app.getAdminURL("_tasks"))
 	})
 
 	app.adminController.get(app.getAdminURL("_tasks/deletetask"), func(request *Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
-		user := request.getUser()
 
 		expectedToken := request.GetData("_csrfToken").(string)
 		if expectedToken != csrf {
 			panic("wrong token")
 		}
 
-		must(app.taskManager.deleteTask(uuid, user))
+		must(app.taskManager.deleteTask(uuid, request.user))
 		request.Redirect(app.getAdminURL("_tasks"))
 	})
 
@@ -157,20 +154,20 @@ func (tm *taskManager) deleteActivity(id string) {
 	delete(tm.activities, id)
 }
 
-func (tm *taskManager) startTask(id string, user User) error {
+func (tm *taskManager) startTask(id string, user *User) error {
 	task, ok := tm.tasksMap[id]
 	if !ok {
 		return fmt.Errorf("Can't find task %s", id)
 	}
 
 	if tm.app.authorize(user, task.permission) {
-		tm.run(task, &user, "button")
+		tm.run(task, user, "button")
 		return nil
 	}
 	return fmt.Errorf("User is not authorized to run this task")
 }
 
-func (tm *taskManager) stopTask(uuid string, user User) error {
+func (tm *taskManager) stopTask(uuid string, user *User) error {
 	tm.activityMutex.Lock()
 	defer tm.activityMutex.Unlock()
 
@@ -182,7 +179,7 @@ func (tm *taskManager) stopTask(uuid string, user User) error {
 	return nil
 }
 
-func (tm *taskManager) deleteTask(uuid string, user User) error {
+func (tm *taskManager) deleteTask(uuid string, user *User) error {
 	tm.activityMutex.Lock()
 	defer tm.activityMutex.Unlock()
 
@@ -212,7 +209,7 @@ func (t *Task) taskView() taskView {
 	}
 }
 
-func (tm *taskManager) getTasks(user User) (ret []taskViewGroup) {
+func (tm *taskManager) getTasks(user *User) (ret []taskViewGroup) {
 
 	var tasks []*Task
 	for _, v := range tm.tasksMap {

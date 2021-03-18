@@ -2,7 +2,7 @@ package prago
 
 func (app *App) initUserSettings() {
 
-	settingsForm := func(user User) *form {
+	settingsForm := func(user *User) *form {
 		form := newForm()
 		form.Method = "POST"
 		form.Action = "settings"
@@ -20,23 +20,23 @@ func (app *App) initUserSettings() {
 
 	app.Action("settings").Name(messages.GetNameFunction("admin_settings")).userMenu().Template("admin_form").DataSource(
 		func(request *Request) interface{} {
-			return settingsForm(request.getUser()).AddCSRFToken(request)
+			return settingsForm(request.user).AddCSRFToken(request)
 		},
 	)
 
 	app.Action("settings").Method("POST").Handler(
 		func(request *Request) {
 			validateCSRF(request)
-			user := request.getUser()
-			form := settingsForm(user).AddCSRFToken(request)
+			u := *request.user
+			form := settingsForm(request.user).AddCSRFToken(request)
 			if form.Validate() {
-				userResource, err := app.getResourceByItem(&user)
+				userResource, err := app.getResourceByItem(&u)
 				if err != nil {
 					panic(err)
 				}
-				must(userResource.bindData(&user, user, request.Params(), form.getFilter()))
-				must(app.Save(&user))
-				request.AddFlashMessage(messages.Get(user.Locale, "admin_settings_changed"))
+				must(userResource.bindData(&u, request.user, request.Params(), form.getFilter()))
+				must(app.Save(&u))
+				request.AddFlashMessage(messages.Get(request.user.Locale, "admin_settings_changed"))
 				request.Redirect(app.getAdminURL("settings"))
 			} else {
 				panic("can't validate settings form")
@@ -44,10 +44,9 @@ func (app *App) initUserSettings() {
 		})
 
 	changePasswordForm := func(request *Request) *form {
-		user := request.getUser()
 		locale := request.user.Locale
 		oldValidator := newValidator(func(field *formItem) bool {
-			if !user.isPassword(field.Value) {
+			if !request.user.isPassword(field.Value) {
 				return false
 			}
 			return true
@@ -79,7 +78,7 @@ func (app *App) initUserSettings() {
 		form.Validate()
 		if form.Valid {
 			password := request.Params().Get("newpassword")
-			user := request.getUser()
+			user := *request.user
 			must(user.newPassword(password))
 			must(app.Save(&user))
 			request.AddFlashMessage(messages.Get(request.user.Locale, "admin_password_changed"))

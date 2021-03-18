@@ -164,15 +164,14 @@ func (action *Action) hiddenMenu() *Action {
 
 func (action *Action) getnavigation(request *Request) navigation {
 	if action.resource != nil {
-		user := request.getUser()
 		code := action.url
 		if action.isItemAction {
 			var item interface{}
 			action.resource.newItem(&item)
 			must(action.resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(item))
-			return action.resource.getItemNavigation(user, item, code)
+			return action.resource.getItemNavigation(request.user, item, code)
 		}
-		return action.resource.getNavigation(user, code)
+		return action.resource.getNavigation(request.user, code)
 	}
 	return navigation{}
 
@@ -208,8 +207,7 @@ func (action *Action) bindAction() error {
 	}
 
 	var fn = func(request *Request) {
-		user := request.getUser()
-		if !app.authorize(user, action.permission) {
+		if !app.authorize(request.user, action.permission) {
 			render403(request)
 			return
 		}
@@ -254,7 +252,7 @@ func (action *Action) bindAction() error {
 	return nil
 }
 
-func (resource *Resource) getResourceActionsButtonData(user User, admin *App) (ret []buttonData) {
+func (resource *Resource) getResourceActionsButtonData(user *User, admin *App) (ret []buttonData) {
 	navigation := resource.getNavigation(user, "")
 	for _, v := range navigation.Tabs {
 		ret = append(ret, buttonData{
@@ -265,7 +263,7 @@ func (resource *Resource) getResourceActionsButtonData(user User, admin *App) (r
 	return
 }
 
-func (app *App) getListItemActions(user User, item interface{}, id int64, resource Resource) listItemActions {
+func (app *App) getListItemActions(user *User, item interface{}, id int64, resource Resource) listItemActions {
 	ret := listItemActions{}
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{

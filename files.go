@@ -219,9 +219,7 @@ func initFilesResource(resource *Resource) {
 			panic("must have 1 file selected")
 		}
 
-		user := request.getUser()
-
-		_, err := resource.app.UploadFile(multipartFiles[0], &user, request.Params().Get("Description"))
+		_, err := resource.app.UploadFile(multipartFiles[0], request.user, request.Params().Get("Description"))
 		must(err)
 		request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_created"))
 		request.Redirect(resource.getURL(""))

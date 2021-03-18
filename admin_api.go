@@ -86,9 +86,7 @@ func bindImageAPI(app *App) {
 		files := []*File{}
 
 		for _, v := range multipartFiles {
-			user := request.getUser()
-
-			file, err := app.UploadFile(v, &user, description)
+			file, err := app.UploadFile(v, request.user, description)
 			if err != nil {
 				panic(err)
 			}

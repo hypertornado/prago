@@ -88,12 +88,12 @@ func createRelationNamingFunction(field field, resource Resource, referenceResou
 	}
 }
 
-func getRelationViewData(resource Resource, user User, f field, value interface{}) interface{} {
+func getRelationViewData(resource Resource, user *User, f field, value interface{}) interface{} {
 	ret, _ := getRelationData(resource, user, f, value)
 	return ret
 }
 
-func getRelationData(resource Resource, user User, f field, value interface{}) (*viewRelationData, error) {
+func getRelationData(resource Resource, user *User, f field, value interface{}) (*viewRelationData, error) {
 	r2 := f.getRelatedResource(*resource.app)
 	if r2 == nil {
 		return nil, fmt.Errorf("resource not found: %s", f.Name)
@@ -118,7 +118,7 @@ func getRelationData(resource Resource, user User, f field, value interface{}) (
 	return r2.itemToRelationData(item, user, nil), nil
 }
 
-func (resource *Resource) itemToRelationData(item interface{}, user User, relatedResource *Resource) *viewRelationData {
+func (resource *Resource) itemToRelationData(item interface{}, user *User, relatedResource *Resource) *viewRelationData {
 	var ret viewRelationData
 	ret.ID = getItemID(item)
 	ret.Name = getItemName(item)
@@ -166,7 +166,7 @@ func getItemName(item interface{}) string {
 	return fmt.Sprintf("#%d", getItemID(item))
 }
 
-func (resource *Resource) getItemDescription(item interface{}, user User, relatedResource *Resource) string {
+func (resource *Resource) getItemDescription(item interface{}, user *User, relatedResource *Resource) string {
 	var items []string
 
 	itemsVal := reflect.ValueOf(item).Elem()
@@ -203,7 +203,7 @@ func (resource *Resource) getItemDescription(item interface{}, user User, relate
 	return utils.CropMarkdown(ret, 500)
 }
 
-func (app App) relationStringer(field field, value reflect.Value, user User) string {
+func (app App) relationStringer(field field, value reflect.Value, user *User) string {
 	switch value.Kind() {
 	case reflect.String:
 		if field.Tags["prago-type"] == "image" || field.Tags["prago-type"] == "file" {

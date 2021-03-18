@@ -81,7 +81,7 @@ type pagination struct {
 	SelectedPage int64
 }
 
-func (resource *Resource) getListHeader(user User) (list list, err error) {
+func (resource *Resource) getListHeader(user *User) (list list, err error) {
 	lang := user.Locale
 
 	list.Colspan = 1
@@ -141,7 +141,7 @@ func (resource *Resource) fieldsStr() string {
 	return strings.Join(ret, ",")
 }
 
-func (field field) getListHeaderItem(user User) listHeaderItem {
+func (field field) getListHeaderItem(user *User) listHeaderItem {
 	headerItem := listHeaderItem{
 		Name:        field.Name,
 		NameHuman:   field.HumanName(user.Locale),
@@ -313,7 +313,7 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 	return q
 }
 
-func (resource *Resource) getListContent(user User, params url.Values) (ret listContent, err error) {
+func (resource *Resource) getListContent(user *User, params url.Values) (ret listContent, err error) {
 	var listHeader list
 	listHeader, err = resource.getListHeader(user)
 	if err != nil {
@@ -441,7 +441,7 @@ type listContentJSON struct {
 	StatsStr string
 }
 
-func (resource *Resource) getListContentJSON(user User, params url.Values) (ret *listContentJSON, err error) {
+func (resource *Resource) getListContentJSON(user *User, params url.Values) (ret *listContentJSON, err error) {
 	listData, err := resource.getListContent(user, params)
 	if err != nil {
 		return nil, err
@@ -473,7 +473,7 @@ func (resource *Resource) getListContentJSON(user User, params url.Values) (ret 
 
 }
 
-func (resource Resource) valueToCell(user User, f field, val reflect.Value, isOrderedBy bool) listCell {
+func (resource Resource) valueToCell(user *User, f field, val reflect.Value, isOrderedBy bool) listCell {
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
 	var cell listCell

@@ -40,9 +40,8 @@ func (menu mainMenu) GetTitle() string {
 }
 
 func (app *App) getMainMenu(request *Request) (ret mainMenu) {
-	user := request.getUser()
-
-	adminSectionName := app.name(user.Locale)
+	user := request.user
+	adminSectionName := app.name(request.user.Locale)
 	if app.logo != "" {
 		adminSectionName = ""
 	}
@@ -126,7 +125,7 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 		}
 
 		if v.url == "logout" {
-			fullURL += "?_csrfToken=" + app.generateCSRFToken(&user)
+			fullURL += "?_csrfToken=" + app.generateCSRFToken(user)
 		}
 
 		userSection.Items = append(userSection.Items, mainMenuItem{

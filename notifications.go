@@ -22,8 +22,7 @@ type Notification struct {
 func initNotificationResource(resource *Resource) {
 
 	resource.app.adminController.get(resource.app.getAdminURL("_api/notifications"), func(request *Request) {
-		user := request.getUser()
-		notifications, err := resource.app.getNotificationViews(user)
+		notifications, err := resource.app.getNotificationViews(request.user)
 		must(err)
 		request.RenderJSON(notifications)
 	})

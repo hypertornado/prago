@@ -18,7 +18,7 @@ func initResourceActions(resource *Resource) {
 	//list action
 	resource.Action("").Permission(resource.canView).Name(resource.name).IsWide().Template("admin_list").DataSource(
 		func(request *Request) interface{} {
-			listData, err := resource.getListHeader(request.getUser())
+			listData, err := resource.getListHeader(request.user)
 			must(err)
 			return listData
 		},
@@ -26,33 +26,31 @@ func initResourceActions(resource *Resource) {
 
 	resource.Action("new").Permission(resource.canCreate).Template("admin_form").Name(messages.GetNameFunction("admin_new")).DataSource(
 		func(request *Request) interface{} {
-			user := request.getUser()
 			var item interface{}
 			resource.newItem(&item)
 
-			resource.bindData(&item, user, request.Request().URL.Query(), defaultEditabilityFilter)
+			resource.bindData(&item, request.user, request.Request().URL.Query(), defaultEditabilityFilter)
 
-			form, err := resource.getForm(item, user)
+			form, err := resource.getForm(item, request.user)
 			must(err)
 
 			form.Classes = append(form.Classes, "form_leavealert")
 			form.Action = "../" + resource.id
-			form.AddSubmit("_submit", messages.Get(user.Locale, "admin_save"))
+			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
 			return form
 		},
 	)
 	resource.Action("").Method("POST").Permission(resource.canCreate).Handler(
 		func(request *Request) {
-			user := request.getUser()
 			validateCSRF(request)
 			var item interface{}
 			resource.newItem(&item)
 
-			form, err := resource.getForm(item, user)
+			form, err := resource.getForm(item, request.user)
 			must(err)
 
-			resource.bindData(item, user, request.Params(), form.getFilter())
+			resource.bindData(item, request.user, request.Params(), form.getFilter())
 			if resource.orderFieldName != "" {
 				resource.setOrderPosition(&item, resource.count()+1)
 			}
@@ -67,11 +65,11 @@ func initResourceActions(resource *Resource) {
 			}
 
 			if resource.activityLog {
-				app.createNewActivityLog(*resource, user, item)
+				app.createNewActivityLog(*resource, request.user, item)
 			}
 
 			must(resource.updateCachedCount())
-			request.AddFlashMessage(messages.Get(user.Locale, "admin_item_created"))
+			request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_created"))
 			request.Redirect(resource.getItemURL(item, ""))
 		},
 	)
@@ -92,13 +90,12 @@ func initResourceActions(resource *Resource) {
 				panic(err)
 			}
 
-			return resource.getViews(id, item, request.getUser())
+			return resource.getViews(id, item, request.user)
 		},
 	)
 
 	resource.ItemAction("edit").Name(messages.GetNameFunction("admin_edit")).Permission(resource.canEdit).Template("admin_form").DataSource(
 		func(request *Request) interface{} {
-			user := request.getUser()
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
@@ -107,12 +104,12 @@ func initResourceActions(resource *Resource) {
 			err = app.Query().WhereIs("id", int64(id)).Get(item)
 			must(err)
 
-			form, err := resource.getForm(item, user)
+			form, err := resource.getForm(item, request.user)
 			must(err)
 
 			form.Classes = append(form.Classes, "form_leavealert")
 			form.Action = "edit"
-			form.AddSubmit("_submit", messages.Get(user.Locale, "admin_save"))
+			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
 			return form
 		},
@@ -120,7 +117,7 @@ func initResourceActions(resource *Resource) {
 
 	resource.ItemAction("edit").Method("POST").Permission(resource.canEdit).Handler(
 		func(request *Request) {
-			user := request.getUser()
+			user := request.user
 			validateCSRF(request)
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
@@ -169,26 +166,24 @@ func initResourceActions(resource *Resource) {
 
 	resource.ItemAction("delete").Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete")).Template("admin_delete").DataSource(
 		func(request *Request) interface{} {
-			user := request.getUser()
 			ret := map[string]interface{}{}
 			form := newForm()
 			form.Method = "POST"
 			form.AddCSRFToken(request)
-			form.AddDeleteSubmit("send", messages.Get(user.Locale, "admin_delete"))
+			form.AddDeleteSubmit("send", messages.Get(request.user.Locale, "admin_delete"))
 			ret["form"] = form
 
 			var item interface{}
 			resource.newItem(&item)
 			must(app.Query().WhereIs("id", request.Params().Get("id")).Get(item))
 			itemName := getItemName(item)
-			ret["delete_title"] = messages.Get(user.Locale, "admin_delete_confirmation_name", itemName)
+			ret["delete_title"] = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
 			return ret
 		},
 	)
 
 	resource.ItemAction("delete").Permission(resource.canDelete).Method("POST").Handler(
 		func(request *Request) {
-			user := request.getUser()
 			validateCSRF(request)
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
@@ -207,11 +202,11 @@ func initResourceActions(resource *Resource) {
 			}
 
 			if resource.activityLog {
-				app.createDeleteActivityLog(*resource, user, int64(id), item)
+				app.createDeleteActivityLog(*resource, request.user, int64(id), item)
 			}
 
 			must(resource.updateCachedCount())
-			request.AddFlashMessage(messages.Get(user.Locale, "admin_item_deleted"))
+			request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_deleted"))
 			request.Redirect(resource.getURL(""))
 		},
 	)

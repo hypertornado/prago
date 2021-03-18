@@ -89,7 +89,7 @@ func (f *form) getFilter() fieldFilter {
 			allowed[v.Name] = true
 		}
 	}
-	return func(resource Resource, user User, field field) bool {
+	return func(resource Resource, user *User, field field) bool {
 		return allowed[field.ColumnName]
 	}
 }

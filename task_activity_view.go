@@ -27,7 +27,7 @@ type taskActivityViewAction struct {
 	URL  string
 }
 
-func (tm *taskManager) getTaskMonitor(user User) (ret *taskMonitor) {
+func (tm *taskManager) getTaskMonitor(user *User) (ret *taskMonitor) {
 	tm.activityMutex.RLock()
 	defer tm.activityMutex.RUnlock()
 
@@ -50,14 +50,14 @@ func (tm *taskManager) getTaskMonitor(user User) (ret *taskMonitor) {
 			if !v.ended && v.stoppable && !v.stopped {
 				var u url.Values = map[string][]string{}
 				u.Add("uuid", v.uuid)
-				u.Add("csrf", tm.app.generateCSRFToken(&user))
+				u.Add("csrf", tm.app.generateCSRFToken(user))
 				actions = append(actions, taskActivityViewAction{"◼", "_tasks/stoptask?" + u.Encode()})
 			}
 
 			if v.ended {
 				var u url.Values = map[string][]string{}
 				u.Add("uuid", v.uuid)
-				u.Add("csrf", tm.app.generateCSRFToken(&user))
+				u.Add("csrf", tm.app.generateCSRFToken(user))
 				actions = append(actions, taskActivityViewAction{"✘", "_tasks/deletetask?" + u.Encode()})
 			}
 

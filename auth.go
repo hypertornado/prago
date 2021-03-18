@@ -42,7 +42,7 @@ func (app *App) getRoleFieldTypeData() [][2]string {
 }
 
 func (app *App) createRoleFieldType() FieldType {
-	var fp = func(field, User) interface{} {
+	var fp = func(field, *User) interface{} {
 		roleNames := []string{""}
 		for k := range app.roles {
 			roleNames = append(roleNames, k)
@@ -76,7 +76,10 @@ func (app *App) AddRole(role string, permissions []string) {
 }
 
 //Authorize user for task
-func (app App) authorize(user User, permission Permission) bool {
+func (app App) authorize(user *User, permission Permission) bool {
+	if user == nil {
+		return false
+	}
 	if !user.IsAdmin {
 		return false
 	}

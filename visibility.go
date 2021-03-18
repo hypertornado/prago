@@ -1,8 +1,8 @@
 package prago
 
-type fieldFilter func(Resource, User, field) bool
+type fieldFilter func(Resource, *User, field) bool
 
-func defaultVisibilityFilter(resource Resource, user User, f field) bool {
+func defaultVisibilityFilter(resource Resource, user *User, f field) bool {
 	permission := f.Tags["prago-view"]
 	if permission != "" {
 		return resource.app.authorize(user, Permission(permission))
@@ -27,7 +27,7 @@ func defaultVisibilityFilter(resource Resource, user User, f field) bool {
 	return visible
 }
 
-func defaultEditabilityFilter(resource Resource, user User, f field) bool {
+func defaultEditabilityFilter(resource Resource, user *User, f field) bool {
 	if !defaultVisibilityFilter(resource, user, f) {
 		return false
 	}

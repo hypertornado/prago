@@ -286,7 +286,8 @@ func (e *adminSearch) saveItem(resource *Resource, item interface{}) error {
 }
 
 func (e *adminSearch) saveItemWithRoles(resource *Resource, item interface{}, roles []string) error {
-	relData := resource.itemToRelationData(item, User{}, nil)
+	//TODO: ugly hack
+	relData := resource.itemToRelationData(item, &User{}, nil)
 	if relData == nil {
 		return errors.New("wrong item to relation data conversion")
 	}
@@ -352,7 +353,7 @@ func (app *App) initSearchInner() {
 				}
 			}
 
-			result, hits, err := adminSearch.Search(q, request.getUser().getRole(), page-1)
+			result, hits, err := adminSearch.Search(q, request.user.getRole(), page-1)
 			must(err)
 
 			var pages = int(hits) / searchPageSize

@@ -62,7 +62,7 @@ func renderNavigation(request *Request, page page, viewName string) {
 	request.RenderView(viewName)
 }
 
-func (resource Resource) getNavigation(user User, code string) navigation {
+func (resource Resource) getNavigation(user *User, code string) navigation {
 	var tabs []tab
 	for _, v := range resource.actions {
 		if v.method == "GET" {
@@ -85,7 +85,7 @@ func (resource Resource) getNavigation(user User, code string) navigation {
 	}
 }
 
-func (resource Resource) getItemNavigation(user User, item interface{}, code string) navigation {
+func (resource Resource) getItemNavigation(user *User, item interface{}, code string) navigation {
 	var tabs []tab
 	for _, v := range resource.itemActions {
 		if v.method == "GET" {

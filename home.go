@@ -21,17 +21,15 @@ type homeData struct {
 }
 
 func (app *App) getHomeData(request *Request) interface{} {
-	user := request.getUser()
-
 	ret := []homeData{}
 
-	for _, resource := range app.getSortedResources(user.Locale) {
-		if app.authorize(user, resource.canView) {
+	for _, resource := range app.getSortedResources(request.user.Locale) {
+		if app.authorize(request.user, resource.canView) {
 			item := homeData{
-				Name: resource.name(user.Locale),
+				Name: resource.name(request.user.Locale),
 				URL:  resource.getURL(""),
 			}
-			item.Actions = resource.getResourceActionsButtonData(user, app)
+			item.Actions = resource.getResourceActionsButtonData(request.user, app)
 			ret = append(ret, item)
 		}
 	}

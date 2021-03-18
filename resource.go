@@ -155,8 +155,7 @@ func (app *App) getResourceByName(name string) *Resource {
 
 func (app *App) initResource(resource *Resource) {
 	resource.resourceController.addAroundAction(func(request *Request, next func()) {
-		user := request.getUser()
-		if !app.authorize(user, resource.canView) {
+		if !app.authorize(request.user, resource.canView) {
 			render403(request)
 		} else {
 			next()
@@ -241,7 +240,7 @@ func (resource Resource) updateCachedCount() error {
 	return resource.app.cache.Set(resource.cachedCountName(), resource.count())
 }
 
-func (resource Resource) getPaginationData(user User) (ret []listPaginationData) {
+func (resource Resource) getPaginationData(user *User) (ret []listPaginationData) {
 	var ints []int64
 	var used bool
 

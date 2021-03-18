@@ -97,7 +97,7 @@ func initActivityLog(resource *Resource) {
 	resource.name = messages.GetNameFunction("admin_history")
 }
 
-func (app App) createNewActivityLog(resource Resource, user User, item interface{}) error {
+func (app App) createNewActivityLog(resource Resource, user *User, item interface{}) error {
 	data, err := json.Marshal(item)
 	if err != nil {
 		return err
@@ -112,7 +112,7 @@ func (app App) createNewActivityLog(resource Resource, user User, item interface
 	})
 }
 
-func (app App) createEditActivityLog(resource Resource, user User, itemID int64, before, after []byte) error {
+func (app App) createEditActivityLog(resource Resource, user *User, itemID int64, before, after []byte) error {
 	return app.createActivityLog(ActivityLog{
 		ResourceName:  resource.id,
 		ItemID:        itemID,
@@ -123,7 +123,7 @@ func (app App) createEditActivityLog(resource Resource, user User, itemID int64,
 	})
 }
 
-func (app App) createDeleteActivityLog(resource Resource, user User, itemID int64, item interface{}) error {
+func (app App) createDeleteActivityLog(resource Resource, user *User, itemID int64, item interface{}) error {
 	data, err := json.Marshal(item)
 	if err != nil {
 		return err

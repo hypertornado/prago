@@ -15,7 +15,7 @@ type viewRelation struct {
 	Count          int64
 }
 
-func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, user User) (ret []view) {
+func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, user *User) (ret []view) {
 
 	for _, v := range resource.autoRelations {
 		if !resource.app.authorize(user, v.resource.canView) {
@@ -74,8 +74,6 @@ type relationListRequest struct {
 func generateRelationListAPIHandler(app *App) func(*Request) {
 	return func(request *Request) {
 
-		user := request.getUser()
-
 		defer request.Request().Body.Close()
 
 		reqData, err := ioutil.ReadAll(request.Request().Body)
@@ -90,12 +88,12 @@ func generateRelationListAPIHandler(app *App) func(*Request) {
 		}
 
 		sourceResource := app.getResourceByName(listRequest.SourceResource)
-		if !app.authorize(user, sourceResource.canView) {
+		if !app.authorize(request.user, sourceResource.canView) {
 			panic("cant authorize source resource")
 		}
 
 		targetResource := app.getResourceByName(listRequest.TargetResource)
-		if !app.authorize(user, targetResource.canView) {
+		if !app.authorize(request.user, targetResource.canView) {
 			panic("cant authorize target resource")
 		}
 
@@ -128,7 +126,7 @@ func generateRelationListAPIHandler(app *App) func(*Request) {
 		for i := 0; i < vv.Len(); i++ {
 			data = append(
 				data,
-				targetResource.itemToRelationData(vv.Index(i).Interface(), user, sourceResource),
+				targetResource.itemToRelationData(vv.Index(i).Interface(), request.user, sourceResource),
 			)
 		}
 
