@@ -3,8 +3,6 @@ package prago
 import (
 	"strconv"
 	"time"
-
-	"github.com/gorilla/sessions"
 )
 
 func initUserLogin(resource *Resource) {
@@ -23,10 +21,7 @@ func initUserLogin(resource *Resource) {
 
 			var user User
 			must(resource.app.Query().WhereIs("id", id).Get(&user))
-
-			session := request.GetData("session").(*sessions.Session)
-			session.Values["user_id"] = user.ID
-			must(session.Save(request.Request(), request.Response()))
+			request.logInUser(&user)
 			request.Redirect(resource.app.getAdminURL(""))
 		},
 	)
@@ -60,8 +55,6 @@ func initUserLogin(resource *Resource) {
 		email = fixEmail(email)
 		password := request.Params().Get("password")
 
-		session := request.GetData("session").(*sessions.Session)
-
 		locale := getLocale(request)
 		form := loginForm(locale)
 		form.Items[0].Value = email
@@ -71,7 +64,6 @@ func initUserLogin(resource *Resource) {
 		err := resource.app.Query().WhereIs("email", email).Get(&user)
 		if err != nil {
 			if err == ErrItemNotFound {
-				must(session.Save(request.Request(), request.Response()))
 				renderLogin(request, form, locale)
 				return
 			}
@@ -88,10 +80,8 @@ func initUserLogin(resource *Resource) {
 		user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
 
 		must(resource.app.Save(&user))
-
-		session.Values["user_id"] = user.ID
-		session.AddFlash(messages.Get(locale, "admin_login_ok"))
-		must(session.Save(request.Request(), request.Response()))
+		request.logInUser(&user)
+		request.AddFlashMessage(messages.Get(locale, "admin_login_ok"))
 		request.Redirect(resource.app.getAdminURL(""))
 	})
 }

@@ -6,8 +6,6 @@ import (
 	"net/url"
 	"strings"
 	"time"
-
-	"github.com/gorilla/sessions"
 )
 
 //Request represents structure for http request
@@ -18,8 +16,8 @@ type Request struct {
 	r          *http.Request
 	data       map[string]interface{}
 	app        App
-	session    *session
-	//user       *user
+	session    *requestSession
+	user       *User
 }
 
 //Request returns underlying http.Request
@@ -44,16 +42,10 @@ func (request Request) RenderView(templateName string) {
 	request.RenderViewWithCode(templateName, 200)
 }
 
-//AddFlashMessage adds flash message to request
-func (request Request) AddFlashMessage(message string) {
-	session := request.GetData("session").(*sessions.Session)
-	session.AddFlash(message)
-	must(session.Save(request.Request(), request.Response()))
-}
-
 //RenderViewWithCode renders view with HTTP code
 func (request Request) RenderViewWithCode(templateName string, statusCode int) {
 	request.Response().Header().Add("Content-Type", "text/html; charset=utf-8")
+	request.writeSessionIfDirty()
 	request.Response().WriteHeader(statusCode)
 	must(
 		request.app.templates.templates.ExecuteTemplate(
@@ -72,6 +64,7 @@ func (request Request) RenderJSON(data interface{}) {
 //RenderJSONWithCode renders JSON with HTTP code
 func (request Request) RenderJSONWithCode(data interface{}, code int) {
 	request.Response().Header().Add("Content-type", "application/json")
+	request.writeSessionIfDirty()
 
 	pretty := false
 	if request.Params().Get("pretty") == "true" {
@@ -104,6 +97,7 @@ func (request Request) RenderJSONWithCode(data interface{}, code int) {
 //Redirect redirects request to new url
 func (request Request) Redirect(url string) {
 	request.Response().Header().Set("Location", url)
+	request.writeSessionIfDirty()
 	request.Response().WriteHeader(http.StatusFound)
 }
 

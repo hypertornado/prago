@@ -5,8 +5,6 @@ import (
 
 	//embed
 	_ "embed"
-
-	"github.com/gorilla/sessions"
 )
 
 //ErrItemNotFound is returned when no item is found
@@ -27,33 +25,21 @@ func (app *App) initAdminActions() {
 	app.initSessions()
 
 	googleAPIKey := app.ConfigurationGetStringWithFallback("google", "")
-
 	app.adminController.addAroundAction(func(request *Request, next func()) {
-		session := request.GetData("session").(*sessions.Session)
-		userID, ok := session.Values["user_id"].(int64)
-
-		if !ok {
+		if request.user == nil {
 			request.Redirect(app.getAdminURL("user/login"))
-			return
 		}
 
-		var user User
-		err := app.Query().WhereIs("id", userID).Get(&user)
-		if err != nil {
-			request.Redirect(app.getAdminURL("user/login"))
-			return
+		request.SetData("_csrfToken", app.generateCSRFToken(request.user))
+		request.SetData("currentuser", request.user)
+		request.SetData("locale", request.user.Locale)
+		request.SetData("gravatar", request.user.gravatarURL())
+
+		if !request.user.IsAdmin && !request.user.emailConfirmed() {
+			addCurrentFlashMessage(request, messages.Get(request.user.Locale, "admin_flash_not_confirmed"))
 		}
 
-		request.SetData("_csrfToken", app.generateCSRFToken(&user))
-		request.SetData("currentuser", &user)
-		request.SetData("locale", user.Locale)
-		request.SetData("gravatar", user.gravatarURL())
-
-		if !user.IsAdmin && !user.emailConfirmed() {
-			addCurrentFlashMessage(request, messages.Get(user.Locale, "admin_flash_not_confirmed"))
-		}
-
-		if !user.IsAdmin {
+		if !request.user.IsAdmin {
 			var sysadmin User
 			err := app.Query().WhereIs("IsSysadmin", true).Get(&sysadmin)
 			var sysadminEmail string
@@ -61,7 +47,7 @@ func (app *App) initAdminActions() {
 				sysadminEmail = sysadmin.Email
 			}
 
-			addCurrentFlashMessage(request, messages.Get(user.Locale, "admin_flash_not_approved", sysadminEmail))
+			addCurrentFlashMessage(request, messages.Get(request.user.Locale, "admin_flash_not_approved", sysadminEmail))
 		}
 
 		request.SetData("main_menu", app.getMainMenu(request))

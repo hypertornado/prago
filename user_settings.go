@@ -1,7 +1,5 @@
 package prago
 
-import "github.com/gorilla/sessions"
-
 func (app *App) initUserSettings() {
 
 	settingsForm := func(user User) *form {
@@ -103,10 +101,7 @@ func (app *App) initUserSettings() {
 
 	app.Action("logout").Name(messages.GetNameFunction("admin_log_out")).userMenu().Handler(func(request *Request) {
 		validateCSRF(request)
-		session := request.GetData("session").(*sessions.Session)
-		delete(session.Values, "user_id")
-		session.AddFlash(messages.Get(getLocale(request), "admin_logout_ok"))
-		must(session.Save(request.Request(), request.Response()))
+		request.logOutUser()
 		request.Redirect(app.getAdminURL("login"))
 	})
 
