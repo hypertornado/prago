@@ -45,7 +45,7 @@ func initUserLogin(resource *Resource) {
 	}
 
 	resource.app.accessController.get(resource.getURL("login"), func(request *Request) {
-		locale := getLocale(request)
+		locale := localeFromRequest(request)
 		form := loginForm(locale)
 		renderLogin(request, form, locale)
 	})
@@ -55,7 +55,7 @@ func initUserLogin(resource *Resource) {
 		email = fixEmail(email)
 		password := request.Params().Get("password")
 
-		locale := getLocale(request)
+		locale := localeFromRequest(request)
 		form := loginForm(locale)
 		form.Items[0].Value = email
 		form.Errors = []string{messages.Get(locale, "admin_login_error")}

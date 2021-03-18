@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	supportedLocales = []language.Tag{language.English, language.Czech}
+	supportedLocales = []language.Tag{language.Czech, language.English}
 	languageMatcher  = language.NewMatcher(supportedLocales)
 	localeNames      = map[string]string{
 		"cs": "Čeština",
@@ -14,22 +14,15 @@ var (
 	availableLocales = [][2]string{{"en", "English"}, {"cs", "Čeština"}}
 )
 
-//GetLocale from request
-func getLocale(request *Request) string {
-	user, hasUser := request.GetData("currentuser").(*User)
-	if hasUser {
-		if validLocale(user.Locale) {
-			return user.Locale
-		}
-	}
-	return localeFromAcceptLanguageString(
-		request.Request().Header.Get("Accept-Language"),
-	)
-}
-
 func validLocale(in string) bool {
 	_, ok := localeNames[in]
 	return ok
+}
+
+func localeFromRequest(request *Request) string {
+	return localeFromAcceptLanguageString(
+		request.Request().Header.Get("Accept-Language"),
+	)
 }
 
 func localeFromAcceptLanguageString(acceptHeader string) string {

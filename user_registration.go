@@ -72,12 +72,12 @@ func initUserRegistration(resource *Resource) {
 	}
 
 	app.accessController.get(resource.getURL("registration"), func(request *Request) {
-		locale := getLocale(request)
+		locale := localeFromRequest(request)
 		renderRegistration(request, newUserForm(locale), locale)
 	})
 
 	app.accessController.post(resource.getURL("registration"), func(request *Request) {
-		locale := getLocale(request)
+		locale := localeFromRequest(request)
 		form := newUserForm(locale)
 
 		form.BindData(request.Params())
@@ -128,7 +128,7 @@ func (user User) sendConfirmEmail(request *Request, app *App) error {
 		return errors.New("no reply email empty")
 	}
 
-	locale := getLocale(request)
+	locale := localeFromRequest(request)
 
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)

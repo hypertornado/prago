@@ -36,7 +36,7 @@ func (app *App) initUserSettings() {
 				}
 				must(userResource.bindData(&user, user, request.Params(), form.getFilter()))
 				must(app.Save(&user))
-				request.AddFlashMessage(messages.Get(getLocale(request), "admin_settings_changed"))
+				request.AddFlashMessage(messages.Get(user.Locale, "admin_settings_changed"))
 				request.Redirect(app.getAdminURL("settings"))
 			} else {
 				panic("can't validate settings form")
@@ -45,7 +45,7 @@ func (app *App) initUserSettings() {
 
 	changePasswordForm := func(request *Request) *form {
 		user := request.getUser()
-		locale := getLocale(request)
+		locale := request.user.Locale
 		oldValidator := newValidator(func(field *formItem) bool {
 			if !user.isPassword(field.Value) {
 				return false
@@ -82,7 +82,7 @@ func (app *App) initUserSettings() {
 			user := request.getUser()
 			must(user.newPassword(password))
 			must(app.Save(&user))
-			request.AddFlashMessage(messages.Get(getLocale(request), "admin_password_changed"))
+			request.AddFlashMessage(messages.Get(request.user.Locale, "admin_password_changed"))
 			request.Redirect(app.getAdminURL(""))
 		} else {
 			//TODO: better validation and UI of errors

@@ -223,7 +223,7 @@ func initFilesResource(resource *Resource) {
 
 		_, err := resource.app.UploadFile(multipartFiles[0], &user, request.Params().Get("Description"))
 		must(err)
-		request.AddFlashMessage(messages.Get(getLocale(request), "admin_item_created"))
+		request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_created"))
 		request.Redirect(resource.getURL(""))
 	})
 

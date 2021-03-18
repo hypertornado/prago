@@ -28,7 +28,7 @@ func initUserRenew(resource *Resource) {
 	}
 
 	app.accessController.get(resource.getURL("forgot"), func(request *Request) {
-		locale := getLocale(request)
+		locale := localeFromRequest(request)
 		renderForgot(request, forgottenPasswordForm(locale), locale)
 	})
 
@@ -90,13 +90,13 @@ func initUserRenew(resource *Resource) {
 	}
 
 	app.accessController.get(resource.getURL("renew_password"), func(request *Request) {
-		locale := getLocale(request)
+		locale := localeFromRequest(request)
 		form := renewPasswordForm(locale)
 		renderRenew(request, form, locale)
 	})
 
 	app.accessController.post(resource.getURL("renew_password"), func(request *Request) {
-		locale := getLocale(request)
+		locale := localeFromRequest(request)
 
 		form := renewPasswordForm(locale)
 
