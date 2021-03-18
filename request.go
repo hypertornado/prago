@@ -18,7 +18,7 @@ type Request struct {
 	r          *http.Request
 	data       map[string]interface{}
 	app        App
-	session    *session
+	//session    *session
 }
 
 //Request returns underlying http.Request
