@@ -16,7 +16,7 @@ const adminPathPrefix = "/admin"
 
 func (app *App) initAdminActions() {
 
-	app.accessController.addBeforeAction(func(request Request) {
+	app.accessController.addBeforeAction(func(request *Request) {
 		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
 		request.SetData("locale", getLocale(request))
 		request.SetData("admin_header_prefix", adminPathPrefix)
@@ -28,7 +28,7 @@ func (app *App) initAdminActions() {
 
 	googleAPIKey := app.ConfigurationGetStringWithFallback("google", "")
 
-	app.adminController.addAroundAction(func(request Request, next func()) {
+	app.adminController.addAroundAction(func(request *Request, next func()) {
 		session := request.GetData("session").(*sessions.Session)
 		userID, ok := session.Values["user_id"].(int64)
 
@@ -96,20 +96,20 @@ func (app *App) AddCSS(url string) {
 	app.css = append(app.css, url)
 }
 
-func addCurrentFlashMessage(request Request, message string) {
+func addCurrentFlashMessage(request *Request, message string) {
 	data := request.GetData("flash_messages")
 	messages, _ := data.([]interface{})
 	messages = append(messages, message)
 	request.SetData("flash_messages", messages)
 }
 
-func render403(request Request) {
+func render403(request *Request) {
 	request.SetData("message", messages.Get(getLocale(request), "admin_403"))
 	request.SetData("admin_yield", "admin_message")
 	request.RenderViewWithCode("admin_layout", 403)
 }
 
-func render404(request Request) {
+func render404(request *Request) {
 	request.SetData("message", messages.Get(getLocale(request), "admin_404"))
 	request.SetData("admin_yield", "admin_message")
 	request.RenderViewWithCode("admin_layout", 404)

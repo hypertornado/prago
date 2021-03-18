@@ -35,7 +35,7 @@ func (r *router) addRoute(route *route) {
 	}
 }
 
-func (r *router) process(request Request) bool {
+func (r *router) process(request *Request) bool {
 	for _, routes := range [][]*route{
 		r.priorityRoutes,
 		r.routes,
@@ -88,7 +88,7 @@ type route struct {
 	constraints []func(map[string]string) bool
 	pathMatcher pathMatcherFn
 	controller  *controller
-	fn          func(p Request)
+	fn          func(p *Request)
 }
 
 type pathMatcherFn func(string) (map[string]string, bool)
@@ -151,7 +151,7 @@ func matcherStarMiddle(route string) pathMatcherFn {
 	}
 }
 
-func newRoute(m method, path string, controller *controller, fn func(p Request), constraints []func(map[string]string) bool) (ret *route) {
+func newRoute(m method, path string, controller *controller, fn func(p *Request), constraints []func(map[string]string) bool) (ret *route) {
 	methodName := map[method]string{
 		get:  "GET",
 		head: "HEAD",

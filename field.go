@@ -19,6 +19,7 @@ type field struct {
 	Scanner    sql.Scanner
 	CanOrder   bool
 
+	resource  *Resource
 	fieldType FieldType
 }
 
@@ -31,7 +32,7 @@ func (field field) GetRelatedResourceName() string {
 	return field.ColumnName
 }
 
-func newField(f reflect.StructField, order int, fieldTypes map[string]FieldType) *field {
+func (resource *Resource) newField(f reflect.StructField, order int, fieldTypes map[string]FieldType) *field {
 	ret := &field{
 		Name:       f.Name,
 		ColumnName: columnName(f.Name),
@@ -40,6 +41,8 @@ func newField(f reflect.StructField, order int, fieldTypes map[string]FieldType)
 		Tags:       make(map[string]string),
 		fieldOrder: order,
 		CanOrder:   true,
+
+		resource: resource,
 	}
 
 	for _, v := range []string{

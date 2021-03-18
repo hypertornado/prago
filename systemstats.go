@@ -13,7 +13,7 @@ func (app *App) initSystemStats() {
 	startedAt := time.Now()
 
 	app.Action("_stats").Name(Unlocalized("Prago Stats")).Permission(permissionSysadmin).Template("admin_systemstats").DataSource(
-		func(request Request) interface{} {
+		func(request *Request) interface{} {
 
 			stats := [][2]string{}
 			stats = append(stats, [2]string{"App name", app.codeName})

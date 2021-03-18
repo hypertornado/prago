@@ -20,9 +20,9 @@ type Action struct {
 	permission Permission
 	method     string
 	url        string
-	handler    func(Request)
+	handler    func(*Request)
 	template   string
-	dataSource func(Request) interface{}
+	dataSource func(*Request) interface{}
 
 	app          *App
 	resource     *Resource
@@ -117,7 +117,7 @@ func (action *Action) Method(method string) *Action {
 }
 
 //Handler sets action handler
-func (action *Action) Handler(handler func(Request)) *Action {
+func (action *Action) Handler(handler func(*Request)) *Action {
 	if action.template != "" {
 		panic("can't set both action handler and template")
 	}
@@ -138,7 +138,7 @@ func (action *Action) Template(template string) *Action {
 }
 
 //DataSource sets action data source, which is used to render template
-func (action *Action) DataSource(dataSource func(Request) interface{}) *Action {
+func (action *Action) DataSource(dataSource func(*Request) interface{}) *Action {
 	if action.handler != nil {
 		panic("can't set both action handler and dataSource")
 	}
@@ -162,7 +162,7 @@ func (action *Action) hiddenMenu() *Action {
 	return action
 }
 
-func (action *Action) getnavigation(request Request) navigation {
+func (action *Action) getnavigation(request *Request) navigation {
 	if action.resource != nil {
 		user := request.getUser()
 		code := action.url
@@ -207,7 +207,7 @@ func (action *Action) bindAction() error {
 		controller = app.adminController
 	}
 
-	var fn = func(request Request) {
+	var fn = func(request *Request) {
 		user := request.getUser()
 		if !app.authorize(user, action.permission) {
 			render403(request)

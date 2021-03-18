@@ -131,7 +131,7 @@ func (request Request) removeTrailingSlash() bool {
 	return false
 }
 
-func parseRequest(r Request) {
+func parseRequest(r *Request) {
 	contentType := r.Request().Header.Get("Content-Type")
 	var err error
 

@@ -10,7 +10,7 @@ import (
 
 func (app *App) initAPI() {
 	app.API("markdown").Method("POST").Handler(
-		func(request Request) {
+		func(request *Request) {
 			basicUserAuthorize(request)
 			data, err := ioutil.ReadAll(request.Request().Body)
 			if err != nil {
@@ -25,7 +25,7 @@ func (app *App) initAPI() {
 }
 
 func bindImageAPI(app *App) {
-	app.adminController.get(app.getAdminURL("file/uuid/:uuid"), func(request Request) {
+	app.adminController.get(app.getAdminURL("file/uuid/:uuid"), func(request *Request) {
 		var image File
 		err := app.Query().WhereIs("uid", request.Params().Get("uuid")).Get(&image)
 		if err != nil {
@@ -34,13 +34,13 @@ func bindImageAPI(app *App) {
 		request.Redirect(app.getAdminURL(fmt.Sprintf("file/%d", image.ID)))
 	})
 
-	app.adminController.get(app.getAdminURL("_api/image/thumb/:id"), func(request Request) {
+	app.adminController.get(app.getAdminURL("_api/image/thumb/:id"), func(request *Request) {
 		var image File
 		must(app.Query().WhereIs("uid", request.Params().Get("id")).Get(&image))
 		request.Redirect(image.GetMedium())
 	})
 
-	app.adminController.get(app.getAdminURL("_api/image/list"), func(request Request) {
+	app.adminController.get(app.getAdminURL("_api/image/list"), func(request *Request) {
 		basicUserAuthorize(request)
 		var images []*File
 		if len(request.Params().Get("ids")) > 0 {
@@ -67,7 +67,7 @@ func bindImageAPI(app *App) {
 		writeFileResponse(request, images)
 	})
 
-	app.adminController.get(app.getAdminURL("_api/imagedata/:uid"), func(request Request) {
+	app.adminController.get(app.getAdminURL("_api/imagedata/:uid"), func(request *Request) {
 		basicUserAuthorize(request)
 		var file File
 		err := app.Query().WhereIs("uid", request.Params().Get("uid")).Get(&file)
@@ -77,7 +77,7 @@ func bindImageAPI(app *App) {
 		request.RenderJSON(file)
 	})
 
-	app.adminController.post(app.getAdminURL("_api/image/upload"), func(request Request) {
+	app.adminController.post(app.getAdminURL("_api/image/upload"), func(request *Request) {
 		basicUserAuthorize(request)
 		multipartFiles := request.Request().MultipartForm.File["file"]
 

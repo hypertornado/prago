@@ -13,7 +13,7 @@ import (
 
 func initResourceAPIs(resource *Resource) {
 	resource.API("list").Handler(
-		func(request Request) {
+		func(request *Request) {
 			user := request.getUser()
 			if request.Request().URL.Query().Get("_format") == "json" {
 				listDataJSON, err := resource.getListContentJSON(user, request.Request().URL.Query())
@@ -64,7 +64,7 @@ func initResourceAPIs(resource *Resource) {
 	)
 
 	resource.API("preview-relation/:id").Handler(
-		func(request Request) {
+		func(request *Request) {
 			user := request.getUser()
 
 			var item interface{}
@@ -85,7 +85,7 @@ func initResourceAPIs(resource *Resource) {
 	)
 
 	resource.API("set-order").Permission(resource.canEdit).Method("POST").Handler(
-		func(request Request) {
+		func(request *Request) {
 			if resource.orderFieldName == "" {
 				panic("can't order")
 			}
@@ -111,7 +111,7 @@ func initResourceAPIs(resource *Resource) {
 	)
 
 	resource.API("searchresource").Handler(
-		func(request Request) {
+		func(request *Request) {
 			user := request.getUser()
 			q := request.Params().Get("q")
 

@@ -15,7 +15,7 @@ var (
 )
 
 //GetLocale from request
-func getLocale(request Request) string {
+func getLocale(request *Request) string {
 	user, hasUser := request.GetData("currentuser").(*User)
 	if hasUser {
 		if validLocale(user.Locale) {

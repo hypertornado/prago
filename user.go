@@ -40,7 +40,7 @@ func (request Request) getUser() User {
 	return *u
 }
 
-func basicUserAuthorize(request Request) {
+func basicUserAuthorize(request *Request) {
 	user := request.getUser()
 	if !user.IsAdmin {
 		panic("can't authorize, user is not admin")

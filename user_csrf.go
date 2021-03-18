@@ -18,18 +18,18 @@ func (app *App) generateCSRFToken(user *User) string {
 }
 
 //CSRFToken returns csrf token from request
-func csrfToken(request Request) string {
+func csrfToken(request *Request) string {
 	return request.GetData("_csrfToken").(string)
 }
 
 //AddCSRFToken adds csrf token to form
-func (form *form) AddCSRFToken(request Request) *form {
+func (form *form) AddCSRFToken(request *Request) *form {
 	form.CSRFToken = csrfToken(request)
 	return form
 }
 
 //ValidateCSRF validates csrf token for request
-func validateCSRF(request Request) {
+func validateCSRF(request *Request) {
 	token := csrfToken(request)
 	if len(token) == 0 {
 		panic("token not set")

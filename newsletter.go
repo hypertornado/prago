@@ -68,11 +68,11 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 	})
 
 	controller := app.mainController.subController()
-	controller.addBeforeAction(func(request Request) {
+	controller.addBeforeAction(func(request *Request) {
 		request.SetData("site", app.name("en"))
 	})
 
-	controller.get("/newsletter-subscribe", func(request Request) {
+	controller.get("/newsletter-subscribe", func(request *Request) {
 		request.SetData("title", "Přihlásit se k odběru newsletteru")
 		request.SetData("csrf", app.newsletter.CSFR(request))
 		request.SetData("yield", "newsletter_subscribe")
@@ -80,7 +80,7 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 		request.RenderView("newsletter_layout")
 	})
 
-	controller.post("/newsletter-subscribe", func(request Request) {
+	controller.post("/newsletter-subscribe", func(request *Request) {
 		if app.newsletter.CSFR(request) != request.Params().Get("csrf") {
 			panic("wrong csrf")
 		}
@@ -111,7 +111,7 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 		request.RenderView("newsletter_layout")
 	})
 
-	controller.get("/newsletter-confirm", func(request Request) {
+	controller.get("/newsletter-confirm", func(request *Request) {
 		email := request.Params().Get("email")
 		secret := request.Params().Get("secret")
 
@@ -137,7 +137,7 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 		request.RenderView("newsletter_layout")
 	})
 
-	controller.get("/newsletter-unsubscribe", func(request Request) {
+	controller.get("/newsletter-unsubscribe", func(request *Request) {
 		email := request.Params().Get("email")
 		secret := request.Params().Get("secret")
 
@@ -170,7 +170,7 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 	//newsletterResource.AddRelation(newsletterSectionResource, "Newsletter", Unlocalized("Přidat sekci"))
 }
 
-func (app *App) NewsletterCSRF(request Request) string {
+func (app *App) NewsletterCSRF(request *Request) string {
 	return app.newsletter.CSFR(request)
 }
 
@@ -222,7 +222,7 @@ func (nm newsletterMiddleware) secret(email string) string {
 }
 
 //CSFR returns csrf token for newsletter
-func (nm newsletterMiddleware) CSFR(request Request) string {
+func (nm newsletterMiddleware) CSFR(request *Request) string {
 	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%s%s", nm.randomness, request.Request().UserAgent()))
 	return fmt.Sprintf("%x", h.Sum(nil))
@@ -262,7 +262,7 @@ type newsletter struct {
 func initNewsletterResource(resource *Resource) {
 	resource.canView = "newsletter"
 
-	resource.resourceController.addBeforeAction(func(request Request) {
+	resource.resourceController.addBeforeAction(func(request *Request) {
 		ret, err := resource.app.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&newsletterPersons{})
 		if err != nil {
 			panic(err)
@@ -291,7 +291,7 @@ func initNewsletterResource(resource *Resource) {
 			},
 		}*/
 	resource.ItemAction("preview").Name(Unlocalized("Náhled")).Handler(
-		func(request Request) {
+		func(request *Request) {
 			var newsletter newsletter
 			err := resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			must(err)
@@ -306,7 +306,7 @@ func initNewsletterResource(resource *Resource) {
 	)
 
 	resource.ItemAction("send-preview").Method("POST").Handler(
-		func(request Request) {
+		func(request *Request) {
 			var newsletter newsletter
 			must(resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
 			newsletter.PreviewSentAt = time.Now()
@@ -320,7 +320,7 @@ func initNewsletterResource(resource *Resource) {
 	)
 
 	resource.ItemAction("send").Method("POST").Template("newsletter_sent").DataSource(
-		func(request Request) interface{} {
+		func(request *Request) interface{} {
 			var newsletter newsletter
 			err := resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			if err != nil {
@@ -346,7 +346,7 @@ func initNewsletterResource(resource *Resource) {
 	)
 
 	resource.ItemAction("duplicate").Method("POST").Handler(
-		func(request Request) {
+		func(request *Request) {
 			var newsletter newsletter
 			must(resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
 
@@ -371,7 +371,7 @@ func initNewsletterResource(resource *Resource) {
 	resource.ItemAction("send-preview").Name(Unlocalized("Odeslat náhled")).Template("newsletter_send_preview")
 
 	resource.ItemAction("send").Name(Unlocalized("Odeslat")).Template("newsletter_send").DataSource(
-		func(Request) interface{} {
+		func(*Request) interface{} {
 			recipients, err := resource.app.getNewsletterRecipients()
 			if err != nil {
 				panic(err)

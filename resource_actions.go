@@ -17,7 +17,7 @@ func initResourceActions(resource *Resource) {
 
 	//list action
 	resource.Action("").Permission(resource.canView).Name(resource.name).IsWide().Template("admin_list").DataSource(
-		func(request Request) interface{} {
+		func(request *Request) interface{} {
 			listData, err := resource.getListHeader(request.getUser())
 			must(err)
 			return listData
@@ -25,7 +25,7 @@ func initResourceActions(resource *Resource) {
 	)
 
 	resource.Action("new").Permission(resource.canCreate).Template("admin_form").Name(messages.GetNameFunction("admin_new")).DataSource(
-		func(request Request) interface{} {
+		func(request *Request) interface{} {
 			user := request.getUser()
 			var item interface{}
 			resource.newItem(&item)
@@ -43,7 +43,7 @@ func initResourceActions(resource *Resource) {
 		},
 	)
 	resource.Action("").Method("POST").Permission(resource.canCreate).Handler(
-		func(request Request) {
+		func(request *Request) {
 			user := request.getUser()
 			validateCSRF(request)
 			var item interface{}
@@ -77,7 +77,7 @@ func initResourceActions(resource *Resource) {
 	)
 
 	resource.ItemAction("").IsWide().Template("admin_views").Permission(resource.canView).DataSource(
-		func(request Request) interface{} {
+		func(request *Request) interface{} {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
@@ -97,7 +97,7 @@ func initResourceActions(resource *Resource) {
 	)
 
 	resource.ItemAction("edit").Name(messages.GetNameFunction("admin_edit")).Permission(resource.canEdit).Template("admin_form").DataSource(
-		func(request Request) interface{} {
+		func(request *Request) interface{} {
 			user := request.getUser()
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
@@ -119,7 +119,7 @@ func initResourceActions(resource *Resource) {
 	)
 
 	resource.ItemAction("edit").Method("POST").Permission(resource.canEdit).Handler(
-		func(request Request) {
+		func(request *Request) {
 			user := request.getUser()
 			validateCSRF(request)
 			id, err := strconv.Atoi(request.Params().Get("id"))
@@ -168,7 +168,7 @@ func initResourceActions(resource *Resource) {
 	)
 
 	resource.ItemAction("delete").Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete")).Template("admin_delete").DataSource(
-		func(request Request) interface{} {
+		func(request *Request) interface{} {
 			user := request.getUser()
 			ret := map[string]interface{}{}
 			form := newForm()
@@ -187,7 +187,7 @@ func initResourceActions(resource *Resource) {
 	)
 
 	resource.ItemAction("delete").Permission(resource.canDelete).Method("POST").Handler(
-		func(request Request) {
+		func(request *Request) {
 			user := request.getUser()
 			validateCSRF(request)
 			id, err := strconv.Atoi(request.Params().Get("id"))
@@ -218,7 +218,7 @@ func initResourceActions(resource *Resource) {
 
 	if resource.previewURL != nil {
 		resource.ItemAction("preview").Name(messages.GetNameFunction("admin_preview")).Handler(
-			func(request Request) {
+			func(request *Request) {
 				var item interface{}
 				resource.newItem(&item)
 				must(app.Query().WhereIs("id", request.Params().Get("id")).Get(item))
@@ -231,13 +231,13 @@ func initResourceActions(resource *Resource) {
 
 	if resource.activityLog {
 		resource.Action("history").Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resource.canEdit).DataSource(
-			func(request Request) interface{} {
+			func(request *Request) interface{} {
 				return app.getHistory(resource, 0)
 			},
 		)
 
 		resource.ItemAction("history").Name(messages.GetNameFunction("admin_history")).Permission(resource.canEdit).Template("admin_history").DataSource(
-			func(request Request) interface{} {
+			func(request *Request) interface{} {
 				id, err := strconv.Atoi(request.Params().Get("id"))
 				must(err)
 

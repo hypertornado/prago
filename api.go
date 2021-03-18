@@ -12,8 +12,8 @@ type API struct {
 	url         string
 	permission  Permission
 	resource    *Resource
-	handler     func(Request)
-	handlerJSON func(Request) interface{}
+	handler     func(*Request)
+	handlerJSON func(*Request) interface{}
 }
 
 func newAPI(app *App, url string) *API {
@@ -52,12 +52,12 @@ func (api *API) Permission(permission Permission) *API {
 	return api
 }
 
-func (api *API) Handler(handler func(Request)) *API {
+func (api *API) Handler(handler func(*Request)) *API {
 	api.handler = handler
 	return api
 }
 
-func (api *API) HandlerJSON(handler func(Request) interface{}) *API {
+func (api *API) HandlerJSON(handler func(*Request) interface{}) *API {
 	api.handlerJSON = handler
 	return api
 }
@@ -96,7 +96,7 @@ func (api *API) bindAPI() error {
 		return errors.New("no handler for API set")
 	}
 
-	var fn = func(request Request) {
+	var fn = func(request *Request) {
 		user := request.getUser()
 		if !api.app.authorize(user, api.permission) {
 			renderAPINotAuthorized(request)
@@ -128,15 +128,15 @@ func (api *API) bindAPI() error {
 	return nil
 }
 
-func renderAPINotAuthorized(request Request) {
+func renderAPINotAuthorized(request *Request) {
 	renderAPICode(request, 403)
 }
 
-func renderAPINotFound(request Request) {
+func renderAPINotFound(request *Request) {
 	renderAPICode(request, 404)
 }
 
-func renderAPICode(request Request, code int) {
+func renderAPICode(request *Request, code int) {
 	var message string
 	switch code {
 	case 403:

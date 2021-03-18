@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (app App) recoveryFunction(p Request, recoveryData interface{}) {
+func (app App) recoveryFunction(p *Request, recoveryData interface{}) {
 	duration := time.Now().Sub(p.receivedAt)
 
 	if app.developmentMode {

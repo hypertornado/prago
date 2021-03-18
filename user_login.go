@@ -10,7 +10,7 @@ import (
 func initUserLogin(resource *Resource) {
 
 	resource.ItemAction("loginas").Name(Unlocalized("Přihlásit se jako")).Permission(permissionSysadmin).Handler(
-		func(request Request) {
+		func(request *Request) {
 			u := request.getUser()
 			if !u.IsSysadmin {
 				panic("access denied")
@@ -40,7 +40,7 @@ func initUserLogin(resource *Resource) {
 		return form
 	}
 
-	renderLogin := func(request Request, form *form, locale string) {
+	renderLogin := func(request *Request, form *form, locale string) {
 		renderNavigationPageNoLogin(request, page{
 			App:          resource.app,
 			Navigation:   resource.app.getNologinNavigation(locale, "login"),
@@ -49,13 +49,13 @@ func initUserLogin(resource *Resource) {
 		})
 	}
 
-	resource.app.accessController.get(resource.getURL("login"), func(request Request) {
+	resource.app.accessController.get(resource.getURL("login"), func(request *Request) {
 		locale := getLocale(request)
 		form := loginForm(locale)
 		renderLogin(request, form, locale)
 	})
 
-	resource.app.accessController.post(resource.getURL("login"), func(request Request) {
+	resource.app.accessController.post(resource.getURL("login"), func(request *Request) {
 		email := request.Params().Get("email")
 		email = fixEmail(email)
 		password := request.Params().Get("password")

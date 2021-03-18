@@ -111,7 +111,7 @@ func (f File) GetExtension() string {
 	return extension
 }
 
-func getOldRedirectParams(request Request, app *App) (uuid, name string, err error) {
+func getOldRedirectParams(request *Request, app *App) (uuid, name string, err error) {
 	name = request.Params().Get("name")
 	uuid = fmt.Sprintf("%s%s%s%s%s%s",
 		request.Params().Get("a"),
@@ -160,7 +160,7 @@ func initFilesResource(resource *Resource) {
 			}
 		})
 
-	resource.resourceController.addBeforeAction(func(request Request) {
+	resource.resourceController.addBeforeAction(func(request *Request) {
 		if request.Request().Method == "POST" && strings.HasSuffix(request.Request().URL.Path, "/delete") {
 			idStr := request.Params().Get("id")
 			id, err := strconv.Atoi(idStr)
@@ -175,7 +175,7 @@ func initFilesResource(resource *Resource) {
 		}
 	})
 
-	app.mainController.get("/files/thumb/:size/:a/:b/:c/:d/:e/:name", func(request Request) {
+	app.mainController.get("/files/thumb/:size/:a/:b/:c/:d/:e/:name", func(request *Request) {
 		uuid, name, err := getOldRedirectParams(request, app)
 		if err != nil {
 			panic(err)
@@ -202,7 +202,7 @@ func initFilesResource(resource *Resource) {
 		return false
 	})
 
-	app.mainController.get("/files/original/:a/:b/:c/:d/:e/:name", func(request Request) {
+	app.mainController.get("/files/original/:a/:b/:c/:d/:e/:name", func(request *Request) {
 		uuid, name, err := getOldRedirectParams(request, app)
 		must(err)
 		request.Redirect(filesCDN.GetFileURL(uuid, name))
@@ -211,7 +211,7 @@ func initFilesResource(resource *Resource) {
 	resource.defaultItemsPerPage = 100
 
 	//TODO: authorize
-	resource.resourceController.post(resource.getURL(""), func(request Request) {
+	resource.resourceController.post(resource.getURL(""), func(request *Request) {
 		validateCSRF(request)
 
 		multipartFiles := request.Request().MultipartForm.File["uid"]
@@ -228,7 +228,7 @@ func initFilesResource(resource *Resource) {
 	})
 
 	resource.Action("getcdnurl").Method("POST").Handler(
-		func(request Request) {
+		func(request *Request) {
 			uuid := request.Params().Get("uuid")
 			size := request.Params().Get("size")
 
@@ -271,7 +271,7 @@ type imageResponse struct {
 	Thumb       string
 }
 
-func writeFileResponse(request Request, files []*File) {
+func writeFileResponse(request *Request, files []*File) {
 	responseData := []*imageResponse{}
 	for _, v := range files {
 		ir := &imageResponse{

@@ -39,7 +39,7 @@ func (menu mainMenu) GetTitle() string {
 	return ""
 }
 
-func (app *App) getMainMenu(request Request) (ret mainMenu) {
+func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 	user := request.getUser()
 
 	adminSectionName := app.name(user.Locale)

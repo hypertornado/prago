@@ -10,7 +10,7 @@ import (
 func initUserRegistration(resource *Resource) {
 	app := resource.app
 
-	app.accessController.get(resource.getURL("confirm_email"), func(request Request) {
+	app.accessController.get(resource.getURL("confirm_email"), func(request *Request) {
 		email := request.Params().Get("email")
 		token := request.Params().Get("token")
 
@@ -62,7 +62,7 @@ func initUserRegistration(resource *Resource) {
 		return form
 	}
 
-	renderRegistration := func(request Request, form *form, locale string) {
+	renderRegistration := func(request *Request, form *form, locale string) {
 		renderNavigationPageNoLogin(request, page{
 			App:          app,
 			Navigation:   app.getNologinNavigation(locale, "registration"),
@@ -71,12 +71,12 @@ func initUserRegistration(resource *Resource) {
 		})
 	}
 
-	app.accessController.get(resource.getURL("registration"), func(request Request) {
+	app.accessController.get(resource.getURL("registration"), func(request *Request) {
 		locale := getLocale(request)
 		renderRegistration(request, newUserForm(locale), locale)
 	})
 
-	app.accessController.post(resource.getURL("registration"), func(request Request) {
+	app.accessController.post(resource.getURL("registration"), func(request *Request) {
 		locale := getLocale(request)
 		form := newUserForm(locale)
 
@@ -118,7 +118,7 @@ func initUserRegistration(resource *Resource) {
 
 }
 
-func (user User) sendConfirmEmail(request Request, app *App) error {
+func (user User) sendConfirmEmail(request *Request, app *App) error {
 
 	if user.emailConfirmed() {
 		return errors.New("email already confirmed")
@@ -148,7 +148,7 @@ func (user User) sendConfirmEmail(request Request, app *App) error {
 
 }
 
-func (user User) sendAdminEmail(request Request, a *App) error {
+func (user User) sendAdminEmail(request *Request, a *App) error {
 	if a.noReplyEmail == "" {
 		return errors.New("no reply email empty")
 	}

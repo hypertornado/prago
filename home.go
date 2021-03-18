@@ -20,7 +20,7 @@ type homeData struct {
 	Actions []buttonData
 }
 
-func (app *App) getHomeData(request Request) interface{} {
+func (app *App) getHomeData(request *Request) interface{} {
 	user := request.getUser()
 
 	ret := []homeData{}

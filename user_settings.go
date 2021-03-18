@@ -21,13 +21,13 @@ func (app *App) initUserSettings() {
 	}
 
 	app.Action("settings").Name(messages.GetNameFunction("admin_settings")).userMenu().Template("admin_form").DataSource(
-		func(request Request) interface{} {
+		func(request *Request) interface{} {
 			return settingsForm(request.getUser()).AddCSRFToken(request)
 		},
 	)
 
 	app.Action("settings").Method("POST").Handler(
-		func(request Request) {
+		func(request *Request) {
 			validateCSRF(request)
 			user := request.getUser()
 			form := settingsForm(user).AddCSRFToken(request)
@@ -45,7 +45,7 @@ func (app *App) initUserSettings() {
 			}
 		})
 
-	changePasswordForm := func(request Request) *form {
+	changePasswordForm := func(request *Request) *form {
 		user := request.getUser()
 		locale := getLocale(request)
 		oldValidator := newValidator(func(field *formItem) bool {
@@ -70,12 +70,12 @@ func (app *App) initUserSettings() {
 	}
 
 	app.Action("password").Name(messages.GetNameFunction("admin_password_change")).userMenu().Template("admin_form").DataSource(
-		func(request Request) interface{} {
+		func(request *Request) interface{} {
 			return changePasswordForm(request)
 		},
 	)
 
-	app.Action("password").Method("POST").Handler(func(request Request) {
+	app.Action("password").Method("POST").Handler(func(request *Request) {
 		form := changePasswordForm(request)
 		form.BindData(request.Params())
 		form.Validate()
@@ -97,11 +97,11 @@ func (app *App) initUserSettings() {
 		}
 	})
 
-	app.Action("redirect-to-homepage").Name(messages.GetNameFunction("admin_homepage")).userMenu().Handler(func(request Request) {
+	app.Action("redirect-to-homepage").Name(messages.GetNameFunction("admin_homepage")).userMenu().Handler(func(request *Request) {
 		request.Redirect("/")
 	})
 
-	app.Action("logout").Name(messages.GetNameFunction("admin_log_out")).userMenu().Handler(func(request Request) {
+	app.Action("logout").Name(messages.GetNameFunction("admin_log_out")).userMenu().Handler(func(request *Request) {
 		validateCSRF(request)
 		session := request.GetData("session").(*sessions.Session)
 		delete(session.Values, "user_id")

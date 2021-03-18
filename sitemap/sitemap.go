@@ -2,11 +2,12 @@ package sitemap
 
 import (
 	"fmt"
+
 	"github.com/hypertornado/prago"
 )
 
 //Sitemap renders sites sitemap xml file
-func Sitemap(request prago.Request, urls []string) {
+func Sitemap(request *prago.Request, urls []string) {
 	request.Response().Header().Set("Content-Type", "text/xml")
 	request.Response().WriteHeader(200)
 	prev := `<?xml version="1.0" encoding="UTF-8"?><urlset

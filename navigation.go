@@ -34,15 +34,15 @@ func isTabVisible(tabs []tab, pos int) bool {
 	return true
 }
 
-func renderNavigationPage(request Request, page page) {
+func renderNavigationPage(request *Request, page page) {
 	renderNavigation(request, page, "admin_layout")
 }
 
-func renderNavigationPageNoLogin(request Request, page page) {
+func renderNavigationPageNoLogin(request *Request, page page) {
 	renderNavigation(request, page, "admin_layout_nologin")
 }
 
-func renderNavigation(request Request, page page, viewName string) {
+func renderNavigation(request *Request, page page, viewName string) {
 	var name string
 	name = page.Name
 	for _, v := range page.Navigation.Tabs {

@@ -36,7 +36,7 @@ func (app *App) initTaskManager() {
 	go app.taskManager.startCRON()
 
 	app.Action("_tasks").Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(
-		func(request Request) interface{} {
+		func(request *Request) interface{} {
 			var ret = map[string]interface{}{}
 			user := request.getUser()
 			ret["currentuser"] = user
@@ -48,12 +48,12 @@ func (app *App) initTaskManager() {
 		},
 	)
 
-	app.adminController.get(app.getAdminURL("_tasks/running"), func(request Request) {
+	app.adminController.get(app.getAdminURL("_tasks/running"), func(request *Request) {
 		request.SetData("taskmonitor", app.taskManager.getTaskMonitor(request.getUser()))
 		request.RenderView("taskmonitor")
 	})
 
-	app.adminController.post(app.getAdminURL("_tasks/runtask"), func(request Request) {
+	app.adminController.post(app.getAdminURL("_tasks/runtask"), func(request *Request) {
 		id := request.Request().FormValue("id")
 		csrf := request.Request().FormValue("csrf")
 		user := request.getUser()
@@ -67,7 +67,7 @@ func (app *App) initTaskManager() {
 		request.Redirect(app.getAdminURL("_tasks"))
 	})
 
-	app.adminController.get(app.getAdminURL("_tasks/stoptask"), func(request Request) {
+	app.adminController.get(app.getAdminURL("_tasks/stoptask"), func(request *Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
 		user := request.getUser()
@@ -81,7 +81,7 @@ func (app *App) initTaskManager() {
 		request.Redirect(app.getAdminURL("_tasks"))
 	})
 
-	app.adminController.get(app.getAdminURL("_tasks/deletetask"), func(request Request) {
+	app.adminController.get(app.getAdminURL("_tasks/deletetask"), func(request *Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
 		user := request.getUser()

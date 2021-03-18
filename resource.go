@@ -72,7 +72,7 @@ func (app *App) Resource(item interface{}) *Resource {
 
 	for i := 0; i < typ.NumField(); i++ {
 		if ast.IsExported(typ.Field(i).Name) {
-			field := newField(typ.Field(i), i, ret.fieldTypes)
+			field := ret.newField(typ.Field(i), i, ret.fieldTypes)
 			if field.Tags["prago-type"] == "order" {
 				ret.orderFieldName = field.Name
 				ret.orderColumnName = field.ColumnName
@@ -94,10 +94,6 @@ func (app *App) Resource(item interface{}) *Resource {
 	app.resourceNameMap[ret.id] = ret
 
 	app.initResource(ret)
-
-	/*if initFunction != nil {
-		initFunction(ret)
-	}*/
 
 	return ret
 }
@@ -158,7 +154,7 @@ func (app *App) getResourceByName(name string) *Resource {
 }
 
 func (app *App) initResource(resource *Resource) {
-	resource.resourceController.addAroundAction(func(request Request, next func()) {
+	resource.resourceController.addAroundAction(func(request *Request, next func()) {
 		user := request.getUser()
 		if !app.authorize(user, resource.canView) {
 			render403(request)

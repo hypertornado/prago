@@ -339,7 +339,7 @@ func (app *App) initSearchInner() {
 	}()
 
 	app.Action("_search").Name(Unlocalized("Vyhledávání")).Template("admin_search").IsWide().hiddenMenu().DataSource(
-		func(request Request) interface{} {
+		func(request *Request) interface{} {
 			q := request.Params().Get("q")
 			pageStr := request.Params().Get("page")
 
@@ -394,7 +394,7 @@ func (app *App) initSearchInner() {
 	)
 
 	app.API("search-suggest").Handler(
-		func(request Request) {
+		func(request *Request) {
 			results, err := adminSearch.Suggest(request.Params().Get("q"))
 			if err != nil {
 				app.Log().Println(err)

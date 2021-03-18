@@ -22,7 +22,7 @@ func (app *App) initSessions() {
 	}
 
 	app.accessController.addAroundAction(
-		func(request Request, next func()) {
+		func(request *Request, next func()) {
 			session, err := cookieStore.Get(request.Request(), app.codeName)
 
 			if err != nil {
