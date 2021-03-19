@@ -17,7 +17,7 @@ type User struct {
 	Name     string `prago-preview:"true"`
 	Email    string `prago-unique:"true" prago-preview:"true" prago-order:"true"`
 	Role     string `prago-preview:"true" prago-type:"role" prago-description:"Role"`
-	Password string `prago-view:"_"`
+	Password string `prago-view:"nobody"`
 	Locale   string
 	//IsSysadmin        bool `prago-preview:"true" prago-description:"Sysadmin"`
 	IsActive          bool

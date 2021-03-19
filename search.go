@@ -178,7 +178,10 @@ func (e *adminSearch) Search(q string, role string, page int) ([]*searchItem, in
 	return ret, searchResult.TotalHits(), nil
 }
 
+//TODO: add roles to suggest
 func (e *adminSearch) Suggest(q string) ([]*searchItem, error) {
+	//disabled
+	return []*searchItem{}, nil
 	suggesterName := "completion_suggester"
 	cs := elastic.NewCompletionSuggester(suggesterName)
 	cs = cs.Field("suggest")
@@ -339,7 +342,7 @@ func (app *App) initSearchInner() {
 		}
 	}()
 
-	app.Action("_search").Name(Unlocalized("Vyhledávání")).Template("admin_search").IsWide().hiddenMenu().DataSource(
+	app.Action("_search").Permission(loggedPermission).Name(Unlocalized("Vyhledávání")).Template("admin_search").IsWide().hiddenMenu().DataSource(
 		func(request *Request) interface{} {
 			q := request.Params().Get("q")
 			pageStr := request.Params().Get("page")
@@ -394,7 +397,7 @@ func (app *App) initSearchInner() {
 		},
 	)
 
-	app.API("search-suggest").Handler(
+	app.API("search-suggest").Permission(loggedPermission).Handler(
 		func(request *Request) {
 			results, err := adminSearch.Suggest(request.Params().Get("q"))
 			if err != nil {

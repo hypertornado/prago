@@ -18,39 +18,30 @@ func (app *App) initAdminActions() {
 		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
 		request.SetData("locale", localeFromRequest(request))
 		request.SetData("admin_header_prefix", adminPathPrefix)
-		request.SetData("javascripts", app.javascripts)
-		request.SetData("css", app.css)
 	})
-	app.initSessions()
 
 	googleAPIKey := app.ConfigurationGetStringWithFallback("google", "")
 	app.adminController.addAroundAction(func(request *Request, next func()) {
-		if request.user == nil {
+		if request.user == nil || !request.user.IsActive {
 			request.Redirect(app.getAdminURL("user/login"))
 		}
 
-		request.SetData("_csrfToken", app.generateCSRFToken(request.user))
+		request.SetData("javascripts", app.javascripts)
+		request.SetData("css", app.css)
+
 		request.SetData("currentuser", request.user)
 		request.SetData("locale", request.user.Locale)
-		request.SetData("gravatar", request.user.gravatarURL())
+		//request.SetData("gravatar", request.user.gravatarURL())
 
 		if request.user.Role == "" && !request.user.emailConfirmed() {
 			addCurrentFlashMessage(request, messages.Get(request.user.Locale, "admin_flash_not_confirmed"))
 		}
 
 		if request.user.Role == "" {
-			var sysadmin User
-			err := app.Query().WhereIs("role", sysadminRoleName).Get(&sysadmin)
-			var sysadminEmail string
-			if err == nil {
-				sysadminEmail = sysadmin.Email
-			}
-
-			addCurrentFlashMessage(request, messages.Get(request.user.Locale, "admin_flash_not_approved", sysadminEmail))
+			addCurrentFlashMessage(request, messages.Get(request.user.Locale, "admin_flash_not_approved"))
 		}
 
 		request.SetData("main_menu", app.getMainMenu(request))
-
 		request.SetData("google", googleAPIKey)
 
 		next()

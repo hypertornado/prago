@@ -17,20 +17,17 @@ func (app *App) generateCSRFToken(user *User) string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-//CSRFToken returns csrf token from request
-func csrfToken(request *Request) string {
-	return request.GetData("_csrfToken").(string)
+func (request *Request) csrfToken() string {
+	return request.app.generateCSRFToken(request.user)
 }
 
-//AddCSRFToken adds csrf token to form
 func (form *form) AddCSRFToken(request *Request) *form {
-	form.CSRFToken = csrfToken(request)
+	form.CSRFToken = request.csrfToken()
 	return form
 }
 
-//ValidateCSRF validates csrf token for request
 func validateCSRF(request *Request) {
-	token := csrfToken(request)
+	token := request.csrfToken()
 	if len(token) == 0 {
 		panic("token not set")
 	}

@@ -30,6 +30,13 @@ func (app *App) initAccessManager() {
 //Permission for access
 type Permission string
 
+func (app *App) validatePermission(permission Permission) error {
+	if app.accessManager.permissions[permission] == false {
+		return fmt.Errorf("Unknown permission '%s'", permission)
+	}
+	return nil
+}
+
 func (app *App) getRoleFieldTypeData() [][2]string {
 	roleNames := []string{""}
 	for k := range app.accessManager.roles {

@@ -437,8 +437,8 @@ var m = map[string]map[string]string{
 		"cs": "Váš email není potvrzen. Můžete ho potvrdit kliknutím na odkaz v emailu, který jsme vám poslali",
 	},
 	"admin_flash_not_approved": {
-		"en": "Your account is not approved. Ask admin %s to be approved.",
-		"cs": "Váš účet není potvrzen. Požádejte prosím administrátora %s, aby vám ho schválil.",
+		"en": "Your account waits to be approved by admin.",
+		"cs": "Váš účet čeká na schválení administrátorem.",
 	},
 
 	"admin_files": {

@@ -125,26 +125,31 @@ func (resource *Resource) ItemsPerPage(itemsPerPage int64) *Resource {
 }
 
 func (resource *Resource) PermissionView(permission Permission) *Resource {
+	must(resource.app.validatePermission(permission))
 	resource.canView = permission
 	return resource
 }
 
 func (resource *Resource) PermissionEdit(permission Permission) *Resource {
+	must(resource.app.validatePermission(permission))
 	resource.canEdit = permission
 	return resource
 }
 
 func (resource *Resource) PermissionCreate(permission Permission) *Resource {
+	must(resource.app.validatePermission(permission))
 	resource.canCreate = permission
 	return resource
 }
 
 func (resource *Resource) PermissionDelete(permission Permission) *Resource {
+	must(resource.app.validatePermission(permission))
 	resource.canDelete = permission
 	return resource
 }
 
 func (resource *Resource) PermissionExport(permission Permission) *Resource {
+	must(resource.app.validatePermission(permission))
 	resource.canExport = permission
 	return resource
 }

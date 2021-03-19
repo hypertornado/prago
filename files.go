@@ -50,11 +50,11 @@ func (app *App) GetFiles(ids string) []*File {
 type File struct {
 	ID          int64  `prago-order-desc:"true" prago-preview:"true"`
 	UID         string `prago-unique:"true" prago-preview:"true" prago-type:"cdnfile" prago-description:"File"`
-	Name        string `prago-edit:"_"`
+	Name        string `prago-edit:"nobody"`
 	Description string `prago-type:"text" prago-preview:"true"`
-	User        int64  `prago-type:"relation" prago-edit:"_"`
-	Width       int64  `prago-edit:"_"`
-	Height      int64  `prago-edit:"_"`
+	User        int64  `prago-type:"relation" prago-edit:"nobody"`
+	Width       int64  `prago-edit:"nobody"`
+	Height      int64  `prago-edit:"nobody"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

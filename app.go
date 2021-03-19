@@ -81,18 +81,18 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 		cache:          cachelib.NewCache(),
 	}
 
+	app.appController = app.mainController.subController()
+	app.accessController = app.mainController.subController()
+	app.accessController.priorityRouter = true
+
 	app.initConfig()
+	app.initSessions()
 	app.initAccessManager()
 	app.initStaticFilesHandler()
 
 	app.name = Unlocalized(app.codeName)
 	app.resourceMap = make(map[reflect.Type]*Resource)
 	app.resourceNameMap = make(map[string]*Resource)
-
-	app.appController = app.mainController.subController()
-
-	app.accessController = app.mainController.subController()
-	app.accessController.priorityRouter = true
 
 	app.sendgridKey = app.ConfigurationGetStringWithFallback("sendgridApi", "")
 	app.noReplyEmail = app.ConfigurationGetStringWithFallback("noReplyEmail", "")

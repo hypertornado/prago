@@ -66,6 +66,18 @@ func (resource *Resource) newField(f reflect.StructField, order int, fieldTypes 
 		ret.Unique = true
 	}
 
+	for _, v := range []string{
+		"prago-edit",
+		"prago-view",
+	} {
+		if ret.Tags[v] != "" {
+			err := resource.app.validatePermission(Permission(ret.Tags[v]))
+			if err != nil {
+				panic(fmt.Sprintf("validating permission '%s' on field '%s' of resource '%s': %s", v, f.Name, resource.name("en"), err))
+			}
+		}
+	}
+
 	description := ret.Tags["prago-description"]
 	if len(description) > 0 {
 		ret.HumanName = Unlocalized(description)

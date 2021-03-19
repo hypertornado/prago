@@ -48,6 +48,7 @@ func (api *API) Method(method string) *API {
 }
 
 func (api *API) Permission(permission Permission) *API {
+	must(api.app.validatePermission(permission))
 	api.permission = permission
 	return api
 }

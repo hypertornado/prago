@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"compress/gzip"
-	"context"
 	"errors"
 	"fmt"
 	"image"
@@ -23,11 +22,8 @@ import (
 	_ "image/png"
 
 	"github.com/hypertornado/prago"
-	"github.com/hypertornado/prago/build"
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 	"github.com/hypertornado/prago/utils"
-
-	"golang.org/x/sync/semaphore"
 )
 
 const version = "2020.6"
@@ -43,8 +39,8 @@ var extensionRegex = regexp.MustCompile("^[a-zA-Z0-9]{1,10}$")
 
 var cmykProfilePath = os.Getenv("HOME") + "/.pragocdn/cmyk.icm"
 
-var sem = semaphore.NewWeighted(10)
-var semCtx = context.Background()
+//var sem = semaphore.NewWeighted(10)
+//var semCtx = context.Background()
 
 func main() {
 
@@ -62,8 +58,8 @@ func main() {
 		accounts[v.Name] = &config.Accounts[k]
 	}
 
-	prago.NewApp("pragocdn", version, func(app *prago.App) {
-		build.CreateBuildHelper(app, build.BuildSettings{})
+	prago.Application("pragocdn", version, func(app *prago.App) {
+		//build.CreateBuildHelper(app, build.BuildSettings{})
 		//app.AddMiddleware(prago.MiddlewareServer{Fn: start})
 		start(app)
 	})
@@ -117,12 +113,12 @@ func uploadFile(account CDNConfigAccount, extension string, inData io.Reader) (*
 }
 
 func start(app *prago.App) {
-	app.MainController().Get("/", func(request prago.Request) {
+	app.GET("/", func(request *prago.Request) {
 		out := fmt.Sprintf("Prago CDN\nhttps://www.prago-cdn.com\nversion %s\nadmin Ondřej Odcházel, https//www.odchazel.com", version)
 		http.Error(request.Response(), out, 200)
 	})
 
-	app.MainController().Post("/:account/upload/:extension", func(request prago.Request) {
+	app.POST("/:account/upload/:extension", func(request *prago.Request) {
 		defer request.Request().Body.Close()
 		accountName := request.Params().Get("account")
 		account := accounts[accountName]
@@ -149,7 +145,7 @@ func start(app *prago.App) {
 		request.RenderJSON(data)
 	})
 
-	app.MainController().Get("/:account/:uuid/metadata", func(request prago.Request) {
+	app.GET("/:account/:uuid/metadata", func(request *prago.Request) {
 		metadata, err := getMetadata(
 			request.Params().Get("account"),
 			request.Params().Get("uuid"),
@@ -160,7 +156,7 @@ func start(app *prago.App) {
 		request.RenderJSON(metadata)
 	})
 
-	app.MainController().Get("/:account/:uuid/:format/:hash/:name", func(request prago.Request) {
+	app.GET("/:account/:uuid/:format/:hash/:name", func(request *prago.Request) {
 		errCode, err, stream, mimeExtension, size := getFile(
 			request.Params().Get("account"),
 			request.Params().Get("uuid"),
@@ -173,7 +169,7 @@ func start(app *prago.App) {
 		}
 
 		if err != nil {
-			if app.DevelopmentMode {
+			if app.DevelopmentMode() {
 				panic(err)
 			} else {
 				path := request.Request().URL.Path
@@ -218,7 +214,7 @@ func start(app *prago.App) {
 		}
 	})
 
-	app.MainController().Delete("/:account/:uuid", func(request prago.Request) {
+	app.DELETE("/:account/:uuid", func(request *prago.Request) {
 		err := deleteFile(
 			request.Params().Get("account"),
 			request.Request().Header.Get("X-Authorization"),
@@ -582,10 +578,10 @@ func vipsThumbnailProfile(originalPath, outputFilePath, size, extension string, 
 	return nil
 }
 
-func render404(request prago.Request) {
+func render404(request *prago.Request) {
 	http.Error(request.Response(), "Not Found", 404)
 }
 
-func render498(request prago.Request) {
+func render498(request *prago.Request) {
 	http.Error(request.Response(), "Wrong Hash", 498)
 }

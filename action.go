@@ -103,6 +103,7 @@ func (action *Action) Name(name func(string) string) *Action {
 
 //Permission sets action permission
 func (action *Action) Permission(permission Permission) *Action {
+	must(action.app.validatePermission(permission))
 	action.permission = permission
 	return action
 }
