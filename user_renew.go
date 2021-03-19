@@ -136,7 +136,7 @@ func (user User) getRenewURL(request *Request, app *App) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)
 	urlValues.Add("token", user.emailToken(app))
-	return app.ConfigurationGetString("baseUrl") + app.getAdminURL("/user/renew_password") + "?" + urlValues.Encode()
+	return app.ConfigurationGetString("baseUrl") + app.getAdminURL("user/renew_password") + "?" + urlValues.Encode()
 }
 
 func (user User) sendRenew(request *Request, app *App) error {

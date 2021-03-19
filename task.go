@@ -275,8 +275,9 @@ func (tg *TaskGroup) Task(id string) *Task {
 	}
 
 	task := &Task{
-		id:    id,
-		group: tg,
+		id:         id,
+		permission: sysadminPermission,
+		group:      tg,
 	}
 
 	tg.tasks = append(tg.tasks, task)

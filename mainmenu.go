@@ -59,6 +59,9 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 		if v.isHiddenMenu {
 			continue
 		}
+		if !request.authorize(v.permission) {
+			continue
+		}
 
 		var selected bool
 		fullURL := app.getAdminURL(v.url)
@@ -115,6 +118,9 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 			continue
 		}
 		if v.isHiddenMenu {
+			continue
+		}
+		if !request.authorize(v.permission) {
 			continue
 		}
 

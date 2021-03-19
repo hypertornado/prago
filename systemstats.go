@@ -12,7 +12,7 @@ import (
 func (app *App) initSystemStats() {
 	startedAt := time.Now()
 
-	app.Action("_stats").Name(Unlocalized("Prago Stats")).Permission(permissionSysadmin).Template("admin_systemstats").DataSource(
+	app.Action("_stats").Name(Unlocalized("Prago Stats")).Permission(sysadminPermission).Template("admin_systemstats").DataSource(
 		func(request *Request) interface{} {
 
 			stats := [][2]string{}
@@ -95,7 +95,7 @@ func (app *App) initSystemStats() {
 
 			ret := map[string]interface{}{}
 
-			ret["roles"] = app.roles
+			ret["roles"] = app.accessManager.roles
 			ret["stats"] = stats
 			ret["configStats"] = configStats
 			ret["databaseStats"] = databaseStats
@@ -125,7 +125,7 @@ type accessViewRole struct {
 
 func getResourceAccessView(app *App) accessView {
 	ret := accessView{}
-	for k := range app.roles {
+	for k := range app.accessManager.roles {
 		ret.Roles = append(ret.Roles, k)
 	}
 
@@ -139,7 +139,7 @@ func getResourceAccessView(app *App) accessView {
 			yeah := "+"
 			no := "-"
 			s := ""
-			user := &User{Role: v, IsAdmin: true}
+			user := &User{Role: v}
 			if app.authorize(user, resource.canView) {
 				s += yeah
 			} else {

@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func initResourceActions(resource *Resource) {
+func initDefaultResourceActions(resource *Resource) {
 	app := resource.app
 	if resource.canCreate == "" {
 		resource.canCreate = resource.canEdit
@@ -16,7 +16,7 @@ func initResourceActions(resource *Resource) {
 	}
 
 	//list action
-	resource.Action("").Permission(resource.canView).Name(resource.name).IsWide().Template("admin_list").DataSource(
+	resource.Action("").priority().Permission(resource.canView).Name(resource.name).IsWide().Template("admin_list").DataSource(
 		func(request *Request) interface{} {
 			listData, err := resource.getListHeader(request.user)
 			must(err)
@@ -24,7 +24,7 @@ func initResourceActions(resource *Resource) {
 		},
 	)
 
-	resource.Action("new").Permission(resource.canCreate).Template("admin_form").Name(messages.GetNameFunction("admin_new")).DataSource(
+	resource.Action("new").priority().Permission(resource.canCreate).Template("admin_form").Name(messages.GetNameFunction("admin_new")).DataSource(
 		func(request *Request) interface{} {
 			var item interface{}
 			resource.newItem(&item)
@@ -74,7 +74,7 @@ func initResourceActions(resource *Resource) {
 		},
 	)
 
-	resource.ItemAction("").IsWide().Template("admin_views").Permission(resource.canView).DataSource(
+	resource.ItemAction("").priority().IsWide().Template("admin_views").Permission(resource.canView).DataSource(
 		func(request *Request) interface{} {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
@@ -89,12 +89,11 @@ func initResourceActions(resource *Resource) {
 				}
 				panic(err)
 			}
-
 			return resource.getViews(id, item, request.user)
 		},
 	)
 
-	resource.ItemAction("edit").Name(messages.GetNameFunction("admin_edit")).Permission(resource.canEdit).Template("admin_form").DataSource(
+	resource.ItemAction("edit").priority().Name(messages.GetNameFunction("admin_edit")).Permission(resource.canEdit).Template("admin_form").DataSource(
 		func(request *Request) interface{} {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
@@ -164,7 +163,7 @@ func initResourceActions(resource *Resource) {
 		},
 	)
 
-	resource.ItemAction("delete").Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete")).Template("admin_delete").DataSource(
+	resource.ItemAction("delete").priority().Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete")).Template("admin_delete").DataSource(
 		func(request *Request) interface{} {
 			ret := map[string]interface{}{}
 			form := newForm()
@@ -212,7 +211,7 @@ func initResourceActions(resource *Resource) {
 	)
 
 	if resource.previewURL != nil {
-		resource.ItemAction("preview").Name(messages.GetNameFunction("admin_preview")).Handler(
+		resource.ItemAction("preview").priority().Name(messages.GetNameFunction("admin_preview")).Handler(
 			func(request *Request) {
 				var item interface{}
 				resource.newItem(&item)
@@ -225,13 +224,13 @@ func initResourceActions(resource *Resource) {
 	}
 
 	if resource.activityLog {
-		resource.Action("history").Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resource.canEdit).DataSource(
+		resource.Action("history").priority().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resource.canEdit).DataSource(
 			func(request *Request) interface{} {
 				return app.getHistory(resource, 0)
 			},
 		)
 
-		resource.ItemAction("history").Name(messages.GetNameFunction("admin_history")).Permission(resource.canEdit).Template("admin_history").DataSource(
+		resource.ItemAction("history").priority().Name(messages.GetNameFunction("admin_history")).Permission(resource.canEdit).Template("admin_history").DataSource(
 			func(request *Request) interface{} {
 				id, err := strconv.Atoi(request.Params().Get("id"))
 				must(err)

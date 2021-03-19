@@ -50,7 +50,8 @@ type App struct {
 	fieldTypes  map[string]FieldType
 	javascripts []string
 	css         []string
-	roles       map[string]map[string]bool
+	//roles       map[string]map[string]bool
+	accessManager *accessManager
 
 	apis []*API
 
@@ -81,6 +82,7 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	}
 
 	app.initConfig()
+	app.initAccessManager()
 	app.initStaticFilesHandler()
 
 	app.name = Unlocalized(app.codeName)
@@ -95,7 +97,6 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	app.sendgridKey = app.ConfigurationGetStringWithFallback("sendgridApi", "")
 	app.noReplyEmail = app.ConfigurationGetStringWithFallback("noReplyEmail", "")
 	app.fieldTypes = make(map[string]FieldType)
-	app.roles = make(map[string]map[string]bool)
 
 	app.db = mustConnectDatabase(
 		app.ConfigurationGetStringWithFallback("dbUser", ""),
@@ -127,10 +128,10 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 		initFunction(app)
 	}
 
+	app.initDefaultResourceActions()
 	app.bindAPIs()
 	app.bindAllActions()
 	app.initAdminNotFoundAction()
-	app.initSysadminPermissions()
 	app.initAllAutoRelations()
 
 	return app

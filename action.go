@@ -30,6 +30,7 @@ type Action struct {
 	isWide       bool
 	isUserMenu   bool
 	isHiddenMenu bool
+	isPriority   bool
 }
 
 func (app *App) bindAllActions() {
@@ -61,7 +62,7 @@ func (app *App) bindAllActions() {
 func newAction(app *App, url string) *Action {
 	return &Action{
 		name:       Unlocalized(url),
-		permission: "",
+		permission: sysadminPermission,
 		method:     "GET",
 		url:        url,
 		app:        app,
@@ -113,6 +114,11 @@ func (action *Action) Method(method string) *Action {
 		panic("unsupported method for action: " + method)
 	}
 	action.method = method
+	return action
+}
+
+func (action *Action) priority() *Action {
+	action.isPriority = true
 	return action
 }
 

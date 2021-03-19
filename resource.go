@@ -58,11 +58,11 @@ func (app *App) Resource(item interface{}) *Resource {
 		resourceController:  app.adminController.subController(),
 		defaultItemsPerPage: 200,
 
-		canView:   "",
-		canEdit:   "",
-		canCreate: "",
-		canDelete: "",
-		canExport: "",
+		canView:   sysadminPermission,
+		canEdit:   loggedPermission,
+		canCreate: loggedPermission,
+		canDelete: loggedPermission,
+		canExport: loggedPermission,
 
 		activityLog: true,
 
@@ -161,9 +161,13 @@ func (app *App) initResource(resource *Resource) {
 			next()
 		}
 	})
+}
 
-	initResourceActions(resource)
-	initResourceAPIs(resource)
+func (app *App) initDefaultResourceActions() {
+	for _, v := range app.resources {
+		initDefaultResourceActions(v)
+		initDefaultResourceAPIs(v)
+	}
 }
 
 func (resource Resource) getURL(suffix string) string {

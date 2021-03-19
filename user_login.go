@@ -7,16 +7,10 @@ import (
 
 func initUserLogin(resource *Resource) {
 
-	resource.ItemAction("loginas").Name(Unlocalized("Přihlásit se jako")).Permission(permissionSysadmin).Handler(
+	resource.ItemAction("loginas").Name(Unlocalized("Přihlásit se jako")).Permission(sysadminPermission).Handler(
 		func(request *Request) {
-			if !request.user.IsSysadmin {
-				panic("access denied")
-			}
-
 			id, err := strconv.Atoi(request.Params().Get("id"))
-			if err != nil {
-				panic(err)
-			}
+			must(err)
 
 			var user User
 			must(resource.app.Query().WhereIs("id", id).Get(&user))

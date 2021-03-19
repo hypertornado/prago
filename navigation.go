@@ -18,6 +18,20 @@ type tab struct {
 	Name     string
 	URL      string
 	Selected bool
+	priority bool
+}
+
+func (n navigation) sortByPriority() navigation {
+	var priorityTabs, nonPriorityTabs []tab
+	for _, v := range n.Tabs {
+		if v.priority {
+			priorityTabs = append(priorityTabs, v)
+		} else {
+			nonPriorityTabs = append(nonPriorityTabs, v)
+		}
+	}
+	n.Tabs = append(priorityTabs, nonPriorityTabs...)
+	return n
 }
 
 func (nav page) Logo() string {
@@ -75,6 +89,7 @@ func (resource Resource) getNavigation(user *User, code string) navigation {
 					Name:     name,
 					URL:      resource.getURL(v.url),
 					Selected: trueIfEqual(code, v.url),
+					priority: v.isPriority,
 				})
 			}
 		}
@@ -82,7 +97,7 @@ func (resource Resource) getNavigation(user *User, code string) navigation {
 
 	return navigation{
 		Tabs: tabs,
-	}
+	}.sortByPriority()
 }
 
 func (resource Resource) getItemNavigation(user *User, item interface{}, code string) navigation {
@@ -102,6 +117,7 @@ func (resource Resource) getItemNavigation(user *User, item interface{}, code st
 					Name:     name,
 					URL:      resource.getItemURL(item, v.url),
 					Selected: trueIfEqual(code, v.url),
+					priority: v.isPriority,
 				})
 			}
 		}
@@ -109,7 +125,7 @@ func (resource Resource) getItemNavigation(user *User, item interface{}, code st
 
 	return navigation{
 		Tabs: tabs,
-	}
+	}.sortByPriority()
 }
 
 func (app *App) getNologinNavigation(language, code string) navigation {
@@ -135,7 +151,7 @@ func (app *App) getNologinNavigation(language, code string) navigation {
 
 	return navigation{
 		Tabs: tabs,
-	}
+	}.sortByPriority()
 }
 
 func trueIfEqual(a, b string) bool {

@@ -102,8 +102,7 @@ func initUserRegistration(resource *Resource) {
 
 			count, err := app.Query().Count(&User{})
 			if err == nil && count == 0 {
-				user.IsAdmin = true
-				user.Role = "sysadmin"
+				user.Role = sysadminRoleName
 			}
 
 			must(app.Create(user))
@@ -135,7 +134,7 @@ func (user User) sendConfirmEmail(request *Request, app *App) error {
 	urlValues.Add("token", user.emailToken(app))
 
 	subject := messages.Get(locale, "admin_confirm_email_subject", app.name(user.Locale))
-	link := app.ConfigurationGetString("baseUrl") + app.getAdminURL("/user/confirm_email") + "?" + urlValues.Encode()
+	link := app.ConfigurationGetString("baseUrl") + app.getAdminURL("user/confirm_email") + "?" + urlValues.Encode()
 	body := messages.Get(locale, "admin_confirm_email_body", link, link, app.name(user.Locale))
 
 	return app.SendEmail(

@@ -18,13 +18,13 @@ func (app *App) initUserSettings() {
 		return form
 	}
 
-	app.Action("settings").Name(messages.GetNameFunction("admin_settings")).userMenu().Template("admin_form").DataSource(
+	app.Action("settings").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu().Template("admin_form").DataSource(
 		func(request *Request) interface{} {
 			return settingsForm(request.user).AddCSRFToken(request)
 		},
 	)
 
-	app.Action("settings").Method("POST").Handler(
+	app.Action("settings").Permission(loggedPermission).Method("POST").Handler(
 		func(request *Request) {
 			validateCSRF(request)
 			u := *request.user
@@ -66,13 +66,13 @@ func (app *App) initUserSettings() {
 		return form
 	}
 
-	app.Action("password").Name(messages.GetNameFunction("admin_password_change")).userMenu().Template("admin_form").DataSource(
+	app.Action("password").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu().Template("admin_form").DataSource(
 		func(request *Request) interface{} {
 			return changePasswordForm(request)
 		},
 	)
 
-	app.Action("password").Method("POST").Handler(func(request *Request) {
+	app.Action("password").Permission(loggedPermission).Method("POST").Handler(func(request *Request) {
 		form := changePasswordForm(request)
 		form.BindData(request.Params())
 		form.Validate()
@@ -94,11 +94,11 @@ func (app *App) initUserSettings() {
 		}
 	})
 
-	app.Action("redirect-to-homepage").Name(messages.GetNameFunction("admin_homepage")).userMenu().Handler(func(request *Request) {
+	app.Action("redirect-to-homepage").Permission(loggedPermission).Name(messages.GetNameFunction("admin_homepage")).userMenu().Handler(func(request *Request) {
 		request.Redirect("/")
 	})
 
-	app.Action("logout").Name(messages.GetNameFunction("admin_log_out")).userMenu().Handler(func(request *Request) {
+	app.Action("logout").Permission(loggedPermission).Name(messages.GetNameFunction("admin_log_out")).userMenu().Handler(func(request *Request) {
 		validateCSRF(request)
 		request.logOutUser()
 		request.Redirect(app.getAdminURL("login"))

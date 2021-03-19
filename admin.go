@@ -21,7 +21,6 @@ func (app *App) initAdminActions() {
 		request.SetData("javascripts", app.javascripts)
 		request.SetData("css", app.css)
 	})
-
 	app.initSessions()
 
 	googleAPIKey := app.ConfigurationGetStringWithFallback("google", "")
@@ -35,13 +34,13 @@ func (app *App) initAdminActions() {
 		request.SetData("locale", request.user.Locale)
 		request.SetData("gravatar", request.user.gravatarURL())
 
-		if !request.user.IsAdmin && !request.user.emailConfirmed() {
+		if request.user.Role == "" && !request.user.emailConfirmed() {
 			addCurrentFlashMessage(request, messages.Get(request.user.Locale, "admin_flash_not_confirmed"))
 		}
 
-		if !request.user.IsAdmin {
+		if request.user.Role == "" {
 			var sysadmin User
-			err := app.Query().WhereIs("IsSysadmin", true).Get(&sysadmin)
+			err := app.Query().WhereIs("role", sysadminRoleName).Get(&sysadmin)
 			var sysadminEmail string
 			if err == nil {
 				sysadminEmail = sysadmin.Email
@@ -56,7 +55,6 @@ func (app *App) initAdminActions() {
 
 		next()
 	})
-
 	app.Action("markdown").Name(Unlocalized("Nápověda markdown")).hiddenMenu().Template("admin_help_markdown").IsWide()
 }
 

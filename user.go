@@ -13,14 +13,13 @@ import (
 
 //User represents admin user account
 type User struct {
-	ID                int64
-	Name              string `prago-preview:"true"`
-	Email             string `prago-unique:"true" prago-preview:"true" prago-order:"true"`
-	Role              string `prago-preview:"true" prago-type:"role" prago-description:"Role"`
-	Password          string `prago-view:"_"`
-	Locale            string
-	IsSysadmin        bool `prago-preview:"true" prago-description:"Sysadmin"`
-	IsAdmin           bool `prago-preview:"true" prago-description:"Admin"`
+	ID       int64
+	Name     string `prago-preview:"true"`
+	Email    string `prago-unique:"true" prago-preview:"true" prago-order:"true"`
+	Role     string `prago-preview:"true" prago-type:"role" prago-description:"Role"`
+	Password string `prago-view:"_"`
+	Locale   string
+	//IsSysadmin        bool `prago-preview:"true" prago-description:"Sysadmin"`
 	IsActive          bool
 	LoggedInIP        string    `prago-view:"sysadmin"`
 	LoggedInUseragent string    `prago-view:"sysadmin"`
@@ -42,8 +41,8 @@ func (request Request) getUserOLD() User {
 
 //TODO: remove
 func basicUserAuthorize(request *Request) {
-	if !request.user.IsAdmin {
-		panic("can't authorize, user is not admin")
+	if request.user.Role == "" {
+		panic("can't authorize, user has no role")
 	}
 }
 
@@ -59,12 +58,10 @@ func (user User) gravatarURL() string {
 	)
 }
 
+/*
 func (user User) getRole() string {
-	if user.IsSysadmin {
-		return string(permissionSysadmin)
-	}
 	return user.Role
-}
+}*/
 
 func (user *User) isPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
@@ -103,7 +100,7 @@ func (user User) emailToken(app *App) string {
 
 func initUserResource(resource *Resource) {
 	resource.name = messages.GetNameFunction("admin_users")
-	resource.canEdit = permissionSysadmin
+	resource.canEdit = sysadminPermission
 
 	initUserRegistration(resource)
 	initUserLogin(resource)

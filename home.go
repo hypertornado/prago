@@ -8,7 +8,7 @@ import (
 )
 
 func (app *App) initHome() {
-	app.Action("").Name(messages.GetNameFunction("admin_signpost")).Template("admin_home_navigation").DataSource(app.getHomeData)
+	app.Action("").Permission(loggedPermission).Name(messages.GetNameFunction("admin_signpost")).Template("admin_home_navigation").DataSource(app.getHomeData)
 }
 
 type homeData struct {
