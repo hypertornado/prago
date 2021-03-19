@@ -30,22 +30,6 @@ func (app *App) initAccessManager() {
 //Permission for access
 type Permission string
 
-/*
-func (app App) getSysadminPermissions() []string {
-	m := map[string]bool{}
-	for _, v1 := range app.accessManager.roles {
-		for v2 := range v1 {
-			m[v2] = true
-		}
-	}
-	m[string(permissionSysadmin)] = true
-	var ret []string
-	for k := range m {
-		ret = append(ret, k)
-	}
-	return ret
-}*/
-
 func (app *App) getRoleFieldTypeData() [][2]string {
 	roleNames := []string{""}
 	for k := range app.accessManager.roles {
