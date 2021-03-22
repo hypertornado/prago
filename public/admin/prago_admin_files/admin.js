@@ -70,10 +70,10 @@ class ImageView {
     addImage(id) {
         var container = document.createElement("a");
         container.classList.add("admin_images_image");
-        container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
-        container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/_api/image/thumb/" + id + "');");
+        container.setAttribute("href", this.adminPrefix + "/file/api/redirect-uuid/" + id);
+        container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/file/api/redirect-thumb/" + id + "');");
         var img = document.createElement("div");
-        img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
+        img.setAttribute("src", this.adminPrefix + "/file/api/redirect-thumb/" + id);
         img.setAttribute("draggable", "false");
         var descriptionEl = document.createElement("div");
         descriptionEl.classList.add("admin_images_image_description");
@@ -181,8 +181,8 @@ class ImagePicker {
         container.setAttribute("data-uuid", id);
         container.setAttribute("draggable", "true");
         container.setAttribute("target", "_blank");
-        container.setAttribute("href", this.adminPrefix + "/file/uuid/" + id);
-        container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/_api/image/thumb/" + id + "');");
+        container.setAttribute("href", this.adminPrefix + "/file/api/redirect-uuid/" + id);
+        container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/file/api/redirect-thumb/" + id + "');");
         var descriptionEl = document.createElement("div");
         descriptionEl.classList.add("admin_images_image_description");
         container.appendChild(descriptionEl);

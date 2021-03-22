@@ -12,6 +12,19 @@ import (
 	"github.com/hypertornado/prago/utils"
 )
 
+//File is structure representing files in admin
+type File struct {
+	ID          int64  `prago-order-desc:"true" prago-preview:"true"`
+	UID         string `prago-unique:"true" prago-preview:"true" prago-type:"cdnfile" prago-description:"File"`
+	Name        string `prago-edit:"nobody"`
+	Description string `prago-type:"text" prago-preview:"true"`
+	User        int64  `prago-type:"relation" prago-edit:"nobody"`
+	Width       int64  `prago-edit:"nobody"`
+	Height      int64  `prago-edit:"nobody"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
 var filesCDN cdnclient.CDNAccount
 
 func initCDN(app *App) {
@@ -44,19 +57,6 @@ func (app *App) GetFiles(ids string) []*File {
 		}
 	}
 	return files
-}
-
-//File is structure representing files in admin
-type File struct {
-	ID          int64  `prago-order-desc:"true" prago-preview:"true"`
-	UID         string `prago-unique:"true" prago-preview:"true" prago-type:"cdnfile" prago-description:"File"`
-	Name        string `prago-edit:"nobody"`
-	Description string `prago-type:"text" prago-preview:"true"`
-	User        int64  `prago-type:"relation" prago-edit:"nobody"`
-	Width       int64  `prago-edit:"nobody"`
-	Height      int64  `prago-edit:"nobody"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
 }
 
 func (app *App) UploadFile(fileHeader *multipart.FileHeader, user *User, description string) (*File, error) {
@@ -135,6 +135,8 @@ func initFilesResource(resource *Resource) {
 	app := resource.app
 	initCDN(app)
 	resource.name = messages.GetNameFunction("admin_files")
+
+	initFilesAPI(resource)
 
 	resource.fieldMap["uid"].HumanName = messages.GetNameFunction("admin_file")
 	resource.fieldMap["width"].HumanName = messages.GetNameFunction("width")
