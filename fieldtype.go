@@ -10,7 +10,7 @@ import (
 //FieldType defines type of field
 type FieldType struct {
 	ViewTemplate   string
-	ViewDataSource func(Resource, *User, field, interface{}) interface{}
+	ViewDataSource func(*User, field, interface{}) interface{}
 
 	DBFieldDescription string
 
@@ -19,7 +19,7 @@ type FieldType struct {
 	FormDataSource func(field, *User) interface{}
 	FormStringer   func(interface{}) string
 
-	ListCellDataSource func(Resource, *User, field, interface{}) interface{}
+	ListCellDataSource func(*User, field, interface{}) interface{}
 	ListCellTemplate   string
 
 	FilterLayoutTemplate   string
@@ -133,7 +133,7 @@ func boolFilterLayoutDataSource(field field, user *User) interface{} {
 	}
 }
 
-func textListDataSource(resource Resource, user *User, f field, value interface{}) interface{} {
+func textListDataSource(user *User, f field, value interface{}) interface{} {
 	return utils.Crop(value.(string), 100)
 }
 
@@ -143,6 +143,6 @@ func createFilesEditDataSource(mimeTypes string) func(f field, u *User) interfac
 	}
 }
 
-func markdownListDataSource(resource Resource, user *User, f field, value interface{}) interface{} {
+func markdownListDataSource(user *User, f field, value interface{}) interface{} {
 	return utils.CropMarkdown(value.(string), 100)
 }

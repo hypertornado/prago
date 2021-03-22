@@ -254,7 +254,7 @@ func (field field) shouldShow() (show bool) {
 	return
 }
 
-func (field field) getRelatedResource(app App) *Resource {
+func (field field) getRelatedResource() *Resource {
 	if field.Tags["prago-type"] != "relation" {
 		return nil
 	}
@@ -264,5 +264,5 @@ func (field field) getRelatedResource(app App) *Resource {
 	} else {
 		relationName = field.Name
 	}
-	return app.getResourceByName(relationName)
+	return field.resource.app.getResourceByName(relationName)
 }

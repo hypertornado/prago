@@ -64,7 +64,7 @@ func (resource Resource) getBasicView(id int, inValues interface{}, user *User) 
 			viewField{
 				Name:     f.HumanName(user.Locale),
 				Template: f.fieldType.ViewTemplate,
-				Value:    f.fieldType.ViewDataSource(resource, user, *f, ifaceVal),
+				Value:    f.fieldType.ViewDataSource(user, *f, ifaceVal),
 			},
 		)
 	}
@@ -105,7 +105,7 @@ func getDefaultViewTemplate(t reflect.Type) string {
 	return "admin_item_view_text"
 }
 
-func getDefaultViewDataSource(f *field) func(resource Resource, user *User, f field, value interface{}) interface{} {
+func getDefaultViewDataSource(f *field) func(user *User, f field, value interface{}) interface{} {
 	t := f.Typ
 	if t == reflect.TypeOf(time.Now()) {
 		if f.Tags["prago-type"] == "timestamp" || f.Name == "CreatedAt" || f.Name == "UpdatedAt" {
@@ -127,11 +127,11 @@ func getDefaultViewDataSource(f *field) func(resource Resource, user *User, f fi
 	}
 }
 
-func defaultViewDataSource(resource Resource, user *User, f field, value interface{}) interface{} {
+func defaultViewDataSource(user *User, f field, value interface{}) interface{} {
 	return value
 }
 
-func numberViewDataSource(resource Resource, user *User, f field, value interface{}) interface{} {
+func numberViewDataSource(user *User, f field, value interface{}) interface{} {
 	switch f.Typ.Kind() {
 	case reflect.Int:
 		return utils.HumanizeNumber(int64(value.(int)))
@@ -142,11 +142,11 @@ func numberViewDataSource(resource Resource, user *User, f field, value interfac
 	return value
 }
 
-func floatViewDataSource(resource Resource, user *User, f field, value interface{}) interface{} {
+func floatViewDataSource(user *User, f field, value interface{}) interface{} {
 	return utils.HumanizeFloat(value.(float64), user.Locale)
 }
 
-func timeViewDataSource(resource Resource, user *User, f field, value interface{}) interface{} {
+func timeViewDataSource(user *User, f field, value interface{}) interface{} {
 	return messages.Timestamp(
 		user.Locale,
 		value.(time.Time),
@@ -154,7 +154,7 @@ func timeViewDataSource(resource Resource, user *User, f field, value interface{
 	)
 }
 
-func timestampViewDataSource(resource Resource, user *User, f field, value interface{}) interface{} {
+func timestampViewDataSource(user *User, f field, value interface{}) interface{} {
 	return messages.Timestamp(
 		user.Locale,
 		value.(time.Time),
@@ -162,7 +162,7 @@ func timestampViewDataSource(resource Resource, user *User, f field, value inter
 	)
 }
 
-func boolViewDataSource(resource Resource, user *User, f field, value interface{}) interface{} {
+func boolViewDataSource(user *User, f field, value interface{}) interface{} {
 	if value.(bool) {
 		return messages.Get(user.Locale, "yes")
 	}

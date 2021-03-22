@@ -41,7 +41,7 @@ class ImageView {
     container.appendChild(descriptionEl);
 
     var request = new XMLHttpRequest();
-    request.open("GET", this.adminPrefix + "/_api/imagedata/" + id);
+    request.open("GET", this.adminPrefix + "/file/api/imagedata/" + id);
     request.addEventListener("load", (e) => {
       if (request.status == 200) {
         var data = JSON.parse(request.response);

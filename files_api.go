@@ -2,7 +2,6 @@ package prago
 
 import (
 	"fmt"
-	"strings"
 )
 
 func initFilesAPI(resource *Resource) {
@@ -25,53 +24,41 @@ func initFilesAPI(resource *Resource) {
 	})
 
 	/*
-		app.adminController.get(app.getAdminURL("_api/image/thumb/:id"), func(request *Request) {
-			var image File
-			must(app.Query().WhereIs("uid", request.Params().Get("id")).Get(&image))
-			request.Redirect(image.GetMedium())
-		})*/
-
-	app.adminController.get(app.getAdminURL("_api/image/list"), func(request *Request) {
-		basicUserAuthorize(request)
-		var images []*File
-		if len(request.Params().Get("ids")) > 0 {
-			ids := strings.Split(request.Params().Get("ids"), ",")
-			for _, v := range ids {
-				var image File
-				err := app.Query().WhereIs("uid", v).Get(&image)
-				if err == nil {
-					images = append(images, &image)
-				} else {
-					if err != ErrItemNotFound {
-						panic(err)
+		app.adminController.get(app.getAdminURL("_api/image/list"), func(request *Request) {
+			basicUserAuthorize(request)
+			var images []*File
+			if len(request.Params().Get("ids")) > 0 {
+				ids := strings.Split(request.Params().Get("ids"), ",")
+				for _, v := range ids {
+					var image File
+					err := app.Query().WhereIs("uid", v).Get(&image)
+					if err == nil {
+						images = append(images, &image)
+					} else {
+						if err != ErrItemNotFound {
+							panic(err)
+						}
 					}
 				}
+			} else {
+				filter := "%" + request.Params().Get("q") + "%"
+				q := app.Query().WhereIs("filetype", "image").OrderDesc("createdat").Limit(10)
+				if len(request.Params().Get("q")) > 0 {
+					q = q.Where("name LIKE ? OR description LIKE ?", filter, filter)
+				}
+				must(q.Get(&images))
 			}
-		} else {
-			filter := "%" + request.Params().Get("q") + "%"
-			q := app.Query().WhereIs("filetype", "image").OrderDesc("createdat").Limit(10)
-			if len(request.Params().Get("q")) > 0 {
-				q = q.Where("name LIKE ? OR description LIKE ?", filter, filter)
-			}
-			must(q.Get(&images))
-		}
-		writeFileResponse(request, images)
-	})
+			writeFileResponse(request, images)
+		})*/
 
-	app.adminController.get(app.getAdminURL("_api/imagedata/:uid"), func(request *Request) {
-		basicUserAuthorize(request)
+	resource.API("imagedata/:uuid").Handler(func(request *Request) {
 		var file File
-		err := app.Query().WhereIs("uid", request.Params().Get("uid")).Get(&file)
-		if err != nil {
-			panic(err)
-		}
+		must(app.Query().WhereIs("uid", request.Params().Get("uuid")).Get(&file))
 		request.RenderJSON(file)
 	})
 
-	app.adminController.post(app.getAdminURL("_api/image/upload"), func(request *Request) {
-		basicUserAuthorize(request)
+	resource.API("upload").Method("POST").Permission(resource.canCreate).Handler(func(request *Request) {
 		multipartFiles := request.Request().MultipartForm.File["file"]
-
 		description := request.Params().Get("description")
 
 		files := []*File{}
@@ -83,7 +70,6 @@ func initFilesAPI(resource *Resource) {
 			}
 			files = append(files, file)
 		}
-
 		writeFileResponse(request, files)
 	})
 }

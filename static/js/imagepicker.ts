@@ -72,7 +72,7 @@ class ImagePicker {
       }
 
       var request = new XMLHttpRequest();
-      request.open("POST", this.adminPrefix + "/_api/image/upload");
+      request.open("POST", this.adminPrefix + "/file/api/upload");
 
       request.addEventListener("load", (e) => {
         this.hideProgress();
@@ -116,7 +116,7 @@ class ImagePicker {
     container.appendChild(descriptionEl);
 
     var request = new XMLHttpRequest();
-    request.open("GET", this.adminPrefix + "/_api/imagedata/" + id);
+    request.open("GET", this.adminPrefix + "/file/api/imagedata/" + id);
     request.addEventListener("load", (e) => {
       if (request.status == 200) {
         var data = JSON.parse(request.response);

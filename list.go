@@ -478,7 +478,7 @@ func (resource Resource) valueToCell(user *User, f field, val reflect.Value, isO
 	reflect.ValueOf(&item).Elem().Set(val)
 	var cell listCell
 	cell.Template = f.fieldType.ListCellTemplate
-	cell.Value = f.fieldType.ListCellDataSource(resource, user, f, item)
+	cell.Value = f.fieldType.ListCellDataSource(user, f, item)
 	cell.OriginalValue = val.Interface()
 	cell.OrderedBy = isOrderedBy
 	return cell

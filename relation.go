@@ -88,18 +88,19 @@ func createRelationNamingFunction(field field, resource Resource, referenceResou
 	}
 }
 
-func getRelationViewData(resource Resource, user *User, f field, value interface{}) interface{} {
-	ret, _ := getRelationData(resource, user, f, value)
+func getRelationViewData(user *User, f field, value interface{}) interface{} {
+	ret, _ := getRelationData(user, f, value)
 	return ret
 }
 
-func getRelationData(resource Resource, user *User, f field, value interface{}) (*viewRelationData, error) {
-	r2 := f.getRelatedResource(*resource.app)
+func getRelationData(user *User, f field, value interface{}) (*viewRelationData, error) {
+	app := f.resource.app
+	r2 := f.getRelatedResource()
 	if r2 == nil {
 		return nil, fmt.Errorf("resource not found: %s", f.Name)
 	}
 
-	if !resource.app.authorize(user, r2.canView) {
+	if !app.authorize(user, r2.canView) {
 		return nil, fmt.Errorf("user is not authorized to view this item")
 	}
 
@@ -110,7 +111,7 @@ func getRelationData(resource Resource, user *User, f field, value interface{}) 
 	if intVal <= 0 {
 		return nil, fmt.Errorf("wrong value")
 	}
-	err := resource.app.Query().WhereIs("id", intVal).Get(item)
+	err := app.Query().WhereIs("id", intVal).Get(item)
 	if err != nil {
 		return nil, fmt.Errorf("can't find this item")
 	}
@@ -188,7 +189,7 @@ func (resource *Resource) getItemDescription(item interface{}, user *User, relat
 			continue
 		}
 
-		rr := v.getRelatedResource(*resource.app)
+		rr := v.getRelatedResource()
 		if rr != nil && relatedResource != nil && rr.id == relatedResource.id {
 			continue
 		}
@@ -215,7 +216,7 @@ func (app App) relationStringer(field field, value reflect.Value, user *User) st
 			if value.Int() <= 0 {
 				return ""
 			}
-			rr := field.getRelatedResource(app)
+			rr := field.getRelatedResource()
 
 			var item interface{}
 			rr.newItem(&item)

@@ -24,7 +24,7 @@ func (app *App) AddEnumFieldType(name string, items [][2]string) {
 //AddEnumFieldTypeLocalized adds localized enum field
 func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 	app.AddFieldType(name, FieldType{
-		ViewDataSource: func(resource Resource, user *User, f field, value interface{}) interface{} {
+		ViewDataSource: func(user *User, f field, value interface{}) interface{} {
 			str := value.(string)
 			for _, v := range items {
 				if str == v.ID {

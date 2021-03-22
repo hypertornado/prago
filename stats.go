@@ -271,7 +271,7 @@ func (resource *Resource) getListStatsTable(field *field, user *User, params url
 					row.Name = "–"
 				}
 
-				rd, err := getRelationData(*resource, user, *field, v)
+				rd, err := getRelationData(user, *field, v)
 				if err == nil {
 					row.Name = rd.Name
 					row.URL = rd.URL

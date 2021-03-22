@@ -131,10 +131,11 @@ func getOldRedirectParams(request *Request, app *App) (uuid, name string, err er
 	return
 }
 
-func initFilesResource(resource *Resource) {
-	app := resource.app
+func (app *App) initFilesResource() {
 	initCDN(app)
-	resource.name = messages.GetNameFunction("admin_files")
+
+	resource := app.Resource(File{}).Name(messages.GetNameFunction("admin_files"))
+	app.FilesResource = resource
 
 	initFilesAPI(resource)
 

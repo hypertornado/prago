@@ -12,14 +12,14 @@ import (
 )
 
 //User represents admin user account
+//TODO: better handle isactive user
 type User struct {
-	ID       int64
-	Name     string `prago-preview:"true"`
-	Email    string `prago-unique:"true" prago-preview:"true" prago-order:"true"`
-	Role     string `prago-preview:"true" prago-type:"role" prago-description:"Role"`
-	Password string `prago-view:"nobody"`
-	Locale   string
-	//IsSysadmin        bool `prago-preview:"true" prago-description:"Sysadmin"`
+	ID                int64
+	Name              string `prago-preview:"true"`
+	Email             string `prago-unique:"true" prago-preview:"true" prago-order:"true"`
+	Role              string `prago-preview:"true" prago-type:"role" prago-description:"Role"`
+	Password          string `prago-view:"nobody"`
+	Locale            string
 	IsActive          bool
 	LoggedInIP        string    `prago-view:"sysadmin"`
 	LoggedInUseragent string    `prago-view:"sysadmin"`
@@ -98,9 +98,15 @@ func (user User) emailToken(app *App) string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-func initUserResource(resource *Resource) {
+func (app *App) initUserResource() {
+	resource := app.Resource(User{})
+	app.UsersResource = resource
 	resource.name = messages.GetNameFunction("admin_users")
+	//resource.PermissionView()
 	resource.canEdit = sysadminPermission
+	resource.canCreate = nobodyPermission
+	resource.canDelete = sysadminPermission
+	resource.canExport = sysadminPermission
 
 	initUserRegistration(resource)
 	initUserLogin(resource)
