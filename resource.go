@@ -130,8 +130,15 @@ func (resource *Resource) PermissionView(permission Permission) *Resource {
 	return resource
 }
 
+//PermissionEdit sets permission to edit functions, if there is no create and delete permissions set, it set them too
 func (resource *Resource) PermissionEdit(permission Permission) *Resource {
 	must(resource.app.validatePermission(permission))
+	if resource.canCreate == loggedPermission {
+		resource.canCreate = permission
+	}
+	if resource.canDelete == loggedPermission {
+		resource.canDelete = permission
+	}
 	resource.canEdit = permission
 	return resource
 }

@@ -8,12 +8,6 @@ import (
 
 func initDefaultResourceActions(resource *Resource) {
 	app := resource.app
-	if resource.canCreate == "" {
-		resource.canCreate = resource.canEdit
-	}
-	if resource.canDelete == "" {
-		resource.canDelete = resource.canEdit
-	}
 
 	//list action
 	resource.Action("").priority().Permission(resource.canView).Name(resource.name).IsWide().Template("admin_list").DataSource(
