@@ -14,15 +14,15 @@ import (
 
 //File is structure representing files in admin
 type File struct {
-	ID          int64  `prago-order-desc:"true" prago-preview:"true"`
-	UID         string `prago-unique:"true" prago-preview:"true" prago-type:"cdnfile" prago-description:"File"`
-	Name        string `prago-edit:"nobody"`
-	Description string `prago-type:"text" prago-preview:"true"`
-	User        int64  `prago-type:"relation" prago-edit:"nobody"`
-	Width       int64  `prago-edit:"nobody"`
-	Height      int64  `prago-edit:"nobody"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID          int64     `prago-order-desc:"true" prago-preview:"true"`
+	UID         string    `prago-unique:"true" prago-preview:"true" prago-type:"cdnfile"`
+	Name        string    `prago-edit:"nobody"`
+	Description string    `prago-type:"text" prago-preview:"true"`
+	User        int64     `prago-type:"relation" prago-preview:"true" prago-edit:"nobody"`
+	Width       int64     `prago-edit:"nobody" prago-preview:"true"`
+	Height      int64     `prago-edit:"nobody" prago-preview:"true"`
+	CreatedAt   time.Time `prago-preview:"true"`
+	UpdatedAt   time.Time `prago-preview:"true"`
 }
 
 var filesCDN cdnclient.CDNAccount
@@ -139,9 +139,13 @@ func (app *App) initFilesResource() {
 
 	initFilesAPI(resource)
 
-	resource.fieldMap["uid"].HumanName = messages.GetNameFunction("admin_file")
-	resource.fieldMap["width"].HumanName = messages.GetNameFunction("width")
-	resource.fieldMap["height"].HumanName = messages.GetNameFunction("height")
+	resource.FieldName("uid", messages.GetNameFunction("admin_file"))
+	resource.FieldName("width", messages.GetNameFunction("width"))
+	resource.FieldName("height", messages.GetNameFunction("height"))
+
+	//resource.fieldMap["uid"].HumanName = messages.GetNameFunction("admin_file")
+	//resource.fieldMap["width"].HumanName = messages.GetNameFunction("width")
+	//resource.fieldMap["height"].HumanName = messages.GetNameFunction("height")
 
 	app.addCommand("files", "metadata").
 		Callback(func() {
@@ -211,22 +215,23 @@ func (app *App) initFilesResource() {
 		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
-	resource.defaultItemsPerPage = 100
+	//resource.defaultItemsPerPage = 100
 
-	//TODO: authorize
-	resource.resourceController.post(resource.getURL(""), func(request *Request) {
-		validateCSRF(request)
+	resource.Action("").Method("POST").Handler(
+		func(request *Request) {
+			validateCSRF(request)
 
-		multipartFiles := request.Request().MultipartForm.File["uid"]
-		if len(multipartFiles) != 1 {
-			panic("must have 1 file selected")
-		}
+			multipartFiles := request.Request().MultipartForm.File["uid"]
+			if len(multipartFiles) != 1 {
+				panic("must have 1 file selected")
+			}
 
-		_, err := resource.app.UploadFile(multipartFiles[0], request.user, request.Params().Get("Description"))
-		must(err)
-		request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_created"))
-		request.Redirect(resource.getURL(""))
-	})
+			_, err := resource.app.UploadFile(multipartFiles[0], request.user, request.Params().Get("description"))
+			must(err)
+			request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_created"))
+			request.Redirect(resource.getURL(""))
+		},
+	)
 
 	resource.Action("getcdnurl").Method("POST").Handler(
 		func(request *Request) {

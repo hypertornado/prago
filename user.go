@@ -17,7 +17,7 @@ type User struct {
 	ID                int64
 	Name              string `prago-preview:"true"`
 	Email             string `prago-unique:"true" prago-preview:"true" prago-order:"true"`
-	Role              string `prago-preview:"true" prago-type:"role" prago-description:"Role"`
+	Role              string `prago-preview:"true" prago-type:"role"`
 	Password          string `prago-view:"nobody"`
 	Locale            string
 	IsActive          bool

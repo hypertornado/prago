@@ -45,12 +45,22 @@ func (resource *Resource) newField(f reflect.StructField, order int, fieldTypes 
 		resource: resource,
 	}
 
+	//remove unused tags
+	for _, v := range []string{
+		"prago-description",
+	} {
+		t := f.Tag.Get(v)
+		if t != "" {
+			panic(fmt.Sprintf("Use of deprecated tag '%s' in field '%s' of resource '%s'", v, ret.Name, ret.resource.id))
+		}
+	}
+
 	for _, v := range []string{
 		"prago-edit",
 		"prago-view",
 
 		"prago-type",
-		"prago-description",
+		"prago-name",
 		"prago-visible",
 		"prago-editable",
 		"prago-preview",
@@ -78,11 +88,11 @@ func (resource *Resource) newField(f reflect.StructField, order int, fieldTypes 
 		}
 	}
 
-	description := ret.Tags["prago-description"]
+	description := ret.Tags["prago-name"]
 	if len(description) > 0 {
 		ret.HumanName = Unlocalized(description)
 	} else {
-		messages.GetNameFunction(ret.Name)
+		//TODO: its ugly
 		nameFunction := messages.GetNameFunction(ret.Name)
 		if nameFunction != nil {
 			ret.HumanName = nameFunction
@@ -92,6 +102,14 @@ func (resource *Resource) newField(f reflect.StructField, order int, fieldTypes 
 	ret.initFieldType(fieldTypes)
 
 	return ret
+}
+
+func (resource *Resource) FieldName(nameOfField string, name func(string) string) {
+	f := resource.fieldMap[nameOfField]
+	if f == nil {
+		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, nameOfField))
+	}
+	f.HumanName = name
 }
 
 /*

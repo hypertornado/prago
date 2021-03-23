@@ -251,7 +251,7 @@ func (app *App) AddEmail(email, name string, confirm bool) error {
 //Newsletter represents newsletter
 type newsletter struct {
 	ID            int64     `prago-preview:"true" prago-order-desc:"true"`
-	Name          string    `prago-preview:"true" prago-description:"Jméno newsletteru"`
+	Name          string    `prago-preview:"true" prago-name:"Jméno newsletteru"`
 	Body          string    `prago-type:"markdown"`
 	PreviewSentAt time.Time `prago-preview:"true"`
 	SentAt        time.Time `prago-preview:"true"`
@@ -481,10 +481,10 @@ func defaultNewsletterRenderer(params map[string]interface{}) (string, error) {
 type newsletterSection struct {
 	ID            int64
 	Newsletter    int64  `prago-type:"relation" prago-preview:"true"`
-	Name          string `prago-description:"Jméno sekce"`
+	Name          string `prago-name:"Jméno sekce"`
 	Text          string `prago-type:"text"`
-	Button        string `prago-description:"Tlačítko"`
-	URL           string `prago-description:"Odkaz"`
+	Button        string `prago-name:"Tlačítko"`
+	URL           string `prago-name:"Odkaz"`
 	Image         string `prago-type:"image" prago-preview:"true"`
 	OrderPosition int64  `prago-type:"order"`
 	CreatedAt     time.Time
@@ -498,7 +498,7 @@ func initNewsletterSection(resource *Resource) {
 //NewsletterPersons represents person of newsletter
 type newsletterPersons struct {
 	ID           int64
-	Name         string `prago-preview:"true" prago-description:"Jméno příjemce"`
+	Name         string `prago-preview:"true" prago-name:"Jméno příjemce"`
 	Email        string `prago-preview:"true"`
 	Confirmed    bool   `prago-preview:"true"`
 	Unsubscribed bool   `prago-preview:"true"`
