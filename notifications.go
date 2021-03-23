@@ -16,7 +16,7 @@ type Notification struct {
 	IsDismissed     bool
 	User            int64 `prago-type:"relation"`
 	CreatedAt       time.Time
-	UpdatedAt       time.Time `prago-view:"sysadmin"`
+	UpdatedAt       time.Time
 }
 
 func initNotificationResource(resource *Resource) {

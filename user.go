@@ -18,16 +18,16 @@ type User struct {
 	Name              string `prago-preview:"true"`
 	Email             string `prago-unique:"true" prago-preview:"true" prago-order:"true"`
 	Role              string `prago-preview:"true" prago-type:"role"`
-	Password          string `prago-view:"nobody"`
+	Password          string `prago-can-view:"nobody"`
 	Locale            string
 	IsActive          bool
-	LoggedInIP        string    `prago-view:"sysadmin"`
-	LoggedInUseragent string    `prago-view:"sysadmin"`
-	LoggedInTime      time.Time `prago-view:"sysadmin"`
-	EmailConfirmedAt  time.Time `prago-view:"sysadmin"`
-	EmailRenewedAt    time.Time `prago-view:"sysadmin"`
+	LoggedInIP        string    `prago-can-view:"sysadmin"`
+	LoggedInUseragent string    `prago-can-view:"sysadmin"`
+	LoggedInTime      time.Time `prago-can-view:"sysadmin"`
+	EmailConfirmedAt  time.Time `prago-can-view:"sysadmin"`
+	EmailRenewedAt    time.Time `prago-can-view:"sysadmin"`
 	CreatedAt         time.Time
-	UpdatedAt         time.Time `prago-view:"sysadmin"`
+	UpdatedAt         time.Time `prago-can-view:"sysadmin"`
 }
 
 //GetUser returns currently logged in user, it panics when there is no user

@@ -48,6 +48,10 @@ func (resource *Resource) newField(f reflect.StructField, order int, fieldTypes 
 	//remove unused tags
 	for _, v := range []string{
 		"prago-description",
+		"prago-edit",
+		"prago-view",
+		"prago-visible",
+		"prago-editable",
 	} {
 		t := f.Tag.Get(v)
 		if t != "" {
@@ -56,13 +60,11 @@ func (resource *Resource) newField(f reflect.StructField, order int, fieldTypes 
 	}
 
 	for _, v := range []string{
-		"prago-edit",
-		"prago-view",
+		"prago-can-view",
+		"prago-can-edit",
 
-		"prago-type",
 		"prago-name",
-		"prago-visible",
-		"prago-editable",
+		"prago-type",
 		"prago-preview",
 		"prago-unique",
 		"prago-order",
@@ -77,8 +79,8 @@ func (resource *Resource) newField(f reflect.StructField, order int, fieldTypes 
 	}
 
 	for _, v := range []string{
-		"prago-edit",
-		"prago-view",
+		"prago-can-view",
+		"prago-can-edit",
 	} {
 		if ret.Tags[v] != "" {
 			err := resource.app.validatePermission(Permission(ret.Tags[v]))
@@ -88,9 +90,9 @@ func (resource *Resource) newField(f reflect.StructField, order int, fieldTypes 
 		}
 	}
 
-	description := ret.Tags["prago-name"]
-	if len(description) > 0 {
-		ret.HumanName = Unlocalized(description)
+	name := ret.Tags["prago-name"]
+	if name != "" {
+		ret.HumanName = Unlocalized(name)
 	} else {
 		//TODO: its ugly
 		nameFunction := messages.GetNameFunction(ret.Name)
@@ -111,17 +113,6 @@ func (resource *Resource) FieldName(nameOfField string, name func(string) string
 	}
 	f.HumanName = name
 }
-
-/*
-if ret.Tags["prago-type"] == "relation" {
-			relationID := ret.Name
-			ret.Tags["prago-relation"] != "" {
-				relationID = ret.Tags["prago-relation"]
-			}
-			referenceResource
-		}
-
-*/
 
 func getDefaultStringer(t reflect.Type) func(interface{}) string {
 	if reflect.TypeOf(time.Now()) == t {

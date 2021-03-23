@@ -3,7 +3,7 @@ package prago
 type fieldFilter func(Resource, *User, field) bool
 
 func defaultVisibilityFilter(resource Resource, user *User, f field) bool {
-	permission := f.Tags["prago-view"]
+	permission := f.Tags["prago-can-view"]
 	if permission != "" {
 		return resource.app.authorize(user, Permission(permission))
 	}
@@ -16,14 +16,6 @@ func defaultVisibilityFilter(resource Resource, user *User, f field) bool {
 	if f.Tags["prago-type"] == "order" {
 		visible = false
 	}
-
-	visibleTag := f.Tags["prago-visible"]
-	if visibleTag == "true" {
-		visible = true
-	}
-	if visibleTag == "false" {
-		visible = false
-	}
 	return visible
 }
 
@@ -32,7 +24,7 @@ func defaultEditabilityFilter(resource Resource, user *User, f field) bool {
 		return false
 	}
 
-	permission := f.Tags["prago-edit"]
+	permission := f.Tags["prago-can-edit"]
 	if permission != "" {
 		return resource.app.authorize(user, Permission(permission))
 	}
@@ -42,14 +34,6 @@ func defaultEditabilityFilter(resource Resource, user *User, f field) bool {
 		editable = false
 	}
 	if f.Name == "CreatedAt" || f.Name == "UpdatedAt" {
-		editable = false
-	}
-
-	editableTag := f.Tags["prago-editable"]
-	if editableTag == "true" {
-		editable = true
-	}
-	if editableTag == "false" {
 		editable = false
 	}
 	return editable
