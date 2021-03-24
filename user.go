@@ -13,7 +13,7 @@ import (
 
 //User represents admin user account
 //TODO: better handle isactive user
-type User struct {
+type user struct {
 	ID                int64
 	Name              string `prago-preview:"true"`
 	Email             string `prago-unique:"true" prago-preview:"true" prago-order:"true"`
@@ -30,27 +30,11 @@ type User struct {
 	UpdatedAt         time.Time `prago-can-view:"sysadmin"`
 }
 
-//GetUser returns currently logged in user, it panics when there is no user
-func (request Request) getUserOLD() User {
-	u := request.GetData("currentuser").(*User)
-	if u == nil {
-		panic("no user found")
-	}
-	return *u
-}
-
-//TODO: remove
-func basicUserAuthorize(request *Request) {
-	if request.user.Role == "" {
-		panic("can't authorize, user has no role")
-	}
-}
-
 func fixEmail(in string) string {
 	return strings.ToLower(in)
 }
 
-func (user User) gravatarURL() string {
+func (user user) gravatarURL() string {
 	h := md5.New()
 	io.WriteString(h, user.Email)
 	return fmt.Sprintf("https://www.gravatar.com/avatar/%ss.jpg?s=50&d=mp",
@@ -58,12 +42,7 @@ func (user User) gravatarURL() string {
 	)
 }
 
-/*
-func (user User) getRole() string {
-	return user.Role
-}*/
-
-func (user *User) isPassword(password string) bool {
+func (user *user) isPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		return false
@@ -72,14 +51,14 @@ func (user *User) isPassword(password string) bool {
 }
 
 //TODO: better comparison
-func (user *User) emailConfirmed() bool {
+func (user *user) emailConfirmed() bool {
 	if user.EmailConfirmedAt.Before(time.Now().AddDate(-1000, 0, 0)) {
 		return false
 	}
 	return true
 }
 
-func (user *User) newPassword(password string) error {
+func (user *user) newPassword(password string) error {
 	if len(password) < 7 {
 		return errors.New("short password")
 	}
@@ -91,7 +70,7 @@ func (user *User) newPassword(password string) error {
 	return nil
 }
 
-func (user User) emailToken(app *App) string {
+func (user user) emailToken(app *App) string {
 	randomness := app.ConfigurationGetString("random")
 	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%s%s", user.Email, randomness))
@@ -99,10 +78,9 @@ func (user User) emailToken(app *App) string {
 }
 
 func (app *App) initUserResource() {
-	resource := app.Resource(User{})
+	resource := app.Resource(user{})
 	app.UsersResource = resource
 	resource.name = messages.GetNameFunction("admin_users")
-	//resource.PermissionView()
 	resource.canEdit = sysadminPermission
 	resource.canCreate = nobodyPermission
 	resource.canDelete = sysadminPermission

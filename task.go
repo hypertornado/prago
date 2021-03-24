@@ -154,7 +154,7 @@ func (tm *taskManager) deleteActivity(id string) {
 	delete(tm.activities, id)
 }
 
-func (tm *taskManager) startTask(id string, user *User) error {
+func (tm *taskManager) startTask(id string, user *user) error {
 	task, ok := tm.tasksMap[id]
 	if !ok {
 		return fmt.Errorf("Can't find task %s", id)
@@ -167,7 +167,7 @@ func (tm *taskManager) startTask(id string, user *User) error {
 	return fmt.Errorf("User is not authorized to run this task")
 }
 
-func (tm *taskManager) stopTask(uuid string, user *User) error {
+func (tm *taskManager) stopTask(uuid string, user *user) error {
 	tm.activityMutex.Lock()
 	defer tm.activityMutex.Unlock()
 
@@ -179,7 +179,7 @@ func (tm *taskManager) stopTask(uuid string, user *User) error {
 	return nil
 }
 
-func (tm *taskManager) deleteTask(uuid string, user *User) error {
+func (tm *taskManager) deleteTask(uuid string, user *user) error {
 	tm.activityMutex.Lock()
 	defer tm.activityMutex.Unlock()
 
@@ -209,7 +209,7 @@ func (t *Task) taskView() taskView {
 	}
 }
 
-func (tm *taskManager) getTasks(user *User) (ret []taskViewGroup) {
+func (tm *taskManager) getTasks(user *user) (ret []taskViewGroup) {
 
 	var tasks []*Task
 	for _, v := range tm.tasksMap {
@@ -323,15 +323,7 @@ func (app *App) TaskGroup(name func(string) string) *TaskGroup {
 	}
 }
 
-//SetGroup sets group task
-/*func (t *Task) SetGroup(group *TaskGroup) *Task {
-	if group != nil {
-		t.group = group
-	}
-	return t
-}*/
-
-func (tm *taskManager) run(t *Task, user *User, starterTyp string) *TaskActivity {
+func (tm *taskManager) run(t *Task, user *user, starterTyp string) *TaskActivity {
 	activity := &TaskActivity{
 		uuid:      utils.RandomString(10),
 		task:      t,

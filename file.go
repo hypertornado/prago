@@ -59,7 +59,7 @@ func (app *App) GetFiles(ids string) []*File {
 	return files
 }
 
-func (app *App) UploadFile(fileHeader *multipart.FileHeader, user *User, description string) (*File, error) {
+func (app *App) UploadFile(fileHeader *multipart.FileHeader, user *user, description string) (*File, error) {
 	fileName := utils.PrettyFilename(fileHeader.Filename)
 	file := File{}
 	file.Name = fileName

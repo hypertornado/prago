@@ -18,7 +18,7 @@ func (rs *requestSession) setValue(key string, value interface{}) {
 
 const userIDSessionName = "user_id"
 
-func (request *Request) logInUser(user *User) {
+func (request *Request) logInUser(user *user) {
 	request.session.setValue(userIDSessionName, user.ID)
 }
 
@@ -45,7 +45,7 @@ func initUserFromSession(request *Request) {
 		return
 	}
 
-	var user User
+	var user user
 	err := request.app.Query().WhereIs("id", userID).Get(&user)
 	if err != nil {
 		return

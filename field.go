@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"database/sql"
 	"fmt"
 	"reflect"
 	"strings"
@@ -16,8 +15,9 @@ type field struct {
 	Tags       map[string]string
 	fieldOrder int
 	Unique     bool
-	Scanner    sql.Scanner
 	CanOrder   bool
+
+	DefaultShow bool
 
 	resource  *Resource
 	fieldType FieldType
@@ -32,15 +32,16 @@ func (field field) GetRelatedResourceName() string {
 	return field.ColumnName
 }
 
-func (resource *Resource) newField(f reflect.StructField, order int, fieldTypes map[string]FieldType) *field {
+func (resource *Resource) newField(f reflect.StructField, order int) *field {
 	ret := &field{
-		Name:       f.Name,
-		ColumnName: columnName(f.Name),
-		HumanName:  Unlocalized(f.Name),
-		Typ:        f.Type,
-		Tags:       make(map[string]string),
-		fieldOrder: order,
-		CanOrder:   true,
+		Name:        f.Name,
+		ColumnName:  columnName(f.Name),
+		HumanName:   Unlocalized(f.Name),
+		Typ:         f.Type,
+		Tags:        make(map[string]string),
+		fieldOrder:  order,
+		CanOrder:    true,
+		DefaultShow: false,
 
 		resource: resource,
 	}
@@ -74,6 +75,18 @@ func (resource *Resource) newField(f reflect.StructField, order int, fieldTypes 
 		ret.Tags[v] = f.Tag.Get(v)
 	}
 
+	for _, v := range []string{"ID", "Name", "Image", "UpdatedAt"} {
+		if ret.Name == v {
+			ret.DefaultShow = true
+		}
+	}
+	if ret.Tags["prago-preview"] == "true" {
+		ret.DefaultShow = true
+	}
+	if ret.Tags["prago-preview"] == "false" {
+		ret.DefaultShow = true
+	}
+
 	if ret.Tags["prago-unique"] == "true" {
 		ret.Unique = true
 	}
@@ -101,7 +114,7 @@ func (resource *Resource) newField(f reflect.StructField, order int, fieldTypes 
 		}
 	}
 
-	ret.initFieldType(fieldTypes)
+	ret.initFieldType()
 
 	return ret
 }
@@ -167,7 +180,8 @@ func getDefaultFormTemplate(t reflect.Type) string {
 	panic("unknown default form for " + t.String())
 }
 
-func (field *field) initFieldType(fieldTypes map[string]FieldType) {
+func (field *field) initFieldType() {
+	fieldTypes := field.resource.app.fieldTypes
 	fieldTypeName := field.Tags["prago-type"]
 
 	ret, found := fieldTypes[fieldTypeName]
@@ -247,20 +261,6 @@ func (field field) fieldDescriptionMysql(fieldTypes map[string]FieldType) string
 		}
 	}
 	return fmt.Sprintf("%s %s %s", field.ColumnName, fieldDescription, additional)
-}
-
-func (field field) shouldShow() (show bool) {
-	if field.Name == "Name" {
-		show = true
-	}
-	showTag := field.Tags["prago-preview"]
-	if showTag == "true" {
-		show = true
-	}
-	if showTag == "false" {
-		show = false
-	}
-	return
 }
 
 func (field field) getRelatedResource() *Resource {

@@ -34,7 +34,7 @@ func (resource Resource) getDefaultOrder() (column string, desc bool) {
 	return
 }
 
-func (resource Resource) getForm(inValues interface{}, user *User, filters ...fieldFilter) (*form, error) {
+func (resource Resource) getForm(inValues interface{}, user *user, filters ...fieldFilter) (*form, error) {
 	filters = append(filters, defaultVisibilityFilter)
 	filters = append(filters, defaultEditabilityFilter)
 	form := newForm()

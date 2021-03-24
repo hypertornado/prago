@@ -290,7 +290,7 @@ func (e *adminSearch) saveItem(resource *Resource, item interface{}) error {
 
 func (e *adminSearch) saveItemWithRoles(resource *Resource, item interface{}, roles []string) error {
 	//TODO: ugly hack
-	relData := resource.itemToRelationData(item, &User{}, nil)
+	relData := resource.itemToRelationData(item, &user{}, nil)
 	if relData == nil {
 		return errors.New("wrong item to relation data conversion")
 	}

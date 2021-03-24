@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func (app *App) generateCSRFToken(user *User) string {
+func (app *App) generateCSRFToken(user *user) string {
 	randomness := app.ConfigurationGetString("random")
 	if len(randomness) <= 0 {
 		panic("randomness too short")

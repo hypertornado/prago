@@ -2,7 +2,7 @@ package prago
 
 func (app *App) initUserSettings() {
 
-	settingsForm := func(user *User) *form {
+	settingsForm := func(user *user) *form {
 		form := newForm()
 		form.Method = "POST"
 		form.Action = "settings"

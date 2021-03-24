@@ -67,7 +67,7 @@ func (app *App) getHistory(resource *Resource, itemID int64) historyView {
 	for _, v := range items {
 		var username, userurl string
 
-		var user User
+		var user user
 		err := app.Query().WhereIs("id", v.User).Get(&user)
 		if err == nil {
 			username = user.Name
@@ -97,7 +97,7 @@ func initActivityLog(resource *Resource) {
 	resource.name = messages.GetNameFunction("admin_history")
 }
 
-func (app App) createNewActivityLog(resource Resource, user *User, item interface{}) error {
+func (app App) createNewActivityLog(resource Resource, user *user, item interface{}) error {
 	data, err := json.Marshal(item)
 	if err != nil {
 		return err
@@ -112,7 +112,7 @@ func (app App) createNewActivityLog(resource Resource, user *User, item interfac
 	})
 }
 
-func (app App) createEditActivityLog(resource Resource, user *User, itemID int64, before, after []byte) error {
+func (app App) createEditActivityLog(resource Resource, user *user, itemID int64, before, after []byte) error {
 	return app.createActivityLog(ActivityLog{
 		ResourceName:  resource.id,
 		ItemID:        itemID,
@@ -123,7 +123,7 @@ func (app App) createEditActivityLog(resource Resource, user *User, itemID int64
 	})
 }
 
-func (app App) createDeleteActivityLog(resource Resource, user *User, itemID int64, item interface{}) error {
+func (app App) createDeleteActivityLog(resource Resource, user *user, itemID int64, item interface{}) error {
 	data, err := json.Marshal(item)
 	if err != nil {
 		return err

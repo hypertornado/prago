@@ -51,8 +51,8 @@ func (app *App) getRoleFieldTypeData() [][2]string {
 }
 
 func (app *App) createRoleFieldType() FieldType {
-	var fp = func(field, *User) interface{} {
-		roleNames := []string{""}
+	var fp = func(field, *user) interface{} {
+		var roleNames []string
 		for k := range app.accessManager.roles {
 			roleNames = append(roleNames, k)
 		}
@@ -103,7 +103,7 @@ func (app *App) AddPermission(permission Permission) {
 	app.accessManager.permissions[Permission(permission)] = true
 }
 
-func (app *App) authorize(user *User, permission Permission) bool {
+func (app *App) authorize(user *user, permission Permission) bool {
 	return app.accessManager.roles[user.Role][permission]
 }
 func (request *Request) authorize(permission Permission) bool {

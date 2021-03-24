@@ -17,7 +17,7 @@ type Request struct {
 	data       map[string]interface{}
 	app        App
 	session    *requestSession
-	user       *User
+	user       *user
 }
 
 //Request returns underlying http.Request

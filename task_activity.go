@@ -8,7 +8,7 @@ import (
 type TaskActivity struct {
 	uuid      string
 	task      *Task
-	user      *User
+	user      *user
 	typ       string
 	progress  float64
 	status    string

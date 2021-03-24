@@ -36,7 +36,7 @@ func initUserRenew(resource *Resource) {
 		email := fixEmail(request.Params().Get("email"))
 
 		var reason = ""
-		var user User
+		var user user
 
 		err := app.Query().WhereIs("email", email).Get(&user)
 		if err == nil {
@@ -109,7 +109,7 @@ func initUserRenew(resource *Resource) {
 
 		errStr := messages.Get(locale, "admin_error")
 
-		var user User
+		var user user
 		err := app.Query().WhereIs("email", email).Get(&user)
 		if err == nil {
 			if token == user.emailToken(app) {
@@ -132,14 +132,14 @@ func initUserRenew(resource *Resource) {
 
 }
 
-func (user User) getRenewURL(request *Request, app *App) string {
+func (user user) getRenewURL(request *Request, app *App) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)
 	urlValues.Add("token", user.emailToken(app))
 	return app.ConfigurationGetString("baseUrl") + app.getAdminURL("user/renew_password") + "?" + urlValues.Encode()
 }
 
-func (user User) sendRenew(request *Request, app *App) error {
+func (user user) sendRenew(request *Request, app *App) error {
 	if app.noReplyEmail == "" {
 		return errors.New("no reply email empty")
 	}

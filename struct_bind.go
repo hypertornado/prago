@@ -22,7 +22,7 @@ func (resource *Resource) setOrderPosition(item interface{}, order int64) error 
 	return nil
 }
 
-func (resource Resource) bindData(item interface{}, user *User, params url.Values, bindDataFilter fieldFilter) error {
+func (resource Resource) bindData(item interface{}, user *user, params url.Values, bindDataFilter fieldFilter) error {
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
 		if value.Kind() == reflect.Struct {

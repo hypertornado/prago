@@ -139,7 +139,7 @@ func getResourceAccessView(app *App) accessView {
 			yeah := "+"
 			no := "-"
 			s := ""
-			user := &User{Role: v}
+			user := &user{Role: v}
 			if app.authorize(user, resource.canView) {
 				s += yeah
 			} else {

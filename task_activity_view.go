@@ -27,7 +27,7 @@ type taskActivityViewAction struct {
 	URL  string
 }
 
-func (tm *taskManager) getTaskMonitor(user *User) (ret *taskMonitor) {
+func (tm *taskManager) getTaskMonitor(user *user) (ret *taskMonitor) {
 	tm.activityMutex.RLock()
 	defer tm.activityMutex.RUnlock()
 

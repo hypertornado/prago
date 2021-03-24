@@ -19,9 +19,10 @@ type Resource struct {
 	orderByColumn string
 	orderDesc     bool
 
-	actions       []*Action
-	itemActions   []*Action
-	autoRelations []relation
+	actions     []*Action
+	itemActions []*Action
+
+	relations []relation
 
 	canView   Permission
 	canEdit   Permission
@@ -35,7 +36,6 @@ type Resource struct {
 
 	fieldArrays []*field
 	fieldMap    map[string]*field
-	fieldTypes  map[string]FieldType
 
 	orderFieldName  string
 	orderColumnName string
@@ -66,13 +66,12 @@ func (app *App) Resource(item interface{}) *Resource {
 
 		activityLog: true,
 
-		fieldMap:   make(map[string]*field),
-		fieldTypes: app.fieldTypes,
+		fieldMap: make(map[string]*field),
 	}
 
 	for i := 0; i < typ.NumField(); i++ {
 		if ast.IsExported(typ.Field(i).Name) {
-			field := ret.newField(typ.Field(i), i, ret.fieldTypes)
+			field := ret.newField(typ.Field(i), i)
 			if field.Tags["prago-type"] == "order" {
 				ret.orderFieldName = field.Name
 				ret.orderColumnName = field.ColumnName
@@ -256,7 +255,7 @@ func (resource Resource) updateCachedCount() error {
 	return resource.app.cache.Set(resource.cachedCountName(), resource.count())
 }
 
-func (resource Resource) getPaginationData(user *User) (ret []listPaginationData) {
+func (resource Resource) getPaginationData(user *user) (ret []listPaginationData) {
 	var ints []int64
 	var used bool
 

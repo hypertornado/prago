@@ -27,13 +27,13 @@ type viewAction struct {
 	URL  string
 }
 
-func (resource Resource) getViews(id int, inValues interface{}, user *User) (ret []view) {
+func (resource Resource) getViews(id int, inValues interface{}, user *user) (ret []view) {
 	ret = append(ret, resource.getBasicView(id, inValues, user))
 	ret = append(ret, resource.getAutoRelationsView(id, inValues, user)...)
 	return ret
 }
 
-func (resource Resource) getBasicView(id int, inValues interface{}, user *User) view {
+func (resource Resource) getBasicView(id int, inValues interface{}, user *user) view {
 	visible := defaultVisibilityFilter
 	ret := view{}
 
@@ -105,7 +105,7 @@ func getDefaultViewTemplate(t reflect.Type) string {
 	return "admin_item_view_text"
 }
 
-func getDefaultViewDataSource(f *field) func(user *User, f field, value interface{}) interface{} {
+func getDefaultViewDataSource(f *field) func(user *user, f field, value interface{}) interface{} {
 	t := f.Typ
 	if t == reflect.TypeOf(time.Now()) {
 		if f.Tags["prago-type"] == "timestamp" || f.Name == "CreatedAt" || f.Name == "UpdatedAt" {
@@ -127,11 +127,11 @@ func getDefaultViewDataSource(f *field) func(user *User, f field, value interfac
 	}
 }
 
-func defaultViewDataSource(user *User, f field, value interface{}) interface{} {
+func defaultViewDataSource(user *user, f field, value interface{}) interface{} {
 	return value
 }
 
-func numberViewDataSource(user *User, f field, value interface{}) interface{} {
+func numberViewDataSource(user *user, f field, value interface{}) interface{} {
 	switch f.Typ.Kind() {
 	case reflect.Int:
 		return utils.HumanizeNumber(int64(value.(int)))
@@ -142,11 +142,11 @@ func numberViewDataSource(user *User, f field, value interface{}) interface{} {
 	return value
 }
 
-func floatViewDataSource(user *User, f field, value interface{}) interface{} {
+func floatViewDataSource(user *user, f field, value interface{}) interface{} {
 	return utils.HumanizeFloat(value.(float64), user.Locale)
 }
 
-func timeViewDataSource(user *User, f field, value interface{}) interface{} {
+func timeViewDataSource(user *user, f field, value interface{}) interface{} {
 	return messages.Timestamp(
 		user.Locale,
 		value.(time.Time),
@@ -154,7 +154,7 @@ func timeViewDataSource(user *User, f field, value interface{}) interface{} {
 	)
 }
 
-func timestampViewDataSource(user *User, f field, value interface{}) interface{} {
+func timestampViewDataSource(user *user, f field, value interface{}) interface{} {
 	return messages.Timestamp(
 		user.Locale,
 		value.(time.Time),
@@ -162,7 +162,7 @@ func timestampViewDataSource(user *User, f field, value interface{}) interface{}
 	)
 }
 
-func boolViewDataSource(user *User, f field, value interface{}) interface{} {
+func boolViewDataSource(user *user, f field, value interface{}) interface{} {
 	if value.(bool) {
 		return messages.Get(user.Locale, "yes")
 	}

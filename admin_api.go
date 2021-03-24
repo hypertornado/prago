@@ -9,11 +9,8 @@ import (
 func (app *App) initAPI() {
 	app.API("markdown").Method("POST").Handler(
 		func(request *Request) {
-			basicUserAuthorize(request)
 			data, err := ioutil.ReadAll(request.Request().Body)
-			if err != nil {
-				panic(err)
-			}
+			must(err)
 			request.RenderJSON(markdown.New(markdown.HTML(true), markdown.Breaks(true)).RenderToString(data))
 		},
 	)

@@ -15,9 +15,9 @@ type viewRelation struct {
 	Count          int64
 }
 
-func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, user *User) (ret []view) {
+func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, user *user) (ret []view) {
 
-	for _, v := range resource.autoRelations {
+	for _, v := range resource.relations {
 		if !resource.app.authorize(user, v.resource.canView) {
 			continue
 		}

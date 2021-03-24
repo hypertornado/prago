@@ -44,14 +44,14 @@ func initNotificationResource(resource *Resource) {
 //NotificationItem represents item for notification
 type NotificationItem struct {
 	app         *App
-	user        User
+	user        user
 	name        string
 	description string
 	typ         string
 }
 
 //Notification creates notification
-func (app *App) Notification(user User, name string) *NotificationItem {
+func (app *App) Notification(user user, name string) *NotificationItem {
 	return &NotificationItem{
 		app:  app,
 		user: user,

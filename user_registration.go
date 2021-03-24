@@ -14,7 +14,7 @@ func initUserRegistration(resource *Resource) {
 		email := request.Params().Get("email")
 		token := request.Params().Get("token")
 
-		var user User
+		var user user
 		err := app.Query().WhereIs("email", email).Get(&user)
 		if err == nil {
 			if !user.emailConfirmed() {
@@ -46,7 +46,7 @@ func initUserRegistration(resource *Resource) {
 				if len(field.Errors) != 0 {
 					return true
 				}
-				var user User
+				var user user
 				app.Query().WhereIs("email", field.Value).Get(&user)
 				if user.Email == field.Value {
 					return false
@@ -85,29 +85,29 @@ func initUserRegistration(resource *Resource) {
 		if form.Validate() {
 			email := request.Params().Get("email")
 			email = fixEmail(email)
-			user := &User{}
-			user.Email = email
-			user.Name = request.Params().Get("name")
-			user.IsActive = true
-			user.Locale = locale
-			must(user.newPassword(request.Params().Get("password")))
-			err := user.sendConfirmEmail(request, app)
+			u := &user{}
+			u.Email = email
+			u.Name = request.Params().Get("name")
+			u.IsActive = true
+			u.Locale = locale
+			must(u.newPassword(request.Params().Get("password")))
+			err := u.sendConfirmEmail(request, app)
 			if err != nil {
 				app.Log().Println(err)
 			}
-			err = user.sendAdminEmail(request, app)
+			err = u.sendAdminEmail(request, app)
 			if err != nil {
 				app.Log().Println(err)
 			}
 
-			count, err := app.Query().Count(&User{})
+			count, err := app.Query().Count(&user{})
 			if err == nil && count == 0 {
-				user.Role = sysadminRoleName
+				u.Role = sysadminRoleName
 			}
 
-			must(app.Create(user))
+			must(app.Create(u))
 
-			request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", user.Email))
+			request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
 			request.Redirect(app.getAdminURL("user/login"))
 		} else {
 			form.GetItemByName("password").Value = ""
@@ -117,9 +117,9 @@ func initUserRegistration(resource *Resource) {
 
 }
 
-func (user User) sendConfirmEmail(request *Request, app *App) error {
+func (u user) sendConfirmEmail(request *Request, app *App) error {
 
-	if user.emailConfirmed() {
+	if u.emailConfirmed() {
 		return errors.New("email already confirmed")
 	}
 
@@ -130,16 +130,16 @@ func (user User) sendConfirmEmail(request *Request, app *App) error {
 	locale := localeFromRequest(request)
 
 	urlValues := make(url.Values)
-	urlValues.Add("email", user.Email)
-	urlValues.Add("token", user.emailToken(app))
+	urlValues.Add("email", u.Email)
+	urlValues.Add("token", u.emailToken(app))
 
-	subject := messages.Get(locale, "admin_confirm_email_subject", app.name(user.Locale))
+	subject := messages.Get(locale, "admin_confirm_email_subject", app.name(u.Locale))
 	link := app.ConfigurationGetString("baseUrl") + app.getAdminURL("user/confirm_email") + "?" + urlValues.Encode()
-	body := messages.Get(locale, "admin_confirm_email_body", link, link, app.name(user.Locale))
+	body := messages.Get(locale, "admin_confirm_email_body", link, link, app.name(u.Locale))
 
 	return app.SendEmail(
-		user.Name,
-		user.Email,
+		u.Name,
+		u.Email,
 		subject,
 		body,
 		body,
@@ -147,23 +147,23 @@ func (user User) sendConfirmEmail(request *Request, app *App) error {
 
 }
 
-func (user User) sendAdminEmail(request *Request, a *App) error {
+func (u user) sendAdminEmail(request *Request, a *App) error {
 	if a.noReplyEmail == "" {
 		return errors.New("no reply email empty")
 	}
-	var users []*User
-	err := a.Query().WhereIs("issysadmin", true).Get(&users)
+	var users []*user
+	err := a.Query().WhereIs("role", "sysadmin").Get(&users)
 	if err != nil {
 		return err
 	}
 	for _, receiver := range users {
 
-		body := fmt.Sprintf("New user registered on %s: %s (%s)", a.name(user.Locale), user.Email, user.Name)
+		body := fmt.Sprintf("New user registered on %s: %s (%s)", a.name(u.Locale), u.Email, u.Name)
 
 		err = a.SendEmail(
 			receiver.Name,
 			receiver.Email,
-			"New registration on "+a.name(user.Locale),
+			"New registration on "+a.name(u.Locale),
 			body,
 			body,
 		)

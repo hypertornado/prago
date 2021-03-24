@@ -49,7 +49,7 @@ func (resource *Resource) initAutoRelations() {
 				v.HumanName = (*referenceResource).name
 			}
 
-			referenceResource.autoRelations = append(referenceResource.autoRelations, relation{
+			referenceResource.relations = append(referenceResource.relations, relation{
 				resource: resource,
 				field:    v.Name,
 				listName: createRelationNamingFunction(*v, *resource, *referenceResource),
@@ -88,12 +88,12 @@ func createRelationNamingFunction(field field, resource Resource, referenceResou
 	}
 }
 
-func getRelationViewData(user *User, f field, value interface{}) interface{} {
+func getRelationViewData(user *user, f field, value interface{}) interface{} {
 	ret, _ := getRelationData(user, f, value)
 	return ret
 }
 
-func getRelationData(user *User, f field, value interface{}) (*viewRelationData, error) {
+func getRelationData(user *user, f field, value interface{}) (*viewRelationData, error) {
 	app := f.resource.app
 	r2 := f.getRelatedResource()
 	if r2 == nil {
@@ -119,7 +119,7 @@ func getRelationData(user *User, f field, value interface{}) (*viewRelationData,
 	return r2.itemToRelationData(item, user, nil), nil
 }
 
-func (resource *Resource) itemToRelationData(item interface{}, user *User, relatedResource *Resource) *viewRelationData {
+func (resource *Resource) itemToRelationData(item interface{}, user *user, relatedResource *Resource) *viewRelationData {
 	var ret viewRelationData
 	ret.ID = getItemID(item)
 	ret.Name = getItemName(item)
@@ -167,7 +167,7 @@ func getItemName(item interface{}) string {
 	return fmt.Sprintf("#%d", getItemID(item))
 }
 
-func (resource *Resource) getItemDescription(item interface{}, user *User, relatedResource *Resource) string {
+func (resource *Resource) getItemDescription(item interface{}, user *user, relatedResource *Resource) string {
 	var items []string
 
 	itemsVal := reflect.ValueOf(item).Elem()
@@ -204,7 +204,7 @@ func (resource *Resource) getItemDescription(item interface{}, user *User, relat
 	return utils.CropMarkdown(ret, 500)
 }
 
-func (app App) relationStringer(field field, value reflect.Value, user *User) string {
+func (app App) relationStringer(field field, value reflect.Value, user *user) string {
 	switch value.Kind() {
 	case reflect.String:
 		if field.Tags["prago-type"] == "image" || field.Tags["prago-type"] == "file" {

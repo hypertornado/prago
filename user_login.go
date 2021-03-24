@@ -12,7 +12,7 @@ func initUserLogin(resource *Resource) {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
-			var user User
+			var user user
 			must(resource.app.Query().WhereIs("id", id).Get(&user))
 			request.logInUser(&user)
 			request.Redirect(resource.app.getAdminURL(""))
@@ -53,7 +53,7 @@ func initUserLogin(resource *Resource) {
 		form.Items[0].Value = email
 		form.Errors = []string{messages.Get(locale, "admin_login_error")}
 
-		var user User
+		var user user
 		err := resource.app.Query().WhereIs("email", email).Get(&user)
 		if err != nil {
 			if err == ErrItemNotFound {
