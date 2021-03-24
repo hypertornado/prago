@@ -56,7 +56,7 @@ func getListStats(resource *Resource, user *user, params url.Values) *listStats 
 
 	columnsStr := params.Get("_columns")
 	if columnsStr == "" {
-		columnsStr = resource.defaultVisibleFieldsStr()
+		columnsStr = resource.defaultVisibleFieldsStr(user)
 	}
 	columnsAr := strings.Split(columnsStr, ",")
 

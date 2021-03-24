@@ -59,7 +59,7 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 		if v.isHiddenMenu {
 			continue
 		}
-		if !request.authorize(v.permission) {
+		if !request.app.authorize(request.user, v.permission) {
 			continue
 		}
 
@@ -120,7 +120,7 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 		if v.isHiddenMenu {
 			continue
 		}
-		if !request.authorize(v.permission) {
+		if !request.app.authorize(request.user, v.permission) {
 			continue
 		}
 

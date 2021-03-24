@@ -34,7 +34,6 @@ func (resource Resource) getViews(id int, inValues interface{}, user *user) (ret
 }
 
 func (resource Resource) getBasicView(id int, inValues interface{}, user *user) view {
-	visible := defaultVisibilityFilter
 	ret := view{}
 
 	ret.Items = append(
@@ -50,7 +49,7 @@ func (resource Resource) getBasicView(id int, inValues interface{}, user *user) 
 	)
 
 	for i, f := range resource.fieldArrays {
-		if !visible(resource, user, *f) {
+		if !f.authorizeView(user) {
 			continue
 		}
 

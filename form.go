@@ -81,19 +81,6 @@ func (f *form) BindData(params url.Values) {
 	}
 }
 
-//GetFilter returns struct filter
-func (f *form) getFilter() fieldFilter {
-	allowed := make(map[string]bool)
-	for _, v := range f.Items {
-		if !v.Readonly {
-			allowed[v.Name] = true
-		}
-	}
-	return func(resource Resource, user *user, field field) bool {
-		return allowed[field.ColumnName]
-	}
-}
-
 func (f *form) addInput(name, description, template string, validators []itemValidator) *formItem {
 	item := &formItem{
 		Name:      name,

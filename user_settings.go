@@ -34,7 +34,7 @@ func (app *App) initUserSettings() {
 				if err != nil {
 					panic(err)
 				}
-				must(userResource.bindData(&u, request.user, request.Params(), form.getFilter()))
+				must(userResource.bindData(&u, request.user, request.Params()))
 				must(app.Save(&u))
 				request.AddFlashMessage(messages.Get(request.user.Locale, "admin_settings_changed"))
 				request.Redirect(app.getAdminURL("settings"))

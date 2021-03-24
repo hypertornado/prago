@@ -34,19 +34,17 @@ func (resource Resource) getDefaultOrder() (column string, desc bool) {
 	return
 }
 
-func (resource Resource) getForm(inValues interface{}, user *user, filters ...fieldFilter) (*form, error) {
-	filters = append(filters, defaultVisibilityFilter)
-	filters = append(filters, defaultEditabilityFilter)
+func (resource Resource) getForm(inValues interface{}, user *user) (*form, error) {
+	//filters = append(filters, defaultVisibilityFilter)
+	//filters = append(filters, defaultEditabilityFilter)
 	form := newForm()
 	form.Method = "POST"
 	itemVal := reflect.ValueOf(inValues).Elem()
 
 fields:
 	for i, field := range resource.fieldArrays {
-		for _, filter := range filters {
-			if !filter(resource, user, *field) {
-				continue fields
-			}
+		if !field.authorizeEdit(user) {
+			continue fields
 		}
 
 		var ifaceVal interface{}

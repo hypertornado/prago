@@ -35,7 +35,7 @@ func initDefaultResourceAPIs(resource *Resource) {
 				row := sheet.AddRow()
 				columnsStr := request.Request().URL.Query().Get("_columns")
 				if columnsStr == "" {
-					columnsStr = resource.defaultVisibleFieldsStr()
+					columnsStr = resource.defaultVisibleFieldsStr(request.user)
 				}
 				columnsAr := strings.Split(columnsStr, ",")
 				for _, v := range columnsAr {

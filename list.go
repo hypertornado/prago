@@ -86,8 +86,8 @@ func (resource *Resource) getListHeader(user *user) (list list, err error) {
 
 	list.Colspan = 1
 	list.TypeID = resource.id
-	list.VisibleColumns = resource.defaultVisibleFieldsStr()
-	list.Columns = resource.fieldsStr()
+	list.VisibleColumns = resource.defaultVisibleFieldsStr(user)
+	list.Columns = resource.fieldsStr(user)
 
 	list.OrderColumn = resource.orderByColumn
 	list.OrderDesc = resource.orderDesc
@@ -111,7 +111,7 @@ func (resource *Resource) getListHeader(user *user) (list list, err error) {
 	}
 
 	for _, v := range resource.fieldArrays {
-		if defaultVisibilityFilter(*resource, user, *v) {
+		if v.authorizeView(user) {
 			headerItem := (*v).getListHeaderItem(user)
 			if headerItem.DefaultShow {
 				list.Colspan++
@@ -122,9 +122,12 @@ func (resource *Resource) getListHeader(user *user) (list list, err error) {
 	return
 }
 
-func (resource *Resource) defaultVisibleFieldsStr() string {
+func (resource *Resource) defaultVisibleFieldsStr(user *user) string {
 	ret := []string{}
 	for _, v := range resource.fieldArrays {
+		if !v.authorizeView(user) {
+			continue
+		}
 		if v.DefaultShow {
 			ret = append(ret, v.ColumnName)
 		}
@@ -133,9 +136,12 @@ func (resource *Resource) defaultVisibleFieldsStr() string {
 	return r
 }
 
-func (resource *Resource) fieldsStr() string {
+func (resource *Resource) fieldsStr(user *user) string {
 	ret := []string{}
 	for _, v := range resource.fieldArrays {
+		if !v.authorizeView(user) {
+			continue
+		}
 		ret = append(ret, v.ColumnName)
 	}
 	return strings.Join(ret, ",")
@@ -322,7 +328,7 @@ func (resource *Resource) getListContent(user *user, params url.Values) (ret lis
 
 	columnsStr := params.Get("_columns")
 	if columnsStr == "" {
-		columnsStr = resource.defaultVisibleFieldsStr()
+		columnsStr = resource.defaultVisibleFieldsStr(user)
 	}
 
 	columnsAr := strings.Split(columnsStr, ",")
@@ -474,6 +480,9 @@ func (resource *Resource) getListContentJSON(user *user, params url.Values) (ret
 }
 
 func (resource Resource) valueToCell(user *user, f field, val reflect.Value, isOrderedBy bool) listCell {
+	if !f.authorizeView(user) {
+		panic(fmt.Sprintf("can't access field '%s'", f.Name))
+	}
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
 	var cell listCell

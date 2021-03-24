@@ -35,6 +35,29 @@ func (field field) GetRelatedResourceName() string {
 	return field.ColumnName
 }
 
+func (field *field) authorizeView(user *user) bool {
+	if !field.resource.app.authorize(user, field.resource.canView) {
+		return false
+	}
+	if !field.resource.app.authorize(user, field.canView) {
+		return false
+	}
+	return true
+}
+
+func (field *field) authorizeEdit(user *user) bool {
+	if !field.authorizeView(user) {
+		return false
+	}
+	if !field.resource.app.authorize(user, field.resource.canEdit) {
+		return false
+	}
+	if !field.resource.app.authorize(user, field.canEdit) {
+		return false
+	}
+	return true
+}
+
 func (resource *Resource) newField(f reflect.StructField, order int) *field {
 	ret := &field{
 		Name:        f.Name,

@@ -14,20 +14,20 @@ import (
 //User represents admin user account
 //TODO: better handle isactive user
 type user struct {
-	ID                int64
-	Name              string `prago-preview:"true"`
-	Email             string `prago-unique:"true" prago-preview:"true" prago-order:"true"`
-	Role              string `prago-preview:"true" prago-type:"role"`
-	Password          string `prago-can-view:"nobody"`
-	Locale            string
-	IsActive          bool
-	LoggedInIP        string    `prago-can-view:"sysadmin"`
-	LoggedInUseragent string    `prago-can-view:"sysadmin"`
+	ID                int64     `prago-order-desc:"true"`
+	Name              string    `prago-preview:"true"`
+	Email             string    `prago-unique:"true" prago-preview:"true"`
+	Role              string    `prago-preview:"true" prago-type:"role"`
+	Password          string    `prago-can-view:"nobody"`
+	Locale            string    `prago-can-view:"nobody"`
+	IsActive          bool      `prago-preview:"true"`
+	LoggedInIP        string    `prago-can-view:"sysadmin" prago-preview:"true"`
+	LoggedInUseragent string    `prago-can-view:"sysadmin" prago-preview:"true"`
 	LoggedInTime      time.Time `prago-can-view:"sysadmin"`
 	EmailConfirmedAt  time.Time `prago-can-view:"sysadmin"`
 	EmailRenewedAt    time.Time `prago-can-view:"sysadmin"`
 	CreatedAt         time.Time
-	UpdatedAt         time.Time `prago-can-view:"sysadmin"`
+	UpdatedAt         time.Time `prago-can-view:"sysadmin" prago-preview:"true"`
 }
 
 func fixEmail(in string) string {

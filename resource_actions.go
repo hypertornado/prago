@@ -23,7 +23,7 @@ func initDefaultResourceActions(resource *Resource) {
 			var item interface{}
 			resource.newItem(&item)
 
-			resource.bindData(&item, request.user, request.Request().URL.Query(), defaultEditabilityFilter)
+			resource.bindData(&item, request.user, request.Request().URL.Query())
 
 			form, err := resource.getForm(item, request.user)
 			must(err)
@@ -41,17 +41,14 @@ func initDefaultResourceActions(resource *Resource) {
 			var item interface{}
 			resource.newItem(&item)
 
-			form, err := resource.getForm(item, request.user)
-			must(err)
-
-			resource.bindData(item, request.user, request.Params(), form.getFilter())
+			resource.bindData(item, request.user, request.Params())
 			if resource.orderFieldName != "" {
 				resource.setOrderPosition(&item, resource.count()+1)
 			}
 			must(app.Create(item))
 
 			if app.search != nil {
-				err = app.search.saveItem(resource, item)
+				err := app.search.saveItem(resource, item)
 				if err != nil {
 					app.Log().Println(fmt.Errorf("%s", err))
 				}
@@ -119,9 +116,6 @@ func initDefaultResourceActions(resource *Resource) {
 			resource.newItem(&item)
 			must(app.Query().WhereIs("id", int64(id)).Get(item))
 
-			form, err := resource.getForm(item, user)
-			must(err)
-
 			var beforeData []byte
 			if resource.activityLog {
 				beforeData, err = json.Marshal(item)
@@ -130,7 +124,7 @@ func initDefaultResourceActions(resource *Resource) {
 
 			must(
 				resource.bindData(
-					item, user, request.Params(), form.getFilter(),
+					item, user, request.Params(),
 				),
 			)
 			must(app.Save(item))

@@ -2,6 +2,7 @@ package prago
 
 import (
 	"fmt"
+	"sort"
 )
 
 var nobodyPermission Permission = "nobody"
@@ -37,25 +38,13 @@ func (app *App) validatePermission(permission Permission) error {
 	return nil
 }
 
-func (app *App) getRoleFieldTypeData() [][2]string {
-	roleNames := []string{""}
-	for k := range app.accessManager.roles {
-		roleNames = append(roleNames, k)
-	}
-
-	vals := [][2]string{}
-	for _, v := range roleNames {
-		vals = append(vals, [2]string{v, v})
-	}
-	return vals
-}
-
 func (app *App) createRoleFieldType() FieldType {
 	var fp = func(field, *user) interface{} {
 		var roleNames []string
 		for k := range app.accessManager.roles {
 			roleNames = append(roleNames, k)
 		}
+		sort.Strings(roleNames)
 
 		vals := [][2]string{}
 		for _, v := range roleNames {
@@ -105,9 +94,6 @@ func (app *App) AddPermission(permission Permission) {
 
 func (app *App) authorize(user *user, permission Permission) bool {
 	return app.accessManager.roles[user.Role][permission]
-}
-func (request *Request) authorize(permission Permission) bool {
-	return request.app.authorize(request.user, permission)
 }
 
 func (app App) getResourceViewRoles(resource Resource) []string {
