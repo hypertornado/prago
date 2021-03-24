@@ -215,8 +215,6 @@ func (app *App) initFilesResource() {
 		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
-	//resource.defaultItemsPerPage = 100
-
 	resource.Action("").Method("POST").Handler(
 		func(request *Request) {
 			validateCSRF(request)
@@ -233,7 +231,7 @@ func (app *App) initFilesResource() {
 		},
 	)
 
-	resource.Action("getcdnurl").Method("POST").Handler(
+	resource.Action("getcdnurl").Permission(sysadminPermission).Method("POST").Handler(
 		func(request *Request) {
 			uuid := request.Params().Get("uuid")
 			size := request.Params().Get("size")

@@ -23,7 +23,7 @@ type field struct {
 	canEdit Permission
 
 	resource  *Resource
-	fieldType FieldType
+	fieldType *FieldType
 }
 
 //GetRelatedResourceName gets related resource name
@@ -226,41 +226,44 @@ func (field *field) initFieldType() {
 		panic(fmt.Sprintf("Field type '%s' not found", fieldTypeName))
 	}
 
-	if ret.ViewTemplate == "" {
-		ret.ViewTemplate = getDefaultViewTemplate(field.Typ)
-	}
-	if ret.ViewDataSource == nil {
-		ret.ViewDataSource = getDefaultViewDataSource(field)
+	if ret == nil {
+		ret = &FieldType{}
 	}
 
-	if ret.FormTemplate == "" {
-		ret.FormTemplate = getDefaultFormTemplate(field.Typ)
+	if ret.viewTemplate == "" {
+		ret.viewTemplate = getDefaultViewTemplate(field.Typ)
+	}
+	if ret.viewDataSource == nil {
+		ret.viewDataSource = getDefaultViewDataSource(field)
 	}
 
-	if ret.FormStringer == nil {
-		ret.FormStringer = getDefaultStringer(field.Typ)
+	if ret.formTemplate == "" {
+		ret.formTemplate = getDefaultFormTemplate(field.Typ)
 	}
 
-	if ret.FormTemplate == "admin_item_checkbox" {
-		ret.FormHideLabel = true
+	if ret.formStringer == nil {
+		ret.formStringer = getDefaultStringer(field.Typ)
 	}
 
-	if ret.ListCellDataSource == nil {
-		ret.ListCellDataSource = ret.ViewDataSource
-	}
-	if ret.ListCellTemplate == "" {
-		ret.ListCellTemplate = ret.ViewTemplate
+	if ret.formTemplate == "admin_item_checkbox" {
+		ret.formHideLabel = true
 	}
 
+	if ret.listCellDataSource == nil {
+		ret.listCellDataSource = ret.viewDataSource
+	}
+	if ret.listCellTemplate == "" {
+		ret.listCellTemplate = ret.viewTemplate
+	}
 	field.fieldType = ret
 }
 
-func (field field) fieldDescriptionMysql(fieldTypes map[string]FieldType) string {
+func (field *field) fieldDescriptionMysql(fieldTypes map[string]*FieldType) string {
 	var fieldDescription string
 
 	t, found := fieldTypes[field.Tags["prago-type"]]
-	if found && t.DBFieldDescription != "" {
-		fieldDescription = t.DBFieldDescription
+	if found && t.dbFieldDescription != "" {
+		fieldDescription = t.dbFieldDescription
 	} else {
 		switch field.Typ.Kind() {
 		case reflect.Struct:

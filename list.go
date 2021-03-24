@@ -166,9 +166,9 @@ func (field field) getListHeaderItem(user *user) listHeaderItem {
 	}
 
 	if headerItem.FilterLayout == "filter_layout_select" {
-		fn := headerItem.Field.fieldType.FilterLayoutDataSource
+		fn := headerItem.Field.fieldType.filterLayoutDataSource
 		if fn == nil {
-			fn = headerItem.Field.fieldType.FormDataSource
+			fn = headerItem.Field.fieldType.formDataSource
 		}
 		headerItem.FilterData = fn(field, user)
 	}
@@ -185,8 +185,8 @@ func (field *field) filterLayout() string {
 		return ""
 	}
 
-	if field.fieldType.FilterLayoutTemplate != "" {
-		return field.fieldType.FilterLayoutTemplate
+	if field.fieldType.filterLayoutTemplate != "" {
+		return field.fieldType.filterLayoutTemplate
 	}
 
 	if field.Typ.Kind() == reflect.String &&
@@ -486,8 +486,8 @@ func (resource Resource) valueToCell(user *user, f field, val reflect.Value, isO
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
 	var cell listCell
-	cell.Template = f.fieldType.ListCellTemplate
-	cell.Value = f.fieldType.ListCellDataSource(user, f, item)
+	cell.Template = f.fieldType.listCellTemplate
+	cell.Value = f.fieldType.listCellDataSource(user, f, item)
 	cell.OriginalValue = val.Interface()
 	cell.OrderedBy = isOrderedBy
 	return cell

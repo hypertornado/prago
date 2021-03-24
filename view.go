@@ -62,8 +62,8 @@ func (resource Resource) getBasicView(id int, inValues interface{}, user *user) 
 			ret.Items,
 			viewField{
 				Name:     f.HumanName(user.Locale),
-				Template: f.fieldType.ViewTemplate,
-				Value:    f.fieldType.ViewDataSource(user, *f, ifaceVal),
+				Template: f.fieldType.viewTemplate,
+				Value:    f.fieldType.viewDataSource(user, *f, ifaceVal),
 			},
 		)
 	}

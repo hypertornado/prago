@@ -9,30 +9,47 @@ import (
 
 //FieldType defines type of field
 type FieldType struct {
-	ViewTemplate   string
-	ViewDataSource func(*user, field, interface{}) interface{}
+	viewTemplate   string
+	viewDataSource func(*user, field, interface{}) interface{}
 
-	DBFieldDescription string
+	dbFieldDescription string
 
-	FormHideLabel bool
+	formHideLabel bool
 
-	FormTemplate   string
-	FormDataSource func(field, *user) interface{}
-	FormStringer   func(interface{}) string
+	formTemplate   string
+	formDataSource func(field, *user) interface{}
+	formStringer   func(interface{}) string
 
-	ListCellDataSource func(*user, field, interface{}) interface{}
-	ListCellTemplate   string
+	listCellDataSource func(*user, field, interface{}) interface{}
+	listCellTemplate   string
 
-	FilterLayoutTemplate   string
-	FilterLayoutDataSource func(field, *user) interface{}
+	filterLayoutTemplate   string
+	filterLayoutDataSource func(field, *user) interface{}
 }
 
-//AddFieldType adds field type
-func (app *App) AddFieldType(name string, fieldType FieldType) {
-	app.addFieldType(name, fieldType)
+//FieldType adds field type
+func (app *App) FieldType(name string) *FieldType {
+	ft := &FieldType{}
+	app.addFieldType(name, ft)
+	return ft
 }
 
-func (app *App) addFieldType(name string, fieldType FieldType) {
+func (ft *FieldType) AddViewTemplate(template string) *FieldType {
+	ft.viewTemplate = template
+	return ft
+}
+
+func (ft *FieldType) AddFormTemplate(template string) *FieldType {
+	ft.formTemplate = template
+	return ft
+}
+
+func (ft *FieldType) AddDBFieldDescription(description string) *FieldType {
+	ft.dbFieldDescription = description
+	return ft
+}
+
+func (app *App) addFieldType(name string, fieldType *FieldType) {
 	_, exist := app.fieldTypes[name]
 	if exist {
 		panic(fmt.Sprintf("field type '%s' already set", name))
@@ -42,7 +59,7 @@ func (app *App) addFieldType(name string, fieldType FieldType) {
 
 //IsRelation detects if field type is relation type
 func (f FieldType) IsRelation() bool {
-	if f.ViewTemplate == "admin_item_view_relation" {
+	if f.viewTemplate == "admin_item_view_relation" {
 		return true
 	}
 	return false
@@ -51,66 +68,64 @@ func (f FieldType) IsRelation() bool {
 func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("role", app.createRoleFieldType())
 
-	app.addFieldType("text", FieldType{
-		ViewTemplate:       "admin_item_view_textarea",
-		FormTemplate:       "admin_item_textarea",
-		ListCellDataSource: textListDataSource,
+	app.addFieldType("text", &FieldType{
+		viewTemplate:       "admin_item_view_textarea",
+		formTemplate:       "admin_item_textarea",
+		listCellDataSource: textListDataSource,
 	})
-	app.addFieldType("order", FieldType{})
-	app.addFieldType("date", FieldType{})
+	app.addFieldType("order", &FieldType{})
+	app.addFieldType("date", &FieldType{})
 
-	app.addFieldType("cdnfile", FieldType{
-		ViewTemplate:   "admin_item_view_file",
-		ViewDataSource: filesViewDataSource,
-		FormTemplate:   "admin_file",
+	app.addFieldType("cdnfile", &FieldType{
+		viewTemplate:   "admin_item_view_file",
+		viewDataSource: filesViewDataSource,
+		formTemplate:   "admin_file",
 		//ListCellTemplate: "admin_item_view_file_cell",
-		ListCellTemplate:   "admin_list_image",
-		ListCellDataSource: defaultViewDataSource,
+		listCellTemplate:   "admin_list_image",
+		listCellDataSource: defaultViewDataSource,
 
-		FilterLayoutTemplate:   "filter_layout_select",
-		FilterLayoutDataSource: boolFilterLayoutDataSource,
+		filterLayoutTemplate:   "filter_layout_select",
+		filterLayoutDataSource: boolFilterLayoutDataSource,
 	})
 
-	app.addFieldType("file", FieldType{
-		ViewTemplate:     "admin_item_view_image",
-		FormTemplate:     "admin_item_image",
-		FormDataSource:   createFilesEditDataSource(""),
-		ListCellTemplate: "admin_list_image",
+	app.addFieldType("file", &FieldType{
+		viewTemplate:     "admin_item_view_image",
+		formTemplate:     "admin_item_image",
+		formDataSource:   createFilesEditDataSource(""),
+		listCellTemplate: "admin_list_image",
 
-		FilterLayoutTemplate:   "filter_layout_select",
-		FilterLayoutDataSource: boolFilterLayoutDataSource,
+		filterLayoutTemplate:   "filter_layout_select",
+		filterLayoutDataSource: boolFilterLayoutDataSource,
 	})
 
-	app.addFieldType("image", FieldType{
-		ViewTemplate:     "admin_item_view_image",
-		FormTemplate:     "admin_item_image",
-		FormDataSource:   createFilesEditDataSource(".jpg,.jpeg,.png"),
-		ListCellTemplate: "admin_list_image",
+	app.addFieldType("image", &FieldType{
+		viewTemplate:     "admin_item_view_image",
+		formTemplate:     "admin_item_image",
+		formDataSource:   createFilesEditDataSource(".jpg,.jpeg,.png"),
+		listCellTemplate: "admin_list_image",
 
-		FilterLayoutTemplate:   "filter_layout_select",
-		FilterLayoutDataSource: boolFilterLayoutDataSource,
+		filterLayoutTemplate:   "filter_layout_select",
+		filterLayoutDataSource: boolFilterLayoutDataSource,
 	})
 
-	app.addFieldType("markdown", FieldType{
-		ViewTemplate:       "admin_item_view_markdown",
-		FormTemplate:       "admin_item_markdown",
-		ListCellDataSource: markdownListDataSource,
-		ListCellTemplate:   "admin_item_view_text",
+	app.addFieldType("markdown", &FieldType{
+		viewTemplate:       "admin_item_view_markdown",
+		formTemplate:       "admin_item_markdown",
+		listCellDataSource: markdownListDataSource,
+		listCellTemplate:   "admin_item_view_text",
 	})
-	app.addFieldType("place", FieldType{
-		ViewTemplate: "admin_item_view_place",
-		FormTemplate: "admin_item_place",
-
-		ListCellTemplate: "admin_item_view_text",
+	app.addFieldType("place", &FieldType{
+		viewTemplate:     "admin_item_view_place",
+		formTemplate:     "admin_item_place",
+		listCellTemplate: "admin_item_view_text",
 	})
 
-	app.addFieldType("relation", FieldType{
-		ViewTemplate:     "admin_item_view_relation",
-		ListCellTemplate: "admin_item_view_relation_cell",
-		ViewDataSource:   getRelationViewData,
-
-		FormTemplate: "admin_item_relation",
-		FormDataSource: func(f field, u *user) interface{} {
+	app.addFieldType("relation", &FieldType{
+		viewTemplate:     "admin_item_view_relation",
+		listCellTemplate: "admin_item_view_relation_cell",
+		viewDataSource:   getRelationViewData,
+		formTemplate:     "admin_item_relation",
+		formDataSource: func(f field, u *user) interface{} {
 			if f.Tags["prago-relation"] != "" {
 				return columnName(f.Tags["prago-relation"])
 			}
@@ -118,9 +133,9 @@ func (app *App) initDefaultFieldTypes() {
 		},
 	})
 
-	app.addFieldType("timestamp", FieldType{
-		FormTemplate: "admin_item_timestamp",
-		FormStringer: func(i interface{}) string {
+	app.addFieldType("timestamp", &FieldType{
+		formTemplate: "admin_item_timestamp",
+		formStringer: func(i interface{}) string {
 			tm := i.(time.Time)
 			if tm.IsZero() {
 				return ""

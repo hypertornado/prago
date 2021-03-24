@@ -50,7 +50,7 @@ type App struct {
 
 	search *adminSearch
 
-	fieldTypes  map[string]FieldType
+	fieldTypes  map[string]*FieldType
 	javascripts []string
 	css         []string
 	//roles       map[string]map[string]bool
@@ -99,7 +99,7 @@ func createApp(codeName string, version string) *App {
 
 	app.sendgridKey = app.ConfigurationGetStringWithFallback("sendgridApi", "")
 	app.noReplyEmail = app.ConfigurationGetStringWithFallback("noReplyEmail", "")
-	app.fieldTypes = make(map[string]FieldType)
+	app.fieldTypes = make(map[string]*FieldType)
 
 	app.db = mustConnectDatabase(
 		app.ConfigurationGetStringWithFallback("dbUser", ""),

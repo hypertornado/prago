@@ -55,18 +55,18 @@ fields:
 		item := &formItem{
 			Name:      field.ColumnName,
 			NameHuman: field.HumanName(user.Locale),
-			Template:  field.fieldType.FormTemplate,
+			Template:  field.fieldType.formTemplate,
 		}
 		item.AddUUID()
 
-		if field.fieldType.FormHideLabel {
+		if field.fieldType.formHideLabel {
 			item.HiddenName = true
 		}
-		item.Value = field.fieldType.FormStringer(ifaceVal)
+		item.Value = field.fieldType.formStringer(ifaceVal)
 		//item.NameHuman = field.HumanName(user.Locale)
 
-		if field.fieldType.FormDataSource != nil {
-			item.Data = field.fieldType.FormDataSource(*field, user)
+		if field.fieldType.formDataSource != nil {
+			item.Data = field.fieldType.formDataSource(*field, user)
 		}
 
 		form.AddItem(item)
