@@ -23,7 +23,7 @@ func (app *App) AddEnumFieldType(name string, items [][2]string) {
 
 //AddEnumFieldTypeLocalized adds localized enum field
 func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
-	app.AddFieldType(name, FieldType{
+	app.addFieldType(name, FieldType{
 		ViewDataSource: func(user *user, f field, value interface{}) interface{} {
 			str := value.(string)
 			for _, v := range items {

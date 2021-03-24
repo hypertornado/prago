@@ -62,11 +62,11 @@ type App struct {
 	taskManager       *taskManager
 }
 
-func newTestingApp(initFunc func(*App)) *App {
-	return createApp("__prago_test_app", "0.0", initFunc)
+func newTestingApp() *App {
+	return createApp("__prago_test_app", "0.0")
 }
 
-func createApp(codeName string, version string, initFunction func(*App)) *App {
+func createApp(codeName string, version string) *App {
 	if codeName != "__prago_test_app" && !configExists(codeName) {
 		if utils.ConsoleQuestion("File config.json does not exist. Can't start app. Would you like to start setup?") {
 			setup.StartSetup(codeName)
@@ -110,9 +110,17 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	app.adminController = app.accessController.subController()
 	app.initDefaultFieldTypes()
 	app.initUserResource()
-	initNotificationResource(app.Resource(Notification{}))
+	initNotificationResource(
+		app.Resource(
+			Notification{},
+		),
+	)
 	app.initFilesResource()
-	initActivityLog(app.Resource(ActivityLog{}))
+	initActivityLog(
+		app.Resource(
+			ActivityLog{},
+		),
+	)
 
 	app.initHome()
 	app.initTaskManager()
@@ -125,24 +133,25 @@ func createApp(codeName string, version string, initFunction func(*App)) *App {
 	app.initSearch()
 	app.initSystemStats()
 	app.initBackupCRON()
+	return app
+}
 
-	if initFunction != nil {
-		initFunction(app)
-	}
-
+func (app *App) afterInit() {
 	app.initDefaultResourceActions()
 	app.bindAPIs()
 	app.bindAllActions()
 	app.initAdminNotFoundAction()
 	app.initAllAutoRelations()
+}
 
-	return app
+func (app *App) Run() {
+	app.afterInit()
+	app.parseCommands()
 }
 
 //Application creates App structure for prago app
-func Application(appName, version string, initFunction func(*App)) {
-	app := createApp(appName, version, initFunction)
-	app.parseCommands()
+func Application(appName, version string) *App {
+	return createApp(appName, version)
 }
 
 //Log returns logger structure

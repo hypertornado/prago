@@ -22,12 +22,12 @@ type ResourceStruct struct {
 
 func prepareResource(initFns ...func(app *App)) (*App, *Resource) {
 	var resource *Resource
-	app := newTestingApp(func(app *App) {
-		resource = app.Resource(ResourceStruct{})
-		for _, v := range initFns {
-			v(app)
-		}
-	})
+	app := newTestingApp()
+	resource = app.Resource(ResourceStruct{})
+	for _, v := range initFns {
+		v(app)
+	}
+	app.afterInit()
 	app.unsafeDropTables()
 	app.migrate(false)
 	return app, resource

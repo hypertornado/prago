@@ -19,6 +19,9 @@ type field struct {
 
 	DefaultShow bool
 
+	canView Permission
+	canEdit Permission
+
 	resource  *Resource
 	fieldType FieldType
 }
@@ -42,6 +45,9 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 		fieldOrder:  order,
 		CanOrder:    true,
 		DefaultShow: false,
+
+		canView: loggedPermission,
+		canEdit: loggedPermission,
 
 		resource: resource,
 	}
@@ -91,15 +97,23 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 		ret.Unique = true
 	}
 
-	for _, v := range []string{
-		"prago-can-view",
-		"prago-can-edit",
-	} {
-		if ret.Tags[v] != "" {
-			err := resource.app.validatePermission(Permission(ret.Tags[v]))
-			if err != nil {
-				panic(fmt.Sprintf("validating permission '%s' on field '%s' of resource '%s': %s", v, f.Name, resource.name("en"), err))
-			}
+	if canView := ret.Tags["prago-can-view"]; canView != "" {
+		err := resource.app.validatePermission(Permission(canView))
+		if err != nil {
+			panic(fmt.Sprintf("validating permission 'prago-can-view' on field '%s' of resource '%s': %s", f.Name, resource.name("en"), err))
+		}
+		ret.canView = Permission(canView)
+	}
+
+	if canEdit := ret.Tags["prago-can-edit"]; canEdit != "" {
+		err := resource.app.validatePermission(Permission(canEdit))
+		if err != nil {
+			panic(fmt.Sprintf("validating permission 'prago-can-edit' on field '%s' of resource '%s': %s", f.Name, resource.name("en"), err))
+		}
+		ret.canEdit = Permission(canEdit)
+	} else {
+		if ret.Name == "ID" || ret.Name == "CreatedAt" || ret.Name == "UpdatedAt" {
+			ret.canEdit = nobodyPermission
 		}
 	}
 
