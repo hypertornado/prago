@@ -244,6 +244,10 @@ func (action *Action) bindAction() error {
 		constraints = append(constraints, utils.ConstraintInt("id"))
 	}
 
+	if action.permission == "" {
+		panic(fmt.Sprintf("Permission for action '%s %s' should not be empty", action.method, url))
+	}
+
 	switch action.method {
 	case "POST":
 		controller.post(url, fn, constraints...)
@@ -289,7 +293,7 @@ func (app *App) getListItemActions(user *user, item interface{}, id int64, resou
 		}
 	}
 
-	if app.authorize(user, resource.canEdit) && resource.orderColumnName != "" {
+	if app.authorize(user, resource.canEdit) && resource.orderField != nil {
 		ret.ShowOrderButton = true
 	}
 

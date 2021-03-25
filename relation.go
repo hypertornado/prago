@@ -40,19 +40,20 @@ func (resource *Resource) initAutoRelations() {
 			if relationFieldName != "" {
 				referenceName = relationFieldName
 			}
-			referenceResource := resource.app.getResourceByName(referenceName)
-			if referenceResource == nil {
+			relatedResource := resource.app.getResourceByName(referenceName)
+			if relatedResource == nil {
 				panic("can't find reference resource: " + referenceName)
 			}
+			v.relatedResource = relatedResource
 
-			if v.Tags["prago-description"] == "" {
-				v.HumanName = (*referenceResource).name
+			if v.Tags["prago-name"] == "" {
+				v.HumanName = (*relatedResource).name
 			}
 
-			referenceResource.relations = append(referenceResource.relations, relation{
+			relatedResource.relations = append(relatedResource.relations, relation{
 				resource: resource,
 				field:    v.Name,
-				listName: createRelationNamingFunction(*v, *resource, *referenceResource),
+				listName: createRelationNamingFunction(*v, *resource, *relatedResource),
 				listURL:  createRelationListURL(*resource, *v),
 				addURL:   createRelationAddURL(*resource, *v),
 			})
@@ -95,17 +96,16 @@ func getRelationViewData(user *user, f field, value interface{}) interface{} {
 
 func getRelationData(user *user, f field, value interface{}) (*viewRelationData, error) {
 	app := f.resource.app
-	r2 := f.getRelatedResource()
-	if r2 == nil {
+	if f.relatedResource == nil {
 		return nil, fmt.Errorf("resource not found: %s", f.Name)
 	}
 
-	if !app.authorize(user, r2.canView) {
+	if !app.authorize(user, f.relatedResource.canView) {
 		return nil, fmt.Errorf("user is not authorized to view this item")
 	}
 
 	var item interface{}
-	r2.newItem(&item)
+	f.relatedResource.newItem(&item)
 
 	intVal := value.(int64)
 	if intVal <= 0 {
@@ -116,7 +116,7 @@ func getRelationData(user *user, f field, value interface{}) (*viewRelationData,
 		return nil, fmt.Errorf("can't find this item")
 	}
 
-	return r2.itemToRelationData(item, user, nil), nil
+	return f.relatedResource.itemToRelationData(item, user, nil), nil
 }
 
 func (resource *Resource) itemToRelationData(item interface{}, user *user, relatedResource *Resource) *viewRelationData {
@@ -183,13 +183,15 @@ func (resource *Resource) getItemDescription(item interface{}, user *user, relat
 		}
 	}
 
-	//TODO: can show field? add access system for fields
 	for _, v := range resource.fieldArrays {
-		if v.Name == "ID" || v.Name == "Name" || v.Name == "Description" || v.Name == "OrderPosition" {
+		if v.Name == "ID" || v.Name == "Name" || v.Name == "Description" {
+			continue
+		}
+		if !v.authorizeView(user) {
 			continue
 		}
 
-		rr := v.getRelatedResource()
+		rr := v.relatedResource
 		if rr != nil && relatedResource != nil && rr.id == relatedResource.id {
 			continue
 		}
@@ -216,7 +218,7 @@ func (app App) relationStringer(field field, value reflect.Value, user *user) st
 			if value.Int() <= 0 {
 				return ""
 			}
-			rr := field.getRelatedResource()
+			rr := field.relatedResource
 
 			var item interface{}
 			rr.newItem(&item)

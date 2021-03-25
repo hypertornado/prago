@@ -6068,6 +6068,9 @@ select.admin_timestamp_minute {
   word-wrap: break-word;
   color: #888;
 }
+.view_content:last-child {
+  margin-bottom: 10px;
+}
 .view_content:empty {
   display: none;
 }

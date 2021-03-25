@@ -248,25 +248,6 @@ func (app *App) initFilesResource() {
 	)
 }
 
-func (f *File) getPath(prefix string) (folder, file string) {
-	pathSeparator := "/"
-	folder = prefix
-	if len(folder) > 0 && !strings.HasSuffix(folder, pathSeparator) {
-		folder += pathSeparator
-	}
-
-	if len(f.UID) < 7 {
-		panic("too short uid")
-	}
-
-	uidPrefix := f.UID[0:5]
-	folders := strings.Split(uidPrefix, "")
-	folder += strings.Join(folders, pathSeparator)
-
-	file = folder + pathSeparator + f.UID[5:] + "-" + f.Name
-	return
-}
-
 type imageResponse struct {
 	ID          int64
 	UID         string

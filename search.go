@@ -413,8 +413,6 @@ func (app *App) initSearchInner() {
 			request.RenderView("admin_search_suggest")
 		},
 	)
-
-	//app.adminController.get(app.getAdminURL("search-suggest"), f)
 }
 
 func parseSuggestions(in string) []string {

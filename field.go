@@ -24,6 +24,8 @@ type field struct {
 
 	resource  *Resource
 	fieldType *FieldType
+
+	relatedResource *Resource
 }
 
 //GetRelatedResourceName gets related resource name
@@ -301,17 +303,4 @@ func (field *field) fieldDescriptionMysql(fieldTypes map[string]*FieldType) stri
 		}
 	}
 	return fmt.Sprintf("%s %s %s", field.ColumnName, fieldDescription, additional)
-}
-
-func (field field) getRelatedResource() *Resource {
-	if field.Tags["prago-type"] != "relation" {
-		return nil
-	}
-	var relationName string
-	if field.Tags["prago-relation"] != "" {
-		relationName = field.Tags["prago-relation"]
-	} else {
-		relationName = field.Name
-	}
-	return field.resource.app.getResourceByName(relationName)
 }

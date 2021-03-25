@@ -37,8 +37,7 @@ type Resource struct {
 	fieldArrays []*field
 	fieldMap    map[string]*field
 
-	orderFieldName  string
-	orderColumnName string
+	orderField *field
 }
 
 //Resource creates new resource based on item
@@ -73,8 +72,7 @@ func (app *App) Resource(item interface{}) *Resource {
 		if ast.IsExported(typ.Field(i).Name) {
 			field := ret.newField(typ.Field(i), i)
 			if field.Tags["prago-type"] == "order" {
-				ret.orderFieldName = field.Name
-				ret.orderColumnName = field.ColumnName
+				ret.orderField = field
 			}
 			ret.fieldArrays = append(ret.fieldArrays, field)
 			ret.fieldMap[field.ColumnName] = field

@@ -42,7 +42,7 @@ func initDefaultResourceActions(resource *Resource) {
 			resource.newItem(&item)
 
 			resource.bindData(item, request.user, request.Params())
-			if resource.orderFieldName != "" {
+			if resource.orderField != nil {
 				resource.setOrderPosition(&item, resource.count()+1)
 			}
 			must(app.Create(item))

@@ -7,7 +7,7 @@ import (
 )
 
 func (app *App) initAPI() {
-	app.API("markdown").Method("POST").Handler(
+	app.API("markdown").Permission(loggedPermission).Method("POST").Handler(
 		func(request *Request) {
 			data, err := ioutil.ReadAll(request.Request().Body)
 			must(err)

@@ -83,7 +83,7 @@ func initDefaultResourceAPIs(resource *Resource) {
 
 	resource.API("set-order").Permission(resource.canEdit).Method("POST").Handler(
 		func(request *Request) {
-			if resource.orderFieldName == "" {
+			if resource.orderField == nil {
 				panic("can't order")
 			}
 

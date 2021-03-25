@@ -169,7 +169,9 @@ class List {
     }
 
     params["_format"] = "xlsx";
-    this.exportButton.setAttribute("href", this.adminPrefix + "/" + this.typeName + "/api/list" + encodeParams(params));
+    if (this.exportButton) {
+      this.exportButton.setAttribute("href", this.adminPrefix + "/" + this.typeName + "/api/list" + encodeParams(params));
+    }
 
     params["_format"] = "json";
     encoded = encodeParams(params);

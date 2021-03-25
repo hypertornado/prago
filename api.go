@@ -79,6 +79,7 @@ func (app *App) bindAPIs() {
 }
 
 func (api *API) bindAPI() error {
+
 	var controller *controller
 	if api.resource != nil {
 		controller = api.resource.resourceController
@@ -111,6 +112,10 @@ func (api *API) bindAPI() error {
 			api.handler(request)
 			return
 		}
+	}
+
+	if api.permission == "" {
+		panic(fmt.Sprintf("Permission for api '%s %s' should not be empty", api.method, url))
 	}
 
 	switch api.method {

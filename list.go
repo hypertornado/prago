@@ -20,6 +20,7 @@ type list struct {
 	VisibleColumns       string
 	Columns              string
 	CanChangeOrder       bool
+	CanExport            bool
 	OrderColumn          string
 	OrderDesc            bool
 	Locale               string
@@ -106,9 +107,10 @@ func (resource *Resource) getListHeader(user *user) (list list, err error) {
 
 	list.Name = resource.name(lang)
 
-	if resource.orderColumnName == list.OrderColumn && !list.OrderDesc {
+	if resource.orderField != nil {
 		list.CanChangeOrder = true
 	}
+	list.CanExport = resource.app.authorize(user, resource.canExport)
 
 	for _, v := range resource.fieldArrays {
 		if v.authorizeView(user) {

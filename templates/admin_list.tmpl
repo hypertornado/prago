@@ -51,8 +51,10 @@
     {{end}}
     </div>
 
-    <h3>Exportovat tabulku do Excelu</h3>
-    <a href="#" class="btn admin_exportbutton" download="export.xlsx">Exportovat</a>
+    {{if .CanExport}}
+      <h3>Exportovat tabulku do Excelu</h3>
+      <a href="#" class="btn admin_exportbutton" download="export.xlsx">Exportovat</a>
+    {{end}}
 
     <h3>Počet položek na stránce</h3>
     <select class="admin_tablesettings_pages input">

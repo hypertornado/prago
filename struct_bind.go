@@ -17,7 +17,7 @@ func (resource *Resource) setOrderPosition(item interface{}, order int64) error 
 		value = value.Elem()
 	}
 
-	val := value.FieldByName(resource.orderFieldName)
+	val := value.FieldByName(resource.orderField.Name)
 	val.SetInt(order)
 	return nil
 }
