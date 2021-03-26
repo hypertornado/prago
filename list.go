@@ -2,6 +2,7 @@ package prago
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -322,6 +323,11 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 }
 
 func (resource *Resource) getListContent(user *user, params url.Values) (ret listContent, err error) {
+
+	if !resource.app.authorize(user, resource.canView) {
+		return listContent{}, errors.New("Access denied")
+	}
+
 	var listHeader list
 	listHeader, err = resource.getListHeader(user)
 	if err != nil {
@@ -420,7 +426,7 @@ func (resource *Resource) getListContent(user *user, params url.Values) (ret lis
 				if v.ColumnName == orderBy {
 					isOrderedBy = true
 				}
-				row.Items = append(row.Items, resource.valueToCell(user, v.Field, fieldVal, isOrderedBy))
+				row.Items = append(row.Items, resource.valueToListCell(user, v.Field, fieldVal, isOrderedBy))
 			}
 		}
 
@@ -481,7 +487,7 @@ func (resource *Resource) getListContentJSON(user *user, params url.Values) (ret
 
 }
 
-func (resource Resource) valueToCell(user *user, f field, val reflect.Value, isOrderedBy bool) listCell {
+func (resource Resource) valueToListCell(user *user, f field, val reflect.Value, isOrderedBy bool) listCell {
 	if !f.authorizeView(user) {
 		panic(fmt.Sprintf("can't access field '%s'", f.Name))
 	}

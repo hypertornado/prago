@@ -123,7 +123,7 @@ func TestQuery(t *testing.T) {
 
 func TestResource(t *testing.T) {
 	app, resource := prepareResource()
-	items, err := resource.getListContent(&user{}, map[string][]string{
+	items, err := resource.getListContent(&user{Role: "sysadmin"}, map[string][]string{
 		"_order": {"id"},
 	})
 	if err != nil {
@@ -155,10 +155,13 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	items, _ = resource.getListContent(&user{}, map[string][]string{
+	items, err = resource.getListContent(&user{Role: "sysadmin"}, map[string][]string{
 		"_order": {"id"},
 		"_page":  {"1"},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if len(items.Rows[0].Items) != 4 {
 		t.Fatalf("wrong length: %d", len(items.Rows[0].Items))
