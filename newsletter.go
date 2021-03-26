@@ -7,9 +7,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
@@ -22,50 +20,40 @@ import (
 var ErrEmailAlreadyInList = errors.New("email already in newsletter list")
 
 //NewsletterMiddleware represents users newsletter
-type newsletterMiddleware struct {
+type Newsletters struct {
 	baseURL    string
 	renderer   NewsletterRenderer
 	app        *App
 	randomness string
+
+	newsletterResource        *Resource
+	newsletterSectionResource *Resource
 }
 
-//InitNewsletter inits apps newsletter function
-func (app *App) InitNewsletter(renderer NewsletterRenderer) {
-	if app.newsletter != nil {
+func (newsletters *Newsletters) Renderer(renderer NewsletterRenderer) *Newsletters {
+	newsletters.renderer = renderer
+	return newsletters
+}
+
+func (newsletters *Newsletters) Permission(permission Permission) *Newsletters {
+	newsletters.newsletterResource.PermissionView(permission)
+	newsletters.newsletterSectionResource.PermissionView(permission)
+
+	return newsletters
+}
+
+//InitNewsletters inits apps newsletter function
+func (app *App) Newsletters() *Newsletters {
+	if app.newsletters != nil {
 		panic("newsletter already initialized")
 	}
-	app.newsletter = &newsletterMiddleware{
+	app.newsletters = &Newsletters{
 		baseURL:  app.ConfigurationGetString("baseUrl"),
-		renderer: renderer,
+		renderer: defaultNewsletterRenderer,
 
 		app:        app,
 		randomness: app.ConfigurationGetString("random"),
 	}
-
-	var importPath string
-	app.addCommand("newsletter", "import").StringArgument(&importPath).Callback(func() {
-		file, err := os.Open(importPath)
-		must(err)
-
-		data, err := ioutil.ReadAll(file)
-		must(err)
-
-		lines := []string{string(data)}
-		for _, sep := range []string{"\r\n", "\r", "\n"} {
-			l2 := []string{}
-			for _, v := range lines {
-				l2 = append(l2, strings.Split(v, sep)...)
-			}
-			lines = l2
-		}
-
-		for _, v := range lines {
-			err := app.AddEmail(v, "", true)
-			if err != nil {
-				fmt.Printf("error while importing %s: %s\n", v, err)
-			}
-		}
-	})
 
 	controller := app.mainController.subController()
 	controller.addBeforeAction(func(request *Request) {
@@ -74,14 +62,14 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 
 	controller.get("/newsletter-subscribe", func(request *Request) {
 		request.SetData("title", "Přihlásit se k odběru newsletteru")
-		request.SetData("csrf", app.newsletter.CSFR(request))
+		request.SetData("csrf", app.newsletters.CSRF(request))
 		request.SetData("yield", "newsletter_subscribe")
 		request.SetData("show_back_button", true)
 		request.RenderView("newsletter_layout")
 	})
 
 	controller.post("/newsletter-subscribe", func(request *Request) {
-		if app.newsletter.CSFR(request) != request.Params().Get("csrf") {
+		if app.newsletters.CSRF(request) != request.Params().Get("csrf") {
 			panic("wrong csrf")
 		}
 
@@ -90,7 +78,7 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 		name := request.Params().Get("name")
 
 		var message string
-		err := app.AddEmail(email, name, false)
+		err := app.newsletters.AddEmail(email, name, false)
 		if err == nil {
 			err := app.sendConfirmEmail(name, email)
 			if err != nil {
@@ -115,7 +103,7 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 		email := request.Params().Get("email")
 		secret := request.Params().Get("secret")
 
-		if app.newsletter.secret(email) != secret {
+		if app.newsletters.secret(email) != secret {
 			panic("wrong secret")
 		}
 
@@ -141,7 +129,7 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 		email := request.Params().Get("email")
 		secret := request.Params().Get("secret")
 
-		if app.newsletter.secret(email) != secret {
+		if app.newsletters.secret(email) != secret {
 			panic("wrong secret")
 		}
 
@@ -163,23 +151,32 @@ func (app *App) InitNewsletter(renderer NewsletterRenderer) {
 		request.RenderView("newsletter_layout")
 	})
 
-	initNewsletterResource(app.Resource(newsletter{}))
-	initNewsletterSection(app.Resource(newsletterSection{}))
-	initNewsletterPersonsResource(app.Resource(newsletterPersons{}))
+	app.newsletters.newsletterResource = app.Resource(newsletter{}).Name(Unlocalized("Newsletter"))
+	initNewsletterResource(
+		app.newsletters.newsletterResource,
+	)
+
+	app.newsletters.newsletterSectionResource = app.Resource(newsletterSection{}).Name(Unlocalized("Newsletter - sekce"))
+	initNewsletterSection(
+		app.newsletters.newsletterSectionResource,
+	)
+
+	app.Resource(newsletterPersons{}).PermissionView(sysadminPermission).Name(Unlocalized("Newsletter - osoby"))
+	return app.newsletters
 
 	//newsletterResource.AddRelation(newsletterSectionResource, "Newsletter", Unlocalized("Přidat sekci"))
 }
 
-func (app *App) NewsletterCSRF(request *Request) string {
-	return app.newsletter.CSFR(request)
-}
+/*func (app *App) NewsletterCSRF(request *Request) string {
+	return app.newsletters.CSFR(request)
+}*/
 
 func (app App) sendConfirmEmail(name, email string) error {
-	text := app.newsletter.confirmEmailBody(name, email)
+	text := app.newsletters.confirmEmailBody(name, email)
 	return app.Email().To(name, email).Subject("Potvrďte prosím odběr newsletteru " + app.name("en")).TextContent(text).Send()
 }
 
-func (nm newsletterMiddleware) confirmEmailBody(name, email string) string {
+func (nm Newsletters) confirmEmailBody(name, email string) string {
 	values := make(url.Values)
 	values.Set("email", email)
 	values.Set("secret", nm.secret(email))
@@ -195,7 +192,7 @@ func (nm newsletterMiddleware) confirmEmailBody(name, email string) string {
 	)
 }
 
-func (nm newsletterMiddleware) unsubscribeURL(email string) string {
+func (nm Newsletters) unsubscribeURL(email string) string {
 	values := make(url.Values)
 	values.Set("email", email)
 	values.Set("secret", nm.secret(email))
@@ -206,28 +203,27 @@ func (nm newsletterMiddleware) unsubscribeURL(email string) string {
 	)
 }
 
-func (nm newsletterMiddleware) secret(email string) string {
+func (nm Newsletters) secret(email string) string {
 	h := md5.New()
 
 	io.WriteString(h, fmt.Sprintf("secret%s%s", nm.randomness, email))
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-//CSFR returns csrf token for newsletter
-func (nm newsletterMiddleware) CSFR(request *Request) string {
+//CSRF returns csrf token for newsletter
+func (nm *Newsletters) CSRF(request *Request) string {
 	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%s%s", nm.randomness, request.Request().UserAgent()))
 	return fmt.Sprintf("%x", h.Sum(nil))
 
 }
 
-//AddEmail adds email to newsletter
-func (app *App) AddEmail(email, name string, confirm bool) error {
+func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 	if !strings.Contains(email, "@") {
 		return errors.New("Wrong email format")
 	}
 
-	err := app.Query().WhereIs("email", email).Get(&newsletterPersons{})
+	err := nm.app.Query().WhereIs("email", email).Get(&newsletterPersons{})
 	if err == nil {
 		return ErrEmailAlreadyInList
 	}
@@ -237,7 +233,7 @@ func (app *App) AddEmail(email, name string, confirm bool) error {
 		Email:     email,
 		Confirmed: confirm,
 	}
-	return app.Create(&person)
+	return nm.app.Create(&person)
 }
 
 //Newsletter represents newsletter
@@ -252,7 +248,7 @@ type newsletter struct {
 }
 
 func initNewsletterResource(resource *Resource) {
-	resource.canView = "newsletter"
+	resource.canView = sysadminPermission
 
 	resource.resourceController.addBeforeAction(func(request *Request) {
 		ret, err := resource.app.Query().WhereIs("confirmed", true).WhereIs("unsubscribed", false).Count(&newsletterPersons{})
@@ -282,13 +278,13 @@ func initNewsletterResource(resource *Resource) {
 				request.Response().Write([]byte(body))
 			},
 		}*/
-	resource.ItemAction("preview").Name(Unlocalized("Náhled")).Handler(
+	resource.ItemAction("preview").Permission(loggedPermission).Name(Unlocalized("Náhled")).Handler(
 		func(request *Request) {
 			var newsletter newsletter
 			err := resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
 			must(err)
 
-			body, err := resource.app.newsletter.GetBody(newsletter, "")
+			body, err := resource.app.newsletters.GetBody(newsletter, "")
 			must(err)
 
 			request.Response().WriteHeader(200)
@@ -297,7 +293,7 @@ func initNewsletterResource(resource *Resource) {
 		},
 	)
 
-	resource.ItemAction("send-preview").Method("POST").Handler(
+	resource.ItemAction("send-preview").Permission(loggedPermission).Method("POST").Handler(
 		func(request *Request) {
 			var newsletter newsletter
 			must(resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
@@ -311,7 +307,7 @@ func initNewsletterResource(resource *Resource) {
 		},
 	)
 
-	resource.ItemAction("send").Method("POST").Template("newsletter_sent").DataSource(
+	resource.ItemAction("send").Permission(loggedPermission).Method("POST").Template("newsletter_sent").DataSource(
 		func(request *Request) interface{} {
 			var newsletter newsletter
 			err := resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
@@ -337,7 +333,7 @@ func initNewsletterResource(resource *Resource) {
 		},
 	)
 
-	resource.ItemAction("duplicate").Method("POST").Handler(
+	resource.ItemAction("duplicate").Permission(loggedPermission).Method("POST").Handler(
 		func(request *Request) {
 			var newsletter newsletter
 			must(resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter))
@@ -360,9 +356,9 @@ func initNewsletterResource(resource *Resource) {
 		},
 	)
 
-	resource.ItemAction("send-preview").Name(Unlocalized("Odeslat náhled")).Template("newsletter_send_preview")
+	resource.ItemAction("send-preview").Permission(loggedPermission).Name(Unlocalized("Odeslat náhled")).Template("newsletter_send_preview")
 
-	resource.ItemAction("send").Name(Unlocalized("Odeslat")).Template("newsletter_send").DataSource(
+	resource.ItemAction("send").Permission(loggedPermission).Name(Unlocalized("Odeslat")).Template("newsletter_send").DataSource(
 		func(*Request) interface{} {
 			recipients, err := resource.app.getNewsletterRecipients()
 			if err != nil {
@@ -375,7 +371,7 @@ func initNewsletterResource(resource *Resource) {
 		},
 	)
 
-	resource.ItemAction("duplicate").Name(Unlocalized("Duplikovat")).Template("newsletter_duplicate")
+	resource.ItemAction("duplicate").Permission(loggedPermission).Name(Unlocalized("Duplikovat")).Template("newsletter_duplicate")
 
 }
 
@@ -408,7 +404,7 @@ func (app *App) getNewsletterRecipients() ([]string, error) {
 
 func (app *App) sendEmails(n newsletter, emails []string) error {
 	for _, v := range emails {
-		body, err := app.newsletter.GetBody(n, v)
+		body, err := app.newsletters.GetBody(n, v)
 		if err == nil {
 			err = app.Email().To("", v).Subject(n.Name).HTMLContent(body).Send()
 		}
@@ -420,7 +416,7 @@ func (app *App) sendEmails(n newsletter, emails []string) error {
 }
 
 //GetBody gets body of newsletter
-func (nm *newsletterMiddleware) GetBody(n newsletter, email string) (string, error) {
+func (nm *Newsletters) GetBody(n newsletter, email string) (string, error) {
 	content := markdown.New(markdown.HTML(true)).RenderToString([]byte(n.Body))
 	params := map[string]interface{}{
 		"id":          n.ID,
@@ -477,7 +473,7 @@ type newsletterSection struct {
 }
 
 func initNewsletterSection(resource *Resource) {
-	resource.canView = "newsletter"
+	resource.canView = sysadminPermission
 }
 
 //NewsletterPersons represents person of newsletter
@@ -491,10 +487,6 @@ type newsletterPersons struct {
 	UpdatedAt    time.Time
 }
 
-func initNewsletterPersonsResource(resource *Resource) {
-	resource.canView = "sysadmin"
-}
-
 //NewsletterSectionData represents data of newsletter section
 type newsletterSectionData struct {
 	Name   string
@@ -504,7 +496,7 @@ type newsletterSectionData struct {
 	Image  string
 }
 
-func (nm *newsletterMiddleware) getNewsletterSectionData(n newsletter) []newsletterSectionData {
+func (nm *Newsletters) getNewsletterSectionData(n newsletter) []newsletterSectionData {
 	var sections []*newsletterSection
 	err := nm.app.Query().WhereIs("newsletter", n.ID).Order("orderposition").Get(&sections)
 	if err != nil {

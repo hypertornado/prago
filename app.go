@@ -48,7 +48,7 @@ type App struct {
 	sendgridKey  string
 	noReplyEmail string
 
-	newsletter *newsletterMiddleware
+	newsletters *Newsletters
 
 	search *adminSearch
 
