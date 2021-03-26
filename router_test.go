@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"github.com/hypertornado/prago/utils"
 	"testing"
 )
 
@@ -59,7 +58,7 @@ func TestRouterNormal(t *testing.T) {
 		t.Fatal(ok)
 	}
 
-	constraint = utils.ConstraintInt("id")
+	constraint = constraintInt("id")
 	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []func(map[string]string) bool{constraint})
 	_, ok = r.match("GET", "/a/123/ondra/aa")
 	if ok != true {
@@ -74,7 +73,7 @@ func TestRouterNormal(t *testing.T) {
 		t.Fatal(ok)
 	}
 
-	constraint = utils.ConstraintWhitelist("name", []string{"ondra", "pepa"})
+	constraint = constraintWhitelist("name", []string{"ondra", "pepa"})
 	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []func(map[string]string) bool{constraint})
 
 	_, ok = r.match("GET", "/a/123/ondra/aa")

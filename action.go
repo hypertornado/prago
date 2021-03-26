@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
-	"github.com/hypertornado/prago/utils"
 )
 
 type buttonData struct {
@@ -241,7 +239,7 @@ func (action *Action) bindAction() error {
 
 	constraints := []func(map[string]string) bool{}
 	if action.isItemAction {
-		constraints = append(constraints, utils.ConstraintInt("id"))
+		constraints = append(constraints, constraintInt("id"))
 	}
 
 	if action.permission == "" {
