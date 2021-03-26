@@ -8,9 +8,15 @@ import (
 )
 
 func (app *App) initEmail() {
-	app.sendgridKey = app.ConfigurationGetStringWithFallback("sendgridApi", "")
-	app.noReplyEmail = app.ConfigurationGetStringWithFallback("noReplyEmail", "")
-	app.sendgridClient = sendgrid.NewSendClient(app.sendgridKey)
+	sendgridKey := app.ConfigurationGetString("sendgridApi")
+	app.noReplyEmail = app.ConfigurationGetString("noReplyEmail")
+	app.noReplyName = app.name("en")
+	app.sendgridClient = sendgrid.NewSendClient(sendgridKey)
+}
+
+func (app *App) SetDefaultEmailAddressFrom(name, email string) {
+	app.noReplyName = name
+	app.noReplyEmail = email
 }
 
 type Email struct {
@@ -37,7 +43,7 @@ func newEmailAddress(name, email string) *emailAddress {
 
 func (app *App) Email() *Email {
 	return &Email{
-		from: newEmailAddress(app.name("en"), app.noReplyEmail),
+		from: newEmailAddress(app.noReplyName, app.noReplyEmail),
 		app:  app,
 	}
 }

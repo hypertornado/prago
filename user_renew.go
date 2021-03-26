@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"errors"
 	"net/url"
 	"time"
 )
@@ -140,10 +139,6 @@ func (user user) getRenewURL(request *Request, app *App) string {
 }
 
 func (user user) sendRenew(request *Request, app *App) error {
-	if app.noReplyEmail == "" {
-		return errors.New("no reply email empty")
-	}
-
 	subject := messages.Get(user.Locale, "admin_forgotten_email_subject", app.name(user.Locale))
 	link := user.getRenewURL(request, app)
 	body := messages.Get(user.Locale, "admin_forgotten_email_body", link, link, app.name(user.Locale))

@@ -1729,7 +1729,20 @@ class TaskMonitor {
     }
 }
 function bindNotifications() {
-    new NotificationCenter(document.querySelector(".notification_center"));
+    new NotificationCenter2(document.querySelector(".notification_center"));
+}
+class NotificationCenter2 {
+    constructor(el) {
+        var notifications = el.querySelectorAll(".notification");
+        for (var i = 0; i < notifications.length; i++) {
+            this.bindNotification(notifications[i]);
+        }
+    }
+    bindNotification(el) {
+        el.querySelector(".notification_close").addEventListener("click", () => {
+            el.classList.add("notification-closed");
+        });
+    }
 }
 class NotificationCenter {
     constructor(el) {

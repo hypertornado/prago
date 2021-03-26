@@ -23,6 +23,9 @@ type homeData struct {
 func (app *App) getHomeData(request *Request) interface{} {
 	ret := []homeData{}
 
+	//app.Notification("hello world " + time.Now().Format(time.RFC3339Nano)).Flash(request)
+	//app.Notification("hello world 2 " + time.Now().Format(time.RFC3339Nano)).Flash(request)
+
 	for _, resource := range app.getSortedResources(request.user.Locale) {
 		if app.authorize(request.user, resource.canView) {
 			item := homeData{

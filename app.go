@@ -45,17 +45,17 @@ type App struct {
 	db             *sql.DB
 	sendgridClient *sendgrid.Client
 
-	sendgridKey  string
 	noReplyEmail string
+	noReplyName  string
 
-	newsletters *Newsletters
+	newsletters        *Newsletters
+	notificationCenter *notificationCenter
 
 	search *adminSearch
 
-	fieldTypes  map[string]*FieldType
-	javascripts []string
-	css         []string
-	//roles       map[string]map[string]bool
+	fieldTypes    map[string]*FieldType
+	javascripts   []string
+	css           []string
 	accessManager *accessManager
 
 	apis []*API
@@ -78,6 +78,7 @@ func createApp(codeName string, version string) *App {
 	app := &App{
 		codeName: codeName,
 		version:  version,
+		name:     Unlocalized(codeName),
 
 		commands: &commands{},
 
@@ -95,8 +96,8 @@ func createApp(codeName string, version string) *App {
 	app.initSessions()
 	app.initAccessManager()
 	app.initStaticFilesHandler()
+	app.initNotifications()
 
-	app.name = Unlocalized(app.codeName)
 	app.resourceMap = make(map[reflect.Type]*Resource)
 	app.resourceNameMap = make(map[string]*Resource)
 
@@ -111,11 +112,6 @@ func createApp(codeName string, version string) *App {
 	app.adminController = app.accessController.subController()
 	app.initDefaultFieldTypes()
 	app.initUserResource()
-	initNotificationResource(
-		app.Resource(
-			Notification{},
-		),
-	)
 	app.initFilesResource()
 	initActivityLog(
 		app.Resource(

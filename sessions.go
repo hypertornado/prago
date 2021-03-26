@@ -34,9 +34,13 @@ func (request *Request) writeSessionIfDirty() {
 }
 
 //AddFlashMessage adds flash message to request
-func (request Request) AddFlashMessage(message string) {
-	request.session.session.AddFlash(message)
-	request.session.dirty = true
+func (request *Request) AddFlashMessage(message string) {
+
+	request.app.Notification(message).Flash(request)
+	//request.session.session.AddFlash(message)
+
+	//request.session.session.add
+	//request.session.dirty = true
 }
 
 func initUserFromSession(request *Request) {
@@ -66,11 +70,22 @@ func initRequestWithSession(request *Request, next func()) {
 	}
 	initUserFromSession(request)
 
-	flashes := session.Flashes()
-	if len(flashes) > 0 {
-		request.SetData("flash_messages", flashes)
-		request.session.dirty = true
+	var notifications []*notificationView
+
+	for _, v := range session.Flashes() {
+		notificationID := v.(string)
+		notification := request.app.notificationCenter.get(notificationID)
+		if notification != nil {
+			request.app.notificationCenter.delete(notificationID)
+			notifications = append(notifications, notification.getView())
+			request.session.dirty = true
+		}
 	}
+
+	if notifications != nil {
+		request.SetData("notifications", notifications)
+	}
+
 	next()
 }
 

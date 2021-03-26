@@ -15,6 +15,7 @@ const adminPathPrefix = "/admin"
 func (app *App) initAdminActions() {
 
 	app.accessController.addBeforeAction(func(request *Request) {
+		//app.Notification("hello world " + time.Now().Format(time.RFC3339Nano)).Flash(request)
 		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
 		request.SetData("locale", localeFromRequest(request))
 		request.SetData("admin_header_prefix", adminPathPrefix)

@@ -123,12 +123,7 @@ func (u user) sendConfirmEmail(request *Request, app *App) error {
 		return errors.New("email already confirmed")
 	}
 
-	if app.noReplyEmail == "" {
-		return errors.New("no reply email empty")
-	}
-
 	locale := localeFromRequest(request)
-
 	urlValues := make(url.Values)
 	urlValues.Add("email", u.Email)
 	urlValues.Add("token", u.emailToken(app))
@@ -140,9 +135,6 @@ func (u user) sendConfirmEmail(request *Request, app *App) error {
 }
 
 func (u user) sendAdminEmail(request *Request, a *App) error {
-	if a.noReplyEmail == "" {
-		return errors.New("no reply email empty")
-	}
 	var users []*user
 	err := a.Query().WhereIs("role", "sysadmin").Get(&users)
 	if err != nil {
