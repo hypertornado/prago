@@ -62,7 +62,7 @@ func (app *App) bindAllActions() {
 func newAction(app *App, url string) *Action {
 	return &Action{
 		name:       Unlocalized(url),
-		permission: sysadminPermission,
+		permission: "",
 		method:     "GET",
 		url:        url,
 		app:        app,

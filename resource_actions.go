@@ -212,13 +212,13 @@ func initDefaultResourceActions(resource *Resource) {
 	}
 
 	if resource.activityLog {
-		resource.Action("history").priority().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resource.canEdit).DataSource(
+		resource.Action("history").priority().IsWide().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resource.canEdit).DataSource(
 			func(request *Request) interface{} {
 				return app.getHistory(resource, 0)
 			},
 		)
 
-		resource.ItemAction("history").priority().Name(messages.GetNameFunction("admin_history")).Permission(resource.canEdit).Template("admin_history").DataSource(
+		resource.ItemAction("history").priority().IsWide().Name(messages.GetNameFunction("admin_history")).Permission(resource.canEdit).Template("admin_history").DataSource(
 			func(request *Request) interface{} {
 				id, err := strconv.Atoi(request.Params().Get("id"))
 				must(err)

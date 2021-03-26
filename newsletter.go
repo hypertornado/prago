@@ -175,16 +175,8 @@ func (app *App) NewsletterCSRF(request *Request) string {
 }
 
 func (app App) sendConfirmEmail(name, email string) error {
-
 	text := app.newsletter.confirmEmailBody(name, email)
-
-	return app.SendEmail(
-		name,
-		email,
-		"Potvrďte prosím odběr newsletteru "+app.name("en"),
-		text,
-		text,
-	)
+	return app.Email().To(name, email).Subject("Potvrďte prosím odběr newsletteru " + app.name("en")).TextContent(text).Send()
 }
 
 func (nm newsletterMiddleware) confirmEmailBody(name, email string) string {
@@ -418,17 +410,10 @@ func (app *App) sendEmails(n newsletter, emails []string) error {
 	for _, v := range emails {
 		body, err := app.newsletter.GetBody(n, v)
 		if err == nil {
-
-			err = app.SendEmail(
-				"",
-				v,
-				n.Name,
-				body,
-				body,
-			)
+			err = app.Email().To("", v).Subject(n.Name).HTMLContent(body).Send()
 		}
 		if err != nil {
-			fmt.Println("ERROR", err.Error())
+			app.Log().Println("ERROR", err.Error())
 		}
 	}
 	return nil

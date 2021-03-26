@@ -10,6 +10,7 @@ import (
 	"github.com/hypertornado/prago/cachelib"
 	setup "github.com/hypertornado/prago/prago-setup/lib"
 	"github.com/hypertornado/prago/utils"
+	"github.com/sendgrid/sendgrid-go"
 )
 
 //App is main struct of prago application
@@ -40,8 +41,9 @@ type App struct {
 	UsersResource *Resource
 	FilesResource *Resource
 
-	rootActions []*Action
-	db          *sql.DB
+	rootActions    []*Action
+	db             *sql.DB
+	sendgridClient *sendgrid.Client
 
 	sendgridKey  string
 	noReplyEmail string
@@ -89,6 +91,7 @@ func createApp(codeName string, version string) *App {
 	app.accessController.priorityRouter = true
 
 	app.initConfig()
+	app.initEmail()
 	app.initSessions()
 	app.initAccessManager()
 	app.initStaticFilesHandler()
@@ -97,8 +100,6 @@ func createApp(codeName string, version string) *App {
 	app.resourceMap = make(map[reflect.Type]*Resource)
 	app.resourceNameMap = make(map[string]*Resource)
 
-	app.sendgridKey = app.ConfigurationGetStringWithFallback("sendgridApi", "")
-	app.noReplyEmail = app.ConfigurationGetStringWithFallback("noReplyEmail", "")
 	app.fieldTypes = make(map[string]*FieldType)
 
 	app.db = mustConnectDatabase(

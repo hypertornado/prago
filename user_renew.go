@@ -148,11 +148,5 @@ func (user user) sendRenew(request *Request, app *App) error {
 	link := user.getRenewURL(request, app)
 	body := messages.Get(user.Locale, "admin_forgotten_email_body", link, link, app.name(user.Locale))
 
-	return app.SendEmail(
-		user.Name,
-		user.Email,
-		subject,
-		body,
-		body,
-	)
+	return app.Email().To(user.Name, user.Email).Subject(subject).TextContent(body).Send()
 }

@@ -35,7 +35,7 @@ func (app *App) initTaskManager() {
 	go app.taskManager.oldTasksRemover()
 	go app.taskManager.startCRON()
 
-	app.Action("_tasks").Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(
+	app.Action("_tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(
 		func(request *Request) interface{} {
 			var ret = map[string]interface{}{}
 			user := request.user

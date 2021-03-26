@@ -136,15 +136,7 @@ func (u user) sendConfirmEmail(request *Request, app *App) error {
 	subject := messages.Get(locale, "admin_confirm_email_subject", app.name(u.Locale))
 	link := app.ConfigurationGetString("baseUrl") + app.getAdminURL("user/confirm_email") + "?" + urlValues.Encode()
 	body := messages.Get(locale, "admin_confirm_email_body", link, link, app.name(u.Locale))
-
-	return app.SendEmail(
-		u.Name,
-		u.Email,
-		subject,
-		body,
-		body,
-	)
-
+	return app.Email().To(u.Name, u.Email).Subject(subject).HTMLContent(body).Send()
 }
 
 func (u user) sendAdminEmail(request *Request, a *App) error {
@@ -160,14 +152,7 @@ func (u user) sendAdminEmail(request *Request, a *App) error {
 
 		body := fmt.Sprintf("New user registered on %s: %s (%s)", a.name(u.Locale), u.Email, u.Name)
 
-		err = a.SendEmail(
-			receiver.Name,
-			receiver.Email,
-			"New registration on "+a.name(u.Locale),
-			body,
-			body,
-		)
-
+		err = request.app.Email().To(receiver.Name, receiver.Email).Subject("New registration on " + a.name(u.Locale)).HTMLContent(body).Send()
 		if err != nil {
 			return err
 		}

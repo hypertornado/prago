@@ -158,12 +158,13 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 	return ret
 }
 
-func (resource *Resource) FieldName(nameOfField string, name func(string) string) {
+func (resource *Resource) FieldName(nameOfField string, name func(string) string) *Resource {
 	f := resource.fieldMap[nameOfField]
 	if f == nil {
 		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, nameOfField))
 	}
 	f.HumanName = name
+	return resource
 }
 
 func getDefaultStringer(t reflect.Type) func(interface{}) string {
