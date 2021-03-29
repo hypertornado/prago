@@ -13,7 +13,6 @@ import (
 
 	"github.com/chris-ramon/douceur/inliner"
 	"github.com/golang-commonmark/markdown"
-	"github.com/hypertornado/prago/utils"
 )
 
 //ErrEmailAlreadyInList is returned when user is already in newsletter list
@@ -151,17 +150,17 @@ func (app *App) Newsletters() *Newsletters {
 		request.RenderView("newsletter_layout")
 	})
 
-	app.newsletters.newsletterResource = app.Resource(newsletter{}).Name(Unlocalized("Newsletter"))
+	app.newsletters.newsletterResource = app.Resource(newsletter{}).Name(unlocalized("Newsletter"))
 	initNewsletterResource(
 		app.newsletters.newsletterResource,
 	)
 
-	app.newsletters.newsletterSectionResource = app.Resource(newsletterSection{}).Name(Unlocalized("Newsletter - sekce"))
+	app.newsletters.newsletterSectionResource = app.Resource(newsletterSection{}).Name(unlocalized("Newsletter - sekce"))
 	initNewsletterSection(
 		app.newsletters.newsletterSectionResource,
 	)
 
-	app.Resource(newsletterPersons{}).PermissionView(sysadminPermission).Name(Unlocalized("Newsletter - osoby"))
+	app.Resource(newsletterPersons{}).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoby"))
 	return app.newsletters
 
 	//newsletterResource.AddRelation(newsletterSectionResource, "Newsletter", Unlocalized("Přidat sekci"))
@@ -278,7 +277,7 @@ func initNewsletterResource(resource *Resource) {
 				request.Response().Write([]byte(body))
 			},
 		}*/
-	resource.ItemAction("preview").Permission(loggedPermission).Name(Unlocalized("Náhled")).Handler(
+	resource.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(
 		func(request *Request) {
 			var newsletter newsletter
 			err := resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
@@ -356,9 +355,9 @@ func initNewsletterResource(resource *Resource) {
 		},
 	)
 
-	resource.ItemAction("send-preview").Permission(loggedPermission).Name(Unlocalized("Odeslat náhled")).Template("newsletter_send_preview")
+	resource.ItemAction("send-preview").Permission(loggedPermission).Name(unlocalized("Odeslat náhled")).Template("newsletter_send_preview")
 
-	resource.ItemAction("send").Permission(loggedPermission).Name(Unlocalized("Odeslat")).Template("newsletter_send").DataSource(
+	resource.ItemAction("send").Permission(loggedPermission).Name(unlocalized("Odeslat")).Template("newsletter_send").DataSource(
 		func(*Request) interface{} {
 			recipients, err := resource.app.getNewsletterRecipients()
 			if err != nil {
@@ -371,7 +370,7 @@ func initNewsletterResource(resource *Resource) {
 		},
 	)
 
-	resource.ItemAction("duplicate").Permission(loggedPermission).Name(Unlocalized("Duplikovat")).Template("newsletter_duplicate")
+	resource.ItemAction("duplicate").Permission(loggedPermission).Name(unlocalized("Duplikovat")).Template("newsletter_duplicate")
 
 }
 
@@ -425,7 +424,7 @@ func (nm *Newsletters) GetBody(n newsletter, email string) (string, error) {
 		"title":       n.Name,
 		"unsubscribe": nm.unsubscribeURL(email),
 		"content":     template.HTML(content),
-		"preview":     utils.CropMarkdown(n.Body, 200),
+		"preview":     cropMarkdown(n.Body, 200),
 		"sections":    nm.getNewsletterSectionData(n),
 	}
 

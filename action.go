@@ -59,7 +59,7 @@ func (app *App) bindAllActions() {
 
 func newAction(app *App, url string) *Action {
 	return &Action{
-		name:       Unlocalized(url),
+		name:       unlocalized(url),
 		permission: "",
 		method:     "GET",
 		url:        url,

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"time"
-
-	"github.com/hypertornado/prago/utils"
 )
 
 type view struct {
@@ -133,16 +131,16 @@ func defaultViewDataSource(user *user, f field, value interface{}) interface{} {
 func numberViewDataSource(user *user, f field, value interface{}) interface{} {
 	switch f.Typ.Kind() {
 	case reflect.Int:
-		return utils.HumanizeNumber(int64(value.(int)))
+		return humanizeNumber(int64(value.(int)))
 	case reflect.Int64:
-		return utils.HumanizeNumber(value.(int64))
+		return humanizeNumber(value.(int64))
 	}
 
 	return value
 }
 
 func floatViewDataSource(user *user, f field, value interface{}) interface{} {
-	return utils.HumanizeFloat(value.(float64), user.Locale)
+	return humanizeFloat(value.(float64), user.Locale)
 }
 
 func timeViewDataSource(user *user, f field, value interface{}) interface{} {

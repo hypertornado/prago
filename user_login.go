@@ -7,7 +7,7 @@ import (
 
 func initUserLogin(resource *Resource) {
 
-	resource.ItemAction("loginas").Name(Unlocalized("Přihlásit se jako")).Permission(sysadminPermission).Handler(
+	resource.ItemAction("loginas").Name(unlocalized("Přihlásit se jako")).Permission(sysadminPermission).Handler(
 		func(request *Request) {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)

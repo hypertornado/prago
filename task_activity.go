@@ -1,6 +1,8 @@
 package prago
 
 import (
+	"fmt"
+	"mime/multipart"
 	"time"
 )
 
@@ -16,6 +18,7 @@ type TaskActivity struct {
 	error     error
 	stoppable bool
 	stopped   bool
+	files     *multipart.Form
 	startedAt time.Time
 	endedAt   time.Time
 }
@@ -30,6 +33,15 @@ func (ta *TaskActivity) SetStatus(progress float64, status string) {
 func (ta *TaskActivity) IsStopped() bool {
 	ta.stoppable = true
 	return ta.stopped
+}
+
+func (ta *TaskActivity) GetFile(name string) (multipart.File, error) {
+	if len(ta.files.File[name]) == 0 {
+		return nil, fmt.Errorf("file with id '%s' not set", name)
+	}
+	header := ta.files.File[name][0]
+	file, err := header.Open()
+	return file, err
 }
 
 type taskMonitor struct {

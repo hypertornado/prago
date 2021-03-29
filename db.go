@@ -13,8 +13,7 @@ import (
 //ErrWrongWhereFormat is returned when where query has a bad format
 var ErrWrongWhereFormat = errors.New("wrong where format")
 
-//Debug enables logging of all sql queries
-var Debug = false
+var debugSQL = false
 
 //GetDB gets DB
 func (app *App) GetDB() *sql.DB {
@@ -151,7 +150,7 @@ func (resource Resource) saveItem(db dbIface, tableName string, item interface{}
 		updateNames = append(updateNames, fmt.Sprintf(" %s=? ", v))
 	}
 	q := fmt.Sprintf("UPDATE `%s` SET %s WHERE id=%d;", tableName, strings.Join(updateNames, ", "), id)
-	if Debug {
+	if debugSQL {
 		fmt.Println(q, values)
 	}
 	execResult, err := db.Exec(q, values...)
@@ -177,7 +176,7 @@ func (resource Resource) createItem(db dbIface, tableName string, item interface
 	}
 
 	q := fmt.Sprintf("INSERT INTO `%s` (%s) VALUES (%s);", tableName, strings.Join(names, ", "), strings.Join(questionMarks, ", "))
-	if Debug {
+	if debugSQL {
 		fmt.Println(q, values)
 	}
 	res, err := db.Exec(q, values...)
@@ -247,7 +246,7 @@ func countItems(db dbIface, tableName string, query *listQuery) (int64, error) {
 	whereString := buildWhereString(query.whereString)
 
 	q := fmt.Sprintf("SELECT COUNT(*) FROM `%s` %s %s %s;", tableName, whereString, orderString, limitString)
-	if Debug {
+	if debugSQL {
 		fmt.Println(q, query.whereParams)
 	}
 	rows, err := db.Query(q, query.whereParams...)
@@ -295,7 +294,7 @@ func listItems(resource Resource, db dbIface, tableName string, items interface{
 	}
 
 	q := fmt.Sprintf("SELECT %s FROM `%s` %s %s %s;", strings.Join(names, ", "), tableName, whereString, orderString, limitString)
-	if Debug {
+	if debugSQL {
 		fmt.Println(q, query.whereParams)
 	}
 	rows, err := db.Query(q, query.whereParams...)
@@ -326,7 +325,7 @@ func deleteItems(db dbIface, tableName string, query *listQuery) (int64, error) 
 	whereString := buildWhereString(query.whereString)
 
 	q := fmt.Sprintf("DELETE FROM `%s` %s %s;", tableName, whereString, limitString)
-	if Debug {
+	if debugSQL {
 		fmt.Println(q, query.whereParams)
 	}
 	res, err := db.Exec(q, query.whereParams...)

@@ -47,7 +47,7 @@ func (app *App) initAdminActions() {
 
 		next()
 	})
-	app.Action("markdown").Name(Unlocalized("Nápověda markdown")).Permission(loggedPermission).hiddenMenu().Template("admin_help_markdown").IsWide()
+	app.Action("markdown").Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).hiddenMenu().Template("admin_help_markdown").IsWide()
 }
 
 func (app *App) initAdminNotFoundAction() {

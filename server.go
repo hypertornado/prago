@@ -5,8 +5,6 @@ import (
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/hypertornado/prago/utils"
 )
 
 func (app *App) listenAndServe(port int) error {
@@ -38,7 +36,7 @@ func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (app App) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	request := &Request{
-		uuid:       utils.RandomString(10),
+		uuid:       randomString(10),
 		receivedAt: time.Now(),
 		w:          w,
 		r:          r,

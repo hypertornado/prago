@@ -6,8 +6,7 @@ import (
 	"time"
 )
 
-//ActivityLog logs all user admin activity
-type ActivityLog struct {
+type activityLog struct {
 	ID            int64
 	ResourceName  string    `prago-preview:"true"`
 	ItemID        int64     `prago-preview:"true"`
@@ -16,6 +15,54 @@ type ActivityLog struct {
 	ContentBefore string    `prago-type:"text"`
 	ContentAfter  string    `prago-type:"text"`
 	CreatedAt     time.Time `prago-preview:"true"`
+}
+
+type ActivityType int
+
+const (
+	ActivityCreate ActivityType = iota
+	ActivityEdit
+	ActivityDelete
+)
+
+func (t ActivityType) string() string {
+	switch t {
+	case ActivityCreate:
+		return "new"
+	case ActivityEdit:
+		return "edit"
+	case ActivityDelete:
+		return "delete"
+	default:
+		return ""
+	}
+}
+
+type Activity struct {
+	ID         int64
+	ResourceID string
+	User       int64
+	Typ        ActivityType
+}
+
+func (al activityLog) activity() Activity {
+
+	var typ ActivityType
+	switch al.ActionType {
+	case "new":
+		typ = ActivityCreate
+	case "edit":
+		typ = ActivityEdit
+	case "delete":
+		typ = ActivityDelete
+	}
+
+	return Activity{
+		ID:         al.ItemID,
+		ResourceID: al.ResourceName,
+		User:       al.User,
+		Typ:        typ,
+	}
 }
 
 type historyView struct {
@@ -33,16 +80,16 @@ type historyItemView struct {
 	CreatedAt   string
 }
 
-//ListenActivityLog listens to all changes in app's administration
-func (app *App) ListenActivityLog(handler func(logItem ActivityLog)) {
+//ListenActivity listens to all changes in app's administration
+func (app *App) ListenActivity(handler func(logItem Activity)) {
 	app.activityListeners = append(app.activityListeners, handler)
 }
 
-func (app *App) createActivityLog(log ActivityLog) error {
+func (app *App) createActivityLog(log activityLog) error {
 	err := app.Create(&log)
 	if err == nil {
 		for _, v := range app.activityListeners {
-			v(log)
+			v(log.activity())
 		}
 	}
 	return err
@@ -61,7 +108,7 @@ func (app *App) getHistory(resource *Resource, itemID int64) historyView {
 	q.Limit(250)
 	q.OrderDesc("ID")
 
-	var items []*ActivityLog
+	var items []*activityLog
 	must(q.Get(&items))
 
 	for _, v := range items {
@@ -103,7 +150,7 @@ func (app App) createNewActivityLog(resource Resource, user *user, item interfac
 		return err
 	}
 
-	return app.createActivityLog(ActivityLog{
+	return app.createActivityLog(activityLog{
 		ResourceName: resource.id,
 		ItemID:       getItemID(item),
 		ActionType:   "new",
@@ -113,7 +160,7 @@ func (app App) createNewActivityLog(resource Resource, user *user, item interfac
 }
 
 func (app App) createEditActivityLog(resource Resource, user *user, itemID int64, before, after []byte) error {
-	return app.createActivityLog(ActivityLog{
+	return app.createActivityLog(activityLog{
 		ResourceName:  resource.id,
 		ItemID:        itemID,
 		ActionType:    "edit",
@@ -129,7 +176,7 @@ func (app App) createDeleteActivityLog(resource Resource, user *user, itemID int
 		return err
 	}
 
-	return app.createActivityLog(ActivityLog{
+	return app.createActivityLog(activityLog{
 		ResourceName:  resource.id,
 		ItemID:        itemID,
 		ActionType:    "delete",

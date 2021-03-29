@@ -9,8 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/hypertornado/prago/utils"
 )
 
 type list struct {
@@ -380,7 +378,7 @@ func (resource *Resource) getListContent(user *user, params url.Values) (ret lis
 	if count == totalCount {
 		ret.TotalCountStr = messages.ItemsCount(count, user.Locale)
 	} else {
-		ret.TotalCountStr = fmt.Sprintf("%s z %s", utils.HumanizeNumber(count), messages.ItemsCount(totalCount, user.Locale))
+		ret.TotalCountStr = fmt.Sprintf("%s z %s", humanizeNumber(count), messages.ItemsCount(totalCount, user.Locale))
 	}
 
 	var itemsPerPage = resource.defaultItemsPerPage

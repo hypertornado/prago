@@ -8,8 +8,6 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/hypertornado/prago/utils"
-
 	setup "github.com/hypertornado/prago/prago-setup/lib"
 )
 
@@ -124,7 +122,7 @@ func build(appName, version string) error {
 	_, err = os.Open(buildDir)
 	if err == nil {
 		question := fmt.Sprintf("There is already file '%s'. Do you want to delete?", buildDir)
-		if utils.ConsoleQuestion(question) {
+		if consoleQuestion(question) {
 			fmt.Println("Deleting " + buildDir)
 			os.RemoveAll(buildDir)
 		} else {

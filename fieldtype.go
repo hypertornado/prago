@@ -3,8 +3,6 @@ package prago
 import (
 	"fmt"
 	"time"
-
-	"github.com/hypertornado/prago/utils"
 )
 
 //FieldType defines type of field
@@ -154,7 +152,7 @@ func boolFilterLayoutDataSource(field field, user *user) interface{} {
 }
 
 func textListDataSource(user *user, f field, value interface{}) interface{} {
-	return utils.Crop(value.(string), 100)
+	return crop(value.(string), 100)
 }
 
 func createFilesEditDataSource(mimeTypes string) func(f field, u *user) interface{} {
@@ -164,5 +162,5 @@ func createFilesEditDataSource(mimeTypes string) func(f field, u *user) interfac
 }
 
 func markdownListDataSource(user *user, f field, value interface{}) interface{} {
-	return utils.CropMarkdown(value.(string), 100)
+	return cropMarkdown(value.(string), 100)
 }

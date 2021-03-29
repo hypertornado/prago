@@ -2,11 +2,12 @@ package prago
 
 import (
 	"fmt"
+	"io/ioutil"
+	"mime/multipart"
 	"sort"
 	"sync"
 	"time"
 
-	"github.com/hypertornado/prago/utils"
 	"golang.org/x/text/collate"
 	"golang.org/x/text/language"
 )
@@ -30,12 +31,12 @@ func (app *App) initTaskManager() {
 		activityMutex: &sync.RWMutex{},
 		startedAt:     time.Now(),
 	}
-	app.taskManager.defaultGroup = app.TaskGroup(Unlocalized("Other"))
+	app.taskManager.defaultGroup = app.TaskGroup(unlocalized("Other"))
 
 	go app.taskManager.oldTasksRemover()
 	go app.taskManager.startCRON()
 
-	app.Action("_tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(
+	app.Action("tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(
 		func(request *Request) interface{} {
 			var ret = map[string]interface{}{}
 			user := request.user
@@ -48,57 +49,67 @@ func (app *App) initTaskManager() {
 		},
 	)
 
-	app.adminController.get(app.getAdminURL("_tasks/running"), func(request *Request) {
+	app.API("tasks/running").Permission(loggedPermission).Handler(func(request *Request) {
 		request.SetData("taskmonitor", app.taskManager.getTaskMonitor(request.user))
 		request.RenderView("taskmonitor")
 	})
 
-	app.adminController.post(app.getAdminURL("_tasks/runtask"), func(request *Request) {
+	app.API("tasks/runtask").Method("POST").Permission(loggedPermission).Handler(func(request *Request) {
 		id := request.Request().FormValue("id")
 		csrf := request.Request().FormValue("csrf")
 
-		expectedToken := request.GetData("_csrfToken").(string)
-		if expectedToken != csrf {
+		if request.csrfToken() != csrf {
 			panic("wrong token")
 		}
 
-		must(app.taskManager.startTask(id, request.user))
-		request.Redirect(app.getAdminURL("_tasks"))
+		//request.Request().MultipartForm
+
+		must(app.taskManager.startTask(id, request.user, request.Request().MultipartForm))
+		request.Redirect(app.getAdminURL("tasks"))
 	})
 
-	app.adminController.get(app.getAdminURL("_tasks/stoptask"), func(request *Request) {
+	app.API("tasks/stoptask").Permission(loggedPermission).Handler(func(request *Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
 
-		expectedToken := request.GetData("_csrfToken").(string)
-		if expectedToken != csrf {
+		if request.csrfToken() != csrf {
 			panic("wrong token")
 		}
 
 		must(app.taskManager.stopTask(uuid, request.user))
-		request.Redirect(app.getAdminURL("_tasks"))
+		request.Redirect(app.getAdminURL("tasks"))
 	})
 
-	app.adminController.get(app.getAdminURL("_tasks/deletetask"), func(request *Request) {
+	app.API("tasks/deletetask").Permission(loggedPermission).Handler(func(request *Request) {
 		uuid := request.Request().FormValue("uuid")
 		csrf := request.Request().FormValue("csrf")
 
-		expectedToken := request.GetData("_csrfToken").(string)
-		if expectedToken != csrf {
+		if request.csrfToken() != csrf {
 			panic("wrong token")
 		}
 
 		must(app.taskManager.deleteTask(uuid, request.user))
-		request.Redirect(app.getAdminURL("_tasks"))
+		request.Redirect(app.getAdminURL("tasks"))
 	})
 
-	grp := app.TaskGroup(Unlocalized("example"))
+	grp := app.TaskGroup(unlocalized("example"))
 
 	grp.Task("example_fail").Handler(func(t *TaskActivity) error {
 		return fmt.Errorf("example error")
 	})
 
-	grp.Task("example").Handler(func(t *TaskActivity) error {
+	grp.Task("example").FileInput("file_example").Handler(func(t *TaskActivity) error {
+		file, err := t.GetFile("file_example")
+		if err != nil {
+			return err
+		}
+
+		data, err := ioutil.ReadAll(file)
+		if err != nil {
+			return err
+		}
+		fmt.Println(data)
+
 		t.IsStopped()
 		var progress float64
 		for {
@@ -119,7 +130,7 @@ func (tm *taskManager) startCRON() {
 			for _, v := range tm.tasksMap {
 				if v.cron > 0 {
 					if tm.startedAt.Add(v.cron).Before(time.Now()) && v.lastStarted.Add(v.cron).Before(time.Now()) {
-						tm.run(v, nil, "cron")
+						tm.run(v, nil, "cron", nil)
 					}
 				}
 			}
@@ -154,14 +165,14 @@ func (tm *taskManager) deleteActivity(id string) {
 	delete(tm.activities, id)
 }
 
-func (tm *taskManager) startTask(id string, user *user) error {
+func (tm *taskManager) startTask(id string, user *user, files *multipart.Form) error {
 	task, ok := tm.tasksMap[id]
 	if !ok {
 		return fmt.Errorf("Can't find task %s", id)
 	}
 
 	if tm.app.authorize(user, task.permission) {
-		tm.run(task, user, "button")
+		tm.run(task, user, "button", files)
 		return nil
 	}
 	return fmt.Errorf("User is not authorized to run this task")
@@ -198,14 +209,16 @@ type taskViewGroup struct {
 }
 
 type taskView struct {
-	ID   string
-	Name string
+	ID    string
+	Name  string
+	Files []*taskFileInput
 }
 
 func (t *Task) taskView() taskView {
 	return taskView{
-		ID:   t.id,
-		Name: t.id,
+		ID:    t.id,
+		Name:  t.id,
+		Files: t.files,
 	}
 }
 
@@ -261,7 +274,11 @@ type Task struct {
 	handler     func(*TaskActivity) error
 	cron        time.Duration
 	lastStarted time.Time
-	//manager     *taskManager
+	files       []*taskFileInput
+}
+
+type taskFileInput struct {
+	ID string
 }
 
 var defaultGroup *TaskGroup
@@ -284,7 +301,7 @@ func (tg *TaskGroup) Task(id string) *Task {
 	tg.manager.tasksMap[task.id] = task
 
 	tg.manager.app.addCommand("task", id).Callback(func() {
-		tg.manager.run(task, nil, "command")
+		tg.manager.run(task, nil, "command", nil)
 	})
 
 	return task
@@ -293,6 +310,14 @@ func (tg *TaskGroup) Task(id string) *Task {
 //Handler sets handler to task
 func (t *Task) Handler(fn func(*TaskActivity) error) *Task {
 	t.handler = fn
+	return t
+}
+
+//FileInput
+func (t *Task) FileInput(id string) *Task {
+	t.files = append(t.files, &taskFileInput{
+		ID: id,
+	})
 	return t
 }
 
@@ -323,13 +348,15 @@ func (app *App) TaskGroup(name func(string) string) *TaskGroup {
 	}
 }
 
-func (tm *taskManager) run(t *Task, user *user, starterTyp string) *TaskActivity {
+func (tm *taskManager) run(t *Task, user *user, starterTyp string, form *multipart.Form) *TaskActivity {
+
 	activity := &TaskActivity{
-		uuid:      utils.RandomString(10),
+		uuid:      randomString(10),
 		task:      t,
 		user:      user,
 		typ:       starterTyp,
 		startedAt: time.Now(),
+		files:     form,
 	}
 	t.lastStarted = time.Now()
 	tm.addActivity(activity)

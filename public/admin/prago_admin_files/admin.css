@@ -7360,9 +7360,31 @@ a.mainmenu_logo:hover {
   line-height: 1.3em;
   color: #333;
 }
+.task_group {
+  display: flex;
+  flex-wrap: wrap;
+}
+.task {
+  border: 1px solid #eee;
+  display: inline-block;
+  background-color: rgba(64, 120, 192, 0.05);
+  border-radius: 5px;
+  width: 40px;
+  height: 40px;
+  margin: 5px;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  padding: 5px;
+  min-width: 200px;
+}
 .task_name {
+  font-weight: 500;
   line-height: 1.3em;
   margin: 10px 0px 5px 0px;
+}
+.task_input {
+  margin: 10px 3px;
 }
 .notification_center {
   position: absolute;

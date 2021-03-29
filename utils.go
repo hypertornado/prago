@@ -1,4 +1,4 @@
-package utils
+package prago
 
 import (
 	"bufio"
@@ -13,28 +13,25 @@ import (
 	"github.com/gosimple/slug"
 )
 
-//PrettyFilename converts filename to url-friendly form with regard to extension
-func PrettyFilename(s string) string {
+func prettyFilename(s string) string {
 	if len(s) > 100 {
 		s = s[len(s)-99:]
 	}
 	items := strings.Split(s, ".")
 	for i := range items {
-		items[i] = PrettyURL(items[i])
+		items[i] = prettyURL(items[i])
 	}
 	return strings.Join(items, ".")
 }
 
-//PrettyURL converts string to url-friendly form
-func PrettyURL(s string) string {
+func prettyURL(s string) string {
 	return slug.Make(s)
 }
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 var seeded = false
 
-//RandomString returns random string
-func RandomString(n int) string {
+func randomString(n int) string {
 	if !seeded {
 		rand.Seed(time.Now().Unix())
 		seeded = true
@@ -47,7 +44,7 @@ func RandomString(n int) string {
 }
 
 //ConsoleQuestion asks for boolean answer in console
-func ConsoleQuestion(question string) bool {
+func consoleQuestion(question string) bool {
 	fmt.Printf("%s (yes|no)\n", question)
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
@@ -57,9 +54,7 @@ func ConsoleQuestion(question string) bool {
 	return false
 }
 
-//Crop removes text longer then count
-//it tries not to split in the middle of words
-func Crop(in string, cropLength int) string {
+func crop(in string, cropLength int) string {
 	if cropLength < 0 {
 		return in
 	}
@@ -121,12 +116,12 @@ func numberToString(n int, sep rune) string {
 	return buff.String()
 }
 
-func HumanizeNumber(i int64) (ret string) {
+func humanizeNumber(i int64) (ret string) {
 	return numberToString(int(i), ' ')
 }
 
-func HumanizeFloat(i float64, locale string) string {
-	ret := HumanizeNumber(int64(i))
+func humanizeFloat(i float64, locale string) string {
+	ret := humanizeNumber(int64(i))
 
 	defaultStr := fmt.Sprintf("%g", i)
 
@@ -147,7 +142,7 @@ func HumanizeFloat(i float64, locale string) string {
 var monthsCS = []string{"Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"}
 var monthsEN = []string{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}
 
-func MonthName(order int64, locale string) string {
+func monthName(order int64, locale string) string {
 	if order < 1 || order > 12 {
 		return ""
 	}

@@ -4,7 +4,6 @@ import (
 	"net/url"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/hypertornado/prago/utils"
 )
 
 //Form represents admin form
@@ -168,7 +167,7 @@ func (f *formItem) AddError(err string) {
 
 //AddUUID to form
 func (f *formItem) AddUUID() {
-	f.UUID = "id-" + utils.RandomString(5)
+	f.UUID = "id-" + randomString(5)
 }
 
 //NewValidator creates new item validator with error message

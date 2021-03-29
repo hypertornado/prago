@@ -64,7 +64,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 	ret := &field{
 		Name:        f.Name,
 		ColumnName:  columnName(f.Name),
-		HumanName:   Unlocalized(f.Name),
+		HumanName:   unlocalized(f.Name),
 		Typ:         f.Type,
 		Tags:        make(map[string]string),
 		fieldOrder:  order,
@@ -144,7 +144,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 
 	name := ret.Tags["prago-name"]
 	if name != "" {
-		ret.HumanName = Unlocalized(name)
+		ret.HumanName = unlocalized(name)
 	} else {
 		//TODO: its ugly
 		nameFunction := messages.GetNameFunction(ret.Name)

@@ -37,7 +37,6 @@ class List {
   statsCheckboxSelectCount: HTMLSelectElement;
   statsContainer: HTMLDivElement;
 
-  //TODO: get filter params from URL
   constructor(el: HTMLDivElement, openbutton: HTMLButtonElement) {
     this.el = el;
 

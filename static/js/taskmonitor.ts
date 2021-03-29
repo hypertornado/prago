@@ -16,7 +16,7 @@ class TaskMonitor {
 
     load() {
         var request = new XMLHttpRequest();
-        request.open("GET", "/admin/_tasks/running", true);
+        request.open("GET", "/admin/api/tasks/running", true);
         request.addEventListener("load", () => {
             this.el.innerHTML = "";
             if (request.status == 200) {

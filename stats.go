@@ -9,8 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/hypertornado/prago/utils"
 )
 
 type listStats struct {
@@ -45,7 +43,7 @@ func statsCountPercent(count, total int64) template.HTML {
 func statsCountDescription(count, total int64) listStatsDescription {
 	percentStr := statsCountPercent(count, total)
 	return listStatsDescription{
-		Count:      utils.HumanizeNumber(count),
+		Count:      humanizeNumber(count),
 		PercentCSS: percentStr,
 		Percent:    string(percentStr),
 	}
@@ -176,7 +174,7 @@ func (resource *Resource) getListStatsDateSectionMonth(field *field, user *user,
 		counted += count
 
 		ret.Table = append(ret.Table, listStatsRow{
-			Name:        fmt.Sprintf("%s %d", utils.MonthName(month, user.Locale), year),
+			Name:        fmt.Sprintf("%s %d", monthName(month, user.Locale), year),
 			Description: statsCountDescription(count, total),
 		})
 	}
@@ -363,14 +361,14 @@ func (resource *Resource) getListStatsTableInt(field *field, user *user, params 
 	table = append(table, listStatsRow{
 		Name: "minimum",
 		Description: listStatsDescription{
-			Count: utils.HumanizeFloat(min, user.Locale),
+			Count: humanizeFloat(min, user.Locale),
 		},
 	})
 
 	table = append(table, listStatsRow{
 		Name: "průměr",
 		Description: listStatsDescription{
-			Count: utils.HumanizeFloat(avg, user.Locale),
+			Count: humanizeFloat(avg, user.Locale),
 		},
 	})
 
@@ -392,19 +390,19 @@ func (resource *Resource) getListStatsTableInt(field *field, user *user, params 
 	table = append(table, listStatsRow{
 		Name: "medián",
 		Description: listStatsDescription{
-			Count: utils.HumanizeFloat(median, user.Locale),
+			Count: humanizeFloat(median, user.Locale),
 		},
 	})
 	table = append(table, listStatsRow{
 		Name: "maximum",
 		Description: listStatsDescription{
-			Count: utils.HumanizeFloat(max, user.Locale),
+			Count: humanizeFloat(max, user.Locale),
 		},
 	})
 	table = append(table, listStatsRow{
 		Name: "součet",
 		Description: listStatsDescription{
-			Count: utils.HumanizeFloat(sum, user.Locale),
+			Count: humanizeFloat(sum, user.Locale),
 		},
 	})
 

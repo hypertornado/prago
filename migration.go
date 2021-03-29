@@ -89,7 +89,7 @@ func createTable(db dbIface, tableName string, resource Resource, verbose bool) 
 		items = append(items, v.fieldDescriptionMysql(resource.app.fieldTypes))
 	}
 	q := fmt.Sprintf("CREATE TABLE %s (%s);", tableName, strings.Join(items, ", "))
-	if verbose || Debug {
+	if verbose || debugSQL {
 		fmt.Printf(" %s\n", q)
 	}
 	_, err = db.Exec(q)
@@ -137,7 +137,7 @@ func migrateTable(db dbIface, tableName string, resource Resource, verbose bool)
 	}
 
 	q := fmt.Sprintf("ALTER TABLE %s %s;", tableName, strings.Join(items, ", "))
-	if verbose || Debug {
+	if verbose || debugSQL {
 		fmt.Printf(" %s\n", q)
 	}
 	_, err = db.Exec(q)

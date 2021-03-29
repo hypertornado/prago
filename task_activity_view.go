@@ -51,14 +51,14 @@ func (tm *taskManager) getTaskMonitor(user *user) (ret *taskMonitor) {
 				var u url.Values = map[string][]string{}
 				u.Add("uuid", v.uuid)
 				u.Add("csrf", tm.app.generateCSRFToken(user))
-				actions = append(actions, taskActivityViewAction{"◼", "_tasks/stoptask?" + u.Encode()})
+				actions = append(actions, taskActivityViewAction{"◼", "api/tasks/stoptask?" + u.Encode()})
 			}
 
 			if v.ended {
 				var u url.Values = map[string][]string{}
 				u.Add("uuid", v.uuid)
 				u.Add("csrf", tm.app.generateCSRFToken(user))
-				actions = append(actions, taskActivityViewAction{"✘", "_tasks/deletetask?" + u.Encode()})
+				actions = append(actions, taskActivityViewAction{"✘", "api/tasks/deletetask?" + u.Encode()})
 			}
 
 			status := v.status

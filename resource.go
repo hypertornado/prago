@@ -51,7 +51,7 @@ func (app *App) Resource(item interface{}) *Resource {
 	defaultName := typ.Name()
 	ret := &Resource{
 		app:                 app,
-		name:                Unlocalized(defaultName),
+		name:                unlocalized(defaultName),
 		id:                  columnName(defaultName),
 		typ:                 typ,
 		resourceController:  app.adminController.subController(),

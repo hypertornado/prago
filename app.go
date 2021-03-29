@@ -9,7 +9,6 @@ import (
 
 	"github.com/hypertornado/prago/cachelib"
 	setup "github.com/hypertornado/prago/prago-setup/lib"
-	"github.com/hypertornado/prago/utils"
 	"github.com/sendgrid/sendgrid-go"
 )
 
@@ -60,7 +59,7 @@ type App struct {
 
 	apis []*API
 
-	activityListeners []func(ActivityLog)
+	activityListeners []func(Activity)
 	taskManager       *taskManager
 }
 
@@ -70,7 +69,7 @@ func newTestingApp() *App {
 
 func createApp(codeName string, version string) *App {
 	if codeName != "__prago_test_app" && !configExists(codeName) {
-		if utils.ConsoleQuestion("File config.json does not exist. Can't start app. Would you like to start setup?") {
+		if consoleQuestion("File config.json does not exist. Can't start app. Would you like to start setup?") {
 			setup.StartSetup(codeName)
 		}
 	}
@@ -78,7 +77,7 @@ func createApp(codeName string, version string) *App {
 	app := &App{
 		codeName: codeName,
 		version:  version,
-		name:     Unlocalized(codeName),
+		name:     unlocalized(codeName),
 
 		commands: &commands{},
 
@@ -115,7 +114,7 @@ func createApp(codeName string, version string) *App {
 	app.initFilesResource()
 	initActivityLog(
 		app.Resource(
-			ActivityLog{},
+			activityLog{},
 		),
 	)
 
@@ -167,7 +166,7 @@ func (app *App) SetLogoPath(logo string) { app.logo = logo }
 func (app *App) dotPath() string { return os.Getenv("HOME") + "/." + app.codeName }
 
 func columnName(fieldName string) string {
-	return utils.PrettyURL(fieldName)
+	return prettyURL(fieldName)
 }
 
 func must(err error) {

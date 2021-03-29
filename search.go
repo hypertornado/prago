@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hypertornado/prago/utils"
 	"github.com/olivere/elastic/v7"
 	"golang.org/x/net/context"
 )
@@ -43,7 +42,7 @@ type adminSearch struct {
 }
 
 func (si searchItem) CroppedDescription() string {
-	return utils.Crop(si.Description, 100)
+	return crop(si.Description, 100)
 }
 
 func newAdminSearch(app *App) (*adminSearch, error) {
@@ -342,7 +341,7 @@ func (app *App) initSearchInner() {
 		}
 	}()
 
-	app.Action("_search").Permission(loggedPermission).Name(Unlocalized("Vyhledávání")).Template("admin_search").IsWide().hiddenMenu().DataSource(
+	app.Action("_search").Permission(loggedPermission).Name(unlocalized("Vyhledávání")).Template("admin_search").IsWide().hiddenMenu().DataSource(
 		func(request *Request) interface{} {
 			q := request.Params().Get("q")
 			pageStr := request.Params().Get("page")

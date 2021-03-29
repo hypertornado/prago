@@ -2,8 +2,6 @@ package prago
 
 import (
 	"strings"
-
-	"github.com/hypertornado/prago/utils"
 )
 
 type mainMenu struct {
@@ -94,7 +92,7 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 
 			resourceSection.Items = append(resourceSection.Items, mainMenuItem{
 				Name:     resource.name(user.Locale),
-				Subname:  utils.HumanizeNumber(resource.getCachedCount()),
+				Subname:  humanizeNumber(resource.getCachedCount()),
 				URL:      resourceURL,
 				Selected: selected,
 			})

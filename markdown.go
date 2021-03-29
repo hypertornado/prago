@@ -1,4 +1,4 @@
-package utils
+package prago
 
 import (
 	"strings"
@@ -13,7 +13,7 @@ func filterMarkdown(in string) string {
 }
 
 //CropMarkdown remove all markdown special characters
-func CropMarkdown(text string, count int) string {
+func cropMarkdown(text string, count int) string {
 	text = filterMarkdown(text)
-	return Crop(text, count)
+	return crop(text, count)
 }

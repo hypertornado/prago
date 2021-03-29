@@ -1,4 +1,4 @@
-package utils
+package prago
 
 import (
 	"fmt"
@@ -11,8 +11,8 @@ func TestPrettyURL(t *testing.T) {
 		{"hello", "hello"},
 		{"  Šíleně žluťoučký kůň úpěl   ďábelské ódy.  ", "silene-zlutoucky-kun-upel-dabelske-ody"},
 	} {
-		if PrettyURL(v[0]) != v[1] {
-			t.Errorf("pretty url of '%s' is '%s' instead of '%s", v[0], PrettyURL(v[0]), v[1])
+		if prettyURL(v[0]) != v[1] {
+			t.Errorf("pretty url of '%s' is '%s' instead of '%s", v[0], prettyURL(v[0]), v[1])
 		}
 	}
 }
@@ -28,7 +28,7 @@ func TestCrop(t *testing.T) {
 		{"žšč řďť ňěóireowprieow", 6, "žšč…"},
 		{"", 6, ""},
 	} {
-		croped := Crop(v.in, v.index)
+		croped := crop(v.in, v.index)
 		if croped != v.out {
 			t.Fatal(fmt.Sprintf("%d Expected '%s', got '%s'", k, v.out, croped))
 		}
@@ -40,8 +40,8 @@ func TestFilenames(t *testing.T) {
 		{"abc", "abc"},
 		{"žluťoučký.kůň", "zlutoucky.kun"},
 	} {
-		if PrettyFilename(v[0]) != v[1] {
-			t.Fatal(fmt.Printf("Expected %s, got %s", v[1], PrettyFilename(v[0])))
+		if prettyFilename(v[0]) != v[1] {
+			t.Fatal(fmt.Printf("Expected %s, got %s", v[1], prettyFilename(v[0])))
 		}
 	}
 }
@@ -76,7 +76,7 @@ func TestHumanizeFloat(t *testing.T) {
 		{1.45678, "cs", "1,45678"},
 		{100000.45678, "cs", "100 000,45678"},
 	} {
-		res := HumanizeFloat(v.f, v.locale)
+		res := humanizeFloat(v.f, v.locale)
 		if res != v.expected {
 			t.Fatal(fmt.Printf("%d: Expected %s, got %s\n", k, v.expected, res))
 		}

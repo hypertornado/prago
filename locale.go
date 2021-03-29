@@ -37,8 +37,7 @@ func localeFromAcceptLanguageString(acceptHeader string) string {
 	return availableLocales[0][0]
 }
 
-//Unlocalized creates non localized name
-func Unlocalized(name string) func(string) string {
+func unlocalized(name string) func(string) string {
 	return func(string) string {
 		return name
 	}

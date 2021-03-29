@@ -6,8 +6,6 @@ import (
 	"reflect"
 	"strings"
 	"time"
-
-	"github.com/hypertornado/prago/utils"
 )
 
 type relation struct {
@@ -172,11 +170,12 @@ func (resource *Resource) getItemDescription(item interface{}, user *user, relat
 
 	itemsVal := reflect.ValueOf(item).Elem()
 
+	//TODO: Authorize descriptio field
 	if item != nil {
 		field := itemsVal.FieldByName("Description")
 		if field.IsValid() {
 			ret := field.String()
-			croped := utils.CropMarkdown(ret, 200)
+			croped := cropMarkdown(ret, 200)
 			if croped != "" {
 				items = append(items, croped)
 			}
@@ -203,7 +202,7 @@ func (resource *Resource) getItemDescription(item interface{}, user *user, relat
 		}
 	}
 	ret := strings.Join(items, " · ")
-	return utils.CropMarkdown(ret, 500)
+	return cropMarkdown(ret, 500)
 }
 
 func (app App) relationStringer(field field, value reflect.Value, user *user) string {

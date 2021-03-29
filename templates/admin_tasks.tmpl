@@ -11,14 +11,27 @@
 
             {{range $group := .tasks}}
                 <h3>{{$group.Name}}</h3>
-                {{range $task := $group.Tasks}}
-                    <div class="task_name">{{$task.Name}}</div>
-                    <form method="POST" action="_tasks/runtask">
-                        <input type="hidden" name="id" value="{{$task.ID}}">
-                        <input type="hidden" name="csrf" value="{{$token}}">
-                        <input type="submit" value="▶" class="btn btn-small">
-                    </form>
-                {{end}}
+                <div class="task_group">
+                    {{range $task := $group.Tasks}}
+                        <div class="task">
+                            <div class="task_name">{{$task.Name}}</div>
+                            <form method="POST" action="api/tasks/runtask" enctype="multipart/form-data">
+                                {{range $file := $task.Files}}
+                                    <div class="task_input">
+                                        <div>{{$file.ID}}</div>
+                                        <div>
+                                            <input type="file" name="{{$file.ID}}" multiple>
+                                        </div>
+                                    </div>
+                                {{end}}
+
+                                <input type="hidden" name="id" value="{{$task.ID}}">
+                                <input type="hidden" name="csrf" value="{{$token}}">
+                                <input type="submit" value="▶" class="btn btn-small">
+                            </form>
+                        </div>
+                    {{end}}
+                </div>
             {{end}}
         </div>
     </div>

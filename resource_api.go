@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hypertornado/prago/utils"
 	"github.com/tealeg/xlsx"
 )
 
@@ -157,7 +156,7 @@ func initDefaultResourceAPIs(resource *Resource) {
 			}
 
 			for k := range ret {
-				ret[k].Description = utils.Crop(ret[k].Description, 100)
+				ret[k].Description = crop(ret[k].Description, 100)
 			}
 
 			request.RenderJSON(ret)

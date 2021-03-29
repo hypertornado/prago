@@ -2,8 +2,6 @@ package prago
 
 import (
 	"sync"
-
-	"github.com/hypertornado/prago/utils"
 )
 
 //Notification represents user notification
@@ -87,7 +85,7 @@ type Notification struct {
 //Notification creates notification
 func (app *App) Notification(name string) *Notification {
 	return &Notification{
-		uuid: utils.RandomString(10),
+		uuid: randomString(10),
 		app:  app,
 		name: name,
 	}

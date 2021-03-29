@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path"
-
-	"github.com/hypertornado/prago/utils"
 )
 
 func createSkeleton(workingDirectory, projectName string) {
-	if !utils.ConsoleQuestion("Do you want to construct app skeleton?") {
+	if !consoleQuestion("Do you want to construct app skeleton?") {
 		return
 	}
 

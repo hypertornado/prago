@@ -3,8 +3,6 @@ package prago
 import (
 	"fmt"
 	"time"
-
-	"github.com/hypertornado/prago/utils"
 )
 
 var (
@@ -26,19 +24,19 @@ func (*messagesStruct) ItemsCount(i int64, locale string) (ret string) {
 
 func itemsCountCS(i int64) (ret string) {
 	if i == 1 {
-		return fmt.Sprintf("%s položka", utils.HumanizeNumber(i))
+		return fmt.Sprintf("%s položka", humanizeNumber(i))
 	}
 	if i >= 2 && i <= 4 {
-		return fmt.Sprintf("%s položky", utils.HumanizeNumber(i))
+		return fmt.Sprintf("%s položky", humanizeNumber(i))
 	}
-	return fmt.Sprintf("%s položek", utils.HumanizeNumber(i))
+	return fmt.Sprintf("%s položek", humanizeNumber(i))
 }
 
 func itemsCountEN(i int64) (ret string) {
 	if i == 1 {
-		return fmt.Sprintf("%s item", utils.HumanizeNumber(i))
+		return fmt.Sprintf("%s item", humanizeNumber(i))
 	}
-	return fmt.Sprintf("%s items", utils.HumanizeNumber(i))
+	return fmt.Sprintf("%s items", humanizeNumber(i))
 }
 
 func (*messagesStruct) Timestamp(lang string, t time.Time, showTime bool) string {

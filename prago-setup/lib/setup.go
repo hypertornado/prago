@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"os"
 	"os/user"
 	"path"
 	"strings"
-
-	"github.com/hypertornado/prago/utils"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql" //use mysql
 )
@@ -36,6 +36,16 @@ func StartSetup(projectName string) {
 
 }
 
+func consoleQuestion(question string) bool {
+	fmt.Printf("%s (yes|no)\n", question)
+	reader := bufio.NewReader(os.Stdin)
+	text, _ := reader.ReadString('\n')
+	if text == "yes\n" || text == "y\n" {
+		return true
+	}
+	return false
+}
+
 func createDirectory(path string) {
 	fmt.Println("Creating directory:", path)
 	err := os.Mkdir(path, 0755)
@@ -50,7 +60,7 @@ func createDirectory(path string) {
 }
 
 func createConfigFiles(projectName string) {
-	if !utils.ConsoleQuestion("Do you want to create app config files?") {
+	if !consoleQuestion("Do you want to create app config files?") {
 		return
 	}
 
@@ -139,7 +149,22 @@ func getValue(question, defaultValue string) string {
 }
 
 func randomPassword() string {
-	return utils.RandomString(16)
+	return randomString(16)
+}
+
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+var seeded = false
+
+func randomString(n int) string {
+	if !seeded {
+		rand.Seed(time.Now().Unix())
+		seeded = true
+	}
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
 }
 
 func createDatabase(rootPassword, projectName string) string {

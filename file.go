@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
-	"github.com/hypertornado/prago/utils"
 )
 
 //File is structure representing files in admin
@@ -60,7 +59,7 @@ func (app *App) GetFiles(ids string) []*File {
 }
 
 func (app *App) UploadFile(fileHeader *multipart.FileHeader, user *user, description string) (*File, error) {
-	fileName := utils.PrettyFilename(fileHeader.Filename)
+	fileName := prettyFilename(fileHeader.Filename)
 	file := File{}
 	file.Name = fileName
 
