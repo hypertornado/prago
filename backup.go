@@ -10,9 +10,10 @@ import (
 )
 
 func (app *App) initBackupCRON() {
-	app.
-		taskManager.
-		defaultGroup.
+
+	backupTaskGroup := app.TaskGroup(unlocalized("Backup"))
+
+	backupTaskGroup.
 		Task("backup_db").
 		Handler(
 			func(tr *TaskActivity) error {
@@ -23,7 +24,7 @@ func (app *App) initBackupCRON() {
 				return nil
 			}).RepeatEvery(24 * time.Hour)
 
-	app.taskManager.defaultGroup.Task("remove_old_backups").Handler(
+	backupTaskGroup.Task("remove_old_backups").Handler(
 		func(tr *TaskActivity) error {
 			tr.SetStatus(0, fmt.Sprintf("Removing old backups"))
 			deadline := time.Now().AddDate(0, 0, -7)

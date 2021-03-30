@@ -19,7 +19,6 @@ type taskManager struct {
 	activities    map[string]*TaskActivity
 	activityMutex *sync.RWMutex
 	startedAt     time.Time
-	defaultGroup  *TaskGroup
 }
 
 func (app *App) initTaskManager() {
@@ -31,7 +30,6 @@ func (app *App) initTaskManager() {
 		activityMutex: &sync.RWMutex{},
 		startedAt:     time.Now(),
 	}
-	app.taskManager.defaultGroup = app.TaskGroup(unlocalized("Other"))
 
 	go app.taskManager.oldTasksRemover()
 	go app.taskManager.startCRON()

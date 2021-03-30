@@ -117,8 +117,107 @@ class List {
 
     this.statsContainer = el.querySelector(".admin_tablesettings_stats_container");
 
+    if (this.hasMultipleActions()) {
+      this.bindMultipleActions();
+    }
+
+
     this.bindOptions(visibleColumnsMap);
     this.bindOrder();
+  }
+
+  checkboxesAr: NodeListOf<HTMLInputElement>;
+
+  hasMultipleActions(): Boolean {
+    if (this.el.classList.contains("admin_list-hasmultipleactions")) {
+      return true;
+    }
+    return false;
+  }
+
+  bindMultipleActions() {
+    var actions = this.el.querySelectorAll(".admin_list_multiple_action");
+    for (var i = 0; i < actions.length; i++) {
+      actions[i].addEventListener("click", this.multipleActionSelected.bind(this));
+    }
+  }
+
+  multipleActionSelected(e: any) {
+    var target: HTMLDivElement = e.target;
+    var actionName = target.getAttribute("name");
+
+    switch (actionName) {
+      case "cancel":
+        this.multipleUncheckAll();
+        break;
+      case "delete":
+        var ids = this.multipleGetIDs();
+        if (window.confirm(`Opravdu chcete smazat ${ids.length} položek?`)) {
+          var params: any = {};
+          params["action"] = "delete";
+          params["ids"] = ids.join(",");
+          var url = this.adminPrefix + "/" + this.typeName + "/api/multipleaction" + encodeParams(params);
+          fetch(url, {
+            method: "POST",
+          }).then((e) => {
+            if (e.status != 200) {
+              alert("Error while doing multipleaction delete");
+              return;
+            }
+            this.load();
+          });
+        }
+        break;
+      default:
+        console.log("other");
+    }
+
+  }
+
+  bindMultipleActionCheckboxes() {
+    this.checkboxesAr = this.el.querySelectorAll(".admin_table_cell-multiple_checkbox");
+    for (var i = 0; i < this.checkboxesAr.length; i++) {
+      var checkbox = <HTMLInputElement>this.checkboxesAr[i];
+      checkbox.addEventListener("change", this.multipleCheckboxChanged.bind(this));
+    }
+    this.multipleCheckboxChanged();
+  }
+
+  multipleGetIDs(): Array<String> {
+    var ret: Array<String> = [];
+    for (var i = 0; i < this.checkboxesAr.length; i++) {
+      var checkbox = <HTMLInputElement>this.checkboxesAr[i];
+      if (checkbox.checked) {
+        ret.push(checkbox.getAttribute("data-id"));
+      }
+    }
+    return ret;
+  }
+
+  multipleCheckboxChanged() {
+    var checkedCount = 0;
+    for (var i = 0; i < this.checkboxesAr.length; i++) {
+      var checkbox = <HTMLInputElement>this.checkboxesAr[i];
+      if (checkbox.checked) {
+        checkedCount++;
+      }
+    }
+
+    var multipleActionsPanel: HTMLDivElement = this.el.querySelector(".admin_list_multiple_actions");
+    if (checkedCount > 0) {
+      multipleActionsPanel.classList.add("admin_list_multiple_actions-visible");
+    } else {
+      multipleActionsPanel.classList.remove("admin_list_multiple_actions-visible");
+    }
+    this.el.querySelector(".admin_list_multiple_actions_description").textContent = `Vybráno ${checkedCount} položek`
+  }
+
+  multipleUncheckAll() {
+    for (var i = 0; i < this.checkboxesAr.length; i++) {
+      var checkbox = <HTMLInputElement>this.checkboxesAr[i];
+      checkbox.checked = false;
+    }
+    this.multipleCheckboxChanged()
   }
 
   settingsCheckboxChange() {
@@ -189,6 +288,9 @@ class List {
         bindOrder();
         this.bindPagination();
         this.bindClick();
+        if (this.hasMultipleActions()) {
+          this.bindMultipleActionCheckboxes();
+        }
         this.tbody.classList.remove("admin_table_loading");
       } else {
         console.error("error while loading list");
@@ -289,6 +391,9 @@ class List {
       var row = <HTMLTableRowElement>rows[i];
       var id = row.getAttribute("data-id");
       row.addEventListener("click", (e) => {
+        if ((<HTMLDivElement>e.target).classList.contains("admin_table_cell-multiple_checkbox")) {
+          return false;
+        }
         var target = <HTMLElement>e.target;
         if (target.classList.contains("preventredirect")) {
           return;

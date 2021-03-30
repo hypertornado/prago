@@ -170,17 +170,12 @@ func (app App) createEditActivityLog(resource Resource, user *user, itemID int64
 	})
 }
 
-func (app App) createDeleteActivityLog(resource Resource, user *user, itemID int64, item interface{}) error {
-	data, err := json.Marshal(item)
-	if err != nil {
-		return err
-	}
-
+func (app App) createDeleteActivityLog(resource Resource, user *user, itemID int64, before []byte) error {
 	return app.createActivityLog(activityLog{
 		ResourceName:  resource.id,
 		ItemID:        itemID,
 		ActionType:    "delete",
 		User:          user.ID,
-		ContentBefore: string(data),
+		ContentBefore: string(before),
 	})
 }

@@ -1,5 +1,5 @@
 {{define "admin_list"}}
-<div class="admin_list {{if .CanChangeOrder}} admin_list-order{{end}}"
+<div class="admin_list {{if .CanChangeOrder}} admin_list-order{{end}}{{if .MultipleActions}} admin_list-hasmultipleactions{{end}}"
   data-type="{{.TypeID}}"
   data-order-column="{{.OrderColumn}}"
   data-order-desc="{{.OrderDesc}}"
@@ -8,9 +8,18 @@
   data-items-per-page="{{.ItemsPerPage}}"
 >
 
+  {{template "admin_list_multiple_actions" .}}
+
   <table class="admin_table admin_list_table">
     <thead>
     <tr>
+      {{if .MultipleActions}}
+        <th rowspan="2">
+          <!--
+          <input type="checkbox">
+          -->
+        </th>
+      {{end}}
       {{range $item := .Header}}
         <th class="admin_list_orderitem{{if $item.CanOrder}} admin_list_orderitem-canorder{{end}}" data-name="{{$item.ColumnName}}">
           {{- $item.NameHuman -}}
@@ -141,6 +150,11 @@
 {{define "admin_list_cells"}}
   {{range $item := .admin_list.Rows}}
     <tr data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="admin_table_row">
+      {{if $item.AllowsMultipleActions}}
+        <td class="admin_table_cell-multiple preventredirect">
+          <input type="checkbox" class="admin_table_cell-multiple_checkbox preventredirect" data-id="{{$item.ID}}">
+        </td>
+      {{end}}
       {{range $cell := $item.Items}}
         <td{{if $cell.OrderedBy}} class="admin_table_cell-orderedby"{{end}}>
           {{tmpl $cell.Template $cell.Value}}
@@ -182,4 +196,15 @@
     </td>
   </tr>
 </div>
+{{end}}
+
+{{define "admin_list_multiple_actions"}}
+  <div class="admin_list_multiple_actions">
+    <div class="admin_list_multiple_actions_content">
+      <span class="admin_list_multiple_actions_description"></span>
+      {{range $item :=  .MultipleActions}}
+        <input type="button" class="btn admin_list_multiple_action" name="{{$item.ID}}" value="{{$item.Name}}">
+      {{end}}
+    </div>
+  </div>
 {{end}}

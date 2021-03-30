@@ -32,14 +32,6 @@ body {
   background-attachment: fixed;
 }
 
-.shadow {
-  box-shadow: 0px 1px 10px 0px rgba(0,0,0,0.1);
-}
-
-.shadowLarge {
-  box-shadow: 0px 1px 10px 10px rgba(0,0,0,0.1);
-}
-
 code {
   background-color: #fafafa;
   padding: 0px 3px;
@@ -146,6 +138,7 @@ ul {
 
 .admin_box h1 {
   //text-align: center;
+  margin-top: 0px;
   padding: 5px 10px;
 }
 
@@ -465,6 +458,15 @@ th.admin_list_lastheadercell {
   //background-color: #eee;
 }
 
+.admin_table_cell-multiple {
+  //border: 1px solid red !important;
+  width: 1px;
+  padding: 5px !important;
+  vertical-align: top;
+  background: white !important;
+  cursor: default !important;
+}
+
 .admin_table_row td {
   padding: 2px 5px;
 }
@@ -533,6 +535,43 @@ th.admin_list_orderitem {
 
 .admin_list_buttons {
   opacity: 0;
+}
+
+.admin_list_multiple_actions {
+  position: fixed;
+  bottom: 0px;
+  //width: 100%;
+  right: 0px;
+  padding: 10px;
+  left: 300px;
+  pointer-events: none;
+  display: none;
+  justify-content: center;
+}
+
+@media (max-width: 1000px) {
+  .admin_list_multiple_actions {
+    left: 0px;
+  }
+}
+
+.admin_list_multiple_actions-visible {
+  display: flex;
+}
+
+.admin_list_multiple_actions_content {
+  .box;
+  pointer-events: initial;
+  display: flex;
+  align-items: center;
+}
+
+.admin_list_multiple_actions_description {
+  margin: 0px 10px;
+}
+
+.admin_list_multiple_action {
+  margin: 0px 5px;
 }
 
 @media (hover: hover) {
@@ -771,6 +810,10 @@ th.admin_list_orderitem {
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
   overflow: auto;
+}
+
+.admin_list {
+  position: relative;
 }
 
 .admin_list_image {

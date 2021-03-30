@@ -175,22 +175,7 @@ func initDefaultResourceActions(resource *Resource) {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
-			var item interface{}
-			resource.newItem(&item)
-			_, err = app.Query().WhereIs("id", int64(id)).Delete(item)
-			must(err)
-
-			if app.search != nil {
-				err = app.search.deleteItem(resource, int64(id))
-				if err != nil {
-					app.Log().Println(fmt.Errorf("%s", err))
-				}
-				app.search.flush()
-			}
-
-			if resource.activityLog {
-				app.createDeleteActivityLog(*resource, request.user, int64(id), item)
-			}
+			must(resource.deleteItemWithLog(request.user, int64(id)))
 
 			must(resource.updateCachedCount())
 			request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_deleted"))
@@ -232,5 +217,43 @@ func initDefaultResourceActions(resource *Resource) {
 		)
 
 	}
+}
 
+func (resource *Resource) deleteItemWithLog(user *user, id int64) error {
+
+	var beforeItem interface{}
+	resource.newItem(&beforeItem)
+	err := resource.app.Query().WhereIs("id", id).Get(beforeItem)
+	if err != nil {
+		return fmt.Errorf("can't find item for deletion id '%d': %s", id, err)
+	}
+
+	var beforeData []byte
+	if resource.activityLog {
+		beforeData, err = json.Marshal(beforeItem)
+		if err != nil {
+			return fmt.Errorf("can't convert item to json: %s", err)
+		}
+	}
+
+	var item interface{}
+	resource.newItem(&item)
+	_, err = resource.app.Query().WhereIs("id", id).Delete(item)
+	if err != nil {
+		return fmt.Errorf("Can't delete item id '%d': %s", id, err)
+	}
+
+	if resource.app.search != nil {
+		err = resource.app.search.deleteItem(resource, id)
+		if err != nil {
+			resource.app.Log().Println(fmt.Errorf("%s", err))
+		}
+		resource.app.search.flush()
+	}
+
+	if resource.activityLog {
+		resource.app.createDeleteActivityLog(*resource, user, id, beforeData)
+	}
+
+	return nil
 }

@@ -2,6 +2,7 @@ package prago
 
 import (
 	"fmt"
+	"io/ioutil"
 	"mime/multipart"
 	"time"
 )
@@ -42,6 +43,20 @@ func (ta *TaskActivity) GetFile(name string) (multipart.File, error) {
 	header := ta.files.File[name][0]
 	file, err := header.Open()
 	return file, err
+}
+
+func (ta *TaskActivity) GetFileContent() []byte {
+	if len(ta.task.files) == 0 {
+		panic("no files for task set")
+	}
+
+	file, err := ta.GetFile(ta.task.files[0].ID)
+	must(err)
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+	return content
 }
 
 type taskMonitor struct {

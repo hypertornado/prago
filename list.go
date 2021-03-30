@@ -26,6 +26,7 @@ type list struct {
 	ItemsPerPage         int64
 	PaginationData       []listPaginationData
 	StatsLimitSelectData []listPaginationData
+	MultipleActions      []listMultipleAction
 }
 
 type listPaginationData struct {
@@ -46,8 +47,6 @@ type listHeaderItem struct {
 }
 
 type listContent struct {
-	//Count         int64
-	//TotalCount    int64
 	TotalCountStr string
 	Rows          []listRow
 	Colspan       int64
@@ -57,10 +56,11 @@ type listContent struct {
 }
 
 type listRow struct {
-	ID      int64
-	URL     string
-	Items   []listCell
-	Actions listItemActions
+	ID                    int64
+	URL                   string
+	Items                 []listCell
+	Actions               listItemActions
+	AllowsMultipleActions bool
 }
 
 type listCell struct {
@@ -81,6 +81,11 @@ type pagination struct {
 	SelectedPage int64
 }
 
+type listMultipleAction struct {
+	ID   string
+	Name string
+}
+
 func (resource *Resource) getListHeader(user *user) (list list, err error) {
 	lang := user.Locale
 
@@ -97,6 +102,7 @@ func (resource *Resource) getListHeader(user *user) (list list, err error) {
 	list.PaginationData = resource.getPaginationData(user)
 
 	list.StatsLimitSelectData = getStatsLimitSelectData(user.Locale)
+	list.MultipleActions = resource.getMultipleActions(user)
 
 	orderField, ok := resource.fieldMap[resource.orderByColumn]
 	if !ok || !orderField.CanOrder {
@@ -432,6 +438,7 @@ func (resource *Resource) getListContent(user *user, params url.Values) (ret lis
 		row.URL = resource.getURL(fmt.Sprintf("%d", row.ID))
 
 		row.Actions = resource.app.getListItemActions(user, val.Index(i).Interface(), row.ID, *resource)
+		row.AllowsMultipleActions = resource.allowsMultipleActions(user)
 		ret.Rows = append(ret.Rows, row)
 	}
 

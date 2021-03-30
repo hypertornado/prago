@@ -1,38 +1,40 @@
 {{define "admin_tasks"}}
-    <div class="admin_box">
+    {{if false}}
         <h1>{{message .locale "tasks"}}</h1>
-        <div class="admin_box_content">
-            <div class="taskmonitorcontainer">{{template "taskmonitor" .}}</div>
+    {{end}}
+    <div class="admin_box_content">
+        <div class="taskmonitorcontainer">{{template "taskmonitor" .}}</div>
 
-            {{$token := .csrf_token}}
-            {{$locale := .locale}}
+        {{$token := .csrf_token}}
+        {{$locale := .locale}}
 
-            <h2>{{message .locale "tasks_run"}}</h2>
+        {{if false}}
+        <h2>{{message .locale "tasks_run"}}</h2>
+        {{end}}
 
-            {{range $group := .tasks}}
-                <h3>{{$group.Name}}</h3>
-                <div class="task_group">
-                    {{range $task := $group.Tasks}}
-                        <div class="task">
-                            <div class="task_name">{{$task.Name}}</div>
-                            <form method="POST" action="api/tasks/runtask" enctype="multipart/form-data">
-                                {{range $file := $task.Files}}
-                                    <div class="task_input">
-                                        <div>{{$file.ID}}</div>
-                                        <div>
-                                            <input type="file" name="{{$file.ID}}" multiple>
-                                        </div>
+        {{range $group := .tasks}}
+            <h3>{{$group.Name}}</h3>
+            <div class="task_group">
+                {{range $task := $group.Tasks}}
+                    <div class="task">
+                        <div class="task_name">{{$task.Name}}</div>
+                        <form method="POST" action="api/tasks/runtask" enctype="multipart/form-data">
+                            {{range $file := $task.Files}}
+                                <div class="task_input">
+                                    <div>{{$file.ID}}</div>
+                                    <div>
+                                        <input type="file" name="{{$file.ID}}" multiple>
                                     </div>
-                                {{end}}
+                                </div>
+                            {{end}}
 
-                                <input type="hidden" name="id" value="{{$task.ID}}">
-                                <input type="hidden" name="csrf" value="{{$token}}">
-                                <input type="submit" value="▶" class="btn btn-small">
-                            </form>
-                        </div>
-                    {{end}}
-                </div>
-            {{end}}
-        </div>
+                            <input type="hidden" name="id" value="{{$task.ID}}">
+                            <input type="hidden" name="csrf" value="{{$token}}">
+                            <input type="submit" value="▶" class="btn btn-small">
+                        </form>
+                    </div>
+                {{end}}
+            </div>
+        {{end}}
     </div>
 {{end}}

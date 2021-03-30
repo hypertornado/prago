@@ -95,6 +95,22 @@ func (app *App) Resource(item interface{}) *Resource {
 	return ret
 }
 
+func (resource Resource) allowsMultipleActions(user *user) bool {
+	return resource.app.authorize(user, resource.canDelete)
+}
+
+func (resource Resource) getMultipleActions(user *user) (ret []listMultipleAction) {
+	ret = append(ret, listMultipleAction{
+		ID:   "delete",
+		Name: "Smazat",
+	})
+	ret = append(ret, listMultipleAction{
+		ID:   "cancel",
+		Name: "Storno",
+	})
+	return
+}
+
 func (resource Resource) getItemURL(item interface{}, suffix string) string {
 	ret := resource.getURL(fmt.Sprintf("%d", getItemID(item)))
 	if suffix != "" {

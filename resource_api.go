@@ -2,6 +2,7 @@ package prago
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -160,6 +161,35 @@ func initDefaultResourceAPIs(resource *Resource) {
 			}
 
 			request.RenderJSON(ret)
+		},
+	)
+
+	resource.API("multipleaction").Method("POST").Handler(
+		func(request *Request) {
+			var ids []int64
+
+			idsStr := strings.Split(request.Params().Get("ids"), ",")
+			for _, v := range idsStr {
+				id, err := strconv.Atoi(v)
+				if err != nil {
+					panic(fmt.Sprintf("can't convert str '%s' to int", v))
+				}
+				ids = append(ids, int64(id))
+			}
+
+			switch request.Params().Get("action") {
+			case "delete":
+				if !request.app.authorize(request.user, resource.canDelete) {
+					renderAPINotAuthorized(request)
+					return
+				}
+				for _, v := range ids {
+					err := resource.deleteItemWithLog(request.user, v)
+					must(err)
+				}
+			default:
+				panic(fmt.Sprintf("unknown action: %s", request.Params().Get("action")))
+			}
 		},
 	)
 }
