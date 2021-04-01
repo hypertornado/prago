@@ -158,7 +158,7 @@ class ImagePicker {
                     }
                 }
                 else {
-                    alert("Chyba při nahrávání souboru.");
+                    new Alert("Chyba při nahrávání souboru.");
                     console.error("Error while loading item.");
                 }
             });
@@ -519,7 +519,7 @@ class List {
                         method: "POST",
                     }).then((e) => {
                         if (e.status != 200) {
-                            alert("Error while doing multipleaction delete");
+                            new Alert("Error while doing multipleaction delete");
                             return;
                         }
                         this.load();
@@ -1891,6 +1891,62 @@ class NotificationItem {
         fetch(this.adminPrefix + "/_api/notification/" + this.uuid, { method: "DELETE" }).then(console.log).then((e) => {
             console.log(e);
         });
+    }
+}
+class Popup {
+    constructor() {
+        this.el = document.createElement("div");
+        this.el.classList.add("popup_background");
+        document.body.appendChild(this.el);
+        this.el.innerHTML = `
+        <div class="popup">
+            <div class="popup_header">
+                <div class="popup_header_name"></div>
+                <div class="popup_header_cancel">
+
+                </div>
+            </div>
+            <div class="popup_content"></div>
+            <div class="popup_footer"></div>
+        </div>
+        `;
+        this.el.querySelector(".popup_header_cancel").addEventListener("click", this.remove.bind(this));
+        this.el.addEventListener("click", this.backgroundClicked.bind(this));
+    }
+    backgroundClicked(e) {
+        var div = e.target;
+        if (!div.classList.contains("popup_background")) {
+            return;
+        }
+        if (this.cancelable) {
+            this.remove();
+        }
+    }
+    remove() {
+        this.el.remove();
+    }
+    setCancelable() {
+        this.cancelable = true;
+        this.el.querySelector(".popup_header_cancel").classList.add("popup_header_cancel-visible");
+    }
+    setTitle(name) {
+        this.el.querySelector(".popup_header_name").textContent = name;
+    }
+    addButton(name, handler) {
+        var button = document.createElement("input");
+        button.setAttribute("type", "button");
+        button.setAttribute("class", "btn");
+        button.setAttribute("value", name);
+        button.addEventListener("click", handler);
+        this.el.querySelector(".popup_footer").appendChild(button);
+    }
+}
+class Alert extends Popup {
+    constructor(text) {
+        super();
+        this.setCancelable();
+        this.addButton("OK", this.remove.bind(this));
+        this.setTitle(text);
     }
 }
 document.addEventListener("DOMContentLoaded", () => {

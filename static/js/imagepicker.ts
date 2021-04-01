@@ -82,7 +82,7 @@ class ImagePicker {
             this.addImage(data[i].UID);
           }
         } else {
-          alert("Chyba při nahrávání souboru.");
+          new Alert("Chyba při nahrávání souboru.");
           console.error("Error while loading item.");
         }
       });

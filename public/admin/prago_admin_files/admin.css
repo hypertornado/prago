@@ -13,8 +13,6 @@
   display: inline-block;
   background-color: rgba(64, 120, 192, 0.05);
   border-radius: 5px;
-  width: 40px;
-  height: 40px;
   margin: 5px;
   flex-shrink: 0;
 }
@@ -7423,8 +7421,6 @@ a.mainmenu_logo:hover {
   display: inline-block;
   background-color: rgba(64, 120, 192, 0.05);
   border-radius: 5px;
-  width: 40px;
-  height: 40px;
   margin: 5px;
   flex-shrink: 0;
   width: auto;
@@ -7439,6 +7435,80 @@ a.mainmenu_logo:hover {
 }
 .task_input {
   margin: 10px 3px;
+}
+.popup_background {
+  background-color: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.popup {
+  border: 1px solid #eee;
+  display: inline-block;
+  background-color: rgba(64, 120, 192, 0.05);
+  margin: 5px;
+  flex-shrink: 0;
+  width: 100vw;
+  max-width: 200px;
+  padding: 10px;
+  background-color: #eee;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  max-width: 300px;
+  padding: 0px;
+  border-radius: 5px;
+}
+.popup_header {
+  padding: 10px 10px;
+  display: flex;
+}
+.popup_header_name {
+  flex-grow: 10;
+  flex-shrink: 10;
+  font-weight: 500;
+}
+.popup_header_cancel {
+  color: #4078c0;
+  cursor: pointer;
+  flex-grow: 0;
+  flex-shrink: 0;
+  font-size: 1.5em;
+  display: none;
+}
+.popup_header_cancel-visible {
+  display: inline-block;
+}
+.popup_header_cancel:hover {
+  opacity: 0.8;
+}
+.popup_header_cancel:active {
+  opacity: 0.6;
+}
+.popup_header_cancel::after {
+  content: "×";
+}
+.popup_content {
+  border: 0px solid #ddd;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  padding: 10px 5px;
+  background-color: white;
+  display: none;
+}
+.popup_footer {
+  text-align: right;
+  padding: 10px 10px;
+}
+.popup_footer input {
+  margin-left: 10px;
 }
 .notification_center {
   position: absolute;
@@ -7487,8 +7557,6 @@ a.mainmenu_logo:hover {
   display: inline-block;
   background-color: rgba(64, 120, 192, 0.05);
   border-radius: 5px;
-  width: 40px;
-  height: 40px;
   margin: 5px;
   flex-shrink: 0;
 }

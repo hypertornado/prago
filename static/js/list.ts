@@ -161,7 +161,7 @@ class List {
             method: "POST",
           }).then((e) => {
             if (e.status != 200) {
-              alert("Error while doing multipleaction delete");
+              new Alert("Error while doing multipleaction delete");
               return;
             }
             this.load();

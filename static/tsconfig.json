@@ -31,6 +31,7 @@
         "js/relationlist.ts",
         "js/taskmonitor.ts",
         "js/notifications.ts",
+        "js/popup.ts",
         "js/load.ts"
     ]
 }

@@ -128,6 +128,7 @@ func createApp(codeName string, version string) *App {
 	app.initTemplates()
 	app.initSearch()
 	app.initSystemStats()
+	app.initSQLConsole()
 	app.initBackupCRON()
 	return app
 }

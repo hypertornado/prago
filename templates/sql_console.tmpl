@@ -1,0 +1,23 @@
+{{define "sql_console"}}
+
+<form>
+    <textarea class="input" name="q">{{.q}}</textarea>
+    <input type="hidden" name="csrf" value="{{.csrf}}">
+    <input type="submit" class="btn" value="Odeslat">
+</form>
+
+<div>{{.message}}</div>
+
+{{if .table}}
+    <table class="admin_table">
+        {{range $row := .table}}
+            <tr>
+                {{range $column := $row}}
+                    <td>{{$column}}</td>
+                {{end}}
+            </tr>
+        {{end}}
+    </table>
+{{end}}
+
+{{end}}
