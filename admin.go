@@ -2,9 +2,6 @@ package prago
 
 import (
 	"errors"
-
-	//embed
-	_ "embed"
 )
 
 //ErrItemNotFound is returned when no item is found
@@ -62,14 +59,16 @@ func (app App) getAdminURL(suffix string) string {
 	return ret
 }
 
-//AddJavascript adds javascript
-func (app *App) AddJavascript(url string) {
+//JavascriptPath adds javascript
+func (app *App) JavascriptPath(url string) *App {
 	app.javascripts = append(app.javascripts, url)
+	return app
 }
 
-//AddCSS adds CSS
-func (app *App) AddCSS(url string) {
+//CSSPath adds CSS
+func (app *App) CSSPath(url string) *App {
 	app.css = append(app.css, url)
+	return app
 }
 
 func addCurrentFlashMessage(request *Request, message string) {

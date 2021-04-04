@@ -37,17 +37,27 @@ class List {
   statsCheckboxSelectCount: HTMLSelectElement;
   statsContainer: HTMLDivElement;
 
+  settingsButton: HTMLButtonElement;
+  settingsPopup: ContentPopup;
+
   constructor(el: HTMLDivElement, openbutton: HTMLButtonElement) {
     this.el = el;
 
-    this.settingsRow = this.el.querySelector(".admin_list_settingsrow");
-    this.settingsRowColumn = this.el.querySelector(".admin_list_settingsrow_column");
-    this.settingsEl = this.el.querySelector(".admin_tablesettings");
-    this.settingsCheckbox = this.el.querySelector(".admin_list_showmore");
-    this.settingsCheckbox.addEventListener("change", this.settingsCheckboxChange.bind(this));
-    this.settingsCheckboxChange();
+    this.settingsRow = document.querySelector(".admin_list_settingsrow");
+    this.settingsRowColumn = document.querySelector(".admin_list_settingsrow_column");
+    this.settingsEl = document.querySelector(".admin_tablesettings");
 
-    this.exportButton = this.el.querySelector(".admin_exportbutton");
+    //this.settingsCheckbox = this.el.querySelector(".admin_list_showmore");
+    //this.settingsCheckbox.addEventListener("change", this.settingsCheckboxChange.bind(this));
+    //this.settingsCheckboxChange();
+
+    this.settingsPopup = new ContentPopup("Možnosti", this.settingsEl);
+    this.settingsButton = this.el.querySelector(".admin_list_settings");
+    this.settingsButton.addEventListener("click", () => {
+      this.settingsPopup.show();
+    })
+
+    this.exportButton = document.querySelector(".admin_exportbutton");
 
     let urlParams = new URLSearchParams(window.location.search);
 
@@ -102,20 +112,20 @@ class List {
     }
 
     this.itemsPerPage = parseInt(el.getAttribute("data-items-per-page"));
-    this.paginationSelect = <HTMLSelectElement>el.querySelector(".admin_tablesettings_pages");
+    this.paginationSelect = <HTMLSelectElement>document.querySelector(".admin_tablesettings_pages");
     this.paginationSelect.addEventListener("change", this.load.bind(this));
 
-    this.statsCheckbox = el.querySelector(".admin_tablesettings_stats");
+    this.statsCheckbox = document.querySelector(".admin_tablesettings_stats");
     this.statsCheckbox.addEventListener("change", () => {
       this.filterChanged();
     });
 
-    this.statsCheckboxSelectCount = el.querySelector(".admin_tablesettings_stats_limit");
+    this.statsCheckboxSelectCount = document.querySelector(".admin_tablesettings_stats_limit");
     this.statsCheckboxSelectCount.addEventListener("change", () => {
       this.filterChanged();
     });
 
-    this.statsContainer = el.querySelector(".admin_tablesettings_stats_container");
+    this.statsContainer = document.querySelector(".admin_tablesettings_stats_container");
 
     if (this.hasMultipleActions()) {
       this.bindMultipleActions();
@@ -152,7 +162,8 @@ class List {
         break;
       case "delete":
         var ids = this.multipleGetIDs();
-        if (window.confirm(`Opravdu chcete smazat ${ids.length} položek?`)) {
+        new Confirm(`Opravdu chcete smazat ${ids.length} položek?`, () => {
+          var loader = new LoadingPopup();
           var params: any = {};
           params["action"] = "delete";
           params["ids"] = ids.join(",");
@@ -160,13 +171,14 @@ class List {
           fetch(url, {
             method: "POST",
           }).then((e) => {
+            loader.done();
             if (e.status != 200) {
               new Alert("Error while doing multipleaction delete");
               return;
             }
             this.load();
           });
-        }
+        }, Function(), ButtonStyle.Delete);
         break;
       default:
         console.log("other");
@@ -175,7 +187,7 @@ class List {
   }
 
   bindMultipleActionCheckboxes() {
-    this.checkboxesAr = this.el.querySelectorAll(".admin_table_cell-multiple_checkbox");
+    this.checkboxesAr = document.querySelectorAll(".admin_table_cell-multiple_checkbox");
     for (var i = 0; i < this.checkboxesAr.length; i++) {
       var checkbox = <HTMLInputElement>this.checkboxesAr[i];
       checkbox.addEventListener("change", this.multipleCheckboxChanged.bind(this));
@@ -301,7 +313,7 @@ class List {
   }
 
   bindOptions(visibleColumnsMap: any) {
-    var columns: NodeListOf<HTMLInputElement> = this.el.querySelectorAll(".admin_tablesettings_column");
+    var columns: NodeListOf<HTMLInputElement> = document.querySelectorAll(".admin_tablesettings_column");
     for (var i = 0; i < columns.length; i++) {
       let columnName = columns[i].getAttribute("data-column-name");
       if (visibleColumnsMap[columnName]) {
@@ -317,7 +329,7 @@ class List {
   changedOptions() {
     var columns: any = this.getSelectedColumnsMap();
 
-    var headers: NodeListOf<HTMLDivElement> = this.el.querySelectorAll(".admin_list_orderitem");
+    var headers: NodeListOf<HTMLDivElement> = document.querySelectorAll(".admin_list_orderitem");
     for (var i = 0; i < headers.length; i++) {
       var name = headers[i].getAttribute("data-name");
       if (columns[name]) {
@@ -327,7 +339,7 @@ class List {
       }
     }
 
-    var filters: NodeListOf<HTMLDivElement> = this.el.querySelectorAll(".admin_list_filteritem");
+    var filters: NodeListOf<HTMLDivElement> = document.querySelectorAll(".admin_list_filteritem");
     for (var i = 0; i < filters.length; i++) {
       var name = filters[i].getAttribute("data-name");
       if (columns[name]) {
@@ -466,7 +478,7 @@ class List {
 
   getSelectedColumnsStr(): string {
     var ret = [];
-    var checked: NodeListOf<HTMLInputElement> = this.el.querySelectorAll(".admin_tablesettings_column:checked");
+    var checked: NodeListOf<HTMLInputElement> = document.querySelectorAll(".admin_tablesettings_column:checked");
     for (var i = 0; i < checked.length; i++) {
       ret.push(checked[i].getAttribute("data-column-name"));
     }
@@ -475,7 +487,7 @@ class List {
 
   getSelectedColumnsMap(): any {
     var columns: any = {};
-    var checked: NodeListOf<HTMLInputElement> = this.el.querySelectorAll(".admin_tablesettings_column:checked");
+    var checked: NodeListOf<HTMLInputElement> = document.querySelectorAll(".admin_tablesettings_column:checked");
     for (var i = 0; i < checked.length; i++) {
       columns[checked[i].getAttribute("data-column-name")] = true;
     }

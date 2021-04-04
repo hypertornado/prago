@@ -82,8 +82,9 @@ type pagination struct {
 }
 
 type listMultipleAction struct {
-	ID   string
-	Name string
+	ID       string
+	Name     string
+	IsDelete bool
 }
 
 func (resource *Resource) getListHeader(user *user) (list list, err error) {

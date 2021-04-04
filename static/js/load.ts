@@ -17,7 +17,23 @@ document.addEventListener("DOMContentLoaded", () => {
   bindTaskMonitor();
   bindNotifications();
 
-  //new Alert("Hello world");
+  /*new Confirm("Hello world confirm", () => {
+    console.log("ok");
+  }, () => {
+    console.log("cancel");
+  }, ButtonStyle.Delete);
+
+  */
+
+  var content = document.createElement("div");
+  content.innerHTML = "<h2>hello world</h2><br><textarea rows='10'></textarea>";
+
+  //new ContentPopup("info", content);
+
+  //new Alert("OOO");
+
+  //var loader = new LoadingPopup();
+
 });
 
 function bindFlashMessages() {

@@ -21,11 +21,11 @@ func (app *App) initAccessManager() {
 		permissions: make(map[Permission]bool),
 	}
 
-	app.AddPermission(nobodyPermission)
-	app.AddRole(sysadminRoleName, nil)
-	app.AddPermission(loggedPermission)
-	app.AddPermission(sysadminPermission)
-	app.AddRole("", []Permission{loggedPermission})
+	app.Permission(nobodyPermission)
+	app.Role(sysadminRoleName, nil)
+	app.Permission(loggedPermission)
+	app.Permission(sysadminPermission)
+	app.Role("", []Permission{loggedPermission})
 }
 
 //Permission for access
@@ -60,8 +60,8 @@ func (app *App) createRoleFieldType() *FieldType {
 	}
 }
 
-//AddRole adds role to admin
-func (app *App) AddRole(role string, permissions []Permission) {
+//Role adds role to admin
+func (app *App) Role(role string, permissions []Permission) *App {
 	_, ok := app.accessManager.roles[role]
 	if ok {
 		panic(fmt.Sprintf("Role '%s' already added", role))
@@ -79,10 +79,11 @@ func (app *App) AddRole(role string, permissions []Permission) {
 	}
 	perms[loggedPermission] = true
 	app.accessManager.roles[role] = perms
+	return app
 }
 
-//AddPermission adds permission to admin
-func (app *App) AddPermission(permission Permission) {
+//Permission adds permission to admin
+func (app *App) Permission(permission Permission) *App {
 	if app.accessManager.permissions[Permission(permission)] {
 		panic(fmt.Sprintf("Permission '%s' already added", permission))
 	}
@@ -90,6 +91,7 @@ func (app *App) AddPermission(permission Permission) {
 		app.accessManager.roles[sysadminRoleName][permission] = true
 	}
 	app.accessManager.permissions[Permission(permission)] = true
+	return app
 }
 
 func (app *App) authorize(user *user, permission Permission) bool {

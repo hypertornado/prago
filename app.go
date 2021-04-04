@@ -3,7 +3,10 @@ package prago
 
 import (
 	"database/sql"
+	"encoding/base64"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"reflect"
 
@@ -26,7 +29,8 @@ type App struct {
 	cache           *cachelib.Cache
 	sessionsManager *sessionsManager
 
-	logo            string
+	logo string
+	//logoPath        string
 	name            func(string) string
 	resources       []*Resource
 	resourceMap     map[reflect.Type]*Resource
@@ -146,8 +150,8 @@ func (app *App) Run() {
 	app.parseCommands()
 }
 
-//Application creates App structure for prago app
-func Application(appName, version string) *App {
+//New creates App structure for prago app
+func New(appName, version string) *App {
 	return createApp(appName, version)
 }
 
@@ -157,11 +161,19 @@ func (app *App) Log() *log.Logger { return app.logger }
 //DevelopmentMode returns if app is running in development mode
 func (app *App) DevelopmentMode() bool { return app.developmentMode }
 
-//SetName sets localized human name to app
-func (app *App) SetName(name func(string) string) { app.name = name }
+//Name sets localized human name to app
+func (app *App) Name(name func(string) string) *App {
+	app.name = name
+	return app
+}
 
-//SetLogoPath sets application public path to logo
-func (app *App) SetLogoPath(logo string) { app.logo = logo }
+//Logo sets application public path to logo
+func (app *App) Logo(logo []byte) *App {
+	mimeType := http.DetectContentType(logo)
+	app.logo = fmt.Sprintf("%s;base64,%s", mimeType, base64.StdEncoding.EncodeToString(logo))
+	//app.logo = logo
+	return app
+}
 
 //DotPath returns path to hidden directory with app configuration and data
 func (app *App) dotPath() string { return os.Getenv("HOME") + "/." + app.codeName }

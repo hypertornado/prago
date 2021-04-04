@@ -219,6 +219,27 @@ ul {
   text-align: right;
 }
 
+.btn-accented {
+  background: linear-gradient(#42a1ec, #0070c9);
+  color: white;
+  border-color: #1E90FF;
+  font-weight: 500;
+}
+
+.btn-accented:hover {
+  background-color: #147bcd;
+  background: linear-gradient(#51a9ee, #147bcd);
+  border-color: #1482d0;
+  outline: none;
+}
+
+.btn-accented:active {
+  background-color: #0067b9;
+  background: linear-gradient(#3d94d9, #0067b9);
+  border-color: #006dbc;
+  outline: none;
+}
+
 .btn-primary {
   background: linear-gradient(#42a1ec, #0070c9);
   color: white;
@@ -251,6 +272,7 @@ ul {
 
 .btn-delete, .btn-delete:hover, .btn-delete:active {
   border: 1px solid red;
+  color: white;
   background: linear-gradient(#dd2e4f, #dd2e4f);
   background: linear-gradient(#dd2e4f, red);
 }
@@ -1226,13 +1248,18 @@ td.admin_list_message {
 .admin_tablesettings {
   //border: 1px solid #eee;
   //background: white;
-  padding: 0px 10px 10px 10px;
+  //padding: 0px 10px 10px 10px;
   //border-radius: 3px;
   //text-align: center;
   //margin: 10px 10px;
-  border-top: none;
-  border-bottom: none;
+  //border-top: none;
+  //border-bottom: none;
   //display: none;
+}
+
+.admin_tablesettings h3 {
+  font-size: 1rem;
+  line-height: 1.3em;
 }
 
 .admin_tablesettings_name {

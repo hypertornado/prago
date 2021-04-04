@@ -422,13 +422,15 @@ function bindLists() {
 class List {
     constructor(el, openbutton) {
         this.el = el;
-        this.settingsRow = this.el.querySelector(".admin_list_settingsrow");
-        this.settingsRowColumn = this.el.querySelector(".admin_list_settingsrow_column");
-        this.settingsEl = this.el.querySelector(".admin_tablesettings");
-        this.settingsCheckbox = this.el.querySelector(".admin_list_showmore");
-        this.settingsCheckbox.addEventListener("change", this.settingsCheckboxChange.bind(this));
-        this.settingsCheckboxChange();
-        this.exportButton = this.el.querySelector(".admin_exportbutton");
+        this.settingsRow = document.querySelector(".admin_list_settingsrow");
+        this.settingsRowColumn = document.querySelector(".admin_list_settingsrow_column");
+        this.settingsEl = document.querySelector(".admin_tablesettings");
+        this.settingsPopup = new ContentPopup("Možnosti", this.settingsEl);
+        this.settingsButton = this.el.querySelector(".admin_list_settings");
+        this.settingsButton.addEventListener("click", () => {
+            this.settingsPopup.show();
+        });
+        this.exportButton = document.querySelector(".admin_exportbutton");
         let urlParams = new URLSearchParams(window.location.search);
         this.page = parseInt(urlParams.get("_page"));
         if (!this.page) {
@@ -472,17 +474,17 @@ class List {
             visibleColumnsMap[visibleColumnsArr[i]] = true;
         }
         this.itemsPerPage = parseInt(el.getAttribute("data-items-per-page"));
-        this.paginationSelect = el.querySelector(".admin_tablesettings_pages");
+        this.paginationSelect = document.querySelector(".admin_tablesettings_pages");
         this.paginationSelect.addEventListener("change", this.load.bind(this));
-        this.statsCheckbox = el.querySelector(".admin_tablesettings_stats");
+        this.statsCheckbox = document.querySelector(".admin_tablesettings_stats");
         this.statsCheckbox.addEventListener("change", () => {
             this.filterChanged();
         });
-        this.statsCheckboxSelectCount = el.querySelector(".admin_tablesettings_stats_limit");
+        this.statsCheckboxSelectCount = document.querySelector(".admin_tablesettings_stats_limit");
         this.statsCheckboxSelectCount.addEventListener("change", () => {
             this.filterChanged();
         });
-        this.statsContainer = el.querySelector(".admin_tablesettings_stats_container");
+        this.statsContainer = document.querySelector(".admin_tablesettings_stats_container");
         if (this.hasMultipleActions()) {
             this.bindMultipleActions();
         }
@@ -510,7 +512,8 @@ class List {
                 break;
             case "delete":
                 var ids = this.multipleGetIDs();
-                if (window.confirm(`Opravdu chcete smazat ${ids.length} položek?`)) {
+                new Confirm(`Opravdu chcete smazat ${ids.length} položek?`, () => {
+                    var loader = new LoadingPopup();
                     var params = {};
                     params["action"] = "delete";
                     params["ids"] = ids.join(",");
@@ -518,20 +521,21 @@ class List {
                     fetch(url, {
                         method: "POST",
                     }).then((e) => {
+                        loader.done();
                         if (e.status != 200) {
                             new Alert("Error while doing multipleaction delete");
                             return;
                         }
                         this.load();
                     });
-                }
+                }, Function(), ButtonStyle.Delete);
                 break;
             default:
                 console.log("other");
         }
     }
     bindMultipleActionCheckboxes() {
-        this.checkboxesAr = this.el.querySelectorAll(".admin_table_cell-multiple_checkbox");
+        this.checkboxesAr = document.querySelectorAll(".admin_table_cell-multiple_checkbox");
         for (var i = 0; i < this.checkboxesAr.length; i++) {
             var checkbox = this.checkboxesAr[i];
             checkbox.addEventListener("change", this.multipleCheckboxChanged.bind(this));
@@ -643,7 +647,7 @@ class List {
         request.send(JSON.stringify({}));
     }
     bindOptions(visibleColumnsMap) {
-        var columns = this.el.querySelectorAll(".admin_tablesettings_column");
+        var columns = document.querySelectorAll(".admin_tablesettings_column");
         for (var i = 0; i < columns.length; i++) {
             let columnName = columns[i].getAttribute("data-column-name");
             if (visibleColumnsMap[columnName]) {
@@ -657,7 +661,7 @@ class List {
     }
     changedOptions() {
         var columns = this.getSelectedColumnsMap();
-        var headers = this.el.querySelectorAll(".admin_list_orderitem");
+        var headers = document.querySelectorAll(".admin_list_orderitem");
         for (var i = 0; i < headers.length; i++) {
             var name = headers[i].getAttribute("data-name");
             if (columns[name]) {
@@ -667,7 +671,7 @@ class List {
                 headers[i].classList.add("hidden");
             }
         }
-        var filters = this.el.querySelectorAll(".admin_list_filteritem");
+        var filters = document.querySelectorAll(".admin_list_filteritem");
         for (var i = 0; i < filters.length; i++) {
             var name = filters[i].getAttribute("data-name");
             if (columns[name]) {
@@ -799,7 +803,7 @@ class List {
     }
     getSelectedColumnsStr() {
         var ret = [];
-        var checked = this.el.querySelectorAll(".admin_tablesettings_column:checked");
+        var checked = document.querySelectorAll(".admin_tablesettings_column:checked");
         for (var i = 0; i < checked.length; i++) {
             ret.push(checked[i].getAttribute("data-column-name"));
         }
@@ -807,7 +811,7 @@ class List {
     }
     getSelectedColumnsMap() {
         var columns = {};
-        var checked = this.el.querySelectorAll(".admin_tablesettings_column:checked");
+        var checked = document.querySelectorAll(".admin_tablesettings_column:checked");
         for (var i = 0; i < checked.length; i++) {
             columns[checked[i].getAttribute("data-column-name")] = true;
         }
@@ -1894,7 +1898,7 @@ class NotificationItem {
     }
 }
 class Popup {
-    constructor() {
+    constructor(title) {
         this.el = document.createElement("div");
         this.el.classList.add("popup_background");
         document.body.appendChild(this.el);
@@ -1910,8 +1914,18 @@ class Popup {
             <div class="popup_footer"></div>
         </div>
         `;
-        this.el.querySelector(".popup_header_cancel").addEventListener("click", this.remove.bind(this));
+        this.el.setAttribute("tabindex", "-1");
+        this.el.querySelector(".popup_header_cancel").addEventListener("click", this.cancel.bind(this));
         this.el.addEventListener("click", this.backgroundClicked.bind(this));
+        this.el.focus();
+        this.el.addEventListener("keydown", (e) => {
+            if (e.code == "Escape") {
+                if (this.cancelable) {
+                    this.cancel();
+                }
+            }
+        });
+        this.setTitle(title);
     }
     backgroundClicked(e) {
         var div = e.target;
@@ -1919,11 +1933,27 @@ class Popup {
             return;
         }
         if (this.cancelable) {
-            this.remove();
+            this.cancel();
+        }
+    }
+    wide() {
+        this.el.querySelector(".popup").classList.add("popup-wide");
+    }
+    focus() {
+        this.el.focus();
+    }
+    cancel() {
+        this.remove();
+        if (this.cancelAction) {
+            this.cancelAction();
         }
     }
     remove() {
         this.el.remove();
+    }
+    setContent(el) {
+        this.el.querySelector(".popup_content").appendChild(el);
+        this.el.querySelector(".popup_content").classList.add("popup_content-visible");
     }
     setCancelable() {
         this.cancelable = true;
@@ -1932,21 +1962,97 @@ class Popup {
     setTitle(name) {
         this.el.querySelector(".popup_header_name").textContent = name;
     }
-    addButton(name, handler) {
+    addButton(name, handler, style) {
+        this.el.querySelector(".popup_footer").classList.add("popup_footer-visible");
         var button = document.createElement("input");
         button.setAttribute("type", "button");
         button.setAttribute("class", "btn");
+        switch (style) {
+            case ButtonStyle.Accented:
+                button.classList.add("btn-accented");
+                break;
+            case ButtonStyle.Delete:
+                button.classList.add("btn-delete");
+                break;
+        }
         button.setAttribute("value", name);
         button.addEventListener("click", handler);
         this.el.querySelector(".popup_footer").appendChild(button);
+        return button;
+    }
+    present() {
+        document.body.appendChild(this.el);
+        this.focus();
+        console.log("heer");
+        this.el.classList.add("popup_background-presented");
+    }
+    unpresent() {
+        this.el.classList.remove("popup_background-presented");
     }
 }
+var ButtonStyle;
+(function (ButtonStyle) {
+    ButtonStyle[ButtonStyle["Default"] = 0] = "Default";
+    ButtonStyle[ButtonStyle["Accented"] = 1] = "Accented";
+    ButtonStyle[ButtonStyle["Delete"] = 2] = "Delete";
+})(ButtonStyle || (ButtonStyle = {}));
 class Alert extends Popup {
-    constructor(text) {
-        super();
+    constructor(title) {
+        super(title);
         this.setCancelable();
-        this.addButton("OK", this.remove.bind(this));
-        this.setTitle(text);
+        this.present();
+        this.addButton("OK", this.remove.bind(this), ButtonStyle.Accented).focus();
+    }
+}
+class Confirm extends Popup {
+    constructor(title, handlerConfirm, handlerCancel, style) {
+        super(title);
+        this.setCancelable();
+        if (!style) {
+            style = ButtonStyle.Accented;
+        }
+        this.cancelAction = handlerCancel;
+        this.addButton("Storno", () => {
+            this.remove();
+            if (handlerCancel) {
+                handlerCancel();
+            }
+        });
+        var primaryText = "OK";
+        if (style = ButtonStyle.Delete) {
+            primaryText = "Smazat";
+        }
+        this.primaryButton = this.addButton(primaryText, () => {
+            this.remove();
+            if (handlerConfirm) {
+                handlerConfirm();
+            }
+        }, style);
+        this.present();
+        this.primaryButton.focus();
+    }
+}
+class ContentPopup extends Popup {
+    constructor(title, content) {
+        super(title);
+        this.setCancelable();
+        this.setContent(content);
+        this.wide();
+    }
+    show() {
+        this.present();
+    }
+}
+class LoadingPopup extends Popup {
+    constructor() {
+        super("");
+        var contentEl = document.createElement("div");
+        contentEl.innerHTML = "<progress class=\"progress\"></progress>";
+        this.setContent(contentEl);
+        this.present();
+    }
+    done() {
+        this.remove();
     }
 }
 document.addEventListener("DOMContentLoaded", () => {
@@ -1967,6 +2073,8 @@ document.addEventListener("DOMContentLoaded", () => {
     bindRelationList();
     bindTaskMonitor();
     bindNotifications();
+    var content = document.createElement("div");
+    content.innerHTML = "<h2>hello world</h2><br><textarea rows='10'></textarea>";
 });
 function bindFlashMessages() {
     var messages = document.querySelectorAll(".flash_message");
