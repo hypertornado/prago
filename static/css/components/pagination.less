@@ -1,35 +1,36 @@
 td.pagination {
-    text-align: center;
-    background-color: white;
-    padding: 10px 5px;
+  text-align: center;
+  background-color: white;
+  padding: 10px 5px;
 
-    //background: @baseColorBackground;
-    
+  //background: @baseColorBackground;
 }
-  
-.pagination_page, .pagination_page_current {
-    color: @baseColor;
-    padding: 2px 10px;
-    margin: 0px;
-    margin-right: 1px;
-    font-size: 1rem;
-    line-height: 1.4em;
-    display: inline-block;
-    text-decoration: none;
-    border-radius: 3px;
-}
-  
-.pagination_page:hover {
-    background-color: @baseColorBackground;
-    .shadow;
-}
-  
-.pagination_page_current, .pagination_page_current:hover {
-    background-color: @baseColor;
-    color: white;
-    .shadow;
-}
-  
+
+.pagination_page,
 .pagination_page_current {
-    cursor: default;
+  color: @baseColor;
+  padding: 2px 10px;
+  margin: 0px;
+  margin-right: 1px;
+  font-size: 1rem;
+  line-height: 1.4em;
+  display: inline-block;
+  text-decoration: none;
+  border-radius: 3px;
+}
+
+.pagination_page:hover {
+  background-color: @baseColorBackground;
+  .shadow;
+}
+
+.pagination_page_current,
+.pagination_page_current:hover {
+  background-color: @baseColor;
+  color: white;
+  .shadow;
+}
+
+.pagination_page_current {
+  cursor: default;
 }

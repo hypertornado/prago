@@ -28,7 +28,7 @@ func initDefaultResourceActions(resource *Resource) {
 			form, err := resource.getForm(item, request.user)
 			must(err)
 
-			form.Classes = append(form.Classes, "form_leavealert")
+			form.Classes = append(form.Classes, "prago_form")
 			form.Action = "../" + resource.id
 			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
@@ -97,7 +97,7 @@ func initDefaultResourceActions(resource *Resource) {
 			form, err := resource.getForm(item, request.user)
 			must(err)
 
-			form.Classes = append(form.Classes, "form_leavealert")
+			form.Classes = append(form.Classes, "prago_form")
 			form.Action = "edit"
 			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
 			form.AddCSRFToken(request)

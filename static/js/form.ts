@@ -1,5 +1,5 @@
 function bindForm() {
-  var els = document.querySelectorAll(".form_leavealert");
+  var els = document.querySelectorAll(".prago_form");
   for (var i = 0; i < els.length; i++) {
     new Form(<HTMLFormElement>els[i]);
   }

@@ -5552,7 +5552,7 @@ ul {
 .btn-accented {
   background: linear-gradient(#42a1ec, #0070c9);
   color: white;
-  border-color: #1E90FF;
+  border-color: #1e90ff;
   font-weight: 500;
 }
 .btn-accented:hover {
@@ -5570,7 +5570,7 @@ ul {
 .btn-primary {
   background: linear-gradient(#42a1ec, #0070c9);
   color: white;
-  border-color: #1E90FF;
+  border-color: #1e90ff;
   font-weight: 500;
   display: block;
   font-size: 1rem;
@@ -6650,13 +6650,13 @@ http://nicolasgallagher.com/micro-clearfix-hack/
 .pika-prev,
 .is-rtl .pika-next {
   float: left;
-  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAeCAYAAAAsEj5rAAAAUklEQVR42u3VMQoAIBADQf8Pgj+OD9hG2CtONJB2ymQkKe0HbwAP0xucDiQWARITIDEBEnMgMQ8S8+AqBIl6kKgHiXqQqAeJepBo/z38J/U0uAHlaBkBl9I4GwAAAABJRU5ErkJggg==');
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAeCAYAAAAsEj5rAAAAUklEQVR42u3VMQoAIBADQf8Pgj+OD9hG2CtONJB2ymQkKe0HbwAP0xucDiQWARITIDEBEnMgMQ8S8+AqBIl6kKgHiXqQqAeJepBo/z38J/U0uAHlaBkBl9I4GwAAAABJRU5ErkJggg==");
   *left: 0;
 }
 .pika-next,
 .is-rtl .pika-prev {
   float: right;
-  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAeCAYAAAAsEj5rAAAAU0lEQVR42u3VOwoAMAgE0dwfAnNjU26bYkBCFGwfiL9VVWoO+BJ4Gf3gtsEKKoFBNTCoCAYVwaAiGNQGMUHMkjGbgjk2mIONuXo0nC8XnCf1JXgArVIZAQh5TKYAAAAASUVORK5CYII=');
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAeCAYAAAAsEj5rAAAAU0lEQVR42u3VOwoAMAgE0dwfAnNjU26bYkBCFGwfiL9VVWoO+BJ4Gf3gtsEKKoFBNTCoCAYVwaAiGNQGMUHMkjGbgjk2mIONuXo0nC8XnCf1JXgArVIZAQh5TKYAAAAASUVORK5CYII=");
   *right: 0;
 }
 .pika-prev.is-disabled,
@@ -6724,11 +6724,11 @@ http://nicolasgallagher.com/micro-clearfix-hack/
 }
 .is-disabled .pika-button,
 .is-inrange .pika-button {
-  background: #D5E9F7;
+  background: #d5e9f7;
 }
 .is-startrange .pika-button {
   color: #fff;
-  background: #6CB31D;
+  background: #6cb31d;
   box-shadow: none;
   border-radius: 3px;
 }
