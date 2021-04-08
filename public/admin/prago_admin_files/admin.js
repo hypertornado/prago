@@ -1,5 +1,3 @@
-function bindStats() {
-}
 class Autoresize {
     constructor(el) {
         this.el = el;
@@ -413,14 +411,8 @@ class ListFilterDate {
         this.hidden.dispatchEvent(event);
     }
 }
-function bindLists() {
-    var els = document.getElementsByClassName("admin_list");
-    for (var i = 0; i < els.length; i++) {
-        new List(els[i], document.querySelector(".admin_tablesettings_buttons"));
-    }
-}
 class List {
-    constructor(el, openbutton) {
+    constructor(el) {
         this.el = el;
         this.settings = new ListSettings(this);
         this.exportButton = document.querySelector(".admin_exportbutton");
@@ -2067,54 +2059,28 @@ class LoadingPopup extends Popup {
         this.remove();
     }
 }
-document.addEventListener("DOMContentLoaded", () => {
-    bindStats();
-    bindMarkdowns();
-    bindTimestamps();
-    bindRelations();
-    bindImagePickers();
-    bindLists();
-    bindForm();
-    bindImageViews();
-    bindFlashMessages();
-    bindScrolled();
-    bindDatePicker();
-    bindDropdowns();
-    bindSearch();
-    bindMainMenu();
-    bindRelationList();
-    bindTaskMonitor();
-    bindNotifications();
-    var content = document.createElement("div");
-    content.innerHTML = "<h2>hello world</h2><br><textarea rows='10'></textarea>";
-});
-function bindFlashMessages() {
-    var messages = document.querySelectorAll(".flash_message");
-    for (var i = 0; i < messages.length; i++) {
-        var message = messages[i];
-        message.addEventListener("click", (e) => {
-            var target = e.target;
-            if (target.classList.contains("flash_message_close")) {
-                var current = e.currentTarget;
-                current.classList.add("hidden");
-            }
-        });
+class Prago {
+    static start() {
+        document.addEventListener("DOMContentLoaded", Prago.init);
+    }
+    static init() {
+        var listEl = document.querySelector(".admin_list");
+        if (listEl) {
+            new List(listEl);
+        }
+        bindMarkdowns();
+        bindTimestamps();
+        bindRelations();
+        bindImagePickers();
+        bindForm();
+        bindImageViews();
+        bindDatePicker();
+        bindDropdowns();
+        bindSearch();
+        bindMainMenu();
+        bindRelationList();
+        bindTaskMonitor();
+        bindNotifications();
     }
 }
-function bindScrolled() {
-    var lastScrollPosition = 0;
-    var header = document.querySelector(".admin_header");
-    document.addEventListener("scroll", (event) => {
-        if (document.body.clientWidth < 1100) {
-            return;
-        }
-        var scrollPosition = window.scrollY;
-        if (scrollPosition > 0) {
-            header.classList.add("admin_header-scrolled");
-        }
-        else {
-            header.classList.remove("admin_header-scrolled");
-        }
-        lastScrollPosition = scrollPosition;
-    });
-}
+Prago.start();

@@ -5876,65 +5876,6 @@ th.admin_list_orderitem {
     opacity: 1;
   }
 }
-.flash_messages {
-  text-align: right;
-  position: fixed;
-  right: 0px;
-  z-index: 10;
-  pointer-events: none;
-  display: flex;
-  flex-direction: column;
-}
-@keyframes example {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-.flash_message {
-  pointer-events: auto;
-  color: #444;
-  display: inline-block;
-  margin: 5px 5px;
-  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
-  min-width: 200px;
-  animation-name: example;
-  animation-duration: 300ms;
-  animation-timing-function: ease-in;
-  background-color: #FFD800;
-  display: inline-flex;
-  align-items: center;
-  cursor: default;
-  -webkit-animation-timing-function: ease-in-out;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  -webkit-animation-iteration-count: infinite;
-  -webkit-animation-duration: 1s;
-  animation-duration: 1s;
-  -webkit-animation-fill-mode: both;
-  animation-fill-mode: both;
-  -webkit-animation-name: slideInRight;
-  animation-name: slideInRight;
-  animation-iteration-count: 1;
-}
-.flash_message_content {
-  border-radius: 3px;
-  padding: 5px 20px;
-  flex-grow: 2;
-}
-.flash_message_close {
-  flex-shrink: 0;
-  padding: 5px;
-  color: #4078c0;
-  opacity: 0.2;
-  cursor: pointer;
-}
-.flash_message:hover .flash_message_close {
-  opacity: 1;
-}
 .admin_images_loaded {
   display: inline-flex;
   flex-wrap: wrap;
@@ -6431,26 +6372,12 @@ td.admin_list_message {
   margin: 5px 0px;
 }
 .admin_nologin_logo {
-  border: 0px solid red;
   width: 100px;
   height: 100px;
   margin: 10px auto;
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat;
-  -webkit-animation-timing-function: ease-in-out;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  -webkit-animation-iteration-count: infinite;
-  -webkit-animation-duration: 1s;
-  animation-duration: 1s;
-  -webkit-animation-fill-mode: both;
-  animation-fill-mode: both;
-  -webkit-backface-visibility: visible !important;
-  backface-visibility: visible !important;
-  -webkit-animation-name: flipInX;
-  animation-name: flipInX;
-  animation-iteration-count: 1;
 }
 .admin_history th {
   border-top: none;
@@ -7522,7 +7449,6 @@ a.mainmenu_logo:hover {
   content: "×";
 }
 .popup_content {
-  border: 0px solid #ddd;
   border-top: none;
   border-left: none;
   border-right: none;

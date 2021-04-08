@@ -1,10 +1,3 @@
-function bindLists() {
-  var els = document.getElementsByClassName("admin_list");
-  for (var i = 0; i < els.length; i++) {
-    new List(<HTMLDivElement>els[i], <HTMLButtonElement>document.querySelector(".admin_tablesettings_buttons"));
-  }
-}
-
 class List {
   settings: ListSettings;
 
@@ -38,7 +31,7 @@ class List {
 
   multiple: ListMultiple;
 
-  constructor(el: HTMLDivElement, openbutton: HTMLButtonElement) {
+  constructor(el: HTMLDivElement) {
     this.el = el;
 
     this.settings = new ListSettings(this);
