@@ -1,7 +1,4 @@
-
-
 class ListSettings {
-
   list: List;
 
   settingsRow: HTMLTableRowElement;
@@ -16,7 +13,9 @@ class ListSettings {
     this.list = list;
 
     this.settingsRow = document.querySelector(".admin_list_settingsrow");
-    this.settingsRowColumn = document.querySelector(".admin_list_settingsrow_column");
+    this.settingsRowColumn = document.querySelector(
+      ".admin_list_settingsrow_column"
+    );
     this.settingsEl = document.querySelector(".admin_tablesettings");
 
     this.settingsPopup = new ContentPopup("Možnosti", this.settingsEl);
@@ -24,7 +23,6 @@ class ListSettings {
     this.settingsButton.addEventListener("click", () => {
       this.settingsPopup.show();
     });
-
   }
 
   settingsCheckboxChange() {
@@ -35,9 +33,10 @@ class ListSettings {
     }
   }
 
-
   bindOptions(visibleColumnsMap: any) {
-    var columns: NodeListOf<HTMLInputElement> = document.querySelectorAll(".admin_tablesettings_column");
+    var columns: NodeListOf<HTMLInputElement> = document.querySelectorAll(
+      ".admin_tablesettings_column"
+    );
     for (var i = 0; i < columns.length; i++) {
       let columnName = columns[i].getAttribute("data-column-name");
       if (visibleColumnsMap[columnName]) {
@@ -53,7 +52,9 @@ class ListSettings {
   changedOptions() {
     var columns: any = this.getSelectedColumnsMap();
 
-    var headers: NodeListOf<HTMLDivElement> = document.querySelectorAll(".admin_list_orderitem");
+    var headers: NodeListOf<HTMLDivElement> = document.querySelectorAll(
+      ".admin_list_orderitem"
+    );
     for (var i = 0; i < headers.length; i++) {
       var name = headers[i].getAttribute("data-name");
       if (columns[name]) {
@@ -63,7 +64,9 @@ class ListSettings {
       }
     }
 
-    var filters: NodeListOf<HTMLDivElement> = document.querySelectorAll(".admin_list_filteritem");
+    var filters: NodeListOf<HTMLDivElement> = document.querySelectorAll(
+      ".admin_list_filteritem"
+    );
     for (var i = 0; i < filters.length; i++) {
       var name = filters[i].getAttribute("data-name");
       if (columns[name]) {
@@ -73,14 +76,19 @@ class ListSettings {
       }
     }
 
-    this.settingsRowColumn.setAttribute("colspan", Object.keys(columns).length + "");
+    this.settingsRowColumn.setAttribute(
+      "colspan",
+      Object.keys(columns).length + ""
+    );
 
     this.list.load();
   }
 
   getSelectedColumnsStr(): string {
     var ret = [];
-    var checked: NodeListOf<HTMLInputElement> = document.querySelectorAll(".admin_tablesettings_column:checked");
+    var checked: NodeListOf<HTMLInputElement> = document.querySelectorAll(
+      ".admin_tablesettings_column:checked"
+    );
     for (var i = 0; i < checked.length; i++) {
       ret.push(checked[i].getAttribute("data-column-name"));
     }
@@ -89,11 +97,12 @@ class ListSettings {
 
   getSelectedColumnsMap(): any {
     var columns: any = {};
-    var checked: NodeListOf<HTMLInputElement> = document.querySelectorAll(".admin_tablesettings_column:checked");
+    var checked: NodeListOf<HTMLInputElement> = document.querySelectorAll(
+      ".admin_tablesettings_column:checked"
+    );
     for (var i = 0; i < checked.length; i++) {
       columns[checked[i].getAttribute("data-column-name")] = true;
     }
     return columns;
   }
-
 }

@@ -11,7 +11,9 @@ class Dropdown {
 
   constructor(el: HTMLDivElement) {
     this.targetEl = <HTMLDivElement>el.querySelector(".admin_dropdown_target");
-    this.contentEl = <HTMLDivElement>el.querySelector(".admin_dropdown_content");
+    this.contentEl = <HTMLDivElement>(
+      el.querySelector(".admin_dropdown_content")
+    );
 
     this.targetEl.addEventListener("mousedown", (e) => {
       if (document.activeElement == el) {
@@ -20,7 +22,5 @@ class Dropdown {
         return false;
       }
     });
-
   }
-
 }

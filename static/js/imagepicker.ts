@@ -17,9 +17,13 @@ class ImagePicker {
   constructor(el: HTMLDivElement) {
     this.el = el;
     this.adminPrefix = document.body.getAttribute("data-admin-prefix");
-    this.hiddenInput = <HTMLInputElement>el.querySelector(".admin_images_hidden");
+    this.hiddenInput = <HTMLInputElement>(
+      el.querySelector(".admin_images_hidden")
+    );
     this.preview = <HTMLDivElement>el.querySelector(".admin_images_preview");
-    this.fileInput = <HTMLInputElement>this.el.querySelector(".admin_images_fileinput input");
+    this.fileInput = <HTMLInputElement>(
+      this.el.querySelector(".admin_images_fileinput input")
+    );
     this.progress = <HTMLProgressElement>this.el.querySelector("progress");
 
     this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
@@ -31,10 +35,10 @@ class ImagePicker {
       if (e.altKey) {
         var ids = window.prompt("IDs of images", this.hiddenInput.value);
         this.hiddenInput.value = ids;
-        e.preventDefault()
+        e.preventDefault();
         return false;
       }
-    })
+    });
 
     this.fileInput.addEventListener("dragenter", (ev) => {
       this.fileInput.classList.add("admin_images_fileinput-droparea");
@@ -49,7 +53,7 @@ class ImagePicker {
     });
 
     this.fileInput.addEventListener("drop", (ev) => {
-      var text = ev.dataTransfer.getData('Text');
+      var text = ev.dataTransfer.getData("Text");
       return;
     });
 
@@ -61,7 +65,7 @@ class ImagePicker {
     }
 
     this.fileInput.addEventListener("change", (e) => {
-      var files = this.fileInput.files
+      var files = this.fileInput.files;
       var formData = new FormData();
       if (files.length == 0) {
         return;
@@ -89,7 +93,7 @@ class ImagePicker {
 
       this.showProgress();
       request.send(formData);
-    })
+    });
   }
 
   updateHiddenData() {
@@ -99,7 +103,7 @@ class ImagePicker {
       var uuid = item.getAttribute("data-uuid");
       ids.push(uuid);
     }
-    this.hiddenInput.value = ids.join(",")
+    this.hiddenInput.value = ids.join(",");
   }
 
   addImage(id: string) {
@@ -108,11 +112,21 @@ class ImagePicker {
     container.setAttribute("data-uuid", id);
     container.setAttribute("draggable", "true");
     container.setAttribute("target", "_blank");
-    container.setAttribute("href", this.adminPrefix + "/file/api/redirect-uuid/" + id);
-    container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/file/api/redirect-thumb/" + id + "');");
+    container.setAttribute(
+      "href",
+      this.adminPrefix + "/file/api/redirect-uuid/" + id
+    );
+    container.setAttribute(
+      "style",
+      "background-image: url('" +
+        this.adminPrefix +
+        "/file/api/redirect-thumb/" +
+        id +
+        "');"
+    );
 
     var descriptionEl = document.createElement("div");
-    descriptionEl.classList.add("admin_images_image_description")
+    descriptionEl.classList.add("admin_images_image_description");
     container.appendChild(descriptionEl);
 
     var request = new XMLHttpRequest();
@@ -121,11 +135,11 @@ class ImagePicker {
       if (request.status == 200) {
         var data = JSON.parse(request.response);
         descriptionEl.innerText = data["Name"];
-        container.setAttribute("title", data["Name"])
+        container.setAttribute("title", data["Name"]);
       } else {
         console.error("Error while loading file metadata.");
       }
-    })
+    });
     request.send();
 
     container.addEventListener("dragstart", (e) => {
@@ -168,7 +182,7 @@ class ImagePicker {
       }
 
       if (draggedIndex <= droppedIndex) {
-        droppedIndex += 1
+        droppedIndex += 1;
       }
 
       DOMinsertChildAtIndex(parent, this.draggedElement, droppedIndex);
@@ -191,7 +205,7 @@ class ImagePicker {
         e.preventDefault();
         return false;
       }
-    })
+    });
 
     /*var img = document.createElement("img");
     img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);

@@ -1,12 +1,11 @@
 function bindTimestamps() {
   var elements = document.querySelectorAll(".admin_timestamp");
-  Array.prototype.forEach.call(elements, function(el: HTMLElement, i: number){
+  Array.prototype.forEach.call(elements, function (el: HTMLElement, i: number) {
     new Timestamp(el);
   });
 }
 
 class Timestamp {
-
   elTsInput: HTMLInputElement;
   elTsDate: HTMLInputElement;
   elTsHour: HTMLInputElement;
@@ -14,9 +13,15 @@ class Timestamp {
 
   constructor(el: HTMLElement) {
     this.elTsInput = <HTMLInputElement>el.getElementsByTagName("input")[0];
-    this.elTsDate = <HTMLInputElement>el.getElementsByClassName("admin_timestamp_date")[0];
-    this.elTsHour = <HTMLInputElement>el.getElementsByClassName("admin_timestamp_hour")[0];
-    this.elTsMinute = <HTMLInputElement>el.getElementsByClassName("admin_timestamp_minute")[0];
+    this.elTsDate = <HTMLInputElement>(
+      el.getElementsByClassName("admin_timestamp_date")[0]
+    );
+    this.elTsHour = <HTMLInputElement>(
+      el.getElementsByClassName("admin_timestamp_hour")[0]
+    );
+    this.elTsMinute = <HTMLInputElement>(
+      el.getElementsByClassName("admin_timestamp_minute")[0]
+    );
 
     this.initClock();
 
@@ -50,7 +55,7 @@ class Timestamp {
 
   setTimestamp(v: string) {
     if (v == "") {
-      return
+      return;
     }
     var date = v.split(" ")[0];
     var hour = parseInt(v.split(" ")[1].split(":")[0]);
@@ -58,10 +63,14 @@ class Timestamp {
 
     this.elTsDate.value = date;
 
-    var minuteOption: HTMLOptionElement = <HTMLOptionElement>this.elTsMinute.children[minute];
+    var minuteOption: HTMLOptionElement = <HTMLOptionElement>(
+      this.elTsMinute.children[minute]
+    );
     minuteOption.selected = true;
 
-    var hourOption: HTMLOptionElement = <HTMLOptionElement>this.elTsHour.children[hour];
+    var hourOption: HTMLOptionElement = <HTMLOptionElement>(
+      this.elTsHour.children[hour]
+    );
     hourOption.selected = true;
   }
 
@@ -90,7 +99,12 @@ class Timestamp {
   }
 
   saveValue() {
-    var str = this.elTsDate.value + " " + this.elTsHour.value + ":" + this.elTsMinute.value;
+    var str =
+      this.elTsDate.value +
+      " " +
+      this.elTsHour.value +
+      ":" +
+      this.elTsMinute.value;
     if (this.elTsDate.value == "") {
       str = "";
     }

@@ -1,14 +1,13 @@
 function bindMarkdowns() {
   var elements = document.querySelectorAll(".admin_markdown");
-  Array.prototype.forEach.call(elements, function(el: HTMLElement, i: number){
+  Array.prototype.forEach.call(elements, function (el: HTMLElement, i: number) {
     new MarkdownEditor(el);
   });
 }
 
 class MarkdownEditor {
-
-  textarea: HTMLTextAreaElement
-  preview: HTMLDivElement
+  textarea: HTMLTextAreaElement;
+  preview: HTMLDivElement;
 
   lastChanged: any;
   changed: boolean;
@@ -23,19 +22,23 @@ class MarkdownEditor {
     new Autoresize(this.textarea);
 
     var prefix = document.body.getAttribute("data-admin-prefix");
-    var helpLink = <HTMLAnchorElement>el.querySelector(".admin_markdown_show_help");
+    var helpLink = <HTMLAnchorElement>(
+      el.querySelector(".admin_markdown_show_help")
+    );
     helpLink.setAttribute("href", prefix + "/markdown");
 
     this.lastChanged = Date.now();
     this.changed = false;
 
-    let showChange = <HTMLInputElement>el.querySelector(".admin_markdown_preview_show");
+    let showChange = <HTMLInputElement>(
+      el.querySelector(".admin_markdown_preview_show")
+    );
     showChange.addEventListener("change", () => {
       this.preview.classList.toggle("hidden");
-    })
+    });
 
     setInterval(() => {
-      if (this.changed && (Date.now() - this.lastChanged > 500)) {
+      if (this.changed && Date.now() - this.lastChanged > 500) {
         this.loadPreview();
       }
     }, 100);
@@ -55,7 +58,7 @@ class MarkdownEditor {
         this.executeCommand(cmd);
         e.preventDefault();
         return false;
-      })
+      });
     }
   }
 
@@ -78,7 +81,7 @@ class MarkdownEditor {
           this.executeCommand("a");
           break;
       }
-    })
+    });
   }
 
   executeCommand(commandName: string) {
@@ -104,7 +107,7 @@ class MarkdownEditor {
           start = "\n" + start;
         }
         if (text[this.textarea.selectionEnd] !== "\n") {
-          end = "\n"
+          end = "\n";
         }
         this.setAroundMarkdown(start, end);
         break;
@@ -114,8 +117,10 @@ class MarkdownEditor {
 
   setAroundMarkdown(before: string, after: string) {
     var text = this.textarea.value;
-    var selected = text.substr(this.textarea.selectionStart,
-        this.textarea.selectionEnd - this.textarea.selectionStart);
+    var selected = text.substr(
+      this.textarea.selectionStart,
+      this.textarea.selectionEnd - this.textarea.selectionStart
+    );
     var newText = text.substr(0, this.textarea.selectionStart);
     newText += before;
     var newStart = newText.length;
@@ -132,13 +137,17 @@ class MarkdownEditor {
 
   textareaChanged() {
     this.changed = true;
-    this.lastChanged = Date.now(); 
+    this.lastChanged = Date.now();
   }
 
   loadPreview() {
     this.changed = false;
     var request = new XMLHttpRequest();
-    request.open("POST", document.body.getAttribute("data-admin-prefix") + "/api/markdown", true);
+    request.open(
+      "POST",
+      document.body.getAttribute("data-admin-prefix") + "/api/markdown",
+      true
+    );
 
     request.addEventListener("load", () => {
       if (request.status == 200) {

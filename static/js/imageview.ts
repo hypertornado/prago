@@ -28,16 +28,28 @@ class ImageView {
   addImage(id: string) {
     var container = document.createElement("a");
     container.classList.add("admin_images_image");
-    container.setAttribute("href", this.adminPrefix + "/file/api/redirect-uuid/" + id);
-    container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/file/api/redirect-thumb/" + id + "');");
+    container.setAttribute(
+      "href",
+      this.adminPrefix + "/file/api/redirect-uuid/" + id
+    );
+    container.setAttribute(
+      "style",
+      "background-image: url('" +
+        this.adminPrefix +
+        "/file/api/redirect-thumb/" +
+        id +
+        "');"
+    );
 
     var img = document.createElement("div");
-    img.setAttribute("src", this.adminPrefix + "/file/api/redirect-thumb/" + id);
+    img.setAttribute(
+      "src",
+      this.adminPrefix + "/file/api/redirect-thumb/" + id
+    );
     img.setAttribute("draggable", "false");
 
-
     var descriptionEl = document.createElement("div");
-    descriptionEl.classList.add("admin_images_image_description")
+    descriptionEl.classList.add("admin_images_image_description");
     container.appendChild(descriptionEl);
 
     var request = new XMLHttpRequest();
@@ -46,14 +58,13 @@ class ImageView {
       if (request.status == 200) {
         var data = JSON.parse(request.response);
         descriptionEl.innerText = data["Name"];
-        container.setAttribute("title", data["Name"])
+        container.setAttribute("title", data["Name"]);
       } else {
         console.error("Error while loading file metadata.");
       }
-    })
+    });
     request.send();
 
     this.el.appendChild(container);
   }
-
 }

@@ -1,19 +1,18 @@
 function bindRelations() {
   var elements = document.querySelectorAll(".admin_item_relation");
-  Array.prototype.forEach.call(elements, function(el: HTMLElement, i: number){
+  Array.prototype.forEach.call(elements, function (el: HTMLElement, i: number) {
     new RelationPicker(<HTMLDivElement>el);
   });
 }
 
 class RelationPicker {
-
   input: HTMLInputElement;
   previewContainer: HTMLDivElement;
   progress: HTMLProgressElement;
 
   changeSection: HTMLDivElement;
   changeButton: HTMLDivElement;
-  
+
   picker: HTMLDivElement;
   pickerInput: HTMLInputElement;
 
@@ -22,25 +21,35 @@ class RelationPicker {
   suggestions: any;
 
   relationName: string;
-  
+
   constructor(el: HTMLDivElement) {
     this.input = <HTMLInputElement>el.getElementsByTagName("input")[0];
-    this.previewContainer = <HTMLDivElement>el.querySelector(".admin_item_relation_preview");
+    this.previewContainer = <HTMLDivElement>(
+      el.querySelector(".admin_item_relation_preview")
+    );
     this.relationName = el.getAttribute("data-relation");
     this.progress = el.querySelector("progress");
 
-    this.changeSection = <HTMLDivElement>el.querySelector(".admin_item_relation_change");
-    this.changeButton = <HTMLDivElement>el.querySelector(".admin_item_relation_change_btn");
+    this.changeSection = <HTMLDivElement>(
+      el.querySelector(".admin_item_relation_change")
+    );
+    this.changeButton = <HTMLDivElement>(
+      el.querySelector(".admin_item_relation_change_btn")
+    );
     this.changeButton.addEventListener("click", () => {
       this.input.value = "0";
       this.showSearch();
       this.pickerInput.focus();
     });
 
-    this.suggestionsEl = <HTMLDivElement>el.querySelector(".admin_item_relation_picker_suggestions_content");
+    this.suggestionsEl = <HTMLDivElement>(
+      el.querySelector(".admin_item_relation_picker_suggestions_content")
+    );
     this.suggestions = [];
-    
-    this.picker = <HTMLDivElement>el.querySelector(".admin_item_relation_picker");
+
+    this.picker = <HTMLDivElement>(
+      el.querySelector(".admin_item_relation_picker")
+    );
     this.pickerInput = this.picker.querySelector("input");
     this.pickerInput.addEventListener("input", () => {
       this.getSuggestions(this.pickerInput.value);
@@ -52,7 +61,10 @@ class RelationPicker {
       this.suggestionsEl.classList.remove("hidden");
       this.getSuggestions(this.pickerInput.value);
     });
-    this.pickerInput.addEventListener("keydown", this.suggestionInput.bind(this));
+    this.pickerInput.addEventListener(
+      "keydown",
+      this.suggestionInput.bind(this)
+    );
 
     if (this.input.value != "0") {
       this.getData();
@@ -66,7 +78,15 @@ class RelationPicker {
     var adminPrefix = document.body.getAttribute("data-admin-prefix");
     var request = new XMLHttpRequest();
 
-    request.open("GET", adminPrefix + "/" + this.relationName + "/api/preview-relation/" + this.input.value, true);
+    request.open(
+      "GET",
+      adminPrefix +
+        "/" +
+        this.relationName +
+        "/api/preview-relation/" +
+        this.input.value,
+      true
+    );
 
     request.addEventListener("load", () => {
       this.progress.classList.add("hidden");
@@ -75,7 +95,7 @@ class RelationPicker {
       } else {
         this.showSearch();
       }
-    })
+    });
     request.send();
   }
 
@@ -103,7 +123,16 @@ class RelationPicker {
   getSuggestions(q: string) {
     var adminPrefix = document.body.getAttribute("data-admin-prefix");
     var request = new XMLHttpRequest();
-    request.open("GET", adminPrefix + "/" + this.relationName + "/api/searchresource" + "?q=" + encodeURIComponent(q), true);
+    request.open(
+      "GET",
+      adminPrefix +
+        "/" +
+        this.relationName +
+        "/api/searchresource" +
+        "?q=" +
+        encodeURIComponent(q),
+      true
+    );
     request.addEventListener("load", () => {
       if (request.status == 200) {
         if (q != this.pickerInput.value) {
@@ -115,7 +144,7 @@ class RelationPicker {
         for (var i = 0; i < data.length; i++) {
           var item = data[i];
           var el = this.createPreview(item, false);
-          el.classList.add("admin_item_relation_picker_suggestion")
+          el.classList.add("admin_item_relation_picker_suggestion");
           el.setAttribute("data-position", i + "");
           el.addEventListener("mousedown", this.suggestionClick.bind(this));
           el.addEventListener("mouseenter", this.suggestionSelect.bind(this));
@@ -124,7 +153,7 @@ class RelationPicker {
       } else {
         console.log("Error while searching");
       }
-    })
+    });
     request.send();
   }
 
@@ -162,14 +191,15 @@ class RelationPicker {
 
   select(i: number) {
     this.unselect();
-    this.suggestionsEl.querySelectorAll(".admin_preview")[i].classList.add(this.selectedClass);
+    this.suggestionsEl
+      .querySelectorAll(".admin_preview")
+      [i].classList.add(this.selectedClass);
   }
-
 
   suggestionInput(e: any) {
     switch (e.keyCode) {
       case 13: //enter
-        this.suggestionClick()
+        this.suggestionClick();
         e.preventDefault();
         return true;
       case 38: //up
@@ -185,12 +215,12 @@ class RelationPicker {
       case 40: //down
         var i = this.getSelected();
         if (i >= 0) {
-          i += 1
+          i += 1;
           i = i % this.suggestions.length;
         } else {
           i = 0;
         }
-        this.select(i)
+        this.select(i);
         e.preventDefault();
         return false;
     }
@@ -219,13 +249,10 @@ class RelationPicker {
     description.classList.add("admin_preview_description");
     description.textContent = data.Description;
 
-
     ret.appendChild(image);
     right.appendChild(name);
     right.appendChild(description);
     ret.appendChild(right);
     return ret;
   }
-
 }
-

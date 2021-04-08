@@ -2,17 +2,14 @@ class Prago {
   private static x: number;
 
   static start() {
-    document.addEventListener("DOMContentLoaded", Prago.init)
-
+    document.addEventListener("DOMContentLoaded", Prago.init);
   }
 
   private static init() {
-
     var listEl = document.querySelector<HTMLDivElement>(".admin_list");
     if (listEl) {
       new List(listEl);
     }
-
 
     bindMarkdowns();
     bindTimestamps();
@@ -45,6 +42,5 @@ class Prago {
 
     //var loader = new LoadingPopup();
   }
-
 }
 Prago.start();

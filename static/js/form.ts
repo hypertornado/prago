@@ -11,7 +11,7 @@ class Form {
   constructor(el: HTMLFormElement) {
     el.addEventListener("submit", () => {
       this.dirty = false;
-    })
+    });
 
     let els = el.querySelectorAll(".form_watcher");
     for (var i = 0; i < els.length; i++) {

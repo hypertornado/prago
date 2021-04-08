@@ -1,6 +1,6 @@
 class ListFilterRelations {
   valueInput: HTMLInputElement;
-  input: HTMLInputElement
+  input: HTMLInputElement;
   preview: HTMLDivElement;
   previewName: HTMLDivElement;
   previewClose: HTMLDivElement;
@@ -21,12 +21,13 @@ class ListFilterRelations {
 
     this.previewClose.addEventListener("click", this.closePreview.bind(this));
 
-
     this.preview.classList.add("hidden");
 
     let hiddenEl: HTMLInputElement = el.querySelector("input");
 
-    this.relatedResourceName = el.querySelector(".admin_table_filter_item-relations").getAttribute("data-related-resource");
+    this.relatedResourceName = el
+      .querySelector(".admin_table_filter_item-relations")
+      .getAttribute("data-related-resource");
 
     this.input.addEventListener("input", () => {
       this.dirty = true;
@@ -40,17 +41,23 @@ class ListFilterRelations {
       }
     }, 30);
 
-
     if (this.valueInput.value) {
       this.loadPreview(this.valueInput.value);
     }
-    
   }
 
   loadPreview(value: string) {
     var request = new XMLHttpRequest();
     var adminPrefix = document.body.getAttribute("data-admin-prefix");
-    request.open("GET", adminPrefix + "/" + this.relatedResourceName + "/api/preview-relation/" + value, true);
+    request.open(
+      "GET",
+      adminPrefix +
+        "/" +
+        this.relatedResourceName +
+        "/api/preview-relation/" +
+        value,
+      true
+    );
 
     request.addEventListener("load", () => {
       if (request.status == 200) {
@@ -58,7 +65,7 @@ class ListFilterRelations {
       } else {
         console.error("not found");
       }
-    })
+    });
     request.send();
   }
 
@@ -71,7 +78,7 @@ class ListFilterRelations {
   }
 
   dispatchChange() {
-    var event = new Event('change');
+    var event = new Event("change");
     this.valueInput.dispatchEvent(event);
   }
 
@@ -94,7 +101,16 @@ class ListFilterRelations {
   getSuggestions(q: string) {
     var request = new XMLHttpRequest();
     var adminPrefix = document.body.getAttribute("data-admin-prefix");
-    request.open("GET", adminPrefix + "/" + this.relatedResourceName + "/api/searchresource" + "?q=" + encodeURIComponent(q), true);
+    request.open(
+      "GET",
+      adminPrefix +
+        "/" +
+        this.relatedResourceName +
+        "/api/searchresource" +
+        "?q=" +
+        encodeURIComponent(q),
+      true
+    );
 
     request.addEventListener("load", () => {
       if (request.status == 200) {
@@ -102,7 +118,7 @@ class ListFilterRelations {
       } else {
         console.error("not found");
       }
-    })
+    });
     request.send();
   }
 
@@ -123,7 +139,7 @@ class ListFilterRelations {
 
   renderSuggestion(data: any): HTMLDivElement {
     var ret = document.createElement("div");
-    
+
     ret.classList.add("list_filter_suggestion");
     ret.setAttribute("href", data.URL);
 
@@ -142,12 +158,10 @@ class ListFilterRelations {
     description.classList.add("list_filter_suggestion_description");
     description.textContent = data.Description;
 
-
     ret.appendChild(image);
     right.appendChild(name);
     right.appendChild(description);
     ret.appendChild(right);
     return ret;
   }
-
 }

@@ -15,8 +15,12 @@ class SearchForm {
 
   constructor(el: HTMLFormElement) {
     this.searchForm = el;
-    this.searchInput = <HTMLInputElement>el.querySelector(".admin_header_search_input");
-    this.suggestionsEl = <HTMLDivElement>el.querySelector(".admin_header_search_suggestions");
+    this.searchInput = <HTMLInputElement>(
+      el.querySelector(".admin_header_search_input")
+    );
+    this.suggestionsEl = <HTMLDivElement>(
+      el.querySelector(".admin_header_search_suggestions")
+    );
 
     this.searchInput.value = document.body.getAttribute("data-search-query");
 
@@ -66,16 +70,16 @@ class SearchForm {
         case 40: //down
           var i = this.getSelected();
           if (i >= 0) {
-            i += 1
+            i += 1;
             i = i % this.suggestions.length;
           } else {
             i = 0;
           }
-          this.setSelected(i)
+          this.setSelected(i);
           e.preventDefault();
           return false;
       }
-    })
+    });
   }
 
   loadSuggestions() {
@@ -85,7 +89,10 @@ class SearchForm {
 
     var adminPrefix = document.body.getAttribute("data-admin-prefix");
 
-    var url = adminPrefix + "/api/search-suggest" + encodeParams({"q": this.searchInput.value});
+    var url =
+      adminPrefix +
+      "/api/search-suggest" +
+      encodeParams({ q: this.searchInput.value });
     request.open("GET", url);
     request.addEventListener("load", () => {
       if (suggestText != this.searchInput.value) {
@@ -98,15 +105,17 @@ class SearchForm {
         //this.dismissSuggestions();
         console.error("Error while loading item.");
       }
-    })
+    });
     request.send();
   }
 
   addSuggestions(content: any) {
     this.suggestionsEl.innerHTML = content;
     this.suggestionsEl.classList.remove("hidden");
-    
-    this.suggestions = this.suggestionsEl.querySelectorAll(".admin_search_suggestion");
+
+    this.suggestions = this.suggestionsEl.querySelectorAll(
+      ".admin_search_suggestion"
+    );
     /*
     if (this.suggestions.length > 0) {
       this.searchForm.classList.add("head_search-suggestion");
@@ -128,19 +137,23 @@ class SearchForm {
         this.deselect();
         var el = <HTMLDivElement>e.currentTarget;
         this.setSelected(parseInt(el.getAttribute("data-position")));
-      })
+      });
     }
   }
 
   deselect() {
-    var el = this.suggestionsEl.querySelector(".admin_search_suggestion-selected");
+    var el = this.suggestionsEl.querySelector(
+      ".admin_search_suggestion-selected"
+    );
     if (el) {
       el.classList.remove("admin_search_suggestion-selected");
     }
   }
 
   getSelected(): number {
-    var el = this.suggestionsEl.querySelector(".admin_search_suggestion-selected");
+    var el = this.suggestionsEl.querySelector(
+      ".admin_search_suggestion-selected"
+    );
     if (el) {
       return parseInt(el.getAttribute("data-position"));
     }
@@ -150,9 +163,8 @@ class SearchForm {
   setSelected(position: number) {
     this.deselect();
     if (position >= 0) {
-       var els = this.suggestionsEl.querySelectorAll(".admin_search_suggestion");
-       els[position].classList.add("admin_search_suggestion-selected");
+      var els = this.suggestionsEl.querySelectorAll(".admin_search_suggestion");
+      els[position].classList.add("admin_search_suggestion-selected");
     }
   }
-
 }

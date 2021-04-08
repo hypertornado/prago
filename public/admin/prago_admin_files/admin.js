@@ -1,12 +1,12 @@
 class Autoresize {
     constructor(el) {
         this.el = el;
-        this.el.addEventListener('input', this.resizeIt.bind(this));
+        this.el.addEventListener("input", this.resizeIt.bind(this));
         this.resizeIt();
     }
     resizeIt() {
         var height = this.el.scrollHeight + 2;
-        this.el.style.height = height + 'px';
+        this.el.style.height = height + "px";
     }
 }
 function DOMinsertChildAtIndex(parent, child, index) {
@@ -40,7 +40,7 @@ function escapeHTML(str) {
     str = str.split("&").join("&amp;");
     str = str.split("<").join("&lt;");
     str = str.split(">").join("&gt;");
-    str = str.split("\"").join("&quot;");
+    str = str.split('"').join("&quot;");
     str = str.split("'").join("&#39;");
     return str;
 }
@@ -69,7 +69,11 @@ class ImageView {
         var container = document.createElement("a");
         container.classList.add("admin_images_image");
         container.setAttribute("href", this.adminPrefix + "/file/api/redirect-uuid/" + id);
-        container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/file/api/redirect-thumb/" + id + "');");
+        container.setAttribute("style", "background-image: url('" +
+            this.adminPrefix +
+            "/file/api/redirect-thumb/" +
+            id +
+            "');");
         var img = document.createElement("div");
         img.setAttribute("src", this.adminPrefix + "/file/api/redirect-thumb/" + id);
         img.setAttribute("draggable", "false");
@@ -102,9 +106,9 @@ class ImagePicker {
     constructor(el) {
         this.el = el;
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
-        this.hiddenInput = el.querySelector(".admin_images_hidden");
+        this.hiddenInput = (el.querySelector(".admin_images_hidden"));
         this.preview = el.querySelector(".admin_images_preview");
-        this.fileInput = this.el.querySelector(".admin_images_fileinput input");
+        this.fileInput = (this.el.querySelector(".admin_images_fileinput input"));
         this.progress = this.el.querySelector("progress");
         this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
         this.hideProgress();
@@ -127,7 +131,7 @@ class ImagePicker {
             ev.preventDefault();
         });
         this.fileInput.addEventListener("drop", (ev) => {
-            var text = ev.dataTransfer.getData('Text');
+            var text = ev.dataTransfer.getData("Text");
             return;
         });
         for (var i = 0; i < ids.length; i++) {
@@ -180,7 +184,11 @@ class ImagePicker {
         container.setAttribute("draggable", "true");
         container.setAttribute("target", "_blank");
         container.setAttribute("href", this.adminPrefix + "/file/api/redirect-uuid/" + id);
-        container.setAttribute("style", "background-image: url('" + this.adminPrefix + "/file/api/redirect-thumb/" + id + "');");
+        container.setAttribute("style", "background-image: url('" +
+            this.adminPrefix +
+            "/file/api/redirect-thumb/" +
+            id +
+            "');");
         var descriptionEl = document.createElement("div");
         descriptionEl.classList.add("admin_images_image_description");
         container.appendChild(descriptionEl);
@@ -275,7 +283,9 @@ class ListFilterRelations {
         this.previewClose.addEventListener("click", this.closePreview.bind(this));
         this.preview.classList.add("hidden");
         let hiddenEl = el.querySelector("input");
-        this.relatedResourceName = el.querySelector(".admin_table_filter_item-relations").getAttribute("data-related-resource");
+        this.relatedResourceName = el
+            .querySelector(".admin_table_filter_item-relations")
+            .getAttribute("data-related-resource");
         this.input.addEventListener("input", () => {
             this.dirty = true;
             this.lastChanged = Date.now();
@@ -293,7 +303,11 @@ class ListFilterRelations {
     loadPreview(value) {
         var request = new XMLHttpRequest();
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        request.open("GET", adminPrefix + "/" + this.relatedResourceName + "/api/preview-relation/" + value, true);
+        request.open("GET", adminPrefix +
+            "/" +
+            this.relatedResourceName +
+            "/api/preview-relation/" +
+            value, true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
                 this.renderPreview(JSON.parse(request.response));
@@ -312,7 +326,7 @@ class ListFilterRelations {
         this.dispatchChange();
     }
     dispatchChange() {
-        var event = new Event('change');
+        var event = new Event("change");
         this.valueInput.dispatchEvent(event);
     }
     closePreview() {
@@ -332,7 +346,12 @@ class ListFilterRelations {
     getSuggestions(q) {
         var request = new XMLHttpRequest();
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        request.open("GET", adminPrefix + "/" + this.relatedResourceName + "/api/searchresource" + "?q=" + encodeURIComponent(q), true);
+        request.open("GET", adminPrefix +
+            "/" +
+            this.relatedResourceName +
+            "/api/searchresource" +
+            "?q=" +
+            encodeURIComponent(q), true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
                 this.renderSuggestions(JSON.parse(request.response));
@@ -381,9 +400,9 @@ class ListFilterRelations {
 }
 class ListFilterDate {
     constructor(el, value) {
-        this.hidden = el.querySelector(".admin_table_filter_item");
-        this.from = el.querySelector(".admin_filter_layout_date_from");
-        this.to = el.querySelector(".admin_filter_layout_date_to");
+        this.hidden = (el.querySelector(".admin_table_filter_item"));
+        this.from = (el.querySelector(".admin_filter_layout_date_from"));
+        this.to = (el.querySelector(".admin_filter_layout_date_to"));
         this.from.addEventListener("input", this.changed.bind(this));
         this.from.addEventListener("change", this.changed.bind(this));
         this.to.addEventListener("input", this.changed.bind(this));
@@ -407,7 +426,7 @@ class ListFilterDate {
             val = this.from.value + "," + this.to.value;
         }
         this.hidden.value = val;
-        var event = new Event('change');
+        var event = new Event("change");
         this.hidden.dispatchEvent(event);
     }
 }
@@ -425,7 +444,7 @@ class List {
         if (!this.typeName) {
             return;
         }
-        this.progress = el.querySelector(".admin_table_progress");
+        this.progress = (el.querySelector(".admin_table_progress"));
         this.tbody = el.querySelector("tbody");
         this.tbody.textContent = "";
         this.bindFilter(urlParams);
@@ -459,7 +478,7 @@ class List {
             visibleColumnsMap[visibleColumnsArr[i]] = true;
         }
         this.itemsPerPage = parseInt(el.getAttribute("data-items-per-page"));
-        this.paginationSelect = document.querySelector(".admin_tablesettings_pages");
+        this.paginationSelect = (document.querySelector(".admin_tablesettings_pages"));
         this.paginationSelect.addEventListener("change", this.load.bind(this));
         this.statsCheckbox = document.querySelector(".admin_tablesettings_stats");
         this.statsCheckbox.addEventListener("change", () => {
@@ -508,7 +527,11 @@ class List {
         }
         params["_format"] = "xlsx";
         if (this.exportButton) {
-            this.exportButton.setAttribute("href", this.adminPrefix + "/" + this.typeName + "/api/list" + encodeParams(params));
+            this.exportButton.setAttribute("href", this.adminPrefix +
+                "/" +
+                this.typeName +
+                "/api/list" +
+                encodeParams(params));
         }
         params["_format"] = "json";
         encoded = encodeParams(params);
@@ -593,7 +616,7 @@ class List {
                 var el = e.currentTarget;
                 var url = el.getAttribute("data-url");
                 if (e.shiftKey || e.metaKey || e.ctrlKey) {
-                    var openedWindow = window.open(url, "newwindow" + (new Date()));
+                    var openedWindow = window.open(url, "newwindow" + new Date());
                     openedWindow.focus();
                     return;
                 }
@@ -707,7 +730,10 @@ class List {
         this.inputPeriodicListener();
     }
     inputListener(e) {
-        if (e.keyCode == 9 || e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
+        if (e.keyCode == 9 ||
+            e.keyCode == 16 ||
+            e.keyCode == 17 ||
+            e.keyCode == 18) {
             return;
         }
         this.filterChanged();
@@ -843,7 +869,11 @@ class ListMultiple {
                     var params = {};
                     params["action"] = "delete";
                     params["ids"] = ids.join(",");
-                    var url = this.list.adminPrefix + "/" + this.list.typeName + "/api/multipleaction" + encodeParams(params);
+                    var url = this.list.adminPrefix +
+                        "/" +
+                        this.list.typeName +
+                        "/api/multipleaction" +
+                        encodeParams(params);
                     fetch(url, {
                         method: "POST",
                     }).then((e) => {
@@ -915,7 +945,7 @@ function bindOrder() {
             row.addEventListener("dragstart", function (ev) {
                 row.classList.add("admin_table_row-selected");
                 draggedElement = this;
-                ev.dataTransfer.setData('text/plain', '');
+                ev.dataTransfer.setData("text/plain", "");
                 ev.dataTransfer.effectAllowed = "move";
                 var d = document.createElement("div");
                 d.style.display = "none";
@@ -952,7 +982,9 @@ function bindOrder() {
         }
         function saveOrder() {
             var adminPrefix = document.body.getAttribute("data-admin-prefix");
-            var typ = document.querySelector(".admin_list-order").getAttribute("data-type");
+            var typ = document
+                .querySelector(".admin_list-order")
+                .getAttribute("data-type");
             var ajaxPath = adminPrefix + "/" + typ + "/api/set-order";
             var order = [];
             var rows = el.getElementsByClassName("admin_table_row");
@@ -966,7 +998,7 @@ function bindOrder() {
                     console.error("Error while saving order.");
                 }
             });
-            request.send(JSON.stringify({ "order": order }));
+            request.send(JSON.stringify({ order: order }));
         }
     }
     var elements = document.querySelectorAll(".admin_list-order");
@@ -987,16 +1019,16 @@ class MarkdownEditor {
         this.preview = el.querySelector(".admin_markdown_preview");
         new Autoresize(this.textarea);
         var prefix = document.body.getAttribute("data-admin-prefix");
-        var helpLink = el.querySelector(".admin_markdown_show_help");
+        var helpLink = (el.querySelector(".admin_markdown_show_help"));
         helpLink.setAttribute("href", prefix + "/markdown");
         this.lastChanged = Date.now();
         this.changed = false;
-        let showChange = el.querySelector(".admin_markdown_preview_show");
+        let showChange = (el.querySelector(".admin_markdown_preview_show"));
         showChange.addEventListener("change", () => {
             this.preview.classList.toggle("hidden");
         });
         setInterval(() => {
-            if (this.changed && (Date.now() - this.lastChanged > 500)) {
+            if (this.changed && Date.now() - this.lastChanged > 500) {
                 this.loadPreview();
             }
         }, 100);
@@ -1110,9 +1142,9 @@ function bindTimestamps() {
 class Timestamp {
     constructor(el) {
         this.elTsInput = el.getElementsByTagName("input")[0];
-        this.elTsDate = el.getElementsByClassName("admin_timestamp_date")[0];
-        this.elTsHour = el.getElementsByClassName("admin_timestamp_hour")[0];
-        this.elTsMinute = el.getElementsByClassName("admin_timestamp_minute")[0];
+        this.elTsDate = (el.getElementsByClassName("admin_timestamp_date")[0]);
+        this.elTsHour = (el.getElementsByClassName("admin_timestamp_hour")[0]);
+        this.elTsMinute = (el.getElementsByClassName("admin_timestamp_minute")[0]);
         this.initClock();
         var v = this.elTsInput.value;
         this.setTimestamp(v);
@@ -1129,9 +1161,9 @@ class Timestamp {
         var hour = parseInt(v.split(" ")[1].split(":")[0]);
         var minute = parseInt(v.split(" ")[1].split(":")[1]);
         this.elTsDate.value = date;
-        var minuteOption = this.elTsMinute.children[minute];
+        var minuteOption = (this.elTsMinute.children[minute]);
         minuteOption.selected = true;
-        var hourOption = this.elTsHour.children[hour];
+        var hourOption = (this.elTsHour.children[hour]);
         hourOption.selected = true;
     }
     initClock() {
@@ -1157,7 +1189,11 @@ class Timestamp {
         }
     }
     saveValue() {
-        var str = this.elTsDate.value + " " + this.elTsHour.value + ":" + this.elTsMinute.value;
+        var str = this.elTsDate.value +
+            " " +
+            this.elTsHour.value +
+            ":" +
+            this.elTsMinute.value;
         if (this.elTsDate.value == "") {
             str = "";
         }
@@ -1174,19 +1210,19 @@ class RelationPicker {
     constructor(el) {
         this.selectedClass = "admin_item_relation_picker_suggestion-selected";
         this.input = el.getElementsByTagName("input")[0];
-        this.previewContainer = el.querySelector(".admin_item_relation_preview");
+        this.previewContainer = (el.querySelector(".admin_item_relation_preview"));
         this.relationName = el.getAttribute("data-relation");
         this.progress = el.querySelector("progress");
-        this.changeSection = el.querySelector(".admin_item_relation_change");
-        this.changeButton = el.querySelector(".admin_item_relation_change_btn");
+        this.changeSection = (el.querySelector(".admin_item_relation_change"));
+        this.changeButton = (el.querySelector(".admin_item_relation_change_btn"));
         this.changeButton.addEventListener("click", () => {
             this.input.value = "0";
             this.showSearch();
             this.pickerInput.focus();
         });
-        this.suggestionsEl = el.querySelector(".admin_item_relation_picker_suggestions_content");
+        this.suggestionsEl = (el.querySelector(".admin_item_relation_picker_suggestions_content"));
         this.suggestions = [];
-        this.picker = el.querySelector(".admin_item_relation_picker");
+        this.picker = (el.querySelector(".admin_item_relation_picker"));
         this.pickerInput = this.picker.querySelector("input");
         this.pickerInput.addEventListener("input", () => {
             this.getSuggestions(this.pickerInput.value);
@@ -1210,7 +1246,11 @@ class RelationPicker {
     getData() {
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
         var request = new XMLHttpRequest();
-        request.open("GET", adminPrefix + "/" + this.relationName + "/api/preview-relation/" + this.input.value, true);
+        request.open("GET", adminPrefix +
+            "/" +
+            this.relationName +
+            "/api/preview-relation/" +
+            this.input.value, true);
         request.addEventListener("load", () => {
             this.progress.classList.add("hidden");
             if (request.status == 200) {
@@ -1242,7 +1282,12 @@ class RelationPicker {
     getSuggestions(q) {
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
         var request = new XMLHttpRequest();
-        request.open("GET", adminPrefix + "/" + this.relationName + "/api/searchresource" + "?q=" + encodeURIComponent(q), true);
+        request.open("GET", adminPrefix +
+            "/" +
+            this.relationName +
+            "/api/searchresource" +
+            "?q=" +
+            encodeURIComponent(q), true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
                 if (q != this.pickerInput.value) {
@@ -1295,7 +1340,8 @@ class RelationPicker {
     }
     select(i) {
         this.unselect();
-        this.suggestionsEl.querySelectorAll(".admin_preview")[i].classList.add(this.selectedClass);
+        this.suggestionsEl
+            .querySelectorAll(".admin_preview")[i].classList.add(this.selectedClass);
     }
     suggestionInput(e) {
         switch (e.keyCode) {
@@ -1372,11 +1418,11 @@ class PlacesView {
         var zoom = 18;
         var map = new google.maps.Map(el, {
             center: position,
-            zoom: zoom
+            zoom: zoom,
         });
         var marker = new google.maps.Marker({
             position: position,
-            map: map
+            map: map,
         });
     }
 }
@@ -1404,24 +1450,27 @@ function bindPlaces() {
         }
         var map = new google.maps.Map(mapEl, {
             center: position,
-            zoom: zoom
+            zoom: zoom,
         });
         var marker = new google.maps.Marker({
             position: position,
             map: map,
             draggable: true,
             title: "",
-            visible: visible
+            visible: visible,
         });
         var searchInput = document.createElement("input");
         searchInput.classList.add("input", "input-placesearch");
         var searchBox = new google.maps.places.SearchBox(searchInput);
         map.controls[google.maps.ControlPosition.LEFT_TOP].push(searchInput);
-        searchBox.addListener('places_changed', () => {
+        searchBox.addListener("places_changed", () => {
             var places = searchBox.getPlaces();
             if (places.length > 0) {
                 map.fitBounds(places[0].geometry.viewport);
-                marker.setPosition({ lat: places[0].geometry.location.lat(), lng: places[0].geometry.location.lng() });
+                marker.setPosition({
+                    lat: places[0].geometry.location.lat(),
+                    lng: places[0].geometry.location.lng(),
+                });
                 marker.setVisible(true);
             }
         });
@@ -1440,7 +1489,7 @@ function bindPlaces() {
             marker.setVisible(false);
             input.value = "";
         });
-        map.addListener('click', function (e) {
+        map.addListener("click", function (e) {
             position.lat = e.latLng.lat();
             position.lng = e.latLng.lng();
             marker.setPosition(position);
@@ -1497,37 +1546,121 @@ class DatePicker {
     constructor(el) {
         var language = "cs";
         var i18n = {
-            previousMonth: 'Previous Month',
-            nextMonth: 'Next Month',
-            months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-            weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-            weekdaysShort: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+            previousMonth: "Previous Month",
+            nextMonth: "Next Month",
+            months: [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December",
+            ],
+            weekdays: [
+                "Sunday",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+            ],
+            weekdaysShort: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
         };
         if (language == "de") {
             i18n = {
-                previousMonth: 'Vorheriger Monat',
-                nextMonth: 'Nächsten Monat',
-                months: ["Januar", "Februar", "März", "April", "Kann", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
-                weekdays: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
-                weekdaysShort: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
+                previousMonth: "Vorheriger Monat",
+                nextMonth: "Nächsten Monat",
+                months: [
+                    "Januar",
+                    "Februar",
+                    "März",
+                    "April",
+                    "Kann",
+                    "Juni",
+                    "Juli",
+                    "August",
+                    "September",
+                    "Oktober",
+                    "November",
+                    "Dezember",
+                ],
+                weekdays: [
+                    "Sonntag",
+                    "Montag",
+                    "Dienstag",
+                    "Mittwoch",
+                    "Donnerstag",
+                    "Freitag",
+                    "Samstag",
+                ],
+                weekdaysShort: ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"],
             };
         }
         if (language == "ru") {
             var i18n = {
-                previousMonth: 'Предыдущий месяц',
-                nextMonth: 'В следующем месяце',
-                months: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
-                weekdays: ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"],
-                weekdaysShort: ['Во', 'По', 'Вт', 'Ср', 'Че', 'Пя', 'Су']
+                previousMonth: "Предыдущий месяц",
+                nextMonth: "В следующем месяце",
+                months: [
+                    "Январь",
+                    "Февраль",
+                    "Март",
+                    "Апрель",
+                    "Май",
+                    "Июнь",
+                    "Июль",
+                    "Август",
+                    "Сентябрь",
+                    "Октябрь",
+                    "Ноябрь",
+                    "Декабрь",
+                ],
+                weekdays: [
+                    "Воскресенье",
+                    "Понедельник",
+                    "Вторник",
+                    "Среда",
+                    "Четверг",
+                    "Пятница",
+                    "Суббота",
+                ],
+                weekdaysShort: ["Во", "По", "Вт", "Ср", "Че", "Пя", "Су"],
             };
         }
         if (language == "cs") {
             i18n = {
-                previousMonth: 'Předchozí měsíc',
-                nextMonth: 'Další měsíc',
-                months: ["Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"],
-                weekdays: ['Neděle', 'Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota'],
-                weekdaysShort: ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So']
+                previousMonth: "Předchozí měsíc",
+                nextMonth: "Další měsíc",
+                months: [
+                    "Leden",
+                    "Únor",
+                    "Březen",
+                    "Duben",
+                    "Květen",
+                    "Červen",
+                    "Červenec",
+                    "Srpen",
+                    "Září",
+                    "Říjen",
+                    "Listopad",
+                    "Prosinec",
+                ],
+                weekdays: [
+                    "Neděle",
+                    "Pondělí",
+                    "Úterý",
+                    "Středa",
+                    "Čtvrtek",
+                    "Pátek",
+                    "Sobota",
+                ],
+                weekdaysShort: ["Ne", "Po", "Út", "St", "Čt", "Pá", "So"],
             };
         }
         var self = this;
@@ -1552,7 +1685,7 @@ class DatePicker {
                 const year = date.getFullYear();
                 var ret = `${year}-${monthStr}-${dayStr}`;
                 return ret;
-            }
+            },
         });
     }
 }
@@ -1571,7 +1704,7 @@ function bindDropdowns() {
 class Dropdown {
     constructor(el) {
         this.targetEl = el.querySelector(".admin_dropdown_target");
-        this.contentEl = el.querySelector(".admin_dropdown_content");
+        this.contentEl = (el.querySelector(".admin_dropdown_content"));
         this.targetEl.addEventListener("mousedown", (e) => {
             if (document.activeElement == el) {
                 el.blur();
@@ -1590,8 +1723,8 @@ function bindSearch() {
 class SearchForm {
     constructor(el) {
         this.searchForm = el;
-        this.searchInput = el.querySelector(".admin_header_search_input");
-        this.suggestionsEl = el.querySelector(".admin_header_search_suggestions");
+        this.searchInput = (el.querySelector(".admin_header_search_input"));
+        this.suggestionsEl = (el.querySelector(".admin_header_search_suggestions"));
         this.searchInput.value = document.body.getAttribute("data-search-query");
         this.searchInput.addEventListener("input", () => {
             this.suggestions = [];
@@ -1653,7 +1786,9 @@ class SearchForm {
         var suggestText = this.searchInput.value;
         var request = new XMLHttpRequest();
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        var url = adminPrefix + "/api/search-suggest" + encodeParams({ "q": this.searchInput.value });
+        var url = adminPrefix +
+            "/api/search-suggest" +
+            encodeParams({ q: this.searchInput.value });
         request.open("GET", url);
         request.addEventListener("load", () => {
             if (suggestText != this.searchInput.value) {
@@ -1892,11 +2027,17 @@ class NotificationItem {
             </div>        
         `;
         this.el = ret.children[0];
-        this.el.querySelector(".notification_close").addEventListener("click", this.closeNotification.bind(this));
+        this.el
+            .querySelector(".notification_close")
+            .addEventListener("click", this.closeNotification.bind(this));
     }
     closeNotification() {
         this.el.classList.add("notification-closed");
-        fetch(this.adminPrefix + "/_api/notification/" + this.uuid, { method: "DELETE" }).then(console.log).then((e) => {
+        fetch(this.adminPrefix + "/_api/notification/" + this.uuid, {
+            method: "DELETE",
+        })
+            .then(console.log)
+            .then((e) => {
             console.log(e);
         });
     }
@@ -1919,7 +2060,9 @@ class Popup {
         </div>
         `;
         this.el.setAttribute("tabindex", "-1");
-        this.el.querySelector(".popup_header_cancel").addEventListener("click", this.cancel.bind(this));
+        this.el
+            .querySelector(".popup_header_cancel")
+            .addEventListener("click", this.cancel.bind(this));
         this.el.addEventListener("click", this.backgroundClicked.bind(this));
         this.el.focus();
         this.el.addEventListener("keydown", (e) => {
@@ -1957,17 +2100,23 @@ class Popup {
     }
     setContent(el) {
         this.el.querySelector(".popup_content").appendChild(el);
-        this.el.querySelector(".popup_content").classList.add("popup_content-visible");
+        this.el
+            .querySelector(".popup_content")
+            .classList.add("popup_content-visible");
     }
     setCancelable() {
         this.cancelable = true;
-        this.el.querySelector(".popup_header_cancel").classList.add("popup_header_cancel-visible");
+        this.el
+            .querySelector(".popup_header_cancel")
+            .classList.add("popup_header_cancel-visible");
     }
     setTitle(name) {
         this.el.querySelector(".popup_header_name").textContent = name;
     }
     addButton(name, handler, style) {
-        this.el.querySelector(".popup_footer").classList.add("popup_footer-visible");
+        this.el
+            .querySelector(".popup_footer")
+            .classList.add("popup_footer-visible");
         var button = document.createElement("input");
         button.setAttribute("type", "button");
         button.setAttribute("class", "btn");
@@ -2023,7 +2172,7 @@ class Confirm extends Popup {
             }
         });
         var primaryText = "OK";
-        if (style = ButtonStyle.Delete) {
+        if ((style = ButtonStyle.Delete)) {
             primaryText = "Smazat";
         }
         this.primaryButton = this.addButton(primaryText, () => {
@@ -2051,7 +2200,7 @@ class LoadingPopup extends Popup {
     constructor() {
         super("");
         var contentEl = document.createElement("div");
-        contentEl.innerHTML = "<progress class=\"progress\"></progress>";
+        contentEl.innerHTML = '<progress class="progress"></progress>';
         this.setContent(contentEl);
         this.present();
     }

@@ -9,7 +9,7 @@ class List {
   exportButton: HTMLAnchorElement;
   changed: boolean;
   changedTimestamp: number;
-  
+
   defaultOrderColumn: string;
   orderColumn: string;
   defaultOrderDesc: boolean;
@@ -19,8 +19,6 @@ class List {
   defaultVisibleColumnsStr: string;
 
   progress: HTMLProgressElement;
-
-  
 
   itemsPerPage: number;
   paginationSelect: HTMLSelectElement;
@@ -49,7 +47,9 @@ class List {
       return;
     }
 
-    this.progress = <HTMLProgressElement>el.querySelector(".admin_table_progress");
+    this.progress = <HTMLProgressElement>(
+      el.querySelector(".admin_table_progress")
+    );
 
     this.tbody = <HTMLElement>el.querySelector("tbody");
     this.tbody.textContent = "";
@@ -71,10 +71,10 @@ class List {
       this.orderColumn = urlParams.get("_order");
     }
     if (urlParams.get("_desc") == "true") {
-      this.orderDesc = true
+      this.orderDesc = true;
     }
     if (urlParams.get("_desc") == "false") {
-      this.orderDesc = false
+      this.orderDesc = false;
     }
 
     this.defaultVisibleColumnsStr = el.getAttribute("data-visible-columns");
@@ -90,7 +90,9 @@ class List {
     }
 
     this.itemsPerPage = parseInt(el.getAttribute("data-items-per-page"));
-    this.paginationSelect = <HTMLSelectElement>document.querySelector(".admin_tablesettings_pages");
+    this.paginationSelect = <HTMLSelectElement>(
+      document.querySelector(".admin_tablesettings_pages")
+    );
     this.paginationSelect.addEventListener("change", this.load.bind(this));
 
     this.statsCheckbox = document.querySelector(".admin_tablesettings_stats");
@@ -98,15 +100,18 @@ class List {
       this.filterChanged();
     });
 
-    this.statsCheckboxSelectCount = document.querySelector(".admin_tablesettings_stats_limit");
+    this.statsCheckboxSelectCount = document.querySelector(
+      ".admin_tablesettings_stats_limit"
+    );
     this.statsCheckboxSelectCount.addEventListener("change", () => {
       this.filterChanged();
     });
 
-    this.statsContainer = document.querySelector(".admin_tablesettings_stats_container");
+    this.statsContainer = document.querySelector(
+      ".admin_tablesettings_stats_container"
+    );
 
     this.multiple = new ListMultiple(this);
-
 
     this.settings.bindOptions(visibleColumnsMap);
     this.bindOrder();
@@ -123,7 +128,6 @@ class List {
       params["_order"] = this.orderColumn;
     }
     if (this.orderDesc != this.defaultOrderDesc) {
-
       params["_desc"] = this.orderDesc + "";
     }
     var columns = this.settings.getSelectedColumnsStr();
@@ -143,7 +147,11 @@ class List {
     }
 
     var encoded = encodeParams(params);
-    window.history.replaceState(null, null, document.location.pathname + encoded);
+    window.history.replaceState(
+      null,
+      null,
+      document.location.pathname + encoded
+    );
 
     if (this.statsCheckbox.checked) {
       params["_stats"] = "true";
@@ -152,13 +160,24 @@ class List {
 
     params["_format"] = "xlsx";
     if (this.exportButton) {
-      this.exportButton.setAttribute("href", this.adminPrefix + "/" + this.typeName + "/api/list" + encodeParams(params));
+      this.exportButton.setAttribute(
+        "href",
+        this.adminPrefix +
+          "/" +
+          this.typeName +
+          "/api/list" +
+          encodeParams(params)
+      );
     }
 
     params["_format"] = "json";
     encoded = encodeParams(params);
 
-    request.open("GET", this.adminPrefix + "/" + this.typeName + "/api/list" + encoded, true);
+    request.open(
+      "GET",
+      this.adminPrefix + "/" + this.typeName + "/api/list" + encoded,
+      true
+    );
     request.addEventListener("load", () => {
       this.tbody.innerHTML = "";
       if (request.status == 200) {
@@ -186,7 +205,9 @@ class List {
 
   colorActiveFilterItems() {
     let itemsToColor = this.getFilterData();
-    var filterItems: NodeListOf<HTMLDivElement> = this.el.querySelectorAll(".admin_list_filteritem");
+    var filterItems: NodeListOf<HTMLDivElement> = this.el.querySelectorAll(
+      ".admin_list_filteritem"
+    );
     for (var i = 0; i < filterItems.length; i++) {
       var item = filterItems[i];
       let name = item.getAttribute("data-name");
@@ -198,7 +219,7 @@ class List {
     }
   }
 
-  paginationChange(e:any) {
+  paginationChange(e: any) {
     var el = <HTMLAnchorElement>e.target;
     var page = parseInt(el.getAttribute("data-page"));
     this.page = page;
@@ -214,17 +235,16 @@ class List {
     for (var i = 1; i <= totalPages; i++) {
       var pEl = document.createElement("a");
       pEl.setAttribute("href", "#");
-      pEl.textContent = i+"";
+      pEl.textContent = i + "";
       if (i == selectedPage) {
         pEl.classList.add("pagination_page_current");
       } else {
         pEl.classList.add("pagination_page");
-        pEl.setAttribute("data-page", i+"");
+        pEl.setAttribute("data-page", i + "");
         pEl.addEventListener("click", this.paginationChange.bind(this));
       }
       paginationEl.appendChild(pEl);
     }
-
   }
 
   bindClick() {
@@ -233,7 +253,11 @@ class List {
       var row = <HTMLTableRowElement>rows[i];
       var id = row.getAttribute("data-id");
       row.addEventListener("click", (e) => {
-        if ((<HTMLDivElement>e.target).classList.contains("admin_table_cell-multiple_checkbox")) {
+        if (
+          (<HTMLDivElement>e.target).classList.contains(
+            "admin_table_cell-multiple_checkbox"
+          )
+        ) {
           return false;
         }
         var target = <HTMLElement>e.target;
@@ -244,7 +268,7 @@ class List {
         var url = el.getAttribute("data-url");
 
         if (e.shiftKey || e.metaKey || e.ctrlKey) {
-          var openedWindow = window.open(url, "newwindow" + (new Date()));
+          var openedWindow = window.open(url, "newwindow" + new Date());
           openedWindow.focus();
           return;
         }
@@ -260,7 +284,7 @@ class List {
           e.stopPropagation();
           return false;
         }
-      })
+      });
     }
   }
 
@@ -361,13 +385,17 @@ class List {
       if (fieldLayout == "filter_layout_date") {
         this.bindFilterDate(field, fieldValue);
       }
-
     }
     this.inputPeriodicListener();
   }
 
   inputListener(e: any) {
-    if (e.keyCode == 9 || e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
+    if (
+      e.keyCode == 9 ||
+      e.keyCode == 16 ||
+      e.keyCode == 17 ||
+      e.keyCode == 18
+    ) {
       return;
     }
     this.filterChanged();
@@ -390,9 +418,8 @@ class List {
     new ListFilterDate(el, value);
   }
 
-
   inputPeriodicListener() {
-    setInterval(() =>{
+    setInterval(() => {
       if (this.changed == true && Date.now() - this.changedTimestamp > 500) {
         this.changed = false;
         this.load();

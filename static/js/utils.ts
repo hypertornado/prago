@@ -1,4 +1,8 @@
-function DOMinsertChildAtIndex(parent: HTMLElement, child: HTMLElement, index: number) {
+function DOMinsertChildAtIndex(
+  parent: HTMLElement,
+  child: HTMLElement,
+  index: number
+) {
   if (index >= parent.children.length) {
     parent.appendChild(child);
   } else {
@@ -31,7 +35,7 @@ function escapeHTML(str: String): String {
   str = str.split("&").join("&amp;");
   str = str.split("<").join("&lt;");
   str = str.split(">").join("&gt;");
-  str = str.split("\"").join("&quot;");
+  str = str.split('"').join("&quot;");
   str = str.split("'").join("&#39;");
   //str = str.split("&").join("&amp;");
   //str = str.replaceAll("&", "&amp;");
