@@ -6,6 +6,8 @@ function bindLists() {
 }
 
 class List {
+  settings: ListSettings;
+
   adminPrefix: string;
   typeName: string;
 
@@ -25,10 +27,7 @@ class List {
 
   progress: HTMLProgressElement;
 
-  settingsRow: HTMLTableRowElement;
-  settingsRowColumn: HTMLTableElement;
-  settingsEl: HTMLDivElement;
-  settingsCheckbox: HTMLInputElement;
+  
 
   itemsPerPage: number;
   paginationSelect: HTMLSelectElement;
@@ -37,26 +36,12 @@ class List {
   statsCheckboxSelectCount: HTMLSelectElement;
   statsContainer: HTMLDivElement;
 
-  settingsButton: HTMLButtonElement;
-  settingsPopup: ContentPopup;
+  multiple: ListMultiple;
 
   constructor(el: HTMLDivElement, openbutton: HTMLButtonElement) {
     this.el = el;
 
-    this.settingsRow = document.querySelector(".admin_list_settingsrow");
-    this.settingsRowColumn = document.querySelector(".admin_list_settingsrow_column");
-    this.settingsEl = document.querySelector(".admin_tablesettings");
-
-    //this.settingsCheckbox = this.el.querySelector(".admin_list_showmore");
-    //this.settingsCheckbox.addEventListener("change", this.settingsCheckboxChange.bind(this));
-    //this.settingsCheckboxChange();
-
-    this.settingsPopup = new ContentPopup("Možnosti", this.settingsEl);
-    this.settingsButton = this.el.querySelector(".admin_list_settings");
-    this.settingsButton.addEventListener("click", () => {
-      this.settingsPopup.show();
-    })
-
+    this.settings = new ListSettings(this);
     this.exportButton = document.querySelector(".admin_exportbutton");
 
     let urlParams = new URLSearchParams(window.location.search);
@@ -127,117 +112,11 @@ class List {
 
     this.statsContainer = document.querySelector(".admin_tablesettings_stats_container");
 
-    if (this.hasMultipleActions()) {
-      this.bindMultipleActions();
-    }
+    this.multiple = new ListMultiple(this);
 
 
-    this.bindOptions(visibleColumnsMap);
+    this.settings.bindOptions(visibleColumnsMap);
     this.bindOrder();
-  }
-
-  checkboxesAr: NodeListOf<HTMLInputElement>;
-
-  hasMultipleActions(): Boolean {
-    if (this.el.classList.contains("admin_list-hasmultipleactions")) {
-      return true;
-    }
-    return false;
-  }
-
-  bindMultipleActions() {
-    var actions = this.el.querySelectorAll(".admin_list_multiple_action");
-    for (var i = 0; i < actions.length; i++) {
-      actions[i].addEventListener("click", this.multipleActionSelected.bind(this));
-    }
-  }
-
-  multipleActionSelected(e: any) {
-    var target: HTMLDivElement = e.target;
-    var actionName = target.getAttribute("name");
-
-    switch (actionName) {
-      case "cancel":
-        this.multipleUncheckAll();
-        break;
-      case "delete":
-        var ids = this.multipleGetIDs();
-        new Confirm(`Opravdu chcete smazat ${ids.length} položek?`, () => {
-          var loader = new LoadingPopup();
-          var params: any = {};
-          params["action"] = "delete";
-          params["ids"] = ids.join(",");
-          var url = this.adminPrefix + "/" + this.typeName + "/api/multipleaction" + encodeParams(params);
-          fetch(url, {
-            method: "POST",
-          }).then((e) => {
-            loader.done();
-            if (e.status != 200) {
-              new Alert("Error while doing multipleaction delete");
-              return;
-            }
-            this.load();
-          });
-        }, Function(), ButtonStyle.Delete);
-        break;
-      default:
-        console.log("other");
-    }
-
-  }
-
-  bindMultipleActionCheckboxes() {
-    this.checkboxesAr = document.querySelectorAll(".admin_table_cell-multiple_checkbox");
-    for (var i = 0; i < this.checkboxesAr.length; i++) {
-      var checkbox = <HTMLInputElement>this.checkboxesAr[i];
-      checkbox.addEventListener("change", this.multipleCheckboxChanged.bind(this));
-    }
-    this.multipleCheckboxChanged();
-  }
-
-  multipleGetIDs(): Array<String> {
-    var ret: Array<String> = [];
-    for (var i = 0; i < this.checkboxesAr.length; i++) {
-      var checkbox = <HTMLInputElement>this.checkboxesAr[i];
-      if (checkbox.checked) {
-        ret.push(checkbox.getAttribute("data-id"));
-      }
-    }
-    return ret;
-  }
-
-  multipleCheckboxChanged() {
-    var checkedCount = 0;
-    for (var i = 0; i < this.checkboxesAr.length; i++) {
-      var checkbox = <HTMLInputElement>this.checkboxesAr[i];
-      if (checkbox.checked) {
-        checkedCount++;
-      }
-    }
-
-    var multipleActionsPanel: HTMLDivElement = this.el.querySelector(".admin_list_multiple_actions");
-    if (checkedCount > 0) {
-      multipleActionsPanel.classList.add("admin_list_multiple_actions-visible");
-    } else {
-      multipleActionsPanel.classList.remove("admin_list_multiple_actions-visible");
-    }
-    this.el.querySelector(".admin_list_multiple_actions_description").textContent = `Vybráno ${checkedCount} položek`
-  }
-
-  multipleUncheckAll() {
-    for (var i = 0; i < this.checkboxesAr.length; i++) {
-      var checkbox = <HTMLInputElement>this.checkboxesAr[i];
-      checkbox.checked = false;
-    }
-    this.multipleCheckboxChanged()
-  }
-
-  settingsCheckboxChange() {
-    if (this.settingsCheckbox.checked) {
-      this.settingsRow.classList.add("admin_list_settingsrow-visible");
-    } else {
-      this.settingsRow.classList.remove("admin_list_settingsrow-visible");
-    }
   }
 
   load() {
@@ -254,7 +133,7 @@ class List {
 
       params["_desc"] = this.orderDesc + "";
     }
-    var columns = this.getSelectedColumnsStr();
+    var columns = this.settings.getSelectedColumnsStr();
     if (columns != this.defaultVisibleColumnsStr) {
       params["_columns"] = columns;
     }
@@ -300,8 +179,8 @@ class List {
         bindOrder();
         this.bindPagination();
         this.bindClick();
-        if (this.hasMultipleActions()) {
-          this.bindMultipleActionCheckboxes();
+        if (this.multiple.hasMultipleActions()) {
+          this.multiple.bindMultipleActionCheckboxes();
         }
         this.tbody.classList.remove("admin_table_loading");
       } else {
@@ -310,48 +189,6 @@ class List {
       this.progress.classList.add("admin_table_progress-inactive");
     });
     request.send(JSON.stringify({}));
-  }
-
-  bindOptions(visibleColumnsMap: any) {
-    var columns: NodeListOf<HTMLInputElement> = document.querySelectorAll(".admin_tablesettings_column");
-    for (var i = 0; i < columns.length; i++) {
-      let columnName = columns[i].getAttribute("data-column-name");
-      if (visibleColumnsMap[columnName]) {
-        columns[i].checked = true;
-      }
-      columns[i].addEventListener("change", () => {
-        this.changedOptions();
-      });
-    }
-    this.changedOptions();
-  }
-
-  changedOptions() {
-    var columns: any = this.getSelectedColumnsMap();
-
-    var headers: NodeListOf<HTMLDivElement> = document.querySelectorAll(".admin_list_orderitem");
-    for (var i = 0; i < headers.length; i++) {
-      var name = headers[i].getAttribute("data-name");
-      if (columns[name]) {
-        headers[i].classList.remove("hidden");
-      } else {
-        headers[i].classList.add("hidden");
-      }
-    }
-
-    var filters: NodeListOf<HTMLDivElement> = document.querySelectorAll(".admin_list_filteritem");
-    for (var i = 0; i < filters.length; i++) {
-      var name = filters[i].getAttribute("data-name");
-      if (columns[name]) {
-        filters[i].classList.remove("hidden");
-      } else {
-        filters[i].classList.add("hidden");
-      }
-    }
-
-    this.settingsRowColumn.setAttribute("colspan", Object.keys(columns).length + "");
-
-    this.load();
   }
 
   colorActiveFilterItems() {
@@ -474,24 +311,6 @@ class List {
         }
       }
     }
-  }
-
-  getSelectedColumnsStr(): string {
-    var ret = [];
-    var checked: NodeListOf<HTMLInputElement> = document.querySelectorAll(".admin_tablesettings_column:checked");
-    for (var i = 0; i < checked.length; i++) {
-      ret.push(checked[i].getAttribute("data-column-name"));
-    }
-    return ret.join(",");
-  }
-
-  getSelectedColumnsMap(): any {
-    var columns: any = {};
-    var checked: NodeListOf<HTMLInputElement> = document.querySelectorAll(".admin_tablesettings_column:checked");
-    for (var i = 0; i < checked.length; i++) {
-      columns[checked[i].getAttribute("data-column-name")] = true;
-    }
-    return columns;
   }
 
   getFilterData(): any {

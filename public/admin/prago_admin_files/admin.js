@@ -422,14 +422,7 @@ function bindLists() {
 class List {
     constructor(el, openbutton) {
         this.el = el;
-        this.settingsRow = document.querySelector(".admin_list_settingsrow");
-        this.settingsRowColumn = document.querySelector(".admin_list_settingsrow_column");
-        this.settingsEl = document.querySelector(".admin_tablesettings");
-        this.settingsPopup = new ContentPopup("Možnosti", this.settingsEl);
-        this.settingsButton = this.el.querySelector(".admin_list_settings");
-        this.settingsButton.addEventListener("click", () => {
-            this.settingsPopup.show();
-        });
+        this.settings = new ListSettings(this);
         this.exportButton = document.querySelector(".admin_exportbutton");
         let urlParams = new URLSearchParams(window.location.search);
         this.page = parseInt(urlParams.get("_page"));
@@ -485,104 +478,9 @@ class List {
             this.filterChanged();
         });
         this.statsContainer = document.querySelector(".admin_tablesettings_stats_container");
-        if (this.hasMultipleActions()) {
-            this.bindMultipleActions();
-        }
-        this.bindOptions(visibleColumnsMap);
+        this.multiple = new ListMultiple(this);
+        this.settings.bindOptions(visibleColumnsMap);
         this.bindOrder();
-    }
-    hasMultipleActions() {
-        if (this.el.classList.contains("admin_list-hasmultipleactions")) {
-            return true;
-        }
-        return false;
-    }
-    bindMultipleActions() {
-        var actions = this.el.querySelectorAll(".admin_list_multiple_action");
-        for (var i = 0; i < actions.length; i++) {
-            actions[i].addEventListener("click", this.multipleActionSelected.bind(this));
-        }
-    }
-    multipleActionSelected(e) {
-        var target = e.target;
-        var actionName = target.getAttribute("name");
-        switch (actionName) {
-            case "cancel":
-                this.multipleUncheckAll();
-                break;
-            case "delete":
-                var ids = this.multipleGetIDs();
-                new Confirm(`Opravdu chcete smazat ${ids.length} položek?`, () => {
-                    var loader = new LoadingPopup();
-                    var params = {};
-                    params["action"] = "delete";
-                    params["ids"] = ids.join(",");
-                    var url = this.adminPrefix + "/" + this.typeName + "/api/multipleaction" + encodeParams(params);
-                    fetch(url, {
-                        method: "POST",
-                    }).then((e) => {
-                        loader.done();
-                        if (e.status != 200) {
-                            new Alert("Error while doing multipleaction delete");
-                            return;
-                        }
-                        this.load();
-                    });
-                }, Function(), ButtonStyle.Delete);
-                break;
-            default:
-                console.log("other");
-        }
-    }
-    bindMultipleActionCheckboxes() {
-        this.checkboxesAr = document.querySelectorAll(".admin_table_cell-multiple_checkbox");
-        for (var i = 0; i < this.checkboxesAr.length; i++) {
-            var checkbox = this.checkboxesAr[i];
-            checkbox.addEventListener("change", this.multipleCheckboxChanged.bind(this));
-        }
-        this.multipleCheckboxChanged();
-    }
-    multipleGetIDs() {
-        var ret = [];
-        for (var i = 0; i < this.checkboxesAr.length; i++) {
-            var checkbox = this.checkboxesAr[i];
-            if (checkbox.checked) {
-                ret.push(checkbox.getAttribute("data-id"));
-            }
-        }
-        return ret;
-    }
-    multipleCheckboxChanged() {
-        var checkedCount = 0;
-        for (var i = 0; i < this.checkboxesAr.length; i++) {
-            var checkbox = this.checkboxesAr[i];
-            if (checkbox.checked) {
-                checkedCount++;
-            }
-        }
-        var multipleActionsPanel = this.el.querySelector(".admin_list_multiple_actions");
-        if (checkedCount > 0) {
-            multipleActionsPanel.classList.add("admin_list_multiple_actions-visible");
-        }
-        else {
-            multipleActionsPanel.classList.remove("admin_list_multiple_actions-visible");
-        }
-        this.el.querySelector(".admin_list_multiple_actions_description").textContent = `Vybráno ${checkedCount} položek`;
-    }
-    multipleUncheckAll() {
-        for (var i = 0; i < this.checkboxesAr.length; i++) {
-            var checkbox = this.checkboxesAr[i];
-            checkbox.checked = false;
-        }
-        this.multipleCheckboxChanged();
-    }
-    settingsCheckboxChange() {
-        if (this.settingsCheckbox.checked) {
-            this.settingsRow.classList.add("admin_list_settingsrow-visible");
-        }
-        else {
-            this.settingsRow.classList.remove("admin_list_settingsrow-visible");
-        }
     }
     load() {
         this.progress.classList.remove("admin_table_progress-inactive");
@@ -597,7 +495,7 @@ class List {
         if (this.orderDesc != this.defaultOrderDesc) {
             params["_desc"] = this.orderDesc + "";
         }
-        var columns = this.getSelectedColumnsStr();
+        var columns = this.settings.getSelectedColumnsStr();
         if (columns != this.defaultVisibleColumnsStr) {
             params["_columns"] = columns;
         }
@@ -634,8 +532,8 @@ class List {
                 bindOrder();
                 this.bindPagination();
                 this.bindClick();
-                if (this.hasMultipleActions()) {
-                    this.bindMultipleActionCheckboxes();
+                if (this.multiple.hasMultipleActions()) {
+                    this.multiple.bindMultipleActionCheckboxes();
                 }
                 this.tbody.classList.remove("admin_table_loading");
             }
@@ -645,44 +543,6 @@ class List {
             this.progress.classList.add("admin_table_progress-inactive");
         });
         request.send(JSON.stringify({}));
-    }
-    bindOptions(visibleColumnsMap) {
-        var columns = document.querySelectorAll(".admin_tablesettings_column");
-        for (var i = 0; i < columns.length; i++) {
-            let columnName = columns[i].getAttribute("data-column-name");
-            if (visibleColumnsMap[columnName]) {
-                columns[i].checked = true;
-            }
-            columns[i].addEventListener("change", () => {
-                this.changedOptions();
-            });
-        }
-        this.changedOptions();
-    }
-    changedOptions() {
-        var columns = this.getSelectedColumnsMap();
-        var headers = document.querySelectorAll(".admin_list_orderitem");
-        for (var i = 0; i < headers.length; i++) {
-            var name = headers[i].getAttribute("data-name");
-            if (columns[name]) {
-                headers[i].classList.remove("hidden");
-            }
-            else {
-                headers[i].classList.add("hidden");
-            }
-        }
-        var filters = document.querySelectorAll(".admin_list_filteritem");
-        for (var i = 0; i < filters.length; i++) {
-            var name = filters[i].getAttribute("data-name");
-            if (columns[name]) {
-                filters[i].classList.remove("hidden");
-            }
-            else {
-                filters[i].classList.add("hidden");
-            }
-        }
-        this.settingsRowColumn.setAttribute("colspan", Object.keys(columns).length + "");
-        this.load();
     }
     colorActiveFilterItems() {
         let itemsToColor = this.getFilterData();
@@ -801,22 +661,6 @@ class List {
             }
         }
     }
-    getSelectedColumnsStr() {
-        var ret = [];
-        var checked = document.querySelectorAll(".admin_tablesettings_column:checked");
-        for (var i = 0; i < checked.length; i++) {
-            ret.push(checked[i].getAttribute("data-column-name"));
-        }
-        return ret.join(",");
-    }
-    getSelectedColumnsMap() {
-        var columns = {};
-        var checked = document.querySelectorAll(".admin_tablesettings_column:checked");
-        for (var i = 0; i < checked.length; i++) {
-            columns[checked[i].getAttribute("data-column-name")] = true;
-        }
-        return columns;
-    }
     getFilterData() {
         var ret = {};
         var items = this.el.querySelectorAll(".admin_table_filter_item");
@@ -897,6 +741,174 @@ class List {
                 this.load();
             }
         }, 200);
+    }
+}
+class ListSettings {
+    constructor(list) {
+        this.list = list;
+        this.settingsRow = document.querySelector(".admin_list_settingsrow");
+        this.settingsRowColumn = document.querySelector(".admin_list_settingsrow_column");
+        this.settingsEl = document.querySelector(".admin_tablesettings");
+        this.settingsPopup = new ContentPopup("Možnosti", this.settingsEl);
+        this.settingsButton = document.querySelector(".admin_list_settings");
+        this.settingsButton.addEventListener("click", () => {
+            this.settingsPopup.show();
+        });
+    }
+    settingsCheckboxChange() {
+        if (this.settingsCheckbox.checked) {
+            this.settingsRow.classList.add("admin_list_settingsrow-visible");
+        }
+        else {
+            this.settingsRow.classList.remove("admin_list_settingsrow-visible");
+        }
+    }
+    bindOptions(visibleColumnsMap) {
+        var columns = document.querySelectorAll(".admin_tablesettings_column");
+        for (var i = 0; i < columns.length; i++) {
+            let columnName = columns[i].getAttribute("data-column-name");
+            if (visibleColumnsMap[columnName]) {
+                columns[i].checked = true;
+            }
+            columns[i].addEventListener("change", () => {
+                this.changedOptions();
+            });
+        }
+        this.changedOptions();
+    }
+    changedOptions() {
+        var columns = this.getSelectedColumnsMap();
+        var headers = document.querySelectorAll(".admin_list_orderitem");
+        for (var i = 0; i < headers.length; i++) {
+            var name = headers[i].getAttribute("data-name");
+            if (columns[name]) {
+                headers[i].classList.remove("hidden");
+            }
+            else {
+                headers[i].classList.add("hidden");
+            }
+        }
+        var filters = document.querySelectorAll(".admin_list_filteritem");
+        for (var i = 0; i < filters.length; i++) {
+            var name = filters[i].getAttribute("data-name");
+            if (columns[name]) {
+                filters[i].classList.remove("hidden");
+            }
+            else {
+                filters[i].classList.add("hidden");
+            }
+        }
+        this.settingsRowColumn.setAttribute("colspan", Object.keys(columns).length + "");
+        this.list.load();
+    }
+    getSelectedColumnsStr() {
+        var ret = [];
+        var checked = document.querySelectorAll(".admin_tablesettings_column:checked");
+        for (var i = 0; i < checked.length; i++) {
+            ret.push(checked[i].getAttribute("data-column-name"));
+        }
+        return ret.join(",");
+    }
+    getSelectedColumnsMap() {
+        var columns = {};
+        var checked = document.querySelectorAll(".admin_tablesettings_column:checked");
+        for (var i = 0; i < checked.length; i++) {
+            columns[checked[i].getAttribute("data-column-name")] = true;
+        }
+        return columns;
+    }
+}
+class ListMultiple {
+    constructor(list) {
+        this.list = list;
+        if (this.hasMultipleActions()) {
+            this.bindMultipleActions();
+        }
+    }
+    hasMultipleActions() {
+        if (this.list.el.classList.contains("admin_list-hasmultipleactions")) {
+            return true;
+        }
+        return false;
+    }
+    bindMultipleActions() {
+        var actions = this.list.el.querySelectorAll(".admin_list_multiple_action");
+        for (var i = 0; i < actions.length; i++) {
+            actions[i].addEventListener("click", this.multipleActionSelected.bind(this));
+        }
+    }
+    multipleActionSelected(e) {
+        var target = e.target;
+        var actionName = target.getAttribute("name");
+        switch (actionName) {
+            case "cancel":
+                this.multipleUncheckAll();
+                break;
+            case "delete":
+                var ids = this.multipleGetIDs();
+                new Confirm(`Opravdu chcete smazat ${ids.length} položek?`, () => {
+                    var loader = new LoadingPopup();
+                    var params = {};
+                    params["action"] = "delete";
+                    params["ids"] = ids.join(",");
+                    var url = this.list.adminPrefix + "/" + this.list.typeName + "/api/multipleaction" + encodeParams(params);
+                    fetch(url, {
+                        method: "POST",
+                    }).then((e) => {
+                        loader.done();
+                        if (e.status != 200) {
+                            new Alert("Error while doing multipleaction delete");
+                            return;
+                        }
+                        this.list.load();
+                    });
+                }, Function(), ButtonStyle.Delete);
+                break;
+            default:
+                console.log("other");
+        }
+    }
+    bindMultipleActionCheckboxes() {
+        this.checkboxesAr = document.querySelectorAll(".admin_table_cell-multiple_checkbox");
+        for (var i = 0; i < this.checkboxesAr.length; i++) {
+            var checkbox = this.checkboxesAr[i];
+            checkbox.addEventListener("change", this.multipleCheckboxChanged.bind(this));
+        }
+        this.multipleCheckboxChanged();
+    }
+    multipleGetIDs() {
+        var ret = [];
+        for (var i = 0; i < this.checkboxesAr.length; i++) {
+            var checkbox = this.checkboxesAr[i];
+            if (checkbox.checked) {
+                ret.push(checkbox.getAttribute("data-id"));
+            }
+        }
+        return ret;
+    }
+    multipleCheckboxChanged() {
+        var checkedCount = 0;
+        for (var i = 0; i < this.checkboxesAr.length; i++) {
+            var checkbox = this.checkboxesAr[i];
+            if (checkbox.checked) {
+                checkedCount++;
+            }
+        }
+        var multipleActionsPanel = this.list.el.querySelector(".admin_list_multiple_actions");
+        if (checkedCount > 0) {
+            multipleActionsPanel.classList.add("admin_list_multiple_actions-visible");
+        }
+        else {
+            multipleActionsPanel.classList.remove("admin_list_multiple_actions-visible");
+        }
+        this.list.el.querySelector(".admin_list_multiple_actions_description").textContent = `Vybráno ${checkedCount} položek`;
+    }
+    multipleUncheckAll() {
+        for (var i = 0; i < this.checkboxesAr.length; i++) {
+            var checkbox = this.checkboxesAr[i];
+            checkbox.checked = false;
+        }
+        this.multipleCheckboxChanged();
     }
 }
 function bindOrder() {

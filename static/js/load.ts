@@ -52,7 +52,7 @@ function bindFlashMessages() {
 
 function bindScrolled() {
   var lastScrollPosition = 0;
-  var header = <HTMLDivElement>document.querySelector(".admin_header");
+  var header = document.querySelector<HTMLDivElement>(".admin_header");
   document.addEventListener("scroll", (event) => {
     if (document.body.clientWidth < 1100) {
       return;

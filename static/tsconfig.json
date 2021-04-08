@@ -17,6 +17,8 @@
         "js/list_filter_relations.ts",
         "js/list_filter_date.ts",
         "js/list.ts",
+        "js/list_settings.ts",
+        "js/list_multiple.ts",
         "js/order.ts",
         "js/markdown.ts",
         "js/timestamps.ts",

@@ -100,6 +100,9 @@ func (resource Resource) allowsMultipleActions(user *user) bool {
 }
 
 func (resource Resource) getMultipleActions(user *user) (ret []listMultipleAction) {
+	if !resource.allowsMultipleActions(user) {
+		return nil
+	}
 	ret = append(ret, listMultipleAction{
 		ID:       "delete",
 		Name:     "Smazat",
