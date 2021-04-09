@@ -2,7 +2,6 @@ package prago
 
 import (
 	"errors"
-	"time"
 )
 
 //ErrItemNotFound is returned when no item is found
@@ -13,7 +12,7 @@ const adminPathPrefix = "/admin"
 func (app *App) initAdminActions() {
 
 	app.accessController.addBeforeAction(func(request *Request) {
-		app.Notification("hello world " + time.Now().Format(time.RFC3339Nano)).Flash(request)
+		//app.Notification("hello world " + time.Now().Format(time.RFC3339Nano)).Flash(request)
 		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
 		request.SetData("locale", localeFromRequest(request))
 		request.SetData("admin_header_prefix", adminPathPrefix)
@@ -46,6 +45,10 @@ func (app *App) initAdminActions() {
 		next()
 	})
 	app.Action("markdown").Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).hiddenMenu().Template("admin_help_markdown").IsWide()
+
+	app.accessController.get("/admin/logo", func(request *Request) {
+		request.w.Write(app.logo)
+	})
 }
 
 func (app *App) initAdminNotFoundAction() {

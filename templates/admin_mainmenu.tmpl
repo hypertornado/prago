@@ -1,7 +1,7 @@
 {{define "admin_mainmenu"}}
     <div class="mainmenu">
-    {{if .Logo}}
-        <a href="{{.AdminHomepageURL}}" class="mainmenu_logo" style="background-image: url('data:{{HTMLAttr .Logo}}');"></a>
+    {{if .HasLogo}}
+        <a href="{{.AdminHomepageURL}}" class="mainmenu_logo" style="background-image: url('/admin/logo');"></a>
     {{end}}
 
     {{if .HasSearch}}

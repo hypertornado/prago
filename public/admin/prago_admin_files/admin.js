@@ -1910,12 +1910,14 @@ class NotificationCenter {
     constructor(el) {
         this.notifications = new Map();
         this.el = el;
-        var notifications = JSON.parse(el.getAttribute("data-notification-views"));
+        var data = el.getAttribute("data-notification-views");
+        var notifications = [];
+        if (data) {
+            notifications = JSON.parse(data);
+        }
         notifications.forEach((item) => {
             this.setData(item);
         });
-        console.log(notifications);
-        return;
     }
     setData(data) {
         var notification;
@@ -1941,82 +1943,98 @@ class NotificationItem {
         this.el.classList.add("notification");
         this.el.innerHTML = `
       <div class="notification_close"></div>
-      <div class="notification_left"></div>
+      <div class="notification_left">
+        <div class="notification_left_progress">
+          <div class="notification_left_progress_human"></div>
+          <progress class="notification_left_progressbar"></progress>
+        </div>
+      </div>
       <div class="notification_right">
+          <div class="notification_prename"></div>
           <div class="notification_name"></div>
+          <div class="notification_description"></div>
+          <div class="notification_action"></div>
+          <div class="notification_action"></div>
       </div>
     `;
+        this.actionElements = this.el.querySelectorAll(".notification_action");
+        this.actionElements.forEach((el) => {
+            el.addEventListener("click", (e) => {
+                var target = e.currentTarget;
+                console.log(target.getAttribute("data-id"));
+                return false;
+            });
+        });
+        this.el.querySelector(".notification_left");
         this.el
             .querySelector(".notification_close")
-            .addEventListener("click", () => {
+            .addEventListener("click", (e) => {
             this.el.classList.add("notification-closed");
+            e.stopPropagation();
+            return false;
         });
+        this.el.addEventListener("click", () => {
+            var url = this.el.getAttribute("data-url");
+            if (!url) {
+                return;
+            }
+            console.log(url);
+            window.location.href = url;
+        });
+    }
+    setAction(actionEl, action) {
+        if (!action) {
+            actionEl.classList.remove("notification_action-visible");
+            return;
+        }
+        actionEl.classList.add("notification_action-visible");
+        actionEl.setAttribute("data-id", action.ID);
+        actionEl.textContent = action.Name;
     }
     setData(data) {
+        this.el.querySelector(".notification_prename").textContent = data.PreName;
         this.el.querySelector(".notification_name").textContent = data.Name;
-    }
-}
-class NotificationCenterOLD {
-    constructor(el) {
-        this.el = el;
-        this.notifications = Array();
-        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
-        this.loadNotifications();
-    }
-    loadNotifications() {
-        return;
-        var request = new XMLHttpRequest();
-        request.open("GET", this.adminPrefix + "/_api/notifications", true);
-        request.addEventListener("load", () => {
-            if (request.status == 200) {
-                var notifications = JSON.parse(request.response);
-                notifications.Views.forEach((item) => {
-                    var notification = this.createNotification(item);
-                    this.notifications.push(notification);
-                    this.el.appendChild(notification.el);
-                });
+        this.el.querySelector(".notification_description").textContent =
+            data.Description;
+        var left = this.el.querySelector(".notification_left");
+        if (data.Image) {
+            left.classList.add("notification_left-visible");
+            left.setAttribute("style", `background-image: url('${data.Image}');`);
+        }
+        var closeButton = this.el.querySelector(".notification_close");
+        if (data.DisableCancel) {
+            closeButton.classList.add("notification_close-disabled");
+        }
+        else {
+            closeButton.classList.remove("notification_close-disabled");
+        }
+        this.setAction(this.actionElements[0], data.PrimaryAction);
+        this.setAction(this.actionElements[1], data.SecondaryAction);
+        var progressEl = this.el.querySelector(".notification_left_progress");
+        if (data.Progress) {
+            left.classList.add("notification_left-visible");
+            progressEl.classList.add("notification_left_progress-visible");
+            this.el.querySelector(".notification_left_progress_human").textContent =
+                data.Progress.Human;
+            var progressBar = this.el.querySelector(".notification_left_progressbar");
+            if (data.Progress.Percentage < 0) {
+                progressBar.setAttribute("value", "");
             }
             else {
-                console.log("failed to load notifications");
+                progressBar.setAttribute("value", data.Progress.Percentage + "");
             }
-        });
-        request.send();
-    }
-    createNotification(data) {
-        return new NotificationItemOLD(data);
-    }
-}
-class NotificationItemOLD {
-    constructor(data) {
-        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
-        this.createElement(data);
-    }
-    createElement(data) {
-        var ret;
-        ret = document.createElement("div");
-        ret.innerHTML = `
-            <div class="notification">
-                <div class="notification_close"></div>
-                <div class="notification_left"></div>
-                <div class="notification_right">
-                    <div class="notification_name">${e(data.Name)}</div>
-                </div>
-            </div>        
-        `;
-        this.el = ret.children[0];
-        this.el
-            .querySelector(".notification_close")
-            .addEventListener("click", this.closeNotification.bind(this));
-    }
-    closeNotification() {
-        this.el.classList.add("notification-closed");
-        fetch(this.adminPrefix + "/_api/notification/" + this.uuid, {
-            method: "DELETE",
-        })
-            .then(console.log)
-            .then((e) => {
-            console.log(e);
-        });
+        }
+        else {
+            progressEl.classList.remove("notification_left_progress-visible");
+        }
+        if (data.URL) {
+            this.el.classList.add("notification-clickable");
+            this.el.setAttribute("data-url", data.URL);
+        }
+        else {
+            this.el.classList.remove("notification-clickable");
+            this.el.setAttribute("data-url", "");
+        }
     }
 }
 class Popup {

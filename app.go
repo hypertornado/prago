@@ -3,10 +3,7 @@ package prago
 
 import (
 	"database/sql"
-	"encoding/base64"
-	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"reflect"
 
@@ -29,7 +26,7 @@ type App struct {
 	cache           *cachelib.Cache
 	sessionsManager *sessionsManager
 
-	logo string
+	logo []byte
 	//logoPath        string
 	name            func(string) string
 	resources       []*Resource
@@ -169,9 +166,9 @@ func (app *App) Name(name func(string) string) *App {
 
 //Logo sets application public path to logo
 func (app *App) Logo(logo []byte) *App {
-	mimeType := http.DetectContentType(logo)
-	app.logo = fmt.Sprintf("%s;base64,%s", mimeType, base64.StdEncoding.EncodeToString(logo))
-	//app.logo = logo
+	app.logo = logo
+	//mimeType := http.DetectContentType(logo)
+	//app.logo = fmt.Sprintf("%s;base64,%s", mimeType, base64.StdEncoding.EncodeToString(logo))
 	return app
 }
 

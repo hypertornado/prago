@@ -35,7 +35,7 @@ func (n navigation) sortByPriority() navigation {
 }
 
 func (nav page) Logo() string {
-	return nav.App.logo
+	return ""
 }
 
 func isTabVisible(tabs []tab, pos int) bool {

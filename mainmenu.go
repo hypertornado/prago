@@ -5,7 +5,7 @@ import (
 )
 
 type mainMenu struct {
-	Logo             string
+	HasLogo          bool
 	Language         string
 	URLPrefix        string
 	AdminHomepageURL string
@@ -40,7 +40,8 @@ func (menu mainMenu) GetTitle() string {
 func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 	user := request.user
 	adminSectionName := app.name(request.user.Locale)
-	if app.logo != "" {
+	if app.logo != nil {
+		ret.HasLogo = true
 		adminSectionName = ""
 	}
 	adminSection := mainMenuSection{
@@ -140,7 +141,6 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 	}
 	ret.Sections = append(ret.Sections, userSection)
 
-	ret.Logo = app.logo
 	ret.URLPrefix = adminPathPrefix
 	ret.Language = user.Locale
 	ret.AdminHomepageURL = app.getAdminURL("")

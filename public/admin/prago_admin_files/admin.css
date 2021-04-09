@@ -7429,6 +7429,16 @@ a.mainmenu_logo:hover {
   display: flex;
   position: relative;
 }
+.notification-clickable {
+  background-color: rgba(64, 120, 192, 0.05);
+  cursor: pointer;
+}
+.notification-clickable:hover {
+  background-color: rgba(64, 120, 192, 0.1);
+}
+.notification-clickable:active {
+  opacity: 0.8;
+}
 .notification-closed {
   display: none;
 }
@@ -7447,6 +7457,9 @@ a.mainmenu_logo:hover {
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
   cursor: pointer;
 }
+.notification_close-disabled {
+  display: none;
+}
 .notification_close:hover {
   background-color: #eee;
 }
@@ -7462,10 +7475,81 @@ a.mainmenu_logo:hover {
   background-color: rgba(64, 120, 192, 0.05);
   border-radius: 5px;
   margin: 5px;
+  display: none;
+  flex-grow: 0;
   flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: white;
+  background-size: cover;
+  margin-right: 0px;
+}
+.notification_left-visible {
+  display: flex;
 }
 .notification_right {
   flex-grow: 10;
   margin: 5px;
-  margin-left: 0px;
+}
+.notification_prename {
+  font-size: 0.8rem;
+  line-height: 1.3em;
+  text-transform: uppercase;
+}
+.notification_name {
+  font-weight: 500;
+}
+.notification_description {
+  font-size: 0.9rem;
+  line-height: 1.3em;
+  color: #888;
+}
+.notification_action {
+  display: none;
+}
+.notification_action-visible {
+  display: block;
+  background-color: rgba(64, 120, 192, 0.05);
+  border-radius: 5px;
+  text-align: center;
+  font-size: 0.9em;
+  line-height: 1.3em;
+  padding: 3px 0px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  background-color: #4078c0;
+  color: white;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+}
+.notification_action-visible:hover {
+  opacity: 0.9;
+}
+.notification_action-visible:active {
+  opacity: 0.8;
+}
+.notification_left_progress {
+  display: none;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  margin: 0px;
+  flex-grow: 10;
+  backdrop-filter: blur(3px);
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 5px;
+}
+.notification_left_progress-visible {
+  display: flex;
+}
+.notification_left_progress_human {
+  font-size: 0.8rem;
+  line-height: 1.3em;
+  font-weight: 500;
+}
+.notification_left_progressbar {
+  width: 100%;
 }
