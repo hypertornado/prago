@@ -1,10 +1,3 @@
-function bindImagePickers() {
-  var els = document.querySelectorAll(".admin_images");
-  for (var i = 0; i < els.length; i++) {
-    new ImagePicker(<HTMLDivElement>els[i]);
-  }
-}
-
 class ImagePicker {
   el: HTMLDivElement;
   adminPrefix: string;

@@ -32,6 +32,13 @@ class List {
   constructor(el: HTMLDivElement) {
     this.el = el;
 
+    var dateFilterInputs = el.querySelectorAll<HTMLInputElement>(
+      ".admin_filter_date_input"
+    );
+    dateFilterInputs.forEach((el) => {
+      new DatePicker(el);
+    });
+
     this.settings = new ListSettings(this);
     this.exportButton = document.querySelector(".admin_exportbutton");
 

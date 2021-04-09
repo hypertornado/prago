@@ -1,18 +1,20 @@
-function bindMainMenu() {
-  var el: HTMLDivElement = document.querySelector(".admin_layout_left");
-  if (el) {
-    new MainMenu(el);
-  }
-}
-
 class MainMenu {
   leftEl: HTMLDivElement;
   menuEl: HTMLDivElement;
+
+  search: SearchForm;
 
   constructor(leftEl: HTMLDivElement) {
     this.leftEl = leftEl;
     this.menuEl = document.querySelector(".admin_header_container_menu");
     this.menuEl.addEventListener("click", this.menuClick.bind(this));
+
+    var searchFormEl = leftEl.querySelector<HTMLFormElement>(
+      ".admin_header_search"
+    );
+    if (searchFormEl) {
+      this.search = new SearchForm(searchFormEl);
+    }
 
     this.scrollTo(this.loadFromStorage());
     this.leftEl.addEventListener("scroll", this.scrollHandler.bind(this));

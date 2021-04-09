@@ -1,10 +1,3 @@
-function bindPlacesView() {
-  var els = document.querySelectorAll(".admin_item_view_place");
-  for (var i = 0; i < els.length; i++) {
-    new PlacesView(<HTMLDivElement>els[i]);
-  }
-}
-
 class PlacesView {
   constructor(el: HTMLDivElement) {
     var val = el.getAttribute("data-value");

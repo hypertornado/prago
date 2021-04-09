@@ -1,25 +1,30 @@
-function bindPlaces() {
-  bindPlacesView();
+class PlacesEdit {
+  private el: HTMLDivElement;
 
-  function bindPlace(el: any) {
+  constructor(el: any) {
+    this.el = el;
+    Prago.registerPlacesEdit(this);
+  }
+
+  start() {
     var mapEl = document.createElement("div");
     mapEl.classList.add("admin_place_map");
-    el.appendChild(mapEl);
+    this.el.appendChild(mapEl);
 
     var position = { lat: 0, lng: 0 };
     var zoom = 1;
     var visible = false;
 
-    var input = el.getElementsByTagName("input")[0];
+    var input = this.el.getElementsByTagName("input")[0];
 
     var inVal = input.value;
     var inVals = inVal.split(",");
     if (inVals.length == 2) {
-      inVals[0] = parseFloat(inVals[0]);
-      inVals[1] = parseFloat(inVals[1]);
-      if (!isNaN(inVals[0]) && !isNaN(inVals[1])) {
-        position.lat = inVals[0];
-        position.lng = inVals[1];
+      var lat = parseFloat(inVals[0]);
+      var lon = parseFloat(inVals[1]);
+      if (!isNaN(lat) && !isNaN(lon)) {
+        position.lat = lat;
+        position.lng = lon;
         zoom = 11;
         visible = true;
       }
@@ -83,9 +88,4 @@ function bindPlaces() {
       return lat + "," + lng;
     }
   }
-
-  var elements = document.querySelectorAll(".admin_place");
-  Array.prototype.forEach.call(elements, function (el: HTMLElement, i: number) {
-    bindPlace(el);
-  });
 }

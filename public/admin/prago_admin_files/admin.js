@@ -44,12 +44,6 @@ function escapeHTML(str) {
     str = str.split("'").join("&#39;");
     return str;
 }
-function bindImageViews() {
-    var els = document.querySelectorAll(".admin_item_view_image_content");
-    for (var i = 0; i < els.length; i++) {
-        new ImageView(els[i]);
-    }
-}
 class ImageView {
     constructor(el) {
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
@@ -94,12 +88,6 @@ class ImageView {
         });
         request.send();
         this.el.appendChild(container);
-    }
-}
-function bindImagePickers() {
-    var els = document.querySelectorAll(".admin_images");
-    for (var i = 0; i < els.length; i++) {
-        new ImagePicker(els[i]);
     }
 }
 class ImagePicker {
@@ -433,6 +421,10 @@ class ListFilterDate {
 class List {
     constructor(el) {
         this.el = el;
+        var dateFilterInputs = el.querySelectorAll(".admin_filter_date_input");
+        dateFilterInputs.forEach((el) => {
+            new DatePicker(el);
+        });
         this.settings = new ListSettings(this);
         this.exportButton = document.querySelector(".admin_exportbutton");
         let urlParams = new URLSearchParams(window.location.search);
@@ -1006,12 +998,6 @@ function bindOrder() {
         orderTable(el);
     });
 }
-function bindMarkdowns() {
-    var elements = document.querySelectorAll(".admin_markdown");
-    Array.prototype.forEach.call(elements, function (el, i) {
-        new MarkdownEditor(el);
-    });
-}
 class MarkdownEditor {
     constructor(el) {
         this.el = el;
@@ -1133,12 +1119,6 @@ class MarkdownEditor {
         request.send(this.textarea.value);
     }
 }
-function bindTimestamps() {
-    var elements = document.querySelectorAll(".admin_timestamp");
-    Array.prototype.forEach.call(elements, function (el, i) {
-        new Timestamp(el);
-    });
-}
 class Timestamp {
     constructor(el) {
         this.elTsInput = el.getElementsByTagName("input")[0];
@@ -1199,12 +1179,6 @@ class Timestamp {
         }
         this.elTsInput.value = str;
     }
-}
-function bindRelations() {
-    var elements = document.querySelectorAll(".admin_item_relation");
-    Array.prototype.forEach.call(elements, function (el, i) {
-        new RelationPicker(el);
-    });
 }
 class RelationPicker {
     constructor(el) {
@@ -1399,12 +1373,6 @@ class RelationPicker {
         return ret;
     }
 }
-function bindPlacesView() {
-    var els = document.querySelectorAll(".admin_item_view_place");
-    for (var i = 0; i < els.length; i++) {
-        new PlacesView(els[i]);
-    }
-}
 class PlacesView {
     constructor(el) {
         var val = el.getAttribute("data-value");
@@ -1426,24 +1394,27 @@ class PlacesView {
         });
     }
 }
-function bindPlaces() {
-    bindPlacesView();
-    function bindPlace(el) {
+class PlacesEdit {
+    constructor(el) {
+        this.el = el;
+        Prago.registerPlacesEdit(this);
+    }
+    start() {
         var mapEl = document.createElement("div");
         mapEl.classList.add("admin_place_map");
-        el.appendChild(mapEl);
+        this.el.appendChild(mapEl);
         var position = { lat: 0, lng: 0 };
         var zoom = 1;
         var visible = false;
-        var input = el.getElementsByTagName("input")[0];
+        var input = this.el.getElementsByTagName("input")[0];
         var inVal = input.value;
         var inVals = inVal.split(",");
         if (inVals.length == 2) {
-            inVals[0] = parseFloat(inVals[0]);
-            inVals[1] = parseFloat(inVals[1]);
-            if (!isNaN(inVals[0]) && !isNaN(inVals[1])) {
-                position.lat = inVals[0];
-                position.lng = inVals[1];
+            var lat = parseFloat(inVals[0]);
+            var lon = parseFloat(inVals[1]);
+            if (!isNaN(lat) && !isNaN(lon)) {
+                position.lat = lat;
+                position.lng = lon;
                 zoom = 11;
                 visible = true;
             }
@@ -1499,20 +1470,34 @@ function bindPlaces() {
             return lat + "," + lng;
         }
     }
-    var elements = document.querySelectorAll(".admin_place");
-    Array.prototype.forEach.call(elements, function (el, i) {
-        bindPlace(el);
-    });
-}
-function bindForm() {
-    var els = document.querySelectorAll(".prago_form");
-    for (var i = 0; i < els.length; i++) {
-        new Form(els[i]);
-    }
 }
 class Form {
     constructor(el) {
         this.dirty = false;
+        var elements = el.querySelectorAll(".admin_markdown");
+        elements.forEach((el) => {
+            new MarkdownEditor(el);
+        });
+        var timestamps = el.querySelectorAll(".admin_timestamp");
+        timestamps.forEach((el) => {
+            new Timestamp(el);
+        });
+        var relations = el.querySelectorAll(".admin_item_relation");
+        relations.forEach((el) => {
+            new RelationPicker(el);
+        });
+        var imagePickers = el.querySelectorAll(".admin_images");
+        imagePickers.forEach((el) => {
+            new ImagePicker(el);
+        });
+        var dateInputs = el.querySelectorAll(".form_input-date");
+        dateInputs.forEach((el) => {
+            new DatePicker(el);
+        });
+        var elements = el.querySelectorAll(".admin_place");
+        elements.forEach((el) => {
+            new PlacesEdit(el);
+        });
         el.addEventListener("submit", () => {
             this.dirty = false;
         });
@@ -1533,13 +1518,6 @@ class Form {
                 return confirmationMessage;
             }
         });
-    }
-}
-function bindDatePicker() {
-    var dates = document.querySelectorAll(".form_input-date");
-    for (var i = 0; i < dates.length; i++) {
-        var dateEl = dates[i];
-        new DatePicker(dateEl);
     }
 }
 class DatePicker {
@@ -1695,31 +1673,6 @@ function prettyDate(date) {
     const year = date.getFullYear();
     return `${day}. ${month}. ${year}`;
 }
-function bindDropdowns() {
-    var els = document.querySelectorAll(".admin_dropdown");
-    for (var i = 0; i < els.length; i++) {
-        new Dropdown(els[i]);
-    }
-}
-class Dropdown {
-    constructor(el) {
-        this.targetEl = el.querySelector(".admin_dropdown_target");
-        this.contentEl = (el.querySelector(".admin_dropdown_content"));
-        this.targetEl.addEventListener("mousedown", (e) => {
-            if (document.activeElement == el) {
-                el.blur();
-                e.preventDefault();
-                return false;
-            }
-        });
-    }
-}
-function bindSearch() {
-    var els = document.querySelectorAll(".admin_header_search");
-    for (var i = 0; i < els.length; i++) {
-        new SearchForm(els[i]);
-    }
-}
 class SearchForm {
     constructor(el) {
         this.searchForm = el;
@@ -1845,17 +1798,15 @@ class SearchForm {
         }
     }
 }
-function bindMainMenu() {
-    var el = document.querySelector(".admin_layout_left");
-    if (el) {
-        new MainMenu(el);
-    }
-}
 class MainMenu {
     constructor(leftEl) {
         this.leftEl = leftEl;
         this.menuEl = document.querySelector(".admin_header_container_menu");
         this.menuEl.addEventListener("click", this.menuClick.bind(this));
+        var searchFormEl = leftEl.querySelector(".admin_header_search");
+        if (searchFormEl) {
+            this.search = new SearchForm(searchFormEl);
+        }
         this.scrollTo(this.loadFromStorage());
         this.leftEl.addEventListener("scroll", this.scrollHandler.bind(this));
     }
@@ -1877,12 +1828,6 @@ class MainMenu {
     }
     scrollTo(position) {
         this.leftEl.scrollTo(0, position);
-    }
-}
-function bindRelationList() {
-    var els = document.getElementsByClassName("admin_relationlist");
-    for (var i = 0; i < els.length; i++) {
-        new RelationList(els[i]);
     }
 }
 class RelationList {
@@ -1937,14 +1882,12 @@ class RelationList {
         }));
     }
 }
-function bindTaskMonitor() {
-    var el = document.querySelector(".taskmonitorcontainer");
-    if (el) {
-        new TaskMonitor(el);
-    }
-}
 class TaskMonitor {
-    constructor(el) {
+    constructor() {
+        var el = document.querySelector(".taskmonitorcontainer");
+        if (!el) {
+            return;
+        }
         this.el = el;
         window.setInterval(this.load.bind(this), 1000);
     }
@@ -1963,15 +1906,28 @@ class TaskMonitor {
         request.send();
     }
 }
-function bindNotifications() {
-    new NotificationCenter2(document.querySelector(".notification_center"));
-}
-class NotificationCenter2 {
+class NotificationCenter {
     constructor(el) {
-        var notifications = el.querySelectorAll(".notification");
-        for (var i = 0; i < notifications.length; i++) {
-            this.bindNotification(notifications[i]);
+        this.notifications = new Map();
+        this.el = el;
+        var notifications = JSON.parse(el.getAttribute("data-notification-views"));
+        notifications.forEach((item) => {
+            this.setData(item);
+        });
+        console.log(notifications);
+        return;
+    }
+    setData(data) {
+        var notification;
+        if (this.notifications.has(data.UUID)) {
+            notification = this.notifications.get(data.UUID);
         }
+        else {
+            notification = new NotificationItem();
+            this.notifications.set(data.UUID, notification);
+            this.el.appendChild(notification.el);
+        }
+        notification.setData(data);
     }
     bindNotification(el) {
         el.querySelector(".notification_close").addEventListener("click", () => {
@@ -1979,7 +1935,28 @@ class NotificationCenter2 {
         });
     }
 }
-class NotificationCenter {
+class NotificationItem {
+    constructor() {
+        this.el = document.createElement("div");
+        this.el.classList.add("notification");
+        this.el.innerHTML = `
+      <div class="notification_close"></div>
+      <div class="notification_left"></div>
+      <div class="notification_right">
+          <div class="notification_name"></div>
+      </div>
+    `;
+        this.el
+            .querySelector(".notification_close")
+            .addEventListener("click", () => {
+            this.el.classList.add("notification-closed");
+        });
+    }
+    setData(data) {
+        this.el.querySelector(".notification_name").textContent = data.Name;
+    }
+}
+class NotificationCenterOLD {
     constructor(el) {
         this.el = el;
         this.notifications = Array();
@@ -2006,10 +1983,10 @@ class NotificationCenter {
         request.send();
     }
     createNotification(data) {
-        return new NotificationItem(data);
+        return new NotificationItemOLD(data);
     }
 }
-class NotificationItem {
+class NotificationItemOLD {
     constructor(data) {
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.createElement(data);
@@ -2217,19 +2194,42 @@ class Prago {
         if (listEl) {
             new List(listEl);
         }
-        bindMarkdowns();
-        bindTimestamps();
-        bindRelations();
-        bindImagePickers();
-        bindForm();
-        bindImageViews();
-        bindDatePicker();
-        bindDropdowns();
-        bindSearch();
-        bindMainMenu();
-        bindRelationList();
-        bindTaskMonitor();
-        bindNotifications();
+        var formElements = document.querySelectorAll(".prago_form");
+        formElements.forEach((el) => {
+            new Form(el);
+        });
+        var imageViews = document.querySelectorAll(".admin_item_view_image_content");
+        imageViews.forEach((el) => {
+            new ImageView(el);
+        });
+        var mainMenuEl = document.querySelector(".admin_layout_left");
+        if (mainMenuEl) {
+            new MainMenu(mainMenuEl);
+        }
+        var relationListEls = document.querySelectorAll(".admin_relationlist");
+        relationListEls.forEach((el) => {
+            new RelationList(el);
+        });
+        new TaskMonitor();
+        new NotificationCenter(document.querySelector(".notification_center"));
+    }
+    static registerPlacesEdit(place) {
+        Prago.placesEditArr.push(place);
+    }
+    static initGoogleMaps() {
+        Prago.googleMapsInited = true;
+        Prago.placesEditArr.forEach((placeEdit) => {
+            placeEdit.start();
+        });
     }
 }
+Prago.placesEditArr = [];
+Prago.googleMapsInited = false;
 Prago.start();
+function googleMapsInited() {
+    var els = document.querySelectorAll(".admin_item_view_place");
+    els.forEach((el) => {
+        new PlacesView(el);
+    });
+    Prago.initGoogleMaps();
+}

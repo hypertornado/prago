@@ -1,10 +1,3 @@
-function bindRelations() {
-  var elements = document.querySelectorAll(".admin_item_relation");
-  Array.prototype.forEach.call(elements, function (el: HTMLElement, i: number) {
-    new RelationPicker(<HTMLDivElement>el);
-  });
-}
-
 class RelationPicker {
   input: HTMLInputElement;
   previewContainer: HTMLDivElement;

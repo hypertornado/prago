@@ -1,11 +1,3 @@
-function bindDatePicker() {
-  var dates = document.querySelectorAll(".form_input-date");
-  for (var i = 0; i < dates.length; i++) {
-    var dateEl = <HTMLInputElement>dates[i];
-    new DatePicker(dateEl);
-  }
-}
-
 class DatePicker {
   constructor(el: HTMLInputElement) {
     var language = "cs"; //el.getAttribute("data-language");

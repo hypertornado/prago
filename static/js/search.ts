@@ -1,9 +1,9 @@
-function bindSearch() {
+/*function bindSearch() {
   var els = document.querySelectorAll(".admin_header_search");
   for (var i = 0; i < els.length; i++) {
     new SearchForm(<HTMLFormElement>els[i]);
   }
-}
+}*/
 
 class SearchForm {
   searchForm: HTMLFormElement;

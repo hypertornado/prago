@@ -1,10 +1,3 @@
-function bindMarkdowns() {
-  var elements = document.querySelectorAll(".admin_markdown");
-  Array.prototype.forEach.call(elements, function (el: HTMLElement, i: number) {
-    new MarkdownEditor(el);
-  });
-}
-
 class MarkdownEditor {
   textarea: HTMLTextAreaElement;
   preview: HTMLDivElement;

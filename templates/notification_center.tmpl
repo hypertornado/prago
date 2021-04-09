@@ -1,9 +1,5 @@
 {{define "notification_center"}}
 
-<div class="notification_center">
-    {{range $notification := .notifications}}
-        {{template "notification" $notification}}
-    {{end}}
-</div>
+<div class="notification_center" data-notification-views="{{.notifications_data}}"></div>
 
 {{end}}

@@ -1,10 +1,3 @@
-function bindImageViews() {
-  var els = document.querySelectorAll(".admin_item_view_image_content");
-  for (var i = 0; i < els.length; i++) {
-    new ImageView(<HTMLDivElement>els[i]);
-  }
-}
-
 class ImageView {
   el: HTMLDivElement;
   adminPrefix: string;

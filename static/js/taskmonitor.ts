@@ -1,14 +1,11 @@
-function bindTaskMonitor() {
-  var el: HTMLDivElement = document.querySelector(".taskmonitorcontainer");
-  if (el) {
-    new TaskMonitor(el);
-  }
-}
-
 class TaskMonitor {
   el: HTMLDivElement;
 
-  constructor(el: HTMLDivElement) {
+  constructor() {
+    var el = document.querySelector<HTMLDivElement>(".taskmonitorcontainer");
+    if (!el) {
+      return;
+    }
     this.el = el;
     window.setInterval(this.load.bind(this), 1000);
   }

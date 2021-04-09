@@ -1,13 +1,39 @@
-function bindNotifications() {
-  new NotificationCenter2(document.querySelector(".notification_center"));
-}
+class NotificationCenter {
+  notifications = new Map<string, NotificationItem>();
+  el: HTMLDivElement;
 
-class NotificationCenter2 {
   constructor(el: HTMLDivElement) {
+    this.el = el;
+    var notifications: NotificationData[] = JSON.parse(
+      el.getAttribute("data-notification-views")
+    );
+
+    notifications.forEach((item) => {
+      this.setData(item);
+      //this.getItem(item.UUID).setData(item);
+    });
+
+    console.log(notifications);
+
+    return;
+
+    /*
     var notifications = el.querySelectorAll(".notification");
     for (var i = 0; i < notifications.length; i++) {
       this.bindNotification(<HTMLDivElement>notifications[i]);
+    }*/
+  }
+
+  setData(data: NotificationData) {
+    var notification: NotificationItem;
+    if (this.notifications.has(data.UUID)) {
+      notification = this.notifications.get(data.UUID);
+    } else {
+      notification = new NotificationItem();
+      this.notifications.set(data.UUID, notification);
+      this.el.appendChild(notification.el);
     }
+    notification.setData(data);
   }
 
   bindNotification(el: HTMLDivElement) {
@@ -17,14 +43,45 @@ class NotificationCenter2 {
   }
 }
 
-class NotificationCenter {
+interface NotificationData {
+  UUID: string;
+  Name: string;
+}
+
+class NotificationItem {
+  el: HTMLDivElement;
+
+  constructor() {
+    this.el = document.createElement("div");
+    this.el.classList.add("notification");
+    this.el.innerHTML = `
+      <div class="notification_close"></div>
+      <div class="notification_left"></div>
+      <div class="notification_right">
+          <div class="notification_name"></div>
+      </div>
+    `;
+
+    this.el
+      .querySelector(".notification_close")
+      .addEventListener("click", () => {
+        this.el.classList.add("notification-closed");
+      });
+  }
+
+  setData(data: NotificationData) {
+    this.el.querySelector(".notification_name").textContent = data.Name;
+  }
+}
+
+class NotificationCenterOLD {
   el: HTMLDivElement;
   adminPrefix: string;
-  notifications: Array<NotificationItem>;
+  notifications: Array<NotificationItemOLD>;
 
   constructor(el: HTMLDivElement) {
     this.el = el;
-    this.notifications = Array<NotificationItem>();
+    this.notifications = Array<NotificationItemOLD>();
     this.adminPrefix = document.body.getAttribute("data-admin-prefix");
     this.loadNotifications();
   }
@@ -51,12 +108,12 @@ class NotificationCenter {
 
   //https://stackoverflow.com/questions/7381974/which-characters-need-to-be-escaped-in-html
 
-  createNotification(data: any): NotificationItem {
-    return new NotificationItem(data);
+  createNotification(data: any): NotificationItemOLD {
+    return new NotificationItemOLD(data);
   }
 }
 
-class NotificationItem {
+class NotificationItemOLD {
   adminPrefix: String;
 
   el: HTMLDivElement;

@@ -1,6 +1,10 @@
 package prago
 
-import "github.com/gorilla/sessions"
+import (
+	"encoding/json"
+
+	"github.com/gorilla/sessions"
+)
 
 type sessionsManager struct {
 	cookieStore *sessions.CookieStore
@@ -83,7 +87,9 @@ func initRequestWithSession(request *Request, next func()) {
 	}
 
 	if notifications != nil {
-		request.SetData("notifications", notifications)
+		b, err := json.Marshal(notifications)
+		must(err)
+		request.SetData("notifications_data", string(b))
 	}
 
 	next()

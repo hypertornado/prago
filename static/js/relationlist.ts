@@ -1,10 +1,3 @@
-function bindRelationList() {
-  var els = document.getElementsByClassName("admin_relationlist");
-  for (var i = 0; i < els.length; i++) {
-    new RelationList(<HTMLDivElement>els[i]);
-  }
-}
-
 class RelationList {
   adminPrefix: string;
 

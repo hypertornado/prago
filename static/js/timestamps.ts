@@ -1,17 +1,10 @@
-function bindTimestamps() {
-  var elements = document.querySelectorAll(".admin_timestamp");
-  Array.prototype.forEach.call(elements, function (el: HTMLElement, i: number) {
-    new Timestamp(el);
-  });
-}
-
 class Timestamp {
   elTsInput: HTMLInputElement;
   elTsDate: HTMLInputElement;
   elTsHour: HTMLInputElement;
   elTsMinute: HTMLInputElement;
 
-  constructor(el: HTMLElement) {
+  constructor(el: HTMLDivElement) {
     this.elTsInput = <HTMLInputElement>el.getElementsByTagName("input")[0];
     this.elTsDate = <HTMLInputElement>(
       el.getElementsByClassName("admin_timestamp_date")[0]

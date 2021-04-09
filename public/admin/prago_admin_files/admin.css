@@ -6461,63 +6461,6 @@ td.admin_list_message {
   overflow-x: auto;
   width: 10px;
 }
-.admin_avatar {
-  margin: 5px 10px 5px 10px;
-}
-.admin_avatar_icon {
-  border: 1px solid #888;
-  width: 25px;
-  height: 25px;
-  border-radius: 100px;
-  display: inline-block;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  cursor: pointer;
-}
-.admin_avatar_icon:hover {
-  border-color: #ddd;
-}
-.admin_avatar:focus .admin_avatar_icon {
-  border: 1px solid #51a7e8;
-}
-.admin_dropdown {
-  position: relative;
-  display: flex;
-  outline: none;
-}
-.admin_dropdown_content {
-  border: 1px solid #eee;
-  position: absolute;
-  right: 0px;
-  top: 25px;
-  background: white;
-  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
-  display: none;
-}
-.admin_dropdown:focus .admin_dropdown_content,
-.admin_dropdown:focus-within .admin_dropdown_content {
-  display: block;
-}
-div.admin_dropdown_item {
-  cursor: default;
-}
-.admin_dropdown_item {
-  display: block;
-  padding: 5px 10px;
-  border-bottom: 1px solid #eee;
-}
-.admin_dropdown_content,
-.admin_dropdown_item:last-child {
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-  border: none;
-}
-.admin_dropdown_content,
-.admin_dropdown_item:first-child {
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
-}
 @media (max-width: 800px) {
   .admin_header {
     box-shadow: none;

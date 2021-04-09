@@ -98,11 +98,13 @@ func (n *Notification) SetDescription(description string) *Notification {
 }
 
 type notificationView struct {
+	UUID string
 	Name string
 }
 
 func (n *Notification) getView() *notificationView {
 	return &notificationView{
+		UUID: n.uuid,
 		Name: n.name,
 	}
 }
