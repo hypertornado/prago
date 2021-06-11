@@ -95,19 +95,35 @@ func (app *App) Resource(item interface{}) *Resource {
 	return ret
 }
 
-func (resource Resource) allowsMultipleActions(user *user) bool {
-	return resource.app.authorize(user, resource.canDelete)
+func (resource Resource) allowsMultipleActions(user *user) (ret bool) {
+	if resource.app.authorize(user, resource.canDelete) {
+		ret = true
+	}
+	if resource.app.authorize(user, resource.canEdit) {
+		ret = true
+	}
+	return ret
 }
 
 func (resource Resource) getMultipleActions(user *user) (ret []listMultipleAction) {
 	if !resource.allowsMultipleActions(user) {
 		return nil
 	}
-	ret = append(ret, listMultipleAction{
-		ID:       "delete",
-		Name:     "Smazat",
-		IsDelete: true,
-	})
+
+	if resource.app.authorize(user, resource.canEdit) {
+		ret = append(ret, listMultipleAction{
+			ID:   "edit",
+			Name: "Upravit",
+		})
+	}
+
+	if resource.app.authorize(user, resource.canDelete) {
+		ret = append(ret, listMultipleAction{
+			ID:       "delete",
+			Name:     "Smazat",
+			IsDelete: true,
+		})
+	}
 	ret = append(ret, listMultipleAction{
 		ID:   "cancel",
 		Name: "Storno",
@@ -216,7 +232,7 @@ func (app *App) getResourceByItem(item interface{}) (*Resource, error) {
 	return resource, nil
 }
 
-func (resource Resource) saveWithDBIface(item interface{}, db dbIface) error {
+func (resource Resource) saveWithDBIface(item interface{}, db dbIface, debugSQL bool) error {
 	val := reflect.ValueOf(item).Elem()
 	timeVal := reflect.ValueOf(time.Now())
 	fn := "UpdatedAt"
@@ -225,10 +241,10 @@ func (resource Resource) saveWithDBIface(item interface{}, db dbIface) error {
 		val.FieldByName(fn).Type() == timeVal.Type() {
 		val.FieldByName(fn).Set(timeVal)
 	}
-	return resource.saveItem(db, resource.id, item)
+	return resource.saveItem(db, resource.id, item, debugSQL)
 }
 
-func (resource Resource) createWithDBIface(item interface{}, db dbIface) error {
+func (resource Resource) createWithDBIface(item interface{}, db dbIface, debugSQL bool) error {
 	val := reflect.ValueOf(item).Elem()
 	timeVal := reflect.ValueOf(time.Now())
 	var t time.Time
@@ -241,7 +257,7 @@ func (resource Resource) createWithDBIface(item interface{}, db dbIface) error {
 			}
 		}
 	}
-	return resource.createItem(db, resource.id, item)
+	return resource.createItem(db, resource.id, item, debugSQL)
 }
 
 func (resource Resource) newItem(item interface{}) {

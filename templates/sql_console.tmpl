@@ -13,7 +13,7 @@
         {{range $row := .table}}
             <tr>
                 {{range $column := $row}}
-                    <td>{{$column}}</td>
+                    <td>{{$column.Value}}</td>
                 {{end}}
             </tr>
         {{end}}

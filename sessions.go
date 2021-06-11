@@ -39,12 +39,7 @@ func (request *Request) writeSessionIfDirty() {
 
 //AddFlashMessage adds flash message to request
 func (request *Request) AddFlashMessage(message string) {
-
 	request.app.Notification(message).Flash(request)
-	//request.session.session.AddFlash(message)
-
-	//request.session.session.add
-	//request.session.dirty = true
 }
 
 func initUserFromSession(request *Request) {
@@ -78,7 +73,7 @@ func initRequestWithSession(request *Request, next func()) {
 
 	for _, v := range session.Flashes() {
 		notificationID := v.(string)
-		notification := request.app.notificationCenter.get(notificationID)
+		notification := request.app.notificationCenter.getFromUUID(notificationID)
 		if notification != nil {
 			request.app.notificationCenter.delete(notificationID)
 			notifications = append(notifications, notification.getView())

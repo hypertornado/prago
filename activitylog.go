@@ -85,16 +85,6 @@ func (app *App) ListenActivity(handler func(logItem Activity)) {
 	app.activityListeners = append(app.activityListeners, handler)
 }
 
-func (app *App) createActivityLog(log activityLog) error {
-	err := app.Create(&log)
-	if err == nil {
-		for _, v := range app.activityListeners {
-			v(log.activity())
-		}
-	}
-	return err
-}
-
 func (app *App) getHistory(resource *Resource, itemID int64) historyView {
 	ret := historyView{}
 
@@ -144,38 +134,40 @@ func initActivityLog(resource *Resource) {
 	resource.name = messages.GetNameFunction("admin_history")
 }
 
-func (app App) createNewActivityLog(resource Resource, user *user, item interface{}) error {
-	data, err := json.Marshal(item)
-	if err != nil {
-		return err
+func (app App) CreateActivityLog(actionType string, userID int64, resourceID string, itemID int64, before, after interface{}) error {
+	var err error
+
+	var beforeData []byte
+	if before != nil {
+		beforeData, err = json.Marshal(before)
+		if err != nil {
+			return fmt.Errorf("can't marshal before data: %s", err)
+		}
 	}
 
-	return app.createActivityLog(activityLog{
-		ResourceName: resource.id,
-		ItemID:       getItemID(item),
-		ActionType:   "new",
-		User:         user.ID,
-		ContentAfter: string(data),
-	})
-}
+	var afterData []byte
+	if after != nil {
+		afterData, err = json.Marshal(after)
+		if err != nil {
+			return fmt.Errorf("can't marshal after data: %s", err)
+		}
+	}
 
-func (app App) createEditActivityLog(resource Resource, user *user, itemID int64, before, after []byte) error {
-	return app.createActivityLog(activityLog{
-		ResourceName:  resource.id,
+	log := activityLog{
+		ResourceName:  resourceID,
 		ItemID:        itemID,
-		ActionType:    "edit",
-		User:          user.ID,
-		ContentBefore: string(before),
-		ContentAfter:  string(after),
-	})
-}
+		ActionType:    actionType,
+		User:          userID,
+		ContentBefore: string(beforeData),
+		ContentAfter:  string(afterData),
+	}
 
-func (app App) createDeleteActivityLog(resource Resource, user *user, itemID int64, before []byte) error {
-	return app.createActivityLog(activityLog{
-		ResourceName:  resource.id,
-		ItemID:        itemID,
-		ActionType:    "delete",
-		User:          user.ID,
-		ContentBefore: string(before),
-	})
+	err = app.Create(&log)
+	if err == nil {
+		for _, v := range app.activityListeners {
+			v(log.activity())
+		}
+	}
+	return err
+
 }

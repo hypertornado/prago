@@ -13,7 +13,7 @@ import (
 //ErrWrongWhereFormat is returned when where query has a bad format
 var ErrWrongWhereFormat = errors.New("wrong where format")
 
-var debugSQL = false
+//var debugSQL = true
 
 //GetDB gets DB
 func (app *App) GetDB() *sql.DB {
@@ -138,7 +138,7 @@ func (resource Resource) prepareValues(value reflect.Value) (names []string, que
 	return
 }
 
-func (resource Resource) saveItem(db dbIface, tableName string, item interface{}) error {
+func (resource Resource) saveItem(db dbIface, tableName string, item interface{}, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	value := reflect.ValueOf(item).Elem()
 	names, _, values, err := resource.prepareValues(value)
@@ -167,7 +167,7 @@ func (resource Resource) saveItem(db dbIface, tableName string, item interface{}
 	return nil
 }
 
-func (resource Resource) createItem(db dbIface, tableName string, item interface{}) error {
+func (resource Resource) createItem(db dbIface, tableName string, item interface{}, debugSQL bool) error {
 	value := reflect.ValueOf(item).Elem()
 
 	names, questionMarks, values, err := resource.prepareValues(value)
@@ -240,7 +240,7 @@ func mapToDBQuery(m map[string]interface{}) (str string, params []interface{}) {
 	return
 }
 
-func countItems(db dbIface, tableName string, query *listQuery) (int64, error) {
+func countItems(db dbIface, tableName string, query *listQuery, debugSQL bool) (int64, error) {
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.whereString)
@@ -265,9 +265,9 @@ func countItems(db dbIface, tableName string, query *listQuery) (int64, error) {
 	return i, err
 }
 
-func getFirstItem(resource Resource, db dbIface, tableName string, item interface{}, query *listQuery) error {
+func getFirstItem(resource Resource, db dbIface, tableName string, item interface{}, query *listQuery, debugSQL bool) error {
 	var items interface{}
-	err := listItems(resource, db, tableName, &items, query)
+	err := listItems(resource, db, tableName, &items, query, debugSQL)
 	if err != nil {
 		return err
 	}
@@ -281,7 +281,7 @@ func getFirstItem(resource Resource, db dbIface, tableName string, item interfac
 	return ErrItemNotFound
 }
 
-func listItems(resource Resource, db dbIface, tableName string, items interface{}, query *listQuery) error {
+func listItems(resource Resource, db dbIface, tableName string, items interface{}, query *listQuery, debugSQL bool) error {
 	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(resource.typ))).Elem()
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
@@ -320,7 +320,7 @@ func listItems(resource Resource, db dbIface, tableName string, items interface{
 	return nil
 }
 
-func deleteItems(db dbIface, tableName string, query *listQuery) (int64, error) {
+func deleteItems(db dbIface, tableName string, query *listQuery, debugSQL bool) (int64, error) {
 	limitString := buildLimitWithoutOffsetString(query.limit)
 	whereString := buildWhereString(query.whereString)
 

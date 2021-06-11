@@ -115,7 +115,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 		ret.DefaultShow = true
 	}
 	if ret.Tags["prago-preview"] == "false" {
-		ret.DefaultShow = true
+		ret.DefaultShow = false
 	}
 
 	if ret.Tags["prago-unique"] == "true" {

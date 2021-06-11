@@ -3,7 +3,6 @@
         <h1>{{message .locale "tasks"}}</h1>
     {{end}}
     <div class="admin_box_content">
-        <div class="taskmonitorcontainer">{{template "taskmonitor" .}}</div>
 
         {{$token := .csrf_token}}
         {{$locale := .locale}}

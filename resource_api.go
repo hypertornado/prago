@@ -192,4 +192,59 @@ func initDefaultResourceAPIs(resource *Resource) {
 			}
 		},
 	)
+
+	type MultipleEditFormItem struct {
+		ID       string
+		Name     string
+		Template string
+		Data     interface{}
+	}
+
+	resource.API("multiple_edit").Permission(resource.canEdit).Method("GET").Handler(
+		func(request *Request) {
+			var items []MultipleEditFormItem
+
+			var item interface{}
+			resource.newItem(&item)
+			form, err := resource.getForm(item, request.user)
+			form.Action = resource.getURL("api/multiple_edit")
+			must(err)
+			request.SetData("form", form)
+
+			request.SetData("CSRFToken", request.csrfToken())
+			request.SetData("ids", request.Params().Get("ids"))
+
+			request.SetData("items", items)
+			request.RenderView("multiple_edit")
+		},
+	)
+
+	resource.API("multiple_edit").Permission(resource.canEdit).Method("POST").Handler(
+		func(request *Request) {
+			validateCSRF(request)
+
+			idsStr := request.Request().PostForm["_ids"][0]
+			fields := request.Request().PostForm["_fields"]
+
+			var ids []int64
+
+			for _, v := range strings.Split(idsStr, ",") {
+				id, err := strconv.Atoi(v)
+				must(err)
+				ids = append(ids, int64(id))
+
+			}
+
+			var fieldsMap = map[string]bool{}
+			for _, v := range fields {
+				fieldsMap[v] = true
+			}
+
+			values := request.Request().PostForm
+
+			_, err := resource.editItemsWithLog(request.user, ids, values, fieldsMap)
+			must(err)
+
+		},
+	)
 }

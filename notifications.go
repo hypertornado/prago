@@ -1,21 +1,9 @@
 package prago
 
 import (
+	"fmt"
 	"sync"
 )
-
-//Notification represents user notification
-/*type Notification struct {
-	ID              int64
-	UUID            string `prago-type:"text"`
-	Name            string `prago-type:"text"`
-	Description     string `prago-type:"text"`
-	NotificationTyp string
-	IsDismissed     bool
-	User            int64 `prago-type:"relation"`
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-}*/
 
 type notificationCenter struct {
 	app             *App
@@ -29,10 +17,22 @@ func (nc *notificationCenter) add(notification *Notification) {
 	nc.notificationMap[notification.uuid] = notification
 }
 
-func (nc *notificationCenter) get(uuid string) *Notification {
+func (nc *notificationCenter) getFromUUID(uuid string) *Notification {
 	nc.mutex.RLock()
 	defer nc.mutex.RUnlock()
 	return nc.notificationMap[uuid]
+}
+
+func (nc *notificationCenter) getFromUser(user *user) (ret []*notificationView) {
+	ret = []*notificationView{}
+	nc.mutex.RLock()
+	defer nc.mutex.RUnlock()
+	for _, v := range nc.notificationMap {
+		if v.user != nil && v.user.ID == user.ID {
+			ret = append(ret, v.getView())
+		}
+	}
+	return
 }
 
 func (nc *notificationCenter) delete(uuid string) {
@@ -49,37 +49,48 @@ func (app *App) initNotifications() {
 	}
 
 	app.API("notifications").Permission(loggedPermission).Handler(func(request *Request) {
-		/*notifications, err := app.getNotificationViews(request.user)
-		must(err)
-		request.RenderJSON(notifications)*/
-	})
-
-	/*.app.adminController.get(resource.app.getAdminURL("_api/notifications"), func(request *Request) {
-		notifications, err := resource.app.getNotificationViews(request.user)
-		must(err)
+		notifications := app.notificationCenter.getFromUser(request.user)
 		request.RenderJSON(notifications)
-	})*/
-
-	app.Action("notification/:uuid").Method("DELETE").Permission(loggedPermission).Handler(func(request *Request) {
-		/*uuid := request.Params().Get("uuid")
-		var notification Notification
-		err := resource.app.Query().WhereIs("uuid", request.Params().Get("uuid")).Get(&notification)
-		must(err)
-		notification.IsDismissed = true
-		must(resource.app.Save(&notification))
-		request.RenderJSON(true)*/
 	})
 
+	app.API("notifications").Method("POST").Permission(loggedPermission).Handler(func(request *Request) {
+		action := request.Params().Get("action")
+		uuid := request.Params().Get("uuid")
+		switch action {
+		case "delete":
+			app.notificationCenter.delete(uuid)
+		case "primary":
+			notification := app.notificationCenter.getFromUUID(uuid)
+			notification.primaryAction.fn()
+		case "secondary":
+			notification := app.notificationCenter.getFromUUID(uuid)
+			notification.secondaryAction.fn()
+		default:
+			panic("unknown action " + action)
+		}
+	})
 }
 
 //NotificationItem represents item for notification
 type Notification struct {
-	uuid        string
-	app         *App
-	user        *user
-	name        string
-	description string
-	typ         string
+	uuid            string
+	app             *App
+	user            *user
+	preName         string
+	image           string
+	url             string
+	name            string
+	description     string
+	primaryAction   *notificationItemAction
+	secondaryAction *notificationItemAction
+	disableCancel   bool
+	style           string
+	progress        *notificationProgress
+}
+
+type notificationProgress struct {
+	Human      string
+	Percentage float64
 }
 
 //Notification creates notification
@@ -97,32 +108,119 @@ func (n *Notification) SetDescription(description string) *Notification {
 	return n
 }
 
+//SetPreName sets prefix name to notification item
+func (n *Notification) SetPreName(preName string) *Notification {
+	n.preName = preName
+	return n
+}
+
+func (n *Notification) SetImage(image string) *Notification {
+	n.image = image
+	return n
+}
+
+func (n *Notification) SetURL(url string) *Notification {
+	n.url = url
+	return n
+}
+
+//SetProgress sets description to notification item
+func (n *Notification) SetProgress(progress *float64) *Notification {
+
+	if progress == nil {
+		n.progress = nil
+	} else {
+		if *progress < 0 {
+			n.progress = &notificationProgress{
+				Human:      "",
+				Percentage: -1,
+			}
+		} else {
+			n.progress = &notificationProgress{
+				Human:      notificationProgressHuman(*progress),
+				Percentage: *progress,
+			}
+		}
+	}
+	return n
+}
+
+func (n *Notification) SetPrimaryAction(name string, fn func()) *Notification {
+	n.primaryAction = &notificationItemAction{
+		name: name,
+		fn:   fn,
+	}
+	return n
+}
+
+func (n *Notification) SetSecondaryAction(name string, fn func()) *Notification {
+	n.secondaryAction = &notificationItemAction{
+		name: name,
+		fn:   fn,
+	}
+	return n
+}
+
+type notificationItemAction struct {
+	name string
+	fn   func()
+}
+
 type notificationView struct {
-	UUID string
-	Name string
+	UUID            string
+	PreName         string
+	Image           string
+	URL             string
+	Name            string
+	Description     string
+	PrimaryAction   *string
+	SecondaryAction *string
+	DisableCancel   bool
+	Style           string
+	Progress        *notificationProgress
 }
 
 func (n *Notification) getView() *notificationView {
+
+	var primaryAction, secondaryAction *string
+	if n.primaryAction != nil {
+		primaryAction = &n.primaryAction.name
+	}
+
+	if n.secondaryAction != nil {
+		secondaryAction = &n.secondaryAction.name
+	}
+
 	return &notificationView{
-		UUID: n.uuid,
-		Name: n.name,
+		UUID:            n.uuid,
+		PreName:         n.preName,
+		Image:           n.image,
+		URL:             n.url,
+		Name:            n.name,
+		Description:     n.description,
+		PrimaryAction:   primaryAction,
+		SecondaryAction: secondaryAction,
+		DisableCancel:   n.disableCancel,
+		Style:           n.style,
+		Progress:        n.progress,
 	}
 }
 
 //SetTypeSuccess sets notification item type to success
-func (n *Notification) SetTypeSuccess() *Notification {
-	n.typ = "success"
+func (n *Notification) SetStyleSuccess() *Notification {
+	n.style = "success"
 	return n
 }
 
 //SetTypeFail sets notification item type to fail
-func (n *Notification) SetTypeFail() *Notification {
-	n.typ = "fail"
+func (n *Notification) SetStyleFail() *Notification {
+	n.style = "fail"
 	return n
 }
 
-func (n *Notification) Push(user *user) error {
-	return nil
+func (n *Notification) Push(user *user) {
+	n.user = user
+	n.app.notificationCenter.add(n)
 }
 
 func (n *Notification) Flash(request *Request) error {
@@ -132,14 +230,12 @@ func (n *Notification) Flash(request *Request) error {
 	return nil
 }
 
-//Create creates notification
-/*func (n *Notification) Create() error {
-	item := Notification{
-		UUID:            utils.RandomString(10),
-		Name:            n.name,
-		Description:     n.description,
-		NotificationTyp: n.typ,
-		User:            n.user.ID,
+func notificationProgressHuman(in float64) string {
+	if in <= 0 {
+		return ""
 	}
-	return n.app.Create(&item)
-}*/
+	if in > 1 {
+		return ""
+	}
+	return fmt.Sprintf("%.2f %%", in*100)
+}

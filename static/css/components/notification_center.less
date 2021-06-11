@@ -158,6 +158,7 @@
   backdrop-filter: blur(3px);
   background-color: rgba(255, 255, 255, 0.8);
   padding: 5px;
+  border-radius: 5px;
 }
 
 .notification_left_progress-visible {
@@ -173,4 +174,24 @@
 
 .notification_left_progressbar {
   width: 100%;
+}
+
+.notification-success .notification_name {
+  color: @green;
+}
+
+.notification-success .notification_left {
+  //border-color: @green;
+}
+
+.notification-fail {
+  //background-color: red;
+}
+
+.notification-fail .notification_name {
+  color: @red;
+}
+
+.notification-fail .notification_left {
+  //border-color: @red;
 }

@@ -59,7 +59,38 @@ class NotificationCenter {
         Human: "56 %",
         Percentage: 0.56,
       },
+      Style: "fail",
+    });
+
+    this.setData({
+      UUID: "xXXXss2",
+      Name: "can't cancel",
+      DisableCancel: true,
+      Progress: {
+        Human: "",
+        Percentage: -1,
+      },
+      Style: "success",
     });*/
+
+    this.periodDataLoader();
+  }
+
+  async periodDataLoader() {
+    for (;;) {
+      if (!document.hidden) this.loadData();
+      await sleep(1000);
+    }
+  }
+
+  loadData() {
+    fetch("/admin/api/notifications")
+      .then((response) => response.json())
+      .then((data: NotificationData[]) =>
+        data.forEach((d) => {
+          this.setData(d);
+        })
+      );
   }
 
   setData(data: NotificationData) {
@@ -88,15 +119,11 @@ interface NotificationData {
   URL?: string;
   Name: string;
   Description?: string;
-  PrimaryAction?: NotificationItemAction;
-  SecondaryAction?: NotificationItemAction;
+  PrimaryAction?: string;
+  SecondaryAction?: string;
   DisableCancel?: Boolean;
+  Style?: String;
   Progress?: NotificationItemProgress;
-}
-
-interface NotificationItemAction {
-  ID: string;
-  Name: string;
 }
 
 interface NotificationItemProgress {
@@ -107,6 +134,7 @@ interface NotificationItemProgress {
 class NotificationItem {
   el: HTMLDivElement;
   actionElements: NodeListOf<HTMLDivElement>;
+  uuid: string;
 
   constructor() {
     this.el = document.createElement("div");
@@ -123,8 +151,8 @@ class NotificationItem {
           <div class="notification_prename"></div>
           <div class="notification_name"></div>
           <div class="notification_description"></div>
-          <div class="notification_action"></div>
-          <div class="notification_action"></div>
+          <div class="notification_action" data-id="primary"></div>
+          <div class="notification_action" data-id="secondary"></div>
       </div>
     `;
 
@@ -134,7 +162,7 @@ class NotificationItem {
     this.actionElements.forEach((el) => {
       el.addEventListener("click", (e) => {
         var target = <HTMLDivElement>e.currentTarget;
-        console.log(target.getAttribute("data-id"));
+        this.sendAction(target.getAttribute("data-id"));
         return false;
       });
     });
@@ -145,6 +173,7 @@ class NotificationItem {
     this.el
       .querySelector(".notification_close")
       .addEventListener("click", (e) => {
+        this.sendAction("delete");
         this.el.classList.add("notification-closed");
         e.stopPropagation();
         return false;
@@ -155,28 +184,45 @@ class NotificationItem {
       if (!url) {
         return;
       }
-      console.log(url);
       window.location.href = url;
     });
   }
 
-  private setAction(actionEl: HTMLDivElement, action: NotificationItemAction) {
+  private sendAction(actionID: string) {
+    fetch(
+      "/admin/api/notifications" +
+        encodeParams({
+          uuid: this.uuid,
+          action: actionID,
+        }),
+      {
+        method: "POST",
+      }
+    ).then((e) => {
+      if (!e.ok) {
+        alert("error while deleting notification");
+      }
+    });
+  }
+
+  private setAction(actionEl: HTMLDivElement, action: string) {
     if (!action) {
       actionEl.classList.remove("notification_action-visible");
       return;
     }
     actionEl.classList.add("notification_action-visible");
-    actionEl.setAttribute("data-id", action.ID);
-    actionEl.textContent = action.Name;
+    actionEl.textContent = action;
   }
 
   setData(data: NotificationData) {
+    this.uuid = data.UUID;
     this.el.querySelector(".notification_prename").textContent = data.PreName;
     this.el.querySelector(".notification_name").textContent = data.Name;
     this.el.querySelector(".notification_description").textContent =
       data.Description;
 
     var left = this.el.querySelector(".notification_left");
+    left.classList.remove("notification_left-visible");
 
     if (data.Image) {
       left.classList.add("notification_left-visible");
@@ -193,6 +239,12 @@ class NotificationItem {
     this.setAction(this.actionElements[0], data.PrimaryAction);
     this.setAction(this.actionElements[1], data.SecondaryAction);
 
+    this.el.classList.remove("notification-success");
+    this.el.classList.remove("notification-fail");
+    if (data.Style) {
+      this.el.classList.add("notification-" + data.Style);
+    }
+
     var progressEl = this.el.querySelector<HTMLDivElement>(
       ".notification_left_progress"
     );
@@ -205,7 +257,8 @@ class NotificationItem {
         ".notification_left_progressbar"
       );
       if (data.Progress.Percentage < 0) {
-        progressBar.setAttribute("value", "");
+        delete progressBar.value;
+        //progressBar.setAttribute("value", "");
       } else {
         progressBar.setAttribute("value", data.Progress.Percentage + "");
       }

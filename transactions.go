@@ -33,7 +33,7 @@ func (t *Transaction) Create(item interface{}) error {
 		return err
 	}
 
-	return resource.createWithDBIface(item, t.tx)
+	return resource.createWithDBIface(item, t.tx, false)
 }
 
 //Save transaction
@@ -43,7 +43,7 @@ func (t *Transaction) Save(item interface{}) error {
 		return err
 	}
 
-	return resource.saveWithDBIface(item, t.tx)
+	return resource.saveWithDBIface(item, t.tx, false)
 }
 
 //Query with transaction

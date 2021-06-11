@@ -18,6 +18,7 @@
     "js/list.ts",
     "js/list_settings.ts",
     "js/list_multiple.ts",
+    "js/list_multiple_edit.ts",
     "js/order.ts",
     "js/markdown.ts",
     "js/timestamps.ts",
@@ -29,7 +30,6 @@
     "js/search.ts",
     "js/mainmenu.ts",
     "js/relationlist.ts",
-    "js/taskmonitor.ts",
     "js/notifications.ts",
     "js/popup.ts",
     "js/prago.ts"

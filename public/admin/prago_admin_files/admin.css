@@ -5890,16 +5890,21 @@ th.admin_list_orderitem {
   padding: 3px;
   border-radius: 3px;
   margin: 0px 10px 10px 0px;
-  display: inline-block;
   text-align: center;
   vertical-align: middle;
   position: relative;
   width: 100px;
   height: 100px;
-  background-size: contain;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   overflow: hidden;
+  border: 1px solid #eee;
+  display: inline-block;
+  background-color: rgba(64, 120, 192, 0.05);
+  border-radius: 5px;
+  margin: 5px;
+  flex-shrink: 0;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
 .admin_images_image_description {
@@ -5912,9 +5917,15 @@ th.admin_list_orderitem {
   bottom: 3px;
   right: 3px;
   left: 3px;
+  display: none;
+  backdrop-filter: blur(3px);
+  padding: 3px;
 }
 .admin_images_image:hover {
   background-color: rgba(64, 120, 192, 0.05);
+}
+.admin_images_image:hover .admin_images_image_description {
+  display: block;
 }
 .admin_images_image:active {
   background-color: rgba(64, 120, 192, 0.1);
@@ -5923,12 +5934,14 @@ th.admin_list_orderitem {
   position: absolute;
   top: 0px;
   right: 0px;
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(3px);
   width: 20px;
   height: 20px;
   font-size: 20px;
   border-bottom-left-radius: 3px;
   border-top-right-radius: 3px;
+  border-radius: 5px;
 }
 .admin_images_image_delete:hover {
   color: white;
@@ -5942,22 +5955,24 @@ th.admin_list_orderitem {
   display: inline-block;
 }*/
 .admin_images_fileinput {
-  display: inline-block;
   padding: 3px;
-  border-radius: 5px;
   padding: 10px;
   background-color: #fff;
-  background-color: rgba(64, 120, 192, 0.05);
   cursor: pointer;
   margin: 0px 10px 10px 0px;
   width: 100px;
   height: 100px;
   overflow: hidden;
+  background: rgba(64, 120, 192, 0.05);
+  border: 1px solid #eee;
+  display: inline-block;
+  background-color: rgba(64, 120, 192, 0.05);
+  border-radius: 5px;
+  margin: 5px;
+  flex-shrink: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(64, 120, 192, 0.05);
-  border: 1px solid #eee;
 }
 .admin_images_fileinput_plus {
   font-size: 30px;
@@ -7252,54 +7267,6 @@ a.mainmenu_logo:hover {
   justify-content: center;
   align-items: center;
 }
-.taskmonitor_task {
-  border-bottom: 1px solid #eee;
-  padding: 10px 5px;
-  display: flex;
-}
-.taskmonitor_task_left {
-  border: 1px solid red;
-  background-color: #fafafa;
-  border: 1px solid #eee;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  margin-right: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.taskmonitor_task_progress progress {
-  width: 30px;
-}
-.taskmonitor_task_middle {
-  font-size: 1.2rem;
-  line-height: 1.3em;
-  flex-grow: 10;
-}
-.taskmonitor_task_right {
-  margin-left: 10px;
-  align-self: center;
-}
-.taskmonitor_task_done {
-  color: #aaa;
-}
-.taskmonitor_task_uuid {
-  font-size: 0.9rem;
-  line-height: 1.3em;
-  color: #aaa;
-}
-.taskmonitor_task_progress {
-  font-size: 0.9rem;
-  line-height: 1.3em;
-  color: #333;
-}
-.taskmonitor_task_status {
-  font-size: 0.9rem;
-  line-height: 1.3em;
-  color: #333;
-}
 .task_group {
   display: flex;
   flex-wrap: wrap;
@@ -7541,6 +7508,7 @@ a.mainmenu_logo:hover {
   backdrop-filter: blur(3px);
   background-color: rgba(255, 255, 255, 0.8);
   padding: 5px;
+  border-radius: 5px;
 }
 .notification_left_progress-visible {
   display: flex;
@@ -7552,4 +7520,26 @@ a.mainmenu_logo:hover {
 }
 .notification_left_progressbar {
   width: 100%;
+}
+.notification-success .notification_name {
+  color: #006400;
+}
+.notification-fail .notification_name {
+  color: #cb2431;
+}
+.multiple_edit_field {
+  border: 1px solid #eee;
+  padding: 5px 5px;
+  margin: 5px 0px;
+  border-radius: 5px;
+}
+.multiple_edit_field_header {
+  display: block;
+}
+.multiple_edit_field_content {
+  display: none;
+  padding: 10px 5px 10px 20px;
+}
+.multiple_edit_field-selected .multiple_edit_field_content {
+  display: block;
 }

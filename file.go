@@ -34,6 +34,9 @@ func initCDN(app *App) {
 }
 
 func (app *App) thumb(ids string) string {
+	if ids == "" {
+		return ""
+	}
 	for _, v := range strings.Split(ids, ",") {
 		var image File
 		err := app.Query().WhereIs("uid", v).Get(&image)
@@ -214,7 +217,7 @@ func (app *App) initFilesResource() {
 		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
-	resource.Action("").Method("POST").Handler(
+	resource.Action("").Method("POST").Permission(resource.canCreate).Handler(
 		func(request *Request) {
 			validateCSRF(request)
 

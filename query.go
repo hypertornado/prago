@@ -11,6 +11,7 @@ type Query struct {
 	app   *App
 	err   error
 	db    dbIface
+	debug bool
 }
 
 //Create item in db
@@ -19,7 +20,7 @@ func (app *App) Create(item interface{}) error {
 	if err != nil {
 		return err
 	}
-	return resource.createWithDBIface(item, app.db)
+	return resource.createWithDBIface(item, app.db, false)
 }
 
 //Save item to db
@@ -28,7 +29,7 @@ func (app *App) Save(item interface{}) error {
 	if err != nil {
 		return err
 	}
-	return resource.saveWithDBIface(item, app.db)
+	return resource.saveWithDBIface(item, app.db, false)
 }
 
 //Query item from db
@@ -51,6 +52,12 @@ func (q Query) Where(w ...interface{}) Query {
 //WhereIs adds where query for single item
 func (q Query) WhereIs(name string, value interface{}) Query {
 	return q.Where(map[string]interface{}{name: value})
+}
+
+//WhereIs adds where query for single item
+func (q Query) Debug() Query {
+	q.debug = true
+	return q
 }
 
 //Order sets order column
@@ -100,13 +107,13 @@ func (q Query) Get(item interface{}) error {
 
 	var newItem interface{}
 	if slice {
-		err = listItems(*resource, q.db, resource.id, &newItem, q.query)
+		err = listItems(*resource, q.db, resource.id, &newItem, q.query, q.debug)
 		if err != nil {
 			return err
 		}
 		reflect.ValueOf(item).Elem().Set(reflect.ValueOf(newItem))
 	} else {
-		err = getFirstItem(*resource, q.db, resource.id, &newItem, q.query)
+		err = getFirstItem(*resource, q.db, resource.id, &newItem, q.query, q.debug)
 		if err != nil {
 			return err
 		}
@@ -121,7 +128,7 @@ func (q Query) Count(item interface{}) (int64, error) {
 	if err != nil {
 		return -1, err
 	}
-	return countItems(q.db, resource.id, q.query)
+	return countItems(q.db, resource.id, q.query, q.debug)
 }
 
 //Delete item with query
@@ -130,5 +137,5 @@ func (q Query) Delete(item interface{}) (int64, error) {
 	if err != nil {
 		return -1, err
 	}
-	return deleteItems(q.db, resource.id, q.query)
+	return deleteItems(q.db, resource.id, q.query, q.debug)
 }

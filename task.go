@@ -16,7 +16,6 @@ type taskManager struct {
 	app           *App
 	taskGroups    []*TaskGroup
 	tasksMap      map[string]*Task
-	activities    map[string]*TaskActivity
 	activityMutex *sync.RWMutex
 	startedAt     time.Time
 }
@@ -24,14 +23,11 @@ type taskManager struct {
 func (app *App) initTaskManager() {
 
 	app.taskManager = &taskManager{
-		app:           app,
-		tasksMap:      make(map[string]*Task),
-		activities:    make(map[string]*TaskActivity),
-		activityMutex: &sync.RWMutex{},
-		startedAt:     time.Now(),
+		app:       app,
+		tasksMap:  make(map[string]*Task),
+		startedAt: time.Now(),
 	}
 
-	go app.taskManager.oldTasksRemover()
 	go app.taskManager.startCRON()
 
 	app.Action("tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(
@@ -41,16 +37,10 @@ func (app *App) initTaskManager() {
 			ret["locale"] = user.Locale
 			ret["csrf_token"] = app.generateCSRFToken(user)
 			ret["tasks"] = app.taskManager.getTasks(user)
-			ret["taskmonitor"] = app.taskManager.getTaskMonitor(user)
 			ret["admin_title"] = messages.Get(user.Locale, "tasks")
 			return ret
 		},
 	)
-
-	app.API("tasks/running").Permission(loggedPermission).Handler(func(request *Request) {
-		request.SetData("taskmonitor", app.taskManager.getTaskMonitor(request.user))
-		request.RenderView("taskmonitor")
-	})
 
 	app.API("tasks/runtask").Method("POST").Permission(loggedPermission).Handler(func(request *Request) {
 		id := request.Request().FormValue("id")
@@ -60,40 +50,34 @@ func (app *App) initTaskManager() {
 			panic("wrong token")
 		}
 
-		//request.Request().MultipartForm
-
-		must(app.taskManager.startTask(id, request.user, request.Request().MultipartForm))
-		request.Redirect(app.getAdminURL("tasks"))
-	})
-
-	app.API("tasks/stoptask").Permission(loggedPermission).Handler(func(request *Request) {
-		uuid := request.Request().FormValue("uuid")
-		csrf := request.Request().FormValue("csrf")
-
-		if request.csrfToken() != csrf {
-			panic("wrong token")
+		task := app.taskManager.tasksMap[id]
+		if !app.authorize(request.user, task.permission) {
+			panic("not authorize")
 		}
-
-		must(app.taskManager.stopTask(uuid, request.user))
-		request.Redirect(app.getAdminURL("tasks"))
-	})
-
-	app.API("tasks/deletetask").Permission(loggedPermission).Handler(func(request *Request) {
-		uuid := request.Request().FormValue("uuid")
-		csrf := request.Request().FormValue("csrf")
-
-		if request.csrfToken() != csrf {
-			panic("wrong token")
-		}
-
-		must(app.taskManager.deleteTask(uuid, request.user))
+		app.taskManager.run(task, request.user, request.Request().MultipartForm)
 		request.Redirect(app.getAdminURL("tasks"))
 	})
 
 	grp := app.TaskGroup(unlocalized("example"))
 
+	grp.Task("example_simple").Handler(func(t *TaskActivity) error {
+		var progress float64
+		for {
+			time.Sleep(1 * time.Second)
+			t.SetStatus(progress, "example status")
+			progress += 0.2
+			if progress >= 1 {
+				return nil
+			}
+		}
+	})
+
 	grp.Task("example_fail").Handler(func(t *TaskActivity) error {
 		return fmt.Errorf("example error")
+	})
+
+	grp.Task("example_panic").Handler(func(t *TaskActivity) error {
+		panic("panic value")
 	})
 
 	grp.Task("example").FileInput("file_example").Handler(func(t *TaskActivity) error {
@@ -108,7 +92,6 @@ func (app *App) initTaskManager() {
 		}
 		fmt.Println(data)
 
-		t.IsStopped()
 		var progress float64
 		for {
 			time.Sleep(1 * time.Second)
@@ -128,77 +111,12 @@ func (tm *taskManager) startCRON() {
 			for _, v := range tm.tasksMap {
 				if v.cron > 0 {
 					if tm.startedAt.Add(v.cron).Before(time.Now()) && v.lastStarted.Add(v.cron).Before(time.Now()) {
-						tm.run(v, nil, "cron", nil)
+						tm.run(v, nil, nil)
 					}
 				}
 			}
 		}
 	}()
-}
-
-func (tm *taskManager) oldTasksRemover() {
-	for {
-		time.Sleep(1 * time.Second)
-		for _, v := range tm.getOldActivities() {
-			tm.deleteActivity(v)
-		}
-	}
-
-}
-
-func (tm *taskManager) getOldActivities() (ret []string) {
-	tm.activityMutex.RLock()
-	defer tm.activityMutex.RUnlock()
-	for k, v := range tm.activities {
-		if v.ended && v.endedAt.Add(24*time.Hour).Before(time.Now()) {
-			ret = append(ret, k)
-		}
-	}
-	return ret
-}
-
-func (tm *taskManager) deleteActivity(id string) {
-	tm.activityMutex.Lock()
-	defer tm.activityMutex.Unlock()
-	delete(tm.activities, id)
-}
-
-func (tm *taskManager) startTask(id string, user *user, files *multipart.Form) error {
-	task, ok := tm.tasksMap[id]
-	if !ok {
-		return fmt.Errorf("Can't find task %s", id)
-	}
-
-	if tm.app.authorize(user, task.permission) {
-		tm.run(task, user, "button", files)
-		return nil
-	}
-	return fmt.Errorf("User is not authorized to run this task")
-}
-
-func (tm *taskManager) stopTask(uuid string, user *user) error {
-	tm.activityMutex.Lock()
-	defer tm.activityMutex.Unlock()
-
-	activity := tm.activities[uuid]
-	if activity.user.ID != user.ID {
-		return fmt.Errorf("Wrong user")
-	}
-	activity.stopped = true
-	return nil
-}
-
-func (tm *taskManager) deleteTask(uuid string, user *user) error {
-	tm.activityMutex.Lock()
-	defer tm.activityMutex.Unlock()
-
-	activity := tm.activities[uuid]
-	if activity.user.ID != user.ID {
-		return fmt.Errorf("Wrong user")
-	}
-
-	delete(tm.activities, uuid)
-	return nil
 }
 
 type taskViewGroup struct {
@@ -299,7 +217,7 @@ func (tg *TaskGroup) Task(id string) *Task {
 	tg.manager.tasksMap[task.id] = task
 
 	tg.manager.app.addCommand("task", id).Callback(func() {
-		tg.manager.run(task, nil, "command", nil)
+		tg.manager.run(task, nil, nil)
 	})
 
 	return task
@@ -346,38 +264,55 @@ func (app *App) TaskGroup(name func(string) string) *TaskGroup {
 	}
 }
 
-func (tm *taskManager) run(t *Task, user *user, starterTyp string, form *multipart.Form) *TaskActivity {
+func (tm *taskManager) run(t *Task, user *user, form *multipart.Form) {
+
+	var language = "en"
+	if user != nil {
+		language = user.Locale
+	}
+
+	var notification *Notification = tm.app.Notification(t.id)
+	notification.preName = t.group.name(language)
 
 	activity := &TaskActivity{
-		uuid:      randomString(10),
-		task:      t,
-		user:      user,
-		typ:       starterTyp,
-		startedAt: time.Now(),
-		files:     form,
+		task:         t,
+		notification: notification,
+		files:        form,
 	}
 	t.lastStarted = time.Now()
-	tm.addActivity(activity)
+
+	notification.SetPrimaryAction("Ukončit", func() {
+		activity.stoppedByUser = true
+	})
+
+	notification.disableCancel = true
+
+	if user != nil {
+		notification.Push(user)
+	}
+
+	progress := -1.0
+	notification.SetProgress(&progress)
 
 	go func() {
 		defer func() {
+			notification.primaryAction = nil
+			notification.secondaryAction = nil
+			activity.notification.disableCancel = false
+			activity.notification.progress = nil
 			if r := recover(); r != nil {
-				recoveryStr := fmt.Sprintf("Recovered in run task: %v", r)
-				activity.SetStatus(1, recoveryStr)
-			}
-			activity.ended = true
-			activity.endedAt = time.Now()
-			if user != nil {
-				err := tm.app.Notification("Task finished").Push(user)
-				if err != nil {
-					fmt.Println(err)
+				activity.notification.SetStyleFail()
+				if activity.stoppedByUser {
+					notification.SetDescription("Ukončeno uživatelem")
+				} else {
+					recoveryStr := fmt.Sprintf("%v", r)
+					notification.SetDescription(recoveryStr)
 				}
+			} else {
+				activity.notification.description = "Úspěšně dokončeno"
+				activity.notification.SetStyleSuccess()
 			}
 		}()
-		if t.handler != nil {
-			activity.error = t.handler(activity)
-		}
+		must(t.handler(activity))
 	}()
-
-	return activity
 }

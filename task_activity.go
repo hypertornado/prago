@@ -4,36 +4,23 @@ import (
 	"fmt"
 	"io/ioutil"
 	"mime/multipart"
-	"time"
 )
 
 //TaskActivity represents task activity
 type TaskActivity struct {
-	uuid      string
-	task      *Task
-	user      *user
-	typ       string
-	progress  float64
-	status    string
-	ended     bool
-	error     error
-	stoppable bool
-	stopped   bool
-	files     *multipart.Form
-	startedAt time.Time
-	endedAt   time.Time
+	task          *Task
+	notification  *Notification
+	stoppedByUser bool
+	files         *multipart.Form
 }
 
 //SetStatus sets progress and status for task activity
 func (ta *TaskActivity) SetStatus(progress float64, status string) {
-	ta.progress = progress
-	ta.status = status
-}
-
-//IsStopped checks if activity is stopped
-func (ta *TaskActivity) IsStopped() bool {
-	ta.stoppable = true
-	return ta.stopped
+	if ta.stoppedByUser {
+		panic("task already stopped by user")
+	}
+	ta.notification.description = status
+	ta.notification.SetProgress(&progress)
 }
 
 func (ta *TaskActivity) GetFile(name string) (multipart.File, error) {
@@ -59,13 +46,10 @@ func (ta *TaskActivity) GetFileContent() []byte {
 	return content
 }
 
-type taskMonitor struct {
-	Name  string
-	Items []taskActivityView
-}
+/*
 
 func (tm *taskManager) addActivity(activity *TaskActivity) {
 	tm.activityMutex.Lock()
 	defer tm.activityMutex.Unlock()
 	tm.activities[activity.uuid] = activity
-}
+}*/

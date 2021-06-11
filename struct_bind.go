@@ -22,7 +22,26 @@ func (resource *Resource) setOrderPosition(item interface{}, order int64) error 
 	return nil
 }
 
-func (resource Resource) bindData(item interface{}, user *user, params url.Values) error {
+func (resource Resource) getDefaultBindedFieldIDs(user *user) map[string]bool {
+	ret := map[string]bool{}
+	for _, v := range resource.fieldArrays {
+		if !v.authorizeView(user) {
+			continue
+		}
+		if !v.authorizeEdit(user) {
+			continue
+		}
+		ret[v.Name] = true
+	}
+	return ret
+}
+
+func (resource Resource) bindData(item interface{}, user *user, params url.Values, bindedFieldIDs map[string]bool) error {
+
+	if bindedFieldIDs == nil {
+		bindedFieldIDs = resource.getDefaultBindedFieldIDs(user)
+	}
+
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
 		if value.Kind() == reflect.Struct {
@@ -35,6 +54,13 @@ func (resource Resource) bindData(item interface{}, user *user, params url.Value
 		if !field.authorizeEdit(user) {
 			continue
 		}
+		if !bindedFieldIDs[field.Name] {
+			continue
+		}
+
+		/*if len(params[field.ColumnName]) == 0 {
+			continue
+		}*/
 
 		val := value.FieldByName(field.Name)
 		urlValue := params.Get(field.ColumnName)

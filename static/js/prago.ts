@@ -41,7 +41,6 @@ class Prago {
       new RelationList(el);
     });
 
-    new TaskMonitor();
     new NotificationCenter(document.querySelector(".notification_center"));
 
     /*new Confirm("Hello world confirm", () => {

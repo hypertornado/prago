@@ -2,9 +2,7 @@ class ListMultiple {
   list: List;
 
   constructor(list: List) {
-    //console.log("list");
     this.list = list;
-
     if (this.hasMultipleActions()) {
       this.bindMultipleActions();
     }
@@ -27,18 +25,26 @@ class ListMultiple {
         this.multipleActionSelected.bind(this)
       );
     }
+
+    //this.multipleActionStart("edit", ["2", "16"]);
   }
 
   multipleActionSelected(e: any) {
     var target: HTMLDivElement = e.target;
     var actionName = target.getAttribute("name");
+    var ids = this.multipleGetIDs();
+    this.multipleActionStart(actionName, ids);
+  }
 
+  multipleActionStart(actionName: string, ids: Array<String>) {
     switch (actionName) {
       case "cancel":
         this.multipleUncheckAll();
         break;
+      case "edit":
+        new ListMultipleEdit(this, ids);
+        break;
       case "delete":
-        var ids = this.multipleGetIDs();
         new Confirm(
           `Opravdu chcete smazat ${ids.length} položek?`,
           () => {

@@ -13,9 +13,7 @@ class Popup {
         <div class="popup">
             <div class="popup_header">
                 <div class="popup_header_name"></div>
-                <div class="popup_header_cancel">
-
-                </div>
+                <div class="popup_header_cancel"></div>
             </div>
             <div class="popup_content"></div>
             <div class="popup_footer"></div>
@@ -37,7 +35,6 @@ class Popup {
         }
       }
     });
-
     this.setTitle(title);
   }
 
@@ -71,6 +68,7 @@ class Popup {
   }
 
   protected setContent(el: HTMLElement) {
+    this.el.querySelector(".popup_content").innerHTML = "";
     this.el.querySelector(".popup_content").appendChild(el);
     this.el
       .querySelector(".popup_content")
@@ -118,7 +116,6 @@ class Popup {
   protected present() {
     document.body.appendChild(this.el);
     this.focus();
-    console.log("heer");
     this.el.classList.add("popup_background-presented");
   }
 
@@ -195,6 +192,21 @@ class ContentPopup extends Popup {
 
   show() {
     this.present();
+  }
+
+  hide() {
+    this.unpresent();
+  }
+
+  setContent(content: HTMLElement) {
+    super.setContent(content);
+  }
+
+  setConfirmButtons(handler: any) {
+    super.addButton("Storno", () => {
+      super.unpresent();
+    });
+    super.addButton("Uložit", handler, ButtonStyle.Accented);
   }
 }
 

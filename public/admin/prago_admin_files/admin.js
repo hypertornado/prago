@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 class Autoresize {
     constructor(el) {
         this.el = el;
@@ -43,6 +52,9 @@ function escapeHTML(str) {
     str = str.split('"').join("&quot;");
     str = str.split("'").join("&#39;");
     return str;
+}
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 class ImageView {
     constructor(el) {
@@ -850,12 +862,18 @@ class ListMultiple {
     multipleActionSelected(e) {
         var target = e.target;
         var actionName = target.getAttribute("name");
+        var ids = this.multipleGetIDs();
+        this.multipleActionStart(actionName, ids);
+    }
+    multipleActionStart(actionName, ids) {
         switch (actionName) {
             case "cancel":
                 this.multipleUncheckAll();
                 break;
+            case "edit":
+                new ListMultipleEdit(this, ids);
+                break;
             case "delete":
-                var ids = this.multipleGetIDs();
                 new Confirm(`Opravdu chcete smazat ${ids.length} položek?`, () => {
                     var loader = new LoadingPopup();
                     var params = {};
@@ -923,6 +941,75 @@ class ListMultiple {
             checkbox.checked = false;
         }
         this.multipleCheckboxChanged();
+    }
+}
+class ListMultipleEdit {
+    constructor(multiple, ids) {
+        this.listMultiple = multiple;
+        var typeID = document
+            .querySelector(".admin_list")
+            .getAttribute("data-type");
+        var progress = document.createElement("progress");
+        this.popup = new ContentPopup(`Hromadná úprava položek (${ids.length} položek)`, progress);
+        this.popup.show();
+        fetch("/admin/" + typeID + "/api/multiple_edit?ids=" + ids.join(","))
+            .then((response) => {
+            if (response.ok) {
+                return response.text();
+            }
+            else {
+                this.popup.hide();
+                new Alert("Operaci nelze nahrát.");
+            }
+        })
+            .then((val) => {
+            var div = document.createElement("div");
+            div.innerHTML = val;
+            this.popup.setContent(div);
+            this.initFormPopup(div.querySelector("form"));
+            this.popup.setConfirmButtons(this.confirm.bind(this));
+        });
+    }
+    initFormPopup(form) {
+        this.form = form;
+        this.form.addEventListener("submit", this.confirm.bind(this));
+        new Form(this.form);
+        this.initCheckboxes();
+    }
+    initCheckboxes() {
+        var checkboxes = this.form.querySelectorAll(".multiple_edit_field_checkbox");
+        checkboxes.forEach((cb) => {
+            cb.addEventListener("change", (e) => {
+                var item = cb.parentElement.parentElement;
+                if (cb.checked) {
+                    item.classList.add("multiple_edit_field-selected");
+                }
+                else {
+                    item.classList.remove("multiple_edit_field-selected");
+                }
+            });
+        });
+    }
+    confirm(e) {
+        var typeID = document
+            .querySelector(".admin_list")
+            .getAttribute("data-type");
+        var data = new FormData(this.form);
+        var loader = new LoadingPopup();
+        fetch("/admin/" + typeID + "/api/multiple_edit", {
+            method: "POST",
+            body: data,
+        }).then((response) => {
+            loader.done();
+            if (response.ok) {
+                this.popup.hide();
+                this.listMultiple.list.load();
+            }
+            else {
+                new Alert("Chyba při ukládání.");
+            }
+        });
+        e.preventDefault();
     }
 }
 function bindOrder() {
@@ -1882,30 +1969,6 @@ class RelationList {
         }));
     }
 }
-class TaskMonitor {
-    constructor() {
-        var el = document.querySelector(".taskmonitorcontainer");
-        if (!el) {
-            return;
-        }
-        this.el = el;
-        window.setInterval(this.load.bind(this), 1000);
-    }
-    load() {
-        var request = new XMLHttpRequest();
-        request.open("GET", "/admin/api/tasks/running", true);
-        request.addEventListener("load", () => {
-            this.el.innerHTML = "";
-            if (request.status == 200) {
-                this.el.innerHTML = request.response;
-            }
-            else {
-                console.error("error while loading list");
-            }
-        });
-        request.send();
-    }
-}
 class NotificationCenter {
     constructor(el) {
         this.notifications = new Map();
@@ -1918,6 +1981,23 @@ class NotificationCenter {
         notifications.forEach((item) => {
             this.setData(item);
         });
+        this.periodDataLoader();
+    }
+    periodDataLoader() {
+        return __awaiter(this, void 0, void 0, function* () {
+            for (;;) {
+                if (!document.hidden)
+                    this.loadData();
+                yield sleep(1000);
+            }
+        });
+    }
+    loadData() {
+        fetch("/admin/api/notifications")
+            .then((response) => response.json())
+            .then((data) => data.forEach((d) => {
+            this.setData(d);
+        }));
     }
     setData(data) {
         var notification;
@@ -1953,15 +2033,15 @@ class NotificationItem {
           <div class="notification_prename"></div>
           <div class="notification_name"></div>
           <div class="notification_description"></div>
-          <div class="notification_action"></div>
-          <div class="notification_action"></div>
+          <div class="notification_action" data-id="primary"></div>
+          <div class="notification_action" data-id="secondary"></div>
       </div>
     `;
         this.actionElements = this.el.querySelectorAll(".notification_action");
         this.actionElements.forEach((el) => {
             el.addEventListener("click", (e) => {
                 var target = e.currentTarget;
-                console.log(target.getAttribute("data-id"));
+                this.sendAction(target.getAttribute("data-id"));
                 return false;
             });
         });
@@ -1969,6 +2049,7 @@ class NotificationItem {
         this.el
             .querySelector(".notification_close")
             .addEventListener("click", (e) => {
+            this.sendAction("delete");
             this.el.classList.add("notification-closed");
             e.stopPropagation();
             return false;
@@ -1978,8 +2059,20 @@ class NotificationItem {
             if (!url) {
                 return;
             }
-            console.log(url);
             window.location.href = url;
+        });
+    }
+    sendAction(actionID) {
+        fetch("/admin/api/notifications" +
+            encodeParams({
+                uuid: this.uuid,
+                action: actionID,
+            }), {
+            method: "POST",
+        }).then((e) => {
+            if (!e.ok) {
+                alert("error while deleting notification");
+            }
         });
     }
     setAction(actionEl, action) {
@@ -1988,15 +2081,16 @@ class NotificationItem {
             return;
         }
         actionEl.classList.add("notification_action-visible");
-        actionEl.setAttribute("data-id", action.ID);
-        actionEl.textContent = action.Name;
+        actionEl.textContent = action;
     }
     setData(data) {
+        this.uuid = data.UUID;
         this.el.querySelector(".notification_prename").textContent = data.PreName;
         this.el.querySelector(".notification_name").textContent = data.Name;
         this.el.querySelector(".notification_description").textContent =
             data.Description;
         var left = this.el.querySelector(".notification_left");
+        left.classList.remove("notification_left-visible");
         if (data.Image) {
             left.classList.add("notification_left-visible");
             left.setAttribute("style", `background-image: url('${data.Image}');`);
@@ -2010,6 +2104,11 @@ class NotificationItem {
         }
         this.setAction(this.actionElements[0], data.PrimaryAction);
         this.setAction(this.actionElements[1], data.SecondaryAction);
+        this.el.classList.remove("notification-success");
+        this.el.classList.remove("notification-fail");
+        if (data.Style) {
+            this.el.classList.add("notification-" + data.Style);
+        }
         var progressEl = this.el.querySelector(".notification_left_progress");
         if (data.Progress) {
             left.classList.add("notification_left-visible");
@@ -2018,7 +2117,7 @@ class NotificationItem {
                 data.Progress.Human;
             var progressBar = this.el.querySelector(".notification_left_progressbar");
             if (data.Progress.Percentage < 0) {
-                progressBar.setAttribute("value", "");
+                delete progressBar.value;
             }
             else {
                 progressBar.setAttribute("value", data.Progress.Percentage + "");
@@ -2046,9 +2145,7 @@ class Popup {
         <div class="popup">
             <div class="popup_header">
                 <div class="popup_header_name"></div>
-                <div class="popup_header_cancel">
-
-                </div>
+                <div class="popup_header_cancel"></div>
             </div>
             <div class="popup_content"></div>
             <div class="popup_footer"></div>
@@ -2094,6 +2191,7 @@ class Popup {
         this.el.remove();
     }
     setContent(el) {
+        this.el.querySelector(".popup_content").innerHTML = "";
         this.el.querySelector(".popup_content").appendChild(el);
         this.el
             .querySelector(".popup_content")
@@ -2131,7 +2229,6 @@ class Popup {
     present() {
         document.body.appendChild(this.el);
         this.focus();
-        console.log("heer");
         this.el.classList.add("popup_background-presented");
     }
     unpresent() {
@@ -2190,6 +2287,18 @@ class ContentPopup extends Popup {
     show() {
         this.present();
     }
+    hide() {
+        this.unpresent();
+    }
+    setContent(content) {
+        super.setContent(content);
+    }
+    setConfirmButtons(handler) {
+        super.addButton("Storno", () => {
+            super.unpresent();
+        });
+        super.addButton("Uložit", handler, ButtonStyle.Accented);
+    }
 }
 class LoadingPopup extends Popup {
     constructor() {
@@ -2228,7 +2337,6 @@ class Prago {
         relationListEls.forEach((el) => {
             new RelationList(el);
         });
-        new TaskMonitor();
         new NotificationCenter(document.querySelector(".notification_center"));
     }
     static registerPlacesEdit(place) {

@@ -1,0 +1,19 @@
+{{define "multiple_edit"}}
+    <form class="multiple_edit_form" method="POST" action="{{.form.Action}}">
+
+    <input type="hidden" name="_ids" value="{{.ids}}">
+    <input type="hidden" name="_csrfToken" value="{{.CSRFToken}}">
+
+    {{range $item := .form.Items}}
+        <div class="multiple_edit_field" data-id="{{$item.Name}}">
+            <label class="multiple_edit_field_header">
+                <input type="checkbox" class="multiple_edit_field_checkbox" name="_fields" value="{{$item.Name}}"> {{$item.NameHuman}}
+            </label>
+            <div class="multiple_edit_field_content">
+                {{tmpl $item.Template $item}}
+            </div>
+        </div>
+    {{end}}
+    </form>
+
+{{end}}

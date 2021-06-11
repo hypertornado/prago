@@ -1,8 +1,8 @@
 package prago
 
 import (
-	"encoding/json"
 	"fmt"
+	"net/url"
 	"strconv"
 )
 
@@ -23,7 +23,7 @@ func initDefaultResourceActions(resource *Resource) {
 			var item interface{}
 			resource.newItem(&item)
 
-			resource.bindData(&item, request.user, request.Request().URL.Query())
+			resource.bindData(&item, request.user, request.Request().URL.Query(), nil)
 
 			form, err := resource.getForm(item, request.user)
 			must(err)
@@ -41,7 +41,7 @@ func initDefaultResourceActions(resource *Resource) {
 			var item interface{}
 			resource.newItem(&item)
 
-			resource.bindData(item, request.user, request.Params())
+			resource.bindData(item, request.user, request.Params(), nil)
 			if resource.orderField != nil {
 				resource.setOrderPosition(&item, resource.count()+1)
 			}
@@ -56,11 +56,17 @@ func initDefaultResourceActions(resource *Resource) {
 			}
 
 			if resource.activityLog {
-				app.createNewActivityLog(*resource, request.user, item)
+				must(
+					app.CreateActivityLog("new", request.UserID(), resource.id, getItemID(item), nil, item),
+				)
 			}
 
 			must(resource.updateCachedCount())
-			request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_created"))
+
+			app.Notification(getItemName(item)).
+				SetImage(app.getItemImage(item)).
+				SetPreName(messages.Get(request.user.Locale, "admin_item_created")).
+				Flash(request)
 			request.Redirect(resource.getItemURL(item, ""))
 		},
 	)
@@ -112,41 +118,16 @@ func initDefaultResourceActions(resource *Resource) {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
-			var item interface{}
-			resource.newItem(&item)
-			must(app.Query().WhereIs("id", int64(id)).Get(item))
+			items, err := resource.editItemsWithLog(user, []int64{int64(id)}, request.Params(), nil)
+			must(err)
 
-			var beforeData []byte
-			if resource.activityLog {
-				beforeData, err = json.Marshal(item)
-				must(err)
-			}
+			item := items[0]
 
-			must(
-				resource.bindData(
-					item, user, request.Params(),
-				),
-			)
-			must(app.Save(item))
+			app.Notification(getItemName(item)).
+				SetImage(app.getItemImage(item)).
+				SetPreName(messages.Get(user.Locale, "admin_item_edited")).
+				Flash(request)
 
-			if app.search != nil {
-				err = app.search.saveItem(resource, item)
-				if err != nil {
-					app.Log().Println(fmt.Errorf("%s", err))
-				}
-				app.search.flush()
-			}
-
-			if resource.activityLog {
-				afterData, err := json.Marshal(item)
-				if err != nil {
-					panic(err)
-				}
-
-				app.createEditActivityLog(*resource, user, int64(id), beforeData, afterData)
-			}
-
-			request.AddFlashMessage(messages.Get(user.Locale, "admin_item_edited"))
 			request.Redirect(resource.getURL(fmt.Sprintf("%d", id)))
 		},
 	)
@@ -228,14 +209,6 @@ func (resource *Resource) deleteItemWithLog(user *user, id int64) error {
 		return fmt.Errorf("can't find item for deletion id '%d': %s", id, err)
 	}
 
-	var beforeData []byte
-	if resource.activityLog {
-		beforeData, err = json.Marshal(beforeItem)
-		if err != nil {
-			return fmt.Errorf("can't convert item to json: %s", err)
-		}
-	}
-
 	var item interface{}
 	resource.newItem(&item)
 	_, err = resource.app.Query().WhereIs("id", id).Delete(item)
@@ -252,8 +225,61 @@ func (resource *Resource) deleteItemWithLog(user *user, id int64) error {
 	}
 
 	if resource.activityLog {
-		resource.app.createDeleteActivityLog(*resource, user, id, beforeData)
+		return resource.app.CreateActivityLog("delete", user.ID, resource.id, id, beforeItem, nil)
 	}
 
 	return nil
+}
+
+func (resource *Resource) editItemsWithLog(user *user, ids []int64, values url.Values, bindedFieldIDs map[string]bool) ([]interface{}, error) {
+
+	var items []interface{}
+	app := resource.app
+
+	for _, id := range ids {
+		//TODO: remove this ugly hack and copy values via reflect package
+		var beforeItem, item interface{}
+		resource.newItem(&beforeItem)
+		err := app.Query().WhereIs("id", id).Get(beforeItem)
+		if err != nil {
+			return nil, fmt.Errorf("Can't get beforeitem with id %d: %s", id, err)
+		}
+
+		resource.newItem(&item)
+		err = app.Query().WhereIs("id", id).Get(item)
+		if err != nil {
+			return nil, fmt.Errorf("Can't get item with id %d: %s", id, err)
+		}
+
+		err = resource.bindData(
+			item, user, values, bindedFieldIDs,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("Can't bind data (%d): %s", id, err)
+		}
+
+		err = app.Save(item)
+		if err != nil {
+			return nil, fmt.Errorf("Can't save item (%d): %s", id, err)
+		}
+		items = append(items, item)
+
+		if app.search != nil {
+			err = app.search.saveItem(resource, item)
+			if err != nil {
+				app.Log().Println(fmt.Errorf("%s", err))
+			}
+			app.search.flush()
+		}
+
+		if resource.activityLog {
+			must(
+				app.CreateActivityLog("edit", user.ID, resource.id, int64(id), beforeItem, item),
+			)
+
+		}
+	}
+
+	return items, nil
+
 }

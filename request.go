@@ -31,6 +31,14 @@ func (request Request) Params() url.Values {
 	return request.Request().Form
 }
 
+//UserID returns id of logged in user, returns 0 if no user is logged
+func (request Request) UserID() int64 {
+	if request.user != nil {
+		return request.user.ID
+	}
+	return 0
+}
+
 //SetData sets request data
 func (request Request) SetData(k string, v interface{}) { request.data[k] = v }
 

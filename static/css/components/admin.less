@@ -627,10 +627,11 @@ th.admin_list_orderitem {
   position: relative;
   width: 100px;
   height: 100px;
-  background-size: contain;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   overflow: hidden;
+  .rectangle;
   .shadow;
 }
 
@@ -644,10 +645,17 @@ th.admin_list_orderitem {
   bottom: 3px;
   right: 3px;
   left: 3px;
+  display: none;
+  backdrop-filter: blur(3px);
+  padding: 3px;
 }
 
 .admin_images_image:hover {
   background-color: @baseColorBackgroundLighter;
+}
+
+.admin_images_image:hover .admin_images_image_description {
+  display: block;
 }
 
 .admin_images_image:active {
@@ -658,12 +666,14 @@ th.admin_list_orderitem {
   position: absolute;
   top: 0px;
   right: 0px;
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(3px);
   width: 20px;
   height: 20px;
   font-size: 20px;
   border-bottom-left-radius: 3px;
   border-top-right-radius: 3px;
+  border-radius: 5px;
 }
 
 .admin_images_image_delete:hover {
@@ -702,6 +712,10 @@ th.admin_list_orderitem {
   align-items: center;
   background: @baseColorBackgroundLighter;
   border: 1px solid #eee;
+  .rectangle;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .admin_images_fileinput_plus {
