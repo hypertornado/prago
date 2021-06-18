@@ -39,6 +39,13 @@ func (request Request) UserID() int64 {
 	return 0
 }
 
+func (request Request) UserHasPermission(permission Permission) bool {
+	if request.user == nil {
+		return false
+	}
+	return request.app.authorize(request.user, permission)
+}
+
 //SetData sets request data
 func (request Request) SetData(k string, v interface{}) { request.data[k] = v }
 

@@ -57,7 +57,7 @@ func initDefaultResourceActions(resource *Resource) {
 
 			if resource.activityLog {
 				must(
-					app.CreateActivityLog("new", request.UserID(), resource.id, getItemID(item), nil, item),
+					app.LogActivity("new", request.UserID(), resource.id, getItemID(item), nil, item),
 				)
 			}
 
@@ -225,7 +225,7 @@ func (resource *Resource) deleteItemWithLog(user *user, id int64) error {
 	}
 
 	if resource.activityLog {
-		return resource.app.CreateActivityLog("delete", user.ID, resource.id, id, beforeItem, nil)
+		return resource.app.LogActivity("delete", user.ID, resource.id, id, beforeItem, nil)
 	}
 
 	return nil
@@ -274,7 +274,7 @@ func (resource *Resource) editItemsWithLog(user *user, ids []int64, values url.V
 
 		if resource.activityLog {
 			must(
-				app.CreateActivityLog("edit", user.ID, resource.id, int64(id), beforeItem, item),
+				app.LogActivity("edit", user.ID, resource.id, int64(id), beforeItem, item),
 			)
 
 		}

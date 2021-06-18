@@ -13,9 +13,8 @@ class Prago {
       new List(listEl);
     }
 
-    var formElements = document.querySelectorAll<HTMLFormElement>(
-      ".prago_form"
-    );
+    var formElements =
+      document.querySelectorAll<HTMLFormElement>(".prago_form");
     formElements.forEach((el) => {
       new Form(el);
     });
@@ -27,9 +26,8 @@ class Prago {
       new ImageView(el);
     });
 
-    var mainMenuEl = document.querySelector<HTMLDivElement>(
-      ".admin_layout_left"
-    );
+    var mainMenuEl =
+      document.querySelector<HTMLDivElement>(".admin_layout_left");
     if (mainMenuEl) {
       new MainMenu(mainMenuEl);
     }
@@ -51,13 +49,14 @@ class Prago {
 
     */
 
-    //var content = document.createElement("div");
-    //content.innerHTML = "<h2>hello world</h2><br><textarea rows='10'></textarea>";
+    /*var content = document.createElement("div");
+    content.innerHTML =
+      "<h2>hello world</h2><br><textarea rows='10'></textarea>";
 
-    //new ContentPopup("info", content);
+    var cp = new ContentPopup("info", content);
+    cp.show();*/
 
     //new Alert("OOO");
-
     //var loader = new LoadingPopup();
   }
 

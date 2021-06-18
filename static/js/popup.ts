@@ -57,9 +57,10 @@ class Popup {
   }
 
   private cancel() {
-    this.remove();
     if (this.cancelAction) {
       this.cancelAction();
+    } else {
+      this.remove();
     }
   }
 
@@ -187,7 +188,7 @@ class ContentPopup extends Popup {
     this.setCancelable();
     this.setContent(content);
     this.wide();
-    //this.present();
+    this.cancelAction = this.hide.bind(this);
   }
 
   show() {

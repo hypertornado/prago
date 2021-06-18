@@ -2182,9 +2182,11 @@ class Popup {
         this.el.focus();
     }
     cancel() {
-        this.remove();
         if (this.cancelAction) {
             this.cancelAction();
+        }
+        else {
+            this.remove();
         }
     }
     remove() {
@@ -2283,6 +2285,7 @@ class ContentPopup extends Popup {
         this.setCancelable();
         this.setContent(content);
         this.wide();
+        this.cancelAction = this.hide.bind(this);
     }
     show() {
         this.present();

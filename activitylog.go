@@ -17,9 +17,9 @@ type activityLog struct {
 	CreatedAt     time.Time `prago-preview:"true"`
 }
 
-type ActivityType int
+//type ActivityType int
 
-const (
+/*const (
 	ActivityCreate ActivityType = iota
 	ActivityEdit
 	ActivityDelete
@@ -36,32 +36,21 @@ func (t ActivityType) string() string {
 	default:
 		return ""
 	}
-}
+}*/
 
 type Activity struct {
-	ID         int64
-	ResourceID string
-	User       int64
-	Typ        ActivityType
+	ID           int64
+	ResourceID   string
+	User         int64
+	ActivityType string
 }
 
 func (al activityLog) activity() Activity {
-
-	var typ ActivityType
-	switch al.ActionType {
-	case "new":
-		typ = ActivityCreate
-	case "edit":
-		typ = ActivityEdit
-	case "delete":
-		typ = ActivityDelete
-	}
-
 	return Activity{
-		ID:         al.ItemID,
-		ResourceID: al.ResourceName,
-		User:       al.User,
-		Typ:        typ,
+		ID:           al.ItemID,
+		ResourceID:   al.ResourceName,
+		User:         al.User,
+		ActivityType: al.ActionType,
 	}
 }
 
@@ -81,7 +70,7 @@ type historyItemView struct {
 }
 
 //ListenActivity listens to all changes in app's administration
-func (app *App) ListenActivity(handler func(logItem Activity)) {
+func (app *App) ListenActivity(handler func(Activity)) {
 	app.activityListeners = append(app.activityListeners, handler)
 }
 
@@ -134,7 +123,7 @@ func initActivityLog(resource *Resource) {
 	resource.name = messages.GetNameFunction("admin_history")
 }
 
-func (app App) CreateActivityLog(actionType string, userID int64, resourceID string, itemID int64, before, after interface{}) error {
+func (app App) LogActivity(activityType string, userID int64, resourceID string, itemID int64, before, after interface{}) error {
 	var err error
 
 	var beforeData []byte
@@ -156,7 +145,7 @@ func (app App) CreateActivityLog(actionType string, userID int64, resourceID str
 	log := activityLog{
 		ResourceName:  resourceID,
 		ItemID:        itemID,
-		ActionType:    actionType,
+		ActionType:    activityType,
 		User:          userID,
 		ContentBefore: string(beforeData),
 		ContentAfter:  string(afterData),

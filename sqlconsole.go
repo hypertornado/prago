@@ -44,7 +44,7 @@ func (app *App) initSQLConsole() {
 						rows.Scan(valuePtrs...)
 
 						var row []SQLConsoleCell
-						for i, _ := range columns {
+						for i := range columns {
 							val := values[i]
 
 							b, ok := val.([]byte)
