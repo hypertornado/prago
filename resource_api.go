@@ -141,10 +141,9 @@ func initDefaultResourceAPIs(resource *Resource) {
 				if err == nil {
 					itemsVal := reflect.ValueOf(items).Elem()
 					for i := 0; i < itemsVal.Len(); i++ {
-						var item interface{}
-						item = itemsVal.Index(i).Interface()
+						item := itemsVal.Index(i).Interface()
 						viewItem := resource.itemToRelationData(item, request.user, nil)
-						if viewItem != nil && usedIDs[viewItem.ID] == false {
+						if viewItem != nil && !usedIDs[viewItem.ID] {
 							usedIDs[viewItem.ID] = true
 							ret = append(ret, *viewItem)
 						}

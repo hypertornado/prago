@@ -35,7 +35,7 @@ func (app *App) migrate(verbose bool) error {
 	if verbose {
 		unusedTables := []string{}
 		for k, v := range tables {
-			if v == true {
+			if v {
 				unusedTables = append(unusedTables, k)
 			}
 		}
@@ -64,10 +64,10 @@ func listTables(db dbIface) (ret map[string]bool, err error) {
 	ret = make(map[string]bool)
 	var rows *sql.Rows
 	rows, err = db.Query("show tables;")
-	defer rows.Close()
 	if err != nil {
 		return ret, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var name string
@@ -123,7 +123,7 @@ func migrateTable(db dbIface, tableName string, resource Resource, verbose bool)
 	if verbose {
 		unusedFields := []string{}
 		for k, v := range tableDescriptionMap {
-			if v == true {
+			if v {
 				unusedFields = append(unusedFields, k)
 			}
 		}

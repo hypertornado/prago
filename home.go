@@ -49,8 +49,9 @@ func (app *App) getSortedResources(locale string) (ret []*Resource) {
 
 		if collator.CompareString(a.name(locale), b.name(locale)) <= 0 {
 			return true
+		} else {
+			return false
 		}
-		return false
 	})
 	return
 }

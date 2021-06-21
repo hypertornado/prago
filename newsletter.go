@@ -219,7 +219,7 @@ func (nm *Newsletters) CSRF(request *Request) string {
 
 func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 	if !strings.Contains(email, "@") {
-		return errors.New("Wrong email format")
+		return errors.New("wrong email format")
 	}
 
 	err := nm.app.Query().WhereIs("email", email).Get(&newsletterPersons{})
@@ -288,7 +288,6 @@ func initNewsletterResource(resource *Resource) {
 
 			request.Response().WriteHeader(200)
 			request.Response().Write([]byte(body))
-			return
 		},
 	)
 
@@ -449,7 +448,7 @@ func defaultNewsletterRenderer(params map[string]interface{}) (string, error) {
 		return "", err
 	}
 
-	ret, err := inliner.Inline(string(buf.Bytes()))
+	ret, err := inliner.Inline(buf.String())
 	if err != nil {
 		return "", err
 	}

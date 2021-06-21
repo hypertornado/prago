@@ -213,7 +213,7 @@ func (resource *Resource) deleteItemWithLog(user *user, id int64) error {
 	resource.newItem(&item)
 	_, err = resource.app.Query().WhereIs("id", id).Delete(item)
 	if err != nil {
-		return fmt.Errorf("Can't delete item id '%d': %s", id, err)
+		return fmt.Errorf("can't delete item id '%d': %s", id, err)
 	}
 
 	if resource.app.search != nil {
@@ -242,25 +242,25 @@ func (resource *Resource) editItemsWithLog(user *user, ids []int64, values url.V
 		resource.newItem(&beforeItem)
 		err := app.Query().WhereIs("id", id).Get(beforeItem)
 		if err != nil {
-			return nil, fmt.Errorf("Can't get beforeitem with id %d: %s", id, err)
+			return nil, fmt.Errorf("can't get beforeitem with id %d: %s", id, err)
 		}
 
 		resource.newItem(&item)
 		err = app.Query().WhereIs("id", id).Get(item)
 		if err != nil {
-			return nil, fmt.Errorf("Can't get item with id %d: %s", id, err)
+			return nil, fmt.Errorf("can't get item with id %d: %s", id, err)
 		}
 
 		err = resource.bindData(
 			item, user, values, bindedFieldIDs,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("Can't bind data (%d): %s", id, err)
+			return nil, fmt.Errorf("can't bind data (%d): %s", id, err)
 		}
 
 		err = app.Save(item)
 		if err != nil {
-			return nil, fmt.Errorf("Can't save item (%d): %s", id, err)
+			return nil, fmt.Errorf("can't save item (%d): %s", id, err)
 		}
 		items = append(items, item)
 

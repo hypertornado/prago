@@ -313,14 +313,10 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 
 			k = strings.Replace(k, "`", "", -1)
 			if fromStr != "" {
-				var str string
-				str = fmt.Sprintf("`%s` >= ?", k)
-				q.Where(str, fromStr)
+				q.Where(fmt.Sprintf("`%s` >= ?", k), fromStr)
 			}
 			if toStr != "" {
-				var str string
-				str = fmt.Sprintf("`%s` <= ?", k)
-				q.Where(str, toStr)
+				q.Where(fmt.Sprintf("`%s` <= ?", k), toStr)
 			}
 		}
 	}
@@ -330,7 +326,7 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 func (resource *Resource) getListContent(user *user, params url.Values) (ret listContent, err error) {
 
 	if !resource.app.authorize(user, resource.canView) {
-		return listContent{}, errors.New("Access denied")
+		return listContent{}, errors.New("access denied")
 	}
 
 	var listHeader list
@@ -482,11 +478,11 @@ func (resource *Resource) getListContentJSON(user *user, params url.Values) (ret
 		if err != nil {
 			return nil, err
 		}
-		statsStr = string(bufStats.Bytes())
+		statsStr = bufStats.String()
 	}
 
 	return &listContentJSON{
-		Content:  string(buf.Bytes()),
+		Content:  buf.String(),
 		CountStr: listData.TotalCountStr,
 		StatsStr: statsStr,
 	}, nil

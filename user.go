@@ -34,28 +34,22 @@ func fixEmail(in string) string {
 	return strings.ToLower(in)
 }
 
-func (user user) gravatarURL() string {
-	h := md5.New()
-	io.WriteString(h, user.Email)
-	return fmt.Sprintf("https://www.gravatar.com/avatar/%ss.jpg?s=50&d=mp",
-		fmt.Sprintf("%x", h.Sum(nil)),
-	)
-}
-
 func (user *user) isPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		return false
+	} else {
+		return true
 	}
-	return true
 }
 
 //TODO: better comparison
 func (user *user) emailConfirmed() bool {
 	if user.EmailConfirmedAt.Before(time.Now().AddDate(-1000, 0, 0)) {
 		return false
+	} else {
+		return true
 	}
-	return true
 }
 
 func (user *user) newPassword(password string) error {

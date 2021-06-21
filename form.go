@@ -194,8 +194,9 @@ func emailValidator(Error string) itemValidator {
 	return newValidator(func(field *formItem) bool {
 		if !govalidator.IsEmail(field.Value) {
 			return false
+		} else {
+			return true
 		}
-		return true
 	}, Error)
 }
 
@@ -204,8 +205,9 @@ func valueValidator(ExpectedValue, Error string) itemValidator {
 	return newValidator(func(field *formItem) bool {
 		if field.Value != ExpectedValue {
 			return false
+		} else {
+			return true
 		}
-		return true
 	}, Error)
 }
 
@@ -214,8 +216,9 @@ func nonEmptyValidator(Error string) itemValidator {
 	return newValidator(func(field *formItem) bool {
 		if len(field.Value) == 0 {
 			return false
+		} else {
+			return true
 		}
-		return true
 	}, Error)
 }
 
@@ -224,17 +227,8 @@ func minLengthValidator(Error string, minLength int) itemValidator {
 	return newValidator(func(field *formItem) bool {
 		if len(field.Value) < minLength {
 			return false
+		} else {
+			return true
 		}
-		return true
-	}, Error)
-}
-
-//MaxLengthValidator for validation of max length of field
-func maxLengthValidator(Error string, maxLength int) itemValidator {
-	return newValidator(func(field *formItem) bool {
-		if len(field.Value) >= maxLength {
-			return false
-		}
-		return true
 	}, Error)
 }

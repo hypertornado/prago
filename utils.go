@@ -69,14 +69,16 @@ func crop(in string, cropLength int) string {
 		in = strings.TrimRightFunc(string(inRune), func(r rune) bool {
 			if r == ' ' {
 				return false
+			} else {
+				return true
 			}
-			return true
 		})
 		in = strings.TrimRightFunc(in, func(r rune) bool {
 			if r == ' ' {
 				return true
+			} else {
+				return false
 			}
-			return false
 		})
 		return in + "…"
 	}

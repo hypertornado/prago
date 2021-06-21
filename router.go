@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -56,17 +55,6 @@ func (r *router) process(request *Request) bool {
 		}
 	}
 	return false
-}
-
-func (r *router) print() {
-	fmt.Println("PRIORITY ROUTES")
-	for _, v := range r.priorityRoutes {
-		fmt.Printf("%s %s\n", v.method, v.path)
-	}
-	fmt.Println("NORMAL ROUTES")
-	for _, v := range r.routes {
-		fmt.Printf("%s %s\n", v.method, v.path)
-	}
 }
 
 func (r *router) export() (ret [][2]string) {
@@ -193,7 +181,7 @@ func (r *route) match(method, path string) (map[string]string, bool) {
 
 	for _, constraint := range r.constraints {
 		ok = constraint(m)
-		if ok != true {
+		if !ok {
 			return nil, false
 		}
 	}

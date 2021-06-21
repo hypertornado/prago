@@ -59,8 +59,9 @@ func (app *App) addFieldType(name string, fieldType *FieldType) {
 func (f FieldType) IsRelation() bool {
 	if f.viewTemplate == "admin_item_view_relation" {
 		return true
+	} else {
+		return false
 	}
-	return false
 }
 
 func (app *App) initDefaultFieldTypes() {

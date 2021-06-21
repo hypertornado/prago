@@ -139,18 +139,6 @@ func (app *App) getItemImage(item interface{}) string {
 	return ""
 }
 
-func (app *App) itemHasImage(item interface{}) bool {
-	if item == nil {
-		return false
-	}
-	itemsVal := reflect.ValueOf(item).Elem()
-	field := itemsVal.FieldByName("Image")
-	if field.IsValid() {
-		return true
-	}
-	return false
-}
-
 func getItemName(item interface{}) string {
 	if item != nil {
 		itemsVal := reflect.ValueOf(item).Elem()

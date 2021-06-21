@@ -33,8 +33,9 @@ func configExists(appName string) bool {
 	_, err := os.Open(getConfigPath(appName))
 	if err == nil {
 		return true
+	} else {
+		return false
 	}
-	return false
 }
 
 type config struct {

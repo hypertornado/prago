@@ -48,8 +48,9 @@ func (app *App) initUserSettings() {
 		oldValidator := newValidator(func(field *formItem) bool {
 			if !request.user.isPassword(field.Value) {
 				return false
+			} else {
+				return true
 			}
-			return true
 		}, messages.Get(locale, "admin_password_wrong"))
 
 		form := newForm()

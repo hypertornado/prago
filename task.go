@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"sort"
-	"sync"
 	"time"
 
 	"golang.org/x/text/collate"
@@ -13,11 +12,11 @@ import (
 )
 
 type taskManager struct {
-	app           *App
-	taskGroups    []*TaskGroup
-	tasksMap      map[string]*Task
-	activityMutex *sync.RWMutex
-	startedAt     time.Time
+	app *App
+	//taskGroups    []*TaskGroup
+	tasksMap map[string]*Task
+	//activityMutex *sync.RWMutex
+	startedAt time.Time
 }
 
 func (app *App) initTaskManager() {
@@ -163,10 +162,7 @@ func (tm *taskManager) getTasks(user *user) (ret []taskViewGroup) {
 		}
 
 		compareID := collate.New(language.Czech).CompareString(t1.id, t2.id)
-		if compareID < 0 {
-			return true
-		}
-		return false
+		return compareID < 0
 	})
 
 	var lastGroup *TaskGroup
@@ -196,8 +192,6 @@ type Task struct {
 type taskFileInput struct {
 	ID string
 }
-
-var defaultGroup *TaskGroup
 
 //Task creates task
 func (tg *TaskGroup) Task(id string) *Task {

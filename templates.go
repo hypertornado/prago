@@ -78,7 +78,6 @@ func (app *App) initTemplates() {
 	app.AddTemplateFunction("istabvisible", isTabVisible)
 
 	must(app.AddTemplates(templatesFS, "templates/*.tmpl"))
-	return
 }
 
 //AddTemplates loads app's html templates from file system

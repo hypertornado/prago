@@ -162,7 +162,7 @@ func (resource Resource) saveItem(db dbIface, tableName string, item interface{}
 		return err
 	}
 	if affected == 0 {
-		return errors.New("Zero rows affected by save operation")
+		return errors.New("zero rows affected by save operation")
 	}
 	return nil
 }
@@ -288,7 +288,7 @@ func listItems(resource Resource, db dbIface, tableName string, items interface{
 	whereString := buildWhereString(query.whereString)
 
 	newValue := reflect.New(resource.typ).Elem()
-	names, scanners, err := resource.getStructScanners(newValue)
+	names, _, err := resource.getStructScanners(newValue)
 	if err != nil {
 		return err
 	}
@@ -308,7 +308,7 @@ func listItems(resource Resource, db dbIface, tableName string, items interface{
 	}
 	for rows.Next() {
 		newValue = reflect.New(resource.typ)
-		names, scanners, err = resource.getStructScanners(newValue.Elem())
+		_, scanners, err := resource.getStructScanners(newValue.Elem())
 		if err != nil {
 			return err
 		}

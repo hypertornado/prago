@@ -23,12 +23,6 @@ func constraintWhitelist(item string, allowedValues []string) func(map[string]st
 	}
 }
 
-func constraintMap(item string, allowedValues map[string]bool) func(map[string]string) bool {
-	return func(m map[string]string) bool {
-		return allowedValues[m[item]]
-	}
-}
-
 func constraintRegexp(item string, reg *regexp.Regexp) func(map[string]string) bool {
 	return func(m map[string]string) bool {
 		if value, ok := m[item]; ok {

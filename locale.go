@@ -14,11 +14,6 @@ var (
 	availableLocales = [][2]string{{"en", "English"}, {"cs", "Čeština"}}
 )
 
-func validLocale(in string) bool {
-	_, ok := localeNames[in]
-	return ok
-}
-
 func localeFromRequest(request *Request) string {
 	return localeFromAcceptLanguageString(
 		request.Request().Header.Get("Accept-Language"),

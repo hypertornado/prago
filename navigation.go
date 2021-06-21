@@ -157,6 +157,7 @@ func (app *App) getNologinNavigation(language, code string) navigation {
 func trueIfEqual(a, b string) bool {
 	if a == b {
 		return true
+	} else {
+		return false
 	}
-	return false
 }

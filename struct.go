@@ -23,7 +23,7 @@ func (resource Resource) getDefaultOrder() (column string, desc bool) {
 			add = false
 		}
 
-		if add == true {
+		if add {
 			column = v.ColumnName
 			desc = false
 			if v.Tags["prago-order-desc"] == "true" {

@@ -32,8 +32,8 @@ func (app *App) initAccessManager() {
 type Permission string
 
 func (app *App) validatePermission(permission Permission) error {
-	if app.accessManager.permissions[permission] == false {
-		return fmt.Errorf("Unknown permission '%s'", permission)
+	if !app.accessManager.permissions[permission] {
+		return fmt.Errorf("unknown permission '%s'", permission)
 	}
 	return nil
 }

@@ -19,26 +19,26 @@ func (app *App) initBackupCRON() {
 			func(tr *TaskActivity) error {
 				err := backupApp(app)
 				if err != nil {
-					return fmt.Errorf("Error while creating backup: %s", err)
+					return fmt.Errorf("error while creating backup: %s", err)
 				}
 				return nil
 			}).RepeatEvery(24 * time.Hour)
 
 	backupTaskGroup.Task("remove_old_backups").Handler(
 		func(tr *TaskActivity) error {
-			tr.SetStatus(0, fmt.Sprintf("Removing old backups"))
+			tr.SetStatus(0, "Removing old backups")
 			deadline := time.Now().AddDate(0, 0, -7)
 			backupPath := app.dotPath() + "/backups"
 			files, err := ioutil.ReadDir(backupPath)
 			if err != nil {
-				return fmt.Errorf("Error while removing old backups: %s", err)
+				return fmt.Errorf("error while removing old backups: %s", err)
 			}
 			for _, file := range files {
 				if file.ModTime().Before(deadline) {
 					removePath := backupPath + "/" + file.Name()
 					err := os.RemoveAll(removePath)
 					if err != nil {
-						return fmt.Errorf("Error while removing old backup file: %s", err)
+						return fmt.Errorf("error while removing old backup file: %s", err)
 					}
 				}
 			}
@@ -81,10 +81,10 @@ func backupApp(app *App) error {
 	dbFilePath := filepath.Join(dirPath, "db.sql")
 
 	dbFile, err := os.Create(dbFilePath)
-	defer dbFile.Close()
 	if err != nil {
 		return fmt.Errorf("creating backup db file: %s", err)
 	}
+	defer dbFile.Close()
 
 	dumpCmd.Stdout = dbFile
 

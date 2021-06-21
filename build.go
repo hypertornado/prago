@@ -126,7 +126,7 @@ func build(appName, version string) error {
 			fmt.Println("Deleting " + buildDir)
 			os.RemoveAll(buildDir)
 		} else {
-			return errors.New("Have not deleted old version")
+			return errors.New("have not deleted old version")
 		}
 	}
 	return copyFiles(dirPath, buildPath)

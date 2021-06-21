@@ -9,7 +9,7 @@ import (
 )
 
 func (app App) recoveryFunction(p *Request, recoveryData interface{}) {
-	duration := time.Now().Sub(p.receivedAt)
+	duration := time.Since(p.receivedAt)
 
 	if app.developmentMode {
 		temp, err := template.New("development_error").Parse(recoveryTmpl)

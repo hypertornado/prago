@@ -20,11 +20,6 @@ type viewField struct {
 	Value    interface{}
 }
 
-type viewAction struct {
-	Name string
-	URL  string
-}
-
 func (resource Resource) getViews(id int, inValues interface{}, user *user) (ret []view) {
 	ret = append(ret, resource.getBasicView(id, inValues, user))
 	ret = append(ret, resource.getAutoRelationsView(id, inValues, user)...)

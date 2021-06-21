@@ -96,7 +96,7 @@ func (request Request) RenderJSONWithCode(data interface{}, code int) {
 	var result []byte
 	var e error
 
-	if pretty == true {
+	if pretty {
 		result, e = json.MarshalIndent(responseToWrite, "", "  ")
 	} else {
 		result, e = json.Marshal(responseToWrite)
@@ -120,13 +120,7 @@ func (request Request) writeAfterLog() {
 	if request.Request().Header.Get("X-Dont-Log") != "true" {
 		request.app.Log().Printf("id=%s %s %s took=%v", request.uuid,
 			request.Request().Method, request.Request().URL.String(),
-			time.Now().Sub(request.receivedAt))
-	}
-}
-
-func (app App) timestampLog(request Request, text string) {
-	if request.Request().Header.Get("X-Dont-Log") != "true" {
-		app.Log().Printf("id=%s %s took=%v", request.uuid, text, time.Now().Sub(request.receivedAt))
+			time.Since(request.receivedAt))
 	}
 }
 

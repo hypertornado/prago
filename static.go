@@ -40,8 +40,8 @@ type staticFiles struct {
 }
 
 type staticFS struct {
-	fs         fs.FS
-	path       string
+	fs fs.FS
+	//path       string
 	pathPrefix string
 }
 

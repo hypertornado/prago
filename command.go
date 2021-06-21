@@ -24,6 +24,7 @@ func addServerCommand(app *App) {
 			app.developmentMode = developmentMode
 			if port <= 0 {
 				configPort, err := app.ConfigurationGetItem("port")
+				must(err)
 				switch configPort.(type) {
 				case string:
 					port, err = strconv.Atoi(configPort.(string))

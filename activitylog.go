@@ -17,27 +17,6 @@ type activityLog struct {
 	CreatedAt     time.Time `prago-preview:"true"`
 }
 
-//type ActivityType int
-
-/*const (
-	ActivityCreate ActivityType = iota
-	ActivityEdit
-	ActivityDelete
-)
-
-func (t ActivityType) string() string {
-	switch t {
-	case ActivityCreate:
-		return "new"
-	case ActivityEdit:
-		return "edit"
-	case ActivityDelete:
-		return "delete"
-	default:
-		return ""
-	}
-}*/
-
 type Activity struct {
 	ID           int64
 	ResourceID   string
