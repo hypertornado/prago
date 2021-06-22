@@ -10,12 +10,12 @@ import (
 func (app *App) initEmail() {
 	sendgridKey := app.ConfigurationGetString("sendgridApi")
 	app.noReplyEmail = app.ConfigurationGetString("noReplyEmail")
-	app.noReplyName = app.name("en")
+	//app.noReplyName = app.name("en")
 	app.sendgridClient = sendgrid.NewSendClient(sendgridKey)
 }
 
-func (app *App) SetDefaultEmailAddressFrom(name, email string) {
-	app.noReplyName = name
+func (app *App) SetDefaultEmailAddressFrom(email string) {
+	//app.noReplyName = name
 	app.noReplyEmail = email
 }
 
@@ -43,7 +43,7 @@ func newEmailAddress(name, email string) *emailAddress {
 
 func (app *App) Email() *Email {
 	return &Email{
-		from: newEmailAddress(app.noReplyName, app.noReplyEmail),
+		from: newEmailAddress(app.name("en"), app.noReplyEmail),
 		app:  app,
 	}
 }

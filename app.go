@@ -46,7 +46,7 @@ type App struct {
 	sendgridClient *sendgrid.Client
 
 	noReplyEmail string
-	noReplyName  string
+	//noReplyName  string
 
 	newsletters        *Newsletters
 	notificationCenter *notificationCenter

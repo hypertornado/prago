@@ -204,7 +204,6 @@ func (nm Newsletters) unsubscribeURL(email string) string {
 
 func (nm Newsletters) secret(email string) string {
 	h := md5.New()
-
 	io.WriteString(h, fmt.Sprintf("secret%s%s", nm.randomness, email))
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
