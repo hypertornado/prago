@@ -35,8 +35,6 @@ func (resource Resource) getDefaultOrder() (column string, desc bool) {
 }
 
 func (resource Resource) getForm(inValues interface{}, user *user) (*form, error) {
-	//filters = append(filters, defaultVisibilityFilter)
-	//filters = append(filters, defaultEditabilityFilter)
 	form := newForm()
 	form.Method = "POST"
 	itemVal := reflect.ValueOf(inValues).Elem()

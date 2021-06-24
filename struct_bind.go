@@ -31,7 +31,7 @@ func (resource Resource) getDefaultBindedFieldIDs(user *user) map[string]bool {
 		if !v.authorizeEdit(user) {
 			continue
 		}
-		ret[v.Name] = true
+		ret[v.ColumnName] = true
 	}
 	return ret
 }
@@ -54,13 +54,9 @@ func (resource Resource) bindData(item interface{}, user *user, params url.Value
 		if !field.authorizeEdit(user) {
 			continue
 		}
-		if !bindedFieldIDs[field.Name] {
+		if !bindedFieldIDs[field.ColumnName] {
 			continue
 		}
-
-		/*if len(params[field.ColumnName]) == 0 {
-			continue
-		}*/
 
 		val := value.FieldByName(field.Name)
 		urlValue := params.Get(field.ColumnName)

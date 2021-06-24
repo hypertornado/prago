@@ -85,3 +85,11 @@ func (app *App) initUserResource() {
 	resource.app.initUserSettings()
 	initUserRenew(resource)
 }
+
+func (app *App) GetCachedUserEmail(id int64) string {
+	return app.cache.Load(fmt.Sprintf("cached-user-email-%d", id), func() interface{} {
+		var user user
+		app.Query().WhereIs("id", id).Get(&user)
+		return user.Email
+	}).(string)
+}

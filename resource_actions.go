@@ -9,7 +9,6 @@ import (
 func initDefaultResourceActions(resource *Resource) {
 	app := resource.app
 
-	//list action
 	resource.Action("").priority().Permission(resource.canView).Name(resource.name).IsWide().Template("admin_list").DataSource(
 		func(request *Request) interface{} {
 			listData, err := resource.getListHeader(request.user)
@@ -232,7 +231,6 @@ func (resource *Resource) deleteItemWithLog(user *user, id int64) error {
 }
 
 func (resource *Resource) editItemsWithLog(user *user, ids []int64, values url.Values, bindedFieldIDs map[string]bool) ([]interface{}, error) {
-
 	var items []interface{}
 	app := resource.app
 
