@@ -24,15 +24,15 @@ func addServerCommand(app *App) {
 			app.developmentMode = developmentMode
 			if port <= 0 {
 				configPort, _ := app.ConfigurationGetItem("port")
-				switch configPort.(type) {
+				switch configPort := configPort.(type) {
 				case string:
 					var err error
-					port, err = strconv.Atoi(configPort.(string))
+					port, err = strconv.Atoi(configPort)
 					if err != nil {
 						app.Log().Fatalf("wrong format of 'port' entry in config file, should be int")
 					}
 				case float64:
-					port = int(configPort.(float64))
+					port = int(configPort)
 				default:
 					port = defaultPort
 				}

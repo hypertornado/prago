@@ -13,8 +13,6 @@ import (
 //ErrWrongWhereFormat is returned when where query has a bad format
 var ErrWrongWhereFormat = errors.New("wrong where format")
 
-//var debugSQL = true
-
 //GetDB gets DB
 func (app *App) GetDB() *sql.DB {
 	return app.db
@@ -79,15 +77,15 @@ func (q *listQuery) where(data ...interface{}) error {
 }
 
 func (q *listQuery) whereSingle(data interface{}) (whereString string, whereParams []interface{}, err error) {
-	switch data.(type) {
+	switch data := data.(type) {
 	case string:
-		whereString = data.(string)
+		whereString = data
 	case int64:
-		whereString, whereParams = mapToDBQuery(map[string]interface{}{"id": data.(int64)})
+		whereString, whereParams = mapToDBQuery(map[string]interface{}{"id": data})
 	case int:
-		whereString, whereParams = mapToDBQuery(map[string]interface{}{"id": data.(int)})
+		whereString, whereParams = mapToDBQuery(map[string]interface{}{"id": data})
 	case map[string]interface{}:
-		whereString, whereParams = mapToDBQuery(data.(map[string]interface{}))
+		whereString, whereParams = mapToDBQuery(data)
 	default:
 		err = ErrWrongWhereFormat
 	}

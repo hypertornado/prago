@@ -23,7 +23,7 @@ type ResourceStruct struct {
 func prepareResource(initFns ...func(app *App)) (*App, *Resource) {
 	var resource *Resource
 	app := newTestingApp()
-	resource = app.Resource(ResourceStruct{})
+	resource = app.Resource(ResourceStruct{privateint: 1})
 	for _, v := range initFns {
 		v(app)
 	}
