@@ -48,7 +48,7 @@ func initUserRegistration(resource *Resource) {
 				}
 				var user user
 				app.Query().WhereIs("email", field.Value).Get(&user)
-				return user.Email == field.Value
+				return user.Email != field.Value
 			}, messages.Get(locale, "admin_email_already_registered")),
 		)
 		form.AddPasswordInput("password", messages.Get(locale, "admin_register_password"),
