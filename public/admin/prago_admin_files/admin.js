@@ -901,28 +901,65 @@ class ListMultiple {
         }
     }
     bindMultipleActionCheckboxes() {
-        this.checkboxesAr = document.querySelectorAll(".admin_table_cell-multiple_checkbox");
-        for (var i = 0; i < this.checkboxesAr.length; i++) {
-            var checkbox = this.checkboxesAr[i];
-            checkbox.addEventListener("change", this.multipleCheckboxChanged.bind(this));
+        this.lastCheckboxIndexClicked = -1;
+        this.pseudoCheckboxesAr = document.querySelectorAll(".admin_table_cell-multiple");
+        for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
+            var checkbox = this.pseudoCheckboxesAr[i];
+            checkbox.addEventListener("click", this.multipleCheckboxClicked.bind(this));
         }
         this.multipleCheckboxChanged();
     }
     multipleGetIDs() {
         var ret = [];
-        for (var i = 0; i < this.checkboxesAr.length; i++) {
-            var checkbox = this.checkboxesAr[i];
-            if (checkbox.checked) {
+        for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
+            var checkbox = this.pseudoCheckboxesAr[i];
+            if (checkbox.classList.contains("admin_table_cell-multiple-checked")) {
                 ret.push(checkbox.getAttribute("data-id"));
             }
         }
         return ret;
     }
+    multipleCheckboxClicked(e) {
+        var cell = e.currentTarget;
+        var index = this.indexOfClickedCheckbox(cell);
+        if (e.shiftKey && this.lastCheckboxIndexClicked >= 0) {
+            var start = Math.min(index, this.lastCheckboxIndexClicked);
+            var end = Math.max(index, this.lastCheckboxIndexClicked);
+            for (var i = start; i <= end; i++) {
+                this.checkPseudocheckbox(i);
+            }
+        }
+        else {
+            this.lastCheckboxIndexClicked = index;
+            if (this.isCheckedPseudocheckbox(index)) {
+                this.uncheckPseudocheckbox(index);
+            }
+            else {
+                this.checkPseudocheckbox(index);
+            }
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        this.multipleCheckboxChanged();
+        return false;
+    }
+    isCheckedPseudocheckbox(index) {
+        var sb = this.pseudoCheckboxesAr[index];
+        return sb.classList.contains("admin_table_cell-multiple-checked");
+    }
+    checkPseudocheckbox(index) {
+        var sb = this.pseudoCheckboxesAr[index];
+        sb.classList.add("admin_table_cell-multiple-checked");
+    }
+    uncheckPseudocheckbox(index) {
+        var sb = this.pseudoCheckboxesAr[index];
+        sb.classList.remove("admin_table_cell-multiple-checked");
+    }
     multipleCheckboxChanged() {
         var checkedCount = 0;
-        for (var i = 0; i < this.checkboxesAr.length; i++) {
-            var checkbox = this.checkboxesAr[i];
-            if (checkbox.checked) {
+        for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
+            var checkbox = this.pseudoCheckboxesAr[i];
+            if (checkbox.classList.contains("admin_table_cell-multiple-checked")) {
                 checkedCount++;
             }
         }
@@ -936,11 +973,21 @@ class ListMultiple {
         this.list.el.querySelector(".admin_list_multiple_actions_description").textContent = `Vybráno ${checkedCount} položek`;
     }
     multipleUncheckAll() {
-        for (var i = 0; i < this.checkboxesAr.length; i++) {
-            var checkbox = this.checkboxesAr[i];
-            checkbox.checked = false;
+        this.lastCheckboxIndexClicked = -1;
+        for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
+            var checkbox = this.pseudoCheckboxesAr[i];
+            checkbox.classList.remove("admin_table_cell-multiple-checked");
         }
         this.multipleCheckboxChanged();
+    }
+    indexOfClickedCheckbox(el) {
+        var ret = -1;
+        this.pseudoCheckboxesAr.forEach((v, k) => {
+            if (v == el) {
+                ret = k;
+            }
+        });
+        return ret;
     }
 }
 class ListMultipleEdit {

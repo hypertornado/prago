@@ -408,7 +408,7 @@ func (resource *Resource) getListContent(user *user, params url.Values) (ret lis
 	}
 
 	q = resource.addFilterParamsToQuery(q, params)
-	q = q.Offset((int64(currentPage) - 1) * itemsPerPage)
+	q = q.Offset((int64(currentPage) - 1) * itemsPerPage).Debug()
 	q = q.Limit(itemsPerPage)
 
 	var rowItems interface{}

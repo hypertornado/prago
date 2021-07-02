@@ -1276,3 +1276,33 @@ td.admin_list_message {
     display: none !important;
   }
 }
+
+.admin_table_cell-multiple {
+}
+
+.admin_table_cell_multiple_pseudocheckbox {
+  border: 1px solid @baseColor;
+  border-radius: 3px;
+  width: 15px;
+  height: 15px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 11px;
+  color: white !important;
+  //.shadow;
+  cursor: pointer;
+}
+
+.admin_table_cell_multiple_pseudocheckbox:hover {
+  background-color: @baseColorBackgroundLighter;
+}
+
+.admin_table_cell-multiple-checked .admin_table_cell_multiple_pseudocheckbox {
+  background-color: @baseColor;
+}
+
+.admin_table_cell_multiple_pseudocheckbox::after {
+  content: "✓";
+  color: white !important;
+}

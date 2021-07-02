@@ -157,8 +157,11 @@
   {{range $item := .admin_list.Rows}}
     <tr data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="admin_table_row">
       {{if $item.AllowsMultipleActions}}
-        <td class="admin_table_cell-multiple preventredirect">
-          <input type="checkbox" class="admin_table_cell-multiple_checkbox preventredirect" data-id="{{$item.ID}}">
+        <td class="admin_table_cell-multiple preventredirect" data-id="{{$item.ID}}">
+          <!--
+          <input type="checkbox" class="admin_table_cell-multiple_checkbox preventredirect">
+          -->
+          <div class="admin_table_cell_multiple_pseudocheckbox"></div>
         </td>
       {{end}}
       {{range $cell := $item.Items}}

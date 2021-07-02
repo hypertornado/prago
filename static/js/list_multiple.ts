@@ -8,7 +8,8 @@ class ListMultiple {
     }
   }
 
-  checkboxesAr: NodeListOf<HTMLInputElement>;
+  pseudoCheckboxesAr: NodeListOf<HTMLTableCellElement>;
+  lastCheckboxIndexClicked: number;
 
   hasMultipleActions(): Boolean {
     if (this.list.el.classList.contains("admin_list-hasmultipleactions")) {
@@ -79,14 +80,15 @@ class ListMultiple {
   }
 
   bindMultipleActionCheckboxes() {
-    this.checkboxesAr = document.querySelectorAll(
-      ".admin_table_cell-multiple_checkbox"
+    this.lastCheckboxIndexClicked = -1;
+    this.pseudoCheckboxesAr = document.querySelectorAll(
+      ".admin_table_cell-multiple"
     );
-    for (var i = 0; i < this.checkboxesAr.length; i++) {
-      var checkbox = <HTMLInputElement>this.checkboxesAr[i];
+    for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
+      var checkbox = <HTMLTableCellElement>this.pseudoCheckboxesAr[i];
       checkbox.addEventListener(
-        "change",
-        this.multipleCheckboxChanged.bind(this)
+        "click",
+        this.multipleCheckboxClicked.bind(this)
       );
     }
     this.multipleCheckboxChanged();
@@ -94,20 +96,62 @@ class ListMultiple {
 
   multipleGetIDs(): Array<String> {
     var ret: Array<String> = [];
-    for (var i = 0; i < this.checkboxesAr.length; i++) {
-      var checkbox = <HTMLInputElement>this.checkboxesAr[i];
-      if (checkbox.checked) {
+    for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
+      var checkbox = <HTMLTableCellElement>this.pseudoCheckboxesAr[i];
+      if (checkbox.classList.contains("admin_table_cell-multiple-checked")) {
         ret.push(checkbox.getAttribute("data-id"));
       }
     }
     return ret;
   }
 
+  multipleCheckboxClicked(e: MouseEvent) {
+    var cell: HTMLTableCellElement = <HTMLTableCellElement>e.currentTarget;
+    var index: number = this.indexOfClickedCheckbox(cell);
+
+    if (e.shiftKey && this.lastCheckboxIndexClicked >= 0) {
+      var start = Math.min(index, this.lastCheckboxIndexClicked);
+      var end = Math.max(index, this.lastCheckboxIndexClicked);
+      for (var i = start; i <= end; i++) {
+        this.checkPseudocheckbox(i);
+      }
+    } else {
+      this.lastCheckboxIndexClicked = index;
+      if (this.isCheckedPseudocheckbox(index)) {
+        this.uncheckPseudocheckbox(index);
+      } else {
+        this.checkPseudocheckbox(index);
+      }
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    this.multipleCheckboxChanged();
+
+    return false;
+  }
+
+  isCheckedPseudocheckbox(index: number): boolean {
+    var sb: HTMLTableCellElement = this.pseudoCheckboxesAr[index];
+    return sb.classList.contains("admin_table_cell-multiple-checked");
+  }
+
+  checkPseudocheckbox(index: number) {
+    var sb: HTMLTableCellElement = this.pseudoCheckboxesAr[index];
+    sb.classList.add("admin_table_cell-multiple-checked");
+  }
+
+  uncheckPseudocheckbox(index: number) {
+    var sb: HTMLTableCellElement = this.pseudoCheckboxesAr[index];
+    sb.classList.remove("admin_table_cell-multiple-checked");
+  }
+
   multipleCheckboxChanged() {
     var checkedCount = 0;
-    for (var i = 0; i < this.checkboxesAr.length; i++) {
-      var checkbox = <HTMLInputElement>this.checkboxesAr[i];
-      if (checkbox.checked) {
+    for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
+      var checkbox = <HTMLTableCellElement>this.pseudoCheckboxesAr[i];
+      if (checkbox.classList.contains("admin_table_cell-multiple-checked")) {
         checkedCount++;
       }
     }
@@ -128,10 +172,21 @@ class ListMultiple {
   }
 
   multipleUncheckAll() {
-    for (var i = 0; i < this.checkboxesAr.length; i++) {
-      var checkbox = <HTMLInputElement>this.checkboxesAr[i];
-      checkbox.checked = false;
+    this.lastCheckboxIndexClicked = -1;
+    for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
+      var checkbox = this.pseudoCheckboxesAr[i];
+      checkbox.classList.remove("admin_table_cell-multiple-checked");
     }
     this.multipleCheckboxChanged();
+  }
+
+  indexOfClickedCheckbox(el: HTMLTableCellElement): number {
+    var ret: number = -1;
+    this.pseudoCheckboxesAr.forEach((v, k) => {
+      if (v == el) {
+        ret = k;
+      }
+    });
+    return ret;
   }
 }
