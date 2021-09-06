@@ -8,14 +8,12 @@ import (
 )
 
 func (app *App) initEmail() {
-	sendgridKey := app.ConfigurationGetString("sendgridApi")
-	app.noReplyEmail = app.ConfigurationGetString("noReplyEmail")
-	//app.noReplyName = app.name("en")
+	sendgridKey := app.ConfigurationGetStringWithFallback("sendgridApi", "")
+	app.noReplyEmail = app.ConfigurationGetStringWithFallback("noReplyEmail", "")
 	app.sendgridClient = sendgrid.NewSendClient(sendgridKey)
 }
 
 func (app *App) SetDefaultEmailAddressFrom(email string) {
-	//app.noReplyName = name
 	app.noReplyEmail = email
 }
 
@@ -92,23 +90,3 @@ func (email *Email) Send() error {
 	}
 	return nil
 }
-
-//SendEmail from app
-/*func (a App) SendEmailOLD(name, email, subject, contentText, contentHTML string) error {
-	from := mail.NewEmail(a.name("en"), a.noReplyEmail)
-	to := mail.NewEmail(name, email)
-	message := mail.NewSingleEmail(from, subject, to, contentText, contentHTML)
-	client := sendgrid.NewSendClient(a.sendgridKey)
-	_, err := client.Send(message)
-	return err
-}*/
-
-//SendEmailFromTo send email with from data
-/*func (a App) SendEmailFromTo(fromEmail, toEmail, subject, contentText, contentHTML string) error {
-	from := mail.NewEmail("", fromEmail)
-	to := mail.NewEmail("", toEmail)
-	message := mail.NewSingleEmail(from, subject, to, contentText, contentHTML)
-	client := sendgrid.NewSendClient(a.sendgridKey)
-	_, err := client.Send(message)
-	return err
-}*/

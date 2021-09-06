@@ -5474,7 +5474,7 @@ ul {
   margin: 20px auto;
   background-color: white;
   border-radius: 2px;
-  max-width: 600px;
+  max-width: min(600px, 100vw);
   width: 100%;
   margin-bottom: 20px;
   background-color: #fff;
