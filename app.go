@@ -7,7 +7,6 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/hypertornado/prago/cachelib"
 	setup "github.com/hypertornado/prago/prago-setup/lib"
 	"github.com/sendgrid/sendgrid-go"
 )
@@ -23,11 +22,10 @@ type App struct {
 	commands        *commands
 	logger          *log.Logger
 	templates       *templates
-	cache           *cachelib.Cache
+	Cache           *Cache
 	sessionsManager *sessionsManager
 
-	logo []byte
-	//logoPath        string
+	logo            []byte
 	name            func(string) string
 	resources       []*Resource
 	resourceMap     map[reflect.Type]*Resource
@@ -46,7 +44,6 @@ type App struct {
 	sendgridClient *sendgrid.Client
 
 	noReplyEmail string
-	//noReplyName  string
 
 	newsletters        *Newsletters
 	notificationCenter *notificationCenter
@@ -84,7 +81,7 @@ func createApp(codeName string, version string) *App {
 
 		logger:         log.New(os.Stdout, "", log.LstdFlags),
 		mainController: newMainController(),
-		cache:          cachelib.NewCache(),
+		Cache:          newCache(),
 	}
 
 	app.appController = app.mainController.subController()
@@ -167,8 +164,6 @@ func (app *App) Name(name func(string) string) *App {
 //Logo sets application public path to logo
 func (app *App) Logo(logo []byte) *App {
 	app.logo = logo
-	//mimeType := http.DetectContentType(logo)
-	//app.logo = fmt.Sprintf("%s;base64,%s", mimeType, base64.StdEncoding.EncodeToString(logo))
 	return app
 }
 

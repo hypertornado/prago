@@ -280,13 +280,13 @@ func (resource Resource) cachedCountName() string {
 }
 
 func (resource Resource) getCachedCount() int64 {
-	return resource.app.cache.Load(resource.cachedCountName(), func() interface{} {
+	return resource.app.Cache.Load(resource.cachedCountName(), func() interface{} {
 		return resource.count()
 	}).(int64)
 }
 
 func (resource Resource) updateCachedCount() error {
-	return resource.app.cache.Set(resource.cachedCountName(), resource.count())
+	return resource.app.Cache.Set(resource.cachedCountName(), resource.count())
 }
 
 func (resource Resource) getPaginationData(user *user) (ret []listPaginationData) {

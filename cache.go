@@ -1,4 +1,4 @@
-package cachelib
+package prago
 
 import (
 	"errors"
@@ -22,7 +22,7 @@ type cacheItem struct {
 	mutex     *sync.RWMutex
 }
 
-func NewCache() *Cache {
+func newCache() *Cache {
 	return &Cache{
 		items: map[string]*cacheItem{},
 		mutex: &sync.RWMutex{},
