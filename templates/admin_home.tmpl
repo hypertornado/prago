@@ -1,14 +1,16 @@
 {{define "admin_home_navigation"}}
   <div class="admin_home">
-    {{range $item := .}}
-      <a href="{{$item.URL}}" class="admin_home_item">{{$item.Name}}</a>
-      {{if false}}
-      <ul>
-        {{range $action := $item.Actions}}
-          <li><a href="{{$action.URL}}">{{$action.Name}}</a></li>
+  {{range $section := .Sections}}
+    <div class="admin_home_section">
+      <h2>{{$section.Name}}</h2>
+      <div class="admin_home_items">
+        {{range $item := $section.Items}}
+            <a href="{{$item.URL}}" class="admin_home_item">
+              <div class="admin_home_item_name">{{$item.Name}}</div>
+            </a>
         {{end}}
-      </ul>
-      {{end}}
-    {{end}}
-  </div>
+      </div>
+    </div>
+  {{end}}
+  <div>
 {{end}}

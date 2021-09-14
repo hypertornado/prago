@@ -19,6 +19,23 @@ type taskManager struct {
 	startedAt time.Time
 }
 
+type taskViewData struct {
+	Title     string
+	Locale    string
+	CSRFToken string
+	Tasks     []taskViewGroup
+}
+
+func GetTaskViewData(request *Request) interface{} {
+	var ret taskViewData
+	user := request.user
+	ret.Locale = user.Locale
+	ret.CSRFToken = request.app.generateCSRFToken(user)
+	ret.Tasks = request.app.taskManager.getTasks(user)
+	ret.Title = messages.Get(user.Locale, "tasks")
+	return ret
+}
+
 func (app *App) initTaskManager() {
 
 	app.taskManager = &taskManager{
@@ -29,7 +46,9 @@ func (app *App) initTaskManager() {
 
 	go app.taskManager.startCRON()
 
-	app.Action("tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(
+	app.Action("tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(GetTaskViewData)
+
+	/*app.Action("tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(
 		func(request *Request) interface{} {
 			var ret = map[string]interface{}{}
 			user := request.user
@@ -39,7 +58,7 @@ func (app *App) initTaskManager() {
 			ret["admin_title"] = messages.Get(user.Locale, "tasks")
 			return ret
 		},
-	)
+	)*/
 
 	app.API("tasks/runtask").Method("POST").Permission(loggedPermission).Handler(func(request *Request) {
 		id := request.Request().FormValue("id")

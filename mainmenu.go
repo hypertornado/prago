@@ -1,7 +1,11 @@
 package prago
 
 import (
+	"sort"
 	"strings"
+
+	"golang.org/x/text/collate"
+	"golang.org/x/text/language"
 )
 
 type mainMenu struct {
@@ -150,4 +154,21 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 	}
 
 	return ret
+}
+
+func (app *App) getSortedResources(locale string) (ret []*Resource) {
+	collator := collate.New(language.Czech)
+
+	ret = app.resources
+	sort.SliceStable(ret, func(i, j int) bool {
+		a := ret[i]
+		b := ret[j]
+
+		if collator.CompareString(a.name(locale), b.name(locale)) <= 0 {
+			return true
+		} else {
+			return false
+		}
+	})
+	return
 }
