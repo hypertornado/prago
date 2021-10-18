@@ -173,7 +173,7 @@ func (action *Action) getnavigation(request *Request) navigation {
 		if action.isItemAction {
 			var item interface{}
 			action.resource.newItem(&item)
-			must(action.resource.app.Query().WhereIs("id", request.Params().Get("id")).Get(item))
+			must(action.resource.app.Query().Is("id", request.Params().Get("id")).Get(item))
 			return action.resource.getItemNavigation(request.user, item, code)
 		}
 		return action.resource.getNavigation(request.user, code)

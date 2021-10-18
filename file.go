@@ -39,7 +39,7 @@ func (app *App) thumb(ids string) string {
 	}
 	for _, v := range strings.Split(ids, ",") {
 		var image File
-		err := app.Query().WhereIs("uid", v).Get(&image)
+		err := app.Query().Is("uid", v).Get(&image)
 		if err == nil && image.isImage() {
 			return image.GetSmall()
 		}
@@ -53,7 +53,7 @@ func (app *App) GetFiles(ids string) []*File {
 	idsAr := strings.Split(ids, ",")
 	for _, v := range idsAr {
 		var image File
-		err := app.Query().WhereIs("uid", v).Get(&image)
+		err := app.Query().Is("uid", v).Get(&image)
 		if err == nil {
 			files = append(files, &image)
 		}
@@ -125,7 +125,7 @@ func getOldRedirectParams(request *Request, app *App) (uuid, name string, err er
 	)
 
 	var file File
-	err = app.Query().WhereIs("uid", uuid).Get(&file)
+	err = app.Query().Is("uid", uuid).Get(&file)
 	if err != nil {
 		return
 	}
@@ -175,7 +175,7 @@ func (app *App) initFilesResource() {
 			id, err := strconv.Atoi(idStr)
 			if err == nil {
 				var file File
-				must(app.Query().WhereIs("id", id).Get(&file))
+				must(app.Query().Is("id", id).Get(&file))
 				err = filesCDN.DeleteFile(file.UID)
 				if err != nil {
 					app.Log().Printf("deleting CDN: %s\n", err)

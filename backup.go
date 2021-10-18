@@ -45,7 +45,6 @@ func (app *App) initBackupCRON() {
 			app.Log().Println("Old backups removed")
 			return nil
 		}).RepeatEvery(1 * time.Hour)
-
 }
 
 func backupApp(app *App) error {

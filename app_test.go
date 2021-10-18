@@ -111,7 +111,7 @@ func TestQuery(t *testing.T) {
 		t.Fatal(list[0].Name)
 	}
 
-	if count, _ = app.Query().WhereIs("name", "A").Delete(&ResourceStruct{}); count != 1 {
+	if count, _ = app.Query().Is("name", "A").Delete(&ResourceStruct{}); count != 1 {
 		t.Fatal(count)
 	}
 
@@ -209,7 +209,7 @@ func TestResourceDate(t *testing.T) {
 
 	var item interface{}
 	resource.newItem(&item)
-	err := app.Query().WhereIs("date", tm.Format("2006-01-02")).Get(item)
+	err := app.Query().Is("date", tm.Format("2006-01-02")).Get(item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -224,7 +224,7 @@ func TestResourceTimestamps(t *testing.T) {
 
 	var itemIface interface{}
 	resource.newItem(&itemIface)
-	err := app.Query().WhereIs("id", 1).Get(itemIface)
+	err := app.Query().Is("id", 1).Get(itemIface)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -248,7 +248,7 @@ func TestResourceBool(t *testing.T) {
 
 	var itemIface interface{}
 	resource.newItem(&itemIface)
-	err := app.Query().WhereIs("issomething", true).Get(itemIface)
+	err := app.Query().Is("issomething", true).Get(itemIface)
 
 	if err != nil {
 		t.Fatal(err)
@@ -259,7 +259,7 @@ func TestResourceBool(t *testing.T) {
 		t.Fatal(item)
 	}
 
-	err = app.Query().WhereIs("issomething", false).Get(itemIface)
+	err = app.Query().Is("issomething", false).Get(itemIface)
 	if err != nil {
 		t.Fatal(err)
 	}

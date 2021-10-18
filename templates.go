@@ -67,7 +67,7 @@ func (app *App) initTemplates() {
 	app.AddTemplateFunction("img", func(ids string) string {
 		for _, v := range strings.Split(ids, ",") {
 			var image File
-			err := app.Query().WhereIs("uid", v).Get(&image)
+			err := app.Query().Is("uid", v).Get(&image)
 			if err == nil && image.isImage() {
 				return image.GetLarge()
 			}

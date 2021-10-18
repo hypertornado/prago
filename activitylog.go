@@ -58,10 +58,10 @@ func (app *App) getHistory(resource *Resource, itemID int64) historyView {
 
 	q := app.Query()
 	if resource != nil {
-		q.WhereIs("ResourceName", resource.id)
+		q.Is("ResourceName", resource.id)
 	}
 	if itemID > 0 {
-		q.WhereIs("ItemID", itemID)
+		q.Is("ItemID", itemID)
 	}
 	q.Limit(250)
 	q.OrderDesc("ID")
@@ -73,7 +73,7 @@ func (app *App) getHistory(resource *Resource, itemID int64) historyView {
 		var username, userurl string
 
 		var user user
-		err := app.Query().WhereIs("id", v.User).Get(&user)
+		err := app.Query().Is("id", v.User).Get(&user)
 		if err == nil {
 			username = user.Name
 			userurl = app.getAdminURL(fmt.Sprintf("user/%d", user.ID))

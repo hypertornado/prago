@@ -23,7 +23,6 @@ import (
 
 	"github.com/hypertornado/prago"
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
-	"github.com/hypertornado/prago/utils"
 )
 
 const version = "2020.6"
@@ -58,11 +57,8 @@ func main() {
 		accounts[v.Name] = &config.Accounts[k]
 	}
 
-	prago.Application("pragocdn", version, func(app *prago.App) {
-		//build.CreateBuildHelper(app, build.BuildSettings{})
-		//app.AddMiddleware(prago.MiddlewareServer{Fn: start})
-		start(app)
-	})
+	app := prago.New("pragocdn", version)
+	start(app)
 }
 
 func getNameAndExtension(filename string) (name, extension string, err error) {
@@ -88,7 +84,7 @@ func getNameAndExtension(filename string) (name, extension string, err error) {
 }
 
 func uploadFile(account CDNConfigAccount, extension string, inData io.Reader) (*cdnclient.CDNFileData, error) {
-	uuid := utils.RandomString(20)
+	uuid := RandomString(20)
 	dirPath := getFileDirectoryPath(account.Name, uuid)
 
 	err := os.MkdirAll(dirPath, 0777)

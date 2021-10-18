@@ -14,6 +14,14 @@ type Query struct {
 	debug bool
 }
 
+//MustCreate
+func (app *App) MustCreate(item interface{}) {
+	err := app.Create(item)
+	if err != nil {
+		panic(fmt.Sprintf("can't create: %s", err))
+	}
+}
+
 //Create item in db
 func (app *App) Create(item interface{}) error {
 	resource, err := app.getResourceByItem(item)
@@ -21,6 +29,14 @@ func (app *App) Create(item interface{}) error {
 		return err
 	}
 	return resource.createWithDBIface(item, app.db, false)
+}
+
+//MustSave
+func (app *App) MustSave(item interface{}) {
+	err := app.Save(item)
+	if err != nil {
+		panic(fmt.Sprintf("can't save: %s", err))
+	}
 }
 
 //Save item to db
@@ -49,8 +65,14 @@ func (q Query) Where(w ...interface{}) Query {
 	return q
 }
 
-//WhereIs adds where query for single item
-func (q Query) WhereIs(name string, value interface{}) Query {
+//Is adds where query for single item
+func (app *App) Is(name string, value interface{}) Query {
+	q := app.Query()
+	return q.Where(map[string]interface{}{name: value})
+}
+
+//Is adds where query for single item
+func (q Query) Is(name string, value interface{}) Query {
 	return q.Where(map[string]interface{}{name: value})
 }
 
@@ -82,6 +104,14 @@ func (q Query) Limit(limit int64) Query {
 func (q Query) Offset(offset int64) Query {
 	q.query.offset = offset
 	return q
+}
+
+//Get item or items with query
+func (q Query) MustGet(item interface{}) {
+	err := q.Get(item)
+	if err != nil {
+		panic(fmt.Sprintf("can't get: %s", err))
+	}
 }
 
 //Get item or items with query
@@ -122,6 +152,15 @@ func (q Query) Get(item interface{}) error {
 	return nil
 }
 
+//MustCount
+func (q Query) MustCount(item interface{}) int64 {
+	count, err := q.Count(item)
+	if err != nil {
+		panic(fmt.Sprintf("can't count: %s", err))
+	}
+	return count
+}
+
 //Count items with query
 func (q Query) Count(item interface{}) (int64, error) {
 	resource, err := q.app.getResourceByItem(item)
@@ -129,6 +168,14 @@ func (q Query) Count(item interface{}) (int64, error) {
 		return -1, err
 	}
 	return countItems(q.db, resource.id, q.query, q.debug)
+}
+
+//MustDelete
+func (q Query) MustDelete(item interface{}) {
+	_, err := q.Delete(item)
+	if err != nil {
+		panic(fmt.Sprintf("can't delete: %s", err))
+	}
 }
 
 //Delete item with query

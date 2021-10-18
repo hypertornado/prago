@@ -89,7 +89,7 @@ func (app *App) initUserResource() {
 func (app *App) GetCachedUserEmail(id int64) string {
 	return app.Cache.Load(fmt.Sprintf("cached-user-email-%d", id), func() interface{} {
 		var user user
-		app.Query().WhereIs("id", id).Get(&user)
+		app.Query().Is("id", id).Get(&user)
 		return user.Email
 	}).(string)
 }

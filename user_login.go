@@ -13,7 +13,7 @@ func initUserLogin(resource *Resource) {
 			must(err)
 
 			var user user
-			must(resource.app.Query().WhereIs("id", id).Get(&user))
+			must(resource.app.Query().Is("id", id).Get(&user))
 			request.logInUser(&user)
 			request.Redirect(resource.app.getAdminURL(""))
 		},
@@ -54,7 +54,7 @@ func initUserLogin(resource *Resource) {
 		form.Errors = []string{messages.Get(locale, "admin_login_error")}
 
 		var user user
-		err := resource.app.Query().WhereIs("email", email).Get(&user)
+		err := resource.app.Query().Is("email", email).Get(&user)
 		if err != nil {
 			if err == ErrItemNotFound {
 				renderLogin(request, form, locale)

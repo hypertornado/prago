@@ -260,7 +260,7 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 			numVal, err := strconv.Atoi(v)
 			if err == nil {
 				if hasPrefix == "" {
-					q.WhereIs(k, numVal)
+					q.Is(k, numVal)
 				} else {
 					q.Where(
 						fmt.Sprintf("%s %s ?", field.ColumnName, hasPrefix),
@@ -272,14 +272,14 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 			v = strings.Trim(v, " ")
 			numVal, err := strconv.Atoi(v)
 			if err == nil {
-				q.WhereIs(k, numVal)
+				q.Is(k, numVal)
 			}
 		case "filter_layout_boolean":
 			switch v {
 			case "true":
-				q.WhereIs(k, true)
+				q.Is(k, true)
 			case "false":
-				q.WhereIs(k, false)
+				q.Is(k, false)
 			}
 		case "filter_layout_select":
 			if field.Tags["prago-type"] == "file" || field.Tags["prago-type"] == "image" || field.Tags["prago-type"] == "cdnfile" {
@@ -292,7 +292,7 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 				continue
 			}
 			if v != "" {
-				q.WhereIs(k, v)
+				q.Is(k, v)
 			}
 		case "filter_layout_date":
 			v = strings.Trim(v, " ")
