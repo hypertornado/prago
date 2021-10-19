@@ -12,10 +12,8 @@ import (
 )
 
 type taskManager struct {
-	app *App
-	//taskGroups    []*TaskGroup
-	tasksMap map[string]*Task
-	//activityMutex *sync.RWMutex
+	app       *App
+	tasksMap  map[string]*Task
 	startedAt time.Time
 }
 
@@ -47,18 +45,6 @@ func (app *App) initTaskManager() {
 	go app.taskManager.startCRON()
 
 	app.Action("tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(GetTaskViewData)
-
-	/*app.Action("tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(
-		func(request *Request) interface{} {
-			var ret = map[string]interface{}{}
-			user := request.user
-			ret["locale"] = user.Locale
-			ret["csrf_token"] = app.generateCSRFToken(user)
-			ret["tasks"] = app.taskManager.getTasks(user)
-			ret["admin_title"] = messages.Get(user.Locale, "tasks")
-			return ret
-		},
-	)*/
 
 	app.API("tasks/runtask").Method("POST").Permission(loggedPermission).Handler(func(request *Request) {
 		id := request.Request().FormValue("id")

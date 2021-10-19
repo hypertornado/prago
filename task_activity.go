@@ -45,11 +45,3 @@ func (ta *TaskActivity) GetFileContent() []byte {
 	}
 	return content
 }
-
-/*
-
-func (tm *taskManager) addActivity(activity *TaskActivity) {
-	tm.activityMutex.Lock()
-	defer tm.activityMutex.Unlock()
-	tm.activities[activity.uuid] = activity
-}*/

@@ -25,8 +25,7 @@ func (resource *Resource) getAutoRelationsView(id int, inValues interface{}, use
 		var rowItem interface{}
 		v.resource.newItem(&rowItem)
 
-		q := resource.app.Query()
-		q = q.Is(v.field, fmt.Sprintf("%d", id))
+		q := resource.app.Is(v.field, fmt.Sprintf("%d", id))
 
 		filteredCount, err := q.Count(rowItem)
 		must(err)
@@ -100,8 +99,7 @@ func generateRelationListAPIHandler(app *App) func(*Request) {
 		var rowItems interface{}
 		targetResource.newArrayOfItems(&rowItems)
 
-		q := app.Query()
-		q = q.Is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
+		q := app.Is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
 		if targetResource.orderDesc {
 			q = q.OrderDesc(targetResource.orderByColumn)
 		} else {

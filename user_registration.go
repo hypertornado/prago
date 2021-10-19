@@ -15,7 +15,7 @@ func initUserRegistration(resource *Resource) {
 		token := request.Params().Get("token")
 
 		var user user
-		err := app.Query().Is("email", email).Get(&user)
+		err := app.Is("email", email).Get(&user)
 		if err == nil {
 			if !user.emailConfirmed() {
 				if token == user.emailToken(app) {
@@ -47,7 +47,7 @@ func initUserRegistration(resource *Resource) {
 					return true
 				}
 				var user user
-				app.Query().Is("email", field.Value).Get(&user)
+				app.Is("email", field.Value).Get(&user)
 				return user.Email != field.Value
 			}, messages.Get(locale, "admin_email_already_registered")),
 		)

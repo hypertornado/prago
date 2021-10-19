@@ -10,19 +10,19 @@ func initFilesAPI(resource *Resource) {
 	//TODO: remove this and use single details API
 	resource.API("redirect-uuid/:uuid").Permission(loggedPermission).Handler(func(request *Request) {
 		var image File
-		must(app.Query().Is("uid", request.Params().Get("uuid")).Get(&image))
+		app.Is("uid", request.Params().Get("uuid")).MustGet(&image)
 		request.Redirect(app.getAdminURL(fmt.Sprintf("file/%d", image.ID)))
 	})
 
 	resource.API("redirect-thumb/:uuid").Permission(loggedPermission).Handler(func(request *Request) {
 		var image File
-		must(app.Query().Is("uid", request.Params().Get("uuid")).Get(&image))
+		app.Is("uid", request.Params().Get("uuid")).MustGet(&image)
 		request.Redirect(image.GetMedium())
 	})
 
 	resource.API("imagedata/:uuid").Permission(loggedPermission).Handler(func(request *Request) {
 		var file File
-		must(app.Query().Is("uid", request.Params().Get("uuid")).Get(&file))
+		app.Is("uid", request.Params().Get("uuid")).MustGet(&file)
 		request.RenderJSON(file)
 	})
 

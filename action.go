@@ -261,6 +261,7 @@ func (action *Action) bindAction() error {
 	return nil
 }
 
+/*
 func (resource *Resource) getResourceActionsButtonData(user *user, admin *App) (ret []buttonData) {
 	navigation := resource.getNavigation(user, "")
 	for _, v := range navigation.Tabs {
@@ -270,7 +271,7 @@ func (resource *Resource) getResourceActionsButtonData(user *user, admin *App) (
 		})
 	}
 	return
-}
+}*/
 
 func (app *App) getListItemActions(user *user, item interface{}, id int64, resource Resource) listItemActions {
 	ret := listItemActions{}

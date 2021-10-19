@@ -2,7 +2,6 @@ package prago
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 )
@@ -32,23 +31,13 @@ func newCache() *Cache {
 func (ci cacheItem) isStale() bool {
 	ci.mutex.RLock()
 	defer ci.mutex.RUnlock()
-	if ci.updatedAt.Add(staleInterval).Before(time.Now()) {
-		return true
-	}
-	return false
+	return ci.updatedAt.Add(staleInterval).Before(time.Now())
 }
 
 func (ci cacheItem) getValue() interface{} {
 	ci.mutex.RLock()
 	defer ci.mutex.RUnlock()
 	return ci.value
-}
-
-func (ci cacheItem) setValue(val interface{}) {
-	ci.mutex.Lock()
-	defer ci.mutex.Unlock()
-	ci.value = val
-	ci.updatedAt = time.Now()
 }
 
 func (ci *cacheItem) reloadValue() {
@@ -87,7 +76,6 @@ func (c *Cache) getItem(name string) *cacheItem {
 
 func (c *Cache) putItem(name string, createFn func() interface{}) *cacheItem {
 	item := &cacheItem{
-		//id:        name,
 		updatedAt: time.Now(),
 		value:     createFn(),
 		createFn:  createFn,
@@ -132,10 +120,4 @@ func (c *Cache) Clear() {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.items = map[string]*cacheItem{}
-}
-
-func (c *Cache) print() {
-	for k, v := range c.items {
-		fmt.Println(k, v)
-	}
 }

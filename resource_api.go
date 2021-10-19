@@ -66,7 +66,7 @@ func initDefaultResourceAPIs(resource *Resource) {
 		func(request *Request) {
 			var item interface{}
 			resource.newItem(&item)
-			err := resource.app.Query().Is("id", request.Params().Get("id")).Get(item)
+			err := resource.app.Is("id", request.Params().Get("id")).Get(item)
 			if err == ErrItemNotFound {
 				render404(request)
 				return
@@ -99,9 +99,9 @@ func initDefaultResourceAPIs(resource *Resource) {
 			for i, id := range order {
 				var item interface{}
 				resource.newItem(&item)
-				must(resource.app.Query().Is("id", int64(id)).Get(item))
+				resource.app.Is("id", int64(id)).MustGet(item)
 				must(resource.setOrderPosition(item, int64(i)))
-				must(resource.app.Save(item))
+				resource.app.MustSave(item)
 			}
 			request.RenderJSON(true)
 		},
@@ -119,7 +119,7 @@ func initDefaultResourceAPIs(resource *Resource) {
 			if err == nil {
 				var item interface{}
 				resource.newItem(&item)
-				err := resource.app.Query().Is("id", id).Get(item)
+				err := resource.app.Is("id", id).Get(item)
 				if err == nil {
 					relationItem := resource.itemToRelationData(item, request.user, nil)
 					if relationItem != nil {

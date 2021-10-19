@@ -107,7 +107,7 @@ func (app *App) Newsletters() *Newsletters {
 		}
 
 		var person newsletterPersons
-		err := app.Query().Is("email", email).Get(&person)
+		err := app.Is("email", email).Get(&person)
 		if err != nil {
 			panic("can't find user")
 		}
@@ -133,7 +133,7 @@ func (app *App) Newsletters() *Newsletters {
 		}
 
 		var person newsletterPersons
-		err := app.Query().Is("email", email).Get(&person)
+		err := app.Is("email", email).Get(&person)
 		if err != nil {
 			panic("can't find user")
 		}
@@ -162,13 +162,7 @@ func (app *App) Newsletters() *Newsletters {
 
 	app.Resource(newsletterPersons{}).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoby"))
 	return app.newsletters
-
-	//newsletterResource.AddRelation(newsletterSectionResource, "Newsletter", Unlocalized("Přidat sekci"))
 }
-
-/*func (app *App) NewsletterCSRF(request *Request) string {
-	return app.newsletters.CSFR(request)
-}*/
 
 func (app App) sendConfirmEmail(name, email string) error {
 	text := app.newsletters.confirmEmailBody(name, email)
@@ -221,7 +215,7 @@ func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 		return errors.New("wrong email format")
 	}
 
-	err := nm.app.Query().Is("email", email).Get(&newsletterPersons{})
+	err := nm.app.Is("email", email).Get(&newsletterPersons{})
 	if err == nil {
 		return ErrEmailAlreadyInList
 	}
@@ -249,38 +243,17 @@ func initNewsletterResource(resource *Resource) {
 	resource.canView = sysadminPermission
 
 	resource.resourceController.addBeforeAction(func(request *Request) {
-		ret, err := resource.app.Query().Is("confirmed", true).Is("unsubscribed", false).Count(&newsletterPersons{})
+		ret, err := resource.app.Is("confirmed", true).Is("unsubscribed", false).Count(&newsletterPersons{})
 		if err != nil {
 			panic(err)
 		}
 		request.SetData("recipients_count", ret)
 	})
 
-	/*
-		previewAction := Action{
-			Name: func(string) string { return "Náhled" },
-			URL:  "preview",
-			Handler: func(resource Resource, request Request, user User) {
-				var newsletter Newsletter
-				err := resource.App.Query().WhereIs("id", request.Params().Get("id")).Get(&newsletter)
-				if err != nil {
-					panic(err)
-				}
-
-				body, err := resource.App.Newsletter.GetBody(newsletter, "")
-				if err != nil {
-					panic(err)
-				}
-
-				request.Response().WriteHeader(200)
-				request.Response().Write([]byte(body))
-			},
-		}*/
 	resource.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(
 		func(request *Request) {
 			var newsletter newsletter
-			err := resource.app.Query().Is("id", request.Params().Get("id")).Get(&newsletter)
-			must(err)
+			resource.app.Is("id", request.Params().Get("id")).MustGet(&newsletter)
 
 			body, err := resource.app.newsletters.GetBody(newsletter, "")
 			must(err)
@@ -293,9 +266,9 @@ func initNewsletterResource(resource *Resource) {
 	resource.ItemAction("send-preview").Permission(loggedPermission).Method("POST").Handler(
 		func(request *Request) {
 			var newsletter newsletter
-			must(resource.app.Query().Is("id", request.Params().Get("id")).Get(&newsletter))
+			resource.app.Is("id", request.Params().Get("id")).MustGet(&newsletter)
 			newsletter.PreviewSentAt = time.Now()
-			must(resource.app.Save(&newsletter))
+			resource.app.MustSave(&newsletter)
 
 			emails := parseEmails(request.Params().Get("emails"))
 			resource.app.sendEmails(newsletter, emails)
@@ -307,10 +280,8 @@ func initNewsletterResource(resource *Resource) {
 	resource.ItemAction("send").Permission(loggedPermission).Method("POST").Template("newsletter_sent").DataSource(
 		func(request *Request) interface{} {
 			var newsletter newsletter
-			err := resource.app.Query().Is("id", request.Params().Get("id")).Get(&newsletter)
-			if err != nil {
-				panic(err)
-			}
+			resource.app.Is("id", request.Params().Get("id")).MustGet(&newsletter)
+
 			newsletter.SentAt = time.Now()
 			resource.app.Save(&newsletter)
 
@@ -333,20 +304,20 @@ func initNewsletterResource(resource *Resource) {
 	resource.ItemAction("duplicate").Permission(loggedPermission).Method("POST").Handler(
 		func(request *Request) {
 			var newsletter newsletter
-			must(resource.app.Query().Is("id", request.Params().Get("id")).Get(&newsletter))
+			resource.app.Is("id", request.Params().Get("id")).MustGet(&newsletter)
 
 			var sections []*newsletterSection
-			err := resource.app.Query().Is("newsletter", newsletter.ID).Order("orderposition").Get(&sections)
+			err := resource.app.Is("newsletter", newsletter.ID).Order("orderposition").Get(&sections)
 
 			newsletter.ID = 0
-			must(resource.app.Create(&newsletter))
+			resource.app.MustCreate(&newsletter)
 
 			if err == nil {
 				for _, v := range sections {
 					section := *v
 					section.ID = 0
 					section.Newsletter = newsletter.ID
-					must(resource.app.Create(&section))
+					resource.app.MustCreate(&section)
 				}
 			}
 			request.Redirect(resource.getItemURL(&newsletter, "edit"))
@@ -388,7 +359,7 @@ func (app *App) getNewsletterRecipients() ([]string, error) {
 	ret := []string{}
 
 	var persons []*newsletterPersons
-	err := app.Query().Is("confirmed", true).Is("unsubscribed", false).Get(&persons)
+	err := app.Is("confirmed", true).Is("unsubscribed", false).Get(&persons)
 	if err != nil {
 		return nil, err
 	}
@@ -495,7 +466,7 @@ type newsletterSectionData struct {
 
 func (nm *Newsletters) getNewsletterSectionData(n newsletter) []newsletterSectionData {
 	var sections []*newsletterSection
-	err := nm.app.Query().Is("newsletter", n.ID).Order("orderposition").Get(&sections)
+	err := nm.app.Is("newsletter", n.ID).Order("orderposition").Get(&sections)
 	if err != nil {
 		return nil
 	}

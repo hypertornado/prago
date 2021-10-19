@@ -37,7 +37,7 @@ func initUserRenew(resource *Resource) {
 		var reason = ""
 		var user user
 
-		err := app.Query().Is("email", email).Get(&user)
+		err := app.Is("email", email).Get(&user)
 		if err == nil {
 			if user.emailConfirmed() {
 				if !time.Now().AddDate(0, 0, -1).Before(user.EmailRenewedAt) {
@@ -109,7 +109,7 @@ func initUserRenew(resource *Resource) {
 		errStr := messages.Get(locale, "admin_error")
 
 		var user user
-		err := app.Query().Is("email", email).Get(&user)
+		err := app.Is("email", email).Get(&user)
 		if err == nil {
 			if token == user.emailToken(app) {
 				if form.Valid {

@@ -248,7 +248,7 @@ func TestResourceBool(t *testing.T) {
 
 	var itemIface interface{}
 	resource.newItem(&itemIface)
-	err := app.Query().Is("issomething", true).Get(itemIface)
+	err := app.Is("issomething", true).Get(itemIface)
 
 	if err != nil {
 		t.Fatal(err)
@@ -259,7 +259,7 @@ func TestResourceBool(t *testing.T) {
 		t.Fatal(item)
 	}
 
-	err = app.Query().Is("issomething", false).Get(itemIface)
+	err = app.Is("issomething", false).Get(itemIface)
 	if err != nil {
 		t.Fatal(err)
 	}
