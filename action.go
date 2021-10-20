@@ -261,18 +261,6 @@ func (action *Action) bindAction() error {
 	return nil
 }
 
-/*
-func (resource *Resource) getResourceActionsButtonData(user *user, admin *App) (ret []buttonData) {
-	navigation := resource.getNavigation(user, "")
-	for _, v := range navigation.Tabs {
-		ret = append(ret, buttonData{
-			Name: v.Name,
-			URL:  v.URL,
-		})
-	}
-	return
-}*/
-
 func (app *App) getListItemActions(user *user, item interface{}, id int64, resource Resource) listItemActions {
 	ret := listItemActions{}
 

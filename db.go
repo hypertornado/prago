@@ -34,7 +34,7 @@ type listQueryOrder struct {
 
 type listQuery struct {
 	whereString string
-	whereParams []interface{}
+	values      []interface{}
 	limit       int64
 	offset      int64
 	order       []listQueryOrder
@@ -46,7 +46,7 @@ type dbIface interface {
 }
 
 func (q *listQuery) where(data ...interface{}) error {
-	var whereParams []interface{}
+	var values []interface{}
 	var whereString string
 	var err error
 
@@ -54,7 +54,7 @@ func (q *listQuery) where(data ...interface{}) error {
 		return ErrWrongWhereFormat
 	}
 	if len(data) == 1 {
-		whereString, whereParams, err = q.whereSingle(data[0])
+		whereString, values, err = q.whereSingle(data[0])
 		if err != nil {
 			return err
 		}
@@ -64,14 +64,14 @@ func (q *listQuery) where(data ...interface{}) error {
 			return ErrWrongWhereFormat
 		}
 		whereString = first
-		whereParams = data[1:]
+		values = data[1:]
 	}
 
 	if len(q.whereString) > 0 {
 		q.whereString += " AND "
 	}
 	q.whereString += whereString
-	q.whereParams = append(q.whereParams, whereParams...)
+	q.values = append(q.values, values...)
 
 	return nil
 }
@@ -221,7 +221,7 @@ func buildLimitWithoutOffsetString(limit int64) string {
 }
 
 func buildWhereString(where string) string {
-	if len(where) == 0 {
+	if where == "" {
 		where = "1"
 	}
 	return fmt.Sprintf("WHERE %s", where)
@@ -230,12 +230,15 @@ func buildWhereString(where string) string {
 func mapToDBQuery(m map[string]interface{}) (str string, params []interface{}) {
 	items := []string{}
 	for k, v := range m {
-		item := fmt.Sprintf("`%s`=?", k)
-		items = append(items, item)
+		items = append(items, sqlFieldToQuery(k))
 		params = append(params, v)
 	}
 	str = strings.Join(items, " AND ")
 	return
+}
+
+func sqlFieldToQuery(fieldName string) string {
+	return fmt.Sprintf("`%s`=?", fieldName)
 }
 
 func countItems(db dbIface, tableName string, query *listQuery, debugSQL bool) (int64, error) {
@@ -245,9 +248,9 @@ func countItems(db dbIface, tableName string, query *listQuery, debugSQL bool) (
 
 	q := fmt.Sprintf("SELECT COUNT(*) FROM `%s` %s %s %s;", tableName, whereString, orderString, limitString)
 	if debugSQL {
-		fmt.Println(q, query.whereParams)
+		fmt.Println(q, query.values)
 	}
-	rows, err := db.Query(q, query.whereParams...)
+	rows, err := db.Query(q, query.values...)
 	defer func() {
 		if rows != nil {
 			rows.Close()
@@ -293,9 +296,9 @@ func listItems(resource Resource, db dbIface, tableName string, items interface{
 
 	q := fmt.Sprintf("SELECT %s FROM `%s` %s %s %s;", strings.Join(names, ", "), tableName, whereString, orderString, limitString)
 	if debugSQL {
-		fmt.Println(q, query.whereParams)
+		fmt.Println(q, query.values)
 	}
-	rows, err := db.Query(q, query.whereParams...)
+	rows, err := db.Query(q, query.values...)
 	defer func() {
 		if rows != nil {
 			rows.Close()
@@ -324,9 +327,9 @@ func deleteItems(db dbIface, tableName string, query *listQuery, debugSQL bool) 
 
 	q := fmt.Sprintf("DELETE FROM `%s` %s %s;", tableName, whereString, limitString)
 	if debugSQL {
-		fmt.Println(q, query.whereParams)
+		fmt.Println(q, query.values)
 	}
-	res, err := db.Exec(q, query.whereParams...)
+	res, err := db.Exec(q, query.values...)
 	if err != nil {
 		return -1, err
 	}

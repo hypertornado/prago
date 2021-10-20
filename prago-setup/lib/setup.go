@@ -74,11 +74,6 @@ func createConfigFiles(projectName string) {
 
 	configPath := path.Join(dotPath, "config.json")
 
-	/*f, err := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE, 0755)
-	if err != nil {
-		panic(err)
-	}*/
-
 	conf := Config{
 		StaticPaths: []string{"public"},
 	}

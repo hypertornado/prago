@@ -8,12 +8,6 @@ type controller struct {
 	aroundActions  []func(p *Request, next func())
 }
 
-//MainController returns main controller of application
-//all controllers in app are children of this controller
-/*func (app *App) MainController() (ret *Controller) {
-	return app.mainController
-}*/
-
 func newMainController() *controller {
 	return &controller{
 		parent:        nil,
