@@ -1776,10 +1776,15 @@ class DatePicker {
             };
         }
         var self = this;
+        var firstDay = 0;
+        if (language == "cs") {
+            firstDay = 1;
+        }
         var pd = new Pikaday({
             field: el,
             setDefaultDate: false,
             i18n: i18n,
+            firstDay: firstDay,
             onSelect: (date) => {
                 el.value = pd.toString();
             },

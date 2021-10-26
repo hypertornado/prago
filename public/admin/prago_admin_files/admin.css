@@ -5374,7 +5374,6 @@ html {
   box-sizing: inherit;
 }
 ::placeholder {
-  /* Chrome, Firefox, Opera, Safari 10.1+ */
   color: #888;
   opacity: 1;
 }
@@ -5796,9 +5795,6 @@ th.admin_list_lastheadercell {
 .admin_list_table tr:last-child td {
   border-bottom: 1px solid #f1f1f1;
 }
-/*.aadmin_list_table tr td:first-child, .admin_list_table tr th:first-child {
-  border-left: 1px solid #f1f1f1;
-}*/
 .admin_table th {
   vertical-align: bottom;
   font-weight: normal;
@@ -5948,13 +5944,6 @@ th.admin_list_orderitem {
   color: white;
   background: red !important;
 }
-/*.admin_images_image img {
-  max-height: 150px;
-  max-width: 150px;
-  margin: 0 auto;
-  vertical-align: middle;
-  display: inline-block;
-}*/
 .admin_images_fileinput {
   padding: 3px;
   padding: 10px;
@@ -5996,7 +5985,6 @@ th.admin_list_orderitem {
 .admin_place_map {
   height: 300px;
 }
-/*markdown*/
 .admin_markdown textarea {
   margin-top: 5px;
   white-space: pre-wrap;

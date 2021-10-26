@@ -47,7 +47,7 @@ func TestQuery(t *testing.T) {
 	app.Create(&ResourceStruct{Name: "C"})
 	app.Create(&ResourceStruct{Name: "B"})
 
-	err = app.Query().Where(2).Get(&item)
+	err = app.Query().Where("id = ?", 2).Get(&item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +56,7 @@ func TestQuery(t *testing.T) {
 	}
 
 	resource.newItem(&createdItem)
-	err = app.Query().Where(2).Get(createdItem)
+	err = app.Query().Where("id = ?", 2).Get(createdItem)
 	if err != nil {
 		t.Fatal(err)
 	}

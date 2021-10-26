@@ -33,11 +33,11 @@ type listQueryOrder struct {
 }
 
 type listQuery struct {
-	whereString string
-	values      []interface{}
-	limit       int64
-	offset      int64
-	order       []listQueryOrder
+	conditions []string
+	values     []interface{}
+	limit      int64
+	offset     int64
+	order      []listQueryOrder
 }
 
 type dbIface interface {
@@ -45,51 +45,9 @@ type dbIface interface {
 	Query(string, ...interface{}) (*sql.Rows, error)
 }
 
-func (q *listQuery) where(data ...interface{}) error {
-	var values []interface{}
-	var whereString string
-	var err error
-
-	if len(data) == 0 {
-		return ErrWrongWhereFormat
-	}
-	if len(data) == 1 {
-		whereString, values, err = q.whereSingle(data[0])
-		if err != nil {
-			return err
-		}
-	} else {
-		first, ok := data[0].(string)
-		if !ok {
-			return ErrWrongWhereFormat
-		}
-		whereString = first
-		values = data[1:]
-	}
-
-	if len(q.whereString) > 0 {
-		q.whereString += " AND "
-	}
-	q.whereString += whereString
+func (q *listQuery) where(condition string, values ...interface{}) {
+	q.conditions = append(q.conditions, condition)
 	q.values = append(q.values, values...)
-
-	return nil
-}
-
-func (q *listQuery) whereSingle(data interface{}) (whereString string, whereParams []interface{}, err error) {
-	switch data := data.(type) {
-	case string:
-		whereString = data
-	case int64:
-		whereString, whereParams = mapToDBQuery(map[string]interface{}{"id": data})
-	case int:
-		whereString, whereParams = mapToDBQuery(map[string]interface{}{"id": data})
-	case map[string]interface{}:
-		whereString, whereParams = mapToDBQuery(data)
-	default:
-		err = ErrWrongWhereFormat
-	}
-	return
 }
 
 func (q *listQuery) addOrder(name string, desc bool) {
@@ -220,21 +178,14 @@ func buildLimitWithoutOffsetString(limit int64) string {
 	return fmt.Sprintf("LIMIT %d", limit)
 }
 
-func buildWhereString(where string) string {
-	if where == "" {
+func buildWhereString(conditions []string) string {
+	var where string
+	if len(conditions) == 0 {
 		where = "1"
+	} else {
+		where = strings.Join(conditions, " AND ")
 	}
 	return fmt.Sprintf("WHERE %s", where)
-}
-
-func mapToDBQuery(m map[string]interface{}) (str string, params []interface{}) {
-	items := []string{}
-	for k, v := range m {
-		items = append(items, sqlFieldToQuery(k))
-		params = append(params, v)
-	}
-	str = strings.Join(items, " AND ")
-	return
 }
 
 func sqlFieldToQuery(fieldName string) string {
@@ -244,7 +195,7 @@ func sqlFieldToQuery(fieldName string) string {
 func countItems(db dbIface, tableName string, query *listQuery, debugSQL bool) (int64, error) {
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
-	whereString := buildWhereString(query.whereString)
+	whereString := buildWhereString(query.conditions)
 
 	q := fmt.Sprintf("SELECT COUNT(*) FROM `%s` %s %s %s;", tableName, whereString, orderString, limitString)
 	if debugSQL {
@@ -286,7 +237,7 @@ func listItems(resource Resource, db dbIface, tableName string, items interface{
 	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(resource.typ))).Elem()
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
-	whereString := buildWhereString(query.whereString)
+	whereString := buildWhereString(query.conditions)
 
 	newValue := reflect.New(resource.typ).Elem()
 	names, _, err := resource.getStructScanners(newValue)
@@ -323,7 +274,7 @@ func listItems(resource Resource, db dbIface, tableName string, items interface{
 
 func deleteItems(db dbIface, tableName string, query *listQuery, debugSQL bool) (int64, error) {
 	limitString := buildLimitWithoutOffsetString(query.limit)
-	whereString := buildWhereString(query.whereString)
+	whereString := buildWhereString(query.conditions)
 
 	q := fmt.Sprintf("DELETE FROM `%s` %s %s;", tableName, whereString, limitString)
 	if debugSQL {

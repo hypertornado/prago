@@ -1,0 +1,158 @@
+html {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+::placeholder {
+  color: @gray;
+  opacity: 1;
+}
+
+html,
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 14px;
+  line-height: 1.4em;
+  color: @black;
+}
+
+@media (max-width: 800px) {
+  html,
+  body {
+    font-size: 16px;
+    line-height: 1.4em;
+  }
+}
+
+body {
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+code {
+  background-color: #fafafa;
+  padding: 0px 3px;
+  border-radius: 3px;
+  border: 1px solid #ddd;
+}
+
+h1 {
+  font-size: 2.5rem;
+  line-height: 1.4em;
+  margin: 0.5em 0 0.2em 0;
+}
+
+h2 {
+  font-size: 1.8rem;
+  line-height: 1.4em;
+  margin: 0.5em 0 0.2em 0;
+}
+
+h3 {
+  font-size: 1.5rem;
+  line-height: 1.4em;
+  margin: 0.5em 0 0.2em 0;
+}
+
+h4 {
+  font-size: 1.4rem;
+  line-height: 1.4em;
+  margin: 0.5em 0 0.2em 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 500;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.right {
+  float: right;
+}
+.center {
+  text-align: center;
+}
+.clear {
+  clear: both;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.top {
+  vertical-align: top;
+}
+
+p {
+  margin: 0px;
+  margin-bottom: 0.5em;
+}
+
+.progress {
+  display: block;
+  margin: 5px auto;
+}
+
+a {
+  color: @baseColor;
+}
+
+a:hover {
+  text-decoration: none;
+  background-color: @baseColorBackgroundLighter;
+}
+
+a:active {
+  background-color: @baseColorBackground;
+}
+
+ul {
+  padding: 0px 20px;
+  margin: 0px;
+  margin-bottom: 1rem;
+}
+
+.admin_box {
+  border: 1px solid #eee;
+  margin: 20px auto;
+  background-color: white;
+  border-radius: 2px;
+  max-width: ~"min(600px, 100vw)";
+  width: 100%;
+  margin-bottom: 20px;
+  background-color: #fff;
+  border-radius: 5px;
+}
+
+.admin_box_content {
+  padding: 0px 5px 5px 5px;
+  max-width: 100vw;
+}
+
+.admin_box h1 {
+  margin-top: 0px;
+  padding: 5px 10px;
+}
+
+.admin_box-wide {
+  box-shadow: none;
+  max-width: none;
+  width: 100%;
+  padding: 0px;
+  margin-top: 0px;
+  border: none;
+  background-color: rgba(0, 0, 0, 0);
+}

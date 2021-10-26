@@ -110,7 +110,7 @@ func (resource *Resource) getListStatsDateSectionDay(field *field, user *user, p
 		field.ColumnName,
 		field.ColumnName,
 		resource.id,
-		buildWhereString(query.query.whereString),
+		buildWhereString(query.query.conditions),
 		field.ColumnName,
 		field.ColumnName,
 		field.ColumnName,
@@ -153,7 +153,7 @@ func (resource *Resource) getListStatsDateSectionMonth(field *field, user *user,
 		field.ColumnName,
 		field.ColumnName,
 		resource.id,
-		buildWhereString(query.query.whereString),
+		buildWhereString(query.query.conditions),
 		field.ColumnName,
 		field.ColumnName,
 		limit,
@@ -193,7 +193,7 @@ func (resource *Resource) getListStatsDateSectionYear(field *field, user *user, 
 	q := fmt.Sprintf("SELECT YEAR(%s), COUNT(id) FROM %s %s GROUP BY YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.ColumnName,
 		resource.id,
-		buildWhereString(query.query.whereString),
+		buildWhereString(query.query.conditions),
 		field.ColumnName,
 		limit,
 	)
@@ -229,7 +229,7 @@ func (resource *Resource) getListStatsTable(field *field, user *user, params url
 	query := resource.addFilterParamsToQuery(resource.app.Query(), params)
 	whereParams := query.query.values
 
-	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.ColumnName, resource.id, buildWhereString(query.query.whereString), field.ColumnName, limit)
+	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.ColumnName, resource.id, buildWhereString(query.query.conditions), field.ColumnName, limit)
 
 	rows, err := resource.app.db.Query(q, whereParams...)
 	if err != nil {
@@ -341,7 +341,7 @@ func (resource *Resource) getListStatsTableInt(field *field, user *user, params 
 		field.ColumnName,
 		field.ColumnName,
 		resource.id,
-		buildWhereString(query.query.whereString),
+		buildWhereString(query.query.conditions),
 	)
 
 	rows, err := resource.app.db.Query(q, whereParams...)
@@ -376,7 +376,7 @@ func (resource *Resource) getListStatsTableInt(field *field, user *user, params 
 	q = fmt.Sprintf("SELECT %s FROM %s %s LIMIT 1 OFFSET %d;",
 		field.ColumnName,
 		resource.id,
-		buildWhereString(query.query.whereString),
+		buildWhereString(query.query.conditions),
 		medianItem,
 	)
 	rows, err = resource.app.db.Query(q, whereParams...)

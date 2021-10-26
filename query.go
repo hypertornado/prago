@@ -58,22 +58,20 @@ func (app *App) Query() Query {
 }
 
 //Where adds where query
-func (q Query) Where(w ...interface{}) Query {
-	if q.err == nil {
-		q.err = q.query.where(w...)
-	}
+func (q Query) Where(condition string, values ...interface{}) Query {
+	q.query.where(condition, values...)
 	return q
 }
 
 //Is adds where query for single item
 func (app *App) Is(name string, value interface{}) Query {
 	q := app.Query()
-	return q.Where(map[string]interface{}{name: value})
+	return q.Is(name, value)
 }
 
 //Is adds where query for single item
 func (q Query) Is(name string, value interface{}) Query {
-	return q.Where(map[string]interface{}{name: value})
+	return q.Where(sqlFieldToQuery(name), value)
 }
 
 //WhereIs adds where query for single item

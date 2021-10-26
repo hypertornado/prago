@@ -129,6 +129,7 @@ func (resource *Resource) itemToRelationData(item interface{}, user *user, relat
 }
 
 func (app *App) getItemImage(item interface{}) string {
+	//TODO: Authorize field
 	if item != nil {
 		itemsVal := reflect.ValueOf(item).Elem()
 		field := itemsVal.FieldByName("Image")
@@ -140,6 +141,7 @@ func (app *App) getItemImage(item interface{}) string {
 }
 
 func getItemName(item interface{}) string {
+	//TODO: Authorize field
 	if item != nil {
 		itemsVal := reflect.ValueOf(item).Elem()
 		field := itemsVal.FieldByName("Name")
@@ -158,7 +160,7 @@ func (resource *Resource) getItemDescription(item interface{}, user *user, relat
 
 	itemsVal := reflect.ValueOf(item).Elem()
 
-	//TODO: Authorize descriptio field
+	//TODO: Authorize description field
 	if item != nil {
 		field := itemsVal.FieldByName("Description")
 		if field.IsValid() {
