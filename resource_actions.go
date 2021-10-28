@@ -24,11 +24,11 @@ func initDefaultResourceActions(resource *Resource) {
 
 			resource.bindData(&item, request.user, request.Request().URL.Query(), nil)
 
-			form, err := resource.getForm(item, request.user)
+			form, err := resource.getForm(item, request)
 			must(err)
 
 			form.Classes = append(form.Classes, "prago_form")
-			form.Action = "../" + resource.id
+			form.Form.Action = "../" + resource.id
 			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
 			return form
@@ -99,11 +99,11 @@ func initDefaultResourceActions(resource *Resource) {
 			err = app.Is("id", int64(id)).Get(item)
 			must(err)
 
-			form, err := resource.getForm(item, request.user)
+			form, err := resource.getForm(item, request)
 			must(err)
 
 			form.Classes = append(form.Classes, "prago_form")
-			form.Action = "edit"
+			form.Form.Action = "edit"
 			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
 			return form
@@ -135,9 +135,9 @@ func initDefaultResourceActions(resource *Resource) {
 		func(request *Request) interface{} {
 			ret := map[string]interface{}{}
 			form := newForm()
-			form.Method = "POST"
-			form.AddCSRFToken(request)
-			form.AddDeleteSubmit("send", messages.Get(request.user.Locale, "admin_delete"))
+			formView := form.GetFormView(request)
+			formView.AddCSRFToken(request)
+			formView.AddDeleteSubmit("send", messages.Get(request.user.Locale, "admin_delete"))
 			ret["form"] = form
 
 			var item interface{}

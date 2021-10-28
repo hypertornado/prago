@@ -19,62 +19,132 @@ func initUserLogin(resource *Resource) {
 		},
 	)
 
-	loginForm := func(locale string) *form {
+	/*loginForm := func(request *Request) *formView {
+		locale := localeFromRequest(request)
 		form := newForm()
-		form.Method = "POST"
-		form.AddEmailInput("email", messages.Get(locale, "admin_email")).Focused = true
-		form.AddPasswordInput("password", messages.Get(locale, "admin_password"))
-		form.AddSubmit("send", messages.Get(locale, "admin_login_action"))
-		return form
+		formView := form.GetFormView(request)
+		formView.AJAX = true
+		formView.Classes = append(formView.Classes, "prago_form")
+		formView.Method = "POST"
+		formView.AddEmailInput("email", messages.Get(locale, "admin_email")).Focused = true
+		formView.AddPasswordInput("password", messages.Get(locale, "admin_password"))
+		formView.AddSubmit("send", messages.Get(locale, "admin_login_action"))
+		return formView
 	}
 
-	renderLogin := func(request *Request, form *form, locale string) {
+	renderLogin := func(request *Request, form *formView, locale string) {
 		renderNavigationPageNoLogin(request, page{
 			App:          resource.app,
 			Navigation:   resource.app.getNologinNavigation(locale, "login"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
-	}
+	}*/
 
 	resource.app.accessController.get(resource.getURL("login"), func(request *Request) {
 		locale := localeFromRequest(request)
-		form := loginForm(locale)
-		renderLogin(request, form, locale)
+		form := newForm()
+		form.AJAX = true
+		form.Action = "/admin/user/login"
+		formView := form.GetFormView(request)
+		formView.Classes = append(formView.Classes, "prago_form")
+		formView.AddEmailInput("email", messages.Get(locale, "admin_email")).Focused = true
+		formView.AddPasswordInput("password", messages.Get(locale, "admin_password"))
+		formView.AddSubmit("send", messages.Get(locale, "admin_login_action"))
+
+		renderNavigationPageNoLogin(request, page{
+			App:          resource.app,
+			Navigation:   resource.app.getNologinNavigation(locale, "login"),
+			PageTemplate: "admin_form",
+			PageData:     formView,
+		})
+
+		//locale := localeFromRequest(request)
+		//form := loginForm(request)
+		//renderLogin(request, form, locale)
 	})
 
 	resource.app.accessController.post(resource.getURL("login"), func(request *Request) {
-		email := request.Params().Get("email")
-		email = fixEmail(email)
-		password := request.Params().Get("password")
+		request.RenderJSON(
+			loginValidation(request),
+		)
+	})
 
-		locale := localeFromRequest(request)
-		form := loginForm(locale)
-		form.Items[0].Value = email
-		form.Errors = []string{messages.Get(locale, "admin_login_error")}
+	/*
 
-		var user user
-		err := resource.app.Is("email", email).Get(&user)
-		if err != nil {
-			if err == ErrItemNotFound {
+		resource.app.accessController.post(resource.getURL("login"), func(request *Request) {
+			email := request.Params().Get("email")
+			email = fixEmail(email)
+			password := request.Params().Get("password")
+
+			locale := localeFromRequest(request)
+			form := loginForm(request)
+			form.Items[0].Value = email
+			form.Errors = []string{messages.Get(locale, "admin_login_error")}
+
+			var user user
+			err := resource.app.Is("email", email).Get(&user)
+			if err != nil {
+				if err == ErrItemNotFound {
+					renderLogin(request, form, locale)
+					return
+				}
+				panic(err)
+			}
+
+			if !user.isPassword(password) {
 				renderLogin(request, form, locale)
 				return
 			}
-			panic(err)
-		}
 
-		if !user.isPassword(password) {
-			renderLogin(request, form, locale)
-			return
-		}
+			user.LoggedInTime = time.Now()
+			user.LoggedInUseragent = request.Request().UserAgent()
+			user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
 
-		user.LoggedInTime = time.Now()
-		user.LoggedInUseragent = request.Request().UserAgent()
-		user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
+			must(resource.app.Save(&user))
+			request.logInUser(&user)
+			request.AddFlashMessage(messages.Get(locale, "admin_login_ok"))
+			request.Redirect(resource.app.getAdminURL(""))
+		})*/
+}
 
-		must(resource.app.Save(&user))
-		request.logInUser(&user)
-		request.AddFlashMessage(messages.Get(locale, "admin_login_ok"))
-		request.Redirect(resource.app.getAdminURL(""))
-	})
+func loginValidation(request *Request) *FormValidation {
+	locale := localeFromRequest(request)
+	ret := &FormValidation{
+		Valid: true,
+	}
+	email := request.Params().Get("email")
+	email = fixEmail(email)
+	password := request.Params().Get("password")
+
+	var user user
+	err := request.app.Is("email", email).Get(&user)
+	if err != nil {
+		ret.Errors = append(ret.Errors, FormValidationError{
+			Text: messages.Get(locale, "admin_login_error"),
+		})
+		ret.Valid = false
+		return ret
+	}
+
+	if !user.isPassword(password) {
+		ret.Errors = append(ret.Errors, FormValidationError{
+			Text: messages.Get(locale, "admin_login_error"),
+		})
+		ret.Valid = false
+		return ret
+	}
+
+	user.LoggedInTime = time.Now()
+	user.LoggedInUseragent = request.Request().UserAgent()
+	user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
+
+	must(request.app.Save(&user))
+	request.logInUser(&user)
+	request.AddFlashMessage(messages.Get(locale, "admin_login_ok"))
+
+	ret.Valid = true
+	ret.RedirectionLocaliton = request.app.getAdminURL("")
+	return ret
+
 }

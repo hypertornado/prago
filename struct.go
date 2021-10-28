@@ -34,9 +34,10 @@ func (resource Resource) getDefaultOrder() (column string, desc bool) {
 	return
 }
 
-func (resource Resource) getForm(inValues interface{}, user *user) (*form, error) {
+func (resource Resource) getForm(inValues interface{}, request *Request) (*formView, error) {
+	user := request.user
 	form := newForm()
-	form.Method = "POST"
+	formView := form.GetFormView(request)
 	itemVal := reflect.ValueOf(inValues).Elem()
 
 fields:
@@ -50,8 +51,8 @@ fields:
 			itemVal.Field(i),
 		)
 
-		item := &formItem{
-			Name:      field.ColumnName,
+		item := &formItemView{
+			ID:        field.ColumnName,
 			NameHuman: field.HumanName(user.Locale),
 			Template:  field.fieldType.formTemplate,
 		}
@@ -67,8 +68,8 @@ fields:
 			item.Data = field.fieldType.formDataSource(*field, user)
 		}
 
-		form.AddItem(item)
+		formView.AddItem(item)
 	}
 
-	return form, nil
+	return formView, nil
 }

@@ -21,11 +21,6 @@ func (request *Request) csrfToken() string {
 	return request.app.generateCSRFToken(request.user)
 }
 
-func (form *form) AddCSRFToken(request *Request) *form {
-	form.CSRFToken = request.csrfToken()
-	return form
-}
-
 func validateCSRF(request *Request) {
 	token := request.csrfToken()
 	if len(token) == 0 {

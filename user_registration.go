@@ -34,15 +34,16 @@ func initUserRegistration(resource *Resource) {
 		request.Redirect(app.getAdminURL("user/login"))
 	})
 
-	newUserForm := func(locale string) *form {
+	newUserForm := func(request *Request) *formView {
+		locale := localeFromRequest(request)
 		form := newForm()
-		form.Method = "POST"
-		form.AddTextInput("name", messages.Get(locale, "Name"),
+		formView := form.GetFormView(request)
+		formView.AddTextInput("name", messages.Get(locale, "Name"),
 			nonEmptyValidator(messages.Get(locale, "admin_user_name_not_empty")),
 		)
-		form.AddEmailInput("email", messages.Get(locale, "admin_email"),
+		formView.AddEmailInput("email", messages.Get(locale, "admin_email"),
 			emailValidator(messages.Get(locale, "admin_email_not_valid")),
-			newValidator(func(field *formItem) bool {
+			newValidator(func(field *formItemView) bool {
 				if len(field.Errors) != 0 {
 					return true
 				}
@@ -51,15 +52,15 @@ func initUserRegistration(resource *Resource) {
 				return user.Email != field.Value
 			}, messages.Get(locale, "admin_email_already_registered")),
 		)
-		form.AddPasswordInput("password", messages.Get(locale, "admin_register_password"),
+		formView.AddPasswordInput("password", messages.Get(locale, "admin_register_password"),
 			minLengthValidator("", 7),
 		)
-		form.AddCAPTCHAInput("captcha", "4 + 5 =", valueValidator("9", "Špatná hodnota"))
-		form.AddSubmit("send", messages.Get(locale, "admin_register"))
-		return form
+		formView.AddCAPTCHAInput("captcha", "4 + 5 =", valueValidator("9", "Špatná hodnota"))
+		formView.AddSubmit("send", messages.Get(locale, "admin_register"))
+		return formView
 	}
 
-	renderRegistration := func(request *Request, form *form, locale string) {
+	renderRegistration := func(request *Request, form *formView, locale string) {
 		renderNavigationPageNoLogin(request, page{
 			App:          app,
 			Navigation:   app.getNologinNavigation(locale, "registration"),
@@ -70,12 +71,12 @@ func initUserRegistration(resource *Resource) {
 
 	app.accessController.get(resource.getURL("registration"), func(request *Request) {
 		locale := localeFromRequest(request)
-		renderRegistration(request, newUserForm(locale), locale)
+		renderRegistration(request, newUserForm(request), locale)
 	})
 
 	app.accessController.post(resource.getURL("registration"), func(request *Request) {
 		locale := localeFromRequest(request)
-		form := newUserForm(locale)
+		form := newUserForm(request)
 
 		form.BindData(request.Params())
 
@@ -107,7 +108,7 @@ func initUserRegistration(resource *Resource) {
 			request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
 			request.Redirect(app.getAdminURL("user/login"))
 		} else {
-			form.GetItemByName("password").Value = ""
+			form.GetItemByID("password").Value = ""
 			renderRegistration(request, form, locale)
 		}
 	})

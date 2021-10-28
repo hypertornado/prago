@@ -1,25 +1,25 @@
 {{define "admin_item_input"}}
-  <input name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input name="{{.ID}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_input_int"}}
-  <input type="number" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-int"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="number" name="{{.ID}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-int"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_input_float"}}
-  <input type="number" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-float"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="number" name="{{.ID}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-float"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_email"}}
-  <input name="{{.Name}}" value="{{.Value}}" type="email" class="input form_watcher form_input" spellcheck="false"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input name="{{.ID}}" value="{{.Value}}" type="email" class="input form_watcher form_input" spellcheck="false"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_password"}}
-  <input name="{{.Name}}" value="{{.Value}}" type="password" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input name="{{.ID}}" value="{{.Value}}" type="password" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_textarea"}}
-  <textarea name="{{.Name}}" id="{{.UUID}}" class="input form_watcher form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
+  <textarea name="{{.ID}}" id="{{.UUID}}" class="input form_watcher form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
 {{end}}
 
 {{define "admin_item_markdown"}}
@@ -37,28 +37,28 @@
       <input type="checkbox" class="admin_markdown_preview_show"> Zobrazit náhled
     </label>
 
-    <textarea name="{{.Name}}" id="{{.UUID}}" class="input form_watcher form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
+    <textarea name="{{.ID}}" id="{{.UUID}}" class="input form_watcher form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
     <div class="admin_markdown_preview hidden"></div>
   </div>
 {{end}}
 
 {{define "admin_item_checkbox"}}
   <label>
-    <input type="checkbox" name="{{.Name}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}} class="form_watcher">
+    <input type="checkbox" name="{{.ID}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}} class="form_watcher">
     <span class="form_label_text-inline">{{.NameHuman}}</span>
   </label>
 {{end}}
 
 {{define "admin_item_date"}}
-  <input type="text" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-date"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}} autocomplete="off">
+  <input type="text" name="{{.ID}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-date"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}} autocomplete="off">
 {{end}}
 
 {{define "admin_item_timestamp"}}
   {{if .Readonly}}
-    <input name="{{.Name}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}} readonly>
+    <input name="{{.ID}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}} readonly>
   {{else}}
     <div class="admin_timestamp">
-      <input type="hidden" id="{{.UUID}}" name="{{.Name}}" value="{{.Value}}">
+      <input type="hidden" id="{{.UUID}}" name="{{.ID}}" value="{{.Value}}">
 
       <input type="text" name="_admin_timestamp_hidden" class="input form_input form_input-date admin_timestamp_date"{{if .Focused}} autofocus{{end}} autocomplete="off">
 
@@ -72,7 +72,7 @@
 
 {{define "admin_item_image"}}
   <div class="admin_images">
-    <input name="{{.Name}}" value="{{.Value}}" type="hidden" class="admin_images_hidden form_watcher">
+    <input name="{{.ID}}" value="{{.Value}}" type="hidden" class="admin_images_hidden form_watcher">
     <div class="admin_images_loaded hidden">
       <div class="admin_images_preview"></div>
       <label class="admin_images_fileinput">
@@ -85,34 +85,34 @@
 {{end}}
 
 {{define "admin_item_file"}}
-  <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="file" id="{{.UUID}}" name="{{.ID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_file"}}
   {{if .Value}}
-    <input type="hidden" id="{{.UUID}}" name="{{.Name}}" value="{{.Value}}">
+    <input type="hidden" id="{{.UUID}}" name="{{.ID}}" value="{{.Value}}">
     <img src="{{thumb .Value}}">
   {{else}}
-    <input type="file" id="{{.UUID}}" name="{{.Name}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+    <input type="file" id="{{.UUID}}" name="{{.ID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
   {{end}}
 {{end}}
 
 {{define "admin_item_captcha"}}
-  <input type="number" name="{{.Name}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-int"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="number" name="{{.ID}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-int"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "admin_item_submit"}}
   <div class="primarybtncontainer">
-    <button id="{{.UUID}}" name="{{.Name}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.NameHuman}}</button>
+    <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.NameHuman}}</button>
   </div>
 {{end}}
 
 {{define "admin_item_delete"}}
-  <button id="{{.UUID}}" name="{{.Name}}" class="btn btn-primary btn-delete"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.NameHuman}}</button>
+  <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary btn-delete"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.NameHuman}}</button>
 {{end}}
 
 {{define "admin_item_select"}}
-  <select name="{{.Name}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <select name="{{.ID}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
     {{$val := .Value}}
     {{range $value := .Data}}
       <option value="{{index $value 0}}"{{if eq $val (index $value 0)}} selected{{end}}>{{index $value 1}}</option>
@@ -122,12 +122,12 @@
 
 {{define "admin_item_place"}}
 <div class="admin_place">
-  <input type="hidden" name="{{.Name}}" value="{{.Value}}">
+  <input type="hidden" name="{{.ID}}" value="{{.Value}}">
 </div>
 {{end}}
 
 {{define "admin_item_hidden"}}
-<input type="hidden" name="{{.Name}}" value="{{.Value}}">
+<input type="hidden" name="{{.ID}}" value="{{.Value}}">
 {{end}}
 
 {{define "admin_item_link"}}
@@ -138,7 +138,7 @@
 
 {{define "admin_item_relation"}}
 <div class="admin_item_relation" data-relation="{{.Data}}">
-  <input type="hidden" name="{{.Name}}" value="{{.Value}}">
+  <input type="hidden" name="{{.ID}}" value="{{.Value}}">
   <progress class="progress"></progress>
   <div class="admin_item_relation_preview hidden"></div>
   <div class="admin_item_relation_change hidden">

@@ -1,36 +1,42 @@
 {{define "admin_form"}}
 
-<form method="{{.Method}}" action="{{.Action}}" class="form{{range $class := .Classes}} {{$class}}{{end}}" enctype="multipart/form-data" novalidate>
-
-{{if .CSRFToken}}
-  <input type="hidden" name="_csrfToken" value="{{.CSRFToken}}">
-{{end}}
-
-{{if .Errors}}
-  <div class="form_errors">
-    {{range $error := .Errors}}
-      <div class="form_errors_error">{{$error}}</div>
+  <form method="POST" action="{{.Form.Action}}" class="form{{range $class := .Classes}} {{$class}}{{end}}{{if .Form.AJAX}} form-ajax{{end}}" enctype="multipart/form-data" novalidate>
+    {{if .CSRFToken}}
+      <input type="hidden" name="_csrfToken" value="{{.CSRFToken}}">
     {{end}}
-  </div>
-{{end}}
 
-{{range $item := .Items}}
-  <div class="form_label{{if .Errors}} form_label-errors{{end}}{{if .Required}} form_label-required{{end}}">
-    {{if eq .HiddenName false}}
-      <label for="{{.UUID}}" class="form_label_text">{{.NameHuman}}</label>
-    {{end}}
-    {{if .Errors}}
-      <div class="form_label_errors">
+    <div class="form_errors hidden">
+
+    </div>
+
+    {{if false}}
+      <div class="form_errors">
         {{range $error := .Errors}}
-          <div class="form_label_errors_error">{{$error}}</div>
+          <div class="form_errors_error">{{$error}}</div>
         {{end}}
       </div>
     {{end}}
-    <div>
-      {{tmpl $item.Template $item}}
-    </div>
-  </div>
-{{end}}
-</form>
+
+    {{range $item := .Items}}
+      <div class="form_label{{if .Errors}} form_label-errors{{end}}{{if .Required}} form_label-required{{end}}">
+        {{if eq .HiddenName false}}
+          <label for="{{.UUID}}" class="form_label_text">{{.NameHuman}}</label>
+        {{end}}
+        {{if .Errors}}
+          <div class="form_label_errors">
+            {{range $error := .Errors}}
+              <div class="form_label_errors_error">{{$error}}</div>
+            {{end}}
+          </div>
+        {{end}}
+        <div>
+          {{tmpl $item.Template $item}}
+        </div>
+      </div>
+    {{end}}
+
+    <progress class="progress form_progress hidden"></progress>
+
+  </form>
 
 {{end}}

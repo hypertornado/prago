@@ -1606,36 +1606,43 @@ class PlacesEdit {
     }
 }
 class Form {
-    constructor(el) {
+    constructor(form) {
         this.dirty = false;
-        var elements = el.querySelectorAll(".admin_markdown");
+        this.ajax = false;
+        this.form = form;
+        this.progress = this.form.querySelector(".form_progress");
+        if (form.classList.contains("form-ajax")) {
+            console.log("ajax");
+            form.addEventListener("submit", this.submitFormAJAX.bind(this));
+        }
+        var elements = form.querySelectorAll(".admin_markdown");
         elements.forEach((el) => {
             new MarkdownEditor(el);
         });
-        var timestamps = el.querySelectorAll(".admin_timestamp");
-        timestamps.forEach((el) => {
-            new Timestamp(el);
+        var timestamps = form.querySelectorAll(".admin_timestamp");
+        timestamps.forEach((form) => {
+            new Timestamp(form);
         });
-        var relations = el.querySelectorAll(".admin_item_relation");
-        relations.forEach((el) => {
-            new RelationPicker(el);
+        var relations = form.querySelectorAll(".admin_item_relation");
+        relations.forEach((form) => {
+            new RelationPicker(form);
         });
-        var imagePickers = el.querySelectorAll(".admin_images");
-        imagePickers.forEach((el) => {
-            new ImagePicker(el);
+        var imagePickers = form.querySelectorAll(".admin_images");
+        imagePickers.forEach((form) => {
+            new ImagePicker(form);
         });
-        var dateInputs = el.querySelectorAll(".form_input-date");
-        dateInputs.forEach((el) => {
-            new DatePicker(el);
+        var dateInputs = form.querySelectorAll(".form_input-date");
+        dateInputs.forEach((form) => {
+            new DatePicker(form);
         });
-        var elements = el.querySelectorAll(".admin_place");
-        elements.forEach((el) => {
-            new PlacesEdit(el);
+        var elements = form.querySelectorAll(".admin_place");
+        elements.forEach((form) => {
+            new PlacesEdit(form);
         });
-        el.addEventListener("submit", () => {
+        form.addEventListener("submit", () => {
             this.dirty = false;
         });
-        let els = el.querySelectorAll(".form_watcher");
+        let els = form.querySelectorAll(".form_watcher");
         for (var i = 0; i < els.length; i++) {
             var input = els[i];
             input.addEventListener("input", () => {
@@ -1652,6 +1659,48 @@ class Form {
                 return confirmationMessage;
             }
         });
+    }
+    submitFormAJAX(event) {
+        event.preventDefault();
+        let formData = new FormData(this.form);
+        var request = new XMLHttpRequest();
+        request.open("POST", this.form.getAttribute("action"));
+        request.addEventListener("load", (e) => {
+            if (request.status == 200) {
+                var data = JSON.parse(request.response);
+                if (data.RedirectionLocaliton) {
+                    window.location = data.RedirectionLocaliton;
+                }
+                else {
+                    this.progress.classList.add("hidden");
+                    this.setFormErrors(data.Errors);
+                }
+            }
+            else {
+                this.progress.classList.add("hidden");
+                new Alert("Chyba při nahrávání souboru.");
+                console.error("Error while loading item.");
+            }
+        });
+        this.progress.classList.remove("hidden");
+        request.send(formData);
+    }
+    setFormErrors(errors) {
+        let errorsDiv = this.form.querySelector(".form_errors");
+        errorsDiv.innerText = "";
+        for (let i = 0; i < errors.length; i++) {
+            let errorDiv = document.createElement("div");
+            errorDiv.classList.add("form_errors_error");
+            errorDiv.innerText = errors[i].Text;
+            errorsDiv.appendChild(errorDiv);
+        }
+        if (errors.length > 0) {
+            errorsDiv.classList.remove("hidden");
+        }
+        else {
+            errorsDiv.classList.add("hidden");
+        }
+        console.log(errors);
     }
 }
 class DatePicker {

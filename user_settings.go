@@ -2,25 +2,26 @@ package prago
 
 func (app *App) initUserSettings() {
 
-	settingsForm := func(user *user) *form {
+	settingsForm := func(request *Request) *formView {
+		user := request.user
 		form := newForm()
-		form.Method = "POST"
-		form.Action = "settings"
+		formView := form.GetFormView(request)
+		formView.Form.Action = "settings"
 
-		name := form.AddTextInput("name", "")
+		name := formView.AddTextInput("name", "")
 		name.NameHuman = messages.Get(user.Locale, "Name")
 		name.Value = user.Name
 
-		sel := form.AddSelect("locale", messages.Get(user.Locale, "admin_locale"), availableLocales)
+		sel := formView.AddSelect("locale", messages.Get(user.Locale, "admin_locale"), availableLocales)
 		sel.Value = user.Locale
 
-		form.AddSubmit("_submit", messages.Get(user.Locale, "admin_edit"))
-		return form
+		formView.AddSubmit("_submit", messages.Get(user.Locale, "admin_edit"))
+		return formView
 	}
 
 	app.Action("settings").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu().Template("admin_form").DataSource(
 		func(request *Request) interface{} {
-			return settingsForm(request.user).AddCSRFToken(request)
+			return settingsForm(request).AddCSRFToken(request)
 		},
 	)
 
@@ -28,7 +29,7 @@ func (app *App) initUserSettings() {
 		func(request *Request) {
 			validateCSRF(request)
 			u := *request.user
-			form := settingsForm(request.user).AddCSRFToken(request)
+			form := settingsForm(request).AddCSRFToken(request)
 			if form.Validate() {
 				userResource, err := app.getResourceByItem(&u)
 				if err != nil {
@@ -43,9 +44,9 @@ func (app *App) initUserSettings() {
 			}
 		})
 
-	changePasswordForm := func(request *Request) *form {
+	changePasswordForm := func(request *Request) *formView {
 		locale := request.user.Locale
-		oldValidator := newValidator(func(field *formItem) bool {
+		oldValidator := newValidator(func(field *formItemView) bool {
 			if !request.user.isPassword(field.Value) {
 				return false
 			} else {
@@ -54,17 +55,17 @@ func (app *App) initUserSettings() {
 		}, messages.Get(locale, "admin_password_wrong"))
 
 		form := newForm()
-		form.Method = "POST"
-		form.AddPasswordInput("oldpassword",
+		formView := form.GetFormView(request)
+		formView.AddPasswordInput("oldpassword",
 			messages.Get(locale, "admin_password_old"),
 			oldValidator,
 		)
-		form.AddPasswordInput("newpassword",
+		formView.AddPasswordInput("newpassword",
 			messages.Get(locale, "admin_password_new"),
 			minLengthValidator(messages.Get(locale, "admin_password_length"), 7),
 		)
-		form.AddSubmit("_submit", messages.Get(locale, "admin_save"))
-		return form
+		formView.AddSubmit("_submit", messages.Get(locale, "admin_save"))
+		return formView
 	}
 
 	app.Action("password").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu().Template("admin_form").DataSource(

@@ -9,15 +9,16 @@ func initUserRenew(resource *Resource) {
 
 	app := resource.app
 
-	forgottenPasswordForm := func(locale string) *form {
+	forgottenPasswordForm := func(request *Request) *formView {
+		locale := localeFromRequest(request)
 		form := newForm()
-		form.Method = "POST"
-		form.AddEmailInput("email", messages.Get(locale, "admin_email")).Focused = true
-		form.AddSubmit("send", messages.Get(locale, "admin_forgotten_submit"))
-		return form
+		formView := form.GetFormView(request)
+		formView.AddEmailInput("email", messages.Get(locale, "admin_email")).Focused = true
+		formView.AddSubmit("send", messages.Get(locale, "admin_forgotten_submit"))
+		return formView
 	}
 
-	renderForgot := func(request *Request, form *form, locale string) {
+	renderForgot := func(request *Request, form *formView, locale string) {
 		renderNavigationPageNoLogin(request, page{
 			App:          app,
 			Navigation:   app.getNologinNavigation(locale, "forgot"),
@@ -28,7 +29,7 @@ func initUserRenew(resource *Resource) {
 
 	app.accessController.get(resource.getURL("forgot"), func(request *Request) {
 		locale := localeFromRequest(request)
-		renderForgot(request, forgottenPasswordForm(locale), locale)
+		renderForgot(request, forgottenPasswordForm(request), locale)
 	})
 
 	app.accessController.post(resource.getURL("forgot"), func(request *Request) {
@@ -68,18 +69,19 @@ func initUserRenew(resource *Resource) {
 		request.Redirect(app.getAdminURL("user/forgot"))
 	})
 
-	renewPasswordForm := func(locale string) (form *form) {
-		form = newForm()
-		form.Method = "POST"
+	renewPasswordForm := func(request *Request) *formView {
+		locale := localeFromRequest(request)
+		form := newForm()
+		formView := form.GetFormView(request)
 
-		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "admin_password_new"),
+		passwordInput := formView.AddPasswordInput("password", messages.Get(locale, "admin_password_new"),
 			minLengthValidator(messages.Get(locale, "admin_password_length"), 7))
 		passwordInput.Focused = true
-		form.AddSubmit("send", messages.Get(locale, "admin_forgoten_set"))
-		return
+		formView.AddSubmit("send", messages.Get(locale, "admin_forgoten_set"))
+		return formView
 	}
 
-	renderRenew := func(request *Request, form *form, locale string) {
+	renderRenew := func(request *Request, form *formView, locale string) {
 		renderNavigationPageNoLogin(request, page{
 			App:          app,
 			Navigation:   app.getNologinNavigation(locale, "forgot"),
@@ -90,14 +92,14 @@ func initUserRenew(resource *Resource) {
 
 	app.accessController.get(resource.getURL("renew_password"), func(request *Request) {
 		locale := localeFromRequest(request)
-		form := renewPasswordForm(locale)
+		form := renewPasswordForm(request)
 		renderRenew(request, form, locale)
 	})
 
 	app.accessController.post(resource.getURL("renew_password"), func(request *Request) {
 		locale := localeFromRequest(request)
 
-		form := renewPasswordForm(locale)
+		form := renewPasswordForm(request)
 
 		form.BindData(request.Params())
 		form.Validate()
