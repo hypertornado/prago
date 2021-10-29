@@ -264,6 +264,10 @@ var m = map[string]map[string]string{
 		"en": "Wrong user email or password.",
 		"cs": "Špatný email, nebo heslo.",
 	},
+	"admin_login_password_error": {
+		"en": "Wrong password.",
+		"cs": "Špatné heslo.",
+	},
 	"admin_login_ok": {
 		"en": "Log in was succesful",
 		"cs": "Přihlášení proběhlo úspěšně",

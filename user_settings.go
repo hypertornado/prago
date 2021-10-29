@@ -2,23 +2,6 @@ package prago
 
 func (app *App) initUserSettings() {
 
-	/*settingsForm := func(request *Request) *formView {
-		user := request.user
-		form := newForm()
-		formView := form.GetFormView(request)
-		formView.Form.Action = "settings"
-
-		name := formView.AddTextInput("name", "")
-		name.NameHuman = messages.Get(user.Locale, "Name")
-		name.Value = user.Name
-
-		sel := formView.AddSelect("locale", messages.Get(user.Locale, "admin_locale"), availableLocales)
-		sel.Value = user.Locale
-
-		formView.AddSubmit("_submit", messages.Get(user.Locale, "admin_edit"))
-		return formView
-	}*/
-
 	app.Action("settings").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu().Template("admin_form").DataSource(
 		func(request *Request) interface{} {
 			user := request.user
@@ -39,7 +22,6 @@ func (app *App) initUserSettings() {
 			formView.AddSubmit("_submit", messages.Get(user.Locale, "admin_edit"))
 			formView.AddCSRFToken(request)
 			return formView
-			//return settingsForm(request).AddCSRFToken(request)
 		},
 	)
 
@@ -47,73 +29,40 @@ func (app *App) initUserSettings() {
 		func(request *Request) {
 			request.RenderJSON(validateSettings(request))
 
-			/*validateCSRF(request)
-			u := *request.user
-			form := settingsForm(request).AddCSRFToken(request)
-			if form.Validate() {
-				userResource, err := app.getResourceByItem(&u)
-				if err != nil {
-					panic(err)
-				}
-				must(userResource.bindData(&u, request.user, request.Params(), nil))
-				must(app.Save(&u))
-				request.AddFlashMessage(messages.Get(request.user.Locale, "admin_settings_changed"))
-				request.Redirect(app.getAdminURL("settings"))
-			} else {
-				panic("can't validate settings form")
-			}*/
 		})
-
-	changePasswordForm := func(request *Request) *formView {
-		locale := request.user.Locale
-		oldValidator := newValidator(func(field *formItemView) bool {
-			if !request.user.isPassword(field.Value) {
-				return false
-			} else {
-				return true
-			}
-		}, messages.Get(locale, "admin_password_wrong"))
-
-		form := newForm()
-		formView := form.GetFormView(request)
-		formView.AddPasswordInput("oldpassword",
-			messages.Get(locale, "admin_password_old"),
-			oldValidator,
-		)
-		formView.AddPasswordInput("newpassword",
-			messages.Get(locale, "admin_password_new"),
-			minLengthValidator(messages.Get(locale, "admin_password_length"), 7),
-		)
-		formView.AddSubmit("_submit", messages.Get(locale, "admin_save"))
-		return formView
-	}
 
 	app.Action("password").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu().Template("admin_form").DataSource(
 		func(request *Request) interface{} {
-			return changePasswordForm(request)
+			locale := request.user.Locale
+			oldValidator := newValidator(func(field *formItemView) bool {
+				if !request.user.isPassword(field.Value) {
+					return false
+				} else {
+					return true
+				}
+			}, messages.Get(locale, "admin_password_wrong"))
+
+			form := newForm()
+			form.AJAX = true
+			form.Action = "/admin/password"
+			formView := form.GetFormView(request)
+			formView.Classes = append(formView.Classes, "prago_form")
+			formView.AddPasswordInput("oldpassword",
+				messages.Get(locale, "admin_password_old"),
+				oldValidator,
+			).Focused = true
+			formView.AddPasswordInput("newpassword",
+				messages.Get(locale, "admin_password_new"),
+				minLengthValidator(messages.Get(locale, "admin_password_length"), 7),
+			)
+			formView.AddCSRFToken(request)
+			formView.AddSubmit("_submit", messages.Get(locale, "admin_save"))
+			return formView
 		},
 	)
 
 	app.Action("password").Permission(loggedPermission).Method("POST").Handler(func(request *Request) {
-		form := changePasswordForm(request)
-		form.BindData(request.Params())
-		form.Validate()
-		if form.Valid {
-			password := request.Params().Get("newpassword")
-			user := *request.user
-			must(user.newPassword(password))
-			must(app.Save(&user))
-			request.AddFlashMessage(messages.Get(request.user.Locale, "admin_password_changed"))
-			request.Redirect(app.getAdminURL(""))
-		} else {
-			//TODO: better validation and UI of errors
-			for _, v := range form.Items {
-				for _, e := range v.Errors {
-					request.AddFlashMessage(e)
-				}
-			}
-			request.Redirect(app.getAdminURL("password"))
-		}
+		request.RenderJSON(validateChangePassword(request))
 	})
 
 	app.Action("redirect-to-homepage").Permission(loggedPermission).Name(messages.GetNameFunction("admin_homepage")).userMenu().Handler(func(request *Request) {
@@ -126,6 +75,32 @@ func (app *App) initUserSettings() {
 		request.Redirect(app.getAdminURL("login"))
 	})
 
+}
+
+func validateChangePassword(request *Request) *FormValidation {
+	ret := NewFormValidation()
+	validateCSRF(request)
+	locale := request.user.Locale
+
+	valid := true
+	oldpassword := request.Params().Get("oldpassword")
+	if !request.user.isPassword(oldpassword) {
+		valid = false
+		ret.AddItemError("oldpassword", messages.Get(locale, "admin_register_password"))
+	}
+
+	newpassword := request.Params().Get("newpassword")
+	if len(newpassword) < 7 {
+		valid = false
+		ret.AddItemError("newpassword", messages.Get(locale, "admin_password_length"))
+	}
+
+	if valid {
+		request.AddFlashMessage(messages.Get(request.user.Locale, "admin_password_changed"))
+		ret.RedirectionLocaliton = "/admin"
+	}
+
+	return ret
 }
 
 func validateSettings(request *Request) *FormValidation {
