@@ -9,7 +9,6 @@ class Form {
     this.form = form;
     this.progress = this.form.querySelector(".form_progress");
     if (form.classList.contains("form-ajax")) {
-      console.log("ajax");
       form.addEventListener("submit", this.submitFormAJAX.bind(this));
     }
 
@@ -86,6 +85,7 @@ class Form {
         } else {
           this.progress.classList.add("hidden");
           this.setFormErrors(data.Errors);
+          this.setItemErrors(data.ItemErrors);
         }
       } else {
         this.progress.classList.add("hidden");
@@ -101,17 +101,40 @@ class Form {
   setFormErrors(errors: any[]) {
     let errorsDiv: HTMLDivElement = this.form.querySelector(".form_errors");
     errorsDiv.innerText = "";
-    for (let i = 0; i < errors.length; i++) {
-      let errorDiv = document.createElement("div");
-      errorDiv.classList.add("form_errors_error");
-      errorDiv.innerText = errors[i].Text;
-      errorsDiv.appendChild(errorDiv);
+    errorsDiv.classList.add("hidden");
+
+    if (errors) {
+      for (let i = 0; i < errors.length; i++) {
+        let errorDiv = document.createElement("div");
+        errorDiv.classList.add("form_errors_error");
+        errorDiv.innerText = errors[i].Text;
+        errorsDiv.appendChild(errorDiv);
+      }
+      if (errors.length > 0) {
+        errorsDiv.classList.remove("hidden");
+      }
     }
-    if (errors.length > 0) {
-      errorsDiv.classList.remove("hidden");
-    } else {
-      errorsDiv.classList.add("hidden");
+  }
+
+  setItemErrors(itemErrors: any) {
+    let labels = this.form.querySelectorAll(".form_label");
+    for (let i = 0; i < labels.length; i++) {
+      let label = labels[i];
+      let id = label.getAttribute("data-id");
+      label.classList.remove("form_label-errors");
+      let labelErrors = label.querySelector(".form_label_errors");
+      labelErrors.innerHTML = "";
+      labelErrors.classList.add("hidden");
+      if (itemErrors[id]) {
+        label.classList.add("form_label-errors");
+        labelErrors.classList.remove("hidden");
+        for (let j = 0; j < itemErrors[id].length; j++) {
+          let errorDiv = document.createElement("div");
+          errorDiv.classList.add("form_label_errors_error");
+          errorDiv.innerText = itemErrors[id][j].Text;
+          labelErrors.appendChild(errorDiv);
+        }
+      }
     }
-    console.log(errors);
   }
 }

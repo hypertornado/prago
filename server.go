@@ -34,7 +34,7 @@ func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.app.serveHTTP(w, r)
 }
 
-func (app App) serveHTTP(w http.ResponseWriter, r *http.Request) {
+func (app *App) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	request := &Request{
 		uuid:       randomString(10),
 		receivedAt: time.Now(),

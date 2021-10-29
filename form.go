@@ -2,8 +2,6 @@ package prago
 
 import (
 	"net/url"
-
-	"github.com/asaskevich/govalidator"
 )
 
 type Form struct {
@@ -48,6 +46,7 @@ type formItemView struct {
 	Focused    bool
 	Readonly   bool
 	HiddenName bool
+	Hidden     bool
 	Template   string
 	Errors     []string
 	Value      string
@@ -167,6 +166,7 @@ func (f *formView) AddCheckbox(name, description string, validators ...itemValid
 func (f *formView) AddHidden(name string, validators ...itemValidator) *formItemView {
 	input := f.addInput(name, "", "", validators)
 	input.Template = "admin_item_hidden"
+	input.Hidden = true
 	return input
 }
 
@@ -213,7 +213,7 @@ func (v validator) Validate(field *formItemView) {
 }
 
 //EmailValidator for validation of email inputs
-func emailValidator(Error string) itemValidator {
+/*func emailValidator(Error string) itemValidator {
 	return newValidator(func(field *formItemView) bool {
 		if !govalidator.IsEmail(field.Value) {
 			return false
@@ -243,7 +243,7 @@ func nonEmptyValidator(Error string) itemValidator {
 			return true
 		}
 	}, Error)
-}
+}*/
 
 //MinLengthValidator for validation of min length of field
 func minLengthValidator(Error string, minLength int) itemValidator {

@@ -2,7 +2,7 @@ package prago
 
 func (app *App) initUserSettings() {
 
-	settingsForm := func(request *Request) *formView {
+	/*settingsForm := func(request *Request) *formView {
 		user := request.user
 		form := newForm()
 		formView := form.GetFormView(request)
@@ -17,17 +17,37 @@ func (app *App) initUserSettings() {
 
 		formView.AddSubmit("_submit", messages.Get(user.Locale, "admin_edit"))
 		return formView
-	}
+	}*/
 
 	app.Action("settings").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu().Template("admin_form").DataSource(
 		func(request *Request) interface{} {
-			return settingsForm(request).AddCSRFToken(request)
+			user := request.user
+			form := newForm()
+			form.AJAX = true
+			form.Action = "/admin/settings"
+			formView := form.GetFormView(request)
+			formView.Classes = append(formView.Classes, "prago_form")
+			formView.Form.Action = "settings"
+
+			name := formView.AddTextInput("name", "")
+			name.NameHuman = messages.Get(user.Locale, "Name")
+			name.Value = user.Name
+
+			sel := formView.AddSelect("locale", messages.Get(user.Locale, "admin_locale"), availableLocales)
+			sel.Value = user.Locale
+
+			formView.AddSubmit("_submit", messages.Get(user.Locale, "admin_edit"))
+			formView.AddCSRFToken(request)
+			return formView
+			//return settingsForm(request).AddCSRFToken(request)
 		},
 	)
 
 	app.Action("settings").Permission(loggedPermission).Method("POST").Handler(
 		func(request *Request) {
-			validateCSRF(request)
+			request.RenderJSON(validateSettings(request))
+
+			/*validateCSRF(request)
 			u := *request.user
 			form := settingsForm(request).AddCSRFToken(request)
 			if form.Validate() {
@@ -41,7 +61,7 @@ func (app *App) initUserSettings() {
 				request.Redirect(app.getAdminURL("settings"))
 			} else {
 				panic("can't validate settings form")
-			}
+			}*/
 		})
 
 	changePasswordForm := func(request *Request) *formView {
@@ -106,4 +126,41 @@ func (app *App) initUserSettings() {
 		request.Redirect(app.getAdminURL("login"))
 	})
 
+}
+
+func validateSettings(request *Request) *FormValidation {
+	ret := NewFormValidation()
+	validateCSRF(request)
+	locale := request.user.Locale
+
+	valid := true
+	name := request.Params().Get("name")
+	if name == "" {
+		valid = false
+		ret.AddItemError("name", messages.Get(locale, "admin_user_name_not_empty"))
+	}
+
+	newLocale := request.Params().Get("locale")
+	foundLocale := false
+	for _, v := range availableLocales {
+		if v[0] == newLocale {
+			foundLocale = true
+		}
+	}
+	if !foundLocale {
+		valid = false
+		ret.AddItemError("locale", "wrong locale")
+	}
+
+	if valid {
+		u := *request.user
+		u.Name = name
+		u.Locale = newLocale
+		must(request.app.Save(&u))
+
+		request.AddFlashMessage(messages.Get(request.user.Locale, "admin_settings_changed"))
+		ret.RedirectionLocaliton = request.app.getAdminURL("")
+	}
+
+	return ret
 }

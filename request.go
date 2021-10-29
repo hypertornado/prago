@@ -15,7 +15,7 @@ type Request struct {
 	w          http.ResponseWriter
 	r          *http.Request
 	data       map[string]interface{}
-	app        App
+	app        *App
 	session    *requestSession
 	user       *user
 }

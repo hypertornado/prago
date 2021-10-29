@@ -42,14 +42,30 @@ func initUserLogin(resource *Resource) {
 	}*/
 
 	resource.app.accessController.get(resource.getURL("login"), func(request *Request) {
+		if request.user != nil {
+			request.Redirect("/admin")
+			return
+		}
+
 		locale := localeFromRequest(request)
 		form := newForm()
 		form.AJAX = true
 		form.Action = "/admin/user/login"
 		formView := form.GetFormView(request)
 		formView.Classes = append(formView.Classes, "prago_form")
-		formView.AddEmailInput("email", messages.Get(locale, "admin_email")).Focused = true
-		formView.AddPasswordInput("password", messages.Get(locale, "admin_password"))
+
+		emailValue := request.Params().Get("email")
+
+		emailInput := formView.AddEmailInput("email", messages.Get(locale, "admin_email"))
+		if emailValue == "" {
+			emailInput.Focused = true
+		}
+		emailInput.Value = request.Params().Get("email")
+		passwordInput := formView.AddPasswordInput("password", messages.Get(locale, "admin_password"))
+		if emailValue != "" {
+			passwordInput.Focused = true
+		}
+
 		formView.AddSubmit("send", messages.Get(locale, "admin_login_action"))
 
 		renderNavigationPageNoLogin(request, page{
@@ -110,9 +126,7 @@ func initUserLogin(resource *Resource) {
 
 func loginValidation(request *Request) *FormValidation {
 	locale := localeFromRequest(request)
-	ret := &FormValidation{
-		Valid: true,
-	}
+	ret := NewFormValidation()
 	email := request.Params().Get("email")
 	email = fixEmail(email)
 	password := request.Params().Get("password")
@@ -123,7 +137,6 @@ func loginValidation(request *Request) *FormValidation {
 		ret.Errors = append(ret.Errors, FormValidationError{
 			Text: messages.Get(locale, "admin_login_error"),
 		})
-		ret.Valid = false
 		return ret
 	}
 
@@ -131,7 +144,6 @@ func loginValidation(request *Request) *FormValidation {
 		ret.Errors = append(ret.Errors, FormValidationError{
 			Text: messages.Get(locale, "admin_login_error"),
 		})
-		ret.Valid = false
 		return ret
 	}
 
@@ -143,7 +155,6 @@ func loginValidation(request *Request) *FormValidation {
 	request.logInUser(&user)
 	request.AddFlashMessage(messages.Get(locale, "admin_login_ok"))
 
-	ret.Valid = true
 	ret.RedirectionLocaliton = request.app.getAdminURL("")
 	return ret
 

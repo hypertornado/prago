@@ -18,17 +18,13 @@
     {{end}}
 
     {{range $item := .Items}}
-      <div class="form_label{{if .Errors}} form_label-errors{{end}}{{if .Required}} form_label-required{{end}}">
+      <div class="form_label{{if .Hidden}} form_label-hidden{{end}}{{if .Errors}} form_label-errors{{end}}{{if .Required}} form_label-required{{end}}" data-id="{{.ID}}">
         {{if eq .HiddenName false}}
           <label for="{{.UUID}}" class="form_label_text">{{.NameHuman}}</label>
         {{end}}
-        {{if .Errors}}
-          <div class="form_label_errors">
-            {{range $error := .Errors}}
-              <div class="form_label_errors_error">{{$error}}</div>
-            {{end}}
-          </div>
-        {{end}}
+        <div class="form_label_errors hidden">
+          <!--<div class="form_label_errors_error"></div>-->
+        </div>
         <div>
           {{tmpl $item.Template $item}}
         </div>

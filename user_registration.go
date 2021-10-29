@@ -4,7 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strings"
 	"time"
+
+	"github.com/asaskevich/govalidator"
 )
 
 func initUserRegistration(resource *Resource) {
@@ -34,28 +37,17 @@ func initUserRegistration(resource *Resource) {
 		request.Redirect(app.getAdminURL("user/login"))
 	})
 
-	newUserForm := func(request *Request) *formView {
+	/*newUserForm := func(request *Request) *formView {
 		locale := localeFromRequest(request)
 		form := newForm()
+		form.AJAX = true
+		form.Action = "/admin/user/registration"
 		formView := form.GetFormView(request)
-		formView.AddTextInput("name", messages.Get(locale, "Name"),
-			nonEmptyValidator(messages.Get(locale, "admin_user_name_not_empty")),
-		)
-		formView.AddEmailInput("email", messages.Get(locale, "admin_email"),
-			emailValidator(messages.Get(locale, "admin_email_not_valid")),
-			newValidator(func(field *formItemView) bool {
-				if len(field.Errors) != 0 {
-					return true
-				}
-				var user user
-				app.Is("email", field.Value).Get(&user)
-				return user.Email != field.Value
-			}, messages.Get(locale, "admin_email_already_registered")),
-		)
-		formView.AddPasswordInput("password", messages.Get(locale, "admin_register_password"),
-			minLengthValidator("", 7),
-		)
-		formView.AddCAPTCHAInput("captcha", "4 + 5 =", valueValidator("9", "Špatná hodnota"))
+		formView.Classes = append(formView.Classes, "prago_form")
+		formView.AddTextInput("name", messages.Get(locale, "Name"))
+		formView.AddEmailInput("email", messages.Get(locale, "admin_email"))
+		formView.AddPasswordInput("password", messages.Get(locale, "admin_register_password"))
+		formView.AddCAPTCHAInput("captcha", "4 + 5 =")
 		formView.AddSubmit("send", messages.Get(locale, "admin_register"))
 		return formView
 	}
@@ -67,51 +59,104 @@ func initUserRegistration(resource *Resource) {
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
-	}
+	}*/
 
 	app.accessController.get(resource.getURL("registration"), func(request *Request) {
 		locale := localeFromRequest(request)
-		renderRegistration(request, newUserForm(request), locale)
+		form := newForm()
+		form.AJAX = true
+		form.Action = "/admin/user/registration"
+		formView := form.GetFormView(request)
+		formView.Classes = append(formView.Classes, "prago_form")
+		formView.AddTextInput("name", messages.Get(locale, "Name"))
+		formView.AddEmailInput("email", messages.Get(locale, "admin_email"))
+		formView.AddPasswordInput("password", messages.Get(locale, "admin_register_password"))
+		formView.AddCAPTCHAInput("captcha", "4 + 5 =")
+		formView.AddSubmit("send", messages.Get(locale, "admin_register"))
+
+		renderNavigationPageNoLogin(request, page{
+			App:          app,
+			Navigation:   app.getNologinNavigation(locale, "registration"),
+			PageTemplate: "admin_form",
+			PageData:     formView,
+		})
+
+		//renderRegistration(request, newUserForm(request), locale)
 	})
 
 	app.accessController.post(resource.getURL("registration"), func(request *Request) {
-		locale := localeFromRequest(request)
-		form := newUserForm(request)
-
-		form.BindData(request.Params())
-
-		if form.Validate() {
-			email := request.Params().Get("email")
-			email = fixEmail(email)
-			u := &user{}
-			u.Email = email
-			u.Name = request.Params().Get("name")
-			u.IsActive = true
-			u.Locale = locale
-			must(u.newPassword(request.Params().Get("password")))
-			err := u.sendConfirmEmail(request, app)
-			if err != nil {
-				app.Log().Println(err)
-			}
-			err = u.sendAdminEmail(request, app)
-			if err != nil {
-				app.Log().Println(err)
-			}
-
-			count, err := app.Query().Count(&user{})
-			if err == nil && count == 0 {
-				u.Role = sysadminRoleName
-			}
-
-			must(app.Create(u))
-
-			request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
-			request.Redirect(app.getAdminURL("user/login"))
-		} else {
-			form.GetItemByID("password").Value = ""
-			renderRegistration(request, form, locale)
-		}
+		request.RenderJSON(registrationValidation(request))
 	})
+}
+
+func registrationValidation(request *Request) *FormValidation {
+	ret := NewFormValidation()
+
+	valid := true
+	locale := localeFromRequest(request)
+
+	name := request.Params().Get("name")
+	if name == "" {
+		valid = false
+		ret.AddItemError("name", messages.Get(locale, "admin_user_name_not_empty"))
+	}
+
+	email := request.Params().Get("email")
+	email = fixEmail(email)
+	if !govalidator.IsEmail(email) {
+		valid = false
+		ret.AddItemError("email", messages.Get(locale, "admin_email_not_valid"))
+	} else {
+		var user user
+		request.app.Is("email", email).Get(&user)
+		if user.Email == email {
+			valid = false
+			ret.AddItemError("email", messages.Get(locale, "admin_email_already_registered"))
+		}
+	}
+
+	password := request.Params().Get("password")
+	if len(password) < 7 {
+		valid = false
+		ret.AddItemError("password", messages.Get(locale, "admin_register_password"))
+	}
+
+	captcha := request.Params().Get("captcha")
+	captcha = strings.Trim(captcha, " ")
+	if captcha != "9" {
+		valid = false
+		ret.AddItemError("captcha", messages.Get(locale, "admin_error"))
+	}
+
+	if valid {
+		u := &user{}
+		u.Email = email
+		u.Name = request.Params().Get("name")
+		u.IsActive = true
+		u.Locale = locale
+		must(u.newPassword(request.Params().Get("password")))
+		err := u.sendConfirmEmail(request, request.app)
+		if err != nil {
+			request.app.Log().Println(err)
+		}
+		err = u.sendAdminEmail(request, request.app)
+		if err != nil {
+			request.app.Log().Println(err)
+		}
+
+		count, err := request.app.Query().Count(&user{})
+		if err == nil && count == 0 {
+			u.Role = sysadminRoleName
+		}
+
+		must(request.app.Create(u))
+
+		request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
+		ret.RedirectionLocaliton = request.app.getAdminURL("user/login") + "?email=" + url.QueryEscape(email)
+
+	}
+
+	return ret
 
 }
 
