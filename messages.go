@@ -363,10 +363,6 @@ var m = map[string]map[string]string{
 		"en": "Change password",
 		"cs": "Změnit heslo",
 	},
-	"admin_password_wrong": {
-		"en": "Wrong password",
-		"cs": "Špatné heslo",
-	},
 	"admin_password_old": {
 		"en": "Old password",
 		"cs": "Staré heslo",

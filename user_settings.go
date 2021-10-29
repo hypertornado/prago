@@ -34,27 +34,13 @@ func (app *App) initUserSettings() {
 	app.Action("password").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu().Template("admin_form").DataSource(
 		func(request *Request) interface{} {
 			locale := request.user.Locale
-			oldValidator := newValidator(func(field *formItemView) bool {
-				if !request.user.isPassword(field.Value) {
-					return false
-				} else {
-					return true
-				}
-			}, messages.Get(locale, "admin_password_wrong"))
-
 			form := newForm()
 			form.AJAX = true
 			form.Action = "/admin/password"
 			formView := form.GetFormView(request)
 			formView.Classes = append(formView.Classes, "prago_form")
-			formView.AddPasswordInput("oldpassword",
-				messages.Get(locale, "admin_password_old"),
-				oldValidator,
-			).Focused = true
-			formView.AddPasswordInput("newpassword",
-				messages.Get(locale, "admin_password_new"),
-				minLengthValidator(messages.Get(locale, "admin_password_length"), 7),
-			)
+			formView.AddPasswordInput("oldpassword", messages.Get(locale, "admin_password_old")).Focused = true
+			formView.AddPasswordInput("newpassword", messages.Get(locale, "admin_password_new"))
 			formView.AddCSRFToken(request)
 			formView.AddSubmit("_submit", messages.Get(locale, "admin_save"))
 			return formView
