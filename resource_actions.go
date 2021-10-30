@@ -28,15 +28,19 @@ func initDefaultResourceActions(resource *Resource) {
 			must(err)
 
 			form.Classes = append(form.Classes, "prago_form")
-			form.Form.Action = "../" + resource.id
+			form.Form.AJAX = true
+			form.Form.Action = "new"
 			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
 			return form
 		},
 	)
-	resource.Action("").Method("POST").Permission(resource.canCreate).Handler(
+	resource.Action("new").Method("POST").Permission(resource.canCreate).Handler(
 		func(request *Request) {
 			validateCSRF(request)
+
+			validation := NewFormValidation()
+
 			var item interface{}
 			resource.newItem(&item)
 
@@ -66,7 +70,8 @@ func initDefaultResourceActions(resource *Resource) {
 				SetImage(app.getItemImage(item)).
 				SetPreName(messages.Get(request.user.Locale, "admin_item_created")).
 				Flash(request)
-			request.Redirect(resource.getItemURL(item, ""))
+			validation.RedirectionLocaliton = resource.getItemURL(item, "")
+			request.RenderJSON(validation)
 		},
 	)
 
@@ -101,7 +106,7 @@ func initDefaultResourceActions(resource *Resource) {
 
 			form, err := resource.getForm(item, request)
 			must(err)
-
+			form.Form.AJAX = true
 			form.Classes = append(form.Classes, "prago_form")
 			form.Form.Action = "edit"
 			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
@@ -112,6 +117,7 @@ func initDefaultResourceActions(resource *Resource) {
 
 	resource.ItemAction("edit").Method("POST").Permission(resource.canEdit).Handler(
 		func(request *Request) {
+			validation := NewFormValidation()
 			user := request.user
 			validateCSRF(request)
 			id, err := strconv.Atoi(request.Params().Get("id"))
@@ -127,31 +133,34 @@ func initDefaultResourceActions(resource *Resource) {
 				SetPreName(messages.Get(user.Locale, "admin_item_edited")).
 				Flash(request)
 
-			request.Redirect(resource.getURL(fmt.Sprintf("%d", id)))
+			validation.RedirectionLocaliton = resource.getURL(fmt.Sprintf("%d", id))
+			request.RenderJSON(validation)
 		},
 	)
 
-	resource.ItemAction("delete").priority().Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete")).Template("admin_delete").DataSource(
+	resource.ItemAction("delete").priority().Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete")).Template("admin_form").DataSource(
 		func(request *Request) interface{} {
-			ret := map[string]interface{}{}
 			form := newForm()
+			form.AJAX = true
+			form.Action = "delete"
 			formView := form.GetFormView(request)
 			formView.AddCSRFToken(request)
+			formView.Classes = append(formView.Classes, "prago_form")
 			formView.AddDeleteSubmit("send", messages.Get(request.user.Locale, "admin_delete"))
-			ret["form"] = form
 
 			var item interface{}
 			resource.newItem(&item)
 			app.Is("id", request.Params().Get("id")).MustGet(item)
 			itemName := getItemName(item)
-			ret["delete_title"] = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
-			return ret
+			formView.Title = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
+			return formView
 		},
 	)
 
 	resource.ItemAction("delete").Permission(resource.canDelete).Method("POST").Handler(
 		func(request *Request) {
 			validateCSRF(request)
+			validation := NewFormValidation()
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
@@ -159,7 +168,9 @@ func initDefaultResourceActions(resource *Resource) {
 
 			must(resource.updateCachedCount())
 			request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_deleted"))
-			request.Redirect(resource.getURL(""))
+			validation.RedirectionLocaliton = resource.getURL("")
+
+			request.RenderJSON(validation)
 		},
 	)
 

@@ -23,6 +23,7 @@ func (form *Form) GetFormView(request *Request) *formView {
 
 //Form represents admin form
 type formView struct {
+	Title     string
 	Items     []*formItemView
 	Valid     bool
 	Classes   []string

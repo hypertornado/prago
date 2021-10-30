@@ -5,6 +5,10 @@
       <input type="hidden" name="_csrfToken" value="{{.CSRFToken}}">
     {{end}}
 
+    {{if .Title}}
+      <h1>{{.Title}}</h1>
+    {{end}}
+
     <div class="form_errors hidden">
 
     </div>
