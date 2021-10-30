@@ -11,10 +11,8 @@ func initUserRenew(resource *Resource) {
 		locale := localeFromRequest(request)
 
 		form := newForm()
-		form.AJAX = true
 		form.Action = "/admin/user/forgot"
 		formView := form.GetFormView(request)
-		formView.Classes = append(formView.Classes, "prago_form")
 		formView.AddEmailInput("email", messages.Get(locale, "admin_email")).Focused = true
 		formView.AddSubmit("send", messages.Get(locale, "admin_forgotten_submit"))
 
@@ -35,10 +33,8 @@ func initUserRenew(resource *Resource) {
 		locale := localeFromRequest(request)
 
 		form := newForm()
-		form.AJAX = true
 		form.Action = "/admin/user/renew_password"
 		formView := form.GetFormView(request)
-		formView.Classes = append(formView.Classes, "prago_form")
 		passwordInput := formView.AddPasswordInput("password", messages.Get(locale, "admin_password_new"))
 		passwordInput.Focused = true
 

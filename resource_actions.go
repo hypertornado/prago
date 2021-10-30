@@ -26,9 +26,6 @@ func initDefaultResourceActions(resource *Resource) {
 
 			form, err := resource.getForm(item, request)
 			must(err)
-
-			form.Classes = append(form.Classes, "prago_form")
-			form.Form.AJAX = true
 			form.Form.Action = "new"
 			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
@@ -106,8 +103,6 @@ func initDefaultResourceActions(resource *Resource) {
 
 			form, err := resource.getForm(item, request)
 			must(err)
-			form.Form.AJAX = true
-			form.Classes = append(form.Classes, "prago_form")
 			form.Form.Action = "edit"
 			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
@@ -141,11 +136,9 @@ func initDefaultResourceActions(resource *Resource) {
 	resource.ItemAction("delete").priority().Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete")).Template("admin_form").DataSource(
 		func(request *Request) interface{} {
 			form := newForm()
-			form.AJAX = true
 			form.Action = "delete"
 			formView := form.GetFormView(request)
 			formView.AddCSRFToken(request)
-			formView.Classes = append(formView.Classes, "prago_form")
 			formView.AddDeleteSubmit("send", messages.Get(request.user.Locale, "admin_delete"))
 
 			var item interface{}

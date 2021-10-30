@@ -6,10 +6,8 @@ func (app *App) initUserSettings() {
 		func(request *Request) interface{} {
 			user := request.user
 			form := newForm()
-			form.AJAX = true
 			form.Action = "/admin/settings"
 			formView := form.GetFormView(request)
-			formView.Classes = append(formView.Classes, "prago_form")
 			formView.Form.Action = "settings"
 
 			name := formView.AddTextInput("name", "")
@@ -35,10 +33,8 @@ func (app *App) initUserSettings() {
 		func(request *Request) interface{} {
 			locale := request.user.Locale
 			form := newForm()
-			form.AJAX = true
 			form.Action = "/admin/password"
 			formView := form.GetFormView(request)
-			formView.Classes = append(formView.Classes, "prago_form")
 			formView.AddPasswordInput("oldpassword", messages.Get(locale, "admin_password_old")).Focused = true
 			formView.AddPasswordInput("newpassword", messages.Get(locale, "admin_password_new"))
 			formView.AddCSRFToken(request)

@@ -5,7 +5,6 @@ import (
 )
 
 type Form struct {
-	AJAX   bool
 	Action string
 	Items  []FormItem
 }
@@ -23,10 +22,10 @@ func (form *Form) GetFormView(request *Request) *formView {
 
 //Form represents admin form
 type formView struct {
-	Title     string
-	Items     []*formItemView
-	Valid     bool
-	Classes   []string
+	Title string
+	Items []*formItemView
+	Valid bool
+	//Classes   []string
 	CSRFToken string
 	Form      *Form
 }

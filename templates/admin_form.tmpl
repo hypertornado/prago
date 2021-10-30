@@ -1,6 +1,6 @@
 {{define "admin_form"}}
 
-  <form method="POST" action="{{.Form.Action}}" class="form{{range $class := .Classes}} {{$class}}{{end}}{{if .Form.AJAX}} form-ajax{{end}}" enctype="multipart/form-data" novalidate>
+  <form method="POST" action="{{.Form.Action}}" class="form prago_form form-ajax" enctype="multipart/form-data" novalidate>
     {{if .CSRFToken}}
       <input type="hidden" name="_csrfToken" value="{{.CSRFToken}}">
     {{end}}

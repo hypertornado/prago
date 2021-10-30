@@ -64,10 +64,8 @@ func initUserRegistration(resource *Resource) {
 	app.accessController.get(resource.getURL("registration"), func(request *Request) {
 		locale := localeFromRequest(request)
 		form := newForm()
-		form.AJAX = true
 		form.Action = "/admin/user/registration"
 		formView := form.GetFormView(request)
-		formView.Classes = append(formView.Classes, "prago_form")
 		formView.AddTextInput("name", messages.Get(locale, "Name"))
 		formView.AddEmailInput("email", messages.Get(locale, "admin_email"))
 		formView.AddPasswordInput("password", messages.Get(locale, "admin_register_password"))
