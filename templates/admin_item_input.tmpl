@@ -45,7 +45,7 @@
 {{define "admin_item_checkbox"}}
   <label>
     <input type="checkbox" name="{{.ID}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}} class="form_watcher">
-    <span class="form_label_text-inline">{{.NameHuman}}</span>
+    <span class="form_label_text-inline">{{.Name}}</span>
   </label>
 {{end}}
 
@@ -103,12 +103,12 @@
 
 {{define "admin_item_submit"}}
   <div class="primarybtncontainer">
-    <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.NameHuman}}</button>
+    <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Name}}</button>
   </div>
 {{end}}
 
 {{define "admin_item_delete"}}
-  <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary btn-delete"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.NameHuman}}</button>
+  <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary btn-delete"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Name}}</button>
 {{end}}
 
 {{define "admin_item_select"}}

@@ -37,49 +37,22 @@ func initUserRegistration(resource *Resource) {
 		request.Redirect(app.getAdminURL("user/login"))
 	})
 
-	/*newUserForm := func(request *Request) *formView {
+	app.accessController.get(resource.getURL("registration"), func(request *Request) {
 		locale := localeFromRequest(request)
-		form := newForm()
-		form.AJAX = true
-		form.Action = "/admin/user/registration"
-		formView := form.GetFormView(request)
-		formView.Classes = append(formView.Classes, "prago_form")
-		formView.AddTextInput("name", messages.Get(locale, "Name"))
-		formView.AddEmailInput("email", messages.Get(locale, "admin_email"))
-		formView.AddPasswordInput("password", messages.Get(locale, "admin_register_password"))
-		formView.AddCAPTCHAInput("captcha", "4 + 5 =")
-		formView.AddSubmit("send", messages.Get(locale, "admin_register"))
-		return formView
-	}
+		form := NewForm("/admin/user/registration")
+		form.AddTextInput("name", messages.Get(locale, "Name"))
+		form.AddEmailInput("email", messages.Get(locale, "admin_email"))
+		form.AddPasswordInput("password", messages.Get(locale, "admin_register_password"))
+		form.AddCAPTCHAInput("captcha", "4 + 5 =")
+		form.AddSubmit("send", messages.Get(locale, "admin_register"))
 
-	renderRegistration := func(request *Request, form *formView, locale string) {
 		renderNavigationPageNoLogin(request, page{
 			App:          app,
 			Navigation:   app.getNologinNavigation(locale, "registration"),
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
-	}*/
 
-	app.accessController.get(resource.getURL("registration"), func(request *Request) {
-		locale := localeFromRequest(request)
-		form := newForm()
-		form.Action = "/admin/user/registration"
-		formView := form.GetFormView(request)
-		formView.AddTextInput("name", messages.Get(locale, "Name"))
-		formView.AddEmailInput("email", messages.Get(locale, "admin_email"))
-		formView.AddPasswordInput("password", messages.Get(locale, "admin_register_password"))
-		formView.AddCAPTCHAInput("captcha", "4 + 5 =")
-		formView.AddSubmit("send", messages.Get(locale, "admin_register"))
-
-		renderNavigationPageNoLogin(request, page{
-			App:          app,
-			Navigation:   app.getNologinNavigation(locale, "registration"),
-			PageTemplate: "admin_form",
-			PageData:     formView,
-		})
-
-		//renderRegistration(request, newUserForm(request), locale)
 	})
 
 	app.accessController.post(resource.getURL("registration"), func(request *Request) {

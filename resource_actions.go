@@ -24,9 +24,8 @@ func initDefaultResourceActions(resource *Resource) {
 
 			resource.bindData(&item, request.user, request.Request().URL.Query(), nil)
 
-			form, err := resource.getForm(item, request)
+			form, err := resource.getForm(item, request, "new")
 			must(err)
-			form.Form.Action = "new"
 			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
 			return form
@@ -101,9 +100,8 @@ func initDefaultResourceActions(resource *Resource) {
 			err = app.Is("id", int64(id)).Get(item)
 			must(err)
 
-			form, err := resource.getForm(item, request)
+			form, err := resource.getForm(item, request, "edit")
 			must(err)
-			form.Form.Action = "edit"
 			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
 			return form
@@ -135,18 +133,16 @@ func initDefaultResourceActions(resource *Resource) {
 
 	resource.ItemAction("delete").priority().Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete")).Template("admin_form").DataSource(
 		func(request *Request) interface{} {
-			form := newForm()
-			form.Action = "delete"
-			formView := form.GetFormView(request)
-			formView.AddCSRFToken(request)
-			formView.AddDeleteSubmit("send", messages.Get(request.user.Locale, "admin_delete"))
+			form := NewForm("delete")
+			form.AddCSRFToken(request)
+			form.AddDeleteSubmit("send", messages.Get(request.user.Locale, "admin_delete"))
 
 			var item interface{}
 			resource.newItem(&item)
 			app.Is("id", request.Params().Get("id")).MustGet(item)
 			itemName := getItemName(item)
-			formView.Title = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
-			return formView
+			form.Title = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
+			return form
 		},
 	)
 

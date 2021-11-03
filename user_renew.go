@@ -10,17 +10,15 @@ func initUserRenew(resource *Resource) {
 	app.accessController.get(resource.getURL("forgot"), func(request *Request) {
 		locale := localeFromRequest(request)
 
-		form := newForm()
-		form.Action = "/admin/user/forgot"
-		formView := form.GetFormView(request)
-		formView.AddEmailInput("email", messages.Get(locale, "admin_email")).Focused = true
-		formView.AddSubmit("send", messages.Get(locale, "admin_forgotten_submit"))
+		form := NewForm("/admin/user/forgot")
+		form.AddEmailInput("email", messages.Get(locale, "admin_email")).Focused = true
+		form.AddSubmit("send", messages.Get(locale, "admin_forgotten_submit"))
 
 		renderNavigationPageNoLogin(request, page{
 			App:          app,
 			Navigation:   app.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
-			PageData:     formView,
+			PageData:     form,
 		})
 
 	})
@@ -32,22 +30,19 @@ func initUserRenew(resource *Resource) {
 	app.accessController.get(resource.getURL("renew_password"), func(request *Request) {
 		locale := localeFromRequest(request)
 
-		form := newForm()
-		form.Action = "/admin/user/renew_password"
-		formView := form.GetFormView(request)
-		passwordInput := formView.AddPasswordInput("password", messages.Get(locale, "admin_password_new"))
+		form := NewForm("/admin/user/renew_password")
+		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "admin_password_new"))
 		passwordInput.Focused = true
 
-		formView.AddHidden("email").Value = request.Params().Get("email")
-		formView.AddHidden("token").Value = request.Params().Get("token")
-
-		formView.AddSubmit("send", messages.Get(locale, "admin_forgoten_set"))
+		form.AddHidden("email").Value = request.Params().Get("email")
+		form.AddHidden("token").Value = request.Params().Get("token")
+		form.AddSubmit("send", messages.Get(locale, "admin_forgoten_set"))
 
 		renderNavigationPageNoLogin(request, page{
 			App:          app,
 			Navigation:   app.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
-			PageData:     formView,
+			PageData:     form,
 		})
 	})
 

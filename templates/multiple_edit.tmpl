@@ -5,9 +5,9 @@
     <input type="hidden" name="_csrfToken" value="{{.CSRFToken}}">
 
     {{range $item := .form.Items}}
-        <div class="multiple_edit_field" data-id="{{$item.Name}}">
+        <div class="multiple_edit_field" data-id="{{$item.ID}}">
             <label class="multiple_edit_field_header">
-                <input type="checkbox" class="multiple_edit_field_checkbox" name="_fields" value="{{$item.Name}}"> {{$item.NameHuman}}
+                <input type="checkbox" class="multiple_edit_field_checkbox" name="_fields" value="{{$item.ID}}"> {{$item.Name}}
             </label>
             <div class="multiple_edit_field_content">
                 {{tmpl $item.Template $item}}

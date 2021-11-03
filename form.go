@@ -4,83 +4,67 @@ import (
 	"net/url"
 )
 
-type Form struct {
-	Action string
-	Items  []FormItem
-}
-
-type FormItem struct {
-	ID   string
-	Name func(string) string
-}
-
-func (form *Form) GetFormView(request *Request) *formView {
-	return &formView{
-		Form: form,
-	}
-}
-
 //Form represents admin form
-type formView struct {
-	Title string
-	Items []*formItemView
-	Valid bool
-	//Classes   []string
+type Form struct {
+	Action    string
+	Title     string
+	Items     []*FormItem
+	Valid     bool
 	CSRFToken string
-	Form      *Form
 }
 
 //FormItem represents item of form
-type formItemView struct {
+type FormItem struct {
 	ID         string
-	NameHuman  string
+	Name       string
 	Required   bool
 	Focused    bool
 	Readonly   bool
 	HiddenName bool
 	Hidden     bool
 	Template   string
-	Errors     []string
 	Value      string
 	Data       interface{}
 	UUID       string
-	form       *formView
+	form       *Form
 }
 
 //NewForm creates new form
-func newForm() *Form {
-	ret := &Form{}
+func NewForm(action string) *Form {
+	ret := &Form{
+		Action: action,
+	}
 	return ret
 }
 
 //GetItemByName returns form item found by name
-func (f *formView) GetItemByID(id string) *formItemView {
+/*func (f *Form) GetItemByID(id string) *FormItem {
 	for _, v := range f.Items {
 		if v.ID == id {
 			return v
 		}
 	}
 	return nil
-}
+}*/
 
 //AddItem adds form item
-func (f *formView) AddItem(item *formItemView) {
+func (f *Form) AddItem(item *FormItem) {
 	item.form = f
 	f.Items = append(f.Items, item)
 }
 
 //BindData to form
-func (f *formView) BindData(params url.Values) {
+func (f *Form) BindData(params url.Values) {
 	for _, v := range f.Items {
 		v.Value = params.Get(v.ID)
 	}
 }
 
-func (f *formView) addInput(id, description, template string) *formItemView {
-	item := &formItemView{
-		ID:        id,
-		Template:  template,
-		NameHuman: description,
+func (f *Form) addInput(id, description, template string) *FormItem {
+	item := &FormItem{
+		ID:       id,
+		Template: template,
+		Name:     description,
 	}
 	item.AddUUID()
 	f.AddItem(item)
@@ -88,37 +72,37 @@ func (f *formView) addInput(id, description, template string) *formItemView {
 }
 
 //AddTextInput to form
-func (f *formView) AddTextInput(name, description string) *formItemView {
+func (f *Form) AddTextInput(name, description string) *FormItem {
 	return f.addInput(name, description, "admin_item_input")
 }
 
 //AddTextareaInput to form
-func (f *formView) AddTextareaInput(name, description string) *formItemView {
+func (f *Form) AddTextareaInput(name, description string) *FormItem {
 	return f.addInput(name, description, "admin_item_textarea")
 }
 
 //AddEmailInput to form
-func (f *formView) AddEmailInput(name, description string) *formItemView {
+func (f *Form) AddEmailInput(name, description string) *FormItem {
 	return f.addInput(name, description, "admin_item_email")
 }
 
 //AddPasswordInput to form
-func (f *formView) AddPasswordInput(name, description string) *formItemView {
+func (f *Form) AddPasswordInput(name, description string) *FormItem {
 	return f.addInput(name, description, "admin_item_password")
 }
 
 //AddFileInput to form
-func (f *formView) AddFileInput(name, description string) *formItemView {
+func (f *Form) AddFileInput(name, description string) *FormItem {
 	return f.addInput(name, description, "admin_item_file")
 }
 
 //AddCAPTCHAInput to form
-func (f *formView) AddCAPTCHAInput(name, description string) *formItemView {
+func (f *Form) AddCAPTCHAInput(name, description string) *FormItem {
 	return f.addInput(name, description, "admin_item_captcha")
 }
 
 //AddSubmit to form
-func (f *formView) AddSubmit(name, description string) *formItemView {
+func (f *Form) AddSubmit(name, description string) *FormItem {
 	input := f.addInput(name, description, "")
 	input.HiddenName = true
 	input.Template = "admin_item_submit"
@@ -126,7 +110,7 @@ func (f *formView) AddSubmit(name, description string) *formItemView {
 }
 
 //AddDeleteSubmit to form
-func (f *formView) AddDeleteSubmit(name, description string) *formItemView {
+func (f *Form) AddDeleteSubmit(name, description string) *FormItem {
 	input := f.addInput(name, description, "")
 	input.HiddenName = true
 	input.Template = "admin_item_delete"
@@ -134,14 +118,14 @@ func (f *formView) AddDeleteSubmit(name, description string) *formItemView {
 }
 
 //AddCheckbox to form
-func (f *formView) AddCheckbox(name, description string) *formItemView {
+func (f *Form) AddCheckbox(name, description string) *FormItem {
 	input := f.addInput(name, description, "admin_item_checkbox")
 	input.HiddenName = true
 	return input
 }
 
 //AddHidden to form
-func (f *formView) AddHidden(name string) *formItemView {
+func (f *Form) AddHidden(name string) *FormItem {
 	input := f.addInput(name, "", "")
 	input.Template = "admin_item_hidden"
 	input.Hidden = true
@@ -149,24 +133,18 @@ func (f *formView) AddHidden(name string) *formItemView {
 }
 
 //AddSelect to form
-func (f *formView) AddSelect(name, description string, values [][2]string) *formItemView {
+func (f *Form) AddSelect(name, description string, values [][2]string) *FormItem {
 	input := f.addInput(name, description, "admin_item_select")
 	input.Data = values
 	return input
 }
 
-//AddError to form
-func (f *formItemView) AddError(err string) {
-	f.Errors = append(f.Errors, err)
-	f.form.Valid = false
-}
-
 //AddUUID to form
-func (f *formItemView) AddUUID() {
+func (f *FormItem) AddUUID() {
 	f.UUID = "id-" + randomString(5)
 }
 
-func (form *formView) AddCSRFToken(request *Request) *formView {
+func (form *Form) AddCSRFToken(request *Request) *Form {
 	form.CSRFToken = request.csrfToken()
 	return form
 }

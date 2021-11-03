@@ -205,8 +205,7 @@ func initDefaultResourceAPIs(resource *Resource) {
 
 			var item interface{}
 			resource.newItem(&item)
-			form, err := resource.getForm(item, request)
-			form.Form.Action = resource.getURL("api/multiple_edit")
+			form, err := resource.getForm(item, request, resource.getURL("api/multiple_edit"))
 			must(err)
 			request.SetData("form", form)
 

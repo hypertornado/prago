@@ -5,21 +5,18 @@ func (app *App) initUserSettings() {
 	app.Action("settings").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu().Template("admin_form").DataSource(
 		func(request *Request) interface{} {
 			user := request.user
-			form := newForm()
-			form.Action = "/admin/settings"
-			formView := form.GetFormView(request)
-			formView.Form.Action = "settings"
+			form := NewForm("/admin/settings")
 
-			name := formView.AddTextInput("name", "")
-			name.NameHuman = messages.Get(user.Locale, "Name")
+			name := form.AddTextInput("name", "")
+			name.Name = messages.Get(user.Locale, "Name")
 			name.Value = user.Name
 
-			sel := formView.AddSelect("locale", messages.Get(user.Locale, "admin_locale"), availableLocales)
+			sel := form.AddSelect("locale", messages.Get(user.Locale, "admin_locale"), availableLocales)
 			sel.Value = user.Locale
 
-			formView.AddSubmit("_submit", messages.Get(user.Locale, "admin_edit"))
-			formView.AddCSRFToken(request)
-			return formView
+			form.AddSubmit("_submit", messages.Get(user.Locale, "admin_edit"))
+			form.AddCSRFToken(request)
+			return form
 		},
 	)
 
@@ -32,14 +29,12 @@ func (app *App) initUserSettings() {
 	app.Action("password").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu().Template("admin_form").DataSource(
 		func(request *Request) interface{} {
 			locale := request.user.Locale
-			form := newForm()
-			form.Action = "/admin/password"
-			formView := form.GetFormView(request)
-			formView.AddPasswordInput("oldpassword", messages.Get(locale, "admin_password_old")).Focused = true
-			formView.AddPasswordInput("newpassword", messages.Get(locale, "admin_password_new"))
-			formView.AddCSRFToken(request)
-			formView.AddSubmit("_submit", messages.Get(locale, "admin_save"))
-			return formView
+			form := NewForm("/admin/password")
+			form.AddPasswordInput("oldpassword", messages.Get(locale, "admin_password_old")).Focused = true
+			form.AddPasswordInput("newpassword", messages.Get(locale, "admin_password_new"))
+			form.AddCSRFToken(request)
+			form.AddSubmit("_submit", messages.Get(locale, "admin_save"))
+			return form
 		},
 	)
 

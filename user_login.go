@@ -20,35 +20,33 @@ func initUserLogin(resource *Resource) {
 	)
 
 	resource.app.accessController.get(resource.getURL("login"), func(request *Request) {
-		if request.user != nil {
+		/*if request.user != nil {
 			request.Redirect("/admin")
 			return
-		}
+		}*/
 
 		locale := localeFromRequest(request)
-		form := newForm()
-		form.Action = "/admin/user/login"
-		formView := form.GetFormView(request)
+		form := NewForm("/admin/user/login")
 
 		emailValue := request.Params().Get("email")
 
-		emailInput := formView.AddEmailInput("email", messages.Get(locale, "admin_email"))
+		emailInput := form.AddEmailInput("email", messages.Get(locale, "admin_email"))
 		if emailValue == "" {
 			emailInput.Focused = true
 		}
 		emailInput.Value = request.Params().Get("email")
-		passwordInput := formView.AddPasswordInput("password", messages.Get(locale, "admin_password"))
+		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "admin_password"))
 		if emailValue != "" {
 			passwordInput.Focused = true
 		}
 
-		formView.AddSubmit("send", messages.Get(locale, "admin_login_action"))
+		form.AddSubmit("send", messages.Get(locale, "admin_login_action"))
 
 		renderNavigationPageNoLogin(request, page{
 			App:          resource.app,
 			Navigation:   resource.app.getNologinNavigation(locale, "login"),
 			PageTemplate: "admin_form",
-			PageData:     formView,
+			PageData:     form,
 		})
 
 	})
