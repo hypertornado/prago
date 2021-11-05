@@ -37,36 +37,42 @@ func initDefaultResourceActions(resource *Resource) {
 
 			validation := NewFormValidation()
 
-			var item interface{}
-			resource.newItem(&item)
-
-			resource.bindData(item, request.user, request.Params(), nil)
-			if resource.orderField != nil {
-				resource.setOrderPosition(&item, resource.count()+1)
+			for _, v := range resource.validations {
+				v(request, validation)
 			}
-			must(app.Create(item))
 
-			if app.search != nil {
-				err := app.search.saveItem(resource, item)
-				if err != nil {
-					app.Log().Println(fmt.Errorf("%s", err))
+			if validation.Valid {
+				var item interface{}
+				resource.newItem(&item)
+
+				resource.bindData(item, request.user, request.Params(), nil)
+				if resource.orderField != nil {
+					resource.setOrderPosition(&item, resource.count()+1)
 				}
-				app.search.flush()
+				must(app.Create(item))
+
+				if app.search != nil {
+					err := app.search.saveItem(resource, item)
+					if err != nil {
+						app.Log().Println(fmt.Errorf("%s", err))
+					}
+					app.search.flush()
+				}
+
+				if resource.activityLog {
+					must(
+						app.LogActivity("new", request.UserID(), resource.id, getItemID(item), nil, item),
+					)
+				}
+
+				must(resource.updateCachedCount())
+
+				app.Notification(getItemName(item)).
+					SetImage(app.getItemImage(item)).
+					SetPreName(messages.Get(request.user.Locale, "admin_item_created")).
+					Flash(request)
+				validation.RedirectionLocaliton = resource.getItemURL(item, "")
 			}
-
-			if resource.activityLog {
-				must(
-					app.LogActivity("new", request.UserID(), resource.id, getItemID(item), nil, item),
-				)
-			}
-
-			must(resource.updateCachedCount())
-
-			app.Notification(getItemName(item)).
-				SetImage(app.getItemImage(item)).
-				SetPreName(messages.Get(request.user.Locale, "admin_item_created")).
-				Flash(request)
-			validation.RedirectionLocaliton = resource.getItemURL(item, "")
 			request.RenderJSON(validation)
 		},
 	)
@@ -111,22 +117,28 @@ func initDefaultResourceActions(resource *Resource) {
 	resource.ItemAction("edit").Method("POST").Permission(resource.canEdit).Handler(
 		func(request *Request) {
 			validation := NewFormValidation()
-			user := request.user
-			validateCSRF(request)
-			id, err := strconv.Atoi(request.Params().Get("id"))
-			must(err)
+			for _, v := range resource.validations {
+				v(request, validation)
+			}
 
-			items, err := resource.editItemsWithLog(user, []int64{int64(id)}, request.Params(), nil)
-			must(err)
+			if validation.Valid {
+				user := request.user
+				validateCSRF(request)
+				id, err := strconv.Atoi(request.Params().Get("id"))
+				must(err)
 
-			item := items[0]
+				items, err := resource.editItemsWithLog(user, []int64{int64(id)}, request.Params(), nil)
+				must(err)
 
-			app.Notification(getItemName(item)).
-				SetImage(app.getItemImage(item)).
-				SetPreName(messages.Get(user.Locale, "admin_item_edited")).
-				Flash(request)
+				item := items[0]
 
-			validation.RedirectionLocaliton = resource.getURL(fmt.Sprintf("%d", id))
+				app.Notification(getItemName(item)).
+					SetImage(app.getItemImage(item)).
+					SetPreName(messages.Get(user.Locale, "admin_item_edited")).
+					Flash(request)
+
+				validation.RedirectionLocaliton = resource.getURL(fmt.Sprintf("%d", id))
+			}
 			request.RenderJSON(validation)
 		},
 	)
@@ -150,14 +162,21 @@ func initDefaultResourceActions(resource *Resource) {
 		func(request *Request) {
 			validateCSRF(request)
 			validation := NewFormValidation()
-			id, err := strconv.Atoi(request.Params().Get("id"))
-			must(err)
 
-			must(resource.deleteItemWithLog(request.user, int64(id)))
+			for _, v := range resource.deleteValidations {
+				v(request, validation)
+			}
 
-			must(resource.updateCachedCount())
-			request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_deleted"))
-			validation.RedirectionLocaliton = resource.getURL("")
+			if validation.Valid {
+				id, err := strconv.Atoi(request.Params().Get("id"))
+				must(err)
+
+				must(resource.deleteItemWithLog(request.user, int64(id)))
+
+				must(resource.updateCachedCount())
+				request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_deleted"))
+				validation.RedirectionLocaliton = resource.getURL("")
+			}
 
 			request.RenderJSON(validation)
 		},

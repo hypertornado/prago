@@ -231,8 +231,8 @@ func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 //Newsletter represents newsletter
 type newsletter struct {
 	ID            int64     `prago-preview:"true" prago-order-desc:"true"`
-	Name          string    `prago-preview:"true" prago-name:"Jméno newsletteru"`
-	Body          string    `prago-type:"markdown"`
+	Name          string    `prago-preview:"true" prago-name:"Jméno newsletteru" prago-validations:"nonempty"`
+	Body          string    `prago-type:"markdown" prago-validations:"nonempty"`
 	PreviewSentAt time.Time `prago-preview:"true"`
 	SentAt        time.Time `prago-preview:"true"`
 	CreatedAt     time.Time
@@ -429,9 +429,9 @@ func defaultNewsletterRenderer(params map[string]interface{}) (string, error) {
 //NewsletterSection represents section of newsletter
 type newsletterSection struct {
 	ID            int64
-	Newsletter    int64  `prago-type:"relation" prago-preview:"true"`
-	Name          string `prago-name:"Jméno sekce"`
-	Text          string `prago-type:"text"`
+	Newsletter    int64  `prago-type:"relation" prago-preview:"true" prago-validations:"nonempty"`
+	Name          string `prago-name:"Jméno sekce" prago-validations:"nonempty"`
+	Text          string `prago-type:"text" prago-validations:"nonempty"`
 	Button        string `prago-name:"Tlačítko"`
 	URL           string `prago-name:"Odkaz"`
 	Image         string `prago-type:"image" prago-preview:"true"`

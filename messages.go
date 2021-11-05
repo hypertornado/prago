@@ -260,6 +260,10 @@ var m = map[string]map[string]string{
 		"en": "Username can't be empty",
 		"cs": "Jméno uživatele nemůže být prázdné",
 	},
+	"admin_validation_not_empty": {
+		"en": "Item can't be empty",
+		"cs": "Položka nemůže být prázdná",
+	},
 	"admin_login_error": {
 		"en": "Wrong user email or password.",
 		"cs": "Špatný email, nebo heslo.",

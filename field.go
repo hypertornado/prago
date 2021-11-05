@@ -102,6 +102,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 		"prago-order",
 		"prago-order-desc",
 		"prago-relation",
+		"prago-validations",
 	} {
 		ret.Tags[v] = f.Tag.Get(v)
 	}
@@ -153,9 +154,47 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 		}
 	}
 
+	validations := ret.Tags["prago-validations"]
+	if validations != "" {
+		for _, v := range strings.Split(validations, ",") {
+			err := ret.addFieldValidation(v)
+			if err != nil {
+				panic(fmt.Sprintf("can't add validation on field '%s' of resource '%s': %s", f.Name, resource.name("en"), err))
+			}
+		}
+	}
+
 	ret.initFieldType()
 
 	return ret
+}
+
+func (field *field) addFieldValidation(nameOfValidation string) error {
+	if nameOfValidation == "nonempty" {
+		field.resource.Validation(func(request *Request, validation *FormValidation) {
+			valid := true
+			if field.Typ.Kind() == reflect.Int64 ||
+				field.Typ.Kind() == reflect.Int32 ||
+				field.Typ.Kind() == reflect.Int ||
+				field.Typ.Kind() == reflect.Float64 ||
+				field.Typ.Kind() == reflect.Float32 {
+				if request.Params().Get(field.ColumnName) == "0" {
+					valid = false
+				}
+			}
+			if field.Tags["prago-type"] == "relation" && request.Params().Get(field.ColumnName) == "0" {
+				valid = false
+			}
+			if request.Params().Get(field.ColumnName) == "" {
+				valid = false
+			}
+			if !valid {
+				validation.AddItemError(field.ColumnName, messages.Get(request.user.Locale, "admin_validation_not_empty"))
+			}
+		})
+		return nil
+	}
+	return fmt.Errorf("unknown validation name: %s", nameOfValidation)
 }
 
 func (resource *Resource) FieldName(nameOfField string, name func(string) string) *Resource {

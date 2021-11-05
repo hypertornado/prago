@@ -37,16 +37,6 @@ func NewForm(action string) *Form {
 	return ret
 }
 
-//GetItemByName returns form item found by name
-/*func (f *Form) GetItemByID(id string) *FormItem {
-	for _, v := range f.Items {
-		if v.ID == id {
-			return v
-		}
-	}
-	return nil
-}*/
-
 //AddItem adds form item
 func (f *Form) AddItem(item *FormItem) {
 	item.form = f

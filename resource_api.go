@@ -178,6 +178,10 @@ func initDefaultResourceAPIs(resource *Resource) {
 
 			switch request.Params().Get("action") {
 			case "delete":
+				//TODO: add validation to this, then reenable this
+				renderAPINotAuthorized(request)
+				return
+
 				if !request.app.authorize(request.user, resource.canDelete) {
 					renderAPINotAuthorized(request)
 					return

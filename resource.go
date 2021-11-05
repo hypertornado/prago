@@ -37,6 +37,9 @@ type Resource struct {
 	fieldArrays []*field
 	fieldMap    map[string]*field
 
+	validations       []Validation
+	deleteValidations []Validation
+
 	orderField *field
 }
 
@@ -191,6 +194,16 @@ func (resource *Resource) PermissionDelete(permission Permission) *Resource {
 func (resource *Resource) PermissionExport(permission Permission) *Resource {
 	must(resource.app.validatePermission(permission))
 	resource.canExport = permission
+	return resource
+}
+
+func (resource *Resource) Validation(validation Validation) *Resource {
+	resource.validations = append(resource.validations, validation)
+	return resource
+}
+
+func (resource *Resource) DeleteValidation(validation Validation) *Resource {
+	resource.deleteValidations = append(resource.deleteValidations, validation)
 	return resource
 }
 
