@@ -163,6 +163,10 @@ func initDefaultResourceAPIs(resource *Resource) {
 		},
 	)
 
+	type MultipleActionResponse struct {
+		Text string
+	}
+
 	resource.API("multipleaction").Method("POST").Handler(
 		func(request *Request) {
 			var ids []int64
@@ -187,6 +191,7 @@ func initDefaultResourceAPIs(resource *Resource) {
 					return
 				}
 				for _, v := range ids {
+
 					err := resource.deleteItemWithLog(request.user, v)
 					must(err)
 				}
@@ -196,16 +201,8 @@ func initDefaultResourceAPIs(resource *Resource) {
 		},
 	)
 
-	type MultipleEditFormItem struct {
-		ID       string
-		Name     string
-		Template string
-		Data     interface{}
-	}
-
 	resource.API("multiple_edit").Permission(resource.canEdit).Method("GET").Handler(
 		func(request *Request) {
-			var items []MultipleEditFormItem
 
 			var item interface{}
 			resource.newItem(&item)
@@ -216,7 +213,6 @@ func initDefaultResourceAPIs(resource *Resource) {
 			request.SetData("CSRFToken", request.csrfToken())
 			request.SetData("ids", request.Params().Get("ids"))
 
-			request.SetData("items", items)
 			request.RenderView("multiple_edit")
 		},
 	)

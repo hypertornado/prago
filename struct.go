@@ -55,6 +55,9 @@ fields:
 			Name:     field.HumanName(user.Locale),
 			Template: field.fieldType.formTemplate,
 		}
+		if field.Description != nil {
+			item.Description = field.Description(user.Locale)
+		}
 		item.AddUUID()
 
 		if field.fieldType.formHideLabel {

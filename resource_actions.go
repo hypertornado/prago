@@ -35,13 +35,13 @@ func initDefaultResourceActions(resource *Resource) {
 		func(request *Request) {
 			validateCSRF(request)
 
-			validation := NewFormValidation()
+			validation := newRequestValidation(request)
 
 			for _, v := range resource.validations {
-				v(request, validation)
+				v(validation)
 			}
 
-			if validation.Valid {
+			if validation.Valid() {
 				var item interface{}
 				resource.newItem(&item)
 
@@ -71,9 +71,9 @@ func initDefaultResourceActions(resource *Resource) {
 					SetImage(app.getItemImage(item)).
 					SetPreName(messages.Get(request.user.Locale, "admin_item_created")).
 					Flash(request)
-				validation.RedirectionLocaliton = resource.getItemURL(item, "")
+				validation.Validation().RedirectionLocaliton = resource.getItemURL(item, "")
 			}
-			request.RenderJSON(validation)
+			request.RenderJSON(validation.Validation())
 		},
 	)
 
@@ -116,12 +116,12 @@ func initDefaultResourceActions(resource *Resource) {
 
 	resource.ItemAction("edit").Method("POST").Permission(resource.canEdit).Handler(
 		func(request *Request) {
-			validation := NewFormValidation()
+			validation := newRequestValidation(request)
 			for _, v := range resource.validations {
-				v(request, validation)
+				v(validation)
 			}
 
-			if validation.Valid {
+			if validation.Valid() {
 				user := request.user
 				validateCSRF(request)
 				id, err := strconv.Atoi(request.Params().Get("id"))
@@ -137,9 +137,9 @@ func initDefaultResourceActions(resource *Resource) {
 					SetPreName(messages.Get(user.Locale, "admin_item_edited")).
 					Flash(request)
 
-				validation.RedirectionLocaliton = resource.getURL(fmt.Sprintf("%d", id))
+				validation.Validation().RedirectionLocaliton = resource.getURL(fmt.Sprintf("%d", id))
 			}
-			request.RenderJSON(validation)
+			request.RenderJSON(validation.Validation())
 		},
 	)
 
@@ -161,13 +161,13 @@ func initDefaultResourceActions(resource *Resource) {
 	resource.ItemAction("delete").Permission(resource.canDelete).Method("POST").Handler(
 		func(request *Request) {
 			validateCSRF(request)
-			validation := NewFormValidation()
 
+			validation := newRequestValidation(request)
 			for _, v := range resource.deleteValidations {
-				v(request, validation)
+				v(validation)
 			}
 
-			if validation.Valid {
+			if validation.Valid() {
 				id, err := strconv.Atoi(request.Params().Get("id"))
 				must(err)
 
@@ -175,10 +175,10 @@ func initDefaultResourceActions(resource *Resource) {
 
 				must(resource.updateCachedCount())
 				request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_deleted"))
-				validation.RedirectionLocaliton = resource.getURL("")
+				validation.Validation().RedirectionLocaliton = resource.getURL("")
 			}
 
-			request.RenderJSON(validation)
+			request.RenderJSON(validation.Validation())
 		},
 	)
 

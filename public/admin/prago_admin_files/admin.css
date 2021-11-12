@@ -5633,13 +5633,20 @@ ul {
 .form_label_text {
   font-size: 1rem;
   line-height: 1.2em;
-  margin: 5px 0px;
+  margin: 0px 0px 5px 0px;
   display: inline-block;
+}
+.form_label_description {
+  color: #777;
+  font-size: 0.8rem;
+  line-height: 1.2em;
+  margin: 5px 0px;
 }
 .form_label-errors {
   color: #dd2e4f;
 }
 .form_label-errors input,
+.form_label-errors select,
 .form_label-errors textarea {
   border-color: #dd2e4f !important;
 }

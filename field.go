@@ -8,14 +8,15 @@ import (
 )
 
 type field struct {
-	Name       string
-	ColumnName string
-	HumanName  func(string) string
-	Typ        reflect.Type
-	Tags       map[string]string
-	fieldOrder int
-	Unique     bool
-	CanOrder   bool
+	Name        string
+	ColumnName  string
+	HumanName   func(string) string
+	Description func(string) string
+	Typ         reflect.Type
+	Tags        map[string]string
+	fieldOrder  int
+	Unique      bool
+	CanOrder    bool
 
 	DefaultShow bool
 
@@ -79,7 +80,6 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 
 	//remove unused tags
 	for _, v := range []string{
-		"prago-description",
 		"prago-edit",
 		"prago-view",
 		"prago-visible",
@@ -96,6 +96,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 		"prago-can-edit",
 
 		"prago-name",
+		"prago-description",
 		"prago-type",
 		"prago-preview",
 		"prago-unique",
@@ -115,6 +116,10 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 	if ret.Tags["prago-preview"] == "true" {
 		ret.DefaultShow = true
 	}
+	if ret.Tags["prago-description"] != "" {
+		ret.Description = unlocalized(ret.Tags["prago-description"])
+	}
+
 	if ret.Tags["prago-preview"] == "false" {
 		ret.DefaultShow = false
 	}
@@ -171,25 +176,27 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 
 func (field *field) addFieldValidation(nameOfValidation string) error {
 	if nameOfValidation == "nonempty" {
-		field.resource.Validation(func(request *Request, validation *FormValidation) {
+		field.resource.Validation(func(vc ValidationContext) {
 			valid := true
 			if field.Typ.Kind() == reflect.Int64 ||
 				field.Typ.Kind() == reflect.Int32 ||
 				field.Typ.Kind() == reflect.Int ||
 				field.Typ.Kind() == reflect.Float64 ||
 				field.Typ.Kind() == reflect.Float32 {
-				if request.Params().Get(field.ColumnName) == "0" {
+
+				if vc.GetValue(field.ColumnName) == "0" {
 					valid = false
 				}
 			}
-			if field.Tags["prago-type"] == "relation" && request.Params().Get(field.ColumnName) == "0" {
+
+			if field.Tags["prago-type"] == "relation" && vc.GetValue(field.ColumnName) == "0" {
 				valid = false
 			}
-			if request.Params().Get(field.ColumnName) == "" {
+			if vc.GetValue(field.ColumnName) == "" {
 				valid = false
 			}
 			if !valid {
-				validation.AddItemError(field.ColumnName, messages.Get(request.user.Locale, "admin_validation_not_empty"))
+				vc.AddItemError(field.ColumnName, messages.Get(vc.Locale(), "admin_validation_not_empty"))
 			}
 		})
 		return nil
@@ -203,6 +210,15 @@ func (resource *Resource) FieldName(nameOfField string, name func(string) string
 		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, nameOfField))
 	}
 	f.HumanName = name
+	return resource
+}
+
+func (resource *Resource) FieldDescription(descriptionOfField string, description func(string) string) *Resource {
+	f := resource.fieldMap[descriptionOfField]
+	if f == nil {
+		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, descriptionOfField))
+	}
+	f.Description = description
 	return resource
 }
 

@@ -15,18 +15,19 @@ type Form struct {
 
 //FormItem represents item of form
 type FormItem struct {
-	ID         string
-	Name       string
-	Required   bool
-	Focused    bool
-	Readonly   bool
-	HiddenName bool
-	Hidden     bool
-	Template   string
-	Value      string
-	Data       interface{}
-	UUID       string
-	form       *Form
+	ID          string
+	Name        string
+	Description string
+	Required    bool
+	Focused     bool
+	Readonly    bool
+	HiddenName  bool
+	Hidden      bool
+	Template    string
+	Value       string
+	Data        interface{}
+	UUID        string
+	form        *Form
 }
 
 //NewForm creates new form

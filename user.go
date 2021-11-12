@@ -19,7 +19,7 @@ type user struct {
 	Email             string    `prago-unique:"true" prago-preview:"true"`
 	Role              string    `prago-preview:"true" prago-type:"role"`
 	Password          string    `prago-can-view:"nobody"`
-	Locale            string    `prago-can-view:"nobody"`
+	Locale            string    `prago-can-view:"sysadmin"`
 	IsActive          bool      `prago-preview:"true"`
 	LoggedInIP        string    `prago-can-view:"sysadmin" prago-preview:"true"`
 	LoggedInUseragent string    `prago-can-view:"sysadmin" prago-preview:"true"`
