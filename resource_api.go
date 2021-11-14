@@ -101,7 +101,7 @@ func initDefaultResourceAPIs(resource *Resource) {
 				var item interface{}
 				resource.newItem(&item)
 				resource.app.Is("id", int64(id)).MustGet(item)
-				must(resource.setOrderPosition(item, int64(i)))
+				resource.setOrderPosition(item, int64(i))
 				resource.app.MustSave(item)
 			}
 			request.RenderJSON(true)
@@ -215,8 +215,10 @@ func initDefaultResourceAPIs(resource *Resource) {
 
 			var item interface{}
 			resource.newItem(&item)
-			form, err := resource.getForm(item, request, resource.getURL("api/multiple_edit"))
-			must(err)
+			form := NewForm(
+				resource.getURL("api/multiple_edit"),
+			)
+			resource.addFormItems(item, request.user, form)
 			request.SetData("form", form)
 
 			request.SetData("CSRFToken", request.csrfToken())
@@ -228,29 +230,42 @@ func initDefaultResourceAPIs(resource *Resource) {
 
 	resource.API("multiple_edit").Permission(resource.canEdit).Method("POST").Handler(
 		func(request *Request) {
+
 			validateCSRF(request)
 
 			idsStr := request.Request().PostForm["_ids"][0]
 			fields := request.Request().PostForm["_fields"]
-
-			var ids []int64
-
-			for _, v := range strings.Split(idsStr, ",") {
-				id, err := strconv.Atoi(v)
-				must(err)
-				ids = append(ids, int64(id))
-
-			}
 
 			var fieldsMap = map[string]bool{}
 			for _, v := range fields {
 				fieldsMap[v] = true
 			}
 
-			values := request.Request().PostForm
+			for _, idStr := range strings.Split(idsStr, ",") {
+				id, err := strconv.Atoi(idStr)
+				must(err)
 
-			_, err := resource.editItemsWithLog(request.user, ids, values, fieldsMap)
-			must(err)
+				var usedValues url.Values = make(map[string][]string)
+				usedValues.Set("id", idStr)
+				for k := range fieldsMap {
+					usedValues.Add(k, request.Request().PostForm.Get(k))
+				}
+
+				_, validation, err := resource.editItemWithLog(
+					request.user,
+					usedValues,
+				)
+
+				if err == validationError {
+					report := validation.Validation().TextErrorReport(int64(id), request.user.Locale)
+					request.RenderJSONWithCode(
+						report,
+						403,
+					)
+					return
+				}
+				must(err)
+			}
 
 		},
 	)

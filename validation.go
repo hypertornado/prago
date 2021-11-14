@@ -1,10 +1,13 @@
 package prago
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
 )
+
+var validationError = errors.New("validation error")
 
 type formValidation struct {
 	Valid                bool

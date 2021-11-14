@@ -34,21 +34,31 @@ func (resource Resource) getDefaultOrder() (column string, desc bool) {
 	return
 }
 
-func (resource Resource) getForm(inValues interface{}, request *Request, action string) (*Form, error) {
-	user := request.user
-	form := NewForm(action)
-	itemVal := reflect.ValueOf(inValues).Elem()
-
-fields:
+func (resource Resource) getItemStringEditableValues(item interface{}, user *user) map[string]string {
+	itemVal := reflect.ValueOf(item).Elem()
+	ret := make(map[string]string)
 	for i, field := range resource.fieldArrays {
 		if !field.authorizeEdit(user) {
-			continue fields
+			continue
 		}
-
 		var ifaceVal interface{}
 		reflect.ValueOf(&ifaceVal).Elem().Set(
 			itemVal.Field(i),
 		)
+		strVal := field.fieldType.formStringer(ifaceVal)
+		ret[field.ColumnName] = strVal
+	}
+	return ret
+}
+
+func (resource Resource) addFormItems(item interface{}, user *user, form *Form) {
+	editableValues := resource.getItemStringEditableValues(item, user)
+
+fields:
+	for _, field := range resource.fieldArrays {
+		if !field.authorizeEdit(user) {
+			continue fields
+		}
 
 		item := &FormItem{
 			ID:       field.ColumnName,
@@ -63,7 +73,8 @@ fields:
 		if field.fieldType.formHideLabel {
 			item.HiddenName = true
 		}
-		item.Value = field.fieldType.formStringer(ifaceVal)
+
+		item.Value = editableValues[field.ColumnName]
 
 		if field.fieldType.formDataSource != nil {
 			item.Data = field.fieldType.formDataSource(*field, user)
@@ -71,6 +82,4 @@ fields:
 
 		form.AddItem(item)
 	}
-
-	return form, nil
 }

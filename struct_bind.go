@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (resource *Resource) setOrderPosition(item interface{}, order int64) error {
+func (resource *Resource) setOrderPosition(item interface{}, order int64) {
 	value := reflect.ValueOf(item)
 
 	for i := 0; i < 10; i++ {
@@ -19,10 +19,9 @@ func (resource *Resource) setOrderPosition(item interface{}, order int64) error 
 
 	val := value.FieldByName(resource.orderField.Name)
 	val.SetInt(order)
-	return nil
 }
 
-func (resource Resource) getDefaultBindedFieldIDs(user *user) map[string]bool {
+/*func (resource Resource) getDefaultBindedFieldIDs(user *user) map[string]bool {
 	ret := map[string]bool{}
 	for _, v := range resource.fieldArrays {
 		if !v.authorizeView(user) {
@@ -34,13 +33,13 @@ func (resource Resource) getDefaultBindedFieldIDs(user *user) map[string]bool {
 		ret[v.ColumnName] = true
 	}
 	return ret
-}
+}*/
 
-func (resource Resource) bindData(item interface{}, user *user, params url.Values, bindedFieldIDs map[string]bool) error {
+func (resource Resource) bindData(item interface{}, user *user, params url.Values) error {
 
-	if bindedFieldIDs == nil {
+	/*if bindedFieldIDs == nil {
 		bindedFieldIDs = resource.getDefaultBindedFieldIDs(user)
-	}
+	}*/
 
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
@@ -54,9 +53,12 @@ func (resource Resource) bindData(item interface{}, user *user, params url.Value
 		if !field.authorizeEdit(user) {
 			continue
 		}
-		if !bindedFieldIDs[field.ColumnName] {
+		if len(params[field.ColumnName]) == 0 {
 			continue
 		}
+		/*if !bindedFieldIDs[field.ColumnName] {
+			continue
+		}*/
 
 		val := value.FieldByName(field.Name)
 		urlValue := params.Get(field.ColumnName)

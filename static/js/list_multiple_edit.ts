@@ -76,7 +76,14 @@ class ListMultipleEdit {
         this.popup.hide();
         this.listMultiple.list.load();
       } else {
-        new Alert("Chyba při ukládání.");
+        if (response.status == 403) {
+          response.json().then((data) => {
+            new Alert(data.error.Text);
+          });
+          return;
+        } else {
+          new Alert("Chyba při ukládání.");
+        }
       }
     });
 

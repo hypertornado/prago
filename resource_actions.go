@@ -21,11 +21,10 @@ func initDefaultResourceActions(resource *Resource) {
 		func(request *Request) interface{} {
 			var item interface{}
 			resource.newItem(&item)
+			resource.bindData(&item, request.user, request.Request().URL.Query())
 
-			resource.bindData(&item, request.user, request.Request().URL.Query(), nil)
-
-			form, err := resource.getForm(item, request, "new")
-			must(err)
+			form := NewForm("new")
+			resource.addFormItems(item, request.user, form)
 			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
 			return form
@@ -45,7 +44,7 @@ func initDefaultResourceActions(resource *Resource) {
 				var item interface{}
 				resource.newItem(&item)
 
-				resource.bindData(item, request.user, request.Params(), nil)
+				resource.bindData(item, request.user, request.Params())
 				if resource.orderField != nil {
 					resource.setOrderPosition(&item, resource.count()+1)
 				}
@@ -106,8 +105,8 @@ func initDefaultResourceActions(resource *Resource) {
 			err = app.Is("id", int64(id)).Get(item)
 			must(err)
 
-			form, err := resource.getForm(item, request, "edit")
-			must(err)
+			form := NewForm("edit")
+			resource.addFormItems(item, request.user, form)
 			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
 			return form
@@ -116,9 +115,9 @@ func initDefaultResourceActions(resource *Resource) {
 
 	resource.ItemAction("edit").Method("POST").Permission(resource.canEdit).Handler(
 		func(request *Request) {
-			validation := newRequestValidation(request)
-			for _, v := range resource.validations {
-				v(validation)
+			item, validation, err := resource.editItemWithLog(request.user, request.Params())
+			if err != nil && err != validationError {
+				panic(err)
 			}
 
 			if validation.Valid() {
@@ -126,11 +125,6 @@ func initDefaultResourceActions(resource *Resource) {
 				validateCSRF(request)
 				id, err := strconv.Atoi(request.Params().Get("id"))
 				must(err)
-
-				items, err := resource.editItemsWithLog(user, []int64{int64(id)}, request.Params(), nil)
-				must(err)
-
-				item := items[0]
 
 				app.Notification(getItemName(item)).
 					SetImage(app.getItemImage(item)).
@@ -249,54 +243,70 @@ func (resource *Resource) deleteItemWithLog(user *user, id int64) error {
 	return nil
 }
 
-func (resource *Resource) editItemsWithLog(user *user, ids []int64, values url.Values, bindedFieldIDs map[string]bool) ([]interface{}, error) {
-	var items []interface{}
+func (resource *Resource) editItemWithLog(user *user, values url.Values) (interface{}, ValidationContext, error) {
 	app := resource.app
 
-	for _, id := range ids {
-		//TODO: remove this ugly hack and copy values via reflect package
-		var beforeItem, item interface{}
-		resource.newItem(&beforeItem)
-		err := app.Is("id", id).Get(beforeItem)
-		if err != nil {
-			return nil, fmt.Errorf("can't get beforeitem with id %d: %s", id, err)
-		}
+	id, err := strconv.Atoi(values.Get("id"))
+	if err != nil {
+		return nil, nil, fmt.Errorf("can't parse id %d: %s", id, err)
+	}
 
-		resource.newItem(&item)
-		err = app.Is("id", id).Get(item)
-		if err != nil {
-			return nil, fmt.Errorf("can't get item with id %d: %s", id, err)
-		}
+	//TODO: remove this ugly hack and copy values via reflect package
+	var beforeItem, item interface{}
+	resource.newItem(&beforeItem)
+	err = app.Is("id", id).Get(beforeItem)
+	if err != nil {
+		return nil, nil, fmt.Errorf("can't get beforeitem with id %d: %s", id, err)
+	}
 
-		err = resource.bindData(
-			item, user, values, bindedFieldIDs,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("can't bind data (%d): %s", id, err)
-		}
+	resource.newItem(&item)
+	err = app.Is("id", id).Get(item)
+	if err != nil {
+		return nil, nil, fmt.Errorf("can't get item with id %d: %s", id, err)
+	}
 
-		err = app.Save(item)
-		if err != nil {
-			return nil, fmt.Errorf("can't save item (%d): %s", id, err)
-		}
-		items = append(items, item)
+	err = resource.bindData(
+		item, user, values,
+	)
+	if err != nil {
+		return nil, nil, fmt.Errorf("can't bind data (%d): %s", id, err)
+	}
 
-		if app.search != nil {
+	stringableValues := resource.getItemStringEditableValues(item, user)
+	var allValues url.Values = make(map[string][]string)
+	for k, v := range stringableValues {
+		allValues.Add(k, v)
+	}
+
+	vv := newValuesValidation(user.Locale, allValues)
+	for _, v := range resource.validations {
+		v(vv)
+	}
+	if !vv.Valid() {
+		return nil, vv, validationError
+	}
+
+	err = app.Save(item)
+	if err != nil {
+		return nil, nil, fmt.Errorf("can't save item (%d): %s", id, err)
+	}
+
+	if app.search != nil {
+		go func() {
 			err = app.search.saveItem(resource, item)
 			if err != nil {
 				app.Log().Println(fmt.Errorf("%s", err))
 			}
 			app.search.flush()
-		}
-
-		if resource.activityLog {
-			must(
-				app.LogActivity("edit", user.ID, resource.id, int64(id), beforeItem, item),
-			)
-
-		}
+		}()
 	}
 
-	return items, nil
+	if resource.activityLog {
+		must(
+			app.LogActivity("edit", user.ID, resource.id, int64(id), beforeItem, item),
+		)
+	}
+
+	return item, vv, nil
 
 }
