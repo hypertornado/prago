@@ -888,8 +888,16 @@ class ListMultiple {
                         method: "POST",
                     }).then((e) => {
                         loader.done();
+                        if (e.status == 403) {
+                            e.json().then((data) => {
+                                new Alert(data.error.Text);
+                            });
+                            this.list.load();
+                            return;
+                        }
                         if (e.status != 200) {
                             new Alert("Error while doing multipleaction delete");
+                            this.list.load();
                             return;
                         }
                         this.list.load();

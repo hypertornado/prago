@@ -245,8 +245,12 @@ var m = map[string]map[string]string{
 		"cs": "Vytvořit nový účet",
 	},
 	"admin_register_password": {
-		"en": "Password (at least 7 characters)",
-		"cs": "Heslo (alespoň 7 znaků)",
+		"en": "Password",
+		"cs": "Heslo",
+	},
+	"admin_register_password_description": {
+		"en": "At least 7 characters",
+		"cs": "Alespoň 7 znaků",
 	},
 	"admin_email_not_valid": {
 		"en": "Invalid format of email",
@@ -263,6 +267,10 @@ var m = map[string]map[string]string{
 	"admin_validation_not_empty": {
 		"en": "Item can't be empty",
 		"cs": "Položka nemůže být prázdná",
+	},
+	"admin_validation_error": {
+		"en": "Error while validating data",
+		"cs": "Chyba při validaci dat",
 	},
 	"admin_login_error": {
 		"en": "Wrong user email or password.",

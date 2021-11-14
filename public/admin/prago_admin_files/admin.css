@@ -5605,7 +5605,7 @@ ul {
   background: linear-gradient(red, red);
 }
 .form {
-  padding: 10px;
+  padding: 0px 10px;
 }
 .form_errors_error {
   border: 1px solid #dd2e4f;
@@ -7145,6 +7145,7 @@ td.pagination {
   vertical-align: bottom;
   flex-wrap: wrap;
   width: 100%;
+  width: calc(100% - 10px);
   margin: 5px;
 }
 .admin_navigation_tabs_content {

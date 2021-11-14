@@ -3,6 +3,7 @@ package prago
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
@@ -163,10 +164,6 @@ func initDefaultResourceAPIs(resource *Resource) {
 		},
 	)
 
-	type MultipleActionResponse struct {
-		Text string
-	}
-
 	resource.API("multipleaction").Method("POST").Handler(
 		func(request *Request) {
 			var ids []int64
@@ -182,15 +179,27 @@ func initDefaultResourceAPIs(resource *Resource) {
 
 			switch request.Params().Get("action") {
 			case "delete":
-				//TODO: add validation to this, then reenable this
-				renderAPINotAuthorized(request)
-				return
-
 				if !request.app.authorize(request.user, resource.canDelete) {
 					renderAPINotAuthorized(request)
 					return
 				}
 				for _, v := range ids {
+
+					var values url.Values = make(map[string][]string)
+					values.Add("id", fmt.Sprintf("%d", v))
+
+					valValidation := newValuesValidation(request.user.Locale, values)
+					for _, v := range resource.deleteValidations {
+						v(valValidation)
+					}
+
+					if !valValidation.Valid() {
+						request.RenderJSONWithCode(
+							valValidation.validation.TextErrorReport(v, request.user.Locale),
+							403,
+						)
+						return
+					}
 
 					err := resource.deleteItemWithLog(request.user, v)
 					must(err)

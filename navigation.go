@@ -70,6 +70,10 @@ func renderNavigation(request *Request, page page, viewName string) {
 		name = mainMenu.GetTitle()
 	}
 
+	if request.app.logo != nil {
+		request.SetData("admin_has_logo", name)
+	}
+
 	request.SetData("admin_title", name)
 	request.SetData("admin_yield", "admin_navigation_page")
 	request.SetData("admin_page", page)

@@ -20,11 +20,6 @@ func initUserLogin(resource *Resource) {
 	)
 
 	resource.app.accessController.get(resource.getURL("login"), func(request *Request) {
-		/*if request.user != nil {
-			request.Redirect("/admin")
-			return
-		}*/
-
 		locale := localeFromRequest(request)
 		form := NewForm("/admin/user/login")
 
@@ -48,7 +43,6 @@ func initUserLogin(resource *Resource) {
 			PageTemplate: "admin_form",
 			PageData:     form,
 		})
-
 	})
 
 	resource.app.accessController.post(resource.getURL("login"), func(request *Request) {
@@ -59,7 +53,7 @@ func initUserLogin(resource *Resource) {
 
 }
 
-func loginValidation(request *Request) *FormValidation {
+func loginValidation(request *Request) *formValidation {
 	locale := localeFromRequest(request)
 	ret := NewFormValidation()
 	email := request.Params().Get("email")
@@ -69,16 +63,12 @@ func loginValidation(request *Request) *FormValidation {
 	var user user
 	err := request.app.Is("email", email).Get(&user)
 	if err != nil {
-		ret.Errors = append(ret.Errors, FormValidationError{
-			Text: messages.Get(locale, "admin_login_error"),
-		})
+		ret.AddError(messages.Get(locale, "admin_login_error"))
 		return ret
 	}
 
 	if !user.isPassword(password) {
-		ret.Errors = append(ret.Errors, FormValidationError{
-			Text: messages.Get(locale, "admin_login_error"),
-		})
+		ret.AddError(messages.Get(locale, "admin_login_error"))
 		return ret
 	}
 

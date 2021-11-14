@@ -52,7 +52,7 @@ func initUserRenew(resource *Resource) {
 	})
 }
 
-func renewPasswordValidation(request *Request) *FormValidation {
+func renewPasswordValidation(request *Request) *formValidation {
 	ret := NewFormValidation()
 	locale := localeFromRequest(request)
 
@@ -89,7 +89,7 @@ func renewPasswordValidation(request *Request) *FormValidation {
 	return ret
 }
 
-func forgotValidation(request *Request) *FormValidation {
+func forgotValidation(request *Request) *formValidation {
 	ret := NewFormValidation()
 	app := request.app
 	locale := localeFromRequest(request)

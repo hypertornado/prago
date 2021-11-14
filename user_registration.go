@@ -40,9 +40,9 @@ func initUserRegistration(resource *Resource) {
 	app.accessController.get(resource.getURL("registration"), func(request *Request) {
 		locale := localeFromRequest(request)
 		form := NewForm("/admin/user/registration")
-		form.AddTextInput("name", messages.Get(locale, "Name"))
+		form.AddTextInput("name", messages.Get(locale, "Name")).Focused = true
 		form.AddEmailInput("email", messages.Get(locale, "admin_email"))
-		form.AddPasswordInput("password", messages.Get(locale, "admin_register_password"))
+		form.AddPasswordInput("password", messages.Get(locale, "admin_register_password")).Description = messages.Get(locale, "admin_register_password_description")
 		form.AddCAPTCHAInput("captcha", "4 + 5 =")
 		form.AddSubmit("send", messages.Get(locale, "admin_register"))
 
@@ -60,7 +60,7 @@ func initUserRegistration(resource *Resource) {
 	})
 }
 
-func registrationValidation(request *Request) *FormValidation {
+func registrationValidation(request *Request) *formValidation {
 	ret := NewFormValidation()
 
 	valid := true

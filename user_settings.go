@@ -6,6 +6,7 @@ func (app *App) initUserSettings() {
 		func(request *Request) interface{} {
 			user := request.user
 			form := NewForm("/admin/settings")
+			form.Title = messages.Get(user.Locale, "admin_settings")
 
 			name := form.AddTextInput("name", "")
 			name.Name = messages.Get(user.Locale, "Name")
@@ -14,7 +15,7 @@ func (app *App) initUserSettings() {
 			sel := form.AddSelect("locale", messages.Get(user.Locale, "admin_locale"), availableLocales)
 			sel.Value = user.Locale
 
-			form.AddSubmit("_submit", messages.Get(user.Locale, "admin_edit"))
+			form.AddSubmit("_submit", messages.Get(user.Locale, "admin_save"))
 			form.AddCSRFToken(request)
 			return form
 		},
@@ -30,6 +31,7 @@ func (app *App) initUserSettings() {
 		func(request *Request) interface{} {
 			locale := request.user.Locale
 			form := NewForm("/admin/password")
+			form.Title = messages.Get(request.user.Locale, "admin_password_change")
 			form.AddPasswordInput("oldpassword", messages.Get(locale, "admin_password_old")).Focused = true
 			form.AddPasswordInput("newpassword", messages.Get(locale, "admin_password_new"))
 			form.AddCSRFToken(request)
@@ -54,7 +56,7 @@ func (app *App) initUserSettings() {
 
 }
 
-func validateChangePassword(request *Request) *FormValidation {
+func validateChangePassword(request *Request) *formValidation {
 	ret := NewFormValidation()
 	validateCSRF(request)
 	locale := request.user.Locale
@@ -80,7 +82,7 @@ func validateChangePassword(request *Request) *FormValidation {
 	return ret
 }
 
-func validateSettings(request *Request) *FormValidation {
+func validateSettings(request *Request) *formValidation {
 	ret := NewFormValidation()
 	validateCSRF(request)
 	locale := request.user.Locale
