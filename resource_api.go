@@ -178,13 +178,62 @@ func initDefaultResourceAPIs(resource *Resource) {
 			}
 
 			switch request.Params().Get("action") {
+			case "clone":
+				if !request.app.authorize(request.user, resource.canCreate) {
+					renderAPINotAuthorized(request)
+					return
+				}
+				for _, v := range ids {
+					app := request.app
+					var item interface{}
+					resource.newItem(&item)
+					err := resource.app.Is("id", v).Get(item)
+					if err != nil {
+						panic(fmt.Sprintf("can't get item for clone with id %d: %s", v, err))
+					}
+					val := reflect.ValueOf(item).Elem()
+					val.FieldByName("ID").SetInt(0)
+					timeVal := reflect.ValueOf(time.Now())
+					for _, fieldName := range []string{"CreatedAt", "UpdatedAt"} {
+						field := val.FieldByName(fieldName)
+						if field.IsValid() && field.CanSet() && field.Type() == timeVal.Type() {
+							field.Set(timeVal)
+						}
+					}
+
+					//TODO: log for creation
+					err = resource.app.Create(item)
+					if err != nil {
+						panic(fmt.Sprintf("can't create item for clone with id %d: %s", v, err))
+					}
+
+					if app.search != nil {
+						go func() {
+							err := app.search.saveItem(resource, item)
+							if err != nil {
+								app.Log().Println(fmt.Errorf("%s", err))
+							}
+							app.search.flush()
+						}()
+					}
+
+					if resource.activityLog {
+						must(
+							app.LogActivity("new", request.UserID(), resource.id, getItemID(item), nil, item),
+						)
+					}
+				}
+
+				request.app.Notification(fmt.Sprintf(
+					"%d položek naklonováno", len(ids),
+				)).Flash(request)
+
 			case "delete":
 				if !request.app.authorize(request.user, resource.canDelete) {
 					renderAPINotAuthorized(request)
 					return
 				}
 				for _, v := range ids {
-
 					var values url.Values = make(map[string][]string)
 					values.Add("id", fmt.Sprintf("%d", v))
 

@@ -12,6 +12,7 @@ var validationError = errors.New("validation error")
 type formValidation struct {
 	Valid                bool
 	RedirectionLocaliton string
+	AfterContent         string
 	Errors               []FormValidationError
 	ItemErrors           map[string][]FormValidationError
 }

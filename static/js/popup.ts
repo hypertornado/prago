@@ -163,7 +163,7 @@ class Confirm extends Popup {
     });
 
     var primaryText = "OK";
-    if ((style = ButtonStyle.Delete)) {
+    if (style == ButtonStyle.Delete) {
       primaryText = "Smazat";
     }
 

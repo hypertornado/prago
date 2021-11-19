@@ -120,6 +120,13 @@ func (resource Resource) getMultipleActions(user *user) (ret []listMultipleActio
 		})
 	}
 
+	if resource.app.authorize(user, resource.canCreate) {
+		ret = append(ret, listMultipleAction{
+			ID:   "clone",
+			Name: "Naklonovat",
+		})
+	}
+
 	if resource.app.authorize(user, resource.canDelete) {
 		ret = append(ret, listMultipleAction{
 			ID:       "delete",

@@ -51,11 +51,13 @@ func initDefaultResourceActions(resource *Resource) {
 				must(app.Create(item))
 
 				if app.search != nil {
-					err := app.search.saveItem(resource, item)
-					if err != nil {
-						app.Log().Println(fmt.Errorf("%s", err))
-					}
-					app.search.flush()
+					go func() {
+						err := app.search.saveItem(resource, item)
+						if err != nil {
+							app.Log().Println(fmt.Errorf("%s", err))
+						}
+						app.search.flush()
+					}()
 				}
 
 				if resource.activityLog {
@@ -166,7 +168,6 @@ func initDefaultResourceActions(resource *Resource) {
 				must(err)
 
 				must(resource.deleteItemWithLog(request.user, int64(id)))
-
 				must(resource.updateCachedCount())
 				request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_deleted"))
 				validation.Validation().RedirectionLocaliton = resource.getURL("")

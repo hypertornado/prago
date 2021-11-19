@@ -80,6 +80,10 @@ fields:
 			item.Data = field.fieldType.formDataSource(*field, user)
 		}
 
+		if field.required {
+			item.Required = true
+		}
+
 		form.AddItem(item)
 	}
 }

@@ -17,6 +17,7 @@ type field struct {
 	fieldOrder  int
 	Unique      bool
 	CanOrder    bool
+	required    bool
 
 	DefaultShow bool
 
@@ -104,6 +105,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 		"prago-order-desc",
 		"prago-relation",
 		"prago-validations",
+		"prago-required",
 	} {
 		ret.Tags[v] = f.Tag.Get(v)
 	}
@@ -124,8 +126,23 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 		ret.DefaultShow = false
 	}
 
+	if ret.Tags["prago-preview"] == "false" {
+		ret.DefaultShow = false
+	}
+
 	if ret.Tags["prago-unique"] == "true" {
 		ret.Unique = true
+	}
+
+	if ret.Tags["prago-required"] != "" {
+		switch ret.Tags["prago-required"] {
+		case "true":
+			ret.required = true
+		case "false":
+			break
+		default:
+			panic(fmt.Sprintf("validating permission 'prago-required' on field '%s' of resource '%s': wrong value '%s'", f.Name, resource.name("en"), ret.Tags["prago-required"]))
+		}
 	}
 
 	if canView := ret.Tags["prago-can-view"]; canView != "" {
@@ -171,11 +188,37 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 
 	ret.initFieldType()
 
+	//TODO: better and localization
+	if ret.Name != "CreatedAt" && ret.Name != "UpdatedAt" {
+		if ret.Typ == reflect.TypeOf(time.Now()) {
+			if ret.Tags["prago-type"] == "timestamp" || ret.Name == "CreatedAt" || ret.Name == "UpdatedAt" {
+				resource.Validation(func(vc ValidationContext) {
+					val := vc.GetValue(ret.ColumnName)
+					_, err := time.Parse("2006-01-02 15:04", val)
+					if err != nil {
+						vc.AddItemError(ret.ColumnName, "Špatný formát data.")
+					}
+				})
+			} else {
+				resource.Validation(func(vc ValidationContext) {
+					val := vc.GetValue(ret.ColumnName)
+					_, err := time.Parse("2006-01-02", val)
+					if err != nil {
+						vc.AddItemError(ret.ColumnName, "Špatný formát data.")
+					}
+				})
+			}
+		}
+	}
+
 	return ret
 }
 
 func (field *field) addFieldValidation(nameOfValidation string) error {
 	if nameOfValidation == "nonempty" {
+		if field.Tags["prago-required"] != "false" {
+			field.required = true
+		}
 		field.resource.Validation(func(vc ValidationContext) {
 			valid := true
 			if field.Typ.Kind() == reflect.Int64 ||

@@ -86,6 +86,7 @@ class Form {
           this.progress.classList.add("hidden");
           this.setFormErrors(data.Errors);
           this.setItemErrors(data.ItemErrors);
+          this.setAfterContent(data.AfterContent);
         }
       } else {
         this.progress.classList.add("hidden");
@@ -96,6 +97,10 @@ class Form {
 
     this.progress.classList.remove("hidden");
     request.send(formData);
+  }
+
+  setAfterContent(text: string) {
+    this.form.querySelector(".form_after_content").innerHTML = text;
   }
 
   setFormErrors(errors: any[]) {

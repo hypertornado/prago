@@ -873,6 +873,37 @@ class ListMultiple {
             case "edit":
                 new ListMultipleEdit(this, ids);
                 break;
+            case "clone":
+                new Confirm(`Opravdu chcete naklonovat ${ids.length} položek?`, () => {
+                    var loader = new LoadingPopup();
+                    var params = {};
+                    params["action"] = "clone";
+                    params["ids"] = ids.join(",");
+                    var url = this.list.adminPrefix +
+                        "/" +
+                        this.list.typeName +
+                        "/api/multipleaction" +
+                        encodeParams(params);
+                    fetch(url, {
+                        method: "POST",
+                    }).then((e) => {
+                        loader.done();
+                        if (e.status == 403) {
+                            e.json().then((data) => {
+                                new Alert(data.error.Text);
+                            });
+                            this.list.load();
+                            return;
+                        }
+                        if (e.status != 200) {
+                            new Alert("Error while doing multipleaction clone");
+                            this.list.load();
+                            return;
+                        }
+                        this.list.load();
+                    });
+                }, Function(), ButtonStyle.Default);
+                break;
             case "delete":
                 new Confirm(`Opravdu chcete smazat ${ids.length} položek?`, () => {
                     var loader = new LoadingPopup();
@@ -1690,6 +1721,7 @@ class Form {
                     this.progress.classList.add("hidden");
                     this.setFormErrors(data.Errors);
                     this.setItemErrors(data.ItemErrors);
+                    this.setAfterContent(data.AfterContent);
                 }
             }
             else {
@@ -1700,6 +1732,9 @@ class Form {
         });
         this.progress.classList.remove("hidden");
         request.send(formData);
+    }
+    setAfterContent(text) {
+        this.form.querySelector(".form_after_content").innerHTML = text;
     }
     setFormErrors(errors) {
         let errorsDiv = this.form.querySelector(".form_errors");
@@ -2403,7 +2438,7 @@ class Confirm extends Popup {
             }
         });
         var primaryText = "OK";
-        if ((style = ButtonStyle.Delete)) {
+        if (style == ButtonStyle.Delete) {
             primaryText = "Smazat";
         }
         this.primaryButton = this.addButton(primaryText, () => {
