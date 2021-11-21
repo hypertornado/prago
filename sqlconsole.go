@@ -10,30 +10,20 @@ type SQLConsoleCell struct {
 }
 
 func (app *App) initSQLConsole() {
-	app.Action("sqlconsole").Name(unlocalized("SQL Console")).Permission(sysadminPermission).Template("admin_form").IsWide().DataSource(
-		func(request *Request) interface{} {
-			form := NewForm("/admin/api/sqlconsole")
+
+	app.FormAction("sqlconsole").Name(unlocalized("SQL Console")).Permission(sysadminPermission).IsWide().Form(
+		func(form *Form, request *Request) {
 			form.Title = "SQL Console"
 			form.AddTextareaInput("q", "").Focused = true
-			form.AddHidden("csrf").Value = request.csrfToken()
 			form.AddSubmit("_submit", "Execute SQL")
-			return form
 		},
-	)
-
-	app.API("sqlconsole").Method("POST").Permission(sysadminPermission).HandlerJSON(func(request *Request) interface{} {
-		validation := NewFormValidation()
-
-		q := request.Params().Get("q")
+	).Validation(func(vc ValidationContext) {
+		q := vc.GetValue("q")
 		var message string
 		var table [][]SQLConsoleCell
 
-		if q != "" && request.csrfToken() != request.Params().Get("csrf") {
-			panic("wrong csrf")
-		}
-
 		if q != "" {
-			rows, err := app.db.QueryContext(request.Request().Context(), q)
+			rows, err := app.db.QueryContext(vc.Request().Request().Context(), q)
 			if err != nil {
 				message = err.Error()
 			} else {
@@ -86,16 +76,15 @@ func (app *App) initSQLConsole() {
 		}
 
 		if message != "" {
-			validation.AddError(message)
+			vc.AddError(message)
 		}
 
 		bufStats := new(bytes.Buffer)
-		err := request.app.ExecuteTemplate(bufStats, "sql_console", retData)
+		err := app.ExecuteTemplate(bufStats, "sql_console", retData)
 		if err != nil {
 			panic(err)
 		}
-		validation.AfterContent = bufStats.String()
-		return validation
+		vc.Validation().AfterContent = bufStats.String()
 	})
 
 }

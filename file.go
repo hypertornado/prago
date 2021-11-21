@@ -169,6 +169,7 @@ func (app *App) initFilesResource() {
 			}
 		})
 
+	//TODO: make it with resource watch instead of resource controllet
 	resource.resourceController.addBeforeAction(func(request *Request) {
 		if request.Request().Method == "POST" && strings.HasSuffix(request.Request().URL.Path, "/delete") {
 			idStr := request.Params().Get("id")

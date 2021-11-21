@@ -54,6 +54,7 @@ func (app *App) Newsletters() *Newsletters {
 		randomness: app.ConfigurationGetString("random"),
 	}
 
+	//TODO: remove need for subcontrollers
 	controller := app.mainController.subController()
 	controller.addBeforeAction(func(request *Request) {
 		request.SetData("site", app.name("en"))

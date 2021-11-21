@@ -7013,7 +7013,7 @@ a.admin_home_item {
 @media (max-width: 800px) {
   .admin_home_item {
     min-height: 30px;
-    font-size: 0.7rem;
+    font-size: 0.9rem;
     line-height: 1.3em;
   }
 }

@@ -78,6 +78,7 @@ type ValidationContext interface {
 	AddItemError(key, err string)
 	Validation() *formValidation
 	Valid() bool
+	Request() *Request
 }
 
 type Validation func(ValidationContext)
@@ -122,6 +123,10 @@ func (rv *requestValidation) Valid() bool {
 	return rv.validation.Valid
 }
 
+func (rv *requestValidation) Request() *Request {
+	return rv.request
+}
+
 type valuesValidation struct {
 	locale     string
 	values     url.Values
@@ -162,4 +167,8 @@ func (rv *valuesValidation) Validation() *formValidation {
 
 func (rv *valuesValidation) Valid() bool {
 	return rv.validation.Valid
+}
+
+func (rv *valuesValidation) Request() *Request {
+	return nil
 }
