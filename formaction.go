@@ -48,6 +48,21 @@ func (app *App) FormAction(url string) *FormAction {
 	return fa
 }
 
+func (resource *Resource) FormAction(url string) *FormAction {
+	fa := newFormAction(resource.app, url)
+
+	fa.actionForm.resource = resource
+	fa.actionValidation.resource = resource
+
+	fa.actionForm.Permission(resource.canView)
+	fa.actionValidation.Permission(resource.canView)
+
+	resource.actions = append(resource.actions, fa.actionForm)
+	resource.actions = append(resource.actions, fa.actionValidation)
+
+	return fa
+}
+
 func (formAction *FormAction) Name(name func(string) string) *FormAction {
 	formAction.actionForm.Name(name)
 	return formAction
@@ -71,5 +86,10 @@ func (formAction *FormAction) Permission(permission Permission) *FormAction {
 
 func (formAction *FormAction) IsWide() *FormAction {
 	formAction.actionForm.IsWide()
+	return formAction
+}
+
+func (formAction *FormAction) userMenu() *FormAction {
+	formAction.actionForm.userMenu()
 	return formAction
 }
