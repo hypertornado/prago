@@ -54,21 +54,16 @@ func (app *App) Newsletters() *Newsletters {
 		randomness: app.ConfigurationGetString("random"),
 	}
 
-	//TODO: remove need for subcontrollers
-	controller := app.mainController.subController()
-	controller.addBeforeAction(func(request *Request) {
-		request.SetData("site", app.name("en"))
-	})
-
-	controller.get("/newsletter-subscribe", func(request *Request) {
+	app.GET("/newsletter-subscribe", func(request *Request) {
 		request.SetData("title", "Přihlásit se k odběru newsletteru")
 		request.SetData("csrf", app.newsletters.CSRF(request))
 		request.SetData("yield", "newsletter_subscribe")
 		request.SetData("show_back_button", true)
+		request.SetData("site", app.name("en"))
 		request.RenderView("newsletter_layout")
 	})
 
-	controller.post("/newsletter-subscribe", func(request *Request) {
+	app.POST("/newsletter-subscribe", func(request *Request) {
 		if app.newsletters.CSRF(request) != request.Params().Get("csrf") {
 			panic("wrong csrf")
 		}
@@ -96,10 +91,11 @@ func (app *App) Newsletters() *Newsletters {
 		request.SetData("show_back_button", true)
 		request.SetData("title", message)
 		request.SetData("yield", "newsletter_empty")
+		request.SetData("site", app.name("en"))
 		request.RenderView("newsletter_layout")
 	})
 
-	controller.get("/newsletter-confirm", func(request *Request) {
+	app.GET("/newsletter-confirm", func(request *Request) {
 		email := request.Params().Get("email")
 		secret := request.Params().Get("secret")
 
@@ -122,10 +118,12 @@ func (app *App) Newsletters() *Newsletters {
 		request.SetData("show_back_button", true)
 		request.SetData("title", "Odběr newsletteru potvrzen")
 		request.SetData("yield", "newsletter_empty")
+		request.SetData("site", app.name("en"))
 		request.RenderView("newsletter_layout")
 	})
 
-	controller.get("/newsletter-unsubscribe", func(request *Request) {
+	//TODO: add confirmation button and form
+	app.GET("/newsletter-unsubscribe", func(request *Request) {
 		email := request.Params().Get("email")
 		secret := request.Params().Get("secret")
 
@@ -148,6 +146,7 @@ func (app *App) Newsletters() *Newsletters {
 		request.SetData("show_back_button", true)
 		request.SetData("title", "Odhlášení z odebírání newsletteru proběhlo úspěšně.")
 		request.SetData("yield", "newsletter_empty")
+		request.SetData("site", app.name("en"))
 		request.RenderView("newsletter_layout")
 	})
 
@@ -243,14 +242,6 @@ type newsletter struct {
 func initNewsletterResource(resource *Resource) {
 	resource.canView = sysadminPermission
 
-	resource.resourceController.addBeforeAction(func(request *Request) {
-		ret, err := resource.app.Is("confirmed", true).Is("unsubscribed", false).Count(&newsletterPersons{})
-		if err != nil {
-			panic(err)
-		}
-		request.SetData("recipients_count", ret)
-	})
-
 	resource.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(
 		func(request *Request) {
 			var newsletter newsletter
@@ -267,7 +258,7 @@ func initNewsletterResource(resource *Resource) {
 	resource.FormItemAction("send-preview").Permission(loggedPermission).Name(unlocalized("Odeslat náhled")).Form(
 		func(f *Form, r *Request) {
 			f.AddTextareaInput("emails", "Seznam emailů na poslání preview (jeden email na řádek)").Focused = true
-			f.AddSubmit("_submit", "Odeslat náhled")
+			f.AddSubmit("Odeslat náhled")
 		},
 	).Validation(func(vc ValidationContext) {
 		var newsletter newsletter
@@ -294,11 +285,8 @@ func initNewsletterResource(resource *Resource) {
 	resource.FormItemAction("send").Permission(loggedPermission).Name(unlocalized("Odeslat")).Form(
 		func(form *Form, request *Request) {
 			recipients, err := resource.app.getNewsletterRecipients()
-			if err != nil {
-				panic(err)
-			}
-
-			form.AddSubmit("_submit", fmt.Sprintf("Odelsat newsletter na %d emailů", len(recipients)))
+			must(err)
+			form.AddSubmit(fmt.Sprintf("Odelsat newsletter na %d emailů", len(recipients)))
 		},
 	).Validation(
 		func(vc ValidationContext) {
@@ -324,7 +312,7 @@ func initNewsletterResource(resource *Resource) {
 
 	resource.FormItemAction("duplicate").Permission(loggedPermission).Name(unlocalized("Duplikovat")).Form(
 		func(f *Form, r *Request) {
-			f.AddSubmit("_submit", "Duplikovat newsletter")
+			f.AddSubmit("Duplikovat newsletter")
 		},
 	).Validation(func(vc ValidationContext) {
 		var newsletter newsletter

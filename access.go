@@ -38,7 +38,7 @@ func (app *App) validatePermission(permission Permission) error {
 	return nil
 }
 
-func (app *App) createRoleFieldType() *FieldType {
+func (app *App) createRoleFieldType() *fieldType {
 	var fp = func(field, *user) interface{} {
 		var roleNames []string
 		for k := range app.accessManager.roles {
@@ -52,7 +52,7 @@ func (app *App) createRoleFieldType() *FieldType {
 		}
 		return vals
 	}
-	return &FieldType{
+	return &fieldType{
 		formTemplate:   "admin_item_select",
 		formDataSource: fp,
 

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"mime/multipart"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -145,10 +144,6 @@ func (app *App) initFilesResource() {
 	resource.FieldName("width", messages.GetNameFunction("width"))
 	resource.FieldName("height", messages.GetNameFunction("height"))
 
-	//resource.fieldMap["uid"].HumanName = messages.GetNameFunction("admin_file")
-	//resource.fieldMap["width"].HumanName = messages.GetNameFunction("width")
-	//resource.fieldMap["height"].HumanName = messages.GetNameFunction("height")
-
 	app.addCommand("files", "metadata").
 		Callback(func() {
 			var files []*File
@@ -169,18 +164,13 @@ func (app *App) initFilesResource() {
 			}
 		})
 
-	//TODO: make it with resource watch instead of resource controllet
-	resource.resourceController.addBeforeAction(func(request *Request) {
-		if request.Request().Method == "POST" && strings.HasSuffix(request.Request().URL.Path, "/delete") {
-			idStr := request.Params().Get("id")
-			id, err := strconv.Atoi(idStr)
-			if err == nil {
-				var file File
-				app.Is("id", id).MustGet(&file)
-				err = filesCDN.DeleteFile(file.UID)
-				if err != nil {
-					app.Log().Printf("deleting CDN: %s\n", err)
-				}
+	app.ListenActivity(func(activity Activity) {
+		if activity.ActivityType == "delete" && activity.ResourceID == resource.id {
+			var file File
+			app.Is("id", activity.ID).MustGet(&file)
+			err := filesCDN.DeleteFile(file.UID)
+			if err != nil {
+				app.Log().Printf("deleting CDN: %s\n", err)
 			}
 		}
 	})

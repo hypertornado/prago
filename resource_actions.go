@@ -23,7 +23,7 @@ func initDefaultResourceActions(resource *Resource) {
 			resource.newItem(&item)
 			resource.bindData(&item, request.user, request.Request().URL.Query())
 			resource.addFormItems(item, request.user, form)
-			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
+			form.AddSubmit(messages.Get(request.user.Locale, "admin_save"))
 		},
 	).Validation(func(vc ValidationContext) {
 		for _, v := range resource.validations {
@@ -95,7 +95,7 @@ func initDefaultResourceActions(resource *Resource) {
 			app.Is("id", int64(id)).MustGet(item)
 
 			resource.addFormItems(item, request.user, form)
-			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
+			form.AddSubmit(messages.Get(request.user.Locale, "admin_save"))
 		},
 	).Validation(func(vc ValidationContext) {
 		request := vc.Request()
@@ -124,7 +124,7 @@ func initDefaultResourceActions(resource *Resource) {
 
 	resource.FormItemAction("delete").priority().Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete")).Form(
 		func(form *Form, request *Request) {
-			form.AddDeleteSubmit("send", messages.Get(request.user.Locale, "admin_delete"))
+			form.AddDeleteSubmit(messages.Get(request.user.Locale, "admin_delete"))
 
 			var item interface{}
 			resource.newItem(&item)

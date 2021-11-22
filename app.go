@@ -50,7 +50,7 @@ type App struct {
 
 	search *adminSearch
 
-	fieldTypes    map[string]*FieldType
+	fieldTypes    map[string]*fieldType
 	javascripts   []string
 	css           []string
 	accessManager *accessManager
@@ -98,7 +98,7 @@ func createApp(codeName string, version string) *App {
 	app.resourceMap = make(map[reflect.Type]*Resource)
 	app.resourceNameMap = make(map[string]*Resource)
 
-	app.fieldTypes = make(map[string]*FieldType)
+	app.fieldTypes = make(map[string]*fieldType)
 
 	app.db = mustConnectDatabase(
 		app.ConfigurationGetStringWithFallback("dbUser", ""),

@@ -6,7 +6,7 @@ import (
 )
 
 //FieldType defines type of field
-type FieldType struct {
+type fieldType struct {
 	viewTemplate   string
 	viewDataSource func(*user, field, interface{}) interface{}
 
@@ -25,29 +25,7 @@ type FieldType struct {
 	filterLayoutDataSource func(field, *user) interface{}
 }
 
-//FieldType adds field type
-func (app *App) FieldType(name string) *FieldType {
-	ft := &FieldType{}
-	app.addFieldType(name, ft)
-	return ft
-}
-
-func (ft *FieldType) AddViewTemplate(template string) *FieldType {
-	ft.viewTemplate = template
-	return ft
-}
-
-func (ft *FieldType) AddFormTemplate(template string) *FieldType {
-	ft.formTemplate = template
-	return ft
-}
-
-func (ft *FieldType) AddDBFieldDescription(description string) *FieldType {
-	ft.dbFieldDescription = description
-	return ft
-}
-
-func (app *App) addFieldType(name string, fieldType *FieldType) {
+func (app *App) addFieldType(name string, fieldType *fieldType) {
 	_, exist := app.fieldTypes[name]
 	if exist {
 		panic(fmt.Sprintf("field type '%s' already set", name))
@@ -56,7 +34,7 @@ func (app *App) addFieldType(name string, fieldType *FieldType) {
 }
 
 //IsRelation detects if field type is relation type
-func (f FieldType) IsRelation() bool {
+func (f fieldType) IsRelation() bool {
 	if f.viewTemplate == "admin_item_view_relation" {
 		return true
 	} else {
@@ -67,15 +45,15 @@ func (f FieldType) IsRelation() bool {
 func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("role", app.createRoleFieldType())
 
-	app.addFieldType("text", &FieldType{
+	app.addFieldType("text", &fieldType{
 		viewTemplate:       "admin_item_view_textarea",
 		formTemplate:       "admin_item_textarea",
 		listCellDataSource: textListDataSource,
 	})
-	app.addFieldType("order", &FieldType{})
-	app.addFieldType("date", &FieldType{})
+	app.addFieldType("order", &fieldType{})
+	app.addFieldType("date", &fieldType{})
 
-	app.addFieldType("cdnfile", &FieldType{
+	app.addFieldType("cdnfile", &fieldType{
 		viewTemplate:   "admin_item_view_file",
 		viewDataSource: filesViewDataSource,
 		formTemplate:   "admin_file",
@@ -87,7 +65,7 @@ func (app *App) initDefaultFieldTypes() {
 		filterLayoutDataSource: boolFilterLayoutDataSource,
 	})
 
-	app.addFieldType("file", &FieldType{
+	app.addFieldType("file", &fieldType{
 		viewTemplate:     "admin_item_view_image",
 		formTemplate:     "admin_item_image",
 		formDataSource:   createFilesEditDataSource(""),
@@ -97,7 +75,7 @@ func (app *App) initDefaultFieldTypes() {
 		filterLayoutDataSource: boolFilterLayoutDataSource,
 	})
 
-	app.addFieldType("image", &FieldType{
+	app.addFieldType("image", &fieldType{
 		viewTemplate:     "admin_item_view_image",
 		formTemplate:     "admin_item_image",
 		formDataSource:   createFilesEditDataSource(".jpg,.jpeg,.png"),
@@ -107,19 +85,19 @@ func (app *App) initDefaultFieldTypes() {
 		filterLayoutDataSource: boolFilterLayoutDataSource,
 	})
 
-	app.addFieldType("markdown", &FieldType{
+	app.addFieldType("markdown", &fieldType{
 		viewTemplate:       "admin_item_view_markdown",
 		formTemplate:       "admin_item_markdown",
 		listCellDataSource: markdownListDataSource,
 		listCellTemplate:   "admin_item_view_text",
 	})
-	app.addFieldType("place", &FieldType{
+	app.addFieldType("place", &fieldType{
 		viewTemplate:     "admin_item_view_place",
 		formTemplate:     "admin_item_place",
 		listCellTemplate: "admin_item_view_text",
 	})
 
-	app.addFieldType("relation", &FieldType{
+	app.addFieldType("relation", &fieldType{
 		viewTemplate:     "admin_item_view_relation",
 		listCellTemplate: "admin_item_view_relation_cell",
 		viewDataSource:   getRelationViewData,
@@ -132,7 +110,7 @@ func (app *App) initDefaultFieldTypes() {
 		},
 	})
 
-	app.addFieldType("timestamp", &FieldType{
+	app.addFieldType("timestamp", &fieldType{
 		formTemplate: "admin_item_timestamp",
 		formStringer: func(i interface{}) string {
 			tm := i.(time.Time)

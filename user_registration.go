@@ -44,7 +44,7 @@ func initUserRegistration(resource *Resource) {
 		form.AddEmailInput("email", messages.Get(locale, "admin_email"))
 		form.AddPasswordInput("password", messages.Get(locale, "admin_register_password")).Description = messages.Get(locale, "admin_register_password_description")
 		form.AddCAPTCHAInput("captcha", "4 + 5 =")
-		form.AddSubmit("send", messages.Get(locale, "admin_register"))
+		form.AddSubmit(messages.Get(locale, "admin_register"))
 
 		renderNavigationPageNoLogin(request, page{
 			App:          app,

@@ -93,16 +93,16 @@ func (f *Form) AddCAPTCHAInput(name, description string) *FormItem {
 }
 
 //AddSubmit to form
-func (f *Form) AddSubmit(name, description string) *FormItem {
-	input := f.addInput(name, description, "")
+func (f *Form) AddSubmit(description string) *FormItem {
+	input := f.addInput("_submit", description, "")
 	input.HiddenName = true
 	input.Template = "admin_item_submit"
 	return input
 }
 
 //AddDeleteSubmit to form
-func (f *Form) AddDeleteSubmit(name, description string) *FormItem {
-	input := f.addInput(name, description, "")
+func (f *Form) AddDeleteSubmit(description string) *FormItem {
+	input := f.addInput("_submit", description, "")
 	input.HiddenName = true
 	input.Template = "admin_item_delete"
 	return input

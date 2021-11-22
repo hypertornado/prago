@@ -13,7 +13,7 @@ func (app *App) initUserSettings() {
 
 			sel := form.AddSelect("locale", messages.Get(user.Locale, "admin_locale"), availableLocales)
 			sel.Value = user.Locale
-			form.AddSubmit("_submit", messages.Get(user.Locale, "admin_save"))
+			form.AddSubmit(messages.Get(user.Locale, "admin_save"))
 		},
 	).Validation(func(vc ValidationContext) {
 		locale := vc.Locale()
@@ -53,7 +53,7 @@ func (app *App) initUserSettings() {
 			form.Title = messages.Get(request.user.Locale, "admin_password_change")
 			form.AddPasswordInput("oldpassword", messages.Get(locale, "admin_password_old")).Focused = true
 			form.AddPasswordInput("newpassword", messages.Get(locale, "admin_password_new"))
-			form.AddSubmit("_submit", messages.Get(locale, "admin_save"))
+			form.AddSubmit(messages.Get(locale, "admin_save"))
 		},
 	).Validation(
 		func(vc ValidationContext) {

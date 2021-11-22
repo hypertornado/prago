@@ -35,7 +35,7 @@ func initUserLogin(resource *Resource) {
 			passwordInput.Focused = true
 		}
 
-		form.AddSubmit("send", messages.Get(locale, "admin_login_action"))
+		form.AddSubmit(messages.Get(locale, "admin_login_action"))
 
 		renderNavigationPageNoLogin(request, page{
 			App:          resource.app,

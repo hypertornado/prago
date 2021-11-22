@@ -25,9 +25,11 @@ type field struct {
 	canEdit Permission
 
 	resource  *Resource
-	fieldType *FieldType
+	fieldType *fieldType
 
 	relatedResource *Resource
+
+	//viewTemplate string
 }
 
 //GetRelatedResourceName gets related resource name
@@ -269,6 +271,42 @@ func (resource *Resource) FieldDescription(descriptionOfField string, descriptio
 	return resource
 }
 
+func (resource *Resource) FieldViewTemplate(IDofField string, viewTemplate string) *Resource {
+	f := resource.fieldMap[IDofField]
+	if f == nil {
+		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
+	}
+	f.fieldType.viewTemplate = viewTemplate
+	return resource
+}
+
+func (resource *Resource) FieldListCellTemplate(IDofField string, template string) *Resource {
+	f := resource.fieldMap[IDofField]
+	if f == nil {
+		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
+	}
+	f.fieldType.listCellTemplate = template
+	return resource
+}
+
+func (resource *Resource) FieldFormTemplate(IDofField string, template string) *Resource {
+	f := resource.fieldMap[IDofField]
+	if f == nil {
+		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
+	}
+	f.fieldType.formTemplate = template
+	return resource
+}
+
+func (resource *Resource) FieldDBDescription(IDofField string, description string) *Resource {
+	f := resource.fieldMap[IDofField]
+	if f == nil {
+		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
+	}
+	f.fieldType.dbFieldDescription = description
+	return resource
+}
+
 func getDefaultStringer(t reflect.Type) func(interface{}) string {
 	if reflect.TypeOf(time.Now()) == t {
 		return func(i interface{}) string {
@@ -332,7 +370,7 @@ func (field *field) initFieldType() {
 	}
 
 	if ret == nil {
-		ret = &FieldType{}
+		ret = &fieldType{}
 	}
 
 	if ret.viewTemplate == "" {
@@ -363,7 +401,7 @@ func (field *field) initFieldType() {
 	field.fieldType = ret
 }
 
-func (field *field) fieldDescriptionMysql(fieldTypes map[string]*FieldType) string {
+func (field *field) fieldDescriptionMysql(fieldTypes map[string]*fieldType) string {
 	var fieldDescription string
 
 	t, found := fieldTypes[field.Tags["prago-type"]]
