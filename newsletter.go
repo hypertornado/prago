@@ -264,26 +264,49 @@ func initNewsletterResource(resource *Resource) {
 		},
 	)
 
-	resource.ItemAction("send-preview").Permission(loggedPermission).Method("POST").Handler(
-		func(request *Request) {
-			var newsletter newsletter
-			resource.app.Is("id", request.Params().Get("id")).MustGet(&newsletter)
-			newsletter.PreviewSentAt = time.Now()
-			resource.app.MustSave(&newsletter)
-
-			emails := parseEmails(request.Params().Get("emails"))
-			resource.app.sendEmails(newsletter, emails)
-			request.AddFlashMessage("Náhled newsletteru odeslán.")
-			request.Redirect(resource.getURL(""))
+	resource.FormItemAction("send-preview").Permission(loggedPermission).Name(unlocalized("Odeslat náhled")).Form(
+		func(f *Form, r *Request) {
+			f.AddTextareaInput("emails", "Seznam emailů na poslání preview (jeden email na řádek)").Focused = true
+			f.AddSubmit("_submit", "Odeslat náhled")
 		},
-	)
+	).Validation(func(vc ValidationContext) {
+		var newsletter newsletter
+		resource.app.Is("id", vc.GetValue("id")).MustGet(&newsletter)
+		newsletter.PreviewSentAt = time.Now()
+		resource.app.MustSave(&newsletter)
 
-	resource.ItemAction("send").Permission(loggedPermission).Method("POST").Template("newsletter_sent").DataSource(
-		func(request *Request) interface{} {
+		emails := parseEmails(vc.GetValue("emails"))
+		if len(emails) == 0 {
+			vc.AddError("Není zadán žádný email")
+		}
+		if vc.Valid() {
+			err := resource.app.sendEmails(newsletter, emails)
+			if err != nil {
+				vc.AddError(fmt.Sprintf("Chyba při odesílání emailů: %s", err))
+			}
+		}
+		if vc.Valid() {
+			vc.Request().AddFlashMessage("Náhled newsletteru odeslán.")
+			vc.Validation().RedirectionLocaliton = resource.getItemURL(&newsletter, "")
+		}
+	})
+
+	resource.FormItemAction("send").Permission(loggedPermission).Name(unlocalized("Odeslat")).Form(
+		func(form *Form, request *Request) {
+			recipients, err := resource.app.getNewsletterRecipients()
+			if err != nil {
+				panic(err)
+			}
+
+			form.AddSubmit("_submit", fmt.Sprintf("Odelsat newsletter na %d emailů", len(recipients)))
+		},
+	).Validation(
+		func(vc ValidationContext) {
 			var newsletter newsletter
-			resource.app.Is("id", request.Params().Get("id")).MustGet(&newsletter)
+			resource.app.Is("id", vc.GetValue("id")).MustGet(&newsletter)
 
 			newsletter.SentAt = time.Now()
+			//TODO: log sent emails
 			resource.app.Save(&newsletter)
 
 			recipients, err := resource.app.getNewsletterRecipients()
@@ -293,55 +316,36 @@ func initNewsletterResource(resource *Resource) {
 
 			go resource.app.sendEmails(newsletter, recipients)
 
-			var ret = map[string]interface{}{}
+			vc.Request().AddFlashMessage(fmt.Sprintf("Newsletter '%s' se odesílá na %d adres", newsletter.Name, len(recipients)))
 
-			ret["recipients"] = recipients
-			ret["recipients_count"] = len(recipients)
-
-			return ret
+			vc.Validation().RedirectionLocaliton = resource.getItemURL(&newsletter, "")
 		},
 	)
 
-	resource.ItemAction("duplicate").Permission(loggedPermission).Method("POST").Handler(
-		func(request *Request) {
-			var newsletter newsletter
-			resource.app.Is("id", request.Params().Get("id")).MustGet(&newsletter)
-
-			var sections []*newsletterSection
-			err := resource.app.Is("newsletter", newsletter.ID).Order("orderposition").Get(&sections)
-
-			newsletter.ID = 0
-			resource.app.MustCreate(&newsletter)
-
-			if err == nil {
-				for _, v := range sections {
-					section := *v
-					section.ID = 0
-					section.Newsletter = newsletter.ID
-					resource.app.MustCreate(&section)
-				}
-			}
-			request.Redirect(resource.getItemURL(&newsletter, "edit"))
+	resource.FormItemAction("duplicate").Permission(loggedPermission).Name(unlocalized("Duplikovat")).Form(
+		func(f *Form, r *Request) {
+			f.AddSubmit("_submit", "Duplikovat newsletter")
 		},
-	)
+	).Validation(func(vc ValidationContext) {
+		var newsletter newsletter
+		resource.app.Is("id", vc.GetValue("id")).MustGet(&newsletter)
 
-	resource.ItemAction("send-preview").Permission(loggedPermission).Name(unlocalized("Odeslat náhled")).Template("newsletter_send_preview")
+		var sections []*newsletterSection
+		err := resource.app.Is("newsletter", newsletter.ID).Order("orderposition").Get(&sections)
 
-	resource.ItemAction("send").Permission(loggedPermission).Name(unlocalized("Odeslat")).Template("newsletter_send").DataSource(
-		func(*Request) interface{} {
-			recipients, err := resource.app.getNewsletterRecipients()
-			if err != nil {
-				panic(err)
+		newsletter.ID = 0
+		resource.app.MustCreate(&newsletter)
+
+		if err == nil {
+			for _, v := range sections {
+				section := *v
+				section.ID = 0
+				section.Newsletter = newsletter.ID
+				resource.app.MustCreate(&section)
 			}
-			return map[string]interface{}{
-				"recipients":       recipients,
-				"recipients_count": len(recipients),
-			}
-		},
-	)
-
-	resource.ItemAction("duplicate").Permission(loggedPermission).Name(unlocalized("Duplikovat")).Template("newsletter_duplicate")
-
+		}
+		vc.Validation().RedirectionLocaliton = resource.getItemURL(&newsletter, "edit")
+	})
 }
 
 func parseEmails(emails string) []string {
