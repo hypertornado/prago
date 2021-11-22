@@ -59,7 +59,23 @@ func (resource *Resource) FormAction(url string) *FormAction {
 
 	resource.actions = append(resource.actions, fa.actionForm)
 	resource.actions = append(resource.actions, fa.actionValidation)
+	return fa
+}
 
+func (resource *Resource) FormItemAction(url string) *FormAction {
+	fa := newFormAction(resource.app, url)
+
+	fa.actionForm.resource = resource
+	fa.actionValidation.resource = resource
+
+	fa.actionForm.Permission(resource.canView)
+	fa.actionValidation.Permission(resource.canView)
+
+	fa.actionForm.isItemAction = true
+	fa.actionValidation.isItemAction = true
+
+	resource.itemActions = append(resource.itemActions, fa.actionForm)
+	resource.itemActions = append(resource.itemActions, fa.actionValidation)
 	return fa
 }
 
@@ -91,5 +107,10 @@ func (formAction *FormAction) IsWide() *FormAction {
 
 func (formAction *FormAction) userMenu() *FormAction {
 	formAction.actionForm.userMenu()
+	return formAction
+}
+
+func (formAction *FormAction) priority() *FormAction {
+	formAction.actionForm.priority()
 	return formAction
 }

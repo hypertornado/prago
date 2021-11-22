@@ -188,23 +188,27 @@ func (resource *Resource) newField(f reflect.StructField, order int) *field {
 
 	ret.initFieldType()
 
-	//TODO: better and localization
+	//TODO: better
 	if ret.Name != "CreatedAt" && ret.Name != "UpdatedAt" {
 		if ret.Typ == reflect.TypeOf(time.Now()) {
 			if ret.Tags["prago-type"] == "timestamp" || ret.Name == "CreatedAt" || ret.Name == "UpdatedAt" {
 				resource.Validation(func(vc ValidationContext) {
 					val := vc.GetValue(ret.ColumnName)
-					_, err := time.Parse("2006-01-02 15:04", val)
-					if err != nil {
-						vc.AddItemError(ret.ColumnName, "Špatný formát data.")
+					if val != "" {
+						_, err := time.Parse("2006-01-02 15:04", val)
+						if err != nil {
+							vc.AddItemError(ret.ColumnName, messages.Get(vc.Locale(), "admin_validation_date_format_error"))
+						}
 					}
 				})
 			} else {
 				resource.Validation(func(vc ValidationContext) {
 					val := vc.GetValue(ret.ColumnName)
-					_, err := time.Parse("2006-01-02", val)
-					if err != nil {
-						vc.AddItemError(ret.ColumnName, "Špatný formát data.")
+					if val != "" {
+						_, err := time.Parse("2006-01-02", val)
+						if err != nil {
+							vc.AddItemError(ret.ColumnName, messages.Get(vc.Locale(), "admin_validation_date_format_error"))
+						}
 					}
 				})
 			}

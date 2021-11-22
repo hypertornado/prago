@@ -17,66 +17,54 @@ func initDefaultResourceActions(resource *Resource) {
 		},
 	)
 
-	resource.Action("new").priority().Permission(resource.canCreate).Template("admin_form").Name(messages.GetNameFunction("admin_new")).DataSource(
-		func(request *Request) interface{} {
+	resource.FormAction("new").priority().Permission(resource.canCreate).Name(messages.GetNameFunction("admin_new")).Form(
+		func(form *Form, request *Request) {
 			var item interface{}
 			resource.newItem(&item)
 			resource.bindData(&item, request.user, request.Request().URL.Query())
-
-			form := NewForm("new")
 			resource.addFormItems(item, request.user, form)
 			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
-			form.AddCSRFToken(request)
-			return form
 		},
-	)
-	resource.Action("new").Method("POST").Permission(resource.canCreate).Handler(
-		func(request *Request) {
-			validateCSRF(request)
+	).Validation(func(vc ValidationContext) {
+		for _, v := range resource.validations {
+			v(vc)
+		}
+		request := vc.Request()
+		if vc.Valid() {
+			var item interface{}
+			resource.newItem(&item)
 
-			validation := newRequestValidation(request)
+			resource.bindData(item, request.user, request.Params())
+			if resource.orderField != nil {
+				resource.setOrderPosition(&item, resource.count()+1)
+			}
+			must(app.Create(item))
 
-			for _, v := range resource.validations {
-				v(validation)
+			if app.search != nil {
+				go func() {
+					err := app.search.saveItem(resource, item)
+					if err != nil {
+						app.Log().Println(fmt.Errorf("%s", err))
+					}
+					app.search.flush()
+				}()
 			}
 
-			if validation.Valid() {
-				var item interface{}
-				resource.newItem(&item)
-
-				resource.bindData(item, request.user, request.Params())
-				if resource.orderField != nil {
-					resource.setOrderPosition(&item, resource.count()+1)
-				}
-				must(app.Create(item))
-
-				if app.search != nil {
-					go func() {
-						err := app.search.saveItem(resource, item)
-						if err != nil {
-							app.Log().Println(fmt.Errorf("%s", err))
-						}
-						app.search.flush()
-					}()
-				}
-
-				if resource.activityLog {
-					must(
-						app.LogActivity("new", request.UserID(), resource.id, getItemID(item), nil, item),
-					)
-				}
-
-				must(resource.updateCachedCount())
-
-				app.Notification(getItemName(item)).
-					SetImage(app.getItemImage(item)).
-					SetPreName(messages.Get(request.user.Locale, "admin_item_created")).
-					Flash(request)
-				validation.Validation().RedirectionLocaliton = resource.getItemURL(item, "")
+			if resource.activityLog {
+				must(
+					app.LogActivity("new", request.UserID(), resource.id, getItemID(item), nil, item),
+				)
 			}
-			request.RenderJSON(validation.Validation())
-		},
-	)
+
+			must(resource.updateCachedCount())
+
+			app.Notification(getItemName(item)).
+				SetImage(app.getItemImage(item)).
+				SetPreName(messages.Get(request.user.Locale, "admin_item_created")).
+				Flash(request)
+			vc.Validation().RedirectionLocaliton = resource.getItemURL(item, "")
+		}
+	})
 
 	resource.ItemAction("").priority().IsWide().Template("admin_views").Permission(resource.canView).DataSource(
 		func(request *Request) interface{} {
@@ -97,52 +85,45 @@ func initDefaultResourceActions(resource *Resource) {
 		},
 	)
 
-	resource.ItemAction("edit").priority().Name(messages.GetNameFunction("admin_edit")).Permission(resource.canEdit).Template("admin_form").DataSource(
-		func(request *Request) interface{} {
+	resource.FormItemAction("edit").priority().Name(messages.GetNameFunction("admin_edit")).Permission(resource.canEdit).Form(
+		func(form *Form, request *Request) {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
 			var item interface{}
 			resource.newItem(&item)
-			err = app.Is("id", int64(id)).Get(item)
-			must(err)
+			app.Is("id", int64(id)).MustGet(item)
 
-			form := NewForm("edit")
 			resource.addFormItems(item, request.user, form)
 			form.AddSubmit("_submit", messages.Get(request.user.Locale, "admin_save"))
-			form.AddCSRFToken(request)
-			return form
 		},
-	)
+	).Validation(func(vc ValidationContext) {
+		request := vc.Request()
+		item, validation, err := resource.editItemWithLog(request.user, request.Params())
+		if err != nil && err != validationError {
+			panic(err)
+		}
 
-	resource.ItemAction("edit").Method("POST").Permission(resource.canEdit).Handler(
-		func(request *Request) {
-			item, validation, err := resource.editItemWithLog(request.user, request.Params())
-			if err != nil && err != validationError {
-				panic(err)
-			}
+		if validation.Valid() {
+			user := request.user
+			id, err := strconv.Atoi(request.Params().Get("id"))
+			must(err)
 
-			if validation.Valid() {
-				user := request.user
-				validateCSRF(request)
-				id, err := strconv.Atoi(request.Params().Get("id"))
-				must(err)
+			app.Notification(getItemName(item)).
+				SetImage(app.getItemImage(item)).
+				SetPreName(messages.Get(user.Locale, "admin_item_edited")).
+				Flash(request)
 
-				app.Notification(getItemName(item)).
-					SetImage(app.getItemImage(item)).
-					SetPreName(messages.Get(user.Locale, "admin_item_edited")).
-					Flash(request)
+			vc.Validation().RedirectionLocaliton = resource.getURL(fmt.Sprintf("%d", id))
+		} else {
+			//TODO: ugly hack with copying two validation contexts
+			vc.Validation().Errors = validation.Validation().Errors
+			vc.Validation().ItemErrors = validation.Validation().ItemErrors
+		}
+	})
 
-				validation.Validation().RedirectionLocaliton = resource.getURL(fmt.Sprintf("%d", id))
-			}
-			request.RenderJSON(validation.Validation())
-		},
-	)
-
-	resource.ItemAction("delete").priority().Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete")).Template("admin_form").DataSource(
-		func(request *Request) interface{} {
-			form := NewForm("delete")
-			form.AddCSRFToken(request)
+	resource.FormItemAction("delete").priority().Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete")).Form(
+		func(form *Form, request *Request) {
 			form.AddDeleteSubmit("send", messages.Get(request.user.Locale, "admin_delete"))
 
 			var item interface{}
@@ -150,32 +131,21 @@ func initDefaultResourceActions(resource *Resource) {
 			app.Is("id", request.Params().Get("id")).MustGet(item)
 			itemName := getItemName(item)
 			form.Title = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
-			return form
 		},
-	)
+	).Validation(func(vc ValidationContext) {
+		for _, v := range resource.deleteValidations {
+			v(vc)
+		}
+		if vc.Valid() {
+			id, err := strconv.Atoi(vc.GetValue("id"))
+			must(err)
 
-	resource.ItemAction("delete").Permission(resource.canDelete).Method("POST").Handler(
-		func(request *Request) {
-			validateCSRF(request)
-
-			validation := newRequestValidation(request)
-			for _, v := range resource.deleteValidations {
-				v(validation)
-			}
-
-			if validation.Valid() {
-				id, err := strconv.Atoi(request.Params().Get("id"))
-				must(err)
-
-				must(resource.deleteItemWithLog(request.user, int64(id)))
-				must(resource.updateCachedCount())
-				request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_deleted"))
-				validation.Validation().RedirectionLocaliton = resource.getURL("")
-			}
-
-			request.RenderJSON(validation.Validation())
-		},
-	)
+			must(resource.deleteItemWithLog(vc.Request().user, int64(id)))
+			must(resource.updateCachedCount())
+			vc.Request().AddFlashMessage(messages.Get(vc.Request().user.Locale, "admin_item_deleted"))
+			vc.Validation().RedirectionLocaliton = resource.getURL("")
+		}
+	})
 
 	if resource.previewURL != nil {
 		resource.ItemAction("preview").priority().Name(messages.GetNameFunction("admin_preview")).Handler(

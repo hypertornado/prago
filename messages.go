@@ -272,6 +272,10 @@ var m = map[string]map[string]string{
 		"en": "Error while validating data",
 		"cs": "Chyba při validaci dat",
 	},
+	"admin_validation_date_format_error": {
+		"en": "Wrong date format",
+		"cs": "Špatný formát data",
+	},
 	"admin_login_error": {
 		"en": "Wrong user email or password.",
 		"cs": "Špatný email, nebo heslo.",
