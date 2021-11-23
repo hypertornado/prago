@@ -130,6 +130,12 @@ func (f *Form) AddSelect(name, description string, values [][2]string) *FormItem
 	return input
 }
 
+func (f *Form) AddRelation(name, description string, relatedResourceID string) *FormItem {
+	input := f.addInput(name, description, "admin_item_relation")
+	input.Data = relatedResourceID
+	return input
+}
+
 //AddUUID to form
 func (f *FormItem) AddUUID() {
 	f.UUID = "id-" + randomString(5)

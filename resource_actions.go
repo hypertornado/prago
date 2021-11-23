@@ -99,7 +99,11 @@ func initDefaultResourceActions(resource *Resource) {
 		},
 	).Validation(func(vc ValidationContext) {
 		request := vc.Request()
-		item, validation, err := resource.editItemWithLog(request.user, request.Params())
+		params := request.Params()
+
+		resource.fixBooleanParams(vc.Request().user, params)
+
+		item, validation, err := resource.editItemWithLog(request.user, params)
 		if err != nil && err != validationError {
 			panic(err)
 		}

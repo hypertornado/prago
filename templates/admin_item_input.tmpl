@@ -112,12 +112,29 @@
 {{end}}
 
 {{define "admin_item_select"}}
-  <select name="{{.ID}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
-    {{$val := .Value}}
-    {{range $value := .Data}}
-      <option value="{{index $value 0}}"{{if eq $val (index $value 0)}} selected{{end}}>{{index $value 1}}</option>
-    {{end}}
-  </select>
+  {{if gt (len .Data) 0}}
+    <select name="{{.ID}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+      {{$val := .Value}}
+      {{range $value := .Data}}
+        <option value="{{index $value 0}}"{{if eq $val (index $value 0)}} selected{{end}}>{{index $value 1}}</option>
+      {{end}}
+    </select>
+  {{else}}
+    {{template "admin_item_select_radio" .}}
+  {{end}}
+{{end}}
+
+{{define "admin_item_select_radio"}}
+  {{$val := .Value}}
+  {{$id := .ID}}
+  <div class="form_radios">
+  {{range $value := .Data}}
+      <div class="form_radio">
+        <input type="radio" id="{{$id}}-{{index $value 0}}" name="{{$id}}" value="{{index $value 0}}"{{if eq $val (index $value 0)}} checked{{end}}>
+        <label for="{{$id}}-{{index $value 0}}">{{index $value 1}}</label>
+      </div>
+  {{end}}
+  </div>
 {{end}}
 
 {{define "admin_item_place"}}

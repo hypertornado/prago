@@ -35,6 +35,17 @@ func (resource *Resource) setOrderPosition(item interface{}, order int64) {
 	return ret
 }*/
 
+func (resource Resource) fixBooleanParams(user *user, params url.Values) {
+	for _, field := range resource.fieldArrays {
+		if !field.authorizeEdit(user) {
+			continue
+		}
+		if len(params[field.ColumnName]) == 0 && field.Typ.Kind() == reflect.Bool {
+			params.Set(field.ColumnName, "")
+		}
+	}
+}
+
 func (resource Resource) bindData(item interface{}, user *user, params url.Values) error {
 
 	/*if bindedFieldIDs == nil {
