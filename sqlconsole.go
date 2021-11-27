@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-type SQLConsoleCell struct {
+type sqlConsoleCell struct {
 	Value string
 }
 
@@ -20,7 +20,7 @@ func (app *App) initSQLConsole() {
 	).Validation(func(vc ValidationContext) {
 		q := vc.GetValue("q")
 		var message string
-		var table [][]SQLConsoleCell
+		var table [][]sqlConsoleCell
 
 		if q != "" {
 			rows, err := app.db.QueryContext(vc.Request().Request().Context(), q)
@@ -29,9 +29,9 @@ func (app *App) initSQLConsole() {
 			} else {
 				columns, err := rows.Columns()
 				must(err)
-				var header []SQLConsoleCell
+				var header []sqlConsoleCell
 				for _, v := range columns {
-					header = append(header, SQLConsoleCell{
+					header = append(header, sqlConsoleCell{
 						Value: v,
 					})
 				}
@@ -48,7 +48,7 @@ func (app *App) initSQLConsole() {
 
 					rows.Scan(valuePtrs...)
 
-					var row []SQLConsoleCell
+					var row []sqlConsoleCell
 					for i := range columns {
 						val := values[i]
 
@@ -60,7 +60,7 @@ func (app *App) initSQLConsole() {
 							v = val
 						}
 
-						row = append(row, SQLConsoleCell{
+						row = append(row, sqlConsoleCell{
 							Value: fmt.Sprintf("%v", v),
 						},
 						)

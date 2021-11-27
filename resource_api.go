@@ -305,7 +305,7 @@ func initDefaultResourceAPIs(resource *Resource) {
 					usedValues,
 				)
 
-				if err == validationError {
+				if err == errValidation {
 					report := validation.Validation().TextErrorReport(int64(id), request.user.Locale)
 					request.RenderJSONWithCode(
 						report,

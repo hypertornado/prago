@@ -70,10 +70,10 @@ func (app *App) JavascriptPath(url string) *App {
 }
 
 //CSSPath adds CSS
-func (app *App) CSSPath(url string) *App {
+/*func (app *App) CSSPath(url string) *App {
 	app.css = append(app.css, url)
 	return app
-}
+}*/
 
 func addCurrentFlashMessage(request *Request, message string) {
 	data := request.GetData("flash_messages")

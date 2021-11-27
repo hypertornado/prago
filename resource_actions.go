@@ -104,7 +104,7 @@ func initDefaultResourceActions(resource *Resource) {
 		resource.fixBooleanParams(vc.Request().user, params)
 
 		item, validation, err := resource.editItemWithLog(request.user, params)
-		if err != nil && err != validationError {
+		if err != nil && err != errValidation {
 			panic(err)
 		}
 
@@ -258,7 +258,7 @@ func (resource *Resource) editItemWithLog(user *user, values url.Values) (interf
 		v(vv)
 	}
 	if !vv.Valid() {
-		return nil, vv, validationError
+		return nil, vv, errValidation
 	}
 
 	err = app.Save(item)

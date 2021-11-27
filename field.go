@@ -380,6 +380,21 @@ func (field *field) initFieldType() {
 		ret.viewDataSource = getDefaultViewDataSource(field)
 	}
 
+	if ret.allowedValues != nil {
+		field.resource.Validation(func(vc ValidationContext) {
+			val := vc.GetValue(field.ColumnName)
+			var found bool
+			for _, v := range ret.allowedValues {
+				if v == val {
+					found = true
+				}
+			}
+			if !found {
+				vc.AddItemError(field.ColumnName, messages.Get(vc.Locale(), "admin_validation_value"))
+			}
+		})
+	}
+
 	if ret.formTemplate == "" {
 		ret.formTemplate = getDefaultFormTemplate(field.Typ)
 	}

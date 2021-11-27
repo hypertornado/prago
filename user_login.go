@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"strconv"
 	"time"
 )
 
@@ -9,11 +8,8 @@ func initUserLogin(resource *Resource) {
 
 	resource.ItemAction("loginas").Name(unlocalized("Přihlásit se jako")).Permission(sysadminPermission).Handler(
 		func(request *Request) {
-			id, err := strconv.Atoi(request.Params().Get("id"))
-			must(err)
-
 			var user user
-			resource.app.Is("id", id).MustGet(&user)
+			resource.app.Is("id", request.Params().Get("id")).MustGet(&user)
 			request.logInUser(&user)
 			request.Redirect(resource.app.getAdminURL(""))
 		},

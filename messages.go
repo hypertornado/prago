@@ -268,6 +268,10 @@ var m = map[string]map[string]string{
 		"en": "Item can't be empty",
 		"cs": "Položka nemůže být prázdná",
 	},
+	"admin_validation_value": {
+		"en": "Wrong value of item",
+		"cs": "Tato hodnota není povolená",
+	},
 	"admin_validation_error": {
 		"en": "Error while validating data",
 		"cs": "Chyba při validaci dat",

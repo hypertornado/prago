@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var validationError = errors.New("validation error")
+var errValidation = errors.New("validation error")
 
 type formValidation struct {
 	Valid                bool

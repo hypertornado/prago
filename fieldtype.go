@@ -12,6 +12,8 @@ type fieldType struct {
 
 	dbFieldDescription string
 
+	allowedValues []string
+
 	formHideLabel bool
 
 	formTemplate   string

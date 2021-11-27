@@ -23,6 +23,12 @@ func (app *App) AddEnumFieldType(name string, items [][2]string) {
 
 //AddEnumFieldTypeLocalized adds localized enum field
 func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
+
+	var allowedValues []string
+	for _, v := range items {
+		allowedValues = append(allowedValues, v.ID)
+	}
+
 	app.addFieldType(name, &fieldType{
 		viewDataSource: func(user *user, f field, value interface{}) interface{} {
 			str := value.(string)
@@ -34,6 +40,8 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 
 			return value
 		},
+
+		allowedValues: allowedValues,
 
 		formTemplate: "admin_item_select",
 		formDataSource: func(f field, u *user) interface{} {

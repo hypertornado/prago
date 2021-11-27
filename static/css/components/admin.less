@@ -61,6 +61,11 @@ th.admin_list_lastheadercell {
   vertical-align: top;
   background: white !important;
   cursor: default !important;
+
+  user-select: none; /* CSS3 (little to no support) */
+  -ms-user-select: none; /* IE 10+ */
+  -moz-user-select: none; /* Gecko (Firefox) */
+  -webkit-user-select: none; /* Webkit (Safari, Chrome) */
 }
 
 .admin_table_row td {
