@@ -5487,6 +5487,9 @@ ul {
   margin-top: 0px;
   padding: 5px 10px;
 }
+.prago_form h1 {
+  padding-left: 0px;
+}
 .admin_box-wide {
   box-shadow: none;
   max-width: none;
