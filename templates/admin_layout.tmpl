@@ -5,14 +5,9 @@
     <meta charset="utf-8">
     <title>{{.admin_title}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <link rel="stylesheet" href="/admin/prago_admin_files/admin.css?v={{.version}}">
-    {{range $c := .css}}
-        <link rel="stylesheet" href="{{$c}}">
-    {{end}}
-
+    <link rel="stylesheet" href="/admin/prago_admin_files/prago.css?v={{.version}}">
     <script type="text/javascript" src="/admin/prago_admin_files/pikaday.js?v={{.version}}"></script>
-    <script type="text/javascript" src="/admin/prago_admin_files/admin.js?v={{.version}}"></script>
+    <script type="text/javascript" src="/admin/prago_admin_files/prago.js?v={{.version}}"></script>
     {{range $javascript := .javascripts}}
         <script type="text/javascript" src="{{$javascript}}"></script>
     {{end}}

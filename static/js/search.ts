@@ -1,10 +1,3 @@
-/*function bindSearch() {
-  var els = document.querySelectorAll(".admin_header_search");
-  for (var i = 0; i < els.length; i++) {
-    new SearchForm(<HTMLFormElement>els[i]);
-  }
-}*/
-
 class SearchForm {
   searchForm: HTMLFormElement;
   searchInput: HTMLInputElement;
@@ -29,10 +22,6 @@ class SearchForm {
       this.dirty = true;
       this.lastChanged = Date.now();
       return false;
-    });
-
-    this.searchInput.addEventListener("blur", () => {
-      //this.suggestionsEl.classList.add("hidden");
     });
 
     window.setInterval(() => {
@@ -116,12 +105,6 @@ class SearchForm {
     this.suggestions = this.suggestionsEl.querySelectorAll(
       ".admin_search_suggestion"
     );
-    /*
-    if (this.suggestions.length > 0) {
-      this.searchForm.classList.add("head_search-suggestion");
-    } else {
-      this.searchForm.classList.remove("head_search-suggestion");
-    }*/
 
     for (var i = 0; i < this.suggestions.length; i++) {
       var suggestion = <HTMLAnchorElement>this.suggestions[i];

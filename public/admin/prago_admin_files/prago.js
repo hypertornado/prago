@@ -1777,6 +1777,7 @@ class Form {
 class DatePicker {
     constructor(el) {
         var language = "cs";
+        language = document.getElementsByTagName("html")[0].lang;
         var i18n = {
             previousMonth: "Previous Month",
             nextMonth: "Next Month",
@@ -1943,8 +1944,6 @@ class SearchForm {
             this.dirty = true;
             this.lastChanged = Date.now();
             return false;
-        });
-        this.searchInput.addEventListener("blur", () => {
         });
         window.setInterval(() => {
             if (this.dirty && Date.now() - this.lastChanged > 100) {

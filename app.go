@@ -50,9 +50,9 @@ type App struct {
 
 	search *adminSearch
 
-	fieldTypes    map[string]*fieldType
-	javascripts   []string
-	css           []string
+	fieldTypes  map[string]*fieldType
+	javascripts []string
+	//css           []string
 	accessManager *accessManager
 
 	apis []*API

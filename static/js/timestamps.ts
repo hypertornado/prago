@@ -20,23 +20,6 @@ class Timestamp {
 
     var v = this.elTsInput.value;
 
-    /*if (v == "0001-01-01 00:00") {
-      var d = new Date();
-      var month = d.getMonth() + 1;
-      var monthStr = String(month);
-      if (month < 10) {
-        monthStr = "0" + monthStr;
-      }
-
-      var day = d.getUTCDate();
-      var dayStr = String(day);
-      if (day < 10) {
-        dayStr = "0" + dayStr;
-      }
-
-      v = d.getFullYear() + "-" + monthStr + "-" + dayStr + " " + d.getHours() + ":" + d.getMinutes();
-    }*/
-
     this.setTimestamp(v);
 
     this.elTsDate.addEventListener("change", this.saveValue.bind(this));

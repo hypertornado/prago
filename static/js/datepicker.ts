@@ -1,6 +1,7 @@
 class DatePicker {
   constructor(el: HTMLInputElement) {
-    var language = "cs"; //el.getAttribute("data-language");
+    var language = "cs";
+    language = document.getElementsByTagName("html")[0].lang;
     var i18n = {
       previousMonth: "Previous Month",
       nextMonth: "Next Month",

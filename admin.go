@@ -12,7 +12,6 @@ const adminPathPrefix = "/admin"
 func (app *App) initAdminActions() {
 
 	app.accessController.addBeforeAction(func(request *Request) {
-		//app.Notification("hello world " + time.Now().Format(time.RFC3339Nano)).Flash(request)
 		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
 		request.SetData("locale", localeFromRequest(request))
 		request.SetData("admin_header_prefix", adminPathPrefix)
@@ -25,11 +24,9 @@ func (app *App) initAdminActions() {
 		}
 
 		request.SetData("javascripts", app.javascripts)
-		request.SetData("css", app.css)
 
 		request.SetData("currentuser", request.user)
 		request.SetData("locale", request.user.Locale)
-		//request.SetData("gravatar", request.user.gravatarURL())
 
 		if request.user.Role == "" && !request.user.emailConfirmed() {
 			addCurrentFlashMessage(request, messages.Get(request.user.Locale, "admin_flash_not_confirmed"))
@@ -68,12 +65,6 @@ func (app *App) JavascriptPath(url string) *App {
 	app.javascripts = append(app.javascripts, url)
 	return app
 }
-
-//CSSPath adds CSS
-/*func (app *App) CSSPath(url string) *App {
-	app.css = append(app.css, url)
-	return app
-}*/
 
 func addCurrentFlashMessage(request *Request, message string) {
 	data := request.GetData("flash_messages")
