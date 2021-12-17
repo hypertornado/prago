@@ -16,15 +16,13 @@
   </head>
   <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.main_menu.URLPrefix}}" data-search-query="{{.search_q}}">
     <div class="admin_layout">
+        <div class="admin_mobile_menu"></div>
         <div class="admin_layout_left">
             {{template "admin_mainmenu" .main_menu}}
         </div>
         <div class="admin_layout_right">
             <div class="admin_header">
                 <div class="admin_header_container">
-                    <div class="admin_header_container_left">
-                        <div class="admin_header_container_menu btn">Menu</div>
-                    </div>
                     {{if .admin_page}}
                         {{template "admin_tabs" .admin_page.Navigation.Tabs}}
                     {{end}}

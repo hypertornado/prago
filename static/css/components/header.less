@@ -7,8 +7,9 @@
 .admin_layout_left {
   overflow: auto;
   width: 300px;
-  box-shadow: inset -10px -10px 30px rgba(0, 0, 0, 0.05);
+  //box-shadow: inset -10px -10px 30px rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
+  //border-right: 1px solid #eee;
 }
 
 .admin_layout_right {
@@ -25,7 +26,7 @@
   line-height: 1.6em;
   flex-grow: 0;
   flex-shrink: 0;
-  background: white;
+  //background: white;
   display: block;
 }
 
@@ -33,9 +34,45 @@
   display: flex;
 }
 
-.admin_header_container_left {
-  padding: 0px 5px;
+.admin_mobile_menu {
+  border-radius: 3px;
+  background-color: @baseColorBackground;
+  font-size: 20px;
+  font-weight: normal;
+  width: 33px;
+  height: 33px;
+  line-height: 33px;
+  text-align: center;
+  color: @baseColor;
+  cursor: pointer;
+  color: @black;
+  //color: white;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 300;
   display: none;
+  //.border;
+}
+
+.admin_mobile_menu::after {
+  content: "☰";
+}
+
+.admin_mobile_menu:hover {
+  //background-color: @baseColorBackgroundLighter;
+  color: black;
+  //color: #eee;
+}
+
+.admin_mobile_menu-selected,
+.admin_mobile_menu-selected:hover {
+  background-color: @baseColor;
+  color: white;
+}
+
+.admin_mobile_menu-selected::after {
+  //content: "✖";
 }
 
 .admin_bottom {

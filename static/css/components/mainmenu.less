@@ -17,7 +17,7 @@ a.mainmenu_logo:hover {
 }
 
 .mainmenu_section {
-  padding: 10px 5px;
+  padding: 10px 0px;
 }
 
 .mainmenu_section_name {
@@ -31,8 +31,8 @@ a.mainmenu_logo:hover {
 
 .mainmenu_section_content {
   padding: 5px;
-  background-color: @baseColorBackground;
-  border-radius: 5px;
+  background-color: @baseColorBackgroundLighter;
+  //border-radius: 5px;
 }
 
 .mainmenu_section_item {
@@ -85,7 +85,8 @@ a.mainmenu_logo:hover {
     right: 0px;
     left: 0px;
     bottom: 0px;
-    top: 42px;
+    //top: 42px;
+    top: 0px;
     background-color: white;
     //width: 100%;
     z-index: 200;
@@ -93,11 +94,15 @@ a.mainmenu_logo:hover {
     display: none;
   }
 
+  .admin_header_container {
+    padding-left: 38px;
+  }
+
   .admin_layout_left-visible {
     display: block;
   }
 
-  .admin_header_container_left {
+  .admin_mobile_menu {
     display: block;
   }
 }

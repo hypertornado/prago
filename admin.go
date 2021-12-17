@@ -74,13 +74,17 @@ func addCurrentFlashMessage(request *Request, message string) {
 }
 
 func render403(request *Request) {
-	request.SetData("message", messages.Get(request.user.Locale, "admin_403"))
+	text := messages.Get(request.user.Locale, "admin_403")
+	request.SetData("message", text)
+	request.SetData("admin_title", text)
 	request.SetData("admin_yield", "admin_message")
 	request.RenderViewWithCode("admin_layout", 403)
 }
 
 func render404(request *Request) {
-	request.SetData("message", messages.Get(request.user.Locale, "admin_404"))
+	text := messages.Get(request.user.Locale, "admin_404")
+	request.SetData("message", text)
+	request.SetData("admin_title", text)
 	request.SetData("admin_yield", "admin_message")
 	request.RenderViewWithCode("admin_layout", 404)
 }

@@ -6,7 +6,7 @@ class MainMenu {
 
   constructor(leftEl: HTMLDivElement) {
     this.leftEl = leftEl;
-    this.menuEl = document.querySelector(".admin_header_container_menu");
+    this.menuEl = document.querySelector(".admin_mobile_menu");
     this.menuEl.addEventListener("click", this.menuClick.bind(this));
 
     var searchFormEl = leftEl.querySelector<HTMLFormElement>(
@@ -30,6 +30,7 @@ class MainMenu {
 
   menuClick() {
     this.leftEl.classList.toggle("admin_layout_left-visible");
+    this.menuEl.classList.toggle("admin_mobile_menu-selected");
   }
 
   loadFromStorage(): number {

@@ -138,6 +138,8 @@ func (app *App) initFilesResource() {
 	resource := app.Resource(File{}).Name(messages.GetNameFunction("admin_files"))
 	app.FilesResource = resource
 
+	resource.canCreate = nobodyPermission
+
 	initFilesAPI(resource)
 
 	resource.FieldName("uid", messages.GetNameFunction("admin_file"))
@@ -208,21 +210,25 @@ func (app *App) initFilesResource() {
 		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
-	resource.Action("").Method("POST").Permission(resource.canCreate).Handler(
-		func(request *Request) {
-			validateCSRF(request)
-
-			multipartFiles := request.Request().MultipartForm.File["uid"]
-			if len(multipartFiles) != 1 {
-				panic("must have 1 file selected")
+	resource.FormAction("upload").priority().Permission(resource.canEdit).Name(unlocalized("Nahrát soubor")).Form(func(f *Form, r *Request) {
+		locale := r.user.Locale
+		f.AddFileInput("file", messages.Get(locale, "admin_file"))
+		f.AddTextareaInput("description", messages.Get(locale, "Description"))
+		f.AddSubmit(messages.Get(locale, "admin_save"))
+	}).Validation(func(vc ValidationContext) {
+		multipartFiles := vc.Request().Request().MultipartForm.File["file"]
+		if len(multipartFiles) != 1 {
+			vc.AddItemError("file", messages.Get(vc.Locale(), "admin_validation_not_empty"))
+		}
+		if vc.Valid() {
+			fileData, err := resource.app.UploadFile(multipartFiles[0], vc.Request().user, vc.GetValue("description"))
+			if err != nil {
+				vc.AddError(err.Error())
+			} else {
+				vc.Validation().RedirectionLocaliton = fmt.Sprintf("/admin/file/%d", fileData.ID)
 			}
-
-			_, err := resource.app.UploadFile(multipartFiles[0], request.user, request.Params().Get("description"))
-			must(err)
-			request.AddFlashMessage(messages.Get(request.user.Locale, "admin_item_created"))
-			request.Redirect(resource.getURL(""))
-		},
-	)
+		}
+	})
 
 	resource.Action("getcdnurl").Permission(sysadminPermission).Method("POST").Handler(
 		func(request *Request) {

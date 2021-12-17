@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"html/template"
 	"net/url"
 )
 
@@ -11,6 +12,7 @@ type Form struct {
 	Items     []*FormItem
 	Valid     bool
 	CSRFToken string
+	HTMLAfter template.HTML
 }
 
 //FormItem represents item of form
@@ -127,6 +129,12 @@ func (f *Form) AddHidden(name string) *FormItem {
 func (f *Form) AddSelect(name, description string, values [][2]string) *FormItem {
 	input := f.addInput(name, description, "admin_item_select")
 	input.Data = values
+	return input
+}
+
+//AddDatePicker to form
+func (f *Form) AddDatePicker(name, description string) *FormItem {
+	input := f.addInput(name, description, "admin_item_date")
 	return input
 }
 

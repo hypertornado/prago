@@ -53,6 +53,7 @@ func renderNavigationPage(request *Request, page page) {
 }
 
 func renderNavigationPageNoLogin(request *Request, page page) {
+	request.SetData("language", localeFromRequest(request))
 	renderNavigation(request, page, "admin_layout_nologin")
 }
 

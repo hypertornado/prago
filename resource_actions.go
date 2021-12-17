@@ -196,6 +196,10 @@ func (resource *Resource) deleteItemWithLog(user *user, id int64) error {
 		return fmt.Errorf("can't find item for deletion id '%d': %s", id, err)
 	}
 
+	if resource.activityLog {
+		return resource.app.LogActivity("delete", user.ID, resource.id, id, beforeItem, nil)
+	}
+
 	var item interface{}
 	resource.newItem(&item)
 	_, err = resource.app.Is("id", id).Delete(item)
@@ -209,10 +213,6 @@ func (resource *Resource) deleteItemWithLog(user *user, id int64) error {
 			resource.app.Log().Println(fmt.Errorf("%s", err))
 		}
 		resource.app.search.flush()
-	}
-
-	if resource.activityLog {
-		return resource.app.LogActivity("delete", user.ID, resource.id, id, beforeItem, nil)
 	}
 
 	return nil

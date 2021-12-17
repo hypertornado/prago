@@ -26,7 +26,7 @@ func initFilesAPI(resource *Resource) {
 		request.RenderJSON(file)
 	})
 
-	resource.API("upload").Method("POST").Permission(resource.canCreate).Handler(func(request *Request) {
+	resource.API("upload").Method("POST").Permission(resource.canEdit).Handler(func(request *Request) {
 		multipartFiles := request.Request().MultipartForm.File["file"]
 		description := request.Params().Get("description")
 

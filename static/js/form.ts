@@ -86,7 +86,7 @@ class Form {
           this.progress.classList.add("hidden");
           this.setFormErrors(data.Errors);
           this.setItemErrors(data.ItemErrors);
-          this.setAfterContent(data.AfterContent);
+          if (data.AfterContent) this.setAfterContent(data.AfterContent);
         }
       } else {
         this.progress.classList.add("hidden");

@@ -38,7 +38,7 @@ func (resource Resource) getItemStringEditableValues(item interface{}, user *use
 	itemVal := reflect.ValueOf(item).Elem()
 	ret := make(map[string]string)
 	for i, field := range resource.fieldArrays {
-		if !field.authorizeEdit(user) {
+		if !field.authorizeEdit(user) && field.ColumnName != "id" {
 			continue
 		}
 		var ifaceVal interface{}

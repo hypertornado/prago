@@ -173,8 +173,12 @@ func (action *Action) getnavigation(request *Request) navigation {
 		if action.isItemAction {
 			var item interface{}
 			action.resource.newItem(&item)
-			must(action.resource.app.Query().Is("id", request.Params().Get("id")).Get(item))
-			return action.resource.getItemNavigation(request.user, item, code)
+			err := action.resource.app.Query().Is("id", request.Params().Get("id")).Get(item)
+			if err == nil {
+				return action.resource.getItemNavigation(request.user, item, code)
+			} else {
+				return navigation{}
+			}
 		}
 		return action.resource.getNavigation(request.user, code)
 	}
