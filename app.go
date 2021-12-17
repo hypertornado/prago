@@ -11,12 +11,6 @@ import (
 	"github.com/sendgrid/sendgrid-go"
 )
 
-//go 1.18 generics test
-/*
-func first[T any](items []T) T {
-	return  items[0]
-}*/
-
 //App is main struct of prago application
 type App struct {
 	codeName        string
@@ -73,9 +67,7 @@ func newTestingApp() *App {
 
 func createApp(codeName string, version string) *App {
 
-	//go 1.18 generics test
-	//x := first([]string{"a", "b", "c"})
-	//fmt.Println(x)
+	resource2playground()
 
 	if codeName != "__prago_test_app" && !configExists(codeName) {
 		if consoleQuestion("File config.json does not exist. Can't start app. Would you like to start setup?") {
