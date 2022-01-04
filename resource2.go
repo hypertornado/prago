@@ -1,25 +1,45 @@
 package prago
 
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+)
 
-type Resource2[T any] struct{}
-
-/*func (resource Resource2[T]) CreateItem() {
-	item := reflect.New(T)
-	fmt.Println(item)
-
-}*/
-
-func newResource2[T any]() Resource2[T] {
-	return Resource2[T]{}
+type App2 struct {
+	resources []any
 }
 
-type XXX struct {
-	A string
+func AddResource2[T any](app *App2) {
+	var r = Resources2[T]{}
+	app.resources = append(app.resources, r)
+}
+
+func GetResource2[T any](app *App2) Resources2[T] {
+	resource := app.resources[0]
+	fmt.Println(reflect.TypeOf(resource).Name())
+	return resource.(Resources2[T])
+}
+
+type Resources2[T any] struct {
+}
+
+type Orange struct {
+	isOrange bool
+}
+
+type Apple struct {
 }
 
 func resource2playground() {
-	r := newResource2[XXX]()
-	fmt.Println(r)
+	if true {
+		return
+	}
 
+	a2 := new(App2)
+	AddResource2[Orange](a2)
+	orange := GetResource2[Orange](a2)
+	fmt.Println("---")
+	//orange.isOrange = true
+	fmt.Println(orange)
+	fmt.Println("---")
 }
