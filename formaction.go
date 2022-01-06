@@ -1,5 +1,7 @@
 package prago
 
+import "fmt"
+
 type FormAction struct {
 	validation    Validation
 	formGenerator func(*Form, *Request)
@@ -46,6 +48,29 @@ func (app *App) FormAction(url string) *FormAction {
 	app.rootActions = append(app.rootActions, fa.actionForm)
 	app.rootActions = append(app.rootActions, fa.actionValidation)
 	return fa
+}
+
+func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Request), validator Validation) {
+	app.accessController.get(fmt.Sprintf("/admin/user/%s", id), func(request *Request) {
+		locale := localeFromRequest(request)
+		form := NewForm("/admin/user/" + id)
+		formHandler(form, request)
+
+		renderPage(request, page{
+			App:          app,
+			Navigation:   app.getNologinNavigation(locale, id),
+			PageTemplate: "admin_form",
+			PageData:     form,
+			HideBox:      true,
+		})
+	})
+
+	app.accessController.post(fmt.Sprintf("/admin/user/%s", id), func(request *Request) {
+		requestValidator := newRequestValidation(request)
+		validator(requestValidator)
+		request.RenderJSON(requestValidator.validation)
+	})
+
 }
 
 func (resource *Resource) FormAction(url string) *FormAction {

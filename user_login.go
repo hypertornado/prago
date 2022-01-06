@@ -15,12 +15,11 @@ func initUserLogin(resource *Resource) {
 		},
 	)
 
-	resource.app.accessController.get(resource.getURL("login"), func(request *Request) {
+	//resource.app.accessController.get(resource.getURL("login"), func(request *Request) {
+
+	resource.app.nologinFormAction("login", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
-		form := NewForm("/admin/user/login")
-
 		emailValue := request.Params().Get("email")
-
 		emailInput := form.AddEmailInput("email", messages.Get(locale, "admin_email"))
 		if emailValue == "" {
 			emailInput.Focused = true
@@ -30,43 +29,28 @@ func initUserLogin(resource *Resource) {
 		if emailValue != "" {
 			passwordInput.Focused = true
 		}
-
 		form.AddSubmit(messages.Get(locale, "admin_login_action"))
-
-		renderPage(request, page{
-			App:          resource.app,
-			Navigation:   resource.app.getNologinNavigation(locale, "login"),
-			PageTemplate: "admin_form",
-			PageData:     form,
-			HideBox:      true,
-		})
-	})
-
-	resource.app.accessController.post(resource.getURL("login"), func(request *Request) {
-		request.RenderJSON(
-			loginValidation(request),
-		)
-	})
+	}, loginValidation)
 
 }
 
-func loginValidation(request *Request) *formValidation {
-	locale := localeFromRequest(request)
-	ret := NewFormValidation()
-	email := request.Params().Get("email")
+func loginValidation(vc ValidationContext) {
+	locale := vc.Locale()
+	email := vc.GetValue("email")
 	email = fixEmail(email)
-	password := request.Params().Get("password")
+	request := vc.Request()
+	password := vc.GetValue("password")
 
 	var user user
 	err := request.app.Is("email", email).Get(&user)
 	if err != nil {
-		ret.AddError(messages.Get(locale, "admin_login_error"))
-		return ret
+		vc.AddError(messages.Get(locale, "admin_login_error"))
+		return
 	}
 
 	if !user.isPassword(password) {
-		ret.AddError(messages.Get(locale, "admin_login_error"))
-		return ret
+		vc.AddError(messages.Get(locale, "admin_login_error"))
+		return
 	}
 
 	user.LoggedInTime = time.Now()
@@ -77,7 +61,5 @@ func loginValidation(request *Request) *formValidation {
 	request.logInUser(&user)
 	request.AddFlashMessage(messages.Get(locale, "admin_login_ok"))
 
-	ret.RedirectionLocaliton = request.app.getAdminURL("")
-	return ret
-
+	vc.Validation().RedirectionLocaliton = request.app.getAdminURL("")
 }

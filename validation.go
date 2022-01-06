@@ -97,6 +97,9 @@ func newRequestValidation(request *Request) *requestValidation {
 }
 
 func (rv *requestValidation) Locale() string {
+	if rv.request.user == nil {
+		return localeFromRequest(rv.request)
+	}
 	return rv.request.user.Locale
 }
 
