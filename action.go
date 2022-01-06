@@ -231,7 +231,7 @@ func (action *Action) bindAction() error {
 			if action.isWide {
 				hideBox = true
 			}
-			renderNavigationPage(request, page{
+			renderPage(request, page{
 				App:          app,
 				Navigation:   action.getnavigation(request),
 				PageTemplate: action.template,

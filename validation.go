@@ -3,6 +3,7 @@ package prago
 import (
 	"errors"
 	"fmt"
+	"html/template"
 	"net/url"
 	"strings"
 )
@@ -12,7 +13,7 @@ var errValidation = errors.New("validation error")
 type formValidation struct {
 	Valid                bool
 	RedirectionLocaliton string
-	AfterContent         string
+	AfterContent         template.HTML
 	Errors               []FormValidationError
 	ItemErrors           map[string][]FormValidationError
 }

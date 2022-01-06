@@ -10,7 +10,7 @@ type FormAction struct {
 
 func newFormAction(app *App, url string) *FormAction {
 	ret := &FormAction{
-		actionForm:       newAction(app, url).Template("admin_form"),
+		actionForm:       newAction(app, url).Template("admin_form").IsWide(),
 		actionValidation: newAction(app, url).Method("POST"),
 	}
 

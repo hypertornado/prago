@@ -13,10 +13,10 @@ class Prago {
       new List(listEl);
     }
 
-    var formElements =
-      document.querySelectorAll<HTMLFormElement>(".prago_form");
-    formElements.forEach((el) => {
-      new Form(el);
+    var formContainerElements =
+      document.querySelectorAll<HTMLDivElement>(".form_container");
+    formContainerElements.forEach((el) => {
+      new FormContainer(el);
     });
 
     var imageViews = document.querySelectorAll<HTMLDivElement>(

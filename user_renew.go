@@ -14,11 +14,12 @@ func initUserRenew(resource *Resource) {
 		form.AddEmailInput("email", messages.Get(locale, "admin_email")).Focused = true
 		form.AddSubmit(messages.Get(locale, "admin_forgotten_submit"))
 
-		renderNavigationPageNoLogin(request, page{
+		renderPage(request, page{
 			App:          app,
 			Navigation:   app.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
 			PageData:     form,
+			HideBox:      true,
 		})
 
 	})
@@ -38,11 +39,12 @@ func initUserRenew(resource *Resource) {
 		form.AddHidden("token").Value = request.Params().Get("token")
 		form.AddSubmit(messages.Get(locale, "admin_forgoten_set"))
 
-		renderNavigationPageNoLogin(request, page{
+		renderPage(request, page{
 			App:          app,
 			Navigation:   app.getNologinNavigation(locale, "forgot"),
 			PageTemplate: "admin_form",
 			PageData:     form,
+			HideBox:      true,
 		})
 	})
 

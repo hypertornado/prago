@@ -46,11 +46,12 @@ func initUserRegistration(resource *Resource) {
 		form.AddCAPTCHAInput("captcha", "4 + 5 =")
 		form.AddSubmit(messages.Get(locale, "admin_register"))
 
-		renderNavigationPageNoLogin(request, page{
+		renderPage(request, page{
 			App:          app,
 			Navigation:   app.getNologinNavigation(locale, "registration"),
 			PageTemplate: "admin_form",
 			PageData:     form,
+			HideBox:      true,
 		})
 
 	})

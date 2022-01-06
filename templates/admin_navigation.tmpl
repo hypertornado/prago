@@ -1,10 +1,6 @@
-{{define "admin_navigation"}}
-  <div class="admin_box{{if .Wide}} admin_box-wide{{end}}">
-{{end}}
-
 {{define "admin_navigation_page"}}
     {{if not .admin_page.HideBox}}
-      {{template "admin_navigation" .admin_page.Navigation}}
+      <div class="admin_box{{if .Wide}} admin_box-wide{{end}}">
     {{end}}
     {{tmpl .admin_page.PageTemplate .admin_page.PageData}}
     {{if not .admin_page.HideBox}}

@@ -1656,11 +1656,7 @@ class Form {
     constructor(form) {
         this.dirty = false;
         this.ajax = false;
-        this.form = form;
-        this.progress = this.form.querySelector(".form_progress");
-        if (form.classList.contains("form-ajax")) {
-            form.addEventListener("submit", this.submitFormAJAX.bind(this));
-        }
+        this.formEl = form;
         var elements = form.querySelectorAll(".admin_markdown");
         elements.forEach((el) => {
             new MarkdownEditor(el);
@@ -1706,11 +1702,20 @@ class Form {
             }
         });
     }
+}
+class FormContainer {
+    constructor(formContainer) {
+        this.formContainer = formContainer;
+        this.progress = formContainer.querySelector(".form_progress");
+        var formEl = formContainer.querySelector("form");
+        this.form = new Form(formEl);
+        this.form.formEl.addEventListener("submit", this.submitFormAJAX.bind(this));
+    }
     submitFormAJAX(event) {
         event.preventDefault();
-        let formData = new FormData(this.form);
+        let formData = new FormData(this.form.formEl);
         var request = new XMLHttpRequest();
-        request.open("POST", this.form.getAttribute("action"));
+        request.open("POST", this.form.formEl.getAttribute("action"));
         request.addEventListener("load", (e) => {
             if (request.status == 200) {
                 var data = JSON.parse(request.response);
@@ -1735,10 +1740,10 @@ class Form {
         request.send(formData);
     }
     setAfterContent(text) {
-        this.form.querySelector(".form_after_content").innerHTML = text;
+        this.formContainer.querySelector(".form_after_content").innerHTML = text;
     }
     setFormErrors(errors) {
-        let errorsDiv = this.form.querySelector(".form_errors");
+        let errorsDiv = this.form.formEl.querySelector(".form_errors");
         errorsDiv.innerText = "";
         errorsDiv.classList.add("hidden");
         if (errors) {
@@ -1754,7 +1759,7 @@ class Form {
         }
     }
     setItemErrors(itemErrors) {
-        let labels = this.form.querySelectorAll(".form_label");
+        let labels = this.form.formEl.querySelectorAll(".form_label");
         for (let i = 0; i < labels.length; i++) {
             let label = labels[i];
             let id = label.getAttribute("data-id");
@@ -2497,9 +2502,9 @@ class Prago {
         if (listEl) {
             new List(listEl);
         }
-        var formElements = document.querySelectorAll(".prago_form");
-        formElements.forEach((el) => {
-            new Form(el);
+        var formContainerElements = document.querySelectorAll(".form_container");
+        formContainerElements.forEach((el) => {
+            new FormContainer(el);
         });
         var imageViews = document.querySelectorAll(".admin_item_view_image_content");
         imageViews.forEach((el) => {

@@ -121,3 +121,11 @@ func (app *App) ExecuteTemplate(wr io.Writer, name string, data interface{}) err
 	defer app.templates.templatesMutex.RUnlock()
 	return app.templates.templates.ExecuteTemplate(wr, name, data)
 }
+
+//ExecuteTemplateToString executes template and return string, it panics
+func (app *App) ExecuteTemplateToString(templateName string, data interface{}) string {
+	bufStats := new(bytes.Buffer)
+	err := app.ExecuteTemplate(bufStats, templateName, data)
+	must(err)
+	return bufStats.String()
+}

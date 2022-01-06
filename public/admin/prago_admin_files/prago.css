@@ -6470,6 +6470,10 @@ select.admin_table_filter_item {
 .form_progress {
   margin-bottom: 10px;
 }
+.form_after_content {
+  padding: 0px 10px;
+  overflow-x: auto;
+}
 .admin_layout {
   width: 100%;
   height: 100vh;
@@ -7651,4 +7655,20 @@ a.mainmenu_logo:hover {
 }
 .multiple_edit_field-selected .multiple_edit_field_content {
   display: block;
+}
+.admin_form_table {
+  border: 0px solid red;
+}
+.admin_form_table table {
+  background-color: white;
+  min-width: 100%;
+  margin: 0px auto;
+}
+.admin_form_table td {
+  padding: 2px;
+  border: 1px solid #f1f1f1;
+}
+.admin_form_table_footer {
+  padding: 5px 10px;
+  color: #888;
 }

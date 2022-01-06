@@ -1,0 +1,20 @@
+{{define "admin_form_table"}}
+    <div class="admin_form_table">
+        <table>
+            {{range $row := .Rows}}
+                <tr>
+                {{range $cell := $row.Cells}}
+                    <td>{{$cell.Content}}</td>
+                {{end}}
+                </tr>
+            {{end}}
+        </table>
+
+        <div class="admin_form_table_footer">
+            {{range $item := .FooterText}}
+                <div class="admin_form_table_footer_text">{{$item}}</div>
+            {{end}}
+        </div>
+
+    </div>
+{{end}}

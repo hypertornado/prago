@@ -7,6 +7,7 @@ type page struct {
 	PageTemplate string
 	PageData     interface{}
 	HideBox      bool
+	HTTPCode     int
 }
 
 type navigation struct {
@@ -48,16 +49,7 @@ func isTabVisible(tabs []tab, pos int) bool {
 	return true
 }
 
-func renderNavigationPage(request *Request, page page) {
-	renderNavigation(request, page, "admin_layout")
-}
-
-func renderNavigationPageNoLogin(request *Request, page page) {
-	request.SetData("language", localeFromRequest(request))
-	renderNavigation(request, page, "admin_layout_nologin")
-}
-
-func renderNavigation(request *Request, page page, viewName string) {
+func renderPage(request *Request, page page) {
 	var name string
 	name = page.Name
 	for _, v := range page.Navigation.Tabs {
@@ -78,7 +70,19 @@ func renderNavigation(request *Request, page page, viewName string) {
 	request.SetData("admin_title", name)
 	request.SetData("admin_yield", "admin_navigation_page")
 	request.SetData("admin_page", page)
-	request.RenderView(viewName)
+
+	code := page.HTTPCode
+	if page.HTTPCode == 0 {
+		code = 200
+	}
+
+	layout := "admin_layout"
+	if request.user == nil {
+		request.SetData("language", localeFromRequest(request))
+		layout = "admin_layout_nologin"
+	}
+
+	request.RenderViewWithCode(layout, code)
 }
 
 func (resource Resource) getNavigation(user *user, code string) navigation {

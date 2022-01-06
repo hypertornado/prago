@@ -1,35 +1,41 @@
 {{define "admin_form"}}
 
-  <form method="POST" action="{{.Action}}" class="form prago_form form-ajax" enctype="multipart/form-data" novalidate>
-    {{if .CSRFToken}}
-      <input type="hidden" name="_csrfToken" value="{{.CSRFToken}}">
-    {{end}}
+  <div class="form_container">
 
-    {{if .Title}}
-      <h1>{{.Title}}</h1>
-    {{end}}
-
-    <div class="form_errors hidden"></div>
-
-    {{range $item := .Items}}
-      <div class="form_label{{if .Hidden}} form_label-hidden{{end}}{{if .Required}} form_label-required{{end}}" data-id="{{.ID}}">
-        {{if eq .HiddenName false}}
-          <label for="{{.UUID}}" class="form_label_text">{{.Name}}</label>
-          {{if .Description}}
-            <div class="form_label_description">{{.Description}}</div>
-          {{end}}
+    <div class="admin_box">
+      <form method="POST" action="{{.Action}}" class="form prago_form" enctype="multipart/form-data" novalidate>
+        {{if .CSRFToken}}
+          <input type="hidden" name="_csrfToken" value="{{.CSRFToken}}">
         {{end}}
-        <div class="form_label_errors hidden"></div>
-        <div>
-          {{tmpl $item.Template $item}}
-        </div>
-      </div>
-    {{end}}
 
-    <progress class="progress form_progress hidden"></progress>
+        {{if .Title}}
+          <h1>{{.Title}}</h1>
+        {{end}}
+
+        <div class="form_errors hidden"></div>
+
+        {{range $item := .Items}}
+          <div class="form_label{{if .Hidden}} form_label-hidden{{end}}{{if .Required}} form_label-required{{end}}" data-id="{{.ID}}">
+            {{if eq .HiddenName false}}
+              <label for="{{.UUID}}" class="form_label_text">{{.Name}}</label>
+              {{if .Description}}
+                <div class="form_label_description">{{.Description}}</div>
+              {{end}}
+            {{end}}
+            <div class="form_label_errors hidden"></div>
+            <div>
+              {{tmpl $item.Template $item}}
+            </div>
+          </div>
+        {{end}}
+
+        <progress class="progress form_progress hidden"></progress>
+
+      </form>
+    </div>
 
     <div class="form_after_content">{{.HTMLAfter}}</div>
 
-  </form>
+  </div>
 
 {{end}}

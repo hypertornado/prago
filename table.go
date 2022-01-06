@@ -2,15 +2,18 @@ package prago
 
 import (
 	"fmt"
+	"html/template"
 )
 
 type Table struct {
+	app  *App
 	data *tableData
 }
 
 type tableData struct {
-	Rows  []tableRow
-	Width int64
+	Rows       []tableRow
+	FooterText []string
+	Width      int64
 }
 
 type tableRow struct {
@@ -22,8 +25,9 @@ type tableCell struct {
 	Content string
 }
 
-func NewTable() *Table {
+func (app *App) Table() *Table {
 	return &Table{
+		app:  app,
 		data: &tableData{},
 	}
 }
@@ -53,6 +57,16 @@ func (t *Table) Header(items ...interface{}) {
 
 func (t *Table) Row(items ...interface{}) {
 	t.tableRow(false, items...)
+}
+
+func (t *Table) AddFooterText(text string) {
+	t.data.FooterText = append(t.data.FooterText, text)
+}
+
+func (t *Table) ExecuteHTML() template.HTML {
+	return template.HTML(
+		t.app.ExecuteTemplateToString("admin_form_table", t.TemplateData()),
+	)
 }
 
 func (t *Table) TemplateData() *tableData {

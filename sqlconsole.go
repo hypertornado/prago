@@ -1,13 +1,8 @@
 package prago
 
 import (
-	"bytes"
 	"fmt"
 )
-
-type sqlConsoleCell struct {
-	Value string
-}
 
 func (app *App) initSQLConsole() {
 
@@ -20,35 +15,35 @@ func (app *App) initSQLConsole() {
 	).Validation(func(vc ValidationContext) {
 		q := vc.GetValue("q")
 		var message string
-		var table [][]sqlConsoleCell
+		table := app.Table()
 
 		if q != "" {
 			rows, err := app.db.QueryContext(vc.Request().Request().Context(), q)
+			rowCount := 0
 			if err != nil {
 				message = err.Error()
 			} else {
 				columns, err := rows.Columns()
 				must(err)
-				var header []sqlConsoleCell
+				var header []interface{}
 				for _, v := range columns {
-					header = append(header, sqlConsoleCell{
-						Value: v,
-					})
+					header = append(header, v)
 				}
-				table = append(table, header)
+				table.Header(header...)
 
 				count := len(columns)
 				values := make([]interface{}, count)
 				valuePtrs := make([]interface{}, count)
 
 				for rows.Next() {
+					rowCount += 1
 					for i := range columns {
 						valuePtrs[i] = &values[i]
 					}
 
 					rows.Scan(valuePtrs...)
 
-					var row []sqlConsoleCell
+					var row []interface{}
 					for i := range columns {
 						val := values[i]
 
@@ -60,31 +55,21 @@ func (app *App) initSQLConsole() {
 							v = val
 						}
 
-						row = append(row, sqlConsoleCell{
-							Value: fmt.Sprintf("%v", v),
-						},
+						row = append(row,
+							fmt.Sprintf("%v", v),
 						)
-
 					}
-					table = append(table, row)
+					table.Row(row...)
 				}
 			}
-		}
-
-		retData := map[string]interface{}{
-			"table": table,
+			table.AddFooterText(fmt.Sprintf("%d items", rowCount))
 		}
 
 		if message != "" {
 			vc.AddError(message)
 		}
 
-		bufStats := new(bytes.Buffer)
-		err := app.ExecuteTemplate(bufStats, "sql_console", retData)
-		if err != nil {
-			panic(err)
-		}
-		vc.Validation().AfterContent = bufStats.String()
+		vc.Validation().AfterContent = table.ExecuteHTML()
 	})
 
 }

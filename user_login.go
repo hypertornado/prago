@@ -33,11 +33,12 @@ func initUserLogin(resource *Resource) {
 
 		form.AddSubmit(messages.Get(locale, "admin_login_action"))
 
-		renderNavigationPageNoLogin(request, page{
+		renderPage(request, page{
 			App:          resource.app,
 			Navigation:   resource.app.getNologinNavigation(locale, "login"),
 			PageTemplate: "admin_form",
 			PageData:     form,
+			HideBox:      true,
 		})
 	})
 
