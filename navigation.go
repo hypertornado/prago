@@ -59,12 +59,14 @@ func renderPage(request *Request, page page) {
 	}
 
 	if name == "" {
-		mainMenu := request.GetData("main_menu").(mainMenu)
-		name = mainMenu.GetTitle()
+		mainMenu, ok := request.GetData("main_menu").(mainMenu)
+		if ok {
+			name = mainMenu.GetTitle()
+		}
 	}
 
 	if request.app.logo != nil {
-		request.SetData("admin_has_logo", name)
+		request.SetData("admin_has_logo", true)
 	}
 
 	request.SetData("admin_title", name)

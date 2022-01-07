@@ -15,8 +15,6 @@ func initUserLogin(resource *Resource) {
 		},
 	)
 
-	//resource.app.accessController.get(resource.getURL("login"), func(request *Request) {
-
 	resource.app.nologinFormAction("login", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		emailValue := request.Params().Get("email")
@@ -30,36 +28,34 @@ func initUserLogin(resource *Resource) {
 			passwordInput.Focused = true
 		}
 		form.AddSubmit(messages.Get(locale, "admin_login_action"))
-	}, loginValidation)
+	}, func(vc ValidationContext) {
+		locale := vc.Locale()
+		email := vc.GetValue("email")
+		email = fixEmail(email)
+		request := vc.Request()
+		password := vc.GetValue("password")
 
-}
+		var user user
+		err := request.app.Is("email", email).Get(&user)
+		if err != nil {
+			vc.AddError(messages.Get(locale, "admin_login_error"))
+			return
+		}
 
-func loginValidation(vc ValidationContext) {
-	locale := vc.Locale()
-	email := vc.GetValue("email")
-	email = fixEmail(email)
-	request := vc.Request()
-	password := vc.GetValue("password")
+		if !user.isPassword(password) {
+			vc.AddError(messages.Get(locale, "admin_login_error"))
+			return
+		}
 
-	var user user
-	err := request.app.Is("email", email).Get(&user)
-	if err != nil {
-		vc.AddError(messages.Get(locale, "admin_login_error"))
-		return
-	}
+		user.LoggedInTime = time.Now()
+		user.LoggedInUseragent = request.Request().UserAgent()
+		user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
 
-	if !user.isPassword(password) {
-		vc.AddError(messages.Get(locale, "admin_login_error"))
-		return
-	}
+		must(request.app.Save(&user))
+		request.logInUser(&user)
+		request.AddFlashMessage(messages.Get(locale, "admin_login_ok"))
 
-	user.LoggedInTime = time.Now()
-	user.LoggedInUseragent = request.Request().UserAgent()
-	user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
+		vc.Validation().RedirectionLocaliton = request.app.getAdminURL("")
+	})
 
-	must(request.app.Save(&user))
-	request.logInUser(&user)
-	request.AddFlashMessage(messages.Get(locale, "admin_login_ok"))
-
-	vc.Validation().RedirectionLocaliton = request.app.getAdminURL("")
 }

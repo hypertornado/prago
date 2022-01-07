@@ -37,108 +37,88 @@ func initUserRegistration(resource *Resource) {
 		request.Redirect(app.getAdminURL("user/login"))
 	})
 
-	app.accessController.get(resource.getURL("registration"), func(request *Request) {
+	resource.app.nologinFormAction("registration", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
-		form := NewForm("/admin/user/registration")
 		form.AddTextInput("name", messages.Get(locale, "Name")).Focused = true
 		form.AddEmailInput("email", messages.Get(locale, "admin_email"))
 		form.AddPasswordInput("password", messages.Get(locale, "admin_register_password")).Description = messages.Get(locale, "admin_register_password_description")
 		form.AddCAPTCHAInput("captcha", "4 + 5 =")
 		form.AddSubmit(messages.Get(locale, "admin_register"))
+	}, registrationValidation)
 
-		renderPage(request, page{
-			App:          app,
-			Navigation:   app.getNologinNavigation(locale, "registration"),
-			PageTemplate: "admin_form",
-			PageData:     form,
-			HideBox:      true,
-		})
-
-	})
-
-	app.accessController.post(resource.getURL("registration"), func(request *Request) {
-		request.RenderJSON(registrationValidation(request))
-	})
 }
 
-func registrationValidation(request *Request) *formValidation {
-	ret := NewFormValidation()
-
+func registrationValidation(vc ValidationContext) {
 	valid := true
-	locale := localeFromRequest(request)
+	locale := vc.Locale()
+	app := vc.Request().app
 
-	name := request.Params().Get("name")
+	name := vc.GetValue("name")
 	if name == "" {
 		valid = false
-		ret.AddItemError("name", messages.Get(locale, "admin_user_name_not_empty"))
+		vc.AddItemError("name", messages.Get(locale, "admin_user_name_not_empty"))
 	}
 
-	email := request.Params().Get("email")
+	email := vc.GetValue("email")
 	email = fixEmail(email)
 	if !govalidator.IsEmail(email) {
 		valid = false
-		ret.AddItemError("email", messages.Get(locale, "admin_email_not_valid"))
+		vc.AddItemError("email", messages.Get(locale, "admin_email_not_valid"))
 	} else {
 		var user user
-		request.app.Is("email", email).Get(&user)
+		app.Is("email", email).Get(&user)
 		if user.Email == email {
 			valid = false
-			ret.AddItemError("email", messages.Get(locale, "admin_email_already_registered"))
+			vc.AddItemError("email", messages.Get(locale, "admin_email_already_registered"))
 		}
 	}
 
-	password := request.Params().Get("password")
+	password := vc.GetValue("password")
 	if len(password) < 7 {
 		valid = false
-		ret.AddItemError("password", messages.Get(locale, "admin_register_password"))
+		vc.AddItemError("password", messages.Get(locale, "admin_register_password"))
 	}
 
-	captcha := request.Params().Get("captcha")
+	captcha := vc.GetValue("captcha")
 	captcha = strings.Trim(captcha, " ")
 	if captcha != "9" {
 		valid = false
-		ret.AddItemError("captcha", messages.Get(locale, "admin_error"))
+		vc.AddItemError("captcha", messages.Get(locale, "admin_error"))
 	}
 
 	if valid {
 		u := &user{}
 		u.Email = email
-		u.Name = request.Params().Get("name")
+		u.Name = vc.GetValue("name")
 		u.IsActive = true
 		u.Locale = locale
-		must(u.newPassword(request.Params().Get("password")))
-		err := u.sendConfirmEmail(request, request.app)
+		must(u.newPassword(vc.GetValue("password")))
+		err := u.sendConfirmEmail(app, locale)
 		if err != nil {
-			request.app.Log().Println(err)
+			app.Log().Println(err)
 		}
-		err = u.sendAdminEmail(request, request.app)
+		err = u.sendAdminEmail(app)
 		if err != nil {
-			request.app.Log().Println(err)
+			app.Log().Println(err)
 		}
 
-		count, err := request.app.Query().Count(&user{})
+		count, err := app.Query().Count(&user{})
 		if err == nil && count == 0 {
 			u.Role = sysadminRoleName
 		}
 
-		must(request.app.Create(u))
+		must(app.Create(u))
 
-		request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
-		ret.RedirectionLocaliton = request.app.getAdminURL("user/login") + "?email=" + url.QueryEscape(email)
+		vc.Request().AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
+		vc.Validation().RedirectionLocaliton = app.getAdminURL("user/login") + "?email=" + url.QueryEscape(email)
 
 	}
-
-	return ret
-
 }
 
-func (u user) sendConfirmEmail(request *Request, app *App) error {
-
+func (u user) sendConfirmEmail(app *App, locale string) error {
 	if u.emailConfirmed() {
 		return errors.New("email already confirmed")
 	}
-
-	locale := localeFromRequest(request)
 	urlValues := make(url.Values)
 	urlValues.Add("email", u.Email)
 	urlValues.Add("token", u.emailToken(app))
@@ -149,17 +129,17 @@ func (u user) sendConfirmEmail(request *Request, app *App) error {
 	return app.Email().To(u.Name, u.Email).Subject(subject).HTMLContent(body).Send()
 }
 
-func (u user) sendAdminEmail(request *Request, a *App) error {
+func (u user) sendAdminEmail(app *App) error {
 	var users []*user
-	err := a.Query().Is("role", "sysadmin").Get(&users)
+	err := app.Query().Is("role", "sysadmin").Get(&users)
 	if err != nil {
 		return err
 	}
 	for _, receiver := range users {
 
-		body := fmt.Sprintf("New user registered on %s: %s (%s)", a.name(u.Locale), u.Email, u.Name)
+		body := fmt.Sprintf("New user registered on %s: %s (%s)", app.name(u.Locale), u.Email, u.Name)
 
-		err = request.app.Email().To(receiver.Name, receiver.Email).Subject("New registration on " + a.name(u.Locale)).HTMLContent(body).Send()
+		err = app.Email().To(receiver.Name, receiver.Email).Subject("New registration on " + app.name(u.Locale)).HTMLContent(body).Send()
 		if err != nil {
 			return err
 		}
