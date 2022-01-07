@@ -2,9 +2,9 @@
     <div class="admin_form_table">
         <table>
             {{range $row := .Rows}}
-                <tr>
+                <tr {{if $row.IsHeader}}class="admin_form_table_header"{{end}}>
                 {{range $cell := $row.Cells}}
-                    <td>{{$cell.Content}}</td>
+                    <td {{if $row.IsHeader}}class="admin_form_table_header_cell"{{end}}>{{$cell.Content}}</td>
                 {{end}}
                 </tr>
             {{end}}

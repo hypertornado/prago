@@ -21,7 +21,6 @@ func (app *App) initAdminActions() {
 	app.adminController.addAroundAction(func(request *Request, next func()) {
 		if request.user == nil || !request.user.IsActive {
 			request.Redirect(app.getAdminURL("user/login"))
-			//next()
 			return
 		}
 
