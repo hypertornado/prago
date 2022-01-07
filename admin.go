@@ -22,7 +22,7 @@ func (app *App) initAdminActions() {
 		if request.user == nil || !request.user.IsActive {
 			request.Redirect(app.getAdminURL("user/login"))
 			//next()
-			//return
+			return
 		}
 
 		request.SetData("javascripts", app.javascripts)
