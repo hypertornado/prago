@@ -1,6 +1,6 @@
 {{define "admin_form"}}
 
-  <div class="form_container">
+  <div class="form_container{{if .AutosubmitOnDataChange}} form_container-autosubmit{{end}}">
 
     <div class="admin_box">
       <form method="POST" action="{{.Action}}" class="form prago_form" enctype="multipart/form-data" novalidate>

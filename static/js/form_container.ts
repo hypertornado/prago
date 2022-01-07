@@ -2,6 +2,8 @@ class FormContainer {
   formContainer: HTMLDivElement;
   form: Form;
   progress: HTMLProgressElement;
+  lastAJAXID: string;
+  activeRequest: XMLHttpRequest;
 
   constructor(formContainer: HTMLDivElement) {
     this.formContainer = formContainer;
@@ -9,17 +11,53 @@ class FormContainer {
     var formEl: HTMLFormElement = formContainer.querySelector("form");
     this.form = new Form(formEl);
     this.form.formEl.addEventListener("submit", this.submitFormAJAX.bind(this));
+
+    if (this.isAutosubmit()) {
+      this.form.changeHandler = this.formChanged.bind(this);
+      this.form.willChangeHandler = this.formWillChange.bind(this);
+      this.sendForm();
+    }
+  }
+
+  isAutosubmit(): boolean {
+    if (this.formContainer.classList.contains("form_container-autosubmit")) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  formWillChange() {
+    this.progress.classList.remove("hidden");
+  }
+
+  formChanged() {
+    this.sendForm();
   }
 
   submitFormAJAX(event: Event) {
     event.preventDefault();
+    this.sendForm();
+  }
 
+  sendForm() {
     let formData = new FormData(this.form.formEl);
-
-    var request = new XMLHttpRequest();
+    let request = new XMLHttpRequest();
     request.open("POST", this.form.formEl.getAttribute("action"));
 
+    let requestID: string = this.makeid(10);
+    this.lastAJAXID = requestID;
+
+    if (this.activeRequest) {
+      this.activeRequest.abort();
+    }
+    this.activeRequest = request;
+
     request.addEventListener("load", (e) => {
+      if (requestID != this.lastAJAXID) {
+        return;
+      }
+      this.activeRequest = null;
       if (request.status == 200) {
         var data = JSON.parse(request.response);
         if (data.RedirectionLocaliton) {
@@ -84,5 +122,16 @@ class FormContainer {
         }
       }
     }
+  }
+
+  makeid(length: number) {
+    var result = "";
+    var characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
   }
 }

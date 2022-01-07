@@ -7,12 +7,13 @@ import (
 
 //Form represents admin form
 type Form struct {
-	Action    string
-	Title     string
-	Items     []*FormItem
-	Valid     bool
-	CSRFToken string
-	HTMLAfter template.HTML
+	Action                 string
+	Title                  string
+	Items                  []*FormItem
+	Valid                  bool
+	CSRFToken              string
+	HTMLAfter              template.HTML
+	AutosubmitOnDataChange bool
 }
 
 //FormItem represents item of form

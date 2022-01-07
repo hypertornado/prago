@@ -1,10 +1,13 @@
 //TODO: does not work with image picker and other hidden elements
 class Form {
-  dirty: boolean = false;
-  ajax: boolean = false;
+  private dirty: boolean = false;
   formEl: HTMLFormElement;
+  lastChanged: number;
+  changeHandler: any;
+  willChangeHandler: any;
 
   constructor(form: HTMLFormElement) {
+    this.dirty = false;
     this.formEl = form;
 
     var elements = form.querySelectorAll<HTMLDivElement>(".admin_markdown");
@@ -47,13 +50,15 @@ class Form {
     let els = form.querySelectorAll(".form_watcher");
     for (var i = 0; i < els.length; i++) {
       var input = <HTMLInputElement>els[i];
-      input.addEventListener("input", () => {
-        this.dirty = true;
-      });
-      input.addEventListener("change", () => {
-        this.dirty = true;
-      });
+      input.addEventListener("keyup", this.messageChanged.bind(this));
+      input.addEventListener("change", this.changed.bind(this));
     }
+
+    window.setInterval(() => {
+      if (this.dirty && Date.now() - this.lastChanged > 500) {
+        this.changed();
+      }
+    }, 100);
 
     window.addEventListener("beforeunload", (e) => {
       if (this.dirty) {
@@ -62,5 +67,22 @@ class Form {
         return confirmationMessage;
       }
     });
+  }
+
+  messageChanged() {
+    if (this.willChangeHandler) {
+      this.willChangeHandler();
+    }
+    this.dirty = true;
+    this.lastChanged = Date.now();
+  }
+
+  changed() {
+    if (this.changeHandler) {
+      this.dirty = false;
+      this.changeHandler();
+    } else {
+      this.dirty = true;
+    }
   }
 }

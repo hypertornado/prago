@@ -1655,7 +1655,7 @@ class PlacesEdit {
 class Form {
     constructor(form) {
         this.dirty = false;
-        this.ajax = false;
+        this.dirty = false;
         this.formEl = form;
         var elements = form.querySelectorAll(".admin_markdown");
         elements.forEach((el) => {
@@ -1687,13 +1687,14 @@ class Form {
         let els = form.querySelectorAll(".form_watcher");
         for (var i = 0; i < els.length; i++) {
             var input = els[i];
-            input.addEventListener("input", () => {
-                this.dirty = true;
-            });
-            input.addEventListener("change", () => {
-                this.dirty = true;
-            });
+            input.addEventListener("keyup", this.messageChanged.bind(this));
+            input.addEventListener("change", this.changed.bind(this));
         }
+        window.setInterval(() => {
+            if (this.dirty && Date.now() - this.lastChanged > 500) {
+                this.changed();
+            }
+        }, 100);
         window.addEventListener("beforeunload", (e) => {
             if (this.dirty) {
                 var confirmationMessage = "Chcete opustit stránku bez uložení změn?";
@@ -1701,6 +1702,22 @@ class Form {
                 return confirmationMessage;
             }
         });
+    }
+    messageChanged() {
+        if (this.willChangeHandler) {
+            this.willChangeHandler();
+        }
+        this.dirty = true;
+        this.lastChanged = Date.now();
+    }
+    changed() {
+        if (this.changeHandler) {
+            this.dirty = false;
+            this.changeHandler();
+        }
+        else {
+            this.dirty = true;
+        }
     }
 }
 class FormContainer {
@@ -1710,13 +1727,45 @@ class FormContainer {
         var formEl = formContainer.querySelector("form");
         this.form = new Form(formEl);
         this.form.formEl.addEventListener("submit", this.submitFormAJAX.bind(this));
+        if (this.isAutosubmit()) {
+            this.form.changeHandler = this.formChanged.bind(this);
+            this.form.willChangeHandler = this.formWillChange.bind(this);
+            this.sendForm();
+        }
+    }
+    isAutosubmit() {
+        if (this.formContainer.classList.contains("form_container-autosubmit")) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    formWillChange() {
+        this.progress.classList.remove("hidden");
+    }
+    formChanged() {
+        this.sendForm();
     }
     submitFormAJAX(event) {
         event.preventDefault();
+        this.sendForm();
+    }
+    sendForm() {
         let formData = new FormData(this.form.formEl);
-        var request = new XMLHttpRequest();
+        let request = new XMLHttpRequest();
         request.open("POST", this.form.formEl.getAttribute("action"));
+        let requestID = this.makeid(10);
+        this.lastAJAXID = requestID;
+        if (this.activeRequest) {
+            this.activeRequest.abort();
+        }
+        this.activeRequest = request;
         request.addEventListener("load", (e) => {
+            if (requestID != this.lastAJAXID) {
+                return;
+            }
+            this.activeRequest = null;
             if (request.status == 200) {
                 var data = JSON.parse(request.response);
                 if (data.RedirectionLocaliton) {
@@ -1778,6 +1827,15 @@ class FormContainer {
                 }
             }
         }
+    }
+    makeid(length) {
+        var result = "";
+        var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        var charactersLength = characters.length;
+        for (var i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
     }
 }
 class DatePicker {
