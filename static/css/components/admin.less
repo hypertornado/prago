@@ -792,8 +792,22 @@ td.admin_list_message {
 }
 
 @media print {
+  .admin_layout {
+    height: 100%;
+    overflow-y: visible;
+    overflow-x: visible;
+  }
+
   .admin_layout_left {
     display: none !important;
+  }
+
+  .admin_layout_right {
+    padding-left: 0px !important;
+    height: 100%;
+    overflow-y: visible;
+    overflow-x: visible;
+    height: auto !important;
   }
 
   .admin_header {

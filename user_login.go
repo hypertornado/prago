@@ -53,7 +53,7 @@ func initUserLogin(resource *Resource) {
 
 		must(request.app.Save(&user))
 		request.logInUser(&user)
-		request.AddFlashMessage(messages.Get(locale, "admin_login_ok"))
+		request.AddFlashMessage(messages.Get(user.Locale, "admin_login_ok"))
 
 		vc.Validation().RedirectionLocaliton = request.app.getAdminURL("")
 	})

@@ -1,7 +1,6 @@
 .admin_layout {
   width: 100%;
-  height: 100vh;
-  display: flex;
+  min-height: 100vh;
 }
 
 .admin_layout_left {
@@ -10,9 +9,9 @@
   height: 100vh;
   flex-shrink: 0;
   //border: 2px solid blue;
-  position: absolute;
-  top: 0px;
-  left: 0px;
+  position: fixed;
+  top: 0;
+  left: 0;
   z-index: 100;
   background-color: @backgroundGrayColor;
 }
@@ -22,7 +21,8 @@
   height: 100vh;
   overflow-y: auto;
   //border: 2px solid red;
-  margin-left: 300px;
+  padding-left: 300px;
+  display: block;
 }
 
 .admin_header {
@@ -34,8 +34,11 @@
   flex-shrink: 0;
   background: @backgroundGrayColor;
   display: block;
+  //border: 2px solid green;
   position: sticky;
-  top: 0px;
+  top: 0;
+  left: 0;
+  right: 0;
 }
 
 .admin_header_container {

@@ -5395,10 +5395,6 @@ body {
     line-height: 1.4em;
   }
 }
-body {
-  background-size: cover;
-  background-attachment: fixed;
-}
 code {
   background-color: #fafafa;
   padding: 0px 3px;
@@ -6181,8 +6177,20 @@ td.admin_list_message {
   border-left: none;
 }
 @media print {
+  .admin_layout {
+    height: 100%;
+    overflow-y: visible;
+    overflow-x: visible;
+  }
   .admin_layout_left {
     display: none !important;
+  }
+  .admin_layout_right {
+    padding-left: 0px !important;
+    height: 100%;
+    overflow-y: visible;
+    overflow-x: visible;
+    height: auto !important;
   }
   .admin_header {
     display: none !important;
@@ -6476,17 +6484,16 @@ select.admin_table_filter_item {
 }
 .admin_layout {
   width: 100%;
-  height: 100vh;
-  display: flex;
+  min-height: 100vh;
 }
 .admin_layout_left {
   overflow: auto;
   width: 300px;
   height: 100vh;
   flex-shrink: 0;
-  position: absolute;
-  top: 0px;
-  left: 0px;
+  position: fixed;
+  top: 0;
+  left: 0;
   z-index: 100;
   background-color: #fafafa;
 }
@@ -6494,7 +6501,8 @@ select.admin_table_filter_item {
   width: 100%;
   height: 100vh;
   overflow-y: auto;
-  margin-left: 300px;
+  padding-left: 300px;
+  display: block;
 }
 .admin_header {
   padding-bottom: 0px;
@@ -6506,7 +6514,9 @@ select.admin_table_filter_item {
   background: #fafafa;
   display: block;
   position: sticky;
-  top: 0px;
+  top: 0;
+  left: 0;
+  right: 0;
 }
 .admin_header_container {
   display: flex;
@@ -7342,7 +7352,7 @@ a.mainmenu_logo:hover {
 }
 @media (max-width: 1000px) {
   .admin_layout_right {
-    margin-left: 0px;
+    padding-left: 0px;
   }
   .admin_layout_left {
     position: absolute;
