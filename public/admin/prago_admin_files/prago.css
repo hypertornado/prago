@@ -6482,13 +6482,19 @@ select.admin_table_filter_item {
 .admin_layout_left {
   overflow: auto;
   width: 300px;
+  height: 100vh;
   flex-shrink: 0;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 100;
+  background-color: #fafafa;
 }
 .admin_layout_right {
   width: 100%;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
+  margin-left: 300px;
 }
 .admin_header {
   padding-bottom: 0px;
@@ -6497,12 +6503,15 @@ select.admin_table_filter_item {
   line-height: 1.6em;
   flex-grow: 0;
   flex-shrink: 0;
+  background: #fafafa;
   display: block;
+  position: sticky;
+  top: 0px;
 }
 .admin_header_container {
   display: flex;
 }
-.admin_mobile_menu {
+.admin_mobile_hamburger {
   border-radius: 3px;
   background-color: rgba(64, 120, 192, 0.1);
   font-size: 20px;
@@ -6520,14 +6529,14 @@ select.admin_table_filter_item {
   z-index: 300;
   display: none;
 }
-.admin_mobile_menu::after {
+.admin_mobile_hamburger::after {
   content: "☰";
 }
-.admin_mobile_menu:hover {
+.admin_mobile_hamburger:hover {
   color: black;
 }
-.admin_mobile_menu-selected,
-.admin_mobile_menu-selected:hover {
+.admin_mobile_hamburger-selected,
+.admin_mobile_hamburger-selected:hover {
   background-color: #4078c0;
   color: white;
 }
@@ -7332,6 +7341,9 @@ a.mainmenu_logo:hover {
   color: #eee;
 }
 @media (max-width: 1000px) {
+  .admin_layout_right {
+    margin-left: 0px;
+  }
   .admin_layout_left {
     position: absolute;
     right: 0px;
@@ -7349,7 +7361,7 @@ a.mainmenu_logo:hover {
   .admin_layout_left-visible {
     display: block;
   }
-  .admin_mobile_menu {
+  .admin_mobile_hamburger {
     display: block;
   }
 }

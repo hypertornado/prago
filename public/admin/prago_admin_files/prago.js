@@ -2123,7 +2123,7 @@ class SearchForm {
 class MainMenu {
     constructor(leftEl) {
         this.leftEl = leftEl;
-        this.menuEl = document.querySelector(".admin_mobile_menu");
+        this.menuEl = document.querySelector(".admin_mobile_hamburger");
         this.menuEl.addEventListener("click", this.menuClick.bind(this));
         var searchFormEl = leftEl.querySelector(".admin_header_search");
         if (searchFormEl) {
@@ -2140,7 +2140,7 @@ class MainMenu {
     }
     menuClick() {
         this.leftEl.classList.toggle("admin_layout_left-visible");
-        this.menuEl.classList.toggle("admin_mobile_menu-selected");
+        this.menuEl.classList.toggle("admin_mobile_hamburger-selected");
     }
     loadFromStorage() {
         var pos = window.localStorage["left_menu_position"];
