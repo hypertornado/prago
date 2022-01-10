@@ -5,6 +5,23 @@ import (
 	"reflect"
 )
 
+type Resource2[T any] struct {
+	resource *Resource
+}
+
+func NewResource2[T any](app *App) *Resource2[T] {
+	var item T
+	app.Resource(item)
+	ret := &Resource2[T]{}
+	return ret
+}
+
+//func GetResource2[T any](app *App) *Resource2[T] {
+//return nil
+//}
+
+// -----
+
 type App2 struct {
 	resources []any
 }
@@ -23,6 +40,11 @@ func GetResource2[T any](app *App2) Resources2[T] {
 type Resources2[T any] struct {
 }
 
+func (r Resources2[T]) Create() *T {
+	var ret T
+	return &ret
+}
+
 type Orange struct {
 	isOrange bool
 }
@@ -37,9 +59,10 @@ func resource2playground() {
 
 	a2 := new(App2)
 	AddResource2[Orange](a2)
-	orange := GetResource2[Orange](a2)
+	orangeResource := GetResource2[Orange](a2)
+	orange := orangeResource.Create()
 	fmt.Println("---")
 	//orange.isOrange = true
-	fmt.Println(orange)
+	fmt.Println(orange.isOrange)
 	fmt.Println("---")
 }

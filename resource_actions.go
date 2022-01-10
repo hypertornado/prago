@@ -188,7 +188,6 @@ func initDefaultResourceActions(resource *Resource) {
 }
 
 func (resource *Resource) deleteItemWithLog(user *user, id int64) error {
-
 	var beforeItem interface{}
 	resource.newItem(&beforeItem)
 	err := resource.app.Is("id", id).Get(beforeItem)
@@ -197,12 +196,15 @@ func (resource *Resource) deleteItemWithLog(user *user, id int64) error {
 	}
 
 	if resource.activityLog {
-		return resource.app.LogActivity("delete", user.ID, resource.id, id, beforeItem, nil)
+		err = resource.app.LogActivity("delete", user.ID, resource.id, id, beforeItem, nil)
+		if err != nil {
+			return err
+		}
 	}
 
 	var item interface{}
 	resource.newItem(&item)
-	_, err = resource.app.Is("id", id).Delete(item)
+	_, err = resource.app.Is("id", id).Debug().Delete(item)
 	if err != nil {
 		return fmt.Errorf("can't delete item id '%d': %s", id, err)
 	}

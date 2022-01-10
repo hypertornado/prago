@@ -60,13 +60,15 @@ class Form {
       }
     }, 100);
 
+    //TODO enable this when it works with new change watcher
+    /*
     window.addEventListener("beforeunload", (e) => {
       if (this.dirty) {
         var confirmationMessage = "Chcete opustit stránku bez uložení změn?";
         e.returnValue = confirmationMessage;
         return confirmationMessage;
       }
-    });
+    });*/
   }
 
   messageChanged() {
