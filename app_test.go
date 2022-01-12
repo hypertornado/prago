@@ -25,7 +25,7 @@ type ResourceStructUnique struct {
 	UniqueName string `prago-unique:"true"`
 }
 
-func prepareResource() *Resource2[ResourceStruct] {
+func prepareResource() *Resource[ResourceStruct] {
 	app := newTestingApp()
 	resource := NewResource[ResourceStruct](app)
 	NewResource[ResourceStructUnique](app)

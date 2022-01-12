@@ -6,13 +6,13 @@ import (
 	"reflect"
 )
 
-type Resource2[T any] struct {
+type Resource[T any] struct {
 	Resource *resource
 }
 
-func NewResource[T any](app *App) *Resource2[T] {
+func NewResource[T any](app *App) *Resource[T] {
 	var item T
-	ret := &Resource2[T]{
+	ret := &Resource[T]{
 		Resource: app.oldNewResource(item),
 	}
 	itemTyp := reflect.TypeOf(item)
@@ -20,34 +20,34 @@ func NewResource[T any](app *App) *Resource2[T] {
 	return ret
 }
 
-func GetResource[T any](app *App) *Resource2[T] {
+func GetResource[T any](app *App) *Resource[T] {
 	var item T
 	itemTyp := reflect.TypeOf(item)
 	ret, ok := app.resource2Map[itemTyp]
 	if !ok {
 		return nil
 	}
-	return ret.(*Resource2[T])
+	return ret.(*Resource[T])
 
 }
 
-func (resource Resource2[T]) Is(name string, value interface{}) *Query2[T] {
+func (resource Resource[T]) Is(name string, value interface{}) *Query2[T] {
 	return resource.Query().Is(name, value)
 }
 
-func (resource Resource2[T]) Create(item *T) error {
+func (resource Resource[T]) Create(item *T) error {
 	return resource.Resource.app.create(item)
 }
 
-func (resource Resource2[T]) Update(item *T) error {
+func (resource Resource[T]) Update(item *T) error {
 	return resource.Resource.app.save(item)
 }
 
-func (resource Resource2[T]) GetItemWithID(id int64) *T {
+func (resource Resource[T]) GetItemWithID(id int64) *T {
 	return resource.Query().Is("id", id).First()
 }
 
-func (resource Resource2[T]) Delete(id int64) error {
+func (resource Resource[T]) Delete(id int64) error {
 	var item T
 	count, err := resource.Query().query.Is("id", id).delete(&item)
 	if err != nil {
@@ -62,10 +62,6 @@ func (resource Resource2[T]) Delete(id int64) error {
 	return nil
 }
 
-func (resource Resource2[T]) Count() (int64, error) {
+func (resource Resource[T]) Count() (int64, error) {
 	return resource.Query().Count()
 }
-
-/*func (resource Resource2[T]) Items() []T {
-	return nil
-}*/

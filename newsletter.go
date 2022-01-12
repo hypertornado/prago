@@ -243,7 +243,7 @@ type newsletter struct {
 	UpdatedAt     time.Time
 }
 
-func initNewsletterResource(res *Resource2[newsletter]) {
+func initNewsletterResource(res *Resource[newsletter]) {
 	resource := res.Resource
 	resource.canView = sysadminPermission
 

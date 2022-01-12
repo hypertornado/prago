@@ -1,11 +1,11 @@
 package prago
 
 type Query2[T any] struct {
-	resource *Resource2[T]
+	resource *Resource[T]
 	query    Query
 }
 
-func (resource *Resource2[T]) Query() *Query2[T] {
+func (resource *Resource[T]) Query() *Query2[T] {
 	ret := &Query2[T]{
 		resource: resource,
 		query:    resource.Resource.app.Query(),
