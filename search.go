@@ -249,8 +249,7 @@ func (e *adminSearch) searchImport() error {
 	return nil
 }
 
-func (e *adminSearch) importResource(resource *Resource) error {
-
+func (e *adminSearch) importResource(resource *resource) error {
 	roles := resource.app.getResourceViewRoles(*resource)
 	var resourceSearchItem = searchItem{
 		ID:    "resource_" + resource.id,
@@ -281,12 +280,12 @@ func (e *adminSearch) importResource(resource *Resource) error {
 	return nil
 }
 
-func (e *adminSearch) saveItem(resource *Resource, item interface{}) error {
+func (e *adminSearch) saveItem(resource *resource, item interface{}) error {
 	roles := resource.app.getResourceViewRoles(*resource)
 	return e.saveItemWithRoles(resource, item, roles)
 }
 
-func (e *adminSearch) saveItemWithRoles(resource *Resource, item interface{}, roles []string) error {
+func (e *adminSearch) saveItemWithRoles(resource *resource, item interface{}, roles []string) error {
 	//TODO: ugly hack
 	relData := resource.itemToRelationData(item, &user{}, nil)
 	if relData == nil {
@@ -297,16 +296,16 @@ func (e *adminSearch) saveItemWithRoles(resource *Resource, item interface{}, ro
 	return e.addItem(&searchItem, 100)
 }
 
-func (e *adminSearch) deleteItem(resource *Resource, id int64) error {
+func (e *adminSearch) deleteItem(resource *resource, id int64) error {
 	_, err := e.client.Delete().Index(e.indexName).Id(searchID(resource, id)).Do(context.Background())
 	return err
 }
 
-func searchID(resource *Resource, id int64) string {
+func searchID(resource *resource, id int64) string {
 	return fmt.Sprintf("%s-%d", resource.id, id)
 }
 
-func relationDataToSearchItem(resource *Resource, data viewRelationData) searchItem {
+func relationDataToSearchItem(resource *resource, data viewRelationData) searchItem {
 	return searchItem{
 		ID:          searchID(resource, data.ID),
 		Category:    resource.name("cs"),

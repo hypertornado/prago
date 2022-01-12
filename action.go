@@ -23,7 +23,7 @@ type Action struct {
 	dataSource func(*Request) interface{}
 
 	app          *App
-	resource     *Resource
+	resource     *resource
 	isItemAction bool
 	isWide       bool
 	isUserMenu   bool
@@ -75,7 +75,7 @@ func (app *App) Action(url string) *Action {
 }
 
 //AddAction adds action to resource
-func (resource *Resource) Action(url string) *Action {
+func (resource *resource) Action(url string) *Action {
 	action := newAction(resource.app, url)
 	action.resource = resource
 	action.permission = resource.canView
@@ -84,7 +84,7 @@ func (resource *Resource) Action(url string) *Action {
 }
 
 //AddItemAction adds action to resource item
-func (resource *Resource) ItemAction(url string) *Action {
+func (resource *resource) ItemAction(url string) *Action {
 	action := newAction(resource.app, url)
 	action.resource = resource
 	action.isItemAction = true
@@ -265,7 +265,7 @@ func (action *Action) bindAction() error {
 	return nil
 }
 
-func (app *App) getListItemActions(user *user, item interface{}, id int64, resource Resource) listItemActions {
+func (app *App) getListItemActions(user *user, item interface{}, id int64, resource resource) listItemActions {
 	ret := listItemActions{}
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{

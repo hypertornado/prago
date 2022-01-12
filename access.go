@@ -98,7 +98,7 @@ func (app *App) authorize(user *user, permission Permission) bool {
 	return app.accessManager.roles[user.Role][permission]
 }
 
-func (app App) getResourceViewRoles(resource Resource) []string {
+func (app App) getResourceViewRoles(resource resource) []string {
 	var ret []string
 	for roleName, permissions := range app.accessManager.roles {
 		for permission := range permissions {

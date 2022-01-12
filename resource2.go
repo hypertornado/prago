@@ -7,7 +7,7 @@ import (
 )
 
 type Resource2[T any] struct {
-	Resource *Resource
+	Resource *resource
 }
 
 func NewResource[T any](app *App) *Resource2[T] {

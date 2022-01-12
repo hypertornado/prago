@@ -12,7 +12,7 @@ import (
 	"github.com/tealeg/xlsx"
 )
 
-func initDefaultResourceAPIs(resource *Resource) {
+func initDefaultResourceAPIs(resource *resource) {
 	resource.API("list").Handler(
 		func(request *Request) {
 			if request.Request().URL.Query().Get("_format") == "json" {

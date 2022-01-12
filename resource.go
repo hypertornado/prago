@@ -8,7 +8,7 @@ import (
 )
 
 //Resource is structure representing one item in admin menu or one table in database
-type Resource struct {
+type resource struct {
 	app                 *App
 	id                  string
 	name                func(locale string) string
@@ -44,7 +44,7 @@ type Resource struct {
 }
 
 //Resource creates new resource based on item
-func (app *App) oldNewResource(item interface{}) *Resource {
+func (app *App) oldNewResource(item interface{}) *resource {
 	typ := reflect.TypeOf(item)
 
 	if typ.Kind() != reflect.Struct {
@@ -52,7 +52,7 @@ func (app *App) oldNewResource(item interface{}) *Resource {
 	}
 
 	defaultName := typ.Name()
-	ret := &Resource{
+	ret := &resource{
 		app:                 app,
 		name:                unlocalized(defaultName),
 		id:                  columnName(defaultName),
@@ -98,7 +98,7 @@ func (app *App) oldNewResource(item interface{}) *Resource {
 	return ret
 }
 
-func (resource Resource) allowsMultipleActions(user *user) (ret bool) {
+func (resource resource) allowsMultipleActions(user *user) (ret bool) {
 	if resource.app.authorize(user, resource.canDelete) {
 		ret = true
 	}
@@ -108,7 +108,7 @@ func (resource Resource) allowsMultipleActions(user *user) (ret bool) {
 	return ret
 }
 
-func (resource Resource) getMultipleActions(user *user) (ret []listMultipleAction) {
+func (resource resource) getMultipleActions(user *user) (ret []listMultipleAction) {
 	if !resource.allowsMultipleActions(user) {
 		return nil
 	}
@@ -141,7 +141,7 @@ func (resource Resource) getMultipleActions(user *user) (ret []listMultipleActio
 	return
 }
 
-func (resource Resource) getItemURL(item interface{}, suffix string) string {
+func (resource resource) getItemURL(item interface{}, suffix string) string {
 	ret := resource.getURL(fmt.Sprintf("%d", getItemID(item)))
 	if suffix != "" {
 		ret += "/" + suffix
@@ -150,31 +150,31 @@ func (resource Resource) getItemURL(item interface{}, suffix string) string {
 }
 
 //Name sets human name for resource
-func (resource *Resource) Name(name func(string) string) *Resource {
+func (resource *resource) Name(name func(string) string) *resource {
 	resource.name = name
 	return resource
 }
 
 //PreviewURLFunction sets function to generate representation of resource item in app
-func (resource *Resource) PreviewURLFunction(fn func(interface{}) string) *Resource {
+func (resource *resource) PreviewURLFunction(fn func(interface{}) string) *resource {
 	resource.previewURL = fn
 	return resource
 }
 
 //ItemsPerPage sets default display value of items per page
-func (resource *Resource) ItemsPerPage(itemsPerPage int64) *Resource {
+func (resource *resource) ItemsPerPage(itemsPerPage int64) *resource {
 	resource.defaultItemsPerPage = itemsPerPage
 	return resource
 }
 
-func (resource *Resource) PermissionView(permission Permission) *Resource {
+func (resource *resource) PermissionView(permission Permission) *resource {
 	must(resource.app.validatePermission(permission))
 	resource.canView = permission
 	return resource
 }
 
 //PermissionEdit sets permission to edit functions, if there is no create and delete permissions set, it set them too
-func (resource *Resource) PermissionEdit(permission Permission) *Resource {
+func (resource *resource) PermissionEdit(permission Permission) *resource {
 	must(resource.app.validatePermission(permission))
 	if resource.canCreate == loggedPermission {
 		resource.canCreate = permission
@@ -186,39 +186,39 @@ func (resource *Resource) PermissionEdit(permission Permission) *Resource {
 	return resource
 }
 
-func (resource *Resource) PermissionCreate(permission Permission) *Resource {
+func (resource *resource) PermissionCreate(permission Permission) *resource {
 	must(resource.app.validatePermission(permission))
 	resource.canCreate = permission
 	return resource
 }
 
-func (resource *Resource) PermissionDelete(permission Permission) *Resource {
+func (resource *resource) PermissionDelete(permission Permission) *resource {
 	must(resource.app.validatePermission(permission))
 	resource.canDelete = permission
 	return resource
 }
 
-func (resource *Resource) PermissionExport(permission Permission) *Resource {
+func (resource *resource) PermissionExport(permission Permission) *resource {
 	must(resource.app.validatePermission(permission))
 	resource.canExport = permission
 	return resource
 }
 
-func (resource *Resource) Validation(validation Validation) *Resource {
+func (resource *resource) Validation(validation Validation) *resource {
 	resource.validations = append(resource.validations, validation)
 	return resource
 }
 
-func (resource *Resource) DeleteValidation(validation Validation) *Resource {
+func (resource *resource) DeleteValidation(validation Validation) *resource {
 	resource.deleteValidations = append(resource.deleteValidations, validation)
 	return resource
 }
 
-func (app *App) getResourceByName(name string) *Resource {
+func (app *App) getResourceByName(name string) *resource {
 	return app.resourceNameMap[columnName(name)]
 }
 
-func (app *App) initResource(resource *Resource) {
+func (app *App) initResource(resource *resource) {
 	resource.resourceController.addAroundAction(func(request *Request, next func()) {
 		if !app.authorize(request.user, resource.canView) {
 			render403(request)
@@ -235,7 +235,7 @@ func (app *App) initDefaultResourceActions() {
 	}
 }
 
-func (resource Resource) getURL(suffix string) string {
+func (resource resource) getURL(suffix string) string {
 	url := resource.id
 	if len(suffix) > 0 {
 		url += "/" + suffix
@@ -243,7 +243,7 @@ func (resource Resource) getURL(suffix string) string {
 	return resource.app.getAdminURL(url)
 }
 
-func (app *App) getResourceByItem(item interface{}) (*Resource, error) {
+func (app *App) getResourceByItem(item interface{}) (*resource, error) {
 	typ := reflect.TypeOf(item).Elem()
 	resource, ok := app.resourceMap[typ]
 	if !ok {
@@ -252,7 +252,7 @@ func (app *App) getResourceByItem(item interface{}) (*Resource, error) {
 	return resource, nil
 }
 
-func (resource Resource) saveWithDBIface(item interface{}, db dbIface, debugSQL bool) error {
+func (resource resource) saveWithDBIface(item interface{}, db dbIface, debugSQL bool) error {
 	val := reflect.ValueOf(item).Elem()
 	timeVal := reflect.ValueOf(time.Now())
 	fn := "UpdatedAt"
@@ -264,7 +264,7 @@ func (resource Resource) saveWithDBIface(item interface{}, db dbIface, debugSQL 
 	return resource.saveItem(db, resource.id, item, debugSQL)
 }
 
-func (resource Resource) createWithDBIface(item interface{}, db dbIface, debugSQL bool) error {
+func (resource resource) createWithDBIface(item interface{}, db dbIface, debugSQL bool) error {
 	val := reflect.ValueOf(item).Elem()
 	timeVal := reflect.ValueOf(time.Now())
 	var t time.Time
@@ -280,36 +280,36 @@ func (resource Resource) createWithDBIface(item interface{}, db dbIface, debugSQ
 	return resource.createItem(db, resource.id, item, debugSQL)
 }
 
-func (resource Resource) newItem(item interface{}) {
+func (resource resource) newItem(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(resource.typ))
 }
 
-func (resource Resource) newArrayOfItems(item interface{}) {
+func (resource resource) newArrayOfItems(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(reflect.SliceOf(reflect.PtrTo(resource.typ))))
 }
 
-func (resource Resource) count() int64 {
+func (resource resource) count() int64 {
 	var item interface{}
 	resource.newItem(&item)
 	count, _ := resource.app.Query().Count(item)
 	return count
 }
 
-func (resource Resource) cachedCountName() string {
+func (resource resource) cachedCountName() string {
 	return fmt.Sprintf("resource_count-%s", resource.id)
 }
 
-func (resource Resource) getCachedCount() int64 {
+func (resource resource) getCachedCount() int64 {
 	return resource.app.Cache.Load(resource.cachedCountName(), func() interface{} {
 		return resource.count()
 	}).(int64)
 }
 
-func (resource Resource) updateCachedCount() error {
+func (resource resource) updateCachedCount() error {
 	return resource.app.Cache.Set(resource.cachedCountName(), resource.count())
 }
 
-func (resource Resource) getPaginationData(user *user) (ret []listPaginationData) {
+func (resource resource) getPaginationData(user *user) (ret []listPaginationData) {
 	var ints []int64
 	var used bool
 

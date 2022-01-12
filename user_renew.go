@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func initUserRenew(resource *Resource) {
+func initUserRenew(resource *resource) {
 	resource.app.nologinFormAction("forgot", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		form.AddEmailInput("email", messages.Get(locale, "admin_email")).Focused = true

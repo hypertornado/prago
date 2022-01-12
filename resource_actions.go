@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func initDefaultResourceActions(resource *Resource) {
+func initDefaultResourceActions(resource *resource) {
 	app := resource.app
 
 	resource.Action("").priority().Permission(resource.canView).Name(resource.name).IsWide().Template("admin_list").DataSource(
@@ -187,7 +187,7 @@ func initDefaultResourceActions(resource *Resource) {
 	}
 }
 
-func (resource *Resource) deleteItemWithLog(user *user, id int64) error {
+func (resource *resource) deleteItemWithLog(user *user, id int64) error {
 	var beforeItem interface{}
 	resource.newItem(&beforeItem)
 	err := resource.app.Is("id", id).Get(beforeItem)
@@ -220,7 +220,7 @@ func (resource *Resource) deleteItemWithLog(user *user, id int64) error {
 	return nil
 }
 
-func (resource *Resource) editItemWithLog(user *user, values url.Values) (interface{}, ValidationContext, error) {
+func (resource *resource) editItemWithLog(user *user, values url.Values) (interface{}, ValidationContext, error) {
 	app := resource.app
 
 	id, err := strconv.Atoi(values.Get("id"))

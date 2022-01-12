@@ -28,17 +28,17 @@ type App struct {
 
 	logo            []byte
 	name            func(string) string
-	resources       []*Resource
-	resourceMap     map[reflect.Type]*Resource
-	resourceNameMap map[string]*Resource
+	resources       []*resource
+	resourceMap     map[reflect.Type]*resource
+	resourceNameMap map[string]*resource
 
 	mainController   *controller
 	appController    *controller
 	accessController *controller
 	adminController  *controller
 
-	UsersResource *Resource
-	FilesResource *Resource
+	UsersResource *resource
+	FilesResource *resource
 
 	rootActions    []*Action
 	db             *sql.DB
@@ -101,8 +101,8 @@ func createApp(codeName string, version string) *App {
 	app.initStaticFilesHandler()
 	app.initNotifications()
 
-	app.resourceMap = make(map[reflect.Type]*Resource)
-	app.resourceNameMap = make(map[string]*Resource)
+	app.resourceMap = make(map[reflect.Type]*resource)
+	app.resourceNameMap = make(map[string]*resource)
 
 	app.fieldTypes = make(map[string]*fieldType)
 

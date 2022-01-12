@@ -53,7 +53,7 @@ func (app *App) ListenActivity(handler func(Activity)) {
 	app.activityListeners = append(app.activityListeners, handler)
 }
 
-func (app *App) getHistory(resource *Resource, itemID int64) historyView {
+func (app *App) getHistory(resource *resource, itemID int64) historyView {
 	ret := historyView{}
 
 	q := app.Query()
@@ -96,7 +96,7 @@ func (app *App) getHistory(resource *Resource, itemID int64) historyView {
 	return ret
 }
 
-func initActivityLog(resource *Resource) {
+func initActivityLog(resource *resource) {
 	resource.canView = Permission(sysadminRoleName)
 	resource.orderDesc = true
 	resource.name = messages.GetNameFunction("admin_history")

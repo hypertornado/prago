@@ -24,10 +24,10 @@ type field struct {
 	canView Permission
 	canEdit Permission
 
-	resource  *Resource
+	resource  *resource
 	fieldType *fieldType
 
-	relatedResource *Resource
+	relatedResource *resource
 
 	//viewTemplate string
 }
@@ -64,7 +64,7 @@ func (field *field) authorizeEdit(user *user) bool {
 	return true
 }
 
-func (resource *Resource) newField(f reflect.StructField, order int) *field {
+func (resource *resource) newField(f reflect.StructField, order int) *field {
 	ret := &field{
 		Name:        f.Name,
 		ColumnName:  columnName(f.Name),
@@ -253,7 +253,7 @@ func (field *field) addFieldValidation(nameOfValidation string) error {
 	return fmt.Errorf("unknown validation name: %s", nameOfValidation)
 }
 
-func (resource *Resource) FieldName(nameOfField string, name func(string) string) *Resource {
+func (resource *resource) FieldName(nameOfField string, name func(string) string) *resource {
 	f := resource.fieldMap[nameOfField]
 	if f == nil {
 		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, nameOfField))
@@ -262,7 +262,7 @@ func (resource *Resource) FieldName(nameOfField string, name func(string) string
 	return resource
 }
 
-func (resource *Resource) FieldDescription(descriptionOfField string, description func(string) string) *Resource {
+func (resource *resource) FieldDescription(descriptionOfField string, description func(string) string) *resource {
 	f := resource.fieldMap[descriptionOfField]
 	if f == nil {
 		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, descriptionOfField))
@@ -271,7 +271,7 @@ func (resource *Resource) FieldDescription(descriptionOfField string, descriptio
 	return resource
 }
 
-func (resource *Resource) FieldViewTemplate(IDofField string, viewTemplate string) *Resource {
+func (resource *resource) FieldViewTemplate(IDofField string, viewTemplate string) *resource {
 	f := resource.fieldMap[IDofField]
 	if f == nil {
 		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
@@ -280,7 +280,7 @@ func (resource *Resource) FieldViewTemplate(IDofField string, viewTemplate strin
 	return resource
 }
 
-func (resource *Resource) FieldListCellTemplate(IDofField string, template string) *Resource {
+func (resource *resource) FieldListCellTemplate(IDofField string, template string) *resource {
 	f := resource.fieldMap[IDofField]
 	if f == nil {
 		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
@@ -289,7 +289,7 @@ func (resource *Resource) FieldListCellTemplate(IDofField string, template strin
 	return resource
 }
 
-func (resource *Resource) FieldFormTemplate(IDofField string, template string) *Resource {
+func (resource *resource) FieldFormTemplate(IDofField string, template string) *resource {
 	f := resource.fieldMap[IDofField]
 	if f == nil {
 		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
@@ -298,7 +298,7 @@ func (resource *Resource) FieldFormTemplate(IDofField string, template string) *
 	return resource
 }
 
-func (resource *Resource) FieldDBDescription(IDofField string, description string) *Resource {
+func (resource *resource) FieldDBDescription(IDofField string, description string) *resource {
 	f := resource.fieldMap[IDofField]
 	if f == nil {
 		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))

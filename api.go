@@ -11,7 +11,7 @@ type API struct {
 	method      string
 	url         string
 	permission  Permission
-	resource    *Resource
+	resource    *resource
 	handler     func(*Request)
 	handlerJSON func(*Request) interface{}
 }
@@ -31,7 +31,7 @@ func (app *App) API(url string) *API {
 	return api
 }
 
-func (resource *Resource) API(url string) *API {
+func (resource *resource) API(url string) *API {
 	api := newAPI(resource.app, url)
 	api.resource = resource
 	api.permission = resource.canView

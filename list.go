@@ -87,7 +87,7 @@ type listMultipleAction struct {
 	IsDelete bool
 }
 
-func (resource *Resource) getListHeader(user *user) (list list, err error) {
+func (resource *resource) getListHeader(user *user) (list list, err error) {
 	lang := user.Locale
 
 	list.Colspan = 1
@@ -130,7 +130,7 @@ func (resource *Resource) getListHeader(user *user) (list list, err error) {
 	return
 }
 
-func (resource *Resource) defaultVisibleFieldsStr(user *user) string {
+func (resource *resource) defaultVisibleFieldsStr(user *user) string {
 	ret := []string{}
 	for _, v := range resource.fieldArrays {
 		if !v.authorizeView(user) {
@@ -144,7 +144,7 @@ func (resource *Resource) defaultVisibleFieldsStr(user *user) string {
 	return r
 }
 
-func (resource *Resource) fieldsStr(user *user) string {
+func (resource *resource) fieldsStr(user *user) string {
 	ret := []string{}
 	for _, v := range resource.fieldArrays {
 		if !v.authorizeView(user) {
@@ -220,7 +220,7 @@ func (field *field) filterLayout() string {
 	return ""
 }
 
-func (resource *Resource) addFilterParamsToQuery(q Query, params url.Values) Query {
+func (resource *resource) addFilterParamsToQuery(q Query, params url.Values) Query {
 	filter := map[string]string{}
 	for _, v := range resource.fieldMap {
 		key := v.ColumnName
@@ -232,7 +232,7 @@ func (resource *Resource) addFilterParamsToQuery(q Query, params url.Values) Que
 	return resource.addFilterToQuery(q, filter)
 }
 
-func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Query {
+func (resource *resource) addFilterToQuery(q Query, filter map[string]string) Query {
 	for k, v := range filter {
 		field := resource.fieldMap[k]
 		if field == nil {
@@ -323,7 +323,7 @@ func (resource *Resource) addFilterToQuery(q Query, filter map[string]string) Qu
 	return q
 }
 
-func (resource *Resource) getListContent(user *user, params url.Values) (ret listContent, err error) {
+func (resource *resource) getListContent(user *user, params url.Values) (ret listContent, err error) {
 
 	if !resource.app.authorize(user, resource.canView) {
 		return listContent{}, errors.New("access denied")
@@ -457,7 +457,7 @@ type listContentJSON struct {
 	StatsStr string
 }
 
-func (resource *Resource) getListContentJSON(user *user, params url.Values) (ret *listContentJSON, err error) {
+func (resource *resource) getListContentJSON(user *user, params url.Values) (ret *listContentJSON, err error) {
 	listData, err := resource.getListContent(user, params)
 	if err != nil {
 		return nil, err
@@ -489,7 +489,7 @@ func (resource *Resource) getListContentJSON(user *user, params url.Values) (ret
 
 }
 
-func (resource Resource) valueToListCell(user *user, f field, val reflect.Value, isOrderedBy bool) listCell {
+func (resource resource) valueToListCell(user *user, f field, val reflect.Value, isOrderedBy bool) listCell {
 	if !f.authorizeView(user) {
 		panic(fmt.Sprintf("can't access field '%s'", f.Name))
 	}

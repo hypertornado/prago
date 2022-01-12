@@ -10,7 +10,7 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
-func initUserRegistration(resource *Resource) {
+func initUserRegistration(resource *resource) {
 	app := resource.app
 
 	app.accessController.get(resource.getURL("confirm_email"), func(request *Request) {

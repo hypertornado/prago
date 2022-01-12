@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-func initUserLogin(resource *Resource) {
+func initUserLogin(resource *resource) {
 
 	resource.ItemAction("loginas").Name(unlocalized("Přihlásit se jako")).Permission(sysadminPermission).Handler(
 		func(request *Request) {

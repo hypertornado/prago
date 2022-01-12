@@ -9,7 +9,7 @@ import (
 )
 
 type relation struct {
-	resource *Resource
+	resource *resource
 	field    string
 	listName func(string) string
 	listURL  func(id int64) string
@@ -30,7 +30,7 @@ func (app *App) initAllAutoRelations() {
 	}
 }
 
-func (resource *Resource) initAutoRelations() {
+func (resource *resource) initAutoRelations() {
 	for _, v := range resource.fieldArrays {
 		if v.Tags["prago-type"] == "relation" {
 			referenceName := v.Name
@@ -59,7 +59,7 @@ func (resource *Resource) initAutoRelations() {
 	}
 }
 
-func createRelationAddURL(resource Resource, field field) func(int64) string {
+func createRelationAddURL(resource resource, field field) func(int64) string {
 	return func(id int64) string {
 		values := url.Values{}
 		values.Add(field.ColumnName, fmt.Sprintf("%d", id))
@@ -67,7 +67,7 @@ func createRelationAddURL(resource Resource, field field) func(int64) string {
 	}
 }
 
-func createRelationListURL(resource Resource, field field) func(int64) string {
+func createRelationListURL(resource resource, field field) func(int64) string {
 	return func(id int64) string {
 		values := url.Values{}
 		values.Add(field.ColumnName, fmt.Sprintf("%d", id))
@@ -75,7 +75,7 @@ func createRelationListURL(resource Resource, field field) func(int64) string {
 	}
 }
 
-func createRelationNamingFunction(field field, resource Resource, referenceResource Resource) func(string) string {
+func createRelationNamingFunction(field field, resource resource, referenceResource resource) func(string) string {
 	return func(lang string) string {
 		ret := resource.name(lang)
 		fieldName := field.HumanName(lang)
@@ -117,7 +117,7 @@ func getRelationData(user *user, f field, value interface{}) (*viewRelationData,
 	return f.relatedResource.itemToRelationData(item, user, nil), nil
 }
 
-func (resource *Resource) itemToRelationData(item interface{}, user *user, relatedResource *Resource) *viewRelationData {
+func (resource *resource) itemToRelationData(item interface{}, user *user, relatedResource *resource) *viewRelationData {
 	var ret viewRelationData
 	ret.ID = getItemID(item)
 	ret.Name = getItemName(item)
@@ -155,7 +155,7 @@ func getItemName(item interface{}) string {
 	return fmt.Sprintf("#%d", getItemID(item))
 }
 
-func (resource *Resource) getItemDescription(item interface{}, user *user, relatedResource *Resource) string {
+func (resource *resource) getItemDescription(item interface{}, user *user, relatedResource *resource) string {
 	var items []string
 
 	itemsVal := reflect.ValueOf(item).Elem()

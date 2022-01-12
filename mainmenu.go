@@ -156,7 +156,7 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 	return ret
 }
 
-func (app *App) getSortedResources(locale string) (ret []*Resource) {
+func (app *App) getSortedResources(locale string) (ret []*resource) {
 	collator := collate.New(language.Czech)
 
 	ret = app.resources

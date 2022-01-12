@@ -20,13 +20,13 @@ type viewField struct {
 	Value    interface{}
 }
 
-func (resource Resource) getViews(id int, inValues interface{}, user *user) (ret []view) {
+func (resource resource) getViews(id int, inValues interface{}, user *user) (ret []view) {
 	ret = append(ret, resource.getBasicView(id, inValues, user))
 	ret = append(ret, resource.getAutoRelationsView(id, inValues, user)...)
 	return ret
 }
 
-func (resource Resource) getBasicView(id int, inValues interface{}, user *user) view {
+func (resource resource) getBasicView(id int, inValues interface{}, user *user) view {
 	ret := view{}
 
 	ret.Items = append(
