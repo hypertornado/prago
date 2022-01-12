@@ -40,7 +40,8 @@ func (app *App) initUserSettings() {
 			u := vc.Request().user
 			u.Name = name
 			u.Locale = newLocale
-			must(app.Save(u))
+			must(GetResource[user](app).Update(u))
+			//must(app.Save(u))
 
 			vc.Request().AddFlashMessage(messages.Get(newLocale, "admin_settings_changed"))
 			vc.Validation().RedirectionLocaliton = app.getAdminURL("")

@@ -40,7 +40,7 @@ func (resource Resource2[T]) Create(item *T) error {
 }
 
 func (resource Resource2[T]) Update(item *T) error {
-	return resource.Resource.app.Save(item)
+	return resource.Resource.app.save(item)
 }
 
 func (resource Resource2[T]) GetItemWithID(id int64) *T {

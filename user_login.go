@@ -35,25 +35,26 @@ func initUserLogin(resource *Resource) {
 		request := vc.Request()
 		password := vc.GetValue("password")
 
-		var user user
-		err := request.app.Is("email", email).Get(&user)
+		var u user
+		err := request.app.Is("email", email).Get(&u)
 		if err != nil {
 			vc.AddError(messages.Get(locale, "admin_login_error"))
 			return
 		}
 
-		if !user.isPassword(password) {
+		if !u.isPassword(password) {
 			vc.AddError(messages.Get(locale, "admin_login_error"))
 			return
 		}
 
-		user.LoggedInTime = time.Now()
-		user.LoggedInUseragent = request.Request().UserAgent()
-		user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
+		u.LoggedInTime = time.Now()
+		u.LoggedInUseragent = request.Request().UserAgent()
+		u.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
 
-		must(request.app.Save(&user))
-		request.logInUser(&user)
-		request.AddFlashMessage(messages.Get(user.Locale, "admin_login_ok"))
+		must(GetResource[user](resource.app).Update(&u))
+		//must(request.app.Save(&user))
+		request.logInUser(&u)
+		request.AddFlashMessage(messages.Get(u.Locale, "admin_login_ok"))
 
 		vc.Validation().RedirectionLocaliton = request.app.getAdminURL("")
 	})

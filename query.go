@@ -33,16 +33,8 @@ func (app *App) create(item interface{}) error {
 	return resource.createWithDBIface(item, app.db, false)
 }
 
-//MustSave
-func (app *App) MustSave(item interface{}) {
-	err := app.Save(item)
-	if err != nil {
-		panic(fmt.Sprintf("can't save: %s", err))
-	}
-}
-
 //Save item to db
-func (app *App) Save(item interface{}) error {
+func (app *App) save(item interface{}) error {
 	resource, err := app.getResourceByItem(item)
 	if err != nil {
 		return err
@@ -152,15 +144,6 @@ func (q Query) Get(item interface{}) error {
 	return nil
 }
 
-//MustCount
-func (q Query) MustCount(item interface{}) int64 {
-	count, err := q.Count(item)
-	if err != nil {
-		panic(fmt.Sprintf("can't count: %s", err))
-	}
-	return count
-}
-
 //Count items with query
 func (q Query) Count(item interface{}) (int64, error) {
 	resource, err := q.app.getResourceByItem(item)
@@ -171,7 +154,7 @@ func (q Query) Count(item interface{}) (int64, error) {
 }
 
 //MustDelete
-func (q Query) MustDelete(item interface{}) {
+func (q Query) mustDelete(item interface{}) {
 	_, err := q.Delete(item)
 	if err != nil {
 		panic(fmt.Sprintf("can't delete: %s", err))

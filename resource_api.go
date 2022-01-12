@@ -102,7 +102,10 @@ func initDefaultResourceAPIs(resource *Resource) {
 				resource.newItem(&item)
 				resource.app.Is("id", int64(id)).MustGet(item)
 				resource.setOrderPosition(item, int64(i))
-				resource.app.MustSave(item)
+				err := resource.app.save(item)
+				if err != nil {
+					panic(err)
+				}
 			}
 			request.RenderJSON(true)
 		},

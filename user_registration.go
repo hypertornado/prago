@@ -17,15 +17,16 @@ func initUserRegistration(resource *Resource) {
 		email := request.Params().Get("email")
 		token := request.Params().Get("token")
 
-		var user user
-		err := app.Is("email", email).Get(&user)
+		var u user
+		err := app.Is("email", email).Get(&u)
 		if err == nil {
-			if !user.emailConfirmed() {
-				if token == user.emailToken(app) {
-					user.EmailConfirmedAt = time.Now()
-					err = app.Save(&user)
+			if !u.emailConfirmed() {
+				if token == u.emailToken(app) {
+					u.EmailConfirmedAt = time.Now()
+					err = GetResource[user](resource.app).Update(&u)
+					//err = app.Save(&user)
 					if err == nil {
-						request.AddFlashMessage(messages.Get(user.Locale, "admin_confirm_email_ok"))
+						request.AddFlashMessage(messages.Get(u.Locale, "admin_confirm_email_ok"))
 						request.Redirect(app.getAdminURL("user/login"))
 						return
 					}
@@ -33,7 +34,7 @@ func initUserRegistration(resource *Resource) {
 			}
 		}
 
-		request.AddFlashMessage(messages.Get(user.Locale, "admin_confirm_email_fail"))
+		request.AddFlashMessage(messages.Get(u.Locale, "admin_confirm_email_fail"))
 		request.Redirect(app.getAdminURL("user/login"))
 	})
 

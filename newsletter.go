@@ -110,7 +110,9 @@ func (app *App) Newsletters() *Newsletters {
 		}
 
 		person.Confirmed = true
-		err = app.Save(&person)
+
+		err = GetResource[newsletterPersons](app).Update(&person)
+		//err = app.Save(&person)
 		if err != nil {
 			panic(err)
 		}
@@ -138,7 +140,8 @@ func (app *App) Newsletters() *Newsletters {
 		}
 
 		person.Unsubscribed = true
-		err = app.Save(&person)
+		err = GetResource[newsletterPersons](app).Update(&person)
+		//err = app.Save(&person)
 		if err != nil {
 			panic(err)
 		}
@@ -152,7 +155,8 @@ func (app *App) Newsletters() *Newsletters {
 
 	app.newsletters.newsletterResource = NewResource[newsletter](app).Resource.Name(unlocalized("Newsletter"))
 	initNewsletterResource(
-		app.newsletters.newsletterResource,
+		GetResource[newsletter](app),
+		//app.newsletters.newsletterResource,
 	)
 
 	app.newsletters.newsletterSectionResource = NewResource[newsletterSection](app).Resource.Name(unlocalized("Newsletter - sekce"))
@@ -239,7 +243,8 @@ type newsletter struct {
 	UpdatedAt     time.Time
 }
 
-func initNewsletterResource(resource *Resource) {
+func initNewsletterResource(res *Resource2[newsletter]) {
+	resource := res.Resource
 	resource.canView = sysadminPermission
 
 	resource.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(
@@ -264,7 +269,10 @@ func initNewsletterResource(resource *Resource) {
 		var newsletter newsletter
 		resource.app.Is("id", vc.GetValue("id")).MustGet(&newsletter)
 		newsletter.PreviewSentAt = time.Now()
-		resource.app.MustSave(&newsletter)
+		err := res.Update(&newsletter)
+		if err != nil {
+			panic(err)
+		}
 
 		emails := parseEmails(vc.GetValue("emails"))
 		if len(emails) == 0 {
@@ -290,23 +298,24 @@ func initNewsletterResource(resource *Resource) {
 		},
 	).Validation(
 		func(vc ValidationContext) {
-			var newsletter newsletter
-			resource.app.Is("id", vc.GetValue("id")).MustGet(&newsletter)
+			var nl newsletter
+			resource.app.Is("id", vc.GetValue("id")).MustGet(&nl)
 
-			newsletter.SentAt = time.Now()
+			nl.SentAt = time.Now()
 			//TODO: log sent emails
-			resource.app.Save(&newsletter)
+			GetResource[newsletter](resource.app).Update(&nl)
+			//resource.app.Save(&newsletter)
 
 			recipients, err := resource.app.getNewsletterRecipients()
 			if err != nil {
 				panic(err)
 			}
 
-			go resource.app.sendEmails(newsletter, recipients)
+			go resource.app.sendEmails(nl, recipients)
 
-			vc.Request().AddFlashMessage(fmt.Sprintf("Newsletter '%s' se odesílá na %d adres", newsletter.Name, len(recipients)))
+			vc.Request().AddFlashMessage(fmt.Sprintf("Newsletter '%s' se odesílá na %d adres", nl.Name, len(recipients)))
 
-			vc.Validation().RedirectionLocaliton = resource.getItemURL(&newsletter, "")
+			vc.Validation().RedirectionLocaliton = resource.getItemURL(&nl, "")
 		},
 	)
 

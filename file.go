@@ -156,8 +156,9 @@ func (app *App) initFilesResource() {
 					fmt.Println("error while updating metadata: ", v.ID, err)
 					continue
 				}
-				file := *v
-				err = app.Save(&file)
+				f := *v
+				err = GetResource[File](app).Update(&f)
+				//err = app.Save(&file)
 				if err != nil {
 					fmt.Println("error while saving file: ", v.ID)
 				} else {
