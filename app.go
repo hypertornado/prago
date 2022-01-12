@@ -3,7 +3,6 @@ package prago
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 	"reflect"
@@ -149,11 +148,6 @@ func (app *App) afterInit() {
 }
 
 func (app *App) Run() {
-	fmt.Println("play XXXXXXXXXX")
-	userResource := GetResource[user](app)
-	users := userResource.Query().List()
-	fmt.Println(users)
-
 	app.afterInit()
 	app.parseCommands()
 }

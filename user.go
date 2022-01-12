@@ -82,7 +82,7 @@ func (app *App) initUserResource() {
 	resource.canExport = sysadminPermission
 
 	initUserRegistration(resource)
-	initUserLogin(resource)
+	initUserLogin(GetResource[user](app))
 	resource.app.initUserSettings()
 	initUserRenew(resource)
 }

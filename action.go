@@ -75,16 +75,25 @@ func (app *App) Action(url string) *Action {
 }
 
 //AddAction adds action to resource
-func (resource *resource) Action(url string) *Action {
+func (resource *Resource[T]) Action(url string) *Action {
+	return newResourceAction(resource.Resource, url)
+}
+
+func newResourceAction(resource *resource, url string) *Action {
 	action := newAction(resource.app, url)
 	action.resource = resource
 	action.permission = resource.canView
 	resource.actions = append(resource.actions, action)
 	return action
+
 }
 
 //AddItemAction adds action to resource item
-func (resource *resource) ItemAction(url string) *Action {
+func (resource *Resource[T]) ItemAction(url string) *Action {
+	return newResourceItemAction(resource.Resource, url)
+}
+
+func newResourceItemAction(resource *resource, url string) *Action {
 	action := newAction(resource.app, url)
 	action.resource = resource
 	action.isItemAction = true

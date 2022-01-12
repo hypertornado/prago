@@ -4,18 +4,18 @@ import (
 	"time"
 )
 
-func initUserLogin(resource *resource) {
+func initUserLogin(resource *Resource[user]) {
 
 	resource.ItemAction("loginas").Name(unlocalized("Přihlásit se jako")).Permission(sysadminPermission).Handler(
 		func(request *Request) {
 			var user user
-			resource.app.Is("id", request.Params().Get("id")).MustGet(&user)
+			resource.Resource.app.Is("id", request.Params().Get("id")).MustGet(&user)
 			request.logInUser(&user)
-			request.Redirect(resource.app.getAdminURL(""))
+			request.Redirect(resource.Resource.app.getAdminURL(""))
 		},
 	)
 
-	resource.app.nologinFormAction("login", func(form *Form, request *Request) {
+	resource.Resource.app.nologinFormAction("login", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		emailValue := request.Params().Get("email")
 		emailInput := form.AddEmailInput("email", messages.Get(locale, "admin_email"))
@@ -51,7 +51,7 @@ func initUserLogin(resource *resource) {
 		u.LoggedInUseragent = request.Request().UserAgent()
 		u.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
 
-		must(GetResource[user](resource.app).Update(&u))
+		must(resource.Update(&u))
 		//must(request.app.Save(&user))
 		request.logInUser(&u)
 		request.AddFlashMessage(messages.Get(u.Locale, "admin_login_ok"))

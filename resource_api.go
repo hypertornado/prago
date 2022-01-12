@@ -13,7 +13,7 @@ import (
 )
 
 func initDefaultResourceAPIs(resource *resource) {
-	resource.API("list").Handler(
+	newResourceAPI(resource, "list").Handler(
 		func(request *Request) {
 			if request.Request().URL.Query().Get("_format") == "json" {
 				listDataJSON, err := resource.getListContentJSON(request.user, request.Request().URL.Query())
@@ -63,7 +63,7 @@ func initDefaultResourceAPIs(resource *resource) {
 		},
 	)
 
-	resource.API("preview-relation/:id").Handler(
+	newResourceAPI(resource, "preview-relation/:id").Handler(
 		func(request *Request) {
 			var item interface{}
 			resource.newItem(&item)
@@ -82,7 +82,7 @@ func initDefaultResourceAPIs(resource *resource) {
 		},
 	)
 
-	resource.API("set-order").Permission(resource.canEdit).Method("POST").Handler(
+	newResourceAPI(resource, "set-order").Permission(resource.canEdit).Method("POST").Handler(
 		func(request *Request) {
 			if resource.orderField == nil {
 				panic("can't order")
@@ -111,7 +111,7 @@ func initDefaultResourceAPIs(resource *resource) {
 		},
 	)
 
-	resource.API("searchresource").Handler(
+	newResourceAPI(resource, "searchresource").Handler(
 		func(request *Request) {
 			q := request.Params().Get("q")
 
@@ -167,7 +167,7 @@ func initDefaultResourceAPIs(resource *resource) {
 		},
 	)
 
-	resource.API("multipleaction").Method("POST").Handler(
+	newResourceAPI(resource, "multipleaction").Method("POST").Handler(
 		func(request *Request) {
 			var ids []int64
 
@@ -262,7 +262,7 @@ func initDefaultResourceAPIs(resource *resource) {
 		},
 	)
 
-	resource.API("multiple_edit").Permission(resource.canEdit).Method("GET").Handler(
+	newResourceAPI(resource, "multiple_edit").Permission(resource.canEdit).Method("GET").Handler(
 		func(request *Request) {
 
 			var item interface{}
@@ -280,7 +280,7 @@ func initDefaultResourceAPIs(resource *resource) {
 		},
 	)
 
-	resource.API("multiple_edit").Permission(resource.canEdit).Method("POST").Handler(
+	newResourceAPI(resource, "multiple_edit").Permission(resource.canEdit).Method("POST").Handler(
 		func(request *Request) {
 
 			validateCSRF(request)

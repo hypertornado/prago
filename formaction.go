@@ -73,7 +73,11 @@ func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Reques
 
 }
 
-func (resource *resource) FormAction(url string) *FormAction {
+func (resource *Resource[T]) FormAction(url string) *FormAction {
+	return newResourceFormAction(resource.Resource, url)
+}
+
+func newResourceFormAction(resource *resource, url string) *FormAction {
 	fa := newFormAction(resource.app, url)
 
 	fa.actionForm.resource = resource
@@ -87,7 +91,11 @@ func (resource *resource) FormAction(url string) *FormAction {
 	return fa
 }
 
-func (resource *resource) FormItemAction(url string) *FormAction {
+func (resource *Resource[T]) FormItemAction(url string) *FormAction {
+	return newResourceItemFormAction(resource.Resource, url)
+}
+
+func newResourceItemFormAction(resource *resource, url string) *FormAction {
 	fa := newFormAction(resource.app, url)
 
 	fa.actionForm.resource = resource

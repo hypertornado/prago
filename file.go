@@ -135,12 +135,14 @@ func getOldRedirectParams(request *Request, app *App) (uuid, name string, err er
 func (app *App) initFilesResource() {
 	initCDN(app)
 
-	resource := NewResource[File](app).Resource.Name(messages.GetNameFunction("admin_files"))
+	filesResource := NewResource[File](app)
+
+	resource := filesResource.Resource.Name(messages.GetNameFunction("admin_files"))
 	app.FilesResource = resource
 
 	resource.canCreate = nobodyPermission
 
-	initFilesAPI(resource)
+	initFilesAPI(filesResource)
 
 	resource.FieldName("uid", messages.GetNameFunction("admin_file"))
 	resource.FieldName("width", messages.GetNameFunction("width"))
@@ -211,7 +213,7 @@ func (app *App) initFilesResource() {
 		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
-	resource.FormAction("upload").priority().Permission(resource.canEdit).Name(unlocalized("Nahrát soubor")).Form(func(f *Form, r *Request) {
+	newResourceFormAction(resource, "upload").priority().Permission(resource.canEdit).Name(unlocalized("Nahrát soubor")).Form(func(f *Form, r *Request) {
 		locale := r.user.Locale
 		f.AddFileInput("file", messages.Get(locale, "admin_file"))
 		f.AddTextareaInput("description", messages.Get(locale, "Description"))
@@ -231,7 +233,7 @@ func (app *App) initFilesResource() {
 		}
 	})
 
-	resource.Action("getcdnurl").Permission(sysadminPermission).Method("POST").Handler(
+	GetResource[File](app).Action("getcdnurl").Permission(sysadminPermission).Method("POST").Handler(
 		func(request *Request) {
 			uuid := request.Params().Get("uuid")
 			size := request.Params().Get("size")
