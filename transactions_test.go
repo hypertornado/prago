@@ -5,11 +5,11 @@ import (
 )
 
 func TestTransactions(t *testing.T) {
-	resource := prepareResource2()
+	resource := prepareResource()
 	app := resource.Resource.app
 
-	s1 := ResourceStruct2{Name: "a"}
-	s2 := ResourceStruct2{Name: "b"}
+	s1 := ResourceStruct{Name: "a"}
+	s2 := ResourceStruct{Name: "b"}
 
 	t1 := app.Transaction()
 

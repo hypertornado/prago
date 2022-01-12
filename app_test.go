@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type ResourceStruct2 struct {
+type ResourceStruct struct {
 	ID          int64
 	Name        string
 	Text        string `prago-type:"text"`
@@ -20,18 +20,16 @@ type ResourceStruct2 struct {
 	UpdatedAt   time.Time
 }
 
-type ResourceStruct2Unique struct {
+type ResourceStructUnique struct {
 	ID         int64
 	UniqueName string `prago-unique:"true"`
 }
 
-func prepareResource2(initFns ...func(app *App)) *Resource2[ResourceStruct2] {
+func prepareResource() *Resource2[ResourceStruct] {
 	app := newTestingApp()
-	resource := NewResource[ResourceStruct2](app)
-	NewResource[ResourceStruct2Unique](app)
-	for _, v := range initFns {
-		v(app)
-	}
+	resource := NewResource[ResourceStruct](app)
+	NewResource[ResourceStructUnique](app)
+
 	app.afterInit()
 	app.unsafeDropTables()
 	app.migrate(false)
@@ -39,9 +37,9 @@ func prepareResource2(initFns ...func(app *App)) *Resource2[ResourceStruct2] {
 }
 
 func TestBasicResource2(t *testing.T) {
-	resource := prepareResource2()
+	resource := prepareResource()
 
-	item := &ResourceStruct2{Name: "A", Floating: 3.14}
+	item := &ResourceStruct{Name: "A", Floating: 3.14}
 
 	err := resource.Create(item)
 	if err != nil {
@@ -52,8 +50,8 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatal("should be positive")
 	}
 
-	resource.Create(&ResourceStruct2{Name: "C"})
-	resource.Create(&ResourceStruct2{Name: "B"})
+	resource.Create(&ResourceStruct{Name: "C"})
+	resource.Create(&ResourceStruct{Name: "B"})
 
 	list := resource.Query().List()
 	if len(list) != 3 {
@@ -103,14 +101,14 @@ func TestBasicResource2(t *testing.T) {
 }
 
 func TestQuery(t *testing.T) {
-	resource := prepareResource2()
+	resource := prepareResource()
 
-	err := resource.Create(&ResourceStruct2{Name: "A", Floating: 3.14})
+	err := resource.Create(&ResourceStruct{Name: "A", Floating: 3.14})
 	if err != nil {
 		t.Fatal(err)
 	}
-	resource.Create(&ResourceStruct2{Name: "C"})
-	resource.Create(&ResourceStruct2{Name: "B"})
+	resource.Create(&ResourceStruct{Name: "C"})
+	resource.Create(&ResourceStruct{Name: "B"})
 
 	item := resource.Query().Where("id = ?", 2).First()
 	if item.Name != "C" {
@@ -139,7 +137,7 @@ func TestQuery(t *testing.T) {
 		t.Fatal(item.Floating)
 	}
 
-	var list []*ResourceStruct2
+	var list []*ResourceStruct
 	list = resource.Query().List()
 	if len(list) != 3 {
 		t.Fatal(len(list))
@@ -177,7 +175,7 @@ func TestQuery(t *testing.T) {
 }
 
 func TestResource(t *testing.T) {
-	resource := prepareResource2()
+	resource := prepareResource()
 	items, err := resource.Resource.getListContent(&user{Role: "sysadmin"}, map[string][]string{
 		"_order": {"id"},
 	})
@@ -193,11 +191,11 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	err = resource.Create(&ResourceStruct2{Name: "First", CreatedAt: time.Now()})
+	err = resource.Create(&ResourceStruct{Name: "First", CreatedAt: time.Now()})
 	if err != nil {
 		t.Fatal(err)
 	}
-	resource.Create(&ResourceStruct2{Name: "Second", Showing: "show"})
+	resource.Create(&ResourceStruct{Name: "Second", Showing: "show"})
 
 	count, err = resource.Count()
 	if err != nil {
@@ -225,13 +223,13 @@ func TestResource(t *testing.T) {
 }
 
 func TestResourceUnique(t *testing.T) {
-	app := prepareResource2().Resource.app
+	app := prepareResource().Resource.app
 
-	resource := GetResource[ResourceStruct2Unique](app)
+	resource := GetResource[ResourceStructUnique](app)
 
-	resource.Create(&ResourceStruct2Unique{UniqueName: "A"})
-	resource.Create(&ResourceStruct2Unique{UniqueName: "B"})
-	resource.Create(&ResourceStruct2Unique{UniqueName: "A"})
+	resource.Create(&ResourceStructUnique{UniqueName: "A"})
+	resource.Create(&ResourceStructUnique{UniqueName: "B"})
+	resource.Create(&ResourceStructUnique{UniqueName: "A"})
 
 	count, err := resource.Count()
 	if err != nil {
@@ -244,10 +242,10 @@ func TestResourceUnique(t *testing.T) {
 }
 
 func TestResourceDate(t *testing.T) {
-	resource := prepareResource2()
+	resource := prepareResource()
 	tm := time.Now()
 
-	resource.Create(&ResourceStruct2{Date: tm})
+	resource.Create(&ResourceStruct{Date: tm})
 
 	first := resource.Is("date", tm.Format("2006-01-02")).First()
 	if first == nil {
@@ -256,11 +254,11 @@ func TestResourceDate(t *testing.T) {
 }
 
 func TestResourceTimestamps(t *testing.T) {
-	resource := prepareResource2()
+	resource := prepareResource()
 
 	testStartTime := time.Now().Truncate(time.Second)
 
-	resource.Create(&ResourceStruct2{Name: "A"})
+	resource.Create(&ResourceStruct{Name: "A"})
 
 	item := resource.Query().Is("id", 1).First()
 
@@ -274,10 +272,10 @@ func TestResourceTimestamps(t *testing.T) {
 }
 
 func TestResourceBool(t *testing.T) {
-	resource := prepareResource2()
+	resource := prepareResource()
 
-	resource.Create(&ResourceStruct2{Name: "A", IsSomething: false})
-	resource.Create(&ResourceStruct2{Name: "B", IsSomething: true})
+	resource.Create(&ResourceStruct{Name: "A", IsSomething: false})
+	resource.Create(&ResourceStruct{Name: "B", IsSomething: true})
 
 	trueItem := resource.Is("issomething", true).First()
 	if trueItem.Name != "B" {
@@ -291,8 +289,8 @@ func TestResourceBool(t *testing.T) {
 }
 
 func TestResourceCreateWithID(t *testing.T) {
-	resource := prepareResource2()
-	resource.Create(&ResourceStruct2{ID: 85, Name: "A"})
+	resource := prepareResource()
+	resource.Create(&ResourceStruct{ID: 85, Name: "A"})
 
 	item := resource.Query().First()
 	id := item.ID
@@ -302,8 +300,8 @@ func TestResourceCreateWithID(t *testing.T) {
 }
 
 func TestShouldNotSaveWithZeroID(t *testing.T) {
-	resource := prepareResource2()
-	err := resource.Update(&ResourceStruct2{})
+	resource := prepareResource()
+	err := resource.Update(&ResourceStruct{})
 	if err == nil {
 		t.Fatal("should not be nil")
 	}
