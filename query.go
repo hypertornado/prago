@@ -153,16 +153,8 @@ func (q Query) Count(item interface{}) (int64, error) {
 	return countItems(q.db, resource.id, q.query, q.debug)
 }
 
-//MustDelete
-func (q Query) mustDelete(item interface{}) {
-	_, err := q.Delete(item)
-	if err != nil {
-		panic(fmt.Sprintf("can't delete: %s", err))
-	}
-}
-
 //Delete item with query
-func (q Query) Delete(item interface{}) (int64, error) {
+func (q Query) delete(item interface{}) (int64, error) {
 	resource, err := q.app.getResourceByItem(item)
 	if err != nil {
 		return -1, err

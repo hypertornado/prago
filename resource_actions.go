@@ -204,7 +204,7 @@ func (resource *Resource) deleteItemWithLog(user *user, id int64) error {
 
 	var item interface{}
 	resource.newItem(&item)
-	_, err = resource.app.Is("id", id).Debug().Delete(item)
+	_, err = resource.app.Is("id", id).Debug().delete(item)
 	if err != nil {
 		return fmt.Errorf("can't delete item id '%d': %s", id, err)
 	}

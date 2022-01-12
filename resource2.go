@@ -49,7 +49,7 @@ func (resource Resource2[T]) GetItemWithID(id int64) *T {
 
 func (resource Resource2[T]) Delete(id int64) error {
 	var item T
-	count, err := resource.Query().query.Is("id", id).Delete(&item)
+	count, err := resource.Query().query.Is("id", id).delete(&item)
 	if err != nil {
 		return err
 	}
