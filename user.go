@@ -72,8 +72,9 @@ func (user user) emailToken(app *App) string {
 }
 
 func (app *App) initUserResource() {
-	resource := app.Resource(user{})
+	resource := NewResource[user](app).Resource
 	app.UsersResource = resource
+
 	resource.name = messages.GetNameFunction("admin_users")
 	resource.canEdit = sysadminPermission
 	resource.canCreate = nobodyPermission

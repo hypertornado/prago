@@ -15,15 +15,17 @@ type Query struct {
 }
 
 //MustCreate
-func (app *App) MustCreate(item interface{}) {
-	err := app.Create(item)
+//Deprecated
+func (app *App) mustCreate(item interface{}) {
+	err := app.create(item)
 	if err != nil {
 		panic(fmt.Sprintf("can't create: %s", err))
 	}
 }
 
 //Create item in db
-func (app *App) Create(item interface{}) error {
+//Deprecated
+func (app *App) create(item interface{}) error {
 	resource, err := app.getResourceByItem(item)
 	if err != nil {
 		return err

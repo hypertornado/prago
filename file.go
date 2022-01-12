@@ -85,7 +85,7 @@ func (app *App) UploadFile(fileHeader *multipart.FileHeader, user *user, descrip
 		file.User = user.ID
 	}
 	file.Description = description
-	err = app.Create(&file)
+	err = app.create(&file)
 	if err != nil {
 		return nil, fmt.Errorf("saving file: %s", err)
 	}
@@ -135,7 +135,7 @@ func getOldRedirectParams(request *Request, app *App) (uuid, name string, err er
 func (app *App) initFilesResource() {
 	initCDN(app)
 
-	resource := app.Resource(File{}).Name(messages.GetNameFunction("admin_files"))
+	resource := NewResource[File](app).Resource.Name(messages.GetNameFunction("admin_files"))
 	app.FilesResource = resource
 
 	resource.canCreate = nobodyPermission

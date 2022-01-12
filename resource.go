@@ -44,7 +44,7 @@ type Resource struct {
 }
 
 //Resource creates new resource based on item
-func (app *App) Resource(item interface{}) *Resource {
+func (app *App) oldNewResource(item interface{}) *Resource {
 	typ := reflect.TypeOf(item)
 
 	if typ.Kind() != reflect.Struct {

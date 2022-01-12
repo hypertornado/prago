@@ -3,6 +3,7 @@ package prago
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"reflect"
@@ -59,6 +60,8 @@ type App struct {
 
 	activityListeners []func(Activity)
 	taskManager       *taskManager
+
+	resource2Map map[reflect.Type]interface{}
 }
 
 func newTestingApp() *App {
@@ -66,8 +69,6 @@ func newTestingApp() *App {
 }
 
 func createApp(codeName string, version string) *App {
-
-	resource2playground()
 
 	if codeName != "__prago_test_app" && !configExists(codeName) {
 		if consoleQuestion("File config.json does not exist. Can't start app. Would you like to start setup?") {
@@ -85,6 +86,8 @@ func createApp(codeName string, version string) *App {
 		logger:         log.New(os.Stdout, "", log.LstdFlags),
 		mainController: newMainController(),
 		Cache:          newCache(),
+
+		resource2Map: make(map[reflect.Type]interface{}),
 	}
 
 	app.appController = app.mainController.subController()
@@ -113,10 +116,13 @@ func createApp(codeName string, version string) *App {
 	app.initDefaultFieldTypes()
 	app.initUserResource()
 	app.initFilesResource()
+
+	//NewResource[activityLog](app).Resource
 	initActivityLog(
-		app.Resource(
-			activityLog{},
-		),
+		NewResource[activityLog](app).Resource,
+		//app.Resource(
+		//	activityLog{},
+		//),
 	)
 
 	app.initHome()
@@ -143,6 +149,11 @@ func (app *App) afterInit() {
 }
 
 func (app *App) Run() {
+	fmt.Println("play XXXXXXXXXX")
+	userResource := GetResource[user](app)
+	users := userResource.Query().List()
+	fmt.Println(users)
+
 	app.afterInit()
 	app.parseCommands()
 }

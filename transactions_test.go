@@ -5,12 +5,13 @@ import (
 )
 
 func TestTransactions(t *testing.T) {
-	admin, _ := prepareResource()
+	resource := prepareResource2()
+	app := resource.Resource.app
 
-	s1 := ResourceStruct{Name: "a"}
-	s2 := ResourceStruct{Name: "b"}
+	s1 := ResourceStruct2{Name: "a"}
+	s2 := ResourceStruct2{Name: "b"}
 
-	t1 := admin.Transaction()
+	t1 := app.Transaction()
 
 	var err error
 
@@ -20,7 +21,7 @@ func TestTransactions(t *testing.T) {
 
 	var c int64
 
-	c, _ = admin.Query().Count(&ResourceStruct{})
+	c, _ = resource.Count()
 	if c != 0 {
 		t.Fatal(c)
 	}
@@ -34,12 +35,12 @@ func TestTransactions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c, _ = admin.Query().Count(&ResourceStruct{})
+	c, _ = resource.Count()
 	if c != 1 {
 		t.Fatal(c)
 	}
 
-	admin.Create(&s1)
-	admin.Create(&s2)
+	resource.Create(&s1)
+	resource.Create(&s2)
 
 }

@@ -202,7 +202,7 @@ func initDefaultResourceAPIs(resource *Resource) {
 					}
 
 					//TODO: log for creation
-					err = resource.app.Create(item)
+					err = resource.app.create(item)
 					if err != nil {
 						panic(fmt.Sprintf("can't create item for clone with id %d: %s", v, err))
 					}

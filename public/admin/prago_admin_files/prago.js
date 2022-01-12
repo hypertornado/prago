@@ -1695,13 +1695,6 @@ class Form {
                 this.changed();
             }
         }, 100);
-        window.addEventListener("beforeunload", (e) => {
-            if (this.dirty) {
-                var confirmationMessage = "Chcete opustit stránku bez uložení změn?";
-                e.returnValue = confirmationMessage;
-                return confirmationMessage;
-            }
-        });
     }
     messageChanged() {
         if (this.willChangeHandler) {

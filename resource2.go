@@ -1,68 +1,71 @@
 package prago
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 )
 
 type Resource2[T any] struct {
-	resource *Resource
+	Resource *Resource
 }
 
-func NewResource2[T any](app *App) *Resource2[T] {
+func NewResource[T any](app *App) *Resource2[T] {
 	var item T
-	app.Resource(item)
-	ret := &Resource2[T]{}
+	ret := &Resource2[T]{
+		Resource: app.oldNewResource(item),
+	}
+	itemTyp := reflect.TypeOf(item)
+	app.resource2Map[itemTyp] = ret
 	return ret
 }
 
-//func GetResource2[T any](app *App) *Resource2[T] {
-//return nil
-//}
-
-// -----
-
-type App2 struct {
-	resources []any
-}
-
-func AddResource2[T any](app *App2) {
-	var r = Resources2[T]{}
-	app.resources = append(app.resources, r)
-}
-
-func GetResource2[T any](app *App2) Resources2[T] {
-	resource := app.resources[0]
-	fmt.Println(reflect.TypeOf(resource).Name())
-	return resource.(Resources2[T])
-}
-
-type Resources2[T any] struct {
-}
-
-func (r Resources2[T]) Create() *T {
-	var ret T
-	return &ret
-}
-
-type Orange struct {
-	isOrange bool
-}
-
-type Apple struct {
-}
-
-func resource2playground() {
-	if true {
-		return
+func GetResource[T any](app *App) *Resource2[T] {
+	var item T
+	itemTyp := reflect.TypeOf(item)
+	ret, ok := app.resource2Map[itemTyp]
+	if !ok {
+		return nil
 	}
+	return ret.(*Resource2[T])
 
-	a2 := new(App2)
-	AddResource2[Orange](a2)
-	orangeResource := GetResource2[Orange](a2)
-	orange := orangeResource.Create()
-	fmt.Println("---")
-	//orange.isOrange = true
-	fmt.Println(orange.isOrange)
-	fmt.Println("---")
 }
+
+func (resource Resource2[T]) Is(name string, value interface{}) *Query2[T] {
+	return resource.Query().Is(name, value)
+}
+
+func (resource Resource2[T]) Create(item *T) error {
+	return resource.Resource.app.create(item)
+}
+
+func (resource Resource2[T]) Update(item *T) error {
+	return resource.Resource.app.Save(item)
+}
+
+func (resource Resource2[T]) GetItemWithID(id int64) *T {
+	return resource.Query().Is("id", id).First()
+}
+
+func (resource Resource2[T]) Delete(id int64) error {
+	var item T
+	count, err := resource.Query().query.Is("id", id).Delete(&item)
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return errors.New("no item deleted")
+	}
+	if count > 1 {
+		return fmt.Errorf("more then one item deleted: %d items deleted", count)
+	}
+	return nil
+}
+
+func (resource Resource2[T]) Count() (int64, error) {
+	return resource.Query().Count()
+}
+
+/*func (resource Resource2[T]) Items() []T {
+	return nil
+}*/

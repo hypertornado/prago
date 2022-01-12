@@ -130,7 +130,7 @@ func (app App) LogActivity(activityType string, userID int64, resourceID string,
 		ContentAfter:  string(afterData),
 	}
 
-	err = app.Create(&log)
+	err = app.create(&log)
 	if err == nil {
 		for _, v := range app.activityListeners {
 			v(log.activity())

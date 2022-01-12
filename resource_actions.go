@@ -38,7 +38,7 @@ func initDefaultResourceActions(resource *Resource) {
 			if resource.orderField != nil {
 				resource.setOrderPosition(&item, resource.count()+1)
 			}
-			must(app.Create(item))
+			must(app.create(item))
 
 			if app.search != nil {
 				go func() {

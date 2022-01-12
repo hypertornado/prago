@@ -150,17 +150,17 @@ func (app *App) Newsletters() *Newsletters {
 		request.RenderView("newsletter_layout")
 	})
 
-	app.newsletters.newsletterResource = app.Resource(newsletter{}).Name(unlocalized("Newsletter"))
+	app.newsletters.newsletterResource = NewResource[newsletter](app).Resource.Name(unlocalized("Newsletter"))
 	initNewsletterResource(
 		app.newsletters.newsletterResource,
 	)
 
-	app.newsletters.newsletterSectionResource = app.Resource(newsletterSection{}).Name(unlocalized("Newsletter - sekce"))
+	app.newsletters.newsletterSectionResource = NewResource[newsletterSection](app).Resource.Name(unlocalized("Newsletter - sekce"))
 	initNewsletterSection(
 		app.newsletters.newsletterSectionResource,
 	)
 
-	app.Resource(newsletterPersons{}).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoby"))
+	NewResource[newsletterPersons](app).Resource.PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoby"))
 	return app.newsletters
 }
 
@@ -225,7 +225,7 @@ func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 		Email:     email,
 		Confirmed: confirm,
 	}
-	return nm.app.Create(&person)
+	return nm.app.create(&person)
 }
 
 //Newsletter represents newsletter
@@ -322,14 +322,14 @@ func initNewsletterResource(resource *Resource) {
 		err := resource.app.Is("newsletter", newsletter.ID).Order("orderposition").Get(&sections)
 
 		newsletter.ID = 0
-		resource.app.MustCreate(&newsletter)
+		resource.app.mustCreate(&newsletter)
 
 		if err == nil {
 			for _, v := range sections {
 				section := *v
 				section.ID = 0
 				section.Newsletter = newsletter.ID
-				resource.app.MustCreate(&section)
+				resource.app.mustCreate(&section)
 			}
 		}
 		vc.Validation().RedirectionLocaliton = resource.getItemURL(&newsletter, "edit")
