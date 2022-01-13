@@ -220,7 +220,7 @@ func (field *field) filterLayout() string {
 	return ""
 }
 
-func (resource *resource) addFilterParamsToQuery(q Query, params url.Values) Query {
+func (resource *resource) addFilterParamsToQuery(q query, params url.Values) query {
 	filter := map[string]string{}
 	for _, v := range resource.fieldMap {
 		key := v.ColumnName
@@ -232,7 +232,7 @@ func (resource *resource) addFilterParamsToQuery(q Query, params url.Values) Que
 	return resource.addFilterToQuery(q, filter)
 }
 
-func (resource *resource) addFilterToQuery(q Query, filter map[string]string) Query {
+func (resource *resource) addFilterToQuery(q query, filter map[string]string) query {
 	for k, v := range filter {
 		field := resource.fieldMap[k]
 		if field == nil {
@@ -246,7 +246,7 @@ func (resource *resource) addFilterToQuery(q Query, filter map[string]string) Qu
 			v = "%" + v + "%"
 			k = strings.Replace(k, "`", "", -1)
 			str := fmt.Sprintf("`%s` LIKE ?", k)
-			q.Where(str, v)
+			q.where(str, v)
 		case "filter_layout_number":
 			var hasPrefix string
 			v = strings.Replace(v, " ", "", -1)
@@ -260,9 +260,9 @@ func (resource *resource) addFilterToQuery(q Query, filter map[string]string) Qu
 			numVal, err := strconv.Atoi(v)
 			if err == nil {
 				if hasPrefix == "" {
-					q.Is(k, numVal)
+					q.is(k, numVal)
 				} else {
-					q.Where(
+					q.where(
 						fmt.Sprintf("%s %s ?", field.ColumnName, hasPrefix),
 						numVal,
 					)
@@ -272,27 +272,27 @@ func (resource *resource) addFilterToQuery(q Query, filter map[string]string) Qu
 			v = strings.Trim(v, " ")
 			numVal, err := strconv.Atoi(v)
 			if err == nil {
-				q.Is(k, numVal)
+				q.is(k, numVal)
 			}
 		case "filter_layout_boolean":
 			switch v {
 			case "true":
-				q.Is(k, true)
+				q.is(k, true)
 			case "false":
-				q.Is(k, false)
+				q.is(k, false)
 			}
 		case "filter_layout_select":
 			if field.Tags["prago-type"] == "file" || field.Tags["prago-type"] == "image" || field.Tags["prago-type"] == "cdnfile" {
 				if v == "true" {
-					q.Where(fmt.Sprintf("%s !=''", field.ColumnName))
+					q.where(fmt.Sprintf("%s !=''", field.ColumnName))
 				}
 				if v == "false" {
-					q.Where(fmt.Sprintf("%s =''", field.ColumnName))
+					q.where(fmt.Sprintf("%s =''", field.ColumnName))
 				}
 				continue
 			}
 			if v != "" {
-				q.Is(k, v)
+				q.is(k, v)
 			}
 		case "filter_layout_date":
 			v = strings.Trim(v, " ")
@@ -313,10 +313,10 @@ func (resource *resource) addFilterToQuery(q Query, filter map[string]string) Qu
 
 			k = strings.Replace(k, "`", "", -1)
 			if fromStr != "" {
-				q.Where(fmt.Sprintf("`%s` >= ?", k), fromStr)
+				q.where(fmt.Sprintf("`%s` >= ?", k), fromStr)
 			}
 			if toStr != "" {
-				q.Where(fmt.Sprintf("`%s` <= ?", k), toStr)
+				q.where(fmt.Sprintf("`%s` <= ?", k), toStr)
 			}
 		}
 	}
@@ -358,19 +358,19 @@ func (resource *resource) getListContent(user *user, params url.Values) (ret lis
 		orderDesc = false
 	}
 
-	q := resource.app.Query()
+	q := resource.app.query()
 	if orderDesc {
-		q = q.OrderDesc(orderBy)
+		q = q.orderDesc(orderBy)
 	} else {
-		q = q.Order(orderBy)
+		q = q.order(orderBy)
 	}
 
 	var count int64
 	var item interface{}
 	resource.newItem(&item)
-	countQuery := resource.app.Query()
+	countQuery := resource.app.query()
 	countQuery = resource.addFilterParamsToQuery(countQuery, params)
-	count, err = countQuery.Count(item)
+	count, err = countQuery.count(item)
 	if err != nil {
 		return
 	}
@@ -408,12 +408,12 @@ func (resource *resource) getListContent(user *user, params url.Values) (ret lis
 	}
 
 	q = resource.addFilterParamsToQuery(q, params)
-	q = q.Offset((int64(currentPage) - 1) * itemsPerPage)
-	q = q.Limit(itemsPerPage)
+	q = q.offset((int64(currentPage) - 1) * itemsPerPage)
+	q = q.limit(itemsPerPage)
 
 	var rowItems interface{}
 	resource.newArrayOfItems(&rowItems)
-	q.Get(rowItems)
+	q.get(rowItems)
 
 	val := reflect.ValueOf(rowItems).Elem()
 	for i := 0; i < val.Len(); i++ {

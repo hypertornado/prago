@@ -18,7 +18,7 @@ func initUserRegistration(resource *resource) {
 		token := request.Params().Get("token")
 
 		var u user
-		err := app.Is("email", email).Get(&u)
+		err := app.is("email", email).get(&u)
 		if err == nil {
 			if !u.emailConfirmed() {
 				if token == u.emailToken(app) {
@@ -67,7 +67,7 @@ func registrationValidation(vc ValidationContext) {
 		vc.AddItemError("email", messages.Get(locale, "admin_email_not_valid"))
 	} else {
 		var user user
-		app.Is("email", email).Get(&user)
+		app.is("email", email).get(&user)
 		if user.Email == email {
 			valid = false
 			vc.AddItemError("email", messages.Get(locale, "admin_email_already_registered"))
@@ -103,7 +103,7 @@ func registrationValidation(vc ValidationContext) {
 			app.Log().Println(err)
 		}
 
-		count, err := app.Query().Count(&user{})
+		count, err := app.query().count(&user{})
 		if err == nil && count == 0 {
 			u.Role = sysadminRoleName
 		}
@@ -132,7 +132,7 @@ func (u user) sendConfirmEmail(app *App, locale string) error {
 
 func (u user) sendAdminEmail(app *App) error {
 	var users []*user
-	err := app.Query().Is("role", "sysadmin").Get(&users)
+	err := app.query().is("role", "sysadmin").get(&users)
 	if err != nil {
 		return err
 	}

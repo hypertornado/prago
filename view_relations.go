@@ -25,9 +25,9 @@ func (resource *resource) getAutoRelationsView(id int, inValues interface{}, use
 		var rowItem interface{}
 		v.resource.newItem(&rowItem)
 
-		q := resource.app.Is(v.field, fmt.Sprintf("%d", id))
+		q := resource.app.is(v.field, fmt.Sprintf("%d", id))
 
-		filteredCount, err := q.Count(rowItem)
+		filteredCount, err := q.count(rowItem)
 		must(err)
 
 		var vi = view{}
@@ -99,22 +99,22 @@ func generateRelationListAPIHandler(app *App) func(*Request) {
 		var rowItems interface{}
 		targetResource.newArrayOfItems(&rowItems)
 
-		q := app.Is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
+		q := app.is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
 		if targetResource.orderDesc {
-			q = q.OrderDesc(targetResource.orderByColumn)
+			q = q.orderDesc(targetResource.orderByColumn)
 		} else {
-			q = q.Order(targetResource.orderByColumn)
+			q = q.order(targetResource.orderByColumn)
 		}
 
 		limit := listRequest.Count
 		if limit > 10 {
 			limit = 10
 		}
-		q = q.Limit(limit)
+		q = q.limit(limit)
 
-		q.Offset(listRequest.Offset)
+		q.offset(listRequest.Offset)
 
-		err = q.Get(rowItems)
+		err = q.get(rowItems)
 		if err != nil {
 			panic(err)
 		}

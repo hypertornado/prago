@@ -47,11 +47,11 @@ func (t *Transaction) Save(item interface{}) error {
 }
 
 //Query with transaction
-func (t *Transaction) Query() *Query {
+func (t *Transaction) Query() *query {
 	if t.err != nil {
-		return &Query{err: t.err}
+		return &query{err: t.err}
 	}
-	return &Query{
+	return &query{
 		query: &listQuery{},
 		app:   t.app,
 		db:    t.tx,

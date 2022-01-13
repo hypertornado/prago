@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"path/filepath"
@@ -36,10 +37,10 @@ func (app *App) thumb(ids string) string {
 	if ids == "" {
 		return ""
 	}
+	fileResource := GetResource[File](app)
 	for _, v := range strings.Split(ids, ",") {
-		var image File
-		err := app.Is("uid", v).Get(&image)
-		if err == nil && image.isImage() {
+		image := fileResource.Is("uid", v).First()
+		if image != nil && image.isImage() {
 			return image.GetSmall()
 		}
 	}
@@ -50,12 +51,17 @@ func (app *App) thumb(ids string) string {
 func (app *App) GetFiles(ids string) []*File {
 	var files []*File
 	idsAr := strings.Split(ids, ",")
+	fileResource := GetResource[File](app)
 	for _, v := range idsAr {
-		var image File
-		err := app.Is("uid", v).Get(&image)
+		//var image File
+		image := fileResource.Is("uid", v).First()
+		if image != nil {
+			files = append(files, image)
+		}
+		/*err := app.Is("uid", v).Get(&image)
 		if err == nil {
 			files = append(files, &image)
-		}
+		}*/
 	}
 	return files
 }
@@ -123,9 +129,11 @@ func getOldRedirectParams(request *Request, app *App) (uuid, name string, err er
 		strings.Split(name, "-")[0],
 	)
 
-	var file File
-	err = app.Is("uid", uuid).Get(&file)
-	if err != nil {
+	//var file File
+	fileResource := GetResource[File](app)
+	file := fileResource.Is("uid", uuid).First()
+	if file == nil {
+		err = errors.New("no file with id found")
 		return
 	}
 	name = file.Name
@@ -150,8 +158,9 @@ func (app *App) initFilesResource() {
 
 	app.addCommand("files", "metadata").
 		Callback(func() {
-			var files []*File
-			app.Query().MustGet(&files)
+			//var files []*File
+			fileResource := GetResource[File](app)
+			files := fileResource.Query().List()
 			for _, v := range files {
 				err := v.updateMetadata()
 				if err != nil {
@@ -171,8 +180,9 @@ func (app *App) initFilesResource() {
 
 	app.ListenActivity(func(activity Activity) {
 		if activity.ActivityType == "delete" && activity.ResourceID == resource.id {
-			var file File
-			app.Is("id", activity.ID).MustGet(&file)
+			//var file File
+			fileResource := GetResource[File](app)
+			file := fileResource.Is("id", activity.ID).First()
 			err := filesCDN.DeleteFile(file.UID)
 			if err != nil {
 				app.Log().Printf("deleting CDN: %s\n", err)

@@ -67,7 +67,7 @@ func initDefaultResourceAPIs(resource *resource) {
 		func(request *Request) {
 			var item interface{}
 			resource.newItem(&item)
-			err := resource.app.Is("id", request.Params().Get("id")).Get(item)
+			err := resource.app.is("id", request.Params().Get("id")).get(item)
 			if err == ErrItemNotFound {
 				render404(request)
 				return
@@ -100,7 +100,7 @@ func initDefaultResourceAPIs(resource *resource) {
 			for i, id := range order {
 				var item interface{}
 				resource.newItem(&item)
-				resource.app.Is("id", int64(id)).MustGet(item)
+				resource.app.is("id", int64(id)).mustGet(item)
 				resource.setOrderPosition(item, int64(i))
 				err := resource.app.save(item)
 				if err != nil {
@@ -123,7 +123,7 @@ func initDefaultResourceAPIs(resource *resource) {
 			if err == nil {
 				var item interface{}
 				resource.newItem(&item)
-				err := resource.app.Is("id", id).Get(item)
+				err := resource.app.is("id", id).get(item)
 				if err == nil {
 					relationItem := resource.itemToRelationData(item, request.user, nil)
 					if relationItem != nil {
@@ -141,7 +141,7 @@ func initDefaultResourceAPIs(resource *resource) {
 				}
 				var items interface{}
 				resource.newArrayOfItems(&items)
-				err := resource.app.Query().Limit(5).Where(v+" LIKE ?", filter).Get(items)
+				err := resource.app.query().limit(5).where(v+" LIKE ?", filter).get(items)
 				if err == nil {
 					itemsVal := reflect.ValueOf(items).Elem()
 					for i := 0; i < itemsVal.Len(); i++ {
@@ -190,7 +190,7 @@ func initDefaultResourceAPIs(resource *resource) {
 					app := request.app
 					var item interface{}
 					resource.newItem(&item)
-					err := resource.app.Is("id", v).Get(item)
+					err := resource.app.is("id", v).get(item)
 					if err != nil {
 						panic(fmt.Sprintf("can't get item for clone with id %d: %s", v, err))
 					}

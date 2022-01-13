@@ -26,7 +26,7 @@ func TestTransactions(t *testing.T) {
 		t.Fatal(c)
 	}
 
-	c, _ = t1.Query().Count(&s1)
+	c, _ = t1.Query().count(&s1)
 	if c != 1 {
 		t.Fatal(c)
 	}

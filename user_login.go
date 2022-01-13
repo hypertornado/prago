@@ -9,7 +9,7 @@ func initUserLogin(resource *Resource[user]) {
 	resource.ItemAction("loginas").Name(unlocalized("Přihlásit se jako")).Permission(sysadminPermission).Handler(
 		func(request *Request) {
 			var user user
-			resource.Resource.app.Is("id", request.Params().Get("id")).MustGet(&user)
+			resource.Resource.app.is("id", request.Params().Get("id")).mustGet(&user)
 			request.logInUser(&user)
 			request.Redirect(resource.Resource.app.getAdminURL(""))
 		},
@@ -36,7 +36,7 @@ func initUserLogin(resource *Resource[user]) {
 		password := vc.GetValue("password")
 
 		var u user
-		err := request.app.Is("email", email).Get(&u)
+		err := request.app.is("email", email).get(&u)
 		if err != nil {
 			vc.AddError(messages.Get(locale, "admin_login_error"))
 			return

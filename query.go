@@ -6,21 +6,12 @@ import (
 )
 
 //Query represents query to db
-type Query struct {
+type query struct {
 	query *listQuery
 	app   *App
 	err   error
 	db    dbIface
 	debug bool
-}
-
-//MustCreate
-//Deprecated
-func (app *App) mustCreate(item interface{}) {
-	err := app.create(item)
-	if err != nil {
-		panic(fmt.Sprintf("can't create: %s", err))
-	}
 }
 
 //Create item in db
@@ -43,8 +34,8 @@ func (app *App) save(item interface{}) error {
 }
 
 //Query item from db
-func (app *App) Query() Query {
-	return Query{
+func (app *App) query() query {
+	return query{
 		query: &listQuery{},
 		app:   app,
 		db:    app.db,
@@ -52,62 +43,62 @@ func (app *App) Query() Query {
 }
 
 //Where adds where query
-func (q Query) Where(condition string, values ...interface{}) Query {
+func (q query) where(condition string, values ...interface{}) query {
 	q.query.where(condition, values...)
 	return q
 }
 
 //Is adds where query for single item
-func (app *App) Is(name string, value interface{}) Query {
-	q := app.Query()
-	return q.Is(name, value)
+func (app *App) is(name string, value interface{}) query {
+	q := app.query()
+	return q.is(name, value)
 }
 
 //Is adds where query for single item
-func (q Query) Is(name string, value interface{}) Query {
-	return q.Where(sqlFieldToQuery(name), value)
+func (q query) is(name string, value interface{}) query {
+	return q.where(sqlFieldToQuery(name), value)
 }
 
 //WhereIs adds where query for single item
-func (q Query) Debug() Query {
+func (q query) Debug() query {
 	q.debug = true
 	return q
 }
 
 //Order sets order column
-func (q Query) Order(name string) Query {
+func (q query) order(name string) query {
 	q.query.addOrder(name, false)
 	return q
 }
 
 //OrderDesc sets descending order column
-func (q Query) OrderDesc(name string) Query {
+func (q query) orderDesc(name string) query {
 	q.query.addOrder(name, true)
 	return q
 }
 
 //Limit query's result
-func (q Query) Limit(limit int64) Query {
+func (q query) limit(limit int64) query {
 	q.query.limit = limit
 	return q
 }
 
 //Offset of query's result
-func (q Query) Offset(offset int64) Query {
+func (q query) offset(offset int64) query {
 	q.query.offset = offset
 	return q
 }
 
 //Get item or items with query
-func (q Query) MustGet(item interface{}) {
-	err := q.Get(item)
+func (q query) mustGet(item interface{}) {
+	err := q.get(item)
 	if err != nil {
 		panic(fmt.Sprintf("can't get: %s", err))
 	}
 }
 
 //Get item or items with query
-func (q Query) Get(item interface{}) error {
+func (q query) get(item interface{}) error {
 	if q.err != nil {
 		return q.err
 	}
@@ -145,7 +136,7 @@ func (q Query) Get(item interface{}) error {
 }
 
 //Count items with query
-func (q Query) Count(item interface{}) (int64, error) {
+func (q query) count(item interface{}) (int64, error) {
 	resource, err := q.app.getResourceByItem(item)
 	if err != nil {
 		return -1, err
@@ -154,7 +145,7 @@ func (q Query) Count(item interface{}) (int64, error) {
 }
 
 //Delete item with query
-func (q Query) delete(item interface{}) (int64, error) {
+func (q query) delete(item interface{}) (int64, error) {
 	resource, err := q.app.getResourceByItem(item)
 	if err != nil {
 		return -1, err

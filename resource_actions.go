@@ -73,7 +73,7 @@ func initDefaultResourceActions(resource *resource) {
 
 			var item interface{}
 			resource.newItem(&item)
-			err = app.Is("id", int64(id)).Get(item)
+			err = app.is("id", int64(id)).get(item)
 			if err != nil {
 				if err == ErrItemNotFound {
 					render404(request)
@@ -92,7 +92,7 @@ func initDefaultResourceActions(resource *resource) {
 
 			var item interface{}
 			resource.newItem(&item)
-			app.Is("id", int64(id)).MustGet(item)
+			app.is("id", int64(id)).mustGet(item)
 
 			resource.addFormItems(item, request.user, form)
 			form.AddSubmit(messages.Get(request.user.Locale, "admin_save"))
@@ -132,7 +132,7 @@ func initDefaultResourceActions(resource *resource) {
 
 			var item interface{}
 			resource.newItem(&item)
-			app.Is("id", request.Params().Get("id")).MustGet(item)
+			app.is("id", request.Params().Get("id")).mustGet(item)
 			itemName := getItemName(item)
 			form.Title = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
 		},
@@ -156,7 +156,7 @@ func initDefaultResourceActions(resource *resource) {
 			func(request *Request) {
 				var item interface{}
 				resource.newItem(&item)
-				app.Is("id", request.Params().Get("id")).MustGet(item)
+				app.is("id", request.Params().Get("id")).mustGet(item)
 				request.Redirect(
 					resource.previewURL(item),
 				)
@@ -178,7 +178,7 @@ func initDefaultResourceActions(resource *resource) {
 
 				var item interface{}
 				resource.newItem(&item)
-				app.Is("id", int64(id)).MustGet(item)
+				app.is("id", int64(id)).mustGet(item)
 
 				return app.getHistory(resource, int64(id))
 			},
@@ -190,7 +190,7 @@ func initDefaultResourceActions(resource *resource) {
 func (resource *resource) deleteItemWithLog(user *user, id int64) error {
 	var beforeItem interface{}
 	resource.newItem(&beforeItem)
-	err := resource.app.Is("id", id).Get(beforeItem)
+	err := resource.app.is("id", id).get(beforeItem)
 	if err != nil {
 		return fmt.Errorf("can't find item for deletion id '%d': %s", id, err)
 	}
@@ -204,7 +204,7 @@ func (resource *resource) deleteItemWithLog(user *user, id int64) error {
 
 	var item interface{}
 	resource.newItem(&item)
-	_, err = resource.app.Is("id", id).Debug().delete(item)
+	_, err = resource.app.is("id", id).Debug().delete(item)
 	if err != nil {
 		return fmt.Errorf("can't delete item id '%d': %s", id, err)
 	}
@@ -231,13 +231,13 @@ func (resource *resource) editItemWithLog(user *user, values url.Values) (interf
 	//TODO: remove this ugly hack and copy values via reflect package
 	var beforeItem, item interface{}
 	resource.newItem(&beforeItem)
-	err = app.Is("id", id).Get(beforeItem)
+	err = app.is("id", id).get(beforeItem)
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't get beforeitem with id %d: %s", id, err)
 	}
 
 	resource.newItem(&item)
-	err = app.Is("id", id).Get(item)
+	err = app.is("id", id).get(item)
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't get item with id %d: %s", id, err)
 	}

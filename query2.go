@@ -2,37 +2,49 @@ package prago
 
 type Query2[T any] struct {
 	resource *Resource[T]
-	query    Query
+	query    query
 }
 
 func (resource *Resource[T]) Query() *Query2[T] {
 	ret := &Query2[T]{
 		resource: resource,
-		query:    resource.Resource.app.Query(),
+		query:    resource.Resource.app.query(),
 	}
 	return ret
 }
 
 func (q *Query2[T]) Is(name string, value interface{}) *Query2[T] {
-	newQ := q.query.Is(name, value)
+	newQ := q.query.is(name, value)
 	q.query = newQ
 	return q
 }
 
 func (q *Query2[T]) Where(condition string, values ...interface{}) *Query2[T] {
-	newQ := q.query.Where(condition, values...)
+	newQ := q.query.where(condition, values...)
 	q.query = newQ
 	return q
 }
 
 func (q *Query2[T]) Limit(limit int64) *Query2[T] {
-	newQ := q.query.Limit(limit)
+	newQ := q.query.limit(limit)
 	q.query = newQ
 	return q
 }
 
 func (q *Query2[T]) Offset(limit int64) *Query2[T] {
-	newQ := q.query.Offset(limit)
+	newQ := q.query.offset(limit)
+	q.query = newQ
+	return q
+}
+
+func (q *Query2[T]) Order(order string) *Query2[T] {
+	newQ := q.query.order(order)
+	q.query = newQ
+	return q
+}
+
+func (q *Query2[T]) OrderDesc(order string) *Query2[T] {
+	newQ := q.query.orderDesc(order)
 	q.query = newQ
 	return q
 }
@@ -40,7 +52,7 @@ func (q *Query2[T]) Offset(limit int64) *Query2[T] {
 func (q *Query2[T]) List() []*T {
 	var items interface{}
 	q.resource.Resource.newArrayOfItems(&items)
-	err := q.query.Get(items)
+	err := q.query.get(items)
 	if err != nil {
 		panic(err)
 	}
@@ -61,5 +73,5 @@ func (q *Query2[T]) First() *T {
 
 func (q *Query2[T]) Count() (int64, error) {
 	var item T
-	return q.query.Count(&item)
+	return q.query.count(&item)
 }

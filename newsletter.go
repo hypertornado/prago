@@ -104,7 +104,7 @@ func (app *App) Newsletters() *Newsletters {
 		}
 
 		var person newsletterPersons
-		err := app.Is("email", email).Get(&person)
+		err := app.is("email", email).get(&person)
 		if err != nil {
 			panic("can't find user")
 		}
@@ -134,7 +134,7 @@ func (app *App) Newsletters() *Newsletters {
 		}
 
 		var person newsletterPersons
-		err := app.Is("email", email).Get(&person)
+		err := app.is("email", email).get(&person)
 		if err != nil {
 			panic("can't find user")
 		}
@@ -219,7 +219,7 @@ func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 		return errors.New("wrong email format")
 	}
 
-	err := nm.app.Is("email", email).Get(&newsletterPersons{})
+	err := nm.app.is("email", email).get(&newsletterPersons{})
 	if err == nil {
 		return ErrEmailAlreadyInList
 	}
@@ -249,10 +249,10 @@ func initNewsletterResource(res *Resource[newsletter]) {
 
 	res.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(
 		func(request *Request) {
-			var newsletter newsletter
-			resource.app.Is("id", request.Params().Get("id")).MustGet(&newsletter)
+			//var newsletter newsletter
+			newsletter := res.Is("id", request.Params().Get("id")).First()
 
-			body, err := resource.app.newsletters.GetBody(newsletter, "")
+			body, err := resource.app.newsletters.GetBody(*newsletter, "")
 			must(err)
 
 			request.Response().WriteHeader(200)
@@ -267,7 +267,7 @@ func initNewsletterResource(res *Resource[newsletter]) {
 		},
 	).Validation(func(vc ValidationContext) {
 		var newsletter newsletter
-		resource.app.Is("id", vc.GetValue("id")).MustGet(&newsletter)
+		resource.app.is("id", vc.GetValue("id")).mustGet(&newsletter)
 		newsletter.PreviewSentAt = time.Now()
 		err := res.Update(&newsletter)
 		if err != nil {
@@ -299,7 +299,7 @@ func initNewsletterResource(res *Resource[newsletter]) {
 	).Validation(
 		func(vc ValidationContext) {
 			var nl newsletter
-			resource.app.Is("id", vc.GetValue("id")).MustGet(&nl)
+			resource.app.is("id", vc.GetValue("id")).mustGet(&nl)
 
 			nl.SentAt = time.Now()
 			//TODO: log sent emails
@@ -324,23 +324,25 @@ func initNewsletterResource(res *Resource[newsletter]) {
 			f.AddSubmit("Duplikovat newsletter")
 		},
 	).Validation(func(vc ValidationContext) {
-		var newsletter newsletter
-		resource.app.Is("id", vc.GetValue("id")).MustGet(&newsletter)
+		//var newsletter newsletter
+		newsletterResource := GetResource[newsletter](vc.Request().app)
+		newsletter := newsletterResource.Is("id", vc.GetValue("id")).First()
 
-		var sections []*newsletterSection
-		err := resource.app.Is("newsletter", newsletter.ID).Order("orderposition").Get(&sections)
+		newsletterSectionResource := GetResource[newsletterSection](vc.Request().app)
+		//var sections []*newsletterSection
+		sections := newsletterSectionResource.Is("newsletter", newsletter.ID).Order("orderposition").List()
 
 		newsletter.ID = 0
-		resource.app.mustCreate(&newsletter)
+		must(newsletterResource.Create(newsletter))
+		//must(resource.app.create(&newsletter))
 
-		if err == nil {
-			for _, v := range sections {
-				section := *v
-				section.ID = 0
-				section.Newsletter = newsletter.ID
-				resource.app.mustCreate(&section)
-			}
+		for _, v := range sections {
+			section := *v
+			section.ID = 0
+			section.Newsletter = newsletter.ID
+			must(resource.app.create(&section))
 		}
+
 		vc.Validation().RedirectionLocaliton = resource.getItemURL(&newsletter, "edit")
 	})
 }
@@ -361,7 +363,7 @@ func (app *App) getNewsletterRecipients() ([]string, error) {
 	ret := []string{}
 
 	var persons []*newsletterPersons
-	err := app.Is("confirmed", true).Is("unsubscribed", false).Get(&persons)
+	err := app.is("confirmed", true).is("unsubscribed", false).get(&persons)
 	if err != nil {
 		return nil, err
 	}
@@ -468,7 +470,7 @@ type newsletterSectionData struct {
 
 func (nm *Newsletters) getNewsletterSectionData(n newsletter) []newsletterSectionData {
 	var sections []*newsletterSection
-	err := nm.app.Is("newsletter", n.ID).Order("orderposition").Get(&sections)
+	err := nm.app.is("newsletter", n.ID).order("orderposition").get(&sections)
 	if err != nil {
 		return nil
 	}

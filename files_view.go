@@ -22,9 +22,9 @@ type filesViewDataPath struct {
 }
 
 func getFilesViewData(app *App, uid string) (ret filesViewData) {
-	var file File
-	err := app.Is("UID", uid).Get(&file)
-	if err != nil {
+	filesResource := GetResource[File](app)
+	file := filesResource.Is("UID", uid).First()
+	if file == nil {
 		ret.Error = "Can't find file."
 		return ret
 	}

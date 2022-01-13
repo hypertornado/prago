@@ -261,14 +261,14 @@ func (e *adminSearch) importResource(resource *resource) error {
 
 	var item interface{}
 	resource.newItem(&item)
-	c, _ := e.app.Query().Count(item)
+	c, _ := e.app.query().count(item)
 	if c > 10000 {
 		return nil
 	}
 
 	var items interface{}
 	resource.newArrayOfItems(&items)
-	err := e.app.Query().Get(items)
+	err := e.app.query().get(items)
 	if err == nil {
 		itemsVal := reflect.ValueOf(items).Elem()
 		for i := 0; i < itemsVal.Len(); i++ {

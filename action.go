@@ -182,7 +182,7 @@ func (action *Action) getnavigation(request *Request) navigation {
 		if action.isItemAction {
 			var item interface{}
 			action.resource.newItem(&item)
-			err := action.resource.app.Query().Is("id", request.Params().Get("id")).Get(item)
+			err := action.resource.app.query().is("id", request.Params().Get("id")).get(item)
 			if err == nil {
 				return action.resource.getItemNavigation(request.user, item, code)
 			} else {

@@ -56,24 +56,24 @@ func (app *App) ListenActivity(handler func(Activity)) {
 func (app *App) getHistory(resource *resource, itemID int64) historyView {
 	ret := historyView{}
 
-	q := app.Query()
+	q := app.query()
 	if resource != nil {
-		q.Is("ResourceName", resource.id)
+		q.is("ResourceName", resource.id)
 	}
 	if itemID > 0 {
-		q.Is("ItemID", itemID)
+		q.is("ItemID", itemID)
 	}
-	q.Limit(250)
-	q.OrderDesc("ID")
+	q.limit(250)
+	q.orderDesc("ID")
 
 	var items []*activityLog
-	must(q.Get(&items))
+	must(q.get(&items))
 
 	for _, v := range items {
 		var username, userurl string
 
 		var user user
-		err := app.Is("id", v.User).Get(&user)
+		err := app.is("id", v.User).get(&user)
 		if err == nil {
 			username = user.Name
 			userurl = app.getAdminURL(fmt.Sprintf("user/%d", user.ID))
