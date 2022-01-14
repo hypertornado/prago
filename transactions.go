@@ -9,9 +9,9 @@ type Transaction struct {
 	tx  *sql.Tx
 	app *App
 	err error
+	//resource *resource
 }
 
-//Transaction creates transaction
 func (app *App) Transaction() (t *Transaction) {
 	tx, err := app.db.Begin()
 	t = &Transaction{
@@ -47,15 +47,17 @@ func (t *Transaction) Save(item interface{}) error {
 }
 
 //Query with transaction
-func (t *Transaction) Query() *query {
+func TransactionQuery[T any](app *App, t *Transaction) *Query[T] {
+	resource := GetResource[T](app)
+	ret := resource.Query()
+
 	if t.err != nil {
-		return &query{err: t.err}
+		ret.query.err = t.err
+		return ret
 	}
-	return &query{
-		query: &listQuery{},
-		app:   t.app,
-		db:    t.tx,
-	}
+
+	ret.query.db = t.tx
+	return ret
 }
 
 //Commit transaction

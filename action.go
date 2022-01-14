@@ -180,9 +180,9 @@ func (action *Action) getnavigation(request *Request) navigation {
 	if action.resource != nil {
 		code := action.url
 		if action.isItemAction {
-			var item interface{}
-			action.resource.newItem(&item)
-			err := action.resource.app.query().is("id", request.Params().Get("id")).get(item)
+			//var item interface{}
+			//action.resource.newItem(&item)
+			item, err := action.resource.query().is("id", request.Params().Get("id")).first()
 			if err == nil {
 				return action.resource.getItemNavigation(request.user, item, code)
 			} else {

@@ -8,7 +8,7 @@ type Query[T any] struct {
 func (resource *Resource[T]) Query() *Query[T] {
 	ret := &Query[T]{
 		resource: resource,
-		query:    resource.Resource.app.query(),
+		query:    resource.Resource.query(),
 	}
 	return ret
 }
@@ -56,17 +56,16 @@ func (q *Query[T]) OrderDesc(order string) *Query[T] {
 }
 
 func (q *Query[T]) List() []*T {
-	var items interface{}
-	q.resource.Resource.newArrayOfItems(&items)
-	err := q.query.get(items)
+	items, err := q.query.list()
 	if err != nil {
 		panic(err)
 	}
-	transformed, ok := items.(*[]*T)
+	transformed, ok := items.([]*T)
 	if !ok {
 		panic("unexpected type")
 	}
-	return *transformed
+	return transformed
+
 }
 
 func (q *Query[T]) First() *T {
@@ -78,6 +77,5 @@ func (q *Query[T]) First() *T {
 }
 
 func (q *Query[T]) Count() (int64, error) {
-	var item T
-	return q.query.count(&item)
+	return q.query.count()
 }

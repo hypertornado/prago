@@ -7,11 +7,12 @@ import (
 
 //Query represents query to db
 type query struct {
-	query   *listQuery
-	app     *App
-	err     error
-	db      dbIface
-	isDebug bool
+	query *listQuery
+	//app      *App
+	err      error
+	db       dbIface
+	isDebug  bool
+	resource *resource
 }
 
 func (app *App) create(item interface{}) error {
@@ -30,12 +31,11 @@ func (app *App) update(item interface{}) error {
 	return resource.saveWithDBIface(item, app.db, false)
 }
 
-//Query item from db
-func (app *App) query() query {
+func (resource *resource) query() query {
 	return query{
-		query: &listQuery{},
-		app:   app,
-		db:    app.db,
+		query:    &listQuery{},
+		db:       resource.app.db,
+		resource: resource,
 	}
 }
 
@@ -73,7 +73,7 @@ func (q query) offset(offset int64) query {
 	return q
 }
 
-func (q query) get(item interface{}) error {
+func (q query) getOLD(item interface{}) error {
 	if q.err != nil {
 		return q.err
 	}
@@ -88,7 +88,7 @@ func (q query) get(item interface{}) error {
 		typ = typ.Elem().Elem()
 	}
 
-	resource, ok := q.app.resourceMap[typ]
+	resource, ok := q.resource.app.resourceMap[typ]
 	if !ok {
 		return fmt.Errorf("can't find resource with type %s", typ)
 	}
@@ -110,16 +110,38 @@ func (q query) get(item interface{}) error {
 	return nil
 }
 
-func (q query) count(item interface{}) (int64, error) {
-	resource, err := q.app.getResourceByItem(item)
+func (q query) first() (interface{}, error) {
+	var ret interface{}
+	q.resource.newItem(&ret)
+	err := q.getOLD(ret)
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+func (q query) list() (interface{}, error) {
+	var items interface{}
+	q.resource.newArrayOfItems(&items)
+	err := q.getOLD(items)
+	if err != nil {
+		return nil, err
+	}
+
+	return reflect.ValueOf(items).Elem().Interface(), nil
+	//return items, nil
+}
+
+func (q query) count() (int64, error) {
+	/*resource, err := q.resource.app.getResourceByItem(item)
 	if err != nil {
 		return -1, err
-	}
-	return countItems(q.db, resource.id, q.query, q.isDebug)
+	}*/
+	return countItems(q.db, q.resource.id, q.query, q.isDebug)
 }
 
 func (q query) delete(item interface{}) (int64, error) {
-	resource, err := q.app.getResourceByItem(item)
+	resource, err := q.resource.app.getResourceByItem(item)
 	if err != nil {
 		return -1, err
 	}

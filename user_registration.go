@@ -55,6 +55,7 @@ func registrationValidation(vc ValidationContext) {
 	valid := true
 	locale := vc.Locale()
 	app := vc.Request().app
+	res := GetResource[user](app)
 
 	name := vc.GetValue("name")
 	if name == "" {
@@ -69,7 +70,8 @@ func registrationValidation(vc ValidationContext) {
 		vc.AddItemError("email", messages.Get(locale, "admin_email_not_valid"))
 	} else {
 		//var user user
-		user := GetResource[user](app).Is("email", email).First()
+
+		user := res.Is("email", email).First()
 		if user != nil && user.Email == email {
 			valid = false
 			vc.AddItemError("email", messages.Get(locale, "admin_email_already_registered"))
@@ -105,7 +107,7 @@ func registrationValidation(vc ValidationContext) {
 			app.Log().Println(err)
 		}
 
-		count, err := app.query().count(&user{})
+		count, err := res.Count()
 		if err == nil && count == 0 {
 			u.Role = sysadminRoleName
 		}
@@ -133,16 +135,13 @@ func (u user) sendConfirmEmail(app *App, locale string) error {
 }
 
 func (u user) sendAdminEmail(app *App) error {
-	var users []*user
-	err := app.query().is("role", "sysadmin").get(&users)
-	if err != nil {
-		return err
-	}
+	//var users []*user
+	res := GetResource[user](app)
+	users := res.Is("role", "sysadmin").List()
 	for _, receiver := range users {
-
 		body := fmt.Sprintf("New user registered on %s: %s (%s)", app.name(u.Locale), u.Email, u.Name)
 
-		err = app.Email().To(receiver.Name, receiver.Email).Subject("New registration on " + app.name(u.Locale)).HTMLContent(body).Send()
+		err := app.Email().To(receiver.Name, receiver.Email).Subject("New registration on " + app.name(u.Locale)).HTMLContent(body).Send()
 		if err != nil {
 			return err
 		}

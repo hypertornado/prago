@@ -102,14 +102,14 @@ func getRelationData(user *user, f field, value interface{}) (*viewRelationData,
 		return nil, fmt.Errorf("user is not authorized to view this item")
 	}
 
-	var item interface{}
-	f.relatedResource.newItem(&item)
+	//var item interface{}
+	//f.relatedResource.newItem(&item)
 
 	intVal := value.(int64)
 	if intVal <= 0 {
 		return nil, fmt.Errorf("wrong value")
 	}
-	err := app.query().is("id", intVal).get(item)
+	item, err := f.relatedResource.query().is("id", intVal).first()
 	if err != nil {
 		return nil, fmt.Errorf("can't find this item")
 	}
@@ -209,9 +209,9 @@ func (app App) relationStringer(field field, value reflect.Value, user *user) st
 			}
 			rr := field.relatedResource
 
-			var item interface{}
-			rr.newItem(&item)
-			err := rr.app.query().is("id", int64(value.Int())).get(item)
+			//var item interface{}
+			//rr.newItem(&item)
+			item, err := rr.query().is("id", int64(value.Int())).first()
 			if err != nil {
 				return fmt.Sprintf("%d", value.Int())
 			}

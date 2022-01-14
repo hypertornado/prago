@@ -47,13 +47,14 @@ func initUserFromSession(request *Request) {
 	if !ok {
 		return
 	}
+	//var user user
+	res := GetResource[user](request.app)
 
-	var user user
-	err := request.app.query().is("id", userID).get(&user)
-	if err != nil {
+	user := res.Is("id", userID).First()
+	if user == nil {
 		return
 	}
-	request.user = &user
+	request.user = user
 }
 
 func initRequestWithSession(request *Request, next func()) {

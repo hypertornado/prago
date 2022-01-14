@@ -71,9 +71,9 @@ func initDefaultResourceActions(resource *resource) {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
-			var item interface{}
-			resource.newItem(&item)
-			err = app.query().is("id", int64(id)).get(item)
+			//var item interface{}
+			//resource.newItem(&item)
+			item, err := resource.query().is("id", int64(id)).first()
 			if err != nil {
 				if err == ErrItemNotFound {
 					render404(request)
@@ -90,9 +90,7 @@ func initDefaultResourceActions(resource *resource) {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
-			var item interface{}
-			resource.newItem(&item)
-			err = app.query().is("id", int64(id)).get(item)
+			item, err := resource.query().is("id", int64(id)).first()
 			must(err)
 
 			resource.addFormItems(item, request.user, form)
@@ -131,9 +129,9 @@ func initDefaultResourceActions(resource *resource) {
 		func(form *Form, request *Request) {
 			form.AddDeleteSubmit(messages.Get(request.user.Locale, "admin_delete"))
 
-			var item interface{}
-			resource.newItem(&item)
-			err := app.query().is("id", request.Params().Get("id")).get(item)
+			//var item interface{}
+			//resource.newItem(&item)
+			item, err := resource.query().is("id", request.Params().Get("id")).first()
 			must(err)
 			itemName := getItemName(item)
 			form.Title = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
@@ -156,9 +154,9 @@ func initDefaultResourceActions(resource *resource) {
 	if resource.previewURL != nil {
 		newResourceItemAction(resource, "preview").priority().Name(messages.GetNameFunction("admin_preview")).Handler(
 			func(request *Request) {
-				var item interface{}
-				resource.newItem(&item)
-				err := app.query().is("id", request.Params().Get("id")).get(item)
+				//var item interface{}
+				//resource.newItem(&item)
+				item, err := resource.query().is("id", request.Params().Get("id")).first()
 				must(err)
 				request.Redirect(
 					resource.previewURL(item),
@@ -179,9 +177,9 @@ func initDefaultResourceActions(resource *resource) {
 				id, err := strconv.Atoi(request.Params().Get("id"))
 				must(err)
 
-				var item interface{}
-				resource.newItem(&item)
-				err = app.query().is("id", int64(id)).get(item)
+				//var item interface{}
+				//resource.newItem(&item)
+				_, err = resource.query().is("id", int64(id)).first()
 				must(err)
 
 				return app.getHistory(resource, int64(id))
@@ -192,9 +190,9 @@ func initDefaultResourceActions(resource *resource) {
 }
 
 func (resource *resource) deleteItemWithLog(user *user, id int64) error {
-	var beforeItem interface{}
-	resource.newItem(&beforeItem)
-	err := resource.app.query().is("id", id).get(beforeItem)
+	//var beforeItem interface{}
+	//resource.newItem(&beforeItem)
+	beforeItem, err := resource.query().is("id", id).first()
 	if err != nil {
 		return fmt.Errorf("can't find item for deletion id '%d': %s", id, err)
 	}
@@ -208,7 +206,7 @@ func (resource *resource) deleteItemWithLog(user *user, id int64) error {
 
 	var item interface{}
 	resource.newItem(&item)
-	_, err = resource.app.query().is("id", id).delete(item)
+	_, err = resource.query().is("id", id).delete(item)
 	if err != nil {
 		return fmt.Errorf("can't delete item id '%d': %s", id, err)
 	}
@@ -233,15 +231,15 @@ func (resource *resource) editItemWithLog(user *user, values url.Values) (interf
 	}
 
 	//TODO: remove this ugly hack and copy values via reflect package
-	var beforeItem, item interface{}
-	resource.newItem(&beforeItem)
-	err = app.query().is("id", id).get(beforeItem)
+	//var beforeItem, item interface{}
+	//resource.newItem(&beforeItem)
+	beforeItem, err := resource.query().is("id", id).first()
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't get beforeitem with id %d: %s", id, err)
 	}
 
-	resource.newItem(&item)
-	err = app.query().is("id", id).get(item)
+	//resource.newItem(&item)
+	item, err := resource.query().is("id", id).first()
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't get item with id %d: %s", id, err)
 	}

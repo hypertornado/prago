@@ -358,7 +358,7 @@ func (resource *resource) getListContent(user *user, params url.Values) (ret lis
 		orderDesc = false
 	}
 
-	q := resource.app.query()
+	q := resource.query()
 	if orderDesc {
 		q = q.orderDesc(orderBy)
 	} else {
@@ -366,11 +366,11 @@ func (resource *resource) getListContent(user *user, params url.Values) (ret lis
 	}
 
 	var count int64
-	var item interface{}
-	resource.newItem(&item)
-	countQuery := resource.app.query()
+	//var item interface{}
+	//resource.newItem(&item)
+	countQuery := resource.query()
 	countQuery = resource.addFilterParamsToQuery(countQuery, params)
-	count, err = countQuery.count(item)
+	count, err = countQuery.count()
 	if err != nil {
 		return
 	}
@@ -411,11 +411,19 @@ func (resource *resource) getListContent(user *user, params url.Values) (ret lis
 	q = q.offset((int64(currentPage) - 1) * itemsPerPage)
 	q = q.limit(itemsPerPage)
 
-	var rowItems interface{}
+	/*var rowItems interface{}
 	resource.newArrayOfItems(&rowItems)
-	q.get(rowItems)
+	q.get(rowItems)*/
+	//fmt.Println(reflect.TypeOf(rowItems))
 
-	val := reflect.ValueOf(rowItems).Elem()
+	//var rowItems interface{}
+	//resource.newArrayOfItems(&rowItems)
+	rowItems, err := q.list()
+	if err != nil {
+		return
+	}
+
+	val := reflect.ValueOf(rowItems)
 	for i := 0; i < val.Len(); i++ {
 		row := listRow{}
 		itemVal := val.Index(i).Elem()

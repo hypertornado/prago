@@ -65,9 +65,9 @@ func initDefaultResourceAPIs(resource *resource) {
 
 	newResourceAPI(resource, "preview-relation/:id").Handler(
 		func(request *Request) {
-			var item interface{}
-			resource.newItem(&item)
-			err := resource.app.query().is("id", request.Params().Get("id")).get(item)
+			//var item interface{}
+			//resource.newItem(&item)
+			item, err := resource.query().is("id", request.Params().Get("id")).first()
 			if err == ErrItemNotFound {
 				render404(request)
 				return
@@ -100,7 +100,7 @@ func initDefaultResourceAPIs(resource *resource) {
 			for i, id := range order {
 				var item interface{}
 				resource.newItem(&item)
-				err := resource.app.query().is("id", int64(id)).get(item)
+				item, err := resource.query().is("id", int64(id)).first()
 				must(err)
 				resource.setOrderPosition(item, int64(i))
 				err = resource.app.update(item)
@@ -120,9 +120,9 @@ func initDefaultResourceAPIs(resource *resource) {
 
 			id, err := strconv.Atoi(q)
 			if err == nil {
-				var item interface{}
-				resource.newItem(&item)
-				err := resource.app.query().is("id", id).get(item)
+				//var item interface{}
+				//resource.newItem(&item)
+				item, err := resource.query().is("id", id).first()
 				if err == nil {
 					relationItem := resource.itemToRelationData(item, request.user, nil)
 					if relationItem != nil {
@@ -138,11 +138,11 @@ func initDefaultResourceAPIs(resource *resource) {
 				if field == nil {
 					continue
 				}
-				var items interface{}
-				resource.newArrayOfItems(&items)
-				err := resource.app.query().limit(5).where(v+" LIKE ?", filter).get(items)
+				//var items interface{}
+				//resource.newArrayOfItems(&items)
+				items, err := resource.query().limit(5).where(v+" LIKE ?", filter).list()
 				if err == nil {
-					itemsVal := reflect.ValueOf(items).Elem()
+					itemsVal := reflect.ValueOf(items)
 					for i := 0; i < itemsVal.Len(); i++ {
 						item := itemsVal.Index(i).Interface()
 						viewItem := resource.itemToRelationData(item, request.user, nil)
@@ -187,9 +187,9 @@ func initDefaultResourceAPIs(resource *resource) {
 				}
 				for _, v := range ids {
 					app := request.app
-					var item interface{}
-					resource.newItem(&item)
-					err := resource.app.query().is("id", v).get(item)
+					//var item interface{}
+					//resource.newItem(&item)
+					item, err := resource.query().is("id", v).first()
 					if err != nil {
 						panic(fmt.Sprintf("can't get item for clone with id %d: %s", v, err))
 					}

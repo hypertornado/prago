@@ -259,18 +259,18 @@ func (e *adminSearch) importResource(resource *resource) error {
 	}
 	e.addItem(&resourceSearchItem, 200)
 
-	var item interface{}
-	resource.newItem(&item)
-	c, _ := e.app.query().count(item)
+	//var item interface{}
+	//resource.newItem(&item)
+	c, _ := resource.query().count()
 	if c > 10000 {
 		return nil
 	}
 
-	var items interface{}
-	resource.newArrayOfItems(&items)
-	err := e.app.query().get(items)
+	//var items interface{}
+	//resource.newArrayOfItems(&items)
+	items, err := resource.query().list()
 	if err == nil {
-		itemsVal := reflect.ValueOf(items).Elem()
+		itemsVal := reflect.ValueOf(items)
 		for i := 0; i < itemsVal.Len(); i++ {
 			item2 := itemsVal.Index(i).Interface()
 			e.saveItemWithRoles(resource, item2, roles)

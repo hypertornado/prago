@@ -22,12 +22,12 @@ func (resource *resource) getAutoRelationsView(id int, inValues interface{}, use
 			continue
 		}
 
-		var rowItem interface{}
-		v.resource.newItem(&rowItem)
+		//var rowItem interface{}
+		//v.resource.newItem(&rowItem)
 
-		q := resource.app.query().is(v.field, fmt.Sprintf("%d", id))
+		q := v.resource.query().is(v.field, fmt.Sprintf("%d", id))
 
-		filteredCount, err := q.count(rowItem)
+		filteredCount, err := q.count()
 		must(err)
 
 		var vi = view{}
@@ -96,10 +96,7 @@ func generateRelationListAPIHandler(app *App) func(*Request) {
 			panic("cant authorize target resource")
 		}
 
-		var rowItems interface{}
-		targetResource.newArrayOfItems(&rowItems)
-
-		q := app.query().is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
+		q := targetResource.query().is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
 		if targetResource.orderDesc {
 			q = q.orderDesc(targetResource.orderByColumn)
 		} else {
@@ -114,12 +111,15 @@ func generateRelationListAPIHandler(app *App) func(*Request) {
 
 		q.offset(listRequest.Offset)
 
-		err = q.get(rowItems)
+		//var rowItems interface{}
+		//targetResource.newArrayOfItems(&rowItems)
+
+		rowItems, err := q.list()
 		if err != nil {
 			panic(err)
 		}
 
-		vv := reflect.ValueOf(rowItems).Elem()
+		vv := reflect.ValueOf(rowItems)
 		var data []interface{}
 		for i := 0; i < vv.Len(); i++ {
 			data = append(

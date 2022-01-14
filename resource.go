@@ -289,9 +289,7 @@ func (resource resource) newArrayOfItems(item interface{}) {
 }
 
 func (resource resource) count() int64 {
-	var item interface{}
-	resource.newItem(&item)
-	count, _ := resource.app.query().count(item)
+	count, _ := resource.query().count()
 	return count
 }
 

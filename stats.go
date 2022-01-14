@@ -58,11 +58,11 @@ func getListStats(resource *resource, user *user, params url.Values) *listStats 
 	}
 	columnsAr := strings.Split(columnsStr, ",")
 
-	query := resource.addFilterParamsToQuery(resource.app.query(), params)
+	query := resource.addFilterParamsToQuery(resource.query(), params)
 
-	var item interface{}
-	resource.newItem(&item)
-	total, err := query.count(item)
+	//var item interface{}
+	//resource.newItem(&item)
+	total, err := query.count()
 	if err != nil {
 		panic(err)
 	}
@@ -103,7 +103,7 @@ func (resource *resource) getListStatsDateSections(field *field, user *user, par
 }
 
 func (resource *resource) getListStatsDateSectionDay(field *field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
-	query := resource.addFilterParamsToQuery(resource.app.query(), params)
+	query := resource.addFilterParamsToQuery(resource.query(), params)
 	whereParams := query.query.values
 	q := fmt.Sprintf("SELECT DAY(%s), MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY DAY(%s), MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.ColumnName,
@@ -147,7 +147,7 @@ func (resource *resource) getListStatsDateSectionDay(field *field, user *user, p
 }
 
 func (resource *resource) getListStatsDateSectionMonth(field *field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
-	query := resource.addFilterParamsToQuery(resource.app.query(), params)
+	query := resource.addFilterParamsToQuery(resource.query(), params)
 	whereParams := query.query.values
 	q := fmt.Sprintf("SELECT MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.ColumnName,
@@ -188,7 +188,7 @@ func (resource *resource) getListStatsDateSectionMonth(field *field, user *user,
 }
 
 func (resource *resource) getListStatsDateSectionYear(field *field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
-	query := resource.addFilterParamsToQuery(resource.app.query(), params)
+	query := resource.addFilterParamsToQuery(resource.query(), params)
 	whereParams := query.query.values
 	q := fmt.Sprintf("SELECT YEAR(%s), COUNT(id) FROM %s %s GROUP BY YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.ColumnName,
@@ -226,7 +226,7 @@ func (resource *resource) getListStatsDateSectionYear(field *field, user *user, 
 }
 
 func (resource *resource) getListStatsTable(field *field, user *user, params url.Values, total, limit int64) (table []listStatsRow) {
-	query := resource.addFilterParamsToQuery(resource.app.query(), params)
+	query := resource.addFilterParamsToQuery(resource.query(), params)
 	whereParams := query.query.values
 
 	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.ColumnName, resource.id, buildWhereString(query.query.conditions), field.ColumnName, limit)
@@ -331,7 +331,7 @@ func (resource *resource) getListStatsTableInt(field *field, user *user, params 
 		return
 	}
 
-	query := resource.addFilterParamsToQuery(resource.app.query(), params)
+	query := resource.addFilterParamsToQuery(resource.query(), params)
 
 	whereParams := query.query.values
 
