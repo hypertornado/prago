@@ -63,7 +63,7 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatal("wrong name")
 	}
 
-	if resource.GetItemWithID(item.ID).Name != "A" {
+	if resource.Is("id", item.ID).First().Name != "A" {
 		t.Fatal("wrong name")
 	}
 
@@ -74,7 +74,7 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if resource.GetItemWithID(item.ID).Name != "changed" {
+	if resource.Is("id", item.ID).First().Name != "changed" {
 		t.Fatal("wrong name")
 	}
 

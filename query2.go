@@ -43,6 +43,12 @@ func (q *Query[T]) Order(order string) *Query[T] {
 	return q
 }
 
+func (q *Query[T]) Debug() *Query[T] {
+	newQ := q.query.debug()
+	q.query = newQ
+	return q
+}
+
 func (q *Query[T]) OrderDesc(order string) *Query[T] {
 	newQ := q.query.orderDesc(order)
 	q.query = newQ

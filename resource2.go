@@ -42,11 +42,7 @@ func (resource Resource[T]) Create(item *T) error {
 }
 
 func (resource Resource[T]) Update(item *T) error {
-	return resource.Resource.app.save(item)
-}
-
-func (resource Resource[T]) GetItemWithID(id int64) *T {
-	return resource.Query().Is("id", id).First()
+	return resource.Resource.app.update(item)
 }
 
 func (resource Resource[T]) Delete(id int64) error {

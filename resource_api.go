@@ -100,12 +100,11 @@ func initDefaultResourceAPIs(resource *resource) {
 			for i, id := range order {
 				var item interface{}
 				resource.newItem(&item)
-				resource.app.query().is("id", int64(id)).mustGet(item)
+				err := resource.app.query().is("id", int64(id)).get(item)
+				must(err)
 				resource.setOrderPosition(item, int64(i))
-				err := resource.app.save(item)
-				if err != nil {
-					panic(err)
-				}
+				err = resource.app.update(item)
+				must(err)
 			}
 			request.RenderJSON(true)
 		},

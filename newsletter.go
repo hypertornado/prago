@@ -345,7 +345,7 @@ func initNewsletterResource(res *Resource[newsletter]) {
 			section := *v
 			section.ID = 0
 			section.Newsletter = newsletter.ID
-			must(resource.app.create(&section))
+			must(newsletterSectionResource.Create(&section))
 		}
 
 		vc.Validation().RedirectionLocaliton = resource.getItemURL(&newsletter, "edit")

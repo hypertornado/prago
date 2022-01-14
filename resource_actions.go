@@ -92,7 +92,8 @@ func initDefaultResourceActions(resource *resource) {
 
 			var item interface{}
 			resource.newItem(&item)
-			app.query().is("id", int64(id)).mustGet(item)
+			err = app.query().is("id", int64(id)).get(item)
+			must(err)
 
 			resource.addFormItems(item, request.user, form)
 			form.AddSubmit(messages.Get(request.user.Locale, "admin_save"))
@@ -132,7 +133,8 @@ func initDefaultResourceActions(resource *resource) {
 
 			var item interface{}
 			resource.newItem(&item)
-			app.query().is("id", request.Params().Get("id")).mustGet(item)
+			err := app.query().is("id", request.Params().Get("id")).get(item)
+			must(err)
 			itemName := getItemName(item)
 			form.Title = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
 		},
@@ -156,7 +158,8 @@ func initDefaultResourceActions(resource *resource) {
 			func(request *Request) {
 				var item interface{}
 				resource.newItem(&item)
-				app.query().is("id", request.Params().Get("id")).mustGet(item)
+				err := app.query().is("id", request.Params().Get("id")).get(item)
+				must(err)
 				request.Redirect(
 					resource.previewURL(item),
 				)
@@ -178,7 +181,8 @@ func initDefaultResourceActions(resource *resource) {
 
 				var item interface{}
 				resource.newItem(&item)
-				app.query().is("id", int64(id)).mustGet(item)
+				err = app.query().is("id", int64(id)).get(item)
+				must(err)
 
 				return app.getHistory(resource, int64(id))
 			},
@@ -204,7 +208,7 @@ func (resource *resource) deleteItemWithLog(user *user, id int64) error {
 
 	var item interface{}
 	resource.newItem(&item)
-	_, err = resource.app.query().is("id", id).Debug().delete(item)
+	_, err = resource.app.query().is("id", id).delete(item)
 	if err != nil {
 		return fmt.Errorf("can't delete item id '%d': %s", id, err)
 	}
@@ -263,7 +267,7 @@ func (resource *resource) editItemWithLog(user *user, values url.Values) (interf
 		return nil, vv, errValidation
 	}
 
-	err = app.save(item)
+	err = app.update(item)
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't save item (%d): %s", id, err)
 	}
