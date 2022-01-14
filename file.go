@@ -145,7 +145,7 @@ func (app *App) initFilesResource() {
 
 	filesResource := NewResource[File](app)
 
-	resource := filesResource.Resource.Name(messages.GetNameFunction("admin_files"))
+	resource := filesResource.Name(messages.GetNameFunction("admin_files")).resource
 	app.FilesResource = resource
 
 	resource.canCreate = nobodyPermission
@@ -158,9 +158,7 @@ func (app *App) initFilesResource() {
 
 	app.addCommand("files", "metadata").
 		Callback(func() {
-			//var files []*File
-			fileResource := GetResource[File](app)
-			files := fileResource.Query().List()
+			files := filesResource.Query().List()
 			for _, v := range files {
 				err := v.updateMetadata()
 				if err != nil {
@@ -168,9 +166,7 @@ func (app *App) initFilesResource() {
 					continue
 				}
 				f := *v
-				err = GetResource[File](app).Update(&f)
-				//err = app.Save(&file)
-				if err != nil {
+				if filesResource.Update(&f) != nil {
 					fmt.Println("error while saving file: ", v.ID)
 				} else {
 					fmt.Println("saved ok: ", v.ID, v.Width, v.Height)
@@ -180,9 +176,7 @@ func (app *App) initFilesResource() {
 
 	app.ListenActivity(func(activity Activity) {
 		if activity.ActivityType == "delete" && activity.ResourceID == resource.id {
-			//var file File
-			fileResource := GetResource[File](app)
-			file := fileResource.Is("id", activity.ID).First()
+			file := filesResource.Is("id", activity.ID).First()
 			err := filesCDN.DeleteFile(file.UID)
 			if err != nil {
 				app.Log().Printf("deleting CDN: %s\n", err)

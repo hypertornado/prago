@@ -157,18 +157,18 @@ func (app *App) Newsletters() *Newsletters {
 		request.RenderView("newsletter_layout")
 	})
 
-	app.newsletters.newsletterResource = NewResource[newsletter](app).Resource.Name(unlocalized("Newsletter"))
+	app.newsletters.newsletterResource = NewResource[newsletter](app).Name(unlocalized("Newsletter")).resource
 	initNewsletterResource(
 		GetResource[newsletter](app),
 		//app.newsletters.newsletterResource,
 	)
 
-	app.newsletters.newsletterSectionResource = NewResource[newsletterSection](app).Resource.Name(unlocalized("Newsletter - sekce"))
+	app.newsletters.newsletterSectionResource = NewResource[newsletterSection](app).Name(unlocalized("Newsletter - sekce")).resource
 	initNewsletterSection(
 		app.newsletters.newsletterSectionResource,
 	)
 
-	NewResource[newsletterPersons](app).Resource.PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoby"))
+	NewResource[newsletterPersons](app).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoby"))
 	return app.newsletters
 }
 
@@ -250,7 +250,7 @@ type newsletter struct {
 }
 
 func initNewsletterResource(res *Resource[newsletter]) {
-	resource := res.Resource
+	resource := res.resource
 	resource.canView = sysadminPermission
 
 	res.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(

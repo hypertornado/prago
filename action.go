@@ -76,7 +76,7 @@ func (app *App) Action(url string) *Action {
 
 //AddAction adds action to resource
 func (resource *Resource[T]) Action(url string) *Action {
-	return newResourceAction(resource.Resource, url)
+	return newResourceAction(resource.resource, url)
 }
 
 func newResourceAction(resource *resource, url string) *Action {
@@ -90,7 +90,7 @@ func newResourceAction(resource *resource, url string) *Action {
 
 //AddItemAction adds action to resource item
 func (resource *Resource[T]) ItemAction(url string) *Action {
-	return newResourceItemAction(resource.Resource, url)
+	return newResourceItemAction(resource.resource, url)
 }
 
 func newResourceItemAction(resource *resource, url string) *Action {
@@ -180,8 +180,6 @@ func (action *Action) getnavigation(request *Request) navigation {
 	if action.resource != nil {
 		code := action.url
 		if action.isItemAction {
-			//var item interface{}
-			//action.resource.newItem(&item)
 			item, err := action.resource.query().is("id", request.Params().Get("id")).first()
 			if err == nil {
 				return action.resource.getItemNavigation(request.user, item, code)

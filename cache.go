@@ -88,6 +88,34 @@ func (c *Cache) putItem(name string, createFn func() interface{}) *cacheItem {
 	return item
 }
 
+func loadCache[T any](c *Cache, name string, createFn func() T) T {
+	fn := func() interface{} {
+		return createFn()
+	}
+
+	item := c.getItem(name)
+	if item == nil {
+		item := c.putItem(name, fn)
+		return item.getValue().(T)
+	}
+
+	if item.isStale() {
+		go func() {
+			item.reloadValue()
+		}()
+		return item.getValue().(T)
+	}
+	return item.getValue().(T)
+}
+
+func Cached[T any](app *App, name string, createFn func() T) T {
+	return loadCache(app.cache, name, createFn)
+}
+
+func (app *App) ClearCache() {
+	app.cache.Clear()
+}
+
 func (c *Cache) Load(cacheName string, createFn func() interface{}) interface{} {
 	item := c.getItem(cacheName)
 	if item == nil {
@@ -104,7 +132,7 @@ func (c *Cache) Load(cacheName string, createFn func() interface{}) interface{} 
 	return item.getValue()
 }
 
-func (c *Cache) Set(cacheName string, value interface{}) error {
+func (c *Cache) set(cacheName string, value interface{}) error {
 	item := c.getItem(cacheName)
 	if item == nil {
 		return errors.New("can't find item in cache: " + cacheName)

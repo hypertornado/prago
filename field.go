@@ -28,8 +28,6 @@ type field struct {
 	fieldType *fieldType
 
 	relatedResource *resource
-
-	//viewTemplate string
 }
 
 //GetRelatedResourceName gets related resource name

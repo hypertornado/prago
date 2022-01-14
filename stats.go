@@ -59,9 +59,6 @@ func getListStats(resource *resource, user *user, params url.Values) *listStats 
 	columnsAr := strings.Split(columnsStr, ",")
 
 	query := resource.addFilterParamsToQuery(resource.query(), params)
-
-	//var item interface{}
-	//resource.newItem(&item)
 	total, err := query.count()
 	if err != nil {
 		panic(err)

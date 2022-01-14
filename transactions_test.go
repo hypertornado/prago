@@ -6,7 +6,7 @@ import (
 
 func TestTransactions(t *testing.T) {
 	resource := prepareResource()
-	app := resource.Resource.app
+	app := resource.resource.app
 
 	s1 := ResourceStruct{Name: "a"}
 	s2 := ResourceStruct{Name: "b"}

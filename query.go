@@ -1,14 +1,8 @@
 package prago
 
-import (
-	"fmt"
-	"reflect"
-)
-
 //Query represents query to db
 type query struct {
-	query *listQuery
-	//app      *App
+	query    *listQuery
 	err      error
 	db       dbIface
 	isDebug  bool
@@ -71,43 +65,6 @@ func (q query) limit(limit int64) query {
 func (q query) offset(offset int64) query {
 	q.query.offset = offset
 	return q
-}
-
-func (q query) getOLD(item interface{}) error {
-	if q.err != nil {
-		return q.err
-	}
-
-	var err error
-	slice := false
-
-	typ := reflect.TypeOf(item).Elem()
-
-	if typ.Kind() == reflect.Slice {
-		slice = true
-		typ = typ.Elem().Elem()
-	}
-
-	resource, ok := q.resource.app.resourceMap[typ]
-	if !ok {
-		return fmt.Errorf("can't find resource with type %s", typ)
-	}
-
-	var newItem interface{}
-	if slice {
-		err = listItems(*resource, q.db, resource.id, &newItem, q.query, q.isDebug)
-		if err != nil {
-			return err
-		}
-		reflect.ValueOf(item).Elem().Set(reflect.ValueOf(newItem))
-	} else {
-		err = getFirstItem(*resource, q.db, resource.id, &newItem, q.query, q.isDebug)
-		if err != nil {
-			return err
-		}
-		reflect.ValueOf(item).Elem().Set(reflect.ValueOf(newItem).Elem())
-	}
-	return nil
 }
 
 func (q query) first() (interface{}, error) {

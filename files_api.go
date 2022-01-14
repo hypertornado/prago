@@ -5,7 +5,7 @@ import (
 )
 
 func initFilesAPI(resource *Resource[File]) {
-	app := resource.Resource.app
+	app := resource.resource.app
 
 	//TODO: remove this and use single details API
 	resource.API("redirect-uuid/:uuid").Permission(loggedPermission).Handler(func(request *Request) {
@@ -23,7 +23,7 @@ func initFilesAPI(resource *Resource[File]) {
 		request.RenderJSON(file)
 	})
 
-	resource.API("upload").Method("POST").Permission(resource.Resource.canEdit).Handler(func(request *Request) {
+	resource.API("upload").Method("POST").Permission(resource.resource.canEdit).Handler(func(request *Request) {
 		multipartFiles := request.Request().MultipartForm.File["file"]
 		description := request.Params().Get("description")
 

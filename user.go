@@ -72,7 +72,7 @@ func (user user) emailToken(app *App) string {
 }
 
 func (app *App) initUserResource() {
-	resource := NewResource[user](app).Resource
+	resource := NewResource[user](app).resource
 	app.UsersResource = resource
 
 	resource.name = messages.GetNameFunction("admin_users")
@@ -88,9 +88,8 @@ func (app *App) initUserResource() {
 }
 
 func (app *App) GetCachedUserEmail(id int64) string {
-	return app.Cache.Load(fmt.Sprintf("cached-user-email-%d", id), func() interface{} {
-		//var user user
+	return Cached(app, fmt.Sprintf("cached-user-email-%d", id), func() string {
 		user := GetResource[user](app).Is("id", id).First()
 		return user.Email
-	}).(string)
+	})
 }

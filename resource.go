@@ -149,12 +149,6 @@ func (resource resource) getItemURL(item interface{}, suffix string) string {
 	return ret
 }
 
-//Name sets human name for resource
-func (resource *resource) Name(name func(string) string) *resource {
-	resource.name = name
-	return resource
-}
-
 //PreviewURLFunction sets function to generate representation of resource item in app
 func (resource *resource) PreviewURLFunction(fn func(interface{}) string) *resource {
 	resource.previewURL = fn
@@ -284,10 +278,6 @@ func (resource resource) newItem(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(resource.typ))
 }
 
-func (resource resource) newArrayOfItems(item interface{}) {
-	reflect.ValueOf(item).Elem().Set(reflect.New(reflect.SliceOf(reflect.PtrTo(resource.typ))))
-}
-
 func (resource resource) count() int64 {
 	count, _ := resource.query().count()
 	return count
@@ -298,13 +288,13 @@ func (resource resource) cachedCountName() string {
 }
 
 func (resource resource) getCachedCount() int64 {
-	return resource.app.Cache.Load(resource.cachedCountName(), func() interface{} {
+	return resource.app.cache.Load(resource.cachedCountName(), func() interface{} {
 		return resource.count()
 	}).(int64)
 }
 
 func (resource resource) updateCachedCount() error {
-	return resource.app.Cache.Set(resource.cachedCountName(), resource.count())
+	return resource.app.cache.set(resource.cachedCountName(), resource.count())
 }
 
 func (resource resource) getPaginationData(user *user) (ret []listPaginationData) {

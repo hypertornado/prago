@@ -19,14 +19,13 @@ func initUserRenew(resource *resource) {
 		res := GetResource[user](app)
 
 		var reason = ""
-		//var u user
+
 		u := res.Is("email", email).First()
 		if u != nil {
 			if u.emailConfirmed() {
 				if !time.Now().AddDate(0, 0, -1).Before(u.EmailRenewedAt) {
 					u.EmailRenewedAt = time.Now()
 					err := res.Update(u)
-					//err = app.Save(&user)
 					if err == nil {
 						err = app.sendRenewPasswordEmail(*u)
 						if err == nil {
@@ -72,7 +71,6 @@ func initUserRenew(resource *resource) {
 
 		res := GetResource[user](app)
 
-		//var u user
 		u := res.Is("email", email).First()
 		if u != nil {
 			if token == u.emailToken(app) {

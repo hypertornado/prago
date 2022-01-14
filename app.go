@@ -22,7 +22,7 @@ type App struct {
 	commands        *commands
 	logger          *log.Logger
 	templates       *templates
-	Cache           *Cache
+	cache           *Cache
 	sessionsManager *sessionsManager
 
 	logo            []byte
@@ -50,9 +50,8 @@ type App struct {
 
 	search *adminSearch
 
-	fieldTypes  map[string]*fieldType
-	javascripts []string
-	//css           []string
+	fieldTypes    map[string]*fieldType
+	javascripts   []string
 	accessManager *accessManager
 
 	apis []*API
@@ -84,7 +83,7 @@ func createApp(codeName string, version string) *App {
 
 		logger:         log.New(os.Stdout, "", log.LstdFlags),
 		mainController: newMainController(),
-		Cache:          newCache(),
+		cache:          newCache(),
 
 		resource2Map: make(map[reflect.Type]interface{}),
 	}
@@ -118,7 +117,7 @@ func createApp(codeName string, version string) *App {
 
 	//NewResource[activityLog](app).Resource
 	initActivityLog(
-		NewResource[activityLog](app).Resource,
+		NewResource[activityLog](app).resource,
 		//app.Resource(
 		//	activityLog{},
 		//),

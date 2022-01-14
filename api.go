@@ -32,7 +32,7 @@ func (app *App) API(url string) *API {
 }
 
 func (resource *Resource[T]) API(url string) *API {
-	return newResourceAPI(resource.Resource, url)
+	return newResourceAPI(resource.resource, url)
 }
 
 func newResourceAPI(resource *resource, url string) *API {

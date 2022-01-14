@@ -8,7 +8,7 @@ type Query[T any] struct {
 func (resource *Resource[T]) Query() *Query[T] {
 	ret := &Query[T]{
 		resource: resource,
-		query:    resource.Resource.query(),
+		query:    resource.resource.query(),
 	}
 	return ret
 }

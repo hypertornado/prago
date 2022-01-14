@@ -8,14 +8,13 @@ func initUserLogin(resource *Resource[user]) {
 
 	resource.ItemAction("loginas").Name(unlocalized("Přihlásit se jako")).Permission(sysadminPermission).Handler(
 		func(request *Request) {
-			//var user user
 			user := resource.Is("id", request.Params().Get("id")).First()
 			request.logInUser(user)
-			request.Redirect(resource.Resource.app.getAdminURL(""))
+			request.Redirect(resource.resource.app.getAdminURL(""))
 		},
 	)
 
-	resource.Resource.app.nologinFormAction("login", func(form *Form, request *Request) {
+	resource.resource.app.nologinFormAction("login", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		emailValue := request.Params().Get("email")
 		emailInput := form.AddEmailInput("email", messages.Get(locale, "admin_email"))
@@ -35,7 +34,6 @@ func initUserLogin(resource *Resource[user]) {
 		request := vc.Request()
 		password := vc.GetValue("password")
 
-		//var u user
 		u := resource.Is("email", email).First()
 		if u == nil {
 			vc.AddError(messages.Get(locale, "admin_login_error"))
