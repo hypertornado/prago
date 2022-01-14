@@ -98,8 +98,8 @@ func initDefaultResourceAPIs(resource *resource) {
 			}
 
 			for i, id := range order {
-				var item interface{}
-				resource.newItem(&item)
+				//var item interface{}
+				//resource.newItem(&item)
 				item, err := resource.query().is("id", int64(id)).first()
 				must(err)
 				resource.setOrderPosition(item, int64(i))

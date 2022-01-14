@@ -112,8 +112,7 @@ func (q query) getOLD(item interface{}) error {
 
 func (q query) first() (interface{}, error) {
 	var ret interface{}
-	q.resource.newItem(&ret)
-	err := q.getOLD(ret)
+	err := getFirstItem(*q.resource, q.db, q.resource.id, &ret, q.query, q.isDebug)
 	if err != nil {
 		return nil, err
 	}
@@ -122,21 +121,14 @@ func (q query) first() (interface{}, error) {
 
 func (q query) list() (interface{}, error) {
 	var items interface{}
-	q.resource.newArrayOfItems(&items)
-	err := q.getOLD(items)
+	err := listItems(*q.resource, q.db, q.resource.id, &items, q.query, q.isDebug)
 	if err != nil {
 		return nil, err
 	}
-
-	return reflect.ValueOf(items).Elem().Interface(), nil
-	//return items, nil
+	return items, nil
 }
 
 func (q query) count() (int64, error) {
-	/*resource, err := q.resource.app.getResourceByItem(item)
-	if err != nil {
-		return -1, err
-	}*/
 	return countItems(q.db, q.resource.id, q.query, q.isDebug)
 }
 
