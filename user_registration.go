@@ -17,13 +17,15 @@ func initUserRegistration(resource *resource) {
 		email := request.Params().Get("email")
 		token := request.Params().Get("token")
 
-		var u user
-		err := app.is("email", email).get(&u)
-		if err == nil {
+		res := GetResource[user](app)
+
+		//var u user
+		u := res.Is("email", email).First()
+		if u != nil {
 			if !u.emailConfirmed() {
 				if token == u.emailToken(app) {
 					u.EmailConfirmedAt = time.Now()
-					err = GetResource[user](resource.app).Update(&u)
+					err := res.Update(u)
 					//err = app.Save(&user)
 					if err == nil {
 						request.AddFlashMessage(messages.Get(u.Locale, "admin_confirm_email_ok"))
@@ -66,9 +68,9 @@ func registrationValidation(vc ValidationContext) {
 		valid = false
 		vc.AddItemError("email", messages.Get(locale, "admin_email_not_valid"))
 	} else {
-		var user user
-		app.is("email", email).get(&user)
-		if user.Email == email {
+		//var user user
+		user := GetResource[user](app).Is("email", email).First()
+		if user != nil && user.Email == email {
 			valid = false
 			vc.AddItemError("email", messages.Get(locale, "admin_email_already_registered"))
 		}

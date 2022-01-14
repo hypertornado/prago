@@ -103,15 +103,17 @@ func (app *App) Newsletters() *Newsletters {
 			panic("wrong secret")
 		}
 
-		var person newsletterPersons
-		err := app.is("email", email).get(&person)
-		if err != nil {
+		res := GetResource[newsletterPersons](app)
+
+		//var person newsletterPersons
+		person := res.Is("email", email).First()
+		if person == nil {
 			panic("can't find user")
 		}
 
 		person.Confirmed = true
 
-		err = GetResource[newsletterPersons](app).Update(&person)
+		err := res.Update(person)
 		//err = app.Save(&person)
 		if err != nil {
 			panic(err)
@@ -133,14 +135,16 @@ func (app *App) Newsletters() *Newsletters {
 			panic("wrong secret")
 		}
 
-		var person newsletterPersons
-		err := app.is("email", email).get(&person)
-		if err != nil {
+		res := GetResource[newsletterPersons](app)
+
+		//var person newsletterPersons
+		person := res.Is("email", email).First()
+		if person == nil {
 			panic("can't find user")
 		}
 
 		person.Unsubscribed = true
-		err = GetResource[newsletterPersons](app).Update(&person)
+		err := res.Update(person)
 		//err = app.Save(&person)
 		if err != nil {
 			panic(err)
@@ -219,17 +223,19 @@ func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 		return errors.New("wrong email format")
 	}
 
-	err := nm.app.is("email", email).get(&newsletterPersons{})
-	if err == nil {
+	res := GetResource[newsletterPersons](nm.app)
+
+	person := res.Is("email", email).First()
+	if person != nil {
 		return ErrEmailAlreadyInList
 	}
 
-	person := newsletterPersons{
+	person = &newsletterPersons{
 		Name:      name,
 		Email:     email,
 		Confirmed: confirm,
 	}
-	return nm.app.create(&person)
+	return res.Create(person)
 }
 
 //Newsletter represents newsletter
@@ -266,10 +272,10 @@ func initNewsletterResource(res *Resource[newsletter]) {
 			f.AddSubmit("Odeslat náhled")
 		},
 	).Validation(func(vc ValidationContext) {
-		var newsletter newsletter
-		resource.app.is("id", vc.GetValue("id")).mustGet(&newsletter)
+		//var newsletter newsletter
+		newsletter := res.Is("id", vc.GetValue("id")).First()
 		newsletter.PreviewSentAt = time.Now()
-		err := res.Update(&newsletter)
+		err := res.Update(newsletter)
 		if err != nil {
 			panic(err)
 		}
@@ -279,7 +285,7 @@ func initNewsletterResource(res *Resource[newsletter]) {
 			vc.AddError("Není zadán žádný email")
 		}
 		if vc.Valid() {
-			err := resource.app.sendEmails(newsletter, emails)
+			err := resource.app.sendEmails(*newsletter, emails)
 			if err != nil {
 				vc.AddError(fmt.Sprintf("Chyba při odesílání emailů: %s", err))
 			}
@@ -298,12 +304,11 @@ func initNewsletterResource(res *Resource[newsletter]) {
 		},
 	).Validation(
 		func(vc ValidationContext) {
-			var nl newsletter
-			resource.app.is("id", vc.GetValue("id")).mustGet(&nl)
-
+			//var nl newsletter
+			nl := res.Is("id", vc.GetValue("id")).First()
 			nl.SentAt = time.Now()
 			//TODO: log sent emails
-			GetResource[newsletter](resource.app).Update(&nl)
+			res.Update(nl)
 			//resource.app.Save(&newsletter)
 
 			recipients, err := resource.app.getNewsletterRecipients()
@@ -311,7 +316,7 @@ func initNewsletterResource(res *Resource[newsletter]) {
 				panic(err)
 			}
 
-			go resource.app.sendEmails(nl, recipients)
+			go resource.app.sendEmails(*nl, recipients)
 
 			vc.Request().AddFlashMessage(fmt.Sprintf("Newsletter '%s' se odesílá na %d adres", nl.Name, len(recipients)))
 
@@ -361,13 +366,9 @@ func parseEmails(emails string) []string {
 
 func (app *App) getNewsletterRecipients() ([]string, error) {
 	ret := []string{}
-
-	var persons []*newsletterPersons
-	err := app.is("confirmed", true).is("unsubscribed", false).get(&persons)
-	if err != nil {
-		return nil, err
-	}
-
+	//var persons []*newsletterPersons
+	//GetResource[newsletterPersons](app).Is()
+	persons := GetResource[newsletterPersons](app).Is("confirmed", true).Is("unsubscribed", false).List()
 	for _, v := range persons {
 		ret = append(ret, v.Email)
 	}
@@ -469,12 +470,8 @@ type newsletterSectionData struct {
 }
 
 func (nm *Newsletters) getNewsletterSectionData(n newsletter) []newsletterSectionData {
-	var sections []*newsletterSection
-	err := nm.app.is("newsletter", n.ID).order("orderposition").get(&sections)
-	if err != nil {
-		return nil
-	}
-
+	//var sections []*newsletterSection
+	sections := GetResource[newsletterSection](nm.app).Is("newsletter", n.ID).Order("orderposition").List()
 	var ret []newsletterSectionData
 
 	for _, v := range sections {

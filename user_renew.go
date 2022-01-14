@@ -16,17 +16,19 @@ func initUserRenew(resource *resource) {
 
 		email := fixEmail(request.Params().Get("email"))
 
+		res := GetResource[user](app)
+
 		var reason = ""
-		var u user
-		err := app.is("email", email).get(&u)
-		if err == nil {
+		//var u user
+		u := res.Is("email", email).First()
+		if u != nil {
 			if u.emailConfirmed() {
 				if !time.Now().AddDate(0, 0, -1).Before(u.EmailRenewedAt) {
 					u.EmailRenewedAt = time.Now()
-					err = GetResource[user](resource.app).Update(&u)
+					err := res.Update(u)
 					//err = app.Save(&user)
 					if err == nil {
-						err = app.sendRenewPasswordEmail(u)
+						err = app.sendRenewPasswordEmail(*u)
 						if err == nil {
 							request.AddFlashMessage(messages.Get(u.Locale, "admin_forgoten_sent", u.Email))
 							vc.Validation().RedirectionLocaliton = app.getAdminURL("/user/login") + "?email=" + url.QueryEscape(u.Email)
@@ -68,15 +70,17 @@ func initUserRenew(resource *resource) {
 
 		errStr := messages.Get(vc.Locale(), "admin_error")
 
-		var u user
-		err := app.is("email", email).get(&u)
-		if err == nil {
+		res := GetResource[user](app)
+
+		//var u user
+		u := res.Is("email", email).First()
+		if u != nil {
 			if token == u.emailToken(app) {
 				password := vc.GetValue("password")
 				if len(password) >= 7 {
-					err = u.newPassword(password)
+					err := u.newPassword(password)
 					if err == nil {
-						err = GetResource[user](resource.app).Update(&u)
+						err = res.Update(u)
 						//err = app.Save(&user)
 						if err == nil {
 							vc.Request().AddFlashMessage(messages.Get(vc.Locale(), "admin_password_changed"))

@@ -8,9 +8,9 @@ func initUserLogin(resource *Resource[user]) {
 
 	resource.ItemAction("loginas").Name(unlocalized("Přihlásit se jako")).Permission(sysadminPermission).Handler(
 		func(request *Request) {
-			var user user
-			resource.Resource.app.is("id", request.Params().Get("id")).mustGet(&user)
-			request.logInUser(&user)
+			//var user user
+			user := resource.Is("id", request.Params().Get("id")).First()
+			request.logInUser(user)
 			request.Redirect(resource.Resource.app.getAdminURL(""))
 		},
 	)
@@ -35,9 +35,9 @@ func initUserLogin(resource *Resource[user]) {
 		request := vc.Request()
 		password := vc.GetValue("password")
 
-		var u user
-		err := request.app.is("email", email).get(&u)
-		if err != nil {
+		//var u user
+		u := resource.Is("email", email).First()
+		if u == nil {
 			vc.AddError(messages.Get(locale, "admin_login_error"))
 			return
 		}
@@ -51,9 +51,9 @@ func initUserLogin(resource *Resource[user]) {
 		u.LoggedInUseragent = request.Request().UserAgent()
 		u.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
 
-		must(resource.Update(&u))
+		must(resource.Update(u))
 		//must(request.app.Save(&user))
-		request.logInUser(&u)
+		request.logInUser(u)
 		request.AddFlashMessage(messages.Get(u.Locale, "admin_login_ok"))
 
 		vc.Validation().RedirectionLocaliton = request.app.getAdminURL("")

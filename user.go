@@ -89,8 +89,8 @@ func (app *App) initUserResource() {
 
 func (app *App) GetCachedUserEmail(id int64) string {
 	return app.Cache.Load(fmt.Sprintf("cached-user-email-%d", id), func() interface{} {
-		var user user
-		app.is("id", id).get(&user)
+		//var user user
+		user := GetResource[user](app).Is("id", id).First()
 		return user.Email
 	}).(string)
 }

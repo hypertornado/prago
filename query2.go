@@ -1,55 +1,55 @@
 package prago
 
-type Query2[T any] struct {
+type Query[T any] struct {
 	resource *Resource[T]
 	query    query
 }
 
-func (resource *Resource[T]) Query() *Query2[T] {
-	ret := &Query2[T]{
+func (resource *Resource[T]) Query() *Query[T] {
+	ret := &Query[T]{
 		resource: resource,
 		query:    resource.Resource.app.query(),
 	}
 	return ret
 }
 
-func (q *Query2[T]) Is(name string, value interface{}) *Query2[T] {
+func (q *Query[T]) Is(name string, value interface{}) *Query[T] {
 	newQ := q.query.is(name, value)
 	q.query = newQ
 	return q
 }
 
-func (q *Query2[T]) Where(condition string, values ...interface{}) *Query2[T] {
+func (q *Query[T]) Where(condition string, values ...interface{}) *Query[T] {
 	newQ := q.query.where(condition, values...)
 	q.query = newQ
 	return q
 }
 
-func (q *Query2[T]) Limit(limit int64) *Query2[T] {
+func (q *Query[T]) Limit(limit int64) *Query[T] {
 	newQ := q.query.limit(limit)
 	q.query = newQ
 	return q
 }
 
-func (q *Query2[T]) Offset(limit int64) *Query2[T] {
+func (q *Query[T]) Offset(limit int64) *Query[T] {
 	newQ := q.query.offset(limit)
 	q.query = newQ
 	return q
 }
 
-func (q *Query2[T]) Order(order string) *Query2[T] {
+func (q *Query[T]) Order(order string) *Query[T] {
 	newQ := q.query.order(order)
 	q.query = newQ
 	return q
 }
 
-func (q *Query2[T]) OrderDesc(order string) *Query2[T] {
+func (q *Query[T]) OrderDesc(order string) *Query[T] {
 	newQ := q.query.orderDesc(order)
 	q.query = newQ
 	return q
 }
 
-func (q *Query2[T]) List() []*T {
+func (q *Query[T]) List() []*T {
 	var items interface{}
 	q.resource.Resource.newArrayOfItems(&items)
 	err := q.query.get(items)
@@ -63,7 +63,7 @@ func (q *Query2[T]) List() []*T {
 	return *transformed
 }
 
-func (q *Query2[T]) First() *T {
+func (q *Query[T]) First() *T {
 	items := q.List()
 	if len(items) > 0 {
 		return items[0]
@@ -71,7 +71,7 @@ func (q *Query2[T]) First() *T {
 	return nil
 }
 
-func (q *Query2[T]) Count() (int64, error) {
+func (q *Query[T]) Count() (int64, error) {
 	var item T
 	return q.query.count(&item)
 }

@@ -49,10 +49,10 @@ func (q query) where(condition string, values ...interface{}) query {
 }
 
 //Is adds where query for single item
-func (app *App) is(name string, value interface{}) query {
+/*func (app *App) is(name string, value interface{}) query {
 	q := app.query()
 	return q.is(name, value)
-}
+}*/
 
 //Is adds where query for single item
 func (q query) is(name string, value interface{}) query {

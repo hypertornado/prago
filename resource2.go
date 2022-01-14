@@ -6,6 +6,8 @@ import (
 	"reflect"
 )
 
+//https://github.com/golang/go/issues/49085
+
 type Resource[T any] struct {
 	Resource *resource
 }
@@ -31,7 +33,7 @@ func GetResource[T any](app *App) *Resource[T] {
 
 }
 
-func (resource Resource[T]) Is(name string, value interface{}) *Query2[T] {
+func (resource Resource[T]) Is(name string, value interface{}) *Query[T] {
 	return resource.Query().Is(name, value)
 }
 

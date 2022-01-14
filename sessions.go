@@ -49,7 +49,7 @@ func initUserFromSession(request *Request) {
 	}
 
 	var user user
-	err := request.app.is("id", userID).get(&user)
+	err := request.app.query().is("id", userID).get(&user)
 	if err != nil {
 		return
 	}

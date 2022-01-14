@@ -109,7 +109,7 @@ func getRelationData(user *user, f field, value interface{}) (*viewRelationData,
 	if intVal <= 0 {
 		return nil, fmt.Errorf("wrong value")
 	}
-	err := app.is("id", intVal).get(item)
+	err := app.query().is("id", intVal).get(item)
 	if err != nil {
 		return nil, fmt.Errorf("can't find this item")
 	}
@@ -211,7 +211,7 @@ func (app App) relationStringer(field field, value reflect.Value, user *user) st
 
 			var item interface{}
 			rr.newItem(&item)
-			err := rr.app.is("id", int64(value.Int())).get(item)
+			err := rr.app.query().is("id", int64(value.Int())).get(item)
 			if err != nil {
 				return fmt.Sprintf("%d", value.Int())
 			}
