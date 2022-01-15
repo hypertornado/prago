@@ -47,10 +47,7 @@ func initUserFromSession(request *Request) {
 	if !ok {
 		return
 	}
-	//var user user
-	res := GetResource[user](request.app)
-
-	user := res.Is("id", userID).First()
+	user := request.app.UsersResource.Is("id", userID).First()
 	if user == nil {
 		return
 	}

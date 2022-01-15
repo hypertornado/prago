@@ -10,25 +10,20 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
-func initUserRegistration(resource *resource) {
-	app := resource.app
+func initUserRegistration(app *App) {
 
-	app.accessController.get(resource.getURL("confirm_email"), func(request *Request) {
+	app.accessController.get(app.UsersResource.resource.getURL("confirm_email"), func(request *Request) {
 		email := request.Params().Get("email")
 		token := request.Params().Get("token")
 
-		res := GetResource[user](app)
-
-		//var u user
-		u := res.Is("email", email).First()
-		if u != nil {
-			if !u.emailConfirmed() {
-				if token == u.emailToken(app) {
-					u.EmailConfirmedAt = time.Now()
-					err := res.Update(u)
-					//err = app.Save(&user)
+		user := app.UsersResource.Is("email", email).First()
+		if user != nil {
+			if !user.emailConfirmed() {
+				if token == user.emailToken(app) {
+					user.EmailConfirmedAt = time.Now()
+					err := app.UsersResource.Update(user)
 					if err == nil {
-						request.AddFlashMessage(messages.Get(u.Locale, "admin_confirm_email_ok"))
+						request.AddFlashMessage(messages.Get(user.Locale, "admin_confirm_email_ok"))
 						request.Redirect(app.getAdminURL("user/login"))
 						return
 					}
@@ -36,11 +31,16 @@ func initUserRegistration(resource *resource) {
 			}
 		}
 
-		request.AddFlashMessage(messages.Get(u.Locale, "admin_confirm_email_fail"))
+		locale := "en"
+		if user != nil {
+			locale = user.Locale
+		}
+
+		request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_fail"))
 		request.Redirect(app.getAdminURL("user/login"))
 	})
 
-	resource.app.nologinFormAction("registration", func(form *Form, request *Request) {
+	app.nologinFormAction("registration", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		form.AddTextInput("name", messages.Get(locale, "Name")).Focused = true
 		form.AddEmailInput("email", messages.Get(locale, "admin_email"))
@@ -55,7 +55,6 @@ func registrationValidation(vc ValidationContext) {
 	valid := true
 	locale := vc.Locale()
 	app := vc.Request().app
-	res := GetResource[user](app)
 
 	name := vc.GetValue("name")
 	if name == "" {
@@ -69,9 +68,7 @@ func registrationValidation(vc ValidationContext) {
 		valid = false
 		vc.AddItemError("email", messages.Get(locale, "admin_email_not_valid"))
 	} else {
-		//var user user
-
-		user := res.Is("email", email).First()
+		user := app.UsersResource.Is("email", email).First()
 		if user != nil && user.Email == email {
 			valid = false
 			vc.AddItemError("email", messages.Get(locale, "admin_email_already_registered"))
@@ -107,12 +104,12 @@ func registrationValidation(vc ValidationContext) {
 			app.Log().Println(err)
 		}
 
-		count, err := res.Count()
+		count, err := app.UsersResource.Count()
 		if err == nil && count == 0 {
 			u.Role = sysadminRoleName
 		}
 
-		must(GetResource[user](app).Create(u))
+		must(app.UsersResource.Create(u))
 
 		vc.Request().AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
 		vc.Validation().RedirectionLocaliton = app.getAdminURL("user/login") + "?email=" + url.QueryEscape(email)

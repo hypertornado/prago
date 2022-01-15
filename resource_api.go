@@ -82,7 +82,7 @@ func initDefaultResourceAPIs(resource *resource) {
 		},
 	)
 
-	newResourceAPI(resource, "set-order").Permission(resource.canEdit).Method("POST").Handler(
+	newResourceAPI(resource, "set-order").Permission(resource.canUpdate).Method("POST").Handler(
 		func(request *Request) {
 			if resource.orderField == nil {
 				panic("can't order")
@@ -261,7 +261,7 @@ func initDefaultResourceAPIs(resource *resource) {
 		},
 	)
 
-	newResourceAPI(resource, "multiple_edit").Permission(resource.canEdit).Method("GET").Handler(
+	newResourceAPI(resource, "multiple_edit").Permission(resource.canUpdate).Method("GET").Handler(
 		func(request *Request) {
 
 			var item interface{}
@@ -279,7 +279,7 @@ func initDefaultResourceAPIs(resource *resource) {
 		},
 	)
 
-	newResourceAPI(resource, "multiple_edit").Permission(resource.canEdit).Method("POST").Handler(
+	newResourceAPI(resource, "multiple_edit").Permission(resource.canUpdate).Method("POST").Handler(
 		func(request *Request) {
 
 			validateCSRF(request)

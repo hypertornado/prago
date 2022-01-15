@@ -72,24 +72,24 @@ func (user user) emailToken(app *App) string {
 }
 
 func (app *App) initUserResource() {
-	resource := NewResource[user](app).resource
+	resource := NewResource[user](app)
 	app.UsersResource = resource
 
-	resource.name = messages.GetNameFunction("admin_users")
-	resource.canEdit = sysadminPermission
-	resource.canCreate = nobodyPermission
-	resource.canDelete = sysadminPermission
-	resource.canExport = sysadminPermission
+	resource.Name(messages.GetNameFunction("admin_users"))
+	resource.PermissionUpdate(sysadminPermission)
+	resource.PermissionCreate(nobodyPermission)
+	resource.PermissionDelete(sysadminPermission)
+	resource.PermissionExport(sysadminPermission)
 
-	initUserRegistration(resource)
-	initUserLogin(GetResource[user](app))
-	resource.app.initUserSettings()
-	initUserRenew(resource)
+	initUserRegistration(app)
+	initUserLogin(app)
+	initUserSettings(app)
+	initUserRenew(app)
 }
 
 func (app *App) GetCachedUserEmail(id int64) string {
 	return Cached(app, fmt.Sprintf("cached-user-email-%d", id), func() string {
-		user := GetResource[user](app).Is("id", id).First()
+		user := app.UsersResource.Is("id", id).First()
 		return user.Email
 	})
 }

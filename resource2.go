@@ -75,6 +75,11 @@ func (resource *Resource[T]) Name(name func(string) string) *Resource[T] {
 	return resource
 }
 
+func (resource *Resource[T]) FieldName(nameOfField string, name func(string) string) *Resource[T] {
+	resource.resource.FieldName(nameOfField, name)
+	return resource
+}
+
 func (resource *Resource[T]) PreviewURLFunction(fn func(interface{}) string) *Resource[T] {
 	resource.resource.PreviewURLFunction(fn)
 	return resource
@@ -90,8 +95,8 @@ func (resource *Resource[T]) PermissionView(permission Permission) *Resource[T] 
 	return resource
 }
 
-func (resource *Resource[T]) PermissionEdit(permission Permission) *Resource[T] {
-	resource.resource.PermissionEdit(permission)
+func (resource *Resource[T]) PermissionUpdate(permission Permission) *Resource[T] {
+	resource.resource.PermissionUpdate(permission)
 	return resource
 }
 

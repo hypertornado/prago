@@ -71,8 +71,6 @@ func initDefaultResourceActions(resource *resource) {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
 
-			//var item interface{}
-			//resource.newItem(&item)
 			item, err := resource.query().is("id", int64(id)).first()
 			if err != nil {
 				if err == ErrItemNotFound {
@@ -85,7 +83,7 @@ func initDefaultResourceActions(resource *resource) {
 		},
 	)
 
-	newResourceItemFormAction(resource, "edit").priority().Name(messages.GetNameFunction("admin_edit")).Permission(resource.canEdit).Form(
+	newResourceItemFormAction(resource, "edit").priority().Name(messages.GetNameFunction("admin_edit")).Permission(resource.canUpdate).Form(
 		func(form *Form, request *Request) {
 			id, err := strconv.Atoi(request.Params().Get("id"))
 			must(err)
@@ -166,19 +164,17 @@ func initDefaultResourceActions(resource *resource) {
 	}
 
 	if resource.activityLog {
-		newResourceAction(resource, "history").priority().IsWide().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resource.canEdit).DataSource(
+		newResourceAction(resource, "history").priority().IsWide().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resource.canUpdate).DataSource(
 			func(request *Request) interface{} {
 				return app.getHistory(resource, 0)
 			},
 		)
 
-		newResourceItemAction(resource, "history").priority().IsWide().Name(messages.GetNameFunction("admin_history")).Permission(resource.canEdit).Template("admin_history").DataSource(
+		newResourceItemAction(resource, "history").priority().IsWide().Name(messages.GetNameFunction("admin_history")).Permission(resource.canUpdate).Template("admin_history").DataSource(
 			func(request *Request) interface{} {
 				id, err := strconv.Atoi(request.Params().Get("id"))
 				must(err)
 
-				//var item interface{}
-				//resource.newItem(&item)
 				_, err = resource.query().is("id", int64(id)).first()
 				must(err)
 
@@ -190,8 +186,6 @@ func initDefaultResourceActions(resource *resource) {
 }
 
 func (resource *resource) deleteItemWithLog(user *user, id int64) error {
-	//var beforeItem interface{}
-	//resource.newItem(&beforeItem)
 	beforeItem, err := resource.query().is("id", id).first()
 	if err != nil {
 		return fmt.Errorf("can't find item for deletion id '%d': %s", id, err)
@@ -231,14 +225,11 @@ func (resource *resource) editItemWithLog(user *user, values url.Values) (interf
 	}
 
 	//TODO: remove this ugly hack and copy values via reflect package
-	//var beforeItem, item interface{}
-	//resource.newItem(&beforeItem)
 	beforeItem, err := resource.query().is("id", id).first()
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't get beforeitem with id %d: %s", id, err)
 	}
 
-	//resource.newItem(&item)
 	item, err := resource.query().is("id", id).first()
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't get item with id %d: %s", id, err)

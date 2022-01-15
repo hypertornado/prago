@@ -66,13 +66,11 @@ func (app *App) getHistory(resource *resource, itemID int64) historyView {
 	q.Limit(250)
 	q.OrderDesc("ID")
 
-	//var items []*activityLog
 	items := q.List()
 
 	for _, v := range items {
 		var username, userurl string
-		//var user user
-		user := GetResource[user](app).Is("id", v.User).First()
+		user := app.UsersResource.Is("id", v.User).First()
 		if user != nil {
 			username = user.Name
 			userurl = app.getAdminURL(fmt.Sprintf("user/%d", user.ID))

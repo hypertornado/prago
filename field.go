@@ -53,7 +53,7 @@ func (field *field) authorizeEdit(user *user) bool {
 	if !field.authorizeView(user) {
 		return false
 	}
-	if !field.resource.app.authorize(user, field.resource.canEdit) {
+	if !field.resource.app.authorize(user, field.resource.canUpdate) {
 		return false
 	}
 	if !field.resource.app.authorize(user, field.canEdit) {

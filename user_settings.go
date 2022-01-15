@@ -1,6 +1,6 @@
 package prago
 
-func (app *App) initUserSettings() {
+func initUserSettings(app *App) {
 
 	app.FormAction("settings").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu().Form(
 		func(form *Form, request *Request) {
@@ -37,11 +37,10 @@ func (app *App) initUserSettings() {
 		}
 
 		if valid {
-			u := vc.Request().user
-			u.Name = name
-			u.Locale = newLocale
-			must(GetResource[user](app).Update(u))
-			//must(app.Save(u))
+			user := vc.Request().user
+			user.Name = name
+			user.Locale = newLocale
+			must(app.UsersResource.Update(user))
 
 			vc.Request().AddFlashMessage(messages.Get(newLocale, "admin_settings_changed"))
 			vc.Validation().RedirectionLocaliton = app.getAdminURL("")

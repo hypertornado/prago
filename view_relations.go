@@ -41,7 +41,7 @@ func (resource *resource) getAutoRelationsView(id int, inValues interface{}, use
 			URL:  v.listURL(int64(id)),
 		})
 
-		if resource.app.authorize(user, v.resource.canEdit) {
+		if resource.app.authorize(user, v.resource.canUpdate) {
 			vi.Navigation = append(vi.Navigation, tab{
 				Name: messages.GetNameFunction("admin_new")(user.Locale),
 				URL:  v.addURL(int64(id)),

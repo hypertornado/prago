@@ -146,7 +146,7 @@ func getResourceAccessView(app *App) accessView {
 				yeah = no
 				s += no
 			}
-			if app.authorize(user, resource.canEdit) {
+			if app.authorize(user, resource.canUpdate) {
 				s += yeah
 			} else {
 				s += no

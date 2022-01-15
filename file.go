@@ -37,9 +37,8 @@ func (app *App) thumb(ids string) string {
 	if ids == "" {
 		return ""
 	}
-	fileResource := GetResource[File](app)
 	for _, v := range strings.Split(ids, ",") {
-		image := fileResource.Is("uid", v).First()
+		image := app.FilesResource.Is("uid", v).First()
 		if image != nil && image.isImage() {
 			return image.GetSmall()
 		}
@@ -51,17 +50,11 @@ func (app *App) thumb(ids string) string {
 func (app *App) GetFiles(ids string) []*File {
 	var files []*File
 	idsAr := strings.Split(ids, ",")
-	fileResource := GetResource[File](app)
 	for _, v := range idsAr {
-		//var image File
-		image := fileResource.Is("uid", v).First()
+		image := app.FilesResource.Is("uid", v).First()
 		if image != nil {
 			files = append(files, image)
 		}
-		/*err := app.Is("uid", v).Get(&image)
-		if err == nil {
-			files = append(files, &image)
-		}*/
 	}
 	return files
 }
@@ -129,9 +122,7 @@ func getOldRedirectParams(request *Request, app *App) (uuid, name string, err er
 		strings.Split(name, "-")[0],
 	)
 
-	//var file File
-	fileResource := GetResource[File](app)
-	file := fileResource.Is("uid", uuid).First()
+	file := app.FilesResource.Is("uid", uuid).First()
 	if file == nil {
 		err = errors.New("no file with id found")
 		return
@@ -143,14 +134,13 @@ func getOldRedirectParams(request *Request, app *App) (uuid, name string, err er
 func (app *App) initFilesResource() {
 	initCDN(app)
 
-	filesResource := NewResource[File](app)
-
-	resource := filesResource.Name(messages.GetNameFunction("admin_files")).resource
+	resource := NewResource[File](app)
+	resource.Name(messages.GetNameFunction("admin_files"))
 	app.FilesResource = resource
 
-	resource.canCreate = nobodyPermission
+	resource.PermissionCreate(nobodyPermission)
 
-	initFilesAPI(filesResource)
+	initFilesAPI(resource)
 
 	resource.FieldName("uid", messages.GetNameFunction("admin_file"))
 	resource.FieldName("width", messages.GetNameFunction("width"))
@@ -158,7 +148,7 @@ func (app *App) initFilesResource() {
 
 	app.addCommand("files", "metadata").
 		Callback(func() {
-			files := filesResource.Query().List()
+			files := resource.Query().List()
 			for _, v := range files {
 				err := v.updateMetadata()
 				if err != nil {
@@ -166,7 +156,7 @@ func (app *App) initFilesResource() {
 					continue
 				}
 				f := *v
-				if filesResource.Update(&f) != nil {
+				if resource.Update(&f) != nil {
 					fmt.Println("error while saving file: ", v.ID)
 				} else {
 					fmt.Println("saved ok: ", v.ID, v.Width, v.Height)
@@ -175,8 +165,8 @@ func (app *App) initFilesResource() {
 		})
 
 	app.ListenActivity(func(activity Activity) {
-		if activity.ActivityType == "delete" && activity.ResourceID == resource.id {
-			file := filesResource.Is("id", activity.ID).First()
+		if activity.ActivityType == "delete" && activity.ResourceID == resource.resource.id {
+			file := resource.Is("id", activity.ID).First()
 			err := filesCDN.DeleteFile(file.UID)
 			if err != nil {
 				app.Log().Printf("deleting CDN: %s\n", err)
@@ -217,7 +207,7 @@ func (app *App) initFilesResource() {
 		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
-	newResourceFormAction(resource, "upload").priority().Permission(resource.canEdit).Name(unlocalized("Nahrát soubor")).Form(func(f *Form, r *Request) {
+	newResourceFormAction(resource.resource, "upload").priority().Permission(resource.resource.canUpdate).Name(unlocalized("Nahrát soubor")).Form(func(f *Form, r *Request) {
 		locale := r.user.Locale
 		f.AddFileInput("file", messages.Get(locale, "admin_file"))
 		f.AddTextareaInput("description", messages.Get(locale, "Description"))
@@ -228,7 +218,7 @@ func (app *App) initFilesResource() {
 			vc.AddItemError("file", messages.Get(vc.Locale(), "admin_validation_not_empty"))
 		}
 		if vc.Valid() {
-			fileData, err := resource.app.UploadFile(multipartFiles[0], vc.Request().user, vc.GetValue("description"))
+			fileData, err := app.UploadFile(multipartFiles[0], vc.Request().user, vc.GetValue("description"))
 			if err != nil {
 				vc.AddError(err.Error())
 			} else {
@@ -242,7 +232,7 @@ func (app *App) initFilesResource() {
 			uuid := request.Params().Get("uuid")
 			size := request.Params().Get("size")
 
-			files := resource.app.GetFiles(uuid)
+			files := app.GetFiles(uuid)
 			if len(files) == 0 {
 				panic("can't find file")
 			}

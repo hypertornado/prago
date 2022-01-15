@@ -5,32 +5,28 @@ import (
 	"time"
 )
 
-func initUserRenew(resource *resource) {
-	resource.app.nologinFormAction("forgot", func(form *Form, request *Request) {
+func initUserRenew(app *App) {
+
+	app.nologinFormAction("forgot", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		form.AddEmailInput("email", messages.Get(locale, "admin_email")).Focused = true
 		form.AddSubmit(messages.Get(locale, "admin_forgotten_submit"))
 	}, func(vc ValidationContext) {
 		request := vc.Request()
-		app := request.app
-
 		email := fixEmail(request.Params().Get("email"))
 
-		res := GetResource[user](app)
-
 		var reason = ""
-
-		u := res.Is("email", email).First()
-		if u != nil {
-			if u.emailConfirmed() {
-				if !time.Now().AddDate(0, 0, -1).Before(u.EmailRenewedAt) {
-					u.EmailRenewedAt = time.Now()
-					err := res.Update(u)
+		user := app.UsersResource.Is("email", email).First()
+		if user != nil {
+			if user.emailConfirmed() {
+				if !time.Now().AddDate(0, 0, -1).Before(user.EmailRenewedAt) {
+					user.EmailRenewedAt = time.Now()
+					err := app.UsersResource.Update(user)
 					if err == nil {
-						err = app.sendRenewPasswordEmail(*u)
+						err = app.sendRenewPasswordEmail(*user)
 						if err == nil {
-							request.AddFlashMessage(messages.Get(u.Locale, "admin_forgoten_sent", u.Email))
-							vc.Validation().RedirectionLocaliton = app.getAdminURL("/user/login") + "?email=" + url.QueryEscape(u.Email)
+							request.AddFlashMessage(messages.Get(user.Locale, "admin_forgoten_sent", user.Email))
+							vc.Validation().RedirectionLocaliton = app.getAdminURL("/user/login") + "?email=" + url.QueryEscape(user.Email)
 						} else {
 							reason = "can't send renew email"
 						}
@@ -48,11 +44,11 @@ func initUserRenew(resource *resource) {
 		}
 
 		if reason != "" {
-			vc.AddError(messages.Get(vc.Locale(), "admin_forgoten_error", u.Email) + " (" + reason + ")")
+			vc.AddError(messages.Get(vc.Locale(), "admin_forgoten_error", user.Email) + " (" + reason + ")")
 		}
 	})
 
-	resource.app.nologinFormAction("renew_password", func(form *Form, request *Request) {
+	app.nologinFormAction("renew_password", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "admin_password_new"))
 		passwordInput.Focused = true
@@ -61,25 +57,20 @@ func initUserRenew(resource *resource) {
 		form.AddHidden("token").Value = request.Params().Get("token")
 		form.AddSubmit(messages.Get(locale, "admin_forgoten_set"))
 	}, func(vc ValidationContext) {
-		app := vc.Request().app
-
 		email := vc.GetValue("email")
 		email = fixEmail(email)
 		token := vc.GetValue("token")
 
 		errStr := messages.Get(vc.Locale(), "admin_error")
 
-		res := GetResource[user](app)
-
-		u := res.Is("email", email).First()
+		u := app.UsersResource.Is("email", email).First()
 		if u != nil {
 			if token == u.emailToken(app) {
 				password := vc.GetValue("password")
 				if len(password) >= 7 {
 					err := u.newPassword(password)
 					if err == nil {
-						err = res.Update(u)
-						//err = app.Save(&user)
+						err = app.UsersResource.Update(u)
 						if err == nil {
 							vc.Request().AddFlashMessage(messages.Get(vc.Locale(), "admin_password_changed"))
 							vc.Validation().RedirectionLocaliton = app.getAdminURL("user/login") + "?email=" + url.QueryEscape(u.Email)

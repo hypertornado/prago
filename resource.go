@@ -25,8 +25,8 @@ type resource struct {
 	relations []relation
 
 	canView   Permission
-	canEdit   Permission
 	canCreate Permission
+	canUpdate Permission
 	canDelete Permission
 	canExport Permission
 
@@ -61,8 +61,8 @@ func (app *App) oldNewResource(item interface{}) *resource {
 		defaultItemsPerPage: 200,
 
 		canView:   sysadminPermission,
-		canEdit:   loggedPermission,
 		canCreate: loggedPermission,
+		canUpdate: loggedPermission,
 		canDelete: loggedPermission,
 		canExport: loggedPermission,
 
@@ -102,7 +102,7 @@ func (resource resource) allowsMultipleActions(user *user) (ret bool) {
 	if resource.app.authorize(user, resource.canDelete) {
 		ret = true
 	}
-	if resource.app.authorize(user, resource.canEdit) {
+	if resource.app.authorize(user, resource.canUpdate) {
 		ret = true
 	}
 	return ret
@@ -113,7 +113,7 @@ func (resource resource) getMultipleActions(user *user) (ret []listMultipleActio
 		return nil
 	}
 
-	if resource.app.authorize(user, resource.canEdit) {
+	if resource.app.authorize(user, resource.canUpdate) {
 		ret = append(ret, listMultipleAction{
 			ID:   "edit",
 			Name: "Upravit",
@@ -167,8 +167,8 @@ func (resource *resource) PermissionView(permission Permission) *resource {
 	return resource
 }
 
-//PermissionEdit sets permission to edit functions, if there is no create and delete permissions set, it set them too
-func (resource *resource) PermissionEdit(permission Permission) *resource {
+//PermissionUpdate sets permission to edit functions, if there is no create and delete permissions set, it set them too
+func (resource *resource) PermissionUpdate(permission Permission) *resource {
 	must(resource.app.validatePermission(permission))
 	if resource.canCreate == loggedPermission {
 		resource.canCreate = permission
@@ -176,7 +176,7 @@ func (resource *resource) PermissionEdit(permission Permission) *resource {
 	if resource.canDelete == loggedPermission {
 		resource.canDelete = permission
 	}
-	resource.canEdit = permission
+	resource.canUpdate = permission
 	return resource
 }
 

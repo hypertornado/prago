@@ -36,8 +36,8 @@ type App struct {
 	accessController *controller
 	adminController  *controller
 
-	UsersResource *resource
-	FilesResource *resource
+	UsersResource *Resource[user]
+	FilesResource *Resource[File]
 
 	rootActions    []*Action
 	db             *sql.DB

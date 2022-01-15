@@ -291,7 +291,7 @@ func (app *App) getListItemActions(user *user, item interface{}, id int64, resou
 		}
 	}
 
-	if app.authorize(user, resource.canEdit) && resource.orderField != nil {
+	if app.authorize(user, resource.canUpdate) && resource.orderField != nil {
 		ret.ShowOrderButton = true
 	}
 
