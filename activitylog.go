@@ -58,7 +58,7 @@ func (app *App) getHistory(resource *resource, itemID int64) historyView {
 
 	q := GetResource[activityLog](app).Query()
 	if resource != nil {
-		q.Is("ResourceName", resource.id)
+		q.Is("ResourceName", resource.newResource.getID())
 	}
 	if itemID > 0 {
 		q.Is("ItemID", itemID)
@@ -93,10 +93,10 @@ func (app *App) getHistory(resource *resource, itemID int64) historyView {
 	return ret
 }
 
-func initActivityLog(resource *resource) {
-	resource.canView = Permission(sysadminRoleName)
+func initActivityLog(resource *Resource[activityLog]) {
+	resource.resource.canView = Permission(sysadminRoleName)
 	resource.orderDesc = true
-	resource.name = messages.GetNameFunction("admin_history")
+	resource.Name(messages.GetNameFunction("admin_history"))
 }
 
 func (app App) LogActivity(activityType string, userID int64, resourceID string, itemID int64, before, after interface{}) error {

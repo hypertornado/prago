@@ -133,7 +133,7 @@ func getResourceAccessView(app *App) accessView {
 
 	for _, resource := range app.resources {
 		viewResource := accessViewResource{
-			Name: resource.id,
+			Name: resource.newResource.getID(),
 		}
 		for _, v := range ret.Roles {
 			yeah := "+"

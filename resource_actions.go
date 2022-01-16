@@ -23,7 +23,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 			form.AddSubmit(messages.Get(request.user.Locale, "admin_save"))
 		},
 	).Validation(func(vc ValidationContext) {
-		for _, v := range resource.resource.validations {
+		for _, v := range resource.validations {
 			v(vc)
 		}
 		request := vc.Request()
@@ -31,7 +31,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 			var item T
 			resource.bindData(&item, request.user, request.Params())
 			if resource.resource.orderField != nil {
-				resource.resource.setOrderPosition(&item, resource.resource.count()+1)
+				resource.resource.setOrderPosition(&item, resource.count()+1)
 			}
 			must(resource.app.create(item))
 
@@ -47,11 +47,11 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 
 			if resource.activityLog {
 				must(
-					resource.app.LogActivity("new", request.UserID(), resource.resource.id, getItemID(item), nil, item),
+					resource.app.LogActivity("new", request.UserID(), resource.id, getItemID(item), nil, item),
 				)
 			}
 
-			must(resource.resource.updateCachedCount())
+			must(resource.updateCachedCount())
 
 			resource.app.Notification(getItemName(item)).
 				SetImage(resource.app.getItemImage(item)).
@@ -131,7 +131,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 			form.Title = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
 		},
 	).Validation(func(vc ValidationContext) {
-		for _, v := range resource.resource.deleteValidations {
+		for _, v := range resource.deleteValidations {
 			v(vc)
 		}
 		if vc.Valid() {
@@ -139,7 +139,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 			must(err)
 
 			must(resource.deleteItemWithLog(vc.Request().user, int64(id)))
-			must(resource.resource.updateCachedCount())
+			must(resource.updateCachedCount())
 			vc.Request().AddFlashMessage(messages.Get(vc.Request().user.Locale, "admin_item_deleted"))
 			vc.Validation().RedirectionLocaliton = resource.resource.getURL("")
 		}
@@ -192,7 +192,7 @@ func (resource *Resource[T]) deleteItemWithLog(user *user, id int64) error {
 	}
 
 	if resource.activityLog {
-		err := resource.app.LogActivity("delete", user.ID, resource.resource.id, id, beforeItem, nil)
+		err := resource.app.LogActivity("delete", user.ID, resource.id, id, beforeItem, nil)
 		if err != nil {
 			return err
 		}
@@ -250,7 +250,7 @@ func (resource *Resource[T]) editItemWithLog(user *user, values url.Values) (int
 	}
 
 	vv := newValuesValidation(user.Locale, allValues)
-	for _, v := range resource.resource.validations {
+	for _, v := range resource.validations {
 		v(vv)
 	}
 	if !vv.Valid() {
@@ -274,7 +274,7 @@ func (resource *Resource[T]) editItemWithLog(user *user, values url.Values) (int
 
 	if resource.activityLog {
 		must(
-			app.LogActivity("edit", user.ID, resource.resource.id, int64(id), beforeItem, item),
+			app.LogActivity("edit", user.ID, resource.id, int64(id), beforeItem, item),
 		)
 	}
 

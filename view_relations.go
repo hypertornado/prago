@@ -46,8 +46,8 @@ func (resource *resource) getAutoRelationsView(id int, inValues interface{}, use
 		}
 
 		vi.Relation = &viewRelation{
-			SourceResource: resource.id,
-			TargetResource: v.resource.id,
+			SourceResource: resource.newResource.getID(),
+			TargetResource: v.resource.newResource.getID(),
 			TargetField:    v.field,
 			IDValue:        int64(id),
 			Count:          filteredCount,
@@ -94,10 +94,10 @@ func generateRelationListAPIHandler(app *App) func(*Request) {
 		}
 
 		q := targetResource.query().is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
-		if targetResource.orderDesc {
-			q = q.orderDesc(targetResource.orderByColumn)
+		if targetResource.newResource.isOrderDesc() {
+			q = q.orderDesc(targetResource.newResource.getOrderByColumn())
 		} else {
-			q = q.order(targetResource.orderByColumn)
+			q = q.order(targetResource.newResource.getOrderByColumn())
 		}
 
 		limit := listRequest.Count

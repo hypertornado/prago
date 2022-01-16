@@ -117,7 +117,7 @@ func createApp(codeName string, version string) *App {
 	app.initFilesResource()
 
 	initActivityLog(
-		NewResource[activityLog](app).resource,
+		NewResource[activityLog](app),
 	)
 
 	app.initHome()

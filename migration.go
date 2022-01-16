@@ -25,7 +25,7 @@ func (app *App) migrate(verbose bool) error {
 		return err
 	}
 	for _, resource := range app.resources {
-		tables[resource.id] = false
+		tables[resource.newResource.getID()] = false
 		err := resource.migrate(verbose)
 		if err != nil {
 			return err
@@ -48,16 +48,16 @@ func (app *App) migrate(verbose bool) error {
 }
 
 func (resource *resource) unsafeDropTable() error {
-	_, err := resource.app.db.Exec(fmt.Sprintf("drop table `%s`;", resource.id))
+	_, err := resource.app.db.Exec(fmt.Sprintf("drop table `%s`;", resource.newResource.getID()))
 	return err
 }
 
 func (resource *resource) migrate(verbose bool) error {
-	_, err := getTableDescription(resource.app.db, resource.id)
+	_, err := getTableDescription(resource.app.db, resource.newResource.getID())
 	if err == nil {
-		return migrateTable(resource.app.db, resource.id, *resource, verbose)
+		return migrateTable(resource.app.db, resource.newResource.getID(), *resource, verbose)
 	}
-	return createTable(resource.app.db, resource.id, *resource, verbose)
+	return createTable(resource.app.db, resource.newResource.getID(), *resource, verbose)
 }
 
 func listTables(db dbIface) (ret map[string]bool, err error) {

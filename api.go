@@ -86,7 +86,7 @@ func (api *API) bindAPI() error {
 
 	var controller *controller
 	if api.resource != nil {
-		controller = api.resource.resourceController
+		controller = api.resource.newResource.getResourceControl()
 	} else {
 		controller = api.app.adminController
 	}

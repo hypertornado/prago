@@ -88,7 +88,7 @@ func (resource *resource) newField(f reflect.StructField, order int) *field {
 	} {
 		t := f.Tag.Get(v)
 		if t != "" {
-			panic(fmt.Sprintf("Use of deprecated tag '%s' in field '%s' of resource '%s'", v, ret.Name, ret.resource.id))
+			panic(fmt.Sprintf("Use of deprecated tag '%s' in field '%s' of resource '%s'", v, ret.Name, ret.resource.newResource.getID()))
 		}
 	}
 
@@ -192,7 +192,7 @@ func (resource *resource) newField(f reflect.StructField, order int) *field {
 	if ret.Name != "CreatedAt" && ret.Name != "UpdatedAt" {
 		if ret.Typ == reflect.TypeOf(time.Now()) {
 			if ret.Tags["prago-type"] == "timestamp" || ret.Name == "CreatedAt" || ret.Name == "UpdatedAt" {
-				resource.Validation(func(vc ValidationContext) {
+				resource.newResource.addValidation(func(vc ValidationContext) {
 					val := vc.GetValue(ret.ColumnName)
 					if val != "" {
 						_, err := time.Parse("2006-01-02 15:04", val)
@@ -202,7 +202,7 @@ func (resource *resource) newField(f reflect.StructField, order int) *field {
 					}
 				})
 			} else {
-				resource.Validation(func(vc ValidationContext) {
+				resource.newResource.addValidation(func(vc ValidationContext) {
 					val := vc.GetValue(ret.ColumnName)
 					if val != "" {
 						_, err := time.Parse("2006-01-02", val)
@@ -223,7 +223,7 @@ func (field *field) addFieldValidation(nameOfValidation string) error {
 		if field.Tags["prago-required"] != "false" {
 			field.required = true
 		}
-		field.resource.Validation(func(vc ValidationContext) {
+		field.resource.newResource.addValidation(func(vc ValidationContext) {
 			valid := true
 			if field.Typ.Kind() == reflect.Int64 ||
 				field.Typ.Kind() == reflect.Int32 ||
@@ -254,7 +254,7 @@ func (field *field) addFieldValidation(nameOfValidation string) error {
 func (resource *resource) FieldName(nameOfField string, name func(string) string) *resource {
 	f := resource.fieldMap[nameOfField]
 	if f == nil {
-		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, nameOfField))
+		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.newResource.getID(), nameOfField))
 	}
 	f.HumanName = name
 	return resource
@@ -263,7 +263,7 @@ func (resource *resource) FieldName(nameOfField string, name func(string) string
 func (resource *resource) FieldDescription(descriptionOfField string, description func(string) string) *resource {
 	f := resource.fieldMap[descriptionOfField]
 	if f == nil {
-		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, descriptionOfField))
+		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.newResource.getID(), descriptionOfField))
 	}
 	f.Description = description
 	return resource
@@ -272,7 +272,7 @@ func (resource *resource) FieldDescription(descriptionOfField string, descriptio
 func (resource *resource) FieldViewTemplate(IDofField string, viewTemplate string) *resource {
 	f := resource.fieldMap[IDofField]
 	if f == nil {
-		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
+		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.newResource.getID(), IDofField))
 	}
 	f.fieldType.viewTemplate = viewTemplate
 	return resource
@@ -281,7 +281,7 @@ func (resource *resource) FieldViewTemplate(IDofField string, viewTemplate strin
 func (resource *resource) FieldListCellTemplate(IDofField string, template string) *resource {
 	f := resource.fieldMap[IDofField]
 	if f == nil {
-		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
+		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.newResource.getID(), IDofField))
 	}
 	f.fieldType.listCellTemplate = template
 	return resource
@@ -290,7 +290,7 @@ func (resource *resource) FieldListCellTemplate(IDofField string, template strin
 func (resource *resource) FieldFormTemplate(IDofField string, template string) *resource {
 	f := resource.fieldMap[IDofField]
 	if f == nil {
-		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
+		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.newResource.getID(), IDofField))
 	}
 	f.fieldType.formTemplate = template
 	return resource
@@ -299,7 +299,7 @@ func (resource *resource) FieldFormTemplate(IDofField string, template string) *
 func (resource *resource) FieldDBDescription(IDofField string, description string) *resource {
 	f := resource.fieldMap[IDofField]
 	if f == nil {
-		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
+		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.newResource.getID(), IDofField))
 	}
 	f.fieldType.dbFieldDescription = description
 	return resource
@@ -379,7 +379,7 @@ func (field *field) initFieldType() {
 	}
 
 	if ret.allowedValues != nil {
-		field.resource.Validation(func(vc ValidationContext) {
+		field.resource.newResource.addValidation(func(vc ValidationContext) {
 			val := vc.GetValue(field.ColumnName)
 			var found bool
 			for _, v := range ret.allowedValues {

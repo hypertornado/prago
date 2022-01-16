@@ -69,7 +69,7 @@ func (q query) offset(offset int64) query {
 
 func (q query) first() (interface{}, error) {
 	var ret interface{}
-	err := getFirstItem(*q.resource, q.db, q.resource.id, &ret, q.query, q.isDebug)
+	err := getFirstItem(*q.resource, q.db, q.resource.newResource.getID(), &ret, q.query, q.isDebug)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (q query) first() (interface{}, error) {
 
 func (q query) list() (interface{}, error) {
 	var items interface{}
-	err := listItems(*q.resource, q.db, q.resource.id, &items, q.query, q.isDebug)
+	err := listItems(*q.resource, q.db, q.resource.newResource.getID(), &items, q.query, q.isDebug)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (q query) list() (interface{}, error) {
 }
 
 func (q query) count() (int64, error) {
-	return countItems(q.db, q.resource.id, q.query, q.isDebug)
+	return countItems(q.db, q.resource.newResource.getID(), q.query, q.isDebug)
 }
 
 func (q query) delete(item interface{}) (int64, error) {
@@ -94,5 +94,5 @@ func (q query) delete(item interface{}) (int64, error) {
 	if err != nil {
 		return -1, err
 	}
-	return deleteItems(q.db, resource.id, q.query, q.isDebug)
+	return deleteItems(q.db, resource.newResource.getID(), q.query, q.isDebug)
 }

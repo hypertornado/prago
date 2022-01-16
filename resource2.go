@@ -9,26 +9,46 @@ import (
 //https://github.com/golang/go/issues/49085
 
 type Resource[T any] struct {
+	id       string
 	resource *resource
 	app      *App
 
 	previewURLFunction func(interface{}) string
 
 	activityLog bool
+
+	validations       []Validation
+	deleteValidations []Validation
+
+	resourceController *controller
+
+	orderByColumn       string
+	orderDesc           bool
+	defaultItemsPerPage int64
 }
 
 func NewResource[T any](app *App) *Resource[T] {
 	var item T
+
+	defaultName := reflect.TypeOf(item).Name()
+
 	ret := &Resource[T]{
-		resource: app.oldNewResource(item),
-		app:      app,
+		app: app,
+
+		id: columnName(defaultName),
 
 		activityLog: true,
+
+		defaultItemsPerPage: 200,
+		resourceController:  app.adminController.subController(),
 	}
 	itemTyp := reflect.TypeOf(item)
 	app.resource2Map[itemTyp] = ret
-
 	app.resources2 = append(app.resources2, ret)
+	ret.resource = oldNewResource(ret, item)
+	initResource(ret)
+
+	ret.orderByColumn, ret.orderDesc = ret.getDefaultOrder()
 
 	return ret
 }
@@ -48,6 +68,32 @@ type resourceIface interface {
 	initDefaultResourceActions()
 	initDefaultResourceAPIs()
 	initAutoRelations()
+	addValidation(validation Validation)
+	isOrderDesc() bool
+	getOrderByColumn() string
+
+	updateCachedCount() error
+	getCachedCount() int64
+	count() int64
+
+	getResourceControl() *controller
+	getID() string
+}
+
+func (resource Resource[T]) getID() string {
+	return resource.id
+}
+
+func (resource Resource[T]) getResourceControl() *controller {
+	return resource.resourceController
+}
+
+func (resource Resource[T]) isOrderDesc() bool {
+	return resource.orderDesc
+}
+
+func (resource Resource[T]) getOrderByColumn() string {
+	return resource.orderByColumn
 }
 
 func (resource Resource[T]) Is(name string, value interface{}) *Query[T] {
@@ -97,7 +143,7 @@ func (resource *Resource[T]) PreviewURLFunction(fn func(interface{}) string) *Re
 }
 
 func (resource *Resource[T]) ItemsPerPage(itemsPerPage int64) *Resource[T] {
-	resource.resource.ItemsPerPage(itemsPerPage)
+	resource.defaultItemsPerPage = itemsPerPage
 	return resource
 }
 
@@ -127,12 +173,16 @@ func (resource *Resource[T]) PermissionExport(permission Permission) *Resource[T
 }
 
 func (resource *Resource[T]) Validation(validation Validation) *Resource[T] {
-	resource.resource.Validation(validation)
+	resource.addValidation(validation)
 	return resource
 }
 
+func (resource *Resource[T]) addValidation(validation Validation) {
+	resource.validations = append(resource.validations, validation)
+}
+
 func (resource *Resource[T]) DeleteValidation(validation Validation) *Resource[T] {
-	resource.resource.DeleteValidation(validation)
+	resource.deleteValidations = append(resource.deleteValidations, validation)
 	return resource
 }
 

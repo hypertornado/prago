@@ -206,7 +206,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 					if resource.activityLog {
 						must(
-							app.LogActivity("new", request.UserID(), resource.resource.id, getItemID(item), nil, item),
+							app.LogActivity("new", request.UserID(), resource.id, getItemID(item), nil, item),
 						)
 					}
 				}
@@ -225,7 +225,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 					values.Add("id", fmt.Sprintf("%d", v))
 
 					valValidation := newValuesValidation(request.user.Locale, values)
-					for _, v := range resource.resource.deleteValidations {
+					for _, v := range resource.deleteValidations {
 						v(valValidation)
 					}
 

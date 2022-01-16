@@ -4,8 +4,8 @@ import (
 	"reflect"
 )
 
-func (resource resource) getDefaultOrder() (column string, desc bool) {
-	for _, v := range resource.fieldArrays {
+func (resource *Resource[T]) getDefaultOrder() (column string, desc bool) {
+	for _, v := range resource.resource.fieldArrays {
 		add := false
 		if v.ColumnName == "id" {
 			add = true

@@ -9,15 +9,10 @@ import (
 
 //Resource is structure representing one item in admin menu or one table in database
 type resource struct {
-	app                 *App
-	id                  string
-	name                func(locale string) string
-	typ                 reflect.Type
-	resourceController  *controller
-	defaultItemsPerPage int64
-
-	orderByColumn string
-	orderDesc     bool
+	app *App
+	//id   string
+	name func(locale string) string
+	typ  reflect.Type
 
 	actions     []*Action
 	itemActions []*Action
@@ -30,19 +25,16 @@ type resource struct {
 	canDelete Permission
 	canExport Permission
 
-	//previewURL func(interface{}) string
-
 	fieldArrays []*field
 	fieldMap    map[string]*field
 
-	validations       []Validation
-	deleteValidations []Validation
-
-	orderField *field
+	newResource resourceIface
+	orderField  *field
 }
 
 //Resource creates new resource based on item
-func (app *App) oldNewResource(item interface{}) *resource {
+func oldNewResource[T any](newResource *Resource[T], item interface{}) *resource {
+	app := newResource.app
 	typ := reflect.TypeOf(item)
 
 	if typ.Kind() != reflect.Struct {
@@ -51,18 +43,19 @@ func (app *App) oldNewResource(item interface{}) *resource {
 
 	defaultName := typ.Name()
 	ret := &resource{
-		app:                 app,
-		name:                unlocalized(defaultName),
-		id:                  columnName(defaultName),
-		typ:                 typ,
-		resourceController:  app.adminController.subController(),
-		defaultItemsPerPage: 200,
+		app:  app,
+		name: unlocalized(defaultName),
+		//id:   columnName(defaultName),
+		typ: typ,
+		//resourceController: app.adminController.subController(),
 
 		canView:   sysadminPermission,
 		canCreate: loggedPermission,
 		canUpdate: loggedPermission,
 		canDelete: loggedPermission,
 		canExport: loggedPermission,
+
+		newResource: newResource,
 
 		fieldMap: make(map[string]*field),
 	}
@@ -78,8 +71,6 @@ func (app *App) oldNewResource(item interface{}) *resource {
 		}
 	}
 
-	ret.orderByColumn, ret.orderDesc = ret.getDefaultOrder()
-
 	app.resources = append(app.resources, ret)
 	_, typFound := app.resourceMap[ret.typ]
 	if typFound {
@@ -87,43 +78,41 @@ func (app *App) oldNewResource(item interface{}) *resource {
 	}
 
 	app.resourceMap[ret.typ] = ret
-	app.resourceNameMap[ret.id] = ret
-
-	app.initResource(ret)
+	app.resourceNameMap[ret.newResource.getID()] = ret
 
 	return ret
 }
 
-func (resource resource) allowsMultipleActions(user *user) (ret bool) {
-	if resource.app.authorize(user, resource.canDelete) {
+func (resource *Resource[T]) allowsMultipleActions(user *user) (ret bool) {
+	if resource.app.authorize(user, resource.resource.canDelete) {
 		ret = true
 	}
-	if resource.app.authorize(user, resource.canUpdate) {
+	if resource.app.authorize(user, resource.resource.canUpdate) {
 		ret = true
 	}
 	return ret
 }
 
-func (resource resource) getMultipleActions(user *user) (ret []listMultipleAction) {
+func (resource *Resource[T]) getMultipleActions(user *user) (ret []listMultipleAction) {
 	if !resource.allowsMultipleActions(user) {
 		return nil
 	}
 
-	if resource.app.authorize(user, resource.canUpdate) {
+	if resource.app.authorize(user, resource.resource.canUpdate) {
 		ret = append(ret, listMultipleAction{
 			ID:   "edit",
 			Name: "Upravit",
 		})
 	}
 
-	if resource.app.authorize(user, resource.canCreate) {
+	if resource.app.authorize(user, resource.resource.canCreate) {
 		ret = append(ret, listMultipleAction{
 			ID:   "clone",
 			Name: "Naklonovat",
 		})
 	}
 
-	if resource.app.authorize(user, resource.canDelete) {
+	if resource.app.authorize(user, resource.resource.canDelete) {
 		ret = append(ret, listMultipleAction{
 			ID:       "delete",
 			Name:     "Smazat",
@@ -146,10 +135,10 @@ func (resource resource) getItemURL(item interface{}, suffix string) string {
 }
 
 //ItemsPerPage sets default display value of items per page
-func (resource *resource) ItemsPerPage(itemsPerPage int64) *resource {
+/*func (resource *resource) ItemsPerPage(itemsPerPage int64) *resource {
 	resource.defaultItemsPerPage = itemsPerPage
 	return resource
-}
+}*/
 
 func (resource *resource) PermissionView(permission Permission) *resource {
 	must(resource.app.validatePermission(permission))
@@ -188,23 +177,13 @@ func (resource *resource) PermissionExport(permission Permission) *resource {
 	return resource
 }
 
-func (resource *resource) Validation(validation Validation) *resource {
-	resource.validations = append(resource.validations, validation)
-	return resource
-}
-
-func (resource *resource) DeleteValidation(validation Validation) *resource {
-	resource.deleteValidations = append(resource.deleteValidations, validation)
-	return resource
-}
-
 func (app *App) getResourceByName(name string) *resource {
 	return app.resourceNameMap[columnName(name)]
 }
 
-func (app *App) initResource(resource *resource) {
+func initResource[T any](resource *Resource[T]) {
 	resource.resourceController.addAroundAction(func(request *Request, next func()) {
-		if !app.authorize(request.user, resource.canView) {
+		if !resource.app.authorize(request.user, resource.resource.canView) {
 			render403(request)
 		} else {
 			next()
@@ -213,7 +192,7 @@ func (app *App) initResource(resource *resource) {
 }
 
 func (resource resource) getURL(suffix string) string {
-	url := resource.id
+	url := resource.newResource.getID()
 	if len(suffix) > 0 {
 		url += "/" + suffix
 	}
@@ -238,7 +217,7 @@ func (resource resource) saveWithDBIface(item interface{}, db dbIface, debugSQL 
 		val.FieldByName(fn).Type() == timeVal.Type() {
 		val.FieldByName(fn).Set(timeVal)
 	}
-	return resource.saveItem(db, resource.id, item, debugSQL)
+	return resource.saveItem(db, resource.newResource.getID(), item, debugSQL)
 }
 
 func (resource resource) createWithDBIface(item interface{}, db dbIface, debugSQL bool) error {
@@ -254,33 +233,33 @@ func (resource resource) createWithDBIface(item interface{}, db dbIface, debugSQ
 			}
 		}
 	}
-	return resource.createItem(db, resource.id, item, debugSQL)
+	return resource.createItem(db, resource.newResource.getID(), item, debugSQL)
 }
 
 func (resource resource) newItem(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(resource.typ))
 }
 
-func (resource resource) count() int64 {
-	count, _ := resource.query().count()
+func (resource *Resource[T]) count() int64 {
+	count, _ := resource.Query().Count()
 	return count
 }
 
-func (resource resource) cachedCountName() string {
-	return fmt.Sprintf("resource_count-%s", resource.id)
+func (resource *Resource[T]) cachedCountName() string {
+	return fmt.Sprintf("resource_count-%s", resource.resource.newResource.getID())
 }
 
-func (resource resource) getCachedCount() int64 {
+func (resource *Resource[T]) getCachedCount() int64 {
 	return resource.app.cache.Load(resource.cachedCountName(), func() interface{} {
 		return resource.count()
 	}).(int64)
 }
 
-func (resource resource) updateCachedCount() error {
+func (resource *Resource[T]) updateCachedCount() error {
 	return resource.app.cache.set(resource.cachedCountName(), resource.count())
 }
 
-func (resource resource) getPaginationData(user *user) (ret []listPaginationData) {
+func (resource *Resource[T]) getPaginationData(user *user) (ret []listPaginationData) {
 	var ints []int64
 	var used bool
 

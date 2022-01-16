@@ -181,7 +181,7 @@ func (resource *resource) getItemDescription(item interface{}, user *user, relat
 		}
 
 		rr := v.relatedResource
-		if rr != nil && relatedResource != nil && rr.id == relatedResource.id {
+		if rr != nil && relatedResource != nil && rr.newResource.getID() == relatedResource.newResource.getID() {
 			continue
 		}
 

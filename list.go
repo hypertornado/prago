@@ -92,21 +92,21 @@ func (res *Resource[T]) getListHeader(user *user) (list list, err error) {
 	lang := user.Locale
 
 	list.Colspan = 1
-	list.TypeID = resource.id
+	list.TypeID = res.id
 	list.VisibleColumns = resource.defaultVisibleFieldsStr(user)
 	list.Columns = resource.fieldsStr(user)
 
-	list.OrderColumn = resource.orderByColumn
-	list.OrderDesc = resource.orderDesc
+	list.OrderColumn = res.orderByColumn
+	list.OrderDesc = res.orderDesc
 	list.Locale = user.Locale
 
-	list.ItemsPerPage = resource.defaultItemsPerPage
-	list.PaginationData = resource.getPaginationData(user)
+	list.ItemsPerPage = res.defaultItemsPerPage
+	list.PaginationData = res.getPaginationData(user)
 
 	list.StatsLimitSelectData = getStatsLimitSelectData(user.Locale)
-	list.MultipleActions = resource.getMultipleActions(user)
+	list.MultipleActions = res.getMultipleActions(user)
 
-	orderField, ok := resource.fieldMap[resource.orderByColumn]
+	orderField, ok := resource.fieldMap[res.orderByColumn]
 	if !ok || !orderField.CanOrder {
 		err = ErrItemNotFound
 		return
@@ -348,11 +348,11 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 		columnsMap[v] = true
 	}
 
-	orderBy := resource.orderByColumn
+	orderBy := res.orderByColumn
 	if params.Get("_order") != "" {
 		orderBy = params.Get("_order")
 	}
-	orderDesc := resource.orderDesc
+	orderDesc := res.orderDesc
 	if params.Get("_desc") == "true" {
 		orderDesc = true
 	}
@@ -368,8 +368,6 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 	}
 
 	var count int64
-	//var item interface{}
-	//resource.newItem(&item)
 	countQuery := resource.query()
 	countQuery = resource.addFilterParamsToQuery(countQuery, params)
 	count, err = countQuery.count()
@@ -377,8 +375,8 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 		return
 	}
 
-	var totalCount = resource.count()
-	resource.updateCachedCount()
+	var totalCount = resource.newResource.count()
+	resource.newResource.updateCachedCount()
 
 	if count == totalCount {
 		ret.TotalCountStr = messages.ItemsCount(count, user.Locale)
@@ -386,7 +384,7 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 		ret.TotalCountStr = fmt.Sprintf("%s z %s", humanizeNumber(count), messages.ItemsCount(totalCount, user.Locale))
 	}
 
-	var itemsPerPage = resource.defaultItemsPerPage
+	var itemsPerPage = res.defaultItemsPerPage
 	if params.Get("_pagesize") != "" {
 		pageSize, err := strconv.Atoi(params.Get("_pagesize"))
 		if err == nil && pageSize > 0 && pageSize <= 1000000 {
@@ -445,7 +443,7 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 		row.URL = resource.getURL(fmt.Sprintf("%d", row.ID))
 
 		row.Actions = res.app.getListItemActions(user, val.Index(i).Interface(), row.ID, *resource)
-		row.AllowsMultipleActions = resource.allowsMultipleActions(user)
+		row.AllowsMultipleActions = res.allowsMultipleActions(user)
 		ret.Rows = append(ret.Rows, row)
 	}
 

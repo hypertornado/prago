@@ -165,7 +165,7 @@ func (app *App) initFilesResource() {
 		})
 
 	app.ListenActivity(func(activity Activity) {
-		if activity.ActivityType == "delete" && activity.ResourceID == resource.resource.id {
+		if activity.ActivityType == "delete" && activity.ResourceID == resource.id {
 			file := resource.Is("id", activity.ID).First()
 			err := filesCDN.DeleteFile(file.UID)
 			if err != nil {

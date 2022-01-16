@@ -97,7 +97,7 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 
 			resourceSection.Items = append(resourceSection.Items, mainMenuItem{
 				Name:     resource.name(user.Locale),
-				Subname:  humanizeNumber(resource.getCachedCount()),
+				Subname:  humanizeNumber(resource.newResource.getCachedCount()),
 				URL:      resourceURL,
 				Selected: selected,
 			})
