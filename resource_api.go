@@ -12,7 +12,7 @@ import (
 	"github.com/tealeg/xlsx"
 )
 
-func initDefaultResourceAPIs(resource *resource) {
+func (resource *Resource[T]) initDefaultResourceAPIs() {
 	newResourceAPI(resource, "list").Handler(
 		func(request *Request) {
 			if request.Request().URL.Query().Get("_format") == "json" {
@@ -22,7 +22,7 @@ func initDefaultResourceAPIs(resource *resource) {
 				return
 			}
 			if request.Request().URL.Query().Get("_format") == "xlsx" {
-				if !resource.app.authorize(request.user, resource.canExport) {
+				if !resource.app.authorize(request.user, resource.resource.canExport) {
 					render403(request)
 					return
 				}
@@ -36,7 +36,7 @@ func initDefaultResourceAPIs(resource *resource) {
 				row := sheet.AddRow()
 				columnsStr := request.Request().URL.Query().Get("_columns")
 				if columnsStr == "" {
-					columnsStr = resource.defaultVisibleFieldsStr(request.user)
+					columnsStr = resource.resource.defaultVisibleFieldsStr(request.user)
 				}
 				columnsAr := strings.Split(columnsStr, ",")
 				for _, v := range columnsAr {
@@ -65,26 +65,21 @@ func initDefaultResourceAPIs(resource *resource) {
 
 	newResourceAPI(resource, "preview-relation/:id").Handler(
 		func(request *Request) {
-			//var item interface{}
-			//resource.newItem(&item)
-			item, err := resource.query().is("id", request.Params().Get("id")).first()
-			if err == ErrItemNotFound {
+			item := resource.Is("id", request.Params().Get("id")).First()
+			if item == nil {
 				render404(request)
 				return
 			}
-			if err != nil {
-				panic(err)
-			}
 
 			request.RenderJSON(
-				resource.itemToRelationData(item, request.user, nil),
+				resource.resource.itemToRelationData(item, request.user, nil),
 			)
 		},
 	)
 
-	newResourceAPI(resource, "set-order").Permission(resource.canUpdate).Method("POST").Handler(
+	newResourceAPI(resource, "set-order").Permission(resource.resource.canUpdate).Method("POST").Handler(
 		func(request *Request) {
-			if resource.orderField == nil {
+			if resource.resource.orderField == nil {
 				panic("can't order")
 			}
 
@@ -98,12 +93,9 @@ func initDefaultResourceAPIs(resource *resource) {
 			}
 
 			for i, id := range order {
-				//var item interface{}
-				//resource.newItem(&item)
-				item, err := resource.query().is("id", int64(id)).first()
-				must(err)
-				resource.setOrderPosition(item, int64(i))
-				err = resource.app.update(item)
+				item := resource.Is("id", int64(id)).First()
+				resource.resource.setOrderPosition(item, int64(i))
+				err := resource.Update(item)
 				must(err)
 			}
 			request.RenderJSON(true)
@@ -120,11 +112,9 @@ func initDefaultResourceAPIs(resource *resource) {
 
 			id, err := strconv.Atoi(q)
 			if err == nil {
-				//var item interface{}
-				//resource.newItem(&item)
-				item, err := resource.query().is("id", id).first()
-				if err == nil {
-					relationItem := resource.itemToRelationData(item, request.user, nil)
+				item := resource.Is("id", id).First()
+				if item != nil {
+					relationItem := resource.resource.itemToRelationData(item, request.user, nil)
 					if relationItem != nil {
 						usedIDs[relationItem.ID] = true
 						ret = append(ret, *relationItem)
@@ -134,24 +124,21 @@ func initDefaultResourceAPIs(resource *resource) {
 
 			filter := "%" + q + "%"
 			for _, v := range []string{"name", "description"} {
-				field := resource.fieldMap[v]
+				field := resource.resource.fieldMap[v]
 				if field == nil {
 					continue
 				}
-				//var items interface{}
-				//resource.newArrayOfItems(&items)
-				items, err := resource.query().limit(5).where(v+" LIKE ?", filter).list()
-				if err == nil {
-					itemsVal := reflect.ValueOf(items)
-					for i := 0; i < itemsVal.Len(); i++ {
-						item := itemsVal.Index(i).Interface()
-						viewItem := resource.itemToRelationData(item, request.user, nil)
-						if viewItem != nil && !usedIDs[viewItem.ID] {
-							usedIDs[viewItem.ID] = true
-							ret = append(ret, *viewItem)
-						}
+				items := resource.Query().Limit(5).Where(v+" LIKE ?", filter).List()
+				itemsVal := reflect.ValueOf(items)
+				for i := 0; i < itemsVal.Len(); i++ {
+					item := itemsVal.Index(i).Interface()
+					viewItem := resource.resource.itemToRelationData(item, request.user, nil)
+					if viewItem != nil && !usedIDs[viewItem.ID] {
+						usedIDs[viewItem.ID] = true
+						ret = append(ret, *viewItem)
 					}
 				}
+
 			}
 
 			if len(ret) > 5 {
@@ -181,17 +168,15 @@ func initDefaultResourceAPIs(resource *resource) {
 
 			switch request.Params().Get("action") {
 			case "clone":
-				if !request.app.authorize(request.user, resource.canCreate) {
+				if !request.app.authorize(request.user, resource.resource.canCreate) {
 					renderAPINotAuthorized(request)
 					return
 				}
 				for _, v := range ids {
 					app := request.app
-					//var item interface{}
-					//resource.newItem(&item)
-					item, err := resource.query().is("id", v).first()
-					if err != nil {
-						panic(fmt.Sprintf("can't get item for clone with id %d: %s", v, err))
+					item := resource.Is("id", v).First()
+					if item == nil {
+						panic(fmt.Sprintf("can't get item for clone with id %d", v))
 					}
 					val := reflect.ValueOf(item).Elem()
 					val.FieldByName("ID").SetInt(0)
@@ -204,14 +189,14 @@ func initDefaultResourceAPIs(resource *resource) {
 					}
 
 					//TODO: log for creation
-					err = resource.app.create(item)
+					err := resource.Create(item)
 					if err != nil {
 						panic(fmt.Sprintf("can't create item for clone with id %d: %s", v, err))
 					}
 
 					if app.search != nil {
 						go func() {
-							err := app.search.saveItem(resource, item)
+							err := app.search.saveItem(resource.resource, item)
 							if err != nil {
 								app.Log().Println(fmt.Errorf("%s", err))
 							}
@@ -219,9 +204,9 @@ func initDefaultResourceAPIs(resource *resource) {
 						}()
 					}
 
-					if resource.activityLog {
+					if resource.resource.activityLog {
 						must(
-							app.LogActivity("new", request.UserID(), resource.id, getItemID(item), nil, item),
+							app.LogActivity("new", request.UserID(), resource.resource.id, getItemID(item), nil, item),
 						)
 					}
 				}
@@ -231,7 +216,7 @@ func initDefaultResourceAPIs(resource *resource) {
 				)).Flash(request)
 
 			case "delete":
-				if !request.app.authorize(request.user, resource.canDelete) {
+				if !request.app.authorize(request.user, resource.resource.canDelete) {
 					renderAPINotAuthorized(request)
 					return
 				}
@@ -240,7 +225,7 @@ func initDefaultResourceAPIs(resource *resource) {
 					values.Add("id", fmt.Sprintf("%d", v))
 
 					valValidation := newValuesValidation(request.user.Locale, values)
-					for _, v := range resource.deleteValidations {
+					for _, v := range resource.resource.deleteValidations {
 						v(valValidation)
 					}
 
@@ -252,7 +237,7 @@ func initDefaultResourceAPIs(resource *resource) {
 						return
 					}
 
-					err := resource.deleteItemWithLog(request.user, v)
+					err := resource.resource.deleteItemWithLog(request.user, v)
 					must(err)
 				}
 			default:
@@ -261,15 +246,16 @@ func initDefaultResourceAPIs(resource *resource) {
 		},
 	)
 
-	newResourceAPI(resource, "multiple_edit").Permission(resource.canUpdate).Method("GET").Handler(
+	newResourceAPI(resource, "multiple_edit").Permission(resource.resource.canUpdate).Method("GET").Handler(
 		func(request *Request) {
 
-			var item interface{}
-			resource.newItem(&item)
+			//var item interface{}
+			//resource.resource.newItem(&item)
+			var item T
 			form := NewForm(
-				resource.getURL("api/multiple_edit"),
+				resource.resource.getURL("api/multiple_edit"),
 			)
-			resource.addFormItems(item, request.user, form)
+			resource.addFormItems(&item, request.user, form)
 			request.SetData("form", form)
 
 			request.SetData("CSRFToken", request.csrfToken())
@@ -279,7 +265,7 @@ func initDefaultResourceAPIs(resource *resource) {
 		},
 	)
 
-	newResourceAPI(resource, "multiple_edit").Permission(resource.canUpdate).Method("POST").Handler(
+	newResourceAPI(resource, "multiple_edit").Permission(resource.resource.canUpdate).Method("POST").Handler(
 		func(request *Request) {
 
 			validateCSRF(request)

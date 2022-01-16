@@ -222,13 +222,6 @@ func (app *App) initResource(resource *resource) {
 	})
 }
 
-func (app *App) initDefaultResourceActions() {
-	for _, v := range app.resources {
-		initDefaultResourceActions(v)
-		initDefaultResourceAPIs(v)
-	}
-}
-
 func (resource resource) getURL(suffix string) string {
 	url := resource.id
 	if len(suffix) > 0 {

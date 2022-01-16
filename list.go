@@ -87,7 +87,8 @@ type listMultipleAction struct {
 	IsDelete bool
 }
 
-func (resource *resource) getListHeader(user *user) (list list, err error) {
+func (res *Resource[T]) getListHeader(user *user) (list list, err error) {
+	resource := res.resource
 	lang := user.Locale
 
 	list.Colspan = 1
@@ -323,14 +324,15 @@ func (resource *resource) addFilterToQuery(q query, filter map[string]string) qu
 	return q
 }
 
-func (resource *resource) getListContent(user *user, params url.Values) (ret listContent, err error) {
+func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listContent, err error) {
+	resource := res.resource
 
 	if !resource.app.authorize(user, resource.canView) {
 		return listContent{}, errors.New("access denied")
 	}
 
 	var listHeader list
-	listHeader, err = resource.getListHeader(user)
+	listHeader, err = res.getListHeader(user)
 	if err != nil {
 		return
 	}
@@ -465,8 +467,9 @@ type listContentJSON struct {
 	StatsStr string
 }
 
-func (resource *resource) getListContentJSON(user *user, params url.Values) (ret *listContentJSON, err error) {
-	listData, err := resource.getListContent(user, params)
+func (res *Resource[T]) getListContentJSON(user *user, params url.Values) (ret *listContentJSON, err error) {
+	resource := res.resource
+	listData, err := res.getListContent(user, params)
 	if err != nil {
 		return nil, err
 	}

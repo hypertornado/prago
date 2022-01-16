@@ -60,6 +60,7 @@ type App struct {
 	taskManager       *taskManager
 
 	resource2Map map[reflect.Type]interface{}
+	resources2   []resourceIface
 }
 
 func newTestingApp() *App {
@@ -115,12 +116,8 @@ func createApp(codeName string, version string) *App {
 	app.initUserResource()
 	app.initFilesResource()
 
-	//NewResource[activityLog](app).Resource
 	initActivityLog(
 		NewResource[activityLog](app).resource,
-		//app.Resource(
-		//	activityLog{},
-		//),
 	)
 
 	app.initHome()
@@ -138,6 +135,11 @@ func createApp(codeName string, version string) *App {
 	return app
 }
 
+func (app *App) Run() {
+	app.afterInit()
+	app.parseCommands()
+}
+
 func (app *App) afterInit() {
 	app.initDefaultResourceActions()
 	app.bindAPIs()
@@ -146,9 +148,11 @@ func (app *App) afterInit() {
 	app.initAllAutoRelations()
 }
 
-func (app *App) Run() {
-	app.afterInit()
-	app.parseCommands()
+func (app *App) initDefaultResourceActions() {
+	for _, v := range app.resources2 {
+		v.initDefaultResourceActions()
+		v.initDefaultResourceAPIs()
+	}
 }
 
 //New creates App structure for prago app

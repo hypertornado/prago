@@ -46,7 +46,7 @@ func (resource resource) fixBooleanParams(user *user, params url.Values) {
 	}
 }
 
-func (resource resource) bindData(item interface{}, user *user, params url.Values) error {
+func (resource Resource[T]) bindData(item *T, user *user, params url.Values) error {
 
 	/*if bindedFieldIDs == nil {
 		bindedFieldIDs = resource.getDefaultBindedFieldIDs(user)
@@ -60,7 +60,7 @@ func (resource resource) bindData(item interface{}, user *user, params url.Value
 		value = value.Elem()
 	}
 
-	for _, field := range resource.fieldArrays {
+	for _, field := range resource.resource.fieldArrays {
 		if !field.authorizeEdit(user) {
 			continue
 		}

@@ -74,41 +74,41 @@ func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Reques
 }
 
 func (resource *Resource[T]) FormAction(url string) *FormAction {
-	return newResourceFormAction(resource.resource, url)
+	return newResourceFormAction(resource, url)
 }
 
-func newResourceFormAction(resource *resource, url string) *FormAction {
+func newResourceFormAction[T any](resource *Resource[T], url string) *FormAction {
 	fa := newFormAction(resource.app, url)
 
-	fa.actionForm.resource = resource
-	fa.actionValidation.resource = resource
+	fa.actionForm.resource = resource.resource
+	fa.actionValidation.resource = resource.resource
 
-	fa.actionForm.Permission(resource.canView)
-	fa.actionValidation.Permission(resource.canView)
+	fa.actionForm.Permission(resource.resource.canView)
+	fa.actionValidation.Permission(resource.resource.canView)
 
-	resource.actions = append(resource.actions, fa.actionForm)
-	resource.actions = append(resource.actions, fa.actionValidation)
+	resource.resource.actions = append(resource.resource.actions, fa.actionForm)
+	resource.resource.actions = append(resource.resource.actions, fa.actionValidation)
 	return fa
 }
 
 func (resource *Resource[T]) FormItemAction(url string) *FormAction {
-	return newResourceItemFormAction(resource.resource, url)
+	return newResourceItemFormAction(resource, url)
 }
 
-func newResourceItemFormAction(resource *resource, url string) *FormAction {
+func newResourceItemFormAction[T any](resource *Resource[T], url string) *FormAction {
 	fa := newFormAction(resource.app, url)
 
-	fa.actionForm.resource = resource
-	fa.actionValidation.resource = resource
+	fa.actionForm.resource = resource.resource
+	fa.actionValidation.resource = resource.resource
 
-	fa.actionForm.Permission(resource.canView)
-	fa.actionValidation.Permission(resource.canView)
+	fa.actionForm.Permission(resource.resource.canView)
+	fa.actionValidation.Permission(resource.resource.canView)
 
 	fa.actionForm.isItemAction = true
 	fa.actionValidation.isItemAction = true
 
-	resource.itemActions = append(resource.itemActions, fa.actionForm)
-	resource.itemActions = append(resource.itemActions, fa.actionValidation)
+	resource.resource.itemActions = append(resource.resource.itemActions, fa.actionForm)
+	resource.resource.itemActions = append(resource.resource.itemActions, fa.actionValidation)
 	return fa
 }
 

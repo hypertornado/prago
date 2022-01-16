@@ -266,7 +266,7 @@ func initNewsletterResource(res *Resource[newsletter]) {
 		},
 	)
 
-	newResourceItemFormAction(resource, "send-preview").Permission(loggedPermission).Name(unlocalized("Odeslat náhled")).Form(
+	newResourceItemFormAction(res, "send-preview").Permission(loggedPermission).Name(unlocalized("Odeslat náhled")).Form(
 		func(f *Form, r *Request) {
 			f.AddTextareaInput("emails", "Seznam emailů na poslání preview (jeden email na řádek)").Focused = true
 			f.AddSubmit("Odeslat náhled")
@@ -296,7 +296,7 @@ func initNewsletterResource(res *Resource[newsletter]) {
 		}
 	})
 
-	newResourceItemFormAction(resource, "send").Permission(loggedPermission).Name(unlocalized("Odeslat")).Form(
+	newResourceItemFormAction(res, "send").Permission(loggedPermission).Name(unlocalized("Odeslat")).Form(
 		func(form *Form, request *Request) {
 			recipients, err := resource.app.getNewsletterRecipients()
 			must(err)
@@ -304,12 +304,10 @@ func initNewsletterResource(res *Resource[newsletter]) {
 		},
 	).Validation(
 		func(vc ValidationContext) {
-			//var nl newsletter
 			nl := res.Is("id", vc.GetValue("id")).First()
 			nl.SentAt = time.Now()
 			//TODO: log sent emails
-			res.Update(nl)
-			//resource.app.Save(&newsletter)
+			must(res.Update(nl))
 
 			recipients, err := resource.app.getNewsletterRecipients()
 			if err != nil {
@@ -324,7 +322,7 @@ func initNewsletterResource(res *Resource[newsletter]) {
 		},
 	)
 
-	newResourceItemFormAction(resource, "duplicate").Permission(loggedPermission).Name(unlocalized("Duplikovat")).Form(
+	newResourceItemFormAction(res, "duplicate").Permission(loggedPermission).Name(unlocalized("Duplikovat")).Form(
 		func(f *Form, r *Request) {
 			f.AddSubmit("Duplikovat newsletter")
 		},

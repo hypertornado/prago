@@ -10,15 +10,20 @@ import (
 
 type Resource[T any] struct {
 	resource *resource
+	app      *App
 }
 
 func NewResource[T any](app *App) *Resource[T] {
 	var item T
 	ret := &Resource[T]{
 		resource: app.oldNewResource(item),
+		app:      app,
 	}
 	itemTyp := reflect.TypeOf(item)
 	app.resource2Map[itemTyp] = ret
+
+	app.resources2 = append(app.resources2, ret)
+
 	return ret
 }
 
@@ -33,11 +38,10 @@ func GetResource[T any](app *App) *Resource[T] {
 
 }
 
-/*func (resource Resource[T]) Name(name string) Resource[T] {
-	resource.resource.name = name
-	return resource
-
-}*/
+type resourceIface interface {
+	initDefaultResourceActions()
+	initDefaultResourceAPIs()
+}
 
 func (resource Resource[T]) Is(name string, value interface{}) *Query[T] {
 	return resource.Query().Is(name, value)
