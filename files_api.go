@@ -5,7 +5,7 @@ import (
 )
 
 func initFilesAPI(resource *Resource[File]) {
-	app := resource.resource.app
+	app := resource.app
 
 	//TODO: remove this and use single details API
 	resource.API("redirect-uuid/:uuid").Permission(loggedPermission).Handler(func(request *Request) {

@@ -204,7 +204,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 						}()
 					}
 
-					if resource.resource.activityLog {
+					if resource.activityLog {
 						must(
 							app.LogActivity("new", request.UserID(), resource.resource.id, getItemID(item), nil, item),
 						)
@@ -237,7 +237,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 						return
 					}
 
-					err := resource.resource.deleteItemWithLog(request.user, v)
+					err := resource.deleteItemWithLog(request.user, v)
 					must(err)
 				}
 			default:

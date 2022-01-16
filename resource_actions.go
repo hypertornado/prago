@@ -45,7 +45,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 				}()
 			}
 
-			if resource.resource.activityLog {
+			if resource.activityLog {
 				must(
 					resource.app.LogActivity("new", request.UserID(), resource.resource.id, getItemID(item), nil, item),
 				)
@@ -138,7 +138,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 			id, err := strconv.Atoi(vc.GetValue("id"))
 			must(err)
 
-			must(resource.resource.deleteItemWithLog(vc.Request().user, int64(id)))
+			must(resource.deleteItemWithLog(vc.Request().user, int64(id)))
 			must(resource.resource.updateCachedCount())
 			vc.Request().AddFlashMessage(messages.Get(vc.Request().user.Locale, "admin_item_deleted"))
 			vc.Validation().RedirectionLocaliton = resource.resource.getURL("")
@@ -160,7 +160,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 		)
 	}
 
-	if resource.resource.activityLog {
+	if resource.activityLog {
 		newResourceAction(resource, "history").priority().IsWide().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resource.resource.canUpdate).DataSource(
 			func(request *Request) interface{} {
 				return resource.app.getHistory(resource.resource, 0)
@@ -185,28 +185,29 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 	}
 }
 
-func (resource *resource) deleteItemWithLog(user *user, id int64) error {
-	beforeItem, err := resource.query().is("id", id).first()
-	if err != nil {
-		return fmt.Errorf("can't find item for deletion id '%d': %s", id, err)
+func (resource *Resource[T]) deleteItemWithLog(user *user, id int64) error {
+	beforeItem := resource.Is("id", id).First()
+	if beforeItem == nil {
+		return fmt.Errorf("can't find item for deletion id '%d'", id)
 	}
 
 	if resource.activityLog {
-		err = resource.app.LogActivity("delete", user.ID, resource.id, id, beforeItem, nil)
+		err := resource.app.LogActivity("delete", user.ID, resource.resource.id, id, beforeItem, nil)
 		if err != nil {
 			return err
 		}
 	}
 
-	var item interface{}
-	resource.newItem(&item)
-	_, err = resource.query().is("id", id).delete(item)
+	//var item interface{}
+	//resource.newItem(&item)
+	err := resource.Delete(id)
+	//_, err = resource.query().is("id", id).delete(item)
 	if err != nil {
 		return fmt.Errorf("can't delete item id '%d': %s", id, err)
 	}
 
 	if resource.app.search != nil {
-		err = resource.app.search.deleteItem(resource, id)
+		err = resource.app.search.deleteItem(resource.resource, id)
 		if err != nil {
 			resource.app.Log().Println(fmt.Errorf("%s", err))
 		}
@@ -271,7 +272,7 @@ func (resource *Resource[T]) editItemWithLog(user *user, values url.Values) (int
 		}()
 	}
 
-	if resource.resource.activityLog {
+	if resource.activityLog {
 		must(
 			app.LogActivity("edit", user.ID, resource.resource.id, int64(id), beforeItem, item),
 		)

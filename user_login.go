@@ -10,7 +10,7 @@ func initUserLogin(app *App) {
 		func(request *Request) {
 			user := app.UsersResource.Is("id", request.Params().Get("id")).First()
 			request.logInUser(user)
-			request.Redirect(app.UsersResource.resource.app.getAdminURL(""))
+			request.Redirect(app.UsersResource.app.getAdminURL(""))
 		},
 	)
 

@@ -117,7 +117,7 @@ func (res *Resource[T]) getListHeader(user *user) (list list, err error) {
 	if resource.orderField != nil {
 		list.CanChangeOrder = true
 	}
-	list.CanExport = resource.app.authorize(user, resource.canExport)
+	list.CanExport = res.app.authorize(user, resource.canExport)
 
 	for _, v := range resource.fieldArrays {
 		if v.authorizeView(user) {
@@ -327,7 +327,7 @@ func (resource *resource) addFilterToQuery(q query, filter map[string]string) qu
 func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listContent, err error) {
 	resource := res.resource
 
-	if !resource.app.authorize(user, resource.canView) {
+	if !res.app.authorize(user, resource.canView) {
 		return listContent{}, errors.New("access denied")
 	}
 
@@ -444,7 +444,7 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 		row.ID = itemVal.FieldByName("ID").Int()
 		row.URL = resource.getURL(fmt.Sprintf("%d", row.ID))
 
-		row.Actions = resource.app.getListItemActions(user, val.Index(i).Interface(), row.ID, *resource)
+		row.Actions = res.app.getListItemActions(user, val.Index(i).Interface(), row.ID, *resource)
 		row.AllowsMultipleActions = resource.allowsMultipleActions(user)
 		ret.Rows = append(ret.Rows, row)
 	}
@@ -467,9 +467,8 @@ type listContentJSON struct {
 	StatsStr string
 }
 
-func (res *Resource[T]) getListContentJSON(user *user, params url.Values) (ret *listContentJSON, err error) {
-	resource := res.resource
-	listData, err := res.getListContent(user, params)
+func (resource *Resource[T]) getListContentJSON(user *user, params url.Values) (ret *listContentJSON, err error) {
+	listData, err := resource.getListContent(user, params)
 	if err != nil {
 		return nil, err
 	}

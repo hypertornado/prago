@@ -250,15 +250,15 @@ type newsletter struct {
 }
 
 func initNewsletterResource(res *Resource[newsletter]) {
-	resource := res.resource
-	resource.canView = sysadminPermission
+	//resource := res.resource
+	res.resource.canView = sysadminPermission
 
 	res.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(
 		func(request *Request) {
 			//var newsletter newsletter
 			newsletter := res.Is("id", request.Params().Get("id")).First()
 
-			body, err := resource.app.newsletters.GetBody(*newsletter, "")
+			body, err := res.app.newsletters.GetBody(*newsletter, "")
 			must(err)
 
 			request.Response().WriteHeader(200)
@@ -272,7 +272,6 @@ func initNewsletterResource(res *Resource[newsletter]) {
 			f.AddSubmit("Odeslat náhled")
 		},
 	).Validation(func(vc ValidationContext) {
-		//var newsletter newsletter
 		newsletter := res.Is("id", vc.GetValue("id")).First()
 		newsletter.PreviewSentAt = time.Now()
 		err := res.Update(newsletter)
@@ -285,20 +284,20 @@ func initNewsletterResource(res *Resource[newsletter]) {
 			vc.AddError("Není zadán žádný email")
 		}
 		if vc.Valid() {
-			err := resource.app.sendEmails(*newsletter, emails)
+			err := res.app.sendEmails(*newsletter, emails)
 			if err != nil {
 				vc.AddError(fmt.Sprintf("Chyba při odesílání emailů: %s", err))
 			}
 		}
 		if vc.Valid() {
 			vc.Request().AddFlashMessage("Náhled newsletteru odeslán.")
-			vc.Validation().RedirectionLocaliton = resource.getItemURL(&newsletter, "")
+			vc.Validation().RedirectionLocaliton = res.resource.getItemURL(&newsletter, "")
 		}
 	})
 
 	newResourceItemFormAction(res, "send").Permission(loggedPermission).Name(unlocalized("Odeslat")).Form(
 		func(form *Form, request *Request) {
-			recipients, err := resource.app.getNewsletterRecipients()
+			recipients, err := res.app.getNewsletterRecipients()
 			must(err)
 			form.AddSubmit(fmt.Sprintf("Odelsat newsletter na %d emailů", len(recipients)))
 		},
@@ -309,16 +308,16 @@ func initNewsletterResource(res *Resource[newsletter]) {
 			//TODO: log sent emails
 			must(res.Update(nl))
 
-			recipients, err := resource.app.getNewsletterRecipients()
+			recipients, err := res.app.getNewsletterRecipients()
 			if err != nil {
 				panic(err)
 			}
 
-			go resource.app.sendEmails(*nl, recipients)
+			go res.app.sendEmails(*nl, recipients)
 
 			vc.Request().AddFlashMessage(fmt.Sprintf("Newsletter '%s' se odesílá na %d adres", nl.Name, len(recipients)))
 
-			vc.Validation().RedirectionLocaliton = resource.getItemURL(&nl, "")
+			vc.Validation().RedirectionLocaliton = res.resource.getItemURL(&nl, "")
 		},
 	)
 
@@ -346,7 +345,7 @@ func initNewsletterResource(res *Resource[newsletter]) {
 			must(newsletterSectionResource.Create(&section))
 		}
 
-		vc.Validation().RedirectionLocaliton = resource.getItemURL(&newsletter, "edit")
+		vc.Validation().RedirectionLocaliton = res.resource.getItemURL(&newsletter, "edit")
 	})
 }
 
@@ -364,8 +363,6 @@ func parseEmails(emails string) []string {
 
 func (app *App) getNewsletterRecipients() ([]string, error) {
 	ret := []string{}
-	//var persons []*newsletterPersons
-	//GetResource[newsletterPersons](app).Is()
 	persons := GetResource[newsletterPersons](app).Is("confirmed", true).Is("unsubscribed", false).List()
 	for _, v := range persons {
 		ret = append(ret, v.Email)

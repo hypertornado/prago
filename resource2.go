@@ -11,6 +11,8 @@ import (
 type Resource[T any] struct {
 	resource *resource
 	app      *App
+
+	activityLog bool
 }
 
 func NewResource[T any](app *App) *Resource[T] {
@@ -18,6 +20,8 @@ func NewResource[T any](app *App) *Resource[T] {
 	ret := &Resource[T]{
 		resource: app.oldNewResource(item),
 		app:      app,
+
+		activityLog: true,
 	}
 	itemTyp := reflect.TypeOf(item)
 	app.resource2Map[itemTyp] = ret

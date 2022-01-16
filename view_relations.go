@@ -22,9 +22,6 @@ func (resource *resource) getAutoRelationsView(id int, inValues interface{}, use
 			continue
 		}
 
-		//var rowItem interface{}
-		//v.resource.newItem(&rowItem)
-
 		q := v.resource.query().is(v.field, fmt.Sprintf("%d", id))
 
 		filteredCount, err := q.count()

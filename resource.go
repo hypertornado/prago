@@ -30,8 +30,6 @@ type resource struct {
 	canDelete Permission
 	canExport Permission
 
-	activityLog bool
-
 	previewURL func(interface{}) string
 
 	fieldArrays []*field
@@ -65,8 +63,6 @@ func (app *App) oldNewResource(item interface{}) *resource {
 		canUpdate: loggedPermission,
 		canDelete: loggedPermission,
 		canExport: loggedPermission,
-
-		activityLog: true,
 
 		fieldMap: make(map[string]*field),
 	}

@@ -209,8 +209,6 @@ func (app App) relationStringer(field field, value reflect.Value, user *user) st
 			}
 			rr := field.relatedResource
 
-			//var item interface{}
-			//rr.newItem(&item)
 			item, err := rr.query().is("id", int64(value.Int())).first()
 			if err != nil {
 				return fmt.Sprintf("%d", value.Int())
