@@ -9,15 +9,9 @@ import (
 
 //Resource is structure representing one item in admin menu or one table in database
 type resource struct {
-	app *App
-	//id   string
+	app  *App
 	name func(locale string) string
 	typ  reflect.Type
-
-	actions     []*Action
-	itemActions []*Action
-
-	relations []relation
 
 	canView   Permission
 	canCreate Permission
@@ -27,9 +21,9 @@ type resource struct {
 
 	fieldArrays []*field
 	fieldMap    map[string]*field
+	orderField  *field
 
 	newResource resourceIface
-	orderField  *field
 }
 
 //Resource creates new resource based on item

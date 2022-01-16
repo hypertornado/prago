@@ -89,7 +89,7 @@ func renderPage(request *Request, page page) {
 
 func (resource resource) getNavigation(user *user, code string) navigation {
 	var tabs []tab
-	for _, v := range resource.actions {
+	for _, v := range resource.newResource.getActions() {
 		if v.method == "GET" {
 			if resource.app.authorize(user, v.permission) {
 				name := v.url
@@ -113,7 +113,7 @@ func (resource resource) getNavigation(user *user, code string) navigation {
 
 func (resource resource) getItemNavigation(user *user, item interface{}, code string) navigation {
 	var tabs []tab
-	for _, v := range resource.itemActions {
+	for _, v := range resource.newResource.getItemActions() {
 		if v.method == "GET" {
 			name := v.url
 			if v.url == "" {

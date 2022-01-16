@@ -48,13 +48,21 @@ func (resource *Resource[T]) initAutoRelations() {
 				v.HumanName = (*relatedResource).name
 			}
 
-			relatedResource.relations = append(relatedResource.relations, relation{
+			relatedResource.newResource.addRelation(relation{
 				resource: resource.resource,
 				field:    v.Name,
 				listName: createRelationNamingFunction(*v, *resource.resource, *relatedResource),
 				listURL:  createRelationListURL(*resource.resource, *v),
 				addURL:   createRelationAddURL(*resource.resource, *v),
 			})
+
+			/*relatedResource.relations = append(relatedResource.relations, relation{
+				resource: resource.resource,
+				field:    v.Name,
+				listName: createRelationNamingFunction(*v, *resource.resource, *relatedResource),
+				listURL:  createRelationListURL(*resource.resource, *v),
+				addURL:   createRelationAddURL(*resource.resource, *v),
+			})*/
 		}
 	}
 }

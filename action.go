@@ -39,22 +39,24 @@ func (app *App) bindAllActions() {
 		}
 	}
 
-	for _, resource := range app.resources {
-		for _, v := range resource.actions {
-			err := v.bindAction()
-			if err != nil {
-				panic(fmt.Sprintf("error while binding resource %s action %s %s: %s", resource.newResource.getID(), v.method, v.name("en"), err))
-			}
-		}
-		for _, v := range resource.itemActions {
-			err := v.bindAction()
-			if err != nil {
-				panic(fmt.Sprintf("error while binding item resource %s action %s %s: %s", resource.newResource.getID(), v.method, v.name("en"), err))
-			}
-		}
-
+	for _, resource := range app.resources2 {
+		resource.bindActions()
 	}
+}
 
+func (resource *Resource[T]) bindActions() {
+	for _, v := range resource.actions {
+		err := v.bindAction()
+		if err != nil {
+			panic(fmt.Sprintf("error while binding resource %s action %s %s: %s", resource.id, v.method, v.name("en"), err))
+		}
+	}
+	for _, v := range resource.itemActions {
+		err := v.bindAction()
+		if err != nil {
+			panic(fmt.Sprintf("error while binding item resource %s action %s %s: %s", resource.id, v.method, v.name("en"), err))
+		}
+	}
 }
 
 func newAction(app *App, url string) *Action {
@@ -83,7 +85,7 @@ func newResourceAction[T any](resource *Resource[T], url string) *Action {
 	action := newAction(resource.app, url)
 	action.resource = resource.resource
 	action.permission = resource.resource.canView
-	resource.resource.actions = append(resource.resource.actions, action)
+	resource.actions = append(resource.actions, action)
 	return action
 
 }
@@ -98,7 +100,7 @@ func newResourceItemAction[T any](resource *Resource[T], url string) *Action {
 	action.resource = resource.resource
 	action.isItemAction = true
 	action.permission = resource.resource.canView
-	resource.resource.itemActions = append(resource.resource.itemActions, action)
+	resource.itemActions = append(resource.itemActions, action)
 	return action
 }
 

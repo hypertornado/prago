@@ -17,7 +17,9 @@ type viewRelation struct {
 
 func (resource *resource) getAutoRelationsView(id int, inValues interface{}, user *user) (ret []view) {
 
-	for _, v := range resource.relations {
+	relations := resource.newResource.getRelations()
+
+	for _, v := range relations {
 		if !resource.app.authorize(user, v.resource.canView) {
 			continue
 		}

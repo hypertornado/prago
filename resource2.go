@@ -20,6 +20,10 @@ type Resource[T any] struct {
 	validations       []Validation
 	deleteValidations []Validation
 
+	actions     []*Action
+	itemActions []*Action
+	relations   []relation
+
 	resourceController *controller
 
 	orderByColumn       string
@@ -76,8 +80,32 @@ type resourceIface interface {
 	getCachedCount() int64
 	count() int64
 
+	addRelation(relation)
+	getRelations() []relation
+
 	getResourceControl() *controller
 	getID() string
+
+	bindActions()
+
+	getActions() []*Action
+	getItemActions() []*Action
+}
+
+func (resource Resource[T]) getActions() []*Action {
+	return resource.actions
+}
+
+func (resource Resource[T]) getItemActions() []*Action {
+	return resource.itemActions
+}
+
+func (resource Resource[T]) addRelation(relation relation) {
+	resource.relations = append(resource.relations, relation)
+}
+
+func (resource Resource[T]) getRelations() []relation {
+	return resource.relations
 }
 
 func (resource Resource[T]) getID() string {
