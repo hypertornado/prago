@@ -28,7 +28,7 @@ func (app *App) update(item interface{}) error {
 func (resource *resource) query() query {
 	return query{
 		query:    &listQuery{},
-		db:       resource.app.db,
+		db:       resource.newResource.getApp().db,
 		resource: resource,
 	}
 }
@@ -90,7 +90,7 @@ func (q query) count() (int64, error) {
 }
 
 func (q query) delete(item interface{}) (int64, error) {
-	resource, err := q.resource.app.getResourceByItem(item)
+	resource, err := q.resource.newResource.getApp().getResourceByItem(item)
 	if err != nil {
 		return -1, err
 	}

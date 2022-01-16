@@ -250,7 +250,7 @@ func (e *adminSearch) searchImport() error {
 }
 
 func (e *adminSearch) importResource(resource *resource) error {
-	roles := resource.app.getResourceViewRoles(*resource)
+	roles := e.app.getResourceViewRoles(*resource)
 	var resourceSearchItem = searchItem{
 		ID:    "resource_" + resource.newResource.getID(),
 		Name:  resource.newResource.getName("cs"),
@@ -281,7 +281,7 @@ func (e *adminSearch) importResource(resource *resource) error {
 }
 
 func (e *adminSearch) saveItem(resource *resource, item interface{}) error {
-	roles := resource.app.getResourceViewRoles(*resource)
+	roles := e.app.getResourceViewRoles(*resource)
 	return e.saveItemWithRoles(resource, item, roles)
 }
 

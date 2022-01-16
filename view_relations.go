@@ -20,7 +20,7 @@ func (resource *resource) getAutoRelationsView(id int, inValues interface{}, use
 	relations := resource.newResource.getRelations()
 
 	for _, v := range relations {
-		if !resource.app.authorize(user, v.resource.newResource.getPermissionView()) {
+		if !resource.newResource.getApp().authorize(user, v.resource.newResource.getPermissionView()) {
 			continue
 		}
 
@@ -40,7 +40,7 @@ func (resource *resource) getAutoRelationsView(id int, inValues interface{}, use
 			URL:  v.listURL(int64(id)),
 		})
 
-		if resource.app.authorize(user, v.resource.newResource.getPermissionUpdate()) {
+		if resource.newResource.getApp().authorize(user, v.resource.newResource.getPermissionUpdate()) {
 			vi.Navigation = append(vi.Navigation, tab{
 				Name: messages.GetNameFunction("admin_new")(user.Locale),
 				URL:  v.addURL(int64(id)),

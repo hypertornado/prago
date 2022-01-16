@@ -113,6 +113,13 @@ type resourceIface interface {
 	getName(string) string
 
 	getNameFunction() func(string) string
+
+	getApp() *App
+}
+
+func (resource Resource[T]) getApp() *App {
+	return resource.app
+
 }
 
 func (resource Resource[T]) getNameFunction() func(string) string {
@@ -180,11 +187,11 @@ func (resource Resource[T]) Is(name string, value interface{}) *Query[T] {
 }
 
 func (resource Resource[T]) Create(item *T) error {
-	return resource.resource.app.create(item)
+	return resource.app.create(item)
 }
 
 func (resource Resource[T]) Update(item *T) error {
-	return resource.resource.app.update(item)
+	return resource.app.update(item)
 }
 
 func (resource Resource[T]) Delete(id int64) error {

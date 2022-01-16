@@ -91,7 +91,7 @@ func (resource resource) getNavigation(user *user, code string) navigation {
 	var tabs []tab
 	for _, v := range resource.newResource.getActions() {
 		if v.method == "GET" {
-			if resource.app.authorize(user, v.permission) {
+			if resource.newResource.getApp().authorize(user, v.permission) {
 				name := v.url
 				if v.name != nil {
 					name = v.name(user.Locale)
@@ -123,7 +123,7 @@ func (resource resource) getItemNavigation(user *user, item interface{}, code st
 					name = v.name(user.Locale)
 				}
 			}
-			if resource.app.authorize(user, v.permission) {
+			if resource.newResource.getApp().authorize(user, v.permission) {
 				tabs = append(tabs, tab{
 					Name:     name,
 					URL:      resource.getItemURL(item, v.url),

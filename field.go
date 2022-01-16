@@ -40,10 +40,10 @@ func (field field) GetRelatedResourceName() string {
 }
 
 func (field *field) authorizeView(user *user) bool {
-	if !field.resource.app.authorize(user, field.resource.newResource.getPermissionView()) {
+	if !field.resource.newResource.getApp().authorize(user, field.resource.newResource.getPermissionView()) {
 		return false
 	}
-	if !field.resource.app.authorize(user, field.canView) {
+	if !field.resource.newResource.getApp().authorize(user, field.canView) {
 		return false
 	}
 	return true
@@ -53,10 +53,10 @@ func (field *field) authorizeEdit(user *user) bool {
 	if !field.authorizeView(user) {
 		return false
 	}
-	if !field.resource.app.authorize(user, field.resource.newResource.getPermissionUpdate()) {
+	if !field.resource.newResource.getApp().authorize(user, field.resource.newResource.getPermissionUpdate()) {
 		return false
 	}
-	if !field.resource.app.authorize(user, field.canEdit) {
+	if !field.resource.newResource.getApp().authorize(user, field.canEdit) {
 		return false
 	}
 	return true
@@ -146,7 +146,7 @@ func (resource *resource) newField(f reflect.StructField, order int) *field {
 	}
 
 	if canView := ret.Tags["prago-can-view"]; canView != "" {
-		err := resource.app.validatePermission(Permission(canView))
+		err := resource.newResource.getApp().validatePermission(Permission(canView))
 		if err != nil {
 			panic(fmt.Sprintf("validating permission 'prago-can-view' on field '%s' of resource '%s': %s", f.Name, resource.newResource.getName("en"), err))
 		}
@@ -154,7 +154,7 @@ func (resource *resource) newField(f reflect.StructField, order int) *field {
 	}
 
 	if canEdit := ret.Tags["prago-can-edit"]; canEdit != "" {
-		err := resource.app.validatePermission(Permission(canEdit))
+		err := resource.newResource.getApp().validatePermission(Permission(canEdit))
 		if err != nil {
 			panic(fmt.Sprintf("validating permission 'prago-can-edit' on field '%s' of resource '%s': %s", f.Name, resource.newResource.getName("en"), err))
 		}
@@ -359,7 +359,7 @@ func getDefaultFormTemplate(t reflect.Type) string {
 }
 
 func (field *field) initFieldType() {
-	fieldTypes := field.resource.app.fieldTypes
+	fieldTypes := field.resource.newResource.getApp().fieldTypes
 	fieldTypeName := field.Tags["prago-type"]
 
 	ret, found := fieldTypes[fieldTypeName]

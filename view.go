@@ -61,7 +61,7 @@ func (resource resource) getBasicView(id int, inValues interface{}, user *user) 
 		)
 	}
 
-	historyView := resource.app.getHistory(&resource, int64(id))
+	historyView := resource.newResource.getApp().getHistory(&resource, int64(id))
 
 	if len(historyView.Items) > 0 {
 		ret.Items = append(

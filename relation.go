@@ -101,7 +101,7 @@ func getRelationViewData(user *user, f field, value interface{}) interface{} {
 }
 
 func getRelationData(user *user, f field, value interface{}) (*viewRelationData, error) {
-	app := f.resource.app
+	app := f.resource.newResource.getApp()
 	if f.relatedResource == nil {
 		return nil, fmt.Errorf("resource not found: %s", f.Name)
 	}
@@ -131,7 +131,7 @@ func (resource *resource) itemToRelationData(item interface{}, user *user, relat
 	ret.Name = getItemName(item)
 	ret.URL = resource.getItemURL(item, "")
 
-	ret.Image = resource.app.getItemImage(item)
+	ret.Image = resource.newResource.getApp().getItemImage(item)
 	ret.Description = resource.getItemDescription(item, user, relatedResource)
 	return &ret
 }
@@ -194,7 +194,7 @@ func (resource *resource) getItemDescription(item interface{}, user *user, relat
 		}
 
 		field := itemsVal.FieldByName(v.Name)
-		stringed := resource.app.relationStringer(*v, field, user)
+		stringed := resource.newResource.getApp().relationStringer(*v, field, user)
 		if stringed != "" {
 			items = append(items, fmt.Sprintf("%s: %s", v.HumanName(user.Locale), stringed))
 		}

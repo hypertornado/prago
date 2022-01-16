@@ -9,8 +9,8 @@ import (
 
 //Resource is structure representing one item in admin menu or one table in database
 type resource struct {
-	app   *App
-	typXX reflect.Type
+	//app *App
+	typ reflect.Type
 
 	fieldArrays []*field
 	fieldMap    map[string]*field
@@ -30,7 +30,7 @@ func oldNewResource[T any](newResource *Resource[T], item interface{}) *resource
 
 	//defaultName := typ.Name()
 	ret := &resource{
-		app: app,
+		//app: app,
 		//name: unlocalized(defaultName),
 		//id:   columnName(defaultName),
 		typ: typ,
@@ -171,7 +171,7 @@ func (resource resource) getURL(suffix string) string {
 	if len(suffix) > 0 {
 		url += "/" + suffix
 	}
-	return resource.app.getAdminURL(url)
+	return resource.newResource.getApp().getAdminURL(url)
 }
 
 func (app *App) getResourceByItem(item interface{}) (*resource, error) {
