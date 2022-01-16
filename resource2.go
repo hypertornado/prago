@@ -20,6 +20,12 @@ type Resource[T any] struct {
 	validations       []Validation
 	deleteValidations []Validation
 
+	canView   Permission
+	canCreate Permission
+	canUpdate Permission
+	canDelete Permission
+	canExport Permission
+
 	actions     []*Action
 	itemActions []*Action
 	relations   []relation
@@ -40,6 +46,12 @@ func NewResource[T any](app *App) *Resource[T] {
 		app: app,
 
 		id: columnName(defaultName),
+
+		canView:   sysadminPermission,
+		canCreate: loggedPermission,
+		canUpdate: loggedPermission,
+		canDelete: loggedPermission,
+		canExport: loggedPermission,
 
 		activityLog: true,
 
@@ -90,6 +102,32 @@ type resourceIface interface {
 
 	getActions() []*Action
 	getItemActions() []*Action
+
+	getPermissionView() Permission
+	getPermissionCreate() Permission
+	getPermissionUpdate() Permission
+	getPermissionDelete() Permission
+	getPermissionExport() Permission
+}
+
+func (resource Resource[T]) getPermissionView() Permission {
+	return resource.canView
+}
+
+func (resource Resource[T]) getPermissionCreate() Permission {
+	return resource.canCreate
+}
+
+func (resource Resource[T]) getPermissionUpdate() Permission {
+	return resource.canUpdate
+}
+
+func (resource Resource[T]) getPermissionDelete() Permission {
+	return resource.canDelete
+}
+
+func (resource Resource[T]) getPermissionExport() Permission {
+	return resource.canDelete
 }
 
 func (resource Resource[T]) getActions() []*Action {
@@ -176,27 +214,43 @@ func (resource *Resource[T]) ItemsPerPage(itemsPerPage int64) *Resource[T] {
 }
 
 func (resource *Resource[T]) PermissionView(permission Permission) *Resource[T] {
-	resource.resource.PermissionView(permission)
+	//resource.resource.PermissionView(permission)
+	must(resource.app.validatePermission(permission))
+	resource.canView = permission
 	return resource
 }
 
 func (resource *Resource[T]) PermissionUpdate(permission Permission) *Resource[T] {
-	resource.resource.PermissionUpdate(permission)
+	//resource.resource.PermissionUpdate(permission)
+	must(resource.app.validatePermission(permission))
+	if resource.canCreate == loggedPermission {
+		resource.canCreate = permission
+	}
+	if resource.canDelete == loggedPermission {
+		resource.canDelete = permission
+	}
+	resource.canUpdate = permission
 	return resource
 }
 
 func (resource *Resource[T]) PermissionCreate(permission Permission) *Resource[T] {
-	resource.resource.PermissionCreate(permission)
+	//resource.resource.PermissionCreate(permission)
+	must(resource.app.validatePermission(permission))
+	resource.canCreate = permission
 	return resource
 }
 
 func (resource *Resource[T]) PermissionDelete(permission Permission) *Resource[T] {
-	resource.resource.PermissionDelete(permission)
+	//resource.resource.PermissionDelete(permission)
+	must(resource.app.validatePermission(permission))
+	resource.canDelete = permission
 	return resource
 }
 
 func (resource *Resource[T]) PermissionExport(permission Permission) *Resource[T] {
-	resource.resource.PermissionExport(permission)
+	//resource.resource.PermissionExport(permission)
+	must(resource.app.validatePermission(permission))
+	resource.canExport = permission
 	return resource
 }
 

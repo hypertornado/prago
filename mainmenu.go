@@ -85,7 +85,7 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 		Name: messages.Get(user.Locale, "admin_tables"),
 	}
 	for _, resource := range app.getSortedResources(user.Locale) {
-		if app.authorize(user, resource.canView) {
+		if app.authorize(user, resource.newResource.getPermissionView()) {
 			resourceURL := resource.getURL("")
 			var selected bool
 			if request.Request().URL.Path == resourceURL {

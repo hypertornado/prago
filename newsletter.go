@@ -25,8 +25,8 @@ type Newsletters struct {
 	app        *App
 	randomness string
 
-	newsletterResource        *resource
-	newsletterSectionResource *resource
+	newsletterResource        *Resource[newsletter]
+	newsletterSectionResource *Resource[newsletterSection]
 }
 
 func (newsletters *Newsletters) Renderer(renderer NewsletterRenderer) *Newsletters {
@@ -37,7 +37,6 @@ func (newsletters *Newsletters) Renderer(renderer NewsletterRenderer) *Newslette
 func (newsletters *Newsletters) Permission(permission Permission) *Newsletters {
 	newsletters.newsletterResource.PermissionView(permission)
 	newsletters.newsletterSectionResource.PermissionView(permission)
-
 	return newsletters
 }
 
@@ -157,16 +156,16 @@ func (app *App) Newsletters() *Newsletters {
 		request.RenderView("newsletter_layout")
 	})
 
-	app.newsletters.newsletterResource = NewResource[newsletter](app).Name(unlocalized("Newsletter")).resource
+	app.newsletters.newsletterResource = NewResource[newsletter](app).Name(unlocalized("Newsletter"))
 	initNewsletterResource(
 		GetResource[newsletter](app),
 		//app.newsletters.newsletterResource,
 	)
 
-	app.newsletters.newsletterSectionResource = NewResource[newsletterSection](app).Name(unlocalized("Newsletter - sekce")).resource
-	initNewsletterSection(
+	app.newsletters.newsletterSectionResource = NewResource[newsletterSection](app).Name(unlocalized("Newsletter - sekce"))
+	/*initNewsletterSection(
 		app.newsletters.newsletterSectionResource,
-	)
+	)*/
 
 	NewResource[newsletterPersons](app).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoby"))
 	return app.newsletters
@@ -251,7 +250,7 @@ type newsletter struct {
 
 func initNewsletterResource(res *Resource[newsletter]) {
 	//resource := res.resource
-	res.resource.canView = sysadminPermission
+	res.canView = sysadminPermission
 
 	res.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(
 		func(request *Request) {
@@ -440,9 +439,9 @@ type newsletterSection struct {
 	UpdatedAt     time.Time
 }
 
-func initNewsletterSection(resource *resource) {
-	resource.canView = sysadminPermission
-}
+//func initNewsletterSection(resource *resource) {
+//resource.canView = sysadminPermission
+//}
 
 //NewsletterPersons represents person of newsletter
 type newsletterPersons struct {

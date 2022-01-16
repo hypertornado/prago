@@ -106,7 +106,7 @@ func getRelationData(user *user, f field, value interface{}) (*viewRelationData,
 		return nil, fmt.Errorf("resource not found: %s", f.Name)
 	}
 
-	if !app.authorize(user, f.relatedResource.canView) {
+	if !app.authorize(user, f.relatedResource.newResource.getPermissionView()) {
 		return nil, fmt.Errorf("user is not authorized to view this item")
 	}
 

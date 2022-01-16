@@ -102,7 +102,7 @@ func (app App) getResourceViewRoles(resource resource) []string {
 	var ret []string
 	for roleName, permissions := range app.accessManager.roles {
 		for permission := range permissions {
-			if permission == resource.canView {
+			if permission == resource.newResource.getPermissionView() {
 				ret = append(ret, roleName)
 			}
 		}

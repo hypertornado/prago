@@ -140,28 +140,28 @@ func getResourceAccessView(app *App) accessView {
 			no := "-"
 			s := ""
 			user := &user{Role: v}
-			if app.authorize(user, resource.canView) {
+			if app.authorize(user, resource.newResource.getPermissionView()) {
 				s += yeah
 			} else {
 				yeah = no
 				s += no
 			}
-			if app.authorize(user, resource.canUpdate) {
+			if app.authorize(user, resource.newResource.getPermissionUpdate()) {
 				s += yeah
 			} else {
 				s += no
 			}
-			if app.authorize(user, resource.canCreate) {
+			if app.authorize(user, resource.newResource.getPermissionCreate()) {
 				s += yeah
 			} else {
 				s += no
 			}
-			if app.authorize(user, resource.canDelete) {
+			if app.authorize(user, resource.newResource.getPermissionDelete()) {
 				s += yeah
 			} else {
 				s += yeah
 			}
-			if app.authorize(user, resource.canExport) {
+			if app.authorize(user, resource.newResource.getPermissionExport()) {
 				s += yeah
 			} else {
 				s += no

@@ -94,7 +94,7 @@ func (app *App) getHistory(resource *resource, itemID int64) historyView {
 }
 
 func initActivityLog(resource *Resource[activityLog]) {
-	resource.resource.canView = Permission(sysadminRoleName)
+	resource.canView = Permission(sysadminRoleName)
 	resource.orderDesc = true
 	resource.Name(messages.GetNameFunction("admin_history"))
 }

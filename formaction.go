@@ -83,8 +83,8 @@ func newResourceFormAction[T any](resource *Resource[T], url string) *FormAction
 	fa.actionForm.resource = resource.resource
 	fa.actionValidation.resource = resource.resource
 
-	fa.actionForm.Permission(resource.resource.canView)
-	fa.actionValidation.Permission(resource.resource.canView)
+	fa.actionForm.Permission(resource.resource.newResource.getPermissionView())
+	fa.actionValidation.Permission(resource.resource.newResource.getPermissionView())
 
 	resource.actions = append(resource.actions, fa.actionForm)
 	resource.actions = append(resource.actions, fa.actionValidation)
@@ -101,8 +101,8 @@ func newResourceItemFormAction[T any](resource *Resource[T], url string) *FormAc
 	fa.actionForm.resource = resource.resource
 	fa.actionValidation.resource = resource.resource
 
-	fa.actionForm.Permission(resource.resource.canView)
-	fa.actionValidation.Permission(resource.resource.canView)
+	fa.actionForm.Permission(resource.canView)
+	fa.actionValidation.Permission(resource.canView)
 
 	fa.actionForm.isItemAction = true
 	fa.actionValidation.isItemAction = true

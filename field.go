@@ -40,7 +40,7 @@ func (field field) GetRelatedResourceName() string {
 }
 
 func (field *field) authorizeView(user *user) bool {
-	if !field.resource.app.authorize(user, field.resource.canView) {
+	if !field.resource.app.authorize(user, field.resource.newResource.getPermissionView()) {
 		return false
 	}
 	if !field.resource.app.authorize(user, field.canView) {
@@ -53,7 +53,7 @@ func (field *field) authorizeEdit(user *user) bool {
 	if !field.authorizeView(user) {
 		return false
 	}
-	if !field.resource.app.authorize(user, field.resource.canUpdate) {
+	if !field.resource.app.authorize(user, field.resource.newResource.getPermissionUpdate()) {
 		return false
 	}
 	if !field.resource.app.authorize(user, field.canEdit) {

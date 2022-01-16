@@ -20,7 +20,7 @@ func (resource *resource) getAutoRelationsView(id int, inValues interface{}, use
 	relations := resource.newResource.getRelations()
 
 	for _, v := range relations {
-		if !resource.app.authorize(user, v.resource.canView) {
+		if !resource.app.authorize(user, v.resource.newResource.getPermissionView()) {
 			continue
 		}
 
@@ -40,7 +40,7 @@ func (resource *resource) getAutoRelationsView(id int, inValues interface{}, use
 			URL:  v.listURL(int64(id)),
 		})
 
-		if resource.app.authorize(user, v.resource.canUpdate) {
+		if resource.app.authorize(user, v.resource.newResource.getPermissionUpdate()) {
 			vi.Navigation = append(vi.Navigation, tab{
 				Name: messages.GetNameFunction("admin_new")(user.Locale),
 				URL:  v.addURL(int64(id)),
@@ -86,12 +86,12 @@ func generateRelationListAPIHandler(app *App) func(*Request) {
 		}
 
 		sourceResource := app.getResourceByName(listRequest.SourceResource)
-		if !app.authorize(request.user, sourceResource.canView) {
+		if !app.authorize(request.user, sourceResource.newResource.getPermissionView()) {
 			panic("cant authorize source resource")
 		}
 
 		targetResource := app.getResourceByName(listRequest.TargetResource)
-		if !app.authorize(request.user, targetResource.canView) {
+		if !app.authorize(request.user, targetResource.newResource.getPermissionView()) {
 			panic("cant authorize target resource")
 		}
 
@@ -109,9 +109,6 @@ func generateRelationListAPIHandler(app *App) func(*Request) {
 		q = q.limit(limit)
 
 		q.offset(listRequest.Offset)
-
-		//var rowItems interface{}
-		//targetResource.newArrayOfItems(&rowItems)
 
 		rowItems, err := q.list()
 		if err != nil {

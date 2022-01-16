@@ -22,7 +22,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 				return
 			}
 			if request.Request().URL.Query().Get("_format") == "xlsx" {
-				if !resource.app.authorize(request.user, resource.resource.canExport) {
+				if !resource.app.authorize(request.user, resource.canExport) {
 					render403(request)
 					return
 				}
@@ -77,7 +77,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 		},
 	)
 
-	newResourceAPI(resource, "set-order").Permission(resource.resource.canUpdate).Method("POST").Handler(
+	newResourceAPI(resource, "set-order").Permission(resource.canUpdate).Method("POST").Handler(
 		func(request *Request) {
 			if resource.resource.orderField == nil {
 				panic("can't order")
@@ -168,7 +168,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 			switch request.Params().Get("action") {
 			case "clone":
-				if !request.app.authorize(request.user, resource.resource.canCreate) {
+				if !request.app.authorize(request.user, resource.canCreate) {
 					renderAPINotAuthorized(request)
 					return
 				}
@@ -216,7 +216,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 				)).Flash(request)
 
 			case "delete":
-				if !request.app.authorize(request.user, resource.resource.canDelete) {
+				if !request.app.authorize(request.user, resource.canDelete) {
 					renderAPINotAuthorized(request)
 					return
 				}
@@ -246,11 +246,8 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 		},
 	)
 
-	newResourceAPI(resource, "multiple_edit").Permission(resource.resource.canUpdate).Method("GET").Handler(
+	newResourceAPI(resource, "multiple_edit").Permission(resource.canUpdate).Method("GET").Handler(
 		func(request *Request) {
-
-			//var item interface{}
-			//resource.resource.newItem(&item)
 			var item T
 			form := NewForm(
 				resource.resource.getURL("api/multiple_edit"),
@@ -265,7 +262,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 		},
 	)
 
-	newResourceAPI(resource, "multiple_edit").Permission(resource.resource.canUpdate).Method("POST").Handler(
+	newResourceAPI(resource, "multiple_edit").Permission(resource.canUpdate).Method("POST").Handler(
 		func(request *Request) {
 
 			validateCSRF(request)

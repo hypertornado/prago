@@ -84,7 +84,7 @@ func (resource *Resource[T]) Action(url string) *Action {
 func newResourceAction[T any](resource *Resource[T], url string) *Action {
 	action := newAction(resource.app, url)
 	action.resource = resource.resource
-	action.permission = resource.resource.canView
+	action.permission = resource.canView
 	resource.actions = append(resource.actions, action)
 	return action
 
@@ -99,7 +99,7 @@ func newResourceItemAction[T any](resource *Resource[T], url string) *Action {
 	action := newAction(resource.app, url)
 	action.resource = resource.resource
 	action.isItemAction = true
-	action.permission = resource.resource.canView
+	action.permission = resource.canView
 	resource.itemActions = append(resource.itemActions, action)
 	return action
 }
@@ -293,7 +293,7 @@ func (app *App) getListItemActions(user *user, item interface{}, id int64, resou
 		}
 	}
 
-	if app.authorize(user, resource.canUpdate) && resource.orderField != nil {
+	if app.authorize(user, resource.newResource.getPermissionUpdate()) && resource.orderField != nil {
 		ret.ShowOrderButton = true
 	}
 

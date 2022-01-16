@@ -117,7 +117,7 @@ func (res *Resource[T]) getListHeader(user *user) (list list, err error) {
 	if resource.orderField != nil {
 		list.CanChangeOrder = true
 	}
-	list.CanExport = res.app.authorize(user, resource.canExport)
+	list.CanExport = res.app.authorize(user, res.canExport)
 
 	for _, v := range resource.fieldArrays {
 		if v.authorizeView(user) {
@@ -327,7 +327,7 @@ func (resource *resource) addFilterToQuery(q query, filter map[string]string) qu
 func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listContent, err error) {
 	resource := res.resource
 
-	if !res.app.authorize(user, resource.canView) {
+	if !res.app.authorize(user, res.canView) {
 		return listContent{}, errors.New("access denied")
 	}
 

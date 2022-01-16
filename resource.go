@@ -13,12 +13,6 @@ type resource struct {
 	name func(locale string) string
 	typ  reflect.Type
 
-	canView   Permission
-	canCreate Permission
-	canUpdate Permission
-	canDelete Permission
-	canExport Permission
-
 	fieldArrays []*field
 	fieldMap    map[string]*field
 	orderField  *field
@@ -42,12 +36,6 @@ func oldNewResource[T any](newResource *Resource[T], item interface{}) *resource
 		//id:   columnName(defaultName),
 		typ: typ,
 		//resourceController: app.adminController.subController(),
-
-		canView:   sysadminPermission,
-		canCreate: loggedPermission,
-		canUpdate: loggedPermission,
-		canDelete: loggedPermission,
-		canExport: loggedPermission,
 
 		newResource: newResource,
 
@@ -78,10 +66,10 @@ func oldNewResource[T any](newResource *Resource[T], item interface{}) *resource
 }
 
 func (resource *Resource[T]) allowsMultipleActions(user *user) (ret bool) {
-	if resource.app.authorize(user, resource.resource.canDelete) {
+	if resource.app.authorize(user, resource.canDelete) {
 		ret = true
 	}
-	if resource.app.authorize(user, resource.resource.canUpdate) {
+	if resource.app.authorize(user, resource.canUpdate) {
 		ret = true
 	}
 	return ret
@@ -92,21 +80,21 @@ func (resource *Resource[T]) getMultipleActions(user *user) (ret []listMultipleA
 		return nil
 	}
 
-	if resource.app.authorize(user, resource.resource.canUpdate) {
+	if resource.app.authorize(user, resource.canUpdate) {
 		ret = append(ret, listMultipleAction{
 			ID:   "edit",
 			Name: "Upravit",
 		})
 	}
 
-	if resource.app.authorize(user, resource.resource.canCreate) {
+	if resource.app.authorize(user, resource.canCreate) {
 		ret = append(ret, listMultipleAction{
 			ID:   "clone",
 			Name: "Naklonovat",
 		})
 	}
 
-	if resource.app.authorize(user, resource.resource.canDelete) {
+	if resource.app.authorize(user, resource.canDelete) {
 		ret = append(ret, listMultipleAction{
 			ID:       "delete",
 			Name:     "Smazat",
@@ -128,13 +116,7 @@ func (resource resource) getItemURL(item interface{}, suffix string) string {
 	return ret
 }
 
-//ItemsPerPage sets default display value of items per page
-/*func (resource *resource) ItemsPerPage(itemsPerPage int64) *resource {
-	resource.defaultItemsPerPage = itemsPerPage
-	return resource
-}*/
-
-func (resource *resource) PermissionView(permission Permission) *resource {
+/*func (resource *resource) PermissionView(permission Permission) *resource {
 	must(resource.app.validatePermission(permission))
 	resource.canView = permission
 	return resource
@@ -169,7 +151,7 @@ func (resource *resource) PermissionExport(permission Permission) *resource {
 	must(resource.app.validatePermission(permission))
 	resource.canExport = permission
 	return resource
-}
+}*/
 
 func (app *App) getResourceByName(name string) *resource {
 	return app.resourceNameMap[columnName(name)]
@@ -177,7 +159,7 @@ func (app *App) getResourceByName(name string) *resource {
 
 func initResource[T any](resource *Resource[T]) {
 	resource.resourceController.addAroundAction(func(request *Request, next func()) {
-		if !resource.app.authorize(request.user, resource.resource.canView) {
+		if !resource.app.authorize(request.user, resource.canView) {
 			render403(request)
 		} else {
 			next()

@@ -23,7 +23,7 @@ func initFilesAPI(resource *Resource[File]) {
 		request.RenderJSON(file)
 	})
 
-	resource.API("upload").Method("POST").Permission(resource.resource.canUpdate).Handler(func(request *Request) {
+	resource.API("upload").Method("POST").Permission(resource.canUpdate).Handler(func(request *Request) {
 		multipartFiles := request.Request().MultipartForm.File["file"]
 		description := request.Params().Get("description")
 

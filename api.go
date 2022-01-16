@@ -38,7 +38,7 @@ func (resource *Resource[T]) API(url string) *API {
 func newResourceAPI[T any](resource *Resource[T], url string) *API {
 	api := newAPI(resource.app, url)
 	api.resource = resource.resource
-	api.permission = resource.resource.canView
+	api.permission = resource.canView
 	return api
 }
 
