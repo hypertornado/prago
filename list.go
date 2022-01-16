@@ -112,7 +112,7 @@ func (res *Resource[T]) getListHeader(user *user) (list list, err error) {
 		return
 	}
 
-	list.Name = resource.name(lang)
+	list.Name = res.name(lang)
 
 	if resource.orderField != nil {
 		list.CanChangeOrder = true

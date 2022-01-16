@@ -96,7 +96,7 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 			}
 
 			resourceSection.Items = append(resourceSection.Items, mainMenuItem{
-				Name:     resource.name(user.Locale),
+				Name:     resource.newResource.getName(user.Locale),
 				Subname:  humanizeNumber(resource.newResource.getCachedCount()),
 				URL:      resourceURL,
 				Selected: selected,
@@ -164,7 +164,7 @@ func (app *App) getSortedResources(locale string) (ret []*resource) {
 		a := ret[i]
 		b := ret[j]
 
-		if collator.CompareString(a.name(locale), b.name(locale)) <= 0 {
+		if collator.CompareString(a.newResource.getName(locale), b.newResource.getName(locale)) <= 0 {
 			return true
 		} else {
 			return false

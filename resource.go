@@ -9,9 +9,8 @@ import (
 
 //Resource is structure representing one item in admin menu or one table in database
 type resource struct {
-	app  *App
-	name func(locale string) string
-	typ  reflect.Type
+	app   *App
+	typXX reflect.Type
 
 	fieldArrays []*field
 	fieldMap    map[string]*field
@@ -29,10 +28,10 @@ func oldNewResource[T any](newResource *Resource[T], item interface{}) *resource
 		panic(fmt.Sprintf("item is not a structure, but " + typ.Kind().String()))
 	}
 
-	defaultName := typ.Name()
+	//defaultName := typ.Name()
 	ret := &resource{
-		app:  app,
-		name: unlocalized(defaultName),
+		app: app,
+		//name: unlocalized(defaultName),
 		//id:   columnName(defaultName),
 		typ: typ,
 		//resourceController: app.adminController.subController(),

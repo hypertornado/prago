@@ -10,6 +10,7 @@ import (
 
 type Resource[T any] struct {
 	id       string
+	name     func(locale string) string
 	resource *resource
 	app      *App
 
@@ -43,9 +44,9 @@ func NewResource[T any](app *App) *Resource[T] {
 	defaultName := reflect.TypeOf(item).Name()
 
 	ret := &Resource[T]{
-		app: app,
-
-		id: columnName(defaultName),
+		app:  app,
+		id:   columnName(defaultName),
+		name: unlocalized(defaultName),
 
 		canView:   sysadminPermission,
 		canCreate: loggedPermission,
@@ -108,6 +109,18 @@ type resourceIface interface {
 	getPermissionUpdate() Permission
 	getPermissionDelete() Permission
 	getPermissionExport() Permission
+
+	getName(string) string
+
+	getNameFunction() func(string) string
+}
+
+func (resource Resource[T]) getNameFunction() func(string) string {
+	return resource.name
+}
+
+func (resource Resource[T]) getName(locale string) string {
+	return resource.name(locale)
 }
 
 func (resource Resource[T]) getPermissionView() Permission {
@@ -194,7 +207,7 @@ func (resource Resource[T]) Count() (int64, error) {
 }
 
 func (resource *Resource[T]) Name(name func(string) string) *Resource[T] {
-	resource.resource.name = name
+	resource.name = name
 	return resource
 }
 

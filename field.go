@@ -141,14 +141,14 @@ func (resource *resource) newField(f reflect.StructField, order int) *field {
 		case "false":
 			break
 		default:
-			panic(fmt.Sprintf("validating permission 'prago-required' on field '%s' of resource '%s': wrong value '%s'", f.Name, resource.name("en"), ret.Tags["prago-required"]))
+			panic(fmt.Sprintf("validating permission 'prago-required' on field '%s' of resource '%s': wrong value '%s'", f.Name, resource.newResource.getName("en"), ret.Tags["prago-required"]))
 		}
 	}
 
 	if canView := ret.Tags["prago-can-view"]; canView != "" {
 		err := resource.app.validatePermission(Permission(canView))
 		if err != nil {
-			panic(fmt.Sprintf("validating permission 'prago-can-view' on field '%s' of resource '%s': %s", f.Name, resource.name("en"), err))
+			panic(fmt.Sprintf("validating permission 'prago-can-view' on field '%s' of resource '%s': %s", f.Name, resource.newResource.getName("en"), err))
 		}
 		ret.canView = Permission(canView)
 	}
@@ -156,7 +156,7 @@ func (resource *resource) newField(f reflect.StructField, order int) *field {
 	if canEdit := ret.Tags["prago-can-edit"]; canEdit != "" {
 		err := resource.app.validatePermission(Permission(canEdit))
 		if err != nil {
-			panic(fmt.Sprintf("validating permission 'prago-can-edit' on field '%s' of resource '%s': %s", f.Name, resource.name("en"), err))
+			panic(fmt.Sprintf("validating permission 'prago-can-edit' on field '%s' of resource '%s': %s", f.Name, resource.newResource.getName("en"), err))
 		}
 		ret.canEdit = Permission(canEdit)
 	} else {
@@ -181,7 +181,7 @@ func (resource *resource) newField(f reflect.StructField, order int) *field {
 		for _, v := range strings.Split(validations, ",") {
 			err := ret.addFieldValidation(v)
 			if err != nil {
-				panic(fmt.Sprintf("can't add validation on field '%s' of resource '%s': %s", f.Name, resource.name("en"), err))
+				panic(fmt.Sprintf("can't add validation on field '%s' of resource '%s': %s", f.Name, resource.newResource.getName("en"), err))
 			}
 		}
 	}

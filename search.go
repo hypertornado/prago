@@ -253,7 +253,7 @@ func (e *adminSearch) importResource(resource *resource) error {
 	roles := resource.app.getResourceViewRoles(*resource)
 	var resourceSearchItem = searchItem{
 		ID:    "resource_" + resource.newResource.getID(),
-		Name:  resource.name("cs"),
+		Name:  resource.newResource.getName("cs"),
 		URL:   resource.getURL(""),
 		Roles: roles,
 	}
@@ -308,7 +308,7 @@ func searchID(resource *resource, id int64) string {
 func relationDataToSearchItem(resource *resource, data viewRelationData) searchItem {
 	return searchItem{
 		ID:          searchID(resource, data.ID),
-		Category:    resource.name("cs"),
+		Category:    resource.newResource.getName("cs"),
 		Name:        data.Name,
 		Description: data.Description,
 		Image:       data.Image,

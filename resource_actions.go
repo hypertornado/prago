@@ -7,7 +7,7 @@ import (
 )
 
 func (resource *Resource[T]) initDefaultResourceActions() {
-	newResourceAction(resource, "").priority().Permission(resource.canView).Name(resource.resource.name).IsWide().Template("admin_list").DataSource(
+	newResourceAction(resource, "").priority().Permission(resource.canView).Name(resource.name).IsWide().Template("admin_list").DataSource(
 		func(request *Request) interface{} {
 			listData, err := resource.getListHeader(request.user)
 			must(err)

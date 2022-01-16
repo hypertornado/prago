@@ -45,7 +45,7 @@ func (resource *Resource[T]) initAutoRelations() {
 			v.relatedResource = relatedResource
 
 			if v.Tags["prago-name"] == "" {
-				v.HumanName = (*relatedResource).name
+				v.HumanName = (*relatedResource).newResource.getNameFunction()
 			}
 
 			relatedResource.newResource.addRelation(relation{
@@ -85,9 +85,9 @@ func createRelationListURL(resource resource, field field) func(int64) string {
 
 func createRelationNamingFunction(field field, resource resource, referenceResource resource) func(string) string {
 	return func(lang string) string {
-		ret := resource.name(lang)
+		ret := resource.newResource.getName(lang)
 		fieldName := field.HumanName(lang)
-		referenceName := referenceResource.name(lang)
+		referenceName := referenceResource.newResource.getName(lang)
 		if fieldName != referenceName {
 			ret += " – " + fieldName
 		}
