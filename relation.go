@@ -25,13 +25,13 @@ type viewRelationData struct {
 }
 
 func (app *App) initAllAutoRelations() {
-	for _, v := range app.resources {
+	for _, v := range app.resources2 {
 		v.initAutoRelations()
 	}
 }
 
-func (resource *resource) initAutoRelations() {
-	for _, v := range resource.fieldArrays {
+func (resource *Resource[T]) initAutoRelations() {
+	for _, v := range resource.resource.fieldArrays {
 		if v.Tags["prago-type"] == "relation" {
 			referenceName := v.Name
 			relationFieldName := v.Tags["prago-relation"]
@@ -49,11 +49,11 @@ func (resource *resource) initAutoRelations() {
 			}
 
 			relatedResource.relations = append(relatedResource.relations, relation{
-				resource: resource,
+				resource: resource.resource,
 				field:    v.Name,
-				listName: createRelationNamingFunction(*v, *resource, *relatedResource),
-				listURL:  createRelationListURL(*resource, *v),
-				addURL:   createRelationAddURL(*resource, *v),
+				listName: createRelationNamingFunction(*v, *resource.resource, *relatedResource),
+				listURL:  createRelationListURL(*resource.resource, *v),
+				addURL:   createRelationAddURL(*resource.resource, *v),
 			})
 		}
 	}

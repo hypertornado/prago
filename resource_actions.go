@@ -145,7 +145,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 		}
 	})
 
-	if resource.resource.previewURL != nil {
+	if resource.previewURLFunction != nil {
 		newResourceItemAction(resource, "preview").priority().Name(messages.GetNameFunction("admin_preview")).Handler(
 			func(request *Request) {
 				item := resource.Is("id", request.Params().Get("id")).First()
@@ -154,7 +154,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 					return
 				}
 				request.Redirect(
-					resource.resource.previewURL(item),
+					resource.previewURLFunction(item),
 				)
 			},
 		)

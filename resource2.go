@@ -12,6 +12,8 @@ type Resource[T any] struct {
 	resource *resource
 	app      *App
 
+	previewURLFunction func(interface{}) string
+
 	activityLog bool
 }
 
@@ -45,6 +47,7 @@ func GetResource[T any](app *App) *Resource[T] {
 type resourceIface interface {
 	initDefaultResourceActions()
 	initDefaultResourceAPIs()
+	initAutoRelations()
 }
 
 func (resource Resource[T]) Is(name string, value interface{}) *Query[T] {
@@ -89,7 +92,7 @@ func (resource *Resource[T]) FieldName(nameOfField string, name func(string) str
 }
 
 func (resource *Resource[T]) PreviewURLFunction(fn func(interface{}) string) *Resource[T] {
-	resource.resource.PreviewURLFunction(fn)
+	resource.previewURLFunction = fn
 	return resource
 }
 

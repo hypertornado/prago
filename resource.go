@@ -30,7 +30,7 @@ type resource struct {
 	canDelete Permission
 	canExport Permission
 
-	previewURL func(interface{}) string
+	//previewURL func(interface{}) string
 
 	fieldArrays []*field
 	fieldMap    map[string]*field
@@ -143,12 +143,6 @@ func (resource resource) getItemURL(item interface{}, suffix string) string {
 		ret += "/" + suffix
 	}
 	return ret
-}
-
-//PreviewURLFunction sets function to generate representation of resource item in app
-func (resource *resource) PreviewURLFunction(fn func(interface{}) string) *resource {
-	resource.previewURL = fn
-	return resource
 }
 
 //ItemsPerPage sets default display value of items per page
