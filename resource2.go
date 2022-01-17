@@ -284,14 +284,12 @@ func (resource *Resource[T]) ItemsPerPage(itemsPerPage int64) *Resource[T] {
 }
 
 func (resource *Resource[T]) PermissionView(permission Permission) *Resource[T] {
-	//resource.resource.PermissionView(permission)
 	must(resource.app.validatePermission(permission))
 	resource.canView = permission
 	return resource
 }
 
 func (resource *Resource[T]) PermissionUpdate(permission Permission) *Resource[T] {
-	//resource.resource.PermissionUpdate(permission)
 	must(resource.app.validatePermission(permission))
 	if resource.canCreate == loggedPermission {
 		resource.canCreate = permission
@@ -304,21 +302,18 @@ func (resource *Resource[T]) PermissionUpdate(permission Permission) *Resource[T
 }
 
 func (resource *Resource[T]) PermissionCreate(permission Permission) *Resource[T] {
-	//resource.resource.PermissionCreate(permission)
 	must(resource.app.validatePermission(permission))
 	resource.canCreate = permission
 	return resource
 }
 
 func (resource *Resource[T]) PermissionDelete(permission Permission) *Resource[T] {
-	//resource.resource.PermissionDelete(permission)
 	must(resource.app.validatePermission(permission))
 	resource.canDelete = permission
 	return resource
 }
 
 func (resource *Resource[T]) PermissionExport(permission Permission) *Resource[T] {
-	//resource.resource.PermissionExport(permission)
 	must(resource.app.validatePermission(permission))
 	resource.canExport = permission
 	return resource
@@ -337,24 +332,3 @@ func (resource *Resource[T]) DeleteValidation(validation Validation) *Resource[T
 	resource.deleteValidations = append(resource.deleteValidations, validation)
 	return resource
 }
-
-/*
-func (resource *Resource[T]) FieldViewTemplate(IDofField string, viewTemplate string) *Resource[T] {
-	resource.resource.FieldViewTemplate(IDofField, viewTemplate)
-	return resource
-}
-
-func (resource *Resource[T]) FieldListCellTemplate(IDofField string, template string) *Resource[T] {
-	resource.resource.FieldListCellTemplate(IDofField, template)
-	return resource
-}
-
-func (resource *Resource[T]) FieldFormTemplate(IDofField string, template string) *Resource[T] {
-	resource.resource.FieldFormTemplate(IDofField, template)
-	return resource
-}
-
-func (resource *Resource[T]) FieldDBDescription(IDofField string, description string) *Resource[T] {
-	resource.resource.FieldDBDescription(IDofField, description)
-	return resource
-}*/
