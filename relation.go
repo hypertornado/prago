@@ -25,7 +25,7 @@ type viewRelationData struct {
 }
 
 func (app *App) initAllAutoRelations() {
-	for _, v := range app.resources2 {
+	for _, v := range app.resources {
 		v.initAutoRelations()
 	}
 }

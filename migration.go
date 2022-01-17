@@ -24,7 +24,7 @@ func (app *App) migrate(verbose bool) error {
 	if err != nil {
 		return err
 	}
-	for _, resource := range app.resources2 {
+	for _, resource := range app.resources {
 		tables[resource.getID()] = false
 		err := resource.migrate(verbose)
 		if err != nil {
@@ -170,7 +170,7 @@ func getTableDescription(db dbIface, tableName string) (map[string]*mysqlColumn,
 }
 
 func (app *App) unsafeDropTables() error {
-	for _, resource := range app.resources2 {
+	for _, resource := range app.resources {
 		err := resource.unsafeDropTable()
 		if err != nil {
 			return err

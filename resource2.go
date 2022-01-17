@@ -12,8 +12,7 @@ import (
 type Resource[T any] struct {
 	id   string
 	name func(locale string) string
-	//resource *resource
-	app *App
+	app  *App
 
 	previewURLFunction func(interface{}) string
 
@@ -53,6 +52,11 @@ func NewResource[T any](app *App) *Resource[T] {
 		panic(fmt.Sprintf("item is not a structure, but " + typ.Kind().String()))
 	}
 
+	_, typFound := app.resourceMap[typ]
+	if typFound {
+		panic(fmt.Errorf("resource with type %s already created", typ))
+	}
+
 	defaultName := typ.Name()
 
 	ret := &Resource[T]{
@@ -76,11 +80,6 @@ func NewResource[T any](app *App) *Resource[T] {
 		fieldMap: make(map[string]*field),
 	}
 
-	app.resource2Map[typ] = ret
-	app.resources2 = append(app.resources2, ret)
-
-	//ret.resource = oldNewResource(ret, item)
-
 	for i := 0; i < typ.NumField(); i++ {
 		if ast.IsExported(typ.Field(i).Name) {
 			field := ret.newField(typ.Field(i), i)
@@ -93,24 +92,19 @@ func NewResource[T any](app *App) *Resource[T] {
 	}
 
 	app.resources = append(app.resources, ret)
-	_, typFound := app.resourceMap[ret.typ]
-	if typFound {
-		panic(fmt.Errorf("resource with type %s already created", ret.typ))
-	}
 	app.resourceMap[ret.typ] = ret
 	app.resourceNameMap[ret.id] = ret
 
 	initResource(ret)
 
 	ret.orderByColumn, ret.orderDesc = ret.getDefaultOrder()
-
 	return ret
 }
 
 func GetResource[T any](app *App) *Resource[T] {
 	var item T
 	itemTyp := reflect.TypeOf(item)
-	ret, ok := app.resource2Map[itemTyp]
+	ret, ok := app.resourceMap[itemTyp]
 	if !ok {
 		return nil
 	}
@@ -278,11 +272,6 @@ func (resource *Resource[T]) Name(name func(string) string) *Resource[T] {
 	resource.name = name
 	return resource
 }
-
-/*func (resource *Resource[T]) FieldName(nameOfField string, name func(string) string) *Resource[T] {
-	resource.resource.FieldName(nameOfField, name)
-	return resource
-}*/
 
 func (resource *Resource[T]) PreviewURLFunction(fn func(interface{}) string) *Resource[T] {
 	resource.previewURLFunction = fn

@@ -59,8 +59,8 @@ type App struct {
 	activityListeners []func(Activity)
 	taskManager       *taskManager
 
-	resource2Map map[reflect.Type]interface{}
-	resources2   []resourceIface
+	//resource2Map map[reflect.Type]interface{}
+	//resources2   []resourceIface
 }
 
 func newTestingApp() *App {
@@ -86,7 +86,7 @@ func createApp(codeName string, version string) *App {
 		mainController: newMainController(),
 		cache:          newCache(),
 
-		resource2Map: make(map[reflect.Type]interface{}),
+		//resource2Map: make(map[reflect.Type]interface{}),
 	}
 
 	app.appController = app.mainController.subController()
@@ -149,7 +149,7 @@ func (app *App) afterInit() {
 }
 
 func (app *App) initDefaultResourceActions() {
-	for _, v := range app.resources2 {
+	for _, v := range app.resources {
 		v.initDefaultResourceActions()
 		v.initDefaultResourceAPIs()
 	}

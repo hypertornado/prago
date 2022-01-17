@@ -39,7 +39,7 @@ func (app *App) bindAllActions() {
 		}
 	}
 
-	for _, resource := range app.resources2 {
+	for _, resource := range app.resources {
 		resource.bindActions()
 	}
 }
