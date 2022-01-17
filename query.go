@@ -6,7 +6,7 @@ type query struct {
 	err      error
 	db       dbIface
 	isDebug  bool
-	resource *resource
+	resource resourceIface
 }
 
 func (app *App) create(item interface{}) error {
@@ -25,10 +25,10 @@ func (app *App) update(item interface{}) error {
 	return resource.saveWithDBIface(item, app.db, false)
 }
 
-func (resource *resource) query() query {
+func (resource *Resource[T]) query() query {
 	return query{
 		query:    &listQuery{},
-		db:       resource.newResource.getApp().db,
+		db:       resource.getApp().db,
 		resource: resource,
 	}
 }
@@ -69,7 +69,7 @@ func (q query) offset(offset int64) query {
 
 func (q query) first() (interface{}, error) {
 	var ret interface{}
-	err := getFirstItem(*q.resource, q.db, q.resource.newResource.getID(), &ret, q.query, q.isDebug)
+	err := getFirstItem(q.resource, q.db, q.resource.getID(), &ret, q.query, q.isDebug)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (q query) first() (interface{}, error) {
 
 func (q query) list() (interface{}, error) {
 	var items interface{}
-	err := listItems(*q.resource, q.db, q.resource.newResource.getID(), &items, q.query, q.isDebug)
+	err := listItems(q.resource, q.db, q.resource.getID(), &items, q.query, q.isDebug)
 	if err != nil {
 		return nil, err
 	}
@@ -86,13 +86,13 @@ func (q query) list() (interface{}, error) {
 }
 
 func (q query) count() (int64, error) {
-	return countItems(q.db, q.resource.newResource.getID(), q.query, q.isDebug)
+	return countItems(q.db, q.resource.getID(), q.query, q.isDebug)
 }
 
 func (q query) delete(item interface{}) (int64, error) {
-	resource, err := q.resource.newResource.getApp().getResourceByItem(item)
+	resource, err := q.resource.getApp().getResourceByItem(item)
 	if err != nil {
 		return -1, err
 	}
-	return deleteItems(q.db, resource.newResource.getID(), q.query, q.isDebug)
+	return deleteItems(q.db, resource.getID(), q.query, q.isDebug)
 }

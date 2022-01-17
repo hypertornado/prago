@@ -85,7 +85,7 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 		Name: messages.Get(user.Locale, "admin_tables"),
 	}
 	for _, resource := range app.getSortedResources(user.Locale) {
-		if app.authorize(user, resource.newResource.getPermissionView()) {
+		if app.authorize(user, resource.getPermissionView()) {
 			resourceURL := resource.getURL("")
 			var selected bool
 			if request.Request().URL.Path == resourceURL {
@@ -96,8 +96,8 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 			}
 
 			resourceSection.Items = append(resourceSection.Items, mainMenuItem{
-				Name:     resource.newResource.getName(user.Locale),
-				Subname:  humanizeNumber(resource.newResource.getCachedCount()),
+				Name:     resource.getName(user.Locale),
+				Subname:  humanizeNumber(resource.getCachedCount()),
 				URL:      resourceURL,
 				Selected: selected,
 			})
@@ -156,7 +156,7 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 	return ret
 }
 
-func (app *App) getSortedResources(locale string) (ret []*resource) {
+func (app *App) getSortedResources(locale string) (ret []resourceIface) {
 	collator := collate.New(language.Czech)
 
 	ret = app.resources
@@ -164,7 +164,7 @@ func (app *App) getSortedResources(locale string) (ret []*resource) {
 		a := ret[i]
 		b := ret[j]
 
-		if collator.CompareString(a.newResource.getName(locale), b.newResource.getName(locale)) <= 0 {
+		if collator.CompareString(a.getName(locale), b.getName(locale)) <= 0 {
 			return true
 		} else {
 			return false

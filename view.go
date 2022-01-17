@@ -20,13 +20,13 @@ type viewField struct {
 	Value    interface{}
 }
 
-func (resource resource) getViews(id int, inValues interface{}, user *user) (ret []view) {
+func (resource *Resource[T]) getViews(id int, inValues interface{}, user *user) (ret []view) {
 	ret = append(ret, resource.getBasicView(id, inValues, user))
 	ret = append(ret, resource.getAutoRelationsView(id, inValues, user)...)
 	return ret
 }
 
-func (resource resource) getBasicView(id int, inValues interface{}, user *user) view {
+func (resource *Resource[T]) getBasicView(id int, inValues interface{}, user *user) view {
 	ret := view{}
 
 	ret.Items = append(
@@ -36,7 +36,7 @@ func (resource resource) getBasicView(id int, inValues interface{}, user *user) 
 			Template: "admin_item_view_url",
 			Value: [2]string{
 				resource.getURL(""),
-				resource.newResource.getName(user.Locale),
+				resource.getName(user.Locale),
 			},
 		},
 	)
@@ -61,7 +61,7 @@ func (resource resource) getBasicView(id int, inValues interface{}, user *user) 
 		)
 	}
 
-	historyView := resource.newResource.getApp().getHistory(&resource, int64(id))
+	historyView := resource.app.getHistory(resource, int64(id))
 
 	if len(historyView.Items) > 0 {
 		ret.Items = append(

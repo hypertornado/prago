@@ -23,7 +23,7 @@ type Action struct {
 	dataSource func(*Request) interface{}
 
 	app          *App
-	resource     *resource
+	resource     resourceIface
 	isItemAction bool
 	isWide       bool
 	isUserMenu   bool
@@ -83,7 +83,7 @@ func (resource *Resource[T]) Action(url string) *Action {
 
 func newResourceAction[T any](resource *Resource[T], url string) *Action {
 	action := newAction(resource.app, url)
-	action.resource = resource.resource
+	action.resource = resource
 	action.permission = resource.canView
 	resource.actions = append(resource.actions, action)
 	return action
@@ -97,7 +97,7 @@ func (resource *Resource[T]) ItemAction(url string) *Action {
 
 func newResourceItemAction[T any](resource *Resource[T], url string) *Action {
 	action := newAction(resource.app, url)
-	action.resource = resource.resource
+	action.resource = resource
 	action.isItemAction = true
 	action.permission = resource.canView
 	resource.itemActions = append(resource.itemActions, action)
@@ -219,7 +219,7 @@ func (action *Action) bindAction() error {
 
 	var controller *controller
 	if action.resource != nil {
-		controller = action.resource.newResource.getResourceControl()
+		controller = action.resource.getResourceControl()
 	} else {
 		controller = app.adminController
 	}
@@ -274,7 +274,7 @@ func (action *Action) bindAction() error {
 	return nil
 }
 
-func (app *App) getListItemActions(user *user, item interface{}, id int64, resource resource) listItemActions {
+func (resource *Resource[T]) getListItemActions(user *user, item interface{}, id int64) listItemActions {
 	ret := listItemActions{}
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{
@@ -293,7 +293,7 @@ func (app *App) getListItemActions(user *user, item interface{}, id int64, resou
 		}
 	}
 
-	if app.authorize(user, resource.newResource.getPermissionUpdate()) && resource.orderField != nil {
+	if resource.app.authorize(user, resource.canUpdate) && resource.orderField != nil {
 		ret.ShowOrderButton = true
 	}
 

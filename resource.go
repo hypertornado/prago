@@ -2,67 +2,58 @@ package prago
 
 import (
 	"fmt"
-	"go/ast"
 	"reflect"
 	"time"
 )
 
 //Resource is structure representing one item in admin menu or one table in database
-type resource struct {
-	//app *App
-	typ reflect.Type
-
-	fieldArrays []*field
-	fieldMap    map[string]*field
-	orderField  *field
-
+/*type resource struct {
 	newResource resourceIface
-}
+}*/
 
 //Resource creates new resource based on item
-func oldNewResource[T any](newResource *Resource[T], item interface{}) *resource {
-	app := newResource.app
-	typ := reflect.TypeOf(item)
+//func oldNewResource[T any](newResource *Resource[T], item interface{}) *resource {
+//app := newResource.app
+//typ := reflect.TypeOf(item)
 
-	if typ.Kind() != reflect.Struct {
-		panic(fmt.Sprintf("item is not a structure, but " + typ.Kind().String()))
-	}
+/*if typ.Kind() != reflect.Struct {
+	panic(fmt.Sprintf("item is not a structure, but " + typ.Kind().String()))
+}*/
 
-	//defaultName := typ.Name()
-	ret := &resource{
-		//app: app,
-		//name: unlocalized(defaultName),
-		//id:   columnName(defaultName),
-		typ: typ,
-		//resourceController: app.adminController.subController(),
+//defaultName := typ.Name()
+//ret := &resource{
+//app: app,
+//name: unlocalized(defaultName),
+//id:   columnName(defaultName),
+//typ: typ,
+//resourceController: app.adminController.subController(),
 
-		newResource: newResource,
+//	newResource: newResource,
 
-		fieldMap: make(map[string]*field),
-	}
+//fieldMap: make(map[string]*field),
+//}
 
-	for i := 0; i < typ.NumField(); i++ {
-		if ast.IsExported(typ.Field(i).Name) {
-			field := ret.newField(typ.Field(i), i)
-			if field.Tags["prago-type"] == "order" {
-				ret.orderField = field
-			}
-			ret.fieldArrays = append(ret.fieldArrays, field)
-			ret.fieldMap[field.ColumnName] = field
+/*for i := 0; i < typ.NumField(); i++ {
+	if ast.IsExported(typ.Field(i).Name) {
+		field := ret.newField(typ.Field(i), i)
+		if field.Tags["prago-type"] == "order" {
+			ret.orderField = field
 		}
+		ret.fieldArrays = append(ret.fieldArrays, field)
+		ret.fieldMap[field.ColumnName] = field
 	}
+}*/
 
-	app.resources = append(app.resources, ret)
-	_, typFound := app.resourceMap[ret.typ]
-	if typFound {
-		panic(fmt.Errorf("resource with type %s already created", ret.typ))
-	}
-
-	app.resourceMap[ret.typ] = ret
-	app.resourceNameMap[ret.newResource.getID()] = ret
-
-	return ret
+/*app.resources = append(app.resources, ret)
+_, typFound := app.resourceMap[ret.typ]
+if typFound {
+	panic(fmt.Errorf("resource with type %s already created", ret.typ))
 }
+app.resourceMap[ret.typ] = ret
+app.resourceNameMap[ret.newResource.getID()] = ret*/
+
+//return ret
+//}
 
 func (resource *Resource[T]) allowsMultipleActions(user *user) (ret bool) {
 	if resource.app.authorize(user, resource.canDelete) {
@@ -107,7 +98,7 @@ func (resource *Resource[T]) getMultipleActions(user *user) (ret []listMultipleA
 	return
 }
 
-func (resource resource) getItemURL(item interface{}, suffix string) string {
+func (resource *Resource[T]) getItemURL(item interface{}, suffix string) string {
 	ret := resource.getURL(fmt.Sprintf("%d", getItemID(item)))
 	if suffix != "" {
 		ret += "/" + suffix
@@ -152,7 +143,7 @@ func (resource *resource) PermissionExport(permission Permission) *resource {
 	return resource
 }*/
 
-func (app *App) getResourceByName(name string) *resource {
+func (app *App) getResourceByName(name string) resourceIface {
 	return app.resourceNameMap[columnName(name)]
 }
 
@@ -166,15 +157,15 @@ func initResource[T any](resource *Resource[T]) {
 	})
 }
 
-func (resource resource) getURL(suffix string) string {
-	url := resource.newResource.getID()
+func (resource *Resource[T]) getURL(suffix string) string {
+	url := resource.id
 	if len(suffix) > 0 {
 		url += "/" + suffix
 	}
-	return resource.newResource.getApp().getAdminURL(url)
+	return resource.app.getAdminURL(url)
 }
 
-func (app *App) getResourceByItem(item interface{}) (*resource, error) {
+func (app *App) getResourceByItem(item interface{}) (resourceIface, error) {
 	typ := reflect.TypeOf(item).Elem()
 	resource, ok := app.resourceMap[typ]
 	if !ok {
@@ -183,7 +174,7 @@ func (app *App) getResourceByItem(item interface{}) (*resource, error) {
 	return resource, nil
 }
 
-func (resource resource) saveWithDBIface(item interface{}, db dbIface, debugSQL bool) error {
+func (resource Resource[T]) saveWithDBIface(item interface{}, db dbIface, debugSQL bool) error {
 	val := reflect.ValueOf(item).Elem()
 	timeVal := reflect.ValueOf(time.Now())
 	fn := "UpdatedAt"
@@ -192,10 +183,10 @@ func (resource resource) saveWithDBIface(item interface{}, db dbIface, debugSQL 
 		val.FieldByName(fn).Type() == timeVal.Type() {
 		val.FieldByName(fn).Set(timeVal)
 	}
-	return resource.saveItem(db, resource.newResource.getID(), item, debugSQL)
+	return resource.saveItem(db, resource.id, item, debugSQL)
 }
 
-func (resource resource) createWithDBIface(item interface{}, db dbIface, debugSQL bool) error {
+func (resource *Resource[T]) createWithDBIface(item interface{}, db dbIface, debugSQL bool) error {
 	val := reflect.ValueOf(item).Elem()
 	timeVal := reflect.ValueOf(time.Now())
 	var t time.Time
@@ -208,12 +199,12 @@ func (resource resource) createWithDBIface(item interface{}, db dbIface, debugSQ
 			}
 		}
 	}
-	return resource.createItem(db, resource.newResource.getID(), item, debugSQL)
+	return resource.createItem(db, resource.id, item, debugSQL)
 }
 
-func (resource resource) newItem(item interface{}) {
+/*func (resource resource) newItem(item interface{}) {
 	reflect.ValueOf(item).Elem().Set(reflect.New(resource.typ))
-}
+}*/
 
 func (resource *Resource[T]) count() int64 {
 	count, _ := resource.Query().Count()
@@ -221,7 +212,7 @@ func (resource *Resource[T]) count() int64 {
 }
 
 func (resource *Resource[T]) cachedCountName() string {
-	return fmt.Sprintf("resource_count-%s", resource.resource.newResource.getID())
+	return fmt.Sprintf("resource_count-%s", resource.id)
 }
 
 func (resource *Resource[T]) getCachedCount() int64 {

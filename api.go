@@ -11,7 +11,7 @@ type API struct {
 	method      string
 	url         string
 	permission  Permission
-	resource    *resource
+	resource    resourceIface
 	handler     func(*Request)
 	handlerJSON func(*Request) interface{}
 }
@@ -37,7 +37,7 @@ func (resource *Resource[T]) API(url string) *API {
 
 func newResourceAPI[T any](resource *Resource[T], url string) *API {
 	api := newAPI(resource.app, url)
-	api.resource = resource.resource
+	api.resource = resource
 	api.permission = resource.canView
 	return api
 }
@@ -86,7 +86,7 @@ func (api *API) bindAPI() error {
 
 	var controller *controller
 	if api.resource != nil {
-		controller = api.resource.newResource.getResourceControl()
+		controller = api.resource.getResourceControl()
 	} else {
 		controller = api.app.adminController
 	}

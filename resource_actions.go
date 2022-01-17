@@ -30,14 +30,14 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 		if vc.Valid() {
 			var item T
 			resource.bindData(&item, request.user, request.Params())
-			if resource.resource.orderField != nil {
-				resource.resource.setOrderPosition(&item, resource.count()+1)
+			if resource.orderField != nil {
+				resource.setOrderPosition(&item, resource.count()+1)
 			}
 			must(resource.app.create(item))
 
 			if resource.app.search != nil {
 				go func() {
-					err := resource.app.search.saveItem(resource.resource, item)
+					err := resource.app.search.saveItem(resource, item)
 					if err != nil {
 						resource.app.Log().Println(fmt.Errorf("%s", err))
 					}
@@ -57,7 +57,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 				SetImage(resource.app.getItemImage(item)).
 				SetPreName(messages.Get(request.user.Locale, "admin_item_created")).
 				Flash(request)
-			vc.Validation().RedirectionLocaliton = resource.resource.getItemURL(item, "")
+			vc.Validation().RedirectionLocaliton = resource.getItemURL(item, "")
 		}
 	})
 
@@ -71,7 +71,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 				render404(request)
 				return nil
 			}
-			return resource.resource.getViews(id, item, request.user)
+			return resource.getViews(id, item, request.user)
 		},
 	)
 
@@ -93,7 +93,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 		request := vc.Request()
 		params := request.Params()
 
-		resource.resource.fixBooleanParams(vc.Request().user, params)
+		resource.fixBooleanParams(vc.Request().user, params)
 
 		item, validation, err := resource.editItemWithLog(request.user, params)
 		if err != nil && err != errValidation {
@@ -110,7 +110,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 				SetPreName(messages.Get(user.Locale, "admin_item_edited")).
 				Flash(request)
 
-			vc.Validation().RedirectionLocaliton = resource.resource.getURL(fmt.Sprintf("%d", id))
+			vc.Validation().RedirectionLocaliton = resource.getURL(fmt.Sprintf("%d", id))
 		} else {
 			//TODO: ugly hack with copying two validation contexts
 			vc.Validation().Errors = validation.Validation().Errors
@@ -141,7 +141,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 			must(resource.deleteItemWithLog(vc.Request().user, int64(id)))
 			must(resource.updateCachedCount())
 			vc.Request().AddFlashMessage(messages.Get(vc.Request().user.Locale, "admin_item_deleted"))
-			vc.Validation().RedirectionLocaliton = resource.resource.getURL("")
+			vc.Validation().RedirectionLocaliton = resource.getURL("")
 		}
 	})
 
@@ -163,7 +163,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 	if resource.activityLog {
 		newResourceAction(resource, "history").priority().IsWide().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resource.canUpdate).DataSource(
 			func(request *Request) interface{} {
-				return resource.app.getHistory(resource.resource, 0)
+				return resource.app.getHistory(resource, 0)
 			},
 		)
 
@@ -178,7 +178,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 					return nil
 				}
 
-				return resource.app.getHistory(resource.resource, int64(id))
+				return resource.app.getHistory(resource, int64(id))
 			},
 		)
 
@@ -198,16 +198,13 @@ func (resource *Resource[T]) deleteItemWithLog(user *user, id int64) error {
 		}
 	}
 
-	//var item interface{}
-	//resource.newItem(&item)
 	err := resource.Delete(id)
-	//_, err = resource.query().is("id", id).delete(item)
 	if err != nil {
 		return fmt.Errorf("can't delete item id '%d': %s", id, err)
 	}
 
 	if resource.app.search != nil {
-		err = resource.app.search.deleteItem(resource.resource, id)
+		err = resource.app.search.deleteItem(resource, id)
 		if err != nil {
 			resource.app.Log().Println(fmt.Errorf("%s", err))
 		}
@@ -264,7 +261,7 @@ func (resource *Resource[T]) editItemWithLog(user *user, values url.Values) (int
 
 	if app.search != nil {
 		go func() {
-			err = app.search.saveItem(resource.resource, item)
+			err = app.search.saveItem(resource, item)
 			if err != nil {
 				app.Log().Println(fmt.Errorf("%s", err))
 			}

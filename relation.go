@@ -9,7 +9,7 @@ import (
 )
 
 type relation struct {
-	resource *resource
+	resource resourceIface
 	field    string
 	listName func(string) string
 	listURL  func(id int64) string
@@ -31,7 +31,7 @@ func (app *App) initAllAutoRelations() {
 }
 
 func (resource *Resource[T]) initAutoRelations() {
-	for _, v := range resource.resource.fieldArrays {
+	for _, v := range resource.fieldArrays {
 		if v.Tags["prago-type"] == "relation" {
 			referenceName := v.Name
 			relationFieldName := v.Tags["prago-relation"]
@@ -45,15 +45,15 @@ func (resource *Resource[T]) initAutoRelations() {
 			v.relatedResource = relatedResource
 
 			if v.Tags["prago-name"] == "" {
-				v.HumanName = (*relatedResource).newResource.getNameFunction()
+				v.HumanName = relatedResource.getNameFunction()
 			}
 
-			relatedResource.newResource.addRelation(relation{
-				resource: resource.resource,
+			relatedResource.addRelation(relation{
+				resource: resource,
 				field:    v.Name,
-				listName: createRelationNamingFunction(*v, *resource.resource, *relatedResource),
-				listURL:  createRelationListURL(*resource.resource, *v),
-				addURL:   createRelationAddURL(*resource.resource, *v),
+				listName: resource.createRelationNamingFunction(*v, relatedResource),
+				listURL:  resource.createRelationListURL(*v),
+				addURL:   resource.createRelationAddURL(*v),
 			})
 
 			/*relatedResource.relations = append(relatedResource.relations, relation{
@@ -67,7 +67,7 @@ func (resource *Resource[T]) initAutoRelations() {
 	}
 }
 
-func createRelationAddURL(resource resource, field field) func(int64) string {
+func (resource *Resource[T]) createRelationAddURL(field field) func(int64) string {
 	return func(id int64) string {
 		values := url.Values{}
 		values.Add(field.ColumnName, fmt.Sprintf("%d", id))
@@ -75,7 +75,7 @@ func createRelationAddURL(resource resource, field field) func(int64) string {
 	}
 }
 
-func createRelationListURL(resource resource, field field) func(int64) string {
+func (resource *Resource[T]) createRelationListURL(field field) func(int64) string {
 	return func(id int64) string {
 		values := url.Values{}
 		values.Add(field.ColumnName, fmt.Sprintf("%d", id))
@@ -83,11 +83,11 @@ func createRelationListURL(resource resource, field field) func(int64) string {
 	}
 }
 
-func createRelationNamingFunction(field field, resource resource, referenceResource resource) func(string) string {
+func (resource *Resource[T]) createRelationNamingFunction(field field, referenceResource resourceIface) func(string) string {
 	return func(lang string) string {
-		ret := resource.newResource.getName(lang)
+		ret := resource.getName(lang)
 		fieldName := field.HumanName(lang)
-		referenceName := referenceResource.newResource.getName(lang)
+		referenceName := referenceResource.getName(lang)
 		if fieldName != referenceName {
 			ret += " – " + fieldName
 		}
@@ -101,17 +101,14 @@ func getRelationViewData(user *user, f field, value interface{}) interface{} {
 }
 
 func getRelationData(user *user, f field, value interface{}) (*viewRelationData, error) {
-	app := f.resource.newResource.getApp()
+	app := f.resource.getApp()
 	if f.relatedResource == nil {
 		return nil, fmt.Errorf("resource not found: %s", f.Name)
 	}
 
-	if !app.authorize(user, f.relatedResource.newResource.getPermissionView()) {
+	if !app.authorize(user, f.relatedResource.getPermissionView()) {
 		return nil, fmt.Errorf("user is not authorized to view this item")
 	}
-
-	//var item interface{}
-	//f.relatedResource.newItem(&item)
 
 	intVal := value.(int64)
 	if intVal <= 0 {
@@ -125,13 +122,13 @@ func getRelationData(user *user, f field, value interface{}) (*viewRelationData,
 	return f.relatedResource.itemToRelationData(item, user, nil), nil
 }
 
-func (resource *resource) itemToRelationData(item interface{}, user *user, relatedResource *resource) *viewRelationData {
+func (resource Resource[T]) itemToRelationData(item interface{}, user *user, relatedResource resourceIface) *viewRelationData {
 	var ret viewRelationData
 	ret.ID = getItemID(item)
 	ret.Name = getItemName(item)
 	ret.URL = resource.getItemURL(item, "")
 
-	ret.Image = resource.newResource.getApp().getItemImage(item)
+	ret.Image = resource.app.getItemImage(item)
 	ret.Description = resource.getItemDescription(item, user, relatedResource)
 	return &ret
 }
@@ -163,7 +160,7 @@ func getItemName(item interface{}) string {
 	return fmt.Sprintf("#%d", getItemID(item))
 }
 
-func (resource *resource) getItemDescription(item interface{}, user *user, relatedResource *resource) string {
+func (resource *Resource[T]) getItemDescription(item interface{}, user *user, relatedResource resourceIface) string {
 	var items []string
 
 	itemsVal := reflect.ValueOf(item).Elem()
@@ -189,12 +186,12 @@ func (resource *resource) getItemDescription(item interface{}, user *user, relat
 		}
 
 		rr := v.relatedResource
-		if rr != nil && relatedResource != nil && rr.newResource.getID() == relatedResource.newResource.getID() {
+		if rr != nil && relatedResource != nil && rr.getID() == relatedResource.getID() {
 			continue
 		}
 
 		field := itemsVal.FieldByName(v.Name)
-		stringed := resource.newResource.getApp().relationStringer(*v, field, user)
+		stringed := resource.app.relationStringer(*v, field, user)
 		if stringed != "" {
 			items = append(items, fmt.Sprintf("%s: %s", v.HumanName(user.Locale), stringed))
 		}

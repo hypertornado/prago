@@ -241,7 +241,7 @@ func (e *adminSearch) searchImport() error {
 	for _, v := range e.app.resources {
 		err = e.importResource(v)
 		if err != nil {
-			return fmt.Errorf("while importing resource %s: %s", v.newResource.getID(), err)
+			return fmt.Errorf("while importing resource %s: %s", v.getID(), err)
 		}
 	}
 	e.flush()
@@ -249,25 +249,21 @@ func (e *adminSearch) searchImport() error {
 	return nil
 }
 
-func (e *adminSearch) importResource(resource *resource) error {
-	roles := e.app.getResourceViewRoles(*resource)
+func (e *adminSearch) importResource(resource resourceIface) error {
+	roles := resource.getResourceViewRoles()
 	var resourceSearchItem = searchItem{
-		ID:    "resource_" + resource.newResource.getID(),
-		Name:  resource.newResource.getName("cs"),
+		ID:    "resource_" + resource.getID(),
+		Name:  resource.getName("cs"),
 		URL:   resource.getURL(""),
 		Roles: roles,
 	}
 	e.addItem(&resourceSearchItem, 200)
 
-	//var item interface{}
-	//resource.newItem(&item)
 	c, _ := resource.query().count()
 	if c > 10000 {
 		return nil
 	}
 
-	//var items interface{}
-	//resource.newArrayOfItems(&items)
 	items, err := resource.query().list()
 	if err == nil {
 		itemsVal := reflect.ValueOf(items)
@@ -280,12 +276,12 @@ func (e *adminSearch) importResource(resource *resource) error {
 	return nil
 }
 
-func (e *adminSearch) saveItem(resource *resource, item interface{}) error {
-	roles := e.app.getResourceViewRoles(*resource)
+func (e *adminSearch) saveItem(resource resourceIface, item interface{}) error {
+	roles := resource.getResourceViewRoles()
 	return e.saveItemWithRoles(resource, item, roles)
 }
 
-func (e *adminSearch) saveItemWithRoles(resource *resource, item interface{}, roles []string) error {
+func (e *adminSearch) saveItemWithRoles(resource resourceIface, item interface{}, roles []string) error {
 	//TODO: ugly hack
 	relData := resource.itemToRelationData(item, &user{}, nil)
 	if relData == nil {
@@ -296,19 +292,19 @@ func (e *adminSearch) saveItemWithRoles(resource *resource, item interface{}, ro
 	return e.addItem(&searchItem, 100)
 }
 
-func (e *adminSearch) deleteItem(resource *resource, id int64) error {
+func (e *adminSearch) deleteItem(resource resourceIface, id int64) error {
 	_, err := e.client.Delete().Index(e.indexName).Id(searchID(resource, id)).Do(context.Background())
 	return err
 }
 
-func searchID(resource *resource, id int64) string {
-	return fmt.Sprintf("%s-%d", resource.newResource.getID(), id)
+func searchID(resource resourceIface, id int64) string {
+	return fmt.Sprintf("%s-%d", resource.getID(), id)
 }
 
-func relationDataToSearchItem(resource *resource, data viewRelationData) searchItem {
+func relationDataToSearchItem(resource resourceIface, data viewRelationData) searchItem {
 	return searchItem{
 		ID:          searchID(resource, data.ID),
-		Category:    resource.newResource.getName("cs"),
+		Category:    resource.getName("cs"),
 		Name:        data.Name,
 		Description: data.Description,
 		Image:       data.Image,

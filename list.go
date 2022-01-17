@@ -87,37 +87,36 @@ type listMultipleAction struct {
 	IsDelete bool
 }
 
-func (res *Resource[T]) getListHeader(user *user) (list list, err error) {
-	resource := res.resource
+func (resource *Resource[T]) getListHeader(user *user) (list list, err error) {
 	lang := user.Locale
 
 	list.Colspan = 1
-	list.TypeID = res.id
+	list.TypeID = resource.id
 	list.VisibleColumns = resource.defaultVisibleFieldsStr(user)
 	list.Columns = resource.fieldsStr(user)
 
-	list.OrderColumn = res.orderByColumn
-	list.OrderDesc = res.orderDesc
+	list.OrderColumn = resource.orderByColumn
+	list.OrderDesc = resource.orderDesc
 	list.Locale = user.Locale
 
-	list.ItemsPerPage = res.defaultItemsPerPage
-	list.PaginationData = res.getPaginationData(user)
+	list.ItemsPerPage = resource.defaultItemsPerPage
+	list.PaginationData = resource.getPaginationData(user)
 
 	list.StatsLimitSelectData = getStatsLimitSelectData(user.Locale)
-	list.MultipleActions = res.getMultipleActions(user)
+	list.MultipleActions = resource.getMultipleActions(user)
 
-	orderField, ok := resource.fieldMap[res.orderByColumn]
+	orderField, ok := resource.fieldMap[resource.orderByColumn]
 	if !ok || !orderField.CanOrder {
 		err = ErrItemNotFound
 		return
 	}
 
-	list.Name = res.name(lang)
+	list.Name = resource.name(lang)
 
 	if resource.orderField != nil {
 		list.CanChangeOrder = true
 	}
-	list.CanExport = res.app.authorize(user, res.canExport)
+	list.CanExport = resource.app.authorize(user, resource.canExport)
 
 	for _, v := range resource.fieldArrays {
 		if v.authorizeView(user) {
@@ -131,7 +130,7 @@ func (res *Resource[T]) getListHeader(user *user) (list list, err error) {
 	return
 }
 
-func (resource *resource) defaultVisibleFieldsStr(user *user) string {
+func (resource *Resource[T]) defaultVisibleFieldsStr(user *user) string {
 	ret := []string{}
 	for _, v := range resource.fieldArrays {
 		if !v.authorizeView(user) {
@@ -145,7 +144,7 @@ func (resource *resource) defaultVisibleFieldsStr(user *user) string {
 	return r
 }
 
-func (resource *resource) fieldsStr(user *user) string {
+func (resource *Resource[T]) fieldsStr(user *user) string {
 	ret := []string{}
 	for _, v := range resource.fieldArrays {
 		if !v.authorizeView(user) {
@@ -221,7 +220,7 @@ func (field *field) filterLayout() string {
 	return ""
 }
 
-func (resource *resource) addFilterParamsToQuery(q query, params url.Values) query {
+func (resource *Resource[T]) addFilterParamsToQuery(q *Query[T], params url.Values) *Query[T] {
 	filter := map[string]string{}
 	for _, v := range resource.fieldMap {
 		key := v.ColumnName
@@ -233,7 +232,7 @@ func (resource *resource) addFilterParamsToQuery(q query, params url.Values) que
 	return resource.addFilterToQuery(q, filter)
 }
 
-func (resource *resource) addFilterToQuery(q query, filter map[string]string) query {
+func (resource *Resource[T]) addFilterToQuery(q *Query[T], filter map[string]string) *Query[T] {
 	for k, v := range filter {
 		field := resource.fieldMap[k]
 		if field == nil {
@@ -247,7 +246,7 @@ func (resource *resource) addFilterToQuery(q query, filter map[string]string) qu
 			v = "%" + v + "%"
 			k = strings.Replace(k, "`", "", -1)
 			str := fmt.Sprintf("`%s` LIKE ?", k)
-			q.where(str, v)
+			q.Where(str, v)
 		case "filter_layout_number":
 			var hasPrefix string
 			v = strings.Replace(v, " ", "", -1)
@@ -261,9 +260,9 @@ func (resource *resource) addFilterToQuery(q query, filter map[string]string) qu
 			numVal, err := strconv.Atoi(v)
 			if err == nil {
 				if hasPrefix == "" {
-					q.is(k, numVal)
+					q.Is(k, numVal)
 				} else {
-					q.where(
+					q.Where(
 						fmt.Sprintf("%s %s ?", field.ColumnName, hasPrefix),
 						numVal,
 					)
@@ -273,27 +272,27 @@ func (resource *resource) addFilterToQuery(q query, filter map[string]string) qu
 			v = strings.Trim(v, " ")
 			numVal, err := strconv.Atoi(v)
 			if err == nil {
-				q.is(k, numVal)
+				q.Is(k, numVal)
 			}
 		case "filter_layout_boolean":
 			switch v {
 			case "true":
-				q.is(k, true)
+				q.Is(k, true)
 			case "false":
-				q.is(k, false)
+				q.Is(k, false)
 			}
 		case "filter_layout_select":
 			if field.Tags["prago-type"] == "file" || field.Tags["prago-type"] == "image" || field.Tags["prago-type"] == "cdnfile" {
 				if v == "true" {
-					q.where(fmt.Sprintf("%s !=''", field.ColumnName))
+					q.Where(fmt.Sprintf("%s !=''", field.ColumnName))
 				}
 				if v == "false" {
-					q.where(fmt.Sprintf("%s =''", field.ColumnName))
+					q.Where(fmt.Sprintf("%s =''", field.ColumnName))
 				}
 				continue
 			}
 			if v != "" {
-				q.is(k, v)
+				q.Is(k, v)
 			}
 		case "filter_layout_date":
 			v = strings.Trim(v, " ")
@@ -314,10 +313,10 @@ func (resource *resource) addFilterToQuery(q query, filter map[string]string) qu
 
 			k = strings.Replace(k, "`", "", -1)
 			if fromStr != "" {
-				q.where(fmt.Sprintf("`%s` >= ?", k), fromStr)
+				q.Where(fmt.Sprintf("`%s` >= ?", k), fromStr)
 			}
 			if toStr != "" {
-				q.where(fmt.Sprintf("`%s` <= ?", k), toStr)
+				q.Where(fmt.Sprintf("`%s` <= ?", k), toStr)
 			}
 		}
 	}
@@ -325,8 +324,6 @@ func (resource *resource) addFilterToQuery(q query, filter map[string]string) qu
 }
 
 func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listContent, err error) {
-	resource := res.resource
-
 	if !res.app.authorize(user, res.canView) {
 		return listContent{}, errors.New("access denied")
 	}
@@ -339,7 +336,7 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 
 	columnsStr := params.Get("_columns")
 	if columnsStr == "" {
-		columnsStr = resource.defaultVisibleFieldsStr(user)
+		columnsStr = res.defaultVisibleFieldsStr(user)
 	}
 
 	columnsAr := strings.Split(columnsStr, ",")
@@ -360,23 +357,23 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 		orderDesc = false
 	}
 
-	q := resource.query()
+	q := res.Query()
 	if orderDesc {
-		q = q.orderDesc(orderBy)
+		q = q.OrderDesc(orderBy)
 	} else {
-		q = q.order(orderBy)
+		q = q.Order(orderBy)
 	}
 
 	var count int64
-	countQuery := resource.query()
-	countQuery = resource.addFilterParamsToQuery(countQuery, params)
-	count, err = countQuery.count()
+	countQuery := res.Query()
+	countQuery = res.addFilterParamsToQuery(countQuery, params)
+	count, err = countQuery.Count()
 	if err != nil {
 		return
 	}
 
-	var totalCount = resource.newResource.count()
-	resource.newResource.updateCachedCount()
+	totalCount, _ := res.Count()
+	res.updateCachedCount()
 
 	if count == totalCount {
 		ret.TotalCountStr = messages.ItemsCount(count, user.Locale)
@@ -407,9 +404,9 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 		SelectedPage: int64(currentPage),
 	}
 
-	q = resource.addFilterParamsToQuery(q, params)
-	q = q.offset((int64(currentPage) - 1) * itemsPerPage)
-	q = q.limit(itemsPerPage)
+	q = res.addFilterParamsToQuery(q, params)
+	q = q.Offset((int64(currentPage) - 1) * itemsPerPage)
+	q = q.Limit(itemsPerPage)
 
 	/*var rowItems interface{}
 	resource.newArrayOfItems(&rowItems)
@@ -418,10 +415,10 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 
 	//var rowItems interface{}
 	//resource.newArrayOfItems(&rowItems)
-	rowItems, err := q.list()
-	if err != nil {
+	rowItems := q.List()
+	/*if err != nil {
 		return
-	}
+	}*/
 
 	val := reflect.ValueOf(rowItems)
 	for i := 0; i < val.Len(); i++ {
@@ -435,14 +432,14 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 				if v.ColumnName == orderBy {
 					isOrderedBy = true
 				}
-				row.Items = append(row.Items, resource.valueToListCell(user, v.Field, fieldVal, isOrderedBy))
+				row.Items = append(row.Items, res.valueToListCell(user, v.Field, fieldVal, isOrderedBy))
 			}
 		}
 
 		row.ID = itemVal.FieldByName("ID").Int()
-		row.URL = resource.getURL(fmt.Sprintf("%d", row.ID))
+		row.URL = res.getURL(fmt.Sprintf("%d", row.ID))
 
-		row.Actions = res.app.getListItemActions(user, val.Index(i).Interface(), row.ID, *resource)
+		row.Actions = res.getListItemActions(user, val.Index(i).Interface(), row.ID)
 		row.AllowsMultipleActions = res.allowsMultipleActions(user)
 		ret.Rows = append(ret.Rows, row)
 	}
@@ -453,7 +450,7 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 	ret.Colspan = int64(len(columnsMap)) + 1
 
 	if params.Get("_stats") == "true" {
-		ret.Stats = getListStats(resource, user, params)
+		ret.Stats = res.getListStats(user, params)
 	}
 
 	return
@@ -497,7 +494,7 @@ func (resource *Resource[T]) getListContentJSON(user *user, params url.Values) (
 
 }
 
-func (resource resource) valueToListCell(user *user, f field, val reflect.Value, isOrderedBy bool) listCell {
+func (resource Resource[T]) valueToListCell(user *user, f field, val reflect.Value, isOrderedBy bool) listCell {
 	if !f.authorizeView(user) {
 		panic(fmt.Sprintf("can't access field '%s'", f.Name))
 	}

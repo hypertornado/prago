@@ -53,12 +53,12 @@ func (app *App) ListenActivity(handler func(Activity)) {
 	app.activityListeners = append(app.activityListeners, handler)
 }
 
-func (app *App) getHistory(resource *resource, itemID int64) historyView {
+func (app *App) getHistory(resource resourceIface, itemID int64) historyView {
 	ret := historyView{}
 
 	q := GetResource[activityLog](app).Query()
 	if resource != nil {
-		q.Is("ResourceName", resource.newResource.getID())
+		q.Is("ResourceName", resource.getID())
 	}
 	if itemID > 0 {
 		q.Is("ItemID", itemID)

@@ -54,7 +54,7 @@ func (q *listQuery) addOrder(name string, desc bool) {
 	q.order = append(q.order, listQueryOrder{name: name, desc: desc})
 }
 
-func (resource resource) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
+func (resource *Resource[T]) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
 
 	for _, field := range resource.fieldArrays {
 		val := value.FieldByName(field.Name)
@@ -94,7 +94,7 @@ func (resource resource) prepareValues(value reflect.Value) (names []string, que
 	return
 }
 
-func (resource resource) saveItem(db dbIface, tableName string, item interface{}, debugSQL bool) error {
+func (resource Resource[T]) saveItem(db dbIface, tableName string, item interface{}, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	value := reflect.ValueOf(item).Elem()
 	names, _, values, err := resource.prepareValues(value)
@@ -123,7 +123,7 @@ func (resource resource) saveItem(db dbIface, tableName string, item interface{}
 	return nil
 }
 
-func (resource resource) createItem(db dbIface, tableName string, item interface{}, debugSQL bool) error {
+func (resource Resource[T]) createItem(db dbIface, tableName string, item interface{}, debugSQL bool) error {
 	value := reflect.ValueOf(item).Elem()
 
 	names, questionMarks, values, err := resource.prepareValues(value)
@@ -217,7 +217,7 @@ func countItems(db dbIface, tableName string, query *listQuery, debugSQL bool) (
 	return i, err
 }
 
-func getFirstItem(resource resource, db dbIface, tableName string, item interface{}, query *listQuery, debugSQL bool) error {
+func getFirstItem(resource resourceIface, db dbIface, tableName string, item interface{}, query *listQuery, debugSQL bool) error {
 	var items interface{}
 	err := listItems(resource, db, tableName, &items, query, debugSQL)
 	if err != nil {
@@ -233,13 +233,13 @@ func getFirstItem(resource resource, db dbIface, tableName string, item interfac
 	return ErrItemNotFound
 }
 
-func listItems(resource resource, db dbIface, tableName string, items interface{}, query *listQuery, debugSQL bool) error {
-	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(resource.typ))).Elem()
+func listItems(resource resourceIface, db dbIface, tableName string, items interface{}, query *listQuery, debugSQL bool) error {
+	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(resource.getTyp()))).Elem()
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.conditions)
 
-	newValue := reflect.New(resource.typ).Elem()
+	newValue := reflect.New(resource.getTyp()).Elem()
 	names, _, err := resource.getStructScanners(newValue)
 	if err != nil {
 		return err
@@ -259,7 +259,7 @@ func listItems(resource resource, db dbIface, tableName string, items interface{
 		return err
 	}
 	for rows.Next() {
-		newValue = reflect.New(resource.typ)
+		newValue = reflect.New(resource.getTyp())
 		_, scanners, err := resource.getStructScanners(newValue.Elem())
 		if err != nil {
 			return err

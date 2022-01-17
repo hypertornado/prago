@@ -290,7 +290,7 @@ func initNewsletterResource(res *Resource[newsletter]) {
 		}
 		if vc.Valid() {
 			vc.Request().AddFlashMessage("Náhled newsletteru odeslán.")
-			vc.Validation().RedirectionLocaliton = res.resource.getItemURL(&newsletter, "")
+			vc.Validation().RedirectionLocaliton = res.getItemURL(&newsletter, "")
 		}
 	})
 
@@ -316,7 +316,7 @@ func initNewsletterResource(res *Resource[newsletter]) {
 
 			vc.Request().AddFlashMessage(fmt.Sprintf("Newsletter '%s' se odesílá na %d adres", nl.Name, len(recipients)))
 
-			vc.Validation().RedirectionLocaliton = res.resource.getItemURL(&nl, "")
+			vc.Validation().RedirectionLocaliton = res.getItemURL(&nl, "")
 		},
 	)
 
@@ -344,7 +344,7 @@ func initNewsletterResource(res *Resource[newsletter]) {
 			must(newsletterSectionResource.Create(&section))
 		}
 
-		vc.Validation().RedirectionLocaliton = res.resource.getItemURL(&newsletter, "edit")
+		vc.Validation().RedirectionLocaliton = res.getItemURL(&newsletter, "edit")
 	})
 }
 

@@ -3,16 +3,17 @@ package prago
 import (
 	"errors"
 	"fmt"
+	"go/ast"
 	"reflect"
 )
 
 //https://github.com/golang/go/issues/49085
 
 type Resource[T any] struct {
-	id       string
-	name     func(locale string) string
-	resource *resource
-	app      *App
+	id   string
+	name func(locale string) string
+	//resource *resource
+	app *App
 
 	previewURLFunction func(interface{}) string
 
@@ -36,12 +37,23 @@ type Resource[T any] struct {
 	orderByColumn       string
 	orderDesc           bool
 	defaultItemsPerPage int64
+
+	typ reflect.Type
+
+	fieldArrays []*field
+	fieldMap    map[string]*field
+	orderField  *field
 }
 
 func NewResource[T any](app *App) *Resource[T] {
 	var item T
+	typ := reflect.TypeOf(item)
 
-	defaultName := reflect.TypeOf(item).Name()
+	if typ.Kind() != reflect.Struct {
+		panic(fmt.Sprintf("item is not a structure, but " + typ.Kind().String()))
+	}
+
+	defaultName := typ.Name()
 
 	ret := &Resource[T]{
 		app:  app,
@@ -54,15 +66,40 @@ func NewResource[T any](app *App) *Resource[T] {
 		canDelete: loggedPermission,
 		canExport: loggedPermission,
 
+		typ: typ,
+
 		activityLog: true,
 
 		defaultItemsPerPage: 200,
 		resourceController:  app.adminController.subController(),
+
+		fieldMap: make(map[string]*field),
 	}
-	itemTyp := reflect.TypeOf(item)
-	app.resource2Map[itemTyp] = ret
+
+	app.resource2Map[typ] = ret
 	app.resources2 = append(app.resources2, ret)
-	ret.resource = oldNewResource(ret, item)
+
+	//ret.resource = oldNewResource(ret, item)
+
+	for i := 0; i < typ.NumField(); i++ {
+		if ast.IsExported(typ.Field(i).Name) {
+			field := ret.newField(typ.Field(i), i)
+			if field.Tags["prago-type"] == "order" {
+				ret.orderField = field
+			}
+			ret.fieldArrays = append(ret.fieldArrays, field)
+			ret.fieldMap[field.ColumnName] = field
+		}
+	}
+
+	app.resources = append(app.resources, ret)
+	_, typFound := app.resourceMap[ret.typ]
+	if typFound {
+		panic(fmt.Errorf("resource with type %s already created", ret.typ))
+	}
+	app.resourceMap[ret.typ] = ret
+	app.resourceNameMap[ret.id] = ret
+
 	initResource(ret)
 
 	ret.orderByColumn, ret.orderDesc = ret.getDefaultOrder()
@@ -115,6 +152,30 @@ type resourceIface interface {
 	getNameFunction() func(string) string
 
 	getApp() *App
+
+	unsafeDropTable() error
+
+	migrate(bool) error
+
+	getURL(suffix string) string
+
+	query() query
+
+	createWithDBIface(interface{}, dbIface, bool) error
+	saveWithDBIface(interface{}, dbIface, bool) error
+
+	getStructScanners(reflect.Value) ([]string, []interface{}, error)
+	getTyp() reflect.Type
+
+	getItemNavigation(*user, interface{}, string) navigation
+	getNavigation(*user, string) navigation
+	itemToRelationData(interface{}, *user, resourceIface) *viewRelationData
+
+	getResourceViewRoles() []string
+}
+
+func (resource Resource[T]) getTyp() reflect.Type {
+	return resource.typ
 }
 
 func (resource Resource[T]) getApp() *App {
@@ -218,10 +279,10 @@ func (resource *Resource[T]) Name(name func(string) string) *Resource[T] {
 	return resource
 }
 
-func (resource *Resource[T]) FieldName(nameOfField string, name func(string) string) *Resource[T] {
+/*func (resource *Resource[T]) FieldName(nameOfField string, name func(string) string) *Resource[T] {
 	resource.resource.FieldName(nameOfField, name)
 	return resource
-}
+}*/
 
 func (resource *Resource[T]) PreviewURLFunction(fn func(interface{}) string) *Resource[T] {
 	resource.previewURLFunction = fn
@@ -288,6 +349,7 @@ func (resource *Resource[T]) DeleteValidation(validation Validation) *Resource[T
 	return resource
 }
 
+/*
 func (resource *Resource[T]) FieldViewTemplate(IDofField string, viewTemplate string) *Resource[T] {
 	resource.resource.FieldViewTemplate(IDofField, viewTemplate)
 	return resource
@@ -306,4 +368,4 @@ func (resource *Resource[T]) FieldFormTemplate(IDofField string, template string
 func (resource *Resource[T]) FieldDBDescription(IDofField string, description string) *Resource[T] {
 	resource.resource.FieldDBDescription(IDofField, description)
 	return resource
-}
+}*/

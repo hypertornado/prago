@@ -36,7 +36,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 				row := sheet.AddRow()
 				columnsStr := request.Request().URL.Query().Get("_columns")
 				if columnsStr == "" {
-					columnsStr = resource.resource.defaultVisibleFieldsStr(request.user)
+					columnsStr = resource.defaultVisibleFieldsStr(request.user)
 				}
 				columnsAr := strings.Split(columnsStr, ",")
 				for _, v := range columnsAr {
@@ -72,14 +72,14 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 			}
 
 			request.RenderJSON(
-				resource.resource.itemToRelationData(item, request.user, nil),
+				resource.itemToRelationData(item, request.user, nil),
 			)
 		},
 	)
 
 	newResourceAPI(resource, "set-order").Permission(resource.canUpdate).Method("POST").Handler(
 		func(request *Request) {
-			if resource.resource.orderField == nil {
+			if resource.orderField == nil {
 				panic("can't order")
 			}
 
@@ -94,7 +94,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 			for i, id := range order {
 				item := resource.Is("id", int64(id)).First()
-				resource.resource.setOrderPosition(item, int64(i))
+				resource.setOrderPosition(item, int64(i))
 				err := resource.Update(item)
 				must(err)
 			}
@@ -114,7 +114,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 			if err == nil {
 				item := resource.Is("id", id).First()
 				if item != nil {
-					relationItem := resource.resource.itemToRelationData(item, request.user, nil)
+					relationItem := resource.itemToRelationData(item, request.user, nil)
 					if relationItem != nil {
 						usedIDs[relationItem.ID] = true
 						ret = append(ret, *relationItem)
@@ -124,7 +124,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 			filter := "%" + q + "%"
 			for _, v := range []string{"name", "description"} {
-				field := resource.resource.fieldMap[v]
+				field := resource.fieldMap[v]
 				if field == nil {
 					continue
 				}
@@ -132,7 +132,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 				itemsVal := reflect.ValueOf(items)
 				for i := 0; i < itemsVal.Len(); i++ {
 					item := itemsVal.Index(i).Interface()
-					viewItem := resource.resource.itemToRelationData(item, request.user, nil)
+					viewItem := resource.itemToRelationData(item, request.user, nil)
 					if viewItem != nil && !usedIDs[viewItem.ID] {
 						usedIDs[viewItem.ID] = true
 						ret = append(ret, *viewItem)
@@ -196,7 +196,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 					if app.search != nil {
 						go func() {
-							err := app.search.saveItem(resource.resource, item)
+							err := app.search.saveItem(resource, item)
 							if err != nil {
 								app.Log().Println(fmt.Errorf("%s", err))
 							}
@@ -250,7 +250,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 		func(request *Request) {
 			var item T
 			form := NewForm(
-				resource.resource.getURL("api/multiple_edit"),
+				resource.getURL("api/multiple_edit"),
 			)
 			resource.addFormItems(&item, request.user, form)
 			request.SetData("form", form)

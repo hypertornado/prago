@@ -87,11 +87,11 @@ func renderPage(request *Request, page page) {
 	request.RenderViewWithCode(layout, code)
 }
 
-func (resource resource) getNavigation(user *user, code string) navigation {
+func (resource *Resource[T]) getNavigation(user *user, code string) navigation {
 	var tabs []tab
-	for _, v := range resource.newResource.getActions() {
+	for _, v := range resource.getActions() {
 		if v.method == "GET" {
-			if resource.newResource.getApp().authorize(user, v.permission) {
+			if resource.app.authorize(user, v.permission) {
 				name := v.url
 				if v.name != nil {
 					name = v.name(user.Locale)
@@ -111,9 +111,9 @@ func (resource resource) getNavigation(user *user, code string) navigation {
 	}.sortByPriority()
 }
 
-func (resource resource) getItemNavigation(user *user, item interface{}, code string) navigation {
+func (resource *Resource[T]) getItemNavigation(user *user, item interface{}, code string) navigation {
 	var tabs []tab
-	for _, v := range resource.newResource.getItemActions() {
+	for _, v := range resource.getItemActions() {
 		if v.method == "GET" {
 			name := v.url
 			if v.url == "" {
@@ -123,7 +123,7 @@ func (resource resource) getItemNavigation(user *user, item interface{}, code st
 					name = v.name(user.Locale)
 				}
 			}
-			if resource.newResource.getApp().authorize(user, v.permission) {
+			if resource.app.authorize(user, v.permission) {
 				tabs = append(tabs, tab{
 					Name:     name,
 					URL:      resource.getItemURL(item, v.url),

@@ -5,7 +5,7 @@ import (
 )
 
 func (resource *Resource[T]) getDefaultOrder() (column string, desc bool) {
-	for _, v := range resource.resource.fieldArrays {
+	for _, v := range resource.fieldArrays {
 		add := false
 		if v.ColumnName == "id" {
 			add = true
@@ -37,7 +37,7 @@ func (resource *Resource[T]) getDefaultOrder() (column string, desc bool) {
 func (resource Resource[T]) getItemStringEditableValues(item *T, user *user) map[string]string {
 	itemVal := reflect.ValueOf(item).Elem()
 	ret := make(map[string]string)
-	for i, field := range resource.resource.fieldArrays {
+	for i, field := range resource.fieldArrays {
 		if !field.authorizeEdit(user) && field.ColumnName != "id" {
 			continue
 		}
@@ -55,7 +55,7 @@ func (resource Resource[T]) addFormItems(item *T, user *user, form *Form) {
 	editableValues := resource.getItemStringEditableValues(item, user)
 
 fields:
-	for _, field := range resource.resource.fieldArrays {
+	for _, field := range resource.fieldArrays {
 		if !field.authorizeEdit(user) {
 			continue fields
 		}
