@@ -57,43 +57,6 @@ func (resource *Resource[T]) getItemURL(item interface{}, suffix string) string 
 	return ret
 }
 
-/*func (resource *resource) PermissionView(permission Permission) *resource {
-	must(resource.app.validatePermission(permission))
-	resource.canView = permission
-	return resource
-}
-
-//PermissionUpdate sets permission to edit functions, if there is no create and delete permissions set, it set them too
-func (resource *resource) PermissionUpdate(permission Permission) *resource {
-	must(resource.app.validatePermission(permission))
-	if resource.canCreate == loggedPermission {
-		resource.canCreate = permission
-	}
-	if resource.canDelete == loggedPermission {
-		resource.canDelete = permission
-	}
-	resource.canUpdate = permission
-	return resource
-}
-
-func (resource *resource) PermissionCreate(permission Permission) *resource {
-	must(resource.app.validatePermission(permission))
-	resource.canCreate = permission
-	return resource
-}
-
-func (resource *resource) PermissionDelete(permission Permission) *resource {
-	must(resource.app.validatePermission(permission))
-	resource.canDelete = permission
-	return resource
-}
-
-func (resource *resource) PermissionExport(permission Permission) *resource {
-	must(resource.app.validatePermission(permission))
-	resource.canExport = permission
-	return resource
-}*/
-
 func (app *App) getResourceByName(name string) resourceIface {
 	return app.resourceNameMap[columnName(name)]
 }

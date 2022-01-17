@@ -135,7 +135,7 @@ func build(appName, version string) error {
 func buildExecutable(bf buildFlag, appName, dirPath string) error {
 	executablePath := filepath.Join(dirPath, fmt.Sprintf("%s.%s", appName, bf.name))
 	fmt.Println("building", bf.name, "at", executablePath)
-	cmd := exec.Command("go", "build", "-o", executablePath)
+	cmd := exec.Command("go", "build", "-o", executablePath, "-v")
 	env := os.Environ()
 	env = append(env, fmt.Sprintf("GOOS=%s", bf.goos))
 	env = append(env, fmt.Sprintf("GOARCH=%s", bf.goarch))

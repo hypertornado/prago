@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -33,31 +34,13 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 			if resource.orderField != nil {
 				resource.setOrderPosition(&item, resource.count()+1)
 			}
-			must(resource.app.create(item))
+			must(resource.CreateWithLog(&item, request))
 
-			if resource.app.search != nil {
-				go func() {
-					err := resource.app.search.saveItem(resource, item)
-					if err != nil {
-						resource.app.Log().Println(fmt.Errorf("%s", err))
-					}
-					resource.app.search.flush()
-				}()
-			}
-
-			if resource.activityLog {
-				must(
-					resource.app.LogActivity("new", request.UserID(), resource.id, getItemID(item), nil, item),
-				)
-			}
-
-			must(resource.updateCachedCount())
-
-			resource.app.Notification(getItemName(item)).
-				SetImage(resource.app.getItemImage(item)).
+			resource.app.Notification(getItemName(&item)).
+				SetImage(resource.app.getItemImage(&item)).
 				SetPreName(messages.Get(request.user.Locale, "admin_item_created")).
 				Flash(request)
-			vc.Validation().RedirectionLocaliton = resource.getItemURL(item, "")
+			vc.Validation().RedirectionLocaliton = resource.getItemURL(&item, "")
 		}
 	})
 
@@ -95,7 +78,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 
 		resource.fixBooleanParams(vc.Request().user, params)
 
-		item, validation, err := resource.editItemWithLog(request.user, params)
+		item, validation, err := resource.editItemWithLogAndValues(request, params)
 		if err != nil && err != errValidation {
 			panic(err)
 		}
@@ -138,8 +121,12 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 			id, err := strconv.Atoi(vc.GetValue("id"))
 			must(err)
 
-			must(resource.deleteItemWithLog(vc.Request().user, int64(id)))
-			must(resource.updateCachedCount())
+			item := resource.Is("id", id).First()
+			if item == nil {
+				panic(fmt.Sprintf("can't find item for deletion id '%d'", id))
+			}
+
+			must(resource.DeleteWithLog(item, vc.Request()))
 			vc.Request().AddFlashMessage(messages.Get(vc.Request().user.Locale, "admin_item_deleted"))
 			vc.Validation().RedirectionLocaliton = resource.getURL("")
 		}
@@ -185,18 +172,42 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 	}
 }
 
-func (resource *Resource[T]) deleteItemWithLog(user *user, id int64) error {
-	beforeItem := resource.Is("id", id).First()
-	if beforeItem == nil {
-		return fmt.Errorf("can't find item for deletion id '%d'", id)
+func (resource *Resource[T]) CreateWithLog(item *T, request *Request) error {
+	err := resource.Create(item)
+	if err != nil {
+		return err
+	}
+
+	if resource.app.search != nil {
+		go func() {
+			err := resource.app.search.saveItem(resource, item)
+			if err != nil {
+				resource.app.Log().Println(fmt.Errorf("%s", err))
+			}
+			resource.app.search.flush()
+		}()
 	}
 
 	if resource.activityLog {
-		err := resource.app.LogActivity("delete", user.ID, resource.id, id, beforeItem, nil)
+		err := resource.LogActivity(request.user, nil, item)
+		if err != nil {
+			return err
+		}
+
+	}
+	return resource.updateCachedCount()
+
+}
+
+func (resource *Resource[T]) DeleteWithLog(item *T, request *Request) error {
+	if resource.activityLog {
+		err := resource.LogActivity(request.user, item, nil)
 		if err != nil {
 			return err
 		}
 	}
+
+	id := getItemID(item)
 
 	err := resource.Delete(id)
 	if err != nil {
@@ -211,27 +222,25 @@ func (resource *Resource[T]) deleteItemWithLog(user *user, id int64) error {
 		resource.app.search.flush()
 	}
 
+	resource.updateCachedCount()
+
 	return nil
 }
 
-func (resource *Resource[T]) editItemWithLog(user *user, values url.Values) (interface{}, ValidationContext, error) {
-	app := resource.app
-
+func (resource *Resource[T]) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, ValidationContext, error) {
+	user := request.user
 	id, err := strconv.Atoi(values.Get("id"))
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't parse id %d: %s", id, err)
 	}
 
-	//TODO: remove this ugly hack and copy values via reflect package
 	beforeItem := resource.Is("id", id).First()
 	if beforeItem == nil {
 		return nil, nil, fmt.Errorf("can't get beforeitem with id %d: %s", id, err)
 	}
 
-	item := resource.Query().Is("id", id).First()
-	if item == nil {
-		return nil, nil, fmt.Errorf("can't get item with id %d: %s", id, err)
-	}
+	cloned := *beforeItem
+	item := &cloned
 
 	err = resource.bindData(
 		item, user, values,
@@ -254,27 +263,41 @@ func (resource *Resource[T]) editItemWithLog(user *user, values url.Values) (int
 		return nil, vv, errValidation
 	}
 
-	err = resource.Update(item)
+	err = resource.UpdateWithLog(item, request)
 	if err != nil {
-		return nil, nil, fmt.Errorf("can't save item (%d): %s", id, err)
+		return nil, nil, err
 	}
 
-	if app.search != nil {
+	return item, vv, nil
+}
+
+func (resource *Resource[T]) UpdateWithLog(item *T, request *Request) error {
+	id := getItemID(item)
+	beforeItem := resource.Is("id", id).First()
+	if beforeItem == nil {
+		return errors.New("can't find before item")
+	}
+
+	err := resource.Update(item)
+	if err != nil {
+		return fmt.Errorf("can't save item (%d): %s", id, err)
+	}
+
+	if resource.app.search != nil {
 		go func() {
-			err = app.search.saveItem(resource, item)
+			err = resource.app.search.saveItem(resource, item)
 			if err != nil {
-				app.Log().Println(fmt.Errorf("%s", err))
+				resource.app.Log().Println(fmt.Errorf("%s", err))
 			}
-			app.search.flush()
+			resource.app.search.flush()
 		}()
 	}
 
 	if resource.activityLog {
 		must(
-			app.LogActivity("edit", user.ID, resource.id, int64(id), beforeItem, item),
+			resource.LogActivity(request.user, beforeItem, item),
 		)
 	}
 
-	return item, vv, nil
-
+	return nil
 }

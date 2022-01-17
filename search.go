@@ -57,8 +57,12 @@ func newAdminSearch(app *App) (*adminSearch, error) {
 }
 
 func (e *adminSearch) createSearchIndex() error {
+	//pragelastic.New("xxx")
+
 	e.client.DeleteIndex(e.indexName).Do(context.Background())
 	e.flush()
+
+	//e.client.CreateIndex(e.indexName).
 
 	_, err := e.client.CreateIndex(e.indexName).BodyString(`
     {

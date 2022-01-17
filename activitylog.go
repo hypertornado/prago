@@ -2,6 +2,7 @@ package prago
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -56,7 +57,7 @@ func (app *App) ListenActivity(handler func(Activity)) {
 func (app *App) getHistory(resource resourceIface, itemID int64) historyView {
 	ret := historyView{}
 
-	q := GetResource[activityLog](app).Query()
+	q := app.activityLogResource.Query()
 	if resource != nil {
 		q.Is("ResourceName", resource.getID())
 	}
@@ -93,13 +94,72 @@ func (app *App) getHistory(resource resourceIface, itemID int64) historyView {
 	return ret
 }
 
-func initActivityLog(resource *Resource[activityLog]) {
-	resource.canView = Permission(sysadminRoleName)
-	resource.orderDesc = true
-	resource.Name(messages.GetNameFunction("admin_history"))
+func (app *App) initActivityLog() {
+	app.activityLogResource = NewResource[activityLog](app)
+	app.activityLogResource.canView = Permission(sysadminRoleName)
+	app.activityLogResource.orderDesc = true
+	app.activityLogResource.Name(messages.GetNameFunction("admin_history"))
 }
 
-func (app App) LogActivity(activityType string, userID int64, resourceID string, itemID int64, before, after interface{}) error {
+func (resource *Resource[T]) LogActivity(user *user, before, after *T) error {
+	var activityType string
+	switch {
+	case before == nil && after != nil:
+		activityType = "new"
+	case before != nil && after != nil:
+		activityType = "edit"
+	case before != nil && after == nil:
+		activityType = "delete"
+	default:
+		return errors.New("unknown activity type")
+
+	}
+
+	var itemID int64 = -1
+	if before != nil {
+		itemID = getItemID(before)
+	} else {
+		itemID = getItemID(after)
+	}
+
+	var err error
+
+	var beforeData []byte
+	if before != nil {
+		beforeData, err = json.Marshal(before)
+		if err != nil {
+			return fmt.Errorf("can't marshal before data: %s", err)
+		}
+	}
+
+	var afterData []byte
+	if after != nil {
+		afterData, err = json.Marshal(after)
+		if err != nil {
+			return fmt.Errorf("can't marshal after data: %s", err)
+		}
+	}
+
+	log := &activityLog{
+		ResourceName:  resource.id,
+		ItemID:        itemID,
+		ActionType:    activityType,
+		User:          user.ID,
+		ContentBefore: string(beforeData),
+		ContentAfter:  string(afterData),
+	}
+
+	err = resource.app.activityLogResource.Create(log)
+	if err == nil {
+		for _, v := range resource.app.activityListeners {
+			v(log.activity())
+		}
+	}
+	return err
+
+}
+
+/*func (app App) LogActivityOLD(activityType string, userID int64, resourceID string, itemID int64, before, after interface{}) error {
 	var err error
 
 	var beforeData []byte
@@ -135,4 +195,4 @@ func (app App) LogActivity(activityType string, userID int64, resourceID string,
 	}
 	return err
 
-}
+}*/

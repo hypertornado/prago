@@ -1,6 +1,5 @@
 package prago
 
-//Query represents query to db
 type query struct {
 	query    *listQuery
 	err      error

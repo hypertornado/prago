@@ -206,7 +206,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 					if resource.activityLog {
 						must(
-							app.LogActivity("new", request.UserID(), resource.id, getItemID(item), nil, item),
+							resource.LogActivity(request.user, nil, item),
 						)
 					}
 				}
@@ -237,7 +237,12 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 						return
 					}
 
-					err := resource.deleteItemWithLog(request.user, v)
+					item := resource.Is("id", v).First()
+					if item == nil {
+						panic("can't find item to delete")
+					}
+
+					err := resource.DeleteWithLog(item, request)
 					must(err)
 				}
 			default:
@@ -285,8 +290,8 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 					usedValues.Add(k, request.Request().PostForm.Get(k))
 				}
 
-				_, validation, err := resource.editItemWithLog(
-					request.user,
+				_, validation, err := resource.editItemWithLogAndValues(
+					request,
 					usedValues,
 				)
 

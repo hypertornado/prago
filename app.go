@@ -36,8 +36,9 @@ type App struct {
 	accessController *controller
 	adminController  *controller
 
-	UsersResource *Resource[user]
-	FilesResource *Resource[File]
+	UsersResource       *Resource[user]
+	FilesResource       *Resource[File]
+	activityLogResource *Resource[activityLog]
 
 	rootActions    []*Action
 	db             *sql.DB
@@ -116,10 +117,7 @@ func createApp(codeName string, version string) *App {
 	app.initUserResource()
 	app.initFilesResource()
 
-	initActivityLog(
-		NewResource[activityLog](app),
-	)
-
+	app.initActivityLog()
 	app.initHome()
 	app.initTaskManager()
 	app.initAdminActions()
