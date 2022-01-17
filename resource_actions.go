@@ -254,7 +254,7 @@ func (resource *Resource[T]) editItemWithLog(user *user, values url.Values) (int
 		return nil, vv, errValidation
 	}
 
-	err = app.update(item)
+	err = resource.Update(item)
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't save item (%d): %s", id, err)
 	}
