@@ -34,7 +34,7 @@ func (resource *Resource[T]) getDefaultOrder() (column string, desc bool) {
 	return
 }
 
-func (resource Resource[T]) getItemStringEditableValues(item *T, user *user) map[string]string {
+func (resource *Resource[T]) getItemStringEditableValues(item *T, user *user) map[string]string {
 	itemVal := reflect.ValueOf(item).Elem()
 	ret := make(map[string]string)
 	for i, field := range resource.fieldArrays {
@@ -51,7 +51,7 @@ func (resource Resource[T]) getItemStringEditableValues(item *T, user *user) map
 	return ret
 }
 
-func (resource Resource[T]) addFormItems(item *T, user *user, form *Form) {
+func (resource *Resource[T]) addFormItems(item *T, user *user, form *Form) {
 	editableValues := resource.getItemStringEditableValues(item, user)
 
 fields:

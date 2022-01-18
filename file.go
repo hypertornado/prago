@@ -84,7 +84,7 @@ func (app *App) UploadFile(fileHeader *multipart.FileHeader, user *user, descrip
 		file.User = user.ID
 	}
 	file.Description = description
-	err = app.create(&file)
+	err = app.FilesResource.Create(&file)
 	if err != nil {
 		return nil, fmt.Errorf("saving file: %s", err)
 	}

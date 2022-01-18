@@ -46,7 +46,7 @@ func (resource *Resource[T]) fixBooleanParams(user *user, params url.Values) {
 	}
 }
 
-func (resource Resource[T]) bindData(item *T, user *user, params url.Values) error {
+func (resource *Resource[T]) bindData(item *T, user *user, params url.Values) error {
 
 	/*if bindedFieldIDs == nil {
 		bindedFieldIDs = resource.getDefaultBindedFieldIDs(user)

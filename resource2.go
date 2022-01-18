@@ -29,7 +29,7 @@ type Resource[T any] struct {
 
 	actions     []*Action
 	itemActions []*Action
-	relations   []relation
+	relations   []*relation
 
 	resourceController *controller
 
@@ -124,8 +124,8 @@ type resourceIface interface {
 	getCachedCount() int64
 	count() int64
 
-	addRelation(relation)
-	getRelations() []relation
+	addRelation(*relation)
+	getRelations() []*relation
 
 	getResourceControl() *controller
 	getID() string
@@ -168,88 +168,88 @@ type resourceIface interface {
 	getResourceViewRoles() []string
 }
 
-func (resource Resource[T]) getTyp() reflect.Type {
+func (resource *Resource[T]) getTyp() reflect.Type {
 	return resource.typ
 }
 
-func (resource Resource[T]) getApp() *App {
+func (resource *Resource[T]) getApp() *App {
 	return resource.app
 
 }
 
-func (resource Resource[T]) getNameFunction() func(string) string {
+func (resource *Resource[T]) getNameFunction() func(string) string {
 	return resource.name
 }
 
-func (resource Resource[T]) getName(locale string) string {
+func (resource *Resource[T]) getName(locale string) string {
 	return resource.name(locale)
 }
 
-func (resource Resource[T]) getPermissionView() Permission {
+func (resource *Resource[T]) getPermissionView() Permission {
 	return resource.canView
 }
 
-func (resource Resource[T]) getPermissionCreate() Permission {
+func (resource *Resource[T]) getPermissionCreate() Permission {
 	return resource.canCreate
 }
 
-func (resource Resource[T]) getPermissionUpdate() Permission {
+func (resource *Resource[T]) getPermissionUpdate() Permission {
 	return resource.canUpdate
 }
 
-func (resource Resource[T]) getPermissionDelete() Permission {
+func (resource *Resource[T]) getPermissionDelete() Permission {
 	return resource.canDelete
 }
 
-func (resource Resource[T]) getPermissionExport() Permission {
+func (resource *Resource[T]) getPermissionExport() Permission {
 	return resource.canDelete
 }
 
-func (resource Resource[T]) getActions() []*Action {
+func (resource *Resource[T]) getActions() []*Action {
 	return resource.actions
 }
 
-func (resource Resource[T]) getItemActions() []*Action {
+func (resource *Resource[T]) getItemActions() []*Action {
 	return resource.itemActions
 }
 
-func (resource Resource[T]) addRelation(relation relation) {
+func (resource *Resource[T]) addRelation(relation *relation) {
 	resource.relations = append(resource.relations, relation)
 }
 
-func (resource Resource[T]) getRelations() []relation {
+func (resource *Resource[T]) getRelations() []*relation {
 	return resource.relations
 }
 
-func (resource Resource[T]) getID() string {
+func (resource *Resource[T]) getID() string {
 	return resource.id
 }
 
-func (resource Resource[T]) getResourceControl() *controller {
+func (resource *Resource[T]) getResourceControl() *controller {
 	return resource.resourceController
 }
 
-func (resource Resource[T]) isOrderDesc() bool {
+func (resource *Resource[T]) isOrderDesc() bool {
 	return resource.orderDesc
 }
 
-func (resource Resource[T]) getOrderByColumn() string {
+func (resource *Resource[T]) getOrderByColumn() string {
 	return resource.orderByColumn
 }
 
-func (resource Resource[T]) Is(name string, value interface{}) *Query[T] {
+func (resource *Resource[T]) Is(name string, value interface{}) *Query[T] {
 	return resource.Query().Is(name, value)
 }
 
-func (resource Resource[T]) Create(item *T) error {
-	return resource.app.create(item)
+func (resource *Resource[T]) Create(item *T) error {
+	return resource.createWithDBIface(item, resource.app.db, false)
 }
 
-func (resource Resource[T]) Update(item *T) error {
-	return resource.app.update(item)
+func (resource *Resource[T]) Update(item *T) error {
+	return resource.saveWithDBIface(item, resource.app.db, false)
 }
 
-func (resource Resource[T]) Delete(id int64) error {
+func (resource *Resource[T]) Delete(id int64) error {
 	var item T
 	count, err := resource.Query().query.is("id", id).delete(&item)
 	if err != nil {
@@ -264,7 +264,7 @@ func (resource Resource[T]) Delete(id int64) error {
 	return nil
 }
 
-func (resource Resource[T]) Count() (int64, error) {
+func (resource *Resource[T]) Count() (int64, error) {
 	return resource.Query().Count()
 }
 

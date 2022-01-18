@@ -494,7 +494,7 @@ func (resource *Resource[T]) getListContentJSON(user *user, params url.Values) (
 
 }
 
-func (resource Resource[T]) valueToListCell(user *user, f field, val reflect.Value, isOrderedBy bool) listCell {
+func (resource *Resource[T]) valueToListCell(user *user, f field, val reflect.Value, isOrderedBy bool) listCell {
 	if !f.authorizeView(user) {
 		panic(fmt.Sprintf("can't access field '%s'", f.Name))
 	}

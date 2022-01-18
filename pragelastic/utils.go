@@ -4,10 +4,10 @@ import (
 	"reflect"
 )
 
-func getID[T any](item *T) int64 {
+func getID[T any](item *T) string {
 	val := reflect.ValueOf(*item)
 	field := val.FieldByName("ID")
-	return int64(field.Int())
+	return field.String()
 }
 
 func getFields[T any]() (ret []field) {

@@ -5,15 +5,16 @@ import (
 )
 
 type TestStruct struct {
-	ID   int64
-	Name string
+	ID        string
+	Name      string
+	SomeCount int64
 }
 
 func TestUtils(t *testing.T) {
 	id := getID(&TestStruct{
-		ID: 85,
+		ID: "85",
 	})
-	if id != 85 {
+	if id != "85" {
 		t.Fatal(id)
 	}
 
@@ -40,7 +41,7 @@ func TestUtils(t *testing.T) {
 	}
 
 	err = index.Update(&TestStruct{
-		ID:   2,
+		ID:   "2",
 		Name: "A",
 	})
 	if err != nil {
@@ -48,7 +49,7 @@ func TestUtils(t *testing.T) {
 	}
 
 	err = index.Update(&TestStruct{
-		ID:   5,
+		ID:   "5",
 		Name: "B",
 	})
 
@@ -62,12 +63,12 @@ func TestUtils(t *testing.T) {
 		t.Fatal("wrong size", c)
 	}
 
-	item, _ := index.Get(5)
+	item, _ := index.Get("5")
 	if item.Name != "B" {
 		t.Fatal(item.Name)
 	}
 
-	err = index.DeleteItem(2)
+	err = index.DeleteItem("2")
 	if err != nil {
 		t.Fatal(err)
 	}

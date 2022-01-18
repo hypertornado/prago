@@ -59,9 +59,6 @@ type App struct {
 
 	activityListeners []func(Activity)
 	taskManager       *taskManager
-
-	//resource2Map map[reflect.Type]interface{}
-	//resources2   []resourceIface
 }
 
 func newTestingApp() *App {
@@ -86,8 +83,6 @@ func createApp(codeName string, version string) *App {
 		logger:         log.New(os.Stdout, "", log.LstdFlags),
 		mainController: newMainController(),
 		cache:          newCache(),
-
-		//resource2Map: make(map[reflect.Type]interface{}),
 	}
 
 	app.appController = app.mainController.subController()
@@ -157,6 +152,8 @@ func (app *App) initDefaultResourceActions() {
 func New(appName, version string) *App {
 	return createApp(appName, version)
 }
+
+func (app *App) GetDB() *sql.DB { return app.db }
 
 //Log returns logger structure
 func (app *App) Log() *log.Logger { return app.logger }

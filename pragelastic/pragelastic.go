@@ -51,9 +51,8 @@ func (index Index[T]) Delete() error {
 	return nil
 }
 
-func (index Index[T]) Get(id int64) (*T, error) {
-	idStr := fmt.Sprintf("%d", id)
-	res, err := index.client.eclient.Get().Index(index.indexName()).Id(idStr).Do(context.Background())
+func (index Index[T]) Get(id string) (*T, error) {
+	res, err := index.client.eclient.Get().Index(index.indexName()).Id(id).Do(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -79,16 +78,14 @@ func (index Index[T]) count() (int64, error) {
 
 //}
 
-func (index Index[T]) DeleteItem(id int64) error {
-	idStr := fmt.Sprintf("%d", id)
-	_, err := index.client.eclient.Delete().Index(index.indexName()).Id(idStr).Do(context.Background())
+func (index Index[T]) DeleteItem(id string) error {
+	_, err := index.client.eclient.Delete().Index(index.indexName()).Id(id).Do(context.Background())
 	return err
 }
 
 func (index Index[T]) Update(item *T) error {
 	id := getID(item)
-	idStr := fmt.Sprintf("%d", id)
-	_, err := index.client.eclient.Index().Index(index.indexName()).BodyJson(item).Id(idStr).Do(context.Background())
+	_, err := index.client.eclient.Index().Index(index.indexName()).BodyJson(item).Id(id).Do(context.Background())
 	return err
 }
 

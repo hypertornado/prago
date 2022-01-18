@@ -8,22 +8,6 @@ type query struct {
 	resource resourceIface
 }
 
-func (app *App) create(item interface{}) error {
-	resource, err := app.getResourceByItem(item)
-	if err != nil {
-		return err
-	}
-	return resource.createWithDBIface(item, app.db, false)
-}
-
-func (app *App) update(item interface{}) error {
-	resource, err := app.getResourceByItem(item)
-	if err != nil {
-		return err
-	}
-	return resource.saveWithDBIface(item, app.db, false)
-}
-
 func (resource *Resource[T]) query() query {
 	return query{
 		query:    &listQuery{},

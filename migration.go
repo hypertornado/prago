@@ -96,7 +96,7 @@ func (resource *Resource[T]) createTable(db dbIface, tableName string, verbose b
 	return err
 }
 
-func (resource Resource[T]) migrateTable(db dbIface, tableName string, verbose bool) error {
+func (resource *Resource[T]) migrateTable(db dbIface, tableName string, verbose bool) error {
 	if verbose {
 		fmt.Printf("Migrating table '%s'\n", tableName)
 	}

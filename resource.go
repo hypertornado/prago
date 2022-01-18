@@ -88,7 +88,7 @@ func (app *App) getResourceByItem(item interface{}) (resourceIface, error) {
 	return resource, nil
 }
 
-func (resource Resource[T]) saveWithDBIface(item interface{}, db dbIface, debugSQL bool) error {
+func (resource *Resource[T]) saveWithDBIface(item interface{}, db dbIface, debugSQL bool) error {
 	val := reflect.ValueOf(item).Elem()
 	timeVal := reflect.ValueOf(time.Now())
 	fn := "UpdatedAt"

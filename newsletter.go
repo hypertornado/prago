@@ -330,12 +330,10 @@ func initNewsletterResource(res *Resource[newsletter]) {
 		newsletter := newsletterResource.Is("id", vc.GetValue("id")).First()
 
 		newsletterSectionResource := GetResource[newsletterSection](vc.Request().app)
-		//var sections []*newsletterSection
 		sections := newsletterSectionResource.Is("newsletter", newsletter.ID).Order("orderposition").List()
 
 		newsletter.ID = 0
 		must(newsletterResource.Create(newsletter))
-		//must(resource.app.create(&newsletter))
 
 		for _, v := range sections {
 			section := *v

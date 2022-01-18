@@ -13,11 +13,6 @@ import (
 //ErrWrongWhereFormat is returned when where query has a bad format
 var ErrWrongWhereFormat = errors.New("wrong where format")
 
-//GetDB gets DB
-func (app *App) GetDB() *sql.DB {
-	return app.db
-}
-
 type mysqlColumn struct {
 	Field   string
 	Type    string
@@ -94,7 +89,7 @@ func (resource *Resource[T]) prepareValues(value reflect.Value) (names []string,
 	return
 }
 
-func (resource Resource[T]) saveItem(db dbIface, tableName string, item interface{}, debugSQL bool) error {
+func (resource *Resource[T]) saveItem(db dbIface, tableName string, item interface{}, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	value := reflect.ValueOf(item).Elem()
 	names, _, values, err := resource.prepareValues(value)
@@ -123,7 +118,7 @@ func (resource Resource[T]) saveItem(db dbIface, tableName string, item interfac
 	return nil
 }
 
-func (resource Resource[T]) createItem(db dbIface, tableName string, item interface{}, debugSQL bool) error {
+func (resource *Resource[T]) createItem(db dbIface, tableName string, item interface{}, debugSQL bool) error {
 	value := reflect.ValueOf(item).Elem()
 
 	names, questionMarks, values, err := resource.prepareValues(value)

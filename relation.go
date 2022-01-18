@@ -31,6 +31,7 @@ func (app *App) initAllAutoRelations() {
 }
 
 func (resource *Resource[T]) initAutoRelations() {
+	fmt.Println("initAutoRelations", resource.name("cs"))
 	for _, v := range resource.fieldArrays {
 		if v.Tags["prago-type"] == "relation" {
 			referenceName := v.Name
@@ -48,7 +49,7 @@ func (resource *Resource[T]) initAutoRelations() {
 				v.HumanName = relatedResource.getNameFunction()
 			}
 
-			relatedResource.addRelation(relation{
+			relatedResource.addRelation(&relation{
 				resource: resource,
 				field:    v.Name,
 				listName: resource.createRelationNamingFunction(*v, relatedResource),
@@ -122,7 +123,7 @@ func getRelationData(user *user, f field, value interface{}) (*viewRelationData,
 	return f.relatedResource.itemToRelationData(item, user, nil), nil
 }
 
-func (resource Resource[T]) itemToRelationData(item interface{}, user *user, relatedResource resourceIface) *viewRelationData {
+func (resource *Resource[T]) itemToRelationData(item interface{}, user *user, relatedResource resourceIface) *viewRelationData {
 	var ret viewRelationData
 	ret.ID = getItemID(item)
 	ret.Name = getItemName(item)
