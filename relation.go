@@ -31,7 +31,6 @@ func (app *App) initAllAutoRelations() {
 }
 
 func (resource *Resource[T]) initAutoRelations() {
-	fmt.Println("initAutoRelations", resource.name("cs"))
 	for _, v := range resource.fieldArrays {
 		if v.Tags["prago-type"] == "relation" {
 			referenceName := v.Name
@@ -56,14 +55,6 @@ func (resource *Resource[T]) initAutoRelations() {
 				listURL:  resource.createRelationListURL(*v),
 				addURL:   resource.createRelationAddURL(*v),
 			})
-
-			/*relatedResource.relations = append(relatedResource.relations, relation{
-				resource: resource.resource,
-				field:    v.Name,
-				listName: createRelationNamingFunction(*v, *resource.resource, *relatedResource),
-				listURL:  createRelationListURL(*resource.resource, *v),
-				addURL:   createRelationAddURL(*resource.resource, *v),
-			})*/
 		}
 	}
 }

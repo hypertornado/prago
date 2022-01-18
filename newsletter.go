@@ -159,13 +159,9 @@ func (app *App) Newsletters() *Newsletters {
 	app.newsletters.newsletterResource = NewResource[newsletter](app).Name(unlocalized("Newsletter"))
 	initNewsletterResource(
 		GetResource[newsletter](app),
-		//app.newsletters.newsletterResource,
 	)
 
 	app.newsletters.newsletterSectionResource = NewResource[newsletterSection](app).Name(unlocalized("Newsletter - sekce"))
-	/*initNewsletterSection(
-		app.newsletters.newsletterSectionResource,
-	)*/
 
 	NewResource[newsletterPersons](app).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoby"))
 	return app.newsletters

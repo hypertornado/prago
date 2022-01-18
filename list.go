@@ -408,17 +408,7 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 	q = q.Offset((int64(currentPage) - 1) * itemsPerPage)
 	q = q.Limit(itemsPerPage)
 
-	/*var rowItems interface{}
-	resource.newArrayOfItems(&rowItems)
-	q.get(rowItems)*/
-	//fmt.Println(reflect.TypeOf(rowItems))
-
-	//var rowItems interface{}
-	//resource.newArrayOfItems(&rowItems)
 	rowItems := q.List()
-	/*if err != nil {
-		return
-	}*/
 
 	val := reflect.ValueOf(rowItems)
 	for i := 0; i < val.Len(); i++ {
