@@ -252,57 +252,33 @@ func (field *Field) addFieldValidation(nameOfValidation string) error {
 }
 
 func (field *Field) Name(name func(string) string) *Field {
-	/*f := resource.fieldMap[nameOfField]
-	if f == nil {
-		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, nameOfField))
-	}*/
 	field.humanName = name
 	return field
 }
 
-func (resource *Resource[T]) FieldDescription(descriptionOfField string, description func(string) string) *Resource[T] {
-	f := resource.fieldMap[descriptionOfField]
-	if f == nil {
-		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, descriptionOfField))
-	}
-	f.description = description
-	return resource
+func (field *Field) Description(description func(string) string) *Field {
+	field.description = description
+	return field
 }
 
-func (resource *Resource[T]) FieldViewTemplate(IDofField string, viewTemplate string) *Resource[T] {
-	f := resource.fieldMap[IDofField]
-	if f == nil {
-		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
-	}
-	f.fieldType.viewTemplate = viewTemplate
-	return resource
+func (field *Field) ViewTemplate(template string) *Field {
+	field.fieldType.viewTemplate = template
+	return field
 }
 
-func (resource *Resource[T]) FieldListCellTemplate(IDofField string, template string) *Resource[T] {
-	f := resource.fieldMap[IDofField]
-	if f == nil {
-		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
-	}
-	f.fieldType.listCellTemplate = template
-	return resource
+func (field *Field) ListCellTemplate(template string) *Field {
+	field.fieldType.listCellTemplate = template
+	return field
 }
 
-func (resource *Resource[T]) FieldFormTemplate(IDofField string, template string) *Resource[T] {
-	f := resource.fieldMap[IDofField]
-	if f == nil {
-		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
-	}
-	f.fieldType.formTemplate = template
-	return resource
+func (field *Field) FormTemplate(template string) *Field {
+	field.fieldType.formTemplate = template
+	return field
 }
 
-func (resource *Resource[T]) FieldDBDescription(IDofField string, description string) *Resource[T] {
-	f := resource.fieldMap[IDofField]
-	if f == nil {
-		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, IDofField))
-	}
-	f.fieldType.dbFieldDescription = description
-	return resource
+func (field *Field) DBDescription(description string) *Field {
+	field.fieldType.dbFieldDescription = description
+	return field
 }
 
 func getDefaultStringer(t reflect.Type) func(interface{}) string {
