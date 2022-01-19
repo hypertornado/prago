@@ -7,19 +7,19 @@ import (
 	"time"
 )
 
-type field struct {
-	Name        string
-	ColumnName  string
-	HumanName   func(string) string
-	Description func(string) string
-	Typ         reflect.Type
-	Tags        map[string]string
+type Field struct {
+	name        string
+	columnName  string
+	humanName   func(string) string
+	description func(string) string
+	typ         reflect.Type
+	tags        map[string]string
 	fieldOrder  int
-	Unique      bool
-	CanOrder    bool
+	unique      bool
+	canOrder    bool
 	required    bool
 
-	DefaultShow bool
+	defaultShow bool
 
 	canView Permission
 	canEdit Permission
@@ -30,16 +30,20 @@ type field struct {
 	relatedResource resourceIface
 }
 
+func (resource *Resource[T]) Field(name string) *Field {
+	return resource.fieldMap[columnName(name)]
+}
+
 //GetRelatedResourceName gets related resource name
-func (field field) GetRelatedResourceName() string {
-	relatedTag := field.Tags["prago-relation"]
+func (field *Field) GetRelatedResourceName() string {
+	relatedTag := field.tags["prago-relation"]
 	if relatedTag != "" {
 		return strings.ToLower(relatedTag)
 	}
-	return field.ColumnName
+	return field.columnName
 }
 
-func (field *field) authorizeView(user *user) bool {
+func (field *Field) authorizeView(user *user) bool {
 	if !field.resource.getApp().authorize(user, field.resource.getPermissionView()) {
 		return false
 	}
@@ -49,7 +53,7 @@ func (field *field) authorizeView(user *user) bool {
 	return true
 }
 
-func (field *field) authorizeEdit(user *user) bool {
+func (field *Field) authorizeEdit(user *user) bool {
 	if !field.authorizeView(user) {
 		return false
 	}
@@ -62,16 +66,16 @@ func (field *field) authorizeEdit(user *user) bool {
 	return true
 }
 
-func (resource *Resource[T]) newField(f reflect.StructField, order int) *field {
-	ret := &field{
-		Name:        f.Name,
-		ColumnName:  columnName(f.Name),
-		HumanName:   unlocalized(f.Name),
-		Typ:         f.Type,
-		Tags:        make(map[string]string),
+func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
+	ret := &Field{
+		name:        f.Name,
+		columnName:  columnName(f.Name),
+		humanName:   unlocalized(f.Name),
+		typ:         f.Type,
+		tags:        make(map[string]string),
 		fieldOrder:  order,
-		CanOrder:    true,
-		DefaultShow: false,
+		canOrder:    true,
+		defaultShow: false,
 
 		canView: loggedPermission,
 		canEdit: loggedPermission,
@@ -88,14 +92,13 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *field {
 	} {
 		t := f.Tag.Get(v)
 		if t != "" {
-			panic(fmt.Sprintf("Use of deprecated tag '%s' in field '%s' of resource '%s'", v, ret.Name, ret.resource.getID()))
+			panic(fmt.Sprintf("Use of deprecated tag '%s' in field '%s' of resource '%s'", v, ret.name, ret.resource.getID()))
 		}
 	}
 
 	for _, v := range []string{
 		"prago-can-view",
 		"prago-can-edit",
-
 		"prago-name",
 		"prago-description",
 		"prago-type",
@@ -107,45 +110,42 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *field {
 		"prago-validations",
 		"prago-required",
 	} {
-		ret.Tags[v] = f.Tag.Get(v)
+		ret.tags[v] = f.Tag.Get(v)
 	}
 
 	for _, v := range []string{"ID", "Name", "Image", "UpdatedAt"} {
-		if ret.Name == v {
-			ret.DefaultShow = true
+		if ret.name == v {
+			ret.defaultShow = true
 		}
 	}
-	if ret.Tags["prago-preview"] == "true" {
-		ret.DefaultShow = true
-	}
-	if ret.Tags["prago-description"] != "" {
-		ret.Description = unlocalized(ret.Tags["prago-description"])
+
+	if ret.tags["prago-description"] != "" {
+		ret.description = unlocalized(ret.tags["prago-description"])
 	}
 
-	if ret.Tags["prago-preview"] == "false" {
-		ret.DefaultShow = false
+	if ret.tags["prago-preview"] == "true" {
+		ret.defaultShow = true
+	}
+	if ret.tags["prago-preview"] == "false" {
+		ret.defaultShow = false
 	}
 
-	if ret.Tags["prago-preview"] == "false" {
-		ret.DefaultShow = false
+	if ret.tags["prago-unique"] == "true" {
+		ret.unique = true
 	}
 
-	if ret.Tags["prago-unique"] == "true" {
-		ret.Unique = true
-	}
-
-	if ret.Tags["prago-required"] != "" {
-		switch ret.Tags["prago-required"] {
+	if ret.tags["prago-required"] != "" {
+		switch ret.tags["prago-required"] {
 		case "true":
 			ret.required = true
 		case "false":
 			break
 		default:
-			panic(fmt.Sprintf("validating permission 'prago-required' on field '%s' of resource '%s': wrong value '%s'", f.Name, resource.getName("en"), ret.Tags["prago-required"]))
+			panic(fmt.Sprintf("validating permission 'prago-required' on field '%s' of resource '%s': wrong value '%s'", f.Name, resource.getName("en"), ret.tags["prago-required"]))
 		}
 	}
 
-	if canView := ret.Tags["prago-can-view"]; canView != "" {
+	if canView := ret.tags["prago-can-view"]; canView != "" {
 		err := resource.getApp().validatePermission(Permission(canView))
 		if err != nil {
 			panic(fmt.Sprintf("validating permission 'prago-can-view' on field '%s' of resource '%s': %s", f.Name, resource.getName("en"), err))
@@ -153,30 +153,30 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *field {
 		ret.canView = Permission(canView)
 	}
 
-	if canEdit := ret.Tags["prago-can-edit"]; canEdit != "" {
+	if canEdit := ret.tags["prago-can-edit"]; canEdit != "" {
 		err := resource.getApp().validatePermission(Permission(canEdit))
 		if err != nil {
 			panic(fmt.Sprintf("validating permission 'prago-can-edit' on field '%s' of resource '%s': %s", f.Name, resource.getName("en"), err))
 		}
 		ret.canEdit = Permission(canEdit)
 	} else {
-		if ret.Name == "ID" || ret.Name == "CreatedAt" || ret.Name == "UpdatedAt" {
+		if ret.name == "ID" || ret.name == "CreatedAt" || ret.name == "UpdatedAt" {
 			ret.canEdit = nobodyPermission
 		}
 	}
 
-	name := ret.Tags["prago-name"]
+	name := ret.tags["prago-name"]
 	if name != "" {
-		ret.HumanName = unlocalized(name)
+		ret.humanName = unlocalized(name)
 	} else {
 		//TODO: its ugly
-		nameFunction := messages.GetNameFunction(ret.Name)
+		nameFunction := messages.GetNameFunction(ret.name)
 		if nameFunction != nil {
-			ret.HumanName = nameFunction
+			ret.humanName = nameFunction
 		}
 	}
 
-	validations := ret.Tags["prago-validations"]
+	validations := ret.tags["prago-validations"]
 	if validations != "" {
 		for _, v := range strings.Split(validations, ",") {
 			err := ret.addFieldValidation(v)
@@ -189,25 +189,25 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *field {
 	ret.initFieldType()
 
 	//TODO: better
-	if ret.Name != "CreatedAt" && ret.Name != "UpdatedAt" {
-		if ret.Typ == reflect.TypeOf(time.Now()) {
-			if ret.Tags["prago-type"] == "timestamp" || ret.Name == "CreatedAt" || ret.Name == "UpdatedAt" {
+	if ret.name != "CreatedAt" && ret.name != "UpdatedAt" {
+		if ret.typ == reflect.TypeOf(time.Now()) {
+			if ret.tags["prago-type"] == "timestamp" || ret.name == "CreatedAt" || ret.name == "UpdatedAt" {
 				resource.addValidation(func(vc ValidationContext) {
-					val := vc.GetValue(ret.ColumnName)
+					val := vc.GetValue(ret.columnName)
 					if val != "" {
 						_, err := time.Parse("2006-01-02 15:04", val)
 						if err != nil {
-							vc.AddItemError(ret.ColumnName, messages.Get(vc.Locale(), "admin_validation_date_format_error"))
+							vc.AddItemError(ret.columnName, messages.Get(vc.Locale(), "admin_validation_date_format_error"))
 						}
 					}
 				})
 			} else {
 				resource.addValidation(func(vc ValidationContext) {
-					val := vc.GetValue(ret.ColumnName)
+					val := vc.GetValue(ret.columnName)
 					if val != "" {
 						_, err := time.Parse("2006-01-02", val)
 						if err != nil {
-							vc.AddItemError(ret.ColumnName, messages.Get(vc.Locale(), "admin_validation_date_format_error"))
+							vc.AddItemError(ret.columnName, messages.Get(vc.Locale(), "admin_validation_date_format_error"))
 						}
 					}
 				})
@@ -218,32 +218,32 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *field {
 	return ret
 }
 
-func (field *field) addFieldValidation(nameOfValidation string) error {
+func (field *Field) addFieldValidation(nameOfValidation string) error {
 	if nameOfValidation == "nonempty" {
-		if field.Tags["prago-required"] != "false" {
+		if field.tags["prago-required"] != "false" {
 			field.required = true
 		}
 		field.resource.addValidation(func(vc ValidationContext) {
 			valid := true
-			if field.Typ.Kind() == reflect.Int64 ||
-				field.Typ.Kind() == reflect.Int32 ||
-				field.Typ.Kind() == reflect.Int ||
-				field.Typ.Kind() == reflect.Float64 ||
-				field.Typ.Kind() == reflect.Float32 {
+			if field.typ.Kind() == reflect.Int64 ||
+				field.typ.Kind() == reflect.Int32 ||
+				field.typ.Kind() == reflect.Int ||
+				field.typ.Kind() == reflect.Float64 ||
+				field.typ.Kind() == reflect.Float32 {
 
-				if vc.GetValue(field.ColumnName) == "0" {
+				if vc.GetValue(field.columnName) == "0" {
 					valid = false
 				}
 			}
 
-			if field.Tags["prago-type"] == "relation" && vc.GetValue(field.ColumnName) == "0" {
+			if field.tags["prago-type"] == "relation" && vc.GetValue(field.columnName) == "0" {
 				valid = false
 			}
-			if vc.GetValue(field.ColumnName) == "" {
+			if vc.GetValue(field.columnName) == "" {
 				valid = false
 			}
 			if !valid {
-				vc.AddItemError(field.ColumnName, messages.Get(vc.Locale(), "admin_validation_not_empty"))
+				vc.AddItemError(field.columnName, messages.Get(vc.Locale(), "admin_validation_not_empty"))
 			}
 		})
 		return nil
@@ -251,13 +251,13 @@ func (field *field) addFieldValidation(nameOfValidation string) error {
 	return fmt.Errorf("unknown validation name: %s", nameOfValidation)
 }
 
-func (resource *Resource[T]) FieldName(nameOfField string, name func(string) string) *Resource[T] {
-	f := resource.fieldMap[nameOfField]
+func (field *Field) Name(name func(string) string) *Field {
+	/*f := resource.fieldMap[nameOfField]
 	if f == nil {
 		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, nameOfField))
-	}
-	f.HumanName = name
-	return resource
+	}*/
+	field.humanName = name
+	return field
 }
 
 func (resource *Resource[T]) FieldDescription(descriptionOfField string, description func(string) string) *Resource[T] {
@@ -265,7 +265,7 @@ func (resource *Resource[T]) FieldDescription(descriptionOfField string, descrip
 	if f == nil {
 		panic(fmt.Sprintf("can't set field name of resource '%s': field named '%s' not found", resource.id, descriptionOfField))
 	}
-	f.Description = description
+	f.description = description
 	return resource
 }
 
@@ -358,9 +358,9 @@ func getDefaultFormTemplate(t reflect.Type) string {
 	panic("unknown default form for " + t.String())
 }
 
-func (field *field) initFieldType() {
+func (field *Field) initFieldType() {
 	fieldTypes := field.resource.getApp().fieldTypes
-	fieldTypeName := field.Tags["prago-type"]
+	fieldTypeName := field.tags["prago-type"]
 
 	ret, found := fieldTypes[fieldTypeName]
 	if !found && fieldTypeName != "" {
@@ -372,7 +372,7 @@ func (field *field) initFieldType() {
 	}
 
 	if ret.viewTemplate == "" {
-		ret.viewTemplate = getDefaultViewTemplate(field.Typ)
+		ret.viewTemplate = getDefaultViewTemplate(field.typ)
 	}
 	if ret.viewDataSource == nil {
 		ret.viewDataSource = getDefaultViewDataSource(field)
@@ -380,7 +380,7 @@ func (field *field) initFieldType() {
 
 	if ret.allowedValues != nil {
 		field.resource.addValidation(func(vc ValidationContext) {
-			val := vc.GetValue(field.ColumnName)
+			val := vc.GetValue(field.columnName)
 			var found bool
 			for _, v := range ret.allowedValues {
 				if v == val {
@@ -388,17 +388,17 @@ func (field *field) initFieldType() {
 				}
 			}
 			if !found {
-				vc.AddItemError(field.ColumnName, messages.Get(vc.Locale(), "admin_validation_value"))
+				vc.AddItemError(field.columnName, messages.Get(vc.Locale(), "admin_validation_value"))
 			}
 		})
 	}
 
 	if ret.formTemplate == "" {
-		ret.formTemplate = getDefaultFormTemplate(field.Typ)
+		ret.formTemplate = getDefaultFormTemplate(field.typ)
 	}
 
 	if ret.formStringer == nil {
-		ret.formStringer = getDefaultStringer(field.Typ)
+		ret.formStringer = getDefaultStringer(field.typ)
 	}
 
 	if ret.formTemplate == "admin_item_checkbox" {
@@ -414,18 +414,18 @@ func (field *field) initFieldType() {
 	field.fieldType = ret
 }
 
-func (field *field) fieldDescriptionMysql(fieldTypes map[string]*fieldType) string {
+func (field *Field) fieldDescriptionMysql(fieldTypes map[string]*fieldType) string {
 	var fieldDescription string
 
-	t, found := fieldTypes[field.Tags["prago-type"]]
+	t, found := fieldTypes[field.tags["prago-type"]]
 	if found && t.dbFieldDescription != "" {
 		fieldDescription = t.dbFieldDescription
 	} else {
-		switch field.Typ.Kind() {
+		switch field.typ.Kind() {
 		case reflect.Struct:
 			dateType := reflect.TypeOf(time.Now())
-			if field.Typ == dateType {
-				if field.Tags["prago-type"] == "date" {
+			if field.typ == dateType {
+				if field.tags["prago-type"] == "date" {
 					fieldDescription = "date"
 				} else {
 					fieldDescription = "datetime"
@@ -438,23 +438,23 @@ func (field *field) fieldDescriptionMysql(fieldTypes map[string]*fieldType) stri
 		case reflect.Int64:
 			fieldDescription = "bigint(20)"
 		case reflect.String:
-			if field.Tags["prago-type"] == "text" || field.Tags["prago-type"] == "image" || field.Tags["prago-type"] == "markdown" {
+			if field.tags["prago-type"] == "text" || field.tags["prago-type"] == "image" || field.tags["prago-type"] == "markdown" {
 				fieldDescription = "text"
 			} else {
 				fieldDescription = "varchar(255)"
 			}
 		default:
-			panic("non supported type " + field.Typ.Kind().String())
+			panic("non supported type " + field.typ.Kind().String())
 		}
 	}
 
 	additional := ""
-	if field.ColumnName == "id" {
+	if field.columnName == "id" {
 		additional = "NOT NULL AUTO_INCREMENT PRIMARY KEY"
 	} else {
-		if field.Unique {
+		if field.unique {
 			additional = "UNIQUE"
 		}
 	}
-	return fmt.Sprintf("%s %s %s", field.ColumnName, fieldDescription, additional)
+	return fmt.Sprintf("%s %s %s", field.columnName, fieldDescription, additional)
 }

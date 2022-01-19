@@ -18,20 +18,20 @@ func (resource *Resource[T]) getStructScanners(value reflect.Value) (names []str
 	for _, v := range resource.fieldArrays {
 		use := true
 
-		switch v.Typ.Kind() {
+		switch v.typ.Kind() {
 		case reflect.Int64:
 		case reflect.Float64:
 		case reflect.Bool:
 		case reflect.String:
 		case reflect.Struct:
-			if v.Typ != reflect.TypeOf(time.Now()) {
+			if v.typ != reflect.TypeOf(time.Now()) {
 				use = false
 			}
 		default:
 			use = false
 		}
 		if use {
-			names = append(names, v.ColumnName)
+			names = append(names, v.columnName)
 			scanners = append(scanners, &scanner{value.Field(v.fieldOrder)})
 		}
 	}

@@ -52,18 +52,18 @@ func (q *listQuery) addOrder(name string, desc bool) {
 func (resource *Resource[T]) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
 
 	for _, field := range resource.fieldArrays {
-		val := value.FieldByName(field.Name)
+		val := value.FieldByName(field.name)
 
-		if field.Name == "ID" {
+		if field.name == "ID" {
 			//TODO: is it really necessary to omit ids?
 			if val.Int() <= 0 {
 				continue
 			}
 		}
 
-		switch field.Typ.Kind() {
+		switch field.typ.Kind() {
 		case reflect.Struct:
-			if field.Typ == reflect.TypeOf(time.Now()) {
+			if field.typ == reflect.TypeOf(time.Now()) {
 				var tm time.Time
 				reflect.ValueOf(&tm).Elem().Set(val)
 				timeStr := tm.Format("2006-01-02 15:04:05")
@@ -83,7 +83,7 @@ func (resource *Resource[T]) prepareValues(value reflect.Value) (names []string,
 			continue
 		}
 
-		names = append(names, "`"+columnName(field.Name)+"`")
+		names = append(names, "`"+columnName(field.name)+"`")
 		questionMarks = append(questionMarks, "?")
 	}
 	return

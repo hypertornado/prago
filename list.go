@@ -42,7 +42,7 @@ type listHeaderItem struct {
 	CanOrder     bool
 	DefaultShow  bool
 	FilterLayout string
-	Field        field
+	Field        *Field
 	FilterData   interface{}
 }
 
@@ -106,7 +106,7 @@ func (resource *Resource[T]) getListHeader(user *user) (list list, err error) {
 	list.MultipleActions = resource.getMultipleActions(user)
 
 	orderField, ok := resource.fieldMap[resource.orderByColumn]
-	if !ok || !orderField.CanOrder {
+	if !ok || !orderField.canOrder {
 		err = ErrItemNotFound
 		return
 	}
@@ -136,8 +136,8 @@ func (resource *Resource[T]) defaultVisibleFieldsStr(user *user) string {
 		if !v.authorizeView(user) {
 			continue
 		}
-		if v.DefaultShow {
-			ret = append(ret, v.ColumnName)
+		if v.defaultShow {
+			ret = append(ret, v.columnName)
 		}
 	}
 	r := strings.Join(ret, ",")
@@ -150,17 +150,17 @@ func (resource *Resource[T]) fieldsStr(user *user) string {
 		if !v.authorizeView(user) {
 			continue
 		}
-		ret = append(ret, v.ColumnName)
+		ret = append(ret, v.columnName)
 	}
 	return strings.Join(ret, ",")
 }
 
-func (field field) getListHeaderItem(user *user) listHeaderItem {
+func (field *Field) getListHeaderItem(user *user) listHeaderItem {
 	headerItem := listHeaderItem{
-		Name:        field.Name,
-		NameHuman:   field.HumanName(user.Locale),
-		ColumnName:  field.ColumnName,
-		DefaultShow: field.DefaultShow,
+		Name:        field.name,
+		NameHuman:   field.humanName(user.Locale),
+		ColumnName:  field.columnName,
+		DefaultShow: field.defaultShow,
 		Field:       field,
 	}
 
@@ -181,14 +181,14 @@ func (field field) getListHeaderItem(user *user) listHeaderItem {
 		headerItem.FilterData = fn(field, user)
 	}
 
-	if field.CanOrder {
+	if field.canOrder {
 		headerItem.CanOrder = true
 	}
 
 	return headerItem
 }
 
-func (field *field) filterLayout() string {
+func (field *Field) filterLayout() string {
 	if field == nil {
 		return ""
 	}
@@ -197,23 +197,23 @@ func (field *field) filterLayout() string {
 		return field.fieldType.filterLayoutTemplate
 	}
 
-	if field.Typ.Kind() == reflect.String &&
-		(field.Tags["prago-type"] == "" || field.Tags["prago-type"] == "text" || field.Tags["prago-type"] == "markdown") {
+	if field.typ.Kind() == reflect.String &&
+		(field.tags["prago-type"] == "" || field.tags["prago-type"] == "text" || field.tags["prago-type"] == "markdown") {
 		return "filter_layout_text"
 	}
 
-	if field.Typ.Kind() == reflect.Int64 || field.Typ.Kind() == reflect.Int {
-		if field.Tags["prago-type"] == "relation" {
+	if field.typ.Kind() == reflect.Int64 || field.typ.Kind() == reflect.Int {
+		if field.tags["prago-type"] == "relation" {
 			return "filter_layout_relation"
 		}
 		return "filter_layout_number"
 	}
 
-	if field.Typ.Kind() == reflect.Bool {
+	if field.typ.Kind() == reflect.Bool {
 		return "filter_layout_boolean"
 	}
 
-	if field.Typ == reflect.TypeOf(time.Now()) {
+	if field.typ == reflect.TypeOf(time.Now()) {
 		return "filter_layout_date"
 	}
 
@@ -223,7 +223,7 @@ func (field *field) filterLayout() string {
 func (resource *Resource[T]) addFilterParamsToQuery(q *Query[T], params url.Values) *Query[T] {
 	filter := map[string]string{}
 	for _, v := range resource.fieldMap {
-		key := v.ColumnName
+		key := v.columnName
 		val := params.Get(key)
 		if val != "" {
 			filter[key] = val
@@ -263,7 +263,7 @@ func (resource *Resource[T]) addFilterToQuery(q *Query[T], filter map[string]str
 					q.Is(k, numVal)
 				} else {
 					q.Where(
-						fmt.Sprintf("%s %s ?", field.ColumnName, hasPrefix),
+						fmt.Sprintf("%s %s ?", field.columnName, hasPrefix),
 						numVal,
 					)
 				}
@@ -282,12 +282,12 @@ func (resource *Resource[T]) addFilterToQuery(q *Query[T], filter map[string]str
 				q.Is(k, false)
 			}
 		case "filter_layout_select":
-			if field.Tags["prago-type"] == "file" || field.Tags["prago-type"] == "image" || field.Tags["prago-type"] == "cdnfile" {
+			if field.tags["prago-type"] == "file" || field.tags["prago-type"] == "image" || field.tags["prago-type"] == "cdnfile" {
 				if v == "true" {
-					q.Where(fmt.Sprintf("%s !=''", field.ColumnName))
+					q.Where(fmt.Sprintf("%s !=''", field.columnName))
 				}
 				if v == "false" {
-					q.Where(fmt.Sprintf("%s =''", field.ColumnName))
+					q.Where(fmt.Sprintf("%s =''", field.columnName))
 				}
 				continue
 			}
@@ -484,9 +484,9 @@ func (resource *Resource[T]) getListContentJSON(user *user, params url.Values) (
 
 }
 
-func (resource *Resource[T]) valueToListCell(user *user, f field, val reflect.Value, isOrderedBy bool) listCell {
+func (resource *Resource[T]) valueToListCell(user *user, f *Field, val reflect.Value, isOrderedBy bool) listCell {
 	if !f.authorizeView(user) {
-		panic(fmt.Sprintf("can't access field '%s'", f.Name))
+		panic(fmt.Sprintf("can't access field '%s'", f.name))
 	}
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)

@@ -39,9 +39,9 @@ type Resource[T any] struct {
 
 	typ reflect.Type
 
-	fieldArrays []*field
-	fieldMap    map[string]*field
-	orderField  *field
+	fieldArrays []*Field
+	fieldMap    map[string]*Field
+	orderField  *Field
 }
 
 func NewResource[T any](app *App) *Resource[T] {
@@ -77,17 +77,17 @@ func NewResource[T any](app *App) *Resource[T] {
 		defaultItemsPerPage: 200,
 		resourceController:  app.adminController.subController(),
 
-		fieldMap: make(map[string]*field),
+		fieldMap: make(map[string]*Field),
 	}
 
 	for i := 0; i < typ.NumField(); i++ {
 		if ast.IsExported(typ.Field(i).Name) {
 			field := ret.newField(typ.Field(i), i)
-			if field.Tags["prago-type"] == "order" {
+			if field.tags["prago-type"] == "order" {
 				ret.orderField = field
 			}
 			ret.fieldArrays = append(ret.fieldArrays, field)
-			ret.fieldMap[field.ColumnName] = field
+			ret.fieldMap[field.columnName] = field
 		}
 	}
 

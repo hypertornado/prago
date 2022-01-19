@@ -17,40 +17,22 @@ func (resource *Resource[T]) setOrderPosition(item interface{}, order int64) {
 		value = value.Elem()
 	}
 
-	val := value.FieldByName(resource.orderField.Name)
+	val := value.FieldByName(resource.orderField.name)
 	val.SetInt(order)
 }
-
-/*func (resource Resource) getDefaultBindedFieldIDs(user *user) map[string]bool {
-	ret := map[string]bool{}
-	for _, v := range resource.fieldArrays {
-		if !v.authorizeView(user) {
-			continue
-		}
-		if !v.authorizeEdit(user) {
-			continue
-		}
-		ret[v.ColumnName] = true
-	}
-	return ret
-}*/
 
 func (resource *Resource[T]) fixBooleanParams(user *user, params url.Values) {
 	for _, field := range resource.fieldArrays {
 		if !field.authorizeEdit(user) {
 			continue
 		}
-		if len(params[field.ColumnName]) == 0 && field.Typ.Kind() == reflect.Bool {
-			params.Set(field.ColumnName, "")
+		if len(params[field.columnName]) == 0 && field.typ.Kind() == reflect.Bool {
+			params.Set(field.columnName, "")
 		}
 	}
 }
 
 func (resource *Resource[T]) bindData(item *T, user *user, params url.Values) error {
-
-	/*if bindedFieldIDs == nil {
-		bindedFieldIDs = resource.getDefaultBindedFieldIDs(user)
-	}*/
 
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
@@ -64,23 +46,20 @@ func (resource *Resource[T]) bindData(item *T, user *user, params url.Values) er
 		if !field.authorizeEdit(user) {
 			continue
 		}
-		if len(params[field.ColumnName]) == 0 {
+		if len(params[field.columnName]) == 0 {
 			continue
 		}
-		/*if !bindedFieldIDs[field.ColumnName] {
-			continue
-		}*/
 
-		val := value.FieldByName(field.Name)
-		urlValue := params.Get(field.ColumnName)
+		val := value.FieldByName(field.name)
+		urlValue := params.Get(field.columnName)
 
-		switch field.Typ.Kind() {
+		switch field.typ.Kind() {
 		case reflect.Struct:
-			if field.Typ == reflect.TypeOf(time.Now()) {
+			if field.typ == reflect.TypeOf(time.Now()) {
 				if urlValue == "" {
 					val.Set(reflect.ValueOf(time.Time{}))
 				}
-				if field.Tags["prago-type"] == "timestamp" {
+				if field.tags["prago-type"] == "timestamp" {
 					tm, err := time.Parse("2006-01-02 15:04", urlValue)
 					if err == nil {
 						val.Set(reflect.ValueOf(tm))

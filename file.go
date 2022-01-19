@@ -142,9 +142,9 @@ func (app *App) initFilesResource() {
 
 	initFilesAPI(resource)
 
-	resource.FieldName("uid", messages.GetNameFunction("admin_file"))
-	resource.FieldName("width", messages.GetNameFunction("width"))
-	resource.FieldName("height", messages.GetNameFunction("height"))
+	resource.Field("uid").Name(messages.GetNameFunction("admin_file"))
+	resource.Field("width").Name(messages.GetNameFunction("width"))
+	resource.Field("height").Name(messages.GetNameFunction("height"))
 
 	app.addCommand("files", "metadata").
 		Callback(func() {

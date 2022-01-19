@@ -73,7 +73,7 @@ func (resource *Resource[T]) getListStats(user *user, params url.Values) *listSt
 	for _, v := range columnsAr {
 		field := resource.fieldMap[v]
 
-		if field.Typ == reflect.TypeOf(time.Now()) {
+		if field.typ == reflect.TypeOf(time.Now()) {
 			ret.Sections = append(ret.Sections, resource.getListStatsDateSections(field, user, params, total, limit)...)
 		}
 
@@ -84,7 +84,7 @@ func (resource *Resource[T]) getListStats(user *user, params url.Values) *listSt
 		}
 
 		ret.Sections = append(ret.Sections, listStatsSection{
-			Name:  field.HumanName(user.Locale),
+			Name:  field.humanName(user.Locale),
 			Table: table,
 		})
 	}
@@ -92,25 +92,25 @@ func (resource *Resource[T]) getListStats(user *user, params url.Values) *listSt
 	return ret
 }
 
-func (resource *Resource[T]) getListStatsDateSections(field *field, user *user, params url.Values, total, limit int64) (ret []listStatsSection) {
+func (resource *Resource[T]) getListStatsDateSections(field *Field, user *user, params url.Values, total, limit int64) (ret []listStatsSection) {
 	ret = append(ret, resource.getListStatsDateSectionDay(field, user, params, total, limit))
 	ret = append(ret, resource.getListStatsDateSectionMonth(field, user, params, total, limit))
 	ret = append(ret, resource.getListStatsDateSectionYear(field, user, params, total, limit))
 	return
 }
 
-func (resource *Resource[T]) getListStatsDateSectionDay(field *field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
+func (resource *Resource[T]) getListStatsDateSectionDay(field *Field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
 	query := resource.addFilterParamsToQuery(resource.Query(), params)
 	whereParams := query.query.query.values
 	q := fmt.Sprintf("SELECT DAY(%s), MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY DAY(%s), MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
-		field.ColumnName,
-		field.ColumnName,
-		field.ColumnName,
+		field.columnName,
+		field.columnName,
+		field.columnName,
 		resource.getID(),
 		buildWhereString(query.query.query.conditions),
-		field.ColumnName,
-		field.ColumnName,
-		field.ColumnName,
+		field.columnName,
+		field.columnName,
+		field.columnName,
 		limit,
 	)
 	rows, err := resource.getApp().db.Query(q, whereParams...)
@@ -118,7 +118,7 @@ func (resource *Resource[T]) getListStatsDateSectionDay(field *field, user *user
 		panic(err)
 	}
 	ret = listStatsSection{
-		Name: fmt.Sprintf("%s – dny", field.HumanName(user.Locale)),
+		Name: fmt.Sprintf("%s – dny", field.humanName(user.Locale)),
 	}
 	var counted int64
 	for rows.Next() {
@@ -143,16 +143,16 @@ func (resource *Resource[T]) getListStatsDateSectionDay(field *field, user *user
 	return
 }
 
-func (resource *Resource[T]) getListStatsDateSectionMonth(field *field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
+func (resource *Resource[T]) getListStatsDateSectionMonth(field *Field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
 	query := resource.addFilterParamsToQuery(resource.Query(), params)
 	whereParams := query.query.query.values
 	q := fmt.Sprintf("SELECT MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
-		field.ColumnName,
-		field.ColumnName,
+		field.columnName,
+		field.columnName,
 		resource.getID(),
 		buildWhereString(query.query.query.conditions),
-		field.ColumnName,
-		field.ColumnName,
+		field.columnName,
+		field.columnName,
 		limit,
 	)
 	rows, err := resource.getApp().db.Query(q, whereParams...)
@@ -160,7 +160,7 @@ func (resource *Resource[T]) getListStatsDateSectionMonth(field *field, user *us
 		panic(err)
 	}
 	ret = listStatsSection{
-		Name: fmt.Sprintf("%s – měsíce", field.HumanName(user.Locale)),
+		Name: fmt.Sprintf("%s – měsíce", field.humanName(user.Locale)),
 	}
 	var counted int64
 	for rows.Next() {
@@ -184,14 +184,14 @@ func (resource *Resource[T]) getListStatsDateSectionMonth(field *field, user *us
 	return
 }
 
-func (resource *Resource[T]) getListStatsDateSectionYear(field *field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
+func (resource *Resource[T]) getListStatsDateSectionYear(field *Field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
 	query := resource.addFilterParamsToQuery(resource.Query(), params)
 	whereParams := query.query.query.values
 	q := fmt.Sprintf("SELECT YEAR(%s), COUNT(id) FROM %s %s GROUP BY YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
-		field.ColumnName,
+		field.columnName,
 		resource.getID(),
 		buildWhereString(query.query.query.conditions),
-		field.ColumnName,
+		field.columnName,
 		limit,
 	)
 	rows, err := resource.getApp().db.Query(q, whereParams...)
@@ -199,7 +199,7 @@ func (resource *Resource[T]) getListStatsDateSectionYear(field *field, user *use
 		panic(err)
 	}
 	ret = listStatsSection{
-		Name: fmt.Sprintf("%s – roky", field.HumanName(user.Locale)),
+		Name: fmt.Sprintf("%s – roky", field.humanName(user.Locale)),
 	}
 	var counted int64
 	for rows.Next() {
@@ -222,11 +222,11 @@ func (resource *Resource[T]) getListStatsDateSectionYear(field *field, user *use
 	return
 }
 
-func (resource *Resource[T]) getListStatsTable(field *field, user *user, params url.Values, total, limit int64) (table []listStatsRow) {
+func (resource *Resource[T]) getListStatsTable(field *Field, user *user, params url.Values, total, limit int64) (table []listStatsRow) {
 	query := resource.addFilterParamsToQuery(resource.Query(), params)
 	whereParams := query.query.query.values
 
-	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.ColumnName, resource.getID(), buildWhereString(query.query.query.conditions), field.ColumnName, limit)
+	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.columnName, resource.getID(), buildWhereString(query.query.query.conditions), field.columnName, limit)
 
 	rows, err := resource.getApp().db.Query(q, whereParams...)
 	if err != nil {
@@ -235,7 +235,7 @@ func (resource *Resource[T]) getListStatsTable(field *field, user *user, params 
 
 	var counted int64
 
-	if field.Typ.Kind() == reflect.String {
+	if field.typ.Kind() == reflect.String {
 		for rows.Next() {
 			var count int64
 			var v string
@@ -249,7 +249,7 @@ func (resource *Resource[T]) getListStatsTable(field *field, user *user, params 
 		}
 	}
 
-	if field.Typ.Kind() == reflect.Int64 {
+	if field.typ.Kind() == reflect.Int64 {
 		if field.fieldType.IsRelation() {
 			for rows.Next() {
 				var count int64
@@ -266,7 +266,7 @@ func (resource *Resource[T]) getListStatsTable(field *field, user *user, params 
 					row.Name = "–"
 				}
 
-				rd, err := getRelationData(user, *field, v)
+				rd, err := getRelationData(user, field, v)
 				if err == nil {
 					row.Name = rd.Name
 					row.URL = rd.URL
@@ -282,12 +282,12 @@ func (resource *Resource[T]) getListStatsTable(field *field, user *user, params 
 		}
 	}
 
-	if field.Typ.Kind() == reflect.Float64 {
+	if field.typ.Kind() == reflect.Float64 {
 		table = resource.getListStatsTableInt(field, user, params, total)
 		counted = total
 	}
 
-	if field.Typ.Kind() == reflect.Bool {
+	if field.typ.Kind() == reflect.Bool {
 		var countTrue, countFalse int64
 
 		for rows.Next() {
@@ -323,7 +323,7 @@ func (resource *Resource[T]) getListStatsTable(field *field, user *user, params 
 	return
 }
 
-func (resource *Resource[T]) getListStatsTableInt(field *field, user *user, params url.Values, total int64) (table []listStatsRow) {
+func (resource *Resource[T]) getListStatsTableInt(field *Field, user *user, params url.Values, total int64) (table []listStatsRow) {
 	if total <= 0 {
 		return
 	}
@@ -333,10 +333,10 @@ func (resource *Resource[T]) getListStatsTableInt(field *field, user *user, para
 	whereParams := query.query.query.values
 
 	q := fmt.Sprintf("SELECT MAX(%s), MIN(%s), AVG(%s), SUM(%s) FROM %s %s;",
-		field.ColumnName,
-		field.ColumnName,
-		field.ColumnName,
-		field.ColumnName,
+		field.columnName,
+		field.columnName,
+		field.columnName,
+		field.columnName,
 		resource.getID(),
 		buildWhereString(query.query.query.conditions),
 	)
@@ -371,7 +371,7 @@ func (resource *Resource[T]) getListStatsTableInt(field *field, user *user, para
 
 	medianItem := int64(math.Floor(float64(total) / 2))
 	q = fmt.Sprintf("SELECT %s FROM %s %s LIMIT 1 OFFSET %d;",
-		field.ColumnName,
+		field.columnName,
 		resource.getID(),
 		buildWhereString(query.query.query.conditions),
 		medianItem,

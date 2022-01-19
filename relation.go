@@ -32,9 +32,9 @@ func (app *App) initAllAutoRelations() {
 
 func (resource *Resource[T]) initAutoRelations() {
 	for _, v := range resource.fieldArrays {
-		if v.Tags["prago-type"] == "relation" {
-			referenceName := v.Name
-			relationFieldName := v.Tags["prago-relation"]
+		if v.tags["prago-type"] == "relation" {
+			referenceName := v.name
+			relationFieldName := v.tags["prago-relation"]
 			if relationFieldName != "" {
 				referenceName = relationFieldName
 			}
@@ -44,13 +44,13 @@ func (resource *Resource[T]) initAutoRelations() {
 			}
 			v.relatedResource = relatedResource
 
-			if v.Tags["prago-name"] == "" {
-				v.HumanName = relatedResource.getNameFunction()
+			if v.tags["prago-name"] == "" {
+				v.humanName = relatedResource.getNameFunction()
 			}
 
 			relatedResource.addRelation(&relation{
 				resource: resource,
-				field:    v.Name,
+				field:    v.name,
 				listName: resource.createRelationNamingFunction(*v, relatedResource),
 				listURL:  resource.createRelationListURL(*v),
 				addURL:   resource.createRelationAddURL(*v),
@@ -59,26 +59,26 @@ func (resource *Resource[T]) initAutoRelations() {
 	}
 }
 
-func (resource *Resource[T]) createRelationAddURL(field field) func(int64) string {
+func (resource *Resource[T]) createRelationAddURL(field Field) func(int64) string {
 	return func(id int64) string {
 		values := url.Values{}
-		values.Add(field.ColumnName, fmt.Sprintf("%d", id))
+		values.Add(field.columnName, fmt.Sprintf("%d", id))
 		return resource.getURL("new?" + values.Encode())
 	}
 }
 
-func (resource *Resource[T]) createRelationListURL(field field) func(int64) string {
+func (resource *Resource[T]) createRelationListURL(field Field) func(int64) string {
 	return func(id int64) string {
 		values := url.Values{}
-		values.Add(field.ColumnName, fmt.Sprintf("%d", id))
+		values.Add(field.columnName, fmt.Sprintf("%d", id))
 		return resource.getURL("") + "?" + values.Encode()
 	}
 }
 
-func (resource *Resource[T]) createRelationNamingFunction(field field, referenceResource resourceIface) func(string) string {
+func (resource *Resource[T]) createRelationNamingFunction(field Field, referenceResource resourceIface) func(string) string {
 	return func(lang string) string {
 		ret := resource.getName(lang)
-		fieldName := field.HumanName(lang)
+		fieldName := field.humanName(lang)
 		referenceName := referenceResource.getName(lang)
 		if fieldName != referenceName {
 			ret += " – " + fieldName
@@ -87,15 +87,15 @@ func (resource *Resource[T]) createRelationNamingFunction(field field, reference
 	}
 }
 
-func getRelationViewData(user *user, f field, value interface{}) interface{} {
+func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
 	ret, _ := getRelationData(user, f, value)
 	return ret
 }
 
-func getRelationData(user *user, f field, value interface{}) (*viewRelationData, error) {
+func getRelationData(user *user, f *Field, value interface{}) (*viewRelationData, error) {
 	app := f.resource.getApp()
 	if f.relatedResource == nil {
-		return nil, fmt.Errorf("resource not found: %s", f.Name)
+		return nil, fmt.Errorf("resource not found: %s", f.name)
 	}
 
 	if !app.authorize(user, f.relatedResource.getPermissionView()) {
@@ -170,7 +170,7 @@ func (resource *Resource[T]) getItemDescription(item interface{}, user *user, re
 	}
 
 	for _, v := range resource.fieldArrays {
-		if v.Name == "ID" || v.Name == "Name" || v.Name == "Description" {
+		if v.name == "ID" || v.name == "Name" || v.name == "Description" {
 			continue
 		}
 		if !v.authorizeView(user) {
@@ -182,25 +182,25 @@ func (resource *Resource[T]) getItemDescription(item interface{}, user *user, re
 			continue
 		}
 
-		field := itemsVal.FieldByName(v.Name)
+		field := itemsVal.FieldByName(v.name)
 		stringed := resource.app.relationStringer(*v, field, user)
 		if stringed != "" {
-			items = append(items, fmt.Sprintf("%s: %s", v.HumanName(user.Locale), stringed))
+			items = append(items, fmt.Sprintf("%s: %s", v.humanName(user.Locale), stringed))
 		}
 	}
 	ret := strings.Join(items, " · ")
 	return cropMarkdown(ret, 500)
 }
 
-func (app App) relationStringer(field field, value reflect.Value, user *user) string {
+func (app App) relationStringer(field Field, value reflect.Value, user *user) string {
 	switch value.Kind() {
 	case reflect.String:
-		if field.Tags["prago-type"] == "image" || field.Tags["prago-type"] == "file" {
+		if field.tags["prago-type"] == "image" || field.tags["prago-type"] == "file" {
 			return fmt.Sprintf("%dx", len(strings.Split(value.String(), ",")))
 		}
 		return value.String()
 	case reflect.Int, reflect.Int32, reflect.Int64:
-		if field.Tags["prago-type"] == "relation" {
+		if field.tags["prago-type"] == "relation" {
 			if value.Int() <= 0 {
 				return ""
 			}
@@ -224,7 +224,7 @@ func (app App) relationStringer(field field, value reflect.Value, user *user) st
 		if value.Type() == reflect.TypeOf(time.Now()) {
 			tm := value.Interface().(time.Time)
 			showTime := false
-			if field.Tags["prago-type"] == "timestamp" {
+			if field.tags["prago-type"] == "timestamp" {
 				showTime = true
 			}
 			return messages.Timestamp(user.Locale, tm, showTime)

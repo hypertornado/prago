@@ -30,7 +30,7 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 	}
 
 	app.addFieldType(name, &fieldType{
-		viewDataSource: func(user *user, f field, value interface{}) interface{} {
+		viewDataSource: func(user *user, f *Field, value interface{}) interface{} {
 			str := value.(string)
 			for _, v := range items {
 				if str == v.ID {
@@ -44,7 +44,7 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 		allowedValues: allowedValues,
 
 		formTemplate: "admin_item_select",
-		formDataSource: func(f field, u *user) interface{} {
+		formDataSource: func(f *Field, u *user) interface{} {
 			var ret [][2]string
 			for _, v := range items {
 				ret = append(ret, [2]string{
@@ -56,7 +56,7 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 		},
 
 		filterLayoutTemplate: "filter_layout_select",
-		filterLayoutDataSource: func(f field, user *user) interface{} {
+		filterLayoutDataSource: func(f *Field, user *user) interface{} {
 			var ret [][2]string
 			if len(items) == 0 || items[0].ID != "" {
 				ret = append(ret, [2]string{"", ""})

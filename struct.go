@@ -7,26 +7,26 @@ import (
 func (resource *Resource[T]) getDefaultOrder() (column string, desc bool) {
 	for _, v := range resource.fieldArrays {
 		add := false
-		if v.ColumnName == "id" {
+		if v.columnName == "id" {
 			add = true
 		}
-		if v.Tags["prago-type"] == "order" {
+		if v.tags["prago-type"] == "order" {
 			add = true
 		}
-		if v.Tags["prago-order"] == "true" {
+		if v.tags["prago-order"] == "true" {
 			add = true
 		}
-		if v.Tags["prago-order-desc"] == "true" {
+		if v.tags["prago-order-desc"] == "true" {
 			add = true
 		}
-		if v.Tags["prago-order"] == "false" {
+		if v.tags["prago-order"] == "false" {
 			add = false
 		}
 
 		if add {
-			column = v.ColumnName
+			column = v.columnName
 			desc = false
-			if v.Tags["prago-order-desc"] == "true" {
+			if v.tags["prago-order-desc"] == "true" {
 				desc = true
 			}
 		}
@@ -38,7 +38,7 @@ func (resource *Resource[T]) getItemStringEditableValues(item *T, user *user) ma
 	itemVal := reflect.ValueOf(item).Elem()
 	ret := make(map[string]string)
 	for i, field := range resource.fieldArrays {
-		if !field.authorizeEdit(user) && field.ColumnName != "id" {
+		if !field.authorizeEdit(user) && field.columnName != "id" {
 			continue
 		}
 		var ifaceVal interface{}
@@ -46,7 +46,7 @@ func (resource *Resource[T]) getItemStringEditableValues(item *T, user *user) ma
 			itemVal.Field(i),
 		)
 		strVal := field.fieldType.formStringer(ifaceVal)
-		ret[field.ColumnName] = strVal
+		ret[field.columnName] = strVal
 	}
 	return ret
 }
@@ -61,12 +61,12 @@ fields:
 		}
 
 		item := &FormItem{
-			ID:       field.ColumnName,
-			Name:     field.HumanName(user.Locale),
+			ID:       field.columnName,
+			Name:     field.humanName(user.Locale),
 			Template: field.fieldType.formTemplate,
 		}
-		if field.Description != nil {
-			item.Description = field.Description(user.Locale)
+		if field.description != nil {
+			item.Description = field.description(user.Locale)
 		}
 		item.AddUUID()
 
@@ -74,10 +74,10 @@ fields:
 			item.HiddenName = true
 		}
 
-		item.Value = editableValues[field.ColumnName]
+		item.Value = editableValues[field.columnName]
 
 		if field.fieldType.formDataSource != nil {
-			item.Data = field.fieldType.formDataSource(*field, user)
+			item.Data = field.fieldType.formDataSource(field, user)
 		}
 
 		if field.required {

@@ -5,6 +5,9 @@ import (
 	"sort"
 )
 
+//Permission for access
+type Permission string
+
 var nobodyPermission Permission = "nobody"
 var loggedPermission Permission = "logged"
 var sysadminPermission Permission = "sysadmin"
@@ -28,9 +31,6 @@ func (app *App) initAccessManager() {
 	app.Role("", []Permission{loggedPermission})
 }
 
-//Permission for access
-type Permission string
-
 func (app *App) validatePermission(permission Permission) error {
 	if !app.accessManager.permissions[permission] {
 		return fmt.Errorf("unknown permission '%s'", permission)
@@ -39,7 +39,7 @@ func (app *App) validatePermission(permission Permission) error {
 }
 
 func (app *App) createRoleFieldType() *fieldType {
-	var fp = func(field, *user) interface{} {
+	var fp = func(*Field, *user) interface{} {
 		var roleNames []string
 		for k := range app.accessManager.roles {
 			roleNames = append(roleNames, k)
