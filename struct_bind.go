@@ -17,7 +17,7 @@ func (resource *Resource[T]) setOrderPosition(item interface{}, order int64) {
 		value = value.Elem()
 	}
 
-	val := value.FieldByName(resource.orderField.name)
+	val := value.FieldByName(resource.orderField.fieldClassName)
 	val.SetInt(order)
 }
 
@@ -50,7 +50,7 @@ func (resource *Resource[T]) bindData(item *T, user *user, params url.Values) er
 			continue
 		}
 
-		val := value.FieldByName(field.name)
+		val := value.FieldByName(field.fieldClassName)
 		urlValue := params.Get(field.columnName)
 
 		switch field.typ.Kind() {

@@ -33,7 +33,7 @@ func (app *App) initAllAutoRelations() {
 func (resource *Resource[T]) initAutoRelations() {
 	for _, v := range resource.fieldArrays {
 		if v.tags["prago-type"] == "relation" {
-			referenceName := v.name
+			referenceName := v.fieldClassName
 			relationFieldName := v.tags["prago-relation"]
 			if relationFieldName != "" {
 				referenceName = relationFieldName
@@ -50,7 +50,7 @@ func (resource *Resource[T]) initAutoRelations() {
 
 			relatedResource.addRelation(&relation{
 				resource: resource,
-				field:    v.name,
+				field:    v.fieldClassName,
 				listName: resource.createRelationNamingFunction(*v, relatedResource),
 				listURL:  resource.createRelationListURL(*v),
 				addURL:   resource.createRelationAddURL(*v),
@@ -95,7 +95,7 @@ func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
 func getRelationData(user *user, f *Field, value interface{}) (*viewRelationData, error) {
 	app := f.resource.getApp()
 	if f.relatedResource == nil {
-		return nil, fmt.Errorf("resource not found: %s", f.name)
+		return nil, fmt.Errorf("resource not found: %s", f.humanName("en"))
 	}
 
 	if !app.authorize(user, f.relatedResource.getPermissionView()) {
@@ -170,7 +170,7 @@ func (resource *Resource[T]) getItemDescription(item interface{}, user *user, re
 	}
 
 	for _, v := range resource.fieldArrays {
-		if v.name == "ID" || v.name == "Name" || v.name == "Description" {
+		if v.fieldClassName == "ID" || v.fieldClassName == "Name" || v.fieldClassName == "Description" {
 			continue
 		}
 		if !v.authorizeView(user) {
@@ -182,7 +182,7 @@ func (resource *Resource[T]) getItemDescription(item interface{}, user *user, re
 			continue
 		}
 
-		field := itemsVal.FieldByName(v.name)
+		field := itemsVal.FieldByName(v.fieldClassName)
 		stringed := resource.app.relationStringer(*v, field, user)
 		if stringed != "" {
 			items = append(items, fmt.Sprintf("%s: %s", v.humanName(user.Locale), stringed))

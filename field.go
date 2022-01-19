@@ -8,16 +8,16 @@ import (
 )
 
 type Field struct {
-	name        string
-	columnName  string
-	humanName   func(string) string
-	description func(string) string
-	typ         reflect.Type
-	tags        map[string]string
-	fieldOrder  int
-	unique      bool
-	canOrder    bool
-	required    bool
+	fieldClassName string
+	columnName     string
+	humanName      func(string) string
+	description    func(string) string
+	typ            reflect.Type
+	tags           map[string]string
+	fieldOrder     int
+	unique         bool
+	canOrder       bool
+	required       bool
 
 	defaultShow bool
 
@@ -68,14 +68,14 @@ func (field *Field) authorizeEdit(user *user) bool {
 
 func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 	ret := &Field{
-		name:        f.Name,
-		columnName:  columnName(f.Name),
-		humanName:   unlocalized(f.Name),
-		typ:         f.Type,
-		tags:        make(map[string]string),
-		fieldOrder:  order,
-		canOrder:    true,
-		defaultShow: false,
+		fieldClassName: f.Name,
+		columnName:     columnName(f.Name),
+		humanName:      unlocalized(f.Name),
+		typ:            f.Type,
+		tags:           make(map[string]string),
+		fieldOrder:     order,
+		canOrder:       true,
+		defaultShow:    false,
 
 		canView: loggedPermission,
 		canEdit: loggedPermission,
@@ -92,7 +92,7 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 	} {
 		t := f.Tag.Get(v)
 		if t != "" {
-			panic(fmt.Sprintf("Use of deprecated tag '%s' in field '%s' of resource '%s'", v, ret.name, ret.resource.getID()))
+			panic(fmt.Sprintf("Use of deprecated tag '%s' in field '%s' of resource '%s'", v, ret.humanName("en"), ret.resource.getID()))
 		}
 	}
 
@@ -114,7 +114,7 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 	}
 
 	for _, v := range []string{"ID", "Name", "Image", "UpdatedAt"} {
-		if ret.name == v {
+		if ret.fieldClassName == v {
 			ret.defaultShow = true
 		}
 	}
@@ -160,7 +160,7 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 		}
 		ret.canEdit = Permission(canEdit)
 	} else {
-		if ret.name == "ID" || ret.name == "CreatedAt" || ret.name == "UpdatedAt" {
+		if ret.fieldClassName == "ID" || ret.fieldClassName == "CreatedAt" || ret.fieldClassName == "UpdatedAt" {
 			ret.canEdit = nobodyPermission
 		}
 	}
@@ -170,7 +170,7 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 		ret.humanName = unlocalized(name)
 	} else {
 		//TODO: its ugly
-		nameFunction := messages.GetNameFunction(ret.name)
+		nameFunction := messages.GetNameFunction(ret.fieldClassName)
 		if nameFunction != nil {
 			ret.humanName = nameFunction
 		}
@@ -189,9 +189,9 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 	ret.initFieldType()
 
 	//TODO: better
-	if ret.name != "CreatedAt" && ret.name != "UpdatedAt" {
+	if ret.fieldClassName != "CreatedAt" && ret.fieldClassName != "UpdatedAt" {
 		if ret.typ == reflect.TypeOf(time.Now()) {
-			if ret.tags["prago-type"] == "timestamp" || ret.name == "CreatedAt" || ret.name == "UpdatedAt" {
+			if ret.tags["prago-type"] == "timestamp" || ret.fieldClassName == "CreatedAt" || ret.fieldClassName == "UpdatedAt" {
 				resource.addValidation(func(vc ValidationContext) {
 					val := vc.GetValue(ret.columnName)
 					if val != "" {

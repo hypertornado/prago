@@ -14,8 +14,7 @@ type fieldType struct {
 
 	allowedValues []string
 
-	formHideLabel bool
-
+	formHideLabel  bool
 	formTemplate   string
 	formDataSource func(*Field, *user) interface{}
 	formStringer   func(interface{}) string
@@ -108,7 +107,7 @@ func (app *App) initDefaultFieldTypes() {
 			if f.tags["prago-relation"] != "" {
 				return columnName(f.tags["prago-relation"])
 			}
-			return columnName(f.name)
+			return f.columnName
 		},
 	})
 

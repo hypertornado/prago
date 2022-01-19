@@ -100,7 +100,7 @@ func getDefaultViewTemplate(t reflect.Type) string {
 func getDefaultViewDataSource(f *Field) func(user *user, f *Field, value interface{}) interface{} {
 	t := f.typ
 	if t == reflect.TypeOf(time.Now()) {
-		if f.tags["prago-type"] == "timestamp" || f.name == "CreatedAt" || f.name == "UpdatedAt" {
+		if f.tags["prago-type"] == "timestamp" || f.fieldClassName == "CreatedAt" || f.fieldClassName == "UpdatedAt" {
 			return timestampViewDataSource
 		}
 		return timeViewDataSource

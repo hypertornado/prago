@@ -50,11 +50,10 @@ func (q *listQuery) addOrder(name string, desc bool) {
 }
 
 func (resource *Resource[T]) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
-
 	for _, field := range resource.fieldArrays {
-		val := value.FieldByName(field.name)
+		val := value.FieldByName(field.fieldClassName)
 
-		if field.name == "ID" {
+		if field.fieldClassName == "ID" {
 			//TODO: is it really necessary to omit ids?
 			if val.Int() <= 0 {
 				continue
@@ -83,7 +82,7 @@ func (resource *Resource[T]) prepareValues(value reflect.Value) (names []string,
 			continue
 		}
 
-		names = append(names, "`"+columnName(field.name)+"`")
+		names = append(names, "`"+columnName(field.columnName)+"`")
 		questionMarks = append(questionMarks, "?")
 	}
 	return
