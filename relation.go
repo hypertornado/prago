@@ -154,7 +154,6 @@ func getItemName(item interface{}) string {
 
 func (resource *Resource[T]) getItemDescription(item interface{}, user *user, relatedResource resourceIface) string {
 	var items []string
-
 	itemsVal := reflect.ValueOf(item).Elem()
 
 	//TODO: Authorize description field

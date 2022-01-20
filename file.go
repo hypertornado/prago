@@ -207,7 +207,7 @@ func (app *App) initFilesResource() {
 		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
-	newResourceFormAction(resource, "upload").priority().Permission(resource.canUpdate).Name(unlocalized("Nahrát soubor")).Form(func(f *Form, r *Request) {
+	resource.FormAction("upload").priority().Permission(resource.canUpdate).Name(unlocalized("Nahrát soubor")).Form(func(f *Form, r *Request) {
 		locale := r.user.Locale
 		f.AddFileInput("file", messages.Get(locale, "admin_file"))
 		f.AddTextareaInput("description", messages.Get(locale, "Description"))

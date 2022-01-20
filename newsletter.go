@@ -244,16 +244,14 @@ type newsletter struct {
 	UpdatedAt     time.Time
 }
 
-func initNewsletterResource(res *Resource[newsletter]) {
-	//resource := res.resource
-	res.canView = sysadminPermission
+func initNewsletterResource(resource *Resource[newsletter]) {
+	resource.canView = sysadminPermission
 
-	res.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(
+	resource.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(
 		func(request *Request) {
-			//var newsletter newsletter
-			newsletter := res.Is("id", request.Params().Get("id")).First()
+			newsletter := resource.Is("id", request.Params().Get("id")).First()
 
-			body, err := res.app.newsletters.GetBody(*newsletter, "")
+			body, err := resource.app.newsletters.GetBody(*newsletter, "")
 			must(err)
 
 			request.Response().WriteHeader(200)
@@ -261,15 +259,15 @@ func initNewsletterResource(res *Resource[newsletter]) {
 		},
 	)
 
-	newResourceItemFormAction(res, "send-preview").Permission(loggedPermission).Name(unlocalized("Odeslat náhled")).Form(
+	resource.FormItemAction("send-preview").Permission(loggedPermission).Name(unlocalized("Odeslat náhled")).Form(
 		func(f *Form, r *Request) {
 			f.AddTextareaInput("emails", "Seznam emailů na poslání preview (jeden email na řádek)").Focused = true
 			f.AddSubmit("Odeslat náhled")
 		},
 	).Validation(func(vc ValidationContext) {
-		newsletter := res.Is("id", vc.GetValue("id")).First()
+		newsletter := resource.Is("id", vc.GetValue("id")).First()
 		newsletter.PreviewSentAt = time.Now()
-		err := res.Update(newsletter)
+		err := resource.Update(newsletter)
 		if err != nil {
 			panic(err)
 		}
@@ -279,49 +277,48 @@ func initNewsletterResource(res *Resource[newsletter]) {
 			vc.AddError("Není zadán žádný email")
 		}
 		if vc.Valid() {
-			err := res.app.sendEmails(*newsletter, emails)
+			err := resource.app.sendEmails(*newsletter, emails)
 			if err != nil {
 				vc.AddError(fmt.Sprintf("Chyba při odesílání emailů: %s", err))
 			}
 		}
 		if vc.Valid() {
 			vc.Request().AddFlashMessage("Náhled newsletteru odeslán.")
-			vc.Validation().RedirectionLocaliton = res.getItemURL(&newsletter, "")
+			vc.Validation().RedirectionLocaliton = resource.getItemURL(&newsletter, "")
 		}
 	})
 
-	newResourceItemFormAction(res, "send").Permission(loggedPermission).Name(unlocalized("Odeslat")).Form(
+	resource.FormItemAction("send").Permission(loggedPermission).Name(unlocalized("Odeslat")).Form(
 		func(form *Form, request *Request) {
-			recipients, err := res.app.getNewsletterRecipients()
+			recipients, err := resource.app.getNewsletterRecipients()
 			must(err)
 			form.AddSubmit(fmt.Sprintf("Odelsat newsletter na %d emailů", len(recipients)))
 		},
 	).Validation(
 		func(vc ValidationContext) {
-			nl := res.Is("id", vc.GetValue("id")).First()
+			nl := resource.Is("id", vc.GetValue("id")).First()
 			nl.SentAt = time.Now()
 			//TODO: log sent emails
-			must(res.Update(nl))
+			must(resource.Update(nl))
 
-			recipients, err := res.app.getNewsletterRecipients()
+			recipients, err := resource.app.getNewsletterRecipients()
 			if err != nil {
 				panic(err)
 			}
 
-			go res.app.sendEmails(*nl, recipients)
+			go resource.app.sendEmails(*nl, recipients)
 
 			vc.Request().AddFlashMessage(fmt.Sprintf("Newsletter '%s' se odesílá na %d adres", nl.Name, len(recipients)))
 
-			vc.Validation().RedirectionLocaliton = res.getItemURL(&nl, "")
+			vc.Validation().RedirectionLocaliton = resource.getItemURL(&nl, "")
 		},
 	)
 
-	newResourceItemFormAction(res, "duplicate").Permission(loggedPermission).Name(unlocalized("Duplikovat")).Form(
+	resource.FormItemAction("duplicate").Permission(loggedPermission).Name(unlocalized("Duplikovat")).Form(
 		func(f *Form, r *Request) {
 			f.AddSubmit("Duplikovat newsletter")
 		},
 	).Validation(func(vc ValidationContext) {
-		//var newsletter newsletter
 		newsletterResource := GetResource[newsletter](vc.Request().app)
 		newsletter := newsletterResource.Is("id", vc.GetValue("id")).First()
 
@@ -338,7 +335,7 @@ func initNewsletterResource(res *Resource[newsletter]) {
 			must(newsletterSectionResource.Create(&section))
 		}
 
-		vc.Validation().RedirectionLocaliton = res.getItemURL(&newsletter, "edit")
+		vc.Validation().RedirectionLocaliton = resource.getItemURL(&newsletter, "edit")
 	})
 }
 

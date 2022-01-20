@@ -74,28 +74,20 @@ func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Reques
 }
 
 func (resource *Resource[T]) FormAction(url string) *FormAction {
-	return newResourceFormAction(resource, url)
-}
+	action := newFormAction(resource.app, url)
 
-func newResourceFormAction[T any](resource *Resource[T], url string) *FormAction {
-	fa := newFormAction(resource.app, url)
+	action.actionForm.resource = resource
+	action.actionValidation.resource = resource
 
-	fa.actionForm.resource = resource
-	fa.actionValidation.resource = resource
+	action.actionForm.Permission(resource.getPermissionView())
+	action.actionValidation.Permission(resource.getPermissionView())
 
-	fa.actionForm.Permission(resource.getPermissionView())
-	fa.actionValidation.Permission(resource.getPermissionView())
-
-	resource.actions = append(resource.actions, fa.actionForm)
-	resource.actions = append(resource.actions, fa.actionValidation)
-	return fa
+	resource.actions = append(resource.actions, action.actionForm)
+	resource.actions = append(resource.actions, action.actionValidation)
+	return action
 }
 
 func (resource *Resource[T]) FormItemAction(url string) *FormAction {
-	return newResourceItemFormAction(resource, url)
-}
-
-func newResourceItemFormAction[T any](resource *Resource[T], url string) *FormAction {
 	fa := newFormAction(resource.app, url)
 
 	fa.actionForm.resource = resource

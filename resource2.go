@@ -14,7 +14,7 @@ type Resource[T any] struct {
 	name func(locale string) string
 	app  *App
 
-	previewURLFunction func(interface{}) string
+	previewURLFunction func(*T) string
 
 	activityLog bool
 
@@ -29,7 +29,8 @@ type Resource[T any] struct {
 
 	actions     []*Action
 	itemActions []*Action
-	relations   []*relation
+
+	relations []*relation
 
 	resourceController *controller
 
@@ -125,7 +126,6 @@ type resourceIface interface {
 	count() int64
 
 	addRelation(*relation)
-	getRelations() []*relation
 
 	getResourceControl() *controller
 	getID() string
@@ -174,7 +174,6 @@ func (resource *Resource[T]) getTyp() reflect.Type {
 
 func (resource *Resource[T]) getApp() *App {
 	return resource.app
-
 }
 
 func (resource *Resource[T]) getNameFunction() func(string) string {
@@ -215,10 +214,6 @@ func (resource *Resource[T]) getItemActions() []*Action {
 
 func (resource *Resource[T]) addRelation(relation *relation) {
 	resource.relations = append(resource.relations, relation)
-}
-
-func (resource *Resource[T]) getRelations() []*relation {
-	return resource.relations
 }
 
 func (resource *Resource[T]) getID() string {
@@ -273,7 +268,7 @@ func (resource *Resource[T]) Name(name func(string) string) *Resource[T] {
 	return resource
 }
 
-func (resource *Resource[T]) PreviewURLFunction(fn func(interface{}) string) *Resource[T] {
+func (resource *Resource[T]) PreviewURLFunction(fn func(*T) string) *Resource[T] {
 	resource.previewURLFunction = fn
 	return resource
 }
