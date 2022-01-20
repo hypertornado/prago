@@ -118,7 +118,7 @@ func (resource *Resource[T]) getListHeader(user *user) (list list, err error) {
 	}
 	list.CanExport = resource.app.authorize(user, resource.canExport)
 
-	for _, v := range resource.fieldArrays {
+	for _, v := range resource.fields {
 		if v.authorizeView(user) {
 			headerItem := (*v).getListHeaderItem(user)
 			if headerItem.DefaultShow {
@@ -132,7 +132,7 @@ func (resource *Resource[T]) getListHeader(user *user) (list list, err error) {
 
 func (resource *Resource[T]) defaultVisibleFieldsStr(user *user) string {
 	ret := []string{}
-	for _, v := range resource.fieldArrays {
+	for _, v := range resource.fields {
 		if !v.authorizeView(user) {
 			continue
 		}
@@ -146,7 +146,7 @@ func (resource *Resource[T]) defaultVisibleFieldsStr(user *user) string {
 
 func (resource *Resource[T]) fieldsStr(user *user) string {
 	ret := []string{}
-	for _, v := range resource.fieldArrays {
+	for _, v := range resource.fields {
 		if !v.authorizeView(user) {
 			continue
 		}

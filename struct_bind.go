@@ -22,7 +22,7 @@ func (resource *Resource[T]) setOrderPosition(item interface{}, order int64) {
 }
 
 func (resource *Resource[T]) fixBooleanParams(user *user, params url.Values) {
-	for _, field := range resource.fieldArrays {
+	for _, field := range resource.fields {
 		if !field.authorizeEdit(user) {
 			continue
 		}
@@ -42,7 +42,7 @@ func (resource *Resource[T]) bindData(item *T, user *user, params url.Values) er
 		value = value.Elem()
 	}
 
-	for _, field := range resource.fieldArrays {
+	for _, field := range resource.fields {
 		if !field.authorizeEdit(user) {
 			continue
 		}

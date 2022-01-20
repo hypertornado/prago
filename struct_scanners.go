@@ -15,7 +15,7 @@ func (resource *Resource[T]) getStructScanners(value reflect.Value) (names []str
 		return
 	}
 
-	for _, v := range resource.fieldArrays {
+	for _, v := range resource.fields {
 		use := true
 
 		switch v.typ.Kind() {

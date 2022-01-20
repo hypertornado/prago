@@ -41,7 +41,7 @@ func (resource *Resource[T]) getBasicView(id int, inValues interface{}, user *us
 		},
 	)
 
-	for i, f := range resource.fieldArrays {
+	for i, f := range resource.fields {
 		if !f.authorizeView(user) {
 			continue
 		}

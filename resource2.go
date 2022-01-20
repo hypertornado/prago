@@ -40,9 +40,9 @@ type Resource[T any] struct {
 
 	typ reflect.Type
 
-	fieldArrays []*Field
-	fieldMap    map[string]*Field
-	orderField  *Field
+	fields     []*Field
+	fieldMap   map[string]*Field
+	orderField *Field
 }
 
 func NewResource[T any](app *App) *Resource[T] {
@@ -87,7 +87,7 @@ func NewResource[T any](app *App) *Resource[T] {
 			if field.tags["prago-type"] == "order" {
 				ret.orderField = field
 			}
-			ret.fieldArrays = append(ret.fieldArrays, field)
+			ret.fields = append(ret.fields, field)
 			ret.fieldMap[field.columnName] = field
 		}
 	}
@@ -132,8 +132,8 @@ type resourceIface interface {
 
 	bindActions()
 
-	getActions() []*Action
-	getItemActions() []*Action
+	//getActions() []*Action
+	//getItemActions() []*Action
 
 	getPermissionView() Permission
 	getPermissionCreate() Permission
@@ -142,28 +142,23 @@ type resourceIface interface {
 	getPermissionExport() Permission
 
 	getName(string) string
-
 	getNameFunction() func(string) string
 
 	getApp() *App
 
 	unsafeDropTable() error
-
 	migrate(bool) error
 
 	getURL(suffix string) string
 
 	query() query
 
-	createWithDBIface(interface{}, dbIface, bool) error
-	saveWithDBIface(interface{}, dbIface, bool) error
-
 	getStructScanners(reflect.Value) ([]string, []interface{}, error)
 	getTyp() reflect.Type
 
 	getItemNavigation(*user, interface{}, string) navigation
 	getNavigation(*user, string) navigation
-	itemToRelationData(interface{}, *user, resourceIface) *viewRelationData
+	itemToRelationData(interface{}, *user, resourceIface) *preview
 
 	getResourceViewRoles() []string
 }
@@ -204,14 +199,6 @@ func (resource *Resource[T]) getPermissionExport() Permission {
 	return resource.canDelete
 }
 
-func (resource *Resource[T]) getActions() []*Action {
-	return resource.actions
-}
-
-func (resource *Resource[T]) getItemActions() []*Action {
-	return resource.itemActions
-}
-
 func (resource *Resource[T]) addRelation(relation *relation) {
 	resource.relations = append(resource.relations, relation)
 }
@@ -246,7 +233,7 @@ func (resource *Resource[T]) Update(item *T) error {
 
 func (resource *Resource[T]) Delete(id int64) error {
 	var item T
-	count, err := resource.Query().query.is("id", id).delete(&item)
+	count, err := resource.Query().query.is("id", id).deleteWithQuery(&item)
 	if err != nil {
 		return err
 	}

@@ -305,7 +305,7 @@ func searchID(resource resourceIface, id int64) string {
 	return fmt.Sprintf("%s-%d", resource.getID(), id)
 }
 
-func relationDataToSearchItem(resource resourceIface, data viewRelationData) searchItem {
+func relationDataToSearchItem(resource resourceIface, data preview) searchItem {
 	return searchItem{
 		ID:          searchID(resource, data.ID),
 		Category:    resource.getName("cs"),

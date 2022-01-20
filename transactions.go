@@ -1,9 +1,7 @@
 package prago
 
-import (
-	"database/sql"
-)
-
+//TODO: fix transactions later
+/*
 //Transaction represents sql transaction
 type Transaction struct {
 	tx  *sql.Tx
@@ -51,11 +49,6 @@ func TransactionQuery[T any](app *App, t *Transaction) *Query[T] {
 	resource := GetResource[T](app)
 	ret := resource.Query()
 
-	if t.err != nil {
-		ret.query.err = t.err
-		return ret
-	}
-
 	ret.query.db = t.tx
 	return ret
 }
@@ -74,3 +67,4 @@ func (t *Transaction) Rollback() error {
 func (t *Transaction) Tx() *sql.Tx {
 	return t.tx
 }
+*/

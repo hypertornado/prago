@@ -108,7 +108,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 			usedIDs := map[int64]bool{}
 
-			ret := []viewRelationData{}
+			ret := []preview{}
 
 			id, err := strconv.Atoi(q)
 			if err == nil {

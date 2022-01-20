@@ -50,7 +50,7 @@ func (q *listQuery) addOrder(name string, desc bool) {
 }
 
 func (resource *Resource[T]) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
-	for _, field := range resource.fieldArrays {
+	for _, field := range resource.fields {
 		val := value.FieldByName(field.fieldClassName)
 
 		if field.fieldClassName == "ID" {

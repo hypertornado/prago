@@ -2,7 +2,6 @@ package prago
 
 type query struct {
 	query    *listQuery
-	err      error
 	db       dbIface
 	isDebug  bool
 	resource resourceIface
@@ -72,10 +71,6 @@ func (q query) count() (int64, error) {
 	return countItems(q.db, q.resource.getID(), q.query, q.isDebug)
 }
 
-func (q query) delete(item interface{}) (int64, error) {
-	resource, err := q.resource.getApp().getResourceByItem(item)
-	if err != nil {
-		return -1, err
-	}
-	return deleteItems(q.db, resource.getID(), q.query, q.isDebug)
+func (q query) deleteWithQuery(item interface{}) (int64, error) {
+	return deleteItems(q.db, q.resource.getID(), q.query, q.isDebug)
 }

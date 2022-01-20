@@ -1,8 +1,6 @@
 package prago
 
-import (
-	"testing"
-)
+/*
 
 func TestTransactions(t *testing.T) {
 	resource := prepareResource()
@@ -44,3 +42,4 @@ func TestTransactions(t *testing.T) {
 	resource.Create(&s2)
 
 }
+*/

@@ -16,7 +16,7 @@ type relation struct {
 	addURL   func(id int64) string
 }
 
-type viewRelationData struct {
+type preview struct {
 	ID          int64
 	Image       string
 	URL         string
@@ -31,7 +31,7 @@ func (app *App) initAllAutoRelations() {
 }
 
 func (resource *Resource[T]) initAutoRelations() {
-	for _, v := range resource.fieldArrays {
+	for _, v := range resource.fields {
 		if v.tags["prago-type"] == "relation" {
 			referenceName := v.fieldClassName
 			relationFieldName := v.tags["prago-relation"]
@@ -92,7 +92,7 @@ func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
 	return ret
 }
 
-func getRelationData(user *user, f *Field, value interface{}) (*viewRelationData, error) {
+func getRelationData(user *user, f *Field, value interface{}) (*preview, error) {
 	app := f.resource.getApp()
 	if f.relatedResource == nil {
 		return nil, fmt.Errorf("resource not found: %s", f.humanName("en"))
@@ -114,12 +114,11 @@ func getRelationData(user *user, f *Field, value interface{}) (*viewRelationData
 	return f.relatedResource.itemToRelationData(item, user, nil), nil
 }
 
-func (resource *Resource[T]) itemToRelationData(item interface{}, user *user, relatedResource resourceIface) *viewRelationData {
-	var ret viewRelationData
+func (resource *Resource[T]) itemToRelationData(item interface{}, user *user, relatedResource resourceIface) *preview {
+	var ret preview
 	ret.ID = getItemID(item)
 	ret.Name = getItemName(item)
 	ret.URL = resource.getItemURL(item, "")
-
 	ret.Image = resource.app.getItemImage(item)
 	ret.Description = resource.getItemDescription(item, user, relatedResource)
 	return &ret
@@ -168,7 +167,7 @@ func (resource *Resource[T]) getItemDescription(item interface{}, user *user, re
 		}
 	}
 
-	for _, v := range resource.fieldArrays {
+	for _, v := range resource.fields {
 		if v.fieldClassName == "ID" || v.fieldClassName == "Name" || v.fieldClassName == "Description" {
 			continue
 		}

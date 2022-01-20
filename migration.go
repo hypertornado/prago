@@ -85,7 +85,7 @@ func (resource *Resource[T]) createTable(db dbIface, tableName string, verbose b
 		fmt.Printf("Creating table '%s'\n", tableName)
 	}
 	items := []string{}
-	for _, v := range resource.fieldArrays {
+	for _, v := range resource.fields {
 		items = append(items, v.fieldDescriptionMysql(resource.app.fieldTypes))
 	}
 	q := fmt.Sprintf("CREATE TABLE %s (%s);", tableName, strings.Join(items, ", "))
@@ -112,7 +112,7 @@ func (resource *Resource[T]) migrateTable(db dbIface, tableName string, verbose 
 
 	items := []string{}
 
-	for _, v := range resource.fieldArrays {
+	for _, v := range resource.fields {
 		if !tableDescriptionMap[v.columnName] {
 			items = append(items, fmt.Sprintf("ADD COLUMN %s", v.fieldDescriptionMysql(resource.app.fieldTypes)))
 		} else {
