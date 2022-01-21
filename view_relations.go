@@ -3,8 +3,6 @@ package prago
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"reflect"
 )
 
 type viewRelation struct {
@@ -15,47 +13,51 @@ type viewRelation struct {
 	Count          int64
 }
 
-func (resource *Resource[T]) getAutoRelationsView(id int, inValues interface{}, user *user) (ret []view) {
-
+func (resource *Resource[T]) getRelationViews(id int, user *user) (ret []view) {
 	for _, v := range resource.relations {
-		if !resource.app.authorize(user, v.resource.getPermissionView()) {
-			continue
+		vi := resource.getRelationView(id, v, user)
+		if vi != nil {
+			ret = append(ret, *vi)
 		}
-
-		q := v.resource.query().is(v.field, fmt.Sprintf("%d", id))
-
-		filteredCount, err := q.count()
-		must(err)
-
-		var vi = view{}
-
-		name := v.listName(user.Locale)
-		vi.Name = name
-		vi.Subname = messages.ItemsCount(filteredCount, user.Locale)
-
-		vi.Navigation = append(vi.Navigation, tab{
-			Name: messages.GetNameFunction("admin_table")(user.Locale),
-			URL:  v.listURL(int64(id)),
-		})
-
-		if resource.app.authorize(user, v.resource.getPermissionUpdate()) {
-			vi.Navigation = append(vi.Navigation, tab{
-				Name: messages.GetNameFunction("admin_new")(user.Locale),
-				URL:  v.addURL(int64(id)),
-			})
-		}
-
-		vi.Relation = &viewRelation{
-			SourceResource: resource.getID(),
-			TargetResource: v.resource.getID(),
-			TargetField:    v.field,
-			IDValue:        int64(id),
-			Count:          filteredCount,
-		}
-
-		ret = append(ret, vi)
 	}
 	return
+}
+
+func (resource *Resource[T]) getRelationView(id int, field *relatedField, user *user) *view {
+	if !resource.app.authorize(user, field.resource.getPermissionView()) {
+		return nil
+	}
+
+	q := field.resource.query().is(field.columnName, fmt.Sprintf("%d", id))
+	filteredCount, err := q.count()
+	must(err)
+
+	ret := &view{}
+
+	name := field.listName(user.Locale)
+	ret.Name = name
+	ret.Subname = messages.ItemsCount(filteredCount, user.Locale)
+
+	ret.Navigation = append(ret.Navigation, tab{
+		Name: messages.GetNameFunction("admin_table")(user.Locale),
+		URL:  field.listURL(int64(id)),
+	})
+
+	if resource.app.authorize(user, field.resource.getPermissionUpdate()) {
+		ret.Navigation = append(ret.Navigation, tab{
+			Name: messages.GetNameFunction("admin_new")(user.Locale),
+			URL:  field.addURL(int64(id)),
+		})
+	}
+
+	ret.Relation = &viewRelation{
+		SourceResource: resource.getID(),
+		TargetResource: field.resource.getID(),
+		TargetField:    field.columnName,
+		IDValue:        int64(id),
+		Count:          filteredCount,
+	}
+	return ret
 }
 
 type relationListRequest struct {
@@ -67,62 +69,53 @@ type relationListRequest struct {
 	Count          int64
 }
 
-func generateRelationListAPIHandler(app *App) func(*Request) {
-	return func(request *Request) {
+func generateRelationListAPIHandler(request *Request) {
+	app := request.app
 
-		defer request.Request().Body.Close()
+	decoder := json.NewDecoder(request.Request().Body)
+	var listRequest relationListRequest
+	decoder.Decode(&listRequest)
+	defer request.Request().Body.Close()
 
-		reqData, err := ioutil.ReadAll(request.Request().Body)
-		if err != nil {
-			panic("relationListAPIHandler parsing json request: " + err.Error())
-		}
+	targetResource := app.getResourceByID(listRequest.TargetResource)
 
-		var listRequest relationListRequest
-		err = json.Unmarshal(reqData, &listRequest)
-		if err != nil {
-			panic("Unmarshalling " + err.Error())
-		}
+	request.SetData("data", targetResource.getPreviews(listRequest, request.user))
+	request.RenderView("admin_item_view_relationlist_response")
+}
 
-		sourceResource := app.getResourceByName(listRequest.SourceResource)
-		if !app.authorize(request.user, sourceResource.getPermissionView()) {
-			panic("cant authorize source resource")
-		}
-
-		targetResource := app.getResourceByName(listRequest.TargetResource)
-		if !app.authorize(request.user, targetResource.getPermissionView()) {
-			panic("cant authorize target resource")
-		}
-
-		q := targetResource.query().is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
-		if targetResource.isOrderDesc() {
-			q = q.orderDesc(targetResource.getOrderByColumn())
-		} else {
-			q = q.order(targetResource.getOrderByColumn())
-		}
-
-		limit := listRequest.Count
-		if limit > 10 {
-			limit = 10
-		}
-		q = q.limit(limit)
-
-		q.offset(listRequest.Offset)
-
-		rowItems, err := q.list()
-		if err != nil {
-			panic(err)
-		}
-
-		vv := reflect.ValueOf(rowItems)
-		var data []interface{}
-		for i := 0; i < vv.Len(); i++ {
-			data = append(
-				data,
-				targetResource.itemToRelationData(vv.Index(i).Interface(), request.user, sourceResource),
-			)
-		}
-
-		request.SetData("data", data)
-		request.RenderView("admin_item_view_relationlist_response")
+func (resource *Resource[T]) getPreviews(listRequest relationListRequest, user *user) []*preview {
+	sourceResource := resource.app.getResourceByID(listRequest.SourceResource)
+	if !resource.app.authorize(user, sourceResource.getPermissionView()) {
+		panic("cant authorize source resource")
 	}
+
+	if !resource.app.authorize(user, resource.getPermissionView()) {
+		panic("cant authorize target resource")
+	}
+
+	q := resource.Is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
+	if resource.isOrderDesc() {
+		q = q.OrderDesc(resource.getOrderByColumn())
+	} else {
+		q = q.Order(resource.getOrderByColumn())
+	}
+
+	limit := listRequest.Count
+	if limit > 10 {
+		limit = 10
+	}
+	q = q.Limit(limit)
+
+	q.Offset(listRequest.Offset)
+
+	rowItems := q.List()
+
+	var ret []*preview
+	for _, item := range rowItems {
+		ret = append(
+			ret,
+			resource.getPreview(item, user, sourceResource),
+		)
+	}
+	return ret
 }

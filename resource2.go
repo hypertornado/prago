@@ -30,7 +30,7 @@ type Resource[T any] struct {
 	actions     []*Action
 	itemActions []*Action
 
-	relations []*relation
+	relations []*relatedField
 
 	resourceController *controller
 
@@ -116,7 +116,7 @@ func GetResource[T any](app *App) *Resource[T] {
 type resourceIface interface {
 	initDefaultResourceActions()
 	initDefaultResourceAPIs()
-	initAutoRelations()
+	createRelations()
 	addValidation(validation Validation)
 	isOrderDesc() bool
 	getOrderByColumn() string
@@ -125,15 +125,12 @@ type resourceIface interface {
 	getCachedCount() int64
 	count() int64
 
-	addRelation(*relation)
+	addRelation(*relatedField)
 
 	getResourceControl() *controller
 	getID() string
 
 	bindActions()
-
-	//getActions() []*Action
-	//getItemActions() []*Action
 
 	getPermissionView() Permission
 	getPermissionCreate() Permission
@@ -158,9 +155,12 @@ type resourceIface interface {
 
 	getItemNavigation(*user, interface{}, string) navigation
 	getNavigation(*user, string) navigation
-	itemToRelationData(interface{}, *user, resourceIface) *preview
+	getPreviewData(user *user, f *Field, value int64) (*preview, error)
+	getnavigation2(action *Action, request *Request) navigation
 
-	getResourceViewRoles() []string
+	getPreviews(listRequest relationListRequest, user *user) []*preview
+	importSearchData(e *adminSearch) error
+	getItemPreview(id int64, user *user, relatedResource resourceIface) *preview
 }
 
 func (resource *Resource[T]) getTyp() reflect.Type {
@@ -199,8 +199,8 @@ func (resource *Resource[T]) getPermissionExport() Permission {
 	return resource.canDelete
 }
 
-func (resource *Resource[T]) addRelation(relation *relation) {
-	resource.relations = append(resource.relations, relation)
+func (resource *Resource[T]) addRelation(field *relatedField) {
+	resource.relations = append(resource.relations, field)
 }
 
 func (resource *Resource[T]) getID() string {

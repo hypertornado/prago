@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"reflect"
 	"testing"
 )
 
@@ -14,28 +13,17 @@ func TestReflectQuery(t *testing.T) {
 	resource.Create(&resA)
 	resource.Create(&resB)
 
-	item, err := resource.Query().Is("id", resB.ID).query.first()
-	if err != nil {
-		t.Fatal(err)
+	item := resource.Query().Is("id", resB.ID).First()
+	if item == nil {
+		t.Fatal("is nil")
 	}
 
-	resStruct, ok := item.(*ResourceStruct)
-	if !ok {
-		t.Fatalf("wrong type: %s", reflect.TypeOf(item))
-	}
-	if resStruct.Name != "B" {
+	if item.Name != "B" {
 		t.Fatal("wrong name")
 	}
 
-	list, err := resource.Query().query.list()
-	if err != nil {
-		t.Fatal(err)
-	}
-	listStruct, ok := list.([]*ResourceStruct)
-	if !ok {
-		t.Fatalf("wrong type: %s", reflect.TypeOf(list))
-	}
-	if len(listStruct) != 2 {
+	list := resource.Query().List()
+	if len(list) != 2 {
 		t.Fatal("wrong length")
 	}
 

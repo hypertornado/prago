@@ -243,7 +243,7 @@ func (e *adminSearch) searchImport() error {
 	}
 
 	for _, v := range e.app.resources {
-		err = e.importResource(v)
+		err = v.importSearchData(e)
 		if err != nil {
 			return fmt.Errorf("while importing resource %s: %s", v.getID(), err)
 		}
@@ -253,47 +253,43 @@ func (e *adminSearch) searchImport() error {
 	return nil
 }
 
-func (e *adminSearch) importResource(resource resourceIface) error {
+func (resource *Resource[T]) importSearchData(e *adminSearch) error {
 	roles := resource.getResourceViewRoles()
 	var resourceSearchItem = searchItem{
-		ID:    "resource_" + resource.getID(),
+		ID:    "resource_" + resource.id,
 		Name:  resource.getName("cs"),
 		URL:   resource.getURL(""),
 		Roles: roles,
 	}
-	e.addItem(&resourceSearchItem, 200)
+	resource.app.search.addItem(&resourceSearchItem, 200)
 
-	c, _ := resource.query().count()
+	c, _ := resource.Query().Count()
 	if c > 10000 {
 		return nil
 	}
 
-	items, err := resource.query().list()
-	if err == nil {
-		itemsVal := reflect.ValueOf(items)
-		for i := 0; i < itemsVal.Len(); i++ {
-			item2 := itemsVal.Index(i).Interface()
-			e.saveItemWithRoles(resource, item2, roles)
-		}
+	items := resource.Query().List()
+	for _, item := range items {
+		resource.saveSearchItemWithRoles(item, roles)
 	}
 
 	return nil
 }
 
-func (e *adminSearch) saveItem(resource resourceIface, item interface{}) error {
+func (resource *Resource[T]) saveSearchItem(item *T) error {
 	roles := resource.getResourceViewRoles()
-	return e.saveItemWithRoles(resource, item, roles)
+	return resource.saveSearchItemWithRoles(item, roles)
 }
 
-func (e *adminSearch) saveItemWithRoles(resource resourceIface, item interface{}, roles []string) error {
+func (resource *Resource[T]) saveSearchItemWithRoles(item *T, roles []string) error {
 	//TODO: ugly hack
-	relData := resource.itemToRelationData(item, &user{}, nil)
-	if relData == nil {
+	preview := resource.getPreview(item, &user{}, nil)
+	if preview == nil {
 		return errors.New("wrong item to relation data conversion")
 	}
-	searchItem := relationDataToSearchItem(resource, *relData)
+	searchItem := relationDataToSearchItem(resource, *preview)
 	searchItem.Roles = roles
-	return e.addItem(&searchItem, 100)
+	return resource.app.search.addItem(&searchItem, 100)
 }
 
 func (e *adminSearch) deleteItem(resource resourceIface, id int64) error {

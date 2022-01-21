@@ -8,13 +8,11 @@ import (
 	"time"
 )
 
-type relation struct {
-	resource resourceIface
-	field    string
-	listName func(string) string
-	listURL  func(id int64) string
-	addURL   func(id int64) string
-}
+type relatedField Field
+
+/*type relation struct {
+	field *Field
+}*/
 
 type preview struct {
 	ID          int64
@@ -24,75 +22,58 @@ type preview struct {
 	Description string
 }
 
-func (app *App) initAllAutoRelations() {
+func (app *App) initRelations() {
 	for _, v := range app.resources {
-		v.initAutoRelations()
+		v.createRelations()
 	}
 }
 
-func (resource *Resource[T]) initAutoRelations() {
-	for _, v := range resource.fields {
-		if v.tags["prago-type"] == "relation" {
-			referenceName := v.fieldClassName
-			relationFieldName := v.tags["prago-relation"]
-			if relationFieldName != "" {
-				referenceName = relationFieldName
+func (resource *Resource[T]) createRelations() {
+	for _, field := range resource.fields {
+		if field.tags["prago-type"] == "relation" {
+			relatedResourceID := field.columnName
+			if field.tags["prago-relation"] != "" {
+				relatedResourceID = field.tags["prago-relation"]
 			}
-			relatedResource := resource.app.getResourceByName(referenceName)
-			if relatedResource == nil {
-				panic("can't find reference resource: " + referenceName)
-			}
-			v.relatedResource = relatedResource
+			field.relatedResource = resource.app.getResourceByID(relatedResourceID)
 
-			if v.tags["prago-name"] == "" {
-				v.humanName = relatedResource.getNameFunction()
+			//TODO: name can be set directly
+			if field.tags["prago-name"] == "" {
+				field.humanName = field.relatedResource.getNameFunction()
 			}
-
-			relatedResource.addRelation(&relation{
-				resource: resource,
-				field:    v.fieldClassName,
-				listName: resource.createRelationNamingFunction(*v, relatedResource),
-				listURL:  resource.createRelationListURL(*v),
-				addURL:   resource.createRelationAddURL(*v),
-			})
+			field.relatedResource.addRelation((*relatedField)(field))
 		}
 	}
 }
 
-func (resource *Resource[T]) createRelationAddURL(field Field) func(int64) string {
-	return func(id int64) string {
-		values := url.Values{}
-		values.Add(field.columnName, fmt.Sprintf("%d", id))
-		return resource.getURL("new?" + values.Encode())
-	}
+func (field *relatedField) addURL(id int64) string {
+	values := url.Values{}
+	values.Add(field.columnName, fmt.Sprintf("%d", id))
+	return field.resource.getURL("new?" + values.Encode())
 }
 
-func (resource *Resource[T]) createRelationListURL(field Field) func(int64) string {
-	return func(id int64) string {
-		values := url.Values{}
-		values.Add(field.columnName, fmt.Sprintf("%d", id))
-		return resource.getURL("") + "?" + values.Encode()
-	}
+func (field *relatedField) listURL(id int64) string {
+	values := url.Values{}
+	values.Add(field.columnName, fmt.Sprintf("%d", id))
+	return field.resource.getURL("") + "?" + values.Encode()
 }
 
-func (resource *Resource[T]) createRelationNamingFunction(field Field, referenceResource resourceIface) func(string) string {
-	return func(lang string) string {
-		ret := resource.getName(lang)
-		fieldName := field.humanName(lang)
-		referenceName := referenceResource.getName(lang)
-		if fieldName != referenceName {
-			ret += " – " + fieldName
-		}
-		return ret
+func (field *relatedField) listName(locale string) string {
+	ret := field.resource.getName(locale)
+	fieldName := field.humanName(locale)
+	referenceName := field.relatedResource.getName(locale)
+	if fieldName != referenceName {
+		ret += " – " + fieldName
 	}
-}
-
-func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
-	ret, _ := getRelationData(user, f, value)
 	return ret
 }
 
-func getRelationData(user *user, f *Field, value interface{}) (*preview, error) {
+func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
+	ret, _ := f.resource.getPreviewData(user, f, value.(int64))
+	return ret
+}
+
+func (resource *Resource[T]) getPreviewData(user *user, f *Field, value int64) (*preview, error) {
 	app := f.resource.getApp()
 	if f.relatedResource == nil {
 		return nil, fmt.Errorf("resource not found: %s", f.humanName("en"))
@@ -102,19 +83,19 @@ func getRelationData(user *user, f *Field, value interface{}) (*preview, error) 
 		return nil, fmt.Errorf("user is not authorized to view this item")
 	}
 
-	intVal := value.(int64)
-	if intVal <= 0 {
-		return nil, fmt.Errorf("wrong value")
-	}
-	item, err := f.relatedResource.query().is("id", intVal).first()
-	if err != nil {
-		return nil, fmt.Errorf("can't find this item")
-	}
-
-	return f.relatedResource.itemToRelationData(item, user, nil), nil
+	return f.relatedResource.getItemPreview(value, user, f.resource), nil
 }
 
-func (resource *Resource[T]) itemToRelationData(item interface{}, user *user, relatedResource resourceIface) *preview {
+func (resource *Resource[T]) getItemPreview(id int64, user *user, relatedResource resourceIface) *preview {
+	item := resource.Is("id", id).First()
+	if item == nil {
+		return nil
+	}
+	return resource.getPreview(item, user, nil)
+
+}
+
+func (resource *Resource[T]) getPreview(item *T, user *user, relatedResource resourceIface) *preview {
 	var ret preview
 	ret.ID = getItemID(item)
 	ret.Name = getItemName(item)

@@ -138,7 +138,7 @@ func (app *App) afterInit() {
 	app.bindAPIs()
 	app.bindAllActions()
 	app.initAdminNotFoundAction()
-	app.initAllAutoRelations()
+	app.initRelations()
 }
 
 func (app *App) initDefaultResourceActions() {

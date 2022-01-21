@@ -15,6 +15,6 @@ func (app *App) initAPI() {
 		},
 	)
 
-	app.API("relationlist").Method("POST").Permission(loggedPermission).Handler(generateRelationListAPIHandler(app))
+	app.API("relationlist").Method("POST").Permission(loggedPermission).Handler(generateRelationListAPIHandler)
 
 }

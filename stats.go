@@ -266,7 +266,7 @@ func (resource *Resource[T]) getListStatsTable(field *Field, user *user, params 
 					row.Name = "–"
 				}
 
-				rd, err := getRelationData(user, field, v)
+				rd, err := field.resource.getPreviewData(user, field, v)
 				if err == nil {
 					row.Name = rd.Name
 					row.URL = rd.URL

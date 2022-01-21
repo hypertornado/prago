@@ -1751,7 +1751,12 @@ class FormContainer {
         let requestID = this.makeid(10);
         this.lastAJAXID = requestID;
         if (this.activeRequest) {
-            this.activeRequest.abort();
+            if (this.isAutosubmit()) {
+                this.activeRequest.abort();
+            }
+            else {
+                return;
+            }
         }
         this.activeRequest = request;
         request.addEventListener("load", (e) => {

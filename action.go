@@ -170,7 +170,8 @@ func (action *Action) hiddenMenu() *Action {
 }
 
 func (action *Action) getnavigation(request *Request) navigation {
-	if action.resource != nil {
+	return action.resource.getnavigation2(action, request)
+	/*if action.resource != nil {
 		code := action.url
 		if action.isItemAction {
 			item, err := action.resource.query().is("id", request.Params().Get("id")).first()
@@ -182,7 +183,24 @@ func (action *Action) getnavigation(request *Request) navigation {
 		}
 		return action.resource.getNavigation(request.user, code)
 	}
-	return navigation{}
+	return navigation{}*/
+}
+
+func (resource *Resource[T]) getnavigation2(action *Action, request *Request) navigation {
+	if resource == nil {
+		return navigation{}
+	}
+
+	code := action.url
+	if action.isItemAction {
+		item := resource.Is("id", request.Params().Get("id")).First()
+		if item != nil {
+			return resource.getItemNavigation(request.user, item, code)
+		} else {
+			return navigation{}
+		}
+	}
+	return resource.getNavigation(request.user, code)
 
 }
 
@@ -265,7 +283,7 @@ func (action *Action) bindAction() error {
 	return nil
 }
 
-func (resource *Resource[T]) getListItemActions(user *user, item interface{}, id int64) listItemActions {
+func (resource *Resource[T]) getListItemActions(user *user, item *T, id int64) listItemActions {
 	ret := listItemActions{}
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{

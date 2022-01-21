@@ -13,7 +13,7 @@ import (
 )
 
 func (resource *Resource[T]) initDefaultResourceAPIs() {
-	newResourceAPI(resource, "list").Handler(
+	resource.API("list").Handler(
 		func(request *Request) {
 			if request.Request().URL.Query().Get("_format") == "json" {
 				listDataJSON, err := resource.getListContentJSON(request.user, request.Request().URL.Query())
@@ -63,7 +63,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 		},
 	)
 
-	newResourceAPI(resource, "preview-relation/:id").Handler(
+	resource.API("preview-relation/:id").Handler(
 		func(request *Request) {
 			item := resource.Is("id", request.Params().Get("id")).First()
 			if item == nil {
@@ -72,12 +72,12 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 			}
 
 			request.RenderJSON(
-				resource.itemToRelationData(item, request.user, nil),
+				resource.getPreview(item, request.user, nil),
 			)
 		},
 	)
 
-	newResourceAPI(resource, "set-order").Permission(resource.canUpdate).Method("POST").Handler(
+	resource.API("set-order").Permission(resource.canUpdate).Method("POST").Handler(
 		func(request *Request) {
 			if resource.orderField == nil {
 				panic("can't order")
@@ -102,7 +102,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 		},
 	)
 
-	newResourceAPI(resource, "searchresource").Handler(
+	resource.API("searchresource").Handler(
 		func(request *Request) {
 			q := request.Params().Get("q")
 
@@ -114,7 +114,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 			if err == nil {
 				item := resource.Is("id", id).First()
 				if item != nil {
-					relationItem := resource.itemToRelationData(item, request.user, nil)
+					relationItem := resource.getPreview(item, request.user, nil)
 					if relationItem != nil {
 						usedIDs[relationItem.ID] = true
 						ret = append(ret, *relationItem)
@@ -124,15 +124,13 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 			filter := "%" + q + "%"
 			for _, v := range []string{"name", "description"} {
-				field := resource.fieldMap[v]
+				field := resource.Field(v)
 				if field == nil {
 					continue
 				}
 				items := resource.Query().Limit(5).Where(v+" LIKE ?", filter).List()
-				itemsVal := reflect.ValueOf(items)
-				for i := 0; i < itemsVal.Len(); i++ {
-					item := itemsVal.Index(i).Interface()
-					viewItem := resource.itemToRelationData(item, request.user, nil)
+				for _, item := range items {
+					viewItem := resource.getPreview(item, request.user, nil)
 					if viewItem != nil && !usedIDs[viewItem.ID] {
 						usedIDs[viewItem.ID] = true
 						ret = append(ret, *viewItem)
@@ -153,7 +151,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 		},
 	)
 
-	newResourceAPI(resource, "multipleaction").Method("POST").Handler(
+	resource.API("multipleaction").Method("POST").Handler(
 		func(request *Request) {
 			var ids []int64
 
@@ -196,7 +194,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 					if app.search != nil {
 						go func() {
-							err := app.search.saveItem(resource, item)
+							err := resource.saveSearchItem(item)
 							if err != nil {
 								app.Log().Println(fmt.Errorf("%s", err))
 							}
@@ -251,7 +249,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 		},
 	)
 
-	newResourceAPI(resource, "multiple_edit").Permission(resource.canUpdate).Method("GET").Handler(
+	resource.API("multiple_edit").Permission(resource.canUpdate).Method("GET").Handler(
 		func(request *Request) {
 			var item T
 			form := NewForm(
@@ -267,7 +265,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 		},
 	)
 
-	newResourceAPI(resource, "multiple_edit").Permission(resource.canUpdate).Method("POST").Handler(
+	resource.API("multiple_edit").Permission(resource.canUpdate).Method("POST").Handler(
 		func(request *Request) {
 
 			validateCSRF(request)

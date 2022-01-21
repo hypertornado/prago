@@ -34,15 +34,6 @@ func (resource *Resource[T]) Field(name string) *Field {
 	return resource.fieldMap[columnName(name)]
 }
 
-//GetRelatedResourceName gets related resource name
-func (field *Field) GetRelatedResourceName() string {
-	relatedTag := field.tags["prago-relation"]
-	if relatedTag != "" {
-		return strings.ToLower(relatedTag)
-	}
-	return field.columnName
-}
-
 func (field *Field) authorizeView(user *user) bool {
 	if !field.resource.getApp().authorize(user, field.resource.getPermissionView()) {
 		return false

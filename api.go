@@ -32,10 +32,6 @@ func (app *App) API(url string) *API {
 }
 
 func (resource *Resource[T]) API(url string) *API {
-	return newResourceAPI(resource, url)
-}
-
-func newResourceAPI[T any](resource *Resource[T], url string) *API {
 	api := newAPI(resource.app, url)
 	api.resource = resource
 	api.permission = resource.canView

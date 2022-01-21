@@ -57,7 +57,7 @@ func (resource *Resource[T]) getItemURL(item interface{}, suffix string) string 
 	return ret
 }
 
-func (app *App) getResourceByName(name string) resourceIface {
+func (app *App) getResourceByID(name string) resourceIface {
 	return app.resourceNameMap[columnName(name)]
 }
 

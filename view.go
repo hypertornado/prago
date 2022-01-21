@@ -20,13 +20,13 @@ type viewField struct {
 	Value    interface{}
 }
 
-func (resource *Resource[T]) getViews(id int, inValues interface{}, user *user) (ret []view) {
-	ret = append(ret, resource.getBasicView(id, inValues, user))
-	ret = append(ret, resource.getAutoRelationsView(id, inValues, user)...)
+func (resource *Resource[T]) getViews(id int, item *T, user *user) (ret []view) {
+	ret = append(ret, resource.getBasicView(id, item, user))
+	ret = append(ret, resource.getRelationViews(id, user)...)
 	return ret
 }
 
-func (resource *Resource[T]) getBasicView(id int, inValues interface{}, user *user) view {
+func (resource *Resource[T]) getBasicView(id int, item *T, user *user) view {
 	ret := view{}
 
 	ret.Items = append(
@@ -48,8 +48,12 @@ func (resource *Resource[T]) getBasicView(id int, inValues interface{}, user *us
 
 		var ifaceVal interface{}
 		reflect.ValueOf(&ifaceVal).Elem().Set(
-			reflect.ValueOf(inValues).Elem().Field(i),
+			reflect.ValueOf(item).Elem().Field(i),
 		)
+
+		fmt.Println("-----")
+		fmt.Println(f.columnName)
+		fmt.Println(ifaceVal)
 
 		ret.Items = append(
 			ret.Items,

@@ -42,8 +42,9 @@ type listHeaderItem struct {
 	CanOrder     bool
 	DefaultShow  bool
 	FilterLayout string
-	Field        *Field
-	FilterData   interface{}
+	//Field        *Field
+	RelatedResourceID string
+	FilterData        interface{}
 }
 
 type listContent struct {
@@ -156,12 +157,17 @@ func (resource *Resource[T]) fieldsStr(user *user) string {
 }
 
 func (field *Field) getListHeaderItem(user *user) listHeaderItem {
+	var relatedResourceID string
+	if field.relatedResource != nil {
+		relatedResourceID = field.relatedResource.getID()
+	}
+
 	headerItem := listHeaderItem{
-		Name:        field.fieldClassName,
-		NameHuman:   field.humanName(user.Locale),
-		ColumnName:  field.columnName,
-		DefaultShow: field.defaultShow,
-		Field:       field,
+		Name:              field.fieldClassName,
+		NameHuman:         field.humanName(user.Locale),
+		ColumnName:        field.columnName,
+		DefaultShow:       field.defaultShow,
+		RelatedResourceID: relatedResourceID,
 	}
 
 	headerItem.FilterLayout = field.filterLayout()
@@ -174,9 +180,9 @@ func (field *Field) getListHeaderItem(user *user) listHeaderItem {
 	}
 
 	if headerItem.FilterLayout == "filter_layout_select" {
-		fn := headerItem.Field.fieldType.filterLayoutDataSource
+		fn := field.fieldType.filterLayoutDataSource
 		if fn == nil {
-			fn = headerItem.Field.fieldType.formDataSource
+			fn = field.fieldType.formDataSource
 		}
 		headerItem.FilterData = fn(field, user)
 	}
@@ -410,10 +416,9 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 
 	rowItems := q.List()
 
-	val := reflect.ValueOf(rowItems)
-	for i := 0; i < val.Len(); i++ {
+	for _, item := range rowItems {
 		row := listRow{}
-		itemVal := val.Index(i).Elem()
+		itemVal := reflect.ValueOf(item).Elem()
 
 		for _, v := range listHeader.Header {
 			if columnsMap[v.ColumnName] {
@@ -422,14 +427,15 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 				if v.ColumnName == orderBy {
 					isOrderedBy = true
 				}
-				row.Items = append(row.Items, res.valueToListCell(user, v.Field, fieldVal, isOrderedBy))
+				row.Items = append(row.Items, res.valueToListCell(user, res.Field(v.ColumnName), fieldVal, isOrderedBy))
 			}
 		}
 
+		//TODO: better find id
 		row.ID = itemVal.FieldByName("ID").Int()
 		row.URL = res.getURL(fmt.Sprintf("%d", row.ID))
 
-		row.Actions = res.getListItemActions(user, val.Index(i).Interface(), row.ID)
+		row.Actions = res.getListItemActions(user, item, row.ID)
 		row.AllowsMultipleActions = res.allowsMultipleActions(user)
 		ret.Rows = append(ret.Rows, row)
 	}

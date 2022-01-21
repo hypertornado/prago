@@ -180,7 +180,7 @@ func (resource *Resource[T]) CreateWithLog(item *T, request *Request) error {
 
 	if resource.app.search != nil {
 		go func() {
-			err := resource.app.search.saveItem(resource, item)
+			err := resource.saveSearchItem(item)
 			if err != nil {
 				resource.app.Log().Println(fmt.Errorf("%s", err))
 			}
@@ -285,7 +285,7 @@ func (resource *Resource[T]) UpdateWithLog(item *T, request *Request) error {
 
 	if resource.app.search != nil {
 		go func() {
-			err = resource.app.search.saveItem(resource, item)
+			err = resource.saveSearchItem(item)
 			if err != nil {
 				resource.app.Log().Println(fmt.Errorf("%s", err))
 			}

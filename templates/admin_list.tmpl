@@ -101,7 +101,7 @@
 {{end}}
 
 {{define "filter_layout_relation"}}
-  <div class="filter_relations admin_table_filter_item admin_table_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}" data-related-resource="{{.Field.GetRelatedResourceName}}">
+  <div class="filter_relations admin_table_filter_item admin_table_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}" data-related-resource="{{.RelatedResourceID}}">
     <input type="hidden" class="filter_relations_hidden">
     <div class="filter_relations_preview">
       <div class="filter_relations_preview_close"></div>
