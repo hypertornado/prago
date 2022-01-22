@@ -1,71 +1,60 @@
 package prago
 
 type Query[T any] struct {
-	resource *Resource[T]
-	query    query
+	resource  *Resource[T]
+	listQuery *listQuery
+	isDebug   bool
 }
 
 func (resource *Resource[T]) Query() *Query[T] {
 	ret := &Query[T]{
-		resource: resource,
-		query:    resource.query(),
+		resource:  resource,
+		listQuery: &listQuery{},
 	}
 	return ret
 }
 
 func (q *Query[T]) Is(name string, value interface{}) *Query[T] {
-	newQ := q.query.is(name, value)
-	q.query = newQ
-	return q
+	return q.Where(sqlFieldToQuery(name), value)
 }
 
 func (q *Query[T]) Where(condition string, values ...interface{}) *Query[T] {
-	newQ := q.query.where(condition, values...)
-	q.query = newQ
+	q.listQuery.where(condition, values...)
 	return q
 }
 
 func (q *Query[T]) Limit(limit int64) *Query[T] {
-	newQ := q.query.limit(limit)
-	q.query = newQ
+	q.listQuery.limit = limit
 	return q
 }
 
 func (q *Query[T]) Offset(limit int64) *Query[T] {
-	newQ := q.query.offset(limit)
-	q.query = newQ
+	q.listQuery.offset = limit
 	return q
 }
 
 func (q *Query[T]) Order(order string) *Query[T] {
-	newQ := q.query.order(order)
-	q.query = newQ
+	q.listQuery.addOrder(order, false)
 	return q
 }
 
 func (q *Query[T]) Debug() *Query[T] {
-	newQ := q.query.debug()
-	q.query = newQ
+	q.isDebug = true
 	return q
 }
 
 func (q *Query[T]) OrderDesc(order string) *Query[T] {
-	newQ := q.query.orderDesc(order)
-	q.query = newQ
+	q.listQuery.addOrder(order, true)
 	return q
 }
 
 func (q *Query[T]) List() []*T {
-	items, err := q.query.list()
+	var items interface{}
+	err := listItems(q.resource, q.resource.app.db, q.resource.getID(), &items, q.listQuery, q.isDebug)
 	if err != nil {
 		panic(err)
 	}
-	transformed, ok := items.([]*T)
-	if !ok {
-		panic("unexpected type")
-	}
-	return transformed
-
+	return items.([]*T)
 }
 
 func (q *Query[T]) First() *T {
@@ -77,5 +66,5 @@ func (q *Query[T]) First() *T {
 }
 
 func (q *Query[T]) Count() (int64, error) {
-	return q.query.count()
+	return countItems(q.resource.app.db, q.resource.getID(), q.listQuery, q.isDebug)
 }

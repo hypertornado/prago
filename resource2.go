@@ -232,8 +232,8 @@ func (resource *Resource[T]) Update(item *T) error {
 }
 
 func (resource *Resource[T]) Delete(id int64) error {
-	var item T
-	count, err := resource.Query().query.is("id", id).deleteWithQuery(&item)
+	q := resource.Is("id", id)
+	count, err := deleteItems(resource.app.db, resource.getID(), q.listQuery, q.isDebug)
 	if err != nil {
 		return err
 	}
