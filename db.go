@@ -211,22 +211,6 @@ func countItems(db dbIface, tableName string, query *listQuery, debugSQL bool) (
 	return i, err
 }
 
-/*func getFirstItem(resource resourceIface, db dbIface, tableName string, item interface{}, query *listQuery, debugSQL bool) error {
-	var items interface{}
-	err := listItems(resource, db, tableName, &items, query, debugSQL)
-	if err != nil {
-		return err
-	}
-
-	val := reflect.ValueOf(items)
-
-	if val.Len() > 0 {
-		reflect.ValueOf(item).Elem().Set(val.Index(0))
-		return nil
-	}
-	return ErrItemNotFound
-}*/
-
 func (resource *Resource[T]) listItems(items interface{}, query *listQuery, debugSQL bool) error {
 	db := resource.app.db
 	tableName := resource.id
@@ -265,6 +249,7 @@ func (resource *Resource[T]) listItems(items interface{}, query *listQuery, debu
 	}
 
 	reflect.ValueOf(items).Elem().Set(slice)
+
 	return nil
 }
 
