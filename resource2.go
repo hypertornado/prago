@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/ast"
 	"reflect"
+	"time"
 )
 
 //https://github.com/golang/go/issues/49085
@@ -210,16 +211,30 @@ func (resource *Resource[T]) Is(name string, value interface{}) *Query[T] {
 }
 
 func (resource *Resource[T]) Create(item *T) error {
-	return resource.createWithDBIface(item, resource.app.db, false)
+	resource.setTimestamp(item, "CreatedAt")
+	resource.setTimestamp(item, "UpdatedAt")
+	return resource.createItem(item, false)
 }
 
 func (resource *Resource[T]) Update(item *T) error {
-	return resource.saveWithDBIface(item, resource.app.db, false)
+	resource.setTimestamp(item, "UpdatedAt")
+	return resource.saveItem(item, false)
+}
+
+func (resource *Resource[T]) setTimestamp(item *T, fieldName string) {
+	val := reflect.ValueOf(item).Elem()
+	fieldVal := val.FieldByName(fieldName)
+	timeVal := reflect.ValueOf(time.Now())
+	if fieldVal.IsValid() &&
+		fieldVal.CanSet() &&
+		fieldVal.Type() == timeVal.Type() {
+		fieldVal.Set(timeVal)
+	}
 }
 
 func (resource *Resource[T]) Delete(id int64) error {
 	q := resource.Is("id", id)
-	count, err := deleteItems(resource.app.db, resource.getID(), q.listQuery, q.isDebug)
+	count, err := resource.deleteItems(q.listQuery, q.isDebug)
 	if err != nil {
 		return err
 	}

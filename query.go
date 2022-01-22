@@ -49,12 +49,11 @@ func (q *Query[T]) OrderDesc(order string) *Query[T] {
 }
 
 func (q *Query[T]) List() []*T {
-	var items interface{}
-	err := q.resource.listItems(&items, q.listQuery, q.isDebug)
+	items, err := q.resource.listItems(q.listQuery, q.isDebug)
 	if err != nil {
 		panic(err)
 	}
-	return items.([]*T)
+	return items
 }
 
 func (q *Query[T]) First() *T {
@@ -66,5 +65,5 @@ func (q *Query[T]) First() *T {
 }
 
 func (q *Query[T]) Count() (int64, error) {
-	return countItems(q.resource.app.db, q.resource.getID(), q.listQuery, q.isDebug)
+	return q.resource.countItems(q.listQuery, q.isDebug)
 }

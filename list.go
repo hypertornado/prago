@@ -503,3 +503,40 @@ func (resource *Resource[T]) valueToListCell(user *user, f *Field, val reflect.V
 	cell.OrderedBy = isOrderedBy
 	return cell
 }
+
+func (resource *Resource[T]) getPaginationData(user *user) (ret []listPaginationData) {
+	var ints []int64
+	var used bool
+
+	for _, v := range []int64{10, 20, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000} {
+		if !used {
+			if v == resource.defaultItemsPerPage {
+				used = true
+			}
+			if resource.defaultItemsPerPage < v {
+				used = true
+				ints = append(ints, resource.defaultItemsPerPage)
+			}
+		}
+		ints = append(ints, v)
+	}
+
+	if resource.defaultItemsPerPage > ints[len(ints)-1] {
+		ints = append(ints, resource.defaultItemsPerPage)
+	}
+
+	for _, v := range ints {
+		var selected bool
+		if v == resource.defaultItemsPerPage {
+			selected = true
+		}
+
+		ret = append(ret, listPaginationData{
+			Name:     messages.ItemsCount(v, user.Locale),
+			Value:    v,
+			Selected: selected,
+		})
+	}
+
+	return
+}
