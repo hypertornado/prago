@@ -93,7 +93,7 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	count, _ = resource.Count()
+	count, _ = resource.Query().Count()
 	if count != 2 {
 		t.Fatalf("wrong count %d", count)
 	}
@@ -168,7 +168,7 @@ func TestQuery(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	count, _ = resource.Count()
+	count, _ = resource.Query().Count()
 	if count != 2 {
 		t.Fatal(count)
 	}
@@ -197,7 +197,7 @@ func TestResource(t *testing.T) {
 	}
 	resource.Create(&ResourceStruct{Name: "Second", Showing: "show"})
 
-	count, err = resource.Count()
+	count, err = resource.Query().Count()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -231,7 +231,7 @@ func TestResourceUnique(t *testing.T) {
 	resource.Create(&ResourceStructUnique{UniqueName: "B"})
 	resource.Create(&ResourceStructUnique{UniqueName: "A"})
 
-	count, err := resource.Count()
+	count, err := resource.Query().Count()
 	if err != nil {
 		t.Fatal(err)
 	}

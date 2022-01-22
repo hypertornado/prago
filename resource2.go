@@ -120,7 +120,6 @@ type resourceIface interface {
 	addValidation(validation Validation)
 
 	getCachedCount() int64
-
 	addRelation(*relatedField)
 
 	getResourceControl() *controller
@@ -144,21 +143,14 @@ type resourceIface interface {
 
 	getURL(suffix string) string
 
-	getStructScanners(reflect.Value) ([]string, []interface{}, error)
-	getTyp() reflect.Type
-
 	getPreviewData(user *user, f *Field, value int64) (*preview, error)
 	getnavigation2(action *Action, request *Request) navigation
-
 	getItemPreview(id int64, user *user, relatedResource resourceIface) *preview
 	getPreviews(listRequest relationListRequest, user *user) []*preview
-	importSearchData(e *adminSearch) error
+
+	importSearchData() error
 	resourceItemName(id int64) string
 	itemWithRelationCount(fieldName string, id int64) int64
-}
-
-func (resource *Resource[T]) getTyp() reflect.Type {
-	return resource.typ
 }
 
 func (resource *Resource[T]) getApp() *App {
@@ -238,10 +230,6 @@ func (resource *Resource[T]) Delete(id int64) error {
 		return fmt.Errorf("more then one item deleted: %d items deleted", count)
 	}
 	return nil
-}
-
-func (resource *Resource[T]) Count() (int64, error) {
-	return resource.Query().Count()
 }
 
 func (resource *Resource[T]) Name(name func(string) string) *Resource[T] {

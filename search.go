@@ -243,7 +243,7 @@ func (e *adminSearch) searchImport() error {
 	}
 
 	for _, v := range e.app.resources {
-		err = v.importSearchData(e)
+		err = v.importSearchData()
 		if err != nil {
 			return fmt.Errorf("while importing resource %s: %s", v.getID(), err)
 		}
@@ -253,7 +253,7 @@ func (e *adminSearch) searchImport() error {
 	return nil
 }
 
-func (resource *Resource[T]) importSearchData(e *adminSearch) error {
+func (resource *Resource[T]) importSearchData() error {
 	roles := resource.getResourceViewRoles()
 	var resourceSearchItem = searchItem{
 		ID:    "resource_" + resource.id,

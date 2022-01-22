@@ -104,7 +104,7 @@ func registrationValidation(vc ValidationContext) {
 			app.Log().Println(err)
 		}
 
-		count, err := app.UsersResource.Count()
+		count, err := app.UsersResource.Query().Count()
 		if err == nil && count == 0 {
 			u.Role = sysadminRoleName
 		}

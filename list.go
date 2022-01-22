@@ -378,7 +378,7 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 		return
 	}
 
-	totalCount, _ := res.Count()
+	totalCount, _ := res.Query().Count()
 	res.updateCachedCount()
 
 	if count == totalCount {

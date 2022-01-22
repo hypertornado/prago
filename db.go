@@ -219,7 +219,7 @@ func (resource *Resource[T]) listItems(items interface{}, query *listQuery, debu
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.conditions)
 
-	newValue := reflect.New(resource.getTyp()).Elem()
+	newValue := reflect.New(resource.typ).Elem()
 	names, _, err := resource.getStructScanners(newValue)
 	if err != nil {
 		return err
@@ -239,7 +239,7 @@ func (resource *Resource[T]) listItems(items interface{}, query *listQuery, debu
 		return err
 	}
 	for rows.Next() {
-		newValue = reflect.New(resource.getTyp())
+		newValue = reflect.New(resource.typ)
 		_, scanners, err := resource.getStructScanners(newValue.Elem())
 		if err != nil {
 			return err
