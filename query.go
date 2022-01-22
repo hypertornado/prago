@@ -50,7 +50,7 @@ func (q *Query[T]) OrderDesc(order string) *Query[T] {
 
 func (q *Query[T]) List() []*T {
 	var items interface{}
-	err := listItems(q.resource, q.resource.app.db, q.resource.getID(), &items, q.listQuery, q.isDebug)
+	err := q.resource.listItems(&items, q.listQuery, q.isDebug)
 	if err != nil {
 		panic(err)
 	}

@@ -211,7 +211,7 @@ func countItems(db dbIface, tableName string, query *listQuery, debugSQL bool) (
 	return i, err
 }
 
-func getFirstItem(resource resourceIface, db dbIface, tableName string, item interface{}, query *listQuery, debugSQL bool) error {
+/*func getFirstItem(resource resourceIface, db dbIface, tableName string, item interface{}, query *listQuery, debugSQL bool) error {
 	var items interface{}
 	err := listItems(resource, db, tableName, &items, query, debugSQL)
 	if err != nil {
@@ -225,10 +225,12 @@ func getFirstItem(resource resourceIface, db dbIface, tableName string, item int
 		return nil
 	}
 	return ErrItemNotFound
-}
+}*/
 
-func listItems(resource resourceIface, db dbIface, tableName string, items interface{}, query *listQuery, debugSQL bool) error {
-	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(resource.getTyp()))).Elem()
+func (resource *Resource[T]) listItems(items interface{}, query *listQuery, debugSQL bool) error {
+	db := resource.app.db
+	tableName := resource.id
+	slice := reflect.New(reflect.SliceOf(reflect.PtrTo(resource.typ))).Elem()
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.conditions)

@@ -118,12 +118,8 @@ type resourceIface interface {
 	initDefaultResourceAPIs()
 	createRelations()
 	addValidation(validation Validation)
-	isOrderDesc() bool
-	getOrderByColumn() string
 
-	updateCachedCount() error
 	getCachedCount() int64
-	count() int64
 
 	addRelation(*relatedField)
 
@@ -148,17 +144,15 @@ type resourceIface interface {
 
 	getURL(suffix string) string
 
-	//query() query
-
 	getStructScanners(reflect.Value) ([]string, []interface{}, error)
 	getTyp() reflect.Type
 
 	getPreviewData(user *user, f *Field, value int64) (*preview, error)
 	getnavigation2(action *Action, request *Request) navigation
 
+	getItemPreview(id int64, user *user, relatedResource resourceIface) *preview
 	getPreviews(listRequest relationListRequest, user *user) []*preview
 	importSearchData(e *adminSearch) error
-	getItemPreview(id int64, user *user, relatedResource resourceIface) *preview
 	resourceItemName(id int64) string
 	itemWithRelationCount(fieldName string, id int64) int64
 }
