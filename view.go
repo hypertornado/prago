@@ -51,10 +51,6 @@ func (resource *Resource[T]) getBasicView(id int, item *T, user *user) view {
 			reflect.ValueOf(item).Elem().Field(i),
 		)
 
-		fmt.Println("-----")
-		fmt.Println(f.columnName)
-		fmt.Println(ifaceVal)
-
 		ret.Items = append(
 			ret.Items,
 			viewField{

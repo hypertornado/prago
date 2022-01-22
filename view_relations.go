@@ -28,9 +28,7 @@ func (resource *Resource[T]) getRelationView(id int, field *relatedField, user *
 		return nil
 	}
 
-	q := field.resource.query().is(field.columnName, fmt.Sprintf("%d", id))
-	filteredCount, err := q.count()
-	must(err)
+	filteredCount := field.resource.itemWithRelationCount(field.columnName, int64(id))
 
 	ret := &view{}
 
@@ -58,6 +56,14 @@ func (resource *Resource[T]) getRelationView(id int, field *relatedField, user *
 		Count:          filteredCount,
 	}
 	return ret
+}
+
+func (resource *Resource[T]) itemWithRelationCount(fieldID string, id int64) int64 {
+	filteredCount, err := resource.Is(fieldID, id).Count()
+	if err != nil {
+		panic(err)
+	}
+	return filteredCount
 }
 
 type relationListRequest struct {

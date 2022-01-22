@@ -171,19 +171,6 @@ func (action *Action) hiddenMenu() *Action {
 
 func (action *Action) getnavigation(request *Request) navigation {
 	return action.resource.getnavigation2(action, request)
-	/*if action.resource != nil {
-		code := action.url
-		if action.isItemAction {
-			item, err := action.resource.query().is("id", request.Params().Get("id")).first()
-			if err == nil {
-				return action.resource.getItemNavigation(request.user, item, code)
-			} else {
-				return navigation{}
-			}
-		}
-		return action.resource.getNavigation(request.user, code)
-	}
-	return navigation{}*/
 }
 
 func (resource *Resource[T]) getnavigation2(action *Action, request *Request) navigation {

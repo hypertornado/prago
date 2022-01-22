@@ -153,14 +153,14 @@ type resourceIface interface {
 	getStructScanners(reflect.Value) ([]string, []interface{}, error)
 	getTyp() reflect.Type
 
-	getItemNavigation(*user, interface{}, string) navigation
-	getNavigation(*user, string) navigation
 	getPreviewData(user *user, f *Field, value int64) (*preview, error)
 	getnavigation2(action *Action, request *Request) navigation
 
 	getPreviews(listRequest relationListRequest, user *user) []*preview
 	importSearchData(e *adminSearch) error
 	getItemPreview(id int64, user *user, relatedResource resourceIface) *preview
+	resourceItemName(id int64) string
+	itemWithRelationCount(fieldName string, id int64) int64
 }
 
 func (resource *Resource[T]) getTyp() reflect.Type {

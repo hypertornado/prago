@@ -132,7 +132,7 @@ func getItemName(item interface{}) string {
 	return fmt.Sprintf("#%d", getItemID(item))
 }
 
-func (resource *Resource[T]) getItemDescription(item interface{}, user *user, relatedResource resourceIface) string {
+func (resource *Resource[T]) getItemDescription(item *T, user *user, relatedResource resourceIface) string {
 	var items []string
 	itemsVal := reflect.ValueOf(item).Elem()
 
@@ -172,6 +172,7 @@ func (resource *Resource[T]) getItemDescription(item interface{}, user *user, re
 }
 
 func (app App) relationStringer(field Field, value reflect.Value, user *user) string {
+
 	switch value.Kind() {
 	case reflect.String:
 		if field.tags["prago-type"] == "image" || field.tags["prago-type"] == "file" {
@@ -183,13 +184,7 @@ func (app App) relationStringer(field Field, value reflect.Value, user *user) st
 			if value.Int() <= 0 {
 				return ""
 			}
-			rr := field.relatedResource
-
-			item, err := rr.query().is("id", int64(value.Int())).first()
-			if err != nil {
-				return fmt.Sprintf("%d", value.Int())
-			}
-			return getItemName(item)
+			field.relatedResource.resourceItemName(int64(value.Int()))
 		}
 		return fmt.Sprintf("%v", value.Int())
 	case reflect.Float32, reflect.Float64:
@@ -210,6 +205,14 @@ func (app App) relationStringer(field Field, value reflect.Value, user *user) st
 		}
 	}
 	return ""
+}
+
+func (resource *Resource[T]) resourceItemName(id int64) string {
+	item := resource.Is("id", id).First()
+	if item == nil {
+		return fmt.Sprintf("%d - not found", id)
+	}
+	return getItemName(item)
 }
 
 func getItemID(item interface{}) int64 {
