@@ -148,7 +148,7 @@ type resourceIface interface {
 
 	getURL(suffix string) string
 
-	query() query
+	//query() query
 
 	getStructScanners(reflect.Value) ([]string, []interface{}, error)
 	getTyp() reflect.Type
