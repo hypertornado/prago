@@ -32,7 +32,8 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 			var item T
 			resource.bindData(&item, request.user, request.Params())
 			if resource.orderField != nil {
-				resource.setOrderPosition(&item, resource.count()+1)
+				count, _ := resource.Query().Count()
+				resource.setOrderPosition(&item, count+1)
 			}
 			must(resource.CreateWithLog(&item, request))
 

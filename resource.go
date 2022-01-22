@@ -77,21 +77,18 @@ func (resource *Resource[T]) getURL(suffix string) string {
 	return resource.app.getAdminURL(url)
 }
 
-func (resource *Resource[T]) count() int64 {
-	count, _ := resource.Query().Count()
-	return count
-}
-
 func (resource *Resource[T]) cachedCountName() string {
-	return fmt.Sprintf("resource_count-%s", resource.id)
+	return fmt.Sprintf("prago-resource_count-%s", resource.id)
 }
 
 func (resource *Resource[T]) getCachedCount() int64 {
 	return resource.app.cache.Load(resource.cachedCountName(), func() interface{} {
-		return resource.count()
+		count, _ := resource.Query().Count()
+		return count
 	}).(int64)
 }
 
 func (resource *Resource[T]) updateCachedCount() error {
-	return resource.app.cache.set(resource.cachedCountName(), resource.count())
+	count, _ := resource.Query().Count()
+	return resource.app.cache.set(resource.cachedCountName(), count)
 }
