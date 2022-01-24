@@ -60,7 +60,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 			resource.addFormItems(item, request.user, form)
 			form.AddSubmit(messages.Get(request.user.Locale, "admin_save"))
 		},
-	).Validation(func(vc ValidationContext) {
+	).Validation(func(_ *T, vc ValidationContext) {
 		request := vc.Request()
 		params := request.Params()
 
@@ -95,19 +95,11 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 			itemName := getItemName(item)
 			form.Title = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
 		},
-	).Validation(func(vc ValidationContext) {
+	).Validation(func(item *T, vc ValidationContext) {
 		for _, v := range resource.deleteValidations {
 			v(vc)
 		}
 		if vc.Valid() {
-			id, err := strconv.Atoi(vc.GetValue("id"))
-			must(err)
-
-			item := resource.Is("id", id).First()
-			if item == nil {
-				panic(fmt.Sprintf("can't find item for deletion id '%d'", id))
-			}
-
 			must(resource.DeleteWithLog(item, vc.Request()))
 			vc.Request().AddFlashMessage(messages.Get(vc.Request().user.Locale, "admin_item_deleted"))
 			vc.Validation().RedirectionLocaliton = resource.getURL("")

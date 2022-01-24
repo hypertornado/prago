@@ -52,7 +52,13 @@ func (action *FormItemAction[T]) Form(formGenerator func(*T, *Form, *Request)) *
 	return action
 }
 
-func (action *FormItemAction[T]) Validation(validation Validation) *FormItemAction[T] {
-	action.formAction.Validation(validation)
+func (action *FormItemAction[T]) Validation(validation func(*T, ValidationContext)) *FormItemAction[T] {
+	action.formAction.Validation(func(vc ValidationContext) {
+		item := action.resource.Is("id", vc.GetValue("id")).First()
+		if item == nil {
+			panic("can't find item")
+		}
+		validation(item, vc)
+	})
 	return action
 }

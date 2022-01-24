@@ -263,8 +263,7 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 			f.AddTextareaInput("emails", "Seznam emailů na poslání preview (jeden email na řádek)").Focused = true
 			f.AddSubmit("Odeslat náhled")
 		},
-	).Validation(func(vc ValidationContext) {
-		newsletter := resource.Is("id", vc.GetValue("id")).First()
+	).Validation(func(newsletter *newsletter, vc ValidationContext) {
 		newsletter.PreviewSentAt = time.Now()
 		err := resource.Update(newsletter)
 		if err != nil {
@@ -294,22 +293,22 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 			form.AddSubmit(fmt.Sprintf("Odelsat newsletter na %d emailů", len(recipients)))
 		},
 	).Validation(
-		func(vc ValidationContext) {
-			nl := resource.Is("id", vc.GetValue("id")).First()
-			nl.SentAt = time.Now()
+		func(newsletter *newsletter, vc ValidationContext) {
+			//nl := resource.Is("id", vc.GetValue("id")).First()
+			newsletter.SentAt = time.Now()
 			//TODO: log sent emails
-			must(resource.Update(nl))
+			must(resource.Update(newsletter))
 
 			recipients, err := resource.app.getNewsletterRecipients()
 			if err != nil {
 				panic(err)
 			}
 
-			go resource.app.sendEmails(*nl, recipients)
+			go resource.app.sendEmails(*newsletter, recipients)
 
-			vc.Request().AddFlashMessage(fmt.Sprintf("Newsletter '%s' se odesílá na %d adres", nl.Name, len(recipients)))
+			vc.Request().AddFlashMessage(fmt.Sprintf("Newsletter '%s' se odesílá na %d adres", newsletter.Name, len(recipients)))
 
-			vc.Validation().RedirectionLocaliton = resource.getItemURL(&nl, "")
+			vc.Validation().RedirectionLocaliton = resource.getItemURL(&newsletter, "")
 		},
 	)
 
@@ -317,15 +316,12 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 		func(newsletter *newsletter, f *Form, r *Request) {
 			f.AddSubmit("Duplikovat newsletter")
 		},
-	).Validation(func(vc ValidationContext) {
-		newsletterResource := GetResource[newsletter](vc.Request().app)
-		newsletter := newsletterResource.Is("id", vc.GetValue("id")).First()
-
+	).Validation(func(newsletter *newsletter, vc ValidationContext) {
 		newsletterSectionResource := GetResource[newsletterSection](vc.Request().app)
 		sections := newsletterSectionResource.Is("newsletter", newsletter.ID).Order("orderposition").List()
 
 		newsletter.ID = 0
-		must(newsletterResource.Create(newsletter))
+		must(resource.CreateWithLog(newsletter, vc.Request()))
 
 		for _, v := range sections {
 			section := *v
