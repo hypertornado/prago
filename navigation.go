@@ -87,20 +87,16 @@ func renderPage(request *Request, page page) {
 	request.RenderViewWithCode(layout, code)
 }
 
-func (resource *Resource[T]) getNavigation(user *user, code string) navigation {
+func (resource *Resource[T]) getResourceNavigation(user *user, code string) navigation {
 	var tabs []tab
 	for _, v := range resource.actions {
-		if v.method == "GET" {
-			if resource.app.authorize(user, v.permission) {
-				name := v.url
-				if v.name != nil {
-					name = v.name(user.Locale)
-				}
+		if v.getMethod() == "GET" {
+			if resource.app.authorize(user, v.getPermission()) {
 				tabs = append(tabs, tab{
-					Name:     name,
-					URL:      resource.getURL(v.url),
-					Selected: trueIfEqual(code, v.url),
-					priority: v.isPriority,
+					Name:     v.getName(user.Locale),
+					URL:      resource.getURL(v.getURLToken()),
+					Selected: trueIfEqual(code, v.getURLToken()),
+					priority: v.returnIsPriority(),
 				})
 			}
 		}
@@ -114,21 +110,17 @@ func (resource *Resource[T]) getNavigation(user *user, code string) navigation {
 func (resource *Resource[T]) getItemNavigation(user *user, item interface{}, code string) navigation {
 	var tabs []tab
 	for _, v := range resource.itemActions {
-		if v.method == "GET" {
-			name := v.url
-			if v.url == "" {
+		if v.getMethod() == "GET" {
+			name := v.getName(user.Locale)
+			if v.getURLToken() == "" {
 				name = getItemName(item)
-			} else {
-				if v.name != nil {
-					name = v.name(user.Locale)
-				}
 			}
-			if resource.app.authorize(user, v.permission) {
+			if resource.app.authorize(user, v.getPermission()) {
 				tabs = append(tabs, tab{
 					Name:     name,
-					URL:      resource.getItemURL(item, v.url),
-					Selected: trueIfEqual(code, v.url),
-					priority: v.isPriority,
+					URL:      resource.getItemURL(item, v.getURLToken()),
+					Selected: trueIfEqual(code, v.getURLToken()),
+					priority: v.returnIsPriority(),
 				})
 			}
 		}

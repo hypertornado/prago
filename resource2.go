@@ -28,8 +28,8 @@ type Resource[T any] struct {
 	canDelete Permission
 	canExport Permission
 
-	actions     []*Action
-	itemActions []*Action
+	actions     []ActionIface
+	itemActions []ActionIface
 
 	relations []*relatedField
 

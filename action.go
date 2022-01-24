@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -31,11 +30,37 @@ type Action struct {
 	isPriority   bool
 }
 
+func bindAction(action ActionIface) error {
+	url := action.getURL()
+	controller := action.getController()
+
+	var fn = action.getHandler()
+	constraints := action.getConstraints()
+
+	if action.getPermission() == "" {
+		panic(fmt.Sprintf("Permission for action '%s %s' should not be empty", action.getMethod(), url))
+	}
+
+	switch action.getMethod() {
+	case "POST":
+		controller.post(url, fn, constraints...)
+	case "GET":
+		controller.get(url, fn, constraints...)
+	case "PUT":
+		controller.put(url, fn, constraints...)
+	case "DELETE":
+		controller.delete(url, fn, constraints...)
+	default:
+		return fmt.Errorf("unknown method %s", action.getMethod())
+	}
+	return nil
+}
+
 func (app *App) bindAllActions() {
 	for _, v := range app.rootActions {
-		err := v.bindAction()
+		err := bindAction(v)
 		if err != nil {
-			panic(fmt.Sprintf("error while binding root action %s %s: %s", v.method, v.name("en"), err))
+			panic(fmt.Sprintf("error while binding root action %s %s: %s", v.getMethod(), v.getName("en"), err))
 		}
 	}
 
@@ -46,15 +71,15 @@ func (app *App) bindAllActions() {
 
 func (resource *Resource[T]) bindActions() {
 	for _, v := range resource.actions {
-		err := v.bindAction()
+		err := bindAction(v)
 		if err != nil {
-			panic(fmt.Sprintf("error while binding resource %s action %s %s: %s", resource.id, v.method, v.name("en"), err))
+			panic(fmt.Sprintf("error while binding resource %s action %s %s: %s", resource.id, v.getMethod(), v.getName("en"), err))
 		}
 	}
 	for _, v := range resource.itemActions {
-		err := v.bindAction()
+		err := bindAction(v)
 		if err != nil {
-			panic(fmt.Sprintf("error while binding item resource %s action %s %s: %s", resource.id, v.method, v.name("en"), err))
+			panic(fmt.Sprintf("error while binding item resource %s action %s %s: %s", resource.id, v.getMethod(), v.getName("en"), err))
 		}
 	}
 }
@@ -170,7 +195,10 @@ func (action *Action) hiddenMenu() *Action {
 }
 
 func (action *Action) getnavigation(request *Request) navigation {
-	return action.resource.getnavigation2(action, request)
+	if action.resource != nil {
+		return action.resource.getnavigation2(action, request)
+	}
+	return navigation{}
 }
 
 func (resource *Resource[T]) getnavigation2(action *Action, request *Request) navigation {
@@ -187,87 +215,8 @@ func (resource *Resource[T]) getnavigation2(action *Action, request *Request) na
 			return navigation{}
 		}
 	}
-	return resource.getNavigation(request.user, code)
+	return resource.getResourceNavigation(request.user, code)
 
-}
-
-func (action *Action) bindAction() error {
-	app := action.app
-	if strings.HasPrefix(action.url, "/") {
-		return errors.New("url can't start with / character")
-	}
-
-	var url string
-	if action.resource == nil {
-		url = app.getAdminURL(action.url)
-	} else {
-		resource := action.resource
-		if action.isItemAction {
-			if action.url != "" {
-				url = resource.getURL(":id/" + action.url)
-			} else {
-				url = resource.getURL(":id")
-			}
-		} else {
-			url = resource.getURL(action.url)
-		}
-	}
-
-	var controller *controller
-	if action.resource != nil {
-		controller = action.resource.getResourceControl()
-	} else {
-		controller = app.adminController
-	}
-
-	var fn = func(request *Request) {
-		if !app.authorize(request.user, action.permission) {
-			render403(request)
-			return
-		}
-		if action.handler != nil {
-			action.handler(request)
-		} else {
-			var data interface{}
-			if action.dataSource != nil {
-				data = action.dataSource(request)
-			}
-			var hideBox bool
-			if action.isWide {
-				hideBox = true
-			}
-			renderPage(request, page{
-				App:          app,
-				Navigation:   action.getnavigation(request),
-				PageTemplate: action.template,
-				PageData:     data,
-				HideBox:      hideBox,
-			})
-		}
-	}
-
-	constraints := []func(map[string]string) bool{}
-	if action.isItemAction {
-		constraints = append(constraints, constraintInt("id"))
-	}
-
-	if action.permission == "" {
-		panic(fmt.Sprintf("Permission for action '%s %s' should not be empty", action.method, url))
-	}
-
-	switch action.method {
-	case "POST":
-		controller.post(url, fn, constraints...)
-	case "GET":
-		controller.get(url, fn, constraints...)
-	case "PUT":
-		controller.put(url, fn, constraints...)
-	case "DELETE":
-		controller.delete(url, fn, constraints...)
-	default:
-		return fmt.Errorf("unknown method %s", action.method)
-	}
-	return nil
 }
 
 func (resource *Resource[T]) getListItemActions(user *user, item *T, id int64) listItemActions {

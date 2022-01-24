@@ -81,28 +81,8 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 
 	ret.Sections = append(ret.Sections, adminSection)
 
-	resourceSection := mainMenuSection{
-		Name: messages.Get(user.Locale, "admin_tables"),
-	}
-	for _, resource := range app.getSortedResources(user.Locale) {
-		if app.authorize(user, resource.getPermissionView()) {
-			resourceURL := resource.getURL("")
-			var selected bool
-			if request.Request().URL.Path == resourceURL {
-				selected = true
-			}
-			if strings.HasPrefix(request.Request().URL.Path, resourceURL+"/") {
-				selected = true
-			}
+	resourceSection := app.getResourcesMainMenuSection(request, user)
 
-			resourceSection.Items = append(resourceSection.Items, mainMenuItem{
-				Name:     resource.getName(user.Locale),
-				Subname:  humanizeNumber(resource.getCachedCount()),
-				URL:      resourceURL,
-				Selected: selected,
-			})
-		}
-	}
 	ret.Sections = append(ret.Sections, resourceSection)
 
 	userName := user.Name
@@ -154,6 +134,32 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 	}
 
 	return ret
+}
+
+func (app *App) getResourcesMainMenuSection(request *Request, user *user) mainMenuSection {
+	resourceSection := mainMenuSection{
+		Name: messages.Get(user.Locale, "admin_tables"),
+	}
+	for _, resource := range app.getSortedResources(user.Locale) {
+		if app.authorize(user, resource.getPermissionView()) {
+			resourceURL := resource.getURL("")
+			var selected bool
+			if request.Request().URL.Path == resourceURL {
+				selected = true
+			}
+			if strings.HasPrefix(request.Request().URL.Path, resourceURL+"/") {
+				selected = true
+			}
+
+			resourceSection.Items = append(resourceSection.Items, mainMenuItem{
+				Name:     resource.getName(user.Locale),
+				Subname:  humanizeNumber(resource.getCachedCount()),
+				URL:      resourceURL,
+				Selected: selected,
+			})
+		}
+	}
+	return resourceSection
 }
 
 func (app *App) getSortedResources(locale string) (ret []resourceIface) {
