@@ -249,7 +249,6 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 
 	resource.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(
 		func(item *newsletter, request *Request) {
-			//newsletter := resource.Is("id", request.Params().Get("id")).First()
 			body, err := resource.app.newsletters.GetBody(*item, "")
 			must(err)
 
@@ -294,7 +293,6 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 		},
 	).Validation(
 		func(newsletter *newsletter, vc ValidationContext) {
-			//nl := resource.Is("id", vc.GetValue("id")).First()
 			newsletter.SentAt = time.Now()
 			//TODO: log sent emails
 			must(resource.Update(newsletter))
