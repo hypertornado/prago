@@ -8,7 +8,7 @@ import (
 )
 
 func (resource *Resource[T]) initDefaultResourceActions() {
-	resource.Action("").priority().Permission(resource.canView).Name(resource.name).IsWide().Template("admin_list").DataSource(
+	resource.Action("").priority().Permission(resource.canView).Name(resource.name).Template("admin_list").DataSource(
 		func(request *Request) interface{} {
 			listData, err := resource.getListHeader(request.user)
 			must(err)
@@ -45,7 +45,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 		}
 	})
 
-	resource.ItemAction("").priority().IsWide().Template("admin_views").Permission(resource.canView).DataSource(
+	resource.ItemAction("").priority().Template("admin_views").Permission(resource.canView).DataSource(
 		func(item *T, request *Request) interface{} {
 			if item == nil {
 				render404(request)
@@ -117,13 +117,13 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 	}
 
 	if resource.activityLog {
-		resource.Action("history").priority().IsWide().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resource.canUpdate).DataSource(
+		resource.Action("history").priority().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resource.canUpdate).DataSource(
 			func(request *Request) interface{} {
 				return resource.app.getHistory(resource, 0)
 			},
 		)
 
-		resource.ItemAction("history").priority().IsWide().Name(messages.GetNameFunction("admin_history")).Permission(resource.canUpdate).Template("admin_history").DataSource(
+		resource.ItemAction("history").priority().Name(messages.GetNameFunction("admin_history")).Permission(resource.canUpdate).Template("admin_history").DataSource(
 			func(item *T, request *Request) interface{} {
 				if item == nil {
 					return nil

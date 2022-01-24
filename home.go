@@ -6,8 +6,7 @@ func (app *App) initHome() {
 		Permission(loggedPermission).
 		Name(messages.GetNameFunction("admin_signpost")).
 		Template("admin_home_navigation").
-		DataSource(app.getHomeData).
-		IsWide()
+		DataSource(app.getHomeData)
 }
 
 func (app *App) getHomeData(request *Request) interface{} {

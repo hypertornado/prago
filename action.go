@@ -21,13 +21,12 @@ type Action struct {
 	template   string
 	dataSource func(*Request) interface{}
 
-	app          *App
-	resource     resourceIface
-	isItemAction bool
-	isWide       bool
-	isUserMenu   bool
-	isHiddenMenu bool
-	isPriority   bool
+	app                *App
+	resource           resourceIface
+	isItemAction       bool
+	isUserMenu         bool
+	isHiddenInMainMenu bool
+	isPriority         bool
 }
 
 func bindAction(action ActionIface) error {
@@ -168,19 +167,13 @@ func (action *Action) DataSource(dataSource func(*Request) interface{}) *Action 
 	return action
 }
 
-//IsWide sets rendering to fill whole realestate of page, no box is rendered
-func (action *Action) IsWide() *Action {
-	action.isWide = true
-	return action
-}
-
 func (action *Action) userMenu() *Action {
 	action.isUserMenu = true
 	return action
 }
 
-func (action *Action) hiddenMenu() *Action {
-	action.isHiddenMenu = true
+func (action *Action) hiddenInMainMenu() *Action {
+	action.isHiddenInMainMenu = true
 	return action
 }
 

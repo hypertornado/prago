@@ -44,7 +44,7 @@ func (app *App) initTaskManager() {
 
 	go app.taskManager.startCRON()
 
-	app.Action("tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).IsWide().Template("admin_tasks").DataSource(GetTaskViewData)
+	app.Action("tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).Template("admin_tasks").DataSource(GetTaskViewData)
 
 	app.API("tasks/runtask").Method("POST").Permission(loggedPermission).Handler(func(request *Request) {
 		id := request.Request().FormValue("id")

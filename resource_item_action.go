@@ -23,11 +23,6 @@ func (action *ResourceItemAction[T]) priority() *ResourceItemAction[T] {
 	return action
 }
 
-func (action *ResourceItemAction[T]) IsWide() *ResourceItemAction[T] {
-	action.action.IsWide()
-	return action
-}
-
 func (action *ResourceItemAction[T]) Template(template string) *ResourceItemAction[T] {
 	action.action.Template(template)
 	return action

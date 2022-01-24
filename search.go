@@ -335,7 +335,7 @@ func (app *App) initSearchInner() {
 		}
 	}()
 
-	app.Action("_search").Permission(loggedPermission).Name(unlocalized("Vyhledávání")).Template("admin_search").IsWide().hiddenMenu().DataSource(
+	app.Action("_search").Permission(loggedPermission).Name(unlocalized("Vyhledávání")).Template("admin_search").hiddenInMainMenu().DataSource(
 		func(request *Request) interface{} {
 			q := request.Params().Get("q")
 			pageStr := request.Params().Get("page")

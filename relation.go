@@ -10,10 +10,6 @@ import (
 
 type relatedField Field
 
-/*type relation struct {
-	field *Field
-}*/
-
 type preview struct {
 	ID          int64
 	Image       string

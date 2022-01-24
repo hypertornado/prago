@@ -77,16 +77,11 @@ func (action *Action) getHandler() func(*Request) {
 			if action.dataSource != nil {
 				data = action.dataSource(request)
 			}
-			var hideBox bool
-			if action.isWide {
-				hideBox = true
-			}
 			renderPage(request, page{
 				App:          action.app,
 				Navigation:   action.getnavigation(request),
 				PageTemplate: action.template,
 				PageData:     data,
-				HideBox:      hideBox,
 			})
 		}
 	}

@@ -6,7 +6,6 @@ type page struct {
 	Navigation   navigation
 	PageTemplate string
 	PageData     interface{}
-	HideBox      bool
 	HTTPCode     int
 }
 

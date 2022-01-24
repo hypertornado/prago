@@ -42,7 +42,7 @@ func (app *App) initAdminActions() {
 
 		next()
 	})
-	app.Action("markdown").Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).hiddenMenu().Template("admin_help_markdown").IsWide()
+	app.Action("markdown").Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).hiddenInMainMenu().Template("admin_help_markdown")
 
 	app.accessController.get("/admin/logo", func(request *Request) {
 		request.w.Write(app.logo)
@@ -79,7 +79,6 @@ func render403(request *Request) {
 	renderPage(request, page{
 		Name:         title,
 		PageTemplate: "admin_message",
-		HideBox:      true,
 		PageData: map[string]interface{}{
 			"message": title,
 		},
@@ -92,7 +91,6 @@ func render404(request *Request) {
 	renderPage(request, page{
 		Name:         title,
 		PageTemplate: "admin_message",
-		HideBox:      true,
 		PageData: map[string]interface{}{
 			"message": title,
 		},

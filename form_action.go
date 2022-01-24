@@ -12,7 +12,7 @@ type FormAction struct {
 
 func newFormAction(app *App, url string) *FormAction {
 	ret := &FormAction{
-		actionForm:       newAction(app, url).Template("admin_form").IsWide(),
+		actionForm:       newAction(app, url).Template("admin_form"),
 		actionValidation: newAction(app, url).Method("POST"),
 	}
 
@@ -61,7 +61,6 @@ func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Reques
 			Navigation:   app.getNologinNavigation(locale, id),
 			PageTemplate: "admin_form",
 			PageData:     form,
-			HideBox:      true,
 		})
 	})
 
@@ -105,11 +104,6 @@ func (formAction *FormAction) Validation(validation Validation) *FormAction {
 func (formAction *FormAction) Permission(permission Permission) *FormAction {
 	formAction.actionForm.Permission(permission)
 	formAction.actionValidation.Permission(permission)
-	return formAction
-}
-
-func (formAction *FormAction) IsWide() *FormAction {
-	formAction.actionForm.IsWide()
 	return formAction
 }
 
