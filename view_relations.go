@@ -13,7 +13,7 @@ type viewRelation struct {
 	Count          int64
 }
 
-func (resource *Resource[T]) getRelationViews(id int, user *user) (ret []view) {
+func (resource *Resource[T]) getRelationViews(id int64, user *user) (ret []view) {
 	for _, v := range resource.relations {
 		vi := resource.getRelationView(id, v, user)
 		if vi != nil {
@@ -23,7 +23,7 @@ func (resource *Resource[T]) getRelationViews(id int, user *user) (ret []view) {
 	return
 }
 
-func (resource *Resource[T]) getRelationView(id int, field *relatedField, user *user) *view {
+func (resource *Resource[T]) getRelationView(id int64, field *relatedField, user *user) *view {
 	if !resource.app.authorize(user, field.resource.getPermissionView()) {
 		return nil
 	}

@@ -46,30 +46,17 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 	})
 
 	resource.ItemAction("").priority().IsWide().Template("admin_views").Permission(resource.canView).DataSource(
-		func(request *Request) interface{} {
-			id, err := strconv.Atoi(request.Params().Get("id"))
-			must(err)
-
-			item := resource.Is("id", int64(id)).First()
+		func(item *T, request *Request) interface{} {
 			if item == nil {
 				render404(request)
 				return nil
 			}
-			return resource.getViews(id, item, request.user)
+			return resource.getViews(item, request.user)
 		},
 	)
 
 	resource.FormItemAction("edit").priority().Name(messages.GetNameFunction("admin_edit")).Permission(resource.canUpdate).Form(
-		func(form *Form, request *Request) {
-			id, err := strconv.Atoi(request.Params().Get("id"))
-			must(err)
-
-			item := resource.Query().Is("id", int64(id)).First()
-			if item == nil {
-				render404(request)
-				return
-			}
-
+		func(item *T, form *Form, request *Request) {
 			resource.addFormItems(item, request.user, form)
 			form.AddSubmit(messages.Get(request.user.Locale, "admin_save"))
 		},
@@ -103,14 +90,8 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 	})
 
 	resource.FormItemAction("delete").priority().Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete")).Form(
-		func(form *Form, request *Request) {
+		func(item *T, form *Form, request *Request) {
 			form.AddDeleteSubmit(messages.Get(request.user.Locale, "admin_delete"))
-
-			item := resource.Is("id", request.Params().Get("id")).First()
-			if item == nil {
-				render404(request)
-				return
-			}
 			itemName := getItemName(item)
 			form.Title = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
 		},
@@ -135,12 +116,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 
 	if resource.previewURLFunction != nil {
 		resource.ItemAction("preview").priority().Name(messages.GetNameFunction("admin_preview")).Handler(
-			func(request *Request) {
-				item := resource.Is("id", request.Params().Get("id")).First()
-				if item == nil {
-					render404(request)
-					return
-				}
+			func(item *T, request *Request) {
 				request.Redirect(
 					resource.previewURLFunction(item),
 				)
@@ -156,20 +132,13 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 		)
 
 		resource.ItemAction("history").priority().IsWide().Name(messages.GetNameFunction("admin_history")).Permission(resource.canUpdate).Template("admin_history").DataSource(
-			func(request *Request) interface{} {
-				id, err := strconv.Atoi(request.Params().Get("id"))
-				must(err)
-
-				item := resource.Query().Is("id", int64(id)).First()
+			func(item *T, request *Request) interface{} {
 				if item == nil {
-					render404(request)
 					return nil
 				}
-
-				return resource.app.getHistory(resource, int64(id))
+				return resource.app.getHistory(resource, getItemID(item))
 			},
 		)
-
 	}
 }
 

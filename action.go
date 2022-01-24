@@ -110,16 +110,6 @@ func (resource *Resource[T]) Action(url string) *Action {
 	return action
 }
 
-//AddItemAction adds action to resource item
-func (resource *Resource[T]) ItemAction(url string) *Action {
-	action := newAction(resource.app, url)
-	action.resource = resource
-	action.isItemAction = true
-	action.permission = resource.canView
-	resource.itemActions = append(resource.itemActions, action)
-	return action
-}
-
 //Name sets action name
 func (action *Action) Name(name func(string) string) *Action {
 	action.name = name

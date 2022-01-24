@@ -7,10 +7,9 @@ import (
 func initUserLogin(app *App) {
 
 	app.UsersResource.ItemAction("loginas").Name(unlocalized("Přihlásit se jako")).Permission(sysadminPermission).Handler(
-		func(request *Request) {
-			user := app.UsersResource.Is("id", request.Params().Get("id")).First()
+		func(user *user, request *Request) {
 			request.logInUser(user)
-			request.Redirect(app.UsersResource.app.getAdminURL(""))
+			request.Redirect(app.getAdminURL(""))
 		},
 	)
 

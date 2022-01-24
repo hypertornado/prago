@@ -87,23 +87,6 @@ func (resource *Resource[T]) FormAction(url string) *FormAction {
 	return action
 }
 
-func (resource *Resource[T]) FormItemAction(url string) *FormAction {
-	fa := newFormAction(resource.app, url)
-
-	fa.actionForm.resource = resource
-	fa.actionValidation.resource = resource
-
-	fa.actionForm.Permission(resource.canView)
-	fa.actionValidation.Permission(resource.canView)
-
-	fa.actionForm.isItemAction = true
-	fa.actionValidation.isItemAction = true
-
-	resource.itemActions = append(resource.itemActions, fa.actionForm)
-	resource.itemActions = append(resource.itemActions, fa.actionValidation)
-	return fa
-}
-
 func (formAction *FormAction) Name(name func(string) string) *FormAction {
 	formAction.actionForm.Name(name)
 	return formAction

@@ -20,13 +20,14 @@ type viewField struct {
 	Value    interface{}
 }
 
-func (resource *Resource[T]) getViews(id int, item *T, user *user) (ret []view) {
+func (resource *Resource[T]) getViews(item *T, user *user) (ret []view) {
+	id := getItemID(item)
 	ret = append(ret, resource.getBasicView(id, item, user))
 	ret = append(ret, resource.getRelationViews(id, user)...)
 	return ret
 }
 
-func (resource *Resource[T]) getBasicView(id int, item *T, user *user) view {
+func (resource *Resource[T]) getBasicView(id int64, item *T, user *user) view {
 	ret := view{}
 
 	ret.Items = append(

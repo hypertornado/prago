@@ -248,10 +248,9 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 	resource.canView = sysadminPermission
 
 	resource.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(
-		func(request *Request) {
-			newsletter := resource.Is("id", request.Params().Get("id")).First()
-
-			body, err := resource.app.newsletters.GetBody(*newsletter, "")
+		func(item *newsletter, request *Request) {
+			//newsletter := resource.Is("id", request.Params().Get("id")).First()
+			body, err := resource.app.newsletters.GetBody(*item, "")
 			must(err)
 
 			request.Response().WriteHeader(200)
@@ -260,7 +259,7 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 	)
 
 	resource.FormItemAction("send-preview").Permission(loggedPermission).Name(unlocalized("Odeslat náhled")).Form(
-		func(f *Form, r *Request) {
+		func(item *newsletter, f *Form, r *Request) {
 			f.AddTextareaInput("emails", "Seznam emailů na poslání preview (jeden email na řádek)").Focused = true
 			f.AddSubmit("Odeslat náhled")
 		},
@@ -289,7 +288,7 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 	})
 
 	resource.FormItemAction("send").Permission(loggedPermission).Name(unlocalized("Odeslat")).Form(
-		func(form *Form, request *Request) {
+		func(newsletter *newsletter, form *Form, request *Request) {
 			recipients, err := resource.app.getNewsletterRecipients()
 			must(err)
 			form.AddSubmit(fmt.Sprintf("Odelsat newsletter na %d emailů", len(recipients)))
@@ -315,7 +314,7 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 	)
 
 	resource.FormItemAction("duplicate").Permission(loggedPermission).Name(unlocalized("Duplikovat")).Form(
-		func(f *Form, r *Request) {
+		func(newsletter *newsletter, f *Form, r *Request) {
 			f.AddSubmit("Duplikovat newsletter")
 		},
 	).Validation(func(vc ValidationContext) {
