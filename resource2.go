@@ -145,9 +145,10 @@ type resourceIface interface {
 	getURL(suffix string) string
 
 	getPreviewData(user *user, f *Field, value int64) (*preview, error)
-	getnavigation2(action *Action, request *Request) navigation
 	getItemPreview(id int64, user *user, relatedResource resourceIface) *preview
 	getPreviews(listRequest relationListRequest, user *user) []*preview
+
+	getnavigation(action *Action, request *Request) navigation
 
 	importSearchData() error
 	resourceItemName(id int64) string

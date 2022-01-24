@@ -186,12 +186,12 @@ func (action *Action) hiddenMenu() *Action {
 
 func (action *Action) getnavigation(request *Request) navigation {
 	if action.resource != nil {
-		return action.resource.getnavigation2(action, request)
+		return action.resource.getnavigation(action, request)
 	}
 	return navigation{}
 }
 
-func (resource *Resource[T]) getnavigation2(action *Action, request *Request) navigation {
+func (resource *Resource[T]) getnavigation(action *Action, request *Request) navigation {
 	if resource == nil {
 		return navigation{}
 	}
