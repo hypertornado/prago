@@ -76,6 +76,9 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 
 	//remove unused tags
 	for _, v := range []string{
+		"prago-name",
+		"prago-description",
+
 		"prago-edit",
 		"prago-view",
 		"prago-visible",
@@ -132,14 +135,14 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 		case "false":
 			break
 		default:
-			panic(fmt.Sprintf("validating permission 'prago-required' on field '%s' of resource '%s': wrong value '%s'", f.Name, resource.getName("en"), ret.tags["prago-required"]))
+			panic(fmt.Sprintf("validating permission 'prago-required' on field '%s' of resource '%s': wrong value '%s'", f.Name, resource.getPluralNameFunction()("en"), ret.tags["prago-required"]))
 		}
 	}
 
 	if canView := ret.tags["prago-can-view"]; canView != "" {
 		err := resource.getApp().validatePermission(Permission(canView))
 		if err != nil {
-			panic(fmt.Sprintf("validating permission 'prago-can-view' on field '%s' of resource '%s': %s", f.Name, resource.getName("en"), err))
+			panic(fmt.Sprintf("validating permission 'prago-can-view' on field '%s' of resource '%s': %s", f.Name, resource.getPluralNameFunction()("en"), err))
 		}
 		ret.canView = Permission(canView)
 	}
@@ -147,7 +150,7 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 	if canEdit := ret.tags["prago-can-edit"]; canEdit != "" {
 		err := resource.getApp().validatePermission(Permission(canEdit))
 		if err != nil {
-			panic(fmt.Sprintf("validating permission 'prago-can-edit' on field '%s' of resource '%s': %s", f.Name, resource.getName("en"), err))
+			panic(fmt.Sprintf("validating permission 'prago-can-edit' on field '%s' of resource '%s': %s", f.Name, resource.getPluralNameFunction()("en"), err))
 		}
 		ret.canEdit = Permission(canEdit)
 	} else {
@@ -172,7 +175,7 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 		for _, v := range strings.Split(validations, ",") {
 			err := ret.addFieldValidation(v)
 			if err != nil {
-				panic(fmt.Sprintf("can't add validation on field '%s' of resource '%s': %s", f.Name, resource.getName("en"), err))
+				panic(fmt.Sprintf("can't add validation on field '%s' of resource '%s': %s", f.Name, resource.getPluralNameFunction()("en"), err))
 			}
 		}
 	}

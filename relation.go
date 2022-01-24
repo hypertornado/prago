@@ -35,7 +35,7 @@ func (resource *Resource[T]) createRelations() {
 
 			//TODO: name can be set directly
 			if field.tags["prago-name"] == "" {
-				field.humanName = field.relatedResource.getNameFunction()
+				field.humanName = field.relatedResource.getPluralNameFunction()
 			}
 			field.relatedResource.addRelation((*relatedField)(field))
 		}
@@ -54,10 +54,11 @@ func (field *relatedField) listURL(id int64) string {
 	return field.resource.getURL("") + "?" + values.Encode()
 }
 
+//TODO: better
 func (field *relatedField) listName(locale string) string {
-	ret := field.resource.getName(locale)
+	ret := field.resource.getPluralNameFunction()(locale)
 	fieldName := field.humanName(locale)
-	referenceName := field.relatedResource.getName(locale)
+	referenceName := field.relatedResource.getPluralNameFunction()(locale)
 	if fieldName != referenceName {
 		ret += " – " + fieldName
 	}

@@ -341,6 +341,10 @@ var m = map[string]map[string]string{
 		"en": "Updated At",
 		"cs": "Datum poslední úpravy",
 	},
+	"OrderPosition": {
+		"en": "Order position",
+		"cs": "Pořadové číslo",
+	},
 
 	"admin_list_empty": {
 		"en": "No items found",
@@ -374,6 +378,10 @@ var m = map[string]map[string]string{
 	"admin_locale": {
 		"en": "Locale",
 		"cs": "Jazyk",
+	},
+	"admin_user": {
+		"en": "User",
+		"cs": "Uživatel",
 	},
 	"admin_users": {
 		"en": "Users",

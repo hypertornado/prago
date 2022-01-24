@@ -75,7 +75,10 @@ func (app *App) initUserResource() {
 	resource := NewResource[user](app)
 	app.UsersResource = resource
 
-	resource.Name(messages.GetNameFunction("admin_users"))
+	resource.Name(
+		messages.GetNameFunction("admin_user"),
+		messages.GetNameFunction("admin_users"),
+	)
 	resource.PermissionUpdate(sysadminPermission)
 	resource.PermissionCreate(nobodyPermission)
 	resource.PermissionDelete(sysadminPermission)

@@ -11,9 +11,10 @@ import (
 //https://github.com/golang/go/issues/49085
 
 type Resource[T any] struct {
-	id   string
-	name func(locale string) string
-	app  *App
+	id           string
+	singularName func(locale string) string
+	pluralName   func(locale string) string
+	app          *App
 
 	previewURLFunction func(*T) string
 
@@ -62,9 +63,10 @@ func NewResource[T any](app *App) *Resource[T] {
 	defaultName := typ.Name()
 
 	ret := &Resource[T]{
-		app:  app,
-		id:   columnName(defaultName),
-		name: unlocalized(defaultName),
+		app:          app,
+		id:           columnName(defaultName),
+		singularName: unlocalized(defaultName),
+		pluralName:   unlocalized(defaultName),
 
 		canView:   sysadminPermission,
 		canCreate: loggedPermission,
@@ -134,8 +136,10 @@ type resourceIface interface {
 	getPermissionDelete() Permission
 	getPermissionExport() Permission
 
-	getName(string) string
-	getNameFunction() func(string) string
+	//getPluralName(string) string
+	//getSingularName(string) string
+	getSingularNameFunction() func(string) string
+	getPluralNameFunction() func(string) string
 
 	getApp() *App
 
@@ -159,13 +163,21 @@ func (resource *Resource[T]) getApp() *App {
 	return resource.app
 }
 
-func (resource *Resource[T]) getNameFunction() func(string) string {
+func (resource *Resource[T]) getSingularNameFunction() func(string) string {
+	return resource.singularName
+}
+
+func (resource *Resource[T]) getPluralNameFunction() func(string) string {
+	return resource.pluralName
+}
+
+/*func (resource *Resource[T]) getNameFunction() func(string) string {
 	return resource.name
 }
 
 func (resource *Resource[T]) getName(locale string) string {
 	return resource.name(locale)
-}
+}*/
 
 func (resource *Resource[T]) getPermissionView() Permission {
 	return resource.canView
@@ -248,8 +260,9 @@ func (resource *Resource[T]) Delete(id int64) error {
 	return nil
 }
 
-func (resource *Resource[T]) Name(name func(string) string) *Resource[T] {
-	resource.name = name
+func (resource *Resource[T]) Name(singularName, pluralName func(string) string) *Resource[T] {
+	resource.singularName = singularName
+	resource.pluralName = pluralName
 	return resource
 }
 

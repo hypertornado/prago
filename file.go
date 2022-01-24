@@ -135,7 +135,10 @@ func (app *App) initFilesResource() {
 	initCDN(app)
 
 	resource := NewResource[File](app)
-	resource.Name(messages.GetNameFunction("admin_files"))
+	resource.Name(
+		messages.GetNameFunction("admin_file"),
+		messages.GetNameFunction("admin_files"),
+	)
 	app.FilesResource = resource
 
 	resource.PermissionCreate(nobodyPermission)

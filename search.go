@@ -257,7 +257,7 @@ func (resource *Resource[T]) importSearchData() error {
 	roles := resource.getResourceViewRoles()
 	var resourceSearchItem = searchItem{
 		ID:    "resource_" + resource.id,
-		Name:  resource.getName("cs"),
+		Name:  resource.getPluralNameFunction()("cs"),
 		URL:   resource.getURL(""),
 		Roles: roles,
 	}
@@ -304,7 +304,7 @@ func searchID(resource resourceIface, id int64) string {
 func relationDataToSearchItem(resource resourceIface, data preview) searchItem {
 	return searchItem{
 		ID:          searchID(resource, data.ID),
-		Category:    resource.getName("cs"),
+		Category:    resource.getPluralNameFunction()("cs"),
 		Name:        data.Name,
 		Description: data.Description,
 		Image:       data.Image,

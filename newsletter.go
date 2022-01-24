@@ -156,14 +156,14 @@ func (app *App) Newsletters() *Newsletters {
 		request.RenderView("newsletter_layout")
 	})
 
-	app.newsletters.newsletterResource = NewResource[newsletter](app).Name(unlocalized("Newsletter"))
+	app.newsletters.newsletterResource = NewResource[newsletter](app).Name(unlocalized("Newsletter"), unlocalized("Newslettery"))
 	initNewsletterResource(
 		GetResource[newsletter](app),
 	)
 
-	app.newsletters.newsletterSectionResource = NewResource[newsletterSection](app).Name(unlocalized("Newsletter - sekce"))
+	app.newsletters.newsletterSectionResource = NewResource[newsletterSection](app).Name(unlocalized("Newsletter - sekce"), unlocalized("Newsletter - sekce"))
 
-	NewResource[newsletterPersons](app).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoby"))
+	NewResource[newsletterPersons](app).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoba"), unlocalized("Newsletter - osoby"))
 	return app.newsletters
 }
 

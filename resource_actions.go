@@ -8,7 +8,7 @@ import (
 )
 
 func (resource *Resource[T]) initDefaultResourceActions() {
-	resource.Action("").priority().Permission(resource.canView).Name(resource.name).Template("admin_list").DataSource(
+	resource.Action("").priority().Permission(resource.canView).Name(resource.pluralName).Template("admin_list").DataSource(
 		func(request *Request) interface{} {
 			listData, err := resource.getListHeader(request.user)
 			must(err)

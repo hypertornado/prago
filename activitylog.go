@@ -98,7 +98,7 @@ func (app *App) initActivityLog() {
 	app.activityLogResource = NewResource[activityLog](app)
 	app.activityLogResource.canView = Permission(sysadminRoleName)
 	app.activityLogResource.orderDesc = true
-	app.activityLogResource.Name(messages.GetNameFunction("admin_history"))
+	app.activityLogResource.Name(messages.GetNameFunction("admin_history"), messages.GetNameFunction("admin_history"))
 }
 
 func (resource *Resource[T]) LogActivity(user *user, before, after *T) error {

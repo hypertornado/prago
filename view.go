@@ -37,7 +37,7 @@ func (resource *Resource[T]) getBasicView(id int64, item *T, user *user) view {
 			Template: "admin_item_view_url",
 			Value: [2]string{
 				resource.getURL(""),
-				resource.name(user.Locale),
+				resource.pluralName(user.Locale),
 			},
 		},
 	)
