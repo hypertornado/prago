@@ -84,7 +84,7 @@ func (resource *Resource[T]) getListStats(user *user, params url.Values) *listSt
 		}
 
 		ret.Sections = append(ret.Sections, listStatsSection{
-			Name:  field.humanName(user.Locale),
+			Name:  field.name(user.Locale),
 			Table: table,
 		})
 	}
@@ -118,7 +118,7 @@ func (resource *Resource[T]) getListStatsDateSectionDay(field *Field, user *user
 		panic(err)
 	}
 	ret = listStatsSection{
-		Name: fmt.Sprintf("%s – dny", field.humanName(user.Locale)),
+		Name: fmt.Sprintf("%s – dny", field.name(user.Locale)),
 	}
 	var counted int64
 	for rows.Next() {
@@ -160,7 +160,7 @@ func (resource *Resource[T]) getListStatsDateSectionMonth(field *Field, user *us
 		panic(err)
 	}
 	ret = listStatsSection{
-		Name: fmt.Sprintf("%s – měsíce", field.humanName(user.Locale)),
+		Name: fmt.Sprintf("%s – měsíce", field.name(user.Locale)),
 	}
 	var counted int64
 	for rows.Next() {
@@ -199,7 +199,7 @@ func (resource *Resource[T]) getListStatsDateSectionYear(field *Field, user *use
 		panic(err)
 	}
 	ret = listStatsSection{
-		Name: fmt.Sprintf("%s – roky", field.humanName(user.Locale)),
+		Name: fmt.Sprintf("%s – roky", field.name(user.Locale)),
 	}
 	var counted int64
 	for rows.Next() {

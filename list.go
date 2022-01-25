@@ -164,7 +164,7 @@ func (field *Field) getListHeaderItem(user *user) listHeaderItem {
 
 	headerItem := listHeaderItem{
 		Name:              field.fieldClassName,
-		NameHuman:         field.humanName(user.Locale),
+		NameHuman:         field.name(user.Locale),
 		ColumnName:        field.id,
 		DefaultShow:       field.defaultShow,
 		RelatedResourceID: relatedResourceID,
@@ -492,7 +492,7 @@ func (resource *Resource[T]) getListContentJSON(user *user, params url.Values) (
 
 func (resource *Resource[T]) valueToListCell(user *user, f *Field, val reflect.Value, isOrderedBy bool) listCell {
 	if !f.authorizeView(user) {
-		panic(fmt.Sprintf("can't access field '%s'", f.humanName("en")))
+		panic(fmt.Sprintf("can't access field '%s'", f.name("en")))
 	}
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)

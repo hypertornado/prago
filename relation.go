@@ -35,7 +35,7 @@ func (resource *Resource[T]) createRelations() {
 
 			//TODO: name can be set directly
 			if field.tags["prago-name"] == "" {
-				field.humanName = field.relatedResource.getPluralNameFunction()
+				field.name = field.relatedResource.getPluralNameFunction()
 			}
 			field.relatedResource.addRelation((*relatedField)(field))
 		}
@@ -57,7 +57,7 @@ func (field *relatedField) listURL(id int64) string {
 //TODO: better
 func (field *relatedField) listName(locale string) string {
 	ret := field.resource.getPluralNameFunction()(locale)
-	fieldName := field.humanName(locale)
+	fieldName := field.name(locale)
 	referenceName := field.relatedResource.getPluralNameFunction()(locale)
 	if fieldName != referenceName {
 		ret += " – " + fieldName
@@ -73,7 +73,7 @@ func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
 func (resource *Resource[T]) getPreviewData(user *user, f *Field, value int64) (*preview, error) {
 	app := f.resource.getApp()
 	if f.relatedResource == nil {
-		return nil, fmt.Errorf("resource not found: %s", f.humanName("en"))
+		return nil, fmt.Errorf("resource not found: %s", f.name("en"))
 	}
 
 	if !app.authorize(user, f.relatedResource.getPermissionView()) {
@@ -161,7 +161,7 @@ func (resource *Resource[T]) getItemDescription(item *T, user *user, relatedReso
 		field := itemsVal.FieldByName(v.fieldClassName)
 		stringed := resource.app.relationStringer(*v, field, user)
 		if stringed != "" {
-			items = append(items, fmt.Sprintf("%s: %s", v.humanName(user.Locale), stringed))
+			items = append(items, fmt.Sprintf("%s: %s", v.name(user.Locale), stringed))
 		}
 	}
 	ret := strings.Join(items, " · ")

@@ -55,7 +55,7 @@ func (resource *Resource[T]) getBasicView(id int64, item *T, user *user) view {
 		ret.Items = append(
 			ret.Items,
 			viewField{
-				Name:     f.humanName(user.Locale),
+				Name:     f.name(user.Locale),
 				Template: f.fieldType.viewTemplate,
 				Value:    f.fieldType.viewDataSource(user, f, ifaceVal),
 			},

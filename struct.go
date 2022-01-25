@@ -62,7 +62,7 @@ fields:
 
 		item := &FormItem{
 			ID:       field.id,
-			Name:     field.humanName(user.Locale),
+			Name:     field.name(user.Locale),
 			Template: field.fieldType.formTemplate,
 		}
 		if field.description != nil {

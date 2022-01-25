@@ -10,7 +10,7 @@ import (
 type Field struct {
 	fieldClassName string
 	id             string
-	humanName      func(string) string
+	name           func(string) string
 	description    func(string) string
 	typ            reflect.Type
 	tags           map[string]string
@@ -61,7 +61,7 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 	ret := &Field{
 		fieldClassName: f.Name,
 		id:             columnName(f.Name),
-		humanName:      unlocalized(f.Name),
+		name:           unlocalized(f.Name),
 		typ:            f.Type,
 		tags:           make(map[string]string),
 		fieldOrder:     order,
@@ -86,7 +86,7 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 	} {
 		t := f.Tag.Get(v)
 		if t != "" {
-			panic(fmt.Sprintf("Use of deprecated tag '%s' in field '%s' of resource '%s'", v, ret.humanName("en"), ret.resource.getID()))
+			panic(fmt.Sprintf("Use of deprecated tag '%s' in field '%s' of resource '%s'", v, ret.name("en"), ret.resource.getID()))
 		}
 	}
 
@@ -161,12 +161,12 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 
 	name := ret.tags["prago-name"]
 	if name != "" {
-		ret.humanName = unlocalized(name)
+		ret.name = unlocalized(name)
 	} else {
 		//TODO: its ugly
 		nameFunction := messages.GetNameFunction(ret.fieldClassName)
 		if nameFunction != nil {
-			ret.humanName = nameFunction
+			ret.name = nameFunction
 		}
 	}
 
@@ -246,7 +246,7 @@ func (field *Field) addFieldValidation(nameOfValidation string) error {
 }
 
 func (field *Field) Name(name func(string) string) *Field {
-	field.humanName = name
+	field.name = name
 	return field
 }
 
