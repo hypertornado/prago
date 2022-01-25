@@ -7,7 +7,7 @@ import (
 func (resource *Resource[T]) getDefaultOrder() (column string, desc bool) {
 	for _, v := range resource.fields {
 		add := false
-		if v.columnName == "id" {
+		if v.id == "id" {
 			add = true
 		}
 		if v.tags["prago-type"] == "order" {
@@ -24,7 +24,7 @@ func (resource *Resource[T]) getDefaultOrder() (column string, desc bool) {
 		}
 
 		if add {
-			column = v.columnName
+			column = v.id
 			desc = false
 			if v.tags["prago-order-desc"] == "true" {
 				desc = true
@@ -38,7 +38,7 @@ func (resource *Resource[T]) getItemStringEditableValues(item *T, user *user) ma
 	itemVal := reflect.ValueOf(item).Elem()
 	ret := make(map[string]string)
 	for i, field := range resource.fields {
-		if !field.authorizeEdit(user) && field.columnName != "id" {
+		if !field.authorizeEdit(user) && field.id != "id" {
 			continue
 		}
 		var ifaceVal interface{}
@@ -46,7 +46,7 @@ func (resource *Resource[T]) getItemStringEditableValues(item *T, user *user) ma
 			itemVal.Field(i),
 		)
 		strVal := field.fieldType.formStringer(ifaceVal)
-		ret[field.columnName] = strVal
+		ret[field.id] = strVal
 	}
 	return ret
 }
@@ -61,7 +61,7 @@ fields:
 		}
 
 		item := &FormItem{
-			ID:       field.columnName,
+			ID:       field.id,
 			Name:     field.humanName(user.Locale),
 			Template: field.fieldType.formTemplate,
 		}
@@ -74,7 +74,7 @@ fields:
 			item.HiddenName = true
 		}
 
-		item.Value = editableValues[field.columnName]
+		item.Value = editableValues[field.id]
 
 		if field.fieldType.formDataSource != nil {
 			item.Data = field.fieldType.formDataSource(field, user)

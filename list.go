@@ -138,7 +138,7 @@ func (resource *Resource[T]) defaultVisibleFieldsStr(user *user) string {
 			continue
 		}
 		if v.defaultShow {
-			ret = append(ret, v.columnName)
+			ret = append(ret, v.id)
 		}
 	}
 	r := strings.Join(ret, ",")
@@ -151,7 +151,7 @@ func (resource *Resource[T]) fieldsStr(user *user) string {
 		if !v.authorizeView(user) {
 			continue
 		}
-		ret = append(ret, v.columnName)
+		ret = append(ret, v.id)
 	}
 	return strings.Join(ret, ",")
 }
@@ -165,7 +165,7 @@ func (field *Field) getListHeaderItem(user *user) listHeaderItem {
 	headerItem := listHeaderItem{
 		Name:              field.fieldClassName,
 		NameHuman:         field.humanName(user.Locale),
-		ColumnName:        field.columnName,
+		ColumnName:        field.id,
 		DefaultShow:       field.defaultShow,
 		RelatedResourceID: relatedResourceID,
 	}
@@ -229,7 +229,7 @@ func (field *Field) filterLayout() string {
 func (resource *Resource[T]) addFilterParamsToQuery(q *Query[T], params url.Values) *Query[T] {
 	filter := map[string]string{}
 	for _, v := range resource.fieldMap {
-		key := v.columnName
+		key := v.id
 		val := params.Get(key)
 		if val != "" {
 			filter[key] = val
@@ -269,7 +269,7 @@ func (resource *Resource[T]) addFilterToQuery(q *Query[T], filter map[string]str
 					q.Is(k, numVal)
 				} else {
 					q.Where(
-						fmt.Sprintf("%s %s ?", field.columnName, hasPrefix),
+						fmt.Sprintf("%s %s ?", field.id, hasPrefix),
 						numVal,
 					)
 				}
@@ -290,10 +290,10 @@ func (resource *Resource[T]) addFilterToQuery(q *Query[T], filter map[string]str
 		case "filter_layout_select":
 			if field.tags["prago-type"] == "file" || field.tags["prago-type"] == "image" || field.tags["prago-type"] == "cdnfile" {
 				if v == "true" {
-					q.Where(fmt.Sprintf("%s !=''", field.columnName))
+					q.Where(fmt.Sprintf("%s !=''", field.id))
 				}
 				if v == "false" {
-					q.Where(fmt.Sprintf("%s =''", field.columnName))
+					q.Where(fmt.Sprintf("%s =''", field.id))
 				}
 				continue
 			}

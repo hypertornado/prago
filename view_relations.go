@@ -28,7 +28,7 @@ func (resource *Resource[T]) getRelationView(id int64, field *relatedField, user
 		return nil
 	}
 
-	filteredCount := field.resource.itemWithRelationCount(field.columnName, int64(id))
+	filteredCount := field.resource.itemWithRelationCount(field.id, int64(id))
 
 	ret := &view{}
 
@@ -51,7 +51,7 @@ func (resource *Resource[T]) getRelationView(id int64, field *relatedField, user
 	ret.Relation = &viewRelation{
 		SourceResource: resource.getID(),
 		TargetResource: field.resource.getID(),
-		TargetField:    field.columnName,
+		TargetField:    field.id,
 		IDValue:        int64(id),
 		Count:          filteredCount,
 	}
@@ -76,14 +76,12 @@ type relationListRequest struct {
 }
 
 func generateRelationListAPIHandler(request *Request) {
-	app := request.app
-
 	decoder := json.NewDecoder(request.Request().Body)
 	var listRequest relationListRequest
 	decoder.Decode(&listRequest)
 	defer request.Request().Body.Close()
 
-	targetResource := app.getResourceByID(listRequest.TargetResource)
+	targetResource := request.app.getResourceByID(listRequest.TargetResource)
 
 	request.SetData("data", targetResource.getPreviews(listRequest, request.user))
 	request.RenderView("admin_item_view_relationlist_response")

@@ -91,7 +91,7 @@ func NewResource[T any](app *App) *Resource[T] {
 				ret.orderField = field
 			}
 			ret.fields = append(ret.fields, field)
-			ret.fieldMap[field.columnName] = field
+			ret.fieldMap[field.id] = field
 		}
 	}
 
@@ -136,8 +136,6 @@ type resourceIface interface {
 	getPermissionDelete() Permission
 	getPermissionExport() Permission
 
-	//getPluralName(string) string
-	//getSingularName(string) string
 	getSingularNameFunction() func(string) string
 	getPluralNameFunction() func(string) string
 

@@ -9,7 +9,7 @@ import (
 
 type Field struct {
 	fieldClassName string
-	columnName     string
+	id             string
 	humanName      func(string) string
 	description    func(string) string
 	typ            reflect.Type
@@ -60,7 +60,7 @@ func (field *Field) authorizeEdit(user *user) bool {
 func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 	ret := &Field{
 		fieldClassName: f.Name,
-		columnName:     columnName(f.Name),
+		id:             columnName(f.Name),
 		humanName:      unlocalized(f.Name),
 		typ:            f.Type,
 		tags:           make(map[string]string),
@@ -76,8 +76,8 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 
 	//remove unused tags
 	for _, v := range []string{
-		"prago-name",
-		"prago-description",
+		//"prago-name",
+		//"prago-description",
 
 		"prago-edit",
 		"prago-view",
@@ -187,21 +187,21 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 		if ret.typ == reflect.TypeOf(time.Now()) {
 			if ret.tags["prago-type"] == "timestamp" || ret.fieldClassName == "CreatedAt" || ret.fieldClassName == "UpdatedAt" {
 				resource.addValidation(func(vc ValidationContext) {
-					val := vc.GetValue(ret.columnName)
+					val := vc.GetValue(ret.id)
 					if val != "" {
 						_, err := time.Parse("2006-01-02 15:04", val)
 						if err != nil {
-							vc.AddItemError(ret.columnName, messages.Get(vc.Locale(), "admin_validation_date_format_error"))
+							vc.AddItemError(ret.id, messages.Get(vc.Locale(), "admin_validation_date_format_error"))
 						}
 					}
 				})
 			} else {
 				resource.addValidation(func(vc ValidationContext) {
-					val := vc.GetValue(ret.columnName)
+					val := vc.GetValue(ret.id)
 					if val != "" {
 						_, err := time.Parse("2006-01-02", val)
 						if err != nil {
-							vc.AddItemError(ret.columnName, messages.Get(vc.Locale(), "admin_validation_date_format_error"))
+							vc.AddItemError(ret.id, messages.Get(vc.Locale(), "admin_validation_date_format_error"))
 						}
 					}
 				})
@@ -225,19 +225,19 @@ func (field *Field) addFieldValidation(nameOfValidation string) error {
 				field.typ.Kind() == reflect.Float64 ||
 				field.typ.Kind() == reflect.Float32 {
 
-				if vc.GetValue(field.columnName) == "0" {
+				if vc.GetValue(field.id) == "0" {
 					valid = false
 				}
 			}
 
-			if field.tags["prago-type"] == "relation" && vc.GetValue(field.columnName) == "0" {
+			if field.tags["prago-type"] == "relation" && vc.GetValue(field.id) == "0" {
 				valid = false
 			}
-			if vc.GetValue(field.columnName) == "" {
+			if vc.GetValue(field.id) == "" {
 				valid = false
 			}
 			if !valid {
-				vc.AddItemError(field.columnName, messages.Get(vc.Locale(), "admin_validation_not_empty"))
+				vc.AddItemError(field.id, messages.Get(vc.Locale(), "admin_validation_not_empty"))
 			}
 		})
 		return nil
@@ -350,7 +350,7 @@ func (field *Field) initFieldType() {
 
 	if ret.allowedValues != nil {
 		field.resource.addValidation(func(vc ValidationContext) {
-			val := vc.GetValue(field.columnName)
+			val := vc.GetValue(field.id)
 			var found bool
 			for _, v := range ret.allowedValues {
 				if v == val {
@@ -358,7 +358,7 @@ func (field *Field) initFieldType() {
 				}
 			}
 			if !found {
-				vc.AddItemError(field.columnName, messages.Get(vc.Locale(), "admin_validation_value"))
+				vc.AddItemError(field.id, messages.Get(vc.Locale(), "admin_validation_value"))
 			}
 		})
 	}
@@ -419,12 +419,12 @@ func (field *Field) fieldDescriptionMysql(fieldTypes map[string]*fieldType) stri
 	}
 
 	additional := ""
-	if field.columnName == "id" {
+	if field.id == "id" {
 		additional = "NOT NULL AUTO_INCREMENT PRIMARY KEY"
 	} else {
 		if field.unique {
 			additional = "UNIQUE"
 		}
 	}
-	return fmt.Sprintf("%s %s %s", field.columnName, fieldDescription, additional)
+	return fmt.Sprintf("%s %s %s", field.id, fieldDescription, additional)
 }

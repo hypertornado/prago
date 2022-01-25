@@ -107,7 +107,7 @@ func (app *App) initDefaultFieldTypes() {
 			if f.tags["prago-relation"] != "" {
 				return columnName(f.tags["prago-relation"])
 			}
-			return f.columnName
+			return f.id
 		},
 	})
 

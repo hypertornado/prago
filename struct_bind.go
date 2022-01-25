@@ -26,8 +26,8 @@ func (resource *Resource[T]) fixBooleanParams(user *user, params url.Values) {
 		if !field.authorizeEdit(user) {
 			continue
 		}
-		if len(params[field.columnName]) == 0 && field.typ.Kind() == reflect.Bool {
-			params.Set(field.columnName, "")
+		if len(params[field.id]) == 0 && field.typ.Kind() == reflect.Bool {
+			params.Set(field.id, "")
 		}
 	}
 }
@@ -46,12 +46,12 @@ func (resource *Resource[T]) bindData(item *T, user *user, params url.Values) er
 		if !field.authorizeEdit(user) {
 			continue
 		}
-		if len(params[field.columnName]) == 0 {
+		if len(params[field.id]) == 0 {
 			continue
 		}
 
 		val := value.FieldByName(field.fieldClassName)
-		urlValue := params.Get(field.columnName)
+		urlValue := params.Get(field.id)
 
 		switch field.typ.Kind() {
 		case reflect.Struct:

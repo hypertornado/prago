@@ -27,7 +27,7 @@ func (app *App) initRelations() {
 func (resource *Resource[T]) createRelations() {
 	for _, field := range resource.fields {
 		if field.tags["prago-type"] == "relation" {
-			relatedResourceID := field.columnName
+			relatedResourceID := field.id
 			if field.tags["prago-relation"] != "" {
 				relatedResourceID = field.tags["prago-relation"]
 			}
@@ -44,13 +44,13 @@ func (resource *Resource[T]) createRelations() {
 
 func (field *relatedField) addURL(id int64) string {
 	values := url.Values{}
-	values.Add(field.columnName, fmt.Sprintf("%d", id))
+	values.Add(field.id, fmt.Sprintf("%d", id))
 	return field.resource.getURL("new?" + values.Encode())
 }
 
 func (field *relatedField) listURL(id int64) string {
 	values := url.Values{}
-	values.Add(field.columnName, fmt.Sprintf("%d", id))
+	values.Add(field.id, fmt.Sprintf("%d", id))
 	return field.resource.getURL("") + "?" + values.Encode()
 }
 

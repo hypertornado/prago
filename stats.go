@@ -103,14 +103,14 @@ func (resource *Resource[T]) getListStatsDateSectionDay(field *Field, user *user
 	query := resource.addFilterParamsToQuery(resource.Query(), params)
 	whereParams := query.listQuery.values
 	q := fmt.Sprintf("SELECT DAY(%s), MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY DAY(%s), MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
-		field.columnName,
-		field.columnName,
-		field.columnName,
+		field.id,
+		field.id,
+		field.id,
 		resource.getID(),
 		buildWhereString(query.listQuery.conditions),
-		field.columnName,
-		field.columnName,
-		field.columnName,
+		field.id,
+		field.id,
+		field.id,
 		limit,
 	)
 	rows, err := resource.getApp().db.Query(q, whereParams...)
@@ -147,12 +147,12 @@ func (resource *Resource[T]) getListStatsDateSectionMonth(field *Field, user *us
 	query := resource.addFilterParamsToQuery(resource.Query(), params)
 	whereParams := query.listQuery.values
 	q := fmt.Sprintf("SELECT MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
-		field.columnName,
-		field.columnName,
+		field.id,
+		field.id,
 		resource.getID(),
 		buildWhereString(query.listQuery.conditions),
-		field.columnName,
-		field.columnName,
+		field.id,
+		field.id,
 		limit,
 	)
 	rows, err := resource.getApp().db.Query(q, whereParams...)
@@ -188,10 +188,10 @@ func (resource *Resource[T]) getListStatsDateSectionYear(field *Field, user *use
 	query := resource.addFilterParamsToQuery(resource.Query(), params)
 	whereParams := query.listQuery.values
 	q := fmt.Sprintf("SELECT YEAR(%s), COUNT(id) FROM %s %s GROUP BY YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
-		field.columnName,
+		field.id,
 		resource.getID(),
 		buildWhereString(query.listQuery.conditions),
-		field.columnName,
+		field.id,
 		limit,
 	)
 	rows, err := resource.getApp().db.Query(q, whereParams...)
@@ -226,7 +226,7 @@ func (resource *Resource[T]) getListStatsTable(field *Field, user *user, params 
 	query := resource.addFilterParamsToQuery(resource.Query(), params)
 	whereParams := query.listQuery.values
 
-	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.columnName, resource.getID(), buildWhereString(query.listQuery.conditions), field.columnName, limit)
+	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.id, resource.getID(), buildWhereString(query.listQuery.conditions), field.id, limit)
 
 	rows, err := resource.getApp().db.Query(q, whereParams...)
 	if err != nil {
@@ -333,10 +333,10 @@ func (resource *Resource[T]) getListStatsTableInt(field *Field, user *user, para
 	whereParams := query.listQuery.values
 
 	q := fmt.Sprintf("SELECT MAX(%s), MIN(%s), AVG(%s), SUM(%s) FROM %s %s;",
-		field.columnName,
-		field.columnName,
-		field.columnName,
-		field.columnName,
+		field.id,
+		field.id,
+		field.id,
+		field.id,
 		resource.getID(),
 		buildWhereString(query.listQuery.conditions),
 	)
@@ -371,7 +371,7 @@ func (resource *Resource[T]) getListStatsTableInt(field *Field, user *user, para
 
 	medianItem := int64(math.Floor(float64(total) / 2))
 	q = fmt.Sprintf("SELECT %s FROM %s %s LIMIT 1 OFFSET %d;",
-		field.columnName,
+		field.id,
 		resource.getID(),
 		buildWhereString(query.listQuery.conditions),
 		medianItem,

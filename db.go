@@ -82,7 +82,7 @@ func (resource *Resource[T]) prepareValues(value reflect.Value) (names []string,
 			continue
 		}
 
-		names = append(names, "`"+columnName(field.columnName)+"`")
+		names = append(names, "`"+columnName(field.id)+"`")
 		questionMarks = append(questionMarks, "?")
 	}
 	return

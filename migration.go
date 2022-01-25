@@ -113,10 +113,10 @@ func (resource *Resource[T]) migrateTable(db dbIface, tableName string, verbose 
 	items := []string{}
 
 	for _, v := range resource.fields {
-		if !tableDescriptionMap[v.columnName] {
+		if !tableDescriptionMap[v.id] {
 			items = append(items, fmt.Sprintf("ADD COLUMN %s", v.fieldDescriptionMysql(resource.app.fieldTypes)))
 		} else {
-			tableDescriptionMap[v.columnName] = false
+			tableDescriptionMap[v.id] = false
 		}
 	}
 
