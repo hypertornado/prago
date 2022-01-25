@@ -3,7 +3,7 @@ class PlacesEdit {
 
   constructor(el: any) {
     this.el = el;
-    Prago.registerPlacesEdit(this);
+    //Prago.registerPlacesEdit(this);
   }
 
   start() {

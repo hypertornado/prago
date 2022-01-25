@@ -33,6 +33,7 @@
     "js/relationlist.ts",
     "js/notifications.ts",
     "js/popup.ts",
+    "js/smap.ts",
     "js/prago.ts"
   ]
 }

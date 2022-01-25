@@ -38,10 +38,10 @@ class Form {
       new DatePicker(form);
     });
 
-    var elements = form.querySelectorAll<HTMLDivElement>(".admin_place");
+    /*var elements = form.querySelectorAll<HTMLDivElement>(".admin_place");
     elements.forEach((form) => {
-      new PlacesEdit(form);
-    });
+      new SMapEdit(form);
+    });*/
 
     form.addEventListener("submit", () => {
       this.dirty = false;

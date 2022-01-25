@@ -345,6 +345,14 @@ var m = map[string]map[string]string{
 		"en": "Order position",
 		"cs": "Pořadové číslo",
 	},
+	"File": {
+		"en": "File",
+		"cs": "Soubor",
+	},
+	"Place": {
+		"en": "Place",
+		"cs": "Místo",
+	},
 
 	"admin_list_empty": {
 		"en": "No items found",

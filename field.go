@@ -165,8 +165,7 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 		ret.nameSetManually = true
 		ret.name = unlocalized(name)
 	} else {
-		//TODO: its ugly
-		nameFunction := messages.GetNameFunction(ret.fieldClassName)
+		nameFunction := getNameFunctionFromStructName(ret.fieldClassName)
 		if nameFunction != nil {
 			ret.name = nameFunction
 		}
@@ -212,6 +211,24 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 	}
 
 	return ret
+}
+
+func getNameFunctionFromStructName(name string) func(string) string {
+	id := map[string]string{
+		"Name":          "Name",
+		"Description":   "Description",
+		"Image":         "Image",
+		"Hidden":        "Hidden",
+		"CreatedAt":     "CreatedAt",
+		"UpdatedAt":     "OrderPosition",
+		"OrderPosition": "OrderPosition",
+		"File":          "File",
+		"Place":         "Place",
+	}[name]
+	if id == "" {
+		return nil
+	}
+	return messages.GetNameFunction(name)
 }
 
 func (field *Field) addFieldValidation(nameOfValidation string) error {

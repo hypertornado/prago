@@ -41,6 +41,8 @@ class Prago {
 
     new NotificationCenter(document.querySelector(".notification_center"));
 
+    initSMap();
+
     /*new Confirm("Hello world confirm", () => {
       console.log("ok");
     }, () => {
@@ -60,6 +62,8 @@ class Prago {
     //var loader = new LoadingPopup();
   }
 
+  /*
+
   static registerPlacesEdit(place: PlacesEdit) {
     Prago.placesEditArr.push(place);
   }
@@ -72,6 +76,7 @@ class Prago {
       placeEdit.start();
     });
   }
+  */
 }
 Prago.start();
 
@@ -81,5 +86,5 @@ function googleMapsInited() {
     new PlacesView(el);
   });
 
-  Prago.initGoogleMaps();
+  //Prago.initGoogleMaps();
 }

@@ -1556,6 +1556,7 @@ class RelationPicker {
 }
 class PlacesView {
     constructor(el) {
+        return;
         var val = el.getAttribute("data-value");
         el.innerText = "";
         var coords = val.split(",");
@@ -1578,7 +1579,6 @@ class PlacesView {
 class PlacesEdit {
     constructor(el) {
         this.el = el;
-        Prago.registerPlacesEdit(this);
     }
     start() {
         var mapEl = document.createElement("div");
@@ -1676,10 +1676,6 @@ class Form {
         var dateInputs = form.querySelectorAll(".form_input-date");
         dateInputs.forEach((form) => {
             new DatePicker(form);
-        });
-        var elements = form.querySelectorAll(".admin_place");
-        elements.forEach((form) => {
-            new PlacesEdit(form);
         });
         form.addEventListener("submit", () => {
             this.dirty = false;
@@ -2549,6 +2545,105 @@ class LoadingPopup extends Popup {
         this.remove();
     }
 }
+function initSMap() {
+    Loader.async = true;
+    Loader.load(null, null, loadSMap);
+}
+function loadSMap() {
+    var viewEls = document.querySelectorAll(".admin_item_view_place");
+    viewEls.forEach((el) => {
+        new SMapView(el);
+    });
+    var elements = document.querySelectorAll(".admin_place");
+    elements.forEach((el) => {
+        new SMapEdit(el);
+    });
+}
+class SMapView {
+    constructor(el) {
+        var val = el.getAttribute("data-value");
+        el.innerText = "";
+        var coords = val.split(",");
+        if (coords.length != 2) {
+            el.classList.remove("admin_item_view_place");
+            return;
+        }
+        var stred = SMap.Coords.fromWGS84(coords[1], coords[0]);
+        var mapa = new SMap(el, stred, 14);
+        mapa.addDefaultLayer(SMap.DEF_BASE).enable();
+        mapa.addDefaultControls();
+        var vrstvaZnacek = new SMap.Layer.Marker(stred);
+        mapa.addLayer(vrstvaZnacek);
+        vrstvaZnacek.enable();
+        var options = {};
+        var marker = new SMap.Marker(stred, "myMarker", options);
+        vrstvaZnacek.addMarker(marker);
+    }
+}
+class SMapEdit {
+    constructor(el) {
+        this.el = el;
+        var mapEl = document.createElement("div");
+        mapEl.classList.add("admin_place_map");
+        this.el.appendChild(mapEl);
+        this.input = this.el.querySelector(".admin_place_value");
+        var zoom = 1;
+        var coords = SMap.Coords.fromWGS84(14.41854, 50.073658);
+        var mapa = new SMap(this.el, coords, 1);
+        mapa.addDefaultLayer(SMap.DEF_BASE).enable();
+        mapa.addDefaultControls();
+        var vrstvaZnacek = new SMap.Layer.Marker(coords);
+        mapa.addLayer(vrstvaZnacek);
+        vrstvaZnacek.disable();
+        this.icon = this.createMarkerIcon();
+        this.icon.addEventListener("click", (e) => {
+            vrstvaZnacek.disable();
+            this.input.value = "";
+            e.stopPropagation();
+            e.preventDefault();
+            return false;
+        });
+        var options = {
+            url: this.icon,
+            title: "",
+            anchor: { left: 10, top: 10 },
+        };
+        this.marker = new SMap.Marker(coords, "", options);
+        vrstvaZnacek.addMarker(this.marker);
+        var inVals = this.input.value.split(",");
+        if (inVals.length == 2) {
+            var lat = parseFloat(inVals[0]);
+            var lon = parseFloat(inVals[1]);
+            if (!isNaN(lat) && !isNaN(lon)) {
+                coords = SMap.Coords.fromWGS84(lon, lat);
+                mapa.setCenterZoom(coords, 10, false);
+                this.marker.setCoords(coords);
+                vrstvaZnacek.enable();
+            }
+        }
+        mapa.getSignals().addListener(window, "map-click", (e, x) => {
+            var coords = SMap.Coords.fromEvent(e.data.event, mapa);
+            this.marker.setCoords(coords);
+            vrstvaZnacek.enable();
+            this.setValue();
+        });
+    }
+    setValue() {
+        let coords = this.marker.getCoords();
+        let val = this.stringifyPosition(coords.y, coords.x);
+        this.input.value = val;
+    }
+    stringifyPosition(lat, lng) {
+        return lat + "," + lng;
+    }
+    createMarkerIcon() {
+        var ret = document.createElement("div");
+        ret.classList.add("smap_edit_label");
+        ret.setAttribute("style", "");
+        ret.innerText = "";
+        return ret;
+    }
+}
 class Prago {
     static start() {
         document.addEventListener("DOMContentLoaded", Prago.init);
@@ -2575,24 +2670,14 @@ class Prago {
             new RelationList(el);
         });
         new NotificationCenter(document.querySelector(".notification_center"));
-    }
-    static registerPlacesEdit(place) {
-        Prago.placesEditArr.push(place);
-    }
-    static initGoogleMaps() {
-        Prago.googleMapsInited = true;
-        Prago.placesEditArr.forEach((placeEdit) => {
-            placeEdit.start();
-        });
+        initSMap();
     }
 }
 Prago.placesEditArr = [];
-Prago.googleMapsInited = false;
 Prago.start();
 function googleMapsInited() {
     var els = document.querySelectorAll(".admin_item_view_place");
     els.forEach((el) => {
         new PlacesView(el);
     });
-    Prago.initGoogleMaps();
 }

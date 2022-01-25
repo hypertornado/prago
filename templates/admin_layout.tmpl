@@ -6,12 +6,12 @@
     <title>{{.admin_title}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/admin/prago_admin_files/prago.css?v={{.version}}">
+    <script src="https://api.mapy.cz/loader.js"></script>
     <script type="text/javascript" src="/admin/prago_admin_files/pikaday.js?v={{.version}}"></script>
     <script type="text/javascript" src="/admin/prago_admin_files/prago.js?v={{.version}}"></script>
     {{range $javascript := .javascripts}}
         <script type="text/javascript" src="{{$javascript}}"></script>
     {{end}}
-    <script src="https://maps.googleapis.com/maps/api/js?callback=googleMapsInited&libraries=places&key={{.google}}" async defer></script>
 
   </head>
   <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.main_menu.URLPrefix}}" data-search-query="{{.search_q}}">

@@ -1,5 +1,6 @@
 class PlacesView {
   constructor(el: HTMLDivElement) {
+    return;
     var val = el.getAttribute("data-value");
     el.innerText = "";
 
