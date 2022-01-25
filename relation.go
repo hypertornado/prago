@@ -33,9 +33,8 @@ func (resource *Resource[T]) createRelations() {
 			}
 			field.relatedResource = resource.app.getResourceByID(relatedResourceID)
 
-			//TODO: name can be set directly
-			if field.tags["prago-name"] == "" {
-				field.name = field.relatedResource.getPluralNameFunction()
+			if !field.nameSetManually {
+				field.name = field.relatedResource.getSingularNameFunction()
 			}
 			field.relatedResource.addRelation((*relatedField)(field))
 		}
@@ -56,13 +55,19 @@ func (field *relatedField) listURL(id int64) string {
 
 //TODO: better
 func (field *relatedField) listName(locale string) string {
-	ret := field.resource.getPluralNameFunction()(locale)
+	f := (*Field)(field)
+	ret := f.GetManuallySetPluralName(locale)
+	if ret != "" {
+		return fmt.Sprintf("%s – %s", field.resource.getPluralNameFunction()(locale), ret)
+	}
+	return field.resource.getPluralNameFunction()(locale)
+	/*ret := field.resource.getPluralNameFunction()(locale)
 	fieldName := field.name(locale)
 	referenceName := field.relatedResource.getPluralNameFunction()(locale)
 	if fieldName != referenceName {
 		ret += " – " + fieldName
 	}
-	return ret
+	return ret*/
 }
 
 func getRelationViewData(user *user, f *Field, value interface{}) interface{} {

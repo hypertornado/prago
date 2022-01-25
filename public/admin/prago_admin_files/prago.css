@@ -5838,13 +5838,12 @@ select.admin_timestamp_minute {
   padding-bottom: 5px;
   padding-left: 15px;
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 .view_header_name {
   font-weight: 500;
   flex-grow: 10;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   line-height: 1.3em;
 }
 .view_header_subname {
@@ -6044,23 +6043,15 @@ td.admin_list_message {
 .admin_item_relation_change_btn {
   display: inline-block;
   width: 40px;
-  margin: 10px 10px;
-  font-size: 1.2rem;
-  line-height: 30px;
   text-align: center;
-  padding: 0px 0px;
+  margin: 10px 10px;
   background: white;
-  border: 1px solid white;
   color: #cb2431;
   width: 30px;
   height: 30px;
+  line-height: 30px;
   border-radius: 300px;
   font-weight: bold;
-}
-.admin_item_relation_change_btn:hover {
-  background: #cb2431;
-  color: white;
-  border: none;
 }
 .admin_item_relation_picker {
   display: flex;

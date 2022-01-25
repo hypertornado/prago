@@ -37,13 +37,13 @@ func (resource *Resource[T]) getRelationView(id int64, field *relatedField, user
 	ret.Subname = messages.ItemsCount(filteredCount, user.Locale)
 
 	ret.Navigation = append(ret.Navigation, tab{
-		Name: messages.GetNameFunction("admin_table")(user.Locale),
+		Name: "☰",
 		URL:  field.listURL(int64(id)),
 	})
 
 	if resource.app.authorize(user, field.resource.getPermissionUpdate()) {
 		ret.Navigation = append(ret.Navigation, tab{
-			Name: messages.GetNameFunction("admin_new")(user.Locale),
+			Name: "+",
 			URL:  field.addURL(int64(id)),
 		})
 	}
@@ -109,7 +109,6 @@ func (resource *Resource[T]) getPreviews(listRequest relationListRequest, user *
 		limit = 10
 	}
 	q = q.Limit(limit)
-
 	q.Offset(listRequest.Offset)
 
 	rowItems := q.List()

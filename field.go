@@ -8,16 +8,17 @@ import (
 )
 
 type Field struct {
-	fieldClassName string
-	id             string
-	name           func(string) string
-	description    func(string) string
-	typ            reflect.Type
-	tags           map[string]string
-	fieldOrder     int
-	unique         bool
-	canOrder       bool
-	required       bool
+	fieldClassName  string
+	id              string
+	name            func(string) string
+	nameSetManually bool
+	description     func(string) string
+	typ             reflect.Type
+	tags            map[string]string
+	fieldOrder      int
+	unique          bool
+	canOrder        bool
+	required        bool
 
 	defaultShow bool
 
@@ -161,6 +162,7 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 
 	name := ret.tags["prago-name"]
 	if name != "" {
+		ret.nameSetManually = true
 		ret.name = unlocalized(name)
 	} else {
 		//TODO: its ugly
@@ -246,8 +248,16 @@ func (field *Field) addFieldValidation(nameOfValidation string) error {
 }
 
 func (field *Field) Name(name func(string) string) *Field {
+	field.nameSetManually = true
 	field.name = name
 	return field
+}
+
+func (field *Field) GetManuallySetPluralName(locale string) string {
+	if !field.nameSetManually {
+		return ""
+	}
+	return field.name(locale)
 }
 
 func (field *Field) Description(description func(string) string) *Field {
