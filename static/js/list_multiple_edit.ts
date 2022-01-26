@@ -87,14 +87,6 @@ class ListMultipleEdit {
       }
     });
 
-    /*
-    var req = new XMLHttpRequest();
-    req.open("POST", "/admin/" + typeID + "/api/multiple_edit", true);
-    req.addEventListener("load", () => {
-      console.log("loaded");
-    });
-    req.send(data);*/
-
     e.preventDefault();
   }
 }

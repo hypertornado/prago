@@ -17,7 +17,6 @@ func (app *App) initAdminActions() {
 		request.SetData("admin_header_prefix", adminPathPrefix)
 	})
 
-	googleAPIKey := app.ConfigurationGetStringWithFallback("google", "")
 	app.adminController.addAroundAction(func(request *Request, next func()) {
 		if request.user == nil || !request.user.IsActive {
 			request.Redirect(app.getAdminURL("user/login"))
@@ -38,7 +37,6 @@ func (app *App) initAdminActions() {
 		}
 
 		request.SetData("main_menu", app.getMainMenu(request))
-		request.SetData("google", googleAPIKey)
 
 		next()
 	})

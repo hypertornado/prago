@@ -200,11 +200,6 @@ class ImagePicker {
       }
     });
 
-    /*var img = document.createElement("img");
-    img.setAttribute("src", this.adminPrefix + "/_api/image/thumb/" + id);
-    img.setAttribute("draggable", "false");
-    container.appendChild(img);*/
-
     var del = document.createElement("div");
     del.textContent = "×";
     del.classList.add("admin_images_image_delete");

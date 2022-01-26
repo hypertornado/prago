@@ -5,8 +5,6 @@ class Prago {
     document.addEventListener("DOMContentLoaded", Prago.init);
   }
 
-  private static placesEditArr: PlacesEdit[] = [];
-
   private static init() {
     var listEl = document.querySelector<HTMLDivElement>(".admin_list");
     if (listEl) {
@@ -61,30 +59,5 @@ class Prago {
     //new Alert("OOO");
     //var loader = new LoadingPopup();
   }
-
-  /*
-
-  static registerPlacesEdit(place: PlacesEdit) {
-    Prago.placesEditArr.push(place);
-  }
-
-  private static googleMapsInited = false;
-
-  static initGoogleMaps() {
-    Prago.googleMapsInited = true;
-    Prago.placesEditArr.forEach((placeEdit) => {
-      placeEdit.start();
-    });
-  }
-  */
 }
 Prago.start();
-
-function googleMapsInited() {
-  var els = document.querySelectorAll<HTMLDivElement>(".admin_item_view_place");
-  els.forEach((el) => {
-    new PlacesView(el);
-  });
-
-  //Prago.initGoogleMaps();
-}

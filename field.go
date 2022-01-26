@@ -77,9 +77,6 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 
 	//remove unused tags
 	for _, v := range []string{
-		//"prago-name",
-		//"prago-description",
-
 		"prago-edit",
 		"prago-view",
 		"prago-visible",

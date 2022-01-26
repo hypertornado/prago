@@ -8,7 +8,6 @@
     "outFile": "../public/admin/prago_admin_files/prago.js"
   },
   "files": [
-    "js/google_maps.d.ts",
     "js/autoresize.ts",
     "js/utils.ts",
     "js/imageview.ts",
@@ -23,8 +22,6 @@
     "js/markdown.ts",
     "js/timestamps.ts",
     "js/relations.ts",
-    "js/places_view.ts",
-    "js/places_edit.ts",
     "js/form.ts",
     "js/form_container.ts",
     "js/datepicker.ts",

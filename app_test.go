@@ -36,6 +36,17 @@ func prepareResource() *Resource[ResourceStruct] {
 	return resource
 }
 
+func prepareFuzzing() *Resource[ResourceStruct] {
+	app := newTestingApp()
+	resource := NewResource[ResourceStruct](app)
+	NewResource[ResourceStructUnique](app)
+
+	app.afterInit()
+	//app.unsafeDropTables()
+	//app.migrate(false)
+	return resource
+}
+
 func TestBasicResource2(t *testing.T) {
 	resource := prepareResource()
 
@@ -306,6 +317,41 @@ func TestShouldNotSaveWithZeroID(t *testing.T) {
 		t.Fatal("should not be nil")
 	}
 
+}
+
+func FuzzCreateItem(f *testing.F) {
+	f.Add(5, "helloss")
+	/*resource := prepareResource()
+	item := &ResourceStruct{
+		Name:  "A",
+		Count: int64(43),
+	}
+	err := resource.Create(item)
+	if err != nil {
+		f.Error(err)
+	}*/
+	resource := prepareFuzzing()
+	f.Fuzz(func(t *testing.T, i int, s string) {
+		item := &ResourceStruct{
+			Name:  s,
+			Count: int64(i),
+		}
+		err := resource.Create(item)
+		if err != nil {
+			//t.Errorf("fuzzing '%s': %s", s, err)
+			return
+		}
+		item2 := resource.Query().Is("id", item.ID).First()
+		if item2 == nil {
+			t.Fatal("item2 is nil")
+		}
+		if item2.Name != item.Name {
+			t.Fatal("name " + s)
+		}
+		if item2.Count != item.Count {
+			t.Fatal("count ", i)
+		}
+	})
 }
 
 /*
