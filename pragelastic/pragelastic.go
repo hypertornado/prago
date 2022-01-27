@@ -28,22 +28,33 @@ func New(id string) *Client {
 
 func NewIndex[T any](client *Client) *Index[T] {
 	ret := &Index[T]{
-		client: client,
+		client:    client,
+		fields:    getFields[T](),
+		fieldsMap: make(map[string]*field),
+	}
+	for _, v := range ret.fields {
+		ret.fieldsMap[v.Name] = v
 	}
 	return ret
 }
 
 type Index[T any] struct {
-	//suffix string
-	client *Client
+	client    *Client
+	fields    []*field
+	fieldsMap map[string]*field
 }
 
-func (index Index[T]) Flush() error {
+func (index *Index[T]) Flush() error {
 	_, err := index.client.eclient.Flush().Do(context.Background())
 	return err
 }
 
-func (index Index[T]) Delete() error {
+func (index *Index[T]) Refresh() error {
+	_, err := index.client.eclient.Refresh().Do(context.Background())
+	return err
+}
+
+func (index *Index[T]) Delete() error {
 	_, err := index.client.eclient.DeleteIndex(index.indexName()).Do(context.Background())
 	if err != nil {
 		return err
@@ -51,7 +62,7 @@ func (index Index[T]) Delete() error {
 	return nil
 }
 
-func (index Index[T]) Get(id string) (*T, error) {
+func (index *Index[T]) Get(id string) (*T, error) {
 	res, err := index.client.eclient.Get().Index(index.indexName()).Id(id).Do(context.Background())
 	if err != nil {
 		return nil, err
@@ -66,7 +77,7 @@ func (index Index[T]) Get(id string) (*T, error) {
 	return &item, nil
 }
 
-func (index Index[T]) count() (int64, error) {
+func (index *Index[T]) Count() (int64, error) {
 	stats, err := index.client.eclient.IndexStats(index.indexName()).Do(context.Background())
 	if err != nil {
 		return -1, err
@@ -74,28 +85,18 @@ func (index Index[T]) count() (int64, error) {
 	return stats.All.Primaries.Docs.Count, nil
 }
 
-//func (index Index[T]) Search(item *T) error {
-
-//}
-
-func (index Index[T]) DeleteItem(id string) error {
+func (index *Index[T]) DeleteItem(id string) error {
 	_, err := index.client.eclient.Delete().Index(index.indexName()).Id(id).Do(context.Background())
 	return err
 }
 
-func (index Index[T]) Update(item *T) error {
+func (index *Index[T]) Update(item *T) error {
 	id := getID(item)
 	_, err := index.client.eclient.Index().Index(index.indexName()).BodyJson(item).Id(id).Do(context.Background())
 	return err
 }
 
-func (index Index[T]) Create() error {
-	str := index.indexDataStr()
-	_, err := index.client.eclient.CreateIndex(index.indexName()).BodyString(str).Do(context.Background())
-	return err
-}
-
-func (index Index[T]) indexName() string {
+func (index *Index[T]) indexName() string {
 	var item T
 	t := reflect.TypeOf(item)
 	suffix := t.Name()
@@ -103,16 +104,72 @@ func (index Index[T]) indexName() string {
 	return fmt.Sprintf("%s-%s", index.client.prefix, suffix)
 }
 
+func (index *Index[T]) Create() error {
+	str := index.indexDataStr()
+	_, err := index.client.eclient.CreateIndex(index.indexName()).BodyString(str).Do(context.Background())
+	return err
+}
+
+func (index *Index[T]) getSettings() map[string]interface{} {
+	settings := make(map[string]interface{})
+
+	analysis := make(map[string]interface{})
+
+	filter := make(map[string]interface{})
+	filter["czech_stop"] = map[string]any{
+		"type":      "stop",
+		"stopwords": "_czech_",
+	}
+	filter["czech_keywords"] = map[string]any{
+		"type":     "keyword_marker",
+		"keywords": []string{"a"},
+	}
+	filter["czech_stemmer"] = map[string]any{
+		"type":     "stemmer",
+		"language": "czech",
+	}
+
+	analysis["filter"] = filter
+
+	analyzer := make(map[string]interface{})
+	analyzer["czech"] = map[string]any{
+		"tokenizer": "standard",
+		"filter": []string{
+			"lowercase",
+			"asciifolding",
+			"czech_stop",
+			"czech_keywords",
+			"czech_stemmer",
+		},
+	}
+	analyzer["czech_suggest"] = map[string]any{
+		"tokenizer": "standard",
+		"filter": []string{
+			"lowercase",
+			"asciifolding",
+		},
+	}
+	analysis["analyzer"] = analyzer
+
+	settings["analysis"] = analysis
+	return settings
+}
+
 func (index Index[T]) indexData() interface{} {
 	properties := map[string]any{}
 
-	for _, v := range getFields[T]() {
-		properties[v.Name] = map[string]any{
+	for _, v := range index.fields {
+		property := map[string]any{
 			"type": v.Type,
 		}
+		if v.Analyzer != "" {
+			property["analyzer"] = v.Analyzer
+		}
+		properties[v.Name] = property
 	}
 
 	ret := map[string]any{
+		"settings": index.getSettings(),
 		"mappings": map[string]any{
 			"properties": properties,
 		},
@@ -129,10 +186,7 @@ func (index Index[T]) indexDataStr() string {
 }
 
 type field struct {
-	Name string
-	Type string
+	Name     string
+	Type     string
+	Analyzer string
 }
-
-//func (index Index[T]) Add(item *T) string {
-
-//}

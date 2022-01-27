@@ -1,6 +1,7 @@
 package pragelastic
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -10,28 +11,60 @@ func getID[T any](item *T) string {
 	return field.String()
 }
 
-func getFields[T any]() (ret []field) {
+func getFields[T any]() (ret []*field) {
 	var item T
 	typ := reflect.TypeOf(item)
 
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
-		ret = append(ret, field{
-			Name: f.Name,
-			Type: getElasticType(f),
-		})
+		ret = append(ret, getElasticField(f))
 	}
 
 	return
 }
 
-func getElasticType(t reflect.StructField) string {
+func getElasticField(t reflect.StructField) (ret *field) {
+	ret = &field{}
+	ret.Name = t.Name
+	if ret.Name == "ID" {
+		ret.Type = "keyword"
+		return
+	}
+
+	if t.Type == reflect.TypeOf([]string{}) {
+		ret.Type = "keyword"
+		return ret
+	}
 	switch t.Type.Kind() {
 	case reflect.String:
-		return "text"
+		typ := t.Tag.Get("elastic-datatype")
+		if typ == "" {
+			panic(fmt.Sprintf("string type '%s' must have elastic-datatype tag", t.Name))
+		}
+		if !stringTypeValid(typ) {
+			panic(fmt.Sprintf("string type '%s' have elastic-datatype tag: %s", t.Name, typ))
+		}
+		ret.Type = typ
+		if ret.Type == "text" {
+			ret.Analyzer = t.Tag.Get("elastic-analyzer")
+		}
 	case reflect.Int64:
-		return "long"
+		ret.Type = "long"
+	case reflect.Bool:
+		ret.Type = "boolean"
 	default:
 		panic("wrong type " + t.Type.Name())
 	}
+
+	return
+}
+
+func stringTypeValid(t string) bool {
+	switch t {
+	case "text":
+		return true
+	case "keyword":
+		return true
+	}
+	return false
 }
