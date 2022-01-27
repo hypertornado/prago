@@ -169,14 +169,6 @@ func (resource *Resource[T]) getPluralNameFunction() func(string) string {
 	return resource.pluralName
 }
 
-/*func (resource *Resource[T]) getNameFunction() func(string) string {
-	return resource.name
-}
-
-func (resource *Resource[T]) getName(locale string) string {
-	return resource.name(locale)
-}*/
-
 func (resource *Resource[T]) getPermissionView() Permission {
 	return resource.canView
 }
@@ -230,6 +222,12 @@ func (resource *Resource[T]) Create(item *T) error {
 func (resource *Resource[T]) Update(item *T) error {
 	resource.setTimestamp(item, "UpdatedAt")
 	return resource.saveItem(item, false)
+}
+
+func (resource *Resource[T]) Replace(item *T) error {
+	resource.setTimestamp(item, "CreatedAt")
+	resource.setTimestamp(item, "UpdatedAt")
+	return resource.replaceItem(item, false)
 }
 
 func (resource *Resource[T]) setTimestamp(item *T, fieldName string) {

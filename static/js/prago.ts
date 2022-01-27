@@ -40,24 +40,6 @@ class Prago {
     new NotificationCenter(document.querySelector(".notification_center"));
 
     initSMap();
-
-    /*new Confirm("Hello world confirm", () => {
-      console.log("ok");
-    }, () => {
-      console.log("cancel");
-    }, ButtonStyle.Delete);
-
-    */
-
-    /*var content = document.createElement("div");
-    content.innerHTML =
-      "<h2>hello world</h2><br><textarea rows='10'></textarea>";
-
-    var cp = new ContentPopup("info", content);
-    cp.show();*/
-
-    //new Alert("OOO");
-    //var loader = new LoadingPopup();
   }
 }
 Prago.start();

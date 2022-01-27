@@ -5471,8 +5471,6 @@ ul {
 .admin_box {
   border: 1px solid #eee;
   margin: 20px auto;
-  background-color: white;
-  border-radius: 2px;
   max-width: min(600px, 100vw);
   width: 100%;
   margin-bottom: 20px;
@@ -5561,13 +5559,9 @@ th.admin_list_lastheadercell {
   background: white !important;
   cursor: default !important;
   user-select: none;
-  /* CSS3 (little to no support) */
   -ms-user-select: none;
-  /* IE 10+ */
   -moz-user-select: none;
-  /* Gecko (Firefox) */
   -webkit-user-select: none;
-  /* Webkit (Safari, Chrome) */
 }
 .admin_table_row td {
   padding: 2px 5px;
@@ -6563,10 +6557,6 @@ select.admin_table_filter_item {
 }
 .admin_content {
   flex-grow: 10;
-  flex-shrink: 0;
-  overflow-y: auto;
-  overflow-x: auto;
-  width: 10px;
 }
 @media (max-width: 800px) {
   .admin_header {
@@ -7264,29 +7254,6 @@ td.pagination {
   box-shadow: none;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
-/*
-  @media (max-width: 800px) {
-    .admin_navigation_tabs {
-      margin: 0px;
-      padding: 0px;
-      background: none;
-      align-content: stretch;
-      padding-left: 0px !important;
-    }
-  
-    .admin_navigation_tabs_content {
-      //background: none;
-      border-radius: 0px;
-      width: 100%;
-      align-content: stretch;
-    }
-  
-    .admin_navigation_tabdivider {
-      border: none;
-      margin: 0px 1px;
-    }
-  }
-*/
 .mainmenu {
   padding: 0px 0px;
 }

@@ -1,23 +1,15 @@
 .notification_center {
-  //border: 1px solid red;
-
   position: absolute;
   top: 10px;
   right: 10px;
   width: 250px;
   z-index: 100;
-  //height: 100px;
-  //display: flex;
-  //flex-direction: row;
-
-  //display: none;
 }
 
 .notification {
   .shadowLarge;
   background-color: white;
   border-radius: 5px;
-  //min-height: 200px;
   margin-bottom: 10px;
   display: flex;
   position: relative;
@@ -44,7 +36,6 @@
   position: absolute;
   top: -5px;
   right: -5px;
-  //border: 1px solid red;
   display: inline-block;
   border: 1px solid #eee;
   width: 20px;
@@ -84,11 +75,8 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-color: white;
-  //opacity: 0.5;
   background-size: cover;
   margin-right: 0px;
-  //justify-content: center;
-  //align-items: center;
 }
 
 .notification_left-visible {
@@ -98,7 +86,6 @@
 .notification_right {
   flex-grow: 10;
   margin: 5px;
-  //margin-left: 0px;
 }
 
 .notification_prename {
@@ -109,7 +96,6 @@
 
 .notification_name {
   font-weight: 500;
-  //margin: 5px 0px;
 }
 
 .notification_description {
@@ -124,7 +110,6 @@
 
 .notification_action-visible {
   display: block;
-  //text-transform: uppercase;
   background-color: @baseColorBackgroundLighter;
   border-radius: 5px;
   text-align: center;
@@ -134,7 +119,6 @@
   margin-top: 10px;
   cursor: pointer;
   font-weight: 500;
-  //.shadowLarge;
   background-color: @baseColor;
   color: white;
   .shadow;
@@ -169,7 +153,6 @@
   font-size: 0.8rem;
   line-height: 1.3em;
   font-weight: 500;
-  //color: @gray;
 }
 
 .notification_left_progressbar {
@@ -181,11 +164,9 @@
 }
 
 .notification-success .notification_left {
-  //border-color: @green;
 }
 
 .notification-fail {
-  //background-color: red;
 }
 
 .notification-fail .notification_name {
@@ -193,5 +174,4 @@
 }
 
 .notification-fail .notification_left {
-  //border-color: @red;
 }

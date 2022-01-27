@@ -1,9 +1,5 @@
 .popup_background {
-  //background-color: rgba(255, 255, 255, 0.9);
   background-color: rgba(0, 0, 0, 0.4);
-  //background-color: red;
-  //width: 100px;
-  //height: 100px;
   position: absolute;
   top: 0px;
   left: 0px;
@@ -15,24 +11,16 @@
   align-items: center;
   outline: none;
   display: none;
-  //-webkit-filter: blur(8px);
-  //filter: blur(8px);
   backdrop-filter: blur(3px);
 }
 
 .popup_background-presented {
   display: flex;
-  //.animated;
-  //.bounceInDown;
-  //animation-iteration-count: 1;
 }
 
 .popup {
   .rectangle;
   width: ~"min(300px, 100vw - 20px)";
-  //border: 1px solid red;
-  //max-width: calc(~"100vw - 20px");
-  //min-width: 200px;
   padding: 10px;
   background-color: #eee;
   border-radius: 10px;
@@ -40,10 +28,8 @@
 
   display: flex;
   flex-direction: column;
-  //max-width: 300px;
   padding: 0px;
   border-radius: 5px;
-  //max-height: 100vh;
   max-height: calc(~"100vh - 20px");
 }
 
@@ -57,7 +43,6 @@
 }
 
 .popup_header_name {
-  //border: 1px solid red;
   flex-grow: 10;
   flex-shrink: 10;
   font-weight: 500;
@@ -70,7 +55,6 @@
   flex-shrink: 0;
   font-size: 1.5em;
   display: none;
-  //font-weight: bold;
 }
 
 .popup_header_cancel-visible {

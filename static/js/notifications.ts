@@ -14,65 +14,6 @@ class NotificationCenter {
       this.setData(item);
     });
 
-    /*
-
-    var action: NotificationItemAction = {
-      Name: "Ukončit",
-      ID: "aaa",
-    };
-
-    this.setData({
-      UUID: "SS",
-      Name: "XXX",
-      PrimaryAction: action,
-      SecondaryAction: {
-        Name: "Storno",
-        ID: "XXX",
-      },
-    });
-
-    this.setData({
-      UUID: "xXXX",
-      PreName: "novinky ze světa",
-      Image:
-        "https://www.prago-cdn.com/lazne/kRX9YPoKMqD3IKQk1Lmy/2500/48dc142cd1/mvx0017.jpg",
-      Name: "Zemřel manžel britské královny. Princi Philipovi bylo 99 let",
-      Progress: {
-        Human: "76 %",
-        Percentage: 0.76,
-      },
-      Description:
-        "Britská královská rodina a celá Velká Británie truchlí. Ve věku 99 let zemřel princ Philip. Manžel britské panovnice Alžběty II., Jeho královská Výsost vévoda z Edinburghu zemřel ráno 9. dubna na zámku Windsor, královská rodina zprávu potvrdila na sociálních sítích.",
-    });
-
-    this.setData({
-      UUID: "xXsssXXss",
-      Name: "OK",
-      URL: "/",
-    });
-
-    this.setData({
-      UUID: "xXXXss",
-      Name: "can't cancel",
-      DisableCancel: true,
-      Progress: {
-        Human: "56 %",
-        Percentage: 0.56,
-      },
-      Style: "fail",
-    });
-
-    this.setData({
-      UUID: "xXXXss2",
-      Name: "can't cancel",
-      DisableCancel: true,
-      Progress: {
-        Human: "",
-        Percentage: -1,
-      },
-      Style: "success",
-    });*/
-
     this.periodDataLoader();
   }
 

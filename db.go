@@ -88,8 +88,46 @@ func (resource *Resource[T]) prepareValues(value reflect.Value) (names []string,
 	return
 }
 
+//https://stackoverflow.com/questions/696190/create-if-an-entry-if-it-doesnt-exist-otherwise-update
+func (resource *Resource[T]) replaceItem(item interface{}, debugSQL bool) error {
+	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
+	if id <= 0 {
+		return errors.New("id must be positive")
+	}
+
+	value := reflect.ValueOf(item).Elem()
+	names, questionMarks, values, err := resource.prepareValues(value)
+	if err != nil {
+		return err
+	}
+	updateNames := []string{}
+	for _, v := range names {
+		updateNames = append(updateNames, fmt.Sprintf(" %s=? ", v))
+	}
+	q := fmt.Sprintf("REPLACE INTO `%s` (%s) VALUES (%s);", resource.id, strings.Join(names, ", "), strings.Join(questionMarks, ", "))
+	if debugSQL {
+		fmt.Println(q, values)
+	}
+	execResult, err := resource.app.db.Exec(q, values...)
+	if err != nil {
+		return err
+	}
+	affected, err := execResult.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected != 1 && affected != 2 {
+		return fmt.Errorf("not one or two rows affected: %d", affected)
+	}
+	return nil
+}
+
 func (resource *Resource[T]) saveItem(item interface{}, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
+	if id <= 0 {
+		return errors.New("id must be positive")
+	}
+
 	value := reflect.ValueOf(item).Elem()
 	names, _, values, err := resource.prepareValues(value)
 	if err != nil {
@@ -113,6 +151,9 @@ func (resource *Resource[T]) saveItem(item interface{}, debugSQL bool) error {
 	}
 	if affected == 0 {
 		return errors.New("zero rows affected by save operation")
+	}
+	if affected != 1 {
+		return fmt.Errorf("non one row affected: %d", affected)
 	}
 	return nil
 }

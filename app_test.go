@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -316,20 +317,65 @@ func TestShouldNotSaveWithZeroID(t *testing.T) {
 	if err == nil {
 		t.Fatal("should not be nil")
 	}
+}
 
+func TestWorkingWithConcreteID(t *testing.T) {
+	resource := prepareResource()
+	item := &ResourceStruct{
+		ID:   3,
+		Name: "A",
+	}
+	err := resource.Create(item)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = resource.Delete(3)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	item.Name = "B"
+
+	err = resource.Create(item)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestReplace(t *testing.T) {
+	resource := prepareResource()
+	var id int64 = 3
+	item := &ResourceStruct{
+		ID:   id,
+		Name: "A",
+	}
+	err := resource.Replace(item)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resource.Is("id", id).First() == nil {
+		t.Fatal("should not be nil")
+	}
+	item.Name = "B"
+	err = resource.Replace(item)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, _ := resource.Query().Count()
+	if count != 1 {
+		t.Fatal(count)
+	}
+
+	modified := resource.Is("id", id).First()
+	if modified.Name != "B" {
+		t.Fatal(modified.Name)
+	}
 }
 
 func FuzzCreateItem(f *testing.F) {
 	f.Add(5, "helloss")
-	/*resource := prepareResource()
-	item := &ResourceStruct{
-		Name:  "A",
-		Count: int64(43),
-	}
-	err := resource.Create(item)
-	if err != nil {
-		f.Error(err)
-	}*/
 	resource := prepareFuzzing()
 	f.Fuzz(func(t *testing.T, i int, s string) {
 		item := &ResourceStruct{
@@ -338,7 +384,6 @@ func FuzzCreateItem(f *testing.F) {
 		}
 		err := resource.Create(item)
 		if err != nil {
-			//t.Errorf("fuzzing '%s': %s", s, err)
 			return
 		}
 		item2 := resource.Query().Is("id", item.ID).First()
@@ -354,18 +399,18 @@ func FuzzCreateItem(f *testing.F) {
 	})
 }
 
-/*
 func TestLongSaveText(t *testing.T) {
-	text := "some" + string(make([]byte, 100000))
-	app, _ := prepareResource()
-	err := app.Create(&ResourceStruct{Text: text})
+	//TODO: make it work with 100000
+	text := "some" + string(make([]byte, 10000))
+	res := prepareResource()
+	newItem := &ResourceStruct{Text: text}
+	err := res.Create(newItem)
 	if err != nil {
 		t.Fatal(err)
 	}
-	var item ResourceStruct
-	app.Query().WhereIs("id", 1).Get(&item)
+	item := res.Is("id", newItem.ID).First()
 
 	if !strings.HasPrefix(item.Text, "some") {
 		t.Fatal(item.Text)
 	}
-}*/
+}

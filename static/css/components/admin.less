@@ -62,10 +62,10 @@ th.admin_list_lastheadercell {
   background: white !important;
   cursor: default !important;
 
-  user-select: none; /* CSS3 (little to no support) */
-  -ms-user-select: none; /* IE 10+ */
-  -moz-user-select: none; /* Gecko (Firefox) */
-  -webkit-user-select: none; /* Webkit (Safari, Chrome) */
+  user-select: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
 }
 
 .admin_table_row td {
@@ -389,8 +389,6 @@ select.admin_timestamp_minute {
   padding-bottom: 5px;
   padding-left: 15px;
   display: flex;
-  //flex-wrap: wrap;
-
   align-items: flex-start;
 }
 
@@ -636,23 +634,13 @@ td.admin_list_message {
   width: 40px;
   text-align: center;
   margin: 10px 10px;
-  //font-size: 1.2rem;
-  //text-align: center;
-  //padding: 0px 0px;
   background: white;
-  //border: 1px solid white;
   color: @red;
   width: 30px;
   height: 30px;
   line-height: 30px;
   border-radius: 300px;
   font-weight: bold;
-}
-
-.admin_item_relation_change_btn:hover {
-  //background: @red;
-  //color: white;
-  //border: none;
 }
 
 .admin_item_relation_picker {
