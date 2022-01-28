@@ -17,7 +17,6 @@ type Suggest struct {
 type SuggestCategoryContext struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
-	//Path string `json:"path"`
 }
 
 func (index *Index[T]) getSuggestFieldName() string {
@@ -29,37 +28,35 @@ func (index *Index[T]) getSuggestFieldName() string {
 	return ""
 }
 
-func (query *Query[T]) mustSuggest(q string, categoryContexts map[string][]string) []*T {
-	ret, err := query.Suggest(q, categoryContexts)
+func (index *Index[T]) mustSuggest(q string, categoryContexts map[string][]string) []*T {
+	ret, err := index.Suggest(q, categoryContexts)
 	if err != nil {
 		panic(err)
 	}
 	return ret
 }
 
-func (query *Query[T]) Suggest(q string, categoryContexts map[string][]string) ([]*T, error) {
-	fieldName := query.index.getSuggestFieldName()
+func (index *Index[T]) Suggest(q string, categoryContexts map[string][]string) ([]*T, error) {
+	fieldName := index.getSuggestFieldName()
 	if fieldName == "" {
 		return nil, fmt.Errorf("Can't find suggest field name: no field has type copletion")
 	}
 
 	suggesterName := "_suggester"
-	cs := elastic.NewCompletionSuggester(suggesterName).
+	completionSuggester := elastic.NewCompletionSuggester(suggesterName).
 		Field(fieldName).
 		Prefix(q)
 
 	for k, v := range categoryContexts {
-		cs.ContextQuery(elastic.NewSuggesterCategoryQuery(k, v...))
+		completionSuggester.ContextQuery(elastic.NewSuggesterCategoryQuery(k, v...))
 	}
 
-	ss, err := query.getSearchService()
-	if err != nil {
-		return nil, err
-	}
+	searchService := index.client.eclient.
+		Search().
+		Index(index.indexName()).
+		Suggester(completionSuggester)
 
-	ss.Suggester(cs)
-
-	searchResult, err := ss.Do(context.Background())
+	searchResult, err := searchService.Do(context.Background())
 	if err != nil {
 		return nil, err
 	}

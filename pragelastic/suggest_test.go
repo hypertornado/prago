@@ -66,21 +66,21 @@ func TestSuggestWithTags(t *testing.T) {
 	index.Flush()
 	index.Refresh()
 
-	res := getIDS(index.Query().mustSuggest("mesto", map[string][]string{
+	res := getIDS(index.mustSuggest("mesto", map[string][]string{
 		"Tags": {"A"},
 	}))
 	if res != "2" {
 		t.Fatal(res)
 	}
 
-	res = getIDS(index.Query().mustSuggest("mesto", map[string][]string{
+	res = getIDS(index.mustSuggest("mesto", map[string][]string{
 		"Tags": {"C"},
 	}))
 	if res != "4" {
 		t.Fatal(res)
 	}
 
-	res = getIDS(index.Query().mustSuggest("mesto", map[string][]string{
+	res = getIDS(index.mustSuggest("mesto", map[string][]string{
 		"Tags": {"B"},
 	}))
 	if res != "4,2" {
@@ -102,9 +102,6 @@ func TestSuggestNoTags(t *testing.T) {
 		SuggestionField: Suggest{
 			Input:  "Město moře stavení",
 			Weight: 10,
-			/*Contexts: map[string][]string{
-				"Tags": {"hello world dd"},
-			},*/
 		},
 	})
 	if err != nil {
@@ -129,7 +126,7 @@ func TestSuggestNoTags(t *testing.T) {
 	index.Flush()
 	index.Refresh()
 
-	res := getIDS(index.Query().mustSuggest("pan", nil))
+	res := getIDS(index.mustSuggest("pan", nil))
 	if res != "4,3" {
 		t.Fatal(res)
 	}
