@@ -35,6 +35,20 @@ func getElasticField(t reflect.StructField) (ret *field) {
 		ret.Type = "keyword"
 		return ret
 	}
+	if t.Type == reflect.TypeOf(Suggest{}) {
+		ret.Type = "completion"
+		ret.Analyzer = t.Tag.Get("elastic-analyzer")
+		categoryContextName := t.Tag.Get("elastic-category-context-name")
+		if categoryContextName != "" {
+			//categoryContextPath := t.Tag.Get("elastic-category-context-path")
+			ret.CategoryContexts = append(ret.CategoryContexts, SuggestCategoryContext{
+				Name: categoryContextName,
+				Type: "category",
+				//Path: categoryContextPath,
+			})
+		}
+		return ret
+	}
 	switch t.Type.Kind() {
 	case reflect.String:
 		typ := t.Tag.Get("elastic-datatype")

@@ -165,6 +165,14 @@ func (index Index[T]) indexData() interface{} {
 		if v.Analyzer != "" {
 			property["analyzer"] = v.Analyzer
 		}
+		if len(v.CategoryContexts) > 0 {
+			b, err := json.MarshalIndent(v.CategoryContexts, " ", " ")
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(string(b))
+			property["contexts"] = v.CategoryContexts
+		}
 		properties[v.Name] = property
 	}
 
@@ -186,7 +194,8 @@ func (index Index[T]) indexDataStr() string {
 }
 
 type field struct {
-	Name     string
-	Type     string
-	Analyzer string
+	Name             string
+	Type             string
+	Analyzer         string
+	CategoryContexts []SuggestCategoryContext
 }

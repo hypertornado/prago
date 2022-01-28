@@ -1383,6 +1383,7 @@ class RelationPicker {
             this.getSuggestions(this.pickerInput.value);
         });
         this.pickerInput.addEventListener("blur", () => {
+            this.suggestionsEl.classList.add("hidden");
         });
         this.pickerInput.addEventListener("focus", () => {
             this.suggestionsEl.classList.remove("hidden");

@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -107,8 +108,7 @@ func (e *adminSearch) createSearchIndex() error {
 		"properties": {
 		"suggest": {
 			"type": "completion",
-			"analyzer": "cesky_suggest",
-			"preserve_separators": true
+			"analyzer": "cesky_suggest"
 		},
 		"name": {"type": "text", "analyzer": "cesky"},
 		"description": {"type": "text", "analyzer": "cesky"},
@@ -184,49 +184,49 @@ func (e *adminSearch) Search(q string, role string, page int) ([]*searchItem, in
 func (e *adminSearch) Suggest(q string) ([]*searchItem, error) {
 	//disabled
 	return []*searchItem{}, nil
-	/*
-		suggesterName := "completion_suggester"
-		cs := elastic.NewCompletionSuggester(suggesterName)
-		cs = cs.Field("suggest")
-		cs = cs.Prefix(q)
-		cs = cs.SkipDuplicates(true)
 
-		searchResult, err := e.client.Search().
-			Index(e.indexName).
-			Suggester(cs).
-			Pretty(true).
-			Do(context.Background())
-		if err != nil {
-			return nil, err
+	suggesterName := "completion_suggester"
+	cs := elastic.NewCompletionSuggester(suggesterName)
+	cs = cs.Field("suggest")
+	cs = cs.Prefix(q)
+	cs = cs.SkipDuplicates(true)
+
+	searchResult, err := e.client.Search().
+		Index(e.indexName).
+		Suggester(cs).
+		Pretty(true).
+		Do(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	suggestions := searchResult.Suggest[suggesterName]
+
+	var ret []*searchItem
+
+	multi := e.client.MultiGet()
+	for _, v := range suggestions {
+		for _, v2 := range v.Options {
+			multiitem := elastic.NewMultiGetItem().Id(v2.Id).Index(e.indexName)
+			multi = multi.Add(multiitem)
 		}
+	}
 
-		suggestions := searchResult.Suggest[suggesterName]
-
-		var ret []*searchItem
-
-		multi := e.client.MultiGet()
-		for _, v := range suggestions {
-			for _, v2 := range v.Options {
-				multiitem := elastic.NewMultiGetItem().Id(v2.Id).Index(e.indexName)
-				multi = multi.Add(multiitem)
+	res, err := multi.Do(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range res.Docs {
+		if v.Source != nil {
+			var item searchItem
+			err = json.Unmarshal(v.Source, &item)
+			if err == nil {
+				ret = append(ret, &item)
 			}
 		}
+	}
 
-		res, err := multi.Do(context.Background())
-		if err != nil {
-			return nil, err
-		}
-		for _, v := range res.Docs {
-			if v.Source != nil {
-				var item searchItem
-				err = json.Unmarshal(v.Source, &item)
-				if err == nil {
-					ret = append(ret, &item)
-				}
-			}
-		}
-
-		return ret, nil*/
+	return ret, nil
 }
 
 func (e *adminSearch) flush() error {

@@ -3,18 +3,19 @@ package pragelastic
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"reflect"
 
 	"github.com/olivere/elastic/v7"
 )
 
 type Query[T any] struct {
-	index     *Index[T]
-	sortField string
-	sortAsc   bool
-	limit     int64
-	offset    int64
-	queries   []elastic.Query
+	index         *Index[T]
+	sortField     string
+	sortAsc       bool
+	limit         int64
+	offset        int64
+	filterQueries []elastic.Query
 }
 
 func (index *Index[T]) Query() *Query[T] {
@@ -35,14 +36,14 @@ func (q *Query[T]) Is(field string, value interface{}) *Query[T] {
 			shouldQueries = append(shouldQueries, elastic.NewTermQuery(field, v))
 		}
 		bq.Should(shouldQueries...)
-		q.queries = append(q.queries, bq)
+		q.filterQueries = append(q.filterQueries, bq)
 		return q
 	}
 	if f.Type == "text" {
 		mq := elastic.NewMatchQuery(field, value)
-		q.queries = append(q.queries, mq)
+		q.filterQueries = append(q.filterQueries, mq)
 	} else {
-		q.queries = append(q.queries, elastic.NewTermsQuery(field, value))
+		q.filterQueries = append(q.filterQueries, elastic.NewTermsQuery(field, value))
 	}
 	return q
 }
@@ -63,7 +64,7 @@ func (q *Query[T]) Offset(offset int64) *Query[T] {
 	return q
 }
 
-func (query *Query[T]) List() []*T {
+func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
 	q := query.index.client.eclient.
 		Search().
 		Index(query.index.indexName())
@@ -73,19 +74,25 @@ func (query *Query[T]) List() []*T {
 	}
 
 	bq := elastic.NewBoolQuery()
-	for _, v := range query.queries {
-		bq.Must(
-			v,
-		)
-	}
+	bq.Filter(query.filterQueries...)
 
-	res, err := q.
+	ret := q.
 		From(int(query.offset)).
 		Size(int(query.limit)).
-		Query(bq).
+		Query(bq)
+	return ret, nil
+}
+
+func (query *Query[T]) List() ([]*T, error) {
+	service, err := query.getSearchService()
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := service.
 		Do(context.Background())
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	var ret []*T
@@ -94,9 +101,17 @@ func (query *Query[T]) List() []*T {
 		var t T
 		err := json.Unmarshal(v.Source, &t)
 		if err != nil {
-			panic(err)
+			return nil, fmt.Errorf("can't unmarshal search result: %s", err)
 		}
 		ret = append(ret, &t)
 	}
-	return ret
+	return ret, nil
+}
+
+func (query *Query[T]) MustList() []*T {
+	list, err := query.List()
+	if err != nil {
+		panic(err)
+	}
+	return list
 }

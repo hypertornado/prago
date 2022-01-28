@@ -1,6 +1,7 @@
 package pragelastic
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -16,17 +17,18 @@ type TestStruct struct {
 	Tags      []string
 }
 
-func getIDS(items []*TestStruct) string {
+func getIDS[T any](items []*T) string {
 	ret := []string{}
 	for _, v := range items {
-		ret = append(ret, v.ID)
+		id := reflect.ValueOf(v).Elem().FieldByName("ID").String()
+		ret = append(ret, id)
 	}
 	return strings.Join(ret, ",")
 }
 
-func prepareTestIndex() *Index[TestStruct] {
+func prepareTestIndex[T any]() *Index[T] {
 	lib := New(testClientName)
-	index := NewIndex[TestStruct](lib)
+	index := NewIndex[T](lib)
 	index.Delete()
 	err := index.Create()
 	if err != nil {
@@ -40,7 +42,7 @@ func prepareTestIndex() *Index[TestStruct] {
 }
 
 func TestMultipleBooleanTags(t *testing.T) {
-	index := prepareTestIndex()
+	index := prepareTestIndex[TestStruct]()
 	index.Update(&TestStruct{
 		ID:        "1",
 		Name:      "A",
@@ -61,7 +63,7 @@ func TestMultipleBooleanTags(t *testing.T) {
 	index.Flush()
 	index.Refresh()
 
-	res := getIDS(index.Query().Is("Name", "A").Is("SomeCount", 7).List())
+	res := getIDS(index.Query().Is("Name", "A").Is("SomeCount", 7).MustList())
 	if res != "2" {
 		t.Fatal(res)
 	}
@@ -69,7 +71,7 @@ func TestMultipleBooleanTags(t *testing.T) {
 }
 
 func TestTags(t *testing.T) {
-	index := prepareTestIndex()
+	index := prepareTestIndex[TestStruct]()
 	index.Update(&TestStruct{
 		ID:   "1",
 		Tags: []string{"hello", "world"},
@@ -91,7 +93,7 @@ func TestTags(t *testing.T) {
 		{"1", "hello"},
 		{"2", "apple"},
 	} {
-		res := getIDS(index.Query().Is("Tags", v[0:]).List())
+		res := getIDS(index.Query().Is("Tags", v[0:]).MustList())
 		if res != v[0] {
 			t.Fatal(k, res)
 		}
@@ -99,7 +101,7 @@ func TestTags(t *testing.T) {
 }
 
 func TestCzechSearch(t *testing.T) {
-	index := prepareTestIndex()
+	index := prepareTestIndex[TestStruct]()
 	index.Update(&TestStruct{
 		ID:   "1",
 		Text: "Nový náměstek ministra baobab průmyslu auto se sešel s Topolánkem, který pracuje pro Křetínského. „Příště si dám pozor,“ říká",
@@ -118,7 +120,7 @@ func TestCzechSearch(t *testing.T) {
 		{"jméno", "2"},
 		{"priste", "1"},
 	} {
-		res := getIDS(index.Query().Is("Text", v[0]).List())
+		res := getIDS(index.Query().Is("Text", v[0]).MustList())
 		if res != v[1] {
 			t.Fatal(k, res)
 		}
@@ -127,7 +129,7 @@ func TestCzechSearch(t *testing.T) {
 }
 
 func TestAllQuery(t *testing.T) {
-	index := prepareTestIndex()
+	index := prepareTestIndex[TestStruct]()
 	index.Update(&TestStruct{
 		ID:        "1",
 		Name:      "C",
@@ -149,52 +151,52 @@ func TestAllQuery(t *testing.T) {
 	index.Flush()
 	index.Refresh()
 
-	expected := getIDS(index.Query().Sort("ID", false).List())
+	expected := getIDS(index.Query().Sort("ID", false).MustList())
 	if expected != "3,2,1" {
 		t.Fatal(expected)
 	}
 
-	expected = getIDS(index.Query().Sort("Name", true).List())
+	expected = getIDS(index.Query().Sort("Name", true).MustList())
 	if expected != "2,3,1" {
 		t.Fatal(expected)
 	}
 
-	expected = getIDS(index.Query().Sort("Name", false).List())
+	expected = getIDS(index.Query().Sort("Name", false).MustList())
 	if expected != "1,3,2" {
 		t.Fatal(expected)
 	}
 
-	expected = getIDS(index.Query().Sort("Name", false).Limit(2).List())
+	expected = getIDS(index.Query().Sort("Name", false).Limit(2).MustList())
 	if expected != "1,3" {
 		t.Fatal(expected)
 	}
 
-	expected = getIDS(index.Query().Sort("Name", false).Limit(2).Offset(1).List())
+	expected = getIDS(index.Query().Sort("Name", false).Limit(2).Offset(1).MustList())
 	if expected != "3,2" {
 		t.Fatal(expected)
 	}
 
-	expected = getIDS(index.Query().Sort("SomeCount", true).List())
+	expected = getIDS(index.Query().Sort("SomeCount", true).MustList())
 	if expected != "1,3,2" {
 		t.Fatal(expected)
 	}
 
-	expected = getIDS(index.Query().Sort("IsOK", false).Limit(1).List())
+	expected = getIDS(index.Query().Sort("IsOK", false).Limit(1).MustList())
 	if expected != "2" {
 		t.Fatal(expected)
 	}
 
-	expected = getIDS(index.Query().Is("IsOK", true).List())
+	expected = getIDS(index.Query().Is("IsOK", true).MustList())
 	if expected != "2" {
 		t.Fatal(expected)
 	}
 
-	expected = getIDS(index.Query().Is("Name", "B").List())
+	expected = getIDS(index.Query().Is("Name", "B").MustList())
 	if expected != "3" {
 		t.Fatal(expected)
 	}
 
-	expected = getIDS(index.Query().Is("SomeCount", 3).List())
+	expected = getIDS(index.Query().Is("SomeCount", 3).MustList())
 	if expected != "2" {
 		t.Fatal(expected)
 	}
@@ -202,7 +204,7 @@ func TestAllQuery(t *testing.T) {
 }
 
 func TestBasic(t *testing.T) {
-	index := prepareTestIndex()
+	index := prepareTestIndex[TestStruct]()
 
 	err := index.Update(&TestStruct{
 		ID:   "2",
