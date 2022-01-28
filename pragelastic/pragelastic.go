@@ -166,11 +166,11 @@ func (index Index[T]) indexData() interface{} {
 			property["analyzer"] = v.Analyzer
 		}
 		if len(v.CategoryContexts) > 0 {
-			b, err := json.MarshalIndent(v.CategoryContexts, " ", " ")
+			/*b, err := json.MarshalIndent(v.CategoryContexts, " ", " ")
 			if err != nil {
 				panic(err)
 			}
-			fmt.Println(string(b))
+			fmt.Println(string(b))*/
 			property["contexts"] = v.CategoryContexts
 		}
 		properties[v.Name] = property

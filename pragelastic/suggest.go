@@ -29,15 +29,15 @@ func (index *Index[T]) getSuggestFieldName() string {
 	return ""
 }
 
-func (query *Query[T]) mustSuggest(q string) []*T {
-	ret, err := query.Suggest(q)
+func (query *Query[T]) mustSuggest(q string, categoryContexts map[string][]string) []*T {
+	ret, err := query.Suggest(q, categoryContexts)
 	if err != nil {
 		panic(err)
 	}
 	return ret
 }
 
-func (query *Query[T]) Suggest(q string) ([]*T, error) {
+func (query *Query[T]) Suggest(q string, categoryContexts map[string][]string) ([]*T, error) {
 	fieldName := query.index.getSuggestFieldName()
 	if fieldName == "" {
 		return nil, fmt.Errorf("Can't find suggest field name: no field has type copletion")
@@ -46,10 +46,11 @@ func (query *Query[T]) Suggest(q string) ([]*T, error) {
 	suggesterName := "_suggester"
 	cs := elastic.NewCompletionSuggester(suggesterName).
 		Field(fieldName).
-		Prefix(q).
-		SkipDuplicates(true)
+		Prefix(q)
 
-	//cs.ContextQueries(query.filterQueries...)
+	for k, v := range categoryContexts {
+		cs.ContextQuery(elastic.NewSuggesterCategoryQuery(k, v...))
+	}
 
 	ss, err := query.getSearchService()
 	if err != nil {
