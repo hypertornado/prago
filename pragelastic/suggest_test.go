@@ -1,37 +1,50 @@
 package pragelastic
 
-import "testing"
+import (
+	"testing"
+)
 
-type TestStructSuggest struct {
+type TestStructSuggestTags struct {
 	ID              string
 	SuggestionField Suggest `elastic-analyzer:"czech_suggest" elastic-category-context-name:"Tags"`
 }
 
-func TestSuggest(t *testing.T) {
-	if true {
-		return
-	}
+type TestStructSuggestNoTags struct {
+	ID              string
+	SuggestionField Suggest `elastic-analyzer:"czech_suggest"`
+}
 
-	index := prepareTestIndex[TestStructSuggest]()
-	index.Update(&TestStructSuggest{
+func TestSuggestNoTags(t *testing.T) {
+	index := prepareTestIndex[TestStructSuggestNoTags]()
+	err := index.Update(&TestStructSuggestNoTags{
 		ID: "1",
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	index.Update(&TestStructSuggest{
+	err = index.Update(&TestStructSuggestNoTags{
 		ID: "2",
 		SuggestionField: Suggest{
 			Input:  "Město moře stavení",
 			Weight: 10,
+			/*Contexts: map[string][]string{
+				"Tags": {"hello world dd"},
+			},*/
 		},
 	})
-	index.Update(&TestStructSuggest{
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	index.Update(&TestStructSuggestNoTags{
 		ID: "3",
 		SuggestionField: Suggest{
 			Input:  "Pán hrad stavení",
 			Weight: 100,
 		},
 	})
-	index.Update(&TestStructSuggest{
+	index.Update(&TestStructSuggestNoTags{
 		ID: "4",
 		SuggestionField: Suggest{
 			Input:  "pan hrad stavení",
@@ -42,20 +55,8 @@ func TestSuggest(t *testing.T) {
 	index.Flush()
 	index.Refresh()
 
-	res := getIDS(index.Query().mustSuggest("mesto"))
-	if res != "2" {
+	res := getIDS(index.Query().mustSuggest("pan"))
+	if res != "4,3" {
 		t.Fatal(res)
 	}
-
-	/*
-		res = getIDS(index.Query().mustSuggest("pan"))
-		if res != "4,3" {
-			t.Fatal(res)
-		}*/
-
-	/*res = getIDS(index.Query().Is("SomeCount", 200).mustSuggest("pan"))
-	if res != "4" {
-		t.Fatal(res)
-	}*/
-
 }
