@@ -83,16 +83,18 @@ func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
 	return ret, nil
 }
 
-func (query *Query[T]) List() ([]*T, error) {
+func (query *Query[T]) searchResult() (*elastic.SearchResult, error) {
 	service, err := query.getSearchService()
 	if err != nil {
 		return nil, err
 	}
+	return service.Do(context.Background())
+}
 
-	res, err := service.
-		Do(context.Background())
+func (query *Query[T]) List() ([]*T, int64, error) {
+	res, err := query.searchResult()
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
 	var ret []*T
@@ -101,15 +103,15 @@ func (query *Query[T]) List() ([]*T, error) {
 		var t T
 		err := json.Unmarshal(v.Source, &t)
 		if err != nil {
-			return nil, fmt.Errorf("can't unmarshal search result: %s", err)
+			return nil, -1, fmt.Errorf("can't unmarshal search result: %s", err)
 		}
 		ret = append(ret, &t)
 	}
-	return ret, nil
+	return ret, res.Hits.TotalHits.Value, nil
 }
 
-func (query *Query[T]) MustList() []*T {
-	list, err := query.List()
+func (query *Query[T]) mustList() []*T {
+	list, _, err := query.List()
 	if err != nil {
 		panic(err)
 	}

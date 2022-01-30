@@ -1,33 +1,7 @@
 package prago
 
-import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/url"
-	"reflect"
-	"strconv"
-	"strings"
-
-	"github.com/olivere/elastic/v7"
-	"golang.org/x/net/context"
-)
-
+/*
 const searchPageSize int = 10
-
-func (app *App) initSearch() {
-	go app.initSearchInner()
-}
-
-type searchItem struct {
-	ID          string   `json:"id"`
-	Category    string   `json:"category"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Image       string   `json:"image"`
-	URL         string   `json:"url"`
-	Roles       []string `json:"roles"`
-}
 
 type searchPage struct {
 	Title    int
@@ -35,7 +9,7 @@ type searchPage struct {
 	URL      string
 }
 
-type adminSearch struct {
+type adminSearchOLD struct {
 	client    *elastic.Client
 	app       *App
 	indexName string
@@ -43,108 +17,6 @@ type adminSearch struct {
 
 func (si searchItem) CroppedDescription() string {
 	return crop(si.Description, 100)
-}
-
-func newAdminSearch(app *App) (*adminSearch, error) {
-	client, err := elastic.NewClient()
-	if err != nil {
-		return nil, err
-	}
-	return &adminSearch{
-		client:    client,
-		app:       app,
-		indexName: "prago_admin",
-	}, nil
-}
-
-func (e *adminSearch) createSearchIndex() error {
-	//pragelastic.New("xxx")
-
-	e.client.DeleteIndex(e.indexName).Do(context.Background())
-	e.flush()
-
-	//e.client.CreateIndex(e.indexName).
-
-	_, err := e.client.CreateIndex(e.indexName).BodyString(`
-    {
-      "settings": {
-          "analysis": {
-            "filter": {
-              "czech_stop": {
-                "type":       "stop",
-                "stopwords":  "_czech_" 
-              },
-              "czech_keywords": {
-                "type":       "keyword_marker",
-                "keywords":   ["a"] 
-              },
-              "czech_stemmer": {
-                "type":       "stemmer",
-                "language":   "czech"
-              }
-            },
-            "analyzer": {
-              "cesky": {
-                "tokenizer":  "standard",
-                "filter": [
-                  "lowercase",
-                  "asciifolding",
-                  "czech_stop",
-                  "czech_keywords",
-                  "czech_stemmer"
-                ]
-              },
-              "cesky_suggest": {
-                "tokenizer":  "standard",
-                "filter": [
-                  "lowercase",
-                  "asciifolding"
-                ]
-              }
-            }
-          }
-        },
-      "mappings": {
-		"properties": {
-		"suggest": {
-			"type": "completion",
-			"analyzer": "cesky_suggest"
-		},
-		"name": {"type": "text", "analyzer": "cesky"},
-		"description": {"type": "text", "analyzer": "cesky"},
-		"image": {"type": "text"},
-					"url": {"type": "text"},
-					"roles": {"type": "text"}
-		}
-      }
-    }
-		`).Do(context.Background())
-	if err != nil {
-		return fmt.Errorf("while creating index %s", err)
-	}
-	return nil
-}
-
-func (e *adminSearch) addItem(item *searchItem, weight int) error {
-	var suggest = parseSuggestions(item.Name)
-	_, err := e.client.Index().Index(e.indexName).BodyJson(map[string]interface{}{
-		"suggest": map[string]interface{}{
-			"input":  suggest,
-			"weight": weight,
-		},
-		"category":    item.Category,
-		"name":        item.Name,
-		"description": item.Description,
-		"image":       item.Image,
-		"url":         item.URL,
-		"roles":       item.Roles,
-	}).Id(item.ID).Do(context.Background())
-	return err
-}
-
-func (e *adminSearch) DeleteIndex() error {
-	_, err := e.client.DeleteIndex(e.indexName).Do(context.Background())
-	return err
 }
 
 func (e *adminSearch) Search(q string, role string, page int) ([]*searchItem, int64, error) {
@@ -234,25 +106,6 @@ func (e *adminSearch) flush() error {
 	return err
 }
 
-func (e *adminSearch) searchImport() error {
-	var err error
-
-	err = e.createSearchIndex()
-	if err != nil {
-		return fmt.Errorf("while creating index: %s", err)
-	}
-
-	for _, v := range e.app.resources {
-		err = v.importSearchData()
-		if err != nil {
-			return fmt.Errorf("while importing resource %s: %s", v.getID(), err)
-		}
-	}
-	e.flush()
-
-	return nil
-}
-
 func (resource *Resource[T]) importSearchData() error {
 	roles := resource.getResourceViewRoles()
 	var resourceSearchItem = searchItem{
@@ -310,7 +163,6 @@ func relationDataToSearchItem(resource resourceIface, data preview) searchItem {
 		Image:       data.Image,
 		URL:         data.URL,
 	}
-
 }
 
 func (app *App) initSearchInner() {
@@ -420,3 +272,4 @@ func parseSuggestions(in string) []string {
 	}
 	return ret
 }
+*/

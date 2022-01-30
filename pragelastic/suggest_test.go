@@ -16,14 +16,14 @@ type TestStructSuggestNoTags struct {
 
 func TestSuggestWithTags(t *testing.T) {
 	index := prepareTestIndex[TestStructSuggestTags]()
-	err := index.Update(&TestStructSuggestTags{
+	err := index.UpdateSingle(&TestStructSuggestTags{
 		ID: "1",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = index.Update(&TestStructSuggestTags{
+	err = index.UpdateSingle(&TestStructSuggestTags{
 		ID: "2",
 		SuggestionField: Suggest{
 			Input:  "Město moře stavení",
@@ -36,7 +36,7 @@ func TestSuggestWithTags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = index.Update(&TestStructSuggestTags{
+	err = index.UpdateSingle(&TestStructSuggestTags{
 		ID: "3",
 		SuggestionField: Suggest{
 			Input:  "Město moře stavení",
@@ -49,7 +49,7 @@ func TestSuggestWithTags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = index.Update(&TestStructSuggestTags{
+	err = index.UpdateSingle(&TestStructSuggestTags{
 		ID: "4",
 		SuggestionField: Suggest{
 			Input:  "Město moře stavení",
@@ -90,14 +90,14 @@ func TestSuggestWithTags(t *testing.T) {
 
 func TestSuggestNoTags(t *testing.T) {
 	index := prepareTestIndex[TestStructSuggestNoTags]()
-	err := index.Update(&TestStructSuggestNoTags{
+	err := index.UpdateSingle(&TestStructSuggestNoTags{
 		ID: "1",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = index.Update(&TestStructSuggestNoTags{
+	err = index.UpdateSingle(&TestStructSuggestNoTags{
 		ID: "2",
 		SuggestionField: Suggest{
 			Input:  "Město moře stavení",
@@ -108,14 +108,14 @@ func TestSuggestNoTags(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	index.Update(&TestStructSuggestNoTags{
+	index.UpdateSingle(&TestStructSuggestNoTags{
 		ID: "3",
 		SuggestionField: Suggest{
 			Input:  "Pán hrad stavení",
 			Weight: 100,
 		},
 	})
-	index.Update(&TestStructSuggestNoTags{
+	index.UpdateSingle(&TestStructSuggestNoTags{
 		ID: "4",
 		SuggestionField: Suggest{
 			Input:  "pan hrad stavení",
