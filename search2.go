@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/hypertornado/prago/pragelastic"
+	"github.com/olivere/elastic/v7"
 	//"github.com/olivere/elastic"
 )
 
@@ -356,10 +357,15 @@ func (e *adminSearch) DeleteIndex() error {
 }
 
 func (e *adminSearch) Search(q string, role string, page int64) ([]*searchItem, int64, error) {
+
+	mq := elastic.NewMultiMatchQuery(q)
+	mq.FieldWithBoost("Name", 3)
+	mq.FieldWithBoost("description", 1)
+
 	items, totalHits, err := e.index.Query().
-		Offset(page*searchPageSize).
+		Offset(page * searchPageSize).
 		Limit(searchPageSize).
-		Filter("Name", q).
+		ShouldQuery(mq).
 		List()
 	if err != nil {
 		return nil, -1, err

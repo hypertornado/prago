@@ -28,9 +28,46 @@ func (index *Index[T]) Query() *Query[T] {
 }
 
 func (q *Query[T]) Filter(field string, value interface{}) *Query[T] {
-	q.boolQuery.Filter(
+	return q.FilterQuery(
 		q.toQuery(field, value),
 	)
+}
+
+func (q *Query[T]) Must(field string, value interface{}) *Query[T] {
+	return q.MustQuery(
+		q.toQuery(field, value),
+	)
+}
+
+func (q *Query[T]) MustNot(field string, value interface{}) *Query[T] {
+	return q.MustNotQuery(
+		q.toQuery(field, value),
+	)
+}
+
+func (q *Query[T]) Should(field string, value interface{}) *Query[T] {
+	return q.ShouldQuery(
+		q.toQuery(field, value),
+	)
+}
+
+func (q *Query[T]) FilterQuery(query elastic.Query) *Query[T] {
+	q.boolQuery.Filter(query)
+	return q
+}
+
+func (q *Query[T]) MustQuery(query elastic.Query) *Query[T] {
+	q.boolQuery.Must(query)
+	return q
+}
+
+func (q *Query[T]) MustNotQuery(query elastic.Query) *Query[T] {
+	q.boolQuery.MustNot(query)
+	return q
+}
+
+func (q *Query[T]) ShouldQuery(query elastic.Query) *Query[T] {
+	q.boolQuery.Should(query)
 	return q
 }
 
