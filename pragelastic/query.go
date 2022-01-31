@@ -10,23 +10,31 @@ import (
 )
 
 type Query[T any] struct {
-	index         *Index[T]
-	sortField     string
-	sortAsc       bool
-	limit         int64
-	offset        int64
-	filterQueries []elastic.Query
+	index     *Index[T]
+	sortField string
+	sortAsc   bool
+	limit     int64
+	offset    int64
+	boolQuery *elastic.BoolQuery
 }
 
 func (index *Index[T]) Query() *Query[T] {
 	q := &Query[T]{
-		index: index,
-		limit: 10,
+		index:     index,
+		boolQuery: elastic.NewBoolQuery(),
+		limit:     10,
 	}
 	return q
 }
 
-func (q *Query[T]) Is(field string, value interface{}) *Query[T] {
+func (q *Query[T]) Filter(field string, value interface{}) *Query[T] {
+	q.boolQuery.Filter(
+		q.toQuery(field, value),
+	)
+	return q
+}
+
+func (q *Query[T]) toQuery(field string, value interface{}) elastic.Query {
 	f := q.index.fieldsMap[field]
 	if f.Type == "keyword" && reflect.TypeOf(value) == reflect.TypeOf([]string{}) {
 		bq := elastic.NewBoolQuery()
@@ -36,16 +44,13 @@ func (q *Query[T]) Is(field string, value interface{}) *Query[T] {
 			shouldQueries = append(shouldQueries, elastic.NewTermQuery(field, v))
 		}
 		bq.Should(shouldQueries...)
-		q.filterQueries = append(q.filterQueries, bq)
-		return q
+		return bq
 	}
 	if f.Type == "text" {
-		mq := elastic.NewMatchQuery(field, value)
-		q.filterQueries = append(q.filterQueries, mq)
+		return elastic.NewMatchQuery(field, value)
 	} else {
-		q.filterQueries = append(q.filterQueries, elastic.NewTermsQuery(field, value))
+		return elastic.NewTermsQuery(field, value)
 	}
-	return q
 }
 
 func (q *Query[T]) Sort(fieldName string, desc bool) *Query[T] {
@@ -73,13 +78,10 @@ func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
 		q = q.Sort(query.sortField, query.sortAsc)
 	}
 
-	bq := elastic.NewBoolQuery()
-	bq.Filter(query.filterQueries...)
-
 	ret := q.
 		From(int(query.offset)).
 		Size(int(query.limit)).
-		Query(bq)
+		Query(query.boolQuery)
 	return ret, nil
 }
 

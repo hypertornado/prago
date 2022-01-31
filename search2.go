@@ -359,7 +359,7 @@ func (e *adminSearch) Search(q string, role string, page int64) ([]*searchItem, 
 	items, totalHits, err := e.index.Query().
 		Offset(page*searchPageSize).
 		Limit(searchPageSize).
-		Is("Name", q).
+		Filter("Name", q).
 		List()
 	if err != nil {
 		return nil, -1, err

@@ -64,7 +64,7 @@ func TestMultipleBooleanTags(t *testing.T) {
 	index.Flush()
 	index.Refresh()
 
-	res := getIDS(index.Query().Is("Name", "A").Is("SomeCount", 7).mustList())
+	res := getIDS(index.Query().Filter("Name", "A").Filter("SomeCount", 7).mustList())
 	if res != "2" {
 		t.Fatal(res)
 	}
@@ -81,7 +81,7 @@ func TestNonIndexedField(t *testing.T) {
 	index.Flush()
 	index.Refresh()
 
-	items, _, _ := index.Query().Is("NonIndexedField", "hello").List()
+	items, _, _ := index.Query().Filter("NonIndexedField", "hello").List()
 	if len(items) != 0 {
 		t.Fatal("expected 0 results for querying diabled field")
 	}
@@ -111,7 +111,7 @@ func TestTags(t *testing.T) {
 		{"1", "hello"},
 		{"2", "apple"},
 	} {
-		res := getIDS(index.Query().Is("Tags", v[0:]).mustList())
+		res := getIDS(index.Query().Filter("Tags", v[0:]).mustList())
 		if res != v[0] {
 			t.Fatal(k, res)
 		}
@@ -138,7 +138,7 @@ func TestCzechSearch(t *testing.T) {
 		{"jméno", "2"},
 		{"priste", "1"},
 	} {
-		res := getIDS(index.Query().Is("Text", v[0]).mustList())
+		res := getIDS(index.Query().Filter("Text", v[0]).mustList())
 		if res != v[1] {
 			t.Fatal(k, res)
 		}
@@ -204,17 +204,17 @@ func TestAllQuery(t *testing.T) {
 		t.Fatal(expected)
 	}
 
-	expected = getIDS(index.Query().Is("IsOK", true).mustList())
+	expected = getIDS(index.Query().Filter("IsOK", true).mustList())
 	if expected != "2" {
 		t.Fatal(expected)
 	}
 
-	expected = getIDS(index.Query().Is("Name", "B").mustList())
+	expected = getIDS(index.Query().Filter("Name", "B").mustList())
 	if expected != "3" {
 		t.Fatal(expected)
 	}
 
-	expected = getIDS(index.Query().Is("SomeCount", 3).mustList())
+	expected = getIDS(index.Query().Filter("SomeCount", 3).mustList())
 	if expected != "2" {
 		t.Fatal(expected)
 	}
