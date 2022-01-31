@@ -16,6 +16,7 @@ type Query[T any] struct {
 	limit     int64
 	offset    int64
 	boolQuery *elastic.BoolQuery
+	context   context.Context
 }
 
 func (index *Index[T]) Query() *Query[T] {
@@ -23,7 +24,13 @@ func (index *Index[T]) Query() *Query[T] {
 		index:     index,
 		boolQuery: elastic.NewBoolQuery(),
 		limit:     10,
+		context:   context.Background(),
 	}
+	return q
+}
+
+func (q *Query[T]) Context(ctx context.Context) *Query[T] {
+	q.context = ctx
 	return q
 }
 
