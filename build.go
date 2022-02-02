@@ -38,6 +38,7 @@ func (app *App) initBuild() {
 	})
 
 	app.addCommand("setup").Callback(func() {
+		panic("dont start it this way, must get setup name first")
 		setup.StartSetup(app.codeName)
 	})
 

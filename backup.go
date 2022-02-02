@@ -2,11 +2,14 @@ package prago
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
+
+	"golang.org/x/net/context"
 )
 
 func (app *App) initBackupCRON() {
@@ -48,9 +51,7 @@ func (app *App) initBackupCRON() {
 }
 
 func backupApp(app *App) error {
-
 	app.Log().Println("Creating backup")
-
 	var appName = app.codeName
 
 	dir, err := ioutil.TempDir("", "backup")
@@ -65,18 +66,6 @@ func backupApp(app *App) error {
 	}
 	defer os.RemoveAll(dir)
 
-	user := app.ConfigurationGetStringWithFallback("dbUser", "")
-	dbName := app.ConfigurationGetStringWithFallback("dbName", "")
-	password := app.ConfigurationGetStringWithFallback("dbPassword", "")
-
-	var dumpCmd *exec.Cmd
-
-	if password == "" {
-		dumpCmd = exec.Command("mysqldump", "-u"+user, dbName)
-	} else {
-		dumpCmd = exec.Command("mysqldump", "-u"+user, "-p"+password, dbName)
-	}
-
 	dbFilePath := filepath.Join(dirPath, "db.sql")
 
 	dbFile, err := os.Create(dbFilePath)
@@ -85,12 +74,17 @@ func backupApp(app *App) error {
 	}
 	defer dbFile.Close()
 
-	dumpCmd.Stdout = dbFile
-
-	err = dumpCmd.Run()
+	err = app.backupSQL(dbFile, context.Background())
 	if err != nil {
 		return fmt.Errorf("dumping cmd: %s", err)
 	}
+
+	//dumpCmd.Stdout = dbFile
+
+	/*err = dumpCmd.Run()
+	if err != nil {
+		return fmt.Errorf("dumping cmd: %s", err)
+	}*/
 
 	backupsPath := filepath.Join(os.Getenv("HOME"), "."+appName, "backups")
 	err = exec.Command("mkdir", "-p", backupsPath).Run()
@@ -99,6 +93,26 @@ func backupApp(app *App) error {
 	}
 
 	return copyFiles(dirPath, backupsPath)
+}
+
+func (app *App) backupSQL(writer io.Writer, context context.Context) error {
+	user := app.ConfigurationGetStringWithFallback("dbUser", "")
+	dbName := app.ConfigurationGetStringWithFallback("dbName", "")
+	password := app.ConfigurationGetStringWithFallback("dbPassword", "")
+	var dumpCmd *exec.Cmd
+	//exec.co
+	if password == "" {
+		dumpCmd = exec.Command("mysqldump", "-u"+user, dbName)
+	} else {
+		dumpCmd = exec.Command("mysqldump", "-u"+user, "-p"+password, dbName)
+	}
+	dumpCmd.Stdout = writer
+
+	//dumpCmd.
+
+	//dumpCmd.Process.
+
+	return dumpCmd.Run()
 }
 
 func syncBackups(appName, ssh string) error {
