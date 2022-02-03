@@ -65,7 +65,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 	resource.API("preview-relation/:id").Handler(
 		func(request *Request) {
-			item := resource.Is("id", request.Params().Get("id")).First()
+			item := resource.ID(request.Param("id"))
 			if item == nil {
 				render404(request)
 				return
@@ -93,7 +93,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 			}
 
 			for i, id := range order {
-				item := resource.Is("id", int64(id)).First()
+				item := resource.ID(id)
 				resource.setOrderPosition(item, int64(i))
 				err := resource.Update(item)
 				must(err)
@@ -104,7 +104,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 	resource.API("searchresource").Handler(
 		func(request *Request) {
-			q := request.Params().Get("q")
+			q := request.Param("q")
 
 			usedIDs := map[int64]bool{}
 
@@ -112,7 +112,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 			id, err := strconv.Atoi(q)
 			if err == nil {
-				item := resource.Is("id", id).First()
+				item := resource.ID(id)
 				if item != nil {
 					relationItem := resource.getPreview(item, request.user, nil)
 					if relationItem != nil {
@@ -155,7 +155,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 		func(request *Request) {
 			var ids []int64
 
-			idsStr := strings.Split(request.Params().Get("ids"), ",")
+			idsStr := strings.Split(request.Param("ids"), ",")
 			for _, v := range idsStr {
 				id, err := strconv.Atoi(v)
 				if err != nil {
@@ -164,7 +164,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 				ids = append(ids, int64(id))
 			}
 
-			switch request.Params().Get("action") {
+			switch request.Param("action") {
 			case "clone":
 				if !request.app.authorize(request.user, resource.canCreate) {
 					renderAPINotAuthorized(request)
@@ -172,7 +172,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 				}
 				for _, v := range ids {
 					app := request.app
-					item := resource.Is("id", v).First()
+					item := resource.ID(v)
 					if item == nil {
 						panic(fmt.Sprintf("can't get item for clone with id %d", v))
 					}
@@ -235,7 +235,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 						return
 					}
 
-					item := resource.Is("id", v).First()
+					item := resource.ID(v)
 					if item == nil {
 						panic("can't find item to delete")
 					}
@@ -244,7 +244,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 					must(err)
 				}
 			default:
-				panic(fmt.Sprintf("unknown action: %s", request.Params().Get("action")))
+				panic(fmt.Sprintf("unknown action: %s", request.Param("action")))
 			}
 		},
 	)
@@ -259,7 +259,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 			request.SetData("form", form)
 
 			request.SetData("CSRFToken", request.csrfToken())
-			request.SetData("ids", request.Params().Get("ids"))
+			request.SetData("ids", request.Param("ids"))
 
 			request.RenderView("multiple_edit")
 		},

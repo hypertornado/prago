@@ -13,7 +13,7 @@ func initUserRenew(app *App) {
 		form.AddSubmit(messages.Get(locale, "admin_forgotten_submit"))
 	}, func(vc ValidationContext) {
 		request := vc.Request()
-		email := fixEmail(request.Params().Get("email"))
+		email := fixEmail(request.Param("email"))
 
 		var reason = ""
 		user := app.UsersResource.Is("email", email).First()
@@ -53,8 +53,8 @@ func initUserRenew(app *App) {
 		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "admin_password_new"))
 		passwordInput.Focused = true
 
-		form.AddHidden("email").Value = request.Params().Get("email")
-		form.AddHidden("token").Value = request.Params().Get("token")
+		form.AddHidden("email").Value = request.Param("email")
+		form.AddHidden("token").Value = request.Param("token")
 		form.AddSubmit(messages.Get(locale, "admin_forgoten_set"))
 	}, func(vc ValidationContext) {
 		email := vc.GetValue("email")

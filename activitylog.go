@@ -71,7 +71,7 @@ func (app *App) getHistory(resource resourceIface, itemID int64) historyView {
 
 	for _, v := range items {
 		var username, userurl string
-		user := app.UsersResource.Is("id", v.User).First()
+		user := app.UsersResource.ID(v.User)
 		if user != nil {
 			username = user.Name
 			userurl = app.getAdminURL(fmt.Sprintf("user/%d", user.ID))

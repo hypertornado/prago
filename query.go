@@ -14,6 +14,14 @@ func (resource *Resource[T]) Query() *Query[T] {
 	return ret
 }
 
+func (resource *Resource[T]) ID(id any) *T {
+	return resource.Query().ID(id)
+}
+
+func (q *Query[T]) ID(id any) *T {
+	return q.Where(sqlFieldToQuery("id"), id).First()
+}
+
 func (q *Query[T]) Is(name string, value interface{}) *Query[T] {
 	return q.Where(sqlFieldToQuery(name), value)
 }

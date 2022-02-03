@@ -13,8 +13,8 @@ import (
 func initUserRegistration(app *App) {
 
 	app.accessController.get(app.UsersResource.getURL("confirm_email"), func(request *Request) {
-		email := request.Params().Get("email")
-		token := request.Params().Get("token")
+		email := request.Param("email")
+		token := request.Param("token")
 
 		user := app.UsersResource.Is("email", email).First()
 		if user != nil {

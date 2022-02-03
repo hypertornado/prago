@@ -116,7 +116,7 @@ func start(app *prago.App) {
 
 	app.POST("/:account/upload/:extension", func(request *prago.Request) {
 		defer request.Request().Body.Close()
-		accountName := request.Params().Get("account")
+		accountName := request.Param("account")
 		account := accounts[accountName]
 		if account == nil {
 			panic("no account")
@@ -127,7 +127,7 @@ func start(app *prago.App) {
 			panic("wrong authorization")
 		}
 
-		extension := normalizeExtension(request.Params().Get("extension"))
+		extension := normalizeExtension(request.Param("extension"))
 		//should load all files, not just images
 		/*if !extensionRegex.MatchString(extension) {
 			panic("wrong extension")
@@ -143,8 +143,8 @@ func start(app *prago.App) {
 
 	app.GET("/:account/:uuid/metadata", func(request *prago.Request) {
 		metadata, err := getMetadata(
-			request.Params().Get("account"),
-			request.Params().Get("uuid"),
+			request.Param("account"),
+			request.Param("uuid"),
 		)
 		if err != nil {
 			panic(err)
@@ -154,11 +154,11 @@ func start(app *prago.App) {
 
 	app.GET("/:account/:uuid/:format/:hash/:name", func(request *prago.Request) {
 		errCode, err, stream, mimeExtension, size := getFile(
-			request.Params().Get("account"),
-			request.Params().Get("uuid"),
-			request.Params().Get("format"),
-			request.Params().Get("hash"),
-			request.Params().Get("name"),
+			request.Param("account"),
+			request.Param("uuid"),
+			request.Param("format"),
+			request.Param("hash"),
+			request.Param("name"),
 		)
 		if stream != nil {
 			defer stream.Close()
@@ -212,9 +212,9 @@ func start(app *prago.App) {
 
 	app.DELETE("/:account/:uuid", func(request *prago.Request) {
 		err := deleteFile(
-			request.Params().Get("account"),
+			request.Param("account"),
 			request.Request().Header.Get("X-Authorization"),
-			request.Params().Get("uuid"),
+			request.Param("uuid"),
 		)
 		if err != nil {
 			panic(err)

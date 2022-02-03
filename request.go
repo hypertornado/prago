@@ -31,6 +31,10 @@ func (request Request) Params() url.Values {
 	return request.Request().Form
 }
 
+func (request Request) Param(name string) string {
+	return request.Request().Form.Get(name)
+}
+
 //UserID returns id of logged in user, returns 0 if no user is logged
 func (request Request) UserID() int64 {
 	if request.user != nil {
@@ -82,7 +86,7 @@ func (request Request) RenderJSONWithCode(data interface{}, code int) {
 	request.writeSessionIfDirty()
 
 	pretty := false
-	if request.Params().Get("pretty") == "true" {
+	if request.Param("pretty") == "true" {
 		pretty = true
 	}
 

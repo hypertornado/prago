@@ -112,13 +112,13 @@ func (f File) GetExtension() string {
 }
 
 func getOldRedirectParams(request *Request, app *App) (uuid, name string, err error) {
-	name = request.Params().Get("name")
+	name = request.Param("name")
 	uuid = fmt.Sprintf("%s%s%s%s%s%s",
-		request.Params().Get("a"),
-		request.Params().Get("b"),
-		request.Params().Get("c"),
-		request.Params().Get("d"),
-		request.Params().Get("e"),
+		request.Param("a"),
+		request.Param("b"),
+		request.Param("c"),
+		request.Param("d"),
+		request.Param("e"),
 		strings.Split(name, "-")[0],
 	)
 
@@ -169,7 +169,7 @@ func (app *App) initFilesResource() {
 
 	app.ListenActivity(func(activity Activity) {
 		if activity.ActivityType == "delete" && activity.ResourceID == resource.id {
-			file := resource.Is("id", activity.ID).First()
+			file := resource.ID(activity.ID)
 			err := filesCDN.DeleteFile(file.UID)
 			if err != nil {
 				app.Log().Printf("deleting CDN: %s\n", err)
@@ -184,7 +184,7 @@ func (app *App) initFilesResource() {
 		}
 
 		var size string
-		switch request.Params().Get("size") {
+		switch request.Param("size") {
 		case "large":
 			size = "1000"
 		case "medium":
@@ -232,8 +232,8 @@ func (app *App) initFilesResource() {
 
 	GetResource[File](app).Action("getcdnurl").Permission(sysadminPermission).Method("POST").Handler(
 		func(request *Request) {
-			uuid := request.Params().Get("uuid")
-			size := request.Params().Get("size")
+			uuid := request.Param("uuid")
+			size := request.Param("size")
 
 			files := app.GetFiles(uuid)
 			if len(files) == 0 {

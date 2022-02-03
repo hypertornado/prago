@@ -191,7 +191,7 @@ func (resource *Resource[T]) getnavigation(action *Action, request *Request) nav
 
 	code := action.url
 	if action.isItemAction {
-		item := resource.Is("id", request.Params().Get("id")).First()
+		item := resource.ID(request.Param("id"))
 		if item != nil {
 			return resource.getItemNavigation(request.user, item, code)
 		} else {

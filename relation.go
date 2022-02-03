@@ -89,7 +89,7 @@ func (resource *Resource[T]) getPreviewData(user *user, f *Field, value int64) (
 }
 
 func (resource *Resource[T]) getItemPreview(id int64, user *user, relatedResource resourceIface) *preview {
-	item := resource.Is("id", id).First()
+	item := resource.ID(id)
 	if item == nil {
 		return nil
 	}
@@ -210,7 +210,7 @@ func (app App) relationStringer(field Field, value reflect.Value, user *user) st
 }
 
 func (resource *Resource[T]) resourceItemName(id int64) string {
-	item := resource.Is("id", id).First()
+	item := resource.ID(id)
 	if item == nil {
 		return fmt.Sprintf("%d - not found", id)
 	}

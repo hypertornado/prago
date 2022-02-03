@@ -58,8 +58,8 @@ func (app *App) initSearchInner() {
 
 	app.Action("_search").Permission(loggedPermission).Name(unlocalized("Vyhledávání")).Template("admin_search").hiddenInMainMenu().DataSource(
 		func(request *Request) interface{} {
-			q := request.Params().Get("q")
-			pageStr := request.Params().Get("page")
+			q := request.Param("q")
+			pageStr := request.Param("page")
 
 			var page = 1
 			if pageStr != "" {
@@ -113,7 +113,7 @@ func (app *App) initSearchInner() {
 
 	app.API("search-suggest").Permission(loggedPermission).Handler(
 		func(request *Request) {
-			results, err := adminSearch.Suggest(request.Params().Get("q"), request.user.Role)
+			results, err := adminSearch.Suggest(request.Param("q"), request.user.Role)
 			if err != nil {
 				app.Log().Println(err)
 			}

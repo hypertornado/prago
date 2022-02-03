@@ -73,7 +73,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 
 		if validation.Valid() {
 			user := request.user
-			id, err := strconv.Atoi(request.Params().Get("id"))
+			id, err := strconv.Atoi(request.Param("id"))
 			must(err)
 
 			resource.app.Notification(getItemName(item)).
@@ -196,7 +196,7 @@ func (resource *Resource[T]) editItemWithLogAndValues(request *Request, values u
 		return nil, nil, fmt.Errorf("can't parse id %d: %s", id, err)
 	}
 
-	beforeItem := resource.Is("id", id).First()
+	beforeItem := resource.ID(id)
 	if beforeItem == nil {
 		return nil, nil, fmt.Errorf("can't get beforeitem with id %d: %s", id, err)
 	}
@@ -235,7 +235,7 @@ func (resource *Resource[T]) editItemWithLogAndValues(request *Request, values u
 
 func (resource *Resource[T]) UpdateWithLog(item *T, request *Request) error {
 	id := getItemID(item)
-	beforeItem := resource.Is("id", id).First()
+	beforeItem := resource.ID(id)
 	if beforeItem == nil {
 		return errors.New("can't find before item")
 	}

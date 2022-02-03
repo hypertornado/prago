@@ -7,7 +7,6 @@ import (
 	"os"
 	"reflect"
 
-	setup "github.com/hypertornado/prago/prago-setup/lib"
 	"github.com/sendgrid/sendgrid-go"
 )
 
@@ -67,11 +66,12 @@ func newTestingApp() *App {
 
 func createApp(codeName string, version string) *App {
 
-	if codeName != "__prago_test_app" && !configExists(codeName) {
-		if consoleQuestion("File config.json does not exist. Can't start app. Would you like to start setup?") {
-			setup.StartSetup(codeName)
-		}
-	}
+	/*
+		if codeName != "__prago_test_app" && !configExists(codeName) {
+			if consoleQuestion("File config.json does not exist. Can't start app. Would you like to start setup?") {
+				setup.StartSetup(codeName)
+			}
+		}*/
 
 	app := &App{
 		codeName: codeName,

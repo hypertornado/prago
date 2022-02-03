@@ -54,8 +54,8 @@ func (app *App) initNotifications() {
 	})
 
 	app.API("notifications").Method("POST").Permission(loggedPermission).Handler(func(request *Request) {
-		action := request.Params().Get("action")
-		uuid := request.Params().Get("uuid")
+		action := request.Param("action")
+		uuid := request.Param("uuid")
 		switch action {
 		case "delete":
 			app.notificationCenter.delete(uuid)

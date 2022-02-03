@@ -63,13 +63,13 @@ func (app *App) Newsletters() *Newsletters {
 	})
 
 	app.POST("/newsletter-subscribe", func(request *Request) {
-		if app.newsletters.CSRF(request) != request.Params().Get("csrf") {
+		if app.newsletters.CSRF(request) != request.Param("csrf") {
 			panic("wrong csrf")
 		}
 
-		email := request.Params().Get("email")
+		email := request.Param("email")
 		email = strings.Trim(email, " ")
-		name := request.Params().Get("name")
+		name := request.Param("name")
 
 		var message string
 		err := app.newsletters.AddEmail(email, name, false)
@@ -95,8 +95,8 @@ func (app *App) Newsletters() *Newsletters {
 	})
 
 	app.GET("/newsletter-confirm", func(request *Request) {
-		email := request.Params().Get("email")
-		secret := request.Params().Get("secret")
+		email := request.Param("email")
+		secret := request.Param("secret")
 
 		if app.newsletters.secret(email) != secret {
 			panic("wrong secret")
@@ -127,8 +127,8 @@ func (app *App) Newsletters() *Newsletters {
 
 	//TODO: add confirmation button and form
 	app.GET("/newsletter-unsubscribe", func(request *Request) {
-		email := request.Params().Get("email")
-		secret := request.Params().Get("secret")
+		email := request.Param("email")
+		secret := request.Param("secret")
 
 		if app.newsletters.secret(email) != secret {
 			panic("wrong secret")

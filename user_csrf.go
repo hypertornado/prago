@@ -26,7 +26,7 @@ func validateCSRF(request *Request) {
 	if len(token) == 0 {
 		panic("token not set")
 	}
-	paramsToken := request.Params().Get("_csrfToken")
+	paramsToken := request.Param("_csrfToken")
 	if paramsToken != token {
 		panic("Wrong CSRF token")
 	}

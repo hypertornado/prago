@@ -42,7 +42,7 @@ func (action *FormItemAction[T]) Name(name func(string) string) *FormItemAction[
 
 func (action *FormItemAction[T]) Form(formGenerator func(*T, *Form, *Request)) *FormItemAction[T] {
 	action.formAction.Form(func(form *Form, request *Request) {
-		item := action.resource.Is("id", request.Params().Get("id")).First()
+		item := action.resource.ID(request.Param("id"))
 		if item == nil {
 			render404(request)
 			return
@@ -54,7 +54,7 @@ func (action *FormItemAction[T]) Form(formGenerator func(*T, *Form, *Request)) *
 
 func (action *FormItemAction[T]) Validation(validation func(*T, ValidationContext)) *FormItemAction[T] {
 	action.formAction.Validation(func(vc ValidationContext) {
-		item := action.resource.Is("id", vc.GetValue("id")).First()
+		item := action.resource.ID(vc.GetValue("id"))
 		if item == nil {
 			panic("can't find item")
 		}

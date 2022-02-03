@@ -35,7 +35,7 @@ func (action *ResourceItemAction[T]) Permission(permission Permission) *Resource
 
 func (action *ResourceItemAction[T]) DataSource(dataSource func(*T, *Request) interface{}) *ResourceItemAction[T] {
 	action.action.DataSource(func(request *Request) interface{} {
-		item := action.resource.Query().Is("id", request.Params().Get("id")).First()
+		item := action.resource.Query().ID(request.Param("id"))
 		if item == nil {
 			//TODO: fix http: superfluous response.WriteHeader call from github.com/hypertornado/prago.Request.RenderViewWithCode
 			render404(request)
@@ -58,7 +58,7 @@ func (action *ResourceItemAction[T]) Method(method string) *ResourceItemAction[T
 
 func (action *ResourceItemAction[T]) Handler(fn func(*T, *Request)) *ResourceItemAction[T] {
 	action.action.Handler(func(request *Request) {
-		item := action.resource.Is("id", request.Params().Get("id")).First()
+		item := action.resource.ID(request.Param("id"))
 		if item == nil {
 			render404(request)
 			return

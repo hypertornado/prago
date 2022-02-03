@@ -62,6 +62,11 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatal("should be positive")
 	}
 
+	item2 := resource.ID(item.ID)
+	if item2 == nil {
+		t.Fatal("should not be nil")
+	}
+
 	resource.Create(&ResourceStruct{Name: "C"})
 	resource.Create(&ResourceStruct{Name: "B"})
 
