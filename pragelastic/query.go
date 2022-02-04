@@ -10,21 +10,23 @@ import (
 )
 
 type Query[T any] struct {
-	index     *Index[T]
-	sortField string
-	sortAsc   bool
-	limit     int64
-	offset    int64
-	boolQuery *elastic.BoolQuery
-	context   context.Context
+	index        *Index[T]
+	sortField    string
+	sortAsc      bool
+	limit        int64
+	offset       int64
+	boolQuery    *elastic.BoolQuery
+	context      context.Context
+	aggregations map[string]elastic.Aggregation
 }
 
 func (index *Index[T]) Query() *Query[T] {
 	q := &Query[T]{
-		index:     index,
-		boolQuery: elastic.NewBoolQuery(),
-		limit:     10,
-		context:   context.Background(),
+		index:        index,
+		boolQuery:    elastic.NewBoolQuery(),
+		limit:        10,
+		context:      context.Background(),
+		aggregations: make(map[string]elastic.Aggregation),
 	}
 	return q
 }
@@ -122,10 +124,15 @@ func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
 		q = q.Sort(query.sortField, query.sortAsc)
 	}
 
+	for k, v := range query.aggregations {
+		q.Aggregation(k, v)
+	}
+
 	ret := q.
 		From(int(query.offset)).
 		Size(int(query.limit)).
 		Query(query.boolQuery)
+
 	return ret, nil
 }
 

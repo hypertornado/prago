@@ -130,9 +130,9 @@ func (app *App) initSearchInner() {
 }
 
 type adminSearch struct {
-	client *pragelastic.Client
-	app    *App
-	index  *pragelastic.Index[searchItem]
+	//client *pragelastic.Client
+	app   *App
+	index *pragelastic.Index[searchItem]
 }
 
 func newAdminSearch(app *App) (*adminSearch, error) {
@@ -140,12 +140,13 @@ func newAdminSearch(app *App) (*adminSearch, error) {
 	if err != nil {
 		return nil, err
 	}
+	app.ElasticClient = client
 	index := pragelastic.NewIndex[searchItem](client)
 
 	return &adminSearch{
-		client: client,
-		app:    app,
-		index:  index,
+		//client: client,
+		app:   app,
+		index: index,
 	}, nil
 }
 

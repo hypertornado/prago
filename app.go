@@ -7,6 +7,7 @@ import (
 	"os"
 	"reflect"
 
+	"github.com/hypertornado/prago/pragelastic"
 	"github.com/sendgrid/sendgrid-go"
 )
 
@@ -48,7 +49,8 @@ type App struct {
 	newsletters        *Newsletters
 	notificationCenter *notificationCenter
 
-	search *adminSearch
+	search        *adminSearch
+	ElasticClient *pragelastic.Client
 
 	fieldTypes    map[string]*fieldType
 	javascripts   []string
