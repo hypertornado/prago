@@ -118,6 +118,27 @@ func TestTags(t *testing.T) {
 	}
 }
 
+func TestKeywordFilter(t *testing.T) {
+
+	index := prepareTestIndex[TestStruct]()
+	index.UpdateSingle(&TestStruct{
+		ID:   "1",
+		Name: "LIB",
+	})
+	index.UpdateSingle(&TestStruct{
+		ID:   "2",
+		Name: "TLP",
+	})
+	index.Flush()
+	index.Refresh()
+
+	res := getIDS(index.Query().Filter("Name", "LIB").mustList())
+	if res != "1" {
+		t.Fatal(res)
+	}
+
+}
+
 func TestCzechSearch(t *testing.T) {
 	index := prepareTestIndex[TestStruct]()
 	index.UpdateSingle(&TestStruct{

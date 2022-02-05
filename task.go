@@ -62,6 +62,8 @@ func (app *App) initTaskManager() {
 		request.Redirect(app.getAdminURL("tasks"))
 	})
 
+	app.sysadminTaskGroup = app.TaskGroup(unlocalized("Sysadmin"))
+
 	grp := app.TaskGroup(unlocalized("example"))
 
 	grp.Task("example_simple").Handler(func(t *TaskActivity) error {

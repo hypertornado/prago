@@ -133,6 +133,12 @@ func (f *Form) AddSelect(name, description string, values [][2]string) *FormItem
 	return input
 }
 
+func (f *Form) AddRadio(name, description string, values [][2]string) *FormItem {
+	input := f.addInput(name, description, "admin_item_select_radio")
+	input.Data = values
+	return input
+}
+
 //AddDatePicker to form
 func (f *Form) AddDatePicker(name, description string) *FormItem {
 	input := f.addInput(name, description, "admin_item_date")

@@ -116,7 +116,10 @@ func (q *Query[T]) Offset(offset int64) *Query[T] {
 }
 
 func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
-	q := query.index.client.eclient.
+	q := query.
+		index.
+		client.
+		eclient.
 		Search().
 		Index(query.index.indexName())
 
@@ -136,7 +139,7 @@ func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
 	return ret, nil
 }
 
-func (query *Query[T]) searchResult() (*elastic.SearchResult, error) {
+func (query *Query[T]) SearchResult() (*elastic.SearchResult, error) {
 	service, err := query.getSearchService()
 	if err != nil {
 		return nil, err
@@ -145,7 +148,7 @@ func (query *Query[T]) searchResult() (*elastic.SearchResult, error) {
 }
 
 func (query *Query[T]) List() ([]*T, int64, error) {
-	res, err := query.searchResult()
+	res, err := query.SearchResult()
 	if err != nil {
 		return nil, -1, err
 	}

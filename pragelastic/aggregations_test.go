@@ -30,7 +30,7 @@ func TestSumAggregations(t *testing.T) {
 	index.Refresh()
 
 	sumAgg := elastic.NewSumAggregation().Field("SomeCount")
-	res, err := index.Query().Aggregation("sum", sumAgg).searchResult()
+	res, err := index.Query().Aggregation("sum", sumAgg).SearchResult()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +65,7 @@ func TestBucketHistogramAggregations(t *testing.T) {
 
 	agg := elastic.NewHistogramAggregation().Field("SomeCount").Interval(1) //.Offset(3)
 
-	res, err := index.Query().Aggregation("agg", agg).searchResult()
+	res, err := index.Query().Aggregation("agg", agg).SearchResult()
 	if err != nil {
 		t.Fatal(err)
 	}

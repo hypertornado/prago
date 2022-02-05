@@ -30,31 +30,31 @@ type searchPage struct {
 	URL      string
 }
 
-func (app *App) initSearch() {
-	go app.initSearchInner()
+type adminSearch struct {
+	app   *App
+	index *pragelastic.Index[searchItem]
 }
 
-func (app *App) initSearchInner() {
-	var err error
+func (app *App) initElasticsearchClient() {
+	client, err := pragelastic.New(app.codeName)
+	if err != nil {
+		panic(err)
+	}
+	app.ElasticClient = client
+}
 
+func (app *App) initSearch() {
 	adminSearch, err := newAdminSearch(app)
 	if err != nil {
-		if app.developmentMode {
-			app.Log().Println("admin search not initialized: " + err.Error())
-		}
+		app.Log().Println("admin search not initialized: " + err.Error())
 		return
 	}
-	if app.developmentMode {
-		app.Log().Println("admin search initialized")
-	}
+	app.Log().Println("admin search initialized")
 	app.search = adminSearch
 
-	go func() {
-		err := adminSearch.searchImport()
-		if err != nil {
-			app.Log().Println(fmt.Errorf("%s", err))
-		}
-	}()
+	app.sysadminTaskGroup.Task("index_search").Handler(func(ta *TaskActivity) error {
+		return adminSearch.searchImport()
+	})
 
 	app.Action("_search").Permission(loggedPermission).Name(unlocalized("Vyhledávání")).Template("admin_search").hiddenInMainMenu().DataSource(
 		func(request *Request) interface{} {
@@ -129,22 +129,10 @@ func (app *App) initSearchInner() {
 	)
 }
 
-type adminSearch struct {
-	//client *pragelastic.Client
-	app   *App
-	index *pragelastic.Index[searchItem]
-}
-
 func newAdminSearch(app *App) (*adminSearch, error) {
-	client, err := pragelastic.New(app.codeName)
-	if err != nil {
-		return nil, err
-	}
-	app.ElasticClient = client
-	index := pragelastic.NewIndex[searchItem](client)
+	index := pragelastic.NewIndex[searchItem](app.ElasticClient)
 
 	return &adminSearch{
-		//client: client,
 		app:   app,
 		index: index,
 	}, nil
@@ -229,6 +217,8 @@ func (e *adminSearch) deleteItem(resource resourceIface, id int64) error {
 
 func (e *adminSearch) searchImport() error {
 	var err error
+
+	e.app.Log().Println("Importing admin search index")
 
 	bulkUpdater, err := e.index.UpdateBulk()
 	if err != nil {

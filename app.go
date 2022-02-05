@@ -40,9 +40,10 @@ type App struct {
 	FilesResource       *Resource[File]
 	activityLogResource *Resource[activityLog]
 
-	rootActions    []*Action
-	db             *sql.DB
-	sendgridClient *sendgrid.Client
+	rootActions       []*Action
+	db                *sql.DB
+	sendgridClient    *sendgrid.Client
+	sysadminTaskGroup *TaskGroup
 
 	noReplyEmail string
 
@@ -92,6 +93,7 @@ func createApp(codeName string, version string) *App {
 	app.accessController.priorityRouter = true
 
 	app.initConfig()
+	app.initElasticsearchClient()
 	app.initEmail()
 	app.initSessions()
 	app.initAccessManager()
