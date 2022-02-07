@@ -91,3 +91,46 @@ func TestBucketHistogramAggregations(t *testing.T) {
 		t.Fatal(aggRes.Buckets[2].DocCount)
 	}
 }
+
+func TestTermsAggregations(t *testing.T) {
+	index := prepareTestIndex[TestStruct]()
+	index.UpdateSingle(&TestStruct{
+		ID:   "1",
+		Name: "A",
+	})
+	index.UpdateSingle(&TestStruct{
+		ID:   "2",
+		Name: "B",
+	})
+	index.UpdateSingle(&TestStruct{
+		ID:   "3",
+		Name: "B",
+	})
+
+	index.Flush()
+	index.Refresh()
+
+	agg := elastic.NewTermsAggregation().Field("Name").Size(10).OrderByCountDesc()
+
+	res, err := index.Query().Aggregation("agg", agg).SearchResult()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	aggRes, ok := res.Aggregations.Terms("agg")
+	if !ok {
+		t.Fatal("wrong")
+	}
+
+	if len(aggRes.Buckets) != 2 {
+		t.Fatal("wrong size")
+	}
+
+	if aggRes.Buckets[0].Key.(string) != "B" {
+		t.Fatal(*aggRes.Buckets[0].KeyAsString)
+	}
+
+	if aggRes.Buckets[0].DocCount != 2 {
+		t.Fatal(aggRes.Buckets[0].DocCount)
+	}
+}

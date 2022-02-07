@@ -38,7 +38,7 @@ type adminSearch struct {
 func (app *App) initElasticsearchClient() {
 	client, err := pragelastic.New(app.codeName)
 	if err != nil {
-		panic(err)
+		app.Log().Printf("initElasticsearchClient, client can't be initiated: %s", err)
 	}
 	app.ElasticClient = client
 }
