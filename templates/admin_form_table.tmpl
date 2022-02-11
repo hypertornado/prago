@@ -4,7 +4,7 @@
             {{range $row := .Rows}}
                 <tr {{if $row.IsHeader}}class="admin_form_table_header"{{end}}>
                 {{range $cell := $row.Cells}}
-                    <td {{if $row.IsHeader}}class="admin_form_table_header_cell"{{end}}>{{$cell.Content}}</td>
+                    <td {{if $row.IsHeader}}class="admin_form_table_header_cell"{{end}}>{{template "admin_form_table_cell" $cell}}</td>
                 {{end}}
                 </tr>
             {{end}}
@@ -15,6 +15,17 @@
                 <div class="admin_form_table_footer_text">{{$item}}</div>
             {{end}}
         </div>
-
     </div>
+{{end}}
+
+{{define "admin_form_table_cell"}}
+    {{if .Template}}
+        {{tmpl .Template .Data}}
+    {{else}}
+        {{.Content}}
+    {{end}}
+{{end}}
+
+{{define "admin_form_table_cell_link"}}
+    <a href="{{index . 0}}">{{index . 1}}</a>
 {{end}}

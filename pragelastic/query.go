@@ -115,6 +115,25 @@ func (q *Query[T]) Offset(offset int64) *Query[T] {
 	return q
 }
 
+func (query *Query[T]) createSearchSource() *elastic.SearchSource {
+	source := elastic.NewSearchSource()
+
+	if query.sortField != "" {
+		source = source.Sort(query.sortField, query.sortAsc)
+	}
+
+	for k, v := range query.aggregations {
+		source.Aggregation(k, v)
+	}
+
+	source.
+		From(int(query.offset)).
+		Size(int(query.limit)).
+		Query(query.boolQuery)
+
+	return source
+}
+
 func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
 	q := query.
 		index.
@@ -123,20 +142,10 @@ func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
 		Search().
 		Index(query.index.indexName())
 
-	if query.sortField != "" {
-		q = q.Sort(query.sortField, query.sortAsc)
-	}
-
-	for k, v := range query.aggregations {
-		q.Aggregation(k, v)
-	}
-
-	ret := q.
-		From(int(query.offset)).
-		Size(int(query.limit)).
-		Query(query.boolQuery)
-
-	return ret, nil
+	q.SearchSource(
+		query.createSearchSource(),
+	)
+	return q, nil
 }
 
 func (query *Query[T]) SearchResult() (*elastic.SearchResult, error) {
@@ -147,14 +156,8 @@ func (query *Query[T]) SearchResult() (*elastic.SearchResult, error) {
 	return service.Do(context.Background())
 }
 
-func (query *Query[T]) List() ([]*T, int64, error) {
-	res, err := query.SearchResult()
-	if err != nil {
-		return nil, -1, err
-	}
-
+func (index Index[T]) SearchResultToList(res *elastic.SearchResult) ([]*T, int64, error) {
 	var ret []*T
-
 	for _, v := range res.Hits.Hits {
 		var t T
 		err := json.Unmarshal(v.Source, &t)
@@ -164,6 +167,15 @@ func (query *Query[T]) List() ([]*T, int64, error) {
 		ret = append(ret, &t)
 	}
 	return ret, res.Hits.TotalHits.Value, nil
+}
+
+func (query *Query[T]) List() ([]*T, int64, error) {
+	res, err := query.SearchResult()
+	if err != nil {
+		return nil, -1, err
+	}
+	return query.index.SearchResultToList(res)
+
 }
 
 func (query *Query[T]) mustList() []*T {

@@ -22,7 +22,9 @@ type tableRow struct {
 }
 
 type tableCell struct {
-	Content string
+	Template string
+	Data     interface{}
+	Content  string
 }
 
 func (app *App) Table() *Table {
@@ -33,6 +35,14 @@ func (app *App) Table() *Table {
 }
 
 func newCell(item interface{}) tableCell {
+	linkData, ok := item.([2]string)
+	if ok {
+		return tableCell{
+			Template: "admin_form_table_cell_link",
+			Data:     linkData,
+		}
+	}
+
 	return tableCell{
 		Content: fmt.Sprintf("%v", item),
 	}
