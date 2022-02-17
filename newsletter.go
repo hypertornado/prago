@@ -43,7 +43,8 @@ func (newsletters *Newsletters) Permission(permission Permission) *Newsletters {
 //InitNewsletters inits apps newsletter function
 func (app *App) Newsletters() *Newsletters {
 	if app.newsletters != nil {
-		panic("newsletter already initialized")
+		//panic("newsletter already initialized")
+		return app.newsletters
 	}
 	app.newsletters = &Newsletters{
 		baseURL:  app.ConfigurationGetString("baseUrl"),
@@ -55,7 +56,7 @@ func (app *App) Newsletters() *Newsletters {
 
 	app.GET("/newsletter-subscribe", func(request *Request) {
 		request.SetData("title", "Přihlásit se k odběru newsletteru")
-		request.SetData("csrf", app.newsletters.CSRF(request))
+		request.SetData("csrf", RequestCSRF(request))
 		request.SetData("yield", "newsletter_subscribe")
 		request.SetData("show_back_button", true)
 		request.SetData("site", app.name("en"))
@@ -63,7 +64,7 @@ func (app *App) Newsletters() *Newsletters {
 	})
 
 	app.POST("/newsletter-subscribe", func(request *Request) {
-		if app.newsletters.CSRF(request) != request.Param("csrf") {
+		if RequestCSRF(request) != request.Param("csrf") {
 			panic("wrong csrf")
 		}
 
@@ -72,12 +73,8 @@ func (app *App) Newsletters() *Newsletters {
 		name := request.Param("name")
 
 		var message string
-		err := app.newsletters.AddEmail(email, name, false)
+		err := app.newsletters.SubscribeWithConfirmationEmail(email, name)
 		if err == nil {
-			err := app.sendConfirmEmail(name, email)
-			if err != nil {
-				panic(err)
-			}
 			message = "Na váš email " + email + " jsme odeslali potvrzovací email k odebírání newsletteru."
 		} else {
 			if err == ErrEmailAlreadyInList {
@@ -104,7 +101,6 @@ func (app *App) Newsletters() *Newsletters {
 
 		res := GetResource[newsletterPersons](app)
 
-		//var person newsletterPersons
 		person := res.Is("email", email).First()
 		if person == nil {
 			panic("can't find user")
@@ -113,10 +109,7 @@ func (app *App) Newsletters() *Newsletters {
 		person.Confirmed = true
 
 		err := res.Update(person)
-		//err = app.Save(&person)
-		if err != nil {
-			panic(err)
-		}
+		must(err)
 
 		request.SetData("show_back_button", true)
 		request.SetData("title", "Odběr newsletteru potvrzen")
@@ -206,11 +199,24 @@ func (nm Newsletters) secret(email string) string {
 }
 
 //CSRF returns csrf token for newsletter
-func (nm *Newsletters) CSRF(request *Request) string {
+/*func (nm *Newsletters) CSRF(request *Request) string {
 	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%s%s", nm.randomness, request.Request().UserAgent()))
 	return fmt.Sprintf("%x", h.Sum(nil))
+}*/
 
+func (nm *Newsletters) SubscribeWithConfirmationEmail(email, name string) error {
+	res := GetResource[newsletterPersons](nm.app)
+	person := res.Is("email", email).First()
+	if person != nil {
+		return ErrEmailAlreadyInList
+	}
+	err := nm.app.sendConfirmEmail(name, email)
+	if err != nil {
+		return err
+	}
+
+	return nm.AddEmail(email, name, false)
 }
 
 func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
