@@ -3,7 +3,6 @@ package prago
 
 import (
 	"database/sql"
-	"log"
 	"os"
 	"reflect"
 
@@ -20,7 +19,8 @@ type App struct {
 	config          config
 	staticFiles     staticFiles
 	commands        *commands
-	logger          *log.Logger
+	//logger          *log.Logger
+	logger          *logger
 	templates       *templates
 	cache           *Cache
 	sessionsManager *sessionsManager
@@ -83,7 +83,8 @@ func createApp(codeName string, version string) *App {
 
 		commands: &commands{},
 
-		logger:         log.New(os.Stdout, "", log.LstdFlags),
+		//logger:         log.New(os.Stdout, "", log.LstdFlags),
+		logger:         newLogger(),
 		mainController: newMainController(),
 		cache:          newCache(),
 	}
@@ -161,7 +162,7 @@ func New(appName, version string) *App {
 func (app *App) GetDB() *sql.DB { return app.db }
 
 //Log returns logger structure
-func (app *App) Log() *log.Logger { return app.logger }
+func (app *App) Log() *logger { return app.logger }
 
 //DevelopmentMode returns if app is running in development mode
 func (app *App) DevelopmentMode() bool { return app.developmentMode }

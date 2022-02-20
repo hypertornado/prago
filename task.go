@@ -66,7 +66,7 @@ func (app *App) initTaskManager() {
 
 	grp := app.TaskGroup(unlocalized("example"))
 
-	grp.Task("example_simple").Handler(func(t *TaskActivity) error {
+	grp.Task(unlocalized("example_simple")).Handler(func(t *TaskActivity) error {
 		var progress float64
 		for {
 			time.Sleep(1 * time.Second)
@@ -78,15 +78,15 @@ func (app *App) initTaskManager() {
 		}
 	})
 
-	grp.Task("example_fail").Handler(func(t *TaskActivity) error {
+	grp.Task(unlocalized("example_fail")).Handler(func(t *TaskActivity) error {
 		return fmt.Errorf("example error")
 	})
 
-	grp.Task("example_panic").Handler(func(t *TaskActivity) error {
+	grp.Task(unlocalized("example_panic")).Handler(func(t *TaskActivity) error {
 		panic("panic value")
 	})
 
-	grp.Task("example").FileInput("file_example").Handler(func(t *TaskActivity) error {
+	grp.Task(unlocalized("example")).FileInput("file_example").Handler(func(t *TaskActivity) error {
 		file, err := t.GetFile("file_example")
 		if err != nil {
 			return err
@@ -136,10 +136,10 @@ type taskView struct {
 	Files []*taskFileInput
 }
 
-func (t *Task) taskView() taskView {
+func (t *Task) taskView(locale string) taskView {
 	return taskView{
 		ID:    t.id,
-		Name:  t.id,
+		Name:  t.name(locale),
 		Files: t.files,
 	}
 }
@@ -178,7 +178,7 @@ func (tm *taskManager) getTasks(user *user) (ret []taskViewGroup) {
 			ret = append(ret, taskViewGroup{Name: v.group.name(user.Locale)})
 		}
 
-		ret[len(ret)-1].Tasks = append(ret[len(ret)-1].Tasks, v.taskView())
+		ret[len(ret)-1].Tasks = append(ret[len(ret)-1].Tasks, v.taskView(user.Locale))
 		lastGroup = v.group
 	}
 
@@ -188,6 +188,7 @@ func (tm *taskManager) getTasks(user *user) (ret []taskViewGroup) {
 //Task represent some user task
 type Task struct {
 	id          string
+	name        func(string) string
 	group       *TaskGroup
 	permission  Permission
 	handler     func(*TaskActivity) error
@@ -201,7 +202,8 @@ type taskFileInput struct {
 }
 
 //Task creates task
-func (tg *TaskGroup) Task(id string) *Task {
+func (tg *TaskGroup) Task(name func(string) string) *Task {
+	id := randomString(20)
 	_, ok := tg.manager.tasksMap[id]
 
 	if ok {
@@ -210,6 +212,7 @@ func (tg *TaskGroup) Task(id string) *Task {
 
 	task := &Task{
 		id:         id,
+		name:       name,
 		permission: sysadminPermission,
 		group:      tg,
 	}
@@ -266,13 +269,19 @@ func (app *App) TaskGroup(name func(string) string) *TaskGroup {
 }
 
 func (tm *taskManager) run(t *Task, user *user, form *multipart.Form) {
-
 	var language = "en"
 	if user != nil {
 		language = user.Locale
 	}
 
-	var notification *Notification = tm.app.Notification(t.id)
+	var name string
+	if user != nil {
+		name = t.name(user.Locale)
+	} else {
+		name = t.name("en")
+	}
+
+	var notification *Notification = tm.app.Notification(name)
 	notification.preName = t.group.name(language)
 
 	activity := &TaskActivity{

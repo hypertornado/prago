@@ -52,7 +52,7 @@ func (app *App) initSearch() {
 	app.Log().Println("admin search initialized")
 	app.search = adminSearch
 
-	app.sysadminTaskGroup.Task("index_search").Handler(func(ta *TaskActivity) error {
+	app.sysadminTaskGroup.Task(unlocalized("index_search")).Handler(func(ta *TaskActivity) error {
 		return adminSearch.searchImport()
 	})
 
