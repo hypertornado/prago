@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 const testClientName = "pragelastic-test"
@@ -15,6 +16,7 @@ type TestStruct struct {
 	SomeCount       int64
 	NonIndexedField string `elastic-datatype:"text" elastic-enabled:"false"`
 	IsOK            bool
+	Time            time.Time
 	Tags            []string
 }
 
@@ -172,6 +174,7 @@ func TestAllQuery(t *testing.T) {
 	index.UpdateSingle(&TestStruct{
 		ID:        "1",
 		Name:      "C",
+		Time:      time.Date(2020, 10, 10, 5, 1, 1, 1, time.UTC),
 		SomeCount: 1,
 	})
 
@@ -179,11 +182,13 @@ func TestAllQuery(t *testing.T) {
 		ID:        "2",
 		Name:      "A",
 		SomeCount: 3,
+		Time:      time.Date(2019, 10, 10, 5, 1, 0, 1, time.UTC),
 		IsOK:      true,
 	})
 	index.UpdateSingle(&TestStruct{
 		ID:        "3",
 		Name:      "B",
+		Time:      time.Date(2019, 10, 10, 5, 1, 1, 1, time.UTC),
 		SomeCount: 2,
 	})
 
@@ -201,6 +206,11 @@ func TestAllQuery(t *testing.T) {
 	}
 
 	expected = getIDS(index.Query().Sort("Name", false).mustList())
+	if expected != "1,3,2" {
+		t.Fatal(expected)
+	}
+
+	expected = getIDS(index.Query().Sort("Time", false).mustList())
 	if expected != "1,3,2" {
 		t.Fatal(expected)
 	}

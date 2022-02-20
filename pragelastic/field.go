@@ -3,6 +3,7 @@ package pragelastic
 import (
 	"fmt"
 	"reflect"
+	"time"
 )
 
 type field struct {
@@ -43,6 +44,11 @@ func getElasticField(t reflect.StructField) (ret *field) {
 		return
 	}
 
+	if t.Type == reflect.TypeOf(time.Now()) {
+		ret.Type = "date"
+		return ret
+	}
+
 	if t.Type == reflect.TypeOf([]string{}) {
 		ret.Type = "keyword"
 		return ret
@@ -79,7 +85,6 @@ func getElasticField(t reflect.StructField) (ret *field) {
 	default:
 		panic("wrong type " + t.Type.Name())
 	}
-
 	return
 }
 
