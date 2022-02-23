@@ -14,7 +14,7 @@ func (app *App) initMigrationCommand() {
 			if err == nil {
 				app.Log().Println("Migration done")
 			} else {
-				app.Log().Fatal(err)
+				panic(err)
 			}
 		})
 }

@@ -99,9 +99,9 @@ func (q *Query[T]) toQuery(field string, value interface{}) elastic.Query {
 	}
 }
 
-func (q *Query[T]) Sort(fieldName string, desc bool) *Query[T] {
+func (q *Query[T]) Sort(fieldName string, asc bool) *Query[T] {
 	q.sortField = fieldName
-	q.sortAsc = desc
+	q.sortAsc = asc
 	return q
 }
 
@@ -175,7 +175,6 @@ func (query *Query[T]) List() ([]*T, int64, error) {
 		return nil, -1, err
 	}
 	return query.index.SearchResultToList(res)
-
 }
 
 func (query *Query[T]) mustList() []*T {

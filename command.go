@@ -29,7 +29,7 @@ func addServerCommand(app *App) {
 					var err error
 					port, err = strconv.Atoi(configPort)
 					if err != nil {
-						app.Log().Fatalf("wrong format of 'port' entry in config file, should be int")
+						panic("wrong format of 'port' entry in config file, should be int")
 					}
 				case float64:
 					port = int(configPort)

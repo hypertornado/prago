@@ -145,6 +145,11 @@ func (f *Form) AddDatePicker(name, description string) *FormItem {
 	return input
 }
 
+func (f *Form) AddDateTimePicker(name, description string) *FormItem {
+	input := f.addInput(name, description, "admin_item_datetime")
+	return input
+}
+
 func (f *Form) AddRelation(name, description string, relatedResourceID string) *FormItem {
 	input := f.addInput(name, description, "admin_item_relation")
 	input.Data = relatedResourceID

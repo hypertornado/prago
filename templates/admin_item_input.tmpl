@@ -53,6 +53,10 @@
   <input type="text" name="{{.ID}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-date"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}} autocomplete="off">
 {{end}}
 
+{{define "admin_item_datetime"}}
+  <input type="datetime-local" name="{{.ID}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}} autocomplete="off">
+{{end}}
+
 {{define "admin_item_timestamp"}}
   {{if .Readonly}}
     <input name="{{.ID}}" value="{{.Value}}" class="input form_input"{{if .Focused}} autofocus{{end}} readonly>

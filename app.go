@@ -84,20 +84,24 @@ func createApp(codeName string, version string) *App {
 		commands: &commands{},
 
 		//logger:         log.New(os.Stdout, "", log.LstdFlags),
-		logger:         newLogger(),
+		//logger:         newLogger(),
 		mainController: newMainController(),
 		cache:          newCache(),
 	}
+
+	app.logger = newLogger(app)
 
 	app.appController = app.mainController.subController()
 	app.accessController = app.mainController.subController()
 	app.accessController.priorityRouter = true
 
+	app.preInitTaskManager()
 	app.initConfig()
 	app.initElasticsearchClient()
+	app.initAccessManager()
+	app.initLogger()
 	app.initEmail()
 	app.initSessions()
-	app.initAccessManager()
 	app.initStaticFilesHandler()
 	app.initNotifications()
 
@@ -119,7 +123,7 @@ func createApp(codeName string, version string) *App {
 
 	app.initActivityLog()
 	app.initHome()
-	app.initTaskManager()
+	app.postInitTaskManager()
 	app.initAdminActions()
 	app.initBuild()
 	app.initAPI()

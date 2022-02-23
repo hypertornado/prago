@@ -90,6 +90,8 @@ func getElasticField(t reflect.StructField) (ret *field) {
 
 func stringTypeValid(t string) bool {
 	switch t {
+	case "match_only_text":
+		return true
 	case "text":
 		return true
 	case "keyword":

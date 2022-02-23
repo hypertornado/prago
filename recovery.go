@@ -36,12 +36,13 @@ func (app App) recoveryFunction(p *Request, recoveryData interface{}) {
 		p.Response().Write([]byte(fmt.Sprintf("We are sorry, some error occured. (errorid %s)", p.uuid)))
 	}
 
-	app.Log().Printf("500 - application error\nmessage=%s\nuuid=%s\ntook=%v\n%s",
+	message := fmt.Sprintf("500 - application error\nmessage=%s\nuuid=%s\ntook=%v\n%s",
 		recoveryData,
 		p.uuid,
 		duration,
 		string(debug.Stack()),
 	)
+	app.Log().panicln(message)
 }
 
 const recoveryTmpl = `

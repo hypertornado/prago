@@ -34,14 +34,16 @@ func GetTaskViewData(request *Request) interface{} {
 	return ret
 }
 
-func (app *App) initTaskManager() {
-
+func (app *App) preInitTaskManager() {
 	app.taskManager = &taskManager{
 		app:       app,
 		tasksMap:  make(map[string]*Task),
 		startedAt: time.Now(),
 	}
 
+}
+
+func (app *App) postInitTaskManager() {
 	go app.taskManager.startCRON()
 
 	app.Action("tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).Template("admin_tasks").DataSource(GetTaskViewData)

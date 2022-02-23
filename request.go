@@ -2,6 +2,7 @@ package prago
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -122,9 +123,14 @@ func (request Request) Redirect(url string) {
 
 func (request Request) writeAfterLog() {
 	if request.Request().Header.Get("X-Dont-Log") != "true" {
-		request.app.Log().Printf("id=%s %s %s took=%v", request.uuid,
-			request.Request().Method, request.Request().URL.String(),
-			time.Since(request.receivedAt))
+		request.app.Log().accessln(
+			fmt.Sprintf("id=%s %s %s took=%v",
+				request.uuid,
+				request.Request().Method,
+				request.Request().URL.String(),
+				time.Since(request.receivedAt),
+			),
+		)
 	}
 }
 
