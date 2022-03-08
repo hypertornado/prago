@@ -44,6 +44,10 @@ func (app *App) initElasticsearchClient() {
 }
 
 func (app *App) initSearch() {
+	if app.ElasticClient == nil {
+		app.Log().Println("will not initialize search since elasticsearch client is not defined")
+		return
+	}
 	adminSearch, err := newAdminSearch(app)
 	if err != nil {
 		app.Log().Println("admin search not initialized: " + err.Error())
@@ -212,7 +216,10 @@ func searchID(resource resourceIface, id int64) string {
 }
 
 func (e *adminSearch) deleteItem(resource resourceIface, id int64) error {
-	return e.index.DeleteItem(searchID(resource, id))
+	if e.index != nil {
+		return e.index.DeleteItem(searchID(resource, id))
+	}
+	return nil
 }
 
 func (e *adminSearch) searchImport() error {
@@ -270,7 +277,10 @@ func (e *adminSearch) addItem(bulkUpdater *pragelastic.BulkUpdater[searchItem], 
 		bulkUpdater.AddItem(item)
 		return nil
 	}
-	return e.index.UpdateSingle(item)
+	if e.index != nil {
+		return e.index.UpdateSingle(item)
+	}
+	return nil
 }
 
 func (e *adminSearch) DeleteIndex() error {

@@ -34,7 +34,17 @@ func (app *App) Table() *Table {
 	}
 }
 
+type TableCellPre string
+
 func newCell(item interface{}) tableCell {
+	pre, ok := item.(TableCellPre)
+	if ok {
+		return tableCell{
+			Template: "admin_form_table_cell_pre",
+			Data:     pre,
+		}
+	}
+
 	linkData, ok := item.([2]string)
 	if ok {
 		return tableCell{

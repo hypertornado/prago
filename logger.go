@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hypertornado/prago/pragelastic"
@@ -26,6 +27,7 @@ func newLogger(app *App) *logger {
 
 func (l *logger) writeString(typ, str string) {
 	go func() {
+		str = strings.Trim(str, " \t\r\n")
 		if l.index != nil {
 			err := l.index.UpdateSingle(&logItem{
 				ID:   randomString(10),
@@ -112,20 +114,23 @@ func (app *App) initLogger() {
 			{"info", "info"},
 			{"access", "access"},
 		})
-		//f.AddDateTimePicker("from_date", "Čas od")
-		//f.AddDateTimePicker("to_date", "Čas do")
+		f.AddDateTimePicker("from_date", "Čas od")
+		f.AddDateTimePicker("to_date", "Čas do")
 		f.AddTextInput("size", "Results count").Value = "20"
 		f.AddTextInput("offset", "Offset").Value = "0"
 		f.AddSubmit("Hledat")
 	}).Validation(func(vc ValidationContext) {
-		query := index.Query().Sort("Time", false).Limit(30)
+		query := index.Query().Sort("Time", false)
 
-		fmt.Println(vc.GetValue("from_date"))
+		from, err := time.ParseInLocation("2006-01-02T15:04", vc.GetValue("from_date"), time.Local)
+		if err == nil {
+			query.GreaterThanOrEqual("Time", from)
+		}
 
-		/*from, err := time.Parse("2006-01-02T15:04", vc.GetValue("from_date"))
-		if err != nil {
-			fmt.Println(from)
-		}*/
+		to, err := time.ParseInLocation("2006-01-02T15:04", vc.GetValue("to_date"), time.Local)
+		if err == nil {
+			query.LowerThanOrEqual("Time", to)
+		}
 
 		size, err := strconv.Atoi(vc.GetValue("size"))
 		if err != nil || size <= 0 {
@@ -158,7 +163,7 @@ func (app *App) initLogger() {
 		table.AddFooterText(fmt.Sprintf("Celkem %d záznamů", total))
 
 		for _, v := range items {
-			table.Row(v.ID, v.Time.Format("2. 1. 2006 15:04:05"), v.Typ, v.Text)
+			table.Row(TableCellPre(v.ID), TableCellPre(v.Time.Format("2. 1. 2006 15:04:05")), TableCellPre(v.Typ), TableCellPre(v.Text))
 		}
 
 		vc.Validation().AfterContent = table.ExecuteHTML()

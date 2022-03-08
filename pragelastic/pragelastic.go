@@ -1,6 +1,8 @@
 package pragelastic
 
 import (
+	"context"
+
 	"github.com/olivere/elastic/v7"
 )
 
@@ -18,4 +20,9 @@ func New(id string) (*Client, error) {
 		prefix:  id,
 		eclient: client,
 	}, nil
+}
+
+func (c *Client) GetStats() *elastic.ClusterStatsResponse {
+	ret, _ := c.eclient.ClusterStats().Do(context.Background())
+	return ret
 }

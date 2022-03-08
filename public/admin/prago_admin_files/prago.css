@@ -5468,6 +5468,9 @@ ul {
   margin: 0px;
   margin-bottom: 1rem;
 }
+pre {
+  margin: 0px;
+}
 .admin_box {
   border: 1px solid #eee;
   margin: 20px auto;
@@ -7660,6 +7663,7 @@ a.mainmenu_logo:hover {
 .admin_form_table td {
   padding: 5px 10px;
   border-top: 1px solid #eee;
+  vertical-align: top;
 }
 .admin_form_table tr:last-child {
   border-bottom: 1px solid #eee;
