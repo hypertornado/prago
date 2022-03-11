@@ -22,6 +22,7 @@ func newLogger(app *App) *logger {
 		app:    app,
 		output: os.Stdout,
 	}
+
 	return ret
 }
 
@@ -36,7 +37,7 @@ func (l *logger) writeString(typ, str string) {
 				Text: str,
 			})
 			if err != nil {
-				fmt.Printf("Logger error, can't update: %s", err)
+				fmt.Printf("Logger error, can't update: %s\n", err)
 				return
 			}
 			if !l.app.developmentMode {
@@ -50,6 +51,16 @@ func (l *logger) writeString(typ, str string) {
 			panic(err)
 		}
 	}()
+}
+
+func (l *logger) deleteOldLogsRobot() {
+	for {
+		err := l.index.Query().LowerThanOrEqual("Time", time.Now().Add(-24*time.Hour)).Delete()
+		if err != nil {
+			l.Printf("deleteOldLogsRobot: can't delete items: %s", err)
+		}
+		time.Sleep(5 * time.Second)
+	}
 }
 
 func (l *logger) accessln(v ...any) {
@@ -103,6 +114,10 @@ func (app *App) initLogger() {
 	}).Permission("sysadmin")
 
 	app.logger.index = index
+
+	go func() {
+		app.logger.deleteOldLogsRobot()
+	}()
 
 	app.FormAction("log_search").Name(unlocalized("Log")).Permission("sysadmin").Form(func(f *Form, r *Request) {
 		f.Title = "Logger"

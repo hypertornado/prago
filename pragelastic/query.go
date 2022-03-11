@@ -148,6 +148,14 @@ func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
 	return q, nil
 }
 
+func (query *Query[T]) Delete() error {
+	deleteService := elastic.NewDeleteByQueryService(query.index.client.eclient)
+	deleteService.Index(query.index.indexName())
+	deleteService.Query(query.boolQuery)
+	_, err := deleteService.Do(query.context)
+	return err
+}
+
 func (query *Query[T]) SearchResult() (*elastic.SearchResult, error) {
 	service, err := query.getSearchService()
 	if err != nil {

@@ -121,7 +121,6 @@ func TestTags(t *testing.T) {
 }
 
 func TestKeywordFilter(t *testing.T) {
-
 	index := prepareTestIndex[TestStruct]()
 	index.UpdateSingle(&TestStruct{
 		ID:   "1",
@@ -135,6 +134,38 @@ func TestKeywordFilter(t *testing.T) {
 	index.Refresh()
 
 	res := getIDS(index.Query().Filter("Name", "LIB").mustList())
+	if res != "1" {
+		t.Fatal(res)
+	}
+
+}
+
+func TestDeleteQuery(t *testing.T) {
+	index := prepareTestIndex[TestStruct]()
+	index.UpdateSingle(&TestStruct{
+		ID:   "1",
+		Name: "LIB",
+	})
+	index.UpdateSingle(&TestStruct{
+		ID:   "2",
+		Name: "TLP",
+	})
+	index.UpdateSingle(&TestStruct{
+		ID:   "3",
+		Name: "TLP",
+	})
+	index.Flush()
+	index.Refresh()
+
+	err := index.Query().Filter("Name", "TLP").Delete()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	index.Flush()
+	index.Refresh()
+
+	res := getIDS(index.Query().mustList())
 	if res != "1" {
 		t.Fatal(res)
 	}
