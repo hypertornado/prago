@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	sendgrid "github.com/sendgrid/sendgrid-go"
@@ -21,6 +22,7 @@ type Email struct {
 	app              *App
 	from             *emailAddress
 	to               *emailAddress
+	attachements     []*mail.Attachment
 	subject          string
 	plainTextContent string
 	htmlContent      string
@@ -61,6 +63,16 @@ func (email *Email) Subject(subject string) *Email {
 	return email
 }
 
+func (email *Email) Attachement(filename string, content []byte) *Email {
+	attachement := mail.NewAttachment()
+	attachement.SetFilename(filename)
+	attachement.SetContent(
+		base64.StdEncoding.EncodeToString(content),
+	)
+	email.attachements = append(email.attachements, attachement)
+	return email
+}
+
 func (email *Email) TextContent(content string) *Email {
 	email.plainTextContent = content
 	if email.htmlContent == "" {
@@ -81,6 +93,11 @@ func (email *Email) Send() error {
 	from := email.from.toSendgridEmail()
 	to := email.to.toSendgridEmail()
 	emailMessage := mail.NewSingleEmail(from, email.subject, to, email.plainTextContent, email.htmlContent)
+
+	for _, v := range email.attachements {
+		emailMessage.AddAttachment(v)
+	}
+
 	resp, err := email.app.sendgridClient.Send(emailMessage)
 	if err != nil {
 		return err
