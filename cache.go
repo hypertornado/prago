@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"errors"
 	"sync"
 	"time"
 )
@@ -132,7 +131,12 @@ func (c *Cache) Load(cacheName string, createFn func() interface{}) interface{} 
 	return item.getValue()
 }
 
-func (c *Cache) set(cacheName string, value interface{}) error {
+func (c *Cache) forceLoad(cacheName string, createFn func() interface{}) interface{} {
+	item := c.putItem(cacheName, createFn)
+	return item.getValue()
+}
+
+/*func (c *Cache) set(cacheName string, value interface{}) error {
 	item := c.getItem(cacheName)
 	if item == nil {
 		return errors.New("can't find item in cache: " + cacheName)
@@ -142,7 +146,7 @@ func (c *Cache) set(cacheName string, value interface{}) error {
 	item.value = value
 	item.updatedAt = time.Now()
 	return nil
-}
+}*/
 
 func (c *Cache) Clear() {
 	c.mutex.Lock()

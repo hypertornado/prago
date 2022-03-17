@@ -89,6 +89,9 @@ func (resource *Resource[T]) getCachedCount() int64 {
 }
 
 func (resource *Resource[T]) updateCachedCount() error {
-	count, _ := resource.Query().Count()
-	return resource.app.cache.set(resource.cachedCountName(), count)
+	resource.app.cache.forceLoad(resource.cachedCountName(), func() interface{} {
+		count, _ := resource.Query().Count()
+		return count
+	})
+	return nil
 }
