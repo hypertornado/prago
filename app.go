@@ -19,7 +19,6 @@ type App struct {
 	config          config
 	staticFiles     staticFiles
 	commands        *commands
-	//logger          *log.Logger
 	logger          *logger
 	templates       *templates
 	cache           *Cache
@@ -77,14 +76,10 @@ func createApp(codeName string, version string) *App {
 		}*/
 
 	app := &App{
-		codeName: codeName,
-		version:  version,
-		name:     unlocalized(codeName),
-
-		commands: &commands{},
-
-		//logger:         log.New(os.Stdout, "", log.LstdFlags),
-		//logger:         newLogger(),
+		codeName:       codeName,
+		version:        version,
+		name:           unlocalized(codeName),
+		commands:       &commands{},
 		mainController: newMainController(),
 		cache:          newCache(),
 	}
