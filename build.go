@@ -7,8 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-
-	setup "github.com/hypertornado/prago/prago-setup/lib"
 )
 
 func (app *App) initBuild() {
@@ -36,12 +34,6 @@ func (app *App) initBuild() {
 	app.addCommand("party").Callback(func() {
 		must(party(appName, version, ssh))
 	})
-
-	app.addCommand("setup").Callback(func() {
-		panic("dont start it this way, must get setup name first")
-		setup.StartSetup(app.codeName)
-	})
-
 }
 
 func party(appName, version, ssh string) (err error) {
