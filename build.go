@@ -19,7 +19,7 @@ func (app *App) initBuild() {
 		build(appName, version)
 	})
 
-	ssh := app.ConfigurationGetStringWithFallback("ssh", "")
+	ssh := app.MustGetSetting("ssh")
 	if ssh == "" {
 		app.Log().Println("no ssh value set in config file")
 		return

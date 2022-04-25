@@ -13,6 +13,19 @@ func initUserSettings(app *App) {
 
 			sel := form.AddSelect("locale", messages.Get(user.Locale, "admin_locale"), availableLocales)
 			sel.Value = user.Locale
+
+			for _, v := range app.settings.settingsArray {
+				if request.UserHasPermission(v.permission) {
+					val, err := app.GetSetting(v.id)
+					if err == nil {
+						input := form.AddTextInput("setting_"+v.id, v.name(request.user.Locale))
+						input.Value = val
+					} else {
+						app.Log().Errorf("can't load setting value '%s': %s", v.id, err)
+					}
+				}
+			}
+
 			form.AddSubmit(messages.Get(user.Locale, "admin_save"))
 		},
 	).Validation(func(vc ValidationContext) {
@@ -41,6 +54,18 @@ func initUserSettings(app *App) {
 			user.Name = name
 			user.Locale = newLocale
 			must(app.UsersResource.Update(user))
+
+			for _, v := range app.settings.settingsArray {
+				request := vc.Request()
+				if request.UserHasPermission(v.permission) {
+					val := request.Params().Get("setting_" + v.id)
+					err := app.saveSetting(v.id, val, request)
+					must(err)
+					if v.changeCallback != nil {
+						v.changeCallback()
+					}
+				}
+			}
 
 			vc.Request().AddFlashMessage(messages.Get(newLocale, "admin_settings_changed"))
 			vc.Validation().RedirectionLocaliton = app.getAdminURL("")

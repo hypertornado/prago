@@ -93,7 +93,7 @@ func (app *App) getRenewPasswordURL(user user) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)
 	urlValues.Add("token", user.emailToken(app))
-	return app.ConfigurationGetString("baseUrl") + app.getAdminURL("user/renew_password") + "?" + urlValues.Encode()
+	return app.MustGetSetting("base_url") + app.getAdminURL("user/renew_password") + "?" + urlValues.Encode()
 }
 
 func (app *App) sendRenewPasswordEmail(user user) error {

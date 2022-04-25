@@ -65,7 +65,7 @@ func (user *user) newPassword(password string) error {
 }
 
 func (user user) emailToken(app *App) string {
-	randomness := app.ConfigurationGetString("random")
+	randomness := app.MustGetSetting("random")
 	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%s%s", user.Email, randomness))
 	return fmt.Sprintf("%x", h.Sum(nil))

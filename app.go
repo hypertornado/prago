@@ -7,7 +7,6 @@ import (
 	"reflect"
 
 	"github.com/hypertornado/prago/pragelastic"
-	"github.com/sendgrid/sendgrid-go"
 )
 
 //App is main struct of prago application
@@ -16,13 +15,14 @@ type App struct {
 	version         string
 	development     *development
 	developmentMode bool
-	config          config
 	staticFiles     staticFiles
 	commands        *commands
 	logger          *logger
 	templates       *templates
 	cache           *Cache
 	sessionsManager *sessionsManager
+
+	settings *settingsSingleton
 
 	logo            []byte
 	name            func(string) string
@@ -41,10 +41,7 @@ type App struct {
 
 	rootActions       []*Action
 	db                *sql.DB
-	sendgridClient    *sendgrid.Client
 	sysadminTaskGroup *TaskGroup
-
-	noReplyEmail string
 
 	newsletters        *Newsletters
 	notificationCenter *notificationCenter
@@ -60,6 +57,8 @@ type App struct {
 
 	activityListeners []func(Activity)
 	taskManager       *taskManager
+
+	dbConfig *dbConnectConfig
 }
 
 func newTestingApp() *App {
@@ -67,14 +66,6 @@ func newTestingApp() *App {
 }
 
 func createApp(codeName string, version string) *App {
-
-	/*
-		if codeName != "__prago_test_app" && !configExists(codeName) {
-			if consoleQuestion("File config.json does not exist. Can't start app. Would you like to start setup?") {
-				setup.StartSetup(codeName)
-			}
-		}*/
-
 	app := &App{
 		codeName:       codeName,
 		version:        version,
@@ -89,30 +80,25 @@ func createApp(codeName string, version string) *App {
 	app.appController = app.mainController.subController()
 	app.accessController = app.mainController.subController()
 	app.accessController.priorityRouter = true
+	app.adminController = app.accessController.subController()
+	app.resourceMap = make(map[reflect.Type]resourceIface)
+	app.resourceNameMap = make(map[string]resourceIface)
+	app.fieldTypes = make(map[string]*fieldType)
 
 	app.preInitTaskManager()
-	app.initConfig()
-	app.initElasticsearchClient()
 	app.initAccessManager()
+	app.initDefaultFieldTypes()
+
+	app.connectDB()
+
+	app.initSettings()
+
+	app.initElasticsearchClient()
 	app.initLogger()
-	app.initEmail()
-	app.initSessions()
+
 	app.initStaticFilesHandler()
 	app.initNotifications()
 
-	app.resourceMap = make(map[reflect.Type]resourceIface)
-	app.resourceNameMap = make(map[string]resourceIface)
-
-	app.fieldTypes = make(map[string]*fieldType)
-
-	app.db = mustConnectDatabase(
-		app.ConfigurationGetStringWithFallback("dbUser", ""),
-		app.ConfigurationGetStringWithFallback("dbPassword", ""),
-		app.ConfigurationGetStringWithFallback("dbName", ""),
-	)
-
-	app.adminController = app.accessController.subController()
-	app.initDefaultFieldTypes()
 	app.initUserResource()
 	app.initFilesResource()
 
@@ -130,6 +116,7 @@ func createApp(codeName string, version string) *App {
 	app.initSQLConsole()
 	app.initSQLBackup()
 	app.initBackupCRON()
+
 	return app
 }
 
@@ -139,6 +126,7 @@ func (app *App) Run() {
 }
 
 func (app *App) afterInit() {
+	app.initSessions()
 	app.initDefaultResourceActions()
 	app.bindAPIs()
 	app.bindAllActions()

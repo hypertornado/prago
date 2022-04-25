@@ -32,8 +32,6 @@ func (app *App) initSystemStats() {
 			stats = append(stats, [2]string{"GOOS", runtime.GOOS})
 			stats = append(stats, [2]string{"GOMAXPROCS", fmt.Sprintf("%d", runtime.GOMAXPROCS(-1))})
 
-			configStats := app.config.Export()
-
 			databaseStats := [][2]string{}
 			dbStats := app.db.Stats()
 			databaseStats = append(databaseStats, [2]string{"MaxOpenConnections", fmt.Sprintf("%d", dbStats.MaxOpenConnections)})
@@ -106,7 +104,6 @@ func (app *App) initSystemStats() {
 
 			ret["roles"] = app.accessManager.roles
 			ret["stats"] = stats
-			ret["configStats"] = configStats
 			ret["databaseStats"] = databaseStats
 			ret["osStats"] = osStats
 			ret["memStats"] = memStats

@@ -126,13 +126,12 @@ func (u user) sendConfirmEmail(app *App, locale string) error {
 	urlValues.Add("token", u.emailToken(app))
 
 	subject := messages.Get(locale, "admin_confirm_email_subject", app.name(u.Locale))
-	link := app.ConfigurationGetString("baseUrl") + app.getAdminURL("user/confirm_email") + "?" + urlValues.Encode()
+	link := app.MustGetSetting("base_url") + app.getAdminURL("user/confirm_email") + "?" + urlValues.Encode()
 	body := messages.Get(locale, "admin_confirm_email_body", link, link, app.name(u.Locale))
 	return app.Email().To(u.Name, u.Email).Subject(subject).HTMLContent(body).Send()
 }
 
 func (u user) sendAdminEmail(app *App) error {
-	//var users []*user
 	res := GetResource[user](app)
 	users := res.Is("role", "sysadmin").List()
 	for _, receiver := range users {

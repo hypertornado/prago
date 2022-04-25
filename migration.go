@@ -96,6 +96,7 @@ func (resource *Resource[T]) createTable(db dbIface, tableName string, verbose b
 	return err
 }
 
+//TODO: migrate after each resource initialization
 func (resource *Resource[T]) migrateTable(db dbIface, tableName string, verbose bool) error {
 	if verbose {
 		fmt.Printf("Migrating table '%s'\n", tableName)

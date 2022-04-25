@@ -78,13 +78,6 @@ func backupApp(app *App) error {
 		return fmt.Errorf("dumping cmd: %s", err)
 	}
 
-	//dumpCmd.Stdout = dbFile
-
-	/*err = dumpCmd.Run()
-	if err != nil {
-		return fmt.Errorf("dumping cmd: %s", err)
-	}*/
-
 	backupsPath := filepath.Join(os.Getenv("HOME"), "."+appName, "backups")
 	err = exec.Command("mkdir", "-p", backupsPath).Run()
 	if err != nil {
@@ -95,22 +88,14 @@ func backupApp(app *App) error {
 }
 
 func (app *App) backupSQL(writer io.Writer, context context.Context) error {
-	user := app.ConfigurationGetStringWithFallback("dbUser", "")
-	dbName := app.ConfigurationGetStringWithFallback("dbName", "")
-	password := app.ConfigurationGetStringWithFallback("dbPassword", "")
+	password := app.dbConfig.Password
 	var dumpCmd *exec.Cmd
-	//exec.co
 	if password == "" {
-		dumpCmd = exec.Command("mysqldump", "-u"+user, dbName)
+		dumpCmd = exec.Command("mysqldump", "-u"+app.dbConfig.User, app.dbConfig.Name)
 	} else {
-		dumpCmd = exec.Command("mysqldump", "-u"+user, "-p"+password, dbName)
+		dumpCmd = exec.Command("mysqldump", "-u"+app.dbConfig.User, "-p"+password, app.dbConfig.Name)
 	}
 	dumpCmd.Stdout = writer
-
-	//dumpCmd.
-
-	//dumpCmd.Process.
-
 	return dumpCmd.Run()
 }
 

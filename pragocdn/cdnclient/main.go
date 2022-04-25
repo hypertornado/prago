@@ -11,7 +11,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	//a "github.com/hypertornado/daft"
 )
 
 type CDNFileData struct {

@@ -4,19 +4,9 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	sendgrid "github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
-
-func (app *App) initEmail() {
-	sendgridKey := app.ConfigurationGetStringWithFallback("sendgridApi", "")
-	app.noReplyEmail = app.ConfigurationGetStringWithFallback("noReplyEmail", "")
-	app.sendgridClient = sendgrid.NewSendClient(sendgridKey)
-}
-
-func (app *App) SetDefaultEmailAddressFrom(email string) {
-	app.noReplyEmail = email
-}
 
 type Email struct {
 	app              *App
@@ -42,8 +32,9 @@ func newEmailAddress(name, email string) *emailAddress {
 }
 
 func (app *App) Email() *Email {
+	noReplyEmail := app.MustGetSetting("no_reply_email")
 	return &Email{
-		from: newEmailAddress(app.name("en"), app.noReplyEmail),
+		from: newEmailAddress(app.name("en"), noReplyEmail),
 		app:  app,
 	}
 }
@@ -98,7 +89,16 @@ func (email *Email) Send() error {
 		emailMessage.AddAttachment(v)
 	}
 
-	resp, err := email.app.sendgridClient.Send(emailMessage)
+	key, err := email.app.GetSetting("sendgrid_key")
+	if err != nil {
+		return err
+	}
+
+	sendGridClient := sendgrid.NewSendClient(
+		key,
+	)
+
+	resp, err := sendGridClient.Send(emailMessage)
 	if err != nil {
 		return err
 	}

@@ -89,7 +89,7 @@ func initRequestWithSession(request *Request, next func()) {
 }
 
 func (app *App) initSessions() {
-	random := app.ConfigurationGetString("random")
+	random := app.MustGetSetting("random")
 	cookieStore := sessions.NewCookieStore([]byte(random))
 	app.sessionsManager = &sessionsManager{
 		cookieStore: cookieStore,

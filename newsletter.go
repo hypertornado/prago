@@ -20,7 +20,6 @@ var ErrEmailAlreadyInList = errors.New("email already in newsletter list")
 
 //NewsletterMiddleware represents users newsletter
 type Newsletters struct {
-	baseURL    string
 	renderer   NewsletterRenderer
 	app        *App
 	randomness string
@@ -46,11 +45,9 @@ func (app *App) Newsletters() *Newsletters {
 		return app.newsletters
 	}
 	app.newsletters = &Newsletters{
-		baseURL:  app.ConfigurationGetString("baseUrl"),
-		renderer: defaultNewsletterRenderer,
-
+		renderer:   defaultNewsletterRenderer,
 		app:        app,
-		randomness: app.ConfigurationGetString("random"),
+		randomness: app.MustGetSetting("random"),
 	}
 
 	app.GET("/newsletter-subscribe", func(request *Request) {
@@ -168,7 +165,7 @@ func (nm Newsletters) confirmEmailBody(name, email string) string {
 	values.Set("secret", nm.secret(email))
 
 	u := fmt.Sprintf("%s/newsletter-confirm?%s",
-		nm.baseURL,
+		nm.app.MustGetSetting("base_url"),
 		values.Encode(),
 	)
 
@@ -184,7 +181,7 @@ func (nm Newsletters) unsubscribeURL(email string) string {
 	values.Set("secret", nm.secret(email))
 
 	return fmt.Sprintf("%s/newsletter-unsubscribe?%s",
-		nm.baseURL,
+		nm.app.MustGetSetting("base_url"),
 		values.Encode(),
 	)
 }
@@ -367,7 +364,7 @@ func (nm *Newsletters) GetBody(n newsletter, email string) (string, error) {
 	content := markdown.New(markdown.HTML(true)).RenderToString([]byte(n.Body))
 	params := map[string]interface{}{
 		"id":          n.ID,
-		"baseUrl":     nm.baseURL,
+		"baseUrl":     nm.app.MustGetSetting("base_url"),
 		"site":        nm.app.name("en"),
 		"title":       n.Name,
 		"unsubscribe": nm.unsubscribeURL(email),
@@ -454,7 +451,7 @@ func (nm *Newsletters) getNewsletterSectionData(n newsletter) []newsletterSectio
 			button = v.Button
 		}
 
-		url := nm.baseURL
+		url := nm.app.MustGetSetting("base_url")
 		if v.URL != "" {
 			url = v.URL
 		}

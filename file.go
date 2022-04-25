@@ -27,10 +27,11 @@ type File struct {
 var filesCDN cdnclient.CDNAccount
 
 func initCDN(app *App) {
-	cdnURL := app.ConfigurationGetStringWithFallback("cdnURL", "https://www.prago-cdn.com")
-	cdnAccount := app.ConfigurationGetStringWithFallback("cdnAccount", app.codeName)
-	cdnPassword := app.ConfigurationGetStringWithFallback("cdnPassword", "")
-	filesCDN = cdnclient.NewCDNAccount(cdnURL, cdnAccount, cdnPassword)
+	filesCDN = cdnclient.NewCDNAccount(
+		app.MustGetSetting("cdn_url"),
+		app.MustGetSetting("cdn_account"),
+		app.MustGetSetting("cdn_password"),
+	)
 }
 
 func (app *App) thumb(ids string) string {
