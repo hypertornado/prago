@@ -7050,6 +7050,9 @@ a.admin_search_suggestion-selected:active {
   margin: 5px;
   max-width: 100vw;
 }
+.admin_home_section_name {
+  padding: 0px 10px;
+}
 .admin_home_items {
   display: flex;
   flex-wrap: wrap;
@@ -7073,6 +7076,22 @@ a.admin_search_suggestion-selected:active {
 }
 a.admin_home_item {
   text-decoration: none;
+}
+.admin_home_item_value {
+  font-size: 1.3rem;
+  line-height: 1.3em;
+  font-weight: bold;
+}
+.admin_home_item_description {
+  color: #888;
+  font-size: 0.9rem;
+  line-height: 1.3em;
+}
+.admin_home_item-green .admin_home_item_description {
+  color: #006400;
+}
+.admin_home_item-red .admin_home_item_description {
+  color: #cb2431;
 }
 @media (max-width: 800px) {
   .admin_home_item {

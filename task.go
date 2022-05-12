@@ -18,18 +18,17 @@ type taskManager struct {
 }
 
 type taskViewData struct {
-	Title     string
-	Locale    string
-	CSRFToken string
-	Tasks     []taskViewGroup
+	Title  string
+	Locale string
+	Tasks  []taskViewGroup
 }
 
-func GetTaskViewData(request *Request) interface{} {
+func GetTaskViewData(request *Request) taskViewData {
 	var ret taskViewData
 	user := request.user
 	ret.Locale = user.Locale
-	ret.CSRFToken = request.app.generateCSRFToken(user)
-	ret.Tasks = request.app.taskManager.getTasks(user)
+	csrfToken := request.app.generateCSRFToken(user)
+	ret.Tasks = request.app.taskManager.getTasks(user, csrfToken)
 	ret.Title = messages.Get(user.Locale, "tasks")
 	return ret
 }
@@ -46,7 +45,7 @@ func (app *App) preInitTaskManager() {
 func (app *App) postInitTaskManager() {
 	go app.taskManager.startCRON()
 
-	app.Action("tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).Template("admin_tasks").DataSource(GetTaskViewData)
+	//app.Action("tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).Template("admin_tasks").DataSource(GetTaskViewData)
 
 	app.API("tasks/runtask").Method("POST").Permission(loggedPermission).Handler(func(request *Request) {
 		id := request.Request().FormValue("id")
@@ -133,20 +132,22 @@ type taskViewGroup struct {
 }
 
 type taskView struct {
-	ID    string
-	Name  string
-	Files []*taskFileInput
+	ID        string
+	Name      string
+	CSRFToken string
+	Files     []*taskFileInput
 }
 
-func (t *Task) taskView(locale string) taskView {
+func (t *Task) taskView(locale, csrfToken string) taskView {
 	return taskView{
-		ID:    t.id,
-		Name:  t.name(locale),
-		Files: t.files,
+		ID:        t.id,
+		Name:      t.name(locale),
+		CSRFToken: csrfToken,
+		Files:     t.files,
 	}
 }
 
-func (tm *taskManager) getTasks(user *user) (ret []taskViewGroup) {
+func (tm *taskManager) getTasks(user *user, csrfToken string) (ret []taskViewGroup) {
 
 	var tasks []*Task
 	for _, v := range tm.tasksMap {
@@ -180,7 +181,7 @@ func (tm *taskManager) getTasks(user *user) (ret []taskViewGroup) {
 			ret = append(ret, taskViewGroup{Name: v.group.name(user.Locale)})
 		}
 
-		ret[len(ret)-1].Tasks = append(ret[len(ret)-1].Tasks, v.taskView(user.Locale))
+		ret[len(ret)-1].Tasks = append(ret[len(ret)-1].Tasks, v.taskView(user.Locale, csrfToken))
 		lastGroup = v.group
 	}
 

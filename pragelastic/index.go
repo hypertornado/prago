@@ -15,6 +15,9 @@ type Index[T any] struct {
 }
 
 func NewIndex[T any](client *Client) *Index[T] {
+	if client == nil {
+		return nil
+	}
 	ret := &Index[T]{
 		client:    client,
 		fields:    getFields[T](),
@@ -81,7 +84,6 @@ func (index *Index[T]) indexName() string {
 
 func (index *Index[T]) Create() error {
 	str := index.indexDataStr()
-	//fmt.Println("creating index:", index.indexName())
 	_, err := index.client.eclient.CreateIndex(index.indexName()).BodyString(str).Do(context.Background())
 	return err
 }

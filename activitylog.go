@@ -72,9 +72,11 @@ func (app *App) getHistory(resource resourceIface, itemID int64) historyView {
 	for _, v := range items {
 		var username, userurl string
 		user := app.UsersResource.ID(v.User)
+		locale := "en"
 		if user != nil {
 			username = user.Name
 			userurl = app.getAdminURL(fmt.Sprintf("user/%d", user.ID))
+			locale = user.Locale
 		}
 
 		activityURL := app.getAdminURL(fmt.Sprintf("activitylog/%d", v.ID))
@@ -88,7 +90,7 @@ func (app *App) getHistory(resource resourceIface, itemID int64) historyView {
 			ItemURL:     resource.getURL(fmt.Sprintf("%d", v.ItemID)),
 			UserName:    username,
 			UserURL:     userurl,
-			CreatedAt:   messages.Timestamp(user.Locale, v.CreatedAt, true),
+			CreatedAt:   messages.Timestamp(locale, v.CreatedAt, true),
 		})
 	}
 	return ret

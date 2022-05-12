@@ -2,14 +2,31 @@
   <div class="admin_home">
   {{range $section := .Sections}}
     <div class="admin_home_section">
-      <h2>{{$section.Name}}</h2>
+      <h2 class="admin_home_section_name">{{$section.Name}}</h2>
       <div class="admin_home_items">
         {{range $item := $section.Items}}
-            <a href="{{$item.URL}}" class="admin_home_item">
+            {{if $item.URL}}
+              <a href="{{$item.URL}}" class="admin_home_item{{if $item.IsRed}} admin_home_item-red{{end}}{{if $item.IsGreen}} admin_home_item-green{{end}}">
+            {{else}}
+              <div class="admin_home_item{{if $item.IsRed}} admin_home_item-red{{end}}{{if $item.IsGreen}} admin_home_item-green{{end}}">
+            {{end}}
               <div class="admin_home_item_name">{{$item.Name}}</div>
-            </a>
+              {{if $item.Value}}
+                <div class="admin_home_item_value">{{$item.Value}}</div>
+              {{end}}
+              {{if $item.Description}}
+                <div class="admin_home_item_description">{{$item.Description}}</div>
+              {{end}}
+            {{if $item.URL}}
+              </a>
+            {{else}}
+              </div>
+            {{end}}
         {{end}}
       </div>
+      {{if $section.Tasks}}
+        {{template "admin_tasks" $section.Tasks}}
+      {{end}}
     </div>
   {{end}}
   <div>

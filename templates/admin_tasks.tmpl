@@ -1,11 +1,5 @@
 {{define "admin_tasks"}}
     <div class="admin_box_content">
-
-        <h1>{{message .Locale "tasks"}}</h1>
-
-        {{$token := .CSRFToken}}
-        {{$locale := .Locale}}
-
         <div class="tasks_groups">
             {{range $group := .Tasks}}
                 <div class="tasks_group">
@@ -25,7 +19,7 @@
                                     {{end}}
 
                                     <input type="hidden" name="id" value="{{$task.ID}}">
-                                    <input type="hidden" name="csrf" value="{{$token}}">
+                                    <input type="hidden" name="csrf" value="{{$task.CSRFToken}}">
                                     <input type="submit" value="Spustit ▶" class="btn btn-small task_runbutton">
                                 </form>
                             </div>

@@ -58,6 +58,8 @@ type App struct {
 	activityListeners []func(Activity)
 	taskManager       *taskManager
 
+	dashboardGroups []*DashboardGroup
+
 	dbConfig *dbConnectConfig
 }
 
