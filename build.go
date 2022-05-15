@@ -17,21 +17,25 @@ func (app *App) initBuild() {
 		build(appName, version)
 	})
 
-	ssh := app.MustGetSetting("ssh")
-	if ssh == "" {
-		app.Log().Println("no ssh value set in config file")
-		return
-	}
-
 	app.addCommand("backup").Callback(func() {
 		must(backupApp(app))
 	})
 
 	app.addCommand("syncbackups").Callback(func() {
+		ssh := app.MustGetSetting("ssh")
+		if ssh == "" {
+			app.Log().Println("no ssh value set in settings")
+			return
+		}
 		must(syncBackups(appName, ssh))
 	})
 
 	app.addCommand("party").Callback(func() {
+		ssh := app.MustGetSetting("ssh")
+		if ssh == "" {
+			app.Log().Println("no ssh value set in settings")
+			return
+		}
 		must(party(appName, version, ssh))
 	})
 }
