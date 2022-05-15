@@ -106,7 +106,6 @@ func (index *Index[T]) getSettings() map[string]interface{} {
 		"type":     "stemmer",
 		"language": "czech",
 	}
-
 	analysis["filter"] = filter
 
 	analyzer := make(map[string]interface{})

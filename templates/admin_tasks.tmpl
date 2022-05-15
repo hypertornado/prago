@@ -8,7 +8,7 @@
                         {{range $task := $group.Tasks}}
                             <div class="task">
                                 <div class="task_name">{{$task.Name}}</div>
-                                <form method="POST" action="api/tasks/runtask" enctype="multipart/form-data">
+                                <form method="POST" action="/admin/api/tasks/runtask" enctype="multipart/form-data">
                                     {{range $file := $task.Files}}
                                         <div class="task_input">
                                             <div>{{$file.ID}}</div>

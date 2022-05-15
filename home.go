@@ -12,6 +12,7 @@ type HomeSection struct {
 	Name  string
 	Items []*HomeItem
 	Tasks *taskViewData
+	Table *Table
 }
 
 type HomeItem struct {
@@ -31,13 +32,21 @@ func (app *App) initHome() {
 		Template("admin_home_navigation").
 		DataSource(app.getHomeData)
 
-	app.DashboardGroup(unlocalized("Sysadmin")).Item("Úpravy", "sysadmin").Value(func() int64 {
+	sysadminGroup := app.DashboardGroup(unlocalized("Sysadmin"))
+	sysadminGroup.Item("Úpravy", "sysadmin").Value(func() int64 {
 		c, _ := app.activityLogResource.Query().Where("createdat >= ?", time.Now().AddDate(0, 0, -1)).Count()
 		return c
 	}).Unit("/ 24 hodin").URL("/admin/activitylog").Compare(func() int64 {
 		c, _ := app.activityLogResource.Query().Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, -1)).Count()
 		return c
 	}, "oproti předchozímu dni")
+
+	/*sysadminGroup.Table(func() *Table {
+		tbl := app.Table()
+		tbl.Row("hello", "world")
+		return tbl
+	}, "sysadmin")*/
+
 }
 
 func (app *App) getHomeData(request *Request) interface{} {
@@ -70,7 +79,12 @@ func (app *App) getHomeData(request *Request) interface{} {
 				homeSection.Items = append(homeSection.Items, item.homeItem(app))
 			}
 		}
-		if len(homeSection.Items) > 0 {
+
+		if group.table != nil && request.UserHasPermission(group.table.permission) {
+			homeSection.Table = group.getTable()
+		}
+
+		if len(homeSection.Items) > 0 || homeSection.Table != nil {
 			home.Sections = append(home.Sections, homeSection)
 		}
 	}

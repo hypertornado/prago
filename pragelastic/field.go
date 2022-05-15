@@ -17,12 +17,10 @@ type field struct {
 func getFields[T any]() (ret []*field) {
 	var item T
 	typ := reflect.TypeOf(item)
-
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		ret = append(ret, getElasticField(f))
 	}
-
 	return
 }
 
@@ -80,6 +78,8 @@ func getElasticField(t reflect.StructField) (ret *field) {
 		}
 	case reflect.Int64:
 		ret.Type = "long"
+	case reflect.Float64:
+		ret.Type = "double"
 	case reflect.Bool:
 		ret.Type = "boolean"
 	default:

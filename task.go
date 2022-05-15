@@ -60,7 +60,7 @@ func (app *App) postInitTaskManager() {
 			panic("not authorize")
 		}
 		app.taskManager.run(task, request.user, request.Request().MultipartForm)
-		request.Redirect(app.getAdminURL("tasks"))
+		request.Redirect("/admin")
 	})
 
 	app.sysadminTaskGroup = app.TaskGroup(unlocalized("Sysadmin"))

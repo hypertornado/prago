@@ -14,6 +14,7 @@ type TestStruct struct {
 	Name            string `elastic-datatype:"keyword"`
 	Text            string `elastic-datatype:"text" elastic-analyzer:"czech"`
 	SomeCount       int64
+	Score           float64
 	NonIndexedField string `elastic-datatype:"text" elastic-enabled:"false"`
 	IsOK            bool
 	Time            time.Time
@@ -205,6 +206,7 @@ func TestAllQuery(t *testing.T) {
 	index.UpdateSingle(&TestStruct{
 		ID:        "1",
 		Name:      "C",
+		Score:     2.34,
 		Time:      time.Date(2020, 10, 10, 5, 1, 1, 1, time.UTC),
 		SomeCount: 1,
 	})
@@ -212,6 +214,7 @@ func TestAllQuery(t *testing.T) {
 	index.UpdateSingle(&TestStruct{
 		ID:        "2",
 		Name:      "A",
+		Score:     2.1,
 		SomeCount: 3,
 		Time:      time.Date(2019, 10, 10, 5, 1, 0, 1, time.UTC),
 		IsOK:      true,
@@ -219,6 +222,7 @@ func TestAllQuery(t *testing.T) {
 	index.UpdateSingle(&TestStruct{
 		ID:        "3",
 		Name:      "B",
+		Score:     2.8,
 		Time:      time.Date(2019, 10, 10, 5, 1, 1, 1, time.UTC),
 		SomeCount: 2,
 	})
@@ -263,6 +267,16 @@ func TestAllQuery(t *testing.T) {
 
 	expected = getIDS(index.Query().Sort("IsOK", false).Limit(1).mustList())
 	if expected != "2" {
+		t.Fatal(expected)
+	}
+
+	expected = getIDS(index.Query().Sort("Score", true).mustList())
+	if expected != "2,1,3" {
+		t.Fatal(expected)
+	}
+
+	expected = getIDS(index.Query().Sort("Score", false).mustList())
+	if expected != "3,1,2" {
 		t.Fatal(expected)
 	}
 

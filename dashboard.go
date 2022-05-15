@@ -4,8 +4,10 @@ import "fmt"
 
 type DashboardGroup struct {
 	app   *App
+	uuid  string
 	name  func(string) string
 	items []*DashboardItem
+	table *dashboardGroupTable
 }
 
 type DashboardItem struct {
@@ -20,9 +22,15 @@ type DashboardItem struct {
 	description        string
 }
 
+type dashboardGroupTable struct {
+	table      func() *Table
+	permission Permission
+}
+
 func (app *App) DashboardGroup(name func(string) string) *DashboardGroup {
 	group := &DashboardGroup{
 		app:  app,
+		uuid: randomString(30),
 		name: name,
 	}
 	app.dashboardGroups = append(app.dashboardGroups, group)
@@ -38,6 +46,23 @@ func (group *DashboardGroup) Item(name string, permission Permission) *Dashboard
 	}
 	group.items = append(group.items, item)
 	return item
+}
+
+func (group *DashboardGroup) Table(table func() *Table, permission Permission) *DashboardGroup {
+	group.table = &dashboardGroupTable{
+		table:      table,
+		permission: permission,
+	}
+	return group
+}
+
+func (group *DashboardGroup) getTable() *Table {
+	if group.table == nil {
+		return nil
+	}
+	return Cached(group.app, fmt.Sprintf("dashboard-table-%s", group.uuid), func() *Table {
+		return group.table.table()
+	})
 }
 
 func (item *DashboardItem) getValues(app *App) (int64, int64) {
@@ -93,10 +118,15 @@ func (item *DashboardItem) getDescriptionStr(app *App) string {
 	diff := val - compareValue
 	var ret string
 	if diff >= 0 {
-		ret = fmt.Sprintf("+%d", diff)
+		ret = fmt.Sprintf("+%s", humanizeNumber(diff))
 	} else {
-		ret = fmt.Sprintf("%d", diff)
+		ret = fmt.Sprintf("%s", humanizeNumber(diff))
 	}
+
+	if item.unit != "" {
+		ret += " " + item.unit
+	}
+
 	if item.compareDescription != "" {
 		ret += " " + item.compareDescription
 	}
@@ -106,7 +136,6 @@ func (item *DashboardItem) getDescriptionStr(app *App) string {
 		ret += fmt.Sprintf(" (%s)", percent)
 	}
 	return ret
-
 }
 
 func (item *DashboardItem) homeItem(app *App) *HomeItem {

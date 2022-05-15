@@ -5547,6 +5547,14 @@ th.admin_list_lastheadercell {
   border-bottom: none;
   border-top: none;
   font-size: 0.9rem;
+  border-right: none;
+  border-left: none;
+}
+.admin_list_table th {
+  border-right: none !important;
+  border-left: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
 }
 .admin_table_row td {
   border-bottom: 1px solid #eee;
@@ -5559,12 +5567,12 @@ th.admin_list_lastheadercell {
   width: 1px;
   padding: 5px !important;
   vertical-align: top;
-  background: white !important;
   cursor: default !important;
   user-select: none;
   -ms-user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
+  vertical-align: middle;
 }
 .admin_table_row td {
   padding: 2px 5px;
@@ -5576,7 +5584,7 @@ th.admin_list_lastheadercell {
   border-left: 10px solid #000;
 }
 .admin_table_row_lastcell {
-  border-bottom: 1px solid #fff !important;
+  vertical-align: middle;
 }
 .admin_list_table tr:last-child td {
   border-bottom: 1px solid #f1f1f1;
@@ -5601,8 +5609,9 @@ th.admin_list_orderitem {
 .admin_list_orderitem-canorder:active {
   background-color: rgba(64, 120, 192, 0.1);
 }
-.admin_list_filteritem {
+th.admin_list_filteritem {
   padding: 5px;
+  border-bottom: 2px solid #eee !important;
 }
 .admin_list_filteritem-colored {
   background-color: rgba(64, 120, 192, 0.1);
@@ -6502,7 +6511,6 @@ select.admin_table_filter_item {
 }
 .admin_header {
   padding-bottom: 0px;
-  position: relative;
   z-index: 2;
   line-height: 1.6em;
   flex-grow: 0;
@@ -6513,6 +6521,9 @@ select.admin_table_filter_item {
   top: 0;
   left: 0;
   right: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(3px);
 }
 .admin_header_container {
   display: flex;

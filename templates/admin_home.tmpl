@@ -24,6 +24,9 @@
             {{end}}
         {{end}}
       </div>
+      {{if $section.Table}}
+        {{template "admin_form_table" $section.Table.TemplateData}}
+      {{end}}
       {{if $section.Tasks}}
         {{template "admin_tasks" $section.Tasks}}
       {{end}}
