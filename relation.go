@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -53,7 +54,6 @@ func (field *relatedField) listURL(id int64) string {
 	return field.resource.getURL("") + "?" + values.Encode()
 }
 
-//TODO: better
 func (field *relatedField) listName(locale string) string {
 	f := (*Field)(field)
 	ret := f.GetManuallySetPluralName(locale)
@@ -61,13 +61,6 @@ func (field *relatedField) listName(locale string) string {
 		return fmt.Sprintf("%s – %s", field.resource.getPluralNameFunction()(locale), ret)
 	}
 	return field.resource.getPluralNameFunction()(locale)
-	/*ret := field.resource.getPluralNameFunction()(locale)
-	fieldName := field.name(locale)
-	referenceName := field.relatedResource.getPluralNameFunction()(locale)
-	if fieldName != referenceName {
-		ret += " – " + fieldName
-	}
-	return ret*/
 }
 
 func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
@@ -85,7 +78,11 @@ func (resource *Resource[T]) getPreviewData(user *user, f *Field, value int64) (
 		return nil, fmt.Errorf("user is not authorized to view this item")
 	}
 
-	return f.relatedResource.getItemPreview(value, user, f.resource), nil
+	ret := f.relatedResource.getItemPreview(value, user, f.resource)
+	if ret == nil {
+		return nil, errors.New("Can't get item preview")
+	}
+	return ret, nil
 }
 
 func (resource *Resource[T]) getItemPreview(id int64, user *user, relatedResource resourceIface) *preview {
@@ -119,10 +116,19 @@ func (app *App) getItemImage(item interface{}) string {
 	return ""
 }
 
+type namedIFace interface {
+	GetName() string
+}
+
 func getItemName(item interface{}) string {
 	//TODO: Authorize field
 	if item != nil {
 		itemsVal := reflect.ValueOf(item).Elem()
+		var valIface = itemsVal.Interface()
+		namedIface, ok := valIface.(namedIFace)
+		if ok {
+			return namedIface.GetName()
+		}
 		field := itemsVal.FieldByName("Name")
 		if field.IsValid() {
 			ret := field.String()
