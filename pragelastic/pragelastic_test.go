@@ -19,6 +19,8 @@ type TestStruct struct {
 	IsOK            bool
 	Time            time.Time
 	Tags            []string
+
+	KVMap map[string]float64
 }
 
 func getIDS[T any](items []*T) string {
@@ -69,6 +71,41 @@ func TestMultipleBooleanTags(t *testing.T) {
 
 	res := getIDS(index.Query().Filter("Name", "A").Filter("SomeCount", 7).mustList())
 	if res != "2" {
+		t.Fatal(res)
+	}
+
+}
+
+func TestMap(t *testing.T) {
+	index := prepareTestIndex[TestStruct]()
+	index.UpdateSingle(&TestStruct{
+		ID: "1",
+		KVMap: map[string]float64{
+			"cs": 11,
+			"en": 23,
+		},
+	})
+
+	index.UpdateSingle(&TestStruct{
+		ID: "2",
+		KVMap: map[string]float64{
+			"cs": 21,
+			"en": 21,
+		},
+	})
+	index.UpdateSingle(&TestStruct{
+		ID: "3",
+		KVMap: map[string]float64{
+			"cs": 31,
+			"en": 33,
+		},
+	})
+
+	index.Flush()
+	index.Refresh()
+
+	res := getIDS(index.Query().Sort("KVMap.en", true).mustList())
+	if res != "2,1,3" {
 		t.Fatal(res)
 	}
 

@@ -31,7 +31,7 @@ func (resource *Resource[T]) getStructScanners(value reflect.Value) (names []str
 			use = false
 		}
 		if use {
-			names = append(names, v.id)
+			names = append(names, "`"+v.id+"`")
 			scanners = append(scanners, &scanner{value.Field(v.fieldOrder)})
 		}
 	}

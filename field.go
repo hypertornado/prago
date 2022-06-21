@@ -450,5 +450,5 @@ func (field *Field) fieldDescriptionMysql(fieldTypes map[string]*fieldType) stri
 			additional = "UNIQUE"
 		}
 	}
-	return fmt.Sprintf("%s %s %s", field.id, fieldDescription, additional)
+	return fmt.Sprintf("`%s` %s %s", field.id, fieldDescription, additional)
 }

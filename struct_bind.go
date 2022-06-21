@@ -46,6 +46,7 @@ func (resource *Resource[T]) bindData(item *T, user *user, params url.Values) er
 		if !field.authorizeEdit(user) {
 			continue
 		}
+
 		if len(params[field.id]) == 0 {
 			continue
 		}
