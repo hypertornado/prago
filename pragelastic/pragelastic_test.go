@@ -21,6 +21,8 @@ type TestStruct struct {
 	Tags            []string
 
 	KVMap map[string]float64
+
+	MapAr map[int64][]int64
 }
 
 func getIDS[T any](items []*T) string {
@@ -84,6 +86,10 @@ func TestMap(t *testing.T) {
 			"cs": 11,
 			"en": 23,
 		},
+
+		MapAr: map[int64][]int64{
+			32: {11, 12},
+		},
 	})
 
 	index.UpdateSingle(&TestStruct{
@@ -92,12 +98,19 @@ func TestMap(t *testing.T) {
 			"cs": 21,
 			"en": 21,
 		},
+		MapAr: map[int64][]int64{
+			32: {12},
+			33: {11, 12},
+		},
 	})
 	index.UpdateSingle(&TestStruct{
 		ID: "3",
 		KVMap: map[string]float64{
 			"cs": 31,
 			"en": 33,
+		},
+		MapAr: map[int64][]int64{
+			32: {11},
 		},
 	})
 
@@ -109,6 +122,20 @@ func TestMap(t *testing.T) {
 		t.Fatal(res)
 	}
 
+	res = getIDS(index.Query().Filter("KVMap.en", 21).mustList())
+	if res != "2" {
+		t.Fatal(res)
+	}
+
+	_, _, err := index.Query().Filter("MapAr.32", 13).List()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	res = getIDS(index.Query().Filter("MapAr.32", 11).mustList())
+	if res != "1,3" {
+		t.Fatal(res)
+	}
 }
 
 func TestNonIndexedField(t *testing.T) {

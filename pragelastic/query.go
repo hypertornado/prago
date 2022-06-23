@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/olivere/elastic/v7"
 )
@@ -81,7 +82,11 @@ func (q *Query[T]) ShouldQuery(query elastic.Query) *Query[T] {
 }
 
 func (q *Query[T]) toQuery(field string, value interface{}) elastic.Query {
-	f := q.index.fieldsMap[field]
+	fieldName, _, _ := strings.Cut(field, ".")
+	f := q.index.fieldsMap[fieldName]
+	if f == nil {
+		panic("could not find field with name: " + fieldName)
+	}
 	if f.Type == "keyword" && reflect.TypeOf(value) == reflect.TypeOf([]string{}) {
 		bq := elastic.NewBoolQuery()
 		shouldQueries := []elastic.Query{}

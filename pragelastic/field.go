@@ -47,10 +47,10 @@ func getElasticField(t reflect.StructField) (ret *field) {
 		return ret
 	}
 
-	if t.Type == reflect.TypeOf(map[string]float64{}) {
+	/*if t.Type == reflect.TypeOf(map[string]float64{}) {
 		ret.Type = "object"
 		return ret
-	}
+	}*/
 
 	if t.Type == reflect.TypeOf([]string{}) {
 		ret.Type = "keyword"
@@ -81,6 +81,9 @@ func getElasticField(t reflect.StructField) (ret *field) {
 		if ret.Type == "text" {
 			ret.Analyzer = t.Tag.Get("elastic-analyzer")
 		}
+	case reflect.Map:
+		//TODO: make supported maps more strict
+		ret.Type = "object"
 	case reflect.Int64:
 		ret.Type = "long"
 	case reflect.Float64:
