@@ -240,7 +240,7 @@ func TestResource(t *testing.T) {
 }
 
 func TestResourceUnique(t *testing.T) {
-	app := prepareResource().app
+	app := prepareResource().data.app
 
 	resource := GetResource[ResourceStructUnique](app)
 

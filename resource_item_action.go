@@ -9,11 +9,11 @@ func (resource *Resource[T]) ItemAction(url string) *ResourceItemAction[T] {
 	ret := &ResourceItemAction[T]{
 		resource: resource,
 	}
-	action := newAction(resource.app, url)
+	action := newAction(resource.data.app, url)
 	action.resource = resource
 	action.isItemAction = true
-	action.permission = resource.canView
-	resource.itemActions = append(resource.itemActions, action)
+	action.permission = resource.data.canView
+	resource.data.itemActions = append(resource.data.itemActions, action)
 	ret.action = action
 	return ret
 }

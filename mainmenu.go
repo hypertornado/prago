@@ -141,8 +141,8 @@ func (app *App) getResourcesMainMenuSection(request *Request, user *user) mainMe
 		Name: messages.Get(user.Locale, "admin_tables"),
 	}
 	for _, resource := range app.getSortedResources(user.Locale) {
-		if app.authorize(user, resource.getPermissionView()) {
-			resourceURL := resource.getURL("")
+		if app.authorize(user, resource.getData().canView) {
+			resourceURL := resource.getData().getURL("")
 			var selected bool
 			if request.Request().URL.Path == resourceURL {
 				selected = true
@@ -152,8 +152,8 @@ func (app *App) getResourcesMainMenuSection(request *Request, user *user) mainMe
 			}
 
 			resourceSection.Items = append(resourceSection.Items, mainMenuItem{
-				Name:     resource.getPluralNameFunction()(user.Locale),
-				Subname:  humanizeNumber(resource.getCachedCount()),
+				Name:     resource.getData().pluralName(user.Locale),
+				Subname:  humanizeNumber(resource.getData().getCachedCount()),
 				URL:      resourceURL,
 				Selected: selected,
 			})
@@ -170,7 +170,7 @@ func (app *App) getSortedResources(locale string) (ret []resourceIface) {
 		a := ret[i]
 		b := ret[j]
 
-		if collator.CompareString(a.getPluralNameFunction()(locale), b.getPluralNameFunction()(locale)) <= 0 {
+		if collator.CompareString(a.getData().pluralName(locale), b.getData().pluralName(locale)) <= 0 {
 			return true
 		} else {
 			return false

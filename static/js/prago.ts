@@ -39,6 +39,11 @@ class Prago {
 
     new NotificationCenter(document.querySelector(".notification_center"));
 
+    var qa: HTMLDivElement = document.querySelector(".quick_actions");
+    if (qa) {
+      new QuickActions(qa);
+    }
+
     initSMap();
   }
 }

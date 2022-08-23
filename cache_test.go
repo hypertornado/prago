@@ -5,7 +5,7 @@ import "testing"
 func TestCache(t *testing.T) {
 	resource := prepareResource()
 
-	app := resource.app
+	app := resource.data.app
 
 	a := Cached(app, "xxx", func() string {
 		return "A"

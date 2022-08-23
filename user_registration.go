@@ -12,7 +12,7 @@ import (
 
 func initUserRegistration(app *App) {
 
-	app.accessController.get(app.UsersResource.getURL("confirm_email"), func(request *Request) {
+	app.accessController.get(app.UsersResource.data.getURL("confirm_email"), func(request *Request) {
 		email := request.Param("email")
 		token := request.Param("token")
 

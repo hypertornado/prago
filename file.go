@@ -11,7 +11,7 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-//File is structure representing files in admin
+// File is structure representing files in admin
 type File struct {
 	ID          int64     `prago-order-desc:"true" prago-preview:"true"`
 	UID         string    `prago-unique:"true" prago-preview:"true" prago-type:"cdnfile"`
@@ -47,7 +47,7 @@ func (app *App) thumb(ids string) string {
 	return ""
 }
 
-//GetFiles gets files from app
+// GetFiles gets files from app
 func (app *App) GetFiles(ids string) []*File {
 	var files []*File
 	idsAr := strings.Split(ids, ",")
@@ -93,7 +93,7 @@ func (app *App) UploadFile(fileHeader *multipart.FileHeader, user *user, descrip
 	return &file, nil
 }
 
-//UpdateMetadata updates metadata of file
+// UpdateMetadata updates metadata of file
 func (f *File) updateMetadata() error {
 	metadata, err := filesCDN.GetMetadata(f.UID)
 	if err != nil {
@@ -105,7 +105,7 @@ func (f *File) updateMetadata() error {
 	return nil
 }
 
-//GetExtension gets file extension
+// GetExtension gets file extension
 func (f File) GetExtension() string {
 	extension := filepath.Ext(f.Name)
 	extension = strings.Replace(extension, ".", "", -1)
@@ -169,7 +169,7 @@ func (app *App) initFilesResource() {
 		})
 
 	app.ListenActivity(func(activity Activity) {
-		if activity.ActivityType == "delete" && activity.ResourceID == resource.id {
+		if activity.ActivityType == "delete" && activity.ResourceID == resource.data.id {
 			file := resource.ID(activity.ID)
 			err := filesCDN.DeleteFile(file.UID)
 			if err != nil {
@@ -211,7 +211,7 @@ func (app *App) initFilesResource() {
 		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
-	resource.FormAction("upload").priority().Permission(resource.canUpdate).Name(unlocalized("Nahrát soubor")).Form(func(f *Form, r *Request) {
+	resource.FormAction("upload").priority().Permission(resource.data.canUpdate).Name(unlocalized("Nahrát soubor")).Form(func(f *Form, r *Request) {
 		locale := r.user.Locale
 		f.AddFileInput("file", messages.Get(locale, "admin_file"))
 		f.AddTextareaInput("description", messages.Get(locale, "Description"))
@@ -273,37 +273,37 @@ func writeFileResponse(request *Request, files []*File) {
 	request.RenderJSON(responseData)
 }
 
-//GetLarge file path
+// GetLarge file path
 func (f *File) GetLarge() string {
 	return filesCDN.GetImageURL(f.UID, f.Name, "1000")
 }
 
-//GetGiant file path
+// GetGiant file path
 func (f *File) GetGiant() string {
 	return filesCDN.GetImageURL(f.UID, f.Name, "2500")
 }
 
-//GetMedium file path
+// GetMedium file path
 func (f *File) GetMedium() string {
 	return filesCDN.GetImageURL(f.UID, f.Name, "400")
 }
 
-//GetSmall file path
+// GetSmall file path
 func (f *File) GetSmall() string {
 	return filesCDN.GetImageURL(f.UID, f.Name, "200")
 }
 
-//GetOriginal file path
+// GetOriginal file path
 func (f *File) GetOriginal() string {
 	return filesCDN.GetFileURL(f.UID, f.Name)
 }
 
-//GetMetadataPath gets metadada file path
+// GetMetadataPath gets metadada file path
 func (f *File) GetMetadataPath() string {
 	return filesCDN.MetadataPath(f.UID)
 }
 
-//IsImage detects if file is image
+// IsImage detects if file is image
 func (f *File) IsImage() bool {
 	return f.isImage()
 }

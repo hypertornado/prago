@@ -11,7 +11,7 @@ type buttonData struct {
 	Params map[string]string
 }
 
-//Action represents action
+// Action represents action
 type Action struct {
 	name       func(string) string
 	permission Permission
@@ -64,21 +64,21 @@ func (app *App) bindAllActions() {
 	}
 
 	for _, resource := range app.resources {
-		resource.bindActions()
+		resource.getData().bindActions()
 	}
 }
 
-func (resource *Resource[T]) bindActions() {
-	for _, v := range resource.actions {
+func (resourceData *resourceData) bindActions() {
+	for _, v := range resourceData.actions {
 		err := bindAction(v)
 		if err != nil {
-			panic(fmt.Sprintf("error while binding resource %s action %s %s: %s", resource.id, v.getMethod(), v.getName("en"), err))
+			panic(fmt.Sprintf("error while binding resource %s action %s %s: %s", resourceData.id, v.getMethod(), v.getName("en"), err))
 		}
 	}
-	for _, v := range resource.itemActions {
+	for _, v := range resourceData.itemActions {
 		err := bindAction(v)
 		if err != nil {
-			panic(fmt.Sprintf("error while binding item resource %s action %s %s: %s", resource.id, v.getMethod(), v.getName("en"), err))
+			panic(fmt.Sprintf("error while binding item resource %s action %s %s: %s", resourceData.id, v.getMethod(), v.getName("en"), err))
 		}
 	}
 }
@@ -93,36 +93,36 @@ func newAction(app *App, url string) *Action {
 	}
 }
 
-//AddAction adds action to root
+// AddAction adds action to root
 func (app *App) Action(url string) *Action {
 	action := newAction(app, url)
 	app.rootActions = append(app.rootActions, action)
 	return action
 }
 
-//AddAction adds action to resource
+// AddAction adds action to resource
 func (resource *Resource[T]) Action(url string) *Action {
-	action := newAction(resource.app, url)
+	action := newAction(resource.data.app, url)
 	action.resource = resource
-	action.permission = resource.canView
-	resource.actions = append(resource.actions, action)
+	action.permission = resource.data.canView
+	resource.data.actions = append(resource.data.actions, action)
 	return action
 }
 
-//Name sets action name
+// Name sets action name
 func (action *Action) Name(name func(string) string) *Action {
 	action.name = name
 	return action
 }
 
-//Permission sets action permission
+// Permission sets action permission
 func (action *Action) Permission(permission Permission) *Action {
 	must(action.app.validatePermission(permission))
 	action.permission = permission
 	return action
 }
 
-//Method sets action method (GET, POST, PUT or DELETE)
+// Method sets action method (GET, POST, PUT or DELETE)
 func (action *Action) Method(method string) *Action {
 	method = strings.ToUpper(method)
 	if method != "GET" && method != "POST" && method != "PUT" && method != "DELETE" {
@@ -137,7 +137,7 @@ func (action *Action) priority() *Action {
 	return action
 }
 
-//Handler sets action handler
+// Handler sets action handler
 func (action *Action) Handler(handler func(*Request)) *Action {
 	if action.template != "" {
 		panic("can't set both action handler and template")
@@ -149,7 +149,7 @@ func (action *Action) Handler(handler func(*Request)) *Action {
 	return action
 }
 
-//Template sets action template
+// Template sets action template
 func (action *Action) Template(template string) *Action {
 	if action.handler != nil {
 		panic("can't set both action handler and template")
@@ -158,7 +158,7 @@ func (action *Action) Template(template string) *Action {
 	return action
 }
 
-//DataSource sets action data source, which is used to render template
+// DataSource sets action data source, which is used to render template
 func (action *Action) DataSource(dataSource func(*Request) interface{}) *Action {
 	if action.handler != nil {
 		panic("can't set both action handler and dataSource")
@@ -198,7 +198,7 @@ func (resource *Resource[T]) getnavigation(action *Action, request *Request) nav
 			return navigation{}
 		}
 	}
-	return resource.getResourceNavigation(request.user, code)
+	return resource.data.getResourceNavigation(request.user, code)
 
 }
 
@@ -207,7 +207,7 @@ func (resource *Resource[T]) getListItemActions(user *user, item *T, id int64) l
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{
 		Name: messages.Get(user.Locale, "admin_view"),
-		URL:  resource.getURL(fmt.Sprintf("%d", id)),
+		URL:  resource.getData().getURL(fmt.Sprintf("%d", id)),
 	})
 
 	navigation := resource.getItemNavigation(user, item, "")
@@ -221,7 +221,7 @@ func (resource *Resource[T]) getListItemActions(user *user, item *T, id int64) l
 		}
 	}
 
-	if resource.app.authorize(user, resource.canUpdate) && resource.orderField != nil {
+	if resource.data.app.authorize(user, resource.data.canUpdate) && resource.data.orderField != nil {
 		ret.ShowOrderButton = true
 	}
 

@@ -21,23 +21,23 @@ type preview struct {
 
 func (app *App) initRelations() {
 	for _, v := range app.resources {
-		v.createRelations()
+		v.getData().createRelations()
 	}
 }
 
-func (resource *Resource[T]) createRelations() {
-	for _, field := range resource.fields {
+func (resourceData *resourceData) createRelations() {
+	for _, field := range resourceData.fields {
 		if field.tags["prago-type"] == "relation" {
 			relatedResourceID := field.id
 			if field.tags["prago-relation"] != "" {
 				relatedResourceID = field.tags["prago-relation"]
 			}
-			field.relatedResource = resource.app.getResourceByID(relatedResourceID)
+			field.relatedResource = resourceData.app.getResourceByID(relatedResourceID)
 
 			if !field.nameSetManually {
-				field.name = field.relatedResource.getSingularNameFunction()
+				field.name = field.relatedResource.getData().singularName
 			}
-			field.relatedResource.addRelation((*relatedField)(field))
+			field.relatedResource.getData().addRelation((*relatedField)(field))
 		}
 	}
 }
@@ -45,22 +45,22 @@ func (resource *Resource[T]) createRelations() {
 func (field *relatedField) addURL(id int64) string {
 	values := url.Values{}
 	values.Add(field.id, fmt.Sprintf("%d", id))
-	return field.resource.getURL("new?" + values.Encode())
+	return field.resource.getData().getURL("new?" + values.Encode())
 }
 
 func (field *relatedField) listURL(id int64) string {
 	values := url.Values{}
 	values.Add(field.id, fmt.Sprintf("%d", id))
-	return field.resource.getURL("") + "?" + values.Encode()
+	return field.resource.getData().getURL("") + "?" + values.Encode()
 }
 
 func (field *relatedField) listName(locale string) string {
 	f := (*Field)(field)
 	ret := f.GetManuallySetPluralName(locale)
 	if ret != "" {
-		return fmt.Sprintf("%s – %s", field.resource.getPluralNameFunction()(locale), ret)
+		return fmt.Sprintf("%s – %s", field.resource.getData().pluralName(locale), ret)
 	}
-	return field.resource.getPluralNameFunction()(locale)
+	return field.resource.getData().pluralName(locale)
 }
 
 func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
@@ -69,12 +69,12 @@ func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
 }
 
 func (resource *Resource[T]) getPreviewData(user *user, f *Field, value int64) (*preview, error) {
-	app := f.resource.getApp()
+	app := f.resource.getData().app
 	if f.relatedResource == nil {
 		return nil, fmt.Errorf("resource not found: %s", f.name("en"))
 	}
 
-	if !app.authorize(user, f.relatedResource.getPermissionView()) {
+	if !app.authorize(user, f.relatedResource.getData().canView) {
 		return nil, fmt.Errorf("user is not authorized to view this item")
 	}
 
@@ -98,8 +98,8 @@ func (resource *Resource[T]) getPreview(item *T, user *user, relatedResource res
 	var ret preview
 	ret.ID = getItemID(item)
 	ret.Name = getItemName(item)
-	ret.URL = resource.getItemURL(item, "")
-	ret.Image = resource.app.getItemImage(item)
+	ret.URL = resource.data.getItemURL(item, "")
+	ret.Image = resource.data.app.getItemImage(item)
 	ret.Description = resource.getItemDescription(item, user, relatedResource)
 	return &ret
 }
@@ -156,7 +156,7 @@ func (resource *Resource[T]) getItemDescription(item *T, user *user, relatedReso
 		}
 	}
 
-	for _, v := range resource.fields {
+	for _, v := range resource.data.fields {
 		if v.fieldClassName == "ID" || v.fieldClassName == "Name" || v.fieldClassName == "Description" {
 			continue
 		}
@@ -165,12 +165,12 @@ func (resource *Resource[T]) getItemDescription(item *T, user *user, relatedReso
 		}
 
 		rr := v.relatedResource
-		if rr != nil && relatedResource != nil && rr.getID() == relatedResource.getID() {
+		if rr != nil && relatedResource != nil && rr.getData().getID() == relatedResource.getData().getID() {
 			continue
 		}
 
 		field := itemsVal.FieldByName(v.fieldClassName)
-		stringed := resource.app.relationStringer(*v, field, user)
+		stringed := resource.data.app.relationStringer(*v, field, user)
 		if stringed != "" {
 			items = append(items, fmt.Sprintf("%s: %s", v.name(user.Locale), stringed))
 		}

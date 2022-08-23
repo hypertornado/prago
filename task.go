@@ -223,9 +223,9 @@ func (tg *TaskGroup) Task(name func(string) string) *Task {
 	tg.tasks = append(tg.tasks, task)
 	tg.manager.tasksMap[task.id] = task
 
-	tg.manager.app.addCommand("task", id).Callback(func() {
+	/*tg.manager.app.addCommand("task", id).Callback(func() {
 		tg.manager.run(task, nil, nil)
-	})
+	})*/
 
 	return task
 }

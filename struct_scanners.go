@@ -10,12 +10,12 @@ import (
 )
 
 func (resource *Resource[T]) getStructScanners(value reflect.Value) (names []string, scanners []interface{}, err error) {
-	if value.Type() != resource.typ {
+	if value.Type() != resource.data.typ {
 		err = errors.New("types dont match")
 		return
 	}
 
-	for _, v := range resource.fields {
+	for _, v := range resource.data.fields {
 		use := true
 
 		switch v.typ.Kind() {

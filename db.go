@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-//ErrWrongWhereFormat is returned when where query has a bad format
+// ErrWrongWhereFormat is returned when where query has a bad format
 var ErrWrongWhereFormat = errors.New("wrong where format")
 
 type mysqlColumn struct {
@@ -49,8 +49,8 @@ func (q *listQuery) addOrder(name string, desc bool) {
 	q.order = append(q.order, listQueryOrder{name: name, desc: desc})
 }
 
-func (resource *Resource[T]) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
-	for _, field := range resource.fields {
+func (resourceData *resourceData) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
+	for _, field := range resourceData.fields {
 		val := value.FieldByName(field.fieldClassName)
 
 		if field.fieldClassName == "ID" {
@@ -88,15 +88,15 @@ func (resource *Resource[T]) prepareValues(value reflect.Value) (names []string,
 	return
 }
 
-//https://stackoverflow.com/questions/696190/create-if-an-entry-if-it-doesnt-exist-otherwise-update
-func (resource *Resource[T]) replaceItem(item interface{}, debugSQL bool) error {
+// https://stackoverflow.com/questions/696190/create-if-an-entry-if-it-doesnt-exist-otherwise-update
+func (resourceData *resourceData) replaceItem(item interface{}, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	if id <= 0 {
 		return errors.New("id must be positive")
 	}
 
 	value := reflect.ValueOf(item).Elem()
-	names, questionMarks, values, err := resource.prepareValues(value)
+	names, questionMarks, values, err := resourceData.prepareValues(value)
 	if err != nil {
 		return err
 	}
@@ -104,11 +104,11 @@ func (resource *Resource[T]) replaceItem(item interface{}, debugSQL bool) error 
 	for _, v := range names {
 		updateNames = append(updateNames, fmt.Sprintf(" %s=? ", v))
 	}
-	q := fmt.Sprintf("REPLACE INTO `%s` (%s) VALUES (%s);", resource.id, strings.Join(names, ", "), strings.Join(questionMarks, ", "))
+	q := fmt.Sprintf("REPLACE INTO `%s` (%s) VALUES (%s);", resourceData.id, strings.Join(names, ", "), strings.Join(questionMarks, ", "))
 	if debugSQL {
 		fmt.Println(q, values)
 	}
-	execResult, err := resource.app.db.Exec(q, values...)
+	execResult, err := resourceData.app.db.Exec(q, values...)
 	if err != nil {
 		return err
 	}
@@ -122,14 +122,14 @@ func (resource *Resource[T]) replaceItem(item interface{}, debugSQL bool) error 
 	return nil
 }
 
-func (resource *Resource[T]) saveItem(item interface{}, debugSQL bool) error {
+func (resourceData *resourceData) saveItem(item interface{}, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	if id <= 0 {
 		return errors.New("id must be positive")
 	}
 
 	value := reflect.ValueOf(item).Elem()
-	names, _, values, err := resource.prepareValues(value)
+	names, _, values, err := resourceData.prepareValues(value)
 	if err != nil {
 		return err
 	}
@@ -137,11 +137,11 @@ func (resource *Resource[T]) saveItem(item interface{}, debugSQL bool) error {
 	for _, v := range names {
 		updateNames = append(updateNames, fmt.Sprintf(" %s=? ", v))
 	}
-	q := fmt.Sprintf("UPDATE `%s` SET %s WHERE id=%d;", resource.id, strings.Join(updateNames, ", "), id)
+	q := fmt.Sprintf("UPDATE `%s` SET %s WHERE id=%d;", resourceData.id, strings.Join(updateNames, ", "), id)
 	if debugSQL {
 		fmt.Println(q, values)
 	}
-	execResult, err := resource.app.db.Exec(q, values...)
+	execResult, err := resourceData.app.db.Exec(q, values...)
 	if err != nil {
 		return err
 	}
@@ -158,19 +158,19 @@ func (resource *Resource[T]) saveItem(item interface{}, debugSQL bool) error {
 	return nil
 }
 
-func (resource *Resource[T]) createItem(item interface{}, debugSQL bool) error {
+func (resourceData *resourceData) createItem(item interface{}, debugSQL bool) error {
 	value := reflect.ValueOf(item).Elem()
 
-	names, questionMarks, values, err := resource.prepareValues(value)
+	names, questionMarks, values, err := resourceData.prepareValues(value)
 	if err != nil {
 		return err
 	}
 
-	q := fmt.Sprintf("INSERT INTO `%s` (%s) VALUES (%s);", resource.id, strings.Join(names, ", "), strings.Join(questionMarks, ", "))
+	q := fmt.Sprintf("INSERT INTO `%s` (%s) VALUES (%s);", resourceData.id, strings.Join(names, ", "), strings.Join(questionMarks, ", "))
 	if debugSQL {
 		fmt.Println(q, values)
 	}
-	res, err := resource.app.db.Exec(q, values...)
+	res, err := resourceData.app.db.Exec(q, values...)
 	if err != nil {
 		return err
 	}
@@ -227,16 +227,20 @@ func sqlFieldToQuery(fieldName string) string {
 	return fmt.Sprintf("`%s`=?", fieldName)
 }
 
-func (resource *Resource[T]) countItems(query *listQuery, debugSQL bool) (int64, error) {
+func (resourceData *resourceData) countAllItems(debugSQL bool) (int64, error) {
+	return resourceData.countItems(&listQuery{}, debugSQL)
+}
+
+func (resourceData *resourceData) countItems(query *listQuery, debugSQL bool) (int64, error) {
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.conditions)
 
-	q := fmt.Sprintf("SELECT COUNT(*) FROM `%s` %s %s %s;", resource.id, whereString, orderString, limitString)
+	q := fmt.Sprintf("SELECT COUNT(*) FROM `%s` %s %s %s;", resourceData.id, whereString, orderString, limitString)
 	if debugSQL {
 		fmt.Println(q, query.values)
 	}
-	rows, err := resource.app.db.Query(q, query.values...)
+	rows, err := resourceData.app.db.Query(q, query.values...)
 	defer func() {
 		if rows != nil {
 			rows.Close()
@@ -253,14 +257,14 @@ func (resource *Resource[T]) countItems(query *listQuery, debugSQL bool) (int64,
 }
 
 func (resource *Resource[T]) listItems(query *listQuery, debugSQL bool) ([]*T, error) {
-	db := resource.app.db
-	tableName := resource.id
+	db := resource.data.app.db
+	tableName := resource.data.id
 	var ret []*T
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.conditions)
 
-	newValue := reflect.New(resource.typ).Elem()
+	newValue := reflect.New(resource.data.typ).Elem()
 	names, _, err := resource.getStructScanners(newValue)
 	if err != nil {
 		return nil, err
@@ -268,7 +272,7 @@ func (resource *Resource[T]) listItems(query *listQuery, debugSQL bool) ([]*T, e
 
 	q := fmt.Sprintf("SELECT %s FROM `%s` %s %s %s;", strings.Join(names, ", "), tableName, whereString, orderString, limitString)
 	if debugSQL {
-		resource.app.Log().Println(q, query.values)
+		resource.data.app.Log().Println(q, query.values)
 	}
 	rows, err := db.Query(q, query.values...)
 	defer func() {
@@ -294,16 +298,16 @@ func (resource *Resource[T]) listItems(query *listQuery, debugSQL bool) ([]*T, e
 	return ret, nil
 }
 
-func (resource *Resource[T]) deleteItems(query *listQuery, debugSQL bool) (int64, error) {
+func (resourceData *resourceData) deleteItems(query *listQuery, debugSQL bool) (int64, error) {
 
 	limitString := buildLimitWithoutOffsetString(query.limit)
 	whereString := buildWhereString(query.conditions)
 
-	q := fmt.Sprintf("DELETE FROM `%s` %s %s;", resource.id, whereString, limitString)
+	q := fmt.Sprintf("DELETE FROM `%s` %s %s;", resourceData.id, whereString, limitString)
 	if debugSQL {
-		resource.app.Log().Println(q, query.values)
+		resourceData.app.Log().Println(q, query.values)
 	}
-	res, err := resource.app.db.Exec(q, query.values...)
+	res, err := resourceData.app.db.Exec(q, query.values...)
 	if err != nil {
 		return -1, err
 	}

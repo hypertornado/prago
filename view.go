@@ -7,11 +7,12 @@ import (
 )
 
 type view struct {
-	Name       string
-	Subname    string
-	Navigation []tab
-	Items      []viewField
-	Relation   *viewRelation
+	Name         string
+	Subname      string
+	Navigation   []tab
+	Items        []viewField
+	Relation     *viewRelation
+	QuickActions []QuickActionView
 }
 
 type viewField struct {
@@ -28,7 +29,9 @@ func (resource *Resource[T]) getViews(item *T, user *user) (ret []view) {
 }
 
 func (resource *Resource[T]) getBasicView(id int64, item *T, user *user) view {
-	ret := view{}
+	ret := view{
+		QuickActions: resource.getQuickActionViews(item, user),
+	}
 
 	ret.Items = append(
 		ret.Items,
@@ -36,13 +39,13 @@ func (resource *Resource[T]) getBasicView(id int64, item *T, user *user) view {
 			Name:     messages.Get(user.Locale, "admin_table"),
 			Template: "admin_item_view_url",
 			Value: [2]string{
-				resource.getURL(""),
-				resource.pluralName(user.Locale),
+				resource.data.getURL(""),
+				resource.data.pluralName(user.Locale),
 			},
 		},
 	)
 
-	for i, f := range resource.fields {
+	for i, f := range resource.data.fields {
 		if !f.authorizeView(user) {
 			continue
 		}
@@ -62,7 +65,7 @@ func (resource *Resource[T]) getBasicView(id int64, item *T, user *user) view {
 		)
 	}
 
-	historyView := resource.app.getHistory(resource, int64(id))
+	historyView := resource.data.app.getHistory(resource, int64(id))
 
 	if len(historyView.Items) > 0 {
 		ret.Items = append(
@@ -83,7 +86,7 @@ func (resource *Resource[T]) getBasicView(id int64, item *T, user *user) view {
 				Name:     messages.Get(user.Locale, "admin_history_count"),
 				Template: "admin_item_view_url",
 				Value: [2]string{
-					resource.getURL(fmt.Sprintf("%d/history", id)),
+					resource.data.getURL(fmt.Sprintf("%d/history", id)),
 					fmt.Sprintf("%d", len(historyView.Items)),
 				},
 			},

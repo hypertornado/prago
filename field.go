@@ -32,14 +32,14 @@ type Field struct {
 }
 
 func (resource *Resource[T]) Field(name string) *Field {
-	return resource.fieldMap[columnName(name)]
+	return resource.data.fieldMap[columnName(name)]
 }
 
 func (field *Field) authorizeView(user *user) bool {
-	if !field.resource.getApp().authorize(user, field.resource.getPermissionView()) {
+	if !field.resource.getData().app.authorize(user, field.resource.getData().canView) {
 		return false
 	}
-	if !field.resource.getApp().authorize(user, field.canView) {
+	if !field.resource.getData().app.authorize(user, field.canView) {
 		return false
 	}
 	return true
@@ -49,10 +49,10 @@ func (field *Field) authorizeEdit(user *user) bool {
 	if !field.authorizeView(user) {
 		return false
 	}
-	if !field.resource.getApp().authorize(user, field.resource.getPermissionUpdate()) {
+	if !field.resource.getData().app.authorize(user, field.resource.getData().canUpdate) {
 		return false
 	}
-	if !field.resource.getApp().authorize(user, field.canEdit) {
+	if !field.resource.getData().app.authorize(user, field.canEdit) {
 		return false
 	}
 	return true
@@ -84,7 +84,7 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 	} {
 		t := f.Tag.Get(v)
 		if t != "" {
-			panic(fmt.Sprintf("Use of deprecated tag '%s' in field '%s' of resource '%s'", v, ret.name("en"), ret.resource.getID()))
+			panic(fmt.Sprintf("Use of deprecated tag '%s' in field '%s' of resource '%s'", v, ret.name("en"), ret.resource.getData().getID()))
 		}
 	}
 
@@ -133,22 +133,22 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 		case "false":
 			break
 		default:
-			panic(fmt.Sprintf("validating permission 'prago-required' on field '%s' of resource '%s': wrong value '%s'", f.Name, resource.getPluralNameFunction()("en"), ret.tags["prago-required"]))
+			panic(fmt.Sprintf("validating permission 'prago-required' on field '%s' of resource '%s': wrong value '%s'", f.Name, resource.data.pluralName("en"), ret.tags["prago-required"]))
 		}
 	}
 
 	if canView := ret.tags["prago-can-view"]; canView != "" {
-		err := resource.getApp().validatePermission(Permission(canView))
+		err := resource.getData().app.validatePermission(Permission(canView))
 		if err != nil {
-			panic(fmt.Sprintf("validating permission 'prago-can-view' on field '%s' of resource '%s': %s", f.Name, resource.getPluralNameFunction()("en"), err))
+			panic(fmt.Sprintf("validating permission 'prago-can-view' on field '%s' of resource '%s': %s", f.Name, resource.data.pluralName("en"), err))
 		}
 		ret.canView = Permission(canView)
 	}
 
 	if canEdit := ret.tags["prago-can-edit"]; canEdit != "" {
-		err := resource.getApp().validatePermission(Permission(canEdit))
+		err := resource.getData().app.validatePermission(Permission(canEdit))
 		if err != nil {
-			panic(fmt.Sprintf("validating permission 'prago-can-edit' on field '%s' of resource '%s': %s", f.Name, resource.getPluralNameFunction()("en"), err))
+			panic(fmt.Sprintf("validating permission 'prago-can-edit' on field '%s' of resource '%s': %s", f.Name, resource.data.pluralName("en"), err))
 		}
 		ret.canEdit = Permission(canEdit)
 	} else {
@@ -173,7 +173,7 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 		for _, v := range strings.Split(validations, ",") {
 			err := ret.addFieldValidation(v)
 			if err != nil {
-				panic(fmt.Sprintf("can't add validation on field '%s' of resource '%s': %s", f.Name, resource.getPluralNameFunction()("en"), err))
+				panic(fmt.Sprintf("can't add validation on field '%s' of resource '%s': %s", f.Name, resource.data.pluralName("en"), err))
 			}
 		}
 	}
@@ -184,7 +184,7 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 	if ret.fieldClassName != "CreatedAt" && ret.fieldClassName != "UpdatedAt" {
 		if ret.typ == reflect.TypeOf(time.Now()) {
 			if ret.tags["prago-type"] == "timestamp" || ret.fieldClassName == "CreatedAt" || ret.fieldClassName == "UpdatedAt" {
-				resource.addValidation(func(vc ValidationContext) {
+				resource.data.addValidation(func(vc ValidationContext) {
 					val := vc.GetValue(ret.id)
 					if val != "" {
 						_, err := time.Parse("2006-01-02 15:04", val)
@@ -194,7 +194,7 @@ func (resource *Resource[T]) newField(f reflect.StructField, order int) *Field {
 					}
 				})
 			} else {
-				resource.addValidation(func(vc ValidationContext) {
+				resource.data.addValidation(func(vc ValidationContext) {
 					val := vc.GetValue(ret.id)
 					if val != "" {
 						_, err := time.Parse("2006-01-02", val)
@@ -233,7 +233,7 @@ func (field *Field) addFieldValidation(nameOfValidation string) error {
 		if field.tags["prago-required"] != "false" {
 			field.required = true
 		}
-		field.resource.addValidation(func(vc ValidationContext) {
+		field.resource.getData().addValidation(func(vc ValidationContext) {
 			valid := true
 			if field.typ.Kind() == reflect.Int64 ||
 				field.typ.Kind() == reflect.Int32 ||
@@ -353,7 +353,7 @@ func getDefaultFormTemplate(t reflect.Type) string {
 }
 
 func (field *Field) initFieldType() {
-	fieldTypes := field.resource.getApp().fieldTypes
+	fieldTypes := field.resource.getData().app.fieldTypes
 	fieldTypeName := field.tags["prago-type"]
 
 	ret, found := fieldTypes[fieldTypeName]
@@ -373,7 +373,7 @@ func (field *Field) initFieldType() {
 	}
 
 	if ret.allowedValues != nil {
-		field.resource.addValidation(func(vc ValidationContext) {
+		field.resource.getData().addValidation(func(vc ValidationContext) {
 			val := vc.GetValue(field.id)
 			var found bool
 			for _, v := range ret.allowedValues {

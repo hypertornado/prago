@@ -73,5 +73,5 @@ func (q *Query[T]) First() *T {
 }
 
 func (q *Query[T]) Count() (int64, error) {
-	return q.resource.countItems(q.listQuery, q.isDebug)
+	return q.resource.data.countItems(q.listQuery, q.isDebug)
 }

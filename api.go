@@ -32,9 +32,9 @@ func (app *App) API(url string) *API {
 }
 
 func (resource *Resource[T]) API(url string) *API {
-	api := newAPI(resource.app, url)
+	api := newAPI(resource.data.app, url)
 	api.resource = resource
-	api.permission = resource.canView
+	api.permission = resource.data.canView
 	return api
 }
 
@@ -82,7 +82,7 @@ func (api *API) bindAPI() error {
 
 	var controller *controller
 	if api.resource != nil {
-		controller = api.resource.getResourceControl()
+		controller = api.resource.getData().getResourceControl()
 	} else {
 		controller = api.app.adminController
 	}
@@ -91,7 +91,7 @@ func (api *API) bindAPI() error {
 	if api.resource == nil {
 		url = api.app.getAdminURL("api/" + api.url)
 	} else {
-		url = api.resource.getURL("api/" + api.url)
+		url = api.resource.getData().getURL("api/" + api.url)
 	}
 
 	if api.handler == nil && api.handlerJSON == nil {
@@ -149,6 +149,21 @@ func renderAPICode(request *Request, code int) {
 	case 404:
 		message = "Not found"
 	}
+	renderAPIMessage(request, code, message)
+
+	//request.Response().WriteHeader(code)
+	//request.Response().Write([]byte(fmt.Sprintf("%d - %s", code, message)))
+
+}
+
+func renderAPIMessage(request *Request, code int, message string) {
+	/*var message string
+	switch code {
+	case 403:
+		message = "Forbidden"
+	case 404:
+		message = "Not found"
+	}*/
 
 	request.Response().WriteHeader(code)
 	request.Response().Write([]byte(fmt.Sprintf("%d - %s", code, message)))

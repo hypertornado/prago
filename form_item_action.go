@@ -6,19 +6,19 @@ type FormItemAction[T any] struct {
 }
 
 func (resource *Resource[T]) FormItemAction(url string) *FormItemAction[T] {
-	fa := newFormAction(resource.app, url)
+	fa := newFormAction(resource.data.app, url)
 
 	fa.actionForm.resource = resource
 	fa.actionValidation.resource = resource
 
-	fa.actionForm.Permission(resource.canView)
-	fa.actionValidation.Permission(resource.canView)
+	fa.actionForm.Permission(resource.data.canView)
+	fa.actionValidation.Permission(resource.data.canView)
 
 	fa.actionForm.isItemAction = true
 	fa.actionValidation.isItemAction = true
 
-	resource.itemActions = append(resource.itemActions, fa.actionForm)
-	resource.itemActions = append(resource.itemActions, fa.actionValidation)
+	resource.data.itemActions = append(resource.data.itemActions, fa.actionForm)
+	resource.data.itemActions = append(resource.data.itemActions, fa.actionValidation)
 	return &FormItemAction[T]{
 		resource:   resource,
 		formAction: fa,

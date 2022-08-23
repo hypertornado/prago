@@ -143,10 +143,10 @@ func newAdminSearch(app *App) (*adminSearch, error) {
 }
 
 func (resource *Resource[T]) importSearchData(bulkUpdater *pragelastic.BulkUpdater[searchItem]) error {
-	roles := resource.getResourceViewRoles()
-	name := resource.getPluralNameFunction()("cs")
+	roles := resource.data.getResourceViewRoles()
+	name := resource.data.pluralName("cs")
 	var resourceSearchItem = searchItem{
-		ID: "resource_" + resource.id,
+		ID: "resource_" + resource.data.id,
 		SuggestionField: pragelastic.Suggest{
 			Input:  name,
 			Weight: 100,
@@ -155,11 +155,11 @@ func (resource *Resource[T]) importSearchData(bulkUpdater *pragelastic.BulkUpdat
 			},
 		},
 		Name:  name,
-		URL:   resource.getURL(""),
+		URL:   resource.data.getURL(""),
 		Roles: roles,
 	}
 
-	resource.app.search.addItem(bulkUpdater, &resourceSearchItem, 200)
+	resource.data.app.search.addItem(bulkUpdater, &resourceSearchItem, 200)
 
 	c, _ := resource.Query().Count()
 	if c > 10000 {
@@ -178,7 +178,7 @@ func (e *adminSearch) flush() error {
 }
 
 func (resource *Resource[T]) saveSearchItem(item *T) error {
-	roles := resource.getResourceViewRoles()
+	roles := resource.data.getResourceViewRoles()
 	return resource.saveSearchItemWithRoles(nil, item, roles)
 }
 
@@ -190,7 +190,7 @@ func (resource *Resource[T]) saveSearchItemWithRoles(bulkUpdater *pragelastic.Bu
 	}
 	searchItem := relationDataToSearchItem(resource, *preview, roles)
 	searchItem.Roles = roles
-	return resource.app.search.addItem(bulkUpdater, &searchItem, 100)
+	return resource.data.app.search.addItem(bulkUpdater, &searchItem, 100)
 }
 
 func relationDataToSearchItem(resource resourceIface, data preview, roles []string) searchItem {
@@ -203,7 +203,7 @@ func relationDataToSearchItem(resource resourceIface, data preview, roles []stri
 				"Roles": roles,
 			},
 		},
-		Category:    resource.getPluralNameFunction()("cs"),
+		Category:    resource.getData().pluralName("cs"),
 		Name:        data.Name,
 		Description: data.Description,
 		Image:       data.Image,
@@ -212,7 +212,7 @@ func relationDataToSearchItem(resource resourceIface, data preview, roles []stri
 }
 
 func searchID(resource resourceIface, id int64) string {
-	return fmt.Sprintf("%s-%d", resource.getID(), id)
+	return fmt.Sprintf("%s-%d", resource.getData().getID(), id)
 }
 
 func (e *adminSearch) deleteItem(resource resourceIface, id int64) error {
@@ -239,10 +239,10 @@ func (e *adminSearch) searchImport() error {
 
 	for _, v := range e.app.resources {
 		total, _ := e.index.Count()
-		e.app.Log().Printf("importing resource: %s, total: %d\n", v.getID(), total)
+		e.app.Log().Printf("importing resource: %s, total: %d\n", v.getData().getID(), total)
 		err = v.importSearchData(bulkUpdater)
 		if err != nil {
-			return fmt.Errorf("while importing resource %s: %s", v.getID(), err)
+			return fmt.Errorf("while importing resource %s: %s", v.getData().getID(), err)
 		}
 	}
 

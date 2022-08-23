@@ -88,38 +88,38 @@ type listMultipleAction struct {
 	IsDelete bool
 }
 
-func (resource *Resource[T]) getListHeader(user *user) (list list, err error) {
+func (resourceData *resourceData) getListHeader(user *user) (list list, err error) {
 	lang := user.Locale
 
 	list.Colspan = 1
-	list.TypeID = resource.id
-	list.VisibleColumns = resource.defaultVisibleFieldsStr(user)
-	list.Columns = resource.fieldsStr(user)
+	list.TypeID = resourceData.id
+	list.VisibleColumns = resourceData.defaultVisibleFieldsStr(user)
+	list.Columns = resourceData.fieldsStr(user)
 
-	list.OrderColumn = resource.orderByColumn
-	list.OrderDesc = resource.orderDesc
+	list.OrderColumn = resourceData.orderByColumn
+	list.OrderDesc = resourceData.orderDesc
 	list.Locale = user.Locale
 
-	list.ItemsPerPage = resource.defaultItemsPerPage
-	list.PaginationData = resource.getPaginationData(user)
+	list.ItemsPerPage = resourceData.defaultItemsPerPage
+	list.PaginationData = resourceData.getPaginationData(user)
 
 	list.StatsLimitSelectData = getStatsLimitSelectData(user.Locale)
-	list.MultipleActions = resource.getMultipleActions(user)
+	list.MultipleActions = resourceData.getMultipleActions(user)
 
-	orderField, ok := resource.fieldMap[resource.orderByColumn]
+	orderField, ok := resourceData.fieldMap[resourceData.orderByColumn]
 	if !ok || !orderField.canOrder {
 		err = ErrItemNotFound
 		return
 	}
 
-	list.Name = resource.pluralName(lang)
+	list.Name = resourceData.pluralName(lang)
 
-	if resource.orderField != nil {
+	if resourceData.orderField != nil {
 		list.CanChangeOrder = true
 	}
-	list.CanExport = resource.app.authorize(user, resource.canExport)
+	list.CanExport = resourceData.app.authorize(user, resourceData.canExport)
 
-	for _, v := range resource.fields {
+	for _, v := range resourceData.fields {
 		if v.authorizeView(user) {
 			headerItem := (*v).getListHeaderItem(user)
 			if headerItem.DefaultShow {
@@ -131,9 +131,9 @@ func (resource *Resource[T]) getListHeader(user *user) (list list, err error) {
 	return
 }
 
-func (resource *Resource[T]) defaultVisibleFieldsStr(user *user) string {
+func (resourceData *resourceData) defaultVisibleFieldsStr(user *user) string {
 	ret := []string{}
-	for _, v := range resource.fields {
+	for _, v := range resourceData.fields {
 		if !v.authorizeView(user) {
 			continue
 		}
@@ -145,9 +145,9 @@ func (resource *Resource[T]) defaultVisibleFieldsStr(user *user) string {
 	return r
 }
 
-func (resource *Resource[T]) fieldsStr(user *user) string {
+func (resourceData *resourceData) fieldsStr(user *user) string {
 	ret := []string{}
-	for _, v := range resource.fields {
+	for _, v := range resourceData.fields {
 		if !v.authorizeView(user) {
 			continue
 		}
@@ -159,7 +159,7 @@ func (resource *Resource[T]) fieldsStr(user *user) string {
 func (field *Field) getListHeaderItem(user *user) listHeaderItem {
 	var relatedResourceID string
 	if field.relatedResource != nil {
-		relatedResourceID = field.relatedResource.getID()
+		relatedResourceID = field.relatedResource.getData().getID()
 	}
 
 	headerItem := listHeaderItem{
@@ -228,7 +228,7 @@ func (field *Field) filterLayout() string {
 
 func (resource *Resource[T]) addFilterParamsToQuery(q *Query[T], params url.Values) *Query[T] {
 	filter := map[string]string{}
-	for _, v := range resource.fieldMap {
+	for _, v := range resource.data.fieldMap {
 		key := v.id
 		val := params.Get(key)
 		if val != "" {
@@ -240,7 +240,7 @@ func (resource *Resource[T]) addFilterParamsToQuery(q *Query[T], params url.Valu
 
 func (resource *Resource[T]) addFilterToQuery(q *Query[T], filter map[string]string) *Query[T] {
 	for k, v := range filter {
-		field := resource.fieldMap[k]
+		field := resource.data.fieldMap[k]
 		if field == nil {
 			continue
 		}
@@ -330,19 +330,20 @@ func (resource *Resource[T]) addFilterToQuery(q *Query[T], filter map[string]str
 }
 
 func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listContent, err error) {
-	if !res.app.authorize(user, res.canView) {
+	resourceData := res.data
+	if !resourceData.app.authorize(user, resourceData.canView) {
 		return listContent{}, errors.New("access denied")
 	}
 
 	var listHeader list
-	listHeader, err = res.getListHeader(user)
+	listHeader, err = resourceData.getListHeader(user)
 	if err != nil {
 		return
 	}
 
 	columnsStr := params.Get("_columns")
 	if columnsStr == "" {
-		columnsStr = res.defaultVisibleFieldsStr(user)
+		columnsStr = resourceData.defaultVisibleFieldsStr(user)
 	}
 
 	columnsAr := strings.Split(columnsStr, ",")
@@ -351,11 +352,11 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 		columnsMap[v] = true
 	}
 
-	orderBy := res.orderByColumn
+	orderBy := resourceData.orderByColumn
 	if params.Get("_order") != "" {
 		orderBy = params.Get("_order")
 	}
-	orderDesc := res.orderDesc
+	orderDesc := resourceData.orderDesc
 	if params.Get("_desc") == "true" {
 		orderDesc = true
 	}
@@ -379,7 +380,7 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 	}
 
 	totalCount, _ := res.Query().Count()
-	res.updateCachedCount()
+	res.data.updateCachedCount()
 
 	if count == totalCount {
 		ret.TotalCountStr = messages.ItemsCount(count, user.Locale)
@@ -387,7 +388,7 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 		ret.TotalCountStr = fmt.Sprintf("%s z %s", humanizeNumber(count), messages.ItemsCount(totalCount, user.Locale))
 	}
 
-	var itemsPerPage = res.defaultItemsPerPage
+	var itemsPerPage = res.data.defaultItemsPerPage
 	if params.Get("_pagesize") != "" {
 		pageSize, err := strconv.Atoi(params.Get("_pagesize"))
 		if err == nil && pageSize > 0 && pageSize <= 1000000 {
@@ -427,16 +428,16 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 				if v.ColumnName == orderBy {
 					isOrderedBy = true
 				}
-				row.Items = append(row.Items, res.valueToListCell(user, res.Field(v.ColumnName), fieldVal, isOrderedBy))
+				row.Items = append(row.Items, valueToListCell(user, res.Field(v.ColumnName), fieldVal, isOrderedBy))
 			}
 		}
 
 		//TODO: better find id
 		row.ID = itemVal.FieldByName("ID").Int()
-		row.URL = res.getURL(fmt.Sprintf("%d", row.ID))
+		row.URL = res.getData().getURL(fmt.Sprintf("%d", row.ID))
 
 		row.Actions = res.getListItemActions(user, item, row.ID)
-		row.AllowsMultipleActions = res.allowsMultipleActions(user)
+		row.AllowsMultipleActions = res.data.allowsMultipleActions(user)
 		ret.Rows = append(ret.Rows, row)
 	}
 
@@ -465,7 +466,7 @@ func (resource *Resource[T]) getListContentJSON(user *user, params url.Values) (
 	}
 
 	buf := new(bytes.Buffer)
-	err = resource.app.ExecuteTemplate(buf, "admin_list_cells", map[string]interface{}{
+	err = resource.data.app.ExecuteTemplate(buf, "admin_list_cells", map[string]interface{}{
 		"admin_list": listData,
 	})
 	if err != nil {
@@ -475,7 +476,7 @@ func (resource *Resource[T]) getListContentJSON(user *user, params url.Values) (
 	var statsStr string
 	if listData.Stats != nil {
 		bufStats := new(bytes.Buffer)
-		err = resource.app.ExecuteTemplate(bufStats, "admin_stats", listData.Stats)
+		err = resource.data.app.ExecuteTemplate(bufStats, "admin_stats", listData.Stats)
 		if err != nil {
 			return nil, err
 		}
@@ -490,7 +491,7 @@ func (resource *Resource[T]) getListContentJSON(user *user, params url.Values) (
 
 }
 
-func (resource *Resource[T]) valueToListCell(user *user, f *Field, val reflect.Value, isOrderedBy bool) listCell {
+func valueToListCell(user *user, f *Field, val reflect.Value, isOrderedBy bool) listCell {
 	if !f.authorizeView(user) {
 		panic(fmt.Sprintf("can't access field '%s'", f.name("en")))
 	}
@@ -504,30 +505,30 @@ func (resource *Resource[T]) valueToListCell(user *user, f *Field, val reflect.V
 	return cell
 }
 
-func (resource *Resource[T]) getPaginationData(user *user) (ret []listPaginationData) {
+func (resourceData *resourceData) getPaginationData(user *user) (ret []listPaginationData) {
 	var ints []int64
 	var used bool
 
 	for _, v := range []int64{10, 20, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000} {
 		if !used {
-			if v == resource.defaultItemsPerPage {
+			if v == resourceData.defaultItemsPerPage {
 				used = true
 			}
-			if resource.defaultItemsPerPage < v {
+			if resourceData.defaultItemsPerPage < v {
 				used = true
-				ints = append(ints, resource.defaultItemsPerPage)
+				ints = append(ints, resourceData.defaultItemsPerPage)
 			}
 		}
 		ints = append(ints, v)
 	}
 
-	if resource.defaultItemsPerPage > ints[len(ints)-1] {
-		ints = append(ints, resource.defaultItemsPerPage)
+	if resourceData.defaultItemsPerPage > ints[len(ints)-1] {
+		ints = append(ints, resourceData.defaultItemsPerPage)
 	}
 
 	for _, v := range ints {
 		var selected bool
-		if v == resource.defaultItemsPerPage {
+		if v == resourceData.defaultItemsPerPage {
 			selected = true
 		}
 

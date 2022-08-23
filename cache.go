@@ -7,7 +7,7 @@ import (
 
 const staleInterval = 30 * time.Minute
 
-type Cache struct {
+type cache struct {
 	items map[string]*cacheItem
 	mutex *sync.RWMutex
 }
@@ -20,8 +20,8 @@ type cacheItem struct {
 	mutex     *sync.RWMutex
 }
 
-func newCache() *Cache {
-	return &Cache{
+func newCache() *cache {
+	return &cache{
 		items: map[string]*cacheItem{},
 		mutex: &sync.RWMutex{},
 	}
@@ -63,7 +63,7 @@ func (ci *cacheItem) reloadValue() {
 	ci.updatedAt = time.Now()
 }
 
-func (c *Cache) getItem(name string) *cacheItem {
+func (c *cache) getItem(name string) *cacheItem {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	item, found := c.items[name]
@@ -73,7 +73,7 @@ func (c *Cache) getItem(name string) *cacheItem {
 	return item
 }
 
-func (c *Cache) putItem(name string, createFn func() interface{}) *cacheItem {
+func (c *cache) putItem(name string, createFn func() interface{}) *cacheItem {
 	item := &cacheItem{
 		updatedAt: time.Now(),
 		value:     createFn(),
@@ -87,7 +87,7 @@ func (c *Cache) putItem(name string, createFn func() interface{}) *cacheItem {
 	return item
 }
 
-func loadCache[T any](c *Cache, name string, createFn func() T) T {
+func loadCache[T any](c *cache, name string, createFn func() T) T {
 	fn := func() interface{} {
 		return createFn()
 	}
@@ -112,10 +112,10 @@ func Cached[T any](app *App, name string, createFn func() T) T {
 }
 
 func (app *App) ClearCache() {
-	app.cache.Clear()
+	app.cache.clear()
 }
 
-func (c *Cache) Load(cacheName string, createFn func() interface{}) interface{} {
+/*func (c *cache) Load(cacheName string, createFn func() interface{}) interface{} {
 	item := c.getItem(cacheName)
 	if item == nil {
 		item := c.putItem(cacheName, createFn)
@@ -129,26 +129,14 @@ func (c *Cache) Load(cacheName string, createFn func() interface{}) interface{} 
 		return item.getValue()
 	}
 	return item.getValue()
-}
+}*/
 
-func (c *Cache) forceLoad(cacheName string, createFn func() interface{}) interface{} {
+func (c *cache) forceLoad(cacheName string, createFn func() interface{}) interface{} {
 	item := c.putItem(cacheName, createFn)
 	return item.getValue()
 }
 
-/*func (c *Cache) set(cacheName string, value interface{}) error {
-	item := c.getItem(cacheName)
-	if item == nil {
-		return errors.New("can't find item in cache: " + cacheName)
-	}
-	item.mutex.Lock()
-	defer item.mutex.Unlock()
-	item.value = value
-	item.updatedAt = time.Now()
-	return nil
-}*/
-
-func (c *Cache) Clear() {
+func (c *cache) clear() {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.items = map[string]*cacheItem{}

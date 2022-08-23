@@ -5,7 +5,7 @@ import (
 	"sort"
 )
 
-//Permission for access
+// Permission for access
 type Permission string
 
 var nobodyPermission Permission = "nobody"
@@ -60,7 +60,7 @@ func (app *App) createRoleFieldType() *fieldType {
 	}
 }
 
-//Role adds role to admin
+// Role adds role to admin
 func (app *App) Role(role string, permissions []Permission) *App {
 	_, ok := app.accessManager.roles[role]
 	if ok {
@@ -82,7 +82,7 @@ func (app *App) Role(role string, permissions []Permission) *App {
 	return app
 }
 
-//Permission adds permission to admin
+// Permission adds permission to admin
 func (app *App) Permission(permission Permission) *App {
 	if app.accessManager.permissions[Permission(permission)] {
 		panic(fmt.Sprintf("Permission '%s' already added", permission))
@@ -98,11 +98,11 @@ func (app *App) authorize(user *user, permission Permission) bool {
 	return app.accessManager.roles[user.Role][permission]
 }
 
-func (resource *Resource[T]) getResourceViewRoles() []string {
+func (resourceData *resourceData) getResourceViewRoles() []string {
 	var ret []string
-	for roleName, permissions := range resource.app.accessManager.roles {
+	for roleName, permissions := range resourceData.app.accessManager.roles {
 		for permission := range permissions {
-			if permission == resource.getPermissionView() {
+			if permission == resourceData.canCreate {
 				ret = append(ret, roleName)
 			}
 		}

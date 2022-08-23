@@ -13,7 +13,8 @@ var defaultPort = 8585
 func addServerCommand(app *App) {
 	var port int
 	var developmentMode bool
-	app.addCommand("server").
+	app.addCommand("run").
+		Description("runs app and blocks").
 		flag(
 			newCommandFlag("port", "port of server").Alias("p").Int(&port),
 		).

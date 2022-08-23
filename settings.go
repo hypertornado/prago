@@ -31,7 +31,7 @@ func (app *App) initSettings() {
 		cache:         make(map[string]string),
 	}
 	app.settings.resource.PermissionView("sysadmin")
-	must(app.settings.resource.migrate(false))
+	must(app.settings.resource.getData().migrate(false))
 	initDefaultSettings(app)
 }
 

@@ -14,7 +14,7 @@ type viewRelation struct {
 }
 
 func (resource *Resource[T]) getRelationViews(id int64, user *user) (ret []view) {
-	for _, v := range resource.relations {
+	for _, v := range resource.data.relations {
 		vi := resource.getRelationView(id, v, user)
 		if vi != nil {
 			ret = append(ret, *vi)
@@ -24,7 +24,7 @@ func (resource *Resource[T]) getRelationViews(id int64, user *user) (ret []view)
 }
 
 func (resource *Resource[T]) getRelationView(id int64, field *relatedField, user *user) *view {
-	if !resource.app.authorize(user, field.resource.getPermissionView()) {
+	if !resource.data.app.authorize(user, field.resource.getData().canView) {
 		return nil
 	}
 
@@ -41,7 +41,7 @@ func (resource *Resource[T]) getRelationView(id int64, field *relatedField, user
 		URL:  field.listURL(int64(id)),
 	})
 
-	if resource.app.authorize(user, field.resource.getPermissionUpdate()) {
+	if resource.data.app.authorize(user, field.resource.getData().canUpdate) {
 		ret.Navigation = append(ret.Navigation, tab{
 			Name: "+",
 			URL:  field.addURL(int64(id)),
@@ -49,8 +49,8 @@ func (resource *Resource[T]) getRelationView(id int64, field *relatedField, user
 	}
 
 	ret.Relation = &viewRelation{
-		SourceResource: resource.getID(),
-		TargetResource: field.resource.getID(),
+		SourceResource: resource.getData().getID(),
+		TargetResource: field.resource.getData().getID(),
 		TargetField:    field.id,
 		IDValue:        int64(id),
 		Count:          filteredCount,
@@ -88,20 +88,20 @@ func generateRelationListAPIHandler(request *Request) {
 }
 
 func (resource *Resource[T]) getPreviews(listRequest relationListRequest, user *user) []*preview {
-	sourceResource := resource.app.getResourceByID(listRequest.SourceResource)
-	if !resource.app.authorize(user, sourceResource.getPermissionView()) {
+	sourceResource := resource.data.app.getResourceByID(listRequest.SourceResource)
+	if !resource.data.app.authorize(user, sourceResource.getData().canView) {
 		panic("cant authorize source resource")
 	}
 
-	if !resource.app.authorize(user, resource.getPermissionView()) {
+	if !resource.data.app.authorize(user, resource.getData().canView) {
 		panic("cant authorize target resource")
 	}
 
 	q := resource.Is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
-	if resource.isOrderDesc() {
-		q = q.OrderDesc(resource.getOrderByColumn())
+	if resource.data.orderDesc {
+		q = q.OrderDesc(resource.getData().orderByColumn)
 	} else {
-		q = q.Order(resource.getOrderByColumn())
+		q = q.Order(resource.getData().orderByColumn)
 	}
 
 	limit := listRequest.Count

@@ -278,7 +278,7 @@ func getFilePathFromUUID(accountName, uuid string) (filePath, extension string, 
 	return fmt.Sprintf("%s/%s", dirPath, name), extension, nil
 }
 
-//TODO: cache somewhere
+// TODO: cache somewhere
 func getMetadata(accountName, uuid string) (*cdnclient.CDNFileData, error) {
 	filePath, extension, err := getFilePathFromUUID(accountName, uuid)
 	if err != nil {
@@ -492,7 +492,7 @@ func getTempFilePath(extension string) string {
 	return path.Join(dir, fileName)
 }
 
-//CMYK: https://github.com/jcupitt/libvips/issues/630
+// CMYK: https://github.com/jcupitt/libvips/issues/630
 func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, extension string, crop bool) error {
 	//tempPath := getTempFilePath()
 	//defer os.Remove(tempPath)

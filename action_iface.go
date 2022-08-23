@@ -43,12 +43,12 @@ func (action *Action) getURL() string {
 		resource := action.resource
 		if action.isItemAction {
 			if action.url != "" {
-				url = resource.getURL(":id/" + action.url)
+				url = resource.getData().getURL(":id/" + action.url)
 			} else {
-				url = resource.getURL(":id")
+				url = resource.getData().getURL(":id")
 			}
 		} else {
-			url = resource.getURL(action.url)
+			url = resource.getData().getURL(action.url)
 		}
 	}
 	return url
@@ -57,7 +57,7 @@ func (action *Action) getURL() string {
 func (action *Action) getController() *controller {
 	var controller *controller
 	if action.resource != nil {
-		controller = action.resource.getResourceControl()
+		controller = action.resource.getData().getResourceControl()
 	} else {
 		controller = action.app.adminController
 	}

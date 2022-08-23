@@ -36,6 +36,17 @@
       {{- tmpl $item.Template $item.Value -}}
     </div>
   {{end}}
+  {{if .QuickActions}}
+    <div class="quick_actions">
+      {{range $action := .QuickActions}}
+        <button class="btn quick_actions_btn quick_actions_btn-{{$action.TypStr}}"
+          data-url="{{$action.ActionURL}}"
+          data-typ="{{$action.TypStr}}"
+          data-item-id="{{$action.ItemID}}"
+        >{{$action.Name}}</button>
+      {{end}}
+    </div>
+  {{end}}
   </div>
 {{end}}
 

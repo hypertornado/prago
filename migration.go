@@ -7,7 +7,7 @@ import (
 )
 
 func (app *App) initMigrationCommand() {
-	app.addCommand("admin", "migrate").Description("migrate database").
+	app.addCommand("migratedb").Description("migrate database").
 		Callback(func() {
 			app.Log().Println("Migrating database")
 			err := app.migrate(true)
@@ -25,8 +25,8 @@ func (app *App) migrate(verbose bool) error {
 		return err
 	}
 	for _, resource := range app.resources {
-		tables[resource.getID()] = false
-		err := resource.migrate(verbose)
+		tables[resource.getData().getID()] = false
+		err := resource.getData().migrate(verbose)
 		if err != nil {
 			return err
 		}
@@ -47,17 +47,17 @@ func (app *App) migrate(verbose bool) error {
 	return nil
 }
 
-func (resource *Resource[T]) unsafeDropTable() error {
-	_, err := resource.app.db.Exec(fmt.Sprintf("drop table `%s`;", resource.id))
+func (resourceData *resourceData) unsafeDropTable() error {
+	_, err := resourceData.app.db.Exec(fmt.Sprintf("drop table `%s`;", resourceData.id))
 	return err
 }
 
-func (resource *Resource[T]) migrate(verbose bool) error {
-	_, err := getTableDescription(resource.app.db, resource.id)
+func (resourceData *resourceData) migrate(verbose bool) error {
+	_, err := getTableDescription(resourceData.app.db, resourceData.id)
 	if err == nil {
-		return resource.migrateTable(resource.app.db, resource.id, verbose)
+		return resourceData.migrateTable(resourceData.app.db, resourceData.id, verbose)
 	}
-	return resource.createTable(resource.app.db, resource.id, verbose)
+	return resourceData.createTable(resourceData.app.db, resourceData.id, verbose)
 }
 
 func listTables(db dbIface) (ret map[string]bool, err error) {
@@ -80,13 +80,13 @@ func listTables(db dbIface) (ret map[string]bool, err error) {
 	return
 }
 
-func (resource *Resource[T]) createTable(db dbIface, tableName string, verbose bool) (err error) {
+func (resourceData *resourceData) createTable(db dbIface, tableName string, verbose bool) (err error) {
 	if verbose {
 		fmt.Printf("Creating table '%s'\n", tableName)
 	}
 	items := []string{}
-	for _, v := range resource.fields {
-		items = append(items, v.fieldDescriptionMysql(resource.app.fieldTypes))
+	for _, v := range resourceData.fields {
+		items = append(items, v.fieldDescriptionMysql(resourceData.app.fieldTypes))
 	}
 	q := fmt.Sprintf("CREATE TABLE %s (%s);", tableName, strings.Join(items, ", "))
 	if verbose {
@@ -96,8 +96,8 @@ func (resource *Resource[T]) createTable(db dbIface, tableName string, verbose b
 	return err
 }
 
-//TODO: migrate after each resource initialization
-func (resource *Resource[T]) migrateTable(db dbIface, tableName string, verbose bool) error {
+// TODO: migrate after each resource initialization
+func (resourceData *resourceData) migrateTable(db dbIface, tableName string, verbose bool) error {
 	if verbose {
 		fmt.Printf("Migrating table '%s'\n", tableName)
 	}
@@ -113,9 +113,9 @@ func (resource *Resource[T]) migrateTable(db dbIface, tableName string, verbose 
 
 	items := []string{}
 
-	for _, v := range resource.fields {
+	for _, v := range resourceData.fields {
 		if !tableDescriptionMap[v.id] {
-			items = append(items, fmt.Sprintf("ADD COLUMN %s", v.fieldDescriptionMysql(resource.app.fieldTypes)))
+			items = append(items, fmt.Sprintf("ADD COLUMN %s", v.fieldDescriptionMysql(resourceData.app.fieldTypes)))
 		} else {
 			tableDescriptionMap[v.id] = false
 		}
@@ -172,7 +172,7 @@ func getTableDescription(db dbIface, tableName string) (map[string]*mysqlColumn,
 
 func (app *App) unsafeDropTables() error {
 	for _, resource := range app.resources {
-		err := resource.unsafeDropTable()
+		err := resource.getData().unsafeDropTable()
 		if err != nil {
 			return err
 		}

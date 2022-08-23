@@ -4,8 +4,8 @@ import (
 	"reflect"
 )
 
-func (resource *Resource[T]) getDefaultOrder() (column string, desc bool) {
-	for _, v := range resource.fields {
+func (resourceData *resourceData) getDefaultOrder() (column string, desc bool) {
+	for _, v := range resourceData.fields {
 		add := false
 		if v.id == "id" {
 			add = true
@@ -37,7 +37,7 @@ func (resource *Resource[T]) getDefaultOrder() (column string, desc bool) {
 func (resource *Resource[T]) getItemStringEditableValues(item *T, user *user) map[string]string {
 	itemVal := reflect.ValueOf(item).Elem()
 	ret := make(map[string]string)
-	for i, field := range resource.fields {
+	for i, field := range resource.data.fields {
 		if !field.authorizeEdit(user) && field.id != "id" {
 			continue
 		}
@@ -55,7 +55,7 @@ func (resource *Resource[T]) addFormItems(item *T, user *user, form *Form) {
 	editableValues := resource.getItemStringEditableValues(item, user)
 
 fields:
-	for _, field := range resource.fields {
+	for _, field := range resource.data.fields {
 		if !field.authorizeEdit(user) {
 			continue fields
 		}

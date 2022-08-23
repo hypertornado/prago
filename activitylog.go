@@ -49,7 +49,7 @@ type historyItemView struct {
 	CreatedAt   string
 }
 
-//ListenActivity listens to all changes in app's administration
+// ListenActivity listens to all changes in app's administration
 func (app *App) ListenActivity(handler func(Activity)) {
 	app.activityListeners = append(app.activityListeners, handler)
 }
@@ -59,7 +59,7 @@ func (app *App) getHistory(resource resourceIface, itemID int64) historyView {
 
 	q := app.activityLogResource.Query()
 	if resource != nil {
-		q.Is("ResourceName", resource.getID())
+		q.Is("ResourceName", resource.getData().getID())
 	}
 	if itemID > 0 {
 		q.Is("ItemID", itemID)
@@ -87,7 +87,7 @@ func (app *App) getHistory(resource resourceIface, itemID int64) historyView {
 			ActivityURL: activityURL,
 			ActionType:  v.ActionType,
 			ItemName:    itemName,
-			ItemURL:     resource.getURL(fmt.Sprintf("%d", v.ItemID)),
+			ItemURL:     resource.getData().getURL(fmt.Sprintf("%d", v.ItemID)),
 			UserName:    username,
 			UserURL:     userurl,
 			CreatedAt:   messages.Timestamp(locale, v.CreatedAt, true),
@@ -98,8 +98,8 @@ func (app *App) getHistory(resource resourceIface, itemID int64) historyView {
 
 func (app *App) initActivityLog() {
 	app.activityLogResource = NewResource[activityLog](app)
-	app.activityLogResource.canView = Permission(sysadminRoleName)
-	app.activityLogResource.orderDesc = true
+	app.activityLogResource.data.canView = Permission(sysadminRoleName)
+	app.activityLogResource.data.orderDesc = true
 	app.activityLogResource.Name(messages.GetNameFunction("admin_history"), messages.GetNameFunction("admin_history"))
 }
 
@@ -143,7 +143,7 @@ func (resource *Resource[T]) LogActivity(user *user, before, after *T) error {
 	}
 
 	log := &activityLog{
-		ResourceName:  resource.id,
+		ResourceName:  resource.data.id,
 		ItemID:        itemID,
 		ActionType:    activityType,
 		User:          user.ID,
@@ -151,9 +151,9 @@ func (resource *Resource[T]) LogActivity(user *user, before, after *T) error {
 		ContentAfter:  string(afterData),
 	}
 
-	err = resource.app.activityLogResource.Create(log)
+	err = resource.data.app.activityLogResource.Create(log)
 	if err == nil {
-		for _, v := range resource.app.activityListeners {
+		for _, v := range resource.data.app.activityListeners {
 			v(log.activity())
 		}
 	}

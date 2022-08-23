@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (resource *Resource[T]) setOrderPosition(item interface{}, order int64) {
+func (resourceData *resourceData) setOrderPosition(item interface{}, order int64) {
 	value := reflect.ValueOf(item)
 
 	for i := 0; i < 10; i++ {
@@ -17,12 +17,12 @@ func (resource *Resource[T]) setOrderPosition(item interface{}, order int64) {
 		value = value.Elem()
 	}
 
-	val := value.FieldByName(resource.orderField.fieldClassName)
+	val := value.FieldByName(resourceData.orderField.fieldClassName)
 	val.SetInt(order)
 }
 
-func (resource *Resource[T]) fixBooleanParams(user *user, params url.Values) {
-	for _, field := range resource.fields {
+func (resourceData *resourceData) fixBooleanParams(user *user, params url.Values) {
+	for _, field := range resourceData.fields {
 		if !field.authorizeEdit(user) {
 			continue
 		}
@@ -42,7 +42,7 @@ func (resource *Resource[T]) bindData(item *T, user *user, params url.Values) er
 		value = value.Elem()
 	}
 
-	for _, field := range resource.fields {
+	for _, field := range resource.data.fields {
 		if !field.authorizeEdit(user) {
 			continue
 		}

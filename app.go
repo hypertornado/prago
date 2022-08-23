@@ -1,4 +1,4 @@
-//Package prago is MVC framework for go
+// Package prago is MVC framework for go
 package prago
 
 import (
@@ -9,7 +9,7 @@ import (
 	"github.com/hypertornado/prago/pragelastic"
 )
 
-//App is main struct of prago application
+// App is main struct of prago application
 type App struct {
 	codeName        string
 	version         string
@@ -19,7 +19,7 @@ type App struct {
 	commands        *commands
 	logger          *logger
 	templates       *templates
-	cache           *Cache
+	cache           *cache
 	sessionsManager *sessionsManager
 
 	settings *settingsSingleton
@@ -143,32 +143,32 @@ func (app *App) initDefaultResourceActions() {
 	}
 }
 
-//New creates App structure for prago app
+// New creates App structure for prago app
 func New(appName, version string) *App {
 	return createApp(appName, version)
 }
 
 func (app *App) GetDB() *sql.DB { return app.db }
 
-//Log returns logger structure
+// Log returns logger structure
 func (app *App) Log() *logger { return app.logger }
 
-//DevelopmentMode returns if app is running in development mode
+// DevelopmentMode returns if app is running in development mode
 func (app *App) DevelopmentMode() bool { return app.developmentMode }
 
-//Name sets localized human name to app
+// Name sets localized human name to app
 func (app *App) Name(name func(string) string) *App {
 	app.name = name
 	return app
 }
 
-//Logo sets application public path to logo
+// Logo sets application public path to logo
 func (app *App) Logo(logo []byte) *App {
 	app.logo = logo
 	return app
 }
 
-//DotPath returns path to hidden directory with app configuration and data
+// DotPath returns path to hidden directory with app configuration and data
 func (app *App) dotPath() string { return os.Getenv("HOME") + "/." + app.codeName }
 
 func columnName(fieldName string) string {

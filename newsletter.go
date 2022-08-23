@@ -15,10 +15,10 @@ import (
 	"github.com/golang-commonmark/markdown"
 )
 
-//ErrEmailAlreadyInList is returned when user is already in newsletter list
+// ErrEmailAlreadyInList is returned when user is already in newsletter list
 var ErrEmailAlreadyInList = errors.New("email already in newsletter list")
 
-//NewsletterMiddleware represents users newsletter
+// NewsletterMiddleware represents users newsletter
 type Newsletters struct {
 	renderer   NewsletterRenderer
 	app        *App
@@ -39,7 +39,7 @@ func (newsletters *Newsletters) Permission(permission Permission) *Newsletters {
 	return newsletters
 }
 
-//InitNewsletters inits apps newsletter function
+// InitNewsletters inits apps newsletter function
 func (app *App) Newsletters() *Newsletters {
 	if app.newsletters != nil {
 		return app.newsletters
@@ -226,7 +226,7 @@ func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 	return res.Create(person)
 }
 
-//Newsletter represents newsletter
+// Newsletter represents newsletter
 type newsletter struct {
 	ID            int64     `prago-preview:"true" prago-order-desc:"true"`
 	Name          string    `prago-preview:"true" prago-name:"Jméno newsletteru" prago-validations:"nonempty"`
@@ -238,11 +238,11 @@ type newsletter struct {
 }
 
 func initNewsletterResource(resource *Resource[newsletter]) {
-	resource.canView = sysadminPermission
+	resource.data.canView = sysadminPermission
 
 	resource.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(
 		func(item *newsletter, request *Request) {
-			body, err := resource.app.newsletters.GetBody(*item, "")
+			body, err := resource.data.app.newsletters.GetBody(*item, "")
 			must(err)
 
 			request.Response().WriteHeader(200)
@@ -267,20 +267,20 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 			vc.AddError("Není zadán žádný email")
 		}
 		if vc.Valid() {
-			err := resource.app.sendEmails(*newsletter, emails)
+			err := resource.data.app.sendEmails(*newsletter, emails)
 			if err != nil {
 				vc.AddError(fmt.Sprintf("Chyba při odesílání emailů: %s", err))
 			}
 		}
 		if vc.Valid() {
 			vc.Request().AddFlashMessage("Náhled newsletteru odeslán.")
-			vc.Validation().RedirectionLocaliton = resource.getItemURL(newsletter, "")
+			vc.Validation().RedirectionLocaliton = resource.data.getItemURL(newsletter, "")
 		}
 	})
 
 	resource.FormItemAction("send").Permission(loggedPermission).Name(unlocalized("Odeslat")).Form(
 		func(newsletter *newsletter, form *Form, request *Request) {
-			recipients, err := resource.app.getNewsletterRecipients()
+			recipients, err := resource.data.app.getNewsletterRecipients()
 			must(err)
 			form.AddSubmit(fmt.Sprintf("Odelsat newsletter na %d emailů", len(recipients)))
 		},
@@ -290,16 +290,14 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 			//TODO: log sent emails
 			must(resource.Update(newsletter))
 
-			recipients, err := resource.app.getNewsletterRecipients()
+			recipients, err := resource.data.app.getNewsletterRecipients()
 			if err != nil {
 				panic(err)
 			}
 
-			go resource.app.sendEmails(*newsletter, recipients)
-
+			go resource.data.app.sendEmails(*newsletter, recipients)
 			vc.Request().AddFlashMessage(fmt.Sprintf("Newsletter '%s' se odesílá na %d adres", newsletter.Name, len(recipients)))
-
-			vc.Validation().RedirectionLocaliton = resource.getItemURL(newsletter, "")
+			vc.Validation().RedirectionLocaliton = resource.data.getItemURL(newsletter, "")
 		},
 	)
 
@@ -321,7 +319,7 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 			must(newsletterSectionResource.Create(&section))
 		}
 
-		vc.Validation().RedirectionLocaliton = resource.getItemURL(newsletter, "edit")
+		vc.Validation().RedirectionLocaliton = resource.data.getItemURL(newsletter, "edit")
 	})
 }
 
@@ -359,7 +357,7 @@ func (app *App) sendEmails(n newsletter, emails []string) error {
 	return nil
 }
 
-//GetBody gets body of newsletter
+// GetBody gets body of newsletter
 func (nm *Newsletters) GetBody(n newsletter, email string) (string, error) {
 	content := markdown.New(markdown.HTML(true)).RenderToString([]byte(n.Body))
 	params := map[string]interface{}{
@@ -379,7 +377,7 @@ func (nm *Newsletters) GetBody(n newsletter, email string) (string, error) {
 	return defaultNewsletterRenderer(params)
 }
 
-//NewsletterRenderer represent newsletter renderer
+// NewsletterRenderer represent newsletter renderer
 type NewsletterRenderer func(map[string]interface{}) (string, error)
 
 func defaultNewsletterRenderer(params map[string]interface{}) (string, error) {
@@ -402,7 +400,7 @@ func defaultNewsletterRenderer(params map[string]interface{}) (string, error) {
 	return ret, nil
 }
 
-//NewsletterSection represents section of newsletter
+// NewsletterSection represents section of newsletter
 type newsletterSection struct {
 	ID            int64
 	Newsletter    int64  `prago-type:"relation" prago-preview:"true" prago-validations:"nonempty"`
@@ -420,7 +418,7 @@ type newsletterSection struct {
 //resource.canView = sysadminPermission
 //}
 
-//NewsletterPersons represents person of newsletter
+// NewsletterPersons represents person of newsletter
 type newsletterPersons struct {
 	ID           int64
 	Name         string `prago-preview:"true" prago-name:"Jméno příjemce"`
@@ -431,7 +429,7 @@ type newsletterPersons struct {
 	UpdatedAt    time.Time
 }
 
-//NewsletterSectionData represents data of newsletter section
+// NewsletterSectionData represents data of newsletter section
 type newsletterSectionData struct {
 	Name   string
 	Text   string

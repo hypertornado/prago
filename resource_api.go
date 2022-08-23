@@ -22,7 +22,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 				return
 			}
 			if request.Request().URL.Query().Get("_format") == "xlsx" {
-				if !resource.app.authorize(request.user, resource.canExport) {
+				if !resource.data.app.authorize(request.user, resource.data.canExport) {
 					render403(request)
 					return
 				}
@@ -36,7 +36,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 				row := sheet.AddRow()
 				columnsStr := request.Request().URL.Query().Get("_columns")
 				if columnsStr == "" {
-					columnsStr = resource.defaultVisibleFieldsStr(request.user)
+					columnsStr = resource.data.defaultVisibleFieldsStr(request.user)
 				}
 				columnsAr := strings.Split(columnsStr, ",")
 				for _, v := range columnsAr {
@@ -63,6 +63,10 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 		},
 	)
 
+	resource.API("quick-action").Handler(func(request *Request) {
+		quickActionAPIHandler(resource, request)
+	}).Method("POST")
+
 	resource.API("preview-relation/:id").Handler(
 		func(request *Request) {
 			item := resource.ID(request.Param("id"))
@@ -77,9 +81,9 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 		},
 	)
 
-	resource.API("set-order").Permission(resource.canUpdate).Method("POST").Handler(
+	resource.API("set-order").Permission(resource.data.canUpdate).Method("POST").Handler(
 		func(request *Request) {
-			if resource.orderField == nil {
+			if resource.data.orderField == nil {
 				panic("can't order")
 			}
 
@@ -94,7 +98,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 			for i, id := range order {
 				item := resource.ID(id)
-				resource.setOrderPosition(item, int64(i))
+				resource.data.setOrderPosition(item, int64(i))
 				err := resource.Update(item)
 				must(err)
 			}
@@ -166,7 +170,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 			switch request.Param("action") {
 			case "clone":
-				if !request.app.authorize(request.user, resource.canCreate) {
+				if !request.app.authorize(request.user, resource.data.canCreate) {
 					renderAPINotAuthorized(request)
 					return
 				}
@@ -202,7 +206,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 						}()
 					}
 
-					if resource.activityLog {
+					if resource.data.activityLog {
 						must(
 							resource.LogActivity(request.user, nil, item),
 						)
@@ -214,7 +218,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 				)).Flash(request)
 
 			case "delete":
-				if !request.app.authorize(request.user, resource.canDelete) {
+				if !request.app.authorize(request.user, resource.data.canDelete) {
 					renderAPINotAuthorized(request)
 					return
 				}
@@ -223,7 +227,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 					values.Add("id", fmt.Sprintf("%d", v))
 
 					valValidation := newValuesValidation(request.user.Locale, values)
-					for _, v := range resource.deleteValidations {
+					for _, v := range resource.data.deleteValidations {
 						v(valValidation)
 					}
 
@@ -249,11 +253,11 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 		},
 	)
 
-	resource.API("multiple_edit").Permission(resource.canUpdate).Method("GET").Handler(
+	resource.API("multiple_edit").Permission(resource.data.canUpdate).Method("GET").Handler(
 		func(request *Request) {
 			var item T
 			form := NewForm(
-				resource.getURL("api/multiple_edit"),
+				resource.data.getURL("api/multiple_edit"),
 			)
 			resource.addFormItems(&item, request.user, form)
 			request.SetData("form", form)
@@ -265,7 +269,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 		},
 	)
 
-	resource.API("multiple_edit").Permission(resource.canUpdate).Method("POST").Handler(
+	resource.API("multiple_edit").Permission(resource.data.canUpdate).Method("POST").Handler(
 		func(request *Request) {
 
 			validateCSRF(request)
