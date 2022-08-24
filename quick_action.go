@@ -3,18 +3,23 @@ package prago
 import "fmt"
 
 type QuickAction[T any] struct {
-	resource     resourceIface
+	data *quickActionData
+}
+
+type quickActionData struct {
 	url          string
+	resource     resourceIface
 	permission   Permission
 	singularName func(locale string) string
 	pluralName   func(locale string) string
 	typ          quickActionType
 
-	validation func(*T, *user) bool
+	validation func(any, *user) bool
+	handler    func(any, *Request) error
+}
 
-	//confirmPrompt func(count int64, locale string) string
-
-	handler func(*T, *Request) error
+type quickActionIface interface {
+	getData() *quickActionData
 }
 
 type quickActionType int64
@@ -28,58 +33,69 @@ const (
 
 func (resource *Resource[T]) QuickAction(url string) *QuickAction[T] {
 	ret := &QuickAction[T]{
-		resource:   resource,
-		url:        url,
-		permission: sysadminPermission,
-		singularName: func(string) string {
-			return url
+		data: &quickActionData{
+			url:        url,
+			resource:   resource,
+			permission: sysadminPermission,
+			singularName: func(string) string {
+				return url
+			},
+			pluralName: func(string) string {
+				return url
+			},
+			typ: quickTypeBasic,
 		},
-		pluralName: func(string) string {
-			return url
-		},
-		typ: quickTypeBasic,
 	}
 	resource.data.quickActions = append(resource.data.quickActions, ret)
 	return ret
 }
 
-func (qa *QuickAction[T]) getApiURL(id int64) string {
-	return fmt.Sprintf("/admin/%s/api/quick-action?action=%s&itemid=%d", qa.resource.getData().getID(), qa.url, id)
+func (qa *QuickAction[T]) getData() *quickActionData {
+	return qa.data
+}
+
+func (data *quickActionData) getApiURL(id int64) string {
+	return fmt.Sprintf("/admin/%s/api/quick-action?action=%s&itemid=%d", data.resource.getData().getID(), data.url, id)
 }
 
 func (qa *QuickAction[T]) Permission(permission Permission) *QuickAction[T] {
-	must(qa.resource.getData().app.validatePermission(permission))
-	qa.permission = permission
+	must(qa.data.resource.getData().app.validatePermission(permission))
+	qa.data.permission = permission
 	return qa
 }
 
 func (qa *QuickAction[T]) Name(singular, plural func(string) string) *QuickAction[T] {
-	qa.singularName = singular
-	qa.pluralName = plural
+	qa.data.singularName = singular
+	qa.data.pluralName = plural
 	return qa
 }
 
 func (qa *QuickAction[T]) Validation(validation func(*T, *user) bool) *QuickAction[T] {
-	qa.validation = validation
+
+	qa.data.validation = func(a any, u *user) bool {
+		return validation(a.(*T), u)
+	}
 	return qa
 }
 
 func (qa *QuickAction[T]) Handler(handler func(*T, *Request) error) *QuickAction[T] {
-	qa.handler = handler
+	qa.data.handler = func(a any, request *Request) error {
+		return handler(a.(*T), request)
+	}
 	return qa
 }
 
 func (qa *QuickAction[T]) DeleteType() *QuickAction[T] {
-	qa.typ = quickTypeDelete
+	qa.data.typ = quickTypeDelete
 	return qa
 }
 
 func (qa *QuickAction[T]) GreenType() *QuickAction[T] {
-	qa.typ = quickTypeGreen
+	qa.data.typ = quickTypeGreen
 	return qa
 }
 
 func (qa *QuickAction[T]) BlueType() *QuickAction[T] {
-	qa.typ = quickTypeBlue
+	qa.data.typ = quickTypeBlue
 	return qa
 }

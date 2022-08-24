@@ -3,6 +3,7 @@ package prago
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 )
 
 type viewRelation struct {
@@ -13,9 +14,9 @@ type viewRelation struct {
 	Count          int64
 }
 
-func (resource *Resource[T]) getRelationViews(id int64, user *user) (ret []view) {
-	for _, v := range resource.data.relations {
-		vi := resource.getRelationView(id, v, user)
+func (resourceData *resourceData) getRelationViews(id int64, user *user) (ret []view) {
+	for _, v := range resourceData.relations {
+		vi := resourceData.getRelationView(id, v, user)
 		if vi != nil {
 			ret = append(ret, *vi)
 		}
@@ -23,12 +24,12 @@ func (resource *Resource[T]) getRelationViews(id int64, user *user) (ret []view)
 	return
 }
 
-func (resource *Resource[T]) getRelationView(id int64, field *relatedField, user *user) *view {
-	if !resource.data.app.authorize(user, field.resource.getData().canView) {
+func (resourceData *resourceData) getRelationView(id int64, field *relatedField, user *user) *view {
+	if !resourceData.app.authorize(user, field.resource.getData().canView) {
 		return nil
 	}
 
-	filteredCount := field.resource.itemWithRelationCount(field.id, int64(id))
+	filteredCount := field.resource.getData().itemWithRelationCount(field.id, int64(id))
 
 	ret := &view{}
 
@@ -41,7 +42,7 @@ func (resource *Resource[T]) getRelationView(id int64, field *relatedField, user
 		URL:  field.listURL(int64(id)),
 	})
 
-	if resource.data.app.authorize(user, field.resource.getData().canUpdate) {
+	if resourceData.app.authorize(user, field.resource.getData().canUpdate) {
 		ret.Navigation = append(ret.Navigation, tab{
 			Name: "+",
 			URL:  field.addURL(int64(id)),
@@ -49,7 +50,7 @@ func (resource *Resource[T]) getRelationView(id int64, field *relatedField, user
 	}
 
 	ret.Relation = &viewRelation{
-		SourceResource: resource.getData().getID(),
+		SourceResource: resourceData.getID(),
 		TargetResource: field.resource.getData().getID(),
 		TargetField:    field.id,
 		IDValue:        int64(id),
@@ -58,8 +59,8 @@ func (resource *Resource[T]) getRelationView(id int64, field *relatedField, user
 	return ret
 }
 
-func (resource *Resource[T]) itemWithRelationCount(fieldID string, id int64) int64 {
-	filteredCount, err := resource.Is(fieldID, id).Count()
+func (resourceData *resourceData) itemWithRelationCount(fieldID string, id int64) int64 {
+	filteredCount, err := resourceData.Is(fieldID, id).count()
 	if err != nil {
 		panic(err)
 	}
@@ -83,25 +84,25 @@ func generateRelationListAPIHandler(request *Request) {
 
 	targetResource := request.app.getResourceByID(listRequest.TargetResource)
 
-	request.SetData("data", targetResource.getPreviews(listRequest, request.user))
+	request.SetData("data", targetResource.getData().getPreviews(listRequest, request.user))
 	request.RenderView("admin_item_view_relationlist_response")
 }
 
-func (resource *Resource[T]) getPreviews(listRequest relationListRequest, user *user) []*preview {
-	sourceResource := resource.data.app.getResourceByID(listRequest.SourceResource)
-	if !resource.data.app.authorize(user, sourceResource.getData().canView) {
+func (resourceData *resourceData) getPreviews(listRequest relationListRequest, user *user) []*preview {
+	sourceResource := resourceData.app.getResourceByID(listRequest.SourceResource)
+	if !resourceData.app.authorize(user, sourceResource.getData().canView) {
 		panic("cant authorize source resource")
 	}
 
-	if !resource.data.app.authorize(user, resource.getData().canView) {
+	if !resourceData.app.authorize(user, resourceData.canView) {
 		panic("cant authorize target resource")
 	}
 
-	q := resource.Is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
-	if resource.data.orderDesc {
-		q = q.OrderDesc(resource.getData().orderByColumn)
+	q := resourceData.query().Is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
+	if resourceData.orderDesc {
+		q.addOrder(resourceData.orderByColumn, true)
 	} else {
-		q = q.Order(resource.getData().orderByColumn)
+		q.addOrder(resourceData.orderByColumn, false)
 	}
 
 	limit := listRequest.Count
@@ -111,14 +112,27 @@ func (resource *Resource[T]) getPreviews(listRequest relationListRequest, user *
 	q = q.Limit(limit)
 	q.Offset(listRequest.Offset)
 
-	rowItems := q.List()
+	rowItems, err := q.list()
+	must(err)
+
+	itemVals := reflect.ValueOf(rowItems)
+
+	itemLen := itemVals.Len()
 
 	var ret []*preview
-	for _, item := range rowItems {
+
+	for i := 0; i < itemLen; i++ {
 		ret = append(
 			ret,
-			resource.getPreview(item, user, sourceResource),
+			resourceData.getPreview(itemVals.Index(i).Interface(), user, sourceResource),
 		)
 	}
+
+	/*for _, item := range rowItems {
+		ret = append(
+			ret,
+			resourceData.getPreview(item, user, sourceResource),
+		)
+	}*/
 	return ret
 }

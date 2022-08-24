@@ -48,7 +48,7 @@ type resourceData struct {
 
 	typ reflect.Type
 
-	quickActions []QuickActionIface
+	quickActions []quickActionIface
 
 	fields     []*Field
 	fieldMap   map[string]*Field
@@ -162,17 +162,17 @@ type resourceIface interface {
 
 	//getURL(suffix string) string
 
-	getPreviewData(user *user, f *Field, value int64) (*preview, error)
-	getItemPreview(id int64, user *user, relatedResource resourceIface) *preview
-	getPreviews(listRequest relationListRequest, user *user) []*preview
+	//getPreviewData(user *user, f *Field, value int64) (*preview, error)
+	//getItemPreview(id int64, user *user, relatedResource resourceIface) *preview
+	//getPreviews(listRequest relationListRequest, user *user) []*preview
 
-	getnavigation(action *Action, request *Request) navigation
+	//getnavigation(action *Action, request *Request) navigation
 
 	importSearchData(*pragelastic.BulkUpdater[searchItem]) error
-	resourceItemName(id int64) string
-	itemWithRelationCount(fieldName string, id int64) int64
+	//resourceItemName(id int64) string
+	//itemWithRelationCount(fieldName string, id int64) int64
 
-	runQuickAction(actionName string, itemID int64, request *Request) error
+	//runQuickAction(actionName string, itemID int64, request *Request) error
 }
 
 func (resource *Resource[T]) getData() *resourceData {
@@ -265,7 +265,7 @@ func (resource *Resource[T]) setTimestamp(item *T, fieldName string) {
 
 func (resource *Resource[T]) Delete(id int64) error {
 	q := resource.Is("id", id)
-	count, err := resource.data.deleteItems(q.listQuery, q.listQuery.isDebug)
+	count, err := q.listQuery.delete()
 	if err != nil {
 		return err
 	}

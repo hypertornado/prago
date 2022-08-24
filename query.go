@@ -1,14 +1,12 @@
 package prago
 
 type Query[T any] struct {
-	resource  *Resource[T]
 	listQuery *listQuery
 }
 
 func (resource *Resource[T]) Query() *Query[T] {
 	ret := &Query[T]{
-		resource:  resource,
-		listQuery: &listQuery{},
+		listQuery: resource.data.query(),
 	}
 	return ret
 }
@@ -18,11 +16,12 @@ func (resource *Resource[T]) ID(id any) *T {
 }
 
 func (q *Query[T]) ID(id any) *T {
-	return q.Where(sqlFieldToQuery("id"), id).First()
+	return q.listQuery.ID(id).(*T)
 }
 
 func (q *Query[T]) Is(name string, value interface{}) *Query[T] {
-	return q.Where(sqlFieldToQuery(name), value)
+	q.listQuery.Is(name, value)
+	return q
 }
 
 func (q *Query[T]) Where(condition string, values ...interface{}) *Query[T] {
@@ -31,12 +30,12 @@ func (q *Query[T]) Where(condition string, values ...interface{}) *Query[T] {
 }
 
 func (q *Query[T]) Limit(limit int64) *Query[T] {
-	q.listQuery.limit = limit
+	q.listQuery.Limit(limit)
 	return q
 }
 
-func (q *Query[T]) Offset(limit int64) *Query[T] {
-	q.listQuery.offset = limit
+func (q *Query[T]) Offset(offset int64) *Query[T] {
+	q.listQuery.Offset(offset)
 	return q
 }
 
@@ -56,7 +55,7 @@ func (q *Query[T]) OrderDesc(order string) *Query[T] {
 }
 
 func (q *Query[T]) List() []*T {
-	items, err := q.resource.data.listItems(q.listQuery, q.listQuery.isDebug)
+	items, err := q.listQuery.list()
 	if err != nil {
 		panic(err)
 	}
@@ -64,13 +63,19 @@ func (q *Query[T]) List() []*T {
 }
 
 func (q *Query[T]) First() *T {
-	items := q.List()
+	ret, ok := q.listQuery.First().(*T)
+	if !ok {
+		return nil
+	}
+	return ret
+
+	/*items := q.List()
 	if len(items) > 0 {
 		return items[0]
 	}
-	return nil
+	return nil*/
 }
 
 func (q *Query[T]) Count() (int64, error) {
-	return q.resource.data.countItems(q.listQuery, q.listQuery.isDebug)
+	return q.listQuery.count()
 }

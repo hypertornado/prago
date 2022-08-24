@@ -179,26 +179,26 @@ func (action *Action) hiddenInMainMenu() *Action {
 
 func (action *Action) getnavigation(request *Request) navigation {
 	if action.resource != nil {
-		return action.resource.getnavigation(action, request)
+		return action.resource.getData().getnavigation(action, request)
 	}
 	return navigation{}
 }
 
-func (resource *Resource[T]) getnavigation(action *Action, request *Request) navigation {
-	if resource == nil {
+func (resourceData *resourceData) getnavigation(action *Action, request *Request) navigation {
+	if resourceData == nil {
 		return navigation{}
 	}
 
 	code := action.url
 	if action.isItemAction {
-		item := resource.ID(request.Param("id"))
+		item := resourceData.query().ID(request.Param("id"))
 		if item != nil {
-			return resource.getItemNavigation(request.user, item, code)
+			return resourceData.getItemNavigation(request.user, item, code)
 		} else {
 			return navigation{}
 		}
 	}
-	return resource.data.getResourceNavigation(request.user, code)
+	return resourceData.getResourceNavigation(request.user, code)
 
 }
 
@@ -210,7 +210,7 @@ func (resource *Resource[T]) getListItemActions(user *user, item *T, id int64) l
 		URL:  resource.getData().getURL(fmt.Sprintf("%d", id)),
 	})
 
-	navigation := resource.getItemNavigation(user, item, "")
+	navigation := resource.data.getItemNavigation(user, item, "")
 
 	for _, v := range navigation.Tabs {
 		if !v.Selected {

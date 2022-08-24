@@ -21,16 +21,16 @@ type viewField struct {
 	Value    interface{}
 }
 
-func (resource *Resource[T]) getViews(item *T, user *user) (ret []view) {
+func (resourceData *resourceData) getViews(item any, user *user) (ret []view) {
 	id := getItemID(item)
-	ret = append(ret, resource.getBasicView(id, item, user))
-	ret = append(ret, resource.getRelationViews(id, user)...)
+	ret = append(ret, resourceData.getBasicView(id, item, user))
+	ret = append(ret, resourceData.getRelationViews(id, user)...)
 	return ret
 }
 
-func (resource *Resource[T]) getBasicView(id int64, item *T, user *user) view {
+func (resourceData *resourceData) getBasicView(id int64, item any, user *user) view {
 	ret := view{
-		QuickActions: resource.getQuickActionViews(item, user),
+		QuickActions: resourceData.getQuickActionViews(item, user),
 	}
 
 	ret.Items = append(
@@ -39,13 +39,13 @@ func (resource *Resource[T]) getBasicView(id int64, item *T, user *user) view {
 			Name:     messages.Get(user.Locale, "admin_table"),
 			Template: "admin_item_view_url",
 			Value: [2]string{
-				resource.data.getURL(""),
-				resource.data.pluralName(user.Locale),
+				resourceData.getURL(""),
+				resourceData.pluralName(user.Locale),
 			},
 		},
 	)
 
-	for i, f := range resource.data.fields {
+	for i, f := range resourceData.fields {
 		if !f.authorizeView(user) {
 			continue
 		}
@@ -65,7 +65,7 @@ func (resource *Resource[T]) getBasicView(id int64, item *T, user *user) view {
 		)
 	}
 
-	historyView := resource.data.app.getHistory(resource, int64(id))
+	historyView := resourceData.app.getHistory(resourceData, int64(id))
 
 	if len(historyView.Items) > 0 {
 		ret.Items = append(
@@ -86,7 +86,7 @@ func (resource *Resource[T]) getBasicView(id int64, item *T, user *user) view {
 				Name:     messages.Get(user.Locale, "admin_history_count"),
 				Template: "admin_item_view_url",
 				Value: [2]string{
-					resource.data.getURL(fmt.Sprintf("%d/history", id)),
+					resourceData.getURL(fmt.Sprintf("%d/history", id)),
 					fmt.Sprintf("%d", len(historyView.Items)),
 				},
 			},

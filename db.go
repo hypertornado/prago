@@ -22,20 +22,6 @@ type mysqlColumn struct {
 	Extra   sql.NullString
 }
 
-type listQueryOrder struct {
-	name string
-	desc bool
-}
-
-type listQuery struct {
-	conditions []string
-	values     []interface{}
-	limit      int64
-	offset     int64
-	order      []listQueryOrder
-	isDebug    bool
-}
-
 type dbIface interface {
 	Exec(string, ...interface{}) (sql.Result, error)
 	Query(string, ...interface{}) (*sql.Rows, error)
@@ -101,6 +87,7 @@ func (resourceData *resourceData) replaceItem(item interface{}, debugSQL bool) e
 	if err != nil {
 		return err
 	}
+	//TODO: suspicious
 	updateNames := []string{}
 	for _, v := range names {
 		updateNames = append(updateNames, fmt.Sprintf(" %s=? ", v))
@@ -229,19 +216,19 @@ func sqlFieldToQuery(fieldName string) string {
 }
 
 func (resourceData *resourceData) countAllItems(debugSQL bool) (int64, error) {
-	return resourceData.countItems(&listQuery{}, debugSQL)
+	return resourceData.query().count()
 }
 
-func (resourceData *resourceData) countItems(query *listQuery, debugSQL bool) (int64, error) {
+func (query *listQuery) count() (int64, error) {
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.conditions)
 
-	q := fmt.Sprintf("SELECT COUNT(*) FROM `%s` %s %s %s;", resourceData.id, whereString, orderString, limitString)
-	if debugSQL {
+	q := fmt.Sprintf("SELECT COUNT(*) FROM `%s` %s %s %s;", query.resourceData.id, whereString, orderString, limitString)
+	if query.isDebug {
 		fmt.Println(q, query.values)
 	}
-	rows, err := resourceData.app.db.Query(q, query.values...)
+	rows, err := query.resourceData.app.db.Query(q, query.values...)
 	defer func() {
 		if rows != nil {
 			rows.Close()
@@ -257,34 +244,26 @@ func (resourceData *resourceData) countItems(query *listQuery, debugSQL bool) (i
 	return i, err
 }
 
-/*func (resource *Resource[T]) listItems(query *listQuery, debugSQL bool) ([]*T, error) {
-	items, err := resource.data.listItems2(query, debugSQL)
-	if err != nil {
-		return nil, err
-	}
-	return items.([]*T), err
-}*/
+func (query *listQuery) list() (interface{}, error) {
+	slice := reflect.New(reflect.SliceOf(reflect.PointerTo(query.resourceData.typ))).Elem()
 
-func (resourceData *resourceData) listItems(query *listQuery, debugSQL bool) (interface{}, error) {
-	slice := reflect.New(reflect.SliceOf(reflect.PointerTo(resourceData.typ))).Elem()
-
-	tableName := resourceData.id
+	tableName := query.resourceData.id
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.conditions)
 
-	names, _, err := resourceData.getStructScanners(
-		reflect.New(resourceData.typ).Elem(),
+	names, _, err := query.resourceData.getStructScanners(
+		reflect.New(query.resourceData.typ).Elem(),
 	)
 	if err != nil {
 		return nil, err
 	}
 
 	q := fmt.Sprintf("SELECT %s FROM `%s` %s %s %s;", strings.Join(names, ", "), tableName, whereString, orderString, limitString)
-	if debugSQL {
-		resourceData.app.Log().Println(q, query.values)
+	if query.isDebug {
+		query.resourceData.app.Log().Println(q, query.values)
 	}
-	rows, err := resourceData.app.db.Query(q, query.values...)
+	rows, err := query.resourceData.app.db.Query(q, query.values...)
 	defer func() {
 		if rows != nil {
 			rows.Close()
@@ -294,9 +273,9 @@ func (resourceData *resourceData) listItems(query *listQuery, debugSQL bool) (in
 		return nil, err
 	}
 	for rows.Next() {
-		newValue := reflect.New(resourceData.typ)
+		newValue := reflect.New(query.resourceData.typ)
 
-		_, scanners, err := resourceData.getStructScanners(newValue.Elem())
+		_, scanners, err := query.resourceData.getStructScanners(newValue.Elem())
 		if err != nil {
 			return nil, err
 		}
@@ -306,13 +285,13 @@ func (resourceData *resourceData) listItems(query *listQuery, debugSQL bool) (in
 	return slice.Interface(), nil
 }
 
-func (resourceData *resourceData) deleteItems(query *listQuery, debugSQL bool) (int64, error) {
-
+func (query *listQuery) delete() (int64, error) {
+	resourceData := query.resourceData
 	limitString := buildLimitWithoutOffsetString(query.limit)
 	whereString := buildWhereString(query.conditions)
 
 	q := fmt.Sprintf("DELETE FROM `%s` %s %s;", resourceData.id, whereString, limitString)
-	if debugSQL {
+	if query.isDebug {
 		resourceData.app.Log().Println(q, query.values)
 	}
 	res, err := resourceData.app.db.Exec(q, query.values...)

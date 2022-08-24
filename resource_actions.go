@@ -51,7 +51,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 				render404(request)
 				return nil
 			}
-			return resource.getViews(item, request.user)
+			return resource.data.getViews(item, request.user)
 		},
 	)
 
@@ -128,7 +128,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 	if resource.data.activityLog {
 		resource.Action("history").priority().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resource.data.canUpdate).DataSource(
 			func(request *Request) interface{} {
-				return resource.data.app.getHistory(resource, 0)
+				return resource.data.app.getHistory(resource.data, 0)
 			},
 		)
 
@@ -137,7 +137,7 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 				if item == nil {
 					return nil
 				}
-				return resource.data.app.getHistory(resource, getItemID(item))
+				return resource.data.app.getHistory(resource.data, getItemID(item))
 			},
 		)
 	}
@@ -186,7 +186,7 @@ func (resource *Resource[T]) DeleteWithLog(item *T, request *Request) error {
 	}
 
 	if resource.data.app.search != nil {
-		err = resource.data.app.search.deleteItem(resource, id)
+		err = resource.data.app.search.deleteItem(resource.data, id)
 		if err != nil {
 			resource.data.app.Log().Println(fmt.Errorf("%s", err))
 		}

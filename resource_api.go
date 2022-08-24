@@ -76,7 +76,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 			}
 
 			request.RenderJSON(
-				resource.getPreview(item, request.user, nil),
+				resource.data.getPreview(item, request.user, nil),
 			)
 		},
 	)
@@ -118,7 +118,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 			if err == nil {
 				item := resource.ID(id)
 				if item != nil {
-					relationItem := resource.getPreview(item, request.user, nil)
+					relationItem := resource.data.getPreview(item, request.user, nil)
 					if relationItem != nil {
 						usedIDs[relationItem.ID] = true
 						ret = append(ret, *relationItem)
@@ -134,7 +134,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 				}
 				items := resource.Query().Limit(5).Where(v+" LIKE ?", filter).List()
 				for _, item := range items {
-					viewItem := resource.getPreview(item, request.user, nil)
+					viewItem := resource.data.getPreview(item, request.user, nil)
 					if viewItem != nil && !usedIDs[viewItem.ID] {
 						usedIDs[viewItem.ID] = true
 						ret = append(ret, *viewItem)

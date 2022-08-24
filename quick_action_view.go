@@ -12,10 +12,6 @@ type QuickActionView struct {
 	ItemID    int64
 }
 
-type QuickActionIface interface {
-	//getName(string) string
-}
-
 type QuickActionAPIResponse struct {
 	Redirect string
 	Error    string
@@ -25,13 +21,13 @@ func (qa *QuickAction[T]) getView() *QuickActionView {
 	return nil
 }
 
-func (resource *Resource[T]) getQuickActionViews(itemIface any, user *user) (ret []QuickActionView) {
-	item := itemIface.(*T)
-	for _, v := range resource.data.quickActions {
-		quickAction := v.(*QuickAction[T])
-		if quickAction.validation == nil || quickAction.validation(item, user) {
+func (resourceData *resourceData) getQuickActionViews(itemIface any, user *user) (ret []QuickActionView) {
+	//item := itemIface.(*T)
+	for _, v := range resourceData.quickActions {
+		quickActionData := v.getData()
+		if quickActionData.validation == nil || quickActionData.validation(itemIface, user) {
 			var typStr string
-			switch quickAction.typ {
+			switch quickActionData.typ {
 			case quickTypeBasic:
 				typStr = "basic"
 			case quickTypeDelete:
@@ -43,8 +39,8 @@ func (resource *Resource[T]) getQuickActionViews(itemIface any, user *user) (ret
 			}
 
 			view := QuickActionView{
-				ActionURL: quickAction.getApiURL(getItemID(item)),
-				Name:      quickAction.singularName(user.Locale),
+				ActionURL: quickActionData.getApiURL(getItemID(itemIface)),
+				Name:      quickActionData.singularName(user.Locale),
 				TypStr:    typStr,
 			}
 			ret = append(ret, view)
@@ -59,7 +55,7 @@ func quickActionAPIHandler(resource resourceIface, request *Request) {
 	itemID, err := strconv.Atoi(request.Param("itemid"))
 	must(err)
 
-	err = resource.runQuickAction(actionName, int64(itemID), request)
+	err = resource.getData().runQuickAction(actionName, int64(itemID), request)
 	if err != nil {
 		renderAPIMessage(request, 500, err.Error())
 		return
@@ -67,18 +63,18 @@ func quickActionAPIHandler(resource resourceIface, request *Request) {
 	renderAPIMessage(request, 200, "")
 }
 
-func (resource *Resource[T]) runQuickAction(actionName string, itemID int64, request *Request) error {
-	item := resource.ID(itemID)
+func (resourceData *resourceData) runQuickAction(actionName string, itemID int64, request *Request) error {
+	item := resourceData.query().ID(itemID)
 	if item == nil {
-		return errors.New("Nelze nalézt položku")
+		return errors.New("nelze nalézt položku")
 	}
-	for _, v := range resource.data.quickActions {
-		action := v.(*QuickAction[T])
-		if action.url == actionName {
-			if action.handler == nil {
+	for _, v := range resourceData.quickActions {
+		actionData := v.getData()
+		if actionData.url == actionName {
+			if actionData.handler == nil {
 				return errors.New("není přiřazena žádná akce")
 			}
-			return action.handler(item, request)
+			return actionData.handler(item, request)
 		}
 	}
 	return errors.New("chyba akce")

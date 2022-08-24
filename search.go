@@ -184,18 +184,18 @@ func (resource *Resource[T]) saveSearchItem(item *T) error {
 
 func (resource *Resource[T]) saveSearchItemWithRoles(bulkUpdater *pragelastic.BulkUpdater[searchItem], item *T, roles []string) error {
 	//TODO: ugly hack
-	preview := resource.getPreview(item, &user{}, nil)
+	preview := resource.data.getPreview(item, &user{}, nil)
 	if preview == nil {
 		return errors.New("wrong item to relation data conversion")
 	}
-	searchItem := relationDataToSearchItem(resource, *preview, roles)
+	searchItem := relationDataToSearchItem(resource.data, *preview, roles)
 	searchItem.Roles = roles
 	return resource.data.app.search.addItem(bulkUpdater, &searchItem, 100)
 }
 
-func relationDataToSearchItem(resource resourceIface, data preview, roles []string) searchItem {
+func relationDataToSearchItem(resourceData *resourceData, data preview, roles []string) searchItem {
 	return searchItem{
-		ID: searchID(resource, data.ID),
+		ID: searchID(resourceData, data.ID),
 		SuggestionField: pragelastic.Suggest{
 			Input:  data.Name,
 			Weight: 10,
@@ -203,7 +203,7 @@ func relationDataToSearchItem(resource resourceIface, data preview, roles []stri
 				"Roles": roles,
 			},
 		},
-		Category:    resource.getData().pluralName("cs"),
+		Category:    resourceData.pluralName("cs"),
 		Name:        data.Name,
 		Description: data.Description,
 		Image:       data.Image,
@@ -211,13 +211,13 @@ func relationDataToSearchItem(resource resourceIface, data preview, roles []stri
 	}
 }
 
-func searchID(resource resourceIface, id int64) string {
-	return fmt.Sprintf("%s-%d", resource.getData().getID(), id)
+func searchID(resourceData *resourceData, id int64) string {
+	return fmt.Sprintf("%s-%d", resourceData.getID(), id)
 }
 
-func (e *adminSearch) deleteItem(resource resourceIface, id int64) error {
+func (e *adminSearch) deleteItem(resourceData *resourceData, id int64) error {
 	if e.index != nil {
-		return e.index.DeleteItem(searchID(resource, id))
+		return e.index.DeleteItem(searchID(resourceData, id))
 	}
 	return nil
 }

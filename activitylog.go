@@ -54,12 +54,12 @@ func (app *App) ListenActivity(handler func(Activity)) {
 	app.activityListeners = append(app.activityListeners, handler)
 }
 
-func (app *App) getHistory(resource resourceIface, itemID int64) historyView {
+func (app *App) getHistory(resourceData *resourceData, itemID int64) historyView {
 	ret := historyView{}
 
 	q := app.activityLogResource.Query()
-	if resource != nil {
-		q.Is("ResourceName", resource.getData().getID())
+	if resourceData != nil {
+		q.Is("ResourceName", resourceData.getID())
 	}
 	if itemID > 0 {
 		q.Is("ItemID", itemID)
@@ -87,7 +87,7 @@ func (app *App) getHistory(resource resourceIface, itemID int64) historyView {
 			ActivityURL: activityURL,
 			ActionType:  v.ActionType,
 			ItemName:    itemName,
-			ItemURL:     resource.getData().getURL(fmt.Sprintf("%d", v.ItemID)),
+			ItemURL:     resourceData.getURL(fmt.Sprintf("%d", v.ItemID)),
 			UserName:    username,
 			UserURL:     userurl,
 			CreatedAt:   messages.Timestamp(locale, v.CreatedAt, true),

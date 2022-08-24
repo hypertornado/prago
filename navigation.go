@@ -106,18 +106,18 @@ func (resourceData *resourceData) getResourceNavigation(user *user, code string)
 	}.sortByPriority()
 }
 
-func (resource *Resource[T]) getItemNavigation(user *user, item interface{}, code string) navigation {
+func (resourceData *resourceData) getItemNavigation(user *user, item interface{}, code string) navigation {
 	var tabs []tab
-	for _, v := range resource.data.itemActions {
+	for _, v := range resourceData.itemActions {
 		if v.getMethod() == "GET" {
 			name := v.getName(user.Locale)
 			if v.getURLToken() == "" {
 				name = getItemName(item)
 			}
-			if resource.data.app.authorize(user, v.getPermission()) {
+			if resourceData.app.authorize(user, v.getPermission()) {
 				tabs = append(tabs, tab{
 					Name:     name,
-					URL:      resource.data.getItemURL(item, v.getURLToken()),
+					URL:      resourceData.getItemURL(item, v.getURLToken()),
 					Selected: trueIfEqual(code, v.getURLToken()),
 					priority: v.returnIsPriority(),
 				})

@@ -64,11 +64,11 @@ func (field *relatedField) listName(locale string) string {
 }
 
 func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
-	ret, _ := f.resource.getPreviewData(user, f, value.(int64))
+	ret, _ := getPreviewData(user, f, value.(int64))
 	return ret
 }
 
-func (resource *Resource[T]) getPreviewData(user *user, f *Field, value int64) (*preview, error) {
+func getPreviewData(user *user, f *Field, value int64) (*preview, error) {
 	app := f.resource.getData().app
 	if f.relatedResource == nil {
 		return nil, fmt.Errorf("resource not found: %s", f.name("en"))
@@ -78,29 +78,29 @@ func (resource *Resource[T]) getPreviewData(user *user, f *Field, value int64) (
 		return nil, fmt.Errorf("user is not authorized to view this item")
 	}
 
-	ret := f.relatedResource.getItemPreview(value, user, f.resource)
+	ret := f.relatedResource.getData().getItemPreview(value, user, f.resource)
 	if ret == nil {
-		return nil, errors.New("Can't get item preview")
+		return nil, errors.New("can't get item preview")
 	}
 	return ret, nil
 }
 
-func (resource *Resource[T]) getItemPreview(id int64, user *user, relatedResource resourceIface) *preview {
-	item := resource.ID(id)
+func (resourceData *resourceData) getItemPreview(id int64, user *user, relatedResource resourceIface) *preview {
+	item := resourceData.query().ID(id)
 	if item == nil {
 		return nil
 	}
-	return resource.getPreview(item, user, nil)
+	return resourceData.getPreview(item, user, nil)
 
 }
 
-func (resource *Resource[T]) getPreview(item *T, user *user, relatedResource resourceIface) *preview {
+func (resourceData *resourceData) getPreview(item any, user *user, relatedResource resourceIface) *preview {
 	var ret preview
 	ret.ID = getItemID(item)
 	ret.Name = getItemName(item)
-	ret.URL = resource.data.getItemURL(item, "")
-	ret.Image = resource.data.app.getItemImage(item)
-	ret.Description = resource.getItemDescription(item, user, relatedResource)
+	ret.URL = resourceData.getItemURL(item, "")
+	ret.Image = resourceData.app.getItemImage(item)
+	ret.Description = resourceData.getItemDescription(item, user, relatedResource)
 	return &ret
 }
 
@@ -140,7 +140,7 @@ func getItemName(item interface{}) string {
 	return fmt.Sprintf("#%d", getItemID(item))
 }
 
-func (resource *Resource[T]) getItemDescription(item *T, user *user, relatedResource resourceIface) string {
+func (resourceData *resourceData) getItemDescription(item any, user *user, relatedResource resourceIface) string {
 	var items []string
 	itemsVal := reflect.ValueOf(item).Elem()
 
@@ -156,7 +156,7 @@ func (resource *Resource[T]) getItemDescription(item *T, user *user, relatedReso
 		}
 	}
 
-	for _, v := range resource.data.fields {
+	for _, v := range resourceData.fields {
 		if v.fieldClassName == "ID" || v.fieldClassName == "Name" || v.fieldClassName == "Description" {
 			continue
 		}
@@ -170,7 +170,7 @@ func (resource *Resource[T]) getItemDescription(item *T, user *user, relatedReso
 		}
 
 		field := itemsVal.FieldByName(v.fieldClassName)
-		stringed := resource.data.app.relationStringer(*v, field, user)
+		stringed := resourceData.app.relationStringer(*v, field, user)
 		if stringed != "" {
 			items = append(items, fmt.Sprintf("%s: %s", v.name(user.Locale), stringed))
 		}
@@ -192,7 +192,7 @@ func (app App) relationStringer(field Field, value reflect.Value, user *user) st
 			if value.Int() <= 0 {
 				return ""
 			}
-			field.relatedResource.resourceItemName(int64(value.Int()))
+			field.relatedResource.getData().resourceItemName(int64(value.Int()))
 		}
 		return fmt.Sprintf("%v", value.Int())
 	case reflect.Float32, reflect.Float64:
@@ -215,8 +215,8 @@ func (app App) relationStringer(field Field, value reflect.Value, user *user) st
 	return ""
 }
 
-func (resource *Resource[T]) resourceItemName(id int64) string {
-	item := resource.ID(id)
+func (resourceData *resourceData) resourceItemName(id int64) string {
+	item := resourceData.query().ID(id)
 	if item == nil {
 		return fmt.Sprintf("%d - not found", id)
 	}
