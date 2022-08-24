@@ -63,8 +63,10 @@ type App struct {
 	dbConfig *dbConnectConfig
 }
 
+const testingAppName = "__prago_test_app"
+
 func newTestingApp() *App {
-	return createApp("__prago_test_app", "0.0")
+	return createApp(testingAppName, "0.0")
 }
 
 func createApp(codeName string, version string) *App {
@@ -91,7 +93,11 @@ func createApp(codeName string, version string) *App {
 	app.initAccessManager()
 	app.initDefaultFieldTypes()
 
-	app.connectDB()
+	var testing bool
+	if app.codeName == testingAppName {
+		testing = true
+	}
+	app.connectDB(testing)
 
 	app.initSettings()
 

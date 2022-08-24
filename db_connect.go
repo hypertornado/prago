@@ -17,23 +17,41 @@ func getDBConnectPath(appName string) string {
 	return fmt.Sprintf("%s/.%s/prago_db.json", os.Getenv("HOME"), appName)
 }
 
-func (app *App) connectDB() {
-	path := getDBConnectPath(app.codeName)
-
+func getDBConfig(codeName string) (*dbConnectConfig, error) {
+	path := getDBConnectPath(codeName)
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		panic(fmt.Sprintf("error while opening db config file %s: %s", path, err))
+		return nil, fmt.Errorf("error while opening db config file %s: %s", path, err)
 	}
 
 	var config dbConnectConfig
-
 	err = json.Unmarshal(data, &config)
 	if err != nil {
-		panic(fmt.Sprintf("error while parsing db config file: %s", err))
+		return nil, fmt.Errorf("error while parsing db config file: %s", err)
 	}
 
-	app.dbConfig = &config
+	return &config, nil
 
+}
+
+func (app *App) connectDB(testing bool) {
+	var config *dbConnectConfig
+
+	if testing {
+		config = &dbConnectConfig{
+			Name:     "prago_test",
+			User:     "prago_test",
+			Password: "prago_test",
+		}
+	} else {
+		var err error
+		config, err = getDBConfig(app.codeName)
+		if err != nil {
+			panic(fmt.Sprintf("can't get config file: %s", err.Error()))
+		}
+	}
+
+	app.dbConfig = config
 	app.db = mustConnectDatabase(
 		app.dbConfig.User,
 		app.dbConfig.Password,
