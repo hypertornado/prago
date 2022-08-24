@@ -3,7 +3,6 @@ package prago
 type Query[T any] struct {
 	resource  *Resource[T]
 	listQuery *listQuery
-	isDebug   bool
 }
 
 func (resource *Resource[T]) Query() *Query[T] {
@@ -47,7 +46,7 @@ func (q *Query[T]) Order(order string) *Query[T] {
 }
 
 func (q *Query[T]) Debug() *Query[T] {
-	q.isDebug = true
+	q.listQuery.isDebug = true
 	return q
 }
 
@@ -57,11 +56,11 @@ func (q *Query[T]) OrderDesc(order string) *Query[T] {
 }
 
 func (q *Query[T]) List() []*T {
-	items, err := q.resource.listItems(q.listQuery, q.isDebug)
+	items, err := q.resource.data.listItems(q.listQuery, q.listQuery.isDebug)
 	if err != nil {
 		panic(err)
 	}
-	return items
+	return items.([]*T)
 }
 
 func (q *Query[T]) First() *T {
@@ -73,5 +72,5 @@ func (q *Query[T]) First() *T {
 }
 
 func (q *Query[T]) Count() (int64, error) {
-	return q.resource.data.countItems(q.listQuery, q.isDebug)
+	return q.resource.data.countItems(q.listQuery, q.listQuery.isDebug)
 }

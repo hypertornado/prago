@@ -265,7 +265,7 @@ func (resource *Resource[T]) setTimestamp(item *T, fieldName string) {
 
 func (resource *Resource[T]) Delete(id int64) error {
 	q := resource.Is("id", id)
-	count, err := resource.data.deleteItems(q.listQuery, q.isDebug)
+	count, err := resource.data.deleteItems(q.listQuery, q.listQuery.isDebug)
 	if err != nil {
 		return err
 	}

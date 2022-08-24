@@ -33,6 +33,7 @@ type listQuery struct {
 	limit      int64
 	offset     int64
 	order      []listQueryOrder
+	isDebug    bool
 }
 
 type dbIface interface {
@@ -256,15 +257,15 @@ func (resourceData *resourceData) countItems(query *listQuery, debugSQL bool) (i
 	return i, err
 }
 
-func (resource *Resource[T]) listItems(query *listQuery, debugSQL bool) ([]*T, error) {
+/*func (resource *Resource[T]) listItems(query *listQuery, debugSQL bool) ([]*T, error) {
 	items, err := resource.data.listItems2(query, debugSQL)
 	if err != nil {
 		return nil, err
 	}
 	return items.([]*T), err
-}
+}*/
 
-func (resourceData *resourceData) listItems2(query *listQuery, debugSQL bool) (interface{}, error) {
+func (resourceData *resourceData) listItems(query *listQuery, debugSQL bool) (interface{}, error) {
 	slice := reflect.New(reflect.SliceOf(reflect.PointerTo(resourceData.typ))).Elem()
 
 	tableName := resourceData.id
