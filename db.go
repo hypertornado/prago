@@ -257,24 +257,33 @@ func (resourceData *resourceData) countItems(query *listQuery, debugSQL bool) (i
 }
 
 func (resource *Resource[T]) listItems(query *listQuery, debugSQL bool) ([]*T, error) {
-	db := resource.data.app.db
-	tableName := resource.data.id
-	var ret []*T
+	items, err := resource.data.listItems2(query, debugSQL)
+	if err != nil {
+		return nil, err
+	}
+	return items.([]*T), err
+}
+
+func (resourceData *resourceData) listItems2(query *listQuery, debugSQL bool) (interface{}, error) {
+	slice := reflect.New(reflect.SliceOf(reflect.PointerTo(resourceData.typ))).Elem()
+
+	tableName := resourceData.id
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.conditions)
 
-	newValue := reflect.New(resource.data.typ).Elem()
-	names, _, err := resource.getStructScanners(newValue)
+	names, _, err := resourceData.getStructScanners(
+		reflect.New(resourceData.typ).Elem(),
+	)
 	if err != nil {
 		return nil, err
 	}
 
 	q := fmt.Sprintf("SELECT %s FROM `%s` %s %s %s;", strings.Join(names, ", "), tableName, whereString, orderString, limitString)
 	if debugSQL {
-		resource.data.app.Log().Println(q, query.values)
+		resourceData.app.Log().Println(q, query.values)
 	}
-	rows, err := db.Query(q, query.values...)
+	rows, err := resourceData.app.db.Query(q, query.values...)
 	defer func() {
 		if rows != nil {
 			rows.Close()
@@ -284,18 +293,16 @@ func (resource *Resource[T]) listItems(query *listQuery, debugSQL bool) ([]*T, e
 		return nil, err
 	}
 	for rows.Next() {
-		var item T
-		var ptrItem *T = &item
-		newValue = reflect.ValueOf(ptrItem)
-		_, scanners, err := resource.getStructScanners(newValue.Elem())
+		newValue := reflect.New(resourceData.typ)
+
+		_, scanners, err := resourceData.getStructScanners(newValue.Elem())
 		if err != nil {
 			return nil, err
 		}
 		rows.Scan(scanners...)
-		ret = append(ret, ptrItem)
+		slice.Set(reflect.Append(slice, newValue))
 	}
-
-	return ret, nil
+	return slice.Interface(), nil
 }
 
 func (resourceData *resourceData) deleteItems(query *listQuery, debugSQL bool) (int64, error) {
