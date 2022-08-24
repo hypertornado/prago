@@ -8,8 +8,8 @@ type FormItemAction[T any] struct {
 func (resource *Resource[T]) FormItemAction(url string) *FormItemAction[T] {
 	fa := newFormAction(resource.data.app, url)
 
-	fa.actionForm.resource = resource
-	fa.actionValidation.resource = resource
+	fa.actionForm.resourceData = resource.data
+	fa.actionValidation.resourceData = resource.data
 
 	fa.actionForm.Permission(resource.data.canView)
 	fa.actionValidation.Permission(resource.data.canView)

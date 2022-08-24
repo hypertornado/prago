@@ -75,8 +75,8 @@ func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Reques
 func (resource *Resource[T]) FormAction(url string) *FormAction {
 	action := newFormAction(resource.data.app, url)
 
-	action.actionForm.resource = resource
-	action.actionValidation.resource = resource
+	action.actionForm.resourceData = resource.data
+	action.actionValidation.resourceData = resource.data
 
 	action.actionForm.Permission(resource.getData().canView)
 	action.actionValidation.Permission(resource.getData().canView)

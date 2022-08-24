@@ -10,7 +10,7 @@ func (resource *Resource[T]) ItemAction(url string) *ResourceItemAction[T] {
 		resource: resource,
 	}
 	action := newAction(resource.data.app, url)
-	action.resource = resource
+	action.resourceData = resource.data
 	action.isItemAction = true
 	action.permission = resource.data.canView
 	resource.data.itemActions = append(resource.data.itemActions, action)

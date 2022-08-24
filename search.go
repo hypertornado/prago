@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"reflect"
 	"strconv"
 
 	"github.com/hypertornado/prago/pragelastic"
@@ -142,11 +143,11 @@ func newAdminSearch(app *App) (*adminSearch, error) {
 	}, nil
 }
 
-func (resource *Resource[T]) importSearchData(bulkUpdater *pragelastic.BulkUpdater[searchItem]) error {
-	roles := resource.data.getResourceViewRoles()
-	name := resource.data.pluralName("cs")
+func (resourceData *resourceData) importSearchData(bulkUpdater *pragelastic.BulkUpdater[searchItem]) error {
+	roles := resourceData.getResourceViewRoles()
+	name := resourceData.pluralName("cs")
 	var resourceSearchItem = searchItem{
-		ID: "resource_" + resource.data.id,
+		ID: "resource_" + resourceData.id,
 		SuggestionField: pragelastic.Suggest{
 			Input:  name,
 			Weight: 100,
@@ -155,21 +156,33 @@ func (resource *Resource[T]) importSearchData(bulkUpdater *pragelastic.BulkUpdat
 			},
 		},
 		Name:  name,
-		URL:   resource.data.getURL(""),
+		URL:   resourceData.getURL(""),
 		Roles: roles,
 	}
 
-	resource.data.app.search.addItem(bulkUpdater, &resourceSearchItem, 200)
+	resourceData.app.search.addItem(bulkUpdater, &resourceSearchItem, 200)
 
-	c, _ := resource.Query().Count()
+	c, _ := resourceData.query().count()
 	if c > 10000 {
 		return nil
 	}
 
-	items := resource.Query().List()
-	for _, item := range items {
-		resource.saveSearchItemWithRoles(bulkUpdater, item, roles)
+	items, err := resourceData.query().list()
+	if err != nil {
+		return err
 	}
+
+	itemVals := reflect.ValueOf(items)
+
+	itemLen := itemVals.Len()
+
+	for i := 0; i < itemLen; i++ {
+		resourceData.saveSearchItemWithRoles(bulkUpdater, itemVals.Index(i).Interface(), roles)
+	}
+
+	/*for _, item := range items {
+		resource.saveSearchItemWithRoles(bulkUpdater, item, roles)
+	}*/
 	return nil
 }
 
@@ -179,18 +192,18 @@ func (e *adminSearch) flush() error {
 
 func (resource *Resource[T]) saveSearchItem(item *T) error {
 	roles := resource.data.getResourceViewRoles()
-	return resource.saveSearchItemWithRoles(nil, item, roles)
+	return resource.data.saveSearchItemWithRoles(nil, item, roles)
 }
 
-func (resource *Resource[T]) saveSearchItemWithRoles(bulkUpdater *pragelastic.BulkUpdater[searchItem], item *T, roles []string) error {
+func (resourceData *resourceData) saveSearchItemWithRoles(bulkUpdater *pragelastic.BulkUpdater[searchItem], item any, roles []string) error {
 	//TODO: ugly hack
-	preview := resource.data.getPreview(item, &user{}, nil)
+	preview := resourceData.getPreview(item, &user{}, nil)
 	if preview == nil {
 		return errors.New("wrong item to relation data conversion")
 	}
-	searchItem := relationDataToSearchItem(resource.data, *preview, roles)
+	searchItem := relationDataToSearchItem(resourceData, *preview, roles)
 	searchItem.Roles = roles
-	return resource.data.app.search.addItem(bulkUpdater, &searchItem, 100)
+	return resourceData.app.search.addItem(bulkUpdater, &searchItem, 100)
 }
 
 func relationDataToSearchItem(resourceData *resourceData, data preview, roles []string) searchItem {
@@ -240,7 +253,7 @@ func (e *adminSearch) searchImport() error {
 	for _, v := range e.app.resources {
 		total, _ := e.index.Count()
 		e.app.Log().Printf("importing resource: %s, total: %d\n", v.getData().getID(), total)
-		err = v.importSearchData(bulkUpdater)
+		err = v.getData().importSearchData(bulkUpdater)
 		if err != nil {
 			return fmt.Errorf("while importing resource %s: %s", v.getData().getID(), err)
 		}

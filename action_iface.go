@@ -37,18 +37,18 @@ func (action *Action) getURL() string {
 	}
 
 	var url string
-	if action.resource == nil {
+	if action.resourceData == nil {
 		url = action.app.getAdminURL(action.url)
 	} else {
-		resource := action.resource
+		resourceData := action.resourceData
 		if action.isItemAction {
 			if action.url != "" {
-				url = resource.getData().getURL(":id/" + action.url)
+				url = resourceData.getURL(":id/" + action.url)
 			} else {
-				url = resource.getData().getURL(":id")
+				url = resourceData.getURL(":id")
 			}
 		} else {
-			url = resource.getData().getURL(action.url)
+			url = resourceData.getURL(action.url)
 		}
 	}
 	return url
@@ -56,8 +56,8 @@ func (action *Action) getURL() string {
 
 func (action *Action) getController() *controller {
 	var controller *controller
-	if action.resource != nil {
-		controller = action.resource.getData().getResourceControl()
+	if action.resourceData != nil {
+		controller = action.resourceData.getResourceControl()
 	} else {
 		controller = action.app.adminController
 	}

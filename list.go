@@ -436,7 +436,7 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 		row.ID = itemVal.FieldByName("ID").Int()
 		row.URL = res.getData().getURL(fmt.Sprintf("%d", row.ID))
 
-		row.Actions = res.getListItemActions(user, item, row.ID)
+		row.Actions = res.getData().getListItemActions(user, item, row.ID)
 		row.AllowsMultipleActions = res.data.allowsMultipleActions(user)
 		ret.Rows = append(ret.Rows, row)
 	}

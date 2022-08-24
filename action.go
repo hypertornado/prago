@@ -22,7 +22,7 @@ type Action struct {
 	dataSource func(*Request) interface{}
 
 	app                *App
-	resource           resourceIface
+	resourceData       *resourceData
 	isItemAction       bool
 	isUserMenu         bool
 	isHiddenInMainMenu bool
@@ -100,12 +100,16 @@ func (app *App) Action(url string) *Action {
 	return action
 }
 
-// AddAction adds action to resource
 func (resource *Resource[T]) Action(url string) *Action {
-	action := newAction(resource.data.app, url)
-	action.resource = resource
-	action.permission = resource.data.canView
-	resource.data.actions = append(resource.data.actions, action)
+	return resource.data.action(url)
+}
+
+// AddAction adds action to resource
+func (resourceData *resourceData) action(url string) *Action {
+	action := newAction(resourceData.app, url)
+	action.resourceData = resourceData
+	action.permission = resourceData.canView
+	resourceData.actions = append(resourceData.actions, action)
 	return action
 }
 
@@ -178,8 +182,8 @@ func (action *Action) hiddenInMainMenu() *Action {
 }
 
 func (action *Action) getnavigation(request *Request) navigation {
-	if action.resource != nil {
-		return action.resource.getData().getnavigation(action, request)
+	if action.resourceData != nil {
+		return action.resourceData.getnavigation(action, request)
 	}
 	return navigation{}
 }
@@ -202,15 +206,15 @@ func (resourceData *resourceData) getnavigation(action *Action, request *Request
 
 }
 
-func (resource *Resource[T]) getListItemActions(user *user, item *T, id int64) listItemActions {
+func (resourceData *resourceData) getListItemActions(user *user, item any, id int64) listItemActions {
 	ret := listItemActions{}
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{
 		Name: messages.Get(user.Locale, "admin_view"),
-		URL:  resource.getData().getURL(fmt.Sprintf("%d", id)),
+		URL:  resourceData.getURL(fmt.Sprintf("%d", id)),
 	})
 
-	navigation := resource.data.getItemNavigation(user, item, "")
+	navigation := resourceData.getItemNavigation(user, item, "")
 
 	for _, v := range navigation.Tabs {
 		if !v.Selected {
@@ -221,7 +225,7 @@ func (resource *Resource[T]) getListItemActions(user *user, item *T, id int64) l
 		}
 	}
 
-	if resource.data.app.authorize(user, resource.data.canUpdate) && resource.data.orderField != nil {
+	if resourceData.app.authorize(user, resourceData.canUpdate) && resourceData.orderField != nil {
 		ret.ShowOrderButton = true
 	}
 

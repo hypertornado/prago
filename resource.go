@@ -6,8 +6,6 @@ import (
 	"go/ast"
 	"reflect"
 	"time"
-
-	"github.com/hypertornado/prago/pragelastic"
 )
 
 //https://github.com/golang/go/issues/49085
@@ -168,7 +166,7 @@ type resourceIface interface {
 
 	//getnavigation(action *Action, request *Request) navigation
 
-	importSearchData(*pragelastic.BulkUpdater[searchItem]) error
+	//importSearchData(*pragelastic.BulkUpdater[searchItem]) error
 	//resourceItemName(id int64) string
 	//itemWithRelationCount(fieldName string, id int64) int64
 
