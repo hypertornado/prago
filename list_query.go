@@ -30,6 +30,10 @@ func (resourceData *resourceData) Is(name string, value interface{}) *listQuery 
 	return listQuery
 }
 
+func (resourceData *resourceData) ID(id any) any {
+	return resourceData.query().ID(id)
+}
+
 func (listQuery *listQuery) Is(name string, value interface{}) *listQuery {
 	listQuery.where(sqlFieldToQuery(name), value)
 	return listQuery

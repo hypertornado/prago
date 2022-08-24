@@ -103,7 +103,7 @@ func (app *App) initActivityLog() {
 	app.activityLogResource.Name(messages.GetNameFunction("admin_history"), messages.GetNameFunction("admin_history"))
 }
 
-func (resource *Resource[T]) LogActivity(user *user, before, after *T) error {
+func (resourceData *resourceData) LogActivity(user *user, before, after any) error {
 	var activityType string
 	switch {
 	case before == nil && after != nil:
@@ -143,7 +143,7 @@ func (resource *Resource[T]) LogActivity(user *user, before, after *T) error {
 	}
 
 	log := &activityLog{
-		ResourceName:  resource.data.id,
+		ResourceName:  resourceData.id,
 		ItemID:        itemID,
 		ActionType:    activityType,
 		User:          user.ID,
@@ -151,9 +151,9 @@ func (resource *Resource[T]) LogActivity(user *user, before, after *T) error {
 		ContentAfter:  string(afterData),
 	}
 
-	err = resource.data.app.activityLogResource.Create(log)
+	err = resourceData.app.activityLogResource.Create(log)
 	if err == nil {
-		for _, v := range resource.data.app.activityListeners {
+		for _, v := range resourceData.app.activityListeners {
 			v(log.activity())
 		}
 	}

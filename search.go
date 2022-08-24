@@ -190,9 +190,9 @@ func (e *adminSearch) flush() error {
 	return e.index.Flush()
 }
 
-func (resource *Resource[T]) saveSearchItem(item *T) error {
-	roles := resource.data.getResourceViewRoles()
-	return resource.data.saveSearchItemWithRoles(nil, item, roles)
+func (resourceData *resourceData) saveSearchItem(item any) error {
+	roles := resourceData.getResourceViewRoles()
+	return resourceData.saveSearchItemWithRoles(nil, item, roles)
 }
 
 func (resourceData *resourceData) saveSearchItemWithRoles(bulkUpdater *pragelastic.BulkUpdater[searchItem], item any, roles []string) error {

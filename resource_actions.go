@@ -144,35 +144,43 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 }
 
 func (resource *Resource[T]) CreateWithLog(item *T, request *Request) error {
-	err := resource.Create(item)
+	return resource.data.CreateWithLog(item, request)
+}
+
+func (resourceData *resourceData) CreateWithLog(item any, request *Request) error {
+	err := resourceData.Create(item)
 	if err != nil {
 		return err
 	}
 
-	if resource.data.app.search != nil {
+	if resourceData.app.search != nil {
 		go func() {
-			err := resource.saveSearchItem(item)
+			err := resourceData.saveSearchItem(item)
 			if err != nil {
-				resource.data.app.Log().Println(fmt.Errorf("%s", err))
+				resourceData.app.Log().Println(fmt.Errorf("%s", err))
 			}
-			resource.data.app.search.flush()
+			resourceData.app.search.flush()
 		}()
 	}
 
-	if resource.data.activityLog {
-		err := resource.LogActivity(request.user, nil, item)
+	if resourceData.activityLog {
+		err := resourceData.LogActivity(request.user, nil, item)
 		if err != nil {
 			return err
 		}
 
 	}
-	return resource.data.updateCachedCount()
+	return resourceData.updateCachedCount()
 
 }
 
 func (resource *Resource[T]) DeleteWithLog(item *T, request *Request) error {
-	if resource.data.activityLog {
-		err := resource.LogActivity(request.user, item, nil)
+	return resource.data.DeleteWithLog(item, request)
+}
+
+func (resourceData *resourceData) DeleteWithLog(item any, request *Request) error {
+	if resourceData.activityLog {
+		err := resourceData.LogActivity(request.user, item, nil)
 		if err != nil {
 			return err
 		}
@@ -180,20 +188,20 @@ func (resource *Resource[T]) DeleteWithLog(item *T, request *Request) error {
 
 	id := getItemID(item)
 
-	err := resource.Delete(id)
+	err := resourceData.Delete(id)
 	if err != nil {
 		return fmt.Errorf("can't delete item id '%d': %s", id, err)
 	}
 
-	if resource.data.app.search != nil {
-		err = resource.data.app.search.deleteItem(resource.data, id)
+	if resourceData.app.search != nil {
+		err = resourceData.app.search.deleteItem(resourceData, id)
 		if err != nil {
-			resource.data.app.Log().Println(fmt.Errorf("%s", err))
+			resourceData.app.Log().Println(fmt.Errorf("%s", err))
 		}
-		resource.data.app.search.flush()
+		resourceData.app.search.flush()
 	}
 
-	resource.data.updateCachedCount()
+	resourceData.updateCachedCount()
 
 	return nil
 }
@@ -256,7 +264,7 @@ func (resource *Resource[T]) UpdateWithLog(item *T, request *Request) error {
 
 	if resource.data.app.search != nil {
 		go func() {
-			err = resource.saveSearchItem(item)
+			err = resource.data.saveSearchItem(item)
 			if err != nil {
 				resource.data.app.Log().Println(fmt.Errorf("%s", err))
 			}
@@ -266,7 +274,7 @@ func (resource *Resource[T]) UpdateWithLog(item *T, request *Request) error {
 
 	if resource.data.activityLog {
 		must(
-			resource.LogActivity(request.user, beforeItem, item),
+			resource.data.LogActivity(request.user, beforeItem, item),
 		)
 	}
 

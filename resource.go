@@ -234,23 +234,37 @@ func (resource *Resource[T]) Is(name string, value interface{}) *Query[T] {
 }
 
 func (resource *Resource[T]) Create(item *T) error {
-	resource.setTimestamp(item, "CreatedAt")
-	resource.setTimestamp(item, "UpdatedAt")
-	return resource.data.createItem(item, false)
+	return resource.data.Create(item)
+
+	/*resource.data.setTimestamp(item, "CreatedAt")
+	resource.data.setTimestamp(item, "UpdatedAt")
+	return resource.data.createItem(item, false)*/
+}
+
+func (resourceData *resourceData) Create(item any) error {
+	resourceData.setTimestamp(item, "CreatedAt")
+	resourceData.setTimestamp(item, "UpdatedAt")
+	return resourceData.createItem(item, false)
 }
 
 func (resource *Resource[T]) Update(item *T) error {
-	resource.setTimestamp(item, "UpdatedAt")
-	return resource.data.saveItem(item, false)
+	return resource.data.Update(item)
+	//resource.setTimestamp(item, "UpdatedAt")
+	//return resource.data.saveItem(item, false)
+}
+
+func (resourceData *resourceData) Update(item any) error {
+	resourceData.setTimestamp(item, "UpdatedAt")
+	return resourceData.saveItem(item, false)
 }
 
 func (resource *Resource[T]) Replace(item *T) error {
-	resource.setTimestamp(item, "CreatedAt")
-	resource.setTimestamp(item, "UpdatedAt")
+	resource.data.setTimestamp(item, "CreatedAt")
+	resource.data.setTimestamp(item, "UpdatedAt")
 	return resource.data.replaceItem(item, false)
 }
 
-func (resource *Resource[T]) setTimestamp(item *T, fieldName string) {
+func (resourceData *resourceData) setTimestamp(item any, fieldName string) {
 	val := reflect.ValueOf(item).Elem()
 	fieldVal := val.FieldByName(fieldName)
 	timeVal := reflect.ValueOf(time.Now())
@@ -262,8 +276,12 @@ func (resource *Resource[T]) setTimestamp(item *T, fieldName string) {
 }
 
 func (resource *Resource[T]) Delete(id int64) error {
-	q := resource.Is("id", id)
-	count, err := q.listQuery.delete()
+	return resource.data.Delete(id)
+}
+
+func (resourceData *resourceData) Delete(id int64) error {
+	q := resourceData.Is("id", id)
+	count, err := q.delete()
 	if err != nil {
 		return err
 	}
