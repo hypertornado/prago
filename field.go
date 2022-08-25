@@ -32,7 +32,11 @@ type Field struct {
 }
 
 func (resource *Resource[T]) Field(name string) *Field {
-	return resource.data.fieldMap[columnName(name)]
+	return resource.data.Field(name)
+}
+
+func (resourceData *resourceData) Field(name string) *Field {
+	return resourceData.fieldMap[columnName(name)]
 }
 
 func (field *Field) authorizeView(user *user) bool {

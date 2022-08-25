@@ -173,9 +173,7 @@ func (resourceData *resourceData) importSearchData(bulkUpdater *pragelastic.Bulk
 	}
 
 	itemVals := reflect.ValueOf(items)
-
 	itemLen := itemVals.Len()
-
 	for i := 0; i < itemLen; i++ {
 		resourceData.saveSearchItemWithRoles(bulkUpdater, itemVals.Index(i).Interface(), roles)
 	}

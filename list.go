@@ -226,21 +226,24 @@ func (field *Field) filterLayout() string {
 	return ""
 }
 
-func (resource *Resource[T]) addFilterParamsToQuery(q *Query[T], params url.Values) *Query[T] {
+func (resourceData *resourceData) addFilterParamsToQuery(listQuery *listQuery, params url.Values) *listQuery {
 	filter := map[string]string{}
-	for _, v := range resource.data.fieldMap {
+	for _, v := range resourceData.fieldMap {
 		key := v.id
 		val := params.Get(key)
 		if val != "" {
 			filter[key] = val
 		}
 	}
-	return resource.addFilterToQuery(q, filter)
+	return resourceData.addFilterToQuery(listQuery, filter)
 }
 
-func (resource *Resource[T]) addFilterToQuery(q *Query[T], filter map[string]string) *Query[T] {
+func (resourceData *resourceData) addFilterToQuery(listQuery *listQuery, filter map[string]string) *listQuery {
+
+	//TODO: check access
+
 	for k, v := range filter {
-		field := resource.data.fieldMap[k]
+		field := resourceData.fieldMap[k]
 		if field == nil {
 			continue
 		}
@@ -252,7 +255,7 @@ func (resource *Resource[T]) addFilterToQuery(q *Query[T], filter map[string]str
 			v = "%" + v + "%"
 			k = strings.Replace(k, "`", "", -1)
 			str := fmt.Sprintf("`%s` LIKE ?", k)
-			q.Where(str, v)
+			listQuery.where(str, v)
 		case "filter_layout_number":
 			var hasPrefix string
 			v = strings.Replace(v, " ", "", -1)
@@ -266,9 +269,9 @@ func (resource *Resource[T]) addFilterToQuery(q *Query[T], filter map[string]str
 			numVal, err := strconv.Atoi(v)
 			if err == nil {
 				if hasPrefix == "" {
-					q.Is(k, numVal)
+					listQuery.Is(k, numVal)
 				} else {
-					q.Where(
+					listQuery.where(
 						fmt.Sprintf("%s %s ?", field.id, hasPrefix),
 						numVal,
 					)
@@ -278,27 +281,27 @@ func (resource *Resource[T]) addFilterToQuery(q *Query[T], filter map[string]str
 			v = strings.Trim(v, " ")
 			numVal, err := strconv.Atoi(v)
 			if err == nil {
-				q.Is(k, numVal)
+				listQuery.Is(k, numVal)
 			}
 		case "filter_layout_boolean":
 			switch v {
 			case "true":
-				q.Is(k, true)
+				listQuery.Is(k, true)
 			case "false":
-				q.Is(k, false)
+				listQuery.Is(k, false)
 			}
 		case "filter_layout_select":
 			if field.tags["prago-type"] == "file" || field.tags["prago-type"] == "image" || field.tags["prago-type"] == "cdnfile" {
 				if v == "true" {
-					q.Where(fmt.Sprintf("%s !=''", field.id))
+					listQuery.where(fmt.Sprintf("%s !=''", field.id))
 				}
 				if v == "false" {
-					q.Where(fmt.Sprintf("%s =''", field.id))
+					listQuery.where(fmt.Sprintf("%s =''", field.id))
 				}
 				continue
 			}
 			if v != "" {
-				q.Is(k, v)
+				listQuery.Is(k, v)
 			}
 		case "filter_layout_date":
 			v = strings.Trim(v, " ")
@@ -319,18 +322,18 @@ func (resource *Resource[T]) addFilterToQuery(q *Query[T], filter map[string]str
 
 			k = strings.Replace(k, "`", "", -1)
 			if fromStr != "" {
-				q.Where(fmt.Sprintf("`%s` >= ?", k), fromStr)
+				listQuery.where(fmt.Sprintf("`%s` >= ?", k), fromStr)
 			}
 			if toStr != "" {
-				q.Where(fmt.Sprintf("`%s` <= ?", k), toStr)
+				listQuery.where(fmt.Sprintf("`%s` <= ?", k), toStr)
 			}
 		}
 	}
-	return q
+	return listQuery
 }
 
-func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listContent, err error) {
-	resourceData := res.data
+func (res2 *Resource[T]) getListContent(user *user, params url.Values) (ret listContent, err error) {
+	resourceData := res2.data
 	if !resourceData.app.authorize(user, resourceData.canView) {
 		return listContent{}, errors.New("access denied")
 	}
@@ -364,7 +367,7 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 		orderDesc = false
 	}
 
-	q := res.Query()
+	q := resourceData.query()
 	if orderDesc {
 		q = q.OrderDesc(orderBy)
 	} else {
@@ -372,15 +375,15 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 	}
 
 	var count int64
-	countQuery := res.Query()
-	countQuery = res.addFilterParamsToQuery(countQuery, params)
-	count, err = countQuery.Count()
+	countQuery := resourceData.query()
+	countQuery = resourceData.addFilterParamsToQuery(countQuery, params)
+	count, err = countQuery.count()
 	if err != nil {
 		return
 	}
 
-	totalCount, _ := res.Query().Count()
-	res.data.updateCachedCount()
+	totalCount, _ := resourceData.query().count()
+	resourceData.updateCachedCount()
 
 	if count == totalCount {
 		ret.TotalCountStr = messages.ItemsCount(count, user.Locale)
@@ -388,7 +391,7 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 		ret.TotalCountStr = fmt.Sprintf("%s z %s", humanizeNumber(count), messages.ItemsCount(totalCount, user.Locale))
 	}
 
-	var itemsPerPage = res.data.defaultItemsPerPage
+	var itemsPerPage = resourceData.defaultItemsPerPage
 	if params.Get("_pagesize") != "" {
 		pageSize, err := strconv.Atoi(params.Get("_pagesize"))
 		if err == nil && pageSize > 0 && pageSize <= 1000000 {
@@ -411,15 +414,20 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 		SelectedPage: int64(currentPage),
 	}
 
-	q = res.addFilterParamsToQuery(q, params)
+	q = resourceData.addFilterParamsToQuery(q, params)
 	q = q.Offset((int64(currentPage) - 1) * itemsPerPage)
 	q = q.Limit(itemsPerPage)
 
-	rowItems := q.List()
+	rowItems, err := q.list()
+	if err != nil {
+		panic(err)
+	}
 
-	for _, item := range rowItems {
+	itemVals := reflect.ValueOf(rowItems)
+	itemLen := itemVals.Len()
+	for i := 0; i < itemLen; i++ {
 		row := listRow{}
-		itemVal := reflect.ValueOf(item).Elem()
+		itemVal := itemVals.Index(i).Elem()
 
 		for _, v := range listHeader.Header {
 			if columnsMap[v.ColumnName] {
@@ -428,17 +436,18 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 				if v.ColumnName == orderBy {
 					isOrderedBy = true
 				}
-				row.Items = append(row.Items, valueToListCell(user, res.Field(v.ColumnName), fieldVal, isOrderedBy))
+				row.Items = append(row.Items, valueToListCell(user, resourceData.Field(v.ColumnName), fieldVal, isOrderedBy))
 			}
 		}
 
 		//TODO: better find id
 		row.ID = itemVal.FieldByName("ID").Int()
-		row.URL = res.getData().getURL(fmt.Sprintf("%d", row.ID))
+		row.URL = resourceData.getURL(fmt.Sprintf("%d", row.ID))
 
-		row.Actions = res.getData().getListItemActions(user, item, row.ID)
-		row.AllowsMultipleActions = res.data.allowsMultipleActions(user)
+		row.Actions = resourceData.getListItemActions(user, itemVal.Addr().Interface(), row.ID)
+		row.AllowsMultipleActions = resourceData.allowsMultipleActions(user)
 		ret.Rows = append(ret.Rows, row)
+
 	}
 
 	if count == 0 {
@@ -447,7 +456,7 @@ func (res *Resource[T]) getListContent(user *user, params url.Values) (ret listC
 	ret.Colspan = int64(len(columnsMap)) + 1
 
 	if params.Get("_stats") == "true" {
-		ret.Stats = res.getListStats(user, params)
+		ret.Stats = resourceData.getListStats(user, params)
 	}
 
 	return

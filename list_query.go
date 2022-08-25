@@ -68,6 +68,16 @@ func (listQuery *listQuery) Offset(offset int64) *listQuery {
 	return listQuery
 }
 
+func (listQuery *listQuery) Order(order string) *listQuery {
+	listQuery.addOrder(order, false)
+	return listQuery
+}
+
+func (listQuery *listQuery) OrderDesc(order string) *listQuery {
+	listQuery.addOrder(order, true)
+	return listQuery
+}
+
 /*func (listQuery *listQuery) ID(id any) interface{} {
 	return q.Where(sqlFieldToQuery("id"), id).First()
 }*/

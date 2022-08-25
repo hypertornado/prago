@@ -39,13 +39,14 @@ func (q *Query[T]) Offset(offset int64) *Query[T] {
 	return q
 }
 
-func (q *Query[T]) Order(order string) *Query[T] {
-	q.listQuery.addOrder(order, false)
+func (q *Query[T]) Debug() *Query[T] {
+	q.listQuery.isDebug = true
 	return q
 }
 
-func (q *Query[T]) Debug() *Query[T] {
-	q.listQuery.isDebug = true
+func (q *Query[T]) Order(order string) *Query[T] {
+
+	q.listQuery.addOrder(order, false)
 	return q
 }
 
