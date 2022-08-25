@@ -1,69 +1,116 @@
 package prago
 
 type ResourceItemAction[T any] struct {
-	resource *Resource[T]
-	action   *Action
+	data *resourceItemActionData
+}
+
+type resourceItemActionData struct {
+	resourceData *resourceData
+	action       *Action
 }
 
 func (resource *Resource[T]) ItemAction(url string) *ResourceItemAction[T] {
-	ret := &ResourceItemAction[T]{
-		resource: resource,
+	return &ResourceItemAction[T]{
+		data: resource.data.ItemAction(url),
 	}
-	action := newAction(resource.data.app, url)
-	action.resourceData = resource.data
+}
+
+func (resourceData *resourceData) ItemAction(url string) *resourceItemActionData {
+	action := newAction(resourceData.app, url)
+	action.resourceData = resourceData
 	action.isItemAction = true
-	action.permission = resource.data.canView
-	resource.data.itemActions = append(resource.data.itemActions, action)
-	ret.action = action
-	return ret
+	action.permission = resourceData.canView
+	resourceData.itemActions = append(resourceData.itemActions, action)
+
+	return &resourceItemActionData{
+		resourceData: resourceData,
+		action:       action,
+	}
 }
 
 func (action *ResourceItemAction[T]) priority() *ResourceItemAction[T] {
-	action.action.priority()
+	action.data.priority()
 	return action
+}
+
+func (actionData *resourceItemActionData) priority() *resourceItemActionData {
+	actionData.action.priority()
+	return actionData
 }
 
 func (action *ResourceItemAction[T]) Template(template string) *ResourceItemAction[T] {
-	action.action.Template(template)
+	action.data.Template(template)
 	return action
+}
+
+func (actionData *resourceItemActionData) Template(template string) *resourceItemActionData {
+	actionData.action.Template(template)
+	return actionData
 }
 
 func (action *ResourceItemAction[T]) Permission(permission Permission) *ResourceItemAction[T] {
-	action.action.Permission(permission)
+	action.data.Permission(permission)
 	return action
+}
+
+func (actionData *resourceItemActionData) Permission(permission Permission) *resourceItemActionData {
+	actionData.action.Permission(permission)
+	return actionData
 }
 
 func (action *ResourceItemAction[T]) DataSource(dataSource func(*T, *Request) interface{}) *ResourceItemAction[T] {
-	action.action.DataSource(func(request *Request) interface{} {
-		item := action.resource.Query().Debug().ID(request.Param("id"))
-		if item == nil {
-			//TODO: fix http: superfluous response.WriteHeader call from github.com/hypertornado/prago.Request.RenderViewWithCode
-			render404(request)
-			return nil
-		}
-		return dataSource(item, request)
+	action.data.DataSource(func(t any, r *Request) interface{} {
+		return dataSource(t.(*T), r)
 	})
 	return action
+}
+
+func (actionData *resourceItemActionData) DataSource(dataSource func(any, *Request) interface{}) *resourceItemActionData {
+	actionData.action.DataSource(func(request *Request) interface{} {
+		item := actionData.resourceData.query().ID(request.Param("id"))
+		if item == nil {
+			panic("can't find item")
+		}
+
+		return dataSource(item, request)
+	})
+	return actionData
 }
 
 func (action *ResourceItemAction[T]) Name(name func(string) string) *ResourceItemAction[T] {
-	action.action.Name(name)
+	action.data.Name(name)
 	return action
+}
+
+func (actionData *resourceItemActionData) Name(name func(string) string) *resourceItemActionData {
+	actionData.action.Name(name)
+	return actionData
 }
 
 func (action *ResourceItemAction[T]) Method(method string) *ResourceItemAction[T] {
-	action.action.Method(method)
+	action.data.Method(method)
 	return action
 }
 
+func (actionData *resourceItemActionData) Method(method string) *resourceItemActionData {
+	actionData.action.Method(method)
+	return actionData
+}
+
 func (action *ResourceItemAction[T]) Handler(fn func(*T, *Request)) *ResourceItemAction[T] {
-	action.action.Handler(func(request *Request) {
-		item := action.resource.ID(request.Param("id"))
+	action.data.Handler(func(t any, r *Request) {
+		fn(t.(*T), r)
+	})
+	return action
+}
+
+func (actionData *resourceItemActionData) Handler(fn func(any, *Request)) *resourceItemActionData {
+	actionData.action.Handler(func(request *Request) {
+		item := actionData.resourceData.ID(request.Param("id"))
 		if item == nil {
-			render404(request)
-			return
+			panic("can't find item")
 		}
 		fn(item, request)
 	})
-	return action
+	return actionData
 }

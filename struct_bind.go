@@ -32,7 +32,7 @@ func (resourceData *resourceData) fixBooleanParams(user *user, params url.Values
 	}
 }
 
-func (resource *Resource[T]) bindData(item *T, user *user, params url.Values) error {
+func (resourceData *resourceData) bindData(item any, user *user, params url.Values) error {
 
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
@@ -42,7 +42,7 @@ func (resource *Resource[T]) bindData(item *T, user *user, params url.Values) er
 		value = value.Elem()
 	}
 
-	for _, field := range resource.data.fields {
+	for _, field := range resourceData.fields {
 		if !field.authorizeEdit(user) {
 			continue
 		}

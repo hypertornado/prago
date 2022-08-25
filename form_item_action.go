@@ -1,64 +1,104 @@
 package prago
 
 type FormItemAction[T any] struct {
-	resource   *Resource[T]
-	formAction *FormAction
+	data *formItemActionData
+}
+
+type formItemActionData struct {
+	resourceData *resourceData
+	formAction   *FormAction
 }
 
 func (resource *Resource[T]) FormItemAction(url string) *FormItemAction[T] {
-	fa := newFormAction(resource.data.app, url)
+	return &FormItemAction[T]{
+		data: resource.data.FormItemAction(url),
+	}
+}
 
-	fa.actionForm.resourceData = resource.data
-	fa.actionValidation.resourceData = resource.data
+func (resourceData *resourceData) FormItemAction(url string) *formItemActionData {
+	fa := newFormAction(resourceData.app, url)
 
-	fa.actionForm.Permission(resource.data.canView)
-	fa.actionValidation.Permission(resource.data.canView)
+	fa.actionForm.resourceData = resourceData
+	fa.actionValidation.resourceData = resourceData
+
+	fa.actionForm.Permission(resourceData.canView)
+	fa.actionValidation.Permission(resourceData.canView)
 
 	fa.actionForm.isItemAction = true
 	fa.actionValidation.isItemAction = true
 
-	resource.data.itemActions = append(resource.data.itemActions, fa.actionForm)
-	resource.data.itemActions = append(resource.data.itemActions, fa.actionValidation)
-	return &FormItemAction[T]{
-		resource:   resource,
-		formAction: fa,
+	resourceData.itemActions = append(resourceData.itemActions, fa.actionForm)
+	resourceData.itemActions = append(resourceData.itemActions, fa.actionValidation)
+	return &formItemActionData{
+		resourceData: resourceData,
+		formAction:   fa,
 	}
+
 }
 
 func (action *FormItemAction[T]) priority() *FormItemAction[T] {
-	action.formAction.priority()
+	action.data.priority()
 	return action
+}
+
+func (actionData *formItemActionData) priority() *formItemActionData {
+	actionData.formAction.priority()
+	return actionData
 }
 
 func (action *FormItemAction[T]) Permission(permission Permission) *FormItemAction[T] {
-	action.formAction.Permission(permission)
+	action.data.Permission(permission)
 	return action
+}
+
+func (actionData *formItemActionData) Permission(permission Permission) *formItemActionData {
+	actionData.formAction.Permission(permission)
+	return actionData
 }
 
 func (action *FormItemAction[T]) Name(name func(string) string) *FormItemAction[T] {
-	action.formAction.Name(name)
+	action.data.Name(name)
 	return action
 }
 
+func (actionData *formItemActionData) Name(name func(string) string) *formItemActionData {
+	actionData.formAction.Name(name)
+	return actionData
+}
+
 func (action *FormItemAction[T]) Form(formGenerator func(*T, *Form, *Request)) *FormItemAction[T] {
-	action.formAction.Form(func(form *Form, request *Request) {
-		item := action.resource.ID(request.Param("id"))
+	action.data.Form(func(a any, f *Form, r *Request) {
+		formGenerator(a.(*T), f, r)
+	})
+	return action
+}
+
+func (actionData *formItemActionData) Form(formGenerator func(any, *Form, *Request)) *formItemActionData {
+	actionData.formAction.Form(func(form *Form, request *Request) {
+		item := actionData.resourceData.ID(request.Param("id"))
 		if item == nil {
 			render404(request)
 			return
 		}
 		formGenerator(item, form, request)
 	})
-	return action
+	return actionData
 }
 
 func (action *FormItemAction[T]) Validation(validation func(*T, ValidationContext)) *FormItemAction[T] {
-	action.formAction.Validation(func(vc ValidationContext) {
-		item := action.resource.ID(vc.GetValue("id"))
+	action.data.Validation(func(a any, vc ValidationContext) {
+		validation(a.(*T), vc)
+	})
+	return action
+}
+
+func (actionData *formItemActionData) Validation(validation func(any, ValidationContext)) *formItemActionData {
+	actionData.formAction.Validation(func(vc ValidationContext) {
+		item := actionData.resourceData.ID(vc.GetValue("id"))
 		if item == nil {
 			panic("can't find item")
 		}
 		validation(item, vc)
 	})
-	return action
+	return actionData
 }

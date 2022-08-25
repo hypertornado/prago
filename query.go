@@ -16,7 +16,11 @@ func (resource *Resource[T]) ID(id any) *T {
 }
 
 func (q *Query[T]) ID(id any) *T {
-	return q.listQuery.ID(id).(*T)
+	ret := q.listQuery.ID(id)
+	if ret == nil {
+		return nil
+	}
+	return ret.(*T)
 }
 
 func (q *Query[T]) Is(name string, value interface{}) *Query[T] {

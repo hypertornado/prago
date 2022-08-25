@@ -4,69 +4,71 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"reflect"
 	"strconv"
 )
 
 func (resource *Resource[T]) initDefaultResourceActions() {
-	resource.Action("").priority().Permission(resource.data.canView).Name(resource.data.pluralName).Template("admin_list").DataSource(
+	resourceData := resource.data
+	resourceData.action("").priority().Permission(resourceData.canView).Name(resourceData.pluralName).Template("admin_list").DataSource(
 		func(request *Request) interface{} {
-			listData, err := resource.data.getListHeader(request.user)
+			listData, err := resourceData.getListHeader(request.user)
 			must(err)
 			return listData
 		},
 	)
 
-	resource.FormAction("new").priority().Permission(resource.data.canCreate).Name(messages.GetNameFunction("admin_new")).Form(
+	resourceData.FormAction("new").priority().Permission(resourceData.canCreate).Name(messages.GetNameFunction("admin_new")).Form(
 		func(form *Form, request *Request) {
 			var item T
-			resource.bindData(&item, request.user, request.Request().URL.Query())
-			resource.addFormItems(&item, request.user, form)
+			resourceData.bindData(&item, request.user, request.Request().URL.Query())
+			resourceData.addFormItems(&item, request.user, form)
 			form.AddSubmit(messages.Get(request.user.Locale, "admin_save"))
 		},
 	).Validation(func(vc ValidationContext) {
-		for _, v := range resource.data.validations {
+		for _, v := range resourceData.validations {
 			v(vc)
 		}
 		request := vc.Request()
 		if vc.Valid() {
 			var item T
-			resource.bindData(&item, request.user, request.Params())
-			if resource.data.orderField != nil {
-				count, _ := resource.Query().Count()
-				resource.data.setOrderPosition(&item, count+1)
+			resourceData.bindData(&item, request.user, request.Params())
+			if resourceData.orderField != nil {
+				count, _ := resourceData.query().count()
+				resourceData.setOrderPosition(&item, count+1)
 			}
-			must(resource.CreateWithLog(&item, request))
+			must(resourceData.CreateWithLog(&item, request))
 
-			resource.data.app.Notification(getItemName(&item)).
-				SetImage(resource.data.app.getItemImage(&item)).
+			resourceData.app.Notification(getItemName(&item)).
+				SetImage(resourceData.app.getItemImage(&item)).
 				SetPreName(messages.Get(request.user.Locale, "admin_item_created")).
 				Flash(request)
-			vc.Validation().RedirectionLocaliton = resource.data.getItemURL(&item, "")
+			vc.Validation().RedirectionLocaliton = resourceData.getItemURL(&item, "")
 		}
 	})
 
-	resource.ItemAction("").priority().Template("admin_views").Permission(resource.data.canView).DataSource(
-		func(item *T, request *Request) interface{} {
+	resourceData.ItemAction("").priority().Template("admin_views").Permission(resourceData.canView).DataSource(
+		func(item any, request *Request) interface{} {
 			if item == nil {
 				render404(request)
 				return nil
 			}
-			return resource.data.getViews(item, request.user)
+			return resourceData.getViews(item, request.user)
 		},
 	)
 
-	resource.FormItemAction("edit").priority().Name(messages.GetNameFunction("admin_edit")).Permission(resource.data.canUpdate).Form(
-		func(item *T, form *Form, request *Request) {
-			resource.addFormItems(item, request.user, form)
+	resourceData.FormItemAction("edit").priority().Name(messages.GetNameFunction("admin_edit")).Permission(resourceData.canUpdate).Form(
+		func(item any, form *Form, request *Request) {
+			resourceData.addFormItems(item, request.user, form)
 			form.AddSubmit(messages.Get(request.user.Locale, "admin_save"))
 		},
-	).Validation(func(_ *T, vc ValidationContext) {
+	).Validation(func(_ any, vc ValidationContext) {
 		request := vc.Request()
 		params := request.Params()
 
-		resource.data.fixBooleanParams(vc.Request().user, params)
+		resourceData.fixBooleanParams(vc.Request().user, params)
 
-		item, validation, err := resource.editItemWithLogAndValues(request, params)
+		item, validation, err := resourceData.editItemWithLogAndValues(request, params)
 		if err != nil && err != errValidation {
 			panic(err)
 		}
@@ -76,12 +78,12 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 			id, err := strconv.Atoi(request.Param("id"))
 			must(err)
 
-			resource.data.app.Notification(getItemName(item)).
-				SetImage(resource.data.app.getItemImage(item)).
+			resourceData.app.Notification(getItemName(item)).
+				SetImage(resourceData.app.getItemImage(item)).
 				SetPreName(messages.Get(user.Locale, "admin_item_edited")).
 				Flash(request)
 
-			vc.Validation().RedirectionLocaliton = resource.data.getURL(fmt.Sprintf("%d", id))
+			vc.Validation().RedirectionLocaliton = resourceData.getURL(fmt.Sprintf("%d", id))
 		} else {
 			//TODO: ugly hack with copying two validation contexts
 			vc.Validation().Errors = validation.Validation().Errors
@@ -98,46 +100,46 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 		return nil
 	})*/
 
-	resource.FormItemAction("delete").priority().Permission(resource.data.canDelete).Name(messages.GetNameFunction("admin_delete")).Form(
-		func(item *T, form *Form, request *Request) {
+	resourceData.FormItemAction("delete").priority().Permission(resourceData.canDelete).Name(messages.GetNameFunction("admin_delete")).Form(
+		func(item any, form *Form, request *Request) {
 			form.AddDeleteSubmit(messages.Get(request.user.Locale, "admin_delete"))
 			itemName := getItemName(item)
 			form.Title = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
 		},
-	).Validation(func(item *T, vc ValidationContext) {
-		for _, v := range resource.data.deleteValidations {
+	).Validation(func(item any, vc ValidationContext) {
+		for _, v := range resourceData.deleteValidations {
 			v(vc)
 		}
 		if vc.Valid() {
-			must(resource.DeleteWithLog(item, vc.Request()))
+			must(resourceData.DeleteWithLog(item, vc.Request()))
 			vc.Request().AddFlashMessage(messages.Get(vc.Request().user.Locale, "admin_item_deleted"))
-			vc.Validation().RedirectionLocaliton = resource.data.getURL("")
+			vc.Validation().RedirectionLocaliton = resourceData.getURL("")
 		}
 	})
 
-	if resource.previewURLFunction != nil {
-		resource.ItemAction("preview").priority().Name(messages.GetNameFunction("admin_preview")).Handler(
-			func(item *T, request *Request) {
+	if resourceData.previewURLFunction != nil {
+		resourceData.ItemAction("preview").priority().Name(messages.GetNameFunction("admin_preview")).Handler(
+			func(item any, request *Request) {
 				request.Redirect(
-					resource.previewURLFunction(item),
+					resourceData.previewURLFunction(item),
 				)
 			},
 		)
 	}
 
-	if resource.data.activityLog {
-		resource.Action("history").priority().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resource.data.canUpdate).DataSource(
+	if resourceData.activityLog {
+		resourceData.action("history").priority().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resourceData.canUpdate).DataSource(
 			func(request *Request) interface{} {
-				return resource.data.app.getHistory(resource.data, 0)
+				return resourceData.app.getHistory(resourceData, 0)
 			},
 		)
 
-		resource.ItemAction("history").priority().Name(messages.GetNameFunction("admin_history")).Permission(resource.data.canUpdate).Template("admin_history").DataSource(
-			func(item *T, request *Request) interface{} {
+		resourceData.ItemAction("history").priority().Name(messages.GetNameFunction("admin_history")).Permission(resourceData.canUpdate).Template("admin_history").DataSource(
+			func(item any, request *Request) interface{} {
 				if item == nil {
 					return nil
 				}
-				return resource.data.app.getHistory(resource.data, getItemID(item))
+				return resourceData.app.getHistory(resourceData, getItemID(item))
 			},
 		)
 	}
@@ -206,43 +208,49 @@ func (resourceData *resourceData) DeleteWithLog(item any, request *Request) erro
 	return nil
 }
 
-func (resource *Resource[T]) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, ValidationContext, error) {
+func (resourceData *resourceData) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, ValidationContext, error) {
 	user := request.user
 	id, err := strconv.Atoi(values.Get("id"))
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't parse id %d: %s", id, err)
 	}
 
-	beforeItem := resource.ID(id)
+	beforeItem := resourceData.ID(id)
 	if beforeItem == nil {
 		return nil, nil, fmt.Errorf("can't get beforeitem with id %d: %s", id, err)
 	}
 
-	cloned := *beforeItem
-	item := &cloned
+	beforeVal := reflect.ValueOf(beforeItem).Elem()
+	itemVal := beforeVal
 
-	err = resource.bindData(
+	var item interface{}
+	item = itemVal.Addr().Interface()
+
+	//cloned := *beforeItem
+	//item := &cloned
+
+	err = resourceData.bindData(
 		item, user, values,
 	)
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't bind data (%d): %s", id, err)
 	}
 
-	stringableValues := resource.getItemStringEditableValues(item, user)
+	stringableValues := resourceData.getItemStringEditableValues(item, user)
 	var allValues url.Values = make(map[string][]string)
 	for k, v := range stringableValues {
 		allValues.Add(k, v)
 	}
 
 	vv := newValuesValidation(user.Locale, allValues)
-	for _, v := range resource.data.validations {
+	for _, v := range resourceData.validations {
 		v(vv)
 	}
 	if !vv.Valid() {
 		return nil, vv, errValidation
 	}
 
-	err = resource.UpdateWithLog(item, request)
+	err = resourceData.UpdateWithLog(item, request)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -251,30 +259,34 @@ func (resource *Resource[T]) editItemWithLogAndValues(request *Request, values u
 }
 
 func (resource *Resource[T]) UpdateWithLog(item *T, request *Request) error {
+	return resource.data.UpdateWithLog(item, request)
+}
+
+func (resourceData *resourceData) UpdateWithLog(item any, request *Request) error {
 	id := getItemID(item)
-	beforeItem := resource.ID(id)
+	beforeItem := resourceData.ID(id)
 	if beforeItem == nil {
 		return errors.New("can't find before item")
 	}
 
-	err := resource.Update(item)
+	err := resourceData.Update(item)
 	if err != nil {
 		return fmt.Errorf("can't save item (%d): %s", id, err)
 	}
 
-	if resource.data.app.search != nil {
+	if resourceData.app.search != nil {
 		go func() {
-			err = resource.data.saveSearchItem(item)
+			err = resourceData.saveSearchItem(item)
 			if err != nil {
-				resource.data.app.Log().Println(fmt.Errorf("%s", err))
+				resourceData.app.Log().Println(fmt.Errorf("%s", err))
 			}
-			resource.data.app.search.flush()
+			resourceData.app.search.flush()
 		}()
 	}
 
-	if resource.data.activityLog {
+	if resourceData.activityLog {
 		must(
-			resource.data.LogActivity(request.user, beforeItem, item),
+			resourceData.LogActivity(request.user, beforeItem, item),
 		)
 	}
 

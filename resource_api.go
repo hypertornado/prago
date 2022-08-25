@@ -12,12 +12,11 @@ import (
 	"github.com/tealeg/xlsx"
 )
 
-func (resource *Resource[T]) initDefaultResourceAPIs() {
-	resourceData := resource.data
+func (resourceData *resourceData) initDefaultResourceAPIs() {
 	resourceData.API("list").Handler(
 		func(request *Request) {
 			if request.Request().URL.Query().Get("_format") == "json" {
-				listDataJSON, err := resource.getListContentJSON(request.user, request.Request().URL.Query())
+				listDataJSON, err := resourceData.getListContentJSON(request.user, request.Request().URL.Query())
 				must(err)
 				request.RenderJSON(listDataJSON)
 				return
@@ -27,7 +26,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 					render403(request)
 					return
 				}
-				listData, err := resource.getListContent(request.user, request.Request().URL.Query())
+				listData, err := resourceData.getListContent(request.user, request.Request().URL.Query())
 				must(err)
 
 				file := xlsx.NewFile()
@@ -65,7 +64,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 	)
 
 	resourceData.API("quick-action").Handler(func(request *Request) {
-		quickActionAPIHandler(resource, request)
+		quickActionAPIHandler(resourceData, request)
 	}).Method("POST")
 
 	resourceData.API("preview-relation/:id").Handler(
@@ -129,18 +128,32 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 			filter := "%" + q + "%"
 			for _, v := range []string{"name", "description"} {
-				field := resource.Field(v)
+				field := resourceData.Field(v)
 				if field == nil {
 					continue
 				}
-				items := resource.Query().Limit(5).Where(v+" LIKE ?", filter).List()
-				for _, item := range items {
-					viewItem := resourceData.getPreview(item, request.user, nil)
+				items, err := resourceData.query().Limit(5).where(v+" LIKE ?", filter).list()
+				if err != nil {
+					panic(err)
+				}
+
+				itemVals := reflect.ValueOf(items)
+				itemLen := itemVals.Len()
+				for i := 0; i < itemLen; i++ {
+					viewItem := resourceData.getPreview(itemVals.Index(i).Interface(), request.user, nil)
 					if viewItem != nil && !usedIDs[viewItem.ID] {
 						usedIDs[viewItem.ID] = true
 						ret = append(ret, *viewItem)
 					}
 				}
+
+				/*for _, item := range items {
+					viewItem := resourceData.getPreview(item, request.user, nil)
+					if viewItem != nil && !usedIDs[viewItem.ID] {
+						usedIDs[viewItem.ID] = true
+						ret = append(ret, *viewItem)
+					}
+				}*/
 
 			}
 
@@ -256,11 +269,12 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 
 	resourceData.API("multiple_edit").Permission(resourceData.canUpdate).Method("GET").Handler(
 		func(request *Request) {
-			var item T
 			form := NewForm(
 				resourceData.getURL("api/multiple_edit"),
 			)
-			resource.addFormItems(&item, request.user, form)
+
+			var item interface{} = reflect.New(resourceData.typ)
+			resourceData.addFormItems(&item, request.user, form)
 			request.SetData("form", form)
 
 			request.SetData("CSRFToken", request.csrfToken())
@@ -293,7 +307,7 @@ func (resource *Resource[T]) initDefaultResourceAPIs() {
 					usedValues.Add(k, request.Request().PostForm.Get(k))
 				}
 
-				_, validation, err := resource.editItemWithLogAndValues(
+				_, validation, err := resourceData.editItemWithLogAndValues(
 					request,
 					usedValues,
 				)

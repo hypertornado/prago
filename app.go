@@ -145,7 +145,7 @@ func (app *App) afterInit() {
 func (app *App) initDefaultResourceActions() {
 	for _, v := range app.resources {
 		v.initDefaultResourceActions()
-		v.initDefaultResourceAPIs()
+		v.getData().initDefaultResourceAPIs()
 	}
 }
 

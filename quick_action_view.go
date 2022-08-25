@@ -49,13 +49,13 @@ func (resourceData *resourceData) getQuickActionViews(itemIface any, user *user)
 	return ret
 }
 
-func quickActionAPIHandler(resource resourceIface, request *Request) {
+func quickActionAPIHandler(resourceData *resourceData, request *Request) {
 	var actionName = request.Param("action")
 
 	itemID, err := strconv.Atoi(request.Param("itemid"))
 	must(err)
 
-	err = resource.getData().runQuickAction(actionName, int64(itemID), request)
+	err = resourceData.runQuickAction(actionName, int64(itemID), request)
 	if err != nil {
 		renderAPIMessage(request, 500, err.Error())
 		return

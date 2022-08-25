@@ -27,9 +27,10 @@ type dbIface interface {
 	Query(string, ...interface{}) (*sql.Rows, error)
 }
 
-func (q *listQuery) where(condition string, values ...interface{}) {
+func (q *listQuery) where(condition string, values ...interface{}) *listQuery {
 	q.conditions = append(q.conditions, condition)
 	q.values = append(q.values, values...)
+	return q
 }
 
 func (q *listQuery) addOrder(name string, desc bool) {

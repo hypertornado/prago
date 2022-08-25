@@ -11,8 +11,7 @@ import (
 //https://github.com/golang/go/issues/49085
 
 type Resource[T any] struct {
-	data               *resourceData
-	previewURLFunction func(*T) string
+	data *resourceData
 }
 
 type resourceData struct {
@@ -51,6 +50,8 @@ type resourceData struct {
 	fields     []*Field
 	fieldMap   map[string]*Field
 	orderField *Field
+
+	previewURLFunction func(any) string
 }
 
 func NewResource[T any](app *App) *Resource[T] {
@@ -130,7 +131,7 @@ func GetResource[T any](app *App) *Resource[T] {
 
 type resourceIface interface {
 	initDefaultResourceActions()
-	initDefaultResourceAPIs()
+	//initDefaultResourceAPIs()
 	//createRelations()
 	//addValidation(validation Validation)
 
@@ -235,10 +236,6 @@ func (resource *Resource[T]) Is(name string, value interface{}) *Query[T] {
 
 func (resource *Resource[T]) Create(item *T) error {
 	return resource.data.Create(item)
-
-	/*resource.data.setTimestamp(item, "CreatedAt")
-	resource.data.setTimestamp(item, "UpdatedAt")
-	return resource.data.createItem(item, false)*/
 }
 
 func (resourceData *resourceData) Create(item any) error {
@@ -249,8 +246,6 @@ func (resourceData *resourceData) Create(item any) error {
 
 func (resource *Resource[T]) Update(item *T) error {
 	return resource.data.Update(item)
-	//resource.setTimestamp(item, "UpdatedAt")
-	//return resource.data.saveItem(item, false)
 }
 
 func (resourceData *resourceData) Update(item any) error {
@@ -301,8 +296,15 @@ func (resource *Resource[T]) Name(singularName, pluralName func(string) string) 
 }
 
 func (resource *Resource[T]) PreviewURLFunction(fn func(*T) string) *Resource[T] {
-	resource.previewURLFunction = fn
+	resource.data.PreviewURLFunction(func(a any) string {
+		return fn(a.(*T))
+	})
 	return resource
+}
+
+func (resourceData *resourceData) PreviewURLFunction(fn func(any) string) *resourceData {
+	resourceData.previewURLFunction = fn
+	return resourceData
 }
 
 func (resource *Resource[T]) ItemsPerPage(itemsPerPage int64) *Resource[T] {

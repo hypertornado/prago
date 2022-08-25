@@ -332,8 +332,7 @@ func (resourceData *resourceData) addFilterToQuery(listQuery *listQuery, filter 
 	return listQuery
 }
 
-func (res2 *Resource[T]) getListContent(user *user, params url.Values) (ret listContent, err error) {
-	resourceData := res2.data
+func (resourceData *resourceData) getListContent(user *user, params url.Values) (ret listContent, err error) {
 	if !resourceData.app.authorize(user, resourceData.canView) {
 		return listContent{}, errors.New("access denied")
 	}
@@ -468,14 +467,14 @@ type listContentJSON struct {
 	StatsStr string
 }
 
-func (resource *Resource[T]) getListContentJSON(user *user, params url.Values) (ret *listContentJSON, err error) {
-	listData, err := resource.getListContent(user, params)
+func (resourceData *resourceData) getListContentJSON(user *user, params url.Values) (ret *listContentJSON, err error) {
+	listData, err := resourceData.getListContent(user, params)
 	if err != nil {
 		return nil, err
 	}
 
 	buf := new(bytes.Buffer)
-	err = resource.data.app.ExecuteTemplate(buf, "admin_list_cells", map[string]interface{}{
+	err = resourceData.app.ExecuteTemplate(buf, "admin_list_cells", map[string]interface{}{
 		"admin_list": listData,
 	})
 	if err != nil {
@@ -485,7 +484,7 @@ func (resource *Resource[T]) getListContentJSON(user *user, params url.Values) (
 	var statsStr string
 	if listData.Stats != nil {
 		bufStats := new(bytes.Buffer)
-		err = resource.data.app.ExecuteTemplate(bufStats, "admin_stats", listData.Stats)
+		err = resourceData.app.ExecuteTemplate(bufStats, "admin_stats", listData.Stats)
 		if err != nil {
 			return nil, err
 		}

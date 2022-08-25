@@ -34,10 +34,10 @@ func (resourceData *resourceData) getDefaultOrder() (column string, desc bool) {
 	return
 }
 
-func (resource *Resource[T]) getItemStringEditableValues(item *T, user *user) map[string]string {
+func (resourceData *resourceData) getItemStringEditableValues(item any, user *user) map[string]string {
 	itemVal := reflect.ValueOf(item).Elem()
 	ret := make(map[string]string)
-	for i, field := range resource.data.fields {
+	for i, field := range resourceData.fields {
 		if !field.authorizeEdit(user) && field.id != "id" {
 			continue
 		}
@@ -51,11 +51,11 @@ func (resource *Resource[T]) getItemStringEditableValues(item *T, user *user) ma
 	return ret
 }
 
-func (resource *Resource[T]) addFormItems(item *T, user *user, form *Form) {
-	editableValues := resource.getItemStringEditableValues(item, user)
+func (resourceData *resourceData) addFormItems(item any, user *user, form *Form) {
+	editableValues := resourceData.getItemStringEditableValues(item, user)
 
 fields:
-	for _, field := range resource.data.fields {
+	for _, field := range resourceData.fields {
 		if !field.authorizeEdit(user) {
 			continue fields
 		}
