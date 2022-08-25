@@ -132,87 +132,6 @@ func GetResource[T any](app *App) *Resource[T] {
 
 }
 
-type resourceIface interface {
-	//initDefaultResourceActions()
-	//initDefaultResourceAPIs()
-	//createRelations()
-	//addValidation(validation Validation)
-
-	//getCachedCount() int64
-	//addRelation(*relatedField)
-
-	//getResourceControl() *controller
-	//getID() string
-
-	//bindActions()
-
-	getData() *resourceData
-
-	//getPermissionView() Permission
-	//getPermissionCreate() Permission
-	//getPermissionUpdate() Permission
-	//getPermissionDelete() Permission
-	//getPermissionExport() Permission
-
-	//getSingularNameFunction() func(string) string
-	//getPluralNameFunction() func(string) string
-
-	//getApp() *App
-
-	//unsafeDropTable() error
-	//migrate(bool) error
-
-	//getURL(suffix string) string
-
-	//getPreviewData(user *user, f *Field, value int64) (*preview, error)
-	//getItemPreview(id int64, user *user, relatedResource resourceIface) *preview
-	//getPreviews(listRequest relationListRequest, user *user) []*preview
-
-	//getnavigation(action *Action, request *Request) navigation
-
-	//importSearchData(*pragelastic.BulkUpdater[searchItem]) error
-	//resourceItemName(id int64) string
-	//itemWithRelationCount(fieldName string, id int64) int64
-
-	//runQuickAction(actionName string, itemID int64, request *Request) error
-}
-
-func (resource *Resource[T]) getData() *resourceData {
-	return resource.data
-}
-
-/*func (resource *Resource[T]) getApp() *App {
-	return resource.data.app
-}*/
-
-/*func (resource *Resource[T]) getSingularNameFunction() func(string) string {
-	return resource.data.singularName
-}*/
-
-/*func (resource *Resource[T]) getPluralNameFunction() func(string) string {
-	return resource.data.pluralName
-}*/
-
-/*func (resource *Resource[T]) getPermissionView() Permission {
-	return resource.data.canView
-}*/
-
-/*func (resource *Resource[T]) getPermissionCreate() Permission {
-	return resource.data.canCreate
-}*/
-
-/*func (resource *Resource[T]) getPermissionUpdate() Permission {
-	return resource.data.canUpdate
-}*/
-
-/*func (resource *Resource[T]) getPermissionDelete() Permission {
-	return resource.data.canDelete
-}*/
-
-/*func (resource *Resource[T]) getPermissionExport() Permission {
-	return resource.data.canDelete
-}*/
-
 func (resourceData *resourceData) addRelation(field *relatedField) {
 	resourceData.relations = append(resourceData.relations, field)
 }
@@ -224,14 +143,6 @@ func (resourceData *resourceData) getID() string {
 func (resourceData *resourceData) getResourceControl() *controller {
 	return resourceData.resourceController
 }
-
-/*func (resource *Resource[T]) isOrderDesc() bool {
-	return resource.data.orderDesc
-}*/
-
-/*func (resource *Resource[T]) getOrderByColumn() string {
-	return resource.data.orderByColumn
-}*/
 
 func (resource *Resource[T]) Is(name string, value interface{}) *Query[T] {
 	return resource.Query().Is(name, value)

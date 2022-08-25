@@ -8,7 +8,7 @@ type QuickAction[T any] struct {
 
 type quickActionData struct {
 	url          string
-	resource     resourceIface
+	resource     *resourceData
 	permission   Permission
 	singularName func(locale string) string
 	pluralName   func(locale string) string
@@ -35,7 +35,7 @@ func (resource *Resource[T]) QuickAction(url string) *QuickAction[T] {
 	ret := &QuickAction[T]{
 		data: &quickActionData{
 			url:        url,
-			resource:   resource,
+			resource:   resource.data,
 			permission: sysadminPermission,
 			singularName: func(string) string {
 				return url
@@ -55,11 +55,11 @@ func (qa *QuickAction[T]) getData() *quickActionData {
 }
 
 func (data *quickActionData) getApiURL(id int64) string {
-	return fmt.Sprintf("/admin/%s/api/quick-action?action=%s&itemid=%d", data.resource.getData().getID(), data.url, id)
+	return fmt.Sprintf("/admin/%s/api/quick-action?action=%s&itemid=%d", data.resource.getID(), data.url, id)
 }
 
 func (qa *QuickAction[T]) Permission(permission Permission) *QuickAction[T] {
-	must(qa.data.resource.getData().app.validatePermission(permission))
+	must(qa.data.resource.app.validatePermission(permission))
 	qa.data.permission = permission
 	return qa
 }
