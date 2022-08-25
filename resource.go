@@ -130,7 +130,7 @@ func GetResource[T any](app *App) *Resource[T] {
 }
 
 type resourceIface interface {
-	initDefaultResourceActions()
+	//initDefaultResourceActions()
 	//initDefaultResourceAPIs()
 	//createRelations()
 	//addValidation(validation Validation)

@@ -8,8 +8,7 @@ import (
 	"strconv"
 )
 
-func (resource *Resource[T]) initDefaultResourceActions() {
-	resourceData := resource.data
+func (resourceData *resourceData) initDefaultResourceActions() {
 	resourceData.action("").priority().Permission(resourceData.canView).Name(resourceData.pluralName).Template("admin_list").DataSource(
 		func(request *Request) interface{} {
 			listData, err := resourceData.getListHeader(request.user)
@@ -20,9 +19,10 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 
 	resourceData.FormAction("new").priority().Permission(resourceData.canCreate).Name(messages.GetNameFunction("admin_new")).Form(
 		func(form *Form, request *Request) {
-			var item T
-			resourceData.bindData(&item, request.user, request.Request().URL.Query())
-			resourceData.addFormItems(&item, request.user, form)
+			//var item T
+			var item interface{} = reflect.New(resourceData.typ).Interface()
+			resourceData.bindData(item, request.user, request.Request().URL.Query())
+			resourceData.addFormItems(item, request.user, form)
 			form.AddSubmit(messages.Get(request.user.Locale, "admin_save"))
 		},
 	).Validation(func(vc ValidationContext) {
@@ -31,19 +31,20 @@ func (resource *Resource[T]) initDefaultResourceActions() {
 		}
 		request := vc.Request()
 		if vc.Valid() {
-			var item T
-			resourceData.bindData(&item, request.user, request.Params())
+			//var item T
+			var item interface{} = reflect.New(resourceData.typ).Interface()
+			resourceData.bindData(item, request.user, request.Params())
 			if resourceData.orderField != nil {
 				count, _ := resourceData.query().count()
-				resourceData.setOrderPosition(&item, count+1)
+				resourceData.setOrderPosition(item, count+1)
 			}
-			must(resourceData.CreateWithLog(&item, request))
+			must(resourceData.CreateWithLog(item, request))
 
-			resourceData.app.Notification(getItemName(&item)).
-				SetImage(resourceData.app.getItemImage(&item)).
+			resourceData.app.Notification(getItemName(item)).
+				SetImage(resourceData.app.getItemImage(item)).
 				SetPreName(messages.Get(request.user.Locale, "admin_item_created")).
 				Flash(request)
-			vc.Validation().RedirectionLocaliton = resourceData.getItemURL(&item, "")
+			vc.Validation().RedirectionLocaliton = resourceData.getItemURL(item, "")
 		}
 	})
 
