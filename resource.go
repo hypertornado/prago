@@ -99,7 +99,7 @@ func NewResource[T any](app *App) *Resource[T] {
 
 	for i := 0; i < typ.NumField(); i++ {
 		if ast.IsExported(typ.Field(i).Name) {
-			field := ret.newField(typ.Field(i), i)
+			field := ret.data.newField(typ.Field(i), i)
 			if field.tags["prago-type"] == "order" {
 				ret.data.orderField = field
 			}
@@ -108,9 +108,9 @@ func NewResource[T any](app *App) *Resource[T] {
 		}
 	}
 
-	app.resources = append(app.resources, ret)
-	app.resourceMap[ret.data.typ] = ret
-	app.resourceNameMap[ret.data.id] = ret
+	app.resources = append(app.resources, ret.data)
+	app.resourceMap[ret.data.typ] = ret.data
+	app.resourceNameMap[ret.data.id] = ret.data
 
 	initResource(ret.data)
 
@@ -125,7 +125,10 @@ func GetResource[T any](app *App) *Resource[T] {
 	if !ok {
 		return nil
 	}
-	return ret.(*Resource[T])
+	return &Resource[T]{
+		data: ret,
+	}
+	//return ret.(*Resource[T])
 
 }
 
@@ -413,7 +416,7 @@ func (resourceData *resourceData) getItemURL(item interface{}, suffix string) st
 	return ret
 }
 
-func (app *App) getResourceByID(name string) resourceIface {
+func (app *App) getResourceByID(name string) *resourceData {
 	return app.resourceNameMap[columnName(name)]
 }
 

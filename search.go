@@ -248,12 +248,12 @@ func (e *adminSearch) searchImport() error {
 		return fmt.Errorf("while creating index: %s", err)
 	}
 
-	for _, v := range e.app.resources {
+	for _, resourceData := range e.app.resources {
 		total, _ := e.index.Count()
-		e.app.Log().Printf("importing resource: %s, total: %d\n", v.getData().getID(), total)
-		err = v.getData().importSearchData(bulkUpdater)
+		e.app.Log().Printf("importing resource: %s, total: %d\n", resourceData.getID(), total)
+		err = resourceData.importSearchData(bulkUpdater)
 		if err != nil {
-			return fmt.Errorf("while importing resource %s: %s", v.getData().getID(), err)
+			return fmt.Errorf("while importing resource %s: %s", resourceData.getID(), err)
 		}
 	}
 

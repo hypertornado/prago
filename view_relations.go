@@ -25,11 +25,11 @@ func (resourceData *resourceData) getRelationViews(id int64, user *user) (ret []
 }
 
 func (resourceData *resourceData) getRelationView(id int64, field *relatedField, user *user) *view {
-	if !resourceData.app.authorize(user, field.resource.getData().canView) {
+	if !resourceData.app.authorize(user, field.resource.canView) {
 		return nil
 	}
 
-	filteredCount := field.resource.getData().itemWithRelationCount(field.id, int64(id))
+	filteredCount := field.resource.itemWithRelationCount(field.id, int64(id))
 
 	ret := &view{}
 
@@ -42,7 +42,7 @@ func (resourceData *resourceData) getRelationView(id int64, field *relatedField,
 		URL:  field.listURL(int64(id)),
 	})
 
-	if resourceData.app.authorize(user, field.resource.getData().canUpdate) {
+	if resourceData.app.authorize(user, field.resource.canUpdate) {
 		ret.Navigation = append(ret.Navigation, tab{
 			Name: "+",
 			URL:  field.addURL(int64(id)),
@@ -51,7 +51,7 @@ func (resourceData *resourceData) getRelationView(id int64, field *relatedField,
 
 	ret.Relation = &viewRelation{
 		SourceResource: resourceData.getID(),
-		TargetResource: field.resource.getData().getID(),
+		TargetResource: field.resource.getID(),
 		TargetField:    field.id,
 		IDValue:        int64(id),
 		Count:          filteredCount,
@@ -84,13 +84,13 @@ func generateRelationListAPIHandler(request *Request) {
 
 	targetResource := request.app.getResourceByID(listRequest.TargetResource)
 
-	request.SetData("data", targetResource.getData().getPreviews(listRequest, request.user))
+	request.SetData("data", targetResource.getPreviews(listRequest, request.user))
 	request.RenderView("admin_item_view_relationlist_response")
 }
 
 func (resourceData *resourceData) getPreviews(listRequest relationListRequest, user *user) []*preview {
 	sourceResource := resourceData.app.getResourceByID(listRequest.SourceResource)
-	if !resourceData.app.authorize(user, sourceResource.getData().canView) {
+	if !resourceData.app.authorize(user, sourceResource.canView) {
 		panic("cant authorize source resource")
 	}
 

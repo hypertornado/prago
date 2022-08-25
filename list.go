@@ -159,7 +159,7 @@ func (resourceData *resourceData) fieldsStr(user *user) string {
 func (field *Field) getListHeaderItem(user *user) listHeaderItem {
 	var relatedResourceID string
 	if field.relatedResource != nil {
-		relatedResourceID = field.relatedResource.getData().getID()
+		relatedResourceID = field.relatedResource.getID()
 	}
 
 	headerItem := listHeaderItem{

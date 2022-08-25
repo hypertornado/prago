@@ -26,9 +26,9 @@ type App struct {
 
 	logo            []byte
 	name            func(string) string
-	resources       []resourceIface
-	resourceMap     map[reflect.Type]resourceIface
-	resourceNameMap map[string]resourceIface
+	resources       []*resourceData
+	resourceMap     map[reflect.Type]*resourceData
+	resourceNameMap map[string]*resourceData
 
 	mainController   *controller
 	appController    *controller
@@ -85,8 +85,8 @@ func createApp(codeName string, version string) *App {
 	app.accessController = app.mainController.subController()
 	app.accessController.priorityRouter = true
 	app.adminController = app.accessController.subController()
-	app.resourceMap = make(map[reflect.Type]resourceIface)
-	app.resourceNameMap = make(map[string]resourceIface)
+	app.resourceMap = make(map[reflect.Type]*resourceData)
+	app.resourceNameMap = make(map[string]*resourceData)
 	app.fieldTypes = make(map[string]*fieldType)
 
 	app.preInitTaskManager()
@@ -143,9 +143,9 @@ func (app *App) afterInit() {
 }
 
 func (app *App) initDefaultResourceActions() {
-	for _, v := range app.resources {
-		v.getData().initDefaultResourceActions()
-		v.getData().initDefaultResourceAPIs()
+	for _, resourceData := range app.resources {
+		resourceData.initDefaultResourceActions()
+		resourceData.initDefaultResourceAPIs()
 	}
 }
 

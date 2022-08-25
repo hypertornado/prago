@@ -20,8 +20,8 @@ type preview struct {
 }
 
 func (app *App) initRelations() {
-	for _, v := range app.resources {
-		v.getData().createRelations()
+	for _, resourceData := range app.resources {
+		resourceData.createRelations()
 	}
 }
 
@@ -35,9 +35,9 @@ func (resourceData *resourceData) createRelations() {
 			field.relatedResource = resourceData.app.getResourceByID(relatedResourceID)
 
 			if !field.nameSetManually {
-				field.name = field.relatedResource.getData().singularName
+				field.name = field.relatedResource.singularName
 			}
-			field.relatedResource.getData().addRelation((*relatedField)(field))
+			field.relatedResource.addRelation((*relatedField)(field))
 		}
 	}
 }
@@ -45,22 +45,22 @@ func (resourceData *resourceData) createRelations() {
 func (field *relatedField) addURL(id int64) string {
 	values := url.Values{}
 	values.Add(field.id, fmt.Sprintf("%d", id))
-	return field.resource.getData().getURL("new?" + values.Encode())
+	return field.resource.getURL("new?" + values.Encode())
 }
 
 func (field *relatedField) listURL(id int64) string {
 	values := url.Values{}
 	values.Add(field.id, fmt.Sprintf("%d", id))
-	return field.resource.getData().getURL("") + "?" + values.Encode()
+	return field.resource.getURL("") + "?" + values.Encode()
 }
 
 func (field *relatedField) listName(locale string) string {
 	f := (*Field)(field)
 	ret := f.GetManuallySetPluralName(locale)
 	if ret != "" {
-		return fmt.Sprintf("%s – %s", field.resource.getData().pluralName(locale), ret)
+		return fmt.Sprintf("%s – %s", field.resource.pluralName(locale), ret)
 	}
-	return field.resource.getData().pluralName(locale)
+	return field.resource.pluralName(locale)
 }
 
 func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
@@ -69,23 +69,23 @@ func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
 }
 
 func getPreviewData(user *user, f *Field, value int64) (*preview, error) {
-	app := f.resource.getData().app
+	app := f.resource.app
 	if f.relatedResource == nil {
 		return nil, fmt.Errorf("resource not found: %s", f.name("en"))
 	}
 
-	if !app.authorize(user, f.relatedResource.getData().canView) {
+	if !app.authorize(user, f.relatedResource.canView) {
 		return nil, fmt.Errorf("user is not authorized to view this item")
 	}
 
-	ret := f.relatedResource.getData().getItemPreview(value, user, f.resource)
+	ret := f.relatedResource.getItemPreview(value, user, f.resource)
 	if ret == nil {
 		return nil, errors.New("can't get item preview")
 	}
 	return ret, nil
 }
 
-func (resourceData *resourceData) getItemPreview(id int64, user *user, relatedResource resourceIface) *preview {
+func (resourceData *resourceData) getItemPreview(id int64, user *user, relatedResource *resourceData) *preview {
 	item := resourceData.query().ID(id)
 	if item == nil {
 		return nil
@@ -94,7 +94,7 @@ func (resourceData *resourceData) getItemPreview(id int64, user *user, relatedRe
 
 }
 
-func (resourceData *resourceData) getPreview(item any, user *user, relatedResource resourceIface) *preview {
+func (resourceData *resourceData) getPreview(item any, user *user, relatedResource *resourceData) *preview {
 	var ret preview
 	ret.ID = getItemID(item)
 	ret.Name = getItemName(item)
@@ -140,7 +140,7 @@ func getItemName(item interface{}) string {
 	return fmt.Sprintf("#%d", getItemID(item))
 }
 
-func (resourceData *resourceData) getItemDescription(item any, user *user, relatedResource resourceIface) string {
+func (resourceData *resourceData) getItemDescription(item any, user *user, relatedResource *resourceData) string {
 	var items []string
 	itemsVal := reflect.ValueOf(item).Elem()
 
@@ -165,7 +165,7 @@ func (resourceData *resourceData) getItemDescription(item any, user *user, relat
 		}
 
 		rr := v.relatedResource
-		if rr != nil && relatedResource != nil && rr.getData().getID() == relatedResource.getData().getID() {
+		if rr != nil && relatedResource != nil && rr.getID() == relatedResource.getID() {
 			continue
 		}
 
@@ -192,7 +192,7 @@ func (app App) relationStringer(field Field, value reflect.Value, user *user) st
 			if value.Int() <= 0 {
 				return ""
 			}
-			field.relatedResource.getData().resourceItemName(int64(value.Int()))
+			field.relatedResource.resourceItemName(int64(value.Int()))
 		}
 		return fmt.Sprintf("%v", value.Int())
 	case reflect.Float32, reflect.Float64:

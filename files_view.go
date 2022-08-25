@@ -60,7 +60,7 @@ func getFilesViewData(app *App, uid string) (ret filesViewData) {
 }
 
 func filesViewDataSource(user *user, f *Field, value interface{}) interface{} {
-	app := f.resource.getData().app
+	app := f.resource.app
 	var ret []filesViewData
 	ar := strings.Split(value.(string), ",")
 	for _, v := range ar {

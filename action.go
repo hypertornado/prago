@@ -63,8 +63,8 @@ func (app *App) bindAllActions() {
 		}
 	}
 
-	for _, resource := range app.resources {
-		resource.getData().bindActions()
+	for _, resourceData := range app.resources {
+		resourceData.bindActions()
 	}
 }
 
