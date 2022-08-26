@@ -3,7 +3,6 @@ package prago
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -91,7 +90,7 @@ var macBuild = buildFlag{"mac", "darwin", "amd64"}
 
 func build(appName, version string) error {
 	fmt.Println(appName, version)
-	dir, err := ioutil.TempDir("", "build")
+	dir, err := os.MkdirTemp("", "build")
 	if err != nil {
 		return err
 	}

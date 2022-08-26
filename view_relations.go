@@ -128,11 +128,5 @@ func (resourceData *resourceData) getPreviews(listRequest relationListRequest, u
 		)
 	}
 
-	/*for _, item := range rowItems {
-		ret = append(
-			ret,
-			resourceData.getPreview(item, user, sourceResource),
-		)
-	}*/
 	return ret
 }

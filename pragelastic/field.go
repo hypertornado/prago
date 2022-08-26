@@ -47,11 +47,6 @@ func getElasticField(t reflect.StructField) (ret *field) {
 		return ret
 	}
 
-	/*if t.Type == reflect.TypeOf(map[string]float64{}) {
-		ret.Type = "object"
-		return ret
-	}*/
-
 	if t.Type == reflect.TypeOf([]string{}) {
 		ret.Type = "keyword"
 		return ret

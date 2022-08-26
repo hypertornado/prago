@@ -146,15 +146,6 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 						ret = append(ret, *viewItem)
 					}
 				}
-
-				/*for _, item := range items {
-					viewItem := resourceData.getPreview(item, request.user, nil)
-					if viewItem != nil && !usedIDs[viewItem.ID] {
-						usedIDs[viewItem.ID] = true
-						ret = append(ret, *viewItem)
-					}
-				}*/
-
 			}
 
 			if len(ret) > 5 {

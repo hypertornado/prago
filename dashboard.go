@@ -19,7 +19,6 @@ type DashboardItem struct {
 	compareDescription string
 	unit               string
 	name               string
-	description        string
 }
 
 type dashboardGroupTable struct {
@@ -120,7 +119,7 @@ func (item *DashboardItem) getDescriptionStr(app *App) string {
 	if diff >= 0 {
 		ret = fmt.Sprintf("+%s", humanizeNumber(diff))
 	} else {
-		ret = fmt.Sprintf("%s", humanizeNumber(diff))
+		ret = humanizeNumber(diff)
 	}
 
 	if item.unit != "" {

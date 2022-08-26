@@ -92,15 +92,6 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		}
 	})
 
-	/*resource.QuickAction("test_quick").Name(unlocalized("Test buttonu 1"), unlocalized("Testy buttonu 1"))
-	resource.QuickAction("test_quick2").DeleteType()
-	resource.QuickAction("test_quick_green").GreenType().Handler(func(t *T, r *Request) error {
-		return errors.New("green error")
-	})
-	resource.QuickAction("test_quick_blue").BlueType().Handler(func(t *T, r *Request) error {
-		return nil
-	})*/
-
 	resourceData.FormItemAction("delete").priority().Permission(resourceData.canDelete).Name(messages.GetNameFunction("admin_delete")).Form(
 		func(item any, form *Form, request *Request) {
 			form.AddDeleteSubmit(messages.Get(request.user.Locale, "admin_delete"))
@@ -224,11 +215,7 @@ func (resourceData *resourceData) editItemWithLogAndValues(request *Request, val
 	beforeVal := reflect.ValueOf(beforeItem).Elem()
 	itemVal := beforeVal
 
-	var item interface{}
-	item = itemVal.Addr().Interface()
-
-	//cloned := *beforeItem
-	//item := &cloned
+	item := itemVal.Addr().Interface()
 
 	err = resourceData.bindData(
 		item, user, values,

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"embed"
 	"errors"
+	"io"
 	"io/fs"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -21,7 +21,7 @@ func (app *App) initStaticFilesHandler() {
 	app.AddStaticFiles(staticAdminFS, "public")
 }
 
-//AddStaticFiles add filesystem of public files and publish them in server's root
+// AddStaticFiles add filesystem of public files and publish them in server's root
 func (app *App) AddStaticFiles(f fs.FS, pathPrefix string) {
 	app.staticFiles.filesystems = append(app.staticFiles.filesystems, staticFS{
 		fs:         f,
@@ -29,7 +29,7 @@ func (app *App) AddStaticFiles(f fs.FS, pathPrefix string) {
 	})
 }
 
-//AddDevStaticFiles adds path for public files for development and publish them in server's root
+// AddDevStaticFiles adds path for public files for development and publish them in server's root
 func (app *App) AddDevStaticFiles(path string) {
 	app.staticFiles.devFilesystems = append(app.staticFiles.devFilesystems, path)
 }
@@ -40,8 +40,7 @@ type staticFiles struct {
 }
 
 type staticFS struct {
-	fs fs.FS
-	//path       string
+	fs         fs.FS
 	pathPrefix string
 }
 
@@ -96,7 +95,7 @@ func (request Request) serveStaticFile(filesystem fs.FS, name string) (err error
 		}
 	}
 
-	b, _ := ioutil.ReadAll(f)
+	b, _ := io.ReadAll(f)
 	reader := bytes.NewReader(b)
 
 	http.ServeContent(request.w, request.r, d.Name(), d.ModTime(), reader)

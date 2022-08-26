@@ -115,22 +115,6 @@ func (app *App) ClearCache() {
 	app.cache.clear()
 }
 
-/*func (c *cache) Load(cacheName string, createFn func() interface{}) interface{} {
-	item := c.getItem(cacheName)
-	if item == nil {
-		item := c.putItem(cacheName, createFn)
-		return item.getValue()
-	}
-
-	if item.isStale() {
-		go func() {
-			item.reloadValue()
-		}()
-		return item.getValue()
-	}
-	return item.getValue()
-}*/
-
 func (c *cache) forceLoad(cacheName string, createFn func() interface{}) interface{} {
 	item := c.putItem(cacheName, createFn)
 	return item.getValue()

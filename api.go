@@ -33,10 +33,6 @@ func (app *App) API(url string) *API {
 
 func (resource *Resource[T]) API(url string) *API {
 	return resource.data.API(url)
-	/*api := newAPI(resource.data.app, url)
-	api.resource = resource
-	api.permission = resource.data.canView
-	return api*/
 }
 
 func (resourceData *resourceData) API(url string) *API {
@@ -158,21 +154,9 @@ func renderAPICode(request *Request, code int) {
 		message = "Not found"
 	}
 	renderAPIMessage(request, code, message)
-
-	//request.Response().WriteHeader(code)
-	//request.Response().Write([]byte(fmt.Sprintf("%d - %s", code, message)))
-
 }
 
 func renderAPIMessage(request *Request, code int, message string) {
-	/*var message string
-	switch code {
-	case 403:
-		message = "Forbidden"
-	case 404:
-		message = "Not found"
-	}*/
-
 	request.Response().WriteHeader(code)
 	request.Response().Write([]byte(fmt.Sprintf("%d - %s", code, message)))
 

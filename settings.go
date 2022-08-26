@@ -72,7 +72,6 @@ func (setting *setting) ValueChangeCallback(fn func()) *setting {
 type setting struct {
 	id             string
 	name           func(string) string
-	value          string
 	permission     Permission
 	defaultValue   string
 	changeCallback func()

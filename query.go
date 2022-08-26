@@ -73,12 +73,6 @@ func (q *Query[T]) First() *T {
 		return nil
 	}
 	return ret
-
-	/*items := q.List()
-	if len(items) > 0 {
-		return items[0]
-	}
-	return nil*/
 }
 
 func (q *Query[T]) Count() (int64, error) {

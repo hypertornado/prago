@@ -3,7 +3,6 @@ package prago
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -31,12 +30,16 @@ func (app *App) initBackupCRON() {
 			tr.SetStatus(0, "Removing old backups")
 			deadline := time.Now().AddDate(0, 0, -7)
 			backupPath := app.dotPath() + "/backups"
-			files, err := ioutil.ReadDir(backupPath)
+			files, err := os.ReadDir(backupPath)
 			if err != nil {
 				return fmt.Errorf("error while removing old backups: %s", err)
 			}
 			for _, file := range files {
-				if file.ModTime().Before(deadline) {
+				info, err := file.Info()
+				if err != nil {
+					return fmt.Errorf("can't get file info: %s", err)
+				}
+				if info.ModTime().Before(deadline) {
 					removePath := backupPath + "/" + file.Name()
 					err := os.RemoveAll(removePath)
 					if err != nil {
@@ -53,7 +56,7 @@ func backupApp(app *App) error {
 	app.Log().Println("Creating backup")
 	var appName = app.codeName
 
-	dir, err := ioutil.TempDir("", "backup")
+	dir, err := os.MkdirTemp("", "backup")
 	if err != nil {
 		return fmt.Errorf("creating backup tmp dir: %s", err)
 	}
@@ -107,7 +110,6 @@ func syncBackups(appName, ssh string) error {
 	}
 
 	from := fmt.Sprintf("%s:~/.%s/backups/*", ssh, appName)
-
 	fmt.Println("scp", "-r", from, to)
 	cmd := exec.Command("scp", "-r", from, to)
 	cmd.Stdout = os.Stdout

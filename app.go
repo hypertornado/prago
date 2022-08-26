@@ -100,10 +100,8 @@ func createApp(codeName string, version string) *App {
 	app.connectDB(testing)
 
 	app.initSettings()
-
 	app.initElasticsearchClient()
 	app.initLogger()
-
 	app.initStaticFilesHandler()
 	app.initNotifications()
 
@@ -124,7 +122,6 @@ func createApp(codeName string, version string) *App {
 	app.initSQLConsole()
 	app.initSQLBackup()
 	app.initBackupCRON()
-
 	return app
 }
 

@@ -30,7 +30,7 @@ func TestCrop(t *testing.T) {
 	} {
 		croped := crop(v.in, v.index)
 		if croped != v.out {
-			t.Fatal(fmt.Sprintf("%d Expected '%s', got '%s'", k, v.out, croped))
+			t.Fatalf("%d Expected '%s', got '%s'", k, v.out, croped)
 		}
 	}
 }

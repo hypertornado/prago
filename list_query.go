@@ -77,7 +77,3 @@ func (listQuery *listQuery) OrderDesc(order string) *listQuery {
 	listQuery.addOrder(order, true)
 	return listQuery
 }
-
-/*func (listQuery *listQuery) ID(id any) interface{} {
-	return q.Where(sqlFieldToQuery("id"), id).First()
-}*/

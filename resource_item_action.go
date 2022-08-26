@@ -28,11 +28,6 @@ func (resourceData *resourceData) ItemAction(url string) *resourceItemActionData
 	}
 }
 
-func (action *ResourceItemAction[T]) priority() *ResourceItemAction[T] {
-	action.data.priority()
-	return action
-}
-
 func (actionData *resourceItemActionData) priority() *resourceItemActionData {
 	actionData.action.priority()
 	return actionData

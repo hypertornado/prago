@@ -2,11 +2,11 @@ package prago
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 )
 
-//TaskActivity represents task activity
+// TaskActivity represents task activity
 type TaskActivity struct {
 	task          *Task
 	notification  *Notification
@@ -14,7 +14,7 @@ type TaskActivity struct {
 	files         *multipart.Form
 }
 
-//SetStatus sets progress and status for task activity
+// SetStatus sets progress and status for task activity
 func (ta *TaskActivity) SetStatus(progress float64, status string) {
 	if ta.stoppedByUser {
 		panic("task already stopped by user")
@@ -39,7 +39,7 @@ func (ta *TaskActivity) GetFileContent() []byte {
 
 	file, err := ta.GetFile(ta.task.files[0].ID)
 	must(err)
-	content, err := ioutil.ReadAll(file)
+	content, err := io.ReadAll(file)
 	if err != nil {
 		panic(err)
 	}

@@ -128,7 +128,6 @@ func GetResource[T any](app *App) *Resource[T] {
 	return &Resource[T]{
 		data: ret,
 	}
-	//return ret.(*Resource[T])
 
 }
 

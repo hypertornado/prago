@@ -17,12 +17,11 @@ type QuickActionAPIResponse struct {
 	Error    string
 }
 
-func (qa *QuickAction[T]) getView() *QuickActionView {
+/*func (qa *QuickAction[T]) getView() *QuickActionView {
 	return nil
-}
+}*/
 
 func (resourceData *resourceData) getQuickActionViews(itemIface any, user *user) (ret []QuickActionView) {
-	//item := itemIface.(*T)
 	for _, v := range resourceData.quickActions {
 		quickActionData := v.getData()
 		if quickActionData.validation == nil || quickActionData.validation(itemIface, user) {

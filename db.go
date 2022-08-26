@@ -89,10 +89,10 @@ func (resourceData *resourceData) replaceItem(item interface{}, debugSQL bool) e
 		return err
 	}
 	//TODO: suspicious
-	updateNames := []string{}
+	/*updateNames := []string{}
 	for _, v := range names {
 		updateNames = append(updateNames, fmt.Sprintf(" %s=? ", v))
-	}
+	}*/
 	q := fmt.Sprintf("REPLACE INTO `%s` (%s) VALUES (%s);", resourceData.id, strings.Join(names, ", "), strings.Join(questionMarks, ", "))
 	if debugSQL {
 		fmt.Println(q, values)

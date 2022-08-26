@@ -91,15 +91,6 @@ func (app *App) initSystemStats() {
 				environmentStats = append(environmentStats, [2]string{pair[0], pair[1]})
 			}
 
-			/*if app.ElasticClient != nil {
-				stats := app.ElasticClient.GetStats()
-				if stats != nil {
-					for _, indice := range stats.Indices {
-						indice
-					}
-				}
-			}*/
-
 			ret := map[string]interface{}{}
 
 			ret["roles"] = app.accessManager.roles
@@ -113,10 +104,6 @@ func (app *App) initSystemStats() {
 			return ret
 		},
 	)
-}
-
-type elasticStatsIndex struct {
-	Name string
 }
 
 type accessView struct {

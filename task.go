@@ -2,7 +2,7 @@ package prago
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 	"sort"
 	"time"
@@ -93,7 +93,7 @@ func (app *App) postInitTaskManager() {
 			return err
 		}
 
-		data, err := ioutil.ReadAll(file)
+		data, err := io.ReadAll(file)
 		if err != nil {
 			return err
 		}
@@ -188,7 +188,7 @@ func (tm *taskManager) getTasks(user *user, csrfToken string) (ret []taskViewGro
 	return ret
 }
 
-//Task represent some user task
+// Task represent some user task
 type Task struct {
 	id          string
 	name        func(string) string
@@ -204,7 +204,7 @@ type taskFileInput struct {
 	ID string
 }
 
-//Task creates task
+// Task creates task
 func (tg *TaskGroup) Task(name func(string) string) *Task {
 	id := randomString(20)
 	_, ok := tg.manager.tasksMap[id]
@@ -223,20 +223,16 @@ func (tg *TaskGroup) Task(name func(string) string) *Task {
 	tg.tasks = append(tg.tasks, task)
 	tg.manager.tasksMap[task.id] = task
 
-	/*tg.manager.app.addCommand("task", id).Callback(func() {
-		tg.manager.run(task, nil, nil)
-	})*/
-
 	return task
 }
 
-//Handler sets handler to task
+// Handler sets handler to task
 func (t *Task) Handler(fn func(*TaskActivity) error) *Task {
 	t.handler = fn
 	return t
 }
 
-//FileInput
+// FileInput
 func (t *Task) FileInput(id string) *Task {
 	t.files = append(t.files, &taskFileInput{
 		ID: id,
@@ -244,26 +240,26 @@ func (t *Task) FileInput(id string) *Task {
 	return t
 }
 
-//SetPermission set permission to task
+// SetPermission set permission to task
 func (t *Task) Permission(permission string) *Task {
 	t.permission = Permission(permission)
 	return t
 }
 
-//RepeatEvery sets cron to task
+// RepeatEvery sets cron to task
 func (t *Task) RepeatEvery(duration time.Duration) *Task {
 	t.cron = duration
 	return t
 }
 
-//TaskGroup represent group of tasks
+// TaskGroup represent group of tasks
 type TaskGroup struct {
 	name    func(string) string
 	manager *taskManager
 	tasks   []*Task
 }
 
-//NewTaskGroup creates new task group
+// NewTaskGroup creates new task group
 func (app *App) TaskGroup(name func(string) string) *TaskGroup {
 	return &TaskGroup{
 		name:    name,

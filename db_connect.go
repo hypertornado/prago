@@ -3,7 +3,6 @@ package prago
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 )
 
@@ -19,7 +18,7 @@ func getDBConnectPath(appName string) string {
 
 func getDBConfig(codeName string) (*dbConnectConfig, error) {
 	path := getDBConnectPath(codeName)
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("error while opening db config file %s: %s", path, err)
 	}

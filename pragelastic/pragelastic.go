@@ -2,6 +2,7 @@ package pragelastic
 
 import (
 	"context"
+	"time"
 
 	"github.com/olivere/elastic/v7"
 )
@@ -12,7 +13,10 @@ type Client struct {
 }
 
 func New(id string) (*Client, error) {
-	client, err := elastic.NewClient()
+	client, err := elastic.NewClient(
+		elastic.SetMaxRetries(0),
+		elastic.SetHealthcheckTimeoutStartup(100*time.Millisecond),
+	)
 	if err != nil {
 		return nil, err
 	}

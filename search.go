@@ -178,9 +178,6 @@ func (resourceData *resourceData) importSearchData(bulkUpdater *pragelastic.Bulk
 		resourceData.saveSearchItemWithRoles(bulkUpdater, itemVals.Index(i).Interface(), roles)
 	}
 
-	/*for _, item := range items {
-		resource.saveSearchItemWithRoles(bulkUpdater, item, roles)
-	}*/
 	return nil
 }
 

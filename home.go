@@ -41,12 +41,6 @@ func (app *App) initHome() {
 		return c
 	}, "oproti předchozímu dni")
 
-	/*sysadminGroup.Table(func() *Table {
-		tbl := app.Table()
-		tbl.Row("hello", "world")
-		return tbl
-	}, "sysadmin")*/
-
 }
 
 func (app *App) getHomeData(request *Request) interface{} {
