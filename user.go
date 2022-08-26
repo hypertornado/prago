@@ -11,8 +11,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-//User represents admin user account
-//TODO: better handle isactive user
+// User represents admin user account
+// TODO: better handle isactive user
 type user struct {
 	ID                int64     `prago-order-desc:"true"`
 	Name              string    `prago-preview:"true"`
@@ -43,7 +43,7 @@ func (user *user) isPassword(password string) bool {
 	}
 }
 
-//TODO: better comparison
+// TODO: better comparison
 func (user *user) emailConfirmed() bool {
 	if user.EmailConfirmedAt.Before(time.Now().AddDate(-1000, 0, 0)) {
 		return false
@@ -91,7 +91,7 @@ func (app *App) initUserResource() {
 }
 
 func (app *App) GetCachedUserEmail(id int64) string {
-	return Cached(app, fmt.Sprintf("cached-user-email-%d", id), func() string {
+	return <-Cached(app, fmt.Sprintf("cached-user-email-%d", id), func() string {
 		user := app.UsersResource.ID(id)
 		return user.Email
 	})

@@ -59,7 +59,7 @@ func (group *DashboardGroup) getTable() *Table {
 	if group.table == nil {
 		return nil
 	}
-	return Cached(group.app, fmt.Sprintf("dashboard-table-%s", group.uuid), func() *Table {
+	return <-Cached(group.app, fmt.Sprintf("dashboard-table-%s", group.uuid), func() *Table {
 		return group.table.table()
 	})
 }
@@ -77,7 +77,7 @@ func (item *DashboardItem) getValues(app *App) (int64, int64) {
 		}
 		return -1
 	})
-	return val, cmpVal
+	return <-val, <-cmpVal
 }
 
 func (item *DashboardItem) Value(value func() int64) *DashboardItem {

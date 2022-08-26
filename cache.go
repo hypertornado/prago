@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -88,6 +89,14 @@ func (c *cache) putItem(name string, createFn func() interface{}) *cacheItem {
 }
 
 func loadCache[T any](c *cache, name string, createFn func() T) T {
+	cacheStart := time.Now()
+	defer func() {
+		durationSince := time.Since(cacheStart)
+		if durationSince.Milliseconds() > 0 {
+			fmt.Printf("cache '%s', took %s\n", name, durationSince.String())
+		}
+	}()
+
 	fn := func() interface{} {
 		return createFn()
 	}
@@ -107,8 +116,13 @@ func loadCache[T any](c *cache, name string, createFn func() T) T {
 	return item.getValue().(T)
 }
 
-func Cached[T any](app *App, name string, createFn func() T) T {
-	return loadCache(app.cache, name, createFn)
+func Cached[T any](app *App, name string, createFn func() T) chan T {
+	ret := make(chan T)
+	go func() {
+		val := loadCache(app.cache, name, createFn)
+		ret <- val
+	}()
+	return ret
 }
 
 func (app *App) ClearCache() {
