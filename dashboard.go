@@ -1,6 +1,9 @@
 package prago
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type DashboardGroup struct {
 	app   *App
@@ -24,6 +27,32 @@ type DashboardItem struct {
 type dashboardGroupTable struct {
 	table      func() *Table
 	permission Permission
+}
+
+func (app *App) initDashboard() {
+
+	app.API("dashboard-table").Method("GET").Permission(loggedPermission).Handler(
+		func(request *Request) {
+			uuid := request.Param("uuid")
+			table, err := app.getDashboardTableData(uuid, request.user)
+			must(err)
+			request.app.templates.templates.ExecuteTemplate(request.Response(), "admin_form_table", table.TemplateData())
+		},
+	)
+}
+
+func (app *App) getDashboardTableData(uuid string, user *user) (*Table, error) {
+
+	for _, group := range app.dashboardGroups {
+		if group.uuid == uuid {
+			if !app.authorize(user, group.table.permission) {
+				return nil, errors.New("can't authorize for access of table data")
+			}
+			return group.table.table(), nil
+		}
+	}
+	return nil, errors.New("can't find table")
+
 }
 
 func (app *App) DashboardGroup(name func(string) string) *DashboardGroup {

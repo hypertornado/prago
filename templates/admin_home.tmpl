@@ -24,8 +24,8 @@
             {{end}}
         {{end}}
       </div>
-      {{if $section.Table}}
-        {{template "admin_form_table" $section.Table.TemplateData}}
+      {{if $section.HasTable}}
+        <div class="admin_home_table" data-uuid="{{$section.UUID}}"><progress class="progress"></progress></div>
       {{end}}
       {{if $section.Tasks}}
         {{template "admin_tasks" $section.Tasks}}

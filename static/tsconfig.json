@@ -32,6 +32,7 @@
     "js/popup.ts",
     "js/smap.ts",
     "js/quick_actions.ts",
+    "js/dashboard.ts",
     "js/prago.ts"
   ]
 }

@@ -122,6 +122,8 @@ func createApp(codeName string, version string) *App {
 	app.initSQLConsole()
 	app.initSQLBackup()
 	app.initBackupCRON()
+	app.initDashboard()
+
 	return app
 }
 

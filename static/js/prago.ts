@@ -44,6 +44,8 @@ class Prago {
       new QuickActions(qa);
     }
 
+    initDashdoard();
+
     initSMap();
   }
 }

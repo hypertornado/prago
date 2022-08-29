@@ -9,10 +9,12 @@ type Home struct {
 }
 
 type HomeSection struct {
-	Name  string
-	Items []*HomeItem
-	Tasks *taskViewData
-	Table *Table
+	Name     string
+	Items    []*HomeItem
+	Tasks    *taskViewData
+	UUID     string
+	HasTable bool
+	//Table    *Table
 }
 
 type HomeItem struct {
@@ -52,6 +54,7 @@ func (app *App) getHomeData(request *Request) interface{} {
 	for _, section := range mainMenu.Sections {
 		homeSection := &HomeSection{
 			Name: section.Name,
+			//UUID: section.UUID,
 		}
 		home.Sections = append(home.Sections, homeSection)
 		for _, item := range section.Items {
@@ -67,6 +70,7 @@ func (app *App) getHomeData(request *Request) interface{} {
 	for _, group := range app.dashboardGroups {
 		homeSection := &HomeSection{
 			Name: group.name(locale),
+			UUID: group.uuid,
 		}
 		for _, item := range group.items {
 			if request.UserHasPermission(item.permission) {
@@ -75,10 +79,11 @@ func (app *App) getHomeData(request *Request) interface{} {
 		}
 
 		if group.table != nil && request.UserHasPermission(group.table.permission) {
-			homeSection.Table = group.getTable()
+			homeSection.HasTable = true
+			//homeSection.Table = group.getTable()
 		}
 
-		if len(homeSection.Items) > 0 || homeSection.Table != nil {
+		if len(homeSection.Items) > 0 || homeSection.HasTable {
 			home.Sections = append(home.Sections, homeSection)
 		}
 	}
