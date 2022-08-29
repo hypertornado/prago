@@ -264,8 +264,8 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				resourceData.getURL("api/multiple_edit"),
 			)
 
-			var item interface{} = reflect.New(resourceData.typ)
-			resourceData.addFormItems(&item, request.user, form)
+			var item interface{} = reflect.New(resourceData.typ).Interface()
+			resourceData.addFormItems(item, request.user, form)
 			request.SetData("form", form)
 
 			request.SetData("CSRFToken", request.csrfToken())
