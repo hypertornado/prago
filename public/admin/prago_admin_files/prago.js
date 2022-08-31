@@ -936,7 +936,35 @@ class ListMultiple {
                 }, Function(), ButtonStyle.Delete);
                 break;
             default:
-                console.log("other");
+                new Confirm(`Opravdu chcete provést tuto akci na ${ids.length} položek?`, () => {
+                    var loader = new LoadingPopup();
+                    var params = {};
+                    params["action"] = actionName;
+                    params["ids"] = ids.join(",");
+                    var url = this.list.adminPrefix +
+                        "/" +
+                        this.list.typeName +
+                        "/api/multipleaction" +
+                        encodeParams(params);
+                    fetch(url, {
+                        method: "POST",
+                    }).then((e) => {
+                        loader.done();
+                        if (e.status == 403) {
+                            e.json().then((data) => {
+                                new Alert(data.error.Text);
+                            });
+                            this.list.load();
+                            return;
+                        }
+                        if (e.status != 200) {
+                            new Alert("Error while doing multipleaction " + actionName);
+                            this.list.load();
+                            return;
+                        }
+                        this.list.load();
+                    });
+                }, Function());
         }
     }
     bindMultipleActionCheckboxes() {

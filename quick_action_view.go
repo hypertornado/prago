@@ -22,8 +22,7 @@ type QuickActionAPIResponse struct {
 }*/
 
 func (resourceData *resourceData) getQuickActionViews(itemIface any, user *user) (ret []QuickActionView) {
-	for _, v := range resourceData.quickActions {
-		quickActionData := v.getData()
+	for _, quickActionData := range resourceData.quickActions {
 		if quickActionData.validation == nil || quickActionData.validation(itemIface, user) {
 			var typStr string
 			switch quickActionData.typ {
@@ -67,8 +66,7 @@ func (resourceData *resourceData) runQuickAction(actionName string, itemID int64
 	if item == nil {
 		return errors.New("nelze nalézt položku")
 	}
-	for _, v := range resourceData.quickActions {
-		actionData := v.getData()
+	for _, actionData := range resourceData.quickActions {
 		if actionData.url == actionName {
 			if actionData.handler == nil {
 				return errors.New("není přiřazena žádná akce")

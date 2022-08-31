@@ -173,7 +173,9 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				ids = append(ids, int64(id))
 			}
 
-			switch request.Param("action") {
+			actionName := request.Param("action")
+
+			switch actionName {
 			case "clone":
 				if !request.app.authorize(request.user, resourceData.canCreate) {
 					renderAPINotAuthorized(request)
@@ -253,7 +255,24 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 					must(err)
 				}
 			default:
-				panic(fmt.Sprintf("unknown action: %s", request.Param("action")))
+				var foundAction bool
+				for _, action := range resourceData.quickActions {
+					if action.url == actionName {
+						foundAction = true
+						if !request.app.authorize(request.user, action.permission) {
+							panic("don't have access")
+						}
+						for _, id := range ids {
+							item := resourceData.ID(id)
+							err := action.handler(item, request)
+							must(err)
+						}
+
+					}
+				}
+				if !foundAction {
+					panic("did not find action")
+				}
 			}
 		},
 	)

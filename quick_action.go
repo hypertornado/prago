@@ -18,9 +18,9 @@ type quickActionData struct {
 	handler    func(any, *Request) error
 }
 
-type quickActionIface interface {
+/*type quickActionIface interface {
 	getData() *quickActionData
-}
+}*/
 
 type quickActionType int64
 
@@ -30,6 +30,8 @@ const (
 	quickTypeGreen  quickActionType = 3
 	quickTypeBlue   quickActionType = 4
 )
+
+//listMultipleAction
 
 func (resource *Resource[T]) QuickAction(url string) *QuickAction[T] {
 	ret := &QuickAction[T]{
@@ -46,12 +48,35 @@ func (resource *Resource[T]) QuickAction(url string) *QuickAction[T] {
 			typ: quickTypeBasic,
 		},
 	}
-	resource.data.quickActions = append(resource.data.quickActions, ret)
+
+	//ret := &QuickAction[T]{data}
+
+	resource.data.quickActions = append(resource.data.quickActions, ret.data)
 	return ret
 }
 
-func (qa *QuickAction[T]) getData() *quickActionData {
-	return qa.data
+func (resourceData *resourceData) getMultipleActionsFromQuickActions(user *user) (ret []listMultipleAction) {
+
+	for _, action := range resourceData.quickActions {
+		a := action.getMultipleAction(user)
+		if a != nil {
+			ret = append(ret, *a)
+		}
+	}
+
+	return
+}
+
+func (data *quickActionData) getMultipleAction(user *user) *listMultipleAction {
+	if !data.resource.app.authorize(user, data.permission) {
+		return nil
+	}
+
+	ret := listMultipleAction{
+		ID:   data.url,
+		Name: data.pluralName(user.Locale),
+	}
+	return &ret
 }
 
 func (data *quickActionData) getApiURL(id int64) string {

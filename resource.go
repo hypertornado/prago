@@ -45,7 +45,7 @@ type resourceData struct {
 
 	typ reflect.Type
 
-	quickActions []quickActionIface
+	quickActions []*quickActionData
 
 	fields     []*Field
 	fieldMap   map[string]*Field
@@ -273,49 +273,6 @@ func (resourceData *resourceData) addValidation(validation Validation) {
 func (resource *Resource[T]) DeleteValidation(validation Validation) *Resource[T] {
 	resource.data.deleteValidations = append(resource.data.deleteValidations, validation)
 	return resource
-}
-
-func (resourceData *resourceData) allowsMultipleActions(user *user) (ret bool) {
-	if resourceData.app.authorize(user, resourceData.canDelete) {
-		ret = true
-	}
-	if resourceData.app.authorize(user, resourceData.canUpdate) {
-		ret = true
-	}
-	return ret
-}
-
-func (resourceData *resourceData) getMultipleActions(user *user) (ret []listMultipleAction) {
-	if !resourceData.allowsMultipleActions(user) {
-		return nil
-	}
-
-	if resourceData.app.authorize(user, resourceData.canUpdate) {
-		ret = append(ret, listMultipleAction{
-			ID:   "edit",
-			Name: "Upravit",
-		})
-	}
-
-	if resourceData.app.authorize(user, resourceData.canCreate) {
-		ret = append(ret, listMultipleAction{
-			ID:   "clone",
-			Name: "Naklonovat",
-		})
-	}
-
-	if resourceData.app.authorize(user, resourceData.canDelete) {
-		ret = append(ret, listMultipleAction{
-			ID:       "delete",
-			Name:     "Smazat",
-			IsDelete: true,
-		})
-	}
-	ret = append(ret, listMultipleAction{
-		ID:   "cancel",
-		Name: "Storno",
-	})
-	return
 }
 
 func (resourceData *resourceData) getItemURL(item interface{}, suffix string) string {
