@@ -25,7 +25,7 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-const version = "2022.4"
+const version = "2022.5"
 
 //var config CDNConfig
 

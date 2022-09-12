@@ -65,6 +65,11 @@ func (app *App) postInitTaskManager() {
 
 	app.sysadminTaskGroup = app.TaskGroup(unlocalized("Sysadmin"))
 
+	app.sysadminTaskGroup.Task(unlocalized("Delete cache")).Handler(func(ta *TaskActivity) error {
+		app.ClearCache()
+		return nil
+	})
+
 	grp := app.TaskGroup(unlocalized("example"))
 
 	grp.Task(unlocalized("example_simple")).Handler(func(t *TaskActivity) error {
