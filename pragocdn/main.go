@@ -25,9 +25,11 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-const version = "2022.1"
+const version = "2022.3"
 
 var config CDNConfig
+
+var app *prago.App
 
 var accounts = map[string]*CDNConfigAccount{}
 var homePath = os.Getenv("HOME")
@@ -57,7 +59,7 @@ func main() {
 		accounts[v.Name] = &config.Accounts[k]
 	}
 
-	app := prago.New("pragocdn", version)
+	app = prago.New("pragocdn", version)
 	start(app)
 	app.Run()
 }
@@ -110,6 +112,9 @@ func uploadFile(account CDNConfigAccount, extension string, inData io.Reader) (*
 }
 
 func start(app *prago.App) {
+
+	initCDNProjectResource()
+
 	app.GET("/", func(request *prago.Request) {
 		out := fmt.Sprintf("Prago CDN\nhttps://www.prago-cdn.com\nversion %s\nadmin Ondřej Odcházel, https//www.odchazel.com", version)
 		http.Error(request.Response(), out, 200)
