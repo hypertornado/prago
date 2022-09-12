@@ -6,6 +6,8 @@ import (
 	"github.com/hypertornado/prago"
 )
 
+var projectResource *prago.Resource[CDNProject]
+
 type CDNProject struct {
 	ID        int64
 	Name      string
@@ -21,6 +23,6 @@ func unlocalized(in string) func(string) string {
 }
 
 func initCDNProjectResource() {
-	project := prago.NewResource[CDNProject](app)
-	project.Name(unlocalized("Projekt"), unlocalized("Projekty"))
+	projectResource = prago.NewResource[CDNProject](app)
+	projectResource.Name(unlocalized("Projekt"), unlocalized("Projekty"))
 }

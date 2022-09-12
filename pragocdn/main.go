@@ -25,13 +25,13 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-const version = "2022.3"
+const version = "2022.4"
 
-var config CDNConfig
+//var config CDNConfig
 
 var app *prago.App
 
-var accounts = map[string]*CDNConfigAccount{}
+// var accounts = map[string]*CDNConfigAccount{}
 var homePath = os.Getenv("HOME")
 
 var uuidRegex = regexp.MustCompile("^[a-zA-Z0-9]{10,}$")
@@ -45,7 +45,7 @@ var cmykProfilePath = os.Getenv("HOME") + "/.pragocdn/cmyk.icm"
 
 func main() {
 
-	var err error
+	/*var err error
 	config, err = loadCDNConfig()
 	if err != nil {
 		panic(err)
@@ -57,11 +57,27 @@ func main() {
 			panic(err)
 		}
 		accounts[v.Name] = &config.Accounts[k]
-	}
+	}*/
 
 	app = prago.New("pragocdn", version)
 	start(app)
 	app.Run()
+}
+
+func getCDNProjectsMap() map[string]*CDNProject {
+	var accounts = map[string]*CDNProject{}
+	projects := projectResource.Query().List()
+	for _, v := range projects {
+		accounts[v.Name] = v
+	}
+	return accounts
+}
+
+func getCDNProject(id string) *CDNProject {
+	projects := <-prago.Cached(app, "get_projects", func() map[string]*CDNProject {
+		return getCDNProjectsMap()
+	})
+	return projects[id]
 }
 
 func getNameAndExtension(filename string) (name, extension string, err error) {
@@ -86,7 +102,7 @@ func getNameAndExtension(filename string) (name, extension string, err error) {
 	return name, extension, nil
 }
 
-func uploadFile(account CDNConfigAccount, extension string, inData io.Reader) (*cdnclient.CDNFileData, error) {
+func uploadFile(account CDNProject, extension string, inData io.Reader) (*cdnclient.CDNFileData, error) {
 	uuid := RandomString(20)
 	dirPath := getFileDirectoryPath(account.Name, uuid)
 
@@ -123,13 +139,14 @@ func start(app *prago.App) {
 	app.POST("/:account/upload/:extension", func(request *prago.Request) {
 		defer request.Request().Body.Close()
 		accountName := request.Param("account")
-		account := accounts[accountName]
-		if account == nil {
+		project := getCDNProject(accountName)
+		//account := accounts[accountName]
+		if project == nil {
 			panic("no account")
 		}
 
 		authorization := request.Request().Header.Get("X-Authorization")
-		if account.Password != authorization {
+		if project.Password != authorization {
 			panic("wrong authorization")
 		}
 
@@ -139,7 +156,7 @@ func start(app *prago.App) {
 			panic("wrong extension")
 		}*/
 
-		data, err := uploadFile(*account, extension, request.Request().Body)
+		data, err := uploadFile(*project, extension, request.Request().Body)
 		if err != nil {
 			panic(err)
 		}
@@ -234,8 +251,8 @@ var fileExtensionMap = map[string]string{
 }
 
 func deleteFile(accountName, password, uuid string) error {
-	account := accounts[accountName]
-	if account == nil {
+	project := getCDNProject(accountName)
+	if project == nil {
 		return errors.New("account not found")
 	}
 
@@ -243,7 +260,7 @@ func deleteFile(accountName, password, uuid string) error {
 		return errors.New("wrongs uuid format: " + uuid)
 	}
 
-	if account.Password != password {
+	if project.Password != password {
 		return errors.New("wrong password")
 	}
 
@@ -324,8 +341,8 @@ func getMetadata(accountName, uuid string) (*cdnclient.CDNFileData, error) {
 }
 
 func getFile(accountName, uuid, format, hash, name string) (eddCode int, err error, source io.ReadCloser, mimeExtension string, size int64) {
-	account := accounts[accountName]
-	if account == nil {
+	project := getCDNProject(accountName)
+	if project == nil {
 		return 404, errors.New("account not found"), nil, "", -1
 	}
 
@@ -341,8 +358,8 @@ func getFile(accountName, uuid, format, hash, name string) (eddCode int, err err
 	mimeExtension = mime.TypeByExtension("." + fileExtension)
 
 	expectedHash := cdnclient.GetHash(
-		account.Name,
-		account.Password,
+		project.Name,
+		project.Password,
 		uuid,
 		format,
 		name,
