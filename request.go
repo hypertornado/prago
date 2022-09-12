@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-//Request represents structure for http request
+// Request represents structure for http request
 type Request struct {
 	uuid       string
 	receivedAt time.Time
@@ -21,13 +21,13 @@ type Request struct {
 	user       *user
 }
 
-//Request returns underlying http.Request
+// Request returns underlying http.Request
 func (request Request) Request() *http.Request { return request.r }
 
-//Response returns underlying http.ResponseWriter
+// Response returns underlying http.ResponseWriter
 func (request Request) Response() http.ResponseWriter { return request.w }
 
-//Params returns url.Values of request
+// Params returns url.Values of request
 func (request Request) Params() url.Values {
 	return request.Request().Form
 }
@@ -36,7 +36,7 @@ func (request Request) Param(name string) string {
 	return request.Request().Form.Get(name)
 }
 
-//UserID returns id of logged in user, returns 0 if no user is logged
+// UserID returns id of logged in user, returns 0 if no user is logged
 func (request Request) UserID() int64 {
 	if request.user != nil {
 		return request.user.ID
@@ -51,18 +51,18 @@ func (request Request) UserHasPermission(permission Permission) bool {
 	return request.app.authorize(request.user, permission)
 }
 
-//SetData sets request data
+// SetData sets request data
 func (request Request) SetData(k string, v interface{}) { request.data[k] = v }
 
-//GetData returns request data
+// GetData returns request data
 func (request Request) GetData(k string) interface{} { return request.data[k] }
 
-//RenderView with HTTP 200 code
+// RenderView with HTTP 200 code
 func (request Request) RenderView(templateName string) {
 	request.RenderViewWithCode(templateName, 200)
 }
 
-//RenderViewWithCode renders view with HTTP code
+// RenderViewWithCode renders view with HTTP code
 func (request Request) RenderViewWithCode(templateName string, statusCode int) {
 	request.Response().Header().Add("Content-Type", "text/html; charset=utf-8")
 	request.writeSessionIfDirty()
@@ -76,12 +76,12 @@ func (request Request) RenderViewWithCode(templateName string, statusCode int) {
 	)
 }
 
-//RenderJSON renders JSON with HTTP 200 code
+// RenderJSON renders JSON with HTTP 200 code
 func (request Request) RenderJSON(data interface{}) {
 	request.RenderJSONWithCode(data, 200)
 }
 
-//RenderJSONWithCode renders JSON with HTTP code
+// RenderJSONWithCode renders JSON with HTTP code
 func (request Request) RenderJSONWithCode(data interface{}, code int) {
 	request.Response().Header().Add("Content-type", "application/json")
 	request.writeSessionIfDirty()
@@ -114,7 +114,7 @@ func (request Request) RenderJSONWithCode(data interface{}, code int) {
 	request.Response().Write(result)
 }
 
-//Redirect redirects request to new url
+// Redirect redirects request to new url
 func (request Request) Redirect(url string) {
 	request.Response().Header().Set("Location", url)
 	request.writeSessionIfDirty()

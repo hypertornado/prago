@@ -25,7 +25,7 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-const version = "2020.6"
+const version = "2022.1"
 
 var config CDNConfig
 
@@ -59,6 +59,7 @@ func main() {
 
 	app := prago.New("pragocdn", version)
 	start(app)
+	app.Run()
 }
 
 func getNameAndExtension(filename string) (name, extension string, err error) {
