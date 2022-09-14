@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"image"
 	"io"
-	"io/ioutil"
 	"math/rand"
 	"mime"
 	"net/http"
@@ -124,10 +123,10 @@ func uploadFile(account CDNProject, extension string, inData io.Reader) (*cdncli
 	filePath := getFilePath(account.Name, uuid, extension)
 
 	file, err := os.Create(filePath)
-	defer file.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
 	_, err = io.Copy(file, inData)
 	if err != nil {
@@ -202,7 +201,7 @@ func start(app *prago.App) {
 				panic(err)
 			} else {
 				path := request.Request().URL.Path
-				fmt.Println(fmt.Sprintf("getFile error on path %s: %s", path, err))
+				fmt.Printf("getFile error on path %s: %s\n", path, err)
 				return
 			}
 		}
@@ -289,7 +288,7 @@ func deleteFile(accountName, password, uuid string) error {
 
 func getFilePathFromUUID(accountName, uuid string) (filePath, extension string, err error) {
 	dirPath := getFileDirectoryPath(accountName, uuid)
-	files, err := ioutil.ReadDir(dirPath)
+	files, err := os.ReadDir(dirPath)
 	if err != nil {
 		return "", "", err
 	}
@@ -403,44 +402,6 @@ func getFile(accountName, uuid, format, hash, name string) (eddCode int, err err
 	return 200, nil, file, mimeExtension, stat.Size()
 }
 
-func prepareAccountDirectories(name string) error {
-	var err error
-	err = os.MkdirAll(
-		fmt.Sprintf("%s/.pragocdn/files/%s",
-			homePath,
-			name,
-		),
-		0777,
-	)
-	if err != nil {
-		return fmt.Errorf("preparing files dir for %s: %s", name, err)
-	}
-
-	err = os.MkdirAll(
-		fmt.Sprintf("%s/.pragocdn/cache/%s",
-			homePath,
-			name,
-		),
-		0777,
-	)
-	if err != nil {
-		return fmt.Errorf("preparing cache dir for %s: %s", name, err)
-	}
-
-	err = os.MkdirAll(
-		fmt.Sprintf("%s/.pragocdn/deleted/%s",
-			homePath,
-			name,
-		),
-		0777,
-	)
-	if err != nil {
-		return fmt.Errorf("preparing deleted dir for %s: %s", name, err)
-	}
-
-	return nil
-}
-
 func getFileDirectoryPath(account, uuid string) string {
 	firstPrefix := strings.ToLower(uuid[0:2])
 	secondPrefix := strings.ToLower(uuid[2:4])
@@ -484,7 +445,7 @@ var singleSizeRegexp = regexp.MustCompile("^[1-9][0-9]*$")
 var sizeRegexp = regexp.MustCompile("^[1-9][0-9]{0,3}x[1-9][0-9]{0,3}$")
 
 func isImageExtension(extension string) bool {
-	if extension == "jpg" || extension == "png" {
+	if extension == "jpg" || extension == "png" || extension == "webp" {
 		return true
 	}
 	return false

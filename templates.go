@@ -64,6 +64,10 @@ func (app *App) initTemplates() {
 		return app.thumb(ids)
 	})
 
+	app.AddTemplateFunction("thumbnailExactSize", func(ids string, width, height int) string {
+		return app.thumbnailExactSize(ids, width, height)
+	})
+
 	app.AddTemplateFunction("img", func(ids string) string {
 		for _, v := range strings.Split(ids, ",") {
 			image := app.FilesResource.Is("uid", v).First()
@@ -79,7 +83,7 @@ func (app *App) initTemplates() {
 	must(app.AddTemplates(templatesFS, "templates/*.tmpl"))
 }
 
-//AddTemplates loads app's html templates from file system
+// AddTemplates loads app's html templates from file system
 func (app *App) AddTemplates(fsys fs.FS, patterns ...string) error {
 	app.templates.templatesMutex.Lock()
 	defer app.templates.templatesMutex.Unlock()
@@ -107,21 +111,21 @@ func (app *App) parseTemplates() error {
 	return nil
 }
 
-//AddTemplateFunction adds template function
+// AddTemplateFunction adds template function
 func (app *App) AddTemplateFunction(name string, f interface{}) {
 	app.templates.templatesMutex.Lock()
 	defer app.templates.templatesMutex.Unlock()
 	app.templates.funcMap[name] = f
 }
 
-//ExecuteTemplate executes template
+// ExecuteTemplate executes template
 func (app *App) ExecuteTemplate(wr io.Writer, name string, data interface{}) error {
 	app.templates.templatesMutex.RLock()
 	defer app.templates.templatesMutex.RUnlock()
 	return app.templates.templates.ExecuteTemplate(wr, name, data)
 }
 
-//ExecuteTemplateToString executes template and return string, it panics
+// ExecuteTemplateToString executes template and return string, it panics
 func (app *App) ExecuteTemplateToString(templateName string, data interface{}) string {
 	bufStats := new(bytes.Buffer)
 	err := app.ExecuteTemplate(bufStats, templateName, data)

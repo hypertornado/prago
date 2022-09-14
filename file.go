@@ -47,6 +47,19 @@ func (app *App) thumb(ids string) string {
 	return ""
 }
 
+func (app *App) thumbnailExactSize(ids string, width, height int) string {
+	if ids == "" {
+		return ""
+	}
+	for _, v := range strings.Split(ids, ",") {
+		image := app.FilesResource.Is("uid", v).First()
+		if image != nil && image.isImage() {
+			return image.GetExactSize(width, height)
+		}
+	}
+	return ""
+}
+
 // GetFiles gets files from app
 func (app *App) GetFiles(ids string) []*File {
 	var files []*File
@@ -291,6 +304,11 @@ func (f *File) GetMedium() string {
 // GetSmall file path
 func (f *File) GetSmall() string {
 	return filesCDN.GetImageURL(f.UID, f.Name, "200")
+}
+
+// GetSmall file path
+func (f *File) GetExactSize(width, height int) string {
+	return filesCDN.GetImageURL(f.UID, f.Name, fmt.Sprintf("%dx%d", width, height))
 }
 
 // GetOriginal file path
