@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 
 	_ "image/jpeg"
 	_ "image/png"
@@ -25,7 +26,7 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-const version = "2022.5"
+const version = "2022.6"
 
 //var config CDNConfig
 
@@ -40,10 +41,19 @@ var extensionRegex = regexp.MustCompile("^[a-zA-Z0-9]{1,10}$")
 
 var cmykProfilePath = os.Getenv("HOME") + "/.pragocdn/cmyk.icm"
 
+var vipsMutexes []*sync.Mutex
+
 //var sem = semaphore.NewWeighted(10)
 //var semCtx = context.Background()
 
 func main() {
+
+	//vipsMutexes = make([]sync.Mutex, 10)
+	for i := 0; i < 10; i++ {
+		vipsMutexes = append(vipsMutexes, &sync.Mutex{})
+	}
+
+	//vipsWaitGroup.Add(10)
 
 	/*var err error
 	config, err = loadCDNConfig()
@@ -519,6 +529,11 @@ func getTempFilePath(extension string) string {
 func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, extension string, crop bool) error {
 	//tempPath := getTempFilePath()
 	//defer os.Remove(tempPath)
+
+	n := rand.Int() % len(vipsMutexes)
+	vipsMutex := vipsMutexes[n]
+	vipsMutex.Lock()
+	defer vipsMutex.Unlock()
 
 	f, err := os.Open(outputFilePath)
 	if err == nil {
