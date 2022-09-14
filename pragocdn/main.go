@@ -25,7 +25,7 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-const version = "2022.6"
+const version = "2022.7"
 
 //var config CDNConfig
 
@@ -387,6 +387,7 @@ func getFile(accountName, uuid, format, hash, name string) (eddCode int, err err
 		if err != nil {
 			return 404, err, nil, "", -1
 		}
+		mimeExtension = mime.TypeByExtension(".webp")
 	}
 
 	file, err := os.Open(path)
@@ -466,15 +467,15 @@ func convertedFilePath(account, uuid, extension, format string) (string, error) 
 	}
 
 	originalPath := getFilePath(account, uuid, extension)
-	outputFilePath := getCacheFilePath(account, uuid, format, extension)
+	outputFilePath := getCacheFilePath(account, uuid, format, "webp")
 	outputDirectoryPath := getCacheDirectoryPath(account, uuid, format)
 
 	if singleSizeRegexp.MatchString(format) {
-		return outputFilePath, vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, format, extension, false)
+		return outputFilePath, vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, format, false)
 	}
 
 	if sizeRegexp.MatchString(format) {
-		return outputFilePath, vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, format, extension, true)
+		return outputFilePath, vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, format, true)
 	}
 
 	return "", errors.New("wrong file convert format")
@@ -487,14 +488,13 @@ func getTempFilePath(extension string) string {
 }
 
 // CMYK: https://github.com/jcupitt/libvips/issues/630
-func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, extension string, crop bool) error {
-	//tempPath := getTempFilePath()
-	//defer os.Remove(tempPath)
-
+func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size string, crop bool) error {
 	n := rand.Int() % len(vipsMutexes)
 	vipsMutex := vipsMutexes[n]
 	vipsMutex.Lock()
 	defer vipsMutex.Unlock()
+
+	extension := "webp"
 
 	f, err := os.Open(outputFilePath)
 	if err == nil {
@@ -507,19 +507,12 @@ func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, exte
 		return fmt.Errorf("error while creating mkdirall %s: %s", outputDirectoryPath, err)
 	}
 
-	/*sizeInt, err := strconv.Atoi(size)
-	if err != nil {
-		return fmt.Errorf("wrong size format: %s", size)
-	}*/
-
-	//return imagingThumbnail(originalPath, outputFilePath, sizeInt)
-
 	tempPath := getTempFilePath(extension)
 	defer os.Remove(tempPath)
 
-	err = vipsThumbnailProfile(originalPath, tempPath, size, extension, crop, false)
+	err = vipsThumbnailProfile(originalPath, tempPath, size, crop, false)
 	if err != nil {
-		err = vipsThumbnailProfile(originalPath, tempPath, size, extension, crop, true)
+		err = vipsThumbnailProfile(originalPath, tempPath, size, crop, true)
 	}
 	if err != nil {
 		return fmt.Errorf("vipsThumbnailProfile: %s", err)
@@ -533,11 +526,14 @@ func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size, exte
 	return nil
 }
 
-func vipsThumbnailProfile(originalPath, outputFilePath, size, extension string, crop bool, cmyk bool) error {
+func vipsThumbnailProfile(originalPath, outputFilePath, size string, crop bool, cmyk bool) error {
+
+	//vips webpsave
+
 	outputParameters := "[strip]"
-	if extension == "jpg" {
+	/*if extension == "jpg" {
 		outputParameters = "[optimize_coding,strip]"
-	}
+	}*/
 
 	cmdAr := []string{
 		originalPath,
