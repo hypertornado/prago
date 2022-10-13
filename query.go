@@ -49,7 +49,6 @@ func (q *Query[T]) Debug() *Query[T] {
 }
 
 func (q *Query[T]) Order(order string) *Query[T] {
-
 	q.listQuery.addOrder(order, false)
 	return q
 }

@@ -99,6 +99,8 @@ func stringTypeValid(t string) bool {
 		return true
 	case "keyword":
 		return true
+	case "geo_shape":
+		return true
 	}
 	return false
 }

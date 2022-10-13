@@ -1,5 +1,7 @@
 package prago
 
+//TODO: use concext in db queries
+
 import (
 	"fmt"
 	"html/template"
@@ -117,6 +119,7 @@ func (resourceData *resourceData) getListStatsDateSectionDay(field *Field, user 
 	if err != nil {
 		panic(err)
 	}
+	defer rows.Close()
 	ret = listStatsSection{
 		Name: fmt.Sprintf("%s – dny", field.name(user.Locale)),
 	}
@@ -159,6 +162,7 @@ func (resourceData *resourceData) getListStatsDateSectionMonth(field *Field, use
 	if err != nil {
 		panic(err)
 	}
+	defer rows.Close()
 	ret = listStatsSection{
 		Name: fmt.Sprintf("%s – měsíce", field.name(user.Locale)),
 	}
@@ -198,6 +202,7 @@ func (resourceData *resourceData) getListStatsDateSectionYear(field *Field, user
 	if err != nil {
 		panic(err)
 	}
+	defer rows.Close()
 	ret = listStatsSection{
 		Name: fmt.Sprintf("%s – roky", field.name(user.Locale)),
 	}
@@ -232,6 +237,7 @@ func (resourceData *resourceData) getListStatsTable(field *Field, user *user, pa
 	if err != nil {
 		panic(err)
 	}
+	defer rows.Close()
 
 	var counted int64
 
@@ -345,6 +351,7 @@ func (resourceData *resourceData) getListStatsTableInt(field *Field, user *user,
 	if err != nil {
 		panic(err)
 	}
+	rows.Close()
 
 	var max float64
 	var min float64
@@ -354,6 +361,7 @@ func (resourceData *resourceData) getListStatsTableInt(field *Field, user *user,
 	for rows.Next() {
 		rows.Scan(&max, &min, &avg, &sum)
 	}
+	must(rows.Close())
 
 	table = append(table, listStatsRow{
 		Name: "minimum",
@@ -380,6 +388,7 @@ func (resourceData *resourceData) getListStatsTableInt(field *Field, user *user,
 	if err != nil {
 		panic(err)
 	}
+	defer rows.Close()
 	var median float64
 	for rows.Next() {
 		rows.Scan(&median)

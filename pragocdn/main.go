@@ -540,6 +540,8 @@ func vipsThumbnailProfile(originalPath, outputFilePath, size string, crop bool, 
 		"--rotate",
 		"-s",
 		size,
+		"--smartcrop",
+		"attention",
 		"-o",
 		outputFilePath + outputParameters,
 	}
