@@ -230,7 +230,7 @@ func (resourceData *resourceData) editItemWithLogAndValues(request *Request, val
 		allValues.Add(k, v)
 	}
 
-	vv := newValuesValidation(user.Locale, allValues)
+	vv := newValuesValidation(resourceData.app, user, allValues)
 	for _, v := range resourceData.validations {
 		v(vv)
 	}

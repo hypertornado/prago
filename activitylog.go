@@ -80,7 +80,11 @@ func (app *App) getHistory(resourceData *resourceData, itemID int64) historyView
 		}
 
 		activityURL := app.getAdminURL(fmt.Sprintf("activitylog/%d", v.ID))
-		itemName := fmt.Sprintf("%s #%d", v.ResourceName, v.ID)
+
+		itemName := fmt.Sprintf("%s #%d", v.ResourceName, v.ItemID)
+		if resourceData != nil {
+			itemName = fmt.Sprintf("#%d", v.ItemID)
+		}
 
 		ret.Items = append(ret.Items, historyItemView{
 			ID:          v.ID,

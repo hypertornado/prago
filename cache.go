@@ -7,6 +7,8 @@ import (
 
 const staleInterval = 30 * time.Minute
 
+//const staleInterval = 1 * time.Second
+
 type cache struct {
 	items map[string]*cacheItem
 	mutex *sync.RWMutex
@@ -51,16 +53,13 @@ func (ci *cacheItem) reloadValue() {
 	ci.updating = true
 	ci.mutex.Unlock()
 
-	defer func() {
-		ci.updating = false
-		ci.mutex.Unlock()
-	}()
-
 	val := ci.createFn()
 
 	ci.mutex.Lock()
 	ci.value = val
 	ci.updatedAt = time.Now()
+	ci.updating = false
+	ci.mutex.Unlock()
 }
 
 func (c *cache) getItem(name string) *cacheItem {
@@ -109,6 +108,7 @@ func loadCache[T any](c *cache, name string, createFn func() T) T {
 	}
 
 	if item.isStale() {
+		//fmt.Println("reloading", name)
 		go func() {
 			item.reloadValue()
 		}()

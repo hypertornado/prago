@@ -80,6 +80,7 @@ type ValidationContext interface {
 	Validation() *formValidation
 	Valid() bool
 	Request() *Request
+	UserHasPermission(Permission) bool
 }
 
 type Validation func(ValidationContext)
@@ -131,22 +132,28 @@ func (rv *requestValidation) Request() *Request {
 	return rv.request
 }
 
-type valuesValidation struct {
-	locale     string
-	values     url.Values
-	validation *formValidation
+func (rv *requestValidation) UserHasPermission(permission Permission) bool {
+	return rv.request.UserHasPermission(permission)
 }
 
-func newValuesValidation(locale string, values url.Values) *valuesValidation {
+type valuesValidation struct {
+	values     url.Values
+	validation *formValidation
+	user       *user
+	app        *App
+}
+
+func newValuesValidation(app *App, user *user, values url.Values) *valuesValidation {
 	return &valuesValidation{
-		locale:     locale,
 		values:     values,
 		validation: NewFormValidation(),
+		user:       user,
+		app:        app,
 	}
 }
 
 func (rv *valuesValidation) Locale() string {
-	return rv.locale
+	return rv.user.Locale
 }
 
 func (rv *valuesValidation) GetValue(key string) string {
@@ -175,4 +182,11 @@ func (rv *valuesValidation) Valid() bool {
 
 func (rv *valuesValidation) Request() *Request {
 	return nil
+}
+
+func (rv *valuesValidation) UserHasPermission(permission Permission) bool {
+	if rv.user == nil {
+		return false
+	}
+	return rv.app.authorize(rv.user, permission)
 }

@@ -18,6 +18,8 @@ type resourceData struct {
 	app *App
 	id  string
 
+	icon string
+
 	singularName func(locale string) string
 	pluralName   func(locale string) string
 
@@ -218,6 +220,12 @@ func (resource *Resource[T]) PreviewURLFunction(fn func(*T) string) *Resource[T]
 func (resourceData *resourceData) PreviewURLFunction(fn func(any) string) *resourceData {
 	resourceData.previewURLFunction = fn
 	return resourceData
+}
+
+func (resource *Resource[T]) Icon(icon string) *Resource[T] {
+	resource.data.icon = icon
+	return resource
+
 }
 
 func (resource *Resource[T]) ItemsPerPage(itemsPerPage int64) *Resource[T] {

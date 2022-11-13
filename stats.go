@@ -351,7 +351,9 @@ func (resourceData *resourceData) getListStatsTableInt(field *Field, user *user,
 	if err != nil {
 		panic(err)
 	}
-	rows.Close()
+	defer func() {
+		rows.Close()
+	}()
 
 	var max float64
 	var min float64
@@ -361,7 +363,7 @@ func (resourceData *resourceData) getListStatsTableInt(field *Field, user *user,
 	for rows.Next() {
 		rows.Scan(&max, &min, &avg, &sum)
 	}
-	must(rows.Close())
+	//must(rows.Close())
 
 	table = append(table, listStatsRow{
 		Name: "minimum",

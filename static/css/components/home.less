@@ -22,22 +22,27 @@
 
 .admin_home_item {
   padding: 5px 10px;
-  border-radius: 2px;
-  .shadow;
+  border-radius: 10px;
   min-height: 30px;
   text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
   background: white;
-  transition: all 0.3s cubic-bezier(0, 0, 0.5, 1);
+  //transition: all 0.1s ease-out;
+  border: 1px solid #eee;
+}
+
+a.admin_home_item:hover {
+  border-color: @baseColor;
 }
 
 a.admin_home_item {
   text-decoration: none;
 }
 
-.admin_home_item_name {
+.admin_home_item_icon img {
+  width: 20px;
 }
 
 .admin_home_item_value {

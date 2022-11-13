@@ -3,6 +3,7 @@ package prago
 
 import (
 	"database/sql"
+	"embed"
 	"os"
 	"reflect"
 
@@ -61,6 +62,9 @@ type App struct {
 	dashboardGroups []*DashboardGroup
 
 	dbConfig *dbConnectConfig
+
+	iconsFS     *embed.FS
+	iconsPrefix string
 }
 
 const testingAppName = "__prago_test_app"
@@ -123,6 +127,7 @@ func createApp(codeName string, version string) *App {
 	app.initSQLBackup()
 	app.initBackupCRON()
 	app.initDashboard()
+	app.initIcons()
 
 	return app
 }

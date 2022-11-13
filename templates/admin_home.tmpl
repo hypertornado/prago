@@ -10,6 +10,9 @@
             {{else}}
               <div class="admin_home_item{{if $item.IsRed}} admin_home_item-red{{end}}{{if $item.IsGreen}} admin_home_item-green{{end}}">
             {{end}}
+              {{if $item.Icon}}
+                <div class="admin_home_item_icon"><img src="/admin/api/icons?file={{$item.Icon}}&color=4078c0"></div>
+              {{end}}
               <div class="admin_home_item_name">{{$item.Name}}</div>
               {{if $item.Value}}
                 <div class="admin_home_item_value">{{$item.Value}}</div>

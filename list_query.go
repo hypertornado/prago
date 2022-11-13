@@ -47,15 +47,11 @@ func (listQuery *listQuery) ID(id any) any {
 func (listQuery *listQuery) First() any {
 	items, err := listQuery.list()
 	must(err)
-
 	if reflect.ValueOf(items).Len() == 0 {
 		return nil
 	}
 
 	return reflect.ValueOf(items).Index(0).Interface()
-
-	//listQuery.where(sqlFieldToQuery(name), value)
-	//return listQuery
 }
 
 func (listQuery *listQuery) Limit(limit int64) *listQuery {

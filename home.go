@@ -18,6 +18,7 @@ type HomeSection struct {
 }
 
 type HomeItem struct {
+	Icon        string
 	URL         string
 	Name        string
 	Value       string
@@ -32,6 +33,7 @@ func (app *App) initHome() {
 		Permission(loggedPermission).
 		Name(messages.GetNameFunction("admin_signpost")).
 		Template("admin_home_navigation").
+		Icon("glyphicons-basic-697-directions-sign.svg").
 		DataSource(app.getHomeData)
 
 	sysadminGroup := app.DashboardGroup(unlocalized("Sysadmin"))
@@ -59,6 +61,7 @@ func (app *App) getHomeData(request *Request) interface{} {
 		home.Sections = append(home.Sections, homeSection)
 		for _, item := range section.Items {
 			homeItem := &HomeItem{
+				Icon: item.Icon,
 				Name: item.Name,
 				URL:  item.URL,
 			}

@@ -233,7 +233,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 					var values url.Values = make(map[string][]string)
 					values.Add("id", fmt.Sprintf("%d", v))
 
-					valValidation := newValuesValidation(request.user.Locale, values)
+					valValidation := newValuesValidation(request.app, request.user, values)
 					for _, v := range resourceData.deleteValidations {
 						v(valValidation)
 					}

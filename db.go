@@ -264,15 +264,19 @@ func (query *listQuery) list() (interface{}, error) {
 	if query.isDebug {
 		query.resourceData.app.Log().Println(q, query.values)
 	}
+
 	rows, err := query.resourceData.app.db.Query(q, query.values...)
-	defer func() {
+	/*defer func() {
 		if rows != nil {
 			rows.Close()
 		}
-	}()
+	}()*/
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		rows.Close()
+	}()
 	for rows.Next() {
 		newValue := reflect.New(query.resourceData.typ)
 

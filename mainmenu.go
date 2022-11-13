@@ -24,6 +24,7 @@ type mainMenuSection struct {
 }
 
 type mainMenuItem struct {
+	Icon     string
 	Name     string
 	Subname  string
 	URL      string
@@ -73,6 +74,7 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 		}
 
 		adminSection.Items = append(adminSection.Items, mainMenuItem{
+			Icon:     v.icon,
 			Name:     v.name(user.Locale),
 			URL:      fullURL,
 			Selected: selected,
@@ -152,6 +154,7 @@ func (app *App) getResourcesMainMenuSection(request *Request, user *user) mainMe
 			}
 
 			resourceSection.Items = append(resourceSection.Items, mainMenuItem{
+				Icon:     resourceData.icon,
 				Name:     resourceData.pluralName(user.Locale),
 				Subname:  humanizeNumber(resourceData.getCachedCount()),
 				URL:      resourceURL,

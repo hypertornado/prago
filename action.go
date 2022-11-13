@@ -14,6 +14,7 @@ type buttonData struct {
 // Action represents action
 type Action struct {
 	name       func(string) string
+	icon       string
 	permission Permission
 	method     string
 	url        string
@@ -150,6 +151,11 @@ func (action *Action) Handler(handler func(*Request)) *Action {
 		panic("can't set both action handler and dataSource")
 	}
 	action.handler = handler
+	return action
+}
+
+func (action *Action) Icon(icon string) *Action {
+	action.icon = icon
 	return action
 }
 
