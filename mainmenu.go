@@ -44,14 +44,11 @@ func (menu mainMenu) GetTitle() string {
 
 func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 	user := request.user
-	adminSectionName := app.name(request.user.Locale)
 	if app.logo != nil {
 		ret.HasLogo = true
-		adminSectionName = ""
 	}
-	adminSection := mainMenuSection{
-		Name: adminSectionName,
-	}
+
+	adminSection := mainMenuSection{}
 
 	for _, v := range app.rootActions {
 		if v.method != "GET" {
@@ -81,11 +78,9 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 		})
 	}
 
-	ret.Sections = append(ret.Sections, adminSection)
+	resourceSection2 := app.getResourcesMainMenuSection(request, user)
 
-	resourceSection := app.getResourcesMainMenuSection(request, user)
-
-	ret.Sections = append(ret.Sections, resourceSection)
+	ret.Sections = append(ret.Sections, resourceSection2)
 
 	userName := user.Name
 	if userName == "" {
@@ -140,7 +135,7 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 
 func (app *App) getResourcesMainMenuSection(request *Request, user *user) mainMenuSection {
 	resourceSection := mainMenuSection{
-		Name: messages.Get(user.Locale, "admin_tables"),
+		//Name: messages.Get(user.Locale, "admin_tables"),
 	}
 	for _, resourceData := range app.getSortedResources(user.Locale) {
 		if app.authorize(user, resourceData.canView) {
@@ -162,6 +157,37 @@ func (app *App) getResourcesMainMenuSection(request *Request, user *user) mainMe
 			})
 		}
 	}
+
+	for _, v := range app.rootActions {
+		if v.method != "GET" {
+			continue
+		}
+		if v.isUserMenu {
+			continue
+		}
+		if v.isHiddenInMainMenu {
+			continue
+		}
+		if !request.app.authorize(request.user, v.permission) {
+			continue
+		}
+
+		var selected bool
+		fullURL := app.getAdminURL(v.url)
+		if request.Request().URL.Path == fullURL {
+			selected = true
+		}
+
+		resourceSection.Items = append(resourceSection.Items, mainMenuItem{
+			Icon:     v.icon,
+			Name:     v.name(user.Locale),
+			URL:      fullURL,
+			Selected: selected,
+		})
+	}
+
+	sortSection(resourceSection, user.Locale)
+
 	return resourceSection
 }
 
@@ -180,4 +206,27 @@ func (app *App) getSortedResources(locale string) (ret []*resourceData) {
 		}
 	})
 	return
+}
+
+func sortSection(section mainMenuSection, locale string) {
+	collator := collate.New(language.Czech)
+
+	sort.SliceStable(section.Items, func(i, j int) bool {
+		a := section.Items[i]
+		b := section.Items[j]
+
+		if a.URL == "/admin" {
+			return true
+		}
+
+		if b.URL == "/admin" {
+			return false
+		}
+
+		if collator.CompareString(a.Name, b.Name) <= 0 {
+			return true
+		} else {
+			return false
+		}
+	})
 }
