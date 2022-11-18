@@ -19,7 +19,7 @@ class ListSettings {
     this.settingsEl = document.querySelector(".admin_tablesettings");
 
     this.settingsPopup = new ContentPopup("Možnosti", this.settingsEl);
-    this.settingsButton = document.querySelector(".admin_list_settings");
+    this.settingsButton = document.querySelector(".list_header_showmore_btn");
     this.settingsButton.addEventListener("click", () => {
       this.settingsPopup.show();
     });

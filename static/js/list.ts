@@ -1,10 +1,13 @@
 class List {
+  minCellWidth = 50;
+  normalCellWidth = 100;
+  maxCellWidth = 500;
+
   settings: ListSettings;
 
   adminPrefix: string;
   typeName: string;
 
-  //table: HTMLElement;
   table: HTMLElement;
   el: HTMLDivElement;
   exportButton: HTMLAnchorElement;
@@ -55,9 +58,7 @@ class List {
       return;
     }
 
-    this.progress = <HTMLProgressElement>(
-      el.querySelector(".admin_table_progress")
-    );
+    this.progress = <HTMLProgressElement>el.querySelector(".list_progress");
 
     //console.log(el);
     //this.table = <HTMLTableElement>el.querySelector("table");
@@ -164,7 +165,7 @@ class List {
   }
 
   load() {
-    this.progress.classList.remove("admin_table_progress-inactive");
+    this.progress.classList.remove("list_progress-inactive");
     var request = new XMLHttpRequest();
     var params: any = {};
     if (this.page > 1) {
@@ -245,7 +246,7 @@ class List {
         console.error("error while loading list");
       }
       this.copyColumnWidths();
-      this.progress.classList.add("admin_table_progress-inactive");
+      this.progress.classList.add("list_progress-inactive");
     });
     request.send(JSON.stringify({}));
   }
@@ -362,56 +363,53 @@ class List {
   }
 
   bindResizer() {
-    //console.log("resizer");
-
     var resizers = this.el.querySelectorAll(".list_header_item_resizer");
 
     for (var i = 0; i < resizers.length; i++) {
       var resizer = <HTMLAnchorElement>resizers[i];
-      let parentEl = resizer.parentElement;
-
-      parentEl.addEventListener(
-        "dragover",
-        (e) => {
-          e.preventDefault();
-        },
-        false
-      );
+      let parentEl: HTMLDivElement = <HTMLDivElement>resizer.parentElement;
 
       resizer.addEventListener("drag", (e) => {
         var clientRect = parentEl.getBoundingClientRect();
         var clientX = clientRect.left;
 
         if (e.clientX == 0) {
-          e.preventDefault();
           return false;
         }
-
         let width = e.clientX - clientX;
-        if (width < 50) {
-          width = 50;
-        }
-        parentEl.setAttribute(
-          "style",
-          "width: " +
-            width +
-            "px; max-width: " +
-            width +
-            "px;min-width: " +
-            width +
-            "px;"
-        );
-        //console.log(e);
-        //console.log(e.type);
+        this.setCellWidth(parentEl, width);
+      });
 
-        e.preventDefault();
-        return false;
+      resizer.addEventListener("dblclick", (e) => {
+        let width = this.getCellWidth(parentEl);
+        if (width == this.maxCellWidth) {
+          this.setCellWidth(parentEl, this.minCellWidth);
+        } else {
+          this.setCellWidth(parentEl, this.maxCellWidth);
+        }
+        //var clientRectWidth = parentEl.getBoundingClientRect().width;
+        //if (clientRectWidth > ) parentEl.setAttribute("style", "width: 100px;");
+        this.copyColumnWidths();
       });
 
       resizer.addEventListener("dragend", (e) => {
         this.copyColumnWidths();
       });
     }
+  }
+
+  getCellWidth(cell: HTMLDivElement): number {
+    return cell.getBoundingClientRect().width;
+  }
+
+  setCellWidth(cell: HTMLDivElement, width: number) {
+    if (width < this.minCellWidth) {
+      width = this.minCellWidth;
+    }
+    if (width > this.maxCellWidth) {
+      width = this.maxCellWidth;
+    }
+    cell.setAttribute("style", "width: " + width + "px;");
   }
 
   renderOrder() {
@@ -507,7 +505,7 @@ class List {
     this.page = 1;
     this.changed = true;
     this.changedTimestamp = Date.now();
-    this.progress.classList.remove("admin_table_progress-inactive");
+    this.progress.classList.remove("list_progress-inactive");
   }
 
   bindFilterRelation(el: HTMLDivElement, value: any) {

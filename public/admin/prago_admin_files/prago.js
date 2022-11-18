@@ -432,6 +432,9 @@ class ListFilterDate {
 }
 class List {
     constructor(el) {
+        this.minCellWidth = 50;
+        this.normalCellWidth = 100;
+        this.maxCellWidth = 500;
         this.el = el;
         var dateFilterInputs = el.querySelectorAll(".admin_filter_date_input");
         dateFilterInputs.forEach((el) => {
@@ -448,7 +451,7 @@ class List {
         if (!this.typeName) {
             return;
         }
-        this.progress = (el.querySelector(".admin_table_progress"));
+        this.progress = el.querySelector(".list_progress");
         this.table = el.querySelector(".admin_list_table");
         this.table.textContent = "";
         this.bindFilter(urlParams);
@@ -518,7 +521,7 @@ class List {
         }
     }
     load() {
-        this.progress.classList.remove("admin_table_progress-inactive");
+        this.progress.classList.remove("list_progress-inactive");
         var request = new XMLHttpRequest();
         var params = {};
         if (this.page > 1) {
@@ -580,7 +583,7 @@ class List {
                 console.error("error while loading list");
             }
             this.copyColumnWidths();
-            this.progress.classList.add("admin_table_progress-inactive");
+            this.progress.classList.add("list_progress-inactive");
         });
         request.send(JSON.stringify({}));
     }
@@ -691,34 +694,41 @@ class List {
         for (var i = 0; i < resizers.length; i++) {
             var resizer = resizers[i];
             let parentEl = resizer.parentElement;
-            parentEl.addEventListener("dragover", (e) => {
-                e.preventDefault();
-            }, false);
             resizer.addEventListener("drag", (e) => {
                 var clientRect = parentEl.getBoundingClientRect();
                 var clientX = clientRect.left;
                 if (e.clientX == 0) {
-                    e.preventDefault();
                     return false;
                 }
                 let width = e.clientX - clientX;
-                if (width < 50) {
-                    width = 50;
+                this.setCellWidth(parentEl, width);
+            });
+            resizer.addEventListener("dblclick", (e) => {
+                let width = this.getCellWidth(parentEl);
+                if (width == this.maxCellWidth) {
+                    this.setCellWidth(parentEl, this.minCellWidth);
                 }
-                parentEl.setAttribute("style", "width: " +
-                    width +
-                    "px; max-width: " +
-                    width +
-                    "px;min-width: " +
-                    width +
-                    "px;");
-                e.preventDefault();
-                return false;
+                else {
+                    this.setCellWidth(parentEl, this.maxCellWidth);
+                }
+                this.copyColumnWidths();
             });
             resizer.addEventListener("dragend", (e) => {
                 this.copyColumnWidths();
             });
         }
+    }
+    getCellWidth(cell) {
+        return cell.getBoundingClientRect().width;
+    }
+    setCellWidth(cell, width) {
+        if (width < this.minCellWidth) {
+            width = this.minCellWidth;
+        }
+        if (width > this.maxCellWidth) {
+            width = this.maxCellWidth;
+        }
+        cell.setAttribute("style", "width: " + width + "px;");
     }
     renderOrder() {
         var headers = this.el.querySelectorAll(".list_header_item_name-canorder");
@@ -803,7 +813,7 @@ class List {
         this.page = 1;
         this.changed = true;
         this.changedTimestamp = Date.now();
-        this.progress.classList.remove("admin_table_progress-inactive");
+        this.progress.classList.remove("list_progress-inactive");
     }
     bindFilterRelation(el, value) {
         new ListFilterRelations(el, value, this);
@@ -827,7 +837,7 @@ class ListSettings {
         this.settingsRowColumn = document.querySelector(".admin_list_settingsrow_column");
         this.settingsEl = document.querySelector(".admin_tablesettings");
         this.settingsPopup = new ContentPopup("Možnosti", this.settingsEl);
-        this.settingsButton = document.querySelector(".admin_list_settings");
+        this.settingsButton = document.querySelector(".list_header_showmore_btn");
         this.settingsButton.addEventListener("click", () => {
             this.settingsPopup.show();
         });

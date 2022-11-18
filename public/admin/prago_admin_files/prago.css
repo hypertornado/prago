@@ -5562,15 +5562,18 @@ pre {
 }
 .list_header_item_resizer {
   width: 3px;
-  border-right: 1px dashed #aaa;
+  border-right: 1px solid #eee;
   cursor: col-resize;
   position: absolute;
-  top: 0px;
+  top: 5px;
   right: 0px;
-  bottom: 0px;
+  bottom: 5px;
 }
 .list_header_item_resizer:hover {
-  border-right: 1px solid #aaa;
+  border-right: 1px solid #555;
+}
+.list_header_item_resizer:active {
+  border-right: 1px solid #999;
 }
 .list_header_item_name-canorder {
   cursor: pointer;
@@ -6247,7 +6250,6 @@ select.admin_timestamp_minute {
 .list_header_last {
   width: 200px;
   position: relative;
-  border-bottom: 1px solid #eee !important;
   background-color: #fafafa;
   padding: 5px;
 }
@@ -6256,7 +6258,7 @@ select.admin_timestamp_minute {
   text-align: center;
   padding: 0px 5px;
 }
-.admin_list_showmore_label {
+.list_header_showmore {
   font-size: 0.9rem;
   line-height: 1.3em;
   color: #888;
@@ -6265,12 +6267,12 @@ select.admin_timestamp_minute {
   bottom: 4px;
   left: 4px;
 }
-.admin_table_progress {
+.list_progress {
   position: absolute;
   top: 10px;
   left: 10px;
 }
-.admin_table_progress-inactive {
+.list_progress-inactive {
   opacity: 0;
 }
 .btn {
