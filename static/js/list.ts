@@ -4,7 +4,8 @@ class List {
   adminPrefix: string;
   typeName: string;
 
-  tbody: HTMLElement;
+  //table: HTMLElement;
+  table: HTMLElement;
   el: HTMLDivElement;
   exportButton: HTMLAnchorElement;
   changed: boolean;
@@ -58,8 +59,13 @@ class List {
       el.querySelector(".admin_table_progress")
     );
 
-    this.tbody = <HTMLElement>el.querySelector("tbody");
-    this.tbody.textContent = "";
+    //console.log(el);
+    //this.table = <HTMLTableElement>el.querySelector("table");
+    //console.log(this.table);
+    //console.log("XXX");
+
+    this.table = <HTMLElement>el.querySelector(".admin_list_table");
+    this.table.textContent = "";
 
     this.bindFilter(urlParams);
 
@@ -122,6 +128,39 @@ class List {
 
     this.settings.bindOptions(visibleColumnsMap);
     this.bindOrder();
+    this.bindResizer();
+  }
+
+  copyColumnWidths() {
+    let headerItems = this.el.querySelectorAll(".list_header > :not(.hidden)");
+
+    let tableRows = this.el.querySelectorAll(
+      ".admin_list_table > .admin_table_row"
+    );
+
+    let totalWidth = 0;
+
+    for (let i = 0; i < tableRows.length; i++) {
+      let rowItems = tableRows[i].children;
+
+      for (let j = 0; j < headerItems.length; j++) {
+        if (j >= rowItems.length) {
+          break;
+        }
+        let headerEl = headerItems[j];
+        let tableEl = rowItems[j];
+
+        var clientRect = headerEl.getBoundingClientRect();
+        var elWidth = clientRect.width;
+
+        totalWidth += elWidth;
+
+        tableEl.setAttribute("style", "width: " + elWidth + "px;");
+      }
+    }
+
+    //let tableEl = this.el.querySelector(".admin_list_table");
+    //tableEl.setAttribute("style", "width: " + totalWidth + "px;");
   }
 
   load() {
@@ -186,14 +225,14 @@ class List {
       true
     );
     request.addEventListener("load", () => {
-      this.tbody.innerHTML = "";
+      this.table.innerHTML = "";
       if (request.status == 200) {
         var response = JSON.parse(request.response);
 
-        this.tbody.innerHTML = response.Content;
+        this.table.innerHTML = response.Content;
         var countStr = response.CountStr;
 
-        this.el.querySelector(".admin_table_count").textContent = countStr;
+        this.el.querySelector(".list_count").textContent = countStr;
         this.statsContainer.innerHTML = response.StatsStr;
         bindOrder();
         this.bindPagination();
@@ -201,10 +240,11 @@ class List {
         if (this.multiple.hasMultipleActions()) {
           this.multiple.bindMultipleActionCheckboxes();
         }
-        this.tbody.classList.remove("admin_table_loading");
+        this.table.classList.remove("admin_table_loading");
       } else {
         console.error("error while loading list");
       }
+      this.copyColumnWidths();
       this.progress.classList.add("admin_table_progress-inactive");
     });
     request.send(JSON.stringify({}));
@@ -213,7 +253,7 @@ class List {
   colorActiveFilterItems() {
     let itemsToColor = this.getFilterData();
     var filterItems: NodeListOf<HTMLDivElement> = this.el.querySelectorAll(
-      ".admin_list_filteritem"
+      ".list_header_item_filter"
     );
     for (var i = 0; i < filterItems.length; i++) {
       var item = filterItems[i];
@@ -297,7 +337,7 @@ class List {
 
   bindOrder() {
     this.renderOrder();
-    var headers = this.el.querySelectorAll(".admin_list_orderitem-canorder");
+    var headers = this.el.querySelectorAll(".list_header_item_name-canorder");
     for (var i = 0; i < headers.length; i++) {
       var header = <HTMLAnchorElement>headers[i];
       header.addEventListener("click", (e) => {
@@ -321,8 +361,61 @@ class List {
     }
   }
 
+  bindResizer() {
+    //console.log("resizer");
+
+    var resizers = this.el.querySelectorAll(".list_header_item_resizer");
+
+    for (var i = 0; i < resizers.length; i++) {
+      var resizer = <HTMLAnchorElement>resizers[i];
+      let parentEl = resizer.parentElement;
+
+      parentEl.addEventListener(
+        "dragover",
+        (e) => {
+          e.preventDefault();
+        },
+        false
+      );
+
+      resizer.addEventListener("drag", (e) => {
+        var clientRect = parentEl.getBoundingClientRect();
+        var clientX = clientRect.left;
+
+        if (e.clientX == 0) {
+          e.preventDefault();
+          return false;
+        }
+
+        let width = e.clientX - clientX;
+        if (width < 50) {
+          width = 50;
+        }
+        parentEl.setAttribute(
+          "style",
+          "width: " +
+            width +
+            "px; max-width: " +
+            width +
+            "px;min-width: " +
+            width +
+            "px;"
+        );
+        //console.log(e);
+        //console.log(e.type);
+
+        e.preventDefault();
+        return false;
+      });
+
+      resizer.addEventListener("dragend", (e) => {
+        this.copyColumnWidths();
+      });
+    }
+  }
+
   renderOrder() {
-    var headers = this.el.querySelectorAll(".admin_list_orderitem-canorder");
+    var headers = this.el.querySelectorAll(".list_header_item_name-canorder");
     for (var i = 0; i < headers.length; i++) {
       var header = <HTMLAnchorElement>headers[i];
       header.classList.remove("ordered");
@@ -357,7 +450,7 @@ class List {
   }
 
   bindFilter(params: any) {
-    var filterFields = this.el.querySelectorAll(".admin_list_filteritem");
+    var filterFields = this.el.querySelectorAll(".list_header_item_filter");
     for (var i = 0; i < filterFields.length; i++) {
       var field: HTMLDivElement = <HTMLDivElement>filterFields[i];
       var fieldName = field.getAttribute("data-name");
@@ -410,7 +503,7 @@ class List {
 
   filterChanged() {
     this.colorActiveFilterItems();
-    this.tbody.classList.add("admin_table_loading");
+    this.table.classList.add("admin_table_loading");
     this.page = 1;
     this.changed = true;
     this.changedTimestamp = Date.now();

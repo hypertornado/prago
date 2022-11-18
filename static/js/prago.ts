@@ -6,7 +6,7 @@ class Prago {
   }
 
   private static init() {
-    var listEl = document.querySelector<HTMLDivElement>(".admin_list");
+    var listEl = document.querySelector<HTMLDivElement>(".list");
     if (listEl) {
       new List(listEl);
     }

@@ -5388,13 +5388,6 @@ body {
   color: #444;
   background-color: #fafafa;
 }
-@media (max-width: 800px) {
-  html,
-  body {
-    font-size: 16px;
-    line-height: 1.4em;
-  }
-}
 code {
   background-color: #fafafa;
   padding: 0px 3px;
@@ -5427,9 +5420,6 @@ h3,
 h4 {
   font-weight: 500;
 }
-.align-right {
-  text-align: right;
-}
 .right {
   float: right;
 }
@@ -5441,9 +5431,6 @@ h4 {
 }
 .hidden {
   display: none !important;
-}
-.top {
-  vertical-align: top;
 }
 p {
   margin: 0px;
@@ -5513,54 +5500,36 @@ pre {
   min-width: 100%;
   margin: 0px auto;
 }
-.admin_table_orderheader {
-  font-size: 0.9rem;
-  font-weight: 500;
-  text-decoration: none;
-}
-th.admin_list_lastheadercell {
-  vertical-align: middle !important;
-}
-.admin_table_progress-inactive {
-  opacity: 0;
-}
 .admin_table td {
   padding: 2px;
   border: 1px solid #f1f1f1;
 }
-.admin_table_count {
+.list_count {
   font-size: 0.9rem;
   color: #888;
   white-space: nowrap;
 }
-.admin_list_showmore {
-  margin-right: 5px;
+.admin_list_table {
+  min-width: auto;
+  margin: 0px;
+  table-layout: fixed;
+  width: auto;
 }
-.admin_list_showmore_label {
-  font-size: 0.9rem;
-  line-height: 1.3em;
-  color: #888;
-  display: block;
-}
-.admin_list_table td {
-  border-bottom: none;
-  border-top: none;
-  font-size: 0.9rem;
-  border-right: none;
-  border-left: none;
-}
-.admin_list_table th {
-  border-right: none !important;
-  border-left: none !important;
-  border-top: none !important;
-  border-bottom: none !important;
-}
-.admin_table_row td {
+.admin_table_row {
+  display: flex;
   border-bottom: 1px solid #eee;
-  cursor: pointer;
 }
-.admin_table_cell-orderedby {
-  background-color: #fcfcfc;
+.admin_table_row > .admin_table_cell {
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+.admin_table_cell {
+  padding: 2px 5px;
+  font-size: 0.9rem;
 }
 .admin_table_cell-multiple {
   width: 1px;
@@ -5573,9 +5542,6 @@ th.admin_list_lastheadercell {
   -webkit-user-select: none;
   vertical-align: middle;
 }
-.admin_table_row td {
-  padding: 2px 5px;
-}
 .admin_table_row-selected {
   background-color: rgba(64, 120, 192, 0.1) !important;
   border-top: 1px solid #777;
@@ -5584,6 +5550,7 @@ th.admin_list_lastheadercell {
 }
 .admin_table_row_lastcell {
   vertical-align: middle;
+  text-align: left;
 }
 .admin_list_table tr:last-child td {
   border-bottom: 1px solid #f1f1f1;
@@ -5593,27 +5560,36 @@ th.admin_list_lastheadercell {
   font-weight: normal;
   border: 1px solid #f1f1f1;
 }
-th.admin_list_orderitem {
-  padding: 3px 3px;
-  font-size: 0.9rem;
-  font-weight: 500;
+.list_header_item_resizer {
+  width: 3px;
+  border-right: 1px dashed #aaa;
+  cursor: col-resize;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
 }
-.admin_list_orderitem-canorder {
+.list_header_item_resizer:hover {
+  border-right: 1px solid #aaa;
+}
+.list_header_item_name-canorder {
   cursor: pointer;
   color: #4078c0;
 }
-.admin_list_orderitem-canorder:hover {
+.list_header_item_name-canorder:hover {
   background-color: rgba(64, 120, 192, 0.05);
 }
-.admin_list_orderitem-canorder:active {
+.list_header_item_name-canorder:active {
   background-color: rgba(64, 120, 192, 0.1);
-}
-th.admin_list_filteritem {
-  padding: 5px;
-  border-bottom: 2px solid #eee !important;
 }
 .admin_list_filteritem-colored {
   background-color: rgba(64, 120, 192, 0.1);
+}
+.admin_list_filteritem-colored input,
+.admin_list_filteritem-colored select {
+  border-color: #4078c0 !important;
+  background: #4078c0 !important;
+  color: white !important;
 }
 .admin_table_loading {
   opacity: 0.4;
@@ -5657,8 +5633,8 @@ th.admin_list_filteritem {
   margin: 0px 5px;
 }
 @media (hover: hover) {
-  .admin_table_row:hover td {
-    background: rgba(64, 120, 192, 0.05);
+  .admin_table_row:hover {
+    background: rgba(64, 120, 192, 0.05) !important;
   }
   .admin_table_row:active {
     background-color: rgba(64, 120, 192, 0.1);
@@ -5795,12 +5771,13 @@ th.admin_list_filteritem {
   border-bottom-right-radius: 3px;
   overflow: auto;
 }
-.admin_list {
+.list {
   position: relative;
+  overflow-x: scroll;
 }
 .admin_list_image {
-  width: 30px;
-  height: 30px;
+  width: 15px;
+  height: 15px;
   border: 1px solid #eee;
   border-radius: 5px;
   background-size: cover;
@@ -5834,15 +5811,15 @@ select.admin_timestamp_minute {
 .ordered:hover {
   background: rgba(64, 120, 192, 0.1);
 }
-.ordered:after,
-.ordered-desc:after {
+.ordered .list_header_item_name:after,
+.ordered-desc .list_header_item_name:after {
   font-weight: bold;
 }
-.ordered:after {
-  content: " ↓";
+.ordered:before {
+  content: "↓ ";
 }
-.ordered-desc:after {
-  content: " ↑";
+.ordered-desc:before {
+  content: "↑ ";
 }
 .view_header {
   margin: 0 auto;
@@ -5895,9 +5872,6 @@ select.admin_timestamp_minute {
 }
 .view_content:empty {
   display: none;
-}
-.admin_item_view_textarea {
-  white-space: pre-wrap;
 }
 .admin_item_view_place {
   height: 200px;
@@ -5954,7 +5928,11 @@ select.admin_timestamp_minute {
 }
 .btn-more_content_item {
   display: block;
-  background: none;
+  background: none !important;
+  border: none !important;
+}
+.btn-more_content_item:hover {
+  background-color: #eee;
 }
 .btn-more_content_item:not(:last-child) {
   border-bottom-right-radius: 0px;
@@ -5966,7 +5944,7 @@ select.admin_timestamp_minute {
   border-top-left-radius: 0px;
 }
 .btn-more_content_item:hover {
-  background-color: rgba(64, 120, 192, 0.1);
+  background-color: rgba(64, 120, 192, 0.1) !important;
 }
 .admin_filter_layout_date_value {
   width: 1px;
@@ -5987,7 +5965,7 @@ select.admin_timestamp_minute {
   width: 90px;
   flex-grow: 10;
 }
-td.admin_list_message {
+.admin_list_message {
   padding: 20px 5px;
   text-align: center;
   font-size: 1.3rem;
@@ -6205,9 +6183,6 @@ td.admin_list_message {
   .admin_tablesettings {
     display: none !important;
   }
-  .admin_list_filterrow {
-    display: none !important;
-  }
 }
 .admin_table_cell_multiple_pseudocheckbox {
   border: 1px solid #4078c0;
@@ -6218,7 +6193,7 @@ td.admin_list_message {
   font-size: 12px;
   font-weight: bold;
   line-height: 11px;
-  color: white !important;
+  color: transparent !important;
   cursor: pointer;
 }
 .admin_table_cell_multiple_pseudocheckbox:hover {
@@ -6229,7 +6204,74 @@ td.admin_list_message {
 }
 .admin_table_cell_multiple_pseudocheckbox::after {
   content: "✓";
-  color: white !important;
+}
+.admin_table_cell-multiple-checked .admin_table_cell_multiple_pseudocheckbox::after {
+  background-color: #4078c0;
+  content: "✓";
+  color: white;
+}
+.list_header {
+  display: flex;
+  position: relative;
+  position: sticky;
+  border-bottom: 1px solid #eee;
+}
+.list_header_item_name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 3px;
+  padding: 0px 3px;
+}
+.list_header_item {
+  width: 100px;
+  flex-shrink: 0;
+  border: 0px solid blue;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  height: 60px;
+  padding: 3px 5px;
+  position: relative;
+}
+.list_header_item_filter {
+  text-align: center;
+}
+.list_header_first {
+  border-bottom: 1px solid #eee;
+  width: 30px;
+  min-width: 30px;
+  background-color: #fafafa;
+}
+.list_header_last {
+  width: 200px;
+  position: relative;
+  border-bottom: 1px solid #eee !important;
+  background-color: #fafafa;
+  padding: 5px;
+}
+.admin_list_showmore {
+  margin-right: 5px;
+  text-align: center;
+  padding: 0px 5px;
+}
+.admin_list_showmore_label {
+  font-size: 0.9rem;
+  line-height: 1.3em;
+  color: #888;
+  display: block;
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+}
+.admin_table_progress {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+.admin_table_progress-inactive {
+  opacity: 0;
 }
 .btn {
   display: inline-block;
@@ -6447,7 +6489,7 @@ select.input {
   max-width: 100%;
 }
 select.admin_table_filter_item {
-  width: auto;
+  width: 100%;
 }
 .input[readonly],
 .textarea[readonly],
@@ -6866,7 +6908,6 @@ a.search_pagination_page-selected {
 .admin_header_search {
   display: flex;
   padding: 5px 10px;
-  position: relative;
 }
 .admin_header_search_suggestions {
   min-height: 20px;
@@ -7208,7 +7249,7 @@ a.admin_home_item {
 a.admin_stats_section_row {
   text-decoration: none;
 }
-td.pagination {
+.pagination {
   text-align: center;
   background-color: white;
   padding: 10px 5px;
@@ -7233,7 +7274,6 @@ td.pagination {
 .pagination_page_current:hover {
   background-color: #4078c0;
   color: white;
-  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
 .pagination_page_current {
   cursor: default;

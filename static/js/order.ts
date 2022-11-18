@@ -62,9 +62,7 @@ function bindOrder() {
 
     function saveOrder() {
       var adminPrefix = document.body.getAttribute("data-admin-prefix");
-      var typ = document
-        .querySelector(".admin_list-order")
-        .getAttribute("data-type");
+      var typ = document.querySelector(".list-order").getAttribute("data-type");
       var ajaxPath = adminPrefix + "/" + typ + "/api/set-order";
       var order: any[] = [];
       var rows = el.getElementsByClassName("admin_table_row");
@@ -88,7 +86,7 @@ function bindOrder() {
     }
   }
 
-  var elements = document.querySelectorAll(".admin_list-order");
+  var elements = document.querySelectorAll(".list-order");
   Array.prototype.forEach.call(elements, function (el: HTMLElement, i: number) {
     orderTable(el);
   });

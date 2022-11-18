@@ -52,9 +52,8 @@ class ListSettings {
   changedOptions() {
     var columns: any = this.getSelectedColumnsMap();
 
-    var headers: NodeListOf<HTMLDivElement> = document.querySelectorAll(
-      ".admin_list_orderitem"
-    );
+    var headers: NodeListOf<HTMLDivElement> =
+      document.querySelectorAll(".list_header_item");
     for (var i = 0; i < headers.length; i++) {
       var name = headers[i].getAttribute("data-name");
       if (columns[name]) {
@@ -65,7 +64,7 @@ class ListSettings {
     }
 
     var filters: NodeListOf<HTMLDivElement> = document.querySelectorAll(
-      ".admin_list_filteritem"
+      ".list_header_item_filter"
     );
     for (var i = 0; i < filters.length; i++) {
       var name = filters[i].getAttribute("data-name");

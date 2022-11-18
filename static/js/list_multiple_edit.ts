@@ -5,9 +5,7 @@ class ListMultipleEdit {
 
   constructor(multiple: ListMultiple, ids: Array<String>) {
     this.listMultiple = multiple;
-    var typeID = document
-      .querySelector(".admin_list")
-      .getAttribute("data-type");
+    var typeID = document.querySelector(".list").getAttribute("data-type");
 
     var progress = document.createElement("progress");
     this.popup = new ContentPopup(
@@ -60,9 +58,7 @@ class ListMultipleEdit {
   }
 
   confirm(e: Event) {
-    var typeID = document
-      .querySelector(".admin_list")
-      .getAttribute("data-type");
+    var typeID = document.querySelector(".list").getAttribute("data-type");
     var data = new FormData(this.form);
 
     var loader = new LoadingPopup();

@@ -1,5 +1,5 @@
 {{define "admin_list"}}
-<div class="admin_list {{if .CanChangeOrder}} admin_list-order{{end}}{{if .MultipleActions}} admin_list-hasmultipleactions{{end}}"
+<div class="list {{if .CanChangeOrder}} list-order{{end}}{{if .MultipleActions}} list-hasmultipleactions{{end}}"
   data-type="{{.TypeID}}"
   data-order-column="{{.OrderColumn}}"
   data-order-desc="{{.OrderDesc}}"
@@ -11,50 +11,35 @@
   {{template "admin_list_multiple_actions" .}}
 
   {{template "admin_list_settings" .}}
-
-  <table class="admin_table admin_list_table">
-    <thead>
-    <tr>
+    <div class="list_header">
       {{if .MultipleActions}}
-        <th rowspan="2">
-          <!--
-          <input type="checkbox">
-          -->
-        </th>
+        <div class="list_header_first"></div>
       {{end}}
-      {{range $item := .Header}}
-        <th class="admin_list_orderitem{{if $item.CanOrder}} admin_list_orderitem-canorder{{end}}" data-name="{{$item.ColumnName}}">
-          {{- $item.NameHuman -}}
-        </th>
+      {{range $i, $item := .Header}}
+        <div class="list_header_item" data-name="{{$item.ColumnName}}" style="width: 100px !important; max-width: 100px !important;">
+          <div class="list_header_item_name{{if $item.CanOrder}} list_header_item_name-canorder{{end}}" data-name="{{$item.ColumnName}}">{{- $item.NameHuman -}}</div>
+          <div class="list_header_item_resizer" draggable="true"></div>
+          <div class="list_header_item_filter" data-name="{{$item.ColumnName}}" data-filter-layout="{{$item.FilterLayout}}">
+            {{if $item.FilterLayout}}
+              {{tmpl $item.FilterLayout $item}}
+            {{end}}
+          </div>
+        </div>
       {{end}}
-      <th rowspan="2" class="admin_list_lastheadercell">
-        <span class="admin_table_count"></span>
+      <div class="list_header_last">
+        <span class="list_count"></span>
         <progress class="progress admin_table_progress"></progress>
         <label class="admin_list_showmore_label">
           <button class="btn admin_list_settings">Možnosti</button>
-          <!--
-          <input type="checkbox" class="admin_list_showmore">Možnosti
-          -->
         </label>
-      </th>
-    </tr>
-    <tr class="admin_list_filterrow">
-      {{range $item := .Header}}
-        <th class="admin_list_filteritem" data-name="{{$item.ColumnName}}" data-filter-layout="{{$item.FilterLayout}}">
-          {{if $item.FilterLayout}}
-            {{tmpl $item.FilterLayout $item}}
-          {{end}}
-        </th>
-      {{end}}
-    </tr>
-    <tr class="admin_list_settingsrow">
-      <td class="admin_list_settingsrow_column">
-        
-      </td>
-    </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+      </div>
+    {{if true}}
+    <div class="admin_list_settingsrow">
+      <div class="admin_list_settingsrow_column"></div>
+    </div>
+    {{end}}
+    </div>
+  <div class="admin_table admin_list_table"></div>
 {{end}}
 
 {{define "admin_list_settings"}}
@@ -155,21 +140,18 @@
 
 {{define "admin_list_cells"}}
   {{range $item := .admin_list.Rows}}
-    <tr data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="admin_table_row">
+    <div data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="admin_table_row">
       {{if $item.AllowsMultipleActions}}
-        <td class="admin_table_cell-multiple preventredirect" data-id="{{$item.ID}}">
-          <!--
-          <input type="checkbox" class="admin_table_cell-multiple_checkbox preventredirect">
-          -->
+        <div class="admin_table_cell-multiple preventredirect" data-id="{{$item.ID}}">
           <div class="admin_table_cell_multiple_pseudocheckbox"></div>
-        </td>
+        </div>
       {{end}}
       {{range $cell := $item.Items}}
-        <td{{if $cell.OrderedBy}} class="admin_table_cell-orderedby"{{end}}>
+        <div class="admin_table_cell">
           {{tmpl $cell.Template $cell.Value}}
-        </td>
+        </div>
       {{end}}
-      <td nowrap class="top align-right admin_table_row_lastcell">
+      <div class="admin_table_row_lastcell">
         <div class="btngroup admin_list_buttons">
           {{range $action := $item.Actions.VisibleButtons}}
             <a href="{{$action.URL}}" class="btn btn-small"
@@ -190,20 +172,20 @@
             </div>
           {{end}}
         </div>
-      </td>
-    </tr>
+      </div>
+    </div>
   {{end}}
   {{if .admin_list.Message}}
-    <tr>
-      <td colspan="{{.admin_list.Colspan}}" class="admin_list_message">
+    <div>
+      <div colspan="{{.admin_list.Colspan}}" class="admin_list_message">
         {{.admin_list.Message}}
-      </td>
-    </tr>
+      </div>
+    </div>
   {{end}}
-  <tr>
-    <td colspan="{{.admin_list.Colspan}}" class="pagination" data-total="{{.admin_list.Pagination.TotalPages}}" data-selected="{{.admin_list.Pagination.SelectedPage}}">
-    </td>
-  </tr>
+  <div>
+    <div colspan="{{.admin_list.Colspan}}" class="pagination" data-total="{{.admin_list.Pagination.TotalPages}}" data-selected="{{.admin_list.Pagination.SelectedPage}}">
+    </div>
+  </div>
 </div>
 {{end}}
 

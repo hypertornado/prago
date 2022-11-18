@@ -12,7 +12,7 @@ class ListMultiple {
   lastCheckboxIndexClicked: number;
 
   hasMultipleActions(): Boolean {
-    if (this.list.el.classList.contains("admin_list-hasmultipleactions")) {
+    if (this.list.el.classList.contains("list-hasmultipleactions")) {
       return true;
     }
     return false;

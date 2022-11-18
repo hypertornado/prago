@@ -132,7 +132,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				if field == nil {
 					continue
 				}
-				items, err := resourceData.query().Limit(5).where(v+" LIKE ?", filter).list()
+				items, err := resourceData.query().Limit(5).where(v+" LIKE ?", filter).OrderDesc("id").list()
 				if err != nil {
 					panic(err)
 				}

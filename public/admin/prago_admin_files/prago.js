@@ -449,8 +449,8 @@ class List {
             return;
         }
         this.progress = (el.querySelector(".admin_table_progress"));
-        this.tbody = el.querySelector("tbody");
-        this.tbody.textContent = "";
+        this.table = el.querySelector(".admin_list_table");
+        this.table.textContent = "";
         this.bindFilter(urlParams);
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.defaultOrderColumn = el.getAttribute("data-order-column");
@@ -496,6 +496,26 @@ class List {
         this.multiple = new ListMultiple(this);
         this.settings.bindOptions(visibleColumnsMap);
         this.bindOrder();
+        this.bindResizer();
+    }
+    copyColumnWidths() {
+        let headerItems = this.el.querySelectorAll(".list_header > :not(.hidden)");
+        let tableRows = this.el.querySelectorAll(".admin_list_table > .admin_table_row");
+        let totalWidth = 0;
+        for (let i = 0; i < tableRows.length; i++) {
+            let rowItems = tableRows[i].children;
+            for (let j = 0; j < headerItems.length; j++) {
+                if (j >= rowItems.length) {
+                    break;
+                }
+                let headerEl = headerItems[j];
+                let tableEl = rowItems[j];
+                var clientRect = headerEl.getBoundingClientRect();
+                var elWidth = clientRect.width;
+                totalWidth += elWidth;
+                tableEl.setAttribute("style", "width: " + elWidth + "px;");
+            }
+        }
     }
     load() {
         this.progress.classList.remove("admin_table_progress-inactive");
@@ -541,12 +561,12 @@ class List {
         encoded = encodeParams(params);
         request.open("GET", this.adminPrefix + "/" + this.typeName + "/api/list" + encoded, true);
         request.addEventListener("load", () => {
-            this.tbody.innerHTML = "";
+            this.table.innerHTML = "";
             if (request.status == 200) {
                 var response = JSON.parse(request.response);
-                this.tbody.innerHTML = response.Content;
+                this.table.innerHTML = response.Content;
                 var countStr = response.CountStr;
-                this.el.querySelector(".admin_table_count").textContent = countStr;
+                this.el.querySelector(".list_count").textContent = countStr;
                 this.statsContainer.innerHTML = response.StatsStr;
                 bindOrder();
                 this.bindPagination();
@@ -554,18 +574,19 @@ class List {
                 if (this.multiple.hasMultipleActions()) {
                     this.multiple.bindMultipleActionCheckboxes();
                 }
-                this.tbody.classList.remove("admin_table_loading");
+                this.table.classList.remove("admin_table_loading");
             }
             else {
                 console.error("error while loading list");
             }
+            this.copyColumnWidths();
             this.progress.classList.add("admin_table_progress-inactive");
         });
         request.send(JSON.stringify({}));
     }
     colorActiveFilterItems() {
         let itemsToColor = this.getFilterData();
-        var filterItems = this.el.querySelectorAll(".admin_list_filteritem");
+        var filterItems = this.el.querySelectorAll(".list_header_item_filter");
         for (var i = 0; i < filterItems.length; i++) {
             var item = filterItems[i];
             let name = item.getAttribute("data-name");
@@ -640,7 +661,7 @@ class List {
     }
     bindOrder() {
         this.renderOrder();
-        var headers = this.el.querySelectorAll(".admin_list_orderitem-canorder");
+        var headers = this.el.querySelectorAll(".list_header_item_name-canorder");
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
             header.addEventListener("click", (e) => {
@@ -665,8 +686,42 @@ class List {
             });
         }
     }
+    bindResizer() {
+        var resizers = this.el.querySelectorAll(".list_header_item_resizer");
+        for (var i = 0; i < resizers.length; i++) {
+            var resizer = resizers[i];
+            let parentEl = resizer.parentElement;
+            parentEl.addEventListener("dragover", (e) => {
+                e.preventDefault();
+            }, false);
+            resizer.addEventListener("drag", (e) => {
+                var clientRect = parentEl.getBoundingClientRect();
+                var clientX = clientRect.left;
+                if (e.clientX == 0) {
+                    e.preventDefault();
+                    return false;
+                }
+                let width = e.clientX - clientX;
+                if (width < 50) {
+                    width = 50;
+                }
+                parentEl.setAttribute("style", "width: " +
+                    width +
+                    "px; max-width: " +
+                    width +
+                    "px;min-width: " +
+                    width +
+                    "px;");
+                e.preventDefault();
+                return false;
+            });
+            resizer.addEventListener("dragend", (e) => {
+                this.copyColumnWidths();
+            });
+        }
+    }
     renderOrder() {
-        var headers = this.el.querySelectorAll(".admin_list_orderitem-canorder");
+        var headers = this.el.querySelectorAll(".list_header_item_name-canorder");
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
             header.classList.remove("ordered");
@@ -700,7 +755,7 @@ class List {
         return ret;
     }
     bindFilter(params) {
-        var filterFields = this.el.querySelectorAll(".admin_list_filteritem");
+        var filterFields = this.el.querySelectorAll(".list_header_item_filter");
         for (var i = 0; i < filterFields.length; i++) {
             var field = filterFields[i];
             var fieldName = field.getAttribute("data-name");
@@ -744,7 +799,7 @@ class List {
     }
     filterChanged() {
         this.colorActiveFilterItems();
-        this.tbody.classList.add("admin_table_loading");
+        this.table.classList.add("admin_table_loading");
         this.page = 1;
         this.changed = true;
         this.changedTimestamp = Date.now();
@@ -800,7 +855,7 @@ class ListSettings {
     }
     changedOptions() {
         var columns = this.getSelectedColumnsMap();
-        var headers = document.querySelectorAll(".admin_list_orderitem");
+        var headers = document.querySelectorAll(".list_header_item");
         for (var i = 0; i < headers.length; i++) {
             var name = headers[i].getAttribute("data-name");
             if (columns[name]) {
@@ -810,7 +865,7 @@ class ListSettings {
                 headers[i].classList.add("hidden");
             }
         }
-        var filters = document.querySelectorAll(".admin_list_filteritem");
+        var filters = document.querySelectorAll(".list_header_item_filter");
         for (var i = 0; i < filters.length; i++) {
             var name = filters[i].getAttribute("data-name");
             if (columns[name]) {
@@ -848,7 +903,7 @@ class ListMultiple {
         }
     }
     hasMultipleActions() {
-        if (this.list.el.classList.contains("admin_list-hasmultipleactions")) {
+        if (this.list.el.classList.contains("list-hasmultipleactions")) {
             return true;
         }
         return false;
@@ -1060,9 +1115,7 @@ class ListMultiple {
 class ListMultipleEdit {
     constructor(multiple, ids) {
         this.listMultiple = multiple;
-        var typeID = document
-            .querySelector(".admin_list")
-            .getAttribute("data-type");
+        var typeID = document.querySelector(".list").getAttribute("data-type");
         var progress = document.createElement("progress");
         this.popup = new ContentPopup(`Hromadná úprava položek (${ids.length} položek)`, progress);
         this.popup.show();
@@ -1105,9 +1158,7 @@ class ListMultipleEdit {
         });
     }
     confirm(e) {
-        var typeID = document
-            .querySelector(".admin_list")
-            .getAttribute("data-type");
+        var typeID = document.querySelector(".list").getAttribute("data-type");
         var data = new FormData(this.form);
         var loader = new LoadingPopup();
         fetch("/admin/" + typeID + "/api/multiple_edit", {
@@ -1183,9 +1234,7 @@ function bindOrder() {
         }
         function saveOrder() {
             var adminPrefix = document.body.getAttribute("data-admin-prefix");
-            var typ = document
-                .querySelector(".admin_list-order")
-                .getAttribute("data-type");
+            var typ = document.querySelector(".list-order").getAttribute("data-type");
             var ajaxPath = adminPrefix + "/" + typ + "/api/set-order";
             var order = [];
             var rows = el.getElementsByClassName("admin_table_row");
@@ -1202,7 +1251,7 @@ function bindOrder() {
             request.send(JSON.stringify({ order: order }));
         }
     }
-    var elements = document.querySelectorAll(".admin_list-order");
+    var elements = document.querySelectorAll(".list-order");
     Array.prototype.forEach.call(elements, function (el, i) {
         orderTable(el);
     });
@@ -2644,7 +2693,7 @@ class Prago {
         document.addEventListener("DOMContentLoaded", Prago.init);
     }
     static init() {
-        var listEl = document.querySelector(".admin_list");
+        var listEl = document.querySelector(".list");
         if (listEl) {
             new List(listEl);
         }
