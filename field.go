@@ -20,6 +20,8 @@ type Field struct {
 	canOrder        bool
 	required        bool
 
+	icon string
+
 	defaultShow bool
 
 	canView Permission
@@ -105,6 +107,7 @@ func (resourceData *resourceData) newField(f reflect.StructField, order int) *Fi
 		"prago-relation",
 		"prago-validations",
 		"prago-required",
+		"prago-icon",
 	} {
 		ret.tags[v] = f.Tag.Get(v)
 	}
@@ -301,6 +304,40 @@ func (field *Field) FormTemplate(template string) *Field {
 func (field *Field) DBDescription(description string) *Field {
 	field.fieldType.dbFieldDescription = description
 	return field
+}
+
+func (field *Field) getIcon() string {
+	if field.tags["prago-icon"] != "" {
+		return field.tags["prago-icon"]
+	}
+
+	if field.fieldType.IsRelation() {
+		if field.relatedResource.icon != "" {
+			return field.relatedResource.icon
+		}
+		return "glyphicons-basic-577-cluster.svg"
+	}
+
+	if field.fieldType.fieldTypeIcon != "" {
+		return field.fieldType.fieldTypeIcon
+	}
+
+	if field.id == "id" {
+		return "glyphicons-basic-740-hash.svg"
+		//return "glyphicons-basic-347-id-badge.svg"
+	}
+
+	if field.id == "createdat" || field.id == "updatedat" {
+		return "glyphicons-basic-55-clock.svg"
+	}
+
+	if field.typ == reflect.TypeOf(time.Now()) {
+		return "glyphicons-basic-46-calendar.svg"
+	}
+
+	//switch fieldType.
+
+	return ""
 }
 
 func getDefaultStringer(t reflect.Type) func(interface{}) string {

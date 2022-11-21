@@ -60,11 +60,6 @@ class List {
 
     this.progress = <HTMLProgressElement>el.querySelector(".list_progress");
 
-    //console.log(el);
-    //this.table = <HTMLTableElement>el.querySelector("table");
-    //console.log(this.table);
-    //console.log("XXX");
-
     this.table = <HTMLElement>el.querySelector(".admin_list_table");
     this.table.textContent = "";
 
@@ -129,6 +124,7 @@ class List {
 
     this.settings.bindOptions(visibleColumnsMap);
     this.bindOrder();
+    this.bindInitialHeaderWidths();
     this.bindResizer();
   }
 
@@ -159,9 +155,6 @@ class List {
         tableEl.setAttribute("style", "width: " + elWidth + "px;");
       }
     }
-
-    //let tableEl = this.el.querySelector(".admin_list_table");
-    //tableEl.setAttribute("style", "width: " + totalWidth + "px;");
   }
 
   load() {
@@ -342,7 +335,7 @@ class List {
     for (var i = 0; i < headers.length; i++) {
       var header = <HTMLAnchorElement>headers[i];
       header.addEventListener("click", (e) => {
-        var el = <HTMLAnchorElement>e.target;
+        var el = <HTMLAnchorElement>e.currentTarget;
         var name = el.getAttribute("data-name");
         if (name == this.orderColumn) {
           if (this.orderDesc) {
@@ -369,6 +362,8 @@ class List {
       var resizer = <HTMLAnchorElement>resizers[i];
       let parentEl: HTMLDivElement = <HTMLDivElement>resizer.parentElement;
 
+      let naturalWidth = parseInt(parentEl.getAttribute("data-natural-width"));
+
       resizer.addEventListener("drag", (e) => {
         var clientRect = parentEl.getBoundingClientRect();
         var clientX = clientRect.left;
@@ -382,13 +377,20 @@ class List {
 
       resizer.addEventListener("dblclick", (e) => {
         let width = this.getCellWidth(parentEl);
-        if (width == this.maxCellWidth) {
-          this.setCellWidth(parentEl, this.minCellWidth);
+
+        if (width == this.minCellWidth) {
+          this.setCellWidth(parentEl, naturalWidth);
         } else {
-          this.setCellWidth(parentEl, this.maxCellWidth);
+          if (width == naturalWidth) {
+            this.setCellWidth(parentEl, this.maxCellWidth);
+          } else {
+            if (width == this.maxCellWidth) {
+              this.setCellWidth(parentEl, this.minCellWidth);
+            } else {
+              this.setCellWidth(parentEl, naturalWidth);
+            }
+          }
         }
-        //var clientRectWidth = parentEl.getBoundingClientRect().width;
-        //if (clientRectWidth > ) parentEl.setAttribute("style", "width: 100px;");
         this.copyColumnWidths();
       });
 
@@ -409,7 +411,54 @@ class List {
     if (width > this.maxCellWidth) {
       width = this.maxCellWidth;
     }
+
+    let cellName = cell.getAttribute("data-name");
+
+    if (width + "" == cell.getAttribute("data-natural-width")) {
+      this.webStorageDeleteWidth(cellName);
+    } else {
+      this.webStorageSetWidth(cellName, width);
+    }
+
     cell.setAttribute("style", "width: " + width + "px;");
+  }
+
+  bindInitialHeaderWidths() {
+    let headerItems = this.el.querySelectorAll(".list_header_item");
+    for (var i = 0; i < headerItems.length; i++) {
+      var itemEl = <HTMLDivElement>headerItems[i];
+
+      let width = parseInt(itemEl.getAttribute("data-natural-width"));
+
+      let cellName = itemEl.getAttribute("data-name");
+
+      let savedWidth = this.webStorageLoadWidth(cellName);
+      if (savedWidth > 0) {
+        width = savedWidth;
+      }
+      this.setCellWidth(itemEl, width);
+    }
+  }
+
+  webStorageWidthName(cell: string): string {
+    let tableName = this.typeName;
+    return "prago_cellwidth_" + tableName + "_" + cell;
+  }
+
+  webStorageLoadWidth(cell: string): number {
+    let val = window.localStorage[this.webStorageWidthName(cell)];
+    if (val) {
+      return parseInt(val);
+    }
+    return 0;
+  }
+
+  webStorageSetWidth(cell: string, width: number) {
+    window.localStorage[this.webStorageWidthName(cell)] = width;
+  }
+
+  webStorageDeleteWidth(cell: string) {
+    window.localStorage.removeItem(this.webStorageWidthName(cell));
   }
 
   renderOrder() {

@@ -95,6 +95,11 @@ func (formAction *FormAction) Name(name func(string) string) *FormAction {
 	return formAction
 }
 
+func (formAction *FormAction) Icon(icon string) *FormAction {
+	formAction.actionForm.icon = icon
+	return formAction
+}
+
 func (formAction *FormAction) Form(formGenerator func(*Form, *Request)) *FormAction {
 	formAction.formGenerator = formGenerator
 	return formAction

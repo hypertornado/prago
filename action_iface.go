@@ -5,6 +5,7 @@ import (
 )
 
 type ActionIface interface {
+	getIcon() string
 	getName(string) string
 	getMethod() string
 	getURL() string
@@ -14,6 +15,10 @@ type ActionIface interface {
 	getPermission() Permission
 	getURLToken() string
 	returnIsPriority() bool
+}
+
+func (action *Action) getIcon() string {
+	return action.icon
 }
 
 func (action *Action) getName(locale string) string {

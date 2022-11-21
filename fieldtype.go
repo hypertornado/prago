@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-//FieldType defines type of field
+// FieldType defines type of field
 type fieldType struct {
 	viewTemplate   string
 	viewDataSource func(*user, *Field, interface{}) interface{}
@@ -24,6 +24,9 @@ type fieldType struct {
 
 	filterLayoutTemplate   string
 	filterLayoutDataSource func(*Field, *user) interface{}
+
+	fieldTypeIcon    string
+	naturalCellWidth int64
 }
 
 func (app *App) addFieldType(name string, fieldType *fieldType) {
@@ -34,7 +37,7 @@ func (app *App) addFieldType(name string, fieldType *fieldType) {
 	app.fieldTypes[name] = fieldType
 }
 
-//IsRelation detects if field type is relation type
+// IsRelation detects if field type is relation type
 func (f fieldType) IsRelation() bool {
 	if f.viewTemplate == "admin_item_view_relation" {
 		return true
@@ -52,7 +55,9 @@ func (app *App) initDefaultFieldTypes() {
 		listCellDataSource: textListDataSource,
 	})
 	app.addFieldType("order", &fieldType{})
-	app.addFieldType("date", &fieldType{})
+	app.addFieldType("date", &fieldType{
+		naturalCellWidth: 130,
+	})
 
 	app.addFieldType("cdnfile", &fieldType{
 		viewTemplate:   "admin_item_view_file",
@@ -74,6 +79,7 @@ func (app *App) initDefaultFieldTypes() {
 
 		filterLayoutTemplate:   "filter_layout_select",
 		filterLayoutDataSource: boolFilterLayoutDataSource,
+		naturalCellWidth:       60,
 	})
 
 	app.addFieldType("image", &fieldType{
@@ -84,6 +90,9 @@ func (app *App) initDefaultFieldTypes() {
 
 		filterLayoutTemplate:   "filter_layout_select",
 		filterLayoutDataSource: boolFilterLayoutDataSource,
+
+		fieldTypeIcon:    "glyphicons-basic-38-picture.svg",
+		naturalCellWidth: 60,
 	})
 
 	app.addFieldType("markdown", &fieldType{
@@ -120,6 +129,7 @@ func (app *App) initDefaultFieldTypes() {
 			}
 			return tm.Format("2006-01-02 15:04")
 		},
+		naturalCellWidth: 130,
 	})
 }
 

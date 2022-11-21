@@ -9,7 +9,7 @@ import (
 )
 
 func (resourceData *resourceData) initDefaultResourceActions() {
-	resourceData.action("").priority().Permission(resourceData.canView).Name(resourceData.pluralName).Template("admin_list").DataSource(
+	resourceData.action("").Icon("glyphicons-basic-120-table.svg").priority().Permission(resourceData.canView).Name(resourceData.pluralName).Template("admin_list").DataSource(
 		func(request *Request) interface{} {
 			listData, err := resourceData.getListHeader(request.user)
 			must(err)
@@ -17,7 +17,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		},
 	)
 
-	resourceData.FormAction("new").priority().Permission(resourceData.canCreate).Name(messages.GetNameFunction("admin_new")).Form(
+	resourceData.FormAction("new").Icon("glyphicons-basic-371-plus.svg").priority().Permission(resourceData.canCreate).Name(messages.GetNameFunction("admin_new")).Form(
 		func(form *Form, request *Request) {
 			//var item T
 			var item interface{} = reflect.New(resourceData.typ).Interface()
@@ -31,7 +31,6 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		}
 		request := vc.Request()
 		if vc.Valid() {
-			//var item T
 			var item interface{} = reflect.New(resourceData.typ).Interface()
 			resourceData.bindData(item, request.user, request.Params())
 			if resourceData.orderField != nil {

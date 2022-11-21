@@ -499,6 +499,7 @@ class List {
         this.multiple = new ListMultiple(this);
         this.settings.bindOptions(visibleColumnsMap);
         this.bindOrder();
+        this.bindInitialHeaderWidths();
         this.bindResizer();
     }
     copyColumnWidths() {
@@ -668,7 +669,7 @@ class List {
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
             header.addEventListener("click", (e) => {
-                var el = e.target;
+                var el = e.currentTarget;
                 var name = el.getAttribute("data-name");
                 if (name == this.orderColumn) {
                     if (this.orderDesc) {
@@ -694,6 +695,7 @@ class List {
         for (var i = 0; i < resizers.length; i++) {
             var resizer = resizers[i];
             let parentEl = resizer.parentElement;
+            let naturalWidth = parseInt(parentEl.getAttribute("data-natural-width"));
             resizer.addEventListener("drag", (e) => {
                 var clientRect = parentEl.getBoundingClientRect();
                 var clientX = clientRect.left;
@@ -705,11 +707,21 @@ class List {
             });
             resizer.addEventListener("dblclick", (e) => {
                 let width = this.getCellWidth(parentEl);
-                if (width == this.maxCellWidth) {
-                    this.setCellWidth(parentEl, this.minCellWidth);
+                if (width == this.minCellWidth) {
+                    this.setCellWidth(parentEl, naturalWidth);
                 }
                 else {
-                    this.setCellWidth(parentEl, this.maxCellWidth);
+                    if (width == naturalWidth) {
+                        this.setCellWidth(parentEl, this.maxCellWidth);
+                    }
+                    else {
+                        if (width == this.maxCellWidth) {
+                            this.setCellWidth(parentEl, this.minCellWidth);
+                        }
+                        else {
+                            this.setCellWidth(parentEl, naturalWidth);
+                        }
+                    }
                 }
                 this.copyColumnWidths();
             });
@@ -728,7 +740,44 @@ class List {
         if (width > this.maxCellWidth) {
             width = this.maxCellWidth;
         }
+        let cellName = cell.getAttribute("data-name");
+        if (width + "" == cell.getAttribute("data-natural-width")) {
+            this.webStorageDeleteWidth(cellName);
+        }
+        else {
+            this.webStorageSetWidth(cellName, width);
+        }
         cell.setAttribute("style", "width: " + width + "px;");
+    }
+    bindInitialHeaderWidths() {
+        let headerItems = this.el.querySelectorAll(".list_header_item");
+        for (var i = 0; i < headerItems.length; i++) {
+            var itemEl = headerItems[i];
+            let width = parseInt(itemEl.getAttribute("data-natural-width"));
+            let cellName = itemEl.getAttribute("data-name");
+            let savedWidth = this.webStorageLoadWidth(cellName);
+            if (savedWidth > 0) {
+                width = savedWidth;
+            }
+            this.setCellWidth(itemEl, width);
+        }
+    }
+    webStorageWidthName(cell) {
+        let tableName = this.typeName;
+        return "prago_cellwidth_" + tableName + "_" + cell;
+    }
+    webStorageLoadWidth(cell) {
+        let val = window.localStorage[this.webStorageWidthName(cell)];
+        if (val) {
+            return parseInt(val);
+        }
+        return 0;
+    }
+    webStorageSetWidth(cell, width) {
+        window.localStorage[this.webStorageWidthName(cell)] = width;
+    }
+    webStorageDeleteWidth(cell) {
+        window.localStorage.removeItem(this.webStorageWidthName(cell));
     }
     renderOrder() {
         var headers = this.el.querySelectorAll(".list_header_item_name-canorder");

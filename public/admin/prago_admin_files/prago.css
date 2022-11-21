@@ -5585,14 +5585,8 @@ pre {
 .list_header_item_name-canorder:active {
   background-color: rgba(64, 120, 192, 0.1);
 }
-.admin_list_filteritem-colored {
-  background-color: rgba(64, 120, 192, 0.1);
-}
-.admin_list_filteritem-colored input,
-.admin_list_filteritem-colored select {
+.admin_list_filteritem-colored * {
   border-color: #4078c0 !important;
-  background: #4078c0 !important;
-  color: white !important;
 }
 .admin_table_loading {
   opacity: 0.4;
@@ -5817,12 +5811,19 @@ select.admin_timestamp_minute {
 .ordered .list_header_item_name:after,
 .ordered-desc .list_header_item_name:after {
   font-weight: bold;
+  color: blue;
 }
-.ordered:before {
-  content: "↓ ";
+.ordered .list_header_item_name_ordericon {
+  display: inline-block;
 }
-.ordered-desc:before {
-  content: "↑ ";
+.ordered-desc .list_header_item_name_ordericon {
+  display: inline-block;
+}
+.ordered .list_header_item_name_ordericon:before {
+  content: "↓";
+}
+.ordered-desc .list_header_item_name_ordericon:before {
+  content: "↑";
 }
 .view_header {
   margin: 0 auto;
@@ -5967,6 +5968,16 @@ select.admin_timestamp_minute {
 .admin_filter_layout_date_to {
   width: 90px;
   flex-grow: 10;
+}
+input.admin_filter_layout_date_from {
+  border-bottom-right-radius: 3px !important;
+  border-top-right-radius: 3px !important;
+  margin-right: 1px;
+}
+input.admin_filter_layout_date_to {
+  border-bottom-left-radius: 3px !important;
+  border-top-left-radius: 3px !important;
+  margin-left: 1px;
 }
 .admin_list_message {
   padding: 20px 5px;
@@ -6188,7 +6199,7 @@ select.admin_timestamp_minute {
   }
 }
 .admin_table_cell_multiple_pseudocheckbox {
-  border: 1px solid #4078c0;
+  border: 1px solid #ccc;
   border-radius: 3px;
   width: 15px;
   height: 15px;
@@ -6198,6 +6209,7 @@ select.admin_timestamp_minute {
   line-height: 11px;
   color: transparent !important;
   cursor: pointer;
+  background-color: white;
 }
 .admin_table_cell_multiple_pseudocheckbox:hover {
   background-color: rgba(64, 120, 192, 0.05);
@@ -6225,6 +6237,29 @@ select.admin_timestamp_minute {
   text-overflow: ellipsis;
   border-radius: 3px;
   padding: 0px 3px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.list_header_item_name_icon {
+  width: 15px;
+  margin-right: 2px;
+}
+.list_header_item_name_text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 100;
+}
+.list_header_item_name_ordericon {
+  flex-shrink: 0;
+  flex-grow: 0;
+  font-size: 0.9rem;
+  line-height: 1em;
+  height: 1em;
+  text-align: center;
+  display: none;
+  font-weight: bold;
 }
 .list_header_item {
   width: 100px;
@@ -6470,11 +6505,12 @@ select.admin_timestamp_minute {
   vertical-align: middle;
   width: 100%;
 }
-.input-small {
+.input-filter {
   padding: 2px 6px;
   box-shadow: none;
   border-radius: 100px;
   border: 1px solid #eee;
+  background-color: #fff !important;
 }
 .input-placesearch {
   max-width: calc(100% - 200px);
@@ -7301,15 +7337,22 @@ a.admin_stats_section_row {
   white-space: nowrap;
   overflow: hidden;
   margin: 4px 0px;
-  display: flex;
   border-bottom: none;
   font-size: 0.9rem;
   line-height: 1.8em;
   text-decoration: none;
   padding: 1px 20px;
-  display: inline-block;
   border-radius: 10px;
   color: #444;
+  display: flex;
+  align-items: center;
+}
+.admin_navigation_tab_icon {
+  width: 15px;
+  margin-right: 5px;
+}
+.admin_navigation_tab_name {
+  border: 0px solid red;
 }
 .admin_navigation_tabdivider {
   border-left: 1px solid rgba(0, 0, 0, 0);

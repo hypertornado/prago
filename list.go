@@ -37,6 +37,7 @@ type listPaginationData struct {
 
 type listHeaderItem struct {
 	Name         string
+	Icon         string
 	NameHuman    string
 	ColumnName   string
 	CanOrder     bool
@@ -45,6 +46,7 @@ type listHeaderItem struct {
 	//Field        *Field
 	RelatedResourceID string
 	FilterData        interface{}
+	NaturalCellWidth  int64
 }
 
 type listContent struct {
@@ -156,6 +158,33 @@ func (resourceData *resourceData) fieldsStr(user *user) string {
 	return strings.Join(ret, ",")
 }
 
+const defaultNaturalCellWidth int64 = 100
+
+func (field *Field) getNaturalCellWidth() int64 {
+	ret := defaultNaturalCellWidth
+	if field.fieldType.naturalCellWidth > 0 {
+		ret = field.fieldType.naturalCellWidth
+	}
+
+	if field.fieldType.IsRelation() {
+		return 150
+	}
+
+	switch field.typ {
+	case reflect.TypeOf(time.Now()):
+		return 150
+	case reflect.TypeOf(true):
+		return 60
+	case reflect.TypeOf(int64(0)):
+		return 60
+	case reflect.TypeOf(int(0)):
+		return 60
+	}
+
+	return ret
+
+}
+
 func (field *Field) getListHeaderItem(user *user) listHeaderItem {
 	var relatedResourceID string
 	if field.relatedResource != nil {
@@ -164,10 +193,12 @@ func (field *Field) getListHeaderItem(user *user) listHeaderItem {
 
 	headerItem := listHeaderItem{
 		Name:              field.fieldClassName,
+		Icon:              field.getIcon(),
 		NameHuman:         field.name(user.Locale),
 		ColumnName:        field.id,
 		DefaultShow:       field.defaultShow,
 		RelatedResourceID: relatedResourceID,
+		NaturalCellWidth:  field.getNaturalCellWidth(),
 	}
 
 	headerItem.FilterLayout = field.filterLayout()

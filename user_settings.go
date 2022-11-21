@@ -2,7 +2,7 @@ package prago
 
 func initUserSettings(app *App) {
 
-	app.FormAction("settings").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu().Form(
+	app.FormAction("settings").Icon("glyphicons-basic-5-settings.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu().Form(
 		func(form *Form, request *Request) {
 			user := request.user
 			form.Title = messages.Get(user.Locale, "admin_settings")
@@ -72,7 +72,7 @@ func initUserSettings(app *App) {
 		}
 	})
 
-	app.FormAction("password").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu().Form(
+	app.FormAction("password").Icon("glyphicons-basic-45-key.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu().Form(
 		func(form *Form, request *Request) {
 			locale := request.user.Locale
 			form.Title = messages.Get(request.user.Locale, "admin_password_change")
@@ -105,11 +105,11 @@ func initUserSettings(app *App) {
 		},
 	)
 
-	app.Action("redirect-to-homepage").Permission(loggedPermission).Name(messages.GetNameFunction("admin_homepage")).userMenu().Handler(func(request *Request) {
+	app.Action("redirect-to-homepage").Icon("glyphicons-basic-21-home.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_homepage")).userMenu().Handler(func(request *Request) {
 		request.Redirect("/")
 	})
 
-	app.Action("logout").Permission(loggedPermission).Name(messages.GetNameFunction("admin_log_out")).userMenu().Handler(func(request *Request) {
+	app.Action("logout").Icon("glyphicons-basic-432-log-out.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_log_out")).userMenu().Handler(func(request *Request) {
 		validateCSRF(request)
 		request.logOutUser()
 		request.Redirect(app.getAdminURL("login"))

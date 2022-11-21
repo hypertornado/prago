@@ -47,7 +47,6 @@
   width: 1px;
   padding: 5px !important;
   vertical-align: top;
-  //background: white !important;
   cursor: default !important;
 
   user-select: none;
@@ -112,14 +111,13 @@
 }
 
 .admin_list_filteritem-colored {
-  background-color: @baseColorBackground;
+  //background-color: @baseColorBackground;
 }
 
-.admin_list_filteritem-colored input,
-.admin_list_filteritem-colored select {
+.admin_list_filteritem-colored * {
   border-color: @baseColor !important;
-  background: @baseColor !important;
-  color: white !important;
+  //background: @baseColor !important;
+  //color: white !important;
 }
 
 .admin_table_loading {
@@ -375,14 +373,23 @@ select.admin_timestamp_minute {
 .ordered .list_header_item_name:after,
 .ordered-desc .list_header_item_name:after {
   font-weight: bold;
+  color: blue;
 }
 
-.ordered:before {
-  content: "↓ ";
+.ordered .list_header_item_name_ordericon {
+  display: inline-block;
 }
 
-.ordered-desc:before {
-  content: "↑ ";
+.ordered-desc .list_header_item_name_ordericon {
+  display: inline-block;
+}
+
+.ordered .list_header_item_name_ordericon:before {
+  content: "↓";
+}
+
+.ordered-desc .list_header_item_name_ordericon:before {
+  content: "↑";
 }
 
 .view_header {
@@ -554,6 +561,18 @@ select.admin_timestamp_minute {
 .admin_filter_layout_date_to {
   width: 90px;
   flex-grow: 10;
+}
+
+input.admin_filter_layout_date_from {
+  border-bottom-right-radius: 3px !important;
+  border-top-right-radius: 3px !important;
+  margin-right: 1px;
+}
+
+input.admin_filter_layout_date_to {
+  border-bottom-left-radius: 3px !important;
+  border-top-left-radius: 3px !important;
+  margin-left: 1px;
 }
 
 .admin_list_message {
@@ -817,7 +836,7 @@ select.admin_timestamp_minute {
 }
 
 .admin_table_cell_multiple_pseudocheckbox {
-  border: 1px solid @baseColor;
+  border: 1px solid #ccc;
   border-radius: 3px;
   width: 15px;
   height: 15px;
@@ -827,6 +846,7 @@ select.admin_timestamp_minute {
   line-height: 11px;
   color: transparent !important;
   cursor: pointer;
+  background-color: white;
 }
 
 .admin_table_cell_multiple_pseudocheckbox:hover {
@@ -863,6 +883,32 @@ select.admin_timestamp_minute {
   text-overflow: ellipsis;
   border-radius: 3px;
   padding: 0px 3px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.list_header_item_name_icon {
+  width: 15px;
+  margin-right: 2px;
+}
+
+.list_header_item_name_text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 100;
+}
+
+.list_header_item_name_ordericon {
+  flex-shrink: 0;
+  flex-grow: 0;
+  font-size: 0.9rem;
+  line-height: 1em;
+  height: 1em;
+  text-align: center;
+  display: none;
+  font-weight: bold;
 }
 
 .list_header_item {
@@ -876,7 +922,6 @@ select.admin_timestamp_minute {
   height: 60px;
   padding: 3px 5px;
   position: relative;
-  //border-bottom: 1px solid #eee;
 }
 
 .list_header_item_filter {

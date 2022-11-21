@@ -115,6 +115,7 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 		}
 
 		userSection.Items = append(userSection.Items, mainMenuItem{
+			Icon:     v.icon,
 			Name:     v.name(user.Locale),
 			URL:      fullURL,
 			Selected: selected,

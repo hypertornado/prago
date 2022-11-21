@@ -84,6 +84,8 @@ func (app *App) initUserResource() {
 	resource.PermissionDelete(sysadminPermission)
 	resource.PermissionExport(sysadminPermission)
 
+	resource.Icon("glyphicons-basic-4-user.svg")
+
 	initUserRegistration(app)
 	initUserLogin(app)
 	initUserSettings(app)

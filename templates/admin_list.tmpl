@@ -16,8 +16,12 @@
         <div class="list_header_first"></div>
       {{end}}
       {{range $i, $item := .Header}}
-        <div class="list_header_item" data-name="{{$item.ColumnName}}" style="width: 100px !important; max-width: 100px !important;">
-          <div class="list_header_item_name{{if $item.CanOrder}} list_header_item_name-canorder{{end}}" data-name="{{$item.ColumnName}}">{{- $item.NameHuman -}}</div>
+        <div class="list_header_item" data-name="{{$item.ColumnName}}" data-natural-width="{{$item.NaturalCellWidth}}" styleOLD="width: {{$item.NaturalCellWidth}}px !important;">
+          <div class="list_header_item_name{{if $item.CanOrder}} list_header_item_name-canorder{{end}}" data-name="{{$item.ColumnName}}" title="{{$item.NameHuman}}">
+            {{if $item.Icon}}<img class="list_header_item_name_icon" src="/admin/api/icons?file={{$item.Icon}}&color=4078c0">{{end}}
+            <div class="list_header_item_name_text">{{- $item.NameHuman -}}</div>
+            <div class="list_header_item_name_ordericon"></div>
+          </div>
           <div class="list_header_item_resizer" draggable="true"></div>
           <div class="list_header_item_filter" data-name="{{$item.ColumnName}}" data-filter-layout="{{$item.FilterLayout}}">
             {{if $item.FilterLayout}}
@@ -82,7 +86,7 @@
 {{end}}
 
 {{define "filter_layout_text"}}
-  <input class="input input-small admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+  <input class="input input-filter admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
 {{end}}
 
 {{define "filter_layout_relation"}}
@@ -95,18 +99,18 @@
       <div class="filter_relations_clear"></div>
     </div>
     <div class="filter_relations_search">
-      <input class="input input-small filter_relations_search_input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <input class="input input-filter filter_relations_search_input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       <div class="filter_relations_suggestions"></div>
     </div>
   </div>
 {{end}}
 
 {{define "filter_layout_number"}}
-  <input class="input input-small admin_table_filter_item" type="text" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+  <input class="input input-filter admin_table_filter_item" type="text" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
 {{end}}
 
 {{define "filter_layout_boolean"}}
-  <select class="input input-small admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+  <select class="input input-filter admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <option value=""></option>
     <option value="true">{{index .FilterData 0}}</option>
     <option value="false">{{index .FilterData 1}}</option>
@@ -114,7 +118,7 @@
 {{end}}
 
 {{define "filter_layout_select"}}
-  <select class="input input-small admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+  <select class="input input-filter admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     {{range $item := .FilterData}}
       <option value="{{index $item 0}}">{{index $item 1}}</option>
     {{end}}
@@ -126,13 +130,12 @@
     <input class="admin_table_filter_item admin_filter_layout_date_value" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <div class="admin_filter_layout_date_content">
       <input type="text"
-        class="input input-small admin_filter_date_input admin_filter_layout_date_from"
-        placeholder="Od"
+        class="input input-filter admin_filter_date_input admin_filter_layout_date_from"
+        placeholder="od"
       >
-      <div class="admin_filter_layout_date_divider">–</div>
       <input type="text"
-        class="input input-small admin_filter_date_input admin_filter_layout_date_to"
-        placeholder="Do"
+        class="input input-filter admin_filter_date_input admin_filter_layout_date_to"
+        placeholder="do"
       >
     </div>
   </div>

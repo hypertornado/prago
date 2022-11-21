@@ -163,6 +163,8 @@ func (app *App) initFilesResource() {
 	resource.Field("width").Name(messages.GetNameFunction("width"))
 	resource.Field("height").Name(messages.GetNameFunction("height"))
 
+	resource.Icon("glyphicons-basic-37-file.svg")
+
 	app.addCommand("files", "metadata").
 		Callback(func() {
 			files := resource.Query().List()

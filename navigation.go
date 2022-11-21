@@ -15,6 +15,7 @@ type navigation struct {
 }
 
 type tab struct {
+	Icon     string
 	Name     string
 	URL      string
 	Selected bool
@@ -92,6 +93,7 @@ func (resourceData *resourceData) getResourceNavigation(user *user, code string)
 		if v.getMethod() == "GET" {
 			if resourceData.app.authorize(user, v.getPermission()) {
 				tabs = append(tabs, tab{
+					Icon:     v.getIcon(),
 					Name:     v.getName(user.Locale),
 					URL:      resourceData.getURL(v.getURLToken()),
 					Selected: trueIfEqual(code, v.getURLToken()),
@@ -116,6 +118,7 @@ func (resourceData *resourceData) getItemNavigation(user *user, item interface{}
 			}
 			if resourceData.app.authorize(user, v.getPermission()) {
 				tabs = append(tabs, tab{
+					Icon:     v.getIcon(),
 					Name:     name,
 					URL:      resourceData.getItemURL(item, v.getURLToken()),
 					Selected: trueIfEqual(code, v.getURLToken()),
