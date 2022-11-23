@@ -29,6 +29,9 @@
   {{range $item := .Items}}
     {{if $item.Name}}
       <div class="view_name">
+        {{if $item.Icon}}
+          <img src="/admin/api/icons?file={{$item.Icon}}&color=444444" class="view_name_icon">
+        {{end}}
         {{$item.Name}}
       </div>
     {{end}}
@@ -154,8 +157,17 @@
   {{.}}
 {{end}}
 
-{{define "admin_item_view_relation_cell"}}
+{{define "list_cell"}}
   {{if .}}
-    <span class="admin_list_relation_cell_image" style="background-image: url('{{.Image}}');"></span>{{.Name}}
+    {{if .Images}}
+      <span class="list_cell_images">
+      {{range $image := .Images}}
+        {{if $image}}
+        <div class="list_cell_image" style="background-image: url('{{CSS (thumb $image)}}');"></div>
+        {{end}}
+      {{end}}
+      </span>
+    {{end}}
+    <span class="list_cell_name">{{.Name}}</span>
   {{end}}
 {{end}}

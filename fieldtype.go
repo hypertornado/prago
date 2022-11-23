@@ -2,6 +2,7 @@ package prago
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -19,8 +20,8 @@ type fieldType struct {
 	formDataSource func(*Field, *user) interface{}
 	formStringer   func(interface{}) string
 
-	listCellDataSource func(*user, *Field, interface{}) interface{}
-	listCellTemplate   string
+	cellDataSource func(*user, *Field, interface{}) cellViewData
+	//listCellTemplate   string
 
 	filterLayoutTemplate   string
 	filterLayoutDataSource func(*Field, *user) interface{}
@@ -50,9 +51,9 @@ func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("role", app.createRoleFieldType())
 
 	app.addFieldType("text", &fieldType{
-		viewTemplate:       "admin_item_view_textarea",
-		formTemplate:       "admin_item_textarea",
-		listCellDataSource: textListDataSource,
+		viewTemplate:   "admin_item_view_textarea",
+		formTemplate:   "admin_item_textarea",
+		cellDataSource: textListDataSource,
 	})
 	app.addFieldType("order", &fieldType{})
 	app.addFieldType("date", &fieldType{
@@ -63,19 +64,17 @@ func (app *App) initDefaultFieldTypes() {
 		viewTemplate:   "admin_item_view_file",
 		viewDataSource: filesViewDataSource,
 		formTemplate:   "admin_file",
-		//ListCellTemplate: "admin_item_view_file_cell",
-		listCellTemplate:   "admin_list_image",
-		listCellDataSource: defaultViewDataSource,
+		cellDataSource: imageCellViewData,
 
 		filterLayoutTemplate:   "filter_layout_select",
 		filterLayoutDataSource: boolFilterLayoutDataSource,
 	})
 
 	app.addFieldType("file", &fieldType{
-		viewTemplate:     "admin_item_view_image",
-		formTemplate:     "admin_item_image",
-		formDataSource:   createFilesEditDataSource(""),
-		listCellTemplate: "admin_list_image",
+		viewTemplate:   "admin_item_view_image",
+		formTemplate:   "admin_item_image",
+		formDataSource: createFilesEditDataSource(""),
+		cellDataSource: imageCellViewData,
 
 		filterLayoutTemplate:   "filter_layout_select",
 		filterLayoutDataSource: boolFilterLayoutDataSource,
@@ -83,10 +82,10 @@ func (app *App) initDefaultFieldTypes() {
 	})
 
 	app.addFieldType("image", &fieldType{
-		viewTemplate:     "admin_item_view_image",
-		formTemplate:     "admin_item_image",
-		formDataSource:   createFilesEditDataSource(".jpg,.jpeg,.png"),
-		listCellTemplate: "admin_list_image",
+		viewTemplate:   "admin_item_view_image",
+		formTemplate:   "admin_item_image",
+		formDataSource: createFilesEditDataSource(".jpg,.jpeg,.png"),
+		cellDataSource: imageCellViewData,
 
 		filterLayoutTemplate:   "filter_layout_select",
 		filterLayoutDataSource: boolFilterLayoutDataSource,
@@ -96,22 +95,23 @@ func (app *App) initDefaultFieldTypes() {
 	})
 
 	app.addFieldType("markdown", &fieldType{
-		viewTemplate:       "admin_item_view_markdown",
-		formTemplate:       "admin_item_markdown",
-		listCellDataSource: markdownListDataSource,
-		listCellTemplate:   "admin_item_view_text",
+		viewTemplate:   "admin_item_view_markdown",
+		viewDataSource: markdownViewDataSource,
+		formTemplate:   "admin_item_markdown",
+		cellDataSource: markdownListDataSource,
+		//listCellTemplate:   "admin_item_view_text",
 	})
 	app.addFieldType("place", &fieldType{
-		viewTemplate:     "admin_item_view_place",
-		formTemplate:     "admin_item_place",
-		listCellTemplate: "admin_item_view_text",
+		viewTemplate: "admin_item_view_place",
+		formTemplate: "admin_item_place",
+		//listCellTemplate: "admin_item_view_text",
 	})
 
 	app.addFieldType("relation", &fieldType{
-		viewTemplate:     "admin_item_view_relation",
-		listCellTemplate: "admin_item_view_relation_cell",
-		viewDataSource:   getRelationViewData,
-		formTemplate:     "admin_item_relation",
+		viewTemplate: "admin_item_view_relation",
+		//listCellTemplate: "admin_item_view_relation_cell",
+		viewDataSource: getRelationViewData,
+		formTemplate:   "admin_item_relation",
 		formDataSource: func(f *Field, u *user) interface{} {
 			if f.tags["prago-relation"] != "" {
 				return columnName(f.tags["prago-relation"])
@@ -141,8 +141,8 @@ func boolFilterLayoutDataSource(field *Field, user *user) interface{} {
 	}
 }
 
-func textListDataSource(user *user, f *Field, value interface{}) interface{} {
-	return crop(value.(string), 100)
+func textListDataSource(user *user, f *Field, value interface{}) cellViewData {
+	return cellViewData{Name: crop(value.(string), 100)}
 }
 
 func createFilesEditDataSource(mimeTypes string) func(f *Field, u *user) interface{} {
@@ -151,6 +151,66 @@ func createFilesEditDataSource(mimeTypes string) func(f *Field, u *user) interfa
 	}
 }
 
-func markdownListDataSource(user *user, f *Field, value interface{}) interface{} {
+func markdownViewDataSource(user *user, f *Field, value interface{}) interface{} {
 	return cropMarkdown(value.(string), 100)
+}
+
+func markdownListDataSource(user *user, f *Field, value interface{}) cellViewData {
+	return cellViewData{Name: cropMarkdown(value.(string), 100)}
+}
+
+func relationCellViewData(user *user, f *Field, value interface{}) cellViewData {
+	previewData, _ := getPreviewData(user, f, value.(int64))
+	if previewData == nil {
+		return cellViewData{}
+	}
+
+	ret := cellViewData{
+		Name: previewData.Name,
+	}
+	if previewData.Image != "" {
+		ret.Images = []string{previewData.Image}
+	}
+	return ret
+}
+
+func imageCellViewData(user *user, f *Field, value interface{}) cellViewData {
+
+	data := value.(string)
+	images := strings.Split(data, ",")
+	ret := cellViewData{}
+	if len(images) > 0 {
+		ret.Images = images
+	}
+	return ret
+
+	/*previewData, _ := getPreviewData(user, f, value.(int64))
+	ret := cellViewData{
+		Name: previewData.Name,
+	}
+	if previewData.Image != "" {
+		ret.Images = []string{previewData.Image}
+	}
+	return ret*/
+}
+
+type cellViewData struct {
+	Images []string
+	Name   string
+}
+
+func getCellViewData(user *user, f *Field, value interface{}) cellViewData {
+	if f.fieldType.cellDataSource != nil {
+		return f.fieldType.cellDataSource(user, f, value)
+	}
+
+	if f.fieldType.IsRelation() {
+		return relationCellViewData(user, f, value)
+	}
+
+	ret := cellViewData{
+		Name: getDefaultFieldStringer(f)(user, f, value),
+	}
+	return ret
+
 }

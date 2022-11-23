@@ -4,7 +4,7 @@ import (
 	"errors"
 )
 
-//ErrItemNotFound is returned when no item is found
+// ErrItemNotFound is returned when no item is found
 var ErrItemNotFound = errors.New("item not found")
 
 const adminPathPrefix = "/admin"
@@ -59,7 +59,7 @@ func (app App) getAdminURL(suffix string) string {
 	return ret
 }
 
-//JavascriptPath adds javascript
+// JavascriptPath adds javascript
 func (app *App) JavascriptPath(url string) *App {
 	app.javascripts = append(app.javascripts, url)
 	return app

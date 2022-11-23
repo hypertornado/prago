@@ -47,7 +47,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		}
 	})
 
-	resourceData.ItemAction("").priority().Template("admin_views").Permission(resourceData.canView).DataSource(
+	resourceData.ItemAction("").Icon("glyphicons-basic-588-book-open-text.svg").priority().Template("admin_views").Permission(resourceData.canView).DataSource(
 		func(item any, request *Request) interface{} {
 			if item == nil {
 				render404(request)
@@ -57,7 +57,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		},
 	)
 
-	resourceData.FormItemAction("edit").priority().Name(messages.GetNameFunction("admin_edit")).Permission(resourceData.canUpdate).Form(
+	resourceData.FormItemAction("edit").Icon("glyphicons-basic-31-pencil.svg").priority().Name(messages.GetNameFunction("admin_edit")).Permission(resourceData.canUpdate).Form(
 		func(item any, form *Form, request *Request) {
 			resourceData.addFormItems(item, request.user, form)
 			form.AddSubmit(messages.Get(request.user.Locale, "admin_save"))
@@ -91,7 +91,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		}
 	})
 
-	resourceData.FormItemAction("delete").priority().Permission(resourceData.canDelete).Name(messages.GetNameFunction("admin_delete")).Form(
+	resourceData.FormItemAction("delete").Icon("glyphicons-basic-17-bin.svg").priority().Permission(resourceData.canDelete).Name(messages.GetNameFunction("admin_delete")).Form(
 		func(item any, form *Form, request *Request) {
 			form.AddDeleteSubmit(messages.Get(request.user.Locale, "admin_delete"))
 			itemName := getItemName(item)
@@ -109,7 +109,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 	})
 
 	if resourceData.previewURLFunction != nil {
-		resourceData.ItemAction("preview").priority().Name(messages.GetNameFunction("admin_preview")).Handler(
+		resourceData.ItemAction("preview").Icon("glyphicons-basic-52-eye.svg").priority().Name(messages.GetNameFunction("admin_preview")).Handler(
 			func(item any, request *Request) {
 				request.Redirect(
 					resourceData.previewURLFunction(item),
@@ -119,13 +119,13 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 	}
 
 	if resourceData.activityLog {
-		resourceData.action("history").priority().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resourceData.canUpdate).DataSource(
+		resourceData.action("history").Icon("glyphicons-basic-58-history.svg").priority().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resourceData.canUpdate).DataSource(
 			func(request *Request) interface{} {
 				return resourceData.app.getHistory(resourceData, 0)
 			},
 		)
 
-		resourceData.ItemAction("history").priority().Name(messages.GetNameFunction("admin_history")).Permission(resourceData.canUpdate).Template("admin_history").DataSource(
+		resourceData.ItemAction("history").Icon("glyphicons-basic-58-history.svg").priority().Name(messages.GetNameFunction("admin_history")).Permission(resourceData.canUpdate).Template("admin_history").DataSource(
 			func(item any, request *Request) interface{} {
 				if item == nil {
 					return nil

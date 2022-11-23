@@ -6,6 +6,7 @@ import (
 )
 
 type buttonData struct {
+	Icon   string
 	Name   string
 	URL    string
 	Params map[string]string
@@ -216,8 +217,9 @@ func (resourceData *resourceData) getListItemActions(user *user, item any, id in
 	ret := listItemActions{}
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{
-		Name: messages.Get(user.Locale, "admin_view"),
-		URL:  resourceData.getURL(fmt.Sprintf("%d", id)),
+		Icon: "glyphicons-basic-588-book-open-text.svg",
+		//Name: messages.Get(user.Locale, "admin_view"),
+		URL: resourceData.getURL(fmt.Sprintf("%d", id)),
 	})
 
 	navigation := resourceData.getItemNavigation(user, item, "")
@@ -225,6 +227,7 @@ func (resourceData *resourceData) getListItemActions(user *user, item any, id in
 	for _, v := range navigation.Tabs {
 		if !v.Selected {
 			ret.MenuButtons = append(ret.MenuButtons, buttonData{
+				Icon: v.Icon,
 				Name: v.Name,
 				URL:  v.URL,
 			})

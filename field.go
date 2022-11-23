@@ -20,8 +20,6 @@ type Field struct {
 	canOrder        bool
 	required        bool
 
-	icon string
-
 	defaultShow bool
 
 	canView Permission
@@ -291,10 +289,10 @@ func (field *Field) ViewTemplate(template string) *Field {
 	return field
 }
 
-func (field *Field) ListCellTemplate(template string) *Field {
+/*func (field *Field) ListCellTemplate(template string) *Field {
 	field.fieldType.listCellTemplate = template
 	return field
-}
+}*/
 
 func (field *Field) FormTemplate(template string) *Field {
 	field.fieldType.formTemplate = template
@@ -440,12 +438,12 @@ func (field *Field) initFieldType() {
 		ret.formHideLabel = true
 	}
 
-	if ret.listCellDataSource == nil {
+	/*if ret.listCellDataSource == nil {
 		ret.listCellDataSource = ret.viewDataSource
 	}
 	if ret.listCellTemplate == "" {
 		ret.listCellTemplate = ret.viewTemplate
-	}
+	}*/
 	field.fieldType = ret
 }
 

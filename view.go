@@ -7,6 +7,7 @@ import (
 )
 
 type view struct {
+	Icon         string
 	Name         string
 	Subname      string
 	Navigation   []tab
@@ -16,6 +17,7 @@ type view struct {
 }
 
 type viewField struct {
+	Icon     string
 	Name     string
 	Template string
 	Value    interface{}
@@ -33,9 +35,15 @@ func (resourceData *resourceData) getBasicView(id int64, item any, user *user) v
 		QuickActions: resourceData.getQuickActionViews(item, user),
 	}
 
+	tableIcon := resourceData.icon
+	if tableIcon == "" {
+		tableIcon = "glyphicons-basic-120-table.svg"
+	}
+
 	ret.Items = append(
 		ret.Items,
 		viewField{
+			Icon:     tableIcon,
 			Name:     messages.Get(user.Locale, "admin_table"),
 			Template: "admin_item_view_url",
 			Value: [2]string{
@@ -55,9 +63,11 @@ func (resourceData *resourceData) getBasicView(id int64, item any, user *user) v
 			reflect.ValueOf(item).Elem().Field(i),
 		)
 
+		icon := f.getIcon()
 		ret.Items = append(
 			ret.Items,
 			viewField{
+				Icon:     icon,
 				Name:     f.name(user.Locale),
 				Template: f.fieldType.viewTemplate,
 				Value:    f.fieldType.viewDataSource(user, f, ifaceVal),
@@ -71,6 +81,7 @@ func (resourceData *resourceData) getBasicView(id int64, item any, user *user) v
 		ret.Items = append(
 			ret.Items,
 			viewField{
+				Icon:     "glyphicons-basic-58-history.svg",
 				Name:     messages.Get(user.Locale, "admin_history_last"),
 				Template: "admin_item_view_url",
 				Value: [2]string{
@@ -83,6 +94,7 @@ func (resourceData *resourceData) getBasicView(id int64, item any, user *user) v
 		ret.Items = append(
 			ret.Items,
 			viewField{
+				Icon:     "glyphicons-basic-58-history.svg",
 				Name:     messages.Get(user.Locale, "admin_history_count"),
 				Template: "admin_item_view_url",
 				Value: [2]string{
@@ -102,6 +114,12 @@ func getDefaultViewTemplate(t reflect.Type) string {
 }
 
 func getDefaultViewDataSource(f *Field) func(user *user, f *Field, value interface{}) interface{} {
+	return func(user *user, f *Field, value interface{}) interface{} {
+		return getDefaultFieldStringer(f)(user, f, value)
+	}
+}
+
+func getDefaultFieldStringer(f *Field) func(user *user, f *Field, value interface{}) string {
 	t := f.typ
 	if t == reflect.TypeOf(time.Now()) {
 		if f.tags["prago-type"] == "timestamp" || f.fieldClassName == "CreatedAt" || f.fieldClassName == "UpdatedAt" {
@@ -123,26 +141,26 @@ func getDefaultViewDataSource(f *Field) func(user *user, f *Field, value interfa
 	}
 }
 
-func defaultViewDataSource(user *user, f *Field, value interface{}) interface{} {
-	return value
+func defaultViewDataSource(user *user, f *Field, value interface{}) string {
+	return fmt.Sprintf("%v", value)
 }
 
-func numberViewDataSource(user *user, f *Field, value interface{}) interface{} {
+func numberViewDataSource(user *user, f *Field, value interface{}) string {
 	switch f.typ.Kind() {
 	case reflect.Int:
 		return humanizeNumber(int64(value.(int)))
 	case reflect.Int64:
 		return humanizeNumber(value.(int64))
 	}
-
-	return value
+	panic("not integer type")
+	//return defaultViewDataSource(user, f, value)
 }
 
-func floatViewDataSource(user *user, f *Field, value interface{}) interface{} {
+func floatViewDataSource(user *user, f *Field, value interface{}) string {
 	return humanizeFloat(value.(float64), user.Locale)
 }
 
-func timeViewDataSource(user *user, f *Field, value interface{}) interface{} {
+func timeViewDataSource(user *user, f *Field, value interface{}) string {
 	return messages.Timestamp(
 		user.Locale,
 		value.(time.Time),
@@ -150,7 +168,7 @@ func timeViewDataSource(user *user, f *Field, value interface{}) interface{} {
 	)
 }
 
-func timestampViewDataSource(user *user, f *Field, value interface{}) interface{} {
+func timestampViewDataSource(user *user, f *Field, value interface{}) string {
 	return messages.Timestamp(
 		user.Locale,
 		value.(time.Time),
@@ -158,7 +176,7 @@ func timestampViewDataSource(user *user, f *Field, value interface{}) interface{
 	)
 }
 
-func boolViewDataSource(user *user, f *Field, value interface{}) interface{} {
+func boolViewDataSource(user *user, f *Field, value interface{}) string {
 	if value.(bool) {
 		return messages.Get(user.Locale, "yes")
 	}

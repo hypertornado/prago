@@ -17,7 +17,12 @@
         {{range $item := .Items}}
           <div class="form_label{{if .Hidden}} form_label-hidden{{end}}{{if .Required}} form_label-required{{end}}" data-id="{{.ID}}">
             {{if eq .HiddenName false}}
-              <label for="{{.UUID}}" class="form_label_text">{{.Name}}</label>
+              <label for="{{.UUID}}" class="form_label_text">
+                {{if .Icon}}
+                  <img src="/admin/api/icons?file={{$item.Icon}}&color=444444" class="form_label_text_icon">
+                {{end}}
+                {{.Name}}
+              </label>
               {{if .Description}}
                 <div class="form_label_description">{{.Description}}</div>
               {{end}}

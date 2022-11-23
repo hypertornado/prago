@@ -1,6 +1,4 @@
 .btn {
-  display: inline-block;
-  padding: 3px 30px;
   font-size: 0.9rem;
   line-height: 1.2em;
   color: #333;
@@ -21,15 +19,35 @@
   text-decoration: none;
   font-weight: 500;
   border-radius: 5px;
-}
 
-.btn-small {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+
   padding: 3px 12px;
   font-size: 12px;
 }
 
+.btn_icon {
+  width: 15px;
+  margin-right: 5px;
+}
+
+.btn_text {
+}
+
+.btn_icon:last-child {
+  margin-right: 0px;
+}
+
 .btngroup {
   display: inline-flex;
+  //position: relative;
+  //z-index: 2;
+}
+
+.btngroup .btn:last-child:hover:has(.btn_more) {
+  border-bottom-right-radius: 0px;
 }
 
 .btngroup > .btn:not(:last-child) {
@@ -161,7 +179,13 @@
   font-size: 1rem;
   line-height: 1.2em;
   margin: 0px 0px 5px 0px;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+}
+
+.form_label_text_icon {
+  width: 15px;
+  margin-right: 5px;
 }
 
 .form_label_description {
@@ -286,4 +310,42 @@ select.admin_table_filter_item {
 .form_after_content {
   padding: 0px 10px;
   overflow-x: auto;
+}
+
+.btn_more {
+  display: none;
+  position: absolute;
+  right: -1px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  top: 21px;
+  .shadowLarge;
+  z-index: 2;
+  flex-flow: column;
+  background-color: white;
+}
+
+.btn:hover .btn_more {
+  display: flex;
+}
+
+a.btn_more_item {
+  padding: 5px 10px;
+  text-decoration: none;
+  color: @black;
+  display: flex;
+  align-items: center;
+}
+
+.btn_more_item_icon {
+  width: 10px;
+  margin-right: 5px;
+}
+
+.btn_more_item:hover {
+  background-color: @baseColorBackgroundLighter;
+}
+
+.btn_more_item:active {
+  background-color: @baseColorBackground;
 }

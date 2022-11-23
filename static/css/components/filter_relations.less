@@ -11,15 +11,21 @@
   position: absolute;
   left: 0px;
   background: white;
-  .shadowLarge;
+  //.shadowLarge;
+  box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.2);
   display: none;
   min-width: 300px;
   max-width: 400px;
-  z-index: 0;
+  z-index: 100;
+  border-radius: 0px 0px 10px 10px;
+}
+
+.filter_relations_suggestions:empty {
+  box-shadow: none !important;
 }
 
 .filter_relations_suggestions-empty {
-  box-shadow: none;
+  box-shadow: none !important;
 }
 
 .filter_relations_search:focus-within .filter_relations_suggestions {
@@ -28,51 +34,56 @@
 
 .filter_relations_preview {
   font-size: 0.9rem;
-  background: #fcfcfc;
+  background: #fafafa;
   border: 1px solid #eee;
   border-radius: 15px;
-  padding: 3px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.filter_relations_preview_image {
+  width: 10px;
+  border: 1px solid red;
+  background-color: #fafafa;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 100px;
+  margin-right: 3px;
+  background-size: cover;
+}
+
+.filter_relations_preview_name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 10;
+  font-size: 0.9rem;
+  line-height: 1.1em;
 }
 
 .filter_relations_preview_close {
   display: inline-block;
-  width: 20px;
-  height: 20px;
-  font-size: 10px;
-  line-height: 18px;
-  font-weight: bold;
-  text-align: center;
+  width: 18px;
+  height: 18px;
   border-radius: 100px;
-  background: #eee;
-  padding-left: 0px;
-  padding-top: 0px;
-  padding-bottom: 0px;
-  float: right;
-  margin: 0px 0px 0px 3px;
+  padding: 2px;
   cursor: pointer;
-  background: @baseColorBackground;
-  background: @baseColor;
-  color: white;
-
-  border: 1px solid #eee;
-
-  text-align: center;
+  flex-shrink: 0;
 }
 
 .filter_relations_preview_close:hover {
-  opacity: 0.9;
+  background-color: @baseColorBackground;
 }
 
 .filter_relations_preview_close:active {
-  opacity: 0.8;
+  background-color: @baseColorBackground;
+  background-color: @baseColorBackgroundLighter;
 }
 
 .filter_relations_preview_close::after {
   content: "✕";
-}
-
-.filter_relations_clear {
-  clear: both;
 }
 
 .list_filter_suggestion {
@@ -108,8 +119,8 @@
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-  background-color: @backgroundGrayColor;
-  border: 1px solid @borderColor;
+  background-color: #fafafa;
+  border: 1px solid #eee;
   align-self: flex-start;
 }
 

@@ -160,9 +160,7 @@ class ListMultiple {
 
   bindMultipleActionCheckboxes() {
     this.lastCheckboxIndexClicked = -1;
-    this.pseudoCheckboxesAr = document.querySelectorAll(
-      ".admin_table_cell-multiple"
-    );
+    this.pseudoCheckboxesAr = document.querySelectorAll(".list_row_multiple");
     for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
       var checkbox = <HTMLTableCellElement>this.pseudoCheckboxesAr[i];
       checkbox.addEventListener(
@@ -177,7 +175,7 @@ class ListMultiple {
     var ret: Array<String> = [];
     for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
       var checkbox = <HTMLTableCellElement>this.pseudoCheckboxesAr[i];
-      if (checkbox.classList.contains("admin_table_cell-multiple-checked")) {
+      if (checkbox.classList.contains("list_row_multiple-checked")) {
         ret.push(checkbox.getAttribute("data-id"));
       }
     }
@@ -213,24 +211,24 @@ class ListMultiple {
 
   isCheckedPseudocheckbox(index: number): boolean {
     var sb: HTMLTableCellElement = this.pseudoCheckboxesAr[index];
-    return sb.classList.contains("admin_table_cell-multiple-checked");
+    return sb.classList.contains("list_row_multiple-checked");
   }
 
   checkPseudocheckbox(index: number) {
     var sb: HTMLTableCellElement = this.pseudoCheckboxesAr[index];
-    sb.classList.add("admin_table_cell-multiple-checked");
+    sb.classList.add("list_row_multiple-checked");
   }
 
   uncheckPseudocheckbox(index: number) {
     var sb: HTMLTableCellElement = this.pseudoCheckboxesAr[index];
-    sb.classList.remove("admin_table_cell-multiple-checked");
+    sb.classList.remove("list_row_multiple-checked");
   }
 
   multipleCheckboxChanged() {
     var checkedCount = 0;
     for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
       var checkbox = <HTMLTableCellElement>this.pseudoCheckboxesAr[i];
-      if (checkbox.classList.contains("admin_table_cell-multiple-checked")) {
+      if (checkbox.classList.contains("list_row_multiple-checked")) {
         checkedCount++;
       }
     }
@@ -247,14 +245,14 @@ class ListMultiple {
     }
     this.list.el.querySelector(
       ".admin_list_multiple_actions_description"
-    ).textContent = `Vybráno ${checkedCount} položek`;
+    ).textContent = `Vybráno ${checkedCount} položek`;
   }
 
   multipleUncheckAll() {
     this.lastCheckboxIndexClicked = -1;
     for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
       var checkbox = this.pseudoCheckboxesAr[i];
-      checkbox.classList.remove("admin_table_cell-multiple-checked");
+      checkbox.classList.remove("list_row_multiple-checked");
     }
     this.multipleCheckboxChanged();
   }

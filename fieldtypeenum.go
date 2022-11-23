@@ -1,12 +1,14 @@
 package prago
 
-//FieldTypeEnum enum type of field
+import "fmt"
+
+// FieldTypeEnum enum type of field
 type FieldTypeEnum struct {
 	ID   string
 	Name func(string) string
 }
 
-//AddEnumFieldType adds enum field type
+// AddEnumFieldType adds enum field type
 func (app *App) AddEnumFieldType(name string, items [][2]string) {
 	var arr []FieldTypeEnum
 	for _, v := range items {
@@ -21,7 +23,7 @@ func (app *App) AddEnumFieldType(name string, items [][2]string) {
 	app.AddEnumFieldTypeLocalized(name, arr)
 }
 
-//AddEnumFieldTypeLocalized adds localized enum field
+// AddEnumFieldTypeLocalized adds localized enum field
 func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 
 	var allowedValues []string
@@ -53,6 +55,17 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 				})
 			}
 			return ret
+		},
+
+		cellDataSource: func(user *user, f *Field, value interface{}) cellViewData {
+			str := value.(string)
+			for _, v := range items {
+				if str == v.ID {
+					return cellViewData{Name: v.Name(user.Locale)}
+				}
+			}
+
+			return cellViewData{Name: fmt.Sprintf("%v", value)}
 		},
 
 		filterLayoutTemplate: "filter_layout_select",

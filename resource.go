@@ -88,7 +88,7 @@ func NewResource[T any](app *App) *Resource[T] {
 
 		resourceController: app.adminController.subController(),
 
-		defaultItemsPerPage: 200,
+		defaultItemsPerPage: 100,
 
 		typ: typ,
 

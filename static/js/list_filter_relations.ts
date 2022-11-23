@@ -2,6 +2,7 @@ class ListFilterRelations {
   valueInput: HTMLInputElement;
   input: HTMLInputElement;
   preview: HTMLDivElement;
+  previewImage: HTMLDivElement;
   previewName: HTMLDivElement;
   previewClose: HTMLDivElement;
   search: HTMLDivElement;
@@ -16,6 +17,7 @@ class ListFilterRelations {
     this.search = el.querySelector(".filter_relations_search");
     this.suggestions = el.querySelector(".filter_relations_suggestions");
     this.preview = el.querySelector(".filter_relations_preview");
+    this.previewImage = el.querySelector(".filter_relations_preview_image");
     this.previewName = el.querySelector(".filter_relations_preview_name");
     this.previewClose = el.querySelector(".filter_relations_preview_close");
 
@@ -73,6 +75,11 @@ class ListFilterRelations {
     this.valueInput.value = item.ID;
     this.preview.classList.remove("hidden");
     this.search.classList.add("hidden");
+    this.preview.setAttribute("title", item.Name);
+    this.previewImage.setAttribute(
+      "style",
+      "background-image: url('" + item.Image + "');"
+    );
     this.previewName.textContent = item.Name;
     this.dispatchChange();
   }

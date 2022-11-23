@@ -62,6 +62,7 @@ fields:
 
 		item := &FormItem{
 			ID:       field.id,
+			Icon:     field.getIcon(),
 			Name:     field.name(user.Locale),
 			Template: field.fieldType.formTemplate,
 		}

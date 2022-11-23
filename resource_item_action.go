@@ -33,6 +33,16 @@ func (actionData *resourceItemActionData) priority() *resourceItemActionData {
 	return actionData
 }
 
+func (action *ResourceItemAction[T]) Icon(icon string) *ResourceItemAction[T] {
+	action.data.Icon(icon)
+	return action
+}
+
+func (actionData *resourceItemActionData) Icon(icon string) *resourceItemActionData {
+	actionData.action.icon = icon
+	return actionData
+}
+
 func (action *ResourceItemAction[T]) Template(template string) *ResourceItemAction[T] {
 	action.data.Template(template)
 	return action

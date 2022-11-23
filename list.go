@@ -537,8 +537,9 @@ func valueToListCell(user *user, f *Field, val reflect.Value, isOrderedBy bool) 
 	var item interface{}
 	reflect.ValueOf(&item).Elem().Set(val)
 	var cell listCell
-	cell.Template = f.fieldType.listCellTemplate
-	cell.Value = f.fieldType.listCellDataSource(user, f, item)
+	cell.Template = "list_cell" //f.fieldType.listCellTemplate
+	cell.Value = getCellViewData(user, f, item)
+	//cell.Value = f.fieldType.cellDataSource(user, f, item)
 	cell.OriginalValue = val.Interface()
 	cell.OrderedBy = isOrderedBy
 	return cell

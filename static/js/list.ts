@@ -60,7 +60,7 @@ class List {
 
     this.progress = <HTMLProgressElement>el.querySelector(".list_progress");
 
-    this.table = <HTMLElement>el.querySelector(".admin_list_table");
+    this.table = <HTMLElement>el.querySelector(".list_table");
     this.table.textContent = "";
 
     this.bindFilter(urlParams);
@@ -131,9 +131,7 @@ class List {
   copyColumnWidths() {
     let headerItems = this.el.querySelectorAll(".list_header > :not(.hidden)");
 
-    let tableRows = this.el.querySelectorAll(
-      ".admin_list_table > .admin_table_row"
-    );
+    let tableRows = this.el.querySelectorAll(".list_row");
 
     let totalWidth = 0;
 
@@ -289,18 +287,11 @@ class List {
   }
 
   bindClick() {
-    var rows = this.el.querySelectorAll(".admin_table_row");
+    var rows = this.el.querySelectorAll(".list_row");
     for (var i = 0; i < rows.length; i++) {
       var row = <HTMLTableRowElement>rows[i];
       var id = row.getAttribute("data-id");
       row.addEventListener("click", (e) => {
-        if (
-          (<HTMLDivElement>e.target).classList.contains(
-            "admin_table_cell-multiple_checkbox"
-          )
-        ) {
-          return false;
-        }
         var target = <HTMLElement>e.target;
         if (target.classList.contains("preventredirect")) {
           return;
@@ -316,6 +307,7 @@ class List {
         window.location.href = url;
       });
 
+      /*
       var buttons = row.querySelector(".admin_list_buttons");
       buttons.addEventListener("click", (e) => {
         var url = (<HTMLDivElement>e.target).getAttribute("href");
@@ -325,7 +317,7 @@ class List {
           e.stopPropagation();
           return false;
         }
-      });
+      });*/
     }
   }
 

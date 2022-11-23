@@ -102,6 +102,7 @@ func (app *App) getHistory(resourceData *resourceData, itemID int64) historyView
 
 func (app *App) initActivityLog() {
 	app.activityLogResource = NewResource[activityLog](app)
+	app.activityLogResource.data.icon = "glyphicons-basic-58-history.svg"
 	app.activityLogResource.data.canView = Permission(sysadminRoleName)
 	app.activityLogResource.data.orderDesc = true
 	app.activityLogResource.Name(messages.GetNameFunction("admin_history"), messages.GetNameFunction("admin_history"))

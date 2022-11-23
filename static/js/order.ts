@@ -1,6 +1,6 @@
 function bindOrder() {
   function orderTable(el: HTMLElement) {
-    var rows = el.getElementsByClassName("admin_table_row");
+    var rows = el.getElementsByClassName("list_row");
     Array.prototype.forEach.call(rows, function (item: HTMLElement, i: number) {
       bindDraggable(<HTMLTableRowElement>item);
     });
@@ -10,7 +10,7 @@ function bindOrder() {
       row.setAttribute("draggable", "true");
 
       row.addEventListener("dragstart", function (ev) {
-        row.classList.add("admin_table_row-selected");
+        row.classList.add("list_row-selected");
 
         draggedElement = this;
         (ev as DragEvent).dataTransfer.setData("text/plain", "");
@@ -27,7 +27,7 @@ function bindOrder() {
           var draggedIndex: number = -1;
           var thisIndex: number = -1;
           Array.prototype.forEach.call(
-            el.getElementsByClassName("admin_table_row"),
+            el.getElementsByClassName("list_row"),
             function (item: HTMLElement, i: number) {
               if (item == draggedElement) {
                 draggedIndex = i;
@@ -51,7 +51,7 @@ function bindOrder() {
 
       row.addEventListener("drop", function (ev) {
         saveOrder();
-        row.classList.remove("admin_table_row-selected");
+        row.classList.remove("list_row-selected");
         return false;
       });
 
@@ -65,7 +65,7 @@ function bindOrder() {
       var typ = document.querySelector(".list-order").getAttribute("data-type");
       var ajaxPath = adminPrefix + "/" + typ + "/api/set-order";
       var order: any[] = [];
-      var rows = el.getElementsByClassName("admin_table_row");
+      var rows = el.getElementsByClassName("list_row");
 
       Array.prototype.forEach.call(
         rows,

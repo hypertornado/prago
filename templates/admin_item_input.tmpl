@@ -24,18 +24,21 @@
 
 {{define "admin_item_markdown"}}
   <div class="admin_markdown">
-    <div class="btngroup">
-      <div class="btn btn-small admin_markdown_command" data-cmd="b" title="ctrl+b">B</div>
-      <div class="btn btn-small admin_markdown_command" data-cmd="i" title="ctrl+i">I</div>
-      <div class="btn btn-small admin_markdown_command" data-cmd="a" title="ctrl+u">Odkaz</div>
-      <div class="btn btn-small admin_markdown_command" data-cmd="h2" title="ctrl+k">Nadpis</div>
+
+    <div class="admin_markdown_header">
+      <div class="btngroup">
+        <div class="btn admin_markdown_command" data-cmd="b" title="ctrl+b">B</div>
+        <div class="btn admin_markdown_command" data-cmd="i" title="ctrl+i">I</div>
+        <div class="btn admin_markdown_command" data-cmd="a" title="ctrl+u">Odkaz</div>
+        <div class="btn admin_markdown_command" data-cmd="h2" title="ctrl+k">Nadpis</div>
+      </div>
+
+      &nbsp;&nbsp;<a href="" target="_blank" class="admin_markdown_show_help">Zobrazit nápovědu</a>&nbsp;&nbsp;
+
+      <label>
+        <input type="checkbox" class="admin_markdown_preview_show"> Zobrazit náhled
+      </label>
     </div>
-
-    &nbsp;&nbsp;<a href="" target="_blank" class="admin_markdown_show_help">Zobrazit nápovědu</a>&nbsp;&nbsp;
-
-    <label>
-      <input type="checkbox" class="admin_markdown_preview_show"> Zobrazit náhled
-    </label>
 
     <textarea name="{{.ID}}" id="{{.UUID}}" class="input form_watcher form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
     <div class="admin_markdown_preview hidden"></div>
@@ -163,7 +166,7 @@
   <progress class="progress"></progress>
   <div class="admin_item_relation_preview hidden"></div>
   <div class="admin_item_relation_change hidden">
-    <div class="btn btn-small admin_item_relation_change_btn">×</div>
+    <div class="btn admin_item_relation_change_btn">×</div>
   </div>
   <div class="admin_item_relation_picker hidden">
     <input class="input">
@@ -176,6 +179,4 @@
 </div>
 {{end}}
 
-{{define "admin_list_image"}}
-  <div class="admin_list_image" style="background-image: url('{{CSS (thumb .)}}');"></div>
-{{end}}
+

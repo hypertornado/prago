@@ -278,6 +278,7 @@ class ListFilterRelations {
         this.search = el.querySelector(".filter_relations_search");
         this.suggestions = el.querySelector(".filter_relations_suggestions");
         this.preview = el.querySelector(".filter_relations_preview");
+        this.previewImage = el.querySelector(".filter_relations_preview_image");
         this.previewName = el.querySelector(".filter_relations_preview_name");
         this.previewClose = el.querySelector(".filter_relations_preview_close");
         this.previewClose.addEventListener("click", this.closePreview.bind(this));
@@ -322,6 +323,8 @@ class ListFilterRelations {
         this.valueInput.value = item.ID;
         this.preview.classList.remove("hidden");
         this.search.classList.add("hidden");
+        this.preview.setAttribute("title", item.Name);
+        this.previewImage.setAttribute("style", "background-image: url('" + item.Image + "');");
         this.previewName.textContent = item.Name;
         this.dispatchChange();
     }
@@ -452,7 +455,7 @@ class List {
             return;
         }
         this.progress = el.querySelector(".list_progress");
-        this.table = el.querySelector(".admin_list_table");
+        this.table = el.querySelector(".list_table");
         this.table.textContent = "";
         this.bindFilter(urlParams);
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
@@ -504,7 +507,7 @@ class List {
     }
     copyColumnWidths() {
         let headerItems = this.el.querySelectorAll(".list_header > :not(.hidden)");
-        let tableRows = this.el.querySelectorAll(".admin_list_table > .admin_table_row");
+        let tableRows = this.el.querySelectorAll(".list_row");
         let totalWidth = 0;
         for (let i = 0; i < tableRows.length; i++) {
             let rowItems = tableRows[i].children;
@@ -630,14 +633,11 @@ class List {
         }
     }
     bindClick() {
-        var rows = this.el.querySelectorAll(".admin_table_row");
+        var rows = this.el.querySelectorAll(".list_row");
         for (var i = 0; i < rows.length; i++) {
             var row = rows[i];
             var id = row.getAttribute("data-id");
             row.addEventListener("click", (e) => {
-                if (e.target.classList.contains("admin_table_cell-multiple_checkbox")) {
-                    return false;
-                }
                 var target = e.target;
                 if (target.classList.contains("preventredirect")) {
                     return;
@@ -650,16 +650,6 @@ class List {
                     return;
                 }
                 window.location.href = url;
-            });
-            var buttons = row.querySelector(".admin_list_buttons");
-            buttons.addEventListener("click", (e) => {
-                var url = e.target.getAttribute("href");
-                if (url != "") {
-                    window.location.href = url;
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return false;
-                }
             });
         }
     }
@@ -1083,7 +1073,7 @@ class ListMultiple {
     }
     bindMultipleActionCheckboxes() {
         this.lastCheckboxIndexClicked = -1;
-        this.pseudoCheckboxesAr = document.querySelectorAll(".admin_table_cell-multiple");
+        this.pseudoCheckboxesAr = document.querySelectorAll(".list_row_multiple");
         for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
             var checkbox = this.pseudoCheckboxesAr[i];
             checkbox.addEventListener("click", this.multipleCheckboxClicked.bind(this));
@@ -1094,7 +1084,7 @@ class ListMultiple {
         var ret = [];
         for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
             var checkbox = this.pseudoCheckboxesAr[i];
-            if (checkbox.classList.contains("admin_table_cell-multiple-checked")) {
+            if (checkbox.classList.contains("list_row_multiple-checked")) {
                 ret.push(checkbox.getAttribute("data-id"));
             }
         }
@@ -1126,21 +1116,21 @@ class ListMultiple {
     }
     isCheckedPseudocheckbox(index) {
         var sb = this.pseudoCheckboxesAr[index];
-        return sb.classList.contains("admin_table_cell-multiple-checked");
+        return sb.classList.contains("list_row_multiple-checked");
     }
     checkPseudocheckbox(index) {
         var sb = this.pseudoCheckboxesAr[index];
-        sb.classList.add("admin_table_cell-multiple-checked");
+        sb.classList.add("list_row_multiple-checked");
     }
     uncheckPseudocheckbox(index) {
         var sb = this.pseudoCheckboxesAr[index];
-        sb.classList.remove("admin_table_cell-multiple-checked");
+        sb.classList.remove("list_row_multiple-checked");
     }
     multipleCheckboxChanged() {
         var checkedCount = 0;
         for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
             var checkbox = this.pseudoCheckboxesAr[i];
-            if (checkbox.classList.contains("admin_table_cell-multiple-checked")) {
+            if (checkbox.classList.contains("list_row_multiple-checked")) {
                 checkedCount++;
             }
         }
@@ -1151,13 +1141,13 @@ class ListMultiple {
         else {
             multipleActionsPanel.classList.remove("admin_list_multiple_actions-visible");
         }
-        this.list.el.querySelector(".admin_list_multiple_actions_description").textContent = `Vybráno ${checkedCount} položek`;
+        this.list.el.querySelector(".admin_list_multiple_actions_description").textContent = `Vybráno ${checkedCount} položek`;
     }
     multipleUncheckAll() {
         this.lastCheckboxIndexClicked = -1;
         for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
             var checkbox = this.pseudoCheckboxesAr[i];
-            checkbox.classList.remove("admin_table_cell-multiple-checked");
+            checkbox.classList.remove("list_row_multiple-checked");
         }
         this.multipleCheckboxChanged();
     }
@@ -1246,7 +1236,7 @@ class ListMultipleEdit {
 }
 function bindOrder() {
     function orderTable(el) {
-        var rows = el.getElementsByClassName("admin_table_row");
+        var rows = el.getElementsByClassName("list_row");
         Array.prototype.forEach.call(rows, function (item, i) {
             bindDraggable(item);
         });
@@ -1254,7 +1244,7 @@ function bindOrder() {
         function bindDraggable(row) {
             row.setAttribute("draggable", "true");
             row.addEventListener("dragstart", function (ev) {
-                row.classList.add("admin_table_row-selected");
+                row.classList.add("list_row-selected");
                 draggedElement = this;
                 ev.dataTransfer.setData("text/plain", "");
                 ev.dataTransfer.effectAllowed = "move";
@@ -1267,7 +1257,7 @@ function bindOrder() {
                 if (this != draggedElement) {
                     var draggedIndex = -1;
                     var thisIndex = -1;
-                    Array.prototype.forEach.call(el.getElementsByClassName("admin_table_row"), function (item, i) {
+                    Array.prototype.forEach.call(el.getElementsByClassName("list_row"), function (item, i) {
                         if (item == draggedElement) {
                             draggedIndex = i;
                         }
@@ -1284,7 +1274,7 @@ function bindOrder() {
             });
             row.addEventListener("drop", function (ev) {
                 saveOrder();
-                row.classList.remove("admin_table_row-selected");
+                row.classList.remove("list_row-selected");
                 return false;
             });
             row.addEventListener("dragover", function (ev) {
@@ -1296,7 +1286,7 @@ function bindOrder() {
             var typ = document.querySelector(".list-order").getAttribute("data-type");
             var ajaxPath = adminPrefix + "/" + typ + "/api/set-order";
             var order = [];
-            var rows = el.getElementsByClassName("admin_table_row");
+            var rows = el.getElementsByClassName("list_row");
             Array.prototype.forEach.call(rows, function (item, i) {
                 order.push(parseInt(item.getAttribute("data-id")));
             });

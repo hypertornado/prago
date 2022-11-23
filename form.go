@@ -5,7 +5,7 @@ import (
 	"net/url"
 )
 
-//Form represents admin form
+// Form represents admin form
 type Form struct {
 	Action                 string
 	Title                  string
@@ -16,9 +16,10 @@ type Form struct {
 	AutosubmitOnDataChange bool
 }
 
-//FormItem represents item of form
+// FormItem represents item of form
 type FormItem struct {
 	ID          string
+	Icon        string
 	Name        string
 	Description string
 	Required    bool
@@ -33,7 +34,7 @@ type FormItem struct {
 	form        *Form
 }
 
-//NewForm creates new form
+// NewForm creates new form
 func NewForm(action string) *Form {
 	ret := &Form{
 		Action: action,
@@ -41,13 +42,13 @@ func NewForm(action string) *Form {
 	return ret
 }
 
-//AddItem adds form item
+// AddItem adds form item
 func (f *Form) AddItem(item *FormItem) {
 	item.form = f
 	f.Items = append(f.Items, item)
 }
 
-//BindData to form
+// BindData to form
 func (f *Form) BindData(params url.Values) {
 	for _, v := range f.Items {
 		v.Value = params.Get(v.ID)
@@ -65,37 +66,37 @@ func (f *Form) addInput(id, description, template string) *FormItem {
 	return item
 }
 
-//AddTextInput to form
+// AddTextInput to form
 func (f *Form) AddTextInput(name, description string) *FormItem {
 	return f.addInput(name, description, "admin_item_input")
 }
 
-//AddTextareaInput to form
+// AddTextareaInput to form
 func (f *Form) AddTextareaInput(name, description string) *FormItem {
 	return f.addInput(name, description, "admin_item_textarea")
 }
 
-//AddEmailInput to form
+// AddEmailInput to form
 func (f *Form) AddEmailInput(name, description string) *FormItem {
 	return f.addInput(name, description, "admin_item_email")
 }
 
-//AddPasswordInput to form
+// AddPasswordInput to form
 func (f *Form) AddPasswordInput(name, description string) *FormItem {
 	return f.addInput(name, description, "admin_item_password")
 }
 
-//AddFileInput to form
+// AddFileInput to form
 func (f *Form) AddFileInput(name, description string) *FormItem {
 	return f.addInput(name, description, "admin_item_file")
 }
 
-//AddCAPTCHAInput to form
+// AddCAPTCHAInput to form
 func (f *Form) AddCAPTCHAInput(name, description string) *FormItem {
 	return f.addInput(name, description, "admin_item_captcha")
 }
 
-//AddSubmit to form
+// AddSubmit to form
 func (f *Form) AddSubmit(description string) *FormItem {
 	input := f.addInput("_submit", description, "")
 	input.HiddenName = true
@@ -103,7 +104,7 @@ func (f *Form) AddSubmit(description string) *FormItem {
 	return input
 }
 
-//AddDeleteSubmit to form
+// AddDeleteSubmit to form
 func (f *Form) AddDeleteSubmit(description string) *FormItem {
 	input := f.addInput("_submit", description, "")
 	input.HiddenName = true
@@ -111,14 +112,14 @@ func (f *Form) AddDeleteSubmit(description string) *FormItem {
 	return input
 }
 
-//AddCheckbox to form
+// AddCheckbox to form
 func (f *Form) AddCheckbox(name, description string) *FormItem {
 	input := f.addInput(name, description, "admin_item_checkbox")
 	input.HiddenName = true
 	return input
 }
 
-//AddHidden to form
+// AddHidden to form
 func (f *Form) AddHidden(name string) *FormItem {
 	input := f.addInput(name, "", "")
 	input.Template = "admin_item_hidden"
@@ -126,7 +127,7 @@ func (f *Form) AddHidden(name string) *FormItem {
 	return input
 }
 
-//AddSelect to form
+// AddSelect to form
 func (f *Form) AddSelect(name, description string, values [][2]string) *FormItem {
 	input := f.addInput(name, description, "admin_item_select")
 	input.Data = values
@@ -139,7 +140,7 @@ func (f *Form) AddRadio(name, description string, values [][2]string) *FormItem 
 	return input
 }
 
-//AddDatePicker to form
+// AddDatePicker to form
 func (f *Form) AddDatePicker(name, description string) *FormItem {
 	input := f.addInput(name, description, "admin_item_date")
 	return input
@@ -156,7 +157,7 @@ func (f *Form) AddRelation(name, description string, relatedResourceID string) *
 	return input
 }
 
-//AddUUID to form
+// AddUUID to form
 func (f *FormItem) AddUUID() {
 	f.UUID = "id-" + randomString(5)
 }

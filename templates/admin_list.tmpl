@@ -34,7 +34,10 @@
         <span class="list_count"></span>
         <progress class="progress list_progress"></progress>
         <label class="list_header_showmore">
-          <button class="btn list_header_showmore_btn">Možnosti</button>
+          <button class="btn list_header_showmore_btn">
+            <img class="btn_icon" src="/admin/api/icons?file=glyphicons-basic-137-cogwheel.svg&color=444444">
+            <div class="btn_text">Možnosti</div>
+          </button>
         </label>
       </div>
     {{if true}}
@@ -43,7 +46,7 @@
     </div>
     {{end}}
     </div>
-  <div class="admin_table admin_list_table"></div>
+  <div class="admin_table list_table"></div>
 {{end}}
 
 {{define "admin_list_settings"}}
@@ -93,10 +96,9 @@
   <div class="filter_relations admin_table_filter_item admin_table_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}" data-related-resource="{{.RelatedResourceID}}">
     <input type="hidden" class="filter_relations_hidden">
     <div class="filter_relations_preview">
-      <div class="filter_relations_preview_close"></div>
       <div class="filter_relations_preview_image"></div>
       <div class="filter_relations_preview_name"></div>
-      <div class="filter_relations_clear"></div>
+      <img class="filter_relations_preview_close" src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=444444">
     </div>
     <div class="filter_relations_search">
       <input class="input input-filter filter_relations_search_input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
@@ -143,35 +145,49 @@
 
 {{define "admin_list_cells"}}
   {{range $item := .admin_list.Rows}}
-    <div data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="admin_table_row">
+    <div data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="list_row">
       {{if $item.AllowsMultipleActions}}
-        <div class="admin_table_cell-multiple preventredirect" data-id="{{$item.ID}}">
-          <div class="admin_table_cell_multiple_pseudocheckbox"></div>
+        <div class="list_row_multiple preventredirect" data-id="{{$item.ID}}">
+          <div class="list_cell_multiple_pseudocheckbox"></div>
         </div>
       {{end}}
       {{range $cell := $item.Items}}
-        <div class="admin_table_cell">
+        <div class="list_cell" title="{{$cell.Value.Name}}">
           {{tmpl $cell.Template $cell.Value}}
         </div>
       {{end}}
-      <div class="admin_table_row_lastcell">
+      <div class="list_row_lastcell">
         <div class="btngroup admin_list_buttons">
           {{range $action := $item.Actions.VisibleButtons}}
-            <a href="{{$action.URL}}" class="btn btn-small"
+            <a href="{{$action.URL}}" class="btn"
               {{range $k, $v := $action.Params}} {{HTMLAttr $k}}="{{$v}}"{{end}}
-            >{{$action.Name}}</a>
+            >
+              {{if $action.Icon}}
+                <img class="btn_icon" src="/admin/api/icons?file={{$action.Icon}}&color=444444">
+              {{end}}
+              {{if $action.Name}}
+                <div class="btn_text">{{$action.Name}}</div>
+              {{end}}
+            </a>
           {{end}}
           {{if $item.Actions.ShowOrderButton}}
-            <a href="" class="btn btn-small admin-action-order preventredirect">☰</a>
+            <a href="#list-order-clicked" class="btn admin-action-order preventredirect">
+              <img class="btn_icon" src="/admin/api/icons?file=glyphicons-basic-600-menu.svg&color=444444">
+            </a>
           {{end}}
           {{if $item.Actions.MenuButtons}}
-            <div class="btn preventredirect btn-small btn-more">
-              <div class="preventredirect">▼</div>
-              <div class="btn-more_content preventredirect">
+            <div class="btn preventredirect">
+              <div class="btn_more preventredirect">
                 {{range $action := $item.Actions.MenuButtons}}
-                  <a href="{{$action.URL}}" class="btn btn-small btn-more_content_item">{{$action.Name}}</a>
+                  <a href="{{$action.URL}}" class="btn_more_item preventredirect">
+                    {{if $action.Icon}}
+                      <img src="/admin/api/icons?file={{$action.Icon}}&color=444444" class="btn_more_item_icon">
+                    {{end}}
+                    <div class="btn_more_item_text">{{$action.Name}}</div>
+                  </a>
                 {{end}}
               </div>
+              <img class="btn_icon preventredirect" src="/admin/api/icons?file=glyphicons-basic-497-more.svg&color=444444">
             </div>
           {{end}}
         </div>
@@ -185,11 +201,7 @@
       </div>
     </div>
   {{end}}
-  <div>
-    <div colspan="{{.admin_list.Colspan}}" class="pagination" data-total="{{.admin_list.Pagination.TotalPages}}" data-selected="{{.admin_list.Pagination.SelectedPage}}">
-    </div>
-  </div>
-</div>
+  <div class="pagination" data-total="{{.admin_list.Pagination.TotalPages}}" data-selected="{{.admin_list.Pagination.SelectedPage}}"></div>
 {{end}}
 
 {{define "admin_list_multiple_actions"}}

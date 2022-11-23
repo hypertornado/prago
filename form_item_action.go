@@ -51,6 +51,16 @@ func (actionData *formItemActionData) Permission(permission Permission) *formIte
 	return actionData
 }
 
+func (action *FormItemAction[T]) Icon(icon string) *FormItemAction[T] {
+	action.data.Icon(icon)
+	return action
+}
+
+func (actionData *formItemActionData) Icon(icon string) *formItemActionData {
+	actionData.formAction.Icon(icon)
+	return actionData
+}
+
 func (action *FormItemAction[T]) Name(name func(string) string) *FormItemAction[T] {
 	action.data.Name(name)
 	return action
