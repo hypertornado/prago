@@ -8,8 +8,8 @@ class List {
   adminPrefix: string;
   typeName: string;
 
+  list: HTMLDivElement;
   table: HTMLElement;
-  el: HTMLDivElement;
   exportButton: HTMLAnchorElement;
   changed: boolean;
   changedTimestamp: number;
@@ -33,10 +33,12 @@ class List {
 
   multiple: ListMultiple;
 
-  constructor(el: HTMLDivElement) {
-    this.el = el;
+  loadStats: Boolean;
 
-    var dateFilterInputs = el.querySelectorAll<HTMLInputElement>(
+  constructor(list: HTMLDivElement) {
+    this.list = list;
+
+    var dateFilterInputs = list.querySelectorAll<HTMLInputElement>(
       ".admin_filter_date_input"
     );
     dateFilterInputs.forEach((el) => {
@@ -53,22 +55,22 @@ class List {
       this.page = 1;
     }
 
-    this.typeName = el.getAttribute("data-type");
+    this.typeName = list.getAttribute("data-type");
     if (!this.typeName) {
       return;
     }
 
-    this.progress = <HTMLProgressElement>el.querySelector(".list_progress");
+    this.progress = <HTMLProgressElement>list.querySelector(".list_progress");
 
-    this.table = <HTMLElement>el.querySelector(".list_table");
+    this.table = <HTMLElement>list.querySelector(".list_table");
     this.table.textContent = "";
 
     this.bindFilter(urlParams);
 
     this.adminPrefix = document.body.getAttribute("data-admin-prefix");
 
-    this.defaultOrderColumn = el.getAttribute("data-order-column");
-    if (el.getAttribute("data-order-desc") == "true") {
+    this.defaultOrderColumn = list.getAttribute("data-order-column");
+    if (list.getAttribute("data-order-desc") == "true") {
       this.defaultOrderDesc = true;
     } else {
       this.defaultOrderDesc = false;
@@ -86,7 +88,7 @@ class List {
       this.orderDesc = false;
     }
 
-    this.defaultVisibleColumnsStr = el.getAttribute("data-visible-columns");
+    this.defaultVisibleColumnsStr = list.getAttribute("data-visible-columns");
     var visibleColumnsStr = this.defaultVisibleColumnsStr;
     if (urlParams.get("_columns")) {
       visibleColumnsStr = urlParams.get("_columns");
@@ -98,27 +100,18 @@ class List {
       visibleColumnsMap[visibleColumnsArr[i]] = true;
     }
 
-    this.itemsPerPage = parseInt(el.getAttribute("data-items-per-page"));
+    this.itemsPerPage = parseInt(list.getAttribute("data-items-per-page"));
     this.paginationSelect = <HTMLSelectElement>(
       document.querySelector(".admin_tablesettings_pages")
     );
     this.paginationSelect.addEventListener("change", this.load.bind(this));
 
-    this.statsCheckbox = document.querySelector(".admin_tablesettings_stats");
-    this.statsCheckbox.addEventListener("change", () => {
-      this.filterChanged();
-    });
-
-    this.statsCheckboxSelectCount = document.querySelector(
-      ".admin_tablesettings_stats_limit"
-    );
+    this.statsCheckboxSelectCount = document.querySelector(".list_stats_limit");
     this.statsCheckboxSelectCount.addEventListener("change", () => {
       this.filterChanged();
     });
 
-    this.statsContainer = document.querySelector(
-      ".admin_tablesettings_stats_container"
-    );
+    this.statsContainer = document.querySelector(".list_stats_container");
 
     this.multiple = new ListMultiple(this);
 
@@ -129,9 +122,11 @@ class List {
   }
 
   copyColumnWidths() {
-    let headerItems = this.el.querySelectorAll(".list_header > :not(.hidden)");
+    let headerItems = this.list.querySelectorAll(
+      ".list_header > :not(.hidden)"
+    );
 
-    let tableRows = this.el.querySelectorAll(".list_row");
+    let tableRows = this.list.querySelectorAll(".list_row");
 
     let totalWidth = 0;
 
@@ -191,7 +186,8 @@ class List {
       document.location.pathname + encoded
     );
 
-    if (this.statsCheckbox.checked) {
+    if (this.loadStats) {
+      this.statsContainer.innerHTML = '<div class="progress"></div>';
       params["_stats"] = "true";
       params["_statslimit"] = this.statsCheckboxSelectCount.value;
     }
@@ -224,7 +220,7 @@ class List {
         this.table.innerHTML = response.Content;
         var countStr = response.CountStr;
 
-        this.el.querySelector(".list_count").textContent = countStr;
+        this.list.querySelector(".list_count").textContent = countStr;
         this.statsContainer.innerHTML = response.StatsStr;
         bindOrder();
         this.bindPagination();
@@ -244,16 +240,16 @@ class List {
 
   colorActiveFilterItems() {
     let itemsToColor = this.getFilterData();
-    var filterItems: NodeListOf<HTMLDivElement> = this.el.querySelectorAll(
+    var filterItems: NodeListOf<HTMLDivElement> = this.list.querySelectorAll(
       ".list_header_item_filter"
     );
     for (var i = 0; i < filterItems.length; i++) {
       var item = filterItems[i];
       let name = item.getAttribute("data-name");
       if (itemsToColor[name]) {
-        item.classList.add("admin_list_filteritem-colored");
+        item.classList.add("list_filteritem-colored");
       } else {
-        item.classList.remove("admin_list_filteritem-colored");
+        item.classList.remove("list_filteritem-colored");
       }
     }
   }
@@ -268,7 +264,7 @@ class List {
   }
 
   bindPagination() {
-    var paginationEl = this.el.querySelector(".pagination");
+    var paginationEl = this.list.querySelector(".pagination");
     var totalPages = parseInt(paginationEl.getAttribute("data-total"));
     var selectedPage = parseInt(paginationEl.getAttribute("data-selected"));
     for (var i = 1; i <= totalPages; i++) {
@@ -287,7 +283,7 @@ class List {
   }
 
   bindClick() {
-    var rows = this.el.querySelectorAll(".list_row");
+    var rows = this.list.querySelectorAll(".list_row");
     for (var i = 0; i < rows.length; i++) {
       var row = <HTMLTableRowElement>rows[i];
       var id = row.getAttribute("data-id");
@@ -306,24 +302,12 @@ class List {
         }
         window.location.href = url;
       });
-
-      /*
-      var buttons = row.querySelector(".admin_list_buttons");
-      buttons.addEventListener("click", (e) => {
-        var url = (<HTMLDivElement>e.target).getAttribute("href");
-        if (url != "") {
-          window.location.href = url;
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }
-      });*/
     }
   }
 
   bindOrder() {
     this.renderOrder();
-    var headers = this.el.querySelectorAll(".list_header_item_name-canorder");
+    var headers = this.list.querySelectorAll(".list_header_item_name-canorder");
     for (var i = 0; i < headers.length; i++) {
       var header = <HTMLAnchorElement>headers[i];
       header.addEventListener("click", (e) => {
@@ -348,7 +332,7 @@ class List {
   }
 
   bindResizer() {
-    var resizers = this.el.querySelectorAll(".list_header_item_resizer");
+    var resizers = this.list.querySelectorAll(".list_header_item_resizer");
 
     for (var i = 0; i < resizers.length; i++) {
       var resizer = <HTMLAnchorElement>resizers[i];
@@ -416,7 +400,7 @@ class List {
   }
 
   bindInitialHeaderWidths() {
-    let headerItems = this.el.querySelectorAll(".list_header_item");
+    let headerItems = this.list.querySelectorAll(".list_header_item");
     for (var i = 0; i < headerItems.length; i++) {
       var itemEl = <HTMLDivElement>headerItems[i];
 
@@ -454,7 +438,7 @@ class List {
   }
 
   renderOrder() {
-    var headers = this.el.querySelectorAll(".list_header_item_name-canorder");
+    var headers = this.list.querySelectorAll(".list_header_item_name-canorder");
     for (var i = 0; i < headers.length; i++) {
       var header = <HTMLAnchorElement>headers[i];
       header.classList.remove("ordered");
@@ -471,7 +455,7 @@ class List {
 
   getFilterData(): any {
     var ret: any = {};
-    var items = this.el.querySelectorAll(".admin_table_filter_item");
+    var items = this.list.querySelectorAll(".admin_table_filter_item");
     for (var i = 0; i < items.length; i++) {
       var item = <HTMLInputElement>items[i];
       var typ = item.getAttribute("data-typ");
@@ -489,7 +473,7 @@ class List {
   }
 
   bindFilter(params: any) {
-    var filterFields = this.el.querySelectorAll(".list_header_item_filter");
+    var filterFields = this.list.querySelectorAll(".list_header_item_filter");
     for (var i = 0; i < filterFields.length; i++) {
       var field: HTMLDivElement = <HTMLDivElement>filterFields[i];
       var fieldName = field.getAttribute("data-name");

@@ -5510,11 +5510,11 @@ pre {
   white-space: nowrap;
 }
 .list_table {
+  min-width: 100%;
   min-width: auto;
   margin: 0px;
   table-layout: fixed;
   width: auto;
-  background: transparent;
 }
 .list_row {
   display: flex;
@@ -5595,18 +5595,19 @@ pre {
 .list_header_item_name-canorder:active {
   background-color: rgba(64, 120, 192, 0.1);
 }
-.admin_list_filteritem-colored * {
+.list_filteritem-colored * {
   border-color: #4078c0 !important;
 }
 .admin_table_loading {
   opacity: 0.4;
 }
-.admin_list_buttons {
+.list_buttons {
   margin-left: 5px;
   opacity: 0;
 }
-.admin_list_multiple_actions {
+.list_multiple_actions {
   position: fixed;
+  z-index: 1000;
   bottom: 0px;
   right: 0px;
   padding: 10px;
@@ -5616,14 +5617,14 @@ pre {
   justify-content: center;
 }
 @media (max-width: 1000px) {
-  .admin_list_multiple_actions {
+  .list_multiple_actions {
     left: 0px;
   }
 }
-.admin_list_multiple_actions-visible {
+.list_multiple_actions-visible {
   display: flex;
 }
-.admin_list_multiple_actions_content {
+.list_multiple_actions_content {
   border: 1px solid #eee;
   border-radius: 5px;
   background-color: white;
@@ -5634,10 +5635,10 @@ pre {
   display: flex;
   align-items: center;
 }
-.admin_list_multiple_actions_description {
+.list_multiple_actions_description {
   margin: 0px 10px;
 }
-.admin_list_multiple_action {
+.list_multiple_action {
   margin: 0px 5px;
 }
 @media (hover: hover) {
@@ -5647,7 +5648,7 @@ pre {
   .list_row:active .list_cell {
     background-color: rgba(64, 120, 192, 0.1) !important;
   }
-  .list_row:hover .admin_list_buttons {
+  .list_row:hover .list_buttons {
     opacity: 1;
   }
 }
@@ -5943,7 +5944,7 @@ input.admin_filter_layout_date_to {
   border-top-left-radius: 3px !important;
   margin-left: 1px;
 }
-.admin_list_message {
+.list_message {
   padding: 20px 5px;
   text-align: center;
   font-size: 1.3rem;
@@ -6077,15 +6078,6 @@ input.admin_filter_layout_date_to {
 .admin_stats_pie canvas {
   margin: 0 auto;
 }
-.admin_list_settingsrow {
-  display: none;
-}
-.admin_list_settingsrow-visible {
-  display: table-row;
-}
-.admin_list_settingsrow_column {
-  background: rgba(64, 120, 192, 0.1);
-}
 .admin_tablesettings h3 {
   font-size: 1rem;
   line-height: 1.3em;
@@ -6117,7 +6109,7 @@ input.admin_filter_layout_date_to {
   display: block;
   margin: 5px 0px;
 }
-.admin_tablesettings_stats_limit {
+.list_stats_limit {
   padding: 1px 3px;
   display: block;
   margin: 5px 0px;
@@ -6265,15 +6257,7 @@ input.admin_filter_layout_date_to {
   padding: 5px;
   flex-shrink: 0;
 }
-.admin_list_showmore {
-  margin-right: 5px;
-  text-align: center;
-  padding: 0px 5px;
-}
-.list_header_showmore {
-  font-size: 0.9rem;
-  line-height: 1.3em;
-  color: #888;
+.list_header_actions {
   display: block;
   position: absolute;
   bottom: 4px;
@@ -7261,10 +7245,6 @@ a.admin_home_item {
     line-height: 1.3em;
   }
 }
-.list_stats {
-  background: #fafafa;
-  box-shadow: inset 0px 0px 10px #ddd;
-}
 .admin_stats {
   padding: 5px 0px;
 }
@@ -7273,12 +7253,15 @@ a.admin_home_item {
   flex-wrap: wrap;
   align-items: flex-start;
   align-items: stretch;
+  justify-content: space-between;
 }
 .admin_stats_section {
   background: white;
   margin: 0px 10px 10px 0px;
   border: 1px solid #eee;
+  box-shadow: 0px 1px 10px 1px rgba(0, 0, 0, 0.1);
   padding: 3px 0px;
+  border-radius: 10px;
 }
 .admin_stats_section_name {
   font-weight: 500;
@@ -7317,7 +7300,7 @@ a.admin_home_item {
   background-color: #eee;
   height: 7px;
   flex-grow: 10;
-  min-width: 100px;
+  min-width: 80px;
   border-radius: 3px;
   display: flex;
   align-items: stretch;

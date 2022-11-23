@@ -1,36 +1,48 @@
 class ListSettings {
   list: List;
 
-  settingsRow: HTMLTableRowElement;
-  settingsRowColumn: HTMLTableElement;
   settingsEl: HTMLDivElement;
-  settingsCheckbox: HTMLInputElement;
-
   settingsButton: HTMLButtonElement;
   settingsPopup: ContentPopup;
+
+  statsEl: HTMLDivElement;
+  statsButton: HTMLButtonElement;
+  statsPopup: ContentPopup;
+
+  exportEl: HTMLDivElement;
+  exportButton: HTMLButtonElement;
+  exportPopup: ContentPopup;
 
   constructor(list: List) {
     this.list = list;
 
-    this.settingsRow = document.querySelector(".admin_list_settingsrow");
-    this.settingsRowColumn = document.querySelector(
-      ".admin_list_settingsrow_column"
-    );
     this.settingsEl = document.querySelector(".admin_tablesettings");
-
     this.settingsPopup = new ContentPopup("Možnosti", this.settingsEl);
-    this.settingsButton = document.querySelector(".list_header_showmore_btn");
+    this.settingsButton = document.querySelector(
+      ".list_header_action-settings"
+    );
     this.settingsButton.addEventListener("click", () => {
       this.settingsPopup.show();
     });
-  }
 
-  settingsCheckboxChange() {
-    if (this.settingsCheckbox.checked) {
-      this.settingsRow.classList.add("admin_list_settingsrow-visible");
-    } else {
-      this.settingsRow.classList.remove("admin_list_settingsrow-visible");
-    }
+    this.statsEl = document.querySelector(".list_stats");
+    this.statsPopup = new ContentPopup("Statistiky", this.statsEl);
+    this.statsPopup.setHiddenHandler(() => {
+      this.list.loadStats = false;
+    });
+    this.statsButton = document.querySelector(".list_header_action-stats");
+    this.statsButton.addEventListener("click", () => {
+      this.list.loadStats = true;
+      this.list.load();
+      this.statsPopup.show();
+    });
+
+    this.exportEl = document.querySelector(".list_export");
+    this.exportPopup = new ContentPopup("Export", this.exportEl);
+    this.exportButton = document.querySelector(".list_header_action-export");
+    this.exportButton.addEventListener("click", () => {
+      this.exportPopup.show();
+    });
   }
 
   bindOptions(visibleColumnsMap: any) {
@@ -74,11 +86,6 @@ class ListSettings {
         filters[i].classList.add("hidden");
       }
     }
-
-    this.settingsRowColumn.setAttribute(
-      "colspan",
-      Object.keys(columns).length + ""
-    );
 
     this.list.load();
   }

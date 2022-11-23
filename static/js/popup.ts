@@ -199,6 +199,13 @@ class ContentPopup extends Popup {
     this.unpresent();
   }
 
+  setHiddenHandler(handler: any) {
+    this.cancelAction = () => {
+      handler();
+      this.remove();
+    };
+  }
+
   setContent(content: HTMLElement) {
     super.setContent(content);
   }

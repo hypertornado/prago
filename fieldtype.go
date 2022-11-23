@@ -21,7 +21,6 @@ type fieldType struct {
 	formStringer   func(interface{}) string
 
 	cellDataSource func(*user, *Field, interface{}) cellViewData
-	//listCellTemplate   string
 
 	filterLayoutTemplate   string
 	filterLayoutDataSource func(*Field, *user) interface{}

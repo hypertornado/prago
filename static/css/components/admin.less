@@ -16,17 +16,17 @@
 }
 
 .list_table {
+  min-width: 100%;
+
   min-width: auto;
   width: auto;
   margin: 0px;
   table-layout: fixed;
   width: auto;
-  background: transparent;
 }
 
 .list_row {
   display: flex;
-  //border-bottom: 1px solid #eee;
 }
 
 .list_cell {
@@ -123,27 +123,22 @@
   background-color: @baseColorBackground;
 }
 
-.admin_list_filteritem-colored {
-  //background-color: @baseColorBackground;
-}
-
-.admin_list_filteritem-colored * {
+.list_filteritem-colored * {
   border-color: @baseColor !important;
-  //background: @baseColor !important;
-  //color: white !important;
 }
 
 .admin_table_loading {
   opacity: 0.4;
 }
 
-.admin_list_buttons {
+.list_buttons {
   margin-left: 5px;
   opacity: 0;
 }
 
-.admin_list_multiple_actions {
+.list_multiple_actions {
   position: fixed;
+  z-index: 1000;
   bottom: 0px;
   right: 0px;
   padding: 10px;
@@ -154,27 +149,27 @@
 }
 
 @media (max-width: 1000px) {
-  .admin_list_multiple_actions {
+  .list_multiple_actions {
     left: 0px;
   }
 }
 
-.admin_list_multiple_actions-visible {
+.list_multiple_actions-visible {
   display: flex;
 }
 
-.admin_list_multiple_actions_content {
+.list_multiple_actions_content {
   .box;
   pointer-events: initial;
   display: flex;
   align-items: center;
 }
 
-.admin_list_multiple_actions_description {
+.list_multiple_actions_description {
   margin: 0px 10px;
 }
 
-.admin_list_multiple_action {
+.list_multiple_action {
   margin: 0px 5px;
 }
 
@@ -187,7 +182,7 @@
     background-color: @baseColorBackground !important;
   }
 
-  .list_row:hover .admin_list_buttons {
+  .list_row:hover .list_buttons {
     opacity: 1;
   }
 }
@@ -536,7 +531,7 @@ input.admin_filter_layout_date_to {
   margin-left: 1px;
 }
 
-.admin_list_message {
+.list_message {
   padding: 20px 5px;
   text-align: center;
   font-size: 1.3rem;
@@ -691,18 +686,6 @@ input.admin_filter_layout_date_to {
   margin: 0 auto;
 }
 
-.admin_list_settingsrow {
-  display: none;
-}
-
-.admin_list_settingsrow-visible {
-  display: table-row;
-}
-
-.admin_list_settingsrow_column {
-  background: @baseColorBackground;
-}
-
 .admin_tablesettings h3 {
   font-size: 1rem;
   line-height: 1.3em;
@@ -740,7 +723,7 @@ input.admin_filter_layout_date_to {
   margin: 5px 0px;
 }
 
-.admin_tablesettings_stats_limit {
+.list_stats_limit {
   padding: 1px 3px;
   display: block;
   margin: 5px 0px;
@@ -917,16 +900,7 @@ input.admin_filter_layout_date_to {
   flex-shrink: 0;
 }
 
-.admin_list_showmore {
-  margin-right: 5px;
-  text-align: center;
-  padding: 0px 5px;
-}
-
-.list_header_showmore {
-  font-size: 0.9rem;
-  line-height: 1.3em;
-  color: @gray;
+.list_header_actions {
   display: block;
   position: absolute;
   bottom: 4px;
@@ -946,12 +920,10 @@ input.admin_filter_layout_date_to {
 .help_icons {
   display: flex;
   flex-wrap: wrap;
-  //flex-direction: column;
 }
 
 .help_icon {
   display: flex;
-  //flex-direction: column;
   align-items: center;
   border: 1px solid #eee;
   width: 150px;
@@ -977,7 +949,6 @@ input.admin_filter_layout_date_to {
   font-size: 0.8rem;
   line-height: 1.2em;
   flex-grow: 10;
-  //border: 1px solid red;
   text-align: center;
   vertical-align: middle;
   display: flex;

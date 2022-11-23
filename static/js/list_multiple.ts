@@ -12,14 +12,14 @@ class ListMultiple {
   lastCheckboxIndexClicked: number;
 
   hasMultipleActions(): Boolean {
-    if (this.list.el.classList.contains("list-hasmultipleactions")) {
+    if (this.list.list.classList.contains("list-hasmultipleactions")) {
       return true;
     }
     return false;
   }
 
   bindMultipleActions() {
-    var actions = this.list.el.querySelectorAll(".admin_list_multiple_action");
+    var actions = this.list.list.querySelectorAll(".list_multiple_action");
     for (var i = 0; i < actions.length; i++) {
       actions[i].addEventListener(
         "click",
@@ -233,18 +233,16 @@ class ListMultiple {
       }
     }
 
-    var multipleActionsPanel: HTMLDivElement = this.list.el.querySelector(
-      ".admin_list_multiple_actions"
+    var multipleActionsPanel: HTMLDivElement = this.list.list.querySelector(
+      ".list_multiple_actions"
     );
     if (checkedCount > 0) {
-      multipleActionsPanel.classList.add("admin_list_multiple_actions-visible");
+      multipleActionsPanel.classList.add("list_multiple_actions-visible");
     } else {
-      multipleActionsPanel.classList.remove(
-        "admin_list_multiple_actions-visible"
-      );
+      multipleActionsPanel.classList.remove("list_multiple_actions-visible");
     }
-    this.list.el.querySelector(
-      ".admin_list_multiple_actions_description"
+    this.list.list.querySelector(
+      ".list_multiple_actions_description"
     ).textContent = `Vybráno ${checkedCount} položek`;
   }
 

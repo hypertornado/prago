@@ -434,12 +434,12 @@ class ListFilterDate {
     }
 }
 class List {
-    constructor(el) {
+    constructor(list) {
         this.minCellWidth = 50;
         this.normalCellWidth = 100;
         this.maxCellWidth = 500;
-        this.el = el;
-        var dateFilterInputs = el.querySelectorAll(".admin_filter_date_input");
+        this.list = list;
+        var dateFilterInputs = list.querySelectorAll(".admin_filter_date_input");
         dateFilterInputs.forEach((el) => {
             new DatePicker(el);
         });
@@ -450,17 +450,17 @@ class List {
         if (!this.page) {
             this.page = 1;
         }
-        this.typeName = el.getAttribute("data-type");
+        this.typeName = list.getAttribute("data-type");
         if (!this.typeName) {
             return;
         }
-        this.progress = el.querySelector(".list_progress");
-        this.table = el.querySelector(".list_table");
+        this.progress = list.querySelector(".list_progress");
+        this.table = list.querySelector(".list_table");
         this.table.textContent = "";
         this.bindFilter(urlParams);
         this.adminPrefix = document.body.getAttribute("data-admin-prefix");
-        this.defaultOrderColumn = el.getAttribute("data-order-column");
-        if (el.getAttribute("data-order-desc") == "true") {
+        this.defaultOrderColumn = list.getAttribute("data-order-column");
+        if (list.getAttribute("data-order-desc") == "true") {
             this.defaultOrderDesc = true;
         }
         else {
@@ -477,7 +477,7 @@ class List {
         if (urlParams.get("_desc") == "false") {
             this.orderDesc = false;
         }
-        this.defaultVisibleColumnsStr = el.getAttribute("data-visible-columns");
+        this.defaultVisibleColumnsStr = list.getAttribute("data-visible-columns");
         var visibleColumnsStr = this.defaultVisibleColumnsStr;
         if (urlParams.get("_columns")) {
             visibleColumnsStr = urlParams.get("_columns");
@@ -487,18 +487,14 @@ class List {
         for (var i = 0; i < visibleColumnsArr.length; i++) {
             visibleColumnsMap[visibleColumnsArr[i]] = true;
         }
-        this.itemsPerPage = parseInt(el.getAttribute("data-items-per-page"));
+        this.itemsPerPage = parseInt(list.getAttribute("data-items-per-page"));
         this.paginationSelect = (document.querySelector(".admin_tablesettings_pages"));
         this.paginationSelect.addEventListener("change", this.load.bind(this));
-        this.statsCheckbox = document.querySelector(".admin_tablesettings_stats");
-        this.statsCheckbox.addEventListener("change", () => {
-            this.filterChanged();
-        });
-        this.statsCheckboxSelectCount = document.querySelector(".admin_tablesettings_stats_limit");
+        this.statsCheckboxSelectCount = document.querySelector(".list_stats_limit");
         this.statsCheckboxSelectCount.addEventListener("change", () => {
             this.filterChanged();
         });
-        this.statsContainer = document.querySelector(".admin_tablesettings_stats_container");
+        this.statsContainer = document.querySelector(".list_stats_container");
         this.multiple = new ListMultiple(this);
         this.settings.bindOptions(visibleColumnsMap);
         this.bindOrder();
@@ -506,8 +502,8 @@ class List {
         this.bindResizer();
     }
     copyColumnWidths() {
-        let headerItems = this.el.querySelectorAll(".list_header > :not(.hidden)");
-        let tableRows = this.el.querySelectorAll(".list_row");
+        let headerItems = this.list.querySelectorAll(".list_header > :not(.hidden)");
+        let tableRows = this.list.querySelectorAll(".list_row");
         let totalWidth = 0;
         for (let i = 0; i < tableRows.length; i++) {
             let rowItems = tableRows[i].children;
@@ -552,7 +548,8 @@ class List {
         }
         var encoded = encodeParams(params);
         window.history.replaceState(null, null, document.location.pathname + encoded);
-        if (this.statsCheckbox.checked) {
+        if (this.loadStats) {
+            this.statsContainer.innerHTML = '<div class="progress"></div>';
             params["_stats"] = "true";
             params["_statslimit"] = this.statsCheckboxSelectCount.value;
         }
@@ -573,7 +570,7 @@ class List {
                 var response = JSON.parse(request.response);
                 this.table.innerHTML = response.Content;
                 var countStr = response.CountStr;
-                this.el.querySelector(".list_count").textContent = countStr;
+                this.list.querySelector(".list_count").textContent = countStr;
                 this.statsContainer.innerHTML = response.StatsStr;
                 bindOrder();
                 this.bindPagination();
@@ -593,15 +590,15 @@ class List {
     }
     colorActiveFilterItems() {
         let itemsToColor = this.getFilterData();
-        var filterItems = this.el.querySelectorAll(".list_header_item_filter");
+        var filterItems = this.list.querySelectorAll(".list_header_item_filter");
         for (var i = 0; i < filterItems.length; i++) {
             var item = filterItems[i];
             let name = item.getAttribute("data-name");
             if (itemsToColor[name]) {
-                item.classList.add("admin_list_filteritem-colored");
+                item.classList.add("list_filteritem-colored");
             }
             else {
-                item.classList.remove("admin_list_filteritem-colored");
+                item.classList.remove("list_filteritem-colored");
             }
         }
     }
@@ -614,7 +611,7 @@ class List {
         return false;
     }
     bindPagination() {
-        var paginationEl = this.el.querySelector(".pagination");
+        var paginationEl = this.list.querySelector(".pagination");
         var totalPages = parseInt(paginationEl.getAttribute("data-total"));
         var selectedPage = parseInt(paginationEl.getAttribute("data-selected"));
         for (var i = 1; i <= totalPages; i++) {
@@ -633,7 +630,7 @@ class List {
         }
     }
     bindClick() {
-        var rows = this.el.querySelectorAll(".list_row");
+        var rows = this.list.querySelectorAll(".list_row");
         for (var i = 0; i < rows.length; i++) {
             var row = rows[i];
             var id = row.getAttribute("data-id");
@@ -655,7 +652,7 @@ class List {
     }
     bindOrder() {
         this.renderOrder();
-        var headers = this.el.querySelectorAll(".list_header_item_name-canorder");
+        var headers = this.list.querySelectorAll(".list_header_item_name-canorder");
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
             header.addEventListener("click", (e) => {
@@ -681,7 +678,7 @@ class List {
         }
     }
     bindResizer() {
-        var resizers = this.el.querySelectorAll(".list_header_item_resizer");
+        var resizers = this.list.querySelectorAll(".list_header_item_resizer");
         for (var i = 0; i < resizers.length; i++) {
             var resizer = resizers[i];
             let parentEl = resizer.parentElement;
@@ -740,7 +737,7 @@ class List {
         cell.setAttribute("style", "width: " + width + "px;");
     }
     bindInitialHeaderWidths() {
-        let headerItems = this.el.querySelectorAll(".list_header_item");
+        let headerItems = this.list.querySelectorAll(".list_header_item");
         for (var i = 0; i < headerItems.length; i++) {
             var itemEl = headerItems[i];
             let width = parseInt(itemEl.getAttribute("data-natural-width"));
@@ -770,7 +767,7 @@ class List {
         window.localStorage.removeItem(this.webStorageWidthName(cell));
     }
     renderOrder() {
-        var headers = this.el.querySelectorAll(".list_header_item_name-canorder");
+        var headers = this.list.querySelectorAll(".list_header_item_name-canorder");
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
             header.classList.remove("ordered");
@@ -786,7 +783,7 @@ class List {
     }
     getFilterData() {
         var ret = {};
-        var items = this.el.querySelectorAll(".admin_table_filter_item");
+        var items = this.list.querySelectorAll(".admin_table_filter_item");
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
             var typ = item.getAttribute("data-typ");
@@ -804,7 +801,7 @@ class List {
         return ret;
     }
     bindFilter(params) {
-        var filterFields = this.el.querySelectorAll(".list_header_item_filter");
+        var filterFields = this.list.querySelectorAll(".list_header_item_filter");
         for (var i = 0; i < filterFields.length; i++) {
             var field = filterFields[i];
             var fieldName = field.getAttribute("data-name");
@@ -872,22 +869,29 @@ class List {
 class ListSettings {
     constructor(list) {
         this.list = list;
-        this.settingsRow = document.querySelector(".admin_list_settingsrow");
-        this.settingsRowColumn = document.querySelector(".admin_list_settingsrow_column");
         this.settingsEl = document.querySelector(".admin_tablesettings");
         this.settingsPopup = new ContentPopup("Možnosti", this.settingsEl);
-        this.settingsButton = document.querySelector(".list_header_showmore_btn");
+        this.settingsButton = document.querySelector(".list_header_action-settings");
         this.settingsButton.addEventListener("click", () => {
             this.settingsPopup.show();
         });
-    }
-    settingsCheckboxChange() {
-        if (this.settingsCheckbox.checked) {
-            this.settingsRow.classList.add("admin_list_settingsrow-visible");
-        }
-        else {
-            this.settingsRow.classList.remove("admin_list_settingsrow-visible");
-        }
+        this.statsEl = document.querySelector(".list_stats");
+        this.statsPopup = new ContentPopup("Statistiky", this.statsEl);
+        this.statsPopup.setHiddenHandler(() => {
+            this.list.loadStats = false;
+        });
+        this.statsButton = document.querySelector(".list_header_action-stats");
+        this.statsButton.addEventListener("click", () => {
+            this.list.loadStats = true;
+            this.list.load();
+            this.statsPopup.show();
+        });
+        this.exportEl = document.querySelector(".list_export");
+        this.exportPopup = new ContentPopup("Export", this.exportEl);
+        this.exportButton = document.querySelector(".list_header_action-export");
+        this.exportButton.addEventListener("click", () => {
+            this.exportPopup.show();
+        });
     }
     bindOptions(visibleColumnsMap) {
         var columns = document.querySelectorAll(".admin_tablesettings_column");
@@ -924,7 +928,6 @@ class ListSettings {
                 filters[i].classList.add("hidden");
             }
         }
-        this.settingsRowColumn.setAttribute("colspan", Object.keys(columns).length + "");
         this.list.load();
     }
     getSelectedColumnsStr() {
@@ -952,13 +955,13 @@ class ListMultiple {
         }
     }
     hasMultipleActions() {
-        if (this.list.el.classList.contains("list-hasmultipleactions")) {
+        if (this.list.list.classList.contains("list-hasmultipleactions")) {
             return true;
         }
         return false;
     }
     bindMultipleActions() {
-        var actions = this.list.el.querySelectorAll(".admin_list_multiple_action");
+        var actions = this.list.list.querySelectorAll(".list_multiple_action");
         for (var i = 0; i < actions.length; i++) {
             actions[i].addEventListener("click", this.multipleActionSelected.bind(this));
         }
@@ -1134,14 +1137,14 @@ class ListMultiple {
                 checkedCount++;
             }
         }
-        var multipleActionsPanel = this.list.el.querySelector(".admin_list_multiple_actions");
+        var multipleActionsPanel = this.list.list.querySelector(".list_multiple_actions");
         if (checkedCount > 0) {
-            multipleActionsPanel.classList.add("admin_list_multiple_actions-visible");
+            multipleActionsPanel.classList.add("list_multiple_actions-visible");
         }
         else {
-            multipleActionsPanel.classList.remove("admin_list_multiple_actions-visible");
+            multipleActionsPanel.classList.remove("list_multiple_actions-visible");
         }
-        this.list.el.querySelector(".admin_list_multiple_actions_description").textContent = `Vybráno ${checkedCount} položek`;
+        this.list.list.querySelector(".list_multiple_actions_description").textContent = `Vybráno ${checkedCount} položek`;
     }
     multipleUncheckAll() {
         this.lastCheckboxIndexClicked = -1;
@@ -2550,6 +2553,12 @@ class ContentPopup extends Popup {
     }
     hide() {
         this.unpresent();
+    }
+    setHiddenHandler(handler) {
+        this.cancelAction = () => {
+            handler();
+            this.remove();
+        };
     }
     setContent(content) {
         super.setContent(content);
