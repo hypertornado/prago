@@ -1,15 +1,18 @@
 class MainMenu {
-  leftEl: HTMLDivElement;
+  rootEl: HTMLDivElement;
+  rootLeft: HTMLDivElement;
   menuEl: HTMLDivElement;
 
   search: SearchForm;
 
-  constructor(leftEl: HTMLDivElement) {
-    this.leftEl = leftEl;
-    this.menuEl = document.querySelector(".admin_mobile_hamburger");
+  constructor() {
+    this.rootEl = document.querySelector(".root");
+    this.rootLeft = document.querySelector(".root_left");
+
+    this.menuEl = document.querySelector(".root_hamburger");
     this.menuEl.addEventListener("click", this.menuClick.bind(this));
 
-    var searchFormEl = leftEl.querySelector<HTMLFormElement>(
+    var searchFormEl = document.querySelector<HTMLFormElement>(
       ".admin_header_search"
     );
     if (searchFormEl) {
@@ -17,11 +20,11 @@ class MainMenu {
     }
 
     this.scrollTo(this.loadFromStorage());
-    this.leftEl.addEventListener("scroll", this.scrollHandler.bind(this));
+    this.rootLeft.addEventListener("scroll", this.scrollHandler.bind(this));
   }
 
   scrollHandler() {
-    this.saveToStorage(this.leftEl.scrollTop);
+    this.saveToStorage(this.rootLeft.scrollTop);
   }
 
   saveToStorage(position: number) {
@@ -29,8 +32,8 @@ class MainMenu {
   }
 
   menuClick() {
-    this.leftEl.classList.toggle("admin_layout_left-visible");
-    this.menuEl.classList.toggle("admin_mobile_hamburger-selected");
+    console.log("toggle");
+    this.rootEl.classList.toggle("root-visible");
   }
 
   loadFromStorage(): number {
@@ -42,6 +45,6 @@ class MainMenu {
   }
 
   scrollTo(position: number) {
-    this.leftEl.scrollTo(0, position);
+    this.rootLeft.scrollTo(0, position);
   }
 }

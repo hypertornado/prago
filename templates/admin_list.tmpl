@@ -52,16 +52,16 @@
 {{end}}
 
 {{define "admin_list_settings"}}
-  <div class="admin_tablesettings">
+  <div class="list_settings">
     <h3>{{message .Locale "admin_options_visible"}}</h3>
-    <div class="admin_tablesettings_labels">
+    <div class="list_settings_labels">
     {{range $item := .Header}}
-      <label class="admin_tablesettings_label"><input type="checkbox" class="admin_tablesettings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
+      <label class="list_settings_label"><input type="checkbox" class="list_settings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
     {{end}}
     </div>
 
     <h3>Počet položek na stránce</h3>
-    <select class="admin_tablesettings_pages input">
+    <select class="list_settings_pages input">
       {{range $item := .PaginationData}}
         <option value="{{$item.Value}}"{{if $item.Selected}} selected{{end}}>{{$item.Name}}</option>
       {{end}}
@@ -95,11 +95,11 @@
 {{end}}
 
 {{define "filter_layout_text"}}
-  <input class="input input-filter admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+  <input class="input list_filter_input list_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
 {{end}}
 
 {{define "filter_layout_relation"}}
-  <div class="filter_relations admin_table_filter_item admin_table_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}" data-related-resource="{{.RelatedResourceID}}">
+  <div class="filter_relations list_filter_item list_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}" data-related-resource="{{.RelatedResourceID}}">
     <input type="hidden" class="filter_relations_hidden">
     <div class="filter_relations_preview">
       <div class="filter_relations_preview_image"></div>
@@ -107,18 +107,18 @@
       <img class="filter_relations_preview_close" src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=444444">
     </div>
     <div class="filter_relations_search">
-      <input class="input input-filter filter_relations_search_input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <input class="input list_filter_input filter_relations_search_input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       <div class="filter_relations_suggestions"></div>
     </div>
   </div>
 {{end}}
 
 {{define "filter_layout_number"}}
-  <input class="input input-filter admin_table_filter_item" type="text" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+  <input class="input list_filter_input list_filter_item" type="text" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
 {{end}}
 
 {{define "filter_layout_boolean"}}
-  <select class="input input-filter admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+  <select class="input list_filter_input list_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <option value=""></option>
     <option value="true">{{index .FilterData 0}}</option>
     <option value="false">{{index .FilterData 1}}</option>
@@ -126,7 +126,7 @@
 {{end}}
 
 {{define "filter_layout_select"}}
-  <select class="input input-filter admin_table_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+  <select class="input list_filter_input list_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     {{range $item := .FilterData}}
       <option value="{{index $item 0}}">{{index $item 1}}</option>
     {{end}}
@@ -134,15 +134,15 @@
 {{end}}
 
 {{define "filter_layout_date"}}
-  <div class="admin_filter_layout_date">
-    <input class="admin_table_filter_item admin_filter_layout_date_value" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
-    <div class="admin_filter_layout_date_content">
+  <div class="list_filter_layout_date">
+    <input class="list_filter_item list_filter_layout_date_value" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+    <div class="list_filter_layout_date_content">
       <input type="text"
-        class="input input-filter admin_filter_date_input admin_filter_layout_date_from"
+        class="input list_filter_input list_filter_date_input list_filter_layout_date_from"
         placeholder="od"
       >
       <input type="text"
-        class="input input-filter admin_filter_date_input admin_filter_layout_date_to"
+        class="input list_filter_input list_filter_date_input list_filter_layout_date_to"
         placeholder="do"
       >
     </div>

@@ -1,4 +1,4 @@
-function bindOrder() {
+function bindReOrder() {
   function orderTable(el: HTMLElement) {
     var rows = el.getElementsByClassName("list_row");
     Array.prototype.forEach.call(rows, function (item: HTMLElement, i: number) {
@@ -10,7 +10,7 @@ function bindOrder() {
       row.setAttribute("draggable", "true");
 
       row.addEventListener("dragstart", function (ev) {
-        row.classList.add("list_row-selected");
+        row.classList.add("list_row-reorder");
 
         draggedElement = this;
         (ev as DragEvent).dataTransfer.setData("text/plain", "");
@@ -51,7 +51,7 @@ function bindOrder() {
 
       row.addEventListener("drop", function (ev) {
         saveOrder();
-        row.classList.remove("list_row-selected");
+        row.classList.remove("list_row-reorder");
         return false;
       });
 

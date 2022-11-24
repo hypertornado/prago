@@ -1,16 +1,18 @@
 .admin_navigation_tabs {
   display: flex;
   justify-content: center;
-  vertical-align: bottom;
-  flex-wrap: wrap;
-  width: 100%;
-  width: calc(~"100% - 10px");
+  flex-grow: 100;
+  overflow: auto;
+  //vertical-align: bottom;
+  //flex-wrap: wrap;
+  //width: 100%;
+  //width: calc(~"100% - 10px");
   margin: 15px;
 }
 
 .admin_navigation_tabs_content {
   display: flex;
-  flex-wrap: wrap;
+  //flex-wrap: wrap;
   border-radius: 10px;
   background: @baseColorBackground;
   padding: 0px 4px;
@@ -56,11 +58,6 @@
 .admin_navigation_tab:hover {
   color: black;
   //.shadow;
-}
-
-.admin_navigation_tab:last-of-type {
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
 }
 
 .admin_navigation_tab-selected,

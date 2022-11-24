@@ -16,7 +16,7 @@ class ListSettings {
   constructor(list: List) {
     this.list = list;
 
-    this.settingsEl = document.querySelector(".admin_tablesettings");
+    this.settingsEl = document.querySelector(".list_settings");
     this.settingsPopup = new ContentPopup("Možnosti", this.settingsEl);
     this.settingsButton = document.querySelector(
       ".list_header_action-settings"
@@ -47,7 +47,7 @@ class ListSettings {
 
   bindOptions(visibleColumnsMap: any) {
     var columns: NodeListOf<HTMLInputElement> = document.querySelectorAll(
-      ".admin_tablesettings_column"
+      ".list_settings_column"
     );
     for (var i = 0; i < columns.length; i++) {
       let columnName = columns[i].getAttribute("data-column-name");
@@ -93,7 +93,7 @@ class ListSettings {
   getSelectedColumnsStr(): string {
     var ret = [];
     var checked: NodeListOf<HTMLInputElement> = document.querySelectorAll(
-      ".admin_tablesettings_column:checked"
+      ".list_settings_column:checked"
     );
     for (var i = 0; i < checked.length; i++) {
       ret.push(checked[i].getAttribute("data-column-name"));
@@ -104,7 +104,7 @@ class ListSettings {
   getSelectedColumnsMap(): any {
     var columns: any = {};
     var checked: NodeListOf<HTMLInputElement> = document.querySelectorAll(
-      ".admin_tablesettings_column:checked"
+      ".list_settings_column:checked"
     );
     for (var i = 0; i < checked.length; i++) {
       columns[checked[i].getAttribute("data-column-name")] = true;

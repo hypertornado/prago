@@ -4,15 +4,11 @@ class ListFilterDate {
   to: HTMLInputElement;
 
   constructor(el: HTMLDivElement, value: any) {
-    this.hidden = <HTMLInputElement>(
-      el.querySelector(".admin_table_filter_item")
-    );
+    this.hidden = <HTMLInputElement>el.querySelector(".list_filter_item");
     this.from = <HTMLInputElement>(
-      el.querySelector(".admin_filter_layout_date_from")
+      el.querySelector(".list_filter_layout_date_from")
     );
-    this.to = <HTMLInputElement>(
-      el.querySelector(".admin_filter_layout_date_to")
-    );
+    this.to = <HTMLInputElement>el.querySelector(".list_filter_layout_date_to");
 
     this.from.addEventListener("input", this.changed.bind(this));
     this.from.addEventListener("change", this.changed.bind(this));

@@ -24,10 +24,9 @@ class Prago {
       new ImageView(el);
     });
 
-    var mainMenuEl =
-      document.querySelector<HTMLDivElement>(".admin_layout_left");
+    var mainMenuEl = document.querySelector<HTMLDivElement>(".root_left");
     if (mainMenuEl) {
-      new MainMenu(mainMenuEl);
+      new MainMenu();
     }
 
     var relationListEls = document.querySelectorAll<HTMLDivElement>(

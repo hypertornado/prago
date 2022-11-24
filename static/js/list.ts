@@ -35,11 +35,13 @@ class List {
 
   loadStats: Boolean;
 
+  currentRequest: XMLHttpRequest;
+
   constructor(list: HTMLDivElement) {
     this.list = list;
 
     var dateFilterInputs = list.querySelectorAll<HTMLInputElement>(
-      ".admin_filter_date_input"
+      ".list_filter_date_input"
     );
     dateFilterInputs.forEach((el) => {
       new DatePicker(el);
@@ -102,7 +104,7 @@ class List {
 
     this.itemsPerPage = parseInt(list.getAttribute("data-items-per-page"));
     this.paginationSelect = <HTMLSelectElement>(
-      document.querySelector(".admin_tablesettings_pages")
+      document.querySelector(".list_settings_pages")
     );
     this.paginationSelect.addEventListener("change", this.load.bind(this));
 
@@ -151,8 +153,15 @@ class List {
   }
 
   load() {
+    if (this.currentRequest) {
+      this.currentRequest.abort();
+    }
+
     this.progress.classList.remove("list_progress-inactive");
     var request = new XMLHttpRequest();
+
+    this.currentRequest = request;
+
     var params: any = {};
     if (this.page > 1) {
       params["_page"] = this.page;
@@ -212,7 +221,9 @@ class List {
       this.adminPrefix + "/" + this.typeName + "/api/list" + encoded,
       true
     );
+
     request.addEventListener("load", () => {
+      this.currentRequest = null;
       this.table.innerHTML = "";
       if (request.status == 200) {
         var response = JSON.parse(request.response);
@@ -222,13 +233,13 @@ class List {
 
         this.list.querySelector(".list_count").textContent = countStr;
         this.statsContainer.innerHTML = response.StatsStr;
-        bindOrder();
+        bindReOrder();
         this.bindPagination();
         this.bindClick();
         if (this.multiple.hasMultipleActions()) {
           this.multiple.bindMultipleActionCheckboxes();
         }
-        this.table.classList.remove("admin_table_loading");
+        this.table.classList.remove("list_table_loading");
       } else {
         console.error("error while loading list");
       }
@@ -455,12 +466,12 @@ class List {
 
   getFilterData(): any {
     var ret: any = {};
-    var items = this.list.querySelectorAll(".admin_table_filter_item");
+    var items = this.list.querySelectorAll(".list_filter_item");
     for (var i = 0; i < items.length; i++) {
       var item = <HTMLInputElement>items[i];
       var typ = item.getAttribute("data-typ");
       var layout = item.getAttribute("data-filter-layout");
-      if (item.classList.contains("admin_table_filter_item-relations")) {
+      if (item.classList.contains("list_filter_item-relations")) {
         ret[typ] = item.querySelector("input").value;
       } else {
         var val = item.value.trim();
@@ -526,7 +537,7 @@ class List {
 
   filterChanged() {
     this.colorActiveFilterItems();
-    this.table.classList.add("admin_table_loading");
+    this.table.classList.add("list_table_loading");
     this.page = 1;
     this.changed = true;
     this.changedTimestamp = Date.now();

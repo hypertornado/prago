@@ -1,0 +1,50 @@
+.list_settings h3 {
+  font-size: 1rem;
+  line-height: 1.3em;
+}
+
+.list_settings_name {
+  display: inline-block;
+  display: block;
+  display: none;
+  font-size: 0.8rem;
+}
+
+.list_settings_name:after {
+  content: ":";
+}
+
+.list_settings_labels {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.list_settings_label {
+  font-size: 0.8rem;
+  display: inline-block;
+  padding: 2px 2px;
+  width: 200px;
+  margin-right: 10px;
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+
+.list_settings_pages {
+  padding: 1px 3px;
+  display: block;
+  margin: 5px 0px;
+}
+
+@media print {
+  .list_settings {
+    display: none !important;
+  }
+
+  .list_header_first {
+    display: none !important;
+  }
+
+  .list_row_multiple {
+    display: none !important;
+  }
+}

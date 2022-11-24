@@ -28,7 +28,7 @@ class ListFilterRelations {
     let hiddenEl: HTMLInputElement = el.querySelector("input");
 
     this.relatedResourceName = el
-      .querySelector(".admin_table_filter_item-relations")
+      .querySelector(".list_filter_item-relations")
       .getAttribute("data-related-resource");
 
     this.input.addEventListener("input", () => {

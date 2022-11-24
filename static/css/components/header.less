@@ -1,4 +1,5 @@
 .admin_layout {
+  display: none;
   width: 100%;
   min-height: 100vh;
 }
@@ -42,39 +43,6 @@
 
 .admin_header_container {
   display: flex;
-}
-
-.admin_mobile_hamburger {
-  border-radius: 3px;
-  background-color: @baseColorBackground;
-  font-size: 20px;
-  font-weight: normal;
-  width: 33px;
-  height: 33px;
-  line-height: 33px;
-  text-align: center;
-  color: @baseColor;
-  cursor: pointer;
-  color: @black;
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  z-index: 300;
-  display: none;
-}
-
-.admin_mobile_hamburger::after {
-  content: "☰";
-}
-
-.admin_mobile_hamburger:hover {
-  color: black;
-}
-
-.admin_mobile_hamburger-selected,
-.admin_mobile_hamburger-selected:hover {
-  background-color: @baseColor;
-  color: white;
 }
 
 .admin_bottom {

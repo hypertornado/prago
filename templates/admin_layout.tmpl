@@ -15,8 +15,31 @@
 
   </head>
   <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.main_menu.URLPrefix}}" data-search-query="{{.search_q}}">
+
+    <div class="root">
+        {{template "notification_center" .}}
+        <div class="root_header">
+            <a href="/admin" class="root_logo" style="background-image: url('/admin/logo');"></a>
+            {{if .admin_page}}
+                {{template "admin_tabs" .admin_page.Navigation.Tabs}}
+            {{end}}
+
+            
+            <div class="root_hamburger"></div>
+        </div>
+        <div class="root_bottom">
+            <div class="root_left">
+                {{template "admin_mainmenu" .main_menu}}
+            </div>
+            <div class="root_content">
+                {{tmpl .admin_yield .}}
+            </div>
+        </div>
+    </div>
+
+    {{if false}}
     <div class="admin_layout">
-        <div class="admin_mobile_hamburger"></div>
+        <div class="root_hamburger"></div>
         <div class="admin_layout_left">
             {{template "admin_mainmenu" .main_menu}}
         </div>
@@ -36,6 +59,7 @@
             </div>
         </div>
     </div>
+    {{end}}
   </body>
 </html>
 
