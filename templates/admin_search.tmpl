@@ -1,4 +1,7 @@
 {{define "admin_search"}}
+
+  {{template "searchbox" .search_q}}
+
   <div class="admin_box">
     <h1>{{.admin_title}}</h1>
 
@@ -26,9 +29,11 @@
 {{define "admin_search_suggest"}}
   <div class="admin_search_suggestions_content">
     {{range $i, $item := .items}}
-      <a href="{{$item.URL}}" class="admin_search_suggestion" data-position="{{$i}}">
-        <div class="admin_search_suggestion_left"
+      <a href="{{$item.URL}}" class="admin_search_suggestion{{if not $item.Image}} admin_search_suggestion-noimage{{end}}" data-position="{{$i}}">
+        {{if $item.Image}}
+          <div class="admin_search_suggestion_left"
           {{if $item.Image}} style="background-image: url('{{CSS $item.Image}}');"{{end}}></div>
+        {{end}}
         <div class="admin_search_suggestion_right">
           <div class="admin_search_suggestion_category">{{$item.Category}}</div>
           <div class="admin_search_suggestion_name">{{$item.Name}}</div>
@@ -37,4 +42,14 @@
       </a>
     {{end}}
   </div>
+{{end}}
+
+{{define "searchbox"}}
+  <form class="searchbox" action="/admin/_search">
+    <input class="searchbox_input" type="search" placeholder="Vyhledávání" name="q" value="{{.}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <button class="searchbox_button">
+      <img src="/admin/api/icons?file=glyphicons-basic-28-search.svg&color=333333">
+    </button>
+    <div class="searchbox_suggestions"></div>
+  </form>
 {{end}}

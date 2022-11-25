@@ -1,10 +1,7 @@
 {{define "admin_home_navigation"}}
   <div class="admin_home">
 
-  <form class="admin_header_search" action="/admin/_search">
-    <input class="input admin_header_search_input" type="search" placeholder="Vyhledávání" name="q" value=""  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-    <div class="admin_header_search_suggestions hidden"></div>
-  </form>
+  {{template "searchbox" ""}}
 
   {{range $section := .Sections}}
     <div class="admin_home_section">

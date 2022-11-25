@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/hypertornado/prago/pragelastic"
 	"github.com/olivere/elastic/v7"
@@ -45,21 +46,19 @@ func (app *App) initElasticsearchClient() {
 }
 
 func (app *App) initSearch() {
-	if app.ElasticClient == nil {
-		app.Log().Println("will not initialize search since elasticsearch client is not defined")
-		return
-	}
-	adminSearch, err := newAdminSearch(app)
-	if err != nil {
-		app.Log().Println("admin search not initialized: " + err.Error())
-		return
-	}
-	app.Log().Println("admin search initialized")
-	app.search = adminSearch
+	app.API("search-suggest").Permission(loggedPermission).Handler(
+		func(request *Request) {
+			results, err := app.suggestItems(request.Param("q"), request.user, request)
+			must(err)
+			if len(results) == 0 {
+				request.RenderJSONWithCode(nil, 204)
+				return
+			}
 
-	app.sysadminTaskGroup.Task(unlocalized("index_search")).Handler(func(ta *TaskActivity) error {
-		return adminSearch.searchImport()
-	})
+			request.SetData("items", results)
+			request.RenderView("admin_search_suggest")
+		},
+	)
 
 	app.Action("_search").Permission(loggedPermission).Name(unlocalized("Vyhledávání")).Template("admin_search").hiddenInMainMenu().DataSource(
 		func(request *Request) interface{} {
@@ -75,7 +74,7 @@ func (app *App) initSearch() {
 				}
 			}
 
-			result, hits, err := adminSearch.Search(q, request.user.Role, int64(page-1), request.Request().Context())
+			result, hits, err := app.searchItems(q, request.user, int64(page-1), request)
 			must(err)
 
 			var pages = hits / searchPageSize
@@ -116,22 +115,78 @@ func (app *App) initSearch() {
 		},
 	)
 
-	app.API("search-suggest").Permission(loggedPermission).Handler(
-		func(request *Request) {
-			results, err := adminSearch.Suggest(request.Param("q"), request.user.Role)
-			if err != nil {
-				app.Log().Println(err)
-			}
+	if app.ElasticClient == nil {
+		app.Log().Println("will not initialize search since elasticsearch client is not defined")
+		return
+	}
+	adminSearch, err := newAdminSearch(app)
+	if err != nil {
+		app.Log().Println("admin search not initialized: " + err.Error())
+		return
+	}
+	app.Log().Println("admin search initialized")
+	app.search = adminSearch
 
-			if len(results) == 0 {
-				request.RenderJSONWithCode(nil, 204)
-				return
-			}
+	app.sysadminTaskGroup.Task(unlocalized("index_search")).Handler(func(ta *TaskActivity) error {
+		return adminSearch.searchImport()
+	})
 
-			request.SetData("items", results)
-			request.RenderView("admin_search_suggest")
-		},
-	)
+}
+
+func (app *App) searchItems(q string, user *user, page int64, request *Request) (ret []*searchItem, hits int64, err error) {
+	if app.search != nil {
+		ret, hits, err = app.search.Search(q, user.Role, page, request.r.Context())
+		must(err)
+		return
+	} else {
+		ret = app.searchWithoutElastic(q, request)
+		hits = int64(len(ret))
+	}
+	return
+}
+
+func (app *App) suggestItems(q string, user *user, request *Request) (ret []*searchItem, err error) {
+	q = strings.Trim(q, " ")
+	if q == "" {
+		return ret, nil
+	}
+
+	ret = app.searchWithoutElastic(q, request)
+
+	if app.search != nil {
+		elasticResults, _, err := app.searchItems(q, user, 0, request)
+		if err != nil {
+			app.Log().Println(err)
+		} else {
+			ret = append(ret, elasticResults...)
+		}
+	}
+
+	if len(ret) > 5 {
+		ret = ret[0:5]
+	}
+
+	return
+}
+
+func (app *App) searchWithoutElastic(q string, request *Request) (ret []*searchItem) {
+	q = normalizeCzechString(q)
+	menu := app.getMainMenu(request)
+	for _, section := range menu.Sections {
+		for _, item := range section.Items {
+			if strings.HasPrefix(item.URL, "/admin/logout") {
+				continue
+			}
+			name := normalizeCzechString(item.Name)
+			if strings.Contains(name, q) {
+				ret = append(ret, &searchItem{
+					Name: item.Name,
+					URL:  item.URL,
+				})
+			}
+		}
+	}
+	return ret
 }
 
 func newAdminSearch(app *App) (*adminSearch, error) {

@@ -81,5 +81,12 @@ func TestHumanizeFloat(t *testing.T) {
 			t.Fatal(fmt.Printf("%d: Expected %s, got %s\n", k, v.expected, res))
 		}
 	}
+}
+
+func TestNormalizeCzech(t *testing.T) {
+	res := normalizeCzechString("HŘíčKa")
+	if res != "hricka" {
+		t.Fatal(res)
+	}
 
 }

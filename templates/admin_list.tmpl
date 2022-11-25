@@ -13,6 +13,7 @@
   {{template "admin_list_settings" .}}
   {{template "admin_list_stats" .}}
   {{template "admin_list_export" .}}
+  <progress class="progress list_progress"></progress>
     <div class="list_header">
       {{if .MultipleActions}}
         <div class="list_header_first"></div>
@@ -34,7 +35,6 @@
       {{end}}
       <div class="list_header_last">
         <span class="list_count"></span>
-        <progress class="progress list_progress"></progress>
         <div class="btngroup list_header_actions">
           <button class="btn list_header_action-settings" title="Nastavení">
             <img class="btn_icon" src="/admin/api/icons?file=glyphicons-basic-137-cogwheel.svg&color=444444">

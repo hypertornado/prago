@@ -14,7 +14,7 @@ func (app *App) initAdminActions() {
 	app.accessController.addBeforeAction(func(request *Request) {
 		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
 		request.SetData("locale", localeFromRequest(request))
-		request.SetData("admin_header_prefix", adminPathPrefix)
+
 	})
 
 	app.adminController.addAroundAction(func(request *Request, next func()) {

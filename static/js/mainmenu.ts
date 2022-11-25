@@ -12,9 +12,7 @@ class MainMenu {
     this.menuEl = document.querySelector(".root_hamburger");
     this.menuEl.addEventListener("click", this.menuClick.bind(this));
 
-    var searchFormEl = document.querySelector<HTMLFormElement>(
-      ".admin_header_search"
-    );
+    var searchFormEl = document.querySelector<HTMLFormElement>(".searchbox");
     if (searchFormEl) {
       this.search = new SearchForm(searchFormEl);
     }

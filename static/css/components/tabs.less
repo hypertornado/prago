@@ -1,23 +1,24 @@
 .admin_navigation_tabs {
   display: flex;
   justify-content: center;
+  justify-content: flex-start;
   flex-grow: 100;
   overflow: auto;
-  //vertical-align: bottom;
-  //flex-wrap: wrap;
-  //width: 100%;
-  //width: calc(~"100% - 10px");
-  margin: 15px;
+  //border: 1px solid red;
+}
+
+.admin_navigation_tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .admin_navigation_tabs_content {
   display: flex;
-  //flex-wrap: wrap;
-  border-radius: 10px;
+  border-radius: 100px;
   background: @baseColorBackground;
   padding: 0px 4px;
+  margin: 0 auto;
 
-  justify-content: center;
+  //justify-content: center;
 }
 
 .admin_navigation_tab {
@@ -30,10 +31,11 @@
 
   text-decoration: none;
   padding: 1px 20px;
-  border-radius: 10px;
+  border-radius: 100px;
   color: @black;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   //flex-wrap: nowrap;
 }
 

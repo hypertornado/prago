@@ -60,7 +60,7 @@ func (app *App) getMainMenu(request *Request) (ret mainMenu) {
 		if v.isHiddenInMainMenu {
 			continue
 		}
-		if !request.app.authorize(request.user, v.permission) {
+		if !app.authorize(request.user, v.permission) {
 			continue
 		}
 

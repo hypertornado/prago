@@ -15,7 +15,6 @@
 
   </head>
   <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.main_menu.URLPrefix}}" data-search-query="{{.search_q}}">
-
     <div class="root">
         {{template "notification_center" .}}
         <div class="root_header">
@@ -25,7 +24,10 @@
             {{end}}
 
             
-            <div class="root_hamburger"></div>
+            <div class="root_hamburger">
+                <img src="/admin/api/icons?file=glyphicons-basic-600-menu.svg&color=444444" class="root_hamburger_iconopen">
+                <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=444444" class="root_hamburger_iconclose">
+            </div>
         </div>
         <div class="root_bottom">
             <div class="root_left">
@@ -36,30 +38,6 @@
             </div>
         </div>
     </div>
-
-    {{if false}}
-    <div class="admin_layout">
-        <div class="root_hamburger"></div>
-        <div class="admin_layout_left">
-            {{template "admin_mainmenu" .main_menu}}
-        </div>
-        <div class="admin_layout_right">
-            <div class="admin_header">
-                <div class="admin_header_container">
-                    {{if .admin_page}}
-                        {{template "admin_tabs" .admin_page.Navigation.Tabs}}
-                    {{end}}
-                </div>
-            </div>
-            <div class="admin_bottom">
-                {{template "notification_center" .}}
-                <div class="admin_content">
-                    {{tmpl .admin_yield .}}
-                </div>
-            </div>
-        </div>
-    </div>
-    {{end}}
   </body>
 </html>
 

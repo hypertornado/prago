@@ -8,11 +8,9 @@ class SearchForm {
 
   constructor(el: HTMLFormElement) {
     this.searchForm = el;
-    this.searchInput = <HTMLInputElement>(
-      el.querySelector(".admin_header_search_input")
-    );
+    this.searchInput = <HTMLInputElement>el.querySelector(".searchbox_input");
     this.suggestionsEl = <HTMLDivElement>(
-      el.querySelector(".admin_header_search_suggestions")
+      el.querySelector(".searchbox_suggestions")
     );
 
     this.searchInput.value = document.body.getAttribute("data-search-query");
@@ -20,6 +18,7 @@ class SearchForm {
     this.searchInput.addEventListener("input", () => {
       this.suggestions = [];
       this.dirty = true;
+      this.deleteSuggestions();
       this.lastChanged = Date.now();
       return false;
     });
@@ -71,6 +70,11 @@ class SearchForm {
     });
   }
 
+  deleteSuggestions() {
+    this.suggestionsEl.innerHTML = "";
+    this.searchForm.classList.remove("searchbox-showsuggestions");
+  }
+
   loadSuggestions() {
     this.dirty = false;
     var suggestText = this.searchInput.value;
@@ -90,8 +94,7 @@ class SearchForm {
       if (request.status == 200) {
         this.addSuggestions(request.response);
       } else {
-        this.suggestionsEl.classList.add("hidden");
-        //this.dismissSuggestions();
+        this.deleteSuggestions();
         console.error("Error while loading item.");
       }
     });
@@ -99,12 +102,20 @@ class SearchForm {
   }
 
   addSuggestions(content: any) {
+    //this.searchForm.classList.add("searchbox-showsuggestions");
     this.suggestionsEl.innerHTML = content;
-    this.suggestionsEl.classList.remove("hidden");
 
     this.suggestions = this.suggestionsEl.querySelectorAll(
       ".admin_search_suggestion"
     );
+
+    console.log(this.suggestions);
+
+    if (this.suggestions.length > 0) {
+      this.searchForm.classList.add("searchbox-showsuggestions");
+    } else {
+      this.searchForm.classList.remove("searchbox-showsuggestions");
+    }
 
     for (var i = 0; i < this.suggestions.length; i++) {
       var suggestion = <HTMLAnchorElement>this.suggestions[i];
@@ -113,7 +124,6 @@ class SearchForm {
         window.location.href = el.getAttribute("href");
       });
       suggestion.addEventListener("click", (e) => {
-        //this.logClick();
         return false;
       });
       suggestion.addEventListener("mouseenter", (e) => {

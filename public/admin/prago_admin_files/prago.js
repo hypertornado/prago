@@ -524,7 +524,7 @@ class List {
         if (this.currentRequest) {
             this.currentRequest.abort();
         }
-        this.progress.classList.remove("list_progress-inactive");
+        this.list.classList.add("list-loading");
         var request = new XMLHttpRequest();
         this.currentRequest = request;
         var params = {};
@@ -583,13 +583,12 @@ class List {
                 if (this.multiple.hasMultipleActions()) {
                     this.multiple.bindMultipleActionCheckboxes();
                 }
-                this.table.classList.remove("list_table_loading");
             }
             else {
                 console.error("error while loading list");
             }
             this.copyColumnWidths();
-            this.progress.classList.add("list_progress-inactive");
+            this.list.classList.remove("list-loading");
         });
         request.send(JSON.stringify({}));
     }
@@ -850,11 +849,10 @@ class List {
     }
     filterChanged() {
         this.colorActiveFilterItems();
-        this.table.classList.add("list_table_loading");
         this.page = 1;
         this.changed = true;
         this.changedTimestamp = Date.now();
-        this.progress.classList.remove("list_progress-inactive");
+        this.list.classList.add("list-loading");
     }
     bindFilterRelation(el, value) {
         new ListFilterRelations(el, value, this);
@@ -2030,12 +2028,13 @@ function prettyDate(date) {
 class SearchForm {
     constructor(el) {
         this.searchForm = el;
-        this.searchInput = (el.querySelector(".admin_header_search_input"));
-        this.suggestionsEl = (el.querySelector(".admin_header_search_suggestions"));
+        this.searchInput = el.querySelector(".searchbox_input");
+        this.suggestionsEl = (el.querySelector(".searchbox_suggestions"));
         this.searchInput.value = document.body.getAttribute("data-search-query");
         this.searchInput.addEventListener("input", () => {
             this.suggestions = [];
             this.dirty = true;
+            this.deleteSuggestions();
             this.lastChanged = Date.now();
             return false;
         });
@@ -2086,6 +2085,10 @@ class SearchForm {
             }
         });
     }
+    deleteSuggestions() {
+        this.suggestionsEl.innerHTML = "";
+        this.searchForm.classList.remove("searchbox-showsuggestions");
+    }
     loadSuggestions() {
         this.dirty = false;
         var suggestText = this.searchInput.value;
@@ -2103,7 +2106,7 @@ class SearchForm {
                 this.addSuggestions(request.response);
             }
             else {
-                this.suggestionsEl.classList.add("hidden");
+                this.deleteSuggestions();
                 console.error("Error while loading item.");
             }
         });
@@ -2111,8 +2114,14 @@ class SearchForm {
     }
     addSuggestions(content) {
         this.suggestionsEl.innerHTML = content;
-        this.suggestionsEl.classList.remove("hidden");
         this.suggestions = this.suggestionsEl.querySelectorAll(".admin_search_suggestion");
+        console.log(this.suggestions);
+        if (this.suggestions.length > 0) {
+            this.searchForm.classList.add("searchbox-showsuggestions");
+        }
+        else {
+            this.searchForm.classList.remove("searchbox-showsuggestions");
+        }
         for (var i = 0; i < this.suggestions.length; i++) {
             var suggestion = this.suggestions[i];
             suggestion.addEventListener("touchend", (e) => {
@@ -2156,7 +2165,7 @@ class MainMenu {
         this.rootLeft = document.querySelector(".root_left");
         this.menuEl = document.querySelector(".root_hamburger");
         this.menuEl.addEventListener("click", this.menuClick.bind(this));
-        var searchFormEl = document.querySelector(".admin_header_search");
+        var searchFormEl = document.querySelector(".searchbox");
         if (searchFormEl) {
             this.search = new SearchForm(searchFormEl);
         }
@@ -2757,6 +2766,7 @@ class Prago {
         document.addEventListener("DOMContentLoaded", Prago.init);
     }
     static init() {
+        Prago.heightListenerSetup();
         var listEl = document.querySelector(".list");
         if (listEl) {
             new List(listEl);
@@ -2784,6 +2794,14 @@ class Prago {
         }
         initDashdoard();
         initSMap();
+    }
+    static heightListenerSetup() {
+        let appHeight = () => {
+            const doc = document.documentElement;
+            doc.style.setProperty("--app-height", `${window.innerHeight}px`);
+        };
+        window.addEventListener("resize", appHeight);
+        appHeight();
     }
 }
 Prago.start();

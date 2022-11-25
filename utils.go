@@ -9,8 +9,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/gosimple/slug"
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 func prettyFilename(s string) string {
@@ -43,7 +47,7 @@ func randomString(n int) string {
 	return string(b)
 }
 
-//ConsoleQuestion asks for boolean answer in console
+// ConsoleQuestion asks for boolean answer in console
 func consoleQuestion(question string) bool {
 	fmt.Printf("%s (yes|no)\n", question)
 	reader := bufio.NewReader(os.Stdin)
@@ -154,4 +158,10 @@ func monthName(order int64, locale string) string {
 	default:
 		return monthsEN[order-1]
 	}
+}
+
+func normalizeCzechString(in string) string {
+	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
+	result, _, _ := transform.String(t, in)
+	return strings.ToLower(result)
 }

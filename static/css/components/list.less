@@ -5,11 +5,6 @@
 
 .list_header {
   display: flex;
-  /*position: fixed;
-  top: 63px;
-  left: 100px;
-  z-index: 10000;
-  background-color: #fafafa;*/
 }
 
 .list_count {
@@ -124,8 +119,23 @@
   background-color: @baseColorBackground;
 }
 
-.list_table_loading {
-  opacity: 0.4;
+@keyframes loading_table {
+  0% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 0.1;
+  }
+
+  100% {
+    opacity: 0.7;
+  }
+}
+
+.list-loading .list_row {
+  animation: loading_table 3000ms ease-in-out infinite;
+  filter: blur(2px);
 }
 
 .list_buttons {
@@ -349,17 +359,45 @@
 }
 
 .list_progress {
-  position: absolute;
+  position: fixed;
   top: 10px;
-  left: 10px;
+  right: 10px;
+  z-index: 1000;
+  display: none;
 }
 
-.list_progress-inactive {
-  opacity: 0;
+.list-loading .list_progress {
+  display: inline;
 }
 
 .list_stats_limit {
   padding: 1px 3px;
   display: block;
   margin: 5px 0px;
+}
+
+@media print {
+  .list_header_item {
+    height: 30px;
+  }
+
+  .list_header_item_filter {
+    display: none;
+  }
+
+  .list_header_first {
+    display: none;
+  }
+
+  .list_row_multiple {
+    display: none;
+  }
+
+  .list_header_last {
+    display: none;
+  }
+
+  .list_row_lastcell {
+    display: none;
+  }
 }

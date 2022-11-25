@@ -2,6 +2,7 @@
   display: flex;
   width: 100%;
   height: 100vh;
+  height: var(--app-height);
   flex-direction: column;
 }
 
@@ -10,6 +11,7 @@
   height: 50px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .root_bottom {
@@ -50,48 +52,71 @@
 }
 
 .root_hamburger {
-  border-radius: 3px;
+  border-radius: 5px;
   background-color: @baseColorBackground;
-  font-size: 20px;
-  font-weight: normal;
-  width: 33px;
+  width: 60px;
   height: 33px;
-  line-height: 33px;
-  text-align: center;
-  color: @baseColor;
   cursor: pointer;
-  color: @black;
   flex-shrink: 0;
-  z-index: 300;
   display: none;
   margin: 0px 10px;
-}
 
-.root_hamburger::after {
-  content: "☰";
+  justify-content: center;
+  align-items: center;
 }
 
 .root_hamburger:hover {
-  color: black;
+  opacity: 0.9;
 }
 
-.root-visible .root_hamburger,
-.root-visible .root_hamburger:hover {
-  background-color: @baseColor;
-  color: white;
+.root_hamburger:active {
+  opacity: 0.8;
+}
+
+.root_hamburger_iconopen,
+.root_hamburger_iconclose {
+  width: 20px;
+}
+
+.root_hamburger_iconclose {
+  display: none;
+}
+
+.root-visible .root_hamburger_iconopen {
+  display: none;
+}
+
+.root-visible .root_hamburger_iconclose {
+  display: inline-block;
+}
+
+@keyframes root_left_animation {
+  0% {
+    opacity: 0.9;
+    //transform: translateX(50px);
+    transform: translateY(100vh);
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 @media (max-width: 1100px) {
+  //fix mobile display: https://dev.to/maciejtrzcinski/100vh-problem-with-ios-safari-3ge9
+
   .root {
     flex-direction: column-reverse;
   }
 
   .root_header {
-    border-top: 1px solid #aaa;
+    border-top: 1px solid #eee;
+    background: white;
+    z-index: 1000;
   }
 
   .root_logo {
-    width: 100px;
+    width: 50px;
     margin: 0px 10px;
   }
 
@@ -108,10 +133,11 @@
     z-index: 10;
     background-color: #fafafa;
     .shadow;
+    animation: root_left_animation 200ms ease-out;
   }
 
   .root_hamburger {
-    display: block;
+    display: flex;
   }
 }
 
@@ -120,5 +146,15 @@
     right: 0px;
     left: 0px;
     width: 100vw;
+  }
+}
+
+@media print {
+  .root_header {
+    display: none;
+  }
+
+  .root_left {
+    display: none;
   }
 }

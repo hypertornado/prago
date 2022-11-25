@@ -157,7 +157,8 @@ class List {
       this.currentRequest.abort();
     }
 
-    this.progress.classList.remove("list_progress-inactive");
+    this.list.classList.add("list-loading");
+    //this.progress.classList.remove("list_progress-inactive");
     var request = new XMLHttpRequest();
 
     this.currentRequest = request;
@@ -239,12 +240,11 @@ class List {
         if (this.multiple.hasMultipleActions()) {
           this.multiple.bindMultipleActionCheckboxes();
         }
-        this.table.classList.remove("list_table_loading");
       } else {
         console.error("error while loading list");
       }
       this.copyColumnWidths();
-      this.progress.classList.add("list_progress-inactive");
+      this.list.classList.remove("list-loading");
     });
     request.send(JSON.stringify({}));
   }
@@ -537,11 +537,11 @@ class List {
 
   filterChanged() {
     this.colorActiveFilterItems();
-    this.table.classList.add("list_table_loading");
     this.page = 1;
     this.changed = true;
     this.changedTimestamp = Date.now();
-    this.progress.classList.remove("list_progress-inactive");
+    this.list.classList.add("list-loading");
+    //this.progress.classList.remove("list_progress-inactive");
   }
 
   bindFilterRelation(el: HTMLDivElement, value: any) {

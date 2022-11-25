@@ -1,11 +1,13 @@
 class Prago {
-  private static x: number;
+  //private static x: number;
 
   static start() {
     document.addEventListener("DOMContentLoaded", Prago.init);
   }
 
   private static init() {
+    Prago.heightListenerSetup();
+
     var listEl = document.querySelector<HTMLDivElement>(".list");
     if (listEl) {
       new List(listEl);
@@ -46,6 +48,15 @@ class Prago {
     initDashdoard();
 
     initSMap();
+  }
+
+  private static heightListenerSetup() {
+    let appHeight = () => {
+      const doc = document.documentElement;
+      doc.style.setProperty("--app-height", `${window.innerHeight}px`);
+    };
+    window.addEventListener("resize", appHeight);
+    appHeight();
   }
 }
 Prago.start();
