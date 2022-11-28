@@ -43,7 +43,21 @@ func (app *App) initAdminActions() {
 	app.Action("markdown").Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).hiddenInMainMenu().Template("admin_help_markdown")
 
 	app.accessController.get("/admin/logo", func(request *Request) {
-		request.w.Write(app.logo)
+		if app.logo != nil {
+			request.w.Write(app.logo)
+			return
+		}
+
+		iconName := "glyphicons-basic-697-directions-sign.svg"
+		if app.icon != "" {
+			iconName = app.icon
+		}
+		iconData, err := app.loadIcon(iconName, "444444")
+		must(err)
+
+		request.Response().Header().Add("Content-Type", "image/svg+xml")
+		request.w.Write(iconData)
+
 	})
 }
 

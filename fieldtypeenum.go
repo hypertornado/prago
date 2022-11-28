@@ -82,5 +82,7 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 			}
 			return ret
 		},
+
+		fieldTypeIcon: "glyphicons-basic-299-circle-selected.svg",
 	})
 }

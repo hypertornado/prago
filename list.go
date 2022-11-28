@@ -493,9 +493,10 @@ func (resourceData *resourceData) getListContent(user *user, params url.Values) 
 }
 
 type listContentJSON struct {
-	Content  string
-	CountStr string
-	StatsStr string
+	Content   string
+	CountStr  string
+	StatsStr  string
+	FooterStr string
 }
 
 func (resourceData *resourceData) getListContentJSON(user *user, params url.Values) (ret *listContentJSON, err error) {
@@ -522,10 +523,21 @@ func (resourceData *resourceData) getListContentJSON(user *user, params url.Valu
 		statsStr = bufStats.String()
 	}
 
+	fmt.Println(listData.Pagination)
+
+	bufFooter := new(bytes.Buffer)
+	err = resourceData.app.ExecuteTemplate(bufFooter, "admin_list_footer", map[string]interface{}{
+		"admin_list": listData,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return &listContentJSON{
-		Content:  buf.String(),
-		CountStr: listData.TotalCountStr,
-		StatsStr: statsStr,
+		Content:   buf.String(),
+		CountStr:  listData.TotalCountStr,
+		StatsStr:  statsStr,
+		FooterStr: bufFooter.String(),
 	}, nil
 
 }

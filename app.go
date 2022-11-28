@@ -14,6 +14,7 @@ import (
 type App struct {
 	codeName        string
 	version         string
+	icon            string
 	development     *development
 	developmentMode bool
 	staticFiles     staticFiles
@@ -169,6 +170,11 @@ func (app *App) DevelopmentMode() bool { return app.developmentMode }
 // Name sets localized human name to app
 func (app *App) Name(name func(string) string) *App {
 	app.name = name
+	return app
+}
+
+func (app *App) Icon(icon string) *App {
+	app.icon = icon
 	return app
 }
 

@@ -329,12 +329,21 @@ func (field *Field) getIcon() string {
 		return "glyphicons-basic-55-clock.svg"
 	}
 
+	if field.typ == reflect.TypeOf(true) {
+		return "glyphicons-basic-153-square-checkbox.svg"
+	}
+
+	if field.typ == reflect.TypeOf("") {
+		return "glyphicons-basic-101-text.svg"
+	}
+
+	if field.typ.Kind() == reflect.Int || field.typ.Kind() == reflect.Int64 || field.typ.Kind() == reflect.Float64 {
+		return "glyphicons-basic-234-calculator.svg"
+	}
+
 	if field.typ == reflect.TypeOf(time.Now()) {
 		return "glyphicons-basic-46-calendar.svg"
 	}
-
-	//switch fieldType.
-
 	return ""
 }
 

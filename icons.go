@@ -12,27 +12,33 @@ func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 
 }
 
-func (app *App) initIcons() {
+func (app *App) loadIcon(iconName, color string) ([]byte, error) {
+	data, err := app.iconsFS.ReadFile(app.iconsPrefix + iconName)
+	if err != nil {
+		return nil, err
+	}
 
+	str := string(data)
+
+	if color != "" {
+		str = fmt.Sprintf("<svg fill=\"#%s\" %s", color, str[4:])
+	}
+
+	return []byte(str), nil
+
+}
+
+func (app *App) initIcons() {
 	app.API("icons").Permission(loggedPermission).Method("GET").Handler(func(request *Request) {
 		if app.iconsFS == nil {
 			panic("no icons fs set")
 		}
 
-		data, err := app.iconsFS.ReadFile(app.iconsPrefix + request.Param("file"))
-		if err != nil {
-			must(err)
-		}
-
-		str := string(data)
-
-		color := request.Param("color")
-		if color != "" {
-			str = fmt.Sprintf("<svg fill=\"#%s\" %s", color, str[4:])
-		}
+		data, err := app.loadIcon(request.Param("file"), request.Param("color"))
+		must(err)
 
 		request.Response().Header().Add("Content-Type", "image/svg+xml")
-		request.Response().Write([]byte(str))
+		request.Response().Write(data)
 
 	})
 

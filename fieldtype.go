@@ -53,6 +53,7 @@ func (app *App) initDefaultFieldTypes() {
 		viewTemplate:   "admin_item_view_textarea",
 		formTemplate:   "admin_item_textarea",
 		cellDataSource: textListDataSource,
+		fieldTypeIcon:  "glyphicons-basic-101-text.svg",
 	})
 	app.addFieldType("order", &fieldType{})
 	app.addFieldType("date", &fieldType{
@@ -98,11 +99,13 @@ func (app *App) initDefaultFieldTypes() {
 		viewDataSource: markdownViewDataSource,
 		formTemplate:   "admin_item_markdown",
 		cellDataSource: markdownListDataSource,
+		fieldTypeIcon:  "glyphicons-basic-692-font.svg",
 		//listCellTemplate:   "admin_item_view_text",
 	})
 	app.addFieldType("place", &fieldType{
-		viewTemplate: "admin_item_view_place",
-		formTemplate: "admin_item_place",
+		viewTemplate:  "admin_item_view_place",
+		formTemplate:  "admin_item_place",
+		fieldTypeIcon: "glyphicons-basic-591-map-marker.svg",
 		//listCellTemplate: "admin_item_view_text",
 	})
 

@@ -1,26 +1,35 @@
 .list {
-  position: relative;
-  overflow-x: scroll;
+  min-height: 100vh;
 }
 
-.list_header {
-  display: flex;
-}
-
-.list_count {
-  font-size: 0.9rem;
-  color: @gray;
-  white-space: nowrap;
+.list_hidden {
+  display: none;
 }
 
 .list_table {
-  min-width: 100%;
+  width: 100%;
+  overflow-x: auto;
+}
 
-  min-width: auto;
-  width: auto;
-  margin: 0px;
-  table-layout: fixed;
-  width: auto;
+.list_header_container {
+  border: 0px solid green;
+  clip-path: inset(-10000px -10000px -10000px 0px);
+  position: fixed;
+  z-index: 100;
+}
+
+.list_header {
+  z-index: 1000;
+  display: flex;
+}
+
+.list_table_content {
+  margin-top: 60px;
+}
+
+.list_table_content:not(:has(.list_row)) {
+  padding-bottom: 50px !important;
+  background-color: #fff;
 }
 
 .list_row {
@@ -76,8 +85,10 @@
 }
 
 .list_row_lastcell {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .list_header_item_resizer {
@@ -139,7 +150,6 @@
 }
 
 .list_buttons {
-  margin-left: 5px;
   opacity: 0;
 }
 
@@ -330,6 +340,7 @@
   height: 60px;
   padding: 3px 5px;
   position: relative;
+  background-color: #fafafa;
   border-bottom: 1px solid #eee;
 }
 
@@ -344,18 +355,27 @@
 }
 
 .list_header_last {
-  width: 250px;
-  position: relative;
+  width: 150px;
+  z-index: 1000;
   background-color: #fafafa;
   padding: 5px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .list_header_actions {
   display: block;
-  position: absolute;
-  bottom: 4px;
-  left: 4px;
+}
+
+.list_count {
+  display: block;
+  font-size: 0.9rem;
+  color: @gray;
+  white-space: nowrap;
+  margin: 0px 5px;
 }
 
 .list_progress {
@@ -400,4 +420,35 @@
   .list_row_lastcell {
     display: none;
   }
+}
+
+.list_tableplaceholder {
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes tableplaceholder {
+  0% {
+    background-color: #fafafa;
+  }
+
+  100% {
+    background-color: #fff;
+    //border: 1px solid red;
+  }
+}
+
+.list_tableplaceholder_row {
+  //background-color: white;
+  height: 25px;
+  border-bottom: 0px solid #eee;
+}
+
+.list_tableplaceholder_row:nth-child(even) {
+  animation: tableplaceholder 1000ms ease-in-out infinite;
+}
+
+.list_tableplaceholder_row:nth-child(odd) {
+  animation: tableplaceholder 1000ms ease-in-out infinite;
+  animation-delay: 500ms;
 }

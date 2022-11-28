@@ -8,8 +8,16 @@ class List {
   adminPrefix: string;
   typeName: string;
 
+  rootContent: HTMLDivElement;
+
   list: HTMLDivElement;
-  table: HTMLElement;
+
+  listHeaderContainer: HTMLDivElement;
+  listHeader: HTMLDivElement;
+  listTable: HTMLDivElement;
+  listFooter: HTMLDivElement;
+
+  tableContent: HTMLElement;
   exportButton: HTMLAnchorElement;
   changed: boolean;
   changedTimestamp: number;
@@ -40,6 +48,14 @@ class List {
   constructor(list: HTMLDivElement) {
     this.list = list;
 
+    this.rootContent = document.querySelector(".root_content");
+    this.listHeaderContainer = this.rootContent.querySelector(
+      ".list_header_container"
+    );
+    this.listTable = this.list.querySelector(".list_table");
+    this.listHeader = this.list.querySelector(".list_header");
+    this.listFooter = this.list.querySelector(".list_footer");
+
     var dateFilterInputs = list.querySelectorAll<HTMLInputElement>(
       ".list_filter_date_input"
     );
@@ -64,8 +80,8 @@ class List {
 
     this.progress = <HTMLProgressElement>list.querySelector(".list_progress");
 
-    this.table = <HTMLElement>list.querySelector(".list_table");
-    this.table.textContent = "";
+    this.tableContent = <HTMLElement>list.querySelector(".list_table_content");
+    //this.tableContent.textContent = "";
 
     this.bindFilter(urlParams);
 
@@ -121,16 +137,18 @@ class List {
     this.bindOrder();
     this.bindInitialHeaderWidths();
     this.bindResizer();
+    this.bindHeaderPositionCalculator();
   }
 
   copyColumnWidths() {
+    let totalWidth = this.listHeader.getBoundingClientRect().width;
+    this.tableContent.setAttribute("style", "width: " + totalWidth + "px;");
+
     let headerItems = this.list.querySelectorAll(
       ".list_header > :not(.hidden)"
     );
 
     let tableRows = this.list.querySelectorAll(".list_row");
-
-    let totalWidth = 0;
 
     for (let i = 0; i < tableRows.length; i++) {
       let rowItems = tableRows[i].children;
@@ -144,9 +162,6 @@ class List {
 
         var clientRect = headerEl.getBoundingClientRect();
         var elWidth = clientRect.width;
-
-        totalWidth += elWidth;
-
         tableEl.setAttribute("style", "width: " + elWidth + "px;");
       }
     }
@@ -225,15 +240,16 @@ class List {
 
     request.addEventListener("load", () => {
       this.currentRequest = null;
-      this.table.innerHTML = "";
+      this.tableContent.innerHTML = "";
       if (request.status == 200) {
         var response = JSON.parse(request.response);
 
-        this.table.innerHTML = response.Content;
+        this.tableContent.innerHTML = response.Content;
         var countStr = response.CountStr;
 
         this.list.querySelector(".list_count").textContent = countStr;
         this.statsContainer.innerHTML = response.StatsStr;
+        this.listFooter.innerHTML = response.FooterStr;
         bindReOrder();
         this.bindPagination();
         this.bindClick();
@@ -541,7 +557,6 @@ class List {
     this.changed = true;
     this.changedTimestamp = Date.now();
     this.list.classList.add("list-loading");
-    //this.progress.classList.remove("list_progress-inactive");
   }
 
   bindFilterRelation(el: HTMLDivElement, value: any) {
@@ -559,5 +574,43 @@ class List {
         this.load();
       }
     }, 200);
+  }
+
+  bindHeaderPositionCalculator() {
+    this.listHeaderPositionChanged();
+
+    window.addEventListener(
+      "resize",
+      this.listHeaderPositionChanged.bind(this)
+    );
+
+    this.list.addEventListener(
+      "scroll",
+      this.listHeaderPositionChanged.bind(this)
+    );
+
+    this.rootContent.addEventListener(
+      "scroll",
+      this.listHeaderPositionChanged.bind(this)
+    );
+
+    this.listTable.addEventListener(
+      "scroll",
+      this.listHeaderPositionChanged.bind(this)
+    );
+  }
+
+  listHeaderPositionChanged() {
+    let rect = this.rootContent.getBoundingClientRect();
+
+    var leftScroll = -this.listTable.scrollLeft;
+    this.listHeader.setAttribute("style", "margin-left: " + leftScroll + "px;");
+
+    this.listHeaderContainer.setAttribute(
+      "style",
+      "top: " + rect.top + "px; left: " + rect.left + "px;"
+    );
+
+    return true;
   }
 }
