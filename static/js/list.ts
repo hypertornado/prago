@@ -171,9 +171,8 @@ class List {
     if (this.currentRequest) {
       this.currentRequest.abort();
     }
-
     this.list.classList.add("list-loading");
-    //this.progress.classList.remove("list_progress-inactive");
+
     var request = new XMLHttpRequest();
 
     this.currentRequest = request;

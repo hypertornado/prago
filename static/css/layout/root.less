@@ -150,11 +150,25 @@
 }
 
 @media print {
+  .root {
+    display: block;
+    height: auto;
+  }
+
   .root_header {
     display: none;
   }
 
   .root_left {
     display: none;
+  }
+
+  .root_bottom {
+    overflow: visible;
+  }
+
+  .root_content {
+    display: block;
+    overflow: visible;
   }
 }

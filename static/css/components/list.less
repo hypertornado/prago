@@ -6,13 +6,7 @@
   display: none;
 }
 
-.list_table {
-  width: 100%;
-  overflow-x: auto;
-}
-
 .list_header_container {
-  border: 0px solid green;
   clip-path: inset(-10000px -10000px -10000px 0px);
   position: fixed;
   z-index: 100;
@@ -21,6 +15,11 @@
 .list_header {
   z-index: 1000;
   display: flex;
+}
+
+.list_table {
+  width: 100%;
+  overflow-x: auto;
 }
 
 .list_table_content {
@@ -142,6 +141,10 @@
   100% {
     opacity: 0.7;
   }
+}
+
+.list-loading {
+  cursor: wait !important;
 }
 
 .list-loading .list_row {
@@ -413,12 +416,24 @@
     display: none;
   }
 
+  .list_header_container {
+    position: static;
+  }
+
   .list_header_last {
     display: none;
   }
 
   .list_row_lastcell {
     display: none;
+  }
+
+  .list_table {
+    overflow: visible;
+  }
+
+  .list_table_content {
+    overflow: visible;
   }
 }
 

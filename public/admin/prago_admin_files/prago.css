@@ -2569,11 +2569,22 @@ pre {
   }
 }
 @media print {
+  .root {
+    display: block;
+    height: auto;
+  }
   .root_header {
     display: none;
   }
   .root_left {
     display: none;
+  }
+  .root_bottom {
+    overflow: visible;
+  }
+  .root_content {
+    display: block;
+    overflow: visible;
   }
 }
 .admin_table {
@@ -2991,12 +3002,7 @@ select.admin_timestamp_minute {
 .list_hidden {
   display: none;
 }
-.list_table {
-  width: 100%;
-  overflow-x: auto;
-}
 .list_header_container {
-  border: 0px solid green;
   clip-path: inset(-10000px -10000px -10000px 0px);
   position: fixed;
   z-index: 100;
@@ -3004,6 +3010,10 @@ select.admin_timestamp_minute {
 .list_header {
   z-index: 1000;
   display: flex;
+}
+.list_table {
+  width: 100%;
+  overflow-x: auto;
 }
 .list_table_content {
   margin-top: 60px;
@@ -3101,6 +3111,9 @@ select.admin_timestamp_minute {
   100% {
     opacity: 0.7;
   }
+}
+.list-loading {
+  cursor: wait !important;
 }
 .list-loading .list_row {
   animation: loading_table 3000ms ease-in-out infinite;
@@ -3333,11 +3346,20 @@ select.admin_timestamp_minute {
   .list_row_multiple {
     display: none;
   }
+  .list_header_container {
+    position: static;
+  }
   .list_header_last {
     display: none;
   }
   .list_row_lastcell {
     display: none;
+  }
+  .list_table {
+    overflow: visible;
+  }
+  .list_table_content {
+    overflow: visible;
   }
 }
 .list_tableplaceholder {
@@ -3693,7 +3715,6 @@ select.input {
 }
 .textarea {
   min-height: 100px;
-  resize: none;
 }
 .form_radios {
   margin: 0px 10px;
@@ -4524,6 +4545,9 @@ a.admin_stats_section_row {
   background-color: #4078c0;
   color: white !important;
   border-color: #4078c0;
+  position: sticky;
+  top: 0px;
+  bottom: 0px;
 }
 .mainmenu_section_item-selected .mainmenu_section_item_right {
   color: #eee;

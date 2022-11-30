@@ -298,6 +298,7 @@ func (resourceData *resourceData) addFilterToQuery(listQuery *listQuery, filter 
 				}
 			}
 			numVal, err := strconv.Atoi(v)
+			//TODO: should not return anything where wrong filter
 			if err == nil {
 				if hasPrefix == "" {
 					listQuery.Is(k, numVal)
