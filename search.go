@@ -246,31 +246,31 @@ func (resourceData *resourceData) saveSearchItem(item any) error {
 }
 
 func (resourceData *resourceData) saveSearchItemWithRoles(bulkUpdater *pragelastic.BulkUpdater[searchItem], item any, roles []string) error {
-	//TODO: ugly hack, remove suggestions
-	preview := resourceData.previewer(&user{}, item).Preview(nil)
-	if preview == nil {
+	//TODO: ugly hack with sysadmin user, remove suggestions
+	previewer := resourceData.previewer(&user{Role: "sysadmin"}, item)
+	if previewer == nil {
 		return errors.New("wrong item to relation data conversion")
 	}
-	searchItem := relationDataToSearchItem(resourceData, *preview, roles)
+	searchItem := relationDataToSearchItem(resourceData, previewer, roles)
 	searchItem.Roles = roles
 	return resourceData.app.search.addItem(bulkUpdater, &searchItem, 100)
 }
 
-func relationDataToSearchItem(resourceData *resourceData, data preview, roles []string) searchItem {
+func relationDataToSearchItem(resourceData *resourceData, previewer *previewer, roles []string) searchItem {
 	return searchItem{
-		ID: searchID(resourceData, data.ID),
+		ID: searchID(resourceData, previewer.ID()),
 		SuggestionField: pragelastic.Suggest{
-			Input:  data.Name,
+			Input:  previewer.Name(),
 			Weight: 10,
 			Contexts: map[string][]string{
 				"Roles": roles,
 			},
 		},
 		Category:    resourceData.pluralName("cs"),
-		Name:        data.Name,
-		Description: data.Description,
-		Image:       data.Image,
-		URL:         data.URL,
+		Name:        previewer.Name(),
+		Description: previewer.DescriptionBasic(nil),
+		Image:       previewer.ThumbnailURL(),
+		URL:         previewer.URL(""),
 	}
 }
 
