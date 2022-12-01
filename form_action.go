@@ -10,7 +10,7 @@ type FormAction struct {
 	actionValidation *Action
 }
 
-func newFormAction(app *App, url string) *FormAction {
+func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *FormAction {
 	ret := &FormAction{
 		actionForm:       newAction(app, url).Template("admin_form"),
 		actionValidation: newAction(app, url).Method("POST"),
@@ -23,6 +23,12 @@ func newFormAction(app *App, url string) *FormAction {
 
 		form := NewForm(request.r.URL.Path)
 		form.AddCSRFToken(request)
+		form.action = ret.actionForm
+
+		if injectForm != nil {
+			injectForm(form, request)
+		}
+
 		ret.formGenerator(form, request)
 		return form
 	})
@@ -44,7 +50,7 @@ func newFormAction(app *App, url string) *FormAction {
 }
 
 func (app *App) FormAction(url string) *FormAction {
-	fa := newFormAction(app, url)
+	fa := newFormAction(app, url, nil)
 	app.rootActions = append(app.rootActions, fa.actionForm)
 	app.rootActions = append(app.rootActions, fa.actionValidation)
 	return fa
@@ -77,7 +83,7 @@ func (resource *Resource[T]) FormAction(url string) *FormAction {
 }
 
 func (resourceData *resourceData) FormAction(url string) *FormAction {
-	action := newFormAction(resourceData.app, url)
+	action := newFormAction(resourceData.app, url, nil)
 
 	action.actionForm.resourceData = resourceData
 	action.actionValidation.resourceData = resourceData

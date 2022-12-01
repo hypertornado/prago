@@ -313,7 +313,7 @@ func (field *Field) getIcon() string {
 		if field.relatedResource.icon != "" {
 			return field.relatedResource.icon
 		}
-		return "glyphicons-basic-577-cluster.svg"
+		return iconResource
 	}
 
 	if field.fieldType.fieldTypeIcon != "" {

@@ -2,14 +2,13 @@
 
   <div class="form_container{{if .AutosubmitOnDataChange}} form_container-autosubmit{{end}}">
 
-    <div class="admin_box">
+    <div class="box">
+      {{$boxHeaderData := .GetBoxHeader}}
+      {{template "box_header" $boxHeaderData}}
+
       <form method="POST" action="{{.Action}}" class="form prago_form" enctype="multipart/form-data" novalidate>
         {{if .CSRFToken}}
           <input type="hidden" name="_csrfToken" value="{{.CSRFToken}}">
-        {{end}}
-
-        {{if .Title}}
-          <h1>{{.Title}}</h1>
         {{end}}
 
         <div class="form_errors hidden"></div>

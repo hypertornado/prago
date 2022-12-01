@@ -33,18 +33,24 @@ func (resourceData *resourceData) getRelationView(id int64, field *relatedField,
 
 	ret := &view{}
 
+	icon := iconResource
+	if field.resource.icon != "" {
+		icon = field.resource.icon
+	}
+	ret.Icon = icon
+
 	name := field.listName(user.Locale)
 	ret.Name = name
 	ret.Subname = messages.ItemsCount(filteredCount, user.Locale)
 
-	ret.Navigation = append(ret.Navigation, tab{
-		Name: "☰",
+	ret.Navigation = append(ret.Navigation, viewButton{
+		Icon: iconTable,
 		URL:  field.listURL(int64(id)),
 	})
 
 	if resourceData.app.authorize(user, field.resource.canUpdate) {
-		ret.Navigation = append(ret.Navigation, tab{
-			Name: "+",
+		ret.Navigation = append(ret.Navigation, viewButton{
+			Icon: iconAdd,
 			URL:  field.addURL(int64(id)),
 		})
 	}

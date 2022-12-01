@@ -7,7 +7,10 @@ import (
 
 // Form represents admin form
 type Form struct {
+	action                 *Action
+	image                  string
 	Action                 string
+	Icon                   string
 	Title                  string
 	Items                  []*FormItem
 	Valid                  bool

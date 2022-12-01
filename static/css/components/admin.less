@@ -192,11 +192,15 @@ select.admin_timestamp_minute {
 .view_header {
   margin: 0 auto;
   max-width: 600px;
-  margin-top: 20px;
   padding-bottom: 5px;
   padding-left: 15px;
   display: flex;
   align-items: flex-start;
+}
+
+.view_header_icon {
+  width: 35px;
+  margin-right: 10px;
 }
 
 .view_header_name {
@@ -214,17 +218,7 @@ select.admin_timestamp_minute {
 }
 
 .view_header_tabs {
-  float: right;
-  margin-right: 0px;
   flex-shrink: 0;
-}
-
-.view_header_tabs .admin_navigation_tabs {
-  margin-bottom: 0px;
-}
-
-.admin_box-view {
-  margin-top: 0px;
 }
 
 .view_name {
@@ -264,7 +258,6 @@ select.admin_timestamp_minute {
 
 .progress {
   padding: 5px;
-  //.shadow;
   margin: 0px auto;
   line-height: 100px;
   display: block;
@@ -285,15 +278,6 @@ select.admin_timestamp_minute {
   }
   100% {
     transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 600px) {
-  .admin_box {
-    box-shadow: none;
-    border: none;
-    margin-top: 0px;
-    border-radius: 0px;
   }
 }
 

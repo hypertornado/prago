@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+const iconResource = "glyphicons-basic-577-cluster.svg"
+const iconTable = "glyphicons-basic-120-table.svg"
+const iconAdd = "glyphicons-basic-371-plus.svg"
+
 func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 	app.iconsFS = &iconsFS
 	app.iconsPrefix = prefix

@@ -5,7 +5,9 @@
 {{end}}
 
 {{define "admin_view"}}
+  {{if .Name}}
   <div class="view_header">
+    <img src="/admin/api/icons?file={{.Icon}}&color=444444" class="view_header_icon">
     {{if .Name}}
       <span class="view_header_name">
         {{.Name}}
@@ -16,11 +18,17 @@
         {{end}}
       </span>
     {{end}}
-    <div class="view_header_tabs">
-      {{template "admin_tabs" .Navigation}}
+    <div class="btngroup view_header_tabs">
+      {{range $navItem := .Navigation}}
+        <a href="{{$navItem.URL}}" class="btn"><img src="/admin/api/icons?file={{.Icon}}&color=444444" class="btn_icon"></a>
+      {{end}}
     </div>
   </div>
-  <div class="admin_box admin_box-view">
+  {{end}}
+  <div class="box">
+  {{- if .Header}}
+    {{- template "box_header" .Header}}
+  {{end}}
   {{if .Relation}}
     {{template "admin_item_view_relationlist" .Relation}}
   {{end}}

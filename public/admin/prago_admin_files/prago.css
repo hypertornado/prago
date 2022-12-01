@@ -19,14 +19,6 @@
   margin: 5px;
   flex-shrink: 0;
 }
-.box {
-  border: 1px solid #eee;
-  border-radius: 5px;
-  background-color: white;
-  padding: 5px;
-  display: inline-block;
-  box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
-}
 @font-face {
   font-family: 'Glyphicons Regular';
   src: url('/fonts/glyphicons-regular.woff2') format('woff2'), url('/fonts/glyphicons-regular.woff') format('woff');
@@ -2407,35 +2399,6 @@ ul {
 pre {
   margin: 0px;
 }
-.admin_box {
-  border: 1px solid #eee;
-  margin: 20px auto;
-  max-width: min(600px, 100vw);
-  width: 100%;
-  margin-bottom: 20px;
-  background-color: #fff;
-  border-radius: 10px;
-}
-.admin_box_content {
-  padding: 0px 5px 5px 5px;
-  max-width: 100vw;
-}
-.admin_box h1 {
-  margin-top: 0px;
-  padding: 5px 10px;
-}
-.prago_form h1 {
-  padding-left: 0px;
-}
-.admin_box-wide {
-  box-shadow: none;
-  max-width: none;
-  width: 100%;
-  padding: 0px;
-  margin-top: 0px;
-  border: none;
-  background-color: rgba(0, 0, 0, 0);
-}
 .smap_edit_label {
   background: #cb2431;
   width: 20px;
@@ -2756,11 +2719,14 @@ select.admin_timestamp_minute {
 .view_header {
   margin: 0 auto;
   max-width: 600px;
-  margin-top: 20px;
   padding-bottom: 5px;
   padding-left: 15px;
   display: flex;
   align-items: flex-start;
+}
+.view_header_icon {
+  width: 35px;
+  margin-right: 10px;
 }
 .view_header_name {
   font-weight: 500;
@@ -2775,15 +2741,7 @@ select.admin_timestamp_minute {
   display: block;
 }
 .view_header_tabs {
-  float: right;
-  margin-right: 0px;
   flex-shrink: 0;
-}
-.view_header_tabs .admin_navigation_tabs {
-  margin-bottom: 0px;
-}
-.admin_box-view {
-  margin-top: 0px;
 }
 .view_name {
   font-size: 1rem;
@@ -2834,14 +2792,6 @@ select.admin_timestamp_minute {
   }
   100% {
     transform: rotate(360deg);
-  }
-}
-@media (max-width: 600px) {
-  .admin_box {
-    box-shadow: none;
-    border: none;
-    margin-top: 0px;
-    border-radius: 0px;
   }
 }
 .admin_preview {
@@ -2996,6 +2946,78 @@ select.admin_timestamp_minute {
   display: flex;
   align-items: center;
 }
+.box {
+  border: 1px solid #eee;
+  margin: 20px auto;
+  max-width: min(600px, 100vw);
+  width: 100%;
+  margin-bottom: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  margin-top: 0px;
+  overflow: hidden;
+}
+.box:first-child {
+  margin-top: 20px;
+}
+.box_content {
+  padding: 0px 5px 5px 5px;
+  max-width: 100vw;
+}
+.box_header {
+  border: 0px solid red;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: inline-block;
+  width: 100%;
+  padding: 5px 5px;
+}
+.box_tags {
+  display: flex;
+}
+a.box_tag {
+  display: flex;
+  margin: 3px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #4078c0;
+  text-decoration: none;
+  box-shadow: 0px 1px 10px 1px rgba(0, 0, 0, 0.1);
+}
+a.box_tag:hover {
+  background: white;
+}
+.box_tag_icon {
+  width: 15px;
+  margin-right: 5px;
+}
+.box_icon {
+  text-align: center;
+  margin-top: 15px;
+}
+.box_icon img {
+  width: 30px;
+}
+.box_name {
+  margin-top: 0px;
+  padding: 5px 10px;
+  text-align: center;
+  font-size: 2.3rem;
+  line-height: 1.3em;
+  font-weight: 500;
+}
+@media (max-width: 600px) {
+  .box {
+    box-shadow: none;
+    border: none;
+    margin-top: 0px;
+    border-radius: 0px;
+  }
+}
 .list {
   min-height: 100vh;
 }
@@ -3143,11 +3165,14 @@ select.admin_timestamp_minute {
 }
 .list_multiple_actions_content {
   border: 1px solid #eee;
-  border-radius: 5px;
-  background-color: white;
-  padding: 5px;
-  display: inline-block;
-  box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  max-width: min(600px, 100vw);
+  width: 100%;
+  margin-bottom: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  margin-top: 0px;
+  overflow: hidden;
   pointer-events: initial;
   display: flex;
   align-items: center;
@@ -4568,6 +4593,7 @@ a.admin_stats_section_row {
   grid-gap: 10px 10px;
   max-width: 100vw;
   margin: 0px;
+  padding: 5px;
 }
 .tasks_group {
   border-radius: 10px;

@@ -116,6 +116,18 @@ func (app *App) getItemImage(item interface{}) string {
 	return ""
 }
 
+func (app *App) getItemImageLarge(item interface{}) string {
+	//TODO: Authorize field
+	if item != nil {
+		itemsVal := reflect.ValueOf(item).Elem()
+		field := itemsVal.FieldByName("Image")
+		if field.IsValid() {
+			return app.largeImage(field.String())
+		}
+	}
+	return ""
+}
+
 type namedIFace interface {
 	GetName() string
 }

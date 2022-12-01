@@ -1,0 +1,28 @@
+{{define "box_header" -}}
+    <div class="box_header" {{if .Image}}
+        style="background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 1)), url('{{CSS .Image}}')"
+    {{end}}>
+
+        {{if .Tags}}
+            <div class="box_tags">
+                {{range $tag := .Tags}}
+                    <a href="{{$tag.URL}}" class="box_tag">
+                        {{if $tag.Icon}}
+                            <img class="box_tag_icon" src="/admin/api/icons?file={{$tag.Icon}}&color=4078c0">
+                        {{end}}
+                        <div class="box_tag_text">{{$tag.Name}}</div>
+                    </a>
+                {{end}}
+            </div>
+        {{end}}
+        {{if .Icon}}
+            <div class="box_icon">
+                <img src="/admin/api/icons?file={{.Icon}}&color=444444">
+            </div>
+        {{end}}
+
+        {{if .Name}}
+            <div class="box_name">{{.Name}}</div>
+        {{end}}
+    </div>
+{{end}}

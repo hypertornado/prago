@@ -47,6 +47,19 @@ func (app *App) thumb(ids string) string {
 	return ""
 }
 
+func (app *App) largeImage(ids string) string {
+	if ids == "" {
+		return ""
+	}
+	for _, v := range strings.Split(ids, ",") {
+		image := app.FilesResource.Is("uid", v).First()
+		if image != nil && image.isImage() {
+			return image.GetLarge()
+		}
+	}
+	return ""
+}
+
 func (app *App) thumbnailExactSize(ids string, width, height int) string {
 	if ids == "" {
 		return ""

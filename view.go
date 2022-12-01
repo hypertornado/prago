@@ -10,7 +10,8 @@ type view struct {
 	Icon         string
 	Name         string
 	Subname      string
-	Navigation   []tab
+	Navigation   []viewButton
+	Header       *BoxHeader
 	Items        []viewField
 	Relation     *viewRelation
 	QuickActions []QuickActionView
@@ -23,6 +24,11 @@ type viewField struct {
 	Value    interface{}
 }
 
+type viewButton struct {
+	URL  string
+	Icon string
+}
+
 func (resourceData *resourceData) getViews(item any, user *user) (ret []view) {
 	id := getItemID(item)
 	ret = append(ret, resourceData.getBasicView(id, item, user))
@@ -33,11 +39,12 @@ func (resourceData *resourceData) getViews(item any, user *user) (ret []view) {
 func (resourceData *resourceData) getBasicView(id int64, item any, user *user) view {
 	ret := view{
 		QuickActions: resourceData.getQuickActionViews(item, user),
+		Header:       &BoxHeader{},
 	}
 
 	tableIcon := resourceData.icon
 	if tableIcon == "" {
-		tableIcon = "glyphicons-basic-120-table.svg"
+		tableIcon = iconTable
 	}
 
 	ret.Items = append(
@@ -52,6 +59,20 @@ func (resourceData *resourceData) getBasicView(id int64, item any, user *user) v
 			},
 		},
 	)
+
+	ret.Header.Name = getItemName(item)
+	ret.Header.Icon = tableIcon
+	ret.Header.Image = resourceData.app.getItemImageLarge(item)
+
+	resourceIcon := resourceData.icon
+	if resourceIcon == "" {
+		resourceIcon = iconResource
+	}
+	ret.Header.Tags = append(ret.Header.Tags, BoxTag{
+		URL:  fmt.Sprintf("/admin/%s", resourceData.id),
+		Icon: resourceIcon,
+		Name: resourceData.pluralName(user.Locale),
+	})
 
 	for i, f := range resourceData.fields {
 		if !f.authorizeView(user) {
