@@ -76,7 +76,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 			}
 
 			request.RenderJSON(
-				resourceData.getPreview(item, request.user, nil),
+				resourceData.previewer(request.user, item).Preview(nil),
 			)
 		},
 	)
@@ -118,7 +118,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 			if err == nil {
 				item := resourceData.ID(id)
 				if item != nil {
-					relationItem := resourceData.getPreview(item, request.user, nil)
+					relationItem := resourceData.previewer(request.user, item).Preview(nil)
 					if relationItem != nil {
 						usedIDs[relationItem.ID] = true
 						ret = append(ret, *relationItem)
@@ -140,7 +140,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				itemVals := reflect.ValueOf(items)
 				itemLen := itemVals.Len()
 				for i := 0; i < itemLen; i++ {
-					viewItem := resourceData.getPreview(itemVals.Index(i).Interface(), request.user, nil)
+					viewItem := resourceData.previewer(request.user, itemVals.Index(i).Interface()).Preview(nil)
 					if viewItem != nil && !usedIDs[viewItem.ID] {
 						usedIDs[viewItem.ID] = true
 						ret = append(ret, *viewItem)

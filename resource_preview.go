@@ -27,6 +27,14 @@ func (resourceData *resourceData) previewer(user *user, item any) *previewer {
 	return prev
 }
 
+/*func (resourceData *resourceData) previewerFromID(user *user, id int64) (*previewer, error) {
+	item := resourceData.query().ID(id)
+	if item == nil {
+		return nil, errors.New("can't find item for previewer")
+	}
+	return resourceData.getPreviewer(user, item)
+}*/
+
 func (resourceData *resourceData) getPreviewer(user *user, item any) (*previewer, error) {
 	if reflect.PointerTo(resourceData.typ) != reflect.TypeOf(item) {
 		return nil, errors.New("wrong type of previewer item")
@@ -127,13 +135,25 @@ func (previewer *previewer) Name() string {
 	return -1
 }*/
 
-func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
-	ret, _ := getPreviewData(user, f, value.(int64))
-	return ret
-}
+/*func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
+	return f.relationPreview(user, value.(int64))
+}*/
 
-func getPreviewData(user *user, f *Field, value int64) (*preview, error) {
-	app := f.resource.app
+func (f *Field) relationPreview(user *user, id int64) *preview {
+	item := f.relatedResource.query().ID(id)
+	if item == nil {
+		return nil
+	}
+	return f.relatedResource.previewer(user, item).Preview(f.resource)
+
+	/*previewer, err := f.relatedResource.previewerFromID(user, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return previewer.Preview(f.resource), nil*/
+
+	/*app := f.resource.app
 	if f.relatedResource == nil {
 		return nil, fmt.Errorf("resource not found: %s", f.name("en"))
 	}
@@ -142,17 +162,17 @@ func getPreviewData(user *user, f *Field, value int64) (*preview, error) {
 		return nil, fmt.Errorf("user is not authorized to view this item")
 	}
 
-	item := f.relatedResource.query().ID(value)
+	item := f.relatedResource.query().ID(id)
 	if item == nil {
 		return nil, errors.New("can't get item preview")
 	}
 
-	ret := f.relatedResource.getPreview(item, user, nil)
+	ret := f.relatedResource.previewer(user, item).Preview(f.resource)
 	if ret == nil {
 		return nil, errors.New("can't get item preview")
 	}
 
-	return ret, nil
+	return ret, nil*/
 }
 
 /*func (resourceData *resourceData) getItemPreview(id int64, user *user, relatedResource *resourceData) *preview {
@@ -163,13 +183,17 @@ func getPreviewData(user *user, f *Field, value int64) (*preview, error) {
 	return resourceData.getPreview(item, user, nil)
 }*/
 
-func (resourceData *resourceData) getPreview(item any, user *user, relatedResource *resourceData) *preview {
+func (previewer *previewer) URL(suffix string) string {
+	return previewer.resourceData.getItemURL(previewer.item, suffix, previewer.user)
+}
+
+func (previewer *previewer) Preview(relatedResource *resourceData) *preview {
 	var ret preview
-	ret.ID = resourceData.previewer(user, item).ID()
-	ret.Name = resourceData.previewer(user, item).Name()
-	ret.URL = resourceData.getItemURL(item, "", user)
-	ret.Image = resourceData.previewer(user, item).ThumbnailURL()
-	ret.Description = resourceData.getItemDescription(item, user, relatedResource)
+	ret.ID = previewer.ID()
+	ret.Name = previewer.Name()
+	ret.URL = previewer.URL("")
+	ret.Image = previewer.ThumbnailURL()
+	ret.Description = previewer.Description(relatedResource)
 	return &ret
 }
 
@@ -199,15 +223,13 @@ type namedIFace interface {
 	GetName(string) string
 }
 
-func (resourceData *resourceData) getItemDescription(item any, user *user, relatedResource *resourceData) string {
+func (previewer *previewer) Description(relatedResource *resourceData) string {
 	var items []string
-	itemsVal := reflect.ValueOf(item).Elem()
+	itemsVal := reflect.ValueOf(previewer.item).Elem()
 
-	//TODO: check access
-
-	if item != nil {
+	if previewer.item != nil {
 		field := itemsVal.FieldByName("Description")
-		if field.IsValid() {
+		if field.IsValid() && previewer.hasAccessToField("Description") {
 			ret := field.String()
 			croped := cropMarkdown(ret, 200)
 			if croped != "" {
@@ -216,11 +238,11 @@ func (resourceData *resourceData) getItemDescription(item any, user *user, relat
 		}
 	}
 
-	for _, v := range resourceData.fields {
+	for _, v := range previewer.resourceData.fields {
 		if v.fieldClassName == "ID" || v.fieldClassName == "Name" || v.fieldClassName == "Description" {
 			continue
 		}
-		if !v.authorizeView(user) {
+		if !v.authorizeView(previewer.user) {
 			continue
 		}
 
@@ -230,9 +252,9 @@ func (resourceData *resourceData) getItemDescription(item any, user *user, relat
 		}
 
 		field := itemsVal.FieldByName(v.fieldClassName)
-		stringed := resourceData.app.relationStringer(*v, field, user)
+		stringed := previewer.resourceData.app.relationStringer(*v, field, previewer.user)
 		if stringed != "" {
-			items = append(items, fmt.Sprintf("%s: %s", v.name(user.Locale), stringed))
+			items = append(items, fmt.Sprintf("%s: %s", v.name(previewer.user.Locale), stringed))
 		}
 	}
 	ret := strings.Join(items, " · ")

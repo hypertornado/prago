@@ -112,8 +112,11 @@ func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("relation", &fieldType{
 		viewTemplate: "admin_item_view_relation",
 		//listCellTemplate: "admin_item_view_relation_cell",
-		viewDataSource: getRelationViewData,
-		formTemplate:   "admin_item_relation",
+		viewDataSource: func(user *user, f *Field, value interface{}) interface{} {
+			return f.relationPreview(user, value.(int64))
+		},
+		//viewDataSource: getRelationViewData,
+		formTemplate: "admin_item_relation",
 		formDataSource: func(f *Field, u *user) interface{} {
 			if f.tags["prago-relation"] != "" {
 				return columnName(f.tags["prago-relation"])
@@ -162,7 +165,7 @@ func markdownListDataSource(user *user, f *Field, value interface{}) cellViewDat
 }
 
 func relationCellViewData(user *user, f *Field, value interface{}) cellViewData {
-	previewData, _ := getPreviewData(user, f, value.(int64))
+	previewData := f.relationPreview(user, value.(int64))
 	if previewData == nil {
 		return cellViewData{}
 	}
@@ -177,7 +180,6 @@ func relationCellViewData(user *user, f *Field, value interface{}) cellViewData 
 }
 
 func imageCellViewData(user *user, f *Field, value interface{}) cellViewData {
-
 	data := value.(string)
 	images := strings.Split(data, ",")
 	ret := cellViewData{}
@@ -185,15 +187,6 @@ func imageCellViewData(user *user, f *Field, value interface{}) cellViewData {
 		ret.Images = images
 	}
 	return ret
-
-	/*previewData, _ := getPreviewData(user, f, value.(int64))
-	ret := cellViewData{
-		Name: previewData.Name,
-	}
-	if previewData.Image != "" {
-		ret.Images = []string{previewData.Image}
-	}
-	return ret*/
 }
 
 type cellViewData struct {

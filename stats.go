@@ -272,8 +272,8 @@ func (resourceData *resourceData) getListStatsTable(field *Field, user *user, pa
 					row.Name = "–"
 				}
 
-				rd, err := getPreviewData(user, field, v)
-				if err == nil {
+				rd := field.relationPreview(user, v)
+				if rd != nil {
 					row.Name = rd.Name
 					row.URL = rd.URL
 					row.Image = rd.Image

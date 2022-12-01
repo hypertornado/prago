@@ -246,8 +246,8 @@ func (resourceData *resourceData) saveSearchItem(item any) error {
 }
 
 func (resourceData *resourceData) saveSearchItemWithRoles(bulkUpdater *pragelastic.BulkUpdater[searchItem], item any, roles []string) error {
-	//TODO: ugly hack
-	preview := resourceData.getPreview(item, &user{}, nil)
+	//TODO: ugly hack, remove suggestions
+	preview := resourceData.previewer(&user{}, item).Preview(nil)
 	if preview == nil {
 		return errors.New("wrong item to relation data conversion")
 	}

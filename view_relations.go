@@ -130,7 +130,7 @@ func (resourceData *resourceData) getPreviews(listRequest relationListRequest, u
 	for i := 0; i < itemLen; i++ {
 		ret = append(
 			ret,
-			resourceData.getPreview(itemVals.Index(i).Interface(), user, sourceResource),
+			resourceData.previewer(user, itemVals.Index(i).Interface()).Preview(sourceResource),
 		)
 	}
 
