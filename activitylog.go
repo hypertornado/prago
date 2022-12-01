@@ -124,9 +124,9 @@ func (resourceData *resourceData) LogActivity(user *user, before, after any) err
 
 	var itemID int64 = -1
 	if before != nil {
-		itemID = getItemID(before)
+		itemID = resourceData.previewer(user, before).ID()
 	} else {
-		itemID = getItemID(after)
+		itemID = resourceData.previewer(user, after).ID()
 	}
 
 	var err error

@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -10,14 +9,6 @@ import (
 )
 
 type relatedField Field
-
-type preview struct {
-	ID          int64
-	Image       string
-	URL         string
-	Name        string
-	Description string
-}
 
 func (app *App) initRelations() {
 	for _, resourceData := range app.resources {
@@ -63,134 +54,6 @@ func (field *relatedField) listName(locale string) string {
 	return field.resource.pluralName(locale)
 }
 
-func getRelationViewData(user *user, f *Field, value interface{}) interface{} {
-	ret, _ := getPreviewData(user, f, value.(int64))
-	return ret
-}
-
-func getPreviewData(user *user, f *Field, value int64) (*preview, error) {
-	app := f.resource.app
-	if f.relatedResource == nil {
-		return nil, fmt.Errorf("resource not found: %s", f.name("en"))
-	}
-
-	if !app.authorize(user, f.relatedResource.canView) {
-		return nil, fmt.Errorf("user is not authorized to view this item")
-	}
-
-	ret := f.relatedResource.getItemPreview(value, user, f.resource)
-	if ret == nil {
-		return nil, errors.New("can't get item preview")
-	}
-	return ret, nil
-}
-
-func (resourceData *resourceData) getItemPreview(id int64, user *user, relatedResource *resourceData) *preview {
-	item := resourceData.query().ID(id)
-	if item == nil {
-		return nil
-	}
-	return resourceData.getPreview(item, user, nil)
-
-}
-
-func (resourceData *resourceData) getPreview(item any, user *user, relatedResource *resourceData) *preview {
-	var ret preview
-	ret.ID = getItemID(item)
-	ret.Name = getItemName(item)
-	ret.URL = resourceData.getItemURL(item, "")
-	ret.Image = resourceData.app.getItemImage(item)
-	ret.Description = resourceData.getItemDescription(item, user, relatedResource)
-	return &ret
-}
-
-func (app *App) getItemImage(item interface{}) string {
-	//TODO: Authorize field
-	if item != nil {
-		itemsVal := reflect.ValueOf(item).Elem()
-		field := itemsVal.FieldByName("Image")
-		if field.IsValid() {
-			return app.thumb(field.String())
-		}
-	}
-	return ""
-}
-
-func (app *App) getItemImageLarge(item interface{}) string {
-	//TODO: Authorize field
-	if item != nil {
-		itemsVal := reflect.ValueOf(item).Elem()
-		field := itemsVal.FieldByName("Image")
-		if field.IsValid() {
-			return app.largeImage(field.String())
-		}
-	}
-	return ""
-}
-
-type namedIFace interface {
-	GetName() string
-}
-
-func getItemName(item interface{}) string {
-	//TODO: Authorize field
-	if item != nil {
-		itemsVal := reflect.ValueOf(item).Elem()
-		var valIface = itemsVal.Interface()
-		namedIface, ok := valIface.(namedIFace)
-		if ok {
-			return namedIface.GetName()
-		}
-		field := itemsVal.FieldByName("Name")
-		if field.IsValid() {
-			ret := field.String()
-			if ret != "" {
-				return ret
-			}
-		}
-	}
-	return fmt.Sprintf("#%d", getItemID(item))
-}
-
-func (resourceData *resourceData) getItemDescription(item any, user *user, relatedResource *resourceData) string {
-	var items []string
-	itemsVal := reflect.ValueOf(item).Elem()
-
-	//TODO: Authorize description field
-	if item != nil {
-		field := itemsVal.FieldByName("Description")
-		if field.IsValid() {
-			ret := field.String()
-			croped := cropMarkdown(ret, 200)
-			if croped != "" {
-				items = append(items, croped)
-			}
-		}
-	}
-
-	for _, v := range resourceData.fields {
-		if v.fieldClassName == "ID" || v.fieldClassName == "Name" || v.fieldClassName == "Description" {
-			continue
-		}
-		if !v.authorizeView(user) {
-			continue
-		}
-
-		rr := v.relatedResource
-		if rr != nil && relatedResource != nil && rr.getID() == relatedResource.getID() {
-			continue
-		}
-
-		field := itemsVal.FieldByName(v.fieldClassName)
-		stringed := resourceData.app.relationStringer(*v, field, user)
-		if stringed != "" {
-			items = append(items, fmt.Sprintf("%s: %s", v.name(user.Locale), stringed))
-		}
-	}
-	ret := strings.Join(items, " · ")
-	return cropMarkdown(ret, 500)
-}
-
 func (app App) relationStringer(field Field, value reflect.Value, user *user) string {
 
 	switch value.Kind() {
@@ -204,7 +67,13 @@ func (app App) relationStringer(field Field, value reflect.Value, user *user) st
 			if value.Int() <= 0 {
 				return ""
 			}
-			field.relatedResource.resourceItemName(int64(value.Int()))
+
+			id := int64(value.Int())
+			item := field.relatedResource.query().ID(id)
+			if item == nil {
+				return fmt.Sprintf("%d - not found", id)
+			}
+			return field.relatedResource.previewer(user, item).Name()
 		}
 		return fmt.Sprintf("%v", value.Int())
 	case reflect.Float32, reflect.Float64:
@@ -225,25 +94,4 @@ func (app App) relationStringer(field Field, value reflect.Value, user *user) st
 		}
 	}
 	return ""
-}
-
-func (resourceData *resourceData) resourceItemName(id int64) string {
-	item := resourceData.query().ID(id)
-	if item == nil {
-		return fmt.Sprintf("%d - not found", id)
-	}
-	return getItemName(item)
-}
-
-func getItemID(item interface{}) int64 {
-	if item == nil {
-		return -1
-	}
-
-	itemsVal := reflect.ValueOf(item).Elem()
-	field := itemsVal.FieldByName("ID")
-	if field.IsValid() {
-		return field.Int()
-	}
-	return -1
 }

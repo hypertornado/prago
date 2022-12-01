@@ -257,22 +257,21 @@ func (field *Field) filterLayout() string {
 	return ""
 }
 
-func (resourceData *resourceData) addFilterParamsToQuery(listQuery *listQuery, params url.Values) *listQuery {
+func (resourceData *resourceData) addFilterParamsToQuery(listQuery *listQuery, params url.Values, user *user) *listQuery {
 	filter := map[string]string{}
 	for _, v := range resourceData.fieldMap {
-		key := v.id
-		val := params.Get(key)
-		if val != "" {
-			filter[key] = val
+		if resourceData.app.authorize(user, v.canView) {
+			key := v.id
+			val := params.Get(key)
+			if val != "" {
+				filter[key] = val
+			}
 		}
 	}
 	return resourceData.addFilterToQuery(listQuery, filter)
 }
 
 func (resourceData *resourceData) addFilterToQuery(listQuery *listQuery, filter map[string]string) *listQuery {
-
-	//TODO: check access
-
 	for k, v := range filter {
 		field := resourceData.fieldMap[k]
 		if field == nil {
@@ -407,7 +406,7 @@ func (resourceData *resourceData) getListContent(user *user, params url.Values) 
 
 	var count int64
 	countQuery := resourceData.query()
-	countQuery = resourceData.addFilterParamsToQuery(countQuery, params)
+	countQuery = resourceData.addFilterParamsToQuery(countQuery, params, user)
 	count, err = countQuery.count()
 	if err != nil {
 		return
@@ -445,7 +444,7 @@ func (resourceData *resourceData) getListContent(user *user, params url.Values) 
 		SelectedPage: int64(currentPage),
 	}
 
-	q = resourceData.addFilterParamsToQuery(q, params)
+	q = resourceData.addFilterParamsToQuery(q, params, user)
 	q = q.Offset((int64(currentPage) - 1) * itemsPerPage)
 	q = q.Limit(itemsPerPage)
 

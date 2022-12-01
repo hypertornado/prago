@@ -39,11 +39,11 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 			}
 			must(resourceData.CreateWithLog(item, request))
 
-			resourceData.app.Notification(getItemName(item)).
-				SetImage(resourceData.app.getItemImage(item)).
+			resourceData.app.Notification(resourceData.previewer(request.user, item).Name()).
+				SetImage(resourceData.previewer(request.user, item).ThumbnailURL()).
 				SetPreName(messages.Get(request.user.Locale, "admin_item_created")).
 				Flash(request)
-			vc.Validation().RedirectionLocaliton = resourceData.getItemURL(item, "")
+			vc.Validation().RedirectionLocaliton = resourceData.getItemURL(item, "", request.user)
 		}
 	})
 
@@ -78,8 +78,8 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 			id, err := strconv.Atoi(request.Param("id"))
 			must(err)
 
-			resourceData.app.Notification(getItemName(item)).
-				SetImage(resourceData.app.getItemImage(item)).
+			resourceData.app.Notification(resourceData.previewer(user, item).Name()).
+				SetImage(resourceData.previewer(request.user, item).ThumbnailURL()).
 				SetPreName(messages.Get(user.Locale, "admin_item_edited")).
 				Flash(request)
 
@@ -94,7 +94,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 	resourceData.FormItemAction("delete").Icon("glyphicons-basic-17-bin.svg").priority().Permission(resourceData.canDelete).Name(messages.GetNameFunction("admin_delete")).Form(
 		func(item any, form *Form, request *Request) {
 			form.AddDeleteSubmit(messages.Get(request.user.Locale, "admin_delete"))
-			itemName := getItemName(item)
+			itemName := resourceData.previewer(request.user, item).Name()
 			form.Title = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
 		},
 	).Validation(func(item any, vc ValidationContext) {
@@ -130,7 +130,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 				if item == nil {
 					return nil
 				}
-				return resourceData.app.getHistory(resourceData, getItemID(item))
+				return resourceData.app.getHistory(resourceData, resourceData.previewer(request.user, item).ID())
 			},
 		)
 	}
@@ -179,7 +179,7 @@ func (resourceData *resourceData) DeleteWithLog(item any, request *Request) erro
 		}
 	}
 
-	id := getItemID(item)
+	id := resourceData.previewer(request.user, item).ID()
 
 	err := resourceData.Delete(id)
 	if err != nil {
@@ -250,7 +250,7 @@ func (resource *Resource[T]) UpdateWithLog(item *T, request *Request) error {
 }
 
 func (resourceData *resourceData) UpdateWithLog(item any, request *Request) error {
-	id := getItemID(item)
+	id := resourceData.previewer(request.user, item).ID()
 	beforeItem := resourceData.ID(id)
 	if beforeItem == nil {
 		return errors.New("can't find before item")

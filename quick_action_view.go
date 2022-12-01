@@ -37,7 +37,7 @@ func (resourceData *resourceData) getQuickActionViews(itemIface any, user *user)
 			}
 
 			view := QuickActionView{
-				ActionURL: quickActionData.getApiURL(getItemID(itemIface)),
+				ActionURL: quickActionData.getApiURL(resourceData.previewer(user, itemIface).ID()),
 				Name:      quickActionData.singularName(user.Locale),
 				TypStr:    typStr,
 			}

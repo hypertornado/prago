@@ -60,7 +60,7 @@ func (resourceData *resourceData) getListStats(user *user, params url.Values) *l
 	}
 	columnsAr := strings.Split(columnsStr, ",")
 
-	query := resourceData.addFilterParamsToQuery(resourceData.query(), params)
+	query := resourceData.addFilterParamsToQuery(resourceData.query(), params, user)
 	total, err := query.count()
 	if err != nil {
 		panic(err)
@@ -102,7 +102,7 @@ func (resourceData *resourceData) getListStatsDateSections(field *Field, user *u
 }
 
 func (resourceData *resourceData) getListStatsDateSectionDay(field *Field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
-	query := resourceData.addFilterParamsToQuery(resourceData.query(), params)
+	query := resourceData.addFilterParamsToQuery(resourceData.query(), params, user)
 	whereParams := query.values
 	q := fmt.Sprintf("SELECT DAY(%s), MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY DAY(%s), MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.id,
@@ -147,7 +147,7 @@ func (resourceData *resourceData) getListStatsDateSectionDay(field *Field, user 
 }
 
 func (resourceData *resourceData) getListStatsDateSectionMonth(field *Field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
-	query := resourceData.addFilterParamsToQuery(resourceData.query(), params)
+	query := resourceData.addFilterParamsToQuery(resourceData.query(), params, user)
 	whereParams := query.values
 	q := fmt.Sprintf("SELECT MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.id,
@@ -189,7 +189,7 @@ func (resourceData *resourceData) getListStatsDateSectionMonth(field *Field, use
 }
 
 func (resourceData *resourceData) getListStatsDateSectionYear(field *Field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
-	query := resourceData.addFilterParamsToQuery(resourceData.query(), params)
+	query := resourceData.addFilterParamsToQuery(resourceData.query(), params, user)
 	whereParams := query.values
 	q := fmt.Sprintf("SELECT YEAR(%s), COUNT(id) FROM %s %s GROUP BY YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.id,
@@ -228,7 +228,7 @@ func (resourceData *resourceData) getListStatsDateSectionYear(field *Field, user
 }
 
 func (resourceData *resourceData) getListStatsTable(field *Field, user *user, params url.Values, total, limit int64) (table []listStatsRow) {
-	query := resourceData.addFilterParamsToQuery(resourceData.query(), params)
+	query := resourceData.addFilterParamsToQuery(resourceData.query(), params, user)
 	whereParams := query.values
 
 	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.id, resourceData.getID(), buildWhereString(query.conditions), field.id, limit)
@@ -334,7 +334,7 @@ func (resourceData *resourceData) getListStatsTableInt(field *Field, user *user,
 		return
 	}
 
-	query := resourceData.addFilterParamsToQuery(resourceData.query(), params)
+	query := resourceData.addFilterParamsToQuery(resourceData.query(), params, user)
 
 	whereParams := query.values
 

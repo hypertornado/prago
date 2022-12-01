@@ -30,7 +30,7 @@ type viewButton struct {
 }
 
 func (resourceData *resourceData) getViews(item any, user *user) (ret []view) {
-	id := getItemID(item)
+	id := resourceData.previewer(user, item).ID()
 	ret = append(ret, resourceData.getBasicView(id, item, user))
 	ret = append(ret, resourceData.getRelationViews(id, user)...)
 	return ret
@@ -60,9 +60,9 @@ func (resourceData *resourceData) getBasicView(id int64, item any, user *user) v
 		},
 	)
 
-	ret.Header.Name = getItemName(item)
+	ret.Header.Name = resourceData.previewer(user, item).Name()
 	ret.Header.Icon = tableIcon
-	ret.Header.Image = resourceData.app.getItemImageLarge(item)
+	ret.Header.Image = resourceData.previewer(user, item).ImageURL()
 
 	resourceIcon := resourceData.icon
 	if resourceIcon == "" {

@@ -114,13 +114,13 @@ func (resourceData *resourceData) getItemNavigation(user *user, item interface{}
 		if v.getMethod() == "GET" {
 			name := v.getName(user.Locale)
 			if v.getURLToken() == "" {
-				name = getItemName(item)
+				name = resourceData.previewer(user, item).Name()
 			}
 			if resourceData.app.authorize(user, v.getPermission()) {
 				tabs = append(tabs, tab{
 					Icon:     v.getIcon(),
 					Name:     name,
-					URL:      resourceData.getItemURL(item, v.getURLToken()),
+					URL:      resourceData.getItemURL(item, v.getURLToken(), user),
 					Selected: trueIfEqual(code, v.getURLToken()),
 					priority: v.returnIsPriority(),
 				})

@@ -283,8 +283,8 @@ func (resource *Resource[T]) DeleteValidation(validation Validation) *Resource[T
 	return resource
 }
 
-func (resourceData *resourceData) getItemURL(item interface{}, suffix string) string {
-	ret := resourceData.getURL(fmt.Sprintf("%d", getItemID(item)))
+func (resourceData *resourceData) getItemURL(item interface{}, suffix string, user *user) string {
+	ret := resourceData.getURL(fmt.Sprintf("%d", resourceData.previewer(user, item).ID()))
 	if suffix != "" {
 		ret += "/" + suffix
 	}
