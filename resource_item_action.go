@@ -1,5 +1,7 @@
 package prago
 
+import "strconv"
+
 type ResourceItemAction[T any] struct {
 	data *resourceItemActionData
 }
@@ -20,6 +22,15 @@ func (resourceData *resourceData) ItemAction(url string) *resourceItemActionData
 	action.resourceData = resourceData
 	action.isItemAction = true
 	action.permission = resourceData.canView
+	action.addConstraint(func(m map[string]string) bool {
+		id, err := strconv.Atoi(m["id"])
+		if err != nil {
+			return false
+		}
+		item := resourceData.query().ID(id)
+		return item != nil
+	})
+
 	resourceData.itemActions = append(resourceData.itemActions, action)
 
 	return &resourceItemActionData{

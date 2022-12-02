@@ -3,8 +3,7 @@
   {{template "searchbox" .search_q}}
 
   <div class="box">
-    <h1>{{.admin_title}}</h1>
-
+    {{template "box_header" .box_header}}
     {{range $result := .search_results}}
       <a href="{{$result.URL}}" class="search">
         <div class="search_icon"

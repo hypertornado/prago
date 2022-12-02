@@ -510,18 +510,22 @@ class List {
         let totalWidth = this.listHeader.getBoundingClientRect().width;
         this.tableContent.setAttribute("style", "width: " + totalWidth + "px;");
         let headerItems = this.list.querySelectorAll(".list_header > :not(.hidden)");
+        let widths = [];
+        for (let j = 0; j < headerItems.length; j++) {
+            let headerEl = headerItems[j];
+            var clientRect = headerEl.getBoundingClientRect();
+            var elWidth = clientRect.width;
+            widths.push(elWidth);
+        }
         let tableRows = this.list.querySelectorAll(".list_row");
         for (let i = 0; i < tableRows.length; i++) {
             let rowItems = tableRows[i].children;
-            for (let j = 0; j < headerItems.length; j++) {
+            for (let j = 0; j < widths.length; j++) {
                 if (j >= rowItems.length) {
                     break;
                 }
-                let headerEl = headerItems[j];
                 let tableEl = rowItems[j];
-                var clientRect = headerEl.getBoundingClientRect();
-                var elWidth = clientRect.width;
-                tableEl.setAttribute("style", "width: " + elWidth + "px;");
+                tableEl.style.width = widths[j] + "px";
             }
         }
     }
@@ -2179,7 +2183,7 @@ class SearchForm {
         }
     }
 }
-class MainMenu {
+class Menu {
     constructor() {
         this.rootEl = document.querySelector(".root");
         this.rootLeft = document.querySelector(".root_left");
@@ -2618,6 +2622,9 @@ class LoadingPopup extends Popup {
     }
 }
 function initSMap() {
+    if (!window.Loader) {
+        return;
+    }
     Loader.async = true;
     Loader.load(null, null, loadSMap);
 }
@@ -2799,9 +2806,9 @@ class Prago {
         imageViews.forEach((el) => {
             new ImageView(el);
         });
-        var mainMenuEl = document.querySelector(".root_left");
-        if (mainMenuEl) {
-            new MainMenu();
+        var menuEl = document.querySelector(".root_left");
+        if (menuEl) {
+            new Menu();
         }
         var relationListEls = document.querySelectorAll(".admin_relationlist");
         relationListEls.forEach((el) => {

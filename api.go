@@ -75,11 +75,13 @@ func (app *App) bindAPIs() {
 		}
 	}
 
+	controller := app.adminController
+
 	//TODO: support ANY
-	app.adminController.get(app.getAdminURL("api/*"), renderAPINotFound)
-	app.adminController.post(app.getAdminURL("api/*"), renderAPINotFound)
-	app.adminController.delete(app.getAdminURL("api/*"), renderAPINotFound)
-	app.adminController.put(app.getAdminURL("api/*"), renderAPINotFound)
+	controller.get(app.getAdminURL("api/*"), renderAPINotFound)
+	controller.post(app.getAdminURL("api/*"), renderAPINotFound)
+	controller.delete(app.getAdminURL("api/*"), renderAPINotFound)
+	controller.put(app.getAdminURL("api/*"), renderAPINotFound)
 }
 
 func (api *API) bindAPI() error {
@@ -88,7 +90,8 @@ func (api *API) bindAPI() error {
 	if api.resourceData != nil {
 		controller = api.resourceData.getResourceControl()
 	} else {
-		controller = api.app.adminController
+		//controller = api.app.adminController
+		controller = api.app.accessController
 	}
 
 	var url string

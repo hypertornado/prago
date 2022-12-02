@@ -14,21 +14,24 @@ type buttonData struct {
 
 // Action represents action
 type Action struct {
-	name       func(string) string
-	icon       string
-	permission Permission
-	method     string
-	url        string
-	handler    func(*Request)
-	template   string
-	dataSource func(*Request) interface{}
+	name          func(string) string
+	icon          string
+	permission    Permission
+	method        string
+	url           string
+	handler       func(*Request)
+	template      string
+	dataSource    func(*Request) interface{}
+	constraints   []func(map[string]string) bool
+	parentBoard   *Board
+	isPartOfBoard *Board
 
-	app                *App
-	resourceData       *resourceData
-	isItemAction       bool
-	isUserMenu         bool
-	isHiddenInMainMenu bool
-	isPriority         bool
+	app            *App
+	resourceData   *resourceData
+	isItemAction   bool
+	isUserMenu     bool
+	isHiddenInMenu bool
+	isPriority     bool
 }
 
 func bindAction(action ActionIface) error {
@@ -87,11 +90,12 @@ func (resourceData *resourceData) bindActions() {
 
 func newAction(app *App, url string) *Action {
 	return &Action{
-		name:       unlocalized(url),
-		permission: "",
-		method:     "GET",
-		url:        url,
-		app:        app,
+		name:        unlocalized(url),
+		permission:  "",
+		method:      "GET",
+		url:         url,
+		app:         app,
+		parentBoard: app.MainBoard,
 	}
 }
 
@@ -178,13 +182,18 @@ func (action *Action) DataSource(dataSource func(*Request) interface{}) *Action 
 	return action
 }
 
+func (action *Action) Board(board *Board) *Action {
+	action.parentBoard = board
+	return action
+}
+
 func (action *Action) userMenu() *Action {
 	action.isUserMenu = true
 	return action
 }
 
-func (action *Action) hiddenInMainMenu() *Action {
-	action.isHiddenInMainMenu = true
+func (action *Action) hiddenInMenu() *Action {
+	action.isHiddenInMenu = true
 	return action
 }
 
@@ -193,6 +202,10 @@ func (action *Action) getnavigation(request *Request) navigation {
 		return action.resourceData.getnavigation(action, request)
 	}
 	return navigation{}
+}
+
+func (action *Action) addConstraint(constraint func(map[string]string) bool) {
+	action.constraints = append(action.constraints, constraint)
 }
 
 func (resourceData *resourceData) getnavigation(action *Action, request *Request) navigation {

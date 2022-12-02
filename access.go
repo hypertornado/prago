@@ -8,10 +8,13 @@ import (
 // Permission for access
 type Permission string
 
-var nobodyPermission Permission = "nobody"
-var loggedPermission Permission = "logged"
-var sysadminPermission Permission = "sysadmin"
-var sysadminRoleName = "sysadmin"
+const (
+	everybodyPermission Permission = "everybody"
+	nobodyPermission    Permission = "nobody"
+	loggedPermission    Permission = "logged"
+	sysadminPermission  Permission = "sysadmin"
+	sysadminRoleName               = "sysadmin"
+)
 
 type accessManager struct {
 	roles       map[string]map[Permission]bool
@@ -24,6 +27,7 @@ func (app *App) initAccessManager() {
 		permissions: make(map[Permission]bool),
 	}
 
+	app.Permission(everybodyPermission)
 	app.Permission(nobodyPermission)
 	app.Role(sysadminRoleName, nil)
 	app.Permission(loggedPermission)
@@ -87,7 +91,7 @@ func (app *App) Permission(permission Permission) *App {
 	if app.accessManager.permissions[Permission(permission)] {
 		panic(fmt.Sprintf("Permission '%s' already added", permission))
 	}
-	if permission != nobodyPermission {
+	if permission != nobodyPermission && permission != everybodyPermission {
 		app.accessManager.roles[sysadminRoleName][permission] = true
 	}
 	app.accessManager.permissions[Permission(permission)] = true
@@ -95,6 +99,12 @@ func (app *App) Permission(permission Permission) *App {
 }
 
 func (app *App) authorize(user *user, permission Permission) bool {
+	if permission == everybodyPermission {
+		return true
+	}
+	if user == nil {
+		return false
+	}
 	return app.accessManager.roles[user.Role][permission]
 }
 

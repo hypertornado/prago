@@ -1,10 +1,11 @@
 package prago
 
 type BoxHeader struct {
-	Icon  string
-	Name  string
-	Image string
-	Tags  []BoxTag
+	Icon      string
+	Name      string
+	TextAfter string
+	Image     string
+	Tags      []BoxTag
 }
 
 type BoxTag struct {

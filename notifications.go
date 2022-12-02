@@ -48,8 +48,11 @@ func (app *App) initNotifications() {
 		notificationMap: make(map[string]*Notification),
 	}
 
-	app.API("notifications").Permission(loggedPermission).Handler(func(request *Request) {
-		notifications := app.notificationCenter.getFromUser(request.user)
+	app.API("notifications").Permission(everybodyPermission).Handler(func(request *Request) {
+		var notifications []*notificationView = []*notificationView{}
+		if request.user != nil {
+			notifications = app.notificationCenter.getFromUser(request.user)
+		}
 		request.RenderJSON(notifications)
 	})
 
@@ -71,7 +74,7 @@ func (app *App) initNotifications() {
 	})
 }
 
-//NotificationItem represents item for notification
+// NotificationItem represents item for notification
 type Notification struct {
 	uuid            string
 	app             *App
@@ -93,7 +96,7 @@ type notificationProgress struct {
 	Percentage float64
 }
 
-//Notification creates notification
+// Notification creates notification
 func (app *App) Notification(name string) *Notification {
 	return &Notification{
 		uuid: randomString(10),
@@ -102,13 +105,13 @@ func (app *App) Notification(name string) *Notification {
 	}
 }
 
-//SetDescription sets description to notification item
+// SetDescription sets description to notification item
 func (n *Notification) SetDescription(description string) *Notification {
 	n.description = description
 	return n
 }
 
-//SetPreName sets prefix name to notification item
+// SetPreName sets prefix name to notification item
 func (n *Notification) SetPreName(preName string) *Notification {
 	n.preName = preName
 	return n
@@ -124,7 +127,7 @@ func (n *Notification) SetURL(url string) *Notification {
 	return n
 }
 
-//SetProgress sets description to notification item
+// SetProgress sets description to notification item
 func (n *Notification) SetProgress(progress *float64) *Notification {
 
 	if progress == nil {
@@ -206,13 +209,13 @@ func (n *Notification) getView() *notificationView {
 	}
 }
 
-//SetTypeSuccess sets notification item type to success
+// SetTypeSuccess sets notification item type to success
 func (n *Notification) SetStyleSuccess() *Notification {
 	n.style = "success"
 	return n
 }
 
-//SetTypeFail sets notification item type to fail
+// SetTypeFail sets notification item type to fail
 func (n *Notification) SetStyleFail() *Notification {
 	n.style = "fail"
 	return n

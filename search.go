@@ -60,7 +60,7 @@ func (app *App) initSearch() {
 		},
 	)
 
-	app.Action("_search").Permission(loggedPermission).Name(unlocalized("Vyhledávání")).Template("admin_search").hiddenInMainMenu().DataSource(
+	app.Action("_search").Permission(loggedPermission).Name(unlocalized("Vyhledávání")).Template("admin_search").hiddenInMenu().DataSource(
 		func(request *Request) interface{} {
 			q := request.Param("q")
 			pageStr := request.Param("page")
@@ -100,14 +100,16 @@ func (app *App) initSearch() {
 				})
 			}
 
-			title := fmt.Sprintf("Vyhledávání – \"%s\" – %d výsledků", q, hits)
-
 			var ret = map[string]interface{}{}
 
 			request.SetData("search_q", q)
 
+			ret["box_header"] = BoxHeader{
+				Name:      fmt.Sprintf("Vyhledávání – „%s", q),
+				TextAfter: fmt.Sprintf("%s výsledků", humanizeNumber(hits)),
+			}
 			ret["search_q"] = q
-			ret["admin_title"] = title
+			ret["admin_title"] = fmt.Sprintf("„%s", q)
 			ret["search_results"] = result
 			ret["search_pages"] = searchPages
 
@@ -171,7 +173,7 @@ func (app *App) suggestItems(q string, user *user, request *Request) (ret []*sea
 
 func (app *App) searchWithoutElastic(q string, request *Request) (ret []*searchItem) {
 	q = normalizeCzechString(q)
-	menu := app.getMainMenu(request)
+	menu := app.getMenu(request)
 	for _, section := range menu.Sections {
 		for _, item := range section.Items {
 			if strings.HasPrefix(item.URL, "/admin/logout") {

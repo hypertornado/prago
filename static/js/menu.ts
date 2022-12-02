@@ -1,4 +1,4 @@
-class MainMenu {
+class Menu {
   rootEl: HTMLDivElement;
   rootLeft: HTMLDivElement;
   menuEl: HTMLDivElement;

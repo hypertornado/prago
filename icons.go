@@ -9,6 +9,7 @@ import (
 const iconResource = "glyphicons-basic-577-cluster.svg"
 const iconTable = "glyphicons-basic-120-table.svg"
 const iconAdd = "glyphicons-basic-371-plus.svg"
+const iconSignpost = "glyphicons-basic-697-directions-sign.svg"
 
 func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 	app.iconsFS = &iconsFS
@@ -33,7 +34,8 @@ func (app *App) loadIcon(iconName, color string) ([]byte, error) {
 }
 
 func (app *App) initIcons() {
-	app.API("icons").Permission(loggedPermission).Method("GET").Handler(func(request *Request) {
+
+	app.API("icons").Permission(everybodyPermission).Method("GET").Handler(func(request *Request) {
 		if app.iconsFS == nil {
 			panic("no icons fs set")
 		}
@@ -46,7 +48,7 @@ func (app *App) initIcons() {
 
 	})
 
-	app.Action("help/icons").Name(unlocalized("Ikony")).Permission(loggedPermission).hiddenInMainMenu().Template("admin_help_icons").DataSource(func(r *Request) interface{} {
+	app.Action("help/icons").Name(unlocalized("Ikony")).Permission(loggedPermission).hiddenInMenu().Template("admin_help_icons").DataSource(func(r *Request) interface{} {
 		prefix := app.iconsPrefix
 		prefix = strings.TrimRight(prefix, "/")
 

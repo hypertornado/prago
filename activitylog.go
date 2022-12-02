@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -54,8 +55,15 @@ func (app *App) ListenActivity(handler func(Activity)) {
 	app.activityListeners = append(app.activityListeners, handler)
 }
 
-func (app *App) getHistory(resourceData *resourceData, itemID int64) historyView {
-	ret := historyView{}
+func (app *App) getHistoryTable(user *user, resourceData *resourceData, itemID int64, pageStr string) *Table {
+
+	ret := app.Table()
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page <= 0 {
+		ret.Row("Špatný formát stránkování")
+		return ret
+	}
 
 	q := app.activityLogResource.Query()
 	if resourceData != nil {
@@ -64,10 +72,33 @@ func (app *App) getHistory(resourceData *resourceData, itemID int64) historyView
 	if itemID > 0 {
 		q.Is("ItemID", itemID)
 	}
-	q.Limit(250)
+
+	var itemsPerPage int64 = 100
+
+	total, err := q.Count()
+	must(err)
+
+	offset := itemsPerPage * (int64(page) - 1)
+
+	q.Offset(offset)
+	q.Limit(itemsPerPage)
 	q.OrderDesc("ID")
 
 	items := q.List()
+
+	if len(items) > 0 {
+		ret.AddFooterText(fmt.Sprintf("Zobrazuji položku %d - %d z celkem %d položek.", offset+1, offset+int64(len(items)), total))
+	} else {
+		if total > 0 {
+			ret.AddFooterText(fmt.Sprintf("Na stránce %d nic není. Celkem %d položek.", page, total))
+		} else {
+			ret.AddFooterText("Žádná úprava nenalezena.")
+		}
+		return ret
+
+	}
+
+	ret.Header("#", "Typ akce", "Položka", "Uživatel", "Datum")
 
 	for _, v := range items {
 		var username, userurl string
@@ -83,19 +114,23 @@ func (app *App) getHistory(resourceData *resourceData, itemID int64) historyView
 
 		itemName := fmt.Sprintf("%s #%d", v.ResourceName, v.ItemID)
 		if resourceData != nil {
-			itemName = fmt.Sprintf("#%d", v.ItemID)
+			item := resourceData.query().ID(v.ItemID)
+			var name string
+			if item != nil {
+				name = resourceData.previewer(user, item).Name()
+			}
+			//resourceData.previewer(user, )
+			itemName = fmt.Sprintf("#%d %s", v.ItemID, name)
 		}
 
-		ret.Items = append(ret.Items, historyItemView{
-			ID:          v.ID,
-			ActivityURL: activityURL,
-			ActionType:  v.ActionType,
-			ItemName:    itemName,
-			ItemURL:     resourceData.getURL(fmt.Sprintf("%d", v.ItemID)),
-			UserName:    username,
-			UserURL:     userurl,
-			CreatedAt:   messages.Timestamp(locale, v.CreatedAt, true),
-		})
+		ret.Row(
+			[2]string{activityURL, fmt.Sprintf("%d", v.ID)},
+			v.ActionType,
+			[2]string{resourceData.getURL(fmt.Sprintf("%d", v.ItemID)), itemName},
+			[2]string{userurl, username},
+			messages.Timestamp(locale, v.CreatedAt, true),
+		)
+
 	}
 	return ret
 }

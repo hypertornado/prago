@@ -148,21 +148,25 @@ class List {
       ".list_header > :not(.hidden)"
     );
 
-    let tableRows = this.list.querySelectorAll(".list_row");
+    let widths = [];
 
+    for (let j = 0; j < headerItems.length; j++) {
+      let headerEl = headerItems[j];
+      var clientRect = headerEl.getBoundingClientRect();
+      var elWidth = clientRect.width;
+      widths.push(elWidth);
+    }
+
+    let tableRows = this.list.querySelectorAll(".list_row");
     for (let i = 0; i < tableRows.length; i++) {
       let rowItems = tableRows[i].children;
 
-      for (let j = 0; j < headerItems.length; j++) {
+      for (let j = 0; j < widths.length; j++) {
         if (j >= rowItems.length) {
           break;
         }
-        let headerEl = headerItems[j];
-        let tableEl = rowItems[j];
-
-        var clientRect = headerEl.getBoundingClientRect();
-        var elWidth = clientRect.width;
-        tableEl.setAttribute("style", "width: " + elWidth + "px;");
+        let tableEl = <HTMLDivElement>rowItems[j];
+        tableEl.style.width = widths[j] + "px";
       }
     }
   }

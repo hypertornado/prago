@@ -6,7 +6,7 @@ import (
 )
 
 type DashboardGroup struct {
-	app   *App
+	board *Board
 	uuid  string
 	name  func(string) string
 	items []*DashboardItem
@@ -42,8 +42,16 @@ func (app *App) initDashboard() {
 }
 
 func (app *App) getDashboardTableData(uuid string, user *user) (*Table, error) {
+	group := app.dashboardGroupMap[uuid]
+	if group == nil {
+		return nil, errors.New("can't find table")
+	}
+	if !app.authorize(user, group.table.permission) {
+		return nil, errors.New("can't authorize for access of table data")
+	}
+	return group.table.table(), nil
 
-	for _, group := range app.dashboardGroups {
+	/*for _, group := range app.dashboardGroups {
 		if group.uuid == uuid {
 			if !app.authorize(user, group.table.permission) {
 				return nil, errors.New("can't authorize for access of table data")
@@ -51,22 +59,23 @@ func (app *App) getDashboardTableData(uuid string, user *user) (*Table, error) {
 			return group.table.table(), nil
 		}
 	}
-	return nil, errors.New("can't find table")
+	return nil, errors.New("can't find table")*/
 
 }
 
-func (app *App) DashboardGroup(name func(string) string) *DashboardGroup {
+func (board *Board) DashboardGroup(name func(string) string) *DashboardGroup {
 	group := &DashboardGroup{
-		app:  app,
-		uuid: randomString(30),
-		name: name,
+		board: board,
+		uuid:  randomString(30),
+		name:  name,
 	}
-	app.dashboardGroups = append(app.dashboardGroups, group)
+	board.app.dashboardGroupMap[group.uuid] = group
+	board.dashboardGroups = append(board.dashboardGroups, group)
 	return group
 }
 
 func (group *DashboardGroup) Item(name string, permission Permission) *DashboardItem {
-	must(group.app.validatePermission(permission))
+	must(group.board.app.validatePermission(permission))
 	item := &DashboardItem{
 		uuid:       randomString(30),
 		name:       name,
@@ -88,7 +97,7 @@ func (group *DashboardGroup) getTable() *Table {
 	if group.table == nil {
 		return nil
 	}
-	return <-Cached(group.app, fmt.Sprintf("dashboard-table-%s", group.uuid), func() *Table {
+	return <-Cached(group.board.app, fmt.Sprintf("dashboard-table-%s", group.uuid), func() *Table {
 		return group.table.table()
 	})
 }

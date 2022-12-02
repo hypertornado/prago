@@ -898,6 +898,12 @@ a.box_tag:hover {
   line-height: 1.3em;
   font-weight: 500;
 }
+.box_textafter {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 500;
+  line-height: 1.3em;
+}
 @media (max-width: 600px) {
   .box {
     box-shadow: none;
@@ -2402,23 +2408,26 @@ a.admin_stats_section_row {
   box-shadow: none;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
-.mainmenu {
+.menu {
   padding: 0px 0px;
 }
-.mainmenu_section {
+.menu_section {
   padding: 10px 0px;
 }
-.mainmenu_section_name {
+.menu_section_name {
   font-weight: 500;
   padding: 3px 25px;
   text-transform: uppercase;
   font-size: 0.9rem;
   line-height: 1.3em;
 }
-.mainmenu_section_content {
+.menu_section > .menu_section_content {
   padding: 5px 15px;
 }
-.mainmenu_section_item {
+.menu_section_content > .menu_section_content {
+  padding-left: 20px;
+}
+.menu_section_item {
   font-weight: 500;
   padding: 3px 10px;
   margin: 0px;
@@ -2432,29 +2441,29 @@ a.admin_stats_section_row {
   display: flex;
   border: 1px solid transparent;
 }
-.mainmenu_section_item_icon {
+.menu_section_item_icon {
   width: 20px;
   margin-right: 5px;
 }
-.mainmenu_section_item:hover {
+.menu_section_item:hover {
   border-color: #ddd;
 }
-.mainmenu_section_item:active {
+.menu_section_item:active {
   border-color: #ccc;
 }
-.mainmenu_section_item_left {
+.menu_section_item_left {
   flex-grow: 10;
   flex-shrink: 0;
 }
-.mainmenu_section_item_right {
+.menu_section_item_right {
   padding-left: 10px;
   flex-grow: 0;
   flex-shrink: 0;
   font-weight: normal;
   color: #999;
 }
-.mainmenu_section_item-selected,
-.mainmenu_section_item-selected:hover {
+.menu_section_item-selected,
+.menu_section_item-selected:hover {
   background-color: #4078c0;
   color: white !important;
   border-color: #4078c0;
@@ -2462,7 +2471,7 @@ a.admin_stats_section_row {
   top: 0px;
   bottom: 0px;
 }
-.mainmenu_section_item-selected .mainmenu_section_item_right {
+.menu_section_item-selected .menu_section_item_right {
   color: #eee;
 }
 .admin_relationlist_target {

@@ -1,14 +1,5 @@
 package prago
 
-type page struct {
-	Name         string
-	App          *App
-	Navigation   navigation
-	PageTemplate string
-	PageData     interface{}
-	HTTPCode     int
-}
-
 type navigation struct {
 	Tabs []tab
 	Wide bool
@@ -47,44 +38,6 @@ func isTabVisible(tabs []tab, pos int) bool {
 		return false
 	}
 	return true
-}
-
-func renderPage(request *Request, page page) {
-	var name string
-	name = page.Name
-	for _, v := range page.Navigation.Tabs {
-		if v.Selected {
-			name = v.Name
-		}
-	}
-
-	if name == "" {
-		mainMenu, ok := request.GetData("main_menu").(mainMenu)
-		if ok {
-			name = mainMenu.GetTitle()
-		}
-	}
-
-	if request.app.logo != nil {
-		request.SetData("admin_has_logo", true)
-	}
-
-	request.SetData("admin_title", name)
-	request.SetData("admin_yield", "admin_navigation_page")
-	request.SetData("admin_page", page)
-
-	code := page.HTTPCode
-	if page.HTTPCode == 0 {
-		code = 200
-	}
-
-	layout := "admin_layout"
-	if request.user == nil {
-		request.SetData("language", localeFromRequest(request))
-		layout = "admin_layout_nologin"
-	}
-
-	request.RenderViewWithCode(layout, code)
 }
 
 func (resourceData *resourceData) getResourceNavigation(user *user, code string) navigation {
@@ -138,18 +91,21 @@ func (app *App) getNologinNavigation(language, code string) navigation {
 
 	tabs = append(tabs, tab{
 		Name:     messages.Get(language, "admin_login_action"),
+		Icon:     "glyphicons-basic-431-log-in.svg",
 		URL:      app.getAdminURL("user/login"),
 		Selected: trueIfEqual(code, "login"),
 	})
 
 	tabs = append(tabs, tab{
 		Name:     messages.Get(language, "admin_register"),
+		Icon:     "glyphicons-basic-7-user-plus.svg",
 		URL:      app.getAdminURL("user/registration"),
 		Selected: trueIfEqual(code, "registration"),
 	})
 
 	tabs = append(tabs, tab{
 		Name:     messages.Get(language, "admin_forgotten"),
+		Icon:     "glyphicons-basic-45-key.svg",
 		URL:      app.getAdminURL("user/forgot"),
 		Selected: trueIfEqual(code, "forgot"),
 	})

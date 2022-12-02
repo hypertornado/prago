@@ -7,8 +7,6 @@ import (
 // ErrItemNotFound is returned when no item is found
 var ErrItemNotFound = errors.New("item not found")
 
-const adminPathPrefix = "/admin"
-
 func (app *App) initAdminActions() {
 
 	app.accessController.addBeforeAction(func(request *Request) {
@@ -24,8 +22,6 @@ func (app *App) initAdminActions() {
 		}
 
 		request.SetData("javascripts", app.javascripts)
-
-		request.SetData("currentuser", request.user)
 		request.SetData("locale", request.user.Locale)
 
 		if request.user.Role == "" && !request.user.emailConfirmed() {
@@ -36,11 +32,9 @@ func (app *App) initAdminActions() {
 			addCurrentFlashMessage(request, messages.Get(request.user.Locale, "admin_flash_not_approved"))
 		}
 
-		request.SetData("main_menu", app.getMainMenu(request))
-
 		next()
 	})
-	app.Action("markdown").Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).hiddenInMainMenu().Template("admin_help_markdown")
+	app.Action("markdown").Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).hiddenInMenu().Template("admin_help_markdown")
 
 	app.accessController.get("/admin/logo", func(request *Request) {
 		if app.logo != nil {
@@ -66,7 +60,7 @@ func (app *App) initAdminNotFoundAction() {
 }
 
 func (app App) getAdminURL(suffix string) string {
-	ret := adminPathPrefix
+	ret := "/admin"
 	if len(suffix) > 0 {
 		ret += "/" + suffix
 	}
@@ -88,11 +82,14 @@ func addCurrentFlashMessage(request *Request, message string) {
 
 func render403(request *Request) {
 	title := messages.Get(request.user.Locale, "admin_403")
+	header := BoxHeader{
+		Name: title,
+	}
 	renderPage(request, page{
 		Name:         title,
 		PageTemplate: "admin_message",
 		PageData: map[string]interface{}{
-			"message": title,
+			"box_header": header,
 		},
 		HTTPCode: 403,
 	})
@@ -100,11 +97,15 @@ func render403(request *Request) {
 
 func render404(request *Request) {
 	title := messages.Get(request.user.Locale, "admin_404")
+	header := BoxHeader{
+		Name: title,
+	}
+
 	renderPage(request, page{
 		Name:         title,
 		PageTemplate: "admin_message",
 		PageData: map[string]interface{}{
-			"message": title,
+			"box_header": header,
 		},
 		HTTPCode: 404,
 	})

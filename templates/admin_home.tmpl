@@ -1,7 +1,9 @@
 {{define "admin_home_navigation"}}
   <div class="admin_home">
 
-  {{template "searchbox" ""}}
+  {{if .IsMainBoard}}
+    {{template "searchbox" ""}}
+  {{end}}
 
   {{range $section := .Sections}}
     <div class="admin_home_section">

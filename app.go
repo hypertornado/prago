@@ -60,7 +60,9 @@ type App struct {
 	activityListeners []func(Activity)
 	taskManager       *taskManager
 
-	dashboardGroups []*DashboardGroup
+	dashboardGroupMap map[string]*DashboardGroup
+
+	MainBoard *Board
 
 	dbConfig *dbConnectConfig
 
@@ -104,6 +106,7 @@ func createApp(codeName string, version string) *App {
 	}
 	app.connectDB(testing)
 
+	app.initBoard()
 	app.initSettings()
 	app.initElasticsearchClient()
 	app.initLogger()

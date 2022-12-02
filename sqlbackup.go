@@ -7,7 +7,7 @@ import (
 
 func (app *App) initSQLBackup() {
 
-	app.FormAction("sqlbackup").Name(unlocalized("SQL Backup")).Permission(sysadminPermission).Form(
+	sysadminBoard.FormAction("sqlbackup").Name(unlocalized("SQL Backup")).Permission(sysadminPermission).Form(
 		func(form *Form, request *Request) {
 			form.Title = "SQL Backup"
 			form.AddSubmit("Download SQL Backup")

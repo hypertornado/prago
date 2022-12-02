@@ -4,6 +4,9 @@ declare var JAK: any;
 declare var Loader: any;
 
 function initSMap() {
+  if (!window.Loader) {
+    return;
+  }
   Loader.async = true;
   Loader.load(null, null, loadSMap);
 }

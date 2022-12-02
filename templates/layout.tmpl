@@ -1,29 +1,28 @@
-{{define "admin_layout"}}
+{{define "layout"}}
 <!doctype html>
-<html lang="{{.main_menu.Language}}">
+<html lang="{{.page.Language}}">
   <head>
     <meta charset="utf-8">
-    <title>{{.admin_title}}</title>
+    <title>{{.page.Name}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/admin/prago_admin_files/prago.css?v={{.version}}">
     <script src="https://api.mapy.cz/loader.js"></script>
     <script type="text/javascript" src="/admin/prago_admin_files/pikaday.js?v={{.version}}"></script>
     <script type="text/javascript" src="/admin/prago_admin_files/prago.js?v={{.version}}"></script>
+    {{if .page.Icon}}
+        <link rel="icon" href="/admin/api/icons?file={{.page.Icon}}&color=444444" type="image/svg+xml">
+    {{end}}
     {{range $javascript := .javascripts}}
         <script type="text/javascript" src="{{$javascript}}"></script>
     {{end}}
 
   </head>
-  <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="{{.main_menu.URLPrefix}}" data-search-query="{{.search_q}}">
+  <body class="admin" data-csrf-token="{{._csrfToken}}" data-admin-prefix="/admin" data-search-query="{{.search_q}}">
     <div class="root">
         {{template "notification_center" .}}
         <div class="root_header">
             <a href="/admin" class="root_logo" style="background-image: url('/admin/logo');"></a>
-            {{if .admin_page}}
-                {{template "admin_tabs" .admin_page.Navigation.Tabs}}
-            {{end}}
-
-            
+            {{template "admin_tabs" .page.Navigation.Tabs}}
             <div class="root_hamburger">
                 <img src="/admin/api/icons?file=glyphicons-basic-600-menu.svg&color=444444" class="root_hamburger_iconopen">
                 <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=444444" class="root_hamburger_iconclose">
@@ -31,10 +30,10 @@
         </div>
         <div class="root_bottom">
             <div class="root_left">
-                {{template "admin_mainmenu" .main_menu}}
+                {{template "menu" .page.Menu}}
             </div>
             <div class="root_content">
-                {{tmpl .admin_yield .}}
+                {{tmpl .page.PageTemplate .page.PageData}}
             </div>
         </div>
     </div>

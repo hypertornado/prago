@@ -2,7 +2,7 @@ package prago
 
 func initUserSettings(app *App) {
 
-	app.FormAction("settings").Icon("glyphicons-basic-5-settings.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu().Form(
+	app.MainBoard.FormAction("settings").Icon("glyphicons-basic-5-settings.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu().Form(
 		func(form *Form, request *Request) {
 			user := request.user
 			form.Title = messages.Get(user.Locale, "admin_settings")
@@ -72,7 +72,7 @@ func initUserSettings(app *App) {
 		}
 	})
 
-	app.FormAction("password").Icon("glyphicons-basic-45-key.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu().Form(
+	app.MainBoard.FormAction("password").Icon("glyphicons-basic-45-key.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu().Form(
 		func(form *Form, request *Request) {
 			locale := request.user.Locale
 			form.Title = messages.Get(request.user.Locale, "admin_password_change")

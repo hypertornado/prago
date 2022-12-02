@@ -5,7 +5,8 @@ import (
 )
 
 type Home struct {
-	Sections []*HomeSection
+	IsMainBoard bool
+	Sections    []*HomeSection
 }
 
 type HomeSection struct {
@@ -14,7 +15,6 @@ type HomeSection struct {
 	Tasks    *taskViewData
 	UUID     string
 	HasTable bool
-	//Table    *Table
 }
 
 type HomeItem struct {
@@ -28,15 +28,7 @@ type HomeItem struct {
 }
 
 func (app *App) initHome() {
-	app.
-		Action("").
-		Permission(loggedPermission).
-		Name(messages.GetNameFunction("admin_signpost")).
-		Template("admin_home_navigation").
-		Icon("glyphicons-basic-697-directions-sign.svg").
-		DataSource(app.getHomeData)
-
-	sysadminGroup := app.DashboardGroup(unlocalized("Sysadmin"))
+	sysadminGroup := sysadminBoard.DashboardGroup(unlocalized("Sysadmin"))
 	sysadminGroup.Item("Úpravy", "sysadmin").Value(func() int64 {
 		c, _ := app.activityLogResource.Query().Where("createdat >= ?", time.Now().AddDate(0, 0, -1)).Count()
 		return c
@@ -47,30 +39,43 @@ func (app *App) initHome() {
 
 }
 
-func (app *App) getHomeData(request *Request) interface{} {
+func (board *Board) homeData(request *Request) *Home {
+	app := board.app
 	locale := request.user.Locale
-	home := &Home{}
+	home := &Home{
+		IsMainBoard: board.IsMainBoard(),
+	}
 
-	mainMenu := app.getMainMenu(request)
-
-	for _, section := range mainMenu.Sections {
-		homeSection := &HomeSection{
-			Name: section.Name,
-			//UUID: section.UUID,
+	mainSection := &HomeSection{}
+	items := board.getMenuItems(request)
+	for _, item := range items {
+		homeItem := &HomeItem{
+			Icon: item.Icon,
+			Name: item.Name,
+			URL:  item.URL,
 		}
-		home.Sections = append(home.Sections, homeSection)
-		for _, item := range section.Items {
+		mainSection.Items = append(mainSection.Items, homeItem)
+	}
+	home.Sections = append(home.Sections, mainSection)
+
+	if board.IsMainBoard() {
+
+		userMenuSection := getMenuUserSection(request)
+		userSection := &HomeSection{
+			Name: userMenuSection.Name,
+		}
+		for _, item := range userMenuSection.Items {
 			homeItem := &HomeItem{
 				Icon: item.Icon,
 				Name: item.Name,
 				URL:  item.URL,
 			}
-			homeSection.Items = append(homeSection.Items, homeItem)
+			userSection.Items = append(userSection.Items, homeItem)
 		}
-
+		home.Sections = append(home.Sections, userSection)
 	}
 
-	for _, group := range app.dashboardGroups {
+	for _, group := range board.dashboardGroups {
 		homeSection := &HomeSection{
 			Name: group.name(locale),
 			UUID: group.uuid,
@@ -91,13 +96,15 @@ func (app *App) getHomeData(request *Request) interface{} {
 		}
 	}
 
-	taskData := GetTaskViewData(request)
-	if len(taskData.Tasks) > 0 {
-		taskSection := &HomeSection{
-			Name:  messages.Get(request.user.Locale, "tasks"),
-			Tasks: &taskData,
+	if board.IsMainBoard() {
+		taskData := GetTaskViewData(request)
+		if len(taskData.Tasks) > 0 {
+			taskSection := &HomeSection{
+				Name:  messages.Get(request.user.Locale, "tasks"),
+				Tasks: &taskData,
+			}
+			home.Sections = append(home.Sections, taskSection)
 		}
-		home.Sections = append(home.Sections, taskSection)
 	}
 
 	return home

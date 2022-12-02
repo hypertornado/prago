@@ -96,7 +96,7 @@ func (resourceData *resourceData) getBasicView(id int64, item any, user *user) v
 		)
 	}
 
-	historyView := resourceData.app.getHistory(resourceData, int64(id))
+	/*historyView := resourceData.app.getHistory(resourceData, int64(id))
 
 	if len(historyView.Items) > 0 {
 		ret.Items = append(
@@ -125,7 +125,7 @@ func (resourceData *resourceData) getBasicView(id int64, item any, user *user) v
 			},
 		)
 
-	}
+	}*/
 
 	return ret
 }

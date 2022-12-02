@@ -53,6 +53,8 @@ type resourceData struct {
 	fieldMap   map[string]*Field
 	orderField *Field
 
+	board *Board
+
 	previewURLFunction func(any) string
 }
 
@@ -91,6 +93,8 @@ func NewResource[T any](app *App) *Resource[T] {
 		defaultItemsPerPage: 100,
 
 		typ: typ,
+
+		board: app.MainBoard,
 
 		fieldMap: make(map[string]*Field),
 	}
@@ -279,7 +283,13 @@ func (resourceData *resourceData) addValidation(validation Validation) {
 }
 
 func (resource *Resource[T]) DeleteValidation(validation Validation) *Resource[T] {
+
 	resource.data.deleteValidations = append(resource.data.deleteValidations, validation)
+	return resource
+}
+
+func (resource *Resource[T]) Board(board *Board) *Resource[T] {
+	resource.data.board = board
 	return resource
 }
 

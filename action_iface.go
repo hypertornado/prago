@@ -93,11 +93,7 @@ func (action *Action) getHandler() func(*Request) {
 }
 
 func (action *Action) getConstraints() []func(map[string]string) bool {
-	constraints := []func(map[string]string) bool{}
-	if action.isItemAction {
-		constraints = append(constraints, constraintInt("id"))
-	}
-	return constraints
+	return action.constraints
 }
 
 func (action *Action) getPermission() Permission {

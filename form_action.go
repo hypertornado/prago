@@ -49,8 +49,11 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *Form
 	return ret
 }
 
-func (app *App) FormAction(url string) *FormAction {
+func (board *Board) FormAction(url string) *FormAction {
+	app := board.app
 	fa := newFormAction(app, url, nil)
+	fa.actionForm.parentBoard = board
+	fa.actionValidation.parentBoard = board
 	app.rootActions = append(app.rootActions, fa.actionForm)
 	app.rootActions = append(app.rootActions, fa.actionValidation)
 	return fa
@@ -58,15 +61,19 @@ func (app *App) FormAction(url string) *FormAction {
 
 func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Request), validator Validation) {
 	app.accessController.get(fmt.Sprintf("/admin/user/%s", id), func(request *Request) {
+		if request.user != nil {
+			request.Redirect("/admin")
+			return
+		}
+
 		locale := localeFromRequest(request)
 		form := NewForm("/admin/user/" + id)
 		formHandler(form, request)
 
-		renderPage(request, page{
-			App:          app,
-			Navigation:   app.getNologinNavigation(locale, id),
-			PageTemplate: "admin_form",
-			PageData:     form,
+		renderPageNoLogin(request, pageNoLogin{
+			App:        app,
+			Navigation: app.getNologinNavigation(locale, id),
+			FormData:   form,
 		})
 	})
 

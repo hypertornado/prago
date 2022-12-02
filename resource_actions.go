@@ -119,20 +119,62 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 	}
 
 	if resourceData.activityLog {
-		resourceData.action("history").Icon("glyphicons-basic-58-history.svg").priority().Name(messages.GetNameFunction("admin_history")).Template("admin_history").Permission(resourceData.canUpdate).DataSource(
-			func(request *Request) interface{} {
-				return resourceData.app.getHistory(resourceData, 0)
-			},
-		)
+		resourceData.FormAction("history").
+			Icon("glyphicons-basic-58-history.svg").
+			priority().
+			Name(messages.GetNameFunction("admin_history")).
+			//Template("admin_history").
+			Permission(resourceData.canUpdate).
+			Form(func(f *Form, r *Request) {
 
-		resourceData.ItemAction("history").Icon("glyphicons-basic-58-history.svg").priority().Name(messages.GetNameFunction("admin_history")).Permission(resourceData.canUpdate).Template("admin_history").DataSource(
+				f.AddTextInput("page", "Stránka").Value = "1"
+
+				f.AddSubmit("Zobrazit")
+				table := resourceData.app.getHistoryTable(r.user, resourceData, 0, "1")
+				f.HTMLAfter = table.ExecuteHTML()
+
+			}).
+			Validation(func(vc ValidationContext) {
+				table := resourceData.app.getHistoryTable(vc.Request().user, resourceData, 0, vc.GetValue("page"))
+				vc.Validation().AfterContent = table.ExecuteHTML()
+
+			})
+			/*DataSource(
+				func(request *Request) interface{} {
+					return resourceData.app.getHistory(resourceData, 0)
+				},
+			)*/
+
+		resourceData.
+			FormItemAction("history").
+			Icon("glyphicons-basic-58-history.svg").
+			priority().
+			Name(messages.GetNameFunction("admin_history")).
+			Permission(resourceData.canUpdate).
+			Form(func(item any, f *Form, r *Request) {
+				f.AddTextInput("page", "Stránka").Value = "1"
+				f.AddSubmit("Zobrazit")
+
+				id := resourceData.previewer(r.user, item).ID()
+				table := resourceData.app.getHistoryTable(r.user, resourceData, id, "1")
+				f.HTMLAfter = table.ExecuteHTML()
+
+			}).
+			Validation(func(item any, vc ValidationContext) {
+				id := resourceData.previewer(vc.Request().user, item).ID()
+				table := resourceData.app.getHistoryTable(vc.Request().user, resourceData, id, vc.GetValue("page"))
+				vc.Validation().AfterContent = table.ExecuteHTML()
+
+			})
+		//Template("admin_history").
+		/*DataSource(
 			func(item any, request *Request) interface{} {
 				if item == nil {
 					return nil
 				}
 				return resourceData.app.getHistory(resourceData, resourceData.previewer(request.user, item).ID())
 			},
-		)
+		)*/
 	}
 }
 

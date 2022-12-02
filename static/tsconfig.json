@@ -26,7 +26,7 @@
     "js/form_container.ts",
     "js/datepicker.ts",
     "js/search.ts",
-    "js/mainmenu.ts",
+    "js/menu.ts",
     "js/relationlist.ts",
     "js/notifications.ts",
     "js/popup.ts",

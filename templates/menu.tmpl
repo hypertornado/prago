@@ -1,0 +1,29 @@
+{{define "menu"}}
+    <div class="menu">
+    {{range $section := .Sections}}
+        <div class="menu_section">
+            <div class="menu_section_name">{{$section.Name}}</div>
+            {{template "menu_items" $section.Items}}
+        </div>
+    {{end}}
+    </div>
+{{end}}
+
+{{define "menu_items"}}
+    <div class="menu_section_content">
+    {{range $item := .}}
+        <a href="{{$item.URL}}" class="menu_section_item{{if $item.Selected}} menu_section_item-selected{{end}}">
+            {{if $item.Icon}}
+                <img class="menu_section_item_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{if $item.Selected}}ffffff{{else}}444444{{end}}">
+            {{end}}
+            <div class="menu_section_item_left">{{$item.Name}}</div>
+            {{if $item.Subname}}
+                <div class="menu_section_item_right">{{$item.Subname}}</div>
+            {{end}}
+        </a>
+        {{if $item.Subitems}}
+            {{template "menu_items" $item.Subitems}}
+        {{end}}
+    {{end}}
+    </div>
+{{end}}

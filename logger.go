@@ -119,7 +119,7 @@ func (app *App) initLogger() {
 		app.logger.deleteOldLogsRobot()
 	}()
 
-	app.FormAction("log_search").Name(unlocalized("Log")).Permission("sysadmin").Form(func(f *Form, r *Request) {
+	sysadminBoard.FormAction("log_search").Name(unlocalized("Log")).Permission("sysadmin").Form(func(f *Form, r *Request) {
 		f.Title = "Logger"
 		f.AddTextInput("q", "Query")
 		f.AddSelect("typ", "Typ", [][2]string{
