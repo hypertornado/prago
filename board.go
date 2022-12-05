@@ -1,5 +1,7 @@
 package prago
 
+import "time"
+
 var sysadminBoard *Board
 
 type Board struct {
@@ -17,8 +19,16 @@ func (app *App) initBoard() {
 	app.MainBoard.action.parentBoard = app.MainBoard
 	app.dashboardTableMap = make(map[string]*dashboardTable)
 	app.dashboardFigureMap = make(map[string]*DashboardFigure)
-
 	sysadminBoard = app.NewBoard("sysadmin-board").Name(unlocalized("Sysadmin"))
+
+	sysadminGroup := sysadminBoard.Dashboard(unlocalized("Sysadmin"))
+	sysadminGroup.Figure("Úpravy", "sysadmin").Value(func() int64 {
+		c, _ := app.activityLogResource.Query().Where("createdat >= ?", time.Now().AddDate(0, 0, -1)).Count()
+		return c
+	}).Unit("/ 24 hodin").URL("/admin/activitylog").Compare(func() int64 {
+		c, _ := app.activityLogResource.Query().Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, -1)).Count()
+		return c
+	}, "oproti předchozímu dni")
 }
 
 func (app *App) NewBoard(url string) *Board {

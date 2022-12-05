@@ -38,26 +38,23 @@
     </div>
   {{end}}
 
-  {{range $section := .Sections}}
-    <div class="board_section">
-      <h2 class="board_section_name">{{$section.Name}}</h2>
-      <div class="board_items">
-        {{range $item := $section.Items}}
+  {{range $dashboard := .Dashboards}}
+    <div class="dashboard">
+      <h2 class="dashboard_name">{{$dashboard.Name}}</h2>
+      <div class="dashboard_figures">
+        {{range $item := $dashboard.Figures}}
             {{if $item.URL}}
-              <a href="{{$item.URL}}" class="board_item{{if $item.IsRed}} board_item-red{{end}}{{if $item.IsGreen}} board_item-green{{end}}">
+              <a href="{{$item.URL}}" data-uuid="{{$item.UUID}}" class="dashboard_figure dashboard_figure-loading">
             {{else}}
-              <div class="board_item{{if $item.IsRed}} board_item-red{{end}}{{if $item.IsGreen}} board_item-green{{end}}">
+              <div data-uuid="{{$item.UUID}}" class="dashboard_figure dashboard_figure-loading">
             {{end}}
+              <div class="progress dashboard_figure_loader"></div>
               {{if $item.Icon}}
-                <div class="board_item_icon"><img src="/admin/api/icons?file={{$item.Icon}}&color=4078c0"></div>
+                <div class="dashboard_figure_icon"><img src="/admin/api/icons?file={{$item.Icon}}&color=4078c0"></div>
               {{end}}
-              <div class="board_item_name">{{$item.Name}}</div>
-              {{if $item.Value}}
-                <div class="board_item_value">{{$item.Value}}</div>
-              {{end}}
-              {{if $item.Description}}
-                <div class="board_item_description">{{$item.Description}}</div>
-              {{end}}
+              <div class="dashboard_figure_name">{{$item.Name}}</div>
+              <div class="dashboard_figure_value"></div>
+              <div class="dashboard_figure_description"></div>
             {{if $item.URL}}
               </a>
             {{else}}
@@ -65,12 +62,16 @@
             {{end}}
         {{end}}
       </div>
-      {{range $table := $section.Tables}}
-        <div class="board_table" data-uuid="{{$table.UUID}}"><progress class="progress"></progress></div>
+      {{range $table := $dashboard.Tables}}
+        <div class="dashboard_table" data-uuid="{{$table.UUID}}"><progress class="progress"></progress></div>
       {{end}}
-      {{if $section.Tasks}}
-        {{template "admin_tasks" $section.Tasks}}
-      {{end}}
+    </div>
+  {{end}}
+
+  {{if .Tasks}}
+    <div class="dashboard">
+      <h2 class="dashboard_name">{{.TasksName}}</h2>
+      {{template "admin_tasks" .Tasks}}
     </div>
   {{end}}
   <div>

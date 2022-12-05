@@ -2764,9 +2764,13 @@ class QuickActions {
     }
 }
 function initDashdoard() {
-    var dashboardTables = document.querySelectorAll(".board_table");
+    var dashboardTables = document.querySelectorAll(".dashboard_table");
     dashboardTables.forEach((el) => {
         new DashboardTable(el);
+    });
+    var dashboardFigures = document.querySelectorAll(".dashboard_figure");
+    dashboardFigures.forEach((el) => {
+        new DashboardFigure(el);
     });
 }
 class DashboardTable {
@@ -2785,6 +2789,41 @@ class DashboardTable {
             }
         });
         request.open("GET", "/admin/api/dashboard-table" + encodeParams(params), true);
+        request.send();
+    }
+}
+class DashboardFigure {
+    constructor(el) {
+        this.el = el;
+        this.valueEl = el.querySelector(".dashboard_figure_value");
+        this.descriptionEl = el.querySelector(".dashboard_figure_description");
+        let uuid = el.getAttribute("data-uuid");
+        var request = new XMLHttpRequest();
+        var params = {
+            uuid: uuid,
+        };
+        request.addEventListener("load", () => {
+            this.el.classList.remove("dashboard_figure-loading");
+            if (request.status == 200) {
+                let data = JSON.parse(request.response);
+                this.valueEl.innerText = data["Value"];
+                this.descriptionEl.innerText = data["Description"];
+                if (data["IsRed"]) {
+                    this.el.classList.add("dashboard_figure-red");
+                }
+                if (data["IsGreen"]) {
+                    this.el.classList.add("dashboard_figure-green");
+                }
+            }
+            else {
+                this.valueEl.innerText = "Error while loading item.";
+            }
+        });
+        request.open("GET", "/admin/api/dashboard-figure" + encodeParams(params), true);
+        this.el.classList.remove("dashboard_figure-green", "dashboard_figure-red");
+        this.el.classList.add("dashboard_figure-loading");
+        this.valueEl.innerText = "Loading...";
+        this.descriptionEl.innerText = "";
         request.send();
     }
 }

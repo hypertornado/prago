@@ -1,9 +1,5 @@
 package prago
 
-import (
-	"time"
-)
-
 type BoardView struct {
 	AppName     string
 	BoardIcon   string
@@ -13,49 +9,40 @@ type BoardView struct {
 	Resources   []menuItem
 	UserSection *menuSection
 
-	Sections []*BoardViewSection
+	Dashboards []*DashboardView
 
 	User *user
+
+	TasksName string
+	Tasks     *taskViewData
 }
 
-type BoardViewSection struct {
-	Name  string
-	Items []*BoardViewItem
-	Tasks *taskViewData
-	//UUID   string
-	Tables []BoardViewTable
+type DashboardView struct {
+	Name string
+	//Tasks   *taskViewData
+	Figures []*DashboardViewFigure
+	Tables  []DashboardViewTable
 }
 
-type BoardViewTable struct {
+type DashboardViewFigure struct {
+	UUID string
+	Icon string
+	URL  string
+	Name string
+}
+
+type DashboardViewTable struct {
 	UUID string
 }
 
-type BoardViewItem struct {
-	Icon        string
-	URL         string
-	Name        string
-	Value       string
-	Description string
-	IsGreen     bool
-	IsRed       bool
-}
-
 func (app *App) initHome() {
-	sysadminGroup := sysadminBoard.Dashboard(unlocalized("Sysadmin"))
-	sysadminGroup.Item("Úpravy", "sysadmin").Value(func() int64 {
-		c, _ := app.activityLogResource.Query().Where("createdat >= ?", time.Now().AddDate(0, 0, -1)).Count()
-		return c
-	}).Unit("/ 24 hodin").URL("/admin/activitylog").Compare(func() int64 {
-		c, _ := app.activityLogResource.Query().Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, -1)).Count()
-		return c
-	}, "oproti předchozímu dni")
 
 }
 
 func (board *Board) boardView(request *Request) *BoardView {
 	app := board.app
 	locale := request.user.Locale
-	home := &BoardView{
+	ret := &BoardView{
 		AppName:     request.app.name(request.user.Locale),
 		BoardName:   board.action.name(request.user.Locale),
 		BoardIcon:   board.action.icon,
@@ -64,46 +51,47 @@ func (board *Board) boardView(request *Request) *BoardView {
 		User:        request.user,
 	}
 
-	home.Resources = board.getMenuItems(request)
+	ret.Resources = board.getMenuItems(request)
 
 	if board.IsMainBoard() {
-		home.UserSection = getMenuUserSection(request)
+		ret.UserSection = getMenuUserSection(request)
 	}
 
 	for _, group := range board.dashboardGroups {
-		homeSection := &BoardViewSection{
+		view := &DashboardView{
 			Name: group.name(locale),
 		}
 		for _, item := range group.figures {
 			if request.UserHasPermission(item.permission) {
-				homeSection.Items = append(homeSection.Items, item.homeItem(app))
+				view.Figures = append(view.Figures, item.view(app))
 			}
 		}
 
 		for _, v := range group.tables {
 			if request.UserHasPermission(v.permission) {
-				homeSection.Tables = append(homeSection.Tables, BoardViewTable{
+				view.Tables = append(view.Tables, DashboardViewTable{
 					UUID: v.uuid,
 				})
 			}
 		}
 
-		if len(homeSection.Items) > 0 || len(homeSection.Tables) > 0 {
-			home.Sections = append(home.Sections, homeSection)
+		if len(view.Figures) > 0 || len(view.Tables) > 0 {
+			ret.Dashboards = append(ret.Dashboards, view)
 		}
 	}
 
 	if board.IsMainBoard() {
 		taskData := GetTaskViewData(request)
 		if len(taskData.Tasks) > 0 {
-			taskSection := &BoardViewSection{
+			ret.TasksName = messages.Get(request.user.Locale, "tasks")
+			ret.Tasks = &taskData
+			/*taskSection := &DashboardView{
 				Name:  messages.Get(request.user.Locale, "tasks"),
 				Tasks: &taskData,
 			}
-			home.Sections = append(home.Sections, taskSection)
+			ret.Dashboards = append(ret.Dashboards, taskSection)*/
 		}
 	}
 
-	return home
-
+	return ret
 }

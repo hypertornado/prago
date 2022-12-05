@@ -29,6 +29,23 @@ type dashboardTable struct {
 	permission Permission
 }
 
+type DashboardFigureData struct {
+	Value       string
+	Description string
+	IsGreen     bool
+	IsRed       bool
+}
+
+func (figure DashboardFigure) data(app *App) *DashboardFigureData {
+	values := figure.getValues(app)
+	ret := &DashboardFigureData{
+		Value:       figure.getValueStr(values, app),
+		Description: figure.getDescriptionStr(values, app),
+	}
+	ret.IsGreen, ret.IsRed = figure.getColors(values, app)
+	return ret
+}
+
 func (app *App) initDashboard() {
 
 	app.API("dashboard-table").Method("GET").Permission(loggedPermission).Handler(
@@ -37,6 +54,16 @@ func (app *App) initDashboard() {
 			table, err := app.getDashboardTableData(uuid, request.user)
 			must(err)
 			request.app.templates.templates.ExecuteTemplate(request.Response(), "admin_form_table", table.TemplateData())
+		},
+	)
+
+	app.API("dashboard-figure").Method("GET").Permission(loggedPermission).HandlerJSON(
+		func(request *Request) any {
+			uuid := request.Param("uuid")
+			figure, err := app.getDashboardFigureData(uuid, request.user)
+			must(err)
+			return figure
+			//request.app.templates.templates.ExecuteTemplate(request.Response(), "admin_form_table", table.TemplateData())
 		},
 	)
 }
@@ -50,7 +77,17 @@ func (app *App) getDashboardTableData(uuid string, user *user) (*Table, error) {
 		return nil, errors.New("can't authorize for access of table data")
 	}
 	return table.table(), nil
+}
 
+func (app *App) getDashboardFigureData(uuid string, user *user) (*DashboardFigureData, error) {
+	figure := app.dashboardFigureMap[uuid]
+	if figure == nil {
+		return nil, errors.New("can't find figure")
+	}
+	if !app.authorize(user, figure.permission) {
+		return nil, errors.New("can't authorize for access of figure data")
+	}
+	return figure.data(app), nil
 }
 
 func (board *Board) Dashboard(name func(string) string) *Dashboard {
@@ -63,15 +100,16 @@ func (board *Board) Dashboard(name func(string) string) *Dashboard {
 	return group
 }
 
-func (group *Dashboard) Item(name string, permission Permission) *DashboardFigure {
+func (group *Dashboard) Figure(name string, permission Permission) *DashboardFigure {
 	must(group.board.app.validatePermission(permission))
-	item := &DashboardFigure{
+	figure := &DashboardFigure{
 		uuid:       randomString(30),
 		name:       name,
 		permission: permission,
 	}
-	group.figures = append(group.figures, item)
-	return item
+	group.board.app.dashboardFigureMap[figure.uuid] = figure
+	group.figures = append(group.figures, figure)
+	return figure
 }
 
 func (group *Dashboard) Table(tableFn func() *Table, permission Permission) *Dashboard {
@@ -85,29 +123,18 @@ func (group *Dashboard) Table(tableFn func() *Table, permission Permission) *Das
 	return group
 }
 
-/*func (group *Dashboard) getTable() *Table {
-	if group.table == nil {
-		return nil
+func (item *DashboardFigure) getValues(app *App) [2]int64 {
+	var val, cmpVal int64 = -1, -1
+	if item.value != nil {
+		val = item.value()
 	}
-	return <-Cached(group.board.app, fmt.Sprintf("dashboard-table-%s", group.uuid), func() *Table {
-		return group.table.table()
-	})
-}*/
+	if item.compareValue != nil {
+		cmpVal = item.compareValue()
+	}
+	return [2]int64{
+		val, cmpVal,
+	}
 
-func (item *DashboardFigure) getValues(app *App) (int64, int64) {
-	val := Cached(app, fmt.Sprintf("dashboard-value-%s", item.uuid), func() int64 {
-		if item.value != nil {
-			return item.value()
-		}
-		return -1
-	})
-	cmpVal := Cached(app, fmt.Sprintf("dashboard-comparevalue-%s", item.uuid), func() int64 {
-		if item.compareValue != nil {
-			return item.compareValue()
-		}
-		return -1
-	})
-	return <-val, <-cmpVal
 }
 
 func (item *DashboardFigure) Value(value func() int64) *DashboardFigure {
@@ -121,10 +148,10 @@ func (item *DashboardFigure) Compare(value func() int64, description string) *Da
 	return item
 }
 
-func (item *DashboardFigure) getValueStr(app *App) string {
+func (item *DashboardFigure) getValueStr(values [2]int64, app *App) string {
 	ret := "–"
 	if item.value != nil {
-		val, _ := item.getValues(app)
+		val := values[0]
 		ret = humanizeNumber(val)
 		if item.unit != "" {
 			ret += " " + item.unit
@@ -134,7 +161,7 @@ func (item *DashboardFigure) getValueStr(app *App) string {
 	return ret
 }
 
-func (item *DashboardFigure) getDescriptionStr(app *App) string {
+func (item *DashboardFigure) getDescriptionStr(values [2]int64, app *App) string {
 	if item.value == nil {
 		return ""
 	}
@@ -142,7 +169,7 @@ func (item *DashboardFigure) getDescriptionStr(app *App) string {
 		return ""
 	}
 
-	val, compareValue := item.getValues(app)
+	val, compareValue := values[0], values[1]
 
 	diff := val - compareValue
 	var ret string
@@ -167,22 +194,24 @@ func (item *DashboardFigure) getDescriptionStr(app *App) string {
 	return ret
 }
 
-func (item *DashboardFigure) homeItem(app *App) *BoardViewItem {
-	ret := &BoardViewItem{
-		URL:         item.url,
-		Name:        item.name,
-		Value:       item.getValueStr(app),
-		Description: item.getDescriptionStr(app),
-	}
-
-	val, compareValue := item.getValues(app)
-	if val > compareValue {
-		ret.IsGreen = true
-	}
-	if val < compareValue {
-		ret.IsRed = true
+func (item *DashboardFigure) view(app *App) *DashboardViewFigure {
+	ret := &DashboardViewFigure{
+		UUID: item.uuid,
+		URL:  item.url,
+		Name: item.name,
 	}
 	return ret
+}
+
+func (item *DashboardFigure) getColors(values [2]int64, app *App) (isGreen, isRed bool) {
+	val, compareValue := values[0], values[1] //item.getValues(app)
+	if val > compareValue {
+		isGreen = true
+	}
+	if val < compareValue {
+		isRed = true
+	}
+	return
 }
 
 func (item *DashboardFigure) URL(url string) *DashboardFigure {
