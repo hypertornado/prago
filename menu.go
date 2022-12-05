@@ -39,6 +39,13 @@ func (menu menu) GetTitle() string {
 	return ""
 }
 
+func (item menuItem) IsBoard() bool {
+	if len(item.Subitems) > 0 {
+		return true
+	}
+	return false
+}
+
 func (app *App) getMenu(request *Request) (ret menu) {
 	user := request.user
 
@@ -47,13 +54,13 @@ func (app *App) getMenu(request *Request) (ret menu) {
 	}
 
 	ret.Sections = append(ret.Sections, resourceSection)
-	ret.Sections = append(ret.Sections, getMenuUserSection(request))
+	ret.Sections = append(ret.Sections, *getMenuUserSection(request))
 
 	ret.Language = user.Locale
 	return ret
 }
 
-func getMenuUserSection(request *Request) menuSection {
+func getMenuUserSection(request *Request) *menuSection {
 	user := request.user
 	app := request.app
 
@@ -97,7 +104,7 @@ func getMenuUserSection(request *Request) menuSection {
 		})
 	}
 
-	return userSection
+	return &userSection
 }
 
 func (board *Board) getMenuItems(request *Request) []menuItem {

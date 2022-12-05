@@ -2764,7 +2764,7 @@ class QuickActions {
     }
 }
 function initDashdoard() {
-    var dashboardTables = document.querySelectorAll(".admin_home_table");
+    var dashboardTables = document.querySelectorAll(".board_table");
     dashboardTables.forEach((el) => {
         new DashboardTable(el);
     });

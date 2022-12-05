@@ -99,13 +99,17 @@ func (app *App) Permission(permission Permission) *App {
 }
 
 func (app *App) authorize(user *user, permission Permission) bool {
+	if permission == loggedPermission && user != nil {
+		return true
+	}
 	if permission == everybodyPermission {
 		return true
 	}
 	if user == nil {
 		return false
 	}
-	return app.accessManager.roles[user.Role][permission]
+	ret := app.accessManager.roles[user.Role][permission]
+	return ret
 }
 
 func (resourceData *resourceData) getResourceViewRoles() []string {

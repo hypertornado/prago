@@ -143,7 +143,7 @@ var m = map[string]map[string]string{
 		"en": "Signpost",
 		"cs": "Rozcestník",
 	},
-	"admin_homepage": {
+	"boardpage": {
 		"en": "Go to homepage",
 		"cs": "Přejít na homepage",
 	},

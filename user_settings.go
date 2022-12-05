@@ -105,7 +105,7 @@ func initUserSettings(app *App) {
 		},
 	)
 
-	app.Action("redirect-to-homepage").Icon("glyphicons-basic-21-home.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_homepage")).userMenu().Handler(func(request *Request) {
+	app.Action("redirect-to-homepage").Icon("glyphicons-basic-21-home.svg").Permission(loggedPermission).Name(messages.GetNameFunction("boardpage")).userMenu().Handler(func(request *Request) {
 		request.Redirect("/")
 	})
 

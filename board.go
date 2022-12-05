@@ -7,7 +7,7 @@ type Board struct {
 	action      *Action
 	parentBoard *Board
 
-	dashboardGroups []*DashboardGroup
+	dashboardGroups []*Dashboard
 }
 
 func (app *App) initBoard() {
@@ -15,7 +15,8 @@ func (app *App) initBoard() {
 		Name(messages.GetNameFunction("admin_signpost")).
 		Icon(iconSignpost)
 	app.MainBoard.action.parentBoard = app.MainBoard
-	app.dashboardGroupMap = make(map[string]*DashboardGroup)
+	app.dashboardTableMap = make(map[string]*dashboardTable)
+	app.dashboardFigureMap = make(map[string]*DashboardFigure)
 
 	sysadminBoard = app.NewBoard("sysadmin-board").Name(unlocalized("Sysadmin"))
 }
@@ -32,9 +33,9 @@ func newBoard(app *App, url string) *Board {
 		action: app.Action(url),
 	}
 	ret.action.isPartOfBoard = ret
-	ret.action.template = "admin_home_navigation"
+	ret.action.template = "board"
 	ret.action.dataSource = func(request *Request) interface{} {
-		return ret.homeData(request)
+		return ret.boardView(request)
 	}
 	ret.action.permission = loggedPermission
 	return ret

@@ -60,7 +60,8 @@ type App struct {
 	activityListeners []func(Activity)
 	taskManager       *taskManager
 
-	dashboardGroupMap map[string]*DashboardGroup
+	dashboardTableMap  map[string]*dashboardTable
+	dashboardFigureMap map[string]*DashboardFigure
 
 	MainBoard *Board
 

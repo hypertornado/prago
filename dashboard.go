@@ -5,15 +5,14 @@ import (
 	"fmt"
 )
 
-type DashboardGroup struct {
-	board *Board
-	uuid  string
-	name  func(string) string
-	items []*DashboardItem
-	table *dashboardGroupTable
+type Dashboard struct {
+	board   *Board
+	name    func(string) string
+	figures []*DashboardFigure
+	tables  []*dashboardTable
 }
 
-type DashboardItem struct {
+type DashboardFigure struct {
 	uuid               string
 	permission         Permission
 	url                string
@@ -24,7 +23,8 @@ type DashboardItem struct {
 	name               string
 }
 
-type dashboardGroupTable struct {
+type dashboardTable struct {
+	uuid       string
 	table      func() *Table
 	permission Permission
 }
@@ -42,67 +42,59 @@ func (app *App) initDashboard() {
 }
 
 func (app *App) getDashboardTableData(uuid string, user *user) (*Table, error) {
-	group := app.dashboardGroupMap[uuid]
-	if group == nil {
+	table := app.dashboardTableMap[uuid]
+	if table == nil {
 		return nil, errors.New("can't find table")
 	}
-	if !app.authorize(user, group.table.permission) {
+	if !app.authorize(user, table.permission) {
 		return nil, errors.New("can't authorize for access of table data")
 	}
-	return group.table.table(), nil
-
-	/*for _, group := range app.dashboardGroups {
-		if group.uuid == uuid {
-			if !app.authorize(user, group.table.permission) {
-				return nil, errors.New("can't authorize for access of table data")
-			}
-			return group.table.table(), nil
-		}
-	}
-	return nil, errors.New("can't find table")*/
+	return table.table(), nil
 
 }
 
-func (board *Board) DashboardGroup(name func(string) string) *DashboardGroup {
-	group := &DashboardGroup{
+func (board *Board) Dashboard(name func(string) string) *Dashboard {
+	group := &Dashboard{
 		board: board,
-		uuid:  randomString(30),
 		name:  name,
 	}
-	board.app.dashboardGroupMap[group.uuid] = group
+	//board.app.dashboardGroupMap[group.uuid] = group
 	board.dashboardGroups = append(board.dashboardGroups, group)
 	return group
 }
 
-func (group *DashboardGroup) Item(name string, permission Permission) *DashboardItem {
+func (group *Dashboard) Item(name string, permission Permission) *DashboardFigure {
 	must(group.board.app.validatePermission(permission))
-	item := &DashboardItem{
+	item := &DashboardFigure{
 		uuid:       randomString(30),
 		name:       name,
 		permission: permission,
 	}
-	group.items = append(group.items, item)
+	group.figures = append(group.figures, item)
 	return item
 }
 
-func (group *DashboardGroup) Table(table func() *Table, permission Permission) *DashboardGroup {
-	group.table = &dashboardGroupTable{
-		table:      table,
+func (group *Dashboard) Table(tableFn func() *Table, permission Permission) *Dashboard {
+	table := &dashboardTable{
+		uuid:       randomString(30),
+		table:      tableFn,
 		permission: permission,
 	}
+	group.tables = append(group.tables, table)
+	group.board.app.dashboardTableMap[table.uuid] = table
 	return group
 }
 
-func (group *DashboardGroup) getTable() *Table {
+/*func (group *Dashboard) getTable() *Table {
 	if group.table == nil {
 		return nil
 	}
 	return <-Cached(group.board.app, fmt.Sprintf("dashboard-table-%s", group.uuid), func() *Table {
 		return group.table.table()
 	})
-}
+}*/
 
-func (item *DashboardItem) getValues(app *App) (int64, int64) {
+func (item *DashboardFigure) getValues(app *App) (int64, int64) {
 	val := Cached(app, fmt.Sprintf("dashboard-value-%s", item.uuid), func() int64 {
 		if item.value != nil {
 			return item.value()
@@ -118,18 +110,18 @@ func (item *DashboardItem) getValues(app *App) (int64, int64) {
 	return <-val, <-cmpVal
 }
 
-func (item *DashboardItem) Value(value func() int64) *DashboardItem {
+func (item *DashboardFigure) Value(value func() int64) *DashboardFigure {
 	item.value = value
 	return item
 }
 
-func (item *DashboardItem) Compare(value func() int64, description string) *DashboardItem {
+func (item *DashboardFigure) Compare(value func() int64, description string) *DashboardFigure {
 	item.compareValue = value
 	item.compareDescription = description
 	return item
 }
 
-func (item *DashboardItem) getValueStr(app *App) string {
+func (item *DashboardFigure) getValueStr(app *App) string {
 	ret := "–"
 	if item.value != nil {
 		val, _ := item.getValues(app)
@@ -142,7 +134,7 @@ func (item *DashboardItem) getValueStr(app *App) string {
 	return ret
 }
 
-func (item *DashboardItem) getDescriptionStr(app *App) string {
+func (item *DashboardFigure) getDescriptionStr(app *App) string {
 	if item.value == nil {
 		return ""
 	}
@@ -175,8 +167,8 @@ func (item *DashboardItem) getDescriptionStr(app *App) string {
 	return ret
 }
 
-func (item *DashboardItem) homeItem(app *App) *HomeItem {
-	ret := &HomeItem{
+func (item *DashboardFigure) homeItem(app *App) *BoardViewItem {
+	ret := &BoardViewItem{
 		URL:         item.url,
 		Name:        item.name,
 		Value:       item.getValueStr(app),
@@ -193,12 +185,12 @@ func (item *DashboardItem) homeItem(app *App) *HomeItem {
 	return ret
 }
 
-func (item *DashboardItem) URL(url string) *DashboardItem {
+func (item *DashboardFigure) URL(url string) *DashboardFigure {
 	item.url = url
 	return item
 }
 
-func (item *DashboardItem) Unit(unit string) *DashboardItem {
+func (item *DashboardFigure) Unit(unit string) *DashboardFigure {
 	item.unit = unit
 	return item
 }

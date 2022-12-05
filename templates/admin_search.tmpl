@@ -45,7 +45,7 @@
 
 {{define "searchbox"}}
   <form class="searchbox" action="/admin/_search">
-    <input class="searchbox_input" type="search" placeholder="Vyhledávání" name="q" value="{{.}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <input class="searchbox_input" type="search" placeholder="Vyhledávání" name="q" value="{{.}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus>
     <button class="searchbox_button">
       <img src="/admin/api/icons?file=glyphicons-basic-28-search.svg&color=333333">
     </button>

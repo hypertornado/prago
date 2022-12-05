@@ -1,6 +1,6 @@
 function initDashdoard() {
   var dashboardTables =
-    document.querySelectorAll<HTMLDivElement>(".admin_home_table");
+    document.querySelectorAll<HTMLDivElement>(".board_table");
   dashboardTables.forEach((el) => {
     new DashboardTable(el);
   });
