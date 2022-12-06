@@ -125,7 +125,7 @@ func (action *ResourceItemAction[T]) Handler(fn func(*T, *Request)) *ResourceIte
 
 func (actionData *resourceItemActionData) Handler(fn func(any, *Request)) *resourceItemActionData {
 	actionData.action.Handler(func(request *Request) {
-		item := actionData.resourceData.ID(context.TODO(), request.Param("id"))
+		item := actionData.resourceData.query(request.r.Context()).ID(request.Param("id"))
 		if item == nil {
 			panic("can't find item")
 		}

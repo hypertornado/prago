@@ -248,7 +248,7 @@ func (resourceData *resourceData) editItemWithLogAndValues(request *Request, val
 		return nil, nil, fmt.Errorf("can't parse id %d: %s", id, err)
 	}
 
-	beforeItem := resourceData.ID(request.r.Context(), id)
+	beforeItem := resourceData.query(request.r.Context()).ID(id)
 	if beforeItem == nil {
 		return nil, nil, fmt.Errorf("can't get beforeitem with id %d: %s", id, err)
 	}
@@ -293,7 +293,7 @@ func (resource *Resource[T]) UpdateWithLog(item *T, request *Request) error {
 
 func (resourceData *resourceData) UpdateWithLog(item any, request *Request) error {
 	id := resourceData.previewer(request.user, item).ID()
-	beforeItem := resourceData.ID(request.r.Context(), id)
+	beforeItem := resourceData.query(request.r.Context()).ID(id)
 	if beforeItem == nil {
 		return errors.New("can't find before item")
 	}

@@ -68,7 +68,7 @@ func (resourceData *resourceData) getRelationView(ctx context.Context, id int64,
 }
 
 func (resourceData *resourceData) itemWithRelationCount(ctx context.Context, fieldID string, id int64) int64 {
-	filteredCount, err := resourceData.Is(ctx, fieldID, id).count()
+	filteredCount, err := resourceData.query(ctx).Is(fieldID, id).count()
 	if err != nil {
 		panic(err)
 	}

@@ -69,7 +69,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 
 	resourceData.API("preview-relation/:id").Handler(
 		func(request *Request) {
-			item := resourceData.ID(request.r.Context(), request.Param("id"))
+			item := resourceData.query(request.r.Context()).ID(request.Param("id"))
 			if item == nil {
 				render404(request)
 				return
@@ -97,7 +97,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 			}
 
 			for i, id := range order {
-				item := resourceData.ID(request.r.Context(), id)
+				item := resourceData.query(request.r.Context()).ID(id)
 				resourceData.setOrderPosition(item, int64(i))
 				err := resourceData.Update(request.r.Context(), item)
 				must(err)
@@ -116,7 +116,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 
 			id, err := strconv.Atoi(q)
 			if err == nil {
-				item := resourceData.ID(request.r.Context(), id)
+				item := resourceData.query(request.r.Context()).ID(id)
 				if item != nil {
 					relationItem := resourceData.previewer(request.user, item).Preview(request.r.Context(), nil)
 					if relationItem != nil {
@@ -183,7 +183,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				}
 				for _, v := range ids {
 					app := request.app
-					item := resourceData.ID(request.r.Context(), v)
+					item := resourceData.query(request.r.Context()).ID(v)
 					if item == nil {
 						panic(fmt.Sprintf("can't get item for clone with id %d", v))
 					}
@@ -246,7 +246,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 						return
 					}
 
-					item := resourceData.ID(request.r.Context(), v)
+					item := resourceData.query(request.r.Context()).ID(v)
 					if item == nil {
 						panic("can't find item to delete")
 					}
@@ -263,7 +263,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 							panic("don't have access")
 						}
 						for _, id := range ids {
-							item := resourceData.ID(request.r.Context(), id)
+							item := resourceData.query(request.r.Context()).ID(id)
 							err := action.handler(item, request)
 							must(err)
 						}

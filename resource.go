@@ -195,7 +195,7 @@ func (resource *Resource[T]) Delete(ctx context.Context, id int64) error {
 }
 
 func (resourceData *resourceData) Delete(ctx context.Context, id int64) error {
-	q := resourceData.Is(ctx, "id", id)
+	q := resourceData.query(ctx).Is("id", id)
 	count, err := q.delete()
 	if err != nil {
 		return err
