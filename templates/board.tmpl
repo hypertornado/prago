@@ -11,12 +11,12 @@
 
   {{if .IsMainBoard}}
     <div class="board_user">
-      <div class="board_user_left">Vítejte v administraci {{.AppName}}.<br>Jste přihlášen(a) jako uživatel <b>{{.UserSection.Name}}</b> s oprávněním {{.User.Role}}.</div>
-      <div class="btngroup board_user_right">
+      <div class="btngroup board_user_buttons">
         {{range $item := .UserSection.Items}}
           <a href="{{$item.URL}}" class="btn"><img src="/admin/api/icons?file={{$item.Icon}}&color=444444" class="btn_icon"><div class="btn_text">{{$item.Name}}</div></a>
         {{end}}
       </div>
+      <div class="board_user_text">Vítejte v administraci {{.AppName}}.<br>Jste přihlášen(a) jako uživatel <b>{{.UserSection.Name}}</b> s oprávněním {{.User.Role}}.</div>
     </div>
   {{end}}
 

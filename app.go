@@ -118,7 +118,6 @@ func createApp(codeName string, version string) *App {
 	app.initFilesResource()
 
 	app.initActivityLog()
-	app.initHome()
 	app.postInitTaskManager()
 	app.initAdminActions()
 	app.initBuild()

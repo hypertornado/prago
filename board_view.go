@@ -18,8 +18,7 @@ type BoardView struct {
 }
 
 type DashboardView struct {
-	Name string
-	//Tasks   *taskViewData
+	Name    string
 	Figures []*DashboardViewFigure
 	Tables  []DashboardViewTable
 }
@@ -33,10 +32,6 @@ type DashboardViewFigure struct {
 
 type DashboardViewTable struct {
 	UUID string
-}
-
-func (app *App) initHome() {
-
 }
 
 func (board *Board) boardView(request *Request) *BoardView {
@@ -85,11 +80,6 @@ func (board *Board) boardView(request *Request) *BoardView {
 		if len(taskData.Tasks) > 0 {
 			ret.TasksName = messages.Get(request.user.Locale, "tasks")
 			ret.Tasks = &taskData
-			/*taskSection := &DashboardView{
-				Name:  messages.Get(request.user.Locale, "tasks"),
-				Tasks: &taskData,
-			}
-			ret.Dashboards = append(ret.Dashboards, taskSection)*/
 		}
 	}
 

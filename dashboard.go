@@ -63,7 +63,6 @@ func (app *App) initDashboard() {
 			figure, err := app.getDashboardFigureData(uuid, request.user)
 			must(err)
 			return figure
-			//request.app.templates.templates.ExecuteTemplate(request.Response(), "admin_form_table", table.TemplateData())
 		},
 	)
 }
@@ -95,7 +94,6 @@ func (board *Board) Dashboard(name func(string) string) *Dashboard {
 		board: board,
 		name:  name,
 	}
-	//board.app.dashboardGroupMap[group.uuid] = group
 	board.dashboardGroups = append(board.dashboardGroups, group)
 	return group
 }
@@ -204,7 +202,7 @@ func (item *DashboardFigure) view(app *App) *DashboardViewFigure {
 }
 
 func (item *DashboardFigure) getColors(values [2]int64, app *App) (isGreen, isRed bool) {
-	val, compareValue := values[0], values[1] //item.getValues(app)
+	val, compareValue := values[0], values[1]
 	if val > compareValue {
 		isGreen = true
 	}

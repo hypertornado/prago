@@ -2239,22 +2239,32 @@ a.board_resource {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+@keyframes board_user {
+  0% {
+    opacity: 0.3;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+  }
+}
 .board_user {
   display: flex;
   justify-content: center;
-  flex-direction: column-reverse;
+  flex-direction: column;
   margin: 20px auto;
   max-width: 600px;
   margin-top: 30px;
   color: #888;
 }
-.board_user_left {
+.board_user_text {
   padding: 20px 10px;
   font-size: 1.3rem;
   line-height: 1.3em;
   text-align: center;
+  animation: board_user 2000ms ease-out;
 }
-.board_user_right {
+.board_user_buttons {
   padding: 0px 10px;
   align-self: center;
 }
