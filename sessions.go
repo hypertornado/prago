@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/gorilla/sessions"
@@ -37,7 +38,7 @@ func (request *Request) writeSessionIfDirty() {
 	}
 }
 
-//AddFlashMessage adds flash message to request
+// AddFlashMessage adds flash message to request
 func (request *Request) AddFlashMessage(message string) {
 	request.app.Notification(message).Flash(request)
 }
@@ -47,7 +48,7 @@ func initUserFromSession(request *Request) {
 	if !ok {
 		return
 	}
-	user := request.app.UsersResource.ID(userID)
+	user := request.app.UsersResource.ID(request.r.Context(), userID)
 	if user == nil {
 		return
 	}
@@ -89,7 +90,7 @@ func initRequestWithSession(request *Request, next func()) {
 }
 
 func (app *App) initSessions() {
-	random := app.MustGetSetting("random")
+	random := app.MustGetSetting(context.Background(), "random")
 	cookieStore := sessions.NewCookieStore([]byte(random))
 	app.sessionsManager = &sessionsManager{
 		cookieStore: cookieStore,

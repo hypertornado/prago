@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"errors"
 	"fmt"
 	"image"
@@ -75,7 +76,7 @@ func main() {
 
 func getCDNProjectsMap() map[string]*CDNProject {
 	var accounts = map[string]*CDNProject{}
-	projects := projectResource.Query().List()
+	projects := projectResource.Query(context.Background()).List()
 	for _, v := range projects {
 		accounts[v.Name] = v
 	}

@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -9,7 +10,7 @@ import (
 // FieldType defines type of field
 type fieldType struct {
 	viewTemplate   string
-	viewDataSource func(*user, *Field, interface{}) interface{}
+	viewDataSource func(context.Context, *user, *Field, interface{}) interface{}
 
 	dbFieldDescription string
 
@@ -112,8 +113,8 @@ func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("relation", &fieldType{
 		viewTemplate: "admin_item_view_relation",
 		//listCellTemplate: "admin_item_view_relation_cell",
-		viewDataSource: func(user *user, f *Field, value interface{}) interface{} {
-			return f.relationPreview(user, value.(int64))
+		viewDataSource: func(ctx context.Context, user *user, f *Field, value interface{}) interface{} {
+			return f.relationPreview(ctx, user, value.(int64))
 		},
 		//viewDataSource: getRelationViewData,
 		formTemplate: "admin_item_relation",
@@ -156,7 +157,7 @@ func createFilesEditDataSource(mimeTypes string) func(f *Field, u *user) interfa
 	}
 }
 
-func markdownViewDataSource(user *user, f *Field, value interface{}) interface{} {
+func markdownViewDataSource(ctx context.Context, user *user, f *Field, value interface{}) interface{} {
 	return cropMarkdown(value.(string), 100)
 }
 
@@ -165,7 +166,7 @@ func markdownListDataSource(user *user, f *Field, value interface{}) cellViewDat
 }
 
 func relationCellViewData(user *user, f *Field, value interface{}) cellViewData {
-	previewData := f.relationPreview(user, value.(int64))
+	previewData := f.relationPreview(context.TODO(), user, value.(int64))
 	if previewData == nil {
 		return cellViewData{}
 	}

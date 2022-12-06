@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	"golang.org/x/net/context"
 )
 
 type activityLog struct {
@@ -65,7 +67,7 @@ func (app *App) getHistoryTable(user *user, resourceData *resourceData, itemID i
 		return ret
 	}
 
-	q := app.activityLogResource.Query()
+	q := app.activityLogResource.Query(context.Background())
 	if resourceData != nil {
 		q.Is("ResourceName", resourceData.getID())
 	}
@@ -102,7 +104,7 @@ func (app *App) getHistoryTable(user *user, resourceData *resourceData, itemID i
 
 	for _, v := range items {
 		var username, userurl string
-		user := app.UsersResource.ID(v.User)
+		user := app.UsersResource.ID(context.Background(), v.User)
 		locale := "en"
 		if user != nil {
 			username = user.Name
@@ -114,7 +116,7 @@ func (app *App) getHistoryTable(user *user, resourceData *resourceData, itemID i
 
 		itemName := fmt.Sprintf("%s #%d", v.ResourceName, v.ItemID)
 		if resourceData != nil {
-			item := resourceData.query().ID(v.ItemID)
+			item := resourceData.query(context.Background()).ID(v.ItemID)
 			var name string
 			if item != nil {
 				name = resourceData.previewer(user, item).Name()
@@ -191,7 +193,7 @@ func (resourceData *resourceData) LogActivity(user *user, before, after any) err
 		ContentAfter:  string(afterData),
 	}
 
-	err = resourceData.app.activityLogResource.Create(log)
+	err = resourceData.app.activityLogResource.Create(context.Background(), log)
 	if err == nil {
 		for _, v := range resourceData.app.activityListeners {
 			v(log.activity())

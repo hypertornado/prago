@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strings"
 	"time"
+
+	"golang.org/x/net/context"
 )
 
 // ErrWrongWhereFormat is returned when where query has a bad format
@@ -77,7 +79,7 @@ func (resourceData *resourceData) prepareValues(value reflect.Value) (names []st
 }
 
 // https://stackoverflow.com/questions/696190/create-if-an-entry-if-it-doesnt-exist-otherwise-update
-func (resourceData *resourceData) replaceItem(item interface{}, debugSQL bool) error {
+func (resourceData *resourceData) replaceItem(ctx context.Context, item interface{}, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	if id <= 0 {
 		return errors.New("id must be positive")
@@ -97,7 +99,7 @@ func (resourceData *resourceData) replaceItem(item interface{}, debugSQL bool) e
 	if debugSQL {
 		fmt.Println(q, values)
 	}
-	execResult, err := resourceData.app.db.Exec(q, values...)
+	execResult, err := resourceData.app.db.ExecContext(ctx, q, values...)
 	if err != nil {
 		return err
 	}
@@ -111,7 +113,7 @@ func (resourceData *resourceData) replaceItem(item interface{}, debugSQL bool) e
 	return nil
 }
 
-func (resourceData *resourceData) saveItem(item interface{}, debugSQL bool) error {
+func (resourceData *resourceData) saveItem(ctx context.Context, item interface{}, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	if id <= 0 {
 		return errors.New("id must be positive")
@@ -130,7 +132,7 @@ func (resourceData *resourceData) saveItem(item interface{}, debugSQL bool) erro
 	if debugSQL {
 		fmt.Println(q, values)
 	}
-	execResult, err := resourceData.app.db.Exec(q, values...)
+	execResult, err := resourceData.app.db.ExecContext(ctx, q, values...)
 	if err != nil {
 		return err
 	}
@@ -147,7 +149,7 @@ func (resourceData *resourceData) saveItem(item interface{}, debugSQL bool) erro
 	return nil
 }
 
-func (resourceData *resourceData) createItem(item interface{}, debugSQL bool) error {
+func (resourceData *resourceData) createItem(ctx context.Context, item interface{}, debugSQL bool) error {
 	value := reflect.ValueOf(item).Elem()
 
 	names, questionMarks, values, err := resourceData.prepareValues(value)
@@ -159,7 +161,7 @@ func (resourceData *resourceData) createItem(item interface{}, debugSQL bool) er
 	if debugSQL {
 		fmt.Println(q, values)
 	}
-	res, err := resourceData.app.db.Exec(q, values...)
+	res, err := resourceData.app.db.ExecContext(ctx, q, values...)
 	if err != nil {
 		return err
 	}
@@ -216,8 +218,8 @@ func sqlFieldToQuery(fieldName string) string {
 	return fmt.Sprintf("`%s`=?", fieldName)
 }
 
-func (resourceData *resourceData) countAllItems(debugSQL bool) (int64, error) {
-	return resourceData.query().count()
+func (resourceData *resourceData) countAllItems(ctx context.Context, debugSQL bool) (int64, error) {
+	return resourceData.query(ctx).count()
 }
 
 func (query *listQuery) count() (int64, error) {
@@ -229,15 +231,14 @@ func (query *listQuery) count() (int64, error) {
 	if query.isDebug {
 		fmt.Println(q, query.values)
 	}
-	rows, err := query.resourceData.app.db.Query(q, query.values...)
-	defer func() {
-		if rows != nil {
-			rows.Close()
-		}
-	}()
+
+	rows, err := query.resourceData.app.db.QueryContext(query.context, q, query.values...)
 	if err != nil {
 		return -1, err
 	}
+	defer func() {
+		rows.Close()
+	}()
 	rows.Next()
 
 	var i int64
@@ -265,7 +266,7 @@ func (query *listQuery) list() (interface{}, error) {
 		query.resourceData.app.Log().Println(q, query.values)
 	}
 
-	rows, err := query.resourceData.app.db.Query(q, query.values...)
+	rows, err := query.resourceData.app.db.QueryContext(query.context, q, query.values...)
 	/*defer func() {
 		if rows != nil {
 			rows.Close()
@@ -299,7 +300,7 @@ func (query *listQuery) delete() (int64, error) {
 	if query.isDebug {
 		resourceData.app.Log().Println(q, query.values)
 	}
-	res, err := resourceData.app.db.Exec(q, query.values...)
+	res, err := resourceData.app.db.ExecContext(query.context, q, query.values...)
 	if err != nil {
 		return -1, err
 	}

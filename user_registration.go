@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -13,15 +14,16 @@ import (
 func initUserRegistration(app *App) {
 
 	app.accessController.get(app.UsersResource.data.getURL("confirm_email"), func(request *Request) {
+		ctx := request.r.Context()
 		email := request.Param("email")
 		token := request.Param("token")
 
-		user := app.UsersResource.Is("email", email).First()
+		user := app.UsersResource.Is(ctx, "email", email).First()
 		if user != nil {
 			if !user.emailConfirmed() {
-				if token == user.emailToken(app) {
+				if token == user.emailToken(request.r.Context(), app) {
 					user.EmailConfirmedAt = time.Now()
-					err := app.UsersResource.Update(user)
+					err := app.UsersResource.Update(ctx, user)
 					if err == nil {
 						request.AddFlashMessage(messages.Get(user.Locale, "admin_confirm_email_ok"))
 						request.Redirect(app.getAdminURL("user/login"))
@@ -68,7 +70,7 @@ func registrationValidation(vc ValidationContext) {
 		valid = false
 		vc.AddItemError("email", messages.Get(locale, "admin_email_not_valid"))
 	} else {
-		user := app.UsersResource.Is("email", email).First()
+		user := app.UsersResource.Is(vc.Context(), "email", email).First()
 		if user != nil && user.Email == email {
 			valid = false
 			vc.AddItemError("email", messages.Get(locale, "admin_email_already_registered"))
@@ -95,21 +97,21 @@ func registrationValidation(vc ValidationContext) {
 		u.IsActive = true
 		u.Locale = locale
 		must(u.newPassword(vc.GetValue("password")))
-		err := u.sendConfirmEmail(app, locale)
+		err := u.sendConfirmEmail(vc.Context(), app, locale)
 		if err != nil {
 			app.Log().Println(err)
 		}
-		err = u.sendAdminEmail(app)
+		err = u.sendAdminEmail(vc.Context(), app)
 		if err != nil {
 			app.Log().Println(err)
 		}
 
-		count, err := app.UsersResource.Query().Count()
+		count, err := app.UsersResource.Query(vc.Context()).Count()
 		if err == nil && count == 0 {
 			u.Role = sysadminRoleName
 		}
 
-		must(app.UsersResource.Create(u))
+		must(app.UsersResource.Create(vc.Context(), u))
 
 		vc.Request().AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
 		vc.Validation().RedirectionLocaliton = app.getAdminURL("user/login") + "?email=" + url.QueryEscape(email)
@@ -117,23 +119,23 @@ func registrationValidation(vc ValidationContext) {
 	}
 }
 
-func (u user) sendConfirmEmail(app *App, locale string) error {
+func (u user) sendConfirmEmail(ctx context.Context, app *App, locale string) error {
 	if u.emailConfirmed() {
 		return errors.New("email already confirmed")
 	}
 	urlValues := make(url.Values)
 	urlValues.Add("email", u.Email)
-	urlValues.Add("token", u.emailToken(app))
+	urlValues.Add("token", u.emailToken(ctx, app))
 
 	subject := messages.Get(locale, "admin_confirm_email_subject", app.name(u.Locale))
-	link := app.MustGetSetting("base_url") + app.getAdminURL("user/confirm_email") + "?" + urlValues.Encode()
+	link := app.MustGetSetting(ctx, "base_url") + app.getAdminURL("user/confirm_email") + "?" + urlValues.Encode()
 	body := messages.Get(locale, "admin_confirm_email_body", link, link, app.name(u.Locale))
 	return app.Email().To(u.Name, u.Email).Subject(subject).HTMLContent(body).Send()
 }
 
-func (u user) sendAdminEmail(app *App) error {
+func (u user) sendAdminEmail(ctx context.Context, app *App) error {
 	res := GetResource[user](app)
-	users := res.Is("role", "sysadmin").List()
+	users := res.Is(ctx, "role", "sysadmin").List()
 	for _, receiver := range users {
 		body := fmt.Sprintf("New user registered on %s: %s (%s)", app.name(u.Locale), u.Email, u.Name)
 

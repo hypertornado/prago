@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"crypto/md5"
 	"errors"
 	"fmt"
@@ -64,8 +65,8 @@ func (user *user) newPassword(password string) error {
 	return nil
 }
 
-func (user user) emailToken(app *App) string {
-	randomness := app.MustGetSetting("random")
+func (user user) emailToken(ctx context.Context, app *App) string {
+	randomness := app.MustGetSetting(ctx, "random")
 	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%s%s", user.Email, randomness))
 	return fmt.Sprintf("%x", h.Sum(nil))
@@ -92,9 +93,9 @@ func (app *App) initUserResource() {
 	initUserRenew(app)
 }
 
-func (app *App) GetCachedUserEmail(id int64) string {
+func (app *App) GetCachedUserEmail(ctx context.Context, id int64) string {
 	return <-Cached(app, fmt.Sprintf("cached-user-email-%d", id), func() string {
-		user := app.UsersResource.ID(id)
+		user := app.UsersResource.ID(ctx, id)
 		return user.Email
 	})
 }

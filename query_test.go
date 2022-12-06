@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"testing"
 )
 
@@ -10,10 +11,10 @@ func TestReflectQuery(t *testing.T) {
 	resA := ResourceStruct{Name: "A"}
 	resB := ResourceStruct{Name: "B"}
 
-	resource.Create(&resA)
-	resource.Create(&resB)
+	resource.Create(context.Background(), &resA)
+	resource.Create(context.Background(), &resB)
 
-	item := resource.Query().Is("id", resB.ID).First()
+	item := resource.Query(context.Background()).Is("id", resB.ID).First()
 	if item == nil {
 		t.Fatal("is nil")
 	}
@@ -22,7 +23,7 @@ func TestReflectQuery(t *testing.T) {
 		t.Fatal("wrong name")
 	}
 
-	list := resource.Query().List()
+	list := resource.Query(context.Background()).List()
 	if len(list) != 2 {
 		t.Fatal("wrong length")
 	}

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+
+	"golang.org/x/net/context"
 )
 
 type viewRelation struct {
@@ -14,9 +16,9 @@ type viewRelation struct {
 	Count          int64
 }
 
-func (resourceData *resourceData) getRelationViews(id int64, user *user) (ret []view) {
+func (resourceData *resourceData) getRelationViews(ctx context.Context, id int64, user *user) (ret []view) {
 	for _, v := range resourceData.relations {
-		vi := resourceData.getRelationView(id, v, user)
+		vi := resourceData.getRelationView(ctx, id, v, user)
 		if vi != nil {
 			ret = append(ret, *vi)
 		}
@@ -24,12 +26,12 @@ func (resourceData *resourceData) getRelationViews(id int64, user *user) (ret []
 	return
 }
 
-func (resourceData *resourceData) getRelationView(id int64, field *relatedField, user *user) *view {
+func (resourceData *resourceData) getRelationView(ctx context.Context, id int64, field *relatedField, user *user) *view {
 	if !resourceData.app.authorize(user, field.resource.canView) {
 		return nil
 	}
 
-	filteredCount := field.resource.itemWithRelationCount(field.id, int64(id))
+	filteredCount := field.resource.itemWithRelationCount(ctx, field.id, int64(id))
 
 	ret := &view{}
 
@@ -65,8 +67,8 @@ func (resourceData *resourceData) getRelationView(id int64, field *relatedField,
 	return ret
 }
 
-func (resourceData *resourceData) itemWithRelationCount(fieldID string, id int64) int64 {
-	filteredCount, err := resourceData.Is(fieldID, id).count()
+func (resourceData *resourceData) itemWithRelationCount(ctx context.Context, fieldID string, id int64) int64 {
+	filteredCount, err := resourceData.Is(ctx, fieldID, id).count()
 	if err != nil {
 		panic(err)
 	}
@@ -90,11 +92,11 @@ func generateRelationListAPIHandler(request *Request) {
 
 	targetResource := request.app.getResourceByID(listRequest.TargetResource)
 
-	request.SetData("data", targetResource.getPreviews(listRequest, request.user))
+	request.SetData("data", targetResource.getPreviews(request.r.Context(), listRequest, request.user))
 	request.RenderView("admin_item_view_relationlist_response")
 }
 
-func (resourceData *resourceData) getPreviews(listRequest relationListRequest, user *user) []*preview {
+func (resourceData *resourceData) getPreviews(ctx context.Context, listRequest relationListRequest, user *user) []*preview {
 	sourceResource := resourceData.app.getResourceByID(listRequest.SourceResource)
 	if !resourceData.app.authorize(user, sourceResource.canView) {
 		panic("cant authorize source resource")
@@ -104,7 +106,7 @@ func (resourceData *resourceData) getPreviews(listRequest relationListRequest, u
 		panic("cant authorize target resource")
 	}
 
-	q := resourceData.query().Is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
+	q := resourceData.query(ctx).Is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
 	if resourceData.orderDesc {
 		q.addOrder(resourceData.orderByColumn, true)
 	} else {
@@ -130,7 +132,7 @@ func (resourceData *resourceData) getPreviews(listRequest relationListRequest, u
 	for i := 0; i < itemLen; i++ {
 		ret = append(
 			ret,
-			resourceData.previewer(user, itemVals.Index(i).Interface()).Preview(sourceResource),
+			resourceData.previewer(user, itemVals.Index(i).Interface()).Preview(ctx, sourceResource),
 		)
 	}
 

@@ -32,6 +32,7 @@ func (index *Index[T]) Query() *Query[T] {
 	return q
 }
 
+// TODO: make context mandatory
 func (q *Query[T]) Context(ctx context.Context) *Query[T] {
 	q.context = ctx
 	return q

@@ -131,7 +131,7 @@ func (board *Board) getMenuItems(request *Request) []menuItem {
 			ret = append(ret, menuItem{
 				Icon:     resourceData.icon,
 				Name:     resourceData.pluralName(request.user.Locale),
-				Subname:  humanizeNumber(resourceData.getCachedCount()),
+				Subname:  humanizeNumber(resourceData.getCachedCount(request.r.Context())),
 				URL:      resourceURL,
 				Selected: selected,
 			})

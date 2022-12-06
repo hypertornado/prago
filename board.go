@@ -1,6 +1,9 @@
 package prago
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 var sysadminBoard *Board
 
@@ -22,11 +25,11 @@ func (app *App) initBoard() {
 	sysadminBoard = app.NewBoard("sysadmin-board").Name(unlocalized("Sysadmin"))
 
 	sysadminGroup := sysadminBoard.Dashboard(unlocalized("Sysadmin"))
-	sysadminGroup.Figure("Úpravy", "sysadmin").Value(func() int64 {
-		c, _ := app.activityLogResource.Query().Where("createdat >= ?", time.Now().AddDate(0, 0, -1)).Count()
+	sysadminGroup.Figure("Úpravy", "sysadmin").Value(func(ctx context.Context) int64 {
+		c, _ := app.activityLogResource.Query(ctx).Where("createdat >= ?", time.Now().AddDate(0, 0, -1)).Count()
 		return c
-	}).Unit("/ 24 hodin").URL("/admin/activitylog").Compare(func() int64 {
-		c, _ := app.activityLogResource.Query().Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, -1)).Count()
+	}).Unit("/ 24 hodin").URL("/admin/activitylog").Compare(func(ctx context.Context) int64 {
+		c, _ := app.activityLogResource.Query(ctx).Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, -1)).Count()
 		return c
 	}, "oproti předchozímu dni")
 }

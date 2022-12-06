@@ -1,6 +1,9 @@
 package prago
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 // FieldTypeEnum enum type of field
 type FieldTypeEnum struct {
@@ -32,7 +35,7 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 	}
 
 	app.addFieldType(name, &fieldType{
-		viewDataSource: func(user *user, f *Field, value interface{}) interface{} {
+		viewDataSource: func(ctx context.Context, user *user, f *Field, value interface{}) interface{} {
 			str := value.(string)
 			for _, v := range items {
 				if str == v.ID {

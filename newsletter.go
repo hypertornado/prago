@@ -2,6 +2,7 @@ package prago
 
 import (
 	"bytes"
+	"context"
 	"crypto/md5"
 	"errors"
 	"fmt"
@@ -47,7 +48,7 @@ func (app *App) Newsletters() *Newsletters {
 	app.newsletters = &Newsletters{
 		renderer:   defaultNewsletterRenderer,
 		app:        app,
-		randomness: app.MustGetSetting("random"),
+		randomness: app.MustGetSetting(context.Background(), "random"),
 	}
 
 	app.GET("/newsletter-subscribe", func(request *Request) {
@@ -97,14 +98,14 @@ func (app *App) Newsletters() *Newsletters {
 
 		res := GetResource[newsletterPersons](app)
 
-		person := res.Is("email", email).First()
+		person := res.Is(request.r.Context(), "email", email).First()
 		if person == nil {
 			panic("can't find user")
 		}
 
 		person.Confirmed = true
 
-		err := res.Update(person)
+		err := res.Update(request.r.Context(), person)
 		must(err)
 
 		request.SetData("show_back_button", true)
@@ -125,13 +126,13 @@ func (app *App) Newsletters() *Newsletters {
 
 		res := GetResource[newsletterPersons](app)
 
-		person := res.Is("email", email).First()
+		person := res.Is(request.r.Context(), "email", email).First()
 		if person == nil {
 			panic("can't find user")
 		}
 
 		person.Unsubscribed = true
-		err := res.Update(person)
+		err := res.Update(request.r.Context(), person)
 		if err != nil {
 			panic(err)
 		}
@@ -165,7 +166,7 @@ func (nm Newsletters) confirmEmailBody(name, email string) string {
 	values.Set("secret", nm.secret(email))
 
 	u := fmt.Sprintf("%s/newsletter-confirm?%s",
-		nm.app.MustGetSetting("base_url"),
+		nm.app.MustGetSetting(context.TODO(), "base_url"),
 		values.Encode(),
 	)
 
@@ -181,7 +182,7 @@ func (nm Newsletters) unsubscribeURL(email string) string {
 	values.Set("secret", nm.secret(email))
 
 	return fmt.Sprintf("%s/newsletter-unsubscribe?%s",
-		nm.app.MustGetSetting("base_url"),
+		nm.app.MustGetSetting(context.TODO(), "base_url"),
 		values.Encode(),
 	)
 }
@@ -194,7 +195,7 @@ func (nm Newsletters) secret(email string) string {
 
 func (nm *Newsletters) SubscribeWithConfirmationEmail(email, name string) error {
 	res := GetResource[newsletterPersons](nm.app)
-	person := res.Is("email", email).First()
+	person := res.Is(context.TODO(), "email", email).First()
 	if person != nil {
 		return ErrEmailAlreadyInList
 	}
@@ -213,7 +214,7 @@ func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 
 	res := GetResource[newsletterPersons](nm.app)
 
-	person := res.Is("email", email).First()
+	person := res.Is(context.TODO(), "email", email).First()
 	if person != nil {
 		return ErrEmailAlreadyInList
 	}
@@ -223,7 +224,7 @@ func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 		Email:     email,
 		Confirmed: confirm,
 	}
-	return res.Create(person)
+	return res.Create(context.TODO(), person)
 }
 
 // Newsletter represents newsletter
@@ -257,7 +258,7 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 		},
 	).Validation(func(newsletter *newsletter, vc ValidationContext) {
 		newsletter.PreviewSentAt = time.Now()
-		err := resource.Update(newsletter)
+		err := resource.Update(vc.Context(), newsletter)
 		if err != nil {
 			panic(err)
 		}
@@ -288,7 +289,7 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 		func(newsletter *newsletter, vc ValidationContext) {
 			newsletter.SentAt = time.Now()
 			//TODO: log sent emails
-			must(resource.Update(newsletter))
+			must(resource.Update(vc.Context(), newsletter))
 
 			recipients, err := resource.data.app.getNewsletterRecipients()
 			if err != nil {
@@ -307,7 +308,7 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 		},
 	).Validation(func(newsletter *newsletter, vc ValidationContext) {
 		newsletterSectionResource := GetResource[newsletterSection](vc.Request().app)
-		sections := newsletterSectionResource.Is("newsletter", newsletter.ID).Order("orderposition").List()
+		sections := newsletterSectionResource.Is(vc.Context(), "newsletter", newsletter.ID).Order("orderposition").List()
 
 		newsletter.ID = 0
 		must(resource.CreateWithLog(newsletter, vc.Request()))
@@ -316,7 +317,7 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 			section := *v
 			section.ID = 0
 			section.Newsletter = newsletter.ID
-			must(newsletterSectionResource.Create(&section))
+			must(newsletterSectionResource.Create(vc.Context(), &section))
 		}
 
 		vc.Validation().RedirectionLocaliton = resource.data.getItemURL(newsletter, "edit", vc.Request().user)
@@ -337,7 +338,7 @@ func parseEmails(emails string) []string {
 
 func (app *App) getNewsletterRecipients() ([]string, error) {
 	ret := []string{}
-	persons := GetResource[newsletterPersons](app).Is("confirmed", true).Is("unsubscribed", false).List()
+	persons := GetResource[newsletterPersons](app).Is(context.TODO(), "confirmed", true).Is("unsubscribed", false).List()
 	for _, v := range persons {
 		ret = append(ret, v.Email)
 	}
@@ -362,7 +363,7 @@ func (nm *Newsletters) GetBody(n newsletter, email string) (string, error) {
 	content := markdown.New(markdown.HTML(true)).RenderToString([]byte(n.Body))
 	params := map[string]interface{}{
 		"id":          n.ID,
-		"baseUrl":     nm.app.MustGetSetting("base_url"),
+		"baseUrl":     nm.app.MustGetSetting(context.TODO(), "base_url"),
 		"site":        nm.app.name("en"),
 		"title":       n.Name,
 		"unsubscribe": nm.unsubscribeURL(email),
@@ -440,7 +441,7 @@ type newsletterSectionData struct {
 
 func (nm *Newsletters) getNewsletterSectionData(n newsletter) []newsletterSectionData {
 	//var sections []*newsletterSection
-	sections := GetResource[newsletterSection](nm.app).Is("newsletter", n.ID).Order("orderposition").List()
+	sections := GetResource[newsletterSection](nm.app).Is(context.TODO(), "newsletter", n.ID).Order("orderposition").List()
 	var ret []newsletterSectionData
 
 	for _, v := range sections {
@@ -449,13 +450,13 @@ func (nm *Newsletters) getNewsletterSectionData(n newsletter) []newsletterSectio
 			button = v.Button
 		}
 
-		url := nm.app.MustGetSetting("base_url")
+		url := nm.app.MustGetSetting(context.TODO(), "base_url")
 		if v.URL != "" {
 			url = v.URL
 		}
 
 		image := ""
-		files := nm.app.GetFiles(v.Image)
+		files := nm.app.GetFiles(context.TODO(), v.Image)
 		if len(files) > 0 {
 			image = files[0].GetMedium()
 		}

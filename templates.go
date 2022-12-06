@@ -2,6 +2,7 @@ package prago
 
 import (
 	"bytes"
+	"context"
 	"embed"
 	"html/template"
 	"io"
@@ -61,16 +62,16 @@ func (app *App) initTemplates() {
 	})
 
 	app.AddTemplateFunction("thumb", func(ids string) string {
-		return app.thumb(ids)
+		return app.thumb(context.TODO(), ids)
 	})
 
 	app.AddTemplateFunction("thumbnailExactSize", func(ids string, width, height int) string {
-		return app.thumbnailExactSize(ids, width, height)
+		return app.thumbnailExactSize(context.TODO(), ids, width, height)
 	})
 
 	app.AddTemplateFunction("img", func(ids string) string {
 		for _, v := range strings.Split(ids, ",") {
-			image := app.FilesResource.Is("uid", v).First()
+			image := app.FilesResource.Is(context.TODO(), "uid", v).First()
 			if image != nil && image.isImage() {
 				return image.GetLarge()
 			}

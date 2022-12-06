@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"strings"
@@ -82,12 +83,12 @@ func (previewer *previewer) Name() string {
 
 }
 
-func (f *Field) relationPreview(user *user, id int64) *preview {
-	item := f.relatedResource.query().ID(id)
+func (f *Field) relationPreview(ctx context.Context, user *user, id int64) *preview {
+	item := f.relatedResource.query(ctx).ID(id)
 	if item == nil {
 		return nil
 	}
-	return f.relatedResource.previewer(user, item).Preview(f.resource)
+	return f.relatedResource.previewer(user, item).Preview(ctx, f.resource)
 
 }
 
@@ -95,33 +96,33 @@ func (previewer *previewer) URL(suffix string) string {
 	return previewer.resourceData.getItemURL(previewer.item, suffix, previewer.user)
 }
 
-func (previewer *previewer) Preview(relatedResource *resourceData) *preview {
+func (previewer *previewer) Preview(ctx context.Context, relatedResource *resourceData) *preview {
 	var ret preview
 	ret.ID = previewer.ID()
 	ret.Name = previewer.Name()
 	ret.URL = previewer.URL("")
-	ret.Image = previewer.ThumbnailURL()
+	ret.Image = previewer.ThumbnailURL(ctx)
 	ret.Description = previewer.DescriptionExtended(relatedResource)
 	return &ret
 }
 
-func (previewer *previewer) ThumbnailURL() string {
+func (previewer *previewer) ThumbnailURL(ctx context.Context) string {
 	if previewer.item != nil {
 		itemsVal := reflect.ValueOf(previewer.item).Elem()
 		field := itemsVal.FieldByName("Image")
 		if field.IsValid() && previewer.hasAccessToField("Image") {
-			return previewer.resourceData.app.thumb(field.String())
+			return previewer.resourceData.app.thumb(ctx, field.String())
 		}
 	}
 	return ""
 }
 
-func (previewer *previewer) ImageURL() string {
+func (previewer *previewer) ImageURL(ctx context.Context) string {
 	if previewer.item != nil {
 		itemsVal := reflect.ValueOf(previewer.item).Elem()
 		field := itemsVal.FieldByName("Image")
 		if field.IsValid() && previewer.hasAccessToField("Image") {
-			return previewer.resourceData.app.largeImage(field.String())
+			return previewer.resourceData.app.largeImage(ctx, field.String())
 		}
 	}
 	return ""

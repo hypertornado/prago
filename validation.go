@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"html/template"
@@ -81,6 +82,7 @@ type ValidationContext interface {
 	Valid() bool
 	Request() *Request
 	UserHasPermission(Permission) bool
+	Context() context.Context
 }
 
 type Validation func(ValidationContext)
@@ -132,6 +134,10 @@ func (rv *requestValidation) Request() *Request {
 	return rv.request
 }
 
+func (rv *requestValidation) Context() context.Context {
+	return rv.request.r.Context()
+}
+
 func (rv *requestValidation) UserHasPermission(permission Permission) bool {
 	return rv.request.UserHasPermission(permission)
 }
@@ -141,14 +147,16 @@ type valuesValidation struct {
 	validation *formValidation
 	user       *user
 	app        *App
+	ctx        context.Context
 }
 
-func newValuesValidation(app *App, user *user, values url.Values) *valuesValidation {
+func newValuesValidation(ctx context.Context, app *App, user *user, values url.Values) *valuesValidation {
 	return &valuesValidation{
 		values:     values,
 		validation: NewFormValidation(),
 		user:       user,
 		app:        app,
+		ctx:        ctx,
 	}
 }
 
@@ -189,4 +197,8 @@ func (rv *valuesValidation) UserHasPermission(permission Permission) bool {
 		return false
 	}
 	return rv.app.authorize(rv.user, permission)
+}
+
+func (rv *valuesValidation) Context() context.Context {
+	return rv.ctx
 }

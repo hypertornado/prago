@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"mime/multipart"
@@ -28,18 +29,18 @@ var filesCDN cdnclient.CDNAccount
 
 func initCDN(app *App) {
 	filesCDN = cdnclient.NewCDNAccount(
-		app.MustGetSetting("cdn_url"),
-		app.MustGetSetting("cdn_account"),
-		app.MustGetSetting("cdn_password"),
+		app.MustGetSetting(context.Background(), "cdn_url"),
+		app.MustGetSetting(context.Background(), "cdn_account"),
+		app.MustGetSetting(context.Background(), "cdn_password"),
 	)
 }
 
-func (app *App) thumb(ids string) string {
+func (app *App) thumb(ctx context.Context, ids string) string {
 	if ids == "" {
 		return ""
 	}
 	for _, v := range strings.Split(ids, ",") {
-		image := app.FilesResource.Is("uid", v).First()
+		image := app.FilesResource.Is(ctx, "uid", v).First()
 		if image != nil && image.isImage() {
 			return image.GetSmall()
 		}
@@ -47,12 +48,12 @@ func (app *App) thumb(ids string) string {
 	return ""
 }
 
-func (app *App) largeImage(ids string) string {
+func (app *App) largeImage(ctx context.Context, ids string) string {
 	if ids == "" {
 		return ""
 	}
 	for _, v := range strings.Split(ids, ",") {
-		image := app.FilesResource.Is("uid", v).First()
+		image := app.FilesResource.Is(ctx, "uid", v).First()
 		if image != nil && image.isImage() {
 			return image.GetLarge()
 		}
@@ -60,12 +61,12 @@ func (app *App) largeImage(ids string) string {
 	return ""
 }
 
-func (app *App) thumbnailExactSize(ids string, width, height int) string {
+func (app *App) thumbnailExactSize(ctx context.Context, ids string, width, height int) string {
 	if ids == "" {
 		return ""
 	}
 	for _, v := range strings.Split(ids, ",") {
-		image := app.FilesResource.Is("uid", v).First()
+		image := app.FilesResource.Is(ctx, "uid", v).First()
 		if image != nil && image.isImage() {
 			return image.GetExactSize(width, height)
 		}
@@ -74,11 +75,11 @@ func (app *App) thumbnailExactSize(ids string, width, height int) string {
 }
 
 // GetFiles gets files from app
-func (app *App) GetFiles(ids string) []*File {
+func (app *App) GetFiles(ctx context.Context, ids string) []*File {
 	var files []*File
 	idsAr := strings.Split(ids, ",")
 	for _, v := range idsAr {
-		image := app.FilesResource.Is("uid", v).First()
+		image := app.FilesResource.Is(ctx, "uid", v).First()
 		if image != nil {
 			files = append(files, image)
 		}
@@ -86,7 +87,7 @@ func (app *App) GetFiles(ids string) []*File {
 	return files
 }
 
-func (app *App) UploadFile(fileHeader *multipart.FileHeader, user *user, description string) (*File, error) {
+func (app *App) UploadFile(ctx context.Context, fileHeader *multipart.FileHeader, user *user, description string) (*File, error) {
 	fileName := prettyFilename(fileHeader.Filename)
 	file := File{}
 	file.Name = fileName
@@ -111,7 +112,7 @@ func (app *App) UploadFile(fileHeader *multipart.FileHeader, user *user, descrip
 		file.User = user.ID
 	}
 	file.Description = description
-	err = app.FilesResource.Create(&file)
+	err = app.FilesResource.Create(ctx, &file)
 	if err != nil {
 		return nil, fmt.Errorf("saving file: %s", err)
 	}
@@ -149,7 +150,7 @@ func getOldRedirectParams(request *Request, app *App) (uuid, name string, err er
 		strings.Split(name, "-")[0],
 	)
 
-	file := app.FilesResource.Is("uid", uuid).First()
+	file := app.FilesResource.Is(request.r.Context(), "uid", uuid).First()
 	if file == nil {
 		err = errors.New("no file with id found")
 		return
@@ -180,7 +181,7 @@ func (app *App) initFilesResource() {
 
 	app.addCommand("files", "metadata").
 		Callback(func() {
-			files := resource.Query().List()
+			files := resource.Query(context.Background()).List()
 			for _, v := range files {
 				err := v.updateMetadata()
 				if err != nil {
@@ -188,7 +189,7 @@ func (app *App) initFilesResource() {
 					continue
 				}
 				f := *v
-				if resource.Update(&f) != nil {
+				if resource.Update(context.Background(), &f) != nil {
 					fmt.Println("error while saving file: ", v.ID)
 				} else {
 					fmt.Println("saved ok: ", v.ID, v.Width, v.Height)
@@ -198,7 +199,7 @@ func (app *App) initFilesResource() {
 
 	app.ListenActivity(func(activity Activity) {
 		if activity.ActivityType == "delete" && activity.ResourceID == resource.data.id {
-			file := resource.ID(activity.ID)
+			file := resource.ID(context.Background(), activity.ID)
 			err := filesCDN.DeleteFile(file.UID)
 			if err != nil {
 				app.Log().Printf("deleting CDN: %s\n", err)
@@ -250,7 +251,7 @@ func (app *App) initFilesResource() {
 			vc.AddItemError("file", messages.Get(vc.Locale(), "admin_validation_not_empty"))
 		}
 		if vc.Valid() {
-			fileData, err := app.UploadFile(multipartFiles[0], vc.Request().user, vc.GetValue("description"))
+			fileData, err := app.UploadFile(vc.Request().r.Context(), multipartFiles[0], vc.Request().user, vc.GetValue("description"))
 			if err != nil {
 				vc.AddError(err.Error())
 			} else {
@@ -264,7 +265,7 @@ func (app *App) initFilesResource() {
 			uuid := request.Param("uuid")
 			size := request.Param("size")
 
-			files := app.GetFiles(uuid)
+			files := app.GetFiles(request.r.Context(), uuid)
 			if len(files) == 0 {
 				panic("can't find file")
 			}

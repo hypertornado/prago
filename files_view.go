@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"strings"
 )
 
@@ -21,8 +22,8 @@ type filesViewDataPath struct {
 	URL  string
 }
 
-func getFilesViewData(app *App, uid string) (ret filesViewData) {
-	file := app.FilesResource.Is("UID", uid).First()
+func getFilesViewData(ctx context.Context, app *App, uid string) (ret filesViewData) {
+	file := app.FilesResource.Is(ctx, "UID", uid).First()
 	if file == nil {
 		ret.Error = "Can't find file."
 		return ret
@@ -59,12 +60,12 @@ func getFilesViewData(app *App, uid string) (ret filesViewData) {
 
 }
 
-func filesViewDataSource(user *user, f *Field, value interface{}) interface{} {
+func filesViewDataSource(ctx context.Context, user *user, f *Field, value interface{}) interface{} {
 	app := f.resource.app
 	var ret []filesViewData
 	ar := strings.Split(value.(string), ",")
 	for _, v := range ar {
-		item := getFilesViewData(app, v)
+		item := getFilesViewData(ctx, app, v)
 		ret = append(ret, item)
 	}
 	return ret

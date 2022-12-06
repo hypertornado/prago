@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"go/ast"
@@ -149,33 +150,33 @@ func (resourceData *resourceData) getResourceControl() *controller {
 	return resourceData.resourceController
 }
 
-func (resource *Resource[T]) Is(name string, value interface{}) *Query[T] {
-	return resource.Query().Is(name, value)
+func (resource *Resource[T]) Is(ctx context.Context, name string, value interface{}) *Query[T] {
+	return resource.Query(ctx).Is(name, value)
 }
 
-func (resource *Resource[T]) Create(item *T) error {
-	return resource.data.Create(item)
+func (resource *Resource[T]) Create(ctx context.Context, item *T) error {
+	return resource.data.Create(ctx, item)
 }
 
-func (resourceData *resourceData) Create(item any) error {
+func (resourceData *resourceData) Create(ctx context.Context, item any) error {
 	resourceData.setTimestamp(item, "CreatedAt")
 	resourceData.setTimestamp(item, "UpdatedAt")
-	return resourceData.createItem(item, false)
+	return resourceData.createItem(ctx, item, false)
 }
 
-func (resource *Resource[T]) Update(item *T) error {
-	return resource.data.Update(item)
+func (resource *Resource[T]) Update(ctx context.Context, item *T) error {
+	return resource.data.Update(ctx, item)
 }
 
-func (resourceData *resourceData) Update(item any) error {
+func (resourceData *resourceData) Update(ctx context.Context, item any) error {
 	resourceData.setTimestamp(item, "UpdatedAt")
-	return resourceData.saveItem(item, false)
+	return resourceData.saveItem(ctx, item, false)
 }
 
-func (resource *Resource[T]) Replace(item *T) error {
+func (resource *Resource[T]) Replace(ctx context.Context, item *T) error {
 	resource.data.setTimestamp(item, "CreatedAt")
 	resource.data.setTimestamp(item, "UpdatedAt")
-	return resource.data.replaceItem(item, false)
+	return resource.data.replaceItem(ctx, item, false)
 }
 
 func (resourceData *resourceData) setTimestamp(item any, fieldName string) {
@@ -189,12 +190,12 @@ func (resourceData *resourceData) setTimestamp(item any, fieldName string) {
 	}
 }
 
-func (resource *Resource[T]) Delete(id int64) error {
-	return resource.data.Delete(id)
+func (resource *Resource[T]) Delete(ctx context.Context, id int64) error {
+	return resource.data.Delete(ctx, id)
 }
 
-func (resourceData *resourceData) Delete(id int64) error {
-	q := resourceData.Is("id", id)
+func (resourceData *resourceData) Delete(ctx context.Context, id int64) error {
+	q := resourceData.Is(ctx, "id", id)
 	count, err := q.delete()
 	if err != nil {
 		return err
@@ -327,16 +328,16 @@ func (resourceData *resourceData) cachedCountName() string {
 	return fmt.Sprintf("prago-resource_count-%s", resourceData.id)
 }
 
-func (resourceData *resourceData) getCachedCount() int64 {
+func (resourceData *resourceData) getCachedCount(ctx context.Context) int64 {
 	return loadCache(resourceData.app.cache, resourceData.cachedCountName(), func() int64 {
-		count, _ := resourceData.countAllItems(false)
+		count, _ := resourceData.countAllItems(ctx, false)
 		return count
 	})
 }
 
-func (resourceData *resourceData) updateCachedCount() error {
+func (resourceData *resourceData) updateCachedCount(ctx context.Context) error {
 	resourceData.app.cache.forceLoad(resourceData.cachedCountName(), func() interface{} {
-		count, _ := resourceData.countAllItems(false)
+		count, _ := resourceData.countAllItems(ctx, false)
 		return count
 	})
 	return nil

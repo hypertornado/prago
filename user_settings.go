@@ -16,7 +16,7 @@ func initUserSettings(app *App) {
 
 			for _, v := range app.settings.settingsArray {
 				if request.UserHasPermission(v.permission) {
-					val, err := app.GetSetting(v.id)
+					val, err := app.GetSetting(request.r.Context(), v.id)
 					if err == nil {
 						input := form.AddTextInput("setting_"+v.id, v.name(request.user.Locale))
 						input.Value = val
@@ -53,7 +53,7 @@ func initUserSettings(app *App) {
 			user := vc.Request().user
 			user.Name = name
 			user.Locale = newLocale
-			must(app.UsersResource.Update(user))
+			must(app.UsersResource.Update(vc.Request().r.Context(), user))
 
 			for _, v := range app.settings.settingsArray {
 				request := vc.Request()

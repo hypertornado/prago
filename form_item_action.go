@@ -1,5 +1,7 @@
 package prago
 
+import "context"
+
 type FormItemAction[T any] struct {
 	data *formItemActionData
 }
@@ -17,8 +19,8 @@ func (resource *Resource[T]) FormItemAction(url string) *FormItemAction[T] {
 
 func (resourceData *resourceData) FormItemAction(url string) *formItemActionData {
 	fa := newFormAction(resourceData.app, url, func(f *Form, r *Request) {
-		item := resourceData.query().ID(r.Param("id"))
-		f.image = resourceData.previewer(r.user, item).ImageURL()
+		item := resourceData.query(context.TODO()).ID(r.Param("id"))
+		f.image = resourceData.previewer(r.user, item).ImageURL(r.r.Context())
 	})
 
 	fa.actionForm.resourceData = resourceData
@@ -83,7 +85,7 @@ func (action *FormItemAction[T]) Form(formGenerator func(*T, *Form, *Request)) *
 
 func (actionData *formItemActionData) Form(formGenerator func(any, *Form, *Request)) *formItemActionData {
 	actionData.formAction.Form(func(form *Form, request *Request) {
-		item := actionData.resourceData.ID(request.Param("id"))
+		item := actionData.resourceData.ID(request.r.Context(), request.Param("id"))
 		formGenerator(item, form, request)
 	})
 	return actionData
@@ -98,7 +100,7 @@ func (action *FormItemAction[T]) Validation(validation func(*T, ValidationContex
 
 func (actionData *formItemActionData) Validation(validation func(any, ValidationContext)) *formItemActionData {
 	actionData.formAction.Validation(func(vc ValidationContext) {
-		item := actionData.resourceData.ID(vc.GetValue("id"))
+		item := actionData.resourceData.ID(vc.Context(), vc.GetValue("id"))
 		validation(item, vc)
 	})
 	return actionData

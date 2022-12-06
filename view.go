@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"time"
+
+	"golang.org/x/net/context"
 )
 
 type view struct {
@@ -29,14 +31,14 @@ type viewButton struct {
 	Icon string
 }
 
-func (resourceData *resourceData) getViews(item any, user *user) (ret []view) {
+func (resourceData *resourceData) getViews(ctx context.Context, item any, user *user) (ret []view) {
 	id := resourceData.previewer(user, item).ID()
-	ret = append(ret, resourceData.getBasicView(id, item, user))
-	ret = append(ret, resourceData.getRelationViews(id, user)...)
+	ret = append(ret, resourceData.getBasicView(ctx, id, item, user))
+	ret = append(ret, resourceData.getRelationViews(ctx, id, user)...)
 	return ret
 }
 
-func (resourceData *resourceData) getBasicView(id int64, item any, user *user) view {
+func (resourceData *resourceData) getBasicView(ctx context.Context, int64, item any, user *user) view {
 	ret := view{
 		QuickActions: resourceData.getQuickActionViews(item, user),
 		Header:       &BoxHeader{},
@@ -62,7 +64,7 @@ func (resourceData *resourceData) getBasicView(id int64, item any, user *user) v
 
 	ret.Header.Name = resourceData.previewer(user, item).Name()
 	ret.Header.Icon = tableIcon
-	ret.Header.Image = resourceData.previewer(user, item).ImageURL()
+	ret.Header.Image = resourceData.previewer(user, item).ImageURL(ctx)
 
 	resourceIcon := resourceData.icon
 	if resourceIcon == "" {
@@ -91,7 +93,7 @@ func (resourceData *resourceData) getBasicView(id int64, item any, user *user) v
 				Icon:     icon,
 				Name:     f.name(user.Locale),
 				Template: f.fieldType.viewTemplate,
-				Value:    f.fieldType.viewDataSource(user, f, ifaceVal),
+				Value:    f.fieldType.viewDataSource(ctx, user, f, ifaceVal),
 			},
 		)
 	}
@@ -134,8 +136,8 @@ func getDefaultViewTemplate(t reflect.Type) string {
 	return "admin_item_view_text"
 }
 
-func getDefaultViewDataSource(f *Field) func(user *user, f *Field, value interface{}) interface{} {
-	return func(user *user, f *Field, value interface{}) interface{} {
+func getDefaultViewDataSource(f *Field) func(ctx context.Context, user *user, f *Field, value interface{}) interface{} {
+	return func(ctx context.Context, user *user, f *Field, value interface{}) interface{} {
 		return getDefaultFieldStringer(f)(user, f, value)
 	}
 }

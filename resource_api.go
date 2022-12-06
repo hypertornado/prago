@@ -16,7 +16,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 	resourceData.API("list").Handler(
 		func(request *Request) {
 			if request.Request().URL.Query().Get("_format") == "json" {
-				listDataJSON, err := resourceData.getListContentJSON(request.user, request.Request().URL.Query())
+				listDataJSON, err := resourceData.getListContentJSON(request.r.Context(), request.user, request.Request().URL.Query())
 				must(err)
 				request.RenderJSON(listDataJSON)
 				return
@@ -26,7 +26,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 					render403(request)
 					return
 				}
-				listData, err := resourceData.getListContent(request.user, request.Request().URL.Query())
+				listData, err := resourceData.getListContent(request.r.Context(), request.user, request.Request().URL.Query())
 				must(err)
 
 				file := xlsx.NewFile()
@@ -69,14 +69,14 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 
 	resourceData.API("preview-relation/:id").Handler(
 		func(request *Request) {
-			item := resourceData.ID(request.Param("id"))
+			item := resourceData.ID(request.r.Context(), request.Param("id"))
 			if item == nil {
 				render404(request)
 				return
 			}
 
 			request.RenderJSON(
-				resourceData.previewer(request.user, item).Preview(nil),
+				resourceData.previewer(request.user, item).Preview(request.r.Context(), nil),
 			)
 		},
 	)
@@ -97,9 +97,9 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 			}
 
 			for i, id := range order {
-				item := resourceData.ID(id)
+				item := resourceData.ID(request.r.Context(), id)
 				resourceData.setOrderPosition(item, int64(i))
-				err := resourceData.Update(item)
+				err := resourceData.Update(request.r.Context(), item)
 				must(err)
 			}
 			request.RenderJSON(true)
@@ -116,9 +116,9 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 
 			id, err := strconv.Atoi(q)
 			if err == nil {
-				item := resourceData.ID(id)
+				item := resourceData.ID(request.r.Context(), id)
 				if item != nil {
-					relationItem := resourceData.previewer(request.user, item).Preview(nil)
+					relationItem := resourceData.previewer(request.user, item).Preview(request.r.Context(), nil)
 					if relationItem != nil {
 						usedIDs[relationItem.ID] = true
 						ret = append(ret, *relationItem)
@@ -132,7 +132,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				if field == nil {
 					continue
 				}
-				items, err := resourceData.query().Limit(5).where(v+" LIKE ?", filter).OrderDesc("id").list()
+				items, err := resourceData.query(request.r.Context()).Limit(5).where(v+" LIKE ?", filter).OrderDesc("id").list()
 				if err != nil {
 					panic(err)
 				}
@@ -140,7 +140,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				itemVals := reflect.ValueOf(items)
 				itemLen := itemVals.Len()
 				for i := 0; i < itemLen; i++ {
-					viewItem := resourceData.previewer(request.user, itemVals.Index(i).Interface()).Preview(nil)
+					viewItem := resourceData.previewer(request.user, itemVals.Index(i).Interface()).Preview(request.r.Context(), nil)
 					if viewItem != nil && !usedIDs[viewItem.ID] {
 						usedIDs[viewItem.ID] = true
 						ret = append(ret, *viewItem)
@@ -183,7 +183,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				}
 				for _, v := range ids {
 					app := request.app
-					item := resourceData.ID(v)
+					item := resourceData.ID(request.r.Context(), v)
 					if item == nil {
 						panic(fmt.Sprintf("can't get item for clone with id %d", v))
 					}
@@ -198,14 +198,14 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 					}
 
 					//TODO: log for creation
-					err := resourceData.Create(item)
+					err := resourceData.Create(request.r.Context(), item)
 					if err != nil {
 						panic(fmt.Sprintf("can't create item for clone with id %d: %s", v, err))
 					}
 
 					if app.search != nil {
 						go func() {
-							err := resourceData.saveSearchItem(item)
+							err := resourceData.saveSearchItem(request.r.Context(), item)
 							if err != nil {
 								app.Log().Println(fmt.Errorf("%s", err))
 							}
@@ -233,7 +233,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 					var values url.Values = make(map[string][]string)
 					values.Add("id", fmt.Sprintf("%d", v))
 
-					valValidation := newValuesValidation(request.app, request.user, values)
+					valValidation := newValuesValidation(request.r.Context(), request.app, request.user, values)
 					for _, v := range resourceData.deleteValidations {
 						v(valValidation)
 					}
@@ -246,7 +246,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 						return
 					}
 
-					item := resourceData.ID(v)
+					item := resourceData.ID(request.r.Context(), v)
 					if item == nil {
 						panic("can't find item to delete")
 					}
@@ -263,7 +263,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 							panic("don't have access")
 						}
 						for _, id := range ids {
-							item := resourceData.ID(id)
+							item := resourceData.ID(request.r.Context(), id)
 							err := action.handler(item, request)
 							must(err)
 						}

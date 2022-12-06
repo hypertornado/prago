@@ -33,7 +33,7 @@ func initUserLogin(app *App) {
 		request := vc.Request()
 		password := vc.GetValue("password")
 
-		user := app.UsersResource.Is("email", email).First()
+		user := app.UsersResource.Is(vc.Context(), "email", email).First()
 		if user == nil {
 			vc.AddError(messages.Get(locale, "admin_login_error"))
 			return
@@ -48,7 +48,7 @@ func initUserLogin(app *App) {
 		user.LoggedInUseragent = request.Request().UserAgent()
 		user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
 
-		must(app.UsersResource.Update(user))
+		must(app.UsersResource.Update(vc.Context(), user))
 		request.logInUser(user)
 		request.AddFlashMessage(messages.Get(user.Locale, "admin_login_ok"))
 

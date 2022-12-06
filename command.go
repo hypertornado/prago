@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"reflect"
@@ -24,7 +25,7 @@ func addServerCommand(app *App) {
 		Callback(func() {
 			app.developmentMode = developmentMode
 			if port <= 0 {
-				configPort := app.MustGetSetting("port")
+				configPort := app.MustGetSetting(context.Background(), "port")
 				var err error
 				port, err = strconv.Atoi(configPort)
 				if err != nil {
@@ -57,7 +58,7 @@ type command struct {
 	stringArgument *string
 }
 
-//CommandFlag represents command-line flag
+// CommandFlag represents command-line flag
 type commandFlag struct {
 	name        string
 	description string
@@ -66,7 +67,7 @@ type commandFlag struct {
 	value       interface{}
 }
 
-//AddCommand adds command to app
+// AddCommand adds command to app
 func (app *App) addCommand(commands ...string) *command {
 	ret := &command{
 		actions: commands,
@@ -76,19 +77,19 @@ func (app *App) addCommand(commands ...string) *command {
 	return ret
 }
 
-//Callback sets command callback
+// Callback sets command callback
 func (c *command) Callback(callback func()) *command {
 	c.callback = callback
 	return c
 }
 
-//Description sets description to command
+// Description sets description to command
 func (c *command) Description(description string) *command {
 	c.description = description
 	return c
 }
 
-//Flag adds flag to command
+// Flag adds flag to command
 func (c *command) flag(flag *commandFlag) *command {
 	if flag.typ == noType {
 		panic("no type of flag set")
@@ -100,13 +101,13 @@ func (c *command) flag(flag *commandFlag) *command {
 	return c
 }
 
-//StringArgument sets command argument
+// StringArgument sets command argument
 func (c *command) StringArgument(arg *string) *command {
 	c.stringArgument = arg
 	return c
 }
 
-//NewCommandFlag creates new command flag
+// NewCommandFlag creates new command flag
 func newCommandFlag(name, description string) *commandFlag {
 	return &commandFlag{
 		name:        name,
@@ -114,13 +115,13 @@ func newCommandFlag(name, description string) *commandFlag {
 	}
 }
 
-//Alias sets flag alias
+// Alias sets flag alias
 func (f *commandFlag) Alias(alias string) *commandFlag {
 	f.aliases = append(f.aliases, alias)
 	return f
 }
 
-//String sets flag type to string
+// String sets flag type to string
 func (f *commandFlag) String(value *string) *commandFlag {
 	if f.typ != noType {
 		panic("type of flag already set")
@@ -130,7 +131,7 @@ func (f *commandFlag) String(value *string) *commandFlag {
 	return f
 }
 
-//Int sets flag type to int
+// Int sets flag type to int
 func (f *commandFlag) Int(value *int) *commandFlag {
 	if f.typ != noType {
 		panic("type of flag already set")
@@ -140,7 +141,7 @@ func (f *commandFlag) Int(value *int) *commandFlag {
 	return f
 }
 
-//Bool sets flag type to boolean
+// Bool sets flag type to boolean
 func (f *commandFlag) Bool(value *bool) *commandFlag {
 	if f.typ != noType {
 		panic("type of flag already set")

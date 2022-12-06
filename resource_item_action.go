@@ -1,6 +1,9 @@
 package prago
 
-import "strconv"
+import (
+	"context"
+	"strconv"
+)
 
 type ResourceItemAction[T any] struct {
 	data *resourceItemActionData
@@ -27,7 +30,7 @@ func (resourceData *resourceData) ItemAction(url string) *resourceItemActionData
 		if err != nil {
 			return false
 		}
-		item := resourceData.query().ID(id)
+		item := resourceData.query(context.TODO()).ID(id)
 		return item != nil
 	})
 
@@ -83,7 +86,7 @@ func (action *ResourceItemAction[T]) DataSource(dataSource func(*T, *Request) in
 
 func (actionData *resourceItemActionData) DataSource(dataSource func(any, *Request) interface{}) *resourceItemActionData {
 	actionData.action.DataSource(func(request *Request) interface{} {
-		item := actionData.resourceData.query().ID(request.Param("id"))
+		item := actionData.resourceData.query(request.r.Context()).ID(request.Param("id"))
 		if item == nil {
 			panic("can't find item")
 		}
@@ -122,7 +125,7 @@ func (action *ResourceItemAction[T]) Handler(fn func(*T, *Request)) *ResourceIte
 
 func (actionData *resourceItemActionData) Handler(fn func(any, *Request)) *resourceItemActionData {
 	actionData.action.Handler(func(request *Request) {
-		item := actionData.resourceData.ID(request.Param("id"))
+		item := actionData.resourceData.ID(context.TODO(), request.Param("id"))
 		if item == nil {
 			panic("can't find item")
 		}

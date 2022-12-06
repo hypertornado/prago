@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -69,7 +70,7 @@ func (app App) relationStringer(field Field, value reflect.Value, user *user) st
 			}
 
 			id := int64(value.Int())
-			item := field.relatedResource.query().ID(id)
+			item := field.relatedResource.query(context.TODO()).ID(id)
 			if item == nil {
 				return fmt.Sprintf("%d - not found", id)
 			}

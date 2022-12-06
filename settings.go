@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -77,7 +78,7 @@ type setting struct {
 	changeCallback func()
 }
 
-func (app *App) GetSetting(id string) (string, error) {
+func (app *App) GetSetting(ctx context.Context, id string) (string, error) {
 	app.settings.mutex.RLock()
 	defer app.settings.mutex.RUnlock()
 	setting := app.settings.settingsMap[id]
@@ -90,7 +91,7 @@ func (app *App) GetSetting(id string) (string, error) {
 		return cachedValue, nil
 	}
 
-	s := app.settings.resource.Is("name", id).First()
+	s := app.settings.resource.Is(ctx, "name", id).First()
 	if s == nil {
 		return setting.defaultValue, nil
 	}
@@ -100,8 +101,8 @@ func (app *App) GetSetting(id string) (string, error) {
 	return s.Value, nil
 }
 
-func (app *App) MustGetSetting(id string) string {
-	val, err := app.GetSetting(id)
+func (app *App) MustGetSetting(ctx context.Context, id string) string {
+	val, err := app.GetSetting(ctx, id)
 	must(err)
 	return val
 
@@ -117,7 +118,7 @@ func (app *App) saveSetting(id, value string, request *Request) error {
 	}
 	app.settings.cache = make(map[string]string)
 
-	s := app.settings.resource.Is("name", id).First()
+	s := app.settings.resource.Is(request.r.Context(), "name", id).First()
 	if s == nil {
 		s = &PragoSettings{
 			Name:  id,

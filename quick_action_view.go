@@ -62,7 +62,7 @@ func quickActionAPIHandler(resourceData *resourceData, request *Request) {
 }
 
 func (resourceData *resourceData) runQuickAction(actionName string, itemID int64, request *Request) error {
-	item := resourceData.query().ID(itemID)
+	item := resourceData.query(request.r.Context()).ID(itemID)
 	if item == nil {
 		return errors.New("nelze nalézt položku")
 	}

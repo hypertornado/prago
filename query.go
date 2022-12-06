@@ -1,18 +1,20 @@
 package prago
 
+import "context"
+
 type Query[T any] struct {
 	listQuery *listQuery
 }
 
-func (resource *Resource[T]) Query() *Query[T] {
+func (resource *Resource[T]) Query(ctx context.Context) *Query[T] {
 	ret := &Query[T]{
-		listQuery: resource.data.query(),
+		listQuery: resource.data.query(ctx),
 	}
 	return ret
 }
 
-func (resource *Resource[T]) ID(id any) *T {
-	return resource.Query().ID(id)
+func (resource *Resource[T]) ID(ctx context.Context, id any) *T {
+	return resource.Query(ctx).ID(id)
 }
 
 func (q *Query[T]) ID(id any) *T {

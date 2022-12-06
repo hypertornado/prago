@@ -34,13 +34,13 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 			var item interface{} = reflect.New(resourceData.typ).Interface()
 			resourceData.bindData(item, request.user, request.Params())
 			if resourceData.orderField != nil {
-				count, _ := resourceData.query().count()
+				count, _ := resourceData.query(vc.Context()).count()
 				resourceData.setOrderPosition(item, count+1)
 			}
 			must(resourceData.CreateWithLog(item, request))
 
 			resourceData.app.Notification(resourceData.previewer(request.user, item).Name()).
-				SetImage(resourceData.previewer(request.user, item).ThumbnailURL()).
+				SetImage(resourceData.previewer(request.user, item).ThumbnailURL(vc.Context())).
 				SetPreName(messages.Get(request.user.Locale, "admin_item_created")).
 				Flash(request)
 			vc.Validation().RedirectionLocaliton = resourceData.getItemURL(item, "", request.user)
@@ -53,7 +53,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 				render404(request)
 				return nil
 			}
-			return resourceData.getViews(item, request.user)
+			return resourceData.getViews(request.r.Context(), item, request.user)
 		},
 	)
 
@@ -79,7 +79,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 			must(err)
 
 			resourceData.app.Notification(resourceData.previewer(user, item).Name()).
-				SetImage(resourceData.previewer(request.user, item).ThumbnailURL()).
+				SetImage(resourceData.previewer(request.user, item).ThumbnailURL(vc.Context())).
 				SetPreName(messages.Get(user.Locale, "admin_item_edited")).
 				Flash(request)
 
@@ -183,14 +183,14 @@ func (resource *Resource[T]) CreateWithLog(item *T, request *Request) error {
 }
 
 func (resourceData *resourceData) CreateWithLog(item any, request *Request) error {
-	err := resourceData.Create(item)
+	err := resourceData.Create(request.r.Context(), item)
 	if err != nil {
 		return err
 	}
 
 	if resourceData.app.search != nil {
 		go func() {
-			err := resourceData.saveSearchItem(item)
+			err := resourceData.saveSearchItem(request.r.Context(), item)
 			if err != nil {
 				resourceData.app.Log().Println(fmt.Errorf("%s", err))
 			}
@@ -205,7 +205,7 @@ func (resourceData *resourceData) CreateWithLog(item any, request *Request) erro
 		}
 
 	}
-	return resourceData.updateCachedCount()
+	return resourceData.updateCachedCount(request.r.Context())
 
 }
 
@@ -223,7 +223,7 @@ func (resourceData *resourceData) DeleteWithLog(item any, request *Request) erro
 
 	id := resourceData.previewer(request.user, item).ID()
 
-	err := resourceData.Delete(id)
+	err := resourceData.Delete(request.r.Context(), id)
 	if err != nil {
 		return fmt.Errorf("can't delete item id '%d': %s", id, err)
 	}
@@ -236,7 +236,7 @@ func (resourceData *resourceData) DeleteWithLog(item any, request *Request) erro
 		resourceData.app.search.flush()
 	}
 
-	resourceData.updateCachedCount()
+	resourceData.updateCachedCount(request.r.Context())
 
 	return nil
 }
@@ -248,7 +248,7 @@ func (resourceData *resourceData) editItemWithLogAndValues(request *Request, val
 		return nil, nil, fmt.Errorf("can't parse id %d: %s", id, err)
 	}
 
-	beforeItem := resourceData.ID(id)
+	beforeItem := resourceData.ID(request.r.Context(), id)
 	if beforeItem == nil {
 		return nil, nil, fmt.Errorf("can't get beforeitem with id %d: %s", id, err)
 	}
@@ -271,7 +271,7 @@ func (resourceData *resourceData) editItemWithLogAndValues(request *Request, val
 		allValues.Add(k, v)
 	}
 
-	vv := newValuesValidation(resourceData.app, user, allValues)
+	vv := newValuesValidation(request.r.Context(), resourceData.app, user, allValues)
 	for _, v := range resourceData.validations {
 		v(vv)
 	}
@@ -293,19 +293,19 @@ func (resource *Resource[T]) UpdateWithLog(item *T, request *Request) error {
 
 func (resourceData *resourceData) UpdateWithLog(item any, request *Request) error {
 	id := resourceData.previewer(request.user, item).ID()
-	beforeItem := resourceData.ID(id)
+	beforeItem := resourceData.ID(request.r.Context(), id)
 	if beforeItem == nil {
 		return errors.New("can't find before item")
 	}
 
-	err := resourceData.Update(item)
+	err := resourceData.Update(request.r.Context(), item)
 	if err != nil {
 		return fmt.Errorf("can't save item (%d): %s", id, err)
 	}
 
 	if resourceData.app.search != nil {
 		go func() {
-			err = resourceData.saveSearchItem(item)
+			err = resourceData.saveSearchItem(request.r.Context(), item)
 			if err != nil {
 				resourceData.app.Log().Println(fmt.Errorf("%s", err))
 			}

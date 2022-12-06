@@ -2,6 +2,7 @@ package prago
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -363,7 +364,7 @@ func (resourceData *resourceData) addFilterToQuery(listQuery *listQuery, filter 
 	return listQuery
 }
 
-func (resourceData *resourceData) getListContent(user *user, params url.Values) (ret listContent, err error) {
+func (resourceData *resourceData) getListContent(ctx context.Context, user *user, params url.Values) (ret listContent, err error) {
 	if !resourceData.app.authorize(user, resourceData.canView) {
 		return listContent{}, errors.New("access denied")
 	}
@@ -397,7 +398,7 @@ func (resourceData *resourceData) getListContent(user *user, params url.Values) 
 		orderDesc = false
 	}
 
-	q := resourceData.query()
+	q := resourceData.query(ctx)
 	if orderDesc {
 		q = q.OrderDesc(orderBy)
 	} else {
@@ -405,15 +406,15 @@ func (resourceData *resourceData) getListContent(user *user, params url.Values) 
 	}
 
 	var count int64
-	countQuery := resourceData.query()
+	countQuery := resourceData.query(ctx)
 	countQuery = resourceData.addFilterParamsToQuery(countQuery, params, user)
 	count, err = countQuery.count()
 	if err != nil {
 		return
 	}
 
-	totalCount, _ := resourceData.query().count()
-	resourceData.updateCachedCount()
+	totalCount, _ := resourceData.query(ctx).count()
+	resourceData.updateCachedCount(ctx)
 
 	if count == totalCount {
 		ret.TotalCountStr = messages.ItemsCount(count, user.Locale)
@@ -486,7 +487,7 @@ func (resourceData *resourceData) getListContent(user *user, params url.Values) 
 	ret.Colspan = int64(len(columnsMap)) + 1
 
 	if params.Get("_stats") == "true" {
-		ret.Stats = resourceData.getListStats(user, params)
+		ret.Stats = resourceData.getListStats(ctx, user, params)
 	}
 
 	return
@@ -499,8 +500,8 @@ type listContentJSON struct {
 	FooterStr string
 }
 
-func (resourceData *resourceData) getListContentJSON(user *user, params url.Values) (ret *listContentJSON, err error) {
-	listData, err := resourceData.getListContent(user, params)
+func (resourceData *resourceData) getListContentJSON(ctx context.Context, user *user, params url.Values) (ret *listContentJSON, err error) {
+	listData, err := resourceData.getListContent(ctx, user, params)
 	if err != nil {
 		return nil, err
 	}

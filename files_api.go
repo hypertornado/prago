@@ -9,17 +9,17 @@ func initFilesAPI(resource *Resource[File]) {
 
 	//TODO: remove this and use single details API
 	resource.API("redirect-uuid/:uuid").Permission(loggedPermission).Handler(func(request *Request) {
-		image := resource.Is("uid", request.Param("uuid")).First()
+		image := resource.Is(request.r.Context(), "uid", request.Param("uuid")).First()
 		request.Redirect(app.getAdminURL(fmt.Sprintf("file/%d", image.ID)))
 	})
 
 	resource.API("redirect-thumb/:uuid").Permission(loggedPermission).Handler(func(request *Request) {
-		image := resource.Is("uid", request.Param("uuid")).First()
+		image := resource.Is(request.r.Context(), "uid", request.Param("uuid")).First()
 		request.Redirect(image.GetMedium())
 	})
 
 	resource.API("imagedata/:uuid").Permission(loggedPermission).Handler(func(request *Request) {
-		file := resource.Is("uid", request.Param("uuid")).First()
+		file := resource.Is(request.r.Context(), "uid", request.Param("uuid")).First()
 		request.RenderJSON(file)
 	})
 
@@ -30,7 +30,7 @@ func initFilesAPI(resource *Resource[File]) {
 		files := []*File{}
 
 		for _, v := range multipartFiles {
-			file, err := app.UploadFile(v, request.user, description)
+			file, err := app.UploadFile(request.r.Context(), v, request.user, description)
 			if err != nil {
 				panic(err)
 			}

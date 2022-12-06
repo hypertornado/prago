@@ -130,7 +130,7 @@ func (app *App) initSearch() {
 	app.search = adminSearch
 
 	app.sysadminTaskGroup.Task(unlocalized("index_search")).Handler(func(ta *TaskActivity) error {
-		return adminSearch.searchImport()
+		return adminSearch.searchImport(context.TODO())
 	})
 
 }
@@ -200,7 +200,7 @@ func newAdminSearch(app *App) (*adminSearch, error) {
 	}, nil
 }
 
-func (resourceData *resourceData) importSearchData(bulkUpdater *pragelastic.BulkUpdater[searchItem]) error {
+func (resourceData *resourceData) importSearchData(ctx context.Context, bulkUpdater *pragelastic.BulkUpdater[searchItem]) error {
 	roles := resourceData.getResourceViewRoles()
 	name := resourceData.pluralName("cs")
 	var resourceSearchItem = searchItem{
@@ -219,12 +219,12 @@ func (resourceData *resourceData) importSearchData(bulkUpdater *pragelastic.Bulk
 
 	resourceData.app.search.addItem(bulkUpdater, &resourceSearchItem, 200)
 
-	c, _ := resourceData.query().count()
+	c, _ := resourceData.query(ctx).count()
 	if c > 10000 {
 		return nil
 	}
 
-	items, err := resourceData.query().list()
+	items, err := resourceData.query(ctx).list()
 	if err != nil {
 		return err
 	}
@@ -232,7 +232,7 @@ func (resourceData *resourceData) importSearchData(bulkUpdater *pragelastic.Bulk
 	itemVals := reflect.ValueOf(items)
 	itemLen := itemVals.Len()
 	for i := 0; i < itemLen; i++ {
-		resourceData.saveSearchItemWithRoles(bulkUpdater, itemVals.Index(i).Interface(), roles)
+		resourceData.saveSearchItemWithRoles(ctx, bulkUpdater, itemVals.Index(i).Interface(), roles)
 	}
 
 	return nil
@@ -242,23 +242,24 @@ func (e *adminSearch) flush() error {
 	return e.index.Flush()
 }
 
-func (resourceData *resourceData) saveSearchItem(item any) error {
+func (resourceData *resourceData) saveSearchItem(ctx context.Context, item any) error {
 	roles := resourceData.getResourceViewRoles()
-	return resourceData.saveSearchItemWithRoles(nil, item, roles)
+	return resourceData.saveSearchItemWithRoles(ctx, nil, item, roles)
 }
 
-func (resourceData *resourceData) saveSearchItemWithRoles(bulkUpdater *pragelastic.BulkUpdater[searchItem], item any, roles []string) error {
+func (resourceData *resourceData) saveSearchItemWithRoles(ctx context.Context, bulkUpdater *pragelastic.BulkUpdater[searchItem], item any, roles []string) error {
+
 	//TODO: ugly hack with sysadmin user, remove suggestions
 	previewer := resourceData.previewer(&user{Role: "sysadmin"}, item)
 	if previewer == nil {
 		return errors.New("wrong item to relation data conversion")
 	}
-	searchItem := relationDataToSearchItem(resourceData, previewer, roles)
+	searchItem := relationDataToSearchItem(ctx, resourceData, previewer, roles)
 	searchItem.Roles = roles
 	return resourceData.app.search.addItem(bulkUpdater, &searchItem, 100)
 }
 
-func relationDataToSearchItem(resourceData *resourceData, previewer *previewer, roles []string) searchItem {
+func relationDataToSearchItem(ctx context.Context, resourceData *resourceData, previewer *previewer, roles []string) searchItem {
 	return searchItem{
 		ID: searchID(resourceData, previewer.ID()),
 		SuggestionField: pragelastic.Suggest{
@@ -271,7 +272,7 @@ func relationDataToSearchItem(resourceData *resourceData, previewer *previewer, 
 		Category:    resourceData.pluralName("cs"),
 		Name:        previewer.Name(),
 		Description: previewer.DescriptionBasic(nil),
-		Image:       previewer.ThumbnailURL(),
+		Image:       previewer.ThumbnailURL(ctx),
 		URL:         previewer.URL(""),
 	}
 }
@@ -287,7 +288,7 @@ func (e *adminSearch) deleteItem(resourceData *resourceData, id int64) error {
 	return nil
 }
 
-func (e *adminSearch) searchImport() error {
+func (e *adminSearch) searchImport(ctx context.Context) error {
 	var err error
 
 	e.app.Log().Println("Importing admin search index")
@@ -305,7 +306,7 @@ func (e *adminSearch) searchImport() error {
 	for _, resourceData := range e.app.resources {
 		total, _ := e.index.Count()
 		e.app.Log().Printf("importing resource: %s, total: %d\n", resourceData.getID(), total)
-		err = resourceData.importSearchData(bulkUpdater)
+		err = resourceData.importSearchData(ctx, bulkUpdater)
 		if err != nil {
 			return fmt.Errorf("while importing resource %s: %s", resourceData.getID(), err)
 		}

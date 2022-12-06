@@ -215,7 +215,7 @@ func (resourceData *resourceData) getnavigation(action *Action, request *Request
 
 	code := action.url
 	if action.isItemAction {
-		item := resourceData.query().ID(request.Param("id"))
+		item := resourceData.query(request.r.Context()).ID(request.Param("id"))
 		if item != nil {
 			return resourceData.getItemNavigation(request.user, item, code)
 		} else {

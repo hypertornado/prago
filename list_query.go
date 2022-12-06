@@ -1,6 +1,9 @@
 package prago
 
-import "reflect"
+import (
+	"context"
+	"reflect"
+)
 
 type listQueryOrder struct {
 	name string
@@ -8,6 +11,7 @@ type listQueryOrder struct {
 }
 
 type listQuery struct {
+	context    context.Context
 	conditions []string
 	values     []interface{}
 	limit      int64
@@ -18,20 +22,21 @@ type listQuery struct {
 	resourceData *resourceData
 }
 
-func (resourceData *resourceData) query() *listQuery {
+func (resourceData *resourceData) query(ctx context.Context) *listQuery {
 	return &listQuery{
+		context:      ctx,
 		resourceData: resourceData,
 	}
 }
 
-func (resourceData *resourceData) Is(name string, value interface{}) *listQuery {
-	listQuery := resourceData.query()
+func (resourceData *resourceData) Is(ctx context.Context, name string, value interface{}) *listQuery {
+	listQuery := resourceData.query(ctx)
 	listQuery.where(sqlFieldToQuery(name), value)
 	return listQuery
 }
 
-func (resourceData *resourceData) ID(id any) any {
-	return resourceData.query().ID(id)
+func (resourceData *resourceData) ID(ctx context.Context, id any) any {
+	return resourceData.query(ctx).ID(id)
 }
 
 func (listQuery *listQuery) Is(name string, value interface{}) *listQuery {
