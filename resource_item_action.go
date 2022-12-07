@@ -2,6 +2,7 @@ package prago
 
 import (
 	"context"
+	"net/url"
 	"strconv"
 )
 
@@ -20,17 +21,17 @@ func (resource *Resource[T]) ItemAction(url string) *ResourceItemAction[T] {
 	}
 }
 
-func (resourceData *resourceData) ItemAction(url string) *resourceItemActionData {
-	action := newAction(resourceData.app, url)
+func (resourceData *resourceData) ItemAction(itemUrl string) *resourceItemActionData {
+	action := newAction(resourceData.app, itemUrl)
 	action.resourceData = resourceData
 	action.isItemAction = true
 	action.permission = resourceData.canView
-	action.addConstraint(func(m map[string]string) bool {
-		id, err := strconv.Atoi(m["id"])
+	action.addConstraint(func(ctx context.Context, values url.Values) bool {
+		id, err := strconv.Atoi(values.Get("id"))
 		if err != nil {
 			return false
 		}
-		item := resourceData.query(context.TODO()).ID(id)
+		item := resourceData.query(ctx).ID(id)
 		return item != nil
 	})
 

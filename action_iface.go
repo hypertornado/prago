@@ -10,7 +10,7 @@ type ActionIface interface {
 	getMethod() string
 	getURL() string
 	getController() *controller
-	getConstraints() []func(map[string]string) bool
+	getConstraints() []routerConstraint
 	getHandler() func(*Request)
 	getPermission() Permission
 	getURLToken() string
@@ -92,7 +92,7 @@ func (action *Action) getHandler() func(*Request) {
 	}
 }
 
-func (action *Action) getConstraints() []func(map[string]string) bool {
+func (action *Action) getConstraints() []routerConstraint {
 	return action.constraints
 }
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"mime/multipart"
+	"net/url"
 	"path/filepath"
 	"strings"
 	"time"
@@ -226,8 +227,8 @@ func (app *App) initFilesResource() {
 		}
 
 		request.Redirect(filesCDN.GetImageURL(uuid, name, size))
-	}, func(params map[string]string) bool {
-		size := params["size"]
+	}, func(ctx context.Context, params url.Values) bool {
+		size := params.Get("size")
 		if size == "large" || size == "medium" || size == "small" {
 			return true
 		}

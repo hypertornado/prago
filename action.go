@@ -22,7 +22,7 @@ type Action struct {
 	handler       func(*Request)
 	template      string
 	dataSource    func(*Request) interface{}
-	constraints   []func(map[string]string) bool
+	constraints   []routerConstraint
 	parentBoard   *Board
 	isPartOfBoard *Board
 
@@ -204,7 +204,7 @@ func (action *Action) getnavigation(request *Request) navigation {
 	return navigation{}
 }
 
-func (action *Action) addConstraint(constraint func(map[string]string) bool) {
+func (action *Action) addConstraint(constraint routerConstraint) {
 	action.constraints = append(action.constraints, constraint)
 }
 

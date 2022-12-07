@@ -1,6 +1,8 @@
 package prago
 
 import (
+	"context"
+	"net/url"
 	"strings"
 )
 
@@ -26,6 +28,8 @@ func newRouter() *router {
 	}
 }
 
+type routerConstraint func(context.Context, url.Values) bool
+
 func (r *router) addRoute(route *route) {
 	if route.controller.priorityRouter {
 		r.priorityRoutes = append(r.priorityRoutes, route)
@@ -40,10 +44,12 @@ func (r *router) process(request *Request) bool {
 		r.routes,
 	} {
 		for _, route := range routes {
-			params, match := route.match(request.Request().Method, request.Request().URL.Path)
+			params, match := route.match(request.r.Context(), request.Request().Method, request.Request().URL.Path)
 			if match {
-				for k, v := range params {
-					request.Params().Add(k, v)
+				for k, values := range params {
+					for _, value := range values {
+						request.Params().Add(k, value)
+					}
 				}
 
 				route.controller.callArounds(request, 0, func() {
@@ -73,21 +79,21 @@ func (r *router) export() (ret [][2]string) {
 type route struct {
 	method      string
 	path        string
-	constraints []func(map[string]string) bool
+	constraints []routerConstraint
 	pathMatcher pathMatcherFn
 	controller  *controller
 	fn          func(p *Request)
 }
 
-type pathMatcherFn func(string) (map[string]string, bool)
+type pathMatcherFn func(string) (url.Values, bool)
 
 func matcherBasic(route string) pathMatcherFn {
 	routeItems := strings.Split(route, "/")
 
-	return func(path string) (m map[string]string, ok bool) {
+	return func(path string) (values url.Values, ok bool) {
 		items := strings.Split(path, "/")
-		m = make(map[string]string)
 
+		values = map[string][]string{}
 		if len(items) != len(routeItems) {
 			return
 		}
@@ -95,14 +101,14 @@ func matcherBasic(route string) pathMatcherFn {
 		for i := 0; i < len(items); i++ {
 			expect := routeItems[i]
 			if len(expect) > 1 && strings.HasPrefix(expect, ":") {
-				m[expect[1:]] = items[i]
+				values.Add(expect[1:], items[i])
 			} else {
 				if expect != items[i] {
 					return
 				}
 			}
 		}
-		return m, true
+		return values, true
 	}
 }
 
@@ -111,12 +117,12 @@ func matcherStar(route string) pathMatcherFn {
 		return nil
 	}
 	routeName := route[1:]
-	return func(path string) (m map[string]string, ok bool) {
-		m = make(map[string]string)
+	return func(path string) (values url.Values, ok bool) {
+		values = map[string][]string{}
 		if len(routeName) > 0 {
-			m[routeName] = path
+			values.Add(routeName, path)
 		}
-		return m, true
+		return values, true
 	}
 }
 
@@ -127,19 +133,19 @@ func matcherStarMiddle(route string) pathMatcherFn {
 	}
 	prefix := route[0 : starIndex+1]
 	routeName := route[starIndex+2:]
-	return func(path string) (m map[string]string, ok bool) {
+	return func(path string) (values url.Values, ok bool) {
 		if !strings.HasPrefix(path, prefix) {
 			return nil, false
 		}
-		m = make(map[string]string)
+		values = map[string][]string{}
 		if len(routeName) > 0 {
-			m[routeName] = path[starIndex+1:]
+			values.Add(routeName, path[starIndex+1:])
 		}
-		return m, true
+		return values, true
 	}
 }
 
-func newRoute(m method, path string, controller *controller, fn func(p *Request), constraints []func(map[string]string) bool) (ret *route) {
+func newRoute(m method, path string, controller *controller, fn func(p *Request), constraints []routerConstraint) (ret *route) {
 	methodName := map[method]string{
 		get:  "GET",
 		head: "HEAD",
@@ -165,7 +171,7 @@ func newRoute(m method, path string, controller *controller, fn func(p *Request)
 	return
 }
 
-func (r *route) match(method, path string) (map[string]string, bool) {
+func (r *route) match(ctx context.Context, method, path string) (url.Values, bool) {
 	if !methodMatch(r.method, method) {
 		return nil, false
 	}
@@ -180,7 +186,7 @@ func (r *route) match(method, path string) (map[string]string, bool) {
 	}
 
 	for _, constraint := range r.constraints {
-		ok = constraint(m)
+		ok = constraint(ctx, m)
 		if !ok {
 			return nil, false
 		}
