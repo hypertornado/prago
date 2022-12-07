@@ -18,7 +18,7 @@ func initUserRegistration(app *App) {
 		email := request.Param("email")
 		token := request.Param("token")
 
-		user := app.UsersResource.Is(ctx, "email", email).First()
+		user := app.UsersResource.Query(ctx).Is("email", email).First()
 		if user != nil {
 			if !user.emailConfirmed() {
 				if token == user.emailToken(request.r.Context(), app) {
@@ -70,7 +70,7 @@ func registrationValidation(vc ValidationContext) {
 		valid = false
 		vc.AddItemError("email", messages.Get(locale, "admin_email_not_valid"))
 	} else {
-		user := app.UsersResource.Is(vc.Context(), "email", email).First()
+		user := app.UsersResource.Query(vc.Context()).Is("email", email).First()
 		if user != nil && user.Email == email {
 			valid = false
 			vc.AddItemError("email", messages.Get(locale, "admin_email_already_registered"))
@@ -135,7 +135,7 @@ func (u user) sendConfirmEmail(ctx context.Context, app *App, locale string) err
 
 func (u user) sendAdminEmail(ctx context.Context, app *App) error {
 	res := GetResource[user](app)
-	users := res.Is(ctx, "role", "sysadmin").List()
+	users := res.Query(ctx).Is("role", "sysadmin").List()
 	for _, receiver := range users {
 		body := fmt.Sprintf("New user registered on %s: %s (%s)", app.name(u.Locale), u.Email, u.Name)
 

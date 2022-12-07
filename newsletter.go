@@ -98,7 +98,7 @@ func (app *App) Newsletters() *Newsletters {
 
 		res := GetResource[newsletterPersons](app)
 
-		person := res.Is(request.r.Context(), "email", email).First()
+		person := res.Query(request.r.Context()).Is("email", email).First()
 		if person == nil {
 			panic("can't find user")
 		}
@@ -126,7 +126,7 @@ func (app *App) Newsletters() *Newsletters {
 
 		res := GetResource[newsletterPersons](app)
 
-		person := res.Is(request.r.Context(), "email", email).First()
+		person := res.Query(request.r.Context()).Is("email", email).First()
 		if person == nil {
 			panic("can't find user")
 		}
@@ -195,7 +195,7 @@ func (nm Newsletters) secret(email string) string {
 
 func (nm *Newsletters) SubscribeWithConfirmationEmail(email, name string) error {
 	res := GetResource[newsletterPersons](nm.app)
-	person := res.Is(context.TODO(), "email", email).First()
+	person := res.Query(context.TODO()).Is("email", email).First()
 	if person != nil {
 		return ErrEmailAlreadyInList
 	}
@@ -214,7 +214,7 @@ func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 
 	res := GetResource[newsletterPersons](nm.app)
 
-	person := res.Is(context.TODO(), "email", email).First()
+	person := res.Query(context.TODO()).Is("email", email).First()
 	if person != nil {
 		return ErrEmailAlreadyInList
 	}
@@ -308,7 +308,7 @@ func initNewsletterResource(resource *Resource[newsletter]) {
 		},
 	).Validation(func(newsletter *newsletter, vc ValidationContext) {
 		newsletterSectionResource := GetResource[newsletterSection](vc.Request().app)
-		sections := newsletterSectionResource.Is(vc.Context(), "newsletter", newsletter.ID).Order("orderposition").List()
+		sections := newsletterSectionResource.Query(vc.Context()).Is("newsletter", newsletter.ID).Order("orderposition").List()
 
 		newsletter.ID = 0
 		must(resource.CreateWithLog(newsletter, vc.Request()))
@@ -338,7 +338,7 @@ func parseEmails(emails string) []string {
 
 func (app *App) getNewsletterRecipients() ([]string, error) {
 	ret := []string{}
-	persons := GetResource[newsletterPersons](app).Is(context.TODO(), "confirmed", true).Is("unsubscribed", false).List()
+	persons := GetResource[newsletterPersons](app).Query(context.TODO()).Is("confirmed", true).Is("unsubscribed", false).List()
 	for _, v := range persons {
 		ret = append(ret, v.Email)
 	}
@@ -441,7 +441,7 @@ type newsletterSectionData struct {
 
 func (nm *Newsletters) getNewsletterSectionData(n newsletter) []newsletterSectionData {
 	//var sections []*newsletterSection
-	sections := GetResource[newsletterSection](nm.app).Is(context.TODO(), "newsletter", n.ID).Order("orderposition").List()
+	sections := GetResource[newsletterSection](nm.app).Query(context.TODO()).Is("newsletter", n.ID).Order("orderposition").List()
 	var ret []newsletterSectionData
 
 	for _, v := range sections {

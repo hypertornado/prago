@@ -922,6 +922,10 @@ a.box_tag:hover {
   clip-path: inset(-10000px -10000px -10000px 0px);
   position: fixed;
   z-index: 100;
+  opacity: 0;
+}
+.list_header_container-visible {
+  opacity: 1;
 }
 .list_header {
   z-index: 1000;

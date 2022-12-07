@@ -91,7 +91,7 @@ func (app *App) GetSetting(ctx context.Context, id string) (string, error) {
 		return cachedValue, nil
 	}
 
-	s := app.settings.resource.Is(ctx, "name", id).First()
+	s := app.settings.resource.Query(ctx).Is("name", id).First()
 	if s == nil {
 		return setting.defaultValue, nil
 	}
@@ -118,7 +118,7 @@ func (app *App) saveSetting(id, value string, request *Request) error {
 	}
 	app.settings.cache = make(map[string]string)
 
-	s := app.settings.resource.Is(request.r.Context(), "name", id).First()
+	s := app.settings.resource.Query(request.r.Context()).Is("name", id).First()
 	if s == nil {
 		s = &PragoSettings{
 			Name:  id,

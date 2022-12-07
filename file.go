@@ -41,7 +41,7 @@ func (app *App) thumb(ctx context.Context, ids string) string {
 		return ""
 	}
 	for _, v := range strings.Split(ids, ",") {
-		image := app.FilesResource.Is(ctx, "uid", v).First()
+		image := app.FilesResource.Query(ctx).Is("uid", v).First()
 		if image != nil && image.isImage() {
 			return image.GetSmall()
 		}
@@ -54,7 +54,7 @@ func (app *App) largeImage(ctx context.Context, ids string) string {
 		return ""
 	}
 	for _, v := range strings.Split(ids, ",") {
-		image := app.FilesResource.Is(ctx, "uid", v).First()
+		image := app.FilesResource.Query(ctx).Is("uid", v).First()
 		if image != nil && image.isImage() {
 			return image.GetLarge()
 		}
@@ -67,7 +67,7 @@ func (app *App) thumbnailExactSize(ctx context.Context, ids string, width, heigh
 		return ""
 	}
 	for _, v := range strings.Split(ids, ",") {
-		image := app.FilesResource.Is(ctx, "uid", v).First()
+		image := app.FilesResource.Query(ctx).Is("uid", v).First()
 		if image != nil && image.isImage() {
 			return image.GetExactSize(width, height)
 		}
@@ -80,7 +80,7 @@ func (app *App) GetFiles(ctx context.Context, ids string) []*File {
 	var files []*File
 	idsAr := strings.Split(ids, ",")
 	for _, v := range idsAr {
-		image := app.FilesResource.Is(ctx, "uid", v).First()
+		image := app.FilesResource.Query(ctx).Is("uid", v).First()
 		if image != nil {
 			files = append(files, image)
 		}
@@ -151,7 +151,7 @@ func getOldRedirectParams(request *Request, app *App) (uuid, name string, err er
 		strings.Split(name, "-")[0],
 	)
 
-	file := app.FilesResource.Is(request.r.Context(), "uid", uuid).First()
+	file := app.FilesResource.Query(request.r.Context()).Is("uid", uuid).First()
 	if file == nil {
 		err = errors.New("no file with id found")
 		return
@@ -200,7 +200,7 @@ func (app *App) initFilesResource() {
 
 	app.ListenActivity(func(activity Activity) {
 		if activity.ActivityType == "delete" && activity.ResourceID == resource.data.id {
-			file := resource.ID(context.Background(), activity.ID)
+			file := resource.Query(context.Background()).ID(activity.ID)
 			err := filesCDN.DeleteFile(file.UID)
 			if err != nil {
 				app.Log().Printf("deleting CDN: %s\n", err)

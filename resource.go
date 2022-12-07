@@ -150,9 +150,9 @@ func (resourceData *resourceData) getResourceControl() *controller {
 	return resourceData.resourceController
 }
 
-func (resource *Resource[T]) Is(ctx context.Context, name string, value interface{}) *Query[T] {
+/*func (resource *Resource[T]) Is(ctx context.Context, name string, value interface{}) *Query[T] {
 	return resource.Query(ctx).Is(name, value)
-}
+}*/
 
 func (resource *Resource[T]) Create(ctx context.Context, item *T) error {
 	return resource.data.Create(ctx, item)

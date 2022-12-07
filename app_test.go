@@ -73,7 +73,7 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatal("should be positive")
 	}
 
-	item2 := resource.ID(context.Background(), item.ID)
+	item2 := resource.Query(context.Background()).ID(item.ID)
 	if item2 == nil {
 		t.Fatal("should not be nil")
 	}
@@ -91,7 +91,7 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatal("wrong name")
 	}
 
-	if resource.Is(context.Background(), "id", item.ID).First().Name != "A" {
+	if resource.Query(context.Background()).Is("id", item.ID).First().Name != "A" {
 		t.Fatal("wrong name")
 	}
 
@@ -102,7 +102,7 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if resource.Is(context.Background(), "id", item.ID).First().Name != "changed" {
+	if resource.Query(context.Background()).Is("id", item.ID).First().Name != "changed" {
 		t.Fatal("wrong name")
 	}
 
@@ -275,7 +275,7 @@ func TestResourceDate(t *testing.T) {
 
 	resource.Create(context.Background(), &ResourceStruct{Date: tm})
 
-	first := resource.Is(context.Background(), "date", tm.Format("2006-01-02")).First()
+	first := resource.Query(context.Background()).Is("date", tm.Format("2006-01-02")).First()
 	if first == nil {
 		t.Fatal("should not be nil")
 	}
@@ -305,12 +305,12 @@ func TestResourceBool(t *testing.T) {
 	resource.Create(context.Background(), &ResourceStruct{Name: "A", IsSomething: false})
 	resource.Create(context.Background(), &ResourceStruct{Name: "B", IsSomething: true})
 
-	trueItem := resource.Is(context.Background(), "issomething", true).First()
+	trueItem := resource.Query(context.Background()).Is("issomething", true).First()
 	if trueItem.Name != "B" {
 		t.Fatal(trueItem.Name)
 	}
 
-	falseItem := resource.Is(context.Background(), "issomething", false).First()
+	falseItem := resource.Query(context.Background()).Is("issomething", false).First()
 	if falseItem.Name != "A" {
 		t.Fatal(trueItem.Name)
 	}
@@ -370,7 +370,7 @@ func TestReplace(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if resource.Is(context.Background(), "id", id).First() == nil {
+	if resource.Query(context.Background()).Is("id", id).First() == nil {
 		t.Fatal("should not be nil")
 	}
 	item.Name = "B"
@@ -384,7 +384,7 @@ func TestReplace(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	modified := resource.Is(context.Background(), "id", id).First()
+	modified := resource.Query(context.Background()).Is("id", id).First()
 	if modified.Name != "B" {
 		t.Fatal(modified.Name)
 	}
@@ -424,7 +424,7 @@ func TestLongSaveText(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	item := res.Is(context.Background(), "id", newItem.ID).First()
+	item := res.Query(context.Background()).Is("id", newItem.ID).First()
 
 	if !strings.HasPrefix(item.Text, "some") {
 		t.Fatal(item.Text)

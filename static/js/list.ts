@@ -265,6 +265,7 @@ class List {
       }
       this.copyColumnWidths();
       this.list.classList.remove("list-loading");
+      this.listHeaderContainer.classList.add("list_header_container-visible");
     });
     request.send(JSON.stringify({}));
   }

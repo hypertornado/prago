@@ -104,7 +104,7 @@ func (app *App) getHistoryTable(user *user, resourceData *resourceData, itemID i
 
 	for _, v := range items {
 		var username, userurl string
-		user := app.UsersResource.ID(context.Background(), v.User)
+		user := app.UsersResource.Query(context.Background()).ID(v.User)
 		locale := "en"
 		if user != nil {
 			username = user.Name
@@ -121,7 +121,6 @@ func (app *App) getHistoryTable(user *user, resourceData *resourceData, itemID i
 			if item != nil {
 				name = resourceData.previewer(user, item).Name()
 			}
-			//resourceData.previewer(user, )
 			itemName = fmt.Sprintf("#%d %s", v.ItemID, name)
 		}
 

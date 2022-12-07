@@ -13,10 +13,6 @@ func (resource *Resource[T]) Query(ctx context.Context) *Query[T] {
 	return ret
 }
 
-func (resource *Resource[T]) ID(ctx context.Context, id any) *T {
-	return resource.Query(ctx).ID(id)
-}
-
 func (q *Query[T]) ID(id any) *T {
 	ret := q.listQuery.ID(id)
 	if ret == nil {
