@@ -26,9 +26,9 @@ func (resourceData *resourceData) previewer(user *user, item any) *previewer {
 		return nil
 	}
 
-	if !resourceData.app.authorize(user, resourceData.canView) {
+	/*if !resourceData.app.authorize(user, resourceData.canView) {
 		return nil
-	}
+	}*/
 
 	return &previewer{
 		user:         user,
@@ -38,6 +38,10 @@ func (resourceData *resourceData) previewer(user *user, item any) *previewer {
 }
 
 func (previewer *previewer) hasAccessToField(fieldID string) bool {
+	if !previewer.resourceData.app.authorize(previewer.user, previewer.resourceData.canView) {
+		return false
+	}
+
 	fieldID = strings.ToLower(fieldID)
 	field := previewer.resourceData.fieldMap[fieldID]
 	if field == nil {
@@ -50,10 +54,9 @@ func (previewer *previewer) ID() int64 {
 	if previewer.item == nil {
 		return -1
 	}
-
 	itemsVal := reflect.ValueOf(previewer.item).Elem()
 	field := itemsVal.FieldByName("ID")
-	if field.IsValid() && previewer.hasAccessToField("ID") {
+	if field.IsValid() {
 		return field.Int()
 	}
 	return -1

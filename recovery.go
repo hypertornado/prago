@@ -36,7 +36,13 @@ func (app App) recoveryFunction(p *Request, recoveryData interface{}) {
 		p.Response().Write([]byte(fmt.Sprintf("We are sorry, some error occured. (errorid %s)", p.uuid)))
 	}
 
-	message := fmt.Sprintf("500 - application error\nmessage=%s\nuuid=%s\ntook=%v\n%s",
+	var userID int64
+	if p != nil && p.user != nil {
+		userID = p.UserID()
+	}
+
+	message := fmt.Sprintf("500 - application error\nuserid=%d\nmessage=%s\nuuid=%s\ntook=%v\n%s",
+		userID,
 		recoveryData,
 		p.uuid,
 		duration,

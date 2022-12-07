@@ -293,6 +293,7 @@ func (resource *Resource[T]) UpdateWithLog(item *T, request *Request) error {
 
 func (resourceData *resourceData) UpdateWithLog(item any, request *Request) error {
 	id := resourceData.previewer(request.user, item).ID()
+
 	beforeItem := resourceData.query(request.r.Context()).ID(id)
 	if beforeItem == nil {
 		return errors.New("can't find before item")
