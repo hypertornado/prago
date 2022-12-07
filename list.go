@@ -524,8 +524,6 @@ func (resourceData *resourceData) getListContentJSON(ctx context.Context, user *
 		statsStr = bufStats.String()
 	}
 
-	fmt.Println(listData.Pagination)
-
 	bufFooter := new(bytes.Buffer)
 	err = resourceData.app.ExecuteTemplate(bufFooter, "admin_list_footer", map[string]interface{}{
 		"admin_list": listData,

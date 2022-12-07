@@ -84,7 +84,7 @@ func getCDNProjectsMap() map[string]*CDNProject {
 }
 
 func getCDNProject(id string) *CDNProject {
-	projects := <-prago.Cached(app, "get_projects", func() map[string]*CDNProject {
+	projects := <-prago.Cached(app, "get_projects", func(ctx context.Context) map[string]*CDNProject {
 		return getCDNProjectsMap()
 	})
 	return projects[id]

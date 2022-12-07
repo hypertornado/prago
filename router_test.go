@@ -58,7 +58,7 @@ func TestRouterNormal(t *testing.T) {
 		t.Fatal(ok)
 	}
 
-	constraint = constraintInt("id")
+	/*constraint = constraintInt("id")
 	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []func(map[string]string) bool{constraint})
 	_, ok = r.match("GET", "/a/123/ondra/aa")
 	if ok != true {
@@ -83,7 +83,7 @@ func TestRouterNormal(t *testing.T) {
 	_, ok = r.match("GET", "/a/123/karel/aa")
 	if ok != false {
 		t.Fatal(ok)
-	}
+	}*/
 }
 
 func TestRouterFallback(t *testing.T) {
