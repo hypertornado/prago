@@ -289,11 +289,6 @@ func (field *Field) ViewTemplate(template string) *Field {
 	return field
 }
 
-/*func (field *Field) ListCellTemplate(template string) *Field {
-	field.fieldType.listCellTemplate = template
-	return field
-}*/
-
 func (field *Field) FormTemplate(template string) *Field {
 	field.fieldType.formTemplate = template
 	return field

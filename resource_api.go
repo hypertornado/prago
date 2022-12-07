@@ -48,12 +48,14 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 					row := sheet.AddRow()
 					for _, v2 := range v1.Items {
 						cell := row.AddCell()
-						if reflect.TypeOf(v2.OriginalValue) == reflect.TypeOf(time.Now()) {
-							t := v2.OriginalValue.(time.Time)
-							cell.SetString(t.Format("2006-01-02"))
-						} else {
-							cell.SetValue(v2.OriginalValue)
-						}
+						cell.SetValue(v2.Name)
+						/*
+							if reflect.TypeOf(v2.OriginalValue) == reflect.TypeOf(time.Now()) {
+								t := v2.OriginalValue.(time.Time)
+								cell.SetString(t.Format("2006-01-02"))
+							} else {
+								cell.SetValue(v2.OriginalValue)
+							}*/
 					}
 				}
 				file.Write(request.Response())

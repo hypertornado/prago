@@ -93,7 +93,7 @@ func (app *App) initUserResource() {
 	initUserRenew(app)
 }
 
-func (app *App) GetCachedUserEmail(ctx context.Context, id int64) string {
+func (app *App) GetCachedUserEmail(_ context.Context, id int64) string {
 	return <-Cached(app, fmt.Sprintf("cached-user-email-%d", id), func(ctx context.Context) string {
 		user := app.UsersResource.ID(ctx, id)
 		return user.Email

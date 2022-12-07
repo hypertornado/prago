@@ -245,8 +245,8 @@ func TestResource(t *testing.T) {
 		t.Fatalf("wrong length: %d", len(items.Rows[0].Items))
 	}
 
-	if items.Rows[1].Items[2].Value != "show" {
-		t.Fatal(items.Rows[1].Items[2].Value)
+	if items.Rows[1].Items[2].Name != "show" {
+		t.Fatal(items.Rows[1].Items[2].Name)
 	}
 }
 

@@ -43,8 +43,8 @@ func TestRouterNormal(t *testing.T) {
 	}
 
 	constraint := func(ctx context.Context, values url.Values) bool {
-		item, ok := values["name"]
-		if !ok || len(item) <= 2 {
+		item := values.Get("name")
+		if !values.Has("name") || len(item) <= 2 {
 			return false
 		}
 		return true
@@ -60,33 +60,6 @@ func TestRouterNormal(t *testing.T) {
 	if ok != false {
 		t.Fatal(ok)
 	}
-
-	/*constraint = constraintInt("id")
-	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []func(map[string]string) bool{constraint})
-	_, ok = r.match("GET", "/a/123/ondra/aa")
-	if ok != true {
-		t.Fatal(ok)
-	}
-	_, ok = r.match("GET", "/a/0/ondra/aa")
-	if ok != false {
-		t.Fatal(ok)
-	}
-	_, ok = r.match("GET", "/a/123AA/ondra/aa")
-	if ok != false {
-		t.Fatal(ok)
-	}
-
-	constraint = constraintWhitelist("name", []string{"ondra", "pepa"})
-	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []func(map[string]string) bool{constraint})
-
-	_, ok = r.match("GET", "/a/123/ondra/aa")
-	if ok != true {
-		t.Fatal(ok)
-	}
-	_, ok = r.match("GET", "/a/123/karel/aa")
-	if ok != false {
-		t.Fatal(ok)
-	}*/
 }
 
 func TestRouterFallback(t *testing.T) {

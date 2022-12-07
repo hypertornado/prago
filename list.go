@@ -37,14 +37,13 @@ type listPaginationData struct {
 }
 
 type listHeaderItem struct {
-	Name         string
-	Icon         string
-	NameHuman    string
-	ColumnName   string
-	CanOrder     bool
-	DefaultShow  bool
-	FilterLayout string
-	//Field        *Field
+	Name              string
+	Icon              string
+	NameHuman         string
+	ColumnName        string
+	CanOrder          bool
+	DefaultShow       bool
+	FilterLayout      string
 	RelatedResourceID string
 	FilterData        interface{}
 	NaturalCellWidth  int64
@@ -65,13 +64,6 @@ type listRow struct {
 	Items                 []listCell
 	Actions               listItemActions
 	AllowsMultipleActions bool
-}
-
-type listCell struct {
-	OrderedBy     bool
-	Template      string
-	Value         interface{}
-	OriginalValue interface{}
 }
 
 type listItemActions struct {
@@ -463,17 +455,13 @@ func (resourceData *resourceData) getListContent(ctx context.Context, user *user
 		for _, v := range listHeader.Header {
 			if columnsMap[v.ColumnName] {
 				fieldVal := itemVal.FieldByName(v.Name)
-				var isOrderedBy bool
-				if v.ColumnName == orderBy {
-					isOrderedBy = true
-				}
-				row.Items = append(row.Items, valueToListCell(user, resourceData.Field(v.ColumnName), fieldVal, isOrderedBy))
+				row.Items = append(row.Items, getCellViewData(user, resourceData.Field(v.ColumnName), fieldVal.Interface()))
 			}
 		}
 
-		//TODO: better find id
-		row.ID = itemVal.FieldByName("ID").Int()
-		row.URL = resourceData.getURL(fmt.Sprintf("%d", row.ID))
+		previewer := resourceData.previewer(user, itemVal.Addr().Interface())
+		row.ID = previewer.ID()
+		row.URL = previewer.URL("")
 
 		row.Actions = resourceData.getListItemActions(user, itemVal.Addr().Interface(), row.ID)
 		row.AllowsMultipleActions = resourceData.allowsMultipleActions(user)
@@ -539,21 +527,6 @@ func (resourceData *resourceData) getListContentJSON(ctx context.Context, user *
 		FooterStr: bufFooter.String(),
 	}, nil
 
-}
-
-func valueToListCell(user *user, f *Field, val reflect.Value, isOrderedBy bool) listCell {
-	if !f.authorizeView(user) {
-		panic(fmt.Sprintf("can't access field '%s'", f.name("en")))
-	}
-	var item interface{}
-	reflect.ValueOf(&item).Elem().Set(val)
-	var cell listCell
-	cell.Template = "list_cell" //f.fieldType.listCellTemplate
-	cell.Value = getCellViewData(user, f, item)
-	//cell.Value = f.fieldType.cellDataSource(user, f, item)
-	cell.OriginalValue = val.Interface()
-	cell.OrderedBy = isOrderedBy
-	return cell
 }
 
 func (resourceData *resourceData) getPaginationData(user *user) (ret []listPaginationData) {

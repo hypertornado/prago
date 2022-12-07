@@ -213,8 +213,8 @@
         </div>
       {{end}}
       {{range $cell := $item.Items}}
-        <div class="list_cell" title="{{$cell.Value.Name}}">
-          {{tmpl $cell.Template $cell.Value}}
+        <div class="list_cell" title="{{$cell.Name}}">
+          {{template "list_cell" $cell}}
         </div>
       {{end}}
       <div class="list_row_lastcell">

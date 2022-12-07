@@ -3,7 +3,6 @@ package prago
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 )
 
@@ -21,7 +20,7 @@ type fieldType struct {
 	formDataSource func(*Field, *user) interface{}
 	formStringer   func(interface{}) string
 
-	cellDataSource func(*user, *Field, interface{}) cellViewData
+	listCellDataSource func(*user, *Field, interface{}) listCell
 
 	filterLayoutTemplate   string
 	filterLayoutDataSource func(*Field, *user) interface{}
@@ -51,10 +50,10 @@ func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("role", app.createRoleFieldType())
 
 	app.addFieldType("text", &fieldType{
-		viewTemplate:   "admin_item_view_textarea",
-		formTemplate:   "admin_item_textarea",
-		cellDataSource: textListDataSource,
-		fieldTypeIcon:  "glyphicons-basic-101-text.svg",
+		viewTemplate:       "admin_item_view_textarea",
+		formTemplate:       "admin_item_textarea",
+		listCellDataSource: textListDataSource,
+		fieldTypeIcon:      "glyphicons-basic-101-text.svg",
 	})
 	app.addFieldType("order", &fieldType{})
 	app.addFieldType("date", &fieldType{
@@ -62,20 +61,20 @@ func (app *App) initDefaultFieldTypes() {
 	})
 
 	app.addFieldType("cdnfile", &fieldType{
-		viewTemplate:   "admin_item_view_file",
-		viewDataSource: filesViewDataSource,
-		formTemplate:   "admin_file",
-		cellDataSource: imageCellViewData,
+		viewTemplate:       "admin_item_view_file",
+		viewDataSource:     filesViewDataSource,
+		formTemplate:       "admin_file",
+		listCellDataSource: imageCellViewData,
 
 		filterLayoutTemplate:   "filter_layout_select",
 		filterLayoutDataSource: boolFilterLayoutDataSource,
 	})
 
 	app.addFieldType("file", &fieldType{
-		viewTemplate:   "admin_item_view_image",
-		formTemplate:   "admin_item_image",
-		formDataSource: createFilesEditDataSource(""),
-		cellDataSource: imageCellViewData,
+		viewTemplate:       "admin_item_view_image",
+		formTemplate:       "admin_item_image",
+		formDataSource:     createFilesEditDataSource(""),
+		listCellDataSource: imageCellViewData,
 
 		filterLayoutTemplate:   "filter_layout_select",
 		filterLayoutDataSource: boolFilterLayoutDataSource,
@@ -83,10 +82,10 @@ func (app *App) initDefaultFieldTypes() {
 	})
 
 	app.addFieldType("image", &fieldType{
-		viewTemplate:   "admin_item_view_image",
-		formTemplate:   "admin_item_image",
-		formDataSource: createFilesEditDataSource(".jpg,.jpeg,.png"),
-		cellDataSource: imageCellViewData,
+		viewTemplate:       "admin_item_view_image",
+		formTemplate:       "admin_item_image",
+		formDataSource:     createFilesEditDataSource(".jpg,.jpeg,.png"),
+		listCellDataSource: imageCellViewData,
 
 		filterLayoutTemplate:   "filter_layout_select",
 		filterLayoutDataSource: boolFilterLayoutDataSource,
@@ -96,11 +95,11 @@ func (app *App) initDefaultFieldTypes() {
 	})
 
 	app.addFieldType("markdown", &fieldType{
-		viewTemplate:   "admin_item_view_markdown",
-		viewDataSource: markdownViewDataSource,
-		formTemplate:   "admin_item_markdown",
-		cellDataSource: markdownListDataSource,
-		fieldTypeIcon:  "glyphicons-basic-692-font.svg",
+		viewTemplate:       "admin_item_view_markdown",
+		viewDataSource:     markdownViewDataSource,
+		formTemplate:       "admin_item_markdown",
+		listCellDataSource: markdownListDataSource,
+		fieldTypeIcon:      "glyphicons-basic-692-font.svg",
 		//listCellTemplate:   "admin_item_view_text",
 	})
 	app.addFieldType("place", &fieldType{
@@ -147,10 +146,6 @@ func boolFilterLayoutDataSource(field *Field, user *user) interface{} {
 	}
 }
 
-func textListDataSource(user *user, f *Field, value interface{}) cellViewData {
-	return cellViewData{Name: crop(value.(string), 100)}
-}
-
 func createFilesEditDataSource(mimeTypes string) func(f *Field, u *user) interface{} {
 	return func(f *Field, u *user) interface{} {
 		return mimeTypes
@@ -159,54 +154,4 @@ func createFilesEditDataSource(mimeTypes string) func(f *Field, u *user) interfa
 
 func markdownViewDataSource(ctx context.Context, user *user, f *Field, value interface{}) interface{} {
 	return cropMarkdown(value.(string), 100)
-}
-
-func markdownListDataSource(user *user, f *Field, value interface{}) cellViewData {
-	return cellViewData{Name: cropMarkdown(value.(string), 100)}
-}
-
-func relationCellViewData(user *user, f *Field, value interface{}) cellViewData {
-	previewData := f.relationPreview(context.TODO(), user, value.(int64))
-	if previewData == nil {
-		return cellViewData{}
-	}
-
-	ret := cellViewData{
-		Name: previewData.Name,
-	}
-	if previewData.Image != "" {
-		ret.Images = []string{previewData.Image}
-	}
-	return ret
-}
-
-func imageCellViewData(user *user, f *Field, value interface{}) cellViewData {
-	data := value.(string)
-	images := strings.Split(data, ",")
-	ret := cellViewData{}
-	if len(images) > 0 {
-		ret.Images = images
-	}
-	return ret
-}
-
-type cellViewData struct {
-	Images []string
-	Name   string
-}
-
-func getCellViewData(user *user, f *Field, value interface{}) cellViewData {
-	if f.fieldType.cellDataSource != nil {
-		return f.fieldType.cellDataSource(user, f, value)
-	}
-
-	if f.fieldType.IsRelation() {
-		return relationCellViewData(user, f, value)
-	}
-
-	ret := cellViewData{
-		Name: getDefaultFieldStringer(f)(user, f, value),
-	}
-	return ret
-
 }

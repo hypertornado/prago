@@ -595,6 +595,7 @@ class List {
                 }
             }
             else {
+                new Alert("Chyba při načítání položek.");
                 console.error("error while loading list");
             }
             this.copyColumnWidths();
