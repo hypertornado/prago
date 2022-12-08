@@ -445,30 +445,11 @@
 .list_tableplaceholder {
   display: flex;
   flex-direction: column;
-}
-
-@keyframes tableplaceholder {
-  0% {
-    background-color: #fafafa;
-  }
-
-  100% {
-    background-color: #fff;
-    //border: 1px solid red;
-  }
+  background-color: #fafafa;
 }
 
 .list_tableplaceholder_row {
-  //background-color: white;
   height: 25px;
-  border-bottom: 0px solid #eee;
-}
-
-.list_tableplaceholder_row:nth-child(even) {
-  animation: tableplaceholder 1000ms ease-in-out infinite;
-}
-
-.list_tableplaceholder_row:nth-child(odd) {
-  animation: tableplaceholder 1000ms ease-in-out infinite;
-  animation-delay: 500ms;
+  border-bottom: 1px solid #eee;
+  background: white;
 }

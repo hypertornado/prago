@@ -169,6 +169,20 @@ class List {
         tableEl.style.width = widths[j] + "px";
       }
     }
+
+    let placeholderItems = this.list.querySelectorAll(
+      ".list_tableplaceholder_row"
+    );
+    if (placeholderItems.length > 0) {
+      let placeholderWidth =
+        totalWidth -
+        this.list.querySelector(".list_header_last").getBoundingClientRect()
+          .width;
+      for (let i = 0; i < placeholderItems.length; i++) {
+        let item: HTMLDivElement = <HTMLDivElement>placeholderItems[i];
+        item.style.width = placeholderWidth + "px";
+      }
+    }
   }
 
   load() {
@@ -178,7 +192,6 @@ class List {
     this.list.classList.add("list-loading");
 
     var request = new XMLHttpRequest();
-
     this.currentRequest = request;
 
     var params: any = {};
@@ -406,6 +419,7 @@ class List {
         this.copyColumnWidths();
       });
     }
+    this.copyColumnWidths();
   }
 
   getCellWidth(cell: HTMLDivElement): number {

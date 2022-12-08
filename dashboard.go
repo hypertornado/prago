@@ -182,14 +182,15 @@ func (item *DashboardFigure) getDescriptionStr(values [2]int64, app *App) string
 		ret += " " + item.unit
 	}
 
-	if item.compareDescription != "" {
-		ret += " " + item.compareDescription
-	}
-
 	if compareValue > 0 {
 		percent := fmt.Sprintf("%.2f%%", (100*float64(diff))/float64(compareValue))
 		ret += fmt.Sprintf(" (%s)", percent)
 	}
+
+	if item.compareDescription != "" {
+		ret += " " + item.compareDescription
+	}
+
 	return ret
 }
 

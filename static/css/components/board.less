@@ -32,6 +32,16 @@
   grid-gap: 5px 5px;
 }
 
+@keyframes board_resource {
+  0% {
+    opacity: 0;
+    transform: scale(0.1);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 .board_resource {
   padding: 5px;
   border-radius: 10px;
@@ -39,6 +49,9 @@
   border: 1px solid #eee;
   display: flex;
   align-items: center;
+
+  animation: board_resource 500ms ease-out;
+  animation-fill-mode: both;
 }
 
 .board_resource-isboard {

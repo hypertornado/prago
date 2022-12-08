@@ -29,16 +29,6 @@ func (resourceData *resourceData) query(ctx context.Context) *listQuery {
 	}
 }
 
-/*func (resourceData *resourceData) Is(ctx context.Context, name string, value interface{}) *listQuery {
-	listQuery := resourceData.query(ctx)
-	listQuery.where(sqlFieldToQuery(name), value)
-	return listQuery
-}*/
-
-/*func (resourceData *resourceData) ID(ctx context.Context, id any) any {
-	return resourceData.query(ctx).ID(id)
-}*/
-
 func (listQuery *listQuery) Is(name string, value interface{}) *listQuery {
 	listQuery.where(sqlFieldToQuery(name), value)
 	return listQuery

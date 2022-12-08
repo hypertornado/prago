@@ -81,6 +81,8 @@ func (app *App) initTemplates() {
 
 	app.AddTemplateFunction("istabvisible", isTabVisible)
 
+	app.AddTemplateFunction("multiplication", func(a, b int) int { return a * b })
+
 	must(app.AddTemplates(templatesFS, "templates/*.tmpl"))
 }
 

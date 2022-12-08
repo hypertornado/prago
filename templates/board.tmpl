@@ -27,9 +27,10 @@
   {{if .Resources}}
     {{$boardURL := .BoardURL}}
     <div class="board_resources">
-      {{range $resource := .Resources}}
+      {{range $i, $resource := .Resources}}
+        {{$delay := multiplication 10 $i}}
         {{if ne $resource.URL $boardURL}}
-        <a href="{{$resource.URL}}" class="board_resource{{if $resource.IsBoard}} board_resource-isboard{{end}}" title="{{$resource.Name}}">
+        <a href="{{$resource.URL}}" class="board_resource{{if $resource.IsBoard}} board_resource-isboard{{end}}" style="animation-delay: {{$delay}}ms;" title="{{$resource.Name}}">
           <div class="board_resource_left">{{if $resource.Icon}}<img class="board_resource_icon" src="/admin/api/icons?file={{$resource.Icon}}&color=4078c0">{{end}}</div>
           <div class="board_resource_right">{{$resource.Name}}</div>
         </a>
@@ -52,7 +53,7 @@
               {{if $item.Icon}}
                 <div class="dashboard_figure_icon"><img src="/admin/api/icons?file={{$item.Icon}}&color=4078c0"></div>
               {{end}}
-              <div class="dashboard_figure_name">{{$item.Name}}</div>
+              <div class="dashboard_figure_name" title="{{$item.Name}}">{{$item.Name}}</div>
               <div class="dashboard_figure_value"></div>
               <div class="dashboard_figure_description"></div>
             {{if $item.URL}}

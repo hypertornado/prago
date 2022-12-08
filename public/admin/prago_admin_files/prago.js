@@ -528,6 +528,16 @@ class List {
                 tableEl.style.width = widths[j] + "px";
             }
         }
+        let placeholderItems = this.list.querySelectorAll(".list_tableplaceholder_row");
+        if (placeholderItems.length > 0) {
+            let placeholderWidth = totalWidth -
+                this.list.querySelector(".list_header_last").getBoundingClientRect()
+                    .width;
+            for (let i = 0; i < placeholderItems.length; i++) {
+                let item = placeholderItems[i];
+                item.style.width = placeholderWidth + "px";
+            }
+        }
     }
     load() {
         if (this.currentRequest) {
@@ -732,6 +742,7 @@ class List {
                 this.copyColumnWidths();
             });
         }
+        this.copyColumnWidths();
     }
     getCellWidth(cell) {
         return cell.getBoundingClientRect().width;
@@ -2809,7 +2820,9 @@ class DashboardFigure {
             if (request.status == 200) {
                 let data = JSON.parse(request.response);
                 this.valueEl.innerText = data["Value"];
+                this.valueEl.setAttribute("title", data["Value"]);
                 this.descriptionEl.innerText = data["Description"];
+                this.descriptionEl.setAttribute("title", data["Description"]);
                 if (data["IsRed"]) {
                     this.el.classList.add("dashboard_figure-red");
                 }

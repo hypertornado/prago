@@ -1288,25 +1288,12 @@ a.box_tag:hover {
 .list_tableplaceholder {
   display: flex;
   flex-direction: column;
-}
-@keyframes tableplaceholder {
-  0% {
-    background-color: #fafafa;
-  }
-  100% {
-    background-color: #fff;
-  }
+  background-color: #fafafa;
 }
 .list_tableplaceholder_row {
   height: 25px;
-  border-bottom: 0px solid #eee;
-}
-.list_tableplaceholder_row:nth-child(even) {
-  animation: tableplaceholder 1000ms ease-in-out infinite;
-}
-.list_tableplaceholder_row:nth-child(odd) {
-  animation: tableplaceholder 1000ms ease-in-out infinite;
-  animation-delay: 500ms;
+  border-bottom: 1px solid #eee;
+  background: white;
 }
 .list_settings h3 {
   font-size: 1rem;
@@ -2204,6 +2191,15 @@ a.admin_search_suggestion-selected:active {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   grid-gap: 5px 5px;
 }
+@keyframes board_resource {
+  0% {
+    opacity: 0;
+    transform: scale(0.1);
+  }
+  100% {
+    opacity: 1;
+  }
+}
 .board_resource {
   padding: 5px;
   border-radius: 10px;
@@ -2211,6 +2207,8 @@ a.admin_search_suggestion-selected:active {
   border: 1px solid #eee;
   display: flex;
   align-items: center;
+  animation: board_resource 500ms ease-out;
+  animation-fill-mode: both;
 }
 .board_resource-isboard {
   font-weight: 500;
@@ -2290,14 +2288,10 @@ a.board_resource {
 .dashboard_figure {
   padding: 5px 10px;
   border-radius: 10px;
-  min-height: 30px;
-  text-align: center;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   background: white;
   border: 1px solid #eee;
-  min-height: 100px;
   position: relative;
 }
 a.dashboard_figure:hover {
@@ -2309,15 +2303,26 @@ a.dashboard_figure {
 .dashboard_figure_icon img {
   width: 20px;
 }
+.dashboard_figure_name {
+  color: #444;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
 .dashboard_figure_value {
   font-size: 1.3rem;
   line-height: 1.3em;
-  font-weight: bold;
+  font-weight: 500;
+  color: #444;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .dashboard_figure_description {
   color: #888;
-  font-size: 0.9rem;
-  line-height: 1.3em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .dashboard_figure-green .dashboard_figure_description {
   color: #006400;

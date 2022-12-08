@@ -61,7 +61,9 @@ class DashboardFigure {
       if (request.status == 200) {
         let data = JSON.parse(request.response);
         this.valueEl.innerText = data["Value"];
+        this.valueEl.setAttribute("title", data["Value"]);
         this.descriptionEl.innerText = data["Description"];
+        this.descriptionEl.setAttribute("title", data["Description"]);
 
         if (data["IsRed"]) {
           this.el.classList.add("dashboard_figure-red");

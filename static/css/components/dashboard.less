@@ -20,14 +20,10 @@
 .dashboard_figure {
   padding: 5px 10px;
   border-radius: 10px;
-  min-height: 30px;
-  text-align: center;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   background: white;
   border: 1px solid #eee;
-  min-height: 100px;
   position: relative;
 }
 
@@ -43,16 +39,30 @@ a.dashboard_figure {
   width: 20px;
 }
 
+.dashboard_figure_name {
+  color: @black;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 .dashboard_figure_value {
   font-size: 1.3rem;
   line-height: 1.3em;
-  font-weight: bold;
+  font-weight: 500;
+  color: @black;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .dashboard_figure_description {
   color: @gray;
-  font-size: 0.9rem;
-  line-height: 1.3em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  //font-size: 0.9rem;
+  //line-height: 1.3em;
 }
 
 .dashboard_figure-green .dashboard_figure_description {
