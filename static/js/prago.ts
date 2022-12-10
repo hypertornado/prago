@@ -60,3 +60,20 @@ class Prago {
   }
 }
 Prago.start();
+
+class VisibilityReloader {
+  lastRequestedTime: number;
+
+  constructor(reloadIntervalMilliseconds: number, handler: any) {
+    this.lastRequestedTime = 0;
+    window.setInterval(() => {
+      if (
+        document.visibilityState == "visible" &&
+        Date.now() - this.lastRequestedTime >= reloadIntervalMilliseconds
+      ) {
+        this.lastRequestedTime = Date.now();
+        handler();
+      }
+    }, 100);
+  }
+}

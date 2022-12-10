@@ -1,0 +1,29 @@
+{{define "dashboard"}}
+    <div class="dashboard">
+      <h2 class="dashboard_name">{{.Name}}</h2>
+      <div class="dashboard_figures">
+        {{range $item := .Figures}}
+            {{if $item.URL}}
+              <a href="{{$item.URL}}" data-refresh-time-seconds="{{$item.RefreshTimeSeconds}}" data-uuid="{{$item.UUID}}" class="dashboard_figure dashboard_figure-loading">
+            {{else}}
+              <div data-uuid="{{$item.UUID}}" data-refresh-time-seconds="{{$item.RefreshTimeSeconds}}" class="dashboard_figure dashboard_figure-loading">
+            {{end}}
+              <div class="progress dashboard_figure_loader"></div>
+              {{if $item.Icon}}
+                <div class="dashboard_figure_icon"><img src="/admin/api/icons?file={{$item.Icon}}&color=4078c0"></div>
+              {{end}}
+              <div class="dashboard_figure_name" title="{{$item.Name}}">{{$item.Name}}</div>
+              <div class="dashboard_figure_value"></div>
+              <div class="dashboard_figure_description"></div>
+            {{if $item.URL}}
+              </a>
+            {{else}}
+              </div>
+            {{end}}
+        {{end}}
+      </div>
+      {{range $table := .Tables}}
+        <div class="dashboard_table" data-uuid="{{$table.UUID}}" data-refresh-time-seconds="{{$table.RefreshTimeSeconds}}"><progress class="progress"></progress></div>
+      {{end}}
+    </div>
+{{end}}

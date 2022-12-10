@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"time"
 )
 
@@ -12,6 +11,8 @@ type Board struct {
 	action      *Action
 	parentBoard *Board
 
+	MainDashboard *Dashboard
+
 	dashboardGroups []*Dashboard
 }
 
@@ -20,16 +21,18 @@ func (app *App) initBoard() {
 		Name(messages.GetNameFunction("admin_signpost")).
 		Icon(iconSignpost)
 	app.MainBoard.action.parentBoard = app.MainBoard
-	app.dashboardTableMap = make(map[string]*dashboardTable)
+	app.dashboardTableMap = make(map[string]*DashboardTable)
 	app.dashboardFigureMap = make(map[string]*DashboardFigure)
 	sysadminBoard = app.NewBoard("sysadmin-board").Name(unlocalized("Sysadmin"))
 
+	app.NewBoard("empty-board")
+
 	sysadminGroup := sysadminBoard.Dashboard(unlocalized("Sysadmin"))
-	sysadminGroup.Figure("Úpravy", "sysadmin").Value(func(ctx context.Context) int64 {
-		c, _ := app.activityLogResource.Query(ctx).Where("createdat >= ?", time.Now().AddDate(0, 0, -1)).Count()
+	sysadminGroup.Figure("Úpravy", "sysadmin").Value(func(request *Request) int64 {
+		c, _ := app.activityLogResource.Query(request.r.Context()).Where("createdat >= ?", time.Now().AddDate(0, 0, -1)).Count()
 		return c
-	}).Unit("/ 24 hodin").URL("/admin/activitylog").Compare(func(ctx context.Context) int64 {
-		c, _ := app.activityLogResource.Query(ctx).Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, -1)).Count()
+	}).Unit("/ 24 hodin").URL("/admin/activitylog").Compare(func(request *Request) int64 {
+		c, _ := app.activityLogResource.Query(request.r.Context()).Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, -1)).Count()
 		return c
 	}, "oproti předchozímu dni")
 }
@@ -51,6 +54,10 @@ func newBoard(app *App, url string) *Board {
 		return ret.boardView(request)
 	}
 	ret.action.permission = loggedPermission
+	ret.MainDashboard = &Dashboard{
+		name:  unlocalized(""),
+		board: ret,
+	}
 	return ret
 }
 
@@ -66,4 +73,23 @@ func (board *Board) Icon(icon string) *Board {
 
 func (board *Board) IsMainBoard() bool {
 	return board == board.app.MainBoard
+}
+
+func (board *Board) isEmpty(request *Request) bool {
+	if board.IsMainBoard() {
+		return false
+	}
+
+	for _, v := range board.dashboardGroups {
+		if v.isVisible(request.app, request.user) {
+			return false
+		}
+	}
+
+	items, _ := board.getItems(request, false)
+	if len(items) > 0 {
+		return false
+	}
+
+	return true
 }

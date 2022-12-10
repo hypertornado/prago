@@ -13,19 +13,30 @@ function initDashdoard() {
 }
 
 class DashboardTable {
+  el: HTMLDivElement;
   constructor(el: HTMLDivElement) {
-    let uuid = el.getAttribute("data-uuid");
+    this.el = el;
+
+    let reloadSeconds = parseInt(
+      this.el.getAttribute("data-refresh-time-seconds")
+    );
+
+    new VisibilityReloader(reloadSeconds * 1000, this.loadTableData.bind(this));
+  }
+
+  loadTableData() {
+    console.log("load table data");
 
     var request = new XMLHttpRequest();
     var params: any = {
-      uuid: uuid,
+      uuid: this.el.getAttribute("data-uuid"),
     };
 
     request.addEventListener("load", () => {
       if (request.status == 200) {
-        el.innerHTML = request.response;
+        this.el.innerHTML = request.response;
       } else {
-        el.innerText = "Error while loading table";
+        this.el.innerText = "Error while loading table";
       }
     });
 
@@ -49,17 +60,32 @@ class DashboardFigure {
     this.valueEl = el.querySelector(".dashboard_figure_value");
     this.descriptionEl = el.querySelector(".dashboard_figure_description");
 
-    let uuid = el.getAttribute("data-uuid");
+    this.el.classList.add("dashboard_figure-loading");
 
+    let reloadSeconds = parseInt(
+      this.el.getAttribute("data-refresh-time-seconds")
+    );
+
+    new VisibilityReloader(
+      reloadSeconds * 1000,
+      this.loadFigureData.bind(this)
+    );
+  }
+
+  loadFigureData() {
     var request = new XMLHttpRequest();
     var params: any = {
-      uuid: uuid,
+      uuid: this.el.getAttribute("data-uuid"),
     };
 
     request.addEventListener("load", () => {
       this.el.classList.remove("dashboard_figure-loading");
       if (request.status == 200) {
         let data = JSON.parse(request.response);
+        this.el.classList.remove(
+          "dashboard_figure-green",
+          "dashboard_figure-red"
+        );
         this.valueEl.innerText = data["Value"];
         this.valueEl.setAttribute("title", data["Value"]);
         this.descriptionEl.innerText = data["Description"];
@@ -81,13 +107,6 @@ class DashboardFigure {
       "/admin/api/dashboard-figure" + encodeParams(params),
       true
     );
-
-    this.el.classList.remove("dashboard_figure-green", "dashboard_figure-red");
-
-    this.el.classList.add("dashboard_figure-loading");
-
-    this.valueEl.innerText = "Loading...";
-    this.descriptionEl.innerText = "";
 
     request.send();
   }

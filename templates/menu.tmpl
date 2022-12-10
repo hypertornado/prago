@@ -12,18 +12,23 @@
 {{define "menu_items"}}
     <div class="menu_section_content">
     {{range $item := .}}
-        <a href="{{$item.URL}}" class="menu_section_item{{if $item.Selected}} menu_section_item-selected{{end}}">
-            {{if $item.Icon}}
-                <img class="menu_section_item_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{if $item.Selected}}ffffff{{else}}444444{{end}}">
-            {{end}}
-            <div class="menu_section_item_left">{{$item.Name}}</div>
-            {{if $item.Subname}}
-                <div class="menu_section_item_right">{{$item.Subname}}</div>
-            {{end}}
-        </a>
-        {{if $item.Subitems}}
-            {{template "menu_items" $item.Subitems}}
-        {{end}}
+        <div class="menu_row{{if $item.Subitems}} menu_row-subitems{{end}}{{if $item.Expanded}} menu_row-expanded{{end}}">
+            <div class="menu_row_icon">
+                <img src="/admin/api/icons?file=glyphicons-basic-175-play.svg&color=888888" class="menu_row_icon_img">
+            </div>
+            <div class="menu_row_content">
+                <a href="{{$item.URL}}" class="menu_item{{if $item.Selected}} menu_item-selected{{end}}">
+                    {{if $item.Icon}}
+                        <img class="menu_item_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{if $item.Selected}}ffffff{{else}}444444{{end}}">
+                    {{end}}
+                    <div class="menu_item_left">{{$item.Name}}</div>
+                    <div class="menu_item_right"></div>
+                </a>
+                {{if $item.Subitems}}
+                    {{template "menu_items" $item.Subitems}}
+                {{end}}
+            </div>
+        </div>
     {{end}}
     </div>
 {{end}}

@@ -60,7 +60,7 @@ type App struct {
 	activityListeners []func(Activity)
 	taskManager       *taskManager
 
-	dashboardTableMap  map[string]*dashboardTable
+	dashboardTableMap  map[string]*DashboardTable
 	dashboardFigureMap map[string]*DashboardFigure
 
 	MainBoard *Board
@@ -132,6 +132,7 @@ func createApp(codeName string, version string) *App {
 	app.initBackupCRON()
 	app.initDashboard()
 	app.initIcons()
+	app.initMenuAPI()
 
 	return app
 }

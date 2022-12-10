@@ -9,6 +9,8 @@ type BoardView struct {
 	Resources   []menuItem
 	UserSection *menuSection
 
+	MainDashboard *DashboardView
+
 	Dashboards []*DashboardView
 
 	User *user
@@ -24,19 +26,19 @@ type DashboardView struct {
 }
 
 type DashboardViewFigure struct {
-	UUID string
-	Icon string
-	URL  string
-	Name string
+	UUID               string
+	Icon               string
+	URL                string
+	Name               string
+	RefreshTimeSeconds int64
 }
 
 type DashboardViewTable struct {
-	UUID string
+	UUID               string
+	RefreshTimeSeconds int64
 }
 
 func (board *Board) boardView(request *Request) *BoardView {
-	app := board.app
-	locale := request.user.Locale
 	ret := &BoardView{
 		AppName:     request.app.name(request.user.Locale),
 		BoardName:   board.action.name(request.user.Locale),
@@ -46,13 +48,19 @@ func (board *Board) boardView(request *Request) *BoardView {
 		User:        request.user,
 	}
 
-	ret.Resources = board.getMenuItems(request)
+	ret.Resources, _ = board.getMainItems(request)
+
+	ret.MainDashboard = board.MainDashboard.view(request)
 
 	if board.IsMainBoard() {
 		ret.UserSection = getMenuUserSection(request)
 	}
 
-	for _, group := range board.dashboardGroups {
+	for _, dashboard := range board.dashboardGroups {
+		/*if !group.isVisible(app, request.user) {
+			continue
+		}
+
 		view := &DashboardView{
 			Name: group.name(locale),
 		}
@@ -65,14 +73,21 @@ func (board *Board) boardView(request *Request) *BoardView {
 		for _, v := range group.tables {
 			if request.UserHasPermission(v.permission) {
 				view.Tables = append(view.Tables, DashboardViewTable{
-					UUID: v.uuid,
+					UUID:               v.uuid,
+					RefreshTimeSeconds: v.refreshTimeSeconds,
 				})
 			}
 		}
 
 		if len(view.Figures) > 0 || len(view.Tables) > 0 {
 			ret.Dashboards = append(ret.Dashboards, view)
+		}*/
+
+		view := dashboard.view(request)
+		if view != nil {
+			ret.Dashboards = append(ret.Dashboards, view)
 		}
+
 	}
 
 	if board.IsMainBoard() {
@@ -84,4 +99,36 @@ func (board *Board) boardView(request *Request) *BoardView {
 	}
 
 	return ret
+}
+
+func (dashboard *Dashboard) view(request *Request) *DashboardView {
+	app := request.app
+	if !dashboard.isVisible(app, request.user) {
+		return nil
+	}
+
+	view := &DashboardView{
+		Name: dashboard.name(request.user.Locale),
+	}
+	for _, item := range dashboard.figures {
+		if request.UserHasPermission(item.permission) {
+			view.Figures = append(view.Figures, item.view(app))
+		}
+	}
+
+	for _, v := range dashboard.tables {
+		if request.UserHasPermission(v.permission) {
+			view.Tables = append(view.Tables, DashboardViewTable{
+				UUID:               v.uuid,
+				RefreshTimeSeconds: v.refreshTimeSeconds,
+			})
+		}
+	}
+
+	if len(view.Figures) > 0 || len(view.Tables) > 0 {
+		return view
+
+	}
+	return nil
+
 }

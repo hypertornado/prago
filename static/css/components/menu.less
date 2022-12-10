@@ -15,20 +15,72 @@
 }
 
 .menu_section > .menu_section_content {
-  padding: 5px 15px;
+  padding: 5px 0px;
 }
 
 .menu_section_content > .menu_section_content {
   padding-left: 20px;
 }
 
-.menu_section_item {
+.menu_row {
+  border: 0px solid red;
+  display: flex;
+  padding-right: 5px;
+}
+
+.menu_row_icon {
+  //margin: 6px 3px 3px 10px;
+  width: 25px;
+  height: 25px;
+  border: 0px solid transparent;
+  flex-shrink: 10;
+  opacity: 0;
+  border: 0px solid red;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+}
+
+.menu_row_icon_img {
+  width: 15px;
+  height: 15px;
+}
+
+.menu_row .menu_row {
+  display: none;
+}
+
+.menu_row-expanded .menu_row {
+  display: flex;
+}
+
+.menu_row-expanded .menu_row_icon_img {
+  transform: rotate(90deg);
+  transition: all 200ms ease-out;
+}
+
+.menu_row-subitems > .menu_row_icon {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.menu_row-subitems > .menu_row_icon:hover {
+  background-color: #eee;
+}
+
+.menu_row_content {
+  flex-grow: 100;
+}
+
+.menu_item {
+  flex-grow: 10;
   font-weight: 500;
   padding: 3px 10px;
   margin: 0px;
   font-size: 0.9rem;
   flex-shrink: 0;
-  border-radius: 10px;
+  border-radius: 100px;
   text-decoration: none;
   color: @gray;
   color: @black;
@@ -37,25 +89,25 @@
   border: 1px solid transparent;
 }
 
-.menu_section_item_icon {
+.menu_item_icon {
   width: 20px;
   margin-right: 5px;
 }
 
-.menu_section_item:hover {
+.menu_item:hover {
   border-color: #ddd;
 }
 
-.menu_section_item:active {
+.menu_item:active {
   border-color: #ccc;
 }
 
-.menu_section_item_left {
+.menu_item_left {
   flex-grow: 10;
   flex-shrink: 0;
 }
 
-.menu_section_item_right {
+.menu_item_right {
   padding-left: 10px;
   flex-grow: 0;
   flex-shrink: 0;
@@ -63,8 +115,8 @@
   color: #999;
 }
 
-.menu_section_item-selected,
-.menu_section_item-selected:hover {
+.menu_item-selected,
+.menu_item-selected:hover {
   background-color: @baseColor;
   color: white !important;
   border-color: @baseColor;
@@ -74,6 +126,6 @@
   bottom: 0px;
 }
 
-.menu_section_item-selected .menu_section_item_right {
+.menu_item-selected .menu_item_right {
   color: #eee;
 }

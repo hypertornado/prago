@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"errors"
 	"fmt"
 )
@@ -10,24 +9,26 @@ type Dashboard struct {
 	board   *Board
 	name    func(string) string
 	figures []*DashboardFigure
-	tables  []*dashboardTable
+	tables  []*DashboardTable
 }
 
 type DashboardFigure struct {
 	uuid               string
 	permission         Permission
 	url                string
-	value              func(context.Context) int64
-	compareValue       func(context.Context) int64
+	value              func(*Request) int64
+	compareValue       func(*Request) int64
 	compareDescription string
 	unit               string
 	name               string
+	refreshTimeSeconds int64
 }
 
-type dashboardTable struct {
-	uuid       string
-	table      func(context.Context) *Table
-	permission Permission
+type DashboardTable struct {
+	uuid               string
+	table              func(*Request) *Table
+	permission         Permission
+	refreshTimeSeconds int64
 }
 
 type DashboardFigureData struct {
@@ -37,8 +38,8 @@ type DashboardFigureData struct {
 	IsRed       bool
 }
 
-func (figure DashboardFigure) data(ctx context.Context, app *App) *DashboardFigureData {
-	values := figure.getValues(ctx, app)
+func (figure DashboardFigure) data(request *Request, app *App) *DashboardFigureData {
+	values := figure.getValues(request, app)
 	ret := &DashboardFigureData{
 		Value:       figure.getValueStr(values, app),
 		Description: figure.getDescriptionStr(values, app),
@@ -52,7 +53,7 @@ func (app *App) initDashboard() {
 	app.API("dashboard-table").Method("GET").Permission(loggedPermission).Handler(
 		func(request *Request) {
 			uuid := request.Param("uuid")
-			table, err := app.getDashboardTableData(request.r.Context(), uuid, request.user)
+			table, err := app.getDashboardTableData(request, uuid, request.user)
 			must(err)
 			request.app.templates.templates.ExecuteTemplate(request.Response(), "admin_form_table", table.TemplateData())
 		},
@@ -61,14 +62,14 @@ func (app *App) initDashboard() {
 	app.API("dashboard-figure").Method("GET").Permission(loggedPermission).HandlerJSON(
 		func(request *Request) any {
 			uuid := request.Param("uuid")
-			figure, err := app.getDashboardFigureData(request.r.Context(), uuid, request.user)
+			figure, err := app.getDashboardFigureData(request, uuid, request.user)
 			must(err)
 			return figure
 		},
 	)
 }
 
-func (app *App) getDashboardTableData(ctx context.Context, uuid string, user *user) (*Table, error) {
+func (app *App) getDashboardTableData(request *Request, uuid string, user *user) (*Table, error) {
 	table := app.dashboardTableMap[uuid]
 	if table == nil {
 		return nil, errors.New("can't find table")
@@ -76,10 +77,10 @@ func (app *App) getDashboardTableData(ctx context.Context, uuid string, user *us
 	if !app.authorize(user, table.permission) {
 		return nil, errors.New("can't authorize for access of table data")
 	}
-	return table.table(ctx), nil
+	return table.table(request), nil
 }
 
-func (app *App) getDashboardFigureData(ctx context.Context, uuid string, user *user) (*DashboardFigureData, error) {
+func (app *App) getDashboardFigureData(request *Request, uuid string, user *user) (*DashboardFigureData, error) {
 	figure := app.dashboardFigureMap[uuid]
 	if figure == nil {
 		return nil, errors.New("can't find figure")
@@ -87,7 +88,7 @@ func (app *App) getDashboardFigureData(ctx context.Context, uuid string, user *u
 	if !app.authorize(user, figure.permission) {
 		return nil, errors.New("can't authorize for access of figure data")
 	}
-	return figure.data(ctx, app), nil
+	return figure.data(request, app), nil
 }
 
 func (board *Board) Dashboard(name func(string) string) *Dashboard {
@@ -99,36 +100,69 @@ func (board *Board) Dashboard(name func(string) string) *Dashboard {
 	return group
 }
 
-func (group *Dashboard) Figure(name string, permission Permission) *DashboardFigure {
-	must(group.board.app.validatePermission(permission))
+func (dashboard *Dashboard) Figure(name string, permission Permission) *DashboardFigure {
+	must(dashboard.board.app.validatePermission(permission))
 	figure := &DashboardFigure{
-		uuid:       randomString(30),
-		name:       name,
-		permission: permission,
+		uuid:               randomString(30),
+		name:               name,
+		permission:         permission,
+		refreshTimeSeconds: 60,
 	}
-	group.board.app.dashboardFigureMap[figure.uuid] = figure
-	group.figures = append(group.figures, figure)
+	dashboard.board.app.dashboardFigureMap[figure.uuid] = figure
+	dashboard.figures = append(dashboard.figures, figure)
 	return figure
 }
 
-func (group *Dashboard) Table(tableFn func(context.Context) *Table, permission Permission) *Dashboard {
-	table := &dashboardTable{
+func (group *Dashboard) Table(tableFn func(*Request) *Table, permission Permission) *DashboardTable {
+	table := &DashboardTable{
 		uuid:       randomString(30),
 		table:      tableFn,
 		permission: permission,
 	}
 	group.tables = append(group.tables, table)
 	group.board.app.dashboardTableMap[table.uuid] = table
-	return group
+	table.refreshTimeSeconds = 300
+	return table
 }
 
-func (item *DashboardFigure) getValues(ctx context.Context, app *App) [2]int64 {
+func (figure *DashboardFigure) RefreshTime(seconds int64) *DashboardFigure {
+	if seconds < 1 {
+		seconds = 1
+	}
+	figure.refreshTimeSeconds = seconds
+	return figure
+}
+
+func (table *DashboardTable) RefreshTime(seconds int64) *DashboardTable {
+	if seconds < 1 {
+		seconds = 1
+	}
+	table.refreshTimeSeconds = seconds
+	return table
+}
+
+func (group *Dashboard) isVisible(app *App, user *user) bool {
+	for _, v := range group.figures {
+		if app.authorize(user, v.permission) {
+			return true
+		}
+	}
+
+	for _, v := range group.tables {
+		if app.authorize(user, v.permission) {
+			return true
+		}
+	}
+	return false
+}
+
+func (item *DashboardFigure) getValues(request *Request, app *App) [2]int64 {
 	var val, cmpVal int64 = -1, -1
 	if item.value != nil {
-		val = item.value(ctx)
+		val = item.value(request)
 	}
 	if item.compareValue != nil {
-		cmpVal = item.compareValue(ctx)
+		cmpVal = item.compareValue(request)
 	}
 	return [2]int64{
 		val, cmpVal,
@@ -136,12 +170,12 @@ func (item *DashboardFigure) getValues(ctx context.Context, app *App) [2]int64 {
 
 }
 
-func (item *DashboardFigure) Value(value func(context.Context) int64) *DashboardFigure {
+func (item *DashboardFigure) Value(value func(*Request) int64) *DashboardFigure {
 	item.value = value
 	return item
 }
 
-func (item *DashboardFigure) Compare(value func(context.Context) int64, description string) *DashboardFigure {
+func (item *DashboardFigure) Compare(value func(*Request) int64, description string) *DashboardFigure {
 	item.compareValue = value
 	item.compareDescription = description
 	return item
@@ -196,9 +230,10 @@ func (item *DashboardFigure) getDescriptionStr(values [2]int64, app *App) string
 
 func (item *DashboardFigure) view(app *App) *DashboardViewFigure {
 	ret := &DashboardViewFigure{
-		UUID: item.uuid,
-		URL:  item.url,
-		Name: item.name,
+		UUID:               item.uuid,
+		URL:                item.url,
+		Name:               item.name,
+		RefreshTimeSeconds: item.refreshTimeSeconds,
 	}
 	return ret
 }

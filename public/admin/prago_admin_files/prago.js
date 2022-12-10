@@ -2200,14 +2200,16 @@ class Menu {
     constructor() {
         this.rootEl = document.querySelector(".root");
         this.rootLeft = document.querySelector(".root_left");
-        this.menuEl = document.querySelector(".root_hamburger");
-        this.menuEl.addEventListener("click", this.menuClick.bind(this));
+        this.hamburgerMenuEl = document.querySelector(".root_hamburger");
+        this.hamburgerMenuEl.addEventListener("click", this.menuClick.bind(this));
         var searchFormEl = document.querySelector(".searchbox");
         if (searchFormEl) {
             this.search = new SearchForm(searchFormEl);
         }
         this.scrollTo(this.loadFromStorage());
         this.rootLeft.addEventListener("scroll", this.scrollHandler.bind(this));
+        this.bindSubmenus();
+        this.bindResourceCounts();
     }
     scrollHandler() {
         this.saveToStorage(this.rootLeft.scrollTop);
@@ -2216,7 +2218,6 @@ class Menu {
         window.localStorage["left_menu_position"] = position;
     }
     menuClick() {
-        console.log("toggle");
         this.rootEl.classList.toggle("root-visible");
     }
     loadFromStorage() {
@@ -2228,6 +2229,79 @@ class Menu {
     }
     scrollTo(position) {
         this.rootLeft.scrollTo(0, position);
+    }
+    bindSubmenus() {
+        let triangleIcons = document.querySelectorAll(".menu_row-subitems > .menu_row_icon");
+        for (var i = 0; i < triangleIcons.length; i++) {
+            let triangleIcon = triangleIcons[i];
+            triangleIcon.addEventListener("click", () => {
+                let parent = triangleIcon.parentElement;
+                parent.classList.toggle("menu_row-expanded");
+            });
+        }
+    }
+    bindResourceCounts() {
+        this.setResourceCountsFromCache();
+        new VisibilityReloader(2000, () => {
+            this.loadResourceCounts();
+        });
+    }
+    saveCountToStorage(url, count) {
+        if (!window.localStorage) {
+            return;
+        }
+        window.localStorage["left_menu_count-" + url] = count;
+    }
+    loadCountFromStorage(url) {
+        if (!window.localStorage) {
+            return "";
+        }
+        var pos = window.localStorage["left_menu_count-" + url];
+        if (pos) {
+            return pos;
+        }
+        return "";
+    }
+    setResourceCountsFromCache() {
+        var items = document.querySelectorAll(".menu_item");
+        for (var i = 0; i < items.length; i++) {
+            let item = items[i];
+            let url = item.getAttribute("href");
+            let count = this.loadCountFromStorage(url);
+            if (count) {
+                this.setResourceCount(item, count);
+            }
+        }
+    }
+    setResourceCounts(data) {
+        var items = document.querySelectorAll(".menu_item");
+        for (var i = 0; i < items.length; i++) {
+            let item = items[i];
+            let url = item.getAttribute("href");
+            let count = data[url];
+            this.setResourceCount(item, count);
+        }
+    }
+    setResourceCount(el, count) {
+        let countEl = el.querySelector(".menu_item_right");
+        if (count) {
+            this.saveCountToStorage(el.getAttribute("href"), count);
+            countEl.textContent = count;
+        }
+    }
+    loadResourceCounts() {
+        var request = new XMLHttpRequest();
+        request.open("GET", "/admin/api/resource-counts", true);
+        request.addEventListener("load", () => {
+            if (request.status == 200) {
+                var data = JSON.parse(request.response);
+                this.setResourceCounts(data);
+            }
+            else {
+                console.error("cant load resource counts");
+            }
+        });
+        request.send();
     }
 }
 class RelationList {
@@ -2788,17 +2862,22 @@ function initDashdoard() {
 }
 class DashboardTable {
     constructor(el) {
-        let uuid = el.getAttribute("data-uuid");
+        this.el = el;
+        let reloadSeconds = parseInt(this.el.getAttribute("data-refresh-time-seconds"));
+        new VisibilityReloader(reloadSeconds * 1000, this.loadTableData.bind(this));
+    }
+    loadTableData() {
+        console.log("load table data");
         var request = new XMLHttpRequest();
         var params = {
-            uuid: uuid,
+            uuid: this.el.getAttribute("data-uuid"),
         };
         request.addEventListener("load", () => {
             if (request.status == 200) {
-                el.innerHTML = request.response;
+                this.el.innerHTML = request.response;
             }
             else {
-                el.innerText = "Error while loading table";
+                this.el.innerText = "Error while loading table";
             }
         });
         request.open("GET", "/admin/api/dashboard-table" + encodeParams(params), true);
@@ -2810,15 +2889,20 @@ class DashboardFigure {
         this.el = el;
         this.valueEl = el.querySelector(".dashboard_figure_value");
         this.descriptionEl = el.querySelector(".dashboard_figure_description");
-        let uuid = el.getAttribute("data-uuid");
+        this.el.classList.add("dashboard_figure-loading");
+        let reloadSeconds = parseInt(this.el.getAttribute("data-refresh-time-seconds"));
+        new VisibilityReloader(reloadSeconds * 1000, this.loadFigureData.bind(this));
+    }
+    loadFigureData() {
         var request = new XMLHttpRequest();
         var params = {
-            uuid: uuid,
+            uuid: this.el.getAttribute("data-uuid"),
         };
         request.addEventListener("load", () => {
             this.el.classList.remove("dashboard_figure-loading");
             if (request.status == 200) {
                 let data = JSON.parse(request.response);
+                this.el.classList.remove("dashboard_figure-green", "dashboard_figure-red");
                 this.valueEl.innerText = data["Value"];
                 this.valueEl.setAttribute("title", data["Value"]);
                 this.descriptionEl.innerText = data["Description"];
@@ -2835,10 +2919,6 @@ class DashboardFigure {
             }
         });
         request.open("GET", "/admin/api/dashboard-figure" + encodeParams(params), true);
-        this.el.classList.remove("dashboard_figure-green", "dashboard_figure-red");
-        this.el.classList.add("dashboard_figure-loading");
-        this.valueEl.innerText = "Loading...";
-        this.descriptionEl.innerText = "";
         request.send();
     }
 }
@@ -2886,3 +2966,15 @@ class Prago {
     }
 }
 Prago.start();
+class VisibilityReloader {
+    constructor(reloadIntervalMilliseconds, handler) {
+        this.lastRequestedTime = 0;
+        window.setInterval(() => {
+            if (document.visibilityState == "visible" &&
+                Date.now() - this.lastRequestedTime >= reloadIntervalMilliseconds) {
+                this.lastRequestedTime = Date.now();
+                handler();
+            }
+        }, 100);
+    }
+}

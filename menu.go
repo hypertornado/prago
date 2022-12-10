@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"sort"
 	"strings"
 
@@ -20,12 +21,15 @@ type menuSection struct {
 }
 
 type menuItem struct {
-	Icon     string
-	Name     string
-	Subname  string
-	URL      string
-	Selected bool
-	Subitems []menuItem
+	Icon string
+	Name string
+	//Subname     string
+	URL         string
+	Selected    bool
+	Subitems    []menuItem
+	Expanded    bool
+	IsBoard     bool
+	IsMainBoard bool
 }
 
 func (menu menu) GetTitle() string {
@@ -39,18 +43,21 @@ func (menu menu) GetTitle() string {
 	return ""
 }
 
-func (item menuItem) IsBoard() bool {
-	if len(item.Subitems) > 0 {
-		return true
-	}
-	return false
+func (app *App) initMenuAPI() {
+
+	app.API("resource-counts").Permission(loggedPermission).HandlerJSON(func(request *Request) any {
+		return getResourceCountsMap(request)
+	})
+
 }
 
 func (app *App) getMenu(request *Request) (ret menu) {
 	user := request.user
 
+	items, _ := app.MainBoard.getMainItems(request)
+
 	resourceSection := menuSection{
-		Items: app.MainBoard.getMenuItems(request),
+		Items: items,
 	}
 
 	ret.Sections = append(ret.Sections, resourceSection)
@@ -60,81 +67,75 @@ func (app *App) getMenu(request *Request) (ret menu) {
 	return ret
 }
 
-func getMenuUserSection(request *Request) *menuSection {
-	user := request.user
+func getResourceCountsMap(request *Request) map[string]string {
 	app := request.app
+	ret := make(map[string]string)
 
-	userName := user.Name
-	if userName == "" {
-		userName = user.Email
+	for _, v := range app.resources {
+		if app.authorize(request.user, v.canView) {
+			url := v.getURL("")
+			count := v.getCachedCount(context.TODO())
+			ret[url] = humanizeNumber(count)
+		}
+
 	}
+	return ret
+}
+
+func getMenuUserSection(request *Request) *menuSection {
+	userName := request.user.Name
+	if userName == "" {
+		userName = request.user.Email
+	}
+
+	mainItems, _ := request.app.MainBoard.getItems(request, true)
 	userSection := menuSection{
 		Name:  userName,
-		Items: []menuItem{},
-	}
-	for _, v := range app.rootActions {
-		if v.method != "GET" {
-			continue
-		}
-		if !v.isUserMenu {
-			continue
-		}
-		if v.isHiddenInMenu {
-			continue
-		}
-		if !request.app.authorize(request.user, v.permission) {
-			continue
-		}
-
-		var selected bool
-		fullURL := app.getAdminURL(v.url)
-		if request.Request().URL.Path == fullURL {
-			selected = true
-		}
-
-		if v.url == "logout" {
-			fullURL += "?_csrfToken=" + app.generateCSRFToken(user)
-		}
-
-		userSection.Items = append(userSection.Items, menuItem{
-			Icon:     v.icon,
-			Name:     v.name(user.Locale),
-			URL:      fullURL,
-			Selected: selected,
-		})
+		Items: mainItems,
 	}
 
 	return &userSection
 }
 
-func (board *Board) getMenuItems(request *Request) []menuItem {
+func (board *Board) getMainItems(request *Request) ([]menuItem, bool) {
+	return board.getItems(request, false)
+}
 
+func (board *Board) getItems(request *Request, isUserMenu bool) ([]menuItem, bool) {
 	app := board.app
 	var ret []menuItem
-	resources := app.resources
 
-	for _, resourceData := range resources {
-		if resourceData.board != board {
-			continue
-		}
+	var isExpanded bool
 
-		if app.authorize(request.user, resourceData.canView) {
-			resourceURL := resourceData.getURL("")
-			var selected bool
-			if request.Request().URL.Path == resourceURL {
-				selected = true
-			}
-			if strings.HasPrefix(request.Request().URL.Path, resourceURL+"/") {
-				selected = true
+	if !isUserMenu {
+		resources := app.resources
+		for _, resourceData := range resources {
+			if resourceData.board != board {
+				continue
 			}
 
-			ret = append(ret, menuItem{
-				Icon:     resourceData.icon,
-				Name:     resourceData.pluralName(request.user.Locale),
-				Subname:  humanizeNumber(resourceData.getCachedCount(request.r.Context())),
-				URL:      resourceURL,
-				Selected: selected,
-			})
+			if app.authorize(request.user, resourceData.canView) {
+				resourceURL := resourceData.getURL("")
+				var selected bool
+				if request.Request().URL.Path == resourceURL {
+					selected = true
+				}
+				if strings.HasPrefix(request.Request().URL.Path, resourceURL+"/") {
+					selected = true
+				}
+
+				if selected {
+					isExpanded = true
+				}
+
+				ret = append(ret, menuItem{
+					Icon: resourceData.icon,
+					Name: resourceData.pluralName(request.user.Locale),
+					//Subname:  humanizeNumber(resourceData.getCachedCount(request.r.Context())),
+					URL:      resourceURL,
+					Selected: selected,
+				})
+			}
 		}
 	}
 
@@ -145,7 +146,7 @@ func (board *Board) getMenuItems(request *Request) []menuItem {
 		if v.method != "GET" {
 			continue
 		}
-		if v.isUserMenu {
+		if v.isUserMenu != isUserMenu {
 			continue
 		}
 		if v.isHiddenInMenu {
@@ -159,17 +160,38 @@ func (board *Board) getMenuItems(request *Request) []menuItem {
 		fullURL := app.getAdminURL(v.url)
 		if request.Request().URL.Path == fullURL {
 			selected = true
+			isExpanded = true
+		}
+
+		var isBoard, isMainBoard bool
+		if v.isPartOfBoard != nil {
+			if v.isPartOfBoard.isEmpty(request) {
+				continue
+			}
+
+			isBoard = true
+			if v.isPartOfBoard.IsMainBoard() {
+				isMainBoard = true
+			}
 		}
 
 		menuItem := menuItem{
-			Icon:     v.icon,
-			Name:     v.name(request.user.Locale),
-			URL:      fullURL,
-			Selected: selected,
+			Icon:        v.icon,
+			Name:        v.name(request.user.Locale),
+			URL:         fullURL,
+			Selected:    selected,
+			Expanded:    selected,
+			IsBoard:     isBoard,
+			IsMainBoard: isMainBoard,
 		}
 
 		if v.isPartOfBoard != nil && v.isPartOfBoard != app.MainBoard {
-			menuItem.Subitems = v.isPartOfBoard.getMenuItems(request)
+			subitems, subitemsIsExpanded := v.isPartOfBoard.getMainItems(request)
+			if subitemsIsExpanded {
+				menuItem.Expanded = true
+				isExpanded = true
+			}
+			menuItem.Subitems = subitems
 		}
 
 		ret = append(ret, menuItem)
@@ -178,25 +200,8 @@ func (board *Board) getMenuItems(request *Request) []menuItem {
 
 	sortSection(ret, request.user.Locale)
 
-	return ret
+	return ret, isExpanded
 }
-
-/*func (app *App) getSortedResources(locale string) (ret []*resourceData) {
-	collator := collate.New(language.Czech)
-
-	ret = app.resources
-	sort.SliceStable(ret, func(i, j int) bool {
-		a := ret[i]
-		b := ret[j]
-
-		if collator.CompareString(a.pluralName(locale), b.pluralName(locale)) <= 0 {
-			return true
-		} else {
-			return false
-		}
-	})
-	return
-}*/
 
 func sortSection(items []menuItem, locale string) {
 	collator := collate.New(language.Czech)
@@ -205,11 +210,19 @@ func sortSection(items []menuItem, locale string) {
 		a := items[i]
 		b := items[j]
 
-		if a.URL == "/admin" {
+		if a.IsMainBoard {
 			return true
 		}
 
-		if b.URL == "/admin" {
+		if b.IsMainBoard {
+			return false
+		}
+
+		if a.IsBoard && !b.IsBoard {
+			return true
+		}
+
+		if !a.IsBoard && b.IsBoard {
 			return false
 		}
 

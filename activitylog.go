@@ -138,6 +138,7 @@ func (app *App) getHistoryTable(user *user, resourceData *resourceData, itemID i
 
 func (app *App) initActivityLog() {
 	app.activityLogResource = NewResource[activityLog](app)
+	app.activityLogResource.Board(sysadminBoard)
 	app.activityLogResource.data.icon = "glyphicons-basic-58-history.svg"
 	app.activityLogResource.data.canView = Permission(sysadminRoleName)
 	app.activityLogResource.data.orderDesc = true
