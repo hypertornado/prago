@@ -18,9 +18,9 @@ type DashboardFigure struct {
 	url                string
 	value              func(*Request) int64
 	compareValue       func(*Request) int64
-	compareDescription string
-	unit               string
-	name               string
+	compareDescription func(string) string
+	unit               func(string) string
+	name               func(string) string
 	refreshTimeSeconds int64
 }
 
@@ -41,8 +41,8 @@ type DashboardFigureData struct {
 func (figure DashboardFigure) data(request *Request, app *App) *DashboardFigureData {
 	values := figure.getValues(request, app)
 	ret := &DashboardFigureData{
-		Value:       figure.getValueStr(values, app),
-		Description: figure.getDescriptionStr(values, app),
+		Value:       figure.getValueStr(request, values, app),
+		Description: figure.getDescriptionStr(request, values, app),
 	}
 	ret.IsGreen, ret.IsRed = figure.getColors(values, app)
 	return ret
@@ -100,7 +100,7 @@ func (board *Board) Dashboard(name func(string) string) *Dashboard {
 	return group
 }
 
-func (dashboard *Dashboard) Figure(name string, permission Permission) *DashboardFigure {
+func (dashboard *Dashboard) Figure(name func(string) string, permission Permission) *DashboardFigure {
 	must(dashboard.board.app.validatePermission(permission))
 	figure := &DashboardFigure{
 		uuid:               randomString(30),
@@ -175,26 +175,26 @@ func (item *DashboardFigure) Value(value func(*Request) int64) *DashboardFigure 
 	return item
 }
 
-func (item *DashboardFigure) Compare(value func(*Request) int64, description string) *DashboardFigure {
+func (item *DashboardFigure) Compare(value func(*Request) int64, description func(string) string) *DashboardFigure {
 	item.compareValue = value
 	item.compareDescription = description
 	return item
 }
 
-func (item *DashboardFigure) getValueStr(values [2]int64, app *App) string {
+func (item *DashboardFigure) getValueStr(request *Request, values [2]int64, app *App) string {
 	ret := "–"
 	if item.value != nil {
 		val := values[0]
 		ret = humanizeNumber(val)
-		if item.unit != "" {
-			ret += " " + item.unit
+		if item.unit != nil && item.unit(request.user.Locale) != "" {
+			ret += " " + item.unit(request.user.Locale)
 		}
 	}
 
 	return ret
 }
 
-func (item *DashboardFigure) getDescriptionStr(values [2]int64, app *App) string {
+func (item *DashboardFigure) getDescriptionStr(request *Request, values [2]int64, app *App) string {
 	if item.value == nil {
 		return ""
 	}
@@ -212,8 +212,8 @@ func (item *DashboardFigure) getDescriptionStr(values [2]int64, app *App) string
 		ret = humanizeNumber(diff)
 	}
 
-	if item.unit != "" {
-		ret += " " + item.unit
+	if item.unit(request.user.Locale) != "" {
+		ret += " " + item.unit(request.user.Locale)
 	}
 
 	if compareValue > 0 {
@@ -221,18 +221,18 @@ func (item *DashboardFigure) getDescriptionStr(values [2]int64, app *App) string
 		ret += fmt.Sprintf(" (%s)", percent)
 	}
 
-	if item.compareDescription != "" {
-		ret += " " + item.compareDescription
+	if item.compareDescription(request.user.Locale) != "" {
+		ret += " " + item.compareDescription(request.user.Locale)
 	}
 
 	return ret
 }
 
-func (item *DashboardFigure) view(app *App) *DashboardViewFigure {
+func (item *DashboardFigure) view(request *Request) *DashboardViewFigure {
 	ret := &DashboardViewFigure{
 		UUID:               item.uuid,
 		URL:                item.url,
-		Name:               item.name,
+		Name:               item.name(request.user.Locale),
 		RefreshTimeSeconds: item.refreshTimeSeconds,
 	}
 	return ret
@@ -254,7 +254,7 @@ func (item *DashboardFigure) URL(url string) *DashboardFigure {
 	return item
 }
 
-func (item *DashboardFigure) Unit(unit string) *DashboardFigure {
+func (item *DashboardFigure) Unit(unit func(string) string) *DashboardFigure {
 	item.unit = unit
 	return item
 }

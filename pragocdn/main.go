@@ -26,7 +26,7 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-const version = "2022.8"
+const version = "2022.9"
 
 //var config CDNConfig
 
@@ -140,6 +140,8 @@ func uploadFile(account CDNProject, extension string, inData io.Reader) (*cdncli
 func start(app *prago.App) {
 
 	initCDNProjectResource()
+
+	bindStats(app)
 
 	app.GET("/", func(request *prago.Request) {
 		out := fmt.Sprintf("Prago CDN\nhttps://www.prago-cdn.com\nversion %s\nadmin Ondřej Odcházel, https//www.odchazel.com", version)

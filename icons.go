@@ -2,6 +2,7 @@ package prago
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -14,10 +15,23 @@ const iconSignpost = "glyphicons-basic-697-directions-sign.svg"
 func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 	app.iconsFS = &iconsFS
 	app.iconsPrefix = prefix
+}
 
+func (app *App) iconExists(iconName string) bool {
+	if app.iconsFS == nil {
+		return false
+	}
+	app.iconsFS.Open(app.iconsPrefix + iconName)
+	_, err := app.iconsFS.ReadFile(app.iconsPrefix + iconName)
+	return err == nil
 }
 
 func (app *App) loadIcon(iconName, color string) ([]byte, error) {
+
+	if app.iconsFS == nil {
+		return nil, errors.New("no icons set")
+	}
+
 	data, err := app.iconsFS.ReadFile(app.iconsPrefix + iconName)
 	if err != nil {
 		return nil, err
@@ -37,7 +51,8 @@ func (app *App) initIcons() {
 
 	app.API("icons").Permission(everybodyPermission).Method("GET").Handler(func(request *Request) {
 		if app.iconsFS == nil {
-			panic("no icons fs set")
+			request.RenderJSONWithCode("icon not found", 404)
+			return
 		}
 
 		data, err := app.loadIcon(request.Param("file"), request.Param("color"))

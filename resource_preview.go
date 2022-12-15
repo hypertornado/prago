@@ -67,13 +67,15 @@ type namedIFace interface {
 }
 
 func (previewer *previewer) Name() string {
+	pointerVal := reflect.ValueOf(previewer.item)
+	itemsVal := pointerVal.Elem()
+	var valIface = pointerVal.Interface()
+	namedIface, ok := valIface.(namedIFace)
+	if ok {
+		return namedIface.GetName(previewer.user.Locale)
+	}
+
 	if previewer.item != nil && previewer.hasAccessToField("Name") {
-		itemsVal := reflect.ValueOf(previewer.item).Elem()
-		var valIface = itemsVal.Interface()
-		namedIface, ok := valIface.(namedIFace)
-		if ok {
-			return namedIface.GetName(previewer.user.Locale)
-		}
 		field := itemsVal.FieldByName("Name")
 		if field.IsValid() {
 			ret := field.String()

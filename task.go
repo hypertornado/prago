@@ -72,12 +72,12 @@ func (app *App) postInitTaskManager() {
 
 	grp := app.TaskGroup(unlocalized("example"))
 
-	grp.Task(unlocalized("example_simple")).Handler(func(t *TaskActivity) error {
+	grp.Task(unlocalized("example_simple ew oifeqio fjewqio fjeiwoq fjeioqwjf eiwoqf jeiowq")).Handler(func(t *TaskActivity) error {
 		var progress float64
 		for {
-			time.Sleep(1 * time.Second)
-			t.SetStatus(progress, "example status")
-			progress += 0.2
+			time.Sleep(1000 * time.Millisecond)
+			t.SetStatus(progress, "example status woiqfje iwoqfjeiwo qfjeiwoq jfeiowq fjeiw oqfjewioq")
+			progress += 0.01
 			if progress >= 1 {
 				return nil
 			}
@@ -106,9 +106,9 @@ func (app *App) postInitTaskManager() {
 
 		var progress float64
 		for {
-			time.Sleep(1 * time.Second)
+			time.Sleep(1000 * time.Millisecond)
 			t.SetStatus(progress, "example status")
-			progress += 0.2
+			progress += 0.01
 			if progress >= 1 {
 				return nil
 			}
@@ -190,7 +190,24 @@ func (tm *taskManager) getTasks(user *user, csrfToken string) (ret []taskViewGro
 		lastGroup = v.group
 	}
 
+	for _, v := range ret {
+		sortTaskViews(v.Tasks)
+	}
+
 	return ret
+}
+
+func sortTaskViews(items []taskView) {
+	collator := collate.New(language.Czech)
+	sort.SliceStable(items, func(i, j int) bool {
+		a := items[i]
+		b := items[j]
+		if collator.CompareString(a.Name, b.Name) <= 0 {
+			return true
+		} else {
+			return false
+		}
+	})
 }
 
 // Task represent some user task

@@ -244,7 +244,7 @@ func (e *adminSearch) flush() error {
 
 func (resourceData *resourceData) saveSearchItem(ctx context.Context, item any) error {
 	roles := resourceData.getResourceViewRoles()
-	return resourceData.saveSearchItemWithRoles(ctx, nil, item, roles)
+	return resourceData.saveSearchItemWithRoles(context.TODO(), nil, item, roles)
 }
 
 func (resourceData *resourceData) saveSearchItemWithRoles(ctx context.Context, bulkUpdater *pragelastic.BulkUpdater[searchItem], item any, roles []string) error {

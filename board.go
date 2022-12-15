@@ -28,13 +28,13 @@ func (app *App) initBoard() {
 	app.NewBoard("empty-board")
 
 	sysadminGroup := sysadminBoard.Dashboard(unlocalized("Sysadmin"))
-	sysadminGroup.Figure("Úpravy", "sysadmin").Value(func(request *Request) int64 {
+	sysadminGroup.Figure(unlocalized("Úpravy"), "sysadmin").Value(func(request *Request) int64 {
 		c, _ := app.activityLogResource.Query(request.r.Context()).Where("createdat >= ?", time.Now().AddDate(0, 0, -1)).Count()
 		return c
-	}).Unit("/ 24 hodin").URL("/admin/activitylog").Compare(func(request *Request) int64 {
+	}).Unit(unlocalized("/ 24 hodin")).URL("/admin/activitylog").Compare(func(request *Request) int64 {
 		c, _ := app.activityLogResource.Query(request.r.Context()).Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, -1)).Count()
 		return c
-	}, "oproti předchozímu dni")
+	}, unlocalized("oproti předchozímu dni"))
 }
 
 func (app *App) NewBoard(url string) *Board {

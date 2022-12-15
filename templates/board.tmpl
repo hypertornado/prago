@@ -13,7 +13,12 @@
     <div class="board_user">
       <div class="btngroup board_user_buttons">
         {{range $item := .UserSection.Items}}
-          <a href="{{$item.URL}}" class="btn"><img src="/admin/api/icons?file={{$item.Icon}}&color=444444" class="btn_icon"><div class="btn_text">{{$item.Name}}</div></a>
+          <a href="{{$item.URL}}" class="btn">
+            {{if iconExists $item.Icon}}
+              <img src="/admin/api/icons?file={{$item.Icon}}&color=444444" class="btn_icon">
+            {{end}}
+            <div class="btn_text">{{$item.Name}}</div>
+          </a>
         {{end}}
       </div>
       <div class="board_user_text">Vítejte v administraci {{.AppName}}.<br>Jste přihlášen(a) jako uživatel <b>{{.UserSection.Name}}</b> s oprávněním {{.User.Role}}.</div>
@@ -21,7 +26,7 @@
   {{end}}
   
 
-  <h1 class="board_name">{{if .BoardIcon}}<img src="/admin/api/icons?file={{.BoardIcon}}&color=444444" class="board_icon">{{end}}{{.BoardName}}</h1>
+  <h1 class="board_name">{{if iconExists .BoardIcon}}<img src="/admin/api/icons?file={{.BoardIcon}}&color=444444" class="board_icon">{{end}}{{.BoardName}}</h1>
 
   {{if .MainDashboard}}
     {{template "dashboard" .MainDashboard}}

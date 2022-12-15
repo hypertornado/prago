@@ -57,32 +57,6 @@ func (board *Board) boardView(request *Request) *BoardView {
 	}
 
 	for _, dashboard := range board.dashboardGroups {
-		/*if !group.isVisible(app, request.user) {
-			continue
-		}
-
-		view := &DashboardView{
-			Name: group.name(locale),
-		}
-		for _, item := range group.figures {
-			if request.UserHasPermission(item.permission) {
-				view.Figures = append(view.Figures, item.view(app))
-			}
-		}
-
-		for _, v := range group.tables {
-			if request.UserHasPermission(v.permission) {
-				view.Tables = append(view.Tables, DashboardViewTable{
-					UUID:               v.uuid,
-					RefreshTimeSeconds: v.refreshTimeSeconds,
-				})
-			}
-		}
-
-		if len(view.Figures) > 0 || len(view.Tables) > 0 {
-			ret.Dashboards = append(ret.Dashboards, view)
-		}*/
-
 		view := dashboard.view(request)
 		if view != nil {
 			ret.Dashboards = append(ret.Dashboards, view)
@@ -112,7 +86,7 @@ func (dashboard *Dashboard) view(request *Request) *DashboardView {
 	}
 	for _, item := range dashboard.figures {
 		if request.UserHasPermission(item.permission) {
-			view.Figures = append(view.Figures, item.view(app))
+			view.Figures = append(view.Figures, item.view(request))
 		}
 	}
 

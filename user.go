@@ -35,6 +35,11 @@ func fixEmail(in string) string {
 	return strings.ToLower(in)
 }
 
+func (user *user) GetName(string) string {
+	ret := fmt.Sprintf("%s %s", user.Name, user.Email)
+	return ret
+}
+
 func (user *user) isPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {

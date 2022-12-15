@@ -163,6 +163,10 @@ func (board *Board) getItems(request *Request, isUserMenu bool) ([]menuItem, boo
 			isExpanded = true
 		}
 
+		if fullURL == "/admin/logout" {
+			fullURL += "?_csrfToken=" + request.csrfToken()
+		}
+
 		var isBoard, isMainBoard bool
 		if v.isPartOfBoard != nil {
 			if v.isPartOfBoard.isEmpty(request) {

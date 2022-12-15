@@ -921,14 +921,14 @@ a.box_tag:hover {
 .list_header_container {
   clip-path: inset(-10000px -10000px -10000px 0px);
   position: fixed;
-  z-index: 100;
+  z-index: 1;
   opacity: 0;
 }
 .list_header_container-visible {
   opacity: 1;
 }
 .list_header {
-  z-index: 1000;
+  z-index: 1;
   display: flex;
 }
 .list_table {
@@ -2787,16 +2787,16 @@ a.admin_stats_section_row {
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 250px;
   z-index: 100;
 }
 .notification {
   box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
   background-color: white;
-  border-radius: 5px;
+  border-radius: 10px;
   margin-bottom: 10px;
   display: flex;
   position: relative;
+  width: 250px;
 }
 .notification-clickable {
   background-color: rgba(64, 120, 192, 0.05);
@@ -2825,6 +2825,14 @@ a.admin_stats_section_row {
   background-color: white;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+}
+@media (hover: hover) {
+  .notification_close {
+    display: none;
+  }
+}
+.notification:hover .notification_close {
+  display: inline-block;
 }
 .notification_close-disabled {
   display: none;
@@ -2860,8 +2868,9 @@ a.admin_stats_section_row {
   display: flex;
 }
 .notification_right {
-  flex-grow: 10;
-  margin: 5px;
+  flex-grow: 0;
+  padding: 5px;
+  min-width: 0;
 }
 .notification_prename {
   font-size: 0.8rem;
@@ -2870,11 +2879,17 @@ a.admin_stats_section_row {
 }
 .notification_name {
   font-weight: 500;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .notification_description {
   font-size: 0.9rem;
   line-height: 1.3em;
   color: #888;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .notification_action {
   display: none;
@@ -2909,16 +2924,16 @@ a.admin_stats_section_row {
   flex-grow: 10;
   backdrop-filter: blur(3px);
   background-color: rgba(255, 255, 255, 0.8);
-  padding: 5px;
+  padding: 0px;
   border-radius: 5px;
 }
 .notification_left_progress-visible {
   display: flex;
 }
 .notification_left_progress_human {
-  font-size: 0.8rem;
-  line-height: 1.3em;
-  font-weight: 500;
+  font-size: 0.7rem;
+  line-height: 1.2em;
+  font-weight: normal;
 }
 .notification_left_progressbar {
   width: 100%;
