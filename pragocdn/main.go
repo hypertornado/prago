@@ -26,13 +26,10 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-const version = "2022.9"
-
-//var config CDNConfig
+const version = "2022.10"
 
 var app *prago.App
 
-// var accounts = map[string]*CDNConfigAccount{}
 var homePath = os.Getenv("HOME")
 
 var uuidRegex = regexp.MustCompile("^[a-zA-Z0-9]{10,}$")
@@ -43,31 +40,11 @@ var cmykProfilePath = os.Getenv("HOME") + "/.pragocdn/cmyk.icm"
 
 var vipsMutexes []*sync.Mutex
 
-//var sem = semaphore.NewWeighted(10)
-//var semCtx = context.Background()
-
 func main() {
 
-	//vipsMutexes = make([]sync.Mutex, 10)
 	for i := 0; i < 10; i++ {
 		vipsMutexes = append(vipsMutexes, &sync.Mutex{})
 	}
-
-	//vipsWaitGroup.Add(10)
-
-	/*var err error
-	config, err = loadCDNConfig()
-	if err != nil {
-		panic(err)
-	}
-
-	for k, v := range config.Accounts {
-		err := prepareAccountDirectories(v.Name)
-		if err != nil {
-			panic(err)
-		}
-		accounts[v.Name] = &config.Accounts[k]
-	}*/
 
 	app = prago.New("pragocdn", version)
 	start(app)
@@ -152,7 +129,6 @@ func start(app *prago.App) {
 		defer request.Request().Body.Close()
 		accountName := request.Param("account")
 		project := getCDNProject(accountName)
-		//account := accounts[accountName]
 		if project == nil {
 			panic("no account")
 		}
@@ -163,11 +139,6 @@ func start(app *prago.App) {
 		}
 
 		extension := normalizeExtension(request.Param("extension"))
-		//should load all files, not just images
-		/*if !extensionRegex.MatchString(extension) {
-			panic("wrong extension")
-		}*/
-
 		data, err := uploadFile(*project, extension, request.Request().Body)
 		if err != nil {
 			panic(err)
@@ -238,7 +209,6 @@ func start(app *prago.App) {
 		} else {
 			request.Response().Header().Set("Content-Length", fmt.Sprintf("%d", size))
 			_, err = io.Copy(request.Response(), stream)
-			//defer request.Response().Close()
 			if err != nil {
 				panic(err)
 			}
