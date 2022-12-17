@@ -1,6 +1,6 @@
 {{define "admin_form"}}
 
-  <div class="form_container{{if .AutosubmitOnDataChange}} form_container-autosubmit{{end}}">
+  <div class="form_container{{if .AutosubmitOnDataChange}} form_container-autosubmit{{end}}{{if .AutosubmitFirstTime}} form_container-autosubmitfirsttime{{end}}">
 
     <div class="box">
       {{$boxHeaderData := .GetBoxHeader}}

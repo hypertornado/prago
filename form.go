@@ -16,6 +16,7 @@ type Form struct {
 	Valid                  bool
 	CSRFToken              string
 	HTMLAfter              template.HTML
+	AutosubmitFirstTime    bool
 	AutosubmitOnDataChange bool
 }
 

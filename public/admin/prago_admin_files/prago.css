@@ -788,18 +788,6 @@ select.admin_timestamp_minute {
   background-size: contain;
   background-repeat: no-repeat;
 }
-.admin_history th {
-  border-top: none;
-}
-.admin_history tr:last-child td {
-  border-bottom: none;
-}
-.admin_history tr td:last-child {
-  border-right: none;
-}
-.admin_history tr td:first-child {
-  border-left: none;
-}
 .help_icons {
   display: flex;
   flex-wrap: wrap;

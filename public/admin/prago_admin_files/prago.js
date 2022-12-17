@@ -1787,10 +1787,21 @@ class FormContainer {
         var formEl = formContainer.querySelector("form");
         this.form = new Form(formEl);
         this.form.formEl.addEventListener("submit", this.submitFormAJAX.bind(this));
+        if (this.isAutosubmitFirstTime()) {
+            this.sendForm();
+        }
         if (this.isAutosubmit()) {
             this.form.changeHandler = this.formChanged.bind(this);
             this.form.willChangeHandler = this.formWillChange.bind(this);
             this.sendForm();
+        }
+    }
+    isAutosubmitFirstTime() {
+        if (this.formContainer.classList.contains("form_container-autosubmitfirsttime")) {
+            return true;
+        }
+        else {
+            return false;
         }
     }
     isAutosubmit() {
