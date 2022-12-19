@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"embed"
 	"errors"
 	"fmt"
 	"image"
@@ -26,7 +27,7 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-const version = "2022.12"
+const version = "2022.13"
 
 var app *prago.App
 
@@ -40,6 +41,9 @@ var cmykProfilePath = os.Getenv("HOME") + "/.pragocdn/cmyk.icm"
 
 var vipsMutexes []*sync.Mutex
 
+//go:embed resources/icons/*
+var iconsFS embed.FS
+
 func main() {
 
 	for i := 0; i < 10; i++ {
@@ -47,6 +51,9 @@ func main() {
 	}
 
 	app = prago.New("pragocdn", version)
+
+	app.SetIcons(iconsFS, "resources/icons/")
+
 	start(app)
 	app.Run()
 }
@@ -119,6 +126,7 @@ func start(app *prago.App) {
 	initCDNProjectResource()
 
 	bindStats(app)
+	bindCDNFiles(app)
 
 	app.GET("/", func(request *prago.Request) {
 		out := fmt.Sprintf("Prago CDN\nhttps://www.prago-cdn.com\nversion %s\nadmin Ondřej Odcházel, https//www.odchazel.com", version)
