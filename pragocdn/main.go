@@ -27,7 +27,7 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-const version = "2022.13"
+const version = "2022.14"
 
 var app *prago.App
 
@@ -308,13 +308,14 @@ func getMetadata(accountName, uuid string) (*cdnclient.CDNFileData, error) {
 
 	if isImageExtension(extension) {
 		i, _, err := image.Decode(file)
-		if err != nil {
-			return nil, fmt.Errorf("decoding: %s", err)
+		if err == nil {
+			bounds := i.Bounds()
+			width = bounds.Max.X
+			height = bounds.Max.Y
+			//return nil, fmt.Errorf("decoding: %s", err)
+		} else {
+			app.Log().Errorf("decoding: %s", err)
 		}
-
-		bounds := i.Bounds()
-		width = bounds.Max.X
-		height = bounds.Max.Y
 	}
 
 	filestat, _ := file.Stat()

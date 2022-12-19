@@ -81,7 +81,7 @@ func (file *CDNFile) update() {
 
 		metadata, err := getMetadata(project.Name, file.UUID)
 		if err != nil {
-			panic(err)
+			panic(fmt.Sprintf("can't get metadata id %s: %s", file.UUID, err))
 		}
 		file.Filesize = metadata.Filesize
 		file.Width = metadata.Width
@@ -89,7 +89,7 @@ func (file *CDNFile) update() {
 	}
 	err = fileResource.Update(context.Background(), file)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("can't update file id %s: %s", file.UUID, err))
 	}
 }
 
