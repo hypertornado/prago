@@ -31,7 +31,7 @@ func getFilesViewData(ctx context.Context, app *App, uid string) (ret filesViewD
 
 	metadata, err := filesCDN.GetMetadata(uid)
 	if err != nil {
-		ret.Error = "Can't get medtadata"
+		ret.Error = "Can't get metadata"
 		return ret
 	}
 

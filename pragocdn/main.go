@@ -1,21 +1,16 @@
 package main
 
 import (
-	"bytes"
 	"compress/gzip"
-	"context"
 	"embed"
 	"errors"
 	"fmt"
 	"image"
 	"io"
-	"math/rand"
 	"mime"
 	"net/http"
 	"os"
 	"os/exec"
-	"path"
-	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -27,7 +22,7 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-const version = "2022.14"
+const version = "2022.15"
 
 var app *prago.App
 
@@ -40,6 +35,10 @@ var extensionRegex = regexp.MustCompile("^[a-zA-Z0-9]{1,10}$")
 var cmykProfilePath = os.Getenv("HOME") + "/.pragocdn/cmyk.icm"
 
 var vipsMutexes []*sync.Mutex
+
+var fileExtensionMap = map[string]string{
+	"jpeg": "jpg",
+}
 
 //go:embed resources/icons/*
 var iconsFS embed.FS
@@ -54,77 +53,7 @@ func main() {
 
 	app.SetIcons(iconsFS, "resources/icons/")
 
-	start(app)
-	app.Run()
-}
-
-func getCDNProjectsMap() map[string]*CDNProject {
-	var accounts = map[string]*CDNProject{}
-	projects := projectResource.Query(context.Background()).List()
-	for _, v := range projects {
-		accounts[v.Name] = v
-	}
-	return accounts
-}
-
-func getCDNProject(id string) *CDNProject {
-	projects := <-prago.Cached(app, "get_projects", func(ctx context.Context) map[string]*CDNProject {
-		return getCDNProjectsMap()
-	})
-	return projects[id]
-}
-
-func getNameAndExtension(filename string) (name, extension string, err error) {
-	extension = filepath.Ext(filename)
-	if extension == "" {
-		return "", "", errors.New("no extension")
-	}
-	extension = extension[1:]
-
-	name = filename[0 : len(filename)-len(extension)-1]
-
-	if !filenameRegex.MatchString(name) {
-		return "", "", errors.New("wrong name of file")
-	}
-
-	if !extensionRegex.MatchString(extension) {
-		return "", "", errors.New("wrong extension of file")
-	}
-
-	extension = normalizeExtension(extension)
-
-	return name, extension, nil
-}
-
-func uploadFile(account CDNProject, extension string, inData io.Reader) (*cdnclient.CDNFileData, error) {
-	uuid := RandomString(20)
-	dirPath := getFileDirectoryPath(account.Name, uuid)
-
-	err := os.MkdirAll(dirPath, 0777)
-	if err != nil {
-		return nil, err
-	}
-
-	filePath := getFilePath(account.Name, uuid, extension)
-
-	file, err := os.Create(filePath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	_, err = io.Copy(file, inData)
-	if err != nil {
-		return nil, err
-	}
-
-	return getMetadata(account.Name, uuid)
-}
-
-func start(app *prago.App) {
-
 	initCDNProjectResource()
-
 	bindStats(app)
 	bindCDNFiles(app)
 
@@ -147,7 +76,7 @@ func start(app *prago.App) {
 		}
 
 		extension := normalizeExtension(request.Param("extension"))
-		data, err := uploadFile(*project, extension, request.Request().Body)
+		data, err := project.uploadFile(extension, request.Request().Body)
 		if err != nil {
 			panic(err)
 		}
@@ -234,10 +163,36 @@ func start(app *prago.App) {
 		}
 		request.RenderJSON(true)
 	})
+
+	app.Run()
 }
 
-var fileExtensionMap = map[string]string{
-	"jpeg": "jpg",
+func (account *CDNProject) uploadFile(extension string, inData io.Reader) (*cdnclient.CDNFileData, error) {
+	uuid := RandomString(20)
+	dirPath := getFileDirectoryPath(account.Name, uuid)
+
+	err := os.MkdirAll(dirPath, 0777)
+	if err != nil {
+		return nil, err
+	}
+
+	filePath := getFilePath(account.Name, uuid, extension)
+
+	file, err := os.Create(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	_, err = io.Copy(file, inData)
+	if err != nil {
+		return nil, err
+	}
+
+	cdnFile := account.createFile(uuid, extension)
+	cdnFile.update()
+
+	return getMetadata(account.Name, uuid)
 }
 
 func deleteFile(accountName, password, uuid string) error {
@@ -312,7 +267,6 @@ func getMetadata(accountName, uuid string) (*cdnclient.CDNFileData, error) {
 			bounds := i.Bounds()
 			width = bounds.Max.X
 			height = bounds.Max.Y
-			//return nil, fmt.Errorf("decoding: %s", err)
 		} else {
 			app.Log().Errorf("decoding: %s", err)
 		}
@@ -434,15 +388,6 @@ func isImageExtension(extension string) bool {
 	return false
 }
 
-func normalizeExtension(extension string) string {
-	extension = strings.ToLower(extension)
-	fileExtensionChanged := fileExtensionMap[extension]
-	if fileExtensionChanged != "" {
-		extension = fileExtensionChanged
-	}
-	return extension
-}
-
 func convertedFilePath(account, uuid, extension, format string) (string, error) {
 	if !isImageExtension(extension) {
 		return "", errors.New("cant resize non images")
@@ -461,96 +406,6 @@ func convertedFilePath(account, uuid, extension, format string) (string, error) 
 	}
 
 	return "", errors.New("wrong file convert format")
-}
-
-func getTempFilePath(extension string) string {
-	dir := os.TempDir()
-	fileName := fmt.Sprintf("pragocdn-%d.%s", rand.Int(), extension)
-	return path.Join(dir, fileName)
-}
-
-// CMYK: https://github.com/jcupitt/libvips/issues/630
-func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size string, crop bool) error {
-	n := rand.Int() % len(vipsMutexes)
-	vipsMutex := vipsMutexes[n]
-	vipsMutex.Lock()
-	defer vipsMutex.Unlock()
-
-	extension := "webp"
-
-	f, err := os.Open(outputFilePath)
-	if err == nil {
-		f.Close()
-		return nil
-	}
-
-	err = os.MkdirAll(outputDirectoryPath, 0777)
-	if err != nil {
-		return fmt.Errorf("error while creating mkdirall %s: %s", outputDirectoryPath, err)
-	}
-
-	tempPath := getTempFilePath(extension)
-	defer os.Remove(tempPath)
-
-	err = vipsThumbnailProfile(originalPath, tempPath, size, crop, false)
-	if err != nil {
-		err = vipsThumbnailProfile(originalPath, tempPath, size, crop, true)
-	}
-	if err != nil {
-		return fmt.Errorf("vipsThumbnailProfile: %s", err)
-	}
-
-	err = os.Rename(tempPath, outputFilePath)
-	if err != nil {
-		return fmt.Errorf("moving file from %s to %s: %s", tempPath, outputFilePath, err)
-	}
-
-	return nil
-}
-
-func vipsThumbnailProfile(originalPath, outputFilePath, size string, crop bool, cmyk bool) error {
-
-	//vips webpsave
-
-	outputParameters := "[strip]"
-	/*if extension == "jpg" {
-		outputParameters = "[optimize_coding,strip]"
-	}*/
-
-	cmdAr := []string{
-		originalPath,
-		"--rotate",
-		"-s",
-		size,
-		"--smartcrop",
-		"attention",
-		"-o",
-		outputFilePath + outputParameters,
-	}
-
-	if cmyk {
-		cmdAr = append(cmdAr, "-i", cmykProfilePath)
-	}
-
-	/*if config.Profile != "" {
-		cmdAr = append(cmdAr, "--delete", "--eprofile", config.Profile)
-	}*/
-
-	if crop {
-		cmdAr = append(cmdAr, "-m", "attention")
-	}
-
-	var b bytes.Buffer
-
-	cmd := exec.Command("vipsthumbnail", cmdAr...)
-	cmd.Stdout = &b
-	cmd.Stderr = &b
-
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("vips exited with error: %s, output: %s;", err, string(b.Bytes()))
-	}
-	return nil
 }
 
 func render404(request *prago.Request) {
