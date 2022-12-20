@@ -168,6 +168,20 @@ func (file *CDNFile) copyToChecksumFormat() {
 
 }
 
+func (file *CDNFile) validateChecksum() {
+	dataPath := file.getDataPath()
+	f, err := os.Open(dataPath)
+	if err != nil {
+		panic(fmt.Errorf("error while validating %s: %s", file.UUID, err))
+	}
+
+	res := checksum(f)
+	if res != file.Checksum {
+		panic(fmt.Errorf("error while validatin checksum file %s: expecting '%s', got '%s'", file.UUID, file.Checksum, res))
+	}
+
+}
+
 func bindCDNFiles(app *prago.App) {
 	fileResource := prago.NewResource[CDNFile](app)
 	fileResource.Name(unlocalized("CDN Soubor"), unlocalized("CDN Soubory"))
@@ -223,5 +237,16 @@ func bindCDNFiles(app *prago.App) {
 		}
 		return nil
 
+	})
+
+	tg.Task(unlocalized("Validate checksums")).Handler(func(ta *prago.TaskActivity) error {
+		fileResource := prago.GetResource[CDNFile](app)
+		files := fileResource.Query(context.Background()).List()
+		totalLen := len(files)
+		for k, file := range files {
+			ta.SetStatus(float64(k)/float64(totalLen), file.UUID)
+			file.validateChecksum()
+		}
+		return nil
 	})
 }
