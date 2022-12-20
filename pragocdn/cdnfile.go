@@ -34,6 +34,20 @@ type CDNFile struct {
 	UpdatedAt time.Time `prago-can-view:"sysadmin" prago-preview:"true"`
 }
 
+func getCDNFile(projectName, uuid string) *CDNFile {
+	if !uuidRegex.MatchString(uuid) {
+		return nil
+	}
+
+	project := getCDNProject(projectName)
+	if project == nil {
+		return nil
+	}
+
+	fileResource := prago.GetResource[CDNFile](app)
+	return fileResource.Query(context.Background()).Is("cdnproject", project.ID).Is("uuid", uuid).First()
+}
+
 func (file *CDNFile) url() string {
 	projectResource := prago.GetResource[CDNProject](app)
 	project := projectResource.Query(context.Background()).ID(file.CDNProject)
@@ -48,13 +62,17 @@ func (file *CDNFile) url() string {
 	return account.GetFileURL(file.UUID, "file."+file.Suffix)
 }
 
+func (file *CDNFile) Project() *CDNProject {
+	return getCDNProjectFromID(file.CDNProject)
+}
+
 func (file *CDNFile) get() (*os.File, error) {
 	projectResource := prago.GetResource[CDNProject](app)
 	project := projectResource.Query(context.Background()).ID(file.CDNProject)
 	if project == nil {
 		return nil, fmt.Errorf("can't find project id %d", file.CDNProject)
 	}
-	filePath := getFilePath(project.Name, file.UUID, file.Suffix)
+	filePath := file.getFilePath()
 	return os.Open(filePath)
 }
 
@@ -73,12 +91,6 @@ func (file *CDNFile) update() {
 		defer fileData.Close()
 
 		file.Checksum = checksum(fileData)
-		//stat, err := fileData.Stat()
-		//if err != nil {
-		//	panic(err)
-		//}
-		//file.Filesize = stat.Size()
-
 		metadata, err := getMetadata(project.Name, file.UUID)
 		if err != nil {
 			panic(fmt.Sprintf("can't get metadata id %s: %s", file.UUID, err))
@@ -115,6 +127,44 @@ func (project *CDNProject) createFile(uuid, suffix string) *CDNFile {
 		panic(fmt.Errorf("can't save file %s: %s", file.UUID, err))
 	}
 	return file
+}
+
+func (file *CDNFile) copyToChecksumFormat() {
+
+	originalPath := file.getFilePath()
+	_, err := os.Stat(originalPath)
+	if err != nil {
+		panic(fmt.Errorf("cant open file %s: %s", file.UUID, err))
+	}
+
+	targetPath := file.getDataPath()
+	_, err = os.Stat(targetPath)
+	if err == nil {
+		return
+	}
+
+	targetDir := file.getDataDirectoryPath()
+	err = os.MkdirAll(targetDir, 0777)
+	if err != nil {
+		panic(err)
+	}
+
+	originalFile, err := os.Open(originalPath)
+	if err != nil {
+		panic(fmt.Errorf("can't open original file while copying %s: %s", file.UUID, err))
+	}
+	defer originalFile.Close()
+
+	f, err := os.Create(targetPath)
+	if err != nil {
+		panic(fmt.Errorf("can't create file while copying %s: %s", file.UUID, err))
+	}
+	defer f.Close()
+
+	_, err = io.Copy(f, originalFile)
+	if err != nil {
+		panic(fmt.Errorf("error while copying copying %s: %s", file.UUID, err))
+	}
 
 }
 
@@ -161,5 +211,17 @@ func bindCDNFiles(app *prago.App) {
 			file.update()
 		}
 		return nil
+	})
+
+	tg.Task(unlocalized("Copy data to new checkum format")).Handler(func(ta *prago.TaskActivity) error {
+		fileResource := prago.GetResource[CDNFile](app)
+		files := fileResource.Query(context.Background()).List()
+		totalLen := len(files)
+		for k, file := range files {
+			ta.SetStatus(float64(k)/float64(totalLen), file.UUID)
+			file.copyToChecksumFormat()
+		}
+		return nil
+
 	})
 }

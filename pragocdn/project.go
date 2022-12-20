@@ -31,9 +31,25 @@ func getCDNProjectsMap() map[string]*CDNProject {
 	return accounts
 }
 
-func getCDNProject(id string) *CDNProject {
-	projects := <-prago.Cached(app, "get_projects", func(ctx context.Context) map[string]*CDNProject {
+func getCDNProjectsIDMap() map[int64]*CDNProject {
+	var accounts = map[int64]*CDNProject{}
+	projects := projectResource.Query(context.Background()).List()
+	for _, v := range projects {
+		accounts[v.ID] = v
+	}
+	return accounts
+}
+
+func getCDNProject(name string) *CDNProject {
+	projects := <-prago.Cached(app, "get_projects_name", func(ctx context.Context) map[string]*CDNProject {
 		return getCDNProjectsMap()
+	})
+	return projects[name]
+}
+
+func getCDNProjectFromID(id int64) *CDNProject {
+	projects := <-prago.Cached(app, "get_projects_id", func(ctx context.Context) map[int64]*CDNProject {
+		return getCDNProjectsIDMap()
 	})
 	return projects[id]
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -41,4 +42,12 @@ func normalizeExtension(extension string) string {
 		extension = fileExtensionChanged
 	}
 	return extension
+}
+
+func cdnDirPath() string {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+	return homeDir + "/.pragocdn"
 }

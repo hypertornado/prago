@@ -9,15 +9,6 @@ import (
 	"github.com/hypertornado/prago"
 )
 
-func cdnDirPath() string {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
-	return homeDir + "/.pragocdn"
-
-}
-
 func bindStats(app *prago.App) {
 
 	app.MainBoard.MainDashboard.Figure(unlocalized("Počet souborů"), "sysadmin").Unit(unlocalized("souborů")).Value(func(r *prago.Request) int64 {

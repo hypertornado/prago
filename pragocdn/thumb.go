@@ -69,7 +69,7 @@ func vipsThumbnailProfile(originalPath, outputFilePath, size string, crop bool, 
 	}
 
 	if cmyk {
-		cmdAr = append(cmdAr, "-i", cmykProfilePath)
+		cmdAr = append(cmdAr, "-i", cdnDirPath()+"/cmyk.icm")
 	}
 
 	/*if config.Profile != "" {
