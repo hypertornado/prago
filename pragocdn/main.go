@@ -10,7 +10,6 @@ import (
 	"mime"
 	"net/http"
 	"os"
-	"os/exec"
 	"regexp"
 	"strings"
 	"sync"
@@ -22,7 +21,7 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-const version = "2022.17"
+const version = "2022.18"
 
 var app *prago.App
 
@@ -81,10 +80,12 @@ func main() {
 	})
 
 	app.GET("/:account/:uuid/metadata", func(request *prago.Request) {
-		metadata, err := getMetadata(
-			request.Param("account"),
-			request.Param("uuid"),
-		)
+		cdnFile := getCDNFile(request.Param("account"), request.Param("uuid"))
+		if cdnFile == nil {
+			render404(request)
+			return
+		}
+		metadata, err := cdnFile.getMetadata()
 		if err != nil {
 			panic(err)
 		}
@@ -172,33 +173,59 @@ func (account *CDNProject) uploadFile(extension string, inData io.Reader) (*cdnc
 	uuid := RandomString(20)
 	cdnFile := account.createFile(uuid, extension)
 
-	dirPath := cdnFile.getFileDirectoryPath()
+	//tempFilePath
 
-	err := os.MkdirAll(dirPath, 0777)
+	tmpPath := cdnFile.tempFilePath()
+	defer os.Remove(tmpPath)
+	tmpFile, err := os.Create(tmpPath)
+	if err != nil {
+		return nil, err
+	}
+	defer tmpFile.Close()
+
+	_, err = io.Copy(tmpFile, inData)
 	if err != nil {
 		return nil, err
 	}
 
-	filePath := cdnFile.getFilePath()
+	cdnFile.Checksum = checksum(tmpPath)
 
-	file, err := os.Create(filePath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
+	filePath := cdnFile.getDataPath()
 
-	_, err = io.Copy(file, inData)
+	_, err = os.Stat(filePath)
+
+	//file does not exist
 	if err != nil {
-		return nil, err
+		dirPath := cdnFile.getDataDirectoryPath()
+		err := os.MkdirAll(dirPath, 0777)
+		if err != nil {
+			return nil, err
+		}
+		err = os.Rename(tmpPath, filePath)
+		if err != nil {
+			return nil, err
+		}
+
+		/*file, err := os.Create(filePath)
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
+
+		_, err = io.Copy(file, inData)
+		if err != nil {
+			return nil, err
+		}*/
 	}
 
 	cdnFile.update()
-
-	return getMetadata(account.Name, uuid)
+	return cdnFile.getMetadata()
 }
 
 func (file *CDNFile) deleteFile(password string) error {
-	uuid := file.UUID
+	panic("not reimplemented")
+
+	/*uuid := file.UUID
 	project := file.Project()
 
 	if !uuidRegex.MatchString(uuid) {
@@ -219,11 +246,11 @@ func (file *CDNFile) deleteFile(password string) error {
 	cmd := exec.Command("mv", filePath, deletedDir)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	return cmd.Run()*/
 }
 
-func (file *CDNFile) getFilePathFromUUID() (filePath, extension string, err error) {
-	dirPath := file.getFileDirectoryPath()
+/*func (file *CDNFile) getFilePathFromUUID() (filePath, extension string, err error) {
+	dirPath := file.getDataDirectoryPath()
 	files, err := os.ReadDir(dirPath)
 	if err != nil {
 		return "", "", err
@@ -244,19 +271,16 @@ func (file *CDNFile) getFilePathFromUUID() (filePath, extension string, err erro
 	}
 
 	return fmt.Sprintf("%s/%s", dirPath, name), extension, nil
-}
+}*/
 
 // TODO: cache somewhere
-func getMetadata(accountName, uuid string) (*cdnclient.CDNFileData, error) {
-
-	cdnFile := getCDNFile(accountName, uuid)
-
-	filePath, extension, err := cdnFile.getFilePathFromUUID()
+func (cdnFile *CDNFile) getMetadata() (*cdnclient.CDNFileData, error) {
+	/*filePath, _, err := cdnFile.getFilePathFromUUID()
 	if err != nil {
 		return nil, fmt.Errorf("getting file path from uuid: %s", err)
-	}
+	}*/
 
-	file, err := os.Open(filePath)
+	file, err := os.Open(cdnFile.getDataPath())
 	if err != nil {
 		return nil, fmt.Errorf("opening file: %s", err)
 	}
@@ -264,7 +288,7 @@ func getMetadata(accountName, uuid string) (*cdnclient.CDNFileData, error) {
 
 	var width, height int
 
-	if isImageExtension(extension) {
+	if isImageExtension(cdnFile.Suffix) {
 		i, _, err := image.Decode(file)
 		if err == nil {
 			bounds := i.Bounds()
@@ -278,9 +302,9 @@ func getMetadata(accountName, uuid string) (*cdnclient.CDNFileData, error) {
 	filestat, _ := file.Stat()
 
 	return &cdnclient.CDNFileData{
-		UUID:      uuid,
-		Extension: extension,
-		IsImage:   isImageExtension(extension),
+		UUID:      cdnFile.UUID,
+		Extension: cdnFile.Suffix,
+		IsImage:   isImageExtension(cdnFile.Suffix),
 		Filesize:  filestat.Size(),
 		Width:     int64(width),
 		Height:    int64(height),
@@ -309,7 +333,7 @@ func (file *CDNFile) getFileDataInFormat(format, hash, name string) (errCode int
 		return 498, errors.New("wrong hash"), nil, "", -1
 	}
 
-	originalPath := file.getFilePath()
+	originalPath := file.getDataPath()
 
 	var path string
 	if format == "file" {
@@ -353,7 +377,7 @@ func (file *CDNFile) getDataPath() string {
 	)
 }
 
-func (file *CDNFile) getFileDirectoryPath() string {
+func (file *CDNFile) getFileDirectoryPathOLD() string {
 	uuid := file.UUID
 	firstPrefix := strings.ToLower(uuid[0:2])
 	secondPrefix := strings.ToLower(uuid[2:4])
@@ -365,21 +389,21 @@ func (file *CDNFile) getFileDirectoryPath() string {
 	)
 }
 
-func (file *CDNFile) getFilePath() string {
+func (file *CDNFile) getFilePathOLD() string {
 	return fmt.Sprintf("%s/%s.%s",
-		file.getFileDirectoryPath(),
+		file.getFileDirectoryPathOLD(),
 		file.UUID,
 		file.Suffix,
 	)
 }
 
 func (file *CDNFile) getCacheDirectoryPath(format string) string {
-	uuid := file.UUID
-	firstPrefix := strings.ToLower(uuid[0:2])
-	secondPrefix := strings.ToLower(uuid[2:4])
-	return fmt.Sprintf("%s/cache/%s/%s/%s/%s",
+	checksum := file.Checksum
+	firstPrefix := strings.ToLower(checksum[0:2])
+	secondPrefix := strings.ToLower(checksum[2:4])
+	return fmt.Sprintf("%s/cache/%s/%s/%s",
 		cdnDirPath(),
-		file.Project().Name,
+		//file.Project().Name,
 		format,
 		firstPrefix,
 		secondPrefix,
@@ -409,7 +433,7 @@ func (file *CDNFile) convertedFilePath(extension, format string) (string, error)
 		return "", errors.New("cant resize non images")
 	}
 
-	originalPath := file.getFilePath()
+	originalPath := file.getDataPath()
 	outputFilePath := file.getCacheFilePath(format, "webp")
 	outputDirectoryPath := file.getCacheDirectoryPath(format)
 

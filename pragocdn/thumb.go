@@ -24,6 +24,8 @@ func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size strin
 		return nil
 	}
 
+	fmt.Println(outputDirectoryPath)
+
 	err = os.MkdirAll(outputDirectoryPath, 0777)
 	if err != nil {
 		return fmt.Errorf("error while creating mkdirall %s: %s", outputDirectoryPath, err)

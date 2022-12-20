@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -72,7 +73,7 @@ func (file *CDNFile) get() (*os.File, error) {
 	if project == nil {
 		return nil, fmt.Errorf("can't find project id %d", file.CDNProject)
 	}
-	filePath := file.getFilePath()
+	filePath := file.getDataPath()
 	return os.Open(filePath)
 }
 
@@ -89,9 +90,8 @@ func (file *CDNFile) update() {
 		file.Deleted = true
 	} else {
 		defer fileData.Close()
-
-		file.Checksum = checksum(fileData)
-		metadata, err := getMetadata(project.Name, file.UUID)
+		file.Checksum = checksum(file.getDataPath())
+		metadata, err := file.getMetadata()
 		if err != nil {
 			panic(fmt.Sprintf("can't get metadata id %s: %s", file.UUID, err))
 		}
@@ -105,10 +105,16 @@ func (file *CDNFile) update() {
 	}
 }
 
-func checksum(file *os.File) string {
+func checksum(path string) string {
+	f, err := os.Open(path)
+	if err != nil {
+		panic(fmt.Errorf("can't open file '%s' for checksum: %s", path, err))
+	}
+	defer f.Close()
+
 	hasher := sha256.New()
 
-	if _, err := io.Copy(hasher, file); err != nil {
+	if _, err := io.Copy(hasher, f); err != nil {
 		log.Fatal(err)
 	}
 	return hex.EncodeToString(hasher.Sum(nil))
@@ -131,7 +137,7 @@ func (project *CDNProject) createFile(uuid, suffix string) *CDNFile {
 
 func (file *CDNFile) copyToChecksumFormat() {
 
-	originalPath := file.getFilePath()
+	originalPath := file.getFilePathOLD()
 	_, err := os.Stat(originalPath)
 	if err != nil {
 		panic(fmt.Errorf("cant open file %s: %s", file.UUID, err))
@@ -169,17 +175,16 @@ func (file *CDNFile) copyToChecksumFormat() {
 }
 
 func (file *CDNFile) validateChecksum() {
-	dataPath := file.getDataPath()
-	f, err := os.Open(dataPath)
-	if err != nil {
-		panic(fmt.Errorf("error while validating %s: %s", file.UUID, err))
-	}
-
-	res := checksum(f)
+	res := checksum(file.getDataPath())
 	if res != file.Checksum {
 		panic(fmt.Errorf("error while validatin checksum file %s: expecting '%s', got '%s'", file.UUID, file.Checksum, res))
 	}
+}
 
+func (file *CDNFile) tempFilePath() string {
+	dir := os.TempDir()
+	fileName := fmt.Sprintf("pragocdn-%s.file", file.UUID)
+	return path.Join(dir, fileName)
 }
 
 func bindCDNFiles(app *prago.App) {
@@ -248,5 +253,10 @@ func bindCDNFiles(app *prago.App) {
 			file.validateChecksum()
 		}
 		return nil
+	})
+
+	tg.Task(unlocalized("Delete thumbs cache")).Handler(func(ta *prago.TaskActivity) error {
+		cachePath := cdnDirPath() + "/cache"
+		return os.RemoveAll(cachePath)
 	})
 }
