@@ -24,8 +24,6 @@ func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size strin
 		return nil
 	}
 
-	fmt.Println(outputDirectoryPath)
-
 	err = os.MkdirAll(outputDirectoryPath, 0777)
 	if err != nil {
 		return fmt.Errorf("error while creating mkdirall %s: %s", outputDirectoryPath, err)
@@ -64,8 +62,8 @@ func vipsThumbnailProfile(originalPath, outputFilePath, size string, crop bool, 
 		"--rotate",
 		"-s",
 		size,
-		"--smartcrop",
-		"attention",
+		//"--smartcrop",
+		//"attention",
 		"-o",
 		outputFilePath + outputParameters,
 	}
@@ -79,7 +77,8 @@ func vipsThumbnailProfile(originalPath, outputFilePath, size string, crop bool, 
 	}*/
 
 	if crop {
-		cmdAr = append(cmdAr, "-m", "attention")
+		//cmdAr = append(cmdAr, "-m", "attention")
+		cmdAr = append(cmdAr, "--smartcrop", "attention")
 	}
 
 	var b bytes.Buffer

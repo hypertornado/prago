@@ -22,7 +22,7 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-const version = "2022.18"
+const version = "2022.19"
 
 var app *prago.App
 
