@@ -2,6 +2,7 @@ package main
 
 import (
 	"compress/gzip"
+	"context"
 	"embed"
 	"errors"
 	"fmt"
@@ -24,8 +25,6 @@ import (
 const version = "2022.18"
 
 var app *prago.App
-
-//var homePath = os.Getenv("HOME")
 
 var uuidRegex = regexp.MustCompile("^[a-zA-Z0-9]{10,}$")
 var filenameRegex = regexp.MustCompile("^[a-zA-Z0-9_.-]{1,150}$")
@@ -157,12 +156,17 @@ func main() {
 
 		file := getCDNFile(request.Param("account"), request.Param("uuid"))
 
-		err := file.deleteFile(
-			request.Request().Header.Get("X-Authorization"),
-		)
+		if file.Project().Password != request.Request().Header.Get("X-Authorization") {
+			panic("wrong password for delete")
+		}
+
+		file.Deleted = true
+		fileResource := prago.GetResource[CDNFile](app)
+		err := fileResource.Update(context.Background(), file)
 		if err != nil {
 			panic(err)
 		}
+
 		request.RenderJSON(true)
 	})
 
@@ -172,8 +176,6 @@ func main() {
 func (account *CDNProject) uploadFile(extension string, inData io.Reader) (*cdnclient.CDNFileData, error) {
 	uuid := RandomString(20)
 	cdnFile := account.createFile(uuid, extension)
-
-	//tempFilePath
 
 	tmpPath := cdnFile.tempFilePath()
 	defer os.Remove(tmpPath)
@@ -206,80 +208,13 @@ func (account *CDNProject) uploadFile(extension string, inData io.Reader) (*cdnc
 			return nil, err
 		}
 
-		/*file, err := os.Create(filePath)
-		if err != nil {
-			return nil, err
-		}
-		defer file.Close()
-
-		_, err = io.Copy(file, inData)
-		if err != nil {
-			return nil, err
-		}*/
 	}
 
 	cdnFile.update()
 	return cdnFile.getMetadata()
 }
 
-func (file *CDNFile) deleteFile(password string) error {
-	panic("not reimplemented")
-
-	/*uuid := file.UUID
-	project := file.Project()
-
-	if !uuidRegex.MatchString(uuid) {
-		return errors.New("wrongs uuid format: " + uuid)
-	}
-
-	if project.Password != password {
-		return errors.New("wrong password")
-	}
-
-	filePath, _, err := file.getFilePathFromUUID()
-	if err != nil {
-		return err
-	}
-
-	deletedDir := fmt.Sprintf("%s/deleted/%s", cdnDirPath(), project.Name)
-
-	cmd := exec.Command("mv", filePath, deletedDir)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()*/
-}
-
-/*func (file *CDNFile) getFilePathFromUUID() (filePath, extension string, err error) {
-	dirPath := file.getDataDirectoryPath()
-	files, err := os.ReadDir(dirPath)
-	if err != nil {
-		return "", "", err
-	}
-
-	var name string
-	for _, v := range files {
-		fileName := v.Name()
-		if strings.HasPrefix(fileName, file.UUID+".") {
-			_, extension, _ = getNameAndExtension(fileName)
-			name = fileName
-			break
-		}
-	}
-
-	if name == "" {
-		return "", "", errors.New("no file found for uuid: " + file.UUID)
-	}
-
-	return fmt.Sprintf("%s/%s", dirPath, name), extension, nil
-}*/
-
-// TODO: cache somewhere
 func (cdnFile *CDNFile) getMetadata() (*cdnclient.CDNFileData, error) {
-	/*filePath, _, err := cdnFile.getFilePathFromUUID()
-	if err != nil {
-		return nil, fmt.Errorf("getting file path from uuid: %s", err)
-	}*/
-
 	file, err := os.Open(cdnFile.getDataPath())
 	if err != nil {
 		return nil, fmt.Errorf("opening file: %s", err)

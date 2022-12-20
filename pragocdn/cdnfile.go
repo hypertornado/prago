@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"html/template"
 	"io"
 	"io/fs"
 	"log"
@@ -49,7 +50,7 @@ func getCDNFile(projectName, uuid string) *CDNFile {
 	return fileResource.Query(context.Background()).Is("cdnproject", project.ID).Is("uuid", uuid).First()
 }
 
-func (file *CDNFile) url() string {
+func (file *CDNFile) url(size string) string {
 	projectResource := prago.GetResource[CDNProject](app)
 	project := projectResource.Query(context.Background()).ID(file.CDNProject)
 	if project == nil {
@@ -60,7 +61,11 @@ func (file *CDNFile) url() string {
 
 	account := cdnclient.NewCDNAccount(baseURL, project.Name, project.Password)
 
-	return account.GetFileURL(file.UUID, "file."+file.Suffix)
+	if size == "" {
+		return account.GetFileURL(file.UUID, "file."+file.Suffix)
+	}
+
+	return account.GetImageURL(file.UUID, "file."+file.Suffix, size)
 }
 
 func (file *CDNFile) Project() *CDNProject {
@@ -192,7 +197,15 @@ func bindCDNFiles(app *prago.App) {
 	fileResource.Name(unlocalized("CDN Soubor"), unlocalized("CDN Soubory"))
 
 	fileResource.PreviewURLFunction(func(file *CDNFile) string {
-		return file.url()
+		return file.url("")
+	})
+
+	fileResource.FormItemAction("previewer").Name(unlocalized("Previews")).Form(func(cdnFile *CDNFile, form *prago.Form, request *prago.Request) {
+		form.AddTextInput("size", "Size")
+		form.AutosubmitFirstTime = true
+		form.AddSubmit("Zobrazit")
+	}).Validation(func(cdnFile *CDNFile, vc prago.ValidationContext) {
+		vc.Validation().AfterContent = template.HTML(fmt.Sprintf("<img src=\"%s\">", cdnFile.url(vc.GetValue("size"))))
 	})
 
 	tg := app.TaskGroup(unlocalized("Soubory"))
