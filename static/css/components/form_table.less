@@ -1,8 +1,8 @@
-.admin_form_table {
+.form_table {
   border: 0px solid red;
 }
 
-.admin_form_table table {
+.form_table table {
   background-color: white;
   min-width: 100%;
   margin: 0px auto;
@@ -10,21 +10,29 @@
   border: 1px solid #eee;
 }
 
-.admin_form_table td {
+.form_table td {
   padding: 5px 10px;
-  border-top: 1px solid #eee;
+  border: 1px solid #eee;
   vertical-align: top;
 }
 
-.admin_form_table tr:last-child {
+.form_table tr:last-child {
   border-bottom: 1px solid #eee;
 }
 
-.admin_form_table_header {
+.form_table_footer {
+  padding: 5px 10px;
+  color: @gray;
+}
+
+.form_table_cell {
+}
+
+.form_table_cell-header {
   font-weight: bold;
 }
 
-.admin_form_table_footer {
-  padding: 5px 10px;
-  color: @gray;
+.form_table_cell-pre {
+  font-family: monospace;
+  white-space: nowrap;
 }

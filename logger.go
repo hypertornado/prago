@@ -178,7 +178,12 @@ func (app *App) initLogger() {
 		table.AddFooterText(fmt.Sprintf("Celkem %d záznamů", total))
 
 		for _, v := range items {
-			table.Row(TableCellPre(v.ID), TableCellPre(v.Time.Format("2. 1. 2006 15:04:05")), TableCellPre(v.Typ), TableCellPre(v.Text))
+			table.Cell(v.ID).Pre()
+			table.Cell(v.Time.Format("2. 1. 2006 15:04:05")).Pre()
+			table.Cell(v.Typ).Pre()
+			table.Cell(v.Text).Pre()
+			table.Row()
+			//table.Row(TableCellPre(v.ID), TableCellPre(v.Time.Format("2. 1. 2006 15:04:05")), TableCellPre(v.Typ), TableCellPre(v.Text))
 		}
 
 		vc.Validation().AfterContent = table.ExecuteHTML()

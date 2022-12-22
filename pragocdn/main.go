@@ -58,11 +58,11 @@ func main() {
 		http.Error(request.Response(), out, 200)
 	})
 
-	app.POST("/:account/upload/:extension", func(request *prago.Request) {
+	app.POST("/:project/upload/:extension", func(request *prago.Request) {
 		//defer request.Request().Body.Close()
-		project := getCDNProject(request.Param("account"))
+		project := getCDNProject(request.Param("project"))
 		if project == nil {
-			panic("no account")
+			panic("no project")
 		}
 
 		if project.Password != request.Request().Header.Get("X-Authorization") {
@@ -78,8 +78,8 @@ func main() {
 		request.RenderJSON(data)
 	})
 
-	app.GET("/:account/:uuid/metadata", func(request *prago.Request) {
-		cdnFile := getCDNFile(request.Param("account"), request.Param("uuid"))
+	app.GET("/:project/:uuid/metadata", func(request *prago.Request) {
+		cdnFile := getCDNFile(request.Param("project"), request.Param("uuid"))
 		if cdnFile == nil {
 			render404(request)
 			return
@@ -91,8 +91,8 @@ func main() {
 		request.RenderJSON(metadata)
 	})
 
-	app.GET("/:account/:uuid/:format/:hash/:name", func(request *prago.Request) {
-		cdnFile := getCDNFile(request.Param("account"), request.Param("uuid"))
+	app.GET("/:project/:uuid/:format/:hash/:name", func(request *prago.Request) {
+		cdnFile := getCDNFile(request.Param("project"), request.Param("uuid"))
 		if cdnFile == nil {
 			render404(request)
 			return
@@ -152,9 +152,9 @@ func main() {
 		}
 	})
 
-	app.DELETE("/:account/:uuid", func(request *prago.Request) {
+	app.DELETE("/:project/:uuid", func(request *prago.Request) {
 
-		file := getCDNFile(request.Param("account"), request.Param("uuid"))
+		file := getCDNFile(request.Param("project"), request.Param("uuid"))
 
 		if file.Project().Password != request.Request().Header.Get("X-Authorization") {
 			panic("wrong password for delete")
@@ -173,9 +173,9 @@ func main() {
 	app.Run()
 }
 
-func (account *CDNProject) uploadFile(extension string, inData io.Reader) (*cdnclient.CDNFileData, error) {
+func (project *CDNProject) uploadFile(extension string, inData io.Reader) (*cdnclient.CDNFileData, error) {
 	uuid := RandomString(20)
-	cdnFile := account.createFile(uuid, extension)
+	cdnFile := project.createFile(uuid, extension)
 
 	tmpPath := cdnFile.tempFilePath()
 	defer os.Remove(tmpPath)
@@ -338,7 +338,6 @@ func (file *CDNFile) getCacheDirectoryPath(format string) string {
 	secondPrefix := strings.ToLower(checksum[2:4])
 	return fmt.Sprintf("%s/cache/%s/%s/%s",
 		cdnDirPath(),
-		//file.Project().Name,
 		format,
 		firstPrefix,
 		secondPrefix,
@@ -370,14 +369,14 @@ func (file *CDNFile) convertedFilePath(extension, format string) (string, error)
 
 	originalPath := file.getDataPath()
 	outputFilePath := file.getCacheFilePath(format, "webp")
-	outputDirectoryPath := file.getCacheDirectoryPath(format)
+	//outputDirectoryPath := file.getCacheDirectoryPath(format)
 
 	if singleSizeRegexp.MatchString(format) {
-		return outputFilePath, vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, format, false)
+		return outputFilePath, vipsThumbnail(originalPath, outputFilePath, format, false)
 	}
 
 	if sizeRegexp.MatchString(format) {
-		return outputFilePath, vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, format, true)
+		return outputFilePath, vipsThumbnail(originalPath, outputFilePath, format, true)
 	}
 
 	return "", errors.New("wrong file convert format")

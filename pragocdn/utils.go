@@ -51,3 +51,7 @@ func cdnDirPath() string {
 	}
 	return homeDir + "/.pragocdn"
 }
+
+func getDirFromFilepath(pathToFile string) string {
+	return filepath.Dir(pathToFile)
+}

@@ -9,8 +9,10 @@ import (
 	"path"
 )
 
+//https://github.com/muesli/smartcrop
+
 // CMYK: https://github.com/jcupitt/libvips/issues/630
-func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size string, crop bool) error {
+func vipsThumbnail(originalPath, outputFilePath, size string, crop bool) error {
 	n := rand.Int() % len(vipsMutexes)
 	vipsMutex := vipsMutexes[n]
 	vipsMutex.Lock()
@@ -23,6 +25,8 @@ func vipsThumbnail(originalPath, outputDirectoryPath, outputFilePath, size strin
 		f.Close()
 		return nil
 	}
+
+	outputDirectoryPath := getDirFromFilepath(outputFilePath)
 
 	err = os.MkdirAll(outputDirectoryPath, 0777)
 	if err != nil {
@@ -52,7 +56,9 @@ func vipsThumbnailProfile(originalPath, outputFilePath, size string, crop bool, 
 
 	//vips webpsave
 
-	outputParameters := "[strip]"
+	//https://www.libvips.org/API/8.9/Using-vipsthumbnail.md.html
+
+	//outputParameters := "[strip]"
 	/*if extension == "jpg" {
 		outputParameters = "[optimize_coding,strip]"
 	}*/
@@ -65,7 +71,7 @@ func vipsThumbnailProfile(originalPath, outputFilePath, size string, crop bool, 
 		//"--smartcrop",
 		//"attention",
 		"-o",
-		outputFilePath + outputParameters,
+		outputFilePath + "[strip]",
 	}
 
 	if cmyk {

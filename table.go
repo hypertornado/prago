@@ -3,92 +3,156 @@ package prago
 import (
 	"fmt"
 	"html/template"
+	"io"
+	"strings"
+
+	"github.com/tealeg/xlsx"
 )
 
 type Table struct {
 	app  *App
-	data *tableData
+	data []*tableData
 }
 
 type tableData struct {
-	Rows       []tableRow
+	Rows       []*tableRow
 	FooterText []string
-	Width      int64
 }
 
 type tableRow struct {
-	IsHeader bool
-	Cells    []tableCell
+	Cells []*TableCell
 }
 
-type tableCell struct {
-	Template string
-	Data     interface{}
-	Content  string
+type TableCell struct {
+	CSSClasses []string
+	Href       string
+	Text       string
+	//Content    string
 }
 
 func (app *App) Table() *Table {
-	return &Table{
-		app:  app,
-		data: &tableData{},
+	ret := &Table{
+		app: app,
 	}
+	ret.Table()
+	return ret
 }
 
-type TableCellPre string
+func (table *Table) Table() *Table {
+	table.data = append(table.data, &tableData{})
+	table.newRow()
+	return table
+}
 
-func newCell(item interface{}) tableCell {
-	pre, ok := item.(TableCellPre)
-	if ok {
-		return tableCell{
-			Template: "admin_form_table_cell_pre",
-			Data:     pre,
-		}
+func (table *Table) newRow() {
+	table.currentTable().Rows = append(table.currentTable().Rows, &tableRow{})
+
+}
+
+func (table *Table) Header(items ...interface{}) *Table {
+	for _, item := range items {
+		cell := table.Cell(item)
+		cell.Header()
 	}
+	table.newRow()
+	return table
+}
+
+func (table *Table) Row(items ...interface{}) *Table {
+	for _, item := range items {
+		table.Cell(item)
+	}
+	table.newRow()
+	return table
+}
+
+func (t *Table) Cell(data interface{}) *TableCell {
+	row := t.currentRow()
+	cell := newCell(data)
+	row.Cells = append(row.Cells, cell)
+	return cell
+}
+
+func (cell *TableCell) Header() *TableCell {
+	cell.CSSClass("form_table_cell-header")
+	return cell
+}
+
+func (cell *TableCell) Pre() *TableCell {
+	cell.CSSClass("form_table_cell-pre")
+	return cell
+}
+
+func (cell *TableCell) URL(link string) *TableCell {
+	cell.Href = link
+	return cell
+}
+
+func (cell *TableCell) CSSClass(class string) *TableCell {
+	cell.CSSClasses = append(cell.CSSClasses, class)
+	return cell
+}
+
+func (cell *TableCell) GetClassesString() template.CSS {
+	return template.CSS(strings.Join(cell.CSSClasses, " "))
+}
+
+func (table *Table) currentTable() *tableData {
+	return table.data[len(table.data)-1]
+}
+
+func (table *Table) currentRow() *tableRow {
+	currentTable := table.currentTable()
+	return currentTable.Rows[len(currentTable.Rows)-1]
+}
+
+func newCell(item interface{}) *TableCell {
+	ret := &TableCell{
+		Text: fmt.Sprintf("%v", item),
+	}
+
+	ret.CSSClass("form_table_cell")
 
 	linkData, ok := item.([2]string)
 	if ok {
-		return tableCell{
-			Template: "admin_form_table_cell_link",
-			Data:     linkData,
-		}
+		ret = newCell(linkData[1])
+		ret.URL(linkData[0])
+
 	}
 
-	return tableCell{
-		Content: fmt.Sprintf("%v", item),
-	}
-}
-
-func (t *Table) tableRow(isHeader bool, items ...interface{}) {
-	if t.data.Width < int64(len(items)) {
-		t.data.Width = int64(len(items))
-	}
-	var row = tableRow{
-		IsHeader: isHeader,
-	}
-	for _, v := range items {
-		row.Cells = append(row.Cells, newCell(v))
-	}
-	t.data.Rows = append(t.data.Rows, row)
-}
-
-func (t *Table) Header(items ...interface{}) {
-	t.tableRow(true, items...)
-}
-
-func (t *Table) Row(items ...interface{}) {
-	t.tableRow(false, items...)
+	return ret
 }
 
 func (t *Table) AddFooterText(text string) {
-	t.data.FooterText = append(t.data.FooterText, text)
+	t.currentTable().FooterText = append(t.currentTable().FooterText, text)
 }
 
+// TODO execute right into
 func (t *Table) ExecuteHTML() template.HTML {
 	return template.HTML(
-		t.app.ExecuteTemplateToString("admin_form_table", t.TemplateData()),
+		t.app.ExecuteTemplateToString("form_table", t.TemplateData()),
 	)
 }
 
-func (t *Table) TemplateData() *tableData {
+func (t *Table) TemplateData() []*tableData {
 	return t.data
+}
+
+func (t *Table) ExportXLSX(writer io.Writer) error {
+	f := xlsx.NewFile()
+
+	for k, table := range t.data {
+		sheet, err := f.AddSheet(fmt.Sprintf("Sheet %d", k+1))
+		must(err)
+
+		for _, v1 := range table.Rows {
+			row := sheet.AddRow()
+			for _, v2 := range v1.Cells {
+				cell := row.AddCell()
+				cell.SetValue(v2.Text)
+			}
+		}
+	}
+
+	return f.Write(writer)
 }
