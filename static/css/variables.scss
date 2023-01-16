@@ -1,0 +1,76 @@
+$baseColor: #4078c0;
+$baseColorBackground: rgba(64, 120, 192, 0.1);
+$baseColorBackgroundLighter: rgba(64, 120, 192, 0.05);
+
+$red: #cb2431;
+$redLighter: #de4450;
+
+$green: #006400;
+$yellow: #ffd800;
+
+$black: #444;
+
+
+$gray: #888;
+
+$borderColor: #eee;
+
+$backgroundGrayColor: #fafafa;
+
+@mixin shadow {
+    box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+}
+
+@mixin shadowLarge {
+    box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
+}
+
+@mixin shadowMedium {
+    box-shadow: 0px 1px 10px 1px rgba(0, 0, 0, 0.1);
+}
+
+@mixin border {
+    border: 1px solid $borderColor;
+}
+
+$radius: 5px;
+
+@mixin rectangle {
+    @include border;
+    display: inline-block;
+    background-color: $baseColorBackgroundLighter;
+    border-radius: $radius;
+    margin: 5px;
+    flex-shrink: 0;
+}
+
+@mixin box {
+    border: 1px solid #eee;
+    margin: 20px auto;
+    max-width: min(600px, 100vw);
+    width: 100%;
+    margin-bottom: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    margin-top: 0px;
+    overflow: hidden;
+}
+
+@mixin inputzone {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+    background-color: #fcfcfc;
+    outline: none;
+    border: 1px solid #ddd;
+    padding: 8px 6px;
+    display: inline-block;
+    border-radius: 3px;
+    font-size: 1rem;
+    line-height: 1.4rem;
+    color: #333;
+    vertical-align: middle;
+    width: 100%;
+}

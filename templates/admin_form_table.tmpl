@@ -5,7 +5,7 @@
             {{range $row := $table.Rows}}
                 <tr>
                 {{range $cell := $row.Cells}}
-                    <td class="{{$cell.GetClassesString}}">
+                    <td class="{{$cell.GetClassesString}}"{{if $cell.Rowspan}} rowspan="{{$cell.Rowspan}}"{{end}}{{if $cell.Colspan}} colspan="{{$cell.Colspan}}"{{end}}>
                         {{if $cell.Href}}<a href="{{$cell.Href}}">{{end}}
                             {{$cell.Text}}
                         {{if $cell.Href}}</a>{{end}}

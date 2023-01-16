@@ -53,7 +53,7 @@
 
 .root_hamburger {
   border-radius: 5px;
-  background-color: @baseColorBackground;
+  background-color: $baseColorBackground;
   width: 60px;
   height: 33px;
   cursor: pointer;
@@ -132,7 +132,7 @@
     right: 0px;
     z-index: 10;
     background-color: #fafafa;
-    .shadow;
+    @include shadow;
     animation: root_left_animation 200ms ease-out;
   }
 

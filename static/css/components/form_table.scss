@@ -22,10 +22,26 @@
 
 .form_table_footer {
   padding: 5px 10px;
-  color: @gray;
+  color: $gray;
 }
 
 .form_table_cell {
+}
+
+.form_table_cell-center {
+  text-align: center;
+}
+
+.form_table_cell-right {
+  text-align: right;
+}
+
+.form_table_cell-nowrap {
+  white-space: nowrap;
+}
+
+.form_table_cell-green {
+  background-color: palegreen;
 }
 
 .form_table_cell-header {
@@ -36,3 +52,4 @@
   font-family: monospace;
   white-space: nowrap;
 }
+

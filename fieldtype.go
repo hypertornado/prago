@@ -66,8 +66,10 @@ func (app *App) initDefaultFieldTypes() {
 		formTemplate:       "admin_file",
 		listCellDataSource: imageCellViewData,
 
-		filterLayoutTemplate:   "filter_layout_select",
-		filterLayoutDataSource: boolFilterLayoutDataSource,
+		filterLayoutTemplate: "filter_layout_text",
+
+		//filterLayoutTemplate:   "filter_layout_select",
+		//filterLayoutDataSource: boolFilterLayoutDataSource,
 	})
 
 	app.addFieldType("file", &fieldType{

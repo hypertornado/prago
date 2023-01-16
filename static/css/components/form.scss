@@ -214,30 +214,15 @@
 }
 
 .inputzone {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
-  background-color: #fcfcfc;
-  outline: none;
-  border: 1px solid #ddd;
-  padding: 8px 6px;
-  display: inline-block;
-  border-radius: 3px;
-  font-size: 1rem;
-  line-height: 1.4rem;
-  color: #333;
-  vertical-align: middle;
-  width: 100%;
+  @include inputzone;
 }
 
 .input {
-  .inputzone;
+  @include inputzone;
 }
 
 .input-placesearch {
-  max-width: calc(~"100% - 200px");
+  max-width: calc(100% - 200px);
   margin-left: 10px;
 }
 
@@ -307,7 +292,7 @@ select.input {
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   top: 21px;
-  .shadowLarge;
+  @include shadowLarge;
   z-index: 2;
   flex-flow: column;
   background-color: white;
@@ -320,7 +305,7 @@ select.input {
 a.btn_more_item {
   padding: 5px 10px;
   text-decoration: none;
-  color: @black;
+  color: $black;
   display: flex;
   align-items: center;
 }
@@ -331,9 +316,10 @@ a.btn_more_item {
 }
 
 .btn_more_item:hover {
-  background-color: @baseColorBackgroundLighter;
+  background-color: $baseColorBackgroundLighter;
 }
 
 .btn_more_item:active {
-  background-color: @baseColorBackground;
+  background-color: $baseColorBackground;
 }
+

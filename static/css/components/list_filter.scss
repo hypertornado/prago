@@ -34,7 +34,7 @@ input.list_filter_layout_date_to {
 }
 
 .list_filteritem-colored * {
-  border-color: @baseColor !important;
+  border-color: $baseColor !important;
 }
 
 .list_filter_item {

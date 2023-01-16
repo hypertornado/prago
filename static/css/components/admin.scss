@@ -41,8 +41,8 @@
   background-repeat: no-repeat;
   background-position: center;
   overflow: hidden;
-  .rectangle;
-  .shadow;
+  @include rectangle;
+  @include shadow;
 }
 
 .admin_images_image_description {
@@ -61,7 +61,7 @@
 }
 
 .admin_images_image:hover {
-  background-color: @baseColorBackgroundLighter;
+  background-color: $baseColorBackgroundLighter;
 }
 
 .admin_images_image:hover .admin_images_image_description {
@@ -69,7 +69,7 @@
 }
 
 .admin_images_image:active {
-  background-color: @baseColorBackground;
+  background-color: $baseColorBackground;
 }
 
 .admin_images_image_delete {
@@ -97,7 +97,7 @@
   border-radius: 5px;
   padding: 10px;
   background-color: #fff;
-  background-color: @baseColorBackgroundLighter;
+  background-color: $baseColorBackgroundLighter;
   cursor: pointer;
   margin: 0px 10px 10px 0px;
   width: 100px;
@@ -106,9 +106,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: @baseColorBackgroundLighter;
+  background: $baseColorBackgroundLighter;
   border: 1px solid #eee;
-  .rectangle;
+  @include rectangle;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -129,7 +129,7 @@
 }
 
 .admin_images_fileinput:hover {
-  background-color: @baseColorBackground;
+  background-color: $baseColorBackground;
 }
 
 .admin_images_fileinput-droparea {
@@ -213,7 +213,7 @@ select.admin_timestamp_minute {
 .view_header_subname {
   font-size: 1rem;
   line-height: 1.3em;
-  color: @gray;
+  color: $gray;
   display: block;
 }
 
@@ -241,7 +241,7 @@ select.admin_timestamp_minute {
   clear: both;
   padding: 0px 10px 0px 10px;
   word-wrap: break-word;
-  color: @gray;
+  color: $gray;
 }
 
 .view_content:last-child {
@@ -264,8 +264,8 @@ select.admin_timestamp_minute {
   background: none;
   -webkit-appearance: none;
   appearance: none;
-  border: 5px solid @baseColor;
-  border-top: 5px solid @baseColorBackground;
+  border: 5px solid $baseColor;
+  border-top: 5px solid $baseColorBackground;
   border-radius: 50%;
   width: 0px;
   height: 0px;
@@ -317,7 +317,7 @@ select.admin_timestamp_minute {
 .admin_preview_description {
   font-size: 0.9rem;
   line-height: 1.4em;
-  color: @gray;
+  color: $gray;
   overflow-wrap: anywhere;
 }
 
@@ -344,7 +344,7 @@ select.admin_timestamp_minute {
   text-align: center;
   margin: 10px 10px;
   background: white;
-  color: @red;
+  color: $red;
   width: 30px;
   height: 30px;
   line-height: 30px;
@@ -370,7 +370,7 @@ select.admin_timestamp_minute {
   margin-bottom: 10px;
   border-bottom-right-radius: 5px;
   border-bottom-left-radius: 5px;
-  .shadow;
+  @include shadow;
   width: 400px;
 }
 
@@ -389,7 +389,7 @@ select.admin_timestamp_minute {
 }
 
 .admin_item_relation_picker_suggestion-selected {
-  background-color: @baseColorBackgroundLighter;
+  background-color: $baseColorBackgroundLighter;
 }
 
 .admin_stats_pie canvas {

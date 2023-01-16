@@ -24,6 +24,7 @@ type Newsletters struct {
 	renderer   NewsletterRenderer
 	app        *App
 	randomness string
+	//board      *Board
 
 	newsletterResource        *Resource[newsletter]
 	newsletterSectionResource *Resource[newsletterSection]
@@ -34,6 +35,11 @@ func (newsletters *Newsletters) Renderer(renderer NewsletterRenderer) *Newslette
 	return newsletters
 }
 
+/*func (newsletters *Newsletters) Board(board *Board) *Newsletters {
+	newsletters.board = board
+	return newsletters
+}*/
+
 func (newsletters *Newsletters) Permission(permission Permission) *Newsletters {
 	newsletters.newsletterResource.PermissionView(permission)
 	newsletters.newsletterSectionResource.PermissionView(permission)
@@ -41,7 +47,7 @@ func (newsletters *Newsletters) Permission(permission Permission) *Newsletters {
 }
 
 // InitNewsletters inits apps newsletter function
-func (app *App) Newsletters() *Newsletters {
+func (app *App) Newsletters(board *Board) *Newsletters {
 	if app.newsletters != nil {
 		return app.newsletters
 	}
@@ -49,6 +55,7 @@ func (app *App) Newsletters() *Newsletters {
 		renderer:   defaultNewsletterRenderer,
 		app:        app,
 		randomness: app.MustGetSetting(context.Background(), "random"),
+		//board:      app.MainBoard,
 	}
 
 	app.GET("/newsletter-subscribe", func(request *Request) {
@@ -147,11 +154,14 @@ func (app *App) Newsletters() *Newsletters {
 	app.newsletters.newsletterResource = NewResource[newsletter](app).Name(unlocalized("Newsletter"), unlocalized("Newslettery"))
 	initNewsletterResource(
 		GetResource[newsletter](app),
+		board,
 	)
 
-	app.newsletters.newsletterSectionResource = NewResource[newsletterSection](app).Name(unlocalized("Newsletter - sekce"), unlocalized("Newsletter - sekce"))
+	app.newsletters.newsletterSectionResource = NewResource[newsletterSection](app).
+		Board(board).
+		Name(unlocalized("Newsletter - sekce"), unlocalized("Newsletter - sekce"))
 
-	NewResource[newsletterPersons](app).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoba"), unlocalized("Newsletter - osoby"))
+	NewResource[newsletterPersons](app).Board(board).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoba"), unlocalized("Newsletter - osoby"))
 	return app.newsletters
 }
 
@@ -238,8 +248,10 @@ type newsletter struct {
 	UpdatedAt     time.Time
 }
 
-func initNewsletterResource(resource *Resource[newsletter]) {
+func initNewsletterResource(resource *Resource[newsletter], board *Board) {
 	resource.data.canView = sysadminPermission
+
+	resource.Board(board)
 
 	resource.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(
 		func(item *newsletter, request *Request) {

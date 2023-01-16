@@ -25,13 +25,13 @@
 }
 
 .quick_actions_btn-green {
-  background: linear-gradient(green, @green);
+  background: linear-gradient(green, $green);
   color: white;
-  border-color: @green;
+  border-color: $green;
 }
 
 .quick_actions_btn-green:hover {
-  background: @green;
+  background: $green;
 }
 
 .quick_actions_btn-blue {
@@ -43,3 +43,5 @@
 .quick_actions_btn-blue:hover {
   background: #0070c9;
 }
+
+

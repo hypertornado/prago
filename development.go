@@ -10,11 +10,17 @@ import (
 type development struct {
 	app           *App
 	less          []less
+	sass          []sass
 	typeScript    []string
 	templatePaths []developmentTemplatePath
 }
 
 type less struct {
+	SourceDir string
+	Target    string
+}
+
+type sass struct {
 	SourceDir string
 	Target    string
 }
@@ -48,17 +54,21 @@ func (app *App) initDevelopment() {
 			})
 }
 
-//AddTypeScriptDevelopmentPath automatically runs compilation of .tsc file in development mode
+// AddTypeScriptDevelopmentPath automatically runs compilation of .tsc file in development mode
 func (app *App) AddTypeScriptDevelopmentPath(path string) {
 	app.development.typeScript = append(app.development.typeScript, path)
 }
 
-//AddLessDevelopmentPaths compiles less files in sourcePath into targetPath in development mode
+// AddLessDevelopmentPaths compiles less files in sourcePath into targetPath in development mode
 func (app *App) AddLessDevelopmentPaths(sourcePath, targetPath string) {
 	app.development.less = append(app.development.less, less{sourcePath, targetPath})
 }
 
-//AddTemplatesDevelopmentPath automatically compiles templates from path in development mode
+func (app *App) AddSassDevelopmentPaths(sourcePath, targetPath string) {
+	app.development.sass = append(app.development.sass, sass{sourcePath, targetPath})
+}
+
+// AddTemplatesDevelopmentPath automatically compiles templates from path in development mode
 func (app *App) AddTemplatesDevelopmentPath(path string, patterns ...string) {
 	app.development.templatePaths = append(app.development.templatePaths, developmentTemplatePath{
 		Path:     path,
@@ -70,6 +80,10 @@ func (app *App) startDevelopment() {
 	app.developmentMode = true
 	for _, v := range app.development.less {
 		go app.developmentLess(v.SourceDir, v.Target)
+	}
+
+	for _, v := range app.development.sass {
+		go app.developmentSass(v.SourceDir, v.Target)
 	}
 
 	for _, v := range app.development.typeScript {
@@ -96,6 +110,14 @@ func (app *App) developmentLess(sourcePath, targetPath string) {
 	})
 }
 
+func (app *App) developmentSass(sourcePath, targetPath string) {
+	indexPath := filepath.Join(sourcePath, "index.scss")
+	compileSass(indexPath, targetPath)
+	app.watchPath(sourcePath, func() {
+		compileSass(indexPath, targetPath)
+	})
+}
+
 func (app *App) developmentTemplate(path developmentTemplatePath) {
 	must(app.AddTemplates(os.DirFS(path.Path), path.Patterns...))
 
@@ -118,6 +140,16 @@ func compileLess(from, to string) error {
 	defer outfile.Close()
 
 	return commandHelper(exec.Command("lessc", from), outfile)
+}
+
+func compileSass(from, to string) error {
+	outfile, err := os.Create(to)
+	if err != nil {
+		return err
+	}
+	defer outfile.Close()
+
+	return commandHelper(exec.Command("sass", from), outfile)
 }
 
 func commandHelper(cmd *exec.Cmd, out io.Writer) error {

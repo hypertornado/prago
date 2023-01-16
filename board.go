@@ -23,7 +23,7 @@ func (app *App) initBoard() {
 	app.MainBoard.action.parentBoard = app.MainBoard
 	app.dashboardTableMap = make(map[string]*DashboardTable)
 	app.dashboardFigureMap = make(map[string]*DashboardFigure)
-	sysadminBoard = app.NewBoard("sysadmin-board").Name(unlocalized("Sysadmin"))
+	sysadminBoard = app.NewBoard("sysadmin-board").Name(unlocalized("Sysadmin")).Icon("glyphicons-basic-501-server.svg")
 
 	app.NewBoard("empty-board")
 

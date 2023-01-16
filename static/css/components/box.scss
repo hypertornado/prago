@@ -1,13 +1,5 @@
 .box {
-  border: 1px solid #eee;
-  margin: 20px auto;
-  max-width: ~"min(600px, 100vw)";
-  width: 100%;
-  margin-bottom: 20px;
-  background-color: #fff;
-  border-radius: 10px;
-  margin-top: 0px;
-  overflow: hidden;
+  @include box;
 }
 
 .box:first-child {
@@ -44,7 +36,7 @@ a.box_tag {
   background-color: rgba(255, 255, 255, 0.8);
   color: #4078c0;
   text-decoration: none;
-  .shadowMedium;
+  @include shadowMedium;
 }
 
 a.box_tag:hover {

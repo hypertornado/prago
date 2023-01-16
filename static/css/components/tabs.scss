@@ -14,7 +14,7 @@
 .admin_navigation_tabs_content {
   display: flex;
   border-radius: 100px;
-  background: @baseColorBackground;
+  background: $baseColorBackground;
   padding: 0px 4px;
   margin: 0 auto;
 
@@ -32,7 +32,7 @@
   text-decoration: none;
   padding: 1px 20px;
   border-radius: 100px;
-  color: @black;
+  color: $black;
   display: flex;
   align-items: center;
   flex-shrink: 0;
@@ -64,8 +64,10 @@
 
 .admin_navigation_tab-selected,
 .admin_navigation_tab-selected:hover {
-  background-color: @baseColor;
+  background-color: $baseColor;
   color: white;
   box-shadow: none;
-  .shadow;
+  @include shadow;
 }
+
+

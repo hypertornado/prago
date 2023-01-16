@@ -28,7 +28,7 @@
 }
 
 a.dashboard_figure:hover {
-  border-color: @baseColor;
+  border-color: $baseColor;
 }
 
 a.dashboard_figure {
@@ -40,7 +40,7 @@ a.dashboard_figure {
 }
 
 .dashboard_figure_name {
-  color: @black;
+  color: $black;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -50,14 +50,14 @@ a.dashboard_figure {
   font-size: 1.3rem;
   line-height: 1.3em;
   font-weight: 500;
-  color: @black;
+  color: $black;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
 }
 
 .dashboard_figure_description {
-  color: @gray;
+  color: $gray;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -66,11 +66,11 @@ a.dashboard_figure {
 }
 
 .dashboard_figure-green .dashboard_figure_description {
-  color: @green;
+  color: $green;
 }
 
 .dashboard_figure-red .dashboard_figure_description {
-  color: @red;
+  color: $red;
 }
 
 .dashboard_figure_loader {
@@ -104,3 +104,4 @@ a.dashboard_figure {
     line-height: 1.3em;
   }
 }
+

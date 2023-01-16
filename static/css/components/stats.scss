@@ -15,8 +15,7 @@
   background: white;
   margin: 0px 10px 10px 0px;
   border: 1px solid #eee;
-  //background-color: #fafafa;
-  .shadowMedium;
+  @include shadowMedium;
   padding: 3px 0px;
   border-radius: 10px;
 }
@@ -36,7 +35,7 @@
 
 .admin_stats_section_row:hover {
   background-color: #fafafa;
-  background-color: @baseColorBackgroundLighter;
+  background-color: $baseColorBackgroundLighter;
 }
 
 .admin_stats_section_row_name {
@@ -78,8 +77,8 @@
 .admin_stats_section_row_graph_content {
   border-radius: 3px;
   background-color: #ccc;
-  background-color: @baseColorBackground;
-  background-color: @baseColor;
+  background-color: $baseColorBackground;
+  background-color: $baseColor;
 }
 
 .admin_stats_section_row_description {
@@ -94,7 +93,7 @@
 }
 
 .admin_stats_section_row_description_count {
-  color: @black;
+  color: $black;
 }
 
 .admin_stats_section_row_description_percent {

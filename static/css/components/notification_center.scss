@@ -7,7 +7,7 @@
 }
 
 .notification {
-  .shadowLarge;
+  @include shadowLarge;
   background-color: white;
   border-radius: 10px;
   margin-bottom: 10px;
@@ -17,12 +17,12 @@
 }
 
 .notification-clickable {
-  background-color: @baseColorBackgroundLighter;
+  background-color: $baseColorBackgroundLighter;
   cursor: pointer;
 }
 
 .notification-clickable:hover {
-  background-color: @baseColorBackground;
+  background-color: $baseColorBackground;
 }
 
 .notification-clickable:active {
@@ -45,7 +45,7 @@
   text-align: center;
   border-radius: 10px;
   background-color: white;
-  .shadow;
+  @include shadow;
   cursor: pointer;
 }
 
@@ -76,7 +76,7 @@
 }
 
 .notification_left {
-  .rectangle;
+  @include rectangle;
   display: none;
   flex-grow: 0;
   flex-shrink: 0;
@@ -117,7 +117,7 @@
 .notification_description {
   font-size: 0.9rem;
   line-height: 1.3em;
-  color: @gray;
+  color: $gray;
 
   text-overflow: ellipsis;
   overflow: hidden;
@@ -130,7 +130,7 @@
 
 .notification_action-visible {
   display: block;
-  background-color: @baseColorBackgroundLighter;
+  background-color: $baseColorBackgroundLighter;
   border-radius: 5px;
   text-align: center;
   font-size: 0.9em;
@@ -139,9 +139,9 @@
   margin-top: 10px;
   cursor: pointer;
   font-weight: 500;
-  background-color: @baseColor;
+  background-color: $baseColor;
   color: white;
-  .shadow;
+  @include shadow;
 }
 
 .notification_action-visible:hover {
@@ -180,7 +180,7 @@
 }
 
 .notification-success .notification_name {
-  color: @green;
+  color: $green;
 }
 
 .notification-success .notification_left {
@@ -190,8 +190,10 @@
 }
 
 .notification-fail .notification_name {
-  color: @red;
+  color: $red;
 }
 
 .notification-fail .notification_left {
 }
+
+

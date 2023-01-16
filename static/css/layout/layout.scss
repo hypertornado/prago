@@ -10,7 +10,7 @@ html {
 }
 
 ::placeholder {
-  color: @gray;
+  color: $gray;
   opacity: 1;
 }
 
@@ -20,12 +20,12 @@ body {
     sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   font-size: 14px;
   line-height: 1.4em;
-  color: @black;
-  background-color: @backgroundGrayColor;
+  color: $black;
+  background-color: $backgroundGrayColor;
 }
 
 code {
-  background-color: @backgroundGrayColor;
+  background-color: $backgroundGrayColor;
   padding: 0px 3px;
   border-radius: 3px;
   border: 1px solid #ddd;
@@ -87,16 +87,16 @@ p {
 }
 
 a {
-  color: @baseColor;
+  color: $baseColor;
 }
 
 a:hover {
   text-decoration: none;
-  background-color: @baseColorBackgroundLighter;
+  background-color: $baseColorBackgroundLighter;
 }
 
 a:active {
-  background-color: @baseColorBackground;
+  background-color: $baseColorBackground;
 }
 
 ul {
@@ -110,7 +110,7 @@ pre {
 }
 
 .smap_edit_label {
-  background: @red;
+  background: $red;
   width: 20px;
   height: 20px;
   border-radius: 10px;

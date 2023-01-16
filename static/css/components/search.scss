@@ -17,7 +17,7 @@ a.search {
 }
 
 .search_category {
-  color: @gray;
+  color: $gray;
   font-size: 0.8rem;
   text-transform: uppercase;
 }
@@ -28,7 +28,7 @@ a.search {
 
 .search_description {
   font-size: 0.9rem;
-  color: @gray;
+  color: $gray;
 }
 
 .search_pagination {
@@ -49,7 +49,7 @@ a.search_pagination_page {
 a.search_pagination_page-selected {
   font-weight: bold;
   text-decoration: none;
-  color: @black;
+  color: $black;
 }
 
 .searchbox {
@@ -59,7 +59,7 @@ a.search_pagination_page-selected {
   max-width: 600px;
   background: white;
   border-radius: 10px;
-  .shadow;
+  @include shadow;
   position: relative;
 }
 
@@ -119,7 +119,7 @@ a.search_pagination_page-selected {
   left: 0px;
   right: 0px;
   top: 42px;
-  .shadow;
+  @include shadow;
   border-radius: 0px 0px 10px 10px;
   padding: 0px;
   overflow: hidden;
@@ -146,7 +146,7 @@ a.search_pagination_page-selected {
 
 a.admin_search_suggestion-selected,
 a.admin_search_suggestion-selected:active {
-  background: @baseColorBackground !important;
+  background: $baseColorBackground !important;
 }
 
 .admin_search_suggestion_left {
@@ -169,7 +169,7 @@ a.admin_search_suggestion-selected:active {
 
 .admin_search_suggestion_category {
   text-transform: uppercase;
-  color: @black;
+  color: $black;
   font-size: 0.7rem;
 }
 
@@ -179,7 +179,7 @@ a.admin_search_suggestion-selected:active {
 }
 
 .admin_search_suggestion_description {
-  color: @gray;
+  color: $gray;
 }
 
 @media (max-width: 800px) {

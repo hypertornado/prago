@@ -69,8 +69,9 @@
 }
 
 a.board_resource:hover {
-  border-color: @baseColor;
+  border-color: $baseColor;
 }
+
 
 a.board_resource {
   text-decoration: none;
@@ -118,7 +119,7 @@ a.board_resource {
   margin: 20px auto;
   max-width: 600px;
   margin-top: 30px;
-  color: @gray;
+  color: $gray;
 
   //display: none;
 }

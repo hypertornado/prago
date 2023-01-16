@@ -97,8 +97,8 @@
 
 .list_header_item_resizer {
   width: 5px;
-  border-right: 2px solid @backgroundGrayColor;
-  border-left: 2px solid @backgroundGrayColor;
+  border-right: 2px solid $backgroundGrayColor;
+  border-left: 2px solid $backgroundGrayColor;
   background-color: #eee;
   cursor: col-resize;
 
@@ -123,15 +123,15 @@
 
 .list_header_item_name-canorder {
   cursor: pointer;
-  color: @baseColor;
+  color: $baseColor;
 }
 
 .list_header_item_name-canorder:hover {
-  background-color: @baseColorBackgroundLighter;
+  background-color: $baseColorBackgroundLighter;
 }
 
 .list_header_item_name-canorder:active {
-  background-color: @baseColorBackground;
+  background-color: $baseColorBackground;
 }
 
 @keyframes loading_table {
@@ -184,7 +184,8 @@
 }
 
 .list_multiple_actions_content {
-  .box;
+  @include box;
+
   pointer-events: initial;
   display: flex;
   align-items: center;
@@ -200,11 +201,11 @@
 
 @media (hover: hover) {
   .list_row:hover .list_cell {
-    background: @baseColorBackgroundLighter !important;
+    background: $baseColorBackgroundLighter !important;
   }
 
   .list_row:active .list_cell {
-    background-color: @baseColorBackground !important;
+    background-color: $baseColorBackground !important;
   }
 
   .list_row:hover .list_buttons {
@@ -218,7 +219,7 @@
 
 .ordered,
 .ordered:hover {
-  background: @baseColorBackground;
+  background: $baseColorBackground;
 }
 
 .ordered .list_header_item_name:after,
@@ -286,11 +287,11 @@
 }
 
 .list_cell_multiple_pseudocheckbox:hover {
-  background-color: @baseColorBackgroundLighter;
+  background-color: $baseColorBackgroundLighter;
 }
 
 .list_row_multiple-checked .list_cell_multiple_pseudocheckbox {
-  background-color: @baseColor;
+  background-color: $baseColor;
 }
 
 .list_cell_multiple_pseudocheckbox::after {
@@ -298,7 +299,7 @@
 }
 
 .list_row_multiple-checked .list_cell_multiple_pseudocheckbox::after {
-  background-color: @baseColor;
+  background-color: $baseColor;
   content: "✓";
   color: white;
 }
@@ -381,7 +382,7 @@
 .list_count {
   display: block;
   font-size: 0.9rem;
-  color: @gray;
+  color: $gray;
   white-space: nowrap;
   margin: 0px 5px;
 }
