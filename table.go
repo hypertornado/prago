@@ -155,7 +155,12 @@ func newCell(item interface{}) *TableCell {
 
 	var number bool
 
-	if reflect.TypeOf(item).Kind() == reflect.Int || reflect.TypeOf(item).Kind() == reflect.Int64 {
+	if reflect.TypeOf(item).Kind() == reflect.Int {
+		item = humanizeNumber(int64(item.(int)))
+		number = true
+	}
+
+	if reflect.TypeOf(item).Kind() == reflect.Int64 {
 		item = humanizeNumber(item.(int64))
 		number = true
 	}

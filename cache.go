@@ -56,11 +56,23 @@ func (ci *cacheItem) reloadValue() {
 	ci.updating = true
 	ci.mutex.Unlock()
 
-	val := ci.createFn(context.TODO())
+	var val interface{}
+
+	var panicked bool
+
+	defer func() {
+		if err := recover(); err != nil {
+			panicked = true
+		}
+	}()
+
+	val = ci.createFn(context.TODO())
 
 	ci.mutex.Lock()
-	ci.value = val
-	ci.updatedAt = time.Now()
+	if !panicked {
+		ci.value = val
+		ci.updatedAt = time.Now()
+	}
 	ci.updating = false
 	ci.mutex.Unlock()
 }
@@ -101,7 +113,6 @@ func loadCache[T any](c *cache, name string, createFn func(context.Context) T) T
 	}
 
 	if item.isStale() {
-		//fmt.Println("reloading", name)
 		go func() {
 			item.reloadValue()
 		}()

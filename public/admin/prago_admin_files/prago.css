@@ -912,7 +912,6 @@ select.admin_timestamp_minute {
   background-color: #fff;
   border-radius: 10px;
   margin-top: 0px;
-  overflow: hidden;
 }
 
 .box:first-child {
@@ -1179,7 +1178,6 @@ a.box_tag:hover {
   background-color: #fff;
   border-radius: 10px;
   margin-top: 0px;
-  overflow: hidden;
   pointer-events: initial;
   display: flex;
   align-items: center;
@@ -2913,7 +2911,7 @@ a.admin_stats_section_row {
   width: 25px;
   height: 25px;
   border: 0px solid transparent;
-  flex-shrink: 10;
+  flex-shrink: 0;
   opacity: 0;
   border: 0px solid red;
   display: flex;
