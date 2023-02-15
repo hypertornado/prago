@@ -31,28 +31,16 @@ type user struct {
 	UpdatedAt         time.Time `prago-can-view:"sysadmin" prago-preview:"true"`
 }
 
-type userData struct {
-	user *user
-	app  *App
-}
-
-func newUserData(user *user, app *App) *userData {
-	return &userData{
-		user: user,
-		app:  app,
-	}
-}
-
-func (d *userData) Locale() string {
-	return d.user.Locale
-}
-
-func (d *userData) Authorize(permission Permission) bool {
-	return d.app.authorize(true, d.user.Role, permission)
-}
-
 func fixEmail(in string) string {
 	return strings.ToLower(in)
+}
+
+func (user *user) LongName() string {
+	ret := user.Name
+	if ret == "" {
+		ret = user.Email
+	}
+	return ret
 }
 
 func (user *user) GetName(string) string {

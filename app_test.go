@@ -204,7 +204,7 @@ func TestQuery(t *testing.T) {
 
 func TestResource(t *testing.T) {
 	resource := prepareResource()
-	items, err := resource.data.getListContent(context.Background(), newUserData(&user{Role: "sysadmin"}, resource.data.app), map[string][]string{
+	items, err := resource.data.getListContent(context.Background(), resource.data.app.newUserData(&user{Role: "sysadmin"}), map[string][]string{
 		"_order": {"id"},
 	})
 	if err != nil {
@@ -233,7 +233,7 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	items, err = resource.data.getListContent(context.Background(), newUserData(&user{Role: "sysadmin"}, resource.data.app), map[string][]string{
+	items, err = resource.data.getListContent(context.Background(), resource.data.app.newUserData(&user{Role: "sysadmin"}), map[string][]string{
 		"_order": {"id"},
 		"_page":  {"1"},
 	})

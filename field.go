@@ -39,11 +39,11 @@ func (resourceData *resourceData) Field(name string) *Field {
 	return resourceData.fieldMap[columnName(name)]
 }
 
-func (field *Field) authorizeView(authorize Authorize) bool {
-	if !authorize.Authorize(field.resource.canView) {
+func (field *Field) authorizeView(userData UserData) bool {
+	if !userData.Authorize(field.resource.canView) {
 		return false
 	}
-	if !authorize.Authorize(field.canView) {
+	if !userData.Authorize(field.canView) {
 		return false
 	}
 	return true

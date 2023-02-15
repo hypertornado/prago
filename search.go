@@ -273,7 +273,7 @@ func (resourceData *resourceData) saveSearchItem(ctx context.Context, item any) 
 func (resourceData *resourceData) saveSearchItemWithRoles(ctx context.Context, bulkUpdater *pragelastic.BulkUpdater[searchItem], item any, roles []string) error {
 
 	//TODO: ugly hack with sysadmin user, remove suggestions
-	previewer := resourceData.previewer(newUserData(&user{Role: "sysadmin"}, resourceData.app), item)
+	previewer := resourceData.previewer(resourceData.app.newUserData(&user{Role: "sysadmin"}), item)
 	if previewer == nil {
 		return errors.New("wrong item to relation data conversion")
 	}

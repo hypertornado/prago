@@ -9,19 +9,6 @@ import (
 	"time"
 )
 
-type Locale interface {
-	Locale() string
-}
-
-type Authorize interface {
-	Authorize(Permission) bool
-}
-
-type UserData interface {
-	Locale
-	Authorize
-}
-
 // Request represents structure for http request
 type Request struct {
 	uuid       string
@@ -80,6 +67,10 @@ func (request *Request) role() string {
 		return user.Role
 	}
 	return ""
+}
+
+func (request *Request) Name() string {
+	return request.getUser().LongName()
 }
 
 func (request *Request) Locale() string {

@@ -80,11 +80,7 @@ func getResourceCountsMap(request *Request) map[string]string {
 }
 
 func getMenuUserSection(request *Request) *menuSection {
-	userName := request.getUser().Name
-	if userName == "" {
-		userName = request.getUser().Email
-	}
-
+	userName := request.getUser().LongName()
 	mainItems, _ := request.app.MainBoard.getItems(request, true)
 	userSection := menuSection{
 		Name:  userName,
