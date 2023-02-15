@@ -75,18 +75,18 @@ func (board *Board) IsMainBoard() bool {
 	return board == board.app.MainBoard
 }
 
-func (board *Board) isEmpty(request *Request) bool {
+func (board *Board) isEmpty(userData UserData, urlPath string) bool {
 	if board.IsMainBoard() {
 		return false
 	}
 
 	for _, v := range board.dashboardGroups {
-		if v.isVisible(request) {
+		if v.isVisible(userData) {
 			return false
 		}
 	}
 
-	items, _ := board.getItems(request, false)
+	items, _ := board.getItems(userData, urlPath, false, "")
 	if len(items) > 0 {
 		return false
 	}

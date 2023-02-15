@@ -1,5 +1,51 @@
 package prago
 
+import (
+	"context"
+	"sync"
+)
+
+func (app *App) initUserDataCache() {
+	app.userDataCache = make(map[int64]*userData)
+	app.userDataCacheMutex = &sync.RWMutex{}
+
+}
+
+func (app *App) userDataCacheGet(id int64) *userData {
+	app.userDataCacheMutex.RLock()
+	ret := app.userDataCache[id]
+	app.userDataCacheMutex.RUnlock()
+
+	if ret != nil {
+		return ret
+	}
+
+	user := app.UsersResource.Query(context.Background()).ID(id)
+	if user == nil {
+		return nil
+	}
+
+	ret = app.newUserData(user)
+
+	app.userDataCacheMutex.Lock()
+	defer app.userDataCacheMutex.Unlock()
+
+	app.userDataCache[id] = ret
+	return ret
+}
+
+func (app *App) userDataCacheDelete(id int64) {
+	app.userDataCacheMutex.Lock()
+	defer app.userDataCacheMutex.Unlock()
+	delete(app.userDataCache, id)
+}
+
+func (app *App) userDataCacheDeleteAll() {
+	app.userDataCacheMutex.Lock()
+	defer app.userDataCacheMutex.Unlock()
+	app.userDataCache = make(map[int64]*userData)
+}
+
 type UserData interface {
 	Name() string
 	Locale() string

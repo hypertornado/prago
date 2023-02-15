@@ -20,7 +20,7 @@ type pageNoLogin struct {
 
 func renderPage(request *Request, page page) {
 	page.Language = request.Locale()
-	page.Menu = request.app.getMenu(request)
+	page.Menu = request.app.getMenu(request, request.Request().URL.Path, request.csrfToken())
 
 	for _, v := range page.Navigation.Tabs {
 		if v.Selected {

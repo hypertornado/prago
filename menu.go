@@ -12,7 +12,7 @@ import (
 type menu struct {
 	Language    string
 	SearchQuery string
-	Sections    []menuSection
+	Sections    []*menuSection
 }
 
 type menuSection struct {
@@ -50,17 +50,17 @@ func (app *App) initMenuAPI() {
 
 }
 
-func (app *App) getMenu(request *Request) (ret menu) {
-	items, _ := app.MainBoard.getMainItems(request)
+func (app *App) getMenu(userData UserData, urlPath, csrfToken string) (ret menu) {
+	items, _ := app.MainBoard.getMainItems(userData, urlPath, csrfToken)
 
-	resourceSection := menuSection{
+	resourceSection := &menuSection{
 		Items: items,
 	}
 
 	ret.Sections = append(ret.Sections, resourceSection)
-	ret.Sections = append(ret.Sections, *getMenuUserSection(request))
+	ret.Sections = append(ret.Sections, app.getMenuUserSection(userData, urlPath, csrfToken))
 
-	ret.Language = request.Locale()
+	ret.Language = userData.Locale()
 	return ret
 }
 
@@ -79,9 +79,9 @@ func getResourceCountsMap(request *Request) map[string]string {
 	return ret
 }
 
-func getMenuUserSection(request *Request) *menuSection {
-	userName := request.getUser().LongName()
-	mainItems, _ := request.app.MainBoard.getItems(request, true)
+func (app *App) getMenuUserSection(userData UserData, urlPath, csrfToken string) *menuSection {
+	userName := userData.Name()
+	mainItems, _ := app.MainBoard.getItems(userData, urlPath, true, csrfToken)
 	userSection := menuSection{
 		Name:  userName,
 		Items: mainItems,
@@ -90,11 +90,13 @@ func getMenuUserSection(request *Request) *menuSection {
 	return &userSection
 }
 
-func (board *Board) getMainItems(request *Request) ([]menuItem, bool) {
-	return board.getItems(request, false)
+//request.Request().URL.Path
+
+func (board *Board) getMainItems(userData UserData, urlPath string, csrfToken string) ([]menuItem, bool) {
+	return board.getItems(userData, urlPath, false, csrfToken)
 }
 
-func (board *Board) getItems(request *Request, isUserMenu bool) ([]menuItem, bool) {
+func (board *Board) getItems(userData UserData, urlPath string, isUserMenu bool, csrfToken string) ([]menuItem, bool) {
 	app := board.app
 	var ret []menuItem
 
@@ -107,13 +109,13 @@ func (board *Board) getItems(request *Request, isUserMenu bool) ([]menuItem, boo
 				continue
 			}
 
-			if request.Authorize(resourceData.canView) {
+			if userData.Authorize(resourceData.canView) {
 				resourceURL := resourceData.getURL("")
 				var selected bool
-				if request.Request().URL.Path == resourceURL {
+				if urlPath == resourceURL {
 					selected = true
 				}
-				if strings.HasPrefix(request.Request().URL.Path, resourceURL+"/") {
+				if strings.HasPrefix(urlPath, resourceURL+"/") {
 					selected = true
 				}
 
@@ -123,7 +125,7 @@ func (board *Board) getItems(request *Request, isUserMenu bool) ([]menuItem, boo
 
 				ret = append(ret, menuItem{
 					Icon: resourceData.icon,
-					Name: resourceData.pluralName(request.Locale()),
+					Name: resourceData.pluralName(userData.Locale()),
 					//Subname:  humanizeNumber(resourceData.getCachedCount(request.r.Context())),
 					URL:      resourceURL,
 					Selected: selected,
@@ -145,24 +147,24 @@ func (board *Board) getItems(request *Request, isUserMenu bool) ([]menuItem, boo
 		if v.isHiddenInMenu {
 			continue
 		}
-		if !request.Authorize(v.permission) {
+		if !userData.Authorize(v.permission) {
 			continue
 		}
 
 		var selected bool
 		fullURL := app.getAdminURL(v.url)
-		if request.Request().URL.Path == fullURL {
+		if urlPath == fullURL {
 			selected = true
 			isExpanded = true
 		}
 
 		if fullURL == "/admin/logout" {
-			fullURL += "?_csrfToken=" + request.csrfToken()
+			fullURL += "?_csrfToken=" + csrfToken
 		}
 
 		var isBoard, isMainBoard bool
 		if v.isPartOfBoard != nil {
-			if v.isPartOfBoard.isEmpty(request) {
+			if v.isPartOfBoard.isEmpty(userData, urlPath) {
 				continue
 			}
 
@@ -174,7 +176,7 @@ func (board *Board) getItems(request *Request, isUserMenu bool) ([]menuItem, boo
 
 		menuItem := menuItem{
 			Icon:        v.icon,
-			Name:        v.name(request.Locale()),
+			Name:        v.name(userData.Locale()),
 			URL:         fullURL,
 			Selected:    selected,
 			Expanded:    selected,
@@ -183,7 +185,7 @@ func (board *Board) getItems(request *Request, isUserMenu bool) ([]menuItem, boo
 		}
 
 		if v.isPartOfBoard != nil && v.isPartOfBoard != app.MainBoard {
-			subitems, subitemsIsExpanded := v.isPartOfBoard.getMainItems(request)
+			subitems, subitemsIsExpanded := v.isPartOfBoard.getMainItems(userData, urlPath, csrfToken)
 			if subitemsIsExpanded {
 				menuItem.Expanded = true
 				isExpanded = true
@@ -195,7 +197,7 @@ func (board *Board) getItems(request *Request, isUserMenu bool) ([]menuItem, boo
 
 	}
 
-	sortSection(ret, request.Locale())
+	sortSection(ret, userData.Locale())
 
 	return ret, isExpanded
 }

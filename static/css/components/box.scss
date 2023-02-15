@@ -1,5 +1,6 @@
 .box {
   @include box;
+  //@include shadowMedium;
 }
 
 .box:first-child {

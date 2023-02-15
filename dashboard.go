@@ -141,15 +141,15 @@ func (table *DashboardTable) RefreshTime(seconds int64) *DashboardTable {
 	return table
 }
 
-func (group *Dashboard) isVisible(request *Request) bool {
+func (group *Dashboard) isVisible(userData UserData) bool {
 	for _, v := range group.figures {
-		if request.Authorize(v.permission) {
+		if userData.Authorize(v.permission) {
 			return true
 		}
 	}
 
 	for _, v := range group.tables {
-		if request.Authorize(v.permission) {
+		if userData.Authorize(v.permission) {
 			return true
 		}
 	}

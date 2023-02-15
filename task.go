@@ -59,7 +59,7 @@ func (app *App) postInitTaskManager() {
 		if !request.Authorize(task.permission) {
 			panic("not authorize")
 		}
-		app.taskManager.run(task, request, request.Request().MultipartForm)
+		app.taskManager.run(task, request.UserID(), request.Locale(), request.Request().MultipartForm)
 		request.Redirect("/admin")
 	})
 
@@ -123,7 +123,7 @@ func (tm *taskManager) startCRON() {
 			for _, v := range tm.tasksMap {
 				if v.cron > 0 {
 					if tm.startedAt.Add(v.cron).Before(time.Now()) && v.lastStarted.Add(v.cron).Before(time.Now()) {
-						tm.run(v, nil, nil)
+						tm.run(v, 0, "en", nil)
 					}
 				}
 			}
@@ -289,13 +289,12 @@ func (app *App) TaskGroup(name func(string) string) *TaskGroup {
 	}
 }
 
-func (tm *taskManager) run(t *Task, request *Request, form *multipart.Form) {
-	var language = request.Locale()
+func (tm *taskManager) run(t *Task, userID int64, locale string, form *multipart.Form) {
 
-	var name string = t.name(language)
+	var name string = t.name(locale)
 
 	var notification *Notification = tm.app.Notification(name)
-	notification.preName = t.group.name(language)
+	notification.preName = t.group.name(locale)
 
 	activity := &TaskActivity{
 		task:         t,
@@ -310,7 +309,6 @@ func (tm *taskManager) run(t *Task, request *Request, form *multipart.Form) {
 
 	notification.disableCancel = true
 
-	userID := request.UserID()
 	if userID > 0 {
 		notification.Push(userID)
 	}

@@ -2587,10 +2587,10 @@ a.board_resource {
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  padding: 10px 5px;
+  padding: 10px 10px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  grid-gap: 5px 5px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-gap: 10px;
 }
 
 .dashboard_figure {
@@ -2601,6 +2601,7 @@ a.board_resource {
   background: white;
   border: 1px solid #eee;
   position: relative;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 a.dashboard_figure:hover {
@@ -2669,6 +2670,7 @@ a.dashboard_figure {
   overflow-x: auto;
   width: 100%;
   margin: 0px;
+  padding: 0px 10px;
 }
 
 @media (max-width: 800px) {
@@ -2970,6 +2972,7 @@ a.admin_stats_section_row {
 }
 
 .menu_item_icon {
+  height: 20px;
   width: 20px;
   margin-right: 5px;
 }

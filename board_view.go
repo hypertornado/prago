@@ -40,7 +40,7 @@ type DashboardViewTable struct {
 
 func (board *Board) boardView(request *Request) *BoardView {
 	ret := &BoardView{
-		AppName:     request.app.name(request.Locale()),
+		AppName:     board.app.name(request.Locale()),
 		BoardName:   board.action.name(request.Locale()),
 		BoardIcon:   board.action.icon,
 		BoardURL:    board.action.getURL(),
@@ -48,12 +48,15 @@ func (board *Board) boardView(request *Request) *BoardView {
 		Role:        request.role(),
 	}
 
-	ret.Resources, _ = board.getMainItems(request)
+	urlPath := request.Request().URL.Path
+	csrfToken := request.csrfToken()
+
+	ret.Resources, _ = board.getMainItems(request, urlPath, csrfToken)
 
 	ret.MainDashboard = board.MainDashboard.view(request)
 
 	if board.IsMainBoard() {
-		ret.UserSection = getMenuUserSection(request)
+		ret.UserSection = board.app.getMenuUserSection(request, urlPath, csrfToken)
 	}
 
 	for _, dashboard := range board.dashboardGroups {

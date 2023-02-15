@@ -11,10 +11,10 @@
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  padding: 10px 5px;
+  padding: 10px 10px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  grid-gap: 5px 5px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-gap: 10px;
 }
 
 .dashboard_figure {
@@ -25,6 +25,7 @@
   background: white;
   border: 1px solid #eee;
   position: relative;
+  @include shadowMedium;
 }
 
 a.dashboard_figure:hover {
@@ -95,6 +96,7 @@ a.dashboard_figure {
   overflow-x: auto;
   width: 100%;
   margin: 0px;
+  padding: 0px 10px;
 }
 
 @media (max-width: 800px) {

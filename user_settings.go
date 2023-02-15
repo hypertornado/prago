@@ -67,6 +67,9 @@ func initUserSettings(app *App) {
 				}
 			}
 
+			app := vc.Request().app
+			app.userDataCacheDelete(user.ID)
+
 			vc.Request().AddFlashMessage(messages.Get(newLocale, "admin_settings_changed"))
 			vc.Validation().RedirectionLocaliton = app.getAdminURL("")
 		}
@@ -87,7 +90,8 @@ func initUserSettings(app *App) {
 
 			valid := true
 			oldpassword := vc.GetValue("oldpassword")
-			if !request.getUser().isPassword(oldpassword) {
+			user := request.getUser()
+			if !user.isPassword(oldpassword) {
 				valid = false
 				vc.AddItemError("oldpassword", messages.Get(locale, "admin_register_password"))
 			}
@@ -99,6 +103,7 @@ func initUserSettings(app *App) {
 			}
 
 			if valid {
+				request.app.userDataCacheDelete(user.ID)
 				request.AddFlashMessage(messages.Get(request.Locale(), "admin_password_changed"))
 				vc.Validation().RedirectionLocaliton = "/admin"
 			}

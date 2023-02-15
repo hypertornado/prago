@@ -19,7 +19,7 @@ type Request struct {
 	app        *App
 	session    *requestSession
 	//userID     int64
-	cachedUser *user
+	//cachedUser *user
 }
 
 // Request returns underlying http.Request
@@ -39,7 +39,6 @@ func (request Request) Param(name string) string {
 
 // UserID returns id of logged in user, returns 0 if no user is logged
 func (request Request) UserID() int64 {
-
 	userID, ok := request.session.session.Values[userIDSessionName].(int64)
 	if !ok {
 		return 0
@@ -49,37 +48,38 @@ func (request Request) UserID() int64 {
 }
 
 func (request *Request) getUser() *user {
-	if request.cachedUser != nil {
-		return request.cachedUser
-	}
-
 	user := request.app.UsersResource.Query(request.r.Context()).ID(request.UserID())
 	if user == nil {
 		return nil
 	}
-	request.cachedUser = user
 	return user
 }
 
 func (request *Request) role() string {
-	user := request.getUser()
-	if user != nil {
-		return user.Role
+	userID := request.UserID()
+	data := request.app.userDataCacheGet(userID)
+	if data == nil {
+		return ""
 	}
-	return ""
+	return data.role
 }
 
 func (request *Request) Name() string {
-	return request.getUser().LongName()
+	userID := request.UserID()
+	data := request.app.userDataCacheGet(userID)
+	if data == nil {
+		return ""
+	}
+	return data.name
 }
 
 func (request *Request) Locale() string {
-	user := request.getUser()
-	if user == nil {
+	userID := request.UserID()
+	data := request.app.userDataCacheGet(userID)
+	if data == nil {
 		return localeFromRequest(request)
 	}
-	return user.Locale
-
+	return data.locale
 }
 
 func (request Request) Authorize(permission Permission) bool {

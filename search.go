@@ -173,23 +173,10 @@ func (app *App) suggestItems(q string, request *Request) (ret []*searchItem, err
 
 func (app *App) searchWithoutElastic(q string, request *Request) (ret []*searchItem) {
 	q = normalizeCzechString(q)
-	menu := app.getMenu(request)
+	menu := app.getMenu(request, "", "")
 	for _, section := range menu.Sections {
-
 		for _, item := range section.Items {
-
 			ret = append(ret, item.SearchWithoutElastic(q)...)
-
-			/*if strings.HasPrefix(item.URL, "/admin/logout") {
-				continue
-			}
-			name := normalizeCzechString(item.Name)
-			if strings.Contains(name, q) {
-				ret = append(ret, &searchItem{
-					Name: item.Name,
-					URL:  item.URL,
-				})
-			}*/
 		}
 	}
 	return ret

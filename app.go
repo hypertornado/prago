@@ -6,6 +6,7 @@ import (
 	"embed"
 	"os"
 	"reflect"
+	"sync"
 
 	"github.com/hypertornado/prago/pragelastic"
 )
@@ -37,7 +38,10 @@ type App struct {
 	accessController *controller
 	adminController  *controller
 
-	UsersResource       *Resource[user]
+	UsersResource      *Resource[user]
+	userDataCache      map[int64]*userData
+	userDataCacheMutex *sync.RWMutex
+
 	FilesResource       *Resource[File]
 	activityLogResource *Resource[activityLog]
 
@@ -107,6 +111,7 @@ func createApp(codeName string, version string) *App {
 	}
 	app.connectDB(testing)
 
+	app.initUserDataCache()
 	app.initBoard()
 	app.initSettings()
 	app.initElasticsearchClient()

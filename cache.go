@@ -132,6 +132,7 @@ func Cached[T any](app *App, name string, createFn func(context.Context) T) chan
 
 func (app *App) ClearCache() {
 	app.cache.clear()
+	app.userDataCacheDeleteAll()
 }
 
 func (c *cache) forceLoad(cacheName string, createFn func(context.Context) interface{}) interface{} {
