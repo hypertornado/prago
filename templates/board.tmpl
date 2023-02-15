@@ -21,7 +21,7 @@
           </a>
         {{end}}
       </div>
-      <div class="board_user_text">Vítejte v administraci {{.AppName}}.<br>Jste přihlášen(a) jako uživatel <b>{{.UserSection.Name}}</b>{{if .Request.Role}} s oprávněním {{.Request.Role}}{{else}}. Administrátor vám zatím nepřiřadil žádné oprávnění{{end}}.</div>
+      <div class="board_user_text">Vítejte v administraci {{.AppName}}.<br>Jste přihlášen(a) jako uživatel <b>{{.UserSection.Name}}</b>{{if .Role}} s oprávněním {{.Role}}{{else}}. Administrátor vám zatím nepřiřadil žádné oprávnění{{end}}.</div>
     </div>
   {{end}}
   

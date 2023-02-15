@@ -13,7 +13,7 @@ type BoardView struct {
 
 	Dashboards []*DashboardView
 
-	Request *Request
+	Role string
 
 	TasksName string
 	Tasks     *taskViewData
@@ -45,7 +45,7 @@ func (board *Board) boardView(request *Request) *BoardView {
 		BoardIcon:   board.action.icon,
 		BoardURL:    board.action.getURL(),
 		IsMainBoard: board.IsMainBoard(),
-		Request:     request,
+		Role:        request.role(),
 	}
 
 	ret.Resources, _ = board.getMainItems(request)

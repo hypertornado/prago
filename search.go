@@ -137,7 +137,7 @@ func (app *App) initSearch() {
 
 func (app *App) searchItems(q string, page int64, request *Request) (ret []*searchItem, hits int64, err error) {
 	if app.search != nil {
-		ret, hits, err = app.search.Search(q, request.Role(), page, request.r.Context())
+		ret, hits, err = app.search.Search(q, request.role(), page, request.r.Context())
 		must(err)
 		return
 	} else {

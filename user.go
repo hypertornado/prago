@@ -15,13 +15,13 @@ import (
 // User represents admin user account
 // TODO: better handle isactive user
 type user struct {
-	ID                int64     `prago-order-desc:"true"`
-	Name              string    `prago-preview:"true"`
-	Email             string    `prago-unique:"true" prago-preview:"true"`
-	Role              string    `prago-preview:"true" prago-type:"role"`
-	Password          string    `prago-can-view:"nobody"`
-	Locale            string    `prago-can-view:"sysadmin"`
-	IsActive          bool      `prago-preview:"true"`
+	ID       int64  `prago-order-desc:"true"`
+	Name     string `prago-preview:"true"`
+	Email    string `prago-unique:"true" prago-preview:"true"`
+	Role     string `prago-preview:"true" prago-type:"role"`
+	Password string `prago-can-view:"nobody"`
+	Locale   string `prago-can-view:"sysadmin"`
+	//IsActive          bool      `prago-preview:"true"`
 	LoggedInIP        string    `prago-can-view:"sysadmin" prago-preview:"true"`
 	LoggedInUseragent string    `prago-can-view:"sysadmin" prago-preview:"true"`
 	LoggedInTime      time.Time `prago-can-view:"sysadmin"`
@@ -48,7 +48,7 @@ func (d *userData) Locale() string {
 }
 
 func (d *userData) Authorize(permission Permission) bool {
-	return d.app.authorize(d.user, permission)
+	return d.app.authorize(true, d.user.Role, permission)
 }
 
 func fixEmail(in string) string {

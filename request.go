@@ -31,7 +31,7 @@ type Request struct {
 	data       map[string]interface{}
 	app        *App
 	session    *requestSession
-	userID     int64
+	//userID     int64
 	cachedUser *user
 }
 
@@ -52,22 +52,21 @@ func (request Request) Param(name string) string {
 
 // UserID returns id of logged in user, returns 0 if no user is logged
 func (request Request) UserID() int64 {
-	user := request.getUser()
-	if user != nil {
-		return user.ID
+
+	userID, ok := request.session.session.Values[userIDSessionName].(int64)
+	if !ok {
+		return 0
 	}
-	return 0
+
+	return userID
 }
 
 func (request *Request) getUser() *user {
 	if request.cachedUser != nil {
 		return request.cachedUser
 	}
-	userID, ok := request.session.session.Values[userIDSessionName].(int64)
-	if !ok {
-		return nil
-	}
-	user := request.app.UsersResource.Query(request.r.Context()).ID(userID)
+
+	user := request.app.UsersResource.Query(request.r.Context()).ID(request.UserID())
 	if user == nil {
 		return nil
 	}
@@ -75,7 +74,7 @@ func (request *Request) getUser() *user {
 	return user
 }
 
-func (request *Request) Role() string {
+func (request *Request) role() string {
 	user := request.getUser()
 	if user != nil {
 		return user.Role
@@ -93,11 +92,11 @@ func (request *Request) Locale() string {
 }
 
 func (request Request) Authorize(permission Permission) bool {
-	user := request.getUser()
-	if user == nil {
-		return false
+	var logged bool
+	if request.UserID() > 0 {
+		logged = true
 	}
-	return request.app.authorize(user, permission)
+	return request.app.authorize(logged, request.role(), permission)
 }
 
 // SetData sets request data

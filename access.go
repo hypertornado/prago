@@ -98,17 +98,17 @@ func (app *App) Permission(permission Permission) *App {
 	return app
 }
 
-func (app *App) authorize(user *user, permission Permission) bool {
-	if permission == loggedPermission && user != nil {
-		return true
-	}
+func (app *App) authorize(isLogged bool, role string, permission Permission) bool {
 	if permission == everybodyPermission {
 		return true
 	}
-	if user == nil {
+	if permission == loggedPermission && isLogged {
+		return true
+	}
+	if !isLogged {
 		return false
 	}
-	ret := app.accessManager.roles[user.Role][permission]
+	ret := app.accessManager.roles[role][permission]
 	return ret
 }
 

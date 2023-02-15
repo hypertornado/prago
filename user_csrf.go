@@ -14,7 +14,7 @@ func (app *App) generateCSRFToken(userID int64) string {
 	}
 
 	h := md5.New()
-	io.WriteString(h, fmt.Sprintf("%d%s%s", userID, randomness))
+	io.WriteString(h, fmt.Sprintf("%d%s", userID, randomness))
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 

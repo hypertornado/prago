@@ -233,7 +233,7 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	items, err = resource.data.getListContent(context.Background(), &user{Role: "sysadmin"}, map[string][]string{
+	items, err = resource.data.getListContent(context.Background(), newUserData(&user{Role: "sysadmin"}, resource.data.app), map[string][]string{
 		"_order": {"id"},
 		"_page":  {"1"},
 	})

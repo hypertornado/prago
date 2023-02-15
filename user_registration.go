@@ -94,7 +94,6 @@ func registrationValidation(vc ValidationContext) {
 		u := &user{}
 		u.Email = email
 		u.Name = vc.GetValue("name")
-		u.IsActive = true
 		u.Locale = locale
 		must(u.newPassword(vc.GetValue("password")))
 		err := u.sendConfirmEmail(vc.Context(), app, locale)
