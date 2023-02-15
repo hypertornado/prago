@@ -100,10 +100,7 @@ func newRequestValidation(request *Request) *requestValidation {
 }
 
 func (rv *requestValidation) Locale() string {
-	if rv.request.user == nil {
-		return localeFromRequest(rv.request)
-	}
-	return rv.request.user.Locale
+	return rv.request.Locale()
 }
 
 func (rv *requestValidation) GetValue(key string) string {
@@ -139,29 +136,29 @@ func (rv *requestValidation) Context() context.Context {
 }
 
 func (rv *requestValidation) UserHasPermission(permission Permission) bool {
-	return rv.request.UserHasPermission(permission)
+	return rv.request.Authorize(permission)
 }
 
 type valuesValidation struct {
 	values     url.Values
 	validation *formValidation
-	user       *user
+	request    *Request
 	app        *App
 	ctx        context.Context
 }
 
-func newValuesValidation(ctx context.Context, app *App, user *user, values url.Values) *valuesValidation {
+func newValuesValidation(ctx context.Context, app *App, request *Request, values url.Values) *valuesValidation {
 	return &valuesValidation{
 		values:     values,
 		validation: NewFormValidation(),
-		user:       user,
+		request:    request,
 		app:        app,
 		ctx:        ctx,
 	}
 }
 
 func (rv *valuesValidation) Locale() string {
-	return rv.user.Locale
+	return rv.request.Locale()
 }
 
 func (rv *valuesValidation) GetValue(key string) string {
@@ -193,10 +190,7 @@ func (rv *valuesValidation) Request() *Request {
 }
 
 func (rv *valuesValidation) UserHasPermission(permission Permission) bool {
-	if rv.user == nil {
-		return false
-	}
-	return rv.app.authorize(rv.user, permission)
+	return rv.request.Authorize(permission)
 }
 
 func (rv *valuesValidation) Context() context.Context {

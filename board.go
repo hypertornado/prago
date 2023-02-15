@@ -81,7 +81,7 @@ func (board *Board) isEmpty(request *Request) bool {
 	}
 
 	for _, v := range board.dashboardGroups {
-		if v.isVisible(request.app, request.user) {
+		if v.isVisible(request) {
 			return false
 		}
 	}

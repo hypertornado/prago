@@ -21,9 +21,9 @@ type QuickActionAPIResponse struct {
 	return nil
 }*/
 
-func (resourceData *resourceData) getQuickActionViews(itemIface any, user *user) (ret []QuickActionView) {
+func (resourceData *resourceData) getQuickActionViews(itemIface any, request *Request) (ret []QuickActionView) {
 	for _, quickActionData := range resourceData.quickActions {
-		if quickActionData.validation == nil || quickActionData.validation(itemIface, user) {
+		if quickActionData.validation == nil || quickActionData.validation(itemIface, request) {
 			var typStr string
 			switch quickActionData.typ {
 			case quickTypeBasic:
@@ -37,8 +37,8 @@ func (resourceData *resourceData) getQuickActionViews(itemIface any, user *user)
 			}
 
 			view := QuickActionView{
-				ActionURL: quickActionData.getApiURL(resourceData.previewer(user, itemIface).ID()),
-				Name:      quickActionData.singularName(user.Locale),
+				ActionURL: quickActionData.getApiURL(resourceData.previewer(request, itemIface).ID()),
+				Name:      quickActionData.singularName(request.Locale()),
 				TypStr:    typStr,
 			}
 			ret = append(ret, view)

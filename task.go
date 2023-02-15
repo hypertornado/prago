@@ -25,11 +25,11 @@ type taskViewData struct {
 
 func GetTaskViewData(request *Request) taskViewData {
 	var ret taskViewData
-	user := request.user
-	ret.Locale = user.Locale
-	csrfToken := request.app.generateCSRFToken(user)
-	ret.Tasks = request.app.taskManager.getTasks(user, csrfToken)
-	ret.Title = messages.Get(user.Locale, "tasks")
+	userID := request.UserID()
+	ret.Locale = request.Locale()
+	csrfToken := request.app.generateCSRFToken(userID)
+	ret.Tasks = request.app.taskManager.getTasks(userID, request, csrfToken)
+	ret.Title = messages.Get(request.Locale(), "tasks")
 	return ret
 }
 
@@ -56,10 +56,10 @@ func (app *App) postInitTaskManager() {
 		}
 
 		task := app.taskManager.tasksMap[id]
-		if !app.authorize(request.user, task.permission) {
+		if !request.Authorize(task.permission) {
 			panic("not authorize")
 		}
-		app.taskManager.run(task, request.user, request.Request().MultipartForm)
+		app.taskManager.run(task, request, request.Request().MultipartForm)
 		request.Redirect("/admin")
 	})
 
@@ -152,11 +152,11 @@ func (t *Task) taskView(locale, csrfToken string) taskView {
 	}
 }
 
-func (tm *taskManager) getTasks(user *user, csrfToken string) (ret []taskViewGroup) {
+func (tm *taskManager) getTasks(userID int64, userData UserData, csrfToken string) (ret []taskViewGroup) {
 
 	var tasks []*Task
 	for _, v := range tm.tasksMap {
-		if tm.app.authorize(user, v.permission) {
+		if userData.Authorize(v.permission) {
 			tasks = append(tasks, v)
 		}
 	}
@@ -166,8 +166,8 @@ func (tm *taskManager) getTasks(user *user, csrfToken string) (ret []taskViewGro
 		t2 := tasks[j]
 
 		compareGroup := collate.New(language.Czech).CompareString(
-			t1.group.name(user.Locale),
-			t2.group.name(user.Locale),
+			t1.group.name(userData.Locale()),
+			t2.group.name(userData.Locale()),
 		)
 		if compareGroup < 0 {
 			return true
@@ -183,10 +183,10 @@ func (tm *taskManager) getTasks(user *user, csrfToken string) (ret []taskViewGro
 	var lastGroup *TaskGroup
 	for _, v := range tasks {
 		if v.group != lastGroup {
-			ret = append(ret, taskViewGroup{Name: v.group.name(user.Locale)})
+			ret = append(ret, taskViewGroup{Name: v.group.name(userData.Locale())})
 		}
 
-		ret[len(ret)-1].Tasks = append(ret[len(ret)-1].Tasks, v.taskView(user.Locale, csrfToken))
+		ret[len(ret)-1].Tasks = append(ret[len(ret)-1].Tasks, v.taskView(userData.Locale(), csrfToken))
 		lastGroup = v.group
 	}
 
@@ -289,18 +289,10 @@ func (app *App) TaskGroup(name func(string) string) *TaskGroup {
 	}
 }
 
-func (tm *taskManager) run(t *Task, user *user, form *multipart.Form) {
-	var language = "en"
-	if user != nil {
-		language = user.Locale
-	}
+func (tm *taskManager) run(t *Task, request *Request, form *multipart.Form) {
+	var language = request.Locale()
 
-	var name string
-	if user != nil {
-		name = t.name(user.Locale)
-	} else {
-		name = t.name("en")
-	}
+	var name string = t.name(language)
 
 	var notification *Notification = tm.app.Notification(name)
 	notification.preName = t.group.name(language)
@@ -318,8 +310,9 @@ func (tm *taskManager) run(t *Task, user *user, form *multipart.Form) {
 
 	notification.disableCancel = true
 
-	if user != nil {
-		notification.Push(user)
+	userID := request.UserID()
+	if userID > 0 {
+		notification.Push(userID)
 	}
 
 	progress := -1.0

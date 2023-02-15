@@ -9,7 +9,7 @@ import (
 // FieldType defines type of field
 type fieldType struct {
 	viewTemplate   string
-	viewDataSource func(context.Context, *user, *Field, interface{}) interface{}
+	viewDataSource func(context.Context, *Request, *Field, interface{}) interface{}
 
 	dbFieldDescription string
 
@@ -17,13 +17,13 @@ type fieldType struct {
 
 	formHideLabel  bool
 	formTemplate   string
-	formDataSource func(*Field, *user) interface{}
+	formDataSource func(*Field, UserData) interface{}
 	formStringer   func(interface{}) string
 
-	listCellDataSource func(*user, *Field, interface{}) listCell
+	listCellDataSource func(UserData, *Field, interface{}) listCell
 
 	filterLayoutTemplate   string
-	filterLayoutDataSource func(*Field, *user) interface{}
+	filterLayoutDataSource func(*Field, UserData) interface{}
 
 	fieldTypeIcon    string
 	naturalCellWidth int64
@@ -114,12 +114,12 @@ func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("relation", &fieldType{
 		viewTemplate: "admin_item_view_relation",
 		//listCellTemplate: "admin_item_view_relation_cell",
-		viewDataSource: func(ctx context.Context, user *user, f *Field, value interface{}) interface{} {
-			return f.relationPreview(ctx, user, value.(int64))
+		viewDataSource: func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
+			return f.relationPreview(ctx, request, value.(int64))
 		},
 		//viewDataSource: getRelationViewData,
 		formTemplate: "admin_item_relation",
-		formDataSource: func(f *Field, u *user) interface{} {
+		formDataSource: func(f *Field, userData UserData) interface{} {
 			if f.tags["prago-relation"] != "" {
 				return columnName(f.tags["prago-relation"])
 			}
@@ -140,20 +140,20 @@ func (app *App) initDefaultFieldTypes() {
 	})
 }
 
-func boolFilterLayoutDataSource(field *Field, user *user) interface{} {
+func boolFilterLayoutDataSource(field *Field, userData UserData) interface{} {
 	return [][2]string{
 		{"", ""},
-		{"true", messages.Get(user.Locale, "yes")},
-		{"false", messages.Get(user.Locale, "no")},
+		{"true", messages.Get(userData.Locale(), "yes")},
+		{"false", messages.Get(userData.Locale(), "no")},
 	}
 }
 
-func createFilesEditDataSource(mimeTypes string) func(f *Field, u *user) interface{} {
-	return func(f *Field, u *user) interface{} {
+func createFilesEditDataSource(mimeTypes string) func(*Field, UserData) interface{} {
+	return func(f *Field, userData UserData) interface{} {
 		return mimeTypes
 	}
 }
 
-func markdownViewDataSource(ctx context.Context, user *user, f *Field, value interface{}) interface{} {
+func markdownViewDataSource(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
 	return cropMarkdown(value.(string), 100)
 }

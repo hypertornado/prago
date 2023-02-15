@@ -297,7 +297,7 @@ pre {
   display: flex;
   width: 100%;
   height: 100vh;
-  height: var(--app-height);
+  height: 100dvh;
   flex-direction: column;
 }
 
@@ -948,7 +948,7 @@ a.box_tag {
   background-color: rgba(255, 255, 255, 0.8);
   color: #4078c0;
   text-decoration: none;
-  box-shadow: 0px 1px 10px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 a.box_tag:hover {
@@ -1165,22 +1165,29 @@ a.box_tag:hover {
     left: 0px;
   }
 }
+@keyframes multipleActionAnimation {
+  from {
+    opacity: 0;
+    transform: perspective(2cm) rotateX(-90deg) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+  }
+}
 .list_multiple_actions-visible {
   display: flex;
+  animation: multipleActionAnimation 700ms ease-in-out;
 }
 
 .list_multiple_actions_content {
-  border: 1px solid #eee;
-  margin: 20px auto;
-  max-width: min(600px, 100vw);
-  width: 100%;
-  margin-bottom: 20px;
-  background-color: #fff;
+  background-color: white;
+  padding: 5px 10px;
   border-radius: 10px;
-  margin-top: 0px;
+  border: 1px solid #eee;
   pointer-events: initial;
   display: flex;
   align-items: center;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .list_multiple_actions_description {
@@ -2469,38 +2476,38 @@ a.admin_search_suggestion-selected:active {
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  padding: 10px 5px;
+  padding: 10px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  grid-gap: 5px 5px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-gap: 10px;
 }
 
 @keyframes board_resource {
   0% {
     opacity: 0;
-    transform: scale(0.1);
+    transform: perspective(5cm) rotateY(30deg);
   }
   100% {
     opacity: 1;
   }
 }
 .board_resource {
-  padding: 5px;
+  padding: 5px 10px;
   border-radius: 10px;
   background: white;
   border: 1px solid #eee;
   display: flex;
   align-items: center;
-  animation: board_resource 500ms ease-out;
-  animation-fill-mode: both;
+  opacity: 0;
+  animation: board_resource 1000ms ease-out;
+  animation-fill-mode: forwards;
+  gap: 10px;
+  min-height: 45px;
 }
 
 .board_resource-isboard {
   font-weight: 500;
-  box-shadow: 1px 1px 0px rgb(255, 255, 255), 2px 2px 0px rgba(0, 0, 0, 0.9), 3px 3px 0px rgb(255, 255, 255), 4px 4px 0px rgba(0, 0, 0, 0.9);
-  box-shadow: 3px 2px 5px rgba(0, 0, 0, 0.2);
-  transform: scale(1.01);
-  z-index: 10;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 a.board_resource:hover {
@@ -2512,8 +2519,8 @@ a.board_resource {
 }
 
 .board_resource_icon {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   border: 0px solid red;
 }
 
@@ -2676,18 +2683,14 @@ a.dashboard_figure {
 }
 
 .admin_stats_sections {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  align-items: stretch;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
 }
 
 .admin_stats_section {
   background: white;
-  margin: 0px 10px 10px 0px;
-  border: 1px solid #eee;
-  box-shadow: 0px 1px 10px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
   padding: 3px 0px;
   border-radius: 10px;
 }
@@ -2735,7 +2738,7 @@ a.dashboard_figure {
   height: 7px;
   flex-grow: 10;
   min-width: 80px;
-  border-radius: 3px;
+  border-radius: 0px;
   display: flex;
   align-items: stretch;
   margin: 0px 3px;
@@ -2746,7 +2749,7 @@ a.dashboard_figure {
 }
 
 .admin_stats_section_row_graph_content {
-  border-radius: 3px;
+  border-radius: 0px;
   background-color: #ccc;
   background-color: rgba(64, 120, 192, 0.1);
   background-color: #4078c0;
@@ -2954,11 +2957,11 @@ a.admin_stats_section_row {
 .menu_item {
   flex-grow: 10;
   font-weight: 500;
-  padding: 3px 10px;
+  padding: 3px 5px;
   margin: 0px;
   font-size: 0.9rem;
   flex-shrink: 0;
-  border-radius: 100px;
+  border-radius: 10px;
   text-decoration: none;
   color: #444;
   display: block;

@@ -55,7 +55,7 @@ func (field *relatedField) listName(locale string) string {
 	return field.resource.pluralName(locale)
 }
 
-func (app App) relationStringer(field Field, value reflect.Value, user *user) string {
+func (app App) relationStringer(field Field, value reflect.Value, userData UserData) string {
 
 	switch value.Kind() {
 	case reflect.String:
@@ -74,16 +74,16 @@ func (app App) relationStringer(field Field, value reflect.Value, user *user) st
 			if item == nil {
 				return fmt.Sprintf("%d - not found", id)
 			}
-			return field.relatedResource.previewer(user, item).Name()
+			return field.relatedResource.previewer(userData, item).Name()
 		}
 		return fmt.Sprintf("%v", value.Int())
 	case reflect.Float32, reflect.Float64:
 		return fmt.Sprintf("%v", value.Float())
 	case reflect.Bool:
 		if value.Bool() {
-			return messages.Get(user.Locale, "yes_plain")
+			return messages.Get(userData.Locale(), "yes_plain")
 		}
-		return messages.Get(user.Locale, "no_plain")
+		return messages.Get(userData.Locale(), "no_plain")
 	case reflect.Struct:
 		if value.Type() == reflect.TypeOf(time.Now()) {
 			tm := value.Interface().(time.Time)
@@ -91,7 +91,7 @@ func (app App) relationStringer(field Field, value reflect.Value, user *user) st
 			if field.tags["prago-type"] == "timestamp" {
 				showTime = true
 			}
-			return messages.Timestamp(user.Locale, tm, showTime)
+			return messages.Timestamp(userData.Locale(), tm, showTime)
 		}
 	}
 	return ""

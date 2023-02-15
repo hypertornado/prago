@@ -19,7 +19,7 @@ type pageNoLogin struct {
 }
 
 func renderPage(request *Request, page page) {
-	page.Language = request.user.Locale
+	page.Language = request.Locale()
 	page.Menu = request.app.getMenu(request)
 
 	for _, v := range page.Navigation.Tabs {
@@ -40,7 +40,7 @@ func renderPage(request *Request, page page) {
 	}
 
 	if page.Name == "" {
-		page.Name = request.app.name(request.user.Locale)
+		page.Name = request.app.name(request.Locale())
 	}
 
 	request.SetData("page", page)

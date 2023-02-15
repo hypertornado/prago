@@ -88,7 +88,7 @@ func (app *App) GetFiles(ctx context.Context, ids string) []*File {
 	return files
 }
 
-func (app *App) UploadFile(ctx context.Context, fileHeader *multipart.FileHeader, user *user, description string) (*File, error) {
+func (app *App) UploadFile(ctx context.Context, fileHeader *multipart.FileHeader, request *Request, description string) (*File, error) {
 	fileName := prettyFilename(fileHeader.Filename)
 	file := File{}
 	file.Name = fileName
@@ -109,9 +109,7 @@ func (app *App) UploadFile(ctx context.Context, fileHeader *multipart.FileHeader
 
 	file.UID = uploadData.UUID
 
-	if user != nil {
-		file.User = user.ID
-	}
+	file.User = request.UserID()
 	file.Description = description
 	err = app.FilesResource.Create(ctx, &file)
 	if err != nil {
@@ -242,17 +240,17 @@ func (app *App) initFilesResource() {
 	})
 
 	resource.FormAction("upload").priority().Permission(resource.data.canUpdate).Name(unlocalized("Nahrát soubor")).Form(func(f *Form, r *Request) {
-		locale := r.user.Locale
-		f.AddFileInput("file", messages.Get(locale, "admin_file"))
-		f.AddTextareaInput("description", messages.Get(locale, "Description"))
-		f.AddSubmit(messages.Get(locale, "admin_save"))
+		//locale := r.user.Locale
+		f.AddFileInput("file", messages.Get(r.Locale(), "admin_file"))
+		f.AddTextareaInput("description", messages.Get(r.Locale(), "Description"))
+		f.AddSubmit(messages.Get(r.Locale(), "admin_save"))
 	}).Validation(func(vc ValidationContext) {
 		multipartFiles := vc.Request().Request().MultipartForm.File["file"]
 		if len(multipartFiles) != 1 {
 			vc.AddItemError("file", messages.Get(vc.Locale(), "admin_validation_not_empty"))
 		}
 		if vc.Valid() {
-			fileData, err := app.UploadFile(vc.Request().r.Context(), multipartFiles[0], vc.Request().user, vc.GetValue("description"))
+			fileData, err := app.UploadFile(vc.Request().r.Context(), multipartFiles[0], vc.Request(), vc.GetValue("description"))
 			if err != nil {
 				vc.AddError(err.Error())
 			} else {

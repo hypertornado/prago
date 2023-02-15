@@ -14,7 +14,7 @@ type quickActionData struct {
 	pluralName   func(locale string) string
 	typ          quickActionType
 
-	validation func(any, *user) bool
+	validation func(any, *Request) bool
 	handler    func(any, *Request) error
 }
 
@@ -55,10 +55,10 @@ func (resource *Resource[T]) QuickAction(url string) *QuickAction[T] {
 	return ret
 }
 
-func (resourceData *resourceData) getMultipleActionsFromQuickActions(user *user) (ret []listMultipleAction) {
+func (resourceData *resourceData) getMultipleActionsFromQuickActions(userData UserData) (ret []listMultipleAction) {
 
 	for _, action := range resourceData.quickActions {
-		a := action.getMultipleAction(user)
+		a := action.getMultipleAction(userData)
 		if a != nil {
 			ret = append(ret, *a)
 		}
@@ -67,14 +67,14 @@ func (resourceData *resourceData) getMultipleActionsFromQuickActions(user *user)
 	return
 }
 
-func (data *quickActionData) getMultipleAction(user *user) *listMultipleAction {
-	if !data.resource.app.authorize(user, data.permission) {
+func (data *quickActionData) getMultipleAction(userData UserData) *listMultipleAction {
+	if !userData.Authorize(data.permission) {
 		return nil
 	}
 
 	ret := listMultipleAction{
 		ID:   data.url,
-		Name: data.pluralName(user.Locale),
+		Name: data.pluralName(userData.Locale()),
 	}
 	return &ret
 }
@@ -95,10 +95,10 @@ func (qa *QuickAction[T]) Name(singular, plural func(string) string) *QuickActio
 	return qa
 }
 
-func (qa *QuickAction[T]) Validation(validation func(*T, *user) bool) *QuickAction[T] {
+func (qa *QuickAction[T]) Validation(validation func(*T, *Request) bool) *QuickAction[T] {
 
-	qa.data.validation = func(a any, u *user) bool {
-		return validation(a.(*T), u)
+	qa.data.validation = func(a any, r *Request) bool {
+		return validation(a.(*T), r)
 	}
 	return qa
 }

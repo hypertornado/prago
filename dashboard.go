@@ -53,7 +53,7 @@ func (app *App) initDashboard() {
 	app.API("dashboard-table").Method("GET").Permission(loggedPermission).Handler(
 		func(request *Request) {
 			uuid := request.Param("uuid")
-			table, err := app.getDashboardTableData(request, uuid, request.user)
+			table, err := app.getDashboardTableData(request, uuid)
 			must(err)
 			request.app.templates.templates.ExecuteTemplate(request.Response(), "form_table", table.templateData())
 		},
@@ -62,30 +62,30 @@ func (app *App) initDashboard() {
 	app.API("dashboard-figure").Method("GET").Permission(loggedPermission).HandlerJSON(
 		func(request *Request) any {
 			uuid := request.Param("uuid")
-			figure, err := app.getDashboardFigureData(request, uuid, request.user)
+			figure, err := app.getDashboardFigureData(request, uuid)
 			must(err)
 			return figure
 		},
 	)
 }
 
-func (app *App) getDashboardTableData(request *Request, uuid string, user *user) (*Table, error) {
+func (app *App) getDashboardTableData(request *Request, uuid string) (*Table, error) {
 	table := app.dashboardTableMap[uuid]
 	if table == nil {
 		return nil, errors.New("can't find table")
 	}
-	if !app.authorize(user, table.permission) {
+	if !request.Authorize(table.permission) {
 		return nil, errors.New("can't authorize for access of table data")
 	}
 	return table.table(request), nil
 }
 
-func (app *App) getDashboardFigureData(request *Request, uuid string, user *user) (*DashboardFigureData, error) {
+func (app *App) getDashboardFigureData(request *Request, uuid string) (*DashboardFigureData, error) {
 	figure := app.dashboardFigureMap[uuid]
 	if figure == nil {
 		return nil, errors.New("can't find figure")
 	}
-	if !app.authorize(user, figure.permission) {
+	if !request.Authorize(figure.permission) {
 		return nil, errors.New("can't authorize for access of figure data")
 	}
 	return figure.data(request, app), nil
@@ -141,15 +141,15 @@ func (table *DashboardTable) RefreshTime(seconds int64) *DashboardTable {
 	return table
 }
 
-func (group *Dashboard) isVisible(app *App, user *user) bool {
+func (group *Dashboard) isVisible(request *Request) bool {
 	for _, v := range group.figures {
-		if app.authorize(user, v.permission) {
+		if request.Authorize(v.permission) {
 			return true
 		}
 	}
 
 	for _, v := range group.tables {
-		if app.authorize(user, v.permission) {
+		if request.Authorize(v.permission) {
 			return true
 		}
 	}
@@ -186,8 +186,8 @@ func (item *DashboardFigure) getValueStr(request *Request, values [2]int64, app 
 	if item.value != nil {
 		val := values[0]
 		ret = humanizeNumber(val)
-		if item.unit != nil && item.unit(request.user.Locale) != "" {
-			ret += " " + item.unit(request.user.Locale)
+		if item.unit != nil && item.unit(request.Locale()) != "" {
+			ret += " " + item.unit(request.Locale())
 		}
 	}
 
@@ -212,8 +212,8 @@ func (item *DashboardFigure) getDescriptionStr(request *Request, values [2]int64
 		ret = humanizeNumber(diff)
 	}
 
-	if item.unit(request.user.Locale) != "" {
-		ret += " " + item.unit(request.user.Locale)
+	if item.unit(request.Locale()) != "" {
+		ret += " " + item.unit(request.Locale())
 	}
 
 	if compareValue > 0 {
@@ -221,8 +221,8 @@ func (item *DashboardFigure) getDescriptionStr(request *Request, values [2]int64
 		ret += fmt.Sprintf(" (%s)", percent)
 	}
 
-	if item.compareDescription(request.user.Locale) != "" {
-		ret += " " + item.compareDescription(request.user.Locale)
+	if item.compareDescription(request.Locale()) != "" {
+		ret += " " + item.compareDescription(request.Locale())
 	}
 
 	return ret
@@ -232,7 +232,7 @@ func (item *DashboardFigure) view(request *Request) *DashboardViewFigure {
 	ret := &DashboardViewFigure{
 		UUID:               item.uuid,
 		URL:                item.url,
-		Name:               item.name(request.user.Locale),
+		Name:               item.name(request.Locale()),
 		RefreshTimeSeconds: item.refreshTimeSeconds,
 	}
 	return ret

@@ -7,19 +7,19 @@ import (
 	"io"
 )
 
-func (app *App) generateCSRFToken(user *user) string {
+func (app *App) generateCSRFToken(userID int64) string {
 	randomness := app.MustGetSetting(context.Background(), "random")
 	if len(randomness) <= 0 {
 		panic("randomness too short")
 	}
 
 	h := md5.New()
-	io.WriteString(h, fmt.Sprintf("%d%s%s", user.ID, randomness, user.LoggedInTime))
+	io.WriteString(h, fmt.Sprintf("%d%s%s", userID, randomness))
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 func (request *Request) csrfToken() string {
-	return request.app.generateCSRFToken(request.user)
+	return request.app.generateCSRFToken(request.UserID())
 }
 
 func validateCSRF(request *Request) {

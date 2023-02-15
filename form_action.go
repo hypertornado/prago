@@ -61,7 +61,7 @@ func (board *Board) FormAction(url string) *FormAction {
 
 func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Request), validator Validation) {
 	app.accessController.get(fmt.Sprintf("/admin/user/%s", id), func(request *Request) {
-		if request.user != nil {
+		if request.UserID() > 0 {
 			request.Redirect("/admin")
 			return
 		}

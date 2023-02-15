@@ -179,16 +179,33 @@
   }
 }
 
+@keyframes multipleActionAnimation {
+
+  from {
+    opacity: 0;
+    transform: perspective(2cm) rotateX(-90deg) translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+  }
+  
+}
+
 .list_multiple_actions-visible {
   display: flex;
+  animation: multipleActionAnimation 700ms ease-in-out;
 }
 
 .list_multiple_actions_content {
-  @include box;
-
+  background-color: white;
+  padding: 5px 10px;
+  border-radius: 10px;
+  border: 1px solid #eee;
   pointer-events: initial;
   display: flex;
   align-items: center;
+  @include shadowMedium;
 }
 
 .list_multiple_actions_description {

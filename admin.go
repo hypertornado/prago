@@ -16,24 +16,16 @@ func (app *App) initAdminActions() {
 	})
 
 	app.adminController.addAroundAction(func(request *Request, next func()) {
-		if request.user == nil || !request.user.IsActive {
+		if request.UserID() == 0 {
 			request.Redirect(app.getAdminURL("user/login"))
 			return
 		}
 
 		request.SetData("javascripts", app.javascripts)
-		request.SetData("locale", request.user.Locale)
-
-		if request.user.Role == "" && !request.user.emailConfirmed() {
-			addCurrentFlashMessage(request, messages.Get(request.user.Locale, "admin_flash_not_confirmed"))
-		}
-
-		if request.user.Role == "" {
-			addCurrentFlashMessage(request, messages.Get(request.user.Locale, "admin_flash_not_approved"))
-		}
-
+		request.SetData("locale", request.Locale())
 		next()
 	})
+
 	app.Action("markdown").Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).hiddenInMenu().Template("admin_help_markdown")
 
 	app.accessController.get("/admin/logo", func(request *Request) {
@@ -73,15 +65,8 @@ func (app *App) JavascriptPath(url string) *App {
 	return app
 }
 
-func addCurrentFlashMessage(request *Request, message string) {
-	data := request.GetData("flash_messages")
-	messages, _ := data.([]interface{})
-	messages = append(messages, message)
-	request.SetData("flash_messages", messages)
-}
-
 func render403(request *Request) {
-	title := messages.Get(request.user.Locale, "admin_403")
+	title := messages.Get(request.Locale(), "admin_403")
 	header := BoxHeader{
 		Name: title,
 	}
@@ -96,7 +81,7 @@ func render403(request *Request) {
 }
 
 func render404(request *Request) {
-	title := messages.Get(request.user.Locale, "admin_404")
+	title := messages.Get(request.Locale(), "admin_404")
 	header := BoxHeader{
 		Name: title,
 	}

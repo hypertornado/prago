@@ -37,9 +37,9 @@ func (app App) recoveryFunction(p *Request, recoveryData interface{}) {
 	}
 
 	var userID int64
-	if p != nil && p.user != nil {
-		userID = p.UserID()
-	}
+	//if p != nil && p.UserID() != nil {
+	userID = p.UserID()
+	//}
 
 	message := fmt.Sprintf("500 - application error\nuserid=%d\nmessage=%s\nuuid=%s\ntook=%v\n%s",
 		userID,

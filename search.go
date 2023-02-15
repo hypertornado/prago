@@ -48,7 +48,7 @@ func (app *App) initElasticsearchClient() {
 func (app *App) initSearch() {
 	app.API("search-suggest").Permission(loggedPermission).Handler(
 		func(request *Request) {
-			results, err := app.suggestItems(request.Param("q"), request.user, request)
+			results, err := app.suggestItems(request.Param("q"), request)
 			must(err)
 			if len(results) == 0 {
 				request.RenderJSONWithCode(nil, 204)
@@ -74,7 +74,7 @@ func (app *App) initSearch() {
 				}
 			}
 
-			result, hits, err := app.searchItems(q, request.user, int64(page-1), request)
+			result, hits, err := app.searchItems(q, int64(page-1), request)
 			must(err)
 
 			var pages = hits / searchPageSize
@@ -135,9 +135,9 @@ func (app *App) initSearch() {
 
 }
 
-func (app *App) searchItems(q string, user *user, page int64, request *Request) (ret []*searchItem, hits int64, err error) {
+func (app *App) searchItems(q string, page int64, request *Request) (ret []*searchItem, hits int64, err error) {
 	if app.search != nil {
-		ret, hits, err = app.search.Search(q, user.Role, page, request.r.Context())
+		ret, hits, err = app.search.Search(q, request.Role(), page, request.r.Context())
 		must(err)
 		return
 	} else {
@@ -147,7 +147,7 @@ func (app *App) searchItems(q string, user *user, page int64, request *Request) 
 	return
 }
 
-func (app *App) suggestItems(q string, user *user, request *Request) (ret []*searchItem, err error) {
+func (app *App) suggestItems(q string, request *Request) (ret []*searchItem, err error) {
 	q = strings.Trim(q, " ")
 	if q == "" {
 		return ret, nil
@@ -156,7 +156,7 @@ func (app *App) suggestItems(q string, user *user, request *Request) (ret []*sea
 	ret = app.searchWithoutElastic(q, request)
 
 	if app.search != nil {
-		elasticResults, _, err := app.searchItems(q, user, 0, request)
+		elasticResults, _, err := app.searchItems(q, 0, request)
 		if err != nil {
 			app.Log().Println(err)
 		} else {
@@ -175,8 +175,12 @@ func (app *App) searchWithoutElastic(q string, request *Request) (ret []*searchI
 	q = normalizeCzechString(q)
 	menu := app.getMenu(request)
 	for _, section := range menu.Sections {
+
 		for _, item := range section.Items {
-			if strings.HasPrefix(item.URL, "/admin/logout") {
+
+			ret = append(ret, item.SearchWithoutElastic(q)...)
+
+			/*if strings.HasPrefix(item.URL, "/admin/logout") {
 				continue
 			}
 			name := normalizeCzechString(item.Name)
@@ -185,10 +189,29 @@ func (app *App) searchWithoutElastic(q string, request *Request) (ret []*searchI
 					Name: item.Name,
 					URL:  item.URL,
 				})
-			}
+			}*/
 		}
 	}
 	return ret
+}
+
+func (item menuItem) SearchWithoutElastic(q string) (ret []*searchItem) {
+	if strings.HasPrefix(item.URL, "/admin/logout") {
+		return
+	}
+	name := normalizeCzechString(item.Name)
+	if strings.Contains(name, q) {
+		ret = append(ret, &searchItem{
+			Name: item.Name,
+			URL:  item.URL,
+		})
+	}
+
+	for _, subitem := range item.Subitems {
+		ret = append(ret, subitem.SearchWithoutElastic(q)...)
+	}
+
+	return
 }
 
 func newAdminSearch(app *App) (*adminSearch, error) {
@@ -250,7 +273,7 @@ func (resourceData *resourceData) saveSearchItem(ctx context.Context, item any) 
 func (resourceData *resourceData) saveSearchItemWithRoles(ctx context.Context, bulkUpdater *pragelastic.BulkUpdater[searchItem], item any, roles []string) error {
 
 	//TODO: ugly hack with sysadmin user, remove suggestions
-	previewer := resourceData.previewer(&user{Role: "sysadmin"}, item)
+	previewer := resourceData.previewer(newUserData(&user{Role: "sysadmin"}, resourceData.app), item)
 	if previewer == nil {
 		return errors.New("wrong item to relation data conversion")
 	}

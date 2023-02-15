@@ -16,9 +16,9 @@ type viewRelation struct {
 	Count          int64
 }
 
-func (resourceData *resourceData) getRelationViews(ctx context.Context, id int64, user *user) (ret []view) {
+func (resourceData *resourceData) getRelationViews(ctx context.Context, id int64, request *Request) (ret []view) {
 	for _, v := range resourceData.relations {
-		vi := resourceData.getRelationView(ctx, id, v, user)
+		vi := resourceData.getRelationView(ctx, id, v, request)
 		if vi != nil {
 			ret = append(ret, *vi)
 		}
@@ -26,8 +26,8 @@ func (resourceData *resourceData) getRelationViews(ctx context.Context, id int64
 	return
 }
 
-func (resourceData *resourceData) getRelationView(ctx context.Context, id int64, field *relatedField, user *user) *view {
-	if !resourceData.app.authorize(user, field.resource.canView) {
+func (resourceData *resourceData) getRelationView(ctx context.Context, id int64, field *relatedField, request *Request) *view {
+	if !request.Authorize(field.resource.canView) {
 		return nil
 	}
 
@@ -41,16 +41,16 @@ func (resourceData *resourceData) getRelationView(ctx context.Context, id int64,
 	}
 	ret.Icon = icon
 
-	name := field.listName(user.Locale)
+	name := field.listName(request.Locale())
 	ret.Name = name
-	ret.Subname = messages.ItemsCount(filteredCount, user.Locale)
+	ret.Subname = messages.ItemsCount(filteredCount, request.Locale())
 
 	ret.Navigation = append(ret.Navigation, viewButton{
 		Icon: iconTable,
 		URL:  field.listURL(int64(id)),
 	})
 
-	if resourceData.app.authorize(user, field.resource.canUpdate) {
+	if request.Authorize(field.resource.canUpdate) {
 		ret.Navigation = append(ret.Navigation, viewButton{
 			Icon: iconAdd,
 			URL:  field.addURL(int64(id)),
@@ -92,17 +92,17 @@ func generateRelationListAPIHandler(request *Request) {
 
 	targetResource := request.app.getResourceByID(listRequest.TargetResource)
 
-	request.SetData("data", targetResource.getPreviews(request.r.Context(), listRequest, request.user))
+	request.SetData("data", targetResource.getPreviews(request.r.Context(), listRequest, request))
 	request.RenderView("admin_item_view_relationlist_response")
 }
 
-func (resourceData *resourceData) getPreviews(ctx context.Context, listRequest relationListRequest, user *user) []*preview {
+func (resourceData *resourceData) getPreviews(ctx context.Context, listRequest relationListRequest, request *Request) []*preview {
 	sourceResource := resourceData.app.getResourceByID(listRequest.SourceResource)
-	if !resourceData.app.authorize(user, sourceResource.canView) {
+	if !request.Authorize(sourceResource.canView) {
 		panic("cant authorize source resource")
 	}
 
-	if !resourceData.app.authorize(user, resourceData.canView) {
+	if !request.Authorize(resourceData.canView) {
 		panic("cant authorize target resource")
 	}
 
@@ -132,7 +132,7 @@ func (resourceData *resourceData) getPreviews(ctx context.Context, listRequest r
 	for i := 0; i < itemLen; i++ {
 		ret = append(
 			ret,
-			resourceData.previewer(user, itemVals.Index(i).Interface()).Preview(ctx, sourceResource),
+			resourceData.previewer(request, itemVals.Index(i).Interface()).Preview(ctx, sourceResource),
 		)
 	}
 

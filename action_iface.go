@@ -71,7 +71,7 @@ func (action *Action) getController() *controller {
 
 func (action *Action) getHandler() func(*Request) {
 	return func(request *Request) {
-		if !action.app.authorize(request.user, action.permission) {
+		if !request.Authorize(action.permission) {
 			render403(request)
 			return
 		}

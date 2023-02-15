@@ -31,16 +31,16 @@ type viewButton struct {
 	Icon string
 }
 
-func (resourceData *resourceData) getViews(ctx context.Context, item any, user *user) (ret []view) {
-	id := resourceData.previewer(user, item).ID()
-	ret = append(ret, resourceData.getBasicView(ctx, id, item, user))
-	ret = append(ret, resourceData.getRelationViews(ctx, id, user)...)
+func (resourceData *resourceData) getViews(ctx context.Context, item any, request *Request) (ret []view) {
+	id := resourceData.previewer(request, item).ID()
+	ret = append(ret, resourceData.getBasicView(ctx, id, item, request))
+	ret = append(ret, resourceData.getRelationViews(ctx, id, request)...)
 	return ret
 }
 
-func (resourceData *resourceData) getBasicView(ctx context.Context, int64, item any, user *user) view {
+func (resourceData *resourceData) getBasicView(ctx context.Context, int64, item any, request *Request) view {
 	ret := view{
-		QuickActions: resourceData.getQuickActionViews(item, user),
+		QuickActions: resourceData.getQuickActionViews(item, request),
 		Header:       &BoxHeader{},
 	}
 
@@ -53,18 +53,18 @@ func (resourceData *resourceData) getBasicView(ctx context.Context, int64, item 
 		ret.Items,
 		viewField{
 			Icon:     tableIcon,
-			Name:     messages.Get(user.Locale, "admin_table"),
+			Name:     messages.Get(request.Locale(), "admin_table"),
 			Template: "admin_item_view_url",
 			Value: [2]string{
 				resourceData.getURL(""),
-				resourceData.pluralName(user.Locale),
+				resourceData.pluralName(request.Locale()),
 			},
 		},
 	)
 
-	ret.Header.Name = resourceData.previewer(user, item).Name()
+	ret.Header.Name = resourceData.previewer(request, item).Name()
 	ret.Header.Icon = tableIcon
-	ret.Header.Image = resourceData.previewer(user, item).ImageURL(ctx)
+	ret.Header.Image = resourceData.previewer(request, item).ImageURL(ctx)
 
 	resourceIcon := resourceData.icon
 	if resourceIcon == "" {
@@ -73,11 +73,11 @@ func (resourceData *resourceData) getBasicView(ctx context.Context, int64, item 
 	ret.Header.Tags = append(ret.Header.Tags, BoxTag{
 		URL:  fmt.Sprintf("/admin/%s", resourceData.id),
 		Icon: resourceIcon,
-		Name: resourceData.pluralName(user.Locale),
+		Name: resourceData.pluralName(request.Locale()),
 	})
 
 	for i, f := range resourceData.fields {
-		if !f.authorizeView(user) {
+		if !f.authorizeView(request) {
 			continue
 		}
 
@@ -91,9 +91,9 @@ func (resourceData *resourceData) getBasicView(ctx context.Context, int64, item 
 			ret.Items,
 			viewField{
 				Icon:     icon,
-				Name:     f.name(user.Locale),
+				Name:     f.name(request.Locale()),
 				Template: f.fieldType.viewTemplate,
-				Value:    f.fieldType.viewDataSource(ctx, user, f, ifaceVal),
+				Value:    f.fieldType.viewDataSource(ctx, request, f, ifaceVal),
 			},
 		)
 	}
@@ -136,13 +136,13 @@ func getDefaultViewTemplate(t reflect.Type) string {
 	return "admin_item_view_text"
 }
 
-func getDefaultViewDataSource(f *Field) func(ctx context.Context, user *user, f *Field, value interface{}) interface{} {
-	return func(ctx context.Context, user *user, f *Field, value interface{}) interface{} {
-		return getDefaultFieldStringer(f)(user, f, value)
+func getDefaultViewDataSource(f *Field) func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
+	return func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
+		return getDefaultFieldStringer(f)(request, f, value)
 	}
 }
 
-func getDefaultFieldStringer(f *Field) func(user *user, f *Field, value interface{}) string {
+func getDefaultFieldStringer(f *Field) func(userData UserData, f *Field, value interface{}) string {
 	t := f.typ
 	if t == reflect.TypeOf(time.Now()) {
 		if f.tags["prago-type"] == "timestamp" || f.fieldClassName == "CreatedAt" || f.fieldClassName == "UpdatedAt" {
@@ -164,11 +164,11 @@ func getDefaultFieldStringer(f *Field) func(user *user, f *Field, value interfac
 	}
 }
 
-func defaultViewDataSource(user *user, f *Field, value interface{}) string {
+func defaultViewDataSource(userData UserData, f *Field, value interface{}) string {
 	return fmt.Sprintf("%v", value)
 }
 
-func numberViewDataSource(user *user, f *Field, value interface{}) string {
+func numberViewDataSource(userData UserData, f *Field, value interface{}) string {
 	switch f.typ.Kind() {
 	case reflect.Int:
 		return humanizeNumber(int64(value.(int)))
@@ -179,29 +179,29 @@ func numberViewDataSource(user *user, f *Field, value interface{}) string {
 	//return defaultViewDataSource(user, f, value)
 }
 
-func floatViewDataSource(user *user, f *Field, value interface{}) string {
-	return humanizeFloat(value.(float64), user.Locale)
+func floatViewDataSource(userData UserData, f *Field, value interface{}) string {
+	return humanizeFloat(value.(float64), userData.Locale())
 }
 
-func timeViewDataSource(user *user, f *Field, value interface{}) string {
+func timeViewDataSource(userData UserData, f *Field, value interface{}) string {
 	return messages.Timestamp(
-		user.Locale,
+		userData.Locale(),
 		value.(time.Time),
 		false,
 	)
 }
 
-func timestampViewDataSource(user *user, f *Field, value interface{}) string {
+func timestampViewDataSource(userData UserData, f *Field, value interface{}) string {
 	return messages.Timestamp(
-		user.Locale,
+		userData.Locale(),
 		value.(time.Time),
 		true,
 	)
 }
 
-func boolViewDataSource(user *user, f *Field, value interface{}) string {
+func boolViewDataSource(userData UserData, f *Field, value interface{}) string {
 	if value.(bool) {
-		return messages.Get(user.Locale, "yes")
+		return messages.Get(userData.Locale(), "yes")
 	}
-	return messages.Get(user.Locale, "no")
+	return messages.Get(userData.Locale(), "no")
 }

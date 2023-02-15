@@ -11,7 +11,7 @@ import (
 func (resourceData *resourceData) initDefaultResourceActions() {
 	resourceData.action("").Icon(iconTable).priority().Permission(resourceData.canView).Name(resourceData.pluralName).Template("admin_list").DataSource(
 		func(request *Request) interface{} {
-			listData, err := resourceData.getListHeader(request.user)
+			listData, err := resourceData.getListHeader(request)
 			must(err)
 			return listData
 		},
@@ -21,9 +21,9 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		func(form *Form, request *Request) {
 			//var item T
 			var item interface{} = reflect.New(resourceData.typ).Interface()
-			resourceData.bindData(item, request.user, request.Request().URL.Query())
-			resourceData.addFormItems(item, request.user, form)
-			form.AddSubmit(messages.Get(request.user.Locale, "admin_save"))
+			resourceData.bindData(item, request, request.Request().URL.Query())
+			resourceData.addFormItems(item, request, form)
+			form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 		},
 	).Validation(func(vc ValidationContext) {
 		for _, v := range resourceData.validations {
@@ -32,18 +32,18 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		request := vc.Request()
 		if vc.Valid() {
 			var item interface{} = reflect.New(resourceData.typ).Interface()
-			resourceData.bindData(item, request.user, request.Params())
+			resourceData.bindData(item, request, request.Params())
 			if resourceData.orderField != nil {
 				count, _ := resourceData.query(vc.Context()).count()
 				resourceData.setOrderPosition(item, count+1)
 			}
 			must(resourceData.CreateWithLog(item, request))
 
-			resourceData.app.Notification(resourceData.previewer(request.user, item).Name()).
-				SetImage(resourceData.previewer(request.user, item).ThumbnailURL(vc.Context())).
-				SetPreName(messages.Get(request.user.Locale, "admin_item_created")).
+			resourceData.app.Notification(resourceData.previewer(request, item).Name()).
+				SetImage(resourceData.previewer(request, item).ThumbnailURL(vc.Context())).
+				SetPreName(messages.Get(request.Locale(), "admin_item_created")).
 				Flash(request)
-			vc.Validation().RedirectionLocaliton = resourceData.getItemURL(item, "", request.user)
+			vc.Validation().RedirectionLocaliton = resourceData.getItemURL(item, "", request)
 		}
 	})
 
@@ -53,20 +53,20 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 				render404(request)
 				return nil
 			}
-			return resourceData.getViews(request.r.Context(), item, request.user)
+			return resourceData.getViews(request.r.Context(), item, request)
 		},
 	)
 
 	resourceData.FormItemAction("edit").Icon("glyphicons-basic-31-pencil.svg").priority().Name(messages.GetNameFunction("admin_edit")).Permission(resourceData.canUpdate).Form(
 		func(item any, form *Form, request *Request) {
-			resourceData.addFormItems(item, request.user, form)
-			form.AddSubmit(messages.Get(request.user.Locale, "admin_save"))
+			resourceData.addFormItems(item, request, form)
+			form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 		},
 	).Validation(func(_ any, vc ValidationContext) {
 		request := vc.Request()
 		params := request.Params()
 
-		resourceData.fixBooleanParams(vc.Request().user, params)
+		resourceData.fixBooleanParams(vc.Request(), params)
 
 		item, validation, err := resourceData.editItemWithLogAndValues(request, params)
 		if err != nil && err != errValidation {
@@ -74,13 +74,13 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		}
 
 		if validation.Valid() {
-			user := request.user
+			user := request
 			id, err := strconv.Atoi(request.Param("id"))
 			must(err)
 
 			resourceData.app.Notification(resourceData.previewer(user, item).Name()).
-				SetImage(resourceData.previewer(request.user, item).ThumbnailURL(vc.Context())).
-				SetPreName(messages.Get(user.Locale, "admin_item_edited")).
+				SetImage(resourceData.previewer(request, item).ThumbnailURL(vc.Context())).
+				SetPreName(messages.Get(request.Locale(), "admin_item_edited")).
 				Flash(request)
 
 			vc.Validation().RedirectionLocaliton = resourceData.getURL(fmt.Sprintf("%d", id))
@@ -93,9 +93,9 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 
 	resourceData.FormItemAction("delete").Icon("glyphicons-basic-17-bin.svg").priority().Permission(resourceData.canDelete).Name(messages.GetNameFunction("admin_delete")).Form(
 		func(item any, form *Form, request *Request) {
-			form.AddDeleteSubmit(messages.Get(request.user.Locale, "admin_delete"))
-			itemName := resourceData.previewer(request.user, item).Name()
-			form.Title = messages.Get(request.user.Locale, "admin_delete_confirmation_name", itemName)
+			form.AddDeleteSubmit(messages.Get(request.Locale(), "admin_delete"))
+			itemName := resourceData.previewer(request, item).Name()
+			form.Title = messages.Get(request.Locale(), "admin_delete_confirmation_name", itemName)
 		},
 	).Validation(func(item any, vc ValidationContext) {
 		for _, v := range resourceData.deleteValidations {
@@ -103,7 +103,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		}
 		if vc.Valid() {
 			must(resourceData.DeleteWithLog(item, vc.Request()))
-			vc.Request().AddFlashMessage(messages.Get(vc.Request().user.Locale, "admin_item_deleted"))
+			vc.Request().AddFlashMessage(messages.Get(vc.Request().Locale(), "admin_item_deleted"))
 			vc.Validation().RedirectionLocaliton = resourceData.getURL("")
 		}
 	})
@@ -130,7 +130,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 
 			}).
 			Validation(func(vc ValidationContext) {
-				table := resourceData.app.getHistoryTable(vc.Request().user, resourceData, 0, vc.GetValue("page"))
+				table := resourceData.app.getHistoryTable(vc.Request(), resourceData, 0, vc.GetValue("page"))
 				vc.Validation().AfterContent = table.ExecuteHTML()
 
 			})
@@ -148,8 +148,8 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 
 			}).
 			Validation(func(item any, vc ValidationContext) {
-				id := resourceData.previewer(vc.Request().user, item).ID()
-				table := resourceData.app.getHistoryTable(vc.Request().user, resourceData, id, vc.GetValue("page"))
+				id := resourceData.previewer(vc.Request(), item).ID()
+				table := resourceData.app.getHistoryTable(vc.Request(), resourceData, id, vc.GetValue("page"))
 				vc.Validation().AfterContent = table.ExecuteHTML()
 
 			})
@@ -178,7 +178,7 @@ func (resourceData *resourceData) CreateWithLog(item any, request *Request) erro
 	}
 
 	if resourceData.activityLog {
-		err := resourceData.LogActivity(request.user, nil, item)
+		err := resourceData.LogActivity(request, nil, item)
 		if err != nil {
 			return err
 		}
@@ -194,13 +194,13 @@ func (resource *Resource[T]) DeleteWithLog(item *T, request *Request) error {
 
 func (resourceData *resourceData) DeleteWithLog(item any, request *Request) error {
 	if resourceData.activityLog {
-		err := resourceData.LogActivity(request.user, item, nil)
+		err := resourceData.LogActivity(request, item, nil)
 		if err != nil {
 			return err
 		}
 	}
 
-	id := resourceData.previewer(request.user, item).ID()
+	id := resourceData.previewer(request, item).ID()
 
 	err := resourceData.Delete(request.r.Context(), id)
 	if err != nil {
@@ -221,7 +221,7 @@ func (resourceData *resourceData) DeleteWithLog(item any, request *Request) erro
 }
 
 func (resourceData *resourceData) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, ValidationContext, error) {
-	user := request.user
+	user := request
 	id, err := strconv.Atoi(values.Get("id"))
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't parse id %d: %s", id, err)
@@ -271,7 +271,7 @@ func (resource *Resource[T]) UpdateWithLog(item *T, request *Request) error {
 }
 
 func (resourceData *resourceData) UpdateWithLog(item any, request *Request) error {
-	id := resourceData.previewer(request.user, item).ID()
+	id := resourceData.previewer(request, item).ID()
 
 	beforeItem := resourceData.query(request.r.Context()).ID(id)
 	if beforeItem == nil {
@@ -295,7 +295,7 @@ func (resourceData *resourceData) UpdateWithLog(item any, request *Request) erro
 
 	if resourceData.activityLog {
 		must(
-			resourceData.LogActivity(request.user, beforeItem, item),
+			resourceData.LogActivity(request, beforeItem, item),
 		)
 	}
 

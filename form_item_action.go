@@ -20,7 +20,7 @@ func (resource *Resource[T]) FormItemAction(url string) *FormItemAction[T] {
 func (resourceData *resourceData) FormItemAction(url string) *formItemActionData {
 	fa := newFormAction(resourceData.app, url, func(f *Form, r *Request) {
 		item := resourceData.query(context.TODO()).ID(r.Param("id"))
-		f.image = resourceData.previewer(r.user, item).ImageURL(r.r.Context())
+		f.image = resourceData.previewer(r, item).ImageURL(r.r.Context())
 	})
 
 	fa.actionForm.resourceData = resourceData

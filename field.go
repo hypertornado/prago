@@ -39,24 +39,24 @@ func (resourceData *resourceData) Field(name string) *Field {
 	return resourceData.fieldMap[columnName(name)]
 }
 
-func (field *Field) authorizeView(user *user) bool {
-	if !field.resource.app.authorize(user, field.resource.canView) {
+func (field *Field) authorizeView(authorize Authorize) bool {
+	if !authorize.Authorize(field.resource.canView) {
 		return false
 	}
-	if !field.resource.app.authorize(user, field.canView) {
+	if !authorize.Authorize(field.canView) {
 		return false
 	}
 	return true
 }
 
-func (field *Field) authorizeEdit(user *user) bool {
-	if !field.authorizeView(user) {
+func (field *Field) authorizeEdit(request *Request) bool {
+	if !field.authorizeView(request) {
 		return false
 	}
-	if !field.resource.app.authorize(user, field.resource.canUpdate) {
+	if !request.Authorize(field.resource.canUpdate) {
 		return false
 	}
-	if !field.resource.app.authorize(user, field.canEdit) {
+	if !request.Authorize(field.canEdit) {
 		return false
 	}
 	return true

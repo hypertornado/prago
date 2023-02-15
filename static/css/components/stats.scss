@@ -4,17 +4,22 @@
 }
 
 .admin_stats_sections {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  align-items: stretch;
-  justify-content: space-between;
+  //display: flex;
+  //flex-wrap: wrap;
+  //align-items: flex-start;
+  //align-items: stretch;
+  //justify-content: space-between;
+
+  display: grid;
+  //grid-template-columns: minmax(200px, 300px);
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
 }
 
 .admin_stats_section {
   background: white;
-  margin: 0px 10px 10px 0px;
-  border: 1px solid #eee;
+  //margin: 0px 10px 10px 0px;
+  //border: 1px solid #eee;
   @include shadowMedium;
   padding: 3px 0px;
   border-radius: 10px;
@@ -64,7 +69,7 @@
 
   flex-grow: 10;
   min-width: 80px;
-  border-radius: 3px;
+  border-radius: 0px;
   display: flex;
   align-items: stretch;
   margin: 0px 3px;
@@ -75,7 +80,7 @@
 }
 
 .admin_stats_section_row_graph_content {
-  border-radius: 3px;
+  border-radius: 0px;
   background-color: #ccc;
   background-color: $baseColorBackground;
   background-color: $baseColor;

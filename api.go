@@ -106,7 +106,7 @@ func (api *API) bindAPI() error {
 	}
 
 	var fn = func(request *Request) {
-		if !api.app.authorize(request.user, api.permission) {
+		if !request.Authorize(api.permission) {
 			renderAPINotAuthorized(request)
 			return
 		}

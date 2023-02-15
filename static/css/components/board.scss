@@ -26,16 +26,16 @@
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  padding: 10px 5px;
+  padding: 10px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  grid-gap: 5px 5px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-gap: 10px;
 }
 
 @keyframes board_resource {
   0% {
     opacity: 0;
-    transform: scale(0.1);
+    transform: perspective(5cm) rotateY(30deg);
   }
   100% {
     opacity: 1;
@@ -43,29 +43,23 @@
 }
 
 .board_resource {
-  padding: 5px;
+  padding: 5px 10px;
   border-radius: 10px;
   background: white;
   border: 1px solid #eee;
   display: flex;
   align-items: center;
+  opacity: 0;
 
-  animation: board_resource 500ms ease-out;
-  animation-fill-mode: both;
+  animation: board_resource 1000ms ease-out;
+  animation-fill-mode: forwards;
+  gap: 10px;
+  min-height: 45px;
 }
 
 .board_resource-isboard {
   font-weight: 500;
-  box-shadow: 1px 1px 0px rgba(255, 255, 255, 1), 2px 2px 0px rgba(0, 0, 0, 0.9),
-    3px 3px 0px rgba(255, 255, 255, 1), 4px 4px 0px rgba(0, 0, 0, 0.9);
-
-  //border-color: #ddd;
-  //background-color: @baseColorBackgroundLighter;
-  box-shadow: 3px 2px 5px rgba(0, 0, 0, 0.2);
-  //border-width: 2px;
-  //box-shadow: none;
-  transform: scale(1.01);
-  z-index: 10;
+  box-shadow: rgb(50 50 93 / 25%) 0px 2px 5px -1px, rgb(0 0 0 / 30%) 0px 1px 3px -1px;
 }
 
 a.board_resource:hover {
@@ -78,8 +72,8 @@ a.board_resource {
 }
 
 .board_resource_icon {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   border: 0px solid red;
 }
 

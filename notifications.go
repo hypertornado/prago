@@ -23,12 +23,12 @@ func (nc *notificationCenter) getFromUUID(uuid string) *Notification {
 	return nc.notificationMap[uuid]
 }
 
-func (nc *notificationCenter) getFromUser(user *user) (ret []*notificationView) {
+func (nc *notificationCenter) getFromUser(userID int64) (ret []*notificationView) {
 	ret = []*notificationView{}
 	nc.mutex.RLock()
 	defer nc.mutex.RUnlock()
 	for _, v := range nc.notificationMap {
-		if v.user != nil && v.user.ID == user.ID {
+		if v.userID > 0 && userID > 0 && v.userID == userID {
 			ret = append(ret, v.getView())
 		}
 	}
@@ -50,8 +50,9 @@ func (app *App) initNotifications() {
 
 	app.API("notifications").Permission(everybodyPermission).Handler(func(request *Request) {
 		var notifications []*notificationView = []*notificationView{}
-		if request.user != nil {
-			notifications = app.notificationCenter.getFromUser(request.user)
+		userID := request.UserID()
+		if userID > 0 {
+			notifications = app.notificationCenter.getFromUser(userID)
 		}
 		request.RenderJSON(notifications)
 	})
@@ -78,7 +79,7 @@ func (app *App) initNotifications() {
 type Notification struct {
 	uuid            string
 	app             *App
-	user            *user
+	userID          int64
 	preName         string
 	image           string
 	url             string
@@ -221,8 +222,8 @@ func (n *Notification) SetStyleFail() *Notification {
 	return n
 }
 
-func (n *Notification) Push(user *user) {
-	n.user = user
+func (n *Notification) Push(userID int64) {
+	n.userID = userID
 	n.app.notificationCenter.add(n)
 }
 

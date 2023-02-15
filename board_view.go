@@ -13,7 +13,7 @@ type BoardView struct {
 
 	Dashboards []*DashboardView
 
-	User *user
+	Request *Request
 
 	TasksName string
 	Tasks     *taskViewData
@@ -40,12 +40,12 @@ type DashboardViewTable struct {
 
 func (board *Board) boardView(request *Request) *BoardView {
 	ret := &BoardView{
-		AppName:     request.app.name(request.user.Locale),
-		BoardName:   board.action.name(request.user.Locale),
+		AppName:     request.app.name(request.Locale()),
+		BoardName:   board.action.name(request.Locale()),
 		BoardIcon:   board.action.icon,
 		BoardURL:    board.action.getURL(),
 		IsMainBoard: board.IsMainBoard(),
-		User:        request.user,
+		Request:     request,
 	}
 
 	ret.Resources, _ = board.getMainItems(request)
@@ -67,7 +67,7 @@ func (board *Board) boardView(request *Request) *BoardView {
 	if board.IsMainBoard() {
 		taskData := GetTaskViewData(request)
 		if len(taskData.Tasks) > 0 {
-			ret.TasksName = messages.Get(request.user.Locale, "tasks")
+			ret.TasksName = messages.Get(request.Locale(), "tasks")
 			ret.Tasks = &taskData
 		}
 	}
@@ -76,22 +76,21 @@ func (board *Board) boardView(request *Request) *BoardView {
 }
 
 func (dashboard *Dashboard) view(request *Request) *DashboardView {
-	app := request.app
-	if !dashboard.isVisible(app, request.user) {
+	if !dashboard.isVisible(request) {
 		return nil
 	}
 
 	view := &DashboardView{
-		Name: dashboard.name(request.user.Locale),
+		Name: dashboard.name(request.Locale()),
 	}
 	for _, item := range dashboard.figures {
-		if request.UserHasPermission(item.permission) {
+		if request.Authorize(item.permission) {
 			view.Figures = append(view.Figures, item.view(request))
 		}
 	}
 
 	for _, v := range dashboard.tables {
-		if request.UserHasPermission(v.permission) {
+		if request.Authorize(v.permission) {
 			view.Tables = append(view.Tables, DashboardViewTable{
 				UUID:               v.uuid,
 				RefreshTimeSeconds: v.refreshTimeSeconds,

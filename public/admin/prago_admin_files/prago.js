@@ -2938,7 +2938,6 @@ class Prago {
         document.addEventListener("DOMContentLoaded", Prago.init);
     }
     static init() {
-        Prago.heightListenerSetup();
         var listEl = document.querySelector(".list");
         if (listEl) {
             new List(listEl);
@@ -2966,14 +2965,6 @@ class Prago {
         }
         initDashdoard();
         initSMap();
-    }
-    static heightListenerSetup() {
-        let appHeight = () => {
-            const doc = document.documentElement;
-            doc.style.setProperty("--app-height", `${window.innerHeight}px`);
-        };
-        window.addEventListener("resize", appHeight);
-        appHeight();
     }
 }
 Prago.start();

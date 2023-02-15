@@ -10,31 +10,31 @@ type listCell struct {
 	Name   string
 }
 
-func getCellViewData(user *user, f *Field, value interface{}) listCell {
+func getCellViewData(userData UserData, f *Field, value interface{}) listCell {
 	if f.fieldType.listCellDataSource != nil {
-		return f.fieldType.listCellDataSource(user, f, value)
+		return f.fieldType.listCellDataSource(userData, f, value)
 	}
 
 	if f.fieldType.IsRelation() {
-		return relationCellViewData(user, f, value)
+		return relationCellViewData(userData, f, value)
 	}
 
 	ret := listCell{
-		Name: getDefaultFieldStringer(f)(user, f, value),
+		Name: getDefaultFieldStringer(f)(userData, f, value),
 	}
 	return ret
 }
 
-func textListDataSource(user *user, f *Field, value interface{}) listCell {
+func textListDataSource(userData UserData, f *Field, value interface{}) listCell {
 	return listCell{Name: crop(value.(string), 100)}
 }
 
-func markdownListDataSource(user *user, f *Field, value interface{}) listCell {
+func markdownListDataSource(userData UserData, f *Field, value interface{}) listCell {
 	return listCell{Name: cropMarkdown(value.(string), 100)}
 }
 
-func relationCellViewData(user *user, f *Field, value interface{}) listCell {
-	previewData := f.relationPreview(context.TODO(), user, value.(int64))
+func relationCellViewData(userData UserData, f *Field, value interface{}) listCell {
+	previewData := f.relationPreview(context.TODO(), userData, value.(int64))
 	if previewData == nil {
 		return listCell{}
 	}
@@ -48,7 +48,7 @@ func relationCellViewData(user *user, f *Field, value interface{}) listCell {
 	return ret
 }
 
-func imageCellViewData(user *user, f *Field, value interface{}) listCell {
+func imageCellViewData(userData UserData, f *Field, value interface{}) listCell {
 	data := value.(string)
 	images := strings.Split(data, ",")
 	ret := listCell{}

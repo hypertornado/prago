@@ -21,9 +21,9 @@ func (resourceData *resourceData) setOrderPosition(item interface{}, order int64
 	val.SetInt(order)
 }
 
-func (resourceData *resourceData) fixBooleanParams(user *user, params url.Values) {
+func (resourceData *resourceData) fixBooleanParams(request *Request, params url.Values) {
 	for _, field := range resourceData.fields {
-		if !field.authorizeEdit(user) {
+		if !field.authorizeEdit(request) {
 			continue
 		}
 		if len(params[field.id]) == 0 && field.typ.Kind() == reflect.Bool {
@@ -32,7 +32,7 @@ func (resourceData *resourceData) fixBooleanParams(user *user, params url.Values
 	}
 }
 
-func (resourceData *resourceData) bindData(item any, user *user, params url.Values) error {
+func (resourceData *resourceData) bindData(item any, request *Request, params url.Values) error {
 
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
@@ -43,7 +43,7 @@ func (resourceData *resourceData) bindData(item any, user *user, params url.Valu
 	}
 
 	for _, field := range resourceData.fields {
-		if !field.authorizeEdit(user) {
+		if !field.authorizeEdit(request) {
 			continue
 		}
 

@@ -35,11 +35,11 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 	}
 
 	app.addFieldType(name, &fieldType{
-		viewDataSource: func(ctx context.Context, user *user, f *Field, value interface{}) interface{} {
+		viewDataSource: func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
 			str := value.(string)
 			for _, v := range items {
 				if str == v.ID {
-					return v.Name(user.Locale)
+					return v.Name(request.Locale())
 				}
 			}
 
@@ -49,22 +49,22 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 		allowedValues: allowedValues,
 
 		formTemplate: "admin_item_select",
-		formDataSource: func(f *Field, u *user) interface{} {
+		formDataSource: func(f *Field, userData UserData) interface{} {
 			var ret [][2]string
 			for _, v := range items {
 				ret = append(ret, [2]string{
 					v.ID,
-					v.Name(u.Locale),
+					v.Name(userData.Locale()),
 				})
 			}
 			return ret
 		},
 
-		listCellDataSource: func(user *user, f *Field, value interface{}) listCell {
+		listCellDataSource: func(userData UserData, f *Field, value interface{}) listCell {
 			str := value.(string)
 			for _, v := range items {
 				if str == v.ID {
-					return listCell{Name: v.Name(user.Locale)}
+					return listCell{Name: v.Name(userData.Locale())}
 				}
 			}
 
@@ -72,7 +72,7 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 		},
 
 		filterLayoutTemplate: "filter_layout_select",
-		filterLayoutDataSource: func(f *Field, user *user) interface{} {
+		filterLayoutDataSource: func(f *Field, userData UserData) interface{} {
 			var ret [][2]string
 			if len(items) == 0 || items[0].ID != "" {
 				ret = append(ret, [2]string{"", ""})
@@ -80,7 +80,7 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 			for _, v := range items {
 				ret = append(ret, [2]string{
 					v.ID,
-					v.Name(user.Locale),
+					v.Name(userData.Locale()),
 				})
 			}
 			return ret

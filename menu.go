@@ -21,9 +21,8 @@ type menuSection struct {
 }
 
 type menuItem struct {
-	Icon string
-	Name string
-	//Subname     string
+	Icon        string
+	Name        string
 	URL         string
 	Selected    bool
 	Subitems    []menuItem
@@ -52,8 +51,6 @@ func (app *App) initMenuAPI() {
 }
 
 func (app *App) getMenu(request *Request) (ret menu) {
-	user := request.user
-
 	items, _ := app.MainBoard.getMainItems(request)
 
 	resourceSection := menuSection{
@@ -63,7 +60,7 @@ func (app *App) getMenu(request *Request) (ret menu) {
 	ret.Sections = append(ret.Sections, resourceSection)
 	ret.Sections = append(ret.Sections, *getMenuUserSection(request))
 
-	ret.Language = user.Locale
+	ret.Language = request.Locale()
 	return ret
 }
 
@@ -72,7 +69,7 @@ func getResourceCountsMap(request *Request) map[string]string {
 	ret := make(map[string]string)
 
 	for _, v := range app.resources {
-		if app.authorize(request.user, v.canView) {
+		if request.Authorize(v.canView) {
 			url := v.getURL("")
 			count := v.getCachedCount(context.TODO())
 			ret[url] = humanizeNumber(count)
@@ -83,9 +80,9 @@ func getResourceCountsMap(request *Request) map[string]string {
 }
 
 func getMenuUserSection(request *Request) *menuSection {
-	userName := request.user.Name
+	userName := request.getUser().Name
 	if userName == "" {
-		userName = request.user.Email
+		userName = request.getUser().Email
 	}
 
 	mainItems, _ := request.app.MainBoard.getItems(request, true)
@@ -114,7 +111,7 @@ func (board *Board) getItems(request *Request, isUserMenu bool) ([]menuItem, boo
 				continue
 			}
 
-			if app.authorize(request.user, resourceData.canView) {
+			if request.Authorize(resourceData.canView) {
 				resourceURL := resourceData.getURL("")
 				var selected bool
 				if request.Request().URL.Path == resourceURL {
@@ -130,7 +127,7 @@ func (board *Board) getItems(request *Request, isUserMenu bool) ([]menuItem, boo
 
 				ret = append(ret, menuItem{
 					Icon: resourceData.icon,
-					Name: resourceData.pluralName(request.user.Locale),
+					Name: resourceData.pluralName(request.Locale()),
 					//Subname:  humanizeNumber(resourceData.getCachedCount(request.r.Context())),
 					URL:      resourceURL,
 					Selected: selected,
@@ -152,7 +149,7 @@ func (board *Board) getItems(request *Request, isUserMenu bool) ([]menuItem, boo
 		if v.isHiddenInMenu {
 			continue
 		}
-		if !request.app.authorize(request.user, v.permission) {
+		if !request.Authorize(v.permission) {
 			continue
 		}
 
@@ -181,7 +178,7 @@ func (board *Board) getItems(request *Request, isUserMenu bool) ([]menuItem, boo
 
 		menuItem := menuItem{
 			Icon:        v.icon,
-			Name:        v.name(request.user.Locale),
+			Name:        v.name(request.Locale()),
 			URL:         fullURL,
 			Selected:    selected,
 			Expanded:    selected,
@@ -202,7 +199,7 @@ func (board *Board) getItems(request *Request, isUserMenu bool) ([]menuItem, boo
 
 	}
 
-	sortSection(ret, request.user.Locale)
+	sortSection(ret, request.Locale())
 
 	return ret, isExpanded
 }

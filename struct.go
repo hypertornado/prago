@@ -34,11 +34,11 @@ func (resourceData *resourceData) getDefaultOrder() (column string, desc bool) {
 	return
 }
 
-func (resourceData *resourceData) getItemStringEditableValues(item any, user *user) map[string]string {
+func (resourceData *resourceData) getItemStringEditableValues(item any, request *Request) map[string]string {
 	itemVal := reflect.ValueOf(item).Elem()
 	ret := make(map[string]string)
 	for i, field := range resourceData.fields {
-		if !field.authorizeEdit(user) && field.id != "id" {
+		if !field.authorizeEdit(request) && field.id != "id" {
 			continue
 		}
 		var ifaceVal interface{}
@@ -51,23 +51,23 @@ func (resourceData *resourceData) getItemStringEditableValues(item any, user *us
 	return ret
 }
 
-func (resourceData *resourceData) addFormItems(item any, user *user, form *Form) {
-	editableValues := resourceData.getItemStringEditableValues(item, user)
+func (resourceData *resourceData) addFormItems(item any, request *Request, form *Form) {
+	editableValues := resourceData.getItemStringEditableValues(item, request)
 
 fields:
 	for _, field := range resourceData.fields {
-		if !field.authorizeEdit(user) {
+		if !field.authorizeEdit(request) {
 			continue fields
 		}
 
 		item := &FormItem{
 			ID:       field.id,
 			Icon:     field.getIcon(),
-			Name:     field.name(user.Locale),
+			Name:     field.name(request.Locale()),
 			Template: field.fieldType.formTemplate,
 		}
 		if field.description != nil {
-			item.Description = field.description(user.Locale)
+			item.Description = field.description(request.Locale())
 		}
 		item.AddUUID()
 
@@ -78,7 +78,7 @@ fields:
 		item.Value = editableValues[field.id]
 
 		if field.fieldType.formDataSource != nil {
-			item.Data = field.fieldType.formDataSource(field, user)
+			item.Data = field.fieldType.formDataSource(field, request)
 		}
 
 		if field.required {

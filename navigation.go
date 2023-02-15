@@ -40,14 +40,14 @@ func isTabVisible(tabs []tab, pos int) bool {
 	return true
 }
 
-func (resourceData *resourceData) getResourceNavigation(user *user, code string) navigation {
+func (resourceData *resourceData) getResourceNavigation(request *Request, code string) navigation {
 	var tabs []tab
 	for _, v := range resourceData.actions {
 		if v.getMethod() == "GET" {
-			if resourceData.app.authorize(user, v.getPermission()) {
+			if request.Authorize(v.getPermission()) {
 				tabs = append(tabs, tab{
 					Icon:     v.getIcon(),
-					Name:     v.getName(user.Locale),
+					Name:     v.getName(request.Locale()),
 					URL:      resourceData.getURL(v.getURLToken()),
 					Selected: trueIfEqual(code, v.getURLToken()),
 					priority: v.returnIsPriority(),
@@ -61,19 +61,19 @@ func (resourceData *resourceData) getResourceNavigation(user *user, code string)
 	}.sortByPriority()
 }
 
-func (resourceData *resourceData) getItemNavigation(user *user, item interface{}, code string) navigation {
+func (resourceData *resourceData) getItemNavigation(userData UserData, item interface{}, code string) navigation {
 	var tabs []tab
 	for _, v := range resourceData.itemActions {
 		if v.getMethod() == "GET" {
-			name := v.getName(user.Locale)
+			name := v.getName(userData.Locale())
 			if v.getURLToken() == "" {
-				name = resourceData.previewer(user, item).Name()
+				name = resourceData.previewer(userData, item).Name()
 			}
-			if resourceData.app.authorize(user, v.getPermission()) {
+			if userData.Authorize(v.getPermission()) {
 				tabs = append(tabs, tab{
 					Icon:     v.getIcon(),
 					Name:     name,
-					URL:      resourceData.getItemURL(item, v.getURLToken(), user),
+					URL:      resourceData.getItemURL(item, v.getURLToken(), userData),
 					Selected: trueIfEqual(code, v.getURLToken()),
 					priority: v.returnIsPriority(),
 				})

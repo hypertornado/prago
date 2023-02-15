@@ -57,7 +57,7 @@ func (app *App) ListenActivity(handler func(Activity)) {
 	app.activityListeners = append(app.activityListeners, handler)
 }
 
-func (app *App) getHistoryTable(user *user, resourceData *resourceData, itemID int64, pageStr string) *Table {
+func (app *App) getHistoryTable(request *Request, resourceData *resourceData, itemID int64, pageStr string) *Table {
 
 	ret := app.Table()
 
@@ -119,7 +119,7 @@ func (app *App) getHistoryTable(user *user, resourceData *resourceData, itemID i
 			item := resourceData.query(context.Background()).ID(v.ItemID)
 			var name string
 			if item != nil {
-				name = resourceData.previewer(user, item).Name()
+				name = resourceData.previewer(request, item).Name()
 			}
 			itemName = fmt.Sprintf("#%d %s", v.ItemID, name)
 		}
@@ -145,7 +145,7 @@ func (app *App) initActivityLog() {
 	app.activityLogResource.Name(messages.GetNameFunction("admin_history"), messages.GetNameFunction("admin_history"))
 }
 
-func (resourceData *resourceData) LogActivity(user *user, before, after any) error {
+func (resourceData *resourceData) LogActivity(request *Request, before, after any) error {
 	var activityType string
 	switch {
 	case before == nil && after != nil:
@@ -161,9 +161,9 @@ func (resourceData *resourceData) LogActivity(user *user, before, after any) err
 
 	var itemID int64 = -1
 	if before != nil {
-		itemID = resourceData.previewer(user, before).ID()
+		itemID = resourceData.previewer(request, before).ID()
 	} else {
-		itemID = resourceData.previewer(user, after).ID()
+		itemID = resourceData.previewer(request, after).ID()
 	}
 
 	var err error
@@ -188,7 +188,7 @@ func (resourceData *resourceData) LogActivity(user *user, before, after any) err
 		ResourceName:  resourceData.id,
 		ItemID:        itemID,
 		ActionType:    activityType,
-		User:          user.ID,
+		User:          request.UserID(),
 		ContentBefore: string(beforeData),
 		ContentAfter:  string(afterData),
 	}

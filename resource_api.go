@@ -16,17 +16,17 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 	resourceData.API("list").Handler(
 		func(request *Request) {
 			if request.Request().URL.Query().Get("_format") == "json" {
-				listDataJSON, err := resourceData.getListContentJSON(request.r.Context(), request.user, request.Request().URL.Query())
+				listDataJSON, err := resourceData.getListContentJSON(request.r.Context(), request, request.Request().URL.Query())
 				must(err)
 				request.RenderJSON(listDataJSON)
 				return
 			}
 			if request.Request().URL.Query().Get("_format") == "xlsx" {
-				if !resourceData.app.authorize(request.user, resourceData.canExport) {
+				if !request.Authorize(resourceData.canExport) {
 					render403(request)
 					return
 				}
-				listData, err := resourceData.getListContent(request.r.Context(), request.user, request.Request().URL.Query())
+				listData, err := resourceData.getListContent(request.r.Context(), request, request.Request().URL.Query())
 				must(err)
 
 				file := xlsx.NewFile()
@@ -36,7 +36,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				row := sheet.AddRow()
 				columnsStr := request.Request().URL.Query().Get("_columns")
 				if columnsStr == "" {
-					columnsStr = resourceData.defaultVisibleFieldsStr(request.user)
+					columnsStr = resourceData.defaultVisibleFieldsStr(request)
 				}
 				columnsAr := strings.Split(columnsStr, ",")
 				for _, v := range columnsAr {
@@ -78,7 +78,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 			}
 
 			request.RenderJSON(
-				resourceData.previewer(request.user, item).Preview(request.r.Context(), nil),
+				resourceData.previewer(request, item).Preview(request.r.Context(), nil),
 			)
 		},
 	)
@@ -120,7 +120,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 			if err == nil {
 				item := resourceData.query(request.r.Context()).ID(id)
 				if item != nil {
-					relationItem := resourceData.previewer(request.user, item).Preview(request.r.Context(), nil)
+					relationItem := resourceData.previewer(request, item).Preview(request.r.Context(), nil)
 					if relationItem != nil {
 						usedIDs[relationItem.ID] = true
 						ret = append(ret, *relationItem)
@@ -142,7 +142,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				itemVals := reflect.ValueOf(items)
 				itemLen := itemVals.Len()
 				for i := 0; i < itemLen; i++ {
-					viewItem := resourceData.previewer(request.user, itemVals.Index(i).Interface()).Preview(request.r.Context(), nil)
+					viewItem := resourceData.previewer(request, itemVals.Index(i).Interface()).Preview(request.r.Context(), nil)
 					if viewItem != nil && !usedIDs[viewItem.ID] {
 						usedIDs[viewItem.ID] = true
 						ret = append(ret, *viewItem)
@@ -179,7 +179,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 
 			switch actionName {
 			case "clone":
-				if !request.app.authorize(request.user, resourceData.canCreate) {
+				if !request.Authorize(resourceData.canCreate) {
 					renderAPINotAuthorized(request)
 					return
 				}
@@ -217,7 +217,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 
 					if resourceData.activityLog {
 						must(
-							resourceData.LogActivity(request.user, nil, item),
+							resourceData.LogActivity(request, nil, item),
 						)
 					}
 				}
@@ -227,7 +227,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				)).Flash(request)
 
 			case "delete":
-				if !request.app.authorize(request.user, resourceData.canDelete) {
+				if !request.Authorize(resourceData.canDelete) {
 					renderAPINotAuthorized(request)
 					return
 				}
@@ -235,14 +235,14 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 					var values url.Values = make(map[string][]string)
 					values.Add("id", fmt.Sprintf("%d", v))
 
-					valValidation := newValuesValidation(request.r.Context(), request.app, request.user, values)
+					valValidation := newValuesValidation(request.r.Context(), request.app, request, values)
 					for _, v := range resourceData.deleteValidations {
 						v(valValidation)
 					}
 
 					if !valValidation.Valid() {
 						request.RenderJSONWithCode(
-							valValidation.validation.TextErrorReport(v, request.user.Locale),
+							valValidation.validation.TextErrorReport(v, request.Locale()),
 							403,
 						)
 						return
@@ -261,7 +261,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				for _, action := range resourceData.quickActions {
 					if action.url == actionName {
 						foundAction = true
-						if !request.app.authorize(request.user, action.permission) {
+						if !request.Authorize(action.permission) {
 							panic("don't have access")
 						}
 						for _, id := range ids {
@@ -286,7 +286,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 			)
 
 			var item interface{} = reflect.New(resourceData.typ).Interface()
-			resourceData.addFormItems(item, request.user, form)
+			resourceData.addFormItems(item, request, form)
 			request.SetData("form", form)
 
 			request.SetData("CSRFToken", request.csrfToken())
@@ -325,7 +325,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				)
 
 				if err == errValidation {
-					report := validation.Validation().TextErrorReport(int64(id), request.user.Locale)
+					report := validation.Validation().TextErrorReport(int64(id), request.Locale())
 					request.RenderJSONWithCode(
 						report,
 						403,

@@ -83,23 +83,23 @@ type listMultipleAction struct {
 	IsDelete bool
 }
 
-func (resourceData *resourceData) getListHeader(user *user) (list list, err error) {
-	lang := user.Locale
+func (resourceData *resourceData) getListHeader(userData UserData) (list list, err error) {
+	lang := userData.Locale()
 
 	list.Colspan = 1
 	list.TypeID = resourceData.id
-	list.VisibleColumns = resourceData.defaultVisibleFieldsStr(user)
-	list.Columns = resourceData.fieldsStr(user)
+	list.VisibleColumns = resourceData.defaultVisibleFieldsStr(userData)
+	list.Columns = resourceData.fieldsStr(userData)
 
 	list.OrderColumn = resourceData.orderByColumn
 	list.OrderDesc = resourceData.orderDesc
-	list.Locale = user.Locale
+	list.Locale = userData.Locale()
 
 	list.ItemsPerPage = resourceData.defaultItemsPerPage
-	list.PaginationData = resourceData.getPaginationData(user)
+	list.PaginationData = resourceData.getPaginationData(userData)
 
-	list.StatsLimitSelectData = getStatsLimitSelectData(user.Locale)
-	list.MultipleActions = resourceData.getMultipleActions(user)
+	list.StatsLimitSelectData = getStatsLimitSelectData(userData.Locale())
+	list.MultipleActions = resourceData.getMultipleActions(userData)
 
 	orderField, ok := resourceData.fieldMap[resourceData.orderByColumn]
 	if !ok || !orderField.canOrder {
@@ -112,11 +112,11 @@ func (resourceData *resourceData) getListHeader(user *user) (list list, err erro
 	if resourceData.orderField != nil {
 		list.CanChangeOrder = true
 	}
-	list.CanExport = resourceData.app.authorize(user, resourceData.canExport)
+	list.CanExport = userData.Authorize(resourceData.canExport)
 
 	for _, v := range resourceData.fields {
-		if v.authorizeView(user) {
-			headerItem := (*v).getListHeaderItem(user)
+		if v.authorizeView(userData) {
+			headerItem := (*v).getListHeaderItem(userData)
 			if headerItem.DefaultShow {
 				list.Colspan++
 			}
@@ -126,10 +126,10 @@ func (resourceData *resourceData) getListHeader(user *user) (list list, err erro
 	return
 }
 
-func (resourceData *resourceData) defaultVisibleFieldsStr(user *user) string {
+func (resourceData *resourceData) defaultVisibleFieldsStr(userData UserData) string {
 	ret := []string{}
 	for _, v := range resourceData.fields {
-		if !v.authorizeView(user) {
+		if !v.authorizeView(userData) {
 			continue
 		}
 		if v.defaultShow {
@@ -140,10 +140,10 @@ func (resourceData *resourceData) defaultVisibleFieldsStr(user *user) string {
 	return r
 }
 
-func (resourceData *resourceData) fieldsStr(user *user) string {
+func (resourceData *resourceData) fieldsStr(userData UserData) string {
 	ret := []string{}
 	for _, v := range resourceData.fields {
-		if !v.authorizeView(user) {
+		if !v.authorizeView(userData) {
 			continue
 		}
 		ret = append(ret, v.id)
@@ -178,7 +178,7 @@ func (field *Field) getNaturalCellWidth() int64 {
 
 }
 
-func (field *Field) getListHeaderItem(user *user) listHeaderItem {
+func (field *Field) getListHeaderItem(userData UserData) listHeaderItem {
 	var relatedResourceID string
 	if field.relatedResource != nil {
 		relatedResourceID = field.relatedResource.getID()
@@ -187,7 +187,7 @@ func (field *Field) getListHeaderItem(user *user) listHeaderItem {
 	headerItem := listHeaderItem{
 		Name:              field.fieldClassName,
 		Icon:              field.getIcon(),
-		NameHuman:         field.name(user.Locale),
+		NameHuman:         field.name(userData.Locale()),
 		ColumnName:        field.id,
 		DefaultShow:       field.defaultShow,
 		RelatedResourceID: relatedResourceID,
@@ -198,8 +198,8 @@ func (field *Field) getListHeaderItem(user *user) listHeaderItem {
 
 	if headerItem.FilterLayout == "filter_layout_boolean" {
 		headerItem.FilterData = []string{
-			messages.Get(user.Locale, "yes"),
-			messages.Get(user.Locale, "no"),
+			messages.Get(userData.Locale(), "yes"),
+			messages.Get(userData.Locale(), "no"),
 		}
 	}
 
@@ -208,7 +208,7 @@ func (field *Field) getListHeaderItem(user *user) listHeaderItem {
 		if fn == nil {
 			fn = field.fieldType.formDataSource
 		}
-		headerItem.FilterData = fn(field, user)
+		headerItem.FilterData = fn(field, userData)
 	}
 
 	if field.canOrder {
@@ -250,10 +250,10 @@ func (field *Field) filterLayout() string {
 	return ""
 }
 
-func (resourceData *resourceData) addFilterParamsToQuery(listQuery *listQuery, params url.Values, user *user) *listQuery {
+func (resourceData *resourceData) addFilterParamsToQuery(listQuery *listQuery, params url.Values, userData UserData) *listQuery {
 	filter := map[string]string{}
 	for _, v := range resourceData.fieldMap {
-		if resourceData.app.authorize(user, v.canView) {
+		if userData.Authorize(v.canView) {
 			key := v.id
 			val := params.Get(key)
 			if val != "" {
@@ -356,20 +356,20 @@ func (resourceData *resourceData) addFilterToQuery(listQuery *listQuery, filter 
 	return listQuery
 }
 
-func (resourceData *resourceData) getListContent(ctx context.Context, user *user, params url.Values) (ret listContent, err error) {
-	if !resourceData.app.authorize(user, resourceData.canView) {
+func (resourceData *resourceData) getListContent(ctx context.Context, userData UserData, params url.Values) (ret listContent, err error) {
+	if !userData.Authorize(resourceData.canView) {
 		return listContent{}, errors.New("access denied")
 	}
 
 	var listHeader list
-	listHeader, err = resourceData.getListHeader(user)
+	listHeader, err = resourceData.getListHeader(userData)
 	if err != nil {
 		return
 	}
 
 	columnsStr := params.Get("_columns")
 	if columnsStr == "" {
-		columnsStr = resourceData.defaultVisibleFieldsStr(user)
+		columnsStr = resourceData.defaultVisibleFieldsStr(userData)
 	}
 
 	columnsAr := strings.Split(columnsStr, ",")
@@ -399,7 +399,7 @@ func (resourceData *resourceData) getListContent(ctx context.Context, user *user
 
 	var count int64
 	countQuery := resourceData.query(ctx)
-	countQuery = resourceData.addFilterParamsToQuery(countQuery, params, user)
+	countQuery = resourceData.addFilterParamsToQuery(countQuery, params, userData)
 	count, err = countQuery.count()
 	if err != nil {
 		return
@@ -409,9 +409,9 @@ func (resourceData *resourceData) getListContent(ctx context.Context, user *user
 	resourceData.updateCachedCount(ctx)
 
 	if count == totalCount {
-		ret.TotalCountStr = messages.ItemsCount(count, user.Locale)
+		ret.TotalCountStr = messages.ItemsCount(count, userData.Locale())
 	} else {
-		ret.TotalCountStr = fmt.Sprintf("%s z %s", humanizeNumber(count), messages.ItemsCount(totalCount, user.Locale))
+		ret.TotalCountStr = fmt.Sprintf("%s z %s", humanizeNumber(count), messages.ItemsCount(totalCount, userData.Locale()))
 	}
 
 	var itemsPerPage = resourceData.defaultItemsPerPage
@@ -437,7 +437,7 @@ func (resourceData *resourceData) getListContent(ctx context.Context, user *user
 		SelectedPage: int64(currentPage),
 	}
 
-	q = resourceData.addFilterParamsToQuery(q, params, user)
+	q = resourceData.addFilterParamsToQuery(q, params, userData)
 	q = q.Offset((int64(currentPage) - 1) * itemsPerPage)
 	q = q.Limit(itemsPerPage)
 
@@ -455,27 +455,27 @@ func (resourceData *resourceData) getListContent(ctx context.Context, user *user
 		for _, v := range listHeader.Header {
 			if columnsMap[v.ColumnName] {
 				fieldVal := itemVal.FieldByName(v.Name)
-				row.Items = append(row.Items, getCellViewData(user, resourceData.Field(v.ColumnName), fieldVal.Interface()))
+				row.Items = append(row.Items, getCellViewData(userData, resourceData.Field(v.ColumnName), fieldVal.Interface()))
 			}
 		}
 
-		previewer := resourceData.previewer(user, itemVal.Addr().Interface())
+		previewer := resourceData.previewer(userData, itemVal.Addr().Interface())
 		row.ID = previewer.ID()
 		row.URL = previewer.URL("")
 
-		row.Actions = resourceData.getListItemActions(user, itemVal.Addr().Interface(), row.ID)
-		row.AllowsMultipleActions = resourceData.allowsMultipleActions(user)
+		row.Actions = resourceData.getListItemActions(userData, itemVal.Addr().Interface(), row.ID)
+		row.AllowsMultipleActions = resourceData.allowsMultipleActions(userData)
 		ret.Rows = append(ret.Rows, row)
 
 	}
 
 	if count == 0 {
-		ret.Message = messages.Get(user.Locale, "admin_list_empty")
+		ret.Message = messages.Get(userData.Locale(), "admin_list_empty")
 	}
 	ret.Colspan = int64(len(columnsMap)) + 1
 
 	if params.Get("_stats") == "true" {
-		ret.Stats = resourceData.getListStats(ctx, user, params)
+		ret.Stats = resourceData.getListStats(ctx, userData, params)
 	}
 
 	return
@@ -488,8 +488,8 @@ type listContentJSON struct {
 	FooterStr string
 }
 
-func (resourceData *resourceData) getListContentJSON(ctx context.Context, user *user, params url.Values) (ret *listContentJSON, err error) {
-	listData, err := resourceData.getListContent(ctx, user, params)
+func (resourceData *resourceData) getListContentJSON(ctx context.Context, userData UserData, params url.Values) (ret *listContentJSON, err error) {
+	listData, err := resourceData.getListContent(ctx, userData, params)
 	if err != nil {
 		return nil, err
 	}
@@ -529,7 +529,7 @@ func (resourceData *resourceData) getListContentJSON(ctx context.Context, user *
 
 }
 
-func (resourceData *resourceData) getPaginationData(user *user) (ret []listPaginationData) {
+func (resourceData *resourceData) getPaginationData(userData UserData) (ret []listPaginationData) {
 	var ints []int64
 	var used bool
 
@@ -557,7 +557,7 @@ func (resourceData *resourceData) getPaginationData(user *user) (ret []listPagin
 		}
 
 		ret = append(ret, listPaginationData{
-			Name:     messages.ItemsCount(v, user.Locale),
+			Name:     messages.ItemsCount(v, userData.Locale()),
 			Value:    v,
 			Selected: selected,
 		})

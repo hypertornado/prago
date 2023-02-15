@@ -9,6 +9,19 @@ import (
 	"time"
 )
 
+type Locale interface {
+	Locale() string
+}
+
+type Authorize interface {
+	Authorize(Permission) bool
+}
+
+type UserData interface {
+	Locale
+	Authorize
+}
+
 // Request represents structure for http request
 type Request struct {
 	uuid       string
@@ -18,7 +31,8 @@ type Request struct {
 	data       map[string]interface{}
 	app        *App
 	session    *requestSession
-	user       *user
+	userID     int64
+	cachedUser *user
 }
 
 // Request returns underlying http.Request
@@ -38,17 +52,52 @@ func (request Request) Param(name string) string {
 
 // UserID returns id of logged in user, returns 0 if no user is logged
 func (request Request) UserID() int64 {
-	if request.user != nil {
-		return request.user.ID
+	user := request.getUser()
+	if user != nil {
+		return user.ID
 	}
 	return 0
 }
 
-func (request Request) UserHasPermission(permission Permission) bool {
-	if request.user == nil {
+func (request *Request) getUser() *user {
+	if request.cachedUser != nil {
+		return request.cachedUser
+	}
+	userID, ok := request.session.session.Values[userIDSessionName].(int64)
+	if !ok {
+		return nil
+	}
+	user := request.app.UsersResource.Query(request.r.Context()).ID(userID)
+	if user == nil {
+		return nil
+	}
+	request.cachedUser = user
+	return user
+}
+
+func (request *Request) Role() string {
+	user := request.getUser()
+	if user != nil {
+		return user.Role
+	}
+	return ""
+}
+
+func (request *Request) Locale() string {
+	user := request.getUser()
+	if user == nil {
+		return localeFromRequest(request)
+	}
+	return user.Locale
+
+}
+
+func (request Request) Authorize(permission Permission) bool {
+	user := request.getUser()
+	if user == nil {
 		return false
 	}
-	return request.app.authorize(request.user, permission)
+	return request.app.authorize(user, permission)
 }
 
 // SetData sets request data

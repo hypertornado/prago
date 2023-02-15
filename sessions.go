@@ -43,7 +43,7 @@ func (request *Request) AddFlashMessage(message string) {
 	request.app.Notification(message).Flash(request)
 }
 
-func initUserFromSession(request *Request) {
+/*func initUserFromSession(request *Request) {
 	userID, ok := request.session.session.Values[userIDSessionName].(int64)
 	if !ok {
 		return
@@ -53,7 +53,7 @@ func initUserFromSession(request *Request) {
 		return
 	}
 	request.user = user
-}
+}*/
 
 func initRequestWithSession(request *Request, next func()) {
 	session, err := request.app.sessionsManager.cookieStore.Get(request.Request(), request.app.codeName)
@@ -66,7 +66,7 @@ func initRequestWithSession(request *Request, next func()) {
 	request.session = &requestSession{
 		session: session,
 	}
-	initUserFromSession(request)
+	//initUserFromSession(request)
 
 	var notifications []*notificationView
 

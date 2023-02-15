@@ -294,8 +294,8 @@ func (resource *Resource[T]) Board(board *Board) *Resource[T] {
 	return resource
 }
 
-func (resourceData *resourceData) getItemURL(item interface{}, suffix string, user *user) string {
-	ret := resourceData.getURL(fmt.Sprintf("%d", resourceData.previewer(user, item).ID()))
+func (resourceData *resourceData) getItemURL(item interface{}, suffix string, userData UserData) string {
+	ret := resourceData.getURL(fmt.Sprintf("%d", resourceData.previewer(userData, item).ID()))
 	if suffix != "" {
 		ret += "/" + suffix
 	}
@@ -308,7 +308,7 @@ func (app *App) getResourceByID(name string) *resourceData {
 
 func initResource(resourceData *resourceData) {
 	resourceData.resourceController.addAroundAction(func(request *Request, next func()) {
-		if !resourceData.app.authorize(request.user, resourceData.canView) {
+		if !request.Authorize(resourceData.canView) {
 			render403(request)
 		} else {
 			next()

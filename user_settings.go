@@ -4,21 +4,21 @@ func initUserSettings(app *App) {
 
 	app.MainBoard.FormAction("settings").Icon("glyphicons-basic-5-settings.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu().Form(
 		func(form *Form, request *Request) {
-			user := request.user
-			form.Title = messages.Get(user.Locale, "admin_settings")
+			user := request.getUser()
+			form.Title = messages.Get(request.Locale(), "admin_settings")
 
 			name := form.AddTextInput("name", "")
-			name.Name = messages.Get(user.Locale, "Name")
+			name.Name = messages.Get(request.Locale(), "Name")
 			name.Value = user.Name
 
-			sel := form.AddSelect("locale", messages.Get(user.Locale, "admin_locale"), availableLocales)
-			sel.Value = user.Locale
+			sel := form.AddSelect("locale", messages.Get(request.Locale(), "admin_locale"), availableLocales)
+			sel.Value = request.Locale()
 
 			for _, v := range app.settings.settingsArray {
-				if request.UserHasPermission(v.permission) {
+				if request.Authorize(v.permission) {
 					val, err := app.GetSetting(request.r.Context(), v.id)
 					if err == nil {
-						input := form.AddTextInput("setting_"+v.id, v.name(request.user.Locale))
+						input := form.AddTextInput("setting_"+v.id, v.name(request.Locale()))
 						input.Value = val
 					} else {
 						app.Log().Errorf("can't load setting value '%s': %s", v.id, err)
@@ -26,7 +26,7 @@ func initUserSettings(app *App) {
 				}
 			}
 
-			form.AddSubmit(messages.Get(user.Locale, "admin_save"))
+			form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 		},
 	).Validation(func(vc ValidationContext) {
 		locale := vc.Locale()
@@ -50,14 +50,14 @@ func initUserSettings(app *App) {
 		}
 
 		if valid {
-			user := vc.Request().user
+			user := vc.Request().getUser()
 			user.Name = name
 			user.Locale = newLocale
 			must(app.UsersResource.Update(vc.Request().r.Context(), user))
 
 			for _, v := range app.settings.settingsArray {
 				request := vc.Request()
-				if request.UserHasPermission(v.permission) {
+				if request.Authorize(v.permission) {
 					val := request.Params().Get("setting_" + v.id)
 					err := app.saveSetting(v.id, val, request)
 					must(err)
@@ -74,8 +74,8 @@ func initUserSettings(app *App) {
 
 	app.MainBoard.FormAction("password").Icon("glyphicons-basic-45-key.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu().Form(
 		func(form *Form, request *Request) {
-			locale := request.user.Locale
-			form.Title = messages.Get(request.user.Locale, "admin_password_change")
+			locale := request.Locale()
+			form.Title = messages.Get(request.Locale(), "admin_password_change")
 			form.AddPasswordInput("oldpassword", messages.Get(locale, "admin_password_old")).Focused = true
 			form.AddPasswordInput("newpassword", messages.Get(locale, "admin_password_new"))
 			form.AddSubmit(messages.Get(locale, "admin_save"))
@@ -83,11 +83,11 @@ func initUserSettings(app *App) {
 	).Validation(
 		func(vc ValidationContext) {
 			request := vc.Request()
-			locale := request.user.Locale
+			locale := request.Locale()
 
 			valid := true
 			oldpassword := vc.GetValue("oldpassword")
-			if !request.user.isPassword(oldpassword) {
+			if !request.getUser().isPassword(oldpassword) {
 				valid = false
 				vc.AddItemError("oldpassword", messages.Get(locale, "admin_register_password"))
 			}
@@ -99,7 +99,7 @@ func initUserSettings(app *App) {
 			}
 
 			if valid {
-				request.AddFlashMessage(messages.Get(request.user.Locale, "admin_password_changed"))
+				request.AddFlashMessage(messages.Get(request.Locale(), "admin_password_changed"))
 				vc.Validation().RedirectionLocaliton = "/admin"
 			}
 		},

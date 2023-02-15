@@ -217,16 +217,16 @@ func (resourceData *resourceData) getnavigation(action *Action, request *Request
 	if action.isItemAction {
 		item := resourceData.query(request.r.Context()).ID(request.Param("id"))
 		if item != nil {
-			return resourceData.getItemNavigation(request.user, item, code)
+			return resourceData.getItemNavigation(request, item, code)
 		} else {
 			return navigation{}
 		}
 	}
-	return resourceData.getResourceNavigation(request.user, code)
+	return resourceData.getResourceNavigation(request, code)
 
 }
 
-func (resourceData *resourceData) getListItemActions(user *user, item any, id int64) listItemActions {
+func (resourceData *resourceData) getListItemActions(userData UserData, item any, id int64) listItemActions {
 	ret := listItemActions{}
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{
@@ -235,7 +235,7 @@ func (resourceData *resourceData) getListItemActions(user *user, item any, id in
 		URL: resourceData.getURL(fmt.Sprintf("%d", id)),
 	})
 
-	navigation := resourceData.getItemNavigation(user, item, "")
+	navigation := resourceData.getItemNavigation(userData, item, "")
 
 	for _, v := range navigation.Tabs {
 		if !v.Selected {
@@ -247,7 +247,7 @@ func (resourceData *resourceData) getListItemActions(user *user, item any, id in
 		}
 	}
 
-	if resourceData.app.authorize(user, resourceData.canUpdate) && resourceData.orderField != nil {
+	if userData.Authorize(resourceData.canUpdate) && resourceData.orderField != nil {
 		ret.ShowOrderButton = true
 	}
 

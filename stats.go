@@ -52,16 +52,16 @@ func statsCountDescription(count, total int64) listStatsDescription {
 	}
 }
 
-func (resourceData *resourceData) getListStats(ctx context.Context, user *user, params url.Values) *listStats {
+func (resourceData *resourceData) getListStats(ctx context.Context, userData UserData, params url.Values) *listStats {
 	ret := &listStats{}
 
 	columnsStr := params.Get("_columns")
 	if columnsStr == "" {
-		columnsStr = resourceData.defaultVisibleFieldsStr(user)
+		columnsStr = resourceData.defaultVisibleFieldsStr(userData)
 	}
 	columnsAr := strings.Split(columnsStr, ",")
 
-	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, user)
+	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, userData)
 	total, err := query.count()
 	if err != nil {
 		panic(err)
@@ -77,17 +77,17 @@ func (resourceData *resourceData) getListStats(ctx context.Context, user *user, 
 		field := resourceData.fieldMap[v]
 
 		if field.typ == reflect.TypeOf(time.Now()) {
-			ret.Sections = append(ret.Sections, resourceData.getListStatsDateSections(ctx, field, user, params, total, limit)...)
+			ret.Sections = append(ret.Sections, resourceData.getListStatsDateSections(ctx, field, userData, params, total, limit)...)
 		}
 
-		table := resourceData.getListStatsTable(ctx, field, user, params, total, limit)
+		table := resourceData.getListStatsTable(ctx, field, userData, params, total, limit)
 
 		if table == nil {
 			continue
 		}
 
 		ret.Sections = append(ret.Sections, listStatsSection{
-			Name:  field.name(user.Locale),
+			Name:  field.name(userData.Locale()),
 			Table: table,
 		})
 	}
@@ -95,15 +95,15 @@ func (resourceData *resourceData) getListStats(ctx context.Context, user *user, 
 	return ret
 }
 
-func (resourceData *resourceData) getListStatsDateSections(ctx context.Context, field *Field, user *user, params url.Values, total, limit int64) (ret []listStatsSection) {
-	ret = append(ret, resourceData.getListStatsDateSectionDay(ctx, field, user, params, total, limit))
-	ret = append(ret, resourceData.getListStatsDateSectionMonth(ctx, field, user, params, total, limit))
-	ret = append(ret, resourceData.getListStatsDateSectionYear(ctx, field, user, params, total, limit))
+func (resourceData *resourceData) getListStatsDateSections(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (ret []listStatsSection) {
+	ret = append(ret, resourceData.getListStatsDateSectionDay(ctx, field, userData, params, total, limit))
+	ret = append(ret, resourceData.getListStatsDateSectionMonth(ctx, field, userData, params, total, limit))
+	ret = append(ret, resourceData.getListStatsDateSectionYear(ctx, field, userData, params, total, limit))
 	return
 }
 
-func (resourceData *resourceData) getListStatsDateSectionDay(ctx context.Context, field *Field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
-	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, user)
+func (resourceData *resourceData) getListStatsDateSectionDay(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (ret listStatsSection) {
+	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, userData)
 	whereParams := query.values
 	q := fmt.Sprintf("SELECT DAY(%s), MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY DAY(%s), MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.id,
@@ -122,7 +122,7 @@ func (resourceData *resourceData) getListStatsDateSectionDay(ctx context.Context
 	}
 	defer rows.Close()
 	ret = listStatsSection{
-		Name: fmt.Sprintf("%s – dny", field.name(user.Locale)),
+		Name: fmt.Sprintf("%s – dny", field.name(userData.Locale())),
 	}
 	var counted int64
 	for rows.Next() {
@@ -147,8 +147,8 @@ func (resourceData *resourceData) getListStatsDateSectionDay(ctx context.Context
 	return
 }
 
-func (resourceData *resourceData) getListStatsDateSectionMonth(ctx context.Context, field *Field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
-	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, user)
+func (resourceData *resourceData) getListStatsDateSectionMonth(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (ret listStatsSection) {
+	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, userData)
 	whereParams := query.values
 	q := fmt.Sprintf("SELECT MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.id,
@@ -165,7 +165,7 @@ func (resourceData *resourceData) getListStatsDateSectionMonth(ctx context.Conte
 	}
 	defer rows.Close()
 	ret = listStatsSection{
-		Name: fmt.Sprintf("%s – měsíce", field.name(user.Locale)),
+		Name: fmt.Sprintf("%s – měsíce", field.name(userData.Locale())),
 	}
 	var counted int64
 	for rows.Next() {
@@ -176,7 +176,7 @@ func (resourceData *resourceData) getListStatsDateSectionMonth(ctx context.Conte
 		counted += count
 
 		ret.Table = append(ret.Table, listStatsRow{
-			Name:        fmt.Sprintf("%s %d", monthName(month, user.Locale), year),
+			Name:        fmt.Sprintf("%s %d", monthName(month, userData.Locale()), year),
 			Description: statsCountDescription(count, total),
 		})
 	}
@@ -189,8 +189,8 @@ func (resourceData *resourceData) getListStatsDateSectionMonth(ctx context.Conte
 	return
 }
 
-func (resourceData *resourceData) getListStatsDateSectionYear(ctx context.Context, field *Field, user *user, params url.Values, total, limit int64) (ret listStatsSection) {
-	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, user)
+func (resourceData *resourceData) getListStatsDateSectionYear(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (ret listStatsSection) {
+	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, userData)
 	whereParams := query.values
 	q := fmt.Sprintf("SELECT YEAR(%s), COUNT(id) FROM %s %s GROUP BY YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.id,
@@ -205,7 +205,7 @@ func (resourceData *resourceData) getListStatsDateSectionYear(ctx context.Contex
 	}
 	defer rows.Close()
 	ret = listStatsSection{
-		Name: fmt.Sprintf("%s – roky", field.name(user.Locale)),
+		Name: fmt.Sprintf("%s – roky", field.name(userData.Locale())),
 	}
 	var counted int64
 	for rows.Next() {
@@ -228,8 +228,8 @@ func (resourceData *resourceData) getListStatsDateSectionYear(ctx context.Contex
 	return
 }
 
-func (resourceData *resourceData) getListStatsTable(ctx context.Context, field *Field, user *user, params url.Values, total, limit int64) (table []listStatsRow) {
-	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, user)
+func (resourceData *resourceData) getListStatsTable(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (table []listStatsRow) {
+	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, userData)
 	whereParams := query.values
 
 	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.id, resourceData.getID(), buildWhereString(query.conditions), field.id, limit)
@@ -273,7 +273,7 @@ func (resourceData *resourceData) getListStatsTable(ctx context.Context, field *
 					row.Name = "–"
 				}
 
-				rd := field.relationPreview(ctx, user, v)
+				rd := field.relationPreview(ctx, userData, v)
 				if rd != nil {
 					row.Name = rd.Name
 					row.URL = rd.URL
@@ -284,13 +284,13 @@ func (resourceData *resourceData) getListStatsTable(ctx context.Context, field *
 			}
 
 		} else {
-			table = resourceData.getListStatsTableInt(ctx, field, user, params, total)
+			table = resourceData.getListStatsTableInt(ctx, field, userData, params, total)
 			counted = total
 		}
 	}
 
 	if field.typ.Kind() == reflect.Float64 {
-		table = resourceData.getListStatsTableInt(ctx, field, user, params, total)
+		table = resourceData.getListStatsTableInt(ctx, field, userData, params, total)
 		counted = total
 	}
 
@@ -330,12 +330,12 @@ func (resourceData *resourceData) getListStatsTable(ctx context.Context, field *
 	return
 }
 
-func (resourceData *resourceData) getListStatsTableInt(ctx context.Context, field *Field, user *user, params url.Values, total int64) (table []listStatsRow) {
+func (resourceData *resourceData) getListStatsTableInt(ctx context.Context, field *Field, userData UserData, params url.Values, total int64) (table []listStatsRow) {
 	if total <= 0 {
 		return
 	}
 
-	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, user)
+	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, userData)
 
 	whereParams := query.values
 
@@ -369,14 +369,14 @@ func (resourceData *resourceData) getListStatsTableInt(ctx context.Context, fiel
 	table = append(table, listStatsRow{
 		Name: "minimum",
 		Description: listStatsDescription{
-			Count: humanizeFloat(min, user.Locale),
+			Count: humanizeFloat(min, userData.Locale()),
 		},
 	})
 
 	table = append(table, listStatsRow{
 		Name: "průměr",
 		Description: listStatsDescription{
-			Count: humanizeFloat(avg, user.Locale),
+			Count: humanizeFloat(avg, userData.Locale()),
 		},
 	})
 
@@ -399,19 +399,19 @@ func (resourceData *resourceData) getListStatsTableInt(ctx context.Context, fiel
 	table = append(table, listStatsRow{
 		Name: "medián",
 		Description: listStatsDescription{
-			Count: humanizeFloat(median, user.Locale),
+			Count: humanizeFloat(median, userData.Locale()),
 		},
 	})
 	table = append(table, listStatsRow{
 		Name: "maximum",
 		Description: listStatsDescription{
-			Count: humanizeFloat(max, user.Locale),
+			Count: humanizeFloat(max, userData.Locale()),
 		},
 	})
 	table = append(table, listStatsRow{
 		Name: "součet",
 		Description: listStatsDescription{
-			Count: humanizeFloat(sum, user.Locale),
+			Count: humanizeFloat(sum, userData.Locale()),
 		},
 	})
 

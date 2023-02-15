@@ -16,12 +16,12 @@ type preview struct {
 }
 
 type previewer struct {
-	user         *user
+	userData     UserData
 	item         any
 	resourceData *resourceData
 }
 
-func (resourceData *resourceData) previewer(user *user, item any) *previewer {
+func (resourceData *resourceData) previewer(userData UserData, item any) *previewer {
 	if reflect.PointerTo(resourceData.typ) != reflect.TypeOf(item) {
 		return nil
 	}
@@ -31,14 +31,14 @@ func (resourceData *resourceData) previewer(user *user, item any) *previewer {
 	}*/
 
 	return &previewer{
-		user:         user,
+		userData:     userData,
 		item:         item,
 		resourceData: resourceData,
 	}
 }
 
 func (previewer *previewer) hasAccessToField(fieldID string) bool {
-	if !previewer.resourceData.app.authorize(previewer.user, previewer.resourceData.canView) {
+	if !previewer.userData.Authorize(previewer.resourceData.canView) {
 		return false
 	}
 
@@ -47,7 +47,7 @@ func (previewer *previewer) hasAccessToField(fieldID string) bool {
 	if field == nil {
 		return false
 	}
-	return field.authorizeView(previewer.user)
+	return field.authorizeView(previewer.userData)
 }
 
 func (previewer *previewer) ID() int64 {
@@ -72,7 +72,7 @@ func (previewer *previewer) Name() string {
 	var valIface = pointerVal.Interface()
 	namedIface, ok := valIface.(namedIFace)
 	if ok {
-		return namedIface.GetName(previewer.user.Locale)
+		return namedIface.GetName(previewer.userData.Locale())
 	}
 
 	if previewer.item != nil && previewer.hasAccessToField("Name") {
@@ -88,17 +88,17 @@ func (previewer *previewer) Name() string {
 
 }
 
-func (f *Field) relationPreview(ctx context.Context, user *user, id int64) *preview {
+func (f *Field) relationPreview(ctx context.Context, userData UserData, id int64) *preview {
 	item := f.relatedResource.query(ctx).ID(id)
 	if item == nil {
 		return nil
 	}
-	return f.relatedResource.previewer(user, item).Preview(ctx, f.resource)
+	return f.relatedResource.previewer(userData, item).Preview(ctx, f.resource)
 
 }
 
 func (previewer *previewer) URL(suffix string) string {
-	return previewer.resourceData.getItemURL(previewer.item, suffix, previewer.user)
+	return previewer.resourceData.getItemURL(previewer.item, suffix, previewer.userData)
 }
 
 func (previewer *previewer) Preview(ctx context.Context, relatedResource *resourceData) *preview {
@@ -163,7 +163,7 @@ func (previewer *previewer) DescriptionExtended(relatedResource *resourceData) s
 		if v.fieldClassName == "ID" || v.fieldClassName == "Name" || v.fieldClassName == "Description" {
 			continue
 		}
-		if !v.authorizeView(previewer.user) {
+		if !v.authorizeView(previewer.userData) {
 			continue
 		}
 
@@ -173,9 +173,9 @@ func (previewer *previewer) DescriptionExtended(relatedResource *resourceData) s
 		}
 
 		field := itemsVal.FieldByName(v.fieldClassName)
-		stringed := previewer.resourceData.app.relationStringer(*v, field, previewer.user)
+		stringed := previewer.resourceData.app.relationStringer(*v, field, previewer.userData)
 		if stringed != "" {
-			items = append(items, fmt.Sprintf("%s: %s", v.name(previewer.user.Locale), stringed))
+			items = append(items, fmt.Sprintf("%s: %s", v.name(previewer.userData.Locale()), stringed))
 		}
 	}
 	ret := strings.Join(items, " · ")
