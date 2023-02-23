@@ -15,7 +15,7 @@ require (
 	github.com/writeas/go-strip-markdown v2.0.1+incompatible
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974
-	golang.org/x/text v0.3.3
+	golang.org/x/text v0.3.8
 )
 
 require (
