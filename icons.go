@@ -59,6 +59,9 @@ func (app *App) initIcons() {
 		must(err)
 
 		request.Response().Header().Add("Content-Type", "image/svg+xml")
+		request.Response().Header().Add("Cache-Control", "max-age=604800")
+		//Cache-Control: max-age=604800
+
 		request.Response().Write(data)
 
 	})

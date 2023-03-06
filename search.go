@@ -334,7 +334,7 @@ func (e *adminSearch) searchImport(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	e.app.Log().Println("INDEX Created")
+	//e.app.Log().Println("INDEX Created")
 	return nil
 }
 

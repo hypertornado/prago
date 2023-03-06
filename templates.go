@@ -13,6 +13,8 @@ import (
 	"github.com/golang-commonmark/markdown"
 )
 
+//TODO: use https://github.com/yuin/goldmark
+
 //go:embed templates
 var templatesFS embed.FS
 

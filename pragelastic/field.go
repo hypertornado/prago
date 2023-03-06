@@ -86,7 +86,7 @@ func getElasticField(t reflect.StructField) (ret *field) {
 	case reflect.Bool:
 		ret.Type = "boolean"
 	default:
-		panic("wrong type " + t.Type.Name())
+		panic("wrong type " + t.Type.String())
 	}
 	return
 }

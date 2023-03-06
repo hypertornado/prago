@@ -33,8 +33,7 @@ func (app *App) initBuild() {
 	app.addCommand("party").Callback(func() {
 		ssh := app.MustGetSetting(context.Background(), "ssh")
 		if ssh == "" {
-			app.Log().Println("no ssh value set in settings")
-			return
+			panic("no ssh value set in settings")
 		}
 		must(party(appName, version, ssh))
 	})

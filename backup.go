@@ -76,7 +76,7 @@ func backupApp(app *App) error {
 	}
 	defer dbFile.Close()
 
-	err = app.backupSQL(dbFile, context.Background())
+	err = app.backupSQL(dbFile, context.Background(), nil)
 	if err != nil {
 		return fmt.Errorf("dumping cmd: %s", err)
 	}
@@ -90,13 +90,38 @@ func backupApp(app *App) error {
 	return copyFiles(dirPath, backupsPath)
 }
 
-func (app *App) backupSQL(writer io.Writer, context context.Context) error {
+func (app *App) backupSQL(writer io.Writer, context context.Context, excludeTableNames []string) error {
+
+	availableTables, err := listTables(app.db)
+	if err != nil {
+		return err
+	}
+
+	var appendedIgnore []string
+
+	for _, v := range excludeTableNames {
+		if v == "" {
+			continue
+		}
+		if !availableTables[v] {
+			return fmt.Errorf("can't ignore table '%s'", v)
+		}
+		appendedIgnore = append(appendedIgnore, fmt.Sprintf("--ignore-table=%s.%s", app.dbConfig.Name, v))
+
+	}
+
 	password := app.dbConfig.Password
 	var dumpCmd *exec.Cmd
 	if password == "" {
-		dumpCmd = exec.Command("mysqldump", "-u"+app.dbConfig.User, app.dbConfig.Name)
+		params := []string{"-u" + app.dbConfig.User, app.dbConfig.Name}
+		params = append(params, appendedIgnore...)
+		app.Log().Printf("mysqldump with params %v", params)
+		dumpCmd = exec.Command("mysqldump", params...)
 	} else {
-		dumpCmd = exec.Command("mysqldump", "-u"+app.dbConfig.User, "-p"+password, app.dbConfig.Name)
+		params := []string{"-u" + app.dbConfig.User, "-p" + password, app.dbConfig.Name}
+		params = append(params, appendedIgnore...)
+		app.Log().Printf("mysqldump with params %v", params)
+		dumpCmd = exec.Command("mysqldump", params...)
 	}
 	dumpCmd.Stdout = writer
 	return dumpCmd.Run()

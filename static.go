@@ -98,6 +98,8 @@ func (request Request) serveStaticFile(filesystem fs.FS, name string) (err error
 	b, _ := io.ReadAll(f)
 	reader := bytes.NewReader(b)
 
+	request.Response().Header().Add("Cache-Control", "max-age=604800")
+
 	http.ServeContent(request.w, request.r, d.Name(), d.ModTime(), reader)
 	return nil
 }
