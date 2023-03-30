@@ -39,6 +39,19 @@ func (request Request) Param(name string) string {
 
 // UserID returns id of logged in user, returns 0 if no user is logged
 func (request Request) UserID() int64 {
+
+	if request.session == nil {
+		return 0
+	}
+
+	if request.session.session == nil {
+		return 0
+	}
+
+	if request.session.session.Values == nil {
+		return 0
+	}
+
 	userID, ok := request.session.session.Values[userIDSessionName].(int64)
 	if !ok {
 		return 0
