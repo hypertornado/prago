@@ -291,8 +291,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 
 			request.SetData("CSRFToken", request.csrfToken())
 			request.SetData("ids", request.Param("ids"))
-
-			request.RenderView("multiple_edit")
+			request.Write(200, "multiple_edit", request.data)
 		},
 	)
 

@@ -56,7 +56,7 @@ func (app *App) initSearch() {
 			}
 
 			request.SetData("items", results)
-			request.RenderView("admin_search_suggest")
+			request.Write(200, "admin_search_suggest", request.data)
 		},
 	)
 

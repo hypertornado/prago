@@ -50,7 +50,7 @@ func renderPage(request *Request, page page) {
 		code = 200
 	}
 
-	request.RenderViewWithCode("prago_layout", code)
+	request.Write(code, "prago_layout", request.data)
 }
 
 func renderPageNoLogin(request *Request, page pageNoLogin) {
@@ -67,5 +67,5 @@ func renderPageNoLogin(request *Request, page pageNoLogin) {
 	request.SetData("admin_title", name)
 	request.SetData("admin_icon", icon)
 	request.SetData("admin_page", page)
-	request.RenderViewWithCode("layout_nologin", 200)
+	request.Write(200, "layout_nologin", request.data)
 }

@@ -64,7 +64,7 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 		request.SetData("yield", "newsletter_subscribe")
 		request.SetData("show_back_button", true)
 		request.SetData("site", app.name("en"))
-		request.RenderView("newsletter_layout")
+		request.Write(200, "newsletter_layout", request.data)
 	})
 
 	app.POST("/newsletter-subscribe", func(request *Request) {
@@ -92,7 +92,7 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 		request.SetData("title", message)
 		request.SetData("yield", "newsletter_empty")
 		request.SetData("site", app.name("en"))
-		request.RenderView("newsletter_layout")
+		request.Write(200, "newsletter_layout", request.data)
 	})
 
 	app.GET("/newsletter-confirm", func(request *Request) {
@@ -119,7 +119,7 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 		request.SetData("title", "Odběr newsletteru potvrzen")
 		request.SetData("yield", "newsletter_empty")
 		request.SetData("site", app.name("en"))
-		request.RenderView("newsletter_layout")
+		request.Write(200, "newsletter_layout", request.data)
 	})
 
 	//TODO: add confirmation button and form
@@ -148,7 +148,7 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 		request.SetData("title", "Odhlášení z odebírání newsletteru proběhlo úspěšně.")
 		request.SetData("yield", "newsletter_empty")
 		request.SetData("site", app.name("en"))
-		request.RenderView("newsletter_layout")
+		request.Write(200, "newsletter_layout", request.data)
 	})
 
 	app.newsletters.newsletterResource = NewResource[newsletter](app).Name(unlocalized("Newsletter"), unlocalized("Newslettery"))

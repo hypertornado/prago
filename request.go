@@ -103,6 +103,8 @@ func (request Request) Authorize(permission Permission) bool {
 	return request.app.authorize(logged, request.role(), permission)
 }
 
+func (request Request) GetAllData() map[string]any { return request.data }
+
 // SetData sets request data
 func (request Request) SetData(k string, v interface{}) { request.data[k] = v }
 
@@ -110,12 +112,12 @@ func (request Request) SetData(k string, v interface{}) { request.data[k] = v }
 func (request Request) GetData(k string) interface{} { return request.data[k] }
 
 // RenderView with HTTP 200 code
-func (request Request) RenderView(templateName string) {
-	request.RenderViewWithCode(templateName, 200)
-}
+//func (request Request) RenderView(templateName string) {
+//	request.RenderViewWithCode(200, templateName)
+//}
 
 // RenderViewWithCode renders view with HTTP code
-func (request Request) RenderViewWithCode(templateName string, statusCode int) {
+func (request Request) Write(statusCode int, templateName string, data any) {
 	request.Response().Header().Add("Content-Type", "text/html; charset=utf-8")
 	request.writeSessionIfDirty()
 	request.Response().WriteHeader(statusCode)
@@ -123,7 +125,7 @@ func (request Request) RenderViewWithCode(templateName string, statusCode int) {
 		request.app.templates.templates.ExecuteTemplate(
 			request.Response(),
 			templateName,
-			request.data,
+			data,
 		),
 	)
 }
