@@ -103,13 +103,13 @@ func (request Request) Authorize(permission Permission) bool {
 	return request.app.authorize(logged, request.role(), permission)
 }
 
-func (request Request) GetAllData() map[string]any { return request.data }
+//func (request Request) GetAllData() map[string]any { return request.data }
 
 // SetData sets request data
-func (request Request) SetData(k string, v interface{}) { request.data[k] = v }
+func (request Request) setData(k string, v interface{}) { request.data[k] = v }
 
 // GetData returns request data
-func (request Request) GetData(k string) interface{} { return request.data[k] }
+//func (request Request) GetData(k string) interface{} { return request.data[k] }
 
 // RenderView with HTTP 200 code
 //func (request Request) RenderView(templateName string) {

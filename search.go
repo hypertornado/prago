@@ -55,7 +55,7 @@ func (app *App) initSearch() {
 				return
 			}
 
-			request.SetData("items", results)
+			request.setData("items", results)
 			request.Write(200, "admin_search_suggest", request.data)
 		},
 	)
@@ -102,7 +102,7 @@ func (app *App) initSearch() {
 
 			var ret = map[string]interface{}{}
 
-			request.SetData("search_q", q)
+			request.setData("search_q", q)
 
 			ret["box_header"] = BoxHeader{
 				Name:      fmt.Sprintf("Vyhledávání – „%s", q),

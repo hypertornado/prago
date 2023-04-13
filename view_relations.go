@@ -92,7 +92,7 @@ func generateRelationListAPIHandler(request *Request) {
 
 	targetResource := request.app.getResourceByID(listRequest.TargetResource)
 
-	request.SetData("data", targetResource.getPreviews(request.r.Context(), listRequest, request))
+	request.setData("data", targetResource.getPreviews(request.r.Context(), listRequest, request))
 	request.Write(200, "admin_item_view_relationlist_response", request.data)
 }
 

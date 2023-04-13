@@ -11,7 +11,7 @@ func (app *App) initAdminActions() {
 
 	app.accessController.addBeforeAction(func(request *Request) {
 		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
-		request.SetData("locale", localeFromRequest(request))
+		request.setData("locale", localeFromRequest(request))
 
 	})
 
@@ -21,8 +21,8 @@ func (app *App) initAdminActions() {
 			return
 		}
 
-		request.SetData("javascripts", app.javascripts)
-		request.SetData("locale", request.Locale())
+		request.setData("javascripts", app.javascripts)
+		request.setData("locale", request.Locale())
 		next()
 	})
 

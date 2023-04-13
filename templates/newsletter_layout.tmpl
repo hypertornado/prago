@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{.title}}</title>
+    <title>{{.Title}}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -33,13 +33,13 @@
   </head>
   <body>
     <div class="box">
-      <a href="/">{{.site}}</a>
-      <h1>{{.title}}</h1>
-    {{tmpl .yield .}}
+      <a href="/">{{.Site}}</a>
+      <h1>{{.Title}}</h1>
+    {{tmpl .Yield .}}
 
-    {{if .show_back_button}}
+    {{if .ShowBackButton}}
       <br><br>
-      <a href="/">Vrátit se zpět na stránky {{.site}}</a>
+      <a href="/">Vrátit se zpět na stránky {{.Site}}</a>
     {{end}}
     </div>
   </body>

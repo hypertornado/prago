@@ -46,6 +46,14 @@ func (newsletters *Newsletters) Permission(permission Permission) *Newsletters {
 	return newsletters
 }
 
+type NewsletterWriteData struct {
+	Title          string
+	Csrf           string
+	Yield          string
+	ShowBackButton bool
+	Site           string
+}
+
 // InitNewsletters inits apps newsletter function
 func (app *App) Newsletters(board *Board) *Newsletters {
 	if app.newsletters != nil {
@@ -59,12 +67,16 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 	}
 
 	app.GET("/newsletter-subscribe", func(request *Request) {
-		request.SetData("title", "Přihlásit se k odběru newsletteru")
-		request.SetData("csrf", RequestCSRF(request))
-		request.SetData("yield", "newsletter_subscribe")
-		request.SetData("show_back_button", true)
-		request.SetData("site", app.name("en"))
-		request.Write(200, "newsletter_layout", request.data)
+
+		data := &NewsletterWriteData{
+			Title:          "Přihlásit se k odběru newsletteru",
+			Csrf:           RequestCSRF(request),
+			Yield:          "newsletter_subscribe",
+			ShowBackButton: true,
+			Site:           app.name("en"),
+		}
+
+		request.Write(200, "newsletter_layout", data)
 	})
 
 	app.POST("/newsletter-subscribe", func(request *Request) {
@@ -88,11 +100,14 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 			}
 		}
 
-		request.SetData("show_back_button", true)
-		request.SetData("title", message)
-		request.SetData("yield", "newsletter_empty")
-		request.SetData("site", app.name("en"))
-		request.Write(200, "newsletter_layout", request.data)
+		data := &NewsletterWriteData{
+			ShowBackButton: true,
+			Title:          message,
+			Yield:          "newsletter_empty",
+			Site:           app.name("en"),
+		}
+
+		request.Write(200, "newsletter_layout", data)
 	})
 
 	app.GET("/newsletter-confirm", func(request *Request) {
@@ -115,11 +130,14 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 		err := res.Update(request.r.Context(), person)
 		must(err)
 
-		request.SetData("show_back_button", true)
-		request.SetData("title", "Odběr newsletteru potvrzen")
-		request.SetData("yield", "newsletter_empty")
-		request.SetData("site", app.name("en"))
-		request.Write(200, "newsletter_layout", request.data)
+		data := &NewsletterWriteData{
+			ShowBackButton: true,
+			Title:          "Odběr newsletteru potvrzen",
+			Yield:          "newsletter_empty",
+			Site:           app.name("en"),
+		}
+
+		request.Write(200, "newsletter_layout", data)
 	})
 
 	//TODO: add confirmation button and form
@@ -144,11 +162,14 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 			panic(err)
 		}
 
-		request.SetData("show_back_button", true)
-		request.SetData("title", "Odhlášení z odebírání newsletteru proběhlo úspěšně.")
-		request.SetData("yield", "newsletter_empty")
-		request.SetData("site", app.name("en"))
-		request.Write(200, "newsletter_layout", request.data)
+		data := &NewsletterWriteData{
+			ShowBackButton: true,
+			Title:          "Odhlášení z odebírání newsletteru proběhlo úspěšně.",
+			Yield:          "newsletter_empty",
+			Site:           app.name("en"),
+		}
+
+		request.Write(200, "newsletter_layout", data)
 	})
 
 	app.newsletters.newsletterResource = NewResource[newsletter](app).Name(unlocalized("Newsletter"), unlocalized("Newslettery"))

@@ -83,7 +83,7 @@ func initRequestWithSession(request *Request, next func()) {
 	if notifications != nil {
 		b, err := json.Marshal(notifications)
 		must(err)
-		request.SetData("notifications_data", string(b))
+		request.setData("notifications_data", string(b))
 	}
 
 	next()

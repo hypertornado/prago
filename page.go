@@ -43,7 +43,7 @@ func renderPage(request *Request, page page) {
 		page.Name = request.app.name(request.Locale())
 	}
 
-	request.SetData("page", page)
+	request.setData("page", page)
 
 	code := page.HTTPCode
 	if code == 0 {
@@ -64,8 +64,8 @@ func renderPageNoLogin(request *Request, page pageNoLogin) {
 		}
 	}
 
-	request.SetData("admin_title", name)
-	request.SetData("admin_icon", icon)
-	request.SetData("admin_page", page)
+	request.setData("admin_title", name)
+	request.setData("admin_icon", icon)
+	request.setData("admin_page", page)
 	request.Write(200, "layout_nologin", request.data)
 }
