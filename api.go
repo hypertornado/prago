@@ -112,7 +112,7 @@ func (api *API) bindAPI() error {
 		}
 		if api.handlerJSON != nil {
 			data := api.handlerJSON(request)
-			request.RenderJSON(data)
+			request.WriteJSON(200, data)
 			return
 		}
 		if api.handler != nil {

@@ -11,7 +11,7 @@ func (app *App) initAPI() {
 		func(request *Request) {
 			data, err := io.ReadAll(request.Request().Body)
 			must(err)
-			request.RenderJSON(markdown.New(markdown.HTML(true), markdown.Breaks(true)).RenderToString(data))
+			request.WriteJSON(200, markdown.New(markdown.HTML(true), markdown.Breaks(true)).RenderToString(data))
 		},
 	)
 

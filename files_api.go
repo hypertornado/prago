@@ -20,7 +20,7 @@ func initFilesAPI(resource *Resource[File]) {
 
 	resource.API("imagedata/:uuid").Permission(loggedPermission).Handler(func(request *Request) {
 		file := resource.Query(request.r.Context()).Is("uid", request.Param("uuid")).First()
-		request.RenderJSON(file)
+		request.WriteJSON(200, file)
 	})
 
 	resource.API("upload").Method("POST").Permission(resource.data.canUpdate).Handler(func(request *Request) {

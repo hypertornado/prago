@@ -51,7 +51,7 @@ func (app *App) initIcons() {
 
 	app.API("icons").Permission(everybodyPermission).Method("GET").Handler(func(request *Request) {
 		if app.iconsFS == nil {
-			request.RenderJSONWithCode("icon not found", 404)
+			request.WriteJSON(404, "icon not found")
 			return
 		}
 
@@ -60,10 +60,8 @@ func (app *App) initIcons() {
 
 		request.Response().Header().Add("Content-Type", "image/svg+xml")
 		request.Response().Header().Add("Cache-Control", "max-age=604800")
-		//Cache-Control: max-age=604800
 
 		request.Response().Write(data)
-
 	})
 
 	app.Action("help/icons").Name(unlocalized("Ikony")).Permission(loggedPermission).hiddenInMenu().Template("admin_help_icons").DataSource(func(r *Request) interface{} {

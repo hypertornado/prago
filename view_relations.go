@@ -91,9 +91,8 @@ func generateRelationListAPIHandler(request *Request) {
 	defer request.Request().Body.Close()
 
 	targetResource := request.app.getResourceByID(listRequest.TargetResource)
-
-	request.setData("data", targetResource.getPreviews(request.r.Context(), listRequest, request))
-	request.Write(200, "admin_item_view_relationlist_response", request.data)
+	data := targetResource.getPreviews(request.r.Context(), listRequest, request)
+	request.WriteHTML(200, "admin_item_view_relationlist_response", data)
 }
 
 func (resourceData *resourceData) getPreviews(ctx context.Context, listRequest relationListRequest, request *Request) []*preview {

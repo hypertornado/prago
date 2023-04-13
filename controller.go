@@ -17,7 +17,6 @@ func newMainController() *controller {
 }
 
 func (c *controller) dispatchRequest(request *Request) bool {
-	request.data = make(map[string]interface{})
 	parseRequest(request)
 	return c.router.process(request)
 }

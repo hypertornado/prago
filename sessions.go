@@ -2,7 +2,6 @@ package prago
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/gorilla/sessions"
 )
@@ -43,18 +42,6 @@ func (request *Request) AddFlashMessage(message string) {
 	request.app.Notification(message).Flash(request)
 }
 
-/*func initUserFromSession(request *Request) {
-	userID, ok := request.session.session.Values[userIDSessionName].(int64)
-	if !ok {
-		return
-	}
-	user := request.app.UsersResource.Query(request.r.Context()).ID(userID)
-	if user == nil {
-		return
-	}
-	request.user = user
-}*/
-
 func initRequestWithSession(request *Request, next func()) {
 	session, err := request.app.sessionsManager.cookieStore.Get(request.Request(), request.app.codeName)
 	if err != nil {
@@ -66,10 +53,8 @@ func initRequestWithSession(request *Request, next func()) {
 	request.session = &requestSession{
 		session: session,
 	}
-	//initUserFromSession(request)
 
 	var notifications []*notificationView
-
 	for _, v := range session.Flashes() {
 		notificationID := v.(string)
 		notification := request.app.notificationCenter.getFromUUID(notificationID)
@@ -79,12 +64,7 @@ func initRequestWithSession(request *Request, next func()) {
 			request.session.dirty = true
 		}
 	}
-
-	if notifications != nil {
-		b, err := json.Marshal(notifications)
-		must(err)
-		request.setData("notifications_data", string(b))
-	}
+	request.notifications = notifications
 
 	next()
 }

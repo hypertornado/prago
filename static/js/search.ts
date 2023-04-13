@@ -13,7 +13,7 @@ class SearchForm {
       el.querySelector(".searchbox_suggestions")
     );
 
-    this.searchInput.value = document.body.getAttribute("data-search-query");
+    //this.searchInput.value = document.body.getAttribute("data-search-query");
 
     this.searchInput.addEventListener("input", () => {
       this.suggestions = [];

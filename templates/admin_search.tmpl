@@ -27,7 +27,7 @@
 
 {{define "admin_search_suggest"}}
   <div class="admin_search_suggestions_content">
-    {{range $i, $item := .items}}
+    {{range $i, $item := .}}
       <a href="{{$item.URL}}" class="admin_search_suggestion{{if not $item.Image}} admin_search_suggestion-noimage{{end}}" data-position="{{$i}}">
         {{if $item.Image}}
           <div class="admin_search_suggestion_left"

@@ -9,20 +9,11 @@ var ErrItemNotFound = errors.New("item not found")
 
 func (app *App) initAdminActions() {
 
-	app.accessController.addBeforeAction(func(request *Request) {
-		request.Response().Header().Set("X-XSS-Protection", "1; mode=block")
-		request.setData("locale", localeFromRequest(request))
-
-	})
-
 	app.adminController.addAroundAction(func(request *Request, next func()) {
 		if request.UserID() == 0 {
 			request.Redirect(app.getAdminURL("user/login"))
 			return
 		}
-
-		request.setData("javascripts", app.javascripts)
-		request.setData("locale", request.Locale())
 		next()
 	})
 

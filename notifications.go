@@ -54,7 +54,7 @@ func (app *App) initNotifications() {
 		if userID > 0 {
 			notifications = app.notificationCenter.getFromUser(userID)
 		}
-		request.RenderJSON(notifications)
+		request.WriteJSON(200, notifications)
 	})
 
 	app.API("notifications").Method("POST").Permission(loggedPermission).Handler(func(request *Request) {

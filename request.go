@@ -15,11 +15,20 @@ type Request struct {
 	receivedAt time.Time
 	w          http.ResponseWriter
 	r          *http.Request
-	data       map[string]interface{}
 	app        *App
 	session    *requestSession
-	//userID     int64
-	//cachedUser *user
+
+	notifications []*notificationView
+}
+
+func (request Request) getNotificationsData() string {
+	if request.notifications == nil {
+		return ""
+	} else {
+		b, err := json.Marshal(request.notifications)
+		must(err)
+		return string(b)
+	}
 }
 
 // Request returns underlying http.Request
@@ -103,21 +112,8 @@ func (request Request) Authorize(permission Permission) bool {
 	return request.app.authorize(logged, request.role(), permission)
 }
 
-//func (request Request) GetAllData() map[string]any { return request.data }
-
-// SetData sets request data
-func (request Request) setData(k string, v interface{}) { request.data[k] = v }
-
-// GetData returns request data
-//func (request Request) GetData(k string) interface{} { return request.data[k] }
-
-// RenderView with HTTP 200 code
-//func (request Request) RenderView(templateName string) {
-//	request.RenderViewWithCode(200, templateName)
-//}
-
-// RenderViewWithCode renders view with HTTP code
-func (request Request) Write(statusCode int, templateName string, data any) {
+// WriteHTML renders HTML view with HTTP code
+func (request Request) WriteHTML(statusCode int, templateName string, data any) {
 	request.Response().Header().Add("Content-Type", "text/html; charset=utf-8")
 	request.writeSessionIfDirty()
 	request.Response().WriteHeader(statusCode)
@@ -130,13 +126,8 @@ func (request Request) Write(statusCode int, templateName string, data any) {
 	)
 }
 
-// RenderJSON renders JSON with HTTP 200 code
-func (request Request) RenderJSON(data interface{}) {
-	request.RenderJSONWithCode(data, 200)
-}
-
-// RenderJSONWithCode renders JSON with HTTP code
-func (request Request) RenderJSONWithCode(data interface{}, code int) {
+// WriteJSON renders JSON with HTTP code
+func (request Request) WriteJSON(statusCode int, data interface{}) {
 	request.Response().Header().Add("Content-type", "application/json")
 	request.writeSessionIfDirty()
 
@@ -146,8 +137,8 @@ func (request Request) RenderJSONWithCode(data interface{}, code int) {
 	}
 
 	var responseToWrite interface{}
-	if code >= 400 {
-		responseToWrite = map[string]interface{}{"error": data, "errorCode": code}
+	if statusCode >= 400 {
+		responseToWrite = map[string]interface{}{"error": data, "errorCode": statusCode}
 	} else {
 		responseToWrite = data
 	}
@@ -164,7 +155,7 @@ func (request Request) RenderJSONWithCode(data interface{}, code int) {
 	if e != nil {
 		panic("error while generating JSON output")
 	}
-	request.Response().WriteHeader(code)
+	request.Response().WriteHeader(statusCode)
 	request.Response().Write(result)
 }
 

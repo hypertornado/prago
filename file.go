@@ -298,7 +298,7 @@ func writeFileResponse(request *Request, files []*File) {
 
 		responseData = append(responseData, ir)
 	}
-	request.RenderJSON(responseData)
+	request.WriteJSON(200, responseData)
 }
 
 // GetLarge file path

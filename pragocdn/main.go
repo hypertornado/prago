@@ -75,7 +75,7 @@ func main() {
 			panic(err)
 		}
 
-		request.RenderJSON(data)
+		request.WriteJSON(200, data)
 	})
 
 	app.GET("/:project/:uuid/metadata", func(request *prago.Request) {
@@ -88,7 +88,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		request.RenderJSON(metadata)
+		request.WriteJSON(200, metadata)
 	})
 
 	app.GET("/:project/:uuid/:format/:hash/:name", func(request *prago.Request) {
@@ -167,7 +167,7 @@ func main() {
 			panic(err)
 		}
 
-		request.RenderJSON(true)
+		request.WriteJSON(200, true)
 	})
 
 	app.Run()

@@ -18,7 +18,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 			if request.Request().URL.Query().Get("_format") == "json" {
 				listDataJSON, err := resourceData.getListContentJSON(request.r.Context(), request, request.Request().URL.Query())
 				must(err)
-				request.RenderJSON(listDataJSON)
+				request.WriteJSON(200, listDataJSON)
 				return
 			}
 			if request.Request().URL.Query().Get("_format") == "xlsx" {
@@ -77,7 +77,8 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				return
 			}
 
-			request.RenderJSON(
+			request.WriteJSON(
+				200,
 				resourceData.previewer(request, item).Preview(request.r.Context(), nil),
 			)
 		},
@@ -104,7 +105,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				err := resourceData.Update(request.r.Context(), item)
 				must(err)
 			}
-			request.RenderJSON(true)
+			request.WriteJSON(200, true)
 		},
 	)
 
@@ -158,7 +159,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 				ret[k].Description = crop(ret[k].Description, 100)
 			}
 
-			request.RenderJSON(ret)
+			request.WriteJSON(200, ret)
 		},
 	)
 
@@ -241,9 +242,9 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 					}
 
 					if !valValidation.Valid() {
-						request.RenderJSONWithCode(
-							valValidation.validation.TextErrorReport(v, request.Locale()),
+						request.WriteJSON(
 							403,
+							valValidation.validation.TextErrorReport(v, request.Locale()),
 						)
 						return
 					}
@@ -279,6 +280,12 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 		},
 	)
 
+	type MultipleEditData struct {
+		Form      *Form
+		CSRFToken string
+		IDs       string
+	}
+
 	resourceData.API("multiple_edit").Permission(resourceData.canUpdate).Method("GET").Handler(
 		func(request *Request) {
 			form := NewForm(
@@ -287,11 +294,13 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 
 			var item interface{} = reflect.New(resourceData.typ).Interface()
 			resourceData.addFormItems(item, request, form)
-			request.setData("form", form)
 
-			request.setData("CSRFToken", request.csrfToken())
-			request.setData("ids", request.Param("ids"))
-			request.Write(200, "multiple_edit", request.data)
+			data := &MultipleEditData{
+				Form:      form,
+				CSRFToken: request.csrfToken(),
+				IDs:       request.Param("ids"),
+			}
+			request.WriteHTML(200, "multiple_edit", data)
 		},
 	)
 
@@ -325,9 +334,9 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 
 				if err == errValidation {
 					report := validation.Validation().TextErrorReport(int64(id), request.Locale())
-					request.RenderJSONWithCode(
-						report,
+					request.WriteJSON(
 						403,
+						report,
 					)
 					return
 				}

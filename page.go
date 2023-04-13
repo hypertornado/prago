@@ -1,25 +1,25 @@
 package prago
 
 type page struct {
-	Language     string
+	Language string
+	Version  string
+
 	Icon         string
 	Name         string
 	App          *App
 	Navigation   navigation
 	PageTemplate string
 	PageData     interface{}
-	HTTPCode     int
 	Menu         menu
-}
 
-type pageNoLogin struct {
-	App        *App
-	Navigation navigation
-	FormData   interface{}
+	NotificationsData string
+	JavaScripts       []string
+	HTTPCode          int
 }
 
 func renderPage(request *Request, page page) {
 	page.Language = request.Locale()
+	page.Version = request.app.version
 	page.Menu = request.app.getMenu(request, request.Request().URL.Path, request.csrfToken())
 
 	for _, v := range page.Navigation.Tabs {
@@ -43,19 +43,36 @@ func renderPage(request *Request, page page) {
 		page.Name = request.app.name(request.Locale())
 	}
 
-	request.setData("page", page)
+	page.JavaScripts = request.app.javascripts
+	page.NotificationsData = request.getNotificationsData()
 
 	code := page.HTTPCode
 	if code == 0 {
 		code = 200
 	}
 
-	request.Write(code, "prago_layout", request.data)
+	request.WriteHTML(code, "prago_layout", page)
 }
 
-func renderPageNoLogin(request *Request, page pageNoLogin) {
+type pageNoLogin struct {
+	Language string
+	Version  string
+	App      *App
+
+	NotificationsData string
+	Title             string
+	Icon              string
+
+	Navigation navigation
+	FormData   interface{}
+}
+
+func renderPageNoLogin(request *Request, page *pageNoLogin) {
 	var name string
 	var icon string
+
+	page.Language = localeFromRequest(request)
+	page.Version = request.app.version
 
 	for _, v := range page.Navigation.Tabs {
 		if v.Selected {
@@ -64,8 +81,8 @@ func renderPageNoLogin(request *Request, page pageNoLogin) {
 		}
 	}
 
-	request.setData("admin_title", name)
-	request.setData("admin_icon", icon)
-	request.setData("admin_page", page)
-	request.Write(200, "layout_nologin", request.data)
+	page.NotificationsData = request.getNotificationsData()
+	page.Title = name
+	page.Icon = icon
+	request.WriteHTML(200, "layout_nologin", page)
 }

@@ -156,7 +156,7 @@
 {{end}}
 
 {{define "admin_item_view_relationlist_response"}}
-  {{range $item := .data}}
+  {{range $item := .}}
       {{template "admin_item_view_relation" $item}}
   {{end}}
 {{end}}

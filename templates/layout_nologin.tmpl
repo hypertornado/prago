@@ -1,23 +1,23 @@
 {{define "layout_nologin"}}
 
 <!doctype html>
-<html lang="{{.language}}">
+<html lang="{{.Language}}">
   <head>
     <meta charset="utf-8">
-    <title>{{.admin_title}}</title>
+    <title>{{.Title}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/admin/prago_admin_files/prago.css?v={{.version}}">
-    <script type="text/javascript" src="/admin/prago_admin_files/prago.js?v={{.version}}"></script>
-    {{if .admin_icon}}
-        <link rel="icon" href="/admin/api/icons?file={{.admin_icon}}&color=444444" type="image/svg+xml">
+    <link rel="stylesheet" href="/admin/prago_admin_files/prago.css?v={{.Version}}">
+    <script type="text/javascript" src="/admin/prago_admin_files/prago.js?v={{.Version}}"></script>
+    {{if .Icon}}
+        <link rel="icon" href="/admin/api/icons?file={{.Icon}}&color=444444" type="image/svg+xml">
     {{end}}
 
   </head>
   <body class="admin_nologin">
     <div class="admin_nologin_logo" style="background-image: url('/admin/logo');"></div>
-    {{template "admin_tabs" .admin_page.Navigation.Tabs}}
-    {{template "notification_center" .}}
-    {{template "admin_form" .admin_page.FormData}}
+    {{template "admin_tabs" .Navigation.Tabs}}
+    {{template "notification_center" .NotificationsData}}
+    {{template "admin_form" .FormData}}
   </body>
 </html>
 

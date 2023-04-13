@@ -43,7 +43,7 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *Form
 			panic("wrong csrf token")
 		}
 		ret.validation(rv)
-		request.RenderJSON(rv.validation)
+		request.WriteJSON(200, rv.validation)
 	})
 
 	return ret
@@ -70,7 +70,7 @@ func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Reques
 		form := NewForm("/admin/user/" + id)
 		formHandler(form, request)
 
-		renderPageNoLogin(request, pageNoLogin{
+		renderPageNoLogin(request, &pageNoLogin{
 			App:        app,
 			Navigation: app.getNologinNavigation(locale, id),
 			FormData:   form,
@@ -80,7 +80,7 @@ func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Reques
 	app.accessController.post(fmt.Sprintf("/admin/user/%s", id), func(request *Request) {
 		requestValidator := newRequestValidation(request)
 		validator(requestValidator)
-		request.RenderJSON(requestValidator.validation)
+		request.WriteJSON(200, requestValidator.validation)
 	})
 
 }

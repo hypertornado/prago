@@ -41,7 +41,6 @@ func (app *App) serveHTTP(w http.ResponseWriter, r *http.Request) {
 		w:          w,
 		r:          r,
 		app:        app,
-		data:       nil,
 	}
 	w.Header().Set("X-Prago-Request", request.uuid)
 

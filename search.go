@@ -51,12 +51,10 @@ func (app *App) initSearch() {
 			results, err := app.suggestItems(request.Param("q"), request)
 			must(err)
 			if len(results) == 0 {
-				request.RenderJSONWithCode(nil, 204)
+				request.WriteJSON(204, nil)
 				return
 			}
-
-			request.setData("items", results)
-			request.Write(200, "admin_search_suggest", request.data)
+			request.WriteHTML(200, "admin_search_suggest", results)
 		},
 	)
 
@@ -101,8 +99,6 @@ func (app *App) initSearch() {
 			}
 
 			var ret = map[string]interface{}{}
-
-			request.setData("search_q", q)
 
 			ret["box_header"] = BoxHeader{
 				Name:      fmt.Sprintf("Vyhledávání – „%s", q),

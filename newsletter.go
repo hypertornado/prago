@@ -76,7 +76,7 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 			Site:           app.name("en"),
 		}
 
-		request.Write(200, "newsletter_layout", data)
+		request.WriteHTML(200, "newsletter_layout", data)
 	})
 
 	app.POST("/newsletter-subscribe", func(request *Request) {
@@ -107,7 +107,7 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 			Site:           app.name("en"),
 		}
 
-		request.Write(200, "newsletter_layout", data)
+		request.WriteHTML(200, "newsletter_layout", data)
 	})
 
 	app.GET("/newsletter-confirm", func(request *Request) {
@@ -137,7 +137,7 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 			Site:           app.name("en"),
 		}
 
-		request.Write(200, "newsletter_layout", data)
+		request.WriteHTML(200, "newsletter_layout", data)
 	})
 
 	//TODO: add confirmation button and form
@@ -169,7 +169,7 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 			Site:           app.name("en"),
 		}
 
-		request.Write(200, "newsletter_layout", data)
+		request.WriteHTML(200, "newsletter_layout", data)
 	})
 
 	app.newsletters.newsletterResource = NewResource[newsletter](app).Name(unlocalized("Newsletter"), unlocalized("Newslettery"))
