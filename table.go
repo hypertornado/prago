@@ -64,29 +64,31 @@ func (table *Table) newRow() {
 
 }
 
-func (table *Table) Header(items ...interface{}) *Table {
+func (table *Table) Header(items ...string) *Table {
+	var headerCells = []*TableCell{}
 	for _, item := range items {
-		cell := table.Cell(item)
+		cell := Cell(item)
 		cell.Header()
+		headerCells = append(headerCells, cell)
 	}
+	table.Row(headerCells...)
+	//table.newRow()
+	return table
+}
+
+func (table *Table) Row(items ...*TableCell) *Table {
+	row := table.currentRow()
+	row.Cells = append(row.Cells, items...)
 	table.newRow()
 	return table
 }
 
-func (table *Table) Row(items ...interface{}) *Table {
-	for _, item := range items {
-		table.Cell(item)
-	}
-	table.newRow()
-	return table
-}
-
-func (t *Table) Cell(data interface{}) *TableCell {
-	row := t.currentRow()
-	cell := newCell(data)
-	row.Cells = append(row.Cells, cell)
-	return cell
-}
+/*func (t *Table) Cell(data interface{}) *TableCell {
+	var nCell *TableCell
+	nCell = Cell(data)
+	//row.Cells = append(row.Cells, nCell)
+	return nCell
+}*/
 
 func (cell *TableCell) Header() *TableCell {
 	cell.CSSClass("form_table_cell-header")
@@ -151,7 +153,7 @@ func (table *Table) currentRow() *tableRow {
 	return currentTable.Rows[len(currentTable.Rows)-1]
 }
 
-func newCell(item interface{}) *TableCell {
+func Cell(item interface{}) *TableCell {
 
 	var number bool
 
@@ -174,7 +176,7 @@ func newCell(item interface{}) *TableCell {
 	ret.CSSClass("form_table_cell")
 	linkData, ok := item.([2]string)
 	if ok {
-		ret = newCell(linkData[1])
+		ret = Cell(linkData[1])
 		ret.URL(linkData[0])
 
 	}

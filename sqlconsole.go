@@ -25,7 +25,7 @@ func (app *App) initSQLConsole() {
 			} else {
 				columns, err := rows.Columns()
 				must(err)
-				var header []interface{}
+				var header = []string{}
 				for _, v := range columns {
 					header = append(header, v)
 				}
@@ -35,6 +35,8 @@ func (app *App) initSQLConsole() {
 				values := make([]interface{}, count)
 				valuePtrs := make([]interface{}, count)
 
+				var cells []*TableCell
+
 				for rows.Next() {
 					rowCount += 1
 					for i := range columns {
@@ -43,7 +45,7 @@ func (app *App) initSQLConsole() {
 
 					rows.Scan(valuePtrs...)
 
-					var row []interface{}
+					//var row []interface{}
 					for i := range columns {
 						val := values[i]
 
@@ -55,11 +57,13 @@ func (app *App) initSQLConsole() {
 							v = val
 						}
 
-						row = append(row,
+						cells = append(cells, Cell(fmt.Sprintf("%v", v)))
+
+						/*row = append(row,
 							fmt.Sprintf("%v", v),
-						)
+						)*/
 					}
-					table.Row(row...)
+					table.Row(cells...)
 				}
 			}
 			table.AddFooterText(fmt.Sprintf("%d items", rowCount))

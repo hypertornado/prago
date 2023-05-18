@@ -89,7 +89,6 @@ func crop(in string, cropLength int) string {
 }
 
 func numberToString(n int, sep rune) string {
-
 	s := strconv.Itoa(n)
 
 	startOffset := 0

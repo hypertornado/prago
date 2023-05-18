@@ -19,6 +19,10 @@ type Request struct {
 	session    *requestSession
 
 	notifications []*notificationView
+
+	Written          bool
+	ResponseStatus   int
+	ResponseTemplate string
 }
 
 func (request Request) getNotificationsData() string {
@@ -117,6 +121,7 @@ func (request Request) WriteHTML(statusCode int, templateName string, data any) 
 	request.Response().Header().Add("Content-Type", "text/html; charset=utf-8")
 	request.writeSessionIfDirty()
 	request.Response().WriteHeader(statusCode)
+	request.Written = true
 	must(
 		request.app.templates.templates.ExecuteTemplate(
 			request.Response(),
@@ -130,6 +135,7 @@ func (request Request) WriteHTML(statusCode int, templateName string, data any) 
 func (request Request) WriteJSON(statusCode int, data interface{}) {
 	request.Response().Header().Add("Content-type", "application/json")
 	request.writeSessionIfDirty()
+	request.Written = true
 
 	pretty := false
 	if request.Param("pretty") == "true" {
@@ -164,6 +170,7 @@ func (request Request) Redirect(url string) {
 	request.Response().Header().Set("Location", url)
 	request.writeSessionIfDirty()
 	request.Response().WriteHeader(http.StatusFound)
+	request.Written = true
 }
 
 func (request Request) writeAfterLog() {

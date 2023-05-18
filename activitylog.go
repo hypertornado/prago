@@ -63,7 +63,7 @@ func (app *App) getHistoryTable(request *Request, resourceData *resourceData, it
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page <= 0 {
-		ret.Row("Špatný formát stránkování")
+		ret.Row(Cell("Špatný formát stránkování"))
 		return ret
 	}
 
@@ -125,11 +125,11 @@ func (app *App) getHistoryTable(request *Request, resourceData *resourceData, it
 		}
 
 		ret.Row(
-			[2]string{activityURL, fmt.Sprintf("%d", v.ID)},
-			v.ActionType,
-			[2]string{resourceData.getURL(fmt.Sprintf("%d", v.ItemID)), itemName},
-			[2]string{userurl, username},
-			messages.Timestamp(locale, v.CreatedAt, true),
+			Cell([2]string{activityURL, fmt.Sprintf("%d", v.ID)}),
+			Cell(v.ActionType),
+			Cell([2]string{resourceData.getURL(fmt.Sprintf("%d", v.ItemID)), itemName}),
+			Cell([2]string{userurl, username}),
+			Cell(messages.Timestamp(locale, v.CreatedAt, true)),
 		)
 
 	}

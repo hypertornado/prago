@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-func (app App) recoveryFunction(p *Request, recoveryData interface{}) {
-	duration := time.Since(p.receivedAt)
+func (app App) recoveryFunction(request *Request, recoveryData interface{}) {
+	duration := time.Since(request.receivedAt)
 
 	if app.developmentMode {
 		temp, err := template.New("development_error").Parse(recoveryTmpl)
@@ -21,30 +21,31 @@ func (app App) recoveryFunction(p *Request, recoveryData interface{}) {
 		buf := new(bytes.Buffer)
 		err = temp.ExecuteTemplate(buf, "development_error", map[string]interface{}{
 			"name":    byteData,
-			"subname": fmt.Sprintf("500 Internal Server Error (errorid %s)", p.uuid),
+			"subname": fmt.Sprintf("500 Internal Server Error (errorid %s)", request.uuid),
 			"stack":   string(debug.Stack()),
 		})
 		if err != nil {
 			panic(err)
 		}
 
-		p.Response().Header().Add("Content-type", "text/html")
-		p.Response().WriteHeader(500)
-		p.Response().Write(buf.Bytes())
+		if !request.Written {
+			request.Response().Header().Add("Content-type", "text/html")
+			request.Response().WriteHeader(500)
+			request.Response().Write(buf.Bytes())
+		}
 	} else {
-		p.Response().WriteHeader(500)
-		p.Response().Write([]byte(fmt.Sprintf("We are sorry, some error occured. (errorid %s)", p.uuid)))
+		request.Response().WriteHeader(500)
+		request.Response().Write([]byte(fmt.Sprintf("We are sorry, some error occured. (errorid %s)", request.uuid)))
 	}
 
-	var userID int64
-	//if p != nil && p.UserID() != nil {
-	userID = p.UserID()
-	//}
+	request.Written = true
+
+	var userID int64 = request.UserID()
 
 	message := fmt.Sprintf("500 - application error\nuserid=%d\nmessage=%s\nuuid=%s\ntook=%v\n%s",
 		userID,
 		recoveryData,
-		p.uuid,
+		request.uuid,
 		duration,
 		string(debug.Stack()),
 	)
