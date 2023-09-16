@@ -2,6 +2,7 @@ package prago
 
 import (
 	"errors"
+	"strings"
 )
 
 // ErrItemNotFound is returned when no item is found
@@ -21,6 +22,9 @@ func (app *App) initAdminActions() {
 
 	app.accessController.get("/admin/logo", func(request *Request) {
 		if app.logo != nil {
+			if strings.HasPrefix(string(app.logo), "<svg") {
+				request.Response().Header().Add("Content-Type", "image/svg+xml")
+			}
 			request.w.Write(app.logo)
 			return
 		}
@@ -34,7 +38,6 @@ func (app *App) initAdminActions() {
 
 		request.Response().Header().Add("Content-Type", "image/svg+xml")
 		request.w.Write(iconData)
-
 	})
 }
 

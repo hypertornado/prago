@@ -30,17 +30,17 @@ func NewIndex[T any](client *Client) *Index[T] {
 }
 
 func (index *Index[T]) Flush() error {
-	_, err := index.client.eclient.Flush().Do(context.Background())
+	_, err := index.client.esclientOld.Flush().Do(context.Background())
 	return err
 }
 
 func (index *Index[T]) Refresh() error {
-	_, err := index.client.eclient.Refresh().Do(context.Background())
+	_, err := index.client.esclientOld.Refresh().Do(context.Background())
 	return err
 }
 
 func (index *Index[T]) Delete() error {
-	_, err := index.client.eclient.DeleteIndex(index.indexName()).Do(context.Background())
+	_, err := index.client.esclientOld.DeleteIndex(index.indexName()).Do(context.Background())
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func (index *Index[T]) Delete() error {
 }
 
 func (index *Index[T]) Get(id string) (*T, error) {
-	res, err := index.client.eclient.Get().Index(index.indexName()).Id(id).Do(context.Background())
+	res, err := index.client.esclientOld.Get().Index(index.indexName()).Id(id).Do(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -62,15 +62,20 @@ func (index *Index[T]) Get(id string) (*T, error) {
 }
 
 func (index *Index[T]) Count() (int64, error) {
-	stats, err := index.client.eclient.IndexStats(index.indexName()).Do(context.Background())
+	stats, err := index.client.esclientOld.IndexStats(index.indexName()).Do(context.Background())
 	if err != nil {
 		return -1, err
 	}
 	return stats.All.Primaries.Docs.Count, nil
 }
 
+func (index *Index[T]) DeleteItemOLD(id string) error {
+	_, err := index.client.esclientOld.Delete().Index(index.indexName()).Id(id).Do(context.Background())
+	return err
+}
+
 func (index *Index[T]) DeleteItem(id string) error {
-	_, err := index.client.eclient.Delete().Index(index.indexName()).Id(id).Do(context.Background())
+	_, err := index.client.esclientNew.Delete(index.indexName(), id)
 	return err
 }
 
@@ -84,7 +89,7 @@ func (index *Index[T]) indexName() string {
 
 func (index *Index[T]) Create() error {
 	str := index.indexDataStr()
-	_, err := index.client.eclient.CreateIndex(index.indexName()).BodyString(str).Do(context.Background())
+	_, err := index.client.esclientOld.CreateIndex(index.indexName()).BodyString(str).Do(context.Background())
 	return err
 }
 

@@ -144,7 +144,7 @@ func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
 	q := query.
 		index.
 		client.
-		eclient.
+		esclientOld.
 		Search().
 		Index(query.index.indexName())
 
@@ -155,7 +155,7 @@ func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
 }
 
 func (query *Query[T]) Delete() error {
-	deleteService := elastic.NewDeleteByQueryService(query.index.client.eclient)
+	deleteService := elastic.NewDeleteByQueryService(query.index.client.esclientOld)
 	deleteService.Index(query.index.indexName())
 	deleteService.Query(query.boolQuery)
 	_, err := deleteService.Do(query.context)

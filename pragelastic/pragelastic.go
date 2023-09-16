@@ -5,11 +5,14 @@ import (
 	"time"
 
 	"github.com/olivere/elastic/v7"
+
+	elasticsearch7 "github.com/elastic/go-elasticsearch/v7"
 )
 
 type Client struct {
-	prefix  string
-	eclient *elastic.Client
+	prefix      string
+	esclientOld *elastic.Client
+	esclientNew *elasticsearch7.Client
 }
 
 func New(id string) (*Client, error) {
@@ -20,13 +23,20 @@ func New(id string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	esClient, err := elasticsearch7.NewDefaultClient()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Client{
-		prefix:  id,
-		eclient: client,
+		prefix:      id,
+		esclientOld: client,
+		esclientNew: esClient,
 	}, nil
 }
 
 func (c *Client) GetStats() *elastic.ClusterStatsResponse {
-	ret, _ := c.eclient.ClusterStats().Do(context.Background())
+	ret, _ := c.esclientOld.ClusterStats().Do(context.Background())
 	return ret
 }

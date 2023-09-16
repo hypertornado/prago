@@ -51,7 +51,7 @@ func (request Request) Param(name string) string {
 }
 
 // UserID returns id of logged in user, returns 0 if no user is logged
-func (request Request) UserID() int64 {
+func (request *Request) UserID() int64 {
 
 	if request.session == nil {
 		return 0
@@ -108,7 +108,7 @@ func (request *Request) Locale() string {
 	return data.locale
 }
 
-func (request Request) Authorize(permission Permission) bool {
+func (request *Request) Authorize(permission Permission) bool {
 	var logged bool
 	if request.UserID() > 0 {
 		logged = true
@@ -117,7 +117,7 @@ func (request Request) Authorize(permission Permission) bool {
 }
 
 // WriteHTML renders HTML view with HTTP code
-func (request Request) WriteHTML(statusCode int, templateName string, data any) {
+func (request *Request) WriteHTML(statusCode int, templateName string, data any) {
 	request.Response().Header().Add("Content-Type", "text/html; charset=utf-8")
 	request.writeSessionIfDirty()
 	request.Response().WriteHeader(statusCode)
@@ -132,7 +132,7 @@ func (request Request) WriteHTML(statusCode int, templateName string, data any) 
 }
 
 // WriteJSON renders JSON with HTTP code
-func (request Request) WriteJSON(statusCode int, data interface{}) {
+func (request *Request) WriteJSON(statusCode int, data interface{}) {
 	request.Response().Header().Add("Content-type", "application/json")
 	request.writeSessionIfDirty()
 	request.Written = true
@@ -166,14 +166,14 @@ func (request Request) WriteJSON(statusCode int, data interface{}) {
 }
 
 // Redirect redirects request to new url
-func (request Request) Redirect(url string) {
+func (request *Request) Redirect(url string) {
 	request.Response().Header().Set("Location", url)
 	request.writeSessionIfDirty()
 	request.Response().WriteHeader(http.StatusFound)
 	request.Written = true
 }
 
-func (request Request) writeAfterLog() {
+func (request *Request) writeAfterLog() {
 	if request.Request().Header.Get("X-Dont-Log") != "true" {
 		request.app.Log().accessln(
 			fmt.Sprintf("id=%s %s %s took=%v",
@@ -186,7 +186,7 @@ func (request Request) writeAfterLog() {
 	}
 }
 
-func (request Request) removeTrailingSlash() bool {
+func (request *Request) removeTrailingSlash() bool {
 	path := request.Request().URL.Path
 	if request.Request().Method == "GET" && len(path) > 1 && path == request.Request().URL.String() && strings.HasSuffix(path, "/") {
 		request.Response().Header().Set("Location", path[0:len(path)-1])

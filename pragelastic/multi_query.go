@@ -30,7 +30,7 @@ func (mq *MultiQuery[T]) Context(ctx context.Context) *MultiQuery[T] {
 }
 
 func (mq *MultiQuery[T]) Search() ([]*elastic.SearchResult, error) {
-	multi := elastic.NewMultiSearchService(mq.index.client.eclient)
+	multi := elastic.NewMultiSearchService(mq.index.client.esclientOld)
 	for _, v := range mq.queries {
 		request := elastic.NewSearchRequest()
 		request.Index(v.index.indexName())

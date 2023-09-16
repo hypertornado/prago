@@ -24,7 +24,7 @@ func (index *Index[T]) UpdateSingle(item *T) error {
 	id := getID(item)
 	_, err := index.
 		client.
-		eclient.
+		esclientOld.
 		Index().
 		Index(
 			index.indexName(),
@@ -38,7 +38,7 @@ func (index *Index[T]) UpdateSingle(item *T) error {
 }
 
 func (index *Index[T]) UpdateBulk() (*BulkUpdater[T], error) {
-	bp, err := index.client.eclient.BulkProcessor().Name("prago-bulk-updater").
+	bp, err := index.client.esclientOld.BulkProcessor().Name("prago-bulk-updater").
 		Before(func(executionId int64, requests []elastic.BulkableRequest) {
 		}).
 		After(func(executionId int64, requests []elastic.BulkableRequest, response *elastic.BulkResponse, err error) {

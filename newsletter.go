@@ -52,6 +52,9 @@ type NewsletterWriteData struct {
 	Yield          string
 	ShowBackButton bool
 	Site           string
+
+	Email  string
+	Secret string
 }
 
 // InitNewsletters inits apps newsletter function
@@ -138,8 +141,31 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 			panic("wrong secret")
 		}
 
-		res := GetResource[newsletterPersons](app)
+		data.Site = app.name("en")
 
+		data.Title = "Opravdu chcete odhlásit odběr newsletterů?"
+		data.Yield = "newsletter_unsubscribe"
+
+		data.Csrf = RequestCSRF(request)
+		data.Email = email
+		data.Secret = secret
+
+	})
+
+	newsletterWriter.POST("/newsletter-unsubscribe", func(request *Request, data *NewsletterWriteData) {
+
+		if RequestCSRF(request) != request.Param("csrf") {
+			panic("wrong csrf")
+		}
+
+		email := request.Param("email")
+		secret := request.Param("secret")
+
+		if app.newsletters.secret(email) != secret {
+			panic("wrong secret")
+		}
+
+		res := GetResource[newsletterPersons](app)
 		person := res.Query(request.r.Context()).Is("email", email).First()
 		if person == nil {
 			panic("can't find user")
@@ -155,6 +181,7 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 		data.Title = "Odhlášení z odebírání newsletteru proběhlo úspěšně."
 		data.Yield = "newsletter_empty"
 		data.Site = app.name("en")
+
 	})
 
 	app.newsletters.newsletterResource = NewResource[newsletter](app).Name(unlocalized("Newsletter"), unlocalized("Newslettery"))
@@ -167,7 +194,13 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 		Board(board).
 		Name(unlocalized("Newsletter - sekce"), unlocalized("Newsletter - sekce"))
 
-	NewResource[newsletterPersons](app).Board(board).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoba"), unlocalized("Newsletter - osoby"))
+	newsletterPersonsResource := NewResource[newsletterPersons](app).Board(board).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoba"), unlocalized("Newsletter - osoby"))
+	newsletterPersonsResource.ItemAction("preview-unsubscribe").Permission("sysadmin").Name(unlocalized("Unsubscribe stránka")).
+		Handler(func(person *newsletterPersons, request *Request) {
+			redirectURL := app.newsletters.unsubscribeURL(person.Email)
+			//unsubscribeURL
+			request.Redirect(redirectURL)
+		})
 	return app.newsletters
 }
 

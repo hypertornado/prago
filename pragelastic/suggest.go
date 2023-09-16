@@ -51,7 +51,7 @@ func (index *Index[T]) Suggest(q string, categoryContexts map[string][]string) (
 		completionSuggester.ContextQuery(elastic.NewSuggesterCategoryQuery(k, v...))
 	}
 
-	searchService := index.client.eclient.
+	searchService := index.client.esclientOld.
 		Search().
 		Index(index.indexName()).
 		Suggester(completionSuggester)

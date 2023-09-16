@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"runtime/debug"
 	"sort"
 	"time"
 
@@ -327,7 +328,7 @@ func (tm *taskManager) run(t *Task, userID int64, locale string, form *multipart
 				if activity.stoppedByUser {
 					notification.SetDescription("Ukončeno uživatelem")
 				} else {
-					recoveryStr := fmt.Sprintf("%v", r)
+					recoveryStr := fmt.Sprintf("%v, stack: %s", r, string(debug.Stack()))
 					notification.SetDescription(recoveryStr)
 				}
 			} else {
