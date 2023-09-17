@@ -1,7 +1,6 @@
 package pragelastic
 
 import (
-	"context"
 	"time"
 
 	"github.com/olivere/elastic/v7"
@@ -36,7 +35,7 @@ func New(id string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) GetStats() *elastic.ClusterStatsResponse {
+/*func (c *Client) GetStats() *elastic.ClusterStatsResponse {
 	ret, _ := c.esclientOld.ClusterStats().Do(context.Background())
 	return ret
-}
+}*/

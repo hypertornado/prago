@@ -1,11 +1,14 @@
 package pragelastic
 
 import (
-	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
+
+	"github.com/elastic/go-elasticsearch/v7/esapi"
+	//esapi "github.com/elastic/go-elasticsearch/esapi"
 )
 
 type Index[T any] struct {
@@ -30,48 +33,47 @@ func NewIndex[T any](client *Client) *Index[T] {
 }
 
 func (index *Index[T]) Flush() error {
-	_, err := index.client.esclientOld.Flush().Do(context.Background())
+	_, err := index.client.esclientNew.Indices.Flush()
 	return err
 }
 
 func (index *Index[T]) Refresh() error {
-	_, err := index.client.esclientOld.Refresh().Do(context.Background())
+	_, err := index.client.esclientNew.Indices.Refresh()
 	return err
 }
 
 func (index *Index[T]) Delete() error {
-	_, err := index.client.esclientOld.DeleteIndex(index.indexName()).Do(context.Background())
-	if err != nil {
-		return err
-	}
-	return nil
+	_, err := index.client.esclientNew.Indices.Delete([]string{index.indexName()})
+	return err
 }
 
 func (index *Index[T]) Get(id string) (*T, error) {
-	res, err := index.client.esclientOld.Get().Index(index.indexName()).Id(id).Do(context.Background())
+	response, err := index.client.esclientNew.GetSource(index.indexName(), id)
 	if err != nil {
 		return nil, err
 	}
 
 	var item T
-	err = json.Unmarshal(res.Source, &item)
+	err = json.NewDecoder(response.Body).Decode(&item)
 	if err != nil {
 		return nil, err
 	}
+
 	return &item, nil
 }
 
 func (index *Index[T]) Count() (int64, error) {
-	stats, err := index.client.esclientOld.IndexStats(index.indexName()).Do(context.Background())
+
+	stats, err := index.client.GetStats()
 	if err != nil {
 		return -1, err
 	}
-	return stats.All.Primaries.Docs.Count, nil
-}
+	indice := stats.Indices[index.indexName()]
+	if indice == nil {
+		return -1, errors.New("cant find indice")
+	}
+	return indice.Total.Docs.Count, nil
 
-func (index *Index[T]) DeleteItemOLD(id string) error {
-	_, err := index.client.esclientOld.Delete().Index(index.indexName()).Id(id).Do(context.Background())
-	return err
 }
 
 func (index *Index[T]) DeleteItem(id string) error {
@@ -89,7 +91,11 @@ func (index *Index[T]) indexName() string {
 
 func (index *Index[T]) Create() error {
 	str := index.indexDataStr()
-	_, err := index.client.esclientOld.CreateIndex(index.indexName()).BodyString(str).Do(context.Background())
+
+	_, err := index.client.esclientNew.Indices.Create(index.indexName(), func(request *esapi.IndicesCreateRequest) {
+		request.Body = strings.NewReader(str)
+	})
+
 	return err
 }
 

@@ -2,7 +2,10 @@ package pragelastic
 
 import (
 	"context"
+	"encoding/json"
+	"strings"
 
+	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/olivere/elastic/v7"
 )
 
@@ -22,19 +25,30 @@ func (index *Index[T]) UpdateSingleNew(item *T) error {
 
 func (index *Index[T]) UpdateSingle(item *T) error {
 	id := getID(item)
-	_, err := index.
-		client.
-		esclientOld.
-		Index().
-		Index(
-			index.indexName(),
-		).
-		BodyJson(item).
-		Id(id).
-		Do(
-			context.Background(),
-		)
+
+	data, err := json.Marshal(item)
+	if err != nil {
+		return err
+	}
+
+	_, err = index.client.esclientNew.Index(index.indexName(), strings.NewReader(string(data)), func(request *esapi.IndexRequest) {
+		request.DocumentID = id
+	})
 	return err
+
+	/*_, err := index.
+	client.
+	esclientOld.
+	Index().
+	Index(
+		index.indexName(),
+	).
+	BodyJson(item).
+	Id(id).
+	Do(
+		context.Background(),
+	)*/
+	//return err
 }
 
 func (index *Index[T]) UpdateBulk() (*BulkUpdater[T], error) {
