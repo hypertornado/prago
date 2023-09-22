@@ -49,10 +49,12 @@
   border: 1px solid #eee;
   display: flex;
   align-items: center;
-  opacity: 0;
+  //opacity: 0;
 
-  animation: board_resource 1000ms ease-out;
-  animation-fill-mode: forwards;
+  //animation: board_resource 1000ms ease-out;
+
+
+  //animation-fill-mode: forwards;
   gap: 10px;
   min-height: 45px;
 }
@@ -120,10 +122,10 @@ a.board_resource {
 
 .board_user_text {
   padding: 20px 10px;
-  font-size: 1.3rem;
+  font-size: 1rem;
   line-height: 1.3em;
   text-align: center;
-  animation: board_user 2000ms ease-out;
+  //animation: board_user 2000ms ease-out;
 }
 
 .board_user_buttons {

@@ -10,6 +10,8 @@ import (
 	"github.com/olivere/elastic/v7"
 )
 
+//https://www.elastic.co/guide/en/elasticsearch/client/go-api/current/examples.html#search
+
 type Query[T any] struct {
 	index        *Index[T]
 	sortField    string
@@ -22,6 +24,7 @@ type Query[T any] struct {
 }
 
 func (index *Index[T]) Query() *Query[T] {
+
 	q := &Query[T]{
 		index:        index,
 		boolQuery:    elastic.NewBoolQuery(),
@@ -141,6 +144,7 @@ func (query *Query[T]) createSearchSource() *elastic.SearchSource {
 }
 
 func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
+
 	q := query.
 		index.
 		client.

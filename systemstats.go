@@ -100,6 +100,7 @@ func (app *App) initSystemStats() {
 			ret["memStats"] = memStats
 			ret["environmentStats"] = environmentStats
 			ret["accessView"] = getResourceAccessView(app)
+			ret["elasticsearch"] = elasticsearchStats(app)
 			ret["routes"] = app.mainController.router.export()
 			return ret
 		},
@@ -168,4 +169,48 @@ func getResourceAccessView(app *App) accessView {
 	}
 
 	return ret
+}
+
+func elasticsearchStats(app *App) [][2]string {
+	if app.ElasticClient == nil {
+		return nil
+	}
+
+	stats, err := app.ElasticClient.GetStats()
+	if err != nil {
+		panic(err)
+	}
+
+	var ret [][2]string
+
+	var indiceNames []string
+	for k := range stats.Indices {
+		indiceNames = append(indiceNames, k)
+	}
+
+	sort.Strings(indiceNames)
+
+	for _, v := range indiceNames {
+		ret = append(ret, [2]string{
+			v,
+			fmt.Sprintf("%d docs, %s size", stats.Indices[v].Total.Docs.Count, ByteCountSI(stats.Indices[v].Total.Store.SizeInBytes)),
+		})
+	}
+
+	return ret
+
+}
+
+func ByteCountSI(b int64) string {
+	const unit = 1000
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB",
+		float64(b)/float64(div), "kMGTPE"[exp])
 }

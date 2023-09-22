@@ -26,7 +26,12 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 					render403(request)
 					return
 				}
-				listData, err := resourceData.getListContent(request.r.Context(), request, request.Request().URL.Query())
+
+				q := request.Request().URL.Query()
+				q.Set("_page", "1")
+				q.Set("_pagesize", fmt.Sprintf("%d", 9223372036854775807))
+
+				listData, err := resourceData.getListContent(request.r.Context(), request, q)
 				must(err)
 
 				file := xlsx.NewFile()

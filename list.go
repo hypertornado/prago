@@ -275,10 +275,15 @@ func (resourceData *resourceData) addFilterToQuery(listQuery *listQuery, filter 
 
 		switch layout {
 		case "filter_layout_text":
-			v = "%" + v + "%"
 			k = strings.Replace(k, "`", "", -1)
-			str := fmt.Sprintf("`%s` LIKE ?", k)
-			listQuery.where(str, v)
+			if v == "\"\"" {
+				str := fmt.Sprintf("`%s` = ''", k)
+				listQuery.where(str)
+			} else {
+				v = "%" + v + "%"
+				str := fmt.Sprintf("`%s` LIKE ?", k)
+				listQuery.where(str, v)
+			}
 		case "filter_layout_number":
 			var hasPrefix string
 			v = strings.Replace(v, " ", "", -1)
@@ -417,7 +422,7 @@ func (resourceData *resourceData) getListContent(ctx context.Context, userData U
 	var itemsPerPage = resourceData.defaultItemsPerPage
 	if params.Get("_pagesize") != "" {
 		pageSize, err := strconv.Atoi(params.Get("_pagesize"))
-		if err == nil && pageSize > 0 && pageSize <= 1000000 {
+		if err == nil && pageSize > 0 /*&& pageSize <= 1000000*/ {
 			itemsPerPage = int64(pageSize)
 		}
 	}

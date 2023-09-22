@@ -35,7 +35,7 @@ func New(id string) (*Client, error) {
 	}, nil
 }
 
-/*func (c *Client) GetStats() *elastic.ClusterStatsResponse {
-	ret, _ := c.esclientOld.ClusterStats().Do(context.Background())
-	return ret
-}*/
+func (client *Client) DeleteIndex(name string) error {
+	_, err := client.esclientNew.Indices.Delete([]string{name})
+	return err
+}

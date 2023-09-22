@@ -22,12 +22,17 @@ type StatsIndice struct {
 }
 
 type StatsIndiceTotal struct {
-	Docs StatsIndiceTotalDocs `json:"docs"`
+	Docs  StatsIndiceTotalDocs  `json:"docs"`
+	Store StatsIndiceTotalStore `json:"store"`
 }
 
 type StatsIndiceTotalDocs struct {
 	Count   int64 `json:"count"`
 	Deleted int64 `json:"deleted"`
+}
+
+type StatsIndiceTotalStore struct {
+	SizeInBytes int64 `json:"size_in_bytes"`
 }
 
 func (c *Client) GetStats() (*Stats, error) {

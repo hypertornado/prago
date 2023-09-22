@@ -20,21 +20,18 @@
 
 .popup {
   @include rectangle;
-  width: min(300px, 100vw - 20px);
-  padding: 10px;
+  width: min(300px, 100% - 20px);
   background-color: #eee;
-  border-radius: 10px;
   @include shadowLarge;
-
   display: flex;
   flex-direction: column;
   padding: 0px;
   border-radius: 5px;
-  max-height: calc(100vh - 100px);
+  max-height: calc(100dvh - 100px);
 }
 
 .popup-wide {
-  width: min(1000px, 100vw - 20px);
+  width: min(1000px, 100% - 20px);
 }
 
 .popup_header {

@@ -14,11 +14,8 @@
 .admin_navigation_tabs_content {
   display: flex;
   border-radius: 100px;
-  background: $baseColorBackground;
   padding: 0px 4px;
   margin: 0 auto;
-
-  //justify-content: center;
 }
 
 .admin_navigation_tab {
@@ -30,13 +27,14 @@
   line-height: 1.8em;
 
   text-decoration: none;
-  padding: 1px 20px;
-  border-radius: 100px;
+  padding: 1px 10px;
+  border-radius: 5px;
   color: $black;
+  //color: 
+  font-weight: 500;
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  //flex-wrap: nowrap;
 }
 
 .admin_navigation_tab_icon {
@@ -49,8 +47,9 @@
 }
 
 .admin_navigation_tabdivider {
-  border-left: 1px solid rgba(0, 0, 0, 0);
+  //border-left: 1px solid rgba(0, 0, 0, 0);
   margin: 7px 4px;
+  margin: 7px 2px;
 }
 
 .admin_navigation_tabdivider-visible {

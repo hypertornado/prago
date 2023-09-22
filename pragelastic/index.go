@@ -18,6 +18,7 @@ type Index[T any] struct {
 }
 
 func NewIndex[T any](client *Client) *Index[T] {
+
 	if client == nil {
 		return nil
 	}

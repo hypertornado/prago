@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -124,6 +125,46 @@ func (app *App) initSearch() {
 	}
 	app.Log().Println("admin search initialized")
 	app.search = adminSearch
+
+	sysadminBoard.FormAction("delete-elastic-indice").Name(unlocalized("Smazat elasticsearch index")).Permission(sysadminPermission).Form(func(f *Form, r *Request) {
+		stats, err := app.ElasticClient.GetStats()
+		if err != nil {
+			panic(err)
+		}
+
+		var indiceNames []string
+		for k := range stats.Indices {
+			indiceNames = append(indiceNames, k)
+		}
+		sort.Strings(indiceNames)
+
+		var doubled [][2]string = [][2]string{{"", ""}}
+
+		for _, v := range indiceNames {
+			doubled = append(doubled, [2]string{v, v})
+		}
+
+		f.AddSelect("indice", "Elastic indices", doubled)
+
+		f.AddSubmit("Delete indice")
+	}).Validation(func(vc ValidationContext) {
+		id := vc.GetValue("indice")
+		if id == "" {
+			vc.AddItemError("indice", "Select indice to delete")
+		}
+		if !vc.Valid() {
+			return
+		}
+
+		err := app.ElasticClient.DeleteIndex(id)
+		if err != nil {
+			vc.AddError(fmt.Sprintf("Index '%s' nelze smazat", id))
+		} else {
+			vc.AddError(fmt.Sprintf("Index '%s' úspěšně smazán", id))
+		}
+	})
+
+	//app.Action("_stats").Board(sysadminBoard).Name(unlocalized("Prago Stats")).Permission(sysadminPermission).Template("admin_systemstats").DataSource()
 
 	app.sysadminTaskGroup.Task(unlocalized("index_search")).Handler(func(ta *TaskActivity) error {
 		return adminSearch.searchImport(context.TODO())

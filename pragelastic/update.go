@@ -7,12 +7,10 @@ import (
 
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/elastic/go-elasticsearch/v7/esutil"
-	"github.com/olivere/elastic/v7"
 )
 
 type BulkUpdater[T any] struct {
-	index     *Index[T]
-	processor *elastic.BulkProcessor
+	index *Index[T]
 
 	indexer esutil.BulkIndexer
 }

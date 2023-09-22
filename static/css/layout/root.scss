@@ -47,7 +47,8 @@
 
 .root_logo:hover {
   background-color: transparent;
-  transform: scale(1.3);
+  filter: brightness(1.1);
+  //transform: scale(1.3);
   transition: all 400ms ease-out;
 }
 
