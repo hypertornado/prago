@@ -64,6 +64,7 @@ func (app *App) initSQLConsole() {
 						)*/
 					}
 					table.Row(cells...)
+					cells = nil
 				}
 			}
 			table.AddFooterText(fmt.Sprintf("%d items", rowCount))

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"strings"
+	"time"
 
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/elastic/go-elasticsearch/v7/esutil"
@@ -41,6 +42,10 @@ func (index *Index[T]) UpdateSingle(item *T) error {
 func (index *Index[T]) UpdateBulk() (*BulkUpdater[T], error) {
 
 	indexer, _ := esutil.NewBulkIndexer(esutil.BulkIndexerConfig{
+		NumWorkers:    1,
+		FlushBytes:    1000000,
+		FlushInterval: 10 * time.Second,
+
 		Index:      index.indexName(),
 		ErrorTrace: true,
 		OnError: func(ctx context.Context, err error) {
