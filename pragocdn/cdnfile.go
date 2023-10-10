@@ -140,8 +140,7 @@ func (project *CDNProject) createFile(uuid, suffix string) *CDNFile {
 	return file
 }
 
-func (file *CDNFile) copyToChecksumFormat() {
-
+/*func (file *CDNFile) copyToChecksumFormat() {
 	originalPath := file.getFilePathOLD()
 	_, err := os.Stat(originalPath)
 	if err != nil {
@@ -177,7 +176,7 @@ func (file *CDNFile) copyToChecksumFormat() {
 		panic(fmt.Errorf("error while copying copying %s: %s", file.UUID, err))
 	}
 
-}
+}*/
 
 func (file *CDNFile) validateChecksum() {
 	res := checksum(file.getDataPath())
@@ -245,7 +244,7 @@ func bindCDNFiles(app *prago.App) {
 		return nil
 	})
 
-	tg.Task(unlocalized("Copy data to new checkum format")).Handler(func(ta *prago.TaskActivity) error {
+	/*tg.Task(unlocalized("Copy data to new checkum format")).Handler(func(ta *prago.TaskActivity) error {
 		fileResource := prago.GetResource[CDNFile](app)
 		files := fileResource.Query(context.Background()).List()
 		totalLen := len(files)
@@ -254,8 +253,7 @@ func bindCDNFiles(app *prago.App) {
 			file.copyToChecksumFormat()
 		}
 		return nil
-
-	})
+	})*/
 
 	tg.Task(unlocalized("Validate checksums")).Handler(func(ta *prago.TaskActivity) error {
 		fileResource := prago.GetResource[CDNFile](app)

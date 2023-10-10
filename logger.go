@@ -37,7 +37,7 @@ func (l *logger) writeString(typ, str string) {
 				Text: str,
 			})
 			if err != nil {
-				fmt.Printf("Logger error, can't update: %s\n", err)
+				fmt.Printf("Logger error, can't update: %s: typ %s: text %s\n", err, typ, str)
 				return
 			}
 			if !l.app.developmentMode {
@@ -59,7 +59,7 @@ func (l *logger) deleteOldLogsRobot() {
 		if err != nil {
 			l.Printf("deleteOldLogsRobot: can't delete items: %s", err)
 		}
-		time.Sleep(5 * time.Second)
+		time.Sleep(60 * time.Second)
 	}
 }
 

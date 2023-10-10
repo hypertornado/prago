@@ -22,7 +22,7 @@ import (
 	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
-const version = "2022.19"
+const version = "2023.1"
 
 var app *prago.App
 
@@ -312,7 +312,7 @@ func (file *CDNFile) getDataPath() string {
 	)
 }
 
-func (file *CDNFile) getFileDirectoryPathOLD() string {
+/*func (file *CDNFile) getFileDirectoryPathOLD() string {
 	uuid := file.UUID
 	firstPrefix := strings.ToLower(uuid[0:2])
 	secondPrefix := strings.ToLower(uuid[2:4])
@@ -322,15 +322,15 @@ func (file *CDNFile) getFileDirectoryPathOLD() string {
 		firstPrefix,
 		secondPrefix,
 	)
-}
+}*/
 
-func (file *CDNFile) getFilePathOLD() string {
+/*func (file *CDNFile) getFilePathOLD() string {
 	return fmt.Sprintf("%s/%s.%s",
 		file.getFileDirectoryPathOLD(),
 		file.UUID,
 		file.Suffix,
 	)
-}
+}*/
 
 func (file *CDNFile) getCacheDirectoryPath(format string) string {
 	checksum := file.Checksum

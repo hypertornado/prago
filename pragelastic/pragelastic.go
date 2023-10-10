@@ -23,6 +23,8 @@ func New(id string) (*Client, error) {
 		return nil, err
 	}
 
+	//elasticsearch7.NewClient(elasticsearch7.Config{})
+
 	esClient, err := elasticsearch7.NewDefaultClient()
 	if err != nil {
 		return nil, err

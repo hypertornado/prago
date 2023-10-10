@@ -46,9 +46,6 @@ func (c *Client) GetStats() (*Stats, error) {
 		return nil, err
 	}
 
-	//fmt.Println("STAATS")
-	//fmt.Println(string(data))
-
 	defer res.Body.Close()
 
 	var ret Stats
@@ -56,7 +53,6 @@ func (c *Client) GetStats() (*Stats, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Println(ret)
 	return &ret, nil
 
 }

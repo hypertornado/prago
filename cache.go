@@ -8,7 +8,7 @@ import (
 
 //use https://github.com/sourcegraph/conc
 
-const staleInterval = 30 * time.Minute
+const staleInterval = 10 * time.Minute
 
 //const staleInterval = 1 * time.Second
 
