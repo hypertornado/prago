@@ -8,7 +8,6 @@ import (
 func (app *App) initUserDataCache() {
 	app.userDataCache = make(map[int64]*userData)
 	app.userDataCacheMutex = &sync.RWMutex{}
-
 }
 
 func (app *App) userDataCacheGet(id int64) *userData {
@@ -43,7 +42,7 @@ func (app *App) userDataCacheDelete(id int64) {
 func (app *App) userDataCacheDeleteAll() {
 	app.userDataCacheMutex.Lock()
 	defer app.userDataCacheMutex.Unlock()
-	app.userDataCache = make(map[int64]*userData)
+	clear(app.userDataCache)
 }
 
 type UserData interface {

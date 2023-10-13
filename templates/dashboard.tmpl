@@ -1,6 +1,10 @@
 {{define "dashboard"}}
     <div class="dashboard">
       <h2 class="dashboard_name">{{.Name}}</h2>
+      {{$tasks := .Tasks}}
+      {{if $tasks}}
+        {{template "admin_tasks" $tasks}}
+      {{end}}
       <div class="dashboard_figures">
         {{range $item := .Figures}}
             {{if $item.URL}}

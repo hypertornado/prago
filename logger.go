@@ -11,6 +11,8 @@ import (
 	"github.com/hypertornado/prago/pragelastic"
 )
 
+var disableESLogger = true
+
 type logger struct {
 	app    *App
 	output io.Writer
@@ -101,14 +103,16 @@ type logItem struct {
 //https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html#match-only-text-field-type
 
 func (app *App) initLogger() {
-	if app.ElasticClient == nil {
+	if app.ElasticClient == nil || disableESLogger {
 		return
 	}
 
 	index := pragelastic.NewIndex[logItem](app.ElasticClient)
 
-	tg := app.TaskGroup(unlocalized("Logger"))
-	tg.Task(unlocalized("reindex log index")).Handler(func(ta *TaskActivity) error {
+	loggerDashboard := sysadminBoard.Dashboard(unlocalized("Logger"))
+
+	//tg := app.TaskGroup(unlocalized("Logger"))
+	loggerDashboard.Task(unlocalized("reindex log index")).Handler(func(ta *TaskActivity) error {
 		index.Delete()
 		return index.Create()
 	}).Permission("sysadmin")

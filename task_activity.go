@@ -1,17 +1,10 @@
 package prago
 
-import (
-	"fmt"
-	"io"
-	"mime/multipart"
-)
-
 // TaskActivity represents task activity
 type TaskActivity struct {
 	task          *Task
 	notification  *Notification
 	stoppedByUser bool
-	files         *multipart.Form
 }
 
 // SetStatus sets progress and status for task activity
@@ -23,7 +16,7 @@ func (ta *TaskActivity) SetStatus(progress float64, status string) {
 	ta.notification.SetProgress(&progress)
 }
 
-func (ta *TaskActivity) GetFile(name string) (multipart.File, error) {
+/*func (ta *TaskActivity) GetFile(name string) (multipart.File, error) {
 	if len(ta.files.File[name]) == 0 {
 		return nil, fmt.Errorf("file with id '%s' not set", name)
 	}
@@ -45,3 +38,4 @@ func (ta *TaskActivity) GetFileContent() []byte {
 	}
 	return content
 }
+*/

@@ -33,6 +33,8 @@ func (index *Index[T]) UpdateSingle(item *T) error {
 		return err
 	}
 
+	//index.client.esclientNew.Update.
+
 	_, err = index.client.esclientNew.Index(index.indexName(), strings.NewReader(string(data)), func(request *esapi.IndexRequest) {
 		request.DocumentID = id
 	})
@@ -75,6 +77,9 @@ func (updater *BulkUpdater[T]) AddItem(item *T) {
 			DocumentID: id,
 			Action:     "index",
 			Body:       strings.NewReader(string(data)),
+			OnFailure: func(ctx context.Context, bii esutil.BulkIndexerItem, biri esutil.BulkIndexerResponseItem, err error) {
+				panic(fmt.Sprintln("FAIL to index BulkIndexerItem:", "id:", id, "item:", string(data), "err:", err, "respItem:", biri))
+			},
 		},
 	)
 	if err != nil {

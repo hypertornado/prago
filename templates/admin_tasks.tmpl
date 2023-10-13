@@ -1,28 +1,12 @@
 {{define "admin_tasks"}}
-        <div class="tasks_groups">
-            {{range $group := .Tasks}}
-                <div class="tasks_group">
-                <h3>{{$group.Name}}</h3>
-                    <div class="task_group_tasks">
-                        {{range $task := $group.Tasks}}
-                            <div class="task">
-                                <form method="POST" action="/admin/api/tasks/runtask" enctype="multipart/form-data">
-                                    {{range $file := $task.Files}}
-                                        <div class="task_input">
-                                            <div>{{$file.ID}}</div>
-                                            <div>
-                                                <input type="file" name="{{$file.ID}}" multiple>
-                                            </div>
-                                        </div>
-                                    {{end}}
-
-                                    <input type="hidden" name="id" value="{{$task.ID}}">
-                                    <input type="hidden" name="csrf" value="{{$task.CSRFToken}}">
-                                    <input type="submit" value="{{$task.Name}}" class="btn task_runbutton">
-                                </form>
-                            </div>
-                        {{end}}
-                    </div>
+        <div class="tasks">
+            {{range $task := .}}
+                <div class="task">
+                    <form method="POST" action="/admin/api/tasks/runtask" enctype="multipart/form-data">
+                        <input type="hidden" name="id" value="{{$task.ID}}">
+                        <input type="hidden" name="csrf" value="{{$task.CSRFToken}}">
+                        <input type="submit" value="{{$task.Name}}" class="btn task_runbutton">
+                    </form>
                 </div>
             {{end}}
         </div>

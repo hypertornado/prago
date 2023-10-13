@@ -2,14 +2,9 @@ package prago
 
 import (
 	"fmt"
-	"io"
 	"mime/multipart"
 	"runtime/debug"
-	"sort"
 	"time"
-
-	"golang.org/x/text/collate"
-	"golang.org/x/text/language"
 )
 
 type taskManager struct {
@@ -18,13 +13,13 @@ type taskManager struct {
 	startedAt time.Time
 }
 
-type taskViewData struct {
+/*type taskViewData struct {
 	Title  string
 	Locale string
 	Tasks  []taskViewGroup
-}
+}*/
 
-func GetTaskViewData(request *Request) taskViewData {
+/*func GetTaskViewData(request *Request) taskViewData {
 	var ret taskViewData
 	userID := request.UserID()
 	ret.Locale = request.Locale()
@@ -32,7 +27,7 @@ func GetTaskViewData(request *Request) taskViewData {
 	ret.Tasks = request.app.taskManager.getTasks(userID, request, csrfToken)
 	ret.Title = messages.Get(request.Locale(), "tasks")
 	return ret
-}
+}*/
 
 func (app *App) preInitTaskManager() {
 	app.taskManager = &taskManager{
@@ -45,8 +40,6 @@ func (app *App) preInitTaskManager() {
 
 func (app *App) postInitTaskManager() {
 	go app.taskManager.startCRON()
-
-	//app.Action("tasks").Permission(loggedPermission).Name(messages.GetNameFunction("tasks")).Template("admin_tasks").DataSource(GetTaskViewData)
 
 	app.API("tasks/runtask").Method("POST").Permission(loggedPermission).Handler(func(request *Request) {
 		id := request.Request().FormValue("id")
@@ -61,19 +54,22 @@ func (app *App) postInitTaskManager() {
 			panic("not authorize")
 		}
 		app.taskManager.run(task, request.UserID(), request.Locale(), request.Request().MultipartForm)
-		request.Redirect("/admin")
+
+		fullURL := app.getAdminURL(task.dashboard.board.action.url)
+		//task.dashboard.ur
+		request.Redirect(fullURL)
 	})
 
-	app.sysadminTaskGroup = app.TaskGroup(unlocalized("Sysadmin"))
+	//app.sysadminTaskGroup = app.TaskGroup(unlocalized("Sysadmin"))
 
-	app.sysadminTaskGroup.Task(unlocalized("Delete cache")).Handler(func(ta *TaskActivity) error {
+	sysadminBoard.Dashboard(unlocalized("Cache")).Task(unlocalized("Delete cache")).Handler(func(ta *TaskActivity) error {
 		app.ClearCache()
 		return nil
 	})
 
-	grp := app.TaskGroup(unlocalized("example"))
+	taskDashboard := app.MainBoard.Dashboard(unlocalized("example"))
 
-	grp.Task(unlocalized("example_simple ew oifeqio fjewqio fjeiwoq fjeioqwjf eiwoqf jeiowq")).Handler(func(t *TaskActivity) error {
+	taskDashboard.Task(unlocalized("example_simple ew oifeqio fjewqio fjeiwoq fjeioqwjf eiwoqf jeiowq")).Handler(func(t *TaskActivity) error {
 		var progress float64
 		for {
 			time.Sleep(1000 * time.Millisecond)
@@ -85,26 +81,15 @@ func (app *App) postInitTaskManager() {
 		}
 	})
 
-	grp.Task(unlocalized("example_fail")).Handler(func(t *TaskActivity) error {
+	taskDashboard.Task(unlocalized("example_fail")).Handler(func(t *TaskActivity) error {
 		return fmt.Errorf("example error")
 	})
 
-	grp.Task(unlocalized("example_panic")).Handler(func(t *TaskActivity) error {
+	taskDashboard.Task(unlocalized("example_panic")).Handler(func(t *TaskActivity) error {
 		panic("panic value")
 	})
 
-	grp.Task(unlocalized("example")).FileInput("file_example").Handler(func(t *TaskActivity) error {
-		file, err := t.GetFile("file_example")
-		if err != nil {
-			return err
-		}
-
-		data, err := io.ReadAll(file)
-		if err != nil {
-			return err
-		}
-		fmt.Println(data)
-
+	taskDashboard.Task(unlocalized("example")).Handler(func(t *TaskActivity) error {
 		var progress float64
 		for {
 			time.Sleep(1000 * time.Millisecond)
@@ -132,16 +117,16 @@ func (tm *taskManager) startCRON() {
 	}()
 }
 
-type taskViewGroup struct {
+/*type taskViewGroup struct {
 	Name  string
 	Tasks []taskView
-}
+}*/
 
 type taskView struct {
 	ID        string
 	Name      string
 	CSRFToken string
-	Files     []*taskFileInput
+	//Files     []*taskFileInput
 }
 
 func (t *Task) taskView(locale, csrfToken string) taskView {
@@ -149,11 +134,20 @@ func (t *Task) taskView(locale, csrfToken string) taskView {
 		ID:        t.id,
 		Name:      t.name(locale),
 		CSRFToken: csrfToken,
-		Files:     t.files,
+		//Files:     t.files,
 	}
 }
 
-func (tm *taskManager) getTasks(userID int64, userData UserData, csrfToken string) (ret []taskViewGroup) {
+func (dashboard *Dashboard) getTasks(userID int64, userData UserData, csrfToken string) (ret []taskView) {
+	for _, v := range dashboard.tasks {
+		if userData.Authorize(v.permission) {
+			ret = append(ret, v.taskView(userData.Locale(), csrfToken))
+		}
+	}
+	return ret
+}
+
+/*func (tm *taskManager) getTasks(userID int64, userData UserData, csrfToken string) (ret []taskViewGroup) {
 
 	var tasks []*Task
 	for _, v := range tm.tasksMap {
@@ -196,9 +190,9 @@ func (tm *taskManager) getTasks(userID int64, userData UserData, csrfToken strin
 	}
 
 	return ret
-}
+}*/
 
-func sortTaskViews(items []taskView) {
+/*func sortTaskViews(items []taskView) {
 	collator := collate.New(language.Czech)
 	sort.SliceStable(items, func(i, j int) bool {
 		a := items[i]
@@ -209,18 +203,18 @@ func sortTaskViews(items []taskView) {
 			return false
 		}
 	})
-}
+}*/
 
 // Task represent some user task
 type Task struct {
 	id          string
 	name        func(string) string
-	group       *TaskGroup
+	dashboard   *Dashboard
 	permission  Permission
 	handler     func(*TaskActivity) error
 	cron        time.Duration
 	lastStarted time.Time
-	files       []*taskFileInput
+	//files       []*taskFileInput
 }
 
 type taskFileInput struct {
@@ -228,10 +222,10 @@ type taskFileInput struct {
 }
 
 // Task creates task
-func (tg *TaskGroup) Task(name func(string) string) *Task {
-	id := randomString(20)
-	_, ok := tg.manager.tasksMap[id]
+func (dashboard *Dashboard) Task(name func(string) string) *Task {
 
+	id := randomString(20)
+	_, ok := dashboard.board.app.taskManager.tasksMap[id]
 	if ok {
 		panic(fmt.Sprintf("Task '%s' already added.", id))
 	}
@@ -240,11 +234,11 @@ func (tg *TaskGroup) Task(name func(string) string) *Task {
 		id:         id,
 		name:       name,
 		permission: sysadminPermission,
-		group:      tg,
+		dashboard:  dashboard,
 	}
 
-	tg.tasks = append(tg.tasks, task)
-	tg.manager.tasksMap[task.id] = task
+	dashboard.tasks = append(dashboard.tasks, task)
+	dashboard.board.app.taskManager.tasksMap[task.id] = task
 
 	return task
 }
@@ -256,12 +250,12 @@ func (t *Task) Handler(fn func(*TaskActivity) error) *Task {
 }
 
 // FileInput
-func (t *Task) FileInput(id string) *Task {
+/*func (t *Task) FileInput(id string) *Task {
 	t.files = append(t.files, &taskFileInput{
 		ID: id,
 	})
 	return t
-}
+}*/
 
 // SetPermission set permission to task
 func (t *Task) Permission(permission string) *Task {
@@ -276,31 +270,31 @@ func (t *Task) RepeatEvery(duration time.Duration) *Task {
 }
 
 // TaskGroup represent group of tasks
-type TaskGroup struct {
+/*type TaskGroup struct {
 	name    func(string) string
 	manager *taskManager
 	tasks   []*Task
-}
+}*/
 
 // NewTaskGroup creates new task group
-func (app *App) TaskGroup(name func(string) string) *TaskGroup {
+/*func (app *App) TaskGroup(name func(string) string) *TaskGroup {
 	return &TaskGroup{
 		name:    name,
 		manager: app.taskManager,
 	}
-}
+}*/
 
 func (tm *taskManager) run(t *Task, userID int64, locale string, form *multipart.Form) {
 
 	var name string = t.name(locale)
 
 	var notification *Notification = tm.app.Notification(name)
-	notification.preName = t.group.name(locale)
+	notification.preName = t.dashboard.name(locale)
 
 	activity := &TaskActivity{
 		task:         t,
 		notification: notification,
-		files:        form,
+		//files:        form,
 	}
 	t.lastStarted = time.Now()
 

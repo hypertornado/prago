@@ -217,7 +217,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 							if err != nil {
 								app.Log().Println(fmt.Errorf("%s", err))
 							}
-							app.search.flush()
+							app.search.index.Flush()
 						}()
 					}
 

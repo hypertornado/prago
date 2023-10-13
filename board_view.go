@@ -16,11 +16,12 @@ type BoardView struct {
 	Role string
 
 	TasksName string
-	Tasks     *taskViewData
+	//Tasks     *taskViewData
 }
 
 type DashboardView struct {
 	Name    string
+	Tasks   []taskView
 	Figures []*DashboardViewFigure
 	Tables  []DashboardViewTable
 }
@@ -67,13 +68,13 @@ func (board *Board) boardView(request *Request) *BoardView {
 
 	}
 
-	if board.IsMainBoard() {
+	/*if board.IsMainBoard() {
 		taskData := GetTaskViewData(request)
 		if len(taskData.Tasks) > 0 {
 			ret.TasksName = messages.Get(request.Locale(), "tasks")
 			ret.Tasks = &taskData
 		}
-	}
+	}*/
 
 	return ret
 }
@@ -86,6 +87,11 @@ func (dashboard *Dashboard) view(request *Request) *DashboardView {
 	view := &DashboardView{
 		Name: dashboard.name(request.Locale()),
 	}
+
+	userID := request.UserID()
+	csrfToken := request.app.generateCSRFToken(userID)
+	view.Tasks = dashboard.getTasks(userID, request, csrfToken)
+
 	for _, item := range dashboard.figures {
 		if request.Authorize(item.permission) {
 			view.Figures = append(view.Figures, item.view(request))
@@ -101,10 +107,10 @@ func (dashboard *Dashboard) view(request *Request) *DashboardView {
 		}
 	}
 
-	if len(view.Figures) > 0 || len(view.Tables) > 0 {
+	/*if len(view.Figures) > 0 || len(view.Tables) > 0 {
 		return view
 
 	}
-	return nil
-
+	return nil*/
+	return view
 }

@@ -9,10 +9,13 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hypertornado/prago/pragelastic"
 	"github.com/olivere/elastic/v7"
 )
+
+var disableAdminElasticsearch = true
 
 type searchItem struct {
 	ID              string
@@ -114,7 +117,7 @@ func (app *App) initSearch() {
 		},
 	)
 
-	if app.ElasticClient == nil {
+	if app.ElasticClient == nil || disableAdminElasticsearch {
 		app.Log().Println("will not initialize search since elasticsearch client is not defined")
 		return
 	}
@@ -166,9 +169,11 @@ func (app *App) initSearch() {
 
 	//app.Action("_stats").Board(sysadminBoard).Name(unlocalized("Prago Stats")).Permission(sysadminPermission).Template("admin_systemstats").DataSource()
 
-	app.sysadminTaskGroup.Task(unlocalized("index_search")).Handler(func(ta *TaskActivity) error {
+	searchDashboard := sysadminBoard.Dashboard(unlocalized("Search"))
+
+	searchDashboard.Task(unlocalized("index_search")).Handler(func(ta *TaskActivity) error {
 		return adminSearch.searchImport(context.TODO())
-	})
+	}).RepeatEvery(3 * time.Hour)
 
 }
 
@@ -240,6 +245,7 @@ func (item menuItem) SearchWithoutElastic(q string) (ret []*searchItem) {
 
 func newAdminSearch(app *App) (*adminSearch, error) {
 	index := pragelastic.NewIndex[searchItem](app.ElasticClient)
+	index.Create()
 
 	return &adminSearch{
 		app:   app,
@@ -249,6 +255,9 @@ func newAdminSearch(app *App) (*adminSearch, error) {
 
 func (resourceData *resourceData) importSearchData(ctx context.Context, bulkUpdater *pragelastic.BulkUpdater[searchItem]) error {
 	roles := resourceData.getResourceViewRoles()
+	if roles == nil {
+		return nil
+	}
 	name := resourceData.pluralName("cs")
 	var resourceSearchItem = searchItem{
 		ID: "resource_" + resourceData.id,
@@ -264,9 +273,13 @@ func (resourceData *resourceData) importSearchData(ctx context.Context, bulkUpda
 		Roles: roles,
 	}
 
-	resourceData.app.search.addItem(bulkUpdater, &resourceSearchItem, 200)
+	err := resourceData.app.search.addItem(bulkUpdater, &resourceSearchItem, 200)
+	if err != nil {
+		panic(err)
+	}
 
-	c, _ := resourceData.query(ctx).count()
+	c, err := resourceData.query(ctx).count()
+	must(err)
 	if c > 10000 {
 		return nil
 	}
@@ -279,14 +292,11 @@ func (resourceData *resourceData) importSearchData(ctx context.Context, bulkUpda
 	itemVals := reflect.ValueOf(items)
 	itemLen := itemVals.Len()
 	for i := 0; i < itemLen; i++ {
-		resourceData.saveSearchItemWithRoles(ctx, bulkUpdater, itemVals.Index(i).Interface(), roles)
+		err := resourceData.saveSearchItemWithRoles(ctx, bulkUpdater, itemVals.Index(i).Interface(), roles)
+		must(err)
 	}
 
 	return nil
-}
-
-func (e *adminSearch) flush() error {
-	return e.index.Flush()
 }
 
 func (resourceData *resourceData) saveSearchItem(ctx context.Context, item any) error {
@@ -338,7 +348,7 @@ func (e *adminSearch) deleteItem(resourceData *resourceData, id int64) error {
 func (e *adminSearch) searchImport(ctx context.Context) error {
 	var err error
 
-	e.app.Log().Println("Importing admin search index")
+	e.app.Log().Println("Importing Prago Admin Search Index")
 
 	bulkUpdater, err := e.index.UpdateBulk()
 	if err != nil {
@@ -351,12 +361,14 @@ func (e *adminSearch) searchImport(ctx context.Context) error {
 	}
 
 	for _, resourceData := range e.app.resources {
-		total, _ := e.index.Count()
-		e.app.Log().Printf("importing resource: %s, total: %d\n", resourceData.getID(), total)
 		err = resourceData.importSearchData(ctx, bulkUpdater)
 		if err != nil {
 			return fmt.Errorf("while importing resource %s: %s", resourceData.getID(), err)
 		}
+
+		//total, _ := e.index.Count()
+		//e.app.Log().Printf("importing resource: %s, total: %d\n", resourceData.getID(), total)
+
 	}
 
 	err = bulkUpdater.Close()
@@ -371,7 +383,8 @@ func (e *adminSearch) searchImport(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	//e.app.Log().Println("INDEX Created")
+
+	e.app.Log().Println("Prago Admin Search Index Created")
 	return nil
 }
 

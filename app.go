@@ -45,9 +45,9 @@ type App struct {
 	FilesResource       *Resource[File]
 	activityLogResource *Resource[activityLog]
 
-	rootActions       []*Action
-	db                *sql.DB
-	sysadminTaskGroup *TaskGroup
+	rootActions []*Action
+	db          *sql.DB
+	//sysadminTaskGroup *TaskGroup
 
 	newsletters        *Newsletters
 	notificationCenter *notificationCenter

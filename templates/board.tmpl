@@ -51,11 +51,14 @@
     {{template "dashboard" $dashboard}}
   {{end}}
 
+  {{if false}}
   {{if .Tasks}}
     <div class="dashboard">
       <h2 class="dashboard_name">{{.TasksName}}</h2>
       {{template "admin_tasks" .Tasks}}
     </div>
   {{end}}
+  {{end}}
+
   <div>
 {{end}}

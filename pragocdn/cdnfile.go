@@ -207,9 +207,10 @@ func bindCDNFiles(app *prago.App) {
 		vc.Validation().AfterContent = template.HTML(fmt.Sprintf("<img src=\"%s\">", cdnFile.url(vc.GetValue("size"))))
 	})
 
-	tg := app.TaskGroup(unlocalized("Soubory"))
+	filesDashboard := app.MainBoard.Dashboard(unlocalized("Soubory"))
+	//tg := app.TaskGroup(unlocalized("Soubory"))
 
-	tg.Task(unlocalized("Create files form import")).Handler(func(ta *prago.TaskActivity) error {
+	filesDashboard.Task(unlocalized("Create files form import")).Handler(func(ta *prago.TaskActivity) error {
 		_, err := app.GetDB().Exec("DELETE FROM cdnfile;")
 		if err != nil {
 			return err
@@ -232,7 +233,7 @@ func bindCDNFiles(app *prago.App) {
 		return nil
 	})
 
-	tg.Task(unlocalized("Reimport files data")).Handler(func(ta *prago.TaskActivity) error {
+	filesDashboard.Task(unlocalized("Reimport files data")).Handler(func(ta *prago.TaskActivity) error {
 		fileResource := prago.GetResource[CDNFile](app)
 
 		files := fileResource.Query(context.Background()).List()
@@ -255,7 +256,7 @@ func bindCDNFiles(app *prago.App) {
 		return nil
 	})*/
 
-	tg.Task(unlocalized("Validate checksums")).Handler(func(ta *prago.TaskActivity) error {
+	filesDashboard.Task(unlocalized("Validate checksums")).Handler(func(ta *prago.TaskActivity) error {
 		fileResource := prago.GetResource[CDNFile](app)
 		files := fileResource.Query(context.Background()).List()
 		totalLen := len(files)
@@ -266,7 +267,7 @@ func bindCDNFiles(app *prago.App) {
 		return nil
 	})
 
-	tg.Task(unlocalized("Delete thumbs cache")).Handler(func(ta *prago.TaskActivity) error {
+	filesDashboard.Task(unlocalized("Delete thumbs cache")).Handler(func(ta *prago.TaskActivity) error {
 		cachePath := cdnDirPath() + "/cache"
 		return os.RemoveAll(cachePath)
 	})

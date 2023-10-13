@@ -23,9 +23,14 @@ func New(id string) (*Client, error) {
 		return nil, err
 	}
 
-	//elasticsearch7.NewClient(elasticsearch7.Config{})
-
-	esClient, err := elasticsearch7.NewDefaultClient()
+	esClient, err := elasticsearch7.NewClient(elasticsearch7.Config{
+		/*EnableRetryOnTimeout: true,
+		MaxRetries:           1000000,
+		RetryBackoff: func(attempt int) time.Duration {
+			return 5 * time.Second
+		},*/
+	})
+	//esClient, err := elasticsearch7.NewDefaultClient()
 	if err != nil {
 		return nil, err
 	}

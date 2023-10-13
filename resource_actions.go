@@ -173,7 +173,7 @@ func (resourceData *resourceData) CreateWithLog(item any, request *Request) erro
 			if err != nil {
 				resourceData.app.Log().Println(fmt.Errorf("%s", err))
 			}
-			resourceData.app.search.flush()
+			resourceData.app.search.index.Flush()
 		}()
 	}
 
@@ -212,7 +212,7 @@ func (resourceData *resourceData) DeleteWithLog(item any, request *Request) erro
 		if err != nil {
 			resourceData.app.Log().Println(fmt.Errorf("%s", err))
 		}
-		resourceData.app.search.flush()
+		resourceData.app.search.index.Flush()
 	}
 
 	resourceData.updateCachedCount(request.r.Context())
@@ -289,7 +289,7 @@ func (resourceData *resourceData) UpdateWithLog(item any, request *Request) erro
 			if err != nil {
 				resourceData.app.Log().Println(fmt.Errorf("%s", err))
 			}
-			resourceData.app.search.flush()
+			resourceData.app.search.index.Flush()
 		}()
 	}
 

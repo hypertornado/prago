@@ -8,6 +8,7 @@ import (
 type Dashboard struct {
 	board   *Board
 	name    func(string) string
+	tasks   []*Task
 	figures []*DashboardFigure
 	tables  []*DashboardTable
 }
@@ -153,6 +154,13 @@ func (group *Dashboard) isVisible(userData UserData) bool {
 			return true
 		}
 	}
+
+	for _, v := range group.tasks {
+		if userData.Authorize(v.permission) {
+			return true
+		}
+	}
+
 	return false
 }
 

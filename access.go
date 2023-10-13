@@ -116,7 +116,7 @@ func (resourceData *resourceData) getResourceViewRoles() []string {
 	var ret []string
 	for roleName, permissions := range resourceData.app.accessManager.roles {
 		for permission := range permissions {
-			if permission == resourceData.canCreate {
+			if permission == resourceData.canView {
 				ret = append(ret, roleName)
 			}
 		}
