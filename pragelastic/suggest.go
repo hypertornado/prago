@@ -39,7 +39,7 @@ func (index *Index[T]) mustSuggest(q string, categoryContexts map[string][]strin
 func (index *Index[T]) Suggest(q string, categoryContexts map[string][]string) ([]*T, error) {
 	fieldName := index.getSuggestFieldName()
 	if fieldName == "" {
-		return nil, fmt.Errorf("Can't find suggest field name: no field has type copletion")
+		return nil, fmt.Errorf("Can't find suggest field name: no field has type completion")
 	}
 
 	suggesterName := "_suggester"

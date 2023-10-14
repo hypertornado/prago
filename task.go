@@ -13,22 +13,6 @@ type taskManager struct {
 	startedAt time.Time
 }
 
-/*type taskViewData struct {
-	Title  string
-	Locale string
-	Tasks  []taskViewGroup
-}*/
-
-/*func GetTaskViewData(request *Request) taskViewData {
-	var ret taskViewData
-	userID := request.UserID()
-	ret.Locale = request.Locale()
-	csrfToken := request.app.generateCSRFToken(userID)
-	ret.Tasks = request.app.taskManager.getTasks(userID, request, csrfToken)
-	ret.Title = messages.Get(request.Locale(), "tasks")
-	return ret
-}*/
-
 func (app *App) preInitTaskManager() {
 	app.taskManager = &taskManager{
 		app:       app,
@@ -56,20 +40,21 @@ func (app *App) postInitTaskManager() {
 		app.taskManager.run(task, request.UserID(), request.Locale(), request.Request().MultipartForm)
 
 		fullURL := app.getAdminURL(task.dashboard.board.action.url)
-		//task.dashboard.ur
 		request.Redirect(fullURL)
 	})
-
-	//app.sysadminTaskGroup = app.TaskGroup(unlocalized("Sysadmin"))
 
 	sysadminBoard.Dashboard(unlocalized("Cache")).Task(unlocalized("Delete cache")).Handler(func(ta *TaskActivity) error {
 		app.ClearCache()
 		return nil
 	})
 
-	taskDashboard := app.MainBoard.Dashboard(unlocalized("example"))
+	//exampleDashboard(app)
 
-	taskDashboard.Task(unlocalized("example_simple ew oifeqio fjewqio fjeiwoq fjeioqwjf eiwoqf jeiowq")).Handler(func(t *TaskActivity) error {
+}
+
+func exampleDashboard(app *App) {
+	taskDashboard := app.MainBoard.Dashboard(unlocalized("example"))
+	taskDashboard.Task(unlocalized("example simple")).Handler(func(t *TaskActivity) error {
 		var progress float64
 		for {
 			time.Sleep(1000 * time.Millisecond)
@@ -100,6 +85,7 @@ func (app *App) postInitTaskManager() {
 			}
 		}
 	})
+
 }
 
 func (tm *taskManager) startCRON() {
@@ -117,16 +103,10 @@ func (tm *taskManager) startCRON() {
 	}()
 }
 
-/*type taskViewGroup struct {
-	Name  string
-	Tasks []taskView
-}*/
-
 type taskView struct {
 	ID        string
 	Name      string
 	CSRFToken string
-	//Files     []*taskFileInput
 }
 
 func (t *Task) taskView(locale, csrfToken string) taskView {
@@ -134,7 +114,6 @@ func (t *Task) taskView(locale, csrfToken string) taskView {
 		ID:        t.id,
 		Name:      t.name(locale),
 		CSRFToken: csrfToken,
-		//Files:     t.files,
 	}
 }
 
@@ -147,64 +126,6 @@ func (dashboard *Dashboard) getTasks(userID int64, userData UserData, csrfToken 
 	return ret
 }
 
-/*func (tm *taskManager) getTasks(userID int64, userData UserData, csrfToken string) (ret []taskViewGroup) {
-
-	var tasks []*Task
-	for _, v := range tm.tasksMap {
-		if userData.Authorize(v.permission) {
-			tasks = append(tasks, v)
-		}
-	}
-
-	sort.SliceStable(tasks, func(i, j int) bool {
-		t1 := tasks[i]
-		t2 := tasks[j]
-
-		compareGroup := collate.New(language.Czech).CompareString(
-			t1.group.name(userData.Locale()),
-			t2.group.name(userData.Locale()),
-		)
-		if compareGroup < 0 {
-			return true
-		}
-		if compareGroup > 0 {
-			return false
-		}
-
-		compareID := collate.New(language.Czech).CompareString(t1.id, t2.id)
-		return compareID < 0
-	})
-
-	var lastGroup *TaskGroup
-	for _, v := range tasks {
-		if v.group != lastGroup {
-			ret = append(ret, taskViewGroup{Name: v.group.name(userData.Locale())})
-		}
-
-		ret[len(ret)-1].Tasks = append(ret[len(ret)-1].Tasks, v.taskView(userData.Locale(), csrfToken))
-		lastGroup = v.group
-	}
-
-	for _, v := range ret {
-		sortTaskViews(v.Tasks)
-	}
-
-	return ret
-}*/
-
-/*func sortTaskViews(items []taskView) {
-	collator := collate.New(language.Czech)
-	sort.SliceStable(items, func(i, j int) bool {
-		a := items[i]
-		b := items[j]
-		if collator.CompareString(a.Name, b.Name) <= 0 {
-			return true
-		} else {
-			return false
-		}
-	})
-}*/
-
 // Task represent some user task
 type Task struct {
 	id          string
@@ -215,10 +136,6 @@ type Task struct {
 	cron        time.Duration
 	lastStarted time.Time
 	//files       []*taskFileInput
-}
-
-type taskFileInput struct {
-	ID string
 }
 
 // Task creates task
@@ -249,14 +166,6 @@ func (t *Task) Handler(fn func(*TaskActivity) error) *Task {
 	return t
 }
 
-// FileInput
-/*func (t *Task) FileInput(id string) *Task {
-	t.files = append(t.files, &taskFileInput{
-		ID: id,
-	})
-	return t
-}*/
-
 // SetPermission set permission to task
 func (t *Task) Permission(permission string) *Task {
 	t.permission = Permission(permission)
@@ -268,21 +177,6 @@ func (t *Task) RepeatEvery(duration time.Duration) *Task {
 	t.cron = duration
 	return t
 }
-
-// TaskGroup represent group of tasks
-/*type TaskGroup struct {
-	name    func(string) string
-	manager *taskManager
-	tasks   []*Task
-}*/
-
-// NewTaskGroup creates new task group
-/*func (app *App) TaskGroup(name func(string) string) *TaskGroup {
-	return &TaskGroup{
-		name:    name,
-		manager: app.taskManager,
-	}
-}*/
 
 func (tm *taskManager) run(t *Task, userID int64, locale string, form *multipart.Form) {
 
