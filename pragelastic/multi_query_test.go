@@ -1,6 +1,6 @@
 package pragelastic
 
-import "testing"
+/*
 
 func TestMultiQuery(t *testing.T) {
 	index := prepareTestIndex[TestStruct]()
@@ -50,3 +50,5 @@ func TestMultiQuery(t *testing.T) {
 	}
 
 }
+
+*/

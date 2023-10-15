@@ -2,8 +2,6 @@ package pragelastic
 
 import (
 	"testing"
-
-	"github.com/olivere/elastic/v7"
 )
 
 //https://github.com/olivere/elastic/blob/release-branch.v7/search_aggs_test.go
@@ -29,7 +27,10 @@ func TestSumAggregations(t *testing.T) {
 	index.Flush()
 	index.Refresh()
 
-	sumAgg := elastic.NewSumAggregation().Field("SomeCount")
+	//var aaa elastic.Aggregations
+	//aaa.Sum()
+
+	sumAgg := NewESSumAggregation().Field("SomeCount")
 	res, err := index.Query().Aggregation("sum", sumAgg).SearchResult()
 	if err != nil {
 		t.Fatal(err)
@@ -63,12 +64,15 @@ func TestBucketHistogramAggregations(t *testing.T) {
 	index.Flush()
 	index.Refresh()
 
-	agg := elastic.NewHistogramAggregation().Field("SomeCount").Interval(1) //.Offset(3)
+	agg := NewESHistogramAggregation().Field("SomeCount").Interval(1) //.Offset(3)
 
 	res, err := index.Query().Aggregation("agg", agg).SearchResult()
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	//var aaa elastic.Aggregations
+	//aaa.Histogram()
 
 	aggRes, ok := res.Aggregations.Histogram("agg")
 	if !ok {
@@ -110,12 +114,15 @@ func TestTermsAggregations(t *testing.T) {
 	index.Flush()
 	index.Refresh()
 
-	agg := elastic.NewTermsAggregation().Field("Name").Size(10).OrderByCountDesc()
+	agg := NewESTermsAggregation().Field("Name").Size(10).OrderByCountDesc()
 
 	res, err := index.Query().Aggregation("agg", agg).SearchResult()
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	//var aaa elastic.Aggregations
+	//aaa.Terms()
 
 	aggRes, ok := res.Aggregations.Terms("agg")
 	if !ok {

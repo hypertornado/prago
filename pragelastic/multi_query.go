@@ -2,8 +2,6 @@ package pragelastic
 
 import (
 	"context"
-
-	"github.com/olivere/elastic/v7"
 )
 
 type MultiQuery[T any] struct {
@@ -29,7 +27,7 @@ func (mq *MultiQuery[T]) Context(ctx context.Context) *MultiQuery[T] {
 	return mq
 }
 
-func (mq *MultiQuery[T]) Search() ([]*elastic.SearchResult, error) {
+/*func (mq *MultiQuery[T]) Search() ([]*elastic.SearchResult, error) {
 	multi := elastic.NewMultiSearchService(mq.index.client.esclientOld)
 	for _, v := range mq.queries {
 		request := elastic.NewSearchRequest()
@@ -43,4 +41,4 @@ func (mq *MultiQuery[T]) Search() ([]*elastic.SearchResult, error) {
 		return nil, err
 	}
 	return res.Responses, nil
-}
+}*/

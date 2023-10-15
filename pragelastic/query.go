@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
 
+	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/olivere/elastic/v7"
 )
 
@@ -18,19 +20,21 @@ type Query[T any] struct {
 	sortAsc      bool
 	limit        int64
 	offset       int64
-	boolQuery    *elastic.BoolQuery
+	boolQuery    *ESBoolQuery
 	context      context.Context
-	aggregations map[string]elastic.Aggregation
+	aggregations map[string]ESAggregation
+
+	oldBoolQuery *elastic.BoolQuery
 }
 
 func (index *Index[T]) Query() *Query[T] {
 
 	q := &Query[T]{
 		index:        index,
-		boolQuery:    elastic.NewBoolQuery(),
+		boolQuery:    NewESBoolQuery(),
 		limit:        10,
 		context:      context.Background(),
-		aggregations: make(map[string]elastic.Aggregation),
+		aggregations: make(map[string]ESAggregation),
 	}
 	return q
 }
@@ -65,46 +69,46 @@ func (q *Query[T]) Should(field string, value interface{}) *Query[T] {
 	)
 }
 
-func (q *Query[T]) FilterQuery(query elastic.Query) *Query[T] {
+func (q *Query[T]) FilterQuery(query ESQuery) *Query[T] {
 	q.boolQuery.Filter(query)
 	return q
 }
 
-func (q *Query[T]) MustQuery(query elastic.Query) *Query[T] {
+func (q *Query[T]) MustQuery(query ESQuery) *Query[T] {
 	q.boolQuery.Must(query)
 	return q
 }
 
-func (q *Query[T]) MustNotQuery(query elastic.Query) *Query[T] {
+func (q *Query[T]) MustNotQuery(query ESQuery) *Query[T] {
 	q.boolQuery.MustNot(query)
 	return q
 }
 
-func (q *Query[T]) ShouldQuery(query elastic.Query) *Query[T] {
+func (q *Query[T]) ShouldQuery(query ESQuery) *Query[T] {
 	q.boolQuery.Should(query)
 	return q
 }
 
-func (q *Query[T]) toQuery(field string, value interface{}) elastic.Query {
+func (q *Query[T]) toQuery(field string, value interface{}) ESQuery {
 	fieldName, _, _ := strings.Cut(field, ".")
 	f := q.index.fieldsMap[fieldName]
 	if f == nil {
 		panic("could not find field with name: " + fieldName)
 	}
 	if f.Type == "keyword" && reflect.TypeOf(value) == reflect.TypeOf([]string{}) {
-		bq := elastic.NewBoolQuery()
-		shouldQueries := []elastic.Query{}
+		bq := NewESBoolQuery()
+		shouldQueries := []ESQuery{}
 		arr := value.([]string)
 		for _, v := range arr {
-			shouldQueries = append(shouldQueries, elastic.NewTermQuery(field, v))
+			shouldQueries = append(shouldQueries, NewESTermQuery(field, v))
 		}
 		bq.Should(shouldQueries...)
 		return bq
 	}
 	if f.Type == "text" {
-		return elastic.NewMatchQuery(field, value)
+		return NewESMatchQuery(field, value)
 	} else {
-		return elastic.NewTermsQuery(field, value)
+		return NewESTermsQuery(field, value)
 	}
 }
 
@@ -124,8 +128,11 @@ func (q *Query[T]) Offset(offset int64) *Query[T] {
 	return q
 }
 
-func (query *Query[T]) createSearchSource() *elastic.SearchSource {
-	source := elastic.NewSearchSource()
+func (query *Query[T]) createSearchSource() *ESSearchSource {
+
+	//var xxx elastic.SearchSource
+
+	source := NewESSearchSource()
 
 	if query.sortField != "" {
 		source = source.Sort(query.sortField, query.sortAsc)
@@ -143,7 +150,7 @@ func (query *Query[T]) createSearchSource() *elastic.SearchSource {
 	return source
 }
 
-func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
+/*func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
 
 	q := query.
 		index.
@@ -156,7 +163,7 @@ func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
 		query.createSearchSource(),
 	)
 	return q, nil
-}
+}*/
 
 func (query *Query[T]) Delete() error {
 	deleteService := elastic.NewDeleteByQueryService(query.index.client.esclientOld)
@@ -166,15 +173,49 @@ func (query *Query[T]) Delete() error {
 	return err
 }
 
-func (query *Query[T]) SearchResult() (*elastic.SearchResult, error) {
-	service, err := query.getSearchService()
+func (query *Query[T]) SearchResult() (*ESSearchResult, error) {
+
+	ss := query.createSearchSource()
+
+	srcData, err := ss.Source()
 	if err != nil {
 		return nil, err
 	}
-	return service.Do(context.Background())
+
+	res, err := query.index.client.esclientNew.Search(func(sr *esapi.SearchRequest) {
+
+		sr.Index = []string{query.index.indexName()}
+
+		data, err := json.Marshal(srcData)
+		if err != nil {
+			panic(err)
+		}
+
+		reader := strings.NewReader(string(data))
+		sr.Body = reader
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result ESSearchResult
+
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.Unmarshal(data, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
-func (index Index[T]) SearchResultToList(res *elastic.SearchResult) ([]*T, int64, error) {
+func (index Index[T]) SearchResultToList(res *ESSearchResult) ([]*T, int64, error) {
+
 	var ret []*T
 	for _, v := range res.Hits.Hits {
 		var t T
