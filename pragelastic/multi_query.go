@@ -2,6 +2,7 @@ package pragelastic
 
 import (
 	"context"
+	"fmt"
 )
 
 type MultiQuery[T any] struct {
@@ -27,18 +28,15 @@ func (mq *MultiQuery[T]) Context(ctx context.Context) *MultiQuery[T] {
 	return mq
 }
 
-/*func (mq *MultiQuery[T]) Search() ([]*elastic.SearchResult, error) {
-	multi := elastic.NewMultiSearchService(mq.index.client.esclientOld)
-	for _, v := range mq.queries {
-		request := elastic.NewSearchRequest()
-		request.Index(v.index.indexName())
-		request.SearchSource(v.createSearchSource())
-		multi.Add(request)
-	}
+// TODO: fix it for real multiquery search
+func (mq *MultiQuery[T]) Search() (ret []*ESSearchResult, err error) {
 
-	res, err := multi.Do(mq.context)
-	if err != nil {
-		return nil, err
+	for k, v := range mq.queries {
+		res, err := v.SearchResult()
+		if err != nil {
+			return nil, fmt.Errorf("error while getting resuld %d: %s", k, err)
+		}
+		ret = append(ret, res)
 	}
-	return res.Responses, nil
-}*/
+	return ret, nil
+}
