@@ -167,16 +167,6 @@ func (resourceData *resourceData) CreateWithLog(item any, request *Request) erro
 		return err
 	}
 
-	if resourceData.app.search != nil {
-		go func() {
-			err := resourceData.saveSearchItem(request.r.Context(), item)
-			if err != nil {
-				resourceData.app.Log().Println(fmt.Errorf("%s", err))
-			}
-			resourceData.app.search.index.Flush()
-		}()
-	}
-
 	if resourceData.activityLog {
 		err := resourceData.LogActivity(request, nil, item)
 		if err != nil {
@@ -205,14 +195,6 @@ func (resourceData *resourceData) DeleteWithLog(item any, request *Request) erro
 	err := resourceData.Delete(request.r.Context(), id)
 	if err != nil {
 		return fmt.Errorf("can't delete item id '%d': %s", id, err)
-	}
-
-	if resourceData.app.search != nil {
-		err = resourceData.app.search.deleteItem(resourceData, id)
-		if err != nil {
-			resourceData.app.Log().Println(fmt.Errorf("%s", err))
-		}
-		resourceData.app.search.index.Flush()
 	}
 
 	resourceData.updateCachedCount(request.r.Context())
@@ -281,16 +263,6 @@ func (resourceData *resourceData) UpdateWithLog(item any, request *Request) erro
 	err := resourceData.Update(request.r.Context(), item)
 	if err != nil {
 		return fmt.Errorf("can't save item (%d): %s", id, err)
-	}
-
-	if resourceData.app.search != nil {
-		go func() {
-			err = resourceData.saveSearchItem(request.r.Context(), item)
-			if err != nil {
-				resourceData.app.Log().Println(fmt.Errorf("%s", err))
-			}
-			resourceData.app.search.index.Flush()
-		}()
 	}
 
 	if resourceData.activityLog {

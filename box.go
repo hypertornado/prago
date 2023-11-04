@@ -27,9 +27,12 @@ func (form *Form) GetBoxHeader() *BoxHeader {
 		name = form.action.name("cs")
 	}
 
+	description := form.Description
+
 	return &BoxHeader{
-		Icon:  icon,
-		Name:  name,
-		Image: form.image,
+		Icon:      icon,
+		Name:      name,
+		Image:     form.image,
+		TextAfter: description,
 	}
 }

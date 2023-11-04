@@ -190,7 +190,6 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 					return
 				}
 				for _, v := range ids {
-					app := request.app
 					item := resourceData.query(request.r.Context()).ID(v)
 					if item == nil {
 						panic(fmt.Sprintf("can't get item for clone with id %d", v))
@@ -209,16 +208,6 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 					err := resourceData.Create(request.r.Context(), item)
 					if err != nil {
 						panic(fmt.Sprintf("can't create item for clone with id %d: %s", v, err))
-					}
-
-					if app.search != nil {
-						go func() {
-							err := resourceData.saveSearchItem(request.r.Context(), item)
-							if err != nil {
-								app.Log().Println(fmt.Errorf("%s", err))
-							}
-							app.search.index.Flush()
-						}()
 					}
 
 					if resourceData.activityLog {

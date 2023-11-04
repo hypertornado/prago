@@ -1,31 +1,17 @@
 package prago
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"net/url"
-	"reflect"
 	"sort"
 	"strconv"
 	"strings"
-	"time"
-
-	"github.com/hypertornado/prago/pragelastic"
-	"github.com/olivere/elastic/v7"
 )
 
-var disableAdminElasticsearch = true
-
 type searchItem struct {
-	ID              string
-	SuggestionField pragelastic.Suggest `elastic-analyzer:"czech_suggest" elastic-category-context-name:"Roles"`
-	Category        string              `elastic-datatype:"keyword"`
-	Name            string              `elastic-datatype:"text" elastic-analyzer:"czech"`
-	Description     string              `elastic-datatype:"text" elastic-analyzer:"czech"`
-	Image           string              `elastic-datatype:"keyword"`
-	URL             string              `elastic-datatype:"keyword"`
-	Roles           []string
+	ID   string
+	Name string
+	URL  string
 }
 
 const searchPageSize int64 = 10
@@ -36,18 +22,18 @@ type searchPage struct {
 	URL      string
 }
 
-type adminSearch struct {
+/*type adminSearch struct {
 	app   *App
 	index *pragelastic.Index[searchItem]
-}
+}*/
 
-func (app *App) initElasticsearchClient() {
+/*func (app *App) initElasticsearchClient() {
 	client, err := pragelastic.New(app.codeName)
 	if err != nil {
 		app.Log().Printf("initElasticsearchClient, client can't be initiated: %s", err)
 	}
 	app.ElasticClient = client
-}
+}*/
 
 func (app *App) initSearch() {
 	app.API("search-suggest").Permission(loggedPermission).Handler(
@@ -117,7 +103,7 @@ func (app *App) initSearch() {
 		},
 	)
 
-	if app.ElasticClient == nil || disableAdminElasticsearch {
+	/*if app.ElasticClient == nil || disableAdminElasticsearch {
 		app.Log().Println("will not initialize search since elasticsearch client is not defined")
 		return
 	}
@@ -127,7 +113,7 @@ func (app *App) initSearch() {
 		return
 	}
 	app.Log().Println("admin search initialized")
-	app.search = adminSearch
+	app.search = adminSearch*/
 
 	sysadminBoard.FormAction("delete-elastic-indice").Name(unlocalized("Smazat elasticsearch index")).Permission(sysadminPermission).Form(func(f *Form, r *Request) {
 		stats, err := app.ElasticClient.GetStats()
@@ -169,23 +155,16 @@ func (app *App) initSearch() {
 
 	//app.Action("_stats").Board(sysadminBoard).Name(unlocalized("Prago Stats")).Permission(sysadminPermission).Template("admin_systemstats").DataSource()
 
-	searchDashboard := sysadminBoard.Dashboard(unlocalized("Search"))
-
+	/*searchDashboard := sysadminBoard.Dashboard(unlocalized("Search"))
 	searchDashboard.Task(unlocalized("index_search")).Handler(func(ta *TaskActivity) error {
 		return adminSearch.searchImport(context.TODO())
-	}).RepeatEvery(3 * time.Hour)
+	}).RepeatEvery(3 * time.Hour)*/
 
 }
 
 func (app *App) searchItems(q string, page int64, request *Request) (ret []*searchItem, hits int64, err error) {
-	if app.search != nil {
-		ret, hits, err = app.search.Search(q, request.role(), page, request.r.Context())
-		must(err)
-		return
-	} else {
-		ret = app.searchWithoutElastic(q, request)
-		hits = int64(len(ret))
-	}
+	ret = app.searchWithoutElastic(q, request)
+	hits = int64(len(ret))
 	return
 }
 
@@ -196,15 +175,6 @@ func (app *App) suggestItems(q string, request *Request) (ret []*searchItem, err
 	}
 
 	ret = app.searchWithoutElastic(q, request)
-
-	if app.search != nil {
-		elasticResults, _, err := app.searchItems(q, 0, request)
-		if err != nil {
-			app.Log().Println(err)
-		} else {
-			ret = append(ret, elasticResults...)
-		}
-	}
 
 	if len(ret) > 5 {
 		ret = ret[0:5]
@@ -243,7 +213,7 @@ func (item menuItem) SearchWithoutElastic(q string) (ret []*searchItem) {
 	return
 }
 
-func newAdminSearch(app *App) (*adminSearch, error) {
+/*func newAdminSearch(app *App) (*adminSearch, error) {
 	index := pragelastic.NewIndex[searchItem](app.ElasticClient)
 	index.Create()
 
@@ -251,9 +221,9 @@ func newAdminSearch(app *App) (*adminSearch, error) {
 		app:   app,
 		index: index,
 	}, nil
-}
+}*/
 
-func (resourceData *resourceData) importSearchData(ctx context.Context, bulkUpdater *pragelastic.BulkUpdater[searchItem]) error {
+/*func (resourceData *resourceData) importSearchData(ctx context.Context, bulkUpdater *pragelastic.BulkUpdater[searchItem]) error {
 	roles := resourceData.getResourceViewRoles()
 	if roles == nil {
 		return nil
@@ -297,14 +267,14 @@ func (resourceData *resourceData) importSearchData(ctx context.Context, bulkUpda
 	}
 
 	return nil
-}
+}*/
 
-func (resourceData *resourceData) saveSearchItem(ctx context.Context, item any) error {
+/*func (resourceData *resourceData) saveSearchItem(ctx context.Context, item any) error {
 	roles := resourceData.getResourceViewRoles()
 	return resourceData.saveSearchItemWithRoles(context.TODO(), nil, item, roles)
-}
+}*/
 
-func (resourceData *resourceData) saveSearchItemWithRoles(ctx context.Context, bulkUpdater *pragelastic.BulkUpdater[searchItem], item any, roles []string) error {
+/*func (resourceData *resourceData) saveSearchItemWithRoles(ctx context.Context, bulkUpdater *pragelastic.BulkUpdater[searchItem], item any, roles []string) error {
 
 	//TODO: ugly hack with sysadmin user, remove suggestions
 	previewer := resourceData.previewer(resourceData.app.newUserData(&user{Role: "sysadmin"}), item)
@@ -314,9 +284,9 @@ func (resourceData *resourceData) saveSearchItemWithRoles(ctx context.Context, b
 	searchItem := relationDataToSearchItem(ctx, resourceData, previewer, roles)
 	searchItem.Roles = roles
 	return resourceData.app.search.addItem(bulkUpdater, &searchItem, 100)
-}
+}*/
 
-func relationDataToSearchItem(ctx context.Context, resourceData *resourceData, previewer *previewer, roles []string) searchItem {
+/*func relationDataToSearchItem(ctx context.Context, resourceData *resourceData, previewer *previewer, roles []string) searchItem {
 	return searchItem{
 		ID: searchID(resourceData, previewer.ID()),
 		SuggestionField: pragelastic.Suggest{
@@ -332,20 +302,20 @@ func relationDataToSearchItem(ctx context.Context, resourceData *resourceData, p
 		Image:       previewer.ThumbnailURL(ctx),
 		URL:         previewer.URL(""),
 	}
-}
+}*/
 
-func searchID(resourceData *resourceData, id int64) string {
+/*func searchID(resourceData *resourceData, id int64) string {
 	return fmt.Sprintf("%s-%d", resourceData.getID(), id)
-}
+}*/
 
-func (e *adminSearch) deleteItem(resourceData *resourceData, id int64) error {
+/*func (e *adminSearch) deleteItem(resourceData *resourceData, id int64) error {
 	if e.index != nil {
 		return e.index.DeleteItem(searchID(resourceData, id))
 	}
 	return nil
-}
+}*/
 
-func (e *adminSearch) searchImport(ctx context.Context) error {
+/*func (e *adminSearch) searchImport(ctx context.Context) error {
 	var err error
 
 	e.app.Log().Println("Importing Prago Admin Search Index")
@@ -365,10 +335,6 @@ func (e *adminSearch) searchImport(ctx context.Context) error {
 		if err != nil {
 			return fmt.Errorf("while importing resource %s: %s", resourceData.getID(), err)
 		}
-
-		//total, _ := e.index.Count()
-		//e.app.Log().Printf("importing resource: %s, total: %d\n", resourceData.getID(), total)
-
 	}
 
 	err = bulkUpdater.Close()
@@ -386,9 +352,9 @@ func (e *adminSearch) searchImport(ctx context.Context) error {
 
 	e.app.Log().Println("Prago Admin Search Index Created")
 	return nil
-}
+}*/
 
-func (e *adminSearch) createSearchIndex() error {
+/*func (e *adminSearch) createSearchIndex() error {
 	e.index.Delete()
 	err := e.index.Create()
 	if err != nil {
@@ -407,13 +373,13 @@ func (e *adminSearch) addItem(bulkUpdater *pragelastic.BulkUpdater[searchItem], 
 		return e.index.UpdateSingle(item)
 	}
 	return nil
-}
+}*/
 
-func (e *adminSearch) DeleteIndex() error {
+/*func (e *adminSearch) DeleteIndex() error {
 	return e.index.Delete()
-}
+}*/
 
-func (e *adminSearch) Search(q string, role string, page int64, ctx context.Context) ([]*searchItem, int64, error) {
+/*func (e *adminSearch) Search(q string, role string, page int64, ctx context.Context) ([]*searchItem, int64, error) {
 
 	mq := elastic.NewMultiMatchQuery(q)
 	mq.FieldWithBoost("Name", 3)
@@ -441,8 +407,8 @@ func (e *adminSearch) Suggest(q string, role string) ([]*searchItem, error) {
 			role,
 		},
 	})
-}
+}*/
 
-func (si searchItem) CroppedDescription() string {
+/*func (si searchItem) CroppedDescription() string {
 	return crop(si.Description, 100)
-}
+}*/

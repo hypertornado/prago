@@ -29,11 +29,13 @@ type TableCell struct {
 }
 
 type tableCellData struct {
-	CSSClasses []string
-	Href       string
-	Text       string
-	Colspan    int64
-	Rowspan    int64
+	CSSClasses        []string
+	Href              string
+	DescriptionBefore string
+	Text              string
+	DescriptionAfter  string
+	Colspan           int64
+	Rowspan           int64
 }
 
 type tableView struct {
@@ -117,6 +119,16 @@ func (cell *TableCell) Green() *TableCell {
 
 func (cell *TableCell) Nowrap() *TableCell {
 	cell.CSSClass("form_table_cell-nowrap")
+	return cell
+}
+
+func (cell *TableCell) DescriptionBefore(description string) *TableCell {
+	cell.data.DescriptionBefore = description
+	return cell
+}
+
+func (cell *TableCell) DescriptionAfter(description string) *TableCell {
+	cell.data.DescriptionAfter = description
 	return cell
 }
 

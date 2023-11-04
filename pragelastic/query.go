@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/elastic/go-elasticsearch/v7/esapi"
-	"github.com/olivere/elastic/v7"
 )
 
 //https://www.elastic.co/guide/en/elasticsearch/client/go-api/current/examples.html#search
@@ -23,8 +22,6 @@ type Query[T any] struct {
 	boolQuery    *ESBoolQuery
 	context      context.Context
 	aggregations map[string]ESAggregation
-
-	oldBoolQuery *elastic.BoolQuery
 }
 
 func (index *Index[T]) Query() *Query[T] {
@@ -130,8 +127,6 @@ func (q *Query[T]) Offset(offset int64) *Query[T] {
 
 func (query *Query[T]) createSearchSource() *ESSearchSource {
 
-	//var xxx elastic.SearchSource
-
 	source := NewESSearchSource()
 
 	if query.sortField != "" {
@@ -150,33 +145,34 @@ func (query *Query[T]) createSearchSource() *ESSearchSource {
 	return source
 }
 
-/*func (query *Query[T]) getSearchService() (*elastic.SearchService, error) {
-
-	q := query.
-		index.
-		client.
-		esclientOld.
-		Search().
-		Index(query.index.indexName())
-
-	q.SearchSource(
-		query.createSearchSource(),
-	)
-	return q, nil
-}*/
-
 func (query *Query[T]) Delete() error {
-	deleteService := elastic.NewDeleteByQueryService(query.index.client.esclientOld)
-	deleteService.Index(query.index.indexName())
-	deleteService.Query(query.boolQuery)
-	_, err := deleteService.Do(query.context)
-	return err
+	qSource, err := query.boolQuery.Source()
+	if err != nil {
+		return err
+	}
+	var srcData = map[string]any{
+		"query": qSource,
+	}
+
+	data, err := json.Marshal(srcData)
+	if err != nil {
+		panic(err)
+	}
+
+	resp, err := query.index.client.esclientNew.DeleteByQuery([]string{query.index.indexName()}, strings.NewReader(string(data)))
+	if err != nil {
+		return err
+	}
+	if resp.IsError() {
+		return fmt.Errorf(resp.String())
+	}
+	return nil
+
 }
 
 func (query *Query[T]) SearchResult() (*ESSearchResult, error) {
 
 	ss := query.createSearchSource()
-
 	srcData, err := ss.Source()
 	if err != nil {
 		return nil, err

@@ -4,8 +4,6 @@ import (
 	"testing"
 )
 
-//https://github.com/olivere/elastic/blob/release-branch.v7/search_aggs_test.go
-
 func TestSumAggregations(t *testing.T) {
 	index := prepareTestIndex[TestStruct]()
 	index.UpdateSingle(&TestStruct{

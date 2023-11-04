@@ -37,6 +37,23 @@ func (menu menu) GetTitle() string {
 			if v2.Selected {
 				return v2.Name
 			}
+			ret := getTitleFromMenuSubsections(v2.Subitems)
+			if ret != "" {
+				return ret
+			}
+		}
+	}
+	return ""
+}
+
+func getTitleFromMenuSubsections(sections []menuItem) string {
+	for _, v := range sections {
+		if v.Selected {
+			return v.Name
+		}
+		ret := getTitleFromMenuSubsections(v.Subitems)
+		if ret != "" {
+			return ret
 		}
 	}
 	return ""

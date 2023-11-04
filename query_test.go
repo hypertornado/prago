@@ -27,5 +27,4 @@ func TestReflectQuery(t *testing.T) {
 	if len(list) != 2 {
 		t.Fatal("wrong length")
 	}
-
 }

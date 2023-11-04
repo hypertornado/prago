@@ -43,7 +43,7 @@ func (index *Index[T]) Suggest(q string, categoryContexts map[string][]string) (
 	}
 
 	suggesterName := "_suggester"
-	completionSuggester := elastic.NewCompletionSuggester(suggesterName).
+	completionSuggester := NewESCompletionSuggester(suggesterName).
 		Field(fieldName).
 		Prefix(q)
 

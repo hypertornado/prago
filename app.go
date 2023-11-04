@@ -52,7 +52,7 @@ type App struct {
 	newsletters        *Newsletters
 	notificationCenter *notificationCenter
 
-	search        *adminSearch
+	//search        *adminSearch
 	ElasticClient *pragelastic.Client
 
 	fieldTypes    map[string]*fieldType
@@ -114,7 +114,7 @@ func createApp(codeName string, version string) *App {
 	app.initUserDataCache()
 	app.initBoard()
 	app.initSettings()
-	app.initElasticsearchClient()
+	//app.initElasticsearchClient()
 	app.initLogger()
 	app.initStaticFilesHandler()
 	app.initNotifications()

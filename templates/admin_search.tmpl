@@ -6,12 +6,9 @@
     {{template "box_header" .box_header}}
     {{range $result := .search_results}}
       <a href="{{$result.URL}}" class="search">
-        <div class="search_icon"
-          {{if $result.Image}} style="background-image: url('{{CSS $result.Image}}');"{{end}}></div>
+        <div class="search_icon"></div>
         <div class="search_right">
-          <div class="search_category">{{$result.Category}}</div>
           <div class="search_name">{{$result.Name}}</div>
-          <div class="search_description">{{$result.Description}}</div>
         </div>
       </a>
     {{end}}
@@ -28,15 +25,9 @@
 {{define "admin_search_suggest"}}
   <div class="admin_search_suggestions_content">
     {{range $i, $item := .}}
-      <a href="{{$item.URL}}" class="admin_search_suggestion{{if not $item.Image}} admin_search_suggestion-noimage{{end}}" data-position="{{$i}}">
-        {{if $item.Image}}
-          <div class="admin_search_suggestion_left"
-          {{if $item.Image}} style="background-image: url('{{CSS $item.Image}}');"{{end}}></div>
-        {{end}}
+      <a href="{{$item.URL}}" class="admin_search_suggestion admin_search_suggestion-noimage" data-position="{{$i}}">
         <div class="admin_search_suggestion_right">
-          <div class="admin_search_suggestion_category">{{$item.Category}}</div>
           <div class="admin_search_suggestion_name">{{$item.Name}}</div>
-          <div class="admin_search_suggestion_description">{{$item.CroppedDescription}}</div>
         </div>
       </a>
     {{end}}

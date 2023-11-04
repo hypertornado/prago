@@ -31,8 +31,13 @@ func renderPage(request *Request, page page) {
 		}
 	}
 
+	title := page.Menu.GetTitle()
 	if page.Name == "" {
-		page.Name = page.Menu.GetTitle()
+		page.Name = title
+	} else {
+		if page.Name != title {
+			page.Name += " – " + title
+		}
 	}
 
 	if page.Icon == "" {

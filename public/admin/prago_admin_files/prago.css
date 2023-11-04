@@ -3389,6 +3389,13 @@ a.admin_stats_section_row {
   white-space: nowrap;
 }
 
+.form_table_cell_descriptionbefore, .form_table_cell_descriptionafter {
+  font-size: 0.8rem;
+  line-height: 1.3em;
+  font-weight: normal;
+  color: #999;
+}
+
 .quick_actions {
   padding: 5px 10px;
   display: flex;
