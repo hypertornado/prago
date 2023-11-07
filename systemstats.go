@@ -260,11 +260,12 @@ func getResourceAccessView(app *App) accessView {
 }
 
 func elasticsearchStats(app *App) [][3]string {
-	if app.ElasticClient == nil {
+	client := app.ElasticSearchClient()
+	if client == nil {
 		return nil
 	}
 
-	stats, err := app.ElasticClient.GetStats()
+	stats, err := client.GetStats()
 	if err != nil {
 		panic(err)
 	}

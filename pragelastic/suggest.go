@@ -76,3 +76,10 @@ func (index *Index[T]) Suggest(q string, categoryContexts map[string][]string) (
 	}
 	return ret, nil
 }
+
+/*func (index *Index[T]) SuggestCompletion(q string, categoryContexts map[string][]string) ([]*T, error) {
+	xx, _ := index.client.esclientNew.Search(func(request *esapi.SearchRequest) {
+		request.SuggestField = ""
+		request.SuggestMode = ""
+	})
+}*/

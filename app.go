@@ -7,8 +7,6 @@ import (
 	"os"
 	"reflect"
 	"sync"
-
-	"github.com/hypertornado/prago/pragelastic"
 )
 
 // App is main struct of prago application
@@ -53,7 +51,7 @@ type App struct {
 	notificationCenter *notificationCenter
 
 	//search        *adminSearch
-	ElasticClient *pragelastic.Client
+	//ElasticClient *pragelastic.Client
 
 	fieldTypes    map[string]*fieldType
 	javascripts   []string

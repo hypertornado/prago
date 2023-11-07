@@ -16,7 +16,7 @@ var disableESLogger = true
 type logger struct {
 	app    *App
 	output io.Writer
-	index  *pragelastic.Index[logItem]
+	//index  *pragelastic.Index[logItem]
 }
 
 func newLogger(app *App) *logger {
@@ -30,9 +30,10 @@ func newLogger(app *App) *logger {
 
 func (l *logger) writeString(typ, str string) {
 	go func() {
+		index := l.app.getLoggerESIndex()
 		str = strings.Trim(str, " \t\r\n")
-		if l.index != nil {
-			err := l.index.UpdateSingle(&logItem{
+		if index != nil {
+			err := index.UpdateSingle(&logItem{
 				ID:   randomString(10),
 				Time: time.Now(),
 				Typ:  typ,
@@ -57,7 +58,8 @@ func (l *logger) writeString(typ, str string) {
 
 func (l *logger) deleteOldLogsRobot() {
 	for {
-		err := l.index.Query().LowerThanOrEqual("Time", time.Now().Add(-24*time.Hour)).Delete()
+		index := l.app.getLoggerESIndex()
+		err := index.Query().LowerThanOrEqual("Time", time.Now().Add(-24*time.Hour)).Delete()
 		if err != nil {
 			l.Printf("deleteOldLogsRobot: can't delete items: %s", err)
 		}
@@ -100,24 +102,40 @@ type logItem struct {
 	Text string `elastic-datatype:"text"`
 }
 
+func (app *App) getLoggerESIndex() *pragelastic.Index[logItem] {
+	client := app.ElasticSearchClient()
+	if client == nil {
+		return nil
+	}
+	return pragelastic.NewIndex[logItem](client)
+}
+
 //https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html#match-only-text-field-type
 
 func (app *App) initLogger() {
-	if app.ElasticClient == nil || disableESLogger {
+
+	if disableESLogger {
 		return
 	}
 
-	index := pragelastic.NewIndex[logItem](app.ElasticClient)
+	client := app.ElasticSearchClient()
+
+	if client == nil {
+		return
+	}
+
+	//index := pragelastic.NewIndex[logItem](client)
 
 	loggerDashboard := sysadminBoard.Dashboard(unlocalized("Logger"))
 
 	//tg := app.TaskGroup(unlocalized("Logger"))
 	loggerDashboard.Task(unlocalized("reindex log index")).Handler(func(ta *TaskActivity) error {
+		index := app.getLoggerESIndex()
 		index.Delete()
 		return index.Create()
 	}).Permission("sysadmin")
 
-	app.logger.index = index
+	//app.logger.index = index
 
 	go func() {
 		app.logger.deleteOldLogsRobot()
@@ -139,6 +157,7 @@ func (app *App) initLogger() {
 		f.AddTextInput("offset", "Offset").Value = "0"
 		f.AddSubmit("Hledat")
 	}).Validation(func(vc ValidationContext) {
+		index := app.getLoggerESIndex()
 		query := index.Query().Sort("Time", false)
 
 		from, err := time.ParseInLocation("2006-01-02T15:04", vc.GetValue("from_date"), time.Local)

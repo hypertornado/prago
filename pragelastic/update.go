@@ -43,6 +43,11 @@ func (index *Index[T]) UpdateSingle(item *T) error {
 
 func (index *Index[T]) UpdateBulk() (*BulkUpdater[T], error) {
 
+	/*
+		OnError can caouse possible memory leaks
+		https://github.com/elastic/go-elasticsearch/issues/232
+	*/
+
 	indexer, _ := esutil.NewBulkIndexer(esutil.BulkIndexerConfig{
 		//NumWorkers:    1,
 		//FlushBytes:    1000000,
@@ -50,9 +55,9 @@ func (index *Index[T]) UpdateBulk() (*BulkUpdater[T], error) {
 
 		Index:      index.indexName(),
 		ErrorTrace: true,
-		OnError: func(ctx context.Context, err error) {
+		/*OnError: func(ctx context.Context, err error) {
 			fmt.Println("error white indexing via UpdateBulk function", err)
-		},
+		},*/
 	})
 
 	ret := &BulkUpdater[T]{
