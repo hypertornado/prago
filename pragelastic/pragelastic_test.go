@@ -12,6 +12,7 @@ const testClientName = "pragelastic-test"
 type TestStruct struct {
 	ID              string
 	Name            string `elastic-datatype:"keyword"`
+	Description     string `elastic-datatype:"text" elastic-analyzer:"czech"`
 	Text            string `elastic-datatype:"text" elastic-analyzer:"czech"`
 	SomeCount       int64
 	Score           float64
