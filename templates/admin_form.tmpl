@@ -12,7 +12,7 @@
         {{end}}
 
         <div class="form_errors hidden"></div>
-
+        
         {{range $item := .Items}}
           <div class="form_label{{if .Hidden}} form_label-hidden{{end}}{{if .Required}} form_label-required{{end}}" data-id="{{.ID}}">
             {{if eq .HiddenName false}}

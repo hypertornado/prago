@@ -24,12 +24,30 @@ type searchPage struct {
 	URL      string
 }
 
+var searchClient *pragelastic.Client
+
+func (app *App) createNewElasticSearchClient() error {
+	ret, err := pragelastic.New(app.codeName)
+	if err != nil {
+		return err
+	}
+	searchClient = ret
+	return nil
+
+}
+
 func (app *App) ElasticSearchClient() *pragelastic.Client {
-	ret, _ := pragelastic.New(app.codeName)
-	return ret
+	if searchClient == nil {
+		app.createNewElasticSearchClient()
+	}
+	return searchClient
 }
 
 func (app *App) initSearch() {
+	db := sysadminBoard.Dashboard(unlocalized("Elasticsearch"))
+	db.Task(unlocalized("Reload elasticsearch client")).Handler(func(ta *TaskActivity) error {
+		return app.createNewElasticSearchClient()
+	})
 
 	app.API("search-suggest").Permission(loggedPermission).Handler(
 		func(request *Request) {

@@ -21,6 +21,7 @@ func connectMysql(dbUser, dbPassword, dbName string) (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error while opening MySQL database: %s", err)
 	}
-
+	//prevent resource exhaustion
+	db.SetMaxOpenConns(10)
 	return db, db.Ping()
 }

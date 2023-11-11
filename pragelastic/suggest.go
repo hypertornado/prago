@@ -1,11 +1,13 @@
 package pragelastic
 
 import (
-	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
+	"strings"
 
-	"github.com/olivere/elastic/v7"
+	"github.com/elastic/go-elasticsearch/v7/esapi"
 )
 
 type Suggest struct {
@@ -39,7 +41,7 @@ func (index *Index[T]) mustSuggest(q string, categoryContexts map[string][]strin
 func (index *Index[T]) Suggest(q string, categoryContexts map[string][]string) ([]*T, error) {
 	fieldName := index.getSuggestFieldName()
 	if fieldName == "" {
-		return nil, fmt.Errorf("Can't find suggest field name: no field has type completion")
+		return nil, errors.New("can't find suggest field name: no field has type completion")
 	}
 
 	suggesterName := "_suggester"
@@ -48,38 +50,59 @@ func (index *Index[T]) Suggest(q string, categoryContexts map[string][]string) (
 		Prefix(q)
 
 	for k, v := range categoryContexts {
-		completionSuggester.ContextQuery(elastic.NewSuggesterCategoryQuery(k, v...))
+		completionSuggester.ContextQuery(NewESSuggesterCategoryQuery(k, v...))
 	}
 
-	searchService := index.client.esclientOld.
-		Search().
-		Index(index.indexName()).
-		Suggester(completionSuggester)
+	srcData, err := completionSuggester.Source(true)
+	if err != nil {
+		return nil, err
+	}
 
-	searchResult, err := searchService.Do(context.Background())
+	res, err := index.client.esclientNew.Search(func(sr *esapi.SearchRequest) {
+		sr.Index = []string{index.indexName()}
+
+		var rootSrc = map[string]any{
+			"suggest": srcData,
+		}
+
+		data, err := json.Marshal(rootSrc)
+		if err != nil {
+			panic(err)
+		}
+
+		reader := strings.NewReader(string(data))
+		sr.Body = reader
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if res.IsError() {
+		return nil, fmt.Errorf("error while searching for suggest: %s", res.Status())
+	}
+
+	var result ESSearchResult
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		panic(err)
+	}
+	err = json.Unmarshal(data, &result)
 	if err != nil {
 		return nil, err
 	}
 
 	var ret []*T
-	suggestions := searchResult.Suggest[suggesterName]
-	for _, v := range suggestions {
+	for _, v := range result.Suggest[suggesterName] {
 		for _, option := range v.Options {
+
 			var t T
 			err := json.Unmarshal(option.Source, &t)
 			if err != nil {
-				return nil, fmt.Errorf("can't unmarshal suggestion result: %s", err)
+				panic(err)
 			}
 			ret = append(ret, &t)
-
 		}
 	}
 	return ret, nil
 }
-
-/*func (index *Index[T]) SuggestCompletion(q string, categoryContexts map[string][]string) ([]*T, error) {
-	xx, _ := index.client.esclientNew.Search(func(request *esapi.SearchRequest) {
-		request.SuggestField = ""
-		request.SuggestMode = ""
-	})
-}*/

@@ -11,9 +11,9 @@ type ESSearchResult struct {
 	TerminatedEarly bool        `json:"terminated_early,omitempty"` // request terminated early
 	NumReducePhases int         `json:"num_reduce_phases,omitempty"`
 	//Clusters        []*SearchResultCluster `json:"_clusters,omitempty"`    // 6.1.0+
-	ScrollId string        `json:"_scroll_id,omitempty"` // only used with Scroll and Scan operations
-	Hits     *ESSearchHits `json:"hits,omitempty"`       // the actual search hits
-	//Suggest      SearchSuggest  `json:"suggest,omitempty"`      // results from suggesters
+	ScrollId     string          `json:"_scroll_id,omitempty"`   // only used with Scroll and Scan operations
+	Hits         *ESSearchHits   `json:"hits,omitempty"`         // the actual search hits
+	Suggest      ESSearchSuggest `json:"suggest,omitempty"`      // results from suggesters
 	Aggregations ESAggregations  `json:"aggregations,omitempty"` // results from aggregations
 	TimedOut     bool            `json:"timed_out,omitempty"`    // true if the search timed out
 	Error        *ESErrorDetails `json:"error,omitempty"`        // only used in MultiGet
@@ -55,4 +55,35 @@ type SearchHit struct {
 	Shard string `json:"_shard,omitempty"` // used e.g. in Search Explain
 	Node  string `json:"_node,omitempty"`  // used e.g. in Search Explain
 
+}
+
+// Suggest
+
+// SearchSuggest is a map of suggestions.
+// See https://www.elastic.co/guide/en/elasticsearch/reference/7.0/search-suggesters.html.
+type ESSearchSuggest map[string][]ESSearchSuggestion
+
+// SearchSuggestion is a single search suggestion.
+// See https://www.elastic.co/guide/en/elasticsearch/reference/7.0/search-suggesters.html.
+type ESSearchSuggestion struct {
+	Text    string                     `json:"text"`
+	Offset  int                        `json:"offset"`
+	Length  int                        `json:"length"`
+	Options []ESSearchSuggestionOption `json:"options"`
+}
+
+// SearchSuggestionOption is an option of a SearchSuggestion.
+// See https://www.elastic.co/guide/en/elasticsearch/reference/7.0/search-suggesters.html.
+type ESSearchSuggestionOption struct {
+	Text            string              `json:"text"`
+	Index           string              `json:"_index"`
+	Type            string              `json:"_type"`
+	Id              string              `json:"_id"`
+	Score           float64             `json:"score"`  // term and phrase suggesters uses "score" as of 6.2.4
+	ScoreUnderscore float64             `json:"_score"` // completion and context suggesters uses "_score" as of 6.2.4
+	Highlighted     string              `json:"highlighted"`
+	CollateMatch    bool                `json:"collate_match"`
+	Freq            int                 `json:"freq"` // from TermSuggestion.Option in Java API
+	Source          json.RawMessage     `json:"_source"`
+	Contexts        map[string][]string `json:"contexts,omitempty"`
 }

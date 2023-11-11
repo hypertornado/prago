@@ -197,6 +197,7 @@ func (query *Query[T]) SearchResult() (*ESSearchResult, error) {
 
 	var result ESSearchResult
 
+	//TODO: faster unmarshal
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		panic(err)

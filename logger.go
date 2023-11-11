@@ -30,21 +30,23 @@ func newLogger(app *App) *logger {
 
 func (l *logger) writeString(typ, str string) {
 	go func() {
-		index := l.app.getLoggerESIndex()
 		str = strings.Trim(str, " \t\r\n")
-		if index != nil {
-			err := index.UpdateSingle(&logItem{
-				ID:   randomString(10),
-				Time: time.Now(),
-				Typ:  typ,
-				Text: str,
-			})
-			if err != nil {
-				fmt.Printf("Logger error, can't update: %s: typ %s: text %s\n", err, typ, str)
-				return
-			}
-			if !l.app.developmentMode {
-				return
+		if !disableESLogger {
+			index := l.app.getLoggerESIndex()
+			if index != nil {
+				err := index.UpdateSingle(&logItem{
+					ID:   randomString(10),
+					Time: time.Now(),
+					Typ:  typ,
+					Text: str,
+				})
+				if err != nil {
+					fmt.Printf("Logger error, can't update: %s: typ %s: text %s\n", err, typ, str)
+					return
+				}
+				if !l.app.developmentMode {
+					return
+				}
 			}
 		}
 

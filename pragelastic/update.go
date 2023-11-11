@@ -3,7 +3,6 @@ package pragelastic
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 	"time"
 
@@ -79,15 +78,20 @@ func (updater *BulkUpdater[T]) AddItem(item *T) {
 
 	updater.indexer.Stats()
 
+	/*
+		OnFailure can cause possible memory leaks
+		https://github.com/elastic/go-elasticsearch/issues/232
+	*/
+
 	err = updater.indexer.Add(
 		context.Background(),
 		esutil.BulkIndexerItem{
 			DocumentID: id,
 			Action:     "index",
 			Body:       strings.NewReader(string(data)),
-			OnFailure: func(ctx context.Context, bii esutil.BulkIndexerItem, biri esutil.BulkIndexerResponseItem, err error) {
+			/*OnFailure: func(ctx context.Context, bii esutil.BulkIndexerItem, biri esutil.BulkIndexerResponseItem, err error) {
 				panic(fmt.Sprintln("FAIL to index BulkIndexerItem:", "id:", id, "item:", string(data), "err:", err, "respItem:", biri))
-			},
+			},*/
 		},
 	)
 	if err != nil {
