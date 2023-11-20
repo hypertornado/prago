@@ -59,7 +59,7 @@ a.search_pagination_page-selected {
   max-width: 600px;
   background: white;
   border-radius: 10px;
-  @include shadow;
+  @include shadowMedium;
   position: relative;
 }
 
@@ -97,6 +97,8 @@ a.search_pagination_page-selected {
   display: flex;
   align-items: center;
   padding: 0px 20px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
 .searchbox_button:hover {

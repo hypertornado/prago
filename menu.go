@@ -3,7 +3,6 @@ package prago
 import (
 	"context"
 	"sort"
-	"strings"
 
 	"golang.org/x/text/collate"
 	"golang.org/x/text/language"
@@ -98,7 +97,7 @@ func getResourceCountsMap(request *Request) map[string]string {
 
 func (app *App) getMenuUserSection(userData UserData, urlPath, csrfToken string) *menuSection {
 	userName := userData.Name()
-	mainItems, _ := app.MainBoard.getItems(userData, urlPath, true, csrfToken)
+	mainItems, _ := app.MainBoard.getMenuItems(userData, urlPath, true, csrfToken)
 	userSection := menuSection{
 		Name:  userName,
 		Items: mainItems,
@@ -107,22 +106,43 @@ func (app *App) getMenuUserSection(userData UserData, urlPath, csrfToken string)
 	return &userSection
 }
 
-//request.Request().URL.Path
-
 func (board *Board) getMainItems(userData UserData, urlPath string, csrfToken string) ([]menuItem, bool) {
-	return board.getItems(userData, urlPath, false, csrfToken)
+	return board.getMenuItems(userData, urlPath, false, csrfToken)
 }
 
-func (board *Board) getItems(userData UserData, urlPath string, isUserMenu bool, csrfToken string) ([]menuItem, bool) {
+func (board *Board) getMenuItems(userData UserData, urlPath string, isUserMenu bool, csrfToken string) ([]menuItem, bool) {
 	app := board.app
 	var ret []menuItem
 
 	var isExpanded bool
+	var dontSortByName bool
+
+	if board.parentResource != nil {
+		dontSortByName = true
+		navigation := board.parentResource.getResourceNavigation(userData, "")
+		for k, v := range navigation.Tabs {
+			if k == 0 {
+				continue
+			}
+			var selected bool
+			if urlPath == v.URL {
+				isExpanded = true
+				selected = true
+			}
+
+			ret = append(ret, menuItem{
+				Icon:     v.Icon,
+				Name:     v.Name,
+				URL:      v.URL,
+				Selected: selected,
+			})
+		}
+	}
 
 	if !isUserMenu {
 		resources := app.resources
 		for _, resourceData := range resources {
-			if resourceData.board != board {
+			if resourceData.parentBoard != board {
 				continue
 			}
 
@@ -132,20 +152,34 @@ func (board *Board) getItems(userData UserData, urlPath string, isUserMenu bool,
 				if urlPath == resourceURL {
 					selected = true
 				}
-				if strings.HasPrefix(urlPath, resourceURL+"/") {
+				/*if strings.HasPrefix(urlPath, resourceURL+"/") {
 					selected = true
-				}
+				}*/
 
 				if selected {
 					isExpanded = true
 				}
 
+				icon := resourceData.icon
+				/*if icon == "" {
+					icon = iconTable
+				}*/
+
+				subitems, expandedSubmenu := resourceData.resourceBoard.getMenuItems(userData, urlPath, false, "")
+				if expandedSubmenu {
+					isExpanded = true
+				}
+				if selected {
+					expandedSubmenu = true
+				}
+
 				ret = append(ret, menuItem{
-					Icon: resourceData.icon,
-					Name: resourceData.pluralName(userData.Locale()),
-					//Subname:  humanizeNumber(resourceData.getCachedCount(request.r.Context())),
+					Icon:     icon,
+					Name:     resourceData.pluralName(userData.Locale()),
 					URL:      resourceURL,
 					Selected: selected,
+					Subitems: subitems,
+					Expanded: expandedSubmenu,
 				})
 			}
 		}
@@ -191,8 +225,13 @@ func (board *Board) getItems(userData UserData, urlPath string, isUserMenu bool,
 			}
 		}
 
+		icon := v.icon
+		if icon == "" {
+			icon = iconForm
+		}
+
 		menuItem := menuItem{
-			Icon:        v.icon,
+			Icon:        icon,
 			Name:        v.name(userData.Locale()),
 			URL:         fullURL,
 			Selected:    selected,
@@ -214,7 +253,9 @@ func (board *Board) getItems(userData UserData, urlPath string, isUserMenu bool,
 
 	}
 
-	sortSection(ret, userData.Locale())
+	if !dontSortByName {
+		sortSection(ret, userData.Locale())
+	}
 
 	return ret, isExpanded
 }

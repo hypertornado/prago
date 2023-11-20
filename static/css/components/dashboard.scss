@@ -22,10 +22,7 @@
   border-radius: 10px;
   display: flex;
   flex-direction: column;
-  background: white;
-  border: 1px solid #eee;
   position: relative;
-  @include shadowMedium;
 }
 
 a.dashboard_figure:hover {
@@ -45,6 +42,12 @@ a.dashboard_figure {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+}
+
+a .dashboard_figure_value {
+  color: $baseColor;
+  //color: red;
+
 }
 
 .dashboard_figure_value {

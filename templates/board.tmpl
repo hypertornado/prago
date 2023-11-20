@@ -11,7 +11,7 @@
 
   {{if .IsMainBoard}}
     <div class="board_user">
-      <div class="btngroup board_user_buttons">
+      <div class="board_user_buttons">
         {{range $item := .UserSection.Items}}
           <a href="{{$item.URL}}" class="btn">
             {{if iconExists $item.Icon}}
@@ -25,8 +25,7 @@
     </div>
   {{end}}
   
-
-  <h1 class="board_name">{{if iconExists .BoardIcon}}<img src="/admin/api/icons?file={{.BoardIcon}}&color=444444" class="board_icon">{{end}}{{.BoardName}}</h1>
+  <h1 class="board_name">{{if iconExists .BoardIcon}}<img src="/admin/api/icons?file={{.BoardIcon}}&color=444444" class="board_icon">{{end}}<div class="board_name_text">{{.BoardName}}</div></h1>
 
   {{if .MainDashboard}}
     {{template "dashboard" .MainDashboard}}
@@ -36,9 +35,8 @@
     {{$boardURL := .BoardURL}}
     <div class="board_resources">
       {{range $i, $resource := .Resources}}
-        {{$delay := multiplication 10 $i}}
         {{if ne $resource.URL $boardURL}}
-        <a href="{{$resource.URL}}" class="board_resource{{if $resource.IsBoard}} board_resource-isboard{{end}}" style="animation-delay: {{$delay}}ms;" title="{{$resource.Name}}">
+        <a href="{{$resource.URL}}" class="board_resource{{if $resource.IsBoard}} board_resource-isboard{{end}}" title="{{$resource.Name}}">
           <div class="board_resource_left">{{if $resource.Icon}}<img class="board_resource_icon" src="/admin/api/icons?file={{$resource.Icon}}&color=4078c0">{{end}}</div>
           <div class="board_resource_right">{{$resource.Name}}</div>
         </a>

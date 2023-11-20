@@ -9,7 +9,18 @@ import (
 )
 
 func (resourceData *resourceData) initDefaultResourceActions() {
-	resourceData.action("").Icon(iconTable).priority().Permission(resourceData.canView).Name(resourceData.pluralName).Template("admin_list").DataSource(
+
+	icon := resourceData.icon
+	if icon == "" {
+		icon = iconBoard
+	}
+
+	resourceData.action("").Icon(icon).priority().
+		Permission(resourceData.canView).Name(resourceData.pluralName).Template("board").DataSource(func(request *Request) any {
+		return resourceData.resourceBoard.boardView(request)
+	})
+
+	resourceData.action("list").Icon(iconTable).priority().Permission(resourceData.canView).Name(messages.GetNameFunction("admin_list")).Template("admin_list").DataSource(
 		func(request *Request) interface{} {
 			listData, err := resourceData.getListHeader(request)
 			must(err)

@@ -2241,7 +2241,7 @@ class Menu {
         this.rootLeft.scrollTo(0, position);
     }
     bindSubmenus() {
-        let triangleIcons = document.querySelectorAll(".menu_row-subitems > .menu_row_icon");
+        let triangleIcons = document.querySelectorAll(".menu_row_icon");
         for (var i = 0; i < triangleIcons.length; i++) {
             let triangleIcon = triangleIcons[i];
             triangleIcon.addEventListener("click", () => {

@@ -26,7 +26,7 @@ func TestSuggestWithTags(t *testing.T) {
 	err = index.UpdateSingle(&TestStructSuggestTags{
 		ID: "2",
 		SuggestionField: Suggest{
-			Input:  "Město moře stavení",
+			Input:  []string{"Město moře stavení"},
 			Weight: 10,
 			Contexts: map[string][]string{
 				"Tags": {"A", "B"},
@@ -39,7 +39,7 @@ func TestSuggestWithTags(t *testing.T) {
 	err = index.UpdateSingle(&TestStructSuggestTags{
 		ID: "3",
 		SuggestionField: Suggest{
-			Input:  "Město moře stavení",
+			Input:  []string{"Město moře stavení"},
 			Weight: 10,
 			Contexts: map[string][]string{
 				"Tags": {""},
@@ -52,7 +52,7 @@ func TestSuggestWithTags(t *testing.T) {
 	err = index.UpdateSingle(&TestStructSuggestTags{
 		ID: "4",
 		SuggestionField: Suggest{
-			Input:  "Město moře stavení",
+			Input:  []string{"Město moře stavení"},
 			Weight: 100,
 			Contexts: map[string][]string{
 				"Tags": {"B", "C"},
@@ -100,7 +100,7 @@ func TestSuggestNoTags(t *testing.T) {
 	err = index.UpdateSingle(&TestStructSuggestNoTags{
 		ID: "2",
 		SuggestionField: Suggest{
-			Input:  "Město moře stavení",
+			Input:  []string{"Město", "moře", "stavení"},
 			Weight: 10,
 		},
 	})
@@ -111,14 +111,14 @@ func TestSuggestNoTags(t *testing.T) {
 	index.UpdateSingle(&TestStructSuggestNoTags{
 		ID: "3",
 		SuggestionField: Suggest{
-			Input:  "Pán hrad stavení",
+			Input:  []string{"Pán", "hrad", "stavení", "brno"},
 			Weight: 100,
 		},
 	})
 	index.UpdateSingle(&TestStructSuggestNoTags{
 		ID: "4",
 		SuggestionField: Suggest{
-			Input:  "pan hrad stavení",
+			Input:  []string{"pan", "hrad", "stavení"},
 			Weight: 1000,
 		},
 	})
@@ -128,6 +128,11 @@ func TestSuggestNoTags(t *testing.T) {
 
 	res := getIDS(index.mustSuggest("pan", nil))
 	if res != "4,3" {
+		t.Fatal(res)
+	}
+
+	res = getIDS(index.mustSuggest("brn", nil))
+	if res != "3" {
 		t.Fatal(res)
 	}
 }

@@ -3,16 +3,22 @@
 
 .board_name {
   padding: 0px 10px;
+  display: flex;
+  align-items: center;
 }
 
+
 .board_icon {
-  width: 25px;
-  height: 25px;
+  width: 40px;
+  aspect-ratio: 1;
   margin-right: 10px;
 }
 
-.board_logo {
+.board_name_text {
   border: 0px solid red;
+}
+
+.board_logo {
   height: 100px;
   width: 200px;
   margin: 10px auto;
@@ -26,7 +32,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  padding: 10px;
+  padding: 10px 5px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   grid-gap: 10px;
@@ -43,29 +49,23 @@
 }
 
 .board_resource {
-  padding: 5px 10px;
+  padding: 5px 5px;
   border-radius: 10px;
-  background: white;
-  border: 1px solid #eee;
   display: flex;
   align-items: center;
-  //opacity: 0;
-
-  //animation: board_resource 1000ms ease-out;
-
-
-  //animation-fill-mode: forwards;
-  gap: 10px;
-  min-height: 45px;
+  gap: 5px;
+  font-size: 1.2rem;
+  line-height: 1.3em;
+  font-weight: 500;
 }
 
 .board_resource-isboard {
   font-weight: 500;
-  box-shadow: rgb(50 50 93 / 25%) 0px 2px 5px -1px, rgb(0 0 0 / 30%) 0px 1px 3px -1px;
 }
 
 a.board_resource:hover {
   border-color: $baseColor;
+  @include shadowMedium;
 }
 
 
@@ -74,8 +74,8 @@ a.board_resource {
 }
 
 .board_resource_icon {
-  width: 30px;
-  height: 30px;
+  width: 20px;
+  aspect-ratio: 1;
   border: 0px solid red;
 }
 
@@ -130,6 +130,9 @@ a.board_resource {
 
 .board_user_buttons {
   padding: 0px 10px;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
   align-self: center;
   flex-wrap: wrap;
 }

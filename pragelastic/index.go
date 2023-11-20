@@ -134,12 +134,16 @@ func (index *Index[T]) getSettings() map[string]interface{} {
 	analyzer["czech_suggest"] = map[string]any{
 		"tokenizer": "standard",
 		"filter": []string{
+			//"asciifolding",
+			//"lowercase",
 			"lowercase",
 			"asciifolding",
+			"czech_stop",
+			"czech_keywords",
+			"czech_stemmer",
 		},
 	}
 	analysis["analyzer"] = analyzer
-
 	settings["analysis"] = analysis
 	return settings
 }

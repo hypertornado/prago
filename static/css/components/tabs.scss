@@ -57,7 +57,8 @@
 }
 
 .admin_navigation_tab:hover {
-  color: black;
+  //color: black;
+  @include shadowMedium;
   //.shadow;
 }
 
@@ -66,7 +67,7 @@
   background-color: $baseColor;
   color: white;
   box-shadow: none;
-  @include shadow;
+  @include shadowMedium;
 }
 
 

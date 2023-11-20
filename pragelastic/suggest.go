@@ -11,7 +11,7 @@ import (
 )
 
 type Suggest struct {
-	Input    string              `json:"input"`
+	Input    []string            `json:"input"`
 	Weight   int64               `json:"weight"`
 	Contexts map[string][]string `json:"contexts,omitempty"`
 }

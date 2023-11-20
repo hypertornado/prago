@@ -5,8 +5,6 @@ class Menu {
 
   search: SearchForm;
 
-  //lastRequestedTime: any;
-
   constructor() {
     this.rootEl = document.querySelector(".root");
     this.rootLeft = document.querySelector(".root_left");
@@ -51,13 +49,15 @@ class Menu {
   }
 
   bindSubmenus() {
-    let triangleIcons = document.querySelectorAll(
+    /*let triangleIcons = document.querySelectorAll(
       ".menu_row-subitems > .menu_row_icon"
-    );
+    );*/
+    let triangleIcons = document.querySelectorAll(".menu_row_icon");
 
     for (var i = 0; i < triangleIcons.length; i++) {
       let triangleIcon = <HTMLDivElement>triangleIcons[i];
       triangleIcon.addEventListener("click", () => {
+        //console.log("XXX");
         let parent = <HTMLDivElement>triangleIcon.parentElement;
         parent.classList.toggle("menu_row-expanded");
       });

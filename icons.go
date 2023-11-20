@@ -11,6 +11,8 @@ const iconResource = "glyphicons-basic-577-cluster.svg"
 const iconTable = "glyphicons-basic-120-table.svg"
 const iconAdd = "glyphicons-basic-371-plus.svg"
 const iconSignpost = "glyphicons-basic-697-directions-sign.svg"
+const iconBoard = "glyphicons-basic-424-blackboard.svg"
+const iconForm = "glyphicons-basic-30-clipboard.svg"
 
 func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 	app.iconsFS = &iconsFS
@@ -21,9 +23,12 @@ func (app *App) iconExists(iconName string) bool {
 	if app.iconsFS == nil {
 		return false
 	}
-	app.iconsFS.Open(app.iconsPrefix + iconName)
-	_, err := app.iconsFS.ReadFile(app.iconsPrefix + iconName)
-	return err == nil
+	file, err := app.iconsFS.Open(app.iconsPrefix + iconName)
+	if err != nil {
+		return false
+	}
+	file.Close()
+	return true
 }
 
 func (app *App) loadIcon(iconName, color string) ([]byte, error) {

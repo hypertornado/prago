@@ -16,7 +16,6 @@ type BoardView struct {
 	Role string
 
 	TasksName string
-	//Tasks     *taskViewData
 }
 
 type DashboardView struct {
@@ -40,11 +39,25 @@ type DashboardViewTable struct {
 }
 
 func (board *Board) boardView(request *Request) *BoardView {
+	locale := request.getUser().Locale
+
+	var boardName, boardIcon, boardURL string
+	if board.action != nil {
+		boardName = board.action.name(locale)
+		boardIcon = board.action.icon
+		boardURL = board.action.getURL()
+	}
+
+	if board.parentResource != nil {
+		boardName = board.parentResource.pluralName(locale)
+		boardIcon = board.parentResource.icon
+	}
+
 	ret := &BoardView{
 		AppName:     board.app.name(request.Locale()),
-		BoardName:   board.action.name(request.Locale()),
-		BoardIcon:   board.action.icon,
-		BoardURL:    board.action.getURL(),
+		BoardName:   boardName,
+		BoardIcon:   boardIcon,
+		BoardURL:    boardURL,
 		IsMainBoard: board.IsMainBoard(),
 		Role:        request.role(),
 	}

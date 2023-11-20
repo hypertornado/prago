@@ -7,9 +7,10 @@ import (
 var sysadminBoard *Board
 
 type Board struct {
-	app         *App
-	action      *Action
-	parentBoard *Board
+	app            *App
+	action         *Action
+	parentBoard    *Board
+	parentResource *resourceData
 
 	MainDashboard *Dashboard
 
@@ -25,7 +26,7 @@ func (app *App) initBoard() {
 	app.dashboardFigureMap = make(map[string]*DashboardFigure)
 	sysadminBoard = app.NewBoard("sysadmin-board").Name(unlocalized("Sysadmin")).Icon("glyphicons-basic-501-server.svg")
 
-	app.NewBoard("empty-board")
+	//app.NewBoard("empty-board")
 
 	sysadminGroup := sysadminBoard.Dashboard(unlocalized("Sysadmin"))
 	sysadminGroup.Figure(unlocalized("Úpravy"), "sysadmin").Value(func(request *Request) int64 {
@@ -86,7 +87,7 @@ func (board *Board) isEmpty(userData UserData, urlPath string) bool {
 		}
 	}
 
-	items, _ := board.getItems(userData, urlPath, false, "")
+	items, _ := board.getMenuItems(userData, urlPath, false, "")
 	if len(items) > 0 {
 		return false
 	}

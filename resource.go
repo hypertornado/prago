@@ -54,7 +54,8 @@ type resourceData struct {
 	fieldMap   map[string]*Field
 	orderField *Field
 
-	board *Board
+	resourceBoard *Board
+	parentBoard   *Board
 
 	previewURLFunction func(any) string
 }
@@ -95,7 +96,7 @@ func NewResource[T any](app *App) *Resource[T] {
 
 		typ: typ,
 
-		board: app.MainBoard,
+		parentBoard: app.MainBoard,
 
 		fieldMap: make(map[string]*Field),
 	}
@@ -120,6 +121,22 @@ func NewResource[T any](app *App) *Resource[T] {
 	app.resourceNameMap[ret.data.id] = ret.data
 
 	initResource(ret.data)
+
+	ret.data.resourceBoard = &Board{
+		app:            app,
+		parentResource: ret.data,
+	}
+
+	ret.data.resourceBoard.MainDashboard = &Dashboard{
+		name:  unlocalized(""),
+		board: ret.data.resourceBoard,
+	}
+
+	statsDashboard := ret.data.resourceBoard.Dashboard(unlocalized("Statistiky"))
+	statsDashboard.Figure(unlocalized(""), ret.data.canView).Value(func(r *Request) int64 {
+		c, _ := ret.data.query(context.Background()).count()
+		return c
+	}).Unit(unlocalized("položek"))
 
 	ret.data.orderByColumn, ret.data.orderDesc = ret.data.getDefaultOrder()
 	return ret
@@ -279,6 +296,10 @@ func (resource *Resource[T]) Validation(validation Validation) *Resource[T] {
 	return resource
 }
 
+func (resource *Resource[T]) Dashboard(name func(string) string) *Dashboard {
+	return resource.data.resourceBoard.Dashboard(name)
+}
+
 func (resourceData *resourceData) addValidation(validation Validation) {
 	resourceData.validations = append(resourceData.validations, validation)
 }
@@ -290,7 +311,7 @@ func (resource *Resource[T]) DeleteValidation(validation Validation) *Resource[T
 }
 
 func (resource *Resource[T]) Board(board *Board) *Resource[T] {
-	resource.data.board = board
+	resource.data.parentBoard = board
 	return resource
 }
 
