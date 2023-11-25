@@ -13,6 +13,7 @@ const iconAdd = "glyphicons-basic-371-plus.svg"
 const iconSignpost = "glyphicons-basic-697-directions-sign.svg"
 const iconBoard = "glyphicons-basic-424-blackboard.svg"
 const iconForm = "glyphicons-basic-30-clipboard.svg"
+const iconView = "glyphicons-basic-588-book-open-text.svg"
 
 func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 	app.iconsFS = &iconsFS

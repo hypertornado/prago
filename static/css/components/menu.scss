@@ -65,8 +65,9 @@
 }
 
 .menu_row-subitems > .menu_row_icon:hover {
-  background-color: #eee;
-  @include shadowMedium;
+  //background-color: #fafafa;
+  filter: contrast(.2);
+  //@include shadowMedium;
 }
 
 .menu_row_content {
@@ -98,7 +99,7 @@
 
 .menu_item:hover {
   //border-color: #ddd;
-  @include shadowMedium;
+  //@include shadowMedium;
 }
 
 .menu_item:active {
@@ -124,7 +125,7 @@
   background-color: $baseColor;
   color: white !important;
   border-color: $baseColor;
-  @include shadowMedium;
+  //@include shadowMedium;
 
   position: sticky;
   top: 0px;

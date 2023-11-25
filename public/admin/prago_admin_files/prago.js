@@ -2162,7 +2162,6 @@ class SearchForm {
     addSuggestions(content) {
         this.suggestionsEl.innerHTML = content;
         this.suggestions = this.suggestionsEl.querySelectorAll(".admin_search_suggestion");
-        console.log(this.suggestions);
         if (this.suggestions.length > 0) {
             this.searchForm.classList.add("searchbox-showsuggestions");
         }

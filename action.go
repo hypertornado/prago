@@ -230,7 +230,7 @@ func (resourceData *resourceData) getListItemActions(userData UserData, item any
 	ret := listItemActions{}
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{
-		Icon: "glyphicons-basic-588-book-open-text.svg",
+		Icon: iconView,
 		//Name: messages.Get(user.Locale, "admin_view"),
 		URL: resourceData.getURL(fmt.Sprintf("%d", id)),
 	})

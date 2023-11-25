@@ -27,10 +27,9 @@
   line-height: 1.8em;
 
   text-decoration: none;
-  padding: 1px 10px;
+  padding: 1px 5px;
   border-radius: 5px;
   color: $black;
-  //color: 
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -47,7 +46,6 @@
 }
 
 .admin_navigation_tabdivider {
-  //border-left: 1px solid rgba(0, 0, 0, 0);
   margin: 7px 4px;
   margin: 7px 2px;
 }
@@ -57,9 +55,7 @@
 }
 
 .admin_navigation_tab:hover {
-  //color: black;
-  @include shadowMedium;
-  //.shadow;
+  //@include shadowMedium;
 }
 
 .admin_navigation_tab-selected,
@@ -67,7 +63,7 @@
   background-color: $baseColor;
   color: white;
   box-shadow: none;
-  @include shadowMedium;
+  //@include shadowMedium;
 }
 
 

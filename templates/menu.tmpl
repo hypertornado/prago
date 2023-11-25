@@ -14,7 +14,7 @@
     {{range $item := .}}
         <div class="menu_row{{if $item.Subitems}} menu_row-subitems{{end}}{{if $item.Expanded}} menu_row-expanded{{end}}">
             <div class="menu_row_icon">
-                <img src="/admin/api/icons?file=glyphicons-basic-175-play.svg&color=888888" class="menu_row_icon_img">
+                <img src="/admin/api/icons?file=glyphicons-basic-175-play.svg&color=dddddd" class="menu_row_icon_img">
             </div>
             <div class="menu_row_content">
                 <a href="{{$item.URL}}" class="menu_item{{if $item.Selected}} menu_item-selected{{end}}">

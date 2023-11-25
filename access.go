@@ -111,15 +111,3 @@ func (app *App) authorize(isLogged bool, role string, permission Permission) boo
 	ret := app.accessManager.roles[role][permission]
 	return ret
 }
-
-func (resourceData *resourceData) getResourceViewRoles() []string {
-	var ret []string
-	for roleName, permissions := range resourceData.app.accessManager.roles {
-		for permission := range permissions {
-			if permission == resourceData.canView {
-				ret = append(ret, roleName)
-			}
-		}
-	}
-	return ret
-}

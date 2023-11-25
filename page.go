@@ -22,12 +22,6 @@ func renderPage(request *Request, page page) {
 	page.Version = request.app.version
 	page.Menu = request.app.getMenu(request, request.Request().URL.Path, request.csrfToken())
 
-	//fmt.Println(page.Menu)
-
-	/*data, err := json.MarshalIndent(page.Menu, " ", " ")
-	must(err)
-	fmt.Println(string(data))*/
-
 	for _, v := range page.Navigation.Tabs {
 		if v.Selected {
 			page.Name = v.Name
@@ -38,13 +32,7 @@ func renderPage(request *Request, page page) {
 	}
 
 	title := page.Menu.GetTitle()
-	if page.Name == "" {
-		page.Name = title
-	} else {
-		if page.Name != title {
-			page.Name += " – " + title
-		}
-	}
+	page.Name = title
 
 	if page.Icon == "" {
 		page.Icon = request.app.icon

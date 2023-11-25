@@ -102,6 +102,8 @@
   <div class="list_export">
     {{if .CanExport}}
       <a href="#" class="btn admin_exportbutton" download="export.xlsx">Stáhnout tabulku ve formátu .xlsx</a>
+      <br><br>
+      <a href="api/export.csv" class="btn" download="export.csv">Stáhnout celou tabulku ve formátu .csv</a>
     {{else}}
       Nemáte oprávnění exportovat tuto tabulku.
     {{end}}

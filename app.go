@@ -9,6 +9,8 @@ import (
 	"sync"
 )
 
+//TODO: implement https://pkg.go.dev/expvar#Handler
+
 // App is main struct of prago application
 type App struct {
 	codeName        string

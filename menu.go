@@ -2,7 +2,10 @@ package prago
 
 import (
 	"context"
+	"fmt"
 	"sort"
+	"strconv"
+	"strings"
 
 	"golang.org/x/text/collate"
 	"golang.org/x/text/language"
@@ -36,26 +39,43 @@ func (menu menu) GetTitle() string {
 			if v2.Selected {
 				return v2.Name
 			}
-			ret := getTitleFromMenuSubsections(v2.Subitems)
-			if ret != "" {
-				return ret
+			ret := getTitleFromMenuSubsections(v2)
+			if len(ret) > 0 {
+				return strings.Join(ret, " · ")
 			}
 		}
 	}
 	return ""
 }
 
-func getTitleFromMenuSubsections(sections []menuItem) string {
-	for _, v := range sections {
-		if v.Selected {
-			return v.Name
+func getTitleFromMenuSubsections(item menuItem) []string {
+	if item.Selected {
+		return []string{
+			item.Name,
 		}
-		ret := getTitleFromMenuSubsections(v.Subitems)
-		if ret != "" {
+	}
+
+	for _, v := range item.Subitems {
+		items := getTitleFromMenuSubsections(v)
+		if len(items) > 0 {
+			ret := append(items, item.Name)
 			return ret
 		}
 	}
-	return ""
+	return []string{}
+
+	/*
+		for _, v := range sections {
+			if v.Selected {
+				return v.Name
+			}
+			ret := getTitleFromMenuSubsections(v.Subitems)
+			if ret != "" {
+				return ret
+			}
+		}
+		return ""
+	*/
 }
 
 func (app *App) initMenuAPI() {
@@ -118,12 +138,27 @@ func (board *Board) getMenuItems(userData UserData, urlPath string, isUserMenu b
 	var dontSortByName bool
 
 	if board.parentResource != nil {
+		parentResource := board.parentResource
+		resourceURLPath := board.parentResource.getURL("")
+
+		var itemID int
+
+		if strings.HasPrefix(urlPath, resourceURLPath) && len(urlPath) > len(resourceURLPath) {
+			isExpanded = true
+
+			beforeStr, _, _ := strings.Cut(urlPath[len(resourceURLPath)+1:], "/")
+			if true {
+				itemID, _ = strconv.Atoi(beforeStr)
+			}
+		}
+
 		dontSortByName = true
 		navigation := board.parentResource.getResourceNavigation(userData, "")
 		for k, v := range navigation.Tabs {
 			if k == 0 {
 				continue
 			}
+
 			var selected bool
 			if urlPath == v.URL {
 				isExpanded = true
@@ -135,6 +170,20 @@ func (board *Board) getMenuItems(userData UserData, urlPath string, isUserMenu b
 				Name:     v.Name,
 				URL:      v.URL,
 				Selected: selected,
+			})
+		}
+
+		if itemID > 0 {
+
+			item := parentResource.query(context.Background()).ID(itemID)
+
+			itemPreviewData := parentResource.previewer(userData, item)
+
+			ret = append(ret, menuItem{
+				Icon:     iconView,
+				Name:     itemPreviewData.Name(),
+				URL:      parentResource.getURL(fmt.Sprintf("%d", itemID)),
+				Selected: true,
 			})
 		}
 	}
@@ -152,18 +201,12 @@ func (board *Board) getMenuItems(userData UserData, urlPath string, isUserMenu b
 				if urlPath == resourceURL {
 					selected = true
 				}
-				/*if strings.HasPrefix(urlPath, resourceURL+"/") {
-					selected = true
-				}*/
 
 				if selected {
 					isExpanded = true
 				}
 
 				icon := resourceData.icon
-				/*if icon == "" {
-					icon = iconTable
-				}*/
 
 				subitems, expandedSubmenu := resourceData.resourceBoard.getMenuItems(userData, urlPath, false, "")
 				if expandedSubmenu {

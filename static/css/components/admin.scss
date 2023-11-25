@@ -1,32 +1,37 @@
 
 .admin_images_loaded {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  //align-items: baseline;
 }
 
 .admin_images_preview {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: inline-grid;
+  flex-grow: 100;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  border: 0px solid red;
+  gap: 10px;
+}
+
+.admin_item_view_image_content {
+  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 }
 
 .admin_images_image {
-  padding: 3px;
   border-radius: 3px;
-  margin: 0px 10px 10px 0px;
-  display: inline-block;
   text-align: center;
   vertical-align: middle;
   position: relative;
-  width: 100px;
-  height: 100px;
+  aspect-ratio: 16/9;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  overflow: hidden;
-  @include rectangle;
-  @include shadow;
+  @include shadowMedium;
+  display: inline-block;
+  position: relative;
 }
 
 .admin_images_image_description {
@@ -76,40 +81,18 @@
 }
 
 .admin_images_fileinput {
-  display: inline-block;
-  padding: 3px;
-  border-radius: 5px;
-  padding: 10px;
-  background-color: #fff;
-  background-color: $baseColorBackgroundLighter;
-  cursor: pointer;
-  margin: 0px 10px 10px 0px;
-  width: 100px;
-  height: 100px;
+  align-self: baseline;
+  margin-top: 5px;
+  margin-bottom: 10px;
   overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: $baseColorBackgroundLighter;
-  border: 1px solid #eee;
-  @include rectangle;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.admin_images_fileinput_plus {
-  font-size: 30px;
-}
-
-.admin_images_fileinput_plus::after {
-  content: "+";
+  padding-left: 18px !important;
+  //aspect-ratio: 1;
 }
 
 .admin_images_fileinput input {
-  opacity: 0;
+  opacity: 10;
   position: absolute;
-  top: -10px;
+  top: -100px;
 }
 
 .admin_images_fileinput:hover {
@@ -175,10 +158,11 @@ select.admin_timestamp_minute {
 
 .view_header {
   margin: 0 auto;
-  max-width: 600px;
+  max-width: 660px;
   padding-bottom: 5px;
   padding-left: 15px;
   display: flex;
+  margin-top: 30px;
   align-items: flex-start;
 }
 
@@ -276,20 +260,22 @@ select.admin_timestamp_minute {
 
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 .admin_preview_image {
   flex-grow: 0;
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  margin-right: 10px;
+  width: 70px;
+  aspect-ratio: 1;
+  //margin-right: 10px;
   border-radius: 5px;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
   background-color: #fafafa;
-  border: 1px solid #eee;
+  //border: 1px solid #eee;
+  @include shadowMedium;
   align-self: flex-start;
 }
 
@@ -300,7 +286,7 @@ select.admin_timestamp_minute {
 
 .admin_preview_description {
   font-size: 0.9rem;
-  line-height: 1.4em;
+  line-height: 1.3em;
   color: $gray;
   overflow-wrap: anywhere;
 }

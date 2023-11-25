@@ -43,7 +43,7 @@ func (field *relatedField) addURL(id int64) string {
 func (field *relatedField) listURL(id int64) string {
 	values := url.Values{}
 	values.Add(field.id, fmt.Sprintf("%d", id))
-	return field.resource.getURL("") + "?" + values.Encode()
+	return field.resource.getURL("list") + "?" + values.Encode()
 }
 
 func (field *relatedField) listName(locale string) string {

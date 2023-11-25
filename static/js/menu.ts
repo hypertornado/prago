@@ -57,7 +57,6 @@ class Menu {
     for (var i = 0; i < triangleIcons.length; i++) {
       let triangleIcon = <HTMLDivElement>triangleIcons[i];
       triangleIcon.addEventListener("click", () => {
-        //console.log("XXX");
         let parent = <HTMLDivElement>triangleIcon.parentElement;
         parent.classList.toggle("menu_row-expanded");
       });

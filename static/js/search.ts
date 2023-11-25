@@ -109,8 +109,6 @@ class SearchForm {
       ".admin_search_suggestion"
     );
 
-    console.log(this.suggestions);
-
     if (this.suggestions.length > 0) {
       this.searchForm.classList.add("searchbox-showsuggestions");
     } else {

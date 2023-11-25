@@ -194,7 +194,6 @@ body {
   font-size: 14px;
   line-height: 1.4em;
   color: #444;
-  background-color: #fafafa;
 }
 
 code {
@@ -451,38 +450,37 @@ pre {
   }
 }
 .admin_images_loaded {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .admin_images_preview {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: inline-grid;
+  flex-grow: 100;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  border: 0px solid red;
+  gap: 10px;
+}
+
+.admin_item_view_image_content {
+  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 }
 
 .admin_images_image {
-  padding: 3px;
   border-radius: 3px;
-  margin: 0px 10px 10px 0px;
-  display: inline-block;
   text-align: center;
   vertical-align: middle;
   position: relative;
-  width: 100px;
-  height: 100px;
+  aspect-ratio: 16/9;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  overflow: hidden;
-  border: 1px solid #eee;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
   display: inline-block;
-  background-color: rgba(64, 120, 192, 0.05);
-  border-radius: 5px;
-  margin: 5px;
-  flex-shrink: 0;
-  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 .admin_images_image_description {
@@ -532,45 +530,17 @@ pre {
 }
 
 .admin_images_fileinput {
-  display: inline-block;
-  padding: 3px;
-  border-radius: 5px;
-  padding: 10px;
-  background-color: #fff;
-  background-color: rgba(64, 120, 192, 0.05);
-  cursor: pointer;
-  margin: 0px 10px 10px 0px;
-  width: 100px;
-  height: 100px;
+  align-self: baseline;
+  margin-top: 5px;
+  margin-bottom: 10px;
   overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(64, 120, 192, 0.05);
-  border: 1px solid #eee;
-  border: 1px solid #eee;
-  display: inline-block;
-  background-color: rgba(64, 120, 192, 0.05);
-  border-radius: 5px;
-  margin: 5px;
-  flex-shrink: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.admin_images_fileinput_plus {
-  font-size: 30px;
-}
-
-.admin_images_fileinput_plus::after {
-  content: "+";
+  padding-left: 18px !important;
 }
 
 .admin_images_fileinput input {
-  opacity: 0;
+  opacity: 10;
   position: absolute;
-  top: -10px;
+  top: -100px;
 }
 
 .admin_images_fileinput:hover {
@@ -636,10 +606,11 @@ select.admin_timestamp_minute {
 
 .view_header {
   margin: 0 auto;
-  max-width: 600px;
+  max-width: 660px;
   padding-bottom: 5px;
   padding-left: 15px;
   display: flex;
+  margin-top: 30px;
   align-items: flex-start;
 }
 
@@ -735,20 +706,20 @@ select.admin_timestamp_minute {
   line-height: 1.4em;
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 .admin_preview_image {
   flex-grow: 0;
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  margin-right: 10px;
+  width: 70px;
+  aspect-ratio: 1;
   border-radius: 5px;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
   background-color: #fafafa;
-  border: 1px solid #eee;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
   align-self: flex-start;
 }
 
@@ -759,7 +730,7 @@ select.admin_timestamp_minute {
 
 .admin_preview_description {
   font-size: 0.9rem;
-  line-height: 1.4em;
+  line-height: 1.3em;
   color: #888;
   overflow-wrap: anywhere;
 }
@@ -888,17 +859,13 @@ select.admin_timestamp_minute {
 
 .box {
   border: 1px solid #eee;
-  margin: 20px auto;
-  max-width: min(600px, 100vw);
+  margin: 0 auto;
+  max-width: min(650px, 100vw);
   width: 100%;
   margin-bottom: 20px;
-  background-color: #fff;
-  border-radius: 10px;
+  border-radius: 5px;
   margin-top: 0px;
-}
-
-.box:first-child {
-  margin-top: 20px;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
 
 .box_content {
@@ -1675,7 +1642,7 @@ input.list_filter_layout_date_to {
 
 .form_label {
   display: block;
-  margin: 10px 0px;
+  margin: 15px 0px;
 }
 
 .form_label:first-of-type {
@@ -2253,7 +2220,10 @@ a.search_pagination_page-selected {
   padding: 10px 10px;
 }
 
-a.admin_search_suggestion-selected,
+a.admin_search_suggestion-selected {
+  background: rgba(64, 120, 192, 0.05) !important;
+}
+
 a.admin_search_suggestion-selected:active {
   background: rgba(64, 120, 192, 0.1) !important;
 }
@@ -2494,11 +2464,6 @@ a.admin_search_suggestion-selected:active {
 
 .board_resource-isboard {
   font-weight: 500;
-}
-
-a.board_resource:hover {
-  border-color: #4078c0;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 a.board_resource {
@@ -2833,7 +2798,7 @@ a.admin_stats_section_row {
   font-size: 0.9rem;
   line-height: 1.8em;
   text-decoration: none;
-  padding: 1px 10px;
+  padding: 1px 5px;
   border-radius: 5px;
   color: #444;
   font-weight: 500;
@@ -2860,16 +2825,11 @@ a.admin_stats_section_row {
   border-color: #ddd;
 }
 
-.admin_navigation_tab:hover {
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-}
-
 .admin_navigation_tab-selected,
 .admin_navigation_tab-selected:hover {
   background-color: #4078c0;
   color: white;
   box-shadow: none;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .menu {
@@ -2939,8 +2899,7 @@ a.admin_stats_section_row {
 }
 
 .menu_row-subitems > .menu_row_icon:hover {
-  background-color: #eee;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  filter: contrast(0.2);
 }
 
 .menu_row_content {
@@ -2969,10 +2928,6 @@ a.admin_stats_section_row {
   margin-right: 5px;
 }
 
-.menu_item:hover {
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-}
-
 .menu_item_left {
   flex-grow: 10;
   flex-shrink: 0;
@@ -2992,7 +2947,6 @@ a.admin_stats_section_row {
   background-color: #4078c0;
   color: white !important;
   border-color: #4078c0;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
   position: sticky;
   top: 0px;
   bottom: 0px;

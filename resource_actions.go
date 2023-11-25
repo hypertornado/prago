@@ -129,6 +129,8 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		)
 	}
 
+	bindResourceExportCSV(resourceData)
+
 	if resourceData.activityLog {
 		resourceData.FormAction("history").
 			Icon("glyphicons-basic-58-history.svg").
