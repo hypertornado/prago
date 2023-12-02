@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"reflect"
+	"time"
 )
 
 const exportCSVPageLimit = 1000
@@ -49,7 +50,11 @@ func bindResourceExportCSV(resourceData *resourceData) {
 
 				for _, outputField := range outputFields {
 					valIface := val.FieldByName(outputField.fieldClassName).Interface()
-					strValuesRow = append(strValuesRow, fmt.Sprintf("%v", valIface))
+					strVal := fmt.Sprintf("%v", valIface)
+					if t, ok := valIface.(time.Time); ok {
+						strVal = t.Format(time.RFC3339)
+					}
+					strValuesRow = append(strValuesRow, strVal)
 				}
 				must(w.Write(strValuesRow))
 

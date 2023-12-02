@@ -11,7 +11,7 @@ type ActionIface interface {
 	getURL() string
 	getController() *controller
 	getConstraints() []routerConstraint
-	getHandler() func(*Request)
+	getActionHandler() func(*Request)
 	getPermission() Permission
 	getURLToken() string
 	returnIsPriority() bool
@@ -69,7 +69,7 @@ func (action *Action) getController() *controller {
 	return controller
 }
 
-func (action *Action) getHandler() func(*Request) {
+func (action *Action) getActionHandler() func(*Request) {
 	return func(request *Request) {
 		if !request.Authorize(action.permission) {
 			render403(request)

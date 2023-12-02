@@ -386,16 +386,16 @@ pre {
 @keyframes root_left_animation {
   0% {
     opacity: 0.9;
-    transform: translateY(100vh);
+    transform: translateX(100vh);
   }
   100% {
     opacity: 1;
   }
 }
 @media (max-width: 1100px) {
-  .root {
+  /*.root {
     flex-direction: column-reverse;
-  }
+  }*/
   .root_header {
     border-top: 1px solid #eee;
     background: white;
@@ -411,13 +411,14 @@ pre {
   .root-visible .root_left {
     display: block;
     position: absolute;
-    top: 0px;
-    bottom: 50px;
+    top: 50px;
+    bottom: 0px;
     right: 0px;
     z-index: 10;
-    background-color: #fafafa;
+    background-color: #fff;
     box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
     animation: root_left_animation 200ms ease-out;
+    width: 100vw;
   }
   .root_hamburger {
     display: flex;

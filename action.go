@@ -38,7 +38,7 @@ func bindAction(action ActionIface) error {
 	url := action.getURL()
 	controller := action.getController()
 
-	var fn = action.getHandler()
+	var fn = action.getActionHandler()
 	constraints := action.getConstraints()
 
 	if action.getPermission() == "" {

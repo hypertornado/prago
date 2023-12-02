@@ -10,6 +10,9 @@ import (
 )
 
 //TODO: implement https://pkg.go.dev/expvar#Handler
+//https://github.com/shirou/gopsutil
+
+//https://github.com/divan/expvarmon
 
 // App is main struct of prago application
 type App struct {
