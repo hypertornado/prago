@@ -2,6 +2,7 @@ package prago
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strings"
 )
@@ -145,17 +146,24 @@ func matcherStarMiddle(route string) pathMatcherFn {
 	}
 }
 
-func newRoute(m method, path string, controller *controller, fn func(p *Request), constraints []routerConstraint) (ret *route) {
-	methodName := map[method]string{
-		get:  "GET",
-		head: "HEAD",
-		post: "POST",
-		put:  "PUT",
-		del:  "DELETE",
+func isHTTPMethodValid(method string) bool {
+	if method == "GET" ||
+		method == "HEAD" ||
+		method == "POST" ||
+		method == "PUT" ||
+		method == "DELETE" {
+		return true
+	}
+	return false
+}
+
+func newRoute(method string, path string, controller *controller, fn func(p *Request), constraints []routerConstraint) (ret *route) {
+	if !isHTTPMethodValid(method) {
+		panic(fmt.Sprintf("unknown method: %s", method))
 	}
 
 	ret = &route{
-		method:      methodName[m],
+		method:      method,
 		path:        path,
 		constraints: constraints,
 		controller:  controller,

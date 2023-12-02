@@ -35,8 +35,8 @@ type resourceData struct {
 	validations       []Validation
 	deleteValidations []Validation
 
-	actions     []ActionIface
-	itemActions []ActionIface
+	actions     []*Action
+	itemActions []*Action
 
 	relations []*relatedField
 
@@ -330,7 +330,7 @@ func (app *App) getResourceByID(name string) *resourceData {
 func initResource(resourceData *resourceData) {
 	resourceData.resourceController.addAroundAction(func(request *Request, next func()) {
 		if !request.Authorize(resourceData.canView) {
-			render403(request)
+			renderErrorPage(request, 403)
 		} else {
 			next()
 		}

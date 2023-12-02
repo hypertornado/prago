@@ -23,7 +23,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 			}
 			if request.Request().URL.Query().Get("_format") == "xlsx" {
 				if !request.Authorize(resourceData.canExport) {
-					render403(request)
+					renderErrorPage(request, 403)
 					return
 				}
 
@@ -78,7 +78,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 		func(request *Request) {
 			item := resourceData.query(request.r.Context()).ID(request.Param("id"))
 			if item == nil {
-				render404(request)
+				renderErrorPage(request, 404)
 				return
 			}
 

@@ -8,7 +8,7 @@ import (
 
 func TestRouterNormal(t *testing.T) {
 	ctx := context.Background()
-	r := newRoute(post, "/a/:id/:name/aa", nil, nil, nil)
+	r := newRoute("POST", "/a/:id/:name/aa", nil, nil, nil)
 	params, ok := r.match(ctx, "POST", "/a/123/ondra/aa")
 	if ok != true {
 		t.Fatal(ok)
@@ -23,7 +23,7 @@ func TestRouterNormal(t *testing.T) {
 		t.Fatal(len(params))
 	}
 
-	r = newRoute(get, "/a/:id/:name/aa", nil, nil, nil)
+	r = newRoute("GET", "/a/:id/:name/aa", nil, nil, nil)
 	_, ok = r.match(ctx, "POST", "/a/123/ondra/aa")
 	if ok != false {
 		t.Fatal(ok)
@@ -50,7 +50,7 @@ func TestRouterNormal(t *testing.T) {
 		return true
 	}
 
-	r = newRoute(get, "/a/:id/:name/aa", nil, nil, []routerConstraint{constraint})
+	r = newRoute("GET", "/a/:id/:name/aa", nil, nil, []routerConstraint{constraint})
 
 	_, ok = r.match(ctx, "GET", "/a/123/ondra/aa")
 	if ok != true {
@@ -63,7 +63,7 @@ func TestRouterNormal(t *testing.T) {
 }
 
 func TestRouterFallback(t *testing.T) {
-	r := newRoute(get, "*some", nil, nil, nil)
+	r := newRoute("GET", "*some", nil, nil, nil)
 	params, ok := r.match(context.Background(), "GET", "/XXX")
 	if ok != true {
 		t.Fatal(ok)
@@ -72,7 +72,7 @@ func TestRouterFallback(t *testing.T) {
 		t.Fatal(params["some"])
 	}
 
-	r = newRoute(get, "/a/b/*some", nil, nil, nil)
+	r = newRoute("GET", "/a/b/*some", nil, nil, nil)
 	params, ok = r.match(context.Background(), "GET", "/a/b/c/d")
 	if ok != true {
 		t.Fatal(ok)

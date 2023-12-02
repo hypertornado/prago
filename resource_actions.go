@@ -61,7 +61,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 	resourceData.ItemAction("").Icon("glyphicons-basic-588-book-open-text.svg").priority().Template("admin_views").Permission(resourceData.canView).DataSource(
 		func(item any, request *Request) interface{} {
 			if item == nil {
-				render404(request)
+				renderErrorPage(request, 404)
 				return nil
 			}
 			return resourceData.getViews(request.r.Context(), item, request)

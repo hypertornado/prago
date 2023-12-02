@@ -34,28 +34,27 @@ type Action struct {
 	isPriority     bool
 }
 
-func bindAction(action ActionIface) error {
+func bindAction(action *Action) error {
 	url := action.getURL()
 	controller := action.getController()
 
 	var fn = action.getActionHandler()
-	constraints := action.getConstraints()
 
-	if action.getPermission() == "" {
-		panic(fmt.Sprintf("Permission for action '%s %s' should not be empty", action.getMethod(), url))
+	if action.permission == "" {
+		panic(fmt.Sprintf("Permission for action '%s %s' should not be empty", action.method, url))
 	}
 
-	switch action.getMethod() {
+	switch action.method {
 	case "POST":
-		controller.post(url, fn, constraints...)
+		controller.post(url, fn, action.constraints...)
 	case "GET":
-		controller.get(url, fn, constraints...)
+		controller.get(url, fn, action.constraints...)
 	case "PUT":
-		controller.put(url, fn, constraints...)
+		controller.put(url, fn, action.constraints...)
 	case "DELETE":
-		controller.delete(url, fn, constraints...)
+		controller.delete(url, fn, action.constraints...)
 	default:
-		return fmt.Errorf("unknown method %s", action.getMethod())
+		return fmt.Errorf("unknown method %s", action.method)
 	}
 	return nil
 }
@@ -64,7 +63,7 @@ func (app *App) bindAllActions() {
 	for _, v := range app.rootActions {
 		err := bindAction(v)
 		if err != nil {
-			panic(fmt.Sprintf("error while binding root action %s %s: %s", v.getMethod(), v.getName("en"), err))
+			panic(fmt.Sprintf("error while binding root action %s %s: %s", v.method, v.name("en"), err))
 		}
 	}
 
@@ -77,13 +76,13 @@ func (resourceData *resourceData) bindActions() {
 	for _, v := range resourceData.actions {
 		err := bindAction(v)
 		if err != nil {
-			panic(fmt.Sprintf("error while binding resource %s action %s %s: %s", resourceData.id, v.getMethod(), v.getName("en"), err))
+			panic(fmt.Sprintf("error while binding resource %s action %s %s: %s", resourceData.id, v.method, v.name("en"), err))
 		}
 	}
 	for _, v := range resourceData.itemActions {
 		err := bindAction(v)
 		if err != nil {
-			panic(fmt.Sprintf("error while binding item resource %s action %s %s: %s", resourceData.id, v.getMethod(), v.getName("en"), err))
+			panic(fmt.Sprintf("error while binding item resource %s action %s %s: %s", resourceData.id, v.method, v.name("en"), err))
 		}
 	}
 }
@@ -134,7 +133,6 @@ func (action *Action) Permission(permission Permission) *Action {
 
 // Method sets action method (GET, POST, PUT or DELETE)
 func (action *Action) Method(method string) *Action {
-	method = strings.ToUpper(method)
 	if method != "GET" && method != "POST" && method != "PUT" && method != "DELETE" {
 		panic("unsupported method for action: " + method)
 	}
@@ -231,8 +229,7 @@ func (resourceData *resourceData) getListItemActions(userData UserData, item any
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{
 		Icon: iconView,
-		//Name: messages.Get(user.Locale, "admin_view"),
-		URL: resourceData.getURL(fmt.Sprintf("%d", id)),
+		URL:  resourceData.getURL(fmt.Sprintf("%d", id)),
 	})
 
 	navigation := resourceData.getItemNavigation(userData, item, "")
@@ -252,4 +249,58 @@ func (resourceData *resourceData) getListItemActions(userData UserData, item any
 	}
 
 	return ret
+}
+
+func (action *Action) getURL() string {
+	if strings.HasPrefix(action.url, "/") {
+		panic("url can't start with / character")
+	}
+
+	var url string
+	if action.resourceData == nil {
+		url = action.app.getAdminURL(action.url)
+	} else {
+		resourceData := action.resourceData
+		if action.isItemAction {
+			if action.url != "" {
+				url = resourceData.getURL(":id/" + action.url)
+			} else {
+				url = resourceData.getURL(":id")
+			}
+		} else {
+			url = resourceData.getURL(action.url)
+		}
+	}
+	return url
+}
+
+func (action *Action) getController() *controller {
+	if action.resourceData != nil {
+		return action.resourceData.getResourceControl()
+	} else {
+		return action.app.adminController
+	}
+}
+
+func (action *Action) getActionHandler() func(*Request) {
+	return func(request *Request) {
+		if !request.Authorize(action.permission) {
+			renderErrorPage(request, 403)
+			return
+		}
+		if action.handler != nil {
+			action.handler(request)
+		} else {
+			var data interface{}
+			if action.dataSource != nil {
+				data = action.dataSource(request)
+			}
+
+			pageData := createPageData(request)
+			pageData.Navigation = action.getnavigation(request)
+			pageData.PageTemplate = action.template
+			pageData.PageData = data
+			pageData.renderPage(request)
+		}
+	}
 }

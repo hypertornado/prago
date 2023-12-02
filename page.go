@@ -1,13 +1,16 @@
 package prago
 
-type page struct {
+type pageData struct {
 	Language string
 	Version  string
 
-	Icon         string
-	Name         string
-	App          *App
-	Navigation   navigation
+	Icon       string
+	Name       string
+	App        *App
+	Navigation navigation
+
+	Messages []pageMessage
+
 	PageTemplate string
 	PageData     interface{}
 	Menu         menu
@@ -17,10 +20,23 @@ type page struct {
 	HTTPCode          int
 }
 
-func renderPage(request *Request, page page) {
+type pageMessage struct {
+	Name string
+}
+
+func createPageData(request *Request) *pageData {
+	page := &pageData{}
+	page.App = request.app
 	page.Language = request.Locale()
 	page.Version = request.app.version
 	page.Menu = request.app.getMenu(request, request.Request().URL.Path, request.csrfToken())
+
+	page.JavaScripts = request.app.javascripts
+	page.NotificationsData = request.getNotificationsData()
+	return page
+}
+
+func (page *pageData) renderPage(request *Request) {
 
 	for _, v := range page.Navigation.Tabs {
 		if v.Selected {
@@ -32,18 +48,13 @@ func renderPage(request *Request, page page) {
 	}
 
 	title := page.Menu.GetTitle()
-	page.Name = title
+	if title != "" {
+		page.Name = title
+	}
 
 	if page.Icon == "" {
 		page.Icon = request.app.icon
 	}
-
-	if page.Name == "" {
-		page.Name = request.app.name(request.Locale())
-	}
-
-	page.JavaScripts = request.app.javascripts
-	page.NotificationsData = request.getNotificationsData()
 
 	code := page.HTTPCode
 	if code == 0 {

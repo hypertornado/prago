@@ -2,6 +2,8 @@ package prago
 
 import (
 	"errors"
+	"fmt"
+	"net/http"
 	"strings"
 )
 
@@ -42,7 +44,9 @@ func (app *App) initAdminActions() {
 }
 
 func (app *App) initAdminNotFoundAction() {
-	app.adminController.get(app.getAdminURL("*"), render404)
+	app.adminController.get(app.getAdminURL("*"), func(request *Request) {
+		renderErrorPage(request, 404)
+	})
 }
 
 func (app App) getAdminURL(suffix string) string {
@@ -59,33 +63,41 @@ func (app *App) JavascriptPath(url string) *App {
 	return app
 }
 
-func render403(request *Request) {
-	title := messages.Get(request.Locale(), "admin_403")
-	header := BoxHeader{
-		Name: title,
+func renderErrorPage(request *Request, httpCode int) {
+	name := messages.Get(request.Locale(), fmt.Sprintf("admin_%d", httpCode))
+
+	if name == "" {
+		name = http.StatusText(httpCode)
 	}
-	renderPage(request, page{
-		Name:         title,
-		PageTemplate: "admin_message",
-		PageData: map[string]interface{}{
-			"box_header": header,
-		},
-		HTTPCode: 403,
+
+	pageData := createPageData(request)
+	pageData.Messages = append(pageData.Messages, pageMessage{
+		Name: name,
 	})
+	pageData.Name = name
+	pageData.HTTPCode = httpCode
+	pageData.renderPage(request)
+}
+
+/*func render403(request *Request) {
+	name := messages.Get(request.Locale(), "admin_403")
+	pageData := createPageData(request)
+	pageData.Messages = append(pageData.Messages, pageMessage{
+		Name: name,
+	})
+	pageData.Name = name
+	pageData.HTTPCode = 403
+	pageData.renderPage(request)
 }
 
 func render404(request *Request) {
-	title := messages.Get(request.Locale(), "admin_404")
-	header := BoxHeader{
-		Name: title,
-	}
-
-	renderPage(request, page{
-		Name:         title,
-		PageTemplate: "admin_message",
-		PageData: map[string]interface{}{
-			"box_header": header,
-		},
-		HTTPCode: 404,
+	name := messages.Get(request.Locale(), "admin_404")
+	pageData := createPageData(request)
+	pageData.Messages = append(pageData.Messages, pageMessage{
+		Name: name,
 	})
-}
+	pageData.Name = name
+	pageData.HTTPCode = 404
+	pageData.renderPage(request)
+
+}*/

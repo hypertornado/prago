@@ -74,30 +74,30 @@ func (c *controller) callArounds(p *Request, i int, finalFunc func(), down bool)
 	}
 }
 
-func (router *router) route(m method, path string, controller *controller, routeAction func(p *Request), constraints ...routerConstraint) {
-	route := newRoute(m, path, controller, routeAction, constraints)
+func (router *router) route(method string, path string, controller *controller, routeAction func(p *Request), constraints ...routerConstraint) {
+	route := newRoute(method, path, controller, routeAction, constraints)
 	router.addRoute(route)
 
 }
 
 // Get creates new route for GET request
 func (c *controller) get(path string, action func(p *Request), constraints ...routerConstraint) {
-	c.router.route(get, path, c, action, constraints...)
+	c.router.route("GET", path, c, action, constraints...)
 }
 
 // Post creates new route for POST request
 func (c *controller) post(path string, action func(p *Request), constraints ...routerConstraint) {
-	c.router.route(post, path, c, action, constraints...)
+	c.router.route("POST", path, c, action, constraints...)
 }
 
 // Put creates new route for PUT request
 func (c *controller) put(path string, action func(p *Request), constraints ...routerConstraint) {
-	c.router.route(put, path, c, action, constraints...)
+	c.router.route("PUT", path, c, action, constraints...)
 }
 
 // Delete creates new route for DELETE request
 func (c *controller) delete(path string, action func(p *Request), constraints ...routerConstraint) {
-	c.router.route(del, path, c, action, constraints...)
+	c.router.route("DELETE", path, c, action, constraints...)
 }
 
 // Get creates new route for GET request

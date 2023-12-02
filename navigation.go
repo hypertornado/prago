@@ -26,10 +26,6 @@ func (n navigation) sortByPriority() navigation {
 	return n
 }
 
-func (nav page) Logo() string {
-	return ""
-}
-
 func isTabVisible(tabs []tab, pos int) bool {
 	if tabs[pos-1].Selected {
 		return false
@@ -43,14 +39,14 @@ func isTabVisible(tabs []tab, pos int) bool {
 func (resourceData *resourceData) getResourceNavigation(userData UserData, code string) navigation {
 	var tabs []tab
 	for _, v := range resourceData.actions {
-		if v.getMethod() == "GET" {
-			if userData.Authorize(v.getPermission()) {
+		if v.method == "GET" {
+			if userData.Authorize(v.permission) {
 				tabs = append(tabs, tab{
-					Icon:     v.getIcon(),
-					Name:     v.getName(userData.Locale()),
-					URL:      resourceData.getURL(v.getURLToken()),
-					Selected: trueIfEqual(code, v.getURLToken()),
-					priority: v.returnIsPriority(),
+					Icon:     v.icon,
+					Name:     v.name(userData.Locale()),
+					URL:      resourceData.getURL(v.url),
+					Selected: trueIfEqual(code, v.url),
+					priority: v.isPriority,
 				})
 			}
 		}
@@ -64,18 +60,18 @@ func (resourceData *resourceData) getResourceNavigation(userData UserData, code 
 func (resourceData *resourceData) getItemNavigation(userData UserData, item interface{}, code string) navigation {
 	var tabs []tab
 	for _, v := range resourceData.itemActions {
-		if v.getMethod() == "GET" {
-			name := v.getName(userData.Locale())
-			if v.getURLToken() == "" {
+		if v.method == "GET" {
+			name := v.name(userData.Locale())
+			if v.url == "" {
 				name = resourceData.previewer(userData, item).Name()
 			}
-			if userData.Authorize(v.getPermission()) {
+			if userData.Authorize(v.permission) {
 				tabs = append(tabs, tab{
-					Icon:     v.getIcon(),
+					Icon:     v.icon,
 					Name:     name,
-					URL:      resourceData.getItemURL(item, v.getURLToken(), userData),
-					Selected: trueIfEqual(code, v.getURLToken()),
-					priority: v.returnIsPriority(),
+					URL:      resourceData.getItemURL(item, v.url, userData),
+					Selected: trueIfEqual(code, v.url),
+					priority: v.isPriority,
 				})
 			}
 		}

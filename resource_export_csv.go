@@ -12,7 +12,7 @@ const exportCSVPageLimit = 1000
 func bindResourceExportCSV(resourceData *resourceData) {
 	resourceData.API("export.csv").Permission(resourceData.canExport).Handler(func(request *Request) {
 		if !request.Authorize(resourceData.canExport) {
-			render403(request)
+			renderErrorPage(request, 403)
 			return
 		}
 
