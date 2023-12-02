@@ -80,44 +80,28 @@ func (router *router) route(method string, path string, controller *controller, 
 
 }
 
-// Get creates new route for GET request
-func (c *controller) get(path string, action func(p *Request), constraints ...routerConstraint) {
-	c.router.route("GET", path, c, action, constraints...)
-}
-
-// Post creates new route for POST request
-func (c *controller) post(path string, action func(p *Request), constraints ...routerConstraint) {
-	c.router.route("POST", path, c, action, constraints...)
-}
-
-// Put creates new route for PUT request
-func (c *controller) put(path string, action func(p *Request), constraints ...routerConstraint) {
-	c.router.route("PUT", path, c, action, constraints...)
-}
-
-// Delete creates new route for DELETE request
-func (c *controller) delete(path string, action func(p *Request), constraints ...routerConstraint) {
-	c.router.route("DELETE", path, c, action, constraints...)
+func (c *controller) routeHandler(method, path string, action func(p *Request), constraints ...routerConstraint) {
+	c.router.route(method, path, c, action, constraints...)
 }
 
 // Get creates new route for GET request
 func (app *App) GET(path string, action func(p *Request), constraints ...routerConstraint) {
-	app.appController.get(path, action, constraints...)
+	app.appController.routeHandler("GET", path, action, constraints...)
 }
 
 // Post creates new route for POST request
 func (app *App) POST(path string, action func(p *Request), constraints ...routerConstraint) {
-	app.appController.post(path, action, constraints...)
+	app.appController.routeHandler("POST", path, action, constraints...)
 }
 
 // Put creates new route for PUT request
 func (app *App) PUT(path string, action func(p *Request), constraints ...routerConstraint) {
-	app.appController.put(path, action, constraints...)
+	app.appController.routeHandler("PUT", path, action, constraints...)
 }
 
 // Delete creates new route for DELETE request
 func (app *App) DELETE(path string, action func(p *Request), constraints ...routerConstraint) {
-	app.appController.delete(path, action, constraints...)
+	app.appController.routeHandler("DELETE", path, action, constraints...)
 }
 
 // AddBeforeAction adds action which is executed before main router action is called

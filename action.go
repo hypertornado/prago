@@ -44,7 +44,9 @@ func bindAction(action *Action) error {
 		panic(fmt.Sprintf("Permission for action '%s %s' should not be empty", action.method, url))
 	}
 
-	switch action.method {
+	controller.routeHandler(action.method, url, fn, action.constraints...)
+
+	/*switch action.method {
 	case "POST":
 		controller.post(url, fn, action.constraints...)
 	case "GET":
@@ -55,7 +57,7 @@ func bindAction(action *Action) error {
 		controller.delete(url, fn, action.constraints...)
 	default:
 		return fmt.Errorf("unknown method %s", action.method)
-	}
+	}*/
 	return nil
 }
 

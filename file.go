@@ -206,7 +206,7 @@ func (app *App) initFilesResource() {
 		}
 	})
 
-	app.mainController.get("/files/thumb/:size/:a/:b/:c/:d/:e/:name", func(request *Request) {
+	app.mainController.routeHandler("GET", "/files/thumb/:size/:a/:b/:c/:d/:e/:name", func(request *Request) {
 		uuid, name, err := getOldRedirectParams(request, app)
 		if err != nil {
 			panic(err)
@@ -233,7 +233,7 @@ func (app *App) initFilesResource() {
 		return false
 	})
 
-	app.mainController.get("/files/original/:a/:b/:c/:d/:e/:name", func(request *Request) {
+	app.mainController.routeHandler("GET", "/files/original/:a/:b/:c/:d/:e/:name", func(request *Request) {
 		uuid, name, err := getOldRedirectParams(request, app)
 		must(err)
 		request.Redirect(filesCDN.GetFileURL(uuid, name))

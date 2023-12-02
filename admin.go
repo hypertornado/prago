@@ -22,7 +22,7 @@ func (app *App) initAdminActions() {
 
 	app.Action("markdown").Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).hiddenInMenu().Template("admin_help_markdown")
 
-	app.accessController.get("/admin/logo", func(request *Request) {
+	app.accessController.routeHandler("GET", "/admin/logo", func(request *Request) {
 		if app.logo != nil {
 			if strings.HasPrefix(string(app.logo), "<svg") {
 				request.Response().Header().Add("Content-Type", "image/svg+xml")
@@ -44,7 +44,7 @@ func (app *App) initAdminActions() {
 }
 
 func (app *App) initAdminNotFoundAction() {
-	app.adminController.get(app.getAdminURL("*"), func(request *Request) {
+	app.adminController.routeHandler("GET", app.getAdminURL("*"), func(request *Request) {
 		renderErrorPage(request, 404)
 	})
 }

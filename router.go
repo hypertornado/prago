@@ -7,16 +7,6 @@ import (
 	"strings"
 )
 
-type method int
-
-const (
-	get method = iota
-	head
-	post
-	put
-	del
-)
-
 type router struct {
 	priorityRoutes []*route
 	routes         []*route

@@ -78,10 +78,10 @@ func (app *App) bindAPIs() {
 	controller := app.adminController
 
 	//TODO: support ANY
-	controller.get(app.getAdminURL("api/*"), renderAPINotFound)
-	controller.post(app.getAdminURL("api/*"), renderAPINotFound)
-	controller.delete(app.getAdminURL("api/*"), renderAPINotFound)
-	controller.put(app.getAdminURL("api/*"), renderAPINotFound)
+	controller.routeHandler("GET", app.getAdminURL("api/*"), renderAPINotFound)
+	controller.routeHandler("POST", app.getAdminURL("api/*"), renderAPINotFound)
+	controller.routeHandler("DELETE", app.getAdminURL("api/*"), renderAPINotFound)
+	controller.routeHandler("PUT", app.getAdminURL("api/*"), renderAPINotFound)
 }
 
 func (api *API) bindAPI() error {
@@ -122,21 +122,11 @@ func (api *API) bindAPI() error {
 	}
 
 	if api.permission == "" {
-		panic(fmt.Sprintf("Permission for api '%s %s' should not be empty", api.method, url))
+		return fmt.Errorf("Permission for api '%s %s' should not be empty", api.method, url)
 	}
 
-	switch api.method {
-	case "POST":
-		controller.post(url, fn)
-	case "GET":
-		controller.get(url, fn)
-	case "PUT":
-		controller.put(url, fn)
-	case "DELETE":
-		controller.delete(url, fn)
-	default:
-		return fmt.Errorf("unknown method %s", api.method)
-	}
+	controller.routeHandler(api.method, url, fn)
+
 	return nil
 }
 
