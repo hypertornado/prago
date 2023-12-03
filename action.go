@@ -14,14 +14,14 @@ type buttonData struct {
 
 // Action represents action
 type Action struct {
-	name          func(string) string
-	icon          string
-	permission    Permission
-	method        string
-	url           string
-	handler       func(*Request)
-	template      string
-	dataSource    func(*Request) interface{}
+	name       func(string) string
+	icon       string
+	permission Permission
+	method     string
+	url        string
+	handler    func(*Request)
+	//template      string
+	//dataSource    func(*Request) interface{}
 	constraints   []routerConstraint
 	parentBoard   *Board
 	isPartOfBoard *Board
@@ -38,26 +38,11 @@ func bindAction(action *Action) error {
 	url := action.getURL()
 	controller := action.getController()
 
-	var fn = action.getActionHandler()
-
 	if action.permission == "" {
 		panic(fmt.Sprintf("Permission for action '%s %s' should not be empty", action.method, url))
 	}
 
-	controller.routeHandler(action.method, url, fn, action.constraints...)
-
-	/*switch action.method {
-	case "POST":
-		controller.post(url, fn, action.constraints...)
-	case "GET":
-		controller.get(url, fn, action.constraints...)
-	case "PUT":
-		controller.put(url, fn, action.constraints...)
-	case "DELETE":
-		controller.delete(url, fn, action.constraints...)
-	default:
-		return fmt.Errorf("unknown method %s", action.method)
-	}*/
+	controller.routeHandler(action.method, url, action.handler, action.constraints...)
 	return nil
 }
 
@@ -135,7 +120,7 @@ func (action *Action) Permission(permission Permission) *Action {
 
 // Method sets action method (GET, POST, PUT or DELETE)
 func (action *Action) Method(method string) *Action {
-	if method != "GET" && method != "POST" && method != "PUT" && method != "DELETE" {
+	if !isHTTPMethodValid(method) {
 		panic("unsupported method for action: " + method)
 	}
 	action.method = method
@@ -147,25 +132,13 @@ func (action *Action) priority() *Action {
 	return action
 }
 
-// Handler sets action handler
-func (action *Action) Handler(handler func(*Request)) *Action {
-	if action.template != "" {
-		panic("can't set both action handler and template")
-	}
-	if action.dataSource != nil {
-		panic("can't set both action handler and dataSource")
-	}
-	action.handler = handler
-	return action
-}
-
 func (action *Action) Icon(icon string) *Action {
 	action.icon = icon
 	return action
 }
 
 // Template sets action template
-func (action *Action) Template(template string) *Action {
+/*func (action *Action) Template(template string) *Action {
 	if action.handler != nil {
 		panic("can't set both action handler and template")
 	}
@@ -180,7 +153,7 @@ func (action *Action) DataSource(dataSource func(*Request) interface{}) *Action 
 	}
 	action.dataSource = dataSource
 	return action
-}
+}*/
 
 func (action *Action) Board(board *Board) *Action {
 	action.parentBoard = board
@@ -284,7 +257,37 @@ func (action *Action) getController() *controller {
 	}
 }
 
-func (action *Action) getActionHandler() func(*Request) {
+func (action *Action) View(template string, dataSource func(*Request) any) *Action {
+	return action.ui(func(request *Request, pd *pageData) {
+		pd.PageTemplate = template
+		if dataSource != nil {
+			pd.PageData = dataSource(request)
+		}
+	})
+
+}
+
+func (action *Action) ui(uiHandler func(*Request, *pageData)) *Action {
+	return action.Handler(func(request *Request) {
+		pageData := createPageData(request)
+		pageData.Navigation = action.getnavigation(request)
+		uiHandler(request, pageData)
+		pageData.renderPage(request)
+	})
+}
+
+func (action *Action) Handler(handler func(*Request)) *Action {
+	action.handler = func(request *Request) {
+		if !request.Authorize(action.permission) {
+			renderErrorPage(request, 403)
+			return
+		}
+		handler(request)
+	}
+	return action
+}
+
+/*func (action *Action) getActionHandler() func(*Request) {
 	return func(request *Request) {
 		if !request.Authorize(action.permission) {
 			renderErrorPage(request, 403)
@@ -305,4 +308,4 @@ func (action *Action) getActionHandler() func(*Request) {
 			pageData.renderPage(request)
 		}
 	}
-}
+}*/

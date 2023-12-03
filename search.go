@@ -61,7 +61,7 @@ func (app *App) initSearch() {
 		},
 	)
 
-	app.Action("_search").Permission(loggedPermission).Name(unlocalized("Vyhledávání")).Template("admin_search").hiddenInMenu().DataSource(
+	app.Action("_search").Permission(loggedPermission).Name(unlocalized("Vyhledávání")).hiddenInMenu().View("admin_search",
 		func(request *Request) interface{} {
 			q := request.Param("q")
 			pageStr := request.Param("page")

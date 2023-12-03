@@ -16,17 +16,18 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 	}
 
 	resourceData.action("").Icon(icon).priority().
-		Permission(resourceData.canView).Name(resourceData.pluralName).Template("board").DataSource(func(request *Request) any {
+		Permission(resourceData.canView).Name(resourceData.pluralName).View("board", func(request *Request) any {
 		return resourceData.resourceBoard.boardView(request)
 	})
 
-	resourceData.action("list").Icon(iconTable).priority().Permission(resourceData.canView).Name(messages.GetNameFunction("admin_list")).Template("admin_list").DataSource(
-		func(request *Request) interface{} {
-			listData, err := resourceData.getListHeader(request)
-			must(err)
-			return listData
-		},
-	)
+	resourceData.action("list").Icon(iconTable).priority().Permission(resourceData.canView).Name(messages.GetNameFunction("admin_list")).
+		View("admin_list",
+			func(request *Request) interface{} {
+				listData, err := resourceData.getListHeader(request)
+				must(err)
+				return listData
+			},
+		)
 
 	resourceData.FormAction("new").Icon(iconAdd).priority().Permission(resourceData.canCreate).Name(messages.GetNameFunction("admin_new")).Form(
 		func(form *Form, request *Request) {
@@ -58,7 +59,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		}
 	})
 
-	resourceData.ItemAction("").Icon("glyphicons-basic-588-book-open-text.svg").priority().Template("admin_views").Permission(resourceData.canView).DataSource(
+	resourceData.ItemAction("").Icon("glyphicons-basic-588-book-open-text.svg").priority().Permission(resourceData.canView).View("admin_views",
 		func(item any, request *Request) interface{} {
 			if item == nil {
 				renderErrorPage(request, 404)

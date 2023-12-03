@@ -137,11 +137,16 @@ func matcherStarMiddle(route string) pathMatcherFn {
 }
 
 func isHTTPMethodValid(method string) bool {
-	if method == "GET" ||
+	if method == "ANY" ||
+		method == "GET" ||
 		method == "HEAD" ||
 		method == "POST" ||
 		method == "PUT" ||
-		method == "DELETE" {
+		method == "DELETE" ||
+		method == "CONNECT" ||
+		method == "OPTIONS" ||
+		method == "TRACE" ||
+		method == "PATCH" {
 		return true
 	}
 	return false
@@ -194,6 +199,9 @@ func (r *route) match(ctx context.Context, method, path string) (url.Values, boo
 }
 
 func methodMatch(m1, m2 string) bool {
+	if m1 == "ANY" {
+		return true
+	}
 	if len(m1) > 0 && m1 != m2 {
 		return false
 	}

@@ -50,10 +50,11 @@ func newBoard(app *App, url string) *Board {
 		action: app.Action(url),
 	}
 	ret.action.isPartOfBoard = ret
-	ret.action.template = "board"
-	ret.action.dataSource = func(request *Request) interface{} {
+
+	ret.action.View("board", func(request *Request) any {
 		return ret.boardView(request)
-	}
+	})
+
 	ret.action.permission = loggedPermission
 	ret.MainDashboard = &Dashboard{
 		name:  unlocalized(""),

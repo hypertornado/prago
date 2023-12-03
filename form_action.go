@@ -12,11 +12,11 @@ type FormAction struct {
 
 func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *FormAction {
 	ret := &FormAction{
-		actionForm:       newAction(app, url).Template("admin_form"),
+		actionForm:       newAction(app, url),
 		actionValidation: newAction(app, url).Method("POST"),
 	}
 
-	ret.actionForm.DataSource(func(request *Request) interface{} {
+	ret.actionForm.View("admin_form", func(request *Request) interface{} {
 		if ret.formGenerator == nil {
 			panic("No form set for this FormAction")
 		}

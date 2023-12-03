@@ -58,16 +58,6 @@ func (actionData *resourceItemActionData) Icon(icon string) *resourceItemActionD
 	return actionData
 }
 
-func (action *ResourceItemAction[T]) Template(template string) *ResourceItemAction[T] {
-	action.data.Template(template)
-	return action
-}
-
-func (actionData *resourceItemActionData) Template(template string) *resourceItemActionData {
-	actionData.action.Template(template)
-	return actionData
-}
-
 func (action *ResourceItemAction[T]) Permission(permission Permission) *ResourceItemAction[T] {
 	action.data.Permission(permission)
 	return action
@@ -78,15 +68,15 @@ func (actionData *resourceItemActionData) Permission(permission Permission) *res
 	return actionData
 }
 
-func (action *ResourceItemAction[T]) DataSource(dataSource func(*T, *Request) interface{}) *ResourceItemAction[T] {
-	action.data.DataSource(func(t any, r *Request) interface{} {
+func (action *ResourceItemAction[T]) View(template string, dataSource func(*T, *Request) interface{}) *ResourceItemAction[T] {
+	action.data.View(template, func(t any, r *Request) interface{} {
 		return dataSource(t.(*T), r)
 	})
 	return action
 }
 
-func (actionData *resourceItemActionData) DataSource(dataSource func(any, *Request) interface{}) *resourceItemActionData {
-	actionData.action.DataSource(func(request *Request) interface{} {
+func (actionData *resourceItemActionData) View(template string, dataSource func(any, *Request) interface{}) *resourceItemActionData {
+	actionData.action.View(template, func(request *Request) interface{} {
 		item := actionData.resourceData.query(request.r.Context()).ID(request.Param("id"))
 		if item == nil {
 			panic("can't find item")

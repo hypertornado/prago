@@ -36,7 +36,9 @@
                 {{range $message := .Messages}}
                     <h1 class="admin_message">{{$message.Name}}</h1>
                 {{end}}
-                {{tmpl .PageTemplate .PageData}}
+                {{if .PageTemplate}}
+                    {{tmpl .PageTemplate .PageData}}
+                {{end}}
             </div>
         </div>
     </div>

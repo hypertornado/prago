@@ -70,19 +70,20 @@ func (app *App) initIcons() {
 		request.Response().Write(data)
 	})
 
-	app.Action("help/icons").Name(unlocalized("Ikony")).Permission(loggedPermission).hiddenInMenu().Template("admin_help_icons").DataSource(func(r *Request) interface{} {
-		prefix := app.iconsPrefix
-		prefix = strings.TrimRight(prefix, "/")
+	app.Action("help/icons").Name(unlocalized("Ikony")).Permission(loggedPermission).hiddenInMenu().View("admin_help_icons",
+		func(request *Request) interface{} {
+			prefix := app.iconsPrefix
+			prefix = strings.TrimRight(prefix, "/")
 
-		icons, err := app.iconsFS.ReadDir(prefix)
-		must(err)
+			icons, err := app.iconsFS.ReadDir(prefix)
+			must(err)
 
-		var ret []string
+			var ret []string
 
-		for _, v := range icons {
-			ret = append(ret, v.Name())
-		}
-		return ret
-	})
+			for _, v := range icons {
+				ret = append(ret, v.Name())
+			}
+			return ret
+		})
 
 }

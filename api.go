@@ -3,7 +3,6 @@ package prago
 import (
 	"errors"
 	"fmt"
-	"strings"
 )
 
 type API struct {
@@ -43,9 +42,8 @@ func (resourceData *resourceData) API(url string) *API {
 }
 
 func (api *API) Method(method string) *API {
-	method = strings.ToUpper(method)
-	if method != "GET" && method != "POST" && method != "PUT" && method != "DELETE" {
-		panic("unsupported method for action: " + method)
+	if !isHTTPMethodValid(method) {
+		panic("unsupported method for API action: " + method)
 	}
 	api.method = method
 	return api
@@ -76,12 +74,7 @@ func (app *App) bindAPIs() {
 	}
 
 	controller := app.adminController
-
-	//TODO: support ANY
-	controller.routeHandler("GET", app.getAdminURL("api/*"), renderAPINotFound)
-	controller.routeHandler("POST", app.getAdminURL("api/*"), renderAPINotFound)
-	controller.routeHandler("DELETE", app.getAdminURL("api/*"), renderAPINotFound)
-	controller.routeHandler("PUT", app.getAdminURL("api/*"), renderAPINotFound)
+	controller.routeHandler("ANY", app.getAdminURL("api/*"), renderAPINotFound)
 }
 
 func (api *API) bindAPI() error {

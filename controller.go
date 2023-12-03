@@ -85,23 +85,8 @@ func (c *controller) routeHandler(method, path string, action func(p *Request), 
 }
 
 // Get creates new route for GET request
-func (app *App) GET(path string, action func(p *Request), constraints ...routerConstraint) {
-	app.appController.routeHandler("GET", path, action, constraints...)
-}
-
-// Post creates new route for POST request
-func (app *App) POST(path string, action func(p *Request), constraints ...routerConstraint) {
-	app.appController.routeHandler("POST", path, action, constraints...)
-}
-
-// Put creates new route for PUT request
-func (app *App) PUT(path string, action func(p *Request), constraints ...routerConstraint) {
-	app.appController.routeHandler("PUT", path, action, constraints...)
-}
-
-// Delete creates new route for DELETE request
-func (app *App) DELETE(path string, action func(p *Request), constraints ...routerConstraint) {
-	app.appController.routeHandler("DELETE", path, action, constraints...)
+func (app *App) Handle(method, path string, action func(p *Request), constraints ...routerConstraint) {
+	app.appController.routeHandler(method, path, action, constraints...)
 }
 
 // AddBeforeAction adds action which is executed before main router action is called
