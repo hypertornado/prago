@@ -108,7 +108,7 @@ func (app *App) initUserResource() {
 
 func (app *App) GetCachedUserEmail(_ context.Context, id int64) string {
 	return <-Cached(app, fmt.Sprintf("cached-user-email-%d", id), func(ctx context.Context) string {
-		user := app.UsersResource.Query(context.Background()).ID(id)
+		user := Query[user](app).ID(id)
 		if user == nil {
 			return ""
 		}

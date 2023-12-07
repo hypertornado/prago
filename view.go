@@ -9,14 +9,14 @@ import (
 )
 
 type view struct {
-	Icon         string
-	Name         string
-	Subname      string
-	Navigation   []viewButton
-	Header       *BoxHeader
-	Items        []viewField
-	Relation     *viewRelation
-	QuickActions []QuickActionView
+	Icon       string
+	Name       string
+	Subname    string
+	Navigation []viewButton
+	Header     *BoxHeader
+	Items      []viewField
+	Relation   *viewRelation
+	//QuickActions []QuickActionView
 }
 
 type viewField struct {
@@ -40,8 +40,8 @@ func (resourceData *resourceData) getViews(ctx context.Context, item any, reques
 
 func (resourceData *resourceData) getBasicView(ctx context.Context, int64, item any, request *Request) view {
 	ret := view{
-		QuickActions: resourceData.getQuickActionViews(item, request),
-		Header:       &BoxHeader{},
+		//QuickActions: resourceData.getQuickActionViews(item, request),
+		Header: &BoxHeader{},
 	}
 
 	tableIcon := resourceData.icon
@@ -97,37 +97,6 @@ func (resourceData *resourceData) getBasicView(ctx context.Context, int64, item 
 			},
 		)
 	}
-
-	/*historyView := resourceData.app.getHistory(resourceData, int64(id))
-
-	if len(historyView.Items) > 0 {
-		ret.Items = append(
-			ret.Items,
-			viewField{
-				Icon:     "glyphicons-basic-58-history.svg",
-				Name:     messages.Get(user.Locale, "admin_history_last"),
-				Template: "admin_item_view_url",
-				Value: [2]string{
-					historyView.Items[0].UserURL,
-					historyView.Items[0].UserName,
-				},
-			},
-		)
-
-		ret.Items = append(
-			ret.Items,
-			viewField{
-				Icon:     "glyphicons-basic-58-history.svg",
-				Name:     messages.Get(user.Locale, "admin_history_count"),
-				Template: "admin_item_view_url",
-				Value: [2]string{
-					resourceData.getURL(fmt.Sprintf("%d/history", id)),
-					fmt.Sprintf("%d", len(historyView.Items)),
-				},
-			},
-		)
-
-	}*/
 
 	return ret
 }

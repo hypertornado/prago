@@ -73,7 +73,7 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatal("should be positive")
 	}
 
-	item2 := resource.Query(context.Background()).ID(item.ID)
+	item2 := Query[ResourceStruct](resource.data.app).ID(item.ID)
 	if item2 == nil {
 		t.Fatal("should not be nil")
 	}
@@ -81,17 +81,17 @@ func TestBasicResource2(t *testing.T) {
 	resource.Create(context.Background(), &ResourceStruct{Name: "C"})
 	resource.Create(context.Background(), &ResourceStruct{Name: "B"})
 
-	list := resource.Query(context.Background()).List()
+	list := Query[ResourceStruct](resource.data.app).List()
 	if len(list) != 3 {
 		t.Fatalf("wrong length %d", len(list))
 	}
 
-	first := resource.Query(context.Background()).Is("id", item.ID).First()
+	first := Query[ResourceStruct](resource.data.app).Is("id", item.ID).First()
 	if first.Name != "A" {
 		t.Fatal("wrong name")
 	}
 
-	if resource.Query(context.Background()).Is("id", item.ID).First().Name != "A" {
+	if Query[ResourceStruct](resource.data.app).Is("id", item.ID).First().Name != "A" {
 		t.Fatal("wrong name")
 	}
 
@@ -102,16 +102,16 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if resource.Query(context.Background()).Is("id", item.ID).First().Name != "changed" {
+	if Query[ResourceStruct](resource.data.app).Is("id", item.ID).First().Name != "changed" {
 		t.Fatal("wrong name")
 	}
 
-	first = resource.Query(context.Background()).Is("name", "B").First()
+	first = Query[ResourceStruct](resource.data.app).Is("name", "B").First()
 	if first.Name != "B" {
 		t.Fatal("wrong name")
 	}
 
-	count, _ := resource.Query(context.Background()).Count()
+	count, _ := Query[ResourceStruct](resource.data.app).Count()
 	if count != 3 {
 		t.Fatalf("wrong count %d", count)
 	}
@@ -121,7 +121,7 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	count, _ = resource.Query(context.Background()).Count()
+	count, _ = Query[ResourceStruct](resource.data.app).Count()
 	if count != 2 {
 		t.Fatalf("wrong count %d", count)
 	}
@@ -138,12 +138,12 @@ func TestQuery(t *testing.T) {
 	resource.Create(context.Background(), &ResourceStruct{Name: "C"})
 	resource.Create(context.Background(), &ResourceStruct{Name: "B"})
 
-	item := resource.Query(context.Background()).Where("id = ?", 2).First()
+	item := Query[ResourceStruct](resource.data.app).Where("id = ?", 2).First()
 	if item.Name != "C" {
 		t.Fatal(item.Name)
 	}
 
-	createdItem := resource.Query(context.Background()).Where("id = ?", 2).First()
+	createdItem := Query[ResourceStruct](resource.data.app).Where("id = ?", 2).First()
 	if createdItem == nil {
 		t.Fatal("should not be nil")
 	}
@@ -151,12 +151,12 @@ func TestQuery(t *testing.T) {
 		t.Fatal(createdItem.Name)
 	}
 
-	item = resource.Query(context.Background()).Where("id=?", 2).First()
+	item = Query[ResourceStruct](resource.data.app).Where("id=?", 2).First()
 	if item.Name != "C" {
 		t.Fatal(item.Name)
 	}
 
-	item = resource.Query(context.Background()).First()
+	item = Query[ResourceStruct](resource.data.app).First()
 	if item.Name != "A" {
 		t.Fatal(item.Name)
 	}
@@ -166,7 +166,7 @@ func TestQuery(t *testing.T) {
 	}
 
 	var list []*ResourceStruct
-	list = resource.Query(context.Background()).List()
+	list = Query[ResourceStruct](resource.data.app).List()
 	if len(list) != 3 {
 		t.Fatal(len(list))
 	}
@@ -175,7 +175,7 @@ func TestQuery(t *testing.T) {
 		t.Fatal(list[2].Name)
 	}
 
-	count, err := resource.Query(context.Background()).Count()
+	count, err := Query[ResourceStruct](resource.data.app).Count()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -183,7 +183,7 @@ func TestQuery(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	list = resource.Query(context.Background()).Limit(1).Offset(1).Limit(1).List()
+	list = Query[ResourceStruct](resource.data.app).Limit(1).Offset(1).Limit(1).List()
 	if len(list) != 1 {
 		t.Fatal(len(list))
 	}
@@ -196,7 +196,7 @@ func TestQuery(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	count, _ = resource.Query(context.Background()).Count()
+	count, _ = Query[ResourceStruct](resource.data.app).Count()
 	if count != 2 {
 		t.Fatal(count)
 	}
@@ -211,7 +211,7 @@ func TestResource(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	count, err := resource.Query(context.Background()).Count()
+	count, err := Query[ResourceStruct](resource.data.app).Count()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -225,7 +225,7 @@ func TestResource(t *testing.T) {
 	}
 	resource.Create(context.Background(), &ResourceStruct{Name: "Second", Showing: "show"})
 
-	count, err = resource.Query(context.Background()).Count()
+	count, err = Query[ResourceStruct](resource.data.app).Count()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -259,7 +259,7 @@ func TestResourceUnique(t *testing.T) {
 	resource.Create(context.Background(), &ResourceStructUnique{UniqueName: "B"})
 	resource.Create(context.Background(), &ResourceStructUnique{UniqueName: "A"})
 
-	count, err := resource.Query(context.Background()).Count()
+	count, err := Query[ResourceStruct](resource.data.app).Count()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -275,7 +275,7 @@ func TestResourceDate(t *testing.T) {
 
 	resource.Create(context.Background(), &ResourceStruct{Date: tm})
 
-	first := resource.Query(context.Background()).Is("date", tm.Format("2006-01-02")).First()
+	first := Query[ResourceStruct](resource.data.app).Is("date", tm.Format("2006-01-02")).First()
 	if first == nil {
 		t.Fatal("should not be nil")
 	}
@@ -288,7 +288,7 @@ func TestResourceTimestamps(t *testing.T) {
 
 	resource.Create(context.Background(), &ResourceStruct{Name: "A"})
 
-	item := resource.Query(context.Background()).Is("id", 1).First()
+	item := Query[ResourceStruct](resource.data.app).Is("id", 1).First()
 
 	if item.UpdatedAt.Before(testStartTime) || time.Now().Before(item.UpdatedAt) {
 		t.Fatal(item.UpdatedAt)
@@ -305,12 +305,12 @@ func TestResourceBool(t *testing.T) {
 	resource.Create(context.Background(), &ResourceStruct{Name: "A", IsSomething: false})
 	resource.Create(context.Background(), &ResourceStruct{Name: "B", IsSomething: true})
 
-	trueItem := resource.Query(context.Background()).Is("issomething", true).First()
+	trueItem := Query[ResourceStruct](resource.data.app).Is("issomething", true).First()
 	if trueItem.Name != "B" {
 		t.Fatal(trueItem.Name)
 	}
 
-	falseItem := resource.Query(context.Background()).Is("issomething", false).First()
+	falseItem := Query[ResourceStruct](resource.data.app).Is("issomething", false).First()
 	if falseItem.Name != "A" {
 		t.Fatal(trueItem.Name)
 	}
@@ -320,7 +320,7 @@ func TestResourceCreateWithID(t *testing.T) {
 	resource := prepareResource()
 	resource.Create(context.Background(), &ResourceStruct{ID: 85, Name: "A"})
 
-	item := resource.Query(context.Background()).First()
+	item := Query[ResourceStruct](resource.data.app).First()
 	id := item.ID
 	if id != 85 {
 		t.Fatal(id)
@@ -370,7 +370,7 @@ func TestReplace(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if resource.Query(context.Background()).Is("id", id).First() == nil {
+	if Query[ResourceStruct](resource.data.app).Is("id", id).First() == nil {
 		t.Fatal("should not be nil")
 	}
 	item.Name = "B"
@@ -379,12 +379,12 @@ func TestReplace(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	count, _ := resource.Query(context.Background()).Count()
+	count, _ := Query[ResourceStruct](resource.data.app).Count()
 	if count != 1 {
 		t.Fatal(count)
 	}
 
-	modified := resource.Query(context.Background()).Is("id", id).First()
+	modified := Query[ResourceStruct](resource.data.app).Is("id", id).First()
 	if modified.Name != "B" {
 		t.Fatal(modified.Name)
 	}
@@ -402,7 +402,7 @@ func FuzzCreateItem(f *testing.F) {
 		if err != nil {
 			return
 		}
-		item2 := resource.Query(context.Background()).Is("id", item.ID).First()
+		item2 := Query[ResourceStruct](resource.data.app).Is("id", item.ID).First()
 		if item2 == nil {
 			t.Fatal("item2 is nil")
 		}
@@ -424,7 +424,7 @@ func TestLongSaveText(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	item := res.Query(context.Background()).Is("id", newItem.ID).First()
+	item := Query[ResourceStruct](res.data.app).Is("id", newItem.ID).First()
 
 	if !strings.HasPrefix(item.Text, "some") {
 		t.Fatal(item.Text)

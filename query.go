@@ -2,18 +2,24 @@ package prago
 
 import "context"
 
-type Query[T any] struct {
+type QueryData[T any] struct {
 	listQuery *listQuery
 }
 
-func (resource *Resource[T]) Query(ctx context.Context) *Query[T] {
-	ret := &Query[T]{
-		listQuery: resource.data.query(ctx),
+func Query[T any](app *App) *QueryData[T] {
+	res := GetResource[T](app)
+	ret := &QueryData[T]{
+		listQuery: res.data.query(context.Background()),
 	}
 	return ret
 }
 
-func (q *Query[T]) ID(id any) *T {
+func (q *QueryData[T]) Context(ctx context.Context) *QueryData[T] {
+	q.listQuery.context = ctx
+	return q
+}
+
+func (q *QueryData[T]) ID(id any) *T {
 	ret := q.listQuery.ID(id)
 	if ret == nil {
 		return nil
@@ -21,42 +27,42 @@ func (q *Query[T]) ID(id any) *T {
 	return ret.(*T)
 }
 
-func (q *Query[T]) Is(name string, value interface{}) *Query[T] {
+func (q *QueryData[T]) Is(name string, value interface{}) *QueryData[T] {
 	q.listQuery.Is(name, value)
 	return q
 }
 
-func (q *Query[T]) Where(condition string, values ...interface{}) *Query[T] {
+func (q *QueryData[T]) Where(condition string, values ...interface{}) *QueryData[T] {
 	q.listQuery.where(condition, values...)
 	return q
 }
 
-func (q *Query[T]) Limit(limit int64) *Query[T] {
+func (q *QueryData[T]) Limit(limit int64) *QueryData[T] {
 	q.listQuery.Limit(limit)
 	return q
 }
 
-func (q *Query[T]) Offset(offset int64) *Query[T] {
+func (q *QueryData[T]) Offset(offset int64) *QueryData[T] {
 	q.listQuery.Offset(offset)
 	return q
 }
 
-func (q *Query[T]) Debug() *Query[T] {
+func (q *QueryData[T]) Debug() *QueryData[T] {
 	q.listQuery.isDebug = true
 	return q
 }
 
-func (q *Query[T]) Order(order string) *Query[T] {
+func (q *QueryData[T]) Order(order string) *QueryData[T] {
 	q.listQuery.addOrder(order, false)
 	return q
 }
 
-func (q *Query[T]) OrderDesc(order string) *Query[T] {
+func (q *QueryData[T]) OrderDesc(order string) *QueryData[T] {
 	q.listQuery.addOrder(order, true)
 	return q
 }
 
-func (q *Query[T]) List() []*T {
+func (q *QueryData[T]) List() []*T {
 	items, err := q.listQuery.list()
 	if err != nil {
 		panic(err)
@@ -64,7 +70,7 @@ func (q *Query[T]) List() []*T {
 	return items.([]*T)
 }
 
-func (q *Query[T]) First() *T {
+func (q *QueryData[T]) First() *T {
 	ret, ok := q.listQuery.First().(*T)
 	if !ok {
 		return nil
@@ -72,6 +78,6 @@ func (q *Query[T]) First() *T {
 	return ret
 }
 
-func (q *Query[T]) Count() (int64, error) {
+func (q *QueryData[T]) Count() (int64, error) {
 	return q.listQuery.count()
 }

@@ -29,7 +29,7 @@ func (resourceData *resourceData) getMultipleActions(userData UserData) (ret []l
 		})
 	}
 
-	ret = append(ret, resourceData.getMultipleActionsFromQuickActions(userData)...)
+	//ret = append(ret, resourceData.getMultipleActionsFromQuickActions(userData)...)
 
 	if userData.Authorize(resourceData.canDelete) {
 		ret = append(ret, listMultipleAction{

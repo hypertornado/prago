@@ -393,9 +393,6 @@ pre {
   }
 }
 @media (max-width: 1100px) {
-  /*.root {
-    flex-direction: column-reverse;
-  }*/
   .root_header {
     border-top: 1px solid #eee;
     background: white;
@@ -844,6 +841,7 @@ select.admin_timestamp_minute {
 
 .help_icon_img {
   width: 50px;
+  height: 50px;
   margin-right: 5px;
   flex-shrink: 0;
 }
@@ -2148,9 +2146,6 @@ a.search_pagination_page-selected {
     margin: 10px;
   }
 }
-/*.searchbox:focus-within .searchbox_suggestions {
-  display: block;
-}*/
 .searchbox_input {
   padding: 0px 10px;
   font-weight: 500;

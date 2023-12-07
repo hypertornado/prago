@@ -442,12 +442,6 @@ func (field *Field) initFieldType() {
 		ret.formHideLabel = true
 	}
 
-	/*if ret.listCellDataSource == nil {
-		ret.listCellDataSource = ret.viewDataSource
-	}
-	if ret.listCellTemplate == "" {
-		ret.listCellTemplate = ret.viewTemplate
-	}*/
 	field.fieldType = ret
 }
 

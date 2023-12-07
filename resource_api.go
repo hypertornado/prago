@@ -54,13 +54,6 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 					for _, v2 := range v1.Items {
 						cell := row.AddCell()
 						cell.SetValue(v2.Name)
-						/*
-							if reflect.TypeOf(v2.OriginalValue) == reflect.TypeOf(time.Now()) {
-								t := v2.OriginalValue.(time.Time)
-								cell.SetString(t.Format("2006-01-02"))
-							} else {
-								cell.SetValue(v2.OriginalValue)
-							}*/
 					}
 				}
 				file.Write(request.Response())
@@ -70,9 +63,9 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 		},
 	)
 
-	resourceData.API("quick-action").Handler(func(request *Request) {
+	/*resourceData.API("quick-action").Handler(func(request *Request) {
 		quickActionAPIHandler(resourceData, request)
-	}).Method("POST")
+	}).Method("POST")*/
 
 	resourceData.API("preview-relation/:id").Handler(
 		func(request *Request) {
@@ -252,24 +245,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 					must(err)
 				}
 			default:
-				var foundAction bool
-				for _, action := range resourceData.quickActions {
-					if action.url == actionName {
-						foundAction = true
-						if !request.Authorize(action.permission) {
-							panic("don't have access")
-						}
-						for _, id := range ids {
-							item := resourceData.query(request.r.Context()).ID(id)
-							err := action.handler(item, request)
-							must(err)
-						}
-
-					}
-				}
-				if !foundAction {
-					panic("did not find action")
-				}
+				panic("did not find action")
 			}
 		},
 	)

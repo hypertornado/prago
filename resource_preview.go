@@ -26,10 +26,6 @@ func (resourceData *resourceData) previewer(userData UserData, item any) *previe
 		return nil
 	}
 
-	/*if !resourceData.app.authorize(user, resourceData.canView) {
-		return nil
-	}*/
-
 	return &previewer{
 		userData:     userData,
 		item:         item,

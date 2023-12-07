@@ -15,6 +15,14 @@ type pageData struct {
 	PageData     interface{}
 	Menu         menu
 
+	Form  *Form
+	List  *list
+	Views []view
+
+	BoardView *BoardView
+
+	HelpIcons []string
+
 	NotificationsData string
 	JavaScripts       []string
 	HTTPCode          int

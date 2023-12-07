@@ -16,15 +16,6 @@ type BulkUpdater[T any] struct {
 	indexer esutil.BulkIndexer
 }
 
-/*func (index *Index[T]) UpdateSingleNew(item *T) error {
-	bulk, err := index.UpdateBulk()
-	if err != nil {
-		return err
-	}
-	bulk.AddItem(item)
-	return bulk.Close()
-}*/
-
 func (index *Index[T]) UpdateSingle(item *T) error {
 	id := getID(item)
 
@@ -52,12 +43,7 @@ func (index *Index[T]) UpdateBulk() (*BulkUpdater[T], error) {
 		NumWorkers:    1,
 		FlushBytes:    1000000,
 		FlushInterval: 5 * time.Second,
-
-		Index: index.indexName(),
-		//ErrorTrace: true,
-		/*OnError: func(ctx context.Context, err error) {
-			fmt.Println("error white indexing via UpdateBulk function", err)
-		},*/
+		Index:         index.indexName(),
 	})
 
 	ret := &BulkUpdater[T]{
@@ -89,9 +75,6 @@ func (updater *BulkUpdater[T]) AddItem(item *T) {
 			DocumentID: id,
 			Action:     "index",
 			Body:       strings.NewReader(string(data)),
-			/*OnFailure: func(ctx context.Context, bii esutil.BulkIndexerItem, biri esutil.BulkIndexerResponseItem, err error) {
-				panic(fmt.Sprintln("FAIL to index BulkIndexerItem:", "id:", id, "item:", string(data), "err:", err, "respItem:", biri))
-			},*/
 		},
 	)
 	if err != nil {

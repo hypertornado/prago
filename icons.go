@@ -4,6 +4,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -53,6 +54,13 @@ func (app *App) loadIcon(iconName, color string) ([]byte, error) {
 
 }
 
+func iconColorPrefix(color string) io.Reader {
+	if len(color) != 6 {
+		return strings.NewReader("<svg ")
+	}
+	return strings.NewReader(fmt.Sprintf("<svg fill=\"#%s\" ", color))
+}
+
 func (app *App) initIcons() {
 
 	app.API("icons").Permission(everybodyPermission).Method("GET").Handler(func(request *Request) {
@@ -61,17 +69,22 @@ func (app *App) initIcons() {
 			return
 		}
 
-		data, err := app.loadIcon(request.Param("file"), request.Param("color"))
-		must(err)
-
 		request.Response().Header().Add("Content-Type", "image/svg+xml")
 		request.Response().Header().Add("Cache-Control", "max-age=604800")
 
-		request.Response().Write(data)
+		file, err := app.iconsFS.Open(app.iconsPrefix + request.Param("file"))
+		must(err)
+		defer file.Close()
+
+		io.Copy(request.Response(), iconColorPrefix(request.Param("color")))
+
+		io.CopyN(io.Discard, file, 4)
+
+		io.Copy(request.Response(), file)
 	})
 
-	app.Action("help/icons").Name(unlocalized("Ikony")).Permission(loggedPermission).hiddenInMenu().View("admin_help_icons",
-		func(request *Request) interface{} {
+	app.Action("help/icons").Name(unlocalized("Ikony")).Permission(loggedPermission).hiddenInMenu().ui(
+		func(request *Request, pd *pageData) {
 			prefix := app.iconsPrefix
 			prefix = strings.TrimRight(prefix, "/")
 
@@ -79,11 +92,10 @@ func (app *App) initIcons() {
 			must(err)
 
 			var ret []string
-
 			for _, v := range icons {
 				ret = append(ret, v.Name())
 			}
-			return ret
+			pd.HelpIcons = ret
 		})
 
 }

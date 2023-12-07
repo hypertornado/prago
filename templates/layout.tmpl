@@ -36,6 +36,21 @@
                 {{range $message := .Messages}}
                     <h1 class="admin_message">{{$message.Name}}</h1>
                 {{end}}
+                {{if .Form}}
+                    {{template "admin_form" .Form}}
+                {{end}}
+                {{if .List}}
+                    {{template "admin_list" .List}}
+                {{end}}
+                {{if .Views}}
+                    {{template "admin_views" .Views}}
+                {{end}}
+                {{if .HelpIcons}}
+                    {{template "admin_help_icons" .HelpIcons}}
+                {{end}}
+                {{if .BoardView}}
+                    {{template "board" .BoardView}}
+                {{end}}
                 {{if .PageTemplate}}
                     {{tmpl .PageTemplate .PageData}}
                 {{end}}

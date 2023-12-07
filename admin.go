@@ -78,26 +78,3 @@ func renderErrorPage(request *Request, httpCode int) {
 	pageData.HTTPCode = httpCode
 	pageData.renderPage(request)
 }
-
-/*func render403(request *Request) {
-	name := messages.Get(request.Locale(), "admin_403")
-	pageData := createPageData(request)
-	pageData.Messages = append(pageData.Messages, pageMessage{
-		Name: name,
-	})
-	pageData.Name = name
-	pageData.HTTPCode = 403
-	pageData.renderPage(request)
-}
-
-func render404(request *Request) {
-	name := messages.Get(request.Locale(), "admin_404")
-	pageData := createPageData(request)
-	pageData.Messages = append(pageData.Messages, pageMessage{
-		Name: name,
-	})
-	pageData.Name = name
-	pageData.HTTPCode = 404
-	pageData.renderPage(request)
-
-}*/

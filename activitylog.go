@@ -67,7 +67,8 @@ func (app *App) getHistoryTable(request *Request, resourceData *resourceData, it
 		return ret
 	}
 
-	q := app.activityLogResource.Query(context.Background())
+	q := Query[activityLog](app)
+	//q := app.activityLogResource.Query(context.Background())
 	if resourceData != nil {
 		q.Is("ResourceName", resourceData.getID())
 	}
@@ -104,7 +105,7 @@ func (app *App) getHistoryTable(request *Request, resourceData *resourceData, it
 
 	for _, v := range items {
 		var username, userurl string
-		user := app.UsersResource.Query(context.Background()).ID(v.User)
+		user := Query[user](app).ID(v.User)
 		locale := "en"
 		if user != nil {
 			username = user.Name

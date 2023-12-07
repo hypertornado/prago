@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"sync"
 )
 
@@ -19,7 +18,7 @@ func (app *App) userDataCacheGet(id int64) *userData {
 		return ret
 	}
 
-	user := app.UsersResource.Query(context.Background()).ID(id)
+	user := Query[user](app).ID(id)
 	if user == nil {
 		return nil
 	}

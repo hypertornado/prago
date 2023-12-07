@@ -18,7 +18,7 @@ func initUserRenew(app *App) {
 		email := fixEmail(request.Param("email"))
 
 		var reason = ""
-		user := app.UsersResource.Query(ctx).Is("email", email).First()
+		user := Query[user](app).Is("email", email).First()
 		if user != nil {
 			if user.emailConfirmed() {
 				if !time.Now().AddDate(0, 0, -1).Before(user.EmailRenewedAt) {
@@ -66,7 +66,7 @@ func initUserRenew(app *App) {
 
 		errStr := messages.Get(vc.Locale(), "admin_error")
 
-		u := app.UsersResource.Query(ctx).Is("email", email).First()
+		u := Query[user](app).Is("email", email).First()
 		if u != nil {
 			if token == u.emailToken(vc.Context(), app) {
 				password := vc.GetValue("password")

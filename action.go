@@ -14,14 +14,12 @@ type buttonData struct {
 
 // Action represents action
 type Action struct {
-	name       func(string) string
-	icon       string
-	permission Permission
-	method     string
-	url        string
-	handler    func(*Request)
-	//template      string
-	//dataSource    func(*Request) interface{}
+	name          func(string) string
+	icon          string
+	permission    Permission
+	method        string
+	url           string
+	handler       func(*Request)
 	constraints   []routerConstraint
 	parentBoard   *Board
 	isPartOfBoard *Board
@@ -136,24 +134,6 @@ func (action *Action) Icon(icon string) *Action {
 	action.icon = icon
 	return action
 }
-
-// Template sets action template
-/*func (action *Action) Template(template string) *Action {
-	if action.handler != nil {
-		panic("can't set both action handler and template")
-	}
-	action.template = template
-	return action
-}
-
-// DataSource sets action data source, which is used to render template
-func (action *Action) DataSource(dataSource func(*Request) interface{}) *Action {
-	if action.handler != nil {
-		panic("can't set both action handler and dataSource")
-	}
-	action.dataSource = dataSource
-	return action
-}*/
 
 func (action *Action) Board(board *Board) *Action {
 	action.parentBoard = board
@@ -286,26 +266,3 @@ func (action *Action) Handler(handler func(*Request)) *Action {
 	}
 	return action
 }
-
-/*func (action *Action) getActionHandler() func(*Request) {
-	return func(request *Request) {
-		if !request.Authorize(action.permission) {
-			renderErrorPage(request, 403)
-			return
-		}
-		if action.handler != nil {
-			action.handler(request)
-		} else {
-			var data interface{}
-			if action.dataSource != nil {
-				data = action.dataSource(request)
-			}
-
-			pageData := createPageData(request)
-			pageData.Navigation = action.getnavigation(request)
-			pageData.PageTemplate = action.template
-			pageData.PageData = data
-			pageData.renderPage(request)
-		}
-	}
-}*/

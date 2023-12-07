@@ -53,13 +53,12 @@ func main() {
 	bindStats(app)
 	bindCDNFiles(app)
 
-	app.GET("/", func(request *prago.Request) {
+	app.Handle("GET", "/", func(request *prago.Request) {
 		out := fmt.Sprintf("Prago CDN\nhttps://www.prago-cdn.com\nversion %s\nadmin Ondřej Odcházel, https//www.odchazel.com", version)
 		http.Error(request.Response(), out, 200)
 	})
 
-	app.POST("/:project/upload/:extension", func(request *prago.Request) {
-		//defer request.Request().Body.Close()
+	app.Handle("POST", "/:project/upload/:extension", func(request *prago.Request) {
 		project := getCDNProject(request.Param("project"))
 		if project == nil {
 			panic("no project")
@@ -78,7 +77,7 @@ func main() {
 		request.WriteJSON(200, data)
 	})
 
-	app.GET("/:project/:uuid/metadata", func(request *prago.Request) {
+	app.Handle("GET", "/:project/:uuid/metadata", func(request *prago.Request) {
 		cdnFile := getCDNFile(request.Param("project"), request.Param("uuid"))
 		if cdnFile == nil {
 			render404(request)
@@ -91,7 +90,7 @@ func main() {
 		request.WriteJSON(200, metadata)
 	})
 
-	app.GET("/:project/:uuid/:format/:hash/:name", func(request *prago.Request) {
+	app.Handle("GET", "/:project/:uuid/:format/:hash/:name", func(request *prago.Request) {
 		cdnFile := getCDNFile(request.Param("project"), request.Param("uuid"))
 		if cdnFile == nil {
 			render404(request)
@@ -152,8 +151,7 @@ func main() {
 		}
 	})
 
-	app.DELETE("/:project/:uuid", func(request *prago.Request) {
-
+	app.Handle("DELETE", "/:project/:uuid", func(request *prago.Request) {
 		file := getCDNFile(request.Param("project"), request.Param("uuid"))
 
 		if file.Project().Password != request.Request().Header.Get("X-Authorization") {
@@ -311,26 +309,6 @@ func (file *CDNFile) getDataPath() string {
 		file.Checksum,
 	)
 }
-
-/*func (file *CDNFile) getFileDirectoryPathOLD() string {
-	uuid := file.UUID
-	firstPrefix := strings.ToLower(uuid[0:2])
-	secondPrefix := strings.ToLower(uuid[2:4])
-	return fmt.Sprintf("%s/files/%s/%s/%s",
-		cdnDirPath(),
-		file.Project().Name,
-		firstPrefix,
-		secondPrefix,
-	)
-}*/
-
-/*func (file *CDNFile) getFilePathOLD() string {
-	return fmt.Sprintf("%s/%s.%s",
-		file.getFileDirectoryPathOLD(),
-		file.UUID,
-		file.Suffix,
-	)
-}*/
 
 func (file *CDNFile) getCacheDirectoryPath(format string) string {
 	checksum := file.Checksum

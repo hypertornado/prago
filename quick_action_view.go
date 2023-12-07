@@ -1,11 +1,6 @@
 package prago
 
-import (
-	"errors"
-	"strconv"
-)
-
-type QuickActionView struct {
+/*type QuickActionView struct {
 	ActionURL string
 	Name      string
 	TypStr    string
@@ -16,10 +11,6 @@ type QuickActionAPIResponse struct {
 	Redirect string
 	Error    string
 }
-
-/*func (qa *QuickAction[T]) getView() *QuickActionView {
-	return nil
-}*/
 
 func (resourceData *resourceData) getQuickActionViews(itemIface any, request *Request) (ret []QuickActionView) {
 	for _, quickActionData := range resourceData.quickActions {
@@ -76,3 +67,4 @@ func (resourceData *resourceData) runQuickAction(actionName string, itemID int64
 	}
 	return errors.New("chyba akce")
 }
+*/

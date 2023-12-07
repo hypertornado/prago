@@ -2,7 +2,6 @@ package prago
 
 type navigation struct {
 	Tabs []tab
-	Wide bool
 }
 
 type tab struct {

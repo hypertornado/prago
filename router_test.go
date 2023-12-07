@@ -82,3 +82,12 @@ func TestRouterFallback(t *testing.T) {
 	}
 
 }
+
+func TestRouterAny(t *testing.T) {
+	r := newRoute("ANY", "/some", nil, nil, nil)
+	_, ok := r.match(context.Background(), "POST", "/some")
+	if ok != true {
+		t.Fatal(ok)
+	}
+
+}

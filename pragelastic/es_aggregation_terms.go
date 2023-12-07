@@ -37,11 +37,6 @@ func (a *ESTermsAggregation) Field(field string) *ESTermsAggregation {
 	return a
 }
 
-/*func (a *TermsAggregation) Script(script *Script) *TermsAggregation {
-	a.script = script
-	return a
-}*/
-
 // Missing configures the value to use when documents miss a value.
 func (a *ESTermsAggregation) Missing(missing interface{}) *ESTermsAggregation {
 	a.missing = missing

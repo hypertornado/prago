@@ -27,11 +27,6 @@ func (a *ESHistogramAggregation) Field(field string) *ESHistogramAggregation {
 	return a
 }
 
-/*func (a *HistogramAggregation) Script(script *Script) *HistogramAggregation {
-	a.script = script
-	return a
-}*/
-
 // Missing configures the value to use when documents miss a value.
 func (a *ESHistogramAggregation) Missing(missing interface{}) *ESHistogramAggregation {
 	a.missing = missing
@@ -196,16 +191,6 @@ func (a *ESHistogramAggregation) Source() (interface{}, error) {
 	if a.field != "" {
 		opts["field"] = a.field
 	}
-	/*if a.script != nil {
-		src, err := a.script.Source()
-		if err != nil {
-			return nil, err
-		}
-		opts["script"] = src
-	}
-	if a.missing != nil {
-		opts["missing"] = a.missing
-	}*/
 
 	opts["interval"] = a.interval
 	if a.order != "" {

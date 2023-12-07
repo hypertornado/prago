@@ -14,7 +14,7 @@ func TestReflectQuery(t *testing.T) {
 	resource.Create(context.Background(), &resA)
 	resource.Create(context.Background(), &resB)
 
-	item := resource.Query(context.Background()).Is("id", resB.ID).First()
+	item := Query[ResourceStruct](resource.data.app).Is("id", resB.ID).First()
 	if item == nil {
 		t.Fatal("is nil")
 	}
@@ -23,7 +23,7 @@ func TestReflectQuery(t *testing.T) {
 		t.Fatal("wrong name")
 	}
 
-	list := resource.Query(context.Background()).List()
+	list := Query[ResourceStruct](resource.data.app).List()
 	if len(list) != 2 {
 		t.Fatal("wrong length")
 	}

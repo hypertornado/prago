@@ -2485,6 +2485,9 @@ class NotificationItem {
         this.el.querySelector(".notification_name").textContent = data.Name;
         this.el.querySelector(".notification_description").textContent =
             data.Description;
+        this.el
+            .querySelector(".notification_description")
+            .setAttribute("title", data.Description);
         var left = this.el.querySelector(".notification_left");
         left.classList.remove("notification_left-visible");
         if (data.Image) {

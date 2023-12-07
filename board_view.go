@@ -81,14 +81,6 @@ func (board *Board) boardView(request *Request) *BoardView {
 
 	}
 
-	/*if board.IsMainBoard() {
-		taskData := GetTaskViewData(request)
-		if len(taskData.Tasks) > 0 {
-			ret.TasksName = messages.Get(request.Locale(), "tasks")
-			ret.Tasks = &taskData
-		}
-	}*/
-
 	return ret
 }
 
@@ -120,10 +112,5 @@ func (dashboard *Dashboard) view(request *Request) *DashboardView {
 		}
 	}
 
-	/*if len(view.Figures) > 0 || len(view.Tables) > 0 {
-		return view
-
-	}
-	return nil*/
 	return view
 }

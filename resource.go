@@ -48,7 +48,7 @@ type resourceData struct {
 
 	typ reflect.Type
 
-	quickActions []*quickActionData
+	//quickActions []*quickActionData
 
 	fields     []*Field
 	fieldMap   map[string]*Field
@@ -166,10 +166,6 @@ func (resourceData *resourceData) getID() string {
 func (resourceData *resourceData) getResourceControl() *controller {
 	return resourceData.resourceController
 }
-
-/*func (resource *Resource[T]) Is(ctx context.Context, name string, value interface{}) *Query[T] {
-	return resource.Query(ctx).Is(name, value)
-}*/
 
 func (resource *Resource[T]) Create(ctx context.Context, item *T) error {
 	return resource.data.Create(ctx, item)

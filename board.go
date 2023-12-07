@@ -30,10 +30,10 @@ func (app *App) initBoard() {
 
 	sysadminGroup := sysadminBoard.Dashboard(unlocalized("Sysadmin"))
 	sysadminGroup.Figure(unlocalized("Úpravy"), "sysadmin").Value(func(request *Request) int64 {
-		c, _ := app.activityLogResource.Query(request.r.Context()).Where("createdat >= ?", time.Now().AddDate(0, 0, -1)).Count()
+		c, _ := Query[activityLog](app).Context(request.r.Context()).Where("createdat >= ?", time.Now().AddDate(0, 0, -1)).Count()
 		return c
 	}).Unit(unlocalized("/ 24 hodin")).URL("/admin/activitylog").Compare(func(request *Request) int64 {
-		c, _ := app.activityLogResource.Query(request.r.Context()).Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, -1)).Count()
+		c, _ := Query[activityLog](app).Context(request.r.Context()).Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, -1)).Count()
 		return c
 	}, unlocalized("oproti předchozímu dni"))
 }
@@ -51,9 +51,10 @@ func newBoard(app *App, url string) *Board {
 	}
 	ret.action.isPartOfBoard = ret
 
-	ret.action.View("board", func(request *Request) any {
-		return ret.boardView(request)
-	})
+	ret.action.ui(
+		func(request *Request, pd *pageData) {
+			pd.BoardView = ret.boardView(request)
+		})
 
 	ret.action.permission = loggedPermission
 	ret.MainDashboard = &Dashboard{

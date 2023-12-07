@@ -1,8 +1,6 @@
 package prago
 
-import "fmt"
-
-type QuickAction[T any] struct {
+/*type QuickAction[T any] struct {
 	data *quickActionData
 }
 
@@ -18,10 +16,6 @@ type quickActionData struct {
 	handler    func(any, *Request) error
 }
 
-/*type quickActionIface interface {
-	getData() *quickActionData
-}*/
-
 type quickActionType int64
 
 const (
@@ -29,11 +23,9 @@ const (
 	quickTypeDelete quickActionType = 2
 	quickTypeGreen  quickActionType = 3
 	quickTypeBlue   quickActionType = 4
-)
+)*/
 
-//listMultipleAction
-
-func (resource *Resource[T]) QuickAction(url string) *QuickAction[T] {
+/*func (resource *Resource[T]) QuickAction(url string) *QuickAction[T] {
 	ret := &QuickAction[T]{
 		data: &quickActionData{
 			url:        url,
@@ -49,13 +41,11 @@ func (resource *Resource[T]) QuickAction(url string) *QuickAction[T] {
 		},
 	}
 
-	//ret := &QuickAction[T]{data}
-
 	resource.data.quickActions = append(resource.data.quickActions, ret.data)
 	return ret
-}
+}*/
 
-func (resourceData *resourceData) getMultipleActionsFromQuickActions(userData UserData) (ret []listMultipleAction) {
+/*func (resourceData *resourceData) getMultipleActionsFromQuickActions(userData UserData) (ret []listMultipleAction) {
 
 	for _, action := range resourceData.quickActions {
 		a := action.getMultipleAction(userData)
@@ -124,3 +114,4 @@ func (qa *QuickAction[T]) BlueType() *QuickAction[T] {
 	qa.data.typ = quickTypeBlue
 	return qa
 }
+*/

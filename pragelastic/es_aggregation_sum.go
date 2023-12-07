@@ -20,11 +20,6 @@ func (a *ESSumAggregation) Field(field string) *ESSumAggregation {
 	return a
 }
 
-/*func (a *SumAggregation) Script(script *Script) *SumAggregation {
-	a.script = script
-	return a
-}*/
-
 func (a *ESSumAggregation) Format(format string) *ESSumAggregation {
 	a.format = format
 	return a

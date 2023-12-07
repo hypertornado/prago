@@ -54,22 +54,11 @@ func vipsThumbnail(originalPath, outputFilePath, size string, crop bool) error {
 
 func vipsThumbnailProfile(originalPath, outputFilePath, size string, crop bool, cmyk bool) error {
 
-	//vips webpsave
-
-	//https://www.libvips.org/API/8.9/Using-vipsthumbnail.md.html
-
-	//outputParameters := "[strip]"
-	/*if extension == "jpg" {
-		outputParameters = "[optimize_coding,strip]"
-	}*/
-
 	cmdAr := []string{
 		originalPath,
 		"--rotate",
 		"-s",
 		size,
-		//"--smartcrop",
-		//"attention",
 		"-o",
 		outputFilePath + "[strip]",
 	}
@@ -78,12 +67,7 @@ func vipsThumbnailProfile(originalPath, outputFilePath, size string, crop bool, 
 		cmdAr = append(cmdAr, "-i", cdnDirPath()+"/cmyk.icm")
 	}
 
-	/*if config.Profile != "" {
-		cmdAr = append(cmdAr, "--delete", "--eprofile", config.Profile)
-	}*/
-
 	if crop {
-		//cmdAr = append(cmdAr, "-m", "attention")
 		cmdAr = append(cmdAr, "--smartcrop", "attention")
 	}
 

@@ -16,7 +16,7 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *Form
 		actionValidation: newAction(app, url).Method("POST"),
 	}
 
-	ret.actionForm.View("admin_form", func(request *Request) interface{} {
+	ret.actionForm.ui(func(request *Request, pd *pageData) {
 		if ret.formGenerator == nil {
 			panic("No form set for this FormAction")
 		}
@@ -30,7 +30,7 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *Form
 		}
 
 		ret.formGenerator(form, request)
-		return form
+		pd.Form = form
 	})
 
 	ret.actionValidation.Handler(func(request *Request) {

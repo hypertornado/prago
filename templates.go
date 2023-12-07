@@ -73,7 +73,7 @@ func (app *App) initTemplates() {
 
 	app.AddTemplateFunction("img", func(ids string) string {
 		for _, v := range strings.Split(ids, ",") {
-			image := app.FilesResource.Query(context.TODO()).Is("uid", v).First()
+			image := Query[File](app).Is("uid", v).First()
 			if image != nil && image.isImage() {
 				return image.GetLarge()
 			}

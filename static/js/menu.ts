@@ -49,9 +49,6 @@ class Menu {
   }
 
   bindSubmenus() {
-    /*let triangleIcons = document.querySelectorAll(
-      ".menu_row-subitems > .menu_row_icon"
-    );*/
     let triangleIcons = document.querySelectorAll(".menu_row_icon");
 
     for (var i = 0; i < triangleIcons.length; i++) {

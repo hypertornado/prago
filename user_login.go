@@ -33,7 +33,7 @@ func initUserLogin(app *App) {
 		request := vc.Request()
 		password := vc.GetValue("password")
 
-		user := app.UsersResource.Query(vc.Context()).Is("email", email).First()
+		user := Query[user](app).Is("email", email).First()
 		if user == nil {
 			vc.AddError(messages.Get(locale, "admin_login_error"))
 			return

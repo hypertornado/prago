@@ -63,19 +63,6 @@ func getTitleFromMenuSubsections(item menuItem) []string {
 		}
 	}
 	return []string{}
-
-	/*
-		for _, v := range sections {
-			if v.Selected {
-				return v.Name
-			}
-			ret := getTitleFromMenuSubsections(v.Subitems)
-			if ret != "" {
-				return ret
-			}
-		}
-		return ""
-	*/
 }
 
 func (app *App) initMenuAPI() {

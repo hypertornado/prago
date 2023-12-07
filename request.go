@@ -74,7 +74,8 @@ func (request *Request) UserID() int64 {
 }
 
 func (request *Request) getUser() *user {
-	user := request.app.UsersResource.Query(request.r.Context()).ID(request.UserID())
+	app := request.app
+	user := Query[user](app).ID(request.UserID())
 	if user == nil {
 		return nil
 	}

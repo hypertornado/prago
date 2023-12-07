@@ -87,6 +87,17 @@ func (actionData *resourceItemActionData) View(template string, dataSource func(
 	return actionData
 }
 
+func (actionData *resourceItemActionData) ui(handler func(any, *Request, *pageData)) *resourceItemActionData {
+	actionData.action.ui(func(request *Request, pd *pageData) {
+		item := actionData.resourceData.query(request.r.Context()).ID(request.Param("id"))
+		if item == nil {
+			panic("can't find item")
+		}
+		handler(item, request, pd)
+	})
+	return actionData
+}
+
 func (action *ResourceItemAction[T]) Name(name func(string) string) *ResourceItemAction[T] {
 	action.data.Name(name)
 	return action

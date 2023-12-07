@@ -45,7 +45,6 @@ func (app *App) initSQLConsole() {
 
 					rows.Scan(valuePtrs...)
 
-					//var row []interface{}
 					for i := range columns {
 						val := values[i]
 
@@ -59,9 +58,6 @@ func (app *App) initSQLConsole() {
 
 						cells = append(cells, Cell(fmt.Sprintf("%v", v)))
 
-						/*row = append(row,
-							fmt.Sprintf("%v", v),
-						)*/
 					}
 					table.Row(cells...)
 					cells = nil

@@ -85,13 +85,6 @@ func (table *Table) Row(items ...*TableCell) *Table {
 	return table
 }
 
-/*func (t *Table) Cell(data interface{}) *TableCell {
-	var nCell *TableCell
-	nCell = Cell(data)
-	//row.Cells = append(row.Cells, nCell)
-	return nCell
-}*/
-
 func (cell *TableCell) Header() *TableCell {
 	cell.CSSClass("form_table_cell-header")
 	return cell

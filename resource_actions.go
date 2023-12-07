@@ -16,22 +16,21 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 	}
 
 	resourceData.action("").Icon(icon).priority().
-		Permission(resourceData.canView).Name(resourceData.pluralName).View("board", func(request *Request) any {
-		return resourceData.resourceBoard.boardView(request)
-	})
+		Permission(resourceData.canView).Name(resourceData.pluralName).ui(
+		func(request *Request, pd *pageData) {
+			pd.BoardView = resourceData.resourceBoard.boardView(request)
+		})
 
 	resourceData.action("list").Icon(iconTable).priority().Permission(resourceData.canView).Name(messages.GetNameFunction("admin_list")).
-		View("admin_list",
-			func(request *Request) interface{} {
-				listData, err := resourceData.getListHeader(request)
-				must(err)
-				return listData
-			},
+		ui(func(request *Request, pd *pageData) {
+			listData, err := resourceData.getListHeader(request)
+			must(err)
+			pd.List = &listData
+		},
 		)
 
 	resourceData.FormAction("new").Icon(iconAdd).priority().Permission(resourceData.canCreate).Name(messages.GetNameFunction("admin_new")).Form(
 		func(form *Form, request *Request) {
-			//var item T
 			var item interface{} = reflect.New(resourceData.typ).Interface()
 			resourceData.bindData(item, request, request.Request().URL.Query())
 			resourceData.addFormItems(item, request, form)
@@ -59,15 +58,15 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		}
 	})
 
-	resourceData.ItemAction("").Icon("glyphicons-basic-588-book-open-text.svg").priority().Permission(resourceData.canView).View("admin_views",
-		func(item any, request *Request) interface{} {
+	resourceData.ItemAction("").Icon("glyphicons-basic-588-book-open-text.svg").priority().Permission(resourceData.canView).
+		ui(func(item any, request *Request, pd *pageData) {
 			if item == nil {
 				renderErrorPage(request, 404)
-				return nil
+				return
 			}
-			return resourceData.getViews(request.r.Context(), item, request)
+			pd.Views = resourceData.getViews(request.r.Context(), item, request)
 		},
-	)
+		)
 
 	resourceData.FormItemAction("edit").Icon("glyphicons-basic-31-pencil.svg").priority().Name(messages.GetNameFunction("admin_edit")).Permission(resourceData.canUpdate).Form(
 		func(item any, form *Form, request *Request) {
