@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"go/ast"
 	"reflect"
+	"sync"
 	"time"
 )
 
 //https://github.com/golang/go/issues/49085
+
+var resourceMapMutex = &sync.RWMutex{}
 
 type Resource[T any] struct {
 	data *resourceData
@@ -48,8 +51,6 @@ type resourceData struct {
 
 	typ reflect.Type
 
-	//quickActions []*quickActionData
-
 	fields     []*Field
 	fieldMap   map[string]*Field
 	orderField *Field
@@ -61,6 +62,8 @@ type resourceData struct {
 }
 
 func NewResource[T any](app *App) *Resource[T] {
+	resourceMapMutex.Lock()
+	defer resourceMapMutex.Unlock()
 	var item T
 	typ := reflect.TypeOf(item)
 
@@ -76,8 +79,9 @@ func NewResource[T any](app *App) *Resource[T] {
 	defaultName := typ.Name()
 
 	data := &resourceData{
-		app: app,
-		id:  columnName(defaultName),
+		app:  app,
+		id:   columnName(defaultName),
+		icon: iconResource,
 
 		singularName: unlocalized(defaultName),
 		pluralName:   unlocalized(defaultName),
@@ -142,7 +146,11 @@ func NewResource[T any](app *App) *Resource[T] {
 	return ret
 }
 
+// TODO: concurrent access
 func GetResource[T any](app *App) *Resource[T] {
+	resourceMapMutex.RLock()
+	defer resourceMapMutex.RUnlock()
+
 	var item T
 	itemTyp := reflect.TypeOf(item)
 	ret, ok := app.resourceMap[itemTyp]
@@ -153,6 +161,13 @@ func GetResource[T any](app *App) *Resource[T] {
 		data: ret,
 	}
 
+}
+
+func (resourceData *resourceData) isItPointerToResourceItem(item any) bool {
+	if item == nil {
+		return false
+	}
+	return reflect.PointerTo(resourceData.typ) == reflect.TypeOf(item)
 }
 
 func (resourceData *resourceData) addRelation(field *relatedField) {
@@ -320,6 +335,8 @@ func (resourceData *resourceData) getItemURL(item interface{}, suffix string, us
 }
 
 func (app *App) getResourceByID(name string) *resourceData {
+	resourceMapMutex.RLock()
+	defer resourceMapMutex.RUnlock()
 	return app.resourceNameMap[columnName(name)]
 }
 

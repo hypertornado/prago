@@ -16,7 +16,9 @@ type view struct {
 	Header     *BoxHeader
 	Items      []viewField
 	Relation   *viewRelation
-	//QuickActions []QuickActionView
+
+	SearchResults []*searchItem
+	Pagination    []PaginationItem
 }
 
 type viewField struct {
@@ -31,16 +33,15 @@ type viewButton struct {
 	Icon string
 }
 
-func (resourceData *resourceData) getViews(ctx context.Context, item any, request *Request) (ret []view) {
+func (resourceData *resourceData) getViews(ctx context.Context, item any, request *Request) (ret []*view) {
 	id := resourceData.previewer(request, item).ID()
 	ret = append(ret, resourceData.getBasicView(ctx, id, item, request))
 	ret = append(ret, resourceData.getRelationViews(ctx, id, request)...)
 	return ret
 }
 
-func (resourceData *resourceData) getBasicView(ctx context.Context, int64, item any, request *Request) view {
-	ret := view{
-		//QuickActions: resourceData.getQuickActionViews(item, request),
+func (resourceData *resourceData) getBasicView(ctx context.Context, int64, item any, request *Request) *view {
+	ret := &view{
 		Header: &BoxHeader{},
 	}
 
@@ -63,18 +64,19 @@ func (resourceData *resourceData) getBasicView(ctx context.Context, int64, item 
 	)
 
 	ret.Header.Name = resourceData.previewer(request, item).Name()
-	ret.Header.Icon = tableIcon
+	ret.Header.Icon = iconView
 	ret.Header.Image = resourceData.previewer(request, item).ImageURL(ctx)
+	ret.Header.Buttons = resourceData.getItemViewHeaderButtons(request, item)
 
 	resourceIcon := resourceData.icon
 	if resourceIcon == "" {
 		resourceIcon = iconResource
 	}
-	ret.Header.Tags = append(ret.Header.Tags, BoxTag{
+	/*ret.Header.Tags = append(ret.Header.Tags, BoxTag{
 		URL:  fmt.Sprintf("/admin/%s", resourceData.id),
 		Icon: resourceIcon,
 		Name: resourceData.pluralName(request.Locale()),
-	})
+	})*/
 
 	for i, f := range resourceData.fields {
 		if !f.authorizeView(request) {
@@ -99,6 +101,22 @@ func (resourceData *resourceData) getBasicView(ctx context.Context, int64, item 
 	}
 
 	return ret
+}
+
+func (resourceData *resourceData) getItemViewHeaderButtons(request *Request, item any) (ret []*buttonData) {
+	navigation := resourceData.getItemNavigation(request, item, "")
+	for _, v := range navigation.Tabs {
+		if v.Selected {
+			continue
+		}
+		ret = append(ret, &buttonData{
+			Icon: v.Icon,
+			Name: v.Name,
+			URL:  v.URL,
+		})
+	}
+	return ret
+
 }
 
 func getDefaultViewTemplate(t reflect.Type) string {

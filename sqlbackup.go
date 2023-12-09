@@ -9,7 +9,7 @@ import (
 
 func (app *App) initSQLBackup() {
 
-	sysadminBoard.FormAction("sqlbackup").Name(unlocalized("SQL Backup")).Permission(sysadminPermission).Form(
+	sysadminBoard.FormAction("sqlbackup",
 		func(form *Form, request *Request) {
 			form.Title = "SQL Backup"
 
@@ -28,27 +28,24 @@ func (app *App) initSQLBackup() {
 				form.AddCheckbox(v, fmt.Sprintf("Ignore table '%s'", v))
 			}
 
-			//form.AddCheckbox("xx", )
-
 			form.AddSubmit("Download SQL Backup")
-		},
-	).Validation(func(vc ValidationContext) {
+		}, func(vc ValidationContext) {
 
-		tables, err := listTables(app.db)
-		must(err)
+			tables, err := listTables(app.db)
+			must(err)
 
-		var exclude []string
+			var exclude []string
 
-		for k := range tables {
-			if vc.GetValue(k) == "on" {
-				exclude = append(exclude, k)
+			for k := range tables {
+				if vc.GetValue(k) == "on" {
+					exclude = append(exclude, k)
+				}
 			}
-		}
 
-		excludes := strings.Join(exclude, ",")
+			excludes := strings.Join(exclude, ",")
 
-		vc.Validation().RedirectionLocaliton = "/admin/api/sqlbackup?exclude=" + excludes
-	})
+			vc.Validation().RedirectionLocaliton = "/admin/api/sqlbackup?exclude=" + excludes
+		}).Name(unlocalized("SQL Backup")).Permission(sysadminPermission)
 
 	app.API("sqlbackup").Permission("sysadmin").Handler(func(r *Request) {
 

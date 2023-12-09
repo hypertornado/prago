@@ -24,12 +24,11 @@ type Action struct {
 	parentBoard   *Board
 	isPartOfBoard *Board
 
-	app            *App
-	resourceData   *resourceData
-	isItemAction   bool
-	isUserMenu     bool
-	isHiddenInMenu bool
-	isPriority     bool
+	app          *App
+	resourceData *resourceData
+	isItemAction bool
+	isUserMenu   bool
+	isPriority   bool
 }
 
 func bindAction(action *Action) error {
@@ -90,7 +89,8 @@ func (app *App) Action(url string) *Action {
 	return action
 }
 
-func (resource *Resource[T]) Action(url string) *Action {
+func ResourceAction[T any](app *App, url string) *Action {
+	resource := GetResource[T](app)
 	return resource.data.action(url)
 }
 
@@ -145,38 +145,8 @@ func (action *Action) userMenu() *Action {
 	return action
 }
 
-func (action *Action) hiddenInMenu() *Action {
-	action.isHiddenInMenu = true
-	return action
-}
-
-func (action *Action) getnavigation(request *Request) navigation {
-	if action.resourceData != nil {
-		return action.resourceData.getnavigation(action, request)
-	}
-	return navigation{}
-}
-
 func (action *Action) addConstraint(constraint routerConstraint) {
 	action.constraints = append(action.constraints, constraint)
-}
-
-func (resourceData *resourceData) getnavigation(action *Action, request *Request) navigation {
-	if resourceData == nil {
-		return navigation{}
-	}
-
-	code := action.url
-	if action.isItemAction {
-		item := resourceData.query(request.r.Context()).ID(request.Param("id"))
-		if item != nil {
-			return resourceData.getItemNavigation(request, item, code)
-		} else {
-			return navigation{}
-		}
-	}
-	return resourceData.getResourceNavigation(request, code)
-
 }
 
 func (resourceData *resourceData) getListItemActions(userData UserData, item any, id int64) listItemActions {
@@ -250,7 +220,13 @@ func (action *Action) View(template string, dataSource func(*Request) any) *Acti
 func (action *Action) ui(uiHandler func(*Request, *pageData)) *Action {
 	return action.Handler(func(request *Request) {
 		pageData := createPageData(request)
-		pageData.Navigation = action.getnavigation(request)
+		//pageData.Navigation = action.getnavigation(request)
+
+		if action.isItemAction {
+			item := action.resourceData.query(request.r.Context()).ID(request.Param("id"))
+			pageData.Menu = action.app.getMenu(request, item)
+		}
+
 		uiHandler(request, pageData)
 		pageData.renderPage(request)
 	})

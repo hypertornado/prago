@@ -4,20 +4,23 @@ type pageData struct {
 	Language string
 	Version  string
 
-	Icon       string
-	Name       string
-	App        *App
-	Navigation navigation
+	Icon string
+	Name string
+	App  *App
+
+	SearchQuery string
+
+	Breadcrumbs *breadcrumbs
 
 	Messages []pageMessage
 
 	PageTemplate string
 	PageData     interface{}
-	Menu         menu
+	Menu         *menu
 
 	Form  *Form
 	List  *list
-	Views []view
+	Views []*view
 
 	BoardView *BoardView
 
@@ -37,7 +40,6 @@ func createPageData(request *Request) *pageData {
 	page.App = request.app
 	page.Language = request.Locale()
 	page.Version = request.app.version
-	page.Menu = request.app.getMenu(request, request.Request().URL.Path, request.csrfToken())
 
 	page.JavaScripts = request.app.javascripts
 	page.NotificationsData = request.getNotificationsData()
@@ -45,30 +47,26 @@ func createPageData(request *Request) *pageData {
 }
 
 func (page *pageData) renderPage(request *Request) {
-
-	for _, v := range page.Navigation.Tabs {
-		if v.Selected {
-			page.Name = v.Name
-			if v.Icon != "" {
-				page.Icon = v.Icon
-			}
-		}
+	if page.Menu == nil {
+		page.Menu = request.app.getMenu(request, nil)
 	}
+
+	page.Icon = page.Menu.GetIcon()
+	if page.Icon == "" {
+		page.Icon = request.app.icon
+	}
+
+	page.Breadcrumbs = page.Menu.GetBreadcrumbs()
 
 	title := page.Menu.GetTitle()
 	if title != "" {
 		page.Name = title
 	}
 
-	if page.Icon == "" {
-		page.Icon = request.app.icon
-	}
-
 	code := page.HTTPCode
 	if code == 0 {
 		code = 200
 	}
-
 	request.WriteHTML(code, "prago_layout", page)
 }
 

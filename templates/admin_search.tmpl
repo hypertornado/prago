@@ -1,31 +1,12 @@
-{{define "admin_search"}}
-
-  {{template "searchbox" .search_q}}
-
-  <div class="box">
-    {{template "box_header" .box_header}}
-    {{range $result := .search_results}}
-      <a href="{{$result.URL}}" class="search">
-        <div class="search_icon"></div>
-        <div class="search_right">
-          <div class="search_name">{{$result.Name}}</div>
-        </div>
-      </a>
-    {{end}}
-
-    <div class="search_pagination">
-      {{range $page := .search_pages}}
-        <a href="{{$page.URL}}" class="search_pagination_page{{if $page.Selected}} search_pagination_page-selected{{end}}">{{$page.Title}}</a>
-      {{end}}
-    </div>
-  </div>
-{{end}}
-
-
 {{define "admin_search_suggest"}}
   <div class="admin_search_suggestions_content">
     {{range $i, $item := .}}
       <a href="{{$item.URL}}" class="admin_search_suggestion admin_search_suggestion-noimage" data-position="{{$i}}">
+        {{if $item.Icon}}
+          <img class="admin_search_suggestion_icon" src="/admin/api/icons?file={{$item.Icon}}&color=4078c0">
+        {{else}}
+          <div class="admin_search_suggestion_icon"></div>
+        {{end}}
         <div class="admin_search_suggestion_right">
           <div class="admin_search_suggestion_name">{{$item.Name}}</div>
         </div>
@@ -36,7 +17,7 @@
 
 {{define "searchbox"}}
   <form class="searchbox" action="/admin/_search">
-    <input class="searchbox_input" type="search" placeholder="Vyhledávání" name="q" value="{{.}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus>
+    <input class="searchbox_input" type="search" placeholder="Vyhledávání" name="q" value="{{.}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <button class="searchbox_button">
       <img src="/admin/api/icons?file=glyphicons-basic-28-search.svg&color=333333">
     </button>

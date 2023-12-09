@@ -90,3 +90,11 @@ a.box_tag:hover {
     border-radius: 0px;
   }
 }
+
+.box_header_buttons {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px;
+  gap: 5px;
+  justify-content: center;
+}

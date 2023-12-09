@@ -55,7 +55,7 @@ a.search_pagination_page-selected {
 .searchbox {
   display: flex;
   border: 1px solid #eee;
-  margin: 10px auto;
+  margin: 0px 10px;
   max-width: 600px;
   background: white;
   border-radius: 10px;
@@ -78,8 +78,8 @@ a.search_pagination_page-selected {
   background-color: white;
   border: none;
   box-shadow: none;
-  font-size: 1.2rem;
-  line-height: 2.5em;
+  font-size: 1rem;
+  line-height: 2em;
   outline: none !important;
   flex-grow: 10;
   border-radius: 10px 0px 0px 10px;
@@ -92,7 +92,7 @@ a.search_pagination_page-selected {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  padding: 0px 20px;
+  padding: 0px 10px;
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
 }
@@ -116,7 +116,7 @@ a.search_pagination_page-selected {
   position: absolute;
   left: 0px;
   right: 0px;
-  top: 42px;
+  top: 28px;
   @include shadow;
   border-radius: 0px 0px 10px 10px;
   padding: 0px;
@@ -131,11 +131,16 @@ a.search_pagination_page-selected {
 
 .admin_search_suggestion {
   display: flex;
-  //border-bottom: 1px solid #eee;
   font-size: 0.8rem;
   line-height: 1.3em;
   overflow: hidden;
   text-decoration: none;
+  gap: 10px;
+}
+
+.admin_search_suggestion_icon {
+  width: 20px;
+  aspect-ratio: 1;
 }
 
 .admin_search_suggestion-noimage {

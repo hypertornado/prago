@@ -22,7 +22,7 @@ type previewer struct {
 }
 
 func (resourceData *resourceData) previewer(userData UserData, item any) *previewer {
-	if reflect.PointerTo(resourceData.typ) != reflect.TypeOf(item) {
+	if !resourceData.isItPointerToResourceItem(item) {
 		return nil
 	}
 

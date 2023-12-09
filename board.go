@@ -26,8 +26,6 @@ func (app *App) initBoard() {
 	app.dashboardFigureMap = make(map[string]*DashboardFigure)
 	sysadminBoard = app.NewBoard("sysadmin-board").Name(unlocalized("Sysadmin")).Icon("glyphicons-basic-501-server.svg")
 
-	//app.NewBoard("empty-board")
-
 	sysadminGroup := sysadminBoard.Dashboard(unlocalized("Sysadmin"))
 	sysadminGroup.Figure(unlocalized("Úpravy"), "sysadmin").Value(func(request *Request) int64 {
 		c, _ := Query[activityLog](app).Context(request.r.Context()).Where("createdat >= ?", time.Now().AddDate(0, 0, -1)).Count()
@@ -78,21 +76,20 @@ func (board *Board) IsMainBoard() bool {
 	return board == board.app.MainBoard
 }
 
-func (board *Board) isEmpty(userData UserData, urlPath string) bool {
+func (board *Board) isEmpty(request *Request, urlPath string) bool {
 	if board.IsMainBoard() {
 		return false
 	}
 
 	for _, v := range board.dashboardGroups {
-		if v.isVisible(userData) {
+		if v.isVisible(request) {
 			return false
 		}
 	}
 
-	items, _ := board.getMenuItems(userData, urlPath, false, "")
+	items := board.getMenuItems(request, nil)
 	if len(items) > 0 {
 		return false
 	}
-
 	return true
 }

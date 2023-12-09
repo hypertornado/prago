@@ -49,9 +49,13 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *Form
 	return ret
 }
 
-func (board *Board) FormAction(url string) *FormAction {
+func (board *Board) FormAction(url string, formGenerator func(*Form, *Request), validator Validation) *FormAction {
 	app := board.app
 	fa := newFormAction(app, url, nil)
+
+	fa.formGenerator = formGenerator
+	fa.validation = validator
+
 	fa.actionForm.parentBoard = board
 	fa.actionValidation.parentBoard = board
 	app.rootActions = append(app.rootActions, fa.actionForm)
@@ -85,11 +89,12 @@ func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Reques
 
 }
 
-func (resource *Resource[T]) FormAction(url string) *FormAction {
-	return resource.data.FormAction(url)
+func ResourceFormAction[T any](app *App, url string, formGenerator func(*Form, *Request), validation Validation) *FormAction {
+	resource := GetResource[T](app)
+	return resource.data.FormAction(url, formGenerator, validation)
 }
 
-func (resourceData *resourceData) FormAction(url string) *FormAction {
+func (resourceData *resourceData) FormAction(url string, formGenerator func(*Form, *Request), validation Validation) *FormAction {
 	action := newFormAction(resourceData.app, url, nil)
 
 	action.actionForm.resourceData = resourceData
@@ -97,6 +102,9 @@ func (resourceData *resourceData) FormAction(url string) *FormAction {
 
 	action.actionForm.Permission(resourceData.canView)
 	action.actionValidation.Permission(resourceData.canView)
+
+	action.formGenerator = formGenerator
+	action.validation = validation
 
 	resourceData.actions = append(resourceData.actions, action.actionForm)
 	resourceData.actions = append(resourceData.actions, action.actionValidation)
@@ -113,7 +121,7 @@ func (formAction *FormAction) Icon(icon string) *FormAction {
 	return formAction
 }
 
-func (formAction *FormAction) Form(formGenerator func(*Form, *Request)) *FormAction {
+/*func (formAction *FormAction) Form(formGenerator func(*Form, *Request)) *FormAction {
 	formAction.formGenerator = formGenerator
 	return formAction
 }
@@ -121,7 +129,7 @@ func (formAction *FormAction) Form(formGenerator func(*Form, *Request)) *FormAct
 func (formAction *FormAction) Validation(validation Validation) *FormAction {
 	formAction.validation = validation
 	return formAction
-}
+}*/
 
 func (formAction *FormAction) Permission(permission Permission) *FormAction {
 	formAction.actionForm.Permission(permission)

@@ -84,10 +84,10 @@ func (action *FormItemAction[T]) Form(formGenerator func(*T, *Form, *Request)) *
 }
 
 func (actionData *formItemActionData) Form(formGenerator func(any, *Form, *Request)) *formItemActionData {
-	actionData.formAction.Form(func(form *Form, request *Request) {
+	actionData.formAction.formGenerator = func(form *Form, request *Request) {
 		item := actionData.resourceData.query(request.r.Context()).ID(request.Param("id"))
 		formGenerator(item, form, request)
-	})
+	}
 	return actionData
 }
 
@@ -99,9 +99,9 @@ func (action *FormItemAction[T]) Validation(validation func(*T, ValidationContex
 }
 
 func (actionData *formItemActionData) Validation(validation func(any, ValidationContext)) *formItemActionData {
-	actionData.formAction.Validation(func(vc ValidationContext) {
+	actionData.formAction.validation = func(vc ValidationContext) {
 		item := actionData.resourceData.query(vc.Context()).ID(vc.GetValue("id"))
 		validation(item, vc)
-	})
+	}
 	return actionData
 }

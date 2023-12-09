@@ -24,7 +24,7 @@ func initCDNProjectResource() {
 
 func getCDNProjectsMap() map[string]*CDNProject {
 	var accounts = map[string]*CDNProject{}
-	projects := projectResource.Query(context.Background()).List()
+	projects := prago.Query[CDNProject](app).List()
 	for _, v := range projects {
 		accounts[v.Name] = v
 	}
@@ -33,7 +33,7 @@ func getCDNProjectsMap() map[string]*CDNProject {
 
 func getCDNProjectsIDMap() map[int64]*CDNProject {
 	var accounts = map[int64]*CDNProject{}
-	projects := projectResource.Query(context.Background()).List()
+	projects := prago.Query[CDNProject](app).List()
 	for _, v := range projects {
 		accounts[v.ID] = v
 	}

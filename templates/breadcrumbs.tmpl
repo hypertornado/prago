@@ -1,0 +1,20 @@
+{{define "admin_breadcrumbs"}}
+    <div class="breadcrumbs">
+        {{range $item := .Items}}
+            <a href="{{$item.URL}}" class="breadcrumb{{if $item.Selected}} breadcrumb-selected{{end}}" title="{{$item.Title}}">
+                {{if $item.Logo}}
+                    <img src="{{$item.Logo}}" class="breadcrumb_logo">
+                {{end}}
+                {{if $item.Icon}}
+                    <img src="/admin/api/icons?file={{$item.Icon}}&color={{if $item.Selected}}000000{{else}}888888{{end}}" class="breadcrumb_icon">
+                {{end}}
+                <div class="breadcrumb_text">
+                    {{$item.Name}}
+                </div>
+            </a>
+            {{if not $item.Selected}}
+                <img src="/admin/api/icons?file=glyphicons-basic-224-chevron-right.svg&color=dddddd" class="breadcrumbs_divider">
+            {{end}}
+        {{end}}
+    </div>
+{{end}}

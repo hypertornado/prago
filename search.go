@@ -11,14 +11,17 @@ import (
 )
 
 type searchItem struct {
-	ID   string
-	Name string
-	URL  string
+	ID       string
+	Icon     string
+	Prename  string
+	Postname string
+	Name     string
+	URL      string
 }
 
 const searchPageSize int64 = 10
 
-type searchPage struct {
+type PaginationItem struct {
 	Title    int
 	Selected bool
 	URL      string
@@ -61,8 +64,8 @@ func (app *App) initSearch() {
 		},
 	)
 
-	app.Action("_search").Permission(loggedPermission).Name(unlocalized("Vyhledávání")).hiddenInMenu().View("admin_search",
-		func(request *Request) interface{} {
+	app.Action("_search").Permission(loggedPermission).Name(unlocalized("Vyhledávání")).Board(nil).ui(
+		func(request *Request, pd *pageData) {
 			q := request.Param("q")
 			pageStr := request.Param("page")
 
@@ -83,7 +86,7 @@ func (app *App) initSearch() {
 				pages++
 			}
 
-			var searchPages []searchPage
+			var pagination []PaginationItem
 			for i := 1; i <= int(pages); i++ {
 				var selected bool
 				if page == i {
@@ -94,29 +97,32 @@ func (app *App) initSearch() {
 				if i > 0 {
 					values.Add("page", strconv.Itoa(i))
 				}
-				searchPages = append(searchPages, searchPage{
+				pagination = append(pagination, PaginationItem{
 					Title:    i,
 					Selected: selected,
 					URL:      "_search?" + values.Encode(),
 				})
 			}
 
-			var ret = map[string]interface{}{}
+			view := &view{
+				Header: &BoxHeader{
+					Name:      fmt.Sprintf("Vyhledávání – „%s“", q),
+					TextAfter: fmt.Sprintf("%s výsledků", humanizeNumber(hits)),
+				},
 
-			ret["box_header"] = BoxHeader{
-				Name:      fmt.Sprintf("Vyhledávání – „%s", q),
-				TextAfter: fmt.Sprintf("%s výsledků", humanizeNumber(hits)),
+				SearchResults: result,
+				Pagination:    pagination,
 			}
-			ret["search_q"] = q
-			ret["admin_title"] = fmt.Sprintf("„%s", q)
-			ret["search_results"] = result
-			ret["search_pages"] = searchPages
 
-			return ret
+			pd.Name = view.Header.Name
+
+			pd.Views = append(pd.Views, view)
+
+			pd.SearchQuery = q
 		},
 	)
 
-	sysadminBoard.FormAction("delete-elastic-indice").Name(unlocalized("Smazat elasticsearch index")).Permission(sysadminPermission).Form(func(f *Form, r *Request) {
+	sysadminBoard.FormAction("delete-elastic-indice", func(f *Form, r *Request) {
 		stats, err := app.ElasticSearchClient().GetStats()
 		if err != nil {
 			panic(err)
@@ -137,7 +143,7 @@ func (app *App) initSearch() {
 		f.AddSelect("indice", "Elastic indices", doubled)
 
 		f.AddSubmit("Delete indice")
-	}).Validation(func(vc ValidationContext) {
+	}, func(vc ValidationContext) {
 		id := vc.GetValue("indice")
 		if id == "" {
 			vc.AddItemError("indice", "Select indice to delete")
@@ -152,7 +158,7 @@ func (app *App) initSearch() {
 		} else {
 			vc.AddError(fmt.Sprintf("Index '%s' úspěšně smazán", id))
 		}
-	})
+	}).Name(unlocalized("Smazat elasticsearch index")).Permission(sysadminPermission)
 
 }
 
@@ -179,11 +185,9 @@ func (app *App) suggestItems(q string, request *Request) (ret []*searchItem, err
 
 func (app *App) searchWithoutElastic(q string, request *Request) (ret []*searchItem) {
 	q = normalizeCzechString(q)
-	menu := app.getMenu(request, "", "")
-	for _, section := range menu.Sections {
-		for _, item := range section.Items {
-			ret = append(ret, item.SearchWithoutElastic(q)...)
-		}
+	menu := app.getMenu(request, nil)
+	for _, item := range menu.Items {
+		ret = append(ret, item.SearchWithoutElastic(q)...)
 	}
 	return ret
 }
@@ -195,6 +199,7 @@ func (item menuItem) SearchWithoutElastic(q string) (ret []*searchItem) {
 	name := normalizeCzechString(item.Name)
 	if strings.Contains(name, q) {
 		ret = append(ret, &searchItem{
+			Icon: item.Icon,
 			Name: item.Name,
 			URL:  item.URL,
 		})

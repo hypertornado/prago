@@ -6,8 +6,7 @@ type BoardView struct {
 	BoardName   string
 	BoardURL    string
 	IsMainBoard bool
-	Resources   []menuItem
-	UserSection *menuSection
+	Resources   []*menuItem
 
 	MainDashboard *DashboardView
 
@@ -44,6 +43,10 @@ func (board *Board) boardView(request *Request) *BoardView {
 	var boardName, boardIcon, boardURL string
 	if board.action != nil {
 		boardName = board.action.name(locale)
+		if board.IsMainBoard() {
+			boardName = messages.GetNameFunction("admin_signpost_long", board.app.name(locale))(locale)
+		}
+
 		boardIcon = board.action.icon
 		boardURL = board.action.getURL()
 	}
@@ -62,23 +65,15 @@ func (board *Board) boardView(request *Request) *BoardView {
 		Role:        request.role(),
 	}
 
-	urlPath := request.Request().URL.Path
-	csrfToken := request.csrfToken()
-
-	ret.Resources, _ = board.getMainItems(request, urlPath, csrfToken)
+	ret.Resources = board.getMenuItems(request, nil)
 
 	ret.MainDashboard = board.MainDashboard.view(request)
-
-	if board.IsMainBoard() {
-		ret.UserSection = board.app.getMenuUserSection(request, urlPath, csrfToken)
-	}
 
 	for _, dashboard := range board.dashboardGroups {
 		view := dashboard.view(request)
 		if view != nil {
 			ret.Dashboards = append(ret.Dashboards, view)
 		}
-
 	}
 
 	return ret

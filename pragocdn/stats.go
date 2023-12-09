@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"io/fs"
 	"path/filepath"
 
@@ -11,14 +10,12 @@ import (
 func bindStats(app *prago.App) {
 
 	app.MainBoard.MainDashboard.Figure(unlocalized("Počet souborů"), "sysadmin").Unit(unlocalized("souborů")).Value(func(r *prago.Request) int64 {
-		fileResource := prago.GetResource[CDNFile](app)
-		files := fileResource.Query(context.Background()).List()
+		files := prago.Query[CDNFile](app).List()
 		return int64(len(files))
 	})
 
 	app.MainBoard.MainDashboard.Figure(unlocalized("Velikost souborů"), "sysadmin").Unit(unlocalized("bajtů")).Value(func(r *prago.Request) int64 {
-		fileResource := prago.GetResource[CDNFile](app)
-		files := fileResource.Query(context.Background()).List()
+		files := prago.Query[CDNFile](app).List()
 		var ret int64
 		for _, file := range files {
 			ret += file.Filesize

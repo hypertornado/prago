@@ -6,6 +6,8 @@ type BoxHeader struct {
 	TextAfter string
 	Image     string
 	Tags      []BoxTag
+
+	Buttons []*buttonData
 }
 
 type BoxTag struct {

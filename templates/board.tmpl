@@ -1,29 +1,5 @@
 {{define "board"}}
   <div class="board">
-
-  {{if .IsMainBoard}}
-    <div class="board_logo" style="background-image: url('/admin/logo');"></div>
-  {{end}}
-
-  {{if .IsMainBoard}}
-    {{template "searchbox" ""}}
-  {{end}}
-
-  {{if .IsMainBoard}}
-    <div class="board_user">
-      <div class="board_user_buttons">
-        {{range $item := .UserSection.Items}}
-          <a href="{{$item.URL}}" class="btn">
-            {{if iconExists $item.Icon}}
-              <img src="/admin/api/icons?file={{$item.Icon}}&color=444444" class="btn_icon">
-            {{end}}
-            <div class="btn_text">{{$item.Name}}</div>
-          </a>
-        {{end}}
-      </div>
-      <div class="board_user_text">Vítejte v administraci {{.AppName}}.<br>Jste přihlášen(a) jako uživatel <b>{{.UserSection.Name}}</b>{{if .Role}} s oprávněním „{{.Role}}“{{else}}. Administrátor vám zatím nepřiřadil žádné oprávnění{{end}}.</div>
-    </div>
-  {{end}}
   
   <h1 class="board_name">{{if iconExists .BoardIcon}}<img src="/admin/api/icons?file={{.BoardIcon}}&color=444444" class="board_icon">{{end}}<div class="board_name_text">{{.BoardName}}</div></h1>
 
@@ -36,7 +12,7 @@
     <div class="board_resources">
       {{range $i, $resource := .Resources}}
         {{if ne $resource.URL $boardURL}}
-        <a href="{{$resource.URL}}" class="board_resource{{if $resource.IsBoard}} board_resource-isboard{{end}}" title="{{$resource.Name}}">
+        <a href="{{$resource.URL}}" class="board_resource" title="{{$resource.Name}}">
           <div class="board_resource_left">{{if $resource.Icon}}<img class="board_resource_icon" src="/admin/api/icons?file={{$resource.Icon}}&color=4078c0">{{end}}</div>
           <div class="board_resource_right">{{$resource.Name}}</div>
         </a>

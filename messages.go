@@ -143,6 +143,10 @@ var m = map[string]map[string]string{
 		"en": "Signpost",
 		"cs": "Rozcestník",
 	},
+	"admin_signpost_long": {
+		"en": "Signpost of %s",
+		"cs": "Rozcestník administrace %s",
+	},
 	"boardpage": {
 		"en": "Go to homepage",
 		"cs": "Přejít na homepage",

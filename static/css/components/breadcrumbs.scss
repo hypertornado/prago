@@ -1,0 +1,52 @@
+.breadcrumbs {
+    border: 0px solid red;
+    display: flex;
+    gap: 0px;
+    flex-grow: 100;
+    align-items: center;
+    padding: 3px;
+    padding-left: 20px;
+    min-width: 0;
+    flex-shrink: 1000;
+}
+
+.breadcrumb {
+    text-decoration: none;
+    color: $black;
+    font-weight: 500;
+    padding: 3px 5px;
+    border-radius: 5px;
+    display: flex;
+    gap: 5px;
+    flex-shrink: 100;
+    min-width: 0;
+}
+
+.breadcrumb-selected {
+    color: black;
+}
+
+.breadcrumb_logo {
+    height: 30px;
+    aspect-ratio: 1;
+    object-fit: contain;
+}
+
+.breadcrumb_icon {
+    height: 20px;
+    aspect-ratio: 1;
+}
+
+.breadcrumb_text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-wrap: nowrap;
+    flex-shrink: 10000;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.breadcrumbs_divider {
+    height: 20px;
+    aspect-ratio: 1;
+}

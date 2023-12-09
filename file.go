@@ -239,27 +239,29 @@ func (app *App) initFilesResource() {
 		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
-	resource.FormAction("upload").priority().Permission(resource.data.canUpdate).Name(unlocalized("Nahrát soubor")).Form(func(f *Form, r *Request) {
-		//locale := r.user.Locale
-		f.AddFileInput("file", messages.Get(r.Locale(), "admin_file"))
-		f.AddTextareaInput("description", messages.Get(r.Locale(), "Description"))
-		f.AddSubmit(messages.Get(r.Locale(), "admin_save"))
-	}).Validation(func(vc ValidationContext) {
-		multipartFiles := vc.Request().Request().MultipartForm.File["file"]
-		if len(multipartFiles) != 1 {
-			vc.AddItemError("file", messages.Get(vc.Locale(), "admin_validation_not_empty"))
-		}
-		if vc.Valid() {
-			fileData, err := app.UploadFile(vc.Request().r.Context(), multipartFiles[0], vc.Request(), vc.GetValue("description"))
-			if err != nil {
-				vc.AddError(err.Error())
-			} else {
-				vc.Validation().RedirectionLocaliton = fmt.Sprintf("/admin/file/%d", fileData.ID)
+	ResourceFormAction[File](app, "upload",
+		func(f *Form, r *Request) {
+			f.AddFileInput("file", messages.Get(r.Locale(), "admin_file"))
+			f.AddTextareaInput("description", messages.Get(r.Locale(), "Description"))
+			f.AddSubmit(messages.Get(r.Locale(), "admin_save"))
+		},
+		func(vc ValidationContext) {
+			multipartFiles := vc.Request().Request().MultipartForm.File["file"]
+			if len(multipartFiles) != 1 {
+				vc.AddItemError("file", messages.Get(vc.Locale(), "admin_validation_not_empty"))
 			}
-		}
-	})
+			if vc.Valid() {
+				fileData, err := app.UploadFile(vc.Request().r.Context(), multipartFiles[0], vc.Request(), vc.GetValue("description"))
+				if err != nil {
+					vc.AddError(err.Error())
+				} else {
+					vc.Validation().RedirectionLocaliton = fmt.Sprintf("/admin/file/%d", fileData.ID)
+				}
+			}
+		},
+	).priority().Permission(resource.data.canUpdate).Name(unlocalized("Nahrát soubor"))
 
-	GetResource[File](app).Action("getcdnurl").Permission(sysadminPermission).Method("POST").Handler(
+	ResourceAction[File](app, "getcdnurl").Permission(sysadminPermission).Method("POST").Handler(
 		func(request *Request) {
 			uuid := request.Param("uuid")
 			size := request.Param("size")

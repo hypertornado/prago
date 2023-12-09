@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 
 	"golang.org/x/text/collate"
@@ -14,41 +13,77 @@ import (
 type menu struct {
 	Language    string
 	SearchQuery string
-	Sections    []*menuSection
-}
+	Items       []*menuItem
 
-type menuSection struct {
-	Name  string
-	Items []menuItem
+	Username           string
+	Email              string
+	Role               string
+	RoleWarning        bool
+	LanguageDecription string
+	Version            string
 }
 
 type menuItem struct {
-	Icon        string
-	Name        string
-	URL         string
-	Selected    bool
-	Subitems    []menuItem
-	Expanded    bool
-	IsBoard     bool
-	IsMainBoard bool
+	Icon         string
+	Name         string
+	URL          string
+	Subitems     []*menuItem
+	Selected     bool
+	Expanded     bool
+	SortPriority int64
 }
 
-func (menu menu) GetTitle() string {
-	for _, v := range menu.Sections {
-		for _, v2 := range v.Items {
-			if v2.Selected {
-				return v2.Name
-			}
-			ret := getTitleFromMenuSubsections(v2)
-			if len(ret) > 0 {
-				return strings.Join(ret, " · ")
-			}
+func (app *App) getMenu(request *Request, item any) (ret *menu) {
+	ret = &menu{
+		Items: app.MainBoard.getMenuItems(request, item),
+	}
+	ret.Language = request.Locale()
+
+	user := request.getUser()
+	ret.Username = fmt.Sprintf("Přihlášený uživatel %s", user.Name)
+	ret.Email = user.Email
+	if request.role() != "" {
+		ret.Role = fmt.Sprintf("Role „%s“", request.role())
+	} else {
+		ret.RoleWarning = true
+		ret.Role = "Nebyla vám zatím administrátorem webu přidělena žádná role"
+	}
+	ret.LanguageDecription = fmt.Sprintf("Jazyk %s", localeNames[request.Locale()])
+	ret.Version = "Verze " + app.version
+	return ret
+}
+
+func (menu menu) GetIcon() string {
+	return getIconFromMenuSubsections(menu.Items)
+}
+
+func getIconFromMenuSubsections(items []*menuItem) string {
+	for _, v := range items {
+		if v.Selected {
+			return v.Icon
+		}
+		icon := getIconFromMenuSubsections(v.Subitems)
+		if icon != "" {
+			return icon
 		}
 	}
 	return ""
 }
 
-func getTitleFromMenuSubsections(item menuItem) []string {
+func (menu menu) GetTitle() string {
+	for _, item := range menu.Items {
+		if item.Selected {
+			return item.Name
+		}
+		ret := getTitleFromMenuSubsections(item)
+		if len(ret) > 0 {
+			return strings.Join(ret, " · ")
+		}
+	}
+	return ""
+}
+
+func getTitleFromMenuSubsections(item *menuItem) []string {
 	if item.Selected {
 		return []string{
 			item.Name,
@@ -66,25 +101,9 @@ func getTitleFromMenuSubsections(item menuItem) []string {
 }
 
 func (app *App) initMenuAPI() {
-
 	app.API("resource-counts").Permission(loggedPermission).HandlerJSON(func(request *Request) any {
 		return getResourceCountsMap(request)
 	})
-
-}
-
-func (app *App) getMenu(userData UserData, urlPath, csrfToken string) (ret menu) {
-	items, _ := app.MainBoard.getMainItems(userData, urlPath, csrfToken)
-
-	resourceSection := &menuSection{
-		Items: items,
-	}
-
-	ret.Sections = append(ret.Sections, resourceSection)
-	ret.Sections = append(ret.Sections, app.getMenuUserSection(userData, urlPath, csrfToken))
-
-	ret.Language = userData.Locale()
-	return ret
 }
 
 func getResourceCountsMap(request *Request) map[string]string {
@@ -102,116 +121,71 @@ func getResourceCountsMap(request *Request) map[string]string {
 	return ret
 }
 
-func (app *App) getMenuUserSection(userData UserData, urlPath, csrfToken string) *menuSection {
-	userName := userData.Name()
-	mainItems, _ := app.MainBoard.getMenuItems(userData, urlPath, true, csrfToken)
-	userSection := menuSection{
-		Name:  userName,
-		Items: mainItems,
-	}
+const sortPriorityBoard = 10
+const sortPriorityMainBoard = 20
 
-	return &userSection
-}
+func (board *Board) getMenuItems(request *Request, item any) []*menuItem {
+	urlPath := request.Request().URL.Path
+	csrfToken := request.csrfToken()
 
-func (board *Board) getMainItems(userData UserData, urlPath string, csrfToken string) ([]menuItem, bool) {
-	return board.getMenuItems(userData, urlPath, false, csrfToken)
-}
-
-func (board *Board) getMenuItems(userData UserData, urlPath string, isUserMenu bool, csrfToken string) ([]menuItem, bool) {
 	app := board.app
-	var ret []menuItem
-
-	var isExpanded bool
-	var dontSortByName bool
+	var ret []*menuItem
 
 	if board.parentResource != nil {
-		parentResource := board.parentResource
-		resourceURLPath := board.parentResource.getURL("")
+		ret = board.parentResource.getResourceMenu(request, item)
 
-		var itemID int
+		/*
+			navigation := board.parentResource.getResourceNavigation(request, "")
+			for k, v := range navigation.Tabs {
+				if k == 0 {
+					continue
+				}
 
-		if strings.HasPrefix(urlPath, resourceURLPath) && len(urlPath) > len(resourceURLPath) {
-			isExpanded = true
-
-			beforeStr, _, _ := strings.Cut(urlPath[len(resourceURLPath)+1:], "/")
-			if true {
-				itemID, _ = strconv.Atoi(beforeStr)
-			}
-		}
-
-		dontSortByName = true
-		navigation := board.parentResource.getResourceNavigation(userData, "")
-		for k, v := range navigation.Tabs {
-			if k == 0 {
-				continue
-			}
-
-			var selected bool
-			if urlPath == v.URL {
-				isExpanded = true
-				selected = true
-			}
-
-			ret = append(ret, menuItem{
-				Icon:     v.Icon,
-				Name:     v.Name,
-				URL:      v.URL,
-				Selected: selected,
-			})
-		}
-
-		if itemID > 0 {
-
-			item := parentResource.query(context.Background()).ID(itemID)
-
-			itemPreviewData := parentResource.previewer(userData, item)
-
-			ret = append(ret, menuItem{
-				Icon:     iconView,
-				Name:     itemPreviewData.Name(),
-				URL:      parentResource.getURL(fmt.Sprintf("%d", itemID)),
-				Selected: true,
-			})
-		}
-	}
-
-	if !isUserMenu {
-		resources := app.resources
-		for _, resourceData := range resources {
-			if resourceData.parentBoard != board {
-				continue
-			}
-
-			if userData.Authorize(resourceData.canView) {
-				resourceURL := resourceData.getURL("")
 				var selected bool
-				if urlPath == resourceURL {
+				if urlPath == v.URL {
 					selected = true
 				}
 
-				if selected {
-					isExpanded = true
-				}
-
-				icon := resourceData.icon
-
-				subitems, expandedSubmenu := resourceData.resourceBoard.getMenuItems(userData, urlPath, false, "")
-				if expandedSubmenu {
-					isExpanded = true
-				}
-				if selected {
-					expandedSubmenu = true
-				}
-
-				ret = append(ret, menuItem{
-					Icon:     icon,
-					Name:     resourceData.pluralName(userData.Locale()),
-					URL:      resourceURL,
-					Selected: selected,
-					Subitems: subitems,
-					Expanded: expandedSubmenu,
+				ret = append(ret, &menuItem{
+					Icon:         v.Icon,
+					Name:         v.Name,
+					URL:          v.URL,
+					Selected:     selected,
+					SortPriority: int64(-k),
 				})
 			}
+
+			if board.parentResource.isItPointerToResourceItem(item) {
+				ret = append(ret, board.parentResource.getResourceItemMenu(request, item))
+
+			}*/
+	}
+
+	resources := app.resources
+	for _, resourceData := range resources {
+		if resourceData.parentBoard != board {
+			continue
+		}
+
+		if request.Authorize(resourceData.canView) {
+			resourceURL := resourceData.getURL("")
+			var selected bool
+			if urlPath == resourceURL {
+				selected = true
+			}
+
+			icon := resourceData.icon
+
+			subitems := resourceData.resourceBoard.getMenuItems(request, item)
+
+			ret = append(ret, &menuItem{
+				Icon:         icon,
+				Name:         resourceData.pluralName(request.Locale()),
+				URL:          resourceURL,
+				Selected:     selected,
+				Subitems:     subitems,
+				SortPriority: 10,
+			})
 		}
 	}
 
@@ -222,13 +196,7 @@ func (board *Board) getMenuItems(userData UserData, urlPath string, isUserMenu b
 		if v.method != "GET" {
 			continue
 		}
-		if v.isUserMenu != isUserMenu {
-			continue
-		}
-		if v.isHiddenInMenu {
-			continue
-		}
-		if !userData.Authorize(v.permission) {
+		if !request.Authorize(v.permission) {
 			continue
 		}
 
@@ -236,22 +204,22 @@ func (board *Board) getMenuItems(userData UserData, urlPath string, isUserMenu b
 		fullURL := app.getAdminURL(v.url)
 		if urlPath == fullURL {
 			selected = true
-			isExpanded = true
 		}
 
+		var sortPriority int64
+
 		if fullURL == "/admin/logout" {
+			sortPriority = -1
 			fullURL += "?_csrfToken=" + csrfToken
 		}
 
-		var isBoard, isMainBoard bool
 		if v.isPartOfBoard != nil {
-			if v.isPartOfBoard.isEmpty(userData, urlPath) {
+			if v.isPartOfBoard.isEmpty(request, urlPath) {
 				continue
 			}
-
-			isBoard = true
+			sortPriority = sortPriorityBoard
 			if v.isPartOfBoard.IsMainBoard() {
-				isMainBoard = true
+				sortPriority = sortPriorityMainBoard
 			}
 		}
 
@@ -260,56 +228,125 @@ func (board *Board) getMenuItems(userData UserData, urlPath string, isUserMenu b
 			icon = iconForm
 		}
 
-		menuItem := menuItem{
-			Icon:        icon,
-			Name:        v.name(userData.Locale()),
-			URL:         fullURL,
-			Selected:    selected,
-			Expanded:    selected,
-			IsBoard:     isBoard,
-			IsMainBoard: isMainBoard,
+		menuItem := &menuItem{
+			Icon:         icon,
+			Name:         v.name(request.Locale()),
+			URL:          fullURL,
+			Selected:     selected,
+			SortPriority: sortPriority,
 		}
 
 		if v.isPartOfBoard != nil && v.isPartOfBoard != app.MainBoard {
-			subitems, subitemsIsExpanded := v.isPartOfBoard.getMainItems(userData, urlPath, csrfToken)
-			if subitemsIsExpanded {
-				menuItem.Expanded = true
-				isExpanded = true
-			}
-			menuItem.Subitems = subitems
+			menuItem.Subitems = v.isPartOfBoard.getMenuItems(request, item)
 		}
 
 		ret = append(ret, menuItem)
 
 	}
-
-	if !dontSortByName {
-		sortSection(ret, userData.Locale())
-	}
-
-	return ret, isExpanded
+	sortAndExpandMenuItems(ret, request.Locale())
+	return ret
 }
 
-func sortSection(items []menuItem, locale string) {
+func (resourceData *resourceData) getResourceMenu(request *Request, item any) (ret []*menuItem) {
+	urlPath := request.Request().URL.Path
+	for k, v := range resourceData.actions {
+		if v.method != "GET" {
+			continue
+		}
+		if !request.Authorize(v.permission) {
+			continue
+		}
+		if v.url == "" {
+			continue
+		}
+		menuItem := &menuItem{
+			Icon:         v.icon,
+			Name:         v.name(request.Locale()),
+			URL:          resourceData.getURL(v.url),
+			SortPriority: -int64(k),
+		}
+		if urlPath == menuItem.URL {
+			menuItem.Selected = true
+		}
+
+		if v.url == "list" && resourceData.isItPointerToResourceItem(item) {
+			menuItem.Subitems = append(menuItem.Subitems, resourceData.getResourceItemMenu(request, item))
+		}
+		ret = append(ret, menuItem)
+	}
+
+	sortAndExpandMenuItems(ret, request.Locale())
+	return
+}
+
+func (resourceData *resourceData) getResourceItemMenu(request *Request, item any) *menuItem {
+	var items []*menuItem
+
+	for k, v := range resourceData.itemActions {
+		if v.method != "GET" {
+			continue
+		}
+		if !request.Authorize(v.permission) {
+			continue
+		}
+		name := v.name(request.Locale())
+		if v.url == "" {
+			name = resourceData.previewer(request, item).Name()
+		}
+
+		priority := -int64(k)
+		if v.isPriority {
+			priority += 1000
+		}
+
+		item := &menuItem{
+			Icon:         v.icon,
+			Name:         name,
+			URL:          resourceData.getItemURL(item, v.url, request),
+			Expanded:     true,
+			SortPriority: priority,
+		}
+
+		if request.Request().URL.Path == item.URL {
+			item.Selected = true
+		}
+		items = append(items, item)
+	}
+
+	if len(items) == 0 {
+		return nil
+	}
+	ret := items[0]
+	ret.Subitems = items[1:]
+	sortAndExpandMenuItems(ret.Subitems, request.Locale())
+	return ret
+
+}
+
+func sortAndExpandMenuItems(items []*menuItem, locale string) {
+	sortSection(items, locale)
+	for _, item := range items {
+		var expanded bool
+		for _, subitem := range item.Subitems {
+			if subitem.Expanded || subitem.Selected {
+				expanded = true
+			}
+		}
+		item.Expanded = expanded
+	}
+}
+
+func sortSection(items []*menuItem, locale string) {
 	collator := collate.New(language.Czech)
 
 	sort.SliceStable(items, func(i, j int) bool {
 		a := items[i]
 		b := items[j]
 
-		if a.IsMainBoard {
+		if a.SortPriority > b.SortPriority {
 			return true
 		}
-
-		if b.IsMainBoard {
-			return false
-		}
-
-		if a.IsBoard && !b.IsBoard {
-			return true
-		}
-
-		if !a.IsBoard && b.IsBoard {
+		if a.SortPriority < b.SortPriority {
 			return false
 		}
 
@@ -319,4 +356,8 @@ func sortSection(items []menuItem, locale string) {
 			return false
 		}
 	})
+}
+
+func (item *menuItem) IsSelectedOrExpanded() bool {
+	return item.Selected || item.Expanded
 }

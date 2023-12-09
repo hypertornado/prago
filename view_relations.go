@@ -16,11 +16,11 @@ type viewRelation struct {
 	Count          int64
 }
 
-func (resourceData *resourceData) getRelationViews(ctx context.Context, id int64, request *Request) (ret []view) {
+func (resourceData *resourceData) getRelationViews(ctx context.Context, id int64, request *Request) (ret []*view) {
 	for _, v := range resourceData.relations {
 		vi := resourceData.getRelationView(ctx, id, v, request)
 		if vi != nil {
-			ret = append(ret, *vi)
+			ret = append(ret, vi)
 		}
 	}
 	return

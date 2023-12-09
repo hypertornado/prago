@@ -8,7 +8,8 @@ import (
 	"strings"
 )
 
-const iconResource = "glyphicons-basic-577-cluster.svg"
+// const iconResource = "glyphicons-basic-577-cluster.svg"
+const iconResource = "glyphicons-basic-964-layers.svg"
 const iconTable = "glyphicons-basic-120-table.svg"
 const iconAdd = "glyphicons-basic-371-plus.svg"
 const iconSignpost = "glyphicons-basic-697-directions-sign.svg"
@@ -83,7 +84,7 @@ func (app *App) initIcons() {
 		io.Copy(request.Response(), file)
 	})
 
-	app.Action("help/icons").Name(unlocalized("Ikony")).Permission(loggedPermission).hiddenInMenu().ui(
+	app.Action("help/icons").Name(unlocalized("Ikony")).Permission(loggedPermission).Board(nil).ui(
 		func(request *Request, pd *pageData) {
 			prefix := app.iconsPrefix
 			prefix = strings.TrimRight(prefix, "/")

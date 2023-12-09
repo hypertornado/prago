@@ -45,14 +45,11 @@ func getCDNFile(projectName, uuid string) *CDNFile {
 	if project == nil {
 		return nil
 	}
-
-	fileResource := prago.GetResource[CDNFile](app)
-	return fileResource.Query(context.Background()).Is("cdnproject", project.ID).Is("uuid", uuid).First()
+	return prago.Query[CDNFile](app).Is("cdnproject", project.ID).Is("uuid", uuid).First()
 }
 
 func (file *CDNFile) url(size string) string {
-	projectResource := prago.GetResource[CDNProject](app)
-	project := projectResource.Query(context.Background()).ID(file.CDNProject)
+	project := prago.Query[CDNProject](app).ID(file.CDNProject)
 	if project == nil {
 		panic(fmt.Errorf("can't find project id %d", file.CDNProject))
 	}
@@ -73,8 +70,7 @@ func (file *CDNFile) Project() *CDNProject {
 }
 
 func (file *CDNFile) get() (*os.File, error) {
-	projectResource := prago.GetResource[CDNProject](app)
-	project := projectResource.Query(context.Background()).ID(file.CDNProject)
+	project := prago.Query[CDNProject](app).ID(file.CDNProject)
 	if project == nil {
 		return nil, fmt.Errorf("can't find project id %d", file.CDNProject)
 	}
@@ -83,8 +79,7 @@ func (file *CDNFile) get() (*os.File, error) {
 }
 
 func (file *CDNFile) update() {
-	projectResource := prago.GetResource[CDNProject](app)
-	project := projectResource.Query(context.Background()).ID(file.CDNProject)
+	project := prago.Query[CDNProject](app).ID(file.CDNProject)
 	if project == nil {
 		panic(fmt.Errorf("can't find project id %d", file.CDNProject))
 	}
@@ -170,7 +165,6 @@ func bindCDNFiles(app *prago.App) {
 	})
 
 	filesDashboard := app.MainBoard.Dashboard(unlocalized("Soubory"))
-	//tg := app.TaskGroup(unlocalized("Soubory"))
 
 	filesDashboard.Task(unlocalized("Create files form import")).Handler(func(ta *prago.TaskActivity) error {
 		_, err := app.GetDB().Exec("DELETE FROM cdnfile;")
@@ -178,7 +172,7 @@ func bindCDNFiles(app *prago.App) {
 			return err
 		}
 
-		projects := prago.GetResource[CDNProject](app).Query(context.Background()).List()
+		projects := prago.Query[CDNProject](app).List()
 		for _, project := range projects {
 			filepath.Walk(cdnDirPath()+"/files/"+project.Name, func(path string, info fs.FileInfo, err error) error {
 				if err == nil && !info.IsDir() {
@@ -196,9 +190,7 @@ func bindCDNFiles(app *prago.App) {
 	})
 
 	filesDashboard.Task(unlocalized("Reimport files data")).Handler(func(ta *prago.TaskActivity) error {
-		fileResource := prago.GetResource[CDNFile](app)
-
-		files := fileResource.Query(context.Background()).List()
+		files := prago.Query[CDNFile](app).List()
 		totalLen := len(files)
 		for k, file := range files {
 			ta.SetStatus(float64(k)/float64(totalLen), file.UUID)
@@ -208,8 +200,7 @@ func bindCDNFiles(app *prago.App) {
 	})
 
 	filesDashboard.Task(unlocalized("Validate checksums")).Handler(func(ta *prago.TaskActivity) error {
-		fileResource := prago.GetResource[CDNFile](app)
-		files := fileResource.Query(context.Background()).List()
+		files := prago.Query[CDNFile](app).List()
 		totalLen := len(files)
 		for k, file := range files {
 			ta.SetStatus(float64(k)/float64(totalLen), file.UUID)

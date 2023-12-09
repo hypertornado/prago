@@ -1,18 +1,22 @@
 {{define "menu"}}
     <div class="menu">
-    {{range $section := .Sections}}
         <div class="menu_section">
-            <div class="menu_section_name">{{$section.Name}}</div>
-            {{template "menu_items" $section.Items}}
+            {{template "menu_items" .Items}}
         </div>
-    {{end}}
+        <div class="menu_footer">
+            <div>{{.Username}}</div>
+            <div>{{.Email}}</div>
+            <div {{if .RoleWarning}}class="menu_footer_item-warning"{{end}}>{{.Role}}</div>
+            <div>{{.LanguageDecription}}</div>
+            <div>{{.Version}}</div>
+        </div>
     </div>
 {{end}}
 
 {{define "menu_items"}}
     <div class="menu_section_content">
     {{range $item := .}}
-        <div class="menu_row{{if $item.Subitems}} menu_row-subitems{{end}}{{if $item.Expanded}} menu_row-expanded{{end}}">
+        <div class="menu_row{{if $item.Subitems}} menu_row-subitems{{end}}{{if $item.IsSelectedOrExpanded}} menu_row-expanded{{end}}">
             <div class="menu_row_icon">
                 <img src="/admin/api/icons?file=glyphicons-basic-175-play.svg&color=dddddd" class="menu_row_icon_img">
             </div>

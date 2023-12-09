@@ -21,8 +21,10 @@
     <div class="root">
         {{template "notification_center" .NotificationsData}}
         <div class="root_header">
-            <a href="/admin" class="root_logo" style="background-image: url('/admin/logo');"></a>
-            {{template "admin_tabs" .Navigation.Tabs}}
+            {{if .Breadcrumbs}}
+                {{template "admin_breadcrumbs" .Breadcrumbs}}
+            {{end}}
+            {{template "searchbox" .SearchQuery}}
             <div class="root_hamburger">
                 <img src="/admin/api/icons?file=glyphicons-basic-600-menu.svg&color=444444" class="root_hamburger_iconopen">
                 <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=444444" class="root_hamburger_iconclose">

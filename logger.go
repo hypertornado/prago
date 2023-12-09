@@ -143,7 +143,7 @@ func (app *App) initLogger() {
 		app.logger.deleteOldLogsRobot()
 	}()
 
-	sysadminBoard.FormAction("log_search").Name(unlocalized("Log")).Permission("sysadmin").Form(func(f *Form, r *Request) {
+	sysadminBoard.FormAction("log_search", func(f *Form, r *Request) {
 		f.Title = "Logger"
 		f.AddTextInput("q", "Query")
 		f.AddSelect("typ", "Typ", [][2]string{
@@ -158,7 +158,7 @@ func (app *App) initLogger() {
 		f.AddTextInput("size", "Results count").Value = "20"
 		f.AddTextInput("offset", "Offset").Value = "0"
 		f.AddSubmit("Hledat")
-	}).Validation(func(vc ValidationContext) {
+	}, func(vc ValidationContext) {
 		index := app.getLoggerESIndex()
 		query := index.Query().Sort("Time", false)
 
@@ -214,5 +214,5 @@ func (app *App) initLogger() {
 		}
 
 		vc.Validation().AfterContent = table.ExecuteHTML()
-	})
+	}).Name(unlocalized("Log")).Permission("sysadmin")
 }

@@ -29,14 +29,12 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		},
 		)
 
-	resourceData.FormAction("new").Icon(iconAdd).priority().Permission(resourceData.canCreate).Name(messages.GetNameFunction("admin_new")).Form(
-		func(form *Form, request *Request) {
-			var item interface{} = reflect.New(resourceData.typ).Interface()
-			resourceData.bindData(item, request, request.Request().URL.Query())
-			resourceData.addFormItems(item, request, form)
-			form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
-		},
-	).Validation(func(vc ValidationContext) {
+	resourceData.FormAction("new", func(form *Form, request *Request) {
+		var item interface{} = reflect.New(resourceData.typ).Interface()
+		resourceData.bindData(item, request, request.Request().URL.Query())
+		resourceData.addFormItems(item, request, form)
+		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
+	}, func(vc ValidationContext) {
 		for _, v := range resourceData.validations {
 			v(vc)
 		}
@@ -56,7 +54,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 				Flash(request)
 			vc.Validation().RedirectionLocaliton = resourceData.getItemURL(item, "", request)
 		}
-	})
+	}).Icon(iconAdd).priority().Permission(resourceData.canCreate).Name(messages.GetNameFunction("admin_new"))
 
 	resourceData.ItemAction("").Icon("glyphicons-basic-588-book-open-text.svg").priority().Permission(resourceData.canView).
 		ui(func(item any, request *Request, pd *pageData) {
@@ -132,21 +130,19 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 	bindResourceExportCSV(resourceData)
 
 	if resourceData.activityLog {
-		resourceData.FormAction("history").
+		resourceData.FormAction("history", func(f *Form, r *Request) {
+			f.AddTextInput("page", "Stránka").Value = "1"
+			f.AutosubmitFirstTime = true
+
+		}, func(vc ValidationContext) {
+			table := resourceData.app.getHistoryTable(vc.Request(), resourceData, 0, vc.GetValue("page"))
+			vc.Validation().AfterContent = table.ExecuteHTML()
+
+		}).
 			Icon("glyphicons-basic-58-history.svg").
 			priority().
 			Name(messages.GetNameFunction("admin_history")).
-			Permission(resourceData.canUpdate).
-			Form(func(f *Form, r *Request) {
-				f.AddTextInput("page", "Stránka").Value = "1"
-				f.AutosubmitFirstTime = true
-
-			}).
-			Validation(func(vc ValidationContext) {
-				table := resourceData.app.getHistoryTable(vc.Request(), resourceData, 0, vc.GetValue("page"))
-				vc.Validation().AfterContent = table.ExecuteHTML()
-
-			})
+			Permission(resourceData.canUpdate)
 
 		resourceData.
 			FormItemAction("history").
