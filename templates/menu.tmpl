@@ -23,6 +23,8 @@
                 <a href="{{$item.URL}}" class="menu2_item_content{{if $item.Selected}} menu2_item_content-selected{{end}}" title="{{$item.Name}}">
                     {{if $item.Icon}}
                         <img class="menu2_item_content_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{if $item.Selected}}ffffff{{else}}444444{{end}}">
+                    {{else}}
+                        <div class="menu2_item_content_icon menu2_item_content_icon-empty"></div>
                     {{end}}
                     <div class="menu2_item_content_name">{{$item.Name}}</div>
                     <div class="menu2_item_content_subname"></div>

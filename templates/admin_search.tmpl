@@ -8,6 +8,9 @@
           <div class="admin_search_suggestion_icon"></div>
         {{end}}
         <div class="admin_search_suggestion_right">
+          {{if $item.Prename}}
+            <div class="admin_search_suggestion_prename">{{$item.Prename}}</div>
+          {{end}}
           <div class="admin_search_suggestion_name">{{$item.Name}}</div>
         </div>
       </a>

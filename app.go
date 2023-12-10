@@ -76,6 +76,8 @@ type App struct {
 
 	iconsFS     *embed.FS
 	iconsPrefix string
+
+	customSearchFunctions []func(string, UserData) []*CustomSearchResult
 }
 
 const testingAppName = "__prago_test_app"

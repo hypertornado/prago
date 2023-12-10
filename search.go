@@ -163,8 +163,24 @@ func (app *App) initSearch() {
 }
 
 func (app *App) searchItems(q string, page int64, request *Request) (ret []*searchItem, hits int64, err error) {
-	ret = app.searchWithoutElastic(q, request)
+	ret, err = app.getCustomSearch(q, request)
+	must(err)
+
+	ret = append(ret, app.searchWithoutElastic(q, request)...)
 	hits = int64(len(ret))
+	return
+}
+
+func (app *App) getCustomSearch(q string, request *Request) (ret []*searchItem, err error) {
+	for _, v := range app.customSearchFunctions {
+		for _, result := range v(q, request) {
+			ret = append(ret, &searchItem{
+				Prename: result.Prename,
+				Name:    result.Name,
+				URL:     result.URL,
+			})
+		}
+	}
 	return
 }
 
@@ -174,7 +190,9 @@ func (app *App) suggestItems(q string, request *Request) (ret []*searchItem, err
 		return ret, nil
 	}
 
-	ret = app.searchWithoutElastic(q, request)
+	customRes, err := app.getCustomSearch(q, request)
+	must(err)
+	ret = append(customRes, app.searchWithoutElastic(q, request)...)
 
 	if len(ret) > 5 {
 		ret = ret[0:5]
@@ -187,27 +205,38 @@ func (app *App) searchWithoutElastic(q string, request *Request) (ret []*searchI
 	q = normalizeCzechString(q)
 	menu := app.getMenu(request, nil)
 	for _, item := range menu.Items {
-		ret = append(ret, item.SearchWithoutElastic(q)...)
+		ret = append(ret, item.SearchWithoutElastic(q, "")...)
 	}
 	return ret
 }
 
-func (item menuItem) SearchWithoutElastic(q string) (ret []*searchItem) {
+func (item menuItem) SearchWithoutElastic(q string, prename string) (ret []*searchItem) {
 	if strings.HasPrefix(item.URL, "/admin/logout") {
 		return
 	}
 	name := normalizeCzechString(item.Name)
 	if strings.Contains(name, q) {
 		ret = append(ret, &searchItem{
-			Icon: item.Icon,
-			Name: item.Name,
-			URL:  item.URL,
+			Icon:    item.Icon,
+			Prename: prename,
+			Name:    item.Name,
+			URL:     item.URL,
 		})
 	}
 
 	for _, subitem := range item.Subitems {
-		ret = append(ret, subitem.SearchWithoutElastic(q)...)
+		ret = append(ret, subitem.SearchWithoutElastic(q, item.Name)...)
 	}
 
 	return
+}
+
+func (app *App) AddCustomSearchFunction(fn func(q string, userData UserData) []*CustomSearchResult) {
+	app.customSearchFunctions = append(app.customSearchFunctions, fn)
+}
+
+type CustomSearchResult struct {
+	URL     string
+	Prename string
+	Name    string
 }

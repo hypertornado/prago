@@ -179,6 +179,13 @@ a.admin_search_suggestion-selected:active {
   font-size: 0.7rem;
 }
 
+.admin_search_suggestion_prename {
+  color: $gray;
+  text-transform: uppercase;
+  font-size: .8rem;
+  line-height: 1.3em;
+}
+
 .admin_search_suggestion_name {
   font-size: 1rem;
   line-height: 1.3em;

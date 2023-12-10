@@ -12,7 +12,6 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  //border: 1px solid red;
   margin-left: 3px;
 }
 
@@ -24,6 +23,11 @@
 .menu2_item_content_icon {
   height: 20px;
   aspect-ratio: 1;
+}
+
+.menu2_item_content_icon-empty {
+  border: 1px solid #eee;
+  border-radius: 3px;
 }
 
 .menu2_item-hassubitems > .menu2_item_top > .menu2_item_icon {
