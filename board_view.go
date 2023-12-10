@@ -65,7 +65,7 @@ func (board *Board) boardView(request *Request) *BoardView {
 		Role:        request.role(),
 	}
 
-	ret.Resources = board.getMenuItems(request, nil)
+	ret.Resources = board.getMenuItems(getMenuRequestContextFromRequest(request, nil))
 
 	ret.MainDashboard = board.MainDashboard.view(request)
 

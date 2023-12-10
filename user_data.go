@@ -46,8 +46,11 @@ func (app *App) userDataCacheDeleteAll() {
 
 type UserData interface {
 	Name() string
+	//Email() string
 	Locale() string
 	Authorize(Permission) bool
+	//Role() string
+	//CSRFToken() string
 }
 
 type userData struct {

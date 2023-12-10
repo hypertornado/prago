@@ -1,6 +1,6 @@
 {{define "menu"}}
-    <div class="menu">
-        <div class="menu_section">
+    <div class="menu2">
+        <div class="menu2_items">
             {{template "menu_items" .Items}}
         </div>
         <div class="menu_footer">
@@ -14,25 +14,25 @@
 {{end}}
 
 {{define "menu_items"}}
-    <div class="menu_section_content">
     {{range $item := .}}
-        <div class="menu_row{{if $item.Subitems}} menu_row-subitems{{end}}{{if $item.IsSelectedOrExpanded}} menu_row-expanded{{end}}">
-            <div class="menu_row_icon">
-                <img src="/admin/api/icons?file=glyphicons-basic-175-play.svg&color=dddddd" class="menu_row_icon_img">
-            </div>
-            <div class="menu_row_content">
-                <a href="{{$item.URL}}" class="menu_item{{if $item.Selected}} menu_item-selected{{end}}">
+        <div class="menu2_item{{if $item.Subitems}} menu2_item-hassubitems{{end}}{{if $item.IsSelectedOrExpanded}} menu2_item-expanded{{end}}">
+            <div class="menu2_item_top">
+                <div class="menu2_item_icon">
+                    <img src="/admin/api/icons?file=glyphicons-basic-175-play.svg&color=dddddd" class="menu2_item_icon_img">
+                </div>
+                <a href="{{$item.URL}}" class="menu2_item_content{{if $item.Selected}} menu2_item_content-selected{{end}}" title="{{$item.Name}}">
                     {{if $item.Icon}}
-                        <img class="menu_item_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{if $item.Selected}}ffffff{{else}}444444{{end}}">
+                        <img class="menu2_item_content_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{if $item.Selected}}ffffff{{else}}444444{{end}}">
                     {{end}}
-                    <div class="menu_item_left">{{$item.Name}}</div>
-                    <div class="menu_item_right"></div>
+                    <div class="menu2_item_content_name">{{$item.Name}}</div>
+                    <div class="menu2_item_content_subname"></div>
                 </a>
-                {{if $item.Subitems}}
-                    {{template "menu_items" $item.Subitems}}
-                {{end}}
             </div>
+            {{if $item.Subitems}}
+                <div class="menu2_items menu2_items-subitems">
+                    {{template "menu_items" $item.Subitems}}
+                </div>
+            {{end}}
         </div>
     {{end}}
-    </div>
 {{end}}

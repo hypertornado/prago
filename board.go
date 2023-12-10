@@ -76,18 +76,18 @@ func (board *Board) IsMainBoard() bool {
 	return board == board.app.MainBoard
 }
 
-func (board *Board) isEmpty(request *Request, urlPath string) bool {
+func (board *Board) isEmpty(requestContext *menuRequestContext) bool {
 	if board.IsMainBoard() {
 		return false
 	}
 
 	for _, v := range board.dashboardGroups {
-		if v.isVisible(request) {
+		if v.isVisible(requestContext.UserData) {
 			return false
 		}
 	}
 
-	items := board.getMenuItems(request, nil)
+	items := board.getMenuItems(requestContext)
 	if len(items) > 0 {
 		return false
 	}

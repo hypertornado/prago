@@ -2240,12 +2240,12 @@ class Menu {
         this.rootLeft.scrollTo(0, position);
     }
     bindSubmenus() {
-        let triangleIcons = document.querySelectorAll(".menu_row_icon");
+        let triangleIcons = document.querySelectorAll(".menu2_item_icon");
         for (var i = 0; i < triangleIcons.length; i++) {
             let triangleIcon = triangleIcons[i];
             triangleIcon.addEventListener("click", () => {
-                let parent = triangleIcon.parentElement;
-                parent.classList.toggle("menu_row-expanded");
+                let parent = triangleIcon.parentElement.parentElement;
+                parent.classList.toggle("menu2_item-expanded");
             });
         }
     }
@@ -2272,7 +2272,7 @@ class Menu {
         return "";
     }
     setResourceCountsFromCache() {
-        var items = document.querySelectorAll(".menu_item");
+        var items = document.querySelectorAll(".menu2_item_content");
         for (var i = 0; i < items.length; i++) {
             let item = items[i];
             let url = item.getAttribute("href");
@@ -2283,7 +2283,7 @@ class Menu {
         }
     }
     setResourceCounts(data) {
-        var items = document.querySelectorAll(".menu_item");
+        var items = document.querySelectorAll(".menu2_item_content");
         for (var i = 0; i < items.length; i++) {
             let item = items[i];
             let url = item.getAttribute("href");
@@ -2292,7 +2292,7 @@ class Menu {
         }
     }
     setResourceCount(el, count) {
-        let countEl = el.querySelector(".menu_item_right");
+        let countEl = el.querySelector(".menu2_item_content_subname");
         if (count) {
             this.saveCountToStorage(el.getAttribute("href"), count);
             countEl.textContent = count;

@@ -49,13 +49,12 @@ class Menu {
   }
 
   bindSubmenus() {
-    let triangleIcons = document.querySelectorAll(".menu_row_icon");
-
+    let triangleIcons = document.querySelectorAll(".menu2_item_icon");
     for (var i = 0; i < triangleIcons.length; i++) {
       let triangleIcon = <HTMLDivElement>triangleIcons[i];
       triangleIcon.addEventListener("click", () => {
-        let parent = <HTMLDivElement>triangleIcon.parentElement;
-        parent.classList.toggle("menu_row-expanded");
+        let parent = <HTMLDivElement>triangleIcon.parentElement.parentElement;
+        parent.classList.toggle("menu2_item-expanded");
       });
     }
   }
@@ -86,7 +85,7 @@ class Menu {
   }
 
   setResourceCountsFromCache() {
-    var items = document.querySelectorAll(".menu_item");
+    var items = document.querySelectorAll(".menu2_item_content");
     for (var i = 0; i < items.length; i++) {
       let item = <HTMLDivElement>items[i];
       let url = item.getAttribute("href");
@@ -98,7 +97,7 @@ class Menu {
   }
 
   setResourceCounts(data: any) {
-    var items = document.querySelectorAll(".menu_item");
+    var items = document.querySelectorAll(".menu2_item_content");
     for (var i = 0; i < items.length; i++) {
       let item = <HTMLDivElement>items[i];
       let url = item.getAttribute("href");
@@ -108,7 +107,7 @@ class Menu {
   }
 
   setResourceCount(el: HTMLDivElement, count: string) {
-    let countEl = el.querySelector(".menu_item_right");
+    let countEl = el.querySelector(".menu2_item_content_subname");
     if (count) {
       this.saveCountToStorage(el.getAttribute("href"), count);
       countEl.textContent = count;
