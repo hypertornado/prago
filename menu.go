@@ -335,9 +335,9 @@ func (resourceData *resourceData) getResourceItemMenu(requestContext *menuReques
 	if len(items) == 0 {
 		return nil
 	}
+	sortAndExpandMenuItems(items, requestContext.UserData.Locale())
 	ret := items[0]
 	ret.Subitems = items[1:]
-	sortAndExpandMenuItems(ret.Subitems, requestContext.UserData.Locale())
 	return ret
 
 }
