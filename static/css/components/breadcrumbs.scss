@@ -32,8 +32,28 @@
     object-fit: contain;
 }
 
-.breadcrumb_icon {
+.breadcrumb_badge {
     height: 20px;
+    aspect-ratio: 1;
+    display: flex;
+    position: relative;
+    border-radius: 3px;
+    overflow: hidden;
+    border: 0px solid red;
+}
+
+.breadcrumb_badge_image {
+    position: absolute;
+    inset: 0;
+    object-fit: cover;
+    aspect-ratio: 1;
+    width: 100%;
+    z-index: -1;
+    opacity: 1;
+}
+
+.breadcrumb_badge_icon {
+    width: 100%;
     aspect-ratio: 1;
 }
 
@@ -47,6 +67,6 @@
 }
 
 .breadcrumbs_divider {
-    height: 20px;
+    height: 15px;
     aspect-ratio: 1;
 }

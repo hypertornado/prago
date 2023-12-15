@@ -8,6 +8,8 @@ import (
 	"strconv"
 )
 
+const defaultHighPriority int64 = 1000
+
 func (resourceData *resourceData) initDefaultResourceActions() {
 
 	icon := resourceData.icon
@@ -15,13 +17,13 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		icon = iconBoard
 	}
 
-	resourceData.action("").Icon(icon).priority().
+	resourceData.action("").Icon(icon).setPriority(defaultHighPriority).
 		Permission(resourceData.canView).Name(resourceData.pluralName).ui(
 		func(request *Request, pd *pageData) {
 			pd.BoardView = resourceData.resourceBoard.boardView(request)
 		})
 
-	resourceData.action("list").Icon(iconTable).priority().Permission(resourceData.canView).Name(messages.GetNameFunction("admin_list")).
+	resourceData.action("list").Icon(iconTable).setPriority(defaultHighPriority).Permission(resourceData.canView).Name(messages.GetNameFunction("admin_list")).
 		ui(func(request *Request, pd *pageData) {
 			listData, err := resourceData.getListHeader(request)
 			must(err)
@@ -54,19 +56,18 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 				Flash(request)
 			vc.Validation().RedirectionLocaliton = resourceData.getItemURL(item, "", request)
 		}
-	}).Icon(iconAdd).priority().Permission(resourceData.canCreate).Name(messages.GetNameFunction("admin_new"))
+	}).Icon(iconAdd).priority(defaultHighPriority).Permission(resourceData.canCreate).Name(messages.GetNameFunction("admin_new"))
 
-	resourceData.ItemAction("").Icon("glyphicons-basic-588-book-open-text.svg").priority().Permission(resourceData.canView).
-		ui(func(item any, request *Request, pd *pageData) {
-			if item == nil {
-				renderErrorPage(request, 404)
-				return
-			}
-			pd.Views = resourceData.getViews(request.r.Context(), item, request)
-		},
-		)
+	resourceData.itemActionUi("", func(item any, request *Request, pd *pageData) {
+		if item == nil {
+			renderErrorPage(request, 404)
+			return
+		}
+		pd.Views = resourceData.getViews(request.r.Context(), item, request)
+	},
+	).Icon("glyphicons-basic-588-book-open-text.svg").setPriority(defaultHighPriority).Permission(resourceData.canView)
 
-	resourceData.FormItemAction("edit").Icon("glyphicons-basic-31-pencil.svg").priority().Name(messages.GetNameFunction("admin_edit")).Permission(resourceData.canUpdate).Form(
+	resourceData.FormItemAction("edit").Icon("glyphicons-basic-31-pencil.svg").priority(defaultHighPriority).Name(messages.GetNameFunction("admin_edit")).Permission(resourceData.canUpdate).Form(
 		func(item any, form *Form, request *Request) {
 			resourceData.addFormItems(item, request, form)
 			form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
@@ -100,7 +101,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		}
 	})
 
-	resourceData.FormItemAction("delete").Icon("glyphicons-basic-17-bin.svg").priority().Permission(resourceData.canDelete).Name(messages.GetNameFunction("admin_delete")).Form(
+	resourceData.FormItemAction("delete").Icon("glyphicons-basic-17-bin.svg").priority(-defaultHighPriority).Permission(resourceData.canDelete).Name(messages.GetNameFunction("admin_delete")).Form(
 		func(item any, form *Form, request *Request) {
 			form.AddDeleteSubmit(messages.Get(request.Locale(), "admin_delete"))
 			itemName := resourceData.previewer(request, item).Name()
@@ -118,7 +119,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 	})
 
 	if resourceData.previewURLFunction != nil {
-		resourceData.ItemAction("preview").Icon("glyphicons-basic-52-eye.svg").priority().Name(messages.GetNameFunction("admin_preview")).Handler(
+		resourceData.ItemAction("preview").Icon("glyphicons-basic-52-eye.svg").priority(defaultHighPriority).Name(messages.GetNameFunction("admin_preview")).Handler(
 			func(item any, request *Request) {
 				request.Redirect(
 					resourceData.previewURLFunction(item),
@@ -140,14 +141,14 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 
 		}).
 			Icon("glyphicons-basic-58-history.svg").
-			priority().
+			priority(defaultHighPriority).
 			Name(messages.GetNameFunction("admin_history")).
 			Permission(resourceData.canUpdate)
 
 		resourceData.
 			FormItemAction("history").
 			Icon("glyphicons-basic-58-history.svg").
-			priority().
+			priority(defaultHighPriority).
 			Name(messages.GetNameFunction("admin_history")).
 			Permission(resourceData.canUpdate).
 			Form(func(item any, f *Form, r *Request) {

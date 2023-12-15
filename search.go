@@ -105,7 +105,7 @@ func (app *App) initSearch() {
 			}
 
 			view := &view{
-				Header: &BoxHeader{
+				Header: &boxHeader{
 					Name:      fmt.Sprintf("Vyhledávání – „%s“", q),
 					TextAfter: fmt.Sprintf("%s výsledků", humanizeNumber(hits)),
 				},

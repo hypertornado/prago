@@ -30,9 +30,9 @@ var filesCDN cdnclient.CDNAccount
 
 func initCDN(app *App) {
 	filesCDN = cdnclient.NewCDNAccount(
-		app.MustGetSetting(context.Background(), "cdn_url"),
-		app.MustGetSetting(context.Background(), "cdn_account"),
-		app.MustGetSetting(context.Background(), "cdn_password"),
+		app.mustGetSetting(context.Background(), "cdn_url"),
+		app.mustGetSetting(context.Background(), "cdn_account"),
+		app.mustGetSetting(context.Background(), "cdn_password"),
 	)
 }
 
@@ -259,7 +259,7 @@ func (app *App) initFilesResource() {
 				}
 			}
 		},
-	).priority().Permission(resource.data.canUpdate).Name(unlocalized("Nahrát soubor"))
+	).priority(1000000).Permission(resource.data.canUpdate).Name(unlocalized("Nahrát soubor"))
 
 	ResourceAction[File](app, "getcdnurl").Permission(sysadminPermission).Method("POST").Handler(
 		func(request *Request) {

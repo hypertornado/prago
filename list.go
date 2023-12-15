@@ -69,7 +69,7 @@ type listRow struct {
 type listItemActions struct {
 	VisibleButtons  []buttonData
 	ShowOrderButton bool
-	MenuButtons     []buttonData
+	MenuButtons     []*buttonData
 }
 
 type pagination struct {

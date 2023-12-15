@@ -16,13 +16,14 @@ type pageData struct {
 
 	PageTemplate string
 	PageData     interface{}
-	Menu         *menu
+
+	Menu *menu
 
 	Form  *Form
 	List  *list
 	Views []*view
 
-	BoardView *BoardView
+	BoardView *boardView
 
 	HelpIcons []string
 
@@ -79,8 +80,8 @@ type pageNoLogin struct {
 	Title             string
 	Icon              string
 
-	Navigation navigation
-	FormData   interface{}
+	Tabs     []*tab
+	FormData interface{}
 }
 
 func renderPageNoLogin(request *Request, page *pageNoLogin) {
@@ -90,7 +91,7 @@ func renderPageNoLogin(request *Request, page *pageNoLogin) {
 	page.Language = localeFromRequest(request)
 	page.Version = request.app.version
 
-	for _, v := range page.Navigation.Tabs {
+	for _, v := range page.Tabs {
 		if v.Selected {
 			name = v.Name
 			icon = v.Icon

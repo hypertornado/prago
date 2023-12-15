@@ -25,7 +25,7 @@ func addServerCommand(app *App) {
 		Callback(func() {
 			app.developmentMode = developmentMode
 			if port <= 0 {
-				configPort := app.MustGetSetting(context.Background(), "port")
+				configPort := app.mustGetSetting(context.Background(), "port")
 				var err error
 				port, err = strconv.Atoi(configPort)
 				if err != nil {

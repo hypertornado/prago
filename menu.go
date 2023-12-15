@@ -25,6 +25,7 @@ type menu struct {
 
 type menuItem struct {
 	Icon         string
+	Image        string
 	Name         string
 	URL          string
 	Subitems     []*menuItem
@@ -42,9 +43,10 @@ type menuRequestContext struct {
 
 func getMenuRequestContextFromRequest(request *Request, item any) *menuRequestContext {
 	ret := &menuRequestContext{
-		URL:      request.Request().URL.Path,
-		UserData: request,
-		Item:     item,
+		URL:       request.Request().URL.Path,
+		UserData:  request,
+		Item:      item,
+		CSRFToken: request.csrfToken(),
 	}
 	return ret
 }
@@ -152,32 +154,6 @@ func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem
 
 	if board.parentResource != nil {
 		ret = board.parentResource.getResourceMenu(requestContext)
-
-		/*
-			navigation := board.parentResource.getResourceNavigation(request, "")
-			for k, v := range navigation.Tabs {
-				if k == 0 {
-					continue
-				}
-
-				var selected bool
-				if urlPath == v.URL {
-					selected = true
-				}
-
-				ret = append(ret, &menuItem{
-					Icon:         v.Icon,
-					Name:         v.Name,
-					URL:          v.URL,
-					Selected:     selected,
-					SortPriority: int64(-k),
-				})
-			}
-
-			if board.parentResource.isItPointerToResourceItem(item) {
-				ret = append(ret, board.parentResource.getResourceItemMenu(request, item))
-
-			}*/
 	}
 
 	resources := app.resources
@@ -282,7 +258,7 @@ func (resourceData *resourceData) getResourceMenu(requestContext *menuRequestCon
 			Icon:         v.icon,
 			Name:         v.name(requestContext.UserData.Locale()),
 			URL:          resourceData.getURL(v.url),
-			SortPriority: -int64(k),
+			SortPriority: v.priority - int64(k),
 		}
 		if urlPath == menuItem.URL {
 			menuItem.Selected = true
@@ -290,6 +266,7 @@ func (resourceData *resourceData) getResourceMenu(requestContext *menuRequestCon
 
 		if v.url == "list" && resourceData.isItPointerToResourceItem(requestContext.Item) {
 			menuItem.Subitems = append(menuItem.Subitems, resourceData.getResourceItemMenu(requestContext))
+			//menuItem.Expanded = true
 		}
 		ret = append(ret, menuItem)
 	}
@@ -309,17 +286,18 @@ func (resourceData *resourceData) getResourceItemMenu(requestContext *menuReques
 			continue
 		}
 		name := v.name(requestContext.UserData.Locale())
+		var thumbnail string
 		if v.url == "" {
-			name = resourceData.previewer(requestContext.UserData, requestContext.Item).Name()
+			previewer := resourceData.previewer(requestContext.UserData, requestContext.Item)
+			thumbnail = previewer.ThumbnailURL(context.Background())
+			name = previewer.Name()
 		}
 
-		priority := -int64(k)
-		if v.isPriority {
-			priority += 1000
-		}
+		priority := v.priority - int64(k)
 
 		item := &menuItem{
 			Icon:         v.icon,
+			Image:        thumbnail,
 			Name:         name,
 			URL:          resourceData.getItemURL(requestContext.Item, v.url, requestContext.UserData),
 			Expanded:     true,
@@ -351,7 +329,9 @@ func sortAndExpandMenuItems(items []*menuItem, locale string) {
 				expanded = true
 			}
 		}
-		item.Expanded = expanded
+		if !item.Expanded {
+			item.Expanded = expanded
+		}
 	}
 }
 

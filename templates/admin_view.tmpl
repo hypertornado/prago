@@ -5,9 +5,10 @@
 {{end}}
 
 {{define "admin_view"}}
+  <div class="box">
   {{if .Name}}
   <div class="view_header">
-    <img src="/admin/api/icons?file={{.Icon}}&color=444444" class="view_header_icon">
+    <img src="/admin/api/icons?file={{.Icon}}&color=888888" class="view_header_icon">
     {{if .Name}}
       <span class="view_header_name">
         {{.Name}}
@@ -25,7 +26,6 @@
     </div>
   </div>
   {{end}}
-  <div class="box">
   {{- if .Header}}
     {{- template "box_header" .Header}}
   {{end}}
@@ -135,7 +135,7 @@
         <div class="admin_preview_image" style="background-image: url('{{CSS .Image}}') ;"></div>
         <div class="admin_preview_right">
           <div class="admin_preview_name">{{.Name}}</div>
-          <div class="admin_preview_description">{{.Description}}</div>
+          <div class="admin_preview_description" title="{{.Description}}">{{.Description}}</div>
         </div>
       </a>
     {{else}}
@@ -158,7 +158,7 @@
       <progress class="progress list_progress"></progress>
     </div>
     <div class="admin_relationlist_more hidden">
-      <div class="btn">Nahrát více</div>
+      <div class="btn"><img src="/admin/api/icons?file=glyphicons-basic-221-chevron-down.svg&color=444444" class="btn_icon"></div>
     </div>
   </div>
 {{end}}

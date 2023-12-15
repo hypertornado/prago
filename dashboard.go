@@ -236,8 +236,8 @@ func (item *DashboardFigure) getDescriptionStr(request *Request, values [2]int64
 	return ret
 }
 
-func (item *DashboardFigure) view(request *Request) *DashboardViewFigure {
-	ret := &DashboardViewFigure{
+func (item *DashboardFigure) view(request *Request) *dashboardViewFigure {
+	ret := &dashboardViewFigure{
 		UUID:               item.uuid,
 		URL:                item.url,
 		Name:               item.name(request.Locale()),

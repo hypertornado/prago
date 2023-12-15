@@ -127,7 +127,7 @@ func (u user) sendConfirmEmail(ctx context.Context, app *App, locale string) err
 	urlValues.Add("token", u.emailToken(ctx, app))
 
 	subject := messages.Get(locale, "admin_confirm_email_subject", app.name(u.Locale))
-	link := app.MustGetSetting(ctx, "base_url") + app.getAdminURL("user/confirm_email") + "?" + urlValues.Encode()
+	link := app.mustGetSetting(ctx, "base_url") + app.getAdminURL("user/confirm_email") + "?" + urlValues.Encode()
 	body := messages.Get(locale, "admin_confirm_email_body", link, link, app.name(u.Locale))
 	return app.Email().To(u.Name, u.Email).Subject(subject).HTMLContent(body).Send()
 }

@@ -22,7 +22,7 @@ func (app *App) initBuild() {
 	})
 
 	app.addCommand("syncbackups").Callback(func() {
-		ssh := app.MustGetSetting(context.Background(), "ssh")
+		ssh := app.mustGetSetting(context.Background(), "ssh")
 		if ssh == "" {
 			app.Log().Println("no ssh value set in settings")
 			return
@@ -31,7 +31,7 @@ func (app *App) initBuild() {
 	})
 
 	app.addCommand("party").Callback(func() {
-		ssh := app.MustGetSetting(context.Background(), "ssh")
+		ssh := app.mustGetSetting(context.Background(), "ssh")
 		if ssh == "" {
 			panic("no ssh value set in settings")
 		}

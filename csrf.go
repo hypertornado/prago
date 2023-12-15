@@ -8,7 +8,7 @@ import (
 
 var csrfRandomness string
 
-func RequestCSRF(request *Request) string {
+func requestCSRF(request *Request) string {
 	if csrfRandomness == "" {
 		csrfRandomness = randomString(30)
 	}

@@ -283,7 +283,7 @@ func elasticsearchStats(app *App) [][3]string {
 		ret = append(ret, [3]string{
 			v,
 			fmt.Sprintf("%d docs", stats.Indices[v].Total.Docs.Count),
-			fmt.Sprintf("%s size", ByteCountSI(stats.Indices[v].Total.Store.SizeInBytes)),
+			fmt.Sprintf("%s size", byteCountSI(stats.Indices[v].Total.Store.SizeInBytes)),
 		})
 	}
 
@@ -291,7 +291,7 @@ func elasticsearchStats(app *App) [][3]string {
 
 }
 
-func ByteCountSI(b int64) string {
+func byteCountSI(b int64) string {
 	const unit = 1000
 	if b < unit {
 		return fmt.Sprintf("%d B", b)

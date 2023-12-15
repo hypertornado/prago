@@ -1,6 +1,6 @@
 package prago
 
-type BoardView struct {
+type boardView struct {
 	AppName     string
 	BoardIcon   string
 	BoardName   string
@@ -8,23 +8,23 @@ type BoardView struct {
 	IsMainBoard bool
 	Resources   []*menuItem
 
-	MainDashboard *DashboardView
+	MainDashboard *dashboardView
 
-	Dashboards []*DashboardView
+	Dashboards []*dashboardView
 
 	Role string
 
 	TasksName string
 }
 
-type DashboardView struct {
+type dashboardView struct {
 	Name    string
 	Tasks   []taskView
-	Figures []*DashboardViewFigure
-	Tables  []DashboardViewTable
+	Figures []*dashboardViewFigure
+	Tables  []dashboardViewTable
 }
 
-type DashboardViewFigure struct {
+type dashboardViewFigure struct {
 	UUID               string
 	Icon               string
 	URL                string
@@ -32,12 +32,12 @@ type DashboardViewFigure struct {
 	RefreshTimeSeconds int64
 }
 
-type DashboardViewTable struct {
+type dashboardViewTable struct {
 	UUID               string
 	RefreshTimeSeconds int64
 }
 
-func (board *Board) boardView(request *Request) *BoardView {
+func (board *Board) boardView(request *Request) *boardView {
 	locale := request.getUser().Locale
 
 	var boardName, boardIcon, boardURL string
@@ -56,7 +56,7 @@ func (board *Board) boardView(request *Request) *BoardView {
 		boardIcon = board.parentResource.icon
 	}
 
-	ret := &BoardView{
+	ret := &boardView{
 		AppName:     board.app.name(request.Locale()),
 		BoardName:   boardName,
 		BoardIcon:   boardIcon,
@@ -79,12 +79,12 @@ func (board *Board) boardView(request *Request) *BoardView {
 	return ret
 }
 
-func (dashboard *Dashboard) view(request *Request) *DashboardView {
+func (dashboard *Dashboard) view(request *Request) *dashboardView {
 	if !dashboard.isVisible(request) {
 		return nil
 	}
 
-	view := &DashboardView{
+	view := &dashboardView{
 		Name: dashboard.name(request.Locale()),
 	}
 
@@ -100,7 +100,7 @@ func (dashboard *Dashboard) view(request *Request) *DashboardView {
 
 	for _, v := range dashboard.tables {
 		if request.Authorize(v.permission) {
-			view.Tables = append(view.Tables, DashboardViewTable{
+			view.Tables = append(view.Tables, dashboardViewTable{
 				UUID:               v.uuid,
 				RefreshTimeSeconds: v.refreshTimeSeconds,
 			})

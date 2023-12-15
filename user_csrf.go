@@ -8,7 +8,7 @@ import (
 )
 
 func (app *App) generateCSRFToken(userID int64) string {
-	randomness := app.MustGetSetting(context.Background(), "random")
+	randomness := app.mustGetSetting(context.Background(), "random")
 	if len(randomness) <= 0 {
 		panic("randomness too short")
 	}

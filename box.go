@@ -1,22 +1,15 @@
 package prago
 
-type BoxHeader struct {
+type boxHeader struct {
 	Icon      string
 	Name      string
 	TextAfter string
 	Image     string
-	Tags      []BoxTag
 
 	Buttons []*buttonData
 }
 
-type BoxTag struct {
-	URL  string
-	Icon string
-	Name string
-}
-
-func (form *Form) GetBoxHeader() *BoxHeader {
+func (form *Form) GetBoxHeader() *boxHeader {
 
 	icon := form.Icon
 
@@ -31,7 +24,7 @@ func (form *Form) GetBoxHeader() *BoxHeader {
 
 	description := form.Description
 
-	return &BoxHeader{
+	return &boxHeader{
 		Icon:      icon,
 		Name:      name,
 		Image:     form.image,

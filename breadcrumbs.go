@@ -7,6 +7,7 @@ type breadcrumbs struct {
 type breadcrumb struct {
 	Logo     string
 	Icon     string
+	Image    string
 	Name     string
 	URL      string
 	Title    string
@@ -20,10 +21,6 @@ func (menu menu) GetBreadcrumbs() *breadcrumbs {
 		Logo: "/admin/logo",
 		URL:  "/admin",
 	}}, items...)
-
-	/*if len(items) > 1 {
-		items = items[0 : len(items)-1]
-	}*/
 
 	return &breadcrumbs{
 		Items: items,
@@ -46,6 +43,7 @@ func getBreadcrumbsFromMenuItems(items []*menuItem) []*breadcrumb {
 func menuItemToBreadcrumb(menuItem *menuItem, selected bool) *breadcrumb {
 	return &breadcrumb{
 		Icon:     menuItem.Icon,
+		Image:    menuItem.Image,
 		Name:     menuItem.Name,
 		URL:      menuItem.URL,
 		Title:    menuItem.Name,

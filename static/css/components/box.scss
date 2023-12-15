@@ -4,14 +4,9 @@
   max-width: min(650px, 100vw);
   width: 100%;
   margin-bottom: 20px;
-  //background-color: #fff;
   border-radius: 5px;
   margin-top: 0px;
   @include shadow;
-}
-
-.box:first-child {
-  //margin-top: 20px;
 }
 
 .box_content {
@@ -30,30 +25,6 @@
   display: inline-block;
   width: 100%;
   padding: 5px 5px;
-}
-
-.box_tags {
-  display: flex;
-}
-
-a.box_tag {
-  display: flex;
-  margin: 3px;
-  padding: 3px 10px;
-  border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.8);
-  color: #4078c0;
-  text-decoration: none;
-  @include shadowMedium;
-}
-
-a.box_tag:hover {
-  background: white;
-}
-
-.box_tag_icon {
-  width: 15px;
-  margin-right: 5px;
 }
 
 .box_icon {

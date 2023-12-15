@@ -175,5 +175,6 @@ func (previewer *previewer) DescriptionExtended(relatedResource *resourceData) s
 		}
 	}
 	ret := strings.Join(items, " · ")
-	return cropMarkdown(ret, 500)
+	return ret
+	//return filterMarkdown(ret)
 }

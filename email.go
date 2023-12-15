@@ -33,7 +33,7 @@ func newEmailAddress(name, email string) *emailAddress {
 }
 
 func (app *App) Email() *Email {
-	noReplyEmail := app.MustGetSetting(context.TODO(), "no_reply_email")
+	noReplyEmail := app.mustGetSetting(context.TODO(), "no_reply_email")
 	return &Email{
 		from: newEmailAddress(app.name("en"), noReplyEmail),
 		app:  app,

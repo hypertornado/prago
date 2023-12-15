@@ -157,18 +157,16 @@ select.admin_timestamp_minute {
 }
 
 .view_header {
-  margin: 0 auto;
-  max-width: 660px;
-  padding-bottom: 5px;
-  padding-left: 15px;
+  padding: 0px 10px 0px 15px;
   display: flex;
-  margin-top: 30px;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .view_header_icon {
-  width: 35px;
+  width: 70px;
+  aspect-ratio: 1;
   margin-right: 10px;
+  padding: 10px;
 }
 
 .view_header_name {
@@ -288,7 +286,12 @@ select.admin_timestamp_minute {
   font-size: 0.9rem;
   line-height: 1.3em;
   color: $gray;
-  overflow-wrap: anywhere;
+  //overflow-wrap: anywhere;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .admin_item_relation {

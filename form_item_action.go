@@ -41,8 +41,8 @@ func (resourceData *resourceData) FormItemAction(url string) *formItemActionData
 
 }
 
-func (actionData *formItemActionData) priority() *formItemActionData {
-	actionData.formAction.priority()
+func (actionData *formItemActionData) priority(priority int64) *formItemActionData {
+	actionData.formAction.priority(priority)
 	return actionData
 }
 

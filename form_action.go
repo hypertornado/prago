@@ -75,9 +75,9 @@ func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Reques
 		formHandler(form, request)
 
 		renderPageNoLogin(request, &pageNoLogin{
-			App:        app,
-			Navigation: app.getNologinNavigation(locale, id),
-			FormData:   form,
+			App:      app,
+			Tabs:     app.getNologinNavigation(locale, id),
+			FormData: form,
 		})
 	})
 
@@ -121,16 +121,6 @@ func (formAction *FormAction) Icon(icon string) *FormAction {
 	return formAction
 }
 
-/*func (formAction *FormAction) Form(formGenerator func(*Form, *Request)) *FormAction {
-	formAction.formGenerator = formGenerator
-	return formAction
-}
-
-func (formAction *FormAction) Validation(validation Validation) *FormAction {
-	formAction.validation = validation
-	return formAction
-}*/
-
 func (formAction *FormAction) Permission(permission Permission) *FormAction {
 	formAction.actionForm.Permission(permission)
 	formAction.actionValidation.Permission(permission)
@@ -142,7 +132,7 @@ func (formAction *FormAction) userMenu() *FormAction {
 	return formAction
 }
 
-func (formAction *FormAction) priority() *FormAction {
-	formAction.actionForm.priority()
+func (formAction *FormAction) priority(priority int64) *FormAction {
+	formAction.actionForm.priority = priority
 	return formAction
 }

@@ -2,14 +2,16 @@ package prago
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
 type buttonData struct {
-	Icon   string
-	Name   string
-	URL    string
-	Params map[string]string
+	Icon     string
+	Name     string
+	URL      string
+	Params   map[string]string
+	Priority int64
 }
 
 // Action represents action
@@ -28,7 +30,8 @@ type Action struct {
 	resourceData *resourceData
 	isItemAction bool
 	isUserMenu   bool
-	isPriority   bool
+	priority     int64
+	//isPriority   bool
 }
 
 func bindAction(action *Action) error {
@@ -125,8 +128,8 @@ func (action *Action) Method(method string) *Action {
 	return action
 }
 
-func (action *Action) priority() *Action {
-	action.isPriority = true
+func (action *Action) setPriority(priority int64) *Action {
+	action.priority = priority
 	return action
 }
 
@@ -149,16 +152,51 @@ func (action *Action) addConstraint(constraint routerConstraint) {
 	action.constraints = append(action.constraints, constraint)
 }
 
+func (resourceData *resourceData) getItemButtonData(userData UserData, item interface{}) (ret []*buttonData) {
+	for _, v := range resourceData.itemActions {
+		if v.method != "GET" {
+			continue
+		}
+		if !userData.Authorize(v.permission) {
+			continue
+		}
+		if v.url == "" {
+			continue
+		}
+		name := v.name(userData.Locale())
+		if v.url == "" {
+			name = resourceData.previewer(userData, item).Name()
+		}
+		ret = append(ret, &buttonData{
+			Icon:     v.icon,
+			Name:     name,
+			URL:      resourceData.getItemURL(item, v.url, userData),
+			Priority: v.priority,
+		},
+		)
+	}
+
+	sort.Slice(ret, func(i, j int) bool {
+		if ret[i].Priority > ret[j].Priority {
+			return true
+		} else {
+			return false
+		}
+	})
+	return ret
+}
+
 func (resourceData *resourceData) getListItemActions(userData UserData, item any, id int64) listItemActions {
-	ret := listItemActions{}
+	ret := listItemActions{
+		MenuButtons: resourceData.getItemButtonData(userData, item),
+	}
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{
 		Icon: iconView,
 		URL:  resourceData.getURL(fmt.Sprintf("%d", id)),
 	})
 
-	navigation := resourceData.getItemNavigation(userData, item, "")
-
+	/*navigation := resourceData.getItemNavigation(userData, item, "")
 	for _, v := range navigation.Tabs {
 		if !v.Selected {
 			ret.MenuButtons = append(ret.MenuButtons, buttonData{
@@ -167,7 +205,7 @@ func (resourceData *resourceData) getListItemActions(userData UserData, item any
 				URL:  v.URL,
 			})
 		}
-	}
+	}*/
 
 	if userData.Authorize(resourceData.canUpdate) && resourceData.orderField != nil {
 		ret.ShowOrderButton = true
@@ -220,7 +258,6 @@ func (action *Action) View(template string, dataSource func(*Request) any) *Acti
 func (action *Action) ui(uiHandler func(*Request, *pageData)) *Action {
 	return action.Handler(func(request *Request) {
 		pageData := createPageData(request)
-		//pageData.Navigation = action.getnavigation(request)
 
 		if action.isItemAction {
 			item := action.resourceData.query(request.r.Context()).ID(request.Param("id"))

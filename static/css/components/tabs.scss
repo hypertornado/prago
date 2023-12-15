@@ -50,14 +50,6 @@
   margin: 7px 2px;
 }
 
-.admin_navigation_tabdivider-visible {
-  border-color: #ddd;
-}
-
-.admin_navigation_tab:hover {
-  //@include shadowMedium;
-}
-
 .admin_navigation_tab-selected,
 .admin_navigation_tab-selected:hover {
   background-color: $baseColor;

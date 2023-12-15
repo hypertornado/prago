@@ -81,7 +81,7 @@ func (app *App) initTemplates() {
 		return ""
 	})
 
-	app.AddTemplateFunction("istabvisible", isTabVisible)
+	//app.AddTemplateFunction("istabvisible", isTabVisible)
 
 	app.AddTemplateFunction("iconExists", func(iconName string) bool {
 		return app.iconExists(iconName)

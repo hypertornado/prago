@@ -8,14 +8,14 @@ import (
 )
 
 type settingsSingleton struct {
-	settingsMap   map[string]*setting
-	settingsArray []*setting
-	resource      *Resource[PragoSettings]
+	settingsMap   map[string]*Setting
+	settingsArray []*Setting
+	resource      *Resource[pragoSettings]
 	mutex         *sync.RWMutex
 	cache         map[string]string
 }
 
-type PragoSettings struct {
+type pragoSettings struct {
 	ID        int64
 	Name      string
 	Value     string    `prago-type:"text" prago-preview:"true"`
@@ -25,9 +25,9 @@ type PragoSettings struct {
 
 func (app *App) initSettings() {
 	app.settings = &settingsSingleton{
-		settingsMap:   make(map[string]*setting),
-		settingsArray: []*setting{},
-		resource:      NewResource[PragoSettings](app),
+		settingsMap:   make(map[string]*Setting),
+		settingsArray: []*Setting{},
+		resource:      NewResource[pragoSettings](app),
 		mutex:         new(sync.RWMutex),
 		cache:         make(map[string]string),
 	}
@@ -38,14 +38,14 @@ func (app *App) initSettings() {
 	initDefaultSettings(app)
 }
 
-func (app *App) Setting(id string, permission Permission) *setting {
+func (app *App) Setting(id string, permission Permission) *Setting {
 
 	s := app.settings.settingsMap[id]
 	if s != nil {
 		panic(fmt.Sprintf("setting %s already set", id))
 	}
 
-	setting := &setting{
+	setting := &Setting{
 		id:         id,
 		name:       unlocalized(id),
 		permission: permission,
@@ -57,22 +57,22 @@ func (app *App) Setting(id string, permission Permission) *setting {
 	return setting
 }
 
-func (setting *setting) Name(name func(string) string) *setting {
+func (setting *Setting) Name(name func(string) string) *Setting {
 	setting.name = name
 	return setting
 }
 
-func (setting *setting) DefaultValue(defaultValue string) *setting {
+func (setting *Setting) DefaultValue(defaultValue string) *Setting {
 	setting.defaultValue = defaultValue
 	return setting
 }
 
-func (setting *setting) ValueChangeCallback(fn func()) *setting {
+func (setting *Setting) ValueChangeCallback(fn func()) *Setting {
 	setting.changeCallback = fn
 	return setting
 }
 
-type setting struct {
+type Setting struct {
 	id             string
 	name           func(string) string
 	permission     Permission
@@ -93,7 +93,7 @@ func (app *App) GetSetting(ctx context.Context, id string) (string, error) {
 		return cachedValue, nil
 	}
 
-	s := Query[PragoSettings](app).Is("name", id).First()
+	s := Query[pragoSettings](app).Is("name", id).First()
 	if s == nil {
 		return setting.defaultValue, nil
 	}
@@ -103,7 +103,7 @@ func (app *App) GetSetting(ctx context.Context, id string) (string, error) {
 	return s.Value, nil
 }
 
-func (app *App) MustGetSetting(ctx context.Context, id string) string {
+func (app *App) mustGetSetting(ctx context.Context, id string) string {
 	val, err := app.GetSetting(ctx, id)
 	must(err)
 	return val
@@ -120,9 +120,9 @@ func (app *App) saveSetting(id, value string, request *Request) error {
 	}
 	app.settings.cache = make(map[string]string)
 
-	s := Query[PragoSettings](app).Is("name", id).First()
+	s := Query[pragoSettings](app).Is("name", id).First()
 	if s == nil {
-		s = &PragoSettings{
+		s = &pragoSettings{
 			Name:  id,
 			Value: value,
 		}

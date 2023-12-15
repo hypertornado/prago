@@ -143,6 +143,7 @@ func createApp(codeName string, version string) *App {
 	app.initDashboard()
 	app.initIcons()
 	app.initMenuAPI()
+	//app.initResourceConnections()
 
 	return app
 }

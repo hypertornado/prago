@@ -60,22 +60,21 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 	app.newsletters = &Newsletters{
 		renderer:   defaultNewsletterRenderer,
 		app:        app,
-		randomness: app.MustGetSetting(context.Background(), "random"),
-		//board:      app.MainBoard,
+		randomness: app.mustGetSetting(context.Background(), "random"),
 	}
 
 	newsletterWriter := NewWriter[NewsletterWriteData](app, "newsletter_layout")
 
 	newsletterWriter.GET("/newsletter-subscribe", func(request *Request, data *NewsletterWriteData) {
 		data.Title = "Přihlásit se k odběru newsletteru"
-		data.Csrf = RequestCSRF(request)
+		data.Csrf = requestCSRF(request)
 		data.Yield = "newsletter_subscribe"
 		data.ShowBackButton = true
 		data.Site = app.name("en")
 	})
 
 	newsletterWriter.POST("/newsletter-subscribe", func(request *Request, data *NewsletterWriteData) {
-		if RequestCSRF(request) != request.Param("csrf") {
+		if requestCSRF(request) != request.Param("csrf") {
 			panic("wrong csrf")
 		}
 
@@ -141,7 +140,7 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 		data.Title = "Opravdu chcete odhlásit odběr newsletterů?"
 		data.Yield = "newsletter_unsubscribe"
 
-		data.Csrf = RequestCSRF(request)
+		data.Csrf = requestCSRF(request)
 		data.Email = email
 		data.Secret = secret
 
@@ -149,7 +148,7 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 
 	newsletterWriter.POST("/newsletter-unsubscribe", func(request *Request, data *NewsletterWriteData) {
 
-		if RequestCSRF(request) != request.Param("csrf") {
+		if requestCSRF(request) != request.Param("csrf") {
 			panic("wrong csrf")
 		}
 
@@ -210,7 +209,7 @@ func (nm Newsletters) confirmEmailBody(name, email string) string {
 	values.Set("secret", nm.secret(email))
 
 	u := fmt.Sprintf("%s/newsletter-confirm?%s",
-		nm.app.MustGetSetting(context.TODO(), "base_url"),
+		nm.app.mustGetSetting(context.TODO(), "base_url"),
 		values.Encode(),
 	)
 
@@ -226,7 +225,7 @@ func (nm Newsletters) unsubscribeURL(email string) string {
 	values.Set("secret", nm.secret(email))
 
 	return fmt.Sprintf("%s/newsletter-unsubscribe?%s",
-		nm.app.MustGetSetting(context.TODO(), "base_url"),
+		nm.app.mustGetSetting(context.TODO(), "base_url"),
 		values.Encode(),
 	)
 }
@@ -410,7 +409,7 @@ func (nm *Newsletters) GetBody(n newsletter, email string) (string, error) {
 	content := markdown.New(markdown.HTML(true)).RenderToString([]byte(n.Body))
 	params := map[string]interface{}{
 		"id":          n.ID,
-		"baseUrl":     nm.app.MustGetSetting(context.TODO(), "base_url"),
+		"baseUrl":     nm.app.mustGetSetting(context.TODO(), "base_url"),
 		"site":        nm.app.name("en"),
 		"title":       n.Name,
 		"unsubscribe": nm.unsubscribeURL(email),
@@ -496,7 +495,7 @@ func (nm *Newsletters) getNewsletterSectionData(n newsletter) []newsletterSectio
 			button = v.Button
 		}
 
-		url := nm.app.MustGetSetting(context.TODO(), "base_url")
+		url := nm.app.mustGetSetting(context.TODO(), "base_url")
 		if v.URL != "" {
 			url = v.URL
 		}

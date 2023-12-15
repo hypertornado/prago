@@ -21,6 +21,24 @@ func (resource *Resource[T]) ItemAction(url string) *ResourceItemAction[T] {
 	}
 }
 
+func (action *ResourceItemAction[T]) View(template string, dataSource func(*T, *Request) interface{}) *ResourceItemAction[T] {
+	action.data.View(template, func(t any, r *Request) interface{} {
+		return dataSource(t.(*T), r)
+	})
+	return action
+}
+
+func (actionData *resourceItemActionData) View(template string, dataSource func(any, *Request) interface{}) *resourceItemActionData {
+	actionData.action.View(template, func(request *Request) interface{} {
+		item := actionData.resourceData.query(request.r.Context()).ID(request.Param("id"))
+		if item == nil {
+			panic("can't find item")
+		}
+		return dataSource(item, request)
+	})
+	return actionData
+}
+
 func (resourceData *resourceData) ItemAction(itemUrl string) *resourceItemActionData {
 	action := newAction(resourceData.app, itemUrl)
 	action.resourceData = resourceData
@@ -43,8 +61,22 @@ func (resourceData *resourceData) ItemAction(itemUrl string) *resourceItemAction
 	}
 }
 
-func (actionData *resourceItemActionData) priority() *resourceItemActionData {
-	actionData.action.priority()
+func (resourceData *resourceData) itemActionUi(itemURL string, handler func(any, *Request, *pageData)) *Action {
+	action := resourceData.ItemAction(itemURL).action
+
+	action.ui(func(request *Request, pd *pageData) {
+		item := resourceData.query(request.r.Context()).ID(request.Param("id"))
+		if item == nil {
+			panic("can't find item")
+		}
+		handler(item, request, pd)
+	})
+
+	return action
+}
+
+func (actionData *resourceItemActionData) priority(priority int64) *resourceItemActionData {
+	actionData.action.priority = priority
 	return actionData
 }
 
@@ -65,36 +97,6 @@ func (action *ResourceItemAction[T]) Permission(permission Permission) *Resource
 
 func (actionData *resourceItemActionData) Permission(permission Permission) *resourceItemActionData {
 	actionData.action.Permission(permission)
-	return actionData
-}
-
-func (action *ResourceItemAction[T]) View(template string, dataSource func(*T, *Request) interface{}) *ResourceItemAction[T] {
-	action.data.View(template, func(t any, r *Request) interface{} {
-		return dataSource(t.(*T), r)
-	})
-	return action
-}
-
-func (actionData *resourceItemActionData) View(template string, dataSource func(any, *Request) interface{}) *resourceItemActionData {
-	actionData.action.View(template, func(request *Request) interface{} {
-		item := actionData.resourceData.query(request.r.Context()).ID(request.Param("id"))
-		if item == nil {
-			panic("can't find item")
-		}
-
-		return dataSource(item, request)
-	})
-	return actionData
-}
-
-func (actionData *resourceItemActionData) ui(handler func(any, *Request, *pageData)) *resourceItemActionData {
-	actionData.action.ui(func(request *Request, pd *pageData) {
-		item := actionData.resourceData.query(request.r.Context()).ID(request.Param("id"))
-		if item == nil {
-			panic("can't find item")
-		}
-		handler(item, request, pd)
-	})
 	return actionData
 }
 
