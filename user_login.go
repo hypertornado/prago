@@ -6,12 +6,11 @@ import (
 
 func initUserLogin(app *App) {
 
-	app.UsersResource.ItemAction("loginas").Name(unlocalized("Přihlásit se jako")).Permission(sysadminPermission).Handler(
+	app.UsersResource.ItemActionHandler("loginas",
 		func(user *user, request *Request) {
 			request.logInUser(user)
 			request.Redirect(app.getAdminURL(""))
-		},
-	)
+		}).Name(unlocalized("Přihlásit se jako")).Permission(sysadminPermission)
 
 	app.nologinFormAction("login", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)

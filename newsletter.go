@@ -188,13 +188,13 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 		Board(board).
 		Name(unlocalized("Newsletter - sekce"), unlocalized("Newsletter - sekce"))
 
-	newsletterPersonsResource := NewResource[newsletterPersons](app).Board(board).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoba"), unlocalized("Newsletter - osoby"))
-	newsletterPersonsResource.ItemAction("preview-unsubscribe").Permission("sysadmin").Name(unlocalized("Unsubscribe stránka")).
-		Handler(func(person *newsletterPersons, request *Request) {
-			redirectURL := app.newsletters.unsubscribeURL(person.Email)
-			//unsubscribeURL
-			request.Redirect(redirectURL)
-		})
+	newsletterPersonsResource := NewResource[newsletterPersons](app).
+		Board(board).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoba"), unlocalized("Newsletter - osoby"))
+	newsletterPersonsResource.ItemActionHandler("preview-unsubscribe", func(person *newsletterPersons, request *Request) {
+		redirectURL := app.newsletters.unsubscribeURL(person.Email)
+		//unsubscribeURL
+		request.Redirect(redirectURL)
+	}).Permission("sysadmin").Name(unlocalized("Unsubscribe stránka"))
 	return app.newsletters
 }
 
@@ -286,15 +286,14 @@ func initNewsletterResource(resource *Resource[newsletter], board *Board) {
 
 	resource.Board(board)
 
-	resource.ItemAction("preview").Permission(loggedPermission).Name(unlocalized("Náhled")).Handler(
+	resource.ItemActionHandler("preview",
 		func(item *newsletter, request *Request) {
 			body, err := resource.data.app.newsletters.GetBody(*item, "")
 			must(err)
 
 			request.Response().WriteHeader(200)
 			request.Response().Write([]byte(body))
-		},
-	)
+		}).Permission(loggedPermission).Name(unlocalized("Náhled"))
 
 	resource.FormItemAction("send-preview").Permission(loggedPermission).Name(unlocalized("Odeslat náhled")).Form(
 		func(item *newsletter, f *Form, r *Request) {

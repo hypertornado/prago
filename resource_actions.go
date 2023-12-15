@@ -119,13 +119,12 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 	})
 
 	if resourceData.previewURLFunction != nil {
-		resourceData.ItemAction("preview").Icon("glyphicons-basic-52-eye.svg").priority(defaultHighPriority).Name(messages.GetNameFunction("admin_preview")).Handler(
+		resourceData.ItemActionHandler("preview",
 			func(item any, request *Request) {
 				request.Redirect(
 					resourceData.previewURLFunction(item),
 				)
-			},
-		)
+			}).Icon("glyphicons-basic-52-eye.svg").setPriority(defaultHighPriority).Name(messages.GetNameFunction("admin_preview"))
 	}
 
 	bindResourceExportCSV(resourceData)
