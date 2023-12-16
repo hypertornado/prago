@@ -259,7 +259,7 @@ func (app *App) initFilesResource() {
 				}
 			}
 		},
-	).priority(1000000).Permission(resource.data.canUpdate).Name(unlocalized("Nahrát soubor"))
+	).setPriority(1000000).Permission(resource.data.canUpdate).Name(unlocalized("Nahrát soubor"))
 
 	ResourceAction[File](app, "getcdnurl").Permission(sysadminPermission).Method("POST").Handler(
 		func(request *Request) {

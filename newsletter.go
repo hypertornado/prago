@@ -188,13 +188,14 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 		Board(board).
 		Name(unlocalized("Newsletter - sekce"), unlocalized("Newsletter - sekce"))
 
-	newsletterPersonsResource := NewResource[newsletterPersons](app).
+	NewResource[newsletterPersons](app).
 		Board(board).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoba"), unlocalized("Newsletter - osoby"))
-	newsletterPersonsResource.ItemActionHandler("preview-unsubscribe", func(person *newsletterPersons, request *Request) {
+
+	ResourceItemHandler[newsletterPersons](app, "preview-unsubscribe", func(person *newsletterPersons, request *Request) {
 		redirectURL := app.newsletters.unsubscribeURL(person.Email)
-		//unsubscribeURL
 		request.Redirect(redirectURL)
-	}).Permission("sysadmin").Name(unlocalized("Unsubscribe stránka"))
+	}).Permission("sysadmin")
+
 	return app.newsletters
 }
 
@@ -286,7 +287,7 @@ func initNewsletterResource(resource *Resource[newsletter], board *Board) {
 
 	resource.Board(board)
 
-	resource.ItemActionHandler("preview",
+	ResourceItemHandler[newsletter](resource.data.app, "preview",
 		func(item *newsletter, request *Request) {
 			body, err := resource.data.app.newsletters.GetBody(*item, "")
 			must(err)
@@ -295,7 +296,7 @@ func initNewsletterResource(resource *Resource[newsletter], board *Board) {
 			request.Response().Write([]byte(body))
 		}).Permission(loggedPermission).Name(unlocalized("Náhled"))
 
-	FormItemAction[newsletter](
+	ResourceFormItemAction[newsletter](
 		resource.data.app,
 		"send-preview",
 		func(item *newsletter, f *Form, r *Request) {
@@ -326,7 +327,7 @@ func initNewsletterResource(resource *Resource[newsletter], board *Board) {
 		},
 	).Permission(loggedPermission).Name(unlocalized("Odeslat náhled"))
 
-	FormItemAction[newsletter](
+	ResourceFormItemAction[newsletter](
 		resource.data.app,
 		"send",
 		func(newsletter *newsletter, form *Form, request *Request) {
@@ -350,7 +351,7 @@ func initNewsletterResource(resource *Resource[newsletter], board *Board) {
 		},
 	).Permission(loggedPermission).Name(unlocalized("Odeslat"))
 
-	FormItemAction[newsletter](
+	ResourceFormItemAction[newsletter](
 		resource.data.app,
 		"duplicate",
 		func(newsletter *newsletter, f *Form, r *Request) {

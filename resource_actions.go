@@ -56,7 +56,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 				Flash(request)
 			vc.Validation().RedirectionLocaliton = resourceData.getItemURL(item, "", request)
 		}
-	}).Icon(iconAdd).priority(defaultHighPriority).Permission(resourceData.canCreate).Name(messages.GetNameFunction("admin_new"))
+	}).Icon(iconAdd).setPriority(defaultHighPriority).Permission(resourceData.canCreate).Name(messages.GetNameFunction("admin_new"))
 
 	resourceData.itemActionUi("", func(item any, request *Request, pd *pageData) {
 		if item == nil {
@@ -123,7 +123,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 	).Icon("glyphicons-basic-17-bin.svg").setPriority(-defaultHighPriority).Permission(resourceData.canDelete).Name(messages.GetNameFunction("admin_delete"))
 
 	if resourceData.previewURLFunction != nil {
-		resourceData.ItemActionHandler("preview",
+		resourceData.itemActionHandler("preview",
 			func(item any, request *Request) {
 				request.Redirect(
 					resourceData.previewURLFunction(item),
@@ -144,7 +144,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 
 		}).
 			Icon("glyphicons-basic-58-history.svg").
-			priority(defaultHighPriority).
+			setPriority(defaultHighPriority).
 			Name(messages.GetNameFunction("admin_history")).
 			Permission(resourceData.canUpdate)
 

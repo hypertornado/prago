@@ -73,36 +73,38 @@ func initUserSettings(app *App) {
 		}
 	}).Icon("glyphicons-basic-5-settings.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu()
 
-	app.FormAction("password", func(form *Form, request *Request) {
-		locale := request.Locale()
-		form.Title = messages.Get(request.Locale(), "admin_password_change")
-		form.AddPasswordInput("oldpassword", messages.Get(locale, "admin_password_old")).Focused = true
-		form.AddPasswordInput("newpassword", messages.Get(locale, "admin_password_new"))
-		form.AddSubmit(messages.Get(locale, "admin_save"))
-	}, func(vc ValidationContext) {
-		request := vc.Request()
-		locale := request.Locale()
+	app.FormAction(
+		"password",
+		func(form *Form, request *Request) {
+			locale := request.Locale()
+			form.Title = messages.Get(request.Locale(), "admin_password_change")
+			form.AddPasswordInput("oldpassword", messages.Get(locale, "admin_password_old")).Focused = true
+			form.AddPasswordInput("newpassword", messages.Get(locale, "admin_password_new"))
+			form.AddSubmit(messages.Get(locale, "admin_save"))
+		}, func(vc ValidationContext) {
+			request := vc.Request()
+			locale := request.Locale()
 
-		valid := true
-		oldpassword := vc.GetValue("oldpassword")
-		user := request.getUser()
-		if !user.isPassword(oldpassword) {
-			valid = false
-			vc.AddItemError("oldpassword", messages.Get(locale, "admin_register_password"))
-		}
+			valid := true
+			oldpassword := vc.GetValue("oldpassword")
+			user := request.getUser()
+			if !user.isPassword(oldpassword) {
+				valid = false
+				vc.AddItemError("oldpassword", messages.Get(locale, "admin_register_password"))
+			}
 
-		newpassword := vc.GetValue("newpassword")
-		if len(newpassword) < 7 {
-			valid = false
-			vc.AddItemError("newpassword", messages.Get(locale, "admin_password_length"))
-		}
+			newpassword := vc.GetValue("newpassword")
+			if len(newpassword) < 7 {
+				valid = false
+				vc.AddItemError("newpassword", messages.Get(locale, "admin_password_length"))
+			}
 
-		if valid {
-			request.app.userDataCacheDelete(user.ID)
-			request.AddFlashMessage(messages.Get(request.Locale(), "admin_password_changed"))
-			vc.Validation().RedirectionLocaliton = "/admin"
-		}
-	}).Icon("glyphicons-basic-45-key.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu()
+			if valid {
+				request.app.userDataCacheDelete(user.ID)
+				request.AddFlashMessage(messages.Get(request.Locale(), "admin_password_changed"))
+				vc.Validation().RedirectionLocaliton = "/admin"
+			}
+		}).Icon("glyphicons-basic-45-key.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu()
 
 	app.Action("redirect-to-homepage").Icon("glyphicons-basic-21-home.svg").Permission(loggedPermission).Name(messages.GetNameFunction("boardpage")).userMenu().Handler(func(request *Request) {
 		request.Redirect("/")

@@ -1,8 +1,11 @@
 package prago
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
-type FormAction struct {
+type formAction struct {
 	validation    Validation
 	formGenerator func(*Form, *Request)
 
@@ -10,8 +13,8 @@ type FormAction struct {
 	actionValidation *Action
 }
 
-func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *FormAction {
-	ret := &FormAction{
+func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *formAction {
+	ret := &formAction{
 		actionForm:       newAction(app, url),
 		actionValidation: newAction(app, url).Method("POST"),
 	}
@@ -51,7 +54,7 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *Form
 	return ret
 }
 
-func (app *App) FormAction(url string, formGenerator func(*Form, *Request), validator Validation) *FormAction {
+func (app *App) FormAction(url string, formGenerator func(*Form, *Request), validator Validation) *Action {
 	fa := newFormAction(app, url, nil)
 
 	fa.formGenerator = formGenerator
@@ -59,7 +62,7 @@ func (app *App) FormAction(url string, formGenerator func(*Form, *Request), vali
 
 	app.rootActions = append(app.rootActions, fa.actionForm)
 	app.rootActions = append(app.rootActions, fa.actionValidation)
-	return fa
+	return fa.actionForm
 }
 
 func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Request), validator Validation) {
@@ -88,12 +91,12 @@ func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Reques
 
 }
 
-func ResourceFormAction[T any](app *App, url string, formGenerator func(*Form, *Request), validation Validation) *FormAction {
+func ResourceFormAction[T any](app *App, url string, formGenerator func(*Form, *Request), validation Validation) *Action {
 	resource := GetResource[T](app)
 	return resource.data.FormAction(url, formGenerator, validation)
 }
 
-func (resourceData *resourceData) FormAction(url string, formGenerator func(*Form, *Request), validation Validation) *FormAction {
+func (resourceData *resourceData) FormAction(url string, formGenerator func(*Form, *Request), validation Validation) *Action {
 	action := newFormAction(resourceData.app, url, nil)
 
 	action.actionForm.resourceData = resourceData
@@ -107,35 +110,54 @@ func (resourceData *resourceData) FormAction(url string, formGenerator func(*For
 
 	resourceData.actions = append(resourceData.actions, action.actionForm)
 	resourceData.actions = append(resourceData.actions, action.actionValidation)
-	return action
+	return action.actionForm
 }
 
-func (formAction *FormAction) Name(name func(string) string) *FormAction {
-	formAction.actionForm.Name(name)
-	return formAction
+func ResourceFormItemAction[T any](
+	app *App,
+	url string,
+	formGenerator func(*T, *Form, *Request),
+	validation func(*T, ValidationContext),
+) *Action {
+	resourceData := GetResource[T](app).data
+	return resourceData.formItemAction(
+		url,
+		func(a any, f *Form, r *Request) {
+			formGenerator(a.(*T), f, r)
+		},
+		func(a any, vc ValidationContext) {
+			validation(a.(*T), vc)
+		},
+	)
 }
 
-func (formAction *FormAction) Board(board *Board) *FormAction {
-	formAction.actionForm.Board(board)
-	return formAction
-}
+func (resourceData *resourceData) formItemAction(url string, formGenerator func(any, *Form, *Request), validation func(any, ValidationContext)) *Action {
+	fa := newFormAction(resourceData.app, url, func(f *Form, r *Request) {
+		item := resourceData.query(context.TODO()).ID(r.Param("id"))
+		f.image = resourceData.previewer(r, item).ImageURL(r.r.Context())
+	})
 
-func (formAction *FormAction) Icon(icon string) *FormAction {
-	formAction.actionForm.icon = icon
-	return formAction
-}
+	fa.actionForm.resourceData = resourceData
+	fa.actionValidation.resourceData = resourceData
 
-func (formAction *FormAction) Permission(permission Permission) *FormAction {
-	formAction.actionForm.Permission(permission)
-	return formAction
-}
+	fa.actionForm.Permission(resourceData.canView)
+	fa.actionValidation.Permission(resourceData.canView)
 
-func (formAction *FormAction) userMenu() *FormAction {
-	formAction.actionForm.userMenu()
-	return formAction
-}
+	fa.actionForm.isItemAction = true
+	fa.actionValidation.isItemAction = true
 
-func (formAction *FormAction) priority(priority int64) *FormAction {
-	formAction.actionForm.priority = priority
-	return formAction
+	resourceData.itemActions = append(resourceData.itemActions, fa.actionForm)
+	resourceData.itemActions = append(resourceData.itemActions, fa.actionValidation)
+
+	fa.formGenerator = func(form *Form, request *Request) {
+		item := resourceData.query(request.r.Context()).ID(request.Param("id"))
+		formGenerator(item, form, request)
+	}
+
+	fa.validation = func(vc ValidationContext) {
+		item := resourceData.query(vc.Context()).ID(vc.GetValue("id"))
+		validation(item, vc)
+	}
+
+	return fa.actionForm
 }
