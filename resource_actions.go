@@ -67,56 +67,60 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 	},
 	).Icon("glyphicons-basic-588-book-open-text.svg").setPriority(defaultHighPriority).Permission(resourceData.canView)
 
-	resourceData.FormItemAction("edit").Icon("glyphicons-basic-31-pencil.svg").priority(defaultHighPriority).Name(messages.GetNameFunction("admin_edit")).Permission(resourceData.canUpdate).Form(
+	resourceData.formItemAction(
+		"edit",
 		func(item any, form *Form, request *Request) {
 			resourceData.addFormItems(item, request, form)
 			form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 		},
-	).Validation(func(_ any, vc ValidationContext) {
-		request := vc.Request()
-		params := request.Params()
+		func(_ any, vc ValidationContext) {
+			request := vc.Request()
+			params := request.Params()
 
-		resourceData.fixBooleanParams(vc.Request(), params)
+			resourceData.fixBooleanParams(vc.Request(), params)
 
-		item, validation, err := resourceData.editItemWithLogAndValues(request, params)
-		if err != nil && err != errValidation {
-			panic(err)
-		}
+			item, validation, err := resourceData.editItemWithLogAndValues(request, params)
+			if err != nil && err != errValidation {
+				panic(err)
+			}
 
-		if validation.Valid() {
-			user := request
-			id, err := strconv.Atoi(request.Param("id"))
-			must(err)
+			if validation.Valid() {
+				user := request
+				id, err := strconv.Atoi(request.Param("id"))
+				must(err)
 
-			resourceData.app.Notification(resourceData.previewer(user, item).Name()).
-				SetImage(resourceData.previewer(request, item).ThumbnailURL(vc.Context())).
-				SetPreName(messages.Get(request.Locale(), "admin_item_edited")).
-				Flash(request)
+				resourceData.app.Notification(resourceData.previewer(user, item).Name()).
+					SetImage(resourceData.previewer(request, item).ThumbnailURL(vc.Context())).
+					SetPreName(messages.Get(request.Locale(), "admin_item_edited")).
+					Flash(request)
 
-			vc.Validation().RedirectionLocaliton = resourceData.getURL(fmt.Sprintf("%d", id))
-		} else {
-			//TODO: ugly hack with copying two validation contexts
-			vc.Validation().Errors = validation.Validation().Errors
-			vc.Validation().ItemErrors = validation.Validation().ItemErrors
-		}
-	})
+				vc.Validation().RedirectionLocaliton = resourceData.getURL(fmt.Sprintf("%d", id))
+			} else {
+				//TODO: ugly hack with copying two validation contexts
+				vc.Validation().Errors = validation.Validation().Errors
+				vc.Validation().ItemErrors = validation.Validation().ItemErrors
+			}
+		},
+	).Icon("glyphicons-basic-31-pencil.svg").priority(defaultHighPriority).Name(messages.GetNameFunction("admin_edit")).Permission(resourceData.canUpdate)
 
-	resourceData.FormItemAction("delete").Icon("glyphicons-basic-17-bin.svg").priority(-defaultHighPriority).Permission(resourceData.canDelete).Name(messages.GetNameFunction("admin_delete")).Form(
+	resourceData.formItemAction(
+		"delete",
 		func(item any, form *Form, request *Request) {
 			form.AddDeleteSubmit(messages.Get(request.Locale(), "admin_delete"))
 			itemName := resourceData.previewer(request, item).Name()
 			form.Title = messages.Get(request.Locale(), "admin_delete_confirmation_name", itemName)
 		},
-	).Validation(func(item any, vc ValidationContext) {
-		for _, v := range resourceData.deleteValidations {
-			v(vc)
-		}
-		if vc.Valid() {
-			must(resourceData.DeleteWithLog(item, vc.Request()))
-			vc.Request().AddFlashMessage(messages.Get(vc.Request().Locale(), "admin_item_deleted"))
-			vc.Validation().RedirectionLocaliton = resourceData.getURL("")
-		}
-	})
+		func(item any, vc ValidationContext) {
+			for _, v := range resourceData.deleteValidations {
+				v(vc)
+			}
+			if vc.Valid() {
+				must(resourceData.DeleteWithLog(item, vc.Request()))
+				vc.Request().AddFlashMessage(messages.Get(vc.Request().Locale(), "admin_item_deleted"))
+				vc.Validation().RedirectionLocaliton = resourceData.getURL("")
+			}
+		},
+	).Icon("glyphicons-basic-17-bin.svg").priority(-defaultHighPriority).Permission(resourceData.canDelete).Name(messages.GetNameFunction("admin_delete"))
 
 	if resourceData.previewURLFunction != nil {
 		resourceData.ItemActionHandler("preview",
@@ -145,24 +149,23 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 			Permission(resourceData.canUpdate)
 
 		resourceData.
-			FormItemAction("history").
+			formItemAction(
+				"history",
+				func(item any, f *Form, r *Request) {
+					f.AddTextInput("page", "Stránka").Value = "1"
+					f.AddSubmit("Zobrazit")
+					f.AutosubmitFirstTime = true
+				},
+				func(item any, vc ValidationContext) {
+					id := resourceData.previewer(vc.Request(), item).ID()
+					table := resourceData.app.getHistoryTable(vc.Request(), resourceData, id, vc.GetValue("page"))
+					vc.Validation().AfterContent = table.ExecuteHTML()
+				},
+			).
 			Icon("glyphicons-basic-58-history.svg").
 			priority(defaultHighPriority).
 			Name(messages.GetNameFunction("admin_history")).
-			Permission(resourceData.canUpdate).
-			Form(func(item any, f *Form, r *Request) {
-				f.AddTextInput("page", "Stránka").Value = "1"
-				f.AddSubmit("Zobrazit")
-				f.AutosubmitFirstTime = true
-
-			}).
-			Validation(func(item any, vc ValidationContext) {
-				id := resourceData.previewer(vc.Request(), item).ID()
-				table := resourceData.app.getHistoryTable(vc.Request(), resourceData, id, vc.GetValue("page"))
-				vc.Validation().AfterContent = table.ExecuteHTML()
-
-			})
-
+			Permission(resourceData.canUpdate)
 	}
 }
 

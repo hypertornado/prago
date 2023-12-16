@@ -15,25 +15,22 @@ func (resource *Resource[T]) FormItemAction(
 	url string,
 	formGenerator func(*T, *Form, *Request),
 	validation func(*T, ValidationContext),
-) *FormItemAction[T] {
+) *Action {
 	ret := &FormItemAction[T]{
-		data: resource.data.FormItemAction(url),
+		data: resource.data.formItemAction(
+			url,
+			func(a any, f *Form, r *Request) {
+				formGenerator(a.(*T), f, r)
+			},
+			func(a any, vc ValidationContext) {
+				validation(a.(*T), vc)
+			},
+		),
 	}
-
-	ret.data.Form(func(a any, f *Form, r *Request) {
-		formGenerator(a.(*T), f, r)
-	})
-
-	ret.data.Validation(func(a any, vc ValidationContext) {
-		validation(a.(*T), vc)
-	})
-
-	//ret.Form(formGenerator)
-	//ret.Validation(validation)
-	return ret
+	return ret.data.formAction.actionForm
 }
 
-func (resourceData *resourceData) FormItemAction(url string) *formItemActionData {
+func (resourceData *resourceData) formItemAction(url string, formGenerator func(any, *Form, *Request), validation func(any, ValidationContext)) *formItemActionData {
 	fa := newFormAction(resourceData.app, url, func(f *Form, r *Request) {
 		item := resourceData.query(context.TODO()).ID(r.Param("id"))
 		f.image = resourceData.previewer(r, item).ImageURL(r.r.Context())
@@ -50,10 +47,22 @@ func (resourceData *resourceData) FormItemAction(url string) *formItemActionData
 
 	resourceData.itemActions = append(resourceData.itemActions, fa.actionForm)
 	resourceData.itemActions = append(resourceData.itemActions, fa.actionValidation)
-	return &formItemActionData{
+	ret := &formItemActionData{
 		resourceData: resourceData,
 		formAction:   fa,
 	}
+
+	fa.formGenerator = func(form *Form, request *Request) {
+		item := resourceData.query(request.r.Context()).ID(request.Param("id"))
+		formGenerator(item, form, request)
+	}
+
+	fa.validation = func(vc ValidationContext) {
+		item := resourceData.query(vc.Context()).ID(vc.GetValue("id"))
+		validation(item, vc)
+	}
+
+	return ret
 
 }
 
@@ -62,42 +71,35 @@ func (actionData *formItemActionData) priority(priority int64) *formItemActionDa
 	return actionData
 }
 
-func (action *FormItemAction[T]) Permission(permission Permission) *FormItemAction[T] {
+/*func (action *FormItemAction[T]) Permission(permission Permission) *FormItemAction[T] {
 	action.data.Permission(permission)
 	return action
-}
+}*/
 
 func (actionData *formItemActionData) Permission(permission Permission) *formItemActionData {
 	actionData.formAction.Permission(permission)
 	return actionData
 }
 
-func (action *FormItemAction[T]) Icon(icon string) *FormItemAction[T] {
+/*func (action *FormItemAction[T]) Icon(icon string) *FormItemAction[T] {
 	action.data.Icon(icon)
 	return action
-}
+}*/
 
 func (actionData *formItemActionData) Icon(icon string) *formItemActionData {
 	actionData.formAction.Icon(icon)
 	return actionData
 }
 
-func (action *FormItemAction[T]) Name(name func(string) string) *FormItemAction[T] {
+/*func (action *FormItemAction[T]) Name(name func(string) string) *FormItemAction[T] {
 	action.data.Name(name)
 	return action
-}
+}*/
 
 func (actionData *formItemActionData) Name(name func(string) string) *formItemActionData {
 	actionData.formAction.Name(name)
 	return actionData
 }
-
-/*func (action *FormItemAction[T]) Form(formGenerator func(*T, *Form, *Request)) *FormItemAction[T] {
-	action.data.Form(func(a any, f *Form, r *Request) {
-		formGenerator(a.(*T), f, r)
-	})
-	return action
-}*/
 
 func (actionData *formItemActionData) Form(formGenerator func(any, *Form, *Request)) *formItemActionData {
 	actionData.formAction.formGenerator = func(form *Form, request *Request) {
@@ -106,13 +108,6 @@ func (actionData *formItemActionData) Form(formGenerator func(any, *Form, *Reque
 	}
 	return actionData
 }
-
-/*func (action *FormItemAction[T]) Validation(validation func(*T, ValidationContext)) *FormItemAction[T] {
-	action.data.Validation(func(a any, vc ValidationContext) {
-		validation(a.(*T), vc)
-	})
-	return action
-}*/
 
 func (actionData *formItemActionData) Validation(validation func(any, ValidationContext)) *formItemActionData {
 	actionData.formAction.validation = func(vc ValidationContext) {
