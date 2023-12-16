@@ -110,7 +110,7 @@ func registrationValidation(vc ValidationContext) {
 			u.Role = sysadminRoleName
 		}
 
-		must(app.UsersResource.Create(vc.Context(), u))
+		must(CreateItemWithContext(vc.Context(), app, u))
 
 		vc.Request().AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
 		vc.Validation().RedirectionLocaliton = app.getAdminURL("user/login") + "?email=" + url.QueryEscape(email)

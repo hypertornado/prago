@@ -111,7 +111,7 @@ func (app *App) UploadFile(ctx context.Context, fileHeader *multipart.FileHeader
 
 	file.User = request.UserID()
 	file.Description = description
-	err = app.FilesResource.Create(ctx, &file)
+	err = CreateItemWithContext(ctx, app, &file)
 	if err != nil {
 		return nil, fmt.Errorf("saving file: %s", err)
 	}

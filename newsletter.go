@@ -268,7 +268,7 @@ func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 		Email:     email,
 		Confirmed: confirm,
 	}
-	return res.Create(context.TODO(), person)
+	return CreateItem(nm.app, person)
 }
 
 // Newsletter represents newsletter
@@ -359,17 +359,16 @@ func initNewsletterResource(resource *Resource[newsletter], board *Board) {
 		},
 		func(newsletter *newsletter, vc ValidationContext) {
 			app := vc.Request().app
-			newsletterSectionResource := GetResource[newsletterSection](app)
 			sections := Query[newsletterSection](app).Is("newsletter", newsletter.ID).Order("orderposition").List()
 
 			newsletter.ID = 0
-			must(resource.CreateWithLog(newsletter, vc.Request()))
+			must(CreateWithLog(newsletter, vc.Request()))
 
 			for _, v := range sections {
 				section := *v
 				section.ID = 0
 				section.Newsletter = newsletter.ID
-				must(newsletterSectionResource.Create(vc.Context(), &section))
+				must(CreateItemWithContext(vc.Context(), app, &section))
 			}
 
 			vc.Validation().RedirectionLocaliton = resource.data.getItemURL(newsletter, "edit", vc.Request())

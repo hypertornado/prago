@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"testing"
 )
 
@@ -11,8 +10,8 @@ func TestReflectQuery(t *testing.T) {
 	resA := ResourceStruct{Name: "A"}
 	resB := ResourceStruct{Name: "B"}
 
-	resource.Create(context.Background(), &resA)
-	resource.Create(context.Background(), &resB)
+	CreateItem(resource.data.app, &resA)
+	CreateItem(resource.data.app, &resB)
 
 	item := Query[ResourceStruct](resource.data.app).Is("id", resB.ID).First()
 	if item == nil {

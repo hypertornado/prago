@@ -181,7 +181,12 @@ func (resourceData *resourceData) getResourceControl() *controller {
 	return resourceData.resourceController
 }
 
-func (resource *Resource[T]) Create(ctx context.Context, item *T) error {
+func CreateItem[T any](app *App, item *T) error {
+	return CreateItemWithContext(context.Background(), app, item)
+}
+
+func CreateItemWithContext[T any](ctx context.Context, app *App, item *T) error {
+	resource := GetResource[T](app)
 	return resource.data.Create(ctx, item)
 }
 
@@ -217,7 +222,12 @@ func (resourceData *resourceData) setTimestamp(item any, fieldName string) {
 	}
 }
 
-func (resource *Resource[T]) Delete(ctx context.Context, id int64) error {
+func DeleteItem[T any](app *App, id int64) error {
+	return DeleteItemWithContext[T](context.Background(), app, id)
+}
+
+func DeleteItemWithContext[T any](ctx context.Context, app *App, id int64) error {
+	resource := GetResource[T](app)
 	return resource.data.Delete(ctx, id)
 }
 

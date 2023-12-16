@@ -194,7 +194,7 @@ func (resourceData *resourceData) LogActivity(request *Request, before, after an
 		ContentAfter:  string(afterData),
 	}
 
-	err = resourceData.app.activityLogResource.Create(context.Background(), log)
+	err = CreateItem(resourceData.app, log)
 	if err == nil {
 		for _, v := range resourceData.app.activityListeners {
 			v(log.activity())

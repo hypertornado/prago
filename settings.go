@@ -126,7 +126,7 @@ func (app *App) saveSetting(id, value string, request *Request) error {
 			Name:  id,
 			Value: value,
 		}
-		return app.settings.resource.CreateWithLog(s, request)
+		return CreateWithLog(s, request)
 	} else {
 		s.Value = value
 		return app.settings.resource.UpdateWithLog(s, request)

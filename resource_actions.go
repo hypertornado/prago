@@ -169,7 +169,8 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 	}
 }
 
-func (resource *Resource[T]) CreateWithLog(item *T, request *Request) error {
+func CreateWithLog[T any](item *T, request *Request) error {
+	resource := GetResource[T](request.app)
 	return resource.data.CreateWithLog(item, request)
 }
 
