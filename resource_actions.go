@@ -191,7 +191,8 @@ func (resourceData *resourceData) CreateWithLog(item any, request *Request) erro
 
 }
 
-func (resource *Resource[T]) DeleteWithLog(item *T, request *Request) error {
+func DeleteWithLog[T any](item *T, request *Request) error {
+	resource := GetResource[T](request.app)
 	return resource.data.DeleteWithLog(item, request)
 }
 
