@@ -129,7 +129,7 @@ func (app *App) saveSetting(id, value string, request *Request) error {
 		return CreateWithLog(s, request)
 	} else {
 		s.Value = value
-		return app.settings.resource.UpdateWithLog(s, request)
+		return UpdateWithLog(s, request)
 	}
 }
 

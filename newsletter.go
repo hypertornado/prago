@@ -108,8 +108,6 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 			panic("wrong secret")
 		}
 
-		res := GetResource[newsletterPersons](app)
-
 		person := Query[newsletterPersons](app).Is("email", email).First()
 		if person == nil {
 			panic("can't find user")
@@ -117,7 +115,7 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 
 		person.Confirmed = true
 
-		err := res.Update(request.r.Context(), person)
+		err := UpdateItem(request.app, person)
 		must(err)
 
 		data.ShowBackButton = true
@@ -159,14 +157,13 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 			panic("wrong secret")
 		}
 
-		res := GetResource[newsletterPersons](app)
 		person := Query[newsletterPersons](app).Is("email", email).First()
 		if person == nil {
 			panic("can't find user")
 		}
 
 		person.Unsubscribed = true
-		err := res.Update(request.r.Context(), person)
+		err := UpdateItem(request.app, person)
 		if err != nil {
 			panic(err)
 		}
@@ -305,7 +302,7 @@ func initNewsletterResource(resource *Resource[newsletter], board *Board) {
 		},
 		func(newsletter *newsletter, vc ValidationContext) {
 			newsletter.PreviewSentAt = time.Now()
-			err := resource.Update(vc.Context(), newsletter)
+			err := UpdateItem(resource.data.app, newsletter)
 			if err != nil {
 				panic(err)
 			}
@@ -338,7 +335,7 @@ func initNewsletterResource(resource *Resource[newsletter], board *Board) {
 		func(newsletter *newsletter, vc ValidationContext) {
 			newsletter.SentAt = time.Now()
 			//TODO: log sent emails
-			must(resource.Update(vc.Context(), newsletter))
+			must(UpdateItem(resource.data.app, newsletter))
 
 			recipients, err := resource.data.app.getNewsletterRecipients()
 			if err != nil {

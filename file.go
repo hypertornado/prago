@@ -188,7 +188,7 @@ func (app *App) initFilesResource() {
 					continue
 				}
 				f := *v
-				if resource.Update(context.Background(), &f) != nil {
+				if UpdateItem(app, &f) != nil {
 					fmt.Println("error while saving file: ", v.ID)
 				} else {
 					fmt.Println("saved ok: ", v.ID, v.Width, v.Height)

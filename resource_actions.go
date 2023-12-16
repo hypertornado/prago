@@ -262,7 +262,8 @@ func (resourceData *resourceData) editItemWithLogAndValues(request *Request, val
 	return item, vv, nil
 }
 
-func (resource *Resource[T]) UpdateWithLog(item *T, request *Request) error {
+func UpdateWithLog[T any](item *T, request *Request) error {
+	resource := GetResource[T](request.app)
 	return resource.data.UpdateWithLog(item, request)
 }
 

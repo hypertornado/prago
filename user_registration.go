@@ -14,7 +14,6 @@ import (
 func initUserRegistration(app *App) {
 
 	app.accessController.routeHandler("GET", app.UsersResource.data.getURL("confirm_email"), func(request *Request) {
-		ctx := request.r.Context()
 		email := request.Param("email")
 		token := request.Param("token")
 
@@ -23,7 +22,7 @@ func initUserRegistration(app *App) {
 			if !user.emailConfirmed() {
 				if token == user.emailToken(request.r.Context(), app) {
 					user.EmailConfirmedAt = time.Now()
-					err := app.UsersResource.Update(ctx, user)
+					err := UpdateItem(app, user)
 					if err == nil {
 						request.AddFlashMessage(messages.Get(user.Locale, "admin_confirm_email_ok"))
 						request.Redirect(app.getAdminURL("user/login"))

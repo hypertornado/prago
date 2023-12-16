@@ -23,7 +23,7 @@ func initUserRenew(app *App) {
 			if user.emailConfirmed() {
 				if !time.Now().AddDate(0, 0, -1).Before(user.EmailRenewedAt) {
 					user.EmailRenewedAt = time.Now()
-					err := app.UsersResource.Update(ctx, user)
+					err := UpdateItem(app, user)
 					if err == nil {
 						err = app.sendRenewPasswordEmail(ctx, *user)
 						if err == nil {
@@ -59,7 +59,6 @@ func initUserRenew(app *App) {
 		form.AddHidden("token").Value = request.Param("token")
 		form.AddSubmit(messages.Get(locale, "admin_forgoten_set"))
 	}, func(vc ValidationContext) {
-		ctx := vc.Request().r.Context()
 		email := vc.GetValue("email")
 		email = fixEmail(email)
 		token := vc.GetValue("token")
@@ -73,7 +72,7 @@ func initUserRenew(app *App) {
 				if len(password) >= 7 {
 					err := u.newPassword(password)
 					if err == nil {
-						err = app.UsersResource.Update(ctx, u)
+						err = UpdateItem(app, u)
 						if err == nil {
 							vc.Request().AddFlashMessage(messages.Get(vc.Locale(), "admin_password_changed"))
 							vc.Validation().RedirectionLocaliton = app.getAdminURL("user/login") + "?email=" + url.QueryEscape(u.Email)

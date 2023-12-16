@@ -97,7 +97,7 @@ func TestBasicResource2(t *testing.T) {
 
 	item.Name = "changed"
 
-	err = resource.Update(context.Background(), item)
+	err = UpdateItem(resource.data.app, item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -329,7 +329,7 @@ func TestResourceCreateWithID(t *testing.T) {
 
 func TestShouldNotSaveWithZeroID(t *testing.T) {
 	resource := prepareResource()
-	err := resource.Update(context.Background(), &ResourceStruct{})
+	err := UpdateItem(resource.data.app, &ResourceStruct{})
 	if err == nil {
 		t.Fatal("should not be nil")
 	}
@@ -366,7 +366,7 @@ func TestReplace(t *testing.T) {
 		ID:   id,
 		Name: "A",
 	}
-	err := resource.Replace(context.Background(), item)
+	err := Replace(context.Background(), resource.data.app, item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -374,7 +374,7 @@ func TestReplace(t *testing.T) {
 		t.Fatal("should not be nil")
 	}
 	item.Name = "B"
-	err = resource.Replace(context.Background(), item)
+	err = Replace(context.Background(), resource.data.app, item)
 	if err != nil {
 		t.Fatal(err)
 	}

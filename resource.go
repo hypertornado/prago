@@ -196,7 +196,12 @@ func (resourceData *resourceData) Create(ctx context.Context, item any) error {
 	return resourceData.createItem(ctx, item, false)
 }
 
-func (resource *Resource[T]) Update(ctx context.Context, item *T) error {
+func UpdateItem[T any](app *App, item *T) error {
+	return UpdateItemWithContext[T](context.Background(), app, item)
+}
+
+func UpdateItemWithContext[T any](ctx context.Context, app *App, item *T) error {
+	resource := GetResource[T](app)
 	return resource.data.Update(ctx, item)
 }
 
@@ -205,7 +210,8 @@ func (resourceData *resourceData) Update(ctx context.Context, item any) error {
 	return resourceData.saveItem(ctx, item, false)
 }
 
-func (resource *Resource[T]) Replace(ctx context.Context, item *T) error {
+func Replace[T any](ctx context.Context, app *App, item *T) error {
+	resource := GetResource[T](app)
 	resource.data.setTimestamp(item, "CreatedAt")
 	resource.data.setTimestamp(item, "UpdatedAt")
 	return resource.data.replaceItem(ctx, item, false)

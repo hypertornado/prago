@@ -51,7 +51,7 @@ func initUserSettings(app *App) {
 			user := vc.Request().getUser()
 			user.Name = name
 			user.Locale = newLocale
-			must(app.UsersResource.Update(vc.Request().r.Context(), user))
+			must(UpdateItem(app, user))
 
 			for _, v := range app.settings.settingsArray {
 				request := vc.Request()

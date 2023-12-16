@@ -46,7 +46,7 @@ func initUserLogin(app *App) {
 		user.LoggedInUseragent = request.Request().UserAgent()
 		user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
 
-		must(app.UsersResource.Update(vc.Context(), user))
+		must(UpdateItem(app, user))
 		request.logInUser(user)
 		request.AddFlashMessage(messages.Get(user.Locale, "admin_login_ok"))
 
