@@ -146,7 +146,6 @@ func NewResource[T any](app *App) *Resource[T] {
 	return ret
 }
 
-// TODO: concurrent access
 func GetResource[T any](app *App) *Resource[T] {
 	resourceMapMutex.RLock()
 	defer resourceMapMutex.RUnlock()

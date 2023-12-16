@@ -295,7 +295,8 @@ func initNewsletterResource(resource *Resource[newsletter], board *Board) {
 			request.Response().Write([]byte(body))
 		}).Permission(loggedPermission).Name(unlocalized("Náhled"))
 
-	resource.FormItemAction(
+	FormItemAction[newsletter](
+		resource.data.app,
 		"send-preview",
 		func(item *newsletter, f *Form, r *Request) {
 			f.AddTextareaInput("emails", "Seznam emailů na poslání preview (jeden email na řádek)").Focused = true
@@ -325,7 +326,8 @@ func initNewsletterResource(resource *Resource[newsletter], board *Board) {
 		},
 	).Permission(loggedPermission).Name(unlocalized("Odeslat náhled"))
 
-	resource.FormItemAction(
+	FormItemAction[newsletter](
+		resource.data.app,
 		"send",
 		func(newsletter *newsletter, form *Form, request *Request) {
 			recipients, err := resource.data.app.getNewsletterRecipients()
@@ -348,7 +350,8 @@ func initNewsletterResource(resource *Resource[newsletter], board *Board) {
 		},
 	).Permission(loggedPermission).Name(unlocalized("Odeslat"))
 
-	resource.FormItemAction(
+	FormItemAction[newsletter](
+		resource.data.app,
 		"duplicate",
 		func(newsletter *newsletter, f *Form, r *Request) {
 			f.AddSubmit("Duplikovat newsletter")

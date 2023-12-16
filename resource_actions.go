@@ -101,7 +101,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 				vc.Validation().ItemErrors = validation.Validation().ItemErrors
 			}
 		},
-	).Icon("glyphicons-basic-31-pencil.svg").priority(defaultHighPriority).Name(messages.GetNameFunction("admin_edit")).Permission(resourceData.canUpdate)
+	).Icon("glyphicons-basic-31-pencil.svg").setPriority(defaultHighPriority).Name(messages.GetNameFunction("admin_edit")).Permission(resourceData.canUpdate)
 
 	resourceData.formItemAction(
 		"delete",
@@ -120,7 +120,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 				vc.Validation().RedirectionLocaliton = resourceData.getURL("")
 			}
 		},
-	).Icon("glyphicons-basic-17-bin.svg").priority(-defaultHighPriority).Permission(resourceData.canDelete).Name(messages.GetNameFunction("admin_delete"))
+	).Icon("glyphicons-basic-17-bin.svg").setPriority(-defaultHighPriority).Permission(resourceData.canDelete).Name(messages.GetNameFunction("admin_delete"))
 
 	if resourceData.previewURLFunction != nil {
 		resourceData.ItemActionHandler("preview",
@@ -163,7 +163,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 				},
 			).
 			Icon("glyphicons-basic-58-history.svg").
-			priority(defaultHighPriority).
+			setPriority(defaultHighPriority).
 			Name(messages.GetNameFunction("admin_history")).
 			Permission(resourceData.canUpdate)
 	}
