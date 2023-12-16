@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func initFilesAPI(resource *Resource[File]) {
+func initFilesAPI(resource *Resource) {
 	app := resource.data.app
 
 	//TODO: remove this and use single details API

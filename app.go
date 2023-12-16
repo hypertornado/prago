@@ -41,12 +41,12 @@ type App struct {
 	accessController *controller
 	adminController  *controller
 
-	UsersResource      *Resource[user]
+	UsersResource      *Resource
 	userDataCache      map[int64]*userData
 	userDataCacheMutex *sync.RWMutex
 
-	FilesResource       *Resource[File]
-	activityLogResource *Resource[activityLog]
+	FilesResource       *Resource
+	activityLogResource *Resource
 
 	rootActions []*Action
 	db          *sql.DB

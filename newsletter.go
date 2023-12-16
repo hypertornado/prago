@@ -26,8 +26,8 @@ type Newsletters struct {
 	randomness string
 	//board      *Board
 
-	newsletterResource        *Resource[newsletter]
-	newsletterSectionResource *Resource[newsletterSection]
+	newsletterResource        *Resource
+	newsletterSectionResource *Resource
 }
 
 func (newsletters *Newsletters) Renderer(renderer NewsletterRenderer) *Newsletters {
@@ -279,7 +279,7 @@ type newsletter struct {
 	UpdatedAt     time.Time
 }
 
-func initNewsletterResource(resource *Resource[newsletter], board *Board) {
+func initNewsletterResource(resource *Resource, board *Board) {
 	resource.data.canView = sysadminPermission
 
 	resource.Board(board)

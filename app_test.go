@@ -37,7 +37,7 @@ type ResourceStructUnique struct {
 	UniqueName string `prago-unique:"true"`
 }
 
-func prepareResource() *Resource[ResourceStruct] {
+func prepareResource() *Resource {
 	app := newTestingApp()
 	resource := NewResource[ResourceStruct](app)
 	NewResource[ResourceStructUnique](app)
@@ -48,7 +48,7 @@ func prepareResource() *Resource[ResourceStruct] {
 	return resource
 }
 
-func prepareFuzzing() *Resource[ResourceStruct] {
+func prepareFuzzing() *Resource {
 	app := newTestingApp()
 	resource := NewResource[ResourceStruct](app)
 	NewResource[ResourceStructUnique](app)

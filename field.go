@@ -31,7 +31,7 @@ type Field struct {
 	relatedResource *resourceData
 }
 
-func (resource *Resource[T]) Field(name string) *Field {
+func (resource *Resource) Field(name string) *Field {
 	return resource.data.Field(name)
 }
 

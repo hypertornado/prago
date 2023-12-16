@@ -10,7 +10,7 @@ import (
 type settingsSingleton struct {
 	settingsMap   map[string]*Setting
 	settingsArray []*Setting
-	resource      *Resource[pragoSettings]
+	resource      *Resource
 	mutex         *sync.RWMutex
 	cache         map[string]string
 }

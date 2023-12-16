@@ -14,7 +14,7 @@ import (
 
 var resourceMapMutex = &sync.RWMutex{}
 
-type Resource[T any] struct {
+type Resource struct {
 	data *resourceData
 }
 
@@ -61,7 +61,7 @@ type resourceData struct {
 	previewURLFunction func(any) string
 }
 
-func NewResource[T any](app *App) *Resource[T] {
+func NewResource[T any](app *App) *Resource {
 	resourceMapMutex.Lock()
 	defer resourceMapMutex.Unlock()
 	var item T
@@ -105,7 +105,7 @@ func NewResource[T any](app *App) *Resource[T] {
 		fieldMap: make(map[string]*Field),
 	}
 
-	ret := &Resource[T]{
+	ret := &Resource{
 		data: data,
 	}
 
@@ -146,7 +146,7 @@ func NewResource[T any](app *App) *Resource[T] {
 	return ret
 }
 
-func GetResource[T any](app *App) *Resource[T] {
+func GetResource[T any](app *App) *Resource {
 	resourceMapMutex.RLock()
 	defer resourceMapMutex.RUnlock()
 
@@ -156,7 +156,7 @@ func GetResource[T any](app *App) *Resource[T] {
 	if !ok {
 		return nil
 	}
-	return &Resource[T]{
+	return &Resource{
 		data: ret,
 	}
 
@@ -252,7 +252,7 @@ func (resourceData *resourceData) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (resource *Resource[T]) Name(singularName, pluralName func(string) string) *Resource[T] {
+func (resource *Resource) Name(singularName, pluralName func(string) string) *Resource {
 	resource.data.singularName = singularName
 	resource.data.pluralName = pluralName
 	return resource
@@ -269,24 +269,24 @@ func (resourceData *resourceData) PreviewURLFunction(fn func(any) string) {
 	resourceData.previewURLFunction = fn
 }
 
-func (resource *Resource[T]) Icon(icon string) *Resource[T] {
+func (resource *Resource) Icon(icon string) *Resource {
 	resource.data.icon = icon
 	return resource
 
 }
 
-func (resource *Resource[T]) ItemsPerPage(itemsPerPage int64) *Resource[T] {
+func (resource *Resource) ItemsPerPage(itemsPerPage int64) *Resource {
 	resource.data.defaultItemsPerPage = itemsPerPage
 	return resource
 }
 
-func (resource *Resource[T]) PermissionView(permission Permission) *Resource[T] {
+func (resource *Resource) PermissionView(permission Permission) *Resource {
 	must(resource.data.app.validatePermission(permission))
 	resource.data.canView = permission
 	return resource
 }
 
-func (resource *Resource[T]) PermissionUpdate(permission Permission) *Resource[T] {
+func (resource *Resource) PermissionUpdate(permission Permission) *Resource {
 	must(resource.data.app.validatePermission(permission))
 	if resource.data.canCreate == loggedPermission {
 		resource.data.canCreate = permission
@@ -298,30 +298,30 @@ func (resource *Resource[T]) PermissionUpdate(permission Permission) *Resource[T
 	return resource
 }
 
-func (resource *Resource[T]) PermissionCreate(permission Permission) *Resource[T] {
+func (resource *Resource) PermissionCreate(permission Permission) *Resource {
 	must(resource.data.app.validatePermission(permission))
 	resource.data.canCreate = permission
 	return resource
 }
 
-func (resource *Resource[T]) PermissionDelete(permission Permission) *Resource[T] {
+func (resource *Resource) PermissionDelete(permission Permission) *Resource {
 	must(resource.data.app.validatePermission(permission))
 	resource.data.canDelete = permission
 	return resource
 }
 
-func (resource *Resource[T]) PermissionExport(permission Permission) *Resource[T] {
+func (resource *Resource) PermissionExport(permission Permission) *Resource {
 	must(resource.data.app.validatePermission(permission))
 	resource.data.canExport = permission
 	return resource
 }
 
-func (resource *Resource[T]) Validation(validation Validation) *Resource[T] {
+func (resource *Resource) Validation(validation Validation) *Resource {
 	resource.data.addValidation(validation)
 	return resource
 }
 
-func (resource *Resource[T]) Dashboard(name func(string) string) *Dashboard {
+func (resource *Resource) Dashboard(name func(string) string) *Dashboard {
 	return resource.data.resourceBoard.Dashboard(name)
 }
 
@@ -329,13 +329,13 @@ func (resourceData *resourceData) addValidation(validation Validation) {
 	resourceData.validations = append(resourceData.validations, validation)
 }
 
-func (resource *Resource[T]) DeleteValidation(validation Validation) *Resource[T] {
+func (resource *Resource) DeleteValidation(validation Validation) *Resource {
 
 	resource.data.deleteValidations = append(resource.data.deleteValidations, validation)
 	return resource
 }
 
-func (resource *Resource[T]) Board(board *Board) *Resource[T] {
+func (resource *Resource) Board(board *Board) *Resource {
 	resource.data.parentBoard = board
 	return resource
 }
