@@ -30,7 +30,8 @@ func (app *App) API(url string) *API {
 	return api
 }
 
-func (resource *Resource[T]) API(url string) *API {
+func ResourceAPI[T any](app *App, url string) *API {
+	resource := GetResource[T](app)
 	return resource.data.API(url)
 }
 

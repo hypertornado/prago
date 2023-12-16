@@ -242,16 +242,15 @@ func (resource *Resource[T]) Name(singularName, pluralName func(string) string) 
 	return resource
 }
 
-func (resource *Resource[T]) PreviewURLFunction(fn func(*T) string) *Resource[T] {
+func PreviewURLFunction[T any](app *App, fn func(*T) string) {
+	resource := GetResource[T](app)
 	resource.data.PreviewURLFunction(func(a any) string {
 		return fn(a.(*T))
 	})
-	return resource
 }
 
-func (resourceData *resourceData) PreviewURLFunction(fn func(any) string) *resourceData {
+func (resourceData *resourceData) PreviewURLFunction(fn func(any) string) {
 	resourceData.previewURLFunction = fn
-	return resourceData
 }
 
 func (resource *Resource[T]) Icon(icon string) *Resource[T] {
