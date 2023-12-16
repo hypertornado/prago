@@ -93,10 +93,10 @@ func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Reques
 
 func ResourceFormAction[T any](app *App, url string, formGenerator func(*Form, *Request), validation Validation) *Action {
 	resource := GetResource[T](app)
-	return resource.data.FormAction(url, formGenerator, validation)
+	return resource.formAction(url, formGenerator, validation)
 }
 
-func (resourceData *resourceData) FormAction(url string, formGenerator func(*Form, *Request), validation Validation) *Action {
+func (resourceData *Resource) formAction(url string, formGenerator func(*Form, *Request), validation Validation) *Action {
 	action := newFormAction(resourceData.app, url, nil)
 
 	action.actionForm.resourceData = resourceData
@@ -119,7 +119,7 @@ func ResourceFormItemAction[T any](
 	formGenerator func(*T, *Form, *Request),
 	validation func(*T, ValidationContext),
 ) *Action {
-	resourceData := GetResource[T](app).data
+	resourceData := GetResource[T](app)
 	return resourceData.formItemAction(
 		url,
 		func(a any, f *Form, r *Request) {
@@ -131,7 +131,7 @@ func ResourceFormItemAction[T any](
 	)
 }
 
-func (resourceData *resourceData) formItemAction(url string, formGenerator func(any, *Form, *Request), validation func(any, ValidationContext)) *Action {
+func (resourceData *Resource) formItemAction(url string, formGenerator func(any, *Form, *Request), validation func(any, ValidationContext)) *Action {
 	fa := newFormAction(resourceData.app, url, func(f *Form, r *Request) {
 		item := resourceData.query(context.TODO()).ID(r.Param("id"))
 		f.image = resourceData.previewer(r, item).ImageURL(r.r.Context())

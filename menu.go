@@ -242,7 +242,7 @@ func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem
 	return ret
 }
 
-func (resourceData *resourceData) getResourceMenu(requestContext *menuRequestContext) (ret []*menuItem) {
+func (resourceData *Resource) getResourceMenu(requestContext *menuRequestContext) (ret []*menuItem) {
 	urlPath := requestContext.URL
 	for k, v := range resourceData.actions {
 		if v.method != "GET" {
@@ -275,7 +275,7 @@ func (resourceData *resourceData) getResourceMenu(requestContext *menuRequestCon
 	return
 }
 
-func (resourceData *resourceData) getResourceItemMenu(requestContext *menuRequestContext) *menuItem {
+func (resourceData *Resource) getResourceItemMenu(requestContext *menuRequestContext) *menuItem {
 	var items []*menuItem
 
 	for k, v := range resourceData.itemActions {

@@ -64,7 +64,7 @@ func TestBasicResource2(t *testing.T) {
 
 	item := &ResourceStruct{Name: "A", Floating: 3.14}
 
-	err := CreateItemWithContext(context.Background(), resource.data.app, item)
+	err := CreateItemWithContext(context.Background(), resource.app, item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,55 +73,55 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatal("should be positive")
 	}
 
-	item2 := Query[ResourceStruct](resource.data.app).ID(item.ID)
+	item2 := Query[ResourceStruct](resource.app).ID(item.ID)
 	if item2 == nil {
 		t.Fatal("should not be nil")
 	}
 
-	CreateItemWithContext(context.Background(), resource.data.app, &ResourceStruct{Name: "C"})
-	CreateItemWithContext(context.Background(), resource.data.app, &ResourceStruct{Name: "B"})
+	CreateItemWithContext(context.Background(), resource.app, &ResourceStruct{Name: "C"})
+	CreateItemWithContext(context.Background(), resource.app, &ResourceStruct{Name: "B"})
 
-	list := Query[ResourceStruct](resource.data.app).List()
+	list := Query[ResourceStruct](resource.app).List()
 	if len(list) != 3 {
 		t.Fatalf("wrong length %d", len(list))
 	}
 
-	first := Query[ResourceStruct](resource.data.app).Is("id", item.ID).First()
+	first := Query[ResourceStruct](resource.app).Is("id", item.ID).First()
 	if first.Name != "A" {
 		t.Fatal("wrong name")
 	}
 
-	if Query[ResourceStruct](resource.data.app).Is("id", item.ID).First().Name != "A" {
+	if Query[ResourceStruct](resource.app).Is("id", item.ID).First().Name != "A" {
 		t.Fatal("wrong name")
 	}
 
 	item.Name = "changed"
 
-	err = UpdateItem(resource.data.app, item)
+	err = UpdateItem(resource.app, item)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if Query[ResourceStruct](resource.data.app).Is("id", item.ID).First().Name != "changed" {
+	if Query[ResourceStruct](resource.app).Is("id", item.ID).First().Name != "changed" {
 		t.Fatal("wrong name")
 	}
 
-	first = Query[ResourceStruct](resource.data.app).Is("name", "B").First()
+	first = Query[ResourceStruct](resource.app).Is("name", "B").First()
 	if first.Name != "B" {
 		t.Fatal("wrong name")
 	}
 
-	count, _ := Query[ResourceStruct](resource.data.app).Count()
+	count, _ := Query[ResourceStruct](resource.app).Count()
 	if count != 3 {
 		t.Fatalf("wrong count %d", count)
 	}
 
-	err = DeleteItem[ResourceStruct](resource.data.app, item.ID)
+	err = DeleteItem[ResourceStruct](resource.app, item.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, _ = Query[ResourceStruct](resource.data.app).Count()
+	count, _ = Query[ResourceStruct](resource.app).Count()
 	if count != 2 {
 		t.Fatalf("wrong count %d", count)
 	}
@@ -131,19 +131,19 @@ func TestBasicResource2(t *testing.T) {
 func TestQuery(t *testing.T) {
 	resource := prepareResource()
 
-	err := CreateItem(resource.data.app, &ResourceStruct{Name: "A", Floating: 3.14})
+	err := CreateItem(resource.app, &ResourceStruct{Name: "A", Floating: 3.14})
 	if err != nil {
 		t.Fatal(err)
 	}
-	CreateItem(resource.data.app, &ResourceStruct{Name: "C"})
-	CreateItem(resource.data.app, &ResourceStruct{Name: "B"})
+	CreateItem(resource.app, &ResourceStruct{Name: "C"})
+	CreateItem(resource.app, &ResourceStruct{Name: "B"})
 
-	item := Query[ResourceStruct](resource.data.app).Where("id = ?", 2).First()
+	item := Query[ResourceStruct](resource.app).Where("id = ?", 2).First()
 	if item.Name != "C" {
 		t.Fatal(item.Name)
 	}
 
-	createdItem := Query[ResourceStruct](resource.data.app).Where("id = ?", 2).First()
+	createdItem := Query[ResourceStruct](resource.app).Where("id = ?", 2).First()
 	if createdItem == nil {
 		t.Fatal("should not be nil")
 	}
@@ -151,12 +151,12 @@ func TestQuery(t *testing.T) {
 		t.Fatal(createdItem.Name)
 	}
 
-	item = Query[ResourceStruct](resource.data.app).Where("id=?", 2).First()
+	item = Query[ResourceStruct](resource.app).Where("id=?", 2).First()
 	if item.Name != "C" {
 		t.Fatal(item.Name)
 	}
 
-	item = Query[ResourceStruct](resource.data.app).First()
+	item = Query[ResourceStruct](resource.app).First()
 	if item.Name != "A" {
 		t.Fatal(item.Name)
 	}
@@ -166,7 +166,7 @@ func TestQuery(t *testing.T) {
 	}
 
 	var list []*ResourceStruct
-	list = Query[ResourceStruct](resource.data.app).List()
+	list = Query[ResourceStruct](resource.app).List()
 	if len(list) != 3 {
 		t.Fatal(len(list))
 	}
@@ -175,7 +175,7 @@ func TestQuery(t *testing.T) {
 		t.Fatal(list[2].Name)
 	}
 
-	count, err := Query[ResourceStruct](resource.data.app).Count()
+	count, err := Query[ResourceStruct](resource.app).Count()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -183,7 +183,7 @@ func TestQuery(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	list = Query[ResourceStruct](resource.data.app).Limit(1).Offset(1).Limit(1).List()
+	list = Query[ResourceStruct](resource.app).Limit(1).Offset(1).Limit(1).List()
 	if len(list) != 1 {
 		t.Fatal(len(list))
 	}
@@ -191,12 +191,12 @@ func TestQuery(t *testing.T) {
 		t.Fatal(list[0].Name)
 	}
 
-	err = DeleteItem[ResourceStruct](resource.data.app, item.ID)
+	err = DeleteItem[ResourceStruct](resource.app, item.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, _ = Query[ResourceStruct](resource.data.app).Count()
+	count, _ = Query[ResourceStruct](resource.app).Count()
 	if count != 2 {
 		t.Fatal(count)
 	}
@@ -204,14 +204,14 @@ func TestQuery(t *testing.T) {
 
 func TestResource(t *testing.T) {
 	resource := prepareResource()
-	items, err := resource.data.getListContent(context.Background(), resource.data.app.newUserData(&user{Role: "sysadmin"}), map[string][]string{
+	items, err := resource.getListContent(context.Background(), resource.app.newUserData(&user{Role: "sysadmin"}), map[string][]string{
 		"_order": {"id"},
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err := Query[ResourceStruct](resource.data.app).Count()
+	count, err := Query[ResourceStruct](resource.app).Count()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -219,13 +219,13 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	err = CreateItem(resource.data.app, &ResourceStruct{Name: "First", CreatedAt: time.Now()})
+	err = CreateItem(resource.app, &ResourceStruct{Name: "First", CreatedAt: time.Now()})
 	if err != nil {
 		t.Fatal(err)
 	}
-	CreateItem(resource.data.app, &ResourceStruct{Name: "Second", Showing: "show"})
+	CreateItem(resource.app, &ResourceStruct{Name: "Second", Showing: "show"})
 
-	count, err = Query[ResourceStruct](resource.data.app).Count()
+	count, err = Query[ResourceStruct](resource.app).Count()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -233,7 +233,7 @@ func TestResource(t *testing.T) {
 		t.Fatal(count)
 	}
 
-	items, err = resource.data.getListContent(context.Background(), resource.data.app.newUserData(&user{Role: "sysadmin"}), map[string][]string{
+	items, err = resource.getListContent(context.Background(), resource.app.newUserData(&user{Role: "sysadmin"}), map[string][]string{
 		"_order": {"id"},
 		"_page":  {"1"},
 	})
@@ -251,15 +251,15 @@ func TestResource(t *testing.T) {
 }
 
 func TestResourceUnique(t *testing.T) {
-	app := prepareResource().data.app
+	app := prepareResource().app
 
 	resource := GetResource[ResourceStructUnique](app)
 
-	CreateItem(resource.data.app, &ResourceStructUnique{UniqueName: "A"})
-	CreateItem(resource.data.app, &ResourceStructUnique{UniqueName: "B"})
-	CreateItem(resource.data.app, &ResourceStructUnique{UniqueName: "A"})
+	CreateItem(resource.app, &ResourceStructUnique{UniqueName: "A"})
+	CreateItem(resource.app, &ResourceStructUnique{UniqueName: "B"})
+	CreateItem(resource.app, &ResourceStructUnique{UniqueName: "A"})
 
-	count, err := Query[ResourceStruct](resource.data.app).Count()
+	count, err := Query[ResourceStruct](resource.app).Count()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -273,9 +273,9 @@ func TestResourceDate(t *testing.T) {
 	resource := prepareResource()
 	tm := time.Now()
 
-	CreateItem(resource.data.app, &ResourceStruct{Date: tm})
+	CreateItem(resource.app, &ResourceStruct{Date: tm})
 
-	first := Query[ResourceStruct](resource.data.app).Is("date", tm.Format("2006-01-02")).First()
+	first := Query[ResourceStruct](resource.app).Is("date", tm.Format("2006-01-02")).First()
 	if first == nil {
 		t.Fatal("should not be nil")
 	}
@@ -286,9 +286,9 @@ func TestResourceTimestamps(t *testing.T) {
 
 	testStartTime := time.Now().Truncate(time.Second)
 
-	CreateItem(resource.data.app, &ResourceStruct{Name: "A"})
+	CreateItem(resource.app, &ResourceStruct{Name: "A"})
 
-	item := Query[ResourceStruct](resource.data.app).Is("id", 1).First()
+	item := Query[ResourceStruct](resource.app).Is("id", 1).First()
 
 	if item.UpdatedAt.Before(testStartTime) || time.Now().Before(item.UpdatedAt) {
 		t.Fatal(item.UpdatedAt)
@@ -302,15 +302,15 @@ func TestResourceTimestamps(t *testing.T) {
 func TestResourceBool(t *testing.T) {
 	resource := prepareResource()
 
-	CreateItem(resource.data.app, &ResourceStruct{Name: "A", IsSomething: false})
-	CreateItem(resource.data.app, &ResourceStruct{Name: "B", IsSomething: true})
+	CreateItem(resource.app, &ResourceStruct{Name: "A", IsSomething: false})
+	CreateItem(resource.app, &ResourceStruct{Name: "B", IsSomething: true})
 
-	trueItem := Query[ResourceStruct](resource.data.app).Is("issomething", true).First()
+	trueItem := Query[ResourceStruct](resource.app).Is("issomething", true).First()
 	if trueItem.Name != "B" {
 		t.Fatal(trueItem.Name)
 	}
 
-	falseItem := Query[ResourceStruct](resource.data.app).Is("issomething", false).First()
+	falseItem := Query[ResourceStruct](resource.app).Is("issomething", false).First()
 	if falseItem.Name != "A" {
 		t.Fatal(trueItem.Name)
 	}
@@ -318,9 +318,9 @@ func TestResourceBool(t *testing.T) {
 
 func TestResourceCreateWithID(t *testing.T) {
 	resource := prepareResource()
-	CreateItem(resource.data.app, &ResourceStruct{ID: 85, Name: "A"})
+	CreateItem(resource.app, &ResourceStruct{ID: 85, Name: "A"})
 
-	item := Query[ResourceStruct](resource.data.app).First()
+	item := Query[ResourceStruct](resource.app).First()
 	id := item.ID
 	if id != 85 {
 		t.Fatal(id)
@@ -329,7 +329,7 @@ func TestResourceCreateWithID(t *testing.T) {
 
 func TestShouldNotSaveWithZeroID(t *testing.T) {
 	resource := prepareResource()
-	err := UpdateItem(resource.data.app, &ResourceStruct{})
+	err := UpdateItem(resource.app, &ResourceStruct{})
 	if err == nil {
 		t.Fatal("should not be nil")
 	}
@@ -341,19 +341,19 @@ func TestWorkingWithConcreteID(t *testing.T) {
 		ID:   3,
 		Name: "A",
 	}
-	err := CreateItem(resource.data.app, item)
+	err := CreateItem(resource.app, item)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = DeleteItem[ResourceStruct](resource.data.app, 3)
+	err = DeleteItem[ResourceStruct](resource.app, 3)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	item.Name = "B"
 
-	err = CreateItem(resource.data.app, item)
+	err = CreateItem(resource.app, item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -366,25 +366,25 @@ func TestReplace(t *testing.T) {
 		ID:   id,
 		Name: "A",
 	}
-	err := Replace(context.Background(), resource.data.app, item)
+	err := Replace(context.Background(), resource.app, item)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if Query[ResourceStruct](resource.data.app).Is("id", id).First() == nil {
+	if Query[ResourceStruct](resource.app).Is("id", id).First() == nil {
 		t.Fatal("should not be nil")
 	}
 	item.Name = "B"
-	err = Replace(context.Background(), resource.data.app, item)
+	err = Replace(context.Background(), resource.app, item)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, _ := Query[ResourceStruct](resource.data.app).Count()
+	count, _ := Query[ResourceStruct](resource.app).Count()
 	if count != 1 {
 		t.Fatal(count)
 	}
 
-	modified := Query[ResourceStruct](resource.data.app).Is("id", id).First()
+	modified := Query[ResourceStruct](resource.app).Is("id", id).First()
 	if modified.Name != "B" {
 		t.Fatal(modified.Name)
 	}
@@ -398,11 +398,11 @@ func FuzzCreateItem(f *testing.F) {
 			Name:  s,
 			Count: int64(i),
 		}
-		err := CreateItem(resource.data.app, item)
+		err := CreateItem(resource.app, item)
 		if err != nil {
 			return
 		}
-		item2 := Query[ResourceStruct](resource.data.app).Is("id", item.ID).First()
+		item2 := Query[ResourceStruct](resource.app).Is("id", item.ID).First()
 		if item2 == nil {
 			t.Fatal("item2 is nil")
 		}
@@ -420,11 +420,11 @@ func TestLongSaveText(t *testing.T) {
 	text := "some" + string(make([]byte, 10000))
 	resource := prepareResource()
 	newItem := &ResourceStruct{Text: text}
-	err := CreateItem(resource.data.app, newItem)
+	err := CreateItem(resource.app, newItem)
 	if err != nil {
 		t.Fatal(err)
 	}
-	item := Query[ResourceStruct](resource.data.app).Is("id", newItem.ID).First()
+	item := Query[ResourceStruct](resource.app).Is("id", newItem.ID).First()
 
 	if !strings.HasPrefix(item.Text, "some") {
 		t.Fatal(item.Text)

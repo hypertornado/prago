@@ -15,10 +15,6 @@ import (
 var resourceMapMutex = &sync.RWMutex{}
 
 type Resource struct {
-	data *resourceData
-}
-
-type resourceData struct {
 	app *App
 	id  string
 
@@ -58,7 +54,7 @@ type resourceData struct {
 	resourceBoard *Board
 	parentBoard   *Board
 
-	previewURLFunction func(any) string
+	previewFn func(any) string
 }
 
 func NewResource[T any](app *App) *Resource {
@@ -78,7 +74,7 @@ func NewResource[T any](app *App) *Resource {
 
 	defaultName := typ.Name()
 
-	data := &resourceData{
+	ret := &Resource{
 		app:  app,
 		id:   columnName(defaultName),
 		icon: iconResource,
@@ -105,44 +101,40 @@ func NewResource[T any](app *App) *Resource {
 		fieldMap: make(map[string]*Field),
 	}
 
-	ret := &Resource{
-		data: data,
-	}
-
 	for i := 0; i < typ.NumField(); i++ {
 		if ast.IsExported(typ.Field(i).Name) {
-			field := ret.data.newField(typ.Field(i), i)
+			field := ret.newField(typ.Field(i), i)
 			if field.tags["prago-type"] == "order" {
-				ret.data.orderField = field
+				ret.orderField = field
 			}
-			ret.data.fields = append(ret.data.fields, field)
-			ret.data.fieldMap[field.id] = field
+			ret.fields = append(ret.fields, field)
+			ret.fieldMap[field.id] = field
 		}
 	}
 
-	app.resources = append(app.resources, ret.data)
-	app.resourceMap[ret.data.typ] = ret.data
-	app.resourceNameMap[ret.data.id] = ret.data
+	app.resources = append(app.resources, ret)
+	app.resourceMap[ret.typ] = ret
+	app.resourceNameMap[ret.id] = ret
 
-	initResource(ret.data)
+	initResource(ret)
 
-	ret.data.resourceBoard = &Board{
+	ret.resourceBoard = &Board{
 		app:            app,
-		parentResource: ret.data,
+		parentResource: ret,
 	}
 
-	ret.data.resourceBoard.MainDashboard = &Dashboard{
+	ret.resourceBoard.MainDashboard = &Dashboard{
 		name:  unlocalized(""),
-		board: ret.data.resourceBoard,
+		board: ret.resourceBoard,
 	}
 
-	statsDashboard := ret.data.resourceBoard.Dashboard(unlocalized("Statistiky"))
-	statsDashboard.Figure(unlocalized(""), ret.data.canView).Value(func(r *Request) int64 {
-		c, _ := ret.data.query(context.Background()).count()
+	statsDashboard := ret.resourceBoard.Dashboard(unlocalized("Statistiky"))
+	statsDashboard.Figure(unlocalized(""), ret.canView).Value(func(r *Request) int64 {
+		c, _ := ret.query(context.Background()).count()
 		return c
 	}).Unit(unlocalized("položek"))
 
-	ret.data.orderByColumn, ret.data.orderDesc = ret.data.getDefaultOrder()
+	ret.orderByColumn, ret.orderDesc = ret.getDefaultOrder()
 	return ret
 }
 
@@ -156,28 +148,25 @@ func GetResource[T any](app *App) *Resource {
 	if !ok {
 		return nil
 	}
-	return &Resource{
-		data: ret,
-	}
-
+	return ret
 }
 
-func (resourceData *resourceData) isItPointerToResourceItem(item any) bool {
+func (resourceData *Resource) isItPointerToResourceItem(item any) bool {
 	if item == nil {
 		return false
 	}
 	return reflect.PointerTo(resourceData.typ) == reflect.TypeOf(item)
 }
 
-func (resourceData *resourceData) addRelation(field *relatedField) {
+func (resourceData *Resource) addRelation(field *relatedField) {
 	resourceData.relations = append(resourceData.relations, field)
 }
 
-func (resourceData *resourceData) getID() string {
+func (resourceData *Resource) getID() string {
 	return resourceData.id
 }
 
-func (resourceData *resourceData) getResourceControl() *controller {
+func (resourceData *Resource) getResourceControl() *controller {
 	return resourceData.resourceController
 }
 
@@ -187,10 +176,10 @@ func CreateItem[T any](app *App, item *T) error {
 
 func CreateItemWithContext[T any](ctx context.Context, app *App, item *T) error {
 	resource := GetResource[T](app)
-	return resource.data.Create(ctx, item)
+	return resource.create(ctx, item)
 }
 
-func (resourceData *resourceData) Create(ctx context.Context, item any) error {
+func (resourceData *Resource) create(ctx context.Context, item any) error {
 	resourceData.setTimestamp(item, "CreatedAt")
 	resourceData.setTimestamp(item, "UpdatedAt")
 	return resourceData.createItem(ctx, item, false)
@@ -202,22 +191,22 @@ func UpdateItem[T any](app *App, item *T) error {
 
 func UpdateItemWithContext[T any](ctx context.Context, app *App, item *T) error {
 	resource := GetResource[T](app)
-	return resource.data.Update(ctx, item)
+	return resource.update(ctx, item)
 }
 
-func (resourceData *resourceData) Update(ctx context.Context, item any) error {
+func (resourceData *Resource) update(ctx context.Context, item any) error {
 	resourceData.setTimestamp(item, "UpdatedAt")
 	return resourceData.saveItem(ctx, item, false)
 }
 
 func Replace[T any](ctx context.Context, app *App, item *T) error {
 	resource := GetResource[T](app)
-	resource.data.setTimestamp(item, "CreatedAt")
-	resource.data.setTimestamp(item, "UpdatedAt")
-	return resource.data.replaceItem(ctx, item, false)
+	resource.setTimestamp(item, "CreatedAt")
+	resource.setTimestamp(item, "UpdatedAt")
+	return resource.replaceItem(ctx, item, false)
 }
 
-func (resourceData *resourceData) setTimestamp(item any, fieldName string) {
+func (resourceData *Resource) setTimestamp(item any, fieldName string) {
 	val := reflect.ValueOf(item).Elem()
 	fieldVal := val.FieldByName(fieldName)
 	timeVal := reflect.ValueOf(time.Now())
@@ -234,10 +223,10 @@ func DeleteItem[T any](app *App, id int64) error {
 
 func DeleteItemWithContext[T any](ctx context.Context, app *App, id int64) error {
 	resource := GetResource[T](app)
-	return resource.data.Delete(ctx, id)
+	return resource.delete(ctx, id)
 }
 
-func (resourceData *resourceData) Delete(ctx context.Context, id int64) error {
+func (resourceData *Resource) delete(ctx context.Context, id int64) error {
 	q := resourceData.query(ctx).Is("id", id)
 	count, err := q.delete()
 	if err != nil {
@@ -253,94 +242,94 @@ func (resourceData *resourceData) Delete(ctx context.Context, id int64) error {
 }
 
 func (resource *Resource) Name(singularName, pluralName func(string) string) *Resource {
-	resource.data.singularName = singularName
-	resource.data.pluralName = pluralName
+	resource.singularName = singularName
+	resource.pluralName = pluralName
 	return resource
 }
 
 func PreviewURLFunction[T any](app *App, fn func(*T) string) {
 	resource := GetResource[T](app)
-	resource.data.PreviewURLFunction(func(a any) string {
+	resource.previewURLFunction(func(a any) string {
 		return fn(a.(*T))
 	})
 }
 
-func (resourceData *resourceData) PreviewURLFunction(fn func(any) string) {
-	resourceData.previewURLFunction = fn
+func (resourceData *Resource) previewURLFunction(fn func(any) string) {
+	resourceData.previewFn = fn
 }
 
 func (resource *Resource) Icon(icon string) *Resource {
-	resource.data.icon = icon
+	resource.icon = icon
 	return resource
 
 }
 
 func (resource *Resource) ItemsPerPage(itemsPerPage int64) *Resource {
-	resource.data.defaultItemsPerPage = itemsPerPage
+	resource.defaultItemsPerPage = itemsPerPage
 	return resource
 }
 
 func (resource *Resource) PermissionView(permission Permission) *Resource {
-	must(resource.data.app.validatePermission(permission))
-	resource.data.canView = permission
+	must(resource.app.validatePermission(permission))
+	resource.canView = permission
 	return resource
 }
 
 func (resource *Resource) PermissionUpdate(permission Permission) *Resource {
-	must(resource.data.app.validatePermission(permission))
-	if resource.data.canCreate == loggedPermission {
-		resource.data.canCreate = permission
+	must(resource.app.validatePermission(permission))
+	if resource.canCreate == loggedPermission {
+		resource.canCreate = permission
 	}
-	if resource.data.canDelete == loggedPermission {
-		resource.data.canDelete = permission
+	if resource.canDelete == loggedPermission {
+		resource.canDelete = permission
 	}
-	resource.data.canUpdate = permission
+	resource.canUpdate = permission
 	return resource
 }
 
 func (resource *Resource) PermissionCreate(permission Permission) *Resource {
-	must(resource.data.app.validatePermission(permission))
-	resource.data.canCreate = permission
+	must(resource.app.validatePermission(permission))
+	resource.canCreate = permission
 	return resource
 }
 
 func (resource *Resource) PermissionDelete(permission Permission) *Resource {
-	must(resource.data.app.validatePermission(permission))
-	resource.data.canDelete = permission
+	must(resource.app.validatePermission(permission))
+	resource.canDelete = permission
 	return resource
 }
 
 func (resource *Resource) PermissionExport(permission Permission) *Resource {
-	must(resource.data.app.validatePermission(permission))
-	resource.data.canExport = permission
+	must(resource.app.validatePermission(permission))
+	resource.canExport = permission
 	return resource
 }
 
 func (resource *Resource) Validation(validation Validation) *Resource {
-	resource.data.addValidation(validation)
+	resource.addValidation(validation)
 	return resource
 }
 
 func (resource *Resource) Dashboard(name func(string) string) *Dashboard {
-	return resource.data.resourceBoard.Dashboard(name)
+	return resource.resourceBoard.Dashboard(name)
 }
 
-func (resourceData *resourceData) addValidation(validation Validation) {
+func (resourceData *Resource) addValidation(validation Validation) {
 	resourceData.validations = append(resourceData.validations, validation)
 }
 
 func (resource *Resource) DeleteValidation(validation Validation) *Resource {
 
-	resource.data.deleteValidations = append(resource.data.deleteValidations, validation)
+	resource.deleteValidations = append(resource.deleteValidations, validation)
 	return resource
 }
 
 func (resource *Resource) Board(board *Board) *Resource {
-	resource.data.parentBoard = board
+	resource.parentBoard = board
 	return resource
 }
 
-func (resourceData *resourceData) getItemURL(item interface{}, suffix string, userData UserData) string {
+func (resourceData *Resource) getItemURL(item interface{}, suffix string, userData UserData) string {
 	ret := resourceData.getURL(fmt.Sprintf("%d", resourceData.previewer(userData, item).ID()))
 	if suffix != "" {
 		ret += "/" + suffix
@@ -348,13 +337,13 @@ func (resourceData *resourceData) getItemURL(item interface{}, suffix string, us
 	return ret
 }
 
-func (app *App) getResourceByID(name string) *resourceData {
+func (app *App) getResourceByID(name string) *Resource {
 	resourceMapMutex.RLock()
 	defer resourceMapMutex.RUnlock()
 	return app.resourceNameMap[columnName(name)]
 }
 
-func initResource(resourceData *resourceData) {
+func initResource(resourceData *Resource) {
 	resourceData.resourceController.addAroundAction(func(request *Request, next func()) {
 		if !request.Authorize(resourceData.canView) {
 			renderErrorPage(request, 403)
@@ -364,7 +353,7 @@ func initResource(resourceData *resourceData) {
 	})
 }
 
-func (resourceData *resourceData) getURL(suffix string) string {
+func (resourceData *Resource) getURL(suffix string) string {
 	url := resourceData.id
 	if len(suffix) > 0 {
 		url += "/" + suffix
@@ -372,18 +361,18 @@ func (resourceData *resourceData) getURL(suffix string) string {
 	return resourceData.app.getAdminURL(url)
 }
 
-func (resourceData *resourceData) cachedCountName() string {
+func (resourceData *Resource) cachedCountName() string {
 	return fmt.Sprintf("prago-resource_count-%s", resourceData.id)
 }
 
-func (resourceData *resourceData) getCachedCount(ctx context.Context) int64 {
+func (resourceData *Resource) getCachedCount(ctx context.Context) int64 {
 	return loadCache(resourceData.app.cache, resourceData.cachedCountName(), func(ctx context.Context) int64 {
 		count, _ := resourceData.countAllItems(ctx, false)
 		return count
 	})
 }
 
-func (resourceData *resourceData) updateCachedCount(ctx context.Context) error {
+func (resourceData *Resource) updateCachedCount(ctx context.Context) error {
 	resourceData.app.cache.forceLoad(resourceData.cachedCountName(), func(ctx context.Context) interface{} {
 		count, _ := resourceData.countAllItems(ctx, false)
 		return count

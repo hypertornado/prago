@@ -57,7 +57,7 @@ func (app *App) ListenActivity(handler func(Activity)) {
 	app.activityListeners = append(app.activityListeners, handler)
 }
 
-func (app *App) getHistoryTable(request *Request, resourceData *resourceData, itemID int64, pageStr string) *Table {
+func (app *App) getHistoryTable(request *Request, resourceData *Resource, itemID int64, pageStr string) *Table {
 
 	ret := app.Table()
 
@@ -140,13 +140,13 @@ func (app *App) getHistoryTable(request *Request, resourceData *resourceData, it
 func (app *App) initActivityLog() {
 	app.activityLogResource = NewResource[activityLog](app)
 	app.activityLogResource.Board(sysadminBoard)
-	app.activityLogResource.data.icon = "glyphicons-basic-58-history.svg"
-	app.activityLogResource.data.canView = Permission(sysadminRoleName)
-	app.activityLogResource.data.orderDesc = true
+	app.activityLogResource.icon = "glyphicons-basic-58-history.svg"
+	app.activityLogResource.canView = Permission(sysadminRoleName)
+	app.activityLogResource.orderDesc = true
 	app.activityLogResource.Name(messages.GetNameFunction("admin_history"), messages.GetNameFunction("admin_history"))
 }
 
-func (resourceData *resourceData) LogActivity(request *Request, before, after any) error {
+func (resourceData *Resource) logActivity(request *Request, before, after any) error {
 	var activityType string
 	switch {
 	case before == nil && after != nil:

@@ -19,10 +19,10 @@ type listQuery struct {
 	order      []listQueryOrder
 	isDebug    bool
 
-	resourceData *resourceData
+	resourceData *Resource
 }
 
-func (resourceData *resourceData) query(ctx context.Context) *listQuery {
+func (resourceData *Resource) query(ctx context.Context) *listQuery {
 	return &listQuery{
 		context:      ctx,
 		resourceData: resourceData,

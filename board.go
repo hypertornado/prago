@@ -10,7 +10,7 @@ type Board struct {
 	app            *App
 	action         *Action
 	parentBoard    *Board
-	parentResource *resourceData
+	parentResource *Resource
 
 	MainDashboard *Dashboard
 

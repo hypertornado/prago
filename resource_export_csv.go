@@ -9,8 +9,8 @@ import (
 
 const exportCSVPageLimit = 1000
 
-func bindResourceExportCSV(resourceData *resourceData) {
-	resourceData.API("export.csv").Permission(resourceData.canExport).Handler(func(request *Request) {
+func bindResourceExportCSV(resourceData *Resource) {
+	resourceData.api("export.csv").Permission(resourceData.canExport).Handler(func(request *Request) {
 		if !request.Authorize(resourceData.canExport) {
 			renderErrorPage(request, 403)
 			return

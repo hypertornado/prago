@@ -236,7 +236,7 @@ func (nm Newsletters) secret(email string) string {
 
 func (nm *Newsletters) SubscribeWithConfirmationEmail(email, name string) error {
 	res := GetResource[newsletterPersons](nm.app)
-	person := Query[newsletterPersons](res.data.app).Is("email", email).First()
+	person := Query[newsletterPersons](res.app).Is("email", email).First()
 	if person != nil {
 		return ErrEmailAlreadyInList
 	}
@@ -255,7 +255,7 @@ func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 
 	res := GetResource[newsletterPersons](nm.app)
 
-	person := Query[newsletterPersons](res.data.app).Is("email", email).First()
+	person := Query[newsletterPersons](res.app).Is("email", email).First()
 	if person != nil {
 		return ErrEmailAlreadyInList
 	}
@@ -280,13 +280,13 @@ type newsletter struct {
 }
 
 func initNewsletterResource(resource *Resource, board *Board) {
-	resource.data.canView = sysadminPermission
+	resource.canView = sysadminPermission
 
 	resource.Board(board)
 
-	ResourceItemHandler[newsletter](resource.data.app, "preview",
+	ResourceItemHandler[newsletter](resource.app, "preview",
 		func(item *newsletter, request *Request) {
-			body, err := resource.data.app.newsletters.GetBody(*item, "")
+			body, err := resource.app.newsletters.GetBody(*item, "")
 			must(err)
 
 			request.Response().WriteHeader(200)
@@ -294,7 +294,7 @@ func initNewsletterResource(resource *Resource, board *Board) {
 		}).Permission(loggedPermission).Name(unlocalized("Náhled"))
 
 	ResourceFormItemAction[newsletter](
-		resource.data.app,
+		resource.app,
 		"send-preview",
 		func(item *newsletter, f *Form, r *Request) {
 			f.AddTextareaInput("emails", "Seznam emailů na poslání preview (jeden email na řádek)").Focused = true
@@ -302,7 +302,7 @@ func initNewsletterResource(resource *Resource, board *Board) {
 		},
 		func(newsletter *newsletter, vc ValidationContext) {
 			newsletter.PreviewSentAt = time.Now()
-			err := UpdateItem(resource.data.app, newsletter)
+			err := UpdateItem(resource.app, newsletter)
 			if err != nil {
 				panic(err)
 			}
@@ -312,44 +312,44 @@ func initNewsletterResource(resource *Resource, board *Board) {
 				vc.AddError("Není zadán žádný email")
 			}
 			if vc.Valid() {
-				err := resource.data.app.sendEmails(*newsletter, emails)
+				err := resource.app.sendEmails(*newsletter, emails)
 				if err != nil {
 					vc.AddError(fmt.Sprintf("Chyba při odesílání emailů: %s", err))
 				}
 			}
 			if vc.Valid() {
 				vc.Request().AddFlashMessage("Náhled newsletteru odeslán.")
-				vc.Validation().RedirectionLocaliton = resource.data.getItemURL(newsletter, "", vc.Request())
+				vc.Validation().RedirectionLocaliton = resource.getItemURL(newsletter, "", vc.Request())
 			}
 		},
 	).Permission(loggedPermission).Name(unlocalized("Odeslat náhled"))
 
 	ResourceFormItemAction[newsletter](
-		resource.data.app,
+		resource.app,
 		"send",
 		func(newsletter *newsletter, form *Form, request *Request) {
-			recipients, err := resource.data.app.getNewsletterRecipients()
+			recipients, err := resource.app.getNewsletterRecipients()
 			must(err)
 			form.AddSubmit(fmt.Sprintf("Odelsat newsletter na %d emailů", len(recipients)))
 		},
 		func(newsletter *newsletter, vc ValidationContext) {
 			newsletter.SentAt = time.Now()
 			//TODO: log sent emails
-			must(UpdateItem(resource.data.app, newsletter))
+			must(UpdateItem(resource.app, newsletter))
 
-			recipients, err := resource.data.app.getNewsletterRecipients()
+			recipients, err := resource.app.getNewsletterRecipients()
 			if err != nil {
 				panic(err)
 			}
 
-			go resource.data.app.sendEmails(*newsletter, recipients)
+			go resource.app.sendEmails(*newsletter, recipients)
 			vc.Request().AddFlashMessage(fmt.Sprintf("Newsletter '%s' se odesílá na %d adres", newsletter.Name, len(recipients)))
-			vc.Validation().RedirectionLocaliton = resource.data.getItemURL(newsletter, "", vc.Request())
+			vc.Validation().RedirectionLocaliton = resource.getItemURL(newsletter, "", vc.Request())
 		},
 	).Permission(loggedPermission).Name(unlocalized("Odeslat"))
 
 	ResourceFormItemAction[newsletter](
-		resource.data.app,
+		resource.app,
 		"duplicate",
 		func(newsletter *newsletter, f *Form, r *Request) {
 			f.AddSubmit("Duplikovat newsletter")
@@ -368,7 +368,7 @@ func initNewsletterResource(resource *Resource, board *Board) {
 				must(CreateItemWithContext(vc.Context(), app, &section))
 			}
 
-			vc.Validation().RedirectionLocaliton = resource.data.getItemURL(newsletter, "edit", vc.Request())
+			vc.Validation().RedirectionLocaliton = resource.getItemURL(newsletter, "edit", vc.Request())
 		},
 	).Permission(loggedPermission).Name(unlocalized("Duplikovat"))
 }

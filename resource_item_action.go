@@ -9,12 +9,12 @@ import (
 
 func ResourceItemView[T any](app *App, url string, template string, dataSource func(*T, *Request) interface{}) *Action {
 	resource := GetResource[T](app)
-	return resource.data.itemActionView(url, template, func(item any, request *Request) interface{} {
+	return resource.itemActionView(url, template, func(item any, request *Request) interface{} {
 		return dataSource(item.(*T), request)
 	})
 }
 
-func (resource *resourceData) itemActionView(url, template string, dataSource func(any, *Request) interface{}) *Action {
+func (resource *Resource) itemActionView(url, template string, dataSource func(any, *Request) interface{}) *Action {
 	action := resource.newItemAction(url)
 
 	action.View(template, func(request *Request) interface{} {
@@ -27,7 +27,7 @@ func (resource *resourceData) itemActionView(url, template string, dataSource fu
 	return action
 }
 
-func (resourceData *resourceData) newItemAction(itemUrl string) *Action {
+func (resourceData *Resource) newItemAction(itemUrl string) *Action {
 	action := newAction(resourceData.app, itemUrl)
 	action.resourceData = resourceData
 	action.isItemAction = true
@@ -45,7 +45,7 @@ func (resourceData *resourceData) newItemAction(itemUrl string) *Action {
 	return action
 }
 
-func (resourceData *resourceData) itemActionUi(itemURL string, handler func(any, *Request, *pageData)) *Action {
+func (resourceData *Resource) itemActionUi(itemURL string, handler func(any, *Request, *pageData)) *Action {
 	action := resourceData.newItemAction(itemURL)
 
 	action.ui(func(request *Request, pd *pageData) {
@@ -61,12 +61,12 @@ func (resourceData *resourceData) itemActionUi(itemURL string, handler func(any,
 
 func ResourceItemHandler[T any](app *App, url string, fn func(*T, *Request)) *Action {
 	resource := GetResource[T](app)
-	return resource.data.itemActionHandler(url, func(item any, request *Request) {
+	return resource.itemActionHandler(url, func(item any, request *Request) {
 		fn(item.(*T), request)
 	})
 }
 
-func (resourceData *resourceData) itemActionHandler(url string, fn func(any, *Request)) *Action {
+func (resourceData *Resource) itemActionHandler(url string, fn func(any, *Request)) *Action {
 	action := resourceData.newItemAction(url)
 
 	return action.Handler(func(request *Request) {

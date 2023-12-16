@@ -2,7 +2,6 @@ package main
 
 import (
 	"compress/gzip"
-	"context"
 	"embed"
 	"errors"
 	"fmt"
@@ -159,8 +158,7 @@ func main() {
 		}
 
 		file.Deleted = true
-		fileResource := prago.GetResource[CDNFile](app)
-		err := fileResource.Update(context.Background(), file)
+		err := prago.UpdateItem(app, file)
 		if err != nil {
 			panic(err)
 		}

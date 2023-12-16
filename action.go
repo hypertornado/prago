@@ -27,7 +27,7 @@ type Action struct {
 	isPartOfBoard *Board
 
 	app          *App
-	resourceData *resourceData
+	resourceData *Resource
 	isItemAction bool
 	isUserMenu   bool
 	priority     int64
@@ -60,7 +60,7 @@ func (app *App) bindAllActions() {
 	}
 }
 
-func (resourceData *resourceData) bindActions() {
+func (resourceData *Resource) bindActions() {
 	for _, v := range resourceData.actions {
 		err := bindAction(v)
 		if err != nil {
@@ -95,11 +95,11 @@ func (app *App) Action(url string) *Action {
 
 func ResourceAction[T any](app *App, url string) *Action {
 	resource := GetResource[T](app)
-	return resource.data.action(url)
+	return resource.action(url)
 }
 
 // AddAction adds action to resource
-func (resourceData *resourceData) action(url string) *Action {
+func (resourceData *Resource) action(url string) *Action {
 	action := newAction(resourceData.app, url)
 	action.resourceData = resourceData
 	action.permission = resourceData.canView
@@ -156,7 +156,7 @@ func (action *Action) addConstraint(constraint routerConstraint) {
 	action.constraints = append(action.constraints, constraint)
 }
 
-func (resourceData *resourceData) getItemButtonData(userData UserData, item interface{}) (ret []*buttonData) {
+func (resourceData *Resource) getItemButtonData(userData UserData, item interface{}) (ret []*buttonData) {
 	for _, v := range resourceData.itemActions {
 		if v.method != "GET" {
 			continue
@@ -190,7 +190,7 @@ func (resourceData *resourceData) getItemButtonData(userData UserData, item inte
 	return ret
 }
 
-func (resourceData *resourceData) getListItemActions(userData UserData, item any, id int64) listItemActions {
+func (resourceData *Resource) getListItemActions(userData UserData, item any, id int64) listItemActions {
 	ret := listItemActions{
 		MenuButtons: resourceData.getItemButtonData(userData, item),
 	}

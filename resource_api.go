@@ -12,8 +12,8 @@ import (
 	"github.com/tealeg/xlsx"
 )
 
-func (resourceData *resourceData) initDefaultResourceAPIs() {
-	resourceData.API("list").Handler(
+func (resourceData *Resource) initDefaultResourceAPIs() {
+	resourceData.api("list").Handler(
 		func(request *Request) {
 			if request.Request().URL.Query().Get("_format") == "json" {
 				listDataJSON, err := resourceData.getListContentJSON(request.r.Context(), request, request.Request().URL.Query())
@@ -67,7 +67,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 		quickActionAPIHandler(resourceData, request)
 	}).Method("POST")*/
 
-	resourceData.API("preview-relation/:id").Handler(
+	resourceData.api("preview-relation/:id").Handler(
 		func(request *Request) {
 			item := resourceData.query(request.r.Context()).ID(request.Param("id"))
 			if item == nil {
@@ -82,7 +82,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 		},
 	)
 
-	resourceData.API("set-order").Permission(resourceData.canUpdate).Method("POST").Handler(
+	resourceData.api("set-order").Permission(resourceData.canUpdate).Method("POST").Handler(
 		func(request *Request) {
 			if resourceData.orderField == nil {
 				panic("can't order")
@@ -100,14 +100,14 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 			for i, id := range order {
 				item := resourceData.query(request.r.Context()).ID(id)
 				resourceData.setOrderPosition(item, int64(i))
-				err := resourceData.Update(request.r.Context(), item)
+				err := resourceData.update(request.r.Context(), item)
 				must(err)
 			}
 			request.WriteJSON(200, true)
 		},
 	)
 
-	resourceData.API("searchresource").Handler(
+	resourceData.api("searchresource").Handler(
 		func(request *Request) {
 			q := request.Param("q")
 
@@ -161,7 +161,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 		},
 	)
 
-	resourceData.API("multipleaction").Method("POST").Handler(
+	resourceData.api("multipleaction").Method("POST").Handler(
 		func(request *Request) {
 			var ids []int64
 
@@ -198,14 +198,14 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 					}
 
 					//TODO: log for creation
-					err := resourceData.Create(request.r.Context(), item)
+					err := resourceData.create(request.r.Context(), item)
 					if err != nil {
 						panic(fmt.Sprintf("can't create item for clone with id %d: %s", v, err))
 					}
 
 					if resourceData.activityLog {
 						must(
-							resourceData.LogActivity(request, nil, item),
+							resourceData.logActivity(request, nil, item),
 						)
 					}
 				}
@@ -241,7 +241,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 						panic("can't find item to delete")
 					}
 
-					err := resourceData.DeleteWithLog(item, request)
+					err := resourceData.deleteWithLog(item, request)
 					must(err)
 				}
 			default:
@@ -256,7 +256,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 		IDs       string
 	}
 
-	resourceData.API("multiple_edit").Permission(resourceData.canUpdate).Method("GET").Handler(
+	resourceData.api("multiple_edit").Permission(resourceData.canUpdate).Method("GET").Handler(
 		func(request *Request) {
 			form := NewForm(
 				resourceData.getURL("api/multiple_edit"),
@@ -274,7 +274,7 @@ func (resourceData *resourceData) initDefaultResourceAPIs() {
 		},
 	)
 
-	resourceData.API("multiple_edit").Permission(resourceData.canUpdate).Method("POST").Handler(
+	resourceData.api("multiple_edit").Permission(resourceData.canUpdate).Method("POST").Handler(
 		func(request *Request) {
 
 			validateCSRF(request)

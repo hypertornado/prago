@@ -39,7 +39,7 @@ func (q *listQuery) addOrder(name string, desc bool) {
 	q.order = append(q.order, listQueryOrder{name: name, desc: desc})
 }
 
-func (resourceData *resourceData) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
+func (resourceData *Resource) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
 	for _, field := range resourceData.fields {
 		val := value.FieldByName(field.fieldClassName)
 
@@ -79,7 +79,7 @@ func (resourceData *resourceData) prepareValues(value reflect.Value) (names []st
 }
 
 // https://stackoverflow.com/questions/696190/create-if-an-entry-if-it-doesnt-exist-otherwise-update
-func (resourceData *resourceData) replaceItem(ctx context.Context, item interface{}, debugSQL bool) error {
+func (resourceData *Resource) replaceItem(ctx context.Context, item interface{}, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	if id <= 0 {
 		return errors.New("id must be positive")
@@ -113,7 +113,7 @@ func (resourceData *resourceData) replaceItem(ctx context.Context, item interfac
 	return nil
 }
 
-func (resourceData *resourceData) saveItem(ctx context.Context, item interface{}, debugSQL bool) error {
+func (resourceData *Resource) saveItem(ctx context.Context, item interface{}, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	if id <= 0 {
 		return errors.New("id must be positive")
@@ -149,7 +149,7 @@ func (resourceData *resourceData) saveItem(ctx context.Context, item interface{}
 	return nil
 }
 
-func (resourceData *resourceData) createItem(ctx context.Context, item interface{}, debugSQL bool) error {
+func (resourceData *Resource) createItem(ctx context.Context, item interface{}, debugSQL bool) error {
 	value := reflect.ValueOf(item).Elem()
 
 	names, questionMarks, values, err := resourceData.prepareValues(value)
@@ -218,7 +218,7 @@ func sqlFieldToQuery(fieldName string) string {
 	return fmt.Sprintf("`%s`=?", fieldName)
 }
 
-func (resourceData *resourceData) countAllItems(ctx context.Context, debugSQL bool) (int64, error) {
+func (resourceData *Resource) countAllItems(ctx context.Context, debugSQL bool) (int64, error) {
 	return resourceData.query(ctx).count()
 }
 

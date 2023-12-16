@@ -17,7 +17,7 @@ func (app *App) initRelations() {
 	}
 }
 
-func (resourceData *resourceData) createRelations() {
+func (resourceData *Resource) createRelations() {
 	for _, field := range resourceData.fields {
 		if field.tags["prago-type"] == "relation" {
 			relatedResourceID := field.id

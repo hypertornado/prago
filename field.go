@@ -25,18 +25,14 @@ type Field struct {
 	canView Permission
 	canEdit Permission
 
-	resource  *resourceData
+	resource  *Resource
 	fieldType *fieldType
 
-	relatedResource *resourceData
+	relatedResource *Resource
 }
 
 func (resource *Resource) Field(name string) *Field {
-	return resource.data.Field(name)
-}
-
-func (resourceData *resourceData) Field(name string) *Field {
-	return resourceData.fieldMap[columnName(name)]
+	return resource.fieldMap[columnName(name)]
 }
 
 func (field *Field) authorizeView(userData UserData) bool {
@@ -62,7 +58,7 @@ func (field *Field) authorizeEdit(request *Request) bool {
 	return true
 }
 
-func (resourceData *resourceData) newField(f reflect.StructField, order int) *Field {
+func (resourceData *Resource) newField(f reflect.StructField, order int) *Field {
 	ret := &Field{
 		fieldClassName: f.Name,
 		id:             columnName(f.Name),

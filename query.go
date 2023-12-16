@@ -9,7 +9,7 @@ type QueryData[T any] struct {
 func Query[T any](app *App) *QueryData[T] {
 	res := GetResource[T](app)
 	ret := &QueryData[T]{
-		listQuery: res.data.query(context.Background()),
+		listQuery: res.query(context.Background()),
 	}
 	return ret
 }

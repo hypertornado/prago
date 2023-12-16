@@ -4,7 +4,7 @@ import (
 	"reflect"
 )
 
-func (resourceData *resourceData) getDefaultOrder() (column string, desc bool) {
+func (resourceData *Resource) getDefaultOrder() (column string, desc bool) {
 	for _, v := range resourceData.fields {
 		add := false
 		if v.id == "id" {
@@ -34,7 +34,7 @@ func (resourceData *resourceData) getDefaultOrder() (column string, desc bool) {
 	return
 }
 
-func (resourceData *resourceData) getItemStringEditableValues(item any, request *Request) map[string]string {
+func (resourceData *Resource) getItemStringEditableValues(item any, request *Request) map[string]string {
 	itemVal := reflect.ValueOf(item).Elem()
 	ret := make(map[string]string)
 	for i, field := range resourceData.fields {
@@ -51,7 +51,7 @@ func (resourceData *resourceData) getItemStringEditableValues(item any, request 
 	return ret
 }
 
-func (resourceData *resourceData) addFormItems(item any, request *Request, form *Form) {
+func (resourceData *Resource) addFormItems(item any, request *Request, form *Form) {
 	editableValues := resourceData.getItemStringEditableValues(item, request)
 
 fields:

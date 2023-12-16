@@ -10,7 +10,7 @@ import (
 
 const defaultHighPriority int64 = 1000
 
-func (resourceData *resourceData) initDefaultResourceActions() {
+func (resourceData *Resource) initDefaultResourceActions() {
 
 	icon := resourceData.icon
 	if icon == "" {
@@ -31,7 +31,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 		},
 		)
 
-	resourceData.FormAction("new", func(form *Form, request *Request) {
+	resourceData.formAction("new", func(form *Form, request *Request) {
 		var item interface{} = reflect.New(resourceData.typ).Interface()
 		resourceData.bindData(item, request, request.Request().URL.Query())
 		resourceData.addFormItems(item, request, form)
@@ -48,7 +48,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 				count, _ := resourceData.query(vc.Context()).count()
 				resourceData.setOrderPosition(item, count+1)
 			}
-			must(resourceData.CreateWithLog(item, request))
+			must(resourceData.createWithLog(item, request))
 
 			resourceData.app.Notification(resourceData.previewer(request, item).Name()).
 				SetImage(resourceData.previewer(request, item).ThumbnailURL(vc.Context())).
@@ -115,18 +115,18 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 				v(vc)
 			}
 			if vc.Valid() {
-				must(resourceData.DeleteWithLog(item, vc.Request()))
+				must(resourceData.deleteWithLog(item, vc.Request()))
 				vc.Request().AddFlashMessage(messages.Get(vc.Request().Locale(), "admin_item_deleted"))
 				vc.Validation().RedirectionLocaliton = resourceData.getURL("")
 			}
 		},
 	).Icon("glyphicons-basic-17-bin.svg").setPriority(-defaultHighPriority).Permission(resourceData.canDelete).Name(messages.GetNameFunction("admin_delete"))
 
-	if resourceData.previewURLFunction != nil {
+	if resourceData.previewFn != nil {
 		resourceData.itemActionHandler("preview",
 			func(item any, request *Request) {
 				request.Redirect(
-					resourceData.previewURLFunction(item),
+					resourceData.previewFn(item),
 				)
 			}).Icon("glyphicons-basic-52-eye.svg").setPriority(defaultHighPriority).Name(messages.GetNameFunction("admin_preview"))
 	}
@@ -134,7 +134,7 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 	bindResourceExportCSV(resourceData)
 
 	if resourceData.activityLog {
-		resourceData.FormAction("history", func(f *Form, r *Request) {
+		resourceData.formAction("history", func(f *Form, r *Request) {
 			f.AddTextInput("page", "Stránka").Value = "1"
 			f.AutosubmitFirstTime = true
 
@@ -171,17 +171,17 @@ func (resourceData *resourceData) initDefaultResourceActions() {
 
 func CreateWithLog[T any](item *T, request *Request) error {
 	resource := GetResource[T](request.app)
-	return resource.data.CreateWithLog(item, request)
+	return resource.createWithLog(item, request)
 }
 
-func (resourceData *resourceData) CreateWithLog(item any, request *Request) error {
-	err := resourceData.Create(request.r.Context(), item)
+func (resourceData *Resource) createWithLog(item any, request *Request) error {
+	err := resourceData.create(request.r.Context(), item)
 	if err != nil {
 		return err
 	}
 
 	if resourceData.activityLog {
-		err := resourceData.LogActivity(request, nil, item)
+		err := resourceData.logActivity(request, nil, item)
 		if err != nil {
 			return err
 		}
@@ -193,12 +193,12 @@ func (resourceData *resourceData) CreateWithLog(item any, request *Request) erro
 
 func DeleteWithLog[T any](item *T, request *Request) error {
 	resource := GetResource[T](request.app)
-	return resource.data.DeleteWithLog(item, request)
+	return resource.deleteWithLog(item, request)
 }
 
-func (resourceData *resourceData) DeleteWithLog(item any, request *Request) error {
+func (resourceData *Resource) deleteWithLog(item any, request *Request) error {
 	if resourceData.activityLog {
-		err := resourceData.LogActivity(request, item, nil)
+		err := resourceData.logActivity(request, item, nil)
 		if err != nil {
 			return err
 		}
@@ -206,7 +206,7 @@ func (resourceData *resourceData) DeleteWithLog(item any, request *Request) erro
 
 	id := resourceData.previewer(request, item).ID()
 
-	err := resourceData.Delete(request.r.Context(), id)
+	err := resourceData.delete(request.r.Context(), id)
 	if err != nil {
 		return fmt.Errorf("can't delete item id '%d': %s", id, err)
 	}
@@ -216,7 +216,7 @@ func (resourceData *resourceData) DeleteWithLog(item any, request *Request) erro
 	return nil
 }
 
-func (resourceData *resourceData) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, ValidationContext, error) {
+func (resourceData *Resource) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, ValidationContext, error) {
 	user := request
 	id, err := strconv.Atoi(values.Get("id"))
 	if err != nil {
@@ -254,7 +254,7 @@ func (resourceData *resourceData) editItemWithLogAndValues(request *Request, val
 		return nil, vv, errValidation
 	}
 
-	err = resourceData.UpdateWithLog(item, request)
+	err = resourceData.updateWithLog(item, request)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -264,10 +264,10 @@ func (resourceData *resourceData) editItemWithLogAndValues(request *Request, val
 
 func UpdateWithLog[T any](item *T, request *Request) error {
 	resource := GetResource[T](request.app)
-	return resource.data.UpdateWithLog(item, request)
+	return resource.updateWithLog(item, request)
 }
 
-func (resourceData *resourceData) UpdateWithLog(item any, request *Request) error {
+func (resourceData *Resource) updateWithLog(item any, request *Request) error {
 	id := resourceData.previewer(request, item).ID()
 
 	beforeItem := resourceData.query(request.r.Context()).ID(id)
@@ -275,14 +275,14 @@ func (resourceData *resourceData) UpdateWithLog(item any, request *Request) erro
 		return errors.New("can't find before item")
 	}
 
-	err := resourceData.Update(request.r.Context(), item)
+	err := resourceData.update(request.r.Context(), item)
 	if err != nil {
 		return fmt.Errorf("can't save item (%d): %s", id, err)
 	}
 
 	if resourceData.activityLog {
 		must(
-			resourceData.LogActivity(request, beforeItem, item),
+			resourceData.logActivity(request, beforeItem, item),
 		)
 	}
 

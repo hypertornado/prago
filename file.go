@@ -197,7 +197,7 @@ func (app *App) initFilesResource() {
 		})
 
 	app.ListenActivity(func(activity Activity) {
-		if activity.ActivityType == "delete" && activity.ResourceID == resource.data.id {
+		if activity.ActivityType == "delete" && activity.ResourceID == resource.id {
 			file := Query[File](app).ID(activity.ID)
 			err := filesCDN.DeleteFile(file.UID)
 			if err != nil {
@@ -259,7 +259,7 @@ func (app *App) initFilesResource() {
 				}
 			}
 		},
-	).setPriority(1000000).Permission(resource.data.canUpdate).Name(unlocalized("Nahrát soubor"))
+	).setPriority(1000000).Permission(resource.canUpdate).Name(unlocalized("Nahrát soubor"))
 
 	ResourceAction[File](app, "getcdnurl").Permission(sysadminPermission).Method("POST").Handler(
 		func(request *Request) {

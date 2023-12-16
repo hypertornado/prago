@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (resourceData *resourceData) setOrderPosition(item interface{}, order int64) {
+func (resourceData *Resource) setOrderPosition(item interface{}, order int64) {
 	value := reflect.ValueOf(item)
 
 	for i := 0; i < 10; i++ {
@@ -21,7 +21,7 @@ func (resourceData *resourceData) setOrderPosition(item interface{}, order int64
 	val.SetInt(order)
 }
 
-func (resourceData *resourceData) fixBooleanParams(request *Request, params url.Values) {
+func (resourceData *Resource) fixBooleanParams(request *Request, params url.Values) {
 	for _, field := range resourceData.fields {
 		if !field.authorizeEdit(request) {
 			continue
@@ -32,7 +32,7 @@ func (resourceData *resourceData) fixBooleanParams(request *Request, params url.
 	}
 }
 
-func (resourceData *resourceData) bindData(item any, request *Request, params url.Values) error {
+func (resourceData *Resource) bindData(item any, request *Request, params url.Values) error {
 
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {

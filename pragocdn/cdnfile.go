@@ -54,7 +54,10 @@ func (file *CDNFile) url(size string) string {
 		panic(fmt.Errorf("can't find project id %d", file.CDNProject))
 	}
 
-	baseURL := app.MustGetSetting(context.Background(), "base_url")
+	baseURL, err := app.GetSetting(context.Background(), "base_url")
+	if err != nil {
+		panic(err)
+	}
 
 	account := cdnclient.NewCDNAccount(baseURL, project.Name, project.Password)
 
@@ -84,7 +87,6 @@ func (file *CDNFile) update() {
 		panic(fmt.Errorf("can't find project id %d", file.CDNProject))
 	}
 
-	fileResource := prago.GetResource[CDNFile](app)
 	fileData, err := file.get()
 	if err != nil {
 		file.Deleted = true
@@ -99,7 +101,7 @@ func (file *CDNFile) update() {
 		file.Width = metadata.Width
 		file.Height = metadata.Height
 	}
-	err = fileResource.Update(context.Background(), file)
+	err = prago.UpdateItem(app, file)
 	if err != nil {
 		panic(fmt.Sprintf("can't update file id %s: %s", file.UUID, err))
 	}
@@ -121,14 +123,13 @@ func checksum(path string) string {
 }
 
 func (project *CDNProject) createFile(uuid, suffix string) *CDNFile {
-	fileResource := prago.GetResource[CDNFile](app)
 	file := &CDNFile{
 		UUID:       uuid,
 		Suffix:     suffix,
 		CDNProject: project.ID,
 	}
 
-	err := fileResource.Create(context.Background(), file)
+	err := prago.CreateItem(app, file)
 	if err != nil {
 		panic(fmt.Errorf("can't save file %s: %s", file.UUID, err))
 	}
@@ -152,17 +153,20 @@ func bindCDNFiles(app *prago.App) {
 	fileResource := prago.NewResource[CDNFile](app)
 	fileResource.Name(unlocalized("CDN Soubor"), unlocalized("CDN Soubory"))
 
-	fileResource.PreviewURLFunction(func(file *CDNFile) string {
+	prago.PreviewURLFunction(app, func(file *CDNFile) string {
 		return file.url("")
 	})
 
-	fileResource.FormItemAction("previewer").Name(unlocalized("Previews")).Form(func(cdnFile *CDNFile, form *prago.Form, request *prago.Request) {
-		form.AddTextInput("size", "Size")
-		form.AutosubmitFirstTime = true
-		form.AddSubmit("Zobrazit")
-	}).Validation(func(cdnFile *CDNFile, vc prago.ValidationContext) {
-		vc.Validation().AfterContent = template.HTML(fmt.Sprintf("<img src=\"%s\">", cdnFile.url(vc.GetValue("size"))))
-	})
+	prago.ResourceFormItemAction(app, "previewer",
+		func(cdnFile *CDNFile, form *prago.Form, request *prago.Request) {
+			form.AddTextInput("size", "Size")
+			form.AutosubmitFirstTime = true
+			form.AddSubmit("Zobrazit")
+		},
+		func(cdnFile *CDNFile, vc prago.ValidationContext) {
+			vc.Validation().AfterContent = template.HTML(fmt.Sprintf("<img src=\"%s\">", cdnFile.url(vc.GetValue("size"))))
+		},
+	).Name(unlocalized("Previews"))
 
 	filesDashboard := app.MainBoard.Dashboard(unlocalized("Soubory"))
 

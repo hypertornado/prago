@@ -1,6 +1,6 @@
 package prago
 
-func (resourceData *resourceData) allowsMultipleActions(userData UserData) (ret bool) {
+func (resourceData *Resource) allowsMultipleActions(userData UserData) (ret bool) {
 	if userData.Authorize(resourceData.canDelete) {
 		ret = true
 	}
@@ -10,7 +10,7 @@ func (resourceData *resourceData) allowsMultipleActions(userData UserData) (ret 
 	return ret
 }
 
-func (resourceData *resourceData) getMultipleActions(userData UserData) (ret []listMultipleAction) {
+func (resourceData *Resource) getMultipleActions(userData UserData) (ret []listMultipleAction) {
 	if !resourceData.allowsMultipleActions(userData) {
 		return nil
 	}

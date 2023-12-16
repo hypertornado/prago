@@ -83,7 +83,7 @@ type listMultipleAction struct {
 	IsDelete bool
 }
 
-func (resourceData *resourceData) getListHeader(userData UserData) (list list, err error) {
+func (resourceData *Resource) getListHeader(userData UserData) (list list, err error) {
 	lang := userData.Locale()
 
 	list.Colspan = 1
@@ -126,7 +126,7 @@ func (resourceData *resourceData) getListHeader(userData UserData) (list list, e
 	return
 }
 
-func (resourceData *resourceData) defaultVisibleFieldsStr(userData UserData) string {
+func (resourceData *Resource) defaultVisibleFieldsStr(userData UserData) string {
 	ret := []string{}
 	for _, v := range resourceData.fields {
 		if !v.authorizeView(userData) {
@@ -140,7 +140,7 @@ func (resourceData *resourceData) defaultVisibleFieldsStr(userData UserData) str
 	return r
 }
 
-func (resourceData *resourceData) fieldsStr(userData UserData) string {
+func (resourceData *Resource) fieldsStr(userData UserData) string {
 	ret := []string{}
 	for _, v := range resourceData.fields {
 		if !v.authorizeView(userData) {
@@ -250,7 +250,7 @@ func (field *Field) filterLayout() string {
 	return ""
 }
 
-func (resourceData *resourceData) addFilterParamsToQuery(listQuery *listQuery, params url.Values, userData UserData) *listQuery {
+func (resourceData *Resource) addFilterParamsToQuery(listQuery *listQuery, params url.Values, userData UserData) *listQuery {
 	filter := map[string]string{}
 	for _, v := range resourceData.fieldMap {
 		if userData.Authorize(v.canView) {
@@ -264,7 +264,7 @@ func (resourceData *resourceData) addFilterParamsToQuery(listQuery *listQuery, p
 	return resourceData.addFilterToQuery(listQuery, filter)
 }
 
-func (resourceData *resourceData) addFilterToQuery(listQuery *listQuery, filter map[string]string) *listQuery {
+func (resourceData *Resource) addFilterToQuery(listQuery *listQuery, filter map[string]string) *listQuery {
 	for k, v := range filter {
 		field := resourceData.fieldMap[k]
 		if field == nil {
@@ -361,7 +361,7 @@ func (resourceData *resourceData) addFilterToQuery(listQuery *listQuery, filter 
 	return listQuery
 }
 
-func (resourceData *resourceData) getListContent(ctx context.Context, userData UserData, params url.Values) (ret listContent, err error) {
+func (resourceData *Resource) getListContent(ctx context.Context, userData UserData, params url.Values) (ret listContent, err error) {
 	if !userData.Authorize(resourceData.canView) {
 		return listContent{}, errors.New("access denied")
 	}
@@ -493,7 +493,7 @@ type listContentJSON struct {
 	FooterStr string
 }
 
-func (resourceData *resourceData) getListContentJSON(ctx context.Context, userData UserData, params url.Values) (ret *listContentJSON, err error) {
+func (resourceData *Resource) getListContentJSON(ctx context.Context, userData UserData, params url.Values) (ret *listContentJSON, err error) {
 	listData, err := resourceData.getListContent(ctx, userData, params)
 	if err != nil {
 		return nil, err
@@ -534,7 +534,7 @@ func (resourceData *resourceData) getListContentJSON(ctx context.Context, userDa
 
 }
 
-func (resourceData *resourceData) getPaginationData(userData UserData) (ret []listPaginationData) {
+func (resourceData *Resource) getPaginationData(userData UserData) (ret []listPaginationData) {
 	var ints []int64
 	var used bool
 

@@ -32,9 +32,9 @@ type App struct {
 
 	logo            []byte
 	name            func(string) string
-	resources       []*resourceData
-	resourceMap     map[reflect.Type]*resourceData
-	resourceNameMap map[string]*resourceData
+	resources       []*Resource
+	resourceMap     map[reflect.Type]*Resource
+	resourceNameMap map[string]*Resource
 
 	mainController   *controller
 	appController    *controller
@@ -102,8 +102,8 @@ func createApp(codeName string, version string) *App {
 	app.accessController = app.mainController.subController()
 	app.accessController.priorityRouter = true
 	app.adminController = app.accessController.subController()
-	app.resourceMap = make(map[reflect.Type]*resourceData)
-	app.resourceNameMap = make(map[string]*resourceData)
+	app.resourceMap = make(map[reflect.Type]*Resource)
+	app.resourceNameMap = make(map[string]*Resource)
 	app.fieldTypes = make(map[string]*fieldType)
 
 	app.preInitTaskManager()

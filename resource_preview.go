@@ -18,10 +18,10 @@ type preview struct {
 type previewer struct {
 	userData     UserData
 	item         any
-	resourceData *resourceData
+	resourceData *Resource
 }
 
-func (resourceData *resourceData) previewer(userData UserData, item any) *previewer {
+func (resourceData *Resource) previewer(userData UserData, item any) *previewer {
 	if !resourceData.isItPointerToResourceItem(item) {
 		return nil
 	}
@@ -97,7 +97,7 @@ func (previewer *previewer) URL(suffix string) string {
 	return previewer.resourceData.getItemURL(previewer.item, suffix, previewer.userData)
 }
 
-func (previewer *previewer) Preview(ctx context.Context, relatedResource *resourceData) *preview {
+func (previewer *previewer) Preview(ctx context.Context, relatedResource *Resource) *preview {
 	var ret preview
 	ret.ID = previewer.ID()
 	ret.Name = previewer.Name()
@@ -129,7 +129,7 @@ func (previewer *previewer) ImageURL(ctx context.Context) string {
 	return ""
 }
 
-func (previewer *previewer) DescriptionBasic(relatedResource *resourceData) string {
+func (previewer *previewer) DescriptionBasic(relatedResource *Resource) string {
 	itemsVal := reflect.ValueOf(previewer.item).Elem()
 
 	if previewer.item != nil {
@@ -145,7 +145,7 @@ func (previewer *previewer) DescriptionBasic(relatedResource *resourceData) stri
 	return ""
 }
 
-func (previewer *previewer) DescriptionExtended(relatedResource *resourceData) string {
+func (previewer *previewer) DescriptionExtended(relatedResource *Resource) string {
 	var items []string
 	itemsVal := reflect.ValueOf(previewer.item).Elem()
 

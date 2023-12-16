@@ -34,7 +34,7 @@ func (app *App) initSettings() {
 	app.settings.resource.PermissionView("sysadmin")
 	app.settings.resource.Board(sysadminBoard)
 
-	must(app.settings.resource.data.migrate(false))
+	must(app.settings.resource.migrate(false))
 	initDefaultSettings(app)
 }
 

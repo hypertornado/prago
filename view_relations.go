@@ -16,7 +16,7 @@ type viewRelation struct {
 	Count          int64
 }
 
-func (resourceData *resourceData) getRelationViews(ctx context.Context, id int64, request *Request) (ret []*view) {
+func (resourceData *Resource) getRelationViews(ctx context.Context, id int64, request *Request) (ret []*view) {
 	for _, v := range resourceData.relations {
 		vi := resourceData.getRelationView(ctx, id, v, request)
 		if vi != nil {
@@ -26,7 +26,7 @@ func (resourceData *resourceData) getRelationViews(ctx context.Context, id int64
 	return
 }
 
-func (resourceData *resourceData) getRelationView(ctx context.Context, id int64, field *relatedField, request *Request) *view {
+func (resourceData *Resource) getRelationView(ctx context.Context, id int64, field *relatedField, request *Request) *view {
 	if !request.Authorize(field.resource.canView) {
 		return nil
 	}
@@ -67,7 +67,7 @@ func (resourceData *resourceData) getRelationView(ctx context.Context, id int64,
 	return ret
 }
 
-func (resourceData *resourceData) itemWithRelationCount(ctx context.Context, fieldID string, id int64) int64 {
+func (resourceData *Resource) itemWithRelationCount(ctx context.Context, fieldID string, id int64) int64 {
 	filteredCount, err := resourceData.query(ctx).Is(fieldID, id).count()
 	if err != nil {
 		panic(err)
@@ -95,7 +95,7 @@ func generateRelationListAPIHandler(request *Request) {
 	request.WriteHTML(200, "admin_item_view_relationlist_response", data)
 }
 
-func (resourceData *resourceData) getPreviews(ctx context.Context, listRequest relationListRequest, request *Request) []*preview {
+func (resourceData *Resource) getPreviews(ctx context.Context, listRequest relationListRequest, request *Request) []*preview {
 	sourceResource := resourceData.app.getResourceByID(listRequest.SourceResource)
 	if !request.Authorize(sourceResource.canView) {
 		panic("cant authorize source resource")

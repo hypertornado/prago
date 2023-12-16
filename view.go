@@ -33,14 +33,14 @@ type viewButton struct {
 	Icon string
 }
 
-func (resourceData *resourceData) getViews(ctx context.Context, item any, request *Request) (ret []*view) {
+func (resourceData *Resource) getViews(ctx context.Context, item any, request *Request) (ret []*view) {
 	id := resourceData.previewer(request, item).ID()
 	ret = append(ret, resourceData.getBasicView(ctx, id, item, request))
 	ret = append(ret, resourceData.getRelationViews(ctx, id, request)...)
 	return ret
 }
 
-func (resourceData *resourceData) getBasicView(ctx context.Context, int64, item any, request *Request) *view {
+func (resourceData *Resource) getBasicView(ctx context.Context, int64, item any, request *Request) *view {
 	ret := &view{
 		Header: &boxHeader{},
 	}

@@ -47,12 +47,12 @@ func (app *App) migrate(verbose bool) error {
 	return nil
 }
 
-func (resourceData *resourceData) unsafeDropTable() error {
+func (resourceData *Resource) unsafeDropTable() error {
 	_, err := resourceData.app.db.Exec(fmt.Sprintf("drop table `%s`;", resourceData.id))
 	return err
 }
 
-func (resourceData *resourceData) migrate(verbose bool) error {
+func (resourceData *Resource) migrate(verbose bool) error {
 	_, err := getTableDescription(resourceData.app.db, resourceData.id)
 	if err == nil {
 		return resourceData.migrateTable(resourceData.app.db, resourceData.id, verbose)
@@ -80,7 +80,7 @@ func listTables(db dbIface) (ret map[string]bool, err error) {
 	return
 }
 
-func (resourceData *resourceData) createTable(db dbIface, tableName string, verbose bool) (err error) {
+func (resourceData *Resource) createTable(db dbIface, tableName string, verbose bool) (err error) {
 	if verbose {
 		fmt.Printf("Creating table '%s'\n", tableName)
 	}
@@ -97,7 +97,7 @@ func (resourceData *resourceData) createTable(db dbIface, tableName string, verb
 }
 
 // TODO: migrate after each resource initialization
-func (resourceData *resourceData) migrateTable(db dbIface, tableName string, verbose bool) error {
+func (resourceData *Resource) migrateTable(db dbIface, tableName string, verbose bool) error {
 	if verbose {
 		fmt.Printf("Migrating table '%s'\n", tableName)
 	}

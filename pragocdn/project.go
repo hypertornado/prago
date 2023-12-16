@@ -7,7 +7,7 @@ import (
 	"github.com/hypertornado/prago"
 )
 
-var projectResource *prago.Resource[CDNProject]
+var projectResource *prago.Resource
 
 type CDNProject struct {
 	ID        int64
