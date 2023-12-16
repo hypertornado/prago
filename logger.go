@@ -143,7 +143,7 @@ func (app *App) initLogger() {
 		app.logger.deleteOldLogsRobot()
 	}()
 
-	sysadminBoard.FormAction("log_search", func(f *Form, r *Request) {
+	app.FormAction("log_search", func(f *Form, r *Request) {
 		f.Title = "Logger"
 		f.AddTextInput("q", "Query")
 		f.AddSelect("typ", "Typ", [][2]string{
@@ -214,5 +214,5 @@ func (app *App) initLogger() {
 		}
 
 		vc.Validation().AfterContent = table.ExecuteHTML()
-	}).Name(unlocalized("Log")).Permission("sysadmin")
+	}).Name(unlocalized("Log")).Permission("sysadmin").Board(sysadminBoard)
 }

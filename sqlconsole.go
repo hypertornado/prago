@@ -6,7 +6,7 @@ import (
 
 func (app *App) initSQLConsole() {
 
-	sysadminBoard.FormAction("sqlconsole",
+	app.FormAction("sqlconsole",
 		func(form *Form, request *Request) {
 			form.Title = "SQL Console"
 			form.AddTextareaInput("q", "").Focused = true
@@ -70,5 +70,5 @@ func (app *App) initSQLConsole() {
 			}
 
 			vc.Validation().AfterContent = table.ExecuteHTML()
-		}).Name(unlocalized("SQL Console")).Permission(sysadminPermission)
+		}).Name(unlocalized("SQL Console")).Permission(sysadminPermission).Board(sysadminBoard)
 }

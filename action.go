@@ -31,7 +31,8 @@ type Action struct {
 	isItemAction bool
 	isUserMenu   bool
 	priority     int64
-	//isPriority   bool
+
+	childAction *Action
 }
 
 func bindAction(action *Action) error {
@@ -116,6 +117,9 @@ func (action *Action) Name(name func(string) string) *Action {
 func (action *Action) Permission(permission Permission) *Action {
 	must(action.app.validatePermission(permission))
 	action.permission = permission
+	if action.childAction != nil {
+		action.childAction.permission = permission
+	}
 	return action
 }
 

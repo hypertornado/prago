@@ -16,6 +16,8 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *Form
 		actionValidation: newAction(app, url).Method("POST"),
 	}
 
+	ret.actionForm.childAction = ret.actionValidation
+
 	ret.actionForm.ui(func(request *Request, pd *pageData) {
 		if ret.formGenerator == nil {
 			panic("No form set for this FormAction")
@@ -49,15 +51,12 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *Form
 	return ret
 }
 
-func (board *Board) FormAction(url string, formGenerator func(*Form, *Request), validator Validation) *FormAction {
-	app := board.app
+func (app *App) FormAction(url string, formGenerator func(*Form, *Request), validator Validation) *FormAction {
 	fa := newFormAction(app, url, nil)
 
 	fa.formGenerator = formGenerator
 	fa.validation = validator
 
-	fa.actionForm.parentBoard = board
-	fa.actionValidation.parentBoard = board
 	app.rootActions = append(app.rootActions, fa.actionForm)
 	app.rootActions = append(app.rootActions, fa.actionValidation)
 	return fa
@@ -116,6 +115,11 @@ func (formAction *FormAction) Name(name func(string) string) *FormAction {
 	return formAction
 }
 
+func (formAction *FormAction) Board(board *Board) *FormAction {
+	formAction.actionForm.Board(board)
+	return formAction
+}
+
 func (formAction *FormAction) Icon(icon string) *FormAction {
 	formAction.actionForm.icon = icon
 	return formAction
@@ -123,7 +127,6 @@ func (formAction *FormAction) Icon(icon string) *FormAction {
 
 func (formAction *FormAction) Permission(permission Permission) *FormAction {
 	formAction.actionForm.Permission(permission)
-	formAction.actionValidation.Permission(permission)
 	return formAction
 }
 

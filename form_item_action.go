@@ -11,10 +11,26 @@ type formItemActionData struct {
 	formAction   *FormAction
 }
 
-func (resource *Resource[T]) FormItemAction(url string) *FormItemAction[T] {
-	return &FormItemAction[T]{
+func (resource *Resource[T]) FormItemAction(
+	url string,
+	formGenerator func(*T, *Form, *Request),
+	validation func(*T, ValidationContext),
+) *FormItemAction[T] {
+	ret := &FormItemAction[T]{
 		data: resource.data.FormItemAction(url),
 	}
+
+	ret.data.Form(func(a any, f *Form, r *Request) {
+		formGenerator(a.(*T), f, r)
+	})
+
+	ret.data.Validation(func(a any, vc ValidationContext) {
+		validation(a.(*T), vc)
+	})
+
+	//ret.Form(formGenerator)
+	//ret.Validation(validation)
+	return ret
 }
 
 func (resourceData *resourceData) FormItemAction(url string) *formItemActionData {
@@ -76,12 +92,12 @@ func (actionData *formItemActionData) Name(name func(string) string) *formItemAc
 	return actionData
 }
 
-func (action *FormItemAction[T]) Form(formGenerator func(*T, *Form, *Request)) *FormItemAction[T] {
+/*func (action *FormItemAction[T]) Form(formGenerator func(*T, *Form, *Request)) *FormItemAction[T] {
 	action.data.Form(func(a any, f *Form, r *Request) {
 		formGenerator(a.(*T), f, r)
 	})
 	return action
-}
+}*/
 
 func (actionData *formItemActionData) Form(formGenerator func(any, *Form, *Request)) *formItemActionData {
 	actionData.formAction.formGenerator = func(form *Form, request *Request) {
@@ -91,12 +107,12 @@ func (actionData *formItemActionData) Form(formGenerator func(any, *Form, *Reque
 	return actionData
 }
 
-func (action *FormItemAction[T]) Validation(validation func(*T, ValidationContext)) *FormItemAction[T] {
+/*func (action *FormItemAction[T]) Validation(validation func(*T, ValidationContext)) *FormItemAction[T] {
 	action.data.Validation(func(a any, vc ValidationContext) {
 		validation(a.(*T), vc)
 	})
 	return action
-}
+}*/
 
 func (actionData *formItemActionData) Validation(validation func(any, ValidationContext)) *formItemActionData {
 	actionData.formAction.validation = func(vc ValidationContext) {

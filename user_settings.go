@@ -2,7 +2,7 @@ package prago
 
 func initUserSettings(app *App) {
 
-	app.MainBoard.FormAction("settings", func(form *Form, request *Request) {
+	app.FormAction("settings", func(form *Form, request *Request) {
 		user := request.getUser()
 		form.Title = messages.Get(request.Locale(), "admin_settings")
 
@@ -73,7 +73,7 @@ func initUserSettings(app *App) {
 		}
 	}).Icon("glyphicons-basic-5-settings.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu()
 
-	app.MainBoard.FormAction("password", func(form *Form, request *Request) {
+	app.FormAction("password", func(form *Form, request *Request) {
 		locale := request.Locale()
 		form.Title = messages.Get(request.Locale(), "admin_password_change")
 		form.AddPasswordInput("oldpassword", messages.Get(locale, "admin_password_old")).Focused = true

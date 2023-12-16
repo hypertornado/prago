@@ -122,7 +122,7 @@ func (app *App) initSearch() {
 		},
 	)
 
-	sysadminBoard.FormAction("delete-elastic-indice", func(f *Form, r *Request) {
+	app.FormAction("delete-elastic-indice", func(f *Form, r *Request) {
 		stats, err := app.ElasticSearchClient().GetStats()
 		if err != nil {
 			panic(err)
@@ -158,7 +158,7 @@ func (app *App) initSearch() {
 		} else {
 			vc.AddError(fmt.Sprintf("Index '%s' úspěšně smazán", id))
 		}
-	}).Name(unlocalized("Smazat elasticsearch index")).Permission(sysadminPermission)
+	}).Name(unlocalized("Smazat elasticsearch index")).Permission(sysadminPermission).Board(sysadminBoard)
 
 }
 
