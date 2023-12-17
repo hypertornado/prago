@@ -7,11 +7,17 @@ type TaskActivity struct {
 	stoppedByUser bool
 }
 
-// SetStatus sets progress and status for task activity
-func (ta *TaskActivity) SetStatus(progress float64, status string) {
+func (ta *TaskActivity) Progress(finishedSoFar, total int64) {
 	if ta.stoppedByUser {
 		panic("task already stopped by user")
 	}
-	ta.notification.description = status
+	progress := float64(finishedSoFar) / float64(total)
 	ta.notification.SetProgress(&progress)
+}
+
+func (ta *TaskActivity) Description(description string) {
+	if ta.stoppedByUser {
+		panic("task already stopped by user")
+	}
+	ta.notification.description = description
 }

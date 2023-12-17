@@ -86,7 +86,8 @@ type buildFlag struct {
 }
 
 var linuxBuild = buildFlag{"linux", "linux", "amd64"}
-var macBuild = buildFlag{"mac", "darwin", "amd64"}
+
+//var macBuild = buildFlag{"mac", "darwin", "amd64"}
 
 func build(appName, version string) error {
 	fmt.Println(appName, version)

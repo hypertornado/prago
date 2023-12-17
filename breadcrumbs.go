@@ -17,7 +17,7 @@ type breadcrumb struct {
 func (menu menu) GetBreadcrumbs() *breadcrumbs {
 	items := getBreadcrumbsFromMenuItems(menu.Items)
 
-	items = append([]*breadcrumb{&breadcrumb{
+	items = append([]*breadcrumb{{
 		Logo: "/admin/logo",
 		URL:  "/admin",
 	}}, items...)

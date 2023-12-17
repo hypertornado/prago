@@ -18,7 +18,7 @@ type view struct {
 	Relation   *viewRelation
 
 	SearchResults []*searchItem
-	Pagination    []PaginationItem
+	Pagination    []paginationItem
 }
 
 type viewField struct {

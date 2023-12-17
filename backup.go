@@ -28,8 +28,8 @@ func (app *App) initBackupCRON() {
 			}).RepeatEvery(24 * time.Hour)
 
 	backupDashboard.Task(unlocalized("remove_old_backups")).Permission("sysadmin").Handler(
-		func(tr *TaskActivity) error {
-			tr.SetStatus(0, "Removing old backups")
+		func(ta *TaskActivity) error {
+			ta.Description("Removing old backups")
 			deadline := time.Now().AddDate(0, 0, -7)
 			backupPath := app.dotPath() + "/backups"
 			files, err := os.ReadDir(backupPath)

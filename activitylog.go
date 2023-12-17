@@ -37,21 +37,6 @@ func (al activityLog) activity() Activity {
 	}
 }
 
-type historyView struct {
-	Items []historyItemView
-}
-
-type historyItemView struct {
-	ID          int64
-	ActionType  string
-	ActivityURL string
-	ItemName    string
-	ItemURL     string
-	UserName    string
-	UserURL     string
-	CreatedAt   string
-}
-
 // ListenActivity listens to all changes in app's administration
 func (app *App) ListenActivity(handler func(Activity)) {
 	app.activityListeners = append(app.activityListeners, handler)

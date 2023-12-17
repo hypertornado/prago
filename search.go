@@ -21,7 +21,7 @@ type searchItem struct {
 
 const searchPageSize int64 = 10
 
-type PaginationItem struct {
+type paginationItem struct {
 	Title    int
 	Selected bool
 	URL      string
@@ -86,7 +86,7 @@ func (app *App) initSearch() {
 				pages++
 			}
 
-			var pagination []PaginationItem
+			var pagination []paginationItem
 			for i := 1; i <= int(pages); i++ {
 				var selected bool
 				if page == i {
@@ -97,7 +97,7 @@ func (app *App) initSearch() {
 				if i > 0 {
 					values.Add("page", strconv.Itoa(i))
 				}
-				pagination = append(pagination, PaginationItem{
+				pagination = append(pagination, paginationItem{
 					Title:    i,
 					Selected: selected,
 					URL:      "_search?" + values.Encode(),

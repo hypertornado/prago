@@ -54,8 +54,6 @@ func prepareFuzzing() *Resource {
 	NewResource[ResourceStructUnique](app)
 
 	app.afterInit()
-	//app.unsafeDropTables()
-	//app.migrate(false)
 	return resource
 }
 

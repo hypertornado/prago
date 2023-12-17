@@ -64,7 +64,7 @@ func (validation *formValidation) TextErrorReport(id int64, locale string) formV
 
 }
 
-func NewFormValidation() *formValidation {
+func newFormValidation() *formValidation {
 	ret := &formValidation{
 		Valid: true,
 	}
@@ -95,7 +95,7 @@ type requestValidation struct {
 func newRequestValidation(request *Request) *requestValidation {
 	return &requestValidation{
 		request:    request,
-		validation: NewFormValidation(),
+		validation: newFormValidation(),
 	}
 }
 
@@ -150,7 +150,7 @@ type valuesValidation struct {
 func newValuesValidation(ctx context.Context, app *App, request *Request, values url.Values) *valuesValidation {
 	return &valuesValidation{
 		values:     values,
-		validation: NewFormValidation(),
+		validation: newFormValidation(),
 		request:    request,
 		app:        app,
 		ctx:        ctx,

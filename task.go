@@ -48,44 +48,6 @@ func (app *App) postInitTaskManager() {
 		return nil
 	})
 
-	//exampleDashboard(app)
-
-}
-
-func exampleDashboard(app *App) {
-	taskDashboard := app.MainBoard.Dashboard(unlocalized("example"))
-	taskDashboard.Task(unlocalized("example simple")).Handler(func(t *TaskActivity) error {
-		var progress float64
-		for {
-			time.Sleep(1000 * time.Millisecond)
-			t.SetStatus(progress, "example status woiqfje iwoqfjeiwo qfjeiwoq jfeiowq fjeiw oqfjewioq")
-			progress += 0.01
-			if progress >= 1 {
-				return nil
-			}
-		}
-	})
-
-	taskDashboard.Task(unlocalized("example_fail")).Handler(func(t *TaskActivity) error {
-		return fmt.Errorf("example error")
-	})
-
-	taskDashboard.Task(unlocalized("example_panic")).Handler(func(t *TaskActivity) error {
-		panic("panic value")
-	})
-
-	taskDashboard.Task(unlocalized("example")).Handler(func(t *TaskActivity) error {
-		var progress float64
-		for {
-			time.Sleep(1000 * time.Millisecond)
-			t.SetStatus(progress, "example status")
-			progress += 0.01
-			if progress >= 1 {
-				return nil
-			}
-		}
-	})
-
 }
 
 func (tm *taskManager) startCRON() {
