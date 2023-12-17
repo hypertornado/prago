@@ -52,7 +52,7 @@ type App struct {
 	db          *sql.DB
 	//sysadminTaskGroup *TaskGroup
 
-	newsletters        *Newsletters
+	//newsletters        *Newsletters
 	notificationCenter *notificationCenter
 
 	//search        *adminSearch

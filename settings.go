@@ -107,7 +107,6 @@ func (app *App) mustGetSetting(ctx context.Context, id string) string {
 	val, err := app.GetSetting(ctx, id)
 	must(err)
 	return val
-
 }
 
 func (app *App) saveSetting(id, value string, request *Request) error {

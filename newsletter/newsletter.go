@@ -1,4 +1,4 @@
-package prago
+package newsletter
 
 import (
 	"bytes"
@@ -14,20 +14,27 @@ import (
 
 	"github.com/chris-ramon/douceur/inliner"
 	"github.com/golang-commonmark/markdown"
+	"github.com/hypertornado/prago"
 )
 
 // ErrEmailAlreadyInList is returned when user is already in newsletter list
 var ErrEmailAlreadyInList = errors.New("email already in newsletter list")
 
+var newsletters *Newsletters
+
+const sysadminPermission prago.Permission = "sysadmin"
+const loggedPermission prago.Permission = "logged"
+
 // NewsletterMiddleware represents users newsletter
 type Newsletters struct {
 	renderer   NewsletterRenderer
-	app        *App
+	app        *prago.App
 	randomness string
+	name       func(string) string
 	//board      *Board
 
-	newsletterResource        *Resource
-	newsletterSectionResource *Resource
+	newsletterResource        *prago.Resource
+	newsletterSectionResource *prago.Resource
 }
 
 func (newsletters *Newsletters) Renderer(renderer NewsletterRenderer) *Newsletters {
@@ -35,7 +42,7 @@ func (newsletters *Newsletters) Renderer(renderer NewsletterRenderer) *Newslette
 	return newsletters
 }
 
-func (newsletters *Newsletters) Permission(permission Permission) *Newsletters {
+func (newsletters *Newsletters) Permission(permission prago.Permission) *Newsletters {
 	newsletters.newsletterResource.PermissionView(permission)
 	newsletters.newsletterSectionResource.PermissionView(permission)
 	return newsletters
@@ -53,27 +60,29 @@ type NewsletterWriteData struct {
 }
 
 // InitNewsletters inits apps newsletter function
-func (app *App) Newsletters(board *Board) *Newsletters {
-	if app.newsletters != nil {
+func InitNewsletters(app *prago.App, board *prago.Board, name func(string) string) *Newsletters {
+	/*if app.newsletters != nil {
 		return app.newsletters
-	}
-	app.newsletters = &Newsletters{
-		renderer:   defaultNewsletterRenderer,
-		app:        app,
-		randomness: app.mustGetSetting(context.Background(), "random"),
+	}*/
+	newsletters = &Newsletters{
+		renderer: defaultNewsletterRenderer,
+		app:      app,
+		name:     name,
 	}
 
-	newsletterWriter := NewWriter[NewsletterWriteData](app, "newsletter_layout")
+	newsletters.randomness = mustGetSetting("random")
 
-	newsletterWriter.GET("/newsletter-subscribe", func(request *Request, data *NewsletterWriteData) {
+	newsletterWriter := prago.NewWriter[NewsletterWriteData](app, "newsletter_layout")
+
+	newsletterWriter.GET("/newsletter-subscribe", func(request *prago.Request, data *NewsletterWriteData) {
 		data.Title = "Přihlásit se k odběru newsletteru"
 		data.Csrf = requestCSRF(request)
 		data.Yield = "newsletter_subscribe"
 		data.ShowBackButton = true
-		data.Site = app.name("en")
+		data.Site = newsletters.name("en")
 	})
 
-	newsletterWriter.POST("/newsletter-subscribe", func(request *Request, data *NewsletterWriteData) {
+	newsletterWriter.POST("/newsletter-subscribe", func(request *prago.Request, data *NewsletterWriteData) {
 		if requestCSRF(request) != request.Param("csrf") {
 			panic("wrong csrf")
 		}
@@ -83,7 +92,7 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 		name := request.Param("name")
 
 		var message string
-		err := app.newsletters.SubscribeWithConfirmationEmail(email, name)
+		err := newsletters.SubscribeWithConfirmationEmail(email, name)
 		if err == nil {
 			message = "Na váš email " + email + " jsme odeslali potvrzovací email k odebírání newsletteru."
 		} else {
@@ -97,43 +106,43 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 		data.ShowBackButton = true
 		data.Title = message
 		data.Yield = "newsletter_empty"
-		data.Site = app.name("en")
+		data.Site = newsletters.name("en")
 	})
 
-	newsletterWriter.GET("/newsletter-confirm", func(request *Request, data *NewsletterWriteData) {
+	newsletterWriter.GET("/newsletter-confirm", func(request *prago.Request, data *NewsletterWriteData) {
 		email := request.Param("email")
 		secret := request.Param("secret")
 
-		if app.newsletters.secret(email) != secret {
+		if newsletters.secret(email) != secret {
 			panic("wrong secret")
 		}
 
-		person := Query[newsletterPersons](app).Is("email", email).First()
+		person := prago.Query[newsletterPersons](app).Is("email", email).First()
 		if person == nil {
 			panic("can't find user")
 		}
 
 		person.Confirmed = true
 
-		err := UpdateItem(request.app, person)
+		err := prago.UpdateItem(newsletters.app, person)
 		must(err)
 
 		data.ShowBackButton = true
 		data.Title = "Odběr newsletteru potvrzen"
 		data.Yield = "newsletter_empty"
-		data.Site = app.name("en")
+		data.Site = newsletters.name("en")
 	})
 
 	//TODO: add confirmation button and form
-	newsletterWriter.GET("/newsletter-unsubscribe", func(request *Request, data *NewsletterWriteData) {
+	newsletterWriter.GET("/newsletter-unsubscribe", func(request *prago.Request, data *NewsletterWriteData) {
 		email := request.Param("email")
 		secret := request.Param("secret")
 
-		if app.newsletters.secret(email) != secret {
+		if newsletters.secret(email) != secret {
 			panic("wrong secret")
 		}
 
-		data.Site = app.name("en")
+		data.Site = newsletters.name("en")
 
 		data.Title = "Opravdu chcete odhlásit odběr newsletterů?"
 		data.Yield = "newsletter_unsubscribe"
@@ -144,7 +153,7 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 
 	})
 
-	newsletterWriter.POST("/newsletter-unsubscribe", func(request *Request, data *NewsletterWriteData) {
+	newsletterWriter.POST("/newsletter-unsubscribe", func(request *prago.Request, data *NewsletterWriteData) {
 
 		if requestCSRF(request) != request.Param("csrf") {
 			panic("wrong csrf")
@@ -153,17 +162,17 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 		email := request.Param("email")
 		secret := request.Param("secret")
 
-		if app.newsletters.secret(email) != secret {
+		if newsletters.secret(email) != secret {
 			panic("wrong secret")
 		}
 
-		person := Query[newsletterPersons](app).Is("email", email).First()
+		person := prago.Query[newsletterPersons](app).Is("email", email).First()
 		if person == nil {
 			panic("can't find user")
 		}
 
 		person.Unsubscribed = true
-		err := UpdateItem(request.app, person)
+		err := prago.UpdateItem(newsletters.app, person)
 		if err != nil {
 			panic(err)
 		}
@@ -171,34 +180,34 @@ func (app *App) Newsletters(board *Board) *Newsletters {
 		data.ShowBackButton = true
 		data.Title = "Odhlášení z odebírání newsletteru proběhlo úspěšně."
 		data.Yield = "newsletter_empty"
-		data.Site = app.name("en")
+		data.Site = newsletters.name("en")
 
 	})
 
-	app.newsletters.newsletterResource = NewResource[newsletter](app).Name(unlocalized("Newsletter"), unlocalized("Newslettery"))
+	newsletters.newsletterResource = prago.NewResource[newsletter](app).Name(unlocalized("Newsletter"), unlocalized("Newslettery"))
 	initNewsletterResource(
-		GetResource[newsletter](app),
+		prago.GetResource[newsletter](app),
 		board,
 	)
 
-	app.newsletters.newsletterSectionResource = NewResource[newsletterSection](app).
+	newsletters.newsletterSectionResource = prago.NewResource[newsletterSection](app).
 		Board(board).
 		Name(unlocalized("Newsletter - sekce"), unlocalized("Newsletter - sekce"))
 
-	NewResource[newsletterPersons](app).
+	prago.NewResource[newsletterPersons](app).
 		Board(board).PermissionView(sysadminPermission).Name(unlocalized("Newsletter - osoba"), unlocalized("Newsletter - osoby"))
 
-	ResourceItemHandler[newsletterPersons](app, "preview-unsubscribe", func(person *newsletterPersons, request *Request) {
-		redirectURL := app.newsletters.unsubscribeURL(person.Email)
+	prago.ResourceItemHandler[newsletterPersons](app, "preview-unsubscribe", func(person *newsletterPersons, request *prago.Request) {
+		redirectURL := newsletters.unsubscribeURL(person.Email)
 		request.Redirect(redirectURL)
 	}).Permission("sysadmin")
 
-	return app.newsletters
+	return newsletters
 }
 
-func (app App) sendConfirmEmail(name, email string) error {
-	text := app.newsletters.confirmEmailBody(name, email)
-	return app.Email().To(name, email).Subject("Potvrďte prosím odběr newsletteru " + app.name("en")).TextContent(text).Send()
+func sendConfirmEmail(name, email string) error {
+	text := newsletters.confirmEmailBody(name, email)
+	return newsletters.app.Email().To(name, email).Subject("Potvrďte prosím odběr newsletteru " + newsletters.name("en")).TextContent(text).Send()
 }
 
 func (nm Newsletters) confirmEmailBody(name, email string) string {
@@ -207,12 +216,12 @@ func (nm Newsletters) confirmEmailBody(name, email string) string {
 	values.Set("secret", nm.secret(email))
 
 	u := fmt.Sprintf("%s/newsletter-confirm?%s",
-		nm.app.mustGetSetting(context.TODO(), "base_url"),
+		mustGetSetting("base_url"),
 		values.Encode(),
 	)
 
 	return fmt.Sprintf("Potvrďte prosím odběr newsletteru z webu %s kliknutím na adresu:\n\n%s",
-		nm.app.name("en"),
+		newsletters.name("en"),
 		u,
 	)
 }
@@ -223,7 +232,7 @@ func (nm Newsletters) unsubscribeURL(email string) string {
 	values.Set("secret", nm.secret(email))
 
 	return fmt.Sprintf("%s/newsletter-unsubscribe?%s",
-		nm.app.mustGetSetting(context.TODO(), "base_url"),
+		mustGetSetting("base_url"),
 		values.Encode(),
 	)
 }
@@ -235,12 +244,11 @@ func (nm Newsletters) secret(email string) string {
 }
 
 func (nm *Newsletters) SubscribeWithConfirmationEmail(email, name string) error {
-	res := GetResource[newsletterPersons](nm.app)
-	person := Query[newsletterPersons](res.app).Is("email", email).First()
+	person := prago.Query[newsletterPersons](newsletters.app).Is("email", email).First()
 	if person != nil {
 		return ErrEmailAlreadyInList
 	}
-	err := nm.app.sendConfirmEmail(name, email)
+	err := sendConfirmEmail(name, email)
 	if err != nil {
 		return err
 	}
@@ -253,9 +261,7 @@ func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 		return errors.New("wrong email format")
 	}
 
-	res := GetResource[newsletterPersons](nm.app)
-
-	person := Query[newsletterPersons](res.app).Is("email", email).First()
+	person := prago.Query[newsletterPersons](nm.app).Is("email", email).First()
 	if person != nil {
 		return ErrEmailAlreadyInList
 	}
@@ -265,7 +271,7 @@ func (nm *Newsletters) AddEmail(email, name string, confirm bool) error {
 		Email:     email,
 		Confirmed: confirm,
 	}
-	return CreateItem(nm.app, person)
+	return prago.CreateItem(nm.app, person)
 }
 
 // Newsletter represents newsletter
@@ -279,30 +285,29 @@ type newsletter struct {
 	UpdatedAt     time.Time
 }
 
-func initNewsletterResource(resource *Resource, board *Board) {
-	resource.canView = sysadminPermission
-
+func initNewsletterResource(resource *prago.Resource, board *prago.Board) {
+	resource.PermissionView(sysadminPermission)
 	resource.Board(board)
 
-	ResourceItemHandler[newsletter](resource.app, "preview",
-		func(item *newsletter, request *Request) {
-			body, err := resource.app.newsletters.GetBody(*item, "")
+	prago.ResourceItemHandler[newsletter](newsletters.app, "preview",
+		func(item *newsletter, request *prago.Request) {
+			body, err := getBody(*item, "")
 			must(err)
 
 			request.Response().WriteHeader(200)
 			request.Response().Write([]byte(body))
 		}).Permission(loggedPermission).Name(unlocalized("Náhled"))
 
-	ResourceFormItemAction[newsletter](
-		resource.app,
+	prago.ResourceFormItemAction[newsletter](
+		newsletters.app,
 		"send-preview",
-		func(item *newsletter, f *Form, r *Request) {
+		func(item *newsletter, f *prago.Form, r *prago.Request) {
 			f.AddTextareaInput("emails", "Seznam emailů na poslání preview (jeden email na řádek)").Focused = true
 			f.AddSubmit("Odeslat náhled")
 		},
-		func(newsletter *newsletter, vc ValidationContext) {
+		func(newsletter *newsletter, vc prago.ValidationContext) {
 			newsletter.PreviewSentAt = time.Now()
-			err := UpdateItem(resource.app, newsletter)
+			err := prago.UpdateItem(newsletters.app, newsletter)
 			if err != nil {
 				panic(err)
 			}
@@ -312,63 +317,63 @@ func initNewsletterResource(resource *Resource, board *Board) {
 				vc.AddError("Není zadán žádný email")
 			}
 			if vc.Valid() {
-				err := resource.app.sendEmails(*newsletter, emails)
+				err := sendEmails(*newsletter, emails)
 				if err != nil {
 					vc.AddError(fmt.Sprintf("Chyba při odesílání emailů: %s", err))
 				}
 			}
 			if vc.Valid() {
 				vc.Request().AddFlashMessage("Náhled newsletteru odeslán.")
-				vc.Validation().RedirectionLocaliton = resource.getItemURL(newsletter, "", vc.Request())
+				vc.Validation().RedirectionLocaliton = "/admin/newsletter"
 			}
 		},
 	).Permission(loggedPermission).Name(unlocalized("Odeslat náhled"))
 
-	ResourceFormItemAction[newsletter](
-		resource.app,
+	prago.ResourceFormItemAction[newsletter](
+		newsletters.app,
 		"send",
-		func(newsletter *newsletter, form *Form, request *Request) {
-			recipients, err := resource.app.getNewsletterRecipients()
+		func(newsletter *newsletter, form *prago.Form, request *prago.Request) {
+			recipients, err := getNewsletterRecipients()
 			must(err)
 			form.AddSubmit(fmt.Sprintf("Odelsat newsletter na %d emailů", len(recipients)))
 		},
-		func(newsletter *newsletter, vc ValidationContext) {
+		func(newsletter *newsletter, vc prago.ValidationContext) {
 			newsletter.SentAt = time.Now()
 			//TODO: log sent emails
-			must(UpdateItem(resource.app, newsletter))
+			must(prago.UpdateItem(newsletters.app, newsletter))
 
-			recipients, err := resource.app.getNewsletterRecipients()
+			recipients, err := getNewsletterRecipients()
 			if err != nil {
 				panic(err)
 			}
 
-			go resource.app.sendEmails(*newsletter, recipients)
+			go sendEmails(*newsletter, recipients)
 			vc.Request().AddFlashMessage(fmt.Sprintf("Newsletter '%s' se odesílá na %d adres", newsletter.Name, len(recipients)))
-			vc.Validation().RedirectionLocaliton = resource.getItemURL(newsletter, "", vc.Request())
+			vc.Validation().RedirectionLocaliton = "/admin/newsletter"
 		},
 	).Permission(loggedPermission).Name(unlocalized("Odeslat"))
 
-	ResourceFormItemAction[newsletter](
-		resource.app,
+	prago.ResourceFormItemAction[newsletter](
+		newsletters.app,
 		"duplicate",
-		func(newsletter *newsletter, f *Form, r *Request) {
+		func(newsletter *newsletter, f *prago.Form, r *prago.Request) {
 			f.AddSubmit("Duplikovat newsletter")
 		},
-		func(newsletter *newsletter, vc ValidationContext) {
-			app := vc.Request().app
-			sections := Query[newsletterSection](app).Is("newsletter", newsletter.ID).Order("orderposition").List()
+		func(newsletter *newsletter, vc prago.ValidationContext) {
+			app := newsletters.app
+			sections := prago.Query[newsletterSection](app).Is("newsletter", newsletter.ID).Order("orderposition").List()
 
 			newsletter.ID = 0
-			must(CreateWithLog(newsletter, vc.Request()))
+			must(prago.CreateWithLog(newsletter, vc.Request()))
 
 			for _, v := range sections {
 				section := *v
 				section.ID = 0
 				section.Newsletter = newsletter.ID
-				must(CreateItemWithContext(vc.Context(), app, &section))
+				must(prago.CreateItemWithContext(vc.Context(), app, &section))
 			}
 
-			vc.Validation().RedirectionLocaliton = resource.getItemURL(newsletter, "edit", vc.Request())
+			vc.Validation().RedirectionLocaliton = "/admin/newsletter/edit"
 		},
 	).Permission(loggedPermission).Name(unlocalized("Duplikovat"))
 }
@@ -385,44 +390,44 @@ func parseEmails(emails string) []string {
 	return ret
 }
 
-func (app *App) getNewsletterRecipients() ([]string, error) {
+func getNewsletterRecipients() ([]string, error) {
 	ret := []string{}
-	persons := Query[newsletterPersons](app).Is("confirmed", true).Is("unsubscribed", false).List()
+	persons := prago.Query[newsletterPersons](newsletters.app).Is("confirmed", true).Is("unsubscribed", false).List()
 	for _, v := range persons {
 		ret = append(ret, v.Email)
 	}
 	return ret, nil
 }
 
-func (app *App) sendEmails(n newsletter, emails []string) error {
+func sendEmails(n newsletter, emails []string) error {
 	for _, v := range emails {
-		body, err := app.newsletters.GetBody(n, v)
+		body, err := getBody(n, v)
 		if err == nil {
-			err = app.Email().To("", v).Subject(n.Name).HTMLContent(body).Send()
+			err = newsletters.app.Email().To("", v).Subject(n.Name).HTMLContent(body).Send()
 		}
 		if err != nil {
-			app.Log().Println("ERROR", err.Error())
+			newsletters.app.Log().Println("ERROR", err.Error())
 		}
 	}
 	return nil
 }
 
 // GetBody gets body of newsletter
-func (nm *Newsletters) GetBody(n newsletter, email string) (string, error) {
+func getBody(n newsletter, email string) (string, error) {
 	content := markdown.New(markdown.HTML(true)).RenderToString([]byte(n.Body))
 	params := map[string]interface{}{
 		"id":          n.ID,
-		"baseUrl":     nm.app.mustGetSetting(context.TODO(), "base_url"),
-		"site":        nm.app.name("en"),
+		"baseUrl":     mustGetSetting("base_url"),
+		"site":        newsletters.name("en"),
 		"title":       n.Name,
-		"unsubscribe": nm.unsubscribeURL(email),
+		"unsubscribe": newsletters.unsubscribeURL(email),
 		"content":     template.HTML(content),
 		"preview":     cropMarkdown(n.Body, 200),
-		"sections":    nm.getNewsletterSectionData(n),
+		"sections":    newsletters.getNewsletterSectionData(n),
 	}
 
-	if nm.renderer != nil {
-		return nm.renderer(params)
+	if newsletters.renderer != nil {
+		return newsletters.renderer(params)
 	}
 	return defaultNewsletterRenderer(params)
 }
@@ -489,7 +494,7 @@ type newsletterSectionData struct {
 }
 
 func (nm *Newsletters) getNewsletterSectionData(n newsletter) []newsletterSectionData {
-	sections := Query[newsletterSection](nm.app).Is("newsletter", n.ID).Order("orderposition").List()
+	sections := prago.Query[newsletterSection](nm.app).Is("newsletter", n.ID).Order("orderposition").List()
 	var ret []newsletterSectionData
 
 	for _, v := range sections {
@@ -498,7 +503,7 @@ func (nm *Newsletters) getNewsletterSectionData(n newsletter) []newsletterSectio
 			button = v.Button
 		}
 
-		url := nm.app.mustGetSetting(context.TODO(), "base_url")
+		url := mustGetSetting("base_url")
 		if v.URL != "" {
 			url = v.URL
 		}
