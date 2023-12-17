@@ -255,11 +255,14 @@ func TestResourceUnique(t *testing.T) {
 
 	resource := GetResource[ResourceStructUnique](app)
 
-	CreateItem(resource.app, &ResourceStructUnique{UniqueName: "A"})
-	CreateItem(resource.app, &ResourceStructUnique{UniqueName: "B"})
-	CreateItem(resource.app, &ResourceStructUnique{UniqueName: "A"})
+	must(CreateItem(resource.app, &ResourceStructUnique{UniqueName: "A"}))
+	must(CreateItem(resource.app, &ResourceStructUnique{UniqueName: "B"}))
+	err := CreateItem(resource.app, &ResourceStructUnique{UniqueName: "A"})
+	if err == nil {
+		t.Fatal("Should fail")
+	}
 
-	count, err := Query[ResourceStruct](resource.app).Count()
+	count, err := Query[ResourceStructUnique](resource.app).Count()
 	if err != nil {
 		t.Fatal(err)
 	}
