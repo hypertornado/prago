@@ -197,7 +197,8 @@ func bindCDNFiles(app *prago.App) {
 		files := prago.Query[CDNFile](app).List()
 		totalLen := len(files)
 		for k, file := range files {
-			ta.SetStatus(float64(k)/float64(totalLen), file.UUID)
+			ta.Progress(int64(k), int64(totalLen))
+			ta.Description(file.UUID)
 			file.update()
 		}
 		return nil
@@ -207,7 +208,8 @@ func bindCDNFiles(app *prago.App) {
 		files := prago.Query[CDNFile](app).List()
 		totalLen := len(files)
 		for k, file := range files {
-			ta.SetStatus(float64(k)/float64(totalLen), file.UUID)
+			ta.Progress(int64(k), int64(totalLen))
+			ta.Description(file.UUID)
 			file.validateChecksum()
 		}
 		return nil

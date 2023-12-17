@@ -135,6 +135,7 @@ func createApp(codeName string, version string) *App {
 	app.initDevelopment()
 	app.initMigrationCommand()
 	app.initTemplates()
+	app.initElasticsearch()
 	app.initSearch()
 	app.initSystemStats()
 	app.initSQLConsole()

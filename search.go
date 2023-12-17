@@ -3,11 +3,8 @@ package prago
 import (
 	"fmt"
 	"net/url"
-	"sort"
 	"strconv"
 	"strings"
-
-	"github.com/hypertornado/prago/pragelastic"
 )
 
 type searchItem struct {
@@ -27,30 +24,7 @@ type paginationItem struct {
 	URL      string
 }
 
-var searchClient *pragelastic.Client
-
-func (app *App) createNewElasticSearchClient() error {
-	ret, err := pragelastic.New(app.codeName)
-	if err != nil {
-		return err
-	}
-	searchClient = ret
-	return nil
-
-}
-
-func (app *App) ElasticSearchClient() *pragelastic.Client {
-	if searchClient == nil {
-		app.createNewElasticSearchClient()
-	}
-	return searchClient
-}
-
 func (app *App) initSearch() {
-	db := sysadminBoard.Dashboard(unlocalized("Elasticsearch"))
-	db.Task(unlocalized("Reload elasticsearch client")).Handler(func(ta *TaskActivity) error {
-		return app.createNewElasticSearchClient()
-	})
 
 	app.API("search-suggest").Permission(loggedPermission).Handler(
 		func(request *Request) {
@@ -121,44 +95,6 @@ func (app *App) initSearch() {
 			pd.SearchQuery = q
 		},
 	)
-
-	app.FormAction("delete-elastic-indice", func(f *Form, r *Request) {
-		stats, err := app.ElasticSearchClient().GetStats()
-		if err != nil {
-			panic(err)
-		}
-
-		var indiceNames []string
-		for k := range stats.Indices {
-			indiceNames = append(indiceNames, k)
-		}
-		sort.Strings(indiceNames)
-
-		var doubled [][2]string = [][2]string{{"", ""}}
-
-		for _, v := range indiceNames {
-			doubled = append(doubled, [2]string{v, v})
-		}
-
-		f.AddSelect("indice", "Elastic indices", doubled)
-
-		f.AddSubmit("Delete indice")
-	}, func(vc ValidationContext) {
-		id := vc.GetValue("indice")
-		if id == "" {
-			vc.AddItemError("indice", "Select indice to delete")
-		}
-		if !vc.Valid() {
-			return
-		}
-
-		err := app.ElasticSearchClient().DeleteIndex(id)
-		if err != nil {
-			vc.AddError(fmt.Sprintf("Index '%s' nelze smazat", id))
-		} else {
-			vc.AddError(fmt.Sprintf("Index '%s' úspěšně smazán", id))
-		}
-	}).Name(unlocalized("Smazat elasticsearch index")).Permission(sysadminPermission).Board(sysadminBoard)
 
 }
 
