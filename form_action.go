@@ -96,20 +96,20 @@ func ResourceFormAction[T any](app *App, url string, formGenerator func(*Form, *
 	return resource.formAction(url, formGenerator, validation)
 }
 
-func (resourceData *Resource) formAction(url string, formGenerator func(*Form, *Request), validation Validation) *Action {
-	action := newFormAction(resourceData.app, url, nil)
+func (resource *Resource) formAction(url string, formGenerator func(*Form, *Request), validation Validation) *Action {
+	action := newFormAction(resource.app, url, nil)
 
-	action.actionForm.resourceData = resourceData
-	action.actionValidation.resourceData = resourceData
+	action.actionForm.resource = resource
+	action.actionValidation.resource = resource
 
-	action.actionForm.Permission(resourceData.canView)
-	action.actionValidation.Permission(resourceData.canView)
+	action.actionForm.Permission(resource.canView)
+	action.actionValidation.Permission(resource.canView)
 
 	action.formGenerator = formGenerator
 	action.validation = validation
 
-	resourceData.actions = append(resourceData.actions, action.actionForm)
-	resourceData.actions = append(resourceData.actions, action.actionValidation)
+	resource.actions = append(resource.actions, action.actionForm)
+	resource.actions = append(resource.actions, action.actionValidation)
 	return action.actionForm
 }
 
@@ -119,8 +119,8 @@ func ResourceFormItemAction[T any](
 	formGenerator func(*T, *Form, *Request),
 	validation func(*T, ValidationContext),
 ) *Action {
-	resourceData := GetResource[T](app)
-	return resourceData.formItemAction(
+	resource := GetResource[T](app)
+	return resource.formItemAction(
 		url,
 		func(a any, f *Form, r *Request) {
 			formGenerator(a.(*T), f, r)
@@ -131,31 +131,31 @@ func ResourceFormItemAction[T any](
 	)
 }
 
-func (resourceData *Resource) formItemAction(url string, formGenerator func(any, *Form, *Request), validation func(any, ValidationContext)) *Action {
-	fa := newFormAction(resourceData.app, url, func(f *Form, r *Request) {
-		item := resourceData.query(context.TODO()).ID(r.Param("id"))
-		f.image = resourceData.previewer(r, item).ImageURL(r.r.Context())
+func (resource *Resource) formItemAction(url string, formGenerator func(any, *Form, *Request), validation func(any, ValidationContext)) *Action {
+	fa := newFormAction(resource.app, url, func(f *Form, r *Request) {
+		item := resource.query(context.TODO()).ID(r.Param("id"))
+		f.image = resource.previewer(r, item).ImageURL(r.r.Context())
 	})
 
-	fa.actionForm.resourceData = resourceData
-	fa.actionValidation.resourceData = resourceData
+	fa.actionForm.resource = resource
+	fa.actionValidation.resource = resource
 
-	fa.actionForm.Permission(resourceData.canView)
-	fa.actionValidation.Permission(resourceData.canView)
+	fa.actionForm.Permission(resource.canView)
+	fa.actionValidation.Permission(resource.canView)
 
 	fa.actionForm.isItemAction = true
 	fa.actionValidation.isItemAction = true
 
-	resourceData.itemActions = append(resourceData.itemActions, fa.actionForm)
-	resourceData.itemActions = append(resourceData.itemActions, fa.actionValidation)
+	resource.itemActions = append(resource.itemActions, fa.actionForm)
+	resource.itemActions = append(resource.itemActions, fa.actionValidation)
 
 	fa.formGenerator = func(form *Form, request *Request) {
-		item := resourceData.query(request.r.Context()).ID(request.Param("id"))
+		item := resource.query(request.r.Context()).ID(request.Param("id"))
 		formGenerator(item, form, request)
 	}
 
 	fa.validation = func(vc ValidationContext) {
-		item := resourceData.query(vc.Context()).ID(vc.GetValue("id"))
+		item := resource.query(vc.Context()).ID(vc.GetValue("id"))
 		validation(item, vc)
 	}
 

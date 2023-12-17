@@ -157,25 +157,25 @@ func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem
 	}
 
 	resources := app.resources
-	for _, resourceData := range resources {
-		if resourceData.parentBoard != board {
+	for _, resource := range resources {
+		if resource.parentBoard != board {
 			continue
 		}
 
-		if requestContext.UserData.Authorize(resourceData.canView) {
-			resourceURL := resourceData.getURL("")
+		if requestContext.UserData.Authorize(resource.canView) {
+			resourceURL := resource.getURL("")
 			var selected bool
 			if urlPath == resourceURL {
 				selected = true
 			}
 
-			icon := resourceData.icon
+			icon := resource.icon
 
-			subitems := resourceData.resourceBoard.getMenuItems(requestContext)
+			subitems := resource.resourceBoard.getMenuItems(requestContext)
 
 			ret = append(ret, &menuItem{
 				Icon:         icon,
-				Name:         resourceData.pluralName(requestContext.UserData.Locale()),
+				Name:         resource.pluralName(requestContext.UserData.Locale()),
 				URL:          resourceURL,
 				Selected:     selected,
 				Subitems:     subitems,
@@ -242,9 +242,9 @@ func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem
 	return ret
 }
 
-func (resourceData *Resource) getResourceMenu(requestContext *menuRequestContext) (ret []*menuItem) {
+func (resource *Resource) getResourceMenu(requestContext *menuRequestContext) (ret []*menuItem) {
 	urlPath := requestContext.URL
-	for k, v := range resourceData.actions {
+	for k, v := range resource.actions {
 		if v.method != "GET" {
 			continue
 		}
@@ -257,15 +257,15 @@ func (resourceData *Resource) getResourceMenu(requestContext *menuRequestContext
 		menuItem := &menuItem{
 			Icon:         v.icon,
 			Name:         v.name(requestContext.UserData.Locale()),
-			URL:          resourceData.getURL(v.url),
+			URL:          resource.getURL(v.url),
 			SortPriority: v.priority - int64(k),
 		}
 		if urlPath == menuItem.URL {
 			menuItem.Selected = true
 		}
 
-		if v.url == "list" && resourceData.isItPointerToResourceItem(requestContext.Item) {
-			menuItem.Subitems = append(menuItem.Subitems, resourceData.getResourceItemMenu(requestContext))
+		if v.url == "list" && resource.isItPointerToResourceItem(requestContext.Item) {
+			menuItem.Subitems = append(menuItem.Subitems, resource.getResourceItemMenu(requestContext))
 			//menuItem.Expanded = true
 		}
 		ret = append(ret, menuItem)
@@ -275,10 +275,10 @@ func (resourceData *Resource) getResourceMenu(requestContext *menuRequestContext
 	return
 }
 
-func (resourceData *Resource) getResourceItemMenu(requestContext *menuRequestContext) *menuItem {
+func (resource *Resource) getResourceItemMenu(requestContext *menuRequestContext) *menuItem {
 	var items []*menuItem
 
-	for k, v := range resourceData.itemActions {
+	for k, v := range resource.itemActions {
 		if v.method != "GET" {
 			continue
 		}
@@ -288,7 +288,7 @@ func (resourceData *Resource) getResourceItemMenu(requestContext *menuRequestCon
 		name := v.name(requestContext.UserData.Locale())
 		var thumbnail string
 		if v.url == "" {
-			previewer := resourceData.previewer(requestContext.UserData, requestContext.Item)
+			previewer := resource.previewer(requestContext.UserData, requestContext.Item)
 			thumbnail = previewer.ThumbnailURL(context.Background())
 			name = previewer.Name()
 		}
@@ -299,7 +299,7 @@ func (resourceData *Resource) getResourceItemMenu(requestContext *menuRequestCon
 			Icon:         v.icon,
 			Image:        thumbnail,
 			Name:         name,
-			URL:          resourceData.getItemURL(requestContext.Item, v.url, requestContext.UserData),
+			URL:          resource.getItemURL(requestContext.Item, v.url, requestContext.UserData),
 			Expanded:     true,
 			SortPriority: priority,
 		}

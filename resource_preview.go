@@ -16,30 +16,30 @@ type preview struct {
 }
 
 type previewer struct {
-	userData     UserData
-	item         any
-	resourceData *Resource
+	userData UserData
+	item     any
+	resource *Resource
 }
 
-func (resourceData *Resource) previewer(userData UserData, item any) *previewer {
-	if !resourceData.isItPointerToResourceItem(item) {
+func (resource *Resource) previewer(userData UserData, item any) *previewer {
+	if !resource.isItPointerToResourceItem(item) {
 		return nil
 	}
 
 	return &previewer{
-		userData:     userData,
-		item:         item,
-		resourceData: resourceData,
+		userData: userData,
+		item:     item,
+		resource: resource,
 	}
 }
 
 func (previewer *previewer) hasAccessToField(fieldID string) bool {
-	if !previewer.userData.Authorize(previewer.resourceData.canView) {
+	if !previewer.userData.Authorize(previewer.resource.canView) {
 		return false
 	}
 
 	fieldID = strings.ToLower(fieldID)
-	field := previewer.resourceData.fieldMap[fieldID]
+	field := previewer.resource.fieldMap[fieldID]
 	if field == nil {
 		return false
 	}
@@ -94,7 +94,7 @@ func (f *Field) relationPreview(ctx context.Context, userData UserData, id int64
 }
 
 func (previewer *previewer) URL(suffix string) string {
-	return previewer.resourceData.getItemURL(previewer.item, suffix, previewer.userData)
+	return previewer.resource.getItemURL(previewer.item, suffix, previewer.userData)
 }
 
 func (previewer *previewer) Preview(ctx context.Context, relatedResource *Resource) *preview {
@@ -112,7 +112,7 @@ func (previewer *previewer) ThumbnailURL(ctx context.Context) string {
 		itemsVal := reflect.ValueOf(previewer.item).Elem()
 		field := itemsVal.FieldByName("Image")
 		if field.IsValid() && previewer.hasAccessToField("Image") {
-			return previewer.resourceData.app.thumb(ctx, field.String())
+			return previewer.resource.app.thumb(ctx, field.String())
 		}
 	}
 	return ""
@@ -123,7 +123,7 @@ func (previewer *previewer) ImageURL(ctx context.Context) string {
 		itemsVal := reflect.ValueOf(previewer.item).Elem()
 		field := itemsVal.FieldByName("Image")
 		if field.IsValid() && previewer.hasAccessToField("Image") {
-			return previewer.resourceData.app.largeImage(ctx, field.String())
+			return previewer.resource.app.largeImage(ctx, field.String())
 		}
 	}
 	return ""
@@ -155,7 +155,7 @@ func (previewer *previewer) DescriptionExtended(relatedResource *Resource) strin
 		items = append(items, basicDescription)
 	}
 
-	for _, v := range previewer.resourceData.fields {
+	for _, v := range previewer.resource.fields {
 		if v.fieldClassName == "ID" || v.fieldClassName == "Name" || v.fieldClassName == "Description" {
 			continue
 		}
@@ -169,7 +169,7 @@ func (previewer *previewer) DescriptionExtended(relatedResource *Resource) strin
 		}
 
 		field := itemsVal.FieldByName(v.fieldClassName)
-		stringed := previewer.resourceData.app.relationStringer(*v, field, previewer.userData)
+		stringed := previewer.resource.app.relationStringer(*v, field, previewer.userData)
 		if stringed != "" {
 			items = append(items, fmt.Sprintf("%s: %s", v.name(previewer.userData.Locale()), stringed))
 		}

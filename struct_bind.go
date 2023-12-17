@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (resourceData *Resource) setOrderPosition(item interface{}, order int64) {
+func (resource *Resource) setOrderPosition(item interface{}, order int64) {
 	value := reflect.ValueOf(item)
 
 	for i := 0; i < 10; i++ {
@@ -17,12 +17,12 @@ func (resourceData *Resource) setOrderPosition(item interface{}, order int64) {
 		value = value.Elem()
 	}
 
-	val := value.FieldByName(resourceData.orderField.fieldClassName)
+	val := value.FieldByName(resource.orderField.fieldClassName)
 	val.SetInt(order)
 }
 
-func (resourceData *Resource) fixBooleanParams(request *Request, params url.Values) {
-	for _, field := range resourceData.fields {
+func (resource *Resource) fixBooleanParams(request *Request, params url.Values) {
+	for _, field := range resource.fields {
 		if !field.authorizeEdit(request) {
 			continue
 		}
@@ -32,7 +32,7 @@ func (resourceData *Resource) fixBooleanParams(request *Request, params url.Valu
 	}
 }
 
-func (resourceData *Resource) bindData(item any, request *Request, params url.Values) error {
+func (resource *Resource) bindData(item any, request *Request, params url.Values) error {
 
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
@@ -42,7 +42,7 @@ func (resourceData *Resource) bindData(item any, request *Request, params url.Va
 		value = value.Elem()
 	}
 
-	for _, field := range resourceData.fields {
+	for _, field := range resource.fields {
 		if !field.authorizeEdit(request) {
 			continue
 		}

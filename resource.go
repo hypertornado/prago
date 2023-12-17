@@ -151,23 +151,23 @@ func GetResource[T any](app *App) *Resource {
 	return ret
 }
 
-func (resourceData *Resource) isItPointerToResourceItem(item any) bool {
+func (resource *Resource) isItPointerToResourceItem(item any) bool {
 	if item == nil {
 		return false
 	}
-	return reflect.PointerTo(resourceData.typ) == reflect.TypeOf(item)
+	return reflect.PointerTo(resource.typ) == reflect.TypeOf(item)
 }
 
-func (resourceData *Resource) addRelation(field *relatedField) {
-	resourceData.relations = append(resourceData.relations, field)
+func (resource *Resource) addRelation(field *relatedField) {
+	resource.relations = append(resource.relations, field)
 }
 
-func (resourceData *Resource) getID() string {
-	return resourceData.id
+func (resource *Resource) getID() string {
+	return resource.id
 }
 
-func (resourceData *Resource) getResourceControl() *controller {
-	return resourceData.resourceController
+func (resource *Resource) getResourceControl() *controller {
+	return resource.resourceController
 }
 
 func CreateItem[T any](app *App, item *T) error {
@@ -179,10 +179,10 @@ func CreateItemWithContext[T any](ctx context.Context, app *App, item *T) error 
 	return resource.create(ctx, item)
 }
 
-func (resourceData *Resource) create(ctx context.Context, item any) error {
-	resourceData.setTimestamp(item, "CreatedAt")
-	resourceData.setTimestamp(item, "UpdatedAt")
-	return resourceData.createItem(ctx, item, false)
+func (resource *Resource) create(ctx context.Context, item any) error {
+	resource.setTimestamp(item, "CreatedAt")
+	resource.setTimestamp(item, "UpdatedAt")
+	return resource.createItem(ctx, item, false)
 }
 
 func UpdateItem[T any](app *App, item *T) error {
@@ -194,9 +194,9 @@ func UpdateItemWithContext[T any](ctx context.Context, app *App, item *T) error 
 	return resource.update(ctx, item)
 }
 
-func (resourceData *Resource) update(ctx context.Context, item any) error {
-	resourceData.setTimestamp(item, "UpdatedAt")
-	return resourceData.saveItem(ctx, item, false)
+func (resource *Resource) update(ctx context.Context, item any) error {
+	resource.setTimestamp(item, "UpdatedAt")
+	return resource.saveItem(ctx, item, false)
 }
 
 func Replace[T any](ctx context.Context, app *App, item *T) error {
@@ -206,7 +206,7 @@ func Replace[T any](ctx context.Context, app *App, item *T) error {
 	return resource.replaceItem(ctx, item, false)
 }
 
-func (resourceData *Resource) setTimestamp(item any, fieldName string) {
+func (resource *Resource) setTimestamp(item any, fieldName string) {
 	val := reflect.ValueOf(item).Elem()
 	fieldVal := val.FieldByName(fieldName)
 	timeVal := reflect.ValueOf(time.Now())
@@ -226,8 +226,8 @@ func DeleteItemWithContext[T any](ctx context.Context, app *App, id int64) error
 	return resource.delete(ctx, id)
 }
 
-func (resourceData *Resource) delete(ctx context.Context, id int64) error {
-	q := resourceData.query(ctx).Is("id", id)
+func (resource *Resource) delete(ctx context.Context, id int64) error {
+	q := resource.query(ctx).Is("id", id)
 	count, err := q.delete()
 	if err != nil {
 		return err
@@ -254,8 +254,8 @@ func PreviewURLFunction[T any](app *App, fn func(*T) string) {
 	})
 }
 
-func (resourceData *Resource) previewURLFunction(fn func(any) string) {
-	resourceData.previewFn = fn
+func (resource *Resource) previewURLFunction(fn func(any) string) {
+	resource.previewFn = fn
 }
 
 func (resource *Resource) Icon(icon string) *Resource {
@@ -314,8 +314,8 @@ func (resource *Resource) Dashboard(name func(string) string) *Dashboard {
 	return resource.resourceBoard.Dashboard(name)
 }
 
-func (resourceData *Resource) addValidation(validation Validation) {
-	resourceData.validations = append(resourceData.validations, validation)
+func (resource *Resource) addValidation(validation Validation) {
+	resource.validations = append(resource.validations, validation)
 }
 
 func (resource *Resource) DeleteValidation(validation Validation) *Resource {
@@ -329,8 +329,8 @@ func (resource *Resource) Board(board *Board) *Resource {
 	return resource
 }
 
-func (resourceData *Resource) getItemURL(item interface{}, suffix string, userData UserData) string {
-	ret := resourceData.getURL(fmt.Sprintf("%d", resourceData.previewer(userData, item).ID()))
+func (resource *Resource) getItemURL(item interface{}, suffix string, userData UserData) string {
+	ret := resource.getURL(fmt.Sprintf("%d", resource.previewer(userData, item).ID()))
 	if suffix != "" {
 		ret += "/" + suffix
 	}
@@ -343,9 +343,9 @@ func (app *App) getResourceByID(name string) *Resource {
 	return app.resourceNameMap[columnName(name)]
 }
 
-func initResource(resourceData *Resource) {
-	resourceData.resourceController.addAroundAction(func(request *Request, next func()) {
-		if !request.Authorize(resourceData.canView) {
+func initResource(resource *Resource) {
+	resource.resourceController.addAroundAction(func(request *Request, next func()) {
+		if !request.Authorize(resource.canView) {
 			renderErrorPage(request, 403)
 		} else {
 			next()
@@ -353,28 +353,28 @@ func initResource(resourceData *Resource) {
 	})
 }
 
-func (resourceData *Resource) getURL(suffix string) string {
-	url := resourceData.id
+func (resource *Resource) getURL(suffix string) string {
+	url := resource.id
 	if len(suffix) > 0 {
 		url += "/" + suffix
 	}
-	return resourceData.app.getAdminURL(url)
+	return resource.app.getAdminURL(url)
 }
 
-func (resourceData *Resource) cachedCountName() string {
-	return fmt.Sprintf("prago-resource_count-%s", resourceData.id)
+func (resource *Resource) cachedCountName() string {
+	return fmt.Sprintf("prago-resource_count-%s", resource.id)
 }
 
-func (resourceData *Resource) getCachedCount(ctx context.Context) int64 {
-	return loadCache(resourceData.app.cache, resourceData.cachedCountName(), func(ctx context.Context) int64 {
-		count, _ := resourceData.countAllItems(ctx, false)
+func (resource *Resource) getCachedCount(ctx context.Context) int64 {
+	return loadCache(resource.app.cache, resource.cachedCountName(), func(ctx context.Context) int64 {
+		count, _ := resource.countAllItems(ctx, false)
 		return count
 	})
 }
 
-func (resourceData *Resource) updateCachedCount(ctx context.Context) error {
-	resourceData.app.cache.forceLoad(resourceData.cachedCountName(), func(ctx context.Context) interface{} {
-		count, _ := resourceData.countAllItems(ctx, false)
+func (resource *Resource) updateCachedCount(ctx context.Context) error {
+	resource.app.cache.forceLoad(resource.cachedCountName(), func(ctx context.Context) interface{} {
+		count, _ := resource.countAllItems(ctx, false)
 		return count
 	})
 	return nil

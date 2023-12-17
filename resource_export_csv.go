@@ -9,16 +9,16 @@ import (
 
 const exportCSVPageLimit = 1000
 
-func bindResourceExportCSV(resourceData *Resource) {
-	resourceData.api("export.csv").Permission(resourceData.canExport).Handler(func(request *Request) {
-		if !request.Authorize(resourceData.canExport) {
+func bindResourceExportCSV(resource *Resource) {
+	resource.api("export.csv").Permission(resource.canExport).Handler(func(request *Request) {
+		if !request.Authorize(resource.canExport) {
 			renderErrorPage(request, 403)
 			return
 		}
 
 		var fieldNames []string
 		var outputFields []*Field
-		for _, v := range resourceData.fields {
+		for _, v := range resource.fields {
 			if v.authorizeView(request) {
 				outputFields = append(outputFields, v)
 				fieldNames = append(fieldNames, v.id)
@@ -32,7 +32,7 @@ func bindResourceExportCSV(resourceData *Resource) {
 		iteration := 0
 
 		for {
-			q := resourceData.query(request.r.Context())
+			q := resource.query(request.r.Context())
 			q.offset = int64(iteration * exportCSVPageLimit)
 			q.limit = exportCSVPageLimit
 			items, err := q.list()

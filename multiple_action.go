@@ -1,45 +1,41 @@
 package prago
 
-func (resourceData *Resource) allowsMultipleActions(userData UserData) (ret bool) {
-	if userData.Authorize(resourceData.canDelete) {
+func (resource *Resource) allowsMultipleActions(userData UserData) (ret bool) {
+	if userData.Authorize(resource.canDelete) {
 		ret = true
 	}
-	if userData.Authorize(resourceData.canUpdate) {
+	if userData.Authorize(resource.canUpdate) {
 		ret = true
 	}
 	return ret
 }
 
-func (resourceData *Resource) getMultipleActions(userData UserData) (ret []listMultipleAction) {
-	if !resourceData.allowsMultipleActions(userData) {
+func (resource *Resource) getMultipleActions(userData UserData) (ret []listMultipleAction) {
+	if !resource.allowsMultipleActions(userData) {
 		return nil
 	}
 
-	if userData.Authorize(resourceData.canUpdate) {
+	if userData.Authorize(resource.canUpdate) {
 		ret = append(ret, listMultipleAction{
 			ID:   "edit",
 			Name: "Upravit",
 		})
 	}
 
-	if userData.Authorize(resourceData.canCreate) {
+	if userData.Authorize(resource.canCreate) {
 		ret = append(ret, listMultipleAction{
 			ID:   "clone",
 			Name: "Naklonovat",
 		})
 	}
 
-	//ret = append(ret, resourceData.getMultipleActionsFromQuickActions(userData)...)
-
-	if userData.Authorize(resourceData.canDelete) {
+	if userData.Authorize(resource.canDelete) {
 		ret = append(ret, listMultipleAction{
 			ID:       "delete",
 			Name:     "Smazat",
 			IsDelete: true,
 		})
 	}
-
-	//resourceData.qui
 
 	ret = append(ret, listMultipleAction{
 		ID:   "cancel",

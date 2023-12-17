@@ -52,16 +52,16 @@ func statsCountDescription(count, total int64) listStatsDescription {
 	}
 }
 
-func (resourceData *Resource) getListStats(ctx context.Context, userData UserData, params url.Values) *listStats {
+func (resource *Resource) getListStats(ctx context.Context, userData UserData, params url.Values) *listStats {
 	ret := &listStats{}
 
 	columnsStr := params.Get("_columns")
 	if columnsStr == "" {
-		columnsStr = resourceData.defaultVisibleFieldsStr(userData)
+		columnsStr = resource.defaultVisibleFieldsStr(userData)
 	}
 	columnsAr := strings.Split(columnsStr, ",")
 
-	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, userData)
+	query := resource.addFilterParamsToQuery(resource.query(ctx), params, userData)
 	total, err := query.count()
 	if err != nil {
 		panic(err)
@@ -74,13 +74,13 @@ func (resourceData *Resource) getListStats(ctx context.Context, userData UserDat
 	}
 
 	for _, v := range columnsAr {
-		field := resourceData.fieldMap[v]
+		field := resource.fieldMap[v]
 
 		if field.typ == reflect.TypeOf(time.Now()) {
-			ret.Sections = append(ret.Sections, resourceData.getListStatsDateSections(ctx, field, userData, params, total, limit)...)
+			ret.Sections = append(ret.Sections, resource.getListStatsDateSections(ctx, field, userData, params, total, limit)...)
 		}
 
-		table := resourceData.getListStatsTable(ctx, field, userData, params, total, limit)
+		table := resource.getListStatsTable(ctx, field, userData, params, total, limit)
 
 		if table == nil {
 			continue
@@ -95,28 +95,28 @@ func (resourceData *Resource) getListStats(ctx context.Context, userData UserDat
 	return ret
 }
 
-func (resourceData *Resource) getListStatsDateSections(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (ret []listStatsSection) {
-	ret = append(ret, resourceData.getListStatsDateSectionDay(ctx, field, userData, params, total, limit))
-	ret = append(ret, resourceData.getListStatsDateSectionMonth(ctx, field, userData, params, total, limit))
-	ret = append(ret, resourceData.getListStatsDateSectionYear(ctx, field, userData, params, total, limit))
+func (resource *Resource) getListStatsDateSections(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (ret []listStatsSection) {
+	ret = append(ret, resource.getListStatsDateSectionDay(ctx, field, userData, params, total, limit))
+	ret = append(ret, resource.getListStatsDateSectionMonth(ctx, field, userData, params, total, limit))
+	ret = append(ret, resource.getListStatsDateSectionYear(ctx, field, userData, params, total, limit))
 	return
 }
 
-func (resourceData *Resource) getListStatsDateSectionDay(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (ret listStatsSection) {
-	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, userData)
+func (resource *Resource) getListStatsDateSectionDay(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (ret listStatsSection) {
+	query := resource.addFilterParamsToQuery(resource.query(ctx), params, userData)
 	whereParams := query.values
 	q := fmt.Sprintf("SELECT DAY(%s), MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY DAY(%s), MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.id,
 		field.id,
 		field.id,
-		resourceData.getID(),
+		resource.getID(),
 		buildWhereString(query.conditions),
 		field.id,
 		field.id,
 		field.id,
 		limit,
 	)
-	rows, err := resourceData.app.db.QueryContext(ctx, q, whereParams...)
+	rows, err := resource.app.db.QueryContext(ctx, q, whereParams...)
 	if err != nil {
 		panic(err)
 	}
@@ -147,19 +147,19 @@ func (resourceData *Resource) getListStatsDateSectionDay(ctx context.Context, fi
 	return
 }
 
-func (resourceData *Resource) getListStatsDateSectionMonth(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (ret listStatsSection) {
-	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, userData)
+func (resource *Resource) getListStatsDateSectionMonth(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (ret listStatsSection) {
+	query := resource.addFilterParamsToQuery(resource.query(ctx), params, userData)
 	whereParams := query.values
 	q := fmt.Sprintf("SELECT MONTH(%s), YEAR(%s), COUNT(id) FROM %s %s GROUP BY MONTH(%s), YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.id,
 		field.id,
-		resourceData.getID(),
+		resource.getID(),
 		buildWhereString(query.conditions),
 		field.id,
 		field.id,
 		limit,
 	)
-	rows, err := resourceData.app.db.QueryContext(ctx, q, whereParams...)
+	rows, err := resource.app.db.QueryContext(ctx, q, whereParams...)
 	if err != nil {
 		panic(err)
 	}
@@ -189,17 +189,17 @@ func (resourceData *Resource) getListStatsDateSectionMonth(ctx context.Context, 
 	return
 }
 
-func (resourceData *Resource) getListStatsDateSectionYear(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (ret listStatsSection) {
-	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, userData)
+func (resource *Resource) getListStatsDateSectionYear(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (ret listStatsSection) {
+	query := resource.addFilterParamsToQuery(resource.query(ctx), params, userData)
 	whereParams := query.values
 	q := fmt.Sprintf("SELECT YEAR(%s), COUNT(id) FROM %s %s GROUP BY YEAR(%s) ORDER BY COUNT(id) DESC LIMIT %d;",
 		field.id,
-		resourceData.getID(),
+		resource.getID(),
 		buildWhereString(query.conditions),
 		field.id,
 		limit,
 	)
-	rows, err := resourceData.app.db.QueryContext(ctx, q, whereParams...)
+	rows, err := resource.app.db.QueryContext(ctx, q, whereParams...)
 	if err != nil {
 		panic(err)
 	}
@@ -228,13 +228,13 @@ func (resourceData *Resource) getListStatsDateSectionYear(ctx context.Context, f
 	return
 }
 
-func (resourceData *Resource) getListStatsTable(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (table []listStatsRow) {
-	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, userData)
+func (resource *Resource) getListStatsTable(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (table []listStatsRow) {
+	query := resource.addFilterParamsToQuery(resource.query(ctx), params, userData)
 	whereParams := query.values
 
-	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.id, resourceData.getID(), buildWhereString(query.conditions), field.id, limit)
+	q := fmt.Sprintf("SELECT %s, COUNT(id) FROM %s %s GROUP BY %s ORDER BY COUNT(id) DESC LIMIT %d;", field.id, resource.getID(), buildWhereString(query.conditions), field.id, limit)
 
-	rows, err := resourceData.app.db.QueryContext(ctx, q, whereParams...)
+	rows, err := resource.app.db.QueryContext(ctx, q, whereParams...)
 	if err != nil {
 		panic(err)
 	}
@@ -284,13 +284,13 @@ func (resourceData *Resource) getListStatsTable(ctx context.Context, field *Fiel
 			}
 
 		} else {
-			table = resourceData.getListStatsTableInt(ctx, field, userData, params, total)
+			table = resource.getListStatsTableInt(ctx, field, userData, params, total)
 			counted = total
 		}
 	}
 
 	if field.typ.Kind() == reflect.Float64 {
-		table = resourceData.getListStatsTableInt(ctx, field, userData, params, total)
+		table = resource.getListStatsTableInt(ctx, field, userData, params, total)
 		counted = total
 	}
 
@@ -330,12 +330,12 @@ func (resourceData *Resource) getListStatsTable(ctx context.Context, field *Fiel
 	return
 }
 
-func (resourceData *Resource) getListStatsTableInt(ctx context.Context, field *Field, userData UserData, params url.Values, total int64) (table []listStatsRow) {
+func (resource *Resource) getListStatsTableInt(ctx context.Context, field *Field, userData UserData, params url.Values, total int64) (table []listStatsRow) {
 	if total <= 0 {
 		return
 	}
 
-	query := resourceData.addFilterParamsToQuery(resourceData.query(ctx), params, userData)
+	query := resource.addFilterParamsToQuery(resource.query(ctx), params, userData)
 
 	whereParams := query.values
 
@@ -344,11 +344,11 @@ func (resourceData *Resource) getListStatsTableInt(ctx context.Context, field *F
 		field.id,
 		field.id,
 		field.id,
-		resourceData.getID(),
+		resource.getID(),
 		buildWhereString(query.conditions),
 	)
 
-	rows, err := resourceData.app.db.QueryContext(ctx, q, whereParams...)
+	rows, err := resource.app.db.QueryContext(ctx, q, whereParams...)
 	if err != nil {
 		panic(err)
 	}
@@ -383,11 +383,11 @@ func (resourceData *Resource) getListStatsTableInt(ctx context.Context, field *F
 	medianItem := int64(math.Floor(float64(total) / 2))
 	q = fmt.Sprintf("SELECT %s FROM %s %s LIMIT 1 OFFSET %d;",
 		field.id,
-		resourceData.getID(),
+		resource.getID(),
 		buildWhereString(query.conditions),
 		medianItem,
 	)
-	rows, err = resourceData.app.db.QueryContext(ctx, q, whereParams...)
+	rows, err = resource.app.db.QueryContext(ctx, q, whereParams...)
 	if err != nil {
 		panic(err)
 	}

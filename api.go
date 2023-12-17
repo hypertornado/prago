@@ -6,13 +6,13 @@ import (
 )
 
 type API struct {
-	app          *App
-	method       string
-	url          string
-	permission   Permission
-	resourceData *Resource
-	handler      func(*Request)
-	handlerJSON  func(*Request) interface{}
+	app         *App
+	method      string
+	url         string
+	permission  Permission
+	resource    *Resource
+	handler     func(*Request)
+	handlerJSON func(*Request) interface{}
 }
 
 func newAPI(app *App, url string) *API {
@@ -35,10 +35,10 @@ func ResourceAPI[T any](app *App, url string) *API {
 	return resource.api(url)
 }
 
-func (resourceData *Resource) api(url string) *API {
-	api := newAPI(resourceData.app, url)
-	api.resourceData = resourceData
-	api.permission = resourceData.canView
+func (resource *Resource) api(url string) *API {
+	api := newAPI(resource.app, url)
+	api.resource = resource
+	api.permission = resource.canView
 	return api
 }
 
@@ -81,18 +81,18 @@ func (app *App) bindAPIs() {
 func (api *API) bindAPI() error {
 
 	var controller *controller
-	if api.resourceData != nil {
-		controller = api.resourceData.getResourceControl()
+	if api.resource != nil {
+		controller = api.resource.getResourceControl()
 	} else {
 		//controller = api.app.adminController
 		controller = api.app.accessController
 	}
 
 	var url string
-	if api.resourceData == nil {
+	if api.resource == nil {
 		url = api.app.getAdminURL("api/" + api.url)
 	} else {
-		url = api.resourceData.getURL("api/" + api.url)
+		url = api.resource.getURL("api/" + api.url)
 	}
 
 	if api.handler == nil && api.handlerJSON == nil {

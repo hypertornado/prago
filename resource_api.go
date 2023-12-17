@@ -12,17 +12,17 @@ import (
 	"github.com/tealeg/xlsx"
 )
 
-func (resourceData *Resource) initDefaultResourceAPIs() {
-	resourceData.api("list").Handler(
+func (resource *Resource) initDefaultResourceAPIs() {
+	resource.api("list").Handler(
 		func(request *Request) {
 			if request.Request().URL.Query().Get("_format") == "json" {
-				listDataJSON, err := resourceData.getListContentJSON(request.r.Context(), request, request.Request().URL.Query())
+				listDataJSON, err := resource.getListContentJSON(request.r.Context(), request, request.Request().URL.Query())
 				must(err)
 				request.WriteJSON(200, listDataJSON)
 				return
 			}
 			if request.Request().URL.Query().Get("_format") == "xlsx" {
-				if !request.Authorize(resourceData.canExport) {
+				if !request.Authorize(resource.canExport) {
 					renderErrorPage(request, 403)
 					return
 				}
@@ -31,7 +31,7 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 				q.Set("_page", "1")
 				q.Set("_pagesize", fmt.Sprintf("%d", 9223372036854775807))
 
-				listData, err := resourceData.getListContent(request.r.Context(), request, q)
+				listData, err := resource.getListContent(request.r.Context(), request, q)
 				must(err)
 
 				file := xlsx.NewFile()
@@ -41,7 +41,7 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 				row := sheet.AddRow()
 				columnsStr := request.Request().URL.Query().Get("_columns")
 				if columnsStr == "" {
-					columnsStr = resourceData.defaultVisibleFieldsStr(request)
+					columnsStr = resource.defaultVisibleFieldsStr(request)
 				}
 				columnsAr := strings.Split(columnsStr, ",")
 				for _, v := range columnsAr {
@@ -63,13 +63,9 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 		},
 	)
 
-	/*resourceData.API("quick-action").Handler(func(request *Request) {
-		quickActionAPIHandler(resourceData, request)
-	}).Method("POST")*/
-
-	resourceData.api("preview-relation/:id").Handler(
+	resource.api("preview-relation/:id").Handler(
 		func(request *Request) {
-			item := resourceData.query(request.r.Context()).ID(request.Param("id"))
+			item := resource.query(request.r.Context()).ID(request.Param("id"))
 			if item == nil {
 				renderErrorPage(request, 404)
 				return
@@ -77,14 +73,14 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 
 			request.WriteJSON(
 				200,
-				resourceData.previewer(request, item).Preview(request.r.Context(), nil),
+				resource.previewer(request, item).Preview(request.r.Context(), nil),
 			)
 		},
 	)
 
-	resourceData.api("set-order").Permission(resourceData.canUpdate).Method("POST").Handler(
+	resource.api("set-order").Permission(resource.canUpdate).Method("POST").Handler(
 		func(request *Request) {
-			if resourceData.orderField == nil {
+			if resource.orderField == nil {
 				panic("can't order")
 			}
 
@@ -98,16 +94,16 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 			}
 
 			for i, id := range order {
-				item := resourceData.query(request.r.Context()).ID(id)
-				resourceData.setOrderPosition(item, int64(i))
-				err := resourceData.update(request.r.Context(), item)
+				item := resource.query(request.r.Context()).ID(id)
+				resource.setOrderPosition(item, int64(i))
+				err := resource.update(request.r.Context(), item)
 				must(err)
 			}
 			request.WriteJSON(200, true)
 		},
 	)
 
-	resourceData.api("searchresource").Handler(
+	resource.api("searchresource").Handler(
 		func(request *Request) {
 			q := request.Param("q")
 
@@ -117,9 +113,9 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 
 			id, err := strconv.Atoi(q)
 			if err == nil {
-				item := resourceData.query(request.r.Context()).ID(id)
+				item := resource.query(request.r.Context()).ID(id)
 				if item != nil {
-					relationItem := resourceData.previewer(request, item).Preview(request.r.Context(), nil)
+					relationItem := resource.previewer(request, item).Preview(request.r.Context(), nil)
 					if relationItem != nil {
 						usedIDs[relationItem.ID] = true
 						ret = append(ret, *relationItem)
@@ -129,11 +125,11 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 
 			filter := "%" + q + "%"
 			for _, v := range []string{"name", "description"} {
-				field := resourceData.Field(v)
+				field := resource.Field(v)
 				if field == nil {
 					continue
 				}
-				items, err := resourceData.query(request.r.Context()).Limit(5).where(v+" LIKE ?", filter).OrderDesc("id").list()
+				items, err := resource.query(request.r.Context()).Limit(5).where(v+" LIKE ?", filter).OrderDesc("id").list()
 				if err != nil {
 					panic(err)
 				}
@@ -141,7 +137,7 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 				itemVals := reflect.ValueOf(items)
 				itemLen := itemVals.Len()
 				for i := 0; i < itemLen; i++ {
-					viewItem := resourceData.previewer(request, itemVals.Index(i).Interface()).Preview(request.r.Context(), nil)
+					viewItem := resource.previewer(request, itemVals.Index(i).Interface()).Preview(request.r.Context(), nil)
 					if viewItem != nil && !usedIDs[viewItem.ID] {
 						usedIDs[viewItem.ID] = true
 						ret = append(ret, *viewItem)
@@ -161,7 +157,7 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 		},
 	)
 
-	resourceData.api("multipleaction").Method("POST").Handler(
+	resource.api("multipleaction").Method("POST").Handler(
 		func(request *Request) {
 			var ids []int64
 
@@ -178,12 +174,12 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 
 			switch actionName {
 			case "clone":
-				if !request.Authorize(resourceData.canCreate) {
+				if !request.Authorize(resource.canCreate) {
 					renderAPINotAuthorized(request)
 					return
 				}
 				for _, v := range ids {
-					item := resourceData.query(request.r.Context()).ID(v)
+					item := resource.query(request.r.Context()).ID(v)
 					if item == nil {
 						panic(fmt.Sprintf("can't get item for clone with id %d", v))
 					}
@@ -198,14 +194,14 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 					}
 
 					//TODO: log for creation
-					err := resourceData.create(request.r.Context(), item)
+					err := resource.create(request.r.Context(), item)
 					if err != nil {
 						panic(fmt.Sprintf("can't create item for clone with id %d: %s", v, err))
 					}
 
-					if resourceData.activityLog {
+					if resource.activityLog {
 						must(
-							resourceData.logActivity(request, nil, item),
+							resource.logActivity(request, nil, item),
 						)
 					}
 				}
@@ -215,7 +211,7 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 				)).Flash(request)
 
 			case "delete":
-				if !request.Authorize(resourceData.canDelete) {
+				if !request.Authorize(resource.canDelete) {
 					renderAPINotAuthorized(request)
 					return
 				}
@@ -224,7 +220,7 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 					values.Add("id", fmt.Sprintf("%d", v))
 
 					valValidation := newValuesValidation(request.r.Context(), request.app, request, values)
-					for _, v := range resourceData.deleteValidations {
+					for _, v := range resource.deleteValidations {
 						v(valValidation)
 					}
 
@@ -236,12 +232,12 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 						return
 					}
 
-					item := resourceData.query(request.r.Context()).ID(v)
+					item := resource.query(request.r.Context()).ID(v)
 					if item == nil {
 						panic("can't find item to delete")
 					}
 
-					err := resourceData.deleteWithLog(item, request)
+					err := resource.deleteWithLog(item, request)
 					must(err)
 				}
 			default:
@@ -256,14 +252,14 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 		IDs       string
 	}
 
-	resourceData.api("multiple_edit").Permission(resourceData.canUpdate).Method("GET").Handler(
+	resource.api("multiple_edit").Permission(resource.canUpdate).Method("GET").Handler(
 		func(request *Request) {
 			form := NewForm(
-				resourceData.getURL("api/multiple_edit"),
+				resource.getURL("api/multiple_edit"),
 			)
 
-			var item interface{} = reflect.New(resourceData.typ).Interface()
-			resourceData.addFormItems(item, request, form)
+			var item interface{} = reflect.New(resource.typ).Interface()
+			resource.addFormItems(item, request, form)
 
 			data := &MultipleEditData{
 				Form:      form,
@@ -274,7 +270,7 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 		},
 	)
 
-	resourceData.api("multiple_edit").Permission(resourceData.canUpdate).Method("POST").Handler(
+	resource.api("multiple_edit").Permission(resource.canUpdate).Method("POST").Handler(
 		func(request *Request) {
 
 			validateCSRF(request)
@@ -297,7 +293,7 @@ func (resourceData *Resource) initDefaultResourceAPIs() {
 					usedValues.Add(k, request.Request().PostForm.Get(k))
 				}
 
-				_, validation, err := resourceData.editItemWithLogAndValues(
+				_, validation, err := resource.editItemWithLogAndValues(
 					request,
 					usedValues,
 				)

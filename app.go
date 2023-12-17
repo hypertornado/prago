@@ -163,9 +163,9 @@ func (app *App) afterInit() {
 }
 
 func (app *App) initDefaultResourceActions() {
-	for _, resourceData := range app.resources {
-		resourceData.initDefaultResourceActions()
-		resourceData.initDefaultResourceAPIs()
+	for _, resource := range app.resources {
+		resource.initDefaultResourceActions()
+		resource.initDefaultResourceAPIs()
 	}
 }
 

@@ -27,29 +27,29 @@ func (resource *Resource) itemActionView(url, template string, dataSource func(a
 	return action
 }
 
-func (resourceData *Resource) newItemAction(itemUrl string) *Action {
-	action := newAction(resourceData.app, itemUrl)
-	action.resourceData = resourceData
+func (resource *Resource) newItemAction(itemUrl string) *Action {
+	action := newAction(resource.app, itemUrl)
+	action.resource = resource
 	action.isItemAction = true
-	action.permission = resourceData.canView
+	action.permission = resource.canView
 	action.addConstraint(func(ctx context.Context, values url.Values) bool {
 		id, err := strconv.Atoi(values.Get("id"))
 		if err != nil {
 			return false
 		}
-		item := resourceData.query(ctx).ID(id)
+		item := resource.query(ctx).ID(id)
 		return item != nil
 	})
 
-	resourceData.itemActions = append(resourceData.itemActions, action)
+	resource.itemActions = append(resource.itemActions, action)
 	return action
 }
 
-func (resourceData *Resource) itemActionUi(itemURL string, handler func(any, *Request, *pageData)) *Action {
-	action := resourceData.newItemAction(itemURL)
+func (resource *Resource) itemActionUi(itemURL string, handler func(any, *Request, *pageData)) *Action {
+	action := resource.newItemAction(itemURL)
 
 	action.ui(func(request *Request, pd *pageData) {
-		item := resourceData.query(request.r.Context()).ID(request.Param("id"))
+		item := resource.query(request.r.Context()).ID(request.Param("id"))
 		if item == nil {
 			panic("can't find item")
 		}
@@ -66,11 +66,11 @@ func ResourceItemHandler[T any](app *App, url string, fn func(*T, *Request)) *Ac
 	})
 }
 
-func (resourceData *Resource) itemActionHandler(url string, fn func(any, *Request)) *Action {
-	action := resourceData.newItemAction(url)
+func (resource *Resource) itemActionHandler(url string, fn func(any, *Request)) *Action {
+	action := resource.newItemAction(url)
 
 	return action.Handler(func(request *Request) {
-		item := resourceData.query(request.r.Context()).ID(request.Param("id"))
+		item := resource.query(request.r.Context()).ID(request.Param("id"))
 		if item == nil {
 			panic("can't find item")
 		}

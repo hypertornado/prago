@@ -12,19 +12,19 @@ import (
 type relatedField Field
 
 func (app *App) initRelations() {
-	for _, resourceData := range app.resources {
-		resourceData.createRelations()
+	for _, resource := range app.resources {
+		resource.createRelations()
 	}
 }
 
-func (resourceData *Resource) createRelations() {
-	for _, field := range resourceData.fields {
+func (resource *Resource) createRelations() {
+	for _, field := range resource.fields {
 		if field.tags["prago-type"] == "relation" {
 			relatedResourceID := field.id
 			if field.tags["prago-relation"] != "" {
 				relatedResourceID = field.tags["prago-relation"]
 			}
-			field.relatedResource = resourceData.app.getResourceByID(relatedResourceID)
+			field.relatedResource = resource.app.getResourceByID(relatedResourceID)
 
 			if !field.nameSetManually {
 				field.name = field.relatedResource.singularName

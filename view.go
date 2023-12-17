@@ -33,19 +33,19 @@ type viewButton struct {
 	Icon string
 }
 
-func (resourceData *Resource) getViews(ctx context.Context, item any, request *Request) (ret []*view) {
-	id := resourceData.previewer(request, item).ID()
-	ret = append(ret, resourceData.getBasicView(ctx, id, item, request))
-	ret = append(ret, resourceData.getRelationViews(ctx, id, request)...)
+func (resource *Resource) getViews(ctx context.Context, item any, request *Request) (ret []*view) {
+	id := resource.previewer(request, item).ID()
+	ret = append(ret, resource.getBasicView(ctx, id, item, request))
+	ret = append(ret, resource.getRelationViews(ctx, id, request)...)
 	return ret
 }
 
-func (resourceData *Resource) getBasicView(ctx context.Context, int64, item any, request *Request) *view {
+func (resource *Resource) getBasicView(ctx context.Context, int64, item any, request *Request) *view {
 	ret := &view{
 		Header: &boxHeader{},
 	}
 
-	tableIcon := resourceData.icon
+	tableIcon := resource.icon
 	if tableIcon == "" {
 		tableIcon = iconTable
 	}
@@ -57,23 +57,23 @@ func (resourceData *Resource) getBasicView(ctx context.Context, int64, item any,
 			Name:     messages.Get(request.Locale(), "admin_table"),
 			Template: "admin_item_view_url",
 			Value: [2]string{
-				resourceData.getURL(""),
-				resourceData.pluralName(request.Locale()),
+				resource.getURL(""),
+				resource.pluralName(request.Locale()),
 			},
 		},
 	)
 
-	ret.Header.Name = resourceData.previewer(request, item).Name()
+	ret.Header.Name = resource.previewer(request, item).Name()
 	ret.Header.Icon = iconView
-	ret.Header.Image = resourceData.previewer(request, item).ImageURL(ctx)
-	ret.Header.Buttons = resourceData.getItemButtonData(request, item)
+	ret.Header.Image = resource.previewer(request, item).ImageURL(ctx)
+	ret.Header.Buttons = resource.getItemButtonData(request, item)
 
-	resourceIcon := resourceData.icon
+	resourceIcon := resource.icon
 	if resourceIcon == "" {
 		resourceIcon = iconResource
 	}
 
-	for i, f := range resourceData.fields {
+	for i, f := range resource.fields {
 		if !f.authorizeView(request) {
 			continue
 		}

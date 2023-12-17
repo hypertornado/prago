@@ -217,36 +217,36 @@ func getResourceAccessView(app *App) accessView {
 
 	sort.Strings(ret.Roles)
 
-	for _, resourceData := range app.resources {
+	for _, resource := range app.resources {
 		viewResource := accessViewResource{
-			Name: resourceData.getID(),
+			Name: resource.getID(),
 		}
 		for _, role := range ret.Roles {
 			yeah := "+"
 			no := "-"
 			s := ""
-			if app.authorize(true, role, resourceData.canView) {
+			if app.authorize(true, role, resource.canView) {
 				s += yeah
 			} else {
 				yeah = no
 				s += no
 			}
-			if app.authorize(true, role, resourceData.canUpdate) {
+			if app.authorize(true, role, resource.canUpdate) {
 				s += yeah
 			} else {
 				s += no
 			}
-			if app.authorize(true, role, resourceData.canCreate) {
+			if app.authorize(true, role, resource.canCreate) {
 				s += yeah
 			} else {
 				s += no
 			}
-			if app.authorize(true, role, resourceData.canDelete) {
+			if app.authorize(true, role, resource.canDelete) {
 				s += yeah
 			} else {
 				s += yeah
 			}
-			if app.authorize(true, role, resourceData.canExport) {
+			if app.authorize(true, role, resource.canExport) {
 				s += yeah
 			} else {
 				s += no

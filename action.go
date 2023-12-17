@@ -27,7 +27,7 @@ type Action struct {
 	isPartOfBoard *Board
 
 	app          *App
-	resourceData *Resource
+	resource     *Resource
 	isItemAction bool
 	isUserMenu   bool
 	priority     int64
@@ -55,22 +55,22 @@ func (app *App) bindAllActions() {
 		}
 	}
 
-	for _, resourceData := range app.resources {
-		resourceData.bindActions()
+	for _, resource := range app.resources {
+		resource.bindActions()
 	}
 }
 
-func (resourceData *Resource) bindActions() {
-	for _, v := range resourceData.actions {
+func (resource *Resource) bindActions() {
+	for _, v := range resource.actions {
 		err := bindAction(v)
 		if err != nil {
-			panic(fmt.Sprintf("error while binding resource %s action %s %s: %s", resourceData.id, v.method, v.name("en"), err))
+			panic(fmt.Sprintf("error while binding resource %s action %s %s: %s", resource.id, v.method, v.name("en"), err))
 		}
 	}
-	for _, v := range resourceData.itemActions {
+	for _, v := range resource.itemActions {
 		err := bindAction(v)
 		if err != nil {
-			panic(fmt.Sprintf("error while binding item resource %s action %s %s: %s", resourceData.id, v.method, v.name("en"), err))
+			panic(fmt.Sprintf("error while binding item resource %s action %s %s: %s", resource.id, v.method, v.name("en"), err))
 		}
 	}
 }
@@ -99,11 +99,11 @@ func ResourceAction[T any](app *App, url string) *Action {
 }
 
 // AddAction adds action to resource
-func (resourceData *Resource) action(url string) *Action {
-	action := newAction(resourceData.app, url)
-	action.resourceData = resourceData
-	action.permission = resourceData.canView
-	resourceData.actions = append(resourceData.actions, action)
+func (resource *Resource) action(url string) *Action {
+	action := newAction(resource.app, url)
+	action.resource = resource
+	action.permission = resource.canView
+	resource.actions = append(resource.actions, action)
 	return action
 }
 
@@ -156,8 +156,8 @@ func (action *Action) addConstraint(constraint routerConstraint) {
 	action.constraints = append(action.constraints, constraint)
 }
 
-func (resourceData *Resource) getItemButtonData(userData UserData, item interface{}) (ret []*buttonData) {
-	for _, v := range resourceData.itemActions {
+func (resource *Resource) getItemButtonData(userData UserData, item interface{}) (ret []*buttonData) {
+	for _, v := range resource.itemActions {
 		if v.method != "GET" {
 			continue
 		}
@@ -169,12 +169,12 @@ func (resourceData *Resource) getItemButtonData(userData UserData, item interfac
 		}
 		name := v.name(userData.Locale())
 		if v.url == "" {
-			name = resourceData.previewer(userData, item).Name()
+			name = resource.previewer(userData, item).Name()
 		}
 		ret = append(ret, &buttonData{
 			Icon:     v.icon,
 			Name:     name,
-			URL:      resourceData.getItemURL(item, v.url, userData),
+			URL:      resource.getItemURL(item, v.url, userData),
 			Priority: v.priority,
 		},
 		)
@@ -190,28 +190,17 @@ func (resourceData *Resource) getItemButtonData(userData UserData, item interfac
 	return ret
 }
 
-func (resourceData *Resource) getListItemActions(userData UserData, item any, id int64) listItemActions {
+func (resource *Resource) getListItemActions(userData UserData, item any, id int64) listItemActions {
 	ret := listItemActions{
-		MenuButtons: resourceData.getItemButtonData(userData, item),
+		MenuButtons: resource.getItemButtonData(userData, item),
 	}
 
 	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{
 		Icon: iconView,
-		URL:  resourceData.getURL(fmt.Sprintf("%d", id)),
+		URL:  resource.getURL(fmt.Sprintf("%d", id)),
 	})
 
-	/*navigation := resourceData.getItemNavigation(userData, item, "")
-	for _, v := range navigation.Tabs {
-		if !v.Selected {
-			ret.MenuButtons = append(ret.MenuButtons, buttonData{
-				Icon: v.Icon,
-				Name: v.Name,
-				URL:  v.URL,
-			})
-		}
-	}*/
-
-	if userData.Authorize(resourceData.canUpdate) && resourceData.orderField != nil {
+	if userData.Authorize(resource.canUpdate) && resource.orderField != nil {
 		ret.ShowOrderButton = true
 	}
 
@@ -224,26 +213,26 @@ func (action *Action) getURL() string {
 	}
 
 	var url string
-	if action.resourceData == nil {
+	if action.resource == nil {
 		url = action.app.getAdminURL(action.url)
 	} else {
-		resourceData := action.resourceData
+		resource := action.resource
 		if action.isItemAction {
 			if action.url != "" {
-				url = resourceData.getURL(":id/" + action.url)
+				url = resource.getURL(":id/" + action.url)
 			} else {
-				url = resourceData.getURL(":id")
+				url = resource.getURL(":id")
 			}
 		} else {
-			url = resourceData.getURL(action.url)
+			url = resource.getURL(action.url)
 		}
 	}
 	return url
 }
 
 func (action *Action) getController() *controller {
-	if action.resourceData != nil {
-		return action.resourceData.getResourceControl()
+	if action.resource != nil {
+		return action.resource.getResourceControl()
 	} else {
 		return action.app.adminController
 	}
@@ -264,7 +253,7 @@ func (action *Action) ui(uiHandler func(*Request, *pageData)) *Action {
 		pageData := createPageData(request)
 
 		if action.isItemAction {
-			item := action.resourceData.query(request.r.Context()).ID(request.Param("id"))
+			item := action.resource.query(request.r.Context()).ID(request.Param("id"))
 			pageData.Menu = action.app.getMenu(request, item)
 		}
 

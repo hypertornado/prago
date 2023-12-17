@@ -39,8 +39,8 @@ func (q *listQuery) addOrder(name string, desc bool) {
 	q.order = append(q.order, listQueryOrder{name: name, desc: desc})
 }
 
-func (resourceData *Resource) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
-	for _, field := range resourceData.fields {
+func (resource *Resource) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
+	for _, field := range resource.fields {
 		val := value.FieldByName(field.fieldClassName)
 
 		if field.fieldClassName == "ID" {
@@ -79,14 +79,14 @@ func (resourceData *Resource) prepareValues(value reflect.Value) (names []string
 }
 
 // https://stackoverflow.com/questions/696190/create-if-an-entry-if-it-doesnt-exist-otherwise-update
-func (resourceData *Resource) replaceItem(ctx context.Context, item interface{}, debugSQL bool) error {
+func (resource *Resource) replaceItem(ctx context.Context, item interface{}, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	if id <= 0 {
 		return errors.New("id must be positive")
 	}
 
 	value := reflect.ValueOf(item).Elem()
-	names, questionMarks, values, err := resourceData.prepareValues(value)
+	names, questionMarks, values, err := resource.prepareValues(value)
 	if err != nil {
 		return err
 	}
@@ -95,11 +95,11 @@ func (resourceData *Resource) replaceItem(ctx context.Context, item interface{},
 	for _, v := range names {
 		updateNames = append(updateNames, fmt.Sprintf(" %s=? ", v))
 	}*/
-	q := fmt.Sprintf("REPLACE INTO `%s` (%s) VALUES (%s);", resourceData.id, strings.Join(names, ", "), strings.Join(questionMarks, ", "))
+	q := fmt.Sprintf("REPLACE INTO `%s` (%s) VALUES (%s);", resource.id, strings.Join(names, ", "), strings.Join(questionMarks, ", "))
 	if debugSQL {
 		fmt.Println(q, values)
 	}
-	execResult, err := resourceData.app.db.ExecContext(ctx, q, values...)
+	execResult, err := resource.app.db.ExecContext(ctx, q, values...)
 	if err != nil {
 		return err
 	}
@@ -113,14 +113,14 @@ func (resourceData *Resource) replaceItem(ctx context.Context, item interface{},
 	return nil
 }
 
-func (resourceData *Resource) saveItem(ctx context.Context, item interface{}, debugSQL bool) error {
+func (resource *Resource) saveItem(ctx context.Context, item interface{}, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	if id <= 0 {
 		return errors.New("id must be positive")
 	}
 
 	value := reflect.ValueOf(item).Elem()
-	names, _, values, err := resourceData.prepareValues(value)
+	names, _, values, err := resource.prepareValues(value)
 	if err != nil {
 		return err
 	}
@@ -128,11 +128,11 @@ func (resourceData *Resource) saveItem(ctx context.Context, item interface{}, de
 	for _, v := range names {
 		updateNames = append(updateNames, fmt.Sprintf(" %s=? ", v))
 	}
-	q := fmt.Sprintf("UPDATE `%s` SET %s WHERE id=%d;", resourceData.id, strings.Join(updateNames, ", "), id)
+	q := fmt.Sprintf("UPDATE `%s` SET %s WHERE id=%d;", resource.id, strings.Join(updateNames, ", "), id)
 	if debugSQL {
 		fmt.Println(q, values)
 	}
-	execResult, err := resourceData.app.db.ExecContext(ctx, q, values...)
+	execResult, err := resource.app.db.ExecContext(ctx, q, values...)
 	if err != nil {
 		return err
 	}
@@ -149,19 +149,19 @@ func (resourceData *Resource) saveItem(ctx context.Context, item interface{}, de
 	return nil
 }
 
-func (resourceData *Resource) createItem(ctx context.Context, item interface{}, debugSQL bool) error {
+func (resource *Resource) createItem(ctx context.Context, item interface{}, debugSQL bool) error {
 	value := reflect.ValueOf(item).Elem()
 
-	names, questionMarks, values, err := resourceData.prepareValues(value)
+	names, questionMarks, values, err := resource.prepareValues(value)
 	if err != nil {
 		return err
 	}
 
-	q := fmt.Sprintf("INSERT INTO `%s` (%s) VALUES (%s);", resourceData.id, strings.Join(names, ", "), strings.Join(questionMarks, ", "))
+	q := fmt.Sprintf("INSERT INTO `%s` (%s) VALUES (%s);", resource.id, strings.Join(names, ", "), strings.Join(questionMarks, ", "))
 	if debugSQL {
 		fmt.Println(q, values)
 	}
-	res, err := resourceData.app.db.ExecContext(ctx, q, values...)
+	res, err := resource.app.db.ExecContext(ctx, q, values...)
 	if err != nil {
 		return err
 	}
@@ -218,8 +218,8 @@ func sqlFieldToQuery(fieldName string) string {
 	return fmt.Sprintf("`%s`=?", fieldName)
 }
 
-func (resourceData *Resource) countAllItems(ctx context.Context, debugSQL bool) (int64, error) {
-	return resourceData.query(ctx).count()
+func (resource *Resource) countAllItems(ctx context.Context, debugSQL bool) (int64, error) {
+	return resource.query(ctx).count()
 }
 
 func (query *listQuery) count() (int64, error) {
@@ -227,12 +227,12 @@ func (query *listQuery) count() (int64, error) {
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.conditions)
 
-	q := fmt.Sprintf("SELECT COUNT(*) FROM `%s` %s %s %s;", query.resourceData.id, whereString, orderString, limitString)
+	q := fmt.Sprintf("SELECT COUNT(*) FROM `%s` %s %s %s;", query.resource.id, whereString, orderString, limitString)
 	if query.isDebug {
 		fmt.Println(q, query.values)
 	}
 
-	rows, err := query.resourceData.app.db.QueryContext(query.context, q, query.values...)
+	rows, err := query.resource.app.db.QueryContext(query.context, q, query.values...)
 	if err != nil {
 		return -1, err
 	}
@@ -247,15 +247,15 @@ func (query *listQuery) count() (int64, error) {
 }
 
 func (query *listQuery) list() (interface{}, error) {
-	slice := reflect.New(reflect.SliceOf(reflect.PointerTo(query.resourceData.typ))).Elem()
+	slice := reflect.New(reflect.SliceOf(reflect.PointerTo(query.resource.typ))).Elem()
 
-	tableName := query.resourceData.id
+	tableName := query.resource.id
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
 	whereString := buildWhereString(query.conditions)
 
-	names, _, err := query.resourceData.getStructScanners(
-		reflect.New(query.resourceData.typ).Elem(),
+	names, _, err := query.resource.getStructScanners(
+		reflect.New(query.resource.typ).Elem(),
 	)
 	if err != nil {
 		return nil, err
@@ -263,10 +263,10 @@ func (query *listQuery) list() (interface{}, error) {
 
 	q := fmt.Sprintf("SELECT %s FROM `%s` %s %s %s;", strings.Join(names, ", "), tableName, whereString, orderString, limitString)
 	if query.isDebug {
-		query.resourceData.app.Log().Println(q, query.values)
+		query.resource.app.Log().Println(q, query.values)
 	}
 
-	rows, err := query.resourceData.app.db.QueryContext(query.context, q, query.values...)
+	rows, err := query.resource.app.db.QueryContext(query.context, q, query.values...)
 	/*defer func() {
 		if rows != nil {
 			rows.Close()
@@ -279,9 +279,9 @@ func (query *listQuery) list() (interface{}, error) {
 		rows.Close()
 	}()
 	for rows.Next() {
-		newValue := reflect.New(query.resourceData.typ)
+		newValue := reflect.New(query.resource.typ)
 
-		_, scanners, err := query.resourceData.getStructScanners(newValue.Elem())
+		_, scanners, err := query.resource.getStructScanners(newValue.Elem())
 		if err != nil {
 			return nil, err
 		}
@@ -292,15 +292,15 @@ func (query *listQuery) list() (interface{}, error) {
 }
 
 func (query *listQuery) delete() (int64, error) {
-	resourceData := query.resourceData
+	resource := query.resource
 	limitString := buildLimitWithoutOffsetString(query.limit)
 	whereString := buildWhereString(query.conditions)
 
-	q := fmt.Sprintf("DELETE FROM `%s` %s %s;", resourceData.id, whereString, limitString)
+	q := fmt.Sprintf("DELETE FROM `%s` %s %s;", resource.id, whereString, limitString)
 	if query.isDebug {
-		resourceData.app.Log().Println(q, query.values)
+		resource.app.Log().Println(q, query.values)
 	}
-	res, err := resourceData.app.db.ExecContext(query.context, q, query.values...)
+	res, err := resource.app.db.ExecContext(query.context, q, query.values...)
 	if err != nil {
 		return -1, err
 	}

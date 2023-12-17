@@ -57,7 +57,7 @@ func (app *App) ListenActivity(handler func(Activity)) {
 	app.activityListeners = append(app.activityListeners, handler)
 }
 
-func (app *App) getHistoryTable(request *Request, resourceData *Resource, itemID int64, pageStr string) *Table {
+func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int64, pageStr string) *Table {
 
 	ret := app.Table()
 
@@ -68,9 +68,8 @@ func (app *App) getHistoryTable(request *Request, resourceData *Resource, itemID
 	}
 
 	q := Query[activityLog](app)
-	//q := app.activityLogResource.Query(context.Background())
-	if resourceData != nil {
-		q.Is("ResourceName", resourceData.getID())
+	if resource != nil {
+		q.Is("ResourceName", resource.getID())
 	}
 	if itemID > 0 {
 		q.Is("ItemID", itemID)
@@ -116,11 +115,11 @@ func (app *App) getHistoryTable(request *Request, resourceData *Resource, itemID
 		activityURL := app.getAdminURL(fmt.Sprintf("activitylog/%d", v.ID))
 
 		itemName := fmt.Sprintf("%s #%d", v.ResourceName, v.ItemID)
-		if resourceData != nil {
-			item := resourceData.query(context.Background()).ID(v.ItemID)
+		if resource != nil {
+			item := resource.query(context.Background()).ID(v.ItemID)
 			var name string
 			if item != nil {
-				name = resourceData.previewer(request, item).Name()
+				name = resource.previewer(request, item).Name()
 			}
 			itemName = fmt.Sprintf("#%d %s", v.ItemID, name)
 		}
@@ -128,7 +127,7 @@ func (app *App) getHistoryTable(request *Request, resourceData *Resource, itemID
 		ret.Row(
 			Cell([2]string{activityURL, fmt.Sprintf("%d", v.ID)}),
 			Cell(v.ActionType),
-			Cell([2]string{resourceData.getURL(fmt.Sprintf("%d", v.ItemID)), itemName}),
+			Cell([2]string{resource.getURL(fmt.Sprintf("%d", v.ItemID)), itemName}),
 			Cell([2]string{userurl, username}),
 			Cell(messages.Timestamp(locale, v.CreatedAt, true)),
 		)
@@ -146,7 +145,7 @@ func (app *App) initActivityLog() {
 	app.activityLogResource.Name(messages.GetNameFunction("admin_history"), messages.GetNameFunction("admin_history"))
 }
 
-func (resourceData *Resource) logActivity(request *Request, before, after any) error {
+func (resource *Resource) logActivity(request *Request, before, after any) error {
 	var activityType string
 	switch {
 	case before == nil && after != nil:
@@ -162,9 +161,9 @@ func (resourceData *Resource) logActivity(request *Request, before, after any) e
 
 	var itemID int64 = -1
 	if before != nil {
-		itemID = resourceData.previewer(request, before).ID()
+		itemID = resource.previewer(request, before).ID()
 	} else {
-		itemID = resourceData.previewer(request, after).ID()
+		itemID = resource.previewer(request, after).ID()
 	}
 
 	var err error
@@ -186,7 +185,7 @@ func (resourceData *Resource) logActivity(request *Request, before, after any) e
 	}
 
 	log := &activityLog{
-		ResourceName:  resourceData.id,
+		ResourceName:  resource.id,
 		ItemID:        itemID,
 		ActionType:    activityType,
 		User:          request.UserID(),
@@ -194,9 +193,9 @@ func (resourceData *Resource) logActivity(request *Request, before, after any) e
 		ContentAfter:  string(afterData),
 	}
 
-	err = CreateItem(resourceData.app, log)
+	err = CreateItem(resource.app, log)
 	if err == nil {
-		for _, v := range resourceData.app.activityListeners {
+		for _, v := range resource.app.activityListeners {
 			v(log.activity())
 		}
 	}
