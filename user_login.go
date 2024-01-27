@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"strings"
 	"time"
 )
 
@@ -23,6 +24,9 @@ func initUserLogin(app *App) {
 		if emailValue != "" {
 			passwordInput.Focused = true
 		}
+
+		form.AddHidden("redirect_url").Value = request.Param("redirect")
+
 		form.AddSubmit(messages.Get(locale, "admin_login_action"))
 	}, func(vc ValidationContext) {
 		locale := vc.Locale()
@@ -50,7 +54,12 @@ func initUserLogin(app *App) {
 		request.logInUser(user)
 		request.AddFlashMessage(messages.Get(user.Locale, "admin_login_ok"))
 
-		vc.Validation().RedirectionLocaliton = request.app.getAdminURL("")
+		redirectURL := vc.Request().Param("redirect_url")
+		if !strings.HasPrefix(redirectURL, "/") {
+			redirectURL = request.app.getAdminURL("")
+		}
+
+		vc.Validation().RedirectionLocaliton = redirectURL
 	})
 
 }

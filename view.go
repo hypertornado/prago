@@ -51,18 +51,19 @@ func (resource *Resource) getBasicView(ctx context.Context, id int64, item any, 
 		tableIcon = iconTable
 	}
 
-	ret.Items = append(
-		ret.Items,
-		viewField{
-			Icon:     tableIcon,
-			Name:     messages.Get(request.Locale(), "admin_table"),
-			Template: "admin_item_view_url",
-			Value: [2]string{
-				resource.getURL(""),
-				resource.pluralName(request.Locale()),
+	/*
+		ret.Items = append(
+			ret.Items,
+			viewField{
+				Icon:     tableIcon,
+				Name:     messages.Get(request.Locale(), "admin_table"),
+				Template: "admin_item_view_url",
+				Value: [2]string{
+					resource.getURL(""),
+					resource.pluralName(request.Locale()),
+				},
 			},
-		},
-	)
+		)*/
 
 	ret.Header.Name = resource.previewer(request, item).Name()
 	ret.Header.Icon = iconView

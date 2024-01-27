@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -14,7 +15,8 @@ func (app *App) initAdminActions() {
 
 	app.adminController.addAroundAction(func(request *Request, next func()) {
 		if request.UserID() == 0 {
-			request.Redirect(app.getAdminURL("user/login"))
+			urlPath := url.PathEscape(request.Request().URL.Path)
+			request.Redirect(app.getAdminURL("user/login") + "?redirect=" + urlPath)
 			return
 		}
 		next()
