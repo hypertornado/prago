@@ -41,6 +41,11 @@
           <img src="/admin/api/icons?file={{$item.Icon}}&color=444444" class="view_name_icon">
         {{end}}
         {{$item.Name}}
+        {{if $item.EditURL}}
+          <a href="{{$item.EditURL}}" class="view_edit">
+            <img src="/admin/api/icons?file=glyphicons-basic-31-pencil.svg&color=4078c0" class="view_edit_icon">
+          </a>
+        {{end}}
       </div>
     {{end}}
     <div class="view_content">

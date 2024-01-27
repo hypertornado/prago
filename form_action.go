@@ -19,6 +19,8 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *form
 		actionValidation: newAction(app, url).Method("POST"),
 	}
 
+	ret.actionForm.icon = iconForm
+
 	ret.actionForm.childAction = ret.actionValidation
 
 	ret.actionForm.ui(func(request *Request, pd *pageData) {

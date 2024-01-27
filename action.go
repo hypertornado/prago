@@ -83,6 +83,7 @@ func newAction(app *App, url string) *Action {
 		url:         url,
 		app:         app,
 		parentBoard: app.MainBoard,
+		icon:        iconAction,
 	}
 }
 

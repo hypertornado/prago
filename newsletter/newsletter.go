@@ -76,14 +76,14 @@ func InitNewsletters(app *prago.App, board *prago.Board, name func(string) strin
 
 	newsletterWriter.GET("/newsletter-subscribe", func(request *prago.Request, data *NewsletterWriteData) {
 		data.Title = "Přihlásit se k odběru newsletteru"
-		data.Csrf = requestCSRF(request)
+		data.Csrf = RequestCSRF(request)
 		data.Yield = "newsletter_subscribe"
 		data.ShowBackButton = true
 		data.Site = newsletters.name("en")
 	})
 
 	newsletterWriter.POST("/newsletter-subscribe", func(request *prago.Request, data *NewsletterWriteData) {
-		if requestCSRF(request) != request.Param("csrf") {
+		if RequestCSRF(request) != request.Param("csrf") {
 			panic("wrong csrf")
 		}
 
@@ -147,7 +147,7 @@ func InitNewsletters(app *prago.App, board *prago.Board, name func(string) strin
 		data.Title = "Opravdu chcete odhlásit odběr newsletterů?"
 		data.Yield = "newsletter_unsubscribe"
 
-		data.Csrf = requestCSRF(request)
+		data.Csrf = RequestCSRF(request)
 		data.Email = email
 		data.Secret = secret
 
@@ -155,7 +155,7 @@ func InitNewsletters(app *prago.App, board *prago.Board, name func(string) strin
 
 	newsletterWriter.POST("/newsletter-unsubscribe", func(request *prago.Request, data *NewsletterWriteData) {
 
-		if requestCSRF(request) != request.Param("csrf") {
+		if RequestCSRF(request) != request.Param("csrf") {
 			panic("wrong csrf")
 		}
 

@@ -132,7 +132,8 @@ func (resource *Resource) defaultVisibleFieldsStr(userData UserData) string {
 		if !v.authorizeView(userData) {
 			continue
 		}
-		if v.defaultShow {
+
+		if !v.defaultHidden {
 			ret = append(ret, v.id)
 		}
 	}
@@ -189,7 +190,7 @@ func (field *Field) getListHeaderItem(userData UserData) listHeaderItem {
 		Icon:              field.getIcon(),
 		NameHuman:         field.name(userData.Locale()),
 		ColumnName:        field.id,
-		DefaultShow:       field.defaultShow,
+		DefaultShow:       !field.defaultHidden,
 		RelatedResourceID: relatedResourceID,
 		NaturalCellWidth:  field.getNaturalCellWidth(),
 	}

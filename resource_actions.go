@@ -34,7 +34,7 @@ func (resource *Resource) initDefaultResourceActions() {
 	resource.formAction("new", func(form *Form, request *Request) {
 		var item interface{} = reflect.New(resource.typ).Interface()
 		resource.bindData(item, request, request.Request().URL.Query())
-		resource.addFormItems(item, request, form)
+		form.addResourceItems(resource, item, request)
 		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 	}, func(vc ValidationContext) {
 		for _, v := range resource.validations {
@@ -70,7 +70,7 @@ func (resource *Resource) initDefaultResourceActions() {
 	resource.formItemAction(
 		"edit",
 		func(item any, form *Form, request *Request) {
-			resource.addFormItems(item, request, form)
+			form.addResourceItems(resource, item, request)
 			form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 		},
 		func(_ any, vc ValidationContext) {

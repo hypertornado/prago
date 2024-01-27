@@ -42,7 +42,7 @@ func (request *Request) AddFlashMessage(message string) {
 	request.app.Notification(message).Flash(request)
 }
 
-func initRequestWithSession(request *Request, next func()) {
+func initRequestWithSession(request *Request) {
 	session, err := request.app.sessionsManager.cookieStore.Get(request.Request(), request.app.codeName)
 	if err != nil {
 		request.app.Log().Println("Session not valid")
@@ -65,8 +65,6 @@ func initRequestWithSession(request *Request, next func()) {
 		}
 	}
 	request.notifications = notifications
-
-	next()
 }
 
 func (app *App) initSessions() {
@@ -76,5 +74,6 @@ func (app *App) initSessions() {
 		cookieStore: cookieStore,
 	}
 
-	app.accessController.addAroundAction(initRequestWithSession)
+	app.mainController.addBeforeAction(initRequestWithSession)
+	//app.accessController.addBeforeAction(initRequestWithSession)
 }

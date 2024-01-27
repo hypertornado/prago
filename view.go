@@ -26,6 +26,7 @@ type viewField struct {
 	Name     string
 	Template string
 	Value    interface{}
+	EditURL  string
 }
 
 type viewButton struct {
@@ -40,7 +41,7 @@ func (resource *Resource) getViews(ctx context.Context, item any, request *Reque
 	return ret
 }
 
-func (resource *Resource) getBasicView(ctx context.Context, int64, item any, request *Request) *view {
+func (resource *Resource) getBasicView(ctx context.Context, id int64, item any, request *Request) *view {
 	ret := &view{
 		Header: &boxHeader{},
 	}
@@ -83,6 +84,11 @@ func (resource *Resource) getBasicView(ctx context.Context, int64, item any, req
 			reflect.ValueOf(item).Elem().Field(i),
 		)
 
+		var editURL string
+		if f.authorizeEdit(request) {
+			editURL = resource.getURL(fmt.Sprintf("%d/edit?_focus=%s", id, f.id))
+		}
+
 		icon := f.getIcon()
 		ret.Items = append(
 			ret.Items,
@@ -91,6 +97,7 @@ func (resource *Resource) getBasicView(ctx context.Context, int64, item any, req
 				Name:     f.name(request.Locale()),
 				Template: f.fieldType.viewTemplate,
 				Value:    f.fieldType.viewDataSource(ctx, request, f, ifaceVal),
+				EditURL:  editURL,
 			},
 		)
 	}

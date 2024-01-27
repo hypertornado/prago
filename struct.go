@@ -51,13 +51,26 @@ func (resource *Resource) getItemStringEditableValues(item any, request *Request
 	return ret
 }
 
-func (resource *Resource) addFormItems(item any, request *Request, form *Form) {
+func (form *Form) addResourceItems(resource *Resource, item any, request *Request) {
 	editableValues := resource.getItemStringEditableValues(item, request)
 
-fields:
+	focusedField := request.Param("_focus")
+
+	var firstField = true
+
 	for _, field := range resource.fields {
 		if !field.authorizeEdit(request) {
-			continue fields
+			continue
+		}
+
+		var focused = false
+		if firstField && focusedField == "" {
+			focused = true
+		}
+		firstField = false
+
+		if field.id == focusedField {
+			focused = true
 		}
 
 		item := &FormItem{
@@ -65,6 +78,7 @@ fields:
 			Icon:     field.getIcon(),
 			Name:     field.name(request.Locale()),
 			Template: field.fieldType.formTemplate,
+			Focused:  focused,
 		}
 		if field.description != nil {
 			item.Description = field.description(request.Locale())

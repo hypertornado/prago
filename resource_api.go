@@ -259,7 +259,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 			)
 
 			var item interface{} = reflect.New(resource.typ).Interface()
-			resource.addFormItems(item, request, form)
+			form.addResourceItems(resource, item, request)
 
 			data := &MultipleEditData{
 				Form:      form,

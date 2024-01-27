@@ -102,6 +102,7 @@ func createApp(codeName string, version string) *App {
 	app.accessController = app.mainController.subController()
 	app.accessController.priorityRouter = true
 	app.adminController = app.accessController.subController()
+
 	app.resourceMap = make(map[reflect.Type]*Resource)
 	app.resourceNameMap = make(map[string]*Resource)
 	app.fieldTypes = make(map[string]*fieldType)
@@ -119,7 +120,6 @@ func createApp(codeName string, version string) *App {
 	app.initUserDataCache()
 	app.initBoard()
 	app.initSettings()
-	//app.initElasticsearchClient()
 	app.initLogger()
 	app.initStaticFilesHandler()
 	app.initNotifications()

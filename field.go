@@ -20,7 +20,7 @@ type Field struct {
 	canOrder        bool
 	required        bool
 
-	defaultShow bool
+	defaultHidden bool
 
 	canView Permission
 	canEdit Permission
@@ -67,7 +67,6 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 		tags:           make(map[string]string),
 		fieldOrder:     order,
 		canOrder:       true,
-		defaultShow:    false,
 
 		canView: loggedPermission,
 		canEdit: loggedPermission,
@@ -106,21 +105,15 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 		ret.tags[v] = f.Tag.Get(v)
 	}
 
-	for _, v := range []string{"ID", "Name", "Image", "UpdatedAt"} {
-		if ret.fieldClassName == v {
-			ret.defaultShow = true
-		}
-	}
-
 	if ret.tags["prago-description"] != "" {
 		ret.description = unlocalized(ret.tags["prago-description"])
 	}
 
 	if ret.tags["prago-preview"] == "true" {
-		ret.defaultShow = true
+		ret.defaultHidden = false
 	}
 	if ret.tags["prago-preview"] == "false" {
-		ret.defaultShow = false
+		ret.defaultHidden = true
 	}
 
 	if ret.tags["prago-unique"] == "true" {

@@ -155,5 +155,6 @@ func createFilesEditDataSource(mimeTypes string) func(*Field, UserData) interfac
 }
 
 func markdownViewDataSource(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
-	return cropMarkdown(value.(string), 100)
+	return filterMarkdown(value.(string))
+	//return cropMarkdown(value.(string), 100)
 }

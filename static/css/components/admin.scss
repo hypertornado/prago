@@ -192,6 +192,7 @@ select.admin_timestamp_minute {
   margin-left: 0px;
   padding: 10px 10px 5px 10px;
   display: flex;
+  align-items: center;
 }
 
 .view_name_icon {
@@ -201,6 +202,20 @@ select.admin_timestamp_minute {
 
 .view_name:first-child {
   border-top: none;
+}
+
+.view_edit { 
+  font-size: .8rem;
+  //line-height: 1.3em;
+  margin-left: 5px;
+}
+
+.view_edit_icon {
+  aspect-ratio: 1;
+  width: 15px;
+  border: 1px solid #eee;
+  @include shadowMedium;
+  border-radius: 5px;
 }
 
 .view_content {

@@ -29,7 +29,7 @@ func must(err error) {
 
 var csrfRandomness string
 
-func requestCSRF(request *prago.Request) string {
+func RequestCSRF(request *prago.Request) string {
 	if csrfRandomness == "" {
 		csrfRandomness = RandomString(30)
 	}

@@ -8,6 +8,7 @@ import (
 type listCell struct {
 	Images []string
 	Name   string
+	ItemID string
 }
 
 func getCellViewData(userData UserData, f *Field, value interface{}) listCell {
@@ -20,17 +21,18 @@ func getCellViewData(userData UserData, f *Field, value interface{}) listCell {
 	}
 
 	ret := listCell{
-		Name: getDefaultFieldStringer(f)(userData, f, value),
+		Name:   getDefaultFieldStringer(f)(userData, f, value),
+		ItemID: f.id,
 	}
 	return ret
 }
 
 func textListDataSource(userData UserData, f *Field, value interface{}) listCell {
-	return listCell{Name: crop(value.(string), 100)}
+	return listCell{Name: crop(value.(string), 100), ItemID: f.id}
 }
 
 func markdownListDataSource(userData UserData, f *Field, value interface{}) listCell {
-	return listCell{Name: cropMarkdown(value.(string), 100)}
+	return listCell{Name: cropMarkdown(value.(string), 100), ItemID: f.id}
 }
 
 func relationCellViewData(userData UserData, f *Field, value interface{}) listCell {
@@ -40,7 +42,8 @@ func relationCellViewData(userData UserData, f *Field, value interface{}) listCe
 	}
 
 	ret := listCell{
-		Name: previewData.Name,
+		Name:   previewData.Name,
+		ItemID: f.id,
 	}
 	if previewData.Image != "" {
 		ret.Images = []string{previewData.Image}
@@ -51,7 +54,9 @@ func relationCellViewData(userData UserData, f *Field, value interface{}) listCe
 func imageCellViewData(userData UserData, f *Field, value interface{}) listCell {
 	data := value.(string)
 	images := strings.Split(data, ",")
-	ret := listCell{}
+	ret := listCell{
+		ItemID: f.id,
+	}
 	if len(images) > 0 {
 		ret.Images = images
 	}

@@ -340,6 +340,17 @@ class List {
         var el = <HTMLDivElement>e.currentTarget;
         var url = el.getAttribute("data-url");
 
+        if (e.altKey) {
+          url += "/edit";
+
+          let targetEl = <HTMLDivElement>e.target;
+          targetEl = targetEl.closest(".list_cell");
+          let focusID = targetEl.getAttribute("data-cell-id");
+          if (focusID) {
+            url += "?_focus=" + focusID;
+          }
+        }
+
         if (e.shiftKey || e.metaKey || e.ctrlKey) {
           var openedWindow = window.open(url, "newwindow" + new Date());
           openedWindow.focus();
