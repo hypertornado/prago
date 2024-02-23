@@ -170,7 +170,7 @@ func bindCDNFiles(app *prago.App) {
 
 	filesDashboard := app.MainBoard.Dashboard(unlocalized("Soubory"))
 
-	filesDashboard.Task(unlocalized("Create files form import")).Handler(func(ta *prago.TaskActivity) error {
+	filesDashboard.AddTask(unlocalized("Create files form import"), "sysadmin", func(ta *prago.TaskActivity) error {
 		_, err := app.GetDB().Exec("DELETE FROM cdnfile;")
 		if err != nil {
 			return err
@@ -193,7 +193,7 @@ func bindCDNFiles(app *prago.App) {
 		return nil
 	})
 
-	filesDashboard.Task(unlocalized("Reimport files data")).Handler(func(ta *prago.TaskActivity) error {
+	filesDashboard.AddTask(unlocalized("Reimport files data"), "sysadmin", func(ta *prago.TaskActivity) error {
 		files := prago.Query[CDNFile](app).List()
 		totalLen := len(files)
 		for k, file := range files {
@@ -204,7 +204,7 @@ func bindCDNFiles(app *prago.App) {
 		return nil
 	})
 
-	filesDashboard.Task(unlocalized("Validate checksums")).Handler(func(ta *prago.TaskActivity) error {
+	filesDashboard.AddTask(unlocalized("Validate checksums"), "sysadmin", func(ta *prago.TaskActivity) error {
 		files := prago.Query[CDNFile](app).List()
 		totalLen := len(files)
 		for k, file := range files {
@@ -215,7 +215,7 @@ func bindCDNFiles(app *prago.App) {
 		return nil
 	})
 
-	filesDashboard.Task(unlocalized("Delete thumbs cache")).Handler(func(ta *prago.TaskActivity) error {
+	filesDashboard.AddTask(unlocalized("Delete thumbs cache"), "sysadmin", func(ta *prago.TaskActivity) error {
 		cachePath := cdnDirPath() + "/cache"
 		return os.RemoveAll(cachePath)
 	})

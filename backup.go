@@ -15,43 +15,60 @@ func (app *App) initBackupCRON() {
 
 	backupDashboard := sysadminBoard.Dashboard(unlocalized("Backup"))
 
+	app.addCronTask("backup db", 24*time.Hour, func() {
+		err := backupApp(app)
+		if err != nil {
+			app.Log().Errorf("error while creating backup: %s", err)
+		}
+	})
+
 	backupDashboard.
-		Task(unlocalized("backup_db")).
-		Permission("sysadmin").
-		Handler(
+		AddTask(unlocalized("backup_db"), "sysadmin",
 			func(tr *TaskActivity) error {
 				err := backupApp(app)
 				if err != nil {
 					return fmt.Errorf("error while creating backup: %s", err)
 				}
 				return nil
-			}).RepeatEvery(24 * time.Hour)
+			})
 
-	backupDashboard.Task(unlocalized("remove_old_backups")).Permission("sysadmin").Handler(
+	app.addCronTask("remove old backups", 24*time.Hour, func() {
+		err := app.removeOldBackups()
+		if err != nil {
+			app.Log().Errorf("error while removing old backups: %s", err)
+		}
+	})
+
+	backupDashboard.AddTask(unlocalized("remove_old_backups"), "sysadmin",
 		func(ta *TaskActivity) error {
-			ta.Description("Removing old backups")
-			deadline := time.Now().AddDate(0, 0, -7)
-			backupPath := app.dotPath() + "/backups"
-			files, err := os.ReadDir(backupPath)
+			return app.removeOldBackups()
+		})
+}
+
+func (app *App) removeOldBackups() error {
+	app.Log().Println("Removing old backups")
+	deadline := time.Now().AddDate(0, 0, -7)
+	backupPath := app.dotPath() + "/backups"
+	files, err := os.ReadDir(backupPath)
+	if err != nil {
+		return fmt.Errorf("error while removing old backups: %s", err)
+	}
+	for _, file := range files {
+		info, err := file.Info()
+		if err != nil {
+			return fmt.Errorf("can't get file info: %s", err)
+		}
+		if info.ModTime().Before(deadline) {
+			removePath := backupPath + "/" + file.Name()
+			err := os.RemoveAll(removePath)
 			if err != nil {
-				return fmt.Errorf("error while removing old backups: %s", err)
+				return fmt.Errorf("error while removing old backup file: %s", err)
 			}
-			for _, file := range files {
-				info, err := file.Info()
-				if err != nil {
-					return fmt.Errorf("can't get file info: %s", err)
-				}
-				if info.ModTime().Before(deadline) {
-					removePath := backupPath + "/" + file.Name()
-					err := os.RemoveAll(removePath)
-					if err != nil {
-						return fmt.Errorf("error while removing old backup file: %s", err)
-					}
-				}
-			}
-			app.Log().Println("Old backups removed")
-			return nil
-		}).RepeatEvery(1 * time.Hour)
+		}
+	}
+	app.Log().Println("Old backups removed")
+	return nil
+
 }
 
 func backupApp(app *App) error {

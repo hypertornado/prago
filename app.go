@@ -65,7 +65,7 @@ type App struct {
 	apis []*API
 
 	activityListeners []func(Activity)
-	taskManager       *taskManager
+	//taskManager       *taskManager
 
 	dashboardTableMap  map[string]*DashboardTable
 	dashboardFigureMap map[string]*DashboardFigure
@@ -78,6 +78,10 @@ type App struct {
 	iconsPrefix string
 
 	customSearchFunctions []func(string, UserData) []*CustomSearchResult
+
+	tasksMap map[string]*Task
+
+	cronTasks []*cronTask
 }
 
 const testingAppName = "__prago_test_app"
@@ -107,7 +111,7 @@ func createApp(codeName string, version string) *App {
 	app.resourceNameMap = make(map[string]*Resource)
 	app.fieldTypes = make(map[string]*fieldType)
 
-	app.preInitTaskManager()
+	//app.preInitTaskManager()
 	app.initAccessManager()
 	app.initDefaultFieldTypes()
 
@@ -144,6 +148,7 @@ func createApp(codeName string, version string) *App {
 	app.initDashboard()
 	app.initIcons()
 	app.initMenuAPI()
+	app.initCron()
 	//app.initResourceConnections()
 
 	return app

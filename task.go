@@ -7,24 +7,7 @@ import (
 	"time"
 )
 
-type taskManager struct {
-	app       *App
-	tasksMap  map[string]*Task
-	startedAt time.Time
-}
-
-func (app *App) preInitTaskManager() {
-	app.taskManager = &taskManager{
-		app:       app,
-		tasksMap:  make(map[string]*Task),
-		startedAt: time.Now(),
-	}
-
-}
-
 func (app *App) postInitTaskManager() {
-	go app.taskManager.startCRON()
-
 	app.API("tasks/runtask").Method("POST").Permission(loggedPermission).Handler(func(request *Request) {
 		id := request.Request().FormValue("id")
 		csrf := request.Request().FormValue("csrf")
@@ -33,36 +16,19 @@ func (app *App) postInitTaskManager() {
 			panic("wrong token")
 		}
 
-		task := app.taskManager.tasksMap[id]
+		task := app.tasksMap[id]
 		if !request.Authorize(task.permission) {
-			panic("not authorize")
+			panic("not authorized")
 		}
-		app.taskManager.run(task, request.UserID(), request.Locale(), request.Request().MultipartForm)
-
-		fullURL := app.getAdminURL(task.dashboard.board.action.url)
-		request.Redirect(fullURL)
+		app.runTask(task, request.UserID(), request.Locale(), request.Request().MultipartForm)
+		request.Redirect(task.dashboard.board.getURL())
 	})
 
-	sysadminBoard.Dashboard(unlocalized("Cache")).Task(unlocalized("Delete cache")).Handler(func(ta *TaskActivity) error {
+	sysadminBoard.Dashboard(unlocalized("Cache")).AddTask(unlocalized("Delete cache"), "sysadmin", func(ta *TaskActivity) error {
 		app.ClearCache()
 		return nil
 	})
 
-}
-
-func (tm *taskManager) startCRON() {
-	go func() {
-		for {
-			time.Sleep(1 * time.Second)
-			for _, v := range tm.tasksMap {
-				if v.cron > 0 {
-					if tm.startedAt.Add(v.cron).Before(time.Now()) && v.lastStarted.Add(v.cron).Before(time.Now()) {
-						tm.run(v, 0, "en", nil)
-					}
-				}
-			}
-		}
-	}()
 }
 
 type taskView struct {
@@ -73,7 +39,7 @@ type taskView struct {
 
 func (t *Task) taskView(locale, csrfToken string) taskView {
 	return taskView{
-		ID:        t.id,
+		ID:        t.uuid,
 		Name:      t.name(locale),
 		CSRFToken: csrfToken,
 	}
@@ -90,67 +56,47 @@ func (dashboard *Dashboard) getTasks(userID int64, userData UserData, csrfToken 
 
 // Task represent some user task
 type Task struct {
-	id          string
+	uuid        string
 	name        func(string) string
 	dashboard   *Dashboard
 	permission  Permission
 	handler     func(*TaskActivity) error
-	cron        time.Duration
 	lastStarted time.Time
-	//files       []*taskFileInput
 }
 
 // Task creates task
-func (dashboard *Dashboard) Task(name func(string) string) *Task {
+func (dashboard *Dashboard) AddTask(name func(string) string, permission Permission, handler func(*TaskActivity) error) {
+	if dashboard.board.app.tasksMap == nil {
+		dashboard.board.app.tasksMap = make(map[string]*Task)
+	}
 
-	id := randomString(20)
-	_, ok := dashboard.board.app.taskManager.tasksMap[id]
-	if ok {
-		panic(fmt.Sprintf("Task '%s' already added.", id))
+	if dashboard.board.app.validatePermission(permission) != nil {
+		panic("invalid permission")
 	}
 
 	task := &Task{
-		id:         id,
+		uuid:       randomString(20),
 		name:       name,
 		permission: sysadminPermission,
 		dashboard:  dashboard,
+		handler:    handler,
 	}
 
 	dashboard.tasks = append(dashboard.tasks, task)
-	dashboard.board.app.taskManager.tasksMap[task.id] = task
+	dashboard.board.app.tasksMap[task.uuid] = task
 
-	return task
 }
 
-// Handler sets handler to task
-func (t *Task) Handler(fn func(*TaskActivity) error) *Task {
-	t.handler = fn
-	return t
-}
-
-// SetPermission set permission to task
-func (t *Task) Permission(permission string) *Task {
-	t.permission = Permission(permission)
-	return t
-}
-
-// RepeatEvery sets cron to task
-func (t *Task) RepeatEvery(duration time.Duration) *Task {
-	t.cron = duration
-	return t
-}
-
-func (tm *taskManager) run(t *Task, userID int64, locale string, form *multipart.Form) {
+func (app *App) runTask(t *Task, userID int64, locale string, form *multipart.Form) {
 
 	var name string = t.name(locale)
 
-	var notification *Notification = tm.app.Notification(name)
+	var notification *Notification = app.Notification(name)
 	notification.preName = t.dashboard.name(locale)
 
 	activity := &TaskActivity{
 		task:         t,
 		notification: notification,
-		//files:        form,
 	}
 	t.lastStarted = time.Now()
 

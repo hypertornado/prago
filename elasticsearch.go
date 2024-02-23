@@ -9,7 +9,7 @@ import (
 
 func (app *App) initElasticsearch() {
 	db := sysadminBoard.Dashboard(unlocalized("Elasticsearch"))
-	db.Task(unlocalized("Reload elasticsearch client")).Handler(func(ta *TaskActivity) error {
+	db.AddTask(unlocalized("Reload elasticsearch client"), "sysadmin", func(ta *TaskActivity) error {
 		return app.createNewElasticSearchClient()
 	})
 

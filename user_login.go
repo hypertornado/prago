@@ -15,7 +15,7 @@ func initUserLogin(app *App) {
 	app.nologinFormAction("login", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		emailValue := request.Param("email")
-		emailInput := form.AddEmailInput("email", messages.Get(locale, "admin_email"))
+		emailInput := form.AddEmailInput("email", messages.Get(locale, "admin_email_or_username"))
 		if emailValue == "" {
 			emailInput.Focused = true
 		}
@@ -35,7 +35,14 @@ func initUserLogin(app *App) {
 		request := vc.Request()
 		password := vc.GetValue("password")
 
-		user := Query[user](app).Is("email", email).First()
+		q := Query[user](app)
+		if email != "" && !strings.Contains(email, "@") {
+			q.Is("username", email)
+		} else {
+			q.Is("email", email)
+		}
+
+		user := q.First()
 		if user == nil {
 			vc.AddError(messages.Get(locale, "admin_login_error"))
 			return
@@ -55,7 +62,7 @@ func initUserLogin(app *App) {
 		request.AddFlashMessage(messages.Get(user.Locale, "admin_login_ok"))
 
 		redirectURL := vc.Request().Param("redirect_url")
-		if !strings.HasPrefix(redirectURL, "/") {
+		if !strings.HasPrefix(redirectURL, "/") || redirectURL == "/admin/login" {
 			redirectURL = request.app.getAdminURL("")
 		}
 

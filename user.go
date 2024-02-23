@@ -6,16 +6,20 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
+var usernameRegex = regexp.MustCompile("^[a-z0-9.]{1,20}$")
+
 // User represents admin user account
 // TODO: better handle isactive user
 type user struct {
 	ID       int64  `prago-order-desc:"true"`
+	Username string `prago-preview:"true"`
 	Name     string `prago-preview:"true"`
 	Email    string `prago-unique:"true" prago-preview:"true"`
 	Role     string `prago-preview:"true" prago-type:"role"`
@@ -44,7 +48,12 @@ func (user *user) LongName() string {
 }
 
 func (user *user) GetName(string) string {
-	ret := fmt.Sprintf("%s %s", user.Name, user.Email)
+	var ret string
+	if user.Username != "" {
+		ret = user.Username + " "
+	}
+
+	ret += fmt.Sprintf("%s %s", user.Name, user.Email)
 	return ret
 }
 
@@ -99,6 +108,29 @@ func (app *App) initUserResource() {
 	resource.PermissionExport(sysadminPermission)
 
 	resource.Icon("glyphicons-basic-4-user.svg")
+
+	resource.Validation(func(vc ValidationContext) {
+		username := vc.GetValue("username")
+		if username == "" {
+			return
+		}
+
+		if !usernameRegex.MatchString(username) {
+			vc.AddItemError("username", "Špatný formát uživatelského jména")
+		}
+
+		var isUsed bool
+		sameUsernameUsers := Query[user](app).Is("username", username).List()
+		for _, sameUser := range sameUsernameUsers {
+			if vc.GetValue("id") != fmt.Sprintf("%d", sameUser.ID) {
+				isUsed = true
+			}
+		}
+		if isUsed {
+			vc.AddItemError("username", fmt.Sprintf("Uživatelské jméno %s je již použito", username))
+		}
+
+	})
 
 	initUserRegistration(app)
 	initUserLogin(app)

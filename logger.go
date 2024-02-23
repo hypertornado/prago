@@ -130,12 +130,11 @@ func (app *App) initLogger() {
 
 	loggerDashboard := sysadminBoard.Dashboard(unlocalized("Logger"))
 
-	//tg := app.TaskGroup(unlocalized("Logger"))
-	loggerDashboard.Task(unlocalized("reindex log index")).Handler(func(ta *TaskActivity) error {
+	loggerDashboard.AddTask(unlocalized("reindex log index"), "sysadmin", func(ta *TaskActivity) error {
 		index := app.getLoggerESIndex()
 		index.Delete()
 		return index.Create()
-	}).Permission("sysadmin")
+	})
 
 	//app.logger.index = index
 

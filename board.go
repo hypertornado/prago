@@ -76,6 +76,13 @@ func (board *Board) IsMainBoard() bool {
 	return board == board.app.MainBoard
 }
 
+func (board *Board) getURL() string {
+	if board.parentResource != nil {
+		return board.app.getAdminURL(board.parentResource.id)
+	}
+	return board.app.getAdminURL(board.action.url)
+}
+
 func (board *Board) isEmpty(requestContext *menuRequestContext) bool {
 	if board.IsMainBoard() {
 		return false

@@ -36,6 +36,19 @@ type tableCellData struct {
 	DescriptionAfter  string
 	Colspan           int64
 	Rowspan           int64
+	Checkboxes        []*tableCellCheckbox
+	Buttons           []*TableCellButton
+}
+
+type tableCellCheckbox struct {
+	Name    string
+	Checked bool
+}
+
+type TableCellButton struct {
+	Name    string
+	URL     string
+	OnClick template.JS
 }
 
 type tableView struct {
@@ -142,6 +155,19 @@ func (cell *TableCell) Rowspan(i int64) *TableCell {
 
 func (cell *TableCell) CSSClass(class string) *TableCell {
 	cell.data.CSSClasses = append(cell.data.CSSClasses, class)
+	return cell
+}
+
+func (cell *TableCell) Checkbox(name string, checked bool) *TableCell {
+	cell.data.Checkboxes = append(cell.data.Checkboxes, &tableCellCheckbox{
+		Name:    name,
+		Checked: checked,
+	})
+	return cell
+}
+
+func (cell *TableCell) Button(btn *TableCellButton) *TableCell {
+	cell.data.Buttons = append(cell.data.Buttons, btn)
 	return cell
 }
 

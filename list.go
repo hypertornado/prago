@@ -277,9 +277,10 @@ func (resource *Resource) addFilterToQuery(listQuery *listQuery, filter map[stri
 		switch layout {
 		case "filter_layout_text":
 			k = strings.Replace(k, "`", "", -1)
-			if v == "\"\"" {
-				str := fmt.Sprintf("`%s` = ''", k)
-				listQuery.where(str)
+			if len(v) > 2 && strings.HasPrefix(v, "\"") && strings.HasSuffix(v, "\"") {
+				qStr := v[1 : len(v)-1]
+				str := fmt.Sprintf("`%s` = ?", k)
+				listQuery.where(str, qStr)
 			} else {
 				v = "%" + v + "%"
 				str := fmt.Sprintf("`%s` LIKE ?", k)

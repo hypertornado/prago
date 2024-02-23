@@ -224,6 +224,10 @@ var m = map[string]map[string]string{
 		"en": "Email",
 		"cs": "Email",
 	},
+	"admin_email_or_username": {
+		"en": "Username or email",
+		"cs": "Uživatelské jméno nebo email",
+	},
 	"admin_password": {
 		"en": "Password",
 		"cs": "Heslo",

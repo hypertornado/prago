@@ -6,11 +6,17 @@
                 <tr>
                 {{range $cell := $row.Cells}}
                     <td class="{{$cell.GetClassesString}}"{{if $cell.Rowspan}} rowspan="{{$cell.Rowspan}}"{{end}}{{if $cell.Colspan}} colspan="{{$cell.Colspan}}"{{end}}>
+                        {{range $checkbox := $cell.Checkboxes}}
+                            <input type="checkbox" name="{{$checkbox.Name}}"{{if $checkbox.Checked}} checked{{end}}>
+                        {{end}}
                         {{if $cell.Href}}<a href="{{$cell.Href}}">{{end}}
                             {{if .DescriptionBefore}}<div class="form_table_cell_descriptionbefore">{{.DescriptionBefore}}</div>{{end}}
                             {{$cell.Text}}
                             {{if .DescriptionAfter}}<div class="form_table_cell_descriptionafter">{{.DescriptionAfter}}</div>{{end}}
                         {{if $cell.Href}}</a>{{end}}
+                        {{range $button := $cell.Buttons}}
+                            <a href="{{if $button.URL}}{{$button.URL}}{{else}}#{{end}}" class="btn" onclick="{{$button.OnClick}}">{{$button.Name}}</a>
+                        {{end}}
                     </td>
                 {{end}}
                 </tr>

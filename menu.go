@@ -61,7 +61,7 @@ func (app *App) getMenu(request *Request, item any) (ret *menu) {
 	ret.Language = request.Locale()
 
 	user := request.getUser()
-	ret.Username = fmt.Sprintf("Přihlášený uživatel %s", user.Name)
+	ret.Username = fmt.Sprintf("Přihlášený uživatel %s %s", user.Username, user.Name)
 	ret.Email = user.Email
 	if request.role() != "" {
 		ret.Role = fmt.Sprintf("Role „%s“", request.role())
