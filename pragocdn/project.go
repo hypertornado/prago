@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"time"
 
 	"github.com/hypertornado/prago"
@@ -41,14 +40,14 @@ func getCDNProjectsIDMap() map[int64]*CDNProject {
 }
 
 func getCDNProject(name string) *CDNProject {
-	projects := <-prago.Cached(app, "get_projects_name", func(ctx context.Context) map[string]*CDNProject {
+	projects := <-prago.Cached(app, "get_projects_name", func() map[string]*CDNProject {
 		return getCDNProjectsMap()
 	})
 	return projects[name]
 }
 
 func getCDNProjectFromID(id int64) *CDNProject {
-	projects := <-prago.Cached(app, "get_projects_id", func(ctx context.Context) map[int64]*CDNProject {
+	projects := <-prago.Cached(app, "get_projects_id", func() map[int64]*CDNProject {
 		return getCDNProjectsIDMap()
 	})
 	return projects[id]

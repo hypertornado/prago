@@ -28,9 +28,18 @@ func newLogger(app *App) *logger {
 	return ret
 }
 
+func (app *App) SetLogHandler(fn func(string, string)) {
+	app.logHandler = fn
+}
+
 func (l *logger) writeString(typ, str string) {
 	go func() {
 		str = strings.Trim(str, " \t\r\n")
+
+		if l.app.logHandler != nil {
+			l.app.logHandler(typ, str)
+		}
+
 		if !disableESLogger {
 			index := l.app.getLoggerESIndex()
 			if index != nil {

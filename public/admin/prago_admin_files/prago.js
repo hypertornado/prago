@@ -2888,7 +2888,6 @@ class DashboardTable {
         new VisibilityReloader(reloadSeconds * 1000, this.loadTableData.bind(this));
     }
     loadTableData() {
-        console.log("load table data");
         var request = new XMLHttpRequest();
         var params = {
             uuid: this.el.getAttribute("data-uuid"),

@@ -22,6 +22,9 @@
                 </tr>
             {{end}}
         </table>
+        {{range $graph := $table.Graphs}}
+            {{template "graph" $graph}}
+        {{end}}
 
         <div class="form_table_footer">
             {{range $item := $table.FooterText}}

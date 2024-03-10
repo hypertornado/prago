@@ -413,7 +413,7 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 	}
 
 	totalCount, _ := resource.query(ctx).count()
-	resource.updateCachedCount(ctx)
+	resource.updateCachedCount()
 
 	if count == totalCount {
 		ret.TotalCountStr = messages.ItemsCount(count, userData.Locale())

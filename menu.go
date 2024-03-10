@@ -134,7 +134,7 @@ func getResourceCountsMap(request *Request) map[string]string {
 	for _, v := range app.resources {
 		if request.Authorize(v.canView) {
 			url := v.getURL("")
-			count := v.getCachedCount(context.TODO())
+			count := v.getCachedCount()
 			ret[url] = humanizeNumber(count)
 		}
 

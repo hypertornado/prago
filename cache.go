@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"sync"
 	"time"
 )
@@ -9,8 +8,6 @@ import (
 //use https://github.com/sourcegraph/conc
 
 const staleInterval = 10 * time.Minute
-
-//const staleInterval = 1 * time.Second
 
 type cache struct {
 	items map[string]*cacheItem
@@ -21,7 +18,7 @@ type cacheItem struct {
 	updatedAt time.Time
 	updating  bool
 	value     interface{}
-	createFn  func(context.Context) interface{}
+	createFn  func() interface{}
 	mutex     *sync.RWMutex
 }
 
@@ -66,7 +63,7 @@ func (ci *cacheItem) reloadValue() {
 		}
 	}()
 
-	val = ci.createFn(context.TODO())
+	val = ci.createFn()
 
 	ci.mutex.Lock()
 	if !panicked {
@@ -87,10 +84,10 @@ func (c *cache) getItem(name string) *cacheItem {
 	return item
 }
 
-func (c *cache) putItem(name string, createFn func(context.Context) interface{}) *cacheItem {
+func (c *cache) putItem(name string, createFn func() interface{}) *cacheItem {
 	item := &cacheItem{
 		updatedAt: time.Now(),
-		value:     createFn(context.Background()),
+		value:     createFn(),
 		createFn:  createFn,
 		mutex:     &sync.RWMutex{},
 	}
@@ -101,9 +98,9 @@ func (c *cache) putItem(name string, createFn func(context.Context) interface{})
 	return item
 }
 
-func loadCache[T any](c *cache, name string, createFn func(context.Context) T) T {
-	fn := func(ctx context.Context) interface{} {
-		return createFn(ctx)
+func loadCache[T any](c *cache, name string, createFn func() T) T {
+	fn := func() interface{} {
+		return createFn()
 	}
 
 	item := c.getItem(name)
@@ -121,7 +118,7 @@ func loadCache[T any](c *cache, name string, createFn func(context.Context) T) T
 	return item.getValue().(T)
 }
 
-func Cached[T any](app *App, name string, createFn func(context.Context) T) chan T {
+func Cached[T any](app *App, name string, createFn func() T) chan T {
 	ret := make(chan T)
 	go func() {
 		val := loadCache(app.cache, name, createFn)
@@ -135,7 +132,7 @@ func (app *App) ClearCache() {
 	app.userDataCacheDeleteAll()
 }
 
-func (c *cache) forceLoad(cacheName string, createFn func(context.Context) interface{}) interface{} {
+func (c *cache) forceLoad(cacheName string, createFn func() interface{}) interface{} {
 	item := c.putItem(cacheName, createFn)
 	return item.getValue()
 }

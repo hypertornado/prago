@@ -82,6 +82,8 @@ type App struct {
 	tasksMap map[string]*Task
 
 	cronTasks []*cronTask
+
+	logHandler func(string, string)
 }
 
 const testingAppName = "__prago_test_app"

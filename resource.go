@@ -365,16 +365,16 @@ func (resource *Resource) cachedCountName() string {
 	return fmt.Sprintf("prago-resource_count-%s", resource.id)
 }
 
-func (resource *Resource) getCachedCount(ctx context.Context) int64 {
-	return loadCache(resource.app.cache, resource.cachedCountName(), func(ctx context.Context) int64 {
-		count, _ := resource.countAllItems(ctx, false)
+func (resource *Resource) getCachedCount() int64 {
+	return loadCache(resource.app.cache, resource.cachedCountName(), func() int64 {
+		count, _ := resource.countAllItems(context.Background(), false)
 		return count
 	})
 }
 
-func (resource *Resource) updateCachedCount(ctx context.Context) error {
-	resource.app.cache.forceLoad(resource.cachedCountName(), func(ctx context.Context) interface{} {
-		count, _ := resource.countAllItems(ctx, false)
+func (resource *Resource) updateCachedCount() error {
+	resource.app.cache.forceLoad(resource.cachedCountName(), func() interface{} {
+		count, _ := resource.countAllItems(context.Background(), false)
 		return count
 	})
 	return nil

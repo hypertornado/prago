@@ -25,8 +25,6 @@ class DashboardTable {
   }
 
   loadTableData() {
-    console.log("load table data");
-
     var request = new XMLHttpRequest();
     var params: any = {
       uuid: this.el.getAttribute("data-uuid"),

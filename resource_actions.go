@@ -187,7 +187,7 @@ func (resource *Resource) createWithLog(item any, request *Request) error {
 		}
 
 	}
-	return resource.updateCachedCount(request.r.Context())
+	return resource.updateCachedCount()
 
 }
 
@@ -211,7 +211,7 @@ func (resource *Resource) deleteWithLog(item any, request *Request) error {
 		return fmt.Errorf("can't delete item id '%d': %s", id, err)
 	}
 
-	resource.updateCachedCount(request.r.Context())
+	resource.updateCachedCount()
 
 	return nil
 }

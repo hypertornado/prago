@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -34,6 +35,30 @@ func (app *App) initBoard() {
 		c, _ := Query[activityLog](app).Context(request.r.Context()).Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, -1)).Count()
 		return c
 	}, unlocalized("oproti předchozímu dni"))
+
+	sysadminGroup.Table(func(request *Request) *Table {
+		table := app.Table()
+
+		m := map[string]float64{}
+
+		//var graphValues []*graphValue
+
+		for i := 7; i >= 0; i-- {
+			c, _ := Query[activityLog](app).Context(request.r.Context()).Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -i-1), time.Now().AddDate(0, 0, -i)).Count()
+			//c += 10
+			//fmt.Println("XXX", c)
+			m[fmt.Sprintf("%d dní", -i)] = float64(c)
+
+			/*graphValues = append(graphValues, &graphValue{
+				Name:  fmt.Sprintf("%d dní", -i),
+				Value: float64(c),
+			})*/
+		}
+
+		table.Graph("", GraphDataFromMap(m))
+		return table
+
+	}, "sysadmin")
 }
 
 func (app *App) NewBoard(url string) *Board {
