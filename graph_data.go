@@ -1,6 +1,8 @@
 package prago
 
-import "sort"
+import (
+	"sort"
+)
 
 type graphDataSource interface {
 	Len() int
@@ -8,9 +10,10 @@ type graphDataSource interface {
 	Value(int) float64
 }
 
-func (graph *graph) View() *graphDataView {
+func (graph *Graph) View() *graphDataView {
+
 	ret := &graphDataView{
-		Name: graph.Name,
+		Name: graph.name,
 	}
 
 	for i := 0; i < graph.dataSource.Len(); i++ {
@@ -47,8 +50,8 @@ type graphDataViewItem struct {
 	Percent float64
 }
 
-func GraphDataFromMap(in map[string]float64) *GraphDataSourceTable {
-	ret := &GraphDataSourceTable{}
+func graphDataFromMap(in map[string]float64) *graphDataSourceTable {
+	ret := &graphDataSourceTable{}
 
 	var keys []string
 	for k := range in {
@@ -56,7 +59,7 @@ func GraphDataFromMap(in map[string]float64) *GraphDataSourceTable {
 	}
 	sort.Strings(keys)
 	for _, v := range keys {
-		ret.Items = append(ret.Items, &GraphDataSourceTableValue{
+		ret.Items = append(ret.Items, &graphDataSourceTableValue{
 			Name:  v,
 			Value: in[v],
 		})
@@ -64,23 +67,23 @@ func GraphDataFromMap(in map[string]float64) *GraphDataSourceTable {
 	return ret
 }
 
-type GraphDataSourceTable struct {
-	Items []*GraphDataSourceTableValue
+type graphDataSourceTable struct {
+	Items []*graphDataSourceTableValue
 }
 
-type GraphDataSourceTableValue struct {
+type graphDataSourceTableValue struct {
 	Name  string
 	Value float64
 }
 
-func (table *GraphDataSourceTable) Len() int {
+func (table *graphDataSourceTable) Len() int {
 	return len(table.Items)
 }
 
-func (table *GraphDataSourceTable) Name(i int) string {
+func (table *graphDataSourceTable) Name(i int) string {
 	return table.Items[i].Name
 }
 
-func (table *GraphDataSourceTable) Value(i int) float64 {
+func (table *graphDataSourceTable) Value(i int) float64 {
 	return table.Items[i].Value
 }

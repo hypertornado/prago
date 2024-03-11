@@ -1,27 +1,23 @@
 package prago
 
-type graph struct {
-	Name       string
+type Graph struct {
+	name       string
 	dataSource graphDataSource
-	//Values     []*graphValue
 }
 
-/*type graphValue struct {
-	Name  string
-	Value float64
-	graph *graph
-}*/
-
-func (t *Table) Graph(name string, graphDataSource graphDataSource) {
-	graph := &graph{
-		Name:       name,
-		dataSource: graphDataSource,
-	}
-
-	/*for _, v := range graph.Values {
-		v.graph = graph
-	}*/
-
+func (t *Table) Graph() *Graph {
+	graph := &Graph{}
 	currentTable := t.currentTable()
 	currentTable.Graphs = append(currentTable.Graphs, graph)
+	return graph
+}
+
+func (g *Graph) Name(name string) *Graph {
+	g.name = name
+	return g
+}
+
+func (g *Graph) DataMap(m map[string]float64) *Graph {
+	g.dataSource = graphDataFromMap(m)
+	return g
 }

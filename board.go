@@ -2,6 +2,7 @@ package prago
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 )
 
@@ -41,21 +42,12 @@ func (app *App) initBoard() {
 
 		m := map[string]float64{}
 
-		//var graphValues []*graphValue
-
-		for i := 7; i >= 0; i-- {
+		for i := 100; i >= 0; i-- {
 			c, _ := Query[activityLog](app).Context(request.r.Context()).Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -i-1), time.Now().AddDate(0, 0, -i)).Count()
-			//c += 10
-			//fmt.Println("XXX", c)
+			c += int64(rand.Intn(100))
 			m[fmt.Sprintf("%d dní", -i)] = float64(c)
-
-			/*graphValues = append(graphValues, &graphValue{
-				Name:  fmt.Sprintf("%d dní", -i),
-				Value: float64(c),
-			})*/
 		}
-
-		table.Graph("", GraphDataFromMap(m))
+		table.Graph().DataMap(m)
 		return table
 
 	}, "sysadmin")

@@ -1,8 +1,0 @@
-{{define "newsletter_unsubscribe"}}
-<form method="post" action="/newsletter-unsubscribe">
-<input type="submit" value="Odhlásit">
-<input type="hidden" name="csrf" value="{{.Csrf}}">
-<input type="hidden" name="email" value="{{.Email}}">
-<input type="hidden" name="secret" value="{{.Secret}}">
-</form>
-{{end}}
