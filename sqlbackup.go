@@ -54,7 +54,7 @@ func (app *App) initSQLBackup() {
 		r.Response().Header().Set("Content-Type", "application/octet-stream")
 		filename := fmt.Sprintf("mysqldump_%s_%s.sql", app.codeName, time.Now().Format("2006-01-02_15:04:05"))
 		r.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
-		err := app.backupSQL(r.Response(), r.Request().Context(), excludes)
+		err := app.backupSQL(r.Response(), excludes)
 		if err != nil {
 			app.Log().Printf("sqlbackup ended with error: %s", err)
 		}

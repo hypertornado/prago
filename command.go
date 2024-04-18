@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"reflect"
@@ -25,7 +24,7 @@ func addServerCommand(app *App) {
 		Callback(func() {
 			app.developmentMode = developmentMode
 			if port <= 0 {
-				configPort := app.mustGetSetting(context.Background(), "port")
+				configPort := app.mustGetSetting("port")
 				var err error
 				port, err = strconv.Atoi(configPort)
 				if err != nil {

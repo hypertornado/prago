@@ -51,20 +51,6 @@ func (resource *Resource) getBasicView(ctx context.Context, id int64, item any, 
 		tableIcon = iconTable
 	}
 
-	/*
-		ret.Items = append(
-			ret.Items,
-			viewField{
-				Icon:     tableIcon,
-				Name:     messages.Get(request.Locale(), "admin_table"),
-				Template: "admin_item_view_url",
-				Value: [2]string{
-					resource.getURL(""),
-					resource.pluralName(request.Locale()),
-				},
-			},
-		)*/
-
 	ret.Header.Name = resource.previewer(request, item).Name()
 	ret.Header.Icon = iconView
 	ret.Header.Image = resource.previewer(request, item).ImageURL(ctx)
@@ -103,14 +89,29 @@ func (resource *Resource) getBasicView(ctx context.Context, id int64, item any, 
 		)
 	}
 
+	for _, v := range resource.itemStats {
+		if !request.Authorize(v.Permission) {
+			continue
+		}
+		ret.Items = append(
+			ret.Items,
+			viewField{
+				Icon:     "glyphicons-basic-43-stats-circle.svg",
+				Name:     v.Name(request.Locale()),
+				Template: "admin_item_view_text",
+				Value:    v.Handler(item),
+			},
+		)
+	}
+
 	return ret
 }
 
-func getDefaultViewTemplate(t reflect.Type) string {
+func getDefaultViewTemplate(_ reflect.Type) string {
 	return "admin_item_view_text"
 }
 
-func getDefaultViewDataSource(f *Field) func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
+func getDefaultViewDataSource(_ *Field) func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
 	return func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
 		return getDefaultFieldStringer(f)(request, f, value)
 	}

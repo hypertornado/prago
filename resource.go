@@ -55,6 +55,8 @@ type Resource struct {
 	parentBoard   *Board
 
 	previewFn func(any) string
+
+	itemStats []*itemStat
 }
 
 func NewResource[T any](app *App) *Resource {
@@ -367,14 +369,14 @@ func (resource *Resource) cachedCountName() string {
 
 func (resource *Resource) getCachedCount() int64 {
 	return loadCache(resource.app.cache, resource.cachedCountName(), func() int64 {
-		count, _ := resource.countAllItems(context.Background(), false)
+		count, _ := resource.countAllItems(context.Background())
 		return count
 	})
 }
 
 func (resource *Resource) updateCachedCount() error {
 	resource.app.cache.forceLoad(resource.cachedCountName(), func() interface{} {
-		count, _ := resource.countAllItems(context.Background(), false)
+		count, _ := resource.countAllItems(context.Background())
 		return count
 	})
 	return nil

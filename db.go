@@ -218,7 +218,7 @@ func sqlFieldToQuery(fieldName string) string {
 	return fmt.Sprintf("`%s`=?", fieldName)
 }
 
-func (resource *Resource) countAllItems(ctx context.Context, debugSQL bool) (int64, error) {
+func (resource *Resource) countAllItems(ctx context.Context) (int64, error) {
 	return resource.query(ctx).count()
 }
 

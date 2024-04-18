@@ -239,12 +239,12 @@ func TestResource(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(items.Rows[0].Items) != 4 {
+	if len(items.Rows[0].Items) != 11 {
 		t.Fatalf("wrong length: %d", len(items.Rows[0].Items))
 	}
 
-	if items.Rows[1].Items[2].Name != "show" {
-		t.Fatal(items.Rows[1].Items[2].Name)
+	if items.Rows[1].Items[4].Name != "show" {
+		t.Fatal(items.Rows[1].Items[4])
 	}
 }
 

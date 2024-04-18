@@ -8,6 +8,7 @@ import (
 )
 
 func (app *App) listenAndServe(port int) error {
+	app.port = port
 	app.Log().Printf("Server started: port=%d, pid=%d, developmentMode=%v\n", port, os.Getpid(), app.developmentMode)
 
 	if !app.developmentMode {

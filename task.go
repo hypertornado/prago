@@ -2,7 +2,6 @@ package prago
 
 import (
 	"fmt"
-	"mime/multipart"
 	"runtime/debug"
 	"time"
 )
@@ -20,7 +19,7 @@ func (app *App) postInitTaskManager() {
 		if !request.Authorize(task.permission) {
 			panic("not authorized")
 		}
-		app.runTask(task, request.UserID(), request.Locale(), request.Request().MultipartForm)
+		app.runTask(task, request.UserID(), request.Locale())
 		request.Redirect(task.dashboard.board.getURL())
 	})
 
@@ -45,7 +44,7 @@ func (t *Task) taskView(locale, csrfToken string) taskView {
 	}
 }
 
-func (dashboard *Dashboard) getTasks(userID int64, userData UserData, csrfToken string) (ret []taskView) {
+func (dashboard *Dashboard) getTasks(userData UserData, csrfToken string) (ret []taskView) {
 	for _, v := range dashboard.tasks {
 		if userData.Authorize(v.permission) {
 			ret = append(ret, v.taskView(userData.Locale(), csrfToken))
@@ -87,7 +86,7 @@ func (dashboard *Dashboard) AddTask(name func(string) string, permission Permiss
 
 }
 
-func (app *App) runTask(t *Task, userID int64, locale string, form *multipart.Form) {
+func (app *App) runTask(t *Task, userID int64, locale string) {
 
 	var name string = t.name(locale)
 

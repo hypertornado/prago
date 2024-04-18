@@ -16,6 +16,7 @@ import (
 
 // App is main struct of prago application
 type App struct {
+	port            int
 	codeName        string
 	version         string
 	icon            string
@@ -66,8 +67,8 @@ type App struct {
 	activityListeners []func(Activity)
 	//taskManager       *taskManager
 
-	dashboardTableMap  map[string]*DashboardTable
-	dashboardFigureMap map[string]*DashboardFigure
+	dashboardTableMap  map[string]*dashboardTable
+	dashboardFigureMap map[string]*dashboardFigure
 
 	MainBoard *Board
 

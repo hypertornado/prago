@@ -24,8 +24,8 @@ func (app *App) initBoard() {
 		Name(messages.GetNameFunction("admin_signpost")).
 		Icon(iconSignpost)
 	app.MainBoard.action.parentBoard = app.MainBoard
-	app.dashboardTableMap = make(map[string]*DashboardTable)
-	app.dashboardFigureMap = make(map[string]*DashboardFigure)
+	app.dashboardTableMap = make(map[string]*dashboardTable)
+	app.dashboardFigureMap = make(map[string]*dashboardFigure)
 	sysadminBoard = app.NewBoard("sysadmin-board").Name(unlocalized("Sysadmin")).Icon("glyphicons-basic-501-server.svg")
 
 	sysadminGroup := sysadminBoard.Dashboard(unlocalized("Sysadmin"))
@@ -112,8 +112,5 @@ func (board *Board) isEmpty(requestContext *menuRequestContext) bool {
 	}
 
 	items := board.getMenuItems(requestContext)
-	if len(items) > 0 {
-		return false
-	}
-	return true
+	return len(items) <= 0
 }

@@ -1852,16 +1852,33 @@ class FormContainer {
             }
             this.activeRequest = null;
             if (request.status == 200) {
-                var data = JSON.parse(request.response);
-                if (data.RedirectionLocaliton) {
-                    window.location = data.RedirectionLocaliton;
+                let contentType = request.getResponseHeader("Content-Type");
+                if (contentType == "application/json") {
+                    var data = JSON.parse(request.response);
+                    if (data.RedirectionLocaliton) {
+                        window.location = data.RedirectionLocaliton;
+                    }
+                    else {
+                        this.progress.classList.add("hidden");
+                        this.setFormErrors(data.Errors);
+                        this.setItemErrors(data.ItemErrors);
+                        if (data.AfterContent)
+                            this.setAfterContent(data.AfterContent);
+                    }
                 }
                 else {
+                    var blob = new Blob([request.response], {
+                        type: "application/octet-stream",
+                    });
+                    var downloadUrl = URL.createObjectURL(blob);
+                    var a = document.createElement("a");
+                    a.href = downloadUrl;
+                    a.download = "data.xlsx";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(downloadUrl);
                     this.progress.classList.add("hidden");
-                    this.setFormErrors(data.Errors);
-                    this.setItemErrors(data.ItemErrors);
-                    if (data.AfterContent)
-                        this.setAfterContent(data.AfterContent);
                 }
             }
             else {

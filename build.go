@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -22,7 +21,7 @@ func (app *App) initBuild() {
 	})
 
 	app.addCommand("syncbackups").Callback(func() {
-		ssh := app.mustGetSetting(context.Background(), "ssh")
+		ssh := app.mustGetSetting("ssh")
 		if ssh == "" {
 			app.Log().Println("no ssh value set in settings")
 			return
@@ -31,7 +30,7 @@ func (app *App) initBuild() {
 	})
 
 	app.addCommand("party").Callback(func() {
-		ssh := app.mustGetSetting(context.Background(), "ssh")
+		ssh := app.mustGetSetting("ssh")
 		if ssh == "" {
 			panic("no ssh value set in settings")
 		}

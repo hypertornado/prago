@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"encoding/base64"
 	"fmt"
 
@@ -33,7 +32,7 @@ func newEmailAddress(name, email string) *emailAddress {
 }
 
 func (app *App) Email() *Email {
-	noReplyEmail := app.mustGetSetting(context.TODO(), "no_reply_email")
+	noReplyEmail := app.mustGetSetting("no_reply_email")
 	return &Email{
 		from: newEmailAddress(app.name("en"), noReplyEmail),
 		app:  app,
@@ -90,7 +89,7 @@ func (email *Email) Send() error {
 		emailMessage.AddAttachment(v)
 	}
 
-	key, err := email.app.GetSetting(context.TODO(), "sendgrid_key")
+	key, err := email.app.GetSetting("sendgrid_key")
 	if err != nil {
 		return err
 	}

@@ -79,14 +79,42 @@ class FormContainer {
       }
       this.activeRequest = null;
       if (request.status == 200) {
-        var data = JSON.parse(request.response);
-        if (data.RedirectionLocaliton) {
-          window.location = data.RedirectionLocaliton;
+        let contentType = request.getResponseHeader("Content-Type");
+        if (contentType == "application/json") {
+          //application/json
+          var data = JSON.parse(request.response);
+          if (data.RedirectionLocaliton) {
+            window.location = data.RedirectionLocaliton;
+          } else {
+            this.progress.classList.add("hidden");
+            this.setFormErrors(data.Errors);
+            this.setItemErrors(data.ItemErrors);
+            if (data.AfterContent) this.setAfterContent(data.AfterContent);
+          }
         } else {
+          // Step 2: Create a Blob from the response
+          var blob = new Blob([request.response], {
+            type: "application/octet-stream",
+          });
+
+          // Step 3: Create a URL for the Blob
+          var downloadUrl = URL.createObjectURL(blob);
+
+          // Step 4: Create an anchor (<a>) element
+          var a = document.createElement("a");
+          a.href = downloadUrl;
+          a.download = "data.xlsx"; // Set the file name
+
+          // Step 5: Simulate a click on the anchor element
+          document.body.appendChild(a); // Append the anchor to document
+          a.click();
+
+          // Step 6: Cleanup
+          document.body.removeChild(a);
+          URL.revokeObjectURL(downloadUrl);
+
+          //console.log("HEEER");
           this.progress.classList.add("hidden");
-          this.setFormErrors(data.Errors);
-          this.setItemErrors(data.ItemErrors);
-          if (data.AfterContent) this.setAfterContent(data.AfterContent);
         }
       } else {
         this.progress.classList.add("hidden");

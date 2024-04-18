@@ -71,6 +71,8 @@ func (app *App) initSystemStats() {
 		stats = append(stats, [2]string{"GOOS", runtime.GOOS})
 		stats = append(stats, [2]string{"GOMAXPROCS", fmt.Sprintf("%d", runtime.GOMAXPROCS(-1))})
 
+		stats = append(stats, [2]string{"Localhost URL", fmt.Sprintf("%s:%d", getLocalIP(), app.port)})
+
 		return statsTable(app, stats)
 
 	}, sysadminPermission)

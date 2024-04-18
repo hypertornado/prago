@@ -7,8 +7,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"time"
-
-	"golang.org/x/net/context"
 )
 
 func (app *App) initBackupCRON() {
@@ -95,7 +93,7 @@ func backupApp(app *App) error {
 	}
 	defer dbFile.Close()
 
-	err = app.backupSQL(dbFile, context.Background(), nil)
+	err = app.backupSQL(dbFile, nil)
 	if err != nil {
 		return fmt.Errorf("dumping cmd: %s", err)
 	}
@@ -109,7 +107,7 @@ func backupApp(app *App) error {
 	return copyFiles(dirPath, backupsPath)
 }
 
-func (app *App) backupSQL(writer io.Writer, context context.Context, excludeTableNames []string) error {
+func (app *App) backupSQL(writer io.Writer, excludeTableNames []string) error {
 
 	availableTables, err := listTables(app.db)
 	if err != nil {

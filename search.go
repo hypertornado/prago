@@ -54,7 +54,7 @@ func (app *App) initSearch() {
 				}
 			}
 
-			result, hits, err := app.searchItems(q, int64(page-1), request)
+			result, hits, err := app.searchItems(q, request)
 			must(err)
 
 			var pages = hits / searchPageSize
@@ -99,28 +99,11 @@ func (app *App) initSearch() {
 	)
 }
 
-func (app *App) searchItems(q string, page int64, request *Request) (ret []*searchItem, hits int64, err error) {
-	/*ret, err = app.getCustomSearch(q, request)
-	must(err)*/
-
+func (app *App) searchItems(q string, request *Request) (ret []*searchItem, hits int64, err error) {
 	ret = append(ret, app.searchWithoutElastic(q, request)...)
 	hits = int64(len(ret))
 	return
 }
-
-/*func (app *App) getCustomSearch(q string, request *Request) (ret []*searchItem, err error) {
-	for _, v := range app.customSearchFunctions {
-		for _, result := range v(q, request) {
-			ret = append(ret, &searchItem{
-				Prename:  result.Prename,
-				Name:     result.Name,
-				URL:      result.URL,
-				Priority: result.Priority,
-			})
-		}
-	}
-	return
-}*/
 
 func (app *App) suggestItems(q string, request *Request) (ret []*searchItem, err error) {
 	q = strings.Trim(q, " ")
@@ -128,8 +111,6 @@ func (app *App) suggestItems(q string, request *Request) (ret []*searchItem, err
 		return ret, nil
 	}
 
-	//customRes, err := app.getCustomSearch(q, request)
-	//must(err)
 	ret = append(ret, app.searchWithoutElastic(q, request)...)
 
 	if len(ret) > 5 {

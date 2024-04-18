@@ -238,7 +238,7 @@ func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem
 		ret = append(ret, menuItem)
 
 	}
-	sortAndExpandMenuItems(ret, requestContext.UserData.Locale())
+	sortAndExpandMenuItems(ret)
 	return ret
 }
 
@@ -271,7 +271,7 @@ func (resource *Resource) getResourceMenu(requestContext *menuRequestContext) (r
 		ret = append(ret, menuItem)
 	}
 
-	sortAndExpandMenuItems(ret, requestContext.UserData.Locale())
+	sortAndExpandMenuItems(ret)
 	return
 }
 
@@ -313,15 +313,15 @@ func (resource *Resource) getResourceItemMenu(requestContext *menuRequestContext
 	if len(items) == 0 {
 		return nil
 	}
-	sortAndExpandMenuItems(items, requestContext.UserData.Locale())
+	sortAndExpandMenuItems(items)
 	ret := items[0]
 	ret.Subitems = items[1:]
 	return ret
 
 }
 
-func sortAndExpandMenuItems(items []*menuItem, locale string) {
-	sortSection(items, locale)
+func sortAndExpandMenuItems(items []*menuItem) {
+	sortSection(items)
 	for _, item := range items {
 		var expanded bool
 		for _, subitem := range item.Subitems {
@@ -335,7 +335,7 @@ func sortAndExpandMenuItems(items []*menuItem, locale string) {
 	}
 }
 
-func sortSection(items []*menuItem, locale string) {
+func sortSection(items []*menuItem) {
 	collator := collate.New(language.Czech)
 
 	sort.SliceStable(items, func(i, j int) bool {

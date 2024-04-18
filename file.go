@@ -30,9 +30,9 @@ var filesCDN cdnclient.CDNAccount
 
 func initCDN(app *App) {
 	filesCDN = cdnclient.NewCDNAccount(
-		app.mustGetSetting(context.Background(), "cdn_url"),
-		app.mustGetSetting(context.Background(), "cdn_account"),
-		app.mustGetSetting(context.Background(), "cdn_password"),
+		app.mustGetSetting("cdn_url"),
+		app.mustGetSetting("cdn_account"),
+		app.mustGetSetting("cdn_password"),
 	)
 }
 

@@ -1,8 +1,6 @@
 package prago
 
 import (
-	"context"
-
 	"github.com/gorilla/sessions"
 )
 
@@ -68,7 +66,7 @@ func initRequestWithSession(request *Request) {
 }
 
 func (app *App) initSessions() {
-	random := app.mustGetSetting(context.Background(), "random")
+	random := app.mustGetSetting("random")
 	cookieStore := sessions.NewCookieStore([]byte(random))
 	app.sessionsManager = &sessionsManager{
 		cookieStore: cookieStore,

@@ -1,14 +1,13 @@
 package prago
 
 import (
-	"context"
 	"crypto/md5"
 	"fmt"
 	"io"
 )
 
 func (app *App) generateCSRFToken(userID int64) string {
-	randomness := app.mustGetSetting(context.Background(), "random")
+	randomness := app.mustGetSetting("random")
 	if len(randomness) <= 0 {
 		panic("randomness too short")
 	}

@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -80,7 +79,7 @@ type Setting struct {
 	changeCallback func()
 }
 
-func (app *App) GetSetting(ctx context.Context, id string) (string, error) {
+func (app *App) GetSetting(id string) (string, error) {
 	app.settings.mutex.RLock()
 	defer app.settings.mutex.RUnlock()
 	setting := app.settings.settingsMap[id]
@@ -103,8 +102,8 @@ func (app *App) GetSetting(ctx context.Context, id string) (string, error) {
 	return s.Value, nil
 }
 
-func (app *App) mustGetSetting(ctx context.Context, id string) string {
-	val, err := app.GetSetting(ctx, id)
+func (app *App) mustGetSetting(id string) string {
+	val, err := app.GetSetting(id)
 	must(err)
 	return val
 }

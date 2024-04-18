@@ -95,7 +95,7 @@ func (app *App) getRenewPasswordURL(ctx context.Context, user user) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)
 	urlValues.Add("token", user.emailToken(ctx, app))
-	return app.mustGetSetting(ctx, "base_url") + app.getAdminURL("user/renew_password") + "?" + urlValues.Encode()
+	return app.mustGetSetting("base_url") + app.getAdminURL("user/renew_password") + "?" + urlValues.Encode()
 }
 
 func (app *App) sendRenewPasswordEmail(ctx context.Context, user user) error {
