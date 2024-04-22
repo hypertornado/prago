@@ -1,5 +1,10 @@
 package prago
 
+import (
+	"fmt"
+	"math/rand"
+)
+
 type pageData struct {
 	Language string
 	Version  string
@@ -41,6 +46,9 @@ func createPageData(request *Request) *pageData {
 	page.App = request.app
 	page.Language = request.Locale()
 	page.Version = request.app.version
+	if request.app.DevelopmentMode() {
+		page.Version += fmt.Sprintf("-development-%d", rand.Intn(10000000000))
+	}
 
 	page.JavaScripts = request.app.javascripts
 	page.NotificationsData = request.getNotificationsData()

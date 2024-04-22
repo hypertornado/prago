@@ -12,8 +12,9 @@
     {{if .Icon}}
         <link rel="icon" href="/admin/api/icons?file={{.Icon}}&color=444444" type="image/svg+xml">
     {{end}}
+    {{$version := .Version}}
     {{range $javascript := .JavaScripts}}
-        <script type="text/javascript" src="{{$javascript}}"></script>
+        <script type="text/javascript" src="{{$javascript}}?v={{$version}}"></script>
     {{end}}
 
   </head>
@@ -32,7 +33,7 @@
         </div>
         <div class="root_bottom">
             <div class="root_left">
-                {{template "menu" .Menu}}
+                {{template "admin_menu" .Menu}}
             </div>
             <div class="root_content">
                 {{range $message := .Messages}}

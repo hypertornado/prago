@@ -4,19 +4,13 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 	"strings"
 	"time"
-
-	"github.com/hypertornado/prago/pragelastic"
 )
-
-var disableESLogger = true
 
 type logger struct {
 	app    *App
 	output io.Writer
-	//index  *pragelastic.Index[logItem]
 }
 
 func newLogger(app *App) *logger {
@@ -38,24 +32,8 @@ func (l *logger) writeString(typ, str string) {
 
 		if l.app.logHandler != nil {
 			l.app.logHandler(typ, str)
-		}
-
-		if !disableESLogger {
-			index := l.app.getLoggerESIndex()
-			if index != nil {
-				err := index.UpdateSingle(&logItem{
-					ID:   randomString(10),
-					Time: time.Now(),
-					Typ:  typ,
-					Text: str,
-				})
-				if err != nil {
-					fmt.Printf("Logger error, can't update: %s: typ %s: text %s\n", err, typ, str)
-					return
-				}
-				if !l.app.developmentMode {
-					return
-				}
+			if !l.app.developmentMode {
+				return
 			}
 		}
 
@@ -67,6 +45,7 @@ func (l *logger) writeString(typ, str string) {
 	}()
 }
 
+/*
 func (l *logger) deleteOldLogsRobot() {
 	for {
 		index := l.app.getLoggerESIndex()
@@ -76,7 +55,7 @@ func (l *logger) deleteOldLogsRobot() {
 		}
 		time.Sleep(60 * time.Second)
 	}
-}
+}*/
 
 func (l *logger) accessln(v ...any) {
 	l.writeString("access", fmt.Sprintln(v...))
@@ -106,6 +85,7 @@ func (l *logger) SetOutput(w io.Writer) {
 	l.output = w
 }
 
+/*
 type logItem struct {
 	ID   string
 	Time time.Time
@@ -119,10 +99,10 @@ func (app *App) getLoggerESIndex() *pragelastic.Index[logItem] {
 		return nil
 	}
 	return pragelastic.NewIndex[logItem](client)
-}
+}*/
 
 //https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html#match-only-text-field-type
-
+/*
 func (app *App) initLogger() {
 
 	if disableESLogger {
@@ -224,3 +204,4 @@ func (app *App) initLogger() {
 		vc.Validation().AfterContent = table.ExecuteHTML()
 	}).Name(unlocalized("Log")).Permission("sysadmin").Board(sysadminBoard)
 }
+*/

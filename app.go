@@ -126,7 +126,7 @@ func createApp(codeName string, version string) *App {
 	app.initUserDataCache()
 	app.initBoard()
 	app.initSettings()
-	app.initLogger()
+	//app.initLogger()
 	app.initStaticFilesHandler()
 	app.initNotifications()
 
