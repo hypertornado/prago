@@ -1,6 +1,5 @@
 .pagination {
   text-align: center;
-  //background-color: white;
   padding: 10px 5px;
 }
 
@@ -19,13 +18,18 @@
 }
 
 .pagination_page:hover {
-  background-color: $baseColorBackground;
+  background-color: $hoverColor;
+}
+
+.pagination_page:active {
+  background-color: $activeColor;
 }
 
 .pagination_page_current,
 .pagination_page_current:hover {
   background-color: $baseColor;
   color: white;
+  border: 1px solid $grayBorderColor;
 }
 
 .pagination_page_current {

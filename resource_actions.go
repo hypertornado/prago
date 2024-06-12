@@ -33,7 +33,11 @@ func (resource *Resource) initDefaultResourceActions() {
 
 	resource.formAction("new", func(form *Form, request *Request) {
 		var item interface{} = reflect.New(resource.typ).Interface()
-		resource.bindData(item, request, request.Request().URL.Query())
+		queryData := request.Request().URL.Query()
+		for k, v := range resource.defaultValues {
+			queryData.Set(k, v(request))
+		}
+		resource.bindData(item, request, queryData)
 		form.addResourceItems(resource, item, request)
 		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 	}, func(vc ValidationContext) {

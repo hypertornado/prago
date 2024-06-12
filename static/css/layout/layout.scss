@@ -1,7 +1,5 @@
 html {
   box-sizing: border-box;
-  //-webkit-font-smoothing: antialiased;
-  //-moz-osx-font-smoothing: grayscale;
 }
 *,
 *:before,
@@ -21,8 +19,6 @@ body {
   font-size: 14px;
   line-height: 1.4em;
   color: $black;
-  //background-color: red;
-  //background-color: $backgroundGrayColor;
 }
 
 code {
@@ -33,19 +29,19 @@ code {
 }
 
 h1 {
-  font-size: 2.5rem;
+  font-size: 1.3rem;
   line-height: 1.4em;
   margin: 0.5em 0 0.2em 0;
 }
 
 h2 {
-  font-size: 1.8rem;
+  font-size: 1.2rem;
   line-height: 1.4em;
   margin: 0.5em 0 0.2em 0;
 }
 
 h3 {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   line-height: 1.4em;
   margin: 0.5em 0 0.2em 0;
 }
@@ -93,11 +89,11 @@ a {
 
 a:hover {
   text-decoration: none;
-  background-color: $baseColorBackgroundLighter;
+  background-color: $hoverColor;
 }
 
 a:active {
-  background-color: $baseColorBackground;
+  background-color: $activeColor;
 }
 
 ul {

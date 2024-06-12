@@ -84,13 +84,17 @@ func (previewer *previewer) Name() string {
 
 }
 
-func (f *Field) relationPreview(ctx context.Context, userData UserData, id int64) *preview {
-	item := f.relatedResource.query(ctx).ID(id)
-	if item == nil {
-		return nil
+func (f *Field) relationPreview(userData UserData, idsStr string) (ret []*preview) {
+	ids := strings.Split(idsStr, ";")
+	for _, id := range ids {
+		item := f.relatedResource.query(context.Background()).ID(id)
+		if item == nil {
+			continue
+		}
+		ret = append(ret, f.relatedResource.previewer(userData, item).Preview(context.Background(), f.resource))
 	}
-	return f.relatedResource.previewer(userData, item).Preview(ctx, f.resource)
 
+	return
 }
 
 func (previewer *previewer) URL(suffix string) string {

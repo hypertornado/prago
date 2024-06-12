@@ -68,11 +68,21 @@ func (resource *Resource) getRelationView(ctx context.Context, id int64, field *
 }
 
 func (resource *Resource) itemWithRelationCount(ctx context.Context, fieldID string, id int64) int64 {
-	filteredCount, err := resource.query(ctx).Is(fieldID, id).count()
-	if err != nil {
-		panic(err)
+
+	field := resource.fieldMap[fieldID]
+	if field.typ.Kind() == reflect.String {
+		filteredCount, err := resource.query(ctx).where(fmt.Sprintf("%s LIKE '%%;%d;%%'", fieldID, id)).count()
+		if err != nil {
+			panic(err)
+		}
+		return filteredCount
+	} else {
+		filteredCount, err := resource.query(ctx).Is(fieldID, id).count()
+		if err != nil {
+			panic(err)
+		}
+		return filteredCount
 	}
-	return filteredCount
 }
 
 type relationListRequest struct {
@@ -92,6 +102,7 @@ func generateRelationListAPIHandler(request *Request) {
 
 	targetResource := request.app.getResourceByID(listRequest.TargetResource)
 	data := targetResource.getPreviews(request.r.Context(), listRequest, request)
+
 	request.WriteHTML(200, "admin_item_view_relationlist_response", data)
 }
 
@@ -105,7 +116,15 @@ func (resource *Resource) getPreviews(ctx context.Context, listRequest relationL
 		panic("cant authorize target resource")
 	}
 
-	q := resource.query(ctx).Is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
+	q := resource.query(ctx)
+
+	field := resource.fieldMap[listRequest.TargetField]
+	if field.typ.Kind() == reflect.String {
+		q.where(fmt.Sprintf("%s LIKE '%%;%d;%%'", listRequest.TargetField, listRequest.IDValue))
+	} else {
+		q.Is(listRequest.TargetField, fmt.Sprintf("%d", listRequest.IDValue))
+	}
+
 	if resource.orderDesc {
 		q.addOrder(resource.orderByColumn, true)
 	} else {

@@ -10,7 +10,7 @@
 
 
 .board_icon {
-  width: 40px;
+  width: 20px;
   aspect-ratio: 1;
   margin-right: 10px;
 }
@@ -48,15 +48,7 @@
   font-size: 1.2rem;
   line-height: 1.3em;
   font-weight: 500;
-}
-
-/*.board_resource-isboard {
-  font-weight: 500;
-}*/
-
-a.board_resource:hover {
-  //border-color: $baseColor;
-  //@include shadowMedium;
+  background-color: $backgroundGrayColor;
 }
 
 

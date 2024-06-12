@@ -273,11 +273,11 @@ func (resource *Resource) getListStatsTable(ctx context.Context, field *Field, u
 					row.Name = "–"
 				}
 
-				rd := field.relationPreview(ctx, userData, v)
+				rd := field.relationPreview(userData, fmt.Sprintf("%d", v))
 				if rd != nil {
-					row.Name = rd.Name
-					row.URL = rd.URL
-					row.Image = rd.Image
+					row.Name = rd[0].Name
+					row.URL = rd[0].URL
+					row.Image = rd[0].Image
 				}
 
 				table = append(table, row)

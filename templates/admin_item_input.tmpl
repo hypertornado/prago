@@ -161,13 +161,11 @@
 {{end}}
 
 {{define "admin_item_relation"}}
-<div class="admin_item_relation" data-relation="{{.Data}}">
+<div class="admin_item_relation" data-relation="{{.Data.RelatedID}}" data-multiple="{{.Data.MultiRelation}}">
   <input type="hidden" name="{{.ID}}" value="{{.Value}}">
   <progress class="progress"></progress>
-  <div class="admin_item_relation_preview hidden"></div>
-  <div class="admin_item_relation_change hidden">
-    <div class="btn admin_item_relation_change_btn">×</div>
-  </div>
+  <div class="admin_relation_previews"></div>
+
   <div class="admin_item_relation_picker hidden">
     <input class="input">
     <div class="admin_item_relation_picker_suggestions">

@@ -2,38 +2,33 @@
   display: flex;
   justify-content: center;
   justify-content: flex-start;
+  align-items: flex-start;
   flex-grow: 100;
   overflow: auto;
-  //border: 1px solid red;
-}
-
-.admin_navigation_tabs::-webkit-scrollbar {
-  display: none;
 }
 
 .admin_navigation_tabs_content {
   display: flex;
   border-radius: 100px;
-  padding: 0px 4px;
   margin: 0 auto;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .admin_navigation_tab {
   white-space: nowrap;
   overflow: hidden;
-  margin: 4px 0px;
+  margin: 10px 0px;
   border-bottom: none;
-  font-size: 0.9rem;
-  line-height: 1.8em;
-
   text-decoration: none;
-  padding: 1px 5px;
+  padding: 5px 10px;
   border-radius: 5px;
   color: $black;
   font-weight: 500;
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  background-color: $backgroundGrayColor;
 }
 
 .admin_navigation_tab_icon {
@@ -45,17 +40,11 @@
   border: 0px solid red;
 }
 
-.admin_navigation_tabdivider {
-  margin: 7px 4px;
-  margin: 7px 2px;
-}
-
 .admin_navigation_tab-selected,
 .admin_navigation_tab-selected:hover {
   background-color: $baseColor;
   color: white;
   box-shadow: none;
-  //@include shadowMedium;
 }
 
 

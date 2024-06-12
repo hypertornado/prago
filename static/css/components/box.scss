@@ -1,12 +1,16 @@
 .box {
-  border: 1px solid #eee;
+  border: 0px solid $grayBorderColor;
   margin: 0 auto;
   max-width: min(650px, 100vw);
   width: 100%;
   margin-bottom: 20px;
   border-radius: 5px;
   margin-top: 0px;
-  @include shadow;
+  overflow: hidden;
+}
+
+.box:has(.admin_relationlist) {
+  border: 1px solid $grayBorderColor;
 }
 
 .box_content {
@@ -15,40 +19,36 @@
 }
 
 .box_header {
-  border: 0px solid red;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   display: inline-block;
   width: 100%;
-  padding: 5px 5px;
+  padding: 5px 10px;
 }
 
 .box_icon {
-  text-align: center;
-  margin-top: 15px;
+  display: flex;
 }
 
 .box_icon img {
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  aspect-ratio: 1;
 }
 
 .box_name {
-  margin-top: 0px;
-  padding: 5px 10px;
-  text-align: center;
-  font-size: 2.3rem;
+  margin-top: 10px;
+  font-size: 1.5rem;
   line-height: 1.3em;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .box_textafter {
-  text-align: center;
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 1.3em;
 }
@@ -65,7 +65,6 @@
 .box_header_buttons {
   display: flex;
   flex-wrap: wrap;
-  padding: 10px;
+  padding: 10px 0px;
   gap: 5px;
-  justify-content: center;
 }

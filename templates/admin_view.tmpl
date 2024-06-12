@@ -136,13 +136,15 @@
 {{define "admin_item_view_relation"}}
   <div class="admin_item_view_relation">
     {{if .}}
-      <a class="admin_preview" href="{{.URL}}">
-        <div class="admin_preview_image" style="background-image: url('{{CSS .Image}}') ;"></div>
+      {{range $item := .}}
+      <a class="admin_preview" href="{{$item.URL}}">
+        <div class="admin_preview_image" style="background-image: url('{{CSS $item.Image}}') ;"></div>
         <div class="admin_preview_right">
-          <div class="admin_preview_name">{{.Name}}</div>
-          <div class="admin_preview_description" title="{{.Description}}">{{.Description}}</div>
+          <div class="admin_preview_name">{{$item.Name}}</div>
+          <div class="admin_preview_description" title="{{$item.Description}}">{{$item.Description}}</div>
         </div>
       </a>
+      {{end}}
     {{else}}
       –
     {{end}}
@@ -169,13 +171,7 @@
 {{end}}
 
 {{define "admin_item_view_relationlist_response"}}
-  {{range $item := .}}
-      {{template "admin_item_view_relation" $item}}
-  {{end}}
-{{end}}
-
-{{define "admin_item_view_relations"}}
-  {{.}}
+      {{template "admin_item_view_relation" .}}
 {{end}}
 
 {{define "list_cell"}}

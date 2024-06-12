@@ -55,9 +55,6 @@ type App struct {
 
 	notificationCenter *notificationCenter
 
-	//search        *adminSearch
-	//ElasticClient *pragelastic.Client
-
 	fieldTypes    map[string]*fieldType
 	javascripts   []string
 	accessManager *accessManager
@@ -65,7 +62,6 @@ type App struct {
 	apis []*API
 
 	activityListeners []func(Activity)
-	//taskManager       *taskManager
 
 	dashboardTableMap  map[string]*dashboardTable
 	dashboardFigureMap map[string]*dashboardFigure

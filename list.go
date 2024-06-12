@@ -233,6 +233,10 @@ func (field *Field) filterLayout() string {
 		return "filter_layout_text"
 	}
 
+	if field.tags["prago-type"] == "multirelation" {
+		return "filter_layout_relation"
+	}
+
 	if field.typ.Kind() == reflect.Int64 || field.typ.Kind() == reflect.Int {
 		if field.tags["prago-type"] == "relation" {
 			return "filter_layout_relation"
@@ -310,9 +314,15 @@ func (resource *Resource) addFilterToQuery(listQuery *listQuery, filter map[stri
 			}
 		case "filter_layout_relation":
 			v = strings.Trim(v, " ")
-			numVal, err := strconv.Atoi(v)
-			if err == nil {
-				listQuery.Is(k, numVal)
+			if field.typ.Kind() == reflect.String {
+				v = "%;" + v + ";%"
+				str := fmt.Sprintf("`%s` LIKE ?", k)
+				listQuery.where(str, v)
+			} else {
+				numVal, err := strconv.Atoi(v)
+				if err == nil {
+					listQuery.Is(k, numVal)
+				}
 			}
 		case "filter_layout_boolean":
 			switch v {

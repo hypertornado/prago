@@ -57,6 +57,8 @@ type Resource struct {
 	previewFn func(any) string
 
 	itemStats []*itemStat
+
+	defaultValues map[string]func(*Request) string
 }
 
 func NewResource[T any](app *App) *Resource {
@@ -151,6 +153,19 @@ func GetResource[T any](app *App) *Resource {
 		return nil
 	}
 	return ret
+}
+
+func (resource *Resource) DefaultValue(fieldName string, fn func(*Request) string) {
+	fieldName = columnName(fieldName)
+	if resource.fieldMap[fieldName] == nil {
+		panic("can't find field name " + fieldName)
+	}
+
+	if resource.defaultValues == nil {
+		resource.defaultValues = map[string]func(*Request) string{}
+	}
+
+	resource.defaultValues[fieldName] = fn
 }
 
 func (resource *Resource) isItPointerToResourceItem(item any) bool {

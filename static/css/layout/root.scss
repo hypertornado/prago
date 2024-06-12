@@ -8,7 +8,6 @@
 
 .root_header {
   flex-shrink: 0;
-  //height: 50px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -33,13 +32,12 @@
 
 .root_hamburger {
   border-radius: 5px;
-  background-color: $baseColorBackground;
-  width: 60px;
+  width: 40px;
   height: 33px;
   cursor: pointer;
   flex-shrink: 0;
   display: none;
-  margin: 0px 10px;
+  margin: 0px 5px;
 
   justify-content: center;
   align-items: center;
@@ -47,10 +45,12 @@
 
 .root_hamburger:hover {
   opacity: 0.9;
+  background-color: $hoverColor;
 }
 
 .root_hamburger:active {
   opacity: 0.8;
+  background-color: $activeColor;
 }
 
 .root_hamburger_iconopen,
@@ -73,7 +73,6 @@
 @keyframes root_left_animation {
   0% {
     opacity: 0.9;
-    //transform: translateX(50px);
     transform: translateX(100vh);
   }
 

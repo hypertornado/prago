@@ -51,19 +51,21 @@ class ListFilterRelations {
   loadPreview(value: string) {
     var request = new XMLHttpRequest();
     var adminPrefix = document.body.getAttribute("data-admin-prefix");
-    request.open(
-      "GET",
+    let apiURL =
       adminPrefix +
-        "/" +
-        this.relatedResourceName +
-        "/api/preview-relation/" +
-        value,
-      true
-    );
+      "/" +
+      this.relatedResourceName +
+      "/api/preview-relation/" +
+      value;
+
+    request.open("GET", apiURL, true);
 
     request.addEventListener("load", () => {
       if (request.status == 200) {
-        this.renderPreview(JSON.parse(request.response));
+        let respData = JSON.parse(request.response);
+        if (respData.length > 0) {
+          this.renderPreview(respData[0]);
+        }
       } else {
         console.error("not found");
       }

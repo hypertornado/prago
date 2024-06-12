@@ -304,14 +304,18 @@ class ListFilterRelations {
     loadPreview(value) {
         var request = new XMLHttpRequest();
         var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        request.open("GET", adminPrefix +
+        let apiURL = adminPrefix +
             "/" +
             this.relatedResourceName +
             "/api/preview-relation/" +
-            value, true);
+            value;
+        request.open("GET", apiURL, true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
-                this.renderPreview(JSON.parse(request.response));
+                let respData = JSON.parse(request.response);
+                if (respData.length > 0) {
+                    this.renderPreview(respData[0]);
+                }
             }
             else {
                 console.error("not found");
@@ -1542,17 +1546,16 @@ class Timestamp {
 class RelationPicker {
     constructor(el) {
         this.selectedClass = "admin_item_relation_picker_suggestion-selected";
+        if (el.getAttribute("data-multiple") == "true") {
+            this.multipleInputs = true;
+        }
+        else {
+            this.multipleInputs = false;
+        }
         this.input = el.getElementsByTagName("input")[0];
-        this.previewContainer = (el.querySelector(".admin_item_relation_preview"));
+        this.previewsContainer = (el.querySelector(".admin_relation_previews"));
         this.relationName = el.getAttribute("data-relation");
         this.progress = el.querySelector("progress");
-        this.changeSection = (el.querySelector(".admin_item_relation_change"));
-        this.changeButton = (el.querySelector(".admin_item_relation_change_btn"));
-        this.changeButton.addEventListener("click", () => {
-            this.input.value = "0";
-            this.showSearch();
-            this.pickerInput.focus();
-        });
         this.suggestionsEl = (el.querySelector(".admin_item_relation_picker_suggestions_content"));
         this.suggestions = [];
         this.picker = (el.querySelector(".admin_item_relation_picker"));
@@ -1577,17 +1580,18 @@ class RelationPicker {
         }
     }
     getData() {
-        var adminPrefix = document.body.getAttribute("data-admin-prefix");
         var request = new XMLHttpRequest();
-        request.open("GET", adminPrefix +
-            "/" +
+        request.open("GET", "/admin/" +
             this.relationName +
             "/api/preview-relation/" +
             this.input.value, true);
         request.addEventListener("load", () => {
             this.progress.classList.add("hidden");
             if (request.status == 200) {
-                this.showPreview(JSON.parse(request.response));
+                let items = JSON.parse(request.response);
+                for (var i = 0; i < items.length; i++) {
+                    this.addPreview(items[i]);
+                }
             }
             else {
                 this.showSearch();
@@ -1595,18 +1599,86 @@ class RelationPicker {
         });
         request.send();
     }
-    showPreview(data) {
-        this.previewContainer.textContent = "";
-        this.input.value = data.ID;
+    addPreview(data) {
+        let previewEl = document.createElement("div");
+        previewEl.classList.add("admin_relation_preview");
         var el = this.createPreview(data, true);
-        this.previewContainer.appendChild(el);
-        this.previewContainer.classList.remove("hidden");
-        this.changeSection.classList.remove("hidden");
-        this.picker.classList.add("hidden");
+        this.previewsContainer.appendChild(previewEl);
+        previewEl.appendChild(el);
+        let upButton = document.createElement("div");
+        upButton.classList.add("admin_relation_preview_action", "admin_relation_preview_action-up");
+        upButton.innerText = "↑";
+        previewEl.appendChild(upButton);
+        upButton.addEventListener("click", (e) => {
+            this.updateOrder(e, false);
+        });
+        let downButton = document.createElement("div");
+        downButton.classList.add("admin_relation_preview_action", "admin_relation_preview_action-down");
+        downButton.innerText = "↓";
+        previewEl.appendChild(downButton);
+        downButton.addEventListener("click", (e) => {
+            this.updateOrder(e, true);
+        });
+        let deleteButton = document.createElement("div");
+        deleteButton.classList.add("admin_relation_preview_action");
+        deleteButton.innerText = "×";
+        previewEl.appendChild(deleteButton);
+        deleteButton.addEventListener("click", () => {
+            previewEl.remove();
+            this.updateLayout();
+        });
+        previewEl.setAttribute("data-id", data.ID);
+        this.pickerInput.value = "";
+        this.updateLayout();
+    }
+    numberOfItems() {
+        return this.previewsContainer.children.length;
+    }
+    updateOrder(e, down) {
+        let target = e.target;
+        let previewEl = target.parentElement;
+        let sibling;
+        if (down) {
+            sibling = previewEl.nextElementSibling;
+        }
+        else {
+            sibling = previewEl.previousElementSibling;
+        }
+        if (!sibling) {
+            return;
+        }
+        let parent = previewEl.parentElement;
+        if (down) {
+            parent.insertBefore(sibling, previewEl);
+        }
+        else {
+            parent.insertBefore(previewEl, sibling);
+        }
+        this.updateLayout();
+    }
+    updateLayout() {
+        if (this.multipleInputs || this.numberOfItems() == 0) {
+            this.picker.classList.remove("hidden");
+        }
+        else {
+            this.picker.classList.add("hidden");
+        }
+        this.updateInput();
+    }
+    updateInput() {
+        var valItems = [];
+        for (var i = 0; i < this.previewsContainer.children.length; i++) {
+            let child = this.previewsContainer.children[i];
+            let val = child.getAttribute("data-id");
+            valItems.push(val);
+        }
+        let val = valItems.join(";");
+        if (this.multipleInputs) {
+            val = ";" + val + ";";
+        }
+        this.input.value = val;
     }
     showSearch() {
-        this.previewContainer.classList.add("hidden");
-        this.changeSection.classList.add("hidden");
         this.picker.classList.remove("hidden");
         this.suggestions = [];
         this.suggestionsEl.innerText = "";
@@ -1648,7 +1720,7 @@ class RelationPicker {
     suggestionClick() {
         var selected = this.getSelected();
         if (selected >= 0) {
-            this.showPreview(this.suggestions[selected]);
+            this.addPreview(this.suggestions[selected]);
         }
     }
     suggestionSelect(e) {

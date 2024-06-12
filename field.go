@@ -261,6 +261,13 @@ func (field *Field) Name(name func(string) string) *Field {
 	return field
 }
 
+func (field *Field) getRelatedID() string {
+	if field.tags["prago-relation"] != "" {
+		return columnName(field.tags["prago-relation"])
+	}
+	return field.id
+}
+
 func (field *Field) GetManuallySetPluralName(locale string) string {
 	if !field.nameSetManually {
 		return ""

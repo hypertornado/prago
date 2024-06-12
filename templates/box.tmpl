@@ -2,14 +2,15 @@
     <div class="box_header" {{if .Image}}
         style="background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 1)), url('{{CSS .Image}}')"
     {{end}}>
-        {{if .Icon}}
-            <div class="box_icon">
-                <img src="/admin/api/icons?file={{.Icon}}&color=444444">
-            </div>
-        {{end}}
-
         {{if .Name}}
-            <div class="box_name">{{.Name}}</div>
+            <div class="box_name">
+                {{if .Icon}}
+                    <div class="box_icon">
+                        <img src="/admin/api/icons?file={{.Icon}}&color=444444">
+                    </div>
+                {{end}}
+                {{.Name}}
+            </div>
         {{end}}
         {{if .TextAfter}}
             <div class="box_textafter">{{.TextAfter}}</div>

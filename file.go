@@ -80,6 +80,9 @@ func (app *App) GetFiles(ctx context.Context, ids string) []*File {
 	var files []*File
 	idsAr := strings.Split(ids, ",")
 	for _, v := range idsAr {
+		if v == "" {
+			continue
+		}
 		image := Query[File](app).Context(ctx).Is("uid", v).First()
 		if image != nil {
 			files = append(files, image)

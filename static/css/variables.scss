@@ -1,8 +1,8 @@
-//https://smoothshadows.com/
-
-$baseColor: #4078c0;
-$baseColorBackground: rgba(64, 120, 192, 0.1);
-$baseColorBackgroundLighter: rgba(64, 120, 192, 0.05);
+$baseColor: hsl(214, 50%, 50%);
+//$baseColorBackground: rgba(64, 120, 192, 0.1);
+$baseColorBackground: hsl(214, 50%, 90%);
+//$baseColorBackgroundLighter: rgba(64, 120, 192, 0.05);
+$baseColorBackgroundLighter: hsl(214, 50%, 97%);
 
 $red: #cb2431;
 $redLighter: #de4450;
@@ -10,12 +10,15 @@ $redLighter: #de4450;
 $green: #006400;
 $yellow: #ffd800;
 
+$hoverColor: $baseColorBackgroundLighter;
+$activeColor: $baseColorBackground;
+
 $black: #444;
 
 
 $gray: #888;
 
-$borderColor: #eee;
+$grayBorderColor: #eee;
 
 $backgroundGrayColor: #fafafa;
 
@@ -32,7 +35,7 @@ $backgroundGrayColor: #fafafa;
 }
 
 @mixin border {
-    border: 1px solid $borderColor;
+    border: 1px solid $grayBorderColor;
 }
 
 $radius: 5px;

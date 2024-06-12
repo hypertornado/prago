@@ -1,7 +1,7 @@
 package prago
 
 import (
-	"context"
+	"fmt"
 	"strings"
 )
 
@@ -36,17 +36,32 @@ func markdownListDataSource(userData UserData, f *Field, value interface{}) list
 }
 
 func relationCellViewData(userData UserData, f *Field, value interface{}) listCell {
-	previewData := f.relationPreview(context.TODO(), userData, value.(int64))
+
+	var ids string
+
+	intVal, ok := value.(int64)
+	if ok {
+		ids = fmt.Sprintf("%d", intVal)
+		//return multiRelationCellViewData(userData, f, strVal)
+	} else {
+		ids = value.(string)
+	}
+
+	previewData := f.relationPreview(userData, ids)
 	if previewData == nil {
 		return listCell{}
 	}
 
-	ret := listCell{
-		Name:   previewData.Name,
-		ItemID: f.id,
+	var names []string
+	var images []string
+	for _, prev := range previewData {
+		images = append(images, prev.Image)
+		names = append(names, prev.Name)
 	}
-	if previewData.Image != "" {
-		ret.Images = []string{previewData.Image}
+
+	ret := listCell{
+		Name:   strings.Join(names, ", "),
+		Images: images,
 	}
 	return ret
 }

@@ -11,6 +11,8 @@
   position: fixed;
   z-index: 1;
   opacity: 0;
+
+  overflow: hidden;
 }
 
 .list_header_container-visible {

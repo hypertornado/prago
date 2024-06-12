@@ -37,13 +37,17 @@ func (app *App) addFieldType(name string, fieldType *fieldType) {
 	app.fieldTypes[name] = fieldType
 }
 
-// IsRelation detects if field type is relation type
 func (f fieldType) IsRelation() bool {
 	if f.viewTemplate == "admin_item_view_relation" {
 		return true
 	} else {
 		return false
 	}
+}
+
+type relationFormDataSource struct {
+	RelatedID     string
+	MultiRelation bool
 }
 
 func (app *App) initDefaultFieldTypes() {
@@ -115,15 +119,30 @@ func (app *App) initDefaultFieldTypes() {
 		viewTemplate: "admin_item_view_relation",
 		//listCellTemplate: "admin_item_view_relation_cell",
 		viewDataSource: func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
-			return f.relationPreview(ctx, request, value.(int64))
+			valInt := value.(int64)
+			return f.relationPreview(request, fmt.Sprintf("%d", valInt))
 		},
 		//viewDataSource: getRelationViewData,
 		formTemplate: "admin_item_relation",
 		formDataSource: func(f *Field, userData UserData) interface{} {
-			if f.tags["prago-relation"] != "" {
-				return columnName(f.tags["prago-relation"])
+			return relationFormDataSource{
+				RelatedID:     f.getRelatedID(),
+				MultiRelation: false,
 			}
-			return f.id
+		},
+	})
+
+	app.addFieldType("multirelation", &fieldType{
+		viewTemplate: "admin_item_view_relation",
+		viewDataSource: func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
+			return f.relationPreview(request, value.(string))
+		},
+		formTemplate: "admin_item_relation",
+		formDataSource: func(f *Field, userData UserData) interface{} {
+			return relationFormDataSource{
+				RelatedID:     f.getRelatedID(),
+				MultiRelation: true,
+			}
 		},
 	})
 

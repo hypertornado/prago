@@ -19,12 +19,16 @@ func (app *App) initRelations() {
 
 func (resource *Resource) createRelations() {
 	for _, field := range resource.fields {
-		if field.tags["prago-type"] == "relation" {
+		if field.tags["prago-type"] == "relation" || field.tags["prago-type"] == "multirelation" {
+
 			relatedResourceID := field.id
 			if field.tags["prago-relation"] != "" {
 				relatedResourceID = field.tags["prago-relation"]
 			}
 			field.relatedResource = resource.app.getResourceByID(relatedResourceID)
+			if field.relatedResource == nil {
+				panic(fmt.Sprintf("can't find related resource by id '%s'", relatedResourceID))
+			}
 
 			if !field.nameSetManually {
 				field.name = field.relatedResource.singularName

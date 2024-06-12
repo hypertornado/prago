@@ -3,7 +3,6 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  //align-items: baseline;
 }
 
 .admin_images_preview {
@@ -86,7 +85,6 @@
   margin-bottom: 10px;
   overflow: hidden;
   padding-left: 18px !important;
-  //aspect-ratio: 1;
 }
 
 .admin_images_fileinput input {
@@ -163,7 +161,7 @@ select.admin_timestamp_minute {
 }
 
 .view_header_icon {
-  width: 70px;
+  width: 40px;
   aspect-ratio: 1;
   margin-right: 10px;
   padding: 10px;
@@ -172,12 +170,12 @@ select.admin_timestamp_minute {
 .view_header_name {
   font-weight: 500;
   flex-grow: 10;
-  font-size: 1.3rem;
+  font-size: 1rem;
   line-height: 1.3em;
 }
 
 .view_header_subname {
-  font-size: 1rem;
+  font-size: .9rem;
   line-height: 1.3em;
   color: $gray;
   display: block;
@@ -206,15 +204,12 @@ select.admin_timestamp_minute {
 
 .view_edit { 
   font-size: .8rem;
-  //line-height: 1.3em;
   margin-left: 5px;
 }
 
 .view_edit_icon {
   aspect-ratio: 1;
   width: 15px;
-  border: 1px solid #eee;
-  @include shadowMedium;
   border-radius: 5px;
 }
 
@@ -277,18 +272,16 @@ select.admin_timestamp_minute {
 }
 
 .admin_preview_image {
+  margin-top: 5px;
   flex-grow: 0;
   flex-shrink: 0;
-  width: 70px;
+  width: 40px;
   aspect-ratio: 1;
-  //margin-right: 10px;
   border-radius: 5px;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-  background-color: #fafafa;
-  //border: 1px solid #eee;
-  @include shadowMedium;
+  background-color: $backgroundGrayColor;
   align-self: flex-start;
 }
 
@@ -301,7 +294,7 @@ select.admin_timestamp_minute {
   font-size: 0.9rem;
   line-height: 1.3em;
   color: $gray;
-  //overflow-wrap: anywhere;
+  overflow-wrap: anywhere;
 
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -313,31 +306,53 @@ select.admin_timestamp_minute {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
 }
 
-.admin_item_relation .admin_item_relation_preview {
-  flex-grow: 2;
+.admin_relation_previews {
+  border: 0px solid red;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.admin_item_relation_change {
-  margin: 10px 0px;
-  flex-grow: 0;
-  flex-shrink: 0;
-  align-self: flex-start;
+.admin_relation_preview {
+  display: flex;
 }
 
-.admin_item_relation_change_btn {
+.admin_relation_preview:first-child .admin_relation_preview_action-up {
+  display: none;
+}
+
+.admin_relation_preview:last-child .admin_relation_preview_action-down {
+  display: none;
+}
+
+.admin_relation_preview_action {
   display: inline-block;
-  width: 40px;
   text-align: center;
   margin: 10px 10px;
+  align-self: center;
   background: white;
-  color: $red;
+  color: $gray;
   width: 30px;
-  height: 30px;
+  aspect-ratio: 1;
+  flex-shrink: 0;
   line-height: 30px;
   border-radius: 300px;
+  font-size: 1.3rem;
+  line-height: 30px;
   font-weight: bold;
+  background-color: $backgroundGrayColor;
+  cursor: pointer;
+}
+
+.admin_relation_preview_action:hover {
+  background-color: $hoverColor;
+}
+
+.admin_relation_preview_action:active {
+  background-color: $activeColor;
 }
 
 .admin_item_relation_picker {
@@ -384,9 +399,14 @@ select.admin_timestamp_minute {
   margin: 0 auto;
 }
 
+html:has(.admin_nologin) {
+  background: linear-gradient(hsl(213.75deg 50.39% 99%), white);
+  background-repeat: no-repeat;
+}
+
 .admin_nologin_logo {
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
   margin: 10px auto;
   background-position: center;
   background-size: contain;

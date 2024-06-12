@@ -31,14 +31,14 @@ func (index *Index[T]) getSuggestFieldName() string {
 }
 
 func (index *Index[T]) mustSuggest(q string, categoryContexts map[string][]string) []*T {
-	ret, err := index.Suggest(q, categoryContexts)
+	ret, err := index.Suggest(q, 10, categoryContexts)
 	if err != nil {
 		panic(err)
 	}
 	return ret
 }
 
-func (index *Index[T]) Suggest(q string, categoryContexts map[string][]string) ([]*T, error) {
+func (index *Index[T]) Suggest(q string, size int64, categoryContexts map[string][]string) ([]*T, error) {
 	fieldName := index.getSuggestFieldName()
 	if fieldName == "" {
 		return nil, errors.New("can't find suggest field name: no field has type completion")
@@ -47,7 +47,7 @@ func (index *Index[T]) Suggest(q string, categoryContexts map[string][]string) (
 	suggesterName := "_suggester"
 	completionSuggester := NewESCompletionSuggester(suggesterName).
 		Field(fieldName).
-		Prefix(q)
+		Prefix(q).Size(int(size))
 
 	for k, v := range categoryContexts {
 		completionSuggester.ContextQuery(NewESSuggesterCategoryQuery(k, v...))

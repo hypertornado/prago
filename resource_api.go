@@ -63,17 +63,31 @@ func (resource *Resource) initDefaultResourceAPIs() {
 		},
 	)
 
-	resource.api("preview-relation/:id").Handler(
+	resource.api("preview-relation/:ids").Handler(
 		func(request *Request) {
-			item := resource.query(request.r.Context()).ID(request.Param("id"))
-			if item == nil {
-				renderErrorPage(request, 404)
-				return
+
+			var previews []*preview = []*preview{}
+
+			ids := strings.Split(request.Param("ids"), ";")
+
+			for _, id := range ids {
+				if id == "" || id == "0" {
+					continue
+				}
+				//fmt.Println("ID:", id)
+				item := resource.query(request.r.Context()).ID(id)
+				if item == nil {
+					panic(fmt.Sprintf("cant find resource item id %s", id))
+				}
+
+				previews = append(previews,
+					resource.previewer(request, item).Preview(request.r.Context(), nil),
+				)
 			}
 
 			request.WriteJSON(
 				200,
-				resource.previewer(request, item).Preview(request.r.Context(), nil),
+				previews,
 			)
 		},
 	)

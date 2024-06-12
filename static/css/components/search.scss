@@ -59,8 +59,11 @@ a.search_pagination_page-selected {
   max-width: 600px;
   background: white;
   border-radius: 10px;
-  @include shadowMedium;
   position: relative;
+}
+
+.searchbox-showsuggestions {
+  @include shadow;
 }
 
 @media (max-width: 650px) {
@@ -87,7 +90,6 @@ a.search_pagination_page-selected {
 
 .searchbox_button {
   border: none;
-  border-left: 1px solid #eee;
   background: none;
   flex-shrink: 0;
   display: flex;
@@ -114,8 +116,8 @@ a.search_pagination_page-selected {
   min-height: 20px;
   background: white;
   position: absolute;
-  left: 0px;
-  right: 0px;
+  left: -1px;
+  right: -1px;
   top: 28px;
   @include shadow;
   border-radius: 0px 0px 10px 10px;
@@ -123,6 +125,9 @@ a.search_pagination_page-selected {
   overflow: hidden;
   display: none;
   z-index: 1000;
+  clip-path: inset(0px -100px -100px -100px);
+  border: 1px solid #eee;
+  border-top: none;
 }
 
 .searchbox-showsuggestions .searchbox_suggestions {
@@ -135,7 +140,8 @@ a.search_pagination_page-selected {
   line-height: 1.3em;
   overflow: hidden;
   text-decoration: none;
-  gap: 10px;
+  gap: 5px;
+  padding-left: 50px;
 }
 
 .admin_search_suggestion_icon {
@@ -156,12 +162,10 @@ a.admin_search_suggestion-selected:active {
 }
 
 .admin_search_suggestion_left {
-  //border: 1px solid #eee;
   border-radius: 10px;
   width: 40px;
-  height: 40px;
+  aspect-ratio: 1;
   flex-shrink: 0;
-  //background: #fafafa;
   margin: 5px;
   background-size: cover;
   background-repeat: no-repeat;
@@ -182,7 +186,7 @@ a.admin_search_suggestion-selected:active {
 .admin_search_suggestion_prename {
   color: $gray;
   text-transform: uppercase;
-  font-size: .8rem;
+  font-size: .7rem;
   line-height: 1.3em;
 }
 

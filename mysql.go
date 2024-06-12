@@ -3,6 +3,7 @@ package prago
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql" //use mysql
 )
@@ -22,6 +23,9 @@ func connectMysql(dbUser, dbPassword, dbName string) (*sql.DB, error) {
 		return nil, fmt.Errorf("error while opening MySQL database: %s", err)
 	}
 	//prevent resource exhaustion
-	db.SetMaxOpenConns(20)
+	//https://github.com/go-sql-driver/mysql#usage
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(100)
+	db.SetMaxIdleConns(100)
 	return db, db.Ping()
 }
