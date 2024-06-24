@@ -12,11 +12,11 @@ import (
 var errValidation = errors.New("validation error")
 
 type formValidation struct {
-	Valid                bool
-	RedirectionLocaliton string
-	AfterContent         template.HTML
-	Errors               []FormValidationError
-	ItemErrors           map[string][]FormValidationError
+	Valid               bool
+	RedirectionLocation string
+	AfterContent        template.HTML
+	Errors              []FormValidationError
+	ItemErrors          map[string][]FormValidationError
 }
 
 type FormValidationError struct {

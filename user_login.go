@@ -66,7 +66,7 @@ func initUserLogin(app *App) {
 			redirectURL = request.app.getAdminURL("")
 		}
 
-		vc.Validation().RedirectionLocaliton = redirectURL
+		vc.Validation().RedirectionLocation = redirectURL
 	})
 
 }

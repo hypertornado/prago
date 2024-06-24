@@ -112,7 +112,7 @@ func registrationValidation(vc ValidationContext) {
 		must(CreateItemWithContext(vc.Context(), app, u))
 
 		vc.Request().AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
-		vc.Validation().RedirectionLocaliton = app.getAdminURL("user/login") + "?email=" + url.QueryEscape(email)
+		vc.Validation().RedirectionLocation = app.getAdminURL("user/login") + "?email=" + url.QueryEscape(email)
 
 	}
 }

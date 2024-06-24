@@ -69,7 +69,7 @@ func initUserSettings(app *App) {
 			app.userDataCacheDelete(user.ID)
 
 			vc.Request().AddFlashMessage(messages.Get(newLocale, "admin_settings_changed"))
-			vc.Validation().RedirectionLocaliton = app.getAdminURL("")
+			vc.Validation().RedirectionLocation = app.getAdminURL("")
 		}
 	}).Icon("glyphicons-basic-5-settings.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu()
 
@@ -102,7 +102,7 @@ func initUserSettings(app *App) {
 			if valid {
 				request.app.userDataCacheDelete(user.ID)
 				request.AddFlashMessage(messages.Get(request.Locale(), "admin_password_changed"))
-				vc.Validation().RedirectionLocaliton = "/admin"
+				vc.Validation().RedirectionLocation = "/admin"
 			}
 		}).Icon("glyphicons-basic-45-key.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu()
 

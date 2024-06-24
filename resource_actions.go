@@ -58,7 +58,7 @@ func (resource *Resource) initDefaultResourceActions() {
 				SetImage(resource.previewer(request, item).ThumbnailURL(vc.Context())).
 				SetPreName(messages.Get(request.Locale(), "admin_item_created")).
 				Flash(request)
-			vc.Validation().RedirectionLocaliton = resource.getItemURL(item, "", request)
+			vc.Validation().RedirectionLocation = resource.getItemURL(item, "", request)
 		}
 	}).Icon(iconAdd).setPriority(defaultHighPriority).Permission(resource.canCreate).Name(messages.GetNameFunction("admin_new"))
 
@@ -98,7 +98,7 @@ func (resource *Resource) initDefaultResourceActions() {
 					SetPreName(messages.Get(request.Locale(), "admin_item_edited")).
 					Flash(request)
 
-				vc.Validation().RedirectionLocaliton = resource.getURL(fmt.Sprintf("%d", id))
+				vc.Validation().RedirectionLocation = resource.getURL(fmt.Sprintf("%d", id))
 			} else {
 				//TODO: ugly hack with copying two validation contexts
 				vc.Validation().Errors = validation.Validation().Errors
@@ -121,7 +121,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			if vc.Valid() {
 				must(resource.deleteWithLog(item, vc.Request()))
 				vc.Request().AddFlashMessage(messages.Get(vc.Request().Locale(), "admin_item_deleted"))
-				vc.Validation().RedirectionLocaliton = resource.getURL("")
+				vc.Validation().RedirectionLocation = resource.getURL("")
 			}
 		},
 	).Icon("glyphicons-basic-17-bin.svg").setPriority(-defaultHighPriority).Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete"))
