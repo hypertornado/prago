@@ -20,13 +20,13 @@ type Board struct {
 }
 
 func (app *App) initBoard() {
-	app.MainBoard = newBoard(app, "").
-		Name(messages.GetNameFunction("admin_signpost")).
-		Icon(iconSignpost)
+	app.MainBoard = newBoard(app, "")
+	app.MainBoard.action.name = messages.GetNameFunction("admin_signpost")
+	app.MainBoard.action.icon = iconSignpost
 	app.MainBoard.action.parentBoard = app.MainBoard
 	app.dashboardTableMap = make(map[string]*dashboardTable)
 	app.dashboardFigureMap = make(map[string]*dashboardFigure)
-	sysadminBoard = app.NewBoard("sysadmin-board").Name(unlocalized("Sysadmin")).Icon("glyphicons-basic-501-server.svg")
+	sysadminBoard = app.MainBoard.Child("sysadmin-board", unlocalized("Sysadmin"), "glyphicons-basic-501-server.svg")
 
 	sysadminGroup := sysadminBoard.Dashboard(unlocalized("Sysadmin"))
 	sysadminGroup.Figure(unlocalized("Úpravy"), "sysadmin").Value(func(request *Request) int64 {
@@ -53,9 +53,12 @@ func (app *App) initBoard() {
 	}, "sysadmin")
 }
 
-func (app *App) NewBoard(url string) *Board {
+func (parent *Board) Child(url string, name func(string) string, icon string) *Board {
+	app := parent.app
 	board := newBoard(app, url)
-	board.parentBoard = app.MainBoard
+	board.parentBoard = parent
+	board.action.name = name
+	board.action.icon = icon
 	return board
 }
 
@@ -77,16 +80,6 @@ func newBoard(app *App, url string) *Board {
 		board: ret,
 	}
 	return ret
-}
-
-func (board *Board) Name(name func(string) string) *Board {
-	board.action.name = name
-	return board
-}
-
-func (board *Board) Icon(icon string) *Board {
-	board.action.icon = icon
-	return board
 }
 
 func (board *Board) isMainBoard() bool {

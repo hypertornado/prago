@@ -14,7 +14,6 @@ import (
 
 //https://github.com/divan/expvarmon
 
-// App is main struct of prago application
 type App struct {
 	port            int
 	codeName        string
@@ -51,7 +50,6 @@ type App struct {
 
 	rootActions []*Action
 	db          *sql.DB
-	//sysadminTaskGroup *TaskGroup
 
 	notificationCenter *notificationCenter
 
