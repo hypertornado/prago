@@ -3,7 +3,6 @@ module github.com/hypertornado/prago
 go 1.22
 
 require (
-	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang-commonmark/markdown v0.0.0-20180910011815-a8f139058164
@@ -12,9 +11,9 @@ require (
 	github.com/sendgrid/sendgrid-go v3.5.0+incompatible
 	github.com/tealeg/xlsx v1.0.5
 	github.com/writeas/go-strip-markdown v2.0.1+incompatible
-	golang.org/x/crypto v0.16.0
-	golang.org/x/net v0.19.0
-	golang.org/x/text v0.14.0
+	golang.org/x/crypto v0.24.0
+	golang.org/x/net v0.26.0
+	golang.org/x/text v0.16.0
 )
 
 require (
