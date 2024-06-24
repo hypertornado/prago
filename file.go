@@ -102,7 +102,7 @@ func (app *App) UploadFile(fileHeader *multipart.FileHeader, request *Request, d
 	}
 	defer openedFile.Close()
 
-	uploadData, err := filesCDN.UploadFile(openedFile, file.GetExtension())
+	uploadData, err := filesCDN.UploadFile(openedFile, file.getExtension())
 	if err != nil {
 		return nil, fmt.Errorf("uploading multipart file: %s", err)
 	}
@@ -134,7 +134,7 @@ func (f *File) updateMetadata() error {
 	return nil
 }
 
-func (f File) GetExtension() string {
+func (f File) getExtension() string {
 	extension := filepath.Ext(f.Name)
 	extension = strings.Replace(extension, ".", "", -1)
 	return extension

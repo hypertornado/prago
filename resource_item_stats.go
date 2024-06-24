@@ -7,7 +7,7 @@ type itemStat struct {
 }
 
 func ItemStatistic[T any](app *App, name func(string) string, permission Permission, statHandler func(item *T) string) {
-	resource := GetResource[T](app)
+	resource := getResource[T](app)
 	resource.itemStats = append(resource.itemStats, &itemStat{
 		Name:       name,
 		Permission: permission,

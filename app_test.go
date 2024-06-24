@@ -251,7 +251,7 @@ func TestResource(t *testing.T) {
 func TestResourceUnique(t *testing.T) {
 	app := prepareResource().app
 
-	resource := GetResource[ResourceStructUnique](app)
+	resource := getResource[ResourceStructUnique](app)
 
 	must(CreateItem(resource.app, &ResourceStructUnique{UniqueName: "A"}))
 	must(CreateItem(resource.app, &ResourceStructUnique{UniqueName: "B"}))

@@ -14,7 +14,7 @@ func CreateItem[T any](app *App, item *T) error {
 }
 
 func CreateItemWithContext[T any](ctx context.Context, app *App, item *T) error {
-	resource := GetResource[T](app)
+	resource := getResource[T](app)
 	return resource.create(ctx, item)
 }
 
@@ -29,7 +29,7 @@ func UpdateItem[T any](app *App, item *T) error {
 }
 
 func UpdateItemWithContext[T any](ctx context.Context, app *App, item *T) error {
-	resource := GetResource[T](app)
+	resource := getResource[T](app)
 	return resource.update(ctx, item)
 }
 
@@ -39,7 +39,7 @@ func (resource *Resource) update(ctx context.Context, item any) error {
 }
 
 func Replace[T any](ctx context.Context, app *App, item *T) error {
-	resource := GetResource[T](app)
+	resource := getResource[T](app)
 	resource.setTimestamp(item, "CreatedAt")
 	resource.setTimestamp(item, "UpdatedAt")
 	return resource.replaceItem(ctx, item, false)
@@ -61,7 +61,7 @@ func DeleteItem[T any](app *App, id int64) error {
 }
 
 func DeleteItemWithContext[T any](ctx context.Context, app *App, id int64) error {
-	resource := GetResource[T](app)
+	resource := getResource[T](app)
 	return resource.delete(ctx, id)
 }
 

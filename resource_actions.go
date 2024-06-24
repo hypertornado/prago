@@ -174,7 +174,7 @@ func (resource *Resource) initDefaultResourceActions() {
 }
 
 func CreateWithLog[T any](item *T, request *Request) error {
-	resource := GetResource[T](request.app)
+	resource := getResource[T](request.app)
 	return resource.createWithLog(item, request)
 }
 
@@ -196,7 +196,7 @@ func (resource *Resource) createWithLog(item any, request *Request) error {
 }
 
 func DeleteWithLog[T any](item *T, request *Request) error {
-	resource := GetResource[T](request.app)
+	resource := getResource[T](request.app)
 	return resource.deleteWithLog(item, request)
 }
 
@@ -267,7 +267,7 @@ func (resource *Resource) editItemWithLogAndValues(request *Request, values url.
 }
 
 func UpdateWithLog[T any](item *T, request *Request) error {
-	resource := GetResource[T](request.app)
+	resource := getResource[T](request.app)
 	return resource.updateWithLog(item, request)
 }
 

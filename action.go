@@ -95,7 +95,7 @@ func (app *App) Action(url string) *Action {
 }
 
 func ResourceAction[T any](app *App, url string) *Action {
-	resource := GetResource[T](app)
+	resource := getResource[T](app)
 	return resource.action(url)
 }
 

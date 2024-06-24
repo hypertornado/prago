@@ -31,7 +31,7 @@ func (app *App) API(url string) *API {
 }
 
 func ResourceAPI[T any](app *App, url string) *API {
-	resource := GetResource[T](app)
+	resource := getResource[T](app)
 	return resource.api(url)
 }
 

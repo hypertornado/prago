@@ -8,7 +8,7 @@ import (
 )
 
 func ResourceItemView[T any](app *App, url string, template string, dataSource func(*T, *Request) interface{}) *Action {
-	resource := GetResource[T](app)
+	resource := getResource[T](app)
 	return resource.itemActionView(url, template, func(item any, request *Request) interface{} {
 		return dataSource(item.(*T), request)
 	})
@@ -60,7 +60,7 @@ func (resource *Resource) itemActionUi(itemURL string, handler func(any, *Reques
 }
 
 func ResourceItemHandler[T any](app *App, url string, fn func(*T, *Request)) *Action {
-	resource := GetResource[T](app)
+	resource := getResource[T](app)
 	return resource.itemActionHandler(url, func(item any, request *Request) {
 		fn(item.(*T), request)
 	})

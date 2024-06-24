@@ -140,7 +140,7 @@ func NewResource[T any](app *App) *Resource {
 	return ret
 }
 
-func GetResource[T any](app *App) *Resource {
+func getResource[T any](app *App) *Resource {
 	resourceMapMutex.RLock()
 	defer resourceMapMutex.RUnlock()
 
@@ -186,7 +186,7 @@ func (resource *Resource) getResourceControl() *controller {
 }
 
 func PreviewURLFunction[T any](app *App, fn func(*T) string) {
-	resource := GetResource[T](app)
+	resource := getResource[T](app)
 	resource.previewURLFunction(func(a any) string {
 		return fn(a.(*T))
 	})
