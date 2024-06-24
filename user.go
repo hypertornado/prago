@@ -87,7 +87,7 @@ func (user *user) newPassword(password string) error {
 	return nil
 }
 
-func (user user) emailToken(ctx context.Context, app *App) string {
+func (user user) emailToken(app *App) string {
 	randomness := app.mustGetSetting("random")
 	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%s%s", user.Email, randomness))

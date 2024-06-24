@@ -20,7 +20,7 @@ func initUserRegistration(app *App) {
 		user := Query[user](app).Is("email", email).First()
 		if user != nil {
 			if !user.emailConfirmed() {
-				if token == user.emailToken(request.r.Context(), app) {
+				if token == user.emailToken(app) {
 					user.EmailConfirmedAt = time.Now()
 					err := UpdateItem(app, user)
 					if err == nil {
@@ -123,7 +123,7 @@ func (u user) sendConfirmEmail(ctx context.Context, app *App, locale string) err
 	}
 	urlValues := make(url.Values)
 	urlValues.Add("email", u.Email)
-	urlValues.Add("token", u.emailToken(ctx, app))
+	urlValues.Add("token", u.emailToken(app))
 
 	subject := messages.Get(locale, "admin_confirm_email_subject", app.name(u.Locale))
 	link := app.mustGetSetting("base_url") + app.getAdminURL("user/confirm_email") + "?" + urlValues.Encode()

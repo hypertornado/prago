@@ -67,7 +67,7 @@ func initUserRenew(app *App) {
 
 		u := Query[user](app).Is("email", email).First()
 		if u != nil {
-			if token == u.emailToken(vc.Context(), app) {
+			if token == u.emailToken(app) {
 				password := vc.GetValue("password")
 				if len(password) >= 7 {
 					err := u.newPassword(password)
@@ -94,7 +94,7 @@ func initUserRenew(app *App) {
 func (app *App) getRenewPasswordURL(ctx context.Context, user user) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)
-	urlValues.Add("token", user.emailToken(ctx, app))
+	urlValues.Add("token", user.emailToken(app))
 	return app.mustGetSetting("base_url") + app.getAdminURL("user/renew_password") + "?" + urlValues.Encode()
 }
 
