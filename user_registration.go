@@ -51,43 +51,37 @@ func initUserRegistration(app *App) {
 }
 
 func registrationValidation(vc ValidationContext) {
-	valid := true
 	locale := vc.Locale()
 	app := vc.Request().app
 
 	name := vc.GetValue("name")
 	if name == "" {
-		valid = false
 		vc.AddItemError("name", messages.Get(locale, "admin_user_name_not_empty"))
 	}
 
 	email := vc.GetValue("email")
 	email = fixEmail(email)
 	if !isEmailValid(email) {
-		valid = false
 		vc.AddItemError("email", messages.Get(locale, "admin_email_not_valid"))
 	} else {
 		user := Query[user](app).Is("email", email).First()
 		if user != nil && user.Email == email {
-			valid = false
 			vc.AddItemError("email", messages.Get(locale, "admin_email_already_registered"))
 		}
 	}
 
 	password := vc.GetValue("password")
 	if len(password) < 7 {
-		valid = false
 		vc.AddItemError("password", messages.Get(locale, "admin_register_password"))
 	}
 
 	captcha := vc.GetValue("captcha")
 	captcha = strings.Trim(captcha, " ")
 	if captcha != "9" {
-		valid = false
 		vc.AddItemError("captcha", messages.Get(locale, "admin_error"))
 	}
 
-	if valid {
+	if vc.Valid() {
 		u := &user{}
 		u.Email = email
 		u.Name = vc.GetValue("name")
@@ -111,7 +105,6 @@ func registrationValidation(vc ValidationContext) {
 
 		vc.Request().AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
 		vc.Validation().RedirectionLocation = app.getAdminURL("user/login") + "?email=" + url.QueryEscape(email)
-
 	}
 }
 
