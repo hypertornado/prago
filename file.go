@@ -2,10 +2,8 @@ package prago
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"mime/multipart"
-	"net/url"
 	"path/filepath"
 	"strings"
 	"time"
@@ -140,26 +138,6 @@ func (f File) getExtension() string {
 	return extension
 }
 
-func getOldRedirectParams(request *Request, app *App) (uuid, name string, err error) {
-	name = request.Param("name")
-	uuid = fmt.Sprintf("%s%s%s%s%s%s",
-		request.Param("a"),
-		request.Param("b"),
-		request.Param("c"),
-		request.Param("d"),
-		request.Param("e"),
-		strings.Split(name, "-")[0],
-	)
-
-	file := Query[File](app).Context(request.r.Context()).Is("uid", uuid).First()
-	if file == nil {
-		err = errors.New("no file with id found")
-		return
-	}
-	name = file.Name
-	return
-}
-
 func (app *App) initFilesResource() {
 	initCDN(app)
 
@@ -206,39 +184,6 @@ func (app *App) initFilesResource() {
 				app.Log().Printf("deleting CDN: %s\n", err)
 			}
 		}
-	})
-
-	app.mainController.routeHandler("GET", "/files/thumb/:size/:a/:b/:c/:d/:e/:name", func(request *Request) {
-		uuid, name, err := getOldRedirectParams(request, app)
-		if err != nil {
-			panic(err)
-		}
-
-		var size string
-		switch request.Param("size") {
-		case "large":
-			size = "1000"
-		case "medium":
-			size = "400"
-		case "small":
-			size = "200"
-		default:
-			panic("wrong size")
-		}
-
-		request.Redirect(filesCDN.GetImageURL(uuid, name, size))
-	}, func(ctx context.Context, params url.Values) bool {
-		size := params.Get("size")
-		if size == "large" || size == "medium" || size == "small" {
-			return true
-		}
-		return false
-	})
-
-	app.mainController.routeHandler("GET", "/files/original/:a/:b/:c/:d/:e/:name", func(request *Request) {
-		uuid, name, err := getOldRedirectParams(request, app)
-		must(err)
-		request.Redirect(filesCDN.GetFileURL(uuid, name))
 	})
 
 	ResourceFormAction[File](app, "upload",
@@ -305,42 +250,34 @@ func writeFileResponse(request *Request, files []*File) {
 	request.WriteJSON(200, responseData)
 }
 
-// GetLarge file path
 func (f *File) GetLarge() string {
 	return filesCDN.GetImageURL(f.UID, f.Name, "1000")
 }
 
-// GetGiant file path
 func (f *File) GetGiant() string {
 	return filesCDN.GetImageURL(f.UID, f.Name, "2500")
 }
 
-// GetMedium file path
 func (f *File) GetMedium() string {
 	return filesCDN.GetImageURL(f.UID, f.Name, "400")
 }
 
-// GetSmall file path
 func (f *File) GetSmall() string {
 	return filesCDN.GetImageURL(f.UID, f.Name, "200")
 }
 
-// GetSmall file path
 func (f *File) GetExactSize(width, height int) string {
 	return filesCDN.GetImageURL(f.UID, f.Name, fmt.Sprintf("%dx%d", width, height))
 }
 
-// GetOriginal file path
 func (f *File) GetOriginal() string {
 	return filesCDN.GetFileURL(f.UID, f.Name)
 }
 
-// GetMetadataPath gets metadada file path
 func (f *File) GetMetadataPath() string {
 	return filesCDN.MetadataPath(f.UID)
 }
 
-// IsImage detects if file is image
 func (f *File) IsImage() bool {
 	return f.isImage()
 }
