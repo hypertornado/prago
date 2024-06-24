@@ -30,7 +30,7 @@ func initFilesAPI(resource *Resource) {
 		files := []*File{}
 
 		for _, v := range multipartFiles {
-			file, err := app.UploadFile(request.r.Context(), v, request, description)
+			file, err := app.UploadFile(v, request, description)
 			if err != nil {
 				panic(err)
 			}

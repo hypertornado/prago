@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -54,7 +53,7 @@ func (file *CDNFile) url(size string) string {
 		panic(fmt.Errorf("can't find project id %d", file.CDNProject))
 	}
 
-	baseURL, err := app.GetSetting(context.Background(), "base_url")
+	baseURL, err := app.GetSetting("base_url")
 	if err != nil {
 		panic(err)
 	}

@@ -91,7 +91,7 @@ func (app *App) GetFiles(ctx context.Context, ids string) []*File {
 	return files
 }
 
-func (app *App) UploadFile(ctx context.Context, fileHeader *multipart.FileHeader, request *Request, description string) (*File, error) {
+func (app *App) UploadFile(fileHeader *multipart.FileHeader, request *Request, description string) (*File, error) {
 	fileName := prettyFilename(fileHeader.Filename)
 	file := File{}
 	file.Name = fileName
@@ -114,7 +114,7 @@ func (app *App) UploadFile(ctx context.Context, fileHeader *multipart.FileHeader
 
 	file.User = request.UserID()
 	file.Description = description
-	err = CreateItemWithContext(ctx, app, &file)
+	err = CreateItemWithContext(request.Request().Context(), app, &file)
 	if err != nil {
 		return nil, fmt.Errorf("saving file: %s", err)
 	}
@@ -134,7 +134,6 @@ func (f *File) updateMetadata() error {
 	return nil
 }
 
-// GetExtension gets file extension
 func (f File) GetExtension() string {
 	extension := filepath.Ext(f.Name)
 	extension = strings.Replace(extension, ".", "", -1)
@@ -254,7 +253,7 @@ func (app *App) initFilesResource() {
 				vc.AddItemError("file", messages.Get(vc.Locale(), "admin_validation_not_empty"))
 			}
 			if vc.Valid() {
-				fileData, err := app.UploadFile(vc.Request().r.Context(), multipartFiles[0], vc.Request(), vc.GetValue("description"))
+				fileData, err := app.UploadFile(multipartFiles[0], vc.Request(), vc.GetValue("description"))
 				if err != nil {
 					vc.AddError(err.Error())
 				} else {

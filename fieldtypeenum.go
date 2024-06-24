@@ -4,13 +4,11 @@ import (
 	"fmt"
 )
 
-// FieldTypeEnum enum type of field
 type FieldTypeEnum struct {
 	ID   string
 	Name func(string) string
 }
 
-// AddEnumFieldType adds enum field type
 func (app *App) AddEnumFieldType(name string, items [][2]string) {
 	var arr []FieldTypeEnum
 	for _, v := range items {
@@ -25,7 +23,6 @@ func (app *App) AddEnumFieldType(name string, items [][2]string) {
 	app.AddEnumFieldTypeLocalized(name, arr)
 }
 
-// AddEnumFieldTypeLocalized adds localized enum field
 func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 
 	var allowedValues []string
@@ -41,7 +38,6 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 					return v.Name(request.Locale())
 				}
 			}
-
 			return value
 		},
 
@@ -84,7 +80,6 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 			}
 			return ret
 		},
-
 		fieldTypeIcon: "glyphicons-basic-299-circle-selected.svg",
 	})
 }
