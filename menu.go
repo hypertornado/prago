@@ -213,7 +213,7 @@ func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem
 				continue
 			}
 			sortPriority = sortPriorityBoard
-			if v.isPartOfBoard.IsMainBoard() {
+			if v.isPartOfBoard.isMainBoard() {
 				sortPriority = sortPriorityMainBoard
 			}
 		}

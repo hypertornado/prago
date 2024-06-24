@@ -89,7 +89,7 @@ func (board *Board) Icon(icon string) *Board {
 	return board
 }
 
-func (board *Board) IsMainBoard() bool {
+func (board *Board) isMainBoard() bool {
 	return board == board.app.MainBoard
 }
 
@@ -101,7 +101,7 @@ func (board *Board) getURL() string {
 }
 
 func (board *Board) isEmpty(requestContext *menuRequestContext) bool {
-	if board.IsMainBoard() {
+	if board.isMainBoard() {
 		return false
 	}
 

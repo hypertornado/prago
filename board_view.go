@@ -43,7 +43,7 @@ func (board *Board) boardView(request *Request) *boardView {
 	var boardName, boardIcon, boardURL string
 	if board.action != nil {
 		boardName = board.action.name(locale)
-		if board.IsMainBoard() {
+		if board.isMainBoard() {
 			boardName = messages.GetNameFunction("admin_signpost_long", board.app.name(locale))(locale)
 		}
 
@@ -61,7 +61,7 @@ func (board *Board) boardView(request *Request) *boardView {
 		BoardName:   boardName,
 		BoardIcon:   boardIcon,
 		BoardURL:    boardURL,
-		IsMainBoard: board.IsMainBoard(),
+		IsMainBoard: board.isMainBoard(),
 		Role:        request.role(),
 	}
 
