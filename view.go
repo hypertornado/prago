@@ -83,7 +83,7 @@ func (resource *Resource) getBasicView(ctx context.Context, id int64, item any, 
 				Icon:     icon,
 				Name:     f.name(request.Locale()),
 				Template: f.fieldType.viewTemplate,
-				Value:    f.fieldType.viewDataSource(ctx, request, f, ifaceVal),
+				Value:    f.fieldType.viewDataSource(request, f, ifaceVal),
 				EditURL:  editURL,
 			},
 		)
@@ -111,8 +111,8 @@ func getDefaultViewTemplate(_ reflect.Type) string {
 	return "admin_item_view_text"
 }
 
-func getDefaultViewDataSource(_ *Field) func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
-	return func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
+func getDefaultViewDataSource(_ *Field) func(request *Request, f *Field, value interface{}) interface{} {
+	return func(request *Request, f *Field, value interface{}) interface{} {
 		return getDefaultFieldStringer(f)(request, f, value)
 	}
 }

@@ -60,12 +60,12 @@ func getFilesViewData(ctx context.Context, app *App, uid string) (ret filesViewD
 
 }
 
-func filesViewDataSource(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
+func filesViewDataSource(request *Request, f *Field, value interface{}) interface{} {
 	app := f.resource.app
 	var ret []filesViewData
 	ar := strings.Split(value.(string), ",")
 	for _, v := range ar {
-		item := getFilesViewData(ctx, app, v)
+		item := getFilesViewData(request.Request().Context(), app, v)
 		ret = append(ret, item)
 	}
 	return ret

@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"fmt"
 	"time"
 )
@@ -9,7 +8,7 @@ import (
 // FieldType defines type of field
 type fieldType struct {
 	viewTemplate   string
-	viewDataSource func(context.Context, *Request, *Field, interface{}) interface{}
+	viewDataSource func(*Request, *Field, interface{}) interface{}
 
 	dbFieldDescription string
 
@@ -112,7 +111,7 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("relation", &fieldType{
 		viewTemplate: "admin_item_view_relation",
-		viewDataSource: func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
+		viewDataSource: func(request *Request, f *Field, value interface{}) interface{} {
 			valInt := value.(int64)
 			return f.relationPreview(request, fmt.Sprintf("%d", valInt))
 		},
@@ -127,7 +126,7 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("multirelation", &fieldType{
 		viewTemplate: "admin_item_view_relation",
-		viewDataSource: func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
+		viewDataSource: func(request *Request, f *Field, value interface{}) interface{} {
 			return f.relationPreview(request, value.(string))
 		},
 		formTemplate: "admin_item_relation",
@@ -166,6 +165,6 @@ func createFilesEditDataSource(mimeTypes string) func(*Field, UserData) interfac
 	}
 }
 
-func markdownViewDataSource(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
+func markdownViewDataSource(request *Request, f *Field, value interface{}) interface{} {
 	return filterMarkdown(value.(string))
 }

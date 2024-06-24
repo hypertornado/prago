@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"fmt"
 )
 
@@ -35,7 +34,7 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 	}
 
 	app.addFieldType(name, &fieldType{
-		viewDataSource: func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
+		viewDataSource: func(request *Request, f *Field, value interface{}) interface{} {
 			str := value.(string)
 			for _, v := range items {
 				if str == v.ID {
