@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"net/url"
 	"time"
 )
@@ -14,7 +13,6 @@ func initUserRenew(app *App) {
 		form.AddSubmit(messages.Get(locale, "admin_forgotten_submit"))
 	}, func(vc ValidationContext) {
 		request := vc.Request()
-		ctx := request.r.Context()
 		email := fixEmail(request.Param("email"))
 
 		var reason = ""
@@ -25,7 +23,7 @@ func initUserRenew(app *App) {
 					user.EmailRenewedAt = time.Now()
 					err := UpdateItem(app, user)
 					if err == nil {
-						err = app.sendRenewPasswordEmail(ctx, *user)
+						err = app.sendRenewPasswordEmail(*user)
 						if err == nil {
 							request.AddFlashMessage(messages.Get(user.Locale, "admin_forgoten_sent", user.Email))
 							vc.Validation().RedirectionLocation = app.getAdminURL("/user/login") + "?email=" + url.QueryEscape(user.Email)
@@ -91,16 +89,16 @@ func initUserRenew(app *App) {
 	})
 }
 
-func (app *App) getRenewPasswordURL(ctx context.Context, user user) string {
+func (app *App) getRenewPasswordURL(user user) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)
 	urlValues.Add("token", user.emailToken(app))
 	return app.mustGetSetting("base_url") + app.getAdminURL("user/renew_password") + "?" + urlValues.Encode()
 }
 
-func (app *App) sendRenewPasswordEmail(ctx context.Context, user user) error {
+func (app *App) sendRenewPasswordEmail(user user) error {
 	subject := messages.Get(user.Locale, "admin_forgotten_email_subject", app.name(user.Locale))
-	link := app.getRenewPasswordURL(ctx, user)
+	link := app.getRenewPasswordURL(user)
 	body := messages.Get(user.Locale, "admin_forgotten_email_body", link, link, app.name(user.Locale))
 
 	return app.Email().To(user.Name, user.Email).Subject(subject).TextContent(body).Send()
