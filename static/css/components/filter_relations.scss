@@ -11,12 +11,14 @@
   position: absolute;
   left: 0px;
   background: white;
-  box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.2);
+  @include shadowMedium;
+  //box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.2);
   display: none;
   min-width: 300px;
   max-width: 400px;
   z-index: 100;
   border-radius: 0px 0px 10px 10px;
+  overflow: hidden;
 }
 
 .filter_relations_suggestions:empty {

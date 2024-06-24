@@ -19,7 +19,7 @@ type File struct {
 	UID         string    `prago-unique:"true" prago-preview:"true" prago-type:"cdnfile"`
 	Name        string    `prago-can-edit:"nobody"`
 	Description string    `prago-type:"text" prago-preview:"true"`
-	User        int64     `prago-type:"relation" prago-preview:"true" prago-can-edit:"nobody"`
+	User        int64     `prago-type:"relation" prago-can-edit:"nobody"`
 	Width       int64     `prago-can-edit:"nobody" prago-preview:"true"`
 	Height      int64     `prago-can-edit:"nobody" prago-preview:"true"`
 	CreatedAt   time.Time `prago-preview:"true"`
