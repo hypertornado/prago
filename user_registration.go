@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -94,7 +93,7 @@ func registrationValidation(vc ValidationContext) {
 		u.Name = vc.GetValue("name")
 		u.Locale = locale
 		must(u.newPassword(vc.GetValue("password")))
-		err := u.sendConfirmEmail(vc.Context(), app, locale)
+		err := u.sendConfirmEmail(app, locale)
 		if err != nil {
 			app.Log().Println(err)
 		}
@@ -116,7 +115,7 @@ func registrationValidation(vc ValidationContext) {
 	}
 }
 
-func (u user) sendConfirmEmail(ctx context.Context, app *App, locale string) error {
+func (u user) sendConfirmEmail(app *App, locale string) error {
 	if u.emailConfirmed() {
 		return errors.New("email already confirmed")
 	}
