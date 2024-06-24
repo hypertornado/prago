@@ -112,8 +112,6 @@ class FormContainer {
           // Step 6: Cleanup
           document.body.removeChild(a);
           URL.revokeObjectURL(downloadUrl);
-
-          //console.log("HEEER");
           this.progress.classList.add("hidden");
         }
       } else {
