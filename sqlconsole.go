@@ -24,11 +24,7 @@ func (app *App) initSQLConsole() {
 				} else {
 					columns, err := rows.Columns()
 					must(err)
-					var header = []string{}
-					for _, v := range columns {
-						header = append(header, v)
-					}
-					table.Header(header...)
+					table.Header(columns...)
 
 					count := len(columns)
 					values := make([]interface{}, count)
