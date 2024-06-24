@@ -71,9 +71,6 @@ func (app *App) initDefaultFieldTypes() {
 		listCellDataSource: imageCellViewData,
 
 		filterLayoutTemplate: "filter_layout_text",
-
-		//filterLayoutTemplate:   "filter_layout_select",
-		//filterLayoutDataSource: boolFilterLayoutDataSource,
 	})
 
 	app.addFieldType("file", &fieldType{
@@ -106,23 +103,19 @@ func (app *App) initDefaultFieldTypes() {
 		formTemplate:       "admin_item_markdown",
 		listCellDataSource: markdownListDataSource,
 		fieldTypeIcon:      "glyphicons-basic-692-font.svg",
-		//listCellTemplate:   "admin_item_view_text",
 	})
 	app.addFieldType("place", &fieldType{
 		viewTemplate:  "admin_item_view_place",
 		formTemplate:  "admin_item_place",
 		fieldTypeIcon: "glyphicons-basic-591-map-marker.svg",
-		//listCellTemplate: "admin_item_view_text",
 	})
 
 	app.addFieldType("relation", &fieldType{
 		viewTemplate: "admin_item_view_relation",
-		//listCellTemplate: "admin_item_view_relation_cell",
 		viewDataSource: func(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
 			valInt := value.(int64)
 			return f.relationPreview(request, fmt.Sprintf("%d", valInt))
 		},
-		//viewDataSource: getRelationViewData,
 		formTemplate: "admin_item_relation",
 		formDataSource: func(f *Field, userData UserData) interface{} {
 			return relationFormDataSource{
@@ -175,5 +168,4 @@ func createFilesEditDataSource(mimeTypes string) func(*Field, UserData) interfac
 
 func markdownViewDataSource(ctx context.Context, request *Request, f *Field, value interface{}) interface{} {
 	return filterMarkdown(value.(string))
-	//return cropMarkdown(value.(string), 100)
 }
