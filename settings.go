@@ -45,6 +45,7 @@ func (app *App) Setting(id string, permission Permission) *Setting {
 	}
 
 	setting := &Setting{
+		app:        app,
 		id:         id,
 		name:       unlocalized(id),
 		permission: permission,
@@ -71,7 +72,14 @@ func (setting *Setting) ValueChangeCallback(fn func()) *Setting {
 	return setting
 }
 
+func (setting *Setting) GetValue() string {
+	ret, err := setting.app.getSetting(setting.id)
+	must(err)
+	return ret
+}
+
 type Setting struct {
+	app            *App
 	id             string
 	name           func(string) string
 	permission     Permission
@@ -79,7 +87,7 @@ type Setting struct {
 	changeCallback func()
 }
 
-func (app *App) GetSetting(id string) (string, error) {
+func (app *App) getSetting(id string) (string, error) {
 	app.settings.mutex.RLock()
 	defer app.settings.mutex.RUnlock()
 	setting := app.settings.settingsMap[id]
@@ -103,7 +111,7 @@ func (app *App) GetSetting(id string) (string, error) {
 }
 
 func (app *App) mustGetSetting(id string) string {
-	val, err := app.GetSetting(id)
+	val, err := app.getSetting(id)
 	must(err)
 	return val
 }

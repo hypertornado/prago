@@ -15,7 +15,7 @@ func initUserSettings(app *App) {
 
 		for _, v := range app.settings.settingsArray {
 			if request.Authorize(v.permission) {
-				val, err := app.GetSetting(v.id)
+				val, err := app.getSetting(v.id)
 				if err == nil {
 					input := form.AddTextInput("setting_"+v.id, v.name(request.Locale()))
 					input.Value = val

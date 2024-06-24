@@ -203,6 +203,11 @@ func (app *App) Logo(logo []byte) *App {
 	return app
 }
 
+func (app *App) BaseURL() string {
+	return app.mustGetSetting("base_url")
+
+}
+
 // DotPath returns path to hidden directory with app configuration and data
 func (app *App) dotPath() string { return os.Getenv("HOME") + "/." + app.codeName }
 

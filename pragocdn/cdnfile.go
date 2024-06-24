@@ -53,12 +53,7 @@ func (file *CDNFile) url(size string) string {
 		panic(fmt.Errorf("can't find project id %d", file.CDNProject))
 	}
 
-	baseURL, err := app.GetSetting("base_url")
-	if err != nil {
-		panic(err)
-	}
-
-	account := cdnclient.NewCDNAccount(baseURL, project.Name, project.Password)
+	account := cdnclient.NewCDNAccount(app.BaseURL(), project.Name, project.Password)
 
 	if size == "" {
 		return account.GetFileURL(file.UUID, "file."+file.Suffix)

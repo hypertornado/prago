@@ -89,7 +89,7 @@ func (email *Email) Send() error {
 		emailMessage.AddAttachment(v)
 	}
 
-	key, err := email.app.GetSetting("sendgrid_key")
+	key, err := email.app.getSetting("sendgrid_key")
 	if err != nil {
 		return err
 	}
