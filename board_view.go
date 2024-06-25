@@ -67,7 +67,7 @@ func (board *Board) boardView(request *Request) *boardView {
 
 	ret.Resources = board.getMenuItems(getMenuRequestContextFromRequest(request, nil))
 
-	ret.MainDashboard = board.MainDashboard.view(request)
+	ret.MainDashboard = board.mainDashboard.view(request)
 
 	for _, dashboard := range board.dashboardGroups {
 		view := dashboard.view(request)

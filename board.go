@@ -14,7 +14,7 @@ type Board struct {
 	parentBoard    *Board
 	parentResource *Resource
 
-	MainDashboard *Dashboard
+	mainDashboard *Dashboard
 
 	dashboardGroups []*Dashboard
 }
@@ -75,7 +75,7 @@ func newBoard(app *App, url string) *Board {
 		})
 
 	ret.action.permission = loggedPermission
-	ret.MainDashboard = &Dashboard{
+	ret.mainDashboard = &Dashboard{
 		name:  unlocalized(""),
 		board: ret,
 	}

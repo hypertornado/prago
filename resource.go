@@ -125,7 +125,7 @@ func NewResource[T any](app *App) *Resource {
 		parentResource: ret,
 	}
 
-	ret.resourceBoard.MainDashboard = &Dashboard{
+	ret.resourceBoard.mainDashboard = &Dashboard{
 		name:  unlocalized(""),
 		board: ret.resourceBoard,
 	}
