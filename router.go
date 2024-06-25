@@ -30,6 +30,8 @@ func (r *router) addRoute(route *route) {
 }
 
 func (r *router) process(request *Request) bool {
+	parseRequest(request)
+
 	for _, routes := range [][]*route{
 		r.priorityRoutes,
 		r.routes,

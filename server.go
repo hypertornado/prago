@@ -65,8 +65,10 @@ func (app *App) serveHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !app.mainController.dispatchRequest(request) {
-		request.Response().WriteHeader(http.StatusNotFound)
-		request.Response().Write([]byte("404 — page not found (prago framework)"))
+	if app.router.process(request) {
+		return
 	}
+
+	request.Response().WriteHeader(http.StatusNotFound)
+	request.Response().Write([]byte("404 — page not found (prago framework)"))
 }

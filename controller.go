@@ -16,11 +16,6 @@ func newMainController(app *App) *controller {
 	}
 }
 
-func (c *controller) dispatchRequest(request *Request) bool {
-	parseRequest(request)
-	return c.app.router.process(request)
-}
-
 func (c *controller) subController() *controller {
 	return &controller{
 		app:            c.app,
