@@ -10,6 +10,15 @@ import (
 
 var defaultPort = 8585
 
+type flagType int
+
+const (
+	noType flagType = iota
+	stringFlag
+	boolFlag
+	intFlag
+)
+
 func addServerCommand(app *App) {
 	var port int
 	var developmentMode bool
@@ -36,19 +45,6 @@ func addServerCommand(app *App) {
 		})
 }
 
-type flagType int
-
-const (
-	noType flagType = iota
-	stringFlag
-	boolFlag
-	intFlag
-)
-
-type commands struct {
-	commands []*command
-}
-
 type command struct {
 	actions        []string
 	description    string
@@ -72,7 +68,7 @@ func (app *App) addCommand(commands ...string) *command {
 		actions: commands,
 		flags:   map[string]*commandFlag{},
 	}
-	app.commands.commands = append(app.commands.commands, ret)
+	app.commands = append(app.commands, ret)
 	return ret
 }
 
@@ -225,7 +221,7 @@ func (f *commandFlag) setValue(value string) error {
 func (app *App) parseCommands() {
 	addServerCommand(app)
 	args := os.Args[1:]
-	for _, command := range app.commands.commands {
+	for _, command := range app.commands {
 		matched, err := command.match(args)
 		if matched {
 			if err != nil {
@@ -244,7 +240,7 @@ func (app *App) parseCommands() {
 
 func (app *App) usage() {
 	fmt.Printf("%s, version %s, usage:\n", app.codeName, app.version)
-	for _, v := range app.commands.commands {
+	for _, v := range app.commands {
 		fmt.Print("  " + strings.Join(v.actions, " "))
 		if len(v.flags) > 0 {
 			fmt.Print(" <flags>")

@@ -22,7 +22,7 @@ type App struct {
 	development     *development
 	developmentMode bool
 	staticFiles     staticFiles
-	commands        *commands
+	commands        []*command
 	logger          *logger
 	templates       *templates
 	cache           *cache
@@ -93,7 +93,6 @@ func createApp(codeName string, version string) *App {
 		codeName: codeName,
 		version:  version,
 		name:     unlocalized(codeName),
-		commands: &commands{},
 		cache:    newCache(),
 		router:   newRouter(),
 	}
