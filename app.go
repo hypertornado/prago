@@ -158,8 +158,8 @@ func (app *App) Run() {
 func (app *App) afterInit() {
 	app.initSessions()
 	app.initDefaultResourceActions()
-	app.bindAPIs()
-	app.bindAllActions()
+	app.initAPIs()
+	app.initAllActions()
 	app.initAdminNotFoundAction()
 	app.initRelations()
 }

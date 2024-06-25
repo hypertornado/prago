@@ -35,7 +35,7 @@ type Action struct {
 	childAction *Action
 }
 
-func bindAction(action *Action) error {
+func initAction(action *Action) error {
 	url := action.getURL()
 	controller := action.getController()
 
@@ -47,28 +47,28 @@ func bindAction(action *Action) error {
 	return nil
 }
 
-func (app *App) bindAllActions() {
+func (app *App) initAllActions() {
 	for _, v := range app.rootActions {
-		err := bindAction(v)
+		err := initAction(v)
 		if err != nil {
 			panic(fmt.Sprintf("error while binding root action %s %s: %s", v.method, v.name("en"), err))
 		}
 	}
 
 	for _, resource := range app.resources {
-		resource.bindActions()
+		resource.initActions()
 	}
 }
 
-func (resource *Resource) bindActions() {
+func (resource *Resource) initActions() {
 	for _, v := range resource.actions {
-		err := bindAction(v)
+		err := initAction(v)
 		if err != nil {
 			panic(fmt.Sprintf("error while binding resource %s action %s %s: %s", resource.id, v.method, v.name("en"), err))
 		}
 	}
 	for _, v := range resource.itemActions {
-		err := bindAction(v)
+		err := initAction(v)
 		if err != nil {
 			panic(fmt.Sprintf("error while binding item resource %s action %s %s: %s", resource.id, v.method, v.name("en"), err))
 		}
@@ -87,7 +87,6 @@ func newAction(app *App, url string) *Action {
 	}
 }
 
-// AddAction adds action to root
 func (app *App) Action(url string) *Action {
 	action := newAction(app, url)
 	app.rootActions = append(app.rootActions, action)
@@ -99,7 +98,6 @@ func ResourceAction[T any](app *App, url string) *Action {
 	return resource.action(url)
 }
 
-// AddAction adds action to resource
 func (resource *Resource) action(url string) *Action {
 	action := newAction(resource.app, url)
 	action.resource = resource
@@ -108,13 +106,11 @@ func (resource *Resource) action(url string) *Action {
 	return action
 }
 
-// Name sets action name
 func (action *Action) Name(name func(string) string) *Action {
 	action.name = name
 	return action
 }
 
-// Permission sets action permission
 func (action *Action) Permission(permission Permission) *Action {
 	must(action.app.validatePermission(permission))
 	action.permission = permission
@@ -124,7 +120,6 @@ func (action *Action) Permission(permission Permission) *Action {
 	return action
 }
 
-// Method sets action method (GET, POST, PUT or DELETE)
 func (action *Action) Method(method string) *Action {
 	if !isHTTPMethodValid(method) {
 		panic("unsupported method for action: " + method)

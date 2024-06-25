@@ -66,9 +66,9 @@ func (api *API) HandlerJSON(handler func(*Request) interface{}) *API {
 	return api
 }
 
-func (app *App) bindAPIs() {
+func (app *App) initAPIs() {
 	for _, v := range app.apis {
-		err := v.bindAPI()
+		err := v.initAPI()
 		if err != nil {
 			panic(fmt.Sprintf("error while initializing api %s: %s", v.url, err))
 		}
@@ -78,7 +78,7 @@ func (app *App) bindAPIs() {
 	controller.routeHandler("ANY", app.getAdminURL("api/*"), renderAPINotFound)
 }
 
-func (api *API) bindAPI() error {
+func (api *API) initAPI() error {
 
 	var controller *controller
 	if api.resource != nil {
