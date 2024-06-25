@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"crypto/md5"
 	"errors"
 	"fmt"
@@ -18,14 +17,13 @@ var usernameRegex = regexp.MustCompile("^[a-z0-9.]{1,20}$")
 // User represents admin user account
 // TODO: better handle isactive user
 type user struct {
-	ID       int64  `prago-order-desc:"true"`
-	Username string `prago-preview:"true"`
-	Name     string `prago-preview:"true"`
-	Email    string `prago-unique:"true" prago-preview:"true"`
-	Role     string `prago-preview:"true" prago-type:"role"`
-	Password string `prago-can-view:"nobody"`
-	Locale   string `prago-can-view:"sysadmin"`
-	//IsActive          bool      `prago-preview:"true"`
+	ID                int64     `prago-order-desc:"true"`
+	Username          string    `prago-preview:"true"`
+	Name              string    `prago-preview:"true"`
+	Email             string    `prago-unique:"true" prago-preview:"true"`
+	Role              string    `prago-preview:"true" prago-type:"role"`
+	Password          string    `prago-can-view:"nobody"`
+	Locale            string    `prago-can-view:"sysadmin"`
 	LoggedInIP        string    `prago-can-view:"sysadmin" prago-preview:"true"`
 	LoggedInUseragent string    `prago-can-view:"sysadmin" prago-preview:"true"`
 	LoggedInTime      time.Time `prago-can-view:"sysadmin"`
@@ -138,7 +136,7 @@ func (app *App) initUserResource() {
 	initUserRenew(app)
 }
 
-func (app *App) GetCachedUserEmail(_ context.Context, id int64) string {
+func (app *App) GetCachedUserEmail(id int64) string {
 	return <-Cached(app, fmt.Sprintf("cached-user-email-%d", id), func() string {
 		user := Query[user](app).ID(id)
 		if user == nil {
