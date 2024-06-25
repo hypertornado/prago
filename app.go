@@ -107,7 +107,6 @@ func createApp(codeName string, version string) *App {
 	app.resourceNameMap = make(map[string]*Resource)
 	app.fieldTypes = make(map[string]*fieldType)
 
-	//app.preInitTaskManager()
 	app.initAccessManager()
 	app.initDefaultFieldTypes()
 
@@ -120,7 +119,6 @@ func createApp(codeName string, version string) *App {
 	app.initUserDataCache()
 	app.initBoard()
 	app.initSettings()
-	//app.initLogger()
 	app.initStaticFilesHandler()
 	app.initNotifications()
 
