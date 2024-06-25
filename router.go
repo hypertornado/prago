@@ -43,7 +43,7 @@ func (r *router) process(request *Request) bool {
 					}
 				}
 
-				route.controller.callArounds(request, 0, func() {
+				route.controller.callAroundActions(request, 0, func() {
 					route.fn(request)
 				}, true)
 

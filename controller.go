@@ -52,21 +52,21 @@ func (c *controller) addAroundAction(fn func(p *Request, next func())) {
 	c.aroundActions = append(c.aroundActions, fn)
 }
 
-func (c *controller) callArounds(p *Request, i int, finalFunc func(), down bool) {
+func (c *controller) callAroundActions(p *Request, i int, finalFunc func(), down bool) {
 	if down {
 		if c.parent != nil {
-			c.parent.callArounds(p, 0, func() {
-				c.callArounds(p, 0, finalFunc, false)
+			c.parent.callAroundActions(p, 0, func() {
+				c.callAroundActions(p, 0, finalFunc, false)
 			}, down)
 		} else {
-			c.callArounds(p, 0, finalFunc, false)
+			c.callAroundActions(p, 0, finalFunc, false)
 		}
 		return
 	}
 
 	if i < len(c.aroundActions) {
 		c.aroundActions[i](p, func() {
-			c.callArounds(p, i+1, finalFunc, false)
+			c.callAroundActions(p, i+1, finalFunc, false)
 		})
 	} else {
 		finalFunc()
