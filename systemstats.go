@@ -168,7 +168,7 @@ func (app *App) initSystemStats() {
 
 	sysadminBoard.Dashboard(unlocalized("Routes")).Table(func(r *Request) *Table {
 		ret := app.Table()
-		routes := app.mainController.router.export()
+		routes := app.router.export()
 		for _, v := range routes {
 			ret.Row(Cell(v[0]), Cell(v[1]))
 		}

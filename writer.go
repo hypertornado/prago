@@ -55,5 +55,5 @@ func (w *Writer[T]) route(method string, path string, handler func(*Request, *T)
 		}
 	}
 
-	w.app.appController.router.route(method, path, w.app.appController, action, constraints...)
+	w.app.router.route(method, path, w.app.appController, action, constraints...)
 }

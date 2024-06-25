@@ -2,29 +2,29 @@ package prago
 
 // Controller struct
 type controller struct {
+	app            *App
 	parent         *controller
-	router         *router
 	priorityRouter bool
 	aroundActions  []func(p *Request, next func())
 }
 
-func newMainController() *controller {
+func newMainController(app *App) *controller {
 	return &controller{
+		app:           app,
 		parent:        nil,
-		router:        newRouter(),
 		aroundActions: []func(p *Request, next func()){},
 	}
 }
 
 func (c *controller) dispatchRequest(request *Request) bool {
 	parseRequest(request)
-	return c.router.process(request)
+	return c.app.router.process(request)
 }
 
 func (c *controller) subController() *controller {
 	return &controller{
+		app:            c.app,
 		parent:         c,
-		router:         c.router,
 		priorityRouter: c.priorityRouter,
 		aroundActions:  []func(p *Request, next func()){},
 	}
@@ -80,7 +80,7 @@ func (router *router) route(method string, path string, controller *controller, 
 }
 
 func (c *controller) routeHandler(method, path string, action func(p *Request), constraints ...routerConstraint) {
-	c.router.route(method, path, c, action, constraints...)
+	c.app.router.route(method, path, c, action, constraints...)
 }
 
 // Get creates new route for GET request

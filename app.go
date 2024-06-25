@@ -78,6 +78,8 @@ type App struct {
 	cronTasks []*cronTask
 
 	logHandler func(string, string)
+
+	router *router
 }
 
 const testingAppName = "__prago_test_app"
@@ -93,11 +95,12 @@ func createApp(codeName string, version string) *App {
 		name:     unlocalized(codeName),
 		commands: &commands{},
 		cache:    newCache(),
+		router:   newRouter(),
 	}
 
 	app.logger = newLogger(app)
 
-	app.mainController = newMainController()
+	app.mainController = newMainController(app)
 	app.appController = app.mainController.subController()
 	app.accessController = app.mainController.subController()
 	app.accessController.priorityRouter = true
