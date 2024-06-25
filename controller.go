@@ -21,7 +21,6 @@ func (c *controller) dispatchRequest(request *Request) bool {
 	return c.router.process(request)
 }
 
-// SubController returns subcontroller of controller
 func (c *controller) subController() *controller {
 	return &controller{
 		parent:         c,

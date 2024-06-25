@@ -88,16 +88,16 @@ func newTestingApp() *App {
 
 func createApp(codeName string, version string) *App {
 	app := &App{
-		codeName:       codeName,
-		version:        version,
-		name:           unlocalized(codeName),
-		commands:       &commands{},
-		mainController: newMainController(),
-		cache:          newCache(),
+		codeName: codeName,
+		version:  version,
+		name:     unlocalized(codeName),
+		commands: &commands{},
+		cache:    newCache(),
 	}
 
 	app.logger = newLogger(app)
 
+	app.mainController = newMainController()
 	app.appController = app.mainController.subController()
 	app.accessController = app.mainController.subController()
 	app.accessController.priorityRouter = true
@@ -143,7 +143,6 @@ func createApp(codeName string, version string) *App {
 	app.initIcons()
 	app.initMenuAPI()
 	app.initCron()
-	//app.initResourceConnections()
 
 	return app
 }
