@@ -74,7 +74,6 @@ func (resource *Resource) initDefaultResourceAPIs() {
 				if id == "" || id == "0" {
 					continue
 				}
-				//fmt.Println("ID:", id)
 				item := resource.query(request.r.Context()).ID(id)
 				if item == nil {
 					panic(fmt.Sprintf("cant find resource item id %s", id))

@@ -83,8 +83,8 @@ class FormContainer {
         if (contentType == "application/json") {
           //application/json
           var data = JSON.parse(request.response);
-          if (data.RedirectionLocaliton) {
-            window.location = data.RedirectionLocaliton;
+          if (data.RedirectionLocation) {
+            window.location = data.RedirectionLocation;
           } else {
             this.progress.classList.add("hidden");
             this.setFormErrors(data.Errors);

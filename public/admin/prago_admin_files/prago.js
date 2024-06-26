@@ -1927,8 +1927,8 @@ class FormContainer {
                 let contentType = request.getResponseHeader("Content-Type");
                 if (contentType == "application/json") {
                     var data = JSON.parse(request.response);
-                    if (data.RedirectionLocaliton) {
-                        window.location = data.RedirectionLocaliton;
+                    if (data.RedirectionLocation) {
+                        window.location = data.RedirectionLocation;
                     }
                     else {
                         this.progress.classList.add("hidden");

@@ -54,10 +54,10 @@ func (resource *Resource) initDefaultResourceActions() {
 			}
 			must(resource.createWithLog(item, request))
 
-			resource.app.Notification(resource.previewer(request, item).Name()).
+			must(resource.app.Notification(resource.previewer(request, item).Name()).
 				SetImage(resource.previewer(request, item).ThumbnailURL(vc.Context())).
 				SetPreName(messages.Get(request.Locale(), "admin_item_created")).
-				Flash(request)
+				Flash(request))
 			vc.Validation().RedirectionLocation = resource.getItemURL(item, "", request)
 		}
 	}).Icon(iconAdd).setPriority(defaultHighPriority).Permission(resource.canCreate).Name(messages.GetNameFunction("admin_new"))
