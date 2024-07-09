@@ -212,8 +212,11 @@ func (query *Query[T]) SearchResult() (*ESSearchResult, error) {
 }
 
 func (index Index[T]) SearchResultToList(res *ESSearchResult) ([]*T, int64, error) {
-
 	var ret []*T
+
+	if res.Hits == nil {
+		return ret, 0, nil
+	}
 	for _, v := range res.Hits.Hits {
 		var t T
 		err := json.Unmarshal(v.Source, &t)
