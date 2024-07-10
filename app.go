@@ -202,7 +202,10 @@ func (app *App) Logo(logo []byte) *App {
 
 func (app *App) BaseURL() string {
 	return app.mustGetSetting("base_url")
+}
 
+func (app *App) RandomizationString() string {
+	return app.mustGetSetting("random")
 }
 
 // DotPath returns path to hidden directory with app configuration and data
