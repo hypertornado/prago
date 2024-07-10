@@ -31,6 +31,10 @@ type server struct {
 	app App
 }
 
+func (app *App) NewServer() server {
+	return server{*app}
+}
+
 func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.app.serveHTTP(w, r)
 }
