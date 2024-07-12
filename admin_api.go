@@ -17,4 +17,6 @@ func (app *App) initAPI() {
 
 	app.API("relationlist").Method("POST").Permission(loggedPermission).Handler(generateRelationListAPIHandler)
 
+	app.API("resource-item-stats").Permission(loggedPermission).Handler(itemStatsAPIHandler)
+
 }

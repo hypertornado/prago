@@ -215,7 +215,7 @@
         </div>
       {{end}}
       {{range $cell := $item.Items}}
-        <div class="list_cell" title="{{$cell.Name}}" data-cell-id="{{$cell.ItemID}}">
+        <div class="list_cell" title="{{$cell.Name}}" data-cell-id="{{$cell.ItemID}}" {{if $cell.FetchURL}}data-fetch-url="{{$cell.FetchURL}}"{{end}}>
           {{template "list_cell" $cell}}
         </div>
       {{end}}

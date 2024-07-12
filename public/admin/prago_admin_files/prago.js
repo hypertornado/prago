@@ -604,6 +604,7 @@ class List {
                 bindReOrder();
                 this.bindPagination();
                 this.bindClick();
+                this.bindFetchStats();
                 if (this.multiple.hasMultipleActions()) {
                     this.multiple.bindMultipleActionCheckboxes();
                 }
@@ -657,6 +658,29 @@ class List {
                 pEl.addEventListener("click", this.paginationChange.bind(this));
             }
             paginationEl.appendChild(pEl);
+        }
+    }
+    bindFetchStats() {
+        var cells = this.list.querySelectorAll(".list_cell[data-fetch-url]");
+        for (var i = 0; i < cells.length; i++) {
+            var cell = cells[i];
+            let url = cell.getAttribute("data-fetch-url");
+            if (!url) {
+                continue;
+            }
+            let cellContentSpan = (cell.querySelector(".list_cell_name"));
+            fetch(url)
+                .then((data) => {
+                return data.json();
+            })
+                .then((data) => {
+                cellContentSpan.innerText = data.Value;
+            })
+                .catch((error) => {
+                cellContentSpan.innerText = "⚠️";
+                console.error("cant fetch data:", error);
+            });
+            console.log(cell);
         }
     }
     bindClick() {
@@ -950,7 +974,6 @@ class ListSettings {
         var columns = document.querySelectorAll(".list_settings_column");
         for (var i = 0; i < columns.length; i++) {
             let columnName = columns[i].getAttribute("data-column-name");
-            console.log(columnName);
             if (visibleColumnsMap[columnName]) {
                 columns[i].checked = true;
             }
@@ -2932,7 +2955,6 @@ class QuickActions {
             let button = buttons[i];
             button.addEventListener("click", this.buttonClicked.bind(this));
         }
-        console.log("elsss");
     }
     buttonClicked(e) {
         var btn = e.target;

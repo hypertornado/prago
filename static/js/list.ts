@@ -269,6 +269,7 @@ class List {
         bindReOrder();
         this.bindPagination();
         this.bindClick();
+        this.bindFetchStats();
         if (this.multiple.hasMultipleActions()) {
           this.multiple.bindMultipleActionCheckboxes();
         }
@@ -324,6 +325,34 @@ class List {
         pEl.addEventListener("click", this.paginationChange.bind(this));
       }
       paginationEl.appendChild(pEl);
+    }
+  }
+
+  bindFetchStats() {
+    var cells = this.list.querySelectorAll(".list_cell[data-fetch-url]");
+    for (var i = 0; i < cells.length; i++) {
+      var cell = <HTMLDivElement>cells[i];
+      let url = cell.getAttribute("data-fetch-url");
+      if (!url) {
+        continue;
+      }
+
+      let cellContentSpan = <HTMLSpanElement>(
+        cell.querySelector(".list_cell_name")
+      );
+
+      fetch(url)
+        .then((data) => {
+          return data.json();
+        })
+        .then((data) => {
+          cellContentSpan.innerText = data.Value;
+        })
+        .catch((error) => {
+          cellContentSpan.innerText = "⚠️";
+          console.error("cant fetch data:", error);
+        });
+      console.log(cell);
     }
   }
 

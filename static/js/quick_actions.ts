@@ -6,8 +6,6 @@ class QuickActions {
       let button = buttons[i];
       button.addEventListener("click", this.buttonClicked.bind(this));
     }
-
-    console.log("elsss");
   }
 
   buttonClicked(e: Event) {

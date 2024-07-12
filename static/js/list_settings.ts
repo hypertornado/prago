@@ -51,7 +51,6 @@ class ListSettings {
     );
     for (var i = 0; i < columns.length; i++) {
       let columnName = columns[i].getAttribute("data-column-name");
-      console.log(columnName);
       if (visibleColumnsMap[columnName]) {
         columns[i].checked = true;
       }

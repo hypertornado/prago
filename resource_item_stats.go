@@ -1,6 +1,8 @@
 package prago
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type itemStat struct {
 	id         string
@@ -18,6 +20,34 @@ func ItemStatistic[T any](app *App, name func(string) string, permission Permiss
 		Handler: func(item any) string {
 			return statHandler(item.(*T))
 		},
+	})
+}
+
+type itemStatResponse struct {
+	Value string
+}
+
+func itemStatsAPIHandler(request *Request) {
+	resource := request.app.resourceNameMap[request.Param("resource_id")]
+	if !request.Authorize(resource.canView) {
+		panic("not allowed resource")
+	}
+
+	var stat *itemStat
+	for _, v := range resource.itemStats {
+		if v.id == request.Param("stat_id") {
+			stat = v
+			break
+		}
+	}
+	if !request.Authorize(stat.Permission) {
+		panic("not allowed stat")
+	}
+
+	item := resource.query(request.r.Context()).ID(request.Param("item_id"))
+
+	request.WriteJSON(200, itemStatResponse{
+		Value: stat.Handler(item),
 	})
 
 }

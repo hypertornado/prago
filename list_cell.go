@@ -6,9 +6,10 @@ import (
 )
 
 type listCell struct {
-	Images []string
-	Name   string
-	ItemID string
+	Images   []string
+	Name     string
+	ItemID   string
+	FetchURL string
 }
 
 func getCellViewData(userData UserData, f *Field, value interface{}) listCell {
