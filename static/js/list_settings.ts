@@ -51,6 +51,7 @@ class ListSettings {
     );
     for (var i = 0; i < columns.length; i++) {
       let columnName = columns[i].getAttribute("data-column-name");
+      console.log(columnName);
       if (visibleColumnsMap[columnName]) {
         columns[i].checked = true;
       }
@@ -80,10 +81,11 @@ class ListSettings {
     );
     for (var i = 0; i < filters.length; i++) {
       var name = filters[i].getAttribute("data-name");
-      if (columns[name]) {
+      if (columns[name] === true) {
         filters[i].classList.remove("hidden");
-      } else {
-        filters[i].classList.add("hidden");
+      }
+      if (columns[name] === false) {
+        //filters[i].classList.add("hidden");
       }
     }
 
@@ -103,11 +105,15 @@ class ListSettings {
 
   getSelectedColumnsMap(): any {
     var columns: any = {};
-    var checked: NodeListOf<HTMLInputElement> = document.querySelectorAll(
-      ".list_settings_column:checked"
+    var inputs: NodeListOf<HTMLInputElement> = document.querySelectorAll(
+      ".list_settings_column"
     );
-    for (var i = 0; i < checked.length; i++) {
-      columns[checked[i].getAttribute("data-column-name")] = true;
+    for (var i = 0; i < inputs.length; i++) {
+      if (inputs[i].checked) {
+        columns[inputs[i].getAttribute("data-column-name")] = true;
+      } else {
+        columns[inputs[i].getAttribute("data-column-name")] = false;
+      }
     }
     return columns;
   }

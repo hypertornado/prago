@@ -123,6 +123,29 @@ func (resource *Resource) getListHeader(userData UserData) (list list, err error
 			list.Header = append(list.Header, headerItem)
 		}
 	}
+
+	for k, stat := range resource.itemStats {
+		if !userData.Authorize(stat.Permission) {
+			continue
+		}
+
+		//who just 1 stat in table
+		if k != 0 {
+			continue
+		}
+
+		headerItem := listHeaderItem{
+			Name:             stat.id,
+			Icon:             "glyphicons-basic-43-stats-circle.svg",
+			ColumnName:       stat.id,
+			NameHuman:        stat.Name(userData.Locale()),
+			CanOrder:         false,
+			DefaultShow:      true,
+			NaturalCellWidth: 150,
+		}
+		list.Header = append([]listHeaderItem{headerItem}, list.Header...)
+	}
+
 	return
 }
 
@@ -134,6 +157,11 @@ func (resource *Resource) defaultVisibleFieldsStr(userData UserData) string {
 		}
 
 		if !v.defaultHidden {
+			ret = append(ret, v.id)
+		}
+	}
+	for _, v := range resource.itemStats {
+		if userData.Authorize(v.Permission) {
 			ret = append(ret, v.id)
 		}
 	}
@@ -471,8 +499,18 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 
 		for _, v := range listHeader.Header {
 			if columnsMap[v.ColumnName] {
-				fieldVal := itemVal.FieldByName(v.Name)
-				row.Items = append(row.Items, getCellViewData(userData, resource.Field(v.ColumnName), fieldVal.Interface()))
+				if resource.Field(v.Name) != nil {
+					fieldVal := itemVal.FieldByName(v.Name)
+					row.Items = append(row.Items, getCellViewData(userData, resource.Field(v.ColumnName), fieldVal.Interface()))
+				} else {
+					cell := listCell{}
+					for _, stat := range resource.itemStats {
+						if stat.id == v.Name {
+							cell.Name = stat.Handler(itemVal.Addr().Interface())
+						}
+					}
+					row.Items = append(row.Items, cell)
+				}
 			}
 		}
 

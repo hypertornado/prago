@@ -950,6 +950,7 @@ class ListSettings {
         var columns = document.querySelectorAll(".list_settings_column");
         for (var i = 0; i < columns.length; i++) {
             let columnName = columns[i].getAttribute("data-column-name");
+            console.log(columnName);
             if (visibleColumnsMap[columnName]) {
                 columns[i].checked = true;
             }
@@ -974,11 +975,10 @@ class ListSettings {
         var filters = document.querySelectorAll(".list_header_item_filter");
         for (var i = 0; i < filters.length; i++) {
             var name = filters[i].getAttribute("data-name");
-            if (columns[name]) {
+            if (columns[name] === true) {
                 filters[i].classList.remove("hidden");
             }
-            else {
-                filters[i].classList.add("hidden");
+            if (columns[name] === false) {
             }
         }
         this.list.load();
@@ -993,9 +993,14 @@ class ListSettings {
     }
     getSelectedColumnsMap() {
         var columns = {};
-        var checked = document.querySelectorAll(".list_settings_column:checked");
-        for (var i = 0; i < checked.length; i++) {
-            columns[checked[i].getAttribute("data-column-name")] = true;
+        var inputs = document.querySelectorAll(".list_settings_column");
+        for (var i = 0; i < inputs.length; i++) {
+            if (inputs[i].checked) {
+                columns[inputs[i].getAttribute("data-column-name")] = true;
+            }
+            else {
+                columns[inputs[i].getAttribute("data-column-name")] = false;
+            }
         }
         return columns;
     }
