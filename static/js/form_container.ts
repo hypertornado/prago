@@ -61,7 +61,7 @@ class FormContainer {
     let request = new XMLHttpRequest();
     request.open("POST", this.form.formEl.getAttribute("action"));
 
-    let requestID: string = this.makeid(10);
+    let requestID: string = makeid(10);
     this.lastAJAXID = requestID;
 
     if (this.activeRequest) {
@@ -169,15 +169,15 @@ class FormContainer {
       }
     }
   }
+}
 
-  makeid(length: number) {
-    var result = "";
-    var characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    var charactersLength = characters.length;
-    for (var i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
+function makeid(length: number) {
+  var result = "";
+  var characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var charactersLength = characters.length;
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
+  return result;
 }

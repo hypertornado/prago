@@ -1,18 +1,33 @@
 .notification_center {
   position: absolute;
-  top: 10px;
+  top: 52px;
   right: 10px;
   z-index: 100;
 }
 
+@keyframes openNotification {
+  from {
+    opacity: 0;
+    transform: scale(1) translateX(100px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .notification {
-  @include shadowLarge;
+  @include shadowMedium;
+  border: 1px solid $grayBorderColor;
   background-color: white;
   border-radius: 10px;
   margin-bottom: 10px;
   display: flex;
   position: relative;
   width: 250px;
+
+  animation: openNotification 500ms ease forwards;
 }
 
 .notification-clickable {
@@ -28,8 +43,20 @@
   opacity: 0.8;
 }
 
+@keyframes closeNotification {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0);
+    display: none;
+  }
+}
+
 .notification-closed {
-  display: none;
+  animation: closeNotification 500ms ease forwards;
 }
 
 .notification_close {

@@ -12,7 +12,7 @@ class QuickActions {
     var btn: HTMLButtonElement = <HTMLButtonElement>e.target;
     let actionURL = btn.getAttribute("data-url");
 
-    new Confirm("Potvrdit akci", () => {
+    new Confirm("Potvrdit akci", "", () => {
       let lp = new LoadingPopup();
       fetch(actionURL, {
         method: "POST",

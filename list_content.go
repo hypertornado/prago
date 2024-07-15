@@ -117,7 +117,6 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 					cell := listCell{}
 					for _, stat := range resource.itemStats {
 						if stat.id == v.Name {
-							//cell.Name = stat.Handler(itemVal.Addr().Interface())
 							cell.Name = "⏳"
 
 							var urlData url.Values = map[string][]string{}

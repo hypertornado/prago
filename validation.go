@@ -142,12 +142,12 @@ func (rv *requestValidation) UserHasPermission(permission Permission) bool {
 type valuesValidation struct {
 	values     url.Values
 	validation *formValidation
-	request    *Request
+	request    UserData
 	app        *App
 	ctx        context.Context
 }
 
-func newValuesValidation(ctx context.Context, app *App, request *Request, values url.Values) *valuesValidation {
+func newValuesValidation(ctx context.Context, app *App, request UserData, values url.Values) *valuesValidation {
 	return &valuesValidation{
 		values:     values,
 		validation: newFormValidation(),

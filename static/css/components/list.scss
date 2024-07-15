@@ -167,17 +167,73 @@
   position: fixed;
   z-index: 1000;
   bottom: 0px;
-  right: 0px;
-  padding: 10px;
-  left: 300px;
-  pointer-events: none;
+  right: 10px;
+  padding: 5px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+  left: 10px;
+  left: 310px;
+  //pointer-events: none;
+  display: flex;
   display: none;
   justify-content: center;
+  align-items: center;
+  @include shadowMedium;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border: 1px solid $grayBorderColor;
+  border-bottom: none;
+  background-color: white;
+  //background: red;
+}
+
+.list_multiple_actions_content {
+  padding: 5px 5px;
+  border-radius: 10px;
+  pointer-events: initial;
+  display: flex;
+  //align-items: center;
+  //@include shadowMedium;
+  gap: 5px;
+  flex-grow: 100;
+  flex-shrink: 100;
+
+  flex-direction: column;
+}
+
+.list_multiple_actions_description {
+  margin: 0px 0px;
+  font-size: .9rem;
+  line-height: 1.3em;
+  font-weight: 500;
+  color: $gray;
+}
+
+.list_multiple_actions_buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: start;
+
+}
+
+.list_multiple_actions_cancel {
+  width: 25px;
+  aspect-ratio: 1;
+  border: 3px solid transparent;
+  border-radius: 100px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $hoverColor;
+  }
+
+  &:active {
+    background-color: $activeColor;
+  }
 }
 
 @media (max-width: 1000px) {
   .list_multiple_actions {
-    left: 0px;
+    left: 10px;
   }
 }
 
@@ -185,7 +241,7 @@
 
   from {
     opacity: 0;
-    transform: perspective(2cm) rotateX(-90deg) translateY(-10px);
+    transform: translateY(50px);
   }
 
   to {
@@ -196,26 +252,11 @@
 
 .list_multiple_actions-visible {
   display: flex;
-  animation: multipleActionAnimation 700ms ease-in-out;
-}
-
-.list_multiple_actions_content {
-  background-color: white;
-  padding: 5px 10px;
-  border-radius: 10px;
-  border: 1px solid #eee;
-  pointer-events: initial;
-  display: flex;
-  align-items: center;
-  @include shadowMedium;
-}
-
-.list_multiple_actions_description {
-  margin: 0px 10px;
+  animation: multipleActionAnimation 300ms ease;
 }
 
 .list_multiple_action {
-  margin: 0px 5px;
+  //margin: 0px 5px;
 }
 
 @media (hover: hover) {

@@ -130,7 +130,7 @@ func (app *App) initActivityLog() {
 	app.activityLogResource.Name(messages.GetNameFunction("admin_history"), messages.GetNameFunction("admin_history"))
 }
 
-func (resource *Resource) logActivity(request *Request, before, after any) error {
+func (resource *Resource) logActivity(userData UserData, before, after any) error {
 	var activityType string
 	switch {
 	case before == nil && after != nil:
@@ -146,9 +146,9 @@ func (resource *Resource) logActivity(request *Request, before, after any) error
 
 	var itemID int64 = -1
 	if before != nil {
-		itemID = resource.previewer(request, before).ID()
+		itemID = resource.previewer(userData, before).ID()
 	} else {
-		itemID = resource.previewer(request, after).ID()
+		itemID = resource.previewer(userData, after).ID()
 	}
 
 	var err error
@@ -173,7 +173,7 @@ func (resource *Resource) logActivity(request *Request, before, after any) error
 		ResourceName:  resource.id,
 		ItemID:        itemID,
 		ActionType:    activityType,
-		User:          request.UserID(),
+		User:          userData.UserID(),
 		ContentBefore: string(beforeData),
 		ContentAfter:  string(afterData),
 	}

@@ -161,6 +161,7 @@ func (app *App) afterInit() {
 	app.initAllActions()
 	app.initAdminNotFoundAction()
 	app.initRelations()
+	app.initMultipleItemActions()
 }
 
 func (app *App) initDefaultResourceActions() {

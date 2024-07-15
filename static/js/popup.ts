@@ -145,6 +145,7 @@ class Confirm extends Popup {
 
   constructor(
     title: string,
+    buttonName: string,
     handlerConfirm?: Function,
     handlerCancel?: Function,
     style?: ButtonStyle
@@ -154,18 +155,23 @@ class Confirm extends Popup {
     if (!style) {
       style = ButtonStyle.Accented;
     }
-    this.cancelAction = handlerCancel;
-    this.addButton("Storno", () => {
+    this.cancelAction = () => {
       this.remove();
       if (handlerCancel) {
         handlerCancel();
       }
+    };
+    this.addButton("Storno", () => {
+      this.cancelAction();
     });
 
-    var primaryText = "OK";
-    if (style == ButtonStyle.Delete) {
-      primaryText = "Smazat";
+    var primaryText = buttonName;
+    if (!primaryText) {
+      primaryText = "OK";
     }
+    /*if (style == ButtonStyle.Delete) {
+      primaryText = "Smazat";
+    }*/
 
     this.primaryButton = this.addButton(
       primaryText,
@@ -214,7 +220,7 @@ class ContentPopup extends Popup {
     super.addButton("Storno", () => {
       super.unpresent();
     });
-    super.addButton("Uložit", handler, ButtonStyle.Accented);
+    super.addButton("Upravit", handler, ButtonStyle.Accented);
   }
 }
 

@@ -25,7 +25,8 @@
   align-items: center;
   position: relative;
 
-  padding: 3px 12px;
+  padding: 3px 5px;
+  gap: 5px;
   font-size: 12px;
 }
 
@@ -123,15 +124,16 @@
 .btn-delete,
 .btn-delete:hover,
 .btn-delete:active {
-  border: 1px solid red;
-  color: white;
-  background: linear-gradient(#dd2e4f, #dd2e4f);
-  background: linear-gradient(#dd2e4f, red);
+  //border: 1px solid red;
+  //color: white;
+  //background: linear-gradient(#dd2e4f, #dd2e4f);
+  //background: linear-gradient(#dd2e4f, red);
+  background: linear-gradient(rgba(255, 0, 0, .2), rgba(255, 0, 0, .1));
 }
 
 .btn-delete:hover,
 .btn-delete:active {
-  background: linear-gradient(red, red);
+  background: linear-gradient(rgba(255, 0, 0, .2), rgba(255, 0, 0, .2));
 }
 
 .form {

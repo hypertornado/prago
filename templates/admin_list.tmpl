@@ -272,9 +272,15 @@
   <div class="list_multiple_actions">
     <div class="list_multiple_actions_content">
       <span class="list_multiple_actions_description"></span>
-      {{range $item :=  .MultipleActions}}
-        <input type="button" class="btn list_multiple_action{{if $item.IsDelete}} btn-delete{{end}}" name="{{$item.ID}}" value="{{$item.Name}}">
-      {{end}}
+      <div class="list_multiple_actions_buttons">
+        {{range $item :=  .MultipleActions}}
+          <button class="btn list_multiple_action" data-id="{{$item.ID}}" data-name="{{$item.Name}}" data-action-type="{{$item.ActionType}}">
+            {{if $item.Icon}}<img class="btn_icon" src="/admin/api/icons?file={{$item.Icon}}&color=444444">{{end}}
+            {{$item.Name}}
+          </button>
+        {{end}}
+      </div>
     </div>
+    <img src="/api/glyphicons/glyphicons-basic-599-menu-close.svg?color=888888" class="list_multiple_actions_cancel">
   </div>
 {{end}}

@@ -1046,88 +1046,28 @@ class ListMultiple {
         for (var i = 0; i < actions.length; i++) {
             actions[i].addEventListener("click", this.multipleActionSelected.bind(this));
         }
+        this.list.list
+            .querySelector(".list_multiple_actions_cancel")
+            .addEventListener("click", () => {
+            this.multipleUncheckAll();
+        });
     }
     multipleActionSelected(e) {
-        var target = e.target;
-        var actionName = target.getAttribute("name");
         var ids = this.multipleGetIDs();
-        this.multipleActionStart(actionName, ids);
+        this.multipleActionStart(e.target, ids);
     }
-    multipleActionStart(actionName, ids) {
-        switch (actionName) {
-            case "cancel":
-                this.multipleUncheckAll();
-                break;
-            case "edit":
+    multipleActionStart(btn, ids) {
+        let actionID = btn.getAttribute("data-id");
+        let actionName = btn.getAttribute("data-name");
+        switch (btn.getAttribute("data-action-type")) {
+            case "mutiple_edit":
                 new ListMultipleEdit(this, ids);
                 break;
-            case "clone":
-                new Confirm(`Opravdu chcete naklonovat ${ids.length} položek?`, () => {
-                    var loader = new LoadingPopup();
-                    var params = {};
-                    params["action"] = "clone";
-                    params["ids"] = ids.join(",");
-                    var url = this.list.adminPrefix +
-                        "/" +
-                        this.list.typeName +
-                        "/api/multipleaction" +
-                        encodeParams(params);
-                    fetch(url, {
-                        method: "POST",
-                    }).then((e) => {
-                        loader.done();
-                        if (e.status == 403) {
-                            e.json().then((data) => {
-                                new Alert(data.error.Text);
-                            });
-                            this.list.load();
-                            return;
-                        }
-                        if (e.status != 200) {
-                            new Alert("Error while doing multipleaction clone");
-                            this.list.load();
-                            return;
-                        }
-                        this.list.load();
-                    });
-                }, Function(), ButtonStyle.Default);
-                break;
-            case "delete":
-                new Confirm(`Opravdu chcete smazat ${ids.length} položek?`, () => {
-                    var loader = new LoadingPopup();
-                    var params = {};
-                    params["action"] = "delete";
-                    params["ids"] = ids.join(",");
-                    var url = this.list.adminPrefix +
-                        "/" +
-                        this.list.typeName +
-                        "/api/multipleaction" +
-                        encodeParams(params);
-                    fetch(url, {
-                        method: "POST",
-                    }).then((e) => {
-                        loader.done();
-                        if (e.status == 403) {
-                            e.json().then((data) => {
-                                new Alert(data.error.Text);
-                            });
-                            this.list.load();
-                            return;
-                        }
-                        if (e.status != 200) {
-                            new Alert("Error while doing multipleaction delete");
-                            this.list.load();
-                            return;
-                        }
-                        this.list.load();
-                    });
-                }, Function(), ButtonStyle.Delete);
-                break;
             default:
-                new Confirm(`Opravdu chcete provést tuto akci na ${ids.length} položek?`, () => {
+                let confirm = new Confirm(`${actionName}: Opravdu chcete provést tuto akci na ${ids.length} položek?`, actionName, () => {
                     var loader = new LoadingPopup();
                     var params = {};
-                    params["action"] = actionName;
+                    params["action"] = actionID;
                     params["ids"] = ids.join(",");
                     var url = this.list.adminPrefix +
                         "/" +
@@ -1138,19 +1078,21 @@ class ListMultiple {
                         method: "POST",
                     }).then((e) => {
                         loader.done();
-                        if (e.status == 403) {
+                        if (e.status == 200) {
                             e.json().then((data) => {
-                                new Alert(data.error.Text);
+                                if (data.FlashMessage) {
+                                    Prago.notificationCenter.flashNotification(actionName, data.FlashMessage, true, false);
+                                }
+                                if (data.RedirectURL) {
+                                    window.location = data.RedirectURL;
+                                }
+                                this.list.load();
                             });
-                            this.list.load();
-                            return;
                         }
-                        if (e.status != 200) {
-                            new Alert("Error while doing multipleaction " + actionName);
+                        else {
+                            Prago.notificationCenter.flashNotification(actionName, "Chyba " + e, false, true);
                             this.list.load();
-                            return;
                         }
-                        this.list.load();
                     });
                 }, Function());
         }
@@ -1935,7 +1877,7 @@ class FormContainer {
         let formData = new FormData(this.form.formEl);
         let request = new XMLHttpRequest();
         request.open("POST", this.form.formEl.getAttribute("action"));
-        let requestID = this.makeid(10);
+        let requestID = makeid(10);
         this.lastAJAXID = requestID;
         if (this.activeRequest) {
             if (this.isAutosubmit()) {
@@ -2030,15 +1972,15 @@ class FormContainer {
             }
         }
     }
-    makeid(length) {
-        var result = "";
-        var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        var charactersLength = characters.length;
-        for (var i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-        return result;
+}
+function makeid(length) {
+    var result = "";
+    var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
+    return result;
 }
 class DatePicker {
     constructor(el) {
@@ -2538,6 +2480,22 @@ class NotificationCenter {
             el.classList.add("notification-closed");
         });
     }
+    flashNotification(name, description, success, fail) {
+        var style = "";
+        if (success) {
+            style = "success";
+        }
+        if (fail) {
+            style = "fail";
+        }
+        this.setData({
+            UUID: makeid(10),
+            Name: name,
+            Description: description,
+            Flash: false,
+            Style: style,
+        });
+    }
 }
 class NotificationItem {
     constructor() {
@@ -2659,6 +2617,14 @@ class NotificationItem {
             this.el.classList.remove("notification-clickable");
             this.el.setAttribute("data-url", "");
         }
+        if (data.Flash) {
+            window.setTimeout(() => {
+                this.close();
+            }, 1000);
+        }
+    }
+    close() {
+        this.el.classList.add("notification-closed");
     }
 }
 class Popup {
@@ -2777,22 +2743,24 @@ class Alert extends Popup {
     }
 }
 class Confirm extends Popup {
-    constructor(title, handlerConfirm, handlerCancel, style) {
+    constructor(title, buttonName, handlerConfirm, handlerCancel, style) {
         super(title);
         this.setCancelable();
         if (!style) {
             style = ButtonStyle.Accented;
         }
-        this.cancelAction = handlerCancel;
-        this.addButton("Storno", () => {
+        this.cancelAction = () => {
             this.remove();
             if (handlerCancel) {
                 handlerCancel();
             }
+        };
+        this.addButton("Storno", () => {
+            this.cancelAction();
         });
-        var primaryText = "OK";
-        if (style == ButtonStyle.Delete) {
-            primaryText = "Smazat";
+        var primaryText = buttonName;
+        if (!primaryText) {
+            primaryText = "OK";
         }
         this.primaryButton = this.addButton(primaryText, () => {
             this.remove();
@@ -2831,7 +2799,7 @@ class ContentPopup extends Popup {
         super.addButton("Storno", () => {
             super.unpresent();
         });
-        super.addButton("Uložit", handler, ButtonStyle.Accented);
+        super.addButton("Upravit", handler, ButtonStyle.Accented);
     }
 }
 class LoadingPopup extends Popup {
@@ -2959,7 +2927,7 @@ class QuickActions {
     buttonClicked(e) {
         var btn = e.target;
         let actionURL = btn.getAttribute("data-url");
-        new Confirm("Potvrdit akci", () => {
+        new Confirm("Potvrdit akci", "", () => {
             let lp = new LoadingPopup();
             fetch(actionURL, {
                 method: "POST",
@@ -3083,7 +3051,7 @@ class Prago {
         relationListEls.forEach((el) => {
             new RelationList(el);
         });
-        new NotificationCenter(document.querySelector(".notification_center"));
+        Prago.notificationCenter = new NotificationCenter(document.querySelector(".notification_center"));
         var qa = document.querySelector(".quick_actions");
         if (qa) {
             new QuickActions(qa);

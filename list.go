@@ -75,9 +75,11 @@ type pagination struct {
 }
 
 type listMultipleAction struct {
-	ID       string
-	Name     string
-	IsDelete bool
+	ID         string
+	ActionType string
+	Icon       string
+	Name       string
+	//IsDelete   bool
 }
 
 func (resource *Resource) getListHeader(userData UserData) (list list, err error) {

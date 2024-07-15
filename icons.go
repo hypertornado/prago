@@ -17,6 +17,9 @@ const iconBoard = "glyphicons-basic-424-blackboard.svg"
 const iconForm = "glyphicons-basic-30-clipboard.svg"
 const iconView = "glyphicons-basic-588-book-open-text.svg"
 const iconAction = "glyphicons-basic-111-paragraph-left.svg"
+const iconEdit = "glyphicons-basic-31-pencil.svg"
+const iconDelete = "glyphicons-basic-17-bin.svg"
+const iconDuplicate = "glyphicons-basic-611-copy-duplicate.svg"
 
 func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 	app.iconsFS = &iconsFS

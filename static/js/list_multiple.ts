@@ -27,105 +27,33 @@ class ListMultiple {
       );
     }
 
-    //this.multipleActionStart("edit", ["2", "16"]);
+    this.list.list
+      .querySelector(".list_multiple_actions_cancel")
+      .addEventListener("click", () => {
+        this.multipleUncheckAll();
+      });
   }
 
   multipleActionSelected(e: any) {
-    var target: HTMLDivElement = e.target;
-    var actionName = target.getAttribute("name");
     var ids = this.multipleGetIDs();
-    this.multipleActionStart(actionName, ids);
+    this.multipleActionStart(e.target, ids);
   }
 
-  multipleActionStart(actionName: string, ids: Array<String>) {
-    switch (actionName) {
-      case "cancel":
-        this.multipleUncheckAll();
-        break;
-      case "edit":
+  multipleActionStart(btn: HTMLButtonElement, ids: Array<String>) {
+    let actionID = btn.getAttribute("data-id");
+    let actionName = btn.getAttribute("data-name");
+    switch (btn.getAttribute("data-action-type")) {
+      case "mutiple_edit":
         new ListMultipleEdit(this, ids);
         break;
-      case "clone":
-        new Confirm(
-          `Opravdu chcete naklonovat ${ids.length} položek?`,
-          () => {
-            var loader = new LoadingPopup();
-            var params: any = {};
-            params["action"] = "clone";
-            params["ids"] = ids.join(",");
-            var url =
-              this.list.adminPrefix +
-              "/" +
-              this.list.typeName +
-              "/api/multipleaction" +
-              encodeParams(params);
-            fetch(url, {
-              method: "POST",
-            }).then((e) => {
-              loader.done();
-              if (e.status == 403) {
-                e.json().then((data) => {
-                  new Alert(data.error.Text);
-                });
-                this.list.load();
-                return;
-              }
-              if (e.status != 200) {
-                new Alert("Error while doing multipleaction clone");
-                this.list.load();
-                return;
-              }
-              this.list.load();
-            });
-          },
-          Function(),
-          ButtonStyle.Default
-        );
-        break;
-      case "delete":
-        new Confirm(
-          `Opravdu chcete smazat ${ids.length} položek?`,
-          () => {
-            var loader = new LoadingPopup();
-            var params: any = {};
-            params["action"] = "delete";
-            params["ids"] = ids.join(",");
-            var url =
-              this.list.adminPrefix +
-              "/" +
-              this.list.typeName +
-              "/api/multipleaction" +
-              encodeParams(params);
-            fetch(url, {
-              method: "POST",
-            }).then((e) => {
-              loader.done();
-              if (e.status == 403) {
-                e.json().then((data) => {
-                  new Alert(data.error.Text);
-                });
-                this.list.load();
-                return;
-              }
-              if (e.status != 200) {
-                new Alert("Error while doing multipleaction delete");
-                this.list.load();
-                return;
-              }
-              this.list.load();
-            });
-          },
-          Function(),
-          ButtonStyle.Delete
-        );
-        break;
       default:
-        new Confirm(
-          `Opravdu chcete provést tuto akci na ${ids.length} položek?`,
+        let confirm = new Confirm(
+          `${actionName}: Opravdu chcete provést tuto akci na ${ids.length} položek?`,
+          actionName,
           () => {
             var loader = new LoadingPopup();
             var params: any = {};
-            params["action"] = actionName;
+            params["action"] = actionID;
             params["ids"] = ids.join(",");
             var url =
               this.list.adminPrefix +
@@ -137,23 +65,33 @@ class ListMultiple {
               method: "POST",
             }).then((e) => {
               loader.done();
-              if (e.status == 403) {
+              if (e.status == 200) {
                 e.json().then((data) => {
-                  new Alert(data.error.Text);
+                  if (data.FlashMessage) {
+                    Prago.notificationCenter.flashNotification(
+                      actionName,
+                      data.FlashMessage,
+                      true,
+                      false
+                    );
+                  }
+                  if (data.RedirectURL) {
+                    window.location = data.RedirectURL;
+                  }
+                  this.list.load();
                 });
+              } else {
+                Prago.notificationCenter.flashNotification(
+                  actionName,
+                  "Chyba " + e,
+                  false,
+                  true
+                );
                 this.list.load();
-                return;
               }
-              if (e.status != 200) {
-                new Alert("Error while doing multipleaction " + actionName);
-                this.list.load();
-                return;
-              }
-              this.list.load();
             });
           },
           Function()
-          //ButtonStyle.Delete
         );
     }
   }

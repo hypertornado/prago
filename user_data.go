@@ -48,6 +48,7 @@ type UserData interface {
 	Name() string
 	Locale() string
 	Authorize(Permission) bool
+	UserID() int64
 }
 
 type userData struct {

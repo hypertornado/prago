@@ -1103,23 +1103,71 @@ html:has(.admin_nologin) {
   position: fixed;
   z-index: 1000;
   bottom: 0px;
-  right: 0px;
-  padding: 10px;
-  left: 300px;
-  pointer-events: none;
+  right: 10px;
+  padding: 5px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+  left: 10px;
+  left: 310px;
+  display: flex;
   display: none;
   justify-content: center;
+  align-items: center;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border: 1px solid #eee;
+  border-bottom: none;
+  background-color: white;
+}
+
+.list_multiple_actions_content {
+  padding: 5px 5px;
+  border-radius: 10px;
+  pointer-events: initial;
+  display: flex;
+  gap: 5px;
+  flex-grow: 100;
+  flex-shrink: 100;
+  flex-direction: column;
+}
+
+.list_multiple_actions_description {
+  margin: 0px 0px;
+  font-size: 0.9rem;
+  line-height: 1.3em;
+  font-weight: 500;
+  color: #888;
+}
+
+.list_multiple_actions_buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: start;
+}
+
+.list_multiple_actions_cancel {
+  width: 25px;
+  aspect-ratio: 1;
+  border: 3px solid transparent;
+  border-radius: 100px;
+  cursor: pointer;
+}
+.list_multiple_actions_cancel:hover {
+  background-color: hsl(214deg, 50%, 97%);
+}
+.list_multiple_actions_cancel:active {
+  background-color: hsl(214deg, 50%, 90%);
 }
 
 @media (max-width: 1000px) {
   .list_multiple_actions {
-    left: 0px;
+    left: 10px;
   }
 }
 @keyframes multipleActionAnimation {
   from {
     opacity: 0;
-    transform: perspective(2cm) rotateX(-90deg) translateY(-10px);
+    transform: translateY(50px);
   }
   to {
     opacity: 1;
@@ -1127,26 +1175,7 @@ html:has(.admin_nologin) {
 }
 .list_multiple_actions-visible {
   display: flex;
-  animation: multipleActionAnimation 700ms ease-in-out;
-}
-
-.list_multiple_actions_content {
-  background-color: white;
-  padding: 5px 10px;
-  border-radius: 10px;
-  border: 1px solid #eee;
-  pointer-events: initial;
-  display: flex;
-  align-items: center;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-}
-
-.list_multiple_actions_description {
-  margin: 0px 10px;
-}
-
-.list_multiple_action {
-  margin: 0px 5px;
+  animation: multipleActionAnimation 300ms ease;
 }
 
 @media (hover: hover) {
@@ -1515,7 +1544,8 @@ input.list_filter_layout_date_to {
   display: inline-flex;
   align-items: center;
   position: relative;
-  padding: 3px 12px;
+  padding: 3px 5px;
+  gap: 5px;
   font-size: 12px;
 }
 
@@ -1613,15 +1643,12 @@ input.list_filter_layout_date_to {
 .btn-delete,
 .btn-delete:hover,
 .btn-delete:active {
-  border: 1px solid red;
-  color: white;
-  background: linear-gradient(#dd2e4f, #dd2e4f);
-  background: linear-gradient(#dd2e4f, red);
+  background: linear-gradient(rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.1));
 }
 
 .btn-delete:hover,
 .btn-delete:active {
-  background: linear-gradient(red, red);
+  background: linear-gradient(rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.2));
 }
 
 .form {
@@ -3070,19 +3097,31 @@ a.admin_stats_section_row {
 
 .notification_center {
   position: absolute;
-  top: 10px;
+  top: 52px;
   right: 10px;
   z-index: 100;
 }
 
+@keyframes openNotification {
+  from {
+    opacity: 0;
+    transform: scale(1) translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 .notification {
-  box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  border: 1px solid #eee;
   background-color: white;
   border-radius: 10px;
   margin-bottom: 10px;
   display: flex;
   position: relative;
   width: 250px;
+  animation: openNotification 500ms ease forwards;
 }
 
 .notification-clickable {
@@ -3098,8 +3137,18 @@ a.admin_stats_section_row {
   opacity: 0.8;
 }
 
+@keyframes closeNotification {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0);
+    display: none;
+  }
+}
 .notification-closed {
-  display: none;
+  animation: closeNotification 500ms ease forwards;
 }
 
 .notification_close {

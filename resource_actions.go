@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -105,7 +106,7 @@ func (resource *Resource) initDefaultResourceActions() {
 				vc.Validation().ItemErrors = validation.Validation().ItemErrors
 			}
 		},
-	).Icon("glyphicons-basic-31-pencil.svg").setPriority(defaultHighPriority).Name(messages.GetNameFunction("admin_edit")).Permission(resource.canUpdate)
+	).Icon(iconEdit).setPriority(defaultHighPriority).Name(messages.GetNameFunction("admin_edit")).Permission(resource.canUpdate)
 
 	resource.formItemAction(
 		"delete",
@@ -124,7 +125,7 @@ func (resource *Resource) initDefaultResourceActions() {
 				vc.Validation().RedirectionLocation = resource.getURL("")
 			}
 		},
-	).Icon("glyphicons-basic-17-bin.svg").setPriority(-defaultHighPriority).Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete"))
+	).Icon(iconDelete).setPriority(-defaultHighPriority).Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete"))
 
 	if resource.previewFn != nil {
 		resource.itemActionHandler("preview",
@@ -178,14 +179,14 @@ func CreateWithLog[T any](item *T, request *Request) error {
 	return resource.createWithLog(item, request)
 }
 
-func (resource *Resource) createWithLog(item any, request *Request) error {
-	err := resource.create(request.r.Context(), item)
+func (resource *Resource) createWithLog(item any, userData UserData) error {
+	err := resource.create(context.Background(), item)
 	if err != nil {
 		return err
 	}
 
 	if resource.activityLog {
-		err := resource.logActivity(request, nil, item)
+		err := resource.logActivity(userData, nil, item)
 		if err != nil {
 			return err
 		}
@@ -200,7 +201,7 @@ func DeleteWithLog[T any](item *T, request *Request) error {
 	return resource.deleteWithLog(item, request)
 }
 
-func (resource *Resource) deleteWithLog(item any, request *Request) error {
+func (resource *Resource) deleteWithLog(item any, request UserData) error {
 	if resource.activityLog {
 		err := resource.logActivity(request, item, nil)
 		if err != nil {
@@ -210,7 +211,7 @@ func (resource *Resource) deleteWithLog(item any, request *Request) error {
 
 	id := resource.previewer(request, item).ID()
 
-	err := resource.delete(request.r.Context(), id)
+	err := resource.delete(context.Background(), id)
 	if err != nil {
 		return fmt.Errorf("can't delete item id '%d': %s", id, err)
 	}

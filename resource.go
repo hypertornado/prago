@@ -57,6 +57,8 @@ type Resource struct {
 	itemStats []*itemStat
 
 	defaultValues map[string]func(*Request) string
+
+	multipleActions []*MultipleItemAction
 }
 
 func NewResource[T any](app *App) *Resource {

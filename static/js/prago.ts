@@ -1,6 +1,8 @@
 class Prago {
   //private static x: number;
 
+  static notificationCenter: NotificationCenter;
+
   static start() {
     document.addEventListener("DOMContentLoaded", Prago.init);
   }
@@ -36,7 +38,9 @@ class Prago {
       new RelationList(el);
     });
 
-    new NotificationCenter(document.querySelector(".notification_center"));
+    Prago.notificationCenter = new NotificationCenter(
+      document.querySelector(".notification_center")
+    );
 
     var qa: HTMLDivElement = document.querySelector(".quick_actions");
     if (qa) {

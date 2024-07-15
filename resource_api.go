@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/tealeg/xlsx"
 )
@@ -172,7 +171,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 
 	resource.api("multipleaction").Method("POST").Handler(
 		func(request *Request) {
-			var ids []int64
+			var items []any
 
 			idsStr := strings.Split(request.Param("ids"), ",")
 			for _, v := range idsStr {
@@ -180,82 +179,30 @@ func (resource *Resource) initDefaultResourceAPIs() {
 				if err != nil {
 					panic(fmt.Sprintf("can't convert str '%s' to int", v))
 				}
-				ids = append(ids, int64(id))
+				item := resource.query(request.r.Context()).ID(id)
+				if item == nil {
+					panic(fmt.Sprintf("can't find item %d", id))
+				}
+				items = append(items, item)
 			}
 
 			actionName := request.Param("action")
 
-			switch actionName {
-			case "clone":
-				if !request.Authorize(resource.canCreate) {
-					renderAPINotAuthorized(request)
-					return
+			var multiItemAction *MultipleItemAction
+			for _, action := range resource.multipleActions {
+				if action.ID == actionName {
+					multiItemAction = action
 				}
-				for _, v := range ids {
-					item := resource.query(request.r.Context()).ID(v)
-					if item == nil {
-						panic(fmt.Sprintf("can't get item for clone with id %d", v))
-					}
-					val := reflect.ValueOf(item).Elem()
-					val.FieldByName("ID").SetInt(0)
-					timeVal := reflect.ValueOf(time.Now())
-					for _, fieldName := range []string{"CreatedAt", "UpdatedAt"} {
-						field := val.FieldByName(fieldName)
-						if field.IsValid() && field.CanSet() && field.Type() == timeVal.Type() {
-							field.Set(timeVal)
-						}
-					}
-
-					//TODO: log for creation
-					err := resource.create(request.r.Context(), item)
-					if err != nil {
-						panic(fmt.Sprintf("can't create item for clone with id %d: %s", v, err))
-					}
-
-					if resource.activityLog {
-						must(
-							resource.logActivity(request, nil, item),
-						)
-					}
-				}
-
-				request.app.Notification(fmt.Sprintf(
-					"%d položek naklonováno", len(ids),
-				)).Flash(request)
-
-			case "delete":
-				if !request.Authorize(resource.canDelete) {
-					renderAPINotAuthorized(request)
-					return
-				}
-				for _, v := range ids {
-					var values url.Values = make(map[string][]string)
-					values.Add("id", fmt.Sprintf("%d", v))
-
-					valValidation := newValuesValidation(request.r.Context(), request.app, request, values)
-					for _, v := range resource.deleteValidations {
-						v(valValidation)
-					}
-
-					if !valValidation.Valid() {
-						request.WriteJSON(
-							403,
-							valValidation.validation.TextErrorReport(v, request.Locale()),
-						)
-						return
-					}
-
-					item := resource.query(request.r.Context()).ID(v)
-					if item == nil {
-						panic("can't find item to delete")
-					}
-
-					err := resource.deleteWithLog(item, request)
-					must(err)
-				}
-			default:
-				panic("did not find action")
 			}
+
+			if !request.Authorize(multiItemAction.Permission) {
+				renderAPINotAuthorized(request)
+				return
+			}
+
+			response := &MultipleItemActionResponse{}
+			multiItemAction.Handler(items, request, response)
+			request.WriteJSON(200, response)
 		},
 	)
 

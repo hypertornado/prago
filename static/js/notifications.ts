@@ -15,6 +15,13 @@ class NotificationCenter {
     });
 
     this.periodDataLoader();
+
+    /*this.flashNotification("Hello world");
+    this.flashNotification("Hello world");
+    this.flashNotification("Hello world");
+    this.flashNotification("Hello world");
+    this.flashNotification("Hello world");
+    this.flashNotification("Hello world");*/
   }
 
   async periodDataLoader() {
@@ -51,6 +58,28 @@ class NotificationCenter {
       el.classList.add("notification-closed");
     });
   }
+
+  flashNotification(
+    name: string,
+    description: string,
+    success: boolean,
+    fail: boolean
+  ) {
+    var style = "";
+    if (success) {
+      style = "success";
+    }
+    if (fail) {
+      style = "fail";
+    }
+    this.setData({
+      UUID: makeid(10),
+      Name: name,
+      Description: description,
+      Flash: false,
+      Style: style,
+    });
+  }
 }
 
 interface NotificationData {
@@ -65,11 +94,12 @@ interface NotificationData {
   DisableCancel?: Boolean;
   Style?: String;
   Progress?: NotificationItemProgress;
+  Flash?: Boolean;
 }
 
 interface NotificationItemProgress {
   Human: string;
-  Percentage: Number;
+  Percentage: number;
 }
 
 class NotificationItem {
@@ -217,5 +247,15 @@ class NotificationItem {
       this.el.classList.remove("notification-clickable");
       this.el.setAttribute("data-url", "");
     }
+
+    if (data.Flash) {
+      window.setTimeout(() => {
+        this.close();
+      }, 1000);
+    }
+  }
+
+  close() {
+    this.el.classList.add("notification-closed");
   }
 }
