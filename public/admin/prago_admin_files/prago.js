@@ -645,25 +645,52 @@ class List {
         var paginationEl = this.list.querySelector(".pagination");
         var totalPages = parseInt(paginationEl.getAttribute("data-total"));
         var selectedPage = parseInt(paginationEl.getAttribute("data-selected"));
+        if (totalPages < 2) {
+            return;
+        }
+        let beforeItemWasShown = true;
         for (var i = 1; i <= totalPages; i++) {
-            var pEl = document.createElement("a");
-            pEl.setAttribute("href", "#");
-            pEl.textContent = i + "";
-            if (i == selectedPage) {
-                pEl.classList.add("pagination_page_current");
+            let shouldBeShown = false;
+            let maxDistance = 2;
+            if (Math.abs(1 - i) <= maxDistance) {
+                shouldBeShown = true;
+            }
+            if (Math.abs(totalPages - i) <= maxDistance) {
+                shouldBeShown = true;
+            }
+            if (Math.abs(selectedPage - i) <= maxDistance) {
+                shouldBeShown = true;
+            }
+            if (shouldBeShown) {
+                if (!beforeItemWasShown) {
+                    let delimiterEl = document.createElement("div");
+                    delimiterEl.classList.add("pagination_page_delimiter");
+                    delimiterEl.innerText = "…";
+                    paginationEl.appendChild(delimiterEl);
+                }
+                var pEl = document.createElement("a");
+                pEl.setAttribute("href", "#");
+                pEl.textContent = i + "";
+                if (i == selectedPage) {
+                    pEl.classList.add("pagination_page_current");
+                }
+                else {
+                    pEl.classList.add("pagination_page");
+                    pEl.setAttribute("data-page", i + "");
+                    pEl.addEventListener("click", this.paginationChange.bind(this));
+                }
+                paginationEl.appendChild(pEl);
+                beforeItemWasShown = true;
             }
             else {
-                pEl.classList.add("pagination_page");
-                pEl.setAttribute("data-page", i + "");
-                pEl.addEventListener("click", this.paginationChange.bind(this));
+                beforeItemWasShown = false;
             }
-            paginationEl.appendChild(pEl);
         }
     }
     bindFetchStats() {
         var cells = this.list.querySelectorAll(".list_cell[data-fetch-url]");
         for (var i = 0; i < cells.length; i++) {
-            var cell = cells[i];
+            let cell = cells[i];
             let url = cell.getAttribute("data-fetch-url");
             if (!url) {
                 continue;
@@ -675,12 +702,12 @@ class List {
             })
                 .then((data) => {
                 cellContentSpan.innerText = data.Value;
+                cell.setAttribute("title", data.Value);
             })
                 .catch((error) => {
                 cellContentSpan.innerText = "⚠️";
                 console.error("cant fetch data:", error);
             });
-            console.log(cell);
         }
     }
     bindClick() {

@@ -13,8 +13,12 @@
   line-height: 1.4em;
   display: inline-block;
   text-decoration: none;
-  border-radius: 3px;
-  min-width: 70px;
+  border-radius: 5px;
+  min-width: 20px;
+}
+
+.pagination_page_delimiter {
+  display: inline-block;
 }
 
 .pagination_page:hover {
@@ -27,8 +31,9 @@
 
 .pagination_page_current,
 .pagination_page_current:hover {
-  background-color: $baseColor;
-  color: white;
+  background-color: $backgroundGrayColor;
+  //color: white;
+  color: $black;
   border: 1px solid $grayBorderColor;
 }
 

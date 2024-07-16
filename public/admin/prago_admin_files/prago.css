@@ -2756,8 +2756,12 @@ a.admin_stats_section_row {
   line-height: 1.4em;
   display: inline-block;
   text-decoration: none;
-  border-radius: 3px;
-  min-width: 70px;
+  border-radius: 5px;
+  min-width: 20px;
+}
+
+.pagination_page_delimiter {
+  display: inline-block;
 }
 
 .pagination_page:hover {
@@ -2770,8 +2774,8 @@ a.admin_stats_section_row {
 
 .pagination_page_current,
 .pagination_page_current:hover {
-  background-color: hsl(214deg, 50%, 50%);
-  color: white;
+  background-color: #fafafa;
+  color: #444;
   border: 1px solid #eee;
 }
 
