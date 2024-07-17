@@ -2,6 +2,7 @@ package prago
 
 import (
 	"fmt"
+	"html/template"
 	"sort"
 	"strings"
 )
@@ -234,12 +235,19 @@ func (action *Action) getController() *controller {
 	}
 }
 
-func (action *Action) View(template string, dataSource func(*Request) any) *Action {
+func (action *Action) Content(dataSource func(*Request) template.HTML) *Action {
 	return action.ui(func(request *Request, pd *pageData) {
-		pd.PageTemplate = template
+		pd.PageContent = dataSource(request)
+	})
+}
+
+func (action *Action) uiView(myTemplate string, dataSource func(*Request) any) *Action {
+	return action.ui(func(request *Request, pd *pageData) {
+		var data any
 		if dataSource != nil {
-			pd.PageData = dataSource(request)
+			data = dataSource(request)
 		}
+		pd.PageContent = template.HTML(request.app.ExecuteTemplateToString(myTemplate, data))
 	})
 
 }

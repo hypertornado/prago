@@ -90,6 +90,7 @@ type Notification struct {
 	disableCancel   bool
 	style           string
 	progress        *notificationProgress
+	isFlash         bool
 }
 
 type notificationProgress struct {
@@ -182,6 +183,7 @@ type notificationView struct {
 	DisableCancel   bool
 	Style           string
 	Progress        *notificationProgress
+	IsFlash         bool
 }
 
 func (n *Notification) getView() *notificationView {
@@ -207,6 +209,7 @@ func (n *Notification) getView() *notificationView {
 		DisableCancel:   n.disableCancel,
 		Style:           n.style,
 		Progress:        n.progress,
+		IsFlash:         n.isFlash,
 	}
 }
 
@@ -228,6 +231,7 @@ func (n *Notification) Push(userID int64) {
 }
 
 func (n *Notification) Flash(request *Request) error {
+	n.isFlash = true
 	n.app.notificationCenter.add(n)
 	request.session.session.AddFlash(n.uuid)
 	request.session.dirty = true

@@ -1,13 +1,15 @@
 class Prago {
-  //private static x: number;
-
   static notificationCenter: NotificationCenter;
+  static shortcuts: Shortcuts;
 
   static start() {
     document.addEventListener("DOMContentLoaded", Prago.init);
   }
 
   private static init() {
+    Prago.shortcuts = new Shortcuts(document.body);
+    Prago.shortcuts.addRootShortcuts();
+
     var listEl = document.querySelector<HTMLDivElement>(".list");
     if (listEl) {
       new List(listEl);

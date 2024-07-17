@@ -139,3 +139,7 @@ func (app *App) ExecuteTemplateToString(templateName string, data interface{}) s
 	must(err)
 	return bufStats.String()
 }
+
+func (app *App) ExecuteTemplateToHTML(templateName string, data interface{}) template.HTML {
+	return template.HTML(app.ExecuteTemplateToString(templateName, data))
+}

@@ -18,11 +18,28 @@
   display: flex;
 }
 
+.popup_background-presented .popup {
+  animation: 300ms ease-out popupDisplayAnimation forwards;
+}
+
+@keyframes popupDisplayAnimation {
+
+  from {
+    opacity: 1;
+    transform: perspective(20cm) rotateX(-45deg) translateY(200px);
+  }
+
+  to {
+    opacity: 1;
+  }
+  
+}
+
 .popup {
   @include rectangle;
   width: min(300px, 100% - 20px);
   background-color: #eee;
-  @include shadowLarge;
+  @include shadowMedium;
   display: flex;
   flex-direction: column;
   padding: 0px;

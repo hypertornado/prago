@@ -17,7 +17,7 @@ func ResourceItemView[T any](app *App, url string, template string, dataSource f
 func (resource *Resource) itemActionView(url, template string, dataSource func(any, *Request) interface{}) *Action {
 	action := resource.newItemAction(url)
 
-	action.View(template, func(request *Request) interface{} {
+	action.uiView(template, func(request *Request) interface{} {
 		item := resource.query(request.r.Context()).ID(request.Param("id"))
 		if item == nil {
 			panic("can't find item")

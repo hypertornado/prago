@@ -54,8 +54,8 @@
                 {{if .BoardView}}
                     {{template "board" .BoardView}}
                 {{end}}
-                {{if .PageTemplate}}
-                    {{tmpl .PageTemplate .PageData}}
+                {{if .PageContent}}
+                    {{.PageContent}}
                 {{end}}
             </div>
         </div>

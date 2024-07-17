@@ -76,7 +76,7 @@ class NotificationCenter {
       UUID: makeid(10),
       Name: name,
       Description: description,
-      Flash: false,
+      IsFlash: true,
       Style: style,
     });
   }
@@ -94,7 +94,7 @@ interface NotificationData {
   DisableCancel?: Boolean;
   Style?: String;
   Progress?: NotificationItemProgress;
-  Flash?: Boolean;
+  IsFlash?: Boolean;
 }
 
 interface NotificationItemProgress {
@@ -248,10 +248,10 @@ class NotificationItem {
       this.el.setAttribute("data-url", "");
     }
 
-    if (data.Flash) {
+    if (data.IsFlash) {
       window.setTimeout(() => {
         this.close();
-      }, 1000);
+      }, 5000);
     }
   }
 

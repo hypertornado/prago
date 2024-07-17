@@ -2173,6 +2173,11 @@ class SearchForm {
         this.searchForm = el;
         this.searchInput = el.querySelector(".searchbox_input");
         this.suggestionsEl = (el.querySelector(".searchbox_suggestions"));
+        Prago.shortcuts.add({
+            Key: "/",
+        }, "Vyhledávání", () => {
+            this.searchInput.focus();
+        });
         this.searchInput.addEventListener("input", () => {
             this.suggestions = [];
             this.dirty = true;
@@ -2519,7 +2524,7 @@ class NotificationCenter {
             UUID: makeid(10),
             Name: name,
             Description: description,
-            Flash: false,
+            IsFlash: true,
             Style: style,
         });
     }
@@ -2644,10 +2649,10 @@ class NotificationItem {
             this.el.classList.remove("notification-clickable");
             this.el.setAttribute("data-url", "");
         }
-        if (data.Flash) {
+        if (data.IsFlash) {
             window.setTimeout(() => {
                 this.close();
-            }, 1000);
+            }, 5000);
         }
     }
     close() {
@@ -3053,11 +3058,82 @@ class DashboardFigure {
         request.send();
     }
 }
+class Shortcuts {
+    constructor(el) {
+        this.el = el;
+        this.shortcuts = [];
+        this.el.addEventListener("keydown", (e) => {
+            for (let shortcut of this.shortcuts) {
+                if (shortcut.match(e)) {
+                    shortcut.handler();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            }
+        });
+    }
+    add(shortcut, description, handler) {
+        this.shortcuts.push(new Shortcut(shortcut, description, handler));
+    }
+    addRootShortcuts() {
+        this.add({
+            Key: "?",
+        }, "Zobrazit nápovědu", () => {
+            let contentEl = document.createElement("div");
+            for (let shortcut of this.shortcuts) {
+                let shortcutEl = document.createElement("div");
+                shortcutEl.innerText = shortcut.getDescription();
+                contentEl.appendChild(shortcutEl);
+            }
+            let popup = new ContentPopup("Zkratky", contentEl);
+            popup.show();
+        });
+    }
+}
+class Shortcut {
+    constructor(shortcut, description, handler) {
+        this.shortcut = shortcut;
+        this.handler = handler;
+        this.description = description;
+    }
+    match(e) {
+        if (e.key != this.shortcut.Key) {
+            return false;
+        }
+        if (this.shortcut.Alt && !e.altKey) {
+            return false;
+        }
+        if (this.shortcut.Shift && !e.shiftKey) {
+            return false;
+        }
+        if (this.shortcut.Control && !e.ctrlKey && !e.metaKey) {
+            return false;
+        }
+        return true;
+    }
+    getDescription() {
+        let items = [];
+        if (this.shortcut.Control) {
+            items.push("Ctrl");
+        }
+        if (this.shortcut.Alt) {
+            items.push("Alt");
+        }
+        if (this.shortcut.Shift) {
+            items.push("Shift");
+        }
+        items.push(this.shortcut.Key);
+        return items.join("+") + ": " + this.description;
+    }
+}
 class Prago {
     static start() {
         document.addEventListener("DOMContentLoaded", Prago.init);
     }
     static init() {
+        Prago.shortcuts = new Shortcuts(document.body);
+        Prago.shortcuts.addRootShortcuts();
         var listEl = document.querySelector(".list");
         if (listEl) {
             new List(listEl);

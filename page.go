@@ -2,6 +2,7 @@ package prago
 
 import (
 	"fmt"
+	"html/template"
 	"math/rand"
 )
 
@@ -19,8 +20,7 @@ type pageData struct {
 
 	Messages []pageMessage
 
-	PageTemplate string
-	PageData     interface{}
+	PageContent template.HTML
 
 	Menu *menu
 
@@ -76,6 +76,7 @@ func (page *pageData) renderPage(request *Request) {
 	if code == 0 {
 		code = 200
 	}
+
 	request.WriteHTML(code, "prago_layout", page)
 }
 

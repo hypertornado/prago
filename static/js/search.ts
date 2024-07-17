@@ -13,6 +13,16 @@ class SearchForm {
       el.querySelector(".searchbox_suggestions")
     );
 
+    Prago.shortcuts.add(
+      {
+        Key: "/",
+      },
+      "Vyhledávání",
+      () => {
+        this.searchInput.focus();
+      }
+    );
+
     //this.searchInput.value = document.body.getAttribute("data-search-query");
 
     this.searchInput.addEventListener("input", () => {

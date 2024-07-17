@@ -3014,6 +3014,19 @@ a.admin_stats_section_row {
   display: flex;
 }
 
+.popup_background-presented .popup {
+  animation: 300ms ease-out popupDisplayAnimation forwards;
+}
+
+@keyframes popupDisplayAnimation {
+  from {
+    opacity: 1;
+    transform: perspective(20cm) rotateX(-45deg) translateY(200px);
+  }
+  to {
+    opacity: 1;
+  }
+}
 .popup {
   border: 1px solid #eee;
   display: inline-block;
@@ -3023,7 +3036,7 @@ a.admin_stats_section_row {
   flex-shrink: 0;
   width: min(300px, 100% - 20px);
   background-color: #eee;
-  box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
   display: flex;
   flex-direction: column;
   padding: 0px;
