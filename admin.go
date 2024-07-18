@@ -22,7 +22,9 @@ func (app *App) initAdminActions() {
 		next()
 	})
 
-	app.Action("markdown").Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).Board(nil).uiView(app.adminTemplates, "admin_help_markdown", nil)
+	app.Action("markdown").Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).Board(nil).ui(func(r *Request, pd *pageData) {
+		pd.PageContent = app.adminTemplates.ExecuteToHTML("admin_help_markdown", nil)
+	})
 
 	app.accessController.routeHandler("GET", "/admin/logo", func(request *Request) {
 		if app.logo != nil {
