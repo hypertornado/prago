@@ -10,7 +10,7 @@
                 <input type="checkbox" class="multiple_edit_field_checkbox" name="_fields" value="{{$item.ID}}"> {{$item.Name}}
             </label>
             <div class="multiple_edit_field_content">
-                {{tmpl $item.Template $item}}
+                {{PragoTMPL $item.Template $item}}
             </div>
         </div>
     {{end}}

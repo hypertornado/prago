@@ -20,9 +20,10 @@ type Request struct {
 
 	notifications []*notificationView
 
-	Written          bool
-	ResponseStatus   int
-	ResponseTemplate string
+	Written        bool
+	ResponseStatus int
+	//ResponseTemplates    *PragoTemplates
+	ResponseTemplateName string
 }
 
 func (request Request) getNotificationsData() string {
@@ -118,13 +119,13 @@ func (request *Request) Authorize(permission Permission) bool {
 }
 
 // WriteHTML renders HTML view with HTTP code
-func (request *Request) WriteHTML(statusCode int, templateName string, data any) {
+func (request *Request) WriteHTML(statusCode int, templates *PragoTemplates, templateName string, data any) {
 	request.Response().Header().Add("Content-Type", "text/html; charset=utf-8")
 	request.writeSessionIfDirty()
 	request.Response().WriteHeader(statusCode)
 	request.Written = true
 	must(
-		request.app.templates.templates.ExecuteTemplate(
+		templates.templates.ExecuteTemplate(
 			request.Response(),
 			templateName,
 			data,

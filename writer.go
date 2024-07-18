@@ -1,17 +1,19 @@
 package prago
 
 type Writer[T any] struct {
-	app      *App
-	template string
+	app          *App
+	templateName string
+	templates    *PragoTemplates
 
 	beforeFN func(*Request, *T)
 	afterFN  func(*Request, *T)
 }
 
-func NewWriter[T any](app *App, template string) *Writer[T] {
+func NewWriter[T any](app *App, templates *PragoTemplates, templateName string) *Writer[T] {
 	return &Writer[T]{
-		app:      app,
-		template: template,
+		app:          app,
+		templateName: templateName,
+		templates:    templates,
 	}
 }
 
@@ -38,7 +40,8 @@ func (w *Writer[T]) route(method string, path string, handler func(*Request, *T)
 	action := func(request *Request) {
 		var d T
 		dp := &d
-		request.ResponseTemplate = w.template
+		//request.ResponseTemplates = w.templates
+		request.ResponseTemplateName = w.templateName
 
 		if w.beforeFN != nil {
 			w.beforeFN(request, dp)
@@ -50,8 +53,8 @@ func (w *Writer[T]) route(method string, path string, handler func(*Request, *T)
 			w.afterFN(request, dp)
 		}
 
-		if !request.Written && request.ResponseTemplate != "" {
-			request.WriteHTML(request.ResponseStatus, request.ResponseTemplate, dp)
+		if !request.Written && request.ResponseTemplateName != "" {
+			request.WriteHTML(request.ResponseStatus, request.app.Templates, request.ResponseTemplateName, dp)
 		}
 	}
 

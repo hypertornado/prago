@@ -24,7 +24,7 @@ type App struct {
 	staticFiles     staticFiles
 	commands        []*command
 	logger          *logger
-	templates       *templates
+	Templates       *PragoTemplates
 	cache           *cache
 	sessionsManager *sessionsManager
 

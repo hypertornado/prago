@@ -116,7 +116,7 @@ func (previewer *previewer) ThumbnailURL(ctx context.Context) string {
 		itemsVal := reflect.ValueOf(previewer.item).Elem()
 		field := itemsVal.FieldByName("Image")
 		if field.IsValid() && previewer.hasAccessToField("Image") {
-			return previewer.resource.app.thumb(ctx, field.String())
+			return previewer.resource.app.thumb(field.String())
 		}
 	}
 	return ""

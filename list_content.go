@@ -169,7 +169,7 @@ func (resource *Resource) getListContentJSON(ctx context.Context, userData UserD
 	}
 
 	buf := new(bytes.Buffer)
-	err = resource.app.ExecuteTemplate(buf, "admin_list_cells", map[string]interface{}{
+	err = resource.app.Templates.Execute(buf, "admin_list_cells", map[string]interface{}{
 		"admin_list": listData,
 	})
 	if err != nil {
@@ -179,7 +179,7 @@ func (resource *Resource) getListContentJSON(ctx context.Context, userData UserD
 	var statsStr string
 	if listData.Stats != nil {
 		bufStats := new(bytes.Buffer)
-		err = resource.app.ExecuteTemplate(bufStats, "admin_stats", listData.Stats)
+		err = resource.app.Templates.Execute(bufStats, "admin_stats", listData.Stats)
 		if err != nil {
 			return nil, err
 		}
@@ -187,7 +187,7 @@ func (resource *Resource) getListContentJSON(ctx context.Context, userData UserD
 	}
 
 	bufFooter := new(bytes.Buffer)
-	err = resource.app.ExecuteTemplate(bufFooter, "admin_list_footer", map[string]interface{}{
+	err = resource.app.Templates.Execute(bufFooter, "admin_list_footer", map[string]interface{}{
 		"admin_list": listData,
 	})
 	if err != nil {

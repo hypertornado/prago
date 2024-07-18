@@ -2,12 +2,10 @@ package prago
 
 import (
 	"bytes"
-	"context"
 	"embed"
 	"html/template"
 	"io"
 	"io/fs"
-	"strings"
 	"sync"
 
 	"github.com/golang-commonmark/markdown"
@@ -18,7 +16,7 @@ import (
 //go:embed templates
 var templatesFS embed.FS
 
-type templates struct {
+type PragoTemplates struct {
 	templates      *template.Template
 	funcMap        template.FuncMap
 	templatesMutex *sync.RWMutex
@@ -31,115 +29,95 @@ type templateFS struct {
 }
 
 func (app *App) initTemplates() {
-	app.templates = &templates{
+	app.Templates = &PragoTemplates{
 		funcMap:        map[string]interface{}{},
 		templatesMutex: &sync.RWMutex{},
 		fileSystems:    []*templateFS{},
 	}
 
-	app.AddTemplateFunction("HTML", func(data string) template.HTML {
+	app.Templates.Function("PragoHTML", func(data string) template.HTML {
 		return template.HTML(data)
 	})
 
-	app.AddTemplateFunction("HTMLAttr", func(data string) template.HTMLAttr {
+	app.Templates.Function("PragoHTMLAttr", func(data string) template.HTMLAttr {
 		return template.HTMLAttr(data)
 	})
 
-	app.AddTemplateFunction("CSS", func(data string) template.CSS {
+	app.Templates.Function("PragoCSS", func(data string) template.CSS {
 		return template.CSS(data)
 	})
 
-	app.AddTemplateFunction("tmpl", func(templateName string, x interface{}) (template.HTML, error) {
+	app.Templates.Function("PragoTMPL", func(templateName string, x interface{}) (template.HTML, error) {
 		var buf bytes.Buffer
-		err := app.templates.templates.ExecuteTemplate(&buf, templateName, x)
+		err := app.Templates.templates.ExecuteTemplate(&buf, templateName, x)
 		return template.HTML(buf.String()), err
 	})
 
-	app.AddTemplateFunction("markdown", func(text string) template.HTML {
+	app.Templates.Function("PragoMarkdown", func(text string) template.HTML {
 		return template.HTML(markdown.New(markdown.Breaks(true)).RenderToString([]byte(text)))
 	})
 
-	app.AddTemplateFunction("message", func(language, id string) template.HTML {
+	app.Templates.Function("PragoMessage", func(language, id string) template.HTML {
 		return template.HTML(messages.Get(language, id))
 	})
 
-	app.AddTemplateFunction("thumb", func(ids string) string {
-		return app.thumb(context.TODO(), ids)
+	app.Templates.Function("PragoThumb", func(ids string) string {
+		return app.thumb(ids)
 	})
 
-	app.AddTemplateFunction("thumbnailExactSize", func(ids string, width, height int) string {
-		return app.thumbnailExactSize(context.TODO(), ids, width, height)
-	})
-
-	app.AddTemplateFunction("img", func(ids string) string {
-		for _, v := range strings.Split(ids, ",") {
-			image := Query[File](app).Is("uid", v).First()
-			if image != nil && image.isImage() {
-				return image.GetLarge()
-			}
-		}
-		return ""
-	})
-
-	app.AddTemplateFunction("iconExists", func(iconName string) bool {
+	app.Templates.Function("PragoIconExists", func(iconName string) bool {
 		return app.iconExists(iconName)
 	})
 
-	app.AddTemplateFunction("multiplication", func(a, b int) int { return a * b })
-
-	must(app.AddTemplates(templatesFS, "templates/*.tmpl"))
+	must(app.Templates.Add(templatesFS, "templates/*.tmpl"))
 }
 
-// AddTemplates loads app's html templates from file system
-func (app *App) AddTemplates(fsys fs.FS, patterns ...string) error {
-	app.templates.templatesMutex.Lock()
-	defer app.templates.templatesMutex.Unlock()
+func (templates *PragoTemplates) Add(fsys fs.FS, patterns ...string) error {
+	templates.templatesMutex.Lock()
+	defer templates.templatesMutex.Unlock()
 
 	tempFS := &templateFS{
 		fs:       fsys,
 		patterns: patterns,
 	}
 
-	app.templates.fileSystems = append(app.templates.fileSystems, tempFS)
-	return app.parseTemplates()
+	templates.fileSystems = append(templates.fileSystems, tempFS)
+	return templates.parseTemplates()
 }
 
-func (app *App) parseTemplates() error {
+func (templates *PragoTemplates) parseTemplates() error {
 	t := template.New("")
-	t = t.Funcs(app.templates.funcMap)
-	for _, v := range app.templates.fileSystems {
+	t = t.Funcs(templates.funcMap)
+	for _, v := range templates.fileSystems {
 		var err error
 		t, err = t.ParseFS(v.fs, v.patterns...)
 		if err != nil {
 			return err
 		}
 	}
-	app.templates.templates = t
+	templates.templates = t
 	return nil
 }
 
-// AddTemplateFunction adds template function
-func (app *App) AddTemplateFunction(name string, f interface{}) {
-	app.templates.templatesMutex.Lock()
-	defer app.templates.templatesMutex.Unlock()
-	app.templates.funcMap[name] = f
+func (templates *PragoTemplates) Function(name string, f interface{}) {
+	templates.templatesMutex.Lock()
+	defer templates.templatesMutex.Unlock()
+	templates.funcMap[name] = f
 }
 
-// ExecuteTemplate executes template
-func (app *App) ExecuteTemplate(wr io.Writer, name string, data interface{}) error {
-	app.templates.templatesMutex.RLock()
-	defer app.templates.templatesMutex.RUnlock()
-	return app.templates.templates.ExecuteTemplate(wr, name, data)
+func (templates *PragoTemplates) Execute(wr io.Writer, name string, data interface{}) error {
+	templates.templatesMutex.RLock()
+	defer templates.templatesMutex.RUnlock()
+	return templates.templates.ExecuteTemplate(wr, name, data)
 }
 
-// ExecuteTemplateToString executes template and return string, it panics
-func (app *App) ExecuteTemplateToString(templateName string, data interface{}) string {
+func (templates *PragoTemplates) ExecuteToString(templateName string, data interface{}) string {
 	bufStats := new(bytes.Buffer)
-	err := app.ExecuteTemplate(bufStats, templateName, data)
+	err := templates.Execute(bufStats, templateName, data)
 	must(err)
 	return bufStats.String()
 }
 
-func (app *App) ExecuteTemplateToHTML(templateName string, data interface{}) template.HTML {
-	return template.HTML(app.ExecuteTemplateToString(templateName, data))
+func (templates *PragoTemplates) ExecuteToHTML(templateName string, data interface{}) template.HTML {
+	return template.HTML(templates.ExecuteToString(templateName, data))
 }

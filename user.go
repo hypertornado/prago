@@ -45,6 +45,10 @@ func (user *user) LongName() string {
 	return ret
 }
 
+func (user *user) UserID() int64 {
+	return user.ID
+}
+
 func (user *user) GetName(string) string {
 	var ret string
 	if user.Username != "" {

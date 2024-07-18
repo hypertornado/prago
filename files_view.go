@@ -44,7 +44,7 @@ func getFilesViewData(ctx context.Context, app *App, uid string) (ret filesViewD
 
 	ret.OriginalURL = file.GetOriginal()
 
-	if file.isImage() {
+	if file.IsImage() {
 		ret.MediumURL = file.GetMedium()
 		ret.SmallURL = file.GetSmall()
 		ret.Paths = append(ret.Paths,

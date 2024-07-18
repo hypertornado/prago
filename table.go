@@ -228,9 +228,7 @@ func (t *Table) AddFooterText(text string) {
 
 // TODO execute right into response
 func (t *Table) ExecuteHTML() template.HTML {
-	return template.HTML(
-		t.app.ExecuteTemplateToString("form_table", t.templateData()),
-	)
+	return t.app.Templates.ExecuteToHTML("form_table", t.templateData())
 }
 
 func (t *Table) templateData() []*tableView {

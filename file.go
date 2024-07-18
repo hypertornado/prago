@@ -34,13 +34,13 @@ func initCDN(app *App) {
 	)
 }
 
-func (app *App) thumb(ctx context.Context, ids string) string {
+func (app *App) thumb(ids string) string {
 	if ids == "" {
 		return ""
 	}
 	for _, v := range strings.Split(ids, ",") {
-		image := Query[File](app).Context(ctx).Is("uid", v).First()
-		if image != nil && image.isImage() {
+		image := Query[File](app).Is("uid", v).First()
+		if image != nil && image.IsImage() {
 			return image.GetSmall()
 		}
 	}
@@ -53,21 +53,8 @@ func (app *App) largeImage(ctx context.Context, ids string) string {
 	}
 	for _, v := range strings.Split(ids, ",") {
 		image := Query[File](app).Context(ctx).Is("uid", v).First()
-		if image != nil && image.isImage() {
+		if image != nil && image.IsImage() {
 			return image.GetLarge()
-		}
-	}
-	return ""
-}
-
-func (app *App) thumbnailExactSize(ctx context.Context, ids string, width, height int) string {
-	if ids == "" {
-		return ""
-	}
-	for _, v := range strings.Split(ids, ",") {
-		image := Query[File](app).Context(ctx).Is("uid", v).First()
-		if image != nil && image.isImage() {
-			return image.GetExactSize(width, height)
 		}
 	}
 	return ""
@@ -279,10 +266,6 @@ func (f *File) GetMetadataPath() string {
 }
 
 func (f *File) IsImage() bool {
-	return f.isImage()
-}
-
-func (f *File) isImage() bool {
 	if strings.HasSuffix(f.Name, ".jpg") || strings.HasSuffix(f.Name, ".jpeg") || strings.HasSuffix(f.Name, ".png") {
 		return true
 	}

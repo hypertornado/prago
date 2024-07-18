@@ -98,7 +98,7 @@
 {{define "admin_file"}}
   {{if .Value}}
     <input type="hidden" id="{{.UUID}}" name="{{.ID}}" value="{{.Value}}">
-    <img src="{{thumb .Value}}">
+    <img src="{{PragoThumb .Value}}">
   {{else}}
     <input type="file" id="{{.UUID}}" name="{{.ID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
   {{end}}

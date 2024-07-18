@@ -1,7 +1,7 @@
 {{define "board"}}
   <div class="board">
   
-  <h1 class="board_name">{{if iconExists .BoardIcon}}<img src="/admin/api/icons?file={{.BoardIcon}}&color=444444" class="board_icon">{{end}}<div class="board_name_text">{{.BoardName}}</div></h1>
+  <h1 class="board_name">{{if PragoIconExists .BoardIcon}}<img src="/admin/api/icons?file={{.BoardIcon}}&color=444444" class="board_icon">{{end}}<div class="board_name_text">{{.BoardName}}</div></h1>
 
   {{if .MainDashboard}}
     {{template "dashboard" .MainDashboard}}

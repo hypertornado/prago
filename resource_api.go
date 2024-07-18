@@ -226,7 +226,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 				CSRFToken: request.csrfToken(),
 				IDs:       request.Param("ids"),
 			}
-			request.WriteHTML(200, "multiple_edit", data)
+			request.WriteHTML(200, request.app.Templates, "multiple_edit", data)
 		},
 	)
 

@@ -42,7 +42,7 @@
         <div class="list_header_item_resizer" draggable="true"></div>
         <div class="list_header_item_filter" data-name="{{$item.ColumnName}}" data-filter-layout="{{$item.FilterLayout}}">
           {{if $item.FilterLayout}}
-            {{tmpl $item.FilterLayout $item}}
+            {{PragoTMPL $item.FilterLayout $item}}
           {{end}}
         </div>
       </div>
@@ -67,7 +67,7 @@
 
 {{define "admin_list_settings"}}
   <div class="list_settings">
-    <h3>{{message .Locale "admin_options_visible"}}</h3>
+    <h3>{{PragoMessage .Locale "admin_options_visible"}}</h3>
     <div class="list_settings_labels">
     {{range $item := .Header}}
       <label class="list_settings_label"><input type="checkbox" class="list_settings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
@@ -223,7 +223,7 @@
         <div class="btngroup list_buttons">
           {{range $action := $item.Actions.VisibleButtons}}
             <a href="{{$action.URL}}" class="btn"
-              {{range $k, $v := $action.Params}} {{HTMLAttr $k}}="{{$v}}"{{end}}
+              {{range $k, $v := $action.Params}} {{PragoHTMLAttr $k}}="{{$v}}"{{end}}
             >
               {{if $action.Icon}}
                 <img class="btn_icon" src="/admin/api/icons?file={{$action.Icon}}&color=444444">
