@@ -54,7 +54,6 @@ type App struct {
 	notificationCenter *notificationCenter
 
 	fieldTypes    map[string]*fieldType
-	javascripts   []string
 	accessManager *accessManager
 
 	apis []*API

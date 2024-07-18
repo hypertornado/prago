@@ -22,7 +22,7 @@ func (app *App) initAdminActions() {
 		next()
 	})
 
-	app.Action("markdown").Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).Board(nil).uiView("admin_help_markdown", nil)
+	app.Action("markdown").Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).Board(nil).uiView(app.adminTemplates, "admin_help_markdown", nil)
 
 	app.accessController.routeHandler("GET", "/admin/logo", func(request *Request) {
 		if app.logo != nil {
@@ -57,12 +57,6 @@ func (app App) getAdminURL(suffix string) string {
 		ret += "/" + suffix
 	}
 	return ret
-}
-
-// JavascriptPath adds javascript
-func (app *App) JavascriptPath(url string) *App {
-	app.javascripts = append(app.javascripts, url)
-	return app
 }
 
 func renderErrorPage(request *Request, httpCode int) {

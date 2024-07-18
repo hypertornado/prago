@@ -7,22 +7,15 @@ import (
 	"golang.org/x/net/context"
 )
 
-func ResourceItemView[T any](app *App, url string, template string, dataSource func(*T, *Request) interface{}) *Action {
+func ResourceItemView[T any](app *App, url string, templates *PragoTemplates, template string, dataSource func(*T, *Request) interface{}) *Action {
 	resource := getResource[T](app)
-	return resource.itemActionView(url, template, func(item any, request *Request) interface{} {
-		return dataSource(item.(*T), request)
-	})
-}
-
-func (resource *Resource) itemActionView(url, template string, dataSource func(any, *Request) interface{}) *Action {
 	action := resource.newItemAction(url)
-
-	action.uiView(template, func(request *Request) interface{} {
+	action.uiView(templates, template, func(request *Request) interface{} {
 		item := resource.query(request.r.Context()).ID(request.Param("id"))
 		if item == nil {
 			panic("can't find item")
 		}
-		return dataSource(item, request)
+		return dataSource(item.(*T), request)
 	})
 	return action
 }

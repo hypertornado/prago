@@ -33,7 +33,6 @@ type pageData struct {
 	HelpIcons []string
 
 	NotificationsData string
-	JavaScripts       []string
 	HTTPCode          int
 }
 
@@ -50,7 +49,6 @@ func createPageData(request *Request) *pageData {
 		page.Version += fmt.Sprintf("-development-%d", rand.Intn(10000000000))
 	}
 
-	page.JavaScripts = request.app.javascripts
 	page.NotificationsData = request.getNotificationsData()
 	return page
 }

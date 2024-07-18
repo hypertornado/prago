@@ -241,13 +241,13 @@ func (action *Action) Content(dataSource func(*Request) template.HTML) *Action {
 	})
 }
 
-func (action *Action) uiView(myTemplate string, dataSource func(*Request) any) *Action {
+func (action *Action) uiView(templates *PragoTemplates, myTemplate string, dataSource func(*Request) any) *Action {
 	return action.ui(func(request *Request, pd *pageData) {
 		var data any
 		if dataSource != nil {
 			data = dataSource(request)
 		}
-		pd.PageContent = request.app.adminTemplates.ExecuteToHTML(myTemplate, data)
+		pd.PageContent = templates.ExecuteToHTML(myTemplate, data)
 	})
 
 }
