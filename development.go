@@ -8,11 +8,11 @@ import (
 )
 
 type development struct {
-	app           *App
-	less          []less
-	sass          []sass
-	typeScript    []string
-	templatePaths []developmentTemplatePath
+	app          *App
+	less         []less
+	sass         []sass
+	typeScript   []string
+	templateData []*developmentTemplateData
 }
 
 type less struct {
@@ -25,9 +25,10 @@ type sass struct {
 	Target    string
 }
 
-type developmentTemplatePath struct {
-	Path     string
-	Patterns []string
+type developmentTemplateData struct {
+	Templates     *PragoTemplates
+	WatchPath     string
+	MatchPatterns []string
 }
 
 func (app *App) initDevelopment() {
@@ -68,11 +69,15 @@ func (app *App) AddSassDevelopmentPaths(sourcePath, targetPath string) {
 	app.development.sass = append(app.development.sass, sass{sourcePath, targetPath})
 }
 
-// AddTemplatesDevelopmentPath automatically compiles templates from path in development mode
-func (app *App) AddTemplatesDevelopmentPath(path string, patterns ...string) {
-	app.development.templatePaths = append(app.development.templatePaths, developmentTemplatePath{
-		Path:     path,
-		Patterns: patterns,
+func (app *App) AddPragoDevelopmentPath(path string) {
+	app.AddTemplatesDevelopmentPath(app.adminTemplates, path+"/templates", "*")
+}
+
+func (app *App) AddTemplatesDevelopmentPath(templates *PragoTemplates, watchPath string, matchPatterns ...string) {
+	app.development.templateData = append(app.development.templateData, &developmentTemplateData{
+		WatchPath:     watchPath,
+		MatchPatterns: matchPatterns,
+		Templates:     templates,
 	})
 }
 
@@ -90,8 +95,8 @@ func (app *App) startDevelopment() {
 		go developmentTypescript(v)
 	}
 
-	for _, v := range app.development.templatePaths {
-		go app.developmentTemplate(v)
+	for _, v := range app.development.templateData {
+		app.developmentTemplate(v)
 	}
 }
 
@@ -105,7 +110,7 @@ func developmentTypescript(path string) {
 func (app *App) developmentLess(sourcePath, targetPath string) {
 	indexPath := filepath.Join(sourcePath, "index.less")
 	compileLess(indexPath, targetPath)
-	app.watchPath(sourcePath, func() {
+	watchPath(sourcePath, func() {
 		compileLess(indexPath, targetPath)
 	})
 }
@@ -113,23 +118,31 @@ func (app *App) developmentLess(sourcePath, targetPath string) {
 func (app *App) developmentSass(sourcePath, targetPath string) {
 	indexPath := filepath.Join(sourcePath, "index.scss")
 	compileSass(indexPath, targetPath)
-	app.watchPath(sourcePath, func() {
+	watchPath(sourcePath, func() {
 		compileSass(indexPath, targetPath)
 	})
 }
 
-func (app *App) developmentTemplate(path developmentTemplatePath) {
-	must(app.adminTemplates.Add(os.DirFS(path.Path), path.Patterns...))
+func (app *App) developmentTemplate(data *developmentTemplateData) {
 
-	app.watchPath(path.Path, func() {
-		app.Log().Printf("Compiling changed templates from path: %s", path.Path)
+	data.Templates.watchPattern = data.WatchPath
+	data.Templates.matchPatterns = data.MatchPatterns
+	data.Templates.fs = os.DirFS(data.WatchPath)
+	go data.Templates.watch()
+
+	//must(app.adminTemplates.SetFilesystem(os.DirFS(data.WatchPath), data.MatchPatterns...))
+
+	/*watchPath(data.WatchPath, func() {
+		data.Templates.templatesMutex.Lock()
+		defer data.Templates.templatesMutex.Unlock()
+		app.Log().Printf("Compiling changed templates from path: %s", data.WatchPath)
 		err := app.adminTemplates.parseTemplates()
 		if err != nil {
-			app.Log().Printf("Error while compiling templates in development mode from path '%s': %s", path.Path, err)
+			app.Log().Printf("Error while compiling templates in development mode from path '%s': %s", data.WatchPath, err)
 		} else {
 			app.Log().Println("Compiling OK.")
 		}
-	})
+	})*/
 }
 
 func compileLess(from, to string) error {

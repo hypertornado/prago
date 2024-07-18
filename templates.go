@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
+	"log"
 	"sync"
 
 	"github.com/golang-commonmark/markdown"
@@ -20,19 +21,15 @@ type PragoTemplates struct {
 	templates      *template.Template
 	funcMap        template.FuncMap
 	templatesMutex *sync.RWMutex
-	fileSystems    []*templateFS
-}
-
-type templateFS struct {
-	fs       fs.FS
-	patterns []string
+	fs             fs.FS
+	matchPatterns  []string
+	watchPattern   string
 }
 
 func NewPragoTemplates() *PragoTemplates {
 	return &PragoTemplates{
 		funcMap:        map[string]interface{}{},
 		templatesMutex: &sync.RWMutex{},
-		fileSystems:    []*templateFS{},
 	}
 }
 
@@ -73,31 +70,24 @@ func (app *App) initTemplates() {
 		return app.iconExists(iconName)
 	})
 
-	must(app.adminTemplates.Add(templatesFS, "templates/*.tmpl"))
+	must(app.adminTemplates.SetFilesystem(templatesFS, "templates/*.tmpl"))
 }
 
-func (templates *PragoTemplates) Add(fsys fs.FS, patterns ...string) error {
+func (templates *PragoTemplates) SetFilesystem(fsys fs.FS, patterns ...string) error {
 	templates.templatesMutex.Lock()
 	defer templates.templatesMutex.Unlock()
-
-	tempFS := &templateFS{
-		fs:       fsys,
-		patterns: patterns,
-	}
-
-	templates.fileSystems = append(templates.fileSystems, tempFS)
+	templates.fs = fsys
+	templates.matchPatterns = patterns
 	return templates.parseTemplates()
 }
 
 func (templates *PragoTemplates) parseTemplates() error {
 	t := template.New("")
 	t = t.Funcs(templates.funcMap)
-	for _, v := range templates.fileSystems {
-		var err error
-		t, err = t.ParseFS(v.fs, v.patterns...)
-		if err != nil {
-			return err
-		}
+	var err error
+	t, err = t.ParseFS(templates.fs, templates.matchPatterns...)
+	if err != nil {
+		return err
 	}
 	templates.templates = t
 	return nil
@@ -107,6 +97,26 @@ func (templates *PragoTemplates) Function(name string, f interface{}) {
 	templates.templatesMutex.Lock()
 	defer templates.templatesMutex.Unlock()
 	templates.funcMap[name] = f
+}
+
+func (templates *PragoTemplates) watch() {
+	if templates.watchPattern == "" {
+		return
+	}
+	log.Printf("Watching templates path: %s", templates.watchPattern)
+
+	watchPath(templates.watchPattern, func() {
+		templates.templatesMutex.Lock()
+		defer templates.templatesMutex.Unlock()
+		log.Printf("Compiling changed templates from path: %s", templates.watchPattern)
+		err := templates.parseTemplates()
+		if err != nil {
+			log.Printf("Error while compiling templates in development mode from path '%s': %s", templates.watchPattern, err)
+		} else {
+			log.Printf("Recompiling templates OK.")
+		}
+	})
+
 }
 
 func (templates *PragoTemplates) Execute(wr io.Writer, name string, data interface{}) error {

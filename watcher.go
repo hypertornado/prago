@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (app *App) watchPath(path string, handler func()) {
+func watchPath(path string, handler func()) {
 	go func() {
 		var t time.Time
 		for {
