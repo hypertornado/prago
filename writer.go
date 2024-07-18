@@ -54,7 +54,7 @@ func (w *Writer[T]) route(method string, path string, handler func(*Request, *T)
 		}
 
 		if !request.Written && request.ResponseTemplateName != "" {
-			request.WriteHTML(request.ResponseStatus, request.app.Templates, request.ResponseTemplateName, dp)
+			request.WriteHTML(request.ResponseStatus, w.templates, request.ResponseTemplateName, dp)
 		}
 	}
 

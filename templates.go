@@ -28,48 +28,52 @@ type templateFS struct {
 	patterns []string
 }
 
-func (app *App) initTemplates() {
-	app.Templates = &PragoTemplates{
+func NewPragoTemplates() *PragoTemplates {
+	return &PragoTemplates{
 		funcMap:        map[string]interface{}{},
 		templatesMutex: &sync.RWMutex{},
 		fileSystems:    []*templateFS{},
 	}
+}
 
-	app.Templates.Function("PragoHTML", func(data string) template.HTML {
+func (app *App) initTemplates() {
+	app.adminTemplates = NewPragoTemplates()
+
+	app.adminTemplates.Function("PragoHTML", func(data string) template.HTML {
 		return template.HTML(data)
 	})
 
-	app.Templates.Function("PragoHTMLAttr", func(data string) template.HTMLAttr {
+	app.adminTemplates.Function("PragoHTMLAttr", func(data string) template.HTMLAttr {
 		return template.HTMLAttr(data)
 	})
 
-	app.Templates.Function("PragoCSS", func(data string) template.CSS {
+	app.adminTemplates.Function("PragoCSS", func(data string) template.CSS {
 		return template.CSS(data)
 	})
 
-	app.Templates.Function("PragoTMPL", func(templateName string, x interface{}) (template.HTML, error) {
+	app.adminTemplates.Function("PragoTMPL", func(templateName string, x interface{}) (template.HTML, error) {
 		var buf bytes.Buffer
-		err := app.Templates.templates.ExecuteTemplate(&buf, templateName, x)
+		err := app.adminTemplates.templates.ExecuteTemplate(&buf, templateName, x)
 		return template.HTML(buf.String()), err
 	})
 
-	app.Templates.Function("PragoMarkdown", func(text string) template.HTML {
+	app.adminTemplates.Function("PragoMarkdown", func(text string) template.HTML {
 		return template.HTML(markdown.New(markdown.Breaks(true)).RenderToString([]byte(text)))
 	})
 
-	app.Templates.Function("PragoMessage", func(language, id string) template.HTML {
+	app.adminTemplates.Function("PragoMessage", func(language, id string) template.HTML {
 		return template.HTML(messages.Get(language, id))
 	})
 
-	app.Templates.Function("PragoThumb", func(ids string) string {
+	app.adminTemplates.Function("PragoThumb", func(ids string) string {
 		return app.thumb(ids)
 	})
 
-	app.Templates.Function("PragoIconExists", func(iconName string) bool {
+	app.adminTemplates.Function("PragoIconExists", func(iconName string) bool {
 		return app.iconExists(iconName)
 	})
 
-	must(app.Templates.Add(templatesFS, "templates/*.tmpl"))
+	must(app.adminTemplates.Add(templatesFS, "templates/*.tmpl"))
 }
 
 func (templates *PragoTemplates) Add(fsys fs.FS, patterns ...string) error {

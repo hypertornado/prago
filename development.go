@@ -119,11 +119,11 @@ func (app *App) developmentSass(sourcePath, targetPath string) {
 }
 
 func (app *App) developmentTemplate(path developmentTemplatePath) {
-	must(app.Templates.Add(os.DirFS(path.Path), path.Patterns...))
+	must(app.adminTemplates.Add(os.DirFS(path.Path), path.Patterns...))
 
 	app.watchPath(path.Path, func() {
 		app.Log().Printf("Compiling changed templates from path: %s", path.Path)
-		err := app.Templates.parseTemplates()
+		err := app.adminTemplates.parseTemplates()
 		if err != nil {
 			app.Log().Printf("Error while compiling templates in development mode from path '%s': %s", path.Path, err)
 		} else {

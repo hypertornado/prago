@@ -247,7 +247,7 @@ func (action *Action) uiView(myTemplate string, dataSource func(*Request) any) *
 		if dataSource != nil {
 			data = dataSource(request)
 		}
-		pd.PageContent = request.app.Templates.ExecuteToHTML(myTemplate, data)
+		pd.PageContent = request.app.adminTemplates.ExecuteToHTML(myTemplate, data)
 	})
 
 }

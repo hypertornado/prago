@@ -77,7 +77,7 @@ func (page *pageData) renderPage(request *Request) {
 		code = 200
 	}
 
-	request.WriteHTML(code, request.app.Templates, "prago_layout", page)
+	request.WriteHTML(code, request.app.adminTemplates, "prago_layout", page)
 }
 
 type pageNoLogin struct {
@@ -110,5 +110,5 @@ func renderPageNoLogin(request *Request, page *pageNoLogin) {
 	page.NotificationsData = request.getNotificationsData()
 	page.Title = name
 	page.Icon = icon
-	request.WriteHTML(200, request.app.Templates, "layout_nologin", page)
+	request.WriteHTML(200, request.app.adminTemplates, "layout_nologin", page)
 }
