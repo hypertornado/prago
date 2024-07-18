@@ -101,7 +101,14 @@ func (app *App) startDevelopment() {
 }
 
 func developmentTypescript(path string) {
-	cmd := exec.Command("tsc", "-p", path, "-w")
+	compileTypescript(path)
+	watchPath(path, func() {
+		compileTypescript(path)
+	})
+}
+
+func compileTypescript(path string) {
+	cmd := exec.Command("tsc", "-p", path)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Start()
@@ -129,20 +136,6 @@ func (app *App) developmentTemplate(data *developmentTemplateData) {
 	data.Templates.matchPatterns = data.MatchPatterns
 	data.Templates.fs = os.DirFS(data.WatchPath)
 	go data.Templates.watch()
-
-	//must(app.adminTemplates.SetFilesystem(os.DirFS(data.WatchPath), data.MatchPatterns...))
-
-	/*watchPath(data.WatchPath, func() {
-		data.Templates.templatesMutex.Lock()
-		defer data.Templates.templatesMutex.Unlock()
-		app.Log().Printf("Compiling changed templates from path: %s", data.WatchPath)
-		err := app.adminTemplates.parseTemplates()
-		if err != nil {
-			app.Log().Printf("Error while compiling templates in development mode from path '%s': %s", data.WatchPath, err)
-		} else {
-			app.Log().Println("Compiling OK.")
-		}
-	})*/
 }
 
 func compileLess(from, to string) error {
