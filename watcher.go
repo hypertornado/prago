@@ -6,14 +6,18 @@ import (
 	"time"
 )
 
-func watchPath(path string, handler func()) {
+func (app *App) watchPath(prefix string, path string, handler func()) {
+	app.Log().Printf("[%s] watching path '%s'", prefix, path)
 	go func() {
 		var t time.Time
 		for {
 			t = time.Now()
 			time.Sleep(300 * time.Millisecond)
 			if dirChangedAfter(path, t) {
+				startTime := time.Now()
+				app.Log().Printf("[%s] Compiling after change in path %s", prefix, path)
 				handler()
+				app.Log().Printf("[%s] ✅ Done compiling path '%s' %v", prefix, path, time.Since(startTime))
 			}
 		}
 	}()

@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
-	"log"
 	"sync"
 
 	"github.com/golang-commonmark/markdown"
@@ -99,21 +98,16 @@ func (templates *PragoTemplates) Function(name string, f interface{}) {
 	templates.funcMap[name] = f
 }
 
-func (templates *PragoTemplates) watch() {
+func (templates *PragoTemplates) watch(app *App) {
 	if templates.watchPattern == "" {
 		return
 	}
-	log.Printf("Watching templates path: %s", templates.watchPattern)
-
-	watchPath(templates.watchPattern, func() {
+	app.watchPath("tmpl", templates.watchPattern, func() {
 		templates.templatesMutex.Lock()
 		defer templates.templatesMutex.Unlock()
-		log.Printf("Compiling changed templates from path: %s", templates.watchPattern)
 		err := templates.parseTemplates()
 		if err != nil {
-			log.Printf("Error while compiling templates in development mode from path '%s': %s", templates.watchPattern, err)
-		} else {
-			log.Printf("Recompiling templates OK.")
+			app.Log().Printf("Error while compiling templates in development mode from path '%s': %s", templates.watchPattern, err)
 		}
 	})
 

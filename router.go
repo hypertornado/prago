@@ -12,6 +12,15 @@ type router struct {
 	routes         []*route
 }
 
+type route struct {
+	method      string
+	path        string
+	constraints []routerConstraint
+	pathMatcher pathMatcherFn
+	controller  *controller
+	fn          func(p *Request)
+}
+
 func newRouter() *router {
 	return &router{
 		[]*route{},
@@ -67,15 +76,6 @@ func (r *router) export() (ret [][2]string) {
 		ret = append(ret, [2]string{v.method, v.path})
 	}
 	return
-}
-
-type route struct {
-	method      string
-	path        string
-	constraints []routerConstraint
-	pathMatcher pathMatcherFn
-	controller  *controller
-	fn          func(p *Request)
 }
 
 type pathMatcherFn func(string) (url.Values, bool)

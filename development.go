@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 type development struct {
@@ -92,7 +93,7 @@ func (app *App) startDevelopment() {
 	}
 
 	for _, v := range app.development.typeScript {
-		go developmentTypescript(v)
+		go app.developmentTypescript(v)
 	}
 
 	for _, v := range app.development.templateData {
@@ -100,9 +101,9 @@ func (app *App) startDevelopment() {
 	}
 }
 
-func developmentTypescript(path string) {
+func (app *App) developmentTypescript(path string) {
 	compileTypescript(path)
-	watchPath(path, func() {
+	app.watchPath("typescript", path, func() {
 		compileTypescript(path)
 	})
 }
@@ -117,7 +118,7 @@ func compileTypescript(path string) {
 func (app *App) developmentLess(sourcePath, targetPath string) {
 	indexPath := filepath.Join(sourcePath, "index.less")
 	compileLess(indexPath, targetPath)
-	watchPath(sourcePath, func() {
+	app.watchPath("less", sourcePath, func() {
 		compileLess(indexPath, targetPath)
 	})
 }
@@ -125,17 +126,16 @@ func (app *App) developmentLess(sourcePath, targetPath string) {
 func (app *App) developmentSass(sourcePath, targetPath string) {
 	indexPath := filepath.Join(sourcePath, "index.scss")
 	compileSass(indexPath, targetPath)
-	watchPath(sourcePath, func() {
+	app.watchPath("sass", sourcePath, func() {
 		compileSass(indexPath, targetPath)
 	})
 }
 
 func (app *App) developmentTemplate(data *developmentTemplateData) {
-
 	data.Templates.watchPattern = data.WatchPath
 	data.Templates.matchPatterns = data.MatchPatterns
 	data.Templates.fs = os.DirFS(data.WatchPath)
-	go data.Templates.watch()
+	go data.Templates.watch(app)
 }
 
 func compileLess(from, to string) error {
@@ -160,8 +160,14 @@ func compileSass(from, to string) error {
 
 func commandHelper(cmd *exec.Cmd, out io.Writer) error {
 	var err error
+
+	pw := &prefixWriter{
+		Writer: os.Stderr,
+		Prefix: "[XXX]",
+	}
+
 	cmd.Stdout = out
-	cmd.Stderr = os.Stderr
+	cmd.Stderr = pw
 
 	err = cmd.Start()
 	if err != nil {
@@ -172,4 +178,28 @@ func commandHelper(cmd *exec.Cmd, out io.Writer) error {
 		return err
 	}
 	return nil
+}
+
+type prefixWriter struct {
+	Writer io.Writer
+	Prefix string
+}
+
+// Write implements the io.Writer interface
+func (p *prefixWriter) Write(data []byte) (int, error) {
+	// Split the data into lines
+	lines := strings.Split(string(data), "\n")
+
+	// Add prefix to each line
+	for i, line := range lines {
+		if line != "" {
+			lines[i] = p.Prefix + line
+		}
+	}
+
+	// Join the lines back together
+	prefixedData := strings.Join(lines, "\n")
+
+	// Write the prefixed data to the underlying writer
+	return p.Writer.Write([]byte(prefixedData))
 }
