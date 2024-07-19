@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func (app *App) generateCSRFToken(userID int64) string {
+func (app *App) GenerateCSRFToken(userID int64) string {
 	randomness := app.mustGetSetting("random")
 	if len(randomness) <= 0 {
 		panic("randomness too short")
@@ -18,7 +18,7 @@ func (app *App) generateCSRFToken(userID int64) string {
 }
 
 func (request *Request) csrfToken() string {
-	return request.app.generateCSRFToken(request.UserID())
+	return request.app.GenerateCSRFToken(request.UserID())
 }
 
 func validateCSRF(request *Request) {

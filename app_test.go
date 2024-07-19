@@ -42,7 +42,7 @@ func prepareResource() *Resource {
 	resource := NewResource[ResourceStruct](app)
 	NewResource[ResourceStructUnique](app)
 
-	app.afterInit()
+	app.AfterInit()
 	app.unsafeDropTables()
 	app.migrate(false)
 	return resource
@@ -53,7 +53,7 @@ func prepareFuzzing() *Resource {
 	resource := NewResource[ResourceStruct](app)
 	NewResource[ResourceStructUnique](app)
 
-	app.afterInit()
+	app.AfterInit()
 	return resource
 }
 

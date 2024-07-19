@@ -149,11 +149,11 @@ func createApp(codeName string, version string) *App {
 }
 
 func (app *App) Run() {
-	app.afterInit()
+	app.AfterInit()
 	app.parseCommands()
 }
 
-func (app *App) afterInit() {
+func (app *App) AfterInit() {
 	app.initSessions()
 	app.initDefaultResourceActions()
 	app.initAPIs()

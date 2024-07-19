@@ -89,7 +89,7 @@ func (dashboard *Dashboard) view(request *Request) *dashboardView {
 	}
 
 	userID := request.UserID()
-	csrfToken := request.app.generateCSRFToken(userID)
+	csrfToken := request.app.GenerateCSRFToken(userID)
 	view.Tasks = dashboard.getTasks(request, csrfToken)
 
 	for _, item := range dashboard.figures {
