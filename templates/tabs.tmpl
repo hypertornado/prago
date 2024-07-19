@@ -1,17 +1,15 @@
-{{define "admin_tabs"}}
+{{define "tabs"}}
   {{$tabs := .}}
   {{if gt (len $tabs) 0}}
     <div class="admin_navigation_tabs">
-      <div class="admin_navigation_tabs_content">
       {{range $i, $item := .}}
         <a href="{{$item.URL}}" class="admin_navigation_tab{{if $item.Selected}} admin_navigation_tab-selected{{end}}">
             {{if $item.Icon}}
-              <img src="/admin/api/icons?file={{$item.Icon}}&color={{if $item.Selected}}ffffff{{else}}444444{{end}}" class="admin_navigation_tab_icon">
+              <img src="/admin/api/icons?file={{$item.Icon}}&color={{if $item.Selected}}ffffff{{else}}444444{{end}}" alt="{{$item.Name}}" class="admin_navigation_tab_icon">
             {{end}}
             <div class="admin_navigation_tab_name">{{$item.Name}}</div>
         </a>
       {{end}}
-      </div>
     </div>
   {{end}}
 {{end}}

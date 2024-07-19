@@ -1,7 +1,7 @@
-{{define "admin_menu"}}
+{{define "menu"}}
     <div class="menu2">
         <div class="menu2_items">
-            {{template "admin_menu_items" .Items}}
+            {{template "menu_items" .Items}}
         </div>
         <div class="menu_footer">
             <div>{{.Username}}</div>
@@ -13,7 +13,7 @@
     </div>
 {{end}}
 
-{{define "admin_menu_items"}}
+{{define "menu_items"}}
     {{range $item := .}}
         <div class="menu2_item{{if $item.Subitems}} menu2_item-hassubitems{{end}}{{if $item.IsSelectedOrExpanded}} menu2_item-expanded{{end}}">
             <div class="menu2_item_top">
@@ -32,7 +32,7 @@
             </div>
             {{if $item.Subitems}}
                 <div class="menu2_items menu2_items-subitems">
-                    {{template "admin_menu_items" $item.Subitems}}
+                    {{template "menu_items" $item.Subitems}}
                 </div>
             {{end}}
         </div>

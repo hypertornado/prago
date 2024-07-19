@@ -78,10 +78,15 @@ class ListFilterRelations {
     this.preview.classList.remove("hidden");
     this.search.classList.add("hidden");
     this.preview.setAttribute("title", item.Name);
-    this.previewImage.setAttribute(
-      "style",
-      "background-image: url('" + item.Image + "');"
-    );
+    if (item.Image) {
+      this.previewImage.classList.remove("hidden");
+      this.previewImage.setAttribute(
+        "style",
+        "background-image: url('" + item.Image + "');"
+      );
+    } else {
+      this.previewImage.classList.add("hidden");
+    }
     this.previewName.textContent = item.Name;
     this.dispatchChange();
   }
@@ -152,10 +157,6 @@ class ListFilterRelations {
     ret.classList.add("list_filter_suggestion");
     ret.setAttribute("href", data.URL);
 
-    var image = document.createElement("div");
-    image.classList.add("list_filter_suggestion_image");
-    image.setAttribute("style", "background-image: url('" + data.Image + "');");
-
     var right = document.createElement("div");
     right.classList.add("list_filter_suggestion_right");
 
@@ -167,7 +168,16 @@ class ListFilterRelations {
     description.classList.add("list_filter_suggestion_description");
     description.textContent = data.Description;
 
-    ret.appendChild(image);
+    if (data.Image) {
+      var image = document.createElement("div");
+      image.classList.add("list_filter_suggestion_image");
+      image.setAttribute(
+        "style",
+        "background-image: url('" + data.Image + "');"
+      );
+      ret.appendChild(image);
+    }
+
     right.appendChild(name);
     right.appendChild(description);
     ret.appendChild(right);

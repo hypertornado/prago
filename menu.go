@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -289,7 +288,7 @@ func (resource *Resource) getResourceItemMenu(requestContext *menuRequestContext
 		var thumbnail string
 		if v.url == "" {
 			previewer := resource.previewer(requestContext.UserData, requestContext.Item)
-			thumbnail = previewer.ThumbnailURL(context.Background())
+			thumbnail = previewer.ThumbnailURL()
 			name = previewer.Name()
 		}
 

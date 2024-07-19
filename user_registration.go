@@ -23,7 +23,7 @@ func initUserRegistration(app *App) {
 					err := UpdateItem(app, user)
 					if err == nil {
 						request.AddFlashMessage(messages.Get(user.Locale, "admin_confirm_email_ok"))
-						request.Redirect(app.getAdminURL("user/login"))
+						request.Redirect("/admin/user/login")
 						return
 					}
 				}
@@ -36,14 +36,22 @@ func initUserRegistration(app *App) {
 		}
 
 		request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_fail"))
-		request.Redirect(app.getAdminURL("user/login"))
+		request.Redirect("/admin/user/login")
 	})
 
 	app.nologinFormAction("registration", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
-		form.AddTextInput("name", messages.Get(locale, "Name")).Focused = true
-		form.AddEmailInput("email", messages.Get(locale, "admin_email"))
-		form.AddPasswordInput("password", messages.Get(locale, "admin_register_password")).Description = messages.Get(locale, "admin_register_password_description")
+		nameInput := form.AddTextInput("name", messages.Get(locale, "Name"))
+		nameInput.Focused = true
+
+		emailInput := form.AddEmailInput("email", messages.Get(locale, "admin_email"))
+		emailInput.InputMode = "email"
+		emailInput.Autocomplete = "email"
+
+		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "admin_register_password"))
+		passwordInput.Description = messages.Get(locale, "admin_register_password_description")
+		passwordInput.Autocomplete = "new-password"
+
 		form.AddCAPTCHAInput("captcha", "4 + 5 =")
 		form.AddSubmit(messages.Get(locale, "admin_register"))
 	}, registrationValidation)

@@ -1,10 +1,10 @@
-{{define "admin_views"}}
+{{define "views"}}
   {{range $item := .}}
-    {{template "admin_view" $item}}
+    {{template "view" $item}}
   {{end}}
 {{end}}
 
-{{define "admin_view"}}
+{{define "view"}}
   <div class="box">
   {{if .Name}}
   <div class="view_header">
@@ -30,7 +30,7 @@
     {{- template "box_header" .Header}}
   {{end}}
   {{if .Relation}}
-    {{template "admin_item_view_relationlist" .Relation}}
+    {{template "view_relationlist" .Relation}}
   {{end}}
 
 
@@ -74,29 +74,25 @@
   </div>
 {{end}}
 
-{{define "admin_item_view_text"}}
+{{define "view_text"}}
   {{- . -}}
 {{end}}
 
-{{define "admin_item_view_url"}}
-  <a href="{{index . 0}}">{{index . 1}}</a>
+{{define "view_textarea"}}
+  <span>{{- . -}}</span>
 {{end}}
 
-{{define "admin_item_view_textarea"}}
-  <span class="admin_item_view_textarea">{{- . -}}</span>
-{{end}}
-
-{{define "admin_item_view_markdown"}}
+{{define "view_markdown"}}
   {{- PragoMarkdown . -}}
 {{end}}
 
-{{define "admin_item_view_file"}}
+{{define "view_file"}}
   {{range $item := .}}
-    {{template "admin_item_view_file_single" $item}}
+    {{template "view_file_single" $item}}
   {{end}}
 {{end}}
 
-{{define "admin_item_view_file_single"}}
+{{define "view_file_single"}}
   {{if .MediumURL}}
     <div>
       <a href="{{.OriginalURL}}"><img src="{{.MediumURL}}"></a>
@@ -121,24 +117,26 @@
   <div>UUID: {{.UUID}}</div>
 {{end}}
 
-{{define "admin_item_view_image"}}
+{{define "view_image"}}
   <div class="admin_item_view_image_content" data-images="{{.}}">
     <progress class="progress" value="" max=""></progress>
   </div>
 {{end}}
 
-{{define "admin_item_view_place"}}
+{{define "view_place"}}
   <div class="admin_item_view_place" data-value="{{.}}">
     <progress class="progress" value="" max=""></progress>
   </div>
 {{end}}
 
-{{define "admin_item_view_relation"}}
+{{define "view_relation"}}
   <div class="admin_item_view_relation">
     {{if .}}
       {{range $item := .}}
       <a class="admin_preview" href="{{$item.URL}}">
-        <div class="admin_preview_image" style="background-image: url('{{PragoCSS $item.Image}}') ;"></div>
+        {{if $item.Image}}
+          <div class="admin_preview_image" style="background-image: url('{{PragoCSS $item.Image}}') ;"></div>
+        {{end}}
         <div class="admin_preview_right">
           <div class="admin_preview_name">{{$item.Name}}</div>
           <div class="admin_preview_description" title="{{$item.Description}}">{{$item.Description}}</div>
@@ -151,7 +149,7 @@
   </div>
 {{end}}
 
-{{define "admin_item_view_relationlist"}}
+{{define "view_relationlist"}}
   <div class="admin_relationlist"
     data-source-resource="{{.SourceResource}}"
     data-target-resource="{{.TargetResource}}"
@@ -170,8 +168,8 @@
   </div>
 {{end}}
 
-{{define "admin_item_view_relationlist_response"}}
-      {{template "admin_item_view_relation" .}}
+{{define "view_relationlist_response"}}
+      {{template "view_relation" .}}
 {{end}}
 
 {{define "list_cell"}}

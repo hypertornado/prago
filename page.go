@@ -75,7 +75,7 @@ func (page *pageData) renderPage(request *Request) {
 		code = 200
 	}
 
-	request.WriteHTML(code, request.app.adminTemplates, "prago_layout", page)
+	request.WriteHTML(code, request.app.adminTemplates, "layout", page)
 }
 
 type pageNoLogin struct {

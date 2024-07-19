@@ -5,11 +5,16 @@ import (
 	"time"
 )
 
+const renewURL = "renew-password"
+
 func initUserRenew(app *App) {
 
 	app.nologinFormAction("forgot", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
-		form.AddEmailInput("email", messages.Get(locale, "admin_email")).Focused = true
+		emailInput := form.AddEmailInput("email", messages.Get(locale, "admin_email"))
+		emailInput.Focused = true
+		emailInput.InputMode = "email"
+		emailInput.Autocomplete = "email"
 		form.AddSubmit(messages.Get(locale, "admin_forgotten_submit"))
 	}, func(vc ValidationContext) {
 		request := vc.Request()
@@ -48,10 +53,11 @@ func initUserRenew(app *App) {
 		}
 	})
 
-	app.nologinFormAction("renew_password", func(form *Form, request *Request) {
+	app.nologinFormAction(renewURL, func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "admin_password_new"))
 		passwordInput.Focused = true
+		passwordInput.Autocomplete = "new-password"
 
 		form.AddHidden("email").Value = request.Param("email")
 		form.AddHidden("token").Value = request.Param("token")
@@ -85,7 +91,7 @@ func initUserRenew(app *App) {
 		}
 
 		vc.Request().AddFlashMessage(errStr)
-		vc.Validation().RedirectionLocation = app.getAdminURL("user/login")
+		vc.Validation().RedirectionLocation = "/admin/user/login"
 	})
 }
 
@@ -93,7 +99,7 @@ func (app *App) getRenewPasswordURL(user user) string {
 	urlValues := make(url.Values)
 	urlValues.Add("email", user.Email)
 	urlValues.Add("token", user.emailToken(app))
-	return app.mustGetSetting("base_url") + app.getAdminURL("user/renew_password") + "?" + urlValues.Encode()
+	return app.mustGetSetting("base_url") + "/admin/user/" + renewURL + "?" + urlValues.Encode()
 }
 
 func (app *App) sendRenewPasswordEmail(user user) error {

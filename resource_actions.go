@@ -56,7 +56,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			must(resource.createWithLog(item, request))
 
 			must(resource.app.Notification(resource.previewer(request, item).Name()).
-				SetImage(resource.previewer(request, item).ThumbnailURL(vc.Context())).
+				SetImage(resource.previewer(request, item).ThumbnailURL()).
 				SetPreName(messages.Get(request.Locale(), "admin_item_created")).
 				Flash(request))
 			vc.Validation().RedirectionLocation = resource.getItemURL(item, "", request)
@@ -95,7 +95,7 @@ func (resource *Resource) initDefaultResourceActions() {
 				must(err)
 
 				resource.app.Notification(resource.previewer(user, item).Name()).
-					SetImage(resource.previewer(request, item).ThumbnailURL(vc.Context())).
+					SetImage(resource.previewer(request, item).ThumbnailURL()).
 					SetPreName(messages.Get(request.Locale(), "admin_item_edited")).
 					Flash(request)
 

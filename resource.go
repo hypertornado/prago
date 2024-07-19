@@ -18,6 +18,8 @@ type Resource struct {
 
 	icon string
 
+	hasImage bool
+
 	singularName func(locale string) string
 	pluralName   func(locale string) string
 

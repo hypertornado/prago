@@ -15,7 +15,8 @@ class SearchForm {
 
     Prago.shortcuts.add(
       {
-        Key: "/",
+        Key: "F",
+        Shift: true,
       },
       "Vyhledávání",
       () => {
@@ -40,6 +41,12 @@ class SearchForm {
     }, 30);
 
     this.searchInput.addEventListener("keydown", (e) => {
+      if (e.keyCode == 27) {
+        this.searchInput.blur();
+        e.preventDefault();
+        return false;
+      }
+
       if (!this.suggestions || this.suggestions.length == 0) {
         return;
       }

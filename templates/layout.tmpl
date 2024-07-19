@@ -1,4 +1,4 @@
-{{define "prago_layout"}}
+{{define "layout"}}
 <!doctype html>
 <html lang="{{.Language}}">
   <head>
@@ -20,7 +20,7 @@
         {{template "notification_center" .NotificationsData}}
         <div class="root_header">
             {{if .Breadcrumbs}}
-                {{template "admin_breadcrumbs" .Breadcrumbs}}
+                {{template "breadcrumbs" .Breadcrumbs}}
             {{end}}
             {{template "searchbox" .SearchQuery}}
             <div class="root_hamburger">
@@ -30,23 +30,23 @@
         </div>
         <div class="root_bottom">
             <div class="root_left">
-                {{template "admin_menu" .Menu}}
+                {{template "menu" .Menu}}
             </div>
             <div class="root_content">
                 {{range $message := .Messages}}
                     <h1 class="admin_message">{{$message.Name}}</h1>
                 {{end}}
                 {{if .Form}}
-                    {{template "admin_form" .Form}}
+                    {{template "form" .Form}}
                 {{end}}
                 {{if .List}}
-                    {{template "admin_list" .List}}
+                    {{template "list" .List}}
                 {{end}}
                 {{if .Views}}
-                    {{template "admin_views" .Views}}
+                    {{template "views" .Views}}
                 {{end}}
                 {{if .HelpIcons}}
-                    {{template "admin_help_icons" .HelpIcons}}
+                    {{template "help_icons" .HelpIcons}}
                 {{end}}
                 {{if .BoardView}}
                     {{template "board" .BoardView}}

@@ -43,7 +43,7 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 
 		allowedValues: allowedValues,
 
-		formTemplate: "admin_item_select",
+		formTemplate: "form_input_select",
 		formDataSource: func(f *Field, userData UserData) interface{} {
 			var ret [][2]string
 			for _, v := range items {

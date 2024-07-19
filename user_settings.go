@@ -76,8 +76,14 @@ func initUserSettings(app *App) {
 		func(form *Form, request *Request) {
 			locale := request.Locale()
 			form.Title = messages.Get(request.Locale(), "admin_password_change")
-			form.AddPasswordInput("oldpassword", messages.Get(locale, "admin_password_old")).Focused = true
-			form.AddPasswordInput("newpassword", messages.Get(locale, "admin_password_new"))
+			oldPassword := form.AddPasswordInput("oldpassword", messages.Get(locale, "admin_password_old"))
+			oldPassword.Focused = true
+			oldPassword.Autocomplete = "old-password"
+
+			newPassword := form.AddPasswordInput("newpassword", messages.Get(locale, "admin_password_new"))
+			newPassword.Focused = true
+			newPassword.Autocomplete = "new-password"
+
 			form.AddSubmit(messages.Get(locale, "admin_save"))
 		}, func(vc ValidationContext) {
 			request := vc.Request()

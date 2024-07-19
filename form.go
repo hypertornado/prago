@@ -37,6 +37,9 @@ type FormItem struct {
 	Data        interface{}
 	UUID        string
 	form        *Form
+
+	Autocomplete string
+	InputMode    string
 }
 
 // NewForm creates new form
@@ -73,39 +76,39 @@ func (f *Form) addInput(id, description, template string) *FormItem {
 
 // AddTextInput to form
 func (f *Form) AddTextInput(name, description string) *FormItem {
-	return f.addInput(name, description, "admin_item_input")
+	return f.addInput(name, description, "form_input")
 }
 
 // AddTextareaInput to form
 func (f *Form) AddTextareaInput(name, description string) *FormItem {
-	return f.addInput(name, description, "admin_item_textarea")
+	return f.addInput(name, description, "form_input_textarea")
 }
 
 // AddEmailInput to form
 func (f *Form) AddEmailInput(name, description string) *FormItem {
-	return f.addInput(name, description, "admin_item_email")
+	return f.addInput(name, description, "form_input_email")
 }
 
 // AddPasswordInput to form
 func (f *Form) AddPasswordInput(name, description string) *FormItem {
-	return f.addInput(name, description, "admin_item_password")
+	return f.addInput(name, description, "form_input_password")
 }
 
 // AddFileInput to form
 func (f *Form) AddFileInput(name, description string) *FormItem {
-	return f.addInput(name, description, "admin_item_file")
+	return f.addInput(name, description, "form_input_file")
 }
 
 // AddCAPTCHAInput to form
 func (f *Form) AddCAPTCHAInput(name, description string) *FormItem {
-	return f.addInput(name, description, "admin_item_captcha")
+	return f.addInput(name, description, "form_input_captcha")
 }
 
 // AddSubmit to form
 func (f *Form) AddSubmit(description string) *FormItem {
 	input := f.addInput("_submit", description, "")
 	input.HiddenName = true
-	input.Template = "admin_item_submit"
+	input.Template = "form_input_submit"
 	return input
 }
 
@@ -113,13 +116,13 @@ func (f *Form) AddSubmit(description string) *FormItem {
 func (f *Form) AddDeleteSubmit(description string) *FormItem {
 	input := f.addInput("_submit", description, "")
 	input.HiddenName = true
-	input.Template = "admin_item_delete"
+	input.Template = "form_input_delete"
 	return input
 }
 
 // AddCheckbox to form
 func (f *Form) AddCheckbox(name, description string) *FormItem {
-	input := f.addInput(name, description, "admin_item_checkbox")
+	input := f.addInput(name, description, "form_input_checkbox")
 	input.HiddenName = true
 	return input
 }
@@ -127,32 +130,32 @@ func (f *Form) AddCheckbox(name, description string) *FormItem {
 // AddHidden to form
 func (f *Form) AddHidden(name string) *FormItem {
 	input := f.addInput(name, "", "")
-	input.Template = "admin_item_hidden"
+	input.Template = "form_input_hidden"
 	input.Hidden = true
 	return input
 }
 
 // AddSelect to form
 func (f *Form) AddSelect(name, description string, values [][2]string) *FormItem {
-	input := f.addInput(name, description, "admin_item_select")
+	input := f.addInput(name, description, "form_input_select")
 	input.Data = values
 	return input
 }
 
 func (f *Form) AddRadio(name, description string, values [][2]string) *FormItem {
-	input := f.addInput(name, description, "admin_item_select_radio")
+	input := f.addInput(name, description, "form_input_select_radio")
 	input.Data = values
 	return input
 }
 
 // AddDatePicker to form
 func (f *Form) AddDatePicker(name, description string) *FormItem {
-	input := f.addInput(name, description, "admin_item_date")
+	input := f.addInput(name, description, "form_input_date")
 	return input
 }
 
 func (f *Form) AddDateTimePicker(name, description string) *FormItem {
-	input := f.addInput(name, description, "admin_item_datetime")
+	input := f.addInput(name, description, "form_input_datetime")
 	return input
 }
 

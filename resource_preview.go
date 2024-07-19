@@ -91,7 +91,7 @@ func (f *Field) relationPreview(userData UserData, idsStr string) (ret []*previe
 		if item == nil {
 			continue
 		}
-		ret = append(ret, f.relatedResource.previewer(userData, item).Preview(context.Background(), f.resource))
+		ret = append(ret, f.relatedResource.previewer(userData, item).Preview(f.resource))
 	}
 
 	return
@@ -101,17 +101,17 @@ func (previewer *previewer) URL(suffix string) string {
 	return previewer.resource.getItemURL(previewer.item, suffix, previewer.userData)
 }
 
-func (previewer *previewer) Preview(ctx context.Context, relatedResource *Resource) *preview {
+func (previewer *previewer) Preview(relatedResource *Resource) *preview {
 	var ret preview
 	ret.ID = previewer.ID()
 	ret.Name = previewer.Name()
 	ret.URL = previewer.URL("")
-	ret.Image = previewer.ThumbnailURL(ctx)
+	ret.Image = previewer.ThumbnailURL()
 	ret.Description = previewer.DescriptionExtended(relatedResource)
 	return &ret
 }
 
-func (previewer *previewer) ThumbnailURL(ctx context.Context) string {
+func (previewer *previewer) ThumbnailURL() string {
 	if previewer.item != nil {
 		itemsVal := reflect.ValueOf(previewer.item).Elem()
 		field := itemsVal.FieldByName("Image")

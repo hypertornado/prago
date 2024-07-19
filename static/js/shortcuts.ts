@@ -7,6 +7,7 @@ class Shortcuts {
     this.shortcuts = [];
 
     this.el.addEventListener("keydown", (e) => {
+      //console.log(e);
       for (let shortcut of this.shortcuts) {
         if (shortcut.match(e)) {
           shortcut.handler();
@@ -23,6 +24,7 @@ class Shortcuts {
   }
 
   addRootShortcuts() {
+    let popup = new ContentPopup("Zkratky");
     this.add(
       {
         Key: "?",
@@ -36,8 +38,12 @@ class Shortcuts {
           contentEl.appendChild(shortcutEl);
         }
 
-        let popup = new ContentPopup("Zkratky", contentEl);
-        popup.show();
+        if (popup.isShown) {
+          popup.hide();
+        } else {
+          popup.setContent(contentEl);
+          popup.show();
+        }
       }
     );
   }

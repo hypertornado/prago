@@ -308,10 +308,6 @@ class RelationPicker {
     ret.classList.add("admin_preview");
     ret.setAttribute("href", data.URL);
 
-    var image = document.createElement("div");
-    image.classList.add("admin_preview_image");
-    image.setAttribute("style", "background-image: url('" + data.Image + "');");
-
     var right = document.createElement("div");
     right.classList.add("admin_preview_right");
 
@@ -323,7 +319,16 @@ class RelationPicker {
     description.classList.add("admin_preview_description");
     description.textContent = data.Description;
 
-    ret.appendChild(image);
+    if (data.Image) {
+      var image = document.createElement("div");
+      image.classList.add("admin_preview_image");
+      image.setAttribute(
+        "style",
+        "background-image: url('" + data.Image + "');"
+      );
+      ret.appendChild(image);
+    }
+
     right.appendChild(name);
     right.appendChild(description);
     ret.appendChild(right);

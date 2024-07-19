@@ -1,4 +1,4 @@
-{{define "admin_list"}}
+{{define "list"}}
 <div class="list {{if .CanChangeOrder}} list-order{{end}}{{if .MultipleActions}} list-hasmultipleactions{{end}}"
   data-type="{{.TypeID}}"
   data-order-column="{{.OrderColumn}}"
@@ -8,25 +8,25 @@
   data-items-per-page="{{.ItemsPerPage}}"
 >
 
-  {{template "admin_list_multiple_actions" .}}
+  {{template "list_multiple_actions" .}}
 
   <div class="list_hidden">
-    {{template "admin_list_settings" .}}
-    {{template "admin_list_stats" .}}
-    {{template "admin_list_export" .}}
+    {{template "list_settings" .}}
+    {{template "list_stats" .}}
+    {{template "list_export" .}}
   </div>
   <progress class="progress list_progress"></progress>
 
   <div class="list_table">
-    {{template "admin_list_header" .}}
+    {{template "list_header" .}}
     <div class="list_table_content">
-      {{template "admin_list_placeholder"}}
+      {{template "list_placeholder"}}
     </div>
   </div>
   <div class="list_footer"></div>
 {{end}}
 
-{{define "admin_list_header"}}
+{{define "list_header"}}
 <div class="list_header_container">
   <div class="list_header">
     {{if .MultipleActions}}
@@ -65,7 +65,7 @@
 </div>
 {{end}}
 
-{{define "admin_list_settings"}}
+{{define "list_settings"}}
   <div class="list_settings">
     <h3>{{PragoMessage .Locale "admin_options_visible"}}</h3>
     <div class="list_settings_labels">
@@ -83,7 +83,7 @@
   </div>
 {{end}}
 
-{{define "admin_list_stats"}}
+{{define "list_stats"}}
   <div class="list_stats">
     <h3>Počet řádků</h3>
     <label>
@@ -98,7 +98,7 @@
   </div>
 {{end}}
 
-{{define "admin_list_export"}}
+{{define "list_export"}}
   <div class="list_export">
     {{if .CanExport}}
       <a href="#" class="btn admin_exportbutton" download="export.xlsx">Stáhnout tabulku ve formátu .xlsx</a>
@@ -110,7 +110,7 @@
   </div>
 {{end}}
 
-{{define "admin_list_placeholder"}}
+{{define "list_placeholder"}}
   <div class="list_tableplaceholder">
     <div class="list_tableplaceholder_row"></div>
     <div class="list_tableplaceholder_row"></div>
@@ -206,7 +206,7 @@
   </div>
 {{end}}
 
-{{define "admin_list_cells"}}
+{{define "list_cells"}}
   {{range $item := .admin_list.Rows}}
     <div data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="list_row">
       {{if $item.AllowsMultipleActions}}
@@ -259,7 +259,7 @@
   {{end}}
 {{end}}
 
-{{define "admin_list_footer"}}
+{{define "list_footer"}}
   {{if .admin_list.Message}}
     <div class="list_message">
       {{.admin_list.Message}}
@@ -268,7 +268,7 @@
   <div class="pagination" data-total="{{.admin_list.Pagination.TotalPages}}" data-selected="{{.admin_list.Pagination.SelectedPage}}"></div>
 {{end}}
 
-{{define "admin_list_multiple_actions"}}
+{{define "list_multiple_actions"}}
   <div class="list_multiple_actions">
     <div class="list_multiple_actions_content">
       <span class="list_multiple_actions_description"></span>

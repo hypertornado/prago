@@ -57,7 +57,7 @@ func (app *App) createRoleFieldType() *fieldType {
 		return vals
 	}
 	return &fieldType{
-		formTemplate:   "admin_item_select",
+		formTemplate:   "form_input_select",
 		formDataSource: fp,
 
 		filterLayoutTemplate: "filter_layout_select",

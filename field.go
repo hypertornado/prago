@@ -375,18 +375,18 @@ func getDefaultStringer(t reflect.Type) func(interface{}) string {
 
 func getDefaultFormTemplate(t reflect.Type) string {
 	if t == reflect.TypeOf(time.Now()) {
-		return "admin_item_date"
+		return "form_input_date"
 	}
 
 	switch t.Kind() {
 	case reflect.String:
-		return "admin_item_input"
+		return "form_input"
 	case reflect.Bool:
-		return "admin_item_checkbox"
+		return "form_input_checkbox"
 	case reflect.Int64:
-		return "admin_item_input_int"
+		return "form_input_int"
 	case reflect.Float64:
-		return "admin_item_input_float"
+		return "form_input_float"
 	}
 	panic("unknown default form for " + t.String())
 }
@@ -434,7 +434,7 @@ func (field *Field) initFieldType() {
 		ret.formStringer = getDefaultStringer(field.typ)
 	}
 
-	if ret.formTemplate == "admin_item_checkbox" {
+	if ret.formTemplate == "form_input_checkbox" {
 		ret.formHideLabel = true
 	}
 

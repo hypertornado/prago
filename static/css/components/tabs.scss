@@ -1,15 +1,12 @@
 .admin_navigation_tabs {
   display: flex;
   justify-content: center;
-  justify-content: flex-start;
+  //justify-content: flex-start;
   align-items: flex-start;
   flex-grow: 100;
   overflow: auto;
-}
 
-.admin_navigation_tabs_content {
   display: flex;
-  border-radius: 100px;
   margin: 0 auto;
   gap: 10px;
   flex-wrap: wrap;
@@ -18,26 +15,23 @@
 .admin_navigation_tab {
   white-space: nowrap;
   overflow: hidden;
-  margin: 10px 0px;
   border-bottom: none;
   text-decoration: none;
   padding: 5px 10px;
-  border-radius: 5px;
+  border-radius: 100px;
   color: $black;
   font-weight: 500;
   display: flex;
+  gap: 5px;
   align-items: center;
   flex-shrink: 0;
   background-color: $backgroundGrayColor;
+  border: 1px solid $grayBorderColor;
 }
 
 .admin_navigation_tab_icon {
   width: 15px;
-  margin-right: 5px;
-}
-
-.admin_navigation_tab_name {
-  border: 0px solid red;
+  aspect-ratio: 1;
 }
 
 .admin_navigation_tab-selected,

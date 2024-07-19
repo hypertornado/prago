@@ -24,7 +24,7 @@ func (app *App) initAdminActions() {
 	})
 
 	ActionUI(app, "markdown", func(request *Request) template.HTML {
-		return app.adminTemplates.ExecuteToHTML("admin_help_markdown", nil)
+		return app.adminTemplates.ExecuteToHTML("help_markdown", nil)
 	}).Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).Board(nil)
 
 	app.accessController.routeHandler("GET", "/admin/logo", func(request *Request) {

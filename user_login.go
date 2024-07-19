@@ -9,18 +9,21 @@ func initUserLogin(app *App) {
 	ActionResourceItemPlain[user](app, "loginas",
 		func(user *user, request *Request) {
 			request.logInUser(user)
-			request.Redirect(app.getAdminURL(""))
+			request.Redirect("/admin")
 		}).Name(unlocalized("Přihlásit se jako")).Permission(sysadminPermission)
 
 	app.nologinFormAction("login", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		emailValue := request.Param("email")
 		emailInput := form.AddEmailInput("email", messages.Get(locale, "admin_email_or_username"))
+		emailInput.InputMode = "email"
+		emailInput.Autocomplete = "email"
 		if emailValue == "" {
 			emailInput.Focused = true
 		}
 		emailInput.Value = request.Param("email")
 		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "admin_password"))
+		passwordInput.Autocomplete = "current-password"
 		if emailValue != "" {
 			passwordInput.Focused = true
 		}
@@ -63,7 +66,7 @@ func initUserLogin(app *App) {
 
 		redirectURL := vc.Request().Param("redirect_url")
 		if !strings.HasPrefix(redirectURL, "/") || redirectURL == "/admin/login" {
-			redirectURL = request.app.getAdminURL("")
+			redirectURL = "/admin"
 		}
 
 		vc.Validation().RedirectionLocation = redirectURL

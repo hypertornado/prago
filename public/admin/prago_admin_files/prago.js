@@ -328,7 +328,13 @@ class ListFilterRelations {
         this.preview.classList.remove("hidden");
         this.search.classList.add("hidden");
         this.preview.setAttribute("title", item.Name);
-        this.previewImage.setAttribute("style", "background-image: url('" + item.Image + "');");
+        if (item.Image) {
+            this.previewImage.classList.remove("hidden");
+            this.previewImage.setAttribute("style", "background-image: url('" + item.Image + "');");
+        }
+        else {
+            this.previewImage.classList.add("hidden");
+        }
         this.previewName.textContent = item.Name;
         this.dispatchChange();
     }
@@ -387,9 +393,6 @@ class ListFilterRelations {
         var ret = document.createElement("div");
         ret.classList.add("list_filter_suggestion");
         ret.setAttribute("href", data.URL);
-        var image = document.createElement("div");
-        image.classList.add("list_filter_suggestion_image");
-        image.setAttribute("style", "background-image: url('" + data.Image + "');");
         var right = document.createElement("div");
         right.classList.add("list_filter_suggestion_right");
         var name = document.createElement("div");
@@ -398,7 +401,12 @@ class ListFilterRelations {
         var description = document.createElement("div");
         description.classList.add("list_filter_suggestion_description");
         description.textContent = data.Description;
-        ret.appendChild(image);
+        if (data.Image) {
+            var image = document.createElement("div");
+            image.classList.add("list_filter_suggestion_image");
+            image.setAttribute("style", "background-image: url('" + data.Image + "');");
+            ret.appendChild(image);
+        }
         right.appendChild(name);
         right.appendChild(description);
         ret.appendChild(right);
@@ -1783,9 +1791,6 @@ class RelationPicker {
         }
         ret.classList.add("admin_preview");
         ret.setAttribute("href", data.URL);
-        var image = document.createElement("div");
-        image.classList.add("admin_preview_image");
-        image.setAttribute("style", "background-image: url('" + data.Image + "');");
         var right = document.createElement("div");
         right.classList.add("admin_preview_right");
         var name = document.createElement("div");
@@ -1794,7 +1799,12 @@ class RelationPicker {
         var description = document.createElement("description");
         description.classList.add("admin_preview_description");
         description.textContent = data.Description;
-        ret.appendChild(image);
+        if (data.Image) {
+            var image = document.createElement("div");
+            image.classList.add("admin_preview_image");
+            image.setAttribute("style", "background-image: url('" + data.Image + "');");
+            ret.appendChild(image);
+        }
         right.appendChild(name);
         right.appendChild(description);
         ret.appendChild(right);
@@ -2174,7 +2184,8 @@ class SearchForm {
         this.searchInput = el.querySelector(".searchbox_input");
         this.suggestionsEl = (el.querySelector(".searchbox_suggestions"));
         Prago.shortcuts.add({
-            Key: "/",
+            Key: "F",
+            Shift: true,
         }, "Vyhledávání", () => {
             this.searchInput.focus();
         });
@@ -2191,6 +2202,11 @@ class SearchForm {
             }
         }, 30);
         this.searchInput.addEventListener("keydown", (e) => {
+            if (e.keyCode == 27) {
+                this.searchInput.blur();
+                e.preventDefault();
+                return false;
+            }
             if (!this.suggestions || this.suggestions.length == 0) {
                 return;
             }
@@ -2807,16 +2823,21 @@ class Confirm extends Popup {
 class ContentPopup extends Popup {
     constructor(title, content) {
         super(title);
+        this.isShown = false;
         this.setCancelable();
-        this.setContent(content);
+        if (content)
+            this.setContent(content);
         this.wide();
         this.cancelAction = this.hide.bind(this);
     }
     show() {
         this.present();
+        this.focus();
+        this.isShown = true;
     }
     hide() {
         this.unpresent();
+        this.isShown = false;
     }
     setHiddenHandler(handler) {
         this.cancelAction = () => {
@@ -3077,6 +3098,7 @@ class Shortcuts {
         this.shortcuts.push(new Shortcut(shortcut, description, handler));
     }
     addRootShortcuts() {
+        let popup = new ContentPopup("Zkratky");
         this.add({
             Key: "?",
         }, "Zobrazit nápovědu", () => {
@@ -3086,8 +3108,13 @@ class Shortcuts {
                 shortcutEl.innerText = shortcut.getDescription();
                 contentEl.appendChild(shortcutEl);
             }
-            let popup = new ContentPopup("Zkratky", contentEl);
-            popup.show();
+            if (popup.isShown) {
+                popup.hide();
+            }
+            else {
+                popup.setContent(contentEl);
+                popup.show();
+            }
         });
     }
 }

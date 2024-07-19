@@ -36,7 +36,7 @@ func (app *App) initSearch() {
 				request.WriteJSON(204, nil)
 				return
 			}
-			request.WriteHTML(200, request.app.adminTemplates, "admin_search_suggest", results)
+			request.WriteHTML(200, request.app.adminTemplates, "search_suggest", results)
 		},
 	)
 

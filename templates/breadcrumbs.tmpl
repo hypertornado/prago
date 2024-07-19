@@ -1,4 +1,4 @@
-{{define "admin_breadcrumbs"}}
+{{define "breadcrumbs"}}
     <div class="breadcrumbs">
         {{range $item := .Items}}
             <a href="{{$item.URL}}" class="breadcrumb{{if $item.Selected}} breadcrumb-selected{{end}}" title="{{$item.Title}}">

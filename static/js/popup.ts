@@ -189,20 +189,26 @@ class Confirm extends Popup {
 }
 
 class ContentPopup extends Popup {
-  constructor(title: string, content: HTMLElement) {
+  isShown: boolean;
+
+  constructor(title: string, content?: HTMLElement) {
     super(title);
+    this.isShown = false;
     this.setCancelable();
-    this.setContent(content);
+    if (content) this.setContent(content);
     this.wide();
     this.cancelAction = this.hide.bind(this);
   }
 
   show() {
     this.present();
+    this.focus();
+    this.isShown = true;
   }
 
   hide() {
     this.unpresent();
+    this.isShown = false;
   }
 
   setHiddenHandler(handler: any) {

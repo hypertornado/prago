@@ -15,9 +15,13 @@ func (resource *Resource) initDefaultResourceAPIs() {
 	resource.api("list").Handler(
 		func(request *Request) {
 			if request.Request().URL.Query().Get("_format") == "json" {
-				listDataJSON, err := resource.getListContentJSON(request.r.Context(), request, request.Request().URL.Query())
-				must(err)
-				request.WriteJSON(200, listDataJSON)
+				request.WriteJSON(200,
+					resource.getListContentJSON(
+						request.r.Context(),
+						request,
+						request.Request().URL.Query(),
+					),
+				)
 				return
 			}
 			if request.Request().URL.Query().Get("_format") == "xlsx" {
@@ -79,7 +83,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 				}
 
 				previews = append(previews,
-					resource.previewer(request, item).Preview(request.r.Context(), nil),
+					resource.previewer(request, item).Preview(nil),
 				)
 			}
 
@@ -127,7 +131,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 			if err == nil {
 				item := resource.query(request.r.Context()).ID(id)
 				if item != nil {
-					relationItem := resource.previewer(request, item).Preview(request.r.Context(), nil)
+					relationItem := resource.previewer(request, item).Preview(nil)
 					if relationItem != nil {
 						usedIDs[relationItem.ID] = true
 						ret = append(ret, *relationItem)
@@ -149,7 +153,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 				itemVals := reflect.ValueOf(items)
 				itemLen := itemVals.Len()
 				for i := 0; i < itemLen; i++ {
-					viewItem := resource.previewer(request, itemVals.Index(i).Interface()).Preview(request.r.Context(), nil)
+					viewItem := resource.previewer(request, itemVals.Index(i).Interface()).Preview(nil)
 					if viewItem != nil && !usedIDs[viewItem.ID] {
 						usedIDs[viewItem.ID] = true
 						ret = append(ret, *viewItem)

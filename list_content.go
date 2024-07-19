@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"net/url"
@@ -162,43 +161,17 @@ type listContentJSON struct {
 	FooterStr string
 }
 
-func (resource *Resource) getListContentJSON(ctx context.Context, userData UserData, params url.Values) (ret *listContentJSON, err error) {
+func (resource *Resource) getListContentJSON(ctx context.Context, userData UserData, params url.Values) *listContentJSON {
 	listData, err := resource.getListContent(ctx, userData, params)
-	if err != nil {
-		return nil, err
-	}
-
-	buf := new(bytes.Buffer)
-	err = resource.app.adminTemplates.Execute(buf, "admin_list_cells", map[string]interface{}{
-		"admin_list": listData,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	var statsStr string
-	if listData.Stats != nil {
-		bufStats := new(bytes.Buffer)
-		err = resource.app.adminTemplates.Execute(bufStats, "admin_stats", listData.Stats)
-		if err != nil {
-			return nil, err
-		}
-		statsStr = bufStats.String()
-	}
-
-	bufFooter := new(bytes.Buffer)
-	err = resource.app.adminTemplates.Execute(bufFooter, "admin_list_footer", map[string]interface{}{
-		"admin_list": listData,
-	})
-	if err != nil {
-		return nil, err
-	}
-
+	must(err)
 	return &listContentJSON{
-		Content:   buf.String(),
-		CountStr:  listData.TotalCountStr,
-		StatsStr:  statsStr,
-		FooterStr: bufFooter.String(),
-	}, nil
-
+		Content: resource.app.adminTemplates.ExecuteToString("list_cells", map[string]interface{}{
+			"admin_list": listData,
+		}),
+		CountStr: listData.TotalCountStr,
+		StatsStr: resource.app.adminTemplates.ExecuteToString("stats", listData.Stats),
+		FooterStr: resource.app.adminTemplates.ExecuteToString("list_footer", map[string]interface{}{
+			"admin_list": listData,
+		}),
+	}
 }

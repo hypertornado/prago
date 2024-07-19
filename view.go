@@ -98,7 +98,7 @@ func (resource *Resource) getBasicView(ctx context.Context, id int64, item any, 
 			viewField{
 				Icon:     "glyphicons-basic-43-stats-circle.svg",
 				Name:     v.Name(request.Locale()),
-				Template: "admin_item_view_text",
+				Template: "view_text",
 				Value:    v.Handler(item),
 			},
 		)
@@ -108,7 +108,7 @@ func (resource *Resource) getBasicView(ctx context.Context, id int64, item any, 
 }
 
 func getDefaultViewTemplate(_ reflect.Type) string {
-	return "admin_item_view_text"
+	return "view_text"
 }
 
 func getDefaultViewDataSource(_ *Field) func(request *Request, f *Field, value interface{}) interface{} {
