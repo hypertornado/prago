@@ -93,7 +93,7 @@ func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Reques
 
 }
 
-func ResourceFormAction[T any](app *App, url string, formGenerator func(*Form, *Request), validation Validation) *Action {
+func ActionResourceForm[T any](app *App, url string, formGenerator func(*Form, *Request), validation Validation) *Action {
 	resource := getResource[T](app)
 	return resource.formAction(url, formGenerator, validation)
 }
@@ -115,7 +115,7 @@ func (resource *Resource) formAction(url string, formGenerator func(*Form, *Requ
 	return action.actionForm
 }
 
-func ResourceFormItemAction[T any](
+func ActionResourceItemForm[T any](
 	app *App,
 	url string,
 	formGenerator func(*T, *Form, *Request),

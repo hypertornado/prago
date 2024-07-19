@@ -151,7 +151,7 @@ func bindCDNFiles(app *prago.App) {
 		return file.url("")
 	})
 
-	prago.ResourceFormItemAction(app, "previewer",
+	prago.ActionResourceItemForm(app, "previewer",
 		func(cdnFile *CDNFile, form *prago.Form, request *prago.Request) {
 			form.AddTextInput("size", "Size")
 			form.AutosubmitFirstTime = true

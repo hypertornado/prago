@@ -8,7 +8,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-func ResourceItemView[T any](app *App, url string, contentSource func(*T, *Request) template.HTML) *Action {
+func ActionResourceItemUI[T any](app *App, url string, contentSource func(*T, *Request) template.HTML) *Action {
 	resource := getResource[T](app)
 	action := resource.newItemAction(url)
 
@@ -54,7 +54,7 @@ func (resource *Resource) itemActionUi(itemURL string, handler func(any, *Reques
 	return action
 }
 
-func ResourceItemHandler[T any](app *App, url string, fn func(*T, *Request)) *Action {
+func ActionResourceItemPlain[T any](app *App, url string, fn func(*T, *Request)) *Action {
 	resource := getResource[T](app)
 	return resource.itemActionHandler(url, func(item any, request *Request) {
 		fn(item.(*T), request)

@@ -6,7 +6,7 @@ import (
 )
 
 func initUserLogin(app *App) {
-	ResourceItemHandler[user](app, "loginas",
+	ActionResourceItemPlain[user](app, "loginas",
 		func(user *user, request *Request) {
 			request.logInUser(user)
 			request.Redirect(app.getAdminURL(""))

@@ -173,7 +173,7 @@ func (app *App) initFilesResource() {
 		}
 	})
 
-	ResourceFormAction[File](app, "upload",
+	ActionResourceForm[File](app, "upload",
 		func(f *Form, r *Request) {
 			f.AddFileInput("file", messages.Get(r.Locale(), "admin_file"))
 			f.AddTextareaInput("description", messages.Get(r.Locale(), "Description"))
