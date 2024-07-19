@@ -8,8 +8,7 @@ import (
 )
 
 func (app *App) initSQLBackup() {
-
-	app.FormAction("sqlbackup",
+	ActionForm(app, "sqlbackup",
 		func(form *Form, request *Request) {
 			form.Title = "SQL Backup"
 

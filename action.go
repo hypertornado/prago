@@ -88,15 +88,32 @@ func newAction(app *App, url string) *Action {
 	}
 }
 
-func (app *App) Action(url string) *Action {
+func ActionPlain(app *App, url string, handler func(*Request)) *Action {
 	action := newAction(app, url)
 	app.rootActions = append(app.rootActions, action)
+	action.addHandler(handler)
 	return action
 }
 
-func ResourceAction[T any](app *App, url string) *Action {
+func ActionUI(app *App, url string, content func(*Request) template.HTML) *Action {
+	action := newAction(app, url)
+	app.rootActions = append(app.rootActions, action)
+	action.addContent(content)
+	return action
+}
+
+func ActionResourcePlain[T any](app *App, url string, handler func(*Request)) *Action {
 	resource := getResource[T](app)
-	return resource.action(url)
+	action := resource.action(url)
+	action.addHandler(handler)
+	return action
+}
+
+func ActionResourceUI[T any](app *App, url string, content func(*Request) template.HTML) *Action {
+	resource := getResource[T](app)
+	action := resource.action(url)
+	action.addContent(content)
+	return action
 }
 
 func (resource *Resource) action(url string) *Action {
@@ -235,14 +252,14 @@ func (action *Action) getController() *controller {
 	}
 }
 
-func (action *Action) Content(dataSource func(*Request) template.HTML) *Action {
+func (action *Action) addContent(dataSource func(*Request) template.HTML) *Action {
 	return action.ui(func(request *Request, pd *pageData) {
 		pd.PageContent = dataSource(request)
 	})
 }
 
 func (action *Action) ui(uiHandler func(*Request, *pageData)) *Action {
-	return action.Handler(func(request *Request) {
+	return action.addHandler(func(request *Request) {
 		pageData := createPageData(request)
 
 		if action.isItemAction {
@@ -255,7 +272,7 @@ func (action *Action) ui(uiHandler func(*Request, *pageData)) *Action {
 	})
 }
 
-func (action *Action) Handler(handler func(*Request)) *Action {
+func (action *Action) addHandler(handler func(*Request)) *Action {
 	action.handler = func(request *Request) {
 		if !request.Authorize(action.permission) {
 			renderErrorPage(request, 403)

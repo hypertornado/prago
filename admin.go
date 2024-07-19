@@ -3,6 +3,7 @@ package prago
 import (
 	"errors"
 	"fmt"
+	"html/template"
 	"net/http"
 	"net/url"
 	"strings"
@@ -22,9 +23,9 @@ func (app *App) initAdminActions() {
 		next()
 	})
 
-	app.Action("markdown").Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).Board(nil).ui(func(r *Request, pd *pageData) {
-		pd.PageContent = app.adminTemplates.ExecuteToHTML("admin_help_markdown", nil)
-	})
+	ActionUI(app, "markdown", func(request *Request) template.HTML {
+		return app.adminTemplates.ExecuteToHTML("admin_help_markdown", nil)
+	}).Name(unlocalized("Nápověda markdown")).Permission(loggedPermission).Board(nil)
 
 	app.accessController.routeHandler("GET", "/admin/logo", func(request *Request) {
 		if app.logo != nil {

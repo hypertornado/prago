@@ -88,7 +88,7 @@ func (app *App) initIcons() {
 		io.Copy(request.Response(), file)
 	})
 
-	app.Action("help/icons").Name(unlocalized("Ikony")).Permission(loggedPermission).Board(nil).ui(
+	ActionPlain(app, "help/icons", nil).Name(unlocalized("Ikony")).Permission(loggedPermission).Board(nil).ui(
 		func(request *Request, pd *pageData) {
 			prefix := app.iconsPrefix
 			prefix = strings.TrimRight(prefix, "/")

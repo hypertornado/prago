@@ -40,7 +40,7 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *form
 		pd.Form = form
 	})
 
-	ret.actionValidation.Handler(func(request *Request) {
+	ret.actionValidation.addHandler(func(request *Request) {
 		if ret.validation == nil {
 			panic("No validation set for this FormAction")
 		}
@@ -56,7 +56,7 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *form
 	return ret
 }
 
-func (app *App) FormAction(url string, formGenerator func(*Form, *Request), validator Validation) *Action {
+func ActionForm(app *App, url string, formGenerator func(*Form, *Request), validator Validation) *Action {
 	fa := newFormAction(app, url, nil)
 
 	fa.formGenerator = formGenerator

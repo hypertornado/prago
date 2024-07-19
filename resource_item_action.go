@@ -64,7 +64,7 @@ func ResourceItemHandler[T any](app *App, url string, fn func(*T, *Request)) *Ac
 func (resource *Resource) itemActionHandler(url string, fn func(any, *Request)) *Action {
 	action := resource.newItemAction(url)
 
-	return action.Handler(func(request *Request) {
+	return action.addHandler(func(request *Request) {
 		item := resource.query(request.r.Context()).ID(request.Param("id"))
 		if item == nil {
 			panic("can't find item")

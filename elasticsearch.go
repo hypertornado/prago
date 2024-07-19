@@ -13,7 +13,7 @@ func (app *App) initElasticsearch() {
 		return app.createNewElasticSearchClient()
 	})
 
-	app.FormAction("delete-elastic-indice", func(f *Form, r *Request) {
+	ActionForm(app, "delete-elastic-indice", func(f *Form, r *Request) {
 		stats, err := app.ElasticSearchClient().GetStats()
 		if err != nil {
 			panic(err)

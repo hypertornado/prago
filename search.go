@@ -40,7 +40,7 @@ func (app *App) initSearch() {
 		},
 	)
 
-	app.Action("_search").Permission(loggedPermission).Name(unlocalized("Vyhledávání")).Board(nil).ui(
+	ActionPlain(app, "_search", nil).Permission(loggedPermission).Name(unlocalized("Vyhledávání")).Board(nil).ui(
 		func(request *Request, pd *pageData) {
 			q := request.Param("q")
 			pageStr := request.Param("page")

@@ -195,21 +195,19 @@ func (app *App) initFilesResource() {
 		},
 	).setPriority(1000000).Permission(resource.canUpdate).Name(unlocalized("Nahrát soubor"))
 
-	ResourceAction[File](app, "getcdnurl").Permission(sysadminPermission).Method("POST").Handler(
-		func(request *Request) {
-			uuid := request.Param("uuid")
-			size := request.Param("size")
+	ActionResourcePlain[File](app, "getcdnurl", func(request *Request) {
+		uuid := request.Param("uuid")
+		size := request.Param("size")
 
-			files := app.GetFiles(request.r.Context(), uuid)
-			if len(files) == 0 {
-				panic("can't find file")
-			}
-			file := files[0]
+		files := app.GetFiles(request.r.Context(), uuid)
+		if len(files) == 0 {
+			panic("can't find file")
+		}
+		file := files[0]
 
-			redirectURL := filesCDN.GetImageURL(uuid, file.Name, size)
-			request.Redirect(redirectURL)
-		},
-	)
+		redirectURL := filesCDN.GetImageURL(uuid, file.Name, size)
+		request.Redirect(redirectURL)
+	}).Permission(sysadminPermission).Method("POST")
 }
 
 type imageResponse struct {

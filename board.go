@@ -65,7 +65,7 @@ func (parent *Board) Child(url string, name func(string) string, icon string) *B
 func newBoard(app *App, url string) *Board {
 	ret := &Board{
 		app:    app,
-		action: app.Action(url),
+		action: ActionPlain(app, url, nil),
 	}
 	ret.action.isPartOfBoard = ret
 
