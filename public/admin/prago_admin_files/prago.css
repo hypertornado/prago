@@ -259,7 +259,7 @@ p {
 }
 
 a {
-  color: hsl(214deg, 50%, 50%);
+  color: #4077bf;
 }
 
 a:hover {
@@ -666,7 +666,7 @@ select.admin_timestamp_minute {
   background: none;
   -webkit-appearance: none;
   appearance: none;
-  border: 5px solid hsl(214deg, 50%, 50%);
+  border: 5px solid #4077bf;
   border-top: 5px solid hsl(214deg, 50%, 90%);
   border-radius: 50%;
   width: 0px;
@@ -1064,7 +1064,7 @@ html:has(.admin_nologin) {
 
 .list_header_item_name-canorder {
   cursor: pointer;
-  color: hsl(214deg, 50%, 50%);
+  color: #4077bf;
 }
 
 .list_header_item_name-canorder:hover {
@@ -1267,7 +1267,7 @@ html:has(.admin_nologin) {
 }
 
 .list_row_multiple-checked .list_cell_multiple_pseudocheckbox {
-  background-color: hsl(214deg, 50%, 50%);
+  background-color: #4077bf;
 }
 
 .list_cell_multiple_pseudocheckbox::after {
@@ -1275,7 +1275,7 @@ html:has(.admin_nologin) {
 }
 
 .list_row_multiple-checked .list_cell_multiple_pseudocheckbox::after {
-  background-color: hsl(214deg, 50%, 50%);
+  background-color: #4077bf;
   content: "✓";
   color: white;
 }
@@ -1506,7 +1506,7 @@ input.list_filter_layout_date_to {
 }
 
 .list_filteritem-colored * {
-  border-color: hsl(214deg, 50%, 50%) !important;
+  border-color: #4077bf !important;
 }
 
 .list_filter_item {
@@ -1695,7 +1695,19 @@ input.list_filter_layout_date_to {
 
 .form_label_text_icon {
   width: 15px;
+  aspect-ratio: 1;
   margin-right: 5px;
+}
+
+.form_label_text_help {
+  margin-left: 5px;
+  border-radius: 3px;
+  display: flex;
+}
+
+.form_label_text_help img {
+  width: 15px;
+  aspect-ratio: 1;
 }
 
 .form_label_description {
@@ -2561,7 +2573,7 @@ a.board_resource {
 }
 
 a.dashboard_figure:hover {
-  border-color: hsl(214deg, 50%, 50%);
+  border-color: #4077bf;
 }
 
 a.dashboard_figure {
@@ -2580,7 +2592,7 @@ a.dashboard_figure {
 }
 
 a .dashboard_figure_value {
-  color: hsl(214deg, 50%, 50%);
+  color: #4077bf;
 }
 
 .dashboard_figure_value {
@@ -2712,7 +2724,7 @@ a .dashboard_figure_value {
   border-radius: 0px;
   background-color: #ccc;
   background-color: hsl(214deg, 50%, 90%);
-  background-color: hsl(214deg, 50%, 50%);
+  background-color: #4077bf;
 }
 
 .admin_stats_section_row_description {
@@ -2748,7 +2760,7 @@ a.admin_stats_section_row {
 
 .pagination_page,
 .pagination_page_current {
-  color: hsl(214deg, 50%, 50%);
+  color: #4077bf;
   padding: 2px 10px;
   margin: 0px;
   margin-right: 1px;
@@ -2819,7 +2831,7 @@ a.admin_stats_section_row {
 
 .admin_navigation_tab-selected,
 .admin_navigation_tab-selected:hover {
-  background-color: hsl(214deg, 50%, 50%);
+  background-color: #4077bf;
   color: white;
   box-shadow: none;
 }
@@ -2897,9 +2909,9 @@ a.admin_stats_section_row {
 
 .menu2_item_content-selected,
 .menu2_item_content-selected:hover {
-  background-color: hsl(214deg, 50%, 50%);
+  background-color: #4077bf;
   color: white !important;
-  border-color: hsl(214deg, 50%, 50%);
+  border-color: #4077bf;
   position: sticky;
   top: 0px;
   bottom: 0px;
@@ -3052,7 +3064,7 @@ a.admin_stats_section_row {
 }
 
 .popup_header_cancel {
-  color: hsl(214deg, 50%, 50%);
+  color: #4077bf;
   cursor: pointer;
   flex-grow: 0;
   flex-shrink: 0;
@@ -3268,7 +3280,7 @@ a.admin_stats_section_row {
   margin-top: 10px;
   cursor: pointer;
   font-weight: 500;
-  background-color: hsl(214deg, 50%, 50%);
+  background-color: #4077bf;
   color: white;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
@@ -3416,7 +3428,7 @@ a.admin_stats_section_row {
 }
 
 .graph_item_bar_percent {
-  background-color: hsl(214deg, 50%, 50%);
+  background-color: #4077bf;
   height: 90%;
 }
 

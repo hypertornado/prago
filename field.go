@@ -2,6 +2,7 @@ package prago
 
 import (
 	"fmt"
+	"html/template"
 	"reflect"
 	"strings"
 	"time"
@@ -29,6 +30,11 @@ type Field struct {
 	fieldType *fieldType
 
 	relatedResource *Resource
+
+	formContentGenerator func(item *FormItem) template.HTML
+	viewContentGenerator func(val any) template.HTML
+
+	helpURL string
 }
 
 func (resource *Resource) Field(name string) *Field {
@@ -261,6 +267,11 @@ func (field *Field) Name(name func(string) string) *Field {
 	return field
 }
 
+func (field *Field) HelpURL(url string) *Field {
+	field.helpURL = url
+	return field
+}
+
 func (field *Field) getRelatedID() string {
 	if field.tags["prago-relation"] != "" {
 		return columnName(field.tags["prago-relation"])
@@ -280,13 +291,13 @@ func (field *Field) Description(description func(string) string) *Field {
 	return field
 }
 
-func (field *Field) ViewTemplate(template string) *Field {
-	field.fieldType.viewTemplate = template
+func (field *Field) ViewContentGenerator(fn func(val any) template.HTML) *Field {
+	field.viewContentGenerator = fn
 	return field
 }
 
-func (field *Field) FormTemplate(template string) *Field {
-	field.fieldType.formTemplate = template
+func (field *Field) FormContentGenerator(fn func(item *FormItem) template.HTML) *Field {
+	field.formContentGenerator = fn
 	return field
 }
 

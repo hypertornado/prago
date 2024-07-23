@@ -30,8 +30,6 @@ type pageData struct {
 
 	BoardView *boardView
 
-	HelpIcons []string
-
 	NotificationsData string
 	HTTPCode          int
 }

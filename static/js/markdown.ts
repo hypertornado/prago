@@ -14,12 +14,6 @@ class MarkdownEditor {
 
     new Autoresize(this.textarea);
 
-    var prefix = document.body.getAttribute("data-admin-prefix");
-    var helpLink = <HTMLAnchorElement>(
-      el.querySelector(".admin_markdown_show_help")
-    );
-    helpLink.setAttribute("href", prefix + "/markdown");
-
     this.lastChanged = Date.now();
     this.changed = false;
 

@@ -2,6 +2,7 @@ package prago
 
 import (
 	"fmt"
+	"html/template"
 	"reflect"
 	"time"
 
@@ -22,11 +23,12 @@ type view struct {
 }
 
 type viewField struct {
-	Icon     string
-	Name     string
-	Template string
-	Value    interface{}
-	EditURL  string
+	Icon    string
+	Name    string
+	Content template.HTML
+	//Template string
+	//Value    interface{}
+	EditURL string
 }
 
 type viewButton struct {
@@ -76,15 +78,24 @@ func (resource *Resource) getBasicView(ctx context.Context, id int64, item any, 
 			editURL = resource.getURL(fmt.Sprintf("%d/edit?_focus=%s", id, f.id))
 		}
 
+		var content template.HTML
+		if f.viewContentGenerator != nil {
+			content = f.viewContentGenerator(ifaceVal)
+		} else {
+			content = resource.app.adminTemplates.ExecuteToHTML(
+				f.fieldType.viewTemplate,
+				f.fieldType.viewDataSource(request, f, ifaceVal),
+			)
+		}
+
 		icon := f.getIcon()
 		ret.Items = append(
 			ret.Items,
 			viewField{
-				Icon:     icon,
-				Name:     f.name(request.Locale()),
-				Template: f.fieldType.viewTemplate,
-				Value:    f.fieldType.viewDataSource(request, f, ifaceVal),
-				EditURL:  editURL,
+				Icon:    icon,
+				Name:    f.name(request.Locale()),
+				Content: content,
+				EditURL: editURL,
 			},
 		)
 	}
@@ -96,10 +107,9 @@ func (resource *Resource) getBasicView(ctx context.Context, id int64, item any, 
 		ret.Items = append(
 			ret.Items,
 			viewField{
-				Icon:     "glyphicons-basic-43-stats-circle.svg",
-				Name:     v.Name(request.Locale()),
-				Template: "view_text",
-				Value:    v.Handler(item),
+				Icon:    "glyphicons-basic-43-stats-circle.svg",
+				Name:    v.Name(request.Locale()),
+				Content: template.HTML(v.Handler(item)),
 			},
 		)
 	}

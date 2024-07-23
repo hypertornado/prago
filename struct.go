@@ -99,6 +99,18 @@ func (form *Form) addResourceItems(resource *Resource, item any, request *Reques
 			item.Required = true
 		}
 
+		if field.formContentGenerator != nil {
+			item.Content = field.formContentGenerator(item)
+		}
+
+		if field.fieldType.helpURL != "" {
+			item.HelpURL = field.fieldType.helpURL
+		}
+
+		if field.helpURL != "" {
+			item.HelpURL = field.helpURL
+		}
+
 		form.AddItem(item)
 	}
 }

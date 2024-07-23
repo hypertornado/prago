@@ -4,6 +4,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"html/template"
 	"io"
 	"strings"
 )
@@ -88,19 +89,19 @@ func (app *App) initIcons() {
 		io.Copy(request.Response(), file)
 	})
 
-	ActionPlain(app, "help/icons", nil).Name(unlocalized("Ikony")).Permission(loggedPermission).Board(nil).ui(
-		func(request *Request, pd *pageData) {
-			prefix := app.iconsPrefix
-			prefix = strings.TrimRight(prefix, "/")
+	app.Help("icons", unlocalized("Ikony"), func(request *Request) template.HTML {
+		prefix := app.iconsPrefix
+		prefix = strings.TrimRight(prefix, "/")
 
-			icons, err := app.iconsFS.ReadDir(prefix)
-			must(err)
+		icons, err := app.iconsFS.ReadDir(prefix)
+		must(err)
 
-			var ret []string
-			for _, v := range icons {
-				ret = append(ret, v.Name())
-			}
-			pd.HelpIcons = ret
-		})
+		var ret []string
+		for _, v := range icons {
+			ret = append(ret, v.Name())
+		}
 
+		return app.adminTemplates.ExecuteToHTML("help_icons", ret)
+
+	})
 }

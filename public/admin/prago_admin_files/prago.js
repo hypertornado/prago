@@ -1372,9 +1372,6 @@ class MarkdownEditor {
         this.textarea = el.querySelector(".textarea");
         this.preview = el.querySelector(".admin_markdown_preview");
         new Autoresize(this.textarea);
-        var prefix = document.body.getAttribute("data-admin-prefix");
-        var helpLink = (el.querySelector(".admin_markdown_show_help"));
-        helpLink.setAttribute("href", prefix + "/markdown");
         this.lastChanged = Date.now();
         this.changed = false;
         let showChange = (el.querySelector(".admin_markdown_preview_show"));

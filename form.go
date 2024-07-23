@@ -35,11 +35,16 @@ type FormItem struct {
 	Template    string
 	Value       string
 	Data        interface{}
-	UUID        string
-	form        *Form
+
+	Content template.HTML
+
+	UUID string
+	form *Form
 
 	Autocomplete string
 	InputMode    string
+
+	HelpURL string
 }
 
 // NewForm creates new form
@@ -160,7 +165,7 @@ func (f *Form) AddDateTimePicker(name, description string) *FormItem {
 }
 
 func (f *Form) AddRelation(name, description string, relatedResourceID string) *FormItem {
-	input := f.addInput(name, description, "admin_item_relation")
+	input := f.addInput(name, description, "form_input_relation")
 	input.Data = relationFormDataSource{
 		RelatedID: relatedResourceID,
 	}
@@ -168,7 +173,7 @@ func (f *Form) AddRelation(name, description string, relatedResourceID string) *
 }
 
 func (f *Form) AddRelationMultiple(name, description string, relatedResourceID string) *FormItem {
-	input := f.addInput(name, description, "admin_item_relation")
+	input := f.addInput(name, description, "form_input_relation")
 	input.Data = relationFormDataSource{
 		RelatedID:     relatedResourceID,
 		MultiRelation: true,

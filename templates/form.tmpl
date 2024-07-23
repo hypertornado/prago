@@ -21,6 +21,9 @@
                   <img src="/admin/api/icons?file={{$item.Icon}}&color=444444" class="form_label_text_icon">
                 {{end}}
                 {{.Name}}
+                {{if .HelpURL}}
+                  <a href="{{.HelpURL}}" class="form_label_text_help"><img src="/admin/api/icons?file=glyphicons-basic-196-circle-empty-info.svg&color=4077bf" title="Nápověda"></a>
+                {{end}}
               </label>
               {{if .Description}}
                 <div class="form_label_description">{{.Description}}</div>
@@ -28,7 +31,13 @@
             {{end}}
             <div class="form_label_errors hidden"></div>
             <div>
-              {{PragoTMPL $item.Template $item}}
+              {{if .Content}}
+                {{.Content}}
+              {{else}}
+                {{if $item.Template}}
+                  {{PragoTMPL $item.Template $item}}
+                {{end}}
+              {{end}}
             </div>
           </div>
         {{end}}

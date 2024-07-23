@@ -164,12 +164,16 @@ type listContentJSON struct {
 func (resource *Resource) getListContentJSON(ctx context.Context, userData UserData, params url.Values) *listContentJSON {
 	listData, err := resource.getListContent(ctx, userData, params)
 	must(err)
+	var statsStr string
+	if listData.Stats != nil {
+		statsStr = resource.app.adminTemplates.ExecuteToString("stats", listData.Stats)
+	}
 	return &listContentJSON{
 		Content: resource.app.adminTemplates.ExecuteToString("list_cells", map[string]interface{}{
 			"admin_list": listData,
 		}),
 		CountStr: listData.TotalCountStr,
-		StatsStr: resource.app.adminTemplates.ExecuteToString("stats", listData.Stats),
+		StatsStr: statsStr,
 		FooterStr: resource.app.adminTemplates.ExecuteToString("list_footer", map[string]interface{}{
 			"admin_list": listData,
 		}),

@@ -180,7 +180,20 @@
 
 .form_label_text_icon {
   width: 15px;
+  aspect-ratio: 1;
   margin-right: 5px;
+}
+
+.form_label_text_help {
+  margin-left: 5px;
+  border-radius: 3px;
+  display: flex;
+}
+
+.form_label_text_help img {
+  width: 15px;
+  aspect-ratio: 1;
+
 }
 
 .form_label_description {

@@ -26,6 +26,8 @@ type fieldType struct {
 
 	fieldTypeIcon    string
 	naturalCellWidth int64
+
+	helpURL string
 }
 
 func (app *App) addFieldType(name string, fieldType *fieldType) {
@@ -102,6 +104,8 @@ func (app *App) initDefaultFieldTypes() {
 		formTemplate:       "form_input_markdown",
 		listCellDataSource: markdownListDataSource,
 		fieldTypeIcon:      "glyphicons-basic-692-font.svg",
+
+		helpURL: "/admin/help/markdown",
 	})
 	app.addFieldType("place", &fieldType{
 		viewTemplate:  "view_place",
