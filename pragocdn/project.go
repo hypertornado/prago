@@ -13,7 +13,7 @@ type CDNProject struct {
 	Name      string
 	Password  string
 	CreatedAt time.Time
-	UpdatedAt time.Time `prago-can-view:"sysadmin" prago-preview:"true"`
+	UpdatedAt time.Time `prago-can-view:"sysadmin"`
 }
 
 func initCDNProjectResource() {

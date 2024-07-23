@@ -13,15 +13,15 @@ import (
 
 // File is structure representing files in admin
 type File struct {
-	ID          int64     `prago-order-desc:"true" prago-preview:"true"`
-	UID         string    `prago-unique:"true" prago-preview:"true" prago-type:"cdnfile"`
-	Name        string    `prago-can-edit:"nobody"`
-	Description string    `prago-type:"text" prago-preview:"true"`
-	User        int64     `prago-type:"relation" prago-can-edit:"nobody"`
-	Width       int64     `prago-can-edit:"nobody" prago-preview:"true"`
-	Height      int64     `prago-can-edit:"nobody" prago-preview:"true"`
-	CreatedAt   time.Time `prago-preview:"true"`
-	UpdatedAt   time.Time `prago-preview:"true"`
+	ID          int64  `prago-order-desc:"true"`
+	UID         string `prago-unique:"true" prago-type:"cdnfile"`
+	Name        string `prago-can-edit:"nobody"`
+	Description string `prago-type:"text"`
+	User        int64  `prago-type:"relation" prago-can-edit:"nobody"`
+	Width       int64  `prago-can-edit:"nobody"`
+	Height      int64  `prago-can-edit:"nobody"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 var filesCDN cdnclient.CDNAccount

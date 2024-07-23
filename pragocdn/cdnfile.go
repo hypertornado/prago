@@ -19,20 +19,20 @@ import (
 )
 
 type CDNFile struct {
-	ID       int64  `prago-order-desc:"true"`
-	UUID     string `prago-preview:"true"`
-	Suffix   string `prago-preview:"true"`
-	Checksum string `prago-preview:"true"`
-	Deleted  bool   `prago-preview:"true"`
+	ID       int64 `prago-order-desc:"true"`
+	UUID     string
+	Suffix   string
+	Checksum string
+	Deleted  bool
 
-	CDNProject int64 `prago-type:"relation" prago-preview:"true"`
+	CDNProject int64 `prago-type:"relation"`
 
-	Filesize int64 `prago-preview:"true"`
-	Width    int64 `prago-preview:"true"`
-	Height   int64 `prago-preview:"true"`
+	Filesize int64
+	Width    int64
+	Height   int64
 
 	CreatedAt time.Time
-	UpdatedAt time.Time `prago-can-view:"sysadmin" prago-preview:"true"`
+	UpdatedAt time.Time `prago-can-view:"sysadmin"`
 }
 
 func getCDNFile(projectName, uuid string) *CDNFile {

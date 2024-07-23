@@ -22,7 +22,7 @@ type ResourceStruct struct {
 	Name        string
 	Text        string `prago-type:"text"`
 	Other       string
-	Showing     string `prago-preview:"true"`
+	Showing     string
 	IsSomething bool
 	Floating    float64
 	Date        time.Time `prago-type:"date"`

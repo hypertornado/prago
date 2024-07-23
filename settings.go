@@ -17,9 +17,9 @@ type settingsSingleton struct {
 type pragoSettings struct {
 	ID        int64
 	Name      string
-	Value     string    `prago-type:"text" prago-preview:"true"`
-	CreatedAt time.Time `prago-preview:"true"`
-	UpdatedAt time.Time `prago-preview:"true"`
+	Value     string `prago-type:"text"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (app *App) initSettings() {

@@ -12,13 +12,13 @@ import (
 
 type activityLog struct {
 	ID            int64
-	ResourceName  string    `prago-preview:"true"`
-	ItemID        int64     `prago-preview:"true"`
-	ActionType    string    `prago-preview:"true"`
-	User          int64     `prago-type:"relation" prago-preview:"true"`
-	ContentBefore string    `prago-type:"text"`
-	ContentAfter  string    `prago-type:"text"`
-	CreatedAt     time.Time `prago-preview:"true"`
+	ResourceName  string
+	ItemID        int64
+	ActionType    string
+	User          int64  `prago-type:"relation"`
+	ContentBefore string `prago-type:"text"`
+	ContentAfter  string `prago-type:"text"`
+	CreatedAt     time.Time
 }
 
 type Activity struct {
