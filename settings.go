@@ -146,6 +146,7 @@ func initDefaultSettings(app *App) {
 	app.Setting("port", "sysadmin").DefaultValue(fmt.Sprintf("%d", defaultPort))
 	app.Setting("base_url", "sysadmin").DefaultValue("http://localhost:8585")
 	app.Setting("ssh", "sysadmin")
+	app.Setting("background_image_url", "sysadmin")
 
 	cdnCallback := func() {
 		initCDN(app)

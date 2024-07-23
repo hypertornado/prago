@@ -399,14 +399,48 @@ select.admin_timestamp_minute {
   margin: 0 auto;
 }
 
-html:has(.admin_nologin) {
-  background: linear-gradient(hsl(213.75deg 50.39% 99%), white);
-  background-repeat: no-repeat;
+.admin_nologin_outer {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  //justify-content: center;
+}
+
+.admin_nologin {
+  background-position: center;
+  background-size: cover;
+  min-height: 100dvh;
+}
+
+.admin_nologin_content {
+  border: 1px solid $grayBorderColor;
+  background: white;
+  margin: 20px;
+  max-width: 600px;
+  border-radius: 5px;
+  padding: 0px 10px;
+  @include shadowMedium;
+
+  animation: nologinLoad 1000ms ease;
+}
+
+@keyframes nologinLoad {
+
+  from {
+    opacity: 1;
+    transform: perspective(20cm) rotateX(0deg) scale(1.02) translateY(-0px);
+  }
+
+  to {
+    opacity: 1;
+  }
+  
 }
 
 .admin_nologin_logo {
-  width: 150px;
-  height: 150px;
+  width: 100px;
+  aspect-ratio: 1;
   margin: 10px auto;
   background-position: center;
   background-size: contain;

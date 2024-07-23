@@ -13,11 +13,16 @@
     {{end}}
 
   </head>
-  <body class="admin_nologin">
-    <div class="admin_nologin_logo" style="background-image: url('/admin/logo');"></div>
-    {{template "tabs" .Tabs}}
+  <body class="admin_nologin"{{if .BackgroundImageURL}} style="background-image: url('{{ .BackgroundImageURL}}')"{{end}}>
     {{template "notification_center" .NotificationsData}}
-    {{template "form" .FormData}}
+
+    <div class="admin_nologin_outer">
+    <div class="admin_nologin_content">
+      <div class="admin_nologin_logo" style="background-image: url('/admin/logo');"></div>
+      {{template "tabs" .Tabs}}
+      {{template "form" .FormData}}
+    </div>
+    </div>
   </body>
 </html>
 

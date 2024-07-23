@@ -81,6 +81,8 @@ type pageNoLogin struct {
 	Version  string
 	App      *App
 
+	BackgroundImageURL string
+
 	NotificationsData string
 	Title             string
 	Icon              string
@@ -95,6 +97,10 @@ func renderPageNoLogin(request *Request, page *pageNoLogin) {
 
 	page.Language = localeFromRequest(request)
 	page.Version = request.app.version
+
+	var err error
+	page.BackgroundImageURL, err = request.app.getSetting("background_image_url")
+	must(err)
 
 	for _, v := range page.Tabs {
 		if v.Selected {
