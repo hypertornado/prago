@@ -92,7 +92,7 @@ func (form *Form) addResourceItems(resource *Resource, item any, request *Reques
 		item.Value = editableValues[field.id]
 
 		if field.fieldType.formDataSource != nil {
-			item.Data = field.fieldType.formDataSource(field, request)
+			item.Data = field.fieldType.formDataSource(field, request, item.Value)
 		}
 
 		if field.required {

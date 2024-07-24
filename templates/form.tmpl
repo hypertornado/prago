@@ -6,6 +6,10 @@
       {{$boxHeaderData := .GetBoxHeader}}
       {{template "box_header" $boxHeaderData}}
 
+      {{range $scriptPath := .ScriptPaths}}
+        <script src="{{$scriptPath}}"></script>
+      {{end}}
+
       <form method="POST" action="{{.Action}}" class="form prago_form" enctype="multipart/form-data" novalidate>
         {{if .CSRFToken}}
           <input type="hidden" name="_csrfToken" value="{{.CSRFToken}}">

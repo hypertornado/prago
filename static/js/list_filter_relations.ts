@@ -50,13 +50,8 @@ class ListFilterRelations {
 
   loadPreview(value: string) {
     var request = new XMLHttpRequest();
-    var adminPrefix = document.body.getAttribute("data-admin-prefix");
     let apiURL =
-      adminPrefix +
-      "/" +
-      this.relatedResourceName +
-      "/api/preview-relation/" +
-      value;
+      "/admin/" + this.relatedResourceName + "/api/preview-relation/" + value;
 
     request.open("GET", apiURL, true);
 
@@ -114,11 +109,9 @@ class ListFilterRelations {
 
   getSuggestions(q: string) {
     var request = new XMLHttpRequest();
-    var adminPrefix = document.body.getAttribute("data-admin-prefix");
     request.open(
       "GET",
-      adminPrefix +
-        "/" +
+      "/admin/" +
         this.relatedResourceName +
         "/api/searchresource" +
         "?q=" +

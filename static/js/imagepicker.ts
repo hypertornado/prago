@@ -1,6 +1,5 @@
 class ImagePicker {
   el: HTMLDivElement;
-  adminPrefix: string;
   preview: HTMLDivElement;
   hiddenInput: HTMLInputElement;
   fileInput: HTMLInputElement;
@@ -9,7 +8,6 @@ class ImagePicker {
 
   constructor(el: HTMLDivElement) {
     this.el = el;
-    this.adminPrefix = document.body.getAttribute("data-admin-prefix");
     this.hiddenInput = <HTMLInputElement>(
       el.querySelector(".admin_images_hidden")
     );
@@ -22,7 +20,10 @@ class ImagePicker {
     this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
     this.hideProgress();
 
-    var ids = this.hiddenInput.value.split(",");
+    let fileResponses = JSON.parse(
+      this.hiddenInput.getAttribute("data-file-responses")
+    );
+    this.addFiles(fileResponses);
 
     this.el.addEventListener("click", (e) => {
       if (e.altKey) {
@@ -50,12 +51,12 @@ class ImagePicker {
       return;
     });
 
-    for (var i = 0; i < ids.length; i++) {
+    /*for (var i = 0; i < ids.length; i++) {
       var id = ids[i];
       if (id) {
         this.addImage(id);
       }
-    }
+    }*/
 
     this.fileInput.addEventListener("change", (e) => {
       var files = this.fileInput.files;
@@ -69,15 +70,13 @@ class ImagePicker {
       }
 
       var request = new XMLHttpRequest();
-      request.open("POST", this.adminPrefix + "/file/api/upload");
+      request.open("POST", "/admin/file/api/upload");
 
       request.addEventListener("load", (e) => {
         this.hideProgress();
         if (request.status == 200) {
           var data = JSON.parse(request.response);
-          for (var i = 0; i < data.length; i++) {
-            this.addImage(data[i].UID);
-          }
+          this.addFiles(data);
         } else {
           new Alert("Chyba při nahrávání souboru.");
           console.error("Error while loading item.");
@@ -99,41 +98,31 @@ class ImagePicker {
     this.hiddenInput.value = ids.join(",");
   }
 
-  addImage(id: string) {
+  addFiles(files: any) {
+    for (var i = 0; i < files.length; i++) {
+      let file = files[i];
+      this.addFile(file);
+    }
+  }
+
+  addFile(file: any) {
     var container = document.createElement("a");
     container.classList.add("admin_images_image");
-    container.setAttribute("data-uuid", id);
+    container.setAttribute("data-uuid", file.UUID);
     container.setAttribute("draggable", "true");
     container.setAttribute("target", "_blank");
-    container.setAttribute(
-      "href",
-      this.adminPrefix + "/file/api/redirect-uuid/" + id
-    );
+    container.setAttribute("href", file.FileURL);
     container.setAttribute(
       "style",
-      "background-image: url('" +
-        this.adminPrefix +
-        "/file/api/redirect-thumb/" +
-        id +
-        "');"
+      "background-image: url('" + file.ThumbnailURL + "');"
     );
 
     var descriptionEl = document.createElement("div");
     descriptionEl.classList.add("admin_images_image_description");
     container.appendChild(descriptionEl);
 
-    var request = new XMLHttpRequest();
-    request.open("GET", this.adminPrefix + "/file/api/imagedata/" + id);
-    request.addEventListener("load", (e) => {
-      if (request.status == 200) {
-        var data = JSON.parse(request.response);
-        descriptionEl.innerText = data["Name"];
-        container.setAttribute("title", data["Name"]);
-      } else {
-        console.error("Error while loading file metadata.");
-      }
-    });
-    request.send();
+    descriptionEl.innerText = file.Name;
+    container.setAttribute("title", file.Name);
 
     container.addEventListener("dragstart", (e) => {
       this.draggedElement = <HTMLAnchorElement>e.target;
@@ -207,6 +196,7 @@ class ImagePicker {
 
     this.preview.appendChild(container);
     this.updateHiddenData();
+    console.log("XXXXX");
   }
 
   hideProgress() {

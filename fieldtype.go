@@ -16,7 +16,7 @@ type fieldType struct {
 
 	formHideLabel  bool
 	formTemplate   string
-	formDataSource func(*Field, UserData) interface{}
+	formDataSource func(*Field, UserData, string) interface{}
 	formStringer   func(interface{}) string
 
 	listCellDataSource func(UserData, *Field, interface{}) listCell
@@ -76,8 +76,9 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("file", &fieldType{
 		viewTemplate:       "view_image",
+		viewDataSource:     fileViewDataSource,
 		formTemplate:       "form_input_image",
-		formDataSource:     createFilesEditDataSource(""),
+		formDataSource:     imageFormDataSource(""),
 		listCellDataSource: imageCellViewData,
 
 		filterLayoutTemplate:   "filter_layout_select",
@@ -87,8 +88,9 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("image", &fieldType{
 		viewTemplate:       "view_image",
+		viewDataSource:     fileViewDataSource,
 		formTemplate:       "form_input_image",
-		formDataSource:     createFilesEditDataSource(".jpg,.jpeg,.png"),
+		formDataSource:     imageFormDataSource(".jpg,.jpeg,.png"),
 		listCellDataSource: imageCellViewData,
 
 		filterLayoutTemplate:   "filter_layout_select",
@@ -120,7 +122,7 @@ func (app *App) initDefaultFieldTypes() {
 			return f.relationPreview(request, fmt.Sprintf("%d", valInt))
 		},
 		formTemplate: "form_input_relation",
-		formDataSource: func(f *Field, userData UserData) interface{} {
+		formDataSource: func(f *Field, userData UserData, value string) interface{} {
 			return relationFormDataSource{
 				RelatedID:     f.getRelatedID(),
 				MultiRelation: false,
@@ -134,7 +136,7 @@ func (app *App) initDefaultFieldTypes() {
 			return f.relationPreview(request, value.(string))
 		},
 		formTemplate: "form_input_relation",
-		formDataSource: func(f *Field, userData UserData) interface{} {
+		formDataSource: func(f *Field, userData UserData, value string) interface{} {
 			return relationFormDataSource{
 				RelatedID:     f.getRelatedID(),
 				MultiRelation: true,
@@ -160,12 +162,6 @@ func boolFilterLayoutDataSource(field *Field, userData UserData) interface{} {
 		{"", ""},
 		{"true", messages.Get(userData.Locale(), "yes")},
 		{"false", messages.Get(userData.Locale(), "no")},
-	}
-}
-
-func createFilesEditDataSource(mimeTypes string) func(*Field, UserData) interface{} {
-	return func(f *Field, userData UserData) interface{} {
-		return mimeTypes
 	}
 }
 

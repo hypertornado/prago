@@ -58,61 +58,44 @@ function sleep(ms) {
 }
 class ImageView {
     constructor(el) {
-        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.el = el;
-        var ids = el.getAttribute("data-images").split(",");
-        this.addImages(ids);
+        var filesData = JSON.parse(el.getAttribute("data-images"));
+        this.addFiles(filesData);
     }
-    addImages(ids) {
+    addFiles(filesData) {
         this.el.innerHTML = "";
-        for (var i = 0; i < ids.length; i++) {
-            if (ids[i] != "") {
-                this.addImage(ids[i]);
-            }
+        for (var i = 0; i < filesData.length; i++) {
+            let file = filesData[i];
+            this.addFile(file);
         }
     }
-    addImage(id) {
+    addFile(file) {
         var container = document.createElement("a");
         container.classList.add("admin_images_image");
-        container.setAttribute("href", this.adminPrefix + "/file/api/redirect-uuid/" + id);
-        container.setAttribute("style", "background-image: url('" +
-            this.adminPrefix +
-            "/file/api/redirect-thumb/" +
-            id +
-            "');");
+        container.setAttribute("href", file.FileURL);
+        container.setAttribute("style", "background-image: url('" + file.ThumbnailURL + "');");
         var img = document.createElement("div");
-        img.setAttribute("src", this.adminPrefix + "/file/api/redirect-thumb/" + id);
+        img.setAttribute("src", file.ThumbnailURL);
         img.setAttribute("draggable", "false");
         var descriptionEl = document.createElement("div");
         descriptionEl.classList.add("admin_images_image_description");
         container.appendChild(descriptionEl);
-        var request = new XMLHttpRequest();
-        request.open("GET", this.adminPrefix + "/file/api/imagedata/" + id);
-        request.addEventListener("load", (e) => {
-            if (request.status == 200) {
-                var data = JSON.parse(request.response);
-                descriptionEl.innerText = data["Name"];
-                container.setAttribute("title", data["Name"]);
-            }
-            else {
-                console.error("Error while loading file metadata.");
-            }
-        });
-        request.send();
+        descriptionEl.innerText = file.Name;
+        container.setAttribute("title", file.Name);
         this.el.appendChild(container);
     }
 }
 class ImagePicker {
     constructor(el) {
         this.el = el;
-        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.hiddenInput = (el.querySelector(".admin_images_hidden"));
         this.preview = el.querySelector(".admin_images_preview");
         this.fileInput = (this.el.querySelector(".admin_images_fileinput input"));
         this.progress = this.el.querySelector("progress");
         this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
         this.hideProgress();
-        var ids = this.hiddenInput.value.split(",");
+        let fileResponses = JSON.parse(this.hiddenInput.getAttribute("data-file-responses"));
+        this.addFiles(fileResponses);
         this.el.addEventListener("click", (e) => {
             if (e.altKey) {
                 var ids = window.prompt("IDs of images", this.hiddenInput.value);
@@ -134,12 +117,6 @@ class ImagePicker {
             var text = ev.dataTransfer.getData("Text");
             return;
         });
-        for (var i = 0; i < ids.length; i++) {
-            var id = ids[i];
-            if (id) {
-                this.addImage(id);
-            }
-        }
         this.fileInput.addEventListener("change", (e) => {
             var files = this.fileInput.files;
             var formData = new FormData();
@@ -150,14 +127,12 @@ class ImagePicker {
                 formData.append("file", files[i]);
             }
             var request = new XMLHttpRequest();
-            request.open("POST", this.adminPrefix + "/file/api/upload");
+            request.open("POST", "/admin/file/api/upload");
             request.addEventListener("load", (e) => {
                 this.hideProgress();
                 if (request.status == 200) {
                     var data = JSON.parse(request.response);
-                    for (var i = 0; i < data.length; i++) {
-                        this.addImage(data[i].UID);
-                    }
+                    this.addFiles(data);
                 }
                 else {
                     new Alert("Chyba při nahrávání souboru.");
@@ -177,34 +152,25 @@ class ImagePicker {
         }
         this.hiddenInput.value = ids.join(",");
     }
-    addImage(id) {
+    addFiles(files) {
+        for (var i = 0; i < files.length; i++) {
+            let file = files[i];
+            this.addFile(file);
+        }
+    }
+    addFile(file) {
         var container = document.createElement("a");
         container.classList.add("admin_images_image");
-        container.setAttribute("data-uuid", id);
+        container.setAttribute("data-uuid", file.UUID);
         container.setAttribute("draggable", "true");
         container.setAttribute("target", "_blank");
-        container.setAttribute("href", this.adminPrefix + "/file/api/redirect-uuid/" + id);
-        container.setAttribute("style", "background-image: url('" +
-            this.adminPrefix +
-            "/file/api/redirect-thumb/" +
-            id +
-            "');");
+        container.setAttribute("href", file.FileURL);
+        container.setAttribute("style", "background-image: url('" + file.ThumbnailURL + "');");
         var descriptionEl = document.createElement("div");
         descriptionEl.classList.add("admin_images_image_description");
         container.appendChild(descriptionEl);
-        var request = new XMLHttpRequest();
-        request.open("GET", this.adminPrefix + "/file/api/imagedata/" + id);
-        request.addEventListener("load", (e) => {
-            if (request.status == 200) {
-                var data = JSON.parse(request.response);
-                descriptionEl.innerText = data["Name"];
-                container.setAttribute("title", data["Name"]);
-            }
-            else {
-                console.error("Error while loading file metadata.");
-            }
-        });
-        request.send();
+        descriptionEl.innerText = file.Name;
+        container.setAttribute("title", file.Name);
         container.addEventListener("dragstart", (e) => {
             this.draggedElement = e.target;
         });
@@ -263,6 +229,7 @@ class ImagePicker {
         container.appendChild(del);
         this.preview.appendChild(container);
         this.updateHiddenData();
+        console.log("XXXXX");
     }
     hideProgress() {
         this.progress.classList.add("hidden");
@@ -303,12 +270,7 @@ class ListFilterRelations {
     }
     loadPreview(value) {
         var request = new XMLHttpRequest();
-        var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        let apiURL = adminPrefix +
-            "/" +
-            this.relatedResourceName +
-            "/api/preview-relation/" +
-            value;
+        let apiURL = "/admin/" + this.relatedResourceName + "/api/preview-relation/" + value;
         request.open("GET", apiURL, true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
@@ -358,9 +320,7 @@ class ListFilterRelations {
     }
     getSuggestions(q) {
         var request = new XMLHttpRequest();
-        var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        request.open("GET", adminPrefix +
-            "/" +
+        request.open("GET", "/admin/" +
             this.relatedResourceName +
             "/api/searchresource" +
             "?q=" +
@@ -474,7 +434,6 @@ class List {
         this.progress = list.querySelector(".list_progress");
         this.tableContent = list.querySelector(".list_table_content");
         this.bindFilter(urlParams);
-        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.defaultOrderColumn = list.getAttribute("data-order-column");
         if (list.getAttribute("data-order-desc") == "true") {
             this.defaultOrderDesc = true;
@@ -590,15 +549,11 @@ class List {
         }
         params["_format"] = "xlsx";
         if (this.exportButton) {
-            this.exportButton.setAttribute("href", this.adminPrefix +
-                "/" +
-                this.typeName +
-                "/api/list" +
-                encodeParams(params));
+            this.exportButton.setAttribute("href", "/admin/" + this.typeName + "/api/list" + encodeParams(params));
         }
         params["_format"] = "json";
         encoded = encodeParams(params);
-        request.open("GET", this.adminPrefix + "/" + this.typeName + "/api/list" + encoded, true);
+        request.open("GET", "/admin/" + this.typeName + "/api/list" + encoded, true);
         request.addEventListener("load", () => {
             this.currentRequest = null;
             this.tableContent.innerHTML = "";
@@ -1104,8 +1059,7 @@ class ListMultiple {
                     var params = {};
                     params["action"] = actionID;
                     params["ids"] = ids.join(",");
-                    var url = this.list.adminPrefix +
-                        "/" +
+                    var url = "/admin/" +
                         this.list.typeName +
                         "/api/multipleaction" +
                         encodeParams(params);
@@ -1343,9 +1297,8 @@ function bindReOrder() {
             });
         }
         function saveOrder() {
-            var adminPrefix = document.body.getAttribute("data-admin-prefix");
             var typ = document.querySelector(".list-order").getAttribute("data-type");
-            var ajaxPath = adminPrefix + "/" + typ + "/api/set-order";
+            var ajaxPath = "/admin/" + typ + "/api/set-order";
             var order = [];
             var rows = el.getElementsByClassName("list_row");
             Array.prototype.forEach.call(rows, function (item, i) {
@@ -1472,7 +1425,7 @@ class MarkdownEditor {
     loadPreview() {
         this.changed = false;
         var request = new XMLHttpRequest();
-        request.open("POST", document.body.getAttribute("data-admin-prefix") + "/api/markdown", true);
+        request.open("POST", "/admin/api/markdown", true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
                 this.preview.innerHTML = JSON.parse(request.response);
@@ -1687,10 +1640,8 @@ class RelationPicker {
         this.pickerInput.value = "";
     }
     getSuggestions(q) {
-        var adminPrefix = document.body.getAttribute("data-admin-prefix");
         var request = new XMLHttpRequest();
-        request.open("GET", adminPrefix +
-            "/" +
+        request.open("GET", "/admin/" +
             this.relationName +
             "/api/searchresource" +
             "?q=" +
@@ -2253,10 +2204,7 @@ class SearchForm {
         this.dirty = false;
         var suggestText = this.searchInput.value;
         var request = new XMLHttpRequest();
-        var adminPrefix = document.body.getAttribute("data-admin-prefix");
-        var url = adminPrefix +
-            "/api/search-suggest" +
-            encodeParams({ q: this.searchInput.value });
+        var url = "/admin/api/search-suggest" + encodeParams({ q: this.searchInput.value });
         request.open("GET", url);
         request.addEventListener("load", () => {
             if (suggestText != this.searchInput.value) {
@@ -2428,7 +2376,6 @@ class Menu {
 }
 class RelationList {
     constructor(el) {
-        this.adminPrefix = document.body.getAttribute("data-admin-prefix");
         this.targetEl = el.querySelector(".admin_relationlist_target");
         this.sourceResource = el.getAttribute("data-source-resource");
         this.targetResource = el.getAttribute("data-target-resource");
@@ -2446,7 +2393,7 @@ class RelationList {
         this.loadingEl.classList.remove("hidden");
         this.moreEl.classList.add("hidden");
         var request = new XMLHttpRequest();
-        request.open("POST", this.adminPrefix + "/api/relationlist", true);
+        request.open("POST", "/admin/api/relationlist", true);
         request.addEventListener("load", () => {
             this.loadingEl.classList.add("hidden");
             if (request.status == 200) {

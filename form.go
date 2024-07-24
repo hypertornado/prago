@@ -19,6 +19,7 @@ type Form struct {
 	HTMLAfter              template.HTML
 	AutosubmitFirstTime    bool
 	AutosubmitOnDataChange bool
+	ScriptPaths            []string
 }
 
 // FormItem represents item of form

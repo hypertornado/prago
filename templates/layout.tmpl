@@ -7,15 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/admin/prago_admin_files/prago.css?v={{.Version}}">
     <script src="https://api.mapy.cz/loader.js"></script>
-    <script type="text/javascript" src="/admin/prago_admin_files/pikaday.js?v={{.Version}}"></script>
-    <script type="text/javascript" src="/admin/prago_admin_files/prago.js?v={{.Version}}"></script>
+    <script src="/admin/prago_admin_files/pikaday.js?v={{.Version}}"></script>
+    <script src="/admin/prago_admin_files/prago.js?v={{.Version}}"></script>
     {{if .Icon}}
         <link rel="icon" href="/admin/api/icons?file={{.Icon}}&color=444444" type="image/svg+xml">
     {{end}}
     {{$version := .Version}}
 
   </head>
-  <body class="admin" data-admin-prefix="/admin">
+  <body class="admin">
     <div class="root">
         {{template "notification_center" .NotificationsData}}
         <div class="root_header">

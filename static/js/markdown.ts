@@ -130,11 +130,7 @@ class MarkdownEditor {
   loadPreview() {
     this.changed = false;
     var request = new XMLHttpRequest();
-    request.open(
-      "POST",
-      document.body.getAttribute("data-admin-prefix") + "/api/markdown",
-      true
-    );
+    request.open("POST", "/admin/api/markdown", true);
 
     request.addEventListener("load", () => {
       if (request.status == 200) {

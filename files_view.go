@@ -51,7 +51,7 @@ func getFilesViewData(ctx context.Context, app *App, uid string) (ret filesViewD
 			filesViewDataPath{"large", file.GetLarge()},
 			filesViewDataPath{"medium", file.GetMedium()},
 			filesViewDataPath{"small", file.GetSmall()},
-			filesViewDataPath{"metadata", file.GetMetadataPath()},
+			filesViewDataPath{"metadata", file.getMetadataPath()},
 		)
 		ret.IsImage = true
 	}

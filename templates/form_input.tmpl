@@ -77,12 +77,12 @@
 
 {{define "form_input_image"}}
   <div class="admin_images">
-    <input name="{{.ID}}" value="{{.Value}}" type="hidden" class="admin_images_hidden form_watcher">
+    <input name="{{.ID}}" value="{{.Value}}" type="hidden" class="admin_images_hidden form_watcher" data-file-responses="{{.Data.FileResponsesJSON}}">
     <div class="admin_images_loaded hidden">
       <div class="admin_images_preview"></div>
       <label class="btn admin_images_fileinput">
         <img class="btn_icon" src="/admin/api/icons?file=glyphicons-basic-371-plus.svg&color=444444">
-        <input type="file" id="{{.UUID}}" accept="{{.Data}}" multiple class="form_watcher">
+        <input type="file" id="{{.UUID}}" accept="{{.Data.MimeTypes}}" multiple class="form_watcher">
       </label>
     </div>
     <progress class="progress"></progress>

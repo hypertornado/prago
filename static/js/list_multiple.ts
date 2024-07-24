@@ -56,8 +56,7 @@ class ListMultiple {
             params["action"] = actionID;
             params["ids"] = ids.join(",");
             var url =
-              this.list.adminPrefix +
-              "/" +
+              "/admin/" +
               this.list.typeName +
               "/api/multipleaction" +
               encodeParams(params);

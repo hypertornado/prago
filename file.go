@@ -2,6 +2,7 @@ package prago
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"mime/multipart"
 	"path/filepath"
@@ -60,7 +61,6 @@ func (app *App) largeImage(ctx context.Context, ids string) string {
 	return ""
 }
 
-// GetFiles gets files from app
 func (app *App) GetFiles(ctx context.Context, ids string) []*File {
 	var files []*File
 	idsAr := strings.Split(ids, ",")
@@ -68,9 +68,9 @@ func (app *App) GetFiles(ctx context.Context, ids string) []*File {
 		if v == "" {
 			continue
 		}
-		image := Query[File](app).Context(ctx).Is("uid", v).First()
-		if image != nil {
-			files = append(files, image)
+		file := Query[File](app).Context(ctx).Is("uid", v).First()
+		if file != nil {
+			files = append(files, file)
 		}
 	}
 	return files
@@ -137,7 +137,20 @@ func (app *App) initFilesResource() {
 
 	resource.PermissionCreate(nobodyPermission)
 
-	initFilesAPI(resource)
+	ResourceAPI[File](app, "upload").Method("POST").Permission(resource.canUpdate).Handler(func(request *Request) {
+		multipartFiles := request.Request().MultipartForm.File["file"]
+		description := request.Param("description")
+
+		files := []*File{}
+		for _, v := range multipartFiles {
+			file, err := app.UploadFile(v, request, description)
+			if err != nil {
+				panic(err)
+			}
+			files = append(files, file)
+		}
+		request.WriteJSON(200, getFileResponse(files))
+	})
 
 	resource.Field("uid").Name(messages.GetNameFunction("admin_file"))
 	resource.Field("width").Name(messages.GetNameFunction("width"))
@@ -210,29 +223,30 @@ func (app *App) initFilesResource() {
 	}).Permission(sysadminPermission).Method("POST")
 }
 
-type imageResponse struct {
-	ID          int64
-	UID         string
-	Name        string
-	Description string
-	Thumb       string
+type fileResponse struct {
+	FileURL      string
+	UUID         string
+	Name         string
+	Description  string
+	ThumbnailURL string
 }
 
-func writeFileResponse(request *Request, files []*File) {
-	responseData := []*imageResponse{}
+func getFileResponse(files []*File) []*fileResponse {
+	responseData := []*fileResponse{}
 	for _, v := range files {
-		ir := &imageResponse{
-			ID:          v.ID,
-			UID:         v.UID,
+		ir := &fileResponse{
+			UUID:        v.UID,
 			Name:        v.Name,
 			Description: v.Description,
 		}
 
-		ir.Thumb = v.GetMedium()
+		ir.FileURL = fmt.Sprintf("/admin/file/%d", v.ID)
+
+		ir.ThumbnailURL = v.GetMedium()
 
 		responseData = append(responseData, ir)
 	}
-	request.WriteJSON(200, responseData)
+	return responseData
 }
 
 func (f *File) GetLarge() string {
@@ -259,7 +273,7 @@ func (f *File) GetOriginal() string {
 	return filesCDN.GetFileURL(f.UID, f.Name)
 }
 
-func (f *File) GetMetadataPath() string {
+func (f *File) getMetadataPath() string {
 	return filesCDN.MetadataPath(f.UID)
 }
 
@@ -268,4 +282,34 @@ func (f *File) IsImage() bool {
 		return true
 	}
 	return false
+}
+
+func (app *App) dataToFileResponseJSON(data any) string {
+	files := app.GetFiles(context.Background(), data.(string))
+	fileResponse := getFileResponse(files)
+
+	jsonResp, err := json.Marshal(fileResponse)
+	must(err)
+	return string(jsonResp)
+
+}
+
+func fileViewDataSource(request *Request, field *Field, data interface{}) interface{} {
+	return request.app.dataToFileResponseJSON(data)
+
+}
+
+type imageFormData struct {
+	MimeTypes         string
+	FileResponsesJSON string
+}
+
+func imageFormDataSource(mimeTypes string) func(*Field, UserData, string) interface{} {
+	return func(f *Field, userData UserData, value string) interface{} {
+		app := f.resource.app
+		return imageFormData{
+			MimeTypes:         mimeTypes,
+			FileResponsesJSON: app.dataToFileResponseJSON(value),
+		}
+	}
 }

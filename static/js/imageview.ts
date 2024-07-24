@@ -1,63 +1,39 @@
 class ImageView {
   el: HTMLDivElement;
-  adminPrefix: string;
 
   constructor(el: HTMLDivElement) {
-    this.adminPrefix = document.body.getAttribute("data-admin-prefix");
     this.el = el;
-    var ids = el.getAttribute("data-images").split(",");
-    this.addImages(ids);
+    var filesData = JSON.parse(el.getAttribute("data-images"));
+    this.addFiles(filesData);
   }
 
-  addImages(ids: any) {
+  addFiles(filesData: any) {
     this.el.innerHTML = "";
-    for (var i = 0; i < ids.length; i++) {
-      if (<string>ids[i] != "") {
-        this.addImage(<string>ids[i]);
-      }
+    for (var i = 0; i < filesData.length; i++) {
+      let file = filesData[i];
+      this.addFile(file);
     }
   }
 
-  addImage(id: string) {
+  addFile(file: any) {
     var container = document.createElement("a");
     container.classList.add("admin_images_image");
-    container.setAttribute(
-      "href",
-      this.adminPrefix + "/file/api/redirect-uuid/" + id
-    );
+    container.setAttribute("href", file.FileURL);
     container.setAttribute(
       "style",
-      "background-image: url('" +
-        this.adminPrefix +
-        "/file/api/redirect-thumb/" +
-        id +
-        "');"
+      "background-image: url('" + file.ThumbnailURL + "');"
     );
 
     var img = document.createElement("div");
-    img.setAttribute(
-      "src",
-      this.adminPrefix + "/file/api/redirect-thumb/" + id
-    );
+    img.setAttribute("src", file.ThumbnailURL);
     img.setAttribute("draggable", "false");
 
     var descriptionEl = document.createElement("div");
     descriptionEl.classList.add("admin_images_image_description");
     container.appendChild(descriptionEl);
 
-    var request = new XMLHttpRequest();
-    request.open("GET", this.adminPrefix + "/file/api/imagedata/" + id);
-    request.addEventListener("load", (e) => {
-      if (request.status == 200) {
-        var data = JSON.parse(request.response);
-        descriptionEl.innerText = data["Name"];
-        container.setAttribute("title", data["Name"]);
-      } else {
-        console.error("Error while loading file metadata.");
-      }
-    });
-    request.send();
-
+    descriptionEl.innerText = file.Name;
+    container.setAttribute("title", file.Name);
     this.el.appendChild(container);
   }
 }

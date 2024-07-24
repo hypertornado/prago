@@ -1,6 +1,4 @@
 class RelationList {
-  adminPrefix: string;
-
   targetEl: HTMLDivElement;
 
   sourceResource: string;
@@ -16,8 +14,6 @@ class RelationList {
   moreButton: HTMLDivElement;
 
   constructor(el: HTMLDivElement) {
-    this.adminPrefix = document.body.getAttribute("data-admin-prefix");
-
     this.targetEl = el.querySelector(".admin_relationlist_target");
 
     this.sourceResource = el.getAttribute("data-source-resource");
@@ -42,7 +38,7 @@ class RelationList {
     this.moreEl.classList.add("hidden");
 
     var request = new XMLHttpRequest();
-    request.open("POST", this.adminPrefix + "/api/relationlist", true);
+    request.open("POST", "/admin/api/relationlist", true);
     request.addEventListener("load", () => {
       this.loadingEl.classList.add("hidden");
       if (request.status == 200) {

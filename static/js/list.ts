@@ -5,7 +5,6 @@ class List {
 
   settings: ListSettings;
 
-  adminPrefix: string;
   typeName: string;
 
   rootContent: HTMLDivElement;
@@ -84,8 +83,6 @@ class List {
     //this.tableContent.textContent = "";
 
     this.bindFilter(urlParams);
-
-    this.adminPrefix = document.body.getAttribute("data-admin-prefix");
 
     this.defaultOrderColumn = list.getAttribute("data-order-column");
     if (list.getAttribute("data-order-desc") == "true") {
@@ -237,11 +234,7 @@ class List {
     if (this.exportButton) {
       this.exportButton.setAttribute(
         "href",
-        this.adminPrefix +
-          "/" +
-          this.typeName +
-          "/api/list" +
-          encodeParams(params)
+        "/admin/" + this.typeName + "/api/list" + encodeParams(params)
       );
     }
 
@@ -250,7 +243,7 @@ class List {
 
     request.open(
       "GET",
-      this.adminPrefix + "/" + this.typeName + "/api/list" + encoded,
+      "/admin/" + this.typeName + "/api/list" + encoded,
       true
     );
 

@@ -631,11 +631,16 @@ select.admin_timestamp_minute {
 .view_edit {
   font-size: 0.8rem;
   margin-left: 5px;
+  opacity: 0;
+}
+
+.view_name:hover .view_edit {
+  opacity: 1;
 }
 
 .view_edit_icon {
   aspect-ratio: 1;
-  width: 15px;
+  width: 13px;
   border-radius: 5px;
 }
 

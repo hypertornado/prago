@@ -43,7 +43,7 @@ func (app *App) validatePermission(permission Permission) error {
 }
 
 func (app *App) createRoleFieldType() *fieldType {
-	var fp = func(*Field, UserData) interface{} {
+	var formDataSource = func(*Field, UserData, string) interface{} {
 		var roleNames []string
 		for k := range app.accessManager.roles {
 			roleNames = append(roleNames, k)
@@ -58,9 +58,12 @@ func (app *App) createRoleFieldType() *fieldType {
 	}
 	return &fieldType{
 		formTemplate:   "form_input_select",
-		formDataSource: fp,
+		formDataSource: formDataSource,
 
 		filterLayoutTemplate: "filter_layout_select",
+		filterLayoutDataSource: func(f *Field, ud UserData) interface{} {
+			return formDataSource(f, ud, "")
+		},
 	}
 }
 

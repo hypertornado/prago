@@ -97,12 +97,8 @@ class SearchForm {
     var suggestText = this.searchInput.value;
     var request = new XMLHttpRequest();
 
-    var adminPrefix = document.body.getAttribute("data-admin-prefix");
-
     var url =
-      adminPrefix +
-      "/api/search-suggest" +
-      encodeParams({ q: this.searchInput.value });
+      "/admin/api/search-suggest" + encodeParams({ q: this.searchInput.value });
     request.open("GET", url);
     request.addEventListener("load", () => {
       if (suggestText != this.searchInput.value) {

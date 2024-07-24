@@ -61,9 +61,8 @@ function bindReOrder() {
     }
 
     function saveOrder() {
-      var adminPrefix = document.body.getAttribute("data-admin-prefix");
       var typ = document.querySelector(".list-order").getAttribute("data-type");
-      var ajaxPath = adminPrefix + "/" + typ + "/api/set-order";
+      var ajaxPath = "/admin/" + typ + "/api/set-order";
       var order: any[] = [];
       var rows = el.getElementsByClassName("list_row");
 
