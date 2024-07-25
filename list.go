@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+//https://caldwell.org/projects/data/city-index
+
 type list struct {
 	Name                 string
 	TypeID               string

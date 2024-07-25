@@ -27,7 +27,7 @@ func (resource *Resource) createRelations() {
 			}
 			field.relatedResource = resource.app.getResourceByID(relatedResourceID)
 			if field.relatedResource == nil {
-				panic(fmt.Sprintf("can't find related resource by id '%s'", relatedResourceID))
+				panic(fmt.Sprintf("can't find related resource by id '%s', resource: %s, field: %s", relatedResourceID, resource.id, field.id))
 			}
 
 			if !field.nameSetManually {
