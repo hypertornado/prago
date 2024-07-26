@@ -31,8 +31,8 @@ type Resource struct {
 	canDelete Permission
 	canExport Permission
 
-	validations       []func(ValidationContext)
-	deleteValidations []func(ValidationContext)
+	updateValidations []func(any, Validation)
+	deleteValidations []func(any, Validation)
 
 	actions     []*Action
 	itemActions []*Action
@@ -247,21 +247,35 @@ func (resource *Resource) PermissionExport(permission Permission) *Resource {
 	return resource
 }
 
-func (resource *Resource) Validation(validation func(ValidationContext)) *Resource {
+/*func (resource *Resource) Validation(validation func(Validation)) *Resource {
 	resource.addValidation(validation)
 	return resource
-}
+}*/
 
 func (resource *Resource) Dashboard(name func(string) string) *Dashboard {
 	return resource.resourceBoard.Dashboard(name)
 }
 
-func (resource *Resource) addValidation(validation func(ValidationContext)) {
-	resource.validations = append(resource.validations, validation)
+func (resource *Resource) addValidation(validation func(any, Validation)) {
+	resource.updateValidations = append(resource.updateValidations, validation)
 }
 
-func (resource *Resource) DeleteValidation(validation func(ValidationContext)) *Resource {
+func ValidateUpdate[T any](app *App, fn func(item *T, validation Validation)) {
+	resource := getResource[T](app)
+	resource.addValidation(func(item any, v Validation) {
+		fn(item.(*T), v)
+	})
+}
 
+func ValidateDelete[T any](app *App, fn func(item *T, validation Validation)) {
+	resource := getResource[T](app)
+	resource.deleteValidation(func(a any, v Validation) {
+		fn(a.(*T), v)
+	})
+
+}
+
+func (resource *Resource) deleteValidation(validation func(any, Validation)) *Resource {
 	resource.deleteValidations = append(resource.deleteValidations, validation)
 	return resource
 }

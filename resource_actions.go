@@ -41,14 +41,13 @@ func (resource *Resource) initDefaultResourceActions() {
 		resource.bindData(item, request, queryData)
 		form.addResourceItems(resource, item, request)
 		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
-	}, func(vc ValidationContext) {
-		for _, v := range resource.validations {
-			v(vc)
+	}, func(request *Request, vc Validation) {
+		var item interface{} = reflect.New(resource.typ).Interface()
+		resource.bindData(item, request, request.Params())
+		for _, v := range resource.updateValidations {
+			v(item, vc)
 		}
-		request := vc.Request()
 		if vc.Valid() {
-			var item interface{} = reflect.New(resource.typ).Interface()
-			resource.bindData(item, request, request.Params())
 			if resource.orderField != nil {
 				count, _ := resource.query(vc.Context()).count()
 				resource.setOrderPosition(item, count+1)
@@ -78,7 +77,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			form.addResourceItems(resource, item, request)
 			form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 		},
-		func(_ any, vc ValidationContext) {
+		func(_ any, vc Validation) {
 			request := vc.Request()
 			params := request.Params()
 
@@ -115,9 +114,9 @@ func (resource *Resource) initDefaultResourceActions() {
 			itemName := resource.previewer(request, item).Name()
 			form.Title = messages.Get(request.Locale(), "admin_delete_confirmation_name", itemName)
 		},
-		func(item any, vc ValidationContext) {
+		func(item any, vc Validation) {
 			for _, v := range resource.deleteValidations {
-				v(vc)
+				v(item, vc)
 			}
 			if vc.Valid() {
 				must(resource.deleteWithLog(item, vc.Request()))
@@ -143,7 +142,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			f.AddTextInput("page", "Stránka").Value = "1"
 			f.AutosubmitFirstTime = true
 
-		}, func(vc ValidationContext) {
+		}, func(request *Request, vc Validation) {
 			table := resource.app.getHistoryTable(vc.Request(), resource, 0, vc.GetValue("page"))
 			vc.Validation().AfterContent = table.ExecuteHTML()
 
@@ -161,7 +160,7 @@ func (resource *Resource) initDefaultResourceActions() {
 					f.AddSubmit("Zobrazit")
 					f.AutosubmitFirstTime = true
 				},
-				func(item any, vc ValidationContext) {
+				func(item any, vc Validation) {
 					id := resource.previewer(vc.Request(), item).ID()
 					table := resource.app.getHistoryTable(vc.Request(), resource, id, vc.GetValue("page"))
 					vc.Validation().AfterContent = table.ExecuteHTML()
@@ -221,7 +220,7 @@ func (resource *Resource) deleteWithLog(item any, request UserData) error {
 	return nil
 }
 
-func (resource *Resource) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, ValidationContext, error) {
+func (resource *Resource) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, Validation, error) {
 	user := request
 	id, err := strconv.Atoi(values.Get("id"))
 	if err != nil {
@@ -252,8 +251,8 @@ func (resource *Resource) editItemWithLogAndValues(request *Request, values url.
 	}
 
 	vv := newValuesValidation(request.r.Context(), resource.app, user, allValues)
-	for _, v := range resource.validations {
-		v(vv)
+	for _, v := range resource.updateValidations {
+		v(item, vv)
 	}
 	if !vv.Valid() {
 		return nil, vv, errValidation

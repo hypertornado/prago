@@ -107,10 +107,9 @@ func (resource *Resource) addDefaultMultipleActions() {
 
 				var values url.Values = make(map[string][]string)
 				values.Add("id", fmt.Sprintf("%d", id))
-
 				valValidation := newValuesValidation(context.Background(), resource.app, request, values)
 				for _, v := range resource.deleteValidations {
-					v(valValidation)
+					v(item, valValidation)
 				}
 
 				if !valValidation.Valid() {

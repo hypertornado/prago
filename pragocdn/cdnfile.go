@@ -157,7 +157,7 @@ func bindCDNFiles(app *prago.App) {
 			form.AutosubmitFirstTime = true
 			form.AddSubmit("Zobrazit")
 		},
-		func(cdnFile *CDNFile, vc prago.ValidationContext) {
+		func(cdnFile *CDNFile, vc prago.Validation) {
 			vc.Validation().AfterContent = template.HTML(fmt.Sprintf("<img src=\"%s\">", cdnFile.url(vc.GetValue("size"))))
 		},
 	).Name(unlocalized("Previews"))

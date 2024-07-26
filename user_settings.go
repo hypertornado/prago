@@ -26,7 +26,7 @@ func initUserSettings(app *App) {
 		}
 
 		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
-	}, func(vc ValidationContext) {
+	}, func(request *Request, vc Validation) {
 		locale := vc.Locale()
 		name := vc.GetValue("name")
 		if name == "" {
@@ -85,8 +85,8 @@ func initUserSettings(app *App) {
 			newPassword.Autocomplete = "new-password"
 
 			form.AddSubmit(messages.Get(locale, "admin_save"))
-		}, func(vc ValidationContext) {
-			request := vc.Request()
+		}, func(request *Request, vc Validation) {
+			//request := vc.Request()
 			locale := request.Locale()
 
 			valid := true

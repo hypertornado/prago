@@ -58,7 +58,7 @@ func initUserRegistration(app *App) {
 
 }
 
-func registrationValidation(vc ValidationContext) {
+func registrationValidation(vc Validation) {
 	locale := vc.Locale()
 	app := vc.Request().app
 

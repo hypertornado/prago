@@ -6,7 +6,7 @@ import (
 )
 
 type formAction struct {
-	validation    func(ValidationContext)
+	validation    func(*Request, Validation)
 	formGenerator func(*Form, *Request)
 
 	actionForm       *Action
@@ -49,14 +49,14 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *form
 		if request.csrfToken() != rv.GetValue("_csrfToken") {
 			panic("wrong csrf token")
 		}
-		ret.validation(rv)
+		ret.validation(request, rv)
 		request.WriteJSON(200, rv.validation)
 	})
 
 	return ret
 }
 
-func ActionForm(app *App, url string, formGenerator func(*Form, *Request), validator func(ValidationContext)) *Action {
+func ActionForm(app *App, url string, formGenerator func(*Form, *Request), validator func(*Request, Validation)) *Action {
 	fa := newFormAction(app, url, nil)
 
 	fa.formGenerator = formGenerator
@@ -67,7 +67,7 @@ func ActionForm(app *App, url string, formGenerator func(*Form, *Request), valid
 	return fa.actionForm
 }
 
-func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Request), validator func(ValidationContext)) {
+func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Request), validator func(Validation)) {
 	app.accessController.routeHandler("GET", fmt.Sprintf("/admin/user/%s", id), func(request *Request) {
 		if request.UserID() > 0 {
 			request.Redirect("/admin")
@@ -93,12 +93,12 @@ func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Reques
 
 }
 
-func ActionResourceForm[T any](app *App, url string, formGenerator func(*Form, *Request), validation func(ValidationContext)) *Action {
+func ActionResourceForm[T any](app *App, url string, formGenerator func(*Form, *Request), validation func(*Request, Validation)) *Action {
 	resource := getResource[T](app)
 	return resource.formAction(url, formGenerator, validation)
 }
 
-func (resource *Resource) formAction(url string, formGenerator func(*Form, *Request), validation func(ValidationContext)) *Action {
+func (resource *Resource) formAction(url string, formGenerator func(*Form, *Request), validation func(*Request, Validation)) *Action {
 	action := newFormAction(resource.app, url, nil)
 
 	action.actionForm.resource = resource
@@ -119,7 +119,7 @@ func ActionResourceItemForm[T any](
 	app *App,
 	url string,
 	formGenerator func(*T, *Form, *Request),
-	validation func(*T, ValidationContext),
+	validation func(*T, Validation),
 ) *Action {
 	resource := getResource[T](app)
 	return resource.formItemAction(
@@ -127,13 +127,13 @@ func ActionResourceItemForm[T any](
 		func(a any, f *Form, r *Request) {
 			formGenerator(a.(*T), f, r)
 		},
-		func(a any, vc ValidationContext) {
+		func(a any, vc Validation) {
 			validation(a.(*T), vc)
 		},
 	)
 }
 
-func (resource *Resource) formItemAction(url string, formGenerator func(any, *Form, *Request), validation func(any, ValidationContext)) *Action {
+func (resource *Resource) formItemAction(url string, formGenerator func(any, *Form, *Request), validation func(any, Validation)) *Action {
 	fa := newFormAction(resource.app, url, func(f *Form, r *Request) {
 		item := resource.query(context.TODO()).ID(r.Param("id"))
 		f.image = resource.previewer(r, item).ImageURL(r.r.Context())
@@ -156,7 +156,7 @@ func (resource *Resource) formItemAction(url string, formGenerator func(any, *Fo
 		formGenerator(item, form, request)
 	}
 
-	fa.validation = func(vc ValidationContext) {
+	fa.validation = func(request *Request, vc Validation) {
 		item := resource.query(vc.Context()).ID(vc.GetValue("id"))
 		validation(item, vc)
 	}

@@ -184,7 +184,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 	if ret.fieldClassName != "CreatedAt" && ret.fieldClassName != "UpdatedAt" {
 		if ret.typ == reflect.TypeOf(time.Now()) {
 			if ret.tags["prago-type"] == "timestamp" || ret.fieldClassName == "CreatedAt" || ret.fieldClassName == "UpdatedAt" {
-				resource.addValidation(func(vc ValidationContext) {
+				resource.addValidation(func(item any, vc Validation) {
 					val := vc.GetValue(ret.id)
 					if val != "" {
 						_, err := time.Parse("2006-01-02 15:04", val)
@@ -194,7 +194,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 					}
 				})
 			} else {
-				resource.addValidation(func(vc ValidationContext) {
+				resource.addValidation(func(item any, vc Validation) {
 					val := vc.GetValue(ret.id)
 					if val != "" {
 						_, err := time.Parse("2006-01-02", val)
@@ -233,7 +233,7 @@ func (field *Field) addFieldValidation(nameOfValidation string) error {
 		if field.tags["prago-required"] != "false" {
 			field.required = true
 		}
-		field.resource.addValidation(func(vc ValidationContext) {
+		field.resource.addValidation(func(item any, vc Validation) {
 			valid := true
 			if field.typ.Kind() == reflect.Int64 ||
 				field.typ.Kind() == reflect.Int32 ||
@@ -423,7 +423,7 @@ func (field *Field) initFieldType() {
 	}
 
 	if ret.allowedValues != nil {
-		field.resource.addValidation(func(vc ValidationContext) {
+		field.resource.addValidation(func(item any, vc Validation) {
 			val := vc.GetValue(field.id)
 			var found bool
 			for _, v := range ret.allowedValues {
