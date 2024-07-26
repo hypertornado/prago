@@ -58,9 +58,9 @@ func initUserRegistration(app *App) {
 
 }
 
-func registrationValidation(vc Validation) {
+func registrationValidation(vc Validation, request *Request) {
 	locale := vc.Locale()
-	app := vc.Request().app
+	app := request.app
 
 	name := vc.GetValue("name")
 	if name == "" {
@@ -111,7 +111,7 @@ func registrationValidation(vc Validation) {
 
 		must(CreateItemWithContext(vc.Context(), app, u))
 
-		vc.Request().AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
+		request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
 		vc.Validation().RedirectionLocation = app.getAdminURL("user/login") + "?email=" + url.QueryEscape(email)
 	}
 }

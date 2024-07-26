@@ -31,11 +31,10 @@ func initUserLogin(app *App) {
 		form.AddHidden("redirect_url").Value = request.Param("redirect")
 
 		form.AddSubmit(messages.Get(locale, "admin_login_action"))
-	}, func(vc Validation) {
+	}, func(vc Validation, request *Request) {
 		locale := vc.Locale()
 		email := vc.GetValue("email")
 		email = fixEmail(email)
-		request := vc.Request()
 		password := vc.GetValue("password")
 
 		q := Query[user](app)
@@ -64,7 +63,7 @@ func initUserLogin(app *App) {
 		request.logInUser(user)
 		request.AddFlashMessage(messages.Get(user.Locale, "admin_login_ok"))
 
-		redirectURL := vc.Request().Param("redirect_url")
+		redirectURL := request.Param("redirect_url")
 		if !strings.HasPrefix(redirectURL, "/") || redirectURL == "/admin/login" {
 			redirectURL = "/admin"
 		}

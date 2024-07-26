@@ -16,8 +16,7 @@ func initUserRenew(app *App) {
 		emailInput.InputMode = "email"
 		emailInput.Autocomplete = "email"
 		form.AddSubmit(messages.Get(locale, "admin_forgotten_submit"))
-	}, func(vc Validation) {
-		request := vc.Request()
+	}, func(vc Validation, request *Request) {
 		email := fixEmail(request.Param("email"))
 
 		var reason = ""
@@ -62,7 +61,7 @@ func initUserRenew(app *App) {
 		form.AddHidden("email").Value = request.Param("email")
 		form.AddHidden("token").Value = request.Param("token")
 		form.AddSubmit(messages.Get(locale, "admin_forgoten_set"))
-	}, func(vc Validation) {
+	}, func(vc Validation, request *Request) {
 		email := vc.GetValue("email")
 		email = fixEmail(email)
 		token := vc.GetValue("token")
@@ -78,7 +77,7 @@ func initUserRenew(app *App) {
 					if err == nil {
 						err = UpdateItem(app, u)
 						if err == nil {
-							vc.Request().AddFlashMessage(messages.Get(vc.Locale(), "admin_password_changed"))
+							request.AddFlashMessage(messages.Get(vc.Locale(), "admin_password_changed"))
 							vc.Validation().RedirectionLocation = app.getAdminURL("user/login") + "?email=" + url.QueryEscape(u.Email)
 							return
 						}
@@ -90,7 +89,7 @@ func initUserRenew(app *App) {
 			}
 		}
 
-		vc.Request().AddFlashMessage(errStr)
+		request.AddFlashMessage(errStr)
 		vc.Validation().RedirectionLocation = "/admin/user/login"
 	})
 }

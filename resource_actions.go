@@ -41,7 +41,7 @@ func (resource *Resource) initDefaultResourceActions() {
 		resource.bindData(item, request, queryData)
 		form.addResourceItems(resource, item, request)
 		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
-	}, func(request *Request, vc Validation) {
+	}, func(vc Validation, request *Request) {
 		var item interface{} = reflect.New(resource.typ).Interface()
 		resource.bindData(item, request, request.Params())
 		for _, v := range resource.updateValidations {
@@ -77,11 +77,9 @@ func (resource *Resource) initDefaultResourceActions() {
 			form.addResourceItems(resource, item, request)
 			form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 		},
-		func(_ any, vc Validation) {
-			request := vc.Request()
+		func(_ any, vc Validation, request *Request) {
 			params := request.Params()
-
-			resource.fixBooleanParams(vc.Request(), params)
+			resource.fixBooleanParams(request, params)
 
 			item, validation, err := resource.editItemWithLogAndValues(request, params)
 			if err != nil && err != errValidation {
@@ -114,13 +112,13 @@ func (resource *Resource) initDefaultResourceActions() {
 			itemName := resource.previewer(request, item).Name()
 			form.Title = messages.Get(request.Locale(), "admin_delete_confirmation_name", itemName)
 		},
-		func(item any, vc Validation) {
+		func(item any, vc Validation, request *Request) {
 			for _, v := range resource.deleteValidations {
 				v(item, vc)
 			}
 			if vc.Valid() {
-				must(resource.deleteWithLog(item, vc.Request()))
-				vc.Request().AddFlashMessage(messages.Get(vc.Request().Locale(), "admin_item_deleted"))
+				must(resource.deleteWithLog(item, request))
+				request.AddFlashMessage(messages.Get(request.Locale(), "admin_item_deleted"))
 				vc.Validation().RedirectionLocation = resource.getURL("")
 			}
 		},
@@ -142,8 +140,8 @@ func (resource *Resource) initDefaultResourceActions() {
 			f.AddTextInput("page", "Stránka").Value = "1"
 			f.AutosubmitFirstTime = true
 
-		}, func(request *Request, vc Validation) {
-			table := resource.app.getHistoryTable(vc.Request(), resource, 0, vc.GetValue("page"))
+		}, func(vc Validation, request *Request) {
+			table := resource.app.getHistoryTable(request, resource, 0, vc.GetValue("page"))
 			vc.Validation().AfterContent = table.ExecuteHTML()
 
 		}).
@@ -160,9 +158,9 @@ func (resource *Resource) initDefaultResourceActions() {
 					f.AddSubmit("Zobrazit")
 					f.AutosubmitFirstTime = true
 				},
-				func(item any, vc Validation) {
-					id := resource.previewer(vc.Request(), item).ID()
-					table := resource.app.getHistoryTable(vc.Request(), resource, id, vc.GetValue("page"))
+				func(item any, vc Validation, request *Request) {
+					id := resource.previewer(request, item).ID()
+					table := resource.app.getHistoryTable(request, resource, id, vc.GetValue("page"))
 					vc.Validation().AfterContent = table.ExecuteHTML()
 				},
 			).

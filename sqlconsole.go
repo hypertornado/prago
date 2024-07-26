@@ -11,13 +11,13 @@ func (app *App) initSQLConsole() {
 			form.Title = "SQL Console"
 			form.AddTextareaInput("q", "").Focused = true
 			form.AddSubmit("Execute SQL")
-		}, func(request *Request, vc Validation) {
+		}, func(vc Validation, request *Request) {
 			q := vc.GetValue("q")
 			var message string
 			table := app.Table()
 
 			if q != "" {
-				rows, err := app.db.QueryContext(vc.Request().Request().Context(), q)
+				rows, err := app.db.QueryContext(request.Request().Context(), q)
 				rowCount := 0
 				if err != nil {
 					message = err.Error()

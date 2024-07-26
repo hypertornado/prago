@@ -192,13 +192,13 @@ func (app *App) initFilesResource() {
 			f.AddTextareaInput("description", messages.Get(r.Locale(), "Description"))
 			f.AddSubmit(messages.Get(r.Locale(), "admin_save"))
 		},
-		func(request *Request, vc Validation) {
-			multipartFiles := vc.Request().Request().MultipartForm.File["file"]
+		func(vc Validation, request *Request) {
+			multipartFiles := request.Request().MultipartForm.File["file"]
 			if len(multipartFiles) != 1 {
 				vc.AddItemError("file", messages.Get(vc.Locale(), "admin_validation_not_empty"))
 			}
 			if vc.Valid() {
-				fileData, err := app.UploadFile(multipartFiles[0], vc.Request(), vc.GetValue("description"))
+				fileData, err := app.UploadFile(multipartFiles[0], request, vc.GetValue("description"))
 				if err != nil {
 					vc.AddError(err.Error())
 				} else {

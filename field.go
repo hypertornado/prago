@@ -51,14 +51,14 @@ func (field *Field) authorizeView(userData UserData) bool {
 	return true
 }
 
-func (field *Field) authorizeEdit(request *Request) bool {
-	if !field.authorizeView(request) {
+func (field *Field) authorizeEdit(userData UserData) bool {
+	if !field.authorizeView(userData) {
 		return false
 	}
-	if !request.Authorize(field.resource.canUpdate) {
+	if !userData.Authorize(field.resource.canUpdate) {
 		return false
 	}
-	if !request.Authorize(field.canEdit) {
+	if !userData.Authorize(field.canEdit) {
 		return false
 	}
 	return true

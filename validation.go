@@ -80,7 +80,7 @@ type Validation interface {
 	AddItemError(key, err string)
 	Validation() *formValidation
 	Valid() bool
-	Request() *Request
+	//Request() *Request
 	UserHasPermission(Permission) bool
 	Context() context.Context
 }
@@ -125,9 +125,9 @@ func (rv *requestValidation) Valid() bool {
 	return rv.validation.Valid
 }
 
-func (rv *requestValidation) Request() *Request {
+/*func (rv *requestValidation) Request() *Request {
 	return rv.request
-}
+}*/
 
 func (rv *requestValidation) Context() context.Context {
 	return rv.request.r.Context()

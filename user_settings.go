@@ -26,7 +26,7 @@ func initUserSettings(app *App) {
 		}
 
 		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
-	}, func(request *Request, vc Validation) {
+	}, func(vc Validation, request *Request) {
 		locale := vc.Locale()
 		name := vc.GetValue("name")
 		if name == "" {
@@ -45,13 +45,12 @@ func initUserSettings(app *App) {
 		}
 
 		if vc.Valid() {
-			user := vc.Request().getUser()
+			user := request.getUser()
 			user.Name = name
 			user.Locale = newLocale
 			must(UpdateItem(app, user))
 
 			for _, v := range app.settings.settingsArray {
-				request := vc.Request()
 				if request.Authorize(v.permission) {
 					val := request.Params().Get("setting_" + v.id)
 					err := app.saveSetting(v.id, val, request)
@@ -62,10 +61,10 @@ func initUserSettings(app *App) {
 				}
 			}
 
-			app := vc.Request().app
+			app := request.app
 			app.userDataCacheDelete(user.ID)
 
-			vc.Request().AddFlashMessage(messages.Get(newLocale, "admin_settings_changed"))
+			request.AddFlashMessage(messages.Get(newLocale, "admin_settings_changed"))
 			vc.Validation().RedirectionLocation = app.getAdminURL("")
 		}
 	}).Icon("glyphicons-basic-5-settings.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu()
@@ -85,7 +84,7 @@ func initUserSettings(app *App) {
 			newPassword.Autocomplete = "new-password"
 
 			form.AddSubmit(messages.Get(locale, "admin_save"))
-		}, func(request *Request, vc Validation) {
+		}, func(vc Validation, request *Request) {
 			//request := vc.Request()
 			locale := request.Locale()
 
