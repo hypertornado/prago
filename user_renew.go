@@ -30,7 +30,7 @@ func initUserRenew(app *App) {
 						err = app.sendRenewPasswordEmail(*user)
 						if err == nil {
 							request.AddFlashMessage(messages.Get(user.Locale, "admin_forgoten_sent", user.Email))
-							vc.Validation().RedirectionLocation = app.getAdminURL("/user/login") + "?email=" + url.QueryEscape(user.Email)
+							vc.Redirect(app.getAdminURL("/user/login") + "?email=" + url.QueryEscape(user.Email))
 						} else {
 							reason = "can't send renew email"
 						}
@@ -78,7 +78,7 @@ func initUserRenew(app *App) {
 						err = UpdateItem(app, u)
 						if err == nil {
 							request.AddFlashMessage(messages.Get(request.Locale(), "admin_password_changed"))
-							vc.Validation().RedirectionLocation = app.getAdminURL("user/login") + "?email=" + url.QueryEscape(u.Email)
+							vc.Redirect(app.getAdminURL("user/login") + "?email=" + url.QueryEscape(u.Email))
 							return
 						}
 					}
@@ -90,7 +90,7 @@ func initUserRenew(app *App) {
 		}
 
 		request.AddFlashMessage(errStr)
-		vc.Validation().RedirectionLocation = "/admin/user/login"
+		vc.Redirect("/admin/user/login")
 	})
 }
 

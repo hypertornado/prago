@@ -43,7 +43,7 @@ func (app *App) initSQLBackup() {
 
 			excludes := strings.Join(exclude, ",")
 
-			vc.Validation().RedirectionLocation = "/admin/api/sqlbackup?exclude=" + excludes
+			vc.Redirect("/admin/api/sqlbackup?exclude=" + excludes)
 		}).Name(unlocalized("SQL Backup")).Permission(sysadminPermission).Board(sysadminBoard)
 
 	app.API("sqlbackup").Permission("sysadmin").Handler(func(r *Request) {

@@ -263,7 +263,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 				)
 
 				if err == errValidation {
-					report := validation.Validation().TextErrorReport(int64(id), request.Locale())
+					report := validation.TextErrorReport(int64(id), request.Locale())
 					request.WriteJSON(
 						403,
 						report,

@@ -1,9 +1,7 @@
 package prago
 
 import (
-	"context"
 	"fmt"
-	"net/url"
 	"reflect"
 	"time"
 )
@@ -103,11 +101,10 @@ func (resource *Resource) addDefaultMultipleActions() {
 		Permission: resource.canDelete,
 		Handler: func(items []any, request UserData, response *MultipleItemActionResponse) {
 			for _, item := range items {
-				id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
-
-				var values url.Values = make(map[string][]string)
-				values.Add("id", fmt.Sprintf("%d", id))
-				valValidation := newValuesValidation(context.Background(), resource.app, request, values)
+				//id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
+				//var values url.Values = make(map[string][]string)
+				//values.Add("id", fmt.Sprintf("%d", id))
+				valValidation := newItemValidation()
 				for _, v := range resource.deleteValidations {
 					v(item, valValidation, request)
 				}

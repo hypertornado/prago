@@ -69,7 +69,7 @@ func initUserLogin(app *App) {
 			redirectURL = "/admin"
 		}
 
-		vc.Validation().RedirectionLocation = redirectURL
+		vc.Redirect(redirectURL)
 	})
 
 }

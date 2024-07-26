@@ -65,6 +65,6 @@ func (app *App) initSQLConsole() {
 				vc.AddError(message)
 			}
 
-			vc.Validation().AfterContent = table.ExecuteHTML()
+			vc.AfterContent(table.ExecuteHTML())
 		}).Name(unlocalized("SQL Console")).Permission(sysadminPermission).Board(sysadminBoard)
 }

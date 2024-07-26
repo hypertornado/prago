@@ -58,7 +58,7 @@ func (resource *Resource) initDefaultResourceActions() {
 				SetImage(resource.previewer(request, item).ThumbnailURL()).
 				SetPreName(messages.Get(request.Locale(), "admin_item_created")).
 				Flash(request))
-			vc.Validation().RedirectionLocation = resource.getItemURL(item, "", request)
+			vc.Redirect(resource.getItemURL(item, "", request))
 		}
 	}).Icon(iconAdd).setPriority(defaultHighPriority).Permission(resource.canCreate).Name(messages.GetNameFunction("admin_new"))
 
@@ -96,11 +96,11 @@ func (resource *Resource) initDefaultResourceActions() {
 					SetPreName(messages.Get(request.Locale(), "admin_item_edited")).
 					Flash(request)
 
-				vc.Validation().RedirectionLocation = resource.getURL(fmt.Sprintf("%d", id))
+				vc.Redirect(resource.getURL(fmt.Sprintf("%d", id)))
 			} else {
-				//TODO: ugly hack with copying two validation contexts
-				vc.Validation().Errors = validation.Validation().Errors
-				vc.Validation().ItemErrors = validation.Validation().ItemErrors
+				formValidation := vc.(*formValidation)
+				formValidation.validationData.Errors = validation.errors
+				formValidation.validationData.ItemErrors = validation.itemErrors
 			}
 		},
 	).Icon(iconEdit).setPriority(defaultHighPriority).Name(messages.GetNameFunction("admin_edit")).Permission(resource.canUpdate)
@@ -119,7 +119,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			if vc.Valid() {
 				must(resource.deleteWithLog(item, request))
 				request.AddFlashMessage(messages.Get(request.Locale(), "admin_item_deleted"))
-				vc.Validation().RedirectionLocation = resource.getURL("")
+				vc.Redirect(resource.getURL(""))
 			}
 		},
 	).Icon(iconDelete).setPriority(-defaultHighPriority).Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete"))
@@ -142,7 +142,7 @@ func (resource *Resource) initDefaultResourceActions() {
 
 		}, func(vc FormValidation, request *Request) {
 			table := resource.app.getHistoryTable(request, resource, 0, request.Param("page"))
-			vc.Validation().AfterContent = table.ExecuteHTML()
+			vc.AfterContent(table.ExecuteHTML())
 
 		}).
 			Icon("glyphicons-basic-58-history.svg").
@@ -161,7 +161,7 @@ func (resource *Resource) initDefaultResourceActions() {
 				func(item any, vc FormValidation, request *Request) {
 					id := resource.previewer(request, item).ID()
 					table := resource.app.getHistoryTable(request, resource, id, request.Param("page"))
-					vc.Validation().AfterContent = table.ExecuteHTML()
+					vc.AfterContent(table.ExecuteHTML())
 				},
 			).
 			Icon("glyphicons-basic-58-history.svg").
@@ -218,7 +218,7 @@ func (resource *Resource) deleteWithLog(item any, request UserData) error {
 	return nil
 }
 
-func (resource *Resource) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, ItemValidation, error) {
+func (resource *Resource) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, *itemValidation, error) {
 	user := request
 	id, err := strconv.Atoi(values.Get("id"))
 	if err != nil {
@@ -242,18 +242,18 @@ func (resource *Resource) editItemWithLogAndValues(request *Request, values url.
 		return nil, nil, fmt.Errorf("can't bind data (%d): %s", id, err)
 	}
 
-	stringableValues := resource.getItemStringEditableValues(item, user)
+	/*stringableValues := resource.getItemStringEditableValues(item, user)
 	var allValues url.Values = make(map[string][]string)
 	for k, v := range stringableValues {
 		allValues.Add(k, v)
-	}
+	}*/
 
-	vv := newValuesValidation(request.r.Context(), resource.app, user, allValues)
+	itemValidation := newItemValidation()
 	for _, v := range resource.updateValidations {
-		v(item, vv, request)
+		v(item, itemValidation, request)
 	}
-	if !vv.Valid() {
-		return nil, vv, errValidation
+	if !itemValidation.Valid() {
+		return nil, itemValidation, errValidation
 	}
 
 	err = resource.updateWithLog(item, request)
@@ -261,7 +261,7 @@ func (resource *Resource) editItemWithLogAndValues(request *Request, values url.
 		return nil, nil, err
 	}
 
-	return item, vv, nil
+	return item, itemValidation, nil
 }
 
 func UpdateWithLog[T any](item *T, request *Request) error {

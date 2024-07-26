@@ -6,8 +6,8 @@ import (
 )
 
 type formAction struct {
-	formGenerator func(*Form, *Request)
-	validation    func(FormValidation, *Request)
+	formGenerator  func(*Form, *Request)
+	formValidation func(FormValidation, *Request)
 
 	actionForm       *Action
 	actionValidation *Action
@@ -41,16 +41,16 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *form
 	})
 
 	ret.actionValidation.addHandler(func(request *Request) {
-		if ret.validation == nil {
+		if ret.formValidation == nil {
 			panic("No validation set for this FormAction")
 		}
 
-		rv := newRequestValidation(request)
-		if request.csrfToken() != rv.GetValue("_csrfToken") {
+		rv := newFormValidation()
+		if request.csrfToken() != request.Param("_csrfToken") {
 			panic("wrong csrf token")
 		}
-		ret.validation(rv, request)
-		request.WriteJSON(200, rv.validation)
+		ret.formValidation(rv, request)
+		request.WriteJSON(200, rv.validationData)
 	})
 
 	return ret
@@ -60,35 +60,35 @@ func ActionForm(app *App, url string, formGenerator func(*Form, *Request), valid
 	fa := newFormAction(app, url, nil)
 
 	fa.formGenerator = formGenerator
-	fa.validation = validator
+	fa.formValidation = validator
 
 	app.rootActions = append(app.rootActions, fa.actionForm)
 	app.rootActions = append(app.rootActions, fa.actionValidation)
 	return fa.actionForm
 }
 
-func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Request), validator func(FormValidation, *Request)) {
-	app.accessController.routeHandler("GET", fmt.Sprintf("/admin/user/%s", id), func(request *Request) {
+func (app *App) nologinFormAction(path string, formHandler func(f *Form, r *Request), validator func(FormValidation, *Request)) {
+	app.accessController.routeHandler("GET", fmt.Sprintf("/admin/user/%s", path), func(request *Request) {
 		if request.UserID() > 0 {
 			request.Redirect("/admin")
 			return
 		}
 
 		locale := localeFromRequest(request)
-		form := NewForm("/admin/user/" + id)
+		form := NewForm("/admin/user/" + path)
 		formHandler(form, request)
 
 		renderPageNoLogin(request, &pageNoLogin{
 			App:      app,
-			Tabs:     app.getNologinNavigation(locale, id),
+			Tabs:     app.getNologinNavigation(locale, path),
 			FormData: form,
 		})
 	})
 
-	app.accessController.routeHandler("POST", fmt.Sprintf("/admin/user/%s", id), func(request *Request) {
-		requestValidator := newRequestValidation(request)
+	app.accessController.routeHandler("POST", fmt.Sprintf("/admin/user/%s", path), func(request *Request) {
+		requestValidator := newFormValidation()
 		validator(requestValidator, request)
-		request.WriteJSON(200, requestValidator.validation)
+		request.WriteJSON(200, requestValidator.validationData)
 	})
 
 }
@@ -108,7 +108,7 @@ func (resource *Resource) formAction(url string, formGenerator func(*Form, *Requ
 	action.actionValidation.Permission(resource.canView)
 
 	action.formGenerator = formGenerator
-	action.validation = validation
+	action.formValidation = validation
 
 	resource.actions = append(resource.actions, action.actionForm)
 	resource.actions = append(resource.actions, action.actionValidation)
@@ -156,7 +156,7 @@ func (resource *Resource) formItemAction(url string, formGenerator func(any, *Fo
 		formGenerator(item, form, request)
 	}
 
-	fa.validation = func(vc FormValidation, request *Request) {
+	fa.formValidation = func(vc FormValidation, request *Request) {
 		item := resource.query(request.Request().Context()).ID(request.Param("id"))
 		validation(item, vc, request)
 	}

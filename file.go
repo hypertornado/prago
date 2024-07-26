@@ -202,7 +202,7 @@ func (app *App) initFilesResource() {
 				if err != nil {
 					vc.AddError(err.Error())
 				} else {
-					vc.Validation().RedirectionLocation = fmt.Sprintf("/admin/file/%d", fileData.ID)
+					vc.Redirect(fmt.Sprintf("/admin/file/%d", fileData.ID))
 				}
 			}
 		},
