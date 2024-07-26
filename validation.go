@@ -12,9 +12,9 @@ import (
 var errValidation = errors.New("validation error")
 
 type formValidation struct {
-	Valid               bool
 	RedirectionLocation string
 	AfterContent        template.HTML
+	Valid               bool
 	Errors              []FormValidationError
 	ItemErrors          map[string][]FormValidationError
 }
@@ -75,7 +75,7 @@ func newFormValidation() *formValidation {
 type Validation interface {
 	//Locale() string
 	GetValue(key string) string
-	GetValues(key string) []string
+	//GetValues(key string) []string
 	AddError(err string)
 	AddItemError(key, err string)
 	Validation() *formValidation
