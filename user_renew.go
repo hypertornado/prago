@@ -16,7 +16,7 @@ func initUserRenew(app *App) {
 		emailInput.InputMode = "email"
 		emailInput.Autocomplete = "email"
 		form.AddSubmit(messages.Get(locale, "admin_forgotten_submit"))
-	}, func(vc Validation, request *Request) {
+	}, func(vc FormValidation, request *Request) {
 		email := fixEmail(request.Param("email"))
 
 		var reason = ""
@@ -61,7 +61,7 @@ func initUserRenew(app *App) {
 		form.AddHidden("email").Value = request.Param("email")
 		form.AddHidden("token").Value = request.Param("token")
 		form.AddSubmit(messages.Get(locale, "admin_forgoten_set"))
-	}, func(vc Validation, request *Request) {
+	}, func(vc FormValidation, request *Request) {
 		email := request.Param("email")
 		email = fixEmail(email)
 		token := request.Param("token")

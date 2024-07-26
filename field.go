@@ -184,7 +184,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 	if ret.fieldClassName != "CreatedAt" && ret.fieldClassName != "UpdatedAt" {
 		if ret.typ == reflect.TypeOf(time.Now()) {
 
-			resource.addValidation(func(item any, vc Validation, userData UserData) {
+			resource.addValidation(func(item any, vc ItemValidation, userData UserData) {
 				itemsVal := reflect.ValueOf(item).Elem()
 				fieldVal := itemsVal.FieldByName(ret.fieldClassName)
 				ivalField := fieldVal.Interface()
@@ -247,7 +247,7 @@ func (field *Field) addFieldValidation(nameOfValidation string) error {
 		if field.tags["prago-required"] != "false" {
 			field.required = true
 		}
-		field.resource.addValidation(func(item any, vc Validation, userData UserData) {
+		field.resource.addValidation(func(item any, vc ItemValidation, userData UserData) {
 
 			itemsVal := reflect.ValueOf(item).Elem()
 			fieldVal := itemsVal.FieldByName(field.fieldClassName)
@@ -459,7 +459,7 @@ func (field *Field) initFieldType() {
 	}
 
 	if ret.allowedValues != nil {
-		field.resource.addValidation(func(item any, vc Validation, userData UserData) {
+		field.resource.addValidation(func(item any, vc ItemValidation, userData UserData) {
 			itemsVal := reflect.ValueOf(item).Elem()
 			val := itemsVal.FieldByName(field.fieldClassName).String()
 			//val := vc.GetValue(field.id)

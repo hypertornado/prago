@@ -28,7 +28,7 @@ func (app *App) initSQLBackup() {
 			}
 
 			form.AddSubmit("Download SQL Backup")
-		}, func(vc Validation, request *Request) {
+		}, func(vc FormValidation, request *Request) {
 
 			tables, err := listTables(app.db)
 			must(err)

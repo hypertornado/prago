@@ -41,7 +41,7 @@ func (resource *Resource) initDefaultResourceActions() {
 		resource.bindData(item, request, queryData)
 		form.addResourceItems(resource, item, request)
 		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
-	}, func(vc Validation, request *Request) {
+	}, func(vc FormValidation, request *Request) {
 		var item interface{} = reflect.New(resource.typ).Interface()
 		resource.bindData(item, request, request.Params())
 		for _, v := range resource.updateValidations {
@@ -77,7 +77,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			form.addResourceItems(resource, item, request)
 			form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 		},
-		func(_ any, vc Validation, request *Request) {
+		func(_ any, vc FormValidation, request *Request) {
 			params := request.Params()
 			resource.fixBooleanParams(request, params)
 
@@ -112,7 +112,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			itemName := resource.previewer(request, item).Name()
 			form.Title = messages.Get(request.Locale(), "admin_delete_confirmation_name", itemName)
 		},
-		func(item any, vc Validation, request *Request) {
+		func(item any, vc FormValidation, request *Request) {
 			for _, v := range resource.deleteValidations {
 				v(item, vc, request)
 			}
@@ -140,7 +140,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			f.AddTextInput("page", "Stránka").Value = "1"
 			f.AutosubmitFirstTime = true
 
-		}, func(vc Validation, request *Request) {
+		}, func(vc FormValidation, request *Request) {
 			table := resource.app.getHistoryTable(request, resource, 0, request.Param("page"))
 			vc.Validation().AfterContent = table.ExecuteHTML()
 
@@ -158,7 +158,7 @@ func (resource *Resource) initDefaultResourceActions() {
 					f.AddSubmit("Zobrazit")
 					f.AutosubmitFirstTime = true
 				},
-				func(item any, vc Validation, request *Request) {
+				func(item any, vc FormValidation, request *Request) {
 					id := resource.previewer(request, item).ID()
 					table := resource.app.getHistoryTable(request, resource, id, request.Param("page"))
 					vc.Validation().AfterContent = table.ExecuteHTML()
@@ -218,7 +218,7 @@ func (resource *Resource) deleteWithLog(item any, request UserData) error {
 	return nil
 }
 
-func (resource *Resource) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, Validation, error) {
+func (resource *Resource) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, ItemValidation, error) {
 	user := request
 	id, err := strconv.Atoi(values.Get("id"))
 	if err != nil {

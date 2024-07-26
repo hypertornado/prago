@@ -111,7 +111,7 @@ func (app *App) initUserResource() {
 
 	resource.Icon("glyphicons-basic-4-user.svg")
 
-	ValidateUpdate(app, func(cuser *user, vc Validation, userData UserData) {
+	ValidateUpdate(app, func(cuser *user, vc ItemValidation, userData UserData) {
 		username := cuser.Username
 		if username == "" {
 			return

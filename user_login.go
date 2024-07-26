@@ -31,7 +31,7 @@ func initUserLogin(app *App) {
 		form.AddHidden("redirect_url").Value = request.Param("redirect")
 
 		form.AddSubmit(messages.Get(locale, "admin_login_action"))
-	}, func(vc Validation, request *Request) {
+	}, func(vc FormValidation, request *Request) {
 		locale := request.Locale()
 
 		email := request.Param("email")
