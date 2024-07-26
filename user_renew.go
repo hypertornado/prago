@@ -62,16 +62,16 @@ func initUserRenew(app *App) {
 		form.AddHidden("token").Value = request.Param("token")
 		form.AddSubmit(messages.Get(locale, "admin_forgoten_set"))
 	}, func(vc Validation, request *Request) {
-		email := vc.GetValue("email")
+		email := request.Param("email")
 		email = fixEmail(email)
-		token := vc.GetValue("token")
+		token := request.Param("token")
 
 		errStr := messages.Get(request.Locale(), "admin_error")
 
 		u := Query[user](app).Is("email", email).First()
 		if u != nil {
 			if token == u.emailToken(app) {
-				password := vc.GetValue("password")
+				password := request.Param("password")
 				if len(password) >= 7 {
 					err := u.newPassword(password)
 					if err == nil {

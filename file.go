@@ -198,7 +198,7 @@ func (app *App) initFilesResource() {
 				vc.AddItemError("file", messages.Get(request.Locale(), "admin_validation_not_empty"))
 			}
 			if vc.Valid() {
-				fileData, err := app.UploadFile(multipartFiles[0], request, vc.GetValue("description"))
+				fileData, err := app.UploadFile(multipartFiles[0], request, request.Param("description"))
 				if err != nil {
 					vc.AddError(err.Error())
 				} else {

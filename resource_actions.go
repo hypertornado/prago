@@ -141,7 +141,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			f.AutosubmitFirstTime = true
 
 		}, func(vc Validation, request *Request) {
-			table := resource.app.getHistoryTable(request, resource, 0, vc.GetValue("page"))
+			table := resource.app.getHistoryTable(request, resource, 0, request.Param("page"))
 			vc.Validation().AfterContent = table.ExecuteHTML()
 
 		}).
@@ -160,7 +160,7 @@ func (resource *Resource) initDefaultResourceActions() {
 				},
 				func(item any, vc Validation, request *Request) {
 					id := resource.previewer(request, item).ID()
-					table := resource.app.getHistoryTable(request, resource, id, vc.GetValue("page"))
+					table := resource.app.getHistoryTable(request, resource, id, request.Param("page"))
 					vc.Validation().AfterContent = table.ExecuteHTML()
 				},
 			).

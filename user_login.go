@@ -33,9 +33,10 @@ func initUserLogin(app *App) {
 		form.AddSubmit(messages.Get(locale, "admin_login_action"))
 	}, func(vc Validation, request *Request) {
 		locale := request.Locale()
-		email := vc.GetValue("email")
+
+		email := request.Param("email")
 		email = fixEmail(email)
-		password := vc.GetValue("password")
+		password := request.Param("password")
 
 		q := Query[user](app)
 		if email != "" && !strings.Contains(email, "@") {

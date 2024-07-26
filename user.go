@@ -111,8 +111,8 @@ func (app *App) initUserResource() {
 
 	resource.Icon("glyphicons-basic-4-user.svg")
 
-	resource.addValidation(func(item any, vc Validation, userData UserData) {
-		username := vc.GetValue("username")
+	ValidateUpdate(app, func(cuser *user, vc Validation, userData UserData) {
+		username := cuser.Username
 		if username == "" {
 			return
 		}
@@ -124,14 +124,13 @@ func (app *App) initUserResource() {
 		var isUsed bool
 		sameUsernameUsers := Query[user](app).Is("username", username).List()
 		for _, sameUser := range sameUsernameUsers {
-			if vc.GetValue("id") != fmt.Sprintf("%d", sameUser.ID) {
+			if cuser.ID != sameUser.ID {
 				isUsed = true
 			}
 		}
 		if isUsed {
 			vc.AddItemError("username", fmt.Sprintf("Uživatelské jméno %s je již použito", username))
 		}
-
 	})
 
 	initUserRegistration(app)

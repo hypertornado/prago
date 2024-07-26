@@ -180,5 +180,4 @@ func (previewer *previewer) DescriptionExtended(relatedResource *Resource) strin
 	}
 	ret := strings.Join(items, " · ")
 	return ret
-	//return filterMarkdown(ret)
 }

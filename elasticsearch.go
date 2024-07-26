@@ -35,7 +35,7 @@ func (app *App) initElasticsearch() {
 
 		f.AddSubmit("Delete indice")
 	}, func(vc Validation, request *Request) {
-		id := vc.GetValue("indice")
+		id := request.Param("indice")
 		if id == "" {
 			vc.AddItemError("indice", "Select indice to delete")
 		}

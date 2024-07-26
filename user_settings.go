@@ -28,12 +28,12 @@ func initUserSettings(app *App) {
 		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 	}, func(vc Validation, request *Request) {
 		locale := request.Locale()
-		name := vc.GetValue("name")
+		name := request.Param("name")
 		if name == "" {
 			vc.AddItemError("name", messages.Get(locale, "admin_user_name_not_empty"))
 		}
 
-		newLocale := vc.GetValue("locale")
+		newLocale := request.Param("locale")
 		foundLocale := false
 		for _, v := range availableLocales {
 			if v[0] == newLocale {
@@ -89,14 +89,14 @@ func initUserSettings(app *App) {
 			locale := request.Locale()
 
 			valid := true
-			oldpassword := vc.GetValue("oldpassword")
+			oldpassword := request.Param("oldpassword")
 			user := request.getUser()
 			if !user.isPassword(oldpassword) {
 				valid = false
 				vc.AddItemError("oldpassword", messages.Get(locale, "admin_register_password"))
 			}
 
-			newpassword := vc.GetValue("newpassword")
+			newpassword := request.Param("newpassword")
 			if len(newpassword) < 7 {
 				valid = false
 				vc.AddItemError("newpassword", messages.Get(locale, "admin_password_length"))

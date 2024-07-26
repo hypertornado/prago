@@ -12,7 +12,7 @@ func (app *App) initSQLConsole() {
 			form.AddTextareaInput("q", "").Focused = true
 			form.AddSubmit("Execute SQL")
 		}, func(vc Validation, request *Request) {
-			q := vc.GetValue("q")
+			q := request.Param("q")
 			var message string
 			table := app.Table()
 

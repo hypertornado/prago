@@ -36,7 +36,7 @@ func (app *App) initSQLBackup() {
 			var exclude []string
 
 			for k := range tables {
-				if vc.GetValue(k) == "on" {
+				if request.Param(k) == "on" {
 					exclude = append(exclude, k)
 				}
 			}

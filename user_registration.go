@@ -62,12 +62,12 @@ func registrationValidation(vc Validation, request *Request) {
 	locale := request.Locale()
 	app := request.app
 
-	name := vc.GetValue("name")
+	name := request.Param("name")
 	if name == "" {
 		vc.AddItemError("name", messages.Get(locale, "admin_user_name_not_empty"))
 	}
 
-	email := vc.GetValue("email")
+	email := request.Param("email")
 	email = fixEmail(email)
 	if !isEmailValid(email) {
 		vc.AddItemError("email", messages.Get(locale, "admin_email_not_valid"))
@@ -78,12 +78,12 @@ func registrationValidation(vc Validation, request *Request) {
 		}
 	}
 
-	password := vc.GetValue("password")
+	password := request.Param("password")
 	if len(password) < 7 {
 		vc.AddItemError("password", messages.Get(locale, "admin_register_password"))
 	}
 
-	captcha := vc.GetValue("captcha")
+	captcha := request.Param("captcha")
 	captcha = strings.Trim(captcha, " ")
 	if captcha != "9" {
 		vc.AddItemError("captcha", messages.Get(locale, "admin_error"))
@@ -92,9 +92,9 @@ func registrationValidation(vc Validation, request *Request) {
 	if vc.Valid() {
 		u := &user{}
 		u.Email = email
-		u.Name = vc.GetValue("name")
+		u.Name = request.Param("name")
 		u.Locale = locale
-		must(u.newPassword(vc.GetValue("password")))
+		must(u.newPassword(request.Param("password")))
 		err := u.sendConfirmEmail(app, locale)
 		if err != nil {
 			app.Log().Println(err)
