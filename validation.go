@@ -82,7 +82,7 @@ type Validation interface {
 	Valid() bool
 	//Request() *Request
 	UserHasPermission(Permission) bool
-	Context() context.Context
+	//Context() context.Context
 }
 
 type requestValidation struct {

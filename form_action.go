@@ -157,7 +157,7 @@ func (resource *Resource) formItemAction(url string, formGenerator func(any, *Fo
 	}
 
 	fa.validation = func(vc Validation, request *Request) {
-		item := resource.query(vc.Context()).ID(vc.GetValue("id"))
+		item := resource.query(request.Request().Context()).ID(vc.GetValue("id"))
 		validation(item, vc, request)
 	}
 

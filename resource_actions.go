@@ -49,7 +49,7 @@ func (resource *Resource) initDefaultResourceActions() {
 		}
 		if vc.Valid() {
 			if resource.orderField != nil {
-				count, _ := resource.query(vc.Context()).count()
+				count, _ := resource.query(request.Request().Context()).count()
 				resource.setOrderPosition(item, count+1)
 			}
 			must(resource.createWithLog(item, request))
