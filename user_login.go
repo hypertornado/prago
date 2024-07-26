@@ -32,7 +32,7 @@ func initUserLogin(app *App) {
 
 		form.AddSubmit(messages.Get(locale, "admin_login_action"))
 	}, func(vc Validation, request *Request) {
-		locale := vc.Locale()
+		locale := request.Locale()
 		email := vc.GetValue("email")
 		email = fixEmail(email)
 		password := vc.GetValue("password")

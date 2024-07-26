@@ -45,7 +45,7 @@ func (resource *Resource) initDefaultResourceActions() {
 		var item interface{} = reflect.New(resource.typ).Interface()
 		resource.bindData(item, request, request.Params())
 		for _, v := range resource.updateValidations {
-			v(item, vc)
+			v(item, vc, request)
 		}
 		if vc.Valid() {
 			if resource.orderField != nil {
@@ -114,7 +114,7 @@ func (resource *Resource) initDefaultResourceActions() {
 		},
 		func(item any, vc Validation, request *Request) {
 			for _, v := range resource.deleteValidations {
-				v(item, vc)
+				v(item, vc, request)
 			}
 			if vc.Valid() {
 				must(resource.deleteWithLog(item, request))
@@ -250,7 +250,7 @@ func (resource *Resource) editItemWithLogAndValues(request *Request, values url.
 
 	vv := newValuesValidation(request.r.Context(), resource.app, user, allValues)
 	for _, v := range resource.updateValidations {
-		v(item, vv)
+		v(item, vv, request)
 	}
 	if !vv.Valid() {
 		return nil, vv, errValidation

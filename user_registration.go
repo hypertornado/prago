@@ -59,7 +59,7 @@ func initUserRegistration(app *App) {
 }
 
 func registrationValidation(vc Validation, request *Request) {
-	locale := vc.Locale()
+	locale := request.Locale()
 	app := request.app
 
 	name := vc.GetValue("name")

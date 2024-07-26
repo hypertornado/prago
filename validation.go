@@ -73,7 +73,7 @@ func newFormValidation() *formValidation {
 }
 
 type Validation interface {
-	Locale() string
+	//Locale() string
 	GetValue(key string) string
 	GetValues(key string) []string
 	AddError(err string)
@@ -81,7 +81,7 @@ type Validation interface {
 	Validation() *formValidation
 	Valid() bool
 	//Request() *Request
-	UserHasPermission(Permission) bool
+	//UserHasPermission(Permission) bool
 	//Context() context.Context
 }
 

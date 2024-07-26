@@ -184,22 +184,22 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 	if ret.fieldClassName != "CreatedAt" && ret.fieldClassName != "UpdatedAt" {
 		if ret.typ == reflect.TypeOf(time.Now()) {
 			if ret.tags["prago-type"] == "timestamp" || ret.fieldClassName == "CreatedAt" || ret.fieldClassName == "UpdatedAt" {
-				resource.addValidation(func(item any, vc Validation) {
+				resource.addValidation(func(item any, vc Validation, userData UserData) {
 					val := vc.GetValue(ret.id)
 					if val != "" {
 						_, err := time.Parse("2006-01-02 15:04", val)
 						if err != nil {
-							vc.AddItemError(ret.id, messages.Get(vc.Locale(), "admin_validation_date_format_error"))
+							vc.AddItemError(ret.id, messages.Get(userData.Locale(), "admin_validation_date_format_error"))
 						}
 					}
 				})
 			} else {
-				resource.addValidation(func(item any, vc Validation) {
+				resource.addValidation(func(item any, vc Validation, userData UserData) {
 					val := vc.GetValue(ret.id)
 					if val != "" {
 						_, err := time.Parse("2006-01-02", val)
 						if err != nil {
-							vc.AddItemError(ret.id, messages.Get(vc.Locale(), "admin_validation_date_format_error"))
+							vc.AddItemError(ret.id, messages.Get(userData.Locale(), "admin_validation_date_format_error"))
 						}
 					}
 				})
@@ -233,7 +233,7 @@ func (field *Field) addFieldValidation(nameOfValidation string) error {
 		if field.tags["prago-required"] != "false" {
 			field.required = true
 		}
-		field.resource.addValidation(func(item any, vc Validation) {
+		field.resource.addValidation(func(item any, vc Validation, userData UserData) {
 			valid := true
 			if field.typ.Kind() == reflect.Int64 ||
 				field.typ.Kind() == reflect.Int32 ||
@@ -253,7 +253,7 @@ func (field *Field) addFieldValidation(nameOfValidation string) error {
 				valid = false
 			}
 			if !valid {
-				vc.AddItemError(field.id, messages.Get(vc.Locale(), "admin_validation_not_empty"))
+				vc.AddItemError(field.id, messages.Get(userData.Locale(), "admin_validation_not_empty"))
 			}
 		})
 		return nil
@@ -423,7 +423,7 @@ func (field *Field) initFieldType() {
 	}
 
 	if ret.allowedValues != nil {
-		field.resource.addValidation(func(item any, vc Validation) {
+		field.resource.addValidation(func(item any, vc Validation, userData UserData) {
 			val := vc.GetValue(field.id)
 			var found bool
 			for _, v := range ret.allowedValues {
@@ -432,7 +432,7 @@ func (field *Field) initFieldType() {
 				}
 			}
 			if !found {
-				vc.AddItemError(field.id, messages.Get(vc.Locale(), "admin_validation_value"))
+				vc.AddItemError(field.id, messages.Get(userData.Locale(), "admin_validation_value"))
 			}
 		})
 	}

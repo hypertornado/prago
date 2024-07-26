@@ -195,7 +195,7 @@ func (app *App) initFilesResource() {
 		func(vc Validation, request *Request) {
 			multipartFiles := request.Request().MultipartForm.File["file"]
 			if len(multipartFiles) != 1 {
-				vc.AddItemError("file", messages.Get(vc.Locale(), "admin_validation_not_empty"))
+				vc.AddItemError("file", messages.Get(request.Locale(), "admin_validation_not_empty"))
 			}
 			if vc.Valid() {
 				fileData, err := app.UploadFile(multipartFiles[0], request, vc.GetValue("description"))

@@ -27,7 +27,7 @@ func initUserSettings(app *App) {
 
 		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 	}, func(vc Validation, request *Request) {
-		locale := vc.Locale()
+		locale := request.Locale()
 		name := vc.GetValue("name")
 		if name == "" {
 			vc.AddItemError("name", messages.Get(locale, "admin_user_name_not_empty"))

@@ -48,7 +48,7 @@ func initUserRenew(app *App) {
 		}
 
 		if reason != "" {
-			vc.AddError(messages.Get(vc.Locale(), "admin_forgoten_error", user.Email) + " (" + reason + ")")
+			vc.AddError(messages.Get(request.Locale(), "admin_forgoten_error", user.Email) + " (" + reason + ")")
 		}
 	})
 
@@ -66,7 +66,7 @@ func initUserRenew(app *App) {
 		email = fixEmail(email)
 		token := vc.GetValue("token")
 
-		errStr := messages.Get(vc.Locale(), "admin_error")
+		errStr := messages.Get(request.Locale(), "admin_error")
 
 		u := Query[user](app).Is("email", email).First()
 		if u != nil {
@@ -77,13 +77,13 @@ func initUserRenew(app *App) {
 					if err == nil {
 						err = UpdateItem(app, u)
 						if err == nil {
-							request.AddFlashMessage(messages.Get(vc.Locale(), "admin_password_changed"))
+							request.AddFlashMessage(messages.Get(request.Locale(), "admin_password_changed"))
 							vc.Validation().RedirectionLocation = app.getAdminURL("user/login") + "?email=" + url.QueryEscape(u.Email)
 							return
 						}
 					}
 				} else {
-					vc.AddItemError("password", messages.Get(vc.Locale(), "admin_register_password"))
+					vc.AddItemError("password", messages.Get(request.Locale(), "admin_register_password"))
 					return
 				}
 			}
