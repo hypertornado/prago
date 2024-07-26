@@ -74,7 +74,7 @@ func newFormValidation() *formValidation {
 
 type Validation interface {
 	//Locale() string
-	GetValue(key string) string
+	//GetValue(key string) string
 	//GetValues(key string) []string
 	AddError(err string)
 	AddItemError(key, err string)
