@@ -5,7 +5,7 @@ import (
 )
 
 func TestCache(t *testing.T) {
-	resource := prepareResource()
+	resource := prepareResource(t)
 
 	app := resource.app
 

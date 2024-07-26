@@ -5,7 +5,7 @@ import (
 )
 
 func TestReflectQuery(t *testing.T) {
-	resource := prepareResource()
+	resource := prepareResource(t)
 
 	resA := ResourceStruct{Name: "A"}
 	resB := ResourceStruct{Name: "B"}

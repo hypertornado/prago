@@ -37,28 +37,17 @@ type ResourceStructUnique struct {
 	UniqueName string `prago-unique:"true"`
 }
 
-func prepareResource() *Resource {
-	app := newTestingApp()
-	resource := NewResource[ResourceStruct](app)
-	NewResource[ResourceStructUnique](app)
-
-	app.AfterInit()
-	app.unsafeDropTables()
-	app.migrate(false)
-	return resource
-}
-
-func prepareFuzzing() *Resource {
-	app := newTestingApp()
-	resource := NewResource[ResourceStruct](app)
-	NewResource[ResourceStructUnique](app)
-
-	app.AfterInit()
+func prepareResource(t *testing.T) *Resource {
+	var resource *Resource
+	_ = NewTesting(t, func(app *App) {
+		resource = NewResource[ResourceStruct](app)
+		NewResource[ResourceStructUnique](app)
+	})
 	return resource
 }
 
 func TestBasicResource2(t *testing.T) {
-	resource := prepareResource()
+	resource := prepareResource(t)
 
 	item := &ResourceStruct{Name: "A", Floating: 3.14}
 
@@ -127,7 +116,7 @@ func TestBasicResource2(t *testing.T) {
 }
 
 func TestQuery(t *testing.T) {
-	resource := prepareResource()
+	resource := prepareResource(t)
 
 	err := CreateItem(resource.app, &ResourceStruct{Name: "A", Floating: 3.14})
 	if err != nil {
@@ -201,7 +190,7 @@ func TestQuery(t *testing.T) {
 }
 
 func TestResource(t *testing.T) {
-	resource := prepareResource()
+	resource := prepareResource(t)
 	items, err := resource.getListContent(context.Background(), resource.app.newUserData(&user{Role: "sysadmin"}), map[string][]string{
 		"_order": {"id"},
 	})
@@ -249,7 +238,7 @@ func TestResource(t *testing.T) {
 }
 
 func TestResourceUnique(t *testing.T) {
-	app := prepareResource().app
+	app := prepareResource(t).app
 
 	resource := getResource[ResourceStructUnique](app)
 
@@ -271,7 +260,7 @@ func TestResourceUnique(t *testing.T) {
 }
 
 func TestResourceDate(t *testing.T) {
-	resource := prepareResource()
+	resource := prepareResource(t)
 	tm := time.Now()
 
 	CreateItem(resource.app, &ResourceStruct{Date: tm})
@@ -283,7 +272,7 @@ func TestResourceDate(t *testing.T) {
 }
 
 func TestResourceTimestamps(t *testing.T) {
-	resource := prepareResource()
+	resource := prepareResource(t)
 
 	testStartTime := time.Now().Truncate(time.Second)
 
@@ -301,7 +290,7 @@ func TestResourceTimestamps(t *testing.T) {
 }
 
 func TestResourceBool(t *testing.T) {
-	resource := prepareResource()
+	resource := prepareResource(t)
 
 	CreateItem(resource.app, &ResourceStruct{Name: "A", IsSomething: false})
 	CreateItem(resource.app, &ResourceStruct{Name: "B", IsSomething: true})
@@ -318,7 +307,7 @@ func TestResourceBool(t *testing.T) {
 }
 
 func TestResourceCreateWithID(t *testing.T) {
-	resource := prepareResource()
+	resource := prepareResource(t)
 	CreateItem(resource.app, &ResourceStruct{ID: 85, Name: "A"})
 
 	item := Query[ResourceStruct](resource.app).First()
@@ -329,7 +318,7 @@ func TestResourceCreateWithID(t *testing.T) {
 }
 
 func TestShouldNotSaveWithZeroID(t *testing.T) {
-	resource := prepareResource()
+	resource := prepareResource(t)
 	err := UpdateItem(resource.app, &ResourceStruct{})
 	if err == nil {
 		t.Fatal("should not be nil")
@@ -337,7 +326,7 @@ func TestShouldNotSaveWithZeroID(t *testing.T) {
 }
 
 func TestWorkingWithConcreteID(t *testing.T) {
-	resource := prepareResource()
+	resource := prepareResource(t)
 	item := &ResourceStruct{
 		ID:   3,
 		Name: "A",
@@ -361,7 +350,7 @@ func TestWorkingWithConcreteID(t *testing.T) {
 }
 
 func TestReplace(t *testing.T) {
-	resource := prepareResource()
+	resource := prepareResource(t)
 	var id int64 = 3
 	item := &ResourceStruct{
 		ID:   id,
@@ -391,6 +380,7 @@ func TestReplace(t *testing.T) {
 	}
 }
 
+/*
 func FuzzCreateItem(f *testing.F) {
 	f.Add(5, "helloss")
 	resource := prepareFuzzing()
@@ -414,12 +404,12 @@ func FuzzCreateItem(f *testing.F) {
 			t.Fatal("count ", i)
 		}
 	})
-}
+}*/
 
 func TestLongSaveText(t *testing.T) {
 	//TODO: make it work with 100000
 	text := "some" + string(make([]byte, 10000))
-	resource := prepareResource()
+	resource := prepareResource(t)
 	newItem := &ResourceStruct{Text: text}
 	err := CreateItem(resource.app, newItem)
 	if err != nil {

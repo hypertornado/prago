@@ -31,6 +31,7 @@ type server struct {
 	app App
 }
 
+// TODO: remove after fixed tests in lazensky
 func (app *App) NewServer() server {
 	return server{*app}
 }

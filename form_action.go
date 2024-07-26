@@ -6,7 +6,7 @@ import (
 )
 
 type formAction struct {
-	validation    Validation
+	validation    func(ValidationContext)
 	formGenerator func(*Form, *Request)
 
 	actionForm       *Action
@@ -56,7 +56,7 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *form
 	return ret
 }
 
-func ActionForm(app *App, url string, formGenerator func(*Form, *Request), validator Validation) *Action {
+func ActionForm(app *App, url string, formGenerator func(*Form, *Request), validator func(ValidationContext)) *Action {
 	fa := newFormAction(app, url, nil)
 
 	fa.formGenerator = formGenerator
@@ -67,7 +67,7 @@ func ActionForm(app *App, url string, formGenerator func(*Form, *Request), valid
 	return fa.actionForm
 }
 
-func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Request), validator Validation) {
+func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Request), validator func(ValidationContext)) {
 	app.accessController.routeHandler("GET", fmt.Sprintf("/admin/user/%s", id), func(request *Request) {
 		if request.UserID() > 0 {
 			request.Redirect("/admin")
@@ -93,12 +93,12 @@ func (app *App) nologinFormAction(id string, formHandler func(f *Form, r *Reques
 
 }
 
-func ActionResourceForm[T any](app *App, url string, formGenerator func(*Form, *Request), validation Validation) *Action {
+func ActionResourceForm[T any](app *App, url string, formGenerator func(*Form, *Request), validation func(ValidationContext)) *Action {
 	resource := getResource[T](app)
 	return resource.formAction(url, formGenerator, validation)
 }
 
-func (resource *Resource) formAction(url string, formGenerator func(*Form, *Request), validation Validation) *Action {
+func (resource *Resource) formAction(url string, formGenerator func(*Form, *Request), validation func(ValidationContext)) *Action {
 	action := newFormAction(resource.app, url, nil)
 
 	action.actionForm.resource = resource

@@ -6,7 +6,7 @@ import (
 )
 
 func TestAggregations(t *testing.T) {
-	resource := prepareResource()
+	resource := prepareResource(t)
 	resA := ResourceStruct{Count: 1}
 	resB := ResourceStruct{Count: 2, IsSomething: true}
 	resC := ResourceStruct{Count: 3, IsSomething: true}

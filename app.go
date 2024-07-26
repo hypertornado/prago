@@ -7,6 +7,7 @@ import (
 	"os"
 	"reflect"
 	"sync"
+	"testing"
 )
 
 //TODO: implement https://pkg.go.dev/expvar#Handler
@@ -15,6 +16,7 @@ import (
 //https://github.com/divan/expvarmon
 
 type App struct {
+	testing         bool
 	port            int
 	codeName        string
 	version         string
@@ -81,14 +83,19 @@ type App struct {
 	router *router
 }
 
-const testingAppName = "__prago_test_app"
+func NewTesting(t *testing.T, initHandler func(app *App)) *App {
+	app := createApp("__prago_test_app", "0.0", true)
+	initHandler(app)
+	app.AfterInit()
+	app.unsafeDropTables()
+	app.migrate(false)
 
-func newTestingApp() *App {
-	return createApp(testingAppName, "0.0")
+	return app
 }
 
-func createApp(codeName string, version string) *App {
+func createApp(codeName string, version string, testing bool) *App {
 	app := &App{
+		testing:  testing,
 		codeName: codeName,
 		version:  version,
 		name:     unlocalized(codeName),
@@ -111,10 +118,10 @@ func createApp(codeName string, version string) *App {
 	app.initAccessManager()
 	app.initDefaultFieldTypes()
 
-	var testing bool
+	/*var testing bool
 	if app.codeName == testingAppName {
 		testing = true
-	}
+	}*/
 	app.connectDB(testing)
 
 	app.initUserDataCache()
@@ -172,7 +179,7 @@ func (app *App) initDefaultResourceActions() {
 
 // New creates App structure for prago app
 func New(appName, version string) *App {
-	return createApp(appName, version)
+	return createApp(appName, version, false)
 }
 
 func (app *App) GetDB() *sql.DB { return app.db }

@@ -85,7 +85,7 @@ type ValidationContext interface {
 	Context() context.Context
 }
 
-type Validation func(ValidationContext)
+//type Validation func(ValidationContext)
 
 type requestValidation struct {
 	request    *Request

@@ -916,7 +916,6 @@ select.admin_timestamp_minute {
   margin-bottom: 20px;
   border-radius: 5px;
   margin-top: 0px;
-  overflow: hidden;
 }
 
 .box:has(.admin_relationlist) {

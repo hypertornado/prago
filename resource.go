@@ -31,8 +31,8 @@ type Resource struct {
 	canDelete Permission
 	canExport Permission
 
-	validations       []Validation
-	deleteValidations []Validation
+	validations       []func(ValidationContext)
+	deleteValidations []func(ValidationContext)
 
 	actions     []*Action
 	itemActions []*Action
@@ -247,7 +247,7 @@ func (resource *Resource) PermissionExport(permission Permission) *Resource {
 	return resource
 }
 
-func (resource *Resource) Validation(validation Validation) *Resource {
+func (resource *Resource) Validation(validation func(ValidationContext)) *Resource {
 	resource.addValidation(validation)
 	return resource
 }
@@ -256,11 +256,11 @@ func (resource *Resource) Dashboard(name func(string) string) *Dashboard {
 	return resource.resourceBoard.Dashboard(name)
 }
 
-func (resource *Resource) addValidation(validation Validation) {
+func (resource *Resource) addValidation(validation func(ValidationContext)) {
 	resource.validations = append(resource.validations, validation)
 }
 
-func (resource *Resource) DeleteValidation(validation Validation) *Resource {
+func (resource *Resource) DeleteValidation(validation func(ValidationContext)) *Resource {
 
 	resource.deleteValidations = append(resource.deleteValidations, validation)
 	return resource
