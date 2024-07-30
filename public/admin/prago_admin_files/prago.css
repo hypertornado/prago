@@ -1673,12 +1673,12 @@ input.list_filter_layout_date_to {
 .btn-delete,
 .btn-delete:hover,
 .btn-delete:active {
-  background: linear-gradient(rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.1));
+  background: linear-gradient(rgba(255, 0, 0, 0.8), rgba(255, 0, 0, 0.9));
 }
 
 .btn-delete:hover,
 .btn-delete:active {
-  background: linear-gradient(rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.2));
+  background: linear-gradient(rgba(255, 0, 0, 0.9), rgba(255, 0, 0, 0.9));
 }
 
 .form {
@@ -1747,10 +1747,6 @@ input.list_filter_layout_date_to {
   margin: 5px 0px;
 }
 
-.form_label-errors {
-  color: #dd2e4f;
-}
-
 .form_label-errors input,
 .form_label-errors select,
 .form_label-errors textarea {
@@ -1759,6 +1755,7 @@ input.list_filter_layout_date_to {
 
 .form_label_errors {
   font-size: 0.8em;
+  color: #dd2e4f;
 }
 
 .form_label_text-checkbox {

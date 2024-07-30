@@ -1,11 +1,8 @@
 package prago
 
 import (
-	"errors"
 	"html/template"
 )
-
-var errValidation = errors.New("validation error")
 
 type FormValidation interface {
 	AddError(err string)
@@ -19,12 +16,7 @@ type formValidationData struct {
 	RedirectionLocation string
 	AfterContent        template.HTML
 	Valid               bool
-	Errors              []FormValidationError
-	ItemErrors          map[string][]FormValidationError
-}
-
-type FormValidationError struct {
-	Text string
+	Errors              []ValidationError
 }
 
 type formValidationReport struct {
@@ -35,7 +27,6 @@ func newFormValidationData() *formValidationData {
 	ret := &formValidationData{
 		Valid: true,
 	}
-	ret.ItemErrors = map[string][]FormValidationError{}
 	return ret
 }
 
@@ -52,15 +43,16 @@ func newFormValidation() *formValidation {
 func (fv *formValidation) AddError(err string) {
 
 	fv.validationData.Valid = false
-	fv.validationData.Errors = append(fv.validationData.Errors, FormValidationError{
+	fv.validationData.Errors = append(fv.validationData.Errors, ValidationError{
 		Text: err,
 	})
 }
 
 func (fv *formValidation) AddItemError(key, err string) {
 	fv.validationData.Valid = false
-	fv.validationData.ItemErrors[key] = append(fv.validationData.ItemErrors[key], FormValidationError{
-		Text: err,
+	fv.validationData.Errors = append(fv.validationData.Errors, ValidationError{
+		Field: key,
+		Text:  err,
 	})
 }
 

@@ -44,9 +44,10 @@ func (resource *Resource) initDefaultResourceActions() {
 	}, func(vc FormValidation, request *Request) {
 		var item interface{} = reflect.New(resource.typ).Interface()
 		resource.bindData(item, request, request.Params())
-		for _, v := range resource.updateValidations {
-			v(item, vc, request)
-		}
+
+		itemValidation := resource.validateUpdate(item, request)
+		vc.(*formValidation).validationData.Errors = itemValidation.errors
+
 		if vc.Valid() {
 			if resource.orderField != nil {
 				count, _ := resource.query(request.Request().Context()).count()
@@ -78,29 +79,16 @@ func (resource *Resource) initDefaultResourceActions() {
 			form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 		},
 		func(_ any, vc FormValidation, request *Request) {
-			params := request.Params()
-			resource.fixBooleanParams(request, params)
-
-			item, validation, err := resource.editItemWithLogAndValues(request, params)
-			if err != nil && err != errValidation {
-				panic(err)
-			}
+			item, validation := resource.editItemWithLogAndValues(request, request.Params())
 
 			if validation.Valid() {
-				user := request
-				id, err := strconv.Atoi(request.Param("id"))
-				must(err)
-
-				resource.app.Notification(resource.previewer(user, item).Name()).
+				resource.app.Notification(resource.previewer(request, item).Name()).
 					SetImage(resource.previewer(request, item).ThumbnailURL()).
 					SetPreName(messages.Get(request.Locale(), "admin_item_edited")).
 					Flash(request)
-
-				vc.Redirect(resource.getURL(fmt.Sprintf("%d", id)))
+				vc.Redirect(resource.getItemURL(item, "", request))
 			} else {
-				formValidation := vc.(*formValidation)
-				formValidation.validationData.Errors = validation.errors
-				formValidation.validationData.ItemErrors = validation.itemErrors
+				vc.(*formValidation).validationData.Errors = validation.errors
 			}
 		},
 	).Icon(iconEdit).setPriority(defaultHighPriority).Name(messages.GetNameFunction("admin_edit")).Permission(resource.canUpdate)
@@ -112,14 +100,13 @@ func (resource *Resource) initDefaultResourceActions() {
 			itemName := resource.previewer(request, item).Name()
 			form.Title = messages.Get(request.Locale(), "admin_delete_confirmation_name", itemName)
 		},
-		func(item any, vc FormValidation, request *Request) {
-			for _, v := range resource.deleteValidations {
-				v(item, vc, request)
-			}
+		func(item any, fv FormValidation, request *Request) {
+			vc := resource.validateDelete(item, request)
+			fv.(*formValidation).validationData.Errors = vc.errors
 			if vc.Valid() {
 				must(resource.deleteWithLog(item, request))
 				request.AddFlashMessage(messages.Get(request.Locale(), "admin_item_deleted"))
-				vc.Redirect(resource.getURL(""))
+				fv.Redirect(resource.getURL(""))
 			}
 		},
 	).Icon(iconDelete).setPriority(-defaultHighPriority).Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete"))
@@ -218,16 +205,14 @@ func (resource *Resource) deleteWithLog(item any, request UserData) error {
 	return nil
 }
 
-func (resource *Resource) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, *itemValidation, error) {
+func (resource *Resource) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, *itemValidation) {
 	user := request
 	id, err := strconv.Atoi(values.Get("id"))
-	if err != nil {
-		return nil, nil, fmt.Errorf("can't parse id %d: %s", id, err)
-	}
+	must(err)
 
 	beforeItem := resource.query(request.r.Context()).ID(id)
 	if beforeItem == nil {
-		return nil, nil, fmt.Errorf("can't get beforeitem with id %d: %s", id, err)
+		panic(fmt.Sprintf("can't get beforeitem with id %d: %s", id, err))
 	}
 
 	beforeVal := reflect.ValueOf(beforeItem).Elem()
@@ -238,30 +223,16 @@ func (resource *Resource) editItemWithLogAndValues(request *Request, values url.
 	err = resource.bindData(
 		item, user, values,
 	)
-	if err != nil {
-		return nil, nil, fmt.Errorf("can't bind data (%d): %s", id, err)
-	}
+	must(err)
 
-	/*stringableValues := resource.getItemStringEditableValues(item, user)
-	var allValues url.Values = make(map[string][]string)
-	for k, v := range stringableValues {
-		allValues.Add(k, v)
-	}*/
-
-	itemValidation := newItemValidation()
-	for _, v := range resource.updateValidations {
-		v(item, itemValidation, request)
-	}
+	itemValidation := resource.validateUpdate(item, request)
 	if !itemValidation.Valid() {
-		return nil, itemValidation, errValidation
+		return nil, itemValidation
 	}
 
 	err = resource.updateWithLog(item, request)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return item, itemValidation, nil
+	must(err)
+	return item, itemValidation
 }
 
 func UpdateWithLog[T any](item *T, request *Request) error {

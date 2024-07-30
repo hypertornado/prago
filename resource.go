@@ -31,8 +31,8 @@ type Resource struct {
 	canDelete Permission
 	canExport Permission
 
-	updateValidations []func(any, ItemValidation, UserData)
-	deleteValidations []func(any, ItemValidation, UserData)
+	updateValidations []func(any, Validation, UserData)
+	deleteValidations []func(any, Validation, UserData)
 
 	actions     []*Action
 	itemActions []*Action
@@ -247,35 +247,30 @@ func (resource *Resource) PermissionExport(permission Permission) *Resource {
 	return resource
 }
 
-/*func (resource *Resource) Validation(validation func(Validation)) *Resource {
-	resource.addValidation(validation)
-	return resource
-}*/
-
 func (resource *Resource) Dashboard(name func(string) string) *Dashboard {
 	return resource.resourceBoard.Dashboard(name)
 }
 
-func (resource *Resource) addValidation(validation func(any, ItemValidation, UserData)) {
+func (resource *Resource) addUpdateValidation(validation func(any, Validation, UserData)) {
 	resource.updateValidations = append(resource.updateValidations, validation)
 }
 
-func ValidateUpdate[T any](app *App, fn func(item *T, validation ItemValidation, userData UserData)) {
+func ValidateUpdate[T any](app *App, fn func(item *T, validation Validation, userData UserData)) {
 	resource := getResource[T](app)
-	resource.addValidation(func(item any, v ItemValidation, userData UserData) {
+	resource.addUpdateValidation(func(item any, v Validation, userData UserData) {
 		fn(item.(*T), v, userData)
 	})
 }
 
-func ValidateDelete[T any](app *App, fn func(item *T, validation ItemValidation, userData UserData)) {
+func ValidateDelete[T any](app *App, fn func(item *T, validation Validation, userData UserData)) {
 	resource := getResource[T](app)
-	resource.deleteValidation(func(a any, v ItemValidation, userData UserData) {
+	resource.addDeleteValidation(func(a any, v Validation, userData UserData) {
 		fn(a.(*T), v, userData)
 	})
 
 }
 
-func (resource *Resource) deleteValidation(validation func(any, ItemValidation, UserData)) *Resource {
+func (resource *Resource) addDeleteValidation(validation func(any, Validation, UserData)) *Resource {
 	resource.deleteValidations = append(resource.deleteValidations, validation)
 	return resource
 }

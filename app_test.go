@@ -19,7 +19,7 @@ FLUSH PRIVILEGES;
 
 type ResourceStruct struct {
 	ID          int64
-	Name        string
+	Name        string `prago-validations:"nonempty"`
 	Text        string `prago-type:"text"`
 	Other       string
 	Showing     string

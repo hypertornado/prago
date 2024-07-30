@@ -257,12 +257,12 @@ func (resource *Resource) initDefaultResourceAPIs() {
 					usedValues.Add(k, request.Request().PostForm.Get(k))
 				}
 
-				_, validation, err := resource.editItemWithLogAndValues(
+				_, validation := resource.editItemWithLogAndValues(
 					request,
 					usedValues,
 				)
 
-				if err == errValidation {
+				if !validation.Valid() {
 					report := validation.TextErrorReport(int64(id), request.Locale())
 					request.WriteJSON(
 						403,
@@ -270,7 +270,6 @@ func (resource *Resource) initDefaultResourceAPIs() {
 					)
 					return
 				}
-				must(err)
 			}
 
 		},

@@ -123,16 +123,12 @@
 .btn-delete,
 .btn-delete:hover,
 .btn-delete:active {
-  //border: 1px solid red;
-  //color: white;
-  //background: linear-gradient(#dd2e4f, #dd2e4f);
-  //background: linear-gradient(#dd2e4f, red);
-  background: linear-gradient(rgba(255, 0, 0, .2), rgba(255, 0, 0, .1));
+  background: linear-gradient(rgba(255, 0, 0, .8), rgba(255, 0, 0, .9));
 }
 
 .btn-delete:hover,
 .btn-delete:active {
-  background: linear-gradient(rgba(255, 0, 0, .2), rgba(255, 0, 0, .2));
+  background: linear-gradient(rgba(255, 0, 0, .9), rgba(255, 0, 0, .9));
 }
 
 .form {
@@ -202,10 +198,6 @@
   margin: 5px 0px;
 }
 
-.form_label-errors {
-  color: #dd2e4f;
-}
-
 .form_label-errors input,
 .form_label-errors select,
 .form_label-errors textarea {
@@ -214,6 +206,7 @@
 
 .form_label_errors {
   font-size: 0.8em;
+  color: #dd2e4f;
 }
 
 .form_label_text-checkbox {

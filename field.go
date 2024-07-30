@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"reflect"
-	"strings"
 	"time"
 )
 
@@ -168,23 +167,13 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 		}
 	}
 
-	validations := ret.tags["prago-validations"]
-	if validations != "" {
-		for _, v := range strings.Split(validations, ",") {
-			err := ret.addFieldValidation(v)
-			if err != nil {
-				panic(fmt.Sprintf("can't add validation on field '%s' of resource '%s': %s", f.Name, resource.pluralName("en"), err))
-			}
-		}
-	}
-
 	ret.initFieldType()
 
 	//TODO: better
 	if ret.fieldClassName != "CreatedAt" && ret.fieldClassName != "UpdatedAt" {
 		if ret.typ == reflect.TypeOf(time.Now()) {
 
-			resource.addValidation(func(item any, vc ItemValidation, userData UserData) {
+			resource.addUpdateValidation(func(item any, vc Validation, userData UserData) {
 				itemsVal := reflect.ValueOf(item).Elem()
 				fieldVal := itemsVal.FieldByName(ret.fieldClassName)
 				ivalField := fieldVal.Interface()
@@ -240,61 +229,6 @@ func getNameFunctionFromStructName(name string) func(string) string {
 		return nil
 	}
 	return messages.GetNameFunction(name)
-}
-
-func (field *Field) addFieldValidation(nameOfValidation string) error {
-	if nameOfValidation == "nonempty" {
-		if field.tags["prago-required"] != "false" {
-			field.required = true
-		}
-		field.resource.addValidation(func(item any, vc ItemValidation, userData UserData) {
-
-			itemsVal := reflect.ValueOf(item).Elem()
-			fieldVal := itemsVal.FieldByName(field.fieldClassName)
-
-			valid := true
-			if field.typ.Kind() == reflect.Int64 ||
-				field.typ.Kind() == reflect.Int32 ||
-				field.typ.Kind() == reflect.Int {
-
-				intVal := fieldVal.Int()
-				if intVal == 0 {
-					valid = false
-				}
-
-				/*if vc.GetValue(field.id) == "0" {
-					valid = false
-				}*/
-			}
-			if field.typ.Kind() == reflect.Float64 ||
-				field.typ.Kind() == reflect.Float32 {
-
-				floatVal := fieldVal.Float()
-				if floatVal == 0 {
-					valid = false
-				}
-			}
-
-			/*if field.tags["prago-type"] == "relation" && vc.GetValue(field.id) == "0" {
-				valid = false
-			}*/
-
-			if field.typ.Kind() == reflect.String {
-				if fieldVal.String() == "" {
-					valid = false
-				}
-			}
-
-			/*if vc.GetValue(field.id) == "" {
-				valid = false
-			}*/
-			if !valid {
-				vc.AddItemError(field.id, messages.Get(userData.Locale(), "admin_validation_not_empty"))
-			}
-		})
-		return nil
-	}
-	return fmt.Errorf("unknown validation name: %s", nameOfValidation)
 }
 
 func (field *Field) Name(name func(string) string) *Field {
@@ -459,7 +393,7 @@ func (field *Field) initFieldType() {
 	}
 
 	if ret.allowedValues != nil {
-		field.resource.addValidation(func(item any, vc ItemValidation, userData UserData) {
+		field.resource.addUpdateValidation(func(item any, vc Validation, userData UserData) {
 			itemsVal := reflect.ValueOf(item).Elem()
 			val := itemsVal.FieldByName(field.fieldClassName).String()
 			//val := vc.GetValue(field.id)

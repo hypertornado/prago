@@ -21,17 +21,6 @@ func (resource *Resource) setOrderPosition(item interface{}, order int64) {
 	val.SetInt(order)
 }
 
-func (resource *Resource) fixBooleanParams(userData UserData, params url.Values) {
-	for _, field := range resource.fields {
-		if !field.authorizeEdit(userData) {
-			continue
-		}
-		if len(params[field.id]) == 0 && field.typ.Kind() == reflect.Bool {
-			params.Set(field.id, "")
-		}
-	}
-}
-
 func (resource *Resource) bindData(item any, request *Request, params url.Values) error {
 
 	value := reflect.ValueOf(item)

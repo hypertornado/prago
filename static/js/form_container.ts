@@ -88,7 +88,7 @@ class FormContainer {
           } else {
             this.progress.classList.add("hidden");
             this.setFormErrors(data.Errors);
-            this.setItemErrors(data.ItemErrors);
+            //this.setItemErrors(data.ItemErrors);
             if (data.AfterContent) this.setAfterContent(data.AfterContent);
           }
         } else {
@@ -117,7 +117,6 @@ class FormContainer {
       } else {
         this.progress.classList.add("hidden");
         new Alert("Chyba při nahrávání souboru.");
-        console.error("Error while loading item.");
       }
     });
 
@@ -130,6 +129,8 @@ class FormContainer {
   }
 
   setFormErrors(errors: any[]) {
+    this.deleteItemErrors();
+
     let errorsDiv: HTMLDivElement =
       this.form.formEl.querySelector(".form_errors");
     errorsDiv.innerText = "";
@@ -137,10 +138,14 @@ class FormContainer {
 
     if (errors) {
       for (let i = 0; i < errors.length; i++) {
-        let errorDiv = document.createElement("div");
-        errorDiv.classList.add("form_errors_error");
-        errorDiv.innerText = errors[i].Text;
-        errorsDiv.appendChild(errorDiv);
+        if (errors[i].Field) {
+          this.setItemError(errors[i]);
+        } else {
+          let errorDiv = document.createElement("div");
+          errorDiv.classList.add("form_errors_error");
+          errorDiv.innerText = errors[i].Text;
+          errorsDiv.appendChild(errorDiv);
+        }
       }
       if (errors.length > 0) {
         errorsDiv.classList.remove("hidden");
@@ -148,24 +153,30 @@ class FormContainer {
     }
   }
 
-  setItemErrors(itemErrors: any) {
+  deleteItemErrors() {
     let labels = this.form.formEl.querySelectorAll(".form_label");
     for (let i = 0; i < labels.length; i++) {
       let label = labels[i];
-      let id = label.getAttribute("data-id");
       label.classList.remove("form_label-errors");
       let labelErrors = label.querySelector(".form_label_errors");
       labelErrors.innerHTML = "";
       labelErrors.classList.add("hidden");
-      if (itemErrors[id]) {
+    }
+  }
+
+  setItemError(itemError: any) {
+    let labels = this.form.formEl.querySelectorAll(".form_label");
+    for (let i = 0; i < labels.length; i++) {
+      let label = labels[i];
+      let id = label.getAttribute("data-id");
+      if (label.getAttribute("data-id") == itemError.Field) {
         label.classList.add("form_label-errors");
+        let labelErrors = label.querySelector(".form_label_errors");
         labelErrors.classList.remove("hidden");
-        for (let j = 0; j < itemErrors[id].length; j++) {
-          let errorDiv = document.createElement("div");
-          errorDiv.classList.add("form_label_errors_error");
-          errorDiv.innerText = itemErrors[id][j].Text;
-          labelErrors.appendChild(errorDiv);
-        }
+        let errorDiv = document.createElement("div");
+        errorDiv.classList.add("form_label_errors_error");
+        errorDiv.innerText = itemError.Text;
+        labelErrors.appendChild(errorDiv);
       }
     }
   }

@@ -94,21 +94,13 @@ func (resource *Resource) addDefaultMultipleActions() {
 	})
 
 	resource.multipleActions = append(resource.multipleActions, &MultipleItemAction{
-		ID:   "delete",
-		Icon: iconDelete,
-		Name: unlocalized("Smazat"),
-		//IsStyleDelete: true,
+		ID:         "delete",
+		Icon:       iconDelete,
+		Name:       unlocalized("Smazat"),
 		Permission: resource.canDelete,
 		Handler: func(items []any, request UserData, response *MultipleItemActionResponse) {
 			for _, item := range items {
-				//id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
-				//var values url.Values = make(map[string][]string)
-				//values.Add("id", fmt.Sprintf("%d", id))
-				valValidation := newItemValidation()
-				for _, v := range resource.deleteValidations {
-					v(item, valValidation, request)
-				}
-
+				valValidation := resource.validateDelete(item, request)
 				if !valValidation.Valid() {
 					panic("cant validate delete")
 				}
@@ -136,7 +128,6 @@ func (resource *Resource) getMultipleActions(userData UserData) (ret []listMulti
 			ActionType: ma.ActionType,
 			Icon:       ma.Icon,
 			Name:       ma.Name(userData.Locale()),
-			//IsDelete:   ma.IsStyleDelete,
 		})
 	}
 	return
