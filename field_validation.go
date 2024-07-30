@@ -51,7 +51,9 @@ func (field *Field) addValidationStrongRelation() {
 		relatedCount, err := field.resource.query(context.Background()).Is(field.id, fieldID).count()
 		must(err)
 		if relatedCount > 0 {
-			v.AddError("Can't delete item with strong relation")
+			v.AddError(
+				"Can't delete item with strong relation",
+			)
 		}
 	})
 
@@ -62,7 +64,7 @@ func (field *Field) addValidationNonempty() {
 		field.required = true
 	}
 
-	field.addValidation(func(fieldVal any, userData UserData) error {
+	field.Validation(func(fieldVal any, userData UserData) error {
 		typ := reflect.TypeOf(fieldVal)
 		valid := true
 		if typ.Kind() == reflect.Int64 ||
@@ -98,7 +100,7 @@ func (field *Field) addValidationNonempty() {
 
 }
 
-func (field *Field) addValidation(fn func(fieldVal any, userData UserData) error) {
+func (field *Field) Validation(fn func(fieldVal any, userData UserData) error) {
 
 	field.resource.addUpdateValidation(func(item any, v Validation, ud UserData) {
 
