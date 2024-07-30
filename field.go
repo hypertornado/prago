@@ -281,7 +281,7 @@ func (field *Field) getIcon() string {
 		return field.tags["prago-icon"]
 	}
 
-	if field.fieldType.IsRelation() {
+	if field.fieldType.isRelation() {
 		if field.relatedResource.icon != "" {
 			return field.relatedResource.icon
 		}
@@ -391,28 +391,12 @@ func (field *Field) initFieldType() {
 		ret.viewDataSource = getDefaultViewDataSource(field)
 	}
 
-	/*if ret.allowedValues != nil {
-		field.resource.addUpdateValidation(func(item any, vc Validation, userData UserData) {
-			itemsVal := reflect.ValueOf(item).Elem()
-			val := itemsVal.FieldByName(field.fieldClassName).String()
-			var found bool
-			for _, v := range ret.allowedValues {
-				if v == val {
-					found = true
-				}
-			}
-			if !found {
-				vc.AddItemError(field.id, messages.Get(userData.Locale(), "admin_validation_value"))
-			}
-		})
-	}*/
-
 	if ret.formTemplate == "" {
 		ret.formTemplate = getDefaultFormTemplate(field.typ)
 	}
 
-	if ret.formStringer == nil {
-		ret.formStringer = getDefaultStringer(field.typ)
+	if ret.ft_formStringer == nil {
+		ret.ft_formStringer = getDefaultStringer(field.typ)
 	}
 
 	if ret.formTemplate == "form_input_checkbox" {

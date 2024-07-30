@@ -56,7 +56,7 @@ func (field *Field) addPragoFieldValidation(nameOfValidation string) {
 
 func (field *Field) addValidationStrongRelation() {
 
-	if !field.fieldType.IsRelation() {
+	if !field.fieldType.isRelation() {
 		panic(
 			fmt.Sprintf("field %s (resource %s) is not of type relation", field.id, field.resource.id),
 		)
@@ -65,8 +65,21 @@ func (field *Field) addValidationStrongRelation() {
 	field.relatedResource.addDeleteValidation(func(item any, v Validation, ud UserData) {
 		itemsVal := reflect.ValueOf(item).Elem()
 		fieldID := itemsVal.FieldByName("ID").Int()
-		relatedCount, err := field.resource.query(context.Background()).Is(field.id, fieldID).count()
-		must(err)
+		//var searchVal any
+
+		var relatedCount int64
+
+		//multirelation
+		if field.typ.Kind() == reflect.String {
+			var err error
+			relatedCount, err = field.resource.query(context.Background()).where(fmt.Sprintf("%s LIKE '%%;%d;%%'", field.id, fieldID)).count()
+			must(err)
+		} else {
+			var err error
+			relatedCount, err = field.resource.query(context.Background()).Is(field.id, fieldID).count()
+			must(err)
+		}
+
 		if relatedCount > 0 {
 			v.AddError(
 				"Can't delete item with strong relation",

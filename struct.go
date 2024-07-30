@@ -45,13 +45,13 @@ func (resource *Resource) getItemStringEditableValues(item any, request *Request
 		reflect.ValueOf(&ifaceVal).Elem().Set(
 			itemVal.Field(i),
 		)
-		strVal := field.fieldType.formStringer(ifaceVal)
+		strVal := field.fieldType.ft_formStringer(ifaceVal)
 		ret[field.id] = strVal
 	}
 	return ret
 }
 
-func (form *Form) addResourceItems(resource *Resource, item any, request *Request) {
+func (form *Form) initWithResourceItem(resource *Resource, item any, request *Request) {
 	editableValues := resource.getItemStringEditableValues(item, request)
 
 	focusedField := request.Param("_focus")
@@ -103,8 +103,8 @@ func (form *Form) addResourceItems(resource *Resource, item any, request *Reques
 			item.Content = field.formContentGenerator(item)
 		}
 
-		if field.fieldType.helpURL != "" {
-			item.HelpURL = field.fieldType.helpURL
+		if field.fieldType.helpURL() != "" {
+			item.HelpURL = field.fieldType.helpURL()
 		}
 
 		if field.helpURL != "" {

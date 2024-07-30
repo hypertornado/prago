@@ -39,7 +39,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			queryData.Set(k, v(request))
 		}
 		resource.bindData(item, request, queryData)
-		form.addResourceItems(resource, item, request)
+		form.initWithResourceItem(resource, item, request)
 		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 	}, func(vc FormValidation, request *Request) {
 		var item interface{} = reflect.New(resource.typ).Interface()
@@ -75,7 +75,7 @@ func (resource *Resource) initDefaultResourceActions() {
 	resource.formItemAction(
 		"edit",
 		func(item any, form *Form, request *Request) {
-			form.addResourceItems(resource, item, request)
+			form.initWithResourceItem(resource, item, request)
 			form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 		},
 		func(_ any, vc FormValidation, request *Request) {

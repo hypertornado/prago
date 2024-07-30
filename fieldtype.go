@@ -7,6 +7,8 @@ import (
 
 // FieldType defines type of field
 type fieldType struct {
+	id string
+
 	viewTemplate   string
 	viewDataSource func(*Request, *Field, interface{}) interface{}
 
@@ -14,10 +16,10 @@ type fieldType struct {
 
 	allowedValues []string
 
-	formHideLabel  bool
-	formTemplate   string
-	formDataSource func(*Field, UserData, string) interface{}
-	formStringer   func(interface{}) string
+	formHideLabel   bool
+	formTemplate    string
+	formDataSource  func(*Field, UserData, string) interface{}
+	ft_formStringer func(interface{}) string
 
 	listCellDataSource func(UserData, *Field, interface{}) listCell
 
@@ -26,19 +28,24 @@ type fieldType struct {
 
 	fieldTypeIcon    string
 	naturalCellWidth int64
-
-	helpURL string
 }
 
-func (app *App) addFieldType(name string, fieldType *fieldType) {
-	_, exist := app.fieldTypes[name]
-	if exist {
-		panic(fmt.Sprintf("field type '%s' already set", name))
+func (ft *fieldType) helpURL() string {
+	if ft.id == "markdown" {
+		return "/admin/help/markdown"
 	}
-	app.fieldTypes[name] = fieldType
+	return ""
 }
 
-func (f fieldType) IsRelation() bool {
+func (app *App) addFieldType(id string, fieldType *fieldType) {
+	fieldType.id = id
+	_, exist := app.fieldTypes[id]
+	if exist {
+		panic(fmt.Sprintf("field type '%s' already set", id))
+	}
+	app.fieldTypes[id] = fieldType
+}
+func (f fieldType) isRelation() bool {
 	if f.viewTemplate == "view_relation" {
 		return true
 	} else {
@@ -55,8 +62,9 @@ func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("role", app.createRoleFieldType())
 
 	app.addFieldType("text", &fieldType{
-		viewTemplate:       "view_textarea",
-		formTemplate:       "form_input_textarea",
+		viewTemplate: "view_textarea",
+		formTemplate: "form_input_textarea",
+
 		listCellDataSource: textListDataSource,
 		fieldTypeIcon:      "glyphicons-basic-101-text.svg",
 	})
@@ -106,8 +114,6 @@ func (app *App) initDefaultFieldTypes() {
 		formTemplate:       "form_input_markdown",
 		listCellDataSource: markdownListDataSource,
 		fieldTypeIcon:      "glyphicons-basic-692-font.svg",
-
-		helpURL: "/admin/help/markdown",
 	})
 	app.addFieldType("place", &fieldType{
 		viewTemplate:  "view_place",
@@ -146,7 +152,7 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("timestamp", &fieldType{
 		formTemplate: "form_input_timestamp",
-		formStringer: func(i interface{}) string {
+		ft_formStringer: func(i interface{}) string {
 			tm := i.(time.Time)
 			if tm.IsZero() {
 				return ""

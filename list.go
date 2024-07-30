@@ -189,7 +189,7 @@ func (field *Field) getNaturalCellWidth() int64 {
 		ret = field.fieldType.naturalCellWidth
 	}
 
-	if field.fieldType.IsRelation() {
+	if field.fieldType.isRelation() {
 		return 150
 	}
 

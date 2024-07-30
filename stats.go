@@ -257,7 +257,7 @@ func (resource *Resource) getListStatsTable(ctx context.Context, field *Field, u
 	}
 
 	if field.typ.Kind() == reflect.Int64 {
-		if field.fieldType.IsRelation() {
+		if field.fieldType.isRelation() {
 			for rows.Next() {
 				var count int64
 				var v int64

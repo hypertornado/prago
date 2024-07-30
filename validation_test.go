@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -56,6 +57,38 @@ func TestValidation(t *testing.T) {
 
 		if _, ok := TestValidationDelete(app, a, app.testUserData("")); ok {
 			t.Fatal("should be able to delete, because of strong relation")
+		}
+	})
+
+	t.Run("strong multirelation validations", func(t *testing.T) {
+		type AStruct struct {
+			ID int64
+		}
+
+		type RelatedStruct struct {
+			ID      int64
+			AStruct string `prago-type:"multirelation" prago-validations:"strong"`
+		}
+
+		app := NewTesting(t, func(app *App) {
+			NewResource[AStruct](app)
+			NewResource[RelatedStruct](app)
+		})
+
+		var a = &AStruct{}
+
+		must(CreateItem(app, a))
+
+		if _, ok := TestValidationDelete(app, a, app.testUserData("")); !ok {
+			t.Fatal("should be able to delete")
+		}
+
+		must(CreateItem(app, &RelatedStruct{
+			AStruct: fmt.Sprintf(";%d;", a.ID),
+		}))
+
+		if _, ok := TestValidationDelete(app, a, app.testUserData("")); ok {
+			t.Fatal("should not be able to delete, because of strong relation")
 		}
 	})
 

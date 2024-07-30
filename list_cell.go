@@ -17,7 +17,7 @@ func getCellViewData(userData UserData, f *Field, value interface{}) listCell {
 		return f.fieldType.listCellDataSource(userData, f, value)
 	}
 
-	if f.fieldType.IsRelation() {
+	if f.fieldType.isRelation() {
 		return relationCellViewData(userData, f, value)
 	}
 
@@ -43,7 +43,6 @@ func relationCellViewData(userData UserData, f *Field, value interface{}) listCe
 	intVal, ok := value.(int64)
 	if ok {
 		ids = fmt.Sprintf("%d", intVal)
-		//return multiRelationCellViewData(userData, f, strVal)
 	} else {
 		ids = value.(string)
 	}
