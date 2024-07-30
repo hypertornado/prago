@@ -294,18 +294,17 @@ func (field *Field) getIcon() string {
 
 	if field.id == "id" {
 		return "glyphicons-basic-740-hash.svg"
-		//return "glyphicons-basic-347-id-badge.svg"
 	}
 
 	if field.id == "createdat" || field.id == "updatedat" {
 		return "glyphicons-basic-55-clock.svg"
 	}
 
-	if field.typ == reflect.TypeOf(true) {
+	if field.typ.Kind() == reflect.Bool {
 		return "glyphicons-basic-153-square-checkbox.svg"
 	}
 
-	if field.typ == reflect.TypeOf("") {
+	if field.typ.Kind() == reflect.String {
 		return "glyphicons-basic-101-text.svg"
 	}
 
@@ -392,11 +391,10 @@ func (field *Field) initFieldType() {
 		ret.viewDataSource = getDefaultViewDataSource(field)
 	}
 
-	if ret.allowedValues != nil {
+	/*if ret.allowedValues != nil {
 		field.resource.addUpdateValidation(func(item any, vc Validation, userData UserData) {
 			itemsVal := reflect.ValueOf(item).Elem()
 			val := itemsVal.FieldByName(field.fieldClassName).String()
-			//val := vc.GetValue(field.id)
 			var found bool
 			for _, v := range ret.allowedValues {
 				if v == val {
@@ -407,7 +405,7 @@ func (field *Field) initFieldType() {
 				vc.AddItemError(field.id, messages.Get(userData.Locale(), "admin_validation_value"))
 			}
 		})
-	}
+	}*/
 
 	if ret.formTemplate == "" {
 		ret.formTemplate = getDefaultFormTemplate(field.typ)

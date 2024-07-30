@@ -86,7 +86,7 @@ type App struct {
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {
 	app := createApp("__prago_test_app", "0.0", true)
 	initHandler(app)
-	app.AfterInit()
+	app.afterInit()
 	app.unsafeDropTables()
 	app.migrate(false)
 
@@ -156,11 +156,11 @@ func createApp(codeName string, version string, testing bool) *App {
 }
 
 func (app *App) Run() {
-	app.AfterInit()
+	app.afterInit()
 	app.parseCommands()
 }
 
-func (app *App) AfterInit() {
+func (app *App) afterInit() {
 	app.initSessions()
 	app.initDefaultResourceActions()
 	app.initAPIs()

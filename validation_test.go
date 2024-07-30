@@ -33,8 +33,7 @@ func TestValidation(t *testing.T) {
 		}
 
 		type RelatedStruct struct {
-			ID int64
-			//Name string `prago-validations:"unique"`
+			ID      int64
 			AStruct int64 `prago-type:"relation" prago-validations:"strong"`
 		}
 
@@ -58,16 +57,32 @@ func TestValidation(t *testing.T) {
 		if _, ok := TestValidationDelete(app, a, app.testUserData("")); ok {
 			t.Fatal("should be able to delete, because of strong relation")
 		}
+	})
 
-		/*if _, valid := TestValidationUpdate(app, &TStruct{}, app.testUserData("")); valid != false {
-			t.Fatal("expected")
+	t.Run("enum field type validation", func(t *testing.T) {
+		type AStruct struct {
+			ID  int64
+			Typ string `prago-type:"myenum"`
 		}
 
-		if _, valid := TestValidationUpdate(app, &TStruct{
-			Name: "AAA",
-		}, app.testUserData("")); valid != true {
-			t.Fatal("expected")
-		}*/
+		app := NewTesting(t, func(app *App) {
+			app.AddEnumFieldType("myenum", [][2]string{
+				{"a", "aname"},
+				{"b", "bname"},
+			})
+			NewResource[AStruct](app)
+		})
+
+		if _, valid := TestValidationUpdate(app, &AStruct{Typ: ""}, app.testUserData("")); valid != false {
+			t.Fatal("should not be allowed")
+		}
+		if _, valid := TestValidationUpdate(app, &AStruct{Typ: "c"}, app.testUserData("")); valid != false {
+			t.Fatal("should not be allowed")
+		}
+		if _, valid := TestValidationUpdate(app, &AStruct{Typ: "a"}, app.testUserData("")); valid == false {
+			t.Fatal("should be ok")
+		}
+
 	})
 
 }

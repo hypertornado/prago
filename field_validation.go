@@ -11,6 +11,7 @@ import (
 func (app *App) initFieldValidations() {
 	for _, resource := range app.resources {
 		for _, field := range resource.fields {
+			field.addAllowedValuesValidation()
 			validations := field.tags["prago-validations"]
 			if validations != "" {
 				for _, v := range strings.Split(validations, ",") {
@@ -19,6 +20,22 @@ func (app *App) initFieldValidations() {
 			}
 		}
 	}
+}
+
+func (field *Field) addAllowedValuesValidation() {
+	if len(field.fieldType.allowedValues) == 0 {
+		return
+	}
+	field.Validation(func(fieldVal any, userData UserData) error {
+		fvStr := fieldVal.(string)
+		for _, v := range field.fieldType.allowedValues {
+			if v == fvStr {
+				return nil
+			}
+		}
+		return errors.New(messages.Get(userData.Locale(), "admin_validation_value"))
+	})
+
 }
 
 func (field *Field) addPragoFieldValidation(nameOfValidation string) {
