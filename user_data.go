@@ -87,7 +87,7 @@ func (d *userData) Authorize(permission Permission) bool {
 
 var lastUserData int64
 
-func (app *App) testUserData(role string) UserData {
+func (app *App) TestUserData(role string) UserData {
 	lastUserData++
 	return &userData{
 		id:   lastUserData,

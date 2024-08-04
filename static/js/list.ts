@@ -382,8 +382,18 @@ class List {
   bindClick() {
     var rows = this.list.querySelectorAll(".list_row");
     for (var i = 0; i < rows.length; i++) {
-      var row = <HTMLTableRowElement>rows[i];
+      let row = <HTMLTableRowElement>rows[i];
       var id = row.getAttribute("data-id");
+
+      let moreButton = row.querySelector(".list_buttons_more");
+      if (moreButton) {
+        moreButton.addEventListener("click", (e) => {
+          this.clickButtonsMore(e, row);
+        });
+      }
+
+      row.addEventListener("contextmenu", this.contextClick.bind(this));
+
       row.addEventListener("click", (e) => {
         var target = <HTMLElement>e.target;
         if (target.classList.contains("preventredirect")) {
@@ -411,6 +421,48 @@ class List {
         window.location.href = url;
       });
     }
+  }
+
+  createCmenu(e: Event, rowEl: HTMLDivElement) {
+    rowEl.classList.add("list_row-context");
+
+    let actions = JSON.parse(rowEl.getAttribute("data-actions"));
+
+    var commands: CMenuCommand[] = [];
+
+    for (let action of actions.MenuButtons) {
+      commands.push({
+        Icon: action.Icon,
+        Name: action.Name,
+        Handler: () => {
+          window.location = action.URL;
+        },
+      });
+    }
+
+    cmenu({
+      Event: e,
+      ImageURL: rowEl.getAttribute("data-image-url"),
+      Name: rowEl.getAttribute("data-name"),
+      Description: rowEl.getAttribute("data-description"),
+      Commands: commands,
+      DismissHandler: () => {
+        rowEl.classList.remove("list_row-context");
+      },
+    });
+    e.preventDefault();
+  }
+
+  clickButtonsMore(e: Event, rowEl: HTMLDivElement) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    e.stopPropagation;
+    this.createCmenu(e, rowEl);
+  }
+
+  contextClick(e: Event) {
+    let rowEl = <HTMLDivElement>e.currentTarget;
+    this.createCmenu(e, rowEl);
   }
 
   bindOrder() {
@@ -692,6 +744,13 @@ class List {
       "style",
       "top: " + rect.top + "px; left: " + rect.left + "px;"
     );
+
+    let scrolledClassName = "list_header_container-scrolled";
+    if (this.rootContent.scrollTop > 50) {
+      this.listHeaderContainer.classList.add(scrolledClassName);
+    } else {
+      this.listHeaderContainer.classList.remove(scrolledClassName);
+    }
 
     return true;
   }

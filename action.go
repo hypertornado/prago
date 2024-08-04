@@ -8,10 +8,10 @@ import (
 )
 
 type buttonData struct {
-	Icon     string
-	Name     string
-	URL      string
-	Params   map[string]string
+	Icon string
+	Name string
+	URL  string
+	//Params   map[string]string
 	Priority int64
 }
 
@@ -178,16 +178,16 @@ func (resource *Resource) getItemButtonData(userData UserData, item interface{})
 		if !userData.Authorize(v.permission) {
 			continue
 		}
-		if v.url == "" {
+		/*if v.url == "" {
 			continue
-		}
-		name := v.name(userData.Locale())
-		if v.url == "" {
+		}*/
+		//name := v.name(userData.Locale())
+		/*if v.url == "" {
 			name = resource.previewer(userData, item).Name()
-		}
+		}*/
 		ret = append(ret, &buttonData{
 			Icon:     v.icon,
-			Name:     name,
+			Name:     v.name(userData.Locale()),
 			URL:      resource.getItemURL(item, v.url, userData),
 			Priority: v.priority,
 		},
@@ -208,11 +208,6 @@ func (resource *Resource) getListItemActions(userData UserData, item any, id int
 	ret := listItemActions{
 		MenuButtons: resource.getItemButtonData(userData, item),
 	}
-
-	ret.VisibleButtons = append(ret.VisibleButtons, buttonData{
-		Icon: iconView,
-		URL:  resource.getURL(fmt.Sprintf("%d", id)),
-	})
 
 	if userData.Authorize(resource.canUpdate) && resource.orderField != nil {
 		ret.ShowOrderButton = true

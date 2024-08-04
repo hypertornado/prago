@@ -1,7 +1,9 @@
 package prago
 
 import (
+	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -58,7 +60,12 @@ type listContent struct {
 }
 
 type listRow struct {
-	ID                    int64
+	ID int64
+
+	Name        string
+	Description string
+	ImageURL    string
+
 	URL                   string
 	Items                 []listCell
 	Actions               listItemActions
@@ -66,9 +73,14 @@ type listRow struct {
 }
 
 type listItemActions struct {
-	VisibleButtons  []buttonData
 	ShowOrderButton bool
 	MenuButtons     []*buttonData
+}
+
+func (actions *listItemActions) JSON() template.HTMLAttr {
+	b, err := json.Marshal(actions)
+	must(err)
+	return template.HTMLAttr(b)
 }
 
 type pagination struct {

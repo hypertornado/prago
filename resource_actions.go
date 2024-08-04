@@ -70,7 +70,7 @@ func (resource *Resource) initDefaultResourceActions() {
 		}
 		pd.Views = resource.getViews(request.r.Context(), item, request)
 	},
-	).Icon("glyphicons-basic-588-book-open-text.svg").setPriority(defaultHighPriority).Permission(resource.canView)
+	).Icon("glyphicons-basic-588-book-open-text.svg").Name(messages.GetNameFunction("admin_view")).setPriority(defaultHighPriority).Permission(resource.canView)
 
 	resource.formItemAction(
 		"edit",

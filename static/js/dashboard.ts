@@ -1,4 +1,4 @@
-function initDashdoard() {
+function initDashboard() {
   var dashboardTables =
     document.querySelectorAll<HTMLDivElement>(".dashboard_table");
   dashboardTables.forEach((el) => {

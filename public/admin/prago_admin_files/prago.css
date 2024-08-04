@@ -992,6 +992,10 @@ select.admin_timestamp_minute {
   opacity: 0;
 }
 
+.list_header_container-scrolled {
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+}
+
 .list_header_container-visible {
   opacity: 1;
 }
@@ -1017,6 +1021,10 @@ select.admin_timestamp_minute {
 
 .list_row {
   display: flex;
+}
+
+.list_row-context .list_cell {
+  background: hsl(214deg, 50%, 90%) !important;
 }
 
 .list_cell {
@@ -1074,7 +1082,7 @@ select.admin_timestamp_minute {
   width: 5px;
   border-right: 2px solid #fafafa;
   border-left: 2px solid #fafafa;
-  background-color: #eee;
+  background-color: #fff;
   cursor: col-resize;
   border-radius: 10px 10px 0px 0px;
   position: absolute;
@@ -1212,10 +1220,10 @@ select.admin_timestamp_minute {
 
 @media (hover: hover) {
   .list_row:hover .list_cell {
-    background: hsl(214deg, 50%, 97%) !important;
+    background: hsl(214deg, 50%, 97%);
   }
   .list_row:active .list_cell {
-    background-color: hsl(214deg, 50%, 90%) !important;
+    background-color: hsl(214deg, 50%, 90%);
   }
   .list_row:hover .list_buttons {
     opacity: 1;
@@ -1349,7 +1357,6 @@ select.admin_timestamp_minute {
 .list_header_item {
   width: 100px;
   flex-shrink: 0;
-  border: 0px solid blue;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -1357,7 +1364,7 @@ select.admin_timestamp_minute {
   height: 60px;
   padding: 3px 5px;
   position: relative;
-  background-color: #fafafa;
+  background-color: #fff;
   border-bottom: 1px solid #eee;
 }
 
@@ -1368,13 +1375,13 @@ select.admin_timestamp_minute {
 .list_header_first {
   width: 30px;
   min-width: 30px;
-  background-color: #fafafa;
+  background-color: #fff;
 }
 
 .list_header_last {
   width: 150px;
   z-index: 1000;
-  background-color: #fafafa;
+  background-color: #fff;
   padding: 5px;
   flex-shrink: 0;
   display: flex;
@@ -2864,6 +2871,10 @@ a.admin_stats_section_row {
   box-shadow: none;
 }
 
+.menu2 {
+  padding-right: 5px;
+}
+
 .menu2_items {
   display: flex;
   flex-direction: column;
@@ -3545,4 +3556,87 @@ a.admin_stats_section_row {
 .breadcrumbs_divider {
   height: 15px;
   aspect-ratio: 1;
+}
+
+.cmenu {
+  border: 1px solid #eee;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  position: absolute;
+  z-index: 9999;
+  top: 3px;
+  left: 3px;
+  width: 250px;
+  padding: 6px 0px;
+}
+
+.cmenu:has(.cmenu_image) {
+  padding-top: 0px;
+}
+
+.cmenu:has(.cmenu_commands) {
+  padding-bottom: 0px;
+}
+
+.cmenu_image {
+  object-fit: cover;
+  height: 100px;
+  width: 100%;
+  background-color: #fafafa;
+}
+
+.cmenu_name {
+  font-size: 1rem;
+  line-height: 1.3em;
+  padding: 0px 6px 0px 6px;
+}
+
+.cmenu_description {
+  color: #888;
+  font-size: 1rem;
+  line-height: 1.3em;
+  padding: 0px 6px 0px 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cmenu_commands {
+  display: flex;
+  flex-direction: column;
+  margin: 3px 0px;
+}
+
+.cmenu_command {
+  display: flex;
+  color: #4077bf;
+  font-size: 1rem;
+  line-height: 1.3em;
+  padding: 3px 3px;
+  margin: 0px 3px;
+  cursor: pointer;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+.cmenu_command:hover {
+  background-color: hsl(214deg, 50%, 97%);
+}
+.cmenu_command:active {
+  background-color: hsl(214deg, 50%, 90%);
+}
+
+.cmenu_command_name {
+  flex-shrink: 100;
+  flex-grow: 100;
+}
+
+.cmenu_command_icon {
+  width: 20px;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+  flex-grow: 0;
 }

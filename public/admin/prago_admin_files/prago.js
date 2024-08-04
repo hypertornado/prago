@@ -676,8 +676,15 @@ class List {
     bindClick() {
         var rows = this.list.querySelectorAll(".list_row");
         for (var i = 0; i < rows.length; i++) {
-            var row = rows[i];
+            let row = rows[i];
             var id = row.getAttribute("data-id");
+            let moreButton = row.querySelector(".list_buttons_more");
+            if (moreButton) {
+                moreButton.addEventListener("click", (e) => {
+                    this.clickButtonsMore(e, row);
+                });
+            }
+            row.addEventListener("contextmenu", this.contextClick.bind(this));
             row.addEventListener("click", (e) => {
                 var target = e.target;
                 if (target.classList.contains("preventredirect")) {
@@ -702,6 +709,41 @@ class List {
                 window.location.href = url;
             });
         }
+    }
+    createCmenu(e, rowEl) {
+        rowEl.classList.add("list_row-context");
+        let actions = JSON.parse(rowEl.getAttribute("data-actions"));
+        var commands = [];
+        for (let action of actions.MenuButtons) {
+            commands.push({
+                Icon: action.Icon,
+                Name: action.Name,
+                Handler: () => {
+                    window.location = action.URL;
+                },
+            });
+        }
+        cmenu({
+            Event: e,
+            ImageURL: rowEl.getAttribute("data-image-url"),
+            Name: rowEl.getAttribute("data-name"),
+            Description: rowEl.getAttribute("data-description"),
+            Commands: commands,
+            DismissHandler: () => {
+                rowEl.classList.remove("list_row-context");
+            },
+        });
+        e.preventDefault();
+    }
+    clickButtonsMore(e, rowEl) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        e.stopPropagation;
+        this.createCmenu(e, rowEl);
+    }
+    contextClick(e) {
+        let rowEl = e.currentTarget;
+        this.createCmenu(e, rowEl);
     }
     bindOrder() {
         this.renderOrder();
@@ -930,6 +972,13 @@ class List {
         var leftScroll = -this.listTable.scrollLeft;
         this.listHeader.setAttribute("style", "margin-left: " + leftScroll + "px;");
         this.listHeaderContainer.setAttribute("style", "top: " + rect.top + "px; left: " + rect.left + "px;");
+        let scrolledClassName = "list_header_container-scrolled";
+        if (this.rootContent.scrollTop > 50) {
+            this.listHeaderContainer.classList.add(scrolledClassName);
+        }
+        else {
+            this.listHeaderContainer.classList.remove(scrolledClassName);
+        }
         return true;
     }
 }
@@ -2961,7 +3010,7 @@ class QuickActions {
         });
     }
 }
-function initDashdoard() {
+function initDashboard() {
     var dashboardTables = document.querySelectorAll(".dashboard_table");
     dashboardTables.forEach((el) => {
         new DashboardTable(el);
@@ -3107,6 +3156,93 @@ class Shortcut {
         return items.join("+") + ": " + this.description;
     }
 }
+function cmenu(data) {
+    Prago.cmenu.showWithData(data);
+}
+class CMenu {
+    constructor() {
+        for (let eventType of ["keydown", "click", "visibilitychange", "blur"]) {
+            document.addEventListener(eventType, (e) => {
+                this.dismiss();
+            });
+        }
+    }
+    dismiss() {
+        if (this.lastEl) {
+            this.lastEl.remove();
+            this.lastEl = null;
+        }
+        if (this.dismissHandler) {
+            this.dismissHandler();
+            this.dismissHandler = null;
+        }
+    }
+    showWithData(data) {
+        this.dismiss();
+        let y = data.Event.clientY;
+        let x = data.Event.clientX;
+        let el = document.createElement("div");
+        el.classList.add("cmenu");
+        if (data.ImageURL) {
+            let imageEl = document.createElement("img");
+            imageEl.classList.add("cmenu_image");
+            imageEl.setAttribute("src", data.ImageURL);
+            el.appendChild(imageEl);
+        }
+        if (data.Name) {
+            let nameEl = document.createElement("div");
+            nameEl.classList.add("cmenu_name");
+            nameEl.innerText = data.Name;
+            el.appendChild(nameEl);
+        }
+        if (data.Description) {
+            let descEl = document.createElement("div");
+            descEl.classList.add("cmenu_description");
+            descEl.innerText = data.Description;
+            el.appendChild(descEl);
+        }
+        if (data.Commands) {
+            let commandsEl = document.createElement("div");
+            commandsEl.classList.add("cmenu_commands");
+            for (let command of data.Commands) {
+                let commandEl = document.createElement("div");
+                commandEl.classList.add("cmenu_command");
+                let commandNameEl = document.createElement("div");
+                commandNameEl.classList.add("cmenu_command_name");
+                commandNameEl.innerText = command.Name;
+                commandEl.appendChild(commandNameEl);
+                if (command.Icon) {
+                    let commandNameIcon = document.createElement("img");
+                    commandNameIcon.classList.add("cmenu_command_icon");
+                    commandNameIcon.setAttribute("src", "/admin/api/icons?file=" + command.Icon + "&color=4077bf");
+                    commandEl.appendChild(commandNameIcon);
+                }
+                commandEl.addEventListener("click", (e) => {
+                    command.Handler();
+                });
+                commandsEl.appendChild(commandEl);
+            }
+            el.appendChild(commandsEl);
+        }
+        document.body.appendChild(el);
+        let elRect = el.getBoundingClientRect();
+        let elWidth = elRect.width;
+        let elHeight = elRect.height;
+        let viewportWidth = window.innerWidth;
+        let viewportHeight = window.innerHeight;
+        console.log(x, elWidth, viewportWidth);
+        if (x + elWidth > viewportWidth) {
+            x = viewportWidth - elWidth;
+        }
+        if (y + elHeight > viewportHeight) {
+            y = viewportHeight - elHeight;
+        }
+        el.style.left = x + "px";
+        el.style.top = y + "px";
+        this.lastEl = el;
+        this.dismissHandler = data.DismissHandler;
+    }
+}
 class Prago {
     static start() {
         document.addEventListener("DOMContentLoaded", Prago.init);
@@ -3114,6 +3250,7 @@ class Prago {
     static init() {
         Prago.shortcuts = new Shortcuts(document.body);
         Prago.shortcuts.addRootShortcuts();
+        Prago.cmenu = new CMenu();
         var listEl = document.querySelector(".list");
         if (listEl) {
             new List(listEl);
@@ -3139,7 +3276,7 @@ class Prago {
         if (qa) {
             new QuickActions(qa);
         }
-        initDashdoard();
+        initDashboard();
         initSMap();
     }
 }

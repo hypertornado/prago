@@ -208,7 +208,7 @@
 
 {{define "list_cells"}}
   {{range $item := .admin_list.Rows}}
-    <div data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="list_row">
+    <div data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="list_row" data-actions="{{$item.Actions.JSON}}" data-name="{{$item.Name}}" data-description="{{$item.Description}}" data-image-url="{{$item.ImageURL}}">
       {{if $item.AllowsMultipleActions}}
         <div class="list_row_multiple preventredirect" data-id="{{$item.ID}}">
           <div class="list_cell_multiple_pseudocheckbox"></div>
@@ -221,35 +221,13 @@
       {{end}}
       <div class="list_row_lastcell">
         <div class="btngroup list_buttons">
-          {{range $action := $item.Actions.VisibleButtons}}
-            <a href="{{$action.URL}}" class="btn"
-              {{range $k, $v := $action.Params}} {{PragoHTMLAttr $k}}="{{$v}}"{{end}}
-            >
-              {{if $action.Icon}}
-                <img class="btn_icon" src="/admin/api/icons?file={{$action.Icon}}&color=444444">
-              {{end}}
-              {{if $action.Name}}
-                <div class="btn_text">{{$action.Name}}</div>
-              {{end}}
-            </a>
-          {{end}}
           {{if $item.Actions.ShowOrderButton}}
             <a href="#list-order-clicked" class="btn admin-action-order preventredirect">
               <img class="btn_icon" src="/admin/api/icons?file=glyphicons-basic-600-menu.svg&color=444444">
             </a>
           {{end}}
           {{if $item.Actions.MenuButtons}}
-            <div class="btn preventredirect">
-              <div class="btn_more preventredirect">
-                {{range $action := $item.Actions.MenuButtons}}
-                  <a href="{{$action.URL}}" class="btn_more_item preventredirect">
-                    {{if $action.Icon}}
-                      <img src="/admin/api/icons?file={{$action.Icon}}&color=444444" class="btn_more_item_icon">
-                    {{end}}
-                    <div class="btn_more_item_text">{{$action.Name}}</div>
-                  </a>
-                {{end}}
-              </div>
+            <div class="btn list_buttons_more preventredirect">
               <img class="btn_icon preventredirect" src="/admin/api/icons?file=glyphicons-basic-497-more.svg&color=444444">
             </div>
           {{end}}

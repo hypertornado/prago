@@ -107,6 +107,11 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 		row := listRow{}
 		itemVal := itemVals.Index(i).Elem()
 
+		pw := resource.previewer(userData, itemVals.Index(i).Interface())
+		row.Name = pw.Name()
+		row.Description = pw.DescriptionBasic(nil)
+		row.ImageURL = pw.ImageURL(context.Background())
+
 		for _, v := range listHeader.Header {
 			if columnsMap[v.ColumnName] {
 				if resource.Field(v.Name) != nil {

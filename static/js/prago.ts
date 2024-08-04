@@ -1,6 +1,7 @@
 class Prago {
   static notificationCenter: NotificationCenter;
   static shortcuts: Shortcuts;
+  static cmenu: CMenu;
 
   static start() {
     document.addEventListener("DOMContentLoaded", Prago.init);
@@ -9,6 +10,7 @@ class Prago {
   private static init() {
     Prago.shortcuts = new Shortcuts(document.body);
     Prago.shortcuts.addRootShortcuts();
+    Prago.cmenu = new CMenu();
 
     var listEl = document.querySelector<HTMLDivElement>(".list");
     if (listEl) {
@@ -49,8 +51,7 @@ class Prago {
       new QuickActions(qa);
     }
 
-    initDashdoard();
-
+    initDashboard();
     initSMap();
   }
 }
