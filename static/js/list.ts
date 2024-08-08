@@ -423,7 +423,7 @@ class List {
     }
   }
 
-  createCmenu(e: Event, rowEl: HTMLDivElement) {
+  createCmenu(e: Event, rowEl: HTMLDivElement, alignByElement?: boolean) {
     rowEl.classList.add("list_row-context");
 
     let actions = JSON.parse(rowEl.getAttribute("data-actions"));
@@ -442,6 +442,7 @@ class List {
 
     cmenu({
       Event: e,
+      AlignByElement: alignByElement,
       ImageURL: rowEl.getAttribute("data-image-url"),
       Name: rowEl.getAttribute("data-name"),
       Description: rowEl.getAttribute("data-description"),
@@ -457,12 +458,12 @@ class List {
     e.preventDefault();
     e.stopImmediatePropagation();
     e.stopPropagation;
-    this.createCmenu(e, rowEl);
+    this.createCmenu(e, rowEl, true);
   }
 
   contextClick(e: Event) {
     let rowEl = <HTMLDivElement>e.currentTarget;
-    this.createCmenu(e, rowEl);
+    this.createCmenu(e, rowEl, false);
   }
 
   bindOrder() {

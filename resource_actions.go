@@ -46,6 +46,7 @@ func (resource *Resource) initDefaultResourceActions() {
 		resource.bindData(item, request, request.Params())
 
 		itemValidation := resource.validateUpdate(item, request)
+
 		vc.(*formValidation).validationData.Errors = itemValidation.errors
 
 		if vc.Valid() {
@@ -220,6 +221,7 @@ func (resource *Resource) editItemWithLogAndValues(request *Request, values url.
 
 	item := itemVal.Addr().Interface()
 
+	resource.addBoleanFalseValuesAsEmpty(values)
 	err = resource.bindData(
 		item, user, values,
 	)
@@ -233,6 +235,14 @@ func (resource *Resource) editItemWithLogAndValues(request *Request, values url.
 	err = resource.updateWithLog(item, request)
 	must(err)
 	return item, itemValidation
+}
+
+func (resource *Resource) addBoleanFalseValuesAsEmpty(values url.Values) {
+	for _, field := range resource.fields {
+		if field.typ.Kind() == reflect.Bool && !values.Has(field.id) {
+			values.Set(field.id, "")
+		}
+	}
 }
 
 func UpdateWithLog[T any](item *T, request *Request) error {

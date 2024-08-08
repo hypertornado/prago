@@ -1,5 +1,6 @@
 interface CMenuData {
   Event: Event;
+  AlignByElement?: boolean;
   ImageURL?: string;
   Name?: string;
   Description?: string;
@@ -50,8 +51,16 @@ class CMenu {
     //@ts-ignore
     let x = data.Event.clientX;
 
+    let containerEl = document.createElement("div");
+    containerEl.classList.add("cmenu_container");
+    containerEl.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+    });
+
     let el = document.createElement("div");
     el.classList.add("cmenu");
+
+    containerEl.appendChild(el);
 
     if (data.ImageURL) {
       let imageEl = document.createElement("img");
@@ -106,7 +115,7 @@ class CMenu {
       el.appendChild(commandsEl);
     }
 
-    document.body.appendChild(el);
+    document.body.appendChild(containerEl);
 
     let elRect = el.getBoundingClientRect();
     let elWidth = elRect.width;
@@ -115,20 +124,57 @@ class CMenu {
     let viewportWidth = window.innerWidth;
     let viewportHeight = window.innerHeight;
 
-    console.log(x, elWidth, viewportWidth);
+    if (data.AlignByElement) {
+      let targetEl = <HTMLDivElement>data.Event.currentTarget;
+      let rect = targetEl.getBoundingClientRect();
 
-    if (x + elWidth > viewportWidth) {
-      x = viewportWidth - elWidth;
-    }
+      x = rect.left;
+      y = rect.top + rect.height;
 
-    if (y + elHeight > viewportHeight) {
-      y = viewportHeight - elHeight;
+      if (x + elWidth > viewportWidth) {
+        if (x > viewportWidth / 2) {
+          x = rect.x + rect.width - elWidth;
+        }
+      }
+
+      if (y + elHeight > viewportHeight) {
+        if (y > viewportHeight / 2) {
+          y = rect.y - elHeight;
+        }
+      }
+
+      if (x < 0) {
+        x = 0;
+      }
+
+      if (y < 0) {
+        y = 0;
+      }
+    } else {
+      if (x + elWidth > viewportWidth) {
+        x = viewportWidth - elWidth;
+      }
+
+      if (y + elHeight > viewportHeight) {
+        y = viewportHeight - elHeight;
+      }
     }
 
     el.style.left = x + "px";
     el.style.top = y + "px";
 
-    this.lastEl = el;
+    this.lastEl = containerEl;
     this.dismissHandler = data.DismissHandler;
+  }
+
+  getOffset(el: HTMLDivElement) {
+    var _x = 0;
+    var _y = 0;
+    while (el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
+      _x += el.offsetLeft - el.scrollLeft;
+      _y += el.offsetTop - el.scrollTop;
+      el = <HTMLDivElement>el.offsetParent;
+    }
+    return { top: _y, left: _x };
   }
 }

@@ -710,7 +710,7 @@ class List {
             });
         }
     }
-    createCmenu(e, rowEl) {
+    createCmenu(e, rowEl, alignByElement) {
         rowEl.classList.add("list_row-context");
         let actions = JSON.parse(rowEl.getAttribute("data-actions"));
         var commands = [];
@@ -725,6 +725,7 @@ class List {
         }
         cmenu({
             Event: e,
+            AlignByElement: alignByElement,
             ImageURL: rowEl.getAttribute("data-image-url"),
             Name: rowEl.getAttribute("data-name"),
             Description: rowEl.getAttribute("data-description"),
@@ -739,11 +740,11 @@ class List {
         e.preventDefault();
         e.stopImmediatePropagation();
         e.stopPropagation;
-        this.createCmenu(e, rowEl);
+        this.createCmenu(e, rowEl, true);
     }
     contextClick(e) {
         let rowEl = e.currentTarget;
-        this.createCmenu(e, rowEl);
+        this.createCmenu(e, rowEl, false);
     }
     bindOrder() {
         this.renderOrder();
@@ -3181,8 +3182,14 @@ class CMenu {
         this.dismiss();
         let y = data.Event.clientY;
         let x = data.Event.clientX;
+        let containerEl = document.createElement("div");
+        containerEl.classList.add("cmenu_container");
+        containerEl.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+        });
         let el = document.createElement("div");
         el.classList.add("cmenu");
+        containerEl.appendChild(el);
         if (data.ImageURL) {
             let imageEl = document.createElement("img");
             imageEl.classList.add("cmenu_image");
@@ -3224,23 +3231,56 @@ class CMenu {
             }
             el.appendChild(commandsEl);
         }
-        document.body.appendChild(el);
+        document.body.appendChild(containerEl);
         let elRect = el.getBoundingClientRect();
         let elWidth = elRect.width;
         let elHeight = elRect.height;
         let viewportWidth = window.innerWidth;
         let viewportHeight = window.innerHeight;
-        console.log(x, elWidth, viewportWidth);
-        if (x + elWidth > viewportWidth) {
-            x = viewportWidth - elWidth;
+        if (data.AlignByElement) {
+            let targetEl = data.Event.currentTarget;
+            let rect = targetEl.getBoundingClientRect();
+            x = rect.left;
+            y = rect.top + rect.height;
+            if (x + elWidth > viewportWidth) {
+                if (x > viewportWidth / 2) {
+                    x = rect.x + rect.width - elWidth;
+                }
+            }
+            if (y + elHeight > viewportHeight) {
+                if (y > viewportHeight / 2) {
+                    y = rect.y - elHeight;
+                }
+            }
+            if (x < 0) {
+                x = 0;
+            }
+            if (y < 0) {
+                y = 0;
+            }
         }
-        if (y + elHeight > viewportHeight) {
-            y = viewportHeight - elHeight;
+        else {
+            if (x + elWidth > viewportWidth) {
+                x = viewportWidth - elWidth;
+            }
+            if (y + elHeight > viewportHeight) {
+                y = viewportHeight - elHeight;
+            }
         }
         el.style.left = x + "px";
         el.style.top = y + "px";
-        this.lastEl = el;
+        this.lastEl = containerEl;
         this.dismissHandler = data.DismissHandler;
+    }
+    getOffset(el) {
+        var _x = 0;
+        var _y = 0;
+        while (el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
+            _x += el.offsetLeft - el.scrollLeft;
+            _y += el.offsetTop - el.scrollTop;
+            el = el.offsetParent;
+        }
+        return { top: _y, left: _x };
     }
 }
 class Prago {

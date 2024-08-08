@@ -3558,6 +3558,16 @@ a.admin_stats_section_row {
   aspect-ratio: 1;
 }
 
+.cmenu_container {
+  background-color: rgba(0, 0, 0, 0.1);
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  z-index: 9999;
+}
+
 .cmenu {
   border: 1px solid #eee;
   border-radius: 10px;
@@ -3570,8 +3580,18 @@ a.admin_stats_section_row {
   left: 3px;
   width: 250px;
   padding: 6px 0px;
+  animation: cmenuShow 50ms ease-in;
 }
 
+@keyframes cmenuShow {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+  }
+}
 .cmenu:has(.cmenu_image) {
   padding-top: 0px;
 }

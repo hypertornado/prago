@@ -22,7 +22,6 @@ func (resource *Resource) setOrderPosition(item interface{}, order int64) {
 }
 
 func (resource *Resource) bindData(item any, request *Request, params url.Values) error {
-
 	value := reflect.ValueOf(item)
 	for i := 0; i < 10; i++ {
 		if value.Kind() == reflect.Struct {
@@ -32,6 +31,7 @@ func (resource *Resource) bindData(item any, request *Request, params url.Values
 	}
 
 	for _, field := range resource.fields {
+
 		if !field.authorizeEdit(request) {
 			continue
 		}

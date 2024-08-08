@@ -15,8 +15,8 @@ type FormValidation interface {
 type formValidationData struct {
 	RedirectionLocation string
 	AfterContent        template.HTML
-	Valid               bool
-	Errors              []ValidationError
+	//Valid               bool
+	Errors []ValidationError
 }
 
 type formValidationReport struct {
@@ -25,7 +25,7 @@ type formValidationReport struct {
 
 func newFormValidationData() *formValidationData {
 	ret := &formValidationData{
-		Valid: true,
+		//Valid: true,
 	}
 	return ret
 }
@@ -42,14 +42,14 @@ func newFormValidation() *formValidation {
 
 func (fv *formValidation) AddError(err string) {
 
-	fv.validationData.Valid = false
+	//fv.validationData.Valid = false
 	fv.validationData.Errors = append(fv.validationData.Errors, ValidationError{
 		Text: err,
 	})
 }
 
 func (fv *formValidation) AddItemError(key, err string) {
-	fv.validationData.Valid = false
+	//fv.validationData.Valid = false
 	fv.validationData.Errors = append(fv.validationData.Errors, ValidationError{
 		Field: key,
 		Text:  err,
@@ -65,5 +65,5 @@ func (fv *formValidation) AfterContent(content template.HTML) {
 }
 
 func (fv *formValidation) Valid() bool {
-	return fv.validationData.Valid
+	return len(fv.validationData.Errors) == 0
 }
