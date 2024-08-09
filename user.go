@@ -14,8 +14,6 @@ import (
 
 var usernameRegex = regexp.MustCompile("^[a-z0-9.]{1,20}$")
 
-// User represents admin user account
-// TODO: better handle isactive user
 type user struct {
 	ID                int64 `prago-order-desc:"true"`
 	Username          string

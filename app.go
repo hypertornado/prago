@@ -81,6 +81,8 @@ type App struct {
 	logHandler func(string, string)
 
 	router *router
+
+	EmailSentHandler func(*Email)
 }
 
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {
@@ -132,6 +134,7 @@ func createApp(codeName string, version string, testing bool) *App {
 
 	app.initUserResource()
 	app.initFilesResource()
+	app.initEmailSentResource()
 
 	app.initActivityLog()
 	app.postInitTaskManager()

@@ -81,6 +81,12 @@ func (email *Email) HTMLContent(content string) *Email {
 }
 
 func (email *Email) Send() error {
+	err := email.sendWithoutLog()
+	logEmailSent(email, err)
+	return err
+}
+
+func (email *Email) sendWithoutLog() error {
 	from := email.from.toSendgridEmail()
 	to := email.to.toSendgridEmail()
 	emailMessage := mail.NewSingleEmail(from, email.subject, to, email.plainTextContent, email.htmlContent)
@@ -105,5 +111,6 @@ func (email *Email) Send() error {
 	if resp.StatusCode >= 300 {
 		return fmt.Errorf("email could not be sent, code %d: %s", resp.StatusCode, resp.Body)
 	}
+
 	return nil
 }
