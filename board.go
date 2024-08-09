@@ -45,7 +45,7 @@ func (app *App) initBoard() {
 		for i := 100; i >= 0; i-- {
 			c, _ := Query[activityLog](app).Context(request.r.Context()).Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -i-1), time.Now().AddDate(0, 0, -i)).Count()
 			c += int64(rand.Intn(100))
-			m[fmt.Sprintf("%d dní", -i)] = float64(c)
+			m[fmt.Sprintf("%03d dní", -i)] = float64(c)
 		}
 		table.Graph().DataMap(m)
 		return table
