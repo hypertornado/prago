@@ -63,7 +63,10 @@ func logEmailSent(email *Email, err error) {
 		logEmail.Error = err.Error()
 	}
 
-	must(CreateItem(email.app, logEmail))
+	err = CreateItem(email.app, logEmail)
+	if err != nil {
+		email.app.Log().Errorf("can't save log error: %s", err)
+	}
 }
 
 func trimTextForMYSQLTextType(in string) string {
