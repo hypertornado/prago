@@ -82,7 +82,7 @@ func (email *Email) HTMLContent(content string) *Email {
 
 func (email *Email) Send() error {
 	err := email.sendWithoutLog()
-	logEmailSent(email, err)
+	go logEmailSent(email, err)
 	return err
 }
 

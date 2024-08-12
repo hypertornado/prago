@@ -31,6 +31,14 @@ func (app *App) initEmailSentResource() {
 	resource.Board(sysadminBoard)
 }
 
+/*
+TODO: fix utf error
+https://forum.golangbridge.org/t/golang-not-supporting-utf8-for-some-reason/21429/3
+
+it does not work with emoji, encoding of database shoul be utf8mb4, not utf8
+
+*/
+
 func logEmailSent(email *Email, err error) {
 
 	var attachements []string
@@ -38,9 +46,6 @@ func logEmailSent(email *Email, err error) {
 	for _, attachement := range email.attachements {
 		attachements = append(attachements, attachement.Filename)
 	}
-
-	fmt.Println(len(email.plainTextContent))
-	fmt.Println(email.plainTextContent)
 
 	logEmail := &emailSent{
 		Name: fmt.Sprintf("%s %s", email.to.Name, email.to.Email),
