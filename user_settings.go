@@ -112,6 +112,31 @@ func initUserSettings(app *App) {
 		request.Redirect("/")
 	}).Icon("glyphicons-basic-21-home.svg").Permission(loggedPermission).Name(messages.GetNameFunction("boardpage")).userMenu()
 
+	ActionResourceItemForm(app, "change-password", func(user *user, form *Form, request *Request) {
+		newPassword := form.AddPasswordInput("newpassword", messages.Get(request.Locale(), "admin_password_new"))
+		newPassword.Focused = true
+		newPassword.Autocomplete = "new-password"
+
+		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
+
+	}, func(user *user, fv FormValidation, request *Request) {
+
+		newpassword := request.Param("newpassword")
+		if len(newpassword) < 7 {
+			fv.AddItemError("newpassword", messages.Get(request.Locale(), "admin_password_length"))
+		}
+
+		if fv.Valid() {
+			must(user.newPassword(newpassword))
+			must(UpdateItem(app, user))
+
+			request.app.userDataCacheDelete(user.ID)
+			request.AddFlashMessage(messages.Get(request.Locale(), "admin_password_changed"))
+			fv.Redirect("/admin")
+		}
+
+	}).Permission("sysadmin").Name(unlocalized("Nastavit heslo"))
+
 	ActionPlain(app, "logout", func(request *Request) {
 		validateCSRF(request)
 		request.logOutUser()
