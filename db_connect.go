@@ -30,7 +30,6 @@ func getDBConfig(codeName string) (*dbConnectConfig, error) {
 	}
 
 	return &config, nil
-
 }
 
 func (app *App) connectDB(testing bool) {

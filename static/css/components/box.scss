@@ -1,3 +1,5 @@
+@use "../variables.scss" as *;
+
 .box {
   border: 0px solid $grayBorderColor;
   margin: 0 auto;

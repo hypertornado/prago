@@ -264,11 +264,11 @@ a {
 
 a:hover {
   text-decoration: none;
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
 }
 
 a:active {
-  background-color: hsl(214deg, 50%, 90%);
+  background-color: hsl(214, 50%, 90%);
 }
 
 ul {
@@ -336,12 +336,12 @@ pre {
 
 .root_hamburger:hover {
   opacity: 0.9;
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
 }
 
 .root_hamburger:active {
   opacity: 0.8;
-  background-color: hsl(214deg, 50%, 90%);
+  background-color: hsl(214, 50%, 90%);
 }
 
 .root_hamburger_iconopen,
@@ -475,7 +475,7 @@ pre {
 }
 
 .admin_images_image:hover {
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
 }
 
 .admin_images_image:hover .admin_images_image_description {
@@ -483,7 +483,7 @@ pre {
 }
 
 .admin_images_image:active {
-  background-color: hsl(214deg, 50%, 90%);
+  background-color: hsl(214, 50%, 90%);
 }
 
 .admin_images_image_delete {
@@ -520,7 +520,7 @@ pre {
 }
 
 .admin_images_fileinput:hover {
-  background-color: hsl(214deg, 50%, 90%);
+  background-color: hsl(214, 50%, 90%);
 }
 
 .admin_images_fileinput-droparea {
@@ -672,7 +672,7 @@ select.admin_timestamp_minute {
   -webkit-appearance: none;
   appearance: none;
   border: 5px solid #4077bf;
-  border-top: 5px solid hsl(214deg, 50%, 90%);
+  border-top: 5px solid hsl(214, 50%, 90%);
   border-radius: 50%;
   width: 0px;
   height: 0px;
@@ -776,11 +776,11 @@ select.admin_timestamp_minute {
 }
 
 .admin_relation_preview_action:hover {
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
 }
 
 .admin_relation_preview_action:active {
-  background-color: hsl(214deg, 50%, 90%);
+  background-color: hsl(214, 50%, 90%);
 }
 
 .admin_item_relation_picker {
@@ -820,7 +820,7 @@ select.admin_timestamp_minute {
 }
 
 .admin_item_relation_picker_suggestion-selected {
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
 }
 
 .admin_stats_pie canvas {
@@ -1024,7 +1024,7 @@ select.admin_timestamp_minute {
 }
 
 .list_row-context .list_cell {
-  background: hsl(214deg, 50%, 90%) !important;
+  background: hsl(214, 50%, 90%) !important;
 }
 
 .list_cell {
@@ -1108,11 +1108,11 @@ select.admin_timestamp_minute {
 }
 
 .list_header_item_name-canorder:hover {
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
 }
 
 .list_header_item_name-canorder:active {
-  background-color: hsl(214deg, 50%, 90%);
+  background-color: hsl(214, 50%, 90%);
 }
 
 @keyframes loading_table {
@@ -1193,10 +1193,10 @@ select.admin_timestamp_minute {
   cursor: pointer;
 }
 .list_multiple_actions_cancel:hover {
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
 }
 .list_multiple_actions_cancel:active {
-  background-color: hsl(214deg, 50%, 90%);
+  background-color: hsl(214, 50%, 90%);
 }
 
 @media (max-width: 1000px) {
@@ -1220,10 +1220,10 @@ select.admin_timestamp_minute {
 
 @media (hover: hover) {
   .list_row:hover .list_cell {
-    background: hsl(214deg, 50%, 97%);
+    background: hsl(214, 50%, 97%);
   }
   .list_row:active .list_cell {
-    background-color: hsl(214deg, 50%, 90%);
+    background-color: hsl(214, 50%, 90%);
   }
   .list_row:hover .list_buttons {
     opacity: 1;
@@ -1235,7 +1235,7 @@ select.admin_timestamp_minute {
 
 .ordered,
 .ordered:hover {
-  background: hsl(214deg, 50%, 90%);
+  background: hsl(214, 50%, 90%);
 }
 
 .ordered .list_header_item_name:after,
@@ -1303,7 +1303,7 @@ select.admin_timestamp_minute {
 }
 
 .list_cell_multiple_pseudocheckbox:hover {
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
 }
 
 .list_row_multiple-checked .list_cell_multiple_pseudocheckbox {
@@ -1616,11 +1616,11 @@ input.list_filter_layout_date_to {
 }
 
 .btn:hover {
-  background: hsl(214deg, 50%, 97%);
+  background: hsl(214, 50%, 97%);
 }
 
 .btn:active {
-  background: hsl(214deg, 50%, 90%);
+  background: hsl(214, 50%, 90%);
 }
 
 .primarybtncontainer {
@@ -1896,11 +1896,11 @@ a.btn_more_item {
 }
 
 .btn_more_item:hover {
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
 }
 
 .btn_more_item:active {
-  background-color: hsl(214deg, 50%, 90%);
+  background-color: hsl(214, 50%, 90%);
 }
 
 /*!
@@ -2300,11 +2300,11 @@ a.search_pagination_page-selected {
 }
 
 a.admin_search_suggestion-selected {
-  background: hsl(214deg, 50%, 97%) !important;
+  background: hsl(214, 50%, 97%) !important;
 }
 
 a.admin_search_suggestion-selected:active {
-  background: hsl(214deg, 50%, 90%) !important;
+  background: hsl(214, 50%, 90%) !important;
 }
 
 .admin_search_suggestion_left {
@@ -2432,12 +2432,12 @@ a.admin_search_suggestion-selected:active {
 }
 
 .filter_relations_preview_close:hover {
-  background-color: hsl(214deg, 50%, 90%);
+  background-color: hsl(214, 50%, 90%);
 }
 
 .filter_relations_preview_close:active {
-  background-color: hsl(214deg, 50%, 90%);
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 90%);
+  background-color: hsl(214, 50%, 97%);
 }
 
 .filter_relations_preview_close::after {
@@ -2458,11 +2458,11 @@ a.admin_search_suggestion-selected:active {
 }
 
 .list_filter_suggestion:hover {
-  background: hsl(214deg, 50%, 97%);
+  background: hsl(214, 50%, 97%);
 }
 
 .list_filter_suggestion:active {
-  background: hsl(214deg, 50%, 90%);
+  background: hsl(214, 50%, 90%);
 }
 
 .list_filter_suggestion_image {
@@ -2716,7 +2716,7 @@ a .dashboard_figure_value {
 
 .admin_stats_section_row:hover {
   background-color: #fafafa;
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
 }
 
 .admin_stats_section_row_name {
@@ -2757,7 +2757,7 @@ a .dashboard_figure_value {
 .admin_stats_section_row_graph_content {
   border-radius: 0px;
   background-color: #ccc;
-  background-color: hsl(214deg, 50%, 90%);
+  background-color: hsl(214, 50%, 90%);
   background-color: #4077bf;
 }
 
@@ -2811,11 +2811,11 @@ a.admin_stats_section_row {
 }
 
 .pagination_page:hover {
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
 }
 
 .pagination_page:active {
-  background-color: hsl(214deg, 50%, 90%);
+  background-color: hsl(214, 50%, 90%);
 }
 
 .pagination_page_current,
@@ -3073,7 +3073,7 @@ a.admin_stats_section_row {
 .popup {
   border: 1px solid #eee;
   display: inline-block;
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
   border-radius: 5px;
   margin: 5px;
   flex-shrink: 0;
@@ -3185,12 +3185,12 @@ a.admin_stats_section_row {
 }
 
 .notification-clickable {
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
   cursor: pointer;
 }
 
 .notification-clickable:hover {
-  background-color: hsl(214deg, 50%, 90%);
+  background-color: hsl(214, 50%, 90%);
 }
 
 .notification-clickable:active {
@@ -3255,7 +3255,7 @@ a.admin_stats_section_row {
 .notification_left {
   border: 1px solid #eee;
   display: inline-block;
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
   border-radius: 5px;
   margin: 5px;
   flex-shrink: 0;
@@ -3310,7 +3310,7 @@ a.admin_stats_section_row {
 
 .notification_action-visible {
   display: block;
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
   border-radius: 5px;
   text-align: center;
   font-size: 0.9em;
@@ -3643,10 +3643,10 @@ a.admin_stats_section_row {
   align-items: center;
 }
 .cmenu_command:hover {
-  background-color: hsl(214deg, 50%, 97%);
+  background-color: hsl(214, 50%, 97%);
 }
 .cmenu_command:active {
-  background-color: hsl(214deg, 50%, 90%);
+  background-color: hsl(214, 50%, 90%);
 }
 
 .cmenu_command_name {

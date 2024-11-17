@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"fmt"
 )
 
 type development struct {
@@ -145,7 +146,7 @@ func compileLess(from, to string) error {
 	}
 	defer outfile.Close()
 
-	return commandHelper(exec.Command("lessc", from), outfile)
+	return commandHelper("lessc", exec.Command("lessc", from), outfile)
 }
 
 func compileSass(from, to string) error {
@@ -155,15 +156,15 @@ func compileSass(from, to string) error {
 	}
 	defer outfile.Close()
 
-	return commandHelper(exec.Command("sass", from), outfile)
+	return commandHelper("sass", exec.Command("sass", from), outfile)
 }
 
-func commandHelper(cmd *exec.Cmd, out io.Writer) error {
+func commandHelper(id string, cmd *exec.Cmd, out io.Writer) error {
 	var err error
 
 	pw := &prefixWriter{
 		Writer: os.Stderr,
-		Prefix: "[XXX]",
+		Prefix: fmt.Sprintf("[%s] ", id),
 	}
 
 	cmd.Stdout = out
