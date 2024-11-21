@@ -11,8 +11,8 @@ class Shortcuts {
       for (let shortcut of this.shortcuts) {
         if (shortcut.match(e)) {
           shortcut.handler();
-          e.preventDefault();
-          e.stopPropagation();
+          //e.preventDefault();
+          //e.stopPropagation();
           return false;
         }
       }
@@ -31,6 +31,9 @@ class Shortcuts {
       },
       "Zobrazit nápovědu",
       () => {
+        if (document.activeElement !== document.body) {
+          return;
+        }
         let contentEl = document.createElement("div");
         for (let shortcut of this.shortcuts) {
           let shortcutEl = document.createElement("div");

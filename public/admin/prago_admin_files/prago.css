@@ -1005,6 +1005,10 @@ select.admin_timestamp_minute {
   display: flex;
 }
 
+.list_footer {
+  min-height: 80px;
+}
+
 .list_table {
   width: 100%;
   overflow-x: auto;
@@ -1627,6 +1631,13 @@ input.list_filter_layout_date_to {
   text-align: right;
 }
 
+.form_label:has(.primarybtncontainer) {
+  position: sticky;
+  bottom: 0px;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
 .btn-accented {
   background: linear-gradient(#42a1ec, #0070c9);
   color: white;
@@ -1692,6 +1703,18 @@ input.list_filter_layout_date_to {
   padding: 0px 10px;
 }
 
+.form-errors {
+  animation: formErrorsAnimation 500ms ease-out forwards;
+}
+
+@keyframes formErrorsAnimation {
+  from {
+    background-color: #de4450;
+  }
+  to {
+    background-color: white;
+  }
+}
 .form_errors_error {
   border: 1px solid #dd2e4f;
   color: #dd2e4f;

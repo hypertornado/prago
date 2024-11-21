@@ -72,6 +72,16 @@
   text-align: right;
 }
 
+.form_label:has(.primarybtncontainer) {
+  position: sticky;
+  bottom: 0px;
+  z-index: 1000;
+  //backdrop-filter: blur(10px);
+  backdrop-filter: blur(3px);
+  //background-color: red;
+  //padding: 10px 0px;
+}
+
 .btn-accented {
   background: linear-gradient(#42a1ec, #0070c9);
   color: white;
@@ -135,6 +145,23 @@
 
 .form {
   padding: 0px 10px;
+}
+
+.form-errors {
+  animation: formErrorsAnimation 500ms ease-out forwards;
+}
+
+
+@keyframes formErrorsAnimation {
+
+  from {
+    background-color: $redLighter;
+  }
+
+  to {
+    background-color: white;
+  }
+  
 }
 
 .form_errors_error {

@@ -73,6 +73,8 @@ class FormContainer {
     }
     this.activeRequest = request;
 
+    this.form.formEl.classList.remove("form-errors");
+
     request.addEventListener("load", (e) => {
       if (requestID != this.lastAJAXID) {
         return;
@@ -148,6 +150,7 @@ class FormContainer {
         }
       }
       if (errors.length > 0) {
+        this.form.formEl.classList.add("form-errors");
         errorsDiv.classList.remove("hidden");
       }
     }

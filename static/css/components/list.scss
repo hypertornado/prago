@@ -29,6 +29,10 @@
   display: flex;
 }
 
+.list_footer {
+  min-height: 80px;
+}
+
 .list_table {
   width: 100%;
   overflow-x: auto;

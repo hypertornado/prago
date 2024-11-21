@@ -1923,6 +1923,7 @@ class FormContainer {
             }
         }
         this.activeRequest = request;
+        this.form.formEl.classList.remove("form-errors");
         request.addEventListener("load", (e) => {
             if (requestID != this.lastAJAXID) {
                 return;
@@ -1986,6 +1987,7 @@ class FormContainer {
                 }
             }
             if (errors.length > 0) {
+                this.form.formEl.classList.add("form-errors");
                 errorsDiv.classList.remove("hidden");
             }
         }
@@ -3090,8 +3092,6 @@ class Shortcuts {
             for (let shortcut of this.shortcuts) {
                 if (shortcut.match(e)) {
                     shortcut.handler();
-                    e.preventDefault();
-                    e.stopPropagation();
                     return false;
                 }
             }
@@ -3105,6 +3105,9 @@ class Shortcuts {
         this.add({
             Key: "?",
         }, "Zobrazit nápovědu", () => {
+            if (document.activeElement !== document.body) {
+                return;
+            }
             let contentEl = document.createElement("div");
             for (let shortcut of this.shortcuts) {
                 let shortcutEl = document.createElement("div");
