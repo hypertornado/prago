@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"golang.org/x/net/context"
@@ -97,7 +98,7 @@ func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int
 			locale = user.Locale
 		}
 
-		activityURL := app.getAdminURL(fmt.Sprintf("activitylog/%d", v.ID))
+		activityURL := app.getAdminURL(fmt.Sprintf("_activity?id=%d", v.ID))
 
 		itemName := fmt.Sprintf("%s #%d", v.ResourceName, v.ItemID)
 		if resource != nil {
@@ -122,12 +123,99 @@ func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int
 }
 
 func (app *App) initActivityLog() {
+
+	ActionForm(app, "_activity", func(form *Form, request *Request) {
+		id := request.Param("id")
+		form.AddTextInput("id", "ID úpravy").Value = id
+		form.AddSubmit("Zobrazit")
+
+		if id != "" {
+			form.AutosubmitFirstTime = true
+		}
+	}, func(fv FormValidation, request *Request) {
+		table := app.Table()
+
+		activity := Query[activityLog](app).ID(request.Param("id"))
+		if activity == nil {
+			fv.AfterContent("Activity not found")
+			return
+		}
+
+		resource := app.getResourceByID(activity.ResourceName)
+		if !request.Authorize(resource.canView) {
+			fv.AfterContent("Not allowed")
+			return
+		}
+
+		table.Row(Cell("Editace:").Header(), Cell(fmt.Sprintf("#%d", activity.ID)).Colspan(2).URL(resource.getURL(fmt.Sprintf("%d", activity.ID))))
+		table.Row(Cell("Tabulka:").Header(), Cell(resource.pluralName(request.Locale())).Colspan(2).URL(resource.getURL("history")))
+		table.Row(Cell("Položka:").Header(), Cell(fmt.Sprintf("#%d", activity.ItemID)).Colspan(2).URL(resource.getURL(fmt.Sprintf("%d/history", activity.ItemID))))
+		table.Row(Cell("Typ akce:").Header(), Cell(activity.ActionType).Colspan(2))
+		table.Row(Cell("Upraveno:").Header(), Cell(activity.CreatedAt.Format("2006-01-02 15:04:05")).Colspan(2))
+
+		user := Query[user](app).ID(activity.User)
+		if user != nil {
+			table.Row(Cell("Upraveno uživatelem:").Header(), Cell(fmt.Sprintf("%s (#%d)", user.Username, user.ID)).Colspan(2).URL(fmt.Sprintf("/admin/user/%d", user.ID)))
+		}
+
+		fromMap := getDiffMap(activity.ContentBefore)
+		toMap := getDiffMap(activity.ContentAfter)
+
+		table.Header("Jméno pole", "Před", "Po")
+
+		for _, field := range resource.fields {
+			if !request.Authorize(field.canView) {
+				continue
+			}
+
+			fromContent := fromMap[field.id]
+			toContent := toMap[field.id]
+
+			nameCell := Cell(field.name(request.Locale()))
+			cellFrom := Cell(fromContent)
+			cellTo := Cell(toContent)
+
+			isSame := fromContent == toContent
+			if isSame {
+				cellFrom.Green()
+				cellTo.Green()
+			} else {
+				cellFrom.Orange()
+				cellTo.Orange()
+			}
+
+			table.Row(nameCell, cellFrom, cellTo)
+		}
+
+		fv.AfterContent(table.ExecuteHTML())
+
+	}).Permission("logged").Name(unlocalized("Úpravy")).Icon(iconActivity)
+
 	app.activityLogResource = NewResource[activityLog](app)
 	app.activityLogResource.Board(sysadminBoard)
-	app.activityLogResource.icon = "glyphicons-basic-58-history.svg"
+	app.activityLogResource.icon = iconActivity
 	app.activityLogResource.canView = Permission(sysadminRoleName)
+	app.activityLogResource.canUpdate = Permission("nobody")
+	app.activityLogResource.canDelete = Permission("nobody")
 	app.activityLogResource.orderDesc = true
 	app.activityLogResource.Name(messages.GetNameFunction("admin_history"), messages.GetNameFunction("admin_history"))
+
+	PreviewURLFunction(app, func(activityLog *activityLog) string {
+		return fmt.Sprintf("/admin/_activity?id=%d", activityLog.ID)
+	})
+
+}
+
+func getDiffMap(inStr string) map[string]string {
+	var objectMap map[string]interface{}
+	must(json.Unmarshal([]byte(inStr), &objectMap))
+
+	var ret = map[string]string{}
+
+	for k, v := range objectMap {
+		ret[strings.ToLower(k)] = fmt.Sprintf("%v", v)
+	}
+	return ret
 }
 
 func (resource *Resource) logActivity(userData UserData, before, after any) error {

@@ -3453,6 +3453,14 @@ a.admin_stats_section_row {
   background-color: palegreen;
 }
 
+.form_table_cell-orange {
+  background-color: orange;
+}
+
+.form_table_cell-red {
+  background-color: palevioletred;
+}
+
 .form_table_cell-header {
   font-weight: bold;
 }
@@ -3550,6 +3558,7 @@ a.admin_stats_section_row {
   border-radius: 3px;
   overflow: hidden;
   border: 0px solid red;
+  z-index: 2;
 }
 
 .breadcrumb_badge_image {

@@ -21,6 +21,7 @@ const iconAction = "glyphicons-basic-111-paragraph-left.svg"
 const iconEdit = "glyphicons-basic-31-pencil.svg"
 const iconDelete = "glyphicons-basic-17-bin.svg"
 const iconDuplicate = "glyphicons-basic-611-copy-duplicate.svg"
+const iconActivity = "glyphicons-basic-58-history.svg"
 
 func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 	app.iconsFS = &iconsFS

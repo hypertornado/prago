@@ -125,6 +125,16 @@ func (cell *TableCell) Green() *TableCell {
 	return cell
 }
 
+func (cell *TableCell) Orange() *TableCell {
+	cell.CSSClass("form_table_cell-orange")
+	return cell
+}
+
+func (cell *TableCell) Red() *TableCell {
+	cell.CSSClass("form_table_cell-red")
+	return cell
+}
+
 func (cell *TableCell) Nowrap() *TableCell {
 	cell.CSSClass("form_table_cell-nowrap")
 	return cell

@@ -133,7 +133,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			vc.AfterContent(table.ExecuteHTML())
 
 		}).
-			Icon("glyphicons-basic-58-history.svg").
+			Icon(iconActivity).
 			setPriority(defaultHighPriority).
 			Name(messages.GetNameFunction("admin_history")).
 			Permission(resource.canUpdate)
@@ -152,10 +152,10 @@ func (resource *Resource) initDefaultResourceActions() {
 					vc.AfterContent(table.ExecuteHTML())
 				},
 			).
-			Icon("glyphicons-basic-58-history.svg").
+			Icon(iconActivity).
 			setPriority(defaultHighPriority).
 			Name(messages.GetNameFunction("admin_history")).
-			Permission(resource.canUpdate)
+			Permission(resource.canView)
 	}
 }
 
