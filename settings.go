@@ -141,6 +141,7 @@ func (app *App) saveSetting(id, value string, request *Request) error {
 
 func initDefaultSettings(app *App) {
 	app.Setting("random", "sysadmin").DefaultValue(randomString(20))
+	app.Setting("google_key", "sysadmin")
 	app.Setting("sendgrid_key", "sysadmin")
 	app.Setting("no_reply_email", "sysadmin")
 	app.Setting("port", "sysadmin").DefaultValue(fmt.Sprintf("%d", defaultPort))

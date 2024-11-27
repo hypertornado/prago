@@ -53,6 +53,7 @@ class Prago {
 
     initDashboard();
     initSMap();
+    initGoogleMaps();
   }
 }
 Prago.start();

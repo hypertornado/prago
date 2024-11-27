@@ -12,10 +12,10 @@ function initSMap() {
 }
 
 function loadSMap() {
-  var viewEls = document.querySelectorAll(".admin_item_view_place");
+  /*var viewEls = document.querySelectorAll(".admin_item_view_place");
   viewEls.forEach((el) => {
     new SMapView(<HTMLDivElement>el);
-  });
+  });*/
 
   var elements = document.querySelectorAll<HTMLDivElement>(".admin_place");
   elements.forEach((el) => {

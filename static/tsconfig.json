@@ -31,6 +31,7 @@
     "js/notifications.ts",
     "js/popup.ts",
     "js/smap.ts",
+    "js/google_maps.ts",
     "js/quick_actions.ts",
     "js/dashboard.ts",
     "js/shortcuts.ts",

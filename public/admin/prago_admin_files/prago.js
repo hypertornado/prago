@@ -2880,10 +2880,6 @@ function initSMap() {
     Loader.load(null, null, loadSMap);
 }
 function loadSMap() {
-    var viewEls = document.querySelectorAll(".admin_item_view_place");
-    viewEls.forEach((el) => {
-        new SMapView(el);
-    });
     var elements = document.querySelectorAll(".admin_place");
     elements.forEach((el) => {
         new SMapEdit(el);
@@ -2973,6 +2969,33 @@ class SMapEdit {
         ret.innerText = "";
         return ret;
     }
+}
+function initGoogleMaps() {
+    console.log("google maps init");
+    var viewEls = document.querySelectorAll(".admin_item_view_place");
+    viewEls.forEach((el) => {
+        initGoogleMapView(el);
+    });
+}
+function initGoogleMapView(el) {
+    console.log("initing google maps view");
+    console.log(el);
+    var val = el.getAttribute("data-value");
+    el.innerText = "";
+    var coords = val.split(",");
+    if (coords.length != 2) {
+        el.classList.remove("admin_item_view_place");
+        return;
+    }
+    const location = { lat: parseFloat(coords[0]), lng: parseFloat(coords[1]) };
+    const map = new google.maps.Map(el, {
+        zoom: 14,
+        center: location,
+    });
+    const marker = new google.maps.Marker({
+        position: location,
+        map: map,
+    });
 }
 class QuickActions {
     constructor(el) {
@@ -3321,6 +3344,7 @@ class Prago {
         }
         initDashboard();
         initSMap();
+        initGoogleMaps();
     }
 }
 Prago.start();

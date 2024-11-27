@@ -215,6 +215,10 @@ func (app *App) BaseURL() string {
 	return app.mustGetSetting("base_url")
 }
 
+func (app *App) GoogleKey() string {
+	return app.mustGetSetting("google_key")
+}
+
 func (app *App) RandomizationString() string {
 	return app.mustGetSetting("random")
 }
