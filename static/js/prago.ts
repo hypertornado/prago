@@ -52,7 +52,6 @@ class Prago {
     }
 
     initDashboard();
-    initSMap();
     initGoogleMaps();
   }
 }

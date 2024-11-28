@@ -229,7 +229,6 @@ class ImagePicker {
         container.appendChild(del);
         this.preview.appendChild(container);
         this.updateHiddenData();
-        console.log("XXXXX");
     }
     hideProgress() {
         this.progress.classList.add("hidden");
@@ -2872,114 +2871,21 @@ class LoadingPopup extends Popup {
         this.remove();
     }
 }
-function initSMap() {
-    if (!window.Loader) {
-        return;
-    }
-    Loader.async = true;
-    Loader.load(null, null, loadSMap);
-}
-function loadSMap() {
-    var elements = document.querySelectorAll(".admin_place");
-    elements.forEach((el) => {
-        new SMapEdit(el);
-    });
-}
-class SMapView {
-    constructor(el) {
-        var val = el.getAttribute("data-value");
-        el.innerText = "";
-        var coords = val.split(",");
-        if (coords.length != 2) {
-            el.classList.remove("admin_item_view_place");
-            return;
-        }
-        var stred = SMap.Coords.fromWGS84(coords[1], coords[0]);
-        var mapa = new SMap(el, stred, 14);
-        mapa.addDefaultLayer(SMap.DEF_BASE).enable();
-        mapa.addDefaultControls();
-        var vrstvaZnacek = new SMap.Layer.Marker(stred);
-        mapa.addLayer(vrstvaZnacek);
-        vrstvaZnacek.enable();
-        var options = {};
-        var marker = new SMap.Marker(stred, "myMarker", options);
-        vrstvaZnacek.addMarker(marker);
-    }
-}
-class SMapEdit {
-    constructor(el) {
-        this.el = el;
-        var mapEl = document.createElement("div");
-        mapEl.classList.add("admin_place_map");
-        this.el.appendChild(mapEl);
-        this.input = this.el.querySelector(".admin_place_value");
-        var zoom = 1;
-        var coords = SMap.Coords.fromWGS84(14.41854, 50.073658);
-        var mapa = new SMap(this.el, coords, 1);
-        mapa.addDefaultLayer(SMap.DEF_BASE).enable();
-        mapa.addDefaultControls();
-        var vrstvaZnacek = new SMap.Layer.Marker(coords);
-        mapa.addLayer(vrstvaZnacek);
-        vrstvaZnacek.disable();
-        this.icon = this.createMarkerIcon();
-        this.icon.addEventListener("click", (e) => {
-            vrstvaZnacek.disable();
-            this.input.value = "";
-            e.stopPropagation();
-            e.preventDefault();
-            return false;
-        });
-        var options = {
-            url: this.icon,
-            title: "",
-            anchor: { left: 10, top: 10 },
-        };
-        this.marker = new SMap.Marker(coords, "", options);
-        vrstvaZnacek.addMarker(this.marker);
-        var inVals = this.input.value.split(",");
-        if (inVals.length == 2) {
-            var lat = parseFloat(inVals[0]);
-            var lon = parseFloat(inVals[1]);
-            if (!isNaN(lat) && !isNaN(lon)) {
-                coords = SMap.Coords.fromWGS84(lon, lat);
-                mapa.setCenterZoom(coords, 10, false);
-                this.marker.setCoords(coords);
-                vrstvaZnacek.enable();
-            }
-        }
-        mapa.getSignals().addListener(window, "map-click", (e, x) => {
-            var coords = SMap.Coords.fromEvent(e.data.event, mapa);
-            this.marker.setCoords(coords);
-            vrstvaZnacek.enable();
-            this.setValue();
-        });
-    }
-    setValue() {
-        let coords = this.marker.getCoords();
-        let val = this.stringifyPosition(coords.y, coords.x);
-        this.input.value = val;
-    }
-    stringifyPosition(lat, lng) {
-        return lat + "," + lng;
-    }
-    createMarkerIcon() {
-        var ret = document.createElement("div");
-        ret.classList.add("smap_edit_label");
-        ret.setAttribute("style", "");
-        ret.innerText = "";
-        return ret;
-    }
-}
 function initGoogleMaps() {
-    console.log("google maps init");
-    var viewEls = document.querySelectorAll(".admin_item_view_place");
-    viewEls.forEach((el) => {
-        initGoogleMapView(el);
+    return __awaiter(this, void 0, void 0, function* () {
+        const { Map } = yield google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement, PinElement } = yield google.maps.importLibrary("marker");
+        var viewEls = document.querySelectorAll(".admin_item_view_place");
+        viewEls.forEach((el) => {
+            initGoogleMapView(el);
+        });
+        var elements = document.querySelectorAll(".map_picker");
+        elements.forEach((el) => {
+            new GoogleMapEdit(el);
+        });
     });
 }
 function initGoogleMapView(el) {
-    console.log("initing google maps view");
-    console.log(el);
     var val = el.getAttribute("data-value");
     el.innerText = "";
     var coords = val.split(",");
@@ -2991,11 +2897,79 @@ function initGoogleMapView(el) {
     const map = new google.maps.Map(el, {
         zoom: 14,
         center: location,
+        mapId: "3dab4a498a2dadb",
     });
-    const marker = new google.maps.Marker({
+    const marker = new google.maps.marker.AdvancedMarkerElement({
         position: location,
         map: map,
     });
+}
+class GoogleMapEdit {
+    constructor(el) {
+        this.el = el;
+        this.statusEl = el.querySelector(".map_picker_description");
+        var mapEl = el.querySelector(".map_picker_map");
+        this.input = this.el.querySelector(".map_picker_value");
+        this.deleteButton = el.querySelector(".map_picker_delete");
+        const location = { lng: 14.41854, lat: 50.073658 };
+        this.map = new google.maps.Map(mapEl, {
+            zoom: 1,
+            center: location,
+            mapId: "3dab4a498a2dadb",
+        });
+        this.marker = new google.maps.marker.AdvancedMarkerElement({
+            position: location,
+            map: null,
+            gmpDraggable: true,
+        });
+        this.marker.addListener("click", (e) => {
+            this.deleteValue();
+        });
+        this.marker.addListener("drag", (e) => {
+            this.setValue(e.latLng.lat(), e.latLng.lng());
+        });
+        this.map.addListener("click", (e) => {
+            this.setValue(e.latLng.lat(), e.latLng.lng());
+        });
+        this.deleteButton.addEventListener("click", () => {
+            this.deleteValue();
+        });
+        var inVals = this.input.value.split(",");
+        if (inVals.length == 2) {
+            let lat = parseFloat(inVals[0]);
+            let lng = parseFloat(inVals[1]);
+            this.setValue(lat, lng);
+            this.centreMap(lat, lng);
+        }
+        else {
+            this.deleteValue();
+        }
+    }
+    centreMap(lat, lng) {
+        let location = {
+            lat: lat,
+            lng: lng,
+        };
+        this.map.setCenter(location);
+        this.map.setZoom(14);
+    }
+    setValue(lat, lng) {
+        let location = {
+            lat: lat,
+            lng: lng,
+        };
+        this.marker.position = location;
+        this.marker.map = this.map;
+        this.input.value = lat + "," + lng;
+        this.statusEl.textContent = "Latitude: " + lat + ", Longitude: " + lng;
+        this.deleteButton.classList.remove("hidden");
+    }
+    deleteValue() {
+        this.marker.map = null;
+        this.input.value = "";
+        this.statusEl.textContent = "Polohu vyberete kliknutím na mapu";
+        this.deleteButton.classList.add("hidden");
+    }
 }
 class QuickActions {
     constructor(el) {
@@ -3343,7 +3317,6 @@ class Prago {
             new QuickActions(qa);
         }
         initDashboard();
-        initSMap();
         initGoogleMaps();
     }
 }

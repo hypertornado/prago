@@ -196,7 +196,6 @@ class ImagePicker {
 
     this.preview.appendChild(container);
     this.updateHiddenData();
-    console.log("XXXXX");
   }
 
   hideProgress() {

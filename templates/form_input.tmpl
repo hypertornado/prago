@@ -143,8 +143,13 @@
 {{end}}
 
 {{define "form_input_place"}}
-<div class="admin_place">
-  <input class="admin_place_value" type="hidden" name="{{.ID}}" value="{{.Value}}">
+<div class="map_picker">
+  <div class="map_picker_map"></div>
+  <input class="map_picker_value" type="hidden" name="{{.ID}}" value="{{.Value}}">
+  <div class="map_picker_status">
+    <div class="map_picker_description">Loading...</div>
+    <div class="btn map_picker_delete hidden">✕</div>
+  </div>
 </div>
 {{end}}
 
