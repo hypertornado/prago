@@ -35,7 +35,7 @@ class Form {
     var dateInputs =
       form.querySelectorAll<HTMLInputElement>(".form_input-date");
     dateInputs.forEach((form) => {
-      new DatePicker(form);
+      //new DatePicker(form);
     });
 
     form.addEventListener("submit", () => {

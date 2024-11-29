@@ -55,12 +55,12 @@ class List {
     this.listHeader = this.list.querySelector(".list_header");
     this.listFooter = this.list.querySelector(".list_footer");
 
-    var dateFilterInputs = list.querySelectorAll<HTMLInputElement>(
+    /*var dateFilterInputs = list.querySelectorAll<HTMLInputElement>(
       ".list_filter_date_input"
     );
     dateFilterInputs.forEach((el) => {
       new DatePicker(el);
-    });
+    });*/
 
     this.settings = new ListSettings(this);
     this.exportButton = document.querySelector(".admin_exportbutton");

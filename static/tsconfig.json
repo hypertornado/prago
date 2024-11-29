@@ -24,7 +24,6 @@
     "js/relations.ts",
     "js/form.ts",
     "js/form_container.ts",
-    "js/datepicker.ts",
     "js/search.ts",
     "js/menu.ts",
     "js/relationlist.ts",
