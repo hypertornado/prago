@@ -1,12 +1,12 @@
 package prago
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"fmt"
 )
 
 type development struct {
@@ -50,6 +50,7 @@ func (app *App) initDevelopment() {
 		Callback(
 			func() {
 				app.startDevelopment()
+				must(app.migrate(false))
 				err := app.listenAndServe(port)
 				if err != nil {
 					panic(err)

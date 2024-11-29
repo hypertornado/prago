@@ -32,12 +32,6 @@ class Form {
       new ImagePicker(form);
     });
 
-    var dateInputs =
-      form.querySelectorAll<HTMLInputElement>(".form_input-date");
-    dateInputs.forEach((form) => {
-      //new DatePicker(form);
-    });
-
     form.addEventListener("submit", () => {
       this.dirty = false;
     });

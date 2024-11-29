@@ -1825,9 +1825,6 @@ class Form {
         imagePickers.forEach((form) => {
             new ImagePicker(form);
         });
-        var dateInputs = form.querySelectorAll(".form_input-date");
-        dateInputs.forEach((form) => {
-        });
         form.addEventListener("submit", () => {
             this.dirty = false;
         });
