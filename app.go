@@ -120,10 +120,6 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initAccessManager()
 	app.initDefaultFieldTypes()
 
-	/*var testing bool
-	if app.codeName == testingAppName {
-		testing = true
-	}*/
 	app.connectDB(testing)
 
 	app.initUserDataCache()

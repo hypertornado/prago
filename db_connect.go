@@ -13,7 +13,11 @@ type dbConnectConfig struct {
 }
 
 func getDBConnectPath(appName string) string {
-	return fmt.Sprintf("%s/.%s/prago_db.json", os.Getenv("HOME"), appName)
+	return fmt.Sprintf("%s/prago_db.json", getAppDotPath(appName))
+}
+
+func getAppDotPath(appName string) string {
+	return fmt.Sprintf("%s/.%s", os.Getenv("HOME"), appName)
 }
 
 func getDBConfig(codeName string) (*dbConnectConfig, error) {
@@ -42,10 +46,19 @@ func (app *App) connectDB(testing bool) {
 			Password: "prago_test",
 		}
 	} else {
+		connectPathFile := getDBConnectPath(app.codeName)
+		if !fileExists(connectPathFile) {
+			fmt.Printf("Database config file does not exist at path '%s'\n", connectPathFile)
+			err := app.autoInstallDatabase()
+			if err != nil {
+				panic(err)
+			}
+		}
+
 		var err error
 		config, err = getDBConfig(app.codeName)
 		if err != nil {
-			panic(fmt.Sprintf("can't get config file: %s", err.Error()))
+			panic(fmt.Sprintf("can't connect to DB: %s\n", err.Error()))
 		}
 	}
 

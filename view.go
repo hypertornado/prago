@@ -26,8 +26,6 @@ type viewField struct {
 	Icon    string
 	Name    string
 	Content template.HTML
-	//Template string
-	//Value    interface{}
 	EditURL string
 }
 
