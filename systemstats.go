@@ -15,6 +15,20 @@ import (
 func (app *App) initSystemStats() {
 	startedAt := time.Now()
 
+	sysadminBoard.Dashboard(unlocalized("DB import")).Table(func(request *Request) *Table {
+		ret := app.Table()
+
+		dbConfig, err := getDBConfig(app.codeName)
+		must(err)
+
+		ret.Row(Cell(fmt.Sprintf("mysql -u %s -p%s -f -D %s < script.sql",
+			dbConfig.User,
+			dbConfig.Password,
+			dbConfig.Name,
+		)))
+		return ret
+	}, "sysadmin")
+
 	sysadminBoard.Dashboard(unlocalized("Access view")).Table(func(r *Request) *Table {
 		ret := app.Table()
 		accessView := getResourceAccessView(app)

@@ -1,6 +1,10 @@
 package prago
 
-import "context"
+import (
+	"context"
+	"fmt"
+	"reflect"
+)
 
 type QueryData[T any] struct {
 	listQuery *listQuery
@@ -8,6 +12,10 @@ type QueryData[T any] struct {
 
 func Query[T any](app *App) *QueryData[T] {
 	res := getResource[T](app)
+	if res == nil {
+		var t T
+		panic(fmt.Sprintf("can't find resource '%s' for query", reflect.TypeOf(t).Name()))
+	}
 	ret := &QueryData[T]{
 		listQuery: res.query(context.Background()),
 	}
