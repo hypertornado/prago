@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"strings"
 )
 
@@ -26,6 +27,38 @@ const iconActivity = "glyphicons-basic-58-history.svg"
 func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 	app.iconsFS = &iconsFS
 	app.iconsPrefix = prefix
+
+	filenames := app.getIconFilenames()
+
+	var selectData [][2]string
+	selectData = append(selectData, [2]string{"", ""})
+	for _, v := range filenames {
+		selectData = append(selectData, [2]string{
+			v, v,
+		})
+	}
+	app.AddEnumFieldType("icon", selectData)
+}
+
+func (app *App) getIconFilenames() []string {
+	var ret []string
+
+	err := fs.WalkDir(app.iconsFS, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		before, after, found := strings.Cut(path, app.iconsPrefix)
+		if found && before == "" {
+			ret = append(ret, after)
+		}
+		return nil
+	})
+
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
+	return ret
 }
 
 func (app *App) iconExists(iconName string) bool {
