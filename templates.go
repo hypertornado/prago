@@ -47,12 +47,6 @@ func (app *App) initTemplates() {
 		return template.CSS(data)
 	})
 
-	app.adminTemplates.Function("PragoTMPL", func(templateName string, x interface{}) (template.HTML, error) {
-		var buf bytes.Buffer
-		err := app.adminTemplates.templates.ExecuteTemplate(&buf, templateName, x)
-		return template.HTML(buf.String()), err
-	})
-
 	app.adminTemplates.Function("PragoMarkdown", func(text string) template.HTML {
 		return template.HTML(markdown.New(markdown.Breaks(true)).RenderToString([]byte(text)))
 	})
