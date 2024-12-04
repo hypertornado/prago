@@ -8,10 +8,9 @@ import (
 )
 
 type buttonData struct {
-	Icon string
-	Name string
-	URL  string
-	//Params   map[string]string
+	Icon     string
+	Name     string
+	URL      string
 	Priority int64
 }
 
@@ -178,13 +177,6 @@ func (resource *Resource) getItemButtonData(userData UserData, item interface{})
 		if !userData.Authorize(v.permission) {
 			continue
 		}
-		/*if v.url == "" {
-			continue
-		}*/
-		//name := v.name(userData.Locale())
-		/*if v.url == "" {
-			name = resource.previewer(userData, item).Name()
-		}*/
 		ret = append(ret, &buttonData{
 			Icon:     v.icon,
 			Name:     v.name(userData.Locale()),
@@ -195,11 +187,7 @@ func (resource *Resource) getItemButtonData(userData UserData, item interface{})
 	}
 
 	sort.Slice(ret, func(i, j int) bool {
-		if ret[i].Priority > ret[j].Priority {
-			return true
-		} else {
-			return false
-		}
+		return ret[i].Priority > ret[j].Priority
 	})
 	return ret
 }

@@ -183,30 +183,6 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 					vc.AddItemError(ret.id, messages.Get(userData.Locale(), "admin_validation_date_format_error"))
 				}
 			})
-
-			/*if ret.tags["prago-type"] == "timestamp" || ret.fieldClassName == "CreatedAt" || ret.fieldClassName == "UpdatedAt" {
-				resource.addValidation(func(item any, vc Validation, userData UserData) {
-
-					itemsVal := reflect.ValueOf(item).Elem()
-					fieldVal := itemsVal.FieldByName(ret.fieldClassName)
-					ivalField := fieldVal.Interface()
-
-					timeVal := ivalField.(time.Time)
-					if timeVal.Year() == 0 {
-						vc.AddItemError(ret.id, messages.Get(userData.Locale(), "admin_validation_date_format_error"))
-					}
-				})
-			} else {
-				resource.addValidation(func(item any, vc Validation, userData UserData) {
-					val := vc.GetValue(ret.id)
-					if val != "" {
-						_, err := time.Parse("2006-01-02", val)
-						if err != nil {
-							vc.AddItemError(ret.id, messages.Get(userData.Locale(), "admin_validation_date_format_error"))
-						}
-					}
-				})
-			}*/
 		}
 	}
 

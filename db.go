@@ -84,17 +84,11 @@ func (resource *Resource) replaceItem(ctx context.Context, item interface{}, deb
 	if id <= 0 {
 		return errors.New("id must be positive")
 	}
-
 	value := reflect.ValueOf(item).Elem()
 	names, questionMarks, values, err := resource.prepareValues(value)
 	if err != nil {
 		return err
 	}
-	//TODO: suspicious
-	/*updateNames := []string{}
-	for _, v := range names {
-		updateNames = append(updateNames, fmt.Sprintf(" %s=? ", v))
-	}*/
 	q := fmt.Sprintf("REPLACE INTO `%s` (%s) VALUES (%s);", resource.id, strings.Join(names, ", "), strings.Join(questionMarks, ", "))
 	if debugSQL {
 		fmt.Println(q, values)
@@ -267,11 +261,6 @@ func (query *listQuery) list() (interface{}, error) {
 	}
 
 	rows, err := query.resource.app.db.QueryContext(query.context, q, query.values...)
-	/*defer func() {
-		if rows != nil {
-			rows.Close()
-		}
-	}()*/
 	if err != nil {
 		return nil, err
 	}

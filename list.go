@@ -247,9 +247,6 @@ func (field *Field) getListHeaderItem(userData UserData) listHeaderItem {
 
 	if headerItem.FilterLayout == "filter_layout_select" {
 		fn := field.fieldType.filterLayoutDataSource
-		/*if fn == nil {
-			fn = field.fieldType.formDataSource
-		}*/
 		headerItem.FilterData = fn(field, userData)
 	}
 

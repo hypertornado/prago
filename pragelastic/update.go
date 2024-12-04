@@ -24,8 +24,6 @@ func (index *Index[T]) UpdateSingle(item *T) error {
 		return err
 	}
 
-	//index.client.esclientNew.Update.
-
 	_, err = index.client.esclientNew.Index(index.indexName(), strings.NewReader(string(data)), func(request *esapi.IndexRequest) {
 		request.DocumentID = id
 	})

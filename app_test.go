@@ -380,32 +380,6 @@ func TestReplace(t *testing.T) {
 	}
 }
 
-/*
-func FuzzCreateItem(f *testing.F) {
-	f.Add(5, "helloss")
-	resource := prepareFuzzing()
-	f.Fuzz(func(t *testing.T, i int, s string) {
-		item := &ResourceStruct{
-			Name:  s,
-			Count: int64(i),
-		}
-		err := CreateItem(resource.app, item)
-		if err != nil {
-			return
-		}
-		item2 := Query[ResourceStruct](resource.app).Is("id", item.ID).First()
-		if item2 == nil {
-			t.Fatal("item2 is nil")
-		}
-		if item2.Name != item.Name {
-			t.Fatal("name " + s)
-		}
-		if item2.Count != item.Count {
-			t.Fatal("count ", i)
-		}
-	})
-}*/
-
 func TestLongSaveText(t *testing.T) {
 	//TODO: make it work with 100000
 	text := "some" + string(make([]byte, 10000))
