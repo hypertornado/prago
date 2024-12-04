@@ -218,7 +218,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 
 	resource.api("multiple_edit").Permission(resource.canUpdate).Method("GET").Handler(
 		func(request *Request) {
-			form := NewForm(
+			form := resource.app.NewForm(
 				resource.getURL("api/multiple_edit"),
 			)
 

@@ -45,6 +45,7 @@ type listHeaderItem struct {
 	CanOrder          bool
 	DefaultShow       bool
 	FilterLayout      string
+	FilterContent     template.HTML
 	RelatedResourceID string
 	FilterData        interface{}
 	NaturalCellWidth  int64
@@ -252,6 +253,11 @@ func (field *Field) getListHeaderItem(userData UserData) listHeaderItem {
 
 	if field.canOrder {
 		headerItem.CanOrder = true
+	}
+
+	if headerItem.FilterLayout != "" {
+		headerItem.FilterContent = field.resource.app.adminTemplates.
+			ExecuteToHTML(headerItem.FilterLayout, headerItem)
 	}
 
 	return headerItem

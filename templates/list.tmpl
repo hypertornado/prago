@@ -41,8 +41,8 @@
         </div>
         <div class="list_header_item_resizer" draggable="true"></div>
         <div class="list_header_item_filter" data-name="{{$item.ColumnName}}" data-filter-layout="{{$item.FilterLayout}}">
-          {{if $item.FilterLayout}}
-            {{PragoTMPL $item.FilterLayout $item}}
+          {{if $item.FilterContent}}
+            {{$item.FilterContent}}
           {{end}}
         </div>
       </div>

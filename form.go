@@ -7,6 +7,7 @@ import (
 
 // Form represents admin form
 type Form struct {
+	app                    *App
 	action                 *Action
 	image                  string
 	Action                 string
@@ -48,9 +49,20 @@ type FormItem struct {
 	HelpURL string
 }
 
+func (fi *FormItem) GetContent() template.HTML {
+	if fi.Content != "" {
+		return fi.Content
+	}
+	if fi.Template != "" {
+		return fi.form.app.adminTemplates.ExecuteToHTML(fi.Template, fi)
+	}
+	return ""
+}
+
 // NewForm creates new form
-func NewForm(action string) *Form {
+func (app *App) NewForm(action string) *Form {
 	ret := &Form{
+		app:    app,
 		Action: action,
 	}
 	return ret

@@ -28,7 +28,7 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *form
 			panic("No form set for this FormAction")
 		}
 
-		form := NewForm(request.r.URL.Path)
+		form := app.NewForm(request.r.URL.Path)
 		form.AddCSRFToken(request)
 		form.action = ret.actionForm
 
@@ -75,7 +75,7 @@ func (app *App) nologinFormAction(path string, formHandler func(f *Form, r *Requ
 		}
 
 		locale := localeFromRequest(request)
-		form := NewForm("/admin/user/" + path)
+		form := app.NewForm("/admin/user/" + path)
 		formHandler(form, request)
 
 		renderPageNoLogin(request, &pageNoLogin{
