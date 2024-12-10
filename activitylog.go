@@ -208,9 +208,11 @@ func (app *App) initActivityLog() {
 
 func getDiffMap(inStr string) map[string]string {
 	var objectMap map[string]interface{}
-	must(json.Unmarshal([]byte(inStr), &objectMap))
-
 	var ret = map[string]string{}
+	if inStr == "" {
+		return ret
+	}
+	must(json.Unmarshal([]byte(inStr), &objectMap))
 
 	for k, v := range objectMap {
 		ret[strings.ToLower(k)] = fmt.Sprintf("%v", v)

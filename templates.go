@@ -35,14 +35,6 @@ func NewPragoTemplates() *PragoTemplates {
 func (app *App) initTemplates() {
 	app.adminTemplates = NewPragoTemplates()
 
-	app.adminTemplates.Function("PragoHTML", func(data string) template.HTML {
-		return template.HTML(data)
-	})
-
-	app.adminTemplates.Function("PragoHTMLAttr", func(data string) template.HTMLAttr {
-		return template.HTMLAttr(data)
-	})
-
 	app.adminTemplates.Function("PragoCSS", func(data string) template.CSS {
 		return template.CSS(data)
 	})
