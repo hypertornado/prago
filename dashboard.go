@@ -24,7 +24,13 @@ func (app *App) initDashboard() {
 		func(request *Request) any {
 			uuid := request.Param("uuid")
 			figure, err := app.getDashboardFigureData(request, uuid)
-			must(err)
+			if err != nil {
+				if err == cantFindFigureError {
+					request.WriteJSON(404, "can't find figure")
+					return nil
+				}
+				panic(err)
+			}
 			return figure
 		},
 	)

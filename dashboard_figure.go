@@ -34,10 +34,12 @@ func (figure dashboardFigure) data(request *Request) *dashboardFigureData {
 	return ret
 }
 
+var cantFindFigureError = errors.New("can't find figure")
+
 func (app *App) getDashboardFigureData(request *Request, uuid string) (*dashboardFigureData, error) {
 	figure := app.dashboardFigureMap[uuid]
 	if figure == nil {
-		return nil, errors.New("can't find figure")
+		return nil, cantFindFigureError
 	}
 	if !request.Authorize(figure.permission) {
 		return nil, errors.New("can't authorize for access of figure data")

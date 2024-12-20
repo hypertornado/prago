@@ -150,6 +150,7 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initIcons()
 	app.initMenuAPI()
 	app.initCron()
+	app.initCacheStats()
 
 	return app
 }

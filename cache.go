@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"encoding/json"
 	"sync"
 	"time"
 )
@@ -12,6 +13,10 @@ const staleInterval = 10 * time.Minute
 type cache struct {
 	items map[string]*cacheItem
 	mutex *sync.RWMutex
+
+	accessMutex *sync.RWMutex
+	accessCount map[string]int64
+	lastAccess  map[string]time.Time
 }
 
 type cacheItem struct {
@@ -22,10 +27,46 @@ type cacheItem struct {
 	mutex     *sync.RWMutex
 }
 
+func (c *cache) markAccess(id string) {
+
+	go func() {
+		c.accessMutex.Lock()
+		defer c.accessMutex.Unlock()
+
+		c.accessCount[id] += 1
+		c.lastAccess[id] = time.Now()
+	}()
+
+}
+
+func (c *cache) getStats() (ret []cacheStats) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.accessMutex.Lock()
+	defer c.accessMutex.Unlock()
+
+	for k, v := range c.items {
+
+		ret = append(ret, cacheStats{
+			ID:         k,
+			Size:       v.getJSONSize(),
+			Count:      c.accessCount[k],
+			LastAccess: c.lastAccess[k],
+		})
+	}
+
+	return ret
+}
+
 func newCache() *cache {
 	return &cache{
 		items: map[string]*cacheItem{},
 		mutex: &sync.RWMutex{},
+
+		accessMutex: &sync.RWMutex{},
+		accessCount: map[string]int64{},
+		lastAccess:  map[string]time.Time{},
 	}
 }
 
@@ -33,6 +74,16 @@ func (ci cacheItem) isStale() bool {
 	ci.mutex.RLock()
 	defer ci.mutex.RUnlock()
 	return ci.updatedAt.Add(staleInterval).Before(time.Now())
+}
+
+func (ci cacheItem) getJSONSize() int64 {
+	val := ci.getValue()
+	data, err := json.Marshal(val)
+	if err != nil {
+		return -1
+	}
+	return int64(len(data))
+
 }
 
 func (ci cacheItem) getValue() interface{} {
@@ -124,6 +175,7 @@ func Cached[T any](app *App, name string, createFn func() T) chan T {
 		val := loadCache(app.cache, name, createFn)
 		ret <- val
 	}()
+	app.cache.markAccess(name)
 	return ret
 }
 
@@ -140,5 +192,11 @@ func (c *cache) forceLoad(cacheName string, createFn func() interface{}) interfa
 func (c *cache) clear() {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
+
+	c.accessMutex.Lock()
+	defer c.accessMutex.Unlock()
+
 	c.items = map[string]*cacheItem{}
+	c.accessCount = map[string]int64{}
+	c.lastAccess = map[string]time.Time{}
 }

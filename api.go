@@ -84,7 +84,6 @@ func (api *API) initAPI() error {
 	if api.resource != nil {
 		controller = api.resource.getResourceControl()
 	} else {
-		//controller = api.app.adminController
 		controller = api.app.accessController
 	}
 
@@ -106,13 +105,16 @@ func (api *API) initAPI() error {
 		}
 		if api.handlerJSON != nil {
 			data := api.handlerJSON(request)
-			request.WriteJSON(200, data)
+			if !request.Written {
+				request.WriteJSON(200, data)
+			}
 			return
 		}
 		if api.handler != nil {
 			api.handler(request)
 			return
 		}
+
 	}
 
 	if api.permission == "" {
