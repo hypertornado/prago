@@ -2,13 +2,16 @@ package prago
 
 import (
 	"encoding/json"
+	"math/rand"
 	"sync"
 	"time"
 )
 
 //use https://github.com/sourcegraph/conc
 
-const staleInterval = 10 * time.Minute
+const staleInterval = 5 * time.Minute
+
+//const staleInterval = 1 * time.Second
 
 type cache struct {
 	items map[string]*cacheItem
@@ -73,7 +76,11 @@ func newCache() *cache {
 func (ci cacheItem) isStale() bool {
 	ci.mutex.RLock()
 	defer ci.mutex.RUnlock()
-	return ci.updatedAt.Add(staleInterval).Before(time.Now())
+
+	//disperse in 5 minutes
+	randomStaleCoeficient := rand.Intn(5*60) * int(time.Second)
+
+	return ci.updatedAt.Add(staleInterval + time.Duration(randomStaleCoeficient)).Before(time.Now())
 }
 
 func (ci cacheItem) getJSONSize() int64 {
