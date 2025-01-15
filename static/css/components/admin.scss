@@ -391,18 +391,20 @@ select.admin_timestamp_minute {
 
 .admin_item_relation_picker_suggestions {
   position: relative;
+  z-index: 100000;
 }
 
 .admin_item_relation_picker_suggestions_content {
   position: absolute;
   top: 0px;
-  z-index: 20;
+  z-index: 100000;
   background-color: white;
   margin-bottom: 10px;
   border-bottom-right-radius: 5px;
   border-bottom-left-radius: 5px;
   @include shadow;
   width: 400px;
+  //border: 1px solid red;
 }
 
 .admin_item_relation_picker_suggestion {

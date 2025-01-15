@@ -12,6 +12,8 @@ import (
 	"golang.org/x/net/context"
 )
 
+//Implement posgresql: https://gist.github.com/cpursley/c8fb81fe8a7e5df038158bdfe0f06dbb
+
 // ErrWrongWhereFormat is returned when where query has a bad format
 var ErrWrongWhereFormat = errors.New("wrong where format")
 
