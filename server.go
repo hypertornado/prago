@@ -8,6 +8,11 @@ import (
 )
 
 func (app *App) listenAndServe(port int) error {
+
+	if app.beforeStartHandler != nil {
+		app.beforeStartHandler()
+	}
+
 	app.port = port
 	app.Log().Printf("Server started: port=%d, pid=%d, developmentMode=%v\n", port, os.Getpid(), app.developmentMode)
 
@@ -34,6 +39,10 @@ type server struct {
 // TODO: remove after fixed tests in lazensky
 func (app *App) NewServer() server {
 	return server{*app}
+}
+
+func (app *App) AddBeforeStartHandler(fn func()) {
+	app.beforeStartHandler = fn
 }
 
 func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {

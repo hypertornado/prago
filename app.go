@@ -83,6 +83,8 @@ type App struct {
 	router *router
 
 	EmailSentHandler func(*Email)
+
+	beforeStartHandler func()
 }
 
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {

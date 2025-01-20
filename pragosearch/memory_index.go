@@ -20,7 +20,6 @@ func NewMemoryIndex() *MemoryIndex {
 	ret := &MemoryIndex{
 		mutex:     &sync.RWMutex{},
 		analyzers: map[string]*analyzer{},
-		//defaultIndexAnalyzer: getAnalyzer(defaultAnalyzerID),
 	}
 	ret.DeleteAll()
 	return ret
