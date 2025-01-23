@@ -113,8 +113,10 @@ func (app *App) suggestItems(q string, request *Request) (ret []*searchItem, err
 
 	ret = append(ret, app.searchWithoutElastic(q, request)...)
 
-	if len(ret) > 5 {
-		ret = ret[0:5]
+	var suggestLimit = 20
+
+	if len(ret) > suggestLimit {
+		ret = ret[0:suggestLimit]
 	}
 
 	return

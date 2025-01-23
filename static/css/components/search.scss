@@ -124,12 +124,14 @@ a.search_pagination_page-selected {
   @include shadow;
   border-radius: 0px 0px 10px 10px;
   padding: 0px;
-  overflow: hidden;
+  overflow: auto;
   display: none;
   z-index: 1000;
   clip-path: inset(0px -100px -100px -100px);
   border: 1px solid #eee;
   border-top: none;
+
+  max-height: calc(100vh - 50px);
 }
 
 .searchbox-showsuggestions .searchbox_suggestions {
