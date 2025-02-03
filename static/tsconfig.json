@@ -34,6 +34,7 @@
     "js/dashboard.ts",
     "js/shortcuts.ts",
     "js/cmenu.ts",
+    "js/timeline.ts",
     "js/prago.ts"
   ]
 }

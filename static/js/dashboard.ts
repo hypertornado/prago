@@ -10,6 +10,12 @@ function initDashboard() {
   dashboardFigures.forEach((el) => {
     new DashboardFigure(el);
   });
+
+  var dashboardTimelines =
+    document.querySelectorAll<HTMLDivElement>(".timeline");
+    dashboardTimelines.forEach((el) => {
+    new Timeline(el);
+  });
 }
 
 class DashboardTable {

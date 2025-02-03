@@ -26,6 +26,7 @@ func (app *App) initBoard() {
 	app.MainBoard.action.parentBoard = app.MainBoard
 	app.dashboardTableMap = make(map[string]*dashboardTable)
 	app.dashboardFigureMap = make(map[string]*dashboardFigure)
+	app.dashboardTimelineMap = make(map[string]*Timeline)
 	sysadminBoard = app.MainBoard.Child("sysadmin-board", unlocalized("Sysadmin"), "glyphicons-basic-501-server.svg")
 
 	sysadminGroup := sysadminBoard.Dashboard(unlocalized("Sysadmin"))
@@ -50,6 +51,11 @@ func (app *App) initBoard() {
 		table.Graph().DataMap(m)
 		return table
 
+	}, "sysadmin")
+
+	sysadminGroup.Timeline(unlocalized("Úpravy"), func(t1, t2 time.Time) float64 {
+		c, _ := Query[activityLog](app).Where("createdat >= ? and createdat < ?", t1, t2).Count()
+		return float64(c)
 	}, "sysadmin")
 }
 

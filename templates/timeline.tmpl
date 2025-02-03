@@ -1,0 +1,19 @@
+{{define "timeline"}}
+    <div class="timeline" data-uuid="{{.UUID}}">
+        <h2 class="timeline_name">{{.Name}}</h2>
+        <div class="timeline_toolbar">
+            <!--
+            <select class="timeline_toolbar_type">
+                <option>Den</option>
+                <option>Měsíc</option>
+                <option>Rok</option>
+            </select>
+            -->
+            <div class="timeline_toolbar_datepicker">
+                <input type="date" class="timeline_toolbar_date">
+            </div>
+        
+        </div>
+        <div class="timeline_values"></div>
+    </div>
+{{end}}

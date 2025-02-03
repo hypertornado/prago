@@ -29,5 +29,9 @@
       {{range $table := .Tables}}
         <div class="dashboard_table" data-uuid="{{$table.UUID}}" data-refresh-time-seconds="{{$table.RefreshTimeSeconds}}"><progress class="progress"></progress></div>
       {{end}}
+
+      {{range $timeline := .Timelines}}
+        {{template "timeline" $timeline}}
+      {{end}}
     </div>
 {{end}}

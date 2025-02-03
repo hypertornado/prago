@@ -1,0 +1,75 @@
+@use "../variables.scss" as *;
+
+.timeline {
+    padding: 0px 10px;
+}
+
+.timeline_toolbar {
+    display: flex;
+    gap: 8px;
+    padding: 4px 0px;
+}
+
+.timeline_values {
+    height: 200px;
+    //border: 1px solid red;
+    display: flex;
+    gap: 4px;
+    padding: 4px 0px;
+    justify-content: stretch;
+}
+
+.timeline_value {
+    //border: 2px solid blue;
+    width: 100%;
+    flex-shrink: 100;
+    display: flex;
+    flex-direction: column;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.timeline_value:hover {
+    opacity: .9;
+    background-color: #eee;
+}
+
+.timeline_value_top {
+    flex-grow: 100;
+    background-color: #eee;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.timeline_value_graph {
+    background-color: $baseColor;
+    height: 50%;
+    width: 100%;
+    align-self: flex-start;
+    position: relative;
+}
+
+.timeline_value_human {
+    font-size: .8rem;
+    line-height: 1.3em;
+    flex-shrink: 0;
+    text-align: center;
+    overflow: hidden;
+}
+
+.timeline_value_name {
+    font-size: .8rem;
+    line-height: 1.3em;
+    flex-shrink: 0;
+    height: 1.3em;
+    text-align: center;
+    overflow: hidden;
+    color: $gray;
+}
+
+.timeline_value-current .timeline_value_name {
+    color: $red;
+}

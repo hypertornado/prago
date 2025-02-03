@@ -1,11 +1,12 @@
 package prago
 
 type Dashboard struct {
-	board   *Board
-	name    func(string) string
-	tasks   []*Task
-	figures []*dashboardFigure
-	tables  []*dashboardTable
+	board     *Board
+	name      func(string) string
+	tasks     []*Task
+	figures   []*dashboardFigure
+	tables    []*dashboardTable
+	timelines []*Timeline
 }
 
 func (app *App) initDashboard() {
@@ -34,6 +35,8 @@ func (app *App) initDashboard() {
 			return figure
 		},
 	)
+
+	app.initTimeline()
 }
 
 func (board *Board) Dashboard(name func(string) string) *Dashboard {

@@ -24,13 +24,13 @@ func connectMysql(dbUser, dbPassword, dbName string) (*sql.DB, error) {
 	}
 	//prevent resource exhaustion
 	//https://github.com/go-sql-driver/mysql#usage
-	db.SetConnMaxLifetime(time.Minute * 3)
-	db.SetMaxOpenConns(100)
-	db.SetMaxIdleConns(100)
+	//db.SetConnMaxLifetime(time.Minute * 3)
+	//db.SetMaxOpenConns(100)
+	//db.SetMaxIdleConns(100)
 
-	db.SetConnMaxLifetime(time.Minute * 1)
-	db.SetMaxOpenConns(10)
-	db.SetMaxIdleConns(10)
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(30)
+	db.SetMaxIdleConns(30)
 
 	return db, db.Ping()
 }

@@ -18,10 +18,11 @@ type boardView struct {
 }
 
 type dashboardView struct {
-	Name    string
-	Tasks   []taskView
-	Figures []*dashboardViewFigure
-	Tables  []dashboardViewTable
+	Name      string
+	Tasks     []taskView
+	Figures   []*dashboardViewFigure
+	Tables    []dashboardViewTable
+	Timelines []*dashboardViewTimeline
 }
 
 type dashboardViewFigure struct {
@@ -103,6 +104,15 @@ func (dashboard *Dashboard) view(request *Request) *dashboardView {
 			view.Tables = append(view.Tables, dashboardViewTable{
 				UUID:               v.uuid,
 				RefreshTimeSeconds: v.refreshTimeSeconds,
+			})
+		}
+	}
+
+	for _, v := range dashboard.timelines {
+		if request.Authorize(v.permission) {
+			view.Timelines = append(view.Timelines, &dashboardViewTimeline{
+				UUID: v.uuid,
+				Name: v.name(request.Locale()),
 			})
 		}
 	}

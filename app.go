@@ -62,8 +62,9 @@ type App struct {
 
 	activityListeners []func(Activity)
 
-	dashboardTableMap  map[string]*dashboardTable
-	dashboardFigureMap map[string]*dashboardFigure
+	dashboardTableMap    map[string]*dashboardTable
+	dashboardFigureMap   map[string]*dashboardFigure
+	dashboardTimelineMap map[string]*Timeline
 
 	MainBoard *Board
 

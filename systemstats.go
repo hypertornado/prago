@@ -170,7 +170,7 @@ func (app *App) initSystemStats() {
 		return statsTable(app, environmentStats)
 	}, sysadminPermission)
 
-	sysadminBoard.Dashboard(unlocalized("Elasticsearch")).Table(func(r *Request) *Table {
+	/*sysadminBoard.Dashboard(unlocalized("Elasticsearch")).Table(func(r *Request) *Table {
 		ret := app.Table()
 		esStats := elasticsearchStats(app)
 		for _, v := range esStats {
@@ -178,7 +178,7 @@ func (app *App) initSystemStats() {
 		}
 
 		return ret
-	}, sysadminPermission)
+	}, sysadminPermission)*/
 
 	sysadminBoard.Dashboard(unlocalized("Routes")).Table(func(r *Request) *Table {
 		ret := app.Table()
