@@ -53,10 +53,18 @@ func (app *App) initBoard() {
 
 	}, "sysadmin")
 
-	sysadminGroup.Timeline(unlocalized("Úpravy"), func(t1, t2 time.Time) float64 {
+	tl := sysadminGroup.Timeline(unlocalized("Úpravy"), "sysadmin")
+
+	tl.DataSource(func(t1, t2 time.Time) float64 {
 		c, _ := Query[activityLog](app).Where("createdat >= ? and createdat < ?", t1, t2).Count()
 		return float64(c)
-	}, "sysadmin")
+	}).Name(unlocalized("Úpravy")).Stringer(func(f float64) string {
+		return fmt.Sprintf("%v editací", f)
+	}).Name(unlocalized("T1"))
+
+	tl.DataSource(func(t1, t2 time.Time) float64 {
+		return -20
+	}).Name(unlocalized("T2"))
 }
 
 func (parent *Board) Child(url string, name func(string) string, icon string) *Board {

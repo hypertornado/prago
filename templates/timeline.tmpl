@@ -2,18 +2,30 @@
     <div class="timeline" data-uuid="{{.UUID}}">
         <h2 class="timeline_name">{{.Name}}</h2>
         <div class="timeline_toolbar">
-            <!--
             <select class="timeline_toolbar_type">
-                <option>Den</option>
-                <option>Měsíc</option>
-                <option>Rok</option>
+                <option value="day">Den</option>
+                <option value="month">Měsíc</option>
+                <option value="year">Rok</option>
             </select>
-            -->
             <div class="timeline_toolbar_datepicker">
+                <button class="timeline_toolbar_prev"><</button>
                 <input type="date" class="timeline_toolbar_date">
+                <input type="month" class="timeline_toolbar_month">
+                <input type="number" class="timeline_toolbar_year">
+                <button class="timeline_toolbar_next">></button>
             </div>
         
         </div>
         <div class="timeline_values"></div>
+        {{if .Legend}}
+            <div class="timeline_legend">
+                {{range $item := .Legend.Items}}
+                    <div class="timeline_legend_item">
+                        <div class="timeline_legend_color" style="background: {{$item.Color}};"></div>
+                        <div class="timeline_legend_name">{{$item.Name}}</div>
+                    </div>
+                {{end}}
+            </div>
+        {{end}}
     </div>
 {{end}}

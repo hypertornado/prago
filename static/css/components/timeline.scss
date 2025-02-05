@@ -25,7 +25,7 @@
     flex-shrink: 100;
     display: flex;
     flex-direction: column;
-    border-radius: 4px;
+    //border-radius: 4px;
     overflow: hidden;
 }
 
@@ -34,30 +34,37 @@
     background-color: #eee;
 }
 
-.timeline_value_top {
+.timeline_value_bars {
     flex-grow: 100;
     background-color: #eee;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+    //justify-content: flex-end;
+    //align-items: center;
+    //align-items: end;
     overflow: hidden;
-    border-radius: 4px;
+    //border-radius: 4px;
+    gap: 1px;
+    border: 0px solid blue;
 }
 
-.timeline_value_graph {
-    background-color: $baseColor;
-    height: 50%;
+.timeline_value_bar {
+    //height: 50%;
     width: 100%;
+    height: 100%;
     align-self: flex-start;
     position: relative;
+
+    display: flex;
+    position: relative;
+    //border: 1px solid red;
 }
 
-.timeline_value_human {
-    font-size: .8rem;
-    line-height: 1.3em;
-    flex-shrink: 0;
-    text-align: center;
-    overflow: hidden;
+.timeline_value_bar_inner {
+    align-self: end;
+    border: 0px solid yellow;
+    width: 100%;
+    position: relative;
+    background-color: $baseColor;
 }
 
 .timeline_value_name {
@@ -72,4 +79,33 @@
 
 .timeline_value-current .timeline_value_name {
     color: $red;
+}
+
+.timeline_legend {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 0px;
+}
+
+.timeline_legend_item {
+    //border: 1px solid red;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.timeline_legend_color {
+    border: 0px solid $grayBorderColor;
+    border-radius: 4px;
+    width: 16px;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.timeline_legend_name {
+    color: $gray;
+    font-size: .8rem;
+    line-height: 1.3em;
 }

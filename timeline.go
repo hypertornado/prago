@@ -9,15 +9,16 @@ import (
 )
 
 type Timeline struct {
-	uuid       string
-	name       func(string) string
-	dataSource func(time.Time, time.Time) float64
-	permission Permission
+	uuid        string
+	name        func(string) string
+	permission  Permission
+	dataSources []*TimelineDataSource
 }
 
 type dashboardViewTimeline struct {
-	UUID string
-	Name string
+	UUID   string
+	Name   string
+	Legend *timelineLegend
 }
 
 func (app *App) initTimeline() {
@@ -39,11 +40,10 @@ func (app *App) initTimeline() {
 
 }
 
-func (dashboard *Dashboard) Timeline(name func(string) string, dataSource func(time.Time, time.Time) float64, permission Permission) *Timeline {
+func (dashboard *Dashboard) Timeline(name func(string) string, permission Permission) *Timeline {
 	timeline := &Timeline{
 		uuid:       "timeline-" + randomString(30),
 		name:       name,
-		dataSource: dataSource,
 		permission: permission,
 	}
 	dashboard.board.app.dashboardTimelineMap[timeline.uuid] = timeline
@@ -64,38 +64,109 @@ func (app *App) getTimelineData(request *Request, uuid string) (*timelineData, e
 	return timeline.data(request), nil
 }
 
+func (timeline *Timeline) getTimelineColumnsCount(widthStr string) int {
+	var defaultValue = 10
+	var optimalSize = 20
+	width, err := strconv.Atoi(widthStr)
+	if err != nil {
+		return defaultValue
+	}
+	var barCount = len(timeline.dataSources)
+	if barCount == 0 {
+		return defaultValue
+	}
+
+	return int(math.Floor(
+		float64(width) / float64(barCount*optimalSize),
+	))
+
+}
+
 func (timeline *Timeline) data(request *Request) *timelineData {
 	ret := &timelineData{}
 
-	var err error
-	var columnsCount int
-	columnsCount, err = strconv.Atoi(request.Param("columns"))
+	var columnsCount = timeline.getTimelineColumnsCount(request.Param("width"))
+	/*columnsCount, _ = strconv.Atoi(request.Param("columns"))
 
 	if columnsCount < 10 {
 		columnsCount = 10
 	}
 	if columnsCount > 100 {
 		columnsCount = 100
+	}*/
+
+	var err error
+	var typ string
+	var endDate time.Time
+
+	endDate, err = time.Parse("2006-01-02", request.Param("date"))
+	if err == nil {
+		typ = "day"
 	}
 
-	endDate, err := time.Parse("2006-01-02", request.Param("date"))
-	must(err)
+	if typ == "" {
+		endDate, err = time.Parse("2006-01", request.Param("date"))
+		if err == nil {
+			typ = "month"
+		}
+	}
+
+	if typ == "" {
+		endDate, err = time.Parse("2006", request.Param("date"))
+		if err == nil {
+			typ = "year"
+		}
+	}
+
+	if typ == "" {
+		panic("can't parse date")
+	}
 
 	for i := columnsCount - 1; i >= 0; i-- {
-		t1 := endDate.AddDate(0, 0, -i)
-		t2 := t1.AddDate(0, 0, 1)
-		val := timeline.dataSource(t1, t2)
-
+		var t1, t2 time.Time
+		var formattedDate string
 		var isCurrent bool
-		if t1.Year() == time.Now().Year() && t1.YearDay() == time.Now().YearDay() {
-			isCurrent = true
+
+		if typ == "day" {
+			t1 = endDate.AddDate(0, 0, -i)
+			t2 = t1.AddDate(0, 0, 1)
+			formattedDate = t1.Format("2. 1. 2006")
+			if t1.Year() == time.Now().Year() && t1.YearDay() == time.Now().YearDay() {
+				isCurrent = true
+			}
+		}
+		if typ == "month" {
+			t1 = endDate.AddDate(0, -i, 0)
+			t2 = t1.AddDate(0, 1, 0)
+			formattedDate = t1.Format("1. 2006")
+			if t1.Year() == time.Now().Year() && t1.Month() == time.Now().Month() {
+				isCurrent = true
+			}
+		}
+		if typ == "year" {
+			t1 = endDate.AddDate(-i, 0, 0)
+			t2 = t1.AddDate(1, 0, 0)
+			formattedDate = t1.Format("2006")
+			if t1.Year() == time.Now().Year() {
+				isCurrent = true
+			}
 		}
 
-		ret.Values = append(ret.Values, &timelineDataValue{
-			Name:      t1.Format("2. 1. 2006"),
-			Value:     val,
+		dataValue := &timelineDataValue{
+			Name:      formattedDate,
 			IsCurrent: isCurrent,
-		})
+		}
+
+		for _, ds := range timeline.dataSources {
+			val := ds.dataSource(t1, t2)
+			dataValue.Bars = append(dataValue.Bars, &timelineDataBar{
+				Value:     val,
+				ValueText: ds.stringer(val),
+				Color:     ds.color,
+			})
+		}
+
+		ret.Values = append(ret.Values, dataValue)
 	}
 
 	ret.FixValues()
@@ -111,46 +182,52 @@ type timelineData struct {
 func (td *timelineData) FixValues() {
 	var maxValue float64 = -math.MaxFloat64
 	for _, v := range td.Values {
-		if v.Value > maxValue {
-			maxValue = v.Value
+		for _, bar := range v.Bars {
+			if bar.Value > maxValue {
+				maxValue = bar.Value
+			}
+			if bar.Value < td.MinValue {
+				td.MinValue = bar.Value
+			}
+			//bar.ValueText = fmt.Sprintf("%v", bar.Value)
 		}
-		if v.Value < td.MinValue {
-			td.MinValue = v.Value
-		}
-
-		v.ValueText = fmt.Sprintf("%v", v.Value)
-
 	}
 	td.MaxValue = maxValue
 
 	for _, v := range td.Values {
-		var height, bottom float64
+		for _, bar := range v.Bars {
+			var height, bottom float64
+			var size = td.MaxValue - td.MinValue
 
-		var size = td.MaxValue - td.MinValue
-
-		if math.Abs(v.Value) > 0 {
-			height = (math.Abs(v.Value) / size) * 100
-		}
-
-		if td.MinValue < 0 {
-
-			var bottomSize = -td.MinValue
-			if v.Value < 0 {
-				bottomSize += v.Value
+			if math.Abs(bar.Value) > 0 {
+				height = (math.Abs(bar.Value) / size) * 100
 			}
 
-			bottom = (bottomSize / size) * 100
-		}
+			if td.MinValue < 0 {
 
-		v.StyleCSS = fmt.Sprintf("height: %v%%; bottom: %v%%;", height, bottom)
+				var bottomSize = -td.MinValue
+				if bar.Value < 0 {
+					bottomSize += bar.Value
+				}
+
+				bottom = (bottomSize / size) * 100
+			}
+
+			bar.StyleCSS = fmt.Sprintf("height: %v%%; bottom: %v%%; background: %s;", height, bottom, bar.Color)
+		}
 
 	}
 }
 
 type timelineDataValue struct {
 	Name      string
+	Bars      []*timelineDataBar
+	IsCurrent bool
+}
+
+type timelineDataBar struct {
 	Value     float64
 	ValueText string
+	Color     string
 	StyleCSS  string
-	IsCurrent bool
 }
