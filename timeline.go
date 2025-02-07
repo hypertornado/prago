@@ -25,7 +25,7 @@ func (app *App) initTimeline() {
 
 	app.API("timeline").Method("GET").Permission(loggedPermission).HandlerJSON(
 		func(request *Request) any {
-			uuid := request.Param("uuid")
+			uuid := request.Param("_uuid")
 			timeline, err := app.getTimelineData(request, uuid)
 			if err != nil {
 				if err == cantFindTimelineError {
@@ -66,7 +66,7 @@ func (app *App) getTimelineData(request *Request, uuid string) (*timelineData, e
 
 func (timeline *Timeline) getTimelineColumnsCount(widthStr string) int {
 	var defaultValue = 10
-	var optimalSize = 20
+	var optimalSize = 40
 	width, err := strconv.Atoi(widthStr)
 	if err != nil {
 		return defaultValue
@@ -85,34 +85,27 @@ func (timeline *Timeline) getTimelineColumnsCount(widthStr string) int {
 func (timeline *Timeline) data(request *Request) *timelineData {
 	ret := &timelineData{}
 
-	var columnsCount = timeline.getTimelineColumnsCount(request.Param("width"))
-	/*columnsCount, _ = strconv.Atoi(request.Param("columns"))
-
-	if columnsCount < 10 {
-		columnsCount = 10
-	}
-	if columnsCount > 100 {
-		columnsCount = 100
-	}*/
+	var columnsCount = timeline.getTimelineColumnsCount(request.Param("_width"))
+	var dateStr = request.Param("_date")
 
 	var err error
 	var typ string
 	var endDate time.Time
 
-	endDate, err = time.Parse("2006-01-02", request.Param("date"))
+	endDate, err = time.Parse("2006-01-02", dateStr)
 	if err == nil {
 		typ = "day"
 	}
 
 	if typ == "" {
-		endDate, err = time.Parse("2006-01", request.Param("date"))
+		endDate, err = time.Parse("2006-01", dateStr)
 		if err == nil {
 			typ = "month"
 		}
 	}
 
 	if typ == "" {
-		endDate, err = time.Parse("2006", request.Param("date"))
+		endDate, err = time.Parse("2006", dateStr)
 		if err == nil {
 			typ = "year"
 		}
@@ -214,6 +207,13 @@ func (td *timelineData) FixValues() {
 			}
 
 			bar.StyleCSS = fmt.Sprintf("height: %v%%; bottom: %v%%; background: %s;", height, bottom, bar.Color)
+
+			var labelBottom = bottom
+			if bar.Value > 0 {
+				labelBottom += height
+			}
+
+			bar.LabelStyleCSS = fmt.Sprintf("bottom: %v%%;", labelBottom)
 		}
 
 	}
@@ -226,8 +226,9 @@ type timelineDataValue struct {
 }
 
 type timelineDataBar struct {
-	Value     float64
-	ValueText string
-	Color     string
-	StyleCSS  string
+	Value         float64
+	ValueText     string
+	Color         string
+	StyleCSS      string
+	LabelStyleCSS string
 }

@@ -2,17 +2,21 @@
     <div class="timeline" data-uuid="{{.UUID}}">
         <h2 class="timeline_name">{{.Name}}</h2>
         <div class="timeline_toolbar">
-            <select class="timeline_toolbar_type">
+            <select class="timeline_toolbar_type timeline_toolbar_item">
                 <option value="day">Den</option>
                 <option value="month">Měsíc</option>
                 <option value="year">Rok</option>
             </select>
             <div class="timeline_toolbar_datepicker">
-                <button class="timeline_toolbar_prev"><</button>
-                <input type="date" class="timeline_toolbar_date">
-                <input type="month" class="timeline_toolbar_month">
-                <input type="number" class="timeline_toolbar_year">
-                <button class="timeline_toolbar_next">></button>
+                <button class="timeline_toolbar_prev timeline_toolbar_item timeline_toolbar_item-nav">
+                    <img class="timeline_toolbar_icon" src="/admin/api/icons?file=glyphicons-basic-223-chevron-left.svg&color=444444">
+                </button>
+                <input type="date" class="timeline_toolbar_date timeline_toolbar_item timeline_toolbar_item-dateselect">
+                <input type="month" class="timeline_toolbar_month timeline_toolbar_item timeline_toolbar_item-dateselect">
+                <input type="number" class="timeline_toolbar_year timeline_toolbar_item timeline_toolbar_item-dateselect">
+                <button class="timeline_toolbar_next timeline_toolbar_item timeline_toolbar_item-nav">
+                    <img class="timeline_toolbar_icon" src="/admin/api/icons?file=glyphicons-basic-224-chevron-right.svg&color=444444">
+                </button>
             </div>
         
         </div>

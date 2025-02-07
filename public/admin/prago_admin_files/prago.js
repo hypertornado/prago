@@ -3158,9 +3158,9 @@ class Timeline {
         }
         var request = new XMLHttpRequest();
         var params = {
-            uuid: this.el.getAttribute("data-uuid"),
-            date: dateStr,
-            width: this.el.clientWidth,
+            _uuid: this.el.getAttribute("data-uuid"),
+            _date: dateStr,
+            _width: this.el.clientWidth,
         };
         request.addEventListener("load", () => {
             if (request.status == 200) {
@@ -3208,6 +3208,11 @@ class Timeline {
         barEl.setAttribute("title", barValue.ValueText);
         barEl.classList.add("timeline_value_bar");
         el.appendChild(barEl);
+        let labelEl = document.createElement("div");
+        labelEl.classList.add("timeline_value_label");
+        labelEl.innerText = barValue.ValueText;
+        labelEl.setAttribute("style", barValue.LabelStyleCSS);
+        barEl.appendChild(labelEl);
     }
     changedType() {
         let typ = this.typeSelect.value;

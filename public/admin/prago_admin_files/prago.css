@@ -3468,14 +3468,52 @@ a.admin_stats_section_row {
 .timeline_toolbar {
   display: flex;
   gap: 8px;
-  padding: 4px 0px;
+  padding: 8px 0px;
+}
+
+.timeline_toolbar_datepicker {
+  display: flex;
+  gap: 4px;
+}
+
+.timeline_toolbar_item {
+  height: 24px;
+  background-color: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  margin: 0px;
+  padding: 0px;
+}
+
+input.timeline_toolbar_item, select.timeline_toolbar_item {
+  padding: 0px 4px;
+}
+
+.timeline_toolbar_item-dateselect {
+  width: 130px;
+}
+
+.timeline_toolbar_item-nav {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timeline_toolbar_item-nav:hover {
+  background-color: hsl(214, 50%, 97%);
+}
+
+.timeline_toolbar_icon {
+  width: 12px;
+  aspect-ratio: 1;
 }
 
 .timeline_values {
   height: 200px;
   display: flex;
   gap: 4px;
-  padding: 4px 0px;
+  padding: 14px 0px 4px 0px;
   justify-content: stretch;
 }
 
@@ -3484,19 +3522,15 @@ a.admin_stats_section_row {
   flex-shrink: 100;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .timeline_value:hover {
   opacity: 0.9;
-  background-color: #eee;
 }
 
 .timeline_value_bars {
   flex-grow: 100;
-  background-color: #eee;
   display: flex;
-  overflow: hidden;
   gap: 1px;
   border: 0px solid blue;
 }
@@ -3508,6 +3542,18 @@ a.admin_stats_section_row {
   position: relative;
   display: flex;
   position: relative;
+}
+
+.timeline_value_label {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  font-size: 10px;
+  line-height: 10px;
+  border: 0px solid red;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .timeline_value_bar_inner {
