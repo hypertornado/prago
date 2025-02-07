@@ -3245,45 +3245,6 @@ a.admin_stats_section_row {
   color: #999;
 }
 
-.graph_items {
-  display: flex;
-  gap: 3px;
-}
-
-.graph_item {
-  flex-grow: 100;
-  flex-shrink: 100;
-  display: flex;
-  flex-direction: column;
-}
-
-.graph_item_bar {
-  height: 100px;
-  border: 0px solid #eee;
-  display: flex;
-  flex-direction: column;
-  justify-content: end;
-}
-
-.graph_item_bar_percent {
-  background-color: hsl(214, 50%, 50%);
-  height: 90%;
-}
-
-.graph_item_value {
-  text-align: center;
-  color: #888;
-  font-size: 0.8rem;
-  line-height: 1.3em;
-}
-
-.graph_item_name {
-  text-align: center;
-  font-weight: 500;
-  font-size: 0.9rem;
-  line-height: 1.3em;
-}
-
 .breadcrumbs {
   border: 0px solid red;
   display: flex;

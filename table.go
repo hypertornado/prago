@@ -18,7 +18,6 @@ type Table struct {
 type tableData struct {
 	Rows       []*tableRow
 	FooterText []string
-	Graphs     []*Graph
 }
 
 type tableRow struct {
@@ -55,7 +54,6 @@ type TableCellButton struct {
 type tableView struct {
 	Rows       []*tableRowView
 	FooterText []string
-	Graphs     []*graphDataView
 }
 
 type tableRowView struct {
@@ -259,10 +257,6 @@ func (t *Table) templateData() []*tableView {
 			}
 
 			view.Rows = append(view.Rows, row)
-		}
-
-		for _, graph := range v.Graphs {
-			view.Graphs = append(view.Graphs, graph.View())
 		}
 
 		ret = append(ret, view)
