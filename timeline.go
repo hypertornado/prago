@@ -22,7 +22,6 @@ type dashboardViewTimeline struct {
 }
 
 func (app *App) initTimeline() {
-
 	app.API("timeline").Method("GET").Permission(loggedPermission).HandlerJSON(
 		func(request *Request) any {
 			uuid := request.Param("_uuid")
@@ -151,7 +150,12 @@ func (timeline *Timeline) data(request *Request) *timelineData {
 		}
 
 		for _, ds := range timeline.dataSources {
-			val := ds.dataSource(t1, t2)
+			request := &TimelineDataRequest{
+				From:    t1,
+				To:      t2,
+				Context: request.r.Context(),
+			}
+			val := ds.dataSource(request)
 			dataValue.Bars = append(dataValue.Bars, &timelineDataBar{
 				Value:     val,
 				ValueText: ds.stringer(val),
@@ -162,7 +166,7 @@ func (timeline *Timeline) data(request *Request) *timelineData {
 		ret.Values = append(ret.Values, dataValue)
 	}
 
-	ret.FixValues()
+	ret.fixValues()
 	return ret
 }
 
@@ -172,7 +176,7 @@ type timelineData struct {
 	MaxValue float64
 }
 
-func (td *timelineData) FixValues() {
+func (td *timelineData) fixValues() {
 	var maxValue float64 = -math.MaxFloat64
 	for _, v := range td.Values {
 		for _, bar := range v.Bars {

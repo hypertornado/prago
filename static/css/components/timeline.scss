@@ -8,6 +8,11 @@
     display: flex;
     gap: 8px;
     padding: 8px 0px;
+    flex-wrap: wrap;
+}
+
+.timeline_toolbar_divider {
+    flex-grow: 1000;
 }
 
 .timeline_toolbar_datepicker {
@@ -49,11 +54,13 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 }
 
 .timeline_values {
-    height: 200px;
+    height: 300px;
     display: flex;
     gap: 4px;
     padding: 14px 0px 4px 0px;
     justify-content: stretch;
+    background-color: $backgroundGrayColor;
+    border-radius: 4px;
 }
 
 .timeline_value {
@@ -64,8 +71,8 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 }
 
 .timeline_value:hover {
-    opacity: .9;
-    //background-color: #eee;
+    //opacity: .9;
+    filter: saturate(102%);
 }
 
 .timeline_value_bars {
@@ -87,15 +94,27 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 
 .timeline_value_label {
     position: absolute;
-    width: 100%;
+    width: calc(100% - 4px);
+    margin-left: 2px;
+    margin-bottom: 2px;
     text-align: center;
     font-size: 10px;
     line-height: 10px;
     border: 0px solid red;
+
+    //text-shadow: 0px 0px 10px rgba(255,255,255,0.8);
+    border-radius: 2px;
+    background-color: rgba(255,255,255,0.3);
     
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+}
+
+.timeline_value:hover .timeline_value_label {
+    color: black;
+    overflow: visible;
 }
 
 .timeline_value_bar_inner {
@@ -116,6 +135,10 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
     color: $gray;
 }
 
+.timeline_value:hover .timeline_value_name {
+    color: black;
+}
+
 .timeline_value-current .timeline_value_name {
     color: $red;
 }
@@ -128,7 +151,6 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 }
 
 .timeline_legend_item {
-    //border: 1px solid red;
     display: flex;
     gap: 4px;
     align-items: center;

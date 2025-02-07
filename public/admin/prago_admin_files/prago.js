@@ -3157,6 +3157,10 @@ class Timeline {
             dateStr = this.yearpicker.value;
         }
         var request = new XMLHttpRequest();
+        if (this.lastRequest) {
+            this.lastRequest.abort();
+        }
+        this.lastRequest = request;
         var params = {
             _uuid: this.el.getAttribute("data-uuid"),
             _date: dateStr,
@@ -3168,8 +3172,10 @@ class Timeline {
                 this.setData(data);
             }
             else {
+                this.valuesEl.innerText = "Error while loading timeline";
                 console.error("Error while loading timeline");
             }
+            this.lastRequest = null;
         });
         request.open("GET", "/admin/api/timeline" + encodeParams(params), true);
         request.send();
@@ -3182,7 +3188,7 @@ class Timeline {
         }
     }
     setLoader() {
-        this.valuesEl.innerText = "Loading...";
+        this.valuesEl.innerHTML = '<progress class="progress"></progress>';
     }
     setValue(data) {
         let valEl = document.createElement("div");

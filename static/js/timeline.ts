@@ -6,6 +6,7 @@ class Timeline {
     yearpicker: HTMLInputElement;
 
     typeSelect: HTMLSelectElement;
+    lastRequest: XMLHttpRequest;
 
     constructor(el: HTMLDivElement) {
         this.el = el;
@@ -52,6 +53,11 @@ class Timeline {
 
 
         var request = new XMLHttpRequest();
+        if (this.lastRequest) {
+            this.lastRequest.abort();
+        }
+        this.lastRequest = request;
+
         var params: any = {
             _uuid: this.el.getAttribute("data-uuid"),
             _date: dateStr,
@@ -60,18 +66,20 @@ class Timeline {
 
 
         request.addEventListener("load", () => {
-        if (request.status == 200) {
-            let data = JSON.parse(request.response)
-            this.setData(data);
-        } else {
-            console.error("Error while loading timeline");
-        }
+            if (request.status == 200) {
+                let data = JSON.parse(request.response)
+                this.setData(data);
+            } else {
+                this.valuesEl.innerText = "Error while loading timeline";
+                console.error("Error while loading timeline");
+            }
+            this.lastRequest = null;
         });
 
         request.open(
-        "GET",
-        "/admin/api/timeline" + encodeParams(params),
-        true
+            "GET",
+            "/admin/api/timeline" + encodeParams(params),
+            true
         );
 
         request.send();
@@ -86,7 +94,7 @@ class Timeline {
     }
 
     setLoader() {
-        this.valuesEl.innerText = "Loading...";
+        this.valuesEl.innerHTML = '<progress class="progress"></progress>';
     }
 
     setValue(data: any) {
@@ -198,7 +206,4 @@ class Timeline {
         }
         this.loadData();
     }
-
-
-
 }

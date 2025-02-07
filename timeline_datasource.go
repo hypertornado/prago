@@ -1,18 +1,25 @@
 package prago
 
 import (
+	"context"
 	"fmt"
 	"time"
 )
 
 type TimelineDataSource struct {
 	name       func(string) string
-	dataSource func(time.Time, time.Time) float64
+	dataSource func(*TimelineDataRequest) float64
 	stringer   func(float64) string
 	color      string
 }
 
-func (timeline *Timeline) DataSource(dataSource func(time.Time, time.Time) float64) *TimelineDataSource {
+type TimelineDataRequest struct {
+	From    time.Time
+	To      time.Time
+	Context context.Context
+}
+
+func (timeline *Timeline) DataSource(dataSource func(request *TimelineDataRequest) float64) *TimelineDataSource {
 	ds := &TimelineDataSource{
 		dataSource: dataSource,
 		stringer: func(f float64) string {
