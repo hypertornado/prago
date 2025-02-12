@@ -11,8 +11,8 @@ class Shortcuts {
       for (let shortcut of this.shortcuts) {
         if (shortcut.match(e)) {
           shortcut.handler();
-          //e.preventDefault();
-          //e.stopPropagation();
+          e.preventDefault();
+          e.stopPropagation();
           return false;
         }
       }

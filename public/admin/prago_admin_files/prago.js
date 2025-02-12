@@ -2025,8 +2025,7 @@ class SearchForm {
         this.searchInput = el.querySelector(".searchbox_input");
         this.suggestionsEl = (el.querySelector(".searchbox_suggestions"));
         Prago.shortcuts.add({
-            Key: "F",
-            Shift: true,
+            Key: "f",
         }, "Vyhledávání", () => {
             this.searchInput.focus();
         });
@@ -2926,6 +2925,8 @@ class Shortcuts {
             for (let shortcut of this.shortcuts) {
                 if (shortcut.match(e)) {
                     shortcut.handler();
+                    e.preventDefault();
+                    e.stopPropagation();
                     return false;
                 }
             }

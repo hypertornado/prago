@@ -147,15 +147,26 @@ func (app *App) initActivityLog() {
 			return
 		}
 
-		table.Row(Cell("Editace:").Header(), Cell(fmt.Sprintf("#%d", activity.ID)).Colspan(2).URL(resource.getURL(fmt.Sprintf("%d", activity.ID))))
-		table.Row(Cell("Tabulka:").Header(), Cell(resource.pluralName(request.Locale())).Colspan(2).URL(resource.getURL("history")))
-		table.Row(Cell("Položka:").Header(), Cell(fmt.Sprintf("#%d", activity.ItemID)).Colspan(2).URL(resource.getURL(fmt.Sprintf("%d/history", activity.ItemID))))
+		table.Row(Cell("Editace:").Header(), Cell(fmt.Sprintf("#%d", activity.ID)).Colspan(2).URL(fmt.Sprintf("/admin/activitylog/%d", activity.ID)))
+		table.Row(Cell("Tabulka:").Header(), Cell(resource.pluralName(request.Locale())).Colspan(2).URL(resource.getURL("")))
+		table.Row(Cell("Položka:").Header(), Cell(fmt.Sprintf("#%d", activity.ItemID)).Colspan(2).URL(resource.getURL(fmt.Sprintf("%d", activity.ItemID))))
 		table.Row(Cell("Typ akce:").Header(), Cell(activity.ActionType).Colspan(2))
 		table.Row(Cell("Upraveno:").Header(), Cell(activity.CreatedAt.Format("2006-01-02 15:04:05")).Colspan(2))
 
 		user := Query[user](app).ID(activity.User)
 		if user != nil {
-			table.Row(Cell("Upraveno uživatelem:").Header(), Cell(fmt.Sprintf("%s (#%d)", user.Username, user.ID)).Colspan(2).URL(fmt.Sprintf("/admin/user/%d", user.ID)))
+			var userNames []string
+			userNames = append(userNames, fmt.Sprintf("#%d", user.ID))
+			if user.Username != "" {
+				userNames = append(userNames, user.Username)
+			}
+			if user.Name != "" {
+				userNames = append(userNames, user.Name)
+			}
+			if user.Email != "" {
+				userNames = append(userNames, user.Email)
+			}
+			table.Row(Cell("Upraveno uživatelem:").Header(), Cell(strings.Join(userNames, " · ")).Colspan(2).URL(fmt.Sprintf("/admin/user/%d", user.ID)))
 		}
 
 		fromMap := getDiffMap(activity.ContentBefore)

@@ -3479,7 +3479,7 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
   height: 300px;
   display: flex;
   gap: 4px;
-  padding: 14px 0px 4px 0px;
+  padding: 14px 4px 4px 4px;
   justify-content: stretch;
   background-color: #fafafa;
   border-radius: 4px;
@@ -3493,7 +3493,7 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 }
 
 .timeline_value:hover {
-  filter: saturate(102%);
+  filter: saturate(110%);
 }
 
 .timeline_value_bars {
@@ -3520,6 +3520,7 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
   text-align: center;
   font-size: 10px;
   line-height: 10px;
+  color: #888;
   border: 0px solid red;
   border-radius: 2px;
   background-color: rgba(255, 255, 255, 0.3);
@@ -3539,13 +3540,15 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
   width: 100%;
   position: relative;
   background-color: hsl(214, 50%, 50%);
+  border-radius: 2px;
 }
 
 .timeline_value_name {
-  font-size: 0.8rem;
-  line-height: 1.3em;
+  font-size: 10px;
+  line-height: 10px;
   flex-shrink: 0;
-  height: 1.3em;
+  height: 10px;
+  margin-top: 2px;
   text-align: center;
   overflow: hidden;
   color: #888;

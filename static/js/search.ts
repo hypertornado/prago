@@ -15,8 +15,9 @@ class SearchForm {
 
     Prago.shortcuts.add(
       {
-        Key: "F",
-        Shift: true,
+        Key: "f",
+        //Shift: true,
+        //Alt: true,
       },
       "Vyhledávání",
       () => {

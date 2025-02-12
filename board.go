@@ -44,11 +44,8 @@ func (app *App) initBoard() {
 		return float64(c)
 	}).Name(unlocalized("Úpravy")).Stringer(func(f float64) string {
 		return fmt.Sprintf("%v editací", f)
-	}).Name(unlocalized("T1"))
+	})
 
-	tl.DataSource(func(request *TimelineDataRequest) float64 {
-		return -20
-	}).Name(unlocalized("T2"))
 }
 
 func (parent *Board) Child(url string, name func(string) string, icon string) *Board {
