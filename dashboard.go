@@ -67,5 +67,11 @@ func (group *Dashboard) isVisible(userData UserData) bool {
 		}
 	}
 
+	for _, v := range group.timelines {
+		if userData.Authorize(v.permission) {
+			return true
+		}
+	}
+
 	return false
 }

@@ -2026,6 +2026,7 @@ class SearchForm {
         this.suggestionsEl = (el.querySelector(".searchbox_suggestions"));
         Prago.shortcuts.add({
             Key: "f",
+            Alt: true,
         }, "Vyhledávání", () => {
             this.searchInput.focus();
         });
@@ -3195,7 +3196,9 @@ class Timeline {
         let valEl = document.createElement("div");
         valEl.innerHTML = `
             <div class="timeline_value_bars"></div>
-            <div class="timeline_value_name" title="${data.Name}">${data.Name}</div>
+            <div class="timeline_value_name" title="${data.Name}">
+                <span class="timeline_value_name_inner">${data.Name}</span>
+            </div>
         `;
         valEl.classList.add("timeline_value");
         let barsEl = valEl.querySelector(".timeline_value_bars");

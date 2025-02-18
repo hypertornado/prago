@@ -101,7 +101,9 @@ class Timeline {
         let valEl = document.createElement("div");
         valEl.innerHTML = `
             <div class="timeline_value_bars"></div>
-            <div class="timeline_value_name" title="${data.Name}">${data.Name}</div>
+            <div class="timeline_value_name" title="${data.Name}">
+                <span class="timeline_value_name_inner">${data.Name}</span>
+            </div>
         `
         valEl.classList.add("timeline_value");
 

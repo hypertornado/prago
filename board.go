@@ -2,7 +2,6 @@ package prago
 
 import (
 	"fmt"
-	"time"
 )
 
 var sysadminBoard *Board
@@ -28,21 +27,13 @@ func (app *App) initBoard() {
 	app.dashboardTimelineMap = make(map[string]*Timeline)
 	sysadminBoard = app.MainBoard.Child("sysadmin-board", unlocalized("Sysadmin"), "glyphicons-basic-501-server.svg")
 
-	sysadminGroup := sysadminBoard.Dashboard(unlocalized("Sysadmin"))
-	sysadminGroup.Figure(unlocalized("Úpravy"), "sysadmin").Value(func(request *Request) int64 {
-		c, _ := Query[activityLog](app).Context(request.r.Context()).Where("createdat >= ?", time.Now().AddDate(0, 0, -1)).Count()
-		return c
-	}).Unit(unlocalized("/ 24 hodin")).URL("/admin/activitylog").Compare(func(request *Request) int64 {
-		c, _ := Query[activityLog](app).Context(request.r.Context()).Where("createdat >= ? and createdat <= ?", time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, -1)).Count()
-		return c
-	}, unlocalized("oproti předchozímu dni"))
+	sysadminGroup := sysadminBoard.Dashboard(unlocalized(""))
 
 	tl := sysadminGroup.Timeline(unlocalized("Úpravy"), "sysadmin")
-
 	tl.DataSource(func(request *TimelineDataRequest) float64 {
 		c, _ := Query[activityLog](app).Context(request.Context).Where("createdat >= ? and createdat < ?", request.From, request.To).Count()
 		return float64(c)
-	}).Name(unlocalized("Úpravy")).Stringer(func(f float64) string {
+	}).Stringer(func(f float64) string {
 		return fmt.Sprintf("%v editací", f)
 	})
 

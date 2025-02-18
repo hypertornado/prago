@@ -116,11 +116,11 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 .timeline_value:hover .timeline_value_label {
     color: black;
     overflow: visible;
+    z-index: 1000;
 }
 
 .timeline_value_bar_inner {
     align-self: end;
-    border: 0px solid yellow;
     width: 100%;
     position: relative;
     background-color: $baseColor;
@@ -128,21 +128,39 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 }
 
 .timeline_value_name {
-    //font-size: .7rem;
-    //line-height: 1.3em;
     font-size: 10px;
     line-height: 10px;
     flex-shrink: 0;
-    //height: 1.3em;
     height: 10px;
     margin-top: 2px;
     text-align: center;
     overflow: hidden;
     color: $gray;
+
+    display: flex;
+    width: 100%;
+}
+
+.timeline_value_name_inner {
+    justify-self: center;
+    align-self: center;
+    overflow: hidden;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .timeline_value:hover .timeline_value_name {
     color: black;
+    width: auto;
+    overflow: visible;
+}
+
+.timeline_value:hover .timeline_value_name_inner {
+    overflow: visible;
+    display: inline-block;
 }
 
 .timeline_value-current .timeline_value_name {

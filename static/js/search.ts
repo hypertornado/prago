@@ -17,7 +17,7 @@ class SearchForm {
       {
         Key: "f",
         //Shift: true,
-        //Alt: true,
+        Alt: true,
       },
       "Vyhledávání",
       () => {
