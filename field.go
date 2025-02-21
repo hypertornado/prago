@@ -22,6 +22,8 @@ type Field struct {
 
 	defaultHidden bool
 
+	isSearchable bool
+
 	canView Permission
 	canEdit Permission
 
@@ -77,6 +79,10 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 		canEdit: loggedPermission,
 
 		resource: resource,
+	}
+
+	if ret.id == "name" || ret.id == "description" {
+		ret.isSearchable = true
 	}
 
 	//remove unused tags
@@ -189,6 +195,18 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 	return ret
 }
 
+func (resource *Resource) getSearchableFields(request *Request) (ret []*Field) {
+	for _, v := range resource.fields {
+		if !request.Authorize(v.canView) {
+			continue
+		}
+		if v.isSearchable {
+			ret = append(ret, v)
+		}
+	}
+	return ret
+}
+
 func getNameFunctionFromStructName(name string) func(string) string {
 	id := map[string]string{
 		"Name":          "Name",
@@ -196,7 +214,7 @@ func getNameFunctionFromStructName(name string) func(string) string {
 		"Image":         "Image",
 		"Hidden":        "Hidden",
 		"CreatedAt":     "CreatedAt",
-		"UpdatedAt":     "OrderPosition",
+		"UpdatedAt":     "UpdatedAt",
 		"OrderPosition": "OrderPosition",
 		"File":          "File",
 		"Place":         "Place",
@@ -250,6 +268,12 @@ func (field *Field) FormContentGenerator(fn func(item *FormItem) template.HTML) 
 func (field *Field) DBDescription(description string) *Field {
 	field.fieldType.dbFieldDescription = description
 	return field
+}
+
+func (field *Field) IsSearchable(isSearchable bool) *Field {
+	field.isSearchable = true
+	return field
+
 }
 
 func (field *Field) getIcon() string {

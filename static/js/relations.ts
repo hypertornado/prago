@@ -211,16 +211,37 @@ class RelationPicker {
           return;
         }
         var data = JSON.parse(request.response);
-        this.suggestions = data;
+        this.suggestions = data.Previews;
         this.suggestionsEl.innerText = "";
-        for (var i = 0; i < data.length; i++) {
-          var item = data[i];
+
+        if (data.Message) {
+          let messageEl = document.createElement("div");
+          messageEl.innerText = data.Message;
+          messageEl.classList.add("relation_message");
+          this.suggestionsEl.appendChild(messageEl);
+        }
+
+        for (var i = 0; i < data.Previews.length; i++) {
+          var item = data.Previews[i];
           var el = this.createPreview(item, false);
           el.classList.add("admin_item_relation_picker_suggestion");
           el.setAttribute("data-position", i + "");
           el.addEventListener("mousedown", this.suggestionClick.bind(this));
           el.addEventListener("mouseenter", this.suggestionSelect.bind(this));
           this.suggestionsEl.appendChild(el);
+        }
+
+        if (data.Button) {
+          let buttonEl = document.createElement("a");
+          buttonEl.innerText = data.Button.Name;
+          buttonEl.setAttribute("href", data.Button.URL);
+          buttonEl.classList.add("btn", "relation_button");
+          buttonEl.addEventListener("mousedown", (e) => {
+            //window.location = data.Button.URL;
+            window.open(data.Button.URL, "_blank");
+            e.preventDefault();
+          })
+          this.suggestionsEl.appendChild(buttonEl);
         }
       } else {
         console.log("Error while searching");
@@ -315,17 +336,18 @@ class RelationPicker {
 
     var description = document.createElement("description");
     description.classList.add("admin_preview_description");
+    description.setAttribute("title", data.Description);
     description.textContent = data.Description;
 
+    var image = document.createElement("div");
+    image.classList.add("admin_preview_image");
     if (data.Image) {
-      var image = document.createElement("div");
-      image.classList.add("admin_preview_image");
       image.setAttribute(
         "style",
         "background-image: url('" + data.Image + "');"
       );
-      ret.appendChild(image);
     }
+    ret.appendChild(image);
 
     right.appendChild(name);
     right.appendChild(description);

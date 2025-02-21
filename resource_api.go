@@ -119,59 +119,9 @@ func (resource *Resource) initDefaultResourceAPIs() {
 		},
 	)
 
-	resource.api("searchresource").Handler(
-		func(request *Request) {
-			q := request.Param("q")
-
-			usedIDs := map[int64]bool{}
-
-			ret := []preview{}
-
-			id, err := strconv.Atoi(q)
-			if err == nil {
-				item := resource.query(request.r.Context()).ID(id)
-				if item != nil {
-					relationItem := resource.previewer(request, item).Preview(nil)
-					if relationItem != nil {
-						usedIDs[relationItem.ID] = true
-						ret = append(ret, *relationItem)
-					}
-				}
-			}
-
-			filter := "%" + q + "%"
-			for _, v := range []string{"name", "description"} {
-				field := resource.Field(v)
-				if field == nil {
-					continue
-				}
-				items, err := resource.query(request.r.Context()).Limit(5).where(v+" LIKE ?", filter).OrderDesc("id").list()
-				if err != nil {
-					panic(err)
-				}
-
-				itemVals := reflect.ValueOf(items)
-				itemLen := itemVals.Len()
-				for i := 0; i < itemLen; i++ {
-					viewItem := resource.previewer(request, itemVals.Index(i).Interface()).Preview(nil)
-					if viewItem != nil && !usedIDs[viewItem.ID] {
-						usedIDs[viewItem.ID] = true
-						ret = append(ret, *viewItem)
-					}
-				}
-			}
-
-			if len(ret) > 5 {
-				ret = ret[0:5]
-			}
-
-			for k := range ret {
-				ret[k].Description = crop(ret[k].Description, 100)
-			}
-
-			request.WriteJSON(200, ret)
-		},
-	)
+	resource.api("searchresource").Handler(func(request *Request) {
+		searchResource(request, resource)
+	})
 
 	resource.api("multipleaction").Method("POST").Handler(
 		func(request *Request) {

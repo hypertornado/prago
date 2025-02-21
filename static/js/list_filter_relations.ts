@@ -132,9 +132,9 @@ class ListFilterRelations {
   renderSuggestions(data: any) {
     this.suggestions.innerHTML = "";
     this.suggestions.classList.add("filter_relations_suggestions-empty");
-    for (var i = 0; i < data.length; i++) {
+    for (var i = 0; i < data.Previews.length; i++) {
       this.suggestions.classList.remove("filter_relations_suggestions-empty");
-      let item = data[i];
+      let item = data.Previews[i];
       let el = this.renderSuggestion(item);
       this.suggestions.appendChild(el);
       let index = i;
@@ -161,15 +161,16 @@ class ListFilterRelations {
     description.classList.add("list_filter_suggestion_description");
     description.textContent = data.Description;
 
+    
+    var image = document.createElement("div");
+    image.classList.add("list_filter_suggestion_image");
     if (data.Image) {
-      var image = document.createElement("div");
-      image.classList.add("list_filter_suggestion_image");
       image.setAttribute(
         "style",
         "background-image: url('" + data.Image + "');"
       );
-      ret.appendChild(image);
     }
+    ret.appendChild(image);
 
     right.appendChild(name);
     right.appendChild(description);

@@ -734,7 +734,7 @@ select.admin_timestamp_minute {
   color: #888;
   overflow-wrap: anywhere;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -744,6 +744,16 @@ select.admin_timestamp_minute {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
+}
+
+.relation_message {
+  padding: 5px 5px;
+  color: #888;
+}
+
+.relation_button {
+  display: block;
+  margin: 5px 10px;
 }
 
 .admin_relation_previews {
@@ -818,7 +828,6 @@ select.admin_timestamp_minute {
 .admin_item_relation_picker_suggestion {
   box-shadow: none;
   margin: 0px;
-  border-bottom: 1px solid #eee;
   cursor: pointer;
   border-radius: 0px;
 }
