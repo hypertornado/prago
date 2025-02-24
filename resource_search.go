@@ -12,8 +12,8 @@ type searchResourceResponse struct {
 }
 
 type searchResourceResponseButton struct {
-	Name string
-	URL  string
+	Name    string
+	FormURL string
 }
 
 func searchResource(request *Request, resource *Resource) {
@@ -78,8 +78,8 @@ func searchResource(request *Request, resource *Resource) {
 	if request.Authorize(resource.canCreate) {
 
 		ret.Button = &searchResourceResponseButton{
-			Name: messages.GetNameFunction("admin_new")(request.Locale()) + " - " + resource.singularName(request.Locale()),
-			URL:  resource.getURL("new"),
+			Name:    messages.GetNameFunction("admin_new")(request.Locale()) + " - " + resource.singularName(request.Locale()),
+			FormURL: resource.getURL("new"),
 		}
 	}
 

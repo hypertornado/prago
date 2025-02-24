@@ -56,13 +56,18 @@ func (resource *Resource) initDefaultResourceActions() {
 			}
 			must(resource.createWithLog(item, request))
 
+			preview := resource.previewer(request, item).Preview(nil)
+			vc.(*formValidation).validationData.Data = preview
+
 			must(resource.app.Notification(resource.previewer(request, item).Name()).
 				SetImage(resource.previewer(request, item).ThumbnailURL()).
 				SetPreName(messages.Get(request.Locale(), "admin_item_created")).
 				Flash(request))
 			vc.Redirect(resource.getItemURL(item, "", request))
 		}
-	}).Icon(iconAdd).setPriority(defaultHighPriority).Permission(resource.canCreate).Name(messages.GetNameFunction("admin_new"))
+	}).Icon(iconAdd).setPriority(defaultHighPriority).Permission(resource.canCreate).Name(func(locale string) string {
+		return fmt.Sprintf("%s „%s“", messages.GetNameFunction("admin_new")(locale), resource.singularName(locale))
+	})
 
 	resource.itemActionUi("", func(item any, request *Request, pd *pageData) {
 		if item == nil {

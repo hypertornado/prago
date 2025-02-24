@@ -15,8 +15,8 @@ type FormValidation interface {
 type formValidationData struct {
 	RedirectionLocation string
 	AfterContent        template.HTML
-	//Valid               bool
-	Errors []ValidationError
+	Errors              []ValidationError
+	Data                any
 }
 
 type formValidationReport struct {
@@ -58,6 +58,11 @@ func (fv *formValidation) AddItemError(key, err string) {
 
 func (fv *formValidation) Redirect(url string) {
 	fv.validationData.RedirectionLocation = url
+}
+
+func (fv *formValidation) Data(data any) {
+	fv.validationData.Data = data
+
 }
 
 func (fv *formValidation) AfterContent(content template.HTML) {

@@ -83,7 +83,7 @@ class Popup {
       .classList.add("popup_header_cancel-visible");
   }
 
-  private setTitle(name: string) {
+  protected setTitle(name: string) {
     this.el.querySelector(".popup_header_name").textContent = name;
   }
 

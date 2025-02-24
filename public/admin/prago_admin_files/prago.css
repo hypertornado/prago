@@ -2937,6 +2937,10 @@ a.admin_stats_section_row {
   display: none;
 }
 
+.popup_content .box_header {
+  display: none;
+}
+
 .popup_content-visible {
   display: block;
 }

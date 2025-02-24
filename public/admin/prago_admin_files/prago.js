@@ -1719,9 +1719,19 @@ class RelationPicker {
                     buttonEl.innerText = data.Button.Name;
                     buttonEl.setAttribute("href", data.Button.URL);
                     buttonEl.classList.add("btn", "relation_button");
-                    buttonEl.addEventListener("mousedown", (e) => {
-                        window.open(data.Button.URL, "_blank");
+                    buttonEl.addEventListener("click", (e) => {
                         e.preventDefault();
+                        e.stopPropagation();
+                    });
+                    buttonEl.addEventListener("mousedown", (e) => {
+                        this.suggestionsEl.classList.add("hidden");
+                        let popupForm = new PopupForm(data.Button.FormURL, (data) => {
+                            this.addPreview(data.Data);
+                            console.log("created item");
+                            console.log(data);
+                        });
+                        e.preventDefault();
+                        e.stopPropagation();
                     });
                     this.suggestionsEl.appendChild(buttonEl);
                 }
@@ -1876,8 +1886,9 @@ class Form {
     }
 }
 class FormContainer {
-    constructor(formContainer) {
+    constructor(formContainer, okHandler) {
         this.formContainer = formContainer;
+        this.okHandler = okHandler;
         this.progress = formContainer.querySelector(".form_progress");
         var formEl = formContainer.querySelector("form");
         this.form = new Form(formEl);
@@ -1942,8 +1953,8 @@ class FormContainer {
                 let contentType = request.getResponseHeader("Content-Type");
                 if (contentType == "application/json") {
                     var data = JSON.parse(request.response);
-                    if (data.RedirectionLocation) {
-                        window.location = data.RedirectionLocation;
+                    if (data.RedirectionLocation || data.Preview) {
+                        this.okHandler(data);
                     }
                     else {
                         this.progress.classList.add("hidden");
@@ -2722,6 +2733,40 @@ class LoadingPopup extends Popup {
         this.remove();
     }
 }
+class PopupForm extends Popup {
+    constructor(path, dataHandler) {
+        super("⌛️");
+        this.dataHandler = dataHandler;
+        this.setCancelable();
+        this.present();
+        this.loadForm(path);
+    }
+    loadForm(path) {
+        fetch(path)
+            .then((response) => {
+            if (response.ok) {
+                return response.text();
+            }
+            else {
+                this.unpresent();
+                new Alert("Formulář nelze nahrát.");
+            }
+        })
+            .then((textVal) => {
+            this.wide();
+            const parser = new DOMParser();
+            const document = parser.parseFromString(textVal, "text/html");
+            let formContainer = document.querySelector(".form_container");
+            this.setContent(formContainer);
+            new FormContainer(formContainer, this.okHandler.bind(this));
+            this.setTitle(formContainer.getAttribute("data-form-name"));
+        });
+    }
+    okHandler(data) {
+        this.unpresent();
+        this.dataHandler(data);
+    }
+}
 function initGoogleMaps() {
     return __awaiter(this, void 0, void 0, function* () {
         const { Map } = yield google.maps.importLibrary("maps");
@@ -3325,7 +3370,11 @@ class Prago {
         }
         var formContainerElements = document.querySelectorAll(".form_container");
         formContainerElements.forEach((el) => {
-            new FormContainer(el);
+            new FormContainer(el, (data) => {
+                if (data.RedirectionLocation) {
+                    window.location = data.RedirectionLocation;
+                }
+            });
         });
         var imageViews = document.querySelectorAll(".admin_item_view_image_content");
         imageViews.forEach((el) => {
@@ -3346,6 +3395,12 @@ class Prago {
         }
         initDashboard();
         initGoogleMaps();
+    }
+    static testPopupForm() {
+        new PopupForm("/admin/packageview/new", (data) => {
+            console.log("form data");
+            console.log(data);
+        });
     }
 }
 Prago.start();

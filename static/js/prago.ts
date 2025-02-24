@@ -20,7 +20,11 @@ class Prago {
     var formContainerElements =
       document.querySelectorAll<HTMLDivElement>(".form_container");
     formContainerElements.forEach((el) => {
-      new FormContainer(el);
+      new FormContainer(el, (data: any) => {
+        if (data.RedirectionLocation) {
+          window.location = data.RedirectionLocation;
+        }
+      });
     });
 
     var imageViews = document.querySelectorAll<HTMLDivElement>(
@@ -53,6 +57,17 @@ class Prago {
 
     initDashboard();
     initGoogleMaps();
+
+    //Prago.testPopupForm();
+  }
+
+  static testPopupForm() {
+    new PopupForm("/admin/packageview/new", (data: any) => {
+      console.log("form data");
+      console.log(data);
+    });
+    //new PopupForm("/admin/hotel/new");
+
   }
 }
 Prago.start();

@@ -188,7 +188,6 @@ class RelationPicker {
 
   showSearch() {
     this.picker.classList.remove("hidden");
-
     this.suggestions = [];
     this.suggestionsEl.innerText = "";
     this.pickerInput.value = "";
@@ -236,10 +235,21 @@ class RelationPicker {
           buttonEl.innerText = data.Button.Name;
           buttonEl.setAttribute("href", data.Button.URL);
           buttonEl.classList.add("btn", "relation_button");
-          buttonEl.addEventListener("mousedown", (e) => {
-            //window.location = data.Button.URL;
-            window.open(data.Button.URL, "_blank");
+          buttonEl.addEventListener("click", (e) => {
             e.preventDefault();
+            e.stopPropagation();
+          })
+          buttonEl.addEventListener("mousedown", (e) => {
+            this.suggestionsEl.classList.add("hidden");
+            let popupForm = new PopupForm(data.Button.FormURL, (data: any) => {
+              this.addPreview(data.Data);
+              console.log("created item");
+              console.log(data);
+
+            });
+            //window.open(data.Button.FormURL, "_blank");
+            e.preventDefault();
+            e.stopPropagation();
           })
           this.suggestionsEl.appendChild(buttonEl);
         }

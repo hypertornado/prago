@@ -4,9 +4,11 @@ class FormContainer {
   progress: HTMLProgressElement;
   lastAJAXID: string;
   activeRequest: XMLHttpRequest;
+  okHandler: Function;
 
-  constructor(formContainer: HTMLDivElement) {
+  constructor(formContainer: HTMLDivElement, okHandler: Function) {
     this.formContainer = formContainer;
+    this.okHandler = okHandler;
     this.progress = formContainer.querySelector(".form_progress");
     var formEl: HTMLFormElement = formContainer.querySelector("form");
     this.form = new Form(formEl);
@@ -85,12 +87,12 @@ class FormContainer {
         if (contentType == "application/json") {
           //application/json
           var data = JSON.parse(request.response);
-          if (data.RedirectionLocation) {
-            window.location = data.RedirectionLocation;
+          if (data.RedirectionLocation || data.Preview) {
+            this.okHandler(data);
+            //window.location = data.RedirectionLocation;
           } else {
             this.progress.classList.add("hidden");
             this.setFormErrors(data.Errors);
-            //this.setItemErrors(data.ItemErrors);
             if (data.AfterContent) this.setAfterContent(data.AfterContent);
           }
         } else {

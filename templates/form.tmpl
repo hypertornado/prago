@@ -1,9 +1,10 @@
 {{define "form"}}
 
-  <div class="form_container{{if .AutosubmitOnDataChange}} form_container-autosubmit{{end}}{{if .AutosubmitFirstTime}} form_container-autosubmitfirsttime{{end}}">
+  {{$boxHeaderData := .GetBoxHeader}}
+
+  <div class="form_container{{if .AutosubmitOnDataChange}} form_container-autosubmit{{end}}{{if .AutosubmitFirstTime}} form_container-autosubmitfirsttime{{end}}" data-form-name="{{$boxHeaderData.Name}}">
 
     <div class="box">
-      {{$boxHeaderData := .GetBoxHeader}}
       {{template "box_header" $boxHeaderData}}
 
       {{range $scriptPath := .ScriptPaths}}
