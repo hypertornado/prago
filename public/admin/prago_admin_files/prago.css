@@ -867,18 +867,20 @@ select.admin_timestamp_minute {
   border-radius: 5px;
   padding: 0px 10px;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-  animation: nologinLoad 1000ms ease;
 }
 
-@keyframes nologinLoad {
-  from {
-    opacity: 1;
-    transform: perspective(20cm) rotateX(0deg) scale(1.02) translateY(0px);
-  }
-  to {
-    opacity: 1;
-  }
+.admin_nologin_footer {
+  font-size: 0.7rem;
+  line-height: 1.3em;
+  color: #888;
+  border-radius: 5px;
+  padding: 3px 5px;
 }
+
+.admin_nologin_footer a {
+  color: #888;
+}
+
 .admin_nologin_logo {
   width: 100px;
   aspect-ratio: 1;
@@ -2648,7 +2650,7 @@ a.admin_stats_section_row {
   border-bottom: none;
   text-decoration: none;
   padding: 5px 10px;
-  border-radius: 100px;
+  border-radius: 5px;
   color: #444;
   font-weight: 500;
   display: flex;

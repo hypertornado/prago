@@ -461,21 +461,21 @@ select.admin_timestamp_minute {
   border-radius: 5px;
   padding: 0px 10px;
   @include shadowMedium;
-
-  animation: nologinLoad 1000ms ease;
 }
 
-@keyframes nologinLoad {
+.admin_nologin_footer {
 
-  from {
-    opacity: 1;
-    transform: perspective(20cm) rotateX(0deg) scale(1.02) translateY(-0px);
-  }
+  font-size: .7rem;
+  line-height: 1.3em;
+  color: $gray;
+  //background-color: rgba(255, 255, 255, 0.9);
+  //text-shadow: 1px 1px 0px rgba(0,0,0,1), 0px 0px 10px rgba(255,255,255,.9);
+  border-radius: 5px;
+  padding: 3px 5px;
+}
 
-  to {
-    opacity: 1;
-  }
-  
+.admin_nologin_footer a {
+  color: $gray;
 }
 
 .admin_nologin_logo {

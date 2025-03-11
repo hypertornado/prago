@@ -79,6 +79,7 @@ func (page *pageData) renderPage(request *Request) {
 }
 
 type pageNoLogin struct {
+	CodeName string
 	Language string
 	Version  string
 	App      *App
@@ -93,6 +94,8 @@ type pageNoLogin struct {
 	FormData interface{}
 }
 
+const defaultBackgroundImageURL = "https://images.unsplash.com/photo-1519677100203-a0e668c92439?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+
 func renderPageNoLogin(request *Request, page *pageNoLogin) {
 	var name string
 	var icon string
@@ -104,12 +107,18 @@ func renderPageNoLogin(request *Request, page *pageNoLogin) {
 	page.BackgroundImageURL, err = request.app.getSetting("background_image_url")
 	must(err)
 
+	if page.BackgroundImageURL == "" {
+		page.BackgroundImageURL = defaultBackgroundImageURL
+	}
+
 	for _, v := range page.Tabs {
 		if v.Selected {
 			name = v.Name
 			icon = v.Icon
 		}
 	}
+
+	page.CodeName = request.app.codeName
 
 	page.NotificationsData = request.getNotificationsData()
 	page.Title = name

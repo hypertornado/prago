@@ -5,6 +5,7 @@
       {{if $tasks}}
         {{template "tasks" $tasks}}
       {{end}}
+      {{if .Figures}}
       <div class="dashboard_figures">
         {{range $item := .Figures}}
             {{if $item.URL}}
@@ -26,6 +27,7 @@
             {{end}}
         {{end}}
       </div>
+      {{end}}
       {{range $table := .Tables}}
         <div class="dashboard_table" data-uuid="{{$table.UUID}}" data-refresh-time-seconds="{{$table.RefreshTimeSeconds}}"><progress class="progress"></progress></div>
       {{end}}
