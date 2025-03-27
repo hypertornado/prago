@@ -1,8 +1,10 @@
 package prago
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 )
 
 type API struct {
@@ -27,6 +29,28 @@ func newAPI(app *App, url string) *API {
 
 func (app *App) API(url string) *API {
 	api := newAPI(app, url)
+	return api
+}
+
+func APIJSON[T any](app *App, url string, handler func(*T) any) *API {
+	api := newAPI(app, url)
+
+	api.handler = func(request *Request) {
+		data, err := io.ReadAll(request.Request().Body)
+		if err != nil {
+			panic(err)
+		}
+
+		var item T
+		err = json.Unmarshal(data, &item)
+		if err != nil {
+			panic(err)
+		}
+
+		retData := handler(&item)
+		request.WriteJSON(200, retData)
+	}
+
 	return api
 }
 
@@ -61,6 +85,7 @@ func (api *API) Handler(handler func(*Request)) *API {
 	return api
 }
 
+// TODO: Deprecated
 func (api *API) HandlerJSON(handler func(*Request) interface{}) *API {
 	api.handlerJSON = handler
 	return api

@@ -1727,8 +1727,6 @@ class RelationPicker {
                         this.suggestionsEl.classList.add("hidden");
                         let popupForm = new PopupForm(data.Button.FormURL, (data) => {
                             this.addPreview(data.Data);
-                            console.log("created item");
-                            console.log(data);
                         });
                         e.preventDefault();
                         e.stopPropagation();
