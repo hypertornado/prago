@@ -26,11 +26,11 @@ class PopupForm extends Popup {
             this.wide();
             const parser = new DOMParser();
             const document = parser.parseFromString(textVal, "text/html");
-            let formContainer = <HTMLDivElement>document.querySelector(".form_container");
+            let formContainerEl = <HTMLDivElement>document.querySelector(".form_container");
 
-            this.setContent(formContainer);
-            new FormContainer(formContainer, this.okHandler.bind(this));
-            this.setTitle(formContainer.getAttribute("data-form-name"));
+            this.setContent(formContainerEl);
+            new FormContainer(formContainerEl, this.okHandler.bind(this));
+            this.setTitle(formContainerEl.getAttribute("data-form-name"));
         });
     }
 

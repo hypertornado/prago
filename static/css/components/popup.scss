@@ -40,17 +40,20 @@
 .popup {
   @include rectangle;
   width: min(300px, 100% - 20px);
-  background-color: #eee;
+  //background-color: #eee;
   @include shadowMedium;
   display: flex;
   flex-direction: column;
   padding: 0px;
   border-radius: 5px;
   max-height: calc(100dvh - 100px);
+
+  background: white;
 }
 
 .popup-wide {
   width: min(1000px, 100% - 20px);
+  height: calc(100dvh - 100px);
 }
 
 .popup_header {
@@ -96,6 +99,7 @@
   padding: 10px 10px;
   background-color: white;
   overflow-y: auto;
+  flex-grow: 1000;
   display: none;
 }
 

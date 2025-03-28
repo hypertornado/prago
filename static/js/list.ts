@@ -407,7 +407,7 @@ class List {
         }
 
         if (e.shiftKey || e.metaKey || e.ctrlKey) {
-          var openedWindow = window.open(url, "newwindow" + new Date());
+          var openedWindow = window.open(url, "newwindow" + new Date() + Math.random());
           openedWindow.focus();
           return;
         }

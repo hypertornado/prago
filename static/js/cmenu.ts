@@ -13,7 +13,8 @@ interface CMenuData {
 interface CMenuCommand {
   Icon?: string;
   Name: string;
-  Handler: Function;
+  URL?: string;
+  Handler?: Function;
 }
 
 function cmenu(data: CMenuData) {
@@ -25,11 +26,18 @@ class CMenu {
   dismissHandler: Function;
 
   constructor() {
-    for (let eventType of ["keydown", "click", "visibilitychange", "blur"]) {
+    for (let eventType of ["click", "visibilitychange", "blur"]) {
       document.addEventListener(eventType, (e) => {
         this.dismiss();
       });
     }
+
+    document.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key == "Escape") {
+        this.dismiss();
+      }
+    });
+
   }
 
   dismiss() {
@@ -73,6 +81,7 @@ class CMenu {
       let nameEl = document.createElement("div");
       nameEl.classList.add("cmenu_name");
       nameEl.innerText = data.Name;
+      nameEl.setAttribute("title", data.Name);
       el.appendChild(nameEl);
     }
 
@@ -80,6 +89,7 @@ class CMenu {
       let descEl = document.createElement("div");
       descEl.classList.add("cmenu_description");
       descEl.innerText = data.Description;
+      descEl.setAttribute("title", data.Description);
       el.appendChild(descEl);
     }
 
@@ -106,8 +116,19 @@ class CMenu {
           commandEl.appendChild(commandNameIcon);
         }
 
-        commandEl.addEventListener("click", (e) => {
-          command.Handler();
+        commandEl.addEventListener("click", (e: MouseEvent) => {
+          if (command.URL) {
+            if (e.shiftKey || e.metaKey || e.ctrlKey) {
+              var openedWindow = window.open(command.URL, "newwindow" + new Date() + Math.random());
+              openedWindow.focus();
+            } else {
+              window.location.href = command.URL;
+            }
+          }
+          if (command.Handler) {
+            command.Handler();
+          }
+          this.dismiss();
         });
         commandsEl.appendChild(commandEl);
       }
@@ -162,6 +183,10 @@ class CMenu {
 
     el.style.left = x + "px";
     el.style.top = y + "px";
+
+    el.addEventListener("click", (e: KeyboardEvent) => {
+      e.stopPropagation();
+    })
 
     this.lastEl = containerEl;
     this.dismissHandler = data.DismissHandler;

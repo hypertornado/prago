@@ -163,3 +163,17 @@ func (resource *Resource) formItemAction(url string, formGenerator func(any, *Fo
 
 	return fa.actionForm
 }
+
+func PopupForm(app *App, url string, formGenerator func(*Form, *Request), validation func(FormValidation, *Request)) *Action {
+	fa := newFormAction(app, url, nil)
+
+	fa.actionForm.parentBoard = nil
+
+	fa.formGenerator = formGenerator
+	fa.formValidation = validation
+
+	app.rootActions = append(app.rootActions, fa.actionForm)
+	app.rootActions = append(app.rootActions, fa.actionValidation)
+
+	return fa.actionForm
+}

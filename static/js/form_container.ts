@@ -87,7 +87,7 @@ class FormContainer {
         if (contentType == "application/json") {
           //application/json
           var data = JSON.parse(request.response);
-          if (data.RedirectionLocation || data.Preview) {
+          if (data.RedirectionLocation || data.Preview || data.Data) {
             this.okHandler(data);
             //window.location = data.RedirectionLocation;
           } else {

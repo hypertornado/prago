@@ -697,7 +697,7 @@ class List {
                     }
                 }
                 if (e.shiftKey || e.metaKey || e.ctrlKey) {
-                    var openedWindow = window.open(url, "newwindow" + new Date());
+                    var openedWindow = window.open(url, "newwindow" + new Date() + Math.random());
                     openedWindow.focus();
                     return;
                 }
@@ -1951,7 +1951,7 @@ class FormContainer {
                 let contentType = request.getResponseHeader("Content-Type");
                 if (contentType == "application/json") {
                     var data = JSON.parse(request.response);
-                    if (data.RedirectionLocation || data.Preview) {
+                    if (data.RedirectionLocation || data.Preview || data.Data) {
                         this.okHandler(data);
                     }
                     else {
@@ -2754,10 +2754,10 @@ class PopupForm extends Popup {
             this.wide();
             const parser = new DOMParser();
             const document = parser.parseFromString(textVal, "text/html");
-            let formContainer = document.querySelector(".form_container");
-            this.setContent(formContainer);
-            new FormContainer(formContainer, this.okHandler.bind(this));
-            this.setTitle(formContainer.getAttribute("data-form-name"));
+            let formContainerEl = document.querySelector(".form_container");
+            this.setContent(formContainerEl);
+            new FormContainer(formContainerEl, this.okHandler.bind(this));
+            this.setTitle(formContainerEl.getAttribute("data-form-name"));
         });
     }
     okHandler(data) {
@@ -3062,11 +3062,16 @@ function cmenu(data) {
 }
 class CMenu {
     constructor() {
-        for (let eventType of ["keydown", "click", "visibilitychange", "blur"]) {
+        for (let eventType of ["click", "visibilitychange", "blur"]) {
             document.addEventListener(eventType, (e) => {
                 this.dismiss();
             });
         }
+        document.addEventListener("keydown", (e) => {
+            if (e.key == "Escape") {
+                this.dismiss();
+            }
+        });
     }
     dismiss() {
         if (this.lastEl) {
@@ -3100,12 +3105,14 @@ class CMenu {
             let nameEl = document.createElement("div");
             nameEl.classList.add("cmenu_name");
             nameEl.innerText = data.Name;
+            nameEl.setAttribute("title", data.Name);
             el.appendChild(nameEl);
         }
         if (data.Description) {
             let descEl = document.createElement("div");
             descEl.classList.add("cmenu_description");
             descEl.innerText = data.Description;
+            descEl.setAttribute("title", data.Description);
             el.appendChild(descEl);
         }
         if (data.Commands) {
@@ -3125,7 +3132,19 @@ class CMenu {
                     commandEl.appendChild(commandNameIcon);
                 }
                 commandEl.addEventListener("click", (e) => {
-                    command.Handler();
+                    if (command.URL) {
+                        if (e.shiftKey || e.metaKey || e.ctrlKey) {
+                            var openedWindow = window.open(command.URL, "newwindow" + new Date() + Math.random());
+                            openedWindow.focus();
+                        }
+                        else {
+                            window.location.href = command.URL;
+                        }
+                    }
+                    if (command.Handler) {
+                        command.Handler();
+                    }
+                    this.dismiss();
                 });
                 commandsEl.appendChild(commandEl);
             }
@@ -3169,6 +3188,9 @@ class CMenu {
         }
         el.style.left = x + "px";
         el.style.top = y + "px";
+        el.addEventListener("click", (e) => {
+            e.stopPropagation();
+        });
         this.lastEl = containerEl;
         this.dismissHandler = data.DismissHandler;
     }

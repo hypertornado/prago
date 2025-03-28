@@ -10,6 +10,7 @@ type FormValidation interface {
 	Valid() bool
 	Redirect(string)
 	AfterContent(template.HTML)
+	Data(any)
 }
 
 type formValidationData struct {
@@ -24,9 +25,7 @@ type formValidationReport struct {
 }
 
 func newFormValidationData() *formValidationData {
-	ret := &formValidationData{
-		//Valid: true,
-	}
+	ret := &formValidationData{}
 	return ret
 }
 
@@ -41,15 +40,12 @@ func newFormValidation() *formValidation {
 }
 
 func (fv *formValidation) AddError(err string) {
-
-	//fv.validationData.Valid = false
 	fv.validationData.Errors = append(fv.validationData.Errors, ValidationError{
 		Text: err,
 	})
 }
 
 func (fv *formValidation) AddItemError(key, err string) {
-	//fv.validationData.Valid = false
 	fv.validationData.Errors = append(fv.validationData.Errors, ValidationError{
 		Field: key,
 		Text:  err,
