@@ -178,7 +178,7 @@ select.admin_timestamp_minute {
 }
 
 .view_header {
-  padding: 0px 10px 0px 15px;
+  padding: 0px 10px 0px 10px;
   display: flex;
   align-items: center;
 }
@@ -188,6 +188,10 @@ select.admin_timestamp_minute {
   aspect-ratio: 1;
   margin-right: 10px;
   padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  background-color: $backgroundGrayColor;
+  border-radius: 5px;
 }
 
 .view_header_name {

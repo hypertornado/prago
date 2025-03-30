@@ -158,7 +158,7 @@
 {{end}}
 
 {{define "form_input_relation"}}
-<div class="admin_item_relation" data-relation="{{.Data.RelatedID}}" data-multiple="{{.Data.MultiRelation}}">
+<div class="admin_item_relation" {{if .Focused}}data-autofocus="true"{{end}} data-relation="{{.Data.RelatedID}}" data-multiple="{{.Data.MultiRelation}}">
   <input type="hidden" name="{{.ID}}" value="{{.Value}}">
   <progress class="progress"></progress>
   <div class="admin_relation_previews"></div>

@@ -21,14 +21,15 @@
 }
 
 .popup_background-presented .popup {
-  animation: 300ms ease-out popupDisplayAnimation forwards;
+  animation: 200ms ease popupDisplayAnimation forwards;
 }
 
 @keyframes popupDisplayAnimation {
 
   from {
-    opacity: 1;
-    transform: perspective(20cm) rotateX(-45deg) translateY(200px);
+    opacity: 0;
+    //transform: perspective(20cm) rotateX(-45deg) translateY(200px);
+    transform: perspective(20cm) scale(.9) translateY(10px);
   }
 
   to {

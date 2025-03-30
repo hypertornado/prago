@@ -69,7 +69,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 	resource.api("preview-relation/:ids").Handler(
 		func(request *Request) {
 
-			var previews []*preview = []*preview{}
+			var previews []*Preview = []*Preview{}
 
 			ids := strings.Split(request.Param("ids"), ";")
 

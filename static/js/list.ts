@@ -353,6 +353,10 @@ class List {
         continue;
       }
 
+      if (cell.classList.contains("list_cell-fetched")) {
+        continue;
+      }
+
       let cellContentSpan = <HTMLSpanElement>(
         cell.querySelector(".list_cell_name")
       );
@@ -364,11 +368,14 @@ class List {
         .then((data) => {
           cellContentSpan.innerText = data.Value;
           cell.setAttribute("title", data.Value);
+          cell.classList.add("list_cell-fetched");
+          this.bindFetchStats();
         })
         .catch((error) => {
           cellContentSpan.innerText = "⚠️";
           console.error("cant fetch data:", error);
         });
+      return;
     }
   }
 
@@ -427,9 +434,7 @@ class List {
       commands.push({
         Icon: action.Icon,
         Name: action.Name,
-        Handler: () => {
-          window.location = action.URL;
-        },
+        URL: action.URL,
       });
     }
 

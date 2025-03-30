@@ -653,6 +653,9 @@ class List {
             if (!url) {
                 continue;
             }
+            if (cell.classList.contains("list_cell-fetched")) {
+                continue;
+            }
             let cellContentSpan = (cell.querySelector(".list_cell_name"));
             fetch(url)
                 .then((data) => {
@@ -661,11 +664,14 @@ class List {
                 .then((data) => {
                 cellContentSpan.innerText = data.Value;
                 cell.setAttribute("title", data.Value);
+                cell.classList.add("list_cell-fetched");
+                this.bindFetchStats();
             })
                 .catch((error) => {
                 cellContentSpan.innerText = "⚠️";
                 console.error("cant fetch data:", error);
             });
+            return;
         }
     }
     bindClick() {
@@ -713,9 +719,7 @@ class List {
             commands.push({
                 Icon: action.Icon,
                 Name: action.Name,
-                Handler: () => {
-                    window.location = action.URL;
-                },
+                URL: action.URL,
             });
         }
         cmenu({
@@ -1546,6 +1550,9 @@ class Timestamp {
 class RelationPicker {
     constructor(el) {
         this.selectedClass = "admin_item_relation_picker_suggestion-selected";
+        if (el.getAttribute("data-autofocus") == "true") {
+            this.autofocus = true;
+        }
         if (el.getAttribute("data-multiple") == "true") {
             this.multipleInputs = true;
         }
@@ -1571,7 +1578,7 @@ class RelationPicker {
             this.getSuggestions(this.pickerInput.value);
         });
         this.pickerInput.addEventListener("keydown", this.suggestionInput.bind(this));
-        if (this.input.value != "0") {
+        if (parseInt(this.input.value) > 0) {
             this.getData();
         }
         else {
@@ -1683,6 +1690,9 @@ class RelationPicker {
         this.suggestions = [];
         this.suggestionsEl.innerText = "";
         this.pickerInput.value = "";
+        if (this.autofocus) {
+            this.pickerInput.focus();
+        }
     }
     getSuggestions(q) {
         var request = new XMLHttpRequest();
@@ -2816,7 +2826,7 @@ class GoogleMapEdit {
             map: null,
             gmpDraggable: true,
         });
-        this.marker.addListener("click", (e) => {
+        this.marker.addListener("gmp-click", (e) => {
             this.deleteValue();
         });
         this.marker.addListener("drag", (e) => {

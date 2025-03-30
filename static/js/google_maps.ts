@@ -79,7 +79,7 @@ class GoogleMapEdit {
             gmpDraggable: true,
         });
 
-        this.marker.addListener("click", (e: any) => {
+        this.marker.addListener("gmp-click", (e: any) => {
             this.deleteValue();
         })
 

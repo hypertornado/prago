@@ -24,7 +24,8 @@ func (resource *Resource) initDefaultResourceActions() {
 			pd.BoardView = resource.resourceBoard.boardView(request)
 		})
 
-	resource.action("list").Icon(iconTable).setPriority(defaultHighPriority).Permission(resource.canView).Name(messages.GetNameFunction("admin_list")).
+	resource.action("list").Icon(iconTable).setPriority(defaultHighPriority).
+		Permission(resource.canView).Name(messages.GetNameFunction("admin_list")).
 		ui(func(request *Request, pd *pageData) {
 			listData, err := resource.getListHeader(request)
 			must(err)
@@ -33,7 +34,7 @@ func (resource *Resource) initDefaultResourceActions() {
 		)
 
 	resource.formAction("new", func(form *Form, request *Request) {
-		var item interface{} = reflect.New(resource.typ).Interface()
+		var item any = reflect.New(resource.typ).Interface()
 		queryData := request.Request().URL.Query()
 		for k, v := range resource.defaultValues {
 			queryData.Set(k, v(request))
@@ -42,7 +43,7 @@ func (resource *Resource) initDefaultResourceActions() {
 		form.initWithResourceItem(resource, item, request)
 		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 	}, func(vc FormValidation, request *Request) {
-		var item interface{} = reflect.New(resource.typ).Interface()
+		var item any = reflect.New(resource.typ).Interface()
 		resource.bindData(item, request, request.Params())
 
 		itemValidation := resource.validateUpdate(item, request)
@@ -66,7 +67,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			vc.Redirect(resource.getItemURL(item, "", request))
 		}
 	}).Icon(iconAdd).setPriority(defaultHighPriority).Permission(resource.canCreate).Name(func(locale string) string {
-		return fmt.Sprintf("%s „%s“", messages.GetNameFunction("admin_new")(locale), resource.singularName(locale))
+		return resource.newItemName(locale)
 	})
 
 	resource.itemActionUi("", func(item any, request *Request, pd *pageData) {

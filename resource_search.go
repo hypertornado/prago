@@ -7,7 +7,7 @@ import (
 
 type searchResourceResponse struct {
 	Message  string
-	Previews []preview
+	Previews []*Preview
 	Button   *searchResourceResponseButton
 }
 
@@ -23,7 +23,7 @@ func searchResource(request *Request, resource *Resource) {
 
 	usedIDs := map[int64]bool{}
 
-	previews := []preview{}
+	previews := []*Preview{}
 
 	id, err := strconv.Atoi(q)
 	if err == nil {
@@ -32,9 +32,13 @@ func searchResource(request *Request, resource *Resource) {
 			relationItem := resource.previewer(request, item).Preview(nil)
 			if relationItem != nil {
 				usedIDs[relationItem.ID] = true
-				previews = append(previews, *relationItem)
+				previews = append(previews, relationItem)
 			}
 		}
+	}
+
+	for _, fn := range resource.customSearchFunctions {
+		previews = append(previews, fn(q, request)...)
 	}
 
 	filter := "%" + q + "%"
@@ -55,19 +59,14 @@ func searchResource(request *Request, resource *Resource) {
 			viewItem := resource.previewer(request, itemVals.Index(i).Interface()).Preview(nil)
 			if viewItem != nil && !usedIDs[viewItem.ID] {
 				usedIDs[viewItem.ID] = true
-				previews = append(previews, *viewItem)
+				previews = append(previews, viewItem)
 			}
 		}
 	}
 
-	if len(previews) > 5 {
-		previews = previews[0:5]
+	if len(previews) > 10 {
+		previews = previews[0:10]
 	}
-
-	/*for k := range previews {
-		//TODO: remove this crop
-		previews[k].Description = crop(previews[k].Description, 100)
-	}*/
 
 	if (len(previews)) == 0 {
 		ret.Message = "Nic nenalezeno"
@@ -76,12 +75,25 @@ func searchResource(request *Request, resource *Resource) {
 	ret.Previews = previews
 
 	if request.Authorize(resource.canCreate) {
-
 		ret.Button = &searchResourceResponseButton{
-			Name:    messages.GetNameFunction("admin_new")(request.Locale()) + " - " + resource.singularName(request.Locale()),
+			Name:    resource.newItemName(request.Locale()),
 			FormURL: resource.getURL("new"),
 		}
 	}
 
 	request.WriteJSON(200, ret)
+}
+
+func AddResourceCustomSearchFunction[T any](app *App, fn func(q string, userData UserData) []*T) {
+	resource := getResource[T](app)
+	resource.customSearchFunctions = append(resource.customSearchFunctions,
+		func(q string, userData UserData) (ret []*Preview) {
+			items := fn(q, userData)
+			for _, item := range items {
+				preview := resource.previewer(userData, item).Preview(nil)
+				ret = append(ret, preview)
+			}
+			return ret
+		},
+	)
 }

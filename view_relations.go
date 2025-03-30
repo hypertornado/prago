@@ -106,7 +106,7 @@ func generateRelationListAPIHandler(request *Request) {
 	request.WriteHTML(200, request.app.adminTemplates, "view_relationlist_response", data)
 }
 
-func (resource *Resource) getPreviews(ctx context.Context, listRequest relationListRequest, request *Request) []*preview {
+func (resource *Resource) getPreviews(ctx context.Context, listRequest relationListRequest, request *Request) []*Preview {
 	sourceResource := resource.app.getResourceByID(listRequest.SourceResource)
 	if !request.Authorize(sourceResource.canView) {
 		panic("cant authorize source resource")
@@ -145,7 +145,7 @@ func (resource *Resource) getPreviews(ctx context.Context, listRequest relationL
 
 	itemLen := itemVals.Len()
 
-	var ret []*preview
+	var ret []*Preview
 
 	for i := 0; i < itemLen; i++ {
 		ret = append(

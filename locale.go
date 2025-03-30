@@ -1,6 +1,8 @@
 package prago
 
 import (
+	"fmt"
+
 	"golang.org/x/text/language"
 )
 
@@ -36,4 +38,8 @@ func unlocalized(name string) func(string) string {
 	return func(string) string {
 		return name
 	}
+}
+
+func (resource *Resource) newItemName(locale string) string {
+	return fmt.Sprintf("%s „%s“", messages.GetNameFunction("admin_new")(locale), resource.singularName(locale))
 }

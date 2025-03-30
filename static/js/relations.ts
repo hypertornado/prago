@@ -20,8 +20,13 @@ class RelationPicker {
   relationName: string;
 
   multipleInputs: boolean;
+  autofocus: boolean;
 
   constructor(el: HTMLDivElement) {
+    if (el.getAttribute("data-autofocus") == "true") {
+      this.autofocus = true
+    }
+
     if (el.getAttribute("data-multiple") == "true") {
       this.multipleInputs = true;
     } else {
@@ -59,7 +64,7 @@ class RelationPicker {
       this.suggestionInput.bind(this)
     );
 
-    if (this.input.value != "0") {
+    if (parseInt(this.input.value) > 0) {
       this.getData();
     } else {
       this.progress.classList.add("hidden");
@@ -69,7 +74,6 @@ class RelationPicker {
 
   getData() {
     var request = new XMLHttpRequest();
-
     request.open(
       "GET",
       "/admin/" +
@@ -191,6 +195,9 @@ class RelationPicker {
     this.suggestions = [];
     this.suggestionsEl.innerText = "";
     this.pickerInput.value = "";
+    if (this.autofocus) {
+      this.pickerInput.focus();
+    }
   }
 
   getSuggestions(q: string) {

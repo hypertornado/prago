@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type preview struct {
+type Preview struct {
 	ID          int64
 	Image       string
 	URL         string
@@ -84,7 +84,7 @@ func (previewer *previewer) Name() string {
 
 }
 
-func (f *Field) relationPreview(userData UserData, idsStr string) (ret []*preview) {
+func (f *Field) relationPreview(userData UserData, idsStr string) (ret []*Preview) {
 	ids := strings.Split(idsStr, ";")
 	for _, id := range ids {
 		item := f.relatedResource.query(context.Background()).ID(id)
@@ -101,8 +101,8 @@ func (previewer *previewer) URL(suffix string) string {
 	return previewer.resource.getItemURL(previewer.item, suffix, previewer.userData)
 }
 
-func (previewer *previewer) Preview(relatedResource *Resource) *preview {
-	var ret preview
+func (previewer *previewer) Preview(relatedResource *Resource) *Preview {
+	var ret Preview
 	ret.ID = previewer.ID()
 	ret.Name = previewer.Name()
 	ret.URL = previewer.URL("")
