@@ -1727,17 +1727,16 @@ class RelationPicker {
                 if (data.Button) {
                     let buttonEl = document.createElement("a");
                     buttonEl.innerText = data.Button.Name;
-                    buttonEl.setAttribute("href", data.Button.URL);
                     buttonEl.classList.add("btn", "relation_button");
                     buttonEl.addEventListener("click", (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    });
-                    buttonEl.addEventListener("mousedown", (e) => {
                         this.suggestionsEl.classList.add("hidden");
                         let popupForm = new PopupForm(data.Button.FormURL, (data) => {
                             this.addPreview(data.Data);
                         });
+                        e.preventDefault();
+                        e.stopPropagation();
+                    });
+                    buttonEl.addEventListener("mousedown", (e) => {
                         e.preventDefault();
                         e.stopPropagation();
                     });

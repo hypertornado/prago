@@ -757,7 +757,9 @@ select.admin_timestamp_minute {
 
 .relation_button {
   display: block;
-  margin: 5px 10px;
+  margin: 5px 5px;
+  justify-content: center;
+  width: calc(100% - 10px);
 }
 
 .admin_relation_previews {

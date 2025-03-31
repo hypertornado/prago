@@ -23,13 +23,19 @@ func (app *App) listenAndServe(port int) error {
 		app.logger.SetOutput(file)
 	}
 
-	return (&http.Server{
+	server := &http.Server{
 		Addr:           "0.0.0.0:" + strconv.Itoa(port),
 		Handler:        server{*app},
 		ReadTimeout:    2 * time.Minute,
 		WriteTimeout:   2 * time.Minute,
 		MaxHeaderBytes: 1 << 20,
-	}).ListenAndServe()
+	}
+
+	if app.serverSetup != nil {
+		app.serverSetup(server)
+	}
+
+	return server.ListenAndServe()
 }
 
 type server struct {
@@ -43,6 +49,10 @@ func (app *App) NewServer() server {
 
 func (app *App) AddBeforeStartHandler(fn func()) {
 	app.beforeStartHandler = fn
+}
+
+func (app *App) AddServerSetup(fn func(*http.Server)) {
+	app.serverSetup = fn
 }
 
 func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {

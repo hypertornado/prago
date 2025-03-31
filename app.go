@@ -4,6 +4,7 @@ package prago
 import (
 	"database/sql"
 	"embed"
+	"net/http"
 	"os"
 	"reflect"
 	"sync"
@@ -86,6 +87,8 @@ type App struct {
 	EmailSentHandler func(*Email)
 
 	beforeStartHandler func()
+
+	serverSetup func(*http.Server)
 }
 
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {
