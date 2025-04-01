@@ -3,11 +3,9 @@
 .breadcrumbs {
     border: 0px solid red;
     display: flex;
-    gap: 0px;
+    gap: 5px;
     flex-grow: 100;
     align-items: center;
-    padding: 3px;
-    padding-left: 10px;
     min-width: 0;
     flex-shrink: 1000;
 }
@@ -22,6 +20,7 @@
     gap: 5px;
     flex-shrink: 100;
     min-width: 0;
+    background-color: $backgroundGrayColor;
 }
 
 .breadcrumb-selected {
@@ -72,4 +71,5 @@
 .breadcrumbs_divider {
     height: 12px;
     aspect-ratio: 1;
+    display: none;
 }

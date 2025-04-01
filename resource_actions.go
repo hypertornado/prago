@@ -116,7 +116,7 @@ func (resource *Resource) initDefaultResourceActions() {
 				fv.Redirect(resource.getURL(""))
 			}
 		},
-	).Icon(iconDelete).setPriority(-defaultHighPriority).Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete"))
+	).Icon(iconDelete).setPriority(-defaultHighPriority).styleDestroy().Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete"))
 
 	if resource.previewFn != nil {
 		resource.itemActionHandler("preview",

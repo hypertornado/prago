@@ -56,31 +56,23 @@ a.search_pagination_page-selected {
 
 .searchbox {
   display: flex;
-  border: 1px solid #eee;
-  margin: 0px 10px;
   max-width: 600px;
   background: white;
   border-radius: 10px;
   position: relative;
+  z-index: 10000000000;
+  background-color: $backgroundGrayColor;
 }
 
 .searchbox-showsuggestions {
   @include shadow;
 }
 
-@media (max-width: 650px) {
-  .searchbox {
-    max-width: 100%;
-    width: auto;
-    margin: 10px;
-  }
-}
-
 .searchbox_input {
   padding: 0px 10px;
   font-weight: 500;
   -webkit-appearance: textfield;
-  background-color: white;
+  background-color: transparent;
   border: none;
   box-shadow: none;
   font-size: 1rem;
@@ -102,7 +94,11 @@ a.search_pagination_page-selected {
 }
 
 .searchbox_button:hover {
-  background-color: #fafafa;
+  background-color: $hoverColor;
+}
+
+.searchbox_button:active {
+  background-color: $activeColor;
 }
 
 .searchbox_button img {
@@ -112,14 +108,15 @@ a.search_pagination_page-selected {
 .searchbox-showsuggestions {
   border-bottom-left-radius: 0px;
   border-bottom-right-radius: 0px;
+  background-color: white;
 }
 
 .searchbox_suggestions {
   min-height: 20px;
   background: white;
   position: absolute;
-  left: -1px;
-  right: -1px;
+  left: 0px;
+  right: 0px;
   top: 28px;
   @include shadow;
   border-radius: 0px 0px 10px 10px;
@@ -128,7 +125,6 @@ a.search_pagination_page-selected {
   display: none;
   z-index: 1000;
   clip-path: inset(0px -100px -100px -100px);
-  border: 1px solid #eee;
   border-top: none;
 
   max-height: calc(100vh - 50px);
@@ -201,18 +197,4 @@ a.admin_search_suggestion-selected:active {
 
 .admin_search_suggestion_description {
   color: $gray;
-}
-
-@media (max-width: 800px) {
-  .searchbox {
-    flex-grow: 2;
-  }
-
-  .searchbox_input {
-    width: 100px;
-  }
-
-  .searchbox_input {
-    flex-grow: 2;
-  }
 }

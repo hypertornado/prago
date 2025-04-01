@@ -11,7 +11,7 @@
 }
 
 .cmenu {
-    border: 1px solid $grayBorderColor;
+    border: 0px solid $grayBorderColor;
     border-radius: 10px;
     overflow: hidden;
     @include shadowLarge;
@@ -22,13 +22,13 @@
     left: 3px;
     width: 250px;
     padding: 6px 0px;
-    animation: cmenuShow 50ms ease-in;
+    animation: cmenuShow 100ms ease-in;
 }
 
 @keyframes cmenuShow {
     from {
         opacity: 0;
-        transform: scale(.9);
+        transform: scale(.1);
     }
 
     to {
@@ -79,7 +79,6 @@
 }
 
 .cmenu_command {
-
     display: flex;
     color: $baseColor;
 
@@ -103,16 +102,17 @@
 }
 
 .cmenu_command_name {
-    //border: 1px solid blue;
     flex-shrink: 100;
     flex-grow: 100;
 }
 
 .cmenu_command_icon {
-    //border: 1px solid red;
     width: 20px;
     aspect-ratio: 1;
     flex-shrink: 0;
     flex-grow: 0;
+}
 
+.cmenu_command-destroy {
+    color: $red;
 }

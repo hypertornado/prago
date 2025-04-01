@@ -15,6 +15,7 @@ interface CMenuCommand {
   Name: string;
   URL?: string;
   Handler?: Function;
+  Style?: string;
 }
 
 function cmenu(data: CMenuData) {
@@ -101,6 +102,10 @@ class CMenu {
         let commandEl = document.createElement("div");
         commandEl.classList.add("cmenu_command");
 
+        if (command.Style) {
+          commandEl.classList.add("cmenu_command-" + command.Style);
+        }
+
         let commandNameEl = document.createElement("div");
         commandNameEl.classList.add("cmenu_command_name");
         commandNameEl.innerText = command.Name;
@@ -109,9 +114,13 @@ class CMenu {
         if (command.Icon) {
           let commandNameIcon = document.createElement("img");
           commandNameIcon.classList.add("cmenu_command_icon");
+          let color = "4077bf";
+          if (command.Style == "destroy") {
+            color = "cb2431";
+          }
           commandNameIcon.setAttribute(
             "src",
-            "/admin/api/icons?file=" + command.Icon + "&color=4077bf"
+            "/admin/api/icons?file=" + command.Icon + "&color=" + color,
           );
           commandEl.appendChild(commandNameIcon);
         }

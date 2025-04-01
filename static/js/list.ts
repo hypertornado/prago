@@ -430,11 +430,13 @@ class List {
 
     var commands: CMenuCommand[] = [];
 
+
     for (let action of actions.MenuButtons) {
       commands.push({
         Icon: action.Icon,
         Name: action.Name,
         URL: action.URL,
+        Style: action.Style,
       });
     }
 

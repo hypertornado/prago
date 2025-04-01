@@ -138,6 +138,7 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initFilesResource()
 	app.initEmailSentResource()
 
+	app.initSystemStats()
 	app.initActivityLog()
 	app.postInitTaskManager()
 	app.initAdminActions()
@@ -148,7 +149,6 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initTemplates()
 	app.initElasticsearch()
 	app.initSearch()
-	app.initSystemStats()
 	app.initSQLConsole()
 	app.initSQLBackup()
 	app.initBackupCRON()

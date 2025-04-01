@@ -12,6 +12,7 @@ type buttonData struct {
 	Name     string
 	URL      string
 	Priority int64
+	Style    string
 }
 
 // Action represents action
@@ -25,6 +26,7 @@ type Action struct {
 	constraints   []routerConstraint
 	parentBoard   *Board
 	isPartOfBoard *Board
+	style         string
 
 	app          *App
 	resource     *Resource
@@ -165,6 +167,11 @@ func (action *Action) userMenu() *Action {
 	return action
 }
 
+func (action *Action) styleDestroy() *Action {
+	action.style = "destroy"
+	return action
+}
+
 func (action *Action) addConstraint(constraint routerConstraint) {
 	action.constraints = append(action.constraints, constraint)
 }
@@ -182,6 +189,7 @@ func (resource *Resource) getItemButtonData(userData UserData, item interface{})
 			Name:     v.name(userData.Locale()),
 			URL:      resource.getItemURL(item, v.url, userData),
 			Priority: v.priority,
+			Style:    v.style,
 		},
 		)
 	}

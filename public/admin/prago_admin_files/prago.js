@@ -720,6 +720,7 @@ class List {
                 Icon: action.Icon,
                 Name: action.Name,
                 URL: action.URL,
+                Style: action.Style,
             });
         }
         cmenu({
@@ -3130,6 +3131,9 @@ class CMenu {
             for (let command of data.Commands) {
                 let commandEl = document.createElement("div");
                 commandEl.classList.add("cmenu_command");
+                if (command.Style) {
+                    commandEl.classList.add("cmenu_command-" + command.Style);
+                }
                 let commandNameEl = document.createElement("div");
                 commandNameEl.classList.add("cmenu_command_name");
                 commandNameEl.innerText = command.Name;
@@ -3137,7 +3141,11 @@ class CMenu {
                 if (command.Icon) {
                     let commandNameIcon = document.createElement("img");
                     commandNameIcon.classList.add("cmenu_command_icon");
-                    commandNameIcon.setAttribute("src", "/admin/api/icons?file=" + command.Icon + "&color=4077bf");
+                    let color = "4077bf";
+                    if (command.Style == "destroy") {
+                        color = "cb2431";
+                    }
+                    commandNameIcon.setAttribute("src", "/admin/api/icons?file=" + command.Icon + "&color=" + color);
                     commandEl.appendChild(commandNameIcon);
                 }
                 commandEl.addEventListener("click", (e) => {
@@ -3424,6 +3432,14 @@ class Prago {
         }
         initDashboard();
         initGoogleMaps();
+        document.querySelector(".searchbox_button").addEventListener("click", (e) => {
+            let input = document.querySelector(".searchbox_input");
+            if (!input.value) {
+                input.focus();
+                e.stopPropagation();
+                e.preventDefault();
+            }
+        });
     }
     static testPopupForm() {
         new PopupForm("/admin/packageview/new", (data) => {

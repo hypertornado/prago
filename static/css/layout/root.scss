@@ -12,7 +12,10 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  gap: 5px;
+  padding: 0px 10px;
   justify-content: space-between;
+  height: 45px;
 }
 
 
@@ -40,10 +43,10 @@
   cursor: pointer;
   flex-shrink: 0;
   display: none;
-  margin: 0px 5px;
 
   justify-content: center;
   align-items: center;
+  background-color: $backgroundGrayColor;
 }
 
 .root_hamburger:hover {
@@ -75,8 +78,8 @@
 
 @keyframes root_left_animation {
   0% {
-    opacity: 0.9;
-    transform: translateX(100vh);
+    opacity: 0;
+    transform: perspective(10cm) scale(1) translateX(100px);
   }
 
   100% {
@@ -88,7 +91,7 @@
   //fix mobile display: https://dev.to/maciejtrzcinski/100vh-problem-with-ios-safari-3ge9
 
   .root_header {
-    border-top: 1px solid #eee;
+    //border-top: 1px solid #eee;
     background: white;
     z-index: 1000;
   }
@@ -110,9 +113,11 @@
     right: 0px;
     z-index: 10;
     background-color: #fff;
-    @include shadow;
+    //@include shadow;
     animation: root_left_animation 200ms ease-out;
     width: 100vw;
+    z-index: 10000000;
+    position: absolute;
   }
 
   .root_hamburger {
@@ -125,6 +130,8 @@
     right: 0px;
     left: 0px;
     width: 100vw;
+    //z-index: 10000000;
+    //position: absolute;
   }
 }
 

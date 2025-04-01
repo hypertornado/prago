@@ -15,6 +15,11 @@ import (
 func (app *App) initSystemStats() {
 	startedAt := time.Now()
 
+	currentStatsDashboard := sysadminBoard.Dashboard(unlocalized("Current stats"))
+	currentStatsDashboard.Figure(unlocalized("# current requests"), "sysadmin").Value(func(request *Request) int64 {
+		return serverRequestCounter.Load()
+	})
+
 	sysadminBoard.Dashboard(unlocalized("DB import")).Table(func(request *Request) *Table {
 		ret := app.Table()
 
