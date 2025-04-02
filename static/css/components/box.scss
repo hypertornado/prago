@@ -1,18 +1,16 @@
 @use "../variables.scss" as *;
 
 .box {
-  border: 0px solid $grayBorderColor;
   margin: 0 auto;
   max-width: min(650px, 100vw);
   width: 100%;
   margin-bottom: 20px;
-  border-radius: 5px;
+  //border-radius: 5px;
   margin-top: 0px;
-  //overflow: hidden;
 }
 
 .box:has(.admin_relationlist) {
-  border: 1px solid $grayBorderColor;
+  border-top: 1px solid $grayBorderColor;
 }
 
 .box_content {
@@ -48,6 +46,12 @@
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+@media (min-width: 700px) {
+  .box_name:has(.box_icon) {
+    margin-left: -30px;
+  } 
 }
 
 .box_textafter {

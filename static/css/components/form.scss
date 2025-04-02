@@ -159,7 +159,7 @@
   }
 
   to {
-    background-color: white;
+    background-color: $redLightest;
   }
   
 }
@@ -200,6 +200,12 @@
   margin: 0px 0px 5px 0px;
   display: flex;
   align-items: center;
+}
+
+@media (min-width: 700px) {
+  .form_label_text:has(.form_label_text_icon) {
+    margin-left: -20px;
+  } 
 }
 
 .form_label_text_icon {

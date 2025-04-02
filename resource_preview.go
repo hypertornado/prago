@@ -68,7 +68,10 @@ func (previewer *previewer) Name() string {
 	var valIface = pointerVal.Interface()
 	namedIface, ok := valIface.(namedIFace)
 	if ok {
-		return namedIface.GetName(previewer.userData.Locale())
+		custom := namedIface.GetName(previewer.userData.Locale())
+		if custom != "" {
+			return custom
+		}
 	}
 
 	if previewer.item != nil && previewer.hasAccessToField("Name") {

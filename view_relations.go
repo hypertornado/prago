@@ -46,12 +46,14 @@ func (resource *Resource) getRelationView(ctx context.Context, id int64, field *
 	ret.Subname = messages.ItemsCount(filteredCount, request.Locale())
 
 	ret.Navigation = append(ret.Navigation, viewButton{
+		Name: messages.Get(request.Locale(), "admin_list"),
 		Icon: iconTable,
 		URL:  field.listURL(int64(id)),
 	})
 
 	if request.Authorize(field.resource.canUpdate) {
 		ret.Navigation = append(ret.Navigation, viewButton{
+			Name: messages.Get(request.Locale(), "admin_new"),
 			Icon: iconAdd,
 			URL:  field.addURL(int64(id)),
 		})

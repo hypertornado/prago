@@ -30,6 +30,7 @@ type viewField struct {
 }
 
 type viewButton struct {
+	Name string
 	URL  string
 	Icon string
 }

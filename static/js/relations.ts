@@ -239,8 +239,17 @@ class RelationPicker {
 
         if (data.Button) {
           let buttonEl = document.createElement("a");
-          buttonEl.innerText = data.Button.Name;
-          //buttonEl.setAttribute("href", data.Button.URL);
+
+          let buttonElIcon = document.createElement("img");
+          buttonElIcon.setAttribute("src", "/admin/api/icons?file=glyphicons-basic-371-plus.svg");
+          buttonElIcon.classList.add("btn_icon");
+
+          let buttonElText = document.createElement("span");
+          buttonElText.innerText = data.Button.Name;
+          
+          buttonEl.appendChild(buttonElIcon);
+          buttonEl.appendChild(buttonElText);
+
           buttonEl.classList.add("btn", "relation_button");
           buttonEl.addEventListener("click", (e) => {
             this.suggestionsEl.classList.add("hidden");
@@ -339,6 +348,10 @@ class RelationPicker {
     }
     ret.classList.add("admin_preview");
     ret.setAttribute("href", data.URL);
+
+    ret.addEventListener("mouseleave", () => {
+      this.unselect();
+    })
 
     var right = document.createElement("div");
     right.classList.add("admin_preview_right");

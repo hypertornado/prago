@@ -9,6 +9,8 @@ class PopupForm extends Popup {
         this.setCancelable();
         this.present();
 
+        this.setIcon("glyphicons-basic-30-clipboard.svg");
+
         this.loadForm(path);
     }
 
@@ -31,6 +33,7 @@ class PopupForm extends Popup {
             this.setContent(formContainerEl);
             new FormContainer(formContainerEl, this.okHandler.bind(this));
             this.setTitle(formContainerEl.getAttribute("data-form-name"));
+            this.setIcon(formContainerEl.getAttribute("data-form-icon"));
         });
     }
 

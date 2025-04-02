@@ -1727,7 +1727,13 @@ class RelationPicker {
                 }
                 if (data.Button) {
                     let buttonEl = document.createElement("a");
-                    buttonEl.innerText = data.Button.Name;
+                    let buttonElIcon = document.createElement("img");
+                    buttonElIcon.setAttribute("src", "/admin/api/icons?file=glyphicons-basic-371-plus.svg");
+                    buttonElIcon.classList.add("btn_icon");
+                    let buttonElText = document.createElement("span");
+                    buttonElText.innerText = data.Button.Name;
+                    buttonEl.appendChild(buttonElIcon);
+                    buttonEl.appendChild(buttonElText);
                     buttonEl.classList.add("btn", "relation_button");
                     buttonEl.addEventListener("click", (e) => {
                         this.suggestionsEl.classList.add("hidden");
@@ -1819,6 +1825,9 @@ class RelationPicker {
         }
         ret.classList.add("admin_preview");
         ret.setAttribute("href", data.URL);
+        ret.addEventListener("mouseleave", () => {
+            this.unselect();
+        });
         var right = document.createElement("div");
         right.classList.add("admin_preview_right");
         var name = document.createElement("div");
@@ -2557,6 +2566,7 @@ class Popup {
         this.el.innerHTML = `
         <div class="popup">
             <div class="popup_header">
+                <img class="popup_header_icon hidden">
                 <div class="popup_header_name"></div>
                 <div class="popup_header_cancel"></div>
             </div>
@@ -2621,6 +2631,14 @@ class Popup {
     setTitle(name) {
         this.el.querySelector(".popup_header_name").textContent = name;
     }
+    setIcon(iconName) {
+        if (!iconName) {
+            return;
+        }
+        let iconEl = this.el.querySelector(".popup_header_icon");
+        iconEl.classList.remove("hidden");
+        iconEl.setAttribute("src", `/admin/api/icons?file=${iconName}&color=444444`);
+    }
     addButton(name, handler, style) {
         this.el
             .querySelector(".popup_footer")
@@ -2661,6 +2679,7 @@ class Alert extends Popup {
         super(title);
         this.setCancelable();
         this.present();
+        this.setIcon("glyphicons-basic-79-triangle-empty-alert.svg");
         this.addButton("OK", this.remove.bind(this), ButtonStyle.Accented).focus();
     }
 }
@@ -2747,6 +2766,7 @@ class PopupForm extends Popup {
         this.dataHandler = dataHandler;
         this.setCancelable();
         this.present();
+        this.setIcon("glyphicons-basic-30-clipboard.svg");
         this.loadForm(path);
     }
     loadForm(path) {
@@ -2768,6 +2788,7 @@ class PopupForm extends Popup {
             this.setContent(formContainerEl);
             new FormContainer(formContainerEl, this.okHandler.bind(this));
             this.setTitle(formContainerEl.getAttribute("data-form-name"));
+            this.setIcon(formContainerEl.getAttribute("data-form-icon"));
         });
     }
     okHandler(data) {

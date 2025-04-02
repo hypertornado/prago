@@ -21,7 +21,7 @@
     {{end}}
     <div class="btngroup view_header_tabs">
       {{range $navItem := .Navigation}}
-        <a href="{{$navItem.URL}}" class="btn"><img src="/admin/api/icons?file={{.Icon}}&color=444444" class="btn_icon"></a>
+        <a href="{{$navItem.URL}}" class="btn"><img src="/admin/api/icons?file={{.Icon}}&color=444444" class="btn_icon">{{$navItem.Name}}</a>
       {{end}}
     </div>
   </div>
@@ -143,9 +143,9 @@
         </div>
       </a>
       {{end}}
-    {{else}}
-      –
-    {{end}}
+    {{else -}}
+      
+    {{- end}}
   </div>
 {{end}}
 

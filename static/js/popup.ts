@@ -12,6 +12,7 @@ class Popup {
     this.el.innerHTML = `
         <div class="popup">
             <div class="popup_header">
+                <img class="popup_header_icon hidden">
                 <div class="popup_header_name"></div>
                 <div class="popup_header_cancel"></div>
             </div>
@@ -87,6 +88,15 @@ class Popup {
     this.el.querySelector(".popup_header_name").textContent = name;
   }
 
+  protected setIcon(iconName: string) {
+    if (!iconName) {
+      return;
+    }
+    let iconEl = this.el.querySelector(".popup_header_icon");
+    iconEl.classList.remove("hidden");
+    iconEl.setAttribute("src", `/admin/api/icons?file=${iconName}&color=444444`)
+  }
+
   protected addButton(
     name: string,
     handler: any,
@@ -136,6 +146,7 @@ class Alert extends Popup {
     super(title);
     this.setCancelable();
     this.present();
+    this.setIcon("glyphicons-basic-79-triangle-empty-alert.svg");
     this.addButton("OK", this.remove.bind(this), ButtonStyle.Accented).focus();
   }
 }
@@ -169,9 +180,6 @@ class Confirm extends Popup {
     if (!primaryText) {
       primaryText = "OK";
     }
-    /*if (style == ButtonStyle.Delete) {
-      primaryText = "Smazat";
-    }*/
 
     this.primaryButton = this.addButton(
       primaryText,

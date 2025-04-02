@@ -2,7 +2,10 @@
 
   {{$boxHeaderData := .GetBoxHeader}}
 
-  <div class="form_container{{if .AutosubmitOnDataChange}} form_container-autosubmit{{end}}{{if .AutosubmitFirstTime}} form_container-autosubmitfirsttime{{end}}" data-form-name="{{$boxHeaderData.Name}}">
+  <div class="form_container{{if .AutosubmitOnDataChange}} form_container-autosubmit{{end}}{{if .AutosubmitFirstTime}} form_container-autosubmitfirsttime{{end}}"
+    data-form-name="{{$boxHeaderData.Name}}"
+    data-form-icon="{{$boxHeaderData.Icon}}"
+  >
 
     <div class="box">
       {{template "box_header" $boxHeaderData}}

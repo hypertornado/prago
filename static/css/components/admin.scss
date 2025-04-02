@@ -220,13 +220,15 @@ select.admin_timestamp_minute {
   align-items: center;
 }
 
+@media (min-width: 700px) {
+  .view_name:has(.view_name_icon) {
+    margin-left: -20px;
+  } 
+}
+
 .view_name_icon {
   width: 15px;
   margin-right: 5px;
-}
-
-.view_name:first-child {
-  border-top: none;
 }
 
 .view_edit { 
@@ -290,7 +292,7 @@ select.admin_timestamp_minute {
 }
 
 .admin_preview {
-  padding: 10px;
+  padding: 5px 10px;
   border-radius: 5px;
   text-decoration: none;
   display: inline-block;
