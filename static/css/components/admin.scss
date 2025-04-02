@@ -235,6 +235,13 @@ select.admin_timestamp_minute {
   font-size: .8rem;
   margin-left: 5px;
   opacity: 0;
+  padding: 0px 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  text-decoration: none;
+  border-radius: 3px;
+  background-color: $backgroundGrayColor;
 }
 
 .view_name:hover .view_edit {

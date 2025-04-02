@@ -648,6 +648,13 @@ select.admin_timestamp_minute {
   font-size: 0.8rem;
   margin-left: 5px;
   opacity: 0;
+  padding: 0px 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  text-decoration: none;
+  border-radius: 3px;
+  background-color: #fafafa;
 }
 
 .view_name:hover .view_edit {
@@ -2431,6 +2438,7 @@ a.dashboard_figure {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  height: 1.3em;
 }
 
 a .dashboard_figure_value {
@@ -2445,6 +2453,7 @@ a .dashboard_figure_value {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  height: 1.3em;
 }
 
 .dashboard_figure_description {
@@ -2452,6 +2461,7 @@ a .dashboard_figure_value {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  height: 1.3em;
 }
 
 .dashboard_figure-green .dashboard_figure_description {
@@ -2462,23 +2472,19 @@ a .dashboard_figure_value {
   color: #cb2431;
 }
 
-.dashboard_figure_loader {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  display: none;
-  text-align: left;
+.dashboard_figure-loading {
+  animation: dashboardLoading 800ms ease-in-out alternate infinite;
 }
 
-.dashboard_figure-loading .dashboard_figure_loader {
-  display: inline-block;
+@keyframes dashboardLoading {
+  from {
+    opacity: 0;
+    filter: blur(2);
+  }
+  to {
+    opacity: 0.5;
+  }
 }
-
-.dashboard_figure-loading > :not(.dashboard_figure_loader) {
-  filter: blur(1px);
-  opacity: 0.8;
-}
-
 .dashboard_table {
   border: 0px solid red;
   overflow-x: auto;
@@ -2830,7 +2836,7 @@ a.admin_stats_section_row {
 .tasks {
   display: flex;
   flex-wrap: wrap;
-  padding: 10px;
+  padding: 3px 10px;
   gap: 5px;
 }
 
@@ -3352,7 +3358,7 @@ a.admin_stats_section_row {
   left: 0px;
   right: 0px;
   bottom: 0px;
-  z-index: 9999;
+  z-index: 1000000000000;
 }
 
 .cmenu {
@@ -3362,7 +3368,6 @@ a.admin_stats_section_row {
   box-shadow: 0px 1px 10px 10px rgba(0, 0, 0, 0.1);
   background-color: white;
   position: absolute;
-  z-index: 9999;
   top: 3px;
   left: 3px;
   width: 250px;
@@ -3411,6 +3416,37 @@ a.admin_stats_section_row {
   -webkit-box-orient: vertical;
   overflow: hidden;
   cursor: default;
+}
+
+.cmenu_table_rows {
+  display: flex;
+  flex-direction: column;
+  margin: 3px 0px;
+  gap: 3px;
+}
+
+.cmenu_table_row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  flex-wrap: nowrap;
+  gap: 5px;
+  padding: 0px 3px;
+  font-size: 0.9rem;
+  line-height: 1.1em;
+}
+
+.cmenu_table_row_name {
+  width: 100%;
+  text-align: right;
+}
+
+.cmenu_table_row_name::after {
+  content: ":";
+}
+
+.cmenu_table_row_value {
+  width: 100%;
 }
 
 .cmenu_commands {
@@ -3563,7 +3599,6 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 
 .timeline_value:hover .timeline_value_label {
   color: black;
-  overflow: visible;
   z-index: 1000;
 }
 
@@ -3602,11 +3637,6 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
   color: black;
   width: auto;
   overflow: visible;
-}
-
-.timeline_value:hover .timeline_value_name_inner {
-  overflow: visible;
-  display: inline-block;
 }
 
 .timeline_value-current .timeline_value_name {

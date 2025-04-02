@@ -116,6 +116,27 @@ class Timeline {
             valEl.classList.add("timeline_value-current");
         }
         this.valuesEl.appendChild(valEl);
+
+        valEl.addEventListener("click", (e) => {
+            var tableRows = [];
+
+            for (let i = 0; i < data.Bars.length; i++) {
+                let bar = data.Bars[i];
+                tableRows.push({
+                    Name: bar.KeyName,
+                    Value: bar.ValueText,
+                });
+            }
+
+            e.stopPropagation();
+            //@ts-ignore
+            cmenu({
+                Event: e,
+                Name: data.Name,
+                Rows: tableRows,
+            })
+
+        })
     }
 
     addBar(el: HTMLDivElement, barValue: any) {
@@ -136,7 +157,6 @@ class Timeline {
     }
 
     changedType() {
-
         let typ = this.typeSelect.value;
 
         this.datepicker.classList.add("hidden");

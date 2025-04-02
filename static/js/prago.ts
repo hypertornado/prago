@@ -85,12 +85,17 @@ class VisibilityReloader {
   lastRequestedTime: number;
 
   constructor(reloadIntervalMilliseconds: number, handler: any) {
+
+    //console.log("VISIB", reloadIntervalMilliseconds);
+
     this.lastRequestedTime = 0;
     window.setInterval(() => {
       if (
         document.visibilityState == "visible" &&
         Date.now() - this.lastRequestedTime >= reloadIntervalMilliseconds
       ) {
+        //console.log("WILL load");
+        //console.log(handler);
         this.lastRequestedTime = Date.now();
         handler();
       }

@@ -56,12 +56,14 @@ func (app *App) AddServerSetup(fn func(*http.Server)) {
 	app.serverSetup = fn
 }
 
-var serverRequestCounter atomic.Int64
+var currentRequestCounter atomic.Int64
+var totalRequestCounter atomic.Int64
 
 func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	serverRequestCounter.Add(1)
+	currentRequestCounter.Add(1)
+	totalRequestCounter.Add(1)
 	defer func() {
-		serverRequestCounter.Add(-1)
+		currentRequestCounter.Add(-1)
 	}()
 
 	s.app.serveHTTP(w, r)

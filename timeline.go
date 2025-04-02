@@ -84,6 +84,8 @@ func (timeline *Timeline) getTimelineColumnsCount(widthStr string) int {
 func (timeline *Timeline) data(request *Request) *timelineData {
 	ret := &timelineData{}
 
+	var language = request.Locale()
+
 	var columnsCount = timeline.getTimelineColumnsCount(request.Param("_width"))
 	var dateStr = request.Param("_date")
 
@@ -156,7 +158,14 @@ func (timeline *Timeline) data(request *Request) *timelineData {
 				Context: request.r.Context(),
 			}
 			val := ds.dataSource(request)
+
+			var keyName string
+			if ds.name != nil {
+				keyName = ds.name(language)
+			}
+
 			dataValue.Bars = append(dataValue.Bars, &timelineDataBar{
+				KeyName:   keyName,
 				Value:     val,
 				ValueText: ds.stringer(val),
 				Color:     ds.color,
@@ -230,6 +239,7 @@ type timelineDataValue struct {
 }
 
 type timelineDataBar struct {
+	KeyName       string
 	Value         float64
 	ValueText     string
 	Color         string

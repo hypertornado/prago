@@ -23,10 +23,11 @@ type view struct {
 }
 
 type viewField struct {
-	Icon    string
-	Name    string
-	Content template.HTML
-	EditURL string
+	Icon     string
+	Name     string
+	Content  template.HTML
+	EditURL  string
+	EditName string
 }
 
 type viewButton struct {
@@ -91,10 +92,11 @@ func (resource *Resource) getBasicView(ctx context.Context, id int64, item any, 
 		ret.Items = append(
 			ret.Items,
 			viewField{
-				Icon:    icon,
-				Name:    f.name(request.Locale()),
-				Content: content,
-				EditURL: editURL,
+				Icon:     icon,
+				Name:     f.name(request.Locale()),
+				Content:  content,
+				EditURL:  editURL,
+				EditName: messages.Get(request.Locale(), "admin_edit"),
 			},
 		)
 	}

@@ -656,6 +656,9 @@ class List {
             if (cell.classList.contains("list_cell-fetched")) {
                 continue;
             }
+            if (!document.contains(cell)) {
+                continue;
+            }
             let cellContentSpan = (cell.querySelector(".list_cell_name"));
             fetch(url)
                 .then((data) => {
@@ -2977,7 +2980,6 @@ class DashboardFigure {
         this.el = el;
         this.valueEl = el.querySelector(".dashboard_figure_value");
         this.descriptionEl = el.querySelector(".dashboard_figure_description");
-        this.el.classList.add("dashboard_figure-loading");
         let reloadSeconds = parseInt(this.el.getAttribute("data-refresh-time-seconds"));
         new VisibilityReloader(reloadSeconds * 1000, this.loadFigureData.bind(this));
     }
@@ -3146,6 +3148,25 @@ class CMenu {
             descEl.setAttribute("title", data.Description);
             el.appendChild(descEl);
         }
+        if (data.Rows) {
+            let rowsEl = document.createElement("div");
+            rowsEl.classList.add("cmenu_table_rows");
+            for (let i = 0; i < data.Rows.length; i++) {
+                let row = data.Rows[i];
+                let rowEl = document.createElement("div");
+                rowEl.classList.add("cmenu_table_row");
+                let rowNameEl = document.createElement("div");
+                rowNameEl.classList.add("cmenu_table_row_name");
+                rowNameEl.innerText = row.Name;
+                rowEl.appendChild(rowNameEl);
+                let rowValueEl = document.createElement("div");
+                rowValueEl.classList.add("cmenu_table_row_value");
+                rowValueEl.innerText = row.Value;
+                rowEl.appendChild(rowValueEl);
+                rowsEl.appendChild(rowEl);
+            }
+            el.appendChild(rowsEl);
+        }
         if (data.Commands) {
             let commandsEl = document.createElement("div");
             commandsEl.classList.add("cmenu_commands");
@@ -3189,9 +3210,8 @@ class CMenu {
             el.appendChild(commandsEl);
         }
         document.body.appendChild(containerEl);
-        let elRect = el.getBoundingClientRect();
-        let elWidth = elRect.width;
-        let elHeight = elRect.height;
+        let elWidth = el.clientWidth;
+        let elHeight = el.clientHeight;
         let viewportWidth = window.innerWidth;
         let viewportHeight = window.innerHeight;
         if (data.AlignByElement) {
@@ -3330,6 +3350,22 @@ class Timeline {
             valEl.classList.add("timeline_value-current");
         }
         this.valuesEl.appendChild(valEl);
+        valEl.addEventListener("click", (e) => {
+            var tableRows = [];
+            for (let i = 0; i < data.Bars.length; i++) {
+                let bar = data.Bars[i];
+                tableRows.push({
+                    Name: bar.KeyName,
+                    Value: bar.ValueText,
+                });
+            }
+            e.stopPropagation();
+            cmenu({
+                Event: e,
+                Name: data.Name,
+                Rows: tableRows,
+            });
+        });
     }
     addBar(el, barValue) {
         let barEl = document.createElement("div");

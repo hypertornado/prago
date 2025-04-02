@@ -21,6 +21,7 @@ type TimelineDataRequest struct {
 
 func (timeline *Timeline) DataSource(dataSource func(request *TimelineDataRequest) float64) *TimelineDataSource {
 	ds := &TimelineDataSource{
+		name:       timeline.name,
 		dataSource: dataSource,
 		stringer: func(f float64) string {
 			return fmt.Sprintf("%v", f)

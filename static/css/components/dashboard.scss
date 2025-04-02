@@ -45,6 +45,7 @@ a.dashboard_figure {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  height: 1.3em;
 }
 
 a .dashboard_figure_value {
@@ -59,6 +60,7 @@ a .dashboard_figure_value {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  height: 1.3em;
 }
 
 .dashboard_figure_description {
@@ -66,6 +68,7 @@ a .dashboard_figure_value {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  height: 1.3em;
 }
 
 .dashboard_figure-green .dashboard_figure_description {
@@ -76,21 +79,19 @@ a .dashboard_figure_value {
   color: $red;
 }
 
-.dashboard_figure_loader {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  display: none;
-  text-align: left;
+.dashboard_figure-loading {
+  animation: dashboardLoading 800ms ease-in-out alternate infinite;
 }
 
-.dashboard_figure-loading .dashboard_figure_loader {
-  display: inline-block;
-}
+@keyframes dashboardLoading {
+  from {
+    opacity: 0;
+    filter: blur(2);
+  }
 
-.dashboard_figure-loading > :not(.dashboard_figure_loader) {
-  filter: blur(1px);
-  opacity: 0.8;
+  to {
+    opacity: .5;
+  }
 }
 
 .dashboard_table {

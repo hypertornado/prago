@@ -6,6 +6,7 @@ interface CMenuData {
   Description?: string;
 
   Commands?: CMenuCommand[];
+  Rows?: CMenuTableRow[];
 
   DismissHandler?: Function;
 }
@@ -16,6 +17,11 @@ interface CMenuCommand {
   URL?: string;
   Handler?: Function;
   Style?: string;
+}
+
+interface CMenuTableRow {
+  Name: string;
+  Value: string;
 }
 
 function cmenu(data: CMenuData) {
@@ -94,6 +100,32 @@ class CMenu {
       el.appendChild(descEl);
     }
 
+    if (data.Rows) {
+      let rowsEl = document.createElement("div");
+      rowsEl.classList.add("cmenu_table_rows");
+
+      for (let i = 0; i < data.Rows.length; i++) {
+        let row = data.Rows[i];
+
+        let rowEl = document.createElement("div");
+        rowEl.classList.add("cmenu_table_row");
+        
+        let rowNameEl = document.createElement("div");
+        rowNameEl.classList.add("cmenu_table_row_name");
+        rowNameEl.innerText = row.Name;
+        rowEl.appendChild(rowNameEl);
+
+        let rowValueEl = document.createElement("div");
+        rowValueEl.classList.add("cmenu_table_row_value");
+        rowValueEl.innerText = row.Value;
+        rowEl.appendChild(rowValueEl);
+
+        rowsEl.appendChild(rowEl);
+      }
+
+      el.appendChild(rowsEl);
+    }
+
     if (data.Commands) {
       let commandsEl = document.createElement("div");
       commandsEl.classList.add("cmenu_commands");
@@ -147,9 +179,8 @@ class CMenu {
 
     document.body.appendChild(containerEl);
 
-    let elRect = el.getBoundingClientRect();
-    let elWidth = elRect.width;
-    let elHeight = elRect.height;
+    let elWidth = el.clientWidth;
+    let elHeight = el.clientHeight;
 
     let viewportWidth = window.innerWidth;
     let viewportHeight = window.innerHeight;
@@ -196,6 +227,7 @@ class CMenu {
     el.addEventListener("click", (e: KeyboardEvent) => {
       e.stopPropagation();
     })
+
 
     this.lastEl = containerEl;
     this.dismissHandler = data.DismissHandler;

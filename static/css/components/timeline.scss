@@ -71,7 +71,6 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 }
 
 .timeline_value:hover {
-    //opacity: .9;
     filter: saturate(110%);
 }
 
@@ -115,7 +114,7 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 
 .timeline_value:hover .timeline_value_label {
     color: black;
-    overflow: visible;
+    //overflow: visible;
     z-index: 1000;
 }
 
@@ -159,8 +158,8 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 }
 
 .timeline_value:hover .timeline_value_name_inner {
-    overflow: visible;
-    display: inline-block;
+    //overflow: visible;
+    //display: inline-block;
 }
 
 .timeline_value-current .timeline_value_name {

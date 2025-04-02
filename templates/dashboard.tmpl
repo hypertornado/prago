@@ -13,7 +13,6 @@
             {{else}}
               <div data-uuid="{{$item.UUID}}" data-refresh-time-seconds="{{$item.RefreshTimeSeconds}}" class="dashboard_figure dashboard_figure-loading">
             {{end}}
-              <div class="progress dashboard_figure_loader"></div>
               {{if $item.Icon}}
                 <div class="dashboard_figure_icon"><img src="/admin/api/icons?file={{$item.Icon}}&color=4078c0"></div>
               {{end}}

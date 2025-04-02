@@ -357,6 +357,11 @@ class List {
         continue;
       }
 
+      if (!document.contains(cell)) {
+        //we reloaded list
+        continue;
+      }
+
       let cellContentSpan = <HTMLSpanElement>(
         cell.querySelector(".list_cell_name")
       );

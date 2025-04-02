@@ -64,11 +64,11 @@ class DashboardFigure {
     this.valueEl = el.querySelector(".dashboard_figure_value");
     this.descriptionEl = el.querySelector(".dashboard_figure_description");
 
-    this.el.classList.add("dashboard_figure-loading");
-
     let reloadSeconds = parseInt(
       this.el.getAttribute("data-refresh-time-seconds")
     );
+
+    
 
     new VisibilityReloader(
       reloadSeconds * 1000,
