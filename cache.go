@@ -14,8 +14,9 @@ const staleInterval = 5 * time.Minute
 //const staleInterval = 1 * time.Second
 
 type cache struct {
-	items map[string]*cacheItem
-	mutex *sync.RWMutex
+	items sync.Map
+
+	reloadMutex *sync.RWMutex
 
 	accessMutex *sync.RWMutex
 	accessCount map[string]int64
@@ -25,52 +26,19 @@ type cache struct {
 type cacheItem struct {
 	updatedAt time.Time
 	updating  bool
-	value     interface{}
-	createFn  func() interface{}
+	value     any
+	createFn  func() any
 	mutex     *sync.RWMutex
 }
 
-func (c *cache) markAccess(id string) {
-
-	go func() {
-		c.accessMutex.Lock()
-		defer c.accessMutex.Unlock()
-
-		c.accessCount[id] += 1
-		c.lastAccess[id] = time.Now()
-	}()
-
-}
-
-func (c *cache) getStats() (ret []cacheStats) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	c.accessMutex.Lock()
-	defer c.accessMutex.Unlock()
-
-	for k, v := range c.items {
-
-		ret = append(ret, cacheStats{
-			ID:         k,
-			Size:       v.getJSONSize(),
-			Count:      c.accessCount[k],
-			LastAccess: c.lastAccess[k],
-		})
-	}
-
-	return ret
-}
-
 func newCache() *cache {
-	return &cache{
-		items: map[string]*cacheItem{},
-		mutex: &sync.RWMutex{},
-
+	ret := &cache{
+		reloadMutex: &sync.RWMutex{},
 		accessMutex: &sync.RWMutex{},
 		accessCount: map[string]int64{},
 		lastAccess:  map[string]time.Time{},
 	}
+	return ret
 }
 
 func (ci cacheItem) isStale() bool {
@@ -93,13 +61,17 @@ func (ci cacheItem) getJSONSize() int64 {
 
 }
 
-func (ci cacheItem) getValue() interface{} {
+func (ci cacheItem) getValue() any {
 	ci.mutex.RLock()
 	defer ci.mutex.RUnlock()
 	return ci.value
 }
 
-func (ci *cacheItem) reloadValue() {
+func (ci *cacheItem) reloadValue(c *cache) {
+
+	c.reloadMutex.Lock()
+	defer c.reloadMutex.Unlock()
+
 	ci.mutex.RLock()
 	if ci.updating {
 		ci.mutex.RUnlock()
@@ -111,7 +83,7 @@ func (ci *cacheItem) reloadValue() {
 	ci.updating = true
 	ci.mutex.Unlock()
 
-	var val interface{}
+	var val any
 
 	var panicked bool
 
@@ -133,16 +105,14 @@ func (ci *cacheItem) reloadValue() {
 }
 
 func (c *cache) getItem(name string) *cacheItem {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-	item, found := c.items[name]
-	if !found {
+	item, ok := c.items.Load(name)
+	if !ok {
 		return nil
 	}
-	return item
+	return item.(*cacheItem)
 }
 
-func (c *cache) putItem(name string, createFn func() interface{}) *cacheItem {
+func (c *cache) putItem(name string, createFn func() any) *cacheItem {
 	item := &cacheItem{
 		updatedAt: time.Now(),
 		value:     createFn(),
@@ -150,14 +120,12 @@ func (c *cache) putItem(name string, createFn func() interface{}) *cacheItem {
 		mutex:     &sync.RWMutex{},
 	}
 
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	c.items[name] = item
+	c.items.Store(name, item)
 	return item
 }
 
 func loadCache[T any](c *cache, name string, createFn func() T) T {
-	fn := func() interface{} {
+	fn := func() any {
 		return createFn()
 	}
 
@@ -169,9 +137,8 @@ func loadCache[T any](c *cache, name string, createFn func() T) T {
 
 	if item.isStale() {
 		go func() {
-			item.reloadValue()
+			item.reloadValue(c)
 		}()
-		return item.getValue().(T)
 	}
 	return item.getValue().(T)
 }
@@ -191,19 +158,21 @@ func (app *App) ClearCache() {
 	app.userDataCacheDeleteAll()
 }
 
-func (c *cache) forceLoad(cacheName string, createFn func() interface{}) interface{} {
+func (c *cache) forceLoad(cacheName string, createFn func() any) any {
 	item := c.putItem(cacheName, createFn)
 	return item.getValue()
 }
 
 func (c *cache) clear() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+
+	c.items.Range(func(key, value any) bool {
+		c.items.Delete(key)
+		return true
+	})
 
 	c.accessMutex.Lock()
 	defer c.accessMutex.Unlock()
 
-	c.items = map[string]*cacheItem{}
 	c.accessCount = map[string]int64{}
 	c.lastAccess = map[string]time.Time{}
 }
