@@ -29,7 +29,8 @@
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  @include shadowMedium;
+  background-color: $backgroundGrayColor;
+  //@include shadowMedium;
   display: inline-block;
   position: relative;
 }
@@ -135,11 +136,7 @@
 }
 
 .admin_markdown_header {
-  display: none;
-}
 
-.admin_markdown:focus-within .admin_markdown_header {
-  display: block;
 }
 
 .admin_markdown_preview {

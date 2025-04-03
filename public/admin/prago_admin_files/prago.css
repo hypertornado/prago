@@ -448,7 +448,7 @@ pre {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  background-color: #fafafa;
   display: inline-block;
   position: relative;
 }
@@ -546,14 +546,6 @@ pre {
 .admin_markdown textarea {
   margin-top: 5px;
   white-space: pre-wrap;
-}
-
-.admin_markdown_header {
-  display: none;
-}
-
-.admin_markdown:focus-within .admin_markdown_header {
-  display: block;
 }
 
 .admin_markdown_preview {
@@ -972,6 +964,14 @@ select.admin_timestamp_minute {
   padding: 5px 10px;
 }
 
+@media (min-width: 700px) {
+  .box_header:has(.box_icon) {
+    margin-left: -30px;
+    width: calc(100% + 50px);
+    padding-left: 40px;
+    border-radius: 5px;
+  }
+}
 .box_icon {
   display: flex;
 }
@@ -1013,7 +1013,7 @@ select.admin_timestamp_minute {
 .box_header_buttons {
   display: flex;
   flex-wrap: wrap;
-  padding: 10px 0px;
+  padding: 5px 0px;
   gap: 5px;
 }
 

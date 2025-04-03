@@ -9,7 +9,7 @@ import (
 
 //use https://github.com/sourcegraph/conc
 
-const staleInterval = 5 * time.Minute
+const staleInterval = 30 * time.Minute
 
 //const staleInterval = 1 * time.Second
 
@@ -45,8 +45,8 @@ func (ci cacheItem) isStale() bool {
 	ci.mutex.RLock()
 	defer ci.mutex.RUnlock()
 
-	//disperse in 5 minutes
-	randomStaleCoeficient := rand.Intn(5*60) * int(time.Second)
+	//disperse in time
+	randomStaleCoeficient := rand.Intn(30*60) * int(time.Second)
 
 	return ci.updatedAt.Add(staleInterval + time.Duration(randomStaleCoeficient)).Before(time.Now())
 }

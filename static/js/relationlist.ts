@@ -64,6 +64,12 @@ class RelationList {
         console.error("Error while RelationList request");
       }
     });
+
+    var count = 5;
+    if (this.offset > 0) {
+      count = 10;
+    }
+
     request.send(
       JSON.stringify({
         SourceResource: this.sourceResource,
@@ -71,7 +77,7 @@ class RelationList {
         TargetField: this.targetField,
         IDValue: this.idValue,
         Offset: this.offset,
-        Count: 10,
+        Count: count,
       })
     );
   }
