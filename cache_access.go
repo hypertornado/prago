@@ -1,6 +1,9 @@
 package prago
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 func (c *cache) markAccess(id string) {
 	go func() {
@@ -31,4 +34,13 @@ func (c *cache) getStats() (ret []cacheStats) {
 	})
 
 	return ret
+}
+
+func (ci cacheItem) getJSONSize() int64 {
+	val := ci.getValue()
+	data, err := json.Marshal(val)
+	if err != nil {
+		return -1
+	}
+	return int64(len(data))
 }

@@ -15,6 +15,7 @@ import (
 
 type list struct {
 	Name                 string
+	Language             string
 	TypeID               string
 	Colspan              int64
 	Header               []listHeaderItem
@@ -94,13 +95,13 @@ type listMultipleAction struct {
 	ActionType string
 	Icon       string
 	Name       string
-	//IsDelete   bool
 }
 
 func (resource *Resource) getListHeader(userData UserData) (list list, err error) {
 	lang := userData.Locale()
 
 	list.Colspan = 1
+	list.Language = lang
 	list.TypeID = resource.id
 	list.VisibleColumns = resource.defaultVisibleFieldsStr(userData)
 	list.Columns = resource.fieldsStr(userData)

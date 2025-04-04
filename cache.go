@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"encoding/json"
 	"math/rand"
 	"sync"
 	"time"
@@ -41,103 +40,95 @@ func newCache() *cache {
 	return ret
 }
 
-func (ci cacheItem) isStale() bool {
-	ci.mutex.RLock()
-	defer ci.mutex.RUnlock()
+func (item cacheItem) isStale() bool {
+	item.mutex.RLock()
+	defer item.mutex.RUnlock()
 
 	//disperse in time
 	randomStaleCoeficient := rand.Intn(30*60) * int(time.Second)
 
-	return ci.updatedAt.Add(staleInterval + time.Duration(randomStaleCoeficient)).Before(time.Now())
+	return item.updatedAt.Add(staleInterval + time.Duration(randomStaleCoeficient)).Before(time.Now())
 }
 
-func (ci cacheItem) getJSONSize() int64 {
-	val := ci.getValue()
-	data, err := json.Marshal(val)
-	if err != nil {
-		return -1
-	}
-	return int64(len(data))
-
+func (item cacheItem) getValue() any {
+	item.mutex.RLock()
+	defer item.mutex.RUnlock()
+	return item.value
 }
 
-func (ci cacheItem) getValue() any {
-	ci.mutex.RLock()
-	defer ci.mutex.RUnlock()
-	return ci.value
-}
+func (item *cacheItem) reloadValue(cache *cache) {
 
-func (ci *cacheItem) reloadValue(c *cache) {
-
-	c.reloadMutex.Lock()
-	defer c.reloadMutex.Unlock()
-
-	ci.mutex.RLock()
-	if ci.updating {
-		ci.mutex.RUnlock()
+	item.mutex.RLock()
+	if item.updating {
+		item.mutex.RUnlock()
 		return
 	}
-	ci.mutex.RUnlock()
+	item.mutex.RUnlock()
 
-	ci.mutex.Lock()
-	ci.updating = true
-	ci.mutex.Unlock()
+	item.mutex.Lock()
+	if item.updating {
+		item.mutex.Unlock()
+		return
+	}
+	item.updating = true
+	item.mutex.Unlock()
+
+	cache.reloadMutex.Lock()
+	defer cache.reloadMutex.Unlock()
 
 	var val any
-
-	var panicked bool
-
 	defer func() {
 		if err := recover(); err != nil {
-			panicked = true
+			item.mutex.Lock()
+			item.updating = false
+			item.mutex.Unlock()
 		}
 	}()
 
-	val = ci.createFn()
+	val = item.createFn()
 
-	ci.mutex.Lock()
-	if !panicked {
-		ci.value = val
-		ci.updatedAt = time.Now()
-	}
-	ci.updating = false
-	ci.mutex.Unlock()
+	item.mutex.Lock()
+	item.value = val
+	item.updatedAt = time.Now()
+	item.updating = false
+	item.mutex.Unlock()
 }
 
-func (c *cache) getItem(name string) *cacheItem {
-	item, ok := c.items.Load(name)
+func (cache *cache) getItem(name string) *cacheItem {
+	item, ok := cache.items.Load(name)
 	if !ok {
 		return nil
 	}
 	return item.(*cacheItem)
 }
 
-func (c *cache) putItem(name string, createFn func() any) *cacheItem {
+func (cache *cache) putItem(name string, createFn func() any) *cacheItem {
 	item := &cacheItem{
 		updatedAt: time.Now(),
 		value:     createFn(),
 		createFn:  createFn,
+		updating:  false,
 		mutex:     &sync.RWMutex{},
 	}
 
-	c.items.Store(name, item)
+	cache.items.Store(name, item)
 	return item
 }
 
-func loadCache[T any](c *cache, name string, createFn func() T) T {
+func loadCache[T any](cache *cache, name string, createFn func() T) T {
 	fn := func() any {
 		return createFn()
 	}
 
-	item := c.getItem(name)
+	item := cache.getItem(name)
 	if item == nil {
-		item := c.putItem(name, fn)
+		item := cache.putItem(name, fn)
 		return item.getValue().(T)
 	}
 
 	if item.isStale() {
 		go func() {
-			item.reloadValue(c)
+			item.reloadValue(cache)
 		}()
 	}
 	return item.getValue().(T)
@@ -164,7 +155,6 @@ func (c *cache) forceLoad(cacheName string, createFn func() any) any {
 }
 
 func (c *cache) clear() {
-
 	c.items.Range(func(key, value any) bool {
 		c.items.Delete(key)
 		return true
