@@ -1,7 +1,12 @@
 @use "../variables.scss" as *;
 
 .list {
-  min-height: 100vh;
+  overflow: hidden;
+
+  height: calc(100vh - 45px);
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
 }
 
 .list_hidden {
@@ -9,13 +14,11 @@
 }
 
 .list_header_container {
-  position: fixed;
-  z-index: 1;
+  z-index: 10;
   opacity: 0;
 
-  //if enabled it blocks filter suggestions
-  //clip-path: inset(-10000px -10000px -10000px 0px);
-  //overflow-x: auto;
+  position: sticky;
+  top: 0px;
 }
 
 .list_header_container-scrolled {
@@ -33,21 +36,45 @@
 }
 
 .list_footer {
-  min-height: 80px;
+  position: absolute;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  bottom: 0px;
+  //left: 0px;
+  left: 300px;
+  right: 0px;
+  padding: 0px 10px;
+  gap: 10px;
+  background: white;
+  min-height: 70px;
+  border-top: 1px solid $grayBorderColor;
+  border-left: 1px solid $grayBorderColor;
+
+  text-wrap: nowrap;
+  flex-shrink: 10000;
+  text-overflow: ellipsis;
+
+  @include blurBackground;
+}
+
+.list_message {
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.3em;
+  color: $gray;
+
+  text-wrap: nowrap;
+  flex-shrink: 10000;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  min-width: 0px;
 }
 
 .list_table {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.list_table_content {
-  margin-top: 60px;
-}
-
-.list_table_content:not(:has(.list_row)) {
-  padding-bottom: 50px !important;
-  background-color: #fff;
+  margin-bottom: 69px;
 }
 
 .list_row {
@@ -106,18 +133,11 @@
   filter: none !important;
 }
 
-.list_row_lastcell {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .list_header_item_resizer {
   width: 5px;
-  border-right: 2px solid $backgroundGrayColor;
-  border-left: 2px solid $backgroundGrayColor;
-  background-color: #fff;
+  border-right: 2px solid white;
+  border-left: 2px solid white;
+  background-color: $grayBorderColor;
   cursor: col-resize;
 
   border-radius: 10px 10px 0px 0px;
@@ -126,6 +146,8 @@
   top: 0px;
   right: -2px;
   bottom: 0px;
+
+  z-index: 1000;
 }
 
 .list_header_item_resizer:hover {
@@ -175,34 +197,26 @@
   filter: blur(2px);
 }
 
-.list_buttons {
-  opacity: 0;
-}
-
 .list_multiple_actions {
   position: fixed;
   z-index: 1000;
   bottom: 0px;
-  right: 10px;
-  padding: 5px;
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
-  left: 10px;
-  left: 310px;
+  right: 0px;
+  padding: 0px 5px;
+  //padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+  padding-bottom: 5px;
+  min-height: 70px;
+  left: 300px;
   display: flex;
   display: none;
   justify-content: center;
   align-items: center;
-  @include shadowMedium;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
-  border: 1px solid $grayBorderColor;
+  border-top: 1px solid $grayBorderColor;
   border-bottom: none;
   background-color: white;
 }
 
 .list_multiple_actions_content {
-  padding: 5px 5px;
-  border-radius: 10px;
   pointer-events: initial;
   display: flex;
   gap: 5px;
@@ -217,7 +231,8 @@
   font-size: .9rem;
   line-height: 1.3em;
   font-weight: 500;
-  color: $gray;
+  color: $baseColor;
+  //color: $gray;
 }
 
 .list_multiple_actions_buttons {
@@ -245,7 +260,12 @@
 
 @media (max-width: 1000px) {
   .list_multiple_actions {
-    left: 10px;
+    left: 0px;
+  }
+
+  .list_footer {
+    left: 0px;
+    border-left: none;
   }
 }
 
@@ -268,7 +288,6 @@
 }
 
 .list_multiple_action {
-  //margin: 0px 5px;
 }
 
 @media (hover: hover) {
@@ -278,10 +297,6 @@
 
   .list_row:active .list_cell {
     background-color: $baseColorBackground;
-  }
-
-  .list_row:hover .list_buttons {
-    opacity: 1;
   }
 }
 
@@ -316,12 +331,7 @@
   content: "↑";
 }
 
-.list_message {
-  padding: 20px 5px;
-  text-align: center;
-  font-size: 1.3rem;
-  color: #999;
-}
+
 
 .list_cell_images {
   display: flex;
@@ -331,7 +341,7 @@
 }
 
 .list_cell_image {
-  border: 1px solid #ddd;
+  border: 1px solid transparent;
   background-color: #fafafa;
   border-radius: 10px;
   width: 15px;
@@ -364,6 +374,7 @@
 
 .list_row_multiple-checked .list_cell_multiple_pseudocheckbox {
   background-color: $baseColor;
+  border-color: $baseColor;
 }
 
 .list_cell_multiple_pseudocheckbox::after {
@@ -420,8 +431,10 @@
   height: 60px;
   padding: 3px 5px;
   position: relative;
-  background-color: #fff;
-  border-bottom: 1px solid #eee;
+  //background-color: #fff;
+  border-bottom: 1px solid $grayBorderColor;
+
+  @include blurBackground;
 }
 
 .list_header_item_filter {
@@ -432,30 +445,6 @@
   width: 30px;
   min-width: 30px;
   background-color: #fff;
-}
-
-.list_header_last {
-  width: 150px;
-  z-index: 1000;
-  background-color: #fff;
-  padding: 5px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.list_header_actions {
-  display: block;
-}
-
-.list_count {
-  display: block;
-  font-size: 0.9rem;
-  color: $gray;
-  white-space: nowrap;
-  margin: 0px 5px;
 }
 
 .list_progress {
@@ -495,10 +484,6 @@
 
   .list_header_container {
     position: static;
-  }
-
-  .list_header_last {
-    display: none;
   }
 
   .list_row_lastcell {

@@ -147,38 +147,30 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 
 	}
 
-	if count == 0 {
-		ret.Message = messages.Get(userData.Locale(), "admin_list_empty")
-	}
+	ret.Language = userData.Locale()
+	ret.Message = ret.TotalCountStr
 	ret.Colspan = int64(len(columnsMap)) + 1
-
-	if params.Get("_stats") == "true" {
-		ret.Stats = resource.getListStats(ctx, userData, params)
-	}
 
 	return
 }
 
 type listContentJSON struct {
-	Content   string
-	CountStr  string
-	StatsStr  string
+	Content string
+	//CountStr  string
+	//StatsStr  string
 	FooterStr string
 }
 
 func (resource *Resource) getListContentJSON(ctx context.Context, userData UserData, params url.Values) *listContentJSON {
 	listData, err := resource.getListContent(ctx, userData, params)
 	must(err)
-	var statsStr string
-	if listData.Stats != nil {
-		statsStr = resource.app.adminTemplates.ExecuteToString("stats", listData.Stats)
-	}
+
 	return &listContentJSON{
 		Content: resource.app.adminTemplates.ExecuteToString("list_cells", map[string]interface{}{
 			"admin_list": listData,
 		}),
-		CountStr: listData.TotalCountStr,
-		StatsStr: statsStr,
+		//CountStr: listData.TotalCountStr,
+		//StatsStr: statsStr,
 		FooterStr: resource.app.adminTemplates.ExecuteToString("list_footer", map[string]interface{}{
 			"admin_list": listData,
 		}),

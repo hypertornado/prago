@@ -13,13 +13,13 @@
   position: absolute;
   left: 0px;
   background: white;
-  @include shadowMedium;
-  //box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.2);
+  @include shadow;
   display: none;
   min-width: 300px;
   max-width: 400px;
   z-index: 100;
-  border-radius: 0px 0px 10px 10px;
+  border-radius: 5px;
+  //border-radius: 0px 0px 10px 10px;
   overflow: hidden;
 }
 
@@ -37,8 +37,8 @@
 
 .filter_relations_preview {
   font-size: 0.9rem;
-  background: #fafafa;
-  border: 1px solid #eee;
+  background: $baseColorBackground;
+  border: 1px solid transparent;
   border-radius: 15px;
   padding: 2px;
   display: flex;
@@ -47,11 +47,11 @@
 
 .filter_relations_preview_image {
   width: 10px;
-  border: 1px solid #eee;
-  background-color: #fafafa;
+  border: 1px solid transparent;
+  background-color: $backgroundGrayColor;
   flex-shrink: 0;
   width: 18px;
-  height: 18px;
+  aspect-ratio: 1;
   border-radius: 100px;
   margin-right: 3px;
   background-size: cover;
@@ -77,12 +77,11 @@
 }
 
 .filter_relations_preview_close:hover {
-  background-color: $baseColorBackground;
+  background-color: $hoverColor;
 }
 
 .filter_relations_preview_close:active {
-  background-color: $baseColorBackground;
-  background-color: $baseColorBackgroundLighter;
+  background-color: $activeColor;
 }
 
 .filter_relations_preview_close::after {
@@ -90,7 +89,7 @@
 }
 
 .list_filter_suggestion {
-  padding: 5px;
+  padding: 5px 10px;
   border-radius: 5px;
   text-decoration: none;
   display: inline-block;
@@ -115,15 +114,15 @@
   flex-grow: 0;
   flex-shrink: 0;
   width: 30px;
-  height: 30px;
+  aspect-ratio: 1;
   margin-right: 10px;
   border-radius: 5px;
   margin-top: 5px;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-  background-color: #fafafa;
-  border: 1px solid #eee;
+  background-color: $backgroundGrayColor;
+  border: 1px solid transparent;
   align-self: flex-start;
 }
 

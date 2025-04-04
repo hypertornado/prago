@@ -37,6 +37,11 @@ $backgroundGrayColor: #fafafa;
     border: 1px solid $grayBorderColor;
 }
 
+@mixin blurBackground {
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(3px);
+}
+
 $radius: 5px;
 
 @mixin rectangle {

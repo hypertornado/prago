@@ -1,4 +1,19 @@
-{{define "stats"}}
+{{define "list_stats"}}
+  <div class="list_stats">
+    <h3>Počet řádků</h3>
+    <label>
+      <select class="list_stats_limit input">
+        {{range $item := .StatsLimitSelectData}}
+          <option value="{{$item.Value}}"{{if $item.Selected}} selected{{end}}>{{$item.Name}}</option>
+        {{end}}
+      </select>
+    </label>
+    <h3>{{PragoMessage .Language "admin_stats"}}</h3>
+    <div class="list_stats_container"></div>
+  </div>
+{{end}}
+
+{{define "list_stats_content"}}
   <div class="admin_stats">
     <div class="admin_stats_sections">
       {{range $section := .Sections}}

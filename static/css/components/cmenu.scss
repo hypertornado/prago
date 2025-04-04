@@ -18,11 +18,12 @@
     background-color: white;
     position: absolute;
     //z-index: 1000000000000;
-    top: 3px;
-    left: 3px;
+    //top: 3px;
+    //left: 3px;
     width: 250px;
-    padding: 6px 0px;
+    padding: 0px 0px;
     animation: cmenuShow 100ms ease-in;
+    //border: 1px solid red;
 }
 
 @keyframes cmenuShow {
@@ -37,14 +38,6 @@
     
 }
 
-.cmenu:has(.cmenu_image) {
-    padding-top: 0px;
-}
-
-.cmenu:has(.cmenu_commands) {
-    padding-bottom: 0px;
-}
-
 .cmenu_image {
     object-fit: cover;
     height: 100px;
@@ -56,11 +49,11 @@
     font-size: 1rem;
     line-height: 1.3em;
     padding: 0px 6px 0px 6px;
+    margin: 3px 0px;
     cursor: default;
 }
 
-.cmenu_description {
-    color: $gray;
+.cmenu_description, .cmenu_prename {
     font-size: .9rem;
     line-height: 1.3em;
     padding: 0px 6px 0px 6px;
@@ -70,6 +63,8 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     cursor: default;
+
+    margin: 3px 0px;
 }
 
 .cmenu_table_rows {

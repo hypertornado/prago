@@ -34,13 +34,11 @@ class List {
   itemsPerPage: number;
   paginationSelect: HTMLSelectElement;
 
-  statsCheckbox: HTMLInputElement;
-  statsCheckboxSelectCount: HTMLSelectElement;
-  statsContainer: HTMLDivElement;
+  //statsCheckbox: HTMLInputElement;
+  //statsCheckboxSelectCount: HTMLSelectElement;
+  //statsContainer: HTMLDivElement;
 
   multiple: ListMultiple;
-
-  loadStats: Boolean;
 
   currentRequest: XMLHttpRequest;
 
@@ -73,7 +71,6 @@ class List {
     this.progress = <HTMLProgressElement>list.querySelector(".list_progress");
 
     this.tableContent = <HTMLElement>list.querySelector(".list_table_content");
-    //this.tableContent.textContent = "";
 
     this.bindFilter(urlParams);
 
@@ -98,9 +95,6 @@ class List {
 
     this.defaultVisibleColumnsStr = list.getAttribute("data-visible-columns");
     var visibleColumnsStr = this.defaultVisibleColumnsStr;
-    if (urlParams.get("_columns")) {
-      visibleColumnsStr = urlParams.get("_columns");
-    }
 
     let visibleColumnsArr = visibleColumnsStr.split(",");
     let visibleColumnsMap: any = {};
@@ -114,12 +108,11 @@ class List {
     );
     this.paginationSelect.addEventListener("change", this.load.bind(this));
 
-    this.statsCheckboxSelectCount = document.querySelector(".list_stats_limit");
+    /*this.statsCheckboxSelectCount = document.querySelector(".list_stats_limit");
     this.statsCheckboxSelectCount.addEventListener("change", () => {
       this.filterChanged();
-    });
-
-    this.statsContainer = document.querySelector(".list_stats_container");
+    });*/
+    //this.statsContainer = document.querySelector(".list_stats_container");
 
     this.multiple = new ListMultiple(this);
 
@@ -132,7 +125,8 @@ class List {
 
   copyColumnWidths() {
     let totalWidth = this.listHeader.getBoundingClientRect().width;
-    this.tableContent.setAttribute("style", "width: " + totalWidth + "px;");
+    //totalWidth -= 1000;
+    //this.tableContent.setAttribute("style", "width: " + totalWidth + "px;");
 
     let headerItems = this.list.querySelectorAll(
       ".list_header > :not(.hidden)"
@@ -165,9 +159,9 @@ class List {
     );
     if (placeholderItems.length > 0) {
       let placeholderWidth =
-        totalWidth -
+        totalWidth; /*-
         this.list.querySelector(".list_header_last").getBoundingClientRect()
-          .width;
+          .width;*/
       for (let i = 0; i < placeholderItems.length; i++) {
         let item: HTMLDivElement = <HTMLDivElement>placeholderItems[i];
         item.style.width = placeholderWidth + "px";
@@ -194,10 +188,7 @@ class List {
     if (this.orderDesc != this.defaultOrderDesc) {
       params["_desc"] = this.orderDesc + "";
     }
-    var columns = this.settings.getSelectedColumnsStr();
-    if (columns != this.defaultVisibleColumnsStr) {
-      params["_columns"] = columns;
-    }
+    
 
     let filterData = this.getFilterData();
     for (var k in filterData) {
@@ -205,10 +196,6 @@ class List {
     }
     this.colorActiveFilterItems();
 
-    let selectedPages = parseInt(this.paginationSelect.value);
-    if (selectedPages != this.itemsPerPage) {
-      params["_pagesize"] = selectedPages;
-    }
 
     var encoded = encodeParams(params);
     window.history.replaceState(
@@ -217,10 +204,14 @@ class List {
       document.location.pathname + encoded
     );
 
-    if (this.loadStats) {
-      this.statsContainer.innerHTML = '<div class="progress"></div>';
-      params["_stats"] = "true";
-      params["_statslimit"] = this.statsCheckboxSelectCount.value;
+    var columns = this.settings.getSelectedColumnsStr();
+    if (columns != this.defaultVisibleColumnsStr) {
+      params["_columns"] = columns;
+    }
+
+    let selectedPages = parseInt(this.paginationSelect.value);
+    if (selectedPages != this.itemsPerPage) {
+      params["_pagesize"] = selectedPages;
     }
 
     params["_format"] = "xlsx";
@@ -245,14 +236,11 @@ class List {
       this.tableContent.innerHTML = "";
       if (request.status == 200) {
         var response = JSON.parse(request.response);
-
         this.tableContent.innerHTML = response.Content;
-        var countStr = response.CountStr;
-
-        this.list.querySelector(".list_count").textContent = countStr;
-        this.statsContainer.innerHTML = response.StatsStr;
+        //this.statsContainer.innerHTML = response.StatsStr;
         this.listFooter.innerHTML = response.FooterStr;
         bindReOrder();
+        this.bindSettingsButton();
         this.bindPagination();
         this.bindClick();
         this.bindFetchStats();
@@ -293,6 +281,16 @@ class List {
     this.load();
     e.preventDefault();
     return false;
+  }
+
+  bindSettingsButton() {
+    let btn: HTMLButtonElement = this.list.querySelector(".list_settings_btn2");
+    this.settings.bindSettingsBtn(btn);
+    /*btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.settings.bindSettingsBtn(e, btn);
+    });*/
   }
 
   bindPagination() {
@@ -388,14 +386,6 @@ class List {
     var rows = this.list.querySelectorAll(".list_row");
     for (var i = 0; i < rows.length; i++) {
       let row = <HTMLTableRowElement>rows[i];
-      var id = row.getAttribute("data-id");
-
-      let moreButton = row.querySelector(".list_buttons_more");
-      if (moreButton) {
-        moreButton.addEventListener("click", (e) => {
-          this.clickButtonsMore(e, row);
-        });
-      }
 
       row.addEventListener("contextmenu", this.contextClick.bind(this));
 
@@ -445,11 +435,18 @@ class List {
       });
     }
 
+    let name = rowEl.getAttribute("data-name");
+    let preName = rowEl.getAttribute("data-prename")
+    if (name == preName) {
+      preName = null;
+    }
+
     cmenu({
       Event: e,
       AlignByElement: alignByElement,
       ImageURL: rowEl.getAttribute("data-image-url"),
-      Name: rowEl.getAttribute("data-name"),
+      PreName: preName,
+      Name: name,
       Description: rowEl.getAttribute("data-description"),
       Commands: commands,
       DismissHandler: () => {
@@ -457,13 +454,6 @@ class List {
       },
     });
     e.preventDefault();
-  }
-
-  clickButtonsMore(e: Event, rowEl: HTMLDivElement) {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    e.stopPropagation;
-    this.createCmenu(e, rowEl, true);
   }
 
   contextClick(e: Event) {
@@ -743,13 +733,13 @@ class List {
   listHeaderPositionChanged() {
     let rect = this.rootContent.getBoundingClientRect();
 
-    var leftScroll = -this.listTable.scrollLeft;
-    this.listHeader.setAttribute("style", "margin-left: " + leftScroll + "px;");
+    //var leftScroll = -this.listTable.scrollLeft;
+    //this.listHeader.setAttribute("style", "margin-left: " + leftScroll + "px;");
 
-    this.listHeaderContainer.setAttribute(
+    /*this.listHeaderContainer.setAttribute(
       "style",
       "top: " + rect.top + "px; left: " + rect.left + "px;"
-    );
+    );*/
 
     let scrolledClassName = "list_header_container-scrolled";
     if (this.rootContent.scrollTop > 50) {

@@ -1,7 +1,5 @@
 package prago
 
-//TODO: use concext in db queries
-
 import (
 	"context"
 	"fmt"

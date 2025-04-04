@@ -66,6 +66,11 @@ func (resource *Resource) initDefaultResourceAPIs() {
 		},
 	)
 
+	resource.api("list-stats").Handler(func(request *Request) {
+		var data = resource.getListStats(request.r.Context(), request, request.Params())
+		request.WriteHTML(200, resource.app.adminTemplates, "list_stats_content", data)
+	})
+
 	resource.api("preview-relation/:ids").Handler(
 		func(request *Request) {
 

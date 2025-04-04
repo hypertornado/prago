@@ -53,17 +53,17 @@ type listHeaderItem struct {
 }
 
 type listContent struct {
+	Language      string
 	TotalCountStr string
 	Rows          []listRow
 	Colspan       int64
-	Stats         *listStats
-	Message       string
-	Pagination    pagination
+	//Stats         *listStats
+	Message    string
+	Pagination pagination
 }
 
 type listRow struct {
-	ID int64
-
+	ID          int64
 	Name        string
 	Description string
 	ImageURL    string
@@ -95,6 +95,10 @@ type listMultipleAction struct {
 	ActionType string
 	Icon       string
 	Name       string
+}
+
+func (row *listRow) PreName() string {
+	return fmt.Sprintf("#%d", row.ID)
 }
 
 func (resource *Resource) getListHeader(userData UserData) (list list, err error) {

@@ -2,6 +2,7 @@ interface CMenuData {
   Event: Event;
   AlignByElement?: boolean;
   ImageURL?: string;
+  PreName?: string;
   Name?: string;
   Description?: string;
 
@@ -33,6 +34,7 @@ class CMenu {
   dismissHandler: Function;
 
   constructor() {
+    //return;
     for (let eventType of ["click", "visibilitychange", "blur"]) {
       document.addEventListener(eventType, (e) => {
         this.dismiss();
@@ -82,6 +84,14 @@ class CMenu {
       imageEl.classList.add("cmenu_image");
       imageEl.setAttribute("src", data.ImageURL);
       el.appendChild(imageEl);
+    }
+
+    if (data.PreName) {
+      let preNameEl = document.createElement("div");
+      preNameEl.classList.add("cmenu_prename");
+      preNameEl.innerText = data.PreName;
+      preNameEl.setAttribute("title", data.PreName);
+      el.appendChild(preNameEl);
     }
 
     if (data.Name) {

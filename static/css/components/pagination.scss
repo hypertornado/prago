@@ -2,25 +2,34 @@
 
 .pagination {
   text-align: center;
-  padding: 10px 5px;
+  padding: 0px 0px;
+  flex-shrink: 10000;
+  display: flex;
+  //border: 1px solid red;
+  min-width: 0px;
 }
 
 .pagination_page,
 .pagination_page_current {
   color: $baseColor;
-  padding: 2px 10px;
+  padding: 2px 5px;
   margin: 0px;
   margin-right: 1px;
   font-size: 1rem;
-  line-height: 1.4em;
+  line-height: 1.3em;
   display: inline-block;
   text-decoration: none;
   border-radius: 5px;
   min-width: 20px;
+  border: 1px solid transparent;
+  flex-shrink: 10000;
+  min-width: 0px;
+  overflow: hidden;
 }
 
 .pagination_page_delimiter {
   display: inline-block;
+  cursor: default;
 }
 
 .pagination_page:hover {
@@ -33,10 +42,10 @@
 
 .pagination_page_current,
 .pagination_page_current:hover {
-  background-color: $backgroundGrayColor;
+  background-color: $baseColorBackground;
   //color: white;
-  color: $black;
-  border: 1px solid $grayBorderColor;
+  //background-color: $baseColor;
+  //border: 1px solid $baseColor;
 }
 
 .pagination_page_current {

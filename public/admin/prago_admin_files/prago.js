@@ -449,9 +449,6 @@ class List {
         }
         this.defaultVisibleColumnsStr = list.getAttribute("data-visible-columns");
         var visibleColumnsStr = this.defaultVisibleColumnsStr;
-        if (urlParams.get("_columns")) {
-            visibleColumnsStr = urlParams.get("_columns");
-        }
         let visibleColumnsArr = visibleColumnsStr.split(",");
         let visibleColumnsMap = {};
         for (var i = 0; i < visibleColumnsArr.length; i++) {
@@ -460,11 +457,6 @@ class List {
         this.itemsPerPage = parseInt(list.getAttribute("data-items-per-page"));
         this.paginationSelect = (document.querySelector(".list_settings_pages"));
         this.paginationSelect.addEventListener("change", this.load.bind(this));
-        this.statsCheckboxSelectCount = document.querySelector(".list_stats_limit");
-        this.statsCheckboxSelectCount.addEventListener("change", () => {
-            this.filterChanged();
-        });
-        this.statsContainer = document.querySelector(".list_stats_container");
         this.multiple = new ListMultiple(this);
         this.settings.bindOptions(visibleColumnsMap);
         this.bindOrder();
@@ -474,7 +466,6 @@ class List {
     }
     copyColumnWidths() {
         let totalWidth = this.listHeader.getBoundingClientRect().width;
-        this.tableContent.setAttribute("style", "width: " + totalWidth + "px;");
         let headerItems = this.list.querySelectorAll(".list_header > :not(.hidden)");
         let widths = [];
         for (let j = 0; j < headerItems.length; j++) {
@@ -496,9 +487,7 @@ class List {
         }
         let placeholderItems = this.list.querySelectorAll(".list_tableplaceholder_row");
         if (placeholderItems.length > 0) {
-            let placeholderWidth = totalWidth -
-                this.list.querySelector(".list_header_last").getBoundingClientRect()
-                    .width;
+            let placeholderWidth = totalWidth;
             for (let i = 0; i < placeholderItems.length; i++) {
                 let item = placeholderItems[i];
                 item.style.width = placeholderWidth + "px";
@@ -522,25 +511,20 @@ class List {
         if (this.orderDesc != this.defaultOrderDesc) {
             params["_desc"] = this.orderDesc + "";
         }
-        var columns = this.settings.getSelectedColumnsStr();
-        if (columns != this.defaultVisibleColumnsStr) {
-            params["_columns"] = columns;
-        }
         let filterData = this.getFilterData();
         for (var k in filterData) {
             params[k] = filterData[k];
         }
         this.colorActiveFilterItems();
+        var encoded = encodeParams(params);
+        window.history.replaceState(null, null, document.location.pathname + encoded);
+        var columns = this.settings.getSelectedColumnsStr();
+        if (columns != this.defaultVisibleColumnsStr) {
+            params["_columns"] = columns;
+        }
         let selectedPages = parseInt(this.paginationSelect.value);
         if (selectedPages != this.itemsPerPage) {
             params["_pagesize"] = selectedPages;
-        }
-        var encoded = encodeParams(params);
-        window.history.replaceState(null, null, document.location.pathname + encoded);
-        if (this.loadStats) {
-            this.statsContainer.innerHTML = '<div class="progress"></div>';
-            params["_stats"] = "true";
-            params["_statslimit"] = this.statsCheckboxSelectCount.value;
         }
         params["_format"] = "xlsx";
         if (this.exportButton) {
@@ -555,11 +539,9 @@ class List {
             if (request.status == 200) {
                 var response = JSON.parse(request.response);
                 this.tableContent.innerHTML = response.Content;
-                var countStr = response.CountStr;
-                this.list.querySelector(".list_count").textContent = countStr;
-                this.statsContainer.innerHTML = response.StatsStr;
                 this.listFooter.innerHTML = response.FooterStr;
                 bindReOrder();
+                this.bindSettingsButton();
                 this.bindPagination();
                 this.bindClick();
                 this.bindFetchStats();
@@ -598,6 +580,10 @@ class List {
         this.load();
         e.preventDefault();
         return false;
+    }
+    bindSettingsButton() {
+        let btn = this.list.querySelector(".list_settings_btn2");
+        this.settings.bindSettingsBtn(btn);
     }
     bindPagination() {
         var paginationEl = this.list.querySelector(".pagination");
@@ -681,13 +667,6 @@ class List {
         var rows = this.list.querySelectorAll(".list_row");
         for (var i = 0; i < rows.length; i++) {
             let row = rows[i];
-            var id = row.getAttribute("data-id");
-            let moreButton = row.querySelector(".list_buttons_more");
-            if (moreButton) {
-                moreButton.addEventListener("click", (e) => {
-                    this.clickButtonsMore(e, row);
-                });
-            }
             row.addEventListener("contextmenu", this.contextClick.bind(this));
             row.addEventListener("click", (e) => {
                 var target = e.target;
@@ -726,11 +705,17 @@ class List {
                 Style: action.Style,
             });
         }
+        let name = rowEl.getAttribute("data-name");
+        let preName = rowEl.getAttribute("data-prename");
+        if (name == preName) {
+            preName = null;
+        }
         cmenu({
             Event: e,
             AlignByElement: alignByElement,
             ImageURL: rowEl.getAttribute("data-image-url"),
-            Name: rowEl.getAttribute("data-name"),
+            PreName: preName,
+            Name: name,
             Description: rowEl.getAttribute("data-description"),
             Commands: commands,
             DismissHandler: () => {
@@ -738,12 +723,6 @@ class List {
             },
         });
         e.preventDefault();
-    }
-    clickButtonsMore(e, rowEl) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        e.stopPropagation;
-        this.createCmenu(e, rowEl, true);
     }
     contextClick(e) {
         let rowEl = e.currentTarget;
@@ -973,9 +952,6 @@ class List {
     }
     listHeaderPositionChanged() {
         let rect = this.rootContent.getBoundingClientRect();
-        var leftScroll = -this.listTable.scrollLeft;
-        this.listHeader.setAttribute("style", "margin-left: " + leftScroll + "px;");
-        this.listHeaderContainer.setAttribute("style", "top: " + rect.top + "px; left: " + rect.left + "px;");
         let scrolledClassName = "list_header_container-scrolled";
         if (this.rootContent.scrollTop > 50) {
             this.listHeaderContainer.classList.add(scrolledClassName);
@@ -990,28 +966,70 @@ class ListSettings {
     constructor(list) {
         this.list = list;
         this.settingsEl = document.querySelector(".list_settings");
-        this.settingsPopup = new ContentPopup("Možnosti", this.settingsEl);
-        this.settingsButton = document.querySelector(".list_header_action-settings");
-        this.settingsButton.addEventListener("click", () => {
-            this.settingsPopup.show();
-        });
+        this.settingsPopup = new ContentPopup("Nastavení", this.settingsEl);
+        this.settingsPopup.setIcon("glyphicons-basic-137-cogwheel.svg");
+        this.statsContainer = document.querySelector(".list_stats_container");
         this.statsEl = document.querySelector(".list_stats");
         this.statsPopup = new ContentPopup("Statistiky", this.statsEl);
-        this.statsPopup.setHiddenHandler(() => {
-            this.list.loadStats = false;
-        });
-        this.statsButton = document.querySelector(".list_header_action-stats");
-        this.statsButton.addEventListener("click", () => {
-            this.list.loadStats = true;
-            this.list.load();
-            this.statsPopup.show();
-        });
+        this.statsPopup.setIcon("glyphicons-basic-43-stats-circle.svg");
         this.exportEl = document.querySelector(".list_export");
         this.exportPopup = new ContentPopup("Export", this.exportEl);
-        this.exportButton = document.querySelector(".list_header_action-export");
-        this.exportButton.addEventListener("click", () => {
-            this.exportPopup.show();
+        this.exportPopup.setIcon("glyphicons-basic-302-square-download.svg");
+        this.statsCheckboxSelectCount = document.querySelector(".list_stats_limit");
+        this.statsCheckboxSelectCount.addEventListener("change", () => {
+            this.loadStats();
         });
+    }
+    bindSettingsBtn(btn) {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            cmenu({
+                Event: e,
+                AlignByElement: true,
+                Commands: [
+                    {
+                        Name: "Nastavení",
+                        Icon: "glyphicons-basic-137-cogwheel.svg",
+                        Handler: () => {
+                            this.settingsPopup.show();
+                        },
+                    },
+                    {
+                        Name: "Statistiky",
+                        Icon: "glyphicons-basic-43-stats-circle.svg",
+                        Handler: () => {
+                            this.loadStats();
+                            this.statsPopup.show();
+                        },
+                    },
+                    {
+                        Name: "Export",
+                        Icon: "glyphicons-basic-302-square-download.svg",
+                        Handler: () => {
+                            this.exportPopup.show();
+                        }
+                    },
+                ],
+            });
+        });
+    }
+    loadStats() {
+        let filterData = this.list.getFilterData();
+        var params = {};
+        params["_statslimit"] = this.statsCheckboxSelectCount.value;
+        for (var k in filterData) {
+            params[k] = filterData[k];
+        }
+        var request = new XMLHttpRequest();
+        var encoded = encodeParams(params);
+        request.open("GET", "/admin/" + this.list.typeName + "/api/list-stats" + encoded, true);
+        this.statsContainer.innerHTML = "Loading...";
+        request.addEventListener("load", () => {
+            if (request.status == 200) {
+                this.statsContainer.innerHTML = request.response;
+            }
+        });
+        request.send();
     }
     bindOptions(visibleColumnsMap) {
         var columns = document.querySelectorAll(".list_settings_column");
@@ -3137,6 +3155,13 @@ class CMenu {
             imageEl.classList.add("cmenu_image");
             imageEl.setAttribute("src", data.ImageURL);
             el.appendChild(imageEl);
+        }
+        if (data.PreName) {
+            let preNameEl = document.createElement("div");
+            preNameEl.classList.add("cmenu_prename");
+            preNameEl.innerText = data.PreName;
+            preNameEl.setAttribute("title", data.PreName);
+            el.appendChild(preNameEl);
         }
         if (data.Name) {
             let nameEl = document.createElement("div");

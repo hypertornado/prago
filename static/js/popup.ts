@@ -88,7 +88,7 @@ class Popup {
     this.el.querySelector(".popup_header_name").textContent = name;
   }
 
-  protected setIcon(iconName: string) {
+  public setIcon(iconName: string) {
     if (!iconName) {
       return;
     }

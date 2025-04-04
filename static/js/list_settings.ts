@@ -2,47 +2,105 @@ class ListSettings {
   list: List;
 
   settingsEl: HTMLDivElement;
-  settingsButton: HTMLButtonElement;
   settingsPopup: ContentPopup;
 
   statsEl: HTMLDivElement;
-  statsButton: HTMLButtonElement;
   statsPopup: ContentPopup;
 
   exportEl: HTMLDivElement;
-  exportButton: HTMLButtonElement;
   exportPopup: ContentPopup;
+  statsCheckboxSelectCount: HTMLSelectElement;
+
+  statsContainer: HTMLDivElement;
 
   constructor(list: List) {
     this.list = list;
 
     this.settingsEl = document.querySelector(".list_settings");
-    this.settingsPopup = new ContentPopup("Možnosti", this.settingsEl);
-    this.settingsButton = document.querySelector(
-      ".list_header_action-settings"
-    );
-    this.settingsButton.addEventListener("click", () => {
-      this.settingsPopup.show();
-    });
+    this.settingsPopup = new ContentPopup("Nastavení", this.settingsEl);
+    this.settingsPopup.setIcon("glyphicons-basic-137-cogwheel.svg");
+    this.statsContainer = document.querySelector(".list_stats_container");
+    
+    
 
     this.statsEl = document.querySelector(".list_stats");
     this.statsPopup = new ContentPopup("Statistiky", this.statsEl);
-    this.statsPopup.setHiddenHandler(() => {
-      this.list.loadStats = false;
-    });
-    this.statsButton = document.querySelector(".list_header_action-stats");
-    this.statsButton.addEventListener("click", () => {
-      this.list.loadStats = true;
-      this.list.load();
-      this.statsPopup.show();
-    });
+    this.statsPopup.setIcon("glyphicons-basic-43-stats-circle.svg");
 
     this.exportEl = document.querySelector(".list_export");
     this.exportPopup = new ContentPopup("Export", this.exportEl);
-    this.exportButton = document.querySelector(".list_header_action-export");
-    this.exportButton.addEventListener("click", () => {
-      this.exportPopup.show();
+    this.exportPopup.setIcon("glyphicons-basic-302-square-download.svg");
+
+    this.statsCheckboxSelectCount = document.querySelector(".list_stats_limit");
+    this.statsCheckboxSelectCount.addEventListener("change", () => {
+      this.loadStats();
     });
+  }
+
+  bindSettingsBtn(btn: HTMLButtonElement) {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      cmenu({
+        Event: e,
+        AlignByElement: true,
+        Commands: [
+          {
+            Name: "Nastavení",
+            Icon: "glyphicons-basic-137-cogwheel.svg",
+            Handler: () => {
+              this.settingsPopup.show();
+            },
+          },
+          {
+            Name: "Statistiky",
+            Icon: "glyphicons-basic-43-stats-circle.svg",
+            Handler: () => {
+              this.loadStats();
+              this.statsPopup.show();
+            },
+          },
+          {
+            Name: "Export",
+            Icon: "glyphicons-basic-302-square-download.svg",
+            Handler: () => {
+              this.exportPopup.show();
+            }
+          },
+        ],
+      })
+    });
+  }
+
+  loadStats() {
+    let filterData = this.list.getFilterData();
+
+    var params: any = {};
+
+    params["_statslimit"] = this.statsCheckboxSelectCount.value;
+
+    for (var k in filterData) {
+      params[k] = filterData[k];
+    }
+
+    var request = new XMLHttpRequest();
+
+    var encoded = encodeParams(params);
+
+    request.open(
+      "GET",
+      "/admin/" + this.list.typeName + "/api/list-stats" + encoded,
+      true
+    );
+
+    this.statsContainer.innerHTML = "Loading...";
+
+    request.addEventListener("load", () => {
+      if (request.status == 200) {
+        this.statsContainer.innerHTML = request.response;
+      }
+    })
+    request.send();
+
   }
 
   bindOptions(visibleColumnsMap: any) {
