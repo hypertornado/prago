@@ -10,6 +10,7 @@ import (
 type Preview struct {
 	ID          int64
 	Image       string
+	ImageID     string
 	URL         string
 	Name        string
 	Description string
@@ -110,27 +111,36 @@ func (previewer *previewer) Preview(relatedResource *Resource) *Preview {
 	ret.Name = previewer.Name()
 	ret.URL = previewer.URL("")
 	ret.Image = previewer.ThumbnailURL()
+	ret.ImageID = previewer.ThumbnailID()
 	ret.Description = previewer.DescriptionExtended(relatedResource)
 	return &ret
 }
 
-func (previewer *previewer) ThumbnailURL() string {
+func (previewer *previewer) ThumbnailID() string {
 	if previewer.item != nil {
 		itemsVal := reflect.ValueOf(previewer.item).Elem()
 		field := itemsVal.FieldByName("Image")
 		if field.IsValid() && previewer.hasAccessToField("Image") {
-			return previewer.resource.app.thumb(field.String())
+			return field.String()
 		}
 	}
 	return ""
 }
 
-func (previewer *previewer) ImageURL(ctx context.Context) string {
+func (previewer *previewer) ThumbnailURL() string {
+	id := previewer.ThumbnailID()
+	if id != "" {
+		return previewer.resource.app.thumb(id)
+	}
+	return ""
+}
+
+func (previewer *previewer) ImageURL() string {
 	if previewer.item != nil {
 		itemsVal := reflect.ValueOf(previewer.item).Elem()
 		field := itemsVal.FieldByName("Image")
 		if field.IsValid() && previewer.hasAccessToField("Image") {
-			return previewer.resource.app.largeImage(ctx, field.String())
+			return previewer.resource.app.largeImage(field.String())
 		}
 	}
 	return ""

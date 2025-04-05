@@ -48,12 +48,12 @@ func (app *App) thumb(ids string) string {
 	return ""
 }
 
-func (app *App) largeImage(ctx context.Context, ids string) string {
+func (app *App) largeImage(ids string) string {
 	if ids == "" {
 		return ""
 	}
 	for _, v := range strings.Split(ids, ",") {
-		image := Query[File](app).Context(ctx).Is("uid", v).First()
+		image := Query[File](app).Is("uid", v).First()
 		if image != nil && image.IsImage() {
 			return image.GetLarge()
 		}

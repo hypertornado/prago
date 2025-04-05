@@ -137,7 +137,7 @@ func ActionResourceItemForm[T any](
 func (resource *Resource) formItemAction(url string, formGenerator func(any, *Form, *Request), validation func(any, FormValidation, *Request)) *Action {
 	fa := newFormAction(resource.app, url, func(f *Form, r *Request) {
 		item := resource.query(context.TODO()).ID(r.Param("id"))
-		f.image = resource.previewer(r, item).ImageURL(r.r.Context())
+		f.image = resource.previewer(r, item).ImageURL()
 	})
 
 	fa.actionForm.resource = resource

@@ -55,7 +55,7 @@ func (resource *Resource) getBasicView(ctx context.Context, id int64, item any, 
 
 	ret.Header.Name = resource.previewer(request, item).Name()
 	ret.Header.Icon = iconView
-	ret.Header.Image = resource.previewer(request, item).ImageURL(ctx)
+	ret.Header.Image = resource.previewer(request, item).ImageURL()
 	ret.Header.Buttons = resource.getItemButtonData(request, item)
 
 	resourceIcon := resource.icon

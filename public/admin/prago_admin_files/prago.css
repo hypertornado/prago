@@ -1475,6 +1475,16 @@ a.btn_more_item {
   background-color: white;
   border-bottom: 1px solid #eee;
   border-right: 1px solid #eee;
+  min-width: 0px;
+  width: 100%;
+  text-overflow: ellipsis;
+}
+
+.list_cell_name {
+  min-width: 0px;
+  width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .list_cell:first-of-type {
@@ -1618,7 +1628,7 @@ a.btn_more_item {
   background-color: hsl(214, 50%, 90%);
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
   .list_multiple_actions {
     left: 0px;
   }
@@ -1683,7 +1693,7 @@ a.btn_more_item {
 .list_cell_images {
   display: flex;
   align-items: center;
-  margin-left: 5px;
+  margin-left: 0px;
   margin-right: 10px;
 }
 

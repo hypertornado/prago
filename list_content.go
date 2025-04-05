@@ -1,8 +1,10 @@
 package prago
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -10,6 +12,38 @@ import (
 
 	"golang.org/x/net/context"
 )
+
+type listContent struct {
+	Language      string
+	TotalCountStr string
+	Rows          []listRow
+	Colspan       int64
+	Message       string
+	Pagination    pagination
+}
+
+type listRow struct {
+	ID          int64
+	Name        string
+	Description string
+	ImageURL    string
+
+	URL                   string
+	Items                 []listCell
+	Actions               listItemActions
+	AllowsMultipleActions bool
+}
+
+type listItemActions struct {
+	ShowOrderButton bool
+	MenuButtons     []*buttonData
+}
+
+func (actions *listItemActions) JSON() template.HTMLAttr {
+	b, err := json.Marshal(actions)
+	must(err)
+	return template.HTMLAttr(b)
+}
 
 func (resource *Resource) getListContent(ctx context.Context, userData UserData, params url.Values) (ret listContent, err error) {
 	if !userData.Authorize(resource.canView) {
@@ -110,7 +144,7 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 		pw := resource.previewer(userData, itemVals.Index(i).Interface())
 		row.Name = pw.Name()
 		row.Description = pw.DescriptionBasic(nil)
-		row.ImageURL = pw.ImageURL(context.Background())
+		row.ImageURL = pw.ImageURL()
 
 		for _, v := range listHeader.Header {
 			if columnsMap[v.ColumnName] {

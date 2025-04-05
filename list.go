@@ -1,7 +1,6 @@
 package prago
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/url"
@@ -50,38 +49,6 @@ type listHeaderItem struct {
 	RelatedResourceID string
 	FilterData        interface{}
 	NaturalCellWidth  int64
-}
-
-type listContent struct {
-	Language      string
-	TotalCountStr string
-	Rows          []listRow
-	Colspan       int64
-	Message       string
-	Pagination    pagination
-}
-
-type listRow struct {
-	ID          int64
-	Name        string
-	Description string
-	ImageURL    string
-
-	URL                   string
-	Items                 []listCell
-	Actions               listItemActions
-	AllowsMultipleActions bool
-}
-
-type listItemActions struct {
-	ShowOrderButton bool
-	MenuButtons     []*buttonData
-}
-
-func (actions *listItemActions) JSON() template.HTMLAttr {
-	b, err := json.Marshal(actions)
-	must(err)
-	return template.HTMLAttr(b)
 }
 
 type pagination struct {
@@ -147,11 +114,6 @@ func (resource *Resource) getListHeader(userData UserData) (list list, err error
 			continue
 		}
 
-		//who just 1 stat in table
-		if k != 0 {
-			continue
-		}
-
 		headerItem := listHeaderItem{
 			Name:             stat.id,
 			Icon:             "glyphicons-basic-43-stats-circle.svg",
@@ -161,7 +123,16 @@ func (resource *Resource) getListHeader(userData UserData) (list list, err error
 			DefaultShow:      true,
 			NaturalCellWidth: 150,
 		}
-		list.Header = append([]listHeaderItem{headerItem}, list.Header...)
+
+		//fist stat
+		if k == 0 {
+			idHeaderItem := list.Header[0]
+			otherHeaderItems := list.Header[1:]
+			//put afted id
+			list.Header = append([]listHeaderItem{idHeaderItem, headerItem}, otherHeaderItems...)
+		} else {
+			list.Header = append(list.Header, headerItem)
+		}
 	}
 
 	return

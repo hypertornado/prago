@@ -171,18 +171,3 @@
 {{define "view_relationlist_response"}}
       {{template "view_relation" .}}
 {{end}}
-
-{{define "list_cell"}}
-  {{if .}}
-    {{if .Images}}
-      <span class="list_cell_images">
-      {{range $image := .Images}}
-        {{if $image}}
-        <div class="list_cell_image" style="background-image: url('{{PragoCSS (PragoThumb $image)}}');"></div>
-        {{end}}
-      {{end}}
-      </span>
-    {{end}}
-    <span class="list_cell_name">{{.Name}}</span>
-  {{end}}
-{{end}}

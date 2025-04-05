@@ -12,6 +12,10 @@ type listCell struct {
 	FetchURL string
 }
 
+func (cell listCell) HasImages() bool {
+	return len(cell.Images) > 0
+}
+
 func getCellViewData(userData UserData, f *Field, value interface{}) listCell {
 	if f.fieldType.listCellDataSource != nil {
 		return f.fieldType.listCellDataSource(userData, f, value)
@@ -55,7 +59,9 @@ func relationCellViewData(userData UserData, f *Field, value interface{}) listCe
 	var names []string
 	var images []string
 	for _, prev := range previewData {
-		images = append(images, prev.Image)
+		if prev.Image != "" {
+			images = append(images, prev.ImageID)
+		}
 		names = append(names, prev.Name)
 	}
 

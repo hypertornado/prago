@@ -100,12 +100,24 @@
 
   background-color: white;
 
-  border-bottom: 1px solid #eee;
-  border-right: 1px solid #eee;
+  border-bottom: 1px solid $grayBorderColor;
+  border-right: 1px solid $grayBorderColor;
+
+  min-width: 0px;
+  width: 100%;
+  text-overflow: ellipsis;
+}
+
+.list_cell_name {
+  min-width: 0px;
+  width: 100%;
+  text-overflow: ellipsis;
+  //border: 1px solid red;
+  overflow: hidden;
 }
 
 .list_cell:first-of-type {
-  border-left: 1px solid #eee;
+  border-left: 1px solid $grayBorderColor;
 }
 
 .list_row_multiple {
@@ -258,7 +270,7 @@
   }
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
   .list_multiple_actions {
     left: 0px;
   }
@@ -336,7 +348,7 @@
 .list_cell_images {
   display: flex;
   align-items: center;
-  margin-left: 5px;
+  margin-left: 0px;
   margin-right: 10px;
 }
 
@@ -507,6 +519,6 @@
 
 .list_tableplaceholder_row {
   height: 25px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid $grayBorderColor;
   background: white;
 }
