@@ -13,6 +13,7 @@ type buttonData struct {
 	URL      string
 	Priority int64
 	Style    string
+	FormURL  string
 }
 
 // Action represents action
@@ -33,6 +34,7 @@ type Action struct {
 	isItemAction bool
 	isUserMenu   bool
 	priority     int64
+	isFormAction bool
 
 	childAction *Action
 }
@@ -184,12 +186,20 @@ func (resource *Resource) getItemButtonData(userData UserData, item interface{})
 		if !userData.Authorize(v.permission) {
 			continue
 		}
+
+		actionURL := resource.getItemURL(item, v.url, userData)
+		var formURL string
+		if v.isFormAction {
+			formURL = actionURL
+		}
+
 		ret = append(ret, &buttonData{
 			Icon:     v.icon,
 			Name:     v.name(userData.Locale()),
-			URL:      resource.getItemURL(item, v.url, userData),
+			URL:      actionURL,
 			Priority: v.priority,
 			Style:    v.style,
+			FormURL:  formURL,
 		},
 		)
 	}

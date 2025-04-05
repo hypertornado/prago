@@ -1,0 +1,12 @@
+{{define "list_footer"}}
+  {{if .Message}}
+    <div class="list_message" title="{{.Message}}">
+      {{.Message}}
+    </div>
+  {{end}}
+  <div class="pagination" data-total="{{.Pagination.TotalPages}}" data-selected="{{.Pagination.SelectedPage}}"></div>
+  <button class="btn list_settings_btn2">
+    <img class="btn_icon" src="/admin/api/icons?file=glyphicons-basic-137-cogwheel.svg&color=444444">
+    {{PragoMessage .Language "admin_options"}}
+  </button>
+{{end}}

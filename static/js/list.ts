@@ -108,12 +108,6 @@ class List {
     );
     this.paginationSelect.addEventListener("change", this.load.bind(this));
 
-    /*this.statsCheckboxSelectCount = document.querySelector(".list_stats_limit");
-    this.statsCheckboxSelectCount.addEventListener("change", () => {
-      this.filterChanged();
-    });*/
-    //this.statsContainer = document.querySelector(".list_stats_container");
-
     this.multiple = new ListMultiple(this);
 
     this.settings.bindOptions(visibleColumnsMap);
@@ -125,8 +119,6 @@ class List {
 
   copyColumnWidths() {
     let totalWidth = this.listHeader.getBoundingClientRect().width;
-    //totalWidth -= 1000;
-    //this.tableContent.setAttribute("style", "width: " + totalWidth + "px;");
 
     let headerItems = this.list.querySelectorAll(
       ".list_header > :not(.hidden)"
@@ -158,10 +150,7 @@ class List {
       ".list_tableplaceholder_row"
     );
     if (placeholderItems.length > 0) {
-      let placeholderWidth =
-        totalWidth; /*-
-        this.list.querySelector(".list_header_last").getBoundingClientRect()
-          .width;*/
+      let placeholderWidth = totalWidth;
       for (let i = 0; i < placeholderItems.length; i++) {
         let item: HTMLDivElement = <HTMLDivElement>placeholderItems[i];
         item.style.width = placeholderWidth + "px";
@@ -286,11 +275,6 @@ class List {
   bindSettingsButton() {
     let btn: HTMLButtonElement = this.list.querySelector(".list_settings_btn2");
     this.settings.bindSettingsBtn(btn);
-    /*btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.settings.bindSettingsBtn(e, btn);
-    });*/
   }
 
   bindPagination() {
@@ -418,20 +402,38 @@ class List {
     }
   }
 
-  createCmenu(e: Event, rowEl: HTMLDivElement, alignByElement?: boolean) {
+  createCmenu(e: PointerEvent, rowEl: HTMLDivElement, alignByElement?: boolean) {
     rowEl.classList.add("list_row-context");
 
     let actions = JSON.parse(rowEl.getAttribute("data-actions"));
 
     var commands: CMenuCommand[] = [];
 
+    let allowPopupForm = true;
+    if (e.altKey || e.metaKey || e.shiftKey || e.ctrlKey) {
+      allowPopupForm = false;
+    }
 
     for (let action of actions.MenuButtons) {
+
+      let actionURL = null;
+      let handler = null;
+      if (action.FormURL && allowPopupForm) {
+        handler = () => {
+          new PopupForm(action.FormURL, (data: any) => {
+            this.load();
+          })
+        }
+      } else {
+        actionURL = action.URL;
+      }
+
       commands.push({
         Icon: action.Icon,
         Name: action.Name,
-        URL: action.URL,
+        URL: actionURL,
         Style: action.Style,
+        Handler: handler,
       });
     }
 
@@ -456,7 +458,7 @@ class List {
     e.preventDefault();
   }
 
-  contextClick(e: Event) {
+  contextClick(e: PointerEvent) {
     let rowEl = <HTMLDivElement>e.currentTarget;
     this.createCmenu(e, rowEl, false);
   }
@@ -732,14 +734,6 @@ class List {
 
   listHeaderPositionChanged() {
     let rect = this.rootContent.getBoundingClientRect();
-
-    //var leftScroll = -this.listTable.scrollLeft;
-    //this.listHeader.setAttribute("style", "margin-left: " + leftScroll + "px;");
-
-    /*this.listHeaderContainer.setAttribute(
-      "style",
-      "top: " + rect.top + "px; left: " + rect.left + "px;"
-    );*/
 
     let scrolledClassName = "list_header_container-scrolled";
     if (this.rootContent.scrollTop > 50) {

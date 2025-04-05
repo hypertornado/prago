@@ -57,9 +57,8 @@ type listContent struct {
 	TotalCountStr string
 	Rows          []listRow
 	Colspan       int64
-	//Stats         *listStats
-	Message    string
-	Pagination pagination
+	Message       string
+	Pagination    pagination
 }
 
 type listRow struct {

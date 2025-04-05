@@ -155,24 +155,16 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 }
 
 type listContentJSON struct {
-	Content string
-	//CountStr  string
-	//StatsStr  string
+	Content   string
 	FooterStr string
 }
 
 func (resource *Resource) getListContentJSON(ctx context.Context, userData UserData, params url.Values) *listContentJSON {
-	listData, err := resource.getListContent(ctx, userData, params)
+	listContentData, err := resource.getListContent(ctx, userData, params)
 	must(err)
 
 	return &listContentJSON{
-		Content: resource.app.adminTemplates.ExecuteToString("list_cells", map[string]interface{}{
-			"admin_list": listData,
-		}),
-		//CountStr: listData.TotalCountStr,
-		//StatsStr: statsStr,
-		FooterStr: resource.app.adminTemplates.ExecuteToString("list_footer", map[string]interface{}{
-			"admin_list": listData,
-		}),
+		Content:   resource.app.adminTemplates.ExecuteToString("list_cells", listContentData),
+		FooterStr: resource.app.adminTemplates.ExecuteToString("list_footer", listContentData),
 	}
 }

@@ -20,6 +20,7 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *form
 	}
 
 	ret.actionForm.icon = iconForm
+	ret.actionForm.isFormAction = true
 
 	ret.actionForm.childAction = ret.actionValidation
 

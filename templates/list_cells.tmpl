@@ -1,0 +1,16 @@
+{{define "list_cells"}}
+  {{range $item := .Rows}}
+    <div data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="list_row" data-actions="{{$item.Actions.JSON}}" data-prename="{{$item.PreName}}" data-name="{{$item.Name}}" data-description="{{$item.Description}}" data-image-url="{{$item.ImageURL}}">
+      {{if $item.AllowsMultipleActions}}
+        <div class="list_row_multiple preventredirect" data-id="{{$item.ID}}">
+          <div class="list_cell_multiple_pseudocheckbox"></div>
+        </div>
+      {{end}}
+      {{range $cell := $item.Items}}
+        <div class="list_cell" title="{{$cell.Name}}" data-cell-id="{{$cell.ItemID}}" {{if $cell.FetchURL}}data-fetch-url="{{$cell.FetchURL}}"{{end}}>
+          {{template "list_cell" $cell}}
+        </div>
+      {{end}}
+    </div>
+  {{end}}
+{{end}}

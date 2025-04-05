@@ -697,12 +697,29 @@ class List {
         rowEl.classList.add("list_row-context");
         let actions = JSON.parse(rowEl.getAttribute("data-actions"));
         var commands = [];
+        let allowPopupForm = true;
+        if (e.altKey || e.metaKey || e.shiftKey || e.ctrlKey) {
+            allowPopupForm = false;
+        }
         for (let action of actions.MenuButtons) {
+            let actionURL = null;
+            let handler = null;
+            if (action.FormURL && allowPopupForm) {
+                handler = () => {
+                    new PopupForm(action.FormURL, (data) => {
+                        this.load();
+                    });
+                };
+            }
+            else {
+                actionURL = action.URL;
+            }
             commands.push({
                 Icon: action.Icon,
                 Name: action.Name,
-                URL: action.URL,
+                URL: actionURL,
                 Style: action.Style,
+                Handler: handler,
             });
         }
         let name = rowEl.getAttribute("data-name");
