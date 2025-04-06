@@ -23,6 +23,9 @@ function DOMinsertChildAtIndex(parent, child, index) {
         parent.appendChild(child);
     }
     else {
+        if (index < 0) {
+            index = 0;
+        }
         parent.insertBefore(child, parent.children[index]);
     }
 }
@@ -64,24 +67,33 @@ class ImageView {
     }
     addFiles(filesData) {
         this.el.innerHTML = "";
-        for (var i = 0; i < filesData.length; i++) {
-            let file = filesData[i];
+        for (var i = 0; i < filesData.Items.length; i++) {
+            let file = filesData.Items[i];
             this.addFile(file);
         }
     }
     addFile(file) {
-        var container = document.createElement("a");
-        container.classList.add("admin_images_image");
-        container.setAttribute("href", file.FileURL);
-        container.setAttribute("style", "background-image: url('" + file.ThumbnailURL + "');");
-        var img = document.createElement("div");
-        img.setAttribute("src", file.ThumbnailURL);
-        img.setAttribute("draggable", "false");
-        var descriptionEl = document.createElement("div");
-        descriptionEl.classList.add("admin_images_image_description");
-        container.appendChild(descriptionEl);
-        descriptionEl.innerText = file.Name;
-        container.setAttribute("title", file.Name);
+        var container = document.createElement("button");
+        container.classList.add("imageview_image");
+        container.setAttribute("href", file.ViewURL);
+        container.setAttribute("style", "background-image: url('" + file.ThumbURL + "');");
+        container.setAttribute("title", file.ImageDescription);
+        container.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            let commands = [];
+            commands.push({
+                Name: "Zobrazit",
+                URL: file.ViewURL,
+            });
+            cmenu({
+                Event: e,
+                AlignByElement: true,
+                Name: file.ImageName,
+                Description: file.ImageDescription,
+                Commands: commands,
+            });
+        });
         this.el.appendChild(container);
     }
 }
@@ -89,33 +101,19 @@ class ImagePicker {
     constructor(el) {
         this.el = el;
         this.hiddenInput = (el.querySelector(".admin_images_hidden"));
-        this.preview = el.querySelector(".admin_images_preview");
-        this.fileInput = (this.el.querySelector(".admin_images_fileinput input"));
+        this.preview2 = el.querySelector(".imagepicker_preview");
+        this.fileInput = (this.el.querySelector(".imagepicker_btn input"));
         this.progress = this.el.querySelector("progress");
-        this.el.querySelector(".admin_images_loaded").classList.remove("hidden");
+        this.el.querySelector(".imagepicker_content").classList.remove("hidden");
         this.hideProgress();
-        let fileResponses = JSON.parse(this.hiddenInput.getAttribute("data-file-responses"));
-        this.addFiles(fileResponses);
         this.el.addEventListener("click", (e) => {
             if (e.altKey) {
                 var ids = window.prompt("IDs of images", this.hiddenInput.value);
                 this.hiddenInput.value = ids;
+                this.load();
                 e.preventDefault();
                 return false;
             }
-        });
-        this.fileInput.addEventListener("dragenter", (ev) => {
-            this.fileInput.classList.add("admin_images_fileinput-droparea");
-        });
-        this.fileInput.addEventListener("dragleave", (ev) => {
-            this.fileInput.classList.remove("admin_images_fileinput-droparea");
-        });
-        this.fileInput.addEventListener("dragover", (ev) => {
-            ev.preventDefault();
-        });
-        this.fileInput.addEventListener("drop", (ev) => {
-            var text = ev.dataTransfer.getData("Text");
-            return;
         });
         this.fileInput.addEventListener("change", (e) => {
             var files = this.fileInput.files;
@@ -132,7 +130,9 @@ class ImagePicker {
                 this.hideProgress();
                 if (request.status == 200) {
                     var data = JSON.parse(request.response);
-                    this.addFiles(data);
+                    for (var i = 0; i < data.length; i++) {
+                        this.addUUID(data[i].UUID);
+                    }
                 }
                 else {
                     new Alert("Chyba při nahrávání souboru.");
@@ -142,99 +142,127 @@ class ImagePicker {
             this.showProgress();
             request.send(formData);
         });
-    }
-    updateHiddenData() {
-        var ids = [];
-        for (var i = 0; i < this.preview.children.length; i++) {
-            var item = this.preview.children[i];
-            var uuid = item.getAttribute("data-uuid");
-            ids.push(uuid);
-        }
-        this.hiddenInput.value = ids.join(",");
-    }
-    addFiles(files) {
-        for (var i = 0; i < files.length; i++) {
-            let file = files[i];
-            this.addFile(file);
-        }
-    }
-    addFile(file) {
-        var container = document.createElement("a");
-        container.classList.add("admin_images_image");
-        container.setAttribute("data-uuid", file.UUID);
-        container.setAttribute("draggable", "true");
-        container.setAttribute("target", "_blank");
-        container.setAttribute("href", file.FileURL);
-        container.setAttribute("style", "background-image: url('" + file.ThumbnailURL + "');");
-        var descriptionEl = document.createElement("div");
-        descriptionEl.classList.add("admin_images_image_description");
-        container.appendChild(descriptionEl);
-        descriptionEl.innerText = file.Name;
-        container.setAttribute("title", file.Name);
-        container.addEventListener("dragstart", (e) => {
-            this.draggedElement = e.target;
-        });
-        container.addEventListener("drop", (e) => {
-            var droppedElement = e.toElement;
-            if (!droppedElement) {
-                droppedElement = e.originalTarget;
-            }
-            for (var i = 0; i < 3; i++) {
-                if (droppedElement.nodeName == "A") {
-                    break;
-                }
-                else {
-                    droppedElement = droppedElement.parentElement;
-                }
-            }
-            var draggedIndex = -1;
-            var droppedIndex = -1;
-            var parent = this.draggedElement.parentElement;
-            for (var i = 0; i < parent.children.length; i++) {
-                var child = parent.children[i];
-                if (child == this.draggedElement) {
-                    draggedIndex = i;
-                }
-                if (child == droppedElement) {
-                    droppedIndex = i;
-                }
-            }
-            if (draggedIndex == -1 || droppedIndex == -1) {
-                return;
-            }
-            if (draggedIndex <= droppedIndex) {
-                droppedIndex += 1;
-            }
-            DOMinsertChildAtIndex(parent, this.draggedElement, droppedIndex);
-            this.updateHiddenData();
-            e.preventDefault();
-            return false;
-        });
-        container.addEventListener("dragover", (e) => {
-            e.preventDefault();
-        });
-        container.addEventListener("click", (e) => {
-            var target = e.target;
-            if (target.classList.contains("admin_images_image_delete")) {
-                var parent = e.currentTarget.parentNode;
-                parent.removeChild(e.currentTarget);
-                this.updateHiddenData();
-                e.preventDefault();
-                return false;
-            }
-        });
-        var del = document.createElement("div");
-        del.textContent = "×";
-        del.classList.add("admin_images_image_delete");
-        container.appendChild(del);
-        this.preview.appendChild(container);
-        this.updateHiddenData();
+        this.load();
     }
     hideProgress() {
         this.progress.classList.add("hidden");
     }
     showProgress() {
         this.progress.classList.remove("hidden");
+    }
+    load() {
+        this.showProgress();
+        var request = new XMLHttpRequest();
+        request.open("GET", "/admin/api/imagepicker" + encodeParams({
+            "ids": this.hiddenInput.value,
+        }));
+        request.addEventListener("load", (e) => {
+            this.hideProgress();
+            if (request.status == 200) {
+                var data = JSON.parse(request.response);
+                this.addFiles2(data);
+            }
+            else {
+                new Alert("Chyba při načítání dat obrázků.");
+                console.error("Error while loading item.");
+            }
+        });
+        request.send();
+    }
+    addFiles2(data) {
+        this.preview2.innerHTML = "";
+        for (let i = 0; i < data.Items.length; i++) {
+            let item = data.Items[i];
+            let itemEl = document.createElement("button");
+            itemEl.setAttribute("data-uuid", item.UUID);
+            itemEl.setAttribute("title", item.ImageName);
+            itemEl.classList.add("imagepicker_preview_item");
+            itemEl.setAttribute("style", "background-image: url('" + item.ThumbURL + "');");
+            itemEl.addEventListener("click", (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                var commands = [];
+                commands.push({
+                    Name: "Zobrazit",
+                    Icon: "glyphicons-basic-588-book-open-text.svg",
+                    URL: item.ViewURL,
+                });
+                commands.push({
+                    Name: "Upravit popis",
+                    Icon: "glyphicons-basic-31-pencil.svg",
+                    Handler: () => {
+                        new PopupForm(item.EditURL, () => {
+                            this.load();
+                        });
+                    }
+                });
+                commands.push({
+                    Name: "První",
+                    Icon: "glyphicons-basic-212-arrow-up.svg",
+                    Handler: () => {
+                        DOMinsertChildAtIndex(this.preview2, itemEl, 0);
+                        this.updateHiddenData2();
+                        this.load();
+                    },
+                });
+                commands.push({
+                    Name: "Nahoru",
+                    Icon: "glyphicons-basic-828-arrow-thin-up.svg",
+                    Handler: () => {
+                        DOMinsertChildAtIndex(this.preview2, itemEl, i - 1);
+                        this.updateHiddenData2();
+                        this.load();
+                    },
+                });
+                commands.push({
+                    Name: "Dolů",
+                    Icon: "glyphicons-basic-827-arrow-thin-down.svg",
+                    Handler: () => {
+                        DOMinsertChildAtIndex(this.preview2, itemEl, i + 2);
+                        this.updateHiddenData2();
+                        this.load();
+                    },
+                });
+                commands.push({
+                    Name: "Smazat",
+                    Handler: () => {
+                        itemEl.remove();
+                        this.updateHiddenData2();
+                    },
+                    Icon: "glyphicons-basic-17-bin.svg",
+                    Style: "destroy",
+                });
+                cmenu({
+                    Event: e,
+                    AlignByElement: true,
+                    Name: item.ImageName,
+                    Description: item.ImageDescription,
+                    Commands: commands,
+                });
+            });
+            this.preview2.appendChild(itemEl);
+        }
+    }
+    updateHiddenData2() {
+        var ids = [];
+        for (var i = 0; i < this.preview2.children.length; i++) {
+            let item = this.preview2.children[i];
+            var uuid = item.getAttribute("data-uuid");
+            ids.push(uuid);
+        }
+        this.hiddenInput.value = ids.join(",");
+    }
+    addUUID(uuid) {
+        if (!uuid) {
+            return;
+        }
+        let val = this.hiddenInput.value;
+        if (val) {
+            val += ",";
+        }
+        val += uuid;
+        this.hiddenInput.value = val;
+        this.load();
     }
 }
 class ListFilterRelations {
@@ -1904,7 +1932,7 @@ class Form {
         relations.forEach((form) => {
             new RelationPicker(form);
         });
-        var imagePickers = form.querySelectorAll(".admin_images");
+        var imagePickers = form.querySelectorAll(".imagepicker");
         imagePickers.forEach((form) => {
             new ImagePicker(form);
         });
@@ -3516,7 +3544,7 @@ class Prago {
                 }
             });
         });
-        var imageViews = document.querySelectorAll(".admin_item_view_image_content");
+        var imageViews = document.querySelectorAll(".imageview");
         imageViews.forEach((el) => {
             new ImageView(el);
         });

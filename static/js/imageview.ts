@@ -9,31 +9,44 @@ class ImageView {
 
   addFiles(filesData: any) {
     this.el.innerHTML = "";
-    for (var i = 0; i < filesData.length; i++) {
-      let file = filesData[i];
+    for (var i = 0; i < filesData.Items.length; i++) {
+      let file = filesData.Items[i];
       this.addFile(file);
     }
   }
 
   addFile(file: any) {
-    var container = document.createElement("a");
-    container.classList.add("admin_images_image");
-    container.setAttribute("href", file.FileURL);
+    var container = document.createElement("button");
+    container.classList.add("imageview_image");
+    container.setAttribute("href", file.ViewURL);
     container.setAttribute(
       "style",
-      "background-image: url('" + file.ThumbnailURL + "');"
+      "background-image: url('" + file.ThumbURL + "');"
     );
+    container.setAttribute("title", file.ImageDescription);
 
-    var img = document.createElement("div");
-    img.setAttribute("src", file.ThumbnailURL);
-    img.setAttribute("draggable", "false");
+    container.addEventListener("click", (e: PointerEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    var descriptionEl = document.createElement("div");
-    descriptionEl.classList.add("admin_images_image_description");
-    container.appendChild(descriptionEl);
+      let commands = [];
+      commands.push({
+        Name: "Zobrazit",
+        URL: file.ViewURL,
+      })
 
-    descriptionEl.innerText = file.Name;
-    container.setAttribute("title", file.Name);
+      cmenu({
+        Event: e,
+        AlignByElement: true,
+        Name: file.ImageName,
+        Description: file.ImageDescription,
+        Commands: commands,
+      });
+
+    })
+    
+    
+    
     this.el.appendChild(container);
   }
 }

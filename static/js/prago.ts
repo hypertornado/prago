@@ -28,7 +28,7 @@ class Prago {
     });
 
     var imageViews = document.querySelectorAll<HTMLDivElement>(
-      ".admin_item_view_image_content"
+      ".imageview"
     );
     imageViews.forEach((el) => {
       new ImageView(el);

@@ -1,0 +1,30 @@
+@use "../variables.scss" as *;
+
+.imageview {
+    gap: 5px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+  
+  .imageview_image {
+    border-radius: 3px;
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+    aspect-ratio: 16/9;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: $backgroundGrayColor;
+    display: inline-block;
+    position: relative;
+    border: none;
+  }
+  
+  .imageview_image:hover {
+    opacity: .9;
+  }
+  
+  .imageview_image:active {
+    opacity: .8;
+  }

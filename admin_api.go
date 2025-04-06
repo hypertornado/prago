@@ -19,4 +19,6 @@ func (app *App) initAPI() {
 
 	app.API("resource-item-stats").Permission(loggedPermission).Handler(itemStatsAPIHandler)
 
+	app.API("imagepicker").Permission(app.FilesResource.canView).HandlerJSON(imagePickerAPIHandler)
+
 }

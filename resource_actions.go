@@ -75,7 +75,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			renderErrorPage(request, 404)
 			return
 		}
-		pd.Views = resource.getViews(request.r.Context(), item, request)
+		pd.Views = resource.getViews(item, request)
 	},
 	).Icon("glyphicons-basic-588-book-open-text.svg").Name(messages.GetNameFunction("admin_view")).setPriority(defaultHighPriority).Permission(resource.canView)
 

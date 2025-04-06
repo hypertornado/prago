@@ -178,7 +178,7 @@ func (action *Action) addConstraint(constraint routerConstraint) {
 	action.constraints = append(action.constraints, constraint)
 }
 
-func (resource *Resource) getItemButtonData(userData UserData, item interface{}) (ret []*buttonData) {
+func (resource *Resource) getItemButtonData(userData UserData, item any) (ret []*buttonData) {
 	for _, v := range resource.itemActions {
 		if v.method != "GET" {
 			continue
@@ -210,7 +210,7 @@ func (resource *Resource) getItemButtonData(userData UserData, item interface{})
 	return ret
 }
 
-func (resource *Resource) getListItemActions(userData UserData, item any, id int64) listItemActions {
+func (resource *Resource) getListItemActions(userData UserData, item any) listItemActions {
 	ret := listItemActions{
 		MenuButtons: resource.getItemButtonData(userData, item),
 	}

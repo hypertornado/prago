@@ -175,7 +175,7 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 		row.ID = previewer.ID()
 		row.URL = previewer.URL("")
 
-		row.Actions = resource.getListItemActions(userData, itemVal.Addr().Interface(), row.ID)
+		row.Actions = resource.getListItemActions(userData, itemVal.Addr().Interface())
 		row.AllowsMultipleActions = resource.allowsMultipleActions(userData)
 		ret.Rows = append(ret.Rows, row)
 

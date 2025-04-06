@@ -5,8 +5,6 @@ import (
 	"html/template"
 	"reflect"
 	"time"
-
-	"golang.org/x/net/context"
 )
 
 type view struct {
@@ -36,14 +34,14 @@ type viewButton struct {
 	Icon string
 }
 
-func (resource *Resource) getViews(ctx context.Context, item any, request *Request) (ret []*view) {
+func (resource *Resource) getViews(item any, request *Request) (ret []*view) {
 	id := resource.previewer(request, item).ID()
-	ret = append(ret, resource.getBasicView(ctx, id, item, request))
-	ret = append(ret, resource.getRelationViews(ctx, id, request)...)
+	ret = append(ret, resource.getBasicView(id, item, request))
+	ret = append(ret, resource.getRelationViews(id, request)...)
 	return ret
 }
 
-func (resource *Resource) getBasicView(ctx context.Context, id int64, item any, request *Request) *view {
+func (resource *Resource) getBasicView(id int64, item any, request *Request) *view {
 	ret := &view{
 		Header: &boxHeader{},
 	}

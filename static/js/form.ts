@@ -27,7 +27,7 @@ class Form {
       new RelationPicker(form);
     });
 
-    var imagePickers = form.querySelectorAll<HTMLDivElement>(".admin_images");
+    var imagePickers = form.querySelectorAll<HTMLDivElement>(".imagepicker");
     imagePickers.forEach((form) => {
       new ImagePicker(form);
     });

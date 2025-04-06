@@ -6,6 +6,9 @@ function DOMinsertChildAtIndex(
   if (index >= parent.children.length) {
     parent.appendChild(child);
   } else {
+    if (index < 0) {
+      index = 0;
+    }
     parent.insertBefore(child, parent.children[index]);
   }
 }

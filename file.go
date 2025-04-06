@@ -284,32 +284,9 @@ func (f *File) IsImage() bool {
 	return false
 }
 
-func (app *App) dataToFileResponseJSON(data any) string {
-	files := app.GetFiles(context.Background(), data.(string))
-	fileResponse := getFileResponse(files)
-
-	jsonResp, err := json.Marshal(fileResponse)
+func fileViewDataSource(request *Request, field *Field, data any) any {
+	outData := request.app.getImagePickerResponse(data.(string))
+	jsonData, err := json.Marshal(outData)
 	must(err)
-	return string(jsonResp)
-
-}
-
-func fileViewDataSource(request *Request, field *Field, data interface{}) interface{} {
-	return request.app.dataToFileResponseJSON(data)
-
-}
-
-type imageFormData struct {
-	MimeTypes         string
-	FileResponsesJSON string
-}
-
-func imageFormDataSource(mimeTypes string) func(*Field, UserData, string) interface{} {
-	return func(f *Field, userData UserData, value string) interface{} {
-		app := f.resource.app
-		return imageFormData{
-			MimeTypes:         mimeTypes,
-			FileResponsesJSON: app.dataToFileResponseJSON(value),
-		}
-	}
+	return string(jsonData)
 }
