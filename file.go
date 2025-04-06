@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"mime/multipart"
+	"html/template"
+	"log"
 	"path/filepath"
 	"strings"
 	"time"
@@ -76,37 +77,6 @@ func (app *App) GetFiles(ctx context.Context, ids string) []*File {
 	return files
 }
 
-func (app *App) UploadFile(fileHeader *multipart.FileHeader, request *Request, description string) (*File, error) {
-	fileName := prettyFilename(fileHeader.Filename)
-	file := File{}
-	file.Name = fileName
-
-	openedFile, err := fileHeader.Open()
-	if err != nil {
-		return nil, fmt.Errorf("opening multipart file: %s", err)
-	}
-	defer openedFile.Close()
-
-	uploadData, err := filesCDN.UploadFile(openedFile, file.getExtension())
-	if err != nil {
-		return nil, fmt.Errorf("uploading multipart file: %s", err)
-	}
-
-	file.Width = uploadData.Width
-	file.Height = uploadData.Height
-
-	file.UID = uploadData.UUID
-
-	file.User = request.UserID()
-	file.Description = description
-	err = CreateItemWithContext(request.Request().Context(), app, &file)
-	if err != nil {
-		return nil, fmt.Errorf("saving file: %s", err)
-	}
-
-	return &file, nil
-}
-
 // UpdateMetadata updates metadata of file
 func (f *File) updateMetadata() error {
 	metadata, err := filesCDN.GetMetadata(f.UID)
@@ -175,6 +145,62 @@ func (app *App) initFilesResource() {
 				}
 			}
 		})
+
+	ActionResourceItemUI(app, "connections", func(file *File, request *Request) template.HTML {
+		table := app.Table()
+		table.Header("Resource", "Field", "Item")
+
+		var totalConnections = 0
+
+		for _, resource := range app.resources {
+
+			for _, field := range resource.fields {
+				if field.fieldType.viewTemplate == "view_image" {
+					query := fmt.Sprintf("SELECT id FROM %s WHERE %s LIKE ?", resource.id, field.id)
+
+					rows, err := app.db.Query(query, "%"+file.UID+"%")
+					if err != nil {
+						log.Fatal(err)
+					}
+					defer rows.Close()
+
+					for rows.Next() {
+						var id int
+						if err := rows.Scan(&id); err != nil {
+							log.Fatal(err)
+						}
+
+						totalConnections++
+
+						item := resource.query(context.Background()).ID(id)
+						previewer := resource.previewer(request, item)
+
+						if request.Authorize(resource.canView) && request.Authorize(field.canView) {
+							table.Row(
+								Cell(resource.singularName(request.Locale())).URL(fmt.Sprintf("/admin/%s", resource.id)),
+								Cell(field.name(request.Locale())),
+								Cell(previewer.Name()).URL(previewer.URL("")),
+							)
+						} else {
+							table.Row(Cell("Not authorized"))
+						}
+					}
+
+					if err := rows.Err(); err != nil {
+						log.Fatal(err)
+					}
+				}
+			}
+		}
+
+		if totalConnections == 1 {
+			table.AddFooterText(fmt.Sprintf("%d connection", totalConnections))
+		} else {
+			table.AddFooterText(fmt.Sprintf("%d connections", totalConnections))
+		}
+
+		return table.ExecuteHTML()
+	}).Name(unlocalized("Connections"))
 
 	app.ListenActivity(func(activity Activity) {
 		if activity.ActivityType == "delete" && activity.ResourceID == resource.id {
