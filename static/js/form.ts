@@ -10,6 +10,8 @@ class Form {
     this.dirty = false;
     this.formEl = form;
 
+    this.fixAufofocus();
+
     var elements = form.querySelectorAll<HTMLDivElement>(".admin_markdown");
     elements.forEach((el) => {
       new MarkdownEditor(el);
@@ -74,6 +76,18 @@ class Form {
       this.changeHandler();
     } else {
       this.dirty = true;
+    }
+  }
+
+  fixAufofocus() {
+    let input: HTMLInputElement = this.formEl.querySelector('[autofocus]');
+    if (input) {
+      let value = input.value;
+      let typ = input.getAttribute("type");
+      if (input.nodeName == "TEXTAREA" || typ == "text" || typ == "password" || typ == "tel" || typ == "search" || typ == "url") {
+        input.focus();
+        input.setSelectionRange(value.length, value.length);
+      }
     }
   }
 }

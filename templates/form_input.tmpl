@@ -97,7 +97,13 @@
 {{define "form_input_cdnfile"}}
   {{if .Value}}
     <input type="hidden" id="{{.UUID}}" name="{{.ID}}" value="{{.Value}}">
-    <img src="{{PragoThumb .Value}}">
+
+    {{$previewURL := PragoLarge .Value}}
+    {{if $previewURL}}
+      <a href="download" class="fileview_preview" style="background-image: url('{{PragoLarge .Value}}');"></a>
+    {{else}}
+      No preview for this format available
+    {{end}}
   {{else}}
     <input type="file" id="{{.UUID}}" name="{{.ID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
   {{end}}

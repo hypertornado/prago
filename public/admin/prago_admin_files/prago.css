@@ -546,7 +546,7 @@ select.admin_timestamp_minute {
   background-color: #fafafa;
 }
 
-.view_name:hover .view_edit {
+.view:hover .view_edit {
   opacity: 1;
 }
 
@@ -619,9 +619,7 @@ select.admin_timestamp_minute {
   width: 40px;
   aspect-ratio: 1;
   border-radius: 5px;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
+  object-fit: cover;
   background-color: #fafafa;
   align-self: flex-start;
 }
@@ -832,6 +830,17 @@ select.admin_timestamp_minute {
   vertical-align: middle;
   display: flex;
   align-items: center;
+}
+
+.fileview_preview {
+  display: block;
+  aspect-ratio: 16/9;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: #fafafa !important;
+  background-color: black !important;
+  border: 20px solid black;
 }
 
 .btn {
@@ -1597,14 +1606,13 @@ a.btn_more_item {
 .list_cell_image {
   border: 1px solid transparent;
   background-color: #fafafa;
-  border-radius: 10px;
+  border-radius: 3px;
   width: 15px;
   height: 15px;
   margin: 0px;
   margin-right: -5px;
   display: inline-block;
-  background-size: cover;
-  background-position: center;
+  object-fit: cover;
 }
 
 .list_cell_multiple_pseudocheckbox {
@@ -3317,6 +3325,7 @@ a.admin_stats_section_row {
   padding: 0px 3px;
   font-size: 0.9rem;
   line-height: 1.1em;
+  word-wrap: break-word;
 }
 
 .cmenu_table_row_name {
@@ -3620,6 +3629,11 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
   display: inline-block;
   position: relative;
   border: none;
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  padding: 0px;
+  justify-content: center;
 }
 
 .imageview_image:hover {
@@ -3628,4 +3642,11 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 
 .imageview_image:active {
   opacity: 0.8;
+}
+
+.imageview_image_img {
+  object-fit: cover;
+  background-position: center;
+  width: 100%;
+  height: 100%;
 }

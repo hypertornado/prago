@@ -74,12 +74,9 @@ func relationCellViewData(userData UserData, f *Field, value interface{}) listCe
 
 func imageCellViewData(userData UserData, f *Field, value interface{}) listCell {
 	data := value.(string)
-	images := strings.Split(data, ",")
 	ret := listCell{
 		ItemID: f.id,
 	}
-	if len(images) > 0 {
-		ret.Images = images
-	}
+	ret.Images = append(ret.Images, data)
 	return ret
 }

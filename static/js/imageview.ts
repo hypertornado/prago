@@ -9,6 +9,10 @@ class ImageView {
 
   addFiles(filesData: any) {
     this.el.innerHTML = "";
+    if (!filesData.Items) {
+      return;
+    }
+
     for (var i = 0; i < filesData.Items.length; i++) {
       let file = filesData.Items[i];
       this.addFile(file);
@@ -16,14 +20,19 @@ class ImageView {
   }
 
   addFile(file: any) {
-    var container = document.createElement("button");
+    let container = document.createElement("button");
     container.classList.add("imageview_image");
     container.setAttribute("href", file.ViewURL);
-    container.setAttribute(
+    /*container.setAttribute(
       "style",
       "background-image: url('" + file.ThumbURL + "');"
-    );
+    );*/
     container.setAttribute("title", file.ImageDescription);
+
+    let imgEl = document.createElement("img");
+    imgEl.classList.add("imageview_image_img");
+    imgEl.setAttribute("src", file.ThumbURL)
+    container.appendChild(imgEl);
 
     container.addEventListener("click", (e: PointerEvent) => {
       e.preventDefault();

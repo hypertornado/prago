@@ -137,7 +137,7 @@ select.admin_timestamp_minute {
   background-color: $backgroundGrayColor;
 }
 
-.view_name:hover .view_edit {
+.view:hover .view_edit {
   opacity: 1;
 }
 
@@ -212,9 +212,10 @@ select.admin_timestamp_minute {
   width: 40px;
   aspect-ratio: 1;
   border-radius: 5px;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
+  //background-repeat: no-repeat;
+  //background-size: cover;
+  //background-position: center;
+  object-fit: cover;
   background-color: $backgroundGrayColor;
   align-self: flex-start;
 }
@@ -432,4 +433,21 @@ select.admin_timestamp_minute {
   vertical-align: middle;
   display: flex;
   align-items: center;
+}
+
+.fileview {
+
+}
+
+.fileview_preview {
+  display: block;
+  aspect-ratio: 16/9;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: $backgroundGrayColor !important;
+  background-color: black !important;
+  //border-radius: 3px;
+  //border: 10px solid $backgroundGrayColor;
+  border: 20px solid black;
 }

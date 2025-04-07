@@ -19,6 +19,11 @@
     display: inline-block;
     position: relative;
     border: none;
+    display: flex;
+    overflow: hidden;
+    align-items: center;
+    padding: 0px;
+    justify-content: center;
   }
   
   .imageview_image:hover {
@@ -27,4 +32,11 @@
   
   .imageview_image:active {
     opacity: .8;
+  }
+
+  .imageview_image_img {
+    object-fit: cover;
+    background-position: center;
+    width: 100%;
+    height: 100%;
   }

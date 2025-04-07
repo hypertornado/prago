@@ -20,7 +20,7 @@
       <span class="list_cell_images">
       {{range $image := .Images}}
         {{if $image}}
-          <div class="list_cell_image" style="background-image: url('{{PragoCSS (PragoThumb $image)}}');"></div>
+          <img src="{{PragoCSS (PragoThumb $image)}}" class="list_cell_image" loading="lazy">
         {{end}}
       {{end}}
       </span>

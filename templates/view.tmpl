@@ -35,6 +35,7 @@
 
 
   {{range $item := .Items}}
+    <div class="view">
     {{if $item.Name}}
       <div class="view_name">
         {{if $item.Icon}}
@@ -50,6 +51,7 @@
     {{end}}
     <div class="view_content">
       {{- $item.Content -}}
+    </div>
     </div>
   {{end}}
 
@@ -86,35 +88,12 @@
   {{- PragoMarkdown . -}}
 {{end}}
 
-{{define "view_file"}}
-  {{range $item := .}}
-    {{template "view_file_single" $item}}
-  {{end}}
-{{end}}
-
-{{define "view_file_single"}}
+{{define "view_cdn_file"}}
+  <div class="fileview">
   {{if .MediumURL}}
-    <div>
-      <a href="{{.OriginalURL}}"><img src="{{.MediumURL}}"></a>
-    </div>
+      <a href="{{.DownloadURL}}" class="fileview_preview" style="background-image: url('{{.MediumURL}}');"></a>
   {{end}}
-  <div>
-    Download:
-    {{range $path := .Paths}}
-      <a href="{{$path.URL}}">{{$path.Name}}</a>
-    {{end}}
   </div>
-  {{if .IsImage}}
-    <div>
-      <form action="getcdnurl" method="POST">
-        Získat zmenšeninu:
-        <input type="hidden" name="uuid" value="{{.UUID}}">
-        <input name="size" value="" placeholder="Velikost">
-        <input type="submit" class="btn" name="Zmenšit">
-      </form>
-    </div>
-  {{end}}
-  <div>UUID: {{.UUID}}</div>
 {{end}}
 
 {{define "view_image"}}
@@ -135,7 +114,7 @@
       {{range $item := .}}
       <a class="admin_preview" href="{{$item.URL}}">
         {{if $item.Image}}
-          <div class="admin_preview_image" style="background-image: url('{{PragoCSS $item.Image}}') ;"></div>
+          <img src="{{PragoCSS $item.Image}}" class="admin_preview_image" loading="lazy">
         {{end}}
         <div class="admin_preview_right">
           <div class="admin_preview_name">{{$item.Name}}</div>

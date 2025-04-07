@@ -49,8 +49,10 @@ class ImagePicker {
         this.hideProgress();
         if (request.status == 200) {
           var data = JSON.parse(request.response);
+          console.log(data);
           for (var i = 0; i < data.length; i++) {
-            this.addUUID(data[i].UUID);
+            console.log(data[i]);
+            this.addUUID(data[i]);
           }
         } else {
           new Alert("Chyba při nahrávání souboru.");
@@ -164,14 +166,21 @@ class ImagePicker {
           Style: "destroy",
         });
 
+        var rows: CMenuTableRow[] = [];
+        for (var j = 0; j < item.Metadata.length; j++) {
+          rows.push({
+            Name: item.Metadata[j][0],
+            Value: item.Metadata[j][1],
+          })
+        }
+
         cmenu({
           Event: e,
-          //PreName: item.UUID,
           AlignByElement: true,
-          //ImageURL: item.ThumbURL,
           Name: item.ImageName,
           Description: item.ImageDescription,
           Commands: commands,
+          Rows: rows,
         })
 
       })

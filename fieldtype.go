@@ -74,8 +74,8 @@ func (app *App) initDefaultFieldTypes() {
 	})
 
 	app.addFieldType("cdnfile", &fieldType{
-		viewTemplate:       "view_file",
-		viewDataSource:     filesViewDataSource,
+		viewTemplate:       "view_cdn_file",
+		viewDataSource:     cdnViewDataSource,
 		formTemplate:       "form_input_cdnfile",
 		listCellDataSource: imageCellViewData,
 

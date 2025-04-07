@@ -354,15 +354,16 @@
 
 .list_cell_image {
   border: 1px solid transparent;
-  background-color: #fafafa;
-  border-radius: 10px;
+  background-color: $backgroundGrayColor;
+  border-radius: 3px;
   width: 15px;
   height: 15px;
   margin: 0px;
   margin-right: -5px;
   display: inline-block;
-  background-size: cover;
-  background-position: center;
+  //background-size: cover;
+  //background-position: center;
+  object-fit: cover;
 }
 
 .list_cell_multiple_pseudocheckbox {

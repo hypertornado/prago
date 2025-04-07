@@ -51,6 +51,10 @@ func (app *App) initTemplates() {
 		return app.thumb(ids)
 	})
 
+	app.adminTemplates.Function("PragoLarge", func(ids string) string {
+		return app.largeImage(ids)
+	})
+
 	app.adminTemplates.Function("PragoIconExists", func(iconName string) bool {
 		return app.iconExists(iconName)
 	})

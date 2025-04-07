@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/hypertornado/prago/pragocdn/cdnclient"
 )
 
 // File is structure representing files in admin
@@ -24,16 +22,6 @@ type File struct {
 	Height      int64  `prago-can-edit:"nobody"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-}
-
-var filesCDN cdnclient.CDNAccount
-
-func initCDN(app *App) {
-	filesCDN = cdnclient.NewCDNAccount(
-		app.mustGetSetting("cdn_url"),
-		app.mustGetSetting("cdn_account"),
-		app.mustGetSetting("cdn_password"),
-	)
 }
 
 func (app *App) thumb(ids string) string {
@@ -111,15 +99,14 @@ func (app *App) initFilesResource() {
 		multipartFiles := request.Request().MultipartForm.File["file"]
 		description := request.Param("description")
 
-		files := []*File{}
+		var uuids []string
+
 		for _, v := range multipartFiles {
 			file, err := app.UploadFile(v, request, description)
-			if err != nil {
-				panic(err)
-			}
-			files = append(files, file)
+			must(err)
+			uuids = append(uuids, file.UID)
 		}
-		request.WriteJSON(200, getFileResponse(files))
+		request.WriteJSON(200, uuids)
 	})
 
 	resource.Field("uid").Name(messages.GetNameFunction("admin_file"))
@@ -128,23 +115,78 @@ func (app *App) initFilesResource() {
 
 	resource.Icon("glyphicons-basic-37-file.svg")
 
-	app.addCommand("files", "metadata").
-		Callback(func() {
-			files := Query[File](app).List()
-			for _, v := range files {
-				err := v.updateMetadata()
-				if err != nil {
-					fmt.Println("error while updating metadata: ", v.ID, err)
-					continue
-				}
-				f := *v
-				if UpdateItem(app, &f) != nil {
-					fmt.Println("error while saving file: ", v.ID)
-				} else {
-					fmt.Println("saved ok: ", v.ID, v.Width, v.Height)
-				}
+	ActionResourceItemForm(app, "download", func(file *File, form *Form, request *Request) {
+		dataPaths := file.getCDNNamedDownloadPaths()
+
+		var values [][2]string
+		for _, v := range dataPaths {
+			values = append(values, [2]string{
+				v[0],
+				v[0],
+			})
+		}
+
+		form.AddSelect("typ", "Type", values).Value = "original"
+		if file.IsImage() {
+			form.AddTextInput("custom", "Custom size")
+		}
+		form.AddSubmit("Download")
+	}, func(file *File, fv FormValidation, request *Request) {
+
+		customSize := request.Param("custom")
+		if customSize != "" {
+			redirectURL := filesCDN.GetImageURL(file.UID, file.Name, customSize)
+			fv.Redirect(redirectURL)
+			return
+		}
+
+		dataPaths := file.getCDNNamedDownloadPaths()
+		for _, v := range dataPaths {
+			if v[0] == request.Param("typ") {
+				fv.Redirect(v[1])
+				return
 			}
-		})
+		}
+		fv.AddError("No size selected")
+
+	}).Name(unlocalized("Download")).Icon("glyphicons-basic-199-save.svg")
+
+	ActionResourceItemUI(app, "metadata", func(file *File, request *Request) template.HTML {
+		metadata, err := filesCDN.GetMetadata(file.UID)
+		if err != nil {
+			panic(err)
+		}
+
+		table := app.Table()
+
+		table.Row(
+			Cell("UUID"),
+			Cell(metadata.UUID),
+		)
+		table.Row(
+			Cell("Extension"),
+			Cell(metadata.Extension),
+		)
+		table.Row(
+			Cell("IsImage"),
+			Cell(metadata.IsImage),
+		)
+		table.Row(
+			Cell("Filesize"),
+			Cell(metadata.Filesize),
+		)
+		table.Row(
+			Cell("Width"),
+			Cell(metadata.Width),
+		)
+		table.Row(
+			Cell("Height"),
+			Cell(metadata.Height),
+		)
+
+		return table.ExecuteHTML()
+
+	}).Name(unlocalized("CDN Metadata")).Icon("glyphicons-basic-501-server.svg")
 
 	ActionResourceItemUI(app, "connections", func(file *File, request *Request) template.HTML {
 		table := app.Table()
@@ -153,7 +195,6 @@ func (app *App) initFilesResource() {
 		var totalConnections = 0
 
 		for _, resource := range app.resources {
-
 			for _, field := range resource.fields {
 				if field.fieldType.viewTemplate == "view_image" {
 					query := fmt.Sprintf("SELECT id FROM %s WHERE %s LIKE ?", resource.id, field.id)
@@ -200,7 +241,48 @@ func (app *App) initFilesResource() {
 		}
 
 		return table.ExecuteHTML()
-	}).Name(unlocalized("Connections"))
+	}).Name(unlocalized("Connections")).Icon("glyphicons-basic-63-paperclip.svg")
+
+	ItemStatistic(app, unlocalized("UUID"), app.FilesResource.canView, func(file *File) string {
+		return file.UID
+	})
+
+	ItemStatistic(app, unlocalized("Connections"), app.FilesResource.canView, func(file *File) string {
+		var totalConnections int64
+		for _, resource := range app.resources {
+			for _, field := range resource.fields {
+				if field.fieldType.viewTemplate == "view_image" {
+					query := fmt.Sprintf("SELECT id FROM %s WHERE %s LIKE ?", resource.id, field.id)
+
+					rows, err := app.db.Query(query, "%"+file.UID+"%")
+					if err != nil {
+						log.Fatal(err)
+					}
+					defer rows.Close()
+
+					for rows.Next() {
+						var id int
+						if err := rows.Scan(&id); err != nil {
+							log.Fatal(err)
+						}
+
+						totalConnections++
+					}
+
+					if err := rows.Err(); err != nil {
+						log.Fatal(err)
+					}
+				}
+			}
+		}
+
+		if totalConnections == 1 {
+			return fmt.Sprintf("%d connection", totalConnections)
+		} else {
+			return fmt.Sprintf("%d connections", totalConnections)
+		}
+
+	})
 
 	app.ListenActivity(func(activity Activity) {
 		if activity.ActivityType == "delete" && activity.ResourceID == resource.id {
@@ -233,23 +315,9 @@ func (app *App) initFilesResource() {
 			}
 		},
 	).setPriority(1000000).Permission(resource.canUpdate).Name(unlocalized("Nahrát soubor"))
-
-	ActionResourcePlain[File](app, "getcdnurl", func(request *Request) {
-		uuid := request.Param("uuid")
-		size := request.Param("size")
-
-		files := app.GetFiles(request.r.Context(), uuid)
-		if len(files) == 0 {
-			panic("can't find file")
-		}
-		file := files[0]
-
-		redirectURL := filesCDN.GetImageURL(uuid, file.Name, size)
-		request.Redirect(redirectURL)
-	}).Permission(sysadminPermission).Method("POST")
 }
 
-type fileResponse struct {
+type fileUploadResponse struct {
 	FileURL      string
 	UUID         string
 	Name         string
@@ -257,10 +325,10 @@ type fileResponse struct {
 	ThumbnailURL string
 }
 
-func getFileResponse(files []*File) []*fileResponse {
-	responseData := []*fileResponse{}
+func getFileUploadResponses(files []*File) []*fileUploadResponse {
+	responseData := []*fileUploadResponse{}
 	for _, v := range files {
-		ir := &fileResponse{
+		ir := &fileUploadResponse{
 			UUID:        v.UID,
 			Name:        v.Name,
 			Description: v.Description,
@@ -297,10 +365,6 @@ func (f *File) GetExactSize(width, height int) string {
 
 func (f *File) GetOriginal() string {
 	return filesCDN.GetFileURL(f.UID, f.Name)
-}
-
-func (f *File) getMetadataPath() string {
-	return filesCDN.MetadataPath(f.UID)
 }
 
 func (f *File) IsImage() bool {

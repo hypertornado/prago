@@ -67,17 +67,23 @@ class ImageView {
     }
     addFiles(filesData) {
         this.el.innerHTML = "";
+        if (!filesData.Items) {
+            return;
+        }
         for (var i = 0; i < filesData.Items.length; i++) {
             let file = filesData.Items[i];
             this.addFile(file);
         }
     }
     addFile(file) {
-        var container = document.createElement("button");
+        let container = document.createElement("button");
         container.classList.add("imageview_image");
         container.setAttribute("href", file.ViewURL);
-        container.setAttribute("style", "background-image: url('" + file.ThumbURL + "');");
         container.setAttribute("title", file.ImageDescription);
+        let imgEl = document.createElement("img");
+        imgEl.classList.add("imageview_image_img");
+        imgEl.setAttribute("src", file.ThumbURL);
+        container.appendChild(imgEl);
         container.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -130,8 +136,10 @@ class ImagePicker {
                 this.hideProgress();
                 if (request.status == 200) {
                     var data = JSON.parse(request.response);
+                    console.log(data);
                     for (var i = 0; i < data.length; i++) {
-                        this.addUUID(data[i].UUID);
+                        console.log(data[i]);
+                        this.addUUID(data[i]);
                     }
                 }
                 else {
@@ -232,12 +240,20 @@ class ImagePicker {
                     Icon: "glyphicons-basic-17-bin.svg",
                     Style: "destroy",
                 });
+                var rows = [];
+                for (var j = 0; j < item.Metadata.length; j++) {
+                    rows.push({
+                        Name: item.Metadata[j][0],
+                        Value: item.Metadata[j][1],
+                    });
+                }
                 cmenu({
                     Event: e,
                     AlignByElement: true,
                     Name: item.ImageName,
                     Description: item.ImageDescription,
                     Commands: commands,
+                    Rows: rows,
                 });
             });
             this.preview2.appendChild(itemEl);
@@ -1903,10 +1919,11 @@ class RelationPicker {
         description.classList.add("admin_preview_description");
         description.setAttribute("title", data.Description);
         description.textContent = data.Description;
-        var image = document.createElement("div");
+        var image = document.createElement("img");
         image.classList.add("admin_preview_image");
         if (data.Image) {
-            image.setAttribute("style", "background-image: url('" + data.Image + "');");
+            image.setAttribute("src", data.Image);
+            image.setAttribute("loading", "lazy");
         }
         ret.appendChild(image);
         right.appendChild(name);
@@ -1920,6 +1937,7 @@ class Form {
         this.dirty = false;
         this.dirty = false;
         this.formEl = form;
+        this.fixAufofocus();
         var elements = form.querySelectorAll(".admin_markdown");
         elements.forEach((el) => {
             new MarkdownEditor(el);
@@ -1965,6 +1983,17 @@ class Form {
         }
         else {
             this.dirty = true;
+        }
+    }
+    fixAufofocus() {
+        let input = this.formEl.querySelector('[autofocus]');
+        if (input) {
+            let value = input.value;
+            let typ = input.getAttribute("type");
+            if (input.nodeName == "TEXTAREA" || typ == "text" || typ == "password" || typ == "tel" || typ == "search" || typ == "url") {
+                input.focus();
+                input.setSelectionRange(value.length, value.length);
+            }
         }
     }
 }
