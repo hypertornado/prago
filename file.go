@@ -109,6 +109,8 @@ func (app *App) initFilesResource() {
 		request.WriteJSON(200, uuids)
 	})
 
+	app.API("imagepicker").Permission(loggedPermission).HandlerJSON(imagePickerAPIHandler)
+
 	resource.Field("uid").Name(messages.GetNameFunction("admin_file"))
 	resource.Field("width").Name(messages.GetNameFunction("width"))
 	resource.Field("height").Name(messages.GetNameFunction("height"))

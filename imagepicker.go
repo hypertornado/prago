@@ -66,6 +66,11 @@ func (app *App) getImagePickerResponse(ids string) (ret *ImagePickerResponse) {
 }
 
 func imagePickerAPIHandler(request *Request) any {
+
+	if !request.Authorize(request.app.FilesResource.canView) {
+		panic("can't load image picker data")
+	}
+
 	return request.app.getImagePickerResponse(request.Param("ids"))
 }
 
