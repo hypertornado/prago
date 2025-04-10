@@ -178,12 +178,15 @@ func (action *Action) addConstraint(constraint routerConstraint) {
 	action.constraints = append(action.constraints, constraint)
 }
 
-func (resource *Resource) getItemButtonData(userData UserData, item any) (ret []*buttonData) {
+func (resource *Resource) getItemButtonData(userData UserData, item any, ignoreView bool) (ret []*buttonData) {
 	for _, v := range resource.itemActions {
 		if v.method != "GET" {
 			continue
 		}
 		if !userData.Authorize(v.permission) {
+			continue
+		}
+		if ignoreView && v.url == "" {
 			continue
 		}
 
@@ -212,7 +215,7 @@ func (resource *Resource) getItemButtonData(userData UserData, item any) (ret []
 
 func (resource *Resource) getListItemActions(userData UserData, item any) listItemActions {
 	ret := listItemActions{
-		MenuButtons: resource.getItemButtonData(userData, item),
+		MenuButtons: resource.getItemButtonData(userData, item, false),
 	}
 
 	if userData.Authorize(resource.canUpdate) && resource.orderField != nil {

@@ -2,7 +2,7 @@
   {{range $item := .Rows}}
     <div data-id="{{$item.ID}}" data-url="{{$item.URL}}" class="list_row" data-actions="{{$item.Actions.JSON}}" data-prename="{{$item.PreName}}" data-name="{{$item.Name}}" data-description="{{$item.Description}}" data-image-url="{{$item.ImageURL}}">
       {{if $item.AllowsMultipleActions}}
-        <div class="list_row_multiple preventredirect" data-id="{{$item.ID}}">
+        <div class="list_row_multiple" data-id="{{$item.ID}}">
           <div class="list_cell_multiple_pseudocheckbox"></div>
         </div>
       {{end}}

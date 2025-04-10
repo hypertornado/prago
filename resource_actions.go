@@ -130,9 +130,10 @@ func (resource *Resource) initDefaultResourceActions() {
 	bindResourceExportCSV(resource)
 
 	if resource.activityLog {
-		resource.formAction("history", func(f *Form, r *Request) {
-			f.AddTextInput("page", "Stránka").Value = "1"
-			f.AutosubmitFirstTime = true
+		resource.formAction("history", func(form *Form, request *Request) {
+			form.AddSelect("page", "", resource.app.getHistorySelect(request, resource, 0))
+			form.AutosubmitFirstTime = true
+			form.AutosubmitOnDataChange = true
 
 		}, func(vc FormValidation, request *Request) {
 			table := resource.app.getHistoryTable(request, resource, 0, request.Param("page"))
@@ -147,10 +148,11 @@ func (resource *Resource) initDefaultResourceActions() {
 		resource.
 			formItemAction(
 				"history",
-				func(item any, f *Form, r *Request) {
-					f.AddTextInput("page", "Stránka").Value = "1"
-					f.AddSubmit("Zobrazit")
-					f.AutosubmitFirstTime = true
+				func(item any, form *Form, request *Request) {
+					id := resource.previewer(request, item).ID()
+					form.AddSelect("page", "", resource.app.getHistorySelect(request, resource, id))
+					form.AutosubmitFirstTime = true
+					form.AutosubmitOnDataChange = true
 				},
 				func(item any, vc FormValidation, request *Request) {
 					id := resource.previewer(request, item).ID()
@@ -161,7 +163,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			Icon(iconActivity).
 			setPriority(defaultHighPriority).
 			Name(messages.GetNameFunction("admin_history")).
-			Permission(resource.canView)
+			Permission(resource.canUpdate)
 	}
 }
 

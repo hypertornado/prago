@@ -13,7 +13,6 @@
   <div class="list_hidden">
     {{template "list_settings" .}}
     {{template "list_stats" .}}
-    {{template "list_export" .}}
   </div>
   <progress class="progress list_progress"></progress>
 
@@ -31,7 +30,9 @@
 <div class="list_header_container">
   <div class="list_header">
     {{if .MultipleActions}}
-      <div class="list_header_first"></div>
+      <div class="list_header_multiple">
+        <div class="list_cell_multiple_pseudocheckbox"></div>
+      </div>
     {{end}}
     {{range $i, $item := .Header}}
       <div class="list_header_item" data-name="{{$item.ColumnName}}" data-natural-width="{{$item.NaturalCellWidth}}">
@@ -67,18 +68,6 @@
         <option value="{{$item.Value}}"{{if $item.Selected}} selected{{end}}>{{$item.Name}}</option>
       {{end}}
     </select>
-  </div>
-{{end}}
-
-{{define "list_export"}}
-  <div class="list_export">
-    {{if .CanExport}}
-      <a href="#" class="btn admin_exportbutton" download="export.xlsx">Stáhnout tabulku ve formátu .xlsx</a>
-      <br><br>
-      <a href="api/export.csv" class="btn" download="export.csv">Stáhnout celou tabulku ve formátu .csv</a>
-    {{else}}
-      Nemáte oprávnění exportovat tuto tabulku.
-    {{end}}
   </div>
 {{end}}
 
@@ -182,7 +171,7 @@
   <div class="list_multiple_actions">
     <div class="list_multiple_actions_content">
       <span class="list_multiple_actions_description"></span>
-      <div class="list_multiple_actions_buttons">
+      <div class="btngroup list_multiple_actions_buttons">
         {{range $item :=  .MultipleActions}}
           <button class="btn list_multiple_action" data-id="{{$item.ID}}" data-name="{{$item.Name}}" data-action-type="{{$item.ActionType}}">
             {{if $item.Icon}}<img class="btn_icon" src="/admin/api/icons?file={{$item.Icon}}&color=444444">{{end}}

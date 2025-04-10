@@ -1,0 +1,45 @@
+@use "../variables.scss" as *;
+
+.admin_preview {
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-block;
+    margin: 0px -10px;
+    font-size: 1rem;
+    line-height: 1.4em;
+  
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .admin_preview_image {
+    margin-top: 5px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 40px;
+    aspect-ratio: 1;
+    border-radius: 5px;
+    object-fit: cover;
+    background-color: $backgroundGrayColor;
+    align-self: flex-start;
+    overflow: hidden;
+  }
+  
+  .admin_preview_right {
+    flex-grow: 2;
+    flex-shrink: 2;
+  }
+  
+  .admin_preview_description {
+    font-size: 0.9rem;
+    line-height: 1.3em;
+    color: $gray;
+    overflow-wrap: anywhere;
+  
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }

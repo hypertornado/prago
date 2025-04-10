@@ -17,7 +17,7 @@ class List {
   listFooter: HTMLDivElement;
 
   tableContent: HTMLElement;
-  exportButton: HTMLAnchorElement;
+  //exportButton: HTMLAnchorElement;
   changed: boolean;
   changedTimestamp: number;
 
@@ -34,9 +34,6 @@ class List {
   itemsPerPage: number;
   paginationSelect: HTMLSelectElement;
 
-  //statsCheckbox: HTMLInputElement;
-  //statsCheckboxSelectCount: HTMLSelectElement;
-  //statsContainer: HTMLDivElement;
 
   multiple: ListMultiple;
 
@@ -54,7 +51,6 @@ class List {
     this.listFooter = this.list.querySelector(".list_footer");
 
     this.settings = new ListSettings(this);
-    this.exportButton = document.querySelector(".admin_exportbutton");
 
     let urlParams = new URLSearchParams(window.location.search);
 
@@ -203,15 +199,6 @@ class List {
       params["_pagesize"] = selectedPages;
     }
 
-    params["_format"] = "xlsx";
-    if (this.exportButton) {
-      this.exportButton.setAttribute(
-        "href",
-        "/admin/" + this.typeName + "/api/list" + encodeParams(params)
-      );
-    }
-
-    params["_format"] = "json";
     encoded = encodeParams(params);
 
     request.open(
@@ -226,7 +213,6 @@ class List {
       if (request.status == 200) {
         var response = JSON.parse(request.response);
         this.tableContent.innerHTML = response.Content;
-        //this.statsContainer.innerHTML = response.StatsStr;
         this.listFooter.innerHTML = response.FooterStr;
         bindReOrder();
         this.bindSettingsButton();
@@ -374,10 +360,6 @@ class List {
       row.addEventListener("contextmenu", this.contextClick.bind(this));
 
       row.addEventListener("click", (e) => {
-        var target = <HTMLElement>e.target;
-        if (target.classList.contains("preventredirect")) {
-          return;
-        }
         var el = <HTMLDivElement>e.currentTarget;
         var url = el.getAttribute("data-url");
 

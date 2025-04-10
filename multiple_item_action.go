@@ -47,6 +47,7 @@ func AddMultipleItemsAction[T any](
 
 type MultipleItemActionResponse struct {
 	FlashMessage string
+	ErrorStr     string
 	RedirectURL  string
 }
 
@@ -58,6 +59,14 @@ func (resource *Resource) addDefaultMultipleActions() {
 		Icon:       iconEdit,
 		Name:       unlocalized("Upravit"),
 		Permission: resource.canUpdate,
+	})
+
+	resource.multipleActions = append(resource.multipleActions, &MultipleItemAction{
+		ID:         "export",
+		ActionType: "mutiple_export",
+		Icon:       iconDownload,
+		Name:       unlocalized("Export .xlsx"),
+		Permission: resource.canExport,
 	})
 
 	resource.multipleActions = append(resource.multipleActions, &MultipleItemAction{
@@ -75,6 +84,12 @@ func (resource *Resource) addDefaultMultipleActions() {
 					if field.IsValid() && field.CanSet() && field.Type() == timeVal.Type() {
 						field.Set(timeVal)
 					}
+				}
+
+				validation := resource.validateUpdate(item, request)
+				if !validation.Valid() {
+					response.ErrorStr = fmt.Sprintf("Nelze naklonovat položku: %s", validation.TextErrorReport(0, request.Locale()).Text)
+					return
 				}
 
 				err := resource.createWithLog(item, request)
@@ -102,7 +117,8 @@ func (resource *Resource) addDefaultMultipleActions() {
 			for _, item := range items {
 				valValidation := resource.validateDelete(item, request)
 				if !valValidation.Valid() {
-					panic("cant validate delete")
+					response.ErrorStr = fmt.Sprintf("Nelze smazat položku: %s", valValidation.TextErrorReport(0, request.Locale()).Text)
+					return
 				}
 
 				err := resource.deleteWithLog(item, request)

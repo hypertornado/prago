@@ -49,7 +49,16 @@ input.list_filter_layout_date_to {
   min-width: 0px;
 }
 
+select.list_filter_input {
+  -webkit-appearance: none; /* Safari/Chrome */
+  -moz-appearance: none;
+  appearance: none;
+  padding-right: 1.5em;
+  background: $backgroundGrayColor !important;
+  padding-right: 6px;
+}
+
 .list_filter_input:focus {
   box-shadow: none;
-  border-color: $grayBorderColor;
+  //border-color: $grayBorderColor;
 }

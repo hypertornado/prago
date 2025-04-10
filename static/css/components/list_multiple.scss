@@ -1,0 +1,61 @@
+@use "../variables.scss" as *;
+
+.list_header_multiple {
+    width: 50px;
+    flex-shrink: 0;
+    background-color: #fff;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 5px;
+    justify-content: center;
+    border-bottom: 1px solid $grayBorderColor;
+  }
+
+.list_row_multiple {
+    vertical-align: top;
+  
+    user-select: none;
+    -ms-user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    vertical-align: middle;
+    flex-shrink: 0;
+
+    cursor: default;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+.list_cell_multiple_pseudocheckbox {
+    border: 1px solid $grayBorderColor;
+    border-radius: 3px;
+    width: 15px;
+    aspect-ratio: 1;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 10px;
+    color: transparent !important;
+    background-color: white;
+    overflow: hidden;
+  }
+  
+  .list_row_multiple:hover .list_cell_multiple_pseudocheckbox {
+    background-color: $baseColorBackground;
+  }
+  
+  .list_row_multiple-checked .list_cell_multiple_pseudocheckbox {
+    background-color: $baseColor !important;
+    border-color: $baseColor !important;
+  }
+  
+  .list_cell_multiple_pseudocheckbox::after {
+    content: "✓";
+  }
+  
+  .list_row_multiple-checked .list_cell_multiple_pseudocheckbox::after {
+    content: "✓";
+    color: white;
+  }

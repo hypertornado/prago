@@ -365,13 +365,18 @@ class RelationPicker {
     description.setAttribute("title", data.Description);
     description.textContent = data.Description;
 
-    var image = document.createElement("img");
-    image.classList.add("admin_preview_image");
+
     if (data.Image) {
+      let image = document.createElement("img");
+      image.classList.add("admin_preview_image");
       image.setAttribute("src", data.Image);
       image.setAttribute("loading", "lazy");
+      ret.appendChild(image);
+    } else {
+      let imageDiv = document.createElement("div");
+      imageDiv.classList.add("admin_preview_image");
+      ret.appendChild(imageDiv);
     }
-    ret.appendChild(image);
 
     right.appendChild(name);
     right.appendChild(description);

@@ -43,6 +43,30 @@ func (app *App) ListenActivity(handler func(Activity)) {
 	app.activityListeners = append(app.activityListeners, handler)
 }
 
+var activityItemsPerPage int64 = 100
+
+func (app *App) getHistorySelect(request *Request, resource *Resource, itemID int64) (ret [][2]string) {
+	q := Query[activityLog](app)
+	if resource != nil {
+		q.Is("ResourceName", resource.getID())
+	}
+	if itemID > 0 {
+		q.Is("ItemID", itemID)
+	}
+
+	total, err := q.Count()
+	must(err)
+
+	pages := total / activityItemsPerPage
+	for i := 0; i <= int(pages); i++ {
+		ret = append(ret, [2]string{
+			fmt.Sprintf("%d", i+1),
+			fmt.Sprintf("Stránka %d", i+1),
+		})
+	}
+	return ret
+}
+
 func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int64, pageStr string) *Table {
 
 	ret := app.Table()
@@ -61,15 +85,13 @@ func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int
 		q.Is("ItemID", itemID)
 	}
 
-	var itemsPerPage int64 = 100
-
 	total, err := q.Count()
 	must(err)
 
-	offset := itemsPerPage * (int64(page) - 1)
+	offset := activityItemsPerPage * (int64(page) - 1)
 
 	q.Offset(offset)
-	q.Limit(itemsPerPage)
+	q.Limit(activityItemsPerPage)
 	q.OrderDesc("ID")
 
 	items := q.List()

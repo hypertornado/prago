@@ -2,15 +2,17 @@
 
 .notification_center {
   position: absolute;
-  top: 52px;
-  right: 10px;
-  z-index: 100;
+  top: 50px;
+  right: 5px;
+  //border: 1px solid red;
+  z-index: 1000000000000000;
 }
 
 @keyframes openNotification {
   from {
-    opacity: 0;
-    transform: scale(1) translateX(100px);
+    opacity: 1;
+    filter: blur(2px);
+    transform: scale(.9) translateX(0px);
   }
 
   to {
@@ -21,13 +23,13 @@
 
 .notification {
   @include shadowMedium;
-  border: 1px solid $grayBorderColor;
   background-color: white;
   border-radius: 10px;
   margin-bottom: 10px;
   display: flex;
   position: relative;
   width: 250px;
+  background-color: $baseColorBackgroundLighter;
 
   animation: openNotification 500ms ease forwards;
 }
@@ -137,9 +139,10 @@
 .notification_name {
   font-weight: 500;
 
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
+  //text-overflow: ellipsis;
+  //overflow: hidden;
+  word-wrap: break-word;
+  //white-space: nowrap;
 }
 
 .notification_description {

@@ -34,7 +34,6 @@ class CMenu {
   dismissHandler: Function;
 
   constructor() {
-    //return;
     for (let eventType of ["click", "visibilitychange", "blur"]) {
       document.addEventListener(eventType, (e) => {
         this.dismiss();
@@ -47,6 +46,17 @@ class CMenu {
       }
     });
 
+  }
+
+  static rowsFromArray(inArr: []): CMenuTableRow[] {
+    var rows: CMenuTableRow[] = [];
+    for (var j = 0; j < inArr.length; j++) {
+      rows.push({
+        Name: inArr[j][0],
+        Value: inArr[j][1],
+      })
+    }
+    return rows;
   }
 
   dismiss() {

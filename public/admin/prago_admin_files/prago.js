@@ -92,12 +92,21 @@ class ImageView {
                 Name: "Zobrazit",
                 URL: file.ViewURL,
             });
+            commands.push({
+                Name: "Kopírovat UUID",
+                Handler: () => {
+                    navigator.clipboard.writeText(file.UUID);
+                    Prago.notificationCenter.flashNotification("Zkopírováno", null, true, false);
+                },
+                Icon: "glyphicons-basic-611-copy-duplicate.svg",
+            });
             cmenu({
                 Event: e,
                 AlignByElement: true,
                 Name: file.ImageName,
                 Description: file.ImageDescription,
                 Commands: commands,
+                Rows: CMenu.rowsFromArray(file.Metadata),
             });
         });
         this.el.appendChild(container);
@@ -232,6 +241,14 @@ class ImagePicker {
                     },
                 });
                 commands.push({
+                    Name: "Kopírovat UUID",
+                    Handler: () => {
+                        navigator.clipboard.writeText(item.UUID);
+                        Prago.notificationCenter.flashNotification("Zkopírováno", null, true, false);
+                    },
+                    Icon: "glyphicons-basic-611-copy-duplicate.svg",
+                });
+                commands.push({
                     Name: "Smazat",
                     Handler: () => {
                         itemEl.remove();
@@ -253,7 +270,7 @@ class ImagePicker {
                     Name: item.ImageName,
                     Description: item.ImageDescription,
                     Commands: commands,
-                    Rows: rows,
+                    Rows: CMenu.rowsFromArray(item.Metadata),
                 });
             });
             this.preview2.appendChild(itemEl);
@@ -293,6 +310,7 @@ class ListFilterRelations {
         this.previewClose = el.querySelector(".filter_relations_preview_close");
         this.previewClose.addEventListener("click", this.closePreview.bind(this));
         this.preview.classList.add("hidden");
+        this.preview.addEventListener("click", this.previewClicked.bind(this));
         let hiddenEl = el.querySelector("input");
         this.relatedResourceName = el
             .querySelector(".list_filter_item-relations")
@@ -329,6 +347,7 @@ class ListFilterRelations {
         request.send();
     }
     renderPreview(item) {
+        this.currentDataItem = item;
         this.valueInput.value = item.ID;
         this.preview.classList.remove("hidden");
         this.search.classList.add("hidden");
@@ -343,11 +362,30 @@ class ListFilterRelations {
         this.previewName.textContent = item.Name;
         this.dispatchChange();
     }
+    previewClicked(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        cmenu({
+            Event: e,
+            AlignByElement: true,
+            ImageURL: this.currentDataItem.Image,
+            Name: this.currentDataItem.Name,
+            Description: this.currentDataItem.Description,
+            Commands: [
+                {
+                    Name: "Detail",
+                    URL: this.currentDataItem.URL,
+                }
+            ]
+        });
+    }
     dispatchChange() {
         var event = new Event("change");
         this.valueInput.dispatchEvent(event);
     }
-    closePreview() {
+    closePreview(e) {
+        e.preventDefault();
+        e.stopPropagation();
         this.valueInput.value = "";
         this.preview.classList.add("hidden");
         this.search.classList.remove("hidden");
@@ -460,7 +498,6 @@ class List {
         this.listHeader = this.list.querySelector(".list_header");
         this.listFooter = this.list.querySelector(".list_footer");
         this.settings = new ListSettings(this);
-        this.exportButton = document.querySelector(".admin_exportbutton");
         let urlParams = new URLSearchParams(window.location.search);
         this.page = parseInt(urlParams.get("_page"));
         if (!this.page) {
@@ -570,11 +607,6 @@ class List {
         if (selectedPages != this.itemsPerPage) {
             params["_pagesize"] = selectedPages;
         }
-        params["_format"] = "xlsx";
-        if (this.exportButton) {
-            this.exportButton.setAttribute("href", "/admin/" + this.typeName + "/api/list" + encodeParams(params));
-        }
-        params["_format"] = "json";
         encoded = encodeParams(params);
         request.open("GET", "/admin/" + this.typeName + "/api/list" + encoded, true);
         request.addEventListener("load", () => {
@@ -713,10 +745,6 @@ class List {
             let row = rows[i];
             row.addEventListener("contextmenu", this.contextClick.bind(this));
             row.addEventListener("click", (e) => {
-                var target = e.target;
-                if (target.classList.contains("preventredirect")) {
-                    return;
-                }
                 var el = e.currentTarget;
                 var url = el.getAttribute("data-url");
                 if (e.altKey) {
@@ -1033,9 +1061,6 @@ class ListSettings {
         this.statsEl = document.querySelector(".list_stats");
         this.statsPopup = new ContentPopup("Statistiky", this.statsEl);
         this.statsPopup.setIcon("glyphicons-basic-43-stats-circle.svg");
-        this.exportEl = document.querySelector(".list_export");
-        this.exportPopup = new ContentPopup("Export", this.exportEl);
-        this.exportPopup.setIcon("glyphicons-basic-302-square-download.svg");
         this.statsCheckboxSelectCount = document.querySelector(".list_stats_limit");
         this.statsCheckboxSelectCount.addEventListener("change", () => {
             this.loadStats();
@@ -1064,10 +1089,10 @@ class ListSettings {
                         },
                     },
                     {
-                        Name: "Export",
+                        Name: "Export CSV",
                         Icon: "glyphicons-basic-302-square-download.svg",
                         Handler: () => {
-                            this.exportPopup.show();
+                            window.open("/admin/" + this.list.typeName + "/api/export.csv");
                         }
                     },
                 ],
@@ -1164,6 +1189,15 @@ class ListMultiple {
         return false;
     }
     bindMultipleActions() {
+        this.listHeaderAllSelect = this.list.list.querySelector(".list_header_multiple");
+        this.listHeaderAllSelect.addEventListener("click", () => {
+            if (this.isAllChecked()) {
+                this.multipleUncheckAll();
+            }
+            else {
+                this.multipleCheckAll();
+            }
+        });
         var actions = this.list.list.querySelectorAll(".list_multiple_action");
         for (var i = 0; i < actions.length; i++) {
             actions[i].addEventListener("click", this.multipleActionSelected.bind(this));
@@ -1185,6 +1219,10 @@ class ListMultiple {
             case "mutiple_edit":
                 new ListMultipleEdit(this, ids);
                 break;
+            case "mutiple_export":
+                let urlStr = "/admin/" + this.list.typeName + "/api/export?ids=" + ids.join(",");
+                window.open(urlStr);
+                break;
             default:
                 let confirm = new Confirm(`${actionName}: Opravdu chcete provést tuto akci na ${ids.length} položek?`, actionName, () => {
                     var loader = new LoadingPopup();
@@ -1201,6 +1239,9 @@ class ListMultiple {
                         loader.done();
                         if (e.status == 200) {
                             e.json().then((data) => {
+                                if (data.ErrorStr) {
+                                    new Alert(data.ErrorStr);
+                                }
                                 if (data.FlashMessage) {
                                     Prago.notificationCenter.flashNotification(actionName, data.FlashMessage, true, false);
                                 }
@@ -1288,6 +1329,12 @@ class ListMultiple {
         else {
             multipleActionsPanel.classList.remove("list_multiple_actions-visible");
         }
+        if (this.isAllChecked()) {
+            this.listHeaderAllSelect.classList.add("list_row_multiple-checked");
+        }
+        else {
+            this.listHeaderAllSelect.classList.remove("list_row_multiple-checked");
+        }
         this.list.list.querySelector(".list_multiple_actions_description").textContent = `Vybráno ${checkedCount} položek`;
     }
     multipleUncheckAll() {
@@ -1297,6 +1344,23 @@ class ListMultiple {
             checkbox.classList.remove("list_row_multiple-checked");
         }
         this.multipleCheckboxChanged();
+    }
+    multipleCheckAll() {
+        this.lastCheckboxIndexClicked = -1;
+        for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
+            var checkbox = this.pseudoCheckboxesAr[i];
+            checkbox.classList.add("list_row_multiple-checked");
+        }
+        this.multipleCheckboxChanged();
+    }
+    isAllChecked() {
+        for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
+            var checkbox = this.pseudoCheckboxesAr[i];
+            if (!checkbox.classList.contains("list_row_multiple-checked")) {
+                return false;
+            }
+        }
+        return true;
     }
     indexOfClickedCheckbox(el) {
         var ret = -1;
@@ -1919,13 +1983,18 @@ class RelationPicker {
         description.classList.add("admin_preview_description");
         description.setAttribute("title", data.Description);
         description.textContent = data.Description;
-        var image = document.createElement("img");
-        image.classList.add("admin_preview_image");
         if (data.Image) {
+            let image = document.createElement("img");
+            image.classList.add("admin_preview_image");
             image.setAttribute("src", data.Image);
             image.setAttribute("loading", "lazy");
+            ret.appendChild(image);
         }
-        ret.appendChild(image);
+        else {
+            let imageDiv = document.createElement("div");
+            imageDiv.classList.add("admin_preview_image");
+            ret.appendChild(imageDiv);
+        }
         right.appendChild(name);
         right.appendChild(description);
         ret.appendChild(right);
@@ -3201,6 +3270,16 @@ class CMenu {
                 this.dismiss();
             }
         });
+    }
+    static rowsFromArray(inArr) {
+        var rows = [];
+        for (var j = 0; j < inArr.length; j++) {
+            rows.push({
+                Name: inArr[j][0],
+                Value: inArr[j][1],
+            });
+        }
+        return rows;
     }
     dismiss() {
         if (this.lastEl) {

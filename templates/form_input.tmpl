@@ -1,5 +1,5 @@
 {{define "form_input"}}
-  <input name="{{.ID}}" value="{{.Value}}" {{if .Autocomplete}}autocomplete="{{.Autocomplete}}"{{end}} {{if .InputMode}}inputmode="{{.InputMode}}"{{end}} id="{{.UUID}}" {{if .Autocomplete}}autocomplete="{{.Autocomplete}}"{{end}} {{if .InputMode}}inputmode="{{.InputMode}}"{{end}} class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="text" name="{{.ID}}" value="{{.Value}}" {{if .Autocomplete}}autocomplete="{{.Autocomplete}}"{{end}} {{if .InputMode}}inputmode="{{.InputMode}}"{{end}} id="{{.UUID}}" {{if .Autocomplete}}autocomplete="{{.Autocomplete}}"{{end}} {{if .InputMode}}inputmode="{{.InputMode}}"{{end}} class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "form_input_int"}}

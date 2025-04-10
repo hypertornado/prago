@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/tealeg/xlsx"
 )
@@ -14,57 +15,58 @@ import (
 func (resource *Resource) initDefaultResourceAPIs() {
 	resource.api("list").Handler(
 		func(request *Request) {
-			if request.Request().URL.Query().Get("_format") == "json" {
-				request.WriteJSON(200,
-					resource.getListContentJSON(
-						request.r.Context(),
-						request,
-						request.Request().URL.Query(),
-					),
-				)
-				return
-			}
-			if request.Request().URL.Query().Get("_format") == "xlsx" {
-				if !request.Authorize(resource.canExport) {
-					renderErrorPage(request, 403)
-					return
-				}
-
-				q := request.Request().URL.Query()
-				q.Set("_page", "1")
-				q.Set("_pagesize", fmt.Sprintf("%d", 9223372036854775807))
-
-				listData, err := resource.getListContent(request.r.Context(), request, q)
-				must(err)
-
-				file := xlsx.NewFile()
-				sheet, err := file.AddSheet("List 1")
-				must(err)
-
-				row := sheet.AddRow()
-				columnsStr := request.Request().URL.Query().Get("_columns")
-				if columnsStr == "" {
-					columnsStr = resource.defaultVisibleFieldsStr(request)
-				}
-				columnsAr := strings.Split(columnsStr, ",")
-				for _, v := range columnsAr {
-					cell := row.AddCell()
-					cell.SetValue(v)
-				}
-
-				for _, v1 := range listData.Rows {
-					row := sheet.AddRow()
-					for _, v2 := range v1.Items {
-						cell := row.AddCell()
-						cell.SetValue(v2.Name)
-					}
-				}
-				file.Write(request.Response())
-				return
-			}
-			panic("unkown format")
+			request.WriteJSON(200,
+				resource.getListContentJSON(
+					request.r.Context(),
+					request,
+					request.Request().URL.Query(),
+				),
+			)
 		},
 	)
+
+	resource.api("export").Handler(func(request *Request) {
+		if !request.Authorize(resource.canExport) {
+			renderErrorPage(request, 403)
+			return
+		}
+
+		cdValue := fmt.Sprintf("attachment; filename=\"export_%s_%s.xlsx\"", resource.id, time.Now().Format("2006-01-02 15:04:05"))
+		request.Response().Header().Set("Content-Disposition", cdValue)
+
+		file := xlsx.NewFile()
+		sheet, err := file.AddSheet(resource.pluralName(request.Locale()))
+		must(err)
+
+		row := sheet.AddRow()
+
+		for _, field := range resource.fields {
+			if request.Authorize(field.canView) {
+				row.AddCell().Value = field.name(request.Locale())
+			}
+		}
+
+		ids := strings.Split(request.Param("ids"), ",")
+		for _, v := range ids {
+
+			item := resource.query(request.r.Context()).ID(v)
+
+			itemVal := reflect.ValueOf(item).Elem()
+
+			row = sheet.AddRow()
+
+			for _, field := range resource.fields {
+				if !request.Authorize(field.canView) {
+					continue
+				}
+				fieldValue := itemVal.FieldByName(field.fieldClassName)
+				row.AddCell().SetValue(fieldValue.Interface())
+			}
+		}
+
+		file.Write(request.Response())
+
+	})
 
 	resource.api("list-stats").Handler(func(request *Request) {
 		var data = resource.getListStats(request.r.Context(), request, request.Params())

@@ -54,7 +54,7 @@ func (resource *Resource) getBasicView(id int64, item any, request *Request) *vi
 	ret.Header.Name = resource.previewer(request, item).Name()
 	ret.Header.Icon = iconView
 	ret.Header.Image = resource.previewer(request, item).ImageURL()
-	ret.Header.Buttons = resource.getItemButtonData(request, item)
+	ret.Header.Buttons = resource.getItemButtonData(request, item, true)
 
 	resourceIcon := resource.icon
 	if resourceIcon == "" {

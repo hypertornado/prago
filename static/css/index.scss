@@ -8,6 +8,7 @@
 @use "components/list.scss";
 @use "components/list_settings.scss";
 @use "components/list_filter.scss";
+@use "components/list_multiple.scss";
 @use "components/search.scss";
 @use "components/filter_relations.scss";
 @use "components/board.scss";
@@ -28,4 +29,5 @@
 @use "components/timeline.scss";
 @use "components/imagepicker.scss";
 @use "components/imageview.scss";
+@use "components/preview.scss";
 

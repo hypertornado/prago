@@ -11,6 +11,8 @@ class ListFilterRelations {
   dirty: boolean;
   lastChanged: number;
 
+  currentDataItem: any;
+
   constructor(el: HTMLDivElement, value: any, list: List) {
     this.valueInput = el.querySelector(".filter_relations_hidden");
     this.input = el.querySelector(".filter_relations_search_input");
@@ -24,6 +26,8 @@ class ListFilterRelations {
     this.previewClose.addEventListener("click", this.closePreview.bind(this));
 
     this.preview.classList.add("hidden");
+
+    this.preview.addEventListener("click", this.previewClicked.bind(this));
 
     let hiddenEl: HTMLInputElement = el.querySelector("input");
 
@@ -69,6 +73,7 @@ class ListFilterRelations {
   }
 
   renderPreview(item: any) {
+    this.currentDataItem = item;
     this.valueInput.value = item.ID;
     this.preview.classList.remove("hidden");
     this.search.classList.add("hidden");
@@ -86,12 +91,37 @@ class ListFilterRelations {
     this.dispatchChange();
   }
 
+  previewClicked(e: PointerEvent) {
+    //console.log("XXX");
+    //console.log(this.currentDataItem);
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    cmenu({
+      Event: e,
+      AlignByElement: true,
+      ImageURL: this.currentDataItem.Image,
+      Name: this.currentDataItem.Name,
+      Description: this.currentDataItem.Description,
+      Commands: [
+        {
+          Name: "Detail",
+          URL: this.currentDataItem.URL,
+        }
+      ]
+    });
+
+  }
+
   dispatchChange() {
     var event = new Event("change");
     this.valueInput.dispatchEvent(event);
   }
 
-  closePreview() {
+  closePreview(e: PointerEvent) {
+    e.preventDefault();
+    e.stopPropagation();
     this.valueInput.value = "";
     this.preview.classList.add("hidden");
     this.search.classList.remove("hidden");

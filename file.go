@@ -85,15 +85,18 @@ func (f File) getExtension() string {
 
 func (app *App) initFilesResource() {
 	initCDN(app)
-
 	resource := NewResource[File](app)
 	resource.Name(
 		messages.GetNameFunction("admin_file"),
 		messages.GetNameFunction("admin_files"),
 	)
 	app.FilesResource = resource
-
 	resource.PermissionCreate(nobodyPermission)
+
+}
+
+func (app *App) afterInitFilesResource() {
+	resource := app.FilesResource
 
 	ResourceAPI[File](app, "upload").Method("POST").Permission(resource.canUpdate).Handler(func(request *Request) {
 		multipartFiles := request.Request().MultipartForm.File["file"]

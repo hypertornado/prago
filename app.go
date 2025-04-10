@@ -167,6 +167,13 @@ func (app *App) Run() {
 }
 
 func (app *App) afterInit() {
+	app.afterInitUserResource()
+	app.afterInitFilesResource()
+
+	for _, resource := range app.resources {
+		resource.afterInit()
+	}
+
 	app.initSessions()
 	app.initDefaultResourceActions()
 	app.initAPIs()

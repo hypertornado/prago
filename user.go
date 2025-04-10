@@ -108,6 +108,9 @@ func (app *App) initUserResource() {
 	resource.PermissionExport(sysadminPermission)
 
 	resource.Icon("glyphicons-basic-4-user.svg")
+}
+
+func (app *App) afterInitUserResource() {
 
 	ValidateUpdate(app, func(cuser *user, vc Validation, userData UserData) {
 		username := cuser.Username

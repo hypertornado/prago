@@ -157,6 +157,19 @@ class ImagePicker {
           },
         });
         commands.push({
+          Name: "Kopírovat UUID",
+          Handler: () => {
+            navigator.clipboard.writeText(item.UUID);
+            Prago.notificationCenter.flashNotification(
+              "Zkopírováno",
+              null,
+              true,
+              false
+            );
+          },
+          Icon: "glyphicons-basic-611-copy-duplicate.svg",
+        });
+        commands.push({
           Name: "Smazat",
           Handler: () => {
             itemEl.remove();
@@ -180,7 +193,7 @@ class ImagePicker {
           Name: item.ImageName,
           Description: item.ImageDescription,
           Commands: commands,
-          Rows: rows,
+          Rows: CMenu.rowsFromArray(item.Metadata),
         })
 
       })

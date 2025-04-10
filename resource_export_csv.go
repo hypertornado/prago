@@ -16,6 +16,9 @@ func bindResourceExportCSV(resource *Resource) {
 			return
 		}
 
+		cdValue := fmt.Sprintf("attachment; filename=\"export_%s_%s.csv\"", resource.id, time.Now().Format("2006-01-02 15:04:05"))
+		request.Response().Header().Set("Content-Disposition", cdValue)
+
 		var fieldNames []string
 		var outputFields []*Field
 		for _, v := range resource.fields {

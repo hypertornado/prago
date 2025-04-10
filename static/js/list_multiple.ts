@@ -1,6 +1,7 @@
 class ListMultiple {
   list: List;
 
+
   constructor(list: List) {
     this.list = list;
     if (this.hasMultipleActions()) {
@@ -11,6 +12,8 @@ class ListMultiple {
   pseudoCheckboxesAr: NodeListOf<HTMLTableCellElement>;
   lastCheckboxIndexClicked: number;
 
+  listHeaderAllSelect: HTMLDivElement;
+
   hasMultipleActions(): Boolean {
     if (this.list.list.classList.contains("list-hasmultipleactions")) {
       return true;
@@ -19,6 +22,15 @@ class ListMultiple {
   }
 
   bindMultipleActions() {
+    this.listHeaderAllSelect = this.list.list.querySelector(".list_header_multiple");
+    this.listHeaderAllSelect.addEventListener("click", () =>{
+      if (this.isAllChecked()) {
+        this.multipleUncheckAll();
+      } else {
+        this.multipleCheckAll();
+      }
+    })
+
     var actions = this.list.list.querySelectorAll(".list_multiple_action");
     for (var i = 0; i < actions.length; i++) {
       actions[i].addEventListener(
@@ -46,6 +58,10 @@ class ListMultiple {
       case "mutiple_edit":
         new ListMultipleEdit(this, ids);
         break;
+      case "mutiple_export":
+        let urlStr = "/admin/" + this.list.typeName + "/api/export?ids=" + ids.join(",");
+        window.open(urlStr);
+        break;
       default:
         let confirm = new Confirm(
           `${actionName}: Opravdu chcete provést tuto akci na ${ids.length} položek?`,
@@ -66,6 +82,9 @@ class ListMultiple {
               loader.done();
               if (e.status == 200) {
                 e.json().then((data) => {
+                  if (data.ErrorStr) {
+                    new Alert(data.ErrorStr);
+                  }
                   if (data.FlashMessage) {
                     Prago.notificationCenter.flashNotification(
                       actionName,
@@ -178,6 +197,13 @@ class ListMultiple {
     } else {
       multipleActionsPanel.classList.remove("list_multiple_actions-visible");
     }
+
+    if (this.isAllChecked()) {
+      this.listHeaderAllSelect.classList.add("list_row_multiple-checked");
+    } else {
+      this.listHeaderAllSelect.classList.remove("list_row_multiple-checked");
+    }
+
     this.list.list.querySelector(
       ".list_multiple_actions_description"
     ).textContent = `Vybráno ${checkedCount} položek`;
@@ -190,6 +216,25 @@ class ListMultiple {
       checkbox.classList.remove("list_row_multiple-checked");
     }
     this.multipleCheckboxChanged();
+  }
+
+  multipleCheckAll() {
+    this.lastCheckboxIndexClicked = -1;
+    for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
+      var checkbox = this.pseudoCheckboxesAr[i];
+      checkbox.classList.add("list_row_multiple-checked");
+    }
+    this.multipleCheckboxChanged();
+  }
+
+  isAllChecked() {
+    for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
+      var checkbox = this.pseudoCheckboxesAr[i];
+      if (!checkbox.classList.contains("list_row_multiple-checked")) {
+        return false
+      }
+    }
+    return true;
   }
 
   indexOfClickedCheckbox(el: HTMLTableCellElement): number {

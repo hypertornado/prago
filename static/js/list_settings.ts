@@ -7,8 +7,8 @@ class ListSettings {
   statsEl: HTMLDivElement;
   statsPopup: ContentPopup;
 
-  exportEl: HTMLDivElement;
-  exportPopup: ContentPopup;
+  //exportEl: HTMLDivElement;
+  //exportPopup: ContentPopup;
   statsCheckboxSelectCount: HTMLSelectElement;
 
   statsContainer: HTMLDivElement;
@@ -26,10 +26,6 @@ class ListSettings {
     this.statsEl = document.querySelector(".list_stats");
     this.statsPopup = new ContentPopup("Statistiky", this.statsEl);
     this.statsPopup.setIcon("glyphicons-basic-43-stats-circle.svg");
-
-    this.exportEl = document.querySelector(".list_export");
-    this.exportPopup = new ContentPopup("Export", this.exportEl);
-    this.exportPopup.setIcon("glyphicons-basic-302-square-download.svg");
 
     this.statsCheckboxSelectCount = document.querySelector(".list_stats_limit");
     this.statsCheckboxSelectCount.addEventListener("change", () => {
@@ -60,10 +56,10 @@ class ListSettings {
             },
           },
           {
-            Name: "Export",
+            Name: "Export CSV",
             Icon: "glyphicons-basic-302-square-download.svg",
             Handler: () => {
-              this.exportPopup.show();
+              window.open("/admin/" + this.list.typeName +"/api/export.csv")
             }
           },
         ],

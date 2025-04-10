@@ -136,14 +136,25 @@ func NewResource[T any](app *App) *Resource {
 		board: ret.resourceBoard,
 	}
 
-	statsDashboard := ret.resourceBoard.Dashboard(unlocalized("Statistiky"))
-	statsDashboard.Figure(unlocalized(""), ret.canView).Value(func(r *Request) int64 {
-		c, _ := ret.query(context.Background()).count()
-		return c
-	}).Unit(unlocalized("položek"))
-
 	ret.orderByColumn, ret.orderDesc = ret.getDefaultOrder()
 	return ret
+}
+
+func (resource *Resource) afterInit() {
+	statsDashboard := resource.resourceBoard.Dashboard(unlocalized("Statistiky"))
+	statsDashboard.Figure(unlocalized(""), resource.canView).Value(func(r *Request) int64 {
+		c, _ := resource.query(context.Background()).count()
+		return c
+	}).Unit(unlocalized("položek")).URL(fmt.Sprintf("/admin/%s/list", resource.id))
+
+	if resource.activityLog {
+		statsDashboard.Figure(unlocalized(""), resource.canUpdate).Value(func(request *Request) int64 {
+			q := resource.app.activityLogResource.query(context.Background())
+			c, _ := q.Is("resourcename", resource.id).count()
+			return c
+		}).Unit(unlocalized("úprav")).URL(fmt.Sprintf("/admin/%s/history", resource.id))
+	}
+
 }
 
 func getResource[T any](app *App) *Resource {

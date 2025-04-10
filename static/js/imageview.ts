@@ -23,10 +23,6 @@ class ImageView {
     let container = document.createElement("button");
     container.classList.add("imageview_image");
     container.setAttribute("href", file.ViewURL);
-    /*container.setAttribute(
-      "style",
-      "background-image: url('" + file.ThumbURL + "');"
-    );*/
     container.setAttribute("title", file.ImageDescription);
 
     let imgEl = document.createElement("img");
@@ -42,7 +38,21 @@ class ImageView {
       commands.push({
         Name: "Zobrazit",
         URL: file.ViewURL,
-      })
+      });
+
+      commands.push({
+        Name: "Kopírovat UUID",
+        Handler: () => {
+          navigator.clipboard.writeText(file.UUID);
+          Prago.notificationCenter.flashNotification(
+            "Zkopírováno",
+            null,
+            true,
+            false
+          );
+        },
+        Icon: "glyphicons-basic-611-copy-duplicate.svg",
+      });
 
       cmenu({
         Event: e,
@@ -50,6 +60,7 @@ class ImageView {
         Name: file.ImageName,
         Description: file.ImageDescription,
         Commands: commands,
+        Rows: CMenu.rowsFromArray(file.Metadata),
       });
 
     })
