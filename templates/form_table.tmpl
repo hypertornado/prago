@@ -1,5 +1,8 @@
 {{define "form_table"}}
     {{range $table := .}}
+    {{if $table.Javascript}}
+        <script>{{$table.Javascript}}</script>
+    {{end}}
     <div class="form_table">
         <table>
             {{range $row := $table.Rows}}

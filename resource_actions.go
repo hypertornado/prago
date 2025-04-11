@@ -178,13 +178,11 @@ func (resource *Resource) createWithLog(item any, userData UserData) error {
 		return err
 	}
 
-	if resource.activityLog {
-		err := resource.logActivity(userData, nil, item)
-		if err != nil {
-			return err
-		}
-
+	err = resource.logActivity(userData, nil, item)
+	if err != nil {
+		return err
 	}
+
 	return resource.updateCachedCount()
 
 }
@@ -195,16 +193,15 @@ func DeleteWithLog[T any](item *T, request *Request) error {
 }
 
 func (resource *Resource) deleteWithLog(item any, request UserData) error {
-	if resource.activityLog {
-		err := resource.logActivity(request, item, nil)
-		if err != nil {
-			return err
-		}
+
+	err := resource.logActivity(request, item, nil)
+	if err != nil {
+		return err
 	}
 
 	id := resource.previewer(request, item).ID()
 
-	err := resource.delete(context.Background(), id)
+	err = resource.delete(context.Background(), id)
 	if err != nil {
 		return fmt.Errorf("can't delete item id '%d': %s", id, err)
 	}
@@ -271,11 +268,9 @@ func (resource *Resource) updateWithLog(item any, request *Request) error {
 		return fmt.Errorf("can't save item (%d): %s", id, err)
 	}
 
-	if resource.activityLog {
-		must(
-			resource.logActivity(request, beforeItem, item),
-		)
-	}
+	must(
+		resource.logActivity(request, beforeItem, item),
+	)
 
 	return nil
 }

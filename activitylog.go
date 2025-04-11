@@ -301,7 +301,10 @@ func (resource *Resource) logActivity(userData UserData, before, after any) erro
 		ContentAfter:  string(afterData),
 	}
 
-	err = CreateItem(resource.app, log)
+	if resource.activityLog {
+		err = CreateItem(resource.app, log)
+	}
+
 	if err == nil {
 		for _, v := range resource.app.activityListeners {
 			v(log.activity())

@@ -97,11 +97,10 @@ func (resource *Resource) addDefaultMultipleActions() {
 					panic(fmt.Sprintf("can't create item for clone %v: %s", item, err))
 				}
 
-				if resource.activityLog {
-					must(
-						resource.logActivity(request, nil, item),
-					)
-				}
+				must(
+					resource.logActivity(request, nil, item),
+				)
+
 			}
 
 			response.FlashMessage = fmt.Sprintf("%d položek naklonováno", len(items))

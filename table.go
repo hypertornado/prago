@@ -18,6 +18,7 @@ type Table struct {
 type tableData struct {
 	Rows       []*tableRow
 	FooterText []string
+	Javascript template.JS
 }
 
 type tableRow struct {
@@ -54,6 +55,7 @@ type TableCellButton struct {
 type tableView struct {
 	Rows       []*tableRowView
 	FooterText []string
+	Javascript template.JS
 }
 
 type tableRowView struct {
@@ -88,6 +90,11 @@ func (table *Table) Header(items ...string) *Table {
 	}
 	table.Row(headerCells...)
 	//table.newRow()
+	return table
+}
+
+func (table *Table) Javascript(javascript template.JS) *Table {
+	table.data[0].Javascript = javascript
 	return table
 }
 
@@ -246,13 +253,13 @@ func (t *Table) templateData() []*tableView {
 
 		view := &tableView{
 			FooterText: v.FooterText,
+			Javascript: v.Javascript,
 		}
 
 		for _, v2 := range v.Rows {
 			row := &tableRowView{}
 
 			for _, v3 := range v2.Cells {
-				//cell := &tableCellData{}
 				row.Cells = append(row.Cells, v3.data)
 			}
 
