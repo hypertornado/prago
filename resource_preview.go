@@ -163,6 +163,7 @@ func (previewer *previewer) DescriptionBasic(relatedResource *Resource) string {
 }
 
 func (previewer *previewer) DescriptionExtended(relatedResource *Resource) string {
+	app := previewer.resource.app
 	var items []string
 	itemsVal := reflect.ValueOf(previewer.item).Elem()
 
@@ -185,8 +186,8 @@ func (previewer *previewer) DescriptionExtended(relatedResource *Resource) strin
 			continue
 		}
 
-		field := itemsVal.FieldByName(v.fieldClassName)
-		stringed := previewer.resource.app.relationStringer(*v, field, previewer.userData)
+		val := itemsVal.FieldByName(v.fieldClassName)
+		stringed := app.relationStringer(*v, val, previewer.userData)
 		if stringed != "" {
 			items = append(items, fmt.Sprintf("%s: %s", v.name(previewer.userData.Locale()), stringed))
 		}

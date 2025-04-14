@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"golang.org/x/net/context"
 )
@@ -157,4 +158,15 @@ func (resource *Resource) getPreviews(ctx context.Context, listRequest relationL
 	}
 
 	return ret
+}
+
+func humanizeMultiRelationsString(in string) string {
+	var outFields []string
+	fields := strings.Split(in, ";")
+	for _, field := range fields {
+		if field != "" {
+			outFields = append(outFields, "#"+field)
+		}
+	}
+	return strings.Join(outFields, ", ")
 }

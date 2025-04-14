@@ -1,6 +1,5 @@
 {{define "list_stats"}}
   <div class="list_stats">
-    <h3>Počet řádků</h3>
     <label>
       <select class="list_stats_limit input">
         {{range $item := .StatsLimitSelectData}}
@@ -8,7 +7,6 @@
         {{end}}
       </select>
     </label>
-    <h3>{{PragoMessage .Language "admin_stats"}}</h3>
     <div class="list_stats_container"></div>
   </div>
 {{end}}
@@ -22,13 +20,13 @@
           <div class="admin_stats_section_table">
             {{range $row := $section.Table}}
               {{if $row.URL}}
-                <a href="{{$row.URL}}" class="admin_stats_section_row" title="{{$row.Name}} - {{$row.Description.Count}} ({{$row.Description.Percent}})">
+                <a href="{{$row.URL}}" class="admin_stats_section_row" title="{{$row.GetTitle}}">
               {{else}}
-                <div class="admin_stats_section_row" title="{{$row.Name}} - {{$row.Description.Count}} ({{$row.Description.Percent}})">
+                <div class="admin_stats_section_row" title="{{$row.GetTitle}}">
               {{end}}
                 <div class="admin_stats_section_row_name">
                   {{if $row.Image}}
-                    <div class="admin_stats_section_row_image" style="background-url: url('{{$row.Image}}');"></div>
+                    <div class="admin_stats_section_row_image" style="background-image: url('{{$row.Image}}');"></div>
                   {{end}}
                   {{$row.Name}}
                 </div>

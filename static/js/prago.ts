@@ -58,16 +58,18 @@ class Prago {
     initDashboard();
     initGoogleMaps();
 
-    document.querySelector(".searchbox_button").addEventListener("click", (e: Event) => {
-      let input: HTMLInputElement = document.querySelector(".searchbox_input");
-      if (!input.value) {
-        input.focus();
-        e.stopPropagation();
-        e.preventDefault();
-      }
-    })
+    let searchboxButton = document.querySelector(".searchbox_button");
 
-    //Prago.testPopupForm();
+    if (searchboxButton) {
+      searchboxButton.addEventListener("click", (e: Event) => {
+        let input: HTMLInputElement = document.querySelector(".searchbox_input");
+        if (!input.value) {
+          input.focus();
+          e.stopPropagation();
+          e.preventDefault();
+        }
+      });
+    }
   }
 
   static testPopupForm() {

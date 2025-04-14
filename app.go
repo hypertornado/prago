@@ -123,6 +123,8 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.resourceNameMap = make(map[string]*Resource)
 	app.fieldTypes = make(map[string]*fieldType)
 
+	app.initPprof()
+
 	app.initAccessManager()
 	app.initDefaultFieldTypes()
 

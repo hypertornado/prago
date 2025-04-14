@@ -21,6 +21,7 @@ class ImageView {
 
   addFile(file: any) {
     let container = document.createElement("button");
+    container.setAttribute("type", "button");
     container.classList.add("imageview_image");
     container.setAttribute("href", file.ViewURL);
     container.setAttribute("title", file.ImageDescription);

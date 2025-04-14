@@ -14,12 +14,40 @@ class ImagePicker {
     );
     this.preview2 = <HTMLDivElement>el.querySelector(".imagepicker_preview");
     this.fileInput = <HTMLInputElement>(
-      this.el.querySelector(".imagepicker_btn input")
+      this.el.querySelector(".imagepicker_input")
     );
     this.progress = <HTMLProgressElement>this.el.querySelector("progress");
 
     this.el.querySelector(".imagepicker_content").classList.remove("hidden");
     this.hideProgress();
+
+    this.el.querySelector(".imagepicker_btn").addEventListener("click", (e: PointerEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      cmenu({
+        Event: e,
+        AlignByElement: true,
+        Commands: [
+          {
+            Name: "Nahrát nový soubor",
+            Icon: "glyphicons-basic-301-square-upload.svg",
+            Handler: () => {
+              this.fileInput.click();        
+            },
+          },
+          {
+            Name: "Vložit UUID",
+            Icon: "glyphicons-basic-613-paste.svg",
+            Handler: () => {
+              new PopupForm("/admin/validate-uuid-files", (data: any) => {
+                this.addUUID(data.Data);
+                this.load();
+              })
+            },
+          },
+        ],
+      })
+    })
 
     this.el.addEventListener("click", (e) => {
       if (e.altKey) {
@@ -103,6 +131,7 @@ class ImagePicker {
       let item = data.Items[i];
       
       let itemEl = document.createElement("button");
+      itemEl.setAttribute("type", "button");
       itemEl.setAttribute("data-uuid", item.UUID);
       itemEl.setAttribute("title", item.ImageName);
       itemEl.classList.add("imagepicker_preview_item");
@@ -122,7 +151,6 @@ class ImagePicker {
         commands.push({
           Name: "Upravit popis",
           Icon: "glyphicons-basic-31-pencil.svg",
-          //URL: item.EditURL,
           Handler: () => {
             new PopupForm(item.EditURL, () => {
               this.load();

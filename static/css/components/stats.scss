@@ -17,7 +17,10 @@
 }
 
 .admin_stats_section_name {
+  font-size: 1.3rem;
+  line-height: 1.3em;
   font-weight: 500;
+  margin-bottom: 5px;
 }
 
 .admin_stats_section_row {
@@ -25,8 +28,13 @@
   width: 100%;
   flex-wrap: nowrap;
   align-items: center;
-  padding: 0px 5px;
-  margin: 0px 0px 0px -10px;
+  padding: 0px 0px;
+  margin: 0px 0px 0px 0px;
+  border-top: 1px solid $grayBorderColor;
+}
+
+.admin_stats_section_row:last-child {
+  border-bottom: 1px solid $grayBorderColor;
 }
 
 .admin_stats_section_row:hover {
@@ -36,7 +44,7 @@
 
 .admin_stats_section_row_name {
   text-align: left;
-  padding: 0px 5px;
+  padding: 0px 5px 0px 0px;
   width: 50%;
   flex-grow: 100;
   text-overflow: ellipsis;

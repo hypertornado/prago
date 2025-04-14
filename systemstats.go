@@ -39,6 +39,13 @@ func (app *App) initSystemStats() {
 		return ret
 	}, "sysadmin")
 
+	sysadminBoard.Dashboard(unlocalized("pprof command")).Table(func(request *Request) *Table {
+		ret := app.Table()
+
+		ret.Row(Cell(app.getPprofProfilePath()))
+		return ret
+	}, "sysadmin")
+
 	sysadminBoard.Dashboard(unlocalized("Access view")).Table(func(r *Request) *Table {
 		ret := app.Table()
 		accessView := getResourceAccessView(app)

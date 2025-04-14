@@ -77,6 +77,7 @@ class ImageView {
     }
     addFile(file) {
         let container = document.createElement("button");
+        container.setAttribute("type", "button");
         container.classList.add("imageview_image");
         container.setAttribute("href", file.ViewURL);
         container.setAttribute("title", file.ImageDescription);
@@ -117,10 +118,37 @@ class ImagePicker {
         this.el = el;
         this.hiddenInput = (el.querySelector(".admin_images_hidden"));
         this.preview2 = el.querySelector(".imagepicker_preview");
-        this.fileInput = (this.el.querySelector(".imagepicker_btn input"));
+        this.fileInput = (this.el.querySelector(".imagepicker_input"));
         this.progress = this.el.querySelector("progress");
         this.el.querySelector(".imagepicker_content").classList.remove("hidden");
         this.hideProgress();
+        this.el.querySelector(".imagepicker_btn").addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            cmenu({
+                Event: e,
+                AlignByElement: true,
+                Commands: [
+                    {
+                        Name: "Nahrát nový soubor",
+                        Icon: "glyphicons-basic-301-square-upload.svg",
+                        Handler: () => {
+                            this.fileInput.click();
+                        },
+                    },
+                    {
+                        Name: "Vložit UUID",
+                        Icon: "glyphicons-basic-613-paste.svg",
+                        Handler: () => {
+                            new PopupForm("/admin/validate-uuid-files", (data) => {
+                                this.addUUID(data.Data);
+                                this.load();
+                            });
+                        },
+                    },
+                ],
+            });
+        });
         this.el.addEventListener("click", (e) => {
             if (e.altKey) {
                 var ids = window.prompt("IDs of images", this.hiddenInput.value);
@@ -191,6 +219,7 @@ class ImagePicker {
         for (let i = 0; i < data.Items.length; i++) {
             let item = data.Items[i];
             let itemEl = document.createElement("button");
+            itemEl.setAttribute("type", "button");
             itemEl.setAttribute("data-uuid", item.UUID);
             itemEl.setAttribute("title", item.ImageName);
             itemEl.classList.add("imagepicker_preview_item");
@@ -1354,6 +1383,9 @@ class ListMultiple {
         this.multipleCheckboxChanged();
     }
     isAllChecked() {
+        if (this.pseudoCheckboxesAr.length == 0) {
+            return false;
+        }
         for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
             var checkbox = this.pseudoCheckboxesAr[i];
             if (!checkbox.classList.contains("list_row_multiple-checked")) {
@@ -2966,14 +2998,17 @@ class PopupForm extends Popup {
 }
 function initGoogleMaps() {
     return __awaiter(this, void 0, void 0, function* () {
+        var viewElements = document.querySelectorAll(".admin_item_view_place");
+        var pickerElements = document.querySelectorAll(".map_picker");
+        if (viewElements.length == 0 && pickerElements.length == 0) {
+            return;
+        }
         const { Map } = yield google.maps.importLibrary("maps");
         const { AdvancedMarkerElement, PinElement } = yield google.maps.importLibrary("marker");
-        var viewEls = document.querySelectorAll(".admin_item_view_place");
-        viewEls.forEach((el) => {
+        viewElements.forEach((el) => {
             initGoogleMapView(el);
         });
-        var elements = document.querySelectorAll(".map_picker");
-        elements.forEach((el) => {
+        pickerElements.forEach((el) => {
             new GoogleMapEdit(el);
         });
     });
@@ -3671,14 +3706,17 @@ class Prago {
         }
         initDashboard();
         initGoogleMaps();
-        document.querySelector(".searchbox_button").addEventListener("click", (e) => {
-            let input = document.querySelector(".searchbox_input");
-            if (!input.value) {
-                input.focus();
-                e.stopPropagation();
-                e.preventDefault();
-            }
-        });
+        let searchboxButton = document.querySelector(".searchbox_button");
+        if (searchboxButton) {
+            searchboxButton.addEventListener("click", (e) => {
+                let input = document.querySelector(".searchbox_input");
+                if (!input.value) {
+                    input.focus();
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+            });
+        }
     }
     static testPopupForm() {
         new PopupForm("/admin/packageview/new", (data) => {

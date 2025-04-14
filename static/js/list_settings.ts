@@ -7,8 +7,6 @@ class ListSettings {
   statsEl: HTMLDivElement;
   statsPopup: ContentPopup;
 
-  //exportEl: HTMLDivElement;
-  //exportPopup: ContentPopup;
   statsCheckboxSelectCount: HTMLSelectElement;
 
   statsContainer: HTMLDivElement;
@@ -21,8 +19,6 @@ class ListSettings {
     this.settingsPopup.setIcon("glyphicons-basic-137-cogwheel.svg");
     this.statsContainer = document.querySelector(".list_stats_container");
     
-    
-
     this.statsEl = document.querySelector(".list_stats");
     this.statsPopup = new ContentPopup("Statistiky", this.statsEl);
     this.statsPopup.setIcon("glyphicons-basic-43-stats-circle.svg");

@@ -63,6 +63,9 @@ func (app App) relationStringer(field Field, value reflect.Value, userData UserD
 
 	switch value.Kind() {
 	case reflect.String:
+		if field.tags["prago-type"] == "multirelation" {
+			return humanizeMultiRelationsString(value.String())
+		}
 		if field.tags["prago-type"] == "image" || field.tags["prago-type"] == "file" {
 			return fmt.Sprintf("%dx", len(strings.Split(value.String(), ",")))
 		}

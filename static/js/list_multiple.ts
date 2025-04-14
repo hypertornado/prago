@@ -228,6 +228,10 @@ class ListMultiple {
   }
 
   isAllChecked() {
+    if (this.pseudoCheckboxesAr.length == 0) {
+      return false;
+    }
+
     for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
       var checkbox = this.pseudoCheckboxesAr[i];
       if (!checkbox.classList.contains("list_row_multiple-checked")) {

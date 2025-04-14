@@ -112,6 +112,40 @@ func (app *App) afterInitFilesResource() {
 		request.WriteJSON(200, uuids)
 	})
 
+	PopupForm(app, "validate-uuid-files", func(form *Form, request *Request) {
+		form.AddTextInput("uuid", "UUID").Focused = true
+		form.AddSubmit("Vložit")
+	}, func(fv FormValidation, request *Request) {
+		uuids := request.Param("uuid")
+
+		var retIDs []string
+
+		idsAr := strings.Split(uuids, ",")
+		for _, v := range idsAr {
+			if v == "" {
+				fv.AddError("Neplatné UUID " + v)
+				return
+			}
+			file := Query[File](app).Is("uid", v).First()
+			if file == nil {
+				fv.AddError("Soubor nelze nalézt " + v)
+				return
+			}
+			if !file.IsImage() {
+				fv.AddError("Soubor není obrázek " + v)
+				return
+			}
+
+			retIDs = append(retIDs, file.UID)
+			//files = append(files, file)
+		}
+		if len(retIDs) == 0 {
+			fv.AddError("Není zadáno UUID")
+			return
+		}
+		fv.Data(strings.Join(retIDs, ","))
+	}).Permission(resource.canUpdate).Name(unlocalized("Vložit UUID"))
+
 	app.API("imagepicker").Permission(loggedPermission).HandlerJSON(imagePickerAPIHandler)
 
 	resource.Field("uid").Name(messages.GetNameFunction("admin_file"))

@@ -1,25 +1,30 @@
 
 async function initGoogleMaps() {
+
+    var viewElements = document.querySelectorAll(".admin_item_view_place");
+    var pickerElements = document.querySelectorAll<HTMLDivElement>(".map_picker");
+
+    if (viewElements.length == 0 && pickerElements.length == 0) {
+        return;
+    }
+
+
     //@ts-ignore
     const { Map } = await google.maps.importLibrary("maps");
     //@ts-ignore
     const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
-
-    var viewEls = document.querySelectorAll(".admin_item_view_place");
-    viewEls.forEach((el) => {
+    viewElements.forEach((el) => {
         initGoogleMapView(<HTMLDivElement>el);
     });
 
-    var elements = document.querySelectorAll<HTMLDivElement>(".map_picker");
-    elements.forEach((el) => {
+    pickerElements.forEach((el) => {
         new GoogleMapEdit(el);
     });
 
 }
 
 function initGoogleMapView(el: HTMLDivElement) {
-    
     var val = el.getAttribute("data-value");
     el.innerText = "";
 

@@ -34,6 +34,18 @@ type listStatsDescription struct {
 	Percent    string
 }
 
+func (row *listStatsRow) GetTitle() string {
+	var fields []string
+
+	fields = append(fields, row.Name)
+	fields = append(fields, row.Description.Count)
+	if row.Description.Percent != "" {
+		fields = append(fields, row.Description.Percent)
+	}
+
+	return strings.Join(fields, " — ")
+}
+
 func statsCountPercent(count, total int64) template.HTML {
 	if total == 0 {
 		return ""
@@ -252,8 +264,13 @@ func (resource *Resource) getListStatsTable(ctx context.Context, field *Field, u
 			rows.Scan(&v, &count)
 			counted += count
 
+			var name = v
+			if field.fieldType.isRelation() {
+				name = humanizeMultiRelationsString(v)
+			}
+
 			table = append(table, listStatsRow{
-				Name:        v,
+				Name:        name,
 				Description: statsCountDescription(count, total),
 			})
 		}
@@ -422,7 +439,7 @@ func (resource *Resource) getListStatsTableInt(ctx context.Context, field *Field
 }
 
 func getStatsLimitSelectData(locale string) (ret []listPaginationData) {
-	var ints = []int64{5, 10, 20, 100, 200, 500, 1000, 2000, 5000, 10000}
+	var ints = []int64{10, 20, 100, 200, 500, 1000, 2000, 5000, 10000}
 
 	for _, v := range ints {
 		ret = append(ret, listPaginationData{

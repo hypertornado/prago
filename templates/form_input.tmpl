@@ -80,10 +80,10 @@
     <input name="{{.ID}}" value="{{.Value}}" type="hidden" class="admin_images_hidden form_watcher">
     <div class="imagepicker_content hidden">
       <div class="imagepicker_preview"></div>
+      <input type="file" class="imagepicker_input" id="{{.UUID}}" accept="{{.Data.MimeTypes}}" multiple class="form_watcher">
       <label class="btn imagepicker_btn">
         <img class="btn_icon" src="/admin/api/icons?file=glyphicons-basic-371-plus.svg&color=444444">
         Přidat obrázek
-        <input type="file" id="{{.UUID}}" accept="{{.Data.MimeTypes}}" multiple class="form_watcher">
       </label>
     </div>
     <progress class="progress"></progress>
