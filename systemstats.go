@@ -2,6 +2,7 @@ package prago
 
 import (
 	"fmt"
+	"html/template"
 	"os"
 	"runtime"
 	"sort"
@@ -23,6 +24,36 @@ func (app *App) initSystemStats() {
 
 	currentStatsDashboard.Figure(unlocalized("Total requests from server start"), "sysadmin").Value(func(request *Request) int64 {
 		return totalRequestCounter.Load()
+	}).RefreshTime(1)
+
+	dbStatsDashboard := sysadminBoard.Dashboard(unlocalized("DB stats"))
+
+	dbStatsDashboard.Figure(unlocalized("Idle"), "sysadmin").Value(func(request *Request) int64 {
+		return int64(app.db.Stats().Idle)
+	}).RefreshTime(1)
+
+	dbStatsDashboard.Figure(unlocalized("OpenConnections"), "sysadmin").Value(func(request *Request) int64 {
+		return int64(app.db.Stats().OpenConnections)
+	}).RefreshTime(1)
+
+	dbStatsDashboard.Figure(unlocalized("InUse"), "sysadmin").Value(func(request *Request) int64 {
+		return int64(app.db.Stats().InUse)
+	}).RefreshTime(1)
+
+	dbStatsDashboard.Figure(unlocalized("WaitCount"), "sysadmin").Value(func(request *Request) int64 {
+		return int64(app.db.Stats().WaitCount)
+	}).RefreshTime(1)
+
+	dbStatsDashboard.Figure(unlocalized("MaxIdleClosed"), "sysadmin").Value(func(request *Request) int64 {
+		return int64(app.db.Stats().MaxIdleClosed)
+	}).RefreshTime(1)
+
+	dbStatsDashboard.Figure(unlocalized("MaxIdleTimeClosed"), "sysadmin").Value(func(request *Request) int64 {
+		return int64(app.db.Stats().MaxIdleTimeClosed)
+	}).RefreshTime(1)
+
+	dbStatsDashboard.Figure(unlocalized("MaxLifetimeClosed"), "sysadmin").Value(func(request *Request) int64 {
+		return int64(app.db.Stats().MaxLifetimeClosed)
 	}).RefreshTime(1)
 
 	sysadminBoard.Dashboard(unlocalized("DB import")).Table(func(request *Request) *Table {
@@ -187,25 +218,15 @@ func (app *App) initSystemStats() {
 		return statsTable(app, environmentStats)
 	}, sysadminPermission)
 
-	/*sysadminBoard.Dashboard(unlocalized("Elasticsearch")).Table(func(r *Request) *Table {
-		ret := app.Table()
-		esStats := elasticsearchStats(app)
-		for _, v := range esStats {
-			ret.Row(Cell(v[0]), Cell(v[1]), Cell(v[2]))
-		}
-
-		return ret
-	}, sysadminPermission)*/
-
-	sysadminBoard.Dashboard(unlocalized("Routes")).Table(func(r *Request) *Table {
+	ActionUI(app, "_routes", func(r *Request) template.HTML {
 		ret := app.Table()
 		routes := app.router.export()
 		for _, v := range routes {
 			ret.Row(Cell(v[0]), Cell(v[1]))
 		}
 
-		return ret
-	}, sysadminPermission)
+		return ret.ExecuteHTML()
+	}).Permission(sysadminPermission).Name(unlocalized("Routes")).Board(sysadminBoard)
 
 }
 
