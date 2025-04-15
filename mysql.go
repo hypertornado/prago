@@ -29,8 +29,8 @@ func connectMysql(dbUser, dbPassword, dbName string) (*sql.DB, error) {
 	//db.SetMaxIdleConns(100)
 
 	db.SetConnMaxLifetime(time.Minute * 3)
-	db.SetMaxOpenConns(30)
-	db.SetMaxIdleConns(30)
+	db.SetMaxOpenConns(50)
+	db.SetMaxIdleConns(50)
 
 	return db, db.Ping()
 }
