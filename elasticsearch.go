@@ -1,13 +1,6 @@
 package prago
 
-import (
-	"fmt"
-	"sort"
-
-	"github.com/hypertornado/prago/pragelastic"
-)
-
-func (app *App) initElasticsearch() {
+/*func (app *App) initElasticsearch() {
 	db := sysadminBoard.Dashboard(unlocalized("Elasticsearch"))
 	db.AddTask(unlocalized("Reload elasticsearch client"), "sysadmin", func(ta *TaskActivity) error {
 		return app.createNewElasticSearchClient()
@@ -70,3 +63,4 @@ func (app *App) ElasticSearchClient() *pragelastic.Client {
 	}
 	return searchClient
 }
+*/

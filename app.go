@@ -149,7 +149,7 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initDevelopment()
 	app.initMigrationCommand()
 	app.initTemplates()
-	app.initElasticsearch()
+	//app.initElasticsearch()
 	app.initSearch()
 	app.initSQLConsole()
 	app.initSQLBackup()

@@ -313,38 +313,6 @@ func getResourceAccessView(app *App) accessView {
 	return ret
 }
 
-func elasticsearchStats(app *App) [][3]string {
-	client := app.ElasticSearchClient()
-	if client == nil {
-		return nil
-	}
-
-	stats, err := client.GetStats()
-	if err != nil {
-		panic(err)
-	}
-
-	var ret [][3]string
-
-	var indiceNames []string
-	for k := range stats.Indices {
-		indiceNames = append(indiceNames, k)
-	}
-
-	sort.Strings(indiceNames)
-
-	for _, v := range indiceNames {
-		ret = append(ret, [3]string{
-			v,
-			fmt.Sprintf("%d docs", stats.Indices[v].Total.Docs.Count),
-			fmt.Sprintf("%s size", byteCountSI(stats.Indices[v].Total.Store.SizeInBytes)),
-		})
-	}
-
-	return ret
-
-}
-
 func byteCountSI(b int64) string {
 	const unit = 1000
 	if b < unit {
