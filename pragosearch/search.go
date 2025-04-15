@@ -7,10 +7,11 @@ import (
 )
 
 type SearchRequest struct {
-	q      string
-	offset int64
-	size   int64
-	index  Datastore
+	q           string
+	offset      int64
+	size        int64
+	index       Datastore
+	prefixMatch bool
 }
 
 type SearchResult struct {
@@ -22,6 +23,7 @@ type SearchResult struct {
 type SearchResultItem struct {
 	ItemID string
 	Score  float64
+	Data   any
 }
 
 func newSearchRequest(mi *MemoryIndex, q string) *SearchRequest {
@@ -60,18 +62,29 @@ func (sr *SearchRequest) Do() *SearchResult {
 
 	var finalResults = map[string]float64{}
 
+	searchSuggestAnalyzer := getDefaultSearchSuggestAnalyzer()
+
 	fields := sr.index.getFields()
 	for _, field := range fields {
 		var fieldResults = map[string]float64{}
-		terms := sr.index.analyze(field, sr.q)
+		var terms []string
+		if sr.prefixMatch {
+			if sr.q == "" {
+				terms = []string{""}
+			} else {
+				terms = searchSuggestAnalyzer.Analyze(sr.q)
+			}
+		} else {
+			terms = sr.index.analyze(field, sr.q)
+		}
 		for _, term := range terms {
-			termResult := searchResultsFor(sr.index, field, term)
+			termResult := searchResultsFor(sr.index, field, term, sr.prefixMatch)
 			for k, result := range termResult {
 				fieldResults[k] += result
 			}
 		}
 		fieldResults = normalizeMap(fieldResults)
-		const fieldBoost float64 = 1
+		var fieldBoost float64 = sr.index.getFieldPriority(field)
 		for k, v := range fieldResults {
 			finalResults[k] += fieldBoost * v
 		}
@@ -87,6 +100,7 @@ func (sr *SearchRequest) Do() *SearchResult {
 		results = append(results, &SearchResultItem{
 			ItemID: k,
 			Score:  v,
+			Data:   sr.index.loadData(k),
 		})
 	}
 
@@ -132,8 +146,8 @@ func normalizeMap(in map[string]float64) map[string]float64 {
 
 }
 
-func searchResultsFor(ds Datastore, field, term string) map[string]float64 {
-	freq := ds.getTermFrequencies(field, term)
+func searchResultsFor(ds Datastore, field, term string, prefixMatch bool) map[string]float64 {
+	freq := ds.getTermFrequencies(field, term, prefixMatch)
 	idf := calculateIDF(int64(len(freq)), ds.countItems())
 
 	ret := map[string]float64{}

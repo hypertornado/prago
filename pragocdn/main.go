@@ -23,7 +23,7 @@ import (
 
 //TODO: shoud read exif data from jpeg files and use real width and height, so that vertical images are not displayed wrong in photoswipe
 
-const version = "2025.1"
+const version = "2025.2"
 
 var app *prago.App
 

@@ -2,14 +2,18 @@ package pragosearch
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 )
 
 type MemoryIndex struct {
 	mutex *sync.RWMutex
-	//defaultIndexAnalyzer *analyzer
 
 	analyzers map[string]*analyzer
+
+	fieldPriority map[string]float64
+
+	dataStore map[string]any
 
 	documentPriority map[string]float64
 	documentLength   map[[2]string]int64
@@ -25,28 +29,7 @@ func NewMemoryIndex() *MemoryIndex {
 	return ret
 }
 
-func (mi *MemoryIndex) SetAnalyzer(field, analyzerID string) error {
-	mi.mutex.Lock()
-	defer mi.mutex.Unlock()
-
-	if field == "" {
-		return fmt.Errorf("field can't be empty")
-	}
-
-	if mi.analyzers[field] != nil {
-		return fmt.Errorf("analyzer for field '%s' already set", field)
-	}
-
-	analyzer := getAnalyzer(analyzerID)
-	if analyzer == nil {
-		return fmt.Errorf("unknown analyzer '%s'", analyzerID)
-	}
-
-	mi.analyzers[field] = analyzer
-	return nil
-}
-
-func (mi *MemoryIndex) Index(id string) *Indexer {
+func (mi *MemoryIndex) Add(id string) *Indexer {
 	return newIndexer(mi, id)
 }
 
@@ -65,7 +48,6 @@ func (mi *MemoryIndex) indexItem(indexer *Indexer) error {
 	for name, value := range indexer.fields {
 		mi.addToIndex(indexer.id, name, value)
 	}
-
 	return nil
 }
 
@@ -73,6 +55,8 @@ func (mi *MemoryIndex) DeleteAll() error {
 	mi.mutex.Lock()
 	defer mi.mutex.Unlock()
 
+	mi.fieldPriority = map[string]float64{}
+	mi.dataStore = map[string]any{}
 	mi.documentPriority = map[string]float64{}
 	mi.documentLength = map[[2]string]int64{}
 	mi.termFrequency = map[[3]string]int64{}
@@ -98,8 +82,32 @@ func (mi *MemoryIndex) getMutex() *sync.RWMutex {
 	return mi.mutex
 }
 
+func (mi *MemoryIndex) storeData(id string, data any) {
+	mi.mutex.Lock()
+	defer mi.mutex.Unlock()
+	mi.dataStore[id] = data
+}
+
+func (mi *MemoryIndex) loadData(id string) any {
+	mi.mutex.RLock()
+	defer mi.mutex.RUnlock()
+	return mi.dataStore[id]
+}
+
 func (mi *MemoryIndex) getDocumentPriority(id string) float64 {
 	return mi.documentPriority[id]
+}
+
+func (mi *MemoryIndex) getFieldPriority(id string) float64 {
+	mi.mutex.RLock()
+	defer mi.mutex.RUnlock()
+	return mi.fieldPriority[id]
+}
+
+func (mi *MemoryIndex) setFieldPriority(id string, value float64) {
+	mi.mutex.Lock()
+	defer mi.mutex.Unlock()
+	mi.fieldPriority[id] = value
 }
 
 func (mi *MemoryIndex) containsItem(id string) bool {
@@ -136,13 +144,18 @@ func (mi *MemoryIndex) Query(q string) *SearchRequest {
 	return newSearchRequest(mi, q)
 }
 
+func (mi *MemoryIndex) Suggest(q string) *SearchRequest {
+	ret := newSearchRequest(mi, q)
+	ret.prefixMatch = true
+	return ret
+}
+
 func (mi *MemoryIndex) getDocumentLength(id, field string) int64 {
 	return mi.documentLength[[2]string{id, field}]
 }
 
 func (mi *MemoryIndex) analyze(field, input string) []string {
 	return mi.analyzers[field].Analyze(input)
-	//return mi.defaultIndexAnalyzer.Analyze(input)
 }
 
 func (mi *MemoryIndex) getAvgDocLength(field string) float64 {
@@ -169,7 +182,8 @@ func (mi *MemoryIndex) getFields() (ret []string) {
 	return
 }
 
-func (mi *MemoryIndex) getTermFrequencies(field, term string) map[string]int64 {
+func (mi *MemoryIndex) getTermFrequencies(field, term string, prefixMatch bool) map[string]int64 {
+
 	freq := map[string]int64{}
 	for k, v := range mi.termFrequency {
 		if v <= 0 {
@@ -178,8 +192,14 @@ func (mi *MemoryIndex) getTermFrequencies(field, term string) map[string]int64 {
 		if k[1] != field {
 			continue
 		}
-		if k[2] != term {
-			continue
+		if prefixMatch {
+			if !strings.HasPrefix(k[2], term) {
+				continue
+			}
+		} else {
+			if k[2] != term {
+				continue
+			}
 		}
 
 		freq[k[0]] = v

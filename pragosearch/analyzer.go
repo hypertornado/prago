@@ -1,6 +1,18 @@
 package pragosearch
 
 const defaultAnalyzerID = "czech"
+const defaultSearchQueryAnalyzerID = "czech_input"
+
+func getDefaultSearchSuggestAnalyzer() *analyzer {
+	return getAnalyzer("czech_input")
+}
+
+type analyzer struct {
+	Name        string
+	PreFilters  []func(string) string
+	Tokenizer   func(string) []string
+	PostFilters []func(string) string
+}
 
 var analyzers = []*analyzer{
 	{
@@ -15,6 +27,18 @@ var analyzers = []*analyzer{
 			removeDiacritics,
 		},
 	},
+	{
+		Name: "czech_input",
+		PreFilters: []func(string) string{
+			lowercaser,
+		},
+		Tokenizer: tokenizer,
+		PostFilters: []func(string) string{
+			//czechStemmer,
+			//isCzechStopword,
+			removeDiacritics,
+		},
+	},
 }
 
 func getAnalyzer(name string) *analyzer {
@@ -26,20 +50,13 @@ func getAnalyzer(name string) *analyzer {
 	return nil
 }
 
-type analyzer struct {
-	Name        string
-	PreFilters  []func(string) string
-	Tokenizer   func(string) []string
-	PostFilters []func(string) string
-}
-
-func (analyzer *analyzer) Analyze(input string) []string {
+func (analyzer *analyzer) Analyze(str string) []string {
 
 	for _, filter := range analyzer.PreFilters {
-		input = filter(input)
+		str = filter(str)
 	}
 
-	tokens := analyzer.Tokenizer(input)
+	tokens := analyzer.Tokenizer(str)
 
 	for _, filter := range analyzer.PostFilters {
 		tokens = useFilter(tokens, filter)

@@ -29,6 +29,11 @@ func (i *Indexer) Set(field, value string) *Indexer {
 	return i
 }
 
+func (i *Indexer) StoreData(data any) *Indexer {
+	i.ds.storeData(i.id, data)
+	return i
+}
+
 func (i *Indexer) Do() error {
 	if i.id == "" {
 		return fmt.Errorf("no error set")
