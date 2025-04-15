@@ -1,10 +1,10 @@
 package pragosearch
 
 const defaultAnalyzerID = "czech"
-const defaultSearchQueryAnalyzerID = "czech_input"
+const defaultSuggestAnalyzerID = "czech_suggest"
 
 func getDefaultSearchSuggestAnalyzer() *analyzer {
-	return getAnalyzer("czech_input")
+	return getAnalyzer(defaultSuggestAnalyzerID)
 }
 
 type analyzer struct {
@@ -28,15 +28,15 @@ var analyzers = []*analyzer{
 		},
 	},
 	{
-		Name: "czech_input",
+		Name: "czech_suggest",
 		PreFilters: []func(string) string{
 			lowercaser,
 		},
-		Tokenizer: tokenizer,
+		Tokenizer:   tokenizer,
 		PostFilters: []func(string) string{
 			//czechStemmer,
 			//isCzechStopword,
-			removeDiacritics,
+			//removeDiacritics,
 		},
 	},
 }

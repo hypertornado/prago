@@ -92,7 +92,7 @@ func TestSuggestion(t *testing.T) {
 func TestSuggestionCH(t *testing.T) {
 
 	index := NewMemoryIndex()
-	index.Field("name")
+	index.Field("name").Analyzer(defaultSuggestAnalyzerID)
 
 	index.Add("1").Set("name", "foo").Do()
 	index.Add("2").Set("name", "chariclea").Do()
@@ -103,6 +103,22 @@ func TestSuggestionCH(t *testing.T) {
 		t.Fatal(result.GetIDs())
 	}
 }
+
+func TestSuggestionFull(t *testing.T) {
+
+	index := NewMemoryIndex()
+	index.Field("name").Analyzer(defaultSuggestAnalyzerID)
+
+	index.Add("1").Set("name", "foo").Do()
+	index.Add("2").Set("name", "chariclea").Do()
+
+	result := index.Suggest("chariclea").Do()
+	if strings.Join(result.GetIDs(), ";") != "2" {
+		t.Fatal(result.GetIDs())
+	}
+}
+
+//Hotel & Spa Chariclea ****sd
 
 func TestSuggestionEmpty(t *testing.T) {
 	index := NewMemoryIndex()

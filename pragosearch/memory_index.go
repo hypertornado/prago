@@ -193,6 +193,9 @@ func (mi *MemoryIndex) getTermFrequencies(field, term string, prefixMatch bool) 
 			continue
 		}
 		if prefixMatch {
+
+			//fmt.Println(field, term, k[2])
+
 			if !strings.HasPrefix(k[2], term) {
 				continue
 			}
