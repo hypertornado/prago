@@ -23,11 +23,19 @@ func (c *cache) getStats() (ret []cacheStats) {
 	c.items.Range(func(key, value any) bool {
 		k := key.(string)
 		v := value.(*cacheItem)
+
+		var updateAt time.Time
+		item := c.getItem(k)
+		if item != nil {
+			updateAt = item.updatedAt
+		}
+
 		ret = append(ret, cacheStats{
-			ID:         k,
-			Size:       v.getJSONSize(),
-			Count:      c.accessCount[k],
-			LastAccess: c.lastAccess[k],
+			ID:            k,
+			Size:          v.getJSONSize(),
+			Count:         c.accessCount[k],
+			LastAccess:    c.lastAccess[k],
+			LastUpdatedAt: updateAt,
 		})
 
 		return true

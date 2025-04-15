@@ -77,43 +77,6 @@ func (app *App) initSystemStats() {
 		return ret
 	}, "sysadmin")
 
-	sysadminBoard.Dashboard(unlocalized("Access view")).Table(func(r *Request) *Table {
-		ret := app.Table()
-		accessView := getResourceAccessView(app)
-
-		header := []string{""}
-		header = append(header, accessView.Roles...)
-
-		ret.Header(header...)
-
-		for _, resource := range accessView.Resources {
-			var cells []*TableCell = []*TableCell{Cell(resource.Name)}
-			for _, role := range resource.Roles {
-				cells = append(cells, Cell(role.Value))
-			}
-			ret.Row(cells...)
-		}
-		return ret
-	}, sysadminPermission)
-
-	sysadminBoard.Dashboard(unlocalized("Auth roles")).Table(func(r *Request) *Table {
-		ret := app.Table()
-
-		roles := app.accessManager.roles
-		for role, permission := range roles {
-			var permStr string
-			for k, v := range permission {
-				if v {
-					permStr += string(k) + " "
-				}
-			}
-			ret.Row(Cell(role), Cell(permStr))
-		}
-
-		return ret
-
-	}, sysadminPermission)
-
 	sysadminBoard.Dashboard(unlocalized("Base app info")).Table(func(r *Request) *Table {
 
 		stats := [][2]string{}
@@ -227,6 +190,39 @@ func (app *App) initSystemStats() {
 
 		return ret.ExecuteHTML()
 	}).Permission(sysadminPermission).Name(unlocalized("Routes")).Board(sysadminBoard)
+
+	ActionUI(app, "_authorization", func(r *Request) template.HTML {
+		ret := app.Table()
+		accessView := getResourceAccessView(app)
+
+		header := []string{""}
+		header = append(header, accessView.Roles...)
+
+		ret.Header(header...)
+
+		for _, resource := range accessView.Resources {
+			var cells []*TableCell = []*TableCell{Cell(resource.Name).Header()}
+			for _, role := range resource.Roles {
+				cells = append(cells, Cell(role.Value))
+			}
+			ret.Row(cells...)
+		}
+
+		ret.Table()
+
+		roles := app.accessManager.roles
+		for role, permission := range roles {
+			var permStr string
+			for k, v := range permission {
+				if v {
+					permStr += string(k) + " "
+				}
+			}
+			ret.Row(Cell(role).Header(), Cell(permStr))
+		}
+
+		return ret.ExecuteHTML()
+	}).Permission(sysadminPermission).Name(unlocalized("Authorization")).Board(sysadminBoard)
 
 }
 

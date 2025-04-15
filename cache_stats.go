@@ -13,6 +13,7 @@ func (app *App) initCacheStats() {
 			{"size", "Size"},
 			{"count", "Access count"},
 			{"latest", "Latest access"},
+			{"updated", "Latest updated at"},
 		})
 		form.AutosubmitFirstTime = true
 		form.AddSubmit("Send")
@@ -20,7 +21,7 @@ func (app *App) initCacheStats() {
 
 		table := app.Table()
 
-		table.Header("Size", "Access count", "Latest access", "ID")
+		table.Header("Size", "Access count", "Latest access", "Last updated at", "ID")
 
 		stats := app.cache.getStats()
 
@@ -33,6 +34,8 @@ func (app *App) initCacheStats() {
 				return stats[i].Count > stats[j].Count
 			case "latest":
 				return stats[j].LastAccess.Before(stats[i].LastAccess)
+			case "updated":
+				return stats[j].LastUpdatedAt.Before(stats[i].LastUpdatedAt)
 			}
 
 			return stats[i].Size > stats[j].Size
@@ -46,6 +49,7 @@ func (app *App) initCacheStats() {
 				Cell(fmt.Sprintf("%s B", humanizeNumber(v.Size))),
 				Cell(v.Count),
 				Cell(v.LastAccess.Format("2. 1. 2006 15:04:05")),
+				Cell(v.LastUpdatedAt.Format("2. 1. 2006 15:04:05")),
 				Cell(v.ID),
 			)
 		}
@@ -58,8 +62,9 @@ func (app *App) initCacheStats() {
 }
 
 type cacheStats struct {
-	ID         string
-	Size       int64
-	Count      int64
-	LastAccess time.Time
+	ID            string
+	Size          int64
+	Count         int64
+	LastAccess    time.Time
+	LastUpdatedAt time.Time
 }

@@ -10,13 +10,10 @@ import (
 
 const staleInterval = 30 * time.Minute
 
-//const staleInterval = 1 * time.Second
-
 type cache struct {
 	items sync.Map
 
 	reloadMutex *sync.RWMutex
-
 	accessMutex *sync.RWMutex
 	accessCount map[string]int64
 	lastAccess  map[string]time.Time
@@ -126,11 +123,12 @@ func loadCache[T any](cache *cache, name string, createFn func() T) T {
 		return item.getValue().(T)
 	}
 
-	if item.isStale() {
-		go func() {
+	go func() {
+		if item.isStale() {
 			item.reloadValue(cache)
-		}()
-	}
+		}
+	}()
+
 	return item.getValue().(T)
 }
 
