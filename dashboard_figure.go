@@ -9,6 +9,7 @@ type dashboardFigure struct {
 	uuid               string
 	permission         Permission
 	url                string
+	valueStr           func(*Request) string
 	value              func(*Request) int64
 	compareValue       func(*Request) int64
 	compareDescription func(string) string
@@ -25,6 +26,20 @@ type dashboardFigureData struct {
 }
 
 func (figure dashboardFigure) data(request *Request) *dashboardFigureData {
+
+	if figure.valueStr != nil {
+
+		var suffix string
+		if figure.unit != nil {
+			suffix = " " + figure.unit(request.Locale())
+		}
+
+		return &dashboardFigureData{
+			Value: figure.valueStr(request) + suffix,
+			//Description: figure.getDescriptionStr(request, values),
+		}
+	}
+
 	values := figure.getValues(request)
 	ret := &dashboardFigureData{
 		Value:       figure.getValueStr(request, values),
@@ -84,6 +99,11 @@ func (item *dashboardFigure) getValues(request *Request) [2]int64 {
 
 func (item *dashboardFigure) Value(value func(*Request) int64) *dashboardFigure {
 	item.value = value
+	return item
+}
+
+func (item *dashboardFigure) ValueString(value func(*Request) string) *dashboardFigure {
+	item.valueStr = value
 	return item
 }
 

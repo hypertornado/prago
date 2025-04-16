@@ -25,7 +25,7 @@ func (app *App) initBoard() {
 	app.dashboardTableMap = make(map[string]*dashboardTable)
 	app.dashboardFigureMap = make(map[string]*dashboardFigure)
 	app.dashboardTimelineMap = make(map[string]*Timeline)
-	sysadminBoard = app.MainBoard.Child("sysadmin-board", unlocalized("Sysadmin"), "glyphicons-basic-501-server.svg")
+	sysadminBoard = app.MainBoard.Child("_sysadmin", unlocalized("Sysadmin"), "glyphicons-basic-501-server.svg")
 
 	sysadminGroup := sysadminBoard.Dashboard(unlocalized(""))
 

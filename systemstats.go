@@ -4,19 +4,17 @@ import (
 	"fmt"
 	"html/template"
 	"os"
+	"reflect"
 	"runtime"
 	"sort"
 	"strings"
 	"time"
-
-	"golang.org/x/text/collate"
-	"golang.org/x/text/language"
 )
 
 func (app *App) initSystemStats() {
 	startedAt := time.Now()
 
-	currentStatsDashboard := sysadminBoard.Dashboard(unlocalized("Current stats"))
+	currentStatsDashboard := sysadminBoard.Dashboard(unlocalized("Requests"))
 
 	currentStatsDashboard.Figure(unlocalized("Current requests"), "sysadmin").Value(func(request *Request) int64 {
 		return currentRequestCounter.Load()
@@ -26,7 +24,7 @@ func (app *App) initSystemStats() {
 		return totalRequestCounter.Load()
 	}).RefreshTime(1)
 
-	dbStatsDashboard := sysadminBoard.Dashboard(unlocalized("DB stats"))
+	dbStatsDashboard := sysadminBoard.Dashboard(unlocalized("Database"))
 
 	dbStatsDashboard.Figure(unlocalized("Idle"), "sysadmin").Value(func(request *Request) int64 {
 		return int64(app.db.Stats().Idle)
@@ -36,12 +34,20 @@ func (app *App) initSystemStats() {
 		return int64(app.db.Stats().OpenConnections)
 	}).RefreshTime(1)
 
+	dbStatsDashboard.Figure(unlocalized("MaxOpenConnections"), "sysadmin").Value(func(request *Request) int64 {
+		return int64(app.db.Stats().MaxOpenConnections)
+	}).RefreshTime(1)
+
 	dbStatsDashboard.Figure(unlocalized("InUse"), "sysadmin").Value(func(request *Request) int64 {
 		return int64(app.db.Stats().InUse)
 	}).RefreshTime(1)
 
 	dbStatsDashboard.Figure(unlocalized("WaitCount"), "sysadmin").Value(func(request *Request) int64 {
 		return int64(app.db.Stats().WaitCount)
+	}).RefreshTime(1)
+
+	dbStatsDashboard.Figure(unlocalized("WaitDuration"), "sysadmin").ValueString(func(request *Request) string {
+		return app.db.Stats().WaitDuration.String()
 	}).RefreshTime(1)
 
 	dbStatsDashboard.Figure(unlocalized("MaxIdleClosed"), "sysadmin").Value(func(request *Request) int64 {
@@ -77,101 +83,98 @@ func (app *App) initSystemStats() {
 		return ret
 	}, "sysadmin")
 
-	sysadminBoard.Dashboard(unlocalized("Base app info")).Table(func(r *Request) *Table {
+	baseAppInfoDashboard := sysadminBoard.Dashboard(unlocalized("Base app info"))
 
-		stats := [][2]string{}
-		stats = append(stats, [2]string{"App name", app.codeName})
-		stats = append(stats, [2]string{"App version", app.version})
-
-		developmentModeStr := "false"
+	baseAppInfoDashboard.Figure(unlocalized("App name"), sysadminPermission).ValueString(func(r *Request) string {
+		return app.codeName
+	})
+	baseAppInfoDashboard.Figure(unlocalized("App version"), sysadminPermission).ValueString(func(r *Request) string {
+		return app.version
+	})
+	baseAppInfoDashboard.Figure(unlocalized("Development mode"), sysadminPermission).ValueString(func(r *Request) string {
 		if app.developmentMode {
-			developmentModeStr = "true"
+			return "true"
 		}
-		stats = append(stats, [2]string{"Development mode", developmentModeStr})
-		stats = append(stats, [2]string{"Started at", startedAt.Format(time.RFC3339)})
+		return "false"
+	})
+	baseAppInfoDashboard.Figure(unlocalized("Started at"), sysadminPermission).ValueString(func(r *Request) string {
+		return startedAt.Format(time.RFC3339)
+	})
+	baseAppInfoDashboard.Figure(unlocalized("Go version"), sysadminPermission).ValueString(func(r *Request) string {
+		return runtime.Version()
+	})
+	baseAppInfoDashboard.Figure(unlocalized("Compiler"), sysadminPermission).ValueString(func(r *Request) string {
+		return runtime.Compiler
+	})
+	baseAppInfoDashboard.Figure(unlocalized("GOARCH"), sysadminPermission).ValueString(func(r *Request) string {
+		return runtime.GOARCH
+	})
+	baseAppInfoDashboard.Figure(unlocalized("GOOS"), sysadminPermission).ValueString(func(r *Request) string {
+		return runtime.GOOS
+	})
+	baseAppInfoDashboard.Figure(unlocalized("GOMAXPROCS"), sysadminPermission).ValueString(func(r *Request) string {
+		return fmt.Sprintf("%d", runtime.GOMAXPROCS(-1))
+	})
+	baseAppInfoDashboard.Figure(unlocalized("Localhost URL"), sysadminPermission).ValueString(func(r *Request) string {
+		return fmt.Sprintf("%s:%d", getLocalIP(), app.port)
+	})
 
-		stats = append(stats, [2]string{"Go version", runtime.Version()})
-		stats = append(stats, [2]string{"Compiler", runtime.Compiler})
-		stats = append(stats, [2]string{"GOARCH", runtime.GOARCH})
-		stats = append(stats, [2]string{"GOOS", runtime.GOOS})
-		stats = append(stats, [2]string{"GOMAXPROCS", fmt.Sprintf("%d", runtime.GOMAXPROCS(-1))})
+	osInfoDashboard := sysadminBoard.Dashboard(unlocalized("OS info"))
 
-		stats = append(stats, [2]string{"Localhost URL", fmt.Sprintf("%s:%d", getLocalIP(), app.port)})
-
-		return statsTable(app, stats)
-
-	}, sysadminPermission)
-
-	sysadminBoard.Dashboard(unlocalized("Database info")).Table(func(r *Request) *Table {
-		databaseStats := [][2]string{}
-		dbStats := app.db.Stats()
-		databaseStats = append(databaseStats, [2]string{"MaxOpenConnections", fmt.Sprintf("%d", dbStats.MaxOpenConnections)})
-		databaseStats = append(databaseStats, [2]string{"OpenConnections", fmt.Sprintf("%d", dbStats.OpenConnections)})
-		databaseStats = append(databaseStats, [2]string{"InUse", fmt.Sprintf("%d", dbStats.InUse)})
-		databaseStats = append(databaseStats, [2]string{"Idle", fmt.Sprintf("%d", dbStats.Idle)})
-		databaseStats = append(databaseStats, [2]string{"WaitCount", fmt.Sprintf("%d", dbStats.WaitCount)})
-		databaseStats = append(databaseStats, [2]string{"WaitDuration", fmt.Sprintf("%v", dbStats.WaitDuration)})
-		databaseStats = append(databaseStats, [2]string{"MaxIdleClosed", fmt.Sprintf("%d", dbStats.MaxIdleClosed)})
-		databaseStats = append(databaseStats, [2]string{"MaxIdleTimeClosed", fmt.Sprintf("%d", dbStats.MaxIdleTimeClosed)})
-		databaseStats = append(databaseStats, [2]string{"MaxLifetimeClosed", fmt.Sprintf("%d", dbStats.MaxLifetimeClosed)})
-
-		return statsTable(app, databaseStats)
-
-	}, sysadminPermission)
-
-	sysadminBoard.Dashboard(unlocalized("OS info")).Table(func(r *Request) *Table {
-		osStats := [][2]string{}
-		osStats = append(osStats, [2]string{"EGID", fmt.Sprintf("%d", os.Getegid())})
-		osStats = append(osStats, [2]string{"EUID", fmt.Sprintf("%d", os.Geteuid())})
-		osStats = append(osStats, [2]string{"GID", fmt.Sprintf("%d", os.Getgid())})
-		osStats = append(osStats, [2]string{"Page size", fmt.Sprintf("%d", os.Getpagesize())})
-		osStats = append(osStats, [2]string{"PID", fmt.Sprintf("%d", os.Getpid())})
-		osStats = append(osStats, [2]string{"PPID", fmt.Sprintf("%d", os.Getppid())})
+	osInfoDashboard.Figure(unlocalized("EGID"), sysadminPermission).ValueString(func(r *Request) string {
+		return fmt.Sprintf("%d", os.Getegid())
+	})
+	osInfoDashboard.Figure(unlocalized("EUID"), sysadminPermission).ValueString(func(r *Request) string {
+		return fmt.Sprintf("%d", os.Geteuid())
+	})
+	osInfoDashboard.Figure(unlocalized("GID"), sysadminPermission).ValueString(func(r *Request) string {
+		return fmt.Sprintf("%d", os.Getgid())
+	})
+	osInfoDashboard.Figure(unlocalized("Page size"), sysadminPermission).ValueString(func(r *Request) string {
+		return fmt.Sprintf("%d", os.Getpagesize())
+	})
+	osInfoDashboard.Figure(unlocalized("PID"), sysadminPermission).ValueString(func(r *Request) string {
+		return fmt.Sprintf("%d", os.Getpid())
+	})
+	osInfoDashboard.Figure(unlocalized("PPID"), sysadminPermission).ValueString(func(r *Request) string {
+		return fmt.Sprintf("%d", os.Getppid())
+	})
+	osInfoDashboard.Figure(unlocalized("Working directory"), sysadminPermission).ValueString(func(r *Request) string {
 		wd, _ := os.Getwd()
-		osStats = append(osStats, [2]string{"Working directory", wd})
+		return wd
+	})
+	osInfoDashboard.Figure(unlocalized("Hostname"), sysadminPermission).ValueString(func(r *Request) string {
 		hostname, _ := os.Hostname()
-		osStats = append(osStats, [2]string{"Hostname", hostname})
+		return hostname
+	})
 
-		return statsTable(app, osStats)
+	memoryInfoDashboard := sysadminBoard.Dashboard(unlocalized("Memory"))
+	var mStatsExmaple runtime.MemStats
+	fieldCount := reflect.TypeOf(mStatsExmaple).NumField()
+	for i := 0; i < fieldCount; i++ {
+		field := reflect.TypeOf(mStatsExmaple).Field(i)
+		if field.Type.Kind() != reflect.Uint64 {
+			continue
+		}
+		memoryInfoDashboard.Figure(unlocalized(field.Name), sysadminPermission).Value(func(r *Request) int64 {
+			var mStats runtime.MemStats
+			runtime.ReadMemStats(&mStats)
+			uinvVal := reflect.ValueOf(mStats).Field(i).Uint()
+			return int64(uinvVal)
+		}).RefreshTime(1)
 
-	}, sysadminPermission)
+	}
 
-	sysadminBoard.Dashboard(unlocalized("Memory info")).Table(func(r *Request) *Table {
-		var mStats runtime.MemStats
-		runtime.ReadMemStats(&mStats)
-		memStats := [][2]string{}
-		memStats = append(memStats, [2]string{"Alloc", fmt.Sprintf("%d", mStats.Alloc)})
-		memStats = append(memStats, [2]string{"TotalAlloc", fmt.Sprintf("%d", mStats.TotalAlloc)})
-		memStats = append(memStats, [2]string{"Sys", fmt.Sprintf("%d", mStats.Sys)})
-		memStats = append(memStats, [2]string{"Lookups", fmt.Sprintf("%d", mStats.Lookups)})
-		memStats = append(memStats, [2]string{"Mallocs", fmt.Sprintf("%d", mStats.Mallocs)})
-		memStats = append(memStats, [2]string{"Frees", fmt.Sprintf("%d", mStats.Frees)})
-		memStats = append(memStats, [2]string{"HeapAlloc", fmt.Sprintf("%d", mStats.HeapAlloc)})
-		memStats = append(memStats, [2]string{"HeapSys", fmt.Sprintf("%d", mStats.HeapSys)})
-		memStats = append(memStats, [2]string{"HeapIdle", fmt.Sprintf("%d", mStats.HeapIdle)})
-		memStats = append(memStats, [2]string{"HeapInuse", fmt.Sprintf("%d", mStats.HeapInuse)})
-		memStats = append(memStats, [2]string{"HeapReleased", fmt.Sprintf("%d", mStats.HeapReleased)})
-		memStats = append(memStats, [2]string{"HeapObjects", fmt.Sprintf("%d", mStats.HeapObjects)})
-		memStats = append(memStats, [2]string{"StackInuse", fmt.Sprintf("%d", mStats.StackInuse)})
-		memStats = append(memStats, [2]string{"StackSys", fmt.Sprintf("%d", mStats.StackSys)})
-		memStats = append(memStats, [2]string{"MSpanInuse", fmt.Sprintf("%d", mStats.MSpanInuse)})
-		memStats = append(memStats, [2]string{"MSpanSys", fmt.Sprintf("%d", mStats.MSpanSys)})
-		memStats = append(memStats, [2]string{"MCacheInuse", fmt.Sprintf("%d", mStats.MCacheInuse)})
-		memStats = append(memStats, [2]string{"MCacheSys", fmt.Sprintf("%d", mStats.MCacheSys)})
-		memStats = append(memStats, [2]string{"BuckHashSys", fmt.Sprintf("%d", mStats.BuckHashSys)})
-		memStats = append(memStats, [2]string{"GCSys", fmt.Sprintf("%d", mStats.GCSys)})
-		memStats = append(memStats, [2]string{"OtherSys", fmt.Sprintf("%d", mStats.OtherSys)})
-		memStats = append(memStats, [2]string{"NextGC", fmt.Sprintf("%d", mStats.NextGC)})
-		memStats = append(memStats, [2]string{"LastGC", fmt.Sprintf("%d", mStats.LastGC)})
-		memStats = append(memStats, [2]string{"PauseTotalNs", fmt.Sprintf("%d", mStats.PauseTotalNs)})
-		memStats = append(memStats, [2]string{"NumGC", fmt.Sprintf("%d", mStats.NumGC)})
+	environmentDashboard := sysadminBoard.Dashboard(unlocalized("Enviroment variables"))
+	for _, e := range os.Environ() {
+		pair := strings.Split(e, "=")
+		environmentDashboard.Figure(unlocalized(pair[0]), sysadminPermission).ValueString(func(r *Request) string {
+			return pair[1]
+		})
 
-		return statsTable(app, memStats)
+	}
 
-	}, sysadminPermission)
-
-	sysadminBoard.Dashboard(unlocalized("Enviroment variables")).Table(func(r *Request) *Table {
-
+	/*environmentDashboard.Table(func(r *Request) *Table {
 		environmentStats := [][2]string{}
 		for _, e := range os.Environ() {
 			pair := strings.Split(e, "=")
@@ -179,7 +182,7 @@ func (app *App) initSystemStats() {
 		}
 
 		return statsTable(app, environmentStats)
-	}, sysadminPermission)
+	}, sysadminPermission)*/
 
 	ActionUI(app, "_routes", func(r *Request) template.HTML {
 		ret := app.Table()
@@ -224,25 +227,6 @@ func (app *App) initSystemStats() {
 		return ret.ExecuteHTML()
 	}).Permission(sysadminPermission).Name(unlocalized("Authorization")).Board(sysadminBoard)
 
-}
-
-func statsTable(app *App, data [][2]string) *Table {
-	ret := app.Table()
-
-	collator := collate.New(language.Czech)
-
-	sort.Slice(data, func(i, j int) bool {
-		if collator.CompareString(data[i][0], data[j][0]) <= 0 {
-			return true
-		} else {
-			return false
-		}
-	})
-
-	for _, v := range data {
-		ret.Row(Cell(v[0]).Header(), Cell(v[1]))
-	}
-	return ret
 }
 
 type accessView struct {
