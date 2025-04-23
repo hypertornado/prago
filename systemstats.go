@@ -83,6 +83,20 @@ func (app *App) initSystemStats() {
 		return ret
 	}, "sysadmin")
 
+	cacheInfoDashboard := sysadminBoard.Dashboard(unlocalized("Cache"))
+	cacheInfoDashboard.Figure(unlocalized("Number of items"), sysadminPermission).Value(func(r *Request) int64 {
+		return app.cache.numberOfItems()
+	}).RefreshTime(1)
+	cacheInfoDashboard.Figure(unlocalized("Total requests"), sysadminPermission).Value(func(r *Request) int64 {
+		return app.cache.totalRequests.Load()
+	}).RefreshTime(1)
+	cacheInfoDashboard.Figure(unlocalized("Current requests"), sysadminPermission).Value(func(r *Request) int64 {
+		return app.cache.currentRequests.Load()
+	}).RefreshTime(1)
+	cacheInfoDashboard.Figure(unlocalized("Reload waiting"), sysadminPermission).Value(func(r *Request) int64 {
+		return app.cache.reloadWaiting.Load()
+	}).RefreshTime(1)
+
 	baseAppInfoDashboard := sysadminBoard.Dashboard(unlocalized("Base app info"))
 
 	baseAppInfoDashboard.Figure(unlocalized("App name"), sysadminPermission).ValueString(func(r *Request) string {

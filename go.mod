@@ -22,6 +22,7 @@ require (
 	github.com/golang-commonmark/mdurl v0.0.0-20180910110917-8d018c6567d6 // indirect
 	github.com/golang-commonmark/puny v0.0.0-20180910110745-050be392d8b8 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
+	github.com/hypertornado/go-strip-markdown v0.0.0-20250417122110-a5ced7b70832 // indirect
 	github.com/opennota/wd v0.0.0-20180911144301-b446539ab1e7 // indirect
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
 	github.com/russross/blackfriday v2.0.0+incompatible // indirect

@@ -690,7 +690,7 @@ select.admin_timestamp_minute {
 
 .admin_item_relation_picker_suggestion {
   box-shadow: none;
-  margin: 0px;
+  margin: 0px !important;
   cursor: pointer;
   border-radius: 0px;
 }
@@ -2786,7 +2786,7 @@ a.admin_stats_section_row {
 }
 
 .popup-wide {
-  width: min(1000px, 100% - 20px);
+  width: min(700px, 100% - 20px);
   height: calc(100dvh - 100px);
 }
 

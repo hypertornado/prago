@@ -14,6 +14,7 @@ func (app *App) initCacheStats() {
 			{"count", "Access count"},
 			{"latest", "Latest access"},
 			{"updated", "Latest updated at"},
+			{"reload", "Reload duration"},
 		})
 		form.AutosubmitFirstTime = true
 		form.AddSubmit("Send")
@@ -21,7 +22,7 @@ func (app *App) initCacheStats() {
 
 		table := app.Table()
 
-		table.Header("Size", "Access count", "Latest access", "Last updated at", "ID")
+		table.Header("Size", "Access count", "Latest access", "Last updated at", "Reload duration", "ID")
 
 		stats := app.cache.getStats()
 
@@ -36,6 +37,8 @@ func (app *App) initCacheStats() {
 				return stats[j].LastAccess.Before(stats[i].LastAccess)
 			case "updated":
 				return stats[j].LastUpdatedAt.Before(stats[i].LastUpdatedAt)
+			case "reload":
+				return stats[j].ReloadDuration < stats[i].ReloadDuration
 			}
 
 			return stats[i].Size > stats[j].Size
@@ -46,10 +49,11 @@ func (app *App) initCacheStats() {
 		for _, v := range stats {
 			totalSize += v.Size
 			table.Row(
-				Cell(fmt.Sprintf("%s B", humanizeNumber(v.Size))),
-				Cell(v.Count),
-				Cell(v.LastAccess.Format("2. 1. 2006 15:04:05")),
-				Cell(v.LastUpdatedAt.Format("2. 1. 2006 15:04:05")),
+				Cell(fmt.Sprintf("%s B", humanizeNumber(v.Size))).Nowrap(),
+				Cell(v.Count).Nowrap(),
+				Cell(v.LastAccess.Format("2. 1. 2006 15:04:05")).Nowrap(),
+				Cell(v.LastUpdatedAt.Format("2. 1. 2006 15:04:05")).Nowrap(),
+				Cell(v.ReloadDuration.String()).Nowrap(),
 				Cell(v.ID),
 			)
 		}
@@ -62,9 +66,18 @@ func (app *App) initCacheStats() {
 }
 
 type cacheStats struct {
-	ID            string
-	Size          int64
-	Count         int64
-	LastAccess    time.Time
-	LastUpdatedAt time.Time
+	ID             string
+	Size           int64
+	Count          int64
+	LastAccess     time.Time
+	LastUpdatedAt  time.Time
+	ReloadDuration time.Duration
+}
+
+func (cache *cache) numberOfItems() (ret int64) {
+	cache.items.Range(func(k, v interface{}) bool {
+		ret++
+		return true
+	})
+	return ret
 }

@@ -1,8 +1,10 @@
 package prago
 
 import (
+	"log"
 	"math/rand"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -13,6 +15,12 @@ const staleInterval = 30 * time.Minute
 type cache struct {
 	items sync.Map
 
+	totalRequests   atomic.Int64
+	currentRequests atomic.Int64
+	reloadWaiting   atomic.Int64
+
+	//reloadingValuesCount sync.
+
 	reloadMutex *sync.RWMutex
 	accessMutex *sync.RWMutex
 	accessCount map[string]int64
@@ -20,11 +28,12 @@ type cache struct {
 }
 
 type cacheItem struct {
-	updatedAt time.Time
-	updating  bool
-	value     any
-	createFn  func() any
-	mutex     *sync.RWMutex
+	updatedAt      time.Time
+	updating       bool
+	value          any
+	createFn       func() any
+	reloadDuration time.Duration
+	mutex          *sync.RWMutex
 }
 
 func newCache() *cache {
@@ -54,6 +63,10 @@ func (item cacheItem) getValue() any {
 }
 
 func (item *cacheItem) reloadValue(cache *cache) {
+	cache.reloadWaiting.Add(1)
+	defer func() {
+		cache.reloadWaiting.Add(-1)
+	}()
 
 	item.mutex.RLock()
 	if item.updating {
@@ -76,22 +89,32 @@ func (item *cacheItem) reloadValue(cache *cache) {
 	var val any
 	defer func() {
 		if err := recover(); err != nil {
+			log.Printf("recovering from cache createFn panic: %v", err)
 			item.mutex.Lock()
 			item.updating = false
 			item.mutex.Unlock()
 		}
 	}()
 
+	var reloadStart = time.Now()
 	val = item.createFn()
+	var reloadEnd = time.Now()
 
 	item.mutex.Lock()
 	item.value = val
 	item.updatedAt = time.Now()
 	item.updating = false
+	item.reloadDuration = reloadEnd.Sub(reloadStart)
 	item.mutex.Unlock()
 }
 
 func (cache *cache) getItem(name string) *cacheItem {
+	cache.totalRequests.Add(1)
+	cache.currentRequests.Add(1)
+	defer func() {
+		cache.currentRequests.Add(-1)
+	}()
+
 	item, ok := cache.items.Load(name)
 	if !ok {
 		return nil
@@ -100,6 +123,7 @@ func (cache *cache) getItem(name string) *cacheItem {
 }
 
 func (cache *cache) putItem(name string, createFn func() any) *cacheItem {
+	var reloadStart = time.Now()
 	item := &cacheItem{
 		updatedAt: time.Now(),
 		value:     createFn(),
@@ -107,6 +131,7 @@ func (cache *cache) putItem(name string, createFn func() any) *cacheItem {
 		updating:  false,
 		mutex:     &sync.RWMutex{},
 	}
+	item.reloadDuration = time.Now().Sub(reloadStart)
 
 	cache.items.Store(name, item)
 	return item

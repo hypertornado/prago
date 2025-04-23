@@ -31,11 +31,12 @@ func (c *cache) getStats() (ret []cacheStats) {
 		}
 
 		ret = append(ret, cacheStats{
-			ID:            k,
-			Size:          v.getJSONSize(),
-			Count:         c.accessCount[k],
-			LastAccess:    c.lastAccess[k],
-			LastUpdatedAt: updateAt,
+			ID:             k,
+			Size:           v.getJSONSize(),
+			Count:          c.accessCount[k],
+			LastAccess:     c.lastAccess[k],
+			LastUpdatedAt:  updateAt,
+			ReloadDuration: v.reloadDuration,
 		})
 
 		return true
