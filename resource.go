@@ -331,14 +331,14 @@ func (resource *Resource) cachedCountName() string {
 
 func (resource *Resource) getCachedCount() int64 {
 	return loadCache(resource.app.cache, resource.cachedCountName(), func() int64 {
-		count, _ := resource.countAllItems(context.Background())
+		count := resource.countAllItems()
 		return count
 	})
 }
 
 func (resource *Resource) updateCachedCount() error {
 	resource.app.cache.forceLoad(resource.cachedCountName(), func() interface{} {
-		count, _ := resource.countAllItems(context.Background())
+		count := resource.countAllItems()
 		return count
 	})
 	return nil
