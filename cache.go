@@ -5,59 +5,48 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"golang.org/x/sync/singleflight"
 )
 
 //use https://github.com/sourcegraph/conc
 
-const staleInterval = 10 * time.Minute
+const staleInterval = 10 * time.Second
 
 type cache struct {
 	items sync.Map
+	group singleflight.Group
 
 	totalRequests   atomic.Int64
 	currentRequests atomic.Int64
 	reloadWaiting   atomic.Int64
 
-	//reloadingValuesCount sync.
-
-	//reloadMutex *sync.RWMutex
-	accessMutex *sync.RWMutex
-	accessCount map[string]int64
-	lastAccess  map[string]time.Time
+	//accessMutex *sync.RWMutex
 }
 
 type cacheItem struct {
-	updatedAt time.Time
-	//updating       bool
-	value          any
+	once           sync.Once
+	updatedAt      syncedItem[time.Time]
+	lastAccess     syncedItem[time.Time]
+	value          syncedItem[any]
 	createFn       func() any
-	reloadDuration time.Duration
-	mutex          *sync.RWMutex
+	reloadDuration syncedItem[time.Duration]
+
+	accessCount atomic.Int64
 }
 
 func newCache() *cache {
-	ret := &cache{
-		//reloadMutex: &sync.RWMutex{},
-		accessMutex: &sync.RWMutex{},
-		accessCount: map[string]int64{},
-		lastAccess:  map[string]time.Time{},
-	}
-
+	ret := &cache{}
 	go cacheReloader(ret)
 	return ret
 }
 
-func (item cacheItem) isStale() bool {
-	item.mutex.RLock()
-	defer item.mutex.RUnlock()
-
-	return item.updatedAt.Add(staleInterval).Before(time.Now())
+func (item *cacheItem) isStale() bool {
+	return item.updatedAt.Get().Add(staleInterval).Before(time.Now())
 }
 
-func (item cacheItem) getValue() any {
-	item.mutex.RLock()
-	defer item.mutex.RUnlock()
-	return item.value
+func (item *cacheItem) getValue() any {
+	return item.value.Get()
 }
 
 func (item *cacheItem) reloadValue(cache *cache) {
@@ -76,12 +65,9 @@ func (item *cacheItem) reloadValue(cache *cache) {
 	var reloadStart = time.Now()
 	val = item.createFn()
 
-	item.mutex.Lock()
-	defer item.mutex.Unlock()
-
-	item.value = val
-	item.updatedAt = time.Now()
-	item.reloadDuration = time.Now().Sub(reloadStart)
+	item.value.Set(val)
+	item.updatedAt.Set(time.Now())
+	item.reloadDuration.Set(time.Now().Sub(reloadStart))
 }
 
 func (cache *cache) getItem(name string) *cacheItem {
@@ -98,28 +84,52 @@ func (cache *cache) getItem(name string) *cacheItem {
 	return item.(*cacheItem)
 }
 
+//use https://pkg.go.dev/golang.org/x/sync/singleflight
+
 func (cache *cache) putItem(name string, createFn func() any) *cacheItem {
+
+	cache.reloadWaiting.Add(1)
+	defer func() {
+		cache.reloadWaiting.Add(-1)
+	}()
+
 	var reloadStart = time.Now()
 	item := &cacheItem{
-		updatedAt: time.Now(),
-		value:     createFn(),
-		createFn:  createFn,
-		mutex:     &sync.RWMutex{},
+		updatedAt:  syncedItem[time.Time]{},
+		lastAccess: syncedItem[time.Time]{},
+		value: syncedItem[any]{
+			val: createFn(),
+		},
+		createFn:       createFn,
+		reloadDuration: syncedItem[time.Duration]{},
 	}
-	item.reloadDuration = time.Now().Sub(reloadStart)
+	item.reloadDuration.Set(time.Now().Sub(reloadStart))
 
 	cache.items.Store(name, item)
 	return item
 }
 
 func loadCache[T any](cache *cache, name string, createFn func() T) T {
-	fn := func() any {
-		return createFn()
+
+	i, err, _ := cache.group.Do(name, func() (interface{}, error) {
+		fn := func() any {
+			return createFn()
+		}
+		item := cache.getItem(name)
+		if item == nil {
+			item = cache.putItem(name, fn)
+		}
+		return item, nil
+	})
+
+	if err != nil {
+		panic(err)
 	}
-	item := cache.getItem(name)
-	if item == nil {
-		item = cache.putItem(name, fn)
-	}
+
+	item := i.(*cacheItem)
+
+	item.accessCount.Add(1)
+	item.lastAccess.Set(time.Now())
 	return item.getValue().(T)
 }
 
@@ -129,7 +139,6 @@ func Cached[T any](app *App, name string, createFn func() T) chan T {
 		val := loadCache(app.cache, name, createFn)
 		ret <- val
 	}()
-	app.cache.markAccess(name)
 	return ret
 }
 
@@ -148,10 +157,4 @@ func (c *cache) clear() {
 		c.items.Delete(key)
 		return true
 	})
-
-	c.accessMutex.Lock()
-	defer c.accessMutex.Unlock()
-
-	c.accessCount = map[string]int64{}
-	c.lastAccess = map[string]time.Time{}
 }

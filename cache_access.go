@@ -5,20 +5,7 @@ import (
 	"time"
 )
 
-func (c *cache) markAccess(id string) {
-	go func() {
-		c.accessMutex.Lock()
-		defer c.accessMutex.Unlock()
-
-		c.accessCount[id] += 1
-		c.lastAccess[id] = time.Now()
-	}()
-}
-
 func (c *cache) getStats() (ret []cacheStats) {
-
-	c.accessMutex.Lock()
-	defer c.accessMutex.Unlock()
 
 	c.items.Range(func(key, value any) bool {
 		k := key.(string)
@@ -27,16 +14,16 @@ func (c *cache) getStats() (ret []cacheStats) {
 		var updateAt time.Time
 		item := c.getItem(k)
 		if item != nil {
-			updateAt = item.updatedAt
+			updateAt = item.updatedAt.Get()
 		}
 
 		ret = append(ret, cacheStats{
 			ID:             k,
 			Size:           v.getJSONSize(),
-			Count:          c.accessCount[k],
-			LastAccess:     c.lastAccess[k],
+			Count:          v.accessCount.Load(),
+			LastAccess:     v.lastAccess.Get(),
 			LastUpdatedAt:  updateAt,
-			ReloadDuration: v.reloadDuration,
+			ReloadDuration: v.reloadDuration.Get(),
 		})
 
 		return true
