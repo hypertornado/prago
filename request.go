@@ -101,6 +101,10 @@ func (request *Request) Name() string {
 	return data.name
 }
 
+func (request *Request) Duration() time.Duration {
+	return time.Since(request.receivedAt)
+}
+
 func (request *Request) Locale() string {
 	userID := request.UserID()
 	data := request.app.userDataCacheGet(userID)

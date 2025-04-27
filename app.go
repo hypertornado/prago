@@ -86,9 +86,9 @@ type App struct {
 
 	EmailSentHandler func(*Email)
 
-	beforeStartHandler func()
-
 	serverSetup func(*http.Server)
+
+	afterRequestServedHandler func(*Request)
 }
 
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {
@@ -97,7 +97,6 @@ func NewTesting(t *testing.T, initHandler func(app *App)) *App {
 	app.afterInit()
 	app.unsafeDropTables()
 	app.migrate(false)
-
 	return app
 }
 
@@ -237,6 +236,10 @@ func (app *App) RandomizationString() string {
 
 // DotPath returns path to hidden directory with app configuration and data
 func (app *App) dotPath() string { return os.Getenv("HOME") + "/." + app.codeName }
+
+func (app *App) SetAfterRequestServedHandler(fn func(*Request)) {
+	app.afterRequestServedHandler = fn
+}
 
 func columnName(fieldName string) string {
 	return prettyURL(fieldName)

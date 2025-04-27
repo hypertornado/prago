@@ -3004,6 +3004,7 @@ function initGoogleMaps() {
             return;
         }
         const { Map } = yield google.maps.importLibrary("maps");
+        const { Autocomplete } = yield google.maps.importLibrary('places');
         const { AdvancedMarkerElement, PinElement } = yield google.maps.importLibrary("marker");
         viewElements.forEach((el) => {
             initGoogleMapView(el);
@@ -3039,7 +3040,16 @@ class GoogleMapEdit {
         var mapEl = el.querySelector(".map_picker_map");
         this.input = this.el.querySelector(".map_picker_value");
         this.deleteButton = el.querySelector(".map_picker_delete");
+        this.searchContainer = el.querySelector(".map_picker_search");
         const location = { lng: 14.41854, lat: 50.073658 };
+        let pac2 = new google.maps.places.PlaceAutocompleteElement();
+        this.searchContainer.append(pac2);
+        pac2.addEventListener('gmp-select', (_a) => __awaiter(this, [_a], void 0, function* ({ placePrediction }) {
+            const place = placePrediction.toPlace();
+            yield place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location'] });
+            this.setValue(place.location.lat(), place.location.lng());
+            this.centreMap(place.location.lat(), place.location.lng());
+        }));
         this.map = new google.maps.Map(mapEl, {
             zoom: 1,
             center: location,

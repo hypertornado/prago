@@ -12,6 +12,8 @@ async function initGoogleMaps() {
     //@ts-ignore
     const { Map } = await google.maps.importLibrary("maps");
     //@ts-ignore
+    const { Autocomplete } = await google.maps.importLibrary('places');
+    //@ts-ignore
     const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
     viewElements.forEach((el) => {
@@ -58,6 +60,8 @@ class GoogleMapEdit {
     icon: HTMLDivElement;
     statusEl: HTMLDivElement;
     deleteButton: HTMLButtonElement;
+
+    searchContainer: HTMLDivElement;
   
     constructor(el: HTMLDivElement) {
         this.el = el;
@@ -66,8 +70,22 @@ class GoogleMapEdit {
         var mapEl = el.querySelector(".map_picker_map");
         this.input = this.el.querySelector(".map_picker_value");
         this.deleteButton = el.querySelector(".map_picker_delete");
+        this.searchContainer = el.querySelector(".map_picker_search");
 
         const location = { lng: 14.41854, lat: 50.073658 };
+
+        //@ts-ignore
+        let pac2 = new google.maps.places.PlaceAutocompleteElement();
+
+        this.searchContainer.append(pac2);
+
+        //@ts-ignore
+        pac2.addEventListener('gmp-select',  async ({ placePrediction }) => {
+            const place = placePrediction.toPlace();
+            await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location'] });
+            this.setValue(place.location.lat(), place.location.lng());
+            this.centreMap(place.location.lat(), place.location.lng());
+        });
 
         //@ts-ignore
         this.map = new google.maps.Map(mapEl, {

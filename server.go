@@ -10,10 +10,6 @@ import (
 
 func (app *App) listenAndServe(port int) error {
 
-	if app.beforeStartHandler != nil {
-		app.beforeStartHandler()
-	}
-
 	app.port = port
 	app.Log().Printf("Server started: port=%d, pid=%d, developmentMode=%v\n", port, os.Getpid(), app.developmentMode)
 
@@ -48,10 +44,6 @@ func (app *App) NewServer() server {
 	return server{*app}
 }
 
-func (app *App) AddBeforeStartHandler(fn func()) {
-	app.beforeStartHandler = fn
-}
-
 func (app *App) AddServerSetup(fn func(*http.Server)) {
 	app.serverSetup = fn
 }
@@ -80,6 +72,12 @@ func (app *App) serveHTTP(w http.ResponseWriter, r *http.Request) {
 		ResponseStatus: 200,
 	}
 	w.Header().Set("X-Prago-Request", request.uuid)
+
+	defer func() {
+		if app.afterRequestServedHandler != nil {
+			app.afterRequestServedHandler(request)
+		}
+	}()
 
 	defer func() {
 		if recoveryData := recover(); recoveryData != nil {

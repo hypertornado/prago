@@ -11,7 +11,7 @@ import (
 
 //use https://github.com/sourcegraph/conc
 
-const staleInterval = 10 * time.Second
+const staleInterval = 10 * time.Minute
 
 type cache struct {
 	items sync.Map
