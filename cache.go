@@ -11,7 +11,7 @@ import (
 
 //use https://github.com/sourcegraph/conc
 
-const staleInterval = 10 * time.Minute
+const staleInterval = 60 * time.Minute
 
 type cache struct {
 	items sync.Map
@@ -20,8 +20,6 @@ type cache struct {
 	totalRequests   atomic.Int64
 	currentRequests atomic.Int64
 	reloadWaiting   atomic.Int64
-
-	//accessMutex *sync.RWMutex
 }
 
 type cacheItem struct {

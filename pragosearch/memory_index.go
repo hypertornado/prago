@@ -145,6 +145,7 @@ func (mi *MemoryIndex) Query(q string) *SearchRequest {
 }
 
 func (mi *MemoryIndex) Suggest(q string) *SearchRequest {
+	q = removeDiacritics(q)
 	ret := newSearchRequest(mi, q)
 	ret.prefixMatch = true
 	return ret

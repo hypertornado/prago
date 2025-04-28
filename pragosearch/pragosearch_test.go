@@ -118,8 +118,6 @@ func TestSuggestionFull(t *testing.T) {
 	}
 }
 
-//Hotel & Spa Chariclea ****sd
-
 func TestSuggestionEmpty(t *testing.T) {
 	index := NewMemoryIndex()
 	index.Field("name")
@@ -131,5 +129,20 @@ func TestSuggestionEmpty(t *testing.T) {
 	result := index.Suggest("").Do()
 	if strings.Join(result.GetIDs(), ";") != "2;3;1" {
 		t.Fatal(result.GetIDs())
+	}
+}
+
+func TestSuggestionDiacritic(t *testing.T) {
+	index := NewMemoryIndex()
+	index.Field("name")
+
+	index.Add("1").Set("name", "chariclea").Do()
+	index.Add("2").Set("name", "Pobyt šitý na míru").Do()
+
+	for _, q := range []string{"sity", "šitý"} {
+		result := index.Suggest(q).Do()
+		if strings.Join(result.GetIDs(), ";") != "2" {
+			t.Fatal(q, result.GetIDs())
+		}
 	}
 }
