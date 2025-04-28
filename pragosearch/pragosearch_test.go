@@ -134,7 +134,7 @@ func TestSuggestionEmpty(t *testing.T) {
 
 func TestSuggestionDiacritic(t *testing.T) {
 	index := NewMemoryIndex()
-	index.Field("name")
+	index.Field("name").Analyzer("czech_suggest")
 
 	index.Add("1").Set("name", "chariclea").Do()
 	index.Add("2").Set("name", "Pobyt šitý na míru").Do()

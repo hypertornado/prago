@@ -32,11 +32,11 @@ var analyzers = []*analyzer{
 		PreFilters: []func(string) string{
 			lowercaser,
 		},
-		Tokenizer:   tokenizer,
+		Tokenizer: tokenizer,
 		PostFilters: []func(string) string{
 			//czechStemmer,
 			//isCzechStopword,
-			//removeDiacritics,
+			removeDiacritics,
 		},
 	},
 }
