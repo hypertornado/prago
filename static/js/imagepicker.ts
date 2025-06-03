@@ -77,9 +77,9 @@ class ImagePicker {
         this.hideProgress();
         if (request.status == 200) {
           var data = JSON.parse(request.response);
-          console.log(data);
+          //console.log(data);
           for (var i = 0; i < data.length; i++) {
-            console.log(data[i]);
+            //console.log(data[i]);
             this.addUUID(data[i]);
           }
         } else {
