@@ -454,12 +454,16 @@ var m = map[string]map[string]string{
 	},
 
 	"admin_confirm_email_subject": {
-		"en": "Confirm your registration email on %s",
-		"cs": "Potvrďte svůj registrační email na %s",
+		"en": "Confirm your registration email",
+		"cs": "Potvrďte svůj registrační email",
+	},
+	"admin_confirm_button": {
+		"en": "Confirm your email",
+		"cs": "Potvrďte email",
 	},
 	"admin_confirm_email_body": {
-		"en": "Thanks for your registration,<br><br>you can confirm your email on <a href=\"%s\">%s</a>.<br><br>%s",
-		"cs": "Děkujeme za registraci,<br><br>váš email můžete potvrdit na <a href=\"%s\">%s</a>.<br><br>%s",
+		"en": "Thanks for your registration.",
+		"cs": "Děkujeme za registraci",
 	},
 	"admin_confirm_email_ok": {
 		"en": "Email confirmed",

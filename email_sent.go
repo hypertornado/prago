@@ -47,8 +47,13 @@ func logEmailSent(email *Email, err error) {
 		attachements = append(attachements, attachement.Filename)
 	}
 
+	var emailsStr []string
+	for _, v := range email.to {
+		emailsStr = append(emailsStr, fmt.Sprintf("%s %s", v.Name, v.Email))
+	}
+
 	logEmail := &emailSent{
-		Name: fmt.Sprintf("%s %s", email.to.Name, email.to.Email),
+		Name: strings.Join(emailsStr, ", "),
 		From: fmt.Sprintf("%s %s", email.from.Name, email.from.Email),
 
 		Subject: email.subject,

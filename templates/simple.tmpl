@@ -1,0 +1,78 @@
+{{define "simple"}}
+
+<!doctype html>
+<html lang="{{.Language}}">
+  <head>
+    <meta charset="utf-8">
+    <title>{{.Title}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/admin/prago_admin_files/prago.css?v={{.Version}}">
+    <script src="/admin/prago_admin_files/prago.js?v={{.Version}}"></script>
+    {{if .Icon}}
+        <link rel="icon" href="/admin/api/icons?file={{.Icon}}&color=444444" type="image/svg+xml">
+    {{else}}
+      <link rel="icon" href="/admin/icon" type="image/svg+xml">
+    {{end}}
+
+  </head>
+  <body class="simple"{{if .BackgroundImageURL}} style="background-image: url('{{ .BackgroundImageURL}}')"{{end}}>
+    {{template "notification_center" .NotificationsData}}
+
+    <div class="simple_outer">
+    <div class="simple_content">
+
+      {{if .BackButton}}
+        <a href="{{.BackButton.URL}}" class="btn simple_backbtn">{{.BackButton.Name}}</a>
+      {{end}}
+      <div class="simple_logo" style="background-image: url('/admin/logo');"></div>
+      {{if .Tabs}}
+        {{template "tabs" .Tabs}}
+      {{end}}
+
+      {{if .PreName}}
+        <div class="simple_prename">{{.PreName}}</div>
+      {{end}}
+      {{if .Name}}
+        <h1 class="simple_name">{{.Name}}</h1>
+      {{end}}
+      {{if .PostName}}
+        <div class="simple_postname">{{.PostName}}</div>
+      {{end}}
+      {{if .Description}}
+        <div class="simple_description">{{.Description}}</div>
+      {{end}}
+
+      {{if .Sections}}
+        {{range $section := .Sections}}
+          <div class="simple_section">
+            {{if $section.Name}}
+              <div class="simple_section_name">{{$section.Name}}</div>
+            {{end}}
+            {{if $section.Description}}
+              <div class="simple_section_description">{{$section.Description}}</div>
+            {{end}}
+          </div>
+        {{end}}
+      {{end}}
+
+      {{if .Text}}
+        <div class="simple_text">{{.Text}}</div>
+      {{end}}
+
+      {{if .FormData}}
+        {{template "form" .FormData}}
+      {{end}}
+
+      {{if .PrimaryButton}}
+        <a href="{{.PrimaryButton.URL}}" class="btn btn-primary simple_primarybtn">{{.PrimaryButton.Name}}</a>
+      {{end}}
+
+    </div>
+      {{if .FooterText}}
+        <div class="simple_footer">{{.FooterText}}</div>
+      {{end}}
+    </div>
+  </body>
+</html>
+
+{{end}}

@@ -214,6 +214,9 @@ class ImagePicker {
     }
     addFiles2(data) {
         this.preview2.innerHTML = "";
+        if (!data.Items) {
+            return;
+        }
         for (let i = 0; i < data.Items.length; i++) {
             let item = data.Items[i];
             let itemEl = document.createElement("button");
@@ -2053,6 +2056,17 @@ class Form {
         imagePickers.forEach((form) => {
             new ImagePicker(form);
         });
+        var textovers = form.querySelectorAll(".form_label_textover");
+        textovers.forEach((textover) => {
+            textover.addEventListener("click", () => {
+                textover.parentElement.classList.add("form_label-textoverexpanded");
+                let inputs = textover.parentElement.querySelectorAll(".input");
+                if (inputs) {
+                    let input = inputs[0];
+                    input.focus();
+                }
+            });
+        });
         form.addEventListener("submit", () => {
             this.dirty = false;
         });
@@ -3228,7 +3242,6 @@ class Shortcuts {
             for (let shortcut of this.shortcuts) {
                 if (shortcut.match(e)) {
                     shortcut.handler();
-                    e.preventDefault();
                     e.stopPropagation();
                     return false;
                 }

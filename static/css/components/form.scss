@@ -74,7 +74,7 @@
 
 .form_label:has(.primarybtncontainer) {
   position: sticky;
-  bottom: 0px;
+  bottom: 10px;
   z-index: 10;
   //backdrop-filter: blur(10px);
   backdrop-filter: blur(3px);
@@ -177,6 +177,22 @@
   margin: 15px 0px;
 }
 
+.form_label-textover .form_label_content {
+  display: none;
+}
+
+.form_label_textover {
+  cursor: pointer;
+}
+
+.form_label-textoverexpanded .form_label_textover {
+  display: none;
+}
+
+.form_label-textoverexpanded .form_label_content {
+  display: block;
+}
+
 .form_label:first-of-type {
   margin-top: 0px;
 }
@@ -248,10 +264,6 @@
   padding: 0px 5px;
 }
 
-.inputzone {
-  @include inputzone;
-}
-
 .input {
   @include inputzone;
 }
@@ -272,6 +284,13 @@ select.input {
     no-repeat right 8px center;
   background-size: 8px 10px;
   width: auto;
+  min-width: 100px;
+  max-width: 100%;
+}
+
+.input[type=date] {
+  width: auto;
+  min-width: 120px;
   max-width: 100%;
 }
 

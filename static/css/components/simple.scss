@@ -1,0 +1,99 @@
+@use "../variables.scss" as *;
+
+.simple_outer {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.simple {
+  background-position: center;
+  background-size: cover;
+  min-height: 100dvh;
+  background-attachment: fixed;
+}
+
+.simple_content {
+  border: 1px solid $grayBorderColor;
+  background: white;
+  margin: 20px;
+  width: calc(100% - 40px);
+  max-width: 600px;
+  border-radius: 5px;
+  padding: 0px 10px;
+  padding-bottom: 10px;
+  @include shadowMedium;
+}
+
+.simple_content h1 {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.simple_content_text {
+  margin-left: 10px;
+}
+
+.simple_text {
+  margin: 0px 10px;
+}
+
+.simple_backbtn {
+  margin-top: 10px;
+}
+
+.simple_footer {
+  font-size: .8rem;
+  line-height: 1.3em;
+  display: block;
+  color: $gray;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(3px);
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin-bottom: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
+  text-align: center;
+}
+
+.simple_footer a {
+  color: $gray;
+}
+
+.simple_logo {
+  width: 100px;
+  aspect-ratio: 1;
+  margin: 10px auto;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.simple_name {
+  text-align: center;
+  font-size: 2rem;
+  line-height: 1.3em;
+  margin: 0px 10px;
+}
+
+.simple_prename, .simple_postname {
+  text-align: center;
+  font-weight: 500;
+  font-size: 1.2rem;
+  line-height: 1.3em;
+}
+
+.simple_primarybtn {
+  text-align: center;
+  margin: 10px 0px;
+}
+
+.simple_section {
+  margin: 5px 0px;
+}
+
+.simple_section_name {
+  font-weight: bold;
+}

@@ -46,7 +46,7 @@
 {{define "form_input_checkbox"}}
   <label>
     <input type="checkbox" name="{{.ID}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}} class="form_watcher">
-    <span class="form_label_text-inline">{{.Name}}</span>
+    <span class="form_label_text-inline">{{PragoHTML .Name}}</span>
   </label>
 {{end}}
 

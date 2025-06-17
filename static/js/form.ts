@@ -34,6 +34,18 @@ class Form {
       new ImagePicker(form);
     });
 
+    var textovers = form.querySelectorAll<HTMLDivElement>(".form_label_textover");
+    textovers.forEach((textover) => {
+      textover.addEventListener("click", () => {
+        textover.parentElement.classList.add("form_label-textoverexpanded");
+        let inputs = textover.parentElement.querySelectorAll(".input");
+        if (inputs) {
+          let input = <HTMLDivElement>inputs[0];
+          input.focus();
+        }
+      })
+    });
+
     form.addEventListener("submit", () => {
       this.dirty = false;
     });

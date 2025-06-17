@@ -11,7 +11,7 @@ import (
 type Email struct {
 	app              *App
 	from             *emailAddress
-	to               *emailAddress
+	to               []*emailAddress
 	attachements     []*mail.Attachment
 	subject          string
 	plainTextContent string
@@ -45,7 +45,7 @@ func (email *Email) From(name, emailAddress string) *Email {
 }
 
 func (email *Email) To(name, emailAddress string) *Email {
-	email.to = newEmailAddress(name, emailAddress)
+	email.to = append(email.to, newEmailAddress(name, emailAddress))
 	return email
 }
 
@@ -88,8 +88,21 @@ func (email *Email) Send() error {
 
 func (email *Email) sendWithoutLog() error {
 	from := email.from.toSendgridEmail()
-	to := email.to.toSendgridEmail()
-	emailMessage := mail.NewSingleEmail(from, email.subject, to, email.plainTextContent, email.htmlContent)
+
+	emailMessage := new(mail.SGMailV3)
+	emailMessage.Subject = email.subject
+	emailMessage.SetFrom(from)
+
+	personalisation := mail.NewPersonalization()
+	for _, email := range email.to {
+		personalisation.AddTos(email.toSendgridEmail())
+	}
+	emailMessage.AddPersonalizations(personalisation)
+
+	plainText := mail.NewContent("text/plain", email.plainTextContent)
+	htmlContent := mail.NewContent("text/html", email.htmlContent)
+
+	emailMessage.AddContent(plainText, htmlContent)
 
 	for _, v := range email.attachements {
 		emailMessage.AddAttachment(v)

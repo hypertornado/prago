@@ -3,13 +3,12 @@
 .admin_navigation_tabs {
   display: flex;
   justify-content: center;
-  //justify-content: flex-start;
   align-items: flex-start;
   flex-grow: 100;
   overflow: auto;
 
   display: flex;
-  margin: 0 auto;
+  margin: 5px auto;
   padding: 0px 10px;
   gap: 10px;
   flex-wrap: wrap;
@@ -40,6 +39,7 @@
 .admin_navigation_tab-selected,
 .admin_navigation_tab-selected:hover {
   background-color: $baseColor;
+  border-color: $baseColor;
   color: white;
   box-shadow: none;
 }

@@ -4,6 +4,8 @@ package prago
 import (
 	"database/sql"
 	"embed"
+	"fmt"
+	"math/rand"
 	"net/http"
 	"os"
 	"reflect"
@@ -158,6 +160,7 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initMenuAPI()
 	app.initCron()
 	app.initCacheStats()
+	app.initMailing()
 
 	return app
 }
@@ -230,6 +233,14 @@ func (app *App) GoogleKey() string {
 	return app.mustGetSetting("google_key")
 }
 
+func (app *App) IconURL() string {
+	ret := app.mustGetSetting("icon_image_url")
+	if ret != "" {
+		return ret
+	}
+	return app.BaseURL() + "/admin/logo"
+}
+
 func (app *App) RandomizationString() string {
 	return app.mustGetSetting("random")
 }
@@ -249,4 +260,11 @@ func must(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (app *App) getVersionString() string {
+	if app.DevelopmentMode() {
+		return fmt.Sprintf("%s-development-%d", app.version, rand.Intn(10000000000))
+	}
+	return app.version
 }

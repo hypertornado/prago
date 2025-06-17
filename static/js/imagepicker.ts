@@ -126,6 +126,9 @@ class ImagePicker {
 
   addFiles2(data: any) {
     this.preview2.innerHTML = "";
+    if (!data.Items) {
+      return;
+    }
 
     for (let i = 0; i < data.Items.length; i++) {
       let item = data.Items[i];

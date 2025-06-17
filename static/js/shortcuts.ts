@@ -7,11 +7,10 @@ class Shortcuts {
     this.shortcuts = [];
 
     this.el.addEventListener("keydown", (e) => {
-      //console.log(e);
       for (let shortcut of this.shortcuts) {
         if (shortcut.match(e)) {
           shortcut.handler();
-          e.preventDefault();
+          //e.preventDefault();
           e.stopPropagation();
           return false;
         }

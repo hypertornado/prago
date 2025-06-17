@@ -3,6 +3,7 @@ package prago
 import (
 	"context"
 	"fmt"
+	"html/template"
 )
 
 type formAction struct {
@@ -79,10 +80,13 @@ func (app *App) nologinFormAction(path string, formHandler func(f *Form, r *Requ
 		form := app.NewForm("/admin/user/" + path)
 		formHandler(form, request)
 
-		renderPageNoLogin(request, &pageNoLogin{
+		renderPageSimple(request, &pageDataSimple{
 			App:      app,
-			Tabs:     app.getNologinNavigation(locale, path),
+			Tabs:     app.getLoginNavigation(locale, path),
 			FormData: form,
+			FooterText: template.HTML(
+				fmt.Sprintf("%s version %s · powered by <a href=\"https://github.com/hypertornado/prago\">prago</a>", app.codeName, app.version),
+			),
 		})
 	})
 

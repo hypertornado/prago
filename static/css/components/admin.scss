@@ -308,54 +308,6 @@ select.admin_timestamp_minute {
   margin: 0 auto;
 }
 
-.admin_nologin_outer {
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  //justify-content: center;
-}
-
-.admin_nologin {
-  background-position: center;
-  background-size: cover;
-  min-height: 100dvh;
-}
-
-.admin_nologin_content {
-  border: 1px solid $grayBorderColor;
-  background: white;
-  margin: 20px;
-  max-width: 600px;
-  border-radius: 5px;
-  padding: 0px 10px;
-  @include shadowMedium;
-}
-
-.admin_nologin_footer {
-
-  font-size: .7rem;
-  line-height: 1.3em;
-  color: $gray;
-  //background-color: rgba(255, 255, 255, 0.9);
-  //text-shadow: 1px 1px 0px rgba(0,0,0,1), 0px 0px 10px rgba(255,255,255,.9);
-  border-radius: 5px;
-  padding: 3px 5px;
-}
-
-.admin_nologin_footer a {
-  color: $gray;
-}
-
-.admin_nologin_logo {
-  width: 100px;
-  aspect-ratio: 1;
-  margin: 10px auto;
-  background-position: center;
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
 .help_icons {
   display: flex;
   flex-wrap: wrap;

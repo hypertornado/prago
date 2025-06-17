@@ -40,6 +40,8 @@ type FormItem struct {
 
 	Content template.HTML
 
+	TextOver string
+
 	UUID string
 	form *Form
 

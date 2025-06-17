@@ -43,6 +43,10 @@ func (app *App) initTemplates() {
 		return template.HTML(markdown.New(markdown.Breaks(true)).RenderToString([]byte(text)))
 	})
 
+	app.adminTemplates.Function("PragoHTML", func(text string) template.HTML {
+		return template.HTML(text)
+	})
+
 	app.adminTemplates.Function("PragoMessage", func(language, id string) template.HTML {
 		return template.HTML(messages.Get(language, id))
 	})

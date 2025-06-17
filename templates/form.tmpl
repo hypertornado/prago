@@ -22,7 +22,11 @@
         <div class="form_errors hidden"></div>
         
         {{range $item := .Items}}
-          <div class="form_label{{if .Hidden}} form_label-hidden{{end}}{{if .Required}} form_label-required{{end}}" data-id="{{.ID}}">
+          <div class="form_label{{if .TextOver}} form_label-textover{{end}}{{if .Hidden}} form_label-hidden{{end}}{{if .Required}} form_label-required{{end}}" data-id="{{.ID}}">
+            <a class="form_label_textover">
+              {{.TextOver}}
+            </a>
+            <div class="form_label_content">
             {{if eq .HiddenName false}}
               <label for="{{.UUID}}" class="form_label_text">
                 {{if .Icon}}
@@ -40,6 +44,7 @@
             <div class="form_label_errors hidden"></div>
             <div>
               {{.GetContent}}
+            </div>
             </div>
           </div>
         {{end}}

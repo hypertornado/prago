@@ -3,6 +3,7 @@ package prago
 import (
 	"errors"
 	"fmt"
+	"html/template"
 	"net/url"
 	"regexp"
 	"strings"
@@ -124,21 +125,45 @@ func (u user) sendConfirmEmail(app *App, locale string) error {
 	urlValues.Add("email", u.Email)
 	urlValues.Add("token", u.emailToken(app))
 
-	subject := messages.Get(locale, "admin_confirm_email_subject", app.name(u.Locale))
-	link := app.mustGetSetting("base_url") + app.getAdminURL("user/confirm_email") + "?" + urlValues.Encode()
-	body := messages.Get(locale, "admin_confirm_email_body", link, link, app.name(u.Locale))
-	return app.Email().To(u.Name, u.Email).Subject(subject).HTMLContent(body).Send()
+	return app.Mailing(locale, func(md *MailingData) {
+		md.AddRecipient(u.Name, u.Email)
+
+		link := app.mustGetSetting("base_url") + app.getAdminURL("user/confirm_email") + "?" + urlValues.Encode()
+
+		md.Name = messages.Get(locale, "admin_confirm_email_subject")
+
+		md.Description = template.HTML(messages.Get(locale, "admin_confirm_email_body"))
+
+		md.Button = &Button{
+			Name: messages.Get(locale, "admin_confirm_button"),
+			URL:  link,
+		}
+
+		md.FooterDescription = template.HTML(fmt.Sprintf("<a href=\"%s\">%s</a>", md.BaseURL, md.AppName))
+
+	})
 }
 
 func (u user) sendAdminEmail(app *App) error {
 	users := Query[user](app).Is("role", "sysadmin").List()
 	for _, receiver := range users {
-		body := fmt.Sprintf("New user registered on %s: %s (%s)", app.name(u.Locale), u.Email, u.Name)
 
-		err := app.Email().To(receiver.Name, receiver.Email).Subject("New registration on " + app.name(u.Locale)).HTMLContent(body).Send()
+		err := app.Mailing(receiver.Locale, func(md *MailingData) {
+			md.AddRecipient(receiver.Name, receiver.Email)
+			md.Name = "New registration"
+
+			md.AddSection("User's name", u.Name)
+			md.AddSection("User's email", u.Email)
+
+			md.Button = &Button{
+				Name: "Detail",
+				URL:  app.BaseURL() + fmt.Sprintf("/admin/user/%d", u.ID),
+			}
+		})
 		if err != nil {
 			return err
 		}
+
 	}
 	return nil
 }
