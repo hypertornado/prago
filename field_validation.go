@@ -81,8 +81,11 @@ func (field *Field) addValidationStrongRelation() {
 		}
 
 		if relatedCount > 0 {
+			errStr := messages.Get(ud.Locale(), "strong_connection_error", field.relatedResource.singularName(ud.Locale()))
+
 			v.AddError(
-				"Can't delete item with strong relation",
+				errStr,
+				//"Can't delete item with strong relation: " + field.relatedResource.singularName(ud.Locale()),
 			)
 		}
 	})

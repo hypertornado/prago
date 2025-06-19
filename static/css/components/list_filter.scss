@@ -42,11 +42,11 @@ input.list_filter_layout_date_to {
 .list_filter_input {
   padding: 2px 6px;
   box-shadow: none;
-  border-radius: 100px;
-  border: 1px solid transparent;
+  border-radius: 100px !important;
+  border: 1px solid $grayBorderColor !important;
   background-color: $backgroundGrayColor !important;
   width: 100% !important;
-  min-width: 0px;
+  min-width: 0px !important;
 }
 
 select.list_filter_input {

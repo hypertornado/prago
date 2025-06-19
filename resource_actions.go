@@ -226,7 +226,8 @@ func (resource *Resource) editItemWithLogAndValues(request *Request, values url.
 
 	item := itemVal.Addr().Interface()
 
-	resource.addBoleanFalseValuesAsEmpty(values)
+	//resource.addBoleanFalseValuesAsEmpty(values)
+
 	err = resource.bindData(
 		item, user, values,
 	)

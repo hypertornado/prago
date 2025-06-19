@@ -519,4 +519,8 @@ var m = map[string]map[string]string{
 		"en": "Run",
 		"cs": "Spustit",
 	},
+	"strong_connection_error": {
+		"en": "Can't delete item with strong relation to '%s'",
+		"cs": "Nelze smazat položku se silnou vazbou na '%s'",
+	},
 }

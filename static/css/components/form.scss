@@ -292,6 +292,7 @@ select.input {
   width: auto;
   min-width: 120px;
   max-width: 100%;
+  min-height: 2.5rem !important;
 }
 
 .input[readonly],
@@ -317,7 +318,7 @@ select.input {
 }
 
 .textarea {
-  min-height: 100px;
+  min-height: 100px !important;
 }
 
 .form_radios {
