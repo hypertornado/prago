@@ -3127,6 +3127,21 @@ a.admin_stats_section_row {
   color: #999;
 }
 
+.form_table_cell_textafter {
+  color: #999;
+  font-size: 0.8rem;
+  line-height: 1.3em;
+  font-weight: normal;
+  color: #999;
+  font-style: italic;
+  max-width: 100px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .breadcrumbs {
   border: 0px solid red;
   display: flex;

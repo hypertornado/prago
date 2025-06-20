@@ -35,6 +35,7 @@ type tableCellData struct {
 	DescriptionBefore string
 	Text              string
 	DescriptionAfter  string
+	TextAfter         string
 	Colspan           int64
 	Rowspan           int64
 	Checkboxes        []*tableCellCheckbox
@@ -152,6 +153,11 @@ func (cell *TableCell) DescriptionBefore(description string) *TableCell {
 
 func (cell *TableCell) DescriptionAfter(description string) *TableCell {
 	cell.data.DescriptionAfter = description
+	return cell
+}
+
+func (cell *TableCell) TextAfter(text string) *TableCell {
+	cell.data.TextAfter = text
 	return cell
 }
 

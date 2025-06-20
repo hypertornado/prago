@@ -70,3 +70,20 @@
   color: #999;
 }
 
+.form_table_cell_textafter {
+  color: #999;
+  font-size: .8rem;
+  line-height: 1.3em;
+  font-weight: normal;
+  color: #999;
+  font-style: italic;
+
+  max-width: 100px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  //border: 1px solid red;
+  text-overflow: ellipsis;
+}
+

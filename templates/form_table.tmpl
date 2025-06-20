@@ -20,6 +20,9 @@
                         {{range $button := $cell.Buttons}}
                             <a href="{{if $button.URL}}{{$button.URL}}{{else}}#{{end}}" class="btn" onclick="{{$button.OnClick}}">{{$button.Name}}</a>
                         {{end}}
+                        {{if $cell.TextAfter}}
+                            <div class="form_table_cell_textafter" title="{{$cell.TextAfter}}">{{$cell.TextAfter}}</div>
+                        {{end}}
                     </td>
                 {{end}}
                 </tr>
