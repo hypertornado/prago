@@ -18,7 +18,12 @@
                             {{if .DescriptionAfter}}<div class="form_table_cell_descriptionafter">{{.DescriptionAfter}}</div>{{end}}
                         {{if $cell.Href}}</a>{{end}}
                         {{range $button := $cell.Buttons}}
-                            <a href="{{if $button.URL}}{{$button.URL}}{{else}}#{{end}}" class="btn" onclick="{{$button.OnClick}}">{{$button.Name}}</a>
+                            <a href="{{if $button.URL}}{{$button.URL}}{{else}}#{{end}}" class="btn" onclick="{{$button.OnClick}}">
+                                {{if $button.Icon}}
+                                    <img src="/admin/api/icons?file={{$button.Icon}}" class="btn_icon">
+                                {{end}}
+                                {{$button.Name}}
+                            </a>
                         {{end}}
                         {{if $cell.TextAfter}}
                             <div class="form_table_cell_textafter" title="{{$cell.TextAfter}}">{{$cell.TextAfter}}</div>

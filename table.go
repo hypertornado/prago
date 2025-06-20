@@ -49,6 +49,7 @@ type tableCellCheckbox struct {
 
 type TableCellButton struct {
 	Name    string
+	Icon    string
 	URL     string
 	OnClick template.JS
 }
