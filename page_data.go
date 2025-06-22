@@ -9,6 +9,9 @@ type pageData struct {
 	Version   string
 	GoogleKey string
 
+	CSSPaths        []string
+	JavascriptPaths []string
+
 	Icon string
 	Name string
 	App  *App
@@ -43,7 +46,14 @@ func createPageData(request *Request) *pageData {
 	page.Language = request.Locale()
 	page.Version = request.app.version
 	page.GoogleKey = request.app.GoogleKey()
-	page.Version = request.app.getVersionString()
+	page.Version = request.app.GetVersionString()
+
+	for _, v := range request.app.cssPaths {
+		page.CSSPaths = append(page.CSSPaths, v())
+	}
+	for _, v := range request.app.javascriptPaths {
+		page.JavascriptPaths = append(page.JavascriptPaths, v())
+	}
 
 	page.NotificationsData = request.getNotificationsData()
 	return page

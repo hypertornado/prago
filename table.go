@@ -52,6 +52,7 @@ type TableCellButton struct {
 	Icon    string
 	URL     string
 	OnClick template.JS
+	Title   string
 }
 
 type tableView struct {
@@ -62,6 +63,13 @@ type tableView struct {
 
 type tableRowView struct {
 	Cells []*tableCellData
+}
+
+func (btn TableCellButton) GetTitle() string {
+	if btn.Title != "" {
+		return btn.Title
+	}
+	return btn.Name
 }
 
 func (app *App) Table() *Table {

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"net/http"
@@ -19,6 +20,14 @@ var staticAdminFS embed.FS
 func (app *App) initStaticFilesHandler() {
 	app.staticFiles = staticFiles{}
 	app.AddStaticFiles(staticAdminFS, "public")
+
+	app.AddCSS(func() string {
+		return fmt.Sprintf("/admin/prago_admin_files/prago.css?v=%s", app.GetVersionString())
+	})
+
+	app.AddJavascript(func() string {
+		return fmt.Sprintf("/admin/prago_admin_files/prago.js?v=%s", app.GetVersionString())
+	})
 }
 
 // AddStaticFiles add filesystem of public files and publish them in server's root
@@ -102,4 +111,12 @@ func (request Request) serveStaticFile(filesystem fs.FS, name string) (err error
 
 	http.ServeContent(request.w, request.r, d.Name(), d.ModTime(), reader)
 	return nil
+}
+
+func (app *App) AddJavascript(fn func() string) {
+	app.javascriptPaths = append(app.javascriptPaths, fn)
+}
+
+func (app *App) AddCSS(fn func() string) {
+	app.cssPaths = append(app.cssPaths, fn)
 }

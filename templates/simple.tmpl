@@ -6,8 +6,14 @@
     <meta charset="utf-8">
     <title>{{.Title}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/admin/prago_admin_files/prago.css?v={{.Version}}">
-    <script src="/admin/prago_admin_files/prago.js?v={{.Version}}"></script>
+
+    {{range $path := .CSSPaths}}
+        <link rel="stylesheet" href="{{$path}}">
+    {{end}}
+    {{range $path := .JavascriptPaths}}
+        <script src="{{$path}}"></script>
+    {{end}}
+
     {{if .Icon}}
         <link rel="icon" href="/admin/api/icons?file={{.Icon}}&color=444444" type="image/svg+xml">
     {{else}}

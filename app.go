@@ -91,6 +91,9 @@ type App struct {
 	serverSetup func(*http.Server)
 
 	afterRequestServedHandler func(*Request)
+
+	cssPaths        []func() string
+	javascriptPaths []func() string
 }
 
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {
@@ -150,7 +153,6 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initDevelopment()
 	app.initMigrationCommand()
 	app.initTemplates()
-	//app.initElasticsearch()
 	app.initSearch()
 	app.initSQLConsole()
 	app.initSQLBackup()
@@ -262,7 +264,7 @@ func must(err error) {
 	}
 }
 
-func (app *App) getVersionString() string {
+func (app *App) GetVersionString() string {
 	if app.DevelopmentMode() {
 		return fmt.Sprintf("%s-development-%d", app.version, rand.Intn(10000000000))
 	}

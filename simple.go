@@ -10,6 +10,9 @@ type pageDataSimple struct {
 	Version  string
 	App      *App
 
+	CSSPaths        []string
+	JavascriptPaths []string
+
 	BackgroundImageURL string
 
 	BackButton *Button
@@ -47,8 +50,14 @@ func renderPageSimple(request *Request, page *pageDataSimple) {
 	var icon string
 
 	page.Language = localeFromRequest(request)
+	page.Version = request.app.GetVersionString()
 
-	page.Version = request.app.getVersionString()
+	for _, v := range request.app.cssPaths {
+		page.CSSPaths = append(page.CSSPaths, v())
+	}
+	for _, v := range request.app.javascriptPaths {
+		page.JavascriptPaths = append(page.JavascriptPaths, v())
+	}
 
 	var err error
 	page.BackgroundImageURL, err = request.app.getSetting("background_image_url")
