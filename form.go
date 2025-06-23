@@ -182,7 +182,7 @@ func (f *Form) AddDateTimePicker(name, description string) *FormItem {
 func (f *Form) AddRelation(name, description string, relatedResourceID string) *FormItem {
 	input := f.addInput(name, description, "form_input_relation")
 	input.Data = relationFormDataSource{
-		RelatedID: relatedResourceID,
+		RelatedID: columnName(relatedResourceID),
 	}
 	return input
 }
@@ -190,7 +190,7 @@ func (f *Form) AddRelation(name, description string, relatedResourceID string) *
 func (f *Form) AddRelationMultiple(name, description string, relatedResourceID string) *FormItem {
 	input := f.addInput(name, description, "form_input_relation")
 	input.Data = relationFormDataSource{
-		RelatedID:     relatedResourceID,
+		RelatedID:     columnName(relatedResourceID),
 		MultiRelation: true,
 	}
 	return input
