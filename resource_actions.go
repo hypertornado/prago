@@ -86,7 +86,10 @@ func (resource *Resource) initDefaultResourceActions() {
 			form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
 		},
 		func(_ any, vc FormValidation, request *Request) {
-			item, validation := resource.editItemWithLogAndValues(request, request.Params())
+			params := request.Params()
+			//fix browsers not sending empry checkbox values
+			resource.addBoleanFalseValuesAsEmpty(params)
+			item, validation := resource.editItemWithLogAndValues(request, params)
 
 			if validation.Valid() {
 				resource.app.Notification(resource.previewer(request, item).Name()).
