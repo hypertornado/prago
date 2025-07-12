@@ -96,14 +96,6 @@ func registrationValidation(vc FormValidation, request *Request) {
 		u.Name = request.Param("name")
 		u.Locale = locale
 		must(u.newPassword(request.Param("password")))
-		err := u.sendConfirmEmail(app, locale)
-		if err != nil {
-			app.Log().Println(err)
-		}
-		err = u.sendAdminEmail(app)
-		if err != nil {
-			app.Log().Println(err)
-		}
 
 		count, err := Query[user](app).Count()
 		if err == nil && count == 0 {
@@ -111,6 +103,15 @@ func registrationValidation(vc FormValidation, request *Request) {
 		}
 
 		must(CreateItemWithContext(request.Request().Context(), app, u))
+
+		err = u.sendConfirmEmail(app, locale)
+		if err != nil {
+			app.Log().Println(err)
+		}
+		err = u.sendAdminEmail(app)
+		if err != nil {
+			app.Log().Println(err)
+		}
 
 		request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
 		vc.Redirect(app.getAdminURL("user/login") + "?email=" + url.QueryEscape(email))
