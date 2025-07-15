@@ -1,6 +1,8 @@
 package prago
 
-import "html/template"
+import (
+	"html/template"
+)
 
 type PageDataSimple struct {
 	Request *Request
@@ -16,8 +18,7 @@ type PageDataSimple struct {
 	Description template.HTML
 	Text        template.HTML
 
-	Form           func(*Form)
-	FormValidation func(FormValidation, *Request)
+	Form func(*Form)
 
 	PrimaryButton *Button
 
@@ -31,10 +32,14 @@ type SimpleHandler struct {
 	FormValidation func(FormValidation, *Request)
 }
 
+func (handler *SimpleHandler) GetValidationURL() string {
+	return handler.URL
+}
+
 func (app *App) HandleSimple(handler *SimpleHandler) {
 
 	if handler.FormValidation != nil {
-		app.router.route("POST", handler.URL, app.appController, func(request *Request) {
+		app.router.route("POST", handler.GetValidationURL(), app.appController, func(request *Request) {
 
 			rv := newFormValidation()
 			if request.csrfToken() != request.Param("_csrfToken") {
@@ -54,7 +59,7 @@ func (app *App) HandleSimple(handler *SimpleHandler) {
 
 		var form *Form
 		if pd.Form != nil {
-			form = app.NewForm(handler.URL)
+			form = app.NewForm(handler.GetValidationURL())
 			form.AddCSRFToken(request)
 			pd.Form(form)
 		}

@@ -4,6 +4,15 @@ import (
 	"sync"
 )
 
+func (app *App) GetAllUsers() (ret []UserData) {
+
+	users := Query[user](app).List()
+	for _, v := range users {
+		ret = append(ret, app.newUserData(v))
+	}
+	return ret
+}
+
 func (app *App) initUserDataCache() {
 	app.userDataCache = make(map[int64]*userData)
 	app.userDataCacheMutex = &sync.RWMutex{}
@@ -47,6 +56,7 @@ func (app *App) userDataCacheDeleteAll() {
 type UserData interface {
 	Name() string
 	Locale() string
+	Email() string
 	Authorize(Permission) bool
 	UserID() int64
 }
@@ -54,6 +64,7 @@ type UserData interface {
 type userData struct {
 	id     int64
 	name   string
+	email  string
 	role   string
 	locale string
 	app    *App
@@ -63,6 +74,7 @@ func (app *App) newUserData(user *user) *userData {
 	return &userData{
 		id:     user.ID,
 		name:   user.LongName(),
+		email:  user.Email,
 		role:   user.Role,
 		locale: user.Locale,
 		app:    app,
@@ -71,6 +83,10 @@ func (app *App) newUserData(user *user) *userData {
 
 func (d *userData) Name() string {
 	return d.name
+}
+
+func (d *userData) Email() string {
+	return d.email
 }
 
 func (d *userData) Locale() string {
