@@ -20,6 +20,10 @@
       <link rel="icon" href="/admin/icon" type="image/svg+xml">
     {{end}}
 
+    {{if .AnalyticsCode}}
+      {{.AnalyticsCode}}
+    {{end}}
+
   </head>
   <body class="simple"{{if .BackgroundImageURL}} style="background-image: url('{{ .BackgroundImageURL}}')"{{end}}>
     {{template "notification_center" .NotificationsData}}

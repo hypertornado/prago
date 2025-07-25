@@ -32,7 +32,7 @@ func (app *App) API(url string) *API {
 	return api
 }
 
-func APIJSON[T any](app *App, url string, handler func(*T) any) *API {
+func APIJSON[T any](app *App, url string, handler func(*Request, *T) any) *API {
 	api := newAPI(app, url)
 
 	api.handler = func(request *Request) {
@@ -47,7 +47,7 @@ func APIJSON[T any](app *App, url string, handler func(*T) any) *API {
 			panic(err)
 		}
 
-		retData := handler(&item)
+		retData := handler(request, &item)
 		request.WriteJSON(200, retData)
 	}
 

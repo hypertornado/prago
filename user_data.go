@@ -18,6 +18,11 @@ func (app *App) initUserDataCache() {
 	app.userDataCacheMutex = &sync.RWMutex{}
 }
 
+func (app *App) GetUserData(id int64) *userData {
+	return app.userDataCacheGet(id)
+
+}
+
 func (app *App) userDataCacheGet(id int64) *userData {
 	app.userDataCacheMutex.RLock()
 	ret := app.userDataCache[id]

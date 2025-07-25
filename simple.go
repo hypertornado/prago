@@ -35,6 +35,8 @@ type pageDataSimple struct {
 
 	PrimaryButton *Button
 
+	AnalyticsCode template.HTML
+
 	FooterText template.HTML
 }
 

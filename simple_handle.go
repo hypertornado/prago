@@ -22,6 +22,8 @@ type PageDataSimple struct {
 
 	PrimaryButton *Button
 
+	AnalyticsCode template.HTML
+
 	FooterText template.HTML
 }
 
@@ -83,6 +85,8 @@ func (app *App) HandleSimple(handler *SimpleHandler) {
 			FormData: form,
 
 			PrimaryButton: pd.PrimaryButton,
+
+			AnalyticsCode: pd.AnalyticsCode,
 
 			FooterText: pd.FooterText,
 		})
