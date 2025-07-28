@@ -7,9 +7,6 @@ class RelationPicker {
 
   progress: HTMLProgressElement;
 
-  //changeSection: HTMLDivElement;
-  //changeButton: HTMLDivElement;
-
   picker: HTMLDivElement;
   pickerInput: HTMLInputElement;
 
@@ -64,7 +61,7 @@ class RelationPicker {
       this.suggestionInput.bind(this)
     );
 
-    if (parseInt(this.input.value) > 0) {
+    if (this.multipleInputs || parseInt(this.input.value) > 0) {
       this.getData();
     } else {
       this.progress.classList.add("hidden");

@@ -1758,7 +1758,7 @@ class RelationPicker {
             this.getSuggestions(this.pickerInput.value);
         });
         this.pickerInput.addEventListener("keydown", this.suggestionInput.bind(this));
-        if (parseInt(this.input.value) > 0) {
+        if (this.multipleInputs || parseInt(this.input.value) > 0) {
             this.getData();
         }
         else {
