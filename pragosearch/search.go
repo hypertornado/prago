@@ -6,6 +6,8 @@ import (
 	"sort"
 )
 
+const maxTermsOfQuery = 100
+
 type SearchRequest struct {
 	q           string
 	offset      int64
@@ -64,6 +66,8 @@ func (sr *SearchRequest) Do() *SearchResult {
 
 	searchSuggestAnalyzer := getDefaultSearchSuggestAnalyzer()
 
+	var termsOfQuery int
+
 	fields := sr.index.getFields()
 	for _, field := range fields {
 		var fieldResults = map[string]float64{}
@@ -77,6 +81,14 @@ func (sr *SearchRequest) Do() *SearchResult {
 		} else {
 			terms = sr.index.analyze(field, sr.q)
 		}
+
+		termsOfQuery += len(terms)
+		if termsOfQuery > maxTermsOfQuery {
+			return &SearchResult{
+				Error: fmt.Errorf("exceeded max terms of query: %d", maxTermsOfQuery),
+			}
+		}
+
 		for _, term := range terms {
 			termResult := searchResultsFor(sr.index, field, term, sr.prefixMatch)
 			for k, result := range termResult {

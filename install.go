@@ -109,5 +109,5 @@ func generateRandomPassword(length int) (string, error) {
 		password = append(password, charset[randomInt.Int64()])
 	}
 
-	return string(password), nil
+	return string(password) + "a1!", nil
 }
