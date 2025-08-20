@@ -142,7 +142,15 @@ class ImagePicker {
                         Handler: () => {
                             new PopupForm("/admin/validate-uuid-files", (data) => {
                                 this.addUUID(data.Data);
-                                this.load();
+                            });
+                        },
+                    },
+                    {
+                        Name: "Upravit UUID",
+                        Icon: "glyphicons-basic-138-cogwheels.svg",
+                        Handler: () => {
+                            new PopupForm("/admin/edit-uuid-files?ids=" + this.hiddenInput.value, (data) => {
+                                this.setUUID(data.Data);
                             });
                         },
                     },
@@ -324,6 +332,9 @@ class ImagePicker {
             val += ",";
         }
         val += uuid;
+        this.setUUID(val);
+    }
+    setUUID(val) {
         this.hiddenInput.value = val;
         this.load();
     }
