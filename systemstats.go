@@ -65,7 +65,7 @@ func (app *App) initSystemStats() {
 	sysadminBoard.Dashboard(unlocalized("DB import")).Table(func(request *Request) *Table {
 		ret := app.Table()
 
-		dbConfig, err := getDBConfig(app.codeName)
+		dbConfig, err := GetDBConnectConfig(app.codeName)
 		must(err)
 
 		ret.Row(Cell(fmt.Sprintf("mysql -u %s -p%s -f -D %s < script.sql",

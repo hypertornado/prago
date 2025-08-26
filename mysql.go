@@ -8,8 +8,8 @@ import (
 	_ "github.com/go-sql-driver/mysql" //use mysql
 )
 
-func mustConnectDatabase(dbUser, dbPassword, dbName string) *sql.DB {
-	db, err := connectMysql(dbUser, dbPassword, dbName)
+func mustConnectDatabase(config *DBConnectConfig) *sql.DB {
+	db, err := connectMysql(config.User, config.Password, config.Name)
 	if err != nil {
 		panic("can't connect to database: " + err.Error())
 	}

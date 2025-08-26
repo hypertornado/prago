@@ -216,13 +216,13 @@ func sqlFieldToQuery(fieldName string) string {
 
 func (resource *Resource) countAllItems() int64 {
 
-	/*ret, err = resource.query(context.Background()).count()
+	ret, err := resource.query(context.Background()).count()
 	if err != nil {
 		return -1
 	}
-	return ret*/
+	return ret
 
-	var name string
+	/*var name string
 	var rows sql.NullInt64
 
 	query := fmt.Sprintf("SHOW TABLE STATUS LIKE '%s'", resource.id)
@@ -254,7 +254,7 @@ func (resource *Resource) countAllItems() int64 {
 		return -1
 	}
 
-	return rows.Int64
+	return rows.Int64*/
 }
 
 func (query *listQuery) count() (int64, error) {

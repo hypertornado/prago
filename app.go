@@ -71,7 +71,7 @@ type App struct {
 
 	MainBoard *Board
 
-	dbConfig *dbConnectConfig
+	dbConfig *DBConnectConfig
 
 	iconsFS     *embed.FS
 	iconsPrefix string

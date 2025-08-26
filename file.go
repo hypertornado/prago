@@ -159,8 +159,8 @@ func (app *App) afterInitFilesResource() {
 		idsAr := strings.Split(uuids, ",")
 		for _, v := range idsAr {
 			if v == "" {
-				fv.AddError("Neplatné UUID " + v)
-				return
+				//fv.AddError("Neplatné UUID " + v)
+				continue
 			}
 			file := Query[File](app).Is("uid", v).First()
 			if file == nil {
@@ -173,6 +173,7 @@ func (app *App) afterInitFilesResource() {
 			}
 			retIDs = append(retIDs, file.UID)
 		}
+		fv.Redirect("/")
 		fv.Data(strings.Join(retIDs, ","))
 	}).Permission(resource.canUpdate).Name(unlocalized("Upravit UUID"))
 

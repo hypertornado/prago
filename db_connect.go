@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-type dbConnectConfig struct {
+type DBConnectConfig struct {
 	Name     string `json:"name"`
 	User     string `json:"user"`
 	Password string `json:"password"`
@@ -20,14 +20,14 @@ func getAppDotPath(appName string) string {
 	return fmt.Sprintf("%s/.%s", os.Getenv("HOME"), appName)
 }
 
-func getDBConfig(codeName string) (*dbConnectConfig, error) {
+func GetDBConnectConfig(codeName string) (*DBConnectConfig, error) {
 	path := getDBConnectPath(codeName)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("error while opening db config file %s: %s", path, err)
 	}
 
-	var config dbConnectConfig
+	var config DBConnectConfig
 	err = json.Unmarshal(data, &config)
 	if err != nil {
 		return nil, fmt.Errorf("error while parsing db config file: %s", err)
@@ -37,10 +37,10 @@ func getDBConfig(codeName string) (*dbConnectConfig, error) {
 }
 
 func (app *App) connectDB(testing bool) {
-	var config *dbConnectConfig
+	var config *DBConnectConfig
 
 	if testing {
-		config = &dbConnectConfig{
+		config = &DBConnectConfig{
 			Name:     "prago_test",
 			User:     "prago_test",
 			Password: "prago_test",
@@ -56,17 +56,12 @@ func (app *App) connectDB(testing bool) {
 		}
 
 		var err error
-		config, err = getDBConfig(app.codeName)
+		config, err = GetDBConnectConfig(app.codeName)
 		if err != nil {
 			panic(fmt.Sprintf("can't connect to DB: %s\n", err.Error()))
 		}
 	}
 
 	app.dbConfig = config
-	app.db = mustConnectDatabase(
-		app.dbConfig.User,
-		app.dbConfig.Password,
-		app.dbConfig.Name,
-	)
-
+	app.db = mustConnectDatabase(config)
 }

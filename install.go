@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -23,16 +24,32 @@ func (app *App) autoInstallDatabase() error {
 	rootPassword, _ := reader.ReadString('\n')
 	rootPassword = strings.TrimRight(rootPassword, "\n")
 
+	codeName := app.codeName
+	codeName = strings.ReplaceAll(codeName, ".", "")
+	codeName = strings.ReplaceAll(codeName, "-", "")
+	codeName = strings.ReplaceAll(codeName, "_", "")
+
+	return app.InstallDatabase(rootPassword, codeName)
+}
+
+func (app *App) InstallDatabase(rootPassword, codeName string) error {
+
+	var codeNameRegex = regexp.MustCompile("^[a-zA-Z0-9]+$")
+	if !codeNameRegex.MatchString(codeName) {
+		return errors.New("wrong codename")
+	}
+
+	filePath := getDBConnectPath(codeName)
+
+	if fileExists(filePath) {
+		return errors.New("config file already exists")
+	}
+
 	db, err := connectMysql("root", rootPassword, "")
 	must(err)
 	defer db.Close()
 
-	mysqlCodeName := app.codeName
-	mysqlCodeName = strings.ReplaceAll(mysqlCodeName, ".", "")
-	mysqlCodeName = strings.ReplaceAll(mysqlCodeName, "-", "")
-	mysqlCodeName = strings.ReplaceAll(mysqlCodeName, "_", "")
-
-	_, err = db.Exec(fmt.Sprintf("CREATE DATABASE %s CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci;", mysqlCodeName))
+	_, err = db.Exec(fmt.Sprintf("CREATE DATABASE %s CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci;", codeName))
 	if err != nil {
 		return err
 	}
@@ -40,12 +57,12 @@ func (app *App) autoInstallDatabase() error {
 	password, err := generateRandomPassword(12)
 	must(err)
 
-	_, err = db.Exec(fmt.Sprintf("CREATE USER '%s'@'localhost' IDENTIFIED BY '%s';", mysqlCodeName, password))
+	_, err = db.Exec(fmt.Sprintf("CREATE USER '%s'@'localhost' IDENTIFIED BY '%s';", codeName, password))
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Exec(fmt.Sprintf("GRANT ALL ON %s.* TO '%s'@'localhost';", mysqlCodeName, mysqlCodeName))
+	_, err = db.Exec(fmt.Sprintf("GRANT ALL ON %s.* TO '%s'@'localhost';", codeName, codeName))
 	if err != nil {
 		return err
 	}
@@ -55,9 +72,9 @@ func (app *App) autoInstallDatabase() error {
 		return err
 	}
 
-	config := dbConnectConfig{
-		Name:     mysqlCodeName,
-		User:     mysqlCodeName,
+	config := DBConnectConfig{
+		Name:     codeName,
+		User:     codeName,
 		Password: password,
 	}
 
@@ -66,12 +83,10 @@ func (app *App) autoInstallDatabase() error {
 		return err
 	}
 
-	err = os.MkdirAll(getAppDotPath(app.codeName), os.ModePerm)
+	err = os.MkdirAll(getAppDotPath(codeName), os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("failed to create folder: %v", err)
 	}
-
-	filePath := getDBConnectPath(app.codeName)
 
 	file, err := os.Create(filePath)
 	if err != nil {
@@ -84,7 +99,7 @@ func (app *App) autoInstallDatabase() error {
 		return fmt.Errorf("error writing to the file: %s", err)
 	}
 
-	fmt.Printf("Database '%s' created successfully\n", mysqlCodeName)
+	fmt.Printf("Database '%s' created successfully\n", codeName)
 	return nil
 
 }
