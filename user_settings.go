@@ -108,10 +108,6 @@ func initUserSettings(app *App) {
 			}
 		}).Icon("glyphicons-basic-45-key.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu()
 
-	ActionPlain(app, "redirect-to-homepage", func(request *Request) {
-		request.Redirect("/")
-	}).Icon("glyphicons-basic-21-home.svg").Permission(loggedPermission).Name(messages.GetNameFunction("boardpage")).userMenu()
-
 	ActionResourceItemForm(app, "change-password", func(user *user, form *Form, request *Request) {
 		newPassword := form.AddPasswordInput("newpassword", messages.Get(request.Locale(), "admin_password_new"))
 		newPassword.Focused = true

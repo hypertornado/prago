@@ -147,6 +147,7 @@ func initDefaultSettings(app *App) {
 	app.Setting("port", "sysadmin").DefaultValue(fmt.Sprintf("%d", defaultPort))
 	app.Setting("base_url", "sysadmin").DefaultValue("http://localhost:8585")
 	app.Setting("ssh", "sysadmin")
+	app.Setting("app_name", "sysadmin")
 	app.Setting("background_image_url", "sysadmin")
 	app.Setting("icon_image_url", "sysadmin")
 
@@ -163,4 +164,11 @@ func initDefaultSettings(app *App) {
 	app.Setting("cdn_password", "sysadmin").
 		ValueChangeCallback(cdnCallback)
 
+	app.name = func(string) string {
+		ret := app.mustGetSetting("app_name")
+		if ret != "" {
+			return ret
+		}
+		return app.codeName
+	}
 }

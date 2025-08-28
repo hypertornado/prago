@@ -23,8 +23,25 @@ func (app *App) initSQLBackup() {
 
 			sort.Strings(tablesAr)
 
+			var resourcesTableNames = map[string]bool{}
+			for _, v := range app.resources {
+				resourcesTableNames[v.id] = true
+			}
+
 			for _, v := range tablesAr {
-				form.AddCheckbox(v, fmt.Sprintf("Ignore table '%s'", v))
+				tableSize := app.getTableDataSize(v)
+
+				var defaultIgnore = true
+				var useIcon = "🔴"
+				if resourcesTableNames[v] {
+					useIcon = "✅"
+					defaultIgnore = false
+				}
+
+				item := form.AddCheckbox(v, fmt.Sprintf("Ignore table '%s' (size %s B) %s", v, humanizeNumber(tableSize), useIcon))
+				if defaultIgnore {
+					item.Value = "checked"
+				}
 			}
 
 			form.AddSubmit("Download SQL Backup")

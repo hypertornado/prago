@@ -257,6 +257,43 @@ func (resource *Resource) countAllItems() int64 {
 	return rows.Int64*/
 }
 
+func (app *App) getTableDataSize(tableName string) int64 {
+
+	var name string
+	var size sql.NullInt64
+
+	query := fmt.Sprintf("SHOW TABLE STATUS LIKE '%s'", tableName)
+	row := app.db.QueryRow(query)
+
+	// You can scan only the columns you need
+	err := row.Scan(
+		&name,            // Name
+		new(interface{}), // Engine
+		new(interface{}), // Version
+		new(interface{}), // Row_format
+		new(interface{}), // Rows (this is what we want)
+		new(interface{}), // Avg_row_length
+		&size,            // Data_length
+		new(interface{}), // Max_data_length
+		new(interface{}), // Index_length
+		new(interface{}), // Data_free
+		new(interface{}), // Auto_increment
+		new(interface{}), // Create_time
+		new(interface{}), // Update_time
+		new(interface{}), // Check_time
+		new(interface{}), // Collation
+		new(interface{}), // Checksum
+		new(interface{}), // Create_options
+		new(interface{}), // Comment
+	)
+	if err != nil {
+		app.Log().Errorf("can't get resource stats (%s): %s", tableName, err)
+		return -1
+	}
+
+	return size.Int64
+}
+
 func (query *listQuery) count() (int64, error) {
 	orderString := buildOrderString(query.order)
 	limitString := buildLimitString(query.offset, query.limit)
