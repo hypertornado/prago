@@ -25,7 +25,10 @@ func (app *App) initBoard() {
 	app.dashboardTableMap = make(map[string]*dashboardTable)
 	app.dashboardFigureMap = make(map[string]*dashboardFigure)
 	app.dashboardTimelineMap = make(map[string]*Timeline)
-	sysadminBoard = app.MainBoard.Child("_sysadmin", unlocalized("Sysadmin"), "glyphicons-basic-501-server.svg")
+
+	app.optionsBoard = app.MainBoard.Child("_options", messages.GetNameFunction("admin_options"), "glyphicons-basic-137-cogwheel.svg")
+
+	sysadminBoard = app.optionsBoard.Child("_sysadmin", unlocalized("Sysadmin"), "glyphicons-basic-501-server.svg")
 
 	sysadminGroup := sysadminBoard.Dashboard(unlocalized(""))
 
@@ -43,6 +46,7 @@ func (parent *Board) Child(url string, name func(string) string, icon string) *B
 	app := parent.app
 	board := newBoard(app, url)
 	board.parentBoard = parent
+	board.action.parentBoard = parent
 	board.action.name = name
 	board.action.icon = icon
 	return board

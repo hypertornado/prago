@@ -222,7 +222,7 @@ func (app *App) initActivityLog() {
 
 		fv.AfterContent(table.ExecuteHTML())
 
-	}).Permission("logged").Name(unlocalized("Úpravy")).Icon(iconActivity)
+	}).Permission("logged").Name(unlocalized("Úpravy")).Icon(iconActivity).Board(app.optionsBoard)
 
 	app.activityLogResource = NewResource[activityLog](app)
 	app.activityLogResource.Board(sysadminBoard)

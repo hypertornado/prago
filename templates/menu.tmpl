@@ -6,9 +6,8 @@
         <div class="menu_footer">
             <div>{{.Username}}</div>
             <div>{{.Email}}</div>
-            <div {{if .RoleWarning}}class="menu_footer_item-warning"{{end}}>{{.Role}}</div>
-            <div>{{.LanguageDecription}}</div>
-            <div>{{.Version}}</div>
+            <div {{if .RoleWarning}}class="menu_footer_item-warning"{{end}}>{{.RoleWarning}}</div>
+            <div>{{.AppDescription}}</div>
         </div>
     </div>
 {{end}}

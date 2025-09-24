@@ -5,6 +5,9 @@ import (
 	"html/template"
 	"sort"
 	"strings"
+
+	"golang.org/x/text/collate"
+	"golang.org/x/text/language"
 )
 
 type buttonData struct {
@@ -32,7 +35,6 @@ type Action struct {
 	app          *App
 	resource     *Resource
 	isItemAction bool
-	isUserMenu   bool
 	priority     int64
 	isFormAction bool
 
@@ -164,11 +166,6 @@ func (action *Action) Board(board *Board) *Action {
 	return action
 }
 
-func (action *Action) userMenu() *Action {
-	action.isUserMenu = true
-	return action
-}
-
 func (action *Action) styleDestroy() *Action {
 	action.style = "destroy"
 	return action
@@ -179,7 +176,7 @@ func (action *Action) addConstraint(constraint routerConstraint) {
 }
 
 func (resource *Resource) getItemButtonData(userData UserData, item any, ignoreView bool) (ret []*buttonData) {
-	for _, v := range resource.itemActions {
+	for k, v := range resource.itemActions {
 		if v.method != "GET" {
 			continue
 		}
@@ -196,19 +193,38 @@ func (resource *Resource) getItemButtonData(userData UserData, item any, ignoreV
 			formURL = actionURL
 		}
 
+		priority := v.priority - int64(k)
+
 		ret = append(ret, &buttonData{
 			Icon:     v.icon,
 			Name:     v.name(userData.Locale()),
 			URL:      actionURL,
-			Priority: v.priority,
+			Priority: priority,
 			Style:    v.style,
 			FormURL:  formURL,
 		},
 		)
 	}
 
+	collator := collate.New(language.Czech)
 	sort.Slice(ret, func(i, j int) bool {
-		return ret[i].Priority > ret[j].Priority
+		a := ret[i]
+		b := ret[j]
+
+		if a.Priority > b.Priority {
+			return true
+		}
+		if a.Priority < b.Priority {
+			return false
+		}
+
+		if collator.CompareString(a.Name, b.Name) <= 0 {
+			return true
+		} else {
+			return false
+		}
+
+		//return ret[i].Priority > ret[j].Priority
 	})
 	return ret
 }

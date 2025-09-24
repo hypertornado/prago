@@ -202,7 +202,7 @@ code {
 }
 
 h1 {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   line-height: 1.4em;
   margin: 0.5em 0 0.2em 0;
 }
@@ -297,6 +297,7 @@ pre {
   padding: 0px 10px;
   justify-content: space-between;
   height: 45px;
+  border-bottom: 0.5px solid hsl(214, 50%, 90%);
 }
 
 .root_bottom {
@@ -715,6 +716,7 @@ select.admin_timestamp_minute {
 .help_icons {
   display: flex;
   flex-wrap: wrap;
+  padding: 0px 5px;
 }
 
 .help_icon {
@@ -728,10 +730,15 @@ select.admin_timestamp_minute {
   border-radius: 10px;
   background-color: white;
   justify-content: space-between;
+  cursor: default;
 }
 
 .help_icon:hover {
-  background-color: #fafafa;
+  background-color: hsl(214, 50%, 97%);
+}
+
+.help_icon:active {
+  background-color: hsl(214, 50%, 90%);
 }
 
 .help_icon_img {
@@ -1865,7 +1872,8 @@ a.search_pagination_page-selected {
   border-radius: 10px;
   position: relative;
   z-index: 10000000000;
-  background-color: #fafafa;
+  background-color: #eee;
+  background-color: hsl(214, 50%, 97%);
 }
 
 .searchbox-showsuggestions {
@@ -2145,7 +2153,7 @@ a.admin_search_suggestion-selected:active {
 
 .board_name {
   padding: 0px 10px;
-  margin: 0px;
+  margin-top: 10px;
   display: flex;
   align-items: center;
 }
@@ -2154,10 +2162,6 @@ a.admin_search_suggestion-selected:active {
   width: 20px;
   aspect-ratio: 1;
   margin-right: 10px;
-}
-
-.board_name_text {
-  border: 0px solid red;
 }
 
 .board_resources {
@@ -2537,6 +2541,7 @@ a.admin_stats_section_row {
 
 .menu2 {
   padding-right: 5px;
+  padding-top: 10px;
 }
 
 .menu2_items {
@@ -3065,6 +3070,7 @@ a.admin_stats_section_row {
 
 .form_table {
   border: 0px solid red;
+  margin-top: 5px;
 }
 
 .form_table table {
@@ -3160,18 +3166,36 @@ a.admin_stats_section_row {
   color: #444;
   font-weight: 500;
   padding: 3px 5px;
-  border-radius: 5px;
+  border-radius: 3px;
   display: flex;
   gap: 5px;
   flex-shrink: 100;
   min-width: 0;
-  background-color: #fafafa;
+}
+
+@media (min-width: 1100px) {
+  .breadcrumb-logo {
+    width: 290px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .breadcrumb-logo .breadcrumb_text {
+    display: block !important;
+  }
+}
+.breadcrumb-logo .breadcrumb_text {
+  font-size: 1.4rem;
+  line-height: 1.3em;
+  padding: 0px 5px;
+  display: none;
 }
 
 .breadcrumb_logo {
-  height: 30px;
+  height: 40px;
   aspect-ratio: 1;
   object-fit: contain;
+  border-radius: 3px;
 }
 
 .breadcrumb_badge {
@@ -3182,6 +3206,7 @@ a.admin_stats_section_row {
   border-radius: 3px;
   overflow: hidden;
   border: 0px solid red;
+  background-color: #fafafa;
   z-index: 2;
 }
 
@@ -3207,12 +3232,6 @@ a.admin_stats_section_row {
   flex-shrink: 10000;
   text-overflow: ellipsis;
   min-width: 0;
-}
-
-.breadcrumbs_divider {
-  height: 12px;
-  aspect-ratio: 1;
-  display: none;
 }
 
 .cmenu_container {
@@ -3754,4 +3773,9 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 
 .simple_section_name {
   font-weight: bold;
+}
+
+.simple_section_logo {
+  height: 150px;
+  margin: 10px 0px;
 }

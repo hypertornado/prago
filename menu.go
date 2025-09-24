@@ -14,12 +14,13 @@ type menu struct {
 	SearchQuery string
 	Items       []*menuItem
 
-	Username           string
-	Email              string
-	Role               string
-	RoleWarning        bool
-	LanguageDecription string
-	Version            string
+	Username       string
+	Email          string
+	AppDescription string
+	RoleWarning    string
+	AppName        string
+	//LanguageDecription string
+	//Version            string
 }
 
 type menuItem struct {
@@ -60,16 +61,23 @@ func (app *App) getMenu(request *Request, item any) (ret *menu) {
 	ret.Language = request.Locale()
 
 	user := request.getUser()
-	ret.Username = fmt.Sprintf("Přihlášený uživatel %s %s", user.Username, user.Name)
+	ret.Username = fmt.Sprintf("%s %s", user.Username, user.Name)
 	ret.Email = user.Email
+
+	var items []string
+
+	items = append(items, app.codeName)
+	items = append(items, fmt.Sprintf("%s", app.version))
+
 	if request.role() != "" {
-		ret.Role = fmt.Sprintf("Role „%s“", request.role())
+		items = append(items, fmt.Sprintf("%s", request.role()))
 	} else {
-		ret.RoleWarning = true
-		ret.Role = "Nebyla vám zatím administrátorem webu přidělena žádná role"
+		ret.RoleWarning = "Nebyla vám zatím administrátorem webu přidělena žádná role"
 	}
-	ret.LanguageDecription = fmt.Sprintf("Jazyk %s", localeNames[user.Locale])
-	ret.Version = "Verze " + app.version
+
+	items = append(items, localeNames[user.Locale])
+	ret.AppDescription = strings.Join(items, " · ")
+	ret.AppName = app.name(request.Locale())
 	return ret
 }
 
@@ -201,7 +209,6 @@ func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem
 		}
 
 		var sortPriority int64
-
 		if fullURL == "/admin/logout" {
 			sortPriority = -1
 			fullURL += "?_csrfToken=" + csrfToken
@@ -220,6 +227,10 @@ func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem
 		icon := v.icon
 		if icon == "" {
 			icon = iconForm
+		}
+
+		if fullURL == "/admin/_options" {
+			sortPriority = -1
 		}
 
 		menuItem := &menuItem{

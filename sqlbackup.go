@@ -8,11 +8,11 @@ import (
 )
 
 func (app *App) initSQLBackup() {
-	ActionForm(app, "sqlbackup",
+	ActionForm(app, "_sqlbackup",
 		func(form *Form, request *Request) {
 			form.Title = "SQL Backup"
 
-			tables, err := listTables(app.db)
+			/*tables, err := listTables(app.db)
 			must(err)
 
 			var tablesAr []string
@@ -21,14 +21,16 @@ func (app *App) initSQLBackup() {
 				tablesAr = append(tablesAr, k)
 			}
 
-			sort.Strings(tablesAr)
+			sort.Strings(tablesAr)*/
+
+			tablesArr := listTablesArr(app)
 
 			var resourcesTableNames = map[string]bool{}
 			for _, v := range app.resources {
 				resourcesTableNames[v.id] = true
 			}
 
-			for _, v := range tablesAr {
+			for _, v := range tablesArr {
 				tableSize := app.getTableDataSize(v)
 
 				var defaultIgnore = true
@@ -76,4 +78,18 @@ func (app *App) initSQLBackup() {
 		}
 	})
 
+}
+
+func listTablesArr(app *App) []string {
+	tables, err := listTables(app.db)
+	must(err)
+
+	var tablesAr []string
+
+	for k := range tables {
+		tablesAr = append(tablesAr, k)
+	}
+
+	sort.Strings(tablesAr)
+	return tablesAr
 }

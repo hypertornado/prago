@@ -92,6 +92,7 @@ func (app *App) initFilesResource() {
 	)
 	app.FilesResource = resource
 	resource.PermissionCreate(nobodyPermission)
+	resource.Board(app.optionsBoard)
 
 }
 

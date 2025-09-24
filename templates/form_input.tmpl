@@ -45,7 +45,7 @@
 
 {{define "form_input_checkbox"}}
   <label>
-    <input type="checkbox" name="{{.ID}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}} class="form_watcher">
+    <input type="checkbox" name="{{.ID}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}} class="form_watcher">
     <span class="form_label_text-inline">{{PragoHTML .Name}}</span>
   </label>
 {{end}}
@@ -105,7 +105,7 @@
       No preview for this format available
     {{end}}
   {{else}}
-    <input type="file" id="{{.UUID}}" name="{{.ID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+    <input type="file" id="{{.UUID}}" name="{{.ID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>
   {{end}}
 {{end}}
 
@@ -115,17 +115,17 @@
 
 {{define "form_input_submit"}}
   <div class="primarybtncontainer">
-    <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Name}}</button>
+    <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>{{.Name}}</button>
   </div>
 {{end}}
 
 {{define "form_input_delete"}}
-  <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary btn-delete"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Name}}</button>
+  <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary btn-delete"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>{{.Name}}</button>
 {{end}}
 
 {{define "form_input_select"}}
   {{if gt (len .Data) 0}}
-    <select name="{{.ID}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+    <select name="{{.ID}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>
       {{$val := .Value}}
       {{range $value := .Data}}
         <option value="{{index $value 0}}"{{if eq $val (index $value 0)}} selected{{end}}>{{index $value 1}}</option>

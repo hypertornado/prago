@@ -3731,6 +3731,12 @@ class Prago {
         relationListEls.forEach((el) => {
             new RelationList(el);
         });
+        var helpIconEls = document.querySelectorAll(".help_icon");
+        helpIconEls.forEach((el) => {
+            el.addEventListener("click", () => {
+                navigator.clipboard.writeText(el.getAttribute("data-icon"));
+            });
+        });
         Prago.notificationCenter = new NotificationCenter(document.querySelector(".notification_center"));
         var qa = document.querySelector(".quick_actions");
         if (qa) {

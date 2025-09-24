@@ -67,7 +67,7 @@ func initUserSettings(app *App) {
 			request.AddFlashMessage(messages.Get(newLocale, "admin_settings_changed"))
 			vc.Redirect("/admin")
 		}
-	}).Icon("glyphicons-basic-5-settings.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).userMenu()
+	}).Icon("glyphicons-basic-5-settings.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).Board(app.optionsBoard)
 
 	ActionForm(
 		app,
@@ -106,7 +106,7 @@ func initUserSettings(app *App) {
 				request.AddFlashMessage(messages.Get(request.Locale(), "admin_password_changed"))
 				vc.Redirect("/admin")
 			}
-		}).Icon("glyphicons-basic-45-key.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).userMenu()
+		}).Icon("glyphicons-basic-45-key.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).Board(app.optionsBoard)
 
 	ActionResourceItemForm(app, "change-password", func(user *user, form *Form, request *Request) {
 		newPassword := form.AddPasswordInput("newpassword", messages.Get(request.Locale(), "admin_password_new"))
@@ -137,5 +137,5 @@ func initUserSettings(app *App) {
 		validateCSRF(request)
 		request.logOutUser()
 		request.Redirect(app.getAdminURL("login"))
-	}).Icon("glyphicons-basic-432-log-out.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_log_out")).userMenu()
+	}).Icon("glyphicons-basic-432-log-out.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_log_out")).Board(app.optionsBoard)
 }

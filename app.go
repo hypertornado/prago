@@ -69,7 +69,8 @@ type App struct {
 	dashboardFigureMap   map[string]*dashboardFigure
 	dashboardTimelineMap map[string]*Timeline
 
-	MainBoard *Board
+	MainBoard    *Board
+	optionsBoard *Board
 
 	dbConfig *DBConnectConfig
 
@@ -156,6 +157,7 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initSearch()
 	app.initSQLConsole()
 	app.initSQLBackup()
+	app.initSQLView()
 	app.initBackupCRON()
 	app.initDashboard()
 	app.initIcons()

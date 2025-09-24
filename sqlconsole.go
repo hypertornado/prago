@@ -6,10 +6,12 @@ import (
 
 func (app *App) initSQLConsole() {
 
-	ActionForm(app, "sqlconsole",
+	ActionForm(app, "_sqlconsole",
 		func(form *Form, request *Request) {
 			form.Title = "SQL Console"
-			form.AddTextareaInput("q", "").Focused = true
+			input := form.AddTextareaInput("q", "")
+			input.Focused = true
+			input.Value = request.Param("q")
 			form.AddSubmit("Execute SQL")
 		}, func(vc FormValidation, request *Request) {
 			q := request.Param("q")

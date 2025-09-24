@@ -61,6 +61,9 @@
             {{if $section.Description}}
               <div class="simple_section_description">{{$section.Description}}</div>
             {{end}}
+            {{if $section.LogoURL}}
+              <img src="{{$section.LogoURL}}" class="simple_section_logo">
+            {{end}}
           </div>
         {{end}}
       {{end}}

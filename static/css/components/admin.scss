@@ -315,6 +315,7 @@ select.admin_timestamp_minute {
 .help_icons {
   display: flex;
   flex-wrap: wrap;
+  padding: 0px 5px;
 }
 
 .help_icon {
@@ -328,10 +329,15 @@ select.admin_timestamp_minute {
   border-radius: 10px;
   background-color: white;
   justify-content: space-between;
+  cursor: default;
 }
 
 .help_icon:hover {
-  background-color: #fafafa;
+  background-color: $hoverColor;
+}
+
+.help_icon:active {
+  background-color: $activeColor;
 }
 
 .help_icon_img {

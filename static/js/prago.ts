@@ -46,6 +46,15 @@ class Prago {
       new RelationList(el);
     });
 
+    var helpIconEls = document.querySelectorAll<HTMLDivElement>(
+      ".help_icon"
+    );
+    helpIconEls.forEach((el) => {
+      el.addEventListener("click", () => {
+        navigator.clipboard.writeText(el.getAttribute("data-icon"));
+      })
+    });
+
     Prago.notificationCenter = new NotificationCenter(
       document.querySelector(".notification_center")
     );
@@ -58,8 +67,9 @@ class Prago {
     initDashboard();
     initGoogleMaps();
 
-    let searchboxButton = document.querySelector(".searchbox_button");
 
+
+    let searchboxButton = document.querySelector(".searchbox_button");
     if (searchboxButton) {
       searchboxButton.addEventListener("click", (e: Event) => {
         let input: HTMLInputElement = document.querySelector(".searchbox_input");
@@ -96,8 +106,6 @@ class VisibilityReloader {
         document.visibilityState == "visible" &&
         Date.now() - this.lastRequestedTime >= reloadIntervalMilliseconds
       ) {
-        //console.log("WILL load");
-        //console.log(handler);
         this.lastRequestedTime = Date.now();
         handler();
       }

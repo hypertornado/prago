@@ -108,6 +108,7 @@ func (app *App) initUserResource() {
 	resource.PermissionExport(sysadminPermission)
 
 	resource.Icon("glyphicons-basic-4-user.svg")
+	resource.Board(app.optionsBoard)
 }
 
 func (app *App) afterInitUserResource() {
