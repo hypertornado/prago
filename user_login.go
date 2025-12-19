@@ -38,6 +38,11 @@ func initUserLogin(app *App) {
 		email = fixEmail(email)
 		password := request.Param("password")
 
+		if email == "" {
+			vc.AddError(messages.Get(locale, "admin_login_error"))
+			return
+		}
+
 		q := Query[user](app)
 		if email != "" && !strings.Contains(email, "@") {
 			q.Is("username", email)

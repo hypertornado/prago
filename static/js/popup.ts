@@ -26,16 +26,16 @@ class Popup {
     this.el
       .querySelector(".popup_header_cancel")
       .addEventListener("click", this.cancel.bind(this));
-    this.el.addEventListener("click", this.backgroundClicked.bind(this));
+    //this.el.addEventListener("click", this.backgroundClicked.bind(this));
     this.el.focus();
 
-    this.el.addEventListener("keydown", (e) => {
+    /*this.el.addEventListener("keydown", (e) => {
       if (e.code == "Escape") {
         if (this.cancelable) {
           this.cancel();
         }
       }
-    });
+    });*/
     this.setTitle(title);
   }
 

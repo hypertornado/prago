@@ -51,10 +51,26 @@ class ListMultiple {
     this.multipleActionStart(e.target, ids);
   }
 
+  multipleActionForm(resourceID: string, actionID: string, ids: Array<String>) {
+    let idsStr = ids.join(",");
+    let formURL = `/admin/${resourceID}/${idsStr}/${actionID}`;
+    //@ts-ignore
+    new PopupForm(formURL, (data: any) => {
+        //window.location.reload();
+        console.log("ok");
+        this.list.load();
+    });
+    //console.log("MAF", formURL);
+  }
+
   multipleActionStart(btn: HTMLButtonElement, ids: Array<String>) {
     let actionID = btn.getAttribute("data-id");
     let actionName = btn.getAttribute("data-name");
     switch (btn.getAttribute("data-action-type")) {
+      case "multiple_action_form":
+        let resourceID = btn.getAttribute("data-resource-id");
+        this.multipleActionForm(resourceID, actionID, ids);
+        break;
       case "mutiple_edit":
         new ListMultipleEdit(this, ids);
         break;

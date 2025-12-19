@@ -25,7 +25,8 @@ type pageDataSimple struct {
 
 	NotificationsData string
 	Title             string
-	Icon              string
+	Logo              string
+	//Icon              string
 
 	Tabs []*Button
 
@@ -41,16 +42,22 @@ type pageDataSimple struct {
 }
 
 type SimpleSection struct {
+	Icon        string
 	Name        string
 	Description string
+	Text        template.HTML
 	LogoURL     string
+
+	Table *Table
+
+	PrimaryButton *Button
+	Buttons       []*Button
 }
 
 const defaultBackgroundImageURL = "https://images.unsplash.com/photo-1519677100203-a0e668c92439?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 
 func renderPageSimple(request *Request, page *pageDataSimple) {
 	var name string = page.Name
-	var icon string
 
 	page.Language = localeFromRequest(request)
 	page.Version = request.app.GetVersionString()
@@ -69,10 +76,12 @@ func renderPageSimple(request *Request, page *pageDataSimple) {
 		page.BackgroundImageURL = defaultBackgroundImageURL
 	}
 
+	page.Logo, err = request.app.getSetting("icon_image_url")
+	must(err)
+
 	for _, v := range page.Tabs {
 		if v.Selected {
 			name = v.Name
-			icon = v.Icon
 		}
 	}
 
@@ -80,6 +89,5 @@ func renderPageSimple(request *Request, page *pageDataSimple) {
 
 	page.NotificationsData = request.getNotificationsData()
 	page.Title = name
-	page.Icon = icon
 	request.WriteHTML(200, request.app.adminTemplates, "simple", page)
 }

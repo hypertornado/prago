@@ -32,11 +32,12 @@ type Action struct {
 	isPartOfBoard *Board
 	style         string
 
-	app          *App
-	resource     *Resource
-	isItemAction bool
-	priority     int64
-	isFormAction bool
+	app                  *App
+	resource             *Resource
+	isItemAction         bool
+	priority             int64
+	isFormAction         bool
+	isFormMultipleAction bool
 
 	childAction *Action
 }
@@ -184,6 +185,9 @@ func (resource *Resource) getItemButtonData(userData UserData, item any, ignoreV
 			continue
 		}
 		if ignoreView && v.url == "" {
+			continue
+		}
+		if v.isFormMultipleAction {
 			continue
 		}
 

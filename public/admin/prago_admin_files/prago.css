@@ -690,6 +690,8 @@ select.admin_timestamp_minute {
   border-bottom-left-radius: 5px;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
   width: 400px;
+  max-height: 300px;
+  overflow: auto;
 }
 
 .admin_item_relation_picker_suggestion {
@@ -769,6 +771,15 @@ select.admin_timestamp_minute {
   border: 20px solid black;
 }
 
+@media print {
+  body {
+    background: none !important;
+  }
+  /** {
+    background: none !important;
+    box-shadow: none !important;
+  }*/
+}
 .btn {
   font-size: 1rem;
   line-height: 1.3em;
@@ -1260,13 +1271,14 @@ a.btn_more_item {
   align-items: center;
   justify-content: space-between;
   bottom: 0px;
-  left: 300px;
+  left: 0px;
   right: 0px;
   padding: 0px 10px;
   gap: 10px;
   background: white;
   min-height: 70px;
   border-top: 1px solid #eee;
+  position: sticky;
   text-wrap: nowrap;
   flex-shrink: 10000;
   text-overflow: ellipsis;
@@ -1285,10 +1297,6 @@ a.btn_more_item {
   overflow: hidden;
   white-space: nowrap;
   min-width: 0px;
-}
-
-.list_table {
-  margin-bottom: 69px;
 }
 
 .list_row {
@@ -3133,7 +3141,11 @@ a.admin_stats_section_row {
   font-size: 0.8rem;
   line-height: 1.3em;
   font-weight: normal;
-  color: #999;
+  color: #444;
+}
+
+.form_table_cell a {
+  text-decoration: none;
 }
 
 .form_table_cell_textafter {
@@ -3746,6 +3758,7 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat;
+  print-color-adjust: exact;
 }
 
 .simple_name {
@@ -3772,10 +3785,73 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 }
 
 .simple_section_name {
+  font-size: 1.2rem;
+  line-height: 1.5em;
   font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.simple_section_icon {
+  aspect-ratio: 1;
+  height: 1em;
 }
 
 .simple_section_logo {
   height: 150px;
   margin: 10px 0px;
+  display: block;
+}
+
+.simple_section_btns {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.simple_section_btn {
+  font-weight: 500;
+  font-size: 1.1rem;
+  line-height: 1.3em;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 5px;
+  text-decoration: none;
+  padding: 5px 5px;
+  margin: 0px 0px;
+  margin-left: -5px;
+}
+
+.simple_section_primarybtn {
+  text-align: center;
+  margin: 10px 0px;
+}
+
+.simple_section_btn_icon {
+  height: 1em;
+  aspect-ratio: 1;
+}
+
+@media print {
+  .simple_content {
+    border: none;
+    box-shadow: none;
+  }
+  .simple_backbtn {
+    display: none;
+  }
+}
+@media (max-width: 630px) {
+  .simple {
+    background: none !important;
+  }
+  .simple_content {
+    border-radius: 0px;
+    box-shadow: none;
+    margin: 0px;
+    border: none;
+    width: 100%;
+  }
 }

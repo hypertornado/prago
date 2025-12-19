@@ -2,12 +2,61 @@ package prago
 
 import (
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 	"time"
 )
 
 func (app *App) initSQLBackup() {
+
+	var backupFilePath string
+
+	app.addCommand("sqlbackup").Description("Backup SQL to FILE").flag(
+		newCommandFlag("path", "path of sql backup file").String(&backupFilePath),
+	).Callback(func() {
+		if backupFilePath == "" {
+			fmt.Println("No backupFilePath set")
+			return
+		}
+
+		file, err := os.Create(backupFilePath)
+		if err != nil {
+			fmt.Println("Error creating file:", err)
+			return
+		}
+		defer file.Close()
+
+		err = app.backupSQL(file, nil)
+		if err != nil {
+			fmt.Println("Error backing SQL file:", err)
+			return
+		}
+	})
+
+	var restoreFilePath string
+	app.addCommand("sqlrestore").Description("Restore SQL from FILE").flag(
+		newCommandFlag("path", "path of sql backup file").String(&restoreFilePath),
+	).Callback(func() {
+		if restoreFilePath == "" {
+			fmt.Println("No restoreFilePath set")
+			return
+		}
+
+		file, err := os.Open(restoreFilePath)
+		if err != nil {
+			fmt.Printf("Error opening file '%s': %s\n", restoreFilePath, err)
+			return
+		}
+		defer file.Close()
+
+		err = app.restoreSQLBackup(file)
+		if err != nil {
+			fmt.Println("Error restoring SQL file:", err)
+			return
+		}
+	})
+
 	ActionForm(app, "_sqlbackup",
 		func(form *Form, request *Request) {
 			form.Title = "SQL Backup"

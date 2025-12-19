@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"strings"
 )
 
 type formAction struct {
@@ -167,6 +168,66 @@ func (resource *Resource) formItemAction(url string, formGenerator func(any, *Fo
 	}
 
 	return fa.actionForm
+}
+
+func (resource *Resource) formItemMultipleAction(url string, formGenerator func([]any, *Form, *Request), validation func([]any, FormValidation, *Request)) *Action {
+	fa := newFormAction(resource.app, url, func(f *Form, r *Request) {
+		//item := resource.query(context.TODO()).ID(r.Param("id"))
+		//f.image = resource.previewer(r, item).ImageURL()
+	})
+
+	fa.actionForm.resource = resource
+	fa.actionValidation.resource = resource
+
+	fa.actionForm.Permission(resource.canView)
+	fa.actionValidation.Permission(resource.canView)
+
+	fa.actionForm.isItemAction = true
+	fa.actionValidation.isItemAction = true
+
+	fa.actionForm.isFormMultipleAction = true
+	fa.actionValidation.isFormMultipleAction = true
+
+	resource.itemActions = append(resource.itemActions, fa.actionForm)
+	resource.itemActions = append(resource.itemActions, fa.actionValidation)
+
+	fa.formGenerator = func(form *Form, request *Request) {
+		idsStr := strings.Split(request.Param("id"), ",")
+		form.AddRelationMultiple("_item_ids", "", resource.id).
+			Value = fmt.Sprintf(";%s;", strings.Join(idsStr, ";"))
+
+		items := getItemsFromIDs(resource, request.Param("id"))
+		formGenerator(items, form, request)
+	}
+
+	fa.formValidation = func(vc FormValidation, request *Request) {
+
+		ids := strings.Split(request.Param("_item_ids"), ";")
+		var filtered []string
+		for _, v := range ids {
+			if v != "" {
+				filtered = append(filtered, v)
+			}
+		}
+
+		items := getItemsFromIDs(resource, strings.Join(filtered, ","))
+		//item := resource.query(request.Request().Context()).ID(request.Param("id"))
+		validation(items, vc, request)
+	}
+
+	return fa.actionForm
+}
+
+func getItemsFromIDs(resource *Resource, ids string) (ret []any) {
+	idsStr := strings.Split(ids, ",")
+	for _, id := range idsStr {
+		item := resource.query(context.Background()).ID(id)
+		if item == nil {
+			return nil
+		}
+		ret = append(ret, item)
+	}
+	return
 }
 
 func PopupForm(app *App, url string, formGenerator func(*Form, *Request), validation func(FormValidation, *Request)) *Action {

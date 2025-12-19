@@ -42,8 +42,8 @@
   align-items: center;
   justify-content: space-between;
   bottom: 0px;
-  //left: 0px;
-  left: 300px;
+  left: 0px;
+  //left: 300px;
   right: 0px;
   padding: 0px 10px;
   gap: 10px;
@@ -51,6 +51,7 @@
   min-height: 70px;
   border-top: 1px solid $grayBorderColor;
   //border-left: 1px solid $grayBorderColor;
+  position: sticky;
 
   text-wrap: nowrap;
   flex-shrink: 10000;
@@ -74,7 +75,7 @@
 }
 
 .list_table {
-  margin-bottom: 69px;
+  //margin-bottom: 69px;
 }
 
 .list_row {

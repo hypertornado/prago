@@ -107,6 +107,24 @@ func backupApp(app *App) error {
 	return copyFiles(dirPath, backupsPath)
 }
 
+func (app *App) restoreSQLBackup(reader io.Reader) error {
+
+	password := app.dbConfig.Password
+	var command *exec.Cmd
+	var params []string
+	if password == "" {
+		params = []string{"-u" + app.dbConfig.User, app.dbConfig.Name}
+	} else {
+		params = []string{"-u" + app.dbConfig.User, "-p" + password, app.dbConfig.Name}
+	}
+	app.Log().Printf("mysql with params %v", params)
+	command = exec.Command("mysql", params...)
+	command.Stdout = os.Stdout
+	command.Stdin = reader
+	return command.Run()
+
+}
+
 func (app *App) backupSQL(writer io.Writer, excludeTableNames []string) error {
 
 	availableTables, err := listTables(app.db)
@@ -129,17 +147,16 @@ func (app *App) backupSQL(writer io.Writer, excludeTableNames []string) error {
 
 	password := app.dbConfig.Password
 	var dumpCmd *exec.Cmd
+	var params []string
 	if password == "" {
-		params := []string{"-u" + app.dbConfig.User, app.dbConfig.Name}
-		params = append(params, appendedIgnore...)
-		app.Log().Printf("mysqldump with params %v", params)
-		dumpCmd = exec.Command("mysqldump", params...)
+		params = []string{"-u" + app.dbConfig.User, app.dbConfig.Name}
 	} else {
-		params := []string{"-u" + app.dbConfig.User, "-p" + password, app.dbConfig.Name}
-		params = append(params, appendedIgnore...)
-		app.Log().Printf("mysqldump with params %v", params)
-		dumpCmd = exec.Command("mysqldump", params...)
+		params = []string{"-u" + app.dbConfig.User, "-p" + password, app.dbConfig.Name}
+
 	}
+	params = append(params, appendedIgnore...)
+	app.Log().Printf("mysqldump with params %v", params)
+	dumpCmd = exec.Command("mysqldump", params...)
 	dumpCmd.Stdout = writer
 	return dumpCmd.Run()
 }

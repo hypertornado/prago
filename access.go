@@ -17,14 +17,16 @@ const (
 )
 
 type accessManager struct {
-	roles       map[string]map[Permission]bool
-	permissions map[Permission]bool
+	roles          map[string]map[Permission]bool
+	permissions    map[Permission]bool
+	canManageRoles map[[2]string]bool
 }
 
 func (app *App) initAccessManager() {
 	app.accessManager = &accessManager{
-		roles:       make(map[string]map[Permission]bool),
-		permissions: make(map[Permission]bool),
+		roles:          make(map[string]map[Permission]bool),
+		permissions:    make(map[Permission]bool),
+		canManageRoles: make(map[[2]string]bool),
 	}
 
 	app.Permission(everybodyPermission)
@@ -86,6 +88,7 @@ func (app *App) Role(role string, permissions []Permission) *App {
 	}
 	perms[loggedPermission] = true
 	app.accessManager.roles[role] = perms
+	app.AddManagerOfRole(sysadminRoleName, role)
 	return app
 }
 
@@ -99,6 +102,22 @@ func (app *App) Permission(permission Permission) *App {
 	}
 	app.accessManager.permissions[Permission(permission)] = true
 	return app
+}
+
+func (app *App) AddManagerOfRole(whoRole, whomRole string) {
+
+	if app.accessManager.roles[whoRole] == nil {
+		panic(fmt.Sprintf("Role '%s' does not exist", whoRole))
+	}
+	if app.accessManager.roles[whomRole] == nil {
+		panic(fmt.Sprintf("Role '%s' does not exist", whomRole))
+	}
+
+	app.accessManager.canManageRoles[[2]string{whoRole, whomRole}] = true
+}
+
+func (app *App) canManageRole(who, whom string) bool {
+	return app.accessManager.canManageRoles[[2]string{who, whom}]
 }
 
 func (app *App) authorize(isLogged bool, role string, permission Permission) bool {

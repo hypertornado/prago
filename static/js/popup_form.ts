@@ -3,7 +3,7 @@ class PopupForm extends Popup {
 
     private dataHandler: Function;
 
-    constructor(path: string, dataHandler: Function) {
+    constructor(path: string, dataHandler: Function, cancelHandler?: Function) {
         super("⌛️");
         this.dataHandler = dataHandler;
         this.setCancelable();
@@ -11,6 +11,12 @@ class PopupForm extends Popup {
 
         this.setIcon("glyphicons-basic-30-clipboard.svg");
 
+        this.cancelAction = () => {
+            if (cancelHandler) {
+                cancelHandler();
+            }
+            this.remove();
+        }
         this.loadForm(path);
     }
 
@@ -41,4 +47,7 @@ class PopupForm extends Popup {
         this.unpresent();
         this.dataHandler(data)
     }
+
+
+
 }

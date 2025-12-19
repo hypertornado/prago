@@ -110,6 +110,15 @@ func (request *Request) Email() string {
 	return data.email
 }
 
+func (request *Request) Phone() string {
+	userID := request.UserID()
+	data := request.app.userDataCacheGet(userID)
+	if data == nil {
+		return ""
+	}
+	return data.phone
+}
+
 func (request *Request) Duration() time.Duration {
 	return time.Since(request.receivedAt)
 }

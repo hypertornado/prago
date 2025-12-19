@@ -343,3 +343,37 @@ func (resource *Resource) updateCachedCount() error {
 	})
 	return nil
 }
+
+func (resource *Resource) forEach(ctx context.Context, handler func(any) error) error {
+	var lastID int64
+	var chunkSize = 100
+
+	for {
+		items, err := resource.query(ctx).Order("id").where("id > ?", lastID).Limit(int64(chunkSize)).list()
+		if err != nil {
+			return err
+		}
+		itemsCount := reflect.ValueOf(items).Len()
+		if itemsCount == 0 {
+			break
+		}
+		for i := range itemsCount {
+			item := reflect.ValueOf(items).Index(i)
+			val := item.Elem()
+			id := val.FieldByName("ID").Int()
+			lastID = id
+			err := handler(item.Interface())
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func ForEach[T any](app *App, ctx context.Context, handler func(*T) error) error {
+	resource := getResource[T](app)
+	return resource.forEach(ctx, func(a any) error {
+		return handler(a.(*T))
+	})
+}

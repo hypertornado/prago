@@ -13,6 +13,8 @@ type Field struct {
 	name            func(string) string
 	nameSetManually bool
 	description     func(string) string
+	useTextOver     bool
+	textOver        func(string) string
 	typ             reflect.Type
 	tags            map[string]string
 	fieldOrder      int
@@ -36,6 +38,8 @@ type Field struct {
 	viewContentGenerator func(val any) template.HTML
 
 	helpURL string
+
+	fixStringValueFN func(string) string
 }
 
 func (resource *Resource) Field(name string) *Field {
@@ -91,6 +95,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 		"prago-view",
 		"prago-visible",
 		"prago-editable",
+		"prago-textover",
 	} {
 		t := f.Tag.Get(v)
 		if t != "" {
@@ -112,6 +117,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 		"prago-validations",
 		"prago-required",
 		"prago-icon",
+		"prago-text-over",
 	} {
 		ret.tags[v] = f.Tag.Get(v)
 	}
@@ -129,6 +135,10 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 
 	if ret.tags["prago-unique"] == "true" {
 		ret.unique = true
+	}
+
+	if ret.tags["prago-text-over"] == "true" {
+		ret.useTextOver = true
 	}
 
 	if ret.tags["prago-required"] != "" {
@@ -255,6 +265,12 @@ func (field *Field) Description(description func(string) string) *Field {
 	return field
 }
 
+func (field *Field) TextOver(textOver func(string) string) *Field {
+	field.useTextOver = true
+	field.textOver = textOver
+	return field
+}
+
 func (field *Field) ViewContentGenerator(fn func(val any) template.HTML) *Field {
 	field.viewContentGenerator = fn
 	return field
@@ -273,7 +289,11 @@ func (field *Field) DBDescription(description string) *Field {
 func (field *Field) IsSearchable(isSearchable bool) *Field {
 	field.isSearchable = true
 	return field
+}
 
+func (field *Field) FixStringValue(fn func(string) string) *Field {
+	field.fixStringValueFN = fn
+	return field
 }
 
 func (field *Field) getIcon() string {

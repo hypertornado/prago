@@ -58,6 +58,7 @@ type pagination struct {
 
 type listMultipleAction struct {
 	ID         string
+	ResourceID string
 	ActionType string
 	Icon       string
 	Name       string

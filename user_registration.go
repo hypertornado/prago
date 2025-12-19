@@ -70,7 +70,7 @@ func registrationValidation(vc FormValidation, request *Request) {
 
 	email := request.Param("email")
 	email = fixEmail(email)
-	if !isEmailValid(email) {
+	if !IsEmailValid(email) {
 		vc.AddItemError("email", messages.Get(locale, "admin_email_not_valid"))
 	} else {
 		user := Query[user](app).Is("email", email).First()
@@ -80,7 +80,7 @@ func registrationValidation(vc FormValidation, request *Request) {
 	}
 
 	password := request.Param("password")
-	if len(password) < 7 {
+	if !isPasswordValid(password) {
 		vc.AddItemError("password", messages.Get(locale, "admin_register_password"))
 	}
 
@@ -173,6 +173,12 @@ const emailRegexpStr = "^(((([a-zA-Z]|\\d|[!#\\$%&'\\*\\+\\-\\/=\\?\\^_`{\\|}~]|
 
 var emailRegexp = regexp.MustCompile(emailRegexpStr)
 
-func isEmailValid(email string) bool {
+func IsEmailValid(email string) bool {
 	return emailRegexp.MatchString(email)
+}
+
+func IsPhoneNumberValid(phone string) bool {
+	//matches the international format +1234567890 and czech format that contains exactly 9 digits
+	expr := regexp.MustCompile(`(^\+[0-9]\d{1,20}$)|(^\d{9}$)`)
+	return expr.MatchString(phone)
 }

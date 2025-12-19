@@ -14,7 +14,7 @@
         <script src="{{$path}}"></script>
     {{end}}
 
-    {{if .Icon}}
+    {{if false}}
         <link rel="icon" href="/admin/api/icons?file={{.Icon}}&color=444444" type="image/svg+xml">
     {{else}}
       <link rel="icon" href="/admin/icon" type="image/svg+xml">
@@ -34,7 +34,9 @@
       {{if .BackButton}}
         <a href="{{.BackButton.URL}}" class="btn simple_backbtn">{{.BackButton.Name}}</a>
       {{end}}
-      <div class="simple_logo" style="background-image: url('/admin/logo');"></div>
+      {{if .Logo}}
+        <div class="simple_logo" style="background-image: url('{{.Logo}}');"></div>
+      {{end}}
       {{if .Tabs}}
         {{template "tabs" .Tabs}}
       {{end}}
@@ -56,13 +58,38 @@
         {{range $section := .Sections}}
           <div class="simple_section">
             {{if $section.Name}}
-              <div class="simple_section_name">{{$section.Name}}</div>
+              <div class="simple_section_name">
+                {{if .Icon}}<img src="/admin/api/icons?file={{$section.Icon}}" class="simple_section_icon">{{end}}
+                {{$section.Name}}
+              </div>
             {{end}}
             {{if $section.Description}}
               <div class="simple_section_description">{{$section.Description}}</div>
             {{end}}
+            {{if $section.Text}}
+              <div class="simple_section_text">{{$section.Text}}</div>
+            {{end}}
             {{if $section.LogoURL}}
               <img src="{{$section.LogoURL}}" class="simple_section_logo">
+            {{end}}
+            {{if $section.Table}}
+              {{template "form_table" $section.Table}}
+            {{end}}
+            {{if $section.PrimaryButton}}
+              <a href="{{$section.PrimaryButton.URL}}" class="btn btn-primary simple_section_primarybtn">{{$section.PrimaryButton.Name}}</a>
+            {{end}}
+            {{if $section.Buttons}}
+              <div class="simple_section_btns">
+              {{range $btn := $section.Buttons}}
+                <a href="{{$btn.URL}}" class="simple_section_btn">
+                  {{if $btn.Icon}}
+                    <img src="/admin/api/icons?file={{$btn.Icon}}&color=4077bf" class="simple_section_btn_icon">
+                  {{end}}
+                  {{$btn.Name}}
+                  <img src="/admin/api/icons?file=glyphicons-basic-224-chevron-right.svg&color=4077bf" class="simple_section_btn_icon">
+                </a>
+              {{end}}
+              </div>
             {{end}}
           </div>
         {{end}}

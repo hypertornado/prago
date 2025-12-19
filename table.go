@@ -32,9 +32,9 @@ type TableCell struct {
 type tableCellData struct {
 	CSSClasses        []string
 	Href              string
-	DescriptionBefore string
+	DescriptionBefore []string
 	Text              string
-	DescriptionAfter  string
+	DescriptionAfter  []string
 	TextAfter         string
 	Colspan           int64
 	Rowspan           int64
@@ -156,12 +156,16 @@ func (cell *TableCell) Nowrap() *TableCell {
 }
 
 func (cell *TableCell) DescriptionBefore(description string) *TableCell {
-	cell.data.DescriptionBefore = description
+	if description != "" {
+		cell.data.DescriptionBefore = append(cell.data.DescriptionBefore, description)
+	}
 	return cell
 }
 
 func (cell *TableCell) DescriptionAfter(description string) *TableCell {
-	cell.data.DescriptionAfter = description
+	if description != "" {
+		cell.data.DescriptionAfter = append(cell.data.DescriptionAfter, description)
+	}
 	return cell
 }
 

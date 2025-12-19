@@ -146,3 +146,34 @@ func TestSuggestionDiacritic(t *testing.T) {
 		}
 	}
 }
+
+func TestSuggestionDamsky(t *testing.T) {
+	index := NewMemoryIndex()
+	index.Field("name").Analyzer("czech_suggest")
+
+	index.Add("1").Set("name", "Dámský víkend").Do()
+
+	for _, q := range []string{"Dámský", "damsky"} {
+		result := index.Suggest(q).Do()
+		if strings.Join(result.GetIDs(), ";") != "1" {
+			t.Fatal(q, result.GetIDs())
+		}
+	}
+}
+
+func TestPragosearchDamsky(t *testing.T) {
+
+	index := NewMemoryIndex()
+	index.Field("name").Analyzer("czech")
+
+	err := index.Add("1").Set("name", "Dámský víkend").Do()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result := index.Query("Dámský").Do()
+	if result.Total != 1 {
+		t.Fatal(result.Total)
+	}
+
+}

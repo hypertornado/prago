@@ -13,7 +13,7 @@ var (
 		"cs": "Čeština",
 		"en": "English",
 	}
-	availableLocales = [][2]string{{"en", "English"}, {"cs", "Čeština"}}
+	availableLocales = [][2]string{{"cs", "Čeština"}, {"en", "English"}}
 )
 
 func localeFromRequest(request *Request) string {

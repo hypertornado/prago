@@ -43,6 +43,10 @@ func (resource *Resource) bindData(item any, request *Request, params url.Values
 		val := value.FieldByName(field.fieldClassName)
 		urlValue := params.Get(field.id)
 
+		if field.fixStringValueFN != nil {
+			urlValue = field.fixStringValueFN(urlValue)
+		}
+
 		switch field.typ.Kind() {
 		case reflect.Struct:
 			if field.typ == reflect.TypeOf(time.Now()) {

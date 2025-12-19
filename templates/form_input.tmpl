@@ -166,17 +166,15 @@
 {{end}}
 
 {{define "form_input_relation"}}
-<div class="admin_item_relation" {{if .Focused}}data-autofocus="true"{{end}} data-relation="{{.Data.RelatedID}}" data-multiple="{{.Data.MultiRelation}}">
+<div class="admin_item_relation" {{if .Focused}}data-autofocus="true"{{end}} data-relation="{{.Data.RelatedID}}" data-multiple="{{.Data.MultiRelation}}" data-filter="{{.FormFilterID}}">
   <input type="hidden" name="{{.ID}}" value="{{.Value}}">
   <progress class="progress"></progress>
   <div class="admin_relation_previews"></div>
 
   <div class="admin_item_relation_picker hidden">
-    <input class="input">
+    <input class="input" placeholder="{{.Data.Placeholder}}">
     <div class="admin_item_relation_picker_suggestions">
-      <div class="admin_item_relation_picker_suggestions_content">
-
-      </div>
+      <div class="admin_item_relation_picker_suggestions_content"></div>
     </div>
   </div>
 </div>

@@ -21,7 +21,7 @@ type fieldType struct {
 	formDataSource  func(*Field, UserData, string) interface{}
 	ft_formStringer func(interface{}) string
 
-	listCellDataSource func(UserData, *Field, interface{}) listCell
+	listCellDataSource func(UserData, *Field, interface{}) *listCell
 
 	filterLayoutTemplate   string
 	filterLayoutDataSource func(*Field, UserData) interface{}
@@ -54,8 +54,14 @@ func (f fieldType) isRelation() bool {
 }
 
 type relationFormDataSource struct {
+	App           *App
 	RelatedID     string
 	MultiRelation bool
+}
+
+func (rfds relationFormDataSource) Placeholder() string {
+	relatedResource := rfds.App.getResourceByID(rfds.RelatedID)
+	return fmt.Sprintf("Hledat v '%s'", relatedResource.pluralName("cs"))
 }
 
 func (app *App) initDefaultFieldTypes() {
@@ -130,6 +136,7 @@ func (app *App) initDefaultFieldTypes() {
 		formTemplate: "form_input_relation",
 		formDataSource: func(f *Field, userData UserData, value string) interface{} {
 			return relationFormDataSource{
+				App:           app,
 				RelatedID:     f.getRelatedID(),
 				MultiRelation: false,
 			}
@@ -144,6 +151,7 @@ func (app *App) initDefaultFieldTypes() {
 		formTemplate: "form_input_relation",
 		formDataSource: func(f *Field, userData UserData, value string) interface{} {
 			return relationFormDataSource{
+				App:           app,
 				RelatedID:     f.getRelatedID(),
 				MultiRelation: true,
 			}

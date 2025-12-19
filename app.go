@@ -95,6 +95,8 @@ type App struct {
 
 	cssPaths        []func() string
 	javascriptPaths []func() string
+
+	formFilters map[string]*FormFilter
 }
 
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {
@@ -165,6 +167,7 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initCron()
 	app.initCacheStats()
 	app.initMailing()
+	app.initValidation()
 
 	return app
 }

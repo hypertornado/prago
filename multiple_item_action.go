@@ -107,7 +107,7 @@ func (resource *Resource) addDefaultMultipleActions() {
 		},
 	})
 
-	resource.multipleActions = append(resource.multipleActions, &MultipleItemAction{
+	/*resource.multipleActions = append(resource.multipleActions, &MultipleItemAction{
 		ID:         "delete",
 		Icon:       iconDelete,
 		Name:       unlocalized("Smazat"),
@@ -125,11 +125,11 @@ func (resource *Resource) addDefaultMultipleActions() {
 				response.FlashMessage = fmt.Sprintf("%d položek smazáno", len(items))
 			}
 		},
-	})
+	})*/
 
 }
 
-func (resource *Resource) allowsMultipleActions(userData UserData) (ret bool) {
+func (resource *Resource) hasMultipleActions(userData UserData) (ret bool) {
 	return len(resource.getMultipleActions(userData)) > 0
 }
 
@@ -140,10 +140,33 @@ func (resource *Resource) getMultipleActions(userData UserData) (ret []listMulti
 		}
 		ret = append(ret, listMultipleAction{
 			ID:         ma.ID,
+			ResourceID: resource.id,
 			ActionType: ma.ActionType,
 			Icon:       ma.Icon,
 			Name:       ma.Name(userData.Locale()),
 		})
 	}
+
+	for _, action := range resource.itemActions {
+		if !action.isFormMultipleAction {
+			continue
+		}
+		if action.method != "GET" {
+			continue
+		}
+
+		if !userData.Authorize(action.permission) {
+			continue
+		}
+		ret = append(ret, listMultipleAction{
+			ID:         action.url,
+			ResourceID: resource.id,
+			ActionType: "multiple_action_form",
+			Icon:       action.icon,
+			Name:       action.name(userData.Locale()),
+		})
+
+	}
+
 	return
 }

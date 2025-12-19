@@ -295,6 +295,10 @@ func (resource *Resource) getResourceItemMenu(requestContext *menuRequestContext
 		if !requestContext.UserData.Authorize(v.permission) {
 			continue
 		}
+		if v.isFormMultipleAction {
+			continue
+		}
+
 		name := v.name(requestContext.UserData.Locale())
 		var thumbnail string
 		if v.url == "" {

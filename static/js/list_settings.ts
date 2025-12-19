@@ -58,6 +58,15 @@ class ListSettings {
               window.open("/admin/" + this.list.typeName +"/api/export.csv")
             }
           },
+          {
+            Name: "Kontrola konzistence",
+            Icon: "glyphicons-basic-322-shield-check.svg",
+            Handler: () => {
+              new PopupForm("/admin/_validation-consistency?resource=" + this.list.typeName, (data: any) => {
+                //this.addUUID(data.Data);
+              })
+            }
+          },
         ],
       })
     });

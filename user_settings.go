@@ -1,5 +1,10 @@
 package prago
 
+import (
+	"fmt"
+	"sort"
+)
+
 func initUserSettings(app *App) {
 
 	ActionForm(app, "settings", func(form *Form, request *Request) {
@@ -9,6 +14,9 @@ func initUserSettings(app *App) {
 		name := form.AddTextInput("name", "")
 		name.Name = messages.Get(request.Locale(), "Name")
 		name.Value = user.Name
+
+		phoneInput := form.AddTextInput("phone", "Telefon")
+		phoneInput.Value = user.Phone
 
 		sel := form.AddSelect("locale", messages.Get(request.Locale(), "admin_locale"), availableLocales)
 		sel.Value = request.Locale()
@@ -33,6 +41,14 @@ func initUserSettings(app *App) {
 			vc.AddItemError("name", messages.Get(locale, "admin_user_name_not_empty"))
 		}
 
+		phone := request.Param("phone")
+		if phone != "" {
+			if !IsPhoneNumberValid(phone) {
+				vc.AddItemError("phone", "Neplatné telefonní číslo")
+			}
+
+		}
+
 		newLocale := request.Param("locale")
 		foundLocale := false
 		for _, v := range availableLocales {
@@ -47,6 +63,7 @@ func initUserSettings(app *App) {
 		if vc.Valid() {
 			user := request.getUser()
 			user.Name = name
+			user.Phone = phone
 			user.Locale = newLocale
 			must(UpdateItem(app, user))
 
@@ -108,34 +125,171 @@ func initUserSettings(app *App) {
 			}
 		}).Icon("glyphicons-basic-45-key.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).Board(app.optionsBoard)
 
-	ActionResourceItemForm(app, "change-password", func(user *user, form *Form, request *Request) {
+	ActionResourceForm[user](app, "create", func(form *Form, request *Request) {
+
+		cu := request.getUser()
+
+		var roles []string
+		for role := range app.accessManager.roles {
+			if app.canManageRole(cu.Role, role) {
+				roles = append(roles, role)
+			}
+		}
+		if len(roles) == 0 {
+			form.Title = "Nelze založit uživatele"
+			return
+		}
+
+		sort.Strings(roles)
+
+		var roleSelect [][2]string
+		//roleSelect = append(roleSelect, [2]string{"", ""})
+		for _, role := range roles {
+			roleSelect = append(roleSelect, [2]string{role, role})
+		}
+
+		form.AddTextInput("username", "Uživatelské jméno")
+		form.AddTextInput("name", "Jméno")
+		form.AddTextInput("email", "Email")
+		form.AddTextInput("phone", "Telefon")
+
+		form.AddSelect("locale", messages.Get(request.Locale(), "admin_locale"), availableLocales)
+
+		form.AddSelect("role", "Role", roleSelect)
+		form.AddPasswordInput("password", "Heslo")
+		form.AddSubmit("Založit uživatele")
+
+	}, func(fv FormValidation, request *Request) {
+
+		password := request.Param("password")
+		role := request.Param("role")
+
+		if role == "" {
+			fv.AddItemError("role", "Vyberte roli")
+		}
+
+		cu := request.getUser()
+		if !app.canManageRole(cu.Role, role) {
+			fv.AddItemError("role", "Nemáte oprávnění pro zakládání této role")
+		}
+
+		if !isPasswordValid(password) {
+			fv.AddItemError("password", "Krátké heslo, alespoň 7 znaků")
+		}
+
+		usr := &user{
+			Username: request.Param("username"),
+			Name:     request.Param("name"),
+			Email:    request.Param("email"),
+			Phone:    request.Param("phone"),
+			Locale:   request.Param("locale"),
+			Role:     role,
+		}
+		usr.newPassword(password)
+
+		res, ok := TestValidationUpdate(app, usr, request)
+		if !ok {
+			for _, e := range res {
+				fv.AddError(fmt.Sprintf("%s: %s", e.Field, e.Text))
+			}
+		}
+
+		if !fv.Valid() {
+			return
+		}
+
+		must(CreateWithLog(usr, request))
+		request.AddFlashMessage("Uživatel založen")
+		fv.Redirect(fmt.Sprintf("/admin/user/%d", usr.ID))
+
+	}).Name(unlocalized("Založit uživatele")).Icon("glyphicons-basic-191-circle-empty-plus.svg")
+
+	ActionResourceItemForm(app, "setup", func(user *user, form *Form, request *Request) {
+		cu := request.getUser()
+		if !app.canManageRole(cu.Role, user.Role) {
+			form.Title = "Nemůžete upravovat tohoto uživatele"
+			return
+		}
+
+		var roles []string
+		roles = append(roles, "")
+		for role := range app.accessManager.roles {
+			roles = append(roles, role)
+		}
+		sort.Strings(roles)
+		var roleSelect [][2]string
+		for _, role := range roles {
+			roleSelect = append(roleSelect, [2]string{role, role})
+		}
+
+		form.AddTextInput("username", "Uživatelské jméno").Value = user.Username
+		form.AddTextInput("name", "Jméno").Value = user.Name
+		form.AddTextInput("email", "Email").Value = user.Email
+		form.AddTextInput("phone", "Telefon").Value = user.Phone
+
+		form.AddSelect("role", "Role", roleSelect).Value = user.Role
+
 		newPassword := form.AddPasswordInput("newpassword", messages.Get(request.Locale(), "admin_password_new"))
 		newPassword.Focused = true
 		newPassword.Autocomplete = "new-password"
 
 		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
+	}, func(usr *user, fv FormValidation, request *Request) {
 
-	}, func(user *user, fv FormValidation, request *Request) {
+		cu := request.getUser()
+		if !app.canManageRole(cu.Role, usr.Role) {
+			panic("Nemůžete upravovat tohoto uživatele")
+		}
+
+		usr.Username = request.Param("username")
+		usr.Name = request.Param("name")
+		usr.Email = request.Param("email")
+		usr.Phone = request.Param("phone")
+
+		newRole := request.Param("role")
+		if usr.Role != "" && !app.canManageRole(cu.Role, usr.Role) {
+			fv.AddItemError("role", "Nemáte oprávnění měnit uživateli roli")
+		}
+		if newRole != "" && !app.canManageRole(cu.Role, newRole) {
+			fv.AddItemError("role", "Nemáte oprávnění nastavit uživateli tuto roli")
+		}
+		usr.Role = newRole
 
 		newpassword := request.Param("newpassword")
-		if len(newpassword) < 7 {
-			fv.AddItemError("newpassword", messages.Get(request.Locale(), "admin_password_length"))
+		if newpassword != "" {
+			if isPasswordValid(newpassword) {
+				must(usr.newPassword(newpassword))
+			} else {
+				fv.AddItemError("newpassword", messages.Get(request.Locale(), "admin_password_length"))
+			}
+		}
+
+		res, ok := TestValidationUpdate(app, usr, request)
+		if !ok {
+			for _, e := range res {
+				fv.AddError(fmt.Sprintf("%s: %s", e.Field, e.Text))
+			}
 		}
 
 		if fv.Valid() {
-			must(user.newPassword(newpassword))
-			must(UpdateItem(app, user))
-
-			request.app.userDataCacheDelete(user.ID)
-			request.AddFlashMessage(messages.Get(request.Locale(), "admin_password_changed"))
-			fv.Redirect("/admin")
+			must(UpdateWithLog(usr, request))
+			request.app.userDataCacheDelete(usr.ID)
+			request.AddFlashMessage("Upraveno")
+			fv.Redirect(fmt.Sprintf("/admin/user/%d", usr.ID))
 		}
 
-	}).Permission("sysadmin").Name(unlocalized("Nastavit heslo"))
+	}).Name(unlocalized("Nastavit uživatele"))
 
 	ActionPlain(app, "logout", func(request *Request) {
 		validateCSRF(request)
 		request.logOutUser()
 		request.Redirect(app.getAdminURL("login"))
 	}).Icon("glyphicons-basic-432-log-out.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_log_out")).Board(app.optionsBoard)
+}
+
+func isPasswordValid(in string) bool {
+	if len(in) < 7 {
+		return false
+	}
+	return true
 }

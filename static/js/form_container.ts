@@ -1,3 +1,6 @@
+
+var primaryFormContainer: any
+
 class FormContainer {
   formContainer: HTMLDivElement;
   form: Form;
@@ -7,6 +10,10 @@ class FormContainer {
   okHandler: Function;
 
   constructor(formContainer: HTMLDivElement, okHandler: Function) {
+    if (!window.primaryFormContainer && !formContainer.parentElement.classList.contains("popup_content")) {
+      window.primaryFormContainer = this;
+    }
+
     this.formContainer = formContainer;
     this.okHandler = okHandler;
     this.progress = formContainer.querySelector(".form_progress");
@@ -23,6 +30,7 @@ class FormContainer {
       this.form.willChangeHandler = this.formWillChange.bind(this);
       this.sendForm();
     }
+
   }
 
   isAutosubmitFirstTime(): boolean {

@@ -16,10 +16,12 @@ import (
 type listContent struct {
 	Language      string
 	TotalCountStr string
-	Rows          []listRow
+	Rows          []*listRow
 	Colspan       int64
 	Message       string
 	Pagination    pagination
+
+	AllowsMultipleActions bool
 }
 
 type listRow struct {
@@ -28,10 +30,12 @@ type listRow struct {
 	Description string
 	ImageURL    string
 
-	URL                   string
-	Items                 []listCell
-	Actions               listItemActions
-	AllowsMultipleActions bool
+	URL   string
+	Items []*listCell
+
+	Actions listItemActions
+
+	ListContent *listContent
 }
 
 type listItemActions struct {
@@ -45,9 +49,10 @@ func (actions *listItemActions) JSON() template.HTMLAttr {
 	return template.HTMLAttr(b)
 }
 
-func (resource *Resource) getListContent(ctx context.Context, userData UserData, params url.Values) (ret listContent, err error) {
+func (resource *Resource) getListContent(ctx context.Context, userData UserData, params url.Values) (ret *listContent, err error) {
+	ret = &listContent{}
 	if !userData.Authorize(resource.canView) {
-		return listContent{}, errors.New("access denied")
+		return ret, errors.New("access denied")
 	}
 
 	var listHeader list
@@ -138,7 +143,9 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 	itemVals := reflect.ValueOf(rowItems)
 	itemLen := itemVals.Len()
 	for i := 0; i < itemLen; i++ {
-		row := listRow{}
+		row := &listRow{
+			ListContent: ret,
+		}
 		itemVal := itemVals.Index(i).Elem()
 
 		pw := resource.previewer(userData, itemVals.Index(i).Interface())
@@ -152,7 +159,7 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 					fieldVal := itemVal.FieldByName(v.Name)
 					row.Items = append(row.Items, getCellViewData(userData, resource.Field(v.ColumnName), fieldVal.Interface()))
 				} else {
-					cell := listCell{}
+					cell := &listCell{}
 					for _, stat := range resource.itemStats {
 						if stat.id == v.Name {
 							cell.Name = "⏳"
@@ -176,10 +183,12 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 		row.URL = previewer.URL("")
 
 		row.Actions = resource.getListItemActions(userData, itemVal.Addr().Interface())
-		row.AllowsMultipleActions = resource.allowsMultipleActions(userData)
+
 		ret.Rows = append(ret.Rows, row)
 
 	}
+
+	ret.AllowsMultipleActions = resource.hasMultipleActions(userData)
 
 	ret.Language = userData.Locale()
 	ret.Message = ret.TotalCountStr

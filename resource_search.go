@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
 )
@@ -18,6 +19,17 @@ type searchResourceResponseButton struct {
 
 func searchResource(request *Request, resource *Resource) {
 	q := request.Param("q")
+
+	filterID := request.Param("filter")
+	app := request.app
+
+	var formFilter *FormFilter
+	if filterID != "" {
+		formFilter = app.formFilters[filterID]
+		if formFilter == nil {
+			panic(fmt.Sprintf("can't find filter id %s", filterID))
+		}
+	}
 
 	ret := &searchResourceResponse{}
 
@@ -43,12 +55,20 @@ func searchResource(request *Request, resource *Resource) {
 
 	filter := "%" + q + "%"
 
+	var searchLimit int64 = 25
+
 	searchableFields := resource.getSearchableFields(request)
 	for _, field := range searchableFields {
 		if field == nil {
 			continue
 		}
-		items, err := resource.query(request.r.Context()).Limit(5).where(field.id+" LIKE ?", filter).OrderDesc("id").list()
+
+		query := resource.query(request.r.Context())
+		if formFilter != nil {
+			query = formFilter.filterFunction(query)
+		}
+
+		items, err := query.Limit(searchLimit).where(field.id+" LIKE ?", filter).OrderDesc("id").list()
 		if err != nil {
 			panic(err)
 		}
@@ -64,8 +84,8 @@ func searchResource(request *Request, resource *Resource) {
 		}
 	}
 
-	if len(previews) > 10 {
-		previews = previews[0:10]
+	if len(previews) > int(searchLimit) {
+		previews = previews[0:searchLimit]
 	}
 
 	if (len(previews)) == 0 {

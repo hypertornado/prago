@@ -81,7 +81,7 @@ func (field *Field) addValidationStrongRelation() {
 		}
 
 		if relatedCount > 0 {
-			errStr := messages.Get(ud.Locale(), "strong_connection_error", field.relatedResource.singularName(ud.Locale()))
+			errStr := messages.Get(ud.Locale(), "strong_connection_error", field.resource.singularName(ud.Locale()))
 
 			v.AddError(
 				errStr,

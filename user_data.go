@@ -62,6 +62,7 @@ type UserData interface {
 	Name() string
 	Locale() string
 	Email() string
+	Phone() string
 	Authorize(Permission) bool
 	UserID() int64
 }
@@ -70,6 +71,7 @@ type userData struct {
 	id     int64
 	name   string
 	email  string
+	phone  string
 	role   string
 	locale string
 	app    *App
@@ -80,6 +82,7 @@ func (app *App) newUserData(user *user) *userData {
 		id:     user.ID,
 		name:   user.LongName(),
 		email:  user.Email,
+		phone:  user.Phone,
 		role:   user.Role,
 		locale: user.Locale,
 		app:    app,
@@ -92,6 +95,10 @@ func (d *userData) Name() string {
 
 func (d *userData) Email() string {
 	return d.email
+}
+
+func (d *userData) Phone() string {
+	return d.phone
 }
 
 func (d *userData) Locale() string {

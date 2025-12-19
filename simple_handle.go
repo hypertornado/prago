@@ -34,14 +34,10 @@ type SimpleHandler struct {
 	FormValidation func(FormValidation, *Request)
 }
 
-func (handler *SimpleHandler) GetValidationURL() string {
-	return handler.URL
-}
-
 func (app *App) HandleSimple(handler *SimpleHandler) {
 
 	if handler.FormValidation != nil {
-		app.router.route("POST", handler.GetValidationURL(), app.appController, func(request *Request) {
+		app.router.route("POST", handler.URL, app.appController, func(request *Request) {
 
 			rv := newFormValidation()
 			if request.csrfToken() != request.Param("_csrfToken") {
@@ -61,7 +57,7 @@ func (app *App) HandleSimple(handler *SimpleHandler) {
 
 		var form *Form
 		if pd.Form != nil {
-			form = app.NewForm(handler.GetValidationURL())
+			form = app.NewForm(request.r.URL.Path)
 			form.AddCSRFToken(request)
 			pd.Form(form)
 		}

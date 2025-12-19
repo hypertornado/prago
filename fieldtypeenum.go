@@ -55,15 +55,15 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 			return ret
 		},
 
-		listCellDataSource: func(userData UserData, f *Field, value interface{}) listCell {
+		listCellDataSource: func(userData UserData, f *Field, value interface{}) *listCell {
 			str := value.(string)
 			for _, v := range items {
 				if str == v.ID {
-					return listCell{Name: v.Name(userData.Locale())}
+					return &listCell{Name: v.Name(userData.Locale())}
 				}
 			}
 
-			return listCell{Name: fmt.Sprintf("%v", value)}
+			return &listCell{Name: fmt.Sprintf("%v", value)}
 		},
 
 		filterLayoutTemplate: "filter_layout_select",

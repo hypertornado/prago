@@ -1136,6 +1136,14 @@ class ListSettings {
                             window.open("/admin/" + this.list.typeName + "/api/export.csv");
                         }
                     },
+                    {
+                        Name: "Kontrola konzistence",
+                        Icon: "glyphicons-basic-322-shield-check.svg",
+                        Handler: () => {
+                            new PopupForm("/admin/_validation-consistency?resource=" + this.list.typeName, (data) => {
+                            });
+                        }
+                    },
                 ],
             });
         });
@@ -1253,10 +1261,22 @@ class ListMultiple {
         var ids = this.multipleGetIDs();
         this.multipleActionStart(e.target, ids);
     }
+    multipleActionForm(resourceID, actionID, ids) {
+        let idsStr = ids.join(",");
+        let formURL = `/admin/${resourceID}/${idsStr}/${actionID}`;
+        new PopupForm(formURL, (data) => {
+            console.log("ok");
+            this.list.load();
+        });
+    }
     multipleActionStart(btn, ids) {
         let actionID = btn.getAttribute("data-id");
         let actionName = btn.getAttribute("data-name");
         switch (btn.getAttribute("data-action-type")) {
+            case "multiple_action_form":
+                let resourceID = btn.getAttribute("data-resource-id");
+                this.multipleActionForm(resourceID, actionID, ids);
+                break;
             case "mutiple_edit":
                 new ListMultipleEdit(this, ids);
                 break;
@@ -1753,6 +1773,7 @@ class RelationPicker {
         this.input = el.getElementsByTagName("input")[0];
         this.previewsContainer = (el.querySelector(".admin_relation_previews"));
         this.relationName = el.getAttribute("data-relation");
+        this.filterID = el.getAttribute("data-filter");
         this.progress = el.querySelector("progress");
         this.suggestionsEl = (el.querySelector(".admin_item_relation_picker_suggestions_content"));
         this.suggestions = [];
@@ -1871,7 +1892,7 @@ class RelationPicker {
             valItems.push(val);
         }
         let val = valItems.join(";");
-        if (this.multipleInputs) {
+        if (this.multipleInputs && val != "") {
             val = ";" + val + ";";
         }
         this.input.value = val;
@@ -1886,12 +1907,15 @@ class RelationPicker {
         }
     }
     getSuggestions(q) {
+        var encoded = encodeParams({
+            "q": q,
+            "filter": this.filterID,
+        });
         var request = new XMLHttpRequest();
         request.open("GET", "/admin/" +
             this.relationName +
             "/api/searchresource" +
-            "?q=" +
-            encodeURIComponent(q), true);
+            encoded, true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
                 if (q != this.pickerInput.value) {
@@ -2121,8 +2145,12 @@ class Form {
         }
     }
 }
+var primaryFormContainer;
 class FormContainer {
     constructor(formContainer, okHandler) {
+        if (!window.primaryFormContainer && !formContainer.parentElement.classList.contains("popup_content")) {
+            window.primaryFormContainer = this;
+        }
         this.formContainer = formContainer;
         this.okHandler = okHandler;
         this.progress = formContainer.querySelector(".form_progress");
@@ -2801,15 +2829,7 @@ class Popup {
         this.el
             .querySelector(".popup_header_cancel")
             .addEventListener("click", this.cancel.bind(this));
-        this.el.addEventListener("click", this.backgroundClicked.bind(this));
         this.el.focus();
-        this.el.addEventListener("keydown", (e) => {
-            if (e.code == "Escape") {
-                if (this.cancelable) {
-                    this.cancel();
-                }
-            }
-        });
         this.setTitle(title);
     }
     backgroundClicked(e) {
@@ -2984,12 +3004,18 @@ class LoadingPopup extends Popup {
     }
 }
 class PopupForm extends Popup {
-    constructor(path, dataHandler) {
+    constructor(path, dataHandler, cancelHandler) {
         super("⌛️");
         this.dataHandler = dataHandler;
         this.setCancelable();
         this.present();
         this.setIcon("glyphicons-basic-30-clipboard.svg");
+        this.cancelAction = () => {
+            if (cancelHandler) {
+                cancelHandler();
+            }
+            this.remove();
+        };
         this.loadForm(path);
     }
     loadForm(path) {

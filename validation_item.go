@@ -46,12 +46,17 @@ func (iv *itemValidation) TextErrorReport(id int64, locale string) formValidatio
 		}
 	}
 
-	return formValidationReport{
-		Text: fmt.Sprintf("%s (id %d): %s",
+	var text string
+	if len(errors) > 0 {
+		text = fmt.Sprintf("%s (id %d): %s",
 			messages.Get(locale, "admin_validation_error"),
 			id,
 			strings.Join(errors, "; "),
-		),
+		)
+	}
+
+	return formValidationReport{
+		Text: text,
 	}
 
 }

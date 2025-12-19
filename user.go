@@ -12,13 +12,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+//ALTER TABLE user DROP INDEX email;
+
 var usernameRegex = regexp.MustCompile("^[a-z0-9.]{1,20}$")
 
 type user struct {
 	ID                int64 `prago-order-desc:"true"`
 	Username          string
 	Name              string
-	Email             string    `prago-unique:"true"`
+	Email             string
+	Phone             string
 	Role              string    `prago-type:"role"`
 	Password          string    `prago-can-view:"nobody"`
 	Locale            string    `prago-can-view:"sysadmin"`
@@ -76,7 +79,7 @@ func (user *user) emailConfirmed() bool {
 }
 
 func (user *user) newPassword(password string) error {
-	if len(password) < 7 {
+	if !isPasswordValid(password) {
 		return errors.New("short password")
 	}
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
@@ -113,25 +116,51 @@ func (app *App) initUserResource() {
 
 func (app *App) afterInitUserResource() {
 
-	ValidateUpdate(app, func(cuser *user, vc Validation, userData UserData) {
-		username := cuser.Username
-		if username == "" {
-			return
-		}
+	ValidateUpdate(app, func(usr *user, vc Validation, userData UserData) {
 
-		if !usernameRegex.MatchString(username) {
-			vc.AddItemError("username", "Špatný formát uživatelského jména")
-		}
-
-		var isUsed bool
-		sameUsernameUsers := Query[user](app).Is("username", username).List()
-		for _, sameUser := range sameUsernameUsers {
-			if cuser.ID != sameUser.ID {
-				isUsed = true
+		if usr.Phone != "" {
+			if !IsPhoneNumberValid(usr.Phone) {
+				vc.AddItemError("phone", "Neplatný formát telefonního čísla")
 			}
 		}
-		if isUsed {
-			vc.AddItemError("username", fmt.Sprintf("Uživatelské jméno %s je již použito", username))
+
+		if usr.Email != "" {
+			if !IsEmailValid(usr.Email) {
+				vc.AddItemError("email", "Neplatný formát emailu")
+			} else {
+				sameEmailUsers := Query[user](app).Is("email", usr.Email).List()
+				for _, same := range sameEmailUsers {
+					if same.ID != usr.ID {
+						vc.AddItemError("email", fmt.Sprintf("Duplicitní email s uživatelem #%d", same.ID))
+					}
+				}
+			}
+		}
+
+		if usr.Username == "" && usr.Email == "" {
+			vc.AddError("Musíte nastavit uživatelské jméno nebo email")
+		}
+
+		username := usr.Username
+		if username != "" {
+			if !usernameRegex.MatchString(username) {
+				vc.AddItemError("username", "Špatný formát uživatelského jména")
+			}
+
+			var isUsed bool
+			sameUsernameUsers := Query[user](app).Is("username", username).List()
+			for _, sameUser := range sameUsernameUsers {
+				if usr.ID != sameUser.ID {
+					isUsed = true
+				}
+			}
+			if isUsed {
+				vc.AddItemError("username", fmt.Sprintf("Uživatelské jméno %s je již použito", username))
+			}
+		}
+
+		if app.accessManager.roles[usr.Role] == nil {
+			vc.AddItemError("role", "Neznámá role")
 		}
 	})
 

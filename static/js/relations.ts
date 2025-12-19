@@ -15,6 +15,7 @@ class RelationPicker {
   suggestions: any;
 
   relationName: string;
+  filterID: string;
 
   multipleInputs: boolean;
   autofocus: boolean;
@@ -35,6 +36,7 @@ class RelationPicker {
       el.querySelector(".admin_relation_previews")
     );
     this.relationName = el.getAttribute("data-relation");
+    this.filterID = el.getAttribute("data-filter");
     this.progress = el.querySelector("progress");
 
     this.suggestionsEl = <HTMLDivElement>(
@@ -181,7 +183,7 @@ class RelationPicker {
       valItems.push(val);
     }
     let val = valItems.join(";");
-    if (this.multipleInputs) {
+    if (this.multipleInputs && val != "") {
       val = ";" + val + ";";
     }
     this.input.value = val;
@@ -198,14 +200,19 @@ class RelationPicker {
   }
 
   getSuggestions(q: string) {
+
+    var encoded = encodeParams({
+      "q": q,
+      "filter": this.filterID,
+    });
+
     var request = new XMLHttpRequest();
     request.open(
       "GET",
       "/admin/" +
         this.relationName +
         "/api/searchresource" +
-        "?q=" +
-        encodeURIComponent(q),
+        encoded,
       true
     );
     request.addEventListener("load", () => {

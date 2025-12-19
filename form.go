@@ -29,6 +29,7 @@ type FormItem struct {
 	Icon        string
 	Name        string
 	Description string
+	Placeholder string
 	Required    bool
 	Focused     bool
 	Readonly    bool
@@ -49,6 +50,8 @@ type FormItem struct {
 	InputMode    string
 
 	HelpURL string
+
+	FormFilterID string
 }
 
 func (fi *FormItem) GetContent() template.HTML {
@@ -182,6 +185,7 @@ func (f *Form) AddDateTimePicker(name, description string) *FormItem {
 func (f *Form) AddRelation(name, description string, relatedResourceID string) *FormItem {
 	input := f.addInput(name, description, "form_input_relation")
 	input.Data = relationFormDataSource{
+		App:       f.app,
 		RelatedID: columnName(relatedResourceID),
 	}
 	return input
@@ -190,6 +194,7 @@ func (f *Form) AddRelation(name, description string, relatedResourceID string) *
 func (f *Form) AddRelationMultiple(name, description string, relatedResourceID string) *FormItem {
 	input := f.addInput(name, description, "form_input_relation")
 	input.Data = relationFormDataSource{
+		App:           f.app,
 		RelatedID:     columnName(relatedResourceID),
 		MultiRelation: true,
 	}
@@ -204,4 +209,8 @@ func (f *FormItem) AddUUID() {
 func (form *Form) AddCSRFToken(request *Request) *Form {
 	form.CSRFToken = request.csrfToken()
 	return form
+}
+
+func (f *FormItem) AddFromFilter(formFilter *FormFilter) {
+	f.FormFilterID = formFilter.uuid
 }

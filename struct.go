@@ -83,6 +83,16 @@ func (form *Form) initWithResourceItem(resource *Resource, item any, request *Re
 		if field.description != nil {
 			item.Description = field.description(request.Locale())
 		}
+
+		if field.useTextOver && (editableValues[field.id] == "" || editableValues[field.id] == "0") {
+			textOverFN := field.textOver
+			if textOverFN == nil {
+				textOverFN = field.name
+			}
+			if textOverFN != nil {
+				item.TextOver = textOverFN(request.Locale())
+			}
+		}
 		item.AddUUID()
 
 		if field.fieldType.formHideLabel {

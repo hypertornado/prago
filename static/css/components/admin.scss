@@ -287,6 +287,8 @@ select.admin_timestamp_minute {
   border-bottom-left-radius: 5px;
   @include shadow;
   width: 400px;
+  max-height: 300px;
+  overflow: auto;
   //border: 1px solid red;
 }
 
@@ -372,4 +374,15 @@ select.admin_timestamp_minute {
   //border-radius: 3px;
   //border: 10px solid $backgroundGrayColor;
   border: 20px solid black;
+}
+
+@media print {
+  body {
+    background: none !important;
+  }
+
+  /** {
+    background: none !important;
+    box-shadow: none !important;
+  }*/
 }
