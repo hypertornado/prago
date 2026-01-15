@@ -378,3 +378,40 @@ a.btn_more_item {
   background-color: $baseColorBackground;
 }
 
+
+@media print {
+  .prago_form {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 5px;
+  }
+
+  .form_label {
+    margin: 0px;
+  }
+
+  .form_label_text_icon {
+    display: none;
+  }
+
+  .form_label_text {
+    margin-left: 0px !important;
+  }
+
+  .form_input {
+    box-shadow: none;
+    padding: 2px 1px !important;
+    font-size: .8rem;
+    line-height: 1.3em;
+    min-height: 0px !important;
+  }
+
+  .input[type=date].form_input {
+    min-height: 0px !important;
+  }
+
+
+  .form_label:has(.btn-primary) {
+    display: none;
+  }
+}

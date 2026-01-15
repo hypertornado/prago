@@ -65,7 +65,7 @@
 }
 
 .form_table_cell_descriptionbefore, .form_table_cell_descriptionafter {
-  font-size: .8rem;
+  font-size: .8em;
   line-height: 1.3em;
   font-weight: normal;
   color: #444;
@@ -77,7 +77,7 @@
 
 .form_table_cell_textafter {
   color: #999;
-  font-size: .8rem;
+  font-size: .8em;
   line-height: 1.3em;
   font-weight: normal;
   color: #999;
@@ -92,3 +92,15 @@
   text-overflow: ellipsis;
 }
 
+
+@media print {
+  .form_table td {
+    padding: 0px 1px;
+    font-size: .9rem;
+    line-height: 1.3em;
+  }
+
+  .form_table_cell .btn {
+    display: none;
+  }
+}

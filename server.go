@@ -62,6 +62,13 @@ func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *App) serveHTTP(w http.ResponseWriter, r *http.Request) {
+
+	if app.exiting {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		w.Write([]byte("503 — unavailable, shutting down"))
+		return
+	}
+
 	request := &Request{
 		uuid:       randomString(10),
 		receivedAt: time.Now(),

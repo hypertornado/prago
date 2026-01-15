@@ -49,7 +49,7 @@ func party(appName, version, ssh string) (err error) {
 }
 
 func remote(appName, version, ssh string) error {
-	cmdStr := fmt.Sprintf("cd ~/.%s/versions/%s.%s; ./%s.linux migratedb; killall %s.linux; nohup ./%s.linux run >> app.log 2>&1 & exit;", appName, appName, version, appName, appName, appName)
+	cmdStr := fmt.Sprintf("cd ~/.%s/versions/%s.%s; ./%s.linux migratedb; killall -w %s.linux; nohup ./%s.linux run >> app.log 2>&1 & exit;", appName, appName, version, appName, appName, appName)
 	println(cmdStr)
 	cmd := exec.Command("ssh", ssh, cmdStr)
 	cmd.Stdout = os.Stdout

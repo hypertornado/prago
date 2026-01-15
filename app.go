@@ -20,6 +20,7 @@ import (
 
 type App struct {
 	testing         bool
+	exiting         bool
 	port            int
 	codeName        string
 	version         string
@@ -114,8 +115,8 @@ func createApp(codeName string, version string, testing bool) *App {
 		codeName: codeName,
 		version:  version,
 		name:     unlocalized(codeName),
-		cache:    newCache(),
-		router:   newRouter(),
+		//cache:    newCache(),
+		router: newRouter(),
 	}
 
 	app.logger = newLogger(app)
@@ -136,12 +137,12 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initDefaultFieldTypes()
 
 	app.connectDB(testing)
-
 	app.initUserDataCache()
 	app.initBoard()
 	app.initSettings()
 	app.initStaticFilesHandler()
 	app.initNotifications()
+	app.initCache()
 
 	app.initUserResource()
 	app.initFilesResource()

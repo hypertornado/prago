@@ -1153,6 +1153,35 @@ a.btn_more_item {
   background-color: hsl(214, 50%, 90%);
 }
 
+@media print {
+  .prago_form {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 5px;
+  }
+  .form_label {
+    margin: 0px;
+  }
+  .form_label_text_icon {
+    display: none;
+  }
+  .form_label_text {
+    margin-left: 0px !important;
+  }
+  .form_input {
+    box-shadow: none;
+    padding: 2px 1px !important;
+    font-size: 0.8rem;
+    line-height: 1.3em;
+    min-height: 0px !important;
+  }
+  .input[type=date].form_input {
+    min-height: 0px !important;
+  }
+  .form_label:has(.btn-primary) {
+    display: none;
+  }
+}
 .box {
   margin: 0 auto;
   max-width: min(650px, 100vw);
@@ -1233,6 +1262,17 @@ a.btn_more_item {
   gap: 5px;
 }
 
+@media print {
+  .box {
+    max-width: 100%;
+  }
+  .box_name {
+    margin-left: 0px !important;
+  }
+  .box_icon {
+    display: none;
+  }
+}
 .list {
   overflow: hidden;
   height: calc(100vh - 45px);
@@ -3138,7 +3178,7 @@ a.admin_stats_section_row {
 }
 
 .form_table_cell_descriptionbefore, .form_table_cell_descriptionafter {
-  font-size: 0.8rem;
+  font-size: 0.8em;
   line-height: 1.3em;
   font-weight: normal;
   color: #444;
@@ -3150,7 +3190,7 @@ a.admin_stats_section_row {
 
 .form_table_cell_textafter {
   color: #999;
-  font-size: 0.8rem;
+  font-size: 0.8em;
   line-height: 1.3em;
   font-weight: normal;
   color: #999;
@@ -3163,6 +3203,16 @@ a.admin_stats_section_row {
   text-overflow: ellipsis;
 }
 
+@media print {
+  .form_table td {
+    padding: 0px 1px;
+    font-size: 0.9rem;
+    line-height: 1.3em;
+  }
+  .form_table_cell .btn {
+    display: none;
+  }
+}
 .breadcrumbs {
   border: 0px solid red;
   display: flex;

@@ -19,6 +19,7 @@ func Query[T any](app *App) *QueryData[T] {
 	ret := &QueryData[T]{
 		listQuery: res.query(context.Background()),
 	}
+	//ret.listQuery.isDebug = true
 	return ret
 }
 
