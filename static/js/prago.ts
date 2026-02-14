@@ -66,8 +66,7 @@ class Prago {
 
     initDashboard();
     initGoogleMaps();
-
-
+    initTables()
 
     let searchboxButton = document.querySelector(".searchbox_button");
     if (searchboxButton) {
@@ -84,8 +83,8 @@ class Prago {
 
   static testPopupForm() {
     new PopupForm("/admin/packageview/new", (data: any) => {
-      console.log("form data");
-      console.log(data);
+      //console.log("form data");
+      //console.log(data);
     });
     //new PopupForm("/admin/hotel/new");
 

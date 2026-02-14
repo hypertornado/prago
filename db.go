@@ -31,16 +31,6 @@ type dbIface interface {
 	Query(string, ...interface{}) (*sql.Rows, error)
 }
 
-func (q *listQuery) where(condition string, values ...interface{}) *listQuery {
-	q.conditions = append(q.conditions, condition)
-	q.values = append(q.values, values...)
-	return q
-}
-
-func (q *listQuery) addOrder(name string, desc bool) {
-	q.order = append(q.order, listQueryOrder{name: name, desc: desc})
-}
-
 func (resource *Resource) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
 	for _, field := range resource.fields {
 		val := value.FieldByName(field.fieldClassName)

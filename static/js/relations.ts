@@ -72,6 +72,12 @@ class RelationPicker {
   }
 
   getData() {
+    if (!this.input.value) {
+      this.progress.classList.add("hidden");
+      this.showSearch();
+      return;
+    }
+
     var request = new XMLHttpRequest();
     request.open(
       "GET",
@@ -133,6 +139,7 @@ class RelationPicker {
     deleteButton.addEventListener("click", () => {
       previewEl.remove();
       this.updateLayout();
+      this.pickerInput.focus();
     });
 
     previewEl.setAttribute("data-id", data.ID);
@@ -236,7 +243,10 @@ class RelationPicker {
           var el = this.createPreview(item, false);
           el.classList.add("admin_item_relation_picker_suggestion");
           el.setAttribute("data-position", i + "");
-          el.addEventListener("mousedown", this.suggestionClick.bind(this));
+          el.addEventListener("mousedown", (e: Event) => {
+            e.preventDefault();
+          });
+          el.addEventListener("click", this.suggestionClick.bind(this));
           el.addEventListener("mouseenter", this.suggestionSelect.bind(this));
           this.suggestionsEl.appendChild(el);
         }
@@ -364,7 +374,7 @@ class RelationPicker {
     name.classList.add("admin_preview_name");
     name.textContent = data.Name;
 
-    var description = document.createElement("description");
+    var description = document.createElement("div");
     description.classList.add("admin_preview_description");
     description.setAttribute("title", data.Description);
     description.textContent = data.Description;

@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"io"
@@ -29,8 +30,19 @@ type TableCell struct {
 	data *tableCellData
 }
 
+type TableCellAsyncData struct {
+	DescriptionsBefore []string
+	Text               string
+	DescriptionsAfter  []string
+
+	Green  bool
+	Orange bool
+	Red    bool
+}
+
 type tableCellData struct {
 	CSSClasses        []string
+	Style             template.CSS
 	Href              string
 	DescriptionBefore []string
 	Text              string
@@ -40,6 +52,8 @@ type tableCellData struct {
 	Rowspan           int64
 	Checkboxes        []*tableCellCheckbox
 	Buttons           []*TableCellButton
+	AsyncDataURL      string
+	Files             []*File
 }
 
 type tableCellCheckbox struct {
@@ -115,6 +129,10 @@ func (table *Table) Row(items ...*TableCell) *Table {
 	return table
 }
 
+func (table *Table) Cell(item any) *TableCell {
+	return Cell(item)
+}
+
 func (cell *TableCell) Header() *TableCell {
 	cell.CSSClass("form_table_cell-header")
 	return cell
@@ -152,6 +170,11 @@ func (cell *TableCell) Red() *TableCell {
 
 func (cell *TableCell) Nowrap() *TableCell {
 	cell.CSSClass("form_table_cell-nowrap")
+	return cell
+}
+
+func (cell *TableCell) Files(app *App, fileIDs string) *TableCell {
+	cell.data.Files = app.GetFiles(context.Background(), fileIDs)
 	return cell
 }
 
@@ -194,6 +217,12 @@ func (cell *TableCell) CSSClass(class string) *TableCell {
 	return cell
 }
 
+func (cell *TableCell) Style(style template.CSS) *TableCell {
+	//cell.data.CSSClasses = append(cell.data.CSSClasses, class)
+	cell.data.Style = style
+	return cell
+}
+
 func (cell *TableCell) Checkbox(name string, checked bool) *TableCell {
 	cell.data.Checkboxes = append(cell.data.Checkboxes, &tableCellCheckbox{
 		Name:    name,
@@ -204,6 +233,10 @@ func (cell *TableCell) Checkbox(name string, checked bool) *TableCell {
 
 func (cell *TableCell) Button(btn *TableCellButton) *TableCell {
 	cell.data.Buttons = append(cell.data.Buttons, btn)
+	return cell
+}
+func (cell *TableCell) AsyncDataURL(url string) *TableCell {
+	cell.data.AsyncDataURL = url
 	return cell
 }
 

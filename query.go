@@ -36,6 +36,11 @@ func (q *QueryData[T]) ID(id any) *T {
 	return ret.(*T)
 }
 
+func (q *QueryData[T]) In(name string, value any) *QueryData[T] {
+	q.listQuery.In(name, value)
+	return q
+}
+
 func (q *QueryData[T]) Is(name string, value interface{}) *QueryData[T] {
 	q.listQuery.Is(name, value)
 	return q

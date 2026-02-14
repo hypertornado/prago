@@ -98,6 +98,8 @@ type App struct {
 	javascriptPaths []func() string
 
 	formFilters map[string]*FormFilter
+
+	InitializationAfterServerStart func()
 }
 
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {

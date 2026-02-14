@@ -2,7 +2,10 @@ package prago
 
 import (
 	"context"
+	"fmt"
 	"reflect"
+	"strconv"
+	"strings"
 )
 
 type listQueryOrder struct {
@@ -27,6 +30,76 @@ func (resource *Resource) query(ctx context.Context) *listQuery {
 		context:  ctx,
 		resource: resource,
 	}
+}
+
+func (q *listQuery) where(condition string, values ...interface{}) *listQuery {
+	q.conditions = append(q.conditions, condition)
+	q.values = append(q.values, values...)
+	return q
+}
+
+func inValueToArr(in any) (ret []any) {
+	inStr, ok := in.(string)
+	if ok {
+		if inStr == "" {
+			return nil
+		}
+		arr := strings.Split(inStr, ";")
+		for _, v := range arr {
+			if v == "" {
+				continue
+			}
+			i, err := strconv.Atoi(v)
+			if err != nil {
+				panic("wrong number format")
+			}
+			ret = append(ret, int64(i))
+		}
+		return
+	}
+	inStrArr, ok := in.([]string)
+	if ok {
+		for _, v := range inStrArr {
+			ret = append(ret, v)
+		}
+		return
+	}
+	inIntArr, ok := in.([]int64)
+	if ok {
+		for _, v := range inIntArr {
+			ret = append(ret, v)
+		}
+		return
+	}
+
+	inInt64, ok := in.(int64)
+	if ok {
+		ret = append(ret, inInt64)
+		return
+	}
+
+	panic("unknown option for multirelation")
+
+}
+
+func (q *listQuery) In(field string, value any) *listQuery {
+
+	values := inValueToArr(value)
+	if len(values) == 0 {
+		return q
+	}
+
+	var placeholders []string
+	for range values {
+		placeholders = append(placeholders, "?")
+	}
+
+	q.where(fmt.Sprintf("`%s` IN (%s)", field, strings.Join(placeholders, ",")), values...)
+	return q
+}
+
+func (q *listQuery) addOrder(name string, desc bool) {
+	q.order = append(q.order, listQueryOrder{name: name, desc: desc})
 }
 
 func (listQuery *listQuery) Is(name string, value interface{}) *listQuery {

@@ -301,6 +301,10 @@ func (field *Field) getIcon() string {
 		return field.tags["prago-icon"]
 	}
 
+	if field.fieldType.fieldTypeIcon != "" {
+		return field.fieldType.fieldTypeIcon
+	}
+
 	if field.fieldType.isRelation() {
 		if field.relatedResource.icon != "" {
 			return field.relatedResource.icon
@@ -308,32 +312,28 @@ func (field *Field) getIcon() string {
 		return iconResource
 	}
 
-	if field.fieldType.fieldTypeIcon != "" {
-		return field.fieldType.fieldTypeIcon
-	}
-
 	if field.id == "id" {
 		return "glyphicons-basic-740-hash.svg"
 	}
 
 	if field.id == "createdat" || field.id == "updatedat" {
-		return "glyphicons-basic-55-clock.svg"
+		return iconDateTime
 	}
 
 	if field.typ.Kind() == reflect.Bool {
-		return "glyphicons-basic-153-square-checkbox.svg"
+		return iconCheckbox
 	}
 
 	if field.typ.Kind() == reflect.String {
-		return "glyphicons-basic-101-text.svg"
+		return iconText
 	}
 
 	if field.typ.Kind() == reflect.Int || field.typ.Kind() == reflect.Int64 || field.typ.Kind() == reflect.Float64 {
-		return "glyphicons-basic-234-calculator.svg"
+		return iconNumber
 	}
 
 	if field.typ == reflect.TypeOf(time.Now()) {
-		return "glyphicons-basic-46-calendar.svg"
+		return iconDate
 	}
 	return ""
 }

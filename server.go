@@ -32,6 +32,10 @@ func (app *App) listenAndServe(port int) error {
 		app.serverSetup(server)
 	}
 
+	if app.InitializationAfterServerStart != nil {
+		app.InitializationAfterServerStart()
+	}
+
 	return server.ListenAndServe()
 }
 

@@ -621,6 +621,9 @@ select.admin_timestamp_minute {
   margin: 5px 5px;
   justify-content: center;
   width: calc(100% - 10px);
+  position: sticky !important;
+  bottom: 5px !important;
+  left: 0px !important;
 }
 
 .admin_relation_previews {
@@ -883,6 +886,10 @@ select.admin_timestamp_minute {
   font-size: 1rem;
   line-height: 1.9em;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .btn-primary:after {
@@ -930,12 +937,41 @@ select.admin_timestamp_minute {
     background-color: hsl(355, 70%, 99%);
   }
 }
-.form_errors_error {
-  border: 1px solid #dd2e4f;
-  color: #dd2e4f;
-  padding: 5px;
-  text-align: center;
-  border-radius: 3px;
+.form_errors {
+  position: sticky;
+  top: 10px;
+  z-index: 2;
+}
+
+.form_errors_item {
+  border: 0px solid #eee;
+  font-size: 1rem;
+  line-height: 1.3em;
+  padding: 10px 10px;
+  border-radius: 1000px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  animation: formErrorsItemAnimation 200ms ease-in-out forwards;
+  animation-delay: 0ms;
+  opacity: 0;
+}
+
+@keyframes formErrorsItemAnimation {
+  from {
+    opacity: 0;
+    transform: perspective(10cm) scale(0.5) translateY(0px) rotateX(0deg);
+  }
+  to {
+    opacity: 1;
+  }
+}
+.form_errors_item-error {
+  background-color: #cb2431;
+  color: white;
+}
+
+.form_errors_item-ok {
+  background-color: #006400;
+  color: white;
 }
 
 .form_label {
@@ -1151,6 +1187,19 @@ a.btn_more_item {
 
 .btn_more_item:active {
   background-color: hsl(214, 50%, 90%);
+}
+
+.checkbox_label {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.checkbox_label .form_label_description {
+  font-size: 0.7rem;
+  line-height: 1.3em;
+  margin: 0px;
+  padding: 0px;
 }
 
 @media print {
@@ -2768,7 +2817,7 @@ a.admin_stats_section_row {
   align-items: center;
   outline: none;
   display: none;
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(1px);
 }
 
 .popup_background-presented {
@@ -3182,6 +3231,7 @@ a.admin_stats_section_row {
   line-height: 1.3em;
   font-weight: normal;
   color: #444;
+  user-select: none;
 }
 
 .form_table_cell a {
@@ -3201,6 +3251,24 @@ a.admin_stats_section_row {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.form_table_cell_files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 5px 0px;
+}
+
+.form_table_cell_file {
+  border: 1px solid #eee;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  border-radius: 5px;
+  width: 100px;
+  aspect-ratio: 16/9;
+  background-color: #fafafa;
+  background-position: center;
+  background-size: cover;
 }
 
 @media print {
@@ -3255,7 +3323,7 @@ a.admin_stats_section_row {
 
 .breadcrumb_logo {
   height: 40px;
-  aspect-ratio: 1;
+  max-width: 100%;
   object-fit: contain;
   border-radius: 3px;
 }

@@ -41,7 +41,9 @@ func (resource *Resource) initDefaultResourceActions() {
 		}
 		resource.bindData(item, request, queryData)
 		form.initWithResourceItem(resource, item, request)
-		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
+		submitItem := form.AddSubmit(messages.Get(request.Locale(), "admin_create"))
+		submitItem.Icon = iconAdd
+
 	}, func(vc FormValidation, request *Request) {
 		var item any = reflect.New(resource.typ).Interface()
 		resource.bindData(item, request, request.Params())
@@ -83,7 +85,8 @@ func (resource *Resource) initDefaultResourceActions() {
 		"edit",
 		func(item any, form *Form, request *Request) {
 			form.initWithResourceItem(resource, item, request)
-			form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
+			submitItem := form.AddSubmit(messages.Get(request.Locale(), "admin_edit"))
+			submitItem.Icon = iconEdit
 		},
 		func(_ any, vc FormValidation, request *Request) {
 			params := request.Params()

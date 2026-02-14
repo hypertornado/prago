@@ -112,6 +112,11 @@
   font-size: 1rem;
   line-height: 1.9em;
   width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .btn-primary:after {
@@ -153,7 +158,6 @@
 
 
 @keyframes formErrorsAnimation {
-
   from {
     background-color: $redLighter;
   }
@@ -161,15 +165,63 @@
   to {
     background-color: $redLightest;
   }
-  
 }
 
-.form_errors_error {
-  border: 1px solid #dd2e4f;
-  color: #dd2e4f;
-  padding: 5px;
-  text-align: center;
-  border-radius: 3px;
+.form_errors {
+  position: sticky;
+  top: 10px;
+  z-index: 2;
+}
+
+.form_errors_item {
+  border: 0px solid $grayBorderColor;
+  //background-color: $baseColorBackground;
+  //color: $red;
+  font-size: 1rem;
+  line-height: 1.3em;
+  padding: 10px 10px;
+  //font-weight: 500;
+  //text-align: center;
+  border-radius: 1000px;
+  @include shadowMedium;
+
+  animation: formErrorsItemAnimation 200ms ease-in-out forwards;
+  animation-delay: 0ms;
+  opacity: 0;
+}
+
+@keyframes formErrorsItemAnimation {
+  from {
+    opacity: 0;
+    transform: perspective(10cm) scale(.5) translateY(-0px) rotateX(-0deg);
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.form_errors_item-error {
+  //border: 1px solid $red;
+  //background-color: $baseColorBackground;
+  //color: $red;
+  background-color: $red;
+  color: white;
+  //padding: 5px;
+  //text-align: center;
+  //border-radius: 3px;
+  //@include shadowMedium;
+}
+
+.form_errors_item-ok {
+  //border: 1px solid $green;
+  //background-color: $baseColorBackground;
+  background-color: $green;
+  color: white;
+  //padding: 5px;
+  //text-align: center;
+  //border-radius: 3px;
+  //@include shadowMedium;
 }
 
 .form_label {
@@ -378,6 +430,20 @@ a.btn_more_item {
   background-color: $baseColorBackground;
 }
 
+
+.checkbox_label {
+  //border: 1px solid red;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.checkbox_label .form_label_description {
+  font-size: .7rem;
+  line-height: 1.3em;
+  margin: 0px;
+  padding: 0px;
+}
 
 @media print {
   .prago_form {

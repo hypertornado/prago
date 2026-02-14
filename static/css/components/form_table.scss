@@ -69,6 +69,7 @@
   line-height: 1.3em;
   font-weight: normal;
   color: #444;
+  user-select: none;
 }
 
 .form_table_cell a {
@@ -90,6 +91,25 @@
   overflow: hidden;
   //border: 1px solid red;
   text-overflow: ellipsis;
+}
+
+.form_table_cell_files {
+  //border: 1px solid red;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 5px 0px;
+}
+
+.form_table_cell_file {
+  border: 1px solid $grayBorderColor;
+  @include shadowMedium;
+  border-radius: 5px;
+  width: 100px;
+  aspect-ratio: 16/9;
+  background-color: $backgroundGrayColor;
+  background-position: center;
+  background-size: cover;
 }
 
 

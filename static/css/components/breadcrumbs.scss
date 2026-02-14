@@ -47,7 +47,8 @@
 
 .breadcrumb_logo {
     height: 40px;
-    aspect-ratio: 1;
+    max-width: 100%;
+    //aspect-ratio: 1;
     object-fit: contain;
     //border: 1px solid #eee;
     border-radius: 3px;

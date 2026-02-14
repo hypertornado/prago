@@ -102,6 +102,7 @@ class FormContainer {
             this.progress.classList.add("hidden");
             this.setFormErrors(data.Errors);
             if (data.AfterContent) this.setAfterContent(data.AfterContent);
+            initTables();
           }
         } else {
           // Step 2: Create a Blob from the response
@@ -148,20 +149,29 @@ class FormContainer {
     errorsDiv.innerText = "";
     errorsDiv.classList.add("hidden");
 
+    var anyError = false;
+
     if (errors) {
       for (let i = 0; i < errors.length; i++) {
         if (errors[i].Field) {
+          anyError = true;
           this.setItemError(errors[i]);
         } else {
           let errorDiv = document.createElement("div");
-          errorDiv.classList.add("form_errors_error");
+          errorDiv.classList.add("form_errors_item");
+          if (errors[i].OK) {
+            errorDiv.classList.add("form_errors_item-ok");
+          } else {
+            anyError = true;
+            errorDiv.classList.add("form_errors_item-error");
+          }
           errorDiv.innerText = errors[i].Text;
           errorsDiv.appendChild(errorDiv);
+          errorsDiv.classList.remove("hidden");
         }
       }
-      if (errors.length > 0) {
+      if (anyError) {
         this.form.formEl.classList.add("form-errors");
-        errorsDiv.classList.remove("hidden");
       }
     }
   }

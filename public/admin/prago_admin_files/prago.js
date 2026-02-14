@@ -1799,6 +1799,11 @@ class RelationPicker {
         }
     }
     getData() {
+        if (!this.input.value) {
+            this.progress.classList.add("hidden");
+            this.showSearch();
+            return;
+        }
         var request = new XMLHttpRequest();
         request.open("GET", "/admin/" +
             this.relationName +
@@ -1845,6 +1850,7 @@ class RelationPicker {
         deleteButton.addEventListener("click", () => {
             previewEl.remove();
             this.updateLayout();
+            this.pickerInput.focus();
         });
         previewEl.setAttribute("data-id", data.ID);
         this.pickerInput.value = "";
@@ -1935,7 +1941,10 @@ class RelationPicker {
                     var el = this.createPreview(item, false);
                     el.classList.add("admin_item_relation_picker_suggestion");
                     el.setAttribute("data-position", i + "");
-                    el.addEventListener("mousedown", this.suggestionClick.bind(this));
+                    el.addEventListener("mousedown", (e) => {
+                        e.preventDefault();
+                    });
+                    el.addEventListener("click", this.suggestionClick.bind(this));
                     el.addEventListener("mouseenter", this.suggestionSelect.bind(this));
                     this.suggestionsEl.appendChild(el);
                 }
@@ -2047,7 +2056,7 @@ class RelationPicker {
         var name = document.createElement("div");
         name.classList.add("admin_preview_name");
         name.textContent = data.Name;
-        var description = document.createElement("description");
+        var description = document.createElement("div");
         description.classList.add("admin_preview_description");
         description.setAttribute("title", data.Description);
         description.textContent = data.Description;
@@ -2068,6 +2077,8 @@ class RelationPicker {
         ret.appendChild(right);
         return ret;
     }
+}
+class Suggestions {
 }
 class Form {
     constructor(form) {
@@ -2225,6 +2236,7 @@ class FormContainer {
                         this.setFormErrors(data.Errors);
                         if (data.AfterContent)
                             this.setAfterContent(data.AfterContent);
+                        initTables();
                     }
                 }
                 else {
@@ -2258,21 +2270,30 @@ class FormContainer {
         let errorsDiv = this.form.formEl.querySelector(".form_errors");
         errorsDiv.innerText = "";
         errorsDiv.classList.add("hidden");
+        var anyError = false;
         if (errors) {
             for (let i = 0; i < errors.length; i++) {
                 if (errors[i].Field) {
+                    anyError = true;
                     this.setItemError(errors[i]);
                 }
                 else {
                     let errorDiv = document.createElement("div");
-                    errorDiv.classList.add("form_errors_error");
+                    errorDiv.classList.add("form_errors_item");
+                    if (errors[i].OK) {
+                        errorDiv.classList.add("form_errors_item-ok");
+                    }
+                    else {
+                        anyError = true;
+                        errorDiv.classList.add("form_errors_item-error");
+                    }
                     errorDiv.innerText = errors[i].Text;
                     errorsDiv.appendChild(errorDiv);
+                    errorsDiv.classList.remove("hidden");
                 }
             }
-            if (errors.length > 0) {
+            if (anyError) {
                 this.form.formEl.classList.add("form-errors");
-                errorsDiv.classList.remove("hidden");
             }
         }
     }
@@ -3725,6 +3746,75 @@ class Timeline {
         this.loadData();
     }
 }
+function initTables() {
+    var tables = document.querySelectorAll(".form_table");
+    tables.forEach((el) => {
+        if (el.getAttribute("data-table-initiated") != "true") {
+            new Table(el);
+        }
+    });
+}
+class Table {
+    constructor(el) {
+        this.el = el;
+        el.setAttribute("data-table-initiated", "true");
+        let cells = el.querySelectorAll("td.form_table_cell");
+        cells.forEach((cell) => {
+            this.bindCell(cell);
+        });
+    }
+    bindCell(cell) {
+        let cellAsyncURL = cell.getAttribute("data-async-data-url");
+        if (!cellAsyncURL) {
+            return;
+        }
+        let textEl = cell.querySelector(".form_table_cell_text");
+        textEl.textContent = "⏳";
+        let descriptionsBefore = cell.querySelector(".form_table_cell_descriptions_before");
+        let descriptionsAfter = cell.querySelector(".form_table_cell_descriptions_after");
+        let request = new XMLHttpRequest();
+        request.open("GET", cellAsyncURL);
+        request.addEventListener("load", (e) => {
+            if (request.status == 200) {
+                let item = JSON.parse(request.response);
+                textEl.textContent = item.Text;
+                descriptionsBefore.textContent = "";
+                descriptionsAfter.textContent = "";
+                if (item.DescriptionsBefore) {
+                    for (let i = 0; i < item.DescriptionsBefore.length; i++) {
+                        let descText = item.DescriptionsBefore[i];
+                        let descDiv = document.createElement("div");
+                        descDiv.innerText = descText;
+                        descDiv.classList.add("form_table_cell_descriptionbefore");
+                        descriptionsBefore.appendChild(descDiv);
+                    }
+                }
+                if (item.DescriptionsAfter) {
+                    for (let i = 0; i < item.DescriptionsAfter.length; i++) {
+                        let descText = item.DescriptionsAfter[i];
+                        let descDiv = document.createElement("div");
+                        descDiv.innerText = descText;
+                        descDiv.classList.add("form_table_cell_descriptionafter");
+                        descriptionsAfter.appendChild(descDiv);
+                    }
+                }
+                if (item.Green) {
+                    cell.classList.add("form_table_cell-green");
+                }
+                if (item.Orange) {
+                    cell.classList.add("form_table_cell-orange");
+                }
+                if (item.Red) {
+                    cell.classList.add("form_table_cell-red");
+                }
+            }
+            else {
+                textEl.textContent = "💥";
+            }
+        });
+        request.send();
+    }
+}
 class Prago {
     static start() {
         document.addEventListener("DOMContentLoaded", Prago.init);
@@ -3770,6 +3860,7 @@ class Prago {
         }
         initDashboard();
         initGoogleMaps();
+        initTables();
         let searchboxButton = document.querySelector(".searchbox_button");
         if (searchboxButton) {
             searchboxButton.addEventListener("click", (e) => {
@@ -3784,8 +3875,6 @@ class Prago {
     }
     static testPopupForm() {
         new PopupForm("/admin/packageview/new", (data) => {
-            console.log("form data");
-            console.log(data);
         });
     }
 }

@@ -8,22 +8,31 @@
             {{range $row := $table.Rows}}
                 <tr>
                 {{range $cell := $row.Cells}}
-                    <td class="{{$cell.GetClassesString}}"{{if $cell.Rowspan}} rowspan="{{$cell.Rowspan}}"{{end}}{{if $cell.Colspan}} colspan="{{$cell.Colspan}}"{{end}}>
+                    <td class="{{$cell.GetClassesString}}"
+                        {{if $cell.Rowspan}} rowspan="{{$cell.Rowspan}}"{{end}}
+                        {{if $cell.Colspan}} colspan="{{$cell.Colspan}}"{{end}}
+                        {{if $cell.AsyncDataURL}} data-async-data-url="{{$cell.AsyncDataURL}}"{{end}}
+                        {{if $cell.Style}} style="{{$cell.Style}}"{{end}}
+                    >
                         {{range $checkbox := $cell.Checkboxes}}
                             <input type="checkbox" name="{{$checkbox.Name}}"{{if $checkbox.Checked}} checked{{end}}>
                         {{end}}
                         {{if $cell.Href}}<a href="{{$cell.Href}}">{{end}}
+                            <div class="form_table_cell_descriptions_before">
                             {{if .DescriptionBefore}}
                                 {{range $text := .DescriptionBefore}}
                                     <div class="form_table_cell_descriptionbefore">{{$text}}</div>
                                 {{end}}
                             {{end}}
-                            {{$cell.Text}}
+                            </div>
+                            <div class="form_table_cell_text">{{$cell.Text}}</div>
+                            <div class="form_table_cell_descriptions_after">
                             {{if .DescriptionAfter}}
                                 {{range $text := .DescriptionAfter}}
                                     <div class="form_table_cell_descriptionafter">{{$text}}</div>
                                 {{end}}
                             {{end}}
+                            </div>
                         {{if $cell.Href}}</a>{{end}}
                         {{range $button := $cell.Buttons}}
                             <a href="{{if $button.URL}}{{$button.URL}}{{else}}#{{end}}" class="btn"
@@ -36,6 +45,13 @@
                         {{end}}
                         {{if $cell.TextAfter}}
                             <div class="form_table_cell_textafter" title="{{$cell.TextAfter}}">{{$cell.TextAfter}}</div>
+                        {{end}}
+                        {{if $cell.Files}}
+                            <div class="form_table_cell_files">
+                                {{range $file := $cell.Files}}
+                                    <a href="/admin/file/{{$file.ID}}" style="background-image: url('{{$file.GetMedium}}');" class="form_table_cell_file"></a>
+                                {{end}}
+                            </div>
                         {{end}}
                     </td>
                 {{end}}

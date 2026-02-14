@@ -2,6 +2,7 @@ package prago
 
 import (
 	"sync"
+	"time"
 )
 
 func (app *App) GetAllUsers() (ret []UserData) {
@@ -16,6 +17,21 @@ func (app *App) GetAllUsers() (ret []UserData) {
 func (app *App) initUserDataCache() {
 	app.userDataCache = make(map[int64]*userData)
 	app.userDataCacheMutex = &sync.RWMutex{}
+
+	go func() {
+		time.Sleep(1 * time.Hour)
+		app.userDataCacheDeleteAll()
+	}()
+
+	app.ListenActivity(func(activity Activity) {
+		if activity.ResourceID == "user" {
+			if activity.ID > 0 {
+				app.userDataCacheDelete(activity.ID)
+			}
+
+		}
+
+	})
 }
 
 func (app *App) GetUserData(id int64) *userData {

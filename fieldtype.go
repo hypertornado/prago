@@ -110,7 +110,7 @@ func (app *App) initDefaultFieldTypes() {
 		filterLayoutTemplate:   "filter_layout_select",
 		filterLayoutDataSource: boolFilterLayoutDataSource,
 
-		fieldTypeIcon:    "glyphicons-basic-38-picture.svg",
+		fieldTypeIcon:    iconImage,
 		naturalCellWidth: 60,
 	})
 

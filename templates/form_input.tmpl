@@ -44,9 +44,20 @@
 {{end}}
 
 {{define "form_input_checkbox"}}
-  <label>
+  <label class="checkbox_label">
     <input type="checkbox" name="{{.ID}}" {{if .Value}}checked{{end}}{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}} class="form_watcher">
-    <span class="form_label_text-inline">{{PragoHTML .Name}}</span>
+    <div class="chackbox_content">
+      {{range $description := .DescriptionsBefore}}
+        <div class="form_label_description">{{$description}}</div>
+      {{end}}
+      <span class="form_label_text-inline">{{PragoHTML .Name}}</span>
+      {{if .Description}}
+        <div class="form_label_description">{{.Description}}</div>
+      {{end}}
+      {{range $description := .DescriptionsAfter}}
+        <div class="form_label_description">{{$description}}</div>
+      {{end}}
+    </div>
   </label>
 {{end}}
 
@@ -91,7 +102,7 @@
 {{end}}
 
 {{define "form_input_file"}}
-  <input type="file" id="{{.UUID}}" name="{{.ID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input type="file" id="{{.UUID}}" name="{{.ID}}" {{if .FileMultiple}}multiple{{end}} {{if .FileAccept}}accept="{{.FileAccept}}"{{end}} class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
 {{end}}
 
 {{define "form_input_cdnfile"}}
@@ -115,12 +126,18 @@
 
 {{define "form_input_submit"}}
   <div class="primarybtncontainer">
-    <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>{{.Name}}</button>
+    <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>
+      {{if .Icon}}<img class="btn_icon" src="/admin/api/icons?file={{.Icon}}&color=ffffff">{{end}}
+      {{.Name}}
+    </button>
   </div>
 {{end}}
 
 {{define "form_input_delete"}}
-  <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary btn-delete"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>{{.Name}}</button>
+  <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary btn-delete"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>
+    {{if .Icon}}<img class="btn_icon" src="/admin/api/icons?file={{.Icon}}&color=ffffff">{{end}}
+    {{.Name}}
+  </button>
 {{end}}
 
 {{define "form_input_select"}}

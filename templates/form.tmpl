@@ -28,6 +28,9 @@
             </a>
             <div class="form_label_content">
             {{if eq .HiddenName false}}
+              {{range $description := .DescriptionsBefore}}
+                <div class="form_label_description">{{$description}}</div>
+              {{end}}
               <label for="{{.UUID}}" class="form_label_text">
                 {{if .Icon}}
                   <img src="/admin/api/icons?file={{$item.Icon}}&color=444444" class="form_label_text_icon">
@@ -39,6 +42,9 @@
               </label>
               {{if .Description}}
                 <div class="form_label_description">{{.Description}}</div>
+              {{end}}
+              {{range $description := .DescriptionsAfter}}
+                <div class="form_label_description">{{$description}}</div>
               {{end}}
             {{end}}
             <div class="form_label_errors hidden"></div>

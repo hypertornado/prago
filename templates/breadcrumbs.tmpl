@@ -15,9 +15,11 @@
                     </div>
                 {{end}}
                 {{if $item.Name}}
-                    <div class="breadcrumb_text">
-                        {{$item.Name}}
-                    </div>
+                    {{if not $item.Logo}}
+                        <div class="breadcrumb_text">
+                            {{$item.Name}}
+                        </div>
+                    {{end}}
                 {{end}}
             </a>
         {{end}}

@@ -25,6 +25,14 @@ const iconDelete = "glyphicons-basic-17-bin.svg"
 const iconDuplicate = "glyphicons-basic-611-copy-duplicate.svg"
 const iconActivity = "glyphicons-basic-58-history.svg"
 
+const iconNumber = "glyphicons-basic-234-calculator.svg"
+const iconText = "glyphicons-basic-101-text.svg"
+const iconCheckbox = "glyphicons-basic-153-square-checkbox.svg"
+const iconDate = "glyphicons-basic-46-calendar.svg"
+const iconDateTime = "glyphicons-basic-55-clock.svg"
+const iconSelect = "glyphicons-basic-299-circle-selected.svg"
+const iconImage = "glyphicons-basic-38-picture.svg"
+
 func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 	app.iconsFS = &iconsFS
 	app.iconsPrefix = prefix

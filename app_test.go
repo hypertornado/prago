@@ -2,6 +2,7 @@ package prago
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -187,6 +188,45 @@ func TestQuery(t *testing.T) {
 	if count != 2 {
 		t.Fatal(count)
 	}
+}
+
+func TestQueryIn(t *testing.T) {
+
+	resource := prepareResource(t)
+
+	resources := []*ResourceStruct{
+		&ResourceStruct{
+			Name: "a",
+		},
+		&ResourceStruct{
+			Name: "b",
+		},
+		&ResourceStruct{
+			Name: "c",
+		},
+	}
+	for _, v := range resources {
+		CreateItem(resource.app, v)
+	}
+
+	items := Query[ResourceStruct](resource.app).In("id", []int64{resources[0].ID, resources[1].ID}).Order("id").List()
+	if len(items) != 2 {
+		t.Fatal(items)
+	}
+	if items[0].ID != resources[0].ID {
+		t.Fatal(items[0])
+	}
+
+	items = Query[ResourceStruct](resource.app).In("id", fmt.Sprintf(";%d;%d;", resources[0].ID, resources[1].ID)).Order("id").List()
+	if len(items) != 2 {
+		t.Fatal(items)
+	}
+
+	items = Query[ResourceStruct](resource.app).In("id", resources[0].ID).Order("id").List()
+	if len(items) != 1 {
+		t.Fatal(items)
+	}
+
 }
 
 func TestResource(t *testing.T) {

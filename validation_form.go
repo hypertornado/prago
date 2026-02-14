@@ -6,6 +6,7 @@ import (
 
 type FormValidation interface {
 	AddError(err string)
+	AddOK(err string)
 	AddItemError(key, err string)
 	Valid() bool
 	Redirect(string)
@@ -42,6 +43,13 @@ func newFormValidation() *formValidation {
 func (fv *formValidation) AddError(err string) {
 	fv.validationData.Errors = append(fv.validationData.Errors, ValidationError{
 		Text: err,
+	})
+}
+
+func (fv *formValidation) AddOK(message string) {
+	fv.validationData.Errors = append(fv.validationData.Errors, ValidationError{
+		OK:   true,
+		Text: message,
 	})
 }
 

@@ -45,9 +45,8 @@ func (app *App) initCache() {
 	ActionForm(app, "_deletecache", func(form *Form, request *Request) {
 		form.AddSubmit("Smazat cache")
 	}, func(fv FormValidation, request *Request) {
-
-		app.cache.clear()
-		fv.AddError("Cache smazána")
+		app.ClearCache()
+		fv.AddOK("Cache smazána")
 
 	}).Permission(sysadminPermission).Name(unlocalized("Smazat cache")).Board(app.optionsBoard).Icon("glyphicons-basic-246-clean.svg")
 

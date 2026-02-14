@@ -15,6 +15,7 @@ type Validation interface {
 }
 
 type ValidationError struct {
+	OK    bool
 	Field string
 	Text  string
 }
