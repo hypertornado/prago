@@ -441,12 +441,13 @@ class ListFilterRelations {
         this.dirty = false;
     }
     getSuggestions(q) {
+        var encoded = encodeParams({
+            q: q,
+            resource: this.relatedResourceName,
+        });
         var request = new XMLHttpRequest();
-        request.open("GET", "/admin/" +
-            this.relatedResourceName +
-            "/api/searchresource" +
-            "?q=" +
-            encodeURIComponent(q), true);
+        var url = "/admin/api/_suggestionsresource" + encoded;
+        request.open("GET", url, true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
                 this.renderSuggestions(JSON.parse(request.response));
@@ -460,12 +461,11 @@ class ListFilterRelations {
     renderSuggestions(data) {
         this.suggestions.innerHTML = "";
         this.suggestions.classList.add("filter_relations_suggestions-empty");
-        for (var i = 0; i < data.Previews.length; i++) {
+        for (var i = 0; i < data.Suggestions.length; i++) {
             this.suggestions.classList.remove("filter_relations_suggestions-empty");
-            let item = data.Previews[i];
+            let item = data.Suggestions[i];
             let el = this.renderSuggestion(item);
             this.suggestions.appendChild(el);
-            let index = i;
             el.addEventListener("mousedown", (e) => {
                 this.renderPreview(item);
             });
@@ -1760,7 +1760,7 @@ class Timestamp {
 }
 class RelationPicker {
     constructor(el) {
-        this.selectedClass = "admin_item_relation_picker_suggestion-selected";
+        this.el = el;
         if (el.getAttribute("data-autofocus") == "true") {
             this.autofocus = true;
         }
@@ -1775,21 +1775,8 @@ class RelationPicker {
         this.relationName = el.getAttribute("data-relation");
         this.filterID = el.getAttribute("data-filter");
         this.progress = el.querySelector("progress");
-        this.suggestionsEl = (el.querySelector(".admin_item_relation_picker_suggestions_content"));
-        this.suggestions = [];
         this.picker = (el.querySelector(".admin_item_relation_picker"));
-        this.pickerInput = this.picker.querySelector("input");
-        this.pickerInput.addEventListener("input", () => {
-            this.getSuggestions(this.pickerInput.value);
-        });
-        this.pickerInput.addEventListener("blur", () => {
-            this.suggestionsEl.classList.add("hidden");
-        });
-        this.pickerInput.addEventListener("focus", () => {
-            this.suggestionsEl.classList.remove("hidden");
-            this.getSuggestions(this.pickerInput.value);
-        });
-        this.pickerInput.addEventListener("keydown", this.suggestionInput.bind(this));
+        this.suggestionsObject = new Suggestions(this.el.querySelector(".admin_item_relation_picker_suggestions_content"), this.picker.querySelector("input"), this.getSearchURL.bind(this), this.addPreview.bind(this));
         if (this.multipleInputs || parseInt(this.input.value) > 0) {
             this.getData();
         }
@@ -1797,6 +1784,14 @@ class RelationPicker {
             this.progress.classList.add("hidden");
             this.showSearch();
         }
+    }
+    getSearchURL(q) {
+        var encoded = encodeParams({
+            q: q,
+            filter: this.filterID,
+            resource: this.relationName,
+        });
+        return "/admin/api/_suggestionsresource" + encoded;
     }
     getData() {
         if (!this.input.value) {
@@ -1826,7 +1821,7 @@ class RelationPicker {
     addPreview(data) {
         let previewEl = document.createElement("div");
         previewEl.classList.add("admin_relation_preview");
-        var el = this.createPreview(data, true);
+        var el = createSuggestionsPreviewEl(data, true);
         this.previewsContainer.appendChild(previewEl);
         previewEl.appendChild(el);
         let upButton = document.createElement("div");
@@ -1850,10 +1845,10 @@ class RelationPicker {
         deleteButton.addEventListener("click", () => {
             previewEl.remove();
             this.updateLayout();
-            this.pickerInput.focus();
+            this.suggestionsObject.focus();
         });
         previewEl.setAttribute("data-id", data.ID);
-        this.pickerInput.value = "";
+        this.suggestionsObject.clear();
         this.updateLayout();
     }
     numberOfItems() {
@@ -1905,30 +1900,42 @@ class RelationPicker {
     }
     showSearch() {
         this.picker.classList.remove("hidden");
-        this.suggestions = [];
-        this.suggestionsEl.innerText = "";
-        this.pickerInput.value = "";
+        this.suggestionsObject.clear();
         if (this.autofocus) {
-            this.pickerInput.focus();
+            this.suggestionsObject.focus();
         }
     }
-    getSuggestions(q) {
-        var encoded = encodeParams({
-            "q": q,
-            "filter": this.filterID,
+}
+class Suggestions {
+    constructor(suggestionEl, pickerInput, searchURL, returnData) {
+        this.selectedClass = "admin_item_relation_picker_suggestion-selected";
+        this.suggestionsEl = suggestionEl;
+        this.suggestions = [];
+        this.pickerInput = pickerInput;
+        this.searchURL = searchURL;
+        this.returnData = returnData;
+        this.pickerInput.addEventListener("input", () => {
+            this.getSuggestions(this.pickerInput.value);
         });
+        this.pickerInput.addEventListener("blur", () => {
+            this.suggestionsEl.classList.add("hidden");
+        });
+        this.pickerInput.addEventListener("focus", () => {
+            this.suggestionsEl.classList.remove("hidden");
+            this.getSuggestions(this.pickerInput.value);
+        });
+        this.pickerInput.addEventListener("keydown", this.suggestionInput.bind(this));
+    }
+    getSuggestions(q) {
         var request = new XMLHttpRequest();
-        request.open("GET", "/admin/" +
-            this.relationName +
-            "/api/searchresource" +
-            encoded, true);
+        request.open("GET", this.searchURL(q), true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
                 if (q != this.pickerInput.value) {
                     return;
                 }
                 var data = JSON.parse(request.response);
-                this.suggestions = data.Previews;
+                this.suggestions = data.Suggestions;
                 this.suggestionsEl.innerText = "";
                 if (data.Message) {
                     let messageEl = document.createElement("div");
@@ -1936,10 +1943,13 @@ class RelationPicker {
                     messageEl.classList.add("relation_message");
                     this.suggestionsEl.appendChild(messageEl);
                 }
-                for (var i = 0; i < data.Previews.length; i++) {
-                    var item = data.Previews[i];
-                    var el = this.createPreview(item, false);
+                for (var i = 0; i < data.Suggestions.length; i++) {
+                    var item = data.Suggestions[i];
+                    var el = createSuggestionsPreviewEl(item, false);
                     el.classList.add("admin_item_relation_picker_suggestion");
+                    el.addEventListener("mouseleave", () => {
+                        this.unselect();
+                    });
                     el.setAttribute("data-position", i + "");
                     el.addEventListener("mousedown", (e) => {
                         e.preventDefault();
@@ -1961,7 +1971,7 @@ class RelationPicker {
                     buttonEl.addEventListener("click", (e) => {
                         this.suggestionsEl.classList.add("hidden");
                         let popupForm = new PopupForm(data.Button.FormURL, (data) => {
-                            this.addPreview(data.Data);
+                            this.returnData(data.Data);
                         });
                         e.preventDefault();
                         e.stopPropagation();
@@ -1982,7 +1992,7 @@ class RelationPicker {
     suggestionClick() {
         var selected = this.getSelected();
         if (selected >= 0) {
-            this.addPreview(this.suggestions[selected]);
+            this.returnData(this.suggestions[selected]);
         }
     }
     suggestionSelect(e) {
@@ -2008,7 +2018,7 @@ class RelationPicker {
     select(i) {
         this.unselect();
         this.suggestionsEl
-            .querySelectorAll(".admin_preview")[i].classList.add(this.selectedClass);
+            .querySelectorAll(".preview")[i].classList.add(this.selectedClass);
     }
     suggestionInput(e) {
         switch (e.keyCode) {
@@ -2041,44 +2051,47 @@ class RelationPicker {
                 return false;
         }
     }
-    createPreview(data, anchor) {
-        var ret = document.createElement("div");
-        if (anchor) {
-            ret = document.createElement("a");
-        }
-        ret.classList.add("admin_preview");
-        ret.setAttribute("href", data.URL);
-        ret.addEventListener("mouseleave", () => {
-            this.unselect();
-        });
-        var right = document.createElement("div");
-        right.classList.add("admin_preview_right");
-        var name = document.createElement("div");
-        name.classList.add("admin_preview_name");
-        name.textContent = data.Name;
-        var description = document.createElement("div");
-        description.classList.add("admin_preview_description");
-        description.setAttribute("title", data.Description);
-        description.textContent = data.Description;
-        if (data.Image) {
-            let image = document.createElement("img");
-            image.classList.add("admin_preview_image");
-            image.setAttribute("src", data.Image);
-            image.setAttribute("loading", "lazy");
-            ret.appendChild(image);
-        }
-        else {
-            let imageDiv = document.createElement("div");
-            imageDiv.classList.add("admin_preview_image");
-            ret.appendChild(imageDiv);
-        }
-        right.appendChild(name);
-        right.appendChild(description);
-        ret.appendChild(right);
-        return ret;
+    clear() {
+        this.suggestions = [];
+        this.suggestionsEl.innerText = "";
+        this.pickerInput.value = "";
+    }
+    focus() {
+        this.pickerInput.focus();
     }
 }
-class Suggestions {
+function createSuggestionsPreviewEl(data, anchor) {
+    var ret = document.createElement("div");
+    if (anchor) {
+        ret = document.createElement("a");
+    }
+    ret.classList.add("preview");
+    ret.setAttribute("href", data.URL);
+    var right = document.createElement("div");
+    right.classList.add("preview_right");
+    var name = document.createElement("div");
+    name.classList.add("preview_name");
+    name.textContent = data.Name;
+    var description = document.createElement("div");
+    description.classList.add("preview_description");
+    description.setAttribute("title", data.Description);
+    description.textContent = data.Description;
+    if (data.Image) {
+        let image = document.createElement("img");
+        image.classList.add("preview_image");
+        image.setAttribute("src", data.Image);
+        image.setAttribute("loading", "lazy");
+        ret.appendChild(image);
+    }
+    else {
+        let imageDiv = document.createElement("div");
+        imageDiv.classList.add("preview_image");
+        ret.appendChild(imageDiv);
+    }
+    right.appendChild(name);
+    right.appendChild(description);
+    ret.appendChild(right);
+    return ret;
 }
 class Form {
     constructor(form) {
@@ -2113,6 +2126,7 @@ class Form {
                 }
             });
         });
+        this.initSuggestions();
         form.addEventListener("submit", () => {
             this.dirty = false;
         });
@@ -2127,6 +2141,13 @@ class Form {
                 this.changed();
             }
         }, 100);
+    }
+    initSuggestions() {
+        let suggestionEls = this.formEl.querySelectorAll(".form_suggestions");
+        for (var i = 0; i < suggestionEls.length; i++) {
+            let suggestionEl = suggestionEls[i];
+            console.log(suggestionEl);
+        }
     }
     messageChanged() {
         if (this.willChangeHandler) {
@@ -2162,12 +2183,15 @@ class FormContainer {
         if (!window.primaryFormContainer && !formContainer.parentElement.classList.contains("popup_content")) {
             window.primaryFormContainer = this;
         }
+        this.formTaskUUID = "";
         this.formContainer = formContainer;
         this.okHandler = okHandler;
         this.progress = formContainer.querySelector(".form_progress");
         var formEl = formContainer.querySelector("form");
         this.form = new Form(formEl);
         this.form.formEl.addEventListener("submit", this.submitFormAJAX.bind(this));
+        this.tableTbody = this.formContainer.querySelector(".form_task_table tbody");
+        this.taskHeader = this.formContainer.querySelector(".form_task_header");
         if (this.isAutosubmitFirstTime()) {
             this.sendForm();
         }
@@ -2176,6 +2200,7 @@ class FormContainer {
             this.form.willChangeHandler = this.formWillChange.bind(this);
             this.sendForm();
         }
+        this.initTaskProgressReader();
     }
     isAutosubmitFirstTime() {
         if (this.formContainer.classList.contains("form_container-autosubmitfirsttime")) {
@@ -2223,16 +2248,19 @@ class FormContainer {
             if (requestID != this.lastAJAXID) {
                 return;
             }
+            this.formTaskUUID = "";
             this.activeRequest = null;
+            this.cleanTable();
             if (request.status == 200) {
                 let contentType = request.getResponseHeader("Content-Type");
                 if (contentType == "application/json") {
                     var data = JSON.parse(request.response);
+                    this.progress.classList.add("hidden");
+                    this.formTaskUUID = data.TaskUUID;
                     if (data.RedirectionLocation || data.Preview || data.Data) {
                         this.okHandler(data);
                     }
                     else {
-                        this.progress.classList.add("hidden");
                         this.setFormErrors(data.Errors);
                         if (data.AfterContent)
                             this.setAfterContent(data.AfterContent);
@@ -2322,6 +2350,59 @@ class FormContainer {
                 labelErrors.appendChild(errorDiv);
             }
         }
+    }
+    initTaskProgressReader() {
+        this.lastTaskLoad = Date.now();
+        let taskEl = this.formContainer.querySelector(".form_task");
+        this.formContainer.querySelector(".form_task_stop").addEventListener("click", () => {
+            new PopupForm("/admin/_taskstop?uuid=" + this.formTaskUUID, (data) => {
+                this.setTaskFinished();
+            });
+        });
+        window.setInterval(() => {
+            if (this.formTaskUUID) {
+                taskEl.classList.remove("hidden");
+            }
+            if (this.formTaskUUID != "" && Date.now() - this.lastTaskLoad > 1000) {
+                this.lastTaskLoad = Date.now();
+                this.loadTaskProgress(this.formTaskUUID);
+            }
+        }, 100);
+    }
+    loadTaskProgress(uuid) {
+        let request = new XMLHttpRequest();
+        request.open("GET", "/admin/api/_taskview?uuid=" + uuid);
+        request.addEventListener("load", (e) => {
+            if (this.formTaskUUID != uuid) {
+                return;
+            }
+            if (request.status == 200) {
+                var data = JSON.parse(request.response);
+                this.setTaskData(data);
+            }
+            else {
+                this.setTaskFinished();
+            }
+        });
+        request.send();
+    }
+    setTaskData(data) {
+        this.taskHeader.classList.remove("hidden");
+        let taskEl = this.formContainer.querySelector(".form_task");
+        taskEl.querySelector(".form_task_status").textContent = data.Description;
+        taskEl.querySelector(".form_task_progress").setAttribute("value", data.Progress);
+        taskEl.querySelector(".form_task_progress_text").textContent = data.ProgressText;
+        this.tableTbody.insertAdjacentHTML("beforeend", data.TableRows);
+        if (data.Finished) {
+            this.setTaskFinished();
+        }
+    }
+    setTaskFinished() {
+        this.formTaskUUID = "";
+        this.taskHeader.classList.add("hidden");
+    }
+    cleanTable() {
+        this.tableTbody.innerHTML = "";
     }
 }
 function makeid(length) {
@@ -3758,20 +3839,30 @@ class Table {
     constructor(el) {
         this.el = el;
         el.setAttribute("data-table-initiated", "true");
+        this.cellsToLoad = [];
         let cells = el.querySelectorAll("td.form_table_cell");
         cells.forEach((cell) => {
             this.bindCell(cell);
         });
+        this.loadCellsAsync();
     }
     bindCell(cell) {
         let cellAsyncURL = cell.getAttribute("data-async-data-url");
         if (!cellAsyncURL) {
             return;
         }
-        let textEl = cell.querySelector(".form_table_cell_text");
-        textEl.textContent = "⏳";
+        cell.classList.add("form_table_cell-loading");
+        this.cellsToLoad.push(cell);
+    }
+    loadCellsAsync() {
+        if (this.cellsToLoad.length == 0) {
+            return;
+        }
+        let cell = this.cellsToLoad.shift();
         let descriptionsBefore = cell.querySelector(".form_table_cell_descriptions_before");
         let descriptionsAfter = cell.querySelector(".form_table_cell_descriptions_after");
+        let cellAsyncURL = cell.getAttribute("data-async-data-url");
+        let textEl = cell.querySelector(".form_table_cell_text");
         let request = new XMLHttpRequest();
         request.open("GET", cellAsyncURL);
         request.addEventListener("load", (e) => {
@@ -3811,6 +3902,8 @@ class Table {
             else {
                 textEl.textContent = "💥";
             }
+            cell.classList.remove("form_table_cell-loading");
+            this.loadCellsAsync();
         });
         request.send();
     }

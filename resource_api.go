@@ -126,10 +126,6 @@ func (resource *Resource) initDefaultResourceAPIs() {
 		},
 	)
 
-	resource.api("searchresource").Handler(func(request *Request) {
-		searchResource(request, resource)
-	})
-
 	resource.api("multipleaction").Method("POST").Handler(
 		func(request *Request) {
 			var items []any

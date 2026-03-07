@@ -1202,6 +1202,57 @@ a.btn_more_item {
   padding: 0px;
 }
 
+.form_task {
+  padding: 0px 10px;
+}
+
+.form_task_header {
+  display: flex;
+  gap: 10px;
+  flex-wrap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0px;
+}
+
+.form_task_progress {
+  appearance: none; /* Removes default styling */
+  width: min(100%, 100px);
+  height: 10px;
+}
+
+/* The background (Firefox) */
+.form_task_progress::-moz-progress-bar {
+  background-color: hsl(214, 50%, 90%);
+  border-radius: 10px;
+}
+
+/* The background (Chrome, Safari, Edge) */
+.form_task_progress::-webkit-progress-bar {
+  background-color: hsl(214, 50%, 90%);
+  border-radius: 10px;
+}
+
+/* The actual "fill" (Chrome, Safari, Edge) */
+.form_task_progress::-webkit-progress-value {
+  background: #4077bf;
+  border-radius: 10px;
+}
+
+.form_task_progress_text {
+  width: 60px;
+  text-align: right;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  color: #888;
+  font-size: 0.8rem;
+  line-height: 1.3em;
+}
+
+.form_task_status {
+  text-align: center;
+  padding: 5px 0px;
+}
+
 @media print {
   .prago_form {
     display: grid;
@@ -3193,6 +3244,19 @@ a.admin_stats_section_row {
   color: #888;
 }
 
+.form_table_cell-loading {
+  animation: formTableCellLoading 800ms ease-in-out alternate infinite;
+}
+
+@keyframes formTableCellLoading {
+  from {
+    opacity: 0.8;
+    background-color: #eee;
+  }
+  to {
+    opacity: 1;
+  }
+}
 .form_table_cell-center {
   text-align: center;
 }
@@ -3765,7 +3829,7 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
   height: 100%;
 }
 
-.admin_preview {
+.preview {
   padding: 5px 10px;
   border-radius: 5px;
   text-decoration: none;
@@ -3778,7 +3842,7 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
   gap: 10px;
 }
 
-.admin_preview_image {
+.preview_image {
   margin-top: 5px;
   flex-grow: 0;
   flex-shrink: 0;
@@ -3791,12 +3855,12 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
   overflow: hidden;
 }
 
-.admin_preview_right {
+.preview_right {
   flex-grow: 2;
   flex-shrink: 2;
 }
 
-.admin_preview_description {
+.preview_description {
   font-size: 0.9rem;
   line-height: 1.3em;
   color: #888;

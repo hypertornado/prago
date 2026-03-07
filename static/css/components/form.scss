@@ -445,6 +445,65 @@ a.btn_more_item {
   padding: 0px;
 }
 
+.form_task {
+  padding: 0px 10px;
+}
+
+.form_task_header {
+  display: flex;
+  gap: 10px;
+  flex-wrap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0px;
+}
+
+.form_task_progress {
+  appearance: none; /* Removes default styling */
+  width: min(100%, 100px);
+  height: 10px;
+}
+
+/* The background (Firefox) */
+.form_task_progress::-moz-progress-bar {
+  background-color: $baseColorBackground;
+  border-radius: 10px;
+}
+
+/* The background (Chrome, Safari, Edge) */
+.form_task_progress::-webkit-progress-bar {
+  background-color: $baseColorBackground;
+  border-radius: 10px;
+}
+
+/* The actual "fill" (Chrome, Safari, Edge) */
+.form_task_progress::-webkit-progress-value {
+  //background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+  background: $baseColor;
+  border-radius: 10px;
+}
+
+.form_task_progress_text {
+  width: 60px;
+  text-align: right;
+  //font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-family: 
+    'SFMono-Regular', 
+    Consolas, 
+    'Liberation Mono', 
+    Menlo, 
+    Courier, 
+    monospace;
+  color: $gray;
+  font-size: .8rem;
+  line-height: 1.3em;
+}
+
+.form_task_status {
+  text-align: center;
+  padding: 5px 0px;
+}
+
 @media print {
   .prago_form {
     display: grid;

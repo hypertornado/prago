@@ -10,7 +10,6 @@ class ListFilterRelations {
   relatedResourceName: string;
   dirty: boolean;
   lastChanged: number;
-
   currentDataItem: any;
 
   constructor(el: HTMLDivElement, value: any, list: List) {
@@ -138,16 +137,19 @@ class ListFilterRelations {
   }
 
   getSuggestions(q: string) {
+    var encoded = encodeParams({
+      q: q,
+      resource: this.relatedResourceName,
+    });
     var request = new XMLHttpRequest();
+
+    var url = "/admin/api/_suggestionsresource" + encoded;
     request.open(
       "GET",
-      "/admin/" +
-        this.relatedResourceName +
-        "/api/searchresource" +
-        "?q=" +
-        encodeURIComponent(q),
+      url,
       true
     );
+
 
     request.addEventListener("load", () => {
       if (request.status == 200) {
@@ -162,12 +164,11 @@ class ListFilterRelations {
   renderSuggestions(data: any) {
     this.suggestions.innerHTML = "";
     this.suggestions.classList.add("filter_relations_suggestions-empty");
-    for (var i = 0; i < data.Previews.length; i++) {
+    for (var i = 0; i < data.Suggestions.length; i++) {
       this.suggestions.classList.remove("filter_relations_suggestions-empty");
-      let item = data.Previews[i];
+      let item = data.Suggestions[i];
       let el = this.renderSuggestion(item);
       this.suggestions.appendChild(el);
-      let index = i;
       el.addEventListener("mousedown", (e) => {
         this.renderPreview(item);
       });

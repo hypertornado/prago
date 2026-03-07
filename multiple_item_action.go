@@ -12,7 +12,7 @@ type MultipleItemAction struct {
 	Icon       string
 	Name       func(string) string
 	Permission Permission
-	Handler    func(items []any, request UserData, response *MultipleItemActionResponse)
+	Handler    func(items []any, request *Request, response *MultipleItemActionResponse)
 }
 
 func (app *App) initMultipleItemActions() {
@@ -24,7 +24,7 @@ func (app *App) initMultipleItemActions() {
 func AddMultipleItemsAction[T any](
 	app *App,
 	name func(string) string, permission Permission, icon string,
-	handler func(items []*T, request UserData, response *MultipleItemActionResponse)) {
+	handler func(items []*T, request *Request, response *MultipleItemActionResponse)) {
 
 	resource := getResource[T](app)
 
@@ -33,7 +33,7 @@ func AddMultipleItemsAction[T any](
 		Icon:       icon,
 		Name:       name,
 		Permission: permission,
-		Handler: func(items []any, request UserData, response *MultipleItemActionResponse) {
+		Handler: func(items []any, request *Request, response *MultipleItemActionResponse) {
 			var arr []*T
 			for _, item := range items {
 				arr = append(arr, item.(*T))
@@ -74,7 +74,7 @@ func (resource *Resource) addDefaultMultipleActions() {
 		Icon:       iconDuplicate,
 		Name:       unlocalized("Naklonovat"),
 		Permission: resource.canCreate,
-		Handler: func(items []any, request UserData, response *MultipleItemActionResponse) {
+		Handler: func(items []any, request *Request, response *MultipleItemActionResponse) {
 			for _, item := range items {
 				val := reflect.ValueOf(item).Elem()
 				val.FieldByName("ID").SetInt(0)

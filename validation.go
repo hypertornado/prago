@@ -1,11 +1,12 @@
 package prago
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sort"
-	"strconv"
 	"strings"
+	"time"
 )
 
 type Validation interface {
@@ -23,13 +24,9 @@ type ValidationError struct {
 func (app *App) initValidation() {
 
 	PopupForm(app, "_validation-consistency", func(form *Form, request *Request) {
-
-		form.AddTextInput("offset", "Offset")
-		form.AddTextInput("limit", "Limit")
-
 		form.AddHidden("resource").Value = request.Param("resource")
-		form.AddSubmit("Spustit kontrolu konzistence")
-		//form.AutosubmitFirstTime = true
+		form.AutosubmitFirstTime = true
+		//form.AddSubmit("Spustit kontrolu konzistence")
 
 	}, func(fv FormValidation, request *Request) {
 		resource := app.getResourceByID(request.Param("resource"))
@@ -37,24 +34,11 @@ func (app *App) initValidation() {
 			fv.AddError("Not allowed")
 			return
 		}
+		fv.RunTask(request, func(fta *FormTaskActivity) error {
+			fta.TableCells(Cell("Item").Header(), Cell("Validation errors").Header())
+			return resource.consistencyCheck(request, fta)
+		})
 
-		var offset, limit int
-		var err error
-		if request.Param("offset") != "" {
-			offset, err = strconv.Atoi(request.Param("offset"))
-			if err != nil || offset < 0 {
-				fv.AddItemError("offset", "Špatná hodnota")
-			}
-		}
-		if request.Param("limit") != "" {
-			limit, err = strconv.Atoi(request.Param("limit"))
-			if err != nil || limit < 0 {
-				fv.AddItemError("limit", "Špatná hodnota")
-			}
-		}
-
-		table := resource.validateResourceTable(request, int64(offset), int64(limit), true)
-		fv.AfterContent(table.ExecuteHTML())
 	}).Permission(loggedPermission).Name(unlocalized("Kontrola konzistence"))
 
 	ActionForm(app, "_validations",
@@ -75,7 +59,6 @@ func (app *App) initValidation() {
 			})
 
 			form.AddSelect("resource", "Resource", values)
-			form.AddCheckbox("ignorecorrect", "Don't show correct items").Value = "on"
 
 			form.AddSubmit("Validate resource")
 		}, func(vc FormValidation, request *Request) {
@@ -89,36 +72,24 @@ func (app *App) initValidation() {
 				return
 			}
 
-			var ignorecorrect bool
-			if request.Param("ignorecorrect") == "on" {
-				ignorecorrect = true
-			}
-
-			table := resource.validateResourceTable(request, 0, 0, ignorecorrect)
-
-			vc.AfterContent(table.ExecuteHTML())
+			vc.RunTask(request, func(fta *FormTaskActivity) error {
+				fta.TableCells(Cell("Item").Header(), Cell("Validation errors").Header())
+				return resource.consistencyCheck(request, fta)
+			})
 
 		}).Name(unlocalized("Validate resources")).Permission(sysadminPermission).Board(sysadminBoard)
 }
 
-func (resource *Resource) validateResourceTable(request *Request, offset, limit int64, ignorecorrect bool) *Table {
-	table := resource.app.Table()
-
-	table.Header("Item", "Validation errors")
+func (resource *Resource) consistencyCheck(request *Request, fta *FormTaskActivity) error {
 	var correctCount, incorrectCount int64
 
 	var i int64 = -1
 
-	resource.forEach(request.r.Context(), func(a any) error {
+	allItems := resource.countAllItems()
+
+	resource.forEach(context.Background(), func(a any) error {
 
 		i++
-
-		if i < offset {
-			return nil
-		}
-		if limit > 0 && i >= offset+limit {
-			return nil
-		}
 
 		val := reflect.ValueOf(a).Elem()
 		id := val.FieldByName("ID").Int()
@@ -133,18 +104,25 @@ func (resource *Resource) validateResourceTable(request *Request, offset, limit 
 			incorrectCount++
 		}
 
-		if !ignorecorrect || validationResult != "" {
-			table.Row(
+		fta.Progress(i, allItems)
+		fta.Description(fmt.Sprintf("Checking #%d", id))
+
+		if validationResult != "" {
+			fta.TableCells(
 				Cell(fmt.Sprintf("#%d", id)).URL(fmt.Sprintf("/admin/%s/%d", resource.id, id)),
 				Cell(validationResult),
 			)
 		}
+
+		time.Sleep(10 * time.Millisecond)
+
 		return nil
 	})
 
-	table.AddFooterText(fmt.Sprintf("correct: %d, incorrect: %d", correctCount, incorrectCount))
+	fta.Description(fmt.Sprintf("Checking done, correct: %d, incorrect: %d", correctCount, incorrectCount))
 
-	return table
+	return nil
+
 }
 
 func (resource *Resource) validateUpdate(item any, user UserData) *itemValidation {

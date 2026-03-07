@@ -31,6 +31,21 @@
 .form_table_cell {
 }
 
+.form_table_cell-loading {
+  animation: formTableCellLoading 800ms ease-in-out alternate infinite;
+}
+
+@keyframes formTableCellLoading {
+  from {
+    opacity: .8;
+    background-color: $grayBorderColor;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 .form_table_cell-center {
   text-align: center;
 }

@@ -73,7 +73,7 @@
               <img src="{{$section.LogoURL}}" class="simple_section_logo">
             {{end}}
             {{if $section.Table}}
-              {{template "form_table" $section.Table}}
+              {{$section.Table.ExecuteHTML}}
             {{end}}
             {{if $section.PrimaryButton}}
               <a href="{{$section.PrimaryButton.URL}}" class="btn btn-primary simple_section_primarybtn">{{$section.PrimaryButton.Name}}</a>

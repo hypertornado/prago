@@ -22,7 +22,9 @@
         <div class="form_errors hidden"></div>
         
         {{range $item := .Items}}
-          <div class="form_label{{if .TextOver}} form_label-textover{{end}}{{if .Hidden}} form_label-hidden{{end}}{{if .Required}} form_label-required{{end}}" data-id="{{.ID}}">
+          <div class="form_label{{if .TextOver}} form_label-textover{{end}}{{if .Hidden}} form_label-hidden{{end}}{{if .Required}} form_label-required{{end}}"
+            data-id="{{.ID}}"
+          >
             <a class="form_label_textover">
               {{.TextOver}}
             </a>
@@ -50,6 +52,9 @@
             <div class="form_label_errors hidden"></div>
             <div>
               {{.GetContent}}
+              {{if .SuggestionURL}}
+                <div class="form_suggestions" data-suggestions-url="{{.SuggestionURL}}"></div>
+              {{end}}
             </div>
             </div>
           </div>
@@ -59,6 +64,26 @@
 
       </form>
     </div>
+
+    <div class="form_task hidden">
+      <div class="form_task_header">
+        <progress class="form_task_progress" value="" max="1"></progress>
+        <div class="form_task_progress_text"></div>
+        <button class="btn form_task_stop">
+          <img src="/admin/api/icons?file=glyphicons-basic-176-stop.svg&color=444444" class="btn_icon">
+        </button>
+      </div>
+
+      <div class="form_task_status"></div>
+
+      <div class="form_table form_task_table">
+        <table>
+          <tbody></tbody>
+        </table>
+      </div>
+
+    </div>
+  
 
     <div class="form_after_content">{{.HTMLAfter}}</div>
 

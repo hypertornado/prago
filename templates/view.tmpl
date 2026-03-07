@@ -112,13 +112,13 @@
   <div class="admin_item_view_relation">
     {{if .}}
       {{range $item := .}}
-      <a class="admin_preview" href="{{$item.URL}}">
+      <a class="preview" href="{{$item.URL}}">
         {{if $item.Image}}
-          <img src="{{PragoCSS $item.Image}}" class="admin_preview_image" loading="lazy">
+          <img src="{{PragoCSS $item.Image}}" class="preview_image" loading="lazy">
         {{end}}
-        <div class="admin_preview_right">
-          <div class="admin_preview_name">{{$item.Name}}</div>
-          <div class="admin_preview_description" title="{{$item.Description}}">{{$item.Description}}</div>
+        <div class="preview_right">
+          <div class="preview_name">{{$item.Name}}</div>
+          <div class="preview_description" title="{{$item.Description}}">{{$item.Description}}</div>
         </div>
       </a>
       {{end}}

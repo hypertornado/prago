@@ -13,15 +13,19 @@ function initTables() {
 class Table {
 
     el: HTMLDivElement;
+    cellsToLoad: HTMLTableCellElement[];
 
     constructor(el: HTMLDivElement) {
+
         this.el = el;
         el.setAttribute("data-table-initiated", "true");
+        this.cellsToLoad = [];
 
         let cells = el.querySelectorAll<HTMLTableCellElement>("td.form_table_cell");
         cells.forEach((cell) => {
             this.bindCell(cell);
-        })
+        });
+        this.loadCellsAsync();
     }
 
     bindCell(cell: HTMLTableCellElement) {
@@ -30,11 +34,26 @@ class Table {
             return;
         }
 
-        let textEl = cell.querySelector(".form_table_cell_text");
-        textEl.textContent = "⏳"
+        cell.classList.add("form_table_cell-loading");
+
+        //let textEl = cell.querySelector(".form_table_cell_text");
+        //textEl.textContent = "⏳";
+        this.cellsToLoad.push(cell);
+
+    }
+
+    loadCellsAsync(){
+        if (this.cellsToLoad.length == 0) {
+            return
+        }
+
+        let cell = this.cellsToLoad.shift();
 
         let descriptionsBefore = cell.querySelector(".form_table_cell_descriptions_before");
         let descriptionsAfter = cell.querySelector(".form_table_cell_descriptions_after");
+
+        let cellAsyncURL = cell.getAttribute("data-async-data-url");
+        let textEl = cell.querySelector(".form_table_cell_text");
 
         let request = new XMLHttpRequest();
         request.open("GET", cellAsyncURL);
@@ -77,8 +96,11 @@ class Table {
                 }
 
             } else {
-                textEl.textContent = "💥"
+                textEl.textContent = "💥";
             }
+
+            cell.classList.remove("form_table_cell-loading");
+            this.loadCellsAsync();
         });
         request.send();
     }

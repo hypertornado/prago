@@ -309,19 +309,27 @@ func (t *Table) templateData() []*tableView {
 		}
 
 		for _, v2 := range v.Rows {
-			row := &tableRowView{}
-
+			/*row := &tableRowView{}
 			for _, v3 := range v2.Cells {
 				row.Cells = append(row.Cells, v3.data)
-			}
+			}*/
 
-			view.Rows = append(view.Rows, row)
+			view.Rows = append(view.Rows, tableCellsToTableRowView(v2.Cells))
 		}
 
 		ret = append(ret, view)
 	}
 
 	return ret
+}
+
+func tableCellsToTableRowView(cells []*TableCell) *tableRowView {
+	row := &tableRowView{}
+	for _, v3 := range cells {
+		row.Cells = append(row.Cells, v3.data)
+	}
+	return row
+
 }
 
 func (t *Table) ExportXLSX(writer io.Writer) error {

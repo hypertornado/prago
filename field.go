@@ -40,6 +40,9 @@ type Field struct {
 	helpURL string
 
 	fixStringValueFN func(string) string
+
+	formFilter    *FormFilter
+	suggestionURL string
 }
 
 func (resource *Resource) Field(name string) *Field {
@@ -293,6 +296,16 @@ func (field *Field) IsSearchable(isSearchable bool) *Field {
 
 func (field *Field) FixStringValue(fn func(string) string) *Field {
 	field.fixStringValueFN = fn
+	return field
+}
+
+func (field *Field) FormFilter(filter *FormFilter) *Field {
+	field.formFilter = filter
+	return field
+}
+
+func (field *Field) SuggestionURL(suggestionURL string) *Field {
+	field.suggestionURL = suggestionURL
 	return field
 }
 

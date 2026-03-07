@@ -180,3 +180,17 @@ type CustomSearchResult struct {
 	Name     string
 	Priority int64
 }
+
+func AddResourceCustomSearchFunction[T any](app *App, fn func(q string, userData UserData) []*T) {
+	resource := getResource[T](app)
+	resource.customSearchFunctions = append(resource.customSearchFunctions,
+		func(q string, userData UserData) (ret []*Preview) {
+			items := fn(q, userData)
+			for _, item := range items {
+				preview := resource.previewer(userData, item).Preview(nil)
+				ret = append(ret, preview)
+			}
+			return ret
+		},
+	)
+}

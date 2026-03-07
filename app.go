@@ -100,6 +100,9 @@ type App struct {
 	formFilters map[string]*FormFilter
 
 	InitializationAfterServerStart func()
+
+	formTasksMutex sync.Mutex
+	formTasksMap   map[string]*FormTaskActivity
 }
 
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {
@@ -171,6 +174,8 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initCacheStats()
 	app.initMailing()
 	app.initValidation()
+	app.initAI()
+	app.initFormTask()
 
 	return app
 }

@@ -6,22 +6,52 @@ import (
 	"strconv"
 )
 
-type searchResourceResponse struct {
-	Message  string
-	Previews []*Preview
-	Button   *searchResourceResponseButton
+type Suggestions struct {
+	Message     string
+	Suggestions []*Suggestion
+	Button      *SuggestionsButton
 }
 
-type searchResourceResponseButton struct {
+type Suggestion struct {
+	ID          int64
+	Image       string
+	URL         string
+	Name        string
+	Description string
+}
+
+type SuggestionsButton struct {
 	Name    string
 	FormURL string
 }
 
-func searchResource(request *Request, resource *Resource) {
+func previewtoSuggestion(preview *Preview) *Suggestion {
+	return &Suggestion{
+		ID:          preview.ID,
+		Image:       preview.Image,
+		URL:         preview.URL,
+		Name:        preview.Name,
+		Description: preview.Description,
+	}
+}
+
+func suggestionsResource(request *Request) {
+
+	app := request.app
+
+	resource := app.getResourceByID(request.Param("resource"))
+	if resource == nil {
+		panic("can't find resource")
+	}
+	if !request.Authorize(resource.canView) {
+		panic("not allowed")
+
+	}
+
 	q := request.Param("q")
 
 	filterID := request.Param("filter")
-	app := request.app
+	//app := request.app
 
 	var formFilter *FormFilter
 	if filterID != "" {
@@ -31,7 +61,7 @@ func searchResource(request *Request, resource *Resource) {
 		}
 	}
 
-	ret := &searchResourceResponse{}
+	ret := &Suggestions{}
 
 	usedIDs := map[int64]bool{}
 
@@ -92,28 +122,18 @@ func searchResource(request *Request, resource *Resource) {
 		ret.Message = "Nic nenalezeno"
 	}
 
-	ret.Previews = previews
+	ret.Suggestions = []*Suggestion{}
+
+	for _, v := range previews {
+		ret.Suggestions = append(ret.Suggestions, previewtoSuggestion(v))
+	}
 
 	if request.Authorize(resource.canCreate) {
-		ret.Button = &searchResourceResponseButton{
+		ret.Button = &SuggestionsButton{
 			Name:    resource.newItemName(request.Locale()),
 			FormURL: resource.getURL("new"),
 		}
 	}
 
 	request.WriteJSON(200, ret)
-}
-
-func AddResourceCustomSearchFunction[T any](app *App, fn func(q string, userData UserData) []*T) {
-	resource := getResource[T](app)
-	resource.customSearchFunctions = append(resource.customSearchFunctions,
-		func(q string, userData UserData) (ret []*Preview) {
-			items := fn(q, userData)
-			for _, item := range items {
-				preview := resource.previewer(userData, item).Preview(nil)
-				ret = append(ret, preview)
-			}
-			return ret
-		},
-	)
 }

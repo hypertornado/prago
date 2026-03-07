@@ -57,6 +57,8 @@ type FormItem struct {
 	FileAccept   string
 
 	FormFilterID string
+
+	SuggestionURL string
 }
 
 func (fi *FormItem) GetContent() template.HTML {

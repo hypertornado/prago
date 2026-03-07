@@ -8,11 +8,17 @@ class FormContainer {
   lastAJAXID: string;
   activeRequest: XMLHttpRequest;
   okHandler: Function;
+  formTaskUUID: string;
+  lastTaskLoad: number;
+  tableTbody: HTMLTableSectionElement;
+  taskHeader: HTMLDivElement;
 
   constructor(formContainer: HTMLDivElement, okHandler: Function) {
     if (!window.primaryFormContainer && !formContainer.parentElement.classList.contains("popup_content")) {
       window.primaryFormContainer = this;
     }
+
+    this.formTaskUUID = "";
 
     this.formContainer = formContainer;
     this.okHandler = okHandler;
@@ -20,6 +26,9 @@ class FormContainer {
     var formEl: HTMLFormElement = formContainer.querySelector("form");
     this.form = new Form(formEl);
     this.form.formEl.addEventListener("submit", this.submitFormAJAX.bind(this));
+
+    this.tableTbody = this.formContainer.querySelector(".form_task_table tbody");
+    this.taskHeader = this.formContainer.querySelector(".form_task_header");
 
     if (this.isAutosubmitFirstTime()) {
       this.sendForm();
@@ -30,6 +39,8 @@ class FormContainer {
       this.form.willChangeHandler = this.formWillChange.bind(this);
       this.sendForm();
     }
+
+    this.initTaskProgressReader();
 
   }
 
@@ -89,17 +100,20 @@ class FormContainer {
       if (requestID != this.lastAJAXID) {
         return;
       }
+      this.formTaskUUID = "";
       this.activeRequest = null;
+      this.cleanTable();
       if (request.status == 200) {
         let contentType = request.getResponseHeader("Content-Type");
         if (contentType == "application/json") {
           //application/json
           var data = JSON.parse(request.response);
+          this.progress.classList.add("hidden");
+          this.formTaskUUID = data.TaskUUID;
           if (data.RedirectionLocation || data.Preview || data.Data) {
             this.okHandler(data);
             //window.location = data.RedirectionLocation;
           } else {
-            this.progress.classList.add("hidden");
             this.setFormErrors(data.Errors);
             if (data.AfterContent) this.setAfterContent(data.AfterContent);
             initTables();
@@ -203,6 +217,71 @@ class FormContainer {
       }
     }
   }
+
+  initTaskProgressReader() {
+    this.lastTaskLoad = Date.now();
+
+    let taskEl = this.formContainer.querySelector(".form_task");
+
+    this.formContainer.querySelector(".form_task_stop").addEventListener("click", () => {
+      new PopupForm("/admin/_taskstop?uuid=" + this.formTaskUUID, (data: any) => {
+        this.setTaskFinished();
+        //this.addUUID(data.Data);
+      })
+    });
+
+    window.setInterval(() => {
+      if (this.formTaskUUID) {
+        taskEl.classList.remove("hidden");
+      }
+
+      if (this.formTaskUUID != "" && Date.now() - this.lastTaskLoad > 1000) {
+        this.lastTaskLoad = Date.now();
+        this.loadTaskProgress(this.formTaskUUID);
+      }
+    }, 100);
+  }
+
+  loadTaskProgress(uuid: string) {
+    let request = new XMLHttpRequest();
+    request.open("GET", "/admin/api/_taskview?uuid=" + uuid);
+
+    request.addEventListener("load", (e) => {
+      if (this.formTaskUUID != uuid) {
+        return;
+      }
+      if (request.status == 200) {
+        var data = JSON.parse(request.response);
+        this.setTaskData(data);
+      } else {
+        this.setTaskFinished();
+      }
+    });
+    request.send();
+  }
+
+  setTaskData(data: any) {
+    this.taskHeader.classList.remove("hidden");
+    let taskEl = this.formContainer.querySelector(".form_task");
+    taskEl.querySelector(".form_task_status").textContent = data.Description;
+    taskEl.querySelector(".form_task_progress").setAttribute("value", data.Progress);
+    taskEl.querySelector(".form_task_progress_text").textContent = data.ProgressText;
+
+    this.tableTbody.insertAdjacentHTML("beforeend", data.TableRows);
+    if (data.Finished) {
+      this.setTaskFinished();
+    }
+  }
+
+  setTaskFinished() {
+    this.formTaskUUID = "";
+    this.taskHeader.classList.add("hidden");
+  }
+
+  cleanTable() {
+    this.tableTbody.innerHTML = "";
+  }
+
 }
 
 function makeid(length: number) {

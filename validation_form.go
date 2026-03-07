@@ -11,6 +11,7 @@ type FormValidation interface {
 	Valid() bool
 	Redirect(string)
 	AfterContent(template.HTML)
+	RunTask(*Request, func(*FormTaskActivity) error)
 	Data(any)
 }
 
@@ -19,6 +20,7 @@ type formValidationData struct {
 	AfterContent        template.HTML
 	Errors              []ValidationError
 	Data                any
+	TaskUUID            string
 }
 
 type formValidationReport struct {
@@ -75,4 +77,12 @@ func (fv *formValidation) AfterContent(content template.HTML) {
 
 func (fv *formValidation) Valid() bool {
 	return len(fv.validationData.Errors) == 0
+}
+
+func (fv *formValidation) RunTask(request *Request, handler func(*FormTaskActivity) error) {
+	if fv.validationData.TaskUUID != "" {
+		panic("task already started")
+	}
+	formTask := newFormTaskActivity(request, handler)
+	fv.validationData.TaskUUID = formTask.uuid
 }

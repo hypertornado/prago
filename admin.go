@@ -46,6 +46,8 @@ func (app *App) initAdminActions() {
 		request.Response().Header().Add("Content-Type", "image/svg+xml")
 		request.w.Write(iconData)
 	})
+
+	app.API("_suggestionsresource").Handler(suggestionsResource).Permission(loggedPermission)
 }
 
 func (app *App) initAdminNotFoundAction() {

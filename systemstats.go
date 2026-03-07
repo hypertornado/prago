@@ -24,6 +24,10 @@ func (app *App) initSystemStats() {
 		return totalRequestCounter.Load()
 	}).RefreshTime(1)
 
+	currentStatsDashboard.Figure(unlocalized("Form tasks"), "sysadmin").Value(func(request *Request) int64 {
+		return int64(len(app.formTasksMap))
+	}).RefreshTime(1)
+
 	dbStatsDashboard := sysadminBoard.Dashboard(unlocalized("Database"))
 
 	dbStatsDashboard.Figure(unlocalized("Idle"), "sysadmin").Value(func(request *Request) int64 {

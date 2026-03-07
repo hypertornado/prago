@@ -46,6 +46,8 @@ class Form {
       })
     });
 
+    this.initSuggestions();
+
     form.addEventListener("submit", () => {
       this.dirty = false;
     });
@@ -72,6 +74,14 @@ class Form {
         return confirmationMessage;
       }
     });*/
+  }
+
+  initSuggestions() {
+    let suggestionEls = this.formEl.querySelectorAll(".form_suggestions");
+    for (var i = 0; i < suggestionEls.length; i++) {
+      let suggestionEl = suggestionEls[i];
+      console.log(suggestionEl);
+    }
   }
 
   messageChanged() {

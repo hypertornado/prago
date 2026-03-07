@@ -121,6 +121,12 @@ func (form *Form) initWithResourceItem(resource *Resource, item any, request *Re
 			item.HelpURL = field.helpURL
 		}
 
+		if field.formFilter != nil {
+			item.FormFilterID = field.formFilter.uuid
+		}
+
+		item.SuggestionURL = field.suggestionURL
+
 		form.AddItem(item)
 	}
 }

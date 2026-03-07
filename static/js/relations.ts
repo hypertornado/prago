@@ -1,18 +1,11 @@
 class RelationPicker {
+  el: HTMLDivElement;
   input: HTMLInputElement;
 
   previewsContainer: HTMLDivElement;
-
-  //TODO: remove this element
-
   progress: HTMLProgressElement;
 
   picker: HTMLDivElement;
-  pickerInput: HTMLInputElement;
-
-  suggestionsEl: HTMLDivElement;
-
-  suggestions: any;
 
   relationName: string;
   filterID: string;
@@ -20,7 +13,11 @@ class RelationPicker {
   multipleInputs: boolean;
   autofocus: boolean;
 
+  suggestionsObject: Suggestions;
+
   constructor(el: HTMLDivElement) {
+    this.el = el;
+
     if (el.getAttribute("data-autofocus") == "true") {
       this.autofocus = true
     }
@@ -39,28 +36,15 @@ class RelationPicker {
     this.filterID = el.getAttribute("data-filter");
     this.progress = el.querySelector("progress");
 
-    this.suggestionsEl = <HTMLDivElement>(
-      el.querySelector(".admin_item_relation_picker_suggestions_content")
-    );
-    this.suggestions = [];
-
     this.picker = <HTMLDivElement>(
       el.querySelector(".admin_item_relation_picker")
     );
-    this.pickerInput = this.picker.querySelector("input");
-    this.pickerInput.addEventListener("input", () => {
-      this.getSuggestions(this.pickerInput.value);
-    });
-    this.pickerInput.addEventListener("blur", () => {
-      this.suggestionsEl.classList.add("hidden");
-    });
-    this.pickerInput.addEventListener("focus", () => {
-      this.suggestionsEl.classList.remove("hidden");
-      this.getSuggestions(this.pickerInput.value);
-    });
-    this.pickerInput.addEventListener(
-      "keydown",
-      this.suggestionInput.bind(this)
+    
+    this.suggestionsObject = new Suggestions(
+      this.el.querySelector(".admin_item_relation_picker_suggestions_content"),
+      this.picker.querySelector("input"),
+      this.getSearchURL.bind(this),
+      this.addPreview.bind(this)
     );
 
     if (this.multipleInputs || parseInt(this.input.value) > 0) {
@@ -69,6 +53,16 @@ class RelationPicker {
       this.progress.classList.add("hidden");
       this.showSearch();
     }
+  }
+
+  getSearchURL(q: string): string {
+    var encoded = encodeParams({
+      q: q,
+      filter: this.filterID,
+      resource: this.relationName,
+    });
+
+    return "/admin/api/_suggestionsresource" + encoded;
   }
 
   getData() {
@@ -106,7 +100,7 @@ class RelationPicker {
     let previewEl = document.createElement("div");
     previewEl.classList.add("admin_relation_preview");
 
-    var el = this.createPreview(data, true);
+    var el = createSuggestionsPreviewEl(data, true);
     this.previewsContainer.appendChild(previewEl);
     previewEl.appendChild(el);
 
@@ -139,12 +133,11 @@ class RelationPicker {
     deleteButton.addEventListener("click", () => {
       previewEl.remove();
       this.updateLayout();
-      this.pickerInput.focus();
+      this.suggestionsObject.focus();
     });
 
     previewEl.setAttribute("data-id", data.ID);
-
-    this.pickerInput.value = "";
+    this.suggestionsObject.clear();
     this.updateLayout();
   }
 
@@ -198,203 +191,9 @@ class RelationPicker {
 
   showSearch() {
     this.picker.classList.remove("hidden");
-    this.suggestions = [];
-    this.suggestionsEl.innerText = "";
-    this.pickerInput.value = "";
+    this.suggestionsObject.clear();
     if (this.autofocus) {
-      this.pickerInput.focus();
+      this.suggestionsObject.focus();
     }
-  }
-
-  getSuggestions(q: string) {
-
-    var encoded = encodeParams({
-      "q": q,
-      "filter": this.filterID,
-    });
-
-    var request = new XMLHttpRequest();
-    request.open(
-      "GET",
-      "/admin/" +
-        this.relationName +
-        "/api/searchresource" +
-        encoded,
-      true
-    );
-    request.addEventListener("load", () => {
-      if (request.status == 200) {
-        if (q != this.pickerInput.value) {
-          return;
-        }
-        var data = JSON.parse(request.response);
-        this.suggestions = data.Previews;
-        this.suggestionsEl.innerText = "";
-
-        if (data.Message) {
-          let messageEl = document.createElement("div");
-          messageEl.innerText = data.Message;
-          messageEl.classList.add("relation_message");
-          this.suggestionsEl.appendChild(messageEl);
-        }
-
-        for (var i = 0; i < data.Previews.length; i++) {
-          var item = data.Previews[i];
-          var el = this.createPreview(item, false);
-          el.classList.add("admin_item_relation_picker_suggestion");
-          el.setAttribute("data-position", i + "");
-          el.addEventListener("mousedown", (e: Event) => {
-            e.preventDefault();
-          });
-          el.addEventListener("click", this.suggestionClick.bind(this));
-          el.addEventListener("mouseenter", this.suggestionSelect.bind(this));
-          this.suggestionsEl.appendChild(el);
-        }
-
-        if (data.Button) {
-          let buttonEl = document.createElement("a");
-
-          let buttonElIcon = document.createElement("img");
-          buttonElIcon.setAttribute("src", "/admin/api/icons?file=glyphicons-basic-371-plus.svg");
-          buttonElIcon.classList.add("btn_icon");
-
-          let buttonElText = document.createElement("span");
-          buttonElText.innerText = data.Button.Name;
-          
-          buttonEl.appendChild(buttonElIcon);
-          buttonEl.appendChild(buttonElText);
-
-          buttonEl.classList.add("btn", "relation_button");
-          buttonEl.addEventListener("click", (e) => {
-            this.suggestionsEl.classList.add("hidden");
-            let popupForm = new PopupForm(data.Button.FormURL, (data: any) => {
-              this.addPreview(data.Data);
-            });
-            e.preventDefault();
-            e.stopPropagation();
-          })
-          buttonEl.addEventListener("mousedown", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          })
-          this.suggestionsEl.appendChild(buttonEl);
-        }
-      } else {
-        console.log("Error while searching");
-      }
-    });
-    request.send();
-  }
-
-  suggestionClick() {
-    var selected = this.getSelected();
-    if (selected >= 0) {
-      this.addPreview(this.suggestions[selected]);
-    }
-  }
-
-  suggestionSelect(e: any) {
-    var target = <HTMLDivElement>e.currentTarget;
-    var position = parseInt(target.getAttribute("data-position"));
-    this.select(position);
-  }
-
-  selectedClass = "admin_item_relation_picker_suggestion-selected";
-
-  getSelected(): number {
-    var selected = this.suggestionsEl.querySelector("." + this.selectedClass);
-    if (!selected) {
-      return -1;
-    }
-    return parseInt(selected.getAttribute("data-position"));
-  }
-
-  unselect(): number {
-    var selected = this.suggestionsEl.querySelector("." + this.selectedClass);
-    if (!selected) {
-      return -1;
-    }
-    selected.classList.remove(this.selectedClass);
-    return parseInt(selected.getAttribute("data-position"));
-  }
-
-  select(i: number) {
-    this.unselect();
-    this.suggestionsEl
-      .querySelectorAll(".admin_preview")
-      [i].classList.add(this.selectedClass);
-  }
-
-  suggestionInput(e: any) {
-    switch (e.keyCode) {
-      case 13: //enter
-        this.suggestionClick();
-        e.preventDefault();
-        return true;
-      case 38: //up
-        var i = this.getSelected();
-        if (i < 1) {
-          i = this.suggestions.length - 1;
-        } else {
-          i = i - 1;
-        }
-        this.select(i);
-        e.preventDefault();
-        return false;
-      case 40: //down
-        var i = this.getSelected();
-        if (i >= 0) {
-          i += 1;
-          i = i % this.suggestions.length;
-        } else {
-          i = 0;
-        }
-        this.select(i);
-        e.preventDefault();
-        return false;
-    }
-  }
-
-  createPreview(data: any, anchor: boolean): HTMLDivElement {
-    var ret = document.createElement("div");
-    if (anchor) {
-      ret = <any>document.createElement("a");
-    }
-    ret.classList.add("admin_preview");
-    ret.setAttribute("href", data.URL);
-
-    ret.addEventListener("mouseleave", () => {
-      this.unselect();
-    })
-
-    var right = document.createElement("div");
-    right.classList.add("admin_preview_right");
-
-    var name = document.createElement("div");
-    name.classList.add("admin_preview_name");
-    name.textContent = data.Name;
-
-    var description = document.createElement("div");
-    description.classList.add("admin_preview_description");
-    description.setAttribute("title", data.Description);
-    description.textContent = data.Description;
-
-
-    if (data.Image) {
-      let image = document.createElement("img");
-      image.classList.add("admin_preview_image");
-      image.setAttribute("src", data.Image);
-      image.setAttribute("loading", "lazy");
-      ret.appendChild(image);
-    } else {
-      let imageDiv = document.createElement("div");
-      imageDiv.classList.add("admin_preview_image");
-      ret.appendChild(imageDiv);
-    }
-
-    right.appendChild(name);
-    right.appendChild(description);
-    ret.appendChild(right);
-    return ret;
   }
 }

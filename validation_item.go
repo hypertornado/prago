@@ -60,3 +60,7 @@ func (iv *itemValidation) TextErrorReport(id int64, locale string) formValidatio
 	}
 
 }
+
+func (iv *itemValidation) RunTask(handler func(*FormTaskActivity)) {
+	panic("not implemented")
+}
