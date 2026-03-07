@@ -162,9 +162,9 @@ func bindCDNFiles(app *prago.App) {
 		},
 	).Name(unlocalized("Previews"))
 
-	filesDashboard := app.MainBoard.Dashboard(unlocalized("Soubory"))
+	//filesDashboard := app.MainBoard.Dashboard(unlocalized("Soubory"))
 
-	filesDashboard.AddTask(unlocalized("Create files form import"), "sysadmin", func(ta *prago.TaskActivity) error {
+	/*filesDashboard.AddTask(unlocalized("Create files form import"), "sysadmin", func(ta *prago.TaskActivity) error {
 		_, err := app.GetDB().Exec("DELETE FROM cdnfile;")
 		if err != nil {
 			return err
@@ -185,9 +185,35 @@ func bindCDNFiles(app *prago.App) {
 
 		}
 		return nil
-	})
+	})*/
 
-	filesDashboard.AddTask(unlocalized("Reimport files data"), "sysadmin", func(ta *prago.TaskActivity) error {
+	prago.ActionForm(app, "create-files-from-import", func(form *prago.Form, request *prago.Request) {
+		form.AddSubmit("Spustit")
+	}, func(fv prago.FormValidation, request *prago.Request) {
+		fv.RunTask(request, func(ta *prago.FormTaskActivity) error {
+			_, err := app.GetDB().Exec("DELETE FROM cdnfile;")
+			if err != nil {
+				return err
+			}
+			projects := prago.Query[CDNProject](app).List()
+			for _, project := range projects {
+				filepath.Walk(cdnDirPath()+"/files/"+project.Name, func(path string, info fs.FileInfo, err error) error {
+					if err == nil && !info.IsDir() {
+						before, after, ok := strings.Cut(info.Name(), ".")
+						if !ok {
+							panic("wrong filename: " + info.Name())
+						}
+						project.createFile(before, after)
+					}
+					return nil
+				})
+
+			}
+			return nil
+		})
+	}).Permission("sysadmin").Name(unlocalized("Create files form import"))
+
+	/*filesDashboard.AddTask(unlocalized("Reimport files data"), "sysadmin", func(ta *prago.TaskActivity) error {
 		files := prago.Query[CDNFile](app).List()
 		totalLen := len(files)
 		for k, file := range files {
@@ -196,9 +222,24 @@ func bindCDNFiles(app *prago.App) {
 			file.update()
 		}
 		return nil
-	})
+	})*/
 
-	filesDashboard.AddTask(unlocalized("Validate checksums"), "sysadmin", func(ta *prago.TaskActivity) error {
+	prago.ActionForm(app, "reimport-files-data", func(form *prago.Form, request *prago.Request) {
+		form.AddSubmit("Spustit")
+	}, func(fv prago.FormValidation, request *prago.Request) {
+		fv.RunTask(request, func(ta *prago.FormTaskActivity) error {
+			files := prago.Query[CDNFile](app).List()
+			totalLen := len(files)
+			for k, file := range files {
+				ta.Progress(int64(k), int64(totalLen))
+				ta.Description(file.UUID)
+				file.update()
+			}
+			return nil
+		})
+	}).Permission("sysadmin").Name(unlocalized("Reimport files data"))
+
+	/*filesDashboard.AddTask(unlocalized("Validate checksums"), "sysadmin", func(ta *prago.TaskActivity) error {
 		files := prago.Query[CDNFile](app).List()
 		totalLen := len(files)
 		for k, file := range files {
@@ -207,10 +248,34 @@ func bindCDNFiles(app *prago.App) {
 			file.validateChecksum()
 		}
 		return nil
-	})
+	})*/
 
-	filesDashboard.AddTask(unlocalized("Delete thumbs cache"), "sysadmin", func(ta *prago.TaskActivity) error {
+	prago.ActionForm(app, "validate-checksums", func(form *prago.Form, request *prago.Request) {
+		form.AddSubmit("Spustit")
+	}, func(fv prago.FormValidation, request *prago.Request) {
+		fv.RunTask(request, func(ta *prago.FormTaskActivity) error {
+			files := prago.Query[CDNFile](app).List()
+			totalLen := len(files)
+			for k, file := range files {
+				ta.Progress(int64(k), int64(totalLen))
+				ta.Description(file.UUID)
+				file.validateChecksum()
+			}
+			return nil
+		})
+	}).Permission("sysadmin").Name(unlocalized("Validate checksums"))
+
+	/*filesDashboard.AddTask(unlocalized("Delete thumbs cache"), "sysadmin", func(ta *prago.TaskActivity) error {
 		cachePath := cdnDirPath() + "/cache"
 		return os.RemoveAll(cachePath)
-	})
+	})*/
+
+	prago.ActionForm(app, "delete-thumbs-cache", func(form *prago.Form, request *prago.Request) {
+		form.AddSubmit("Spustit")
+	}, func(fv prago.FormValidation, request *prago.Request) {
+		fv.RunTask(request, func(ta *prago.FormTaskActivity) error {
+			cachePath := cdnDirPath() + "/cache"
+			return os.RemoveAll(cachePath)
+		})
+	}).Permission("sysadmin").Name(unlocalized("Delete thumbs cache"))
 }
