@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"sort"
 	"strings"
-	"time"
 )
 
 type Validation interface {
@@ -114,7 +113,7 @@ func (resource *Resource) consistencyCheck(request *Request, fta *FormTaskActivi
 			)
 		}
 
-		time.Sleep(10 * time.Millisecond)
+		//time.Sleep(10 * time.Millisecond)
 
 		return nil
 	})

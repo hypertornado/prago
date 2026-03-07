@@ -500,8 +500,9 @@ a.btn_more_item {
 }
 
 .form_task_status {
-  text-align: center;
+  //text-align: center;
   padding: 5px 0px;
+  white-space: pre-wrap;
 }
 
 @media print {

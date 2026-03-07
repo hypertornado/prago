@@ -11,7 +11,7 @@ import (
 
 func (app *App) initBackupCRON() {
 
-	backupDashboard := sysadminBoard.Dashboard(unlocalized("Backup"))
+	//backupDashboard := sysadminBoard.Dashboard(unlocalized("Backup"))
 
 	app.addCronTask("backup db", 24*time.Hour, func() {
 		err := backupApp(app)
@@ -20,15 +20,23 @@ func (app *App) initBackupCRON() {
 		}
 	})
 
-	backupDashboard.
-		AddTask(unlocalized("backup_db"), "sysadmin",
-			func(tr *TaskActivity) error {
-				err := backupApp(app)
-				if err != nil {
-					return fmt.Errorf("error while creating backup: %s", err)
-				}
-				return nil
-			})
+	ActionForm(app, "_backupdb", func(form *Form, request *Request) {
+		form.AddSubmit("Spustit")
+	}, func(fv FormValidation, request *Request) {
+		fv.RunTask(request, func(ta *FormTaskActivity) error {
+			return backupApp(app)
+		})
+	}).Permission("sysadmin").Name(unlocalized("Backup DB")).Board(sysadminBoard)
+
+	/*backupDashboard.
+	AddTask(unlocalized("backup_db"), "sysadmin",
+		func(tr *TaskActivity) error {
+			err := backupApp(app)
+			if err != nil {
+				return fmt.Errorf("error while creating backup: %s", err)
+			}
+			return nil
+		})*/
 
 	app.addCronTask("remove old backups", 24*time.Hour, func() {
 		err := app.removeOldBackups()
@@ -37,10 +45,19 @@ func (app *App) initBackupCRON() {
 		}
 	})
 
-	backupDashboard.AddTask(unlocalized("remove_old_backups"), "sysadmin",
-		func(ta *TaskActivity) error {
+	ActionForm(app, "_removeoldbackups", func(form *Form, request *Request) {
+		form.AddSubmit("Spustit")
+	}, func(fv FormValidation, request *Request) {
+		fv.RunTask(request, func(ta *FormTaskActivity) error {
 			return app.removeOldBackups()
 		})
+	}).Permission("sysadmin").Name(unlocalized("Remove old backups")).Board(sysadminBoard)
+
+	/*
+		backupDashboard.AddTask(unlocalized("remove_old_backups"), "sysadmin",
+			func(ta *TaskActivity) error {
+				return app.removeOldBackups()
+			})*/
 }
 
 func (app *App) removeOldBackups() error {

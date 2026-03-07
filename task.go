@@ -22,12 +22,6 @@ func (app *App) postInitTaskManager() {
 		app.runTask(task, request.UserID(), request.Locale())
 		request.Redirect(task.dashboard.board.getURL())
 	})
-
-	sysadminBoard.Dashboard(unlocalized("Cache")).AddTask(unlocalized("Delete cache"), "sysadmin", func(ta *TaskActivity) error {
-		app.ClearCache()
-		return nil
-	})
-
 }
 
 type taskView struct {

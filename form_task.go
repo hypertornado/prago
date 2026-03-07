@@ -72,6 +72,7 @@ func newFormTaskActivity(request *Request, handler func(*FormTaskActivity) error
 
 	go func() {
 		defer func() {
+			fmt.Println("AC recover")
 			if r := recover(); r != nil {
 				if ret.stoppedByUser {
 					ret.description = "Ukončeno uživatelem"
@@ -84,7 +85,14 @@ func newFormTaskActivity(request *Request, handler func(*FormTaskActivity) error
 			request.app.taskActivityCleanup(ret.uuid)
 			ret.finished = true
 		}()
-		must(handler(ret))
+		err := handler(ret)
+		if err != nil {
+			fmt.Println("AC noo", err)
+			ret.description = "🔴 " + err.Error()
+		} else {
+			fmt.Println("AC ook")
+			ret.description = "✅ " + ret.description
+		}
 	}()
 
 	return ret
