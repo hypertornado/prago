@@ -58,7 +58,7 @@ type Task struct {
 }
 
 // Task creates task
-func (dashboard *Dashboard) AddTask(name func(string) string, permission Permission, handler func(*TaskActivity) error) {
+func (dashboard *Dashboard) AddTaskOLD(name func(string) string, permission Permission, handler func(*TaskActivity) error) {
 	if dashboard.board.app.tasksMap == nil {
 		dashboard.board.app.tasksMap = make(map[string]*Task)
 	}
