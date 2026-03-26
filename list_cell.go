@@ -33,11 +33,11 @@ func getCellViewData(userData UserData, f *Field, value interface{}) *listCell {
 }
 
 func textListDataSource(userData UserData, f *Field, value interface{}) *listCell {
-	return &listCell{Name: crop(value.(string), 100), ItemID: f.id}
+	return &listCell{Name: value.(string), ItemID: f.id}
 }
 
 func markdownListDataSource(userData UserData, f *Field, value interface{}) *listCell {
-	return &listCell{Name: cropMarkdown(value.(string), 100), ItemID: f.id}
+	return &listCell{Name: filterMarkdown(value.(string)), ItemID: f.id}
 }
 
 func relationCellViewData(userData UserData, f *Field, value interface{}) *listCell {

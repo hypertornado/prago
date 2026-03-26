@@ -61,7 +61,7 @@ class Menu {
 
   bindResourceCounts() {
     this.setResourceCountsFromCache();
-    new VisibilityReloader(2000, () => {
+    new VisibilityReloader(10000, () => {
       this.loadResourceCounts();
     });
   }

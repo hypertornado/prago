@@ -1,5 +1,7 @@
 package prago
 
+import "html/template"
+
 /*type Tab struct {
 	Icon     string
 	Name     string
@@ -12,6 +14,10 @@ type Button struct {
 	Name     string
 	URL      string
 	Selected bool
+}
+
+func (b *Button) SafeURL() template.URL {
+	return template.URL(b.URL)
 }
 
 func (app *App) getLoginNavigation(language, code string) (ret []*Button) {

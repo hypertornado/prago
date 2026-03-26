@@ -11,6 +11,8 @@
     "js/autoresize.ts",
     "js/utils.ts",
     "js/imageview.ts",
+    "js/hls.ts",
+    "js/videoview.ts",
     "js/imagepicker.ts",
     "js/list_filter_relations.ts",
     "js/list_filter_date.ts",

@@ -11,7 +11,6 @@
   {{template "list_multiple_actions" .}}
 
   <div class="list_hidden">
-    {{template "list_settings" .}}
     {{template "list_stats" .}}
   </div>
   <progress class="progress list_progress"></progress>
@@ -51,24 +50,6 @@
     {{end}}
   </div>
 </div>
-{{end}}
-
-{{define "list_settings"}}
-  <div class="list_settings">
-    <h3>{{PragoMessage .Locale "admin_options_visible"}}</h3>
-    <div class="list_settings_labels">
-    {{range $item := .Header}}
-      <label class="list_settings_label"><input type="checkbox" class="list_settings_column" data-column-name="{{$item.ColumnName}}"> {{$item.NameHuman}}</label>
-    {{end}}
-    </div>
-
-    <h3>Počet položek na stránce</h3>
-    <select class="list_settings_pages input">
-      {{range $item := .PaginationData}}
-        <option value="{{$item.Value}}"{{if $item.Selected}} selected{{end}}>{{$item.Name}}</option>
-      {{end}}
-    </select>
-  </div>
 {{end}}
 
 {{define "list_placeholder"}}

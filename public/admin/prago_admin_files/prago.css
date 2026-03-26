@@ -948,7 +948,8 @@ select.admin_timestamp_minute {
   font-size: 1rem;
   line-height: 1.3em;
   padding: 10px 10px;
-  border-radius: 1000px;
+  margin: 3px 0px;
+  border-radius: 10px;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
   animation: formErrorsItemAnimation 200ms ease-in-out forwards;
   animation-delay: 0ms;
@@ -1204,6 +1205,9 @@ a.btn_more_item {
 
 .form_task {
   padding: 0px 10px;
+  margin: 0px 10px;
+  background-color: #fafafa;
+  border-radius: 5px;
 }
 
 .form_task_header {
@@ -1212,13 +1216,15 @@ a.btn_more_item {
   flex-wrap: 10px;
   align-items: center;
   justify-content: center;
-  padding: 10px 0px;
+  padding: 4px 0px;
 }
 
 .form_task_progress {
   appearance: none; /* Removes default styling */
   width: min(100%, 100px);
   height: 10px;
+  overflow: hidden;
+  border-radius: 10px;
 }
 
 /* The background (Firefox) */
@@ -1249,8 +1255,12 @@ a.btn_more_item {
 }
 
 .form_task_status {
-  padding: 5px 0px;
+  padding: 0px 0px 4px 0px;
   white-space: pre-wrap;
+  text-align: center;
+  color: #888;
+  font-size: 0.9rem;
+  line-height: 1.3em;
 }
 
 @media print {
@@ -1793,54 +1803,6 @@ a.btn_more_item {
   background: white;
 }
 
-.list_settings h3 {
-  font-size: 1rem;
-  line-height: 1.3em;
-}
-
-.list_settings_name {
-  display: inline-block;
-  display: block;
-  display: none;
-  font-size: 0.8rem;
-}
-
-.list_settings_name:after {
-  content: ":";
-}
-
-.list_settings_labels {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.list_settings_label {
-  font-size: 0.8rem;
-  display: inline-block;
-  padding: 2px 2px;
-  width: 200px;
-  margin-right: 10px;
-  flex-shrink: 0;
-  flex-grow: 0;
-}
-
-.list_settings_pages {
-  padding: 1px 3px;
-  display: block;
-  margin: 5px 0px;
-}
-
-@media print {
-  .list_settings {
-    display: none !important;
-  }
-  .list_header_first {
-    display: none !important;
-  }
-  .list_row_multiple {
-    display: none !important;
-  }
-}
 .list_filter_layout_date_value {
   display: none;
 }
@@ -2020,8 +1982,8 @@ a.search_pagination_page-selected {
   border-radius: 10px;
   position: relative;
   z-index: 10000000000;
-  background-color: #eee;
-  background-color: hsl(214, 50%, 97%);
+  border: 1px solid #eee;
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
 }
 
 .searchbox-showsuggestions {
@@ -2836,25 +2798,6 @@ a.admin_stats_section_row {
   align-items: center;
 }
 
-.tasks {
-  display: flex;
-  flex-wrap: wrap;
-  padding: 3px 10px;
-  gap: 5px;
-}
-
-.task {
-  display: inline-block;
-  width: auto;
-  height: auto;
-}
-
-.task_runbutton {
-  margin: 0 auto;
-  display: block;
-  width: 100%;
-}
-
 .popup_background {
   background-color: rgba(0, 0, 0, 0.4);
   position: absolute;
@@ -3295,11 +3238,15 @@ a.admin_stats_section_row {
   line-height: 1.3em;
   font-weight: normal;
   color: #444;
-  user-select: none;
 }
 
 .form_table_cell a {
   text-decoration: none;
+}
+
+.form_table_cell .btn {
+  margin-top: 2.5px;
+  margin-bottom: 2.5px;
 }
 
 .form_table_cell_textafter {
@@ -3400,7 +3347,6 @@ a.admin_stats_section_row {
   border-radius: 3px;
   overflow: hidden;
   border: 0px solid red;
-  background-color: #fafafa;
   z-index: 2;
 }
 
@@ -3829,6 +3775,15 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
   height: 100%;
 }
 
+.videoview {
+  display: flex;
+}
+
+.videoview_video {
+  aspect-ratio: 16/9;
+  width: 100%;
+}
+
 .preview {
   padding: 5px 10px;
   border-radius: 5px;
@@ -4035,5 +3990,60 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
     margin: 0px;
     border: none;
     width: 100%;
+  }
+}
+.accordions {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 0px;
+}
+
+.accordion {
+  border-top: 1px solid #eee;
+}
+
+.accordion:last-child {
+  border-bottom: 1px solid #eee;
+}
+
+.accordion_header {
+  padding: 5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.accordion_header:hover {
+  background-color: hsl(214, 50%, 97%);
+}
+
+.accordion_header:active {
+  background-color: hsl(214, 50%, 90%);
+}
+
+.accordion_header_icon {
+  width: 1rem;
+  flex-shrink: 0;
+  flex-grow: 0;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.accordion_content {
+  padding: 2px 5px;
+  color: #888;
+  display: none;
+}
+
+.accordion-visible .accordion_content {
+  display: block;
+}
+
+@media print {
+  .accordion_content {
+    display: block;
   }
 }

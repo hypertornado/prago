@@ -26,7 +26,6 @@ type list struct {
 	OrderDesc            bool
 	Locale               string
 	ItemsPerPage         int64
-	PaginationData       []listPaginationData
 	StatsLimitSelectData []listPaginationData
 	MultipleActions      []listMultipleAction
 }
@@ -82,7 +81,6 @@ func (resource *Resource) getListHeader(userData UserData) (list list, err error
 	list.Locale = userData.Locale()
 
 	list.ItemsPerPage = resource.defaultItemsPerPage
-	list.PaginationData = resource.getPaginationData(userData)
 
 	list.StatsLimitSelectData = getStatsLimitSelectData(userData.Locale())
 	list.MultipleActions = resource.getMultipleActions(userData)
@@ -391,41 +389,4 @@ func (resource *Resource) addFilterToQuery(listQuery *listQuery, filter map[stri
 		}
 	}
 	return listQuery
-}
-
-func (resource *Resource) getPaginationData(userData UserData) (ret []listPaginationData) {
-	var ints []int64
-	var used bool
-
-	for _, v := range []int64{10, 20, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000} {
-		if !used {
-			if v == resource.defaultItemsPerPage {
-				used = true
-			}
-			if resource.defaultItemsPerPage < v {
-				used = true
-				ints = append(ints, resource.defaultItemsPerPage)
-			}
-		}
-		ints = append(ints, v)
-	}
-
-	if resource.defaultItemsPerPage > ints[len(ints)-1] {
-		ints = append(ints, resource.defaultItemsPerPage)
-	}
-
-	for _, v := range ints {
-		var selected bool
-		if v == resource.defaultItemsPerPage {
-			selected = true
-		}
-
-		ret = append(ret, listPaginationData{
-			Name:     messages.ItemsCount(v, userData.Locale()),
-			Value:    v,
-			Selected: selected,
-		})
-	}
-
-	return
 }

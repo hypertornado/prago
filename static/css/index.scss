@@ -6,7 +6,6 @@
 @use "components/form.scss";
 @use "components/box.scss";
 @use "components/list.scss";
-@use "components/list_settings.scss";
 @use "components/list_filter.scss";
 @use "components/list_multiple.scss";
 @use "components/search.scss";
@@ -18,7 +17,6 @@
 @use "components/tabs.scss";
 @use "components/menu.scss";
 @use "components/relationlist.scss";
-@use "components/task.scss";
 @use "components/popup.scss";
 @use "components/notification_center.scss";
 @use "components/multiple_edit.scss";
@@ -29,6 +27,8 @@
 @use "components/timeline.scss";
 @use "components/imagepicker.scss";
 @use "components/imageview.scss";
+@use "components/videoview.scss";
 @use "components/preview.scss";
 @use "components/simple.scss";
+@use "components/accordion.scss";
 

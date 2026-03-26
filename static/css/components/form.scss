@@ -182,7 +182,8 @@
   padding: 10px 10px;
   //font-weight: 500;
   //text-align: center;
-  border-radius: 1000px;
+  margin: 3px 0px;
+  border-radius: 10px;
   @include shadowMedium;
 
   animation: formErrorsItemAnimation 200ms ease-in-out forwards;
@@ -447,6 +448,9 @@ a.btn_more_item {
 
 .form_task {
   padding: 0px 10px;
+  margin: 0px 10px;
+  background-color: $backgroundGrayColor;
+  border-radius: 5px;
 }
 
 .form_task_header {
@@ -455,13 +459,15 @@ a.btn_more_item {
   flex-wrap: 10px;
   align-items: center;
   justify-content: center;
-  padding: 10px 0px;
+  padding: 4px 0px;
 }
 
 .form_task_progress {
   appearance: none; /* Removes default styling */
   width: min(100%, 100px);
   height: 10px;
+  overflow: hidden;
+  border-radius: 10px;
 }
 
 /* The background (Firefox) */
@@ -501,8 +507,12 @@ a.btn_more_item {
 
 .form_task_status {
   //text-align: center;
-  padding: 5px 0px;
+  padding: 0px 0px 4px 0px;
   white-space: pre-wrap;
+  text-align: center;
+  color: $gray;
+  font-size: 0.9rem;
+  line-height: 1.3em;
 }
 
 @media print {

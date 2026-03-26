@@ -123,3 +123,7 @@ func (templates *PragoTemplates) ExecuteToString(templateName string, data inter
 func (templates *PragoTemplates) ExecuteToHTML(templateName string, data interface{}) template.HTML {
 	return template.HTML(templates.ExecuteToString(templateName, data))
 }
+
+func (app *App) GetAdminTemplates() *PragoTemplates {
+	return app.adminTemplates
+}

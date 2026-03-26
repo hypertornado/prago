@@ -438,6 +438,14 @@ func (resource *Resource) getListStatsTableInt(ctx context.Context, field *Field
 	return table
 }
 
+func getStatsLimitSelectPlain() (ret [][2]string) {
+	data := getStatsLimitSelectData("cs")
+	for _, item := range data {
+		ret = append(ret, [2]string{fmt.Sprintf("%d", item.Value), item.Name})
+	}
+	return ret
+}
+
 func getStatsLimitSelectData(locale string) (ret []listPaginationData) {
 	var ints = []int64{10, 20, 100, 200, 500, 1000, 2000, 5000, 10000}
 

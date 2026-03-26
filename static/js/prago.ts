@@ -34,6 +34,13 @@ class Prago {
       new ImageView(el);
     });
 
+    var videoViews = document.querySelectorAll<HTMLDivElement>(
+      ".videoview"
+    );
+    videoViews.forEach((el) => {
+      new VideoView(el);
+    });
+
     var menuEl = document.querySelector<HTMLDivElement>(".root_left");
     if (menuEl) {
       new Menu();

@@ -46,3 +46,7 @@ func cdnViewDataSource(request *Request, f *Field, value any) any {
 	app := f.resource.app
 	return getCDNViewData(app, value.(string))
 }
+
+func (app *App) GetCDNVideoURL(uuid string) string {
+	return filesCDN.GetVideoURL(uuid)
+}

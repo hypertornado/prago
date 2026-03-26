@@ -61,9 +61,10 @@ a.search_pagination_page-selected {
   border-radius: 10px;
   position: relative;
   z-index: 10000000000;
-  background-color: #eee;
-  background-color: $baseColorBackgroundLighter;
-  //border: 1px solid $grayBorderColor;
+  //background-color: #eee;
+  //background-color: $baseColorBackgroundLighter;
+  border: 1px solid $grayBorderColor;
+  @include shadow;
 }
 
 .searchbox-showsuggestions {

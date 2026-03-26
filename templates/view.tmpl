@@ -102,6 +102,13 @@
   </div>
 {{end}}
 
+{{define "view_video"}}
+  <div class="videoview" data-videos="{{.}}">
+    <video class="videoview_video hidden"></video>
+    <progress class="progress" value="" max=""></progress>
+  </div>
+{{end}}
+
 {{define "view_place"}}
   <div class="admin_item_view_place" data-value="{{.}}">
     <progress class="progress" value="" max=""></progress>

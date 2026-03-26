@@ -48,7 +48,7 @@ class ListMultiple {
 
   multipleActionSelected(e: any) {
     var ids = this.multipleGetIDs();
-    this.multipleActionStart(e.target, ids);
+    this.multipleActionStart(e.currentTarget, ids);
   }
 
   multipleActionForm(resourceID: string, actionID: string, ids: Array<String>) {
@@ -112,7 +112,13 @@ class ListMultiple {
                   if (data.RedirectURL) {
                     window.location = data.RedirectURL;
                   }
-                  this.list.load();
+                  if (data.FormURL) {
+                    new PopupForm(data.FormURL, () => {
+                      this.list.load();
+                    });
+                  } else {
+                    this.list.load();
+                  }
                 });
               } else {
                 Prago.notificationCenter.flashNotification(

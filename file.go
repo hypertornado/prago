@@ -451,3 +451,7 @@ func fileViewDataSource(request *Request, field *Field, data any) any {
 	must(err)
 	return string(jsonData)
 }
+
+func videoViewDataSource(request *Request, field *Field, data any) any {
+	return filesCDN.GetVideoURL(data.(string))
+}

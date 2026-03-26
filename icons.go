@@ -32,6 +32,8 @@ const iconDate = "glyphicons-basic-46-calendar.svg"
 const iconDateTime = "glyphicons-basic-55-clock.svg"
 const iconSelect = "glyphicons-basic-299-circle-selected.svg"
 const iconImage = "glyphicons-basic-38-picture.svg"
+const iconVideo = "glyphicons-basic-181-video.svg"
+const iconAI = "glyphicons-basic-954-brain.svg"
 
 func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 	app.iconsFS = &iconsFS

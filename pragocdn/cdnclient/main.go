@@ -59,6 +59,10 @@ func (a CDNAccount) getHash(uuid, format, filename string) string {
 	)
 }
 
+func (a CDNAccount) GetVideoURL(uuid string) string {
+	return fmt.Sprintf("https://pragocdn.fra1.digitaloceanspaces.com/%s/%s/videofiles/master.m3u8", a.Account, uuid)
+}
+
 func (a CDNAccount) GetFileURL(uuid, filename string) string {
 	hash := a.getHash(uuid, "file", filename)
 	return fmt.Sprintf("%s/%s/%s/file/%s/%s", a.URL, a.Account, uuid, hash, filename)

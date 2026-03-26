@@ -17,7 +17,6 @@ class List {
   listFooter: HTMLDivElement;
 
   tableContent: HTMLElement;
-  //exportButton: HTMLAnchorElement;
   changed: boolean;
   changedTimestamp: number;
 
@@ -28,12 +27,11 @@ class List {
   page: number;
 
   defaultVisibleColumnsStr: string;
+  visibleColumnsStr: string;
 
   progress: HTMLProgressElement;
 
   itemsPerPage: number;
-  paginationSelect: HTMLSelectElement;
-
 
   multiple: ListMultiple;
 
@@ -49,6 +47,9 @@ class List {
     this.listTable = this.list.querySelector(".list_table");
     this.listHeader = this.list.querySelector(".list_header");
     this.listFooter = this.list.querySelector(".list_footer");
+
+    this.defaultVisibleColumnsStr = list.getAttribute("data-visible-columns");
+    this.visibleColumnsStr = this.defaultVisibleColumnsStr;
 
     this.settings = new ListSettings(this);
 
@@ -88,25 +89,14 @@ class List {
     if (urlParams.get("_desc") == "false") {
       this.orderDesc = false;
     }
-
-    this.defaultVisibleColumnsStr = list.getAttribute("data-visible-columns");
-    var visibleColumnsStr = this.defaultVisibleColumnsStr;
-
-    let visibleColumnsArr = visibleColumnsStr.split(",");
-    let visibleColumnsMap: any = {};
-    for (var i = 0; i < visibleColumnsArr.length; i++) {
-      visibleColumnsMap[visibleColumnsArr[i]] = true;
-    }
+    
 
     this.itemsPerPage = parseInt(list.getAttribute("data-items-per-page"));
-    this.paginationSelect = <HTMLSelectElement>(
-      document.querySelector(".list_settings_pages")
-    );
-    this.paginationSelect.addEventListener("change", this.load.bind(this));
 
     this.multiple = new ListMultiple(this);
 
-    this.settings.bindOptions(visibleColumnsMap);
+    this.settings.setVisibleColumns();
+
     this.bindOrder();
     this.bindInitialHeaderWidths();
     this.bindResizer();
@@ -189,15 +179,11 @@ class List {
       document.location.pathname + encoded
     );
 
-    var columns = this.settings.getSelectedColumnsStr();
+    var columns = this.visibleColumnsStr;
     if (columns != this.defaultVisibleColumnsStr) {
       params["_columns"] = columns;
     }
-
-    let selectedPages = parseInt(this.paginationSelect.value);
-    if (selectedPages != this.itemsPerPage) {
-      params["_pagesize"] = selectedPages;
-    }
+    params["_pagesize"] = this.itemsPerPage;
 
     encoded = encodeParams(params);
 
@@ -229,9 +215,6 @@ class List {
       this.copyColumnWidths();
       this.list.classList.remove("list-loading");
       this.listHeaderContainer.classList.add("list_header_container-visible");
-
-      //this.settings.loadStats();
-      //this.settings.statsPopup.show();
     });
     request.send(JSON.stringify({}));
   }

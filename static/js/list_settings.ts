@@ -1,9 +1,6 @@
 class ListSettings {
   list: List;
 
-  settingsEl: HTMLDivElement;
-  settingsPopup: ContentPopup;
-
   statsEl: HTMLDivElement;
   statsPopup: ContentPopup;
 
@@ -13,10 +10,6 @@ class ListSettings {
 
   constructor(list: List) {
     this.list = list;
-
-    this.settingsEl = document.querySelector(".list_settings");
-    this.settingsPopup = new ContentPopup("Nastavení", this.settingsEl);
-    this.settingsPopup.setIcon("glyphicons-basic-137-cogwheel.svg");
     this.statsContainer = document.querySelector(".list_stats_container");
     
     this.statsEl = document.querySelector(".list_stats");
@@ -37,10 +30,23 @@ class ListSettings {
         AlignByElement: true,
         Commands: [
           {
-            Name: "Nastavení",
-            Icon: "glyphicons-basic-137-cogwheel.svg",
+            Name: "Počet položek na stránce",
+            Icon: "glyphicons-basic-960-files-queue.svg",
             Handler: () => {
-              this.settingsPopup.show();
+              new PopupForm("/admin/_list-items-per-page?count=" + this.list.itemsPerPage +"&resource=" + this.list.typeName, (data: any) => {
+                this.list.itemsPerPage = data.Data;
+                this.list.load();
+              });
+            },
+          },
+          {
+            Name: "Viditelné sloupce",
+            Icon: "glyphicons-basic-107-text-width.svg",
+            Handler: () => {
+              new PopupForm("/admin/_list-items-visible?fields=" + this.list.visibleColumnsStr +"&resource=" + this.list.typeName, (data: any) => {
+                this.list.visibleColumnsStr = data.Data;
+                this.setVisibleColumns();
+              });
             },
           },
           {
@@ -55,7 +61,25 @@ class ListSettings {
             Name: "Export CSV",
             Icon: "glyphicons-basic-302-square-download.svg",
             Handler: () => {
-              window.open("/admin/" + this.list.typeName +"/api/export.csv")
+              var params: any = {};
+              params["_resource"] = this.list.typeName;
+              params["_columns"] = this.list.visibleColumnsStr;
+
+              let filterData = this.list.getFilterData();
+              for (var k in filterData) {
+                params[k] = filterData[k];
+              }
+
+              if (this.list.orderColumn != this.list.defaultOrderColumn) {
+                params["_order"] = this.list.orderColumn;
+              }
+              if (this.list.orderDesc != this.list.defaultOrderDesc) {
+                params["_desc"] = this.list.orderDesc + "";
+              }
+
+              new PopupForm("/admin/_list-export-csv?_params=" + encodeURIComponent(JSON.stringify(params)), (data: any) => {
+                window.open(data.RedirectionLocation);
+              });
             }
           },
           {
@@ -64,7 +88,7 @@ class ListSettings {
             Handler: () => {
               new PopupForm("/admin/_validation-consistency?resource=" + this.list.typeName, (data: any) => {
                 //this.addUUID(data.Data);
-              })
+              });
             }
           },
         ],
@@ -104,24 +128,9 @@ class ListSettings {
 
   }
 
-  bindOptions(visibleColumnsMap: any) {
-    var columns: NodeListOf<HTMLInputElement> = document.querySelectorAll(
-      ".list_settings_column"
-    );
-    for (var i = 0; i < columns.length; i++) {
-      let columnName = columns[i].getAttribute("data-column-name");
-      if (visibleColumnsMap[columnName]) {
-        columns[i].checked = true;
-      }
-      columns[i].addEventListener("change", () => {
-        this.changedOptions();
-      });
-    }
-    this.changedOptions();
-  }
-
-  changedOptions() {
+  setVisibleColumns() {
     var columns: any = this.getSelectedColumnsMap();
+    console.log(columns);
 
     var headers: NodeListOf<HTMLDivElement> =
       document.querySelectorAll(".list_header_item");
@@ -150,29 +159,10 @@ class ListSettings {
     this.list.load();
   }
 
-  getSelectedColumnsStr(): string {
-    var ret = [];
-    var checked: NodeListOf<HTMLInputElement> = document.querySelectorAll(
-      ".list_settings_column:checked"
-    );
-    for (var i = 0; i < checked.length; i++) {
-      ret.push(checked[i].getAttribute("data-column-name"));
-    }
-    return ret.join(",");
-  }
-
   getSelectedColumnsMap(): any {
-    var columns: any = {};
-    var inputs: NodeListOf<HTMLInputElement> = document.querySelectorAll(
-      ".list_settings_column"
-    );
-    for (var i = 0; i < inputs.length; i++) {
-      if (inputs[i].checked) {
-        columns[inputs[i].getAttribute("data-column-name")] = true;
-      } else {
-        columns[inputs[i].getAttribute("data-column-name")] = false;
-      }
-    }
-    return columns;
+    let str = this.list.visibleColumnsStr;
+    const map: any = {};
+    str.split(",").forEach((key) => { map[key] = true; });
+    return map;
   }
 }

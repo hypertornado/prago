@@ -1,0 +1,60 @@
+@use "../variables.scss" as *;
+
+.accordions {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 0px;
+}
+
+.accordion {
+    border-top: 1px solid $grayBorderColor;
+}
+
+.accordion:last-child {
+    border-bottom: 1px solid $grayBorderColor;
+}
+
+.accordion_header {
+    padding: 5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    //background-color: $backgroundGrayColor;
+}
+
+.accordion_header:hover {
+    background-color: $hoverColor;
+}
+
+.accordion_header:active {
+    background-color: $activeColor;
+}
+
+.accordion_header_icon {
+    //border: 1px solid red;
+    width: 1rem;
+    flex-shrink: 0;
+    flex-grow: 0;
+    aspect-ratio: 1;
+    object-fit: cover;
+
+}
+
+.accordion_content {
+    padding: 2px 5px;
+    color: $gray;
+    display: none;
+}
+
+.accordion-visible .accordion_content {
+    display: block;
+}
+
+@media print {
+    .accordion_content {
+        display: block;
+    }
+}

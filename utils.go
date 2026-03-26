@@ -181,3 +181,26 @@ func normalizeCzechString(in string) string {
 	result, _, _ := transform.String(t, in)
 	return strings.ToLower(result)
 }
+func MultirelationStringToArray(in string) (ret []int64) {
+	arr := strings.Split(in, ";")
+	for _, v := range arr {
+		if v == "" {
+			continue
+		}
+		i, err := strconv.Atoi(v)
+		if err == nil {
+			ret = append(ret, int64(i))
+		}
+	}
+	return ret
+}
+
+func MultirelationArrayToString(in []int64) string {
+	var arr []string
+	for _, v := range in {
+		arr = append(arr, fmt.Sprintf("%d", v))
+	}
+
+	ret := strings.Join(arr, ";")
+	return ";" + ret + ";"
+}

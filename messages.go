@@ -378,10 +378,6 @@ var m = map[string]map[string]string{
 		"en": "Options",
 		"cs": "Možnosti",
 	},
-	"admin_options_visible": {
-		"en": "Visible columns",
-		"cs": "Viditelné sloupce",
-	},
 	"admin_settings_changed": {
 		"en": "Settings changed",
 		"cs": "Nastavení změněno",
@@ -497,18 +493,6 @@ var m = map[string]map[string]string{
 	"height": {
 		"en": "Height",
 		"cs": "Výška",
-	},
-	"tasks": {
-		"en": "Tasks",
-		"cs": "Úlohy",
-	},
-	"tasks_run": {
-		"en": "Run tasks",
-		"cs": "Spustit úlohy",
-	},
-	"tasks_runned": {
-		"en": "Runned tasks",
-		"cs": "Spuštěné úlohy",
 	},
 	"run": {
 		"en": "Run",

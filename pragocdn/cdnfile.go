@@ -6,12 +6,9 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"io/fs"
 	"log"
 	"os"
 	"path"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/hypertornado/prago"
@@ -30,6 +27,7 @@ type CDNFile struct {
 	Filesize int64
 	Width    int64
 	Height   int64
+	//CDNKey   string
 
 	CreatedAt time.Time
 	UpdatedAt time.Time `prago-can-view:"sysadmin"`
@@ -162,6 +160,47 @@ func bindCDNFiles(app *prago.App) {
 		},
 	).Name(unlocalized("Previews"))
 
+	/*prago.ActionResourceItemForm(app, "upload-to-spaces",
+		func(cdnFile *CDNFile, form *prago.Form, request *prago.Request) {
+			form.AddSubmit("Nahrát do DO Spaces")
+		},
+		func(cdnFile *CDNFile, fv prago.FormValidation, request *prago.Request) {
+			project := getCDNProjectFromID(cdnFile.CDNProject)
+			if project == nil {
+				fv.AddError("Projekt nenalezen")
+				return
+			}
+			if !project.hasSpacesConfig() {
+				fv.AddError("Projekt nemá nakonfigurované DO Spaces")
+				return
+			}
+			if cdnFile.CDNKey != "" {
+				fv.AddError("Soubor již byl nahrán do DO Spaces (CDNKey je neprázdný)")
+				return
+			}
+			f, err := os.Open(cdnFile.getDataPath())
+			if err != nil {
+				fv.AddError(fmt.Sprintf("Chyba při otevírání souboru: %s", err))
+				return
+			}
+			defer f.Close()
+			stat, err := f.Stat()
+			if err != nil {
+				fv.AddError(fmt.Sprintf("Chyba při čtení souboru: %s", err))
+				return
+			}
+			if err := project.uploadFileToSpaces(cdnFile, f, stat.Size()); err != nil {
+				fv.AddError(fmt.Sprintf("Chyba při nahrávání: %s", err))
+				return
+			}
+			cdnFile.CDNKey = cdnFile.UUID
+			if err := prago.UpdateItem(app, cdnFile); err != nil {
+				fv.AddError(fmt.Sprintf("Chyba při ukládání: %s", err))
+				return
+			}
+		},
+	).Name(unlocalized("Nahrát do DO Spaces"))*/
+
 	//filesDashboard := app.MainBoard.Dashboard(unlocalized("Soubory"))
 
 	/*filesDashboard.AddTask(unlocalized("Create files form import"), "sysadmin", func(ta *prago.TaskActivity) error {
@@ -187,7 +226,7 @@ func bindCDNFiles(app *prago.App) {
 		return nil
 	})*/
 
-	prago.ActionForm(app, "create-files-from-import", func(form *prago.Form, request *prago.Request) {
+	/*prago.ActionForm(app, "create-files-from-import", func(form *prago.Form, request *prago.Request) {
 		form.AddSubmit("Spustit")
 	}, func(fv prago.FormValidation, request *prago.Request) {
 		fv.RunTask(request, func(ta *prago.FormTaskActivity) error {
@@ -211,7 +250,7 @@ func bindCDNFiles(app *prago.App) {
 			}
 			return nil
 		})
-	}).Permission("sysadmin").Name(unlocalized("Create files form import"))
+	}).Permission("sysadmin").Name(unlocalized("Create files form import"))*/
 
 	/*filesDashboard.AddTask(unlocalized("Reimport files data"), "sysadmin", func(ta *prago.TaskActivity) error {
 		files := prago.Query[CDNFile](app).List()

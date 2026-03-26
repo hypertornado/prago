@@ -2,6 +2,7 @@ package prago
 
 import (
 	"fmt"
+	"net/url"
 	"reflect"
 	"time"
 )
@@ -49,6 +50,7 @@ type MultipleItemActionResponse struct {
 	FlashMessage string
 	ErrorStr     string
 	RedirectURL  string
+	FormURL      string
 }
 
 func (resource *Resource) addDefaultMultipleActions() {
@@ -107,26 +109,27 @@ func (resource *Resource) addDefaultMultipleActions() {
 		},
 	})
 
-	/*resource.multipleActions = append(resource.multipleActions, &MultipleItemAction{
-		ID:         "delete",
-		Icon:       iconDelete,
-		Name:       unlocalized("Smazat"),
-		Permission: resource.canDelete,
-		Handler: func(items []any, request UserData, response *MultipleItemActionResponse) {
+	resource.multipleActions = append(resource.multipleActions, &MultipleItemAction{
+		ID:         "ai-context",
+		Icon:       iconAI,
+		Name:       unlocalized("AI Kontext"),
+		Permission: resource.canView,
+		Handler: func(items []any, request *Request, response *MultipleItemActionResponse) {
+
+			var values url.Values = make(url.Values)
+			values.Add("_resource", resource.id)
+
+			var ids []int64
 			for _, item := range items {
-				valValidation := resource.validateDelete(item, request)
-				if !valValidation.Valid() {
-					response.ErrorStr = fmt.Sprintf("Nelze smazat položku: %s", valValidation.TextErrorReport(0, request.Locale()).Text)
-					return
-				}
-
-				err := resource.deleteWithLog(item, request)
-				must(err)
-				response.FlashMessage = fmt.Sprintf("%d položek smazáno", len(items))
+				val := reflect.ValueOf(item).Elem()
+				ids = append(ids, val.FieldByName("ID").Int())
 			}
-		},
-	})*/
 
+			values.Add("_ids", MultirelationArrayToString(ids))
+
+			response.FormURL = fmt.Sprintf("/admin/_aicontextresource?%s", values.Encode())
+		},
+	})
 }
 
 func (resource *Resource) hasMultipleActions(userData UserData) (ret bool) {

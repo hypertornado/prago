@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"func.*UploadFile\\\\b\" /Users/odchazel/go/pkg/mod/github.com/google/generative-ai-go@v0.20.1/genai/*.go)",
+      "Bash(go build ./...)",
+      "Bash(go get:*)",
+      "Bash(go build:*)"
+    ]
+  }
+}

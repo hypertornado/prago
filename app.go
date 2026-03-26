@@ -80,8 +80,6 @@ type App struct {
 
 	customSearchFunctions []func(string, UserData) []*CustomSearchResult
 
-	tasksMap map[string]*Task
-
 	cronTasks []*cronTask
 
 	logHandler func(string, string)
@@ -155,7 +153,6 @@ func createApp(codeName string, version string, testing bool) *App {
 
 	app.initSystemStats()
 	app.initActivityLog()
-	app.postInitTaskManager()
 	app.initAdminActions()
 	app.initBuild()
 	app.initAPI()
@@ -176,6 +173,7 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initValidation()
 	app.initAI()
 	app.initFormTask()
+	app.initListSettings()
 
 	return app
 }

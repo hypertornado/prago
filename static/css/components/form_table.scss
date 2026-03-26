@@ -84,11 +84,16 @@
   line-height: 1.3em;
   font-weight: normal;
   color: #444;
-  user-select: none;
+  //user-select: none;
 }
 
 .form_table_cell a {
   text-decoration: none;
+}
+
+.form_table_cell .btn {
+  margin-top: 2.5px;
+  margin-bottom: 2.5px;
 }
 
 .form_table_cell_textafter {

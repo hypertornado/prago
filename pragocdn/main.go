@@ -53,6 +53,7 @@ func main() {
 	initCDNProjectResource()
 	bindStats(app)
 	bindCDNFiles(app)
+	bindCDNVideos(app)
 
 	app.Handle("GET", "/", func(request *prago.Request) {
 		out := fmt.Sprintf("Prago CDN\nhttps://www.prago-cdn.com\nversion %s\nadmin Ondřej Odcházel, https//www.odchazel.com", version)
@@ -209,6 +210,11 @@ func (project *CDNProject) uploadFile(extension string, inData io.Reader) (*cdnc
 	}
 
 	cdnFile.update()
+
+	/*if err := project.uploadFileToSpaces(cdnFile, filePath); err != nil {
+		return nil, fmt.Errorf("spaces upload: %w", err)
+	}*/
+
 	return cdnFile.getMetadata()
 }
 

@@ -25,7 +25,6 @@ func (app *App) initValidation() {
 	PopupForm(app, "_validation-consistency", func(form *Form, request *Request) {
 		form.AddHidden("resource").Value = request.Param("resource")
 		form.AutosubmitFirstTime = true
-		//form.AddSubmit("Spustit kontrolu konzistence")
 
 	}, func(fv FormValidation, request *Request) {
 		resource := app.getResourceByID(request.Param("resource"))

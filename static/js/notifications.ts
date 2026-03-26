@@ -14,16 +14,9 @@ class NotificationCenter {
       this.setData(item);
     });
 
-    this.periodDataLoader();
+    //No need to load notifications periodically
+    //this.periodDataLoader();
 
-    //this.flashNotification("Hello world dwjoqjd iwqod jwioq djwiqoj dwiqo djwiqo djwiqo djwiqo djwiqo", "sss", false, false);
-
-    /*this.flashNotification("Hello world");
-    this.flashNotification("Hello world");
-    this.flashNotification("Hello world");
-    this.flashNotification("Hello world");
-    this.flashNotification("Hello world");
-    this.flashNotification("Hello world");*/
   }
 
   async periodDataLoader() {

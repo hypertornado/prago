@@ -3,7 +3,6 @@ package prago
 type Dashboard struct {
 	board     *Board
 	name      func(string) string
-	tasks     []*Task
 	figures   []*dashboardFigure
 	tables    []*dashboardTable
 	timelines []*Timeline
@@ -56,12 +55,6 @@ func (group *Dashboard) isVisible(userData UserData) bool {
 	}
 
 	for _, v := range group.tables {
-		if userData.Authorize(v.permission) {
-			return true
-		}
-	}
-
-	for _, v := range group.tasks {
 		if userData.Authorize(v.permission) {
 			return true
 		}
