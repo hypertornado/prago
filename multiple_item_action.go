@@ -42,6 +42,7 @@ func ActionResourceMultipleItemsForm[T any](
 	)
 }
 
+/*
 func AddMultipleItemsAction[T any](
 	app *App,
 	name func(string) string, permission Permission, icon string,
@@ -63,8 +64,7 @@ func AddMultipleItemsAction[T any](
 			handler(arr, request, response)
 		},
 	})
-
-}
+}*/
 
 type MultipleItemActionResponse struct {
 	FlashMessage string
