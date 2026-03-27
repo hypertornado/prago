@@ -7287,6 +7287,10 @@ class List {
                     if (focusID) {
                         url += "?_focus=" + focusID;
                     }
+                    new PopupForm(url, (data) => {
+                        this.load();
+                    });
+                    return;
                 }
                 if (e.shiftKey || e.metaKey || e.ctrlKey) {
                     var openedWindow = window.open(url, "newwindow" + new Date() + Math.random());
@@ -7754,7 +7758,9 @@ class ListMultiple {
         let idsStr = ids.join(",");
         let formURL = `/admin/${resourceID}/${idsStr}/${actionID}`;
         new PopupForm(formURL, (data) => {
-            console.log("ok");
+            if (data.RedirectionLocation) {
+                window.location.href = data.RedirectionLocation;
+            }
             this.list.load();
         });
     }

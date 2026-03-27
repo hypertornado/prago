@@ -4,7 +4,9 @@
       "Bash(grep -n \"func.*UploadFile\\\\b\" /Users/odchazel/go/pkg/mod/github.com/google/generative-ai-go@v0.20.1/genai/*.go)",
       "Bash(go build ./...)",
       "Bash(go get:*)",
-      "Bash(go build:*)"
+      "Bash(go build:*)",
+      "Bash(grep -n \"getAdminURL\" /Users/odchazel/go/src/github.com/hypertornado/prago/*.go)",
+      "Bash(grep -n \"AddRelationMultiple\\\\|func.*RelationMultiple\" /Users/odchazel/go/src/github.com/hypertornado/prago/*.go)"
     ]
   }
 }

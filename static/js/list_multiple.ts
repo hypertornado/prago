@@ -56,11 +56,11 @@ class ListMultiple {
     let formURL = `/admin/${resourceID}/${idsStr}/${actionID}`;
     //@ts-ignore
     new PopupForm(formURL, (data: any) => {
-        //window.location.reload();
-        console.log("ok");
+        if (data.RedirectionLocation) {
+          window.location.href = data.RedirectionLocation;
+        }
         this.list.load();
     });
-    //console.log("MAF", formURL);
   }
 
   multipleActionStart(btn: HTMLButtonElement, ids: Array<String>) {

@@ -358,6 +358,10 @@ class List {
           if (focusID) {
             url += "?_focus=" + focusID;
           }
+          new PopupForm(url, (data: any) => {
+            this.load();
+          });
+          return
         }
 
         if (e.shiftKey || e.metaKey || e.ctrlKey) {
