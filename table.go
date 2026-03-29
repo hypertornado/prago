@@ -54,6 +54,7 @@ type tableCellData struct {
 	Buttons           []*TableCellButton
 	AsyncDataURL      string
 	Files             []*File
+	Progress          *float64
 }
 
 type tableCellCheckbox struct {
@@ -240,8 +241,30 @@ func (cell *TableCell) AsyncDataURL(url string) *TableCell {
 	return cell
 }
 
+func (cell *TableCell) Progress(progress float64) *TableCell {
+	cell.data.Progress = &progress
+	return cell
+}
+
 func (cell *tableCellData) GetClassesString() template.CSS {
 	return template.CSS(strings.Join(cell.CSSClasses, " "))
+}
+
+func (cell *tableCellData) ProgressHuman() string {
+	if cell.Progress == nil {
+		return ""
+	}
+
+	ret := fmt.Sprintf("%.1f %%", *cell.Progress*100)
+	ret = strings.ReplaceAll(ret, ".", ",")
+	return ret
+}
+
+func (cell *tableCellData) ProgressCSS() template.CSS {
+	if cell.Progress == nil {
+		return ""
+	}
+	return template.CSS(fmt.Sprintf("%v%%", *cell.Progress*100))
 }
 
 func (table *Table) currentTable() *tableData {

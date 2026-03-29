@@ -60,8 +60,6 @@ type Resource struct {
 
 	defaultValues map[string]func(*Request) string
 
-	multipleActions []*MultipleItemAction
-
 	customSearchFunctions []func(q string, userData UserData) []*Preview
 }
 

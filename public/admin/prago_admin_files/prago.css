@@ -3139,26 +3139,6 @@ a.admin_stats_section_row {
   color: #cb2431;
 }
 
-.multiple_edit_field {
-  border: 1px solid #eee;
-  padding: 5px 5px;
-  margin: 5px 0px;
-  border-radius: 5px;
-}
-
-.multiple_edit_field_header {
-  display: block;
-}
-
-.multiple_edit_field_content {
-  display: none;
-  padding: 10px 5px 10px 20px;
-}
-
-.multiple_edit_field-selected .multiple_edit_field_content {
-  display: block;
-}
-
 .form_table {
   border: 0px solid red;
   margin-top: 5px;
@@ -3280,6 +3260,38 @@ a.admin_stats_section_row {
   background-color: #fafafa;
   background-position: center;
   background-size: cover;
+}
+
+.form_table_cell_progress {
+  border: 1px solid #4077bf;
+  display: flex;
+  background-color: white;
+  font-size: 10px;
+  line-height: 1.3em;
+  font-weight: normal;
+  border-radius: 3px;
+  overflow: hidden;
+  height: 15px;
+  position: relative;
+  background-color: hsl(214, 50%, 90%);
+  min-width: 50px;
+}
+
+.form_table_cell_progress_snake {
+  background-color: #4077bf;
+}
+
+.form_table_cell_progress_value {
+  flex-shrink: 1000;
+  position: absolute;
+  left: 0px;
+  z-index: 100;
+  padding: 0px 4px;
+  align-self: center;
+  justify-self: center;
+  white-space: nowrap;
+  color: hsl(214, 50%, 90%);
+  text-shadow: 1px 0px 0px #4077bf, 0px 1px 0px #4077bf, -1px 0px 0px #4077bf, 0px -1px 0px #4077bf;
 }
 
 @media print {

@@ -6,7 +6,9 @@
       "Bash(go get:*)",
       "Bash(go build:*)",
       "Bash(grep -n \"getAdminURL\" /Users/odchazel/go/src/github.com/hypertornado/prago/*.go)",
-      "Bash(grep -n \"AddRelationMultiple\\\\|func.*RelationMultiple\" /Users/odchazel/go/src/github.com/hypertornado/prago/*.go)"
+      "Bash(grep -n \"AddRelationMultiple\\\\|func.*RelationMultiple\" /Users/odchazel/go/src/github.com/hypertornado/prago/*.go)",
+      "Bash(grep -l \"type Board\\\\|type Dashboard\\\\|type Menu\" /Users/odchazel/go/src/github.com/hypertornado/prago/*.go)",
+      "Bash(grep \"\\\\.go$\")"
     ]
   }
 }

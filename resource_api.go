@@ -126,43 +126,6 @@ func (resource *Resource) initDefaultResourceAPIs() {
 		},
 	)
 
-	resource.api("multipleaction").Method("POST").Handler(
-		func(request *Request) {
-			var items []any
-
-			idsStr := strings.Split(request.Param("ids"), ",")
-			for _, v := range idsStr {
-				id, err := strconv.Atoi(v)
-				if err != nil {
-					panic(fmt.Sprintf("can't convert str '%s' to int", v))
-				}
-				item := resource.query(request.r.Context()).ID(id)
-				if item == nil {
-					panic(fmt.Sprintf("can't find item %d", id))
-				}
-				items = append(items, item)
-			}
-
-			actionName := request.Param("action")
-
-			var multiItemAction *MultipleItemAction
-			for _, action := range resource.multipleActions {
-				if action.ID == actionName {
-					multiItemAction = action
-				}
-			}
-
-			if !request.Authorize(multiItemAction.Permission) {
-				renderAPINotAuthorized(request)
-				return
-			}
-
-			response := &MultipleItemActionResponse{}
-			multiItemAction.Handler(items, request, response)
-			request.WriteJSON(200, response)
-		},
-	)
-
 	type MultipleEditData struct {
 		Form      *Form
 		CSRFToken string

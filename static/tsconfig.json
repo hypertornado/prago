@@ -19,7 +19,6 @@
     "js/list.ts",
     "js/list_settings.ts",
     "js/list_multiple.ts",
-    "js/list_multiple_edit.ts",
     "js/reorder.ts",
     "js/markdown.ts",
     "js/timestamps.ts",

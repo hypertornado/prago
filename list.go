@@ -58,9 +58,19 @@ type pagination struct {
 type listMultipleAction struct {
 	ID         string
 	ResourceID string
-	ActionType string
 	Icon       string
 	Name       string
+}
+
+func (resource *Resource) initListAction() {
+	resource.action("list").Icon(iconTable).setPriority(defaultHighPriority).
+		Permission(resource.canView).Name(messages.GetNameFunction("admin_list")).
+		ui(func(request *Request, pd *pageData) {
+			listData, err := resource.getListHeader(request)
+			must(err)
+			pd.List = &listData
+		},
+		)
 }
 
 func (row *listRow) PreName() string {

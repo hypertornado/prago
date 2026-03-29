@@ -49,12 +49,26 @@ class ListSettings {
               });
             },
           },
-          {
+          /*{
             Name: "Statistiky",
             Icon: "glyphicons-basic-43-stats-circle.svg",
             Handler: () => {
               this.loadStats();
               this.statsPopup.show();
+            },
+          },*/
+          {
+            Name: "Statistiky",
+            Icon: "glyphicons-basic-43-stats-circle.svg",
+            Handler: () => {
+              var params: any = {};
+              params["_resource"] = this.list.typeName;
+              let filterData = this.list.getFilterData();
+              for (var k in filterData) {
+                params[k] = filterData[k];
+              }
+              new PopupForm("/admin/_list-stats?_resource=" + this.list.typeName + "&_params=" + encodeURIComponent(JSON.stringify(params)), (data: any) => {
+              });
             },
           },
           {

@@ -35,7 +35,7 @@ class ListMultiple {
     for (var i = 0; i < actions.length; i++) {
       actions[i].addEventListener(
         "click",
-        this.multipleActionSelected.bind(this)
+        this.multipleActionClicked.bind(this)
       );
     }
 
@@ -46,12 +46,15 @@ class ListMultiple {
       });
   }
 
-  multipleActionSelected(e: any) {
-    var ids = this.multipleGetIDs();
-    this.multipleActionStart(e.currentTarget, ids);
+  multipleActionClicked(e: any) {
+    let btn = e.currentTarget;
+    let actionID = btn.getAttribute("data-id");
+    let resourceID = btn.getAttribute("data-resource-id");
+    this.multipleActionForm(resourceID, actionID);
   }
 
-  multipleActionForm(resourceID: string, actionID: string, ids: Array<String>) {
+  multipleActionForm(resourceID: string, actionID: string) {
+    var ids = this.multipleGetIDs();
     let idsStr = ids.join(",");
     let formURL = `/admin/${resourceID}/${idsStr}/${actionID}`;
     //@ts-ignore
@@ -61,79 +64,6 @@ class ListMultiple {
         }
         this.list.load();
     });
-  }
-
-  multipleActionStart(btn: HTMLButtonElement, ids: Array<String>) {
-    let actionID = btn.getAttribute("data-id");
-    let actionName = btn.getAttribute("data-name");
-    switch (btn.getAttribute("data-action-type")) {
-      case "multiple_action_form":
-        let resourceID = btn.getAttribute("data-resource-id");
-        this.multipleActionForm(resourceID, actionID, ids);
-        break;
-      case "mutiple_edit":
-        new ListMultipleEdit(this, ids);
-        break;
-      case "mutiple_export":
-        let urlStr = "/admin/" + this.list.typeName + "/api/export?ids=" + ids.join(",");
-        window.open(urlStr);
-        break;
-      default:
-        let confirm = new Confirm(
-          `${actionName}: Opravdu chcete provést tuto akci na ${ids.length} položek?`,
-          actionName,
-          () => {
-            var loader = new LoadingPopup();
-            var params: any = {};
-            params["action"] = actionID;
-            params["ids"] = ids.join(",");
-            var url =
-              "/admin/" +
-              this.list.typeName +
-              "/api/multipleaction" +
-              encodeParams(params);
-            fetch(url, {
-              method: "POST",
-            }).then((e) => {
-              loader.done();
-              if (e.status == 200) {
-                e.json().then((data) => {
-                  if (data.ErrorStr) {
-                    new Alert(data.ErrorStr);
-                  }
-                  if (data.FlashMessage) {
-                    Prago.notificationCenter.flashNotification(
-                      actionName,
-                      data.FlashMessage,
-                      true,
-                      false
-                    );
-                  }
-                  if (data.RedirectURL) {
-                    window.location = data.RedirectURL;
-                  }
-                  if (data.FormURL) {
-                    new PopupForm(data.FormURL, () => {
-                      this.list.load();
-                    });
-                  } else {
-                    this.list.load();
-                  }
-                });
-              } else {
-                Prago.notificationCenter.flashNotification(
-                  actionName,
-                  "Chyba " + e,
-                  false,
-                  true
-                );
-                this.list.load();
-              }
-            });
-          },
-          Function()
-        );
-    }
   }
 
   bindMultipleActionCheckboxes() {

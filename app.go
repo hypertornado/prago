@@ -174,6 +174,7 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initAI()
 	app.initFormTask()
 	app.initListSettings()
+	app.initListStats()
 
 	return app
 }
@@ -197,7 +198,6 @@ func (app *App) afterInit() {
 	app.initAllActions()
 	app.initAdminNotFoundAction()
 	app.initRelations()
-	app.initMultipleItemActions()
 	app.initFieldValidations()
 }
 

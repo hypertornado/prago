@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"golang.org/x/net/context"
 )
 
 func (resource *Resource) initDefaultResourceMultipleActions() {
@@ -120,15 +118,13 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 				form.AddCheckbox("_previewurl", "Ukázat preview URL").Value = "on"
 			}
 
-			form.AddHidden("_resource").Value = resource.id
-			form.AddRelationMultiple("_items", resource.pluralName(request.Locale()), resource.id).Value = request.Param("_ids")
+			//form.AddHidden("_resource").Value = resource.id
+			//form.AddRelationMultiple("_items", resource.pluralName(request.Locale()), resource.id).Value = request.Param("_ids")
 
 			form.AddSubmit("Zobrazit")
-			//form.AddSubmit("AI Kontext")
 		},
 		func(items []any, fv FormValidation, request *Request) {
 			var fields []*Field
-			//resource := app.getResourceByID(request.Param("_resource"))
 			for _, field := range resource.fields {
 				if !request.Authorize(field.canView) {
 					continue
@@ -138,8 +134,7 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 				}
 			}
 
-			ids := MultirelationStringToArray(request.Param("_items"))
-			if len(ids) == 0 {
+			if len(items) == 0 {
 				fv.AddItemError("_items", "Není vybrána žádná položka")
 			}
 
@@ -149,8 +144,10 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 
 			var strVal string
 
-			for _, id := range ids {
-				item := resource.query(context.Background()).ID(id)
+			for _, item := range items {
+				//val := reflect.ValueOf(item).Elem()
+				//id := val.FieldByName("ID").Int()
+				//item := resource.query(context.Background()).ID(id)
 
 				for _, field := range fields {
 					ifaceVal := reflect.ValueOf(item).Elem().FieldByName(field.fieldClassName).Interface()

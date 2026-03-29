@@ -132,6 +132,39 @@
   background-size: cover;
 }
 
+.form_table_cell_progress {
+  border: 1px solid $baseColor;
+  display: flex;
+  background-color: white;
+  font-size: 10px;
+  line-height: 1.3em;
+  font-weight: normal;
+  border-radius: 3px;
+  overflow: hidden;
+  height: 15px;
+  position: relative;
+  background-color: $baseColorBackground;
+  min-width: 50px;
+}
+
+.form_table_cell_progress_snake {
+  background-color: $baseColor;
+}
+
+.form_table_cell_progress_value {
+  flex-shrink: 1000;
+  position: absolute;
+  left: 0px;
+  z-index: 100;
+  padding: 0px 4px;
+  align-self: center;
+  justify-self: center;
+  white-space: nowrap;
+
+  color: $baseColorBackground; 
+  text-shadow: 1px 0px 0px $baseColor, 0px 1px 0px $baseColor, -1px 0px 0px $baseColor, 0px -1px 0px $baseColor;
+}
+
 
 @media print {
   .form_table td {

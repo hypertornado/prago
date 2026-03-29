@@ -7630,8 +7630,14 @@ class ListSettings {
                         Name: "Statistiky",
                         Icon: "glyphicons-basic-43-stats-circle.svg",
                         Handler: () => {
-                            this.loadStats();
-                            this.statsPopup.show();
+                            var params = {};
+                            params["_resource"] = this.list.typeName;
+                            let filterData = this.list.getFilterData();
+                            for (var k in filterData) {
+                                params[k] = filterData[k];
+                            }
+                            new PopupForm("/admin/_list-stats?_resource=" + this.list.typeName + "&_params=" + encodeURIComponent(JSON.stringify(params)), (data) => {
+                            });
                         },
                     },
                     {
@@ -7742,7 +7748,7 @@ class ListMultiple {
         });
         var actions = this.list.list.querySelectorAll(".list_multiple_action");
         for (var i = 0; i < actions.length; i++) {
-            actions[i].addEventListener("click", this.multipleActionSelected.bind(this));
+            actions[i].addEventListener("click", this.multipleActionClicked.bind(this));
         }
         this.list.list
             .querySelector(".list_multiple_actions_cancel")
@@ -7750,11 +7756,14 @@ class ListMultiple {
             this.multipleUncheckAll();
         });
     }
-    multipleActionSelected(e) {
-        var ids = this.multipleGetIDs();
-        this.multipleActionStart(e.currentTarget, ids);
+    multipleActionClicked(e) {
+        let btn = e.currentTarget;
+        let actionID = btn.getAttribute("data-id");
+        let resourceID = btn.getAttribute("data-resource-id");
+        this.multipleActionForm(resourceID, actionID);
     }
-    multipleActionForm(resourceID, actionID, ids) {
+    multipleActionForm(resourceID, actionID) {
+        var ids = this.multipleGetIDs();
         let idsStr = ids.join(",");
         let formURL = `/admin/${resourceID}/${idsStr}/${actionID}`;
         new PopupForm(formURL, (data) => {
@@ -7763,64 +7772,6 @@ class ListMultiple {
             }
             this.list.load();
         });
-    }
-    multipleActionStart(btn, ids) {
-        let actionID = btn.getAttribute("data-id");
-        let actionName = btn.getAttribute("data-name");
-        switch (btn.getAttribute("data-action-type")) {
-            case "multiple_action_form":
-                let resourceID = btn.getAttribute("data-resource-id");
-                this.multipleActionForm(resourceID, actionID, ids);
-                break;
-            case "mutiple_edit":
-                new ListMultipleEdit(this, ids);
-                break;
-            case "mutiple_export":
-                let urlStr = "/admin/" + this.list.typeName + "/api/export?ids=" + ids.join(",");
-                window.open(urlStr);
-                break;
-            default:
-                let confirm = new Confirm(`${actionName}: Opravdu chcete provést tuto akci na ${ids.length} položek?`, actionName, () => {
-                    var loader = new LoadingPopup();
-                    var params = {};
-                    params["action"] = actionID;
-                    params["ids"] = ids.join(",");
-                    var url = "/admin/" +
-                        this.list.typeName +
-                        "/api/multipleaction" +
-                        encodeParams(params);
-                    fetch(url, {
-                        method: "POST",
-                    }).then((e) => {
-                        loader.done();
-                        if (e.status == 200) {
-                            e.json().then((data) => {
-                                if (data.ErrorStr) {
-                                    new Alert(data.ErrorStr);
-                                }
-                                if (data.FlashMessage) {
-                                    Prago.notificationCenter.flashNotification(actionName, data.FlashMessage, true, false);
-                                }
-                                if (data.RedirectURL) {
-                                    window.location = data.RedirectURL;
-                                }
-                                if (data.FormURL) {
-                                    new PopupForm(data.FormURL, () => {
-                                        this.list.load();
-                                    });
-                                }
-                                else {
-                                    this.list.load();
-                                }
-                            });
-                        }
-                        else {
-                            Prago.notificationCenter.flashNotification(actionName, "Chyba " + e, false, true);
-                            this.list.load();
-                        }
-                    });
-                }, Function());
-        }
     }
     bindMultipleActionCheckboxes() {
         this.lastCheckboxIndexClicked = -1;
@@ -7936,79 +7887,6 @@ class ListMultiple {
             }
         });
         return ret;
-    }
-}
-class ListMultipleEdit {
-    constructor(multiple, ids) {
-        this.listMultiple = multiple;
-        var typeID = document.querySelector(".list").getAttribute("data-type");
-        var progress = document.createElement("progress");
-        this.popup = new ContentPopup(`Hromadná úprava položek (${ids.length} položek)`, progress);
-        this.popup.show();
-        fetch("/admin/" + typeID + "/api/multiple_edit?ids=" + ids.join(","))
-            .then((response) => {
-            if (response.ok) {
-                return response.text();
-            }
-            else {
-                this.popup.hide();
-                new Alert("Operaci nelze nahrát.");
-            }
-        })
-            .then((val) => {
-            var div = document.createElement("div");
-            div.innerHTML = val;
-            this.popup.setContent(div);
-            this.initFormPopup(div.querySelector("form"));
-            this.popup.setConfirmButtons(this.confirm.bind(this));
-        });
-    }
-    initFormPopup(form) {
-        this.form = form;
-        this.form.addEventListener("submit", this.confirm.bind(this));
-        new Form(this.form);
-        this.initCheckboxes();
-    }
-    initCheckboxes() {
-        var checkboxes = this.form.querySelectorAll(".multiple_edit_field_checkbox");
-        checkboxes.forEach((cb) => {
-            cb.addEventListener("change", (e) => {
-                var item = cb.parentElement.parentElement;
-                if (cb.checked) {
-                    item.classList.add("multiple_edit_field-selected");
-                }
-                else {
-                    item.classList.remove("multiple_edit_field-selected");
-                }
-            });
-        });
-    }
-    confirm(e) {
-        var typeID = document.querySelector(".list").getAttribute("data-type");
-        var data = new FormData(this.form);
-        var loader = new LoadingPopup();
-        fetch("/admin/" + typeID + "/api/multiple_edit", {
-            method: "POST",
-            body: data,
-        }).then((response) => {
-            loader.done();
-            if (response.ok) {
-                this.popup.hide();
-                this.listMultiple.list.load();
-            }
-            else {
-                if (response.status == 403) {
-                    response.json().then((data) => {
-                        new Alert(data.error.Text);
-                    });
-                    return;
-                }
-                else {
-                    new Alert("Chyba při ukládání.");
-                }
-            }
-        });
-        e.preventDefault();
     }
 }
 function bindReOrder() {

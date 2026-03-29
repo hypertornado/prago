@@ -2,6 +2,7 @@ package prago
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"math"
@@ -32,6 +33,98 @@ type listStatsDescription struct {
 	Count      string
 	PercentCSS template.HTML
 	Percent    string
+	Progress   *float64
+}
+
+func (app *App) initListStats() {
+	PopupForm(app, "_list-stats", func(form *Form, request *Request) {
+		resource := app.getResourceByID(request.Param("_resource"))
+		if !request.Authorize(resource.canView) {
+			panic("not allowed")
+		}
+
+		var fieldOptions [][2]string
+		fieldOptions = append(fieldOptions, [2]string{"", ""})
+
+		for _, field := range resource.fields {
+			if !request.Authorize(field.canView) {
+				continue
+			}
+			fieldOptions = append(fieldOptions, [2]string{
+				field.id,
+				field.name(request.Locale()),
+			})
+		}
+
+		form.AddSelect("field", "Sloupec", fieldOptions)
+
+		form.AddNumberInput("limit", "Počet položek").Value = "10"
+
+		form.AddHidden("_params").Value = request.Param("_params")
+		form.AddHidden("_resource").Value = resource.id
+
+		form.AddSubmit("Zobrazit statistiky")
+	}, func(fv FormValidation, request *Request) {
+		resource := app.getResourceByID(request.Param("_resource"))
+		if !request.Authorize(resource.canView) {
+			panic("not allowed")
+		}
+
+		field := resource.fieldMap[request.Param("field")]
+		if field == nil || !request.Authorize(field.canView) {
+			fv.AddItemError("field", "Zadejte sloupec")
+		}
+
+		var listparams map[string]string
+		if err := json.Unmarshal([]byte(request.Param("_params")), &listparams); err != nil {
+			fv.AddError("Invalid params")
+		}
+
+		limit, err := strconv.Atoi(request.Param("limit"))
+		if err != nil || limit < 1 {
+			fv.AddItemError("limit", "Zadejte kladné číslo")
+		}
+
+		if !fv.Valid() {
+			return
+		}
+
+		urlParams := make(url.Values)
+		for k, v := range listparams {
+			urlParams.Set(k, v)
+		}
+
+		sections := getListStatsSections(request.r.Context(), field, request, urlParams, int64(limit))
+
+		table := app.Table()
+
+		for _, section := range sections {
+			table.Row(
+				table.Cell(section.Name).Header().Colspan(2),
+			)
+
+			for _, row := range section.Table {
+				nameCell := table.Cell(row.Name)
+				if row.URL != "" {
+					nameCell.URL(row.URL)
+				}
+
+				countCell := table.Cell(row.Description.Count)
+				if row.Description.Progress != nil {
+					countCell.Progress(*row.Description.Progress)
+				}
+				table.Row(
+					nameCell,
+					countCell,
+				)
+
+			}
+
+		}
+
+		fv.AfterContent(table.ExecuteHTML())
+	}).Permission(loggedPermission).Name(unlocalized("Statistiky")).Icon("glyphicons-basic-43-stats-circle.svg")
+
 }
 
 func (row *listStatsRow) GetTitle() string {
@@ -55,10 +148,12 @@ func statsCountPercent(count, total int64) template.HTML {
 
 func statsCountDescription(count, total int64) listStatsDescription {
 	percentStr := statsCountPercent(count, total)
+	var progress float64 = float64(count) / float64(total)
 	return listStatsDescription{
 		Count:      humanizeNumber(count),
 		PercentCSS: percentStr,
 		Percent:    string(percentStr),
+		Progress:   &progress,
 	}
 }
 
@@ -70,12 +165,6 @@ func (resource *Resource) getListStats(ctx context.Context, userData UserData, p
 		columnsStr = resource.defaultVisibleFieldsStr(userData)
 	}
 	columnsAr := strings.Split(columnsStr, ",")
-
-	query := resource.addFilterParamsToQuery(resource.query(ctx), params, userData)
-	total, err := query.count()
-	if err != nil {
-		panic(err)
-	}
 
 	var limit int64 = 10
 	statsLimit, err := strconv.Atoi(params.Get("_statslimit"))
@@ -90,23 +179,52 @@ func (resource *Resource) getListStats(ctx context.Context, userData UserData, p
 			continue
 		}
 
-		if field.typ == reflect.TypeOf(time.Now()) {
-			ret.Sections = append(ret.Sections, resource.getListStatsDateSections(ctx, field, userData, params, total, limit)...)
-		}
-
-		table := resource.getListStatsTable(ctx, field, userData, params, total, limit)
-
-		if table == nil {
+		if !userData.Authorize(field.canView) {
 			continue
 		}
 
-		ret.Sections = append(ret.Sections, listStatsSection{
-			Name:  field.name(userData.Locale()),
-			Table: table,
-		})
+		ret.Sections = append(ret.Sections, getListStatsSections(ctx, field, userData, params, limit)...)
+
 	}
 
 	return ret
+}
+
+func getListStatsSections(ctx context.Context, field *Field, userData UserData, params url.Values, limit int64) (ret []listStatsSection) {
+
+	resource := field.resource
+
+	query := resource.addFilterParamsToQuery(resource.query(ctx), params, userData)
+	total, err := query.count()
+	if err != nil {
+		panic(err)
+	}
+
+	if !userData.Authorize(field.canView) {
+		return
+	}
+
+	if !userData.Authorize(resource.canView) {
+		return
+	}
+
+	if field.typ == reflect.TypeOf(time.Now()) {
+		ret = append(ret, resource.getListStatsDateSections(ctx, field, userData, params, total, limit)...)
+	}
+
+	table := resource.getListStatsTable(ctx, field, userData, params, total, limit)
+
+	if table == nil {
+		return
+	}
+
+	ret = append(ret, listStatsSection{
+		Name:  field.name(userData.Locale()),
+		Table: table,
+	})
+
+	return
+
 }
 
 func (resource *Resource) getListStatsDateSections(ctx context.Context, field *Field, userData UserData, params url.Values, total, limit int64) (ret []listStatsSection) {
