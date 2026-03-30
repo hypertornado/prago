@@ -110,10 +110,15 @@ class ListFilterItem {
             return this.el.querySelector("input").value;
         }
 
-        if (this.el.classList.contains("list_filter_item-relations")) {
-            return this.el.querySelector("input").value;
+        if (this.filterLayout == "filter_layout_relation") {
+            let hiddenEl: HTMLInputElement = this.el.querySelector(".filter_relations_hidden");
+            return hiddenEl.value;
         }
+
         let input: HTMLInputElement = this.el.querySelector(".list_filter_input");
+        if (!input) {
+            return "";
+        }
         return input.value.trim();
     }
 
