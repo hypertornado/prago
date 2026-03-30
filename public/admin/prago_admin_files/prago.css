@@ -1856,28 +1856,39 @@ select.list_filter_input {
 }
 
 .list_filter2 {
-  border: 1px solid red;
   height: 25px;
   padding: 2px 6px;
   border: 1px solid #eee;
   border-radius: 100px !important;
-  background-color: #fafafa !important;
+  background-color: #fafafa;
   overflow: hidden;
   white-space: nowrap;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.list_filteritem-colored .list_filter2 {
+  background: hsl(214, 50%, 90%) !important;
+  border-color: #4077bf;
 }
 
 .list_filter2:hover {
-  background-color: hsl(214, 50%, 97%);
+  background: hsl(214, 50%, 97%);
 }
 
 .list_filter2:hover {
-  background-color: hsl(214, 50%, 90%);
+  background: hsl(214, 50%, 90%);
 }
 
 .list_filter2_name {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   line-height: 1.3em;
+  width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .list_header_multiple {

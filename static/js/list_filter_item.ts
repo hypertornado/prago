@@ -40,17 +40,18 @@ class ListFilterItem {
             fieldSelect.addEventListener("change", this.inputListener.bind(this));
         }
 
-        if (this.filterLayout == "filter_layout_select") {
-            this.initFilter2()
+        if (this.filterLayout == "filter_layout_text" || this.filterLayout == "filter_layout_number" || this.filterLayout == "filter_layout_select" || this.filterLayout == "filter_layout_relation" || this.filterLayout == "filter_layout_date" || this.filterLayout == "filter_layout_boolean") {
+            this.initFilter2();
+            return;
         }
 
-        if (this.filterLayout == "filter_layout_relation") {
+        /*if (this.filterLayout == "filter_layout_relation") {
             new ListFilterRelations(el, fieldValue, this.filter.list);
-        }
+        }*/
 
-        if (this.filterLayout == "filter_layout_date") {
+        /*if (this.filterLayout == "filter_layout_date") {
             new ListFilterDate(el, fieldValue);
-        }
+        }*/
     }
 
     inputListener(e: any) {

@@ -26,7 +26,6 @@ func (resource *Resource) previewer(userData UserData, item any) *previewer {
 	if !resource.isItPointerToResourceItem(item) {
 		return nil
 	}
-
 	return &previewer{
 		userData: userData,
 		item:     item,

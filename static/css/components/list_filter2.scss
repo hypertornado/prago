@@ -1,26 +1,39 @@
 @use "../variables.scss" as *;
 
 .list_filter2 {
-    border: 1px solid red;
     height: 25px;
     padding: 2px 6px;
     border: 1px solid $grayBorderColor;
     border-radius: 100px !important;
-    background-color: $backgroundGrayColor !important;
+    background-color: $backgroundGrayColor;
     overflow: hidden;
     white-space: nowrap;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.list_filteritem-colored .list_filter2 {
+  background: $baseColorBackground !important;
+  border-color: $baseColor;
 }
 
 .list_filter2:hover {
-    background-color: $hoverColor;
+    background: $hoverColor;
 }
 
 .list_filter2:hover {
-    background-color: $activeColor;
+    background: $activeColor;
 }
 
 .list_filter2_name {
-    font-size: .8rem;
+    font-size: .9rem;
     line-height: 1.3em;
+    width: 100%;
+    //border: 1px solid red;
+
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }

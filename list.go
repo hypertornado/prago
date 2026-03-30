@@ -353,15 +353,22 @@ func (resource *Resource) addFilterToQuery(listQuery *listQuery, filter map[stri
 			}
 		case "filter_layout_relation":
 			v = strings.Trim(v, " ")
+
 			if field.typ.Kind() == reflect.String {
-				v = "%;" + v + ";%"
-				str := fmt.Sprintf("`%s` LIKE ?", k)
-				listQuery.where(str, v)
-			} else {
-				numVal, err := strconv.Atoi(v)
-				if err == nil {
-					listQuery.Is(k, numVal)
+				if v == "" {
+					break
 				}
+				inValues := strings.Split(v, ",")
+
+				var orValues []string
+				var queryValues []any
+				for _, value := range inValues {
+					orValues = append(orValues, fmt.Sprintf("`%s` LIKE ?", k))
+					queryValues = append(queryValues, "%;"+value+";%")
+				}
+				listQuery.where(fmt.Sprintf("(%s)", strings.Join(orValues, " OR ")), queryValues...)
+			} else {
+				listQuery.In(k, strings.Split(v, ","))
 			}
 		case "filter_layout_boolean":
 			switch v {

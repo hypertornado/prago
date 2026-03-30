@@ -91,10 +91,17 @@
 {{end}}
 
 {{define "filter_layout_text"}}
-  <input class="input list_filter_input list_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+  {{template "filter_layout2" .}}
+  
+  {{if false}}
+    <input class="input list_filter_input list_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+  {{end}}
 {{end}}
 
 {{define "filter_layout_relation"}}
+  {{template "filter_layout2" .}}
+
+  {{if false}}
   <div class="filter_relations list_filter_item list_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}" data-related-resource="{{.RelatedResourceID}}">
     <input type="hidden" class="filter_relations_hidden">
     <div class="filter_relations_preview hidden">
@@ -107,18 +114,27 @@
       <div class="filter_relations_suggestions"></div>
     </div>
   </div>
+  {{end}}
 {{end}}
 
 {{define "filter_layout_number"}}
-  <input class="input list_filter_input list_filter_item" type="text" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+  {{template "filter_layout2" .}}
+
+  {{if false}}
+    <input class="input list_filter_input list_filter_item" type="text" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
+  {{end}}
 {{end}}
 
 {{define "filter_layout_boolean"}}
+  {{template "filter_layout2" .}}
+
+  {{if false}}
   <select class="input list_filter_input list_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <option value=""></option>
     <option value="true">{{index .FilterData 0}}</option>
     <option value="false">{{index .FilterData 1}}</option>
   </select>
+  {{end}}
 {{end}}
 
 {{define "filter_layout_select"}}
@@ -141,6 +157,9 @@
 {{end}}
 
 {{define "filter_layout_date"}}
+  {{template "filter_layout2" .}}
+
+  {{if false}}
   <div class="list_filter_layout_date">
     <input class="list_filter_item list_filter_layout_date_value" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     <div class="list_filter_layout_date_content">
@@ -154,6 +173,7 @@
       >
     </div>
   </div>
+  {{end}}
 {{end}}
 
 {{define "list_multiple_actions"}}

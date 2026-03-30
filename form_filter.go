@@ -6,7 +6,6 @@ type FormFilter struct {
 }
 
 func (app *App) FormFilter() *FormFilter {
-
 	if app.formFilters == nil {
 		app.formFilters = map[string]*FormFilter{}
 	}
