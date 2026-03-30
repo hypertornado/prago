@@ -4,18 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"math"
 	"net/url"
 	"reflect"
 	"strconv"
-	"strings"
 	"time"
 )
-
-type listStats struct {
-	Sections []listStatsSection
-}
 
 type listStatsSection struct {
 	Name  string
@@ -23,17 +17,11 @@ type listStatsSection struct {
 }
 
 type listStatsRow struct {
-	Name        string
-	Image       string
-	URL         string
-	Description listStatsDescription
-}
-
-type listStatsDescription struct {
-	Count      string
-	PercentCSS template.HTML
-	Percent    string
-	Progress   *float64
+	Name     string
+	Image    string
+	URL      string
+	Count    string
+	Progress *float64
 }
 
 func (app *App) initListStats() {
@@ -109,25 +97,22 @@ func (app *App) initListStats() {
 					nameCell.URL(row.URL)
 				}
 
-				countCell := table.Cell(row.Description.Count)
-				if row.Description.Progress != nil {
-					countCell.Progress(*row.Description.Progress)
+				countCell := table.Cell(row.Count)
+				if row.Progress != nil {
+					countCell.Progress(*row.Progress)
 				}
 				table.Row(
 					nameCell,
 					countCell,
 				)
-
 			}
-
 		}
-
 		fv.AfterContent(table.ExecuteHTML())
 	}).Permission(loggedPermission).Name(unlocalized("Statistiky")).Icon("glyphicons-basic-43-stats-circle.svg")
 
 }
 
-func (row *listStatsRow) GetTitle() string {
+/*func (row *listStatsRow) GetTitle() string {
 	var fields []string
 
 	fields = append(fields, row.Name)
@@ -137,57 +122,30 @@ func (row *listStatsRow) GetTitle() string {
 	}
 
 	return strings.Join(fields, " — ")
-}
+}*/
 
-func statsCountPercent(count, total int64) template.HTML {
+/*func statsCountPercent(count, total int64) template.HTML {
 	if total == 0 {
 		return ""
 	}
 	return template.HTML(fmt.Sprintf("%.2f%%", (100*float64(count))/float64(total)))
-}
+}*/
 
+/*
 func statsCountDescription(count, total int64) listStatsDescription {
-	percentStr := statsCountPercent(count, total)
+	//percentStr := statsCountPercent(count, total)
 	var progress float64 = float64(count) / float64(total)
 	return listStatsDescription{
-		Count:      humanizeNumber(count),
-		PercentCSS: percentStr,
-		Percent:    string(percentStr),
-		Progress:   &progress,
+		Count: humanizeNumber(count),
+		//PercentCSS: percentStr,
+		//Percent:    string(percentStr),
+		Progress: &progress,
 	}
-}
+}*/
 
-func (resource *Resource) getListStats(ctx context.Context, userData UserData, params url.Values) *listStats {
-	ret := &listStats{}
-
-	columnsStr := params.Get("_columns")
-	if columnsStr == "" {
-		columnsStr = resource.defaultVisibleFieldsStr(userData)
-	}
-	columnsAr := strings.Split(columnsStr, ",")
-
-	var limit int64 = 10
-	statsLimit, err := strconv.Atoi(params.Get("_statslimit"))
-	if err == nil && statsLimit > 0 && statsLimit <= 10000 {
-		limit = int64(statsLimit)
-	}
-
-	for _, v := range columnsAr {
-		field := resource.fieldMap[v]
-
-		if field == nil {
-			continue
-		}
-
-		if !userData.Authorize(field.canView) {
-			continue
-		}
-
-		ret.Sections = append(ret.Sections, getListStatsSections(ctx, field, userData, params, limit)...)
-
-	}
-
-	return ret
+func statsProgress(count, total int64) *float64 {
+	var progress float64 = float64(count) / float64(total)
+	return &progress
 }
 
 func getListStatsSections(ctx context.Context, field *Field, userData UserData, params url.Values, limit int64) (ret []listStatsSection) {
@@ -267,14 +225,17 @@ func (resource *Resource) getListStatsDateSectionDay(ctx context.Context, field 
 		counted += count
 
 		ret.Table = append(ret.Table, listStatsRow{
-			Name:        fmt.Sprintf("%d. %d. %d", day, month, year),
-			Description: statsCountDescription(count, total),
+			Name:     fmt.Sprintf("%d. %d. %d", day, month, year),
+			Count:    humanizeNumber(count),
+			Progress: statsProgress(count, total),
 		})
 	}
 	if counted < total {
 		ret.Table = append(ret.Table, listStatsRow{
-			Name:        "ostatní",
-			Description: statsCountDescription(total-counted, total),
+			Name:     "ostatní",
+			Count:    humanizeNumber(total - counted),
+			Progress: statsProgress(total-counted, total),
+			//Description: statsCountDescription(total-counted, total),
 		})
 	}
 	return
@@ -309,14 +270,18 @@ func (resource *Resource) getListStatsDateSectionMonth(ctx context.Context, fiel
 		counted += count
 
 		ret.Table = append(ret.Table, listStatsRow{
-			Name:        fmt.Sprintf("%s %d", monthName(month, userData.Locale()), year),
-			Description: statsCountDescription(count, total),
+			Name:     fmt.Sprintf("%s %d", monthName(month, userData.Locale()), year),
+			Count:    humanizeNumber(count),
+			Progress: statsProgress(count, total),
+			//Description: statsCountDescription(count, total),
 		})
 	}
 	if counted < total {
 		ret.Table = append(ret.Table, listStatsRow{
-			Name:        "ostatní",
-			Description: statsCountDescription(total-counted, total),
+			Name:     "ostatní",
+			Count:    humanizeNumber(total - counted),
+			Progress: statsProgress(total-counted, total),
+			//Description: statsCountDescription(total-counted, total),
 		})
 	}
 	return
@@ -348,14 +313,18 @@ func (resource *Resource) getListStatsDateSectionYear(ctx context.Context, field
 		counted += count
 
 		ret.Table = append(ret.Table, listStatsRow{
-			Name:        fmt.Sprintf("%d", year),
-			Description: statsCountDescription(count, total),
+			Name:     fmt.Sprintf("%d", year),
+			Count:    humanizeNumber(count),
+			Progress: statsProgress(count, total),
+			//Description: statsCountDescription(count, total),
 		})
 	}
 	if counted < total {
 		ret.Table = append(ret.Table, listStatsRow{
-			Name:        "ostatní",
-			Description: statsCountDescription(total-counted, total),
+			Name:     "ostatní",
+			Count:    humanizeNumber(total - counted),
+			Progress: statsProgress(total-counted, total),
+			//Description: statsCountDescription(total-counted, total),
 		})
 	}
 	return
@@ -388,8 +357,10 @@ func (resource *Resource) getListStatsTable(ctx context.Context, field *Field, u
 			}
 
 			table = append(table, listStatsRow{
-				Name:        name,
-				Description: statsCountDescription(count, total),
+				Name:     name,
+				Count:    humanizeNumber(count),
+				Progress: statsProgress(count, total),
+				//Description: statsCountDescription(count, total),
 			})
 		}
 	}
@@ -403,8 +374,10 @@ func (resource *Resource) getListStatsTable(ctx context.Context, field *Field, u
 				counted += count
 
 				row := listStatsRow{
-					Name:        fmt.Sprintf("#%d", v),
-					Description: statsCountDescription(count, total),
+					Name:     fmt.Sprintf("#%d", v),
+					Count:    humanizeNumber(count),
+					Progress: statsProgress(count, total),
+					//Description: statsCountDescription(count, total),
 				}
 
 				if v == 0 {
@@ -450,19 +423,22 @@ func (resource *Resource) getListStatsTable(ctx context.Context, field *Field, u
 		}
 
 		table = append(table, listStatsRow{
-			Name:        "ano",
-			Description: statsCountDescription(countTrue, total),
+			Name:     "ano",
+			Count:    humanizeNumber(countTrue),
+			Progress: statsProgress(countTrue, total),
 		})
 		table = append(table, listStatsRow{
-			Name:        "ne",
-			Description: statsCountDescription(countFalse, total),
+			Name:     "ne",
+			Count:    humanizeNumber(countFalse),
+			Progress: statsProgress(countFalse, total),
 		})
 	}
 
 	if counted < total && len(table) > 0 {
 		table = append(table, listStatsRow{
-			Name:        "ostatní",
-			Description: statsCountDescription(total-counted, total),
+			Name:     "ostatní",
+			Count:    humanizeNumber(total - counted),
+			Progress: statsProgress(total-counted, total),
 		})
 	}
 	return
@@ -505,17 +481,13 @@ func (resource *Resource) getListStatsTableInt(ctx context.Context, field *Field
 	//must(rows.Close())
 
 	table = append(table, listStatsRow{
-		Name: "minimum",
-		Description: listStatsDescription{
-			Count: humanizeFloat(min, userData.Locale()),
-		},
+		Name:  "minimum",
+		Count: humanizeFloat(min, userData.Locale()),
 	})
 
 	table = append(table, listStatsRow{
-		Name: "průměr",
-		Description: listStatsDescription{
-			Count: humanizeFloat(avg, userData.Locale()),
-		},
+		Name:  "průměr",
+		Count: humanizeFloat(avg, userData.Locale()),
 	})
 
 	medianItem := int64(math.Floor(float64(total) / 2))
@@ -535,22 +507,16 @@ func (resource *Resource) getListStatsTableInt(ctx context.Context, field *Field
 		rows.Scan(&median)
 	}
 	table = append(table, listStatsRow{
-		Name: "medián",
-		Description: listStatsDescription{
-			Count: humanizeFloat(median, userData.Locale()),
-		},
+		Name:  "medián",
+		Count: humanizeFloat(median, userData.Locale()),
 	})
 	table = append(table, listStatsRow{
-		Name: "maximum",
-		Description: listStatsDescription{
-			Count: humanizeFloat(max, userData.Locale()),
-		},
+		Name:  "maximum",
+		Count: humanizeFloat(max, userData.Locale()),
 	})
 	table = append(table, listStatsRow{
-		Name: "součet",
-		Description: listStatsDescription{
-			Count: humanizeFloat(sum, userData.Locale()),
-		},
+		Name:  "součet",
+		Count: humanizeFloat(sum, userData.Locale()),
 	})
 
 	return table

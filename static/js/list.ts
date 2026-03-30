@@ -9,7 +9,7 @@ class List {
 
   rootContent: HTMLDivElement;
 
-  list: HTMLDivElement;
+  listEl: HTMLDivElement;
 
   listHeaderContainer: HTMLDivElement;
   listHeader: HTMLDivElement;
@@ -37,18 +37,20 @@ class List {
 
   currentRequest: XMLHttpRequest;
 
-  constructor(list: HTMLDivElement) {
-    this.list = list;
+  filter: ListFilter;
+
+  constructor(listEl: HTMLDivElement) {
+    this.listEl = listEl;
 
     this.rootContent = document.querySelector(".root_content");
     this.listHeaderContainer = this.rootContent.querySelector(
       ".list_header_container"
     );
-    this.listTable = this.list.querySelector(".list_table");
-    this.listHeader = this.list.querySelector(".list_header");
-    this.listFooter = this.list.querySelector(".list_footer");
+    this.listTable = this.listEl.querySelector(".list_table");
+    this.listHeader = this.listEl.querySelector(".list_header");
+    this.listFooter = this.listEl.querySelector(".list_footer");
 
-    this.defaultVisibleColumnsStr = list.getAttribute("data-visible-columns");
+    this.defaultVisibleColumnsStr = listEl.getAttribute("data-visible-columns");
     this.visibleColumnsStr = this.defaultVisibleColumnsStr;
 
     this.settings = new ListSettings(this);
@@ -60,19 +62,21 @@ class List {
       this.page = 1;
     }
 
-    this.typeName = list.getAttribute("data-type");
+    this.typeName = listEl.getAttribute("data-type");
     if (!this.typeName) {
       return;
     }
 
-    this.progress = <HTMLProgressElement>list.querySelector(".list_progress");
+    this.progress = <HTMLProgressElement>listEl.querySelector(".list_progress");
 
-    this.tableContent = <HTMLElement>list.querySelector(".list_table_content");
+    this.tableContent = <HTMLElement>listEl.querySelector(".list_table_content");
 
-    this.bindFilter(urlParams);
+    this.filter = new ListFilter(this, urlParams);
 
-    this.defaultOrderColumn = list.getAttribute("data-order-column");
-    if (list.getAttribute("data-order-desc") == "true") {
+    this.inputPeriodicListener();
+
+    this.defaultOrderColumn = listEl.getAttribute("data-order-column");
+    if (listEl.getAttribute("data-order-desc") == "true") {
       this.defaultOrderDesc = true;
     } else {
       this.defaultOrderDesc = false;
@@ -90,8 +94,7 @@ class List {
       this.orderDesc = false;
     }
     
-
-    this.itemsPerPage = parseInt(list.getAttribute("data-items-per-page"));
+    this.itemsPerPage = parseInt(listEl.getAttribute("data-items-per-page"));
 
     this.multiple = new ListMultiple(this);
 
@@ -106,7 +109,7 @@ class List {
   copyColumnWidths() {
     let totalWidth = this.listHeader.getBoundingClientRect().width;
 
-    let headerItems = this.list.querySelectorAll(
+    let headerItems = this.listEl.querySelectorAll(
       ".list_header > :not(.hidden)"
     );
 
@@ -119,7 +122,7 @@ class List {
       widths.push(elWidth);
     }
 
-    let tableRows = this.list.querySelectorAll(".list_row");
+    let tableRows = this.listEl.querySelectorAll(".list_row");
     for (let i = 0; i < tableRows.length; i++) {
       let rowItems = tableRows[i].children;
 
@@ -132,7 +135,7 @@ class List {
       }
     }
 
-    let placeholderItems = this.list.querySelectorAll(
+    let placeholderItems = this.listEl.querySelectorAll(
       ".list_tableplaceholder_row"
     );
     if (placeholderItems.length > 0) {
@@ -148,7 +151,7 @@ class List {
     if (this.currentRequest) {
       this.currentRequest.abort();
     }
-    this.list.classList.add("list-loading");
+    this.listEl.classList.add("list-loading");
 
     var request = new XMLHttpRequest();
     this.currentRequest = request;
@@ -165,11 +168,11 @@ class List {
     }
     
 
-    let filterData = this.getFilterData();
+    let filterData = this.filter.getFilterData();
     for (var k in filterData) {
       params[k] = filterData[k];
     }
-    this.colorActiveFilterItems();
+    this.filter.colorActiveFilterItems();
 
 
     var encoded = encodeParams(params);
@@ -213,26 +216,10 @@ class List {
         console.error("error while loading list");
       }
       this.copyColumnWidths();
-      this.list.classList.remove("list-loading");
+      this.listEl.classList.remove("list-loading");
       this.listHeaderContainer.classList.add("list_header_container-visible");
     });
     request.send(JSON.stringify({}));
-  }
-
-  colorActiveFilterItems() {
-    let itemsToColor = this.getFilterData();
-    var filterItems: NodeListOf<HTMLDivElement> = this.list.querySelectorAll(
-      ".list_header_item_filter"
-    );
-    for (var i = 0; i < filterItems.length; i++) {
-      var item = filterItems[i];
-      let name = item.getAttribute("data-name");
-      if (itemsToColor[name]) {
-        item.classList.add("list_filteritem-colored");
-      } else {
-        item.classList.remove("list_filteritem-colored");
-      }
-    }
   }
 
   paginationChange(e: any) {
@@ -245,12 +232,12 @@ class List {
   }
 
   bindSettingsButton() {
-    let btn: HTMLButtonElement = this.list.querySelector(".list_settings_btn2");
+    let btn: HTMLButtonElement = this.listEl.querySelector(".list_settings_btn2");
     this.settings.bindSettingsBtn(btn);
   }
 
   bindPagination() {
-    var paginationEl = this.list.querySelector(".pagination");
+    var paginationEl = this.listEl.querySelector(".pagination");
     var totalPages = parseInt(paginationEl.getAttribute("data-total"));
     var selectedPage = parseInt(paginationEl.getAttribute("data-selected"));
     if (totalPages < 2) {
@@ -299,7 +286,7 @@ class List {
   }
 
   bindFetchStats() {
-    var cells = this.list.querySelectorAll(".list_cell[data-fetch-url]");
+    var cells = this.listEl.querySelectorAll(".list_cell[data-fetch-url]");
     for (var i = 0; i < cells.length; i++) {
       let cell = <HTMLDivElement>cells[i];
       let url = cell.getAttribute("data-fetch-url");
@@ -339,7 +326,7 @@ class List {
   }
 
   bindClick() {
-    var rows = this.list.querySelectorAll(".list_row");
+    var rows = this.listEl.querySelectorAll(".list_row");
     for (var i = 0; i < rows.length; i++) {
       let row = <HTMLTableRowElement>rows[i];
 
@@ -437,7 +424,7 @@ class List {
 
   bindOrder() {
     this.renderOrder();
-    var headers = this.list.querySelectorAll(".list_header_item_name-canorder");
+    var headers = this.listEl.querySelectorAll(".list_header_item_name-canorder");
     for (var i = 0; i < headers.length; i++) {
       var header = <HTMLAnchorElement>headers[i];
       header.addEventListener("click", (e) => {
@@ -462,7 +449,7 @@ class List {
   }
 
   bindResizer() {
-    var resizers = this.list.querySelectorAll(".list_header_item_resizer");
+    var resizers = this.listEl.querySelectorAll(".list_header_item_resizer");
 
     for (var i = 0; i < resizers.length; i++) {
       var resizer = <HTMLAnchorElement>resizers[i];
@@ -531,7 +518,7 @@ class List {
   }
 
   bindInitialHeaderWidths() {
-    let headerItems = this.list.querySelectorAll(".list_header_item");
+    let headerItems = this.listEl.querySelectorAll(".list_header_item");
     for (var i = 0; i < headerItems.length; i++) {
       var itemEl = <HTMLDivElement>headerItems[i];
 
@@ -569,7 +556,7 @@ class List {
   }
 
   renderOrder() {
-    var headers = this.list.querySelectorAll(".list_header_item_name-canorder");
+    var headers = this.listEl.querySelectorAll(".list_header_item_name-canorder");
     for (var i = 0; i < headers.length; i++) {
       var header = <HTMLAnchorElement>headers[i];
       header.classList.remove("ordered");
@@ -582,93 +569,6 @@ class List {
         }
       }
     }
-  }
-
-  getFilterData(): any {
-    var ret: any = {};
-    var items = this.list.querySelectorAll(".list_filter_item");
-    for (var i = 0; i < items.length; i++) {
-      var item = <HTMLInputElement>items[i];
-      var typ = item.getAttribute("data-typ");
-      var layout = item.getAttribute("data-filter-layout");
-      if (item.classList.contains("list_filter_item-relations")) {
-        ret[typ] = item.querySelector("input").value;
-      } else {
-        var val = item.value.trim();
-        if (val) {
-          ret[typ] = val;
-        }
-      }
-    }
-    return ret;
-  }
-
-  bindFilter(params: any) {
-    var filterFields = this.list.querySelectorAll(".list_header_item_filter");
-    for (var i = 0; i < filterFields.length; i++) {
-      var field: HTMLDivElement = <HTMLDivElement>filterFields[i];
-      var fieldName = field.getAttribute("data-name");
-      var fieldLayout = field.getAttribute("data-filter-layout");
-      var fieldInput = field.querySelector("input");
-      var fieldSelect = field.querySelector("select");
-      var fieldValue = params.get(fieldName);
-
-      if (fieldValue) {
-        if (fieldInput) {
-          fieldInput.value = fieldValue;
-        }
-        if (fieldSelect) {
-          fieldSelect.value = fieldValue;
-        }
-      }
-
-      if (fieldInput) {
-        fieldInput.addEventListener("input", this.inputListener.bind(this));
-        fieldInput.addEventListener("change", this.inputListener.bind(this));
-      }
-
-      if (fieldSelect) {
-        fieldSelect.addEventListener("input", this.inputListener.bind(this));
-        fieldSelect.addEventListener("change", this.inputListener.bind(this));
-      }
-
-      if (fieldLayout == "filter_layout_relation") {
-        this.bindFilterRelation(field, fieldValue);
-      }
-
-      if (fieldLayout == "filter_layout_date") {
-        this.bindFilterDate(field, fieldValue);
-      }
-    }
-    this.inputPeriodicListener();
-  }
-
-  inputListener(e: any) {
-    if (
-      e.keyCode == 9 ||
-      e.keyCode == 16 ||
-      e.keyCode == 17 ||
-      e.keyCode == 18
-    ) {
-      return;
-    }
-    this.filterChanged();
-  }
-
-  filterChanged() {
-    this.colorActiveFilterItems();
-    this.page = 1;
-    this.changed = true;
-    this.changedTimestamp = Date.now();
-    this.list.classList.add("list-loading");
-  }
-
-  bindFilterRelation(el: HTMLDivElement, value: any) {
-    new ListFilterRelations(el, value, this);
-  }
-
-  bindFilterDate(el: HTMLDivElement, value: any) {
-    new ListFilterDate(el, value);
   }
 
   inputPeriodicListener() {
@@ -688,7 +588,7 @@ class List {
       this.listHeaderPositionChanged.bind(this)
     );
 
-    this.list.addEventListener(
+    this.listEl.addEventListener(
       "scroll",
       this.listHeaderPositionChanged.bind(this)
     );

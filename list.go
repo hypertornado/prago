@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/url"
@@ -48,6 +49,8 @@ type listHeaderItem struct {
 	RelatedResourceID string
 	FilterData        interface{}
 	NaturalCellWidth  int64
+
+	DefaultFilterResponse *ListFilterResponse
 }
 
 type pagination struct {
@@ -77,23 +80,29 @@ func (row *listRow) PreName() string {
 	return fmt.Sprintf("#%d", row.ID)
 }
 
-func (resource *Resource) getListHeader(userData UserData) (list list, err error) {
-	lang := userData.Locale()
+func (lhi listHeaderItem) DefaultFilterResponseJSON() template.HTMLAttr {
+	data, err := json.Marshal(lhi.DefaultFilterResponse)
+	must(err)
+	return template.HTMLAttr(data)
+}
+
+func (resource *Resource) getListHeader(request *Request) (list list, err error) {
+	lang := request.Locale()
 
 	list.Colspan = 1
 	list.Language = lang
 	list.TypeID = resource.id
-	list.VisibleColumns = resource.defaultVisibleFieldsStr(userData)
-	list.Columns = resource.fieldsStr(userData)
+	list.VisibleColumns = resource.defaultVisibleFieldsStr(request)
+	list.Columns = resource.fieldsStr(request)
 
 	list.OrderColumn = resource.orderByColumn
 	list.OrderDesc = resource.orderDesc
-	list.Locale = userData.Locale()
+	list.Locale = request.Locale()
 
 	list.ItemsPerPage = resource.defaultItemsPerPage
 
-	list.StatsLimitSelectData = getStatsLimitSelectData(userData.Locale())
-	list.MultipleActions = resource.getMultipleActions(userData)
+	list.StatsLimitSelectData = getStatsLimitSelectData(request.Locale())
+	list.MultipleActions = resource.getMultipleActions(request)
 
 	orderField, ok := resource.fieldMap[resource.orderByColumn]
 	if !ok || !orderField.canOrder {
@@ -106,11 +115,11 @@ func (resource *Resource) getListHeader(userData UserData) (list list, err error
 	if resource.orderField != nil {
 		list.CanChangeOrder = true
 	}
-	list.CanExport = userData.Authorize(resource.canExport)
+	list.CanExport = request.Authorize(resource.canExport)
 
 	for _, v := range resource.fields {
-		if v.authorizeView(userData) {
-			headerItem := (*v).getListHeaderItem(userData)
+		if v.authorizeView(request) {
+			headerItem := (*v).getListHeaderItem(request)
 			if headerItem.DefaultShow {
 				list.Colspan++
 			}
@@ -119,7 +128,7 @@ func (resource *Resource) getListHeader(userData UserData) (list list, err error
 	}
 
 	for k, stat := range resource.itemStats {
-		if !userData.Authorize(stat.Permission) {
+		if !request.Authorize(stat.Permission) {
 			continue
 		}
 
@@ -127,7 +136,7 @@ func (resource *Resource) getListHeader(userData UserData) (list list, err error
 			Name:             stat.id,
 			Icon:             "glyphicons-basic-43-stats-circle.svg",
 			ColumnName:       stat.id,
-			NameHuman:        stat.Name(userData.Locale()),
+			NameHuman:        stat.Name(request.Locale()),
 			CanOrder:         false,
 			DefaultShow:      true,
 			NaturalCellWidth: 150,
@@ -205,7 +214,7 @@ func (field *Field) getNaturalCellWidth() int64 {
 
 }
 
-func (field *Field) getListHeaderItem(userData UserData) listHeaderItem {
+func (field *Field) getListHeaderItem(request *Request) listHeaderItem {
 	var relatedResourceID string
 	if field.relatedResource != nil {
 		relatedResourceID = field.relatedResource.getID()
@@ -214,25 +223,27 @@ func (field *Field) getListHeaderItem(userData UserData) listHeaderItem {
 	headerItem := listHeaderItem{
 		Name:              field.fieldClassName,
 		Icon:              field.getIcon(),
-		NameHuman:         field.name(userData.Locale()),
+		NameHuman:         field.name(request.Locale()),
 		ColumnName:        field.id,
 		DefaultShow:       !field.defaultHidden,
 		RelatedResourceID: relatedResourceID,
 		NaturalCellWidth:  field.getNaturalCellWidth(),
+
+		DefaultFilterResponse: listFilterGetResponse(request.Param(field.id), field, request),
 	}
 
 	headerItem.FilterLayout = field.filterLayout()
 
 	if headerItem.FilterLayout == "filter_layout_boolean" {
 		headerItem.FilterData = []string{
-			messages.Get(userData.Locale(), "yes"),
-			messages.Get(userData.Locale(), "no"),
+			messages.Get(request.Locale(), "yes"),
+			messages.Get(request.Locale(), "no"),
 		}
 	}
 
 	if headerItem.FilterLayout == "filter_layout_select" {
 		fn := field.fieldType.filterLayoutDataSource
-		headerItem.FilterData = fn(field, userData)
+		headerItem.FilterData = fn(field, request)
 	}
 
 	if field.canOrder {
@@ -370,7 +381,14 @@ func (resource *Resource) addFilterToQuery(listQuery *listQuery, filter map[stri
 				continue
 			}
 			if v != "" {
-				listQuery.Is(k, v)
+				items := strings.Split(v, ",")
+				var queryParts []string
+				var values []any
+				for _, item := range items {
+					queryParts = append(queryParts, fmt.Sprintf("%s = ?", k))
+					values = append(values, item)
+				}
+				listQuery.where("("+strings.Join(queryParts, " OR ")+")", values...)
 			}
 		case "filter_layout_date":
 			v = strings.Trim(v, " ")

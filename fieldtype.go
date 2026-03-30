@@ -116,12 +116,6 @@ func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("video", &fieldType{
 		viewTemplate:   "view_video",
 		viewDataSource: videoViewDataSource,
-		//formTemplate:       "form_input_image",
-		//formDataSource:     imageFormDataSource(".jpg,.jpeg,.png"),
-		//listCellDataSource: imageCellViewData,
-
-		//filterLayoutTemplate:   "filter_layout_select",
-		//filterLayoutDataSource: boolFilterLayoutDataSource,
 
 		fieldTypeIcon:    iconVideo,
 		naturalCellWidth: 60,

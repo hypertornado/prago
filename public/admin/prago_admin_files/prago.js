@@ -7029,17 +7029,17 @@ class ListFilterDate {
     }
 }
 class List {
-    constructor(list) {
+    constructor(listEl) {
         this.minCellWidth = 50;
         this.normalCellWidth = 100;
         this.maxCellWidth = 500;
-        this.list = list;
+        this.listEl = listEl;
         this.rootContent = document.querySelector(".root_content");
         this.listHeaderContainer = this.rootContent.querySelector(".list_header_container");
-        this.listTable = this.list.querySelector(".list_table");
-        this.listHeader = this.list.querySelector(".list_header");
-        this.listFooter = this.list.querySelector(".list_footer");
-        this.defaultVisibleColumnsStr = list.getAttribute("data-visible-columns");
+        this.listTable = this.listEl.querySelector(".list_table");
+        this.listHeader = this.listEl.querySelector(".list_header");
+        this.listFooter = this.listEl.querySelector(".list_footer");
+        this.defaultVisibleColumnsStr = listEl.getAttribute("data-visible-columns");
         this.visibleColumnsStr = this.defaultVisibleColumnsStr;
         this.settings = new ListSettings(this);
         let urlParams = new URLSearchParams(window.location.search);
@@ -7047,15 +7047,16 @@ class List {
         if (!this.page) {
             this.page = 1;
         }
-        this.typeName = list.getAttribute("data-type");
+        this.typeName = listEl.getAttribute("data-type");
         if (!this.typeName) {
             return;
         }
-        this.progress = list.querySelector(".list_progress");
-        this.tableContent = list.querySelector(".list_table_content");
-        this.bindFilter(urlParams);
-        this.defaultOrderColumn = list.getAttribute("data-order-column");
-        if (list.getAttribute("data-order-desc") == "true") {
+        this.progress = listEl.querySelector(".list_progress");
+        this.tableContent = listEl.querySelector(".list_table_content");
+        this.filter = new ListFilter(this, urlParams);
+        this.inputPeriodicListener();
+        this.defaultOrderColumn = listEl.getAttribute("data-order-column");
+        if (listEl.getAttribute("data-order-desc") == "true") {
             this.defaultOrderDesc = true;
         }
         else {
@@ -7072,7 +7073,7 @@ class List {
         if (urlParams.get("_desc") == "false") {
             this.orderDesc = false;
         }
-        this.itemsPerPage = parseInt(list.getAttribute("data-items-per-page"));
+        this.itemsPerPage = parseInt(listEl.getAttribute("data-items-per-page"));
         this.multiple = new ListMultiple(this);
         this.settings.setVisibleColumns();
         this.bindOrder();
@@ -7082,7 +7083,7 @@ class List {
     }
     copyColumnWidths() {
         let totalWidth = this.listHeader.getBoundingClientRect().width;
-        let headerItems = this.list.querySelectorAll(".list_header > :not(.hidden)");
+        let headerItems = this.listEl.querySelectorAll(".list_header > :not(.hidden)");
         let widths = [];
         for (let j = 0; j < headerItems.length; j++) {
             let headerEl = headerItems[j];
@@ -7090,7 +7091,7 @@ class List {
             var elWidth = clientRect.width;
             widths.push(elWidth);
         }
-        let tableRows = this.list.querySelectorAll(".list_row");
+        let tableRows = this.listEl.querySelectorAll(".list_row");
         for (let i = 0; i < tableRows.length; i++) {
             let rowItems = tableRows[i].children;
             for (let j = 0; j < widths.length; j++) {
@@ -7101,7 +7102,7 @@ class List {
                 tableEl.style.width = widths[j] + "px";
             }
         }
-        let placeholderItems = this.list.querySelectorAll(".list_tableplaceholder_row");
+        let placeholderItems = this.listEl.querySelectorAll(".list_tableplaceholder_row");
         if (placeholderItems.length > 0) {
             let placeholderWidth = totalWidth;
             for (let i = 0; i < placeholderItems.length; i++) {
@@ -7114,7 +7115,7 @@ class List {
         if (this.currentRequest) {
             this.currentRequest.abort();
         }
-        this.list.classList.add("list-loading");
+        this.listEl.classList.add("list-loading");
         var request = new XMLHttpRequest();
         this.currentRequest = request;
         var params = {};
@@ -7127,11 +7128,11 @@ class List {
         if (this.orderDesc != this.defaultOrderDesc) {
             params["_desc"] = this.orderDesc + "";
         }
-        let filterData = this.getFilterData();
+        let filterData = this.filter.getFilterData();
         for (var k in filterData) {
             params[k] = filterData[k];
         }
-        this.colorActiveFilterItems();
+        this.filter.colorActiveFilterItems();
         var encoded = encodeParams(params);
         window.history.replaceState(null, null, document.location.pathname + encoded);
         var columns = this.visibleColumnsStr;
@@ -7162,24 +7163,10 @@ class List {
                 console.error("error while loading list");
             }
             this.copyColumnWidths();
-            this.list.classList.remove("list-loading");
+            this.listEl.classList.remove("list-loading");
             this.listHeaderContainer.classList.add("list_header_container-visible");
         });
         request.send(JSON.stringify({}));
-    }
-    colorActiveFilterItems() {
-        let itemsToColor = this.getFilterData();
-        var filterItems = this.list.querySelectorAll(".list_header_item_filter");
-        for (var i = 0; i < filterItems.length; i++) {
-            var item = filterItems[i];
-            let name = item.getAttribute("data-name");
-            if (itemsToColor[name]) {
-                item.classList.add("list_filteritem-colored");
-            }
-            else {
-                item.classList.remove("list_filteritem-colored");
-            }
-        }
     }
     paginationChange(e) {
         var el = e.target;
@@ -7190,11 +7177,11 @@ class List {
         return false;
     }
     bindSettingsButton() {
-        let btn = this.list.querySelector(".list_settings_btn2");
+        let btn = this.listEl.querySelector(".list_settings_btn2");
         this.settings.bindSettingsBtn(btn);
     }
     bindPagination() {
-        var paginationEl = this.list.querySelector(".pagination");
+        var paginationEl = this.listEl.querySelector(".pagination");
         var totalPages = parseInt(paginationEl.getAttribute("data-total"));
         var selectedPage = parseInt(paginationEl.getAttribute("data-selected"));
         if (totalPages < 2) {
@@ -7240,7 +7227,7 @@ class List {
         }
     }
     bindFetchStats() {
-        var cells = this.list.querySelectorAll(".list_cell[data-fetch-url]");
+        var cells = this.listEl.querySelectorAll(".list_cell[data-fetch-url]");
         for (var i = 0; i < cells.length; i++) {
             let cell = cells[i];
             let url = cell.getAttribute("data-fetch-url");
@@ -7272,7 +7259,7 @@ class List {
         }
     }
     bindClick() {
-        var rows = this.list.querySelectorAll(".list_row");
+        var rows = this.listEl.querySelectorAll(".list_row");
         for (var i = 0; i < rows.length; i++) {
             let row = rows[i];
             row.addEventListener("contextmenu", this.contextClick.bind(this));
@@ -7355,7 +7342,7 @@ class List {
     }
     bindOrder() {
         this.renderOrder();
-        var headers = this.list.querySelectorAll(".list_header_item_name-canorder");
+        var headers = this.listEl.querySelectorAll(".list_header_item_name-canorder");
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
             header.addEventListener("click", (e) => {
@@ -7381,7 +7368,7 @@ class List {
         }
     }
     bindResizer() {
-        var resizers = this.list.querySelectorAll(".list_header_item_resizer");
+        var resizers = this.listEl.querySelectorAll(".list_header_item_resizer");
         for (var i = 0; i < resizers.length; i++) {
             var resizer = resizers[i];
             let parentEl = resizer.parentElement;
@@ -7441,7 +7428,7 @@ class List {
         cell.setAttribute("style", "width: " + width + "px;");
     }
     bindInitialHeaderWidths() {
-        let headerItems = this.list.querySelectorAll(".list_header_item");
+        let headerItems = this.listEl.querySelectorAll(".list_header_item");
         for (var i = 0; i < headerItems.length; i++) {
             var itemEl = headerItems[i];
             let width = parseInt(itemEl.getAttribute("data-natural-width"));
@@ -7471,7 +7458,7 @@ class List {
         window.localStorage.removeItem(this.webStorageWidthName(cell));
     }
     renderOrder() {
-        var headers = this.list.querySelectorAll(".list_header_item_name-canorder");
+        var headers = this.listEl.querySelectorAll(".list_header_item_name-canorder");
         for (var i = 0; i < headers.length; i++) {
             var header = headers[i];
             header.classList.remove("ordered");
@@ -7485,81 +7472,6 @@ class List {
             }
         }
     }
-    getFilterData() {
-        var ret = {};
-        var items = this.list.querySelectorAll(".list_filter_item");
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            var typ = item.getAttribute("data-typ");
-            var layout = item.getAttribute("data-filter-layout");
-            if (item.classList.contains("list_filter_item-relations")) {
-                ret[typ] = item.querySelector("input").value;
-            }
-            else {
-                var val = item.value.trim();
-                if (val) {
-                    ret[typ] = val;
-                }
-            }
-        }
-        return ret;
-    }
-    bindFilter(params) {
-        var filterFields = this.list.querySelectorAll(".list_header_item_filter");
-        for (var i = 0; i < filterFields.length; i++) {
-            var field = filterFields[i];
-            var fieldName = field.getAttribute("data-name");
-            var fieldLayout = field.getAttribute("data-filter-layout");
-            var fieldInput = field.querySelector("input");
-            var fieldSelect = field.querySelector("select");
-            var fieldValue = params.get(fieldName);
-            if (fieldValue) {
-                if (fieldInput) {
-                    fieldInput.value = fieldValue;
-                }
-                if (fieldSelect) {
-                    fieldSelect.value = fieldValue;
-                }
-            }
-            if (fieldInput) {
-                fieldInput.addEventListener("input", this.inputListener.bind(this));
-                fieldInput.addEventListener("change", this.inputListener.bind(this));
-            }
-            if (fieldSelect) {
-                fieldSelect.addEventListener("input", this.inputListener.bind(this));
-                fieldSelect.addEventListener("change", this.inputListener.bind(this));
-            }
-            if (fieldLayout == "filter_layout_relation") {
-                this.bindFilterRelation(field, fieldValue);
-            }
-            if (fieldLayout == "filter_layout_date") {
-                this.bindFilterDate(field, fieldValue);
-            }
-        }
-        this.inputPeriodicListener();
-    }
-    inputListener(e) {
-        if (e.keyCode == 9 ||
-            e.keyCode == 16 ||
-            e.keyCode == 17 ||
-            e.keyCode == 18) {
-            return;
-        }
-        this.filterChanged();
-    }
-    filterChanged() {
-        this.colorActiveFilterItems();
-        this.page = 1;
-        this.changed = true;
-        this.changedTimestamp = Date.now();
-        this.list.classList.add("list-loading");
-    }
-    bindFilterRelation(el, value) {
-        new ListFilterRelations(el, value, this);
-    }
-    bindFilterDate(el, value) {
-        new ListFilterDate(el, value);
-    }
     inputPeriodicListener() {
         setInterval(() => {
             if (this.changed == true && Date.now() - this.changedTimestamp > 500) {
@@ -7571,7 +7483,7 @@ class List {
     bindHeaderPositionCalculator() {
         this.listHeaderPositionChanged();
         window.addEventListener("resize", this.listHeaderPositionChanged.bind(this));
-        this.list.addEventListener("scroll", this.listHeaderPositionChanged.bind(this));
+        this.listEl.addEventListener("scroll", this.listHeaderPositionChanged.bind(this));
         this.rootContent.addEventListener("scroll", this.listHeaderPositionChanged.bind(this));
         this.listTable.addEventListener("scroll", this.listHeaderPositionChanged.bind(this));
     }
@@ -7587,17 +7499,140 @@ class List {
         return true;
     }
 }
+class ListFilter {
+    constructor(list, params) {
+        this.list = list;
+        this.listFilterItems = [];
+        var filterFields = this.list.listEl.querySelectorAll(".list_header_item_filter");
+        for (var i = 0; i < filterFields.length; i++) {
+            var field = filterFields[i];
+            this.listFilterItems.push(new ListFilterItem(this, field, params));
+        }
+    }
+    filterChanged() {
+        this.colorActiveFilterItems();
+        this.list.page = 1;
+        this.list.changed = true;
+        this.list.changedTimestamp = Date.now();
+        this.list.listEl.classList.add("list-loading");
+    }
+    getFilterData() {
+        var ret = {};
+        this.listFilterItems.forEach((item) => {
+            var val = item.getFieldValue();
+            if (val) {
+                ret[item.getFieldID()] = val;
+            }
+        });
+        return ret;
+    }
+    colorActiveFilterItems() {
+        let itemsToColor = this.getFilterData();
+        this.listFilterItems.forEach((item) => {
+            item.setColor();
+        });
+    }
+}
+class ListFilterItem {
+    constructor(filter, el, params) {
+        this.filter = filter;
+        this.el = el;
+        var fieldName = el.getAttribute("data-name");
+        this.filterLayout = el.getAttribute("data-filter-layout");
+        var fieldInput = el.querySelector("input");
+        var fieldSelect = el.querySelector("select");
+        var fieldValue = params.get(fieldName);
+        this.value = fieldValue;
+        if (fieldValue) {
+            if (fieldInput) {
+                fieldInput.value = fieldValue;
+            }
+            if (fieldSelect) {
+                fieldSelect.value = fieldValue;
+            }
+        }
+        if (fieldInput) {
+            fieldInput.addEventListener("input", this.inputListener.bind(this));
+            fieldInput.addEventListener("change", this.inputListener.bind(this));
+        }
+        if (fieldSelect) {
+            fieldSelect.addEventListener("input", this.inputListener.bind(this));
+            fieldSelect.addEventListener("change", this.inputListener.bind(this));
+        }
+        if (this.filterLayout == "filter_layout_select") {
+            this.initFilter2();
+        }
+        if (this.filterLayout == "filter_layout_relation") {
+            new ListFilterRelations(el, fieldValue, this.filter.list);
+        }
+        if (this.filterLayout == "filter_layout_date") {
+            new ListFilterDate(el, fieldValue);
+        }
+    }
+    inputListener(e) {
+        if (e.keyCode == 9 ||
+            e.keyCode == 16 ||
+            e.keyCode == 17 ||
+            e.keyCode == 18) {
+            return;
+        }
+        this.filter.filterChanged();
+    }
+    initFilter2() {
+        this.isListFilter2 = true;
+        this.filter2El = this.el.querySelector(".list_filter2");
+        this.filter2NameEl = this.el.querySelector(".list_filter2_name");
+        this.filter2El.addEventListener("click", this.filter2Clicked.bind(this));
+        let data = JSON.parse(this.filter2El.getAttribute("data-filter-content"));
+        this.setFilter2Data(data);
+    }
+    filter2Clicked() {
+        new PopupForm("/admin/_list-fiter-item?field=" + this.getFieldID() + "&resource=" + this.filter.list.typeName + "&value=" + this.getFieldValue(), (data) => {
+            this.setFilter2Data(data.Data);
+        });
+    }
+    setFilter2Data(data) {
+        this.value = "";
+        this.setFilter2Name("");
+        if (data) {
+            this.value = data.ID;
+            this.setFilter2Name(data.Name);
+        }
+        this.filter.filterChanged();
+    }
+    setFilter2Name(name) {
+        this.filter2El.title = name;
+        this.filter2NameEl.innerText = name;
+    }
+    getFieldID() {
+        return this.el.getAttribute("data-name");
+    }
+    getFieldValue() {
+        if (this.isListFilter2) {
+            return this.value;
+        }
+        if (this.filterLayout == "filter_layout_select") {
+            return this.el.querySelector("input").value;
+        }
+        if (this.el.classList.contains("list_filter_item-relations")) {
+            return this.el.querySelector("input").value;
+        }
+        let input = this.el.querySelector(".list_filter_input");
+        return input.value.trim();
+    }
+    setColor() {
+        var val = this.getFieldValue();
+        if (val) {
+            this.el.classList.add("list_filteritem-colored");
+        }
+        else {
+            this.el.classList.remove("list_filteritem-colored");
+        }
+    }
+}
 class ListSettings {
     constructor(list) {
         this.list = list;
-        this.statsContainer = document.querySelector(".list_stats_container");
-        this.statsEl = document.querySelector(".list_stats");
-        this.statsPopup = new ContentPopup("Statistiky", this.statsEl);
-        this.statsPopup.setIcon("glyphicons-basic-43-stats-circle.svg");
-        this.statsCheckboxSelectCount = document.querySelector(".list_stats_limit");
-        this.statsCheckboxSelectCount.addEventListener("change", () => {
-            this.loadStats();
-        });
     }
     bindSettingsBtn(btn) {
         btn.addEventListener("click", (e) => {
@@ -7632,7 +7667,7 @@ class ListSettings {
                         Handler: () => {
                             var params = {};
                             params["_resource"] = this.list.typeName;
-                            let filterData = this.list.getFilterData();
+                            let filterData = this.list.filter.getFilterData();
                             for (var k in filterData) {
                                 params[k] = filterData[k];
                             }
@@ -7647,7 +7682,7 @@ class ListSettings {
                             var params = {};
                             params["_resource"] = this.list.typeName;
                             params["_columns"] = this.list.visibleColumnsStr;
-                            let filterData = this.list.getFilterData();
+                            let filterData = this.list.filter.getFilterData();
                             for (var k in filterData) {
                                 params[k] = filterData[k];
                             }
@@ -7674,27 +7709,8 @@ class ListSettings {
             });
         });
     }
-    loadStats() {
-        let filterData = this.list.getFilterData();
-        var params = {};
-        params["_statslimit"] = this.statsCheckboxSelectCount.value;
-        for (var k in filterData) {
-            params[k] = filterData[k];
-        }
-        var request = new XMLHttpRequest();
-        var encoded = encodeParams(params);
-        request.open("GET", "/admin/" + this.list.typeName + "/api/list-stats" + encoded, true);
-        this.statsContainer.innerHTML = "Loading...";
-        request.addEventListener("load", () => {
-            if (request.status == 200) {
-                this.statsContainer.innerHTML = request.response;
-            }
-        });
-        request.send();
-    }
     setVisibleColumns() {
         var columns = this.getSelectedColumnsMap();
-        console.log(columns);
         var headers = document.querySelectorAll(".list_header_item");
         for (var i = 0; i < headers.length; i++) {
             var name = headers[i].getAttribute("data-name");
@@ -7731,13 +7747,13 @@ class ListMultiple {
         }
     }
     hasMultipleActions() {
-        if (this.list.list.classList.contains("list-hasmultipleactions")) {
+        if (this.list.listEl.classList.contains("list-hasmultipleactions")) {
             return true;
         }
         return false;
     }
     bindMultipleActions() {
-        this.listHeaderAllSelect = this.list.list.querySelector(".list_header_multiple");
+        this.listHeaderAllSelect = this.list.listEl.querySelector(".list_header_multiple");
         this.listHeaderAllSelect.addEventListener("click", () => {
             if (this.isAllChecked()) {
                 this.multipleUncheckAll();
@@ -7746,11 +7762,11 @@ class ListMultiple {
                 this.multipleCheckAll();
             }
         });
-        var actions = this.list.list.querySelectorAll(".list_multiple_action");
+        var actions = this.list.listEl.querySelectorAll(".list_multiple_action");
         for (var i = 0; i < actions.length; i++) {
             actions[i].addEventListener("click", this.multipleActionClicked.bind(this));
         }
-        this.list.list
+        this.list.listEl
             .querySelector(".list_multiple_actions_cancel")
             .addEventListener("click", () => {
             this.multipleUncheckAll();
@@ -7836,7 +7852,7 @@ class ListMultiple {
                 checkedCount++;
             }
         }
-        var multipleActionsPanel = this.list.list.querySelector(".list_multiple_actions");
+        var multipleActionsPanel = this.list.listEl.querySelector(".list_multiple_actions");
         if (checkedCount > 0) {
             multipleActionsPanel.classList.add("list_multiple_actions-visible");
         }
@@ -7849,7 +7865,7 @@ class ListMultiple {
         else {
             this.listHeaderAllSelect.classList.remove("list_row_multiple-checked");
         }
-        this.list.list.querySelector(".list_multiple_actions_description").textContent = `Vybráno ${checkedCount} položek`;
+        this.list.listEl.querySelector(".list_multiple_actions_description").textContent = `Vybráno ${checkedCount} položek`;
     }
     multipleUncheckAll() {
         this.lastCheckboxIndexClicked = -1;

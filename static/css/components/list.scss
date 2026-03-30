@@ -9,9 +9,6 @@
   overflow: auto;
 }
 
-.list_hidden {
-  display: none;
-}
 
 .list_header_container {
   z-index: 10;
@@ -413,12 +410,6 @@
 
 .list-loading .list_progress {
   display: inline;
-}
-
-.list_stats_limit {
-  padding: 1px 3px;
-  display: block;
-  margin: 5px 0px;
 }
 
 @media print {

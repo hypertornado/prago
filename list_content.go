@@ -9,8 +9,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-
-	"golang.org/x/net/context"
 )
 
 type listContent struct {
@@ -49,21 +47,22 @@ func (actions *listItemActions) JSON() template.HTMLAttr {
 	return template.HTMLAttr(b)
 }
 
-func (resource *Resource) getListContent(ctx context.Context, userData UserData, params url.Values) (ret *listContent, err error) {
+func (resource *Resource) getListContent(request *Request, params url.Values) (ret *listContent, err error) {
+	ctx := request.r.Context()
 	ret = &listContent{}
-	if !userData.Authorize(resource.canView) {
+	if !request.Authorize(resource.canView) {
 		return ret, errors.New("access denied")
 	}
 
 	var listHeader list
-	listHeader, err = resource.getListHeader(userData)
+	listHeader, err = resource.getListHeader(request)
 	if err != nil {
 		return
 	}
 
 	columnsStr := params.Get("_columns")
 	if columnsStr == "" {
-		columnsStr = resource.defaultVisibleFieldsStr(userData)
+		columnsStr = resource.defaultVisibleFieldsStr(request)
 	}
 
 	columnsAr := strings.Split(columnsStr, ",")
@@ -93,7 +92,7 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 
 	var count int64
 	countQuery := resource.query(ctx)
-	countQuery = resource.addFilterParamsToQuery(countQuery, params, userData)
+	countQuery = resource.addFilterParamsToQuery(countQuery, params, request)
 	count, err = countQuery.count()
 	if err != nil {
 		return
@@ -103,9 +102,9 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 	resource.updateCachedCount()
 
 	if count == totalCount {
-		ret.TotalCountStr = messages.ItemsCount(count, userData.Locale())
+		ret.TotalCountStr = messages.ItemsCount(count, request.Locale())
 	} else {
-		ret.TotalCountStr = fmt.Sprintf("%s z %s", humanizeNumber(count), messages.ItemsCount(totalCount, userData.Locale()))
+		ret.TotalCountStr = fmt.Sprintf("%s z %s", humanizeNumber(count), messages.ItemsCount(totalCount, request.Locale()))
 	}
 
 	var itemsPerPage = resource.defaultItemsPerPage
@@ -131,7 +130,7 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 		SelectedPage: int64(currentPage),
 	}
 
-	q = resource.addFilterParamsToQuery(q, params, userData)
+	q = resource.addFilterParamsToQuery(q, params, request)
 	q = q.Offset((int64(currentPage) - 1) * itemsPerPage)
 	q = q.Limit(itemsPerPage)
 
@@ -148,7 +147,7 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 		}
 		itemVal := itemVals.Index(i).Elem()
 
-		pw := resource.previewer(userData, itemVals.Index(i).Interface())
+		pw := resource.previewer(request, itemVals.Index(i).Interface())
 		row.Name = pw.Name()
 		row.Description = pw.DescriptionBasic(nil)
 		row.ImageURL = pw.ImageURL()
@@ -157,7 +156,7 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 			if columnsMap[v.ColumnName] {
 				if resource.Field(v.Name) != nil {
 					fieldVal := itemVal.FieldByName(v.Name)
-					row.Items = append(row.Items, getCellViewData(userData, resource.Field(v.ColumnName), fieldVal.Interface()))
+					row.Items = append(row.Items, getCellViewData(request, resource.Field(v.ColumnName), fieldVal.Interface()))
 				} else {
 					cell := &listCell{}
 					for _, stat := range resource.itemStats {
@@ -178,19 +177,19 @@ func (resource *Resource) getListContent(ctx context.Context, userData UserData,
 			}
 		}
 
-		previewer := resource.previewer(userData, itemVal.Addr().Interface())
+		previewer := resource.previewer(request, itemVal.Addr().Interface())
 		row.ID = previewer.ID()
 		row.URL = previewer.URL("")
 
-		row.Actions = resource.getListItemActions(userData, itemVal.Addr().Interface())
+		row.Actions = resource.getListItemActions(request, itemVal.Addr().Interface())
 
 		ret.Rows = append(ret.Rows, row)
 
 	}
 
-	ret.AllowsMultipleActions = resource.hasMultipleActions(userData)
+	ret.AllowsMultipleActions = resource.hasMultipleActions(request)
 
-	ret.Language = userData.Locale()
+	ret.Language = request.Locale()
 	ret.Message = ret.TotalCountStr
 	ret.Colspan = int64(len(columnsMap)) + 1
 
@@ -202,8 +201,8 @@ type listContentJSON struct {
 	FooterStr string
 }
 
-func (resource *Resource) getListContentJSON(ctx context.Context, userData UserData, params url.Values) *listContentJSON {
-	listContentData, err := resource.getListContent(ctx, userData, params)
+func (resource *Resource) getListContentJSON(request *Request, params url.Values) *listContentJSON {
+	listContentData, err := resource.getListContent(request, params)
 	must(err)
 
 	return &listContentJSON{

@@ -15,14 +15,14 @@ class ListMultiple {
   listHeaderAllSelect: HTMLDivElement;
 
   hasMultipleActions(): Boolean {
-    if (this.list.list.classList.contains("list-hasmultipleactions")) {
+    if (this.list.listEl.classList.contains("list-hasmultipleactions")) {
       return true;
     }
     return false;
   }
 
   bindMultipleActions() {
-    this.listHeaderAllSelect = this.list.list.querySelector(".list_header_multiple");
+    this.listHeaderAllSelect = this.list.listEl.querySelector(".list_header_multiple");
     this.listHeaderAllSelect.addEventListener("click", () =>{
       if (this.isAllChecked()) {
         this.multipleUncheckAll();
@@ -31,7 +31,7 @@ class ListMultiple {
       }
     })
 
-    var actions = this.list.list.querySelectorAll(".list_multiple_action");
+    var actions = this.list.listEl.querySelectorAll(".list_multiple_action");
     for (var i = 0; i < actions.length; i++) {
       actions[i].addEventListener(
         "click",
@@ -39,7 +39,7 @@ class ListMultiple {
       );
     }
 
-    this.list.list
+    this.list.listEl
       .querySelector(".list_multiple_actions_cancel")
       .addEventListener("click", () => {
         this.multipleUncheckAll();
@@ -141,7 +141,7 @@ class ListMultiple {
       }
     }
 
-    var multipleActionsPanel: HTMLDivElement = this.list.list.querySelector(
+    var multipleActionsPanel: HTMLDivElement = this.list.listEl.querySelector(
       ".list_multiple_actions"
     );
     if (checkedCount > 0) {
@@ -156,7 +156,7 @@ class ListMultiple {
       this.listHeaderAllSelect.classList.remove("list_row_multiple-checked");
     }
 
-    this.list.list.querySelector(
+    this.list.listEl.querySelector(
       ".list_multiple_actions_description"
     ).textContent = `Vybráno ${checkedCount} položek`;
   }

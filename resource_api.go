@@ -17,7 +17,6 @@ func (resource *Resource) initDefaultResourceAPIs() {
 		func(request *Request) {
 			request.WriteJSON(200,
 				resource.getListContentJSON(
-					request.r.Context(),
 					request,
 					request.Request().URL.Query(),
 				),
@@ -66,11 +65,6 @@ func (resource *Resource) initDefaultResourceAPIs() {
 
 		file.Write(request.Response())
 
-	})
-
-	resource.api("list-stats").Handler(func(request *Request) {
-		var data = resource.getListStats(request.r.Context(), request, request.Params())
-		request.WriteHTML(200, resource.app.adminTemplates, "list_stats_content", data)
 	})
 
 	resource.api("preview-relation/:ids").Handler(

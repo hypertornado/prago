@@ -175,6 +175,7 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initFormTask()
 	app.initListSettings()
 	app.initListStats()
+	app.initListFilter()
 
 	return app
 }

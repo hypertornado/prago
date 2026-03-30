@@ -10,9 +10,6 @@
 
   {{template "list_multiple_actions" .}}
 
-  <div class="list_hidden">
-    {{template "list_stats" .}}
-  </div>
   <progress class="progress list_progress"></progress>
 
   {{template "list_header" .}}
@@ -125,11 +122,22 @@
 {{end}}
 
 {{define "filter_layout_select"}}
+  {{template "filter_layout2" .}}
+
+  {{if false}}
   <select class="input list_filter_input list_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
     {{range $item := .FilterData}}
       <option value="{{index $item 0}}">{{index $item 1}}</option>
     {{end}}
   </select>
+  {{end}}
+{{end}}
+
+{{define "filter_layout2"}}
+  <div class="list_filter2" data-filter-content="{{.DefaultFilterResponseJSON}}">
+    <div class="list_filter2_name"></div>
+  </div>
+
 {{end}}
 
 {{define "filter_layout_date"}}

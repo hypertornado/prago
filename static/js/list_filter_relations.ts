@@ -91,9 +91,6 @@ class ListFilterRelations {
   }
 
   previewClicked(e: PointerEvent) {
-    //console.log("XXX");
-    //console.log(this.currentDataItem);
-
     e.preventDefault();
     e.stopPropagation();
 

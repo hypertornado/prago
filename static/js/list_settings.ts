@@ -1,25 +1,8 @@
 class ListSettings {
   list: List;
 
-  statsEl: HTMLDivElement;
-  statsPopup: ContentPopup;
-
-  statsCheckboxSelectCount: HTMLSelectElement;
-
-  statsContainer: HTMLDivElement;
-
   constructor(list: List) {
     this.list = list;
-    this.statsContainer = document.querySelector(".list_stats_container");
-    
-    this.statsEl = document.querySelector(".list_stats");
-    this.statsPopup = new ContentPopup("Statistiky", this.statsEl);
-    this.statsPopup.setIcon("glyphicons-basic-43-stats-circle.svg");
-
-    this.statsCheckboxSelectCount = document.querySelector(".list_stats_limit");
-    this.statsCheckboxSelectCount.addEventListener("change", () => {
-      this.loadStats();
-    });
   }
 
   bindSettingsBtn(btn: HTMLButtonElement) {
@@ -49,21 +32,13 @@ class ListSettings {
               });
             },
           },
-          /*{
-            Name: "Statistiky",
-            Icon: "glyphicons-basic-43-stats-circle.svg",
-            Handler: () => {
-              this.loadStats();
-              this.statsPopup.show();
-            },
-          },*/
           {
             Name: "Statistiky",
             Icon: "glyphicons-basic-43-stats-circle.svg",
             Handler: () => {
               var params: any = {};
               params["_resource"] = this.list.typeName;
-              let filterData = this.list.getFilterData();
+              let filterData = this.list.filter.getFilterData();
               for (var k in filterData) {
                 params[k] = filterData[k];
               }
@@ -79,7 +54,7 @@ class ListSettings {
               params["_resource"] = this.list.typeName;
               params["_columns"] = this.list.visibleColumnsStr;
 
-              let filterData = this.list.getFilterData();
+              let filterData = this.list.filter.getFilterData();
               for (var k in filterData) {
                 params[k] = filterData[k];
               }
@@ -110,41 +85,8 @@ class ListSettings {
     });
   }
 
-  loadStats() {
-    let filterData = this.list.getFilterData();
-
-    var params: any = {};
-
-    params["_statslimit"] = this.statsCheckboxSelectCount.value;
-
-    for (var k in filterData) {
-      params[k] = filterData[k];
-    }
-
-    var request = new XMLHttpRequest();
-
-    var encoded = encodeParams(params);
-
-    request.open(
-      "GET",
-      "/admin/" + this.list.typeName + "/api/list-stats" + encoded,
-      true
-    );
-
-    this.statsContainer.innerHTML = "Loading...";
-
-    request.addEventListener("load", () => {
-      if (request.status == 200) {
-        this.statsContainer.innerHTML = request.response;
-      }
-    })
-    request.send();
-
-  }
-
   setVisibleColumns() {
     var columns: any = this.getSelectedColumnsMap();
-    console.log(columns);
 
     var headers: NodeListOf<HTMLDivElement> =
       document.querySelectorAll(".list_header_item");
