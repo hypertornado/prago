@@ -6840,194 +6840,6 @@ class ImagePicker {
         this.load();
     }
 }
-class ListFilterRelations {
-    constructor(el, value, list) {
-        this.valueInput = el.querySelector(".filter_relations_hidden");
-        this.input = el.querySelector(".filter_relations_search_input");
-        this.search = el.querySelector(".filter_relations_search");
-        this.suggestions = el.querySelector(".filter_relations_suggestions");
-        this.preview = el.querySelector(".filter_relations_preview");
-        this.previewImage = el.querySelector(".filter_relations_preview_image");
-        this.previewName = el.querySelector(".filter_relations_preview_name");
-        this.previewClose = el.querySelector(".filter_relations_preview_close");
-        this.previewClose.addEventListener("click", this.closePreview.bind(this));
-        this.preview.classList.add("hidden");
-        this.preview.addEventListener("click", this.previewClicked.bind(this));
-        let hiddenEl = el.querySelector("input");
-        this.relatedResourceName = el
-            .querySelector(".list_filter_item-relations")
-            .getAttribute("data-related-resource");
-        this.input.addEventListener("input", () => {
-            this.dirty = true;
-            this.lastChanged = Date.now();
-            return false;
-        });
-        window.setInterval(() => {
-            if (this.dirty && Date.now() - this.lastChanged > 100) {
-                this.loadSuggestions();
-            }
-        }, 30);
-        if (this.valueInput.value) {
-            this.loadPreview(this.valueInput.value);
-        }
-    }
-    loadPreview(value) {
-        var request = new XMLHttpRequest();
-        let apiURL = "/admin/" + this.relatedResourceName + "/api/preview-relation/" + value;
-        request.open("GET", apiURL, true);
-        request.addEventListener("load", () => {
-            if (request.status == 200) {
-                let respData = JSON.parse(request.response);
-                if (respData.length > 0) {
-                    this.renderPreview(respData[0]);
-                }
-            }
-            else {
-                console.error("not found");
-            }
-        });
-        request.send();
-    }
-    renderPreview(item) {
-        this.currentDataItem = item;
-        this.valueInput.value = item.ID;
-        this.preview.classList.remove("hidden");
-        this.search.classList.add("hidden");
-        this.preview.setAttribute("title", item.Name);
-        if (item.Image) {
-            this.previewImage.classList.remove("hidden");
-            this.previewImage.setAttribute("style", "background-image: url('" + item.Image + "');");
-        }
-        else {
-            this.previewImage.classList.add("hidden");
-        }
-        this.previewName.textContent = item.Name;
-        this.dispatchChange();
-    }
-    previewClicked(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        cmenu({
-            Event: e,
-            AlignByElement: true,
-            ImageURL: this.currentDataItem.Image,
-            Name: this.currentDataItem.Name,
-            Description: this.currentDataItem.Description,
-            Commands: [
-                {
-                    Name: "Detail",
-                    URL: this.currentDataItem.URL,
-                }
-            ]
-        });
-    }
-    dispatchChange() {
-        var event = new Event("change");
-        this.valueInput.dispatchEvent(event);
-    }
-    closePreview(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.valueInput.value = "";
-        this.preview.classList.add("hidden");
-        this.search.classList.remove("hidden");
-        this.input.value = "";
-        this.suggestions.innerHTML = "";
-        this.suggestions.classList.add("filter_relations_suggestions-empty");
-        this.dispatchChange();
-        this.input.focus();
-    }
-    loadSuggestions() {
-        this.getSuggestions(this.input.value);
-        this.dirty = false;
-    }
-    getSuggestions(q) {
-        var encoded = encodeParams({
-            q: q,
-            resource: this.relatedResourceName,
-        });
-        var request = new XMLHttpRequest();
-        var url = "/admin/api/_suggestionsresource" + encoded;
-        request.open("GET", url, true);
-        request.addEventListener("load", () => {
-            if (request.status == 200) {
-                this.renderSuggestions(JSON.parse(request.response));
-            }
-            else {
-                console.error("not found");
-            }
-        });
-        request.send();
-    }
-    renderSuggestions(data) {
-        this.suggestions.innerHTML = "";
-        this.suggestions.classList.add("filter_relations_suggestions-empty");
-        for (var i = 0; i < data.Suggestions.length; i++) {
-            this.suggestions.classList.remove("filter_relations_suggestions-empty");
-            let item = data.Suggestions[i];
-            let el = this.renderSuggestion(item);
-            this.suggestions.appendChild(el);
-            el.addEventListener("mousedown", (e) => {
-                this.renderPreview(item);
-            });
-        }
-    }
-    renderSuggestion(data) {
-        var ret = document.createElement("div");
-        ret.classList.add("list_filter_suggestion");
-        ret.setAttribute("href", data.URL);
-        var right = document.createElement("div");
-        right.classList.add("list_filter_suggestion_right");
-        var name = document.createElement("div");
-        name.classList.add("list_filter_suggestion_name");
-        name.textContent = data.Name;
-        var description = document.createElement("div");
-        description.classList.add("list_filter_suggestion_description");
-        description.textContent = data.Description;
-        var image = document.createElement("div");
-        image.classList.add("list_filter_suggestion_image");
-        if (data.Image) {
-            image.setAttribute("style", "background-image: url('" + data.Image + "');");
-        }
-        ret.appendChild(image);
-        right.appendChild(name);
-        right.appendChild(description);
-        ret.appendChild(right);
-        return ret;
-    }
-}
-class ListFilterDate {
-    constructor(el, value) {
-        this.hidden = el.querySelector(".list_filter_item");
-        this.from = (el.querySelector(".list_filter_layout_date_from"));
-        this.to = el.querySelector(".list_filter_layout_date_to");
-        this.from.addEventListener("input", this.changed.bind(this));
-        this.from.addEventListener("change", this.changed.bind(this));
-        this.to.addEventListener("input", this.changed.bind(this));
-        this.to.addEventListener("change", this.changed.bind(this));
-        this.setValue(value);
-    }
-    setValue(value) {
-        if (!value) {
-            return;
-        }
-        var splited = value.split(",");
-        if (splited.length == 2) {
-            this.from.value = splited[0];
-            this.to.value = splited[1];
-        }
-        this.hidden.value = value;
-    }
-    changed() {
-        var val = "";
-        if (this.from.value || this.to.value) {
-            val = this.from.value + "," + this.to.value;
-        }
-        this.hidden.value = val;
-        var event = new Event("change");
-        this.hidden.dispatchEvent(event);
-    }
-}
 class List {
     constructor(listEl) {
         this.minCellWidth = 50;
@@ -7537,87 +7349,89 @@ class ListFilterItem {
     constructor(filter, el, params) {
         this.filter = filter;
         this.el = el;
-        var fieldName = el.getAttribute("data-name");
+        this.key = el.getAttribute("data-name");
         this.filterLayout = el.getAttribute("data-filter-layout");
-        var fieldInput = el.querySelector("input");
-        var fieldSelect = el.querySelector("select");
-        var fieldValue = params.get(fieldName);
-        this.value = fieldValue;
-        if (fieldValue) {
-            if (fieldInput) {
-                fieldInput.value = fieldValue;
-            }
-            if (fieldSelect) {
-                fieldSelect.value = fieldValue;
-            }
-        }
-        if (fieldInput) {
-            fieldInput.addEventListener("input", this.inputListener.bind(this));
-            fieldInput.addEventListener("change", this.inputListener.bind(this));
-        }
-        if (fieldSelect) {
-            fieldSelect.addEventListener("input", this.inputListener.bind(this));
-            fieldSelect.addEventListener("change", this.inputListener.bind(this));
-        }
-        if (this.filterLayout == "filter_layout_text" || this.filterLayout == "filter_layout_number" || this.filterLayout == "filter_layout_select" || this.filterLayout == "filter_layout_relation" || this.filterLayout == "filter_layout_date" || this.filterLayout == "filter_layout_boolean") {
+        this.value = params.get(this.key);
+        if (this.filterLayout) {
             this.initFilter2();
-            return;
         }
-    }
-    inputListener(e) {
-        if (e.keyCode == 9 ||
-            e.keyCode == 16 ||
-            e.keyCode == 17 ||
-            e.keyCode == 18) {
-            return;
-        }
-        this.filter.filterChanged();
     }
     initFilter2() {
         this.isListFilter2 = true;
         this.filter2El = this.el.querySelector(".list_filter2");
+        this.filterInput = this.el.querySelector(".list_filter2_input");
         this.filter2NameEl = this.el.querySelector(".list_filter2_name");
         this.filter2El.addEventListener("click", this.filter2Clicked.bind(this));
+        this.closeButton = this.el.querySelector(".list_filter2_close");
+        this.closeButton.addEventListener("click", this.closeButtonClicked.bind(this));
+        if (this.isInlineItem()) {
+            this.filterInput.classList.remove("hidden");
+            this.filter2NameEl.classList.add("hidden");
+            this.filterInput.addEventListener("input", this.inlineInputChange.bind(this));
+        }
+        else {
+            this.filterInput.classList.add("hidden");
+            this.filter2NameEl.classList.remove("hidden");
+        }
         let data = JSON.parse(this.filter2El.getAttribute("data-filter-content"));
         this.setFilter2Data(data);
     }
+    inlineInputChange() {
+        let val = this.filterInput.value;
+        this.setFilter2Data({
+            ID: val,
+            Name: val,
+        });
+        this.filter.filterChanged();
+    }
+    closeButtonClicked(e) {
+        this.setFilter2Data(null);
+        this.filter.filterChanged();
+        e.preventDefault();
+        e.stopPropagation();
+    }
     filter2Clicked() {
+        if (this.isInlineItem()) {
+            return;
+        }
         new PopupForm("/admin/_list-fiter-item?field=" + this.getFieldID() + "&resource=" + this.filter.list.typeName + "&value=" + this.getFieldValue(), (data) => {
             this.setFilter2Data(data.Data);
+            this.filter.filterChanged();
         });
     }
     setFilter2Data(data) {
         this.value = "";
-        this.setFilter2Name("");
+        this.closeButton.classList.add("hidden");
         if (data) {
             this.value = data.ID;
+            if (this.value) {
+                this.closeButton.classList.remove("hidden");
+            }
             this.setFilter2Name(data.Name);
+            this.setInlineValue(this.value);
         }
-        this.filter.filterChanged();
+        else {
+            this.setFilter2Name("");
+            this.setInlineValue("");
+        }
     }
     setFilter2Name(name) {
         this.filter2El.title = name;
         this.filter2NameEl.innerText = name;
     }
+    setInlineValue(name) {
+        if (this.isInlineItem() && this.filterInput.value != name) {
+            this.filterInput.value = name;
+        }
+    }
     getFieldID() {
-        return this.el.getAttribute("data-name");
+        return this.key;
     }
     getFieldValue() {
         if (this.isListFilter2) {
             return this.value;
         }
-        if (this.filterLayout == "filter_layout_select") {
-            return this.el.querySelector("input").value;
-        }
-        if (this.filterLayout == "filter_layout_relation") {
-            let hiddenEl = this.el.querySelector(".filter_relations_hidden");
-            return hiddenEl.value;
-        }
-        let input = this.el.querySelector(".list_filter_input");
-        if (!input) {
-            return "";
-        }
-        return input.value.trim();
+        return null;
     }
     setColor() {
         var val = this.getFieldValue();
@@ -7627,6 +7441,12 @@ class ListFilterItem {
         else {
             this.el.classList.remove("list_filteritem-colored");
         }
+    }
+    isInlineItem() {
+        if (this.filterLayout == "filter_layout_text" || this.filterLayout == "filter_layout_number") {
+            return true;
+        }
+        return false;
     }
 }
 class ListSettings {
@@ -7718,15 +7538,6 @@ class ListSettings {
             }
             else {
                 headers[i].classList.add("hidden");
-            }
-        }
-        var filters = document.querySelectorAll(".list_header_item_filter");
-        for (var i = 0; i < filters.length; i++) {
-            var name = filters[i].getAttribute("data-name");
-            if (columns[name] === true) {
-                filters[i].classList.remove("hidden");
-            }
-            if (columns[name] === false) {
             }
         }
         this.list.load();

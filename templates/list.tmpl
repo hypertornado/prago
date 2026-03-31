@@ -39,8 +39,8 @@
         </div>
         <div class="list_header_item_resizer" draggable="true"></div>
         <div class="list_header_item_filter" data-name="{{$item.ColumnName}}" data-filter-layout="{{$item.FilterLayout}}">
-          {{if $item.FilterContent}}
-            {{$item.FilterContent}}
+          {{if $item.FilterLayout}}
+            {{template "filter_layout2" $item}}
           {{end}}
         </div>
       </div>
@@ -90,90 +90,14 @@
   </div>
 {{end}}
 
-{{define "filter_layout_text"}}
-  {{template "filter_layout2" .}}
-  
-  {{if false}}
-    <input class="input list_filter_input list_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
-  {{end}}
-{{end}}
-
-{{define "filter_layout_relation"}}
-  {{template "filter_layout2" .}}
-
-  {{if false}}
-  <div class="filter_relations list_filter_item list_filter_item-relations" name="{{.ColumnName}}" data-typ="{{.ColumnName}}" data-related-resource="{{.RelatedResourceID}}">
-    <input type="hidden" class="filter_relations_hidden">
-    <div class="filter_relations_preview hidden">
-      <div class="filter_relations_preview_image"></div>
-      <div class="filter_relations_preview_name"></div>
-      <img class="filter_relations_preview_close" src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=444444">
-    </div>
-    <div class="filter_relations_search">
-      <input class="input list_filter_input filter_relations_search_input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-      <div class="filter_relations_suggestions"></div>
-    </div>
-  </div>
-  {{end}}
-{{end}}
-
-{{define "filter_layout_number"}}
-  {{template "filter_layout2" .}}
-
-  {{if false}}
-    <input class="input list_filter_input list_filter_item" type="text" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
-  {{end}}
-{{end}}
-
-{{define "filter_layout_boolean"}}
-  {{template "filter_layout2" .}}
-
-  {{if false}}
-  <select class="input list_filter_input list_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
-    <option value=""></option>
-    <option value="true">{{index .FilterData 0}}</option>
-    <option value="false">{{index .FilterData 1}}</option>
-  </select>
-  {{end}}
-{{end}}
-
-{{define "filter_layout_select"}}
-  {{template "filter_layout2" .}}
-
-  {{if false}}
-  <select class="input list_filter_input list_filter_item" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
-    {{range $item := .FilterData}}
-      <option value="{{index $item 0}}">{{index $item 1}}</option>
-    {{end}}
-  </select>
-  {{end}}
-{{end}}
-
 {{define "filter_layout2"}}
   <div class="list_filter2" data-filter-content="{{.DefaultFilterResponseJSON}}">
     <div class="list_filter2_name"></div>
-  </div>
-
-{{end}}
-
-{{define "filter_layout_date"}}
-  {{template "filter_layout2" .}}
-
-  {{if false}}
-  <div class="list_filter_layout_date">
-    <input class="list_filter_item list_filter_layout_date_value" name="{{.ColumnName}}" data-typ="{{.ColumnName}}">
-    <div class="list_filter_layout_date_content">
-      <input type="date"
-        class="input list_filter_input list_filter_date_input list_filter_layout_date_from"
-        placeholder="od"
-      >
-      <input type="date"
-        class="input list_filter_input list_filter_date_input list_filter_layout_date_to"
-        placeholder="do"
-      >
+    <input class="list_filter2_input">
+    <div class="list_filter2_close hidden">
+      <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=4077bf" class="list_filter2_close_icon">
     </div>
   </div>
-  {{end}}
 {{end}}
 
 {{define "list_multiple_actions"}}
@@ -192,6 +116,6 @@
         {{end}}
       </div>
     </div>
-    <img src="/api/glyphicons/glyphicons-basic-599-menu-close.svg?color=888888" class="list_multiple_actions_cancel">
+    <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=888888" class="list_multiple_actions_cancel">
   </div>
 {{end}}

@@ -73,7 +73,6 @@ func (previewer *previewer) Name() string {
 			return custom
 		}
 	}
-
 	if previewer.item != nil && previewer.hasAccessToField("Name") {
 		field := itemsVal.FieldByName("Name")
 		if field.IsValid() {

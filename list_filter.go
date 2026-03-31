@@ -54,7 +54,7 @@ func (app *App) initListFilter() {
 			listFilterFormNumber(form, field, value, request)
 		}
 
-		form.AddSubmit("Filtrovat")
+		form.AddSubmit(fmt.Sprintf("Filtrovat pole „%s“", field.name(request.Locale())))
 
 	}, func(fv FormValidation, request *Request) {
 		resource := app.getResourceByID(request.Param("_resource"))

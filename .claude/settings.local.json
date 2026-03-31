@@ -8,7 +8,10 @@
       "Bash(grep -n \"getAdminURL\" /Users/odchazel/go/src/github.com/hypertornado/prago/*.go)",
       "Bash(grep -n \"AddRelationMultiple\\\\|func.*RelationMultiple\" /Users/odchazel/go/src/github.com/hypertornado/prago/*.go)",
       "Bash(grep -l \"type Board\\\\|type Dashboard\\\\|type Menu\" /Users/odchazel/go/src/github.com/hypertornado/prago/*.go)",
-      "Bash(grep \"\\\\.go$\")"
+      "Bash(grep \"\\\\.go$\")",
+      "Bash(grep -r \"ListFilterDate\\\\|ListFilterRelations\\\\|list_filter_date\\\\|list_filter_relations\" /Users/odchazel/go/src/github.com/hypertornado/prago --include=*.ts --include=*.js --include=*.html --include=*.go)",
+      "Bash(grep -r \"filter_layout_date\\\\|filter_layout_relation\" /Users/odchazel/go/src/github.com/hypertornado/prago --include=*.go --include=*.html)",
+      "Bash(grep -r \"encodeParams\\\\|XMLHttpRequest\" /Users/odchazel/go/src/github.com/hypertornado/prago/static/js/*.ts)"
     ]
   }
 }

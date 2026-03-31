@@ -2,7 +2,7 @@
 
 .list_filter2 {
     height: 25px;
-    padding: 2px 6px;
+    padding: 2px 0px;
     border: 1px solid $grayBorderColor;
     border-radius: 100px !important;
     background-color: $backgroundGrayColor;
@@ -12,6 +12,44 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.list_filter2_input {
+    //border: 1px solid red;
+    border: none;
+    outline: none;
+    flex-shrink: 0;
+    flex-grow: 1000;
+    min-width: 0px;
+    height: 25px;
+    width: calc(100% - 24px);
+    padding: 0px;
+    padding-left: 8px;
+    background: none;
+
+}
+
+.list_filter2_close {
+    aspect-ratio: 1;
+    width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 25px;
+    flex-shrink: 0;
+}
+
+.list_filter2_close:hover {
+    opacity: .5;
+}
+
+.list_filter2_close:active {
+    opacity: .2;
+}
+
+.list_filter2_close_icon {
+    width: 15px;
+    aspect-ratio: 1;
 }
 
 .list_filteritem-colored .list_filter2 {
@@ -30,9 +68,8 @@
 .list_filter2_name {
     font-size: .9rem;
     line-height: 1.3em;
+    padding: 0px 6px;
     width: 100%;
-    //border: 1px solid red;
-
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;

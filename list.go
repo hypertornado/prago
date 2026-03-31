@@ -38,14 +38,14 @@ type listPaginationData struct {
 }
 
 type listHeaderItem struct {
-	Name              string
-	Icon              string
-	NameHuman         string
-	ColumnName        string
-	CanOrder          bool
-	DefaultShow       bool
-	FilterLayout      string
-	FilterContent     template.HTML
+	Name         string
+	Icon         string
+	NameHuman    string
+	ColumnName   string
+	CanOrder     bool
+	DefaultShow  bool
+	FilterLayout string
+	//FilterContent     template.HTML
 	RelatedResourceID string
 	FilterData        interface{}
 	NaturalCellWidth  int64
@@ -146,7 +146,7 @@ func (resource *Resource) getListHeader(request *Request) (list list, err error)
 		if k == 0 {
 			idHeaderItem := list.Header[0]
 			otherHeaderItems := list.Header[1:]
-			//put afted id
+			//put after id
 			list.Header = append([]listHeaderItem{idHeaderItem, headerItem}, otherHeaderItems...)
 		} else {
 			list.Header = append(list.Header, headerItem)
@@ -250,10 +250,10 @@ func (field *Field) getListHeaderItem(request *Request) listHeaderItem {
 		headerItem.CanOrder = true
 	}
 
-	if headerItem.FilterLayout != "" {
+	/*if headerItem.FilterLayout != "" {
 		headerItem.FilterContent = field.resource.app.adminTemplates.
 			ExecuteToHTML(headerItem.FilterLayout, headerItem)
-	}
+	}*/
 
 	return headerItem
 }

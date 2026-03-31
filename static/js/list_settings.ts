@@ -99,19 +99,6 @@ class ListSettings {
       }
     }
 
-    var filters: NodeListOf<HTMLDivElement> = document.querySelectorAll(
-      ".list_header_item_filter"
-    );
-    for (var i = 0; i < filters.length; i++) {
-      var name = filters[i].getAttribute("data-name");
-      if (columns[name] === true) {
-        filters[i].classList.remove("hidden");
-      }
-      if (columns[name] === false) {
-        //filters[i].classList.add("hidden");
-      }
-    }
-
     this.list.load();
   }
 

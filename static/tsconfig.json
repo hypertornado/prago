@@ -14,8 +14,6 @@
     "js/hls.ts",
     "js/videoview.ts",
     "js/imagepicker.ts",
-    "js/list_filter_relations.ts",
-    "js/list_filter_date.ts",
     "js/list.ts",
     "js/list_filter.ts",
     "js/list_filter_item.ts",

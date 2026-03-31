@@ -52,6 +52,16 @@ func (app *App) initListSettings() {
 			}
 		}
 
+		for _, stat := range resource.itemStats {
+			if !request.Authorize(stat.Permission) {
+				continue
+			}
+			input := form.AddCheckbox(stat.id, stat.Name(request.Locale()))
+			if fieldsMap[stat.id] {
+				input.Value = "on"
+			}
+		}
+
 		form.AddHidden("resource").Value = request.Param("resource")
 		form.AddSubmit("Nastavit viditelné sloupce")
 
@@ -72,6 +82,16 @@ func (app *App) initListSettings() {
 				continue
 			}
 			ret = append(ret, field.id)
+		}
+
+		for _, stat := range resource.itemStats {
+			if !request.Authorize(stat.Permission) {
+				continue
+			}
+			if request.Param(stat.id) != "on" {
+				continue
+			}
+			ret = append(ret, stat.id)
 		}
 
 		fv.Data(strings.Join(ret, ","))

@@ -1,36 +1,5 @@
 @use "../variables.scss" as *;
 
-.list_filter_layout_date_value {
-  display: none;
-}
-
-.list_filter_layout_date_content {
-  display: flex;
-}
-
-.list_filter_layout_date_divider {
-  padding: 0px 2px;
-  color: #eee;
-}
-
-.list_filter_layout_date_from,
-.list_filter_layout_date_to {
-  width: 90px;
-  flex-grow: 10;
-}
-
-input.list_filter_layout_date_from {
-  border-bottom-right-radius: 3px !important;
-  border-top-right-radius: 3px !important;
-  margin-right: 1px;
-}
-
-input.list_filter_layout_date_to {
-  border-bottom-left-radius: 3px !important;
-  border-top-left-radius: 3px !important;
-  margin-left: 1px;
-}
-
 .list_filteritem-colored .list_filter_input {
   background: $baseColorBackground !important;
 }
@@ -60,5 +29,4 @@ select.list_filter_input {
 
 .list_filter_input:focus {
   box-shadow: none;
-  //border-color: $grayBorderColor;
 }

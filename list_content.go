@@ -48,6 +48,7 @@ func (actions *listItemActions) JSON() template.HTMLAttr {
 }
 
 func (resource *Resource) getListContent(request *Request, params url.Values) (ret *listContent, err error) {
+
 	ctx := request.r.Context()
 	ret = &listContent{}
 	if !request.Authorize(resource.canView) {
@@ -141,6 +142,7 @@ func (resource *Resource) getListContent(request *Request, params url.Values) (r
 
 	itemVals := reflect.ValueOf(rowItems)
 	itemLen := itemVals.Len()
+
 	for i := 0; i < itemLen; i++ {
 		row := &listRow{
 			ListContent: ret,
@@ -148,7 +150,7 @@ func (resource *Resource) getListContent(request *Request, params url.Values) (r
 		itemVal := itemVals.Index(i).Elem()
 
 		pw := resource.previewer(request, itemVals.Index(i).Interface())
-		row.Name = pw.Name()
+
 		row.Description = pw.DescriptionBasic(nil)
 		row.ImageURL = pw.ImageURL()
 
@@ -192,7 +194,6 @@ func (resource *Resource) getListContent(request *Request, params url.Values) (r
 	ret.Language = request.Locale()
 	ret.Message = ret.TotalCountStr
 	ret.Colspan = int64(len(columnsMap)) + 1
-
 	return
 }
 
