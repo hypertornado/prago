@@ -1,13 +1,13 @@
 {{define "timeline"}}
     <div class="timeline" data-uuid="{{.UUID}}">
-        <h2 class="timeline_name">{{.Name}}</h2>
         <div class="timeline_toolbar">
+            <h2 class="timeline_name">{{.Name}}</h2>
+            <div class="timeline_toolbar_divider"></div>
             <select class="timeline_toolbar_type timeline_toolbar_item">
                 <option value="day">Den</option>
                 <option value="month">Měsíc</option>
                 <option value="year">Rok</option>
             </select>
-            <div class="timeline_toolbar_divider"></div>
             <div class="timeline_toolbar_datepicker">
                 <button class="timeline_toolbar_prev timeline_toolbar_item timeline_toolbar_item-nav">
                     <img class="timeline_toolbar_icon" src="/admin/api/icons?file=glyphicons-basic-223-chevron-left.svg&color=444444">
@@ -22,15 +22,5 @@
         
         </div>
         <div class="timeline_values"></div>
-        {{if .Legend}}
-            <div class="timeline_legend">
-                {{range $item := .Legend.Items}}
-                    <div class="timeline_legend_item">
-                        <div class="timeline_legend_color" style="background: {{$item.Color}};"></div>
-                        <div class="timeline_legend_name">{{$item.Name}}</div>
-                    </div>
-                {{end}}
-            </div>
-        {{end}}
     </div>
 {{end}}

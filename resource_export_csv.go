@@ -90,45 +90,33 @@ func bindResourceExportCSV(resource *Resource) {
 		w.Comma = ';'
 		must(w.Write(fieldNames))
 
-		iteration := 0
-
-		for {
-			q := resource.query(request.r.Context())
+		err := resource.forEach(request.r.Context(), func(q *listQuery) {
 			q = resource.addFilterParamsToQuery(q, params, request)
 			if orderDesc {
 				q = q.OrderDesc(orderBy)
 			} else {
 				q = q.Order(orderBy)
 			}
-			q.offset = int64(iteration * exportCSVPageLimit)
-			q.limit = exportCSVPageLimit
-			items, err := q.list()
-			must(err)
+		}, func(item any) error {
 
-			itemsCount := reflect.ValueOf(items).Len()
-			if itemsCount == 0 {
-				break
-			}
+			val := reflect.ValueOf(item).Elem()
 
-			for i := 0; i < itemsCount; i++ {
-				val := reflect.ValueOf(items).Index(i).Elem()
+			var strValuesRow []string
 
-				var strValuesRow []string
-
-				for _, outputField := range outputFields {
-					valIface := val.FieldByName(outputField.fieldClassName).Interface()
-					strVal := fmt.Sprintf("%v", valIface)
-					if t, ok := valIface.(time.Time); ok {
-						strVal = t.Format(time.RFC3339)
-					}
-					strValuesRow = append(strValuesRow, strVal)
+			for _, outputField := range outputFields {
+				valIface := val.FieldByName(outputField.fieldClassName).Interface()
+				strVal := fmt.Sprintf("%v", valIface)
+				if t, ok := valIface.(time.Time); ok {
+					strVal = t.Format(time.RFC3339)
 				}
-				must(w.Write(strValuesRow))
-
+				strValuesRow = append(strValuesRow, strVal)
 			}
-			iteration++
+			must(w.Write(strValuesRow))
 
-		}
+			return nil
+
+		})
+		must(err)
 		w.Flush()
 	})
 }

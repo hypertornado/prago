@@ -101,50 +101,34 @@ class Timeline {
         let valEl = document.createElement("div");
         valEl.innerHTML = `
             <div class="timeline_value_bars"></div>
-            <div class="timeline_value_name" title="${data.Name}">
+            <div class="timeline_value_name">
                 <span class="timeline_value_name_inner">${data.Name}</span>
             </div>
         `
         valEl.classList.add("timeline_value");
 
         let barsEl: HTMLDivElement = valEl.querySelector(".timeline_value_bars");
-        for (var i = 0; i < data.Bars.length; i++) {
-            this.addBar(barsEl, data.Bars[i]);
-        }
+        this.addBar(barsEl, data);
 
         if (data.IsCurrent) {
             valEl.classList.add("timeline_value-current");
         }
         this.valuesEl.appendChild(valEl);
-
-        valEl.addEventListener("click", (e) => {
-            var tableRows = [];
-
-            for (let i = 0; i < data.Bars.length; i++) {
-                let bar = data.Bars[i];
-                tableRows.push({
-                    Name: bar.KeyName,
-                    Value: bar.ValueText,
-                });
-            }
-
-            e.stopPropagation();
-            //@ts-ignore
-            cmenu({
-                Event: e,
-                Name: data.Name,
-                Rows: tableRows,
-            })
-
-        })
     }
 
     addBar(el: HTMLDivElement, barValue: any) {
         let barEl = document.createElement("div");
+
+        var styleName: string;
+        if (barValue.Value >= 0) {
+            styleName = "timeline_value_bar_inner-positive";
+        } else {
+            styleName = "timeline_value_bar_inner-negative";
+        }
+
         barEl.innerHTML = `
-            <div class="timeline_value_bar_inner" style="${barValue.StyleCSS}"></div>
+            <div class="timeline_value_bar_inner ${styleName}" style="${barValue.StyleCSS}"></div>
         `;
-        barEl.setAttribute("title", barValue.ValueText);
         barEl.classList.add("timeline_value_bar");
         el.appendChild(barEl);
 

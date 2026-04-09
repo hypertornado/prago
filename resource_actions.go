@@ -131,10 +131,11 @@ func (resource *Resource) initDefaultResourceActions() {
 	bindResourceExportCSV(resource)
 
 	if resource.activityLog {
-		resource.formAction("history", func(form *Form, request *Request) {
-			form.AddSelect("page", "", resource.app.getHistorySelect(request, resource, 0))
+		resource.formAction("_history", func(form *Form, request *Request) {
+			form.AddNumberInput("page", "Stránka").Value = "1"
+			form.AddRelationMultiple("user", "Uživatel", "user")
 			form.AutosubmitFirstTime = true
-			form.AutosubmitOnDataChange = true
+			form.AddSubmit("Zobrazit")
 
 		}, func(vc FormValidation, request *Request) {
 			table := resource.app.getHistoryTable(request, resource, 0, request.Param("page"))
@@ -148,12 +149,15 @@ func (resource *Resource) initDefaultResourceActions() {
 
 		resource.
 			formItemAction(
-				"history",
+				"_history",
 				func(item any, form *Form, request *Request) {
-					id := resource.previewer(request, item).ID()
-					form.AddSelect("page", "", resource.app.getHistorySelect(request, resource, id))
+					//id := resource.previewer(request, item).ID()
+					//form.AddSelect("page", "", resource.app.getHistorySelect(request, resource, id))
+					form.AddNumberInput("page", "Stránka").Value = "1"
+					form.AddRelationMultiple("user", "Uživatel", "user")
 					form.AutosubmitFirstTime = true
-					form.AutosubmitOnDataChange = true
+					form.AddSubmit("Zobrazit")
+					//form.AutosubmitOnDataChange = true
 				},
 				func(item any, vc FormValidation, request *Request) {
 					id := resource.previewer(request, item).ID()

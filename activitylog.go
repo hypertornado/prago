@@ -85,6 +85,8 @@ func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int
 		q.Is("ItemID", itemID)
 	}
 
+	q.In("user", request.Param("user"))
+
 	total, err := q.Count()
 	must(err)
 
@@ -108,16 +110,15 @@ func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int
 
 	}
 
-	ret.Header("#", "Typ akce", "Položka", "Uživatel", "Datum")
+	ret.Header("", "Položka", "Úprava")
 
 	for _, v := range items {
 		var username, userurl string
 		user := Query[user](app).ID(v.User)
-		locale := "en"
+		locale := request.Locale()
 		if user != nil {
 			username = user.Name
 			userurl = app.getAdminURL(fmt.Sprintf("user/%d", user.ID))
-			locale = user.Locale
 		}
 
 		activityURL := app.getAdminURL(fmt.Sprintf("_activity?id=%d", v.ID))
@@ -132,16 +133,57 @@ func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int
 			itemName = fmt.Sprintf("#%d %s", v.ItemID, name)
 		}
 
+		actionCell := Cell(humanizeActionType(v.ActionType))
+
+		actionCell.DescriptionBefore(fmt.Sprintf("#%d", v.ID))
+
+		if v.ActionType == "delete" {
+			actionCell.Red()
+		}
+		if v.ActionType == "new" {
+			actionCell.Green()
+		}
+		if v.ActionType == "edit" {
+			actionCell.Orange()
+
+			diffLog := v.getInlineDiffLog(request)
+			for _, item := range diffLog {
+				actionCell.DescriptionAfter(item)
+			}
+		}
+
+		actionCell.Button(&TableCellButton{
+			Title: "Detail",
+			Icon:  iconView,
+			URL:   activityURL,
+		})
+
+		itemCell := Cell([2]string{resource.getURL(fmt.Sprintf("%d", v.ItemID)), itemName})
+
+		metadataCell := Cell([2]string{userurl, username})
+		metadataCell.DescriptionAfter(messages.Timestamp(locale, v.CreatedAt, true))
+
 		ret.Row(
-			Cell([2]string{activityURL, fmt.Sprintf("%d", v.ID)}),
-			Cell(v.ActionType),
-			Cell([2]string{resource.getURL(fmt.Sprintf("%d", v.ItemID)), itemName}),
-			Cell([2]string{userurl, username}),
-			Cell(messages.Timestamp(locale, v.CreatedAt, true)),
+			metadataCell,
+			itemCell,
+			actionCell,
 		)
 
 	}
 	return ret
+}
+
+func humanizeActionType(in string) string {
+	if in == "delete" {
+		return "Smazat"
+	}
+	if in == "new" {
+		return "Vytvořit"
+	}
+	if in == "edit" {
+		return "Upravit"
+	}
+	return in
 }
 
 func (app *App) initActivityLog() {
@@ -237,6 +279,32 @@ func (app *App) initActivityLog() {
 		return fmt.Sprintf("/admin/_activity?id=%d", activityLog.ID)
 	})
 
+}
+
+func (activity *activityLog) getInlineDiffLog(request *Request) (ret []string) {
+	app := request.app
+	resource := app.getResourceByID(activity.ResourceName)
+	if resource == nil {
+		return nil
+	}
+
+	fromMap := getDiffMap(activity.ContentBefore)
+	toMap := getDiffMap(activity.ContentAfter)
+
+	for _, field := range resource.fields {
+		if !request.Authorize(field.canView) {
+			continue
+		}
+
+		fromContent := fromMap[field.id]
+		toContent := toMap[field.id]
+
+		if fromContent != toContent {
+			ret = append(ret, fmt.Sprintf("%s: %s → %s", field.name(request.Locale()), fromContent, toContent))
+		}
+
+	}
+	return
 }
 
 func getDiffMap(inStr string) map[string]string {

@@ -9,10 +9,15 @@
     border: 1px solid $grayBorderColor;
 }
 
+.timeline_name {
+    padding: 0px;
+    margin: 0px;
+}
+
 .timeline_toolbar {
     display: flex;
     gap: 8px;
-    padding: 8px 0px;
+    //padding: 8px 0px;
     flex-wrap: wrap;
 }
 
@@ -61,32 +66,25 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 .timeline_values {
     height: 300px;
     display: flex;
-    gap: 4px;
     border-radius: 8px;
-    border: 1px solid $grayBorderColor;
-    padding: 14px 4px 4px 4px;
+    padding: 14px 4px 4px 60px;
     justify-content: stretch;
-    //background-color: $backgroundGrayColor;
-    @include softShadow;
-    border-radius: 4px;
 }
 
 .timeline_value {
     width: 100%;
     flex-shrink: 100;
+    flex-grow: 0;
     display: flex;
     flex-direction: column;
-}
-
-.timeline_value:hover {
-    filter: saturate(110%);
+    padding: 0px 3px;
+    cursor: pointer;
 }
 
 .timeline_value_bars {
     flex-grow: 100;
     display: flex;
     gap: 1px;
-    border: 0px solid blue;
 }
 
 .timeline_value_bar {
@@ -94,75 +92,96 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
     height: 100%;
     align-self: flex-start;
     position: relative;
-
     display: flex;
     position: relative;
 }
 
 .timeline_value_label {
     position: absolute;
-    width: calc(100% - 4px);
-    margin-left: 2px;
-    margin-bottom: 2px;
+    justify-self: center;
+    margin-bottom: 4px;
+    margin-left: 50%;
     text-align: center;
-    font-size: 10px;
-    line-height: 10px;
+    font-size: 0.8rem;
+    line-height: 1.3em;
     color: $gray;
-    border: 0px solid red;
-
-    //text-shadow: 0px 0px 10px rgba(255,255,255,0.8);
-    border-radius: 2px;
-    background-color: rgba(255,255,255,0.3);
+    border-radius: 4px;
+    background-color: white;
+    @include softShadow;
+    padding: 4px 8px;
     
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: $black;
+    cursor: default;
+    display: none;
+    z-index: 10000;
 
 }
 
 .timeline_value:hover .timeline_value_label {
-    color: black;
-    //overflow: visible;
-    z-index: 1000;
+    display: inline-block;
 }
 
 .timeline_value_bar_inner {
     align-self: end;
     width: 100%;
-    position: relative;
     background-color: $baseColor;
-    border-radius: 2px;
+    border-radius: 3px;
+    @include softShadow;
+}
+
+.timeline_value_bar_inner-negative {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+}
+
+.timeline_value_bar_inner-positive {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
 }
 
 .timeline_value_name {
     font-size: 10px;
     line-height: 10px;
     flex-shrink: 0;
-    height: 10px;
+    height: 70px;
     margin-top: 2px;
     text-align: center;
-    overflow: hidden;
     color: $gray;
-
-    display: flex;
     width: 100%;
+    max-width: 100%;
+    cursor: default;
+    position: relative;
 }
 
 .timeline_value_name_inner {
-    justify-self: center;
-    align-self: center;
     overflow: hidden;
-
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    transform-origin: top right;
+    transform: rotate(-45deg);
+    position: absolute;
+    z-index: 100;
+    width: 80px;
+    right: 50%;
+}
+
+.timeline_value:hover {
+    z-index: 1000;
 }
 
 .timeline_value:hover .timeline_value_name {
-    color: black;
+    color: $black;
     width: auto;
     overflow: visible;
+}
+
+.timeline_value:hover .timeline_value_bar_inner {
+    filter: contrast(1.4);
 }
 
 .timeline_value:hover .timeline_value_name_inner {
@@ -172,32 +191,4 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 
 .timeline_value-current .timeline_value_name {
     color: $red;
-}
-
-.timeline_legend {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 4px 0px;
-}
-
-.timeline_legend_item {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-}
-
-.timeline_legend_color {
-    border: 0px solid $grayBorderColor;
-    border-radius: 4px;
-    width: 16px;
-    aspect-ratio: 1;
-    flex-shrink: 0;
-    align-self: center;
-}
-
-.timeline_legend_name {
-    color: $gray;
-    font-size: .8rem;
-    line-height: 1.3em;
 }

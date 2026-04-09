@@ -1,9 +1,5 @@
 package prago
 
-import (
-	"fmt"
-)
-
 var sysadminBoard *Board
 
 type Board struct {
@@ -32,13 +28,10 @@ func (app *App) initBoard() {
 
 	sysadminGroup := sysadminBoard.Dashboard(unlocalized(""))
 
-	tl := sysadminGroup.Timeline(unlocalized("Úpravy"), "sysadmin")
-	tl.DataSource(func(request *TimelineDataRequest) float64 {
+	sysadminGroup.Timeline(unlocalized("Úpravy"), "sysadmin", func(request *TimelineDataRequest) float64 {
 		c, _ := Query[activityLog](app).Context(request.Context).Where("createdat >= ? and createdat < ?", request.From, request.To).Count()
 		return float64(c)
-	}).Stringer(func(f float64) string {
-		return fmt.Sprintf("%v editací", f)
-	})
+	}).Unit(unlocalized("editací"))
 
 }
 
