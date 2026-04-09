@@ -342,12 +342,16 @@ func (resource *Resource) updateCachedCount() error {
 	return nil
 }
 
-func (resource *Resource) forEach(ctx context.Context, handler func(any) error) error {
+func (resource *Resource) forEach(ctx context.Context, filter func(*listQuery), handler func(any) error) error {
 	var lastID int64
 	var chunkSize = 100
 
 	for {
-		items, err := resource.query(ctx).Order("id").where("id > ?", lastID).Limit(int64(chunkSize)).list()
+		query := resource.query(ctx)
+		if filter != nil {
+			filter(query)
+		}
+		items, err := query.Order("id").where("id > ?", lastID).Limit(int64(chunkSize)).list()
 		if err != nil {
 			return err
 		}
@@ -369,9 +373,21 @@ func (resource *Resource) forEach(ctx context.Context, handler func(any) error) 
 	return nil
 }
 
-func ForEach[T any](app *App, ctx context.Context, handler func(*T) error) error {
+func ForEach[T any](app *App, ctx context.Context, filter map[string][]string, handler func(*T) error) error {
 	resource := getResource[T](app)
-	return resource.forEach(ctx, func(a any) error {
+
+	var filterFn func(*listQuery)
+	if filter != nil {
+		filterFn = func(lq *listQuery) {
+			for k, values := range filter {
+				for _, val := range values {
+					lq.Is(k, val)
+				}
+			}
+		}
+	}
+
+	return resource.forEach(ctx, filterFn, func(a any) error {
 		return handler(a.(*T))
 	})
 }

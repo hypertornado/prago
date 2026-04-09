@@ -64,11 +64,11 @@ a.search_pagination_page-selected {
   //background-color: #eee;
   //background-color: $baseColorBackgroundLighter;
   border: 1px solid $grayBorderColor;
-  @include shadow;
+  @include softShadow;
 }
 
 .searchbox-showsuggestions {
-  @include shadow;
+  @include softShadow;
 }
 
 .searchbox_input {

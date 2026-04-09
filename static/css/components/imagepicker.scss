@@ -25,6 +25,8 @@
     background-color: $backgroundGrayColor;
     background-position: center;
     background-size: cover;
+    @include softShadow;
+    background-color: white;
 }
 
 .imagepicker_preview_item:hover {

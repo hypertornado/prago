@@ -73,10 +73,16 @@
 
 .list_table {
   //margin-bottom: 69px;
+  background-color: white;
 }
 
 .list_row {
   display: flex;
+}
+
+.list_row:has(.list_row_multiple-checked) .list_cell {
+  background-color: $baseColor !important;
+  color: white;
 }
 
 .list_row-context .list_cell {
@@ -110,7 +116,6 @@
   min-width: 0px;
   width: 100%;
   text-overflow: ellipsis;
-  //border: 1px solid red;
   overflow: hidden;
 }
 
@@ -234,22 +239,10 @@
   overflow: auto;
   flex-shrink: 1000;
   min-width: 0px;
+  box-shadow: none !important;
 }
 
 .list_multiple_actions_cancel {
-  width: 25px;
-  aspect-ratio: 1;
-  border: 3px solid transparent;
-  border-radius: 100px;
-  cursor: pointer;
-
-  &:hover {
-    background-color: $hoverColor;
-  }
-
-  &:active {
-    background-color: $activeColor;
-  }
 }
 
 @media (max-width: 1100px) {

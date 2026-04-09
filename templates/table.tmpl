@@ -40,12 +40,6 @@
                     {{end}}
                 {{end}}
                 </div>
-                {{if $cell.Progress}}
-                    <div class="form_table_cell_progress" title="{{$cell.ProgressHuman}}">
-                        <div class="form_table_cell_progress_snake" style="width:{{$cell.ProgressCSS}};"></div>
-                        <div class="form_table_cell_progress_value">{{$cell.ProgressHuman}}</div>
-                    </div>
-                {{end}}
                 <div class="form_table_cell_text">{{$cell.Text}}</div>
                 <div class="form_table_cell_descriptions_after">
                 {{if .DescriptionAfter}}
@@ -54,6 +48,14 @@
                     {{end}}
                 {{end}}
                 </div>
+                {{if $cell.Progress}}
+                    <div class="form_table_cell_progress" title="{{$cell.ProgressHuman}}">
+                        <div class="form_table_cell_progress_value">{{$cell.ProgressHuman}}</div>
+                        <div class="form_table_cell_progress_snake">
+                            <div class="form_table_cell_progress_snake_value" style="width:{{$cell.ProgressCSS}};"></div>
+                        </div>
+                    </div>
+                {{end}}
             {{if $cell.Href}}</a>{{end}}
             {{range $button := $cell.Buttons}}
                 <a href="{{if $button.URL}}{{$button.URL}}{{else}}#{{end}}" class="btn"

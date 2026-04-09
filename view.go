@@ -8,13 +8,13 @@ import (
 )
 
 type view struct {
-	Icon       string
-	Name       string
-	Subname    string
-	Navigation []viewButton
-	Header     *boxHeader
-	Items      []viewField
-	Relation   *viewRelation
+	Icon     string
+	Name     string
+	Subname  string
+	Buttons  []*viewButton
+	Header   *boxHeader
+	Items    []viewField
+	Relation *viewRelation
 
 	SearchResults []*searchItem
 	Pagination    []paginationItem

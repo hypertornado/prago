@@ -8,7 +8,7 @@
   <div class="box">
   {{if .Name}}
   <div class="view_header">
-    <img src="/admin/api/icons?file={{.Icon}}&color=888888" class="view_header_icon">
+    <img src="/admin/api/icons?file={{.Icon}}&color=444444" class="view_header_icon">
     {{if .Name}}
       <span class="view_header_name">
         {{.Name}}
@@ -20,7 +20,7 @@
       </span>
     {{end}}
     <div class="btngroup view_header_tabs">
-      {{range $navItem := .Navigation}}
+      {{range $navItem := .Buttons}}
         <a href="{{$navItem.URL}}" class="btn"><img src="/admin/api/icons?file={{.Icon}}&color=444444" class="btn_icon">{{$navItem.Name}}</a>
       {{end}}
     </div>

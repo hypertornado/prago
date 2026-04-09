@@ -85,7 +85,7 @@ func (resource *Resource) consistencyCheck(request *Request, fta *FormTaskActivi
 
 	allItems := resource.countAllItems()
 
-	resource.forEach(context.Background(), func(a any) error {
+	resource.forEach(context.Background(), nil, func(a any) error {
 
 		i++
 

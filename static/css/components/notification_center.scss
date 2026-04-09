@@ -29,13 +29,12 @@
   display: flex;
   position: relative;
   width: 250px;
-  background-color: $baseColorBackgroundLighter;
+  //background-color: $baseColorBackgroundLighter;
 
   animation: openNotification 500ms ease forwards;
 }
 
 .notification-clickable {
-  background-color: $baseColorBackgroundLighter;
   cursor: pointer;
 }
 

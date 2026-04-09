@@ -1,5 +1,6 @@
 class ListMultiple {
   list: List;
+  lastWasUnchecked: boolean;
 
 
   constructor(list: List) {
@@ -72,8 +73,19 @@ class ListMultiple {
     for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
       var checkbox = <HTMLTableCellElement>this.pseudoCheckboxesAr[i];
       checkbox.addEventListener(
+        "mousedown",
+        this.multipleCheckboxMousedown.bind(this)
+      );
+      checkbox.addEventListener(
+        "mouseenter",
+        this.multipleCheckboxMousenter.bind(this)
+      );
+      checkbox.addEventListener(
         "click",
-        this.multipleCheckboxClicked.bind(this)
+        (e: MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }
       );
     }
     this.multipleCheckboxChanged();
@@ -90,7 +102,20 @@ class ListMultiple {
     return ret;
   }
 
-  multipleCheckboxClicked(e: MouseEvent) {
+  multipleCheckboxMousenter(e: MouseEvent) {
+    var cell: HTMLTableCellElement = <HTMLTableCellElement>e.currentTarget;
+    var index: number = this.indexOfClickedCheckbox(cell);
+    if (e.buttons == 1) {
+      if (this.lastWasUnchecked) {
+        this.uncheckPseudocheckbox(index);
+      } else {
+        this.checkPseudocheckbox(index);
+      }
+      this.multipleCheckboxChanged();
+    }
+  }
+
+  multipleCheckboxMousedown(e: MouseEvent) {
     var cell: HTMLTableCellElement = <HTMLTableCellElement>e.currentTarget;
     var index: number = this.indexOfClickedCheckbox(cell);
 
@@ -125,11 +150,13 @@ class ListMultiple {
   checkPseudocheckbox(index: number) {
     var sb: HTMLTableCellElement = this.pseudoCheckboxesAr[index];
     sb.classList.add("list_row_multiple-checked");
+    this.lastWasUnchecked = false;
   }
 
   uncheckPseudocheckbox(index: number) {
     var sb: HTMLTableCellElement = this.pseudoCheckboxesAr[index];
     sb.classList.remove("list_row_multiple-checked");
+    this.lastWasUnchecked = true;
   }
 
   multipleCheckboxChanged() {

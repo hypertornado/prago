@@ -4,8 +4,9 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": false,
+    "strict": false,
     "target": "es6",
-    "outFile": "../public/admin/prago_admin_files/prago.js"
+    "outFile": "../public/admin/prago_admin_files/prago.js",
   },
   "files": [
     "js/autoresize.ts",

@@ -5,7 +5,6 @@
   max-width: min(650px, 100vw);
   width: 100%;
   margin-bottom: 20px;
-  //border-radius: 5px;
   margin-top: 0px;
 }
 
@@ -81,8 +80,8 @@
 .box_header_buttons {
   display: flex;
   flex-wrap: wrap;
-  padding: 5px 0px;
-  gap: 5px;
+  padding: 4px 0px;
+  gap: 4px;
 }
 
 @media print {

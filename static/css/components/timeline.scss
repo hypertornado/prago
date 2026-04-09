@@ -1,7 +1,12 @@
 @use "../variables.scss" as *;
 
 .timeline {
-    padding: 0px 10px;
+    padding: 8px 8px;
+    margin: 8px 8px;
+    background: white;
+    @include softShadow;
+    border-radius: 8px;
+    border: 1px solid $grayBorderColor;
 }
 
 .timeline_toolbar {
@@ -57,9 +62,12 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
     height: 300px;
     display: flex;
     gap: 4px;
+    border-radius: 8px;
+    border: 1px solid $grayBorderColor;
     padding: 14px 4px 4px 4px;
     justify-content: stretch;
-    background-color: $backgroundGrayColor;
+    //background-color: $backgroundGrayColor;
+    @include softShadow;
     border-radius: 4px;
 }
 

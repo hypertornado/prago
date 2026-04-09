@@ -2,14 +2,14 @@ class ListFilterItem {
     filter: ListFilter;
     el: HTMLDivElement;
     filterLayout: string;
-    isListFilter2: boolean;
-    filter2El: HTMLDivElement;
-    filter2NameEl: HTMLDivElement;
+    isListFilter2: boolean = false;
+    filter2El: HTMLDivElement | null = null;
+    filter2NameEl: HTMLDivElement | null = null;
     filter2Data: any;
 
-    closeButton: HTMLButtonElement;
+    closeButton: HTMLButtonElement | null = null;
 
-    filterInput: HTMLInputElement;
+    filterInput: HTMLInputElement | null = null;
 
     key: string;
     value: string;
@@ -18,10 +18,10 @@ class ListFilterItem {
         this.filter = filter;
         this.el = el;
 
-        this.key = el.getAttribute("data-name");
-        this.filterLayout = el.getAttribute("data-filter-layout");
+        this.key = <string>el.getAttribute("data-name");
+        this.filterLayout = <string>el.getAttribute("data-filter-layout");
 
-        this.value = params.get(this.key);
+        this.value = <string>params.get(<string>this.key);
 
         if (this.filterLayout) {
             this.initFilter2();
@@ -31,29 +31,35 @@ class ListFilterItem {
 
     initFilter2() {
         this.isListFilter2 = true
-        this.filter2El = this.el.querySelector(".list_filter2");
-        this.filterInput = this.el.querySelector(".list_filter2_input");
-        this.filter2NameEl = this.el.querySelector(".list_filter2_name");
+        this.filter2El = <HTMLDivElement>this.el.querySelector(".list_filter2");
+        this.filterInput = <HTMLInputElement>this.el.querySelector(".list_filter2_input");
+        this.filter2NameEl = <HTMLDivElement>this.el.querySelector(".list_filter2_name");
         this.filter2El.addEventListener("click", this.filter2Clicked.bind(this));
 
-        this.closeButton = this.el.querySelector(".list_filter2_close");
+        this.closeButton = <HTMLButtonElement>this.el.querySelector(".list_filter2_close");
         this.closeButton.addEventListener("click", this.closeButtonClicked.bind(this));
 
         if (this.isInlineItem()) {
             this.filterInput.classList.remove("hidden");
             this.filter2NameEl.classList.add("hidden");
             this.filterInput.addEventListener("input", this.inlineInputChange.bind(this));
+            this.filterInput.addEventListener("keydown", (e: KeyboardEvent) => {
+                if (e.keyCode == 27) {
+                    this.filterInput!.value = "";
+                    this.inlineInputChange();
+                }
+            })
         } else {
             this.filterInput.classList.add("hidden");
             this.filter2NameEl.classList.remove("hidden");
         }
 
-        let data = JSON.parse(this.filter2El.getAttribute("data-filter-content"));
+        let data = JSON.parse(<any>this.filter2El.getAttribute("data-filter-content"));
         this.setFilter2Data(data);
     }
 
     inlineInputChange() {
-        let val = this.filterInput.value;
+        let val = this.filterInput!.value;
         this.setFilter2Data({
             ID: val,
             Name: val,
@@ -83,11 +89,11 @@ class ListFilterItem {
 
     setFilter2Data(data: any) {
         this.value = "";
-        this.closeButton.classList.add("hidden");
+        this.closeButton!.classList.add("hidden");
         if (data) {
             this.value = data.ID;
             if (this.value) {
-                this.closeButton.classList.remove("hidden");
+                this.closeButton!.classList.remove("hidden");
             }
             this.setFilter2Name(data.Name);
             this.setInlineValue(this.value);
@@ -98,13 +104,13 @@ class ListFilterItem {
     }
 
     setFilter2Name(name: string) {
-        this.filter2El.title = name;
-        this.filter2NameEl.innerText = name;
+        this.filter2El!.title = name;
+        this.filter2NameEl!.innerText = name;
     }
 
     setInlineValue(name: string) {
-        if (this.isInlineItem() && this.filterInput.value != name) {
-            this.filterInput.value = name;
+        if (this.isInlineItem() && this.filterInput!.value != name) {
+            this.filterInput!.value = name;
         }
     }
 
@@ -112,7 +118,7 @@ class ListFilterItem {
         return this.key;
     }
 
-    getFieldValue(): string {
+    getFieldValue(): string | null {
         if (this.isListFilter2) {
             return this.value;
         }

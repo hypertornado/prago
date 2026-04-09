@@ -14,7 +14,9 @@ class Popup {
             <div class="popup_header">
                 <img class="popup_header_icon hidden">
                 <div class="popup_header_name"></div>
-                <div class="popup_header_cancel"></div>
+                <div class="btn popup_header_cancel">
+                  <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=4077bf" class="btn_icon">
+                </div>
             </div>
             <div class="popup_content"></div>
             <div class="popup_footer"></div>

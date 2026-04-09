@@ -38,6 +38,9 @@
                   <img src="/admin/api/icons?file={{$item.Icon}}&color=444444" class="form_label_text_icon">
                 {{end}}
                 {{.Name}}
+                {{if .Required}}
+                  <span class="form_label_required" title="Povinná položka">✱</span>
+                {{end}}
                 {{if .HelpURL}}
                   <a href="{{.HelpURL}}" class="form_label_text_help"><img src="/admin/api/icons?file=glyphicons-basic-196-circle-empty-info.svg&color=4077bf" title="Nápověda"></a>
                 {{end}}

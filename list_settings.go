@@ -32,7 +32,7 @@ func (app *App) initListSettings() {
 
 	PopupForm(app, "_list-items-visible", func(form *Form, request *Request) {
 		resource := app.getResourceByID(request.Param("resource"))
-		if !request.Authorize(resource.canUpdate) {
+		if !request.Authorize(resource.canView) {
 			panic("can't show")
 		}
 

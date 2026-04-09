@@ -7347,6 +7347,11 @@ class ListFilter {
 }
 class ListFilterItem {
     constructor(filter, el, params) {
+        this.isListFilter2 = false;
+        this.filter2El = null;
+        this.filter2NameEl = null;
+        this.closeButton = null;
+        this.filterInput = null;
         this.filter = filter;
         this.el = el;
         this.key = el.getAttribute("data-name");
@@ -7368,6 +7373,12 @@ class ListFilterItem {
             this.filterInput.classList.remove("hidden");
             this.filter2NameEl.classList.add("hidden");
             this.filterInput.addEventListener("input", this.inlineInputChange.bind(this));
+            this.filterInput.addEventListener("keydown", (e) => {
+                if (e.keyCode == 27) {
+                    this.filterInput.value = "";
+                    this.inlineInputChange();
+                }
+            });
         }
         else {
             this.filterInput.classList.add("hidden");
@@ -7604,7 +7615,12 @@ class ListMultiple {
         this.pseudoCheckboxesAr = document.querySelectorAll(".list_row_multiple");
         for (var i = 0; i < this.pseudoCheckboxesAr.length; i++) {
             var checkbox = this.pseudoCheckboxesAr[i];
-            checkbox.addEventListener("click", this.multipleCheckboxClicked.bind(this));
+            checkbox.addEventListener("mousedown", this.multipleCheckboxMousedown.bind(this));
+            checkbox.addEventListener("mouseenter", this.multipleCheckboxMousenter.bind(this));
+            checkbox.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
         }
         this.multipleCheckboxChanged();
     }
@@ -7618,7 +7634,20 @@ class ListMultiple {
         }
         return ret;
     }
-    multipleCheckboxClicked(e) {
+    multipleCheckboxMousenter(e) {
+        var cell = e.currentTarget;
+        var index = this.indexOfClickedCheckbox(cell);
+        if (e.buttons == 1) {
+            if (this.lastWasUnchecked) {
+                this.uncheckPseudocheckbox(index);
+            }
+            else {
+                this.checkPseudocheckbox(index);
+            }
+            this.multipleCheckboxChanged();
+        }
+    }
+    multipleCheckboxMousedown(e) {
         var cell = e.currentTarget;
         var index = this.indexOfClickedCheckbox(cell);
         if (e.shiftKey && this.lastCheckboxIndexClicked >= 0) {
@@ -7649,10 +7678,12 @@ class ListMultiple {
     checkPseudocheckbox(index) {
         var sb = this.pseudoCheckboxesAr[index];
         sb.classList.add("list_row_multiple-checked");
+        this.lastWasUnchecked = false;
     }
     uncheckPseudocheckbox(index) {
         var sb = this.pseudoCheckboxesAr[index];
         sb.classList.remove("list_row_multiple-checked");
+        this.lastWasUnchecked = true;
     }
     multipleCheckboxChanged() {
         var checkedCount = 0;
@@ -8290,9 +8321,6 @@ function createSuggestionsPreviewEl(data, anchor) {
         ret.appendChild(image);
     }
     else {
-        let imageDiv = document.createElement("div");
-        imageDiv.classList.add("preview_image");
-        ret.appendChild(imageDiv);
     }
     right.appendChild(name);
     right.appendChild(description);
@@ -9126,7 +9154,9 @@ class Popup {
             <div class="popup_header">
                 <img class="popup_header_icon hidden">
                 <div class="popup_header_name"></div>
-                <div class="popup_header_cancel"></div>
+                <div class="btn popup_header_cancel">
+                  <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=4077bf" class="btn_icon">
+                </div>
             </div>
             <div class="popup_content"></div>
             <div class="popup_footer"></div>
@@ -9561,8 +9591,12 @@ class DashboardFigure {
                 this.el.classList.remove("dashboard_figure-green", "dashboard_figure-red");
                 this.valueEl.innerText = data["Value"];
                 this.valueEl.setAttribute("title", data["Value"]);
-                this.descriptionEl.innerText = data["Description"];
-                this.descriptionEl.setAttribute("title", data["Description"]);
+                this.descriptionEl.classList.add("hidden");
+                if (data["Description"]) {
+                    this.descriptionEl.classList.remove("hidden");
+                    this.descriptionEl.innerText = data["Description"];
+                    this.descriptionEl.setAttribute("title", data["Description"]);
+                }
                 if (data["IsRed"]) {
                     this.el.classList.add("dashboard_figure-red");
                 }

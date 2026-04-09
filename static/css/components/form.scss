@@ -10,9 +10,9 @@
   //background-color: #eee;
   //background-image: -webkit-linear-gradient(#fcfcfc, #eee);
   //background-image: linear-gradient(#fcfcfc, #eee);
-  background: $backgroundGrayColor;
+  //background: $backgroundGrayColor;
+  background: white;
   border: 1px solid $grayBorderColor;
-  border-radius: 3px;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -21,18 +21,19 @@
   outline: none;
   text-decoration: none;
   font-weight: 500;
-  border-radius: 5px;
+  border-radius: 8px;
 
   display: inline-flex;
   align-items: center;
   position: relative;
 
-  padding: 5px 7px;
-  gap: 7px;
+  padding: 4px 8px;
+  gap: 8px;
+  @include softShadow;
 }
 
 .btn_icon {
-  width: 15px;
+  width: 16px;
   aspect-ratio: 1;
   //margin-right: 5px;
 }
@@ -43,6 +44,8 @@
 
 .btngroup {
   display: inline-flex;
+  border-radius: 8px;
+  @include softShadow;
 }
 
 .btngroup .btn:last-child:hover:has(.btn_more) {
@@ -59,9 +62,19 @@
   border-top-left-radius: 0px;
   border-bottom-left-radius: 0px;
 }
+.btngroup .btn {
+  box-shadow: none;
+
+}
+
+.btngroup .btn:hover {
+  border-color: $grayBorderColor;
+
+}
 
 .btn:hover {
   background: $hoverColor;
+  border-color: $baseColor;
 }
 
 .btn:active {
@@ -106,7 +119,9 @@
 .btn-primary {
   background: linear-gradient(#42a1ec, #0070c9);
   color: white;
-  border-color: #1e90ff;
+  border: none;
+  //border-color: #1e90ff;
+  //border-color: transparent;
   font-weight: 500;
   display: block;
   font-size: 1rem;
@@ -117,6 +132,7 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+  @include softShadow;
 }
 
 .btn-primary:after {
@@ -203,31 +219,22 @@
 }
 
 .form_errors_item-error {
-  //border: 1px solid $red;
-  //background-color: $baseColorBackground;
-  //color: $red;
   background-color: $red;
   color: white;
-  //padding: 5px;
-  //text-align: center;
-  //border-radius: 3px;
-  //@include shadowMedium;
 }
 
 .form_errors_item-ok {
-  //border: 1px solid $green;
-  //background-color: $baseColorBackground;
   background-color: $green;
   color: white;
-  //padding: 5px;
-  //text-align: center;
-  //border-radius: 3px;
-  //@include shadowMedium;
 }
 
 .form_label {
   display: block;
-  margin: 15px 0px;
+  margin: 16px 0px;
+}
+
+.form_label:has(.checkbox_label) {
+  margin: 0px;
 }
 
 .form_label-textover .form_label_content {
@@ -256,7 +263,19 @@
 
 .form_label-required input,
 .form_label-required select {
-  border-width: 2px;
+  //border-width: 2px;
+}
+
+.form_label_required {
+ //background-color: white;
+ //padding: 0px 8px;
+ margin-left: 4px;
+ //color: $gray;
+ //border-radius: 10px;
+ font-size: 1rem;
+ font-weight: bold;
+ line-height: 1.3em;
+ @include softShadow;
 }
 
 .form_label-hidden {
@@ -332,7 +351,7 @@ select.input {
   appearance: none;
 
   padding-right: 24px;
-  background: #fcfcfc
+  background: #fff
     url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAUCAMAAACzvE1FAAAADFBMVEUzMzMzMzMzMzMzMzMKAG/3AAAAA3RSTlMAf4C/aSLHAAAAPElEQVR42q3NMQ4AIAgEQTn//2cLdRKppSGzBYwzVXvznNWs8C58CiussPJj8h6NwgorrKRdTvuV9v16Afn0AYFOB7aYAAAAAElFTkSuQmCC")
     no-repeat right 8px center;
   background-size: 8px 10px;
@@ -433,10 +452,25 @@ a.btn_more_item {
 
 
 .checkbox_label {
-  //border: 1px solid red;
   display: flex;
-  gap: 5px;
+  gap: 4px;
   align-items: center;
+  border: 1px solid transparent;
+  padding: 4px 4px;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-left: -4px;
+
+}
+
+.checkbox_label:hover {
+  background-color: $hoverColor;
+  //border-color: $baseColor;
+  //@include softShadow;
+}
+
+.checkbox_label:active {
+  background-color: $activeColor;
 }
 
 .checkbox_label .form_label_description {

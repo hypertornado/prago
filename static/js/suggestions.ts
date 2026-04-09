@@ -217,9 +217,9 @@ function createSuggestionsPreviewEl(
     image.setAttribute("loading", "lazy");
     ret.appendChild(image);
   } else {
-    let imageDiv = document.createElement("div");
-    imageDiv.classList.add("preview_image");
-    ret.appendChild(imageDiv);
+    //let imageDiv = document.createElement("div");
+    //imageDiv.classList.add("preview_image");
+    //ret.appendChild(imageDiv);
   }
 
   right.appendChild(name);

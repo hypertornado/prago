@@ -1,5 +1,9 @@
 @use "../variables.scss" as *;
 
+body.admin {
+  background-color: $backgroundGrayColor;
+}
+
 .root {
   display: flex;
   width: 100%;
@@ -30,7 +34,7 @@
 .root_left {
   flex-shrink: 0;
   width: 300px;
-  overflow: auto;
+  overflow-y: auto;
 }
 
 .root_content {
@@ -39,7 +43,7 @@
 }
 
 .root_hamburger {
-  border-radius: 5px;
+  border-radius: 8px;
   width: 40px;
   height: 33px;
   cursor: pointer;
@@ -48,12 +52,15 @@
 
   justify-content: center;
   align-items: center;
-  background-color: $backgroundGrayColor;
+  background-color: white;
+  border: 1px solid $grayBorderColor;
+  @include softShadow;
 }
 
 .root_hamburger:hover {
   opacity: 0.9;
   background-color: $hoverColor;
+  border-color: $baseColor;
 }
 
 .root_hamburger:active {
@@ -94,7 +101,7 @@
 
   .root_header {
     //border-top: 1px solid #eee;
-    background: white;
+    //background: white;
     z-index: 1000;
   }
 
@@ -110,16 +117,17 @@
   .root-visible .root_left {
     display: block;
     position: absolute;
-    top: 50px;
+    top: 45px;
     bottom: 0px;
     right: 0px;
     z-index: 10;
-    background-color: #fff;
+    background-color: $backgroundGrayColor;
     //@include shadow;
     animation: root_left_animation 200ms ease-out;
-    width: 100vw;
+    width: min(100vw, 300px);
     z-index: 10000000;
     position: absolute;
+    @include shadow;
   }
 
   .root_hamburger {

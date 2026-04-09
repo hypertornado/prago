@@ -12,9 +12,11 @@
               {{if $item.Icon}}
                 <div class="dashboard_figure_icon"><img src="/admin/api/icons?file={{$item.Icon}}&color=4078c0"></div>
               {{end}}
-              <div class="dashboard_figure_name" title="{{$item.Name}}">{{$item.Name}}</div>
+              {{if $item.Name}}
+                <div class="dashboard_figure_name" title="{{$item.Name}}">{{$item.Name}}</div>
+              {{end}}
               <div class="dashboard_figure_value"></div>
-              <div class="dashboard_figure_description"></div>
+              <div class="dashboard_figure_description hidden"></div>
             {{if $item.URL}}
               </a>
             {{else}}

@@ -1,17 +1,23 @@
 @use "../variables.scss" as *;
 
 .preview {
-    padding: 5px 10px;
-    border-radius: 5px;
+    padding: 8px 16px;
+    border-radius: 8px;
     text-decoration: none;
     display: inline-block;
-    margin: 0px -10px;
     font-size: 1rem;
     line-height: 1.4em;
   
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 16px;
+    background-color: white;
+    @include softShadow;
+    border: 1px solid $grayBorderColor;
+  }
+
+  .preview:hover {
+    border-color: $baseColor;
   }
   
   .preview_image {
@@ -20,11 +26,13 @@
     flex-shrink: 0;
     width: 40px;
     aspect-ratio: 1;
-    border-radius: 5px;
+    border-radius: 8px;
     object-fit: cover;
-    background-color: $backgroundGrayColor;
+    //background-color: $backgroundGrayColor;
+    border: 1px solid $grayBorderColor; 
     align-self: flex-start;
     overflow: hidden;
+    @include softShadow;
   }
   
   .preview_right {

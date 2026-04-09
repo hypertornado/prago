@@ -24,7 +24,7 @@ class DashboardTable {
     this.el = el;
 
     let reloadSeconds = parseInt(
-      this.el.getAttribute("data-refresh-time-seconds")
+      <string> this.el.getAttribute("data-refresh-time-seconds")
     );
 
     new VisibilityReloader(reloadSeconds * 1000, this.loadTableData.bind(this));
@@ -61,11 +61,11 @@ class DashboardFigure {
 
   constructor(el: HTMLDivElement) {
     this.el = el;
-    this.valueEl = el.querySelector(".dashboard_figure_value");
-    this.descriptionEl = el.querySelector(".dashboard_figure_description");
+    this.valueEl = <HTMLDivElement> el.querySelector(".dashboard_figure_value");
+    this.descriptionEl = <HTMLDivElement> el.querySelector(".dashboard_figure_description");
 
     let reloadSeconds = parseInt(
-      this.el.getAttribute("data-refresh-time-seconds")
+      <string> this.el.getAttribute("data-refresh-time-seconds")
     );
 
     
@@ -92,8 +92,13 @@ class DashboardFigure {
         );
         this.valueEl.innerText = data["Value"];
         this.valueEl.setAttribute("title", data["Value"]);
-        this.descriptionEl.innerText = data["Description"];
-        this.descriptionEl.setAttribute("title", data["Description"]);
+
+        this.descriptionEl.classList.add("hidden");
+        if (data["Description"]) {
+          this.descriptionEl.classList.remove("hidden");
+          this.descriptionEl.innerText = data["Description"];
+          this.descriptionEl.setAttribute("title", data["Description"]);
+        }
 
         if (data["IsRed"]) {
           this.el.classList.add("dashboard_figure-red");

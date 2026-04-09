@@ -28,6 +28,14 @@
     justify-content: center;
   }
 
+  .list_row_multiple:hover {
+    background-color: $hoverColor;
+  }
+
+  .list_row_multiple:active {
+    background-color: $activeColor;
+  }
+
 .list_cell_multiple_pseudocheckbox {
     border: 1px solid $grayBorderColor;
     border-radius: 3px;

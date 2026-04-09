@@ -41,7 +41,6 @@
 .popup {
   @include rectangle;
   width: min(300px, 100% - 20px);
-  //background-color: #eee;
   @include shadowMedium;
   display: flex;
   flex-direction: column;
@@ -49,17 +48,26 @@
   border-radius: 5px;
   max-height: calc(100dvh - 100px);
 
-  background: white;
+  background: $backgroundGrayColor;
 }
 
 .popup-wide {
-  width: min(700px, 100% - 20px);
+  width: min(700px, 100% - 16px);
   height: calc(100dvh - 100px);
 }
 
+@media (max-height: 800px) {
+  .popup-wide {
+    max-height: calc(100dvh - 20px);
+    height: calc(100dvh - 20px);
+  }
+}
+
 .popup_header {
-  padding: 10px 10px;
+  padding: 8px 8px;
   display: flex;
+  align-items: center;
+  border-bottom: 1px solid $grayBorderColor;
 }
 
 .popup_header_name {
@@ -75,36 +83,42 @@
 }
 
 .popup_header_cancel {
-  color: $baseColor;
+  /*color: $baseColor;
   cursor: pointer;
   flex-grow: 0;
   flex-shrink: 0;
   font-size: 1.5em;
   display: none;
+  border: 1px solid $grayBorderColor;
+  background-color: white;
+  border-radius: 100px;
+  width: 24px;
+  padding: 2px;
+  aspect-ratio: 1;
+  flex-direction: column;
+  align-items: center;
+  @include softShadow;*/
+  
 }
 
 .popup_header_cancel-visible {
-  display: inline-block;
+  display: inline-flex;
 }
 
 .popup_header_cancel:hover {
-  opacity: 0.8;
+  background-color: $hoverColor;
 }
 
 .popup_header_cancel:active {
-  opacity: 0.6;
-}
-
-.popup_header_cancel::after {
-  content: "×";
+  background-color: $activeColor;
 }
 
 .popup_content {
   border-top: none;
   border-left: none;
   border-right: none;
-  padding: 10px 10px;
-  background-color: white;
+  padding: 8px 8px;
+  //background-color: white;
   overflow-y: auto;
   flex-grow: 1000;
   display: none;
@@ -120,7 +134,7 @@
 
 .popup_footer {
   text-align: right;
-  padding: 10px 10px;
+  padding: 8px 8px;
   display: none;
 }
 

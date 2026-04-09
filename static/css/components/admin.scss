@@ -59,13 +59,13 @@ select.admin_timestamp_date {
 }
 
 select.admin_timestamp_hour {
-  width: 60px;
+  min-width: 50px !important;
   flex-grow: 0;
   margin: 0px 5px;
 }
 
 select.admin_timestamp_minute {
-  width: 60px;
+  min-width: 50px !important;
   flex-grow: 0;
   margin-left: 5px;
 }
@@ -83,12 +83,15 @@ select.admin_timestamp_minute {
 .view_header_icon {
   width: 40px;
   aspect-ratio: 1;
-  margin-right: 10px;
-  padding: 10px;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  margin-right: 8px;
+  padding: 8px;
+  margin-top: 8px;
+  margin-bottom: 8px;
   background-color: $backgroundGrayColor;
-  border-radius: 5px;
+  background-color: white;
+  border: 1px solid $grayBorderColor;
+  border-radius: 8px;
+  //margin-left: -48px;
 }
 
 .view_header_name {
@@ -119,26 +122,30 @@ select.admin_timestamp_minute {
 
 @media (min-width: 700px) {
   .view_name:has(.view_name_icon) {
-    margin-left: -20px;
+    margin-left: -22px;
   } 
 }
 
 .view_name_icon {
   width: 15px;
-  margin-right: 5px;
+  margin-right: 4px;
 }
 
 .view_edit { 
   font-size: .8rem;
-  margin-left: 5px;
+  line-height: 1.2em;
+  margin-left: 4px;
   opacity: 0;
-  padding: 0px 3px;
+  padding: 0px 4px;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   text-decoration: none;
-  border-radius: 3px;
-  background-color: $backgroundGrayColor;
+  border-radius: 4px;
+  //background-color: $backgroundGrayColor;
+
+  border: 1px solid $baseColor;
+  @include softShadow;
 
   user-select: none;
   -webkit-user-select: none; /* Safari */
@@ -154,18 +161,18 @@ select.admin_timestamp_minute {
 .view_edit_icon {
   aspect-ratio: 1;
   width: 13px;
-  border-radius: 5px;
+  border-radius: 8px;
 }
 
 .view_content {
   clear: both;
-  padding: 0px 10px 0px 10px;
+  padding: 0px 8px 0px 8px;
   word-wrap: break-word;
   color: $gray;
 }
 
 .view_content:last-child {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .view_content:empty {
@@ -177,7 +184,7 @@ select.admin_timestamp_minute {
 }
 
 .progress {
-  padding: 5px;
+  padding: 8px;
   margin: 0px auto;
   line-height: 100px;
   display: block;
@@ -237,33 +244,41 @@ select.admin_timestamp_minute {
 
 .admin_relation_preview:first-child .admin_relation_preview_action-up {
   display: none;
+  //opacity: 0;
 }
 
 .admin_relation_preview:last-child .admin_relation_preview_action-down {
   display: none;
+  //opacity: 0;
 }
 
 .admin_relation_preview_action {
-  display: inline-block;
-  text-align: center;
-  margin: 10px 10px;
+  display: inline-flex;
+  //text-align: center;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
   align-self: center;
   background: white;
   color: $gray;
-  width: 30px;
+  width: 32px;
+  height: 32px;
   aspect-ratio: 1;
   flex-shrink: 0;
-  line-height: 30px;
-  border-radius: 300px;
-  font-size: 1.3rem;
-  line-height: 30px;
+  border-radius: 3000px;
+  font-size: 1.5rem;
+  //line-height: 32px;
   font-weight: bold;
-  background-color: $backgroundGrayColor;
+  //background-color: $backgroundGrayColor;
+  background-color: white;
+  border: 1px solid $grayBorderColor;
   cursor: pointer;
+  @include softShadow;
 }
 
 .admin_relation_preview_action:hover {
   background-color: $hoverColor;
+  border-color: $baseColor;
 }
 
 .admin_relation_preview_action:active {
@@ -301,7 +316,8 @@ select.admin_timestamp_minute {
   margin: 0px !important;
   //border-bottom: 1px solid #eee;
   cursor: pointer;
-  border-radius: 0px;
+  border-radius: 0px !important;
+  background: $backgroundGrayColor !important;
 }
 
 .admin_item_relation_picker_suggestion:last-child {
