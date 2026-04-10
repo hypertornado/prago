@@ -1134,7 +1134,7 @@ select.input {
   max-width: 100%;
 }
 
-.input[type=date] {
+.input[type=date], .input[type=month] {
   width: auto;
   min-width: 120px;
   max-width: 100%;
@@ -3415,42 +3415,8 @@ a .dashboard_figure_value {
   flex-grow: 1000;
 }
 
-.timeline_toolbar_datepicker {
-  display: flex;
-  gap: 4px;
-}
-
-.timeline_toolbar_item {
-  height: 24px;
-  background-color: #fafafa;
-  border: 1px solid #eee;
-  border-radius: 4px;
-  margin: 0px;
-  padding: 0px;
-}
-
-input.timeline_toolbar_item, select.timeline_toolbar_item {
-  padding: 0px 4px;
-}
-
-.timeline_toolbar_item-dateselect {
-  width: 130px;
-}
-
-.timeline_toolbar_item-nav {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.timeline_toolbar_item-nav:hover {
-  background-color: hsl(214, 50%, 97%);
-}
-
-.timeline_toolbar_icon {
-  width: 12px;
-  aspect-ratio: 1;
+.timeline_toolbar .input {
+  max-width: 200px;
 }
 
 .timeline_values {
@@ -3490,7 +3456,7 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
   position: absolute;
   justify-self: center;
   margin-bottom: 4px;
-  margin-left: 50%;
+  margin-left: 0px;
   text-align: center;
   font-size: 0.8rem;
   line-height: 1.3em;
@@ -3498,7 +3464,8 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
   border-radius: 4px;
   background-color: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 4px 8px;
+  padding: 0px 8px;
+  border: 1px solid #eee;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3512,7 +3479,16 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
   display: inline-block;
 }
 
+.timeline_value:hover {
+  opacity: 1 !important;
+}
+
+.timeline_values:has(.timeline_value:hover) .timeline_value {
+  opacity: 0.5;
+}
+
 .timeline_value_bar_inner {
+  position: relative;
   align-self: end;
   width: 100%;
   background-color: #4077bf;
@@ -3523,6 +3499,7 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 .timeline_value_bar_inner-negative {
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
+  background-color: #cb2431;
 }
 
 .timeline_value_bar_inner-positive {
@@ -3564,12 +3541,6 @@ input.timeline_toolbar_item, select.timeline_toolbar_item {
 
 .timeline_value:hover .timeline_value_name {
   color: #444;
-  width: auto;
-  overflow: visible;
-}
-
-.timeline_value:hover .timeline_value_bar_inner {
-  filter: contrast(1.4);
 }
 
 .timeline_value-current .timeline_value_name {

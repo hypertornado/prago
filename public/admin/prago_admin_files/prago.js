@@ -8418,6 +8418,7 @@ class FormContainer {
             window.primaryFormContainer = this;
         }
         this.formTaskUUID = "";
+        this.taskDataRequesting = false;
         this.formContainer = formContainer;
         this.okHandler = okHandler;
         this.progress = formContainer.querySelector(".form_progress");
@@ -8597,16 +8598,21 @@ class FormContainer {
             if (this.formTaskUUID) {
                 taskEl.classList.remove("hidden");
             }
-            if (this.formTaskUUID != "" && Date.now() - this.lastTaskLoad > 1000) {
+            if (this.formTaskUUID != "" && Date.now() - this.lastTaskLoad > 500) {
                 this.lastTaskLoad = Date.now();
                 this.loadTaskProgress(this.formTaskUUID);
             }
         }, 100);
     }
     loadTaskProgress(uuid) {
+        if (this.taskDataRequesting) {
+            return;
+        }
         let request = new XMLHttpRequest();
         request.open("GET", "/admin/api/_taskview?uuid=" + uuid);
+        this.taskDataRequesting = true;
         request.addEventListener("load", (e) => {
+            this.taskDataRequesting = false;
             if (this.formTaskUUID != uuid) {
                 return;
             }
@@ -9950,6 +9956,7 @@ class Timeline {
         this.valuesEl.innerHTML = '<progress class="progress"></progress>';
     }
     setValue(data) {
+        console.log(data);
         let valEl = document.createElement("div");
         valEl.innerHTML = `
             <div class="timeline_value_bars"></div>

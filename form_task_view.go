@@ -28,6 +28,7 @@ func (fta *FormTaskActivity) toView(app *App) *FormTaskView {
 	for _, row := range tableRows {
 		rowsHTML += app.adminTemplates.ExecuteToHTML("table_row", tableCellsToTableRowView(row))
 	}
+	fmt.Println("ROOWS", rowsHTML)
 
 	ret := &FormTaskView{
 		Description:  fta.description,

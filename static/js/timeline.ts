@@ -98,6 +98,7 @@ class Timeline {
     }
 
     setValue(data: any) {
+        console.log(data);
         let valEl = document.createElement("div");
         valEl.innerHTML = `
             <div class="timeline_value_bars"></div>

@@ -12,12 +12,15 @@ class FormContainer {
   tableTbody: HTMLTableSectionElement;
   taskHeader: HTMLDivElement;
 
+  taskDataRequesting: boolean;
+
   constructor(formContainer: HTMLDivElement, okHandler: Function) {
     if (!window.primaryFormContainer && !formContainer.parentElement.classList.contains("popup_content")) {
       window.primaryFormContainer = this;
     }
 
     this.formTaskUUID = "";
+    this.taskDataRequesting = false;
 
     this.formContainer = formContainer;
     this.okHandler = okHandler;
@@ -234,7 +237,7 @@ class FormContainer {
         taskEl.classList.remove("hidden");
       }
 
-      if (this.formTaskUUID != "" && Date.now() - this.lastTaskLoad > 1000) {
+      if (this.formTaskUUID != "" && Date.now() - this.lastTaskLoad > 500) {
         this.lastTaskLoad = Date.now();
         this.loadTaskProgress(this.formTaskUUID);
       }
@@ -242,10 +245,17 @@ class FormContainer {
   }
 
   loadTaskProgress(uuid: string) {
+    //just one task progress at time
+    if (this.taskDataRequesting) {
+      return;
+    }
+
     let request = new XMLHttpRequest();
     request.open("GET", "/admin/api/_taskview?uuid=" + uuid);
+    this.taskDataRequesting = true;
 
     request.addEventListener("load", (e) => {
+      this.taskDataRequesting = false;
       if (this.formTaskUUID != uuid) {
         return;
       }

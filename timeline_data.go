@@ -155,7 +155,7 @@ func getTimelineDateInterval(typ string, endDate time.Time, i int64) *timelineDa
 	if typ == "month" {
 		t1 = endDate.AddDate(0, int(-i), 0)
 		t2 = t1.AddDate(0, 1, 0)
-		formattedDate = t1.Format("1. 2006")
+		formattedDate = monthName(int64(t1.Month()), "cs") + " " + t1.Format("2006")
 		if t1.Year() == time.Now().Year() && t1.Month() == time.Now().Month() {
 			isCurrent = true
 		}
@@ -163,7 +163,7 @@ func getTimelineDateInterval(typ string, endDate time.Time, i int64) *timelineDa
 	if typ == "year" {
 		t1 = endDate.AddDate(int(-i), 0, 0)
 		t2 = t1.AddDate(1, 0, 0)
-		formattedDate = t1.Format("2006")
+		formattedDate = "Rok" + t1.Format("2006")
 		if t1.Year() == time.Now().Year() {
 			isCurrent = true
 		}

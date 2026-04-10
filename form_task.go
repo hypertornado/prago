@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"context"
 	"fmt"
 	"runtime/debug"
 	"sync"
@@ -16,6 +17,12 @@ type FormTaskActivity struct {
 	stoppedByUser    bool
 	tableRows        [][]*TableCell
 	lastStateRequest time.Time
+	ctx              context.Context
+	cancel           context.CancelFunc
+}
+
+func (fta *FormTaskActivity) Context() context.Context {
+	return fta.ctx
 }
 
 func (fta *FormTaskActivity) checkIfStop() {
@@ -62,17 +69,19 @@ func (fta *FormTaskActivity) TableCells(cells ...*TableCell) {
 }
 
 func newFormTaskActivity(request *Request, handler func(*FormTaskActivity) error) *FormTaskActivity {
+	ctx, cancel := context.WithCancel(context.Background())
 	ret := &FormTaskActivity{
 		mutex:            &sync.RWMutex{},
 		uuid:             randomString(30),
 		lastStateRequest: time.Now(),
+		ctx:              ctx,
+		cancel:           cancel,
 	}
 
 	request.app.setFormTaskActivity(ret)
 
 	go func() {
 		defer func() {
-			//fmt.Println("AC recover")
 			if r := recover(); r != nil {
 				if ret.stoppedByUser {
 					ret.description = "Ukončeno uživatelem"
@@ -119,6 +128,7 @@ func (app *App) deleteFormTaskActivity(uuid string) {
 func (app *App) stopFormTask(uuid string) {
 	task := app.getFormTaskActivity(uuid)
 	task.stoppedByUser = true
+	task.cancel()
 	for {
 		time.Sleep(200 * time.Millisecond)
 	}

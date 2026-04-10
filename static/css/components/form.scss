@@ -360,7 +360,7 @@ select.input {
   max-width: 100%;
 }
 
-.input[type=date] {
+.input[type=date], .input[type=month] {
   width: auto;
   min-width: 120px;
   max-width: 100%;
