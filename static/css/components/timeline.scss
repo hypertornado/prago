@@ -1,5 +1,8 @@
 @use "../variables.scss" as *;
 
+$timelineBottomHeight: 70px;
+$timelineLeftWidth: 60px;
+
 .timeline {
     padding: 8px 8px;
     margin: 8px 8px;
@@ -12,12 +15,24 @@
 .timeline_name {
     padding: 0px;
     margin: 0px;
+    align-self: flex-start;
 }
 
 .timeline_toolbar {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    align-items: center;
+}
+
+.timeline_toolbar_date, .timeline_toolbar_month, .timeline_toolbar_year {
+    border: 1px solid $grayBorderColor;
+    @include softShadow;
+    font-size: .8rem;
+    height: 26px !important;
+    min-height: 0px !important;
+    //line-height: 26px;
+    padding: 0px 4px;
 }
 
 .timeline_toolbar_divider {
@@ -29,11 +44,12 @@
 }
 
 .timeline_values {
+    position: relative;
     height: 300px;
     display: flex;
-    border-radius: 8px;
-    padding: 14px 4px 4px 60px;
+    padding: 0px 0px 0px $timelineLeftWidth;
     justify-content: stretch;
+    margin-top: 8px;
 }
 
 .timeline_value {
@@ -49,7 +65,7 @@
 .timeline_value_bars {
     flex-grow: 100;
     display: flex;
-    gap: 1px;
+    //gap: 1px;
 }
 
 .timeline_value_bar {
@@ -119,10 +135,10 @@
 }
 
 .timeline_value_name {
-    font-size: 10px;
-    line-height: 10px;
+    font-size: .8rem;
+    line-height: 1.3em;
     flex-shrink: 0;
-    height: 70px;
+    height: $timelineBottomHeight;
     margin-top: 2px;
     text-align: center;
     color: $gray;
@@ -158,4 +174,55 @@
 
 .timeline_value-current .timeline_value_name {
     color: $red;
+}
+
+.timeline_value-selected .timeline_value_name {
+    //color: $red;
+    font-weight: bold;
+}
+
+.timeline_lines {
+    //border: 1px solid red;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    bottom: $timelineBottomHeight;
+}
+
+.timeline_line {
+    position: absolute;
+    left: 0px;
+    border-bottom: 1px solid $grayBorderColor;
+    width: 100%;
+}
+
+.timeline_line_name {
+    color: $gray;
+    width: $timelineLeftWidth;
+    text-align: right;
+    font-size: .8rem;
+    line-height: 1.3em;
+    padding: 0px 4px;
+    cursor: default;
+}
+
+.timeline_filters {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 16px 0px;
+    gap: 8px;
+    //border: 1px solid red;
+}
+
+.timeline_filter {
+    background-color: $baseColorBackground;
+    //color: white;
+    @include softShadow;
+    font-size: .8rem;
+    line-height: 1.3em;
+    border-radius: 4px;
+    padding: 0px 8px;
+    cursor: default;
+
 }

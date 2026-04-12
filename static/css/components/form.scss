@@ -364,7 +364,7 @@ select.input {
   width: auto;
   min-width: 120px;
   max-width: 100%;
-  min-height: 2.5rem !important;
+  min-height: 2.5rem;
 }
 
 .input[readonly],
@@ -394,11 +394,26 @@ select.input {
 }
 
 .form_radios {
-  margin: 0px 10px;
+  margin: 0px 0px;
 }
 
 .form_radio {
-  margin: 5px 5px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  border: 1px solid transparent;
+  padding: 4px 4px;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-left: -4px;
+}
+
+.form_radio:hover {
+  background-color: $hoverColor;
+}
+
+.form_radio:active {
+  background-color: $activeColor;
 }
 
 .form_progress {

@@ -1,24 +1,22 @@
 {{define "timeline"}}
-    <div class="timeline" data-uuid="{{.UUID}}">
+    <div class="timeline" data-uuid="{{.UUID}}" data-alignment={{.Alignment}}>
         <div class="timeline_toolbar">
             <h2 class="timeline_name">{{.Name}}</h2>
             <div class="timeline_toolbar_divider"></div>
-            <select class="input timeline_toolbar_type">
-                <option value="day">Den</option>
-                <option value="month">Měsíc</option>
-                <option value="year">Rok</option>
-            </select>
             <button class="btn timeline_toolbar_prev">
                 <img class="btn_icon" src="/admin/api/icons?file=glyphicons-basic-223-chevron-left.svg&color=444444">
             </button>
             <input type="date" class="input timeline_toolbar_date">
             <input type="month" class="input timeline_toolbar_month">
             <input type="number" class="input timeline_toolbar_year">
-            <button class="btn timeline_toolbar_next">
+            <button class="btn btn-large timeline_toolbar_next">
                 <img class="btn_icon" src="/admin/api/icons?file=glyphicons-basic-224-chevron-right.svg&color=444444">
             </button>
-        
+            <button class="btn timeline_toolbar_settings">
+                <img class="btn_icon" src="/admin/api/icons?file=glyphicons-basic-137-cogwheel.svg&color=444444">
+            </button>
         </div>
+        <div class="timeline_filters hidden"></div>
         <div class="timeline_values"></div>
     </div>
 {{end}}

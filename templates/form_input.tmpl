@@ -158,10 +158,10 @@
   {{$id := .ID}}
   <div class="form_radios">
   {{range $value := .Data}}
-      <div class="form_radio">
+      <label class="form_radio">
         <input type="radio" id="{{$id}}-{{index $value 0}}" name="{{$id}}" value="{{index $value 0}}"{{if eq $val (index $value 0)}} checked{{end}}>
-        <label for="{{$id}}-{{index $value 0}}">{{index $value 1}}</label>
-      </div>
+        <div class="form_radio_name">{{index $value 1}}</div>
+      </label>
   {{end}}
   </div>
 {{end}}

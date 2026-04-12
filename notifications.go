@@ -230,14 +230,6 @@ func (n *Notification) Push(userID int64) {
 	n.app.notificationCenter.add(n)
 }
 
-func (n *Notification) Flash(request *Request) error {
-	n.isFlash = true
-	n.app.notificationCenter.add(n)
-	request.session.session.AddFlash(n.uuid)
-	request.session.dirty = true
-	return nil
-}
-
 func notificationProgressHuman(in float64) string {
 	if in <= 0 {
 		return ""

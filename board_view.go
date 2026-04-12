@@ -104,8 +104,9 @@ func (dashboard *Dashboard) view(request *Request) *dashboardView {
 	for _, v := range dashboard.timelines {
 		if request.Authorize(v.permission) {
 			view.Timelines = append(view.Timelines, &dashboardViewTimeline{
-				UUID: v.uuid,
-				Name: v.name(request.Locale()),
+				UUID:      v.uuid,
+				Name:      v.name(request.Locale()),
+				Alignment: v.defaultAlignment,
 			})
 		}
 	}

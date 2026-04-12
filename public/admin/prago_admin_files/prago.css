@@ -1138,7 +1138,7 @@ select.input {
   width: auto;
   min-width: 120px;
   max-width: 100%;
-  min-height: 2.5rem !important;
+  min-height: 2.5rem;
 }
 
 .input[readonly],
@@ -1167,11 +1167,26 @@ select.input {
 }
 
 .form_radios {
-  margin: 0px 10px;
+  margin: 0px 0px;
 }
 
 .form_radio {
-  margin: 5px 5px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  border: 1px solid transparent;
+  padding: 4px 4px;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-left: -4px;
+}
+
+.form_radio:hover {
+  background-color: hsl(214, 50%, 97%);
+}
+
+.form_radio:active {
+  background-color: hsl(214, 50%, 90%);
 }
 
 .form_progress {
@@ -3403,12 +3418,23 @@ a .dashboard_figure_value {
 .timeline_name {
   padding: 0px;
   margin: 0px;
+  align-self: flex-start;
 }
 
 .timeline_toolbar {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.timeline_toolbar_date, .timeline_toolbar_month, .timeline_toolbar_year {
+  border: 1px solid #eee;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-size: 0.8rem;
+  height: 26px !important;
+  min-height: 0px !important;
+  padding: 0px 4px;
 }
 
 .timeline_toolbar_divider {
@@ -3420,11 +3446,12 @@ a .dashboard_figure_value {
 }
 
 .timeline_values {
+  position: relative;
   height: 300px;
   display: flex;
-  border-radius: 8px;
-  padding: 14px 4px 4px 60px;
+  padding: 0px 0px 0px 60px;
   justify-content: stretch;
+  margin-top: 8px;
 }
 
 .timeline_value {
@@ -3440,7 +3467,6 @@ a .dashboard_figure_value {
 .timeline_value_bars {
   flex-grow: 100;
   display: flex;
-  gap: 1px;
 }
 
 .timeline_value_bar {
@@ -3508,8 +3534,8 @@ a .dashboard_figure_value {
 }
 
 .timeline_value_name {
-  font-size: 10px;
-  line-height: 10px;
+  font-size: 0.8rem;
+  line-height: 1.3em;
   flex-shrink: 0;
   height: 70px;
   margin-top: 2px;
@@ -3545,6 +3571,52 @@ a .dashboard_figure_value {
 
 .timeline_value-current .timeline_value_name {
   color: #cb2431;
+}
+
+.timeline_value-selected .timeline_value_name {
+  font-weight: bold;
+}
+
+.timeline_lines {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  bottom: 70px;
+}
+
+.timeline_line {
+  position: absolute;
+  left: 0px;
+  border-bottom: 1px solid #eee;
+  width: 100%;
+}
+
+.timeline_line_name {
+  color: #888;
+  width: 60px;
+  text-align: right;
+  font-size: 0.8rem;
+  line-height: 1.3em;
+  padding: 0px 4px;
+  cursor: default;
+}
+
+.timeline_filters {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 16px 0px;
+  gap: 8px;
+}
+
+.timeline_filter {
+  background-color: hsl(214, 50%, 90%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-size: 0.8rem;
+  line-height: 1.3em;
+  border-radius: 4px;
+  padding: 0px 8px;
+  cursor: default;
 }
 
 .imagepicker_content {

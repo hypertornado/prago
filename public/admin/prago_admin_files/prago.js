@@ -9888,7 +9888,6 @@ class CMenu {
 class Timeline {
     constructor(el) {
         this.el = el;
-        this.typeSelect = el.querySelector(".timeline_toolbar_type");
         this.valuesEl = el.querySelector(".timeline_values");
         this.datepicker = el.querySelector(".timeline_toolbar_date");
         this.monthpicker = el.querySelector(".timeline_toolbar_month");
@@ -9896,7 +9895,10 @@ class Timeline {
         this.datepicker.valueAsDate = new Date();
         this.monthpicker.valueAsDate = new Date();
         this.yearpicker.value = new Date().getFullYear() + "";
-        this.typeSelect.addEventListener("change", this.changedType.bind(this));
+        this.cache = {};
+        this.settingsOptions = {};
+        this.typeValue = "day";
+        this.alignmentValue = this.el.getAttribute("data-alignment");
         this.datepicker.addEventListener("change", this.changedType.bind(this));
         this.monthpicker.addEventListener("change", this.changedType.bind(this));
         this.yearpicker.addEventListener("change", this.changedType.bind(this));
@@ -9906,12 +9908,29 @@ class Timeline {
         this.el.querySelector(".timeline_toolbar_next").addEventListener("click", () => {
             this.changePosition(true);
         });
+        window.addEventListener("resize", this.loadData.bind(this));
+        this.el.querySelector(".timeline_toolbar_settings").addEventListener("click", this.settingsClicked.bind(this));
+        this.filtersEl = this.el.querySelector(".timeline_filters");
         this.changedType();
+    }
+    settingsClicked() {
+        let params = JSON.parse(JSON.stringify(this.settingsOptions));
+        params["_uuid"] = this.el.getAttribute("data-uuid");
+        params["_alignment"] = this.alignmentValue;
+        params["_type"] = this.typeValue;
+        new PopupForm("/admin/_timeline-settings" + encodeParams(params), (data) => {
+            this.cache = {};
+            this.settingsOptions = data.Data;
+            console.log(data);
+            this.alignmentValue = data.Data["_alignment"];
+            this.typeValue = data.Data["_type"];
+            this.changedType();
+        });
     }
     loadData() {
         this.setLoader();
         var dateStr;
-        let typ = this.typeSelect.value;
+        let typ = this.typeValue;
         if (typ == "day") {
             dateStr = this.datepicker.value;
         }
@@ -9927,9 +9946,12 @@ class Timeline {
         }
         this.lastRequest = request;
         var params = {
-            _uuid: this.el.getAttribute("data-uuid"),
-            _date: dateStr,
-            _width: this.el.clientWidth,
+            UUID: this.el.getAttribute("data-uuid"),
+            DateStr: dateStr,
+            Width: this.el.clientWidth,
+            ValueCache: this.cache,
+            Alignment: this.alignmentValue,
+            Options: this.settingsOptions,
         };
         request.addEventListener("load", () => {
             if (request.status == 200) {
@@ -9942,21 +9964,50 @@ class Timeline {
             }
             this.lastRequest = null;
         });
-        request.open("GET", "/admin/api/timeline" + encodeParams(params), true);
-        request.send();
+        request.open("POST", "/admin/api/timeline", true);
+        request.send(JSON.stringify(params));
     }
     setData(data) {
         this.valuesEl.innerText = "";
+        let linesEl = document.createElement("div");
+        linesEl.classList.add("timeline_lines");
+        this.valuesEl.appendChild(linesEl);
+        this.filtersEl.innerHTML = "";
+        this.filtersEl.classList.add("hidden");
+        for (var i = 0; i < data.Filters.length; i++) {
+            this.setFilter(data.Filters[i]);
+        }
+        for (var i = 0; i < data.Lines.length; i++) {
+            this.drawLine(linesEl, data.Lines[i]);
+        }
         for (var i = 0; i < data.Values.length; i++) {
             let val = data.Values[i];
             this.setValue(val);
         }
     }
+    setFilter(data) {
+        this.filtersEl.classList.remove("hidden");
+        let el = document.createElement("div");
+        el.innerText = `${data.KeyName}: ${data.ValueName}`;
+        el.classList.add("timeline_filter");
+        this.filtersEl.appendChild(el);
+        console.log("filter", data);
+    }
+    drawLine(linesEl, data) {
+        let lineEl = document.createElement("div");
+        lineEl.classList.add("timeline_line");
+        lineEl.setAttribute("style", data.StyleCSS);
+        let lineNameEl = document.createElement("div");
+        lineNameEl.classList.add("timeline_line_name");
+        lineNameEl.textContent = data.Name;
+        lineEl.appendChild(lineNameEl);
+        linesEl.appendChild(lineEl);
+    }
     setLoader() {
         this.valuesEl.innerHTML = '<progress class="progress"></progress>';
     }
     setValue(data) {
-        console.log(data);
+        this.cache[data.DateID] = data.Value;
         let valEl = document.createElement("div");
         valEl.innerHTML = `
             <div class="timeline_value_bars"></div>
@@ -9969,6 +10020,9 @@ class Timeline {
         this.addBar(barsEl, data);
         if (data.IsCurrent) {
             valEl.classList.add("timeline_value-current");
+        }
+        if (data.IsSelected) {
+            valEl.classList.add("timeline_value-selected");
         }
         this.valuesEl.appendChild(valEl);
     }
@@ -9993,7 +10047,7 @@ class Timeline {
         barEl.appendChild(labelEl);
     }
     changedType() {
-        let typ = this.typeSelect.value;
+        let typ = this.typeValue;
         this.datepicker.classList.add("hidden");
         this.monthpicker.classList.add("hidden");
         this.yearpicker.classList.add("hidden");
@@ -10009,7 +10063,7 @@ class Timeline {
         this.loadData();
     }
     changePosition(next) {
-        let typ = this.typeSelect.value;
+        let typ = this.typeValue;
         if (typ == "day") {
             let date = new Date(this.datepicker.value);
             if (isNaN(date.getTime())) {
