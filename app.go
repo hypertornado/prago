@@ -149,6 +149,7 @@ func createApp(codeName string, version string, testing bool) *App {
 
 	app.initUserResource()
 	app.initFilesResource()
+	app.initSessionsResource()
 	app.initEmailSentResource()
 
 	app.initSystemStats()

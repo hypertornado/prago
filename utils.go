@@ -4,12 +4,11 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"net"
 	"os"
 	"strconv"
 	"strings"
-	"time"
 	"unicode"
 
 	"github.com/gosimple/slug"
@@ -53,13 +52,13 @@ var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345
 var seeded = false
 
 func randomString(n int) string {
-	if !seeded {
+	/*if !seeded {
 		rand.Seed(time.Now().Unix())
 		seeded = true
-	}
+	}*/
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
+		b[i] = letters[rand.IntN(len(letters))]
 	}
 	return string(b)
 }

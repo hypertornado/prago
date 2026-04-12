@@ -43,11 +43,7 @@ func (request *Request) AddFlashMessage(message string) {
 func (n *Notification) Flash(request *Request) error {
 	n.isFlash = true
 	n.app.notificationCenter.add(n)
-
 	request.setCookie(n.app.getFlashCookieID(), n.uuid)
-
-	//request.session.session.AddFlash(n.uuid)
-	//request.session.dirty = true
 	return nil
 }
 
@@ -70,24 +66,11 @@ func initRequestWithSession(request *Request) {
 	for _, cookie := range flashCookies {
 		notification := request.app.notificationCenter.getFromUUID(cookie.Value)
 		if notification != nil {
-			//request.app.notificationCenter.delete(notificationID)
 			notifications = append(notifications, notification.getView())
 			request.deleteCookie(app.getFlashCookieID())
-			//request.session.dirty = true
 		}
 
 	}
-
-	/*
-		for _, v := range session.Flashes() {
-			notificationID := v.(string)
-			notification := request.app.notificationCenter.getFromUUID(notificationID)
-			if notification != nil {
-				request.app.notificationCenter.delete(notificationID)
-				notifications = append(notifications, notification.getView())
-				request.session.dirty = true
-			}
-		}*/
 	request.notifications = notifications
 }
 
@@ -99,5 +82,4 @@ func (app *App) initSessions() {
 	}
 
 	app.mainController.addBeforeAction(initRequestWithSession)
-	//app.accessController.addBeforeAction(initRequestWithSession)
 }

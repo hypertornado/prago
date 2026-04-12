@@ -10,6 +10,10 @@ func (app *App) getFlashCookieID() string {
 	return fmt.Sprintf("prago-flash-" + app.codeName)
 }
 
+func (app *App) getLoginCookieID() string {
+	return fmt.Sprintf("prago-login-" + app.codeName)
+}
+
 func (request *Request) setCookie(name, value string) {
 	cookie := http.Cookie{
 		Name:     name,
