@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 class Autoresize {
     constructor(el) {
         this.el = el;
@@ -8970,14 +8961,12 @@ class NotificationCenter {
             this.setData(item);
         });
     }
-    periodDataLoader() {
-        return __awaiter(this, void 0, void 0, function* () {
-            for (;;) {
-                if (!document.hidden)
-                    this.loadData();
-                yield sleep(1000);
-            }
-        });
+    async periodDataLoader() {
+        for (;;) {
+            if (!document.hidden)
+                this.loadData();
+            await sleep(1000);
+        }
     }
     loadData() {
         fetch("/admin/api/notifications")
@@ -9388,22 +9377,20 @@ class PopupForm extends Popup {
         this.dataHandler(data);
     }
 }
-function initGoogleMaps() {
-    return __awaiter(this, void 0, void 0, function* () {
-        var viewElements = document.querySelectorAll(".admin_item_view_place");
-        var pickerElements = document.querySelectorAll(".map_picker");
-        if (viewElements.length == 0 && pickerElements.length == 0) {
-            return;
-        }
-        const { Map } = yield google.maps.importLibrary("maps");
-        const { Autocomplete } = yield google.maps.importLibrary('places');
-        const { AdvancedMarkerElement, PinElement } = yield google.maps.importLibrary("marker");
-        viewElements.forEach((el) => {
-            initGoogleMapView(el);
-        });
-        pickerElements.forEach((el) => {
-            new GoogleMapEdit(el);
-        });
+async function initGoogleMaps() {
+    var viewElements = document.querySelectorAll(".admin_item_view_place");
+    var pickerElements = document.querySelectorAll(".map_picker");
+    if (viewElements.length == 0 && pickerElements.length == 0) {
+        return;
+    }
+    const { Map } = await google.maps.importLibrary("maps");
+    const { Autocomplete } = await google.maps.importLibrary('places');
+    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+    viewElements.forEach((el) => {
+        initGoogleMapView(el);
+    });
+    pickerElements.forEach((el) => {
+        new GoogleMapEdit(el);
     });
 }
 function initGoogleMapView(el) {
@@ -9436,12 +9423,12 @@ class GoogleMapEdit {
         const location = { lng: 14.41854, lat: 50.073658 };
         let pac2 = new google.maps.places.PlaceAutocompleteElement();
         this.searchContainer.append(pac2);
-        pac2.addEventListener('gmp-select', (_a) => __awaiter(this, [_a], void 0, function* ({ placePrediction }) {
+        pac2.addEventListener('gmp-select', async ({ placePrediction }) => {
             const place = placePrediction.toPlace();
-            yield place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location'] });
+            await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location'] });
             this.setValue(place.location.lat(), place.location.lng());
             this.centreMap(place.location.lat(), place.location.lng());
-        }));
+        });
         this.map = new google.maps.Map(mapEl, {
             zoom: 1,
             center: location,
@@ -9892,8 +9879,11 @@ class Timeline {
         this.datepicker = el.querySelector(".timeline_toolbar_date");
         this.monthpicker = el.querySelector(".timeline_toolbar_month");
         this.yearpicker = el.querySelector(".timeline_toolbar_year");
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
         this.datepicker.valueAsDate = new Date();
-        this.monthpicker.valueAsDate = new Date();
+        this.monthpicker.value = `${year}-${month}`;
         this.yearpicker.value = new Date().getFullYear() + "";
         this.cache = {};
         this.settingsOptions = {};
@@ -9997,6 +9987,9 @@ class Timeline {
         let lineEl = document.createElement("div");
         lineEl.classList.add("timeline_line");
         lineEl.setAttribute("style", data.StyleCSS);
+        if (data.IsZero) {
+            lineEl.classList.add("timeline_line-iszero");
+        }
         let lineNameEl = document.createElement("div");
         lineNameEl.classList.add("timeline_line_name");
         lineNameEl.textContent = data.Name;

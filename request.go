@@ -16,13 +16,11 @@ type Request struct {
 	w          http.ResponseWriter
 	r          *http.Request
 	app        *App
-	session    *requestSession
 
 	notifications []*notificationView
 
-	Written        bool
-	ResponseStatus int
-	//ResponseTemplates    *PragoTemplates
+	Written              bool
+	ResponseStatus       int
 	ResponseTemplateName string
 }
 
@@ -49,29 +47,6 @@ func (request Request) Params() url.Values {
 
 func (request Request) Param(name string) string {
 	return request.Request().Form.Get(name)
-}
-
-// UserID returns id of logged in user, returns 0 if no user is logged
-func (request *Request) UserID() int64 {
-
-	if request.session == nil {
-		return 0
-	}
-
-	if request.session.session == nil {
-		return 0
-	}
-
-	if request.session.session.Values == nil {
-		return 0
-	}
-
-	userID, ok := request.session.session.Values[userIDSessionName].(int64)
-	if !ok {
-		return 0
-	}
-
-	return userID
 }
 
 func (request *Request) getUser() *user {
@@ -143,7 +118,6 @@ func (request *Request) Authorize(permission Permission) bool {
 // WriteHTML renders HTML view with HTTP code
 func (request *Request) WriteHTML(statusCode int, templates *PragoTemplates, templateName string, data any) {
 	request.Response().Header().Add("Content-Type", "text/html; charset=utf-8")
-	request.writeSessionIfDirty()
 	request.Response().WriteHeader(statusCode)
 	request.Written = true
 	must(
@@ -158,7 +132,6 @@ func (request *Request) WriteHTML(statusCode int, templates *PragoTemplates, tem
 // WriteJSON renders JSON with HTTP code
 func (request *Request) WriteJSON(statusCode int, data interface{}) {
 	request.Response().Header().Add("Content-type", "application/json")
-	request.writeSessionIfDirty()
 	request.Written = true
 
 	pretty := false
@@ -192,7 +165,6 @@ func (request *Request) WriteJSON(statusCode int, data interface{}) {
 // Redirect redirects request to new url
 func (request *Request) Redirect(url string) {
 	request.Response().Header().Set("Location", url)
-	request.writeSessionIfDirty()
 	request.Response().WriteHeader(http.StatusFound)
 	request.Written = true
 }

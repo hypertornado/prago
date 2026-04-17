@@ -1056,7 +1056,7 @@ select.admin_timestamp_minute {
 }
 
 @media (min-width: 700px) {
-  .form_label_text:has(.form_label_text_icon) {
+  .form_label_text:has(.form_label_text_icon):not(.simple_content *) {
     margin-left: -20px;
   }
 }
@@ -2087,6 +2087,10 @@ a.search_pagination_page-selected {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.searchbox:has(:focus) {
+  border-color: #4077bf;
+}
+
 .searchbox-showsuggestions {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
@@ -2138,8 +2142,8 @@ a.search_pagination_page-selected {
   min-height: 20px;
   background: white;
   position: absolute;
-  left: 0px;
-  right: 0px;
+  left: -1px;
+  right: -1px;
   top: 28px;
   box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
   border-radius: 0px 0px 10px 10px;
@@ -2148,6 +2152,7 @@ a.search_pagination_page-selected {
   display: none;
   z-index: 1000;
   clip-path: inset(0px -100px -100px -100px);
+  border: 1px solid #4077bf;
   border-top: none;
   max-height: calc(100vh - 50px);
 }
@@ -2239,7 +2244,7 @@ a.admin_search_suggestion-selected:active {
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  padding: 8px 8px;
+  margin: 8px 8px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   grid-gap: 8px;
@@ -2321,7 +2326,7 @@ a.board_resource {
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  padding: 8px 8px;
+  margin: 8px 8px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   grid-gap: 8px;
@@ -2471,11 +2476,10 @@ a .dashboard_figure_value {
   justify-content: center;
   align-items: flex-start;
   flex-grow: 100;
-  overflow: auto;
   display: flex;
-  margin: 5px auto;
-  padding: 0px 10px;
-  gap: 10px;
+  margin: 8px auto;
+  padding: 0px 8px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
@@ -2484,16 +2488,21 @@ a .dashboard_figure_value {
   overflow: hidden;
   border-bottom: none;
   text-decoration: none;
-  padding: 5px 10px;
-  border-radius: 5px;
+  padding: 4px 8px;
+  border-radius: 8px;
   color: #444;
   font-weight: 500;
   display: flex;
-  gap: 5px;
+  gap: 8px;
   align-items: center;
   flex-shrink: 0;
   background-color: #fafafa;
   border: 1px solid #eee;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.admin_navigation_tab:hover {
+  border-color: #4077bf;
 }
 
 .admin_navigation_tab_icon {
@@ -2597,7 +2606,6 @@ a .dashboard_figure_value {
   position: sticky;
   top: 0px;
   bottom: 0px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .menu2_items-subitems {
@@ -3233,7 +3241,7 @@ a .dashboard_figure_value {
 }
 
 .breadcrumb_logo {
-  height: 40px;
+  height: 32px;
   max-width: 100%;
   object-fit: contain;
   border-radius: 3px;
@@ -3406,9 +3414,16 @@ a .dashboard_figure_value {
   color: #cb2431;
 }
 
+.timelines {
+  border: 0px solid red;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 500px), 1fr));
+  grid-gap: 8px;
+  margin: 8px;
+}
+
 .timeline {
   padding: 8px 8px;
-  margin: 8px 8px;
   background: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
@@ -3419,11 +3434,12 @@ a .dashboard_figure_value {
   padding: 0px;
   margin: 0px;
   align-self: flex-start;
+  padding-left: 8px;
 }
 
 .timeline_toolbar {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   flex-wrap: wrap;
   align-items: center;
 }
@@ -3445,13 +3461,17 @@ a .dashboard_figure_value {
   max-width: 200px;
 }
 
+.timeline_toolbar > * {
+  box-shadow: none;
+}
+
 .timeline_values {
   position: relative;
-  height: 300px;
+  height: 200px;
   display: flex;
   padding: 0px 0px 0px 60px;
   justify-content: stretch;
-  margin-top: 8px;
+  margin-top: 16px;
 }
 
 .timeline_value {
@@ -3510,7 +3530,7 @@ a .dashboard_figure_value {
 }
 
 .timeline_values:has(.timeline_value:hover) .timeline_value {
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 .timeline_value_bar_inner {
@@ -3588,8 +3608,13 @@ a .dashboard_figure_value {
 .timeline_line {
   position: absolute;
   left: 0px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 2px dashed #eee;
   width: 100%;
+}
+
+.timeline_line-iszero {
+  border-color: #888;
+  border-bottom: 2px solid #eee;
 }
 
 .timeline_line_name {
@@ -3735,6 +3760,11 @@ a .dashboard_figure_value {
 
 .preview:hover {
   border-color: #4077bf;
+  background: hsl(214, 50%, 97%) !important;
+}
+
+.preview:active {
+  background: hsl(214, 50%, 90%) !important;
 }
 
 .preview_image {
@@ -3787,9 +3817,9 @@ a .dashboard_figure_value {
   margin: 20px;
   width: calc(100% - 40px);
   max-width: 600px;
-  border-radius: 5px;
-  padding: 0px 10px;
-  padding-bottom: 10px;
+  border-radius: 8px;
+  padding: 8px;
+  background-color: #fafafa;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
@@ -3817,8 +3847,8 @@ a .dashboard_figure_value {
   color: #888;
   background-color: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(3px);
-  border-radius: 5px;
-  padding: 5px 10px;
+  border-radius: 8px;
+  padding: 8px 16px;
   margin-bottom: 20px;
   margin-left: 20px;
   margin-right: 20px;
@@ -3832,7 +3862,7 @@ a .dashboard_figure_value {
 .simple_logo {
   width: 100px;
   aspect-ratio: 1;
-  margin: 10px auto;
+  margin: 0px auto;
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat;

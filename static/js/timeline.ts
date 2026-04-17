@@ -23,9 +23,14 @@ class Timeline {
         this.datepicker = el.querySelector(".timeline_toolbar_date");
         this.monthpicker = el.querySelector(".timeline_toolbar_month");
         this.yearpicker = el.querySelector(".timeline_toolbar_year");
+
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0'); 
         
         this.datepicker.valueAsDate = new Date();
-        this.monthpicker.valueAsDate = new Date();
+        //this.monthpicker.valueAsDate = new Date();
+        this.monthpicker.value = `${year}-${month}`;
         this.yearpicker.value = new Date().getFullYear() + "";
         this.cache = {};
         this.settingsOptions = {};
@@ -169,6 +174,9 @@ class Timeline {
         let lineEl = document.createElement("div");
         lineEl.classList.add("timeline_line");
         lineEl.setAttribute("style", data.StyleCSS);
+        if (data.IsZero) {
+            lineEl.classList.add("timeline_line-iszero");
+        }
         //lineEl.setAttribute("")
 
         let lineNameEl = document.createElement("div");

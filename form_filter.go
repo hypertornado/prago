@@ -34,7 +34,6 @@ func (filter *FormFilter) Is(name string, value interface{}) *FormFilter {
 
 func (filter *FormFilter) Where(condition string, values ...interface{}) *FormFilter {
 	filter.filterFunction = func(lq *listQuery) *listQuery {
-		lq = filter.filterFunction(lq)
 		return lq.where(condition, values...)
 	}
 	return filter

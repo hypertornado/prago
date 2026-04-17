@@ -18,6 +18,7 @@ const (
 
 type accessManager struct {
 	roles          map[string]map[Permission]bool
+	roleNames      map[string]func(string) string
 	permissions    map[Permission]bool
 	canManageRoles map[[2]string]bool
 }
@@ -25,16 +26,17 @@ type accessManager struct {
 func (app *App) initAccessManager() {
 	app.accessManager = &accessManager{
 		roles:          make(map[string]map[Permission]bool),
+		roleNames:      make(map[string]func(string) string),
 		permissions:    make(map[Permission]bool),
 		canManageRoles: make(map[[2]string]bool),
 	}
 
 	app.Permission(everybodyPermission)
 	app.Permission(nobodyPermission)
-	app.Role(sysadminRoleName, nil)
+	app.Role(sysadminRoleName, unlocalized("Sysadmin"), nil)
 	app.Permission(loggedPermission)
 	app.Permission(sysadminPermission)
-	app.Role("", []Permission{loggedPermission})
+	app.Role("", unlocalized("Bez oprávnění"), []Permission{loggedPermission})
 }
 
 func (app *App) validatePermission(permission Permission) error {
@@ -44,18 +46,30 @@ func (app *App) validatePermission(permission Permission) error {
 	return nil
 }
 
+func (app *App) getRoleName(roleID string, locale string) string {
+	name := app.accessManager.roleNames[roleID]
+	if name == nil {
+		return roleID
+	}
+	return name(locale)
+}
+
 func (app *App) createRoleFieldType() *fieldType {
-	var formDataSource = func(*Field, UserData, string) interface{} {
-		var roleNames []string
+	var formDataSource = func(field *Field, ud UserData, value string) interface{} {
+		var roleIDs []string
 		for k := range app.accessManager.roles {
-			roleNames = append(roleNames, k)
+			if k == "" {
+				continue
+			}
+			roleIDs = append(roleIDs, k)
 		}
-		sort.Strings(roleNames)
+		sort.Strings(roleIDs)
 
 		vals := [][2]string{}
-		for _, v := range roleNames {
-			vals = append(vals, [2]string{v, v})
+		for _, id := range roleIDs {
+			vals = append(vals, [2]string{id, app.getRoleName(id, ud.Locale())})
 		}
+
 		return vals
 	}
 	return &fieldType{
@@ -66,20 +80,28 @@ func (app *App) createRoleFieldType() *fieldType {
 		filterLayoutDataSource: func(f *Field, ud UserData) interface{} {
 			return formDataSource(f, ud, "")
 		},
+
+		listCellDataSource: func(userData UserData, f *Field, value interface{}) *listCell {
+			return &listCell{Name: app.getRoleName(value.(string), userData.Locale()), ItemID: f.id}
+		},
 	}
 }
 
 // Role adds role to admin
-func (app *App) Role(role string, permissions []Permission) *App {
-	_, ok := app.accessManager.roles[role]
+func (app *App) Role(roleID string, roleName func(string) string, permissions []Permission) *App {
+	_, ok := app.accessManager.roles[roleID]
 	if ok {
-		panic(fmt.Sprintf("Role '%s' already added", role))
+		panic(fmt.Sprintf("Role '%s' already added", roleID))
 	}
+	if roleName == nil {
+		panic(fmt.Sprintf("No name set for role '%s'", roleID))
+	}
+	app.accessManager.roleNames[roleID] = roleName
 
 	perms := map[Permission]bool{}
 	for _, v := range permissions {
 		if v == nobodyPermission {
-			panic(fmt.Sprintf("Can't add permission nobody to role %s.", role))
+			panic(fmt.Sprintf("Can't add permission nobody to role %s.", roleID))
 		}
 		if !app.accessManager.permissions[Permission(v)] {
 			panic(fmt.Sprintf("Permission '%s' not found, you should add it before adding to role.", v))
@@ -87,8 +109,8 @@ func (app *App) Role(role string, permissions []Permission) *App {
 		perms[v] = true
 	}
 	perms[loggedPermission] = true
-	app.accessManager.roles[role] = perms
-	app.AddManagerOfRole(sysadminRoleName, role)
+	app.accessManager.roles[roleID] = perms
+	app.AddManagerOfRole(sysadminRoleName, roleID)
 	return app
 }
 

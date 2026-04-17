@@ -1,6 +1,8 @@
 {{define "dashboard"}}
     <div class="dashboard">
-      <h2 class="dashboard_name">{{.Name}}</h2>
+      {{if .Name}}
+        <h2 class="dashboard_name">{{.Name}}</h2>
+      {{end}}
       {{if .Figures}}
       <div class="dashboard_figures">
         {{range $item := .Figures}}
@@ -29,8 +31,12 @@
         <div class="dashboard_table" data-uuid="{{$table.UUID}}" data-refresh-time-seconds="{{$table.RefreshTimeSeconds}}"><progress class="progress"></progress></div>
       {{end}}
 
-      {{range $timeline := .Timelines}}
-        {{template "timeline" $timeline}}
+      {{if .Timelines}}
+        <div class="timelines">
+        {{range $timeline := .Timelines}}
+          {{template "timeline" $timeline}}
+        {{end}}
+        </div>
       {{end}}
     </div>
 {{end}}

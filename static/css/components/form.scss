@@ -291,7 +291,7 @@
 }
 
 @media (min-width: 700px) {
-  .form_label_text:has(.form_label_text_icon) {
+  .form_label_text:has(.form_label_text_icon):not(.simple_content *) {
     margin-left: -20px;
   } 
 }

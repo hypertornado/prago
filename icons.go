@@ -35,6 +35,9 @@ const iconImage = "glyphicons-basic-38-picture.svg"
 const iconVideo = "glyphicons-basic-181-video.svg"
 const iconAI = "glyphicons-basic-954-brain.svg"
 
+const iconEmail = "glyphicons-basic-792-email.svg"
+const iconPassword = "glyphicons-basic-45-key.svg"
+
 func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 	app.iconsFS = &iconsFS
 	app.iconsPrefix = prefix

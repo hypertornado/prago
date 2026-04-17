@@ -18,6 +18,11 @@
 
   .preview:hover {
     border-color: $baseColor;
+    background: $hoverColor !important;
+  }
+
+  .preview:active {
+    background: $activeColor !important;
   }
   
   .preview_image {
@@ -28,7 +33,6 @@
     aspect-ratio: 1;
     border-radius: 8px;
     object-fit: cover;
-    //background-color: $backgroundGrayColor;
     border: 1px solid $grayBorderColor; 
     align-self: flex-start;
     overflow: hidden;

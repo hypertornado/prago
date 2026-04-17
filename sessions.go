@@ -1,85 +1,72 @@
 package prago
 
 import (
-	"github.com/gorilla/sessions"
+	"fmt"
+	"time"
 )
 
-type sessionsManager struct {
-	cookieStore *sessions.CookieStore
+type session struct {
+	ID         int64 `prago-order-desc:"true"`
+	UUID       string
+	User       int64  `prago-type:"relation"`
+	UserAgent  string `prago-type:"text"`
+	IPAddress  string `prago-type:"text"`
+	LastAccess time.Time
+	IsDeleted  bool
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
-type requestSession struct {
-	session *sessions.Session
-	dirty   bool
+func (app *App) initSessionsResource() {
+	NewResource[session](app).PermissionView("sysadmin").Name(unlocalized("Session"), unlocalized("Sessiony")).Board(sysadminBoard)
+	app.initSessionsCache()
 }
 
-func (rs *requestSession) setValue(key string, value interface{}) {
-	rs.session.Values[key] = value
-	rs.dirty = true
+func generateSessionKey() string {
+	return fmt.Sprintf("PSK_%s", randomString(64))
 }
 
-const userIDSessionName = "user_id"
-
-func (request *Request) logInUser(user *user) {
-	request.session.setValue(userIDSessionName, user.ID)
-}
-
-func (request *Request) logOutUser() {
-	delete(request.session.session.Values, userIDSessionName)
-	request.session.dirty = true
-}
-
-func (request *Request) writeSessionIfDirty() {
-	if request.session != nil && request.session.dirty {
-		must(request.session.session.Save(request.Request(), request.Response()))
+func (app *App) createSessionKey(user *user) string {
+	ses := &session{
+		UUID: generateSessionKey(),
+		User: user.ID,
 	}
+	must(CreateItem(app, ses))
+	return ses.UUID
 }
 
-// AddFlashMessage adds flash message to request
-func (request *Request) AddFlashMessage(message string) {
-	request.app.Notification(message).Flash(request)
+func (app *App) getUserIDFromSession(sessionID string) int64 {
+	id := app.getSessionCacheUserID(sessionID)
+	if id > 0 {
+		return id
+	}
+
+	ses := Query[session](app).Is("isdeleted", false).Is("uuid", sessionID).First()
+	if ses == nil {
+		return 0
+	}
+	app.setSessionCacheUserID(ses.UUID, ses.User)
+
+	return ses.User
 }
 
-func (n *Notification) Flash(request *Request) error {
-	n.isFlash = true
-	n.app.notificationCenter.add(n)
-	request.setCookie(n.app.getFlashCookieID(), n.uuid)
-	return nil
-}
+func (app *App) deleteSession(sessionID string) error {
+	if sessionID == "" {
+		return fmt.Errorf("Nelze smazat prazdnou session")
+	}
 
-func initRequestWithSession(request *Request) {
-	app := request.app
-	session, err := request.app.sessionsManager.cookieStore.Get(request.Request(), request.app.codeName)
+	ses := Query[session](app).Is("uuid", sessionID).First()
+	if ses == nil {
+		return fmt.Errorf("Nelze najít session")
+	}
+
+	ses.IsDeleted = true
+	err := UpdateItem(app, ses)
 	if err != nil {
-		request.app.Log().Println("Session not valid")
-		request.Response().Header().Set("Set-Cookie", request.app.codeName+"=; expires=Thu, 01 Jan 1970 00:00:01 GMT;")
-		panic(err)
+		return err
 	}
 
-	request.session = &requestSession{
-		session: session,
-	}
+	app.deleteSessionCacheUserID(sessionID)
 
-	var notifications []*notificationView
-
-	flashCookies := request.r.CookiesNamed(app.getFlashCookieID())
-	for _, cookie := range flashCookies {
-		notification := request.app.notificationCenter.getFromUUID(cookie.Value)
-		if notification != nil {
-			notifications = append(notifications, notification.getView())
-			request.deleteCookie(app.getFlashCookieID())
-		}
-
-	}
-	request.notifications = notifications
-}
-
-func (app *App) initSessions() {
-	random := app.mustGetSetting("random")
-	cookieStore := sessions.NewCookieStore([]byte(random))
-	app.sessionsManager = &sessionsManager{
-		cookieStore: cookieStore,
-	}
-
-	app.mainController.addBeforeAction(initRequestWithSession)
+	return nil
 }

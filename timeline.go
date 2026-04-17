@@ -1,11 +1,10 @@
 package prago
 
 import (
+	"context"
 	"errors"
 	"math"
 	"time"
-
-	"golang.org/x/net/context"
 )
 
 type Timeline struct {
@@ -21,7 +20,7 @@ type Timeline struct {
 
 	optionsForm func(request *Request, form *Form)
 
-	filterCustomNames map[string]func(string) (string, string)
+	filterCustomNames map[string]func(*Request, string) (string, string)
 }
 
 type dashboardViewTimeline struct {
@@ -56,14 +55,14 @@ func (app *App) initTimeline() {
 	app.initTimelineSettings()
 }
 
-func (dashboard *Dashboard) Timeline(name func(string) string, permission Permission, dataSource func(request *TimelineDataRequest) float64) *Timeline {
+func (dashboard *Dashboard) Timeline(name func(string) string, permission Permission, dataSource func(tdr *TimelineDataRequest) float64) *Timeline {
 	timeline := &Timeline{
 		uuid:              "timeline-" + randomString(30),
 		name:              name,
 		permission:        permission,
 		dataSource:        dataSource,
 		defaultAlignment:  "history",
-		filterCustomNames: map[string]func(string) (string, string){},
+		filterCustomNames: map[string]func(*Request, string) (string, string){},
 	}
 	dashboard.board.app.dashboardTimelineMap[timeline.uuid] = timeline
 	dashboard.timelines = append(dashboard.timelines, timeline)
@@ -104,8 +103,12 @@ func (timeline *Timeline) getTimelineColumnsCount(width int64) int {
 type TimelineDataRequest struct {
 	From    time.Time
 	To      time.Time
-	Context context.Context
 	Options map[string]string
+	Request *Request
+}
+
+func (tdr *TimelineDataRequest) Context() context.Context {
+	return tdr.Request.r.Context()
 }
 
 func (timeline *Timeline) Unit(unit func(string) string) *Timeline {
@@ -128,7 +131,7 @@ func (timeline *Timeline) OptionsForm(fn func(request *Request, form *Form)) *Ti
 	return timeline
 }
 
-func (timeline *Timeline) FilterName(key string, fn func(value string) (string, string)) *Timeline {
+func (timeline *Timeline) FilterName(key string, fn func(request *Request, value string) (string, string)) *Timeline {
 	timeline.filterCustomNames[key] = fn
 	return timeline
 }

@@ -84,6 +84,8 @@ func (app *App) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("X-Prago-Request", request.uuid)
 
+	request.writeToSessionCache()
+
 	defer func() {
 		if app.afterRequestServedHandler != nil {
 			app.afterRequestServedHandler(request)

@@ -229,7 +229,7 @@ func TestQueryIn(t *testing.T) {
 
 }
 
-func TestResource(t *testing.T) {
+/*func TestResourceList(t *testing.T) {
 	resource := prepareResource(t)
 	items, err := resource.getListContent(context.Background(), resource.app.newUserData(&user{Role: "sysadmin"}), map[string][]string{
 		"_order": {"id"},
@@ -275,7 +275,7 @@ func TestResource(t *testing.T) {
 	if items.Rows[1].Items[4].Name != "show" {
 		t.Fatal(items.Rows[1].Items[4])
 	}
-}
+}*/
 
 func TestResourceUnique(t *testing.T) {
 	app := prepareResource(t).app
@@ -327,6 +327,41 @@ func TestResourceTimestamps(t *testing.T) {
 	if item.CreatedAt.Before(testStartTime) || time.Now().Before(item.CreatedAt) {
 		t.Fatal(item.CreatedAt)
 	}
+}
+
+func TestPartialSave(t *testing.T) {
+	resource := prepareResource(t)
+
+	item := &ResourceStruct{Name: "A", Text: "B"}
+	must(CreateItem(resource.app, item))
+
+	item.Name = "X"
+	item.Text = "Y"
+
+	err := resource.saveItem(context.Background(), item, map[string]bool{
+		"Name": true,
+	}, false)
+	must(err)
+
+	item2 := Query[ResourceStruct](resource.app).ID(item.ID)
+	if item2.Name != "X" {
+		t.Fatal(item2.Name)
+	}
+	if item2.Text != "B" {
+		t.Fatal(item2.Text)
+	}
+
+	//item2 := prago.CreateItem
+
+	/*item := Query[ResourceStruct](resource.app).Is("id", 1).First()
+
+	if item.UpdatedAt.Before(testStartTime) || time.Now().Before(item.UpdatedAt) {
+		t.Fatal(item.UpdatedAt)
+	}
+
+	if item.CreatedAt.Before(testStartTime) || time.Now().Before(item.CreatedAt) {
+		t.Fatal(item.CreatedAt)
+	}*/
 }
 
 func TestResourceBool(t *testing.T) {

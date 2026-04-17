@@ -208,7 +208,6 @@ func (resource *Resource) getListStatsDateSectionDay(ctx context.Context, field 
 	)
 	rows, err := resource.app.db.QueryContext(ctx, q, whereParams...)
 	if err != nil {
-		fmt.Println(q)
 		panic(err)
 	}
 	defer rows.Close()

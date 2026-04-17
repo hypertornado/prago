@@ -70,7 +70,7 @@ func NewResource[T any](app *App) *Resource {
 	typ := reflect.TypeOf(item)
 
 	if typ.Kind() != reflect.Struct {
-		panic(fmt.Sprintf("item is not a structure, but " + typ.Kind().String()))
+		panic(fmt.Sprintf("item is not a structure, but %s", typ.Kind().String()))
 	}
 
 	_, typFound := app.resourceMap[typ]
@@ -150,8 +150,10 @@ func (resource *Resource) afterInit() {
 			q := resource.app.activityLogResource.query(context.Background())
 			c, _ := q.Is("resourcename", resource.id).count()
 			return c
-		}).Unit(unlocalized("úprav")).URL(fmt.Sprintf("/admin/%s/history", resource.id))
+		}).Unit(unlocalized("úprav")).URL(fmt.Sprintf("/admin/%s/_history", resource.id))
 	}
+
+	resource.initResourceTimelines()
 
 }
 

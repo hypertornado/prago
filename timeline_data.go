@@ -148,8 +148,8 @@ func (timeline *Timeline) getTimelineData(request *Request, tr *TimelineRequest)
 				&TimelineDataRequest{
 					From:    dateIntervals[k].From,
 					To:      dateIntervals[k].To,
-					Context: request.r.Context(),
 					Options: tr.Options,
+					Request: request,
 				},
 			)
 		}
@@ -163,7 +163,7 @@ func (timeline *Timeline) getTimelineData(request *Request, tr *TimelineRequest)
 		value.ValueText = strVal
 	}
 
-	timeline.setDataFilter(ret, tr.Options)
+	timeline.setDataFilter(request, ret, tr.Options)
 	ret.fixValues()
 	return ret
 }
@@ -205,7 +205,7 @@ func getTimelineDateInterval(typ string, endDate time.Time, shift int64) *timeli
 		t1 = endDate.AddDate(int(shift), 0, 0)
 		t2 = t1.AddDate(1, 0, 0)
 		dateID = t1.Format("2006")
-		formattedDate = "Rok" + t1.Format("2006")
+		formattedDate = "Rok " + t1.Format("2006")
 		if t1.Year() == time.Now().Year() {
 			isCurrent = true
 		}

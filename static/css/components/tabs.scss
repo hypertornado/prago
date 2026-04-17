@@ -5,12 +5,12 @@
   justify-content: center;
   align-items: flex-start;
   flex-grow: 100;
-  overflow: auto;
+  //overflow: auto;
 
   display: flex;
-  margin: 5px auto;
-  padding: 0px 10px;
-  gap: 10px;
+  margin: 8px auto;
+  padding: 0px 8px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
@@ -19,16 +19,21 @@
   overflow: hidden;
   border-bottom: none;
   text-decoration: none;
-  padding: 5px 10px;
-  border-radius: 5px;
+  padding: 4px 8px;
+  border-radius: 8px;
   color: $black;
   font-weight: 500;
   display: flex;
-  gap: 5px;
+  gap: 8px;
   align-items: center;
   flex-shrink: 0;
   background-color: $backgroundGrayColor;
   border: 1px solid $grayBorderColor;
+  @include softShadow;
+}
+
+.admin_navigation_tab:hover {
+  border-color: $baseColor;
 }
 
 .admin_navigation_tab_icon {

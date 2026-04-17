@@ -27,7 +27,7 @@ func (fta *FormTaskActivity) Context() context.Context {
 
 func (fta *FormTaskActivity) checkIfStop() {
 
-	if fta.lastStateRequest.Before(time.Now().Add(-20 * time.Second)) {
+	if fta.lastStateRequest.Before(time.Now().Add(-2 * time.Minute)) {
 		fta.stoppedByUser = true
 	}
 
@@ -96,10 +96,8 @@ func newFormTaskActivity(request *Request, handler func(*FormTaskActivity) error
 		}()
 		err := handler(ret)
 		if err != nil {
-			//fmt.Println("AC noo", err)
 			ret.description = "🔴 " + err.Error()
 		} else {
-			//fmt.Println("AC ook")
 			ret.description = "✅ " + ret.description
 		}
 	}()

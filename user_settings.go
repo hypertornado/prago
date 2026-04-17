@@ -145,7 +145,7 @@ func initUserSettings(app *App) {
 		var roleSelect [][2]string
 		//roleSelect = append(roleSelect, [2]string{"", ""})
 		for _, role := range roles {
-			roleSelect = append(roleSelect, [2]string{role, role})
+			roleSelect = append(roleSelect, [2]string{role, app.getRoleName(role, request.Locale())})
 		}
 
 		form.AddTextInput("username", "Uživatelské jméno")
@@ -219,7 +219,7 @@ func initUserSettings(app *App) {
 		sort.Strings(roles)
 		var roleSelect [][2]string
 		for _, role := range roles {
-			roleSelect = append(roleSelect, [2]string{role, role})
+			roleSelect = append(roleSelect, [2]string{role, app.getRoleName(role, user.Locale)})
 		}
 
 		form.AddTextInput("username", "Uživatelské jméno").Value = user.Username

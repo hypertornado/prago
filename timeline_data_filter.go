@@ -7,7 +7,7 @@ type TimelineDataFilter struct {
 	ValueName string
 }
 
-func (timeline *Timeline) setDataFilter(data *timelineData, options map[string]string) {
+func (timeline *Timeline) setDataFilter(request *Request, data *timelineData, options map[string]string) {
 	data.Filters = []*TimelineDataFilter{}
 	for k, v := range options {
 		if strings.HasPrefix(k, "_") {
@@ -23,7 +23,7 @@ func (timeline *Timeline) setDataFilter(data *timelineData, options map[string]s
 		valueName := v
 
 		if customFn != nil {
-			keyName, valueName = customFn(v)
+			keyName, valueName = customFn(request, v)
 		}
 
 		data.Filters = append(data.Filters, &TimelineDataFilter{

@@ -35,7 +35,7 @@ func UpdateItemWithContext[T any](ctx context.Context, app *App, item *T) error 
 
 func (resource *Resource) update(ctx context.Context, item any) error {
 	resource.setTimestamp(item, "UpdatedAt")
-	return resource.saveItem(ctx, item, false)
+	return resource.saveItem(ctx, item, nil, false)
 }
 
 func Replace[T any](ctx context.Context, app *App, item *T) error {

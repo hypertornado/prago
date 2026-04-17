@@ -32,7 +32,6 @@ type App struct {
 	logger          *logger
 	adminTemplates  *PragoTemplates
 	cache           *cache
-	sessionsManager *sessionsManager
 
 	settings *settingsSingleton
 
@@ -101,6 +100,12 @@ type App struct {
 
 	formTasksMutex sync.Mutex
 	formTasksMap   map[string]*FormTaskActivity
+
+	sessionsCacheMutex sync.RWMutex
+	sessionsCacheMap   map[string]int64
+
+	sessionsCacheLogMutex sync.Mutex
+	sessionsCacheLogMap   map[string]*sessionCacheLog
 }
 
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {
@@ -194,7 +199,6 @@ func (app *App) afterInit() {
 		resource.afterInit()
 	}
 
-	app.initSessions()
 	app.initDefaultResourceActions()
 	app.initAPIs()
 	app.initAllActions()

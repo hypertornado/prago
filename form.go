@@ -133,12 +133,16 @@ func (f *Form) AddTextareaInput(name, description string) *FormItem {
 
 // AddEmailInput to form
 func (f *Form) AddEmailInput(name, description string) *FormItem {
-	return f.addInput(name, description, "form_input_email")
+	input := f.addInput(name, description, "form_input_email")
+	input.Icon = iconEmail
+	return input
 }
 
 // AddPasswordInput to form
 func (f *Form) AddPasswordInput(name, description string) *FormItem {
-	return f.addInput(name, description, "form_input_password")
+	input := f.addInput(name, description, "form_input_password")
+	input.Icon = iconPassword
+	return input
 }
 
 // AddFileInput to form

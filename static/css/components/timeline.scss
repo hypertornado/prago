@@ -3,9 +3,17 @@
 $timelineBottomHeight: 70px;
 $timelineLeftWidth: 60px;
 
+.timelines {
+    border: 0px solid red;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 500px), 1fr));
+    grid-gap: 8px;
+    margin: 8px;
+}
+
 .timeline {
     padding: 8px 8px;
-    margin: 8px 8px;
+    //margin: 8px 8px;
     background: white;
     @include softShadow;
     border-radius: 8px;
@@ -16,11 +24,12 @@ $timelineLeftWidth: 60px;
     padding: 0px;
     margin: 0px;
     align-self: flex-start;
+    padding-left: 8px;
 }
 
 .timeline_toolbar {
     display: flex;
-    gap: 8px;
+    gap: 4px;
     flex-wrap: wrap;
     align-items: center;
 }
@@ -43,13 +52,17 @@ $timelineLeftWidth: 60px;
     max-width: 200px;
 }
 
+.timeline_toolbar > * {
+    box-shadow: none;
+}
+
 .timeline_values {
     position: relative;
-    height: 300px;
+    height: 200px;
     display: flex;
     padding: 0px 0px 0px $timelineLeftWidth;
     justify-content: stretch;
-    margin-top: 8px;
+    margin-top: 16px;
 }
 
 .timeline_value {
@@ -111,7 +124,7 @@ $timelineLeftWidth: 60px;
 }
 
 .timeline_values:has(.timeline_value:hover) .timeline_value {
-    opacity: .5;
+    opacity: .7;
 }
 
 .timeline_value_bar_inner {
@@ -193,8 +206,13 @@ $timelineLeftWidth: 60px;
 .timeline_line {
     position: absolute;
     left: 0px;
-    border-bottom: 1px solid $grayBorderColor;
+    border-bottom: 2px dashed $grayBorderColor;
     width: 100%;
+}
+
+.timeline_line-iszero {
+    border-color: $gray;
+    border-bottom: 2px solid $grayBorderColor;
 }
 
 .timeline_line_name {

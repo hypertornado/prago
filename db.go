@@ -31,9 +31,14 @@ type dbIface interface {
 	Query(string, ...interface{}) (*sql.Rows, error)
 }
 
-func (resource *Resource) prepareValues(value reflect.Value) (names []string, questionMarks []string, values []interface{}, err error) {
+func (resource *Resource) prepareValues(value reflect.Value, onlyFields map[string]bool) (names []string, questionMarks []string, values []interface{}, err error) {
 	for _, field := range resource.fields {
+
 		val := value.FieldByName(field.fieldClassName)
+
+		if onlyFields != nil && !onlyFields[field.fieldClassName] {
+			continue
+		}
 
 		if field.fieldClassName == "ID" {
 			//TODO: is it really necessary to omit ids?
@@ -77,7 +82,7 @@ func (resource *Resource) replaceItem(ctx context.Context, item interface{}, deb
 		return errors.New("id must be positive")
 	}
 	value := reflect.ValueOf(item).Elem()
-	names, questionMarks, values, err := resource.prepareValues(value)
+	names, questionMarks, values, err := resource.prepareValues(value, nil)
 	if err != nil {
 		return err
 	}
@@ -99,14 +104,14 @@ func (resource *Resource) replaceItem(ctx context.Context, item interface{}, deb
 	return nil
 }
 
-func (resource *Resource) saveItem(ctx context.Context, item interface{}, debugSQL bool) error {
+func (resource *Resource) saveItem(ctx context.Context, item interface{}, onlyFields map[string]bool, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	if id <= 0 {
 		return errors.New("id must be positive")
 	}
 
 	value := reflect.ValueOf(item).Elem()
-	names, _, values, err := resource.prepareValues(value)
+	names, _, values, err := resource.prepareValues(value, onlyFields)
 	if err != nil {
 		return err
 	}
@@ -138,7 +143,7 @@ func (resource *Resource) saveItem(ctx context.Context, item interface{}, debugS
 func (resource *Resource) createItem(ctx context.Context, item interface{}, debugSQL bool) error {
 	value := reflect.ValueOf(item).Elem()
 
-	names, questionMarks, values, err := resource.prepareValues(value)
+	names, questionMarks, values, err := resource.prepareValues(value, nil)
 	if err != nil {
 		return err
 	}
