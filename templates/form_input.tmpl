@@ -127,7 +127,7 @@
 {{define "form_input_submit"}}
   <div class="primarybtncontainer">
     <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>
-      {{if .Icon}}<img class="btn_icon" src="/admin/api/icons?file={{.Icon}}&color=ffffff">{{end}}
+      {{if .Icon}}<img class="btn_icon" src="/admin/api/icons?file={{.Icon}}&color=01354a">{{end}}
       {{.Name}}
     </button>
   </div>
@@ -135,7 +135,7 @@
 
 {{define "form_input_delete"}}
   <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary btn-delete"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>
-    {{if .Icon}}<img class="btn_icon" src="/admin/api/icons?file={{.Icon}}&color=ffffff">{{end}}
+    {{if .Icon}}<img class="btn_icon" src="/admin/api/icons?file={{.Icon}}&color=01354a">{{end}}
     {{.Name}}
   </button>
 {{end}}

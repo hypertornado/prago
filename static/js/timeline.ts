@@ -53,6 +53,15 @@ class Timeline {
         this.el.querySelector(".timeline_toolbar_settings").addEventListener("click", this.settingsClicked.bind(this));
 
         this.filtersEl = this.el.querySelector(".timeline_filters");
+
+        this.el.querySelector(".timeline_toolbar_fullscreen_open").addEventListener("click", () => {
+            this.el.classList.add("timeline-fullscreen");
+            this.loadData();
+        });
+        this.el.querySelector(".timeline_toolbar_fullscreen_close").addEventListener("click", () => {
+            this.el.classList.remove("timeline-fullscreen");
+            this.loadData();
+        });
         
         this.changedType();
     }

@@ -163,14 +163,13 @@ func (resource *Resource) getListContent(request *Request, params url.Values) (r
 					cell := &listCell{}
 					for _, stat := range resource.itemStats {
 						if stat.id == v.Name {
-							cell.Name = "⏳"
+							cell.Name = ""
 
 							var urlData url.Values = map[string][]string{}
 							urlData.Add("resource_id", resource.id)
 							urlData.Add("stat_id", stat.id)
 							itemID := itemVal.FieldByName("ID").Int()
 							urlData.Add("item_id", fmt.Sprintf("%d", itemID))
-
 							cell.FetchURL = "/admin/api/resource-item-stats?" + urlData.Encode()
 						}
 					}

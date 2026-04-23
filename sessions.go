@@ -8,40 +8,59 @@ import (
 type session struct {
 	ID         int64 `prago-order-desc:"true"`
 	UUID       string
-	User       int64  `prago-type:"relation"`
-	UserAgent  string `prago-type:"text"`
-	IPAddress  string `prago-type:"text"`
-	LastAccess time.Time
+	User       int64     `prago-type:"relation"`
+	UserAgent  string    `prago-type:"text" prago-name:"User Agent"`
+	IPAddress  string    `prago-type:"text" prago-name:"IP Adresa"`
+	LastAccess time.Time `prago-type:"timestamp"  prago-name:"Poslední přístup"`
+	IsAPI      bool
 	IsDeleted  bool
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
 
 func (app *App) initSessionsResource() {
-	NewResource[session](app).PermissionView("sysadmin").Name(unlocalized("Session"), unlocalized("Sessiony")).Board(sysadminBoard)
+	app.sessionsResource = NewResource[session](app).PermissionView("sysadmin").Name(unlocalized("Session"), unlocalized("Sessiony")).Board(sysadminBoard)
 	app.initSessionsCache()
+
+	ActionResourceItemForm(app, "logout", func(ses *session, form *Form, request *Request) {
+		form.AddSubmit("Odhlásit")
+	}, func(ses *session, fv FormValidation, request *Request) {
+
+		err := app.deleteSession(ses.UUID)
+		if err != nil {
+			fv.AddError(err.Error())
+		} else {
+			fv.AddOK("Session odhlášena")
+		}
+	}).Name(unlocalized("Odhlásit"))
 }
 
-func generateSessionKey() string {
-	return fmt.Sprintf("PSK_%s", randomString(64))
+func generateSessionKey(isAPI bool) string {
+
+	prefix := "PSK_"
+	if isAPI {
+		prefix = "PAK_"
+	}
+	return fmt.Sprintf("%s%s", prefix, randomString(64))
 }
 
-func (app *App) createSessionKey(user *user) string {
+func (app *App) createSessionKey(user *user, isAPI bool) string {
 	ses := &session{
-		UUID: generateSessionKey(),
-		User: user.ID,
+		UUID:  generateSessionKey(isAPI),
+		User:  user.ID,
+		IsAPI: isAPI,
 	}
 	must(CreateItem(app, ses))
 	return ses.UUID
 }
 
-func (app *App) getUserIDFromSession(sessionID string) int64 {
+func (app *App) getUserIDFromSession(sessionID string, api bool) int64 {
 	id := app.getSessionCacheUserID(sessionID)
 	if id > 0 {
 		return id
 	}
 
-	ses := Query[session](app).Is("isdeleted", false).Is("uuid", sessionID).First()
+	ses := Query[session](app).Is("isdeleted", false).Is("uuid", sessionID).Is("isapi", api).First()
 	if ses == nil {
 		return 0
 	}

@@ -16,14 +16,12 @@
 {{end}}
 
 {{define "list_cell"}}
-    {{if .HasImages}}
-      <span class="list_cell_images">
-      {{range $image := .Images}}
-        {{if $image}}
-          <img src="{{PragoCSS (PragoThumb $image)}}" class="list_cell_image" loading="lazy">
-        {{end}}
-      {{end}}
-      </span>
-    {{end}}
+    <span class="list_cell_images">
+    {{- range $image := .Images}}
+      {{if $image -}}
+        <img src="{{PragoCSS (PragoThumb $image)}}" class="list_cell_image" loading="lazy">
+      {{- end -}}
+    {{end -}}
+    </span>
     <span class="list_cell_name">{{.Name}}</span>
 {{end}}

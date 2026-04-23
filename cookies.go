@@ -3,6 +3,7 @@ package prago
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -47,11 +48,11 @@ func (request *Request) deleteCookie(name string) {
 // UserID returns id of logged in user, returns 0 if no user is logged
 func (request *Request) UserID() int64 {
 	app := request.app
-	sessionID := request.getLoginSessionID()
+	sessionID, isAPI := request.getLoginSessionID()
 	if sessionID == "" {
 		return 0
 	}
-	ret := app.getUserIDFromSession(sessionID)
+	ret := app.getUserIDFromSession(sessionID, isAPI)
 	if ret == 0 {
 		request.deleteCookie(app.getLoginCookieID())
 	}
@@ -59,24 +60,34 @@ func (request *Request) UserID() int64 {
 
 }
 
-func (request *Request) getLoginSessionID() string {
+func (request *Request) getLoginSessionID() (string, bool) {
 	app := request.app
+
+	apiHeader := request.r.Header.Get(apiHTTPHeader)
+
+	if strings.HasPrefix(apiHeader, "PAK_") {
+		return apiHeader, true
+	}
+
 	cookies := request.r.CookiesNamed(app.getLoginCookieID())
 	if len(cookies) == 0 {
-		return ""
+		return "", false
 	}
-	return cookies[0].Value
+	return cookies[0].Value, false
 }
 
 func (request *Request) logInUser(user *user) {
 	app := request.app
-	sessionID := app.createSessionKey(user)
+	sessionID := app.createSessionKey(user, false)
 	request.setCookie(app.getLoginCookieID(), sessionID)
 }
 
 func (request *Request) logOutUser() {
 	app := request.app
-	sessionID := request.getLoginSessionID()
+	sessionID, isAPI := request.getLoginSessionID()
+	if isAPI {
+		panic("can't logout api this way")
+	}
 	if sessionID != "" {
 		must(app.deleteSession(sessionID))
 	}

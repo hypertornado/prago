@@ -22,6 +22,9 @@ type FormTaskActivity struct {
 }
 
 func (fta *FormTaskActivity) Context() context.Context {
+	if fta == nil {
+		return context.Background()
+	}
 	return fta.ctx
 }
 
@@ -38,6 +41,10 @@ func (fta *FormTaskActivity) checkIfStop() {
 }
 
 func (fta *FormTaskActivity) Progress(finishedSoFar, total int64) {
+	if fta == nil {
+		return
+	}
+
 	fta.mutex.Lock()
 	defer fta.mutex.Unlock()
 
@@ -51,6 +58,10 @@ func (fta *FormTaskActivity) Progress(finishedSoFar, total int64) {
 }
 
 func (fta *FormTaskActivity) Description(description string) {
+	if fta == nil {
+		return
+	}
+
 	fta.mutex.Lock()
 	defer fta.mutex.Unlock()
 
@@ -60,6 +71,10 @@ func (fta *FormTaskActivity) Description(description string) {
 }
 
 func (fta *FormTaskActivity) TableCells(cells ...*TableCell) {
+	if fta == nil {
+		return
+	}
+
 	fta.mutex.Lock()
 	defer fta.mutex.Unlock()
 

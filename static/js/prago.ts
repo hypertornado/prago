@@ -118,3 +118,18 @@ class VisibilityReloader {
     }, 100);
   }
 }
+
+
+function popup(url: string) {
+    //@ts-ignore
+    new PopupForm(url, (data: any) => {
+        //@ts-ignore
+        if (window.primaryFormContainer) {
+            //@ts-ignore
+            window.primaryFormContainer.sendForm();
+            return;
+        }
+
+        window.location.reload();
+    });
+}

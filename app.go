@@ -101,10 +101,12 @@ type App struct {
 	formTasksMutex sync.Mutex
 	formTasksMap   map[string]*FormTaskActivity
 
-	sessionsCacheMutex sync.RWMutex
+	sessionsResource *Resource
+
+	sessionsCacheMutex *sync.RWMutex
 	sessionsCacheMap   map[string]int64
 
-	sessionsCacheLogMutex sync.Mutex
+	sessionsCacheLogMutex *sync.Mutex
 	sessionsCacheLogMap   map[string]*sessionCacheLog
 }
 

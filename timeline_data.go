@@ -39,22 +39,20 @@ func (td *timelineData) fixValues() {
 		}
 	}
 	td.MaxValue = maxValue
+	var size = td.MaxValue - td.MinValue
 
 	for _, v := range td.Values {
 		var height, bottom float64
-		var size = td.MaxValue - td.MinValue
 
 		if math.Abs(v.Value) > 0 {
 			height = (math.Abs(v.Value) / size) * 100
 		}
 
 		if td.MinValue < 0 {
-
 			var bottomSize = -td.MinValue
 			if v.Value < 0 {
 				bottomSize += v.Value
 			}
-
 			bottom = (bottomSize / size) * 100
 		}
 

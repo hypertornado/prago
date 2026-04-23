@@ -19,4 +19,6 @@ func (app *App) initAPI() {
 
 	app.API("resource-item-stats").Permission(loggedPermission).Handler(itemStatsAPIHandler)
 
+	app.API("_fetch_list_cell_relation").Permission(loggedPermission).Handler(fetchListCellRelationAPIHandler)
+
 }

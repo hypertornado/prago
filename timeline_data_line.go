@@ -29,7 +29,10 @@ func getTimelineDataLine(min, max float64, value float64) (ret *timelineDataLine
 
 	maxDistance := max - min
 	distanceFromMin := value - min
-	bottom := distanceFromMin / maxDistance
+	var bottom float64
+	if maxDistance != 0 {
+		bottom = distanceFromMin / maxDistance
+	}
 	var isZero bool
 	if value == 0 {
 		isZero = true

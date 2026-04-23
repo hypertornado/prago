@@ -6836,6 +6836,7 @@ class List {
         this.minCellWidth = 50;
         this.normalCellWidth = 100;
         this.maxCellWidth = 500;
+        this.fetchCache = {};
         this.listEl = listEl;
         this.rootContent = document.querySelector(".root_content");
         this.listHeaderContainer = this.rootContent.querySelector(".list_header_container");
@@ -6956,7 +6957,7 @@ class List {
                 this.bindSettingsButton();
                 this.bindPagination();
                 this.bindClick();
-                this.bindFetchStats();
+                this.bindFetchCellData();
                 if (this.multiple.hasMultipleActions()) {
                     this.multiple.bindMultipleActionCheckboxes();
                 }
@@ -7029,7 +7030,7 @@ class List {
             }
         }
     }
-    bindFetchStats() {
+    bindFetchCellData() {
         var cells = this.listEl.querySelectorAll(".list_cell[data-fetch-url]");
         for (var i = 0; i < cells.length; i++) {
             let cell = cells[i];
@@ -7043,22 +7044,57 @@ class List {
             if (!document.contains(cell)) {
                 continue;
             }
-            let cellContentSpan = (cell.querySelector(".list_cell_name"));
+            if (this.fetchCache[url]) {
+                this.setFetchedData(url, this.fetchCache[url]);
+                this.bindFetchCellData();
+                return;
+            }
             fetch(url)
                 .then((data) => {
                 return data.json();
             })
                 .then((data) => {
-                cellContentSpan.innerText = data.Value;
-                cell.setAttribute("title", data.Value);
-                cell.classList.add("list_cell-fetched");
-                this.bindFetchStats();
+                this.setFetchedData(url, data);
+                this.bindFetchCellData();
             })
                 .catch((error) => {
-                cellContentSpan.innerText = "⚠️";
+                let nameEl = cell.querySelector(".list_cell_name");
+                cell.classList.add("list_cell-fetched");
+                nameEl.innerText = "⚠️";
                 console.error("cant fetch data:", error);
             });
             return;
+        }
+    }
+    setFetchedData(dataURL, data) {
+        this.fetchCache[dataURL] = data;
+        var cells = this.listEl.querySelectorAll(".list_cell");
+        for (let i = 0; i < cells.length; i++) {
+            let cell = cells[i];
+            if (cell.getAttribute("data-fetch-url") != dataURL) {
+                continue;
+            }
+            if (cell.classList.contains("list_cell-fetched")) {
+                continue;
+            }
+            this.setFetchedDataToCell(cell, data);
+        }
+    }
+    setFetchedDataToCell(cell, data) {
+        let cellNameSpan = (cell.querySelector(".list_cell_name"));
+        cellNameSpan.innerText = data.Name;
+        cell.setAttribute("title", data.Name);
+        cell.classList.add("list_cell-fetched");
+        let cellImagesSpan = (cell.querySelector(".list_cell_images"));
+        cellImagesSpan.innerHTML = "";
+        if (data.Images) {
+            for (var i = 0; i < data.Images.length; i++) {
+                let imageEl = document.createElement("img");
+                imageEl.classList.add("list_cell_image");
+                imageEl.setAttribute("loading", "lazy");
+                imageEl.setAttribute("src", data.Images[i]);
+                cellImagesSpan.appendChild(imageEl);
+            }
         }
     }
     bindClick() {
@@ -7277,11 +7313,11 @@ class List {
     }
     inputPeriodicListener() {
         setInterval(() => {
-            if (this.changed == true && Date.now() - this.changedTimestamp > 500) {
+            if (this.changed == true && Date.now() - this.changedTimestamp > 200) {
                 this.changed = false;
                 this.load();
             }
-        }, 200);
+        }, 50);
     }
     bindHeaderPositionCalculator() {
         this.listHeaderPositionChanged();
@@ -9901,6 +9937,14 @@ class Timeline {
         window.addEventListener("resize", this.loadData.bind(this));
         this.el.querySelector(".timeline_toolbar_settings").addEventListener("click", this.settingsClicked.bind(this));
         this.filtersEl = this.el.querySelector(".timeline_filters");
+        this.el.querySelector(".timeline_toolbar_fullscreen_open").addEventListener("click", () => {
+            this.el.classList.add("timeline-fullscreen");
+            this.loadData();
+        });
+        this.el.querySelector(".timeline_toolbar_fullscreen_close").addEventListener("click", () => {
+            this.el.classList.remove("timeline-fullscreen");
+            this.loadData();
+        });
         this.changedType();
     }
     settingsClicked() {
@@ -10268,4 +10312,13 @@ class VisibilityReloader {
             }
         }, 100);
     }
+}
+function popup(url) {
+    new PopupForm(url, (data) => {
+        if (window.primaryFormContainer) {
+            window.primaryFormContainer.sendForm();
+            return;
+        }
+        window.location.reload();
+    });
 }

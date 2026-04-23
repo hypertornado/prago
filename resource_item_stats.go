@@ -24,8 +24,9 @@ func ItemStatistic[T any](app *App, name func(string) string, permission Permiss
 	})
 }
 
-type itemStatResponse struct {
-	Value string
+type listCellFetchResponse struct {
+	Name   string
+	Images []string
 }
 
 func itemStatsAPIHandler(request *Request) {
@@ -47,8 +48,8 @@ func itemStatsAPIHandler(request *Request) {
 
 	item := resource.query(request.r.Context()).ID(request.Param("item_id"))
 
-	request.WriteJSON(200, itemStatResponse{
-		Value: stat.Handler(item),
+	request.WriteJSON(200, listCellFetchResponse{
+		Name: stat.Handler(item),
 	})
 
 }

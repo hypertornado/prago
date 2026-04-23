@@ -20,6 +20,33 @@ $timelineLeftWidth: 60px;
     border: 1px solid $grayBorderColor;
 }
 
+.timeline_toolbar_fullscreen_close {
+    display: none;
+}
+
+.timeline-fullscreen .timeline_toolbar_fullscreen_close {
+    display: flex;
+}
+
+.timeline-fullscreen .timeline_toolbar_fullscreen_open {
+    display: none;
+}
+
+.timeline-fullscreen {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
+    z-index: 100000000000;
+    border: none;
+    border-radius: none;
+}
+
+.timeline-fullscreen .timeline_values {
+    height: calc(100vh - 100px);
+}
+
 .timeline_name {
     padding: 0px;
     margin: 0px;

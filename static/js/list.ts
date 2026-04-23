@@ -39,6 +39,8 @@ class List {
 
   filter: ListFilter;
 
+  fetchCache: any = {};
+
   constructor(listEl: HTMLDivElement) {
     this.listEl = listEl;
 
@@ -207,7 +209,7 @@ class List {
         this.bindSettingsButton();
         this.bindPagination();
         this.bindClick();
-        this.bindFetchStats();
+        this.bindFetchCellData();
         if (this.multiple.hasMultipleActions()) {
           this.multiple.bindMultipleActionCheckboxes();
         }
@@ -285,10 +287,10 @@ class List {
     }
   }
 
-  bindFetchStats() {
+  bindFetchCellData() {
     var cells = this.listEl.querySelectorAll(".list_cell[data-fetch-url]");
     for (var i = 0; i < cells.length; i++) {
-      let cell = <HTMLDivElement>cells[i];
+      let cell = <HTMLTableCellElement>cells[i];
       let url = cell.getAttribute("data-fetch-url");
       if (!url) {
         continue;
@@ -303,25 +305,69 @@ class List {
         continue;
       }
 
-      let cellContentSpan = <HTMLSpanElement>(
-        cell.querySelector(".list_cell_name")
-      );
+      if (this.fetchCache[url]) {
+        this.setFetchedData(url, this.fetchCache[url]);
+        this.bindFetchCellData();
+        return;
+      }
+
 
       fetch(url)
         .then((data) => {
           return data.json();
         })
         .then((data) => {
-          cellContentSpan.innerText = data.Value;
-          cell.setAttribute("title", data.Value);
-          cell.classList.add("list_cell-fetched");
-          this.bindFetchStats();
+          this.setFetchedData(url, data);
+          this.bindFetchCellData();
         })
         .catch((error) => {
-          cellContentSpan.innerText = "⚠️";
+          let nameEl: HTMLDivElement = cell.querySelector(".list_cell_name");
+          cell.classList.add("list_cell-fetched");
+          nameEl.innerText = "⚠️";
           console.error("cant fetch data:", error);
         });
       return;
+    }
+  }
+
+  setFetchedData(dataURL: string, data: any) {
+
+    this.fetchCache[dataURL] = data;
+
+    var cells = this.listEl.querySelectorAll(".list_cell");
+    for (let i = 0; i < cells.length; i++) {
+      let cell = <HTMLTableCellElement>cells[i];
+      if (cell.getAttribute("data-fetch-url") != dataURL) {
+        continue;
+      }
+      if (cell.classList.contains("list_cell-fetched")) {
+        continue;
+      }
+      this.setFetchedDataToCell(cell, data);
+    }
+  }
+
+
+  setFetchedDataToCell(cell: HTMLTableCellElement, data: any) {
+    let cellNameSpan = <HTMLSpanElement>(
+      cell.querySelector(".list_cell_name")
+    );
+    cellNameSpan.innerText = data.Name;
+    cell.setAttribute("title", data.Name);
+    cell.classList.add("list_cell-fetched");
+    let cellImagesSpan = <HTMLSpanElement>(
+      cell.querySelector(".list_cell_images")
+    );
+    cellImagesSpan.innerHTML = "";
+
+    if (data.Images) {
+      for (var i = 0; i < data.Images.length; i++) {
+        let imageEl = document.createElement("img");
+        imageEl.classList.add("list_cell_image");
+        imageEl.setAttribute("loading", "lazy");
+        imageEl.setAttribute("src", data.Images[i]);
+        cellImagesSpan.appendChild(imageEl);
+      }
     }
   }
 
@@ -573,11 +619,11 @@ class List {
 
   inputPeriodicListener() {
     setInterval(() => {
-      if (this.changed == true && Date.now() - this.changedTimestamp > 500) {
+      if (this.changed == true && Date.now() - this.changedTimestamp > 200) {
         this.changed = false;
         this.load();
       }
-    }, 200);
+    }, 50);
   }
 
   bindHeaderPositionCalculator() {

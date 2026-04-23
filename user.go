@@ -30,8 +30,13 @@ type user struct {
 	LoggedInTime      time.Time `prago-can-view:"sysadmin"`
 	EmailConfirmedAt  time.Time `prago-can-view:"sysadmin"`
 	EmailRenewedAt    time.Time `prago-can-view:"sysadmin"`
-	CreatedAt         time.Time
-	UpdatedAt         time.Time `prago-can-view:"sysadmin"`
+
+	UserAgent  string    `prago-type:"text" prago-can-view:"sysadmin" prago-name:"User Agent"`
+	IPAddress  string    `prago-type:"text" prago-can-view:"sysadmin" prago-name:"IP Adresa"`
+	LastAccess time.Time `prago-type:"timestamp" prago-can-view:"sysadmin" prago-name:"Poslední přístup"`
+
+	CreatedAt time.Time
+	UpdatedAt time.Time `prago-can-view:"sysadmin"`
 }
 
 func fixEmail(in string) string {
@@ -112,6 +117,24 @@ func (app *App) initUserResource() {
 
 	resource.Icon("glyphicons-basic-4-user.svg")
 	resource.Board(app.optionsBoard)
+
+	ActionResourceItemForm(app, "logout", func(usr *user, form *Form, request *Request) {
+		form.AddSubmit("Odhlásit")
+	}, func(usr *user, fv FormValidation, request *Request) {
+		sessions := Query[session](app).Is("user", usr.ID).Is("IsDeleted", false).Is("IsAPI", false).List()
+		for _, session := range sessions {
+			err := app.deleteSession(session.UUID)
+			if err != nil {
+				fv.AddError(fmt.Sprintf("Nelze smazat session %s: %s", session.UUID, err))
+				return
+			}
+		}
+
+		fv.AddOK("Uživatel odhlášen ze všech session")
+
+	}).Permission("sysadmin").Name(unlocalized("Odhlásit"))
+
+	app.initUserAPI()
 }
 
 func (app *App) afterInitUserResource() {
