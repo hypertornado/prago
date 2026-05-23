@@ -127,7 +127,7 @@
 {{define "form_input_submit"}}
   <div class="primarybtncontainer">
     <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>
-      {{if .Icon}}<img class="btn_icon" src="/admin/api/icons?file={{.Icon}}&color=01354a">{{end}}
+      {{if .Icon}}<img class="btn_icon" src="/admin/api/icons?file={{.Icon}}&color=ffffff">{{end}}
       {{.Name}}
     </button>
   </div>
@@ -135,7 +135,7 @@
 
 {{define "form_input_delete"}}
   <button id="{{.UUID}}" name="{{.ID}}" class="btn btn-primary btn-delete"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>
-    {{if .Icon}}<img class="btn_icon" src="/admin/api/icons?file={{.Icon}}&color=01354a">{{end}}
+    {{if .Icon}}<img class="btn_icon" src="/admin/api/icons?file={{.Icon}}&color=ffffff">{{end}}
     {{.Name}}
   </button>
 {{end}}
@@ -157,10 +157,27 @@
   {{$val := .Value}}
   {{$id := .ID}}
   <div class="form_radios">
-  {{range $value := .Data}}
+  {{range $item := .Data}}
       <label class="form_radio">
-        <input type="radio" id="{{$id}}-{{index $value 0}}" name="{{$id}}" value="{{index $value 0}}"{{if eq $val (index $value 0)}} checked{{end}}>
-        <div class="form_radio_name">{{index $value 1}}</div>
+        <input type="radio" id="{{$id}}-{{$item.ID}}" name="{{$id}}" value="{{$item.ID}}"{{if eq $val $item.ID}} checked{{end}}>
+        {{if .ImageURL}}
+          <img src="{{.ImageURL}}" class="form_radio_image">
+        {{end}}
+        <div class="form_radio_content">
+          {{if $item.DescriptionBefore}}
+            <div class="form_radio_prename">{{$item.DescriptionBefore}}</div>
+          {{end}}
+          <div class="form_radio_name">{{$item.Name}}</div>
+          {{if $item.DescriptionAfter}}
+            <div class="form_radio_postname">{{$item.DescriptionAfter}}</div>
+          {{end}}
+        </div>
+        {{if .Button}}
+          <a href="{{.Button.URL}}" class="btn form_radio_btn">
+            {{if .Button.Icon}}<img src="/admin/api/icons?file={{.Button.Icon}}" class="btn_icon">{{end}}
+            {{.Button.Name}}
+          </a>
+        {{end}}
       </label>
   {{end}}
   </div>

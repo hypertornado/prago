@@ -81,6 +81,7 @@ type UserData interface {
 	Phone() string
 	Authorize(Permission) bool
 	UserID() int64
+	Role() string
 }
 
 type userData struct {
@@ -123,6 +124,10 @@ func (d *userData) Locale() string {
 
 func (d *userData) UserID() int64 {
 	return d.id
+}
+
+func (d *userData) Role() string {
+	return d.role
 }
 
 func (d *userData) Authorize(permission Permission) bool {

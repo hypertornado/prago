@@ -113,7 +113,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 			for i, id := range order {
 				item := resource.query(request.r.Context()).ID(id)
 				resource.setOrderPosition(item, int64(i))
-				err := resource.update(request.r.Context(), item)
+				err := resource.update(request.r.Context(), item, nil)
 				must(err)
 			}
 			request.WriteJSON(200, true)

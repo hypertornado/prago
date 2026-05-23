@@ -28,16 +28,6 @@ func (app *App) initBackupCRON() {
 		})
 	}).Permission("sysadmin").Name(unlocalized("Backup DB")).Board(sysadminBoard)
 
-	/*backupDashboard.
-	AddTask(unlocalized("backup_db"), "sysadmin",
-		func(tr *TaskActivity) error {
-			err := backupApp(app)
-			if err != nil {
-				return fmt.Errorf("error while creating backup: %s", err)
-			}
-			return nil
-		})*/
-
 	app.addCronTask("remove old backups", 24*time.Hour, func() {
 		err := app.removeOldBackups()
 		if err != nil {
@@ -143,7 +133,6 @@ func (app *App) restoreSQLBackup(reader io.Reader) error {
 }
 
 func (app *App) backupSQL(writer io.Writer, excludeTableNames []string) error {
-
 	availableTables, err := listTables(app.db)
 	if err != nil {
 		return err
@@ -172,6 +161,7 @@ func (app *App) backupSQL(writer io.Writer, excludeTableNames []string) error {
 
 	}
 	params = append(params, appendedIgnore...)
+	params = append(params, "--single-transaction")
 	app.Log().Printf("mysqldump with params %v", params)
 	dumpCmd = exec.Command("mysqldump", params...)
 	dumpCmd.Stdout = writer
@@ -186,7 +176,6 @@ func syncBackups(appName, ssh string) error {
 	}
 
 	from := fmt.Sprintf("%s:~/.%s/backups/*", ssh, appName)
-	fmt.Println("scp", "-r", from, to)
 	cmd := exec.Command("scp", "-r", from, to)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

@@ -5,14 +5,20 @@ class NotificationCenter {
   constructor(el: HTMLDivElement) {
     this.el = el;
     var data = el.getAttribute("data-notification-views");
+    console.log(data);
     var notifications: NotificationData[] = [];
     if (data) {
       notifications = JSON.parse(data);
     }
 
-    notifications.forEach((item) => {
-      this.setData(item);
-    });
+    console.log(notifications);
+
+
+    if (notifications) {
+      notifications.forEach((item) => {
+        this.setData(item);
+      });
+    }
 
     //No need to load notifications periodically
     //this.periodDataLoader();

@@ -1172,21 +1172,45 @@ select.input {
 
 .form_radio {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   align-items: center;
   border: 1px solid transparent;
-  padding: 4px 4px;
+  padding: 4px 8px;
   cursor: pointer;
   border-radius: 8px;
-  margin-left: -4px;
+  background-color: white;
+  margin-bottom: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .form_radio:hover {
   background-color: hsl(214, 50%, 97%);
+  border-color: hsl(214, 50%, 50%);
 }
 
 .form_radio:active {
   background-color: hsl(214, 50%, 90%);
+}
+
+.form_radio_image {
+  object-fit: cover;
+  width: 40px;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  aspect-ratio: 1;
+}
+
+.form_radio_content {
+  flex-grow: 1000;
+}
+
+.form_radio_btn {
+  flex-shrink: 0;
+}
+
+.form_radio_prename, .form_radio_postname {
+  font-size: 0.8rem;
+  line-height: 1.3em;
 }
 
 .form_progress {

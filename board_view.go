@@ -60,7 +60,7 @@ func (board *Board) boardView(request *Request) *boardView {
 		BoardIcon:   boardIcon,
 		BoardURL:    boardURL,
 		IsMainBoard: board.isMainBoard(),
-		Role:        request.role(),
+		Role:        request.Role(),
 	}
 
 	ret.Resources = board.getMenuItems(getMenuRequestContextFromRequest(request, nil))

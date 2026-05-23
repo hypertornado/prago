@@ -267,7 +267,7 @@ func (resource *Resource) updateWithLog(item any, request *Request) error {
 		return errors.New("can't find before item")
 	}
 
-	err := resource.update(request.r.Context(), item)
+	err := resource.update(request.r.Context(), item, nil)
 	if err != nil {
 		return fmt.Errorf("can't save item (%d): %s", id, err)
 	}

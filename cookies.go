@@ -16,7 +16,6 @@ func (app *App) getLoginCookieID() string {
 }
 
 func (request *Request) setCookie(name, value string) {
-
 	var isSecureCookie bool
 	if !request.app.developmentMode {
 		isSecureCookie = true

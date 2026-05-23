@@ -94,28 +94,28 @@ func newAction(app *App, url string) *Action {
 	}
 }
 
-func ActionPlain(app *App, url string, handler func(*Request)) *Action {
+func ActionPlain(app *App, url string, handler func(request *Request)) *Action {
 	action := newAction(app, url)
 	app.rootActions = append(app.rootActions, action)
 	action.addHandler(handler)
 	return action
 }
 
-func ActionUI(app *App, url string, content func(*Request) template.HTML) *Action {
+func ActionUI(app *App, url string, content func(request *Request) template.HTML) *Action {
 	action := newAction(app, url)
 	app.rootActions = append(app.rootActions, action)
 	action.addContent(content)
 	return action
 }
 
-func ActionResourcePlain[T any](app *App, url string, handler func(*Request)) *Action {
+func ActionResourcePlain[T any](app *App, url string, handler func(request *Request)) *Action {
 	resource := getResource[T](app)
 	action := resource.action(url)
 	action.addHandler(handler)
 	return action
 }
 
-func ActionResourceUI[T any](app *App, url string, content func(*Request) template.HTML) *Action {
+func ActionResourceUI[T any](app *App, url string, content func(request *Request) template.HTML) *Action {
 	resource := getResource[T](app)
 	action := resource.action(url)
 	action.addContent(content)

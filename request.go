@@ -25,13 +25,22 @@ type Request struct {
 }
 
 func (request Request) getNotificationsData() string {
-	if request.notifications == nil {
-		return ""
-	} else {
-		b, err := json.Marshal(request.notifications)
+	app := request.app
+	cookie, err := request.Request().Cookie(app.getFlashCookieID())
+	if err == nil && cookie.Value != "" {
+		notification := app.notificationCenter.getFromUUID(cookie.Value)
+		if notification == nil {
+			return ""
+		}
+		request.deleteCookie(app.getFlashCookieID())
+		var views []*notificationView
+		view := notification.getView()
+		views = append(views, view)
+		b, err := json.Marshal(views)
 		must(err)
 		return string(b)
 	}
+	return ""
 }
 
 // Request returns underlying http.Request
@@ -58,7 +67,7 @@ func (request *Request) getUser() *user {
 	return user
 }
 
-func (request *Request) role() string {
+func (request *Request) Role() string {
 	userID := request.UserID()
 	data := request.app.userDataCacheGet(userID)
 	if data == nil {
@@ -112,7 +121,7 @@ func (request *Request) Authorize(permission Permission) bool {
 	if request.UserID() > 0 {
 		logged = true
 	}
-	return request.app.authorize(logged, request.role(), permission)
+	return request.app.authorize(logged, request.Role(), permission)
 }
 
 // WriteHTML renders HTML view with HTTP code

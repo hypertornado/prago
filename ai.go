@@ -38,7 +38,6 @@ func (app *App) getAvailableAImodels() (ret [][2]string) {
 			log.Fatal(err)
 		}
 		ret = append(ret, [2]string{m.Name, m.Name})
-		//fmt.Printf("- %s\n", m.Name)
 	}
 
 	return ret

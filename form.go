@@ -81,19 +81,19 @@ func (app *App) NewForm(action string) *Form {
 }
 
 // AddItem adds form item
-func (f *Form) AddItem(item *FormItem) {
-	item.form = f
-	f.Items = append(f.Items, item)
+func (form *Form) AddItem(item *FormItem) {
+	item.form = form
+	form.Items = append(form.Items, item)
 }
 
 // BindData to form
-func (f *Form) BindData(params url.Values) {
-	for _, v := range f.Items {
+func (form *Form) BindData(params url.Values) {
+	for _, v := range form.Items {
 		v.Value = params.Get(v.ID)
 	}
 }
 
-func (f *Form) addInput(id, description, template string) *FormItem {
+func (form *Form) addInput(id, description, template string) *FormItem {
 	item := &FormItem{
 		ID:       id,
 		Template: template,
@@ -103,28 +103,28 @@ func (f *Form) addInput(id, description, template string) *FormItem {
 		item.HiddenName = true
 	}
 	item.AddUUID()
-	f.AddItem(item)
+	form.AddItem(item)
 	return item
 }
 
 // AddTextInput to form
-func (f *Form) AddTextInput(name, description string) *FormItem {
-	input := f.addInput(name, description, "form_input")
+func (form *Form) AddTextInput(name, description string) *FormItem {
+	input := form.addInput(name, description, "form_input")
 	if description != "" {
 		input.Icon = iconText
 	}
 	return input
 }
 
-func (f *Form) AddNumberInput(name, description string) *FormItem {
-	input := f.addInput(name, description, "form_input_int")
+func (form *Form) AddNumberInput(name, description string) *FormItem {
+	input := form.addInput(name, description, "form_input_int")
 	input.Icon = iconNumber
 	return input
 }
 
 // AddTextareaInput to form
-func (f *Form) AddTextareaInput(name, description string) *FormItem {
-	input := f.addInput(name, description, "form_input_textarea")
+func (form *Form) AddTextareaInput(name, description string) *FormItem {
+	input := form.addInput(name, description, "form_input_textarea")
 	if description != "" {
 		input.Icon = iconText
 	}
@@ -132,42 +132,42 @@ func (f *Form) AddTextareaInput(name, description string) *FormItem {
 }
 
 // AddEmailInput to form
-func (f *Form) AddEmailInput(name, description string) *FormItem {
-	input := f.addInput(name, description, "form_input_email")
+func (form *Form) AddEmailInput(name, description string) *FormItem {
+	input := form.addInput(name, description, "form_input_email")
 	input.Icon = iconEmail
 	return input
 }
 
 // AddPasswordInput to form
-func (f *Form) AddPasswordInput(name, description string) *FormItem {
-	input := f.addInput(name, description, "form_input_password")
+func (form *Form) AddPasswordInput(name, description string) *FormItem {
+	input := form.addInput(name, description, "form_input_password")
 	input.Icon = iconPassword
 	return input
 }
 
 // AddFileInput to form
-func (f *Form) AddFileInput(name, description string) *FormItem {
-	input := f.addInput(name, description, "form_input_file")
+func (form *Form) AddFileInput(name, description string) *FormItem {
+	input := form.addInput(name, description, "form_input_file")
 	input.Icon = iconImage
 	return input
 }
 
 // AddCAPTCHAInput to form
-func (f *Form) AddCAPTCHAInput(name, description string) *FormItem {
-	return f.addInput(name, description, "form_input_captcha")
+func (form *Form) AddCAPTCHAInput(name, description string) *FormItem {
+	return form.addInput(name, description, "form_input_captcha")
 }
 
 // AddSubmit to form
-func (f *Form) AddSubmit(description string) *FormItem {
-	input := f.addInput("_submit", description, "")
+func (form *Form) AddSubmit(description string) *FormItem {
+	input := form.addInput("_submit", description, "")
 	input.HiddenName = true
 	input.Template = "form_input_submit"
 	return input
 }
 
 // AddDeleteSubmit to form
-func (f *Form) AddDeleteSubmit(description string) *FormItem {
-	input := f.addInput("_submit", description, "")
+func (form *Form) AddDeleteSubmit(description string) *FormItem {
+	input := form.addInput("_submit", description, "")
 	input.HiddenName = true
 	input.Template = "form_input_delete"
 	input.Icon = iconDelete
@@ -175,66 +175,86 @@ func (f *Form) AddDeleteSubmit(description string) *FormItem {
 }
 
 // AddCheckbox to form
-func (f *Form) AddCheckbox(name, description string) *FormItem {
-	input := f.addInput(name, description, "form_input_checkbox")
+func (form *Form) AddCheckbox(name, description string) *FormItem {
+	input := form.addInput(name, description, "form_input_checkbox")
 	input.HiddenName = true
 	return input
 }
 
 // AddHidden to form
-func (f *Form) AddHidden(name string) *FormItem {
-	input := f.addInput(name, "", "")
+func (form *Form) AddHidden(name string) *FormItem {
+	input := form.addInput(name, "", "")
 	input.Template = "form_input_hidden"
 	input.Hidden = true
 	return input
 }
 
 // AddSelect to form
-func (f *Form) AddSelect(name, description string, values [][2]string) *FormItem {
-	input := f.addInput(name, description, "form_input_select")
+func (form *Form) AddSelect(name, description string, values [][2]string) *FormItem {
+	input := form.addInput(name, description, "form_input_select")
 	input.Data = values
 	input.Icon = iconSelect
 	return input
 }
 
-func (f *Form) AddRadio(name, description string, values [][2]string) *FormItem {
-	input := f.addInput(name, description, "form_input_select_radio")
-	input.Data = values
+type FormOption struct {
+	ID                string
+	Name              string
+	DescriptionBefore string
+	DescriptionAfter  string
+	ImageURL          string
+	Button            *Button
+}
+
+func (form *Form) AddOptions(name, description string, options []*FormOption) *FormItem {
+	input := form.addInput(name, description, "form_input_select_radio")
+	input.Data = options
 	input.Icon = iconSelect
 	return input
+}
+
+func (form *Form) AddRadio(name, description string, values [][2]string) *FormItem {
+	var options []*FormOption
+	for _, v := range values {
+		options = append(options, &FormOption{
+			ID:   v[0],
+			Name: v[1],
+		})
+	}
+	return form.AddOptions(name, description, options)
 }
 
 // AddDatePicker to form
-func (f *Form) AddDatePicker(name, description string) *FormItem {
-	input := f.addInput(name, description, "form_input_date")
+func (form *Form) AddDatePicker(name, description string) *FormItem {
+	input := form.addInput(name, description, "form_input_date")
 	input.Icon = iconDate
 	return input
 }
 
-func (f *Form) AddDateTimePicker(name, description string) *FormItem {
-	input := f.addInput(name, description, "form_input_datetime")
+func (form *Form) AddDateTimePicker(name, description string) *FormItem {
+	input := form.addInput(name, description, "form_input_datetime")
 	input.Icon = iconDateTime
 	return input
 }
 
-func (f *Form) AddRelation(name, description string, relatedResourceID string) *FormItem {
-	input := f.addInput(name, description, "form_input_relation")
+func (form *Form) AddRelation(name, description string, relatedResourceID string) *FormItem {
+	input := form.addInput(name, description, "form_input_relation")
 	input.Data = relationFormDataSource{
-		App:       f.app,
+		App:       form.app,
 		RelatedID: columnName(relatedResourceID),
 	}
-	input.Icon = f.app.getResourceByID(relatedResourceID).icon
+	input.Icon = form.app.getResourceByID(relatedResourceID).icon
 	return input
 }
 
-func (f *Form) AddRelationMultiple(name, description string, relatedResourceID string) *FormItem {
-	input := f.addInput(name, description, "form_input_relation")
+func (form *Form) AddRelationMultiple(name, description string, relatedResourceID string) *FormItem {
+	input := form.addInput(name, description, "form_input_relation")
 	input.Data = relationFormDataSource{
-		App:           f.app,
+		App:           form.app,
 		RelatedID:     columnName(relatedResourceID),
 		MultiRelation: true,
 	}
-	input.Icon = f.app.getResourceByID(relatedResourceID).icon
+	input.Icon = form.app.getResourceByID(relatedResourceID).icon
 	return input
 }
 

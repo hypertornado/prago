@@ -131,10 +131,10 @@ func (resource *Resource) saveItem(ctx context.Context, item interface{}, onlyFi
 	if err != nil {
 		return err
 	}
-	if affected == 0 {
+	/*if affected == 0 {
 		return errors.New("zero rows affected by save operation")
-	}
-	if affected != 1 {
+	}*/
+	if affected > 1 {
 		return fmt.Errorf("non one row affected: %d", affected)
 	}
 	return nil

@@ -79,7 +79,7 @@ func (c *controller) routeHandler(method, path string, action func(p *Request), 
 }
 
 // Get creates new route for GET request
-func (app *App) Handle(method, path string, action func(p *Request), constraints ...routerConstraint) {
+func (app *App) Handle(method, path string, action func(request *Request), constraints ...routerConstraint) {
 	app.appController.routeHandler(method, path, action, constraints...)
 }
 

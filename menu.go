@@ -69,8 +69,13 @@ func (app *App) getMenu(request *Request, item any) (ret *menu) {
 	items = append(items, app.codeName)
 	items = append(items, fmt.Sprintf("%s", app.version))
 
-	if request.role() != "" {
-		items = append(items, fmt.Sprintf("%s", request.role()))
+	if request.Role() != "" {
+		roleID := request.Role()
+		roleName := roleID
+		if request.app.accessManager.roleNames[roleID] != nil {
+			roleName = request.app.accessManager.roleNames[roleID](request.Locale())
+		}
+		items = append(items, roleName)
 	} else {
 		ret.RoleWarning = "Nebyla vám zatím administrátorem webu přidělena žádná role"
 	}

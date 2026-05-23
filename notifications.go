@@ -20,7 +20,9 @@ func (nc *notificationCenter) add(notification *Notification) {
 func (nc *notificationCenter) getFromUUID(uuid string) *Notification {
 	nc.mutex.RLock()
 	defer nc.mutex.RUnlock()
-	return nc.notificationMap[uuid]
+	ret := nc.notificationMap[uuid]
+	delete(nc.notificationMap, uuid)
+	return ret
 }
 
 func (nc *notificationCenter) getFromUser(userID int64) (ret []*notificationView) {

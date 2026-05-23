@@ -230,7 +230,7 @@ func getItemsFromIDs(resource *Resource, ids string) (ret []any) {
 	return
 }
 
-func PopupForm(app *App, url string, formGenerator func(*Form, *Request), validation func(FormValidation, *Request)) *Action {
+func PopupForm(app *App, url string, formGenerator func(form *Form, request *Request), validation func(fv FormValidation, request *Request)) *Action {
 	fa := newFormAction(app, url, nil)
 
 	fa.actionForm.parentBoard = nil

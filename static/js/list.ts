@@ -287,7 +287,9 @@ class List {
     }
   }
 
-  bindFetchCellData() {
+  getCellToFetch(): HTMLTableCellElement {
+    var secondaryCell: HTMLTableCellElement;
+
     var cells = this.listEl.querySelectorAll(".list_cell[data-fetch-url]");
     for (var i = 0; i < cells.length; i++) {
       let cell = <HTMLTableCellElement>cells[i];
@@ -305,29 +307,48 @@ class List {
         continue;
       }
 
-      if (this.fetchCache[url]) {
-        this.setFetchedData(url, this.fetchCache[url]);
-        this.bindFetchCellData();
-        return;
+      if (url.includes("_fetch_list_cell_relation")) {
+        return cell;
+      } else {
+        if (!secondaryCell) {
+          secondaryCell = cell;
+        }
       }
+      //return cell;
+    }
+    return secondaryCell;
+  }
 
+  bindFetchCellData() {
 
-      fetch(url)
-        .then((data) => {
-          return data.json();
-        })
-        .then((data) => {
-          this.setFetchedData(url, data);
-          this.bindFetchCellData();
-        })
-        .catch((error) => {
-          let nameEl: HTMLDivElement = cell.querySelector(".list_cell_name");
-          cell.classList.add("list_cell-fetched");
-          nameEl.innerText = "⚠️";
-          console.error("cant fetch data:", error);
-        });
+    let cell = this.getCellToFetch();
+    if (!cell) {
       return;
     }
+
+    let url = cell.getAttribute("data-fetch-url");
+
+    if (this.fetchCache[url]) {
+      this.setFetchedData(url, this.fetchCache[url]);
+      this.bindFetchCellData();
+      return;
+    }
+
+
+    fetch(url)
+      .then((data) => {
+        return data.json();
+      })
+      .then((data) => {
+        this.setFetchedData(url, data);
+        this.bindFetchCellData();
+      })
+      .catch((error) => {
+        let nameEl: HTMLDivElement = cell.querySelector(".list_cell_name");
+        cell.classList.add("list_cell-fetched");
+        nameEl.innerText = "⚠️";
+        console.error("cant fetch data:", error);
+      });
   }
 
   setFetchedData(dataURL: string, data: any) {

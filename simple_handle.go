@@ -30,8 +30,8 @@ type PageDataSimple struct {
 type SimpleHandler struct {
 	URL string
 
-	Handler        func(*PageDataSimple)
-	FormValidation func(FormValidation, *Request)
+	Handler        func(pds *PageDataSimple)
+	FormValidation func(fv FormValidation, request *Request)
 }
 
 func (app *App) HandleSimple(handler *SimpleHandler) {

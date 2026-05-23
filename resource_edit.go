@@ -25,17 +25,23 @@ func (resource *Resource) create(ctx context.Context, item any) error {
 }
 
 func UpdateItem[T any](app *App, item *T) error {
-	return UpdateItemWithContext[T](context.Background(), app, item)
-}
-
-func UpdateItemWithContext[T any](ctx context.Context, app *App, item *T) error {
 	resource := getResource[T](app)
-	return resource.update(ctx, item)
+	return resource.update(context.Background(), item, nil)
 }
 
-func (resource *Resource) update(ctx context.Context, item any) error {
+func UpdateItemPartial[T any](app *App, item *T, fields []string) error {
+	resource := getResource[T](app)
+	onlyFields := map[string]bool{}
+	for _, field := range fields {
+		onlyFields[resource.Field(field).fieldClassName] = true
+	}
+	return resource.update(context.Background(), item, onlyFields)
+
+}
+
+func (resource *Resource) update(ctx context.Context, item any, onlyFields map[string]bool) error {
 	resource.setTimestamp(item, "UpdatedAt")
-	return resource.saveItem(ctx, item, nil, false)
+	return resource.saveItem(ctx, item, onlyFields, false)
 }
 
 func Replace[T any](ctx context.Context, app *App, item *T) error {
