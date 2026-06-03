@@ -14,13 +14,23 @@ var ErrItemNotFound = errors.New("item not found")
 
 func (app *App) initAdminActions() {
 
-	app.adminController.addAroundAction(func(request *Request, next func()) {
+	/*
+		app.adminController.addAroundAction(func(request *Request, next func()) {
+			if request.UserID() == 0 {
+				urlPath := url.PathEscape(request.Request().URL.Path)
+				request.Redirect(app.getAdminURL("user/login") + "?redirect=" + urlPath)
+				return
+			}
+			next()
+		})*/
+
+	app.adminController.addBeforeAction(func(request *Request) bool {
 		if request.UserID() == 0 {
 			urlPath := url.PathEscape(request.Request().URL.Path)
 			request.Redirect(app.getAdminURL("user/login") + "?redirect=" + urlPath)
-			return
+			return false
 		}
-		next()
+		return true
 	})
 
 	app.Help("markdown", unlocalized("Markdown"), func(request *Request) template.HTML {
@@ -56,7 +66,7 @@ func (app *App) initAdminNotFoundAction() {
 	})
 }
 
-func (app App) getAdminURL(suffix string) string {
+func (app *App) getAdminURL(suffix string) string {
 	ret := "/admin"
 	if len(suffix) > 0 {
 		ret += "/" + suffix

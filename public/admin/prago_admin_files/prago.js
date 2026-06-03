@@ -8534,6 +8534,7 @@ class FormContainer {
                 if (contentType == "application/json") {
                     var data = JSON.parse(request.response);
                     this.progress.classList.add("hidden");
+                    this.form.formEl.classList.remove("form-loading");
                     this.formTaskUUID = data.TaskUUID;
                     if (data.RedirectionLocation || data.Preview || data.Data) {
                         this.okHandler(data);
@@ -8566,6 +8567,7 @@ class FormContainer {
             }
         });
         this.progress.classList.remove("hidden");
+        this.form.formEl.classList.add("form-loading");
         request.send(formData);
     }
     setAfterContent(text) {
@@ -8963,6 +8965,10 @@ class RelationList {
     load() {
         this.loadingEl.classList.remove("hidden");
         this.moreEl.classList.add("hidden");
+        let count = 5;
+        if (this.offset > 0) {
+            count = 10;
+        }
         var request = new XMLHttpRequest();
         request.open("POST", "/admin/api/relationlist", true);
         request.addEventListener("load", () => {
@@ -8986,10 +8992,6 @@ class RelationList {
                 console.error("Error while RelationList request");
             }
         });
-        var count = 5;
-        if (this.offset > 0) {
-            count = 10;
-        }
         request.send(JSON.stringify({
             SourceResource: this.sourceResource,
             TargetResource: this.targetResource,

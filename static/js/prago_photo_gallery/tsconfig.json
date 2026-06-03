@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "strictNullChecks": false,
+
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": false,
+        "target": "ES2020",
+        //"ignoreDeprecations": "6.0",
+        //"outFile": "../../../prago_photo_gallery.js"
+        "outFile": "../../../public/admin/prago_admin_files/prago_photo_gallery.js"
+    },
+    "files": [
+        "prago_photo_gallery.ts",
+    ]
+}

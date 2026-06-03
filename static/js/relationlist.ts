@@ -37,6 +37,11 @@ class RelationList {
     this.loadingEl.classList.remove("hidden");
     this.moreEl.classList.add("hidden");
 
+    let count = 5;
+    if (this.offset > 0) {
+      count = 10;
+    }
+
     var request = new XMLHttpRequest();
     request.open("POST", "/admin/api/relationlist", true);
     request.addEventListener("load", () => {
@@ -65,10 +70,10 @@ class RelationList {
       }
     });
 
-    var count = 5;
+    /*var count = 5;
     if (this.offset > 0) {
       count = 10;
-    }
+    }*/
 
     request.send(
       JSON.stringify({

@@ -15,7 +15,9 @@ type pageDataSimple struct {
 
 	BackgroundImageURL string
 
-	BackButton *Button
+	BannerImageURL string
+
+	BackButtons []*Button
 
 	PreName     string
 	Name        string

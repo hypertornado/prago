@@ -5,67 +5,62 @@ type controller struct {
 	app            *App
 	parent         *controller
 	priorityRouter bool
-	aroundActions  []func(p *Request, next func())
+
+	beforeActions []func(request *Request) bool
+	afterActions  []func(request *Request) bool
 }
 
-func newMainController(app *App) *controller {
+func newController(app *App) *controller {
 	return &controller{
-		app:           app,
-		parent:        nil,
-		aroundActions: []func(p *Request, next func()){},
+		app: app,
+
+		beforeActions: []func(request *Request) bool{},
+		afterActions:  []func(request *Request) bool{},
 	}
+
 }
 
 func (c *controller) subController() *controller {
-	return &controller{
-		app:            c.app,
-		parent:         c,
-		priorityRouter: c.priorityRouter,
-		aroundActions:  []func(p *Request, next func()){},
-	}
+	ret := newController(c.app)
+	ret.parent = c
+	ret.priorityRouter = c.priorityRouter
+	return ret
 }
 
-// AddBeforeAction adds action which is executed before main router action is called
-func (c *controller) addBeforeAction(fn func(p *Request)) {
-	c.addAroundAction(func(p *Request, next func()) {
-		fn(p)
-		next()
-	})
+func (c *controller) addBeforeAction(fn func(request *Request) bool) {
+	c.beforeActions = append(c.beforeActions, fn)
 }
 
-// AddAfterAction adds action which is executed after main router action is called
-func (c *controller) addAfterAction(fn func(p *Request)) {
-	c.addAroundAction(func(p *Request, next func()) {
-		next()
-		fn(p)
-	})
-}
-
-// AddAroundAction adds action which is executed before and after action
-// next function needs to be called in fn function
-func (c *controller) addAroundAction(fn func(p *Request, next func())) {
-	c.aroundActions = append(c.aroundActions, fn)
-}
-
-func (c *controller) callAroundActions(p *Request, i int, finalFunc func(), down bool) {
-	if down {
-		if c.parent != nil {
-			c.parent.callAroundActions(p, 0, func() {
-				c.callAroundActions(p, 0, finalFunc, false)
-			}, down)
-		} else {
-			c.callAroundActions(p, 0, finalFunc, false)
+func (c *controller) callBeforeActions(request *Request) bool {
+	if c.parent != nil {
+		ok := c.parent.callBeforeActions(request)
+		if !ok {
+			return false
 		}
-		return
 	}
+	for _, action := range c.beforeActions {
+		ok := action(request)
+		if !ok {
+			return false
+		}
+	}
+	return true
+}
 
-	if i < len(c.aroundActions) {
-		c.aroundActions[i](p, func() {
-			c.callAroundActions(p, i+1, finalFunc, false)
-		})
-	} else {
-		finalFunc()
+func (c *controller) callAfterActions(request *Request) bool {
+	if c.parent != nil {
+		ok := c.parent.callAfterActions(request)
+		if !ok {
+			return false
+		}
 	}
+	for _, action := range c.afterActions {
+		ok := action(request)
+		if !ok {
+			return false
+		}
+	}
+	return true
 }
 
 func (router *router) route(method string, path string, controller *controller, routeAction func(p *Request), constraints ...routerConstraint) {
@@ -84,11 +79,6 @@ func (app *App) Handle(method, path string, action func(request *Request), const
 }
 
 // AddBeforeAction adds action which is executed before main router action is called
-func (app *App) BeforeAction(fn func(p *Request)) {
+func (app *App) BeforeAction(fn func(request *Request) bool) {
 	app.appController.addBeforeAction(fn)
-}
-
-// AddAfterAction adds action which is executed after main router action is called
-func (app *App) AfterAction(fn func(p *Request)) {
-	app.appController.addAfterAction(fn)
 }

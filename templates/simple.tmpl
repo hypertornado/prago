@@ -31,8 +31,8 @@
     <div class="simple_outer">
     <div class="simple_content">
 
-      {{if .BackButton}}
-        <a href="{{.BackButton.SafeURL}}" class="btn simple_backbtn">{{.BackButton.Name}}</a>
+      {{range $btn := .BackButtons}}
+        <a href="{{$btn.SafeURL}}" class="btn simple_backbtn">{{$btn.Name}}</a>
       {{end}}
       {{if .Logo}}
         <div class="simple_logo" style="background-image: url('{{.Logo}}');"></div>
@@ -52,6 +52,10 @@
       {{end}}
       {{if .Description}}
         <div class="simple_description">{{.Description}}</div>
+      {{end}}
+
+      {{if .BannerImageURL}}
+        <img src="{{.BannerImageURL}}" class="simple_banner">
       {{end}}
 
       {{if .Sections}}

@@ -120,8 +120,6 @@
   background: linear-gradient(#42a1ec, #0070c9);
   color: white;
   border: none;
-  //border-color: #1e90ff;
-  //border-color: transparent;
   font-weight: 500;
   display: block;
   font-size: 1rem;
@@ -132,7 +130,40 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+  position: relative;
   @include softShadow;
+  overflow: hidden;
+}
+
+.form-loading .btn-primary {
+  //filter: blur(0px) grayscale(.2);
+  //transform: perspective(20cm) rotateX(00deg) scale(0.98);
+  animation: savingBtn 1.3s infinite alternate ease-in-out;
+}
+
+@keyframes savingBtn {
+  from {
+
+  }
+
+  to {
+    //transform: perspective(20cm) scale(1.02) rotateX(-0deg) rotateY(0deg);
+    filter:drop-shadow(10px 10px 10px rgba(0,0,0,0.3));
+  }
+}
+
+.form-loading .btn-primary::before {
+  content: ""; position: absolute; inset: 0; z-index: 100;
+  background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.9) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: shimmerBtn 2.3s infinite ease-in-out;
+}
+@keyframes shimmerBtn {
+  from {
+  }
+  to {
+    transform: translateX(100%);
+  }
 }
 
 .btn-primary:after {

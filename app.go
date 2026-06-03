@@ -131,7 +131,7 @@ func createApp(codeName string, version string, testing bool) *App {
 
 	app.logger = newLogger(app)
 
-	app.mainController = newMainController(app)
+	app.mainController = newController(app)
 	app.appController = app.mainController.subController()
 	app.accessController = app.mainController.subController()
 	app.accessController.priorityRouter = true

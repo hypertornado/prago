@@ -7,11 +7,13 @@ import (
 type PageDataSimple struct {
 	Request *Request
 
-	BackButton *Button
+	BackButtons []*Button
 
 	PreName  string
 	Name     string
 	PostName string
+
+	BannerImageID string
 
 	Sections []*SimpleSection
 
@@ -64,16 +66,23 @@ func (app *App) HandleSimple(handler *SimpleHandler) {
 
 		locale := localeFromRequest(request)
 
+		var bannerImageURL string
+		if pd.BannerImageID != "" {
+			bannerImageURL = app.largeImage(pd.BannerImageID)
+		}
+
 		renderPageSimple(request, &pageDataSimple{
 			Language: locale,
 			App:      app,
 
-			BackButton: pd.BackButton,
+			BackButtons: pd.BackButtons,
 
 			PreName:     pd.PreName,
 			Name:        pd.Name,
 			PostName:    pd.PostName,
 			Description: pd.Description,
+
+			BannerImageURL: bannerImageURL,
 
 			Sections: pd.Sections,
 
@@ -87,4 +96,8 @@ func (app *App) HandleSimple(handler *SimpleHandler) {
 			FooterText: pd.FooterText,
 		})
 	})
+}
+
+func (pds *PageDataSimple) BackButton(btn *Button) {
+	pds.BackButtons = append(pds.BackButtons, btn)
 }

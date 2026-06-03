@@ -98,6 +98,7 @@ class FormContainer {
 
     this.form.formEl.classList.remove("form-errors");
 
+
     request.addEventListener("load", (e) => {
       if (requestID != this.lastAJAXID) {
         return;
@@ -111,6 +112,7 @@ class FormContainer {
           //application/json
           var data = JSON.parse(request.response);
           this.progress.classList.add("hidden");
+          this.form.formEl.classList.remove("form-loading");
           this.formTaskUUID = data.TaskUUID;
           if (data.RedirectionLocation || data.Preview || data.Data) {
             this.okHandler(data);
@@ -150,6 +152,7 @@ class FormContainer {
     });
 
     this.progress.classList.remove("hidden");
+    this.form.formEl.classList.add("form-loading");
     request.send(formData);
   }
 

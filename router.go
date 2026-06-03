@@ -54,9 +54,17 @@ func (r *router) process(request *Request) bool {
 					}
 				}
 
-				route.controller.callAroundActions(request, 0, func() {
-					route.fn(request)
-				}, true)
+				ok := route.controller.callBeforeActions(request)
+				if !ok {
+					return true
+				}
+
+				route.fn(request)
+
+				ok = route.controller.callAfterActions(request)
+				if !ok {
+					return true
+				}
 
 				return true
 			}

@@ -3,6 +3,7 @@ package prago
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"time"
 )
@@ -56,6 +57,11 @@ func (app *App) initTimeline() {
 }
 
 func (dashboard *Dashboard) Timeline(name func(string) string, permission Permission, dataSource func(tdr *TimelineDataRequest) float64) *Timeline {
+
+	if !dashboard.board.app.accessManager.permissions[permission] {
+		panic(fmt.Sprintf("Persmission '%s' is not set", permission))
+	}
+
 	timeline := &Timeline{
 		uuid:              "timeline-" + randomString(30),
 		name:              name,

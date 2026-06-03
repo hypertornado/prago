@@ -171,6 +171,9 @@ table {
   border-spacing: 0;
 }
 
+@view-transition {
+  navigation: auto;
+}
 html {
   box-sizing: border-box;
 }
@@ -916,9 +919,35 @@ select.admin_timestamp_minute {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+  position: relative;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
+.form-loading .btn-primary {
+  animation: savingBtn 1.3s infinite alternate ease-in-out;
+}
+
+@keyframes savingBtn {
+  to {
+    filter: drop-shadow(10px 10px 10px rgba(0, 0, 0, 0.3));
+  }
+}
+.form-loading .btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.9) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: shimmerBtn 2.3s infinite ease-in-out;
+}
+
+@keyframes shimmerBtn {
+  to {
+    transform: translateX(100%);
+  }
+}
 .btn-primary:after {
   font-weight: normal;
 }
@@ -3883,7 +3912,7 @@ a .dashboard_figure_value {
 .simple_content {
   border: 1px solid #eee;
   background: white;
-  margin: 20px;
+  margin: 16px;
   width: calc(100% - 40px);
   max-width: 600px;
   border-radius: 8px;
@@ -3903,10 +3932,6 @@ a .dashboard_figure_value {
 
 .simple_text {
   margin: 0px 10px;
-}
-
-.simple_backbtn {
-  margin-top: 10px;
 }
 
 .simple_footer {
@@ -3955,6 +3980,15 @@ a .dashboard_figure_value {
 .simple_primarybtn {
   text-align: center;
   margin: 10px 0px;
+}
+
+.simple_banner {
+  width: calc(100% - 16px);
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  border-radius: 8px;
+  margin: 8px auto;
+  display: block;
 }
 
 .simple_section {

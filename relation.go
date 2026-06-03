@@ -59,7 +59,7 @@ func (field *relatedField) listName(locale string) string {
 	return field.resource.pluralName(locale)
 }
 
-func (app App) relationStringer(field Field, value reflect.Value, userData UserData) string {
+func (app *App) relationStringer(field Field, value reflect.Value, userData UserData) string {
 
 	switch value.Kind() {
 	case reflect.String:

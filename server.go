@@ -22,7 +22,7 @@ func (app *App) listenAndServe(port int) error {
 
 	server := &http.Server{
 		Addr:           "0.0.0.0:" + strconv.Itoa(port),
-		Handler:        server{*app},
+		Handler:        &server{app},
 		ReadTimeout:    2 * time.Minute,
 		WriteTimeout:   2 * time.Minute,
 		MaxHeaderBytes: 1 << 20,
@@ -40,12 +40,7 @@ func (app *App) listenAndServe(port int) error {
 }
 
 type server struct {
-	app App
-}
-
-// TODO: remove after fixed tests in lazensky
-func (app *App) NewServer() server {
-	return server{*app}
+	app *App
 }
 
 func (app *App) AddServerSetup(fn func(*http.Server)) {
@@ -55,17 +50,16 @@ func (app *App) AddServerSetup(fn func(*http.Server)) {
 var currentRequestCounter atomic.Int64
 var totalRequestCounter atomic.Int64
 
-func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	currentRequestCounter.Add(1)
 	totalRequestCounter.Add(1)
 	defer func() {
 		currentRequestCounter.Add(-1)
 	}()
 
-	s.app.serveHTTP(w, r)
-}
+	app := s.app
 
-func (app *App) serveHTTP(w http.ResponseWriter, r *http.Request) {
+	//s.app.serveHTTP(w, r)
 
 	if app.exiting {
 		w.WriteHeader(http.StatusServiceUnavailable)
@@ -117,3 +111,7 @@ func (app *App) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	request.Response().WriteHeader(http.StatusNotFound)
 	request.Response().Write([]byte("404 — page not found (prago framework)"))
 }
+
+/*func (app *App) serveHTTP(w http.ResponseWriter, r *http.Request) {
+
+}*/

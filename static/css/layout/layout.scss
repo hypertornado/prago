@@ -1,5 +1,9 @@
 @use "../variables.scss" as *;
 
+@view-transition {
+  navigation: auto;
+}
+
 html {
   box-sizing: border-box;
 }

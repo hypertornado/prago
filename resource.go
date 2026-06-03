@@ -170,7 +170,7 @@ func getResource[T any](app *App) *Resource {
 	return ret
 }
 
-func (resource *Resource) DefaultValue(fieldName string, fn func(*Request) string) {
+func (resource *Resource) DefaultValue(fieldName string, fn func(request *Request) string) *Resource {
 	fieldName = columnName(fieldName)
 	if resource.fieldMap[fieldName] == nil {
 		panic("can't find field name " + fieldName)
@@ -181,6 +181,7 @@ func (resource *Resource) DefaultValue(fieldName string, fn func(*Request) strin
 	}
 
 	resource.defaultValues[fieldName] = fn
+	return resource
 }
 
 func (resource *Resource) isItPointerToResourceItem(item any) bool {
@@ -308,12 +309,12 @@ func (app *App) getResourceByID(name string) *Resource {
 }
 
 func initResource(resource *Resource) {
-	resource.resourceController.addAroundAction(func(request *Request, next func()) {
+	resource.resourceController.addBeforeAction(func(request *Request) bool {
 		if !request.Authorize(resource.canView) {
 			renderErrorPage(request, 403)
-		} else {
-			next()
+			return false
 		}
+		return true
 	})
 }
 
