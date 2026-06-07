@@ -38,8 +38,8 @@
 }
 .imagepicker_btn {
     align-self: baseline;
-    margin-top: 5px;
-    margin-bottom: 10px;
+    margin-top: 4px;
+    margin-bottom: 4px;
     overflow: hidden;
   }
   
@@ -50,5 +50,5 @@
   }
   
   .imagepicker_btn:hover {
-    background-color: $baseColorBackground;
+    background-color: var(--baseColorBackground);
   }

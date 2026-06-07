@@ -19,6 +19,8 @@ func initCDN(app *App) {
 type filesViewData struct {
 	DownloadURL string
 	MediumURL   string
+	GiantURL    string
+	OriginalURL string
 }
 
 func getCDNViewData(app *App, uid string) (ret filesViewData) {
@@ -26,6 +28,8 @@ func getCDNViewData(app *App, uid string) (ret filesViewData) {
 	ret.DownloadURL = fmt.Sprintf("/admin/file/%d/download", file.ID)
 	if file.IsImage() {
 		ret.MediumURL = file.GetMedium()
+		ret.GiantURL = file.GetGiant()
+		ret.OriginalURL = file.GetOriginal()
 	}
 
 	return ret

@@ -81,7 +81,7 @@ func getTestingMailingData(app *App) *MailingData {
 	data.PostName = "test name"
 
 	data.Description = "This is some description"
-	data.Text = "This is some text"
+	data.Text = "This is <a href=\"/neco\">pak pilotův</a> text"
 
 	data.Button = &Button{
 		Name: "More info",

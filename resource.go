@@ -265,7 +265,7 @@ func (resource *Resource) Dashboard(name func(string) string) *Dashboard {
 	return resource.resourceBoard.Dashboard(name)
 }
 
-func (resource *Resource) addUpdateValidation(validation func(any, Validation, UserData)) {
+func (resource *Resource) addUpdateValidation(validation func(item any, vc Validation, ud UserData)) {
 	resource.updateValidations = append(resource.updateValidations, validation)
 }
 

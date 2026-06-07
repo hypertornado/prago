@@ -54,7 +54,9 @@
   flex-shrink: 10000;
   text-overflow: ellipsis;
 
-  @include blurBackground;
+  @include appleBackdrop;
+
+  //@include blurBackground;
 }
 
 .list_message {
@@ -81,12 +83,12 @@
 }
 
 .list_row:has(.list_row_multiple-checked) .list_cell {
-  background-color: $baseColor !important;
+  background-color: var(--baseColor) !important;
   color: white;
 }
 
 .list_row-context .list_cell {
-  background: $baseColorBackground !important;
+  background: var(--baseColorBackground) !important;
 }
 
 .list_cell {
@@ -158,7 +160,7 @@
   background-color: $grayBorderColor;
   cursor: col-resize;
 
-  border-radius: 10px 10px 0px 0px;
+  //border-radius: 10px 10px 0px 0px;
 
   position: absolute;
   top: 0px;
@@ -169,27 +171,27 @@
 }
 
 .list_header_item_resizer:hover {
-  border-color: #555;
-  background-color: #555;
+  border-color: $baseColor;
+  background-color: $baseColor;
   transition: all 200ms ease-out;
 }
 
 .list_header_item_resizer:active {
-  border-color: #999;
-  background-color: #999;
+  border-color: $baseColor;
+  background-color: $baseColor;
 }
 
 .list_header_item_name-canorder {
   cursor: pointer;
-  color: $baseColor;
+  color: var(--baseColor);
 }
 
 .list_header_item_name-canorder:hover {
-  background-color: $baseColorBackgroundLighter;
+  background-color: var(--baseColorBackgroundLighter);
 }
 
 .list_header_item_name-canorder:active {
-  background-color: $baseColorBackground;
+  background-color: var(--baseColorBackground);
 }
 
 @keyframes loading_table {
@@ -296,11 +298,11 @@
 
 @media (hover: hover) {
   .list_row:hover .list_cell {
-    background: $baseColorBackgroundLighter;
+    background: var(--baseColorBackgroundLighter);
   }
 
   .list_row:active .list_cell {
-    background-color: $baseColorBackground;
+    background-color: var(--baseColorBackground);
   }
 }
 
@@ -310,7 +312,7 @@
 
 .ordered,
 .ordered:hover {
-  background: $baseColorBackground;
+  background: var(--baseColorBackground);
 }
 
 .ordered .list_header_item_name:after,
@@ -405,10 +407,9 @@
   height: 60px;
   padding: 3px 5px;
   position: relative;
-  //background-color: #fff;
   border-bottom: 1px solid $grayBorderColor;
 
-  @include blurBackground;
+  @include appleBackdrop;
 }
 
 .list_header_item_filter {
@@ -464,7 +465,7 @@
 .list_tableplaceholder {
   display: flex;
   flex-direction: column;
-  background-color: #fafafa;
+  background-color: $backgroundGrayColor;
 }
 
 .list_tableplaceholder_row {

@@ -11,7 +11,7 @@
 
 .pagination_page,
 .pagination_page_current {
-  color: $baseColor;
+  color: var(--baseColor);
   padding: 2px 5px;
   margin: 0px;
   margin-right: 1px;
@@ -42,10 +42,7 @@
 
 .pagination_page_current,
 .pagination_page_current:hover {
-  background-color: $baseColorBackground;
-  //color: white;
-  //background-color: $baseColor;
-  //border: 1px solid $baseColor;
+  background-color: var(--baseColorBackground);
 }
 
 .pagination_page_current {

@@ -85,8 +85,6 @@ type App struct {
 
 	router *router
 
-	EmailSentHandler func(*Email)
-
 	serverSetup func(*http.Server)
 
 	afterRequestServedHandler func(*Request)
@@ -108,6 +106,13 @@ type App struct {
 
 	sessionsCacheLogMutex *sync.Mutex
 	sessionsCacheLogMap   map[string]*sessionCacheLog
+
+	conflictMutex *sync.Mutex
+	conflictQueue []*conflictQueueItem
+
+	hue        int64
+	saturation float64
+	lightness  float64
 }
 
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {
@@ -126,7 +131,10 @@ func createApp(codeName string, version string, testing bool) *App {
 		version:  version,
 		name:     unlocalized(codeName),
 		//cache:    newCache(),
-		router: newRouter(),
+		router:     newRouter(),
+		hue:        214,
+		saturation: 1,
+		lightness:  .34,
 	}
 
 	app.logger = newLogger(app)
@@ -184,6 +192,7 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initListSettings()
 	app.initListStats()
 	app.initListFilter()
+	app.initResourceConflict()
 
 	return app
 }
@@ -232,6 +241,23 @@ func (app *App) DevelopmentMode() bool { return app.developmentMode }
 // Name sets localized human name to app
 func (app *App) Name(name func(string) string) *App {
 	app.name = name
+	return app
+}
+
+func (app *App) BaseColor(hue int64, saturation float64, lightness float64) *App {
+	if hue < 0 || hue > 360 {
+		panic("wrong hue value")
+	}
+	if saturation < 0 || saturation > 1 {
+		panic("wrong saturation value")
+	}
+	if lightness < 0 || lightness > 1 {
+		panic("wrong lightness value")
+	}
+
+	app.hue = hue
+	app.saturation = saturation
+	app.lightness = lightness
 	return app
 }
 

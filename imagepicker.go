@@ -17,6 +17,7 @@ type ImagePickerImage struct {
 	ViewURL          string
 	EditURL          string
 	ThumbURL         string
+	GiantURL         string
 
 	Metadata [][2]string
 }
@@ -56,6 +57,7 @@ func (app *App) getImagePickerResponse(ids string) (ret *ImagePickerResponse) {
 			ViewURL:          fmt.Sprintf("/admin/file/%d", file.ID),
 			EditURL:          fmt.Sprintf("/admin/file/%d/edit", file.ID),
 			ThumbURL:         file.GetMedium(),
+			GiantURL:         file.GetGiant(),
 			Metadata:         metadata,
 		}
 

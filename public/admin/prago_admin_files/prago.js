@@ -52,6 +52,7 @@ function sleep(ms) {
 }
 class ImageView {
     constructor(el) {
+        this.galleryImagesData = [];
         this.el = el;
         var filesData = JSON.parse(el.getAttribute("data-images"));
         this.addFiles(filesData);
@@ -63,10 +64,10 @@ class ImageView {
         }
         for (var i = 0; i < filesData.Items.length; i++) {
             let file = filesData.Items[i];
-            this.addFile(file);
+            this.addFile(file, i);
         }
     }
-    addFile(file) {
+    addFile(file, index) {
         let container = document.createElement("button");
         container.setAttribute("type", "button");
         container.classList.add("imageview_image");
@@ -76,10 +77,28 @@ class ImageView {
         imgEl.classList.add("imageview_image_img");
         imgEl.setAttribute("src", file.ThumbURL);
         container.appendChild(imgEl);
+        let btnEl = document.createElement("div");
+        btnEl.classList.add("btn");
+        btnEl.classList.add("imageview_image_btn");
+        btnEl.innerText = "…";
+        container.appendChild(btnEl);
+        this.galleryImagesData.push({ "URL": file.GiantURL, "Title": file.ImageName + " " + file.ImageDescription });
         container.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
+            new PragoPhotoGallery(this.galleryImagesData, { "index": index });
+        });
+        btnEl.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             let commands = [];
+            commands.push({
+                Name: "Náhled",
+                Icon: "glyphicons-basic-52-eye.svg",
+                Handler: () => {
+                    new PragoPhotoGallery(this.galleryImagesData, { "index": index });
+                },
+            });
             commands.push({
                 Name: "Zobrazit",
                 URL: file.ViewURL,
@@ -94,7 +113,6 @@ class ImageView {
             });
             cmenu({
                 Event: e,
-                AlignByElement: true,
                 Name: file.ImageName,
                 Description: file.ImageDescription,
                 Commands: commands,
@@ -8404,6 +8422,7 @@ class Form {
             });
         });
         this.initSuggestions();
+        this.initConflictCheck();
         form.addEventListener("submit", () => {
             this.dirty = false;
         });
@@ -8418,6 +8437,39 @@ class Form {
                 this.changed();
             }
         }, 100);
+    }
+    initConflictCheck() {
+        let version = this.formEl.getAttribute("data-item-version");
+        if (!version) {
+            return;
+        }
+        if (version == "0") {
+            return;
+        }
+        this.versionCheck(version);
+        window.setInterval(() => {
+            this.versionCheck(version);
+        }, 2000);
+    }
+    versionCheck(version) {
+        var request = new XMLHttpRequest();
+        request.open("POST", "/admin/api/_conflict?version=" + version, true);
+        request.addEventListener("load", (e) => {
+            if (request.status != 200) {
+                console.error("Error while saving order.");
+                return;
+            }
+            var data = JSON.parse(request.response);
+            let conflictEl = this.formEl.querySelector(".form_conflict");
+            if (data.Show) {
+                conflictEl.innerText = data.Text;
+                conflictEl.classList.remove("hidden");
+            }
+            else {
+                conflictEl.classList.add("hidden");
+            }
+        });
+        request.send();
     }
     initSuggestions() {
         let suggestionEls = this.formEl.querySelectorAll(".form_suggestions");
@@ -9012,7 +9064,6 @@ class NotificationCenter {
         if (data) {
             notifications = JSON.parse(data);
         }
-        console.log(notifications);
         if (notifications) {
             notifications.forEach((item) => {
                 this.setData(item);
@@ -9208,7 +9259,7 @@ class Popup {
                 <img class="popup_header_icon hidden">
                 <div class="popup_header_name"></div>
                 <div class="btn popup_header_cancel">
-                  <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=4077bf" class="btn_icon">
+                  <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg" class="btn_icon">
                 </div>
             </div>
             <div class="popup_content"></div>
@@ -9850,7 +9901,7 @@ class CMenu {
                 if (command.Icon) {
                     let commandNameIcon = document.createElement("img");
                     commandNameIcon.classList.add("cmenu_command_icon");
-                    let color = "4077bf";
+                    let color = "";
                     if (command.Style == "destroy") {
                         color = "cb2431";
                     }
@@ -9977,7 +10028,6 @@ class Timeline {
         new PopupForm("/admin/_timeline-settings" + encodeParams(params), (data) => {
             this.cache = {};
             this.settingsOptions = data.Data;
-            console.log(data);
             this.alignmentValue = data.Data["_alignment"];
             this.typeValue = data.Data["_type"];
             this.changedType();
@@ -10047,7 +10097,6 @@ class Timeline {
         el.innerText = `${data.KeyName}: ${data.ValueName}`;
         el.classList.add("timeline_filter");
         this.filtersEl.appendChild(el);
-        console.log("filter", data);
     }
     drawLine(linesEl, data) {
         let lineEl = document.createElement("div");

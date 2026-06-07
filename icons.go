@@ -10,7 +10,6 @@ import (
 	"strings"
 )
 
-// const iconResource = "glyphicons-basic-577-cluster.svg"
 const iconResource = "glyphicons-basic-964-layers.svg"
 const iconTable = "glyphicons-basic-120-table.svg"
 const iconAdd = "glyphicons-basic-371-plus.svg"
@@ -130,7 +129,12 @@ func (app *App) initIcons() {
 		must(err)
 		defer file.Close()
 
-		io.Copy(request.Response(), iconColorPrefix(request.Param("color")))
+		color := request.Param("color")
+		if color == "" {
+			color = hslToHex(app.hue, app.saturation, app.lightness)
+		}
+
+		io.Copy(request.Response(), iconColorPrefix(color))
 
 		io.CopyN(io.Discard, file, 4)
 

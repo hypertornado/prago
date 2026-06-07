@@ -11,6 +11,8 @@ import (
 	"golang.org/x/net/context"
 )
 
+//ALTER TABLE activitylog ADD INDEX idx_resource_item (resourcename, itemid);
+
 type activityLog struct {
 	ID            int64
 	ResourceName  string

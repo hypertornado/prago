@@ -20,8 +20,7 @@ body.admin {
   padding: 0px 10px;
   justify-content: space-between;
   height: 45px;
-  border-bottom: .5px solid $baseColorBackground;
-  //background-color: $baseColorBackground;
+  border-bottom: .5px solid var(--baseColorBackground);
 }
 
 
@@ -60,7 +59,7 @@ body.admin {
 .root_hamburger:hover {
   opacity: 0.9;
   background-color: $hoverColor;
-  border-color: $baseColor;
+  border-color: var(--baseColor);
 }
 
 .root_hamburger:active {
@@ -100,8 +99,6 @@ body.admin {
   //fix mobile display: https://dev.to/maciejtrzcinski/100vh-problem-with-ios-safari-3ge9
 
   .root_header {
-    //border-top: 1px solid #eee;
-    //background: white;
     z-index: 1000;
   }
 

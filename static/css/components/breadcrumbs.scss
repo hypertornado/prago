@@ -24,7 +24,7 @@
 }
 
 .breadcrumb:hover {
-    border-color: $baseColor;
+    border-color: var(--baseColor);
     @include softShadow;
 }
 
@@ -42,7 +42,6 @@
 }
 
 .breadcrumb-logo .breadcrumb_text {
-    //font-weight: bold;
     font-size: 1.4rem;
     line-height: 1.3em;
     padding: 0px 5px;
@@ -52,9 +51,7 @@
 .breadcrumb_logo {
     height: 32px;
     max-width: 100%;
-    //aspect-ratio: 1;
     object-fit: contain;
-    //border: 1px solid #eee;
     border-radius: 3px;
 }
 
@@ -66,7 +63,6 @@
     border-radius: 3px;
     overflow: hidden;
     border: 0px solid red;
-    //background-color: $backgroundGrayColor;
     z-index: 2;
 }
 

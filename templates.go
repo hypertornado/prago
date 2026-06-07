@@ -3,6 +3,7 @@ package prago
 import (
 	"bytes"
 	"embed"
+	"fmt"
 	"html/template"
 	"io"
 	"io/fs"
@@ -61,6 +62,30 @@ func (app *App) initTemplates() {
 
 	app.adminTemplates.Function("PragoIconExists", func(iconName string) bool {
 		return app.iconExists(iconName)
+	})
+
+	app.adminTemplates.Function("PragoBaseColor", func() string {
+		return hslToHex(app.hue, app.saturation, app.lightness)
+	})
+
+	app.adminTemplates.Function("PragoGrayColor", func() string {
+		return "888888"
+	})
+
+	app.adminTemplates.Function("PragoBlackColor", func() string {
+		return "444444"
+	})
+
+	app.adminTemplates.Function("PragoHue", func() int64 {
+		return app.hue
+	})
+
+	app.adminTemplates.Function("PragoSaturation", func() string {
+		return fmt.Sprintf("%v%%", app.saturation*100)
+	})
+
+	app.adminTemplates.Function("PragoLightness", func() string {
+		return fmt.Sprintf("%v%%", app.lightness*100)
 	})
 
 	must(app.adminTemplates.SetFilesystem(templatesFS, "templates/*.tmpl"))

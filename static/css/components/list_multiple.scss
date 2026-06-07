@@ -3,7 +3,7 @@
 .list_header_multiple {
     width: 50px;
     flex-shrink: 0;
-    background-color: #fff;
+    background-color: white;
     display: flex;
     align-items: flex-end;
     padding-bottom: 5px;
@@ -51,12 +51,12 @@
   }
   
   .list_row_multiple:hover .list_cell_multiple_pseudocheckbox {
-    background-color: $baseColorBackground;
+    background-color: var(--baseColorBackground);
   }
   
   .list_row_multiple-checked .list_cell_multiple_pseudocheckbox {
-    background-color: $baseColor !important;
-    border-color: $baseColor !important;
+    background-color: var(--baseColor) !important;
+    border-color: var(--baseColor) !important;
   }
   
   .list_cell_multiple_pseudocheckbox::after {

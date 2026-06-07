@@ -79,7 +79,6 @@ class Timeline {
         new PopupForm("/admin/_timeline-settings" + encodeParams(params), (data: any) => {
             this.cache = {};
             this.settingsOptions = data.Data;
-            console.log(data);
             this.alignmentValue = data.Data["_alignment"];
             this.typeValue = data.Data["_type"];
             this.changedType();
@@ -150,16 +149,6 @@ class Timeline {
             this.setFilter(data.Filters[i]);
         }
 
-        /*this.setFilter({
-            "KeyName": "Neco",
-            "ValueName": "1234",
-        });
-
-        this.setFilter({
-            "KeyName": "B",
-            "ValueName": "1dwdw234",
-        });*/
-
         for (var i = 0; i < data.Lines.length; i++) {
             this.drawLine(linesEl, data.Lines[i]);
         }
@@ -176,7 +165,6 @@ class Timeline {
         el.innerText = `${data.KeyName}: ${data.ValueName}`;
         el.classList.add("timeline_filter");
         this.filtersEl.appendChild(el);
-        console.log("filter", data);
     }
 
     drawLine(linesEl: HTMLDivElement, data: any) {

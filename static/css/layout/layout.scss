@@ -4,6 +4,10 @@
   navigation: auto;
 }
 
+* {
+  outline-color: $baseColor; /* Sets your default outline color */
+}
+
 html {
   box-sizing: border-box;
 }
@@ -15,7 +19,11 @@ html {
 
 ::placeholder {
   color: $gray;
-  opacity: 1;
+}
+
+::selection {
+  background-color: $baseColor;
+  color: white;
 }
 
 html,
@@ -31,7 +39,7 @@ code {
   background-color: $backgroundGrayColor;
   padding: 0px 3px;
   border-radius: 3px;
-  border: 1px solid #ddd;
+  border: 1px solid $grayBorderColor;
 }
 
 h1 {
@@ -90,7 +98,7 @@ p {
 }
 
 a {
-  color: $baseColor;
+  color: var(--baseColor);
 }
 
 a:hover {

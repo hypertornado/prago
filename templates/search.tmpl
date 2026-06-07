@@ -3,7 +3,7 @@
     {{range $i, $item := .}}
       <a href="{{$item.URL}}" class="admin_search_suggestion admin_search_suggestion-noimage" data-position="{{$i}}">
         {{if $item.Icon}}
-          <img class="admin_search_suggestion_icon" src="/admin/api/icons?file={{$item.Icon}}&color=4078c0">
+          <img class="admin_search_suggestion_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBaseColor}}">
         {{else}}
           <div class="admin_search_suggestion_icon"></div>
         {{end}}
@@ -22,7 +22,7 @@
   <form class="searchbox" action="/admin/_search">
     <input class="searchbox_input" type="search" placeholder="Vyhledávání" name="q" value="{{.}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <button class="searchbox_button">
-      <img src="/admin/api/icons?file=glyphicons-basic-28-search.svg&color=4077bf">
+      <img src="/admin/api/icons?file=glyphicons-basic-28-search.svg">
     </button>
     <div class="searchbox_suggestions"></div>
   </form>

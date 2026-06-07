@@ -14,15 +14,23 @@
         <script src="{{$path}}"></script>
     {{end}}
 
-    {{if false}}
-        <link rel="icon" href="/admin/api/icons?file={{.Icon}}&color=444444" type="image/svg+xml">
+    {{if .AnalyticsCode}}
+      {{.AnalyticsCode}}
+    {{end}}
+
+    {{if .Icon}}
+      <link rel="icon" href="/admin/api/icons?file={{.Icon}}" type="image/svg+xml">
     {{else}}
       <link rel="icon" href="/admin/icon" type="image/svg+xml">
     {{end}}
 
-    {{if .AnalyticsCode}}
-      {{.AnalyticsCode}}
-    {{end}}
+    <style>
+        :root {
+            --hue: {{PragoHue}};
+            --saturation: {{PragoSaturation}};
+            --lightness: {{PragoLightness}};
+        }
+    </style>
 
   </head>
   <body class="simple"{{if .BackgroundImageURL}} style="background-image: url('{{ .BackgroundImageURL}}')"{{end}}>
@@ -90,10 +98,10 @@
               {{range $btn := $section.Buttons}}
                 <a href="{{$btn.SafeURL}}" class="simple_section_btn">
                   {{if $btn.Icon}}
-                    <img src="/admin/api/icons?file={{$btn.Icon}}&color=4077bf" class="simple_section_btn_icon">
+                    <img src="/admin/api/icons?file={{$btn.Icon}}" class="simple_section_btn_icon">
                   {{end}}
                   {{$btn.Name}}
-                  <img src="/admin/api/icons?file=glyphicons-basic-224-chevron-right.svg&color=4077bf" class="simple_section_btn_icon">
+                  <img src="/admin/api/icons?file=glyphicons-basic-224-chevron-right.svg" class="simple_section_btn_icon">
                 </a>
               {{end}}
               </div>

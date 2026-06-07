@@ -12,7 +12,7 @@
               <div data-uuid="{{$item.UUID}}" data-refresh-time-seconds="{{$item.RefreshTimeSeconds}}" class="dashboard_figure dashboard_figure-loading">
             {{end}}
               {{if $item.Icon}}
-                <div class="dashboard_figure_icon"><img src="/admin/api/icons?file={{$item.Icon}}&color=4078c0"></div>
+                <div class="dashboard_figure_icon"><img src="/admin/api/icons?file={{$item.Icon}}"></div>
               {{end}}
               {{if $item.Name}}
                 <div class="dashboard_figure_name" title="{{$item.Name}}">{{$item.Name}}</div>

@@ -24,9 +24,15 @@ func (app *App) initStaticFilesHandler() {
 	app.AddCSS(func() string {
 		return fmt.Sprintf("/admin/prago_admin_files/prago.css?v=%s", app.GetVersionString())
 	})
+	app.AddCSS(func() string {
+		return fmt.Sprintf("/admin/prago_admin_files/prago_photo_gallery.css?v=%s", app.GetVersionString())
+	})
 
 	app.AddJavascript(func() string {
 		return fmt.Sprintf("/admin/prago_admin_files/prago.js?v=%s", app.GetVersionString())
+	})
+	app.AddJavascript(func() string {
+		return fmt.Sprintf("/admin/prago_admin_files/prago_photo_gallery.js?v=%s", app.GetVersionString())
 	})
 }
 

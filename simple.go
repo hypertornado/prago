@@ -8,6 +8,7 @@ type pageDataSimple struct {
 	CodeName string
 	Language string
 	Version  string
+	Icon     string
 	App      *App
 
 	CSSPaths        []string

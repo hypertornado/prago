@@ -29,7 +29,6 @@
   display: flex;
   position: relative;
   width: 250px;
-  //background-color: $baseColorBackgroundLighter;
 
   animation: openNotification 500ms ease forwards;
 }
@@ -39,7 +38,7 @@
 }
 
 .notification-clickable:hover {
-  background-color: $baseColorBackground;
+  background-color: var(--baseColorBackground);
 }
 
 .notification-clickable:active {
@@ -67,7 +66,7 @@
   top: -5px;
   right: -5px;
   display: inline-block;
-  border: 1px solid #eee;
+  border: 1px solid $grayBorderColor;
   width: 20px;
   height: 20px;
   line-height: 15px;
@@ -93,11 +92,11 @@
 }
 
 .notification_close:hover {
-  background-color: #eee;
+  background-color: $hoverColor;
 }
 
 .notification_close:active {
-  background-color: #ddd;
+  background-color: $grayBorderColor;
 }
 
 .notification_close::after {
@@ -160,7 +159,7 @@
 
 .notification_action-visible {
   display: block;
-  background-color: $baseColorBackgroundLighter;
+  background-color: var(--baseColorBackgroundLighter);
   border-radius: 5px;
   text-align: center;
   font-size: 0.9em;
@@ -169,7 +168,7 @@
   margin-top: 10px;
   cursor: pointer;
   font-weight: 500;
-  background-color: $baseColor;
+  background-color: var(--baseColor);
   color: white;
   @include shadow;
 }

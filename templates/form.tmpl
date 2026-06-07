@@ -14,12 +14,15 @@
         <script src="{{$scriptPath}}"></script>
       {{end}}
 
-      <form method="POST" action="{{.Action}}" class="form prago_form" enctype="multipart/form-data" novalidate>
+      <form method="POST" action="{{.Action}}" class="form prago_form" enctype="multipart/form-data" data-item-version="{{.ItemVersion}}" novalidate>
         {{if .CSRFToken}}
           <input type="hidden" name="_csrfToken" value="{{.CSRFToken}}">
         {{end}}
+        <input type="hidden" name="_itemversion" value="{{.ItemVersion}}">
 
         <div class="form_errors hidden"></div>
+
+        <div class="form_conflict hidden"></div>
         
         {{range $item := .Items}}
           <div class="form_label{{if .TextOver}} form_label-textover{{end}}{{if .Hidden}} form_label-hidden{{end}}{{if .Required}} form_label-required{{end}}"
@@ -42,7 +45,7 @@
                   <span class="form_label_required" title="Povinná položka">✱</span>
                 {{end}}
                 {{if .HelpURL}}
-                  <a href="{{.HelpURL}}" class="form_label_text_help"><img src="/admin/api/icons?file=glyphicons-basic-196-circle-empty-info.svg&color=4077bf" title="Nápověda"></a>
+                  <a href="{{.HelpURL}}" class="form_label_text_help"><img src="/admin/api/icons?file=glyphicons-basic-196-circle-empty-info.svg" title="Nápověda"></a>
                 {{end}}
               </label>
               {{if .Description}}

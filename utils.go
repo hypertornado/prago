@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"math"
 	"math/rand/v2"
 	"net"
 	"os"
@@ -202,4 +203,46 @@ func MultirelationArrayToString(in []int64) string {
 
 	ret := strings.Join(arr, ";")
 	return ";" + ret + ";"
+}
+
+func hslToHex(hue int64, saturation float64, lightness float64) string {
+	// Normalize hue to be within 0-360
+	h := float64(hue % 360)
+	if h < 0 {
+		h += 360
+	}
+
+	//s := 1.0  // 50% Saturation
+	//l := 0.34 // 50% Lightness
+	s := saturation
+	l := lightness
+
+	// HSL to RGB conversion formula
+	c := (1 - math.Abs(2*l-1)) * s
+	x := c * (1 - math.Abs(math.Mod(h/60.0, 2)-1))
+	m := l - c/2
+
+	var rPrime, gPrime, bPrime float64
+
+	switch {
+	case h >= 0 && h < 60:
+		rPrime, gPrime, bPrime = c, x, 0
+	case h >= 60 && h < 120:
+		rPrime, gPrime, bPrime = x, c, 0
+	case h >= 120 && h < 180:
+		rPrime, gPrime, bPrime = 0, c, x
+	case h >= 180 && h < 240:
+		rPrime, gPrime, bPrime = 0, x, c
+	case h >= 240 && h < 300:
+		rPrime, gPrime, bPrime = x, 0, c
+	case h >= 300 && h < 360:
+		rPrime, gPrime, bPrime = c, 0, x
+	}
+
+	// Convert to 0-255 range and round properly
+	r := int(math.Round((rPrime + m) * 255))
+	g := int(math.Round((gPrime + m) * 255))
+	b := int(math.Round((bPrime + m) * 255))
+
+	return fmt.Sprintf("%02x%02x%02x", r, g, b)
 }

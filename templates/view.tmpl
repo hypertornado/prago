@@ -44,7 +44,7 @@
         {{$item.Name}}
         {{if $item.EditURL}}
           <a href="{{$item.EditURL}}" class="view_edit">
-            <img src="/admin/api/icons?file=glyphicons-basic-31-pencil.svg&color=4078c0" class="view_edit_icon">{{$item.EditName}}
+            <img src="/admin/api/icons?file=glyphicons-basic-31-pencil.svg" class="view_edit_icon">{{$item.EditName}}
           </a>
         {{end}}
       </div>
@@ -90,8 +90,8 @@
 
 {{define "view_cdn_file"}}
   <div class="fileview">
-  {{if .MediumURL}}
-      <a href="{{.DownloadURL}}" class="fileview_preview" style="background-image: url('{{.MediumURL}}');"></a>
+  {{if .OriginalURL}}
+      <a href="{{.OriginalURL}}" class="fileview_preview" style="background-image: url('{{.GiantURL}}');"></a>
   {{end}}
   </div>
 {{end}}

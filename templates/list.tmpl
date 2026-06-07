@@ -33,7 +33,7 @@
     {{range $i, $item := .Header}}
       <div class="list_header_item" data-name="{{$item.ColumnName}}" data-natural-width="{{$item.NaturalCellWidth}}">
         <div class="list_header_item_name{{if $item.CanOrder}} list_header_item_name-canorder{{end}}" data-name="{{$item.ColumnName}}" title="{{$item.NameHuman}}">
-          {{if $item.Icon}}<img class="list_header_item_name_icon" src="/admin/api/icons?file={{$item.Icon}}&color=4078c0">{{end}}
+          {{if $item.Icon}}<img class="list_header_item_name_icon" src="/admin/api/icons?file={{$item.Icon}}">{{end}}
           <div class="list_header_item_name_text">{{- $item.NameHuman -}}</div>
           <div class="list_header_item_name_ordericon"></div>
         </div>
@@ -95,7 +95,7 @@
     <div class="list_filter2_name"></div>
     <input class="list_filter2_input">
     <div class="list_filter2_close hidden">
-      <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=4077bf" class="list_filter2_close_icon">
+      <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg" class="list_filter2_close_icon">
     </div>
   </div>
 {{end}}

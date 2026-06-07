@@ -33,7 +33,7 @@
 }
 
 a.dashboard_figure:hover {
-  border-color: $baseColor;
+  border-color: var(--baseColor);
 }
 
 a.dashboard_figure {
@@ -53,7 +53,7 @@ a.dashboard_figure {
 }
 
 a .dashboard_figure_value {
-  color: $baseColor;
+  color: var(--baseColor);
 }
 
 .dashboard_figure_value {

@@ -80,13 +80,13 @@ func (api *API) Permission(permission Permission) *API {
 	return api
 }
 
-func (api *API) Handler(handler func(*Request)) *API {
+func (api *API) Handler(handler func(request *Request)) *API {
 	api.handler = handler
 	return api
 }
 
 // TODO: Deprecated
-func (api *API) HandlerJSON(handler func(*Request) interface{}) *API {
+func (api *API) HandlerJSON(handler func(request *Request) interface{}) *API {
 	api.handlerJSON = handler
 	return api
 }

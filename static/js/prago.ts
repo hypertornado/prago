@@ -133,3 +133,8 @@ function popup(url: string) {
         window.location.reload();
     });
 }
+
+/*function getBaseColor(): string {
+  let rootStyle = window.getComputedStyle(document.documentElement);
+  let color = rootStyle.getPropertyValue('--hlavni-barva').trim()
+}*/

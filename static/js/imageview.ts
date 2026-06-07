@@ -1,7 +1,9 @@
 class ImageView {
   el: HTMLDivElement;
+  galleryImagesData: any[];
 
   constructor(el: HTMLDivElement) {
+    this.galleryImagesData = [];
     this.el = el;
     var filesData = JSON.parse(el.getAttribute("data-images"));
     this.addFiles(filesData);
@@ -15,11 +17,11 @@ class ImageView {
 
     for (var i = 0; i < filesData.Items.length; i++) {
       let file = filesData.Items[i];
-      this.addFile(file);
+      this.addFile(file, i);
     }
   }
 
-  addFile(file: any) {
+  addFile(file: any, index: number) {
     let container = document.createElement("button");
     container.setAttribute("type", "button");
     container.classList.add("imageview_image");
@@ -31,11 +33,35 @@ class ImageView {
     imgEl.setAttribute("src", file.ThumbURL)
     container.appendChild(imgEl);
 
+    let btnEl = document.createElement("div");
+    btnEl.classList.add("btn");
+    btnEl.classList.add("imageview_image_btn");
+    btnEl.innerText = "…";
+    container.appendChild(btnEl);
+
+    this.galleryImagesData.push({"URL": file.GiantURL, "Title": file.ImageName + " " + file.ImageDescription})
+
     container.addEventListener("click", (e: PointerEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      //@ts-ignore
+      new PragoPhotoGallery(this.galleryImagesData, {"index": index});
+    });
+
+
+    btnEl.addEventListener("click", (e: PointerEvent) => {
       e.preventDefault();
       e.stopPropagation();
 
       let commands = [];
+      commands.push({
+        Name: "Náhled",
+        Icon: "glyphicons-basic-52-eye.svg",
+        Handler: () => {
+          //@ts-ignore
+          new PragoPhotoGallery(this.galleryImagesData, {"index": index});
+        },
+      });
       commands.push({
         Name: "Zobrazit",
         URL: file.ViewURL,
@@ -57,7 +83,7 @@ class ImageView {
 
       cmenu({
         Event: e,
-        AlignByElement: true,
+        //AlignByElement: true,
         Name: file.ImageName,
         Description: file.ImageDescription,
         Commands: commands,

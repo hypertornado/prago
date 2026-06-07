@@ -28,6 +28,10 @@ func (app *App) initSystemStats() {
 		return int64(len(app.formTasksMap))
 	}).RefreshTime(1)
 
+	currentStatsDashboard.Figure(unlocalized("Conflict checks"), "sysadmin").Value(func(request *Request) int64 {
+		return int64(len(app.getCurrentConflicts()))
+	}).RefreshTime(1).URL("/admin/_conflicts")
+
 	dbStatsDashboard := sysadminBoard.Dashboard(unlocalized("Database"))
 
 	dbStatsDashboard.Figure(unlocalized("Idle"), "sysadmin").Value(func(request *Request) int64 {

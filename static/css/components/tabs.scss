@@ -33,7 +33,7 @@
 }
 
 .admin_navigation_tab:hover {
-  border-color: $baseColor;
+  border-color: var(--baseColor);
 }
 
 .admin_navigation_tab_icon {
@@ -43,8 +43,8 @@
 
 .admin_navigation_tab-selected,
 .admin_navigation_tab-selected:hover {
-  background-color: $baseColor;
-  border-color: $baseColor;
+  background-color: var(--baseColor);
+  border-color: var(--baseColor);
   color: white;
   box-shadow: none;
 }

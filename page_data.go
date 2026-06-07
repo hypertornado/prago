@@ -34,6 +34,7 @@ type pageData struct {
 
 	NotificationsData string
 	HTTPCode          int
+	Hue               int64
 }
 
 type pageMessage struct {
@@ -44,7 +45,6 @@ func createPageData(request *Request) *pageData {
 	page := &pageData{}
 	page.App = request.app
 	page.Language = request.Locale()
-	page.Version = request.app.version
 	page.GoogleKey = request.app.GoogleKey()
 	page.Version = request.app.GetVersionString()
 
@@ -56,6 +56,7 @@ func createPageData(request *Request) *pageData {
 	}
 
 	page.NotificationsData = request.getNotificationsData()
+	page.Hue = request.app.hue
 	return page
 }
 

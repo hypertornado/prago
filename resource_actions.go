@@ -103,11 +103,17 @@ func (resource *Resource) initDefaultResourceActions() {
 		"delete",
 		func(item any, form *Form, request *Request) {
 			form.AddDeleteSubmit(messages.Get(request.Locale(), "admin_delete"))
-			itemName := resource.previewer(request, item).Name()
+			preview := resource.previewer(request, item)
+			itemName := preview.Name()
+			form.ItemVersion = resource.currentItemVersion(preview.ID())
 			form.Title = messages.Get(request.Locale(), "admin_delete_confirmation_name", itemName)
 		},
 		func(item any, fv FormValidation, request *Request) {
+			preview := resource.previewer(request, item)
 			vc := resource.validateDelete(item, request)
+			resource.validateConflict(request, vc, preview.ID())
+			//TODO: its not working
+			fmt.Println(vc.errors)
 			fv.(*formValidation).validationData.Errors = vc.errors
 			if vc.Valid() {
 				must(resource.deleteWithLog(item, request))
@@ -145,19 +151,16 @@ func (resource *Resource) initDefaultResourceActions() {
 			Icon(iconActivity).
 			setPriority(defaultHighPriority).
 			Name(messages.GetNameFunction("admin_history")).
-			Permission(resource.canUpdate)
+			Permission(resource.canView)
 
 		resource.
 			formItemAction(
 				"_history",
 				func(item any, form *Form, request *Request) {
-					//id := resource.previewer(request, item).ID()
-					//form.AddSelect("page", "", resource.app.getHistorySelect(request, resource, id))
 					form.AddNumberInput("page", "Stránka").Value = "1"
 					form.AddRelationMultiple("user", "Uživatel", "user")
 					form.AutosubmitFirstTime = true
 					form.AddSubmit("Zobrazit")
-					//form.AutosubmitOnDataChange = true
 				},
 				func(item any, vc FormValidation, request *Request) {
 					id := resource.previewer(request, item).ID()
@@ -168,7 +171,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			Icon(iconActivity).
 			setPriority(defaultHighPriority).
 			Name(messages.GetNameFunction("admin_history")).
-			Permission(resource.canUpdate)
+			Permission(resource.canView)
 	}
 }
 
@@ -237,6 +240,7 @@ func (resource *Resource) editItemWithLogAndValues(request *Request, values url.
 	must(err)
 
 	itemValidation := resource.validateUpdate(item, request)
+	resource.validateConflict(request, itemValidation, int64(id))
 	if !itemValidation.Valid() {
 		return nil, itemValidation
 	}

@@ -21,6 +21,7 @@ type Form struct {
 	AutosubmitFirstTime    bool
 	AutosubmitOnDataChange bool
 	ScriptPaths            []string
+	ItemVersion            int64
 }
 
 // FormItem represents item of form

@@ -47,6 +47,7 @@ class Form {
     });
 
     this.initSuggestions();
+    this.initConflictCheck();
 
     form.addEventListener("submit", () => {
       this.dirty = false;
@@ -74,6 +75,40 @@ class Form {
         return confirmationMessage;
       }
     });*/
+  }
+
+  initConflictCheck() {
+    let version = this.formEl.getAttribute("data-item-version");
+    if (!version) {
+      return;
+    }
+    if (version == "0") {
+      return;
+    }
+    this.versionCheck(version);
+    window.setInterval(() => {
+      this.versionCheck(version);
+    }, 2000);
+  }
+
+  versionCheck(version: string) {
+    var request = new XMLHttpRequest();
+    request.open("POST", "/admin/api/_conflict?version="+version, true);
+    request.addEventListener("load", (e: any) => {
+        if (request.status != 200) {
+            console.error("Error while saving order.");
+            return;
+        }
+        var data = JSON.parse(request.response);
+        let conflictEl = <HTMLDivElement>this.formEl.querySelector(".form_conflict");
+        if (data.Show) {
+          conflictEl.innerText = data.Text;
+          conflictEl.classList.remove("hidden");
+        } else {
+          conflictEl.classList.add("hidden");
+        }
+    });
+    request.send();
   }
 
   initSuggestions() {

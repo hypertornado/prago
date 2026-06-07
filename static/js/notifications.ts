@@ -11,8 +11,6 @@ class NotificationCenter {
       notifications = JSON.parse(data);
     }
 
-    console.log(notifications);
-
 
     if (notifications) {
       notifications.forEach((item) => {

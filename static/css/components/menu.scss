@@ -81,15 +81,15 @@
 
 .menu2_item_content:hover {
   //border: 1px solid red;
-  border-color: $baseColor;
+  border-color: var(--baseColor);
   @include softShadow;
 }
 
 .menu2_item_content-selected,
 .menu2_item_content-selected:hover {
-  background-color: $baseColor;
+  background-color: var(--baseColor);
   color: white !important;
-  border-color: $baseColor;
+  border-color: var(--baseColor);
 
   position: sticky;
   top: 0px;
@@ -121,11 +121,11 @@
   flex-grow: 0;
   flex-shrink: 0;
   font-weight: normal;
-  color: #999;
+  color: $gray;
 }
 
 .menu2_item_content-selected .menu2_item_content_subname {
-  color: #eee;
+  color: white;
 }
 
 .menu2_item-expanded > div > .menu2_item_icon .menu2_item_icon_img {

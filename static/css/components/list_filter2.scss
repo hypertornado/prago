@@ -15,7 +15,7 @@
 }
 
 .list_filter2:has(:focus) {
-    border-color: $baseColor;
+    border-color: var(--baseColor);
 }
 
 .list_filter2_input {
@@ -57,12 +57,13 @@
 }
 
 .list_filteritem-colored .list_filter2 {
-  background: $baseColorBackground !important;
-  border-color: $baseColor;
+  background: var(--baseColorBackground) !important;
+  border-color: var(--baseColor);
 }
 
 .list_filter2:hover {
     background: $hoverColor;
+    border-color: var(--baseColor);
 }
 
 .list_filter2:hover {

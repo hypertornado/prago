@@ -18,7 +18,7 @@
         {{if .Buttons}}
             <div class="box_header_buttons">
                 {{range $button := .Buttons}}
-                    <a href="{{$button.URL}}" class="btn">{{if $button.Icon}}<img src="/admin/api/icons?file={{$button.Icon}}&color=444444" class="btn_icon">{{end}}<div class="btn_text">{{$button.Name}}</div></a>
+                    <a href="{{$button.URL}}" class="btn">{{if $button.Icon}}<img src="/admin/api/icons?file={{$button.Icon}}&color={{PragoBlackColor}}" class="btn_icon">{{end}}<div class="btn_text">{{$button.Name}}</div></a>
                 {{end}}
             </div>
         {{end}}

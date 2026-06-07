@@ -158,7 +158,7 @@ $timelineLeftWidth: 60px;
     position: relative;
     align-self: end;
     width: 100%;
-    background-color: $baseColor;
+    background-color: var(--baseColor);
     border-radius: 3px;
     @include softShadow;
 }
@@ -261,7 +261,7 @@ $timelineLeftWidth: 60px;
 }
 
 .timeline_filter {
-    background-color: $baseColorBackground;
+    background-color: var(--baseColorBackground);
     //color: white;
     @include softShadow;
     font-size: .8rem;

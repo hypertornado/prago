@@ -83,21 +83,6 @@
 }
 
 .popup_header_cancel {
-  /*color: $baseColor;
-  cursor: pointer;
-  flex-grow: 0;
-  flex-shrink: 0;
-  font-size: 1.5em;
-  display: none;
-  border: 1px solid $grayBorderColor;
-  background-color: white;
-  border-radius: 100px;
-  width: 24px;
-  padding: 2px;
-  aspect-ratio: 1;
-  flex-direction: column;
-  align-items: center;
-  @include softShadow;*/
   
 }
 
@@ -118,7 +103,6 @@
   border-left: none;
   border-right: none;
   padding: 8px 8px;
-  //background-color: white;
   overflow-y: auto;
   flex-grow: 1000;
   display: none;

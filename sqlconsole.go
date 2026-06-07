@@ -67,6 +67,16 @@ func (app *App) initSQLConsole() {
 				vc.AddError(message)
 			}
 
-			vc.AfterContent(table.ExecuteHTML())
+			if !vc.Valid() {
+				return
+			}
+
+			htmlData := table.ExecuteHTML()
+			if htmlData != "" {
+				vc.AfterContent(htmlData)
+			} else {
+				vc.Data(true)
+			}
+
 		}).Name(unlocalized("SQL Console")).Permission(sysadminPermission).Board(sysadminBoard)
 }

@@ -166,7 +166,7 @@ class CMenu {
         if (command.Icon) {
           let commandNameIcon = document.createElement("img");
           commandNameIcon.classList.add("cmenu_command_icon");
-          let color = "4077bf";
+          let color = "";
           if (command.Style == "destroy") {
             color = "cb2431";
           }

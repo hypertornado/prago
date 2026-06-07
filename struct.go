@@ -54,6 +54,9 @@ func (resource *Resource) getItemStringEditableValues(item any, request *Request
 func (form *Form) initWithResourceItem(resource *Resource, item any, request *Request) {
 	editableValues := resource.getItemStringEditableValues(item, request)
 
+	itemID := resource.previewer(request, item).ID()
+	form.ItemVersion = resource.currentItemVersion(itemID)
+
 	focusedField := request.Param("_focus")
 
 	var firstField = true

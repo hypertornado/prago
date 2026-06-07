@@ -9,18 +9,18 @@
   background-color: white;
   min-width: 100%;
   margin: 0px auto;
-  border-left: 1px solid #eee;
-  border: 1px solid #eee;
+  border-left: 1px solid $grayBorderColor;
+  border: 1px solid $grayBorderColor;
 }
 
 .form_table td {
   padding: 5px 10px;
-  border: 1px solid #eee;
+  border: 1px solid $grayBorderColor;
   vertical-align: top;
 }
 
 .form_table tr:last-child {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid $grayBorderColor;
 }
 
 .form_table_footer {
@@ -83,12 +83,15 @@
   font-size: .8em;
   line-height: 1.3em;
   font-weight: normal;
-  color: #444;
-  //user-select: none;
+  color: $black;
 }
 
 .form_table_cell a {
   text-decoration: none;
+}
+
+.form_table_cell a:hover .form_table_cell_text {
+  text-decoration: underline;
 }
 
 .form_table_cell .btn {
@@ -97,11 +100,10 @@
 }
 
 .form_table_cell_textafter {
-  color: #999;
+  color: $gray;
   font-size: .8em;
   line-height: 1.3em;
   font-weight: normal;
-  color: #999;
   font-style: italic;
 
   max-width: 100px;
@@ -109,12 +111,10 @@
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  //border: 1px solid red;
   text-overflow: ellipsis;
 }
 
 .form_table_cell_files {
-  //border: 1px solid red;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -154,7 +154,7 @@
 
 .form_table_cell_progress_snake {
   background-color: $backgroundGrayColor;
-  background-color: $baseColorBackground;
+  background-color: var(--baseColorBackground);
   width: 100%;
   height: 8px;
   display: flex;
@@ -168,7 +168,7 @@
 }
 
 .form_table_cell_progress_snake_value {
-  background-color: $baseColor;
+  background-color: var(--baseColor);
   height: 100%;
 }
 

@@ -13,7 +13,7 @@
       {{range $i, $resource := .Resources}}
         {{if ne $resource.URL $boardURL}}
         <a href="{{$resource.URL}}" class="board_resource" title="{{$resource.Name}}">
-          <div class="board_resource_left">{{if $resource.Icon}}<img class="board_resource_icon" src="/admin/api/icons?file={{$resource.Icon}}&color=4078c0">{{end}}</div>
+          <div class="board_resource_left">{{if $resource.Icon}}<img class="board_resource_icon" src="/admin/api/icons?file={{$resource.Icon}}&color={{PragoBaseColor}}">{{end}}</div>
           <div class="board_resource_right">{{$resource.Name}}</div>
         </a>
         {{end}}
