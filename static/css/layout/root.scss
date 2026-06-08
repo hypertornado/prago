@@ -52,7 +52,7 @@ body.admin {
   justify-content: center;
   align-items: center;
   background-color: white;
-  border: 1px solid $grayBorderColor;
+  border: 1px solid $baseColor;
   @include softShadow;
 }
 
@@ -70,6 +70,7 @@ body.admin {
 .root_hamburger_iconopen,
 .root_hamburger_iconclose {
   width: 20px;
+  background: transparent;
 }
 
 .root_hamburger_iconclose {

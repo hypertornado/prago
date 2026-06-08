@@ -150,6 +150,10 @@ func (app *App) searchWithoutElastic(q string, request *Request) (ret []*searchI
 }
 
 func (item menuItem) searchMenuItem(q string, prename string) (ret []*searchItem) {
+	if item.NoSearch {
+		return
+	}
+
 	if strings.HasPrefix(item.URL, "/admin/logout") {
 		return
 	}

@@ -338,11 +338,11 @@ var m = map[string]map[string]string{
 	},
 	"CreatedAt": {
 		"en": "Created At",
-		"cs": "Datum vytvoření",
+		"cs": "Vytvořeno",
 	},
 	"UpdatedAt": {
 		"en": "Updated At",
-		"cs": "Datum poslední úpravy",
+		"cs": "Naposledy upraveno",
 	},
 	"OrderPosition": {
 		"en": "Order position",

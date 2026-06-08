@@ -5,17 +5,18 @@
     padding: 2px 0px;
     border: 1px solid $grayBorderColor;
     border-radius: 100px !important;
-    background-color: $backgroundGrayColor;
     overflow: hidden;
     white-space: nowrap;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    background-color: white;
 }
 
 .list_filter2:has(:focus) {
     border-color: var(--baseColor);
+    //background-color: $baseColorBackground;
 }
 
 .list_filter2_input {
@@ -29,7 +30,7 @@
     width: calc(100% - 24px);
     padding: 0px;
     padding-left: 8px;
-    background: none;
+    background: transparent;
 
 }
 

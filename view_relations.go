@@ -36,7 +36,7 @@ func (resource *Resource) getRelationView(id int64, field *relatedField, request
 
 	ret := &view{}
 
-	icon := iconResource
+	icon := ""
 	if field.resource.icon != "" {
 		icon = field.resource.icon
 	}

@@ -8,8 +8,13 @@
     --baseColorBackground: hsl(var(--hue), 50%, 90%);
     --baseColorBackgroundLighter: hsl(var(--hue), 50%, 97%);
 
+    --black: black;
+    --red: red;
+    --green: green;
+
     accent-color: var(--baseColor);
     outline-color: var(--baseColor);
+    caret-color: var(--baseColor);
 }
 
 $baseColor: var(--baseColor);
@@ -21,20 +26,20 @@ $baseColor: var(--baseColor);
 //$baseColorBackground: hsl(214, 50%, 90%);
 //$baseColorBackgroundLighter: hsl(214, 50%, 97%);
 
-$red: #cb2431;
+$red: var(--red);
 $redLighter: #de4450;
 $redLightest: hsl(355, 70%, 99%);
 
-$green: #006400;
+$green: var(--green);
 $yellow: #ffd800;
 
 $hoverColor: var(--baseColorBackgroundLighter);
 $activeColor: var(--baseColorBackground);
 
-$black: #444;
+$black: var(--black);
 //$black: hsl(var(--hue), 10%, 20%);
 
-$gray: #888;
+$gray: #999;
 //$gray: hsl(var(--hue), 10%, 50%);
 
 $grayBorderColor: #eee;
@@ -108,4 +113,10 @@ $radius: 5px;
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   backdrop-filter: saturate(180%) blur(20px);
   background-color: rgba(255, 255, 255, 0.7);
+}
+
+@mixin appleBackdropGray {
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  background-color: rgba(250, 250, 250, 0.7);
 }

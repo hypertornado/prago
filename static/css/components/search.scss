@@ -68,17 +68,15 @@ a.search_pagination_page-selected {
 .searchbox {
   display: flex;
   max-width: 600px;
-  background: white;
-  border-radius: 10px;
+  border-radius: 14px;
   position: relative;
   z-index: 10000000000;
-  border: 1px solid $baseColor;
-  //@include softShadow;
+  border: 1px solid $grayBorderColor;
 }
 
 .searchbox:has(:focus) {
   border-color: var(--baseColor);
-  background-color: $hoverColor;
+  background-color: white;
   @include softShadow;
 }
 
@@ -112,11 +110,13 @@ a.search_pagination_page-selected {
 }
 
 .searchbox_button:hover {
-  background-color: $hoverColor;
+  //background-color: $hoverColor;
+  opacity: .8;
 }
 
 .searchbox_button:active {
-  background-color: $activeColor;
+  //background-color: $activeColor;
+  opacity: .7;
 }
 
 .searchbox_button img {

@@ -22,19 +22,16 @@
         <script src="{{$path}}"></script>
     {{end}}
     {{if .Icon}}
-        <link rel="icon" href="/admin/api/icons?file={{.Icon}}" type="image/svg+xml">
+        <link rel="icon" href="/admin/api/icons?file={{.Icon}}&color={{PragoBaseColor}}" type="image/svg+xml">
     {{end}}
 
-    <style>
-        :root {
-            --hue: {{PragoHue}};
-            --saturation: {{PragoSaturation}};
-            --lightness: {{PragoLightness}};
-        }
-    </style>
+    {{template "layout_style" .}}
 
   </head>
-  <body class="admin">
+  <body class="admin"
+    data-base-color={{PragoBaseColor}}
+    data-black-color={{PragoBlackColor}}
+    >
     <div class="root">
         {{template "notification_center" .NotificationsData}}
         <div class="root_header">
@@ -43,8 +40,8 @@
             {{end}}
             {{template "searchbox" .SearchQuery}}
             <div class="root_hamburger">
-                <img src="/admin/api/icons?file=glyphicons-basic-600-menu.svg" class="root_hamburger_iconopen">
-                <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg" class="root_hamburger_iconclose">
+                <img src="/admin/api/icons?file=glyphicons-basic-600-menu.svg&color={{PragoBaseColor}}" class="root_hamburger_iconopen">
+                <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color={{PragoBaseColor}}" class="root_hamburger_iconclose">
             </div>
         </div>
         <div class="root_bottom">

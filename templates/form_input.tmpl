@@ -26,13 +26,12 @@
   <div class="admin_markdown">
 
     <div class="admin_markdown_header">
-      <div class="btngroup">
+      <div class="admin_markdown_header_buttons">
         <div class="btn admin_markdown_command" data-cmd="b" title="ctrl+b">B</div>
         <div class="btn admin_markdown_command" data-cmd="i" title="ctrl+i">I</div>
         <div class="btn admin_markdown_command" data-cmd="a" title="ctrl+u">Odkaz</div>
         <div class="btn admin_markdown_command" data-cmd="h2" title="ctrl+k">Nadpis</div>
       </div>
-      &nbsp;&nbsp;
       <label>
         <input type="checkbox" class="admin_markdown_preview_show"> Zobrazit náhled
       </label>
@@ -93,7 +92,7 @@
       <div class="imagepicker_preview"></div>
       <input type="file" class="imagepicker_input" id="{{.UUID}}" accept="{{.Data.MimeTypes}}" multiple class="form_watcher">
       <label class="btn imagepicker_btn">
-        <img class="btn_icon" src="/admin/api/icons?file=glyphicons-basic-371-plus.svg&color=444444">
+        <img class="btn_icon" src="/admin/api/icons?file=glyphicons-basic-371-plus.svg&color={{PragoBlackColor}}">
         Přidat obrázek
       </label>
     </div>
@@ -174,7 +173,7 @@
         </div>
         {{if .Button}}
           <a href="{{.Button.URL}}" class="btn form_radio_btn">
-            {{if .Button.Icon}}<img src="/admin/api/icons?file={{.Button.Icon}}" class="btn_icon">{{end}}
+            {{if .Button.Icon}}<img src="/admin/api/icons?file={{.Button.Icon}}&color={{PragoBaseColor}}" class="btn_icon">{{end}}
             {{.Button.Name}}
           </a>
         {{end}}
@@ -200,7 +199,7 @@
 {{end}}
 
 {{define "form_input_relation"}}
-<div class="admin_item_relation" {{if .Focused}}data-autofocus="true"{{end}} data-relation="{{.Data.RelatedID}}" data-multiple="{{.Data.MultiRelation}}" data-filter="{{.FormFilterID}}">
+<div class="admin_item_relation {{if .Data.MultiRelation}}admin_item_relation-multiple{{else}}admin_item_relation-single{{end}}" {{if .Focused}}data-autofocus="true"{{end}} data-relation="{{.Data.RelatedID}}" data-multiple="{{.Data.MultiRelation}}" data-filter="{{.FormFilterID}}">
   <input type="hidden" name="{{.ID}}" value="{{.Value}}">
   <progress class="progress"></progress>
   <div class="admin_relation_previews"></div>

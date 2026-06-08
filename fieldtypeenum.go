@@ -80,6 +80,5 @@ func (app *App) AddEnumFieldTypeLocalized(name string, items []FieldTypeEnum) {
 			}
 			return ret
 		},
-		fieldTypeIcon: iconSelect,
 	})
 }

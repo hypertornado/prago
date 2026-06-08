@@ -56,6 +56,11 @@ func (user *user) UserID() int64 {
 }
 
 func (user *user) GetName(string) string {
+
+	if user.Name != "" {
+		return user.Name
+	}
+
 	var ret string
 	if user.Username != "" {
 		ret = user.Username + " "

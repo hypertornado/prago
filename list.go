@@ -133,8 +133,8 @@ func (resource *Resource) getListHeader(request *Request) (list list, err error)
 		}
 
 		headerItem := listHeaderItem{
-			Name:             stat.id,
-			Icon:             "glyphicons-basic-43-stats-circle.svg",
+			Name: stat.id,
+			//Icon:             "glyphicons-basic-43-stats-circle.svg",
 			ColumnName:       stat.id,
 			NameHuman:        stat.Name(request.Locale()),
 			CanOrder:         false,

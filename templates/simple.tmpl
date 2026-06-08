@@ -19,21 +19,19 @@
     {{end}}
 
     {{if .Icon}}
-      <link rel="icon" href="/admin/api/icons?file={{.Icon}}" type="image/svg+xml">
+      <link rel="icon" href="/admin/api/icons?file={{.Icon}}&color={{PragoBaseColor}}" type="image/svg+xml">
     {{else}}
       <link rel="icon" href="/admin/icon" type="image/svg+xml">
     {{end}}
 
-    <style>
-        :root {
-            --hue: {{PragoHue}};
-            --saturation: {{PragoSaturation}};
-            --lightness: {{PragoLightness}};
-        }
-    </style>
+    {{template "layout_style" .}}
 
   </head>
-  <body class="simple"{{if .BackgroundImageURL}} style="background-image: url('{{ .BackgroundImageURL}}')"{{end}}>
+  <body
+    class="simple"{{if .BackgroundImageURL}} style="background-image: url('{{ .BackgroundImageURL}}')"{{end}}
+    data-base-color={{PragoBaseColor}}
+    data-black-color={{PragoBlackColor}}
+  >
     {{template "notification_center" .NotificationsData}}
 
     <div class="simple_outer">
@@ -71,7 +69,7 @@
           <div class="simple_section">
             {{if $section.Name}}
               <div class="simple_section_name">
-                {{if .Icon}}<img src="/admin/api/icons?file={{$section.Icon}}" class="simple_section_icon">{{end}}
+                {{if .Icon}}<img src="/admin/api/icons?file={{$section.Icon}}&color={{PragoBlackColor}}" class="simple_section_icon">{{end}}
                 {{$section.Name}}
               </div>
             {{end}}
@@ -98,10 +96,10 @@
               {{range $btn := $section.Buttons}}
                 <a href="{{$btn.SafeURL}}" class="simple_section_btn">
                   {{if $btn.Icon}}
-                    <img src="/admin/api/icons?file={{$btn.Icon}}" class="simple_section_btn_icon">
+                    <img src="/admin/api/icons?file={{$btn.Icon}}&color={{PragoBaseColor}}" class="simple_section_btn_icon">
                   {{end}}
                   {{$btn.Name}}
-                  <img src="/admin/api/icons?file=glyphicons-basic-224-chevron-right.svg" class="simple_section_btn_icon">
+                  <img src="/admin/api/icons?file=glyphicons-basic-224-chevron-right.svg&color={{PragoBaseColor}}" class="simple_section_btn_icon">
                 </a>
               {{end}}
               </div>

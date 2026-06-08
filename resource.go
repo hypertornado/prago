@@ -81,9 +81,9 @@ func NewResource[T any](app *App) *Resource {
 	defaultName := typ.Name()
 
 	ret := &Resource{
-		app:  app,
-		id:   columnName(defaultName),
-		icon: iconResource,
+		app: app,
+		id:  columnName(defaultName),
+		//icon: iconResource,
 
 		singularName: unlocalized(defaultName),
 		pluralName:   unlocalized(defaultName),
@@ -139,7 +139,7 @@ func NewResource[T any](app *App) *Resource {
 }
 
 func (resource *Resource) afterInit() {
-	statsDashboard := resource.resourceBoard.Dashboard(unlocalized("Statistiky"))
+	statsDashboard := resource.resourceBoard.Dashboard(unlocalized(""))
 	statsDashboard.Figure(unlocalized(""), resource.canView).Value(func(r *Request) int64 {
 		c, _ := resource.query(context.Background()).count()
 		return c

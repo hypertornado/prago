@@ -217,39 +217,6 @@ func (resource *Resource) countAllItems() int64 {
 	}
 	return ret
 
-	/*var name string
-	var rows sql.NullInt64
-
-	query := fmt.Sprintf("SHOW TABLE STATUS LIKE '%s'", resource.id)
-	row := resource.app.db.QueryRow(query)
-
-	// You can scan only the columns you need
-	err := row.Scan(
-		&name,            // Name
-		new(interface{}), // Engine
-		new(interface{}), // Version
-		new(interface{}), // Row_format
-		&rows,            // Rows (this is what we want)
-		new(interface{}), // Avg_row_length
-		new(interface{}), // Data_length
-		new(interface{}), // Max_data_length
-		new(interface{}), // Index_length
-		new(interface{}), // Data_free
-		new(interface{}), // Auto_increment
-		new(interface{}), // Create_time
-		new(interface{}), // Update_time
-		new(interface{}), // Check_time
-		new(interface{}), // Collation
-		new(interface{}), // Checksum
-		new(interface{}), // Create_options
-		new(interface{}), // Comment
-	)
-	if err != nil {
-		resource.app.Log().Errorf("can't get resource stats (%s): %s", resource.id, err)
-		return -1
-	}
-
-	return rows.Int64*/
 }
 
 func (app *App) getTableDataSize(tableName string) int64 {

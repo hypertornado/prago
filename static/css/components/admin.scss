@@ -32,10 +32,22 @@
 }
 
 .admin_markdown_header {
-  display: flex;
+  //display: flex;
   //border: 1px solid red;
   align-items: center;
   flex-wrap: wrap;
+  gap: 4px;
+  display: none;
+}
+
+.form_label:focus-within .admin_markdown_header {
+  display: flex;
+}
+
+.admin_markdown_header_buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .admin_markdown_header label {
@@ -81,27 +93,45 @@ select.admin_timestamp_minute {
   margin-left: 5px;
 }
 
+.views {
+ display: flex;
+ flex-direction: column;
+ flex-wrap: wrap;
+ gap: 8px;
+ padding: 0px 8px;
+ margin-bottom: 16px;
+ margin-top: 8px;
+}
+
 .view {
-  //border: 1px solid red;
+  border: 1px solid $grayBorderColor;
+  @include softShadow;
+  background-color: white;
+  border: 0px solid $grayBorderColor;
+  border-radius: 8px;
+  padding: 8px 8px;
+  width: 100%;
 }
 
 .view_header {
-  padding: 0px 10px 0px 10px;
+  padding: 8px;
   display: flex;
   align-items: center;
 }
 
 .view_header_icon {
-  width: 40px;
+  width: 16px;
+  position: relative;
+  top: 4px;
   aspect-ratio: 1;
-  margin-right: 8px;
-  padding: 8px;
-  margin-top: 8px;
-  margin-bottom: 8px;
-  background-color: $backgroundGrayColor;
-  background-color: white;
-  border: 1px solid $grayBorderColor;
-  border-radius: 8px;
+  //margin-right: 8px;
+  //padding: 8px;
+  //margin-top: 8px;
+  //margin-bottom: 8px;
+  //background-color: $backgroundGrayColor;
+  //background-color: white;
+  //border: 1px solid $grayBorderColor;
+  //border-radius: 8px;
   //margin-left: -48px;
 }
 
@@ -126,15 +156,11 @@ select.admin_timestamp_minute {
 .view_name {
   font-size: 1rem;
   margin-left: 0px;
-  padding: 5px 10px 5px 10px;
+  margin-bottom: 4px;
   display: flex;
   align-items: center;
-}
-
-@media (min-width: 700px) {
-  .view_name:has(.view_name_icon) {
-    margin-left: -22px;
-  } 
+  color: $black;
+  font-weight: 500;
 }
 
 .view_name_icon {
@@ -156,7 +182,7 @@ select.admin_timestamp_minute {
   //background-color: $backgroundGrayColor;
 
   border: 1px solid var(--baseColor);
-  @include softShadow;
+  //@include softShadow;
 
   user-select: none;
   -webkit-user-select: none; /* Safari */
@@ -177,13 +203,8 @@ select.admin_timestamp_minute {
 
 .view_content {
   clear: both;
-  padding: 0px 8px 0px 8px;
   word-wrap: break-word;
-  color: $gray;
-}
-
-.view_content:last-child {
-  margin-bottom: 8px;
+  color: $black;
 }
 
 .view_content:empty {
@@ -192,6 +213,14 @@ select.admin_timestamp_minute {
 
 .admin_item_view_place {
   height: 200px;
+}
+
+.admin_item_view_relation .preview {
+  border-color: transparent;
+  box-shadow: none;
+  padding: 4px;
+  margin-left: -4px;
+
 }
 
 .progress {
@@ -233,13 +262,14 @@ select.admin_timestamp_minute {
 
 .relation_button {
   display: block;
-  margin: 5px 5px;
+  margin: 8px 0px;
   justify-content: center;
-  width: calc(100% - 10px);
+  width: 100%;
   
   position: sticky !important;
-  bottom: 5px !important;
+  bottom: 4px !important;
   left: 0px !important;
+  @include shadowMedium;
 }
 
 .admin_relation_previews {
@@ -254,8 +284,14 @@ select.admin_timestamp_minute {
   padding: 8px;
   gap: 4px;
   border: 1px solid $grayBorderColorDarker;
-  //@include softShadow;
   @include insetShadow;
+}
+
+.admin_item_relation-single .admin_relation_previews {
+  border: none;
+  background: transparent;
+  padding: 0px;
+  box-shadow: none;
 }
 
 .admin_relation_previews:empty {
@@ -293,7 +329,7 @@ select.admin_timestamp_minute {
   background-color: white;
   border: 1px solid $grayBorderColor;
   cursor: pointer;
-  @include softShadow;
+  //@include softShadow;
 }
 
 .admin_relation_preview_action:hover {
@@ -312,22 +348,19 @@ select.admin_timestamp_minute {
 }
 
 .admin_item_relation_picker input {
-  max-width: 300px;
-  padding: 4px;
+  max-width: 200px;
+  padding: 4px 8px;
   font-size: 1rem;
   line-height: 1.3em;
-  border-color: transparent;
+  border-color: $grayBorderColorDarker;
   box-shadow: none;
-}
-
-.admin_item_relation_picker input:hover {
-  background: $hoverColor;
-
+  border-radius: 1000px;
 }
 
 .admin_item_relation_picker_suggestions {
   position: relative;
   z-index: 100000;
+  background-color: $backgroundGrayColor;
 }
 
 .admin_item_relation_picker_suggestions_content {
@@ -335,28 +368,29 @@ select.admin_timestamp_minute {
   top: 0px;
   z-index: 100000;
   background-color: white;
-  margin-bottom: 10px;
-  border-bottom-right-radius: 5px;
-  border-bottom-left-radius: 5px;
-  @include shadow;
+  //@include appleBackdrop;
+  margin-bottom: 8px;
+  border: 1px solid $grayBorderColor;
+  @include shadowMedium;
   width: 400px;
   max-height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
   overflow: auto;
-  //border: 1px solid red;
+  border-radius: 8px;
+}
+
+.admin_item_relation_picker_suggestions_content:empty {
+  display: none;
 }
 
 .admin_item_relation_picker_suggestion {
   box-shadow: none;
   margin: 0px !important;
   cursor: pointer;
-  border-radius: 0px !important;
-  background: $backgroundGrayColor !important;
-}
-
-.admin_item_relation_picker_suggestion:last-child {
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
-  border-bottom: none;
+  background: white !important;
 }
 
 .admin_item_relation_picker_suggestion-selected {
@@ -433,9 +467,4 @@ select.admin_timestamp_minute {
   body {
     background: none !important;
   }
-
-  /** {
-    background: none !important;
-    box-shadow: none !important;
-  }*/
 }

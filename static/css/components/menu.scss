@@ -12,13 +12,25 @@
 }
 
 .menu2_item_icon {
-  height: 20px;
+  height: 24px;
   aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   margin-left: 3px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.menu2_item_icon:hover {
+  background: $hoverColor;
+  border-color: $baseColor;
+
+}
+
+.menu2_item_icon:active {
+  background: $activeColor;
 }
 
 .menu2_item_icon_img {
@@ -33,6 +45,7 @@
 
 .menu2_item_content_icon-empty {
   border-radius: 3px;
+  display: none;
 }
 
 .menu2_item-hassubitems > .menu2_item_top > .menu2_item_icon {
@@ -41,7 +54,7 @@
 }
 
 .menu2_item-hassubitems:hover > div > .menu2_item_icon {
-  filter: contrast(.2);
+  //filter: contrast(.2);
 }
 
 .menu2_item {
@@ -74,15 +87,25 @@
   text-decoration: none;
   color: $black;
   display: flex;
-  //overflow: hidden;
   gap: 4px;
   border: 1px solid transparent;
 }
 
 .menu2_item_content:hover {
-  //border: 1px solid red;
   border-color: var(--baseColor);
   @include softShadow;
+}
+
+.menu2_item_content-destroy {
+  color: $red;
+}
+
+.menu2_item_content-accented {
+  color: $baseColor;
+}
+
+.menu2_item_content-create {
+  color: $green;
 }
 
 .menu2_item_content-selected,

@@ -75,6 +75,13 @@ class Prago {
     initGoogleMaps();
     initTables()
 
+    let rootEl = document.querySelector(".root_content");
+    rootEl.addEventListener("scroll", (e: any) => {
+      console.log("SCROLL", e);
+      console.log(rootEl.scrollTop);
+      console.trace();
+    })
+    
     let searchboxButton = document.querySelector(".searchbox_button");
     if (searchboxButton) {
       searchboxButton.addEventListener("click", (e: Event) => {
@@ -91,7 +98,6 @@ class Prago {
   static testPopupForm() {
     new PopupForm("/admin/packageview/new", (data: any) => {
       //console.log("form data");
-      //console.log(data);
     });
     //new PopupForm("/admin/hotel/new");
 
@@ -134,7 +140,10 @@ function popup(url: string) {
     });
 }
 
-/*function getBaseColor(): string {
-  let rootStyle = window.getComputedStyle(document.documentElement);
-  let color = rootStyle.getPropertyValue('--hlavni-barva').trim()
-}*/
+function getBaseColor(): string {
+  return document.body.getAttribute("data-base-color");
+}
+
+function getBlackColor(): string {
+  return document.body.getAttribute("data-black-color");
+}

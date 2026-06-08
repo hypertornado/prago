@@ -1,12 +1,13 @@
 {{define "box_header" -}}
-    <div class="box_header" {{if .Image}}
-        style="background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 1)), url('{{PragoCSS .Image}}')"
-    {{end}}>
+    <div class="box_header">
+        {{if .TextBefore}}
+            <div class="box_textbefore">{{.TextBefore}}</div>
+        {{end}}
         {{if .Name}}
             <div class="box_name">
                 {{if .Icon}}
                     <div class="box_icon">
-                        <img src="/admin/api/icons?file={{.Icon}}&color=444444">
+                        <img src="/admin/api/icons?file={{.Icon}}&color={{PragoBlackColor}}">
                     </div>
                 {{end}}
                 {{.Name}}
@@ -18,7 +19,19 @@
         {{if .Buttons}}
             <div class="box_header_buttons">
                 {{range $button := .Buttons}}
-                    <a href="{{$button.URL}}" class="btn">{{if $button.Icon}}<img src="/admin/api/icons?file={{$button.Icon}}&color={{PragoBlackColor}}" class="btn_icon">{{end}}<div class="btn_text">{{$button.Name}}</div></a>
+                    {{$color := PragoBlackColor}}
+                    {{if eq $button.Style "destroy"}}
+                        {{$color = PragoRedColor}}
+                    {{end}}
+
+                    {{if eq $button.Style "accented"}}
+                        {{$color = PragoBaseColor}}
+                    {{end}}
+                    
+                    <a href="{{$button.URL}}" class="btn{{if $button.Style}} btn-{{$button.Style}}{{end}}">
+                        {{if $button.Icon}}<img src="/admin/api/icons?file={{$button.Icon}}&color={{$color}}" class="btn_icon">{{end}}
+                        <div class="btn_text">{{$button.Name}}</div>
+                    </a>
                 {{end}}
             </div>
         {{end}}

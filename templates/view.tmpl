@@ -8,9 +8,11 @@
   <div class="box">
   {{if .Name}}
   <div class="view_header">
-    <img src="/admin/api/icons?file={{.Icon}}&color=444444" class="view_header_icon">
     {{if .Name}}
       <span class="view_header_name">
+        {{if .Icon}}
+          <img src="/admin/api/icons?file={{.Icon}}&color={{PragoBlackColor}}" class="view_header_icon">
+        {{end}}
         {{.Name}}
         {{if .Subname}}
           <span class="view_header_subname">
@@ -19,9 +21,9 @@
         {{end}}
       </span>
     {{end}}
-    <div class="btngroup view_header_tabs">
+    <div class="view_header_tabs">
       {{range $navItem := .Buttons}}
-        <a href="{{$navItem.URL}}" class="btn"><img src="/admin/api/icons?file={{.Icon}}&color=444444" class="btn_icon">{{$navItem.Name}}</a>
+        <a href="{{$navItem.URL}}" class="btn"><img src="/admin/api/icons?file={{.Icon}}&color={{PragoBlackColor}}" class="btn_icon">{{$navItem.Name}}</a>
       {{end}}
     </div>
   </div>
@@ -33,27 +35,7 @@
     {{template "view_relationlist" .Relation}}
   {{end}}
 
-
-  {{range $item := .Items}}
-    <div class="view">
-    {{if $item.Name}}
-      <div class="view_name">
-        {{if $item.Icon}}
-          <img src="/admin/api/icons?file={{$item.Icon}}&color=444444" class="view_name_icon">
-        {{end}}
-        {{$item.Name}}
-        {{if $item.EditURL}}
-          <a href="{{$item.EditURL}}" class="view_edit">
-            <img src="/admin/api/icons?file=glyphicons-basic-31-pencil.svg" class="view_edit_icon">{{$item.EditName}}
-          </a>
-        {{end}}
-      </div>
-    {{end}}
-    <div class="view_content">
-      {{- $item.Content -}}
-    </div>
-    </div>
-  {{end}}
+  {{template "item_views" .Items}}
 
   {{range $result := .SearchResults}}
     <a href="{{$result.URL}}" class="search">
@@ -74,18 +56,52 @@
   {{end}}
 
   </div>
+
+
+{{end}}
+
+
+{{define "item_views"}}
+  <div class="views">
+  {{range $item := .}}
+    <div class="view">
+    {{if $item.Name}}
+      <div class="view_name">
+        {{if $item.Icon}}
+          <img src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBlackColor}}" class="view_name_icon">
+        {{end}}
+        {{$item.Name}}
+        {{if $item.EditURL}}
+          <a href="{{$item.EditURL}}" class="view_edit">
+            <img src="/admin/api/icons?file=glyphicons-basic-31-pencil.svg&color={{PragoBaseColor}}" class="view_edit_icon">{{$item.EditName}}
+          </a>
+        {{end}}
+      </div>
+    {{end}}
+    <div class="view_content">
+      {{- $item.Content -}}
+    </div>
+    </div>
+  {{end}}
+  </div>
 {{end}}
 
 {{define "view_text"}}
-  {{- . -}}
+  {{- if . -}}
+    {{- . -}}
+  {{- end -}}
 {{end}}
 
 {{define "view_textarea"}}
-  <span>{{- . -}}</span>
+  {{- if . -}}
+    <span>{{- . -}}</span>
+  {{- end -}}
 {{end}}
 
 {{define "view_markdown"}}
-  {{- PragoMarkdown . -}}
+  {{- if . -}}
+    {{- PragoMarkdown . -}}
+  {{- end -}}
 {{end}}
 
 {{define "view_cdn_file"}}
@@ -97,27 +113,33 @@
 {{end}}
 
 {{define "view_image"}}
+  {{if .}}
   <div class="imageview" data-images="{{.}}">
     <progress class="progress" value="" max=""></progress>
   </div>
+  {{end}}
 {{end}}
 
 {{define "view_video"}}
+  {{if .}}
   <div class="videoview" data-videos="{{.}}">
     <video class="videoview_video hidden"></video>
     <progress class="progress" value="" max=""></progress>
   </div>
+  {{end}}
 {{end}}
 
 {{define "view_place"}}
+  {{if .}}
   <div class="admin_item_view_place" data-value="{{.}}">
     <progress class="progress" value="" max=""></progress>
   </div>
+  {{end}}
 {{end}}
 
 {{define "view_relation"}}
-  <div class="admin_item_view_relation">
     {{if .}}
+      <div class="admin_item_view_relation">
       {{range $item := .}}
       <a class="preview" href="{{$item.URL}}">
         {{if $item.Image}}
@@ -129,10 +151,9 @@
         </div>
       </a>
       {{end}}
+      </div>
     {{else -}}
-      
     {{- end}}
-  </div>
 {{end}}
 
 {{define "view_relationlist"}}
@@ -149,7 +170,7 @@
       <progress class="progress list_progress"></progress>
     </div>
     <div class="admin_relationlist_more hidden">
-      <div class="btn"><img src="/admin/api/icons?file=glyphicons-basic-221-chevron-down.svg&color=444444" class="btn_icon"></div>
+      <div class="btn"><img src="/admin/api/icons?file=glyphicons-basic-221-chevron-down.svg&color={{PragoBlackColor}}" class="btn_icon"></div>
     </div>
   </div>
 {{end}}

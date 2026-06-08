@@ -47,7 +47,7 @@ class RelationList {
     request.addEventListener("load", () => {
       this.loadingEl.classList.add("hidden");
       if (request.status == 200) {
-        this.offset += 10;
+        this.offset += count;
 
         var parentEl = document.createElement("div");
         parentEl.innerHTML = request.response;

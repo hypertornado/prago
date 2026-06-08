@@ -30,6 +30,7 @@
 .list_header {
   z-index: 1;
   display: flex;
+  //@include appleBackdrop;
 }
 
 .list_footer {
@@ -47,23 +48,21 @@
   background: white;
   min-height: 70px;
   border-top: 1px solid $grayBorderColor;
-  //border-left: 1px solid $grayBorderColor;
   position: sticky;
 
   text-wrap: nowrap;
   flex-shrink: 10000;
   text-overflow: ellipsis;
 
-  @include appleBackdrop;
-
-  //@include blurBackground;
+  background: $backgroundGrayColor;
 }
 
 .list_message {
   text-align: center;
   font-size: 1rem;
   line-height: 1.3em;
-  color: $gray;
+  color: $black;
+  font-weight: 500;
 
   text-wrap: nowrap;
   flex-shrink: 10000;
@@ -74,7 +73,6 @@
 }
 
 .list_table {
-  //margin-bottom: 69px;
   background-color: white;
 }
 
@@ -155,8 +153,8 @@
 
 .list_header_item_resizer {
   width: 5px;
-  border-right: 2px solid white;
-  border-left: 2px solid white;
+  border-right: 2px solid $backgroundGrayColor;
+  border-left: 2px solid $backgroundGrayColor;
   background-color: $grayBorderColor;
   cursor: col-resize;
 
@@ -232,7 +230,7 @@
   align-items: center;
   border-top: 1px solid $grayBorderColor;
   border-bottom: none;
-  background-color: white;
+  background-color: $backgroundGrayColor;
 }
 
 .list_multiple_actions_content {
@@ -250,11 +248,14 @@
   font-size: .9rem;
   line-height: 1.3em;
   font-weight: 500;
+  color: $baseColor;
+  font-weight: bold;
 }
 
 .list_multiple_actions_buttons {
   display: flex;
   justify-content: start;
+  gap: 4px;
   overflow: auto;
   flex-shrink: 1000;
   min-width: 0px;
@@ -313,6 +314,8 @@
 .ordered,
 .ordered:hover {
   background: var(--baseColorBackground);
+  background: var(--baseColor);
+  color: white;
 }
 
 .ordered .list_header_item_name:after,
@@ -377,6 +380,7 @@
 .list_header_item_name_icon {
   width: 15px;
   margin-right: 2px;
+  display: none;
 }
 
 .list_header_item_name_text {
@@ -409,7 +413,8 @@
   position: relative;
   border-bottom: 1px solid $grayBorderColor;
 
-  @include appleBackdrop;
+  background: $backgroundGrayColor;
+  //@include appleBackdrop;
 }
 
 .list_header_item_filter {

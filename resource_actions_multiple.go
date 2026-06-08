@@ -176,7 +176,7 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 
 			fv.AfterContent(template.HTML(fmt.Sprintf("<textarea class=\"input\">%s</textarea>", template.HTMLEscapeString(strVal))))
 		},
-	).Icon(iconDelete).Permission(resource.canDelete).Name(unlocalized("AI Kontext"))
+	).Icon(iconAI).Permission(resource.canDelete).Name(unlocalized("AI Kontext"))
 
 	resource.formItemMultipleAction(
 		"clone-multiple",

@@ -38,14 +38,14 @@
               {{end}}
               <label for="{{.UUID}}" class="form_label_text">
                 {{if .Icon}}
-                  <img src="/admin/api/icons?file={{$item.Icon}}&color=444444" class="form_label_text_icon">
+                  <img src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBlackColor}}" class="form_label_text_icon">
                 {{end}}
                 {{.Name}}
                 {{if .Required}}
                   <span class="form_label_required" title="Povinná položka">✱</span>
                 {{end}}
                 {{if .HelpURL}}
-                  <a href="{{.HelpURL}}" class="form_label_text_help"><img src="/admin/api/icons?file=glyphicons-basic-196-circle-empty-info.svg" title="Nápověda"></a>
+                  <a href="{{.HelpURL}}" class="form_label_text_help"><img src="/admin/api/icons?file=glyphicons-basic-196-circle-empty-info.svg&color={{PragoBlackColor}}" title="Nápověda"></a>
                 {{end}}
               </label>
               {{if .Description}}
@@ -76,7 +76,7 @@
         <progress class="form_task_progress" value="" max="1"></progress>
         <div class="form_task_progress_text"></div>
         <button class="btn form_task_stop">
-          <img src="/admin/api/icons?file=glyphicons-basic-176-stop.svg&color=444444" class="btn_icon">
+          <img src="/admin/api/icons?file=glyphicons-basic-176-stop.svg&color={{PragoBlackColor}}" class="btn_icon">
           Stop
         </button>
       </div>

@@ -56,6 +56,7 @@ class ImageView {
         this.el = el;
         var filesData = JSON.parse(el.getAttribute("data-images"));
         this.addFiles(filesData);
+        console.log("done");
     }
     addFiles(filesData) {
         this.el.innerHTML = "";
@@ -8259,7 +8260,7 @@ class Suggestions {
                 if (data.Button) {
                     let buttonEl = document.createElement("a");
                     let buttonElIcon = document.createElement("img");
-                    buttonElIcon.setAttribute("src", "/admin/api/icons?file=glyphicons-basic-371-plus.svg");
+                    buttonElIcon.setAttribute("src", "/admin/api/icons?file=glyphicons-basic-371-plus.svg&color=${getBaseColor}");
                     buttonElIcon.classList.add("btn_icon");
                     let buttonElText = document.createElement("span");
                     buttonElText.innerText = data.Button.Name;
@@ -8958,7 +8959,7 @@ class Menu {
         return "";
     }
     setResourceCountsFromCache() {
-        var items = document.querySelectorAll(".menu2_item_content");
+        var items = document.querySelectorAll(".menu2_item_content, .board_resource");
         for (var i = 0; i < items.length; i++) {
             let item = items[i];
             let url = item.getAttribute("href");
@@ -8969,7 +8970,7 @@ class Menu {
         }
     }
     setResourceCounts(data) {
-        var items = document.querySelectorAll(".menu2_item_content");
+        var items = document.querySelectorAll(".menu2_item_content, .board_resource");
         for (var i = 0; i < items.length; i++) {
             let item = items[i];
             let url = item.getAttribute("href");
@@ -8978,7 +8979,7 @@ class Menu {
         }
     }
     setResourceCount(el, count) {
-        let countEl = el.querySelector(".menu2_item_content_subname");
+        let countEl = el.querySelector(".menu2_item_content_subname, .board_resource_subname");
         if (count) {
             this.saveCountToStorage(el.getAttribute("href"), count);
             countEl.textContent = count;
@@ -9026,7 +9027,7 @@ class RelationList {
         request.addEventListener("load", () => {
             this.loadingEl.classList.add("hidden");
             if (request.status == 200) {
-                this.offset += 10;
+                this.offset += count;
                 var parentEl = document.createElement("div");
                 parentEl.innerHTML = request.response;
                 var parentAr = [];
@@ -9059,7 +9060,6 @@ class NotificationCenter {
         this.notifications = new Map();
         this.el = el;
         var data = el.getAttribute("data-notification-views");
-        console.log(data);
         var notifications = [];
         if (data) {
             notifications = JSON.parse(data);
@@ -9259,7 +9259,7 @@ class Popup {
                 <img class="popup_header_icon hidden">
                 <div class="popup_header_name"></div>
                 <div class="btn popup_header_cancel">
-                  <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg" class="btn_icon">
+                  <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=${getBaseColor()}" class="btn_icon">
                 </div>
             </div>
             <div class="popup_content"></div>
@@ -9321,7 +9321,7 @@ class Popup {
         }
         let iconEl = this.el.querySelector(".popup_header_icon");
         iconEl.classList.remove("hidden");
-        iconEl.setAttribute("src", `/admin/api/icons?file=${iconName}&color=444444`);
+        iconEl.setAttribute("src", `/admin/api/icons?file=${iconName}&color=${getBlackColor()}`);
     }
     addButton(name, handler, style) {
         this.el
@@ -9901,7 +9901,7 @@ class CMenu {
                 if (command.Icon) {
                     let commandNameIcon = document.createElement("img");
                     commandNameIcon.classList.add("cmenu_command_icon");
-                    let color = "";
+                    let color = getBaseColor();
                     if (command.Style == "destroy") {
                         color = "cb2431";
                     }
@@ -10354,6 +10354,12 @@ class Prago {
         initDashboard();
         initGoogleMaps();
         initTables();
+        let rootEl = document.querySelector(".root_content");
+        rootEl.addEventListener("scroll", (e) => {
+            console.log("SCROLL", e);
+            console.log(rootEl.scrollTop);
+            console.trace();
+        });
         let searchboxButton = document.querySelector(".searchbox_button");
         if (searchboxButton) {
             searchboxButton.addEventListener("click", (e) => {
@@ -10392,4 +10398,10 @@ function popup(url) {
         }
         window.location.reload();
     });
+}
+function getBaseColor() {
+    return document.body.getAttribute("data-base-color");
+}
+function getBlackColor() {
+    return document.body.getAttribute("data-black-color");
 }

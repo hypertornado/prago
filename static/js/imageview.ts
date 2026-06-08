@@ -7,6 +7,7 @@ class ImageView {
     this.el = el;
     var filesData = JSON.parse(el.getAttribute("data-images"));
     this.addFiles(filesData);
+    console.log("done");
   }
 
   addFiles(filesData: any) {

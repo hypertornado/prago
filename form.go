@@ -111,45 +111,35 @@ func (form *Form) addInput(id, description, template string) *FormItem {
 // AddTextInput to form
 func (form *Form) AddTextInput(name, description string) *FormItem {
 	input := form.addInput(name, description, "form_input")
-	if description != "" {
-		input.Icon = iconText
-	}
 	return input
 }
 
 func (form *Form) AddNumberInput(name, description string) *FormItem {
 	input := form.addInput(name, description, "form_input_int")
-	input.Icon = iconNumber
 	return input
 }
 
 // AddTextareaInput to form
 func (form *Form) AddTextareaInput(name, description string) *FormItem {
 	input := form.addInput(name, description, "form_input_textarea")
-	if description != "" {
-		input.Icon = iconText
-	}
 	return input
 }
 
 // AddEmailInput to form
 func (form *Form) AddEmailInput(name, description string) *FormItem {
 	input := form.addInput(name, description, "form_input_email")
-	input.Icon = iconEmail
 	return input
 }
 
 // AddPasswordInput to form
 func (form *Form) AddPasswordInput(name, description string) *FormItem {
 	input := form.addInput(name, description, "form_input_password")
-	input.Icon = iconPassword
 	return input
 }
 
 // AddFileInput to form
 func (form *Form) AddFileInput(name, description string) *FormItem {
 	input := form.addInput(name, description, "form_input_file")
-	input.Icon = iconImage
 	return input
 }
 
@@ -194,7 +184,6 @@ func (form *Form) AddHidden(name string) *FormItem {
 func (form *Form) AddSelect(name, description string, values [][2]string) *FormItem {
 	input := form.addInput(name, description, "form_input_select")
 	input.Data = values
-	input.Icon = iconSelect
 	return input
 }
 
@@ -210,7 +199,6 @@ type FormOption struct {
 func (form *Form) AddOptions(name, description string, options []*FormOption) *FormItem {
 	input := form.addInput(name, description, "form_input_select_radio")
 	input.Data = options
-	input.Icon = iconSelect
 	return input
 }
 
@@ -228,13 +216,11 @@ func (form *Form) AddRadio(name, description string, values [][2]string) *FormIt
 // AddDatePicker to form
 func (form *Form) AddDatePicker(name, description string) *FormItem {
 	input := form.addInput(name, description, "form_input_date")
-	input.Icon = iconDate
 	return input
 }
 
 func (form *Form) AddDateTimePicker(name, description string) *FormItem {
 	input := form.addInput(name, description, "form_input_datetime")
-	input.Icon = iconDateTime
 	return input
 }
 

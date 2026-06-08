@@ -92,6 +92,10 @@ p {
   margin-bottom: 0.5em;
 }
 
+p:last-child {
+  margin-bottom: 0px;
+}
+
 .progress {
   display: block;
   margin: 5px auto;

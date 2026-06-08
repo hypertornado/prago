@@ -85,7 +85,7 @@ class Menu {
   }
 
   setResourceCountsFromCache() {
-    var items = document.querySelectorAll(".menu2_item_content");
+    var items = document.querySelectorAll(".menu2_item_content, .board_resource");
     for (var i = 0; i < items.length; i++) {
       let item = <HTMLDivElement>items[i];
       let url = item.getAttribute("href");
@@ -97,7 +97,7 @@ class Menu {
   }
 
   setResourceCounts(data: any) {
-    var items = document.querySelectorAll(".menu2_item_content");
+    var items = document.querySelectorAll(".menu2_item_content, .board_resource");
     for (var i = 0; i < items.length; i++) {
       let item = <HTMLDivElement>items[i];
       let url = item.getAttribute("href");
@@ -107,7 +107,7 @@ class Menu {
   }
 
   setResourceCount(el: HTMLDivElement, count: string) {
-    let countEl = el.querySelector(".menu2_item_content_subname");
+    let countEl = el.querySelector(".menu2_item_content_subname, .board_resource_subname");
     if (count) {
       this.saveCountToStorage(el.getAttribute("href"), count);
       countEl.textContent = count;

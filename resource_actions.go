@@ -61,7 +61,7 @@ func (resource *Resource) initDefaultResourceActions() {
 				Flash(request))
 			vc.Redirect(resource.getItemURL(item, "", request))
 		}
-	}).Icon(iconAdd).setPriority(defaultHighPriority).Permission(resource.canCreate).Name(func(locale string) string {
+	}).Icon(iconAdd).setPriority(defaultHighPriority).styleCreate().Permission(resource.canCreate).Name(func(locale string) string {
 		return resource.newItemName(locale)
 	})
 
@@ -97,7 +97,7 @@ func (resource *Resource) initDefaultResourceActions() {
 				vc.(*formValidation).validationData.Errors = validation.errors
 			}
 		},
-	).Icon(iconEdit).setPriority(defaultHighPriority).Name(messages.GetNameFunction("admin_edit")).Permission(resource.canUpdate)
+	).Icon(iconEdit).setPriority(defaultHighPriority).styleAccented().Name(messages.GetNameFunction("admin_edit")).Permission(resource.canUpdate)
 
 	resource.formItemAction(
 		"delete",

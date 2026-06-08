@@ -31,37 +31,10 @@
 .btn_icon {
   width: 16px;
   aspect-ratio: 1;
-  //margin-right: 5px;
 }
 
 .btn_icon:last-child {
   margin-right: 0px;
-}
-
-.btngroup {
-  display: inline-flex;
-  border-radius: 8px;
-  @include softShadow;
-}
-
-.btngroup > .btn:not(:last-child) {
-  border-right: none;
-  border-top-right-radius: 0px;
-  border-bottom-right-radius: 0px;
-}
-
-.btngroup > .btn:not(:first-child) {
-  border-top-left-radius: 0px;
-  border-bottom-left-radius: 0px;
-}
-.btngroup .btn {
-  box-shadow: none;
-
-}
-
-.btngroup .btn:hover {
-  border-color: $grayBorderColor;
-
 }
 
 .btn:hover {
@@ -85,6 +58,7 @@
 }
 
 .btn-primary {
+  background: linear-gradient(var(--baseColorDarker), var(--baseColor));
   background: linear-gradient(var(--baseColor), var(--baseColorDarker));
   color: white;
   border: none;
@@ -101,6 +75,18 @@
   position: relative;
   @include softShadow;
   overflow: hidden;
+}
+
+.btn-accented {
+  color: $baseColor;
+}
+
+.btn-destroy {
+  color: $red;
+}
+
+.btn-destroy:hover, .btn-destroy:active, .btn-destroy:focus {
+  border-color: $red !important;
 }
 
 .form-loading .btn-primary {
@@ -137,24 +123,30 @@
 }
 
 .btn-primary:hover {
-  background: var(--baseColorDarker) !important;
+  background: var(--baseColor) !important;
   outline: none;
 }
 
 .btn-primary:active {
-  background: var(--baseColor) !important;
+  background: var(--baseColorDarker) !important;
   outline: none;
 }
 
 .btn-delete,
 .btn-delete:hover,
 .btn-delete:active {
-  background: linear-gradient(rgba(255, 0, 0, .8), rgba(255, 0, 0, .9));
+  //background: linear-gradient(rgba(255, 0, 0, .8), rgba(255, 0, 0, .9)) !important;
+  background: $red !important;
 }
 
-.btn-delete:hover,
+.btn-delete:hover {
+  //background: linear-gradient(rgba(255, 0, 0, .9), rgba(255, 0, 0, .9)) !important;
+  background: $redLighter !important;
+}
+
 .btn-delete:active {
-  background: linear-gradient(rgba(255, 0, 0, .9), rgba(255, 0, 0, .9));
+  //background: linear-gradient(rgba(255, 0, 0, .9), rgba(255, 0, 0, .9)) !important;
+  background: $redLighter !important;
 }
 
 .form {
@@ -288,12 +280,6 @@
   align-items: center;
 }
 
-@media (min-width: 700px) {
-  .form_label_text:has(.form_label_text_icon):not(.simple_content *) {
-    margin-left: -20px;
-  } 
-}
-
 .form_label_text_icon {
   width: 16px;
   aspect-ratio: 1;
@@ -379,12 +365,17 @@ select.input {
 .btn:focus {
   outline: none;
   border-color: var(--baseColor);
-  background-color: $hoverColor;
+  //background-color: $hoverColor;
   @include softShadow;
 }
 
+.input:focus {
+  background-color: $hoverColor;
+}
+
 .textarea {
-  min-height: 100px !important;
+  min-height: 4em !important;
+  field-sizing: content;
 }
 
 .form_radios {

@@ -72,7 +72,6 @@ func (app *App) initDefaultFieldTypes() {
 		formTemplate: "form_input_textarea",
 
 		listCellDataSource: textListDataSource,
-		fieldTypeIcon:      "glyphicons-basic-101-text.svg",
 	})
 	app.addFieldType("order", &fieldType{})
 	app.addFieldType("date", &fieldType{
@@ -110,14 +109,11 @@ func (app *App) initDefaultFieldTypes() {
 		filterLayoutTemplate:   "filter_layout_select",
 		filterLayoutDataSource: boolFilterLayoutDataSource,
 
-		fieldTypeIcon:    iconImage,
 		naturalCellWidth: 60,
 	})
 	app.addFieldType("video", &fieldType{
-		viewTemplate:   "view_video",
-		viewDataSource: videoViewDataSource,
-
-		fieldTypeIcon:    iconVideo,
+		viewTemplate:     "view_video",
+		viewDataSource:   videoViewDataSource,
 		naturalCellWidth: 60,
 	})
 
@@ -126,12 +122,10 @@ func (app *App) initDefaultFieldTypes() {
 		viewDataSource:     markdownViewDataSource,
 		formTemplate:       "form_input_markdown",
 		listCellDataSource: markdownListDataSource,
-		fieldTypeIcon:      "glyphicons-basic-692-font.svg",
 	})
 	app.addFieldType("place", &fieldType{
-		viewTemplate:  "view_place",
-		formTemplate:  "form_input_place",
-		fieldTypeIcon: "glyphicons-basic-591-map-marker.svg",
+		viewTemplate: "view_place",
+		formTemplate: "form_input_place",
 	})
 
 	app.addFieldType("relation", &fieldType{

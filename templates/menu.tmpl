@@ -19,11 +19,24 @@
         <div class="menu2_item{{if $item.Subitems}} menu2_item-hassubitems{{end}}{{if $item.IsSelectedOrExpanded}} menu2_item-expanded{{end}}">
             <div class="menu2_item_top">
                 <div class="menu2_item_icon">
-                    <img src="/admin/api/icons?file=glyphicons-basic-224-chevron-right.svg&color=dddddd" class="menu2_item_icon_img">
+                    <img src="/admin/api/icons?file=glyphicons-basic-224-chevron-right.svg&color={{PragoBlackColor}}" class="menu2_item_icon_img">
                 </div>
-                <a href="{{$item.URL}}" class="menu2_item_content{{if $item.Selected}} menu2_item_content-selected{{end}}" title="{{$item.Name}}">
+                <a href="{{$item.URL}}" class="menu2_item_content {{if $item.Style}}menu2_item_content-{{$item.Style}}{{end}} {{if $item.Selected}} menu2_item_content-selected{{end}}" title="{{$item.Name}}">
                     {{if $item.Icon}}
-                        <img class="menu2_item_content_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{if $item.Selected}}ffffff{{else}}444444{{end}}">
+                        {{$color := PragoBlackColor}}
+                        {{if eq $item.Style "destroy"}}
+                            {{$color = PragoRedColor}}
+                        {{end}}
+                        {{if eq $item.Style "accented"}}
+                            {{$color = PragoBaseColor}}
+                        {{end}}
+                        {{if eq $item.Style "create"}}
+                            {{$color = PragoGreenColor}}
+                        {{end}}
+                        {{if $item.Selected}}
+                            {{$color = "ffffff"}}
+                        {{end}}
+                        <img class="menu2_item_content_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{$color}}">
                     {{else}}
                         <div class="menu2_item_content_icon menu2_item_content_icon-empty"></div>
                     {{end}}

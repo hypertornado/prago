@@ -61,7 +61,7 @@
                 <a href="{{if $button.URL}}{{$button.URL}}{{else}}#{{end}}" class="btn"
                     onclick="{{$button.OnClick}}" title="{{$button.GetTitle}}">
                     {{if $button.Icon}}
-                        <img src="/admin/api/icons?file={{$button.Icon}}" class="btn_icon">
+                        <img src="/admin/api/icons?file={{$button.Icon}}&color={{PragoBlackColor}}" class="btn_icon">
                     {{end}}
                     {{$button.Name}}
                 </a>

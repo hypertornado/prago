@@ -15,7 +15,7 @@ class Popup {
                 <img class="popup_header_icon hidden">
                 <div class="popup_header_name"></div>
                 <div class="btn popup_header_cancel">
-                  <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg" class="btn_icon">
+                  <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=${getBaseColor()}" class="btn_icon">
                 </div>
             </div>
             <div class="popup_content"></div>
@@ -96,7 +96,7 @@ class Popup {
     }
     let iconEl = this.el.querySelector(".popup_header_icon");
     iconEl.classList.remove("hidden");
-    iconEl.setAttribute("src", `/admin/api/icons?file=${iconName}&color=444444`)
+    iconEl.setAttribute("src", `/admin/api/icons?file=${iconName}&color=${getBlackColor()}`)
   }
 
   protected addButton(

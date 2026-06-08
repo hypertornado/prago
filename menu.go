@@ -19,8 +19,6 @@ type menu struct {
 	AppDescription string
 	RoleWarning    string
 	AppName        string
-	//LanguageDecription string
-	//Version            string
 }
 
 type menuItem struct {
@@ -32,6 +30,8 @@ type menuItem struct {
 	Selected     bool
 	Expanded     bool
 	SortPriority int64
+	NoSearch     bool
+	Style        string
 }
 
 type menuRequestContext struct {
@@ -230,9 +230,9 @@ func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem
 		}
 
 		icon := v.icon
-		if icon == "" {
+		/*if icon == "" {
 			icon = iconForm
-		}
+		}*/
 
 		if fullURL == "/admin/_options" {
 			sortPriority = -1
@@ -244,6 +244,7 @@ func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem
 			URL:          fullURL,
 			Selected:     selected,
 			SortPriority: sortPriority,
+			Style:        v.style,
 		}
 
 		if v.isPartOfBoard != nil && v.isPartOfBoard != app.MainBoard {
@@ -274,6 +275,8 @@ func (resource *Resource) getResourceMenu(requestContext *menuRequestContext) (r
 			Name:         v.name(requestContext.UserData.Locale()),
 			URL:          resource.getURL(v.url),
 			SortPriority: v.priority - int64(k),
+			NoSearch:     true,
+			Style:        v.style,
 		}
 		if urlPath == menuItem.URL {
 			menuItem.Selected = true
@@ -281,7 +284,6 @@ func (resource *Resource) getResourceMenu(requestContext *menuRequestContext) (r
 
 		if v.url == "list" && resource.isItPointerToResourceItem(requestContext.Item) {
 			menuItem.Subitems = append(menuItem.Subitems, resource.getResourceItemMenu(requestContext))
-			//menuItem.Expanded = true
 		}
 		ret = append(ret, menuItem)
 	}
@@ -321,6 +323,8 @@ func (resource *Resource) getResourceItemMenu(requestContext *menuRequestContext
 			URL:          resource.getItemURL(requestContext.Item, v.url, requestContext.UserData),
 			Expanded:     true,
 			SortPriority: priority,
+			NoSearch:     true,
+			Style:        v.style,
 		}
 
 		if requestContext.URL == item.URL {

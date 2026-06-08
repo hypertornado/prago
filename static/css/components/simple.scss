@@ -49,13 +49,12 @@
   line-height: 1.3em;
   display: block;
   color: $gray;
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(3px);
+  @include appleBackdrop;
   border-radius: 8px;
   padding: 8px 16px;
-  margin-bottom: 20px;
-  margin-left: 20px;
-  margin-right: 20px;
+  margin-bottom: 16px;
+  margin-left: 16px;
+  margin-right: 16px;
   text-align: center;
 }
 

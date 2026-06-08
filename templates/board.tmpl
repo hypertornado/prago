@@ -1,7 +1,7 @@
 {{define "board"}}
   <div class="board">
   
-  <h1 class="board_name">{{if PragoIconExists .BoardIcon}}<img src="/admin/api/icons?file={{.BoardIcon}}&color=444444" class="board_icon">{{end}}<div class="board_name_text">{{.BoardName}}</div></h1>
+  <h1 class="board_name">{{if PragoIconExists .BoardIcon}}<img src="/admin/api/icons?file={{.BoardIcon}}&color={{PragoBlackColor}}" class="board_icon">{{end}}<div class="board_name_text">{{.BoardName}}</div></h1>
 
   {{if .MainDashboard}}
     {{template "dashboard" .MainDashboard}}
@@ -13,8 +13,11 @@
       {{range $i, $resource := .Resources}}
         {{if ne $resource.URL $boardURL}}
         <a href="{{$resource.URL}}" class="board_resource" title="{{$resource.Name}}">
-          <div class="board_resource_left">{{if $resource.Icon}}<img class="board_resource_icon" src="/admin/api/icons?file={{$resource.Icon}}&color={{PragoBaseColor}}">{{end}}</div>
-          <div class="board_resource_right">{{$resource.Name}}</div>
+          {{if $resource.Icon}}
+            <div class="board_resource_left"><img class="board_resource_icon" src="/admin/api/icons?file={{$resource.Icon}}&color={{PragoBaseColor}}"></div>
+          {{end}}
+          <div class="board_resource_name">{{$resource.Name}}</div>
+          <div class="board_resource_subname"></div>
         </a>
         {{end}}
       {{end}}

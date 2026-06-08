@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -51,18 +52,18 @@ func (resource *Resource) getBasicView(id int64, item any, request *Request) *vi
 		tableIcon = iconTable
 	}
 
+	ret.Header.TextBefore = fmt.Sprintf("%s #%d", resource.singularName(request.Locale()), id)
 	ret.Header.Name = resource.previewer(request, item).Name()
 	ret.Header.Icon = iconView
 	ret.Header.Image = resource.previewer(request, item).ImageURL()
 	ret.Header.Buttons = resource.getItemButtonData(request, item, true)
 
-	resourceIcon := resource.icon
-	if resourceIcon == "" {
-		resourceIcon = iconResource
-	}
-
 	for i, f := range resource.fields {
 		if !f.authorizeView(request) {
+			continue
+		}
+
+		if f.id == "id" {
 			continue
 		}
 
@@ -86,6 +87,19 @@ func (resource *Resource) getBasicView(id int64, item any, request *Request) *vi
 			)
 		}
 
+		kind := f.typ.Kind()
+		if kind == reflect.Float64 || kind == reflect.Int64 || kind == reflect.Int {
+			if content == "0" {
+				content = ""
+			}
+		}
+
+		content = template.HTML(strings.Trim(string(content), " \n\t"))
+
+		if content == "" {
+			continue
+		}
+
 		icon := f.getIcon()
 		ret.Items = append(
 			ret.Items,
@@ -106,7 +120,7 @@ func (resource *Resource) getBasicView(id int64, item any, request *Request) *vi
 		ret.Items = append(
 			ret.Items,
 			viewField{
-				Icon:    "glyphicons-basic-43-stats-circle.svg",
+				//Icon:    "glyphicons-basic-43-stats-circle.svg",
 				Name:    v.Name(request.Locale()),
 				Content: template.HTML(v.Handler(item)),
 			},
@@ -166,7 +180,7 @@ func floatViewDataSource(userData UserData, f *Field, value interface{}) string 
 	return humanizeFloat(value.(float64), userData.Locale())
 }
 
-func timeViewDataSource(userData UserData, f *Field, value interface{}) string {
+func timeViewDataSource(userData UserData, f *Field, value any) string {
 	return messages.Timestamp(
 		userData.Locale(),
 		value.(time.Time),
@@ -174,7 +188,7 @@ func timeViewDataSource(userData UserData, f *Field, value interface{}) string {
 	)
 }
 
-func timestampViewDataSource(userData UserData, f *Field, value interface{}) string {
+func timestampViewDataSource(userData UserData, field *Field, value any) string {
 	return messages.Timestamp(
 		userData.Locale(),
 		value.(time.Time),
@@ -182,9 +196,9 @@ func timestampViewDataSource(userData UserData, f *Field, value interface{}) str
 	)
 }
 
-func boolViewDataSource(userData UserData, f *Field, value interface{}) string {
+func boolViewDataSource(userData UserData, field *Field, value any) string {
 	if value.(bool) {
 		return messages.Get(userData.Locale(), "yes")
 	}
-	return messages.Get(userData.Locale(), "no")
+	return ""
 }

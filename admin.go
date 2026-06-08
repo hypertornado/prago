@@ -50,7 +50,7 @@ func (app *App) initAdminActions() {
 		if app.icon != "" {
 			iconName = app.icon
 		}
-		iconData, err := app.loadIcon(iconName, "444444")
+		iconData, err := app.loadIcon(iconName, blackColor)
 		must(err)
 
 		request.Response().Header().Add("Content-Type", "image/svg+xml")

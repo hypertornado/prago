@@ -34,6 +34,7 @@
 
 .pagination_page:hover {
   background-color: $hoverColor;
+  border-color: var(--baseColor);
 }
 
 .pagination_page:active {
@@ -42,7 +43,8 @@
 
 .pagination_page_current,
 .pagination_page_current:hover {
-  background-color: var(--baseColorBackground);
+  background-color: var(--baseColor);
+  color: white;
 }
 
 .pagination_page_current {

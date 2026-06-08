@@ -131,7 +131,8 @@ func (app *App) initIcons() {
 
 		color := request.Param("color")
 		if color == "" {
-			color = hslToHex(app.hue, app.saturation, app.lightness)
+			//color = hslToHex(app.hue, app.saturation, app.lightness)
+			color = blackColor
 		}
 
 		io.Copy(request.Response(), iconColorPrefix(color))

@@ -51,7 +51,6 @@ $timelineLeftWidth: 60px;
     padding: 0px;
     margin: 0px;
     align-self: flex-start;
-    padding-left: 8px;
 }
 
 .timeline_toolbar {
@@ -99,7 +98,7 @@ $timelineLeftWidth: 60px;
     display: flex;
     flex-direction: column;
     padding: 0px 3px;
-    cursor: pointer;
+    //cursor: pointer;
 }
 
 .timeline_value_bars {

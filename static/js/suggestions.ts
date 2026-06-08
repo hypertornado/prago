@@ -76,7 +76,7 @@ class Suggestions {
           let buttonElIcon = document.createElement("img");
           buttonElIcon.setAttribute(
             "src",
-            "/admin/api/icons?file=glyphicons-basic-371-plus.svg",
+            "/admin/api/icons?file=glyphicons-basic-371-plus.svg&color=${getBaseColor}",
           );
           buttonElIcon.classList.add("btn_icon");
 

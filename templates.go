@@ -17,6 +17,10 @@ import (
 //go:embed templates
 var templatesFS embed.FS
 
+var blackColor = "444444"
+var redColor = "cb2431"
+var greenColor = "006400"
+
 type PragoTemplates struct {
 	templates      *template.Template
 	funcMap        template.FuncMap
@@ -68,12 +72,16 @@ func (app *App) initTemplates() {
 		return hslToHex(app.hue, app.saturation, app.lightness)
 	})
 
-	app.adminTemplates.Function("PragoGrayColor", func() string {
-		return "888888"
+	app.adminTemplates.Function("PragoBlackColor", func() string {
+		return blackColor
 	})
 
-	app.adminTemplates.Function("PragoBlackColor", func() string {
-		return "444444"
+	app.adminTemplates.Function("PragoRedColor", func() string {
+		return redColor
+	})
+
+	app.adminTemplates.Function("PragoGreenColor", func() string {
+		return greenColor
 	})
 
 	app.adminTemplates.Function("PragoHue", func() int64 {

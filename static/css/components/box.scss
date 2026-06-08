@@ -4,12 +4,16 @@
   margin: 0 auto;
   max-width: min(650px, 100vw);
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   margin-top: 0px;
 }
 
 .box:has(.admin_relationlist) {
-  border-top: 1px solid $grayBorderColor;
+  //border-top: 1px solid $grayBorderColor;
+  background-color: white;
+  @include softShadow;
+  border-radius: 8px;
+  max-width: min(632px, 100vw);
 }
 
 .box_content {
@@ -28,45 +32,45 @@
   padding: 4px 8px;
   position: sticky;
   top: 0px;
-  background-color: $backgroundGrayColor;
+  gap: 4px;
+  //background-color: $backgroundGrayColor;
+  background: $backgroundGrayColor;
   z-index: 10;
-}
-
-@media (min-width: 700px) {
-  .box_header:has(.box_icon) {
-    margin-left: -30px;
-    width: calc(100% + 50px);
-    padding-left: 40px;
-    border-radius: 8px;
-  } 
 }
 
 .box_icon {
   display: flex;
+  //background-color: white;
+  border: 0px solid $black;
+  //background-color: white;
+  border-radius: 8px;
+  //@include softShadow
 }
 
 .box_icon img {
-  width: 25px;
+  width: 1em;
+  margin-right: 4px;
   aspect-ratio: 1;
 }
 
+.box_header_prename {
+  font-size: .9rem;
+
+}
+
 .box_name {
-  margin-top: 10px;
+  //margin-top: 8px;
   font-size: 1.5rem;
   line-height: 1.3em;
   font-weight: 500;
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 5px;
+  justify-content: start;
+  gap: 0px;
 }
 
-@media (min-width: 700px) {
-  .box_name:has(.box_icon) {
-    margin-left: -30px;
-  } 
-}
-
-.box_textafter {
+.box_textbefore, .box_textafter {
   font-size: 1rem;
   font-weight: 500;
   line-height: 1.3em;
@@ -101,5 +105,8 @@
   .box_icon {
     display: none;
   }
-
+  
+  .box_header_buttons {
+    display: none;
+  }
 }

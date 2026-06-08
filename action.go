@@ -90,7 +90,7 @@ func newAction(app *App, url string) *Action {
 		url:         url,
 		app:         app,
 		parentBoard: app.MainBoard,
-		icon:        iconAction,
+		//icon:        iconAction,
 	}
 }
 
@@ -164,6 +164,16 @@ func (action *Action) Icon(icon string) *Action {
 
 func (action *Action) Board(board *Board) *Action {
 	action.parentBoard = board
+	return action
+}
+
+func (action *Action) styleAccented() *Action {
+	action.style = "accented"
+	return action
+}
+
+func (action *Action) styleCreate() *Action {
+	action.style = "create"
 	return action
 }
 

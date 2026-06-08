@@ -81,13 +81,19 @@ a.board_resource {
   min-width: 20px;
 }
 
-.board_resource_right {
+.board_resource_name {
   flex-grow: 10;
   flex-shrink: 10;
   border: 0px solid red;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.board_resource_subname {
+  color: $baseColor;
+  font-size: .9rem;
+  line-height: 1.3em;
 }
 
 @keyframes board_user {

@@ -33,7 +33,7 @@
     {{range $i, $item := .Header}}
       <div class="list_header_item" data-name="{{$item.ColumnName}}" data-natural-width="{{$item.NaturalCellWidth}}">
         <div class="list_header_item_name{{if $item.CanOrder}} list_header_item_name-canorder{{end}}" data-name="{{$item.ColumnName}}" title="{{$item.NameHuman}}">
-          {{if $item.Icon}}<img class="list_header_item_name_icon" src="/admin/api/icons?file={{$item.Icon}}">{{end}}
+          {{if $item.Icon}}<img class="list_header_item_name_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBaseColor}}">{{end}}
           <div class="list_header_item_name_text">{{- $item.NameHuman -}}</div>
           <div class="list_header_item_name_ordericon"></div>
         </div>
@@ -95,7 +95,7 @@
     <div class="list_filter2_name"></div>
     <input class="list_filter2_input">
     <div class="list_filter2_close hidden">
-      <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg" class="list_filter2_close_icon">
+      <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color={{PragoBaseColor}}" class="list_filter2_close_icon">
     </div>
   </div>
 {{end}}
@@ -104,20 +104,20 @@
   <div class="list_multiple_actions">
     <div class="list_multiple_actions_content">
       <span class="list_multiple_actions_description"></span>
-      <div class="btngroup list_multiple_actions_buttons">
+      <div class="list_multiple_actions_buttons">
         {{range $item :=  .MultipleActions}}
           <button class="btn list_multiple_action"
             data-id="{{$item.ID}}"
             data-resource-id="{{$item.ResourceID}}"
           >
-            {{if $item.Icon}}<img class="btn_icon" src="/admin/api/icons?file={{$item.Icon}}&color=444444">{{end}}
+            {{if $item.Icon}}<img class="btn_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBlackColor}}">{{end}}
             {{$item.Name}}
           </button>
         {{end}}
       </div>
     </div>
     <div class="btn list_multiple_actions_cancel">
-      <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=444444" class="btn_icon">
+      <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color={{PragoBaseColor}}" class="btn_icon">
     </div>
   </div>
 {{end}}

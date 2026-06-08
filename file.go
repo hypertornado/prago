@@ -447,6 +447,9 @@ func (f *File) IsImage() bool {
 
 func fileViewDataSource(request *Request, field *Field, data any) any {
 	outData := request.app.getImagePickerResponse(data.(string))
+	if len(outData.Items) == 0 {
+		return ""
+	}
 	jsonData, err := json.Marshal(outData)
 	must(err)
 	return string(jsonData)

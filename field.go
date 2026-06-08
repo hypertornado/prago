@@ -322,10 +322,11 @@ func (field *Field) getIcon() string {
 		if field.relatedResource.icon != "" {
 			return field.relatedResource.icon
 		}
-		return iconResource
 	}
 
-	if field.id == "id" {
+	return ""
+
+	/*if field.id == "id" {
 		return "glyphicons-basic-740-hash.svg"
 	}
 
@@ -348,7 +349,7 @@ func (field *Field) getIcon() string {
 	if field.typ == reflect.TypeOf(time.Now()) {
 		return iconDate
 	}
-	return ""
+	return ""*/
 }
 
 func getDefaultStringer(t reflect.Type) func(interface{}) string {
