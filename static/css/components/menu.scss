@@ -97,15 +97,15 @@
 }
 
 .menu2_item_content-destroy {
-  color: $red;
+  //border-color: $red;
 }
 
 .menu2_item_content-accented {
-  color: $baseColor;
+  //border-color: $baseColor;
 }
 
 .menu2_item_content-create {
-  color: $green;
+  //color: $green;
 }
 
 .menu2_item_content-selected,
@@ -117,8 +117,6 @@
   position: sticky;
   top: 0px;
   bottom: 0px;
-
-  //@include softShadow;
 }
 
 .menu2_items-subitems {

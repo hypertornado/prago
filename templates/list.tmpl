@@ -106,11 +106,11 @@
       <span class="list_multiple_actions_description"></span>
       <div class="list_multiple_actions_buttons">
         {{range $item :=  .MultipleActions}}
-          <button class="btn list_multiple_action"
+          <button class="btn list_multiple_action{{if $item.Style}} btn-{{$item.Style}}{{end}}"
             data-id="{{$item.ID}}"
             data-resource-id="{{$item.ResourceID}}"
           >
-            {{if $item.Icon}}<img class="btn_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBlackColor}}">{{end}}
+            {{if $item.Icon}}<img class="btn_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{PragoStyleColor $item.Style}}">{{end}}
             {{$item.Name}}
           </button>
         {{end}}

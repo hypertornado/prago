@@ -23,16 +23,7 @@
                 </div>
                 <a href="{{$item.URL}}" class="menu2_item_content {{if $item.Style}}menu2_item_content-{{$item.Style}}{{end}} {{if $item.Selected}} menu2_item_content-selected{{end}}" title="{{$item.Name}}">
                     {{if $item.Icon}}
-                        {{$color := PragoBlackColor}}
-                        {{if eq $item.Style "destroy"}}
-                            {{$color = PragoRedColor}}
-                        {{end}}
-                        {{if eq $item.Style "accented"}}
-                            {{$color = PragoBaseColor}}
-                        {{end}}
-                        {{if eq $item.Style "create"}}
-                            {{$color = PragoGreenColor}}
-                        {{end}}
+                        {{$color := PragoStyleColor $item.Style}}
                         {{if $item.Selected}}
                             {{$color = "ffffff"}}
                         {{end}}

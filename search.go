@@ -82,8 +82,10 @@ func (app *App) initSearch() {
 
 			view := &view{
 				Header: &boxHeader{
-					Name:      fmt.Sprintf("Vyhledávání – „%s“", q),
-					TextAfter: fmt.Sprintf("%s výsledků", humanizeNumber(hits)),
+					TextBefore: "Vyhledávání",
+					Icon:       "glyphicons-basic-28-search.svg",
+					Name:       fmt.Sprintf("„%s“", q),
+					TextAfter:  fmt.Sprintf("%s výsledků", humanizeNumber(hits)),
 				},
 
 				SearchResults: result,

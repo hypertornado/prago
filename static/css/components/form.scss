@@ -58,8 +58,9 @@
 }
 
 .btn-primary {
-  background: linear-gradient(var(--baseColorDarker), var(--baseColor));
+  //background: linear-gradient(var(--baseColorDarker), var(--baseColor));
   background: linear-gradient(var(--baseColor), var(--baseColorDarker));
+  background: var(--baseColor);
   color: white;
   border: none;
   font-weight: 500;
@@ -78,15 +79,21 @@
 }
 
 .btn-accented {
-  color: $baseColor;
+  //color: $baseColor;
 }
 
 .btn-destroy {
-  color: $red;
+  //color: $red;
+}
+
+.btn-accented:hover, .btn-accented:active, .btn-accented:focus {
+  color: $baseColor;
 }
 
 .btn-destroy:hover, .btn-destroy:active, .btn-destroy:focus {
   border-color: $red !important;
+  background: $redLightest;
+  color: $red;
 }
 
 .form-loading .btn-primary {
@@ -123,12 +130,12 @@
 }
 
 .btn-primary:hover {
-  background: var(--baseColor) !important;
+  background: var(--baseColorDarker) !important;
   outline: none;
 }
 
 .btn-primary:active {
-  background: var(--baseColorDarker) !important;
+  background: var(--baseColor) !important;
   outline: none;
 }
 
@@ -312,8 +319,12 @@
 }
 
 .form_label_errors {
-  font-size: 0.8em;
+  font-size: 0.9em;
   color: $red;
+  padding: 2px 4px;
+  //background: $redLightest;
+  display: inline-block;
+  border-radius: 4px;
 }
 
 .input {

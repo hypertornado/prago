@@ -167,18 +167,25 @@ func (action *Action) Board(board *Board) *Action {
 	return action
 }
 
-func (action *Action) styleAccented() *Action {
-	action.style = "accented"
+func (action *Action) setStyle(styleID string) {
+	action.style = styleID
+	if action.childAction != nil {
+		action.childAction.style = styleID
+	}
+}
+
+func (action *Action) StyleAccented() *Action {
+	action.setStyle("accented")
 	return action
 }
 
-func (action *Action) styleCreate() *Action {
-	action.style = "create"
+func (action *Action) StyleCreate() *Action {
+	action.setStyle("create")
 	return action
 }
 
-func (action *Action) styleDestroy() *Action {
-	action.style = "destroy"
+func (action *Action) StyleDestroy() *Action {
+	action.setStyle("destroy")
 	return action
 }
 

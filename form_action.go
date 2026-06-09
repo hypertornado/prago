@@ -140,9 +140,9 @@ func ActionResourceItemForm[T any](
 }
 
 func (resource *Resource) formItemAction(url string, formGenerator func(any, *Form, *Request), validation func(any, FormValidation, *Request)) *Action {
-	fa := newFormAction(resource.app, url, func(f *Form, r *Request) {
-		item := resource.query(context.TODO()).ID(r.Param("id"))
-		f.image = resource.previewer(r, item).ImageURL()
+	fa := newFormAction(resource.app, url, func(form *Form, request *Request) {
+		item := resource.query(context.TODO()).ID(request.Param("id"))
+		form.image = resource.previewer(request, item).ImageURL()
 	})
 
 	fa.actionForm.resource = resource
@@ -193,8 +193,8 @@ func (resource *Resource) formItemMultipleAction(url string, formGenerator func(
 
 	fa.formGenerator = func(form *Form, request *Request) {
 		idsStr := strings.Split(request.Param("id"), ",")
-		form.AddRelationMultiple("_item_ids", "", resource.id).
-			Value = fmt.Sprintf(";%s;", strings.Join(idsStr, ";"))
+		itemField := form.AddRelationMultiple("_item_ids", resource.pluralName(request.Locale()), resource.id)
+		itemField.Value = fmt.Sprintf(";%s;", strings.Join(idsStr, ";"))
 
 		items := getItemsFromIDs(resource, request.Param("id"))
 		formGenerator(items, form, request)

@@ -69,7 +69,7 @@ func (app *App) initTemplates() {
 	})
 
 	app.adminTemplates.Function("PragoBaseColor", func() string {
-		return hslToHex(app.hue, app.saturation, app.lightness)
+		return app.getBaseColor()
 	})
 
 	app.adminTemplates.Function("PragoBlackColor", func() string {
@@ -94,6 +94,19 @@ func (app *App) initTemplates() {
 
 	app.adminTemplates.Function("PragoLightness", func() string {
 		return fmt.Sprintf("%v%%", app.lightness*100)
+	})
+
+	app.adminTemplates.Function("PragoStyleColor", func(style string) string {
+		if style == "destroy" {
+			return redColor
+		}
+		if style == "create" {
+			return greenColor
+		}
+		if style == "accented" {
+			return app.getBaseColor()
+		}
+		return blackColor
 	})
 
 	must(app.adminTemplates.SetFilesystem(templatesFS, "templates/*.tmpl"))
@@ -159,4 +172,8 @@ func (templates *PragoTemplates) ExecuteToHTML(templateName string, data interfa
 
 func (app *App) GetAdminTemplates() *PragoTemplates {
 	return app.adminTemplates
+}
+
+func (app *App) getBaseColor() string {
+	return hslToHex(app.hue, app.saturation, app.lightness)
 }

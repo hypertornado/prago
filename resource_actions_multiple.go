@@ -35,7 +35,7 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 			form.initWithResourceItem(resource, item, request)
 
 			for _, v := range form.Items {
-				if v.ID == "_field" {
+				if v.ID == "_item_ids" || v.ID == "_field" {
 					continue
 				}
 				v.TextOver = v.Name
@@ -76,7 +76,7 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 			fv.Data(true)
 
 		},
-	).Icon(iconEdit).Permission(resource.canUpdate).Name(unlocalized("Upravit"))
+	).Icon(iconEdit).Permission(resource.canUpdate).Name(unlocalized("Upravit")).StyleAccented()
 
 	resource.formItemMultipleAction(
 		"export-multiple",
@@ -145,10 +145,6 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 			var strVal string
 
 			for _, item := range items {
-				//val := reflect.ValueOf(item).Elem()
-				//id := val.FieldByName("ID").Int()
-				//item := resource.query(context.Background()).ID(id)
-
 				for _, field := range fields {
 					ifaceVal := reflect.ValueOf(item).Elem().FieldByName(field.fieldClassName).Interface()
 
@@ -252,6 +248,6 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 			request.AddFlashMessage(messages.Get(request.Locale(), "admin_item_deleted"))
 			fv.Data(true)
 		},
-	).Icon(iconDelete).setPriority(-defaultHighPriority).styleDestroy().Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete"))
+	).Icon(iconDelete).setPriority(-defaultHighPriority).StyleDestroy().Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete"))
 
 }

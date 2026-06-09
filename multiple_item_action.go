@@ -10,19 +10,19 @@ func ActionResourceMultipleItemsForm[T any](
 
 	return resource.formItemMultipleAction(
 		url,
-		func(a []any, f *Form, r *Request) {
+		func(a []any, form *Form, request *Request) {
 			items := make([]*T, len(a))
 			for i, v := range a {
 				items[i] = v.(*T)
 			}
-			formGenerator(items, f, r)
+			formGenerator(items, form, request)
 		},
-		func(a []any, fv FormValidation, r *Request) {
+		func(a []any, fv FormValidation, request *Request) {
 			items := make([]*T, len(a))
 			for i, v := range a {
 				items[i] = v.(*T)
 			}
-			validation(items, fv, r)
+			validation(items, fv, request)
 		},
 	)
 }
@@ -47,6 +47,7 @@ func (resource *Resource) getMultipleActions(userData UserData) (ret []listMulti
 			ResourceID: resource.id,
 			Icon:       action.icon,
 			Name:       action.name(userData.Locale()),
+			Style:      action.style,
 		})
 
 	}

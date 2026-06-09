@@ -63,6 +63,7 @@ type listMultipleAction struct {
 	ResourceID string
 	Icon       string
 	Name       string
+	Style      string
 }
 
 func (resource *Resource) initListAction() {

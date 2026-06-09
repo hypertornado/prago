@@ -947,8 +947,8 @@ select.admin_timestamp_minute {
 }
 
 .btn-primary {
-  background: linear-gradient(var(--baseColorDarker), var(--baseColor));
   background: linear-gradient(var(--baseColor), var(--baseColorDarker));
+  background: var(--baseColor);
   color: white;
   border: none;
   font-weight: 500;
@@ -965,16 +965,14 @@ select.admin_timestamp_minute {
   overflow: hidden;
 }
 
-.btn-accented {
+.btn-accented:hover, .btn-accented:active, .btn-accented:focus {
   color: var(--baseColor);
-}
-
-.btn-destroy {
-  color: var(--red);
 }
 
 .btn-destroy:hover, .btn-destroy:active, .btn-destroy:focus {
   border-color: var(--red) !important;
+  background: hsl(355, 70%, 99%);
+  color: var(--red);
 }
 
 .form-loading .btn-primary {
@@ -1006,12 +1004,12 @@ select.admin_timestamp_minute {
 }
 
 .btn-primary:hover {
-  background: var(--baseColor) !important;
+  background: var(--baseColorDarker) !important;
   outline: none;
 }
 
 .btn-primary:active {
-  background: var(--baseColorDarker) !important;
+  background: var(--baseColor) !important;
   outline: none;
 }
 
@@ -1179,8 +1177,11 @@ select.admin_timestamp_minute {
 }
 
 .form_label_errors {
-  font-size: 0.8em;
+  font-size: 0.9em;
   color: var(--red);
+  padding: 2px 4px;
+  display: inline-block;
+  border-radius: 4px;
 }
 
 .input {
@@ -2201,6 +2202,7 @@ a.search_pagination_page-selected {
   border-radius: 14px;
   position: relative;
   z-index: 10000000000;
+  background: white;
   border: 1px solid #eee;
 }
 
@@ -2731,18 +2733,6 @@ a .dashboard_figure_value {
 .menu2_item_content:hover {
   border-color: var(--baseColor);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.menu2_item_content-destroy {
-  color: var(--red);
-}
-
-.menu2_item_content-accented {
-  color: var(--baseColor);
-}
-
-.menu2_item_content-create {
-  color: var(--green);
 }
 
 .menu2_item_content-selected,

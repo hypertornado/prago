@@ -7,7 +7,7 @@
             <div class="box_name">
                 {{if .Icon}}
                     <div class="box_icon">
-                        <img src="/admin/api/icons?file={{.Icon}}&color={{PragoBlackColor}}">
+                        <img src="/admin/api/icons?file={{.Icon}}&color={{PragoStyleColor .Style}}">
                     </div>
                 {{end}}
                 {{.Name}}
@@ -18,18 +18,9 @@
         {{end}}
         {{if .Buttons}}
             <div class="box_header_buttons">
-                {{range $button := .Buttons}}
-                    {{$color := PragoBlackColor}}
-                    {{if eq $button.Style "destroy"}}
-                        {{$color = PragoRedColor}}
-                    {{end}}
-
-                    {{if eq $button.Style "accented"}}
-                        {{$color = PragoBaseColor}}
-                    {{end}}
-                    
+                {{range $button := .Buttons}}                    
                     <a href="{{$button.URL}}" class="btn{{if $button.Style}} btn-{{$button.Style}}{{end}}">
-                        {{if $button.Icon}}<img src="/admin/api/icons?file={{$button.Icon}}&color={{$color}}" class="btn_icon">{{end}}
+                        {{if $button.Icon}}<img src="/admin/api/icons?file={{$button.Icon}}&color={{PragoStyleColor $button.Style}}" class="btn_icon">{{end}}
                         <div class="btn_text">{{$button.Name}}</div>
                     </a>
                 {{end}}

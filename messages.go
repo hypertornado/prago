@@ -180,8 +180,8 @@ var m = map[string]map[string]string{
 		"cs": "Opravdu chcete položku smazat?",
 	},
 	"admin_delete_confirmation_name": {
-		"en": "Really want to delete item %s?",
-		"cs": "Opravdu chcete smazat položku %s?",
+		"en": "Really want to delete item „%s“?",
+		"cs": "Opravdu chcete smazat položku „%s“?",
 	},
 	"admin_back": {
 		"en": "Back",

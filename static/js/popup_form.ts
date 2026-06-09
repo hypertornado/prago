@@ -45,7 +45,7 @@ class PopupForm extends Popup {
 
     okHandler(data: any) {
         this.unpresent();
-        this.dataHandler(data)
+        this.dataHandler(data);
     }
 
 

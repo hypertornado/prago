@@ -10354,12 +10354,6 @@ class Prago {
         initDashboard();
         initGoogleMaps();
         initTables();
-        let rootEl = document.querySelector(".root_content");
-        rootEl.addEventListener("scroll", (e) => {
-            console.log("SCROLL", e);
-            console.log(rootEl.scrollTop);
-            console.trace();
-        });
         let searchboxButton = document.querySelector(".searchbox_button");
         if (searchboxButton) {
             searchboxButton.addEventListener("click", (e) => {

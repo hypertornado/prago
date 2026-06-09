@@ -1,6 +1,7 @@
 package prago
 
 type boxHeader struct {
+	Style      string
 	Icon       string
 	TextBefore string
 	Name       string
@@ -25,10 +26,17 @@ func (form *Form) GetBoxHeader() *boxHeader {
 
 	description := form.Description
 
+	var style string
+	if form.action != nil {
+		style = form.action.style
+
+	}
+
 	return &boxHeader{
 		Icon:      icon,
 		Name:      name,
 		Image:     form.image,
 		TextAfter: description,
+		Style:     style,
 	}
 }

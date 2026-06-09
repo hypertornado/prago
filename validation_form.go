@@ -13,6 +13,7 @@ type FormValidation interface {
 	AfterContent(template.HTML)
 	RunTask(*Request, func(*FormTaskActivity) error)
 	Data(any)
+	PopupFormURL(string)
 }
 
 type formValidationData struct {
@@ -21,6 +22,7 @@ type formValidationData struct {
 	Errors              []ValidationError
 	Data                any
 	TaskUUID            string
+	PopupFormURL        string
 }
 
 type formValidationReport struct {
@@ -85,4 +87,8 @@ func (fv *formValidation) RunTask(request *Request, handler func(*FormTaskActivi
 	}
 	formTask := newFormTaskActivity(request, handler)
 	fv.validationData.TaskUUID = formTask.uuid
+}
+
+func (fv *formValidation) PopupFormURL(url string) {
+	fv.validationData.PopupFormURL = url
 }
