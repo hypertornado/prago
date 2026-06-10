@@ -193,6 +193,7 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initListStats()
 	app.initListFilter()
 	app.initResourceConflict()
+	app.initMultieditChangePopup()
 
 	return app
 }

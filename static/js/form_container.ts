@@ -79,6 +79,22 @@ class FormContainer {
     this.sendForm();
   }
 
+  handleOkData(data: any) {
+    if (data.PopupFormURL) {
+      new PopupForm(data.PopupFormURL, (data: any) => {
+        this.okHandler(data);
+      })
+      return;
+    }
+    if (data.RedirectionLocation || data.Preview || data.Data) {
+      this.okHandler(data);
+    } else {
+      this.setFormErrors(data.Errors);
+      if (data.AfterContent) this.setAfterContent(data.AfterContent);
+      initTables();
+    }
+  }
+
   sendForm() {
     let formData = new FormData(this.form.formEl);
     let request = new XMLHttpRequest();
@@ -114,14 +130,7 @@ class FormContainer {
           this.progress.classList.add("hidden");
           this.form.formEl.classList.remove("form-loading");
           this.formTaskUUID = data.TaskUUID;
-          if (data.RedirectionLocation || data.Preview || data.Data) {
-            this.okHandler(data);
-            //window.location = data.RedirectionLocation;
-          } else {
-            this.setFormErrors(data.Errors);
-            if (data.AfterContent) this.setAfterContent(data.AfterContent);
-            initTables();
-          }
+          this.handleOkData(data);
         } else {
           // Step 2: Create a Blob from the response
           var blob = new Blob([request.response], {
@@ -147,7 +156,7 @@ class FormContainer {
         }
       } else {
         this.progress.classList.add("hidden");
-        new Alert("Chyba při nahrávání souboru.");
+        new Alert(`Chyba ${request.status} při nahrávání souboru.`);
       }
     });
 

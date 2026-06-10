@@ -4,8 +4,6 @@
       <a href="{{$item.URL}}" class="admin_search_suggestion admin_search_suggestion-noimage" data-position="{{$i}}">
         {{if $item.Icon}}
           <img class="admin_search_suggestion_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBaseColor}}">
-        {{else}}
-          <div class="admin_search_suggestion_icon"></div>
         {{end}}
         <div class="admin_search_suggestion_right">
           {{if $item.Prename}}

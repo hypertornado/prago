@@ -46,15 +46,15 @@ func (resource *Resource) getRelationView(id int64, field *relatedField, request
 	ret.Name = name
 	ret.Subname = messages.ItemsCount(filteredCount, request.Locale())
 
-	ret.Buttons = append(ret.Buttons, &viewButton{
-		Name: messages.Get(request.Locale(), "admin_list"),
+	ret.Buttons = append(ret.Buttons, &Button{
+		Name: field.resource.pluralName(request.Locale()),
 		Icon: iconTable,
 		URL:  field.listURL(int64(id)),
 	})
 
 	if request.Authorize(field.resource.canCreate) {
-		ret.Buttons = append(ret.Buttons, &viewButton{
-			Name: messages.Get(request.Locale(), "admin_new"),
+		ret.Buttons = append(ret.Buttons, &Button{
+			Name: field.resource.singularName(request.Locale()),
 			Icon: iconAdd,
 			URL:  field.addURL(int64(id)),
 		})

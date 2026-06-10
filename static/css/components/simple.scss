@@ -18,12 +18,12 @@
   border: 1px solid $grayBorderColor;
   background: white;
   margin: 16px;
-  width: calc(100% - 40px);
+  width: calc(100% - 32px);
   max-width: 600px;
   border-radius: 8px;
-  padding: 8px;
+  padding: 16px;
   background-color: $backgroundGrayColor;
-  //padding-bottom: 10px;
+  //@include appleBackdrop;
   @include shadowMedium;
 }
 
@@ -101,16 +101,16 @@
 }
 
 .simple_section {
-  margin: 5px 0px;
+  margin: 16px 0px;
 }
 
 .simple_section_name {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   line-height: 1.5em;
   font-weight: bold;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
 }
 
 .simple_section_icon {

@@ -160,7 +160,7 @@ a.search_pagination_page-selected {
   line-height: 1.3em;
   overflow: hidden;
   text-decoration: none;
-  gap: 5px;
+  gap: 0px;
   padding-left: 50px;
 }
 
@@ -204,7 +204,7 @@ a.admin_search_suggestion-selected:active {
 }
 
 .admin_search_suggestion_prename {
-  color: $gray;
+  color: $black;
   text-transform: uppercase;
   font-size: .7rem;
   line-height: 1.3em;

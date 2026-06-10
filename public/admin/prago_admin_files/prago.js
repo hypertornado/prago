@@ -8559,6 +8559,23 @@ class FormContainer {
         event.preventDefault();
         this.sendForm();
     }
+    handleOkData(data) {
+        if (data.PopupFormURL) {
+            new PopupForm(data.PopupFormURL, (data) => {
+                this.okHandler(data);
+            });
+            return;
+        }
+        if (data.RedirectionLocation || data.Preview || data.Data) {
+            this.okHandler(data);
+        }
+        else {
+            this.setFormErrors(data.Errors);
+            if (data.AfterContent)
+                this.setAfterContent(data.AfterContent);
+            initTables();
+        }
+    }
     sendForm() {
         let formData = new FormData(this.form.formEl);
         let request = new XMLHttpRequest();
@@ -8589,15 +8606,7 @@ class FormContainer {
                     this.progress.classList.add("hidden");
                     this.form.formEl.classList.remove("form-loading");
                     this.formTaskUUID = data.TaskUUID;
-                    if (data.RedirectionLocation || data.Preview || data.Data) {
-                        this.okHandler(data);
-                    }
-                    else {
-                        this.setFormErrors(data.Errors);
-                        if (data.AfterContent)
-                            this.setAfterContent(data.AfterContent);
-                        initTables();
-                    }
+                    this.handleOkData(data);
                 }
                 else {
                     var blob = new Blob([request.response], {
@@ -8616,7 +8625,7 @@ class FormContainer {
             }
             else {
                 this.progress.classList.add("hidden");
-                new Alert("Chyba při nahrávání souboru.");
+                new Alert(`Chyba ${request.status} při nahrávání souboru.`);
             }
         });
         this.progress.classList.remove("hidden");
@@ -9460,6 +9469,7 @@ class PopupForm extends Popup {
         this.loadForm(path);
     }
     loadForm(path) {
+        console.log("LOADING FORM", path);
         fetch(path)
             .then((response) => {
             if (response.ok) {

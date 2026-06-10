@@ -36,8 +36,9 @@ type MailingData struct {
 }
 
 type MailingDataSection struct {
-	Name string
-	Text string
+	Name  string
+	Text  string
+	Table *Table
 }
 
 type MailingRecipient struct {
@@ -48,9 +49,7 @@ type MailingRecipient struct {
 func (app *App) initMailing() {
 
 	ActionPlain(app, "mailing-preview", func(request *Request) {
-
-		request.WriteHTML(200, app.adminTemplates, "mailing", getTestingMailingData(app))
-
+		request.w.Write([]byte(generateMailingHTMLData(getTestingMailingData(app))))
 	}).Permission("sysadmin").Board(sysadminBoard)
 
 	ActionForm(app, "send-mailing-preview", func(f *Form, r *Request) {
@@ -88,7 +87,13 @@ func getTestingMailingData(app *App) *MailingData {
 		URL:  "https://www.seznam.cz",
 	}
 
-	data.AddSection("Pohlaví", "žena")
+	section := data.AddSection("Pohlaví", "žena")
+
+	table := app.Table()
+	table.Header("Row1", "Row2")
+	table.Row(table.Cell("A"), table.Cell("B"))
+	section.Table = table
+
 	data.AddSection("Poznámka", "Nejdřív bylo škubnutí, pak pilotův třesoucí se hlas a nakonec náraz a horko. Tak médiím popsal okamžiky před čtvrteční havárií letadla Air India na západě Indie jediný přeživší Viswashkumar Ramesh. Muž cestoval s dalšími 241 lidmi, kteří při pádu letadla do obydlené oblasti za letištěm v Ahmadábádu.")
 
 	data.FooterDescription = "q oejw <a href=\"/xxxx\">ifoejwifoe</a> e"
@@ -137,6 +142,16 @@ func (app *App) Mailing(locale string, fn func(*MailingData)) error {
 	return sendMailingData(data)
 }
 
+func (app *App) GetMailingDataHTML(locale string, fn func(*MailingData)) string {
+	data := initMailingData(locale, app)
+	fn(data)
+	return generateMailingHTMLData(data)
+}
+
+func generateMailingHTMLData(data *MailingData) string {
+	return data.App.adminTemplates.ExecuteToString("mailing", data)
+}
+
 func sendMailingData(data *MailingData) error {
 	var subject = data.Subject
 	if subject == "" {
@@ -146,7 +161,7 @@ func sendMailingData(data *MailingData) error {
 		subject = data.FromName
 	}
 
-	htmlContent := data.App.adminTemplates.ExecuteToString("mailing", data)
+	htmlContent := generateMailingHTMLData(data)
 
 	email := data.App.Email().From(data.FromName, data.FromEmail).HTMLContent(htmlContent).Subject(subject)
 	for _, v := range data.Tos {

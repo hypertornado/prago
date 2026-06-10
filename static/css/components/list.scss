@@ -182,10 +182,12 @@
 .list_header_item_name-canorder {
   cursor: pointer;
   color: var(--baseColor);
+  border: 1px solid transparent;
 }
 
 .list_header_item_name-canorder:hover {
   background-color: var(--baseColorBackgroundLighter);
+  border-color: var(--baseColor);
 }
 
 .list_header_item_name-canorder:active {
@@ -370,8 +372,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-radius: 3px;
-  padding: 0px 3px;
+  border-radius: 4px;
+  padding: 0px 4px;
   display: flex;
   align-items: center;
   width: 100%;

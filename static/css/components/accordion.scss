@@ -3,24 +3,26 @@
 .accordions {
     display: flex;
     flex-direction: column;
-    padding: 5px 0px;
+    padding: 8px 0px;
 }
 
 .accordion {
-    border-top: 1px solid $grayBorderColor;
+    border-top: 1px solid $black;
 }
 
 .accordion:last-child {
-    border-bottom: 1px solid $grayBorderColor;
+    border-bottom: 1px solid $black;
 }
 
 .accordion_header {
-    padding: 5px;
+    padding: 4px 8px;
+    font-size: 1.2rem;
+    line-height: 1.3em;
     font-weight: 500;
-    text-transform: uppercase;
+    //text-transform: uppercase;
     cursor: pointer;
     display: flex;
-    gap: 5px;
+    gap: 4px;
     align-items: center;
     //background-color: $backgroundGrayColor;
 }
@@ -35,22 +37,64 @@
 
 .accordion_header_icon {
     //border: 1px solid red;
-    width: 1rem;
+    width: 1em;
     flex-shrink: 0;
     flex-grow: 0;
     aspect-ratio: 1;
     object-fit: cover;
+}
 
+.accordion_header_name {
+    flex-grow: 100;
+    flex-shrink: 100;
+
+}
+
+.accordion_header_chevron {
+    width: 1em;
+    aspect-ratio: 1;
+    flex-shrink: 100;
+
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
 }
 
 .accordion_content {
-    padding: 2px 5px;
-    color: $gray;
-    display: none;
+    padding: 0px 16px;
+    //padding-bottom: 16px;
+    color: $black;
+    font-size: 1rem;
+    line-height: 1.3em;
+    //display: none;
+    //padding: 0px;
+    //padding-bottom: 16px;
+
+    opacity: 0;
+    visibility: hidden;
+    max-height: 0;
+    overflow: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.25s ease,
+                transform 0.25s ease,
+                max-height 0.3s ease,
+                visibility 0s linear 0.3s;
 }
 
 .accordion-visible .accordion_content {
-    display: block;
+    //padding: 8px;
+    //padding-bottom: 16px;
+    opacity: 1;
+    visibility: visible;
+    max-height: 5000px;       // odhad horní hranice
+    transform: translateY(0);
+    transition: opacity 0.25s ease,
+                transform 0.25s ease,
+                max-height 0.3s ease,
+                visibility 0s;
+}
+
+.accordion-visible .accordion_header_chevron {
+    transform: rotate(180deg);
 }
 
 @media print {

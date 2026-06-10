@@ -10,6 +10,80 @@ import (
 	"time"
 )
 
+func (app *App) initMultieditChangePopup() {
+
+	PopupForm(app, "_multiedit-change", func(form *Form, request *Request) {
+
+		resource := app.getResourceByID(request.Param("resource"))
+
+		form.AddHidden("resource").Value = resource.id
+		form.AddHidden("field").Value = request.Param("field")
+
+		form.AddRelationMultiple("items", resource.pluralName(request.Locale()), resource.id).Value = request.Param("items")
+
+		newForm := app.NewForm("")
+		var item any = reflect.New(resource.typ).Interface()
+		var queryData url.Values = make(url.Values)
+		for k, v := range resource.defaultValues {
+			queryData.Set(k, v(request))
+		}
+		resource.bindData(item, request, queryData)
+		newForm.initWithResourceItem(resource, item, request)
+
+		for _, item := range newForm.Items {
+			if item.ID == request.Param("field") {
+				item.Focused = true
+				form.Items = append(form.Items, item)
+			}
+		}
+
+		form.AddSubmit("Změnit")
+
+	}, func(fv FormValidation, request *Request) {
+
+		resource := app.getResourceByID(request.Param("resource"))
+		if resource == nil {
+			fv.AddError("Není vybrán resource")
+		} else {
+			if !request.Authorize(resource.canUpdate) {
+				fv.AddError("Tento resource nelze upravovat")
+			} else {
+				field := resource.Field(request.Param("field"))
+				if !request.Authorize(field.canEdit) {
+					fv.AddError("Tento field nelze upravovat")
+				}
+			}
+		}
+
+		itemIDs := MultirelationStringToArray(request.Param("items"))
+		if len(itemIDs) == 0 {
+			fv.AddItemError("items", "Vyberte položku")
+		}
+
+		if !fv.Valid() {
+			return
+		}
+
+		fieldID := request.Param("field")
+
+		for _, id := range itemIDs {
+			params := make(url.Values)
+			params.Set("id", fmt.Sprintf("%d", id))
+			params.Set(fieldID, request.Param(fieldID))
+
+			_, validation := resource.editItemWithLogAndValues(request, params)
+			if !validation.valid {
+				fv.AddError(validation.TextErrorReport(id, "cs").Text)
+				return
+			}
+		}
+
+		fv.Data("OK")
+
+	}).Permission("logged").Name(unlocalized("Změnit"))
+
+}
+
 func (resource *Resource) initDefaultResourceMultipleActions() {
 
 	resource.formItemMultipleAction(
@@ -25,22 +99,6 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 			}
 
 			form.AddRadio("_field", "Jakou položku chcete opravit?", fieldOptions)
-
-			var item any = reflect.New(resource.typ).Interface()
-			var queryData url.Values = make(url.Values)
-			for k, v := range resource.defaultValues {
-				queryData.Set(k, v(request))
-			}
-			resource.bindData(item, request, queryData)
-			form.initWithResourceItem(resource, item, request)
-
-			for _, v := range form.Items {
-				if v.ID == "_item_ids" || v.ID == "_field" {
-					continue
-				}
-				v.TextOver = v.Name
-			}
-
 			form.AddSubmit("Upravit položky")
 		},
 		func(items []any, fv FormValidation, request *Request) {
@@ -60,21 +118,12 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 				return
 			}
 
-			for _, item := range items {
-				val := reflect.ValueOf(item).Elem()
-				id := val.FieldByName("ID").Int()
-				params := make(url.Values)
-				params.Set("id", fmt.Sprintf("%d", id))
-				params.Set(field.id, request.Param(field.id))
-				_, validation := resource.editItemWithLogAndValues(request, params)
-				if !validation.valid {
-					fv.AddError(validation.TextErrorReport(id, "cs").Text)
-					return
-				}
-			}
+			var urlPath url.Values = make(url.Values)
+			urlPath.Set("resource", resource.id)
+			urlPath.Set("field", field.id)
+			urlPath.Set("items", request.Param("_item_ids"))
 
-			fv.Data(true)
-
+			fv.PopupFormURL(fmt.Sprintf("/admin/_multiedit-change?%s", urlPath.Encode()))
 		},
 	).Icon(iconEdit).Permission(resource.canUpdate).Name(unlocalized("Upravit")).StyleAccented()
 

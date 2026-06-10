@@ -12,7 +12,7 @@ type view struct {
 	Icon     string
 	Name     string
 	Subname  string
-	Buttons  []*viewButton
+	Buttons  []*Button
 	Header   *boxHeader
 	Items    []viewField
 	Relation *viewRelation
@@ -29,11 +29,11 @@ type viewField struct {
 	EditName string
 }
 
-type viewButton struct {
+/*type viewButton struct {
 	Name string
 	URL  string
 	Icon string
-}
+}*/
 
 func (resource *Resource) getViews(item any, request *Request) (ret []*view) {
 	id := resource.previewer(request, item).ID()

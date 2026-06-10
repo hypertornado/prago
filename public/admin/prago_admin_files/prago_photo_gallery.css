@@ -9,8 +9,20 @@
   outline: none;
   overscroll-behavior: contain;
   overflow: auto;
+  animation: photogalleryReveal 300ms ease-in-out;
 }
 
+@keyframes photogalleryReveal {
+  from {
+    opacity: 0;
+    transform: scale(0) perspective(20cm) rotateX(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
 .prago_photo_gallery-hiddencontrols .prago_photo_gallery_btn {
   display: none;
 }

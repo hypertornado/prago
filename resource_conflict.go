@@ -185,7 +185,7 @@ func (resource *Resource) currentItemVersion(itemID int64) int64 {
 func (resource *Resource) validateConflict(request *Request, vc *itemValidation, itemID int64) {
 	app := resource.app
 	itemVersionStr := request.Param("_itemversion")
-	if itemVersionStr == "" {
+	if itemVersionStr == "" || itemVersionStr == "0" {
 		return
 	}
 	oldVersion, err := strconv.Atoi(itemVersionStr)

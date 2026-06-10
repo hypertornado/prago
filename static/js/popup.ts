@@ -1,5 +1,5 @@
 class Popup {
-  private el: HTMLDivElement;
+  protected el: HTMLDivElement;
   private contentEL: HTMLDivElement;
   private cancelable: boolean;
   protected cancelAction: Function;

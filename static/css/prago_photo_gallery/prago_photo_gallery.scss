@@ -9,6 +9,28 @@
     outline: none;
     overscroll-behavior: contain;
     overflow: auto;
+    animation: photogalleryReveal 300ms ease-in-out;
+}
+
+@keyframes photogalleryReveal {
+    from {
+        opacity: 0;
+        //filter: grayscale(1);
+        //clip-path: inset(0 50% 0 50%);
+        transform: scale(0) perspective(20cm) rotateX(0deg);
+        opacity: 1;
+        //transition: transform .85s cubic-bezier(.4,0,.2,1);
+    }
+
+    50% {
+        //transform: scale(1.1) perspective(20cm) rotateX(0deg); opacity: 1;
+    }
+
+    to {
+        //opacity: 1;
+        //clip-path: inset(0 0 0 0);
+        transform: scale(1); opacity: 1;
+    }
 }
 
 .prago_photo_gallery-hiddencontrols .prago_photo_gallery_btn {

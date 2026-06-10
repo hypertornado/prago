@@ -21,6 +21,7 @@ class PopupForm extends Popup {
     }
 
     loadForm(path: string) {
+        console.log("LOADING FORM", path);
         fetch(path)
         .then((response) => {
             if (response.ok) {
@@ -34,6 +35,7 @@ class PopupForm extends Popup {
             this.wide();
             const parser = new DOMParser();
             const document = parser.parseFromString(textVal, "text/html");
+            //let formContainerEl = <HTMLDivElement>this.el.querySelector(".form_container");
             let formContainerEl = <HTMLDivElement>document.querySelector(".form_container");
 
             this.setContent(formContainerEl);

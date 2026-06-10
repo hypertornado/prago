@@ -16,14 +16,14 @@
         {{.Name}}
         {{if .Subname}}
           <span class="view_header_subname">
-            {{.Subname}}
+            {{- .Subname -}}
           </span>
         {{end}}
       </span>
     {{end}}
     <div class="view_header_tabs">
       {{range $navItem := .Buttons}}
-        <a href="{{$navItem.URL}}" class="btn"><img src="/admin/api/icons?file={{.Icon}}&color={{PragoBlackColor}}" class="btn_icon">{{$navItem.Name}}</a>
+        <a href="{{$navItem.URL}}" class="btn" title="{{$navItem.Name}}"><img src="/admin/api/icons?file={{.Icon}}&color={{PragoBlackColor}}" class="btn_icon"></a>
       {{end}}
     </div>
   </div>
