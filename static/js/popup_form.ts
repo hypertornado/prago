@@ -21,7 +21,6 @@ class PopupForm extends Popup {
     }
 
     loadForm(path: string) {
-        console.log("LOADING FORM", path);
         fetch(path)
         .then((response) => {
             if (response.ok) {

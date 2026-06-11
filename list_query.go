@@ -83,7 +83,6 @@ func inValueToArr(in any) (ret []any) {
 }
 
 func (q *listQuery) In(field string, value any) *listQuery {
-
 	values := inValueToArr(value)
 	if len(values) == 0 {
 		return q

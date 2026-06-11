@@ -89,6 +89,10 @@ class RelationPicker {
         for (var i = 0; i < items.length; i++) {
           this.addPreview(items[i]);
         }
+        if (items.length == 0) {
+          this.showSearch();
+        }
+        this.updateInput();
       } else {
         this.showSearch();
       }

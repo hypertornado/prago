@@ -17,30 +17,29 @@ func NewWriter[T any](app *App, templates *PragoTemplates, templateName string) 
 	}
 }
 
-func (w *Writer[T]) Before(fn func(*Request, *T)) *Writer[T] {
+func (w *Writer[T]) Before(fn func(request *Request, item *T)) *Writer[T] {
 	w.beforeFN = fn
 	return w
 }
 
-func (w *Writer[T]) After(fn func(*Request, *T)) *Writer[T] {
+func (w *Writer[T]) After(fn func(request *Request, item *T)) *Writer[T] {
 	w.afterFN = fn
 	return w
 }
 
-func (w *Writer[T]) GET(path string, handler func(*Request, *T), constraints ...routerConstraint) {
+func (w *Writer[T]) GET(path string, handler func(request *Request, item *T), constraints ...routerConstraint) {
 	w.route("GET", path, handler, constraints...)
 }
 
-func (w *Writer[T]) POST(path string, handler func(*Request, *T), constraints ...routerConstraint) {
+func (w *Writer[T]) POST(path string, handler func(request *Request, item *T), constraints ...routerConstraint) {
 	w.route("POST", path, handler, constraints...)
 
 }
 
-func (w *Writer[T]) route(method string, path string, handler func(*Request, *T), constraints ...routerConstraint) {
+func (w *Writer[T]) route(method string, path string, handler func(request *Request, item *T), constraints ...routerConstraint) {
 	action := func(request *Request) {
 		var d T
 		dp := &d
-		//request.ResponseTemplates = w.templates
 		request.ResponseTemplateName = w.templateName
 
 		if w.beforeFN != nil {

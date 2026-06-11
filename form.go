@@ -13,7 +13,8 @@ type Form struct {
 	Action                 string
 	Icon                   string
 	Title                  string
-	Description            string
+	DescriptionsBefore     []string
+	DescriptionsAfter      []string
 	Items                  []*FormItem
 	Valid                  bool
 	CSRFToken              string

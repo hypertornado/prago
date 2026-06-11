@@ -1,12 +1,12 @@
 package prago
 
 type boxHeader struct {
-	Style      string
-	Icon       string
-	TextBefore string
-	Name       string
-	TextAfter  string
-	Image      string
+	Style              string
+	Icon               string
+	DescriptionsBefore []string
+	Name               string
+	DescriptionsAfter  []string
+	Image              string
 
 	Buttons []*buttonData
 }
@@ -24,19 +24,27 @@ func (form *Form) GetBoxHeader() *boxHeader {
 		name = form.action.name("cs")
 	}
 
-	description := form.Description
-
 	var style string
 	if form.action != nil {
 		style = form.action.style
 
 	}
 
-	return &boxHeader{
-		Icon:      icon,
-		Name:      name,
-		Image:     form.image,
-		TextAfter: description,
-		Style:     style,
+	ret := &boxHeader{
+		Icon:  icon,
+		Name:  name,
+		Image: form.image,
+		Style: style,
 	}
+
+	ret.DescriptionsBefore = form.DescriptionsBefore
+	ret.DescriptionsAfter = form.DescriptionsAfter
+
+	return ret
+}
+
+func (form *Form) Description(text string) {
+
+	form.DescriptionsAfter = append(form.DescriptionsAfter, text)
+
 }

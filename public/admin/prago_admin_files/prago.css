@@ -2730,6 +2730,7 @@ a .dashboard_figure_value {
   color: var(--black);
   display: flex;
   gap: 4px;
+  align-items: center;
   border: 1px solid transparent;
 }
 

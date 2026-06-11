@@ -1,7 +1,7 @@
 {{define "box_header" -}}
     <div class="box_header">
-        {{if .TextBefore}}
-            <div class="box_textbefore">{{.TextBefore}}</div>
+        {{range $text := .DescriptionsBefore}}
+            <div class="box_textbefore">{{$text}}</div>
         {{end}}
         {{if .Name}}
             <div class="box_name">
@@ -13,8 +13,8 @@
                 {{.Name}}
             </div>
         {{end}}
-        {{if .TextAfter}}
-            <div class="box_textafter">{{.TextAfter}}</div>
+        {{range $text := .DescriptionsAfter}}
+            <div class="box_textafter">{{$text}}</div>
         {{end}}
         {{if .Buttons}}
             <div class="box_header_buttons">

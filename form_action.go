@@ -141,8 +141,20 @@ func ActionResourceItemForm[T any](
 
 func (resource *Resource) formItemAction(url string, formGenerator func(any, *Form, *Request), validation func(any, FormValidation, *Request)) *Action {
 	fa := newFormAction(resource.app, url, func(form *Form, request *Request) {
+
 		item := resource.query(context.TODO()).ID(request.Param("id"))
-		form.image = resource.previewer(request, item).ImageURL()
+
+		previewer := resource.previewer(request, item)
+
+		previewID := fmt.Sprintf("#%d", previewer.ID())
+		previewName := previewer.Name()
+
+		form.DescriptionsBefore = append(form.DescriptionsBefore, fmt.Sprintf("%s %s", resource.singularName(request.Locale()), previewID))
+
+		if previewID != previewName {
+			form.DescriptionsBefore = append(form.DescriptionsBefore, previewName)
+		}
+		form.image = previewer.ImageURL()
 	})
 
 	fa.actionForm.resource = resource

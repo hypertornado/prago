@@ -8110,6 +8110,10 @@ class RelationPicker {
                 for (var i = 0; i < items.length; i++) {
                     this.addPreview(items[i]);
                 }
+                if (items.length == 0) {
+                    this.showSearch();
+                }
+                this.updateInput();
             }
             else {
                 this.showSearch();
@@ -9469,7 +9473,6 @@ class PopupForm extends Popup {
         this.loadForm(path);
     }
     loadForm(path) {
-        console.log("LOADING FORM", path);
         fetch(path)
             .then((response) => {
             if (response.ok) {

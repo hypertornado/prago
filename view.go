@@ -29,12 +29,6 @@ type viewField struct {
 	EditName string
 }
 
-/*type viewButton struct {
-	Name string
-	URL  string
-	Icon string
-}*/
-
 func (resource *Resource) getViews(item any, request *Request) (ret []*view) {
 	id := resource.previewer(request, item).ID()
 	ret = append(ret, resource.getBasicView(id, item, request))
@@ -52,7 +46,7 @@ func (resource *Resource) getBasicView(id int64, item any, request *Request) *vi
 		tableIcon = iconTable
 	}
 
-	ret.Header.TextBefore = fmt.Sprintf("%s #%d", resource.singularName(request.Locale()), id)
+	ret.Header.DescriptionsBefore = []string{fmt.Sprintf("%s #%d", resource.singularName(request.Locale()), id)}
 	ret.Header.Name = resource.previewer(request, item).Name()
 	ret.Header.Icon = iconView
 	ret.Header.Image = resource.previewer(request, item).ImageURL()

@@ -125,6 +125,7 @@ func NewTesting(t *testing.T, initHandler func(app *App)) *App {
 }
 
 func createApp(codeName string, version string, testing bool) *App {
+
 	app := &App{
 		testing:  testing,
 		codeName: codeName,
