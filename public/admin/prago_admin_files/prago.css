@@ -1339,6 +1339,32 @@ select.input {
   padding: 0px;
 }
 
+input[type=checkbox] {
+  /* Odstraní nativní vzhled prohlížeče */
+  appearance: none;
+  -webkit-appearance: none; /* Pro starší Safari */
+  /* Nastavení vlastních rozměrů a tvaru */
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  background-color: white;
+}
+
+input[type=checkbox]:hover {
+  border-color: var(--baseColor);
+}
+
+input[type=checkbox]:checked {
+  border-color: var(--baseColor);
+  background-color: var(--baseColor);
+  /* Můžeš přidat i ikonku fajfky jako pozadí */
+  background-image: url("/admin/api/icons?file=glyphicons-basic-739-check.svg&color=ffffff");
+  background-size: contain;
+}
+
 .input[type=number] {
   max-width: 200px;
 }

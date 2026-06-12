@@ -473,6 +473,36 @@ select.input {
   padding: 0px;
 }
 
+input[type="checkbox"] {
+  /* Odstraní nativní vzhled prohlížeče */
+  appearance: none;
+  -webkit-appearance: none; /* Pro starší Safari */
+  
+  /* Nastavení vlastních rozměrů a tvaru */
+  width: 16px;
+  height: 16px;
+  border: 2px solid $grayBorderColorDarker;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  background-color: white;  
+}
+
+input[type="checkbox"]:hover {
+  //background: $hoverColor;
+  border-color: $baseColor;
+}
+
+input[type="checkbox"]:checked {
+  //background-color: $baseColor;
+  border-color: $baseColor;
+  background-color: $baseColor;
+  /* Můžeš přidat i ikonku fajfky jako pozadí */
+  //background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+  background-image: url("/admin/api/icons?file=glyphicons-basic-739-check.svg&color=ffffff");
+  background-size: contain;
+}
+
 .input[type=number] {
   max-width: 200px;
 

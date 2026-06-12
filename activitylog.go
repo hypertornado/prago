@@ -112,7 +112,7 @@ func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int
 
 	}
 
-	ret.Header("", "Položka", "Úprava")
+	ret.Header("Datum", "Uživatel", "Položka", "Úprava")
 
 	for _, v := range items {
 		var username, userurl string
@@ -126,13 +126,15 @@ func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int
 		activityURL := app.getAdminURL(fmt.Sprintf("_activity?id=%d", v.ID))
 
 		itemName := fmt.Sprintf("%s #%d", v.ResourceName, v.ItemID)
+		var itemPreName string
 		if resource != nil {
 			item := resource.query(context.Background()).ID(v.ItemID)
 			var name string
 			if item != nil {
 				name = resource.previewer(request, item).Name()
 			}
-			itemName = fmt.Sprintf("#%d %s", v.ItemID, name)
+			itemPreName = fmt.Sprintf("%s #%d", resource.singularName(request.Locale()), v.ItemID)
+			itemName = name
 		}
 
 		actionCell := Cell(humanizeActionType(v.ActionType))
@@ -161,12 +163,14 @@ func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int
 		})
 
 		itemCell := Cell([2]string{resource.getURL(fmt.Sprintf("%d", v.ItemID)), itemName})
+		itemCell.DescriptionBefore(itemPreName)
 
-		metadataCell := Cell([2]string{userurl, username})
-		metadataCell.DescriptionAfter(messages.Timestamp(locale, v.CreatedAt, true))
+		dateCell := Cell(messages.Timestamp(locale, v.CreatedAt, true))
+		userCell := Cell([2]string{userurl, username})
 
 		ret.Row(
-			metadataCell,
+			dateCell,
+			userCell,
 			itemCell,
 			actionCell,
 		)

@@ -113,7 +113,10 @@ func (resource *Resource) formAction(url string, formGenerator func(*Form, *Requ
 	action.actionForm.Permission(resource.canView)
 	action.actionValidation.Permission(resource.canView)
 
-	action.formGenerator = formGenerator
+	action.formGenerator = func(form *Form, request *Request) {
+		form.DescriptionsBefore = append(form.DescriptionsBefore, resource.pluralName(request.Locale()))
+		formGenerator(form, request)
+	}
 	action.formValidation = validation
 
 	resource.actions = append(resource.actions, action.actionForm)
