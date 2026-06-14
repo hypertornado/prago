@@ -3,7 +3,13 @@
 {{end}}
 
 {{define "form_input_int"}}
+  <button type="button" class="btn form_item_minus">
+    <img src="/admin/api/icons?file=glyphicons-basic-372-minus.svg&color=${getBaseColor()}" class="btn_icon">
+  </button>
   <input type="number" name="{{.ID}}" value="{{.Value}}" {{if .Autocomplete}}autocomplete="{{.Autocomplete}}"{{end}} {{if .InputMode}}inputmode="{{.InputMode}}"{{end}} id="{{.UUID}}" class="input form_watcher form_input form_input-int"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <button type="button" class="btn form_item_plus">
+    <img src="/admin/api/icons?file=glyphicons-basic-371-plus.svg&color=${getBaseColor()}" class="btn_icon">
+  </button>
 {{end}}
 
 {{define "form_input_float"}}

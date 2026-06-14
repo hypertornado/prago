@@ -21,6 +21,7 @@
     "js/list_settings.ts",
     "js/list_multiple.ts",
     "js/reorder.ts",
+    "js/reorder2.ts",
     "js/markdown.ts",
     "js/timestamps.ts",
     "js/relations.ts",

@@ -45,7 +45,7 @@
   .imageview_image_btn {
     position: absolute;
     right: 4px;
-    bottom: 4px;
+    top: 4px;
     font-weight: bold;
     display: flex;
     opacity: 0;
@@ -54,5 +54,22 @@
   
   .imageview_image:hover .imageview_image_btn {
     opacity: 1;
+  }
+
+  .imageview_image_description {
+    position: absolute;
+    right: 4px;
+    left: 4px;
+    bottom: 4px;
+    @include appleBackdrop;
+    border-radius: 4px;
+    padding: 0px 4px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: calc(100% - 8px);
+    font-size: .9rem;
+    line-height: 1.3em;
   }
 

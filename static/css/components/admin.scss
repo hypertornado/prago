@@ -6,8 +6,8 @@
 }
 
 .map_picker_map {
-  height: 300px;
-  background-color: $backgroundGrayColor;
+  height: 250px;
+  background-color: white;
 }
 
 .map_picker_status {
@@ -303,14 +303,13 @@ select.admin_timestamp_minute {
   display: flex;
 }
 
-.admin_relation_preview:first-child .admin_relation_preview_action-up {
+/*.admin_relation_preview:first-child .admin_relation_preview_action-up {
   display: none;
-  //opacity: 0;
 }
 
 .admin_relation_preview:last-child .admin_relation_preview_action-down {
   display: none;
-}
+}*/
 
 .admin_relation_preview_action {
   display: inline-flex;

@@ -47,12 +47,20 @@ class RelationPicker {
       this.addPreview.bind(this)
     );
 
+    this.makeReordable();
+
     if (this.multipleInputs || parseInt(this.input.value) > 0) {
       this.getData();
     } else {
       this.progress.classList.add("hidden");
       this.showSearch();
     }
+  }
+
+  makeReordable() {
+    makeReorderable(this.previewsContainer, () => {
+      this.updateLayout();
+    });
   }
 
   getSearchURL(q: string): string {
@@ -108,6 +116,7 @@ class RelationPicker {
     this.previewsContainer.appendChild(previewEl);
     previewEl.appendChild(el);
 
+    /*
     let upButton = document.createElement("div");
     upButton.classList.add(
       "admin_relation_preview_action",
@@ -129,6 +138,7 @@ class RelationPicker {
     downButton.addEventListener("click", (e: Event) => {
       this.updateOrder(e, true);
     });
+    */
 
     let deleteButton = document.createElement("div");
     deleteButton.classList.add("admin_relation_preview_action");

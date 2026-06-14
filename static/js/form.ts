@@ -48,6 +48,7 @@ class Form {
 
     this.initSuggestions();
     this.initConflictCheck();
+    this.initPlusMinus();
 
     form.addEventListener("submit", () => {
       this.dirty = false;
@@ -116,6 +117,23 @@ class Form {
     for (var i = 0; i < suggestionEls.length; i++) {
       let suggestionEl = suggestionEls[i];
       console.log(suggestionEl);
+    }
+  }
+
+  initPlusMinus() {
+    let els = this.formEl.querySelectorAll(".form_item_plus,.form_item_minus");
+    for (var i = 0; i < els.length; i++) {
+      let btnEl = els[i];
+      btnEl.addEventListener("mousedown", (e: Event) => {
+        let input = btnEl.parentElement.querySelector("input");
+        if (btnEl.classList.contains("form_item_plus")) {
+          input.stepUp();
+        } else {
+          input.stepDown();
+        }
+        input.focus();
+        e.preventDefault();
+      })
     }
   }
 

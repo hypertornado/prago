@@ -34,11 +34,20 @@ class ImageView {
     imgEl.setAttribute("src", file.ThumbURL)
     container.appendChild(imgEl);
 
+    console.log(file);
+
     let btnEl = document.createElement("div");
     btnEl.classList.add("btn");
     btnEl.classList.add("imageview_image_btn");
     btnEl.innerText = "…";
     container.appendChild(btnEl);
+
+    if (file.ImageDescription) {
+      let descriptionEl = document.createElement("div");
+      descriptionEl.classList.add("imageview_image_description");
+      descriptionEl.innerText = file.ImageDescription;
+      container.appendChild(descriptionEl);
+    }
 
     this.galleryImagesData.push({"URL": file.GiantURL, "Title": file.ImageName + " " + file.ImageDescription})
 

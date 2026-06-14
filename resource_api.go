@@ -80,7 +80,8 @@ func (resource *Resource) initDefaultResourceAPIs() {
 				}
 				item := resource.query(request.r.Context()).ID(id)
 				if item == nil {
-					panic(fmt.Sprintf("cant find resource item id %s", id))
+					resource.app.Log().Errorf("cant find resource item id %s", id)
+					continue
 				}
 
 				previews = append(previews,

@@ -78,35 +78,15 @@ $backgroundGrayColor: #fafafa;
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
 }
 
-$radius: 5px;
+$radius: 8px;
 
 @mixin rectangle {
     @include border;
     display: inline-block;
     background-color: var(--baseColorBackgroundLighter);
     border-radius: $radius;
-    margin: 5px;
+    margin: 4px;
     flex-shrink: 0;
-}
-
-@mixin inputzone {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    @include insetShadow;
-    outline: none;
-    border: 1px solid $grayBorderColorDarker;
-    padding: 8px 6px;
-    display: inline-block;
-    border-radius: 8px;
-    font-size: 1rem;
-    line-height: 1.4rem;
-    
-    text-align: left;
-    
-    color: #333;
-    vertical-align: middle;
-    width: 100%;
 }
 
 @mixin appleBackdrop {

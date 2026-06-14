@@ -238,6 +238,14 @@ class ImagePicker {
       this.preview2.appendChild(itemEl);
     }
 
+    this.inirReorder();
+
+  }
+
+  inirReorder() {
+    makeReorderable(this.preview2, () => {
+      this.updateHiddenData2();
+    });
   }
 
   updateHiddenData2() {
