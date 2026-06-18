@@ -26,9 +26,16 @@ type pageData struct {
 
 	Menu *menu
 
-	Form  *Form
-	List  *list
-	Views []*view
+	BoxHeader *boxHeader
+
+	Form          *Form
+	List          *list
+	RelationViews []*viewRelation
+
+	ViewFields []viewField
+
+	SearchResults []*searchItem
+	Pagination    []paginationItem
 
 	BoardView *boardView
 

@@ -40,6 +40,7 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *form
 		}
 
 		ret.formGenerator(form, request)
+		pd.BoxHeader = form.GetBoxHeader()
 		pd.Form = form
 	})
 

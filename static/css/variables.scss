@@ -19,13 +19,6 @@
 
 $baseColor: var(--baseColor);
 
-//Old base color: 4077bf
-
-
-//$baseColor: hsl(214, 50%, 50%);
-//$baseColorBackground: hsl(214, 50%, 90%);
-//$baseColorBackgroundLighter: hsl(214, 50%, 97%);
-
 $red: var(--red);
 $redLighter: #de4450;
 $redLightest: hsl(355, 70%, 99%);
@@ -37,17 +30,13 @@ $hoverColor: var(--baseColorBackgroundLighter);
 $activeColor: var(--baseColorBackground);
 
 $black: var(--black);
-//$black: hsl(var(--hue), 10%, 20%);
 
 $gray: #999;
-//$gray: hsl(var(--hue), 10%, 50%);
 
 $grayBorderColor: #eee;
 $grayBorderColorDarker: #ddd;
 
 $backgroundGrayColor: #fafafa;
-//$backgroundGrayColor: #111;
-//$backgroundGrayColor: hsl(var(--hue), 1%, 99.5%);
 
 @mixin shadow {
     box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.1);
@@ -61,17 +50,8 @@ $backgroundGrayColor: #fafafa;
     box-shadow: rgb(50 50 93 / 25%) 0px 2px 5px -1px, rgb(0 0 0 / 30%) 0px 1px 3px -1px;
 }
 
-@mixin border {
-    border: 1px solid $grayBorderColor;
-}
-
 @mixin softShadow {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-@mixin blurBackground {
-    background-color: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(3px);
 }
 
 @mixin insetShadow {
@@ -81,7 +61,7 @@ $backgroundGrayColor: #fafafa;
 $radius: 8px;
 
 @mixin rectangle {
-    @include border;
+    border: 1px solid $grayBorderColor;
     display: inline-block;
     background-color: var(--baseColorBackgroundLighter);
     border-radius: $radius;

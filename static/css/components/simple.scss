@@ -65,22 +65,22 @@
 .simple_logo {
   width: 100px;
   aspect-ratio: 1;
-  margin: 0px auto;
+  margin: 0px 8px;
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat;
   print-color-adjust: exact;
 }
 
-.simple_name {
-  text-align: center;
+h1.simple_name {
+  //text-align: center;
   font-size: 2rem;
   line-height: 1.3em;
-  margin: 0px 10px;
+  margin: 0px 0px;
 }
 
 .simple_prename, .simple_postname {
-  text-align: center;
+  //text-align: center;
   font-weight: 500;
   font-size: 1.2rem;
   line-height: 1.3em;

@@ -240,7 +240,6 @@ class FormContainer {
     this.formContainer.querySelector(".form_task_stop").addEventListener("click", () => {
       new PopupForm("/admin/_taskstop?uuid=" + this.formTaskUUID, (data: any) => {
         this.setTaskFinished();
-        //this.addUUID(data.Data);
       })
     });
 

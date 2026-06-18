@@ -97,16 +97,31 @@
   @include softShadow;
 }
 
-.menu2_item_content-destroy {
-  //border-color: $red;
+.menu2_item_content-destroy:hover {
+  border-color: $red;
+  background-color: $redLightest;
+}
+
+.menu2_item_content-destroy:active {
+  background-color: $redLighter;
+}
+
+.menu2_item_content-selected.menu2_item_content-destroy, .menu2_item_content-selected.menu2_item_content-destroy:hover {
+  background: $red;
+  border-color: $red;
 }
 
 .menu2_item_content-accented {
   //border-color: $baseColor;
 }
 
-.menu2_item_content-create {
-  //color: $green;
+.menu2_item_content-create:hover {
+  border-color: $green;
+}
+
+.menu2_item_content-selected.menu2_item_content-create, .menu2_item_content-selected.menu2_item_content-create:hover {
+  //background: $green;
+  //border-color: $green;
 }
 
 .menu2_item_content-selected,

@@ -1,0 +1,94 @@
+{{define "item_views"}}
+  <div class="box views">
+  {{range $item := .}}
+    <div class="view">
+    {{if $item.Name}}
+      <div class="view_name">
+        {{if $item.Icon}}
+          <img src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBlackColor}}" class="view_name_icon">
+        {{end}}
+        {{$item.Name}}
+        {{if $item.EditURL}}
+          <a href="{{$item.EditURL}}" class="view_edit">
+            <img src="/admin/api/icons?file=glyphicons-basic-31-pencil.svg&color={{PragoBaseColor}}" class="view_edit_icon">{{$item.EditName}}
+          </a>
+        {{end}}
+      </div>
+    {{end}}
+    <div class="view_content">
+      {{- $item.Content -}}
+    </div>
+    </div>
+  {{end}}
+  </div>
+{{end}}
+
+{{define "view_text"}}
+  {{- if . -}}
+    {{- . -}}
+  {{- end -}}
+{{end}}
+
+{{define "view_textarea"}}
+  {{- if . -}}
+    <span>{{- . -}}</span>
+  {{- end -}}
+{{end}}
+
+{{define "view_markdown"}}
+  {{- if . -}}
+    {{- PragoMarkdown . -}}
+  {{- end -}}
+{{end}}
+
+{{define "view_cdn_file"}}
+  <div class="fileview">
+  {{if .OriginalURL}}
+      <a href="{{.OriginalURL}}" class="fileview_preview" style="background-image: url('{{.GiantURL}}');"></a>
+  {{end}}
+  </div>
+{{end}}
+
+{{define "view_image"}}
+  {{if .}}
+  <div class="imageview" data-images="{{.}}">
+    <progress class="progress" value="" max=""></progress>
+  </div>
+  {{end}}
+{{end}}
+
+{{define "view_video"}}
+  {{if .}}
+  <div class="videoview" data-videos="{{.}}">
+    <video class="videoview_video hidden"></video>
+    <progress class="progress" value="" max=""></progress>
+  </div>
+  {{end}}
+{{end}}
+
+{{define "view_place"}}
+  {{if .}}
+  <div class="admin_item_view_place" data-value="{{.}}">
+    <progress class="progress" value="" max=""></progress>
+  </div>
+  {{end}}
+{{end}}
+
+{{define "view_relation"}}
+    {{if .}}
+      <div class="admin_item_view_relation">
+      {{range $item := .}}
+      <a class="preview" href="{{$item.URL}}">
+        {{if $item.Image}}
+          <img src="{{PragoCSS $item.Image}}" class="preview_image" loading="lazy">
+        {{end}}
+        <div class="preview_right">
+          <div class="preview_name">{{$item.Name}}</div>
+          <div class="preview_description" title="{{$item.Description}}">{{$item.Description}}</div>
+        </div>
+      </a>
+      {{end}}
+      </div>
+    {{else -}}
+    {{- end}}
+{{end}}

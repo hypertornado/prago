@@ -70,7 +70,10 @@ func (resource *Resource) initDefaultResourceActions() {
 			renderErrorPage(request, 404)
 			return
 		}
-		pd.Views = resource.getViews(item, request)
+		id := resource.previewer(request, item).ID()
+		pd.BoxHeader = resource.getBoxHeader(id, item, request)
+		pd.ViewFields = resource.getViewFields(id, item, request)
+		pd.RelationViews = resource.getRelationViews(id, request)
 	},
 	).Icon("glyphicons-basic-588-book-open-text.svg").Name(messages.GetNameFunction("admin_view")).setPriority(defaultHighPriority).Permission(resource.canView)
 

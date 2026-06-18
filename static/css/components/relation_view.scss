@@ -1,0 +1,33 @@
+@use "../variables.scss" as *;
+
+.relation_view_header {
+  padding: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.relation_view_header_icon {
+  width: 16px;
+  position: relative;
+  top: 4px;
+  aspect-ratio: 1;
+}
+
+.relation_view_header_name {
+  font-weight: 500;
+  flex-grow: 10;
+  font-size: 1rem;
+  line-height: 1.3em;
+}
+
+.relation_view_header_subname {
+  font-size: .9rem;
+  font-weight: normal;
+  line-height: 1.3em;
+  color: $gray;
+  display: block;
+}
+
+.relation_view_header_tabs {
+  flex-shrink: 0;
+}

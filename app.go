@@ -113,6 +113,8 @@ type App struct {
 	hue        int64
 	saturation float64
 	lightness  float64
+
+	GetTrackingUUIDFunc func(request *Request) string
 }
 
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {
@@ -136,6 +138,9 @@ func createApp(codeName string, version string, testing bool) *App {
 		hue:        214,
 		saturation: 1,
 		lightness:  .34,
+		GetTrackingUUIDFunc: func(*Request) string {
+			return ""
+		},
 	}
 
 	app.logger = newLogger(app)
@@ -165,6 +170,8 @@ func createApp(codeName string, version string, testing bool) *App {
 
 	app.initUserResource()
 	app.initFilesResource()
+
+	app.initBeacons()
 	app.initSessionsResource()
 	app.initEmailSentResource()
 

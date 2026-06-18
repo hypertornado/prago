@@ -80,21 +80,19 @@ func (app *App) initSearch() {
 				})
 			}
 
-			view := &view{
-				Header: &boxHeader{
-					DescriptionsBefore: []string{"Vyhledávání"},
-					Icon:               "glyphicons-basic-28-search.svg",
-					Name:               fmt.Sprintf("„%s“", q),
-					DescriptionsAfter:  []string{fmt.Sprintf("%s výsledků", humanizeNumber(hits))},
-				},
-
-				SearchResults: result,
-				Pagination:    pagination,
+			pd.BoxHeader = &boxHeader{
+				DescriptionsBefore: []string{"Vyhledávání"},
+				Icon:               "glyphicons-basic-28-search.svg",
+				Name:               fmt.Sprintf("„%s“", q),
+				DescriptionsAfter:  []string{fmt.Sprintf("%s výsledků", humanizeNumber(hits))},
 			}
 
-			pd.Name = view.Header.Name
+			pd.SearchResults = result
+			pd.Pagination = pagination
 
-			pd.Views = append(pd.Views, view)
+			pd.Name = pd.BoxHeader.Name
+
+			//pd.Views = append(pd.Views, view)
 
 			pd.SearchQuery = q
 		},

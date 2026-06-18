@@ -82,6 +82,9 @@ func (form *Form) initWithResourceItem(resource *Resource, item any, request *Re
 			Name:     field.name(request.Locale()),
 			Template: field.fieldType.formTemplate,
 			Focused:  focused,
+
+			IsWide:                 field.isWide,
+			PreventPasswordManager: field.preventPasswordManager,
 		}
 		if field.description != nil {
 			item.Description = field.description(request.Locale())

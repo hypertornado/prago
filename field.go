@@ -39,6 +39,9 @@ type Field struct {
 
 	helpURL string
 
+	isWide                 bool
+	preventPasswordManager bool
+
 	fixStringValueFN func(string) string
 
 	formFilter    *FormFilter
@@ -90,6 +93,8 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 
 	if ret.id == "name" || ret.id == "description" {
 		ret.isSearchable = true
+		ret.isWide = true
+		ret.preventPasswordManager = true
 	}
 
 	//remove unused tags
@@ -306,6 +311,16 @@ func (field *Field) FormFilter(filter *FormFilter) *Field {
 
 func (field *Field) SuggestionURL(suggestionURL string) *Field {
 	field.suggestionURL = suggestionURL
+	return field
+}
+
+func (field *Field) Wide(isWide bool) *Field {
+	field.isWide = isWide
+	return field
+}
+
+func (field *Field) PreventPasswordManager(prevent bool) *Field {
+	field.preventPasswordManager = prevent
 	return field
 }
 

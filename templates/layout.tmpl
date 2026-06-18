@@ -52,15 +52,36 @@
                 {{range $message := .Messages}}
                     <h1 class="admin_message">{{$message.Name}}</h1>
                 {{end}}
+                {{if .BoxHeader}}
+                    {{template "box_header" .BoxHeader}}
+                {{end}}
+
+                {{if .ViewFields}}
+                    {{template "item_views" .ViewFields}}
+                {{end}}
+
                 {{if .Form}}
                     {{template "form" .Form}}
                 {{end}}
                 {{if .List}}
                     {{template "list" .List}}
                 {{end}}
-                {{if .Views}}
-                    {{template "views" .Views}}
+                {{if .RelationViews}}
+                    {{template "relation_views" .RelationViews}}
                 {{end}}
+                {{if .SearchResults}}
+                    {{template "search_results" .SearchResults}}
+                {{end}}
+
+
+                {{if .Pagination}}
+                    <div class="search_pagination">
+                    {{range $page := .Pagination}}
+                        <a href="{{$page.URL}}" class="search_pagination_page{{if $page.Selected}} search_pagination_page-selected{{end}}">{{$page.Title}}</a>
+                    {{end}}
+                    </div>
+                {{end}}
+
                 {{if .BoardView}}
                     {{template "board" .BoardView}}
                 {{end}}

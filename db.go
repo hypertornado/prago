@@ -277,6 +277,14 @@ func (query *listQuery) count() (int64, error) {
 
 	var i int64
 	err = rows.Scan(&i)
+	if err != nil {
+		return -1, err
+	}
+
+	if err := rows.Err(); err != nil {
+		return -1, fmt.Errorf("Error while scanning row: %s", err)
+	}
+
 	return i, err
 }
 
@@ -317,6 +325,11 @@ func (query *listQuery) list() (interface{}, error) {
 		rows.Scan(scanners...)
 		slice.Set(reflect.Append(slice, newValue))
 	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("Error while scanning rows: %s", err)
+	}
+
 	return slice.Interface(), nil
 }
 

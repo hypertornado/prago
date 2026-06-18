@@ -128,7 +128,6 @@ function popup(url: string) {
             window.primaryFormContainer.sendForm();
             return;
         }
-
         window.location.reload();
     });
 }

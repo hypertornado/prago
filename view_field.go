@@ -8,19 +8,6 @@ import (
 	"time"
 )
 
-type view struct {
-	Icon     string
-	Name     string
-	Subname  string
-	Buttons  []*Button
-	Header   *boxHeader
-	Items    []viewField
-	Relation *viewRelation
-
-	SearchResults []*searchItem
-	Pagination    []paginationItem
-}
-
 type viewField struct {
 	Icon     string
 	Name     string
@@ -29,28 +16,18 @@ type viewField struct {
 	EditName string
 }
 
-func (resource *Resource) getViews(item any, request *Request) (ret []*view) {
-	id := resource.previewer(request, item).ID()
-	ret = append(ret, resource.getBasicView(id, item, request))
-	ret = append(ret, resource.getRelationViews(id, request)...)
+func (resource *Resource) getBoxHeader(id int64, item any, request *Request) *boxHeader {
+	ret := &boxHeader{}
+	ret.DescriptionsBefore = []string{fmt.Sprintf("%s #%d", resource.singularName(request.Locale()), id)}
+	ret.Name = resource.previewer(request, item).Name()
+	ret.Icon = iconView
+	ret.Image = resource.previewer(request, item).ImageURL()
+	ret.Buttons = resource.getItemButtonData(request, item, true)
 	return ret
+
 }
 
-func (resource *Resource) getBasicView(id int64, item any, request *Request) *view {
-	ret := &view{
-		Header: &boxHeader{},
-	}
-
-	tableIcon := resource.icon
-	if tableIcon == "" {
-		tableIcon = iconTable
-	}
-
-	ret.Header.DescriptionsBefore = []string{fmt.Sprintf("%s #%d", resource.singularName(request.Locale()), id)}
-	ret.Header.Name = resource.previewer(request, item).Name()
-	ret.Header.Icon = iconView
-	ret.Header.Image = resource.previewer(request, item).ImageURL()
-	ret.Header.Buttons = resource.getItemButtonData(request, item, true)
+func (resource *Resource) getViewFields(id int64, item any, request *Request) (ret []viewField) {
 
 	for i, f := range resource.fields {
 		if !f.authorizeView(request) {
@@ -95,8 +72,8 @@ func (resource *Resource) getBasicView(id int64, item any, request *Request) *vi
 		}
 
 		icon := f.getIcon()
-		ret.Items = append(
-			ret.Items,
+		ret = append(
+			ret,
 			viewField{
 				Icon:     icon,
 				Name:     f.name(request.Locale()),
@@ -111,8 +88,8 @@ func (resource *Resource) getBasicView(id int64, item any, request *Request) *vi
 		if !request.Authorize(v.Permission) {
 			continue
 		}
-		ret.Items = append(
-			ret.Items,
+		ret = append(
+			ret,
 			viewField{
 				//Icon:    "glyphicons-basic-43-stats-circle.svg",
 				Name:    v.Name(request.Locale()),

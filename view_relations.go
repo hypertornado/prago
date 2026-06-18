@@ -10,6 +10,14 @@ import (
 )
 
 type viewRelation struct {
+	Icon     string
+	Name     string
+	Subname  string
+	Buttons  []*Button
+	Relation *viewRelationItem
+}
+
+type viewRelationItem struct {
 	SourceResource string
 	TargetResource string
 	TargetField    string
@@ -17,7 +25,7 @@ type viewRelation struct {
 	Count          int64
 }
 
-func (resource *Resource) getRelationViews(id int64, request *Request) (ret []*view) {
+func (resource *Resource) getRelationViews(id int64, request *Request) (ret []*viewRelation) {
 	for _, v := range resource.relations {
 		vi := resource.getRelationView(id, v, request)
 		if vi != nil {
@@ -27,14 +35,14 @@ func (resource *Resource) getRelationViews(id int64, request *Request) (ret []*v
 	return
 }
 
-func (resource *Resource) getRelationView(id int64, field *relatedField, request *Request) *view {
+func (resource *Resource) getRelationView(id int64, field *relatedField, request *Request) *viewRelation {
 	if !request.Authorize(field.resource.canView) {
 		return nil
 	}
 
 	filteredCount := field.resource.itemWithRelationCount(request.r.Context(), field.id, int64(id))
 
-	ret := &view{}
+	ret := &viewRelation{}
 
 	icon := ""
 	if field.resource.icon != "" {
@@ -60,7 +68,7 @@ func (resource *Resource) getRelationView(id int64, field *relatedField, request
 		})
 	}
 
-	ret.Relation = &viewRelation{
+	ret.Relation = &viewRelationItem{
 		SourceResource: resource.getID(),
 		TargetResource: field.resource.getID(),
 		TargetField:    field.id,

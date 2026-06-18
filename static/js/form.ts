@@ -100,8 +100,15 @@ class Form {
             console.error("Error while saving order.");
             return;
         }
+
         var data = JSON.parse(request.response);
         let conflictEl = <HTMLDivElement>this.formEl.querySelector(".form_conflict");
+
+        if (this.formEl.classList.contains("form-loading")) {
+          conflictEl.classList.add("hidden");
+          return;
+        };
+
         if (data.Show) {
           conflictEl.innerText = data.Text;
           conflictEl.classList.remove("hidden");

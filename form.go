@@ -23,6 +23,7 @@ type Form struct {
 	AutosubmitOnDataChange bool
 	ScriptPaths            []string
 	ItemVersion            int64
+	BoxHeader              *boxHeader
 }
 
 // FormItem represents item of form
@@ -61,6 +62,17 @@ type FormItem struct {
 	FormFilterID string
 
 	SuggestionURL string
+
+	IsWide                 bool
+	PreventPasswordManager bool
+}
+
+func (form *Form) HeaderName() string {
+	return form.GetBoxHeader().Name
+}
+
+func (form *Form) HeaderIcon() string {
+	return form.GetBoxHeader().Icon
 }
 
 func (fi *FormItem) GetContent() template.HTML {

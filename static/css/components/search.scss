@@ -1,5 +1,10 @@
 @use "../variables.scss" as *;
 
+.search_results {
+  margin: 0 auto;
+  max-width: min(650px, 100vw);
+}
+
 a.search {
   display: flex;
   padding: 8px 8px;
@@ -111,12 +116,10 @@ a.search_pagination_page-selected {
 }
 
 .searchbox_button:hover {
-  //background-color: $hoverColor;
   opacity: .8;
 }
 
 .searchbox_button:active {
-  //background-color: $activeColor;
   opacity: .7;
 }
 

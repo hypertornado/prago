@@ -115,31 +115,24 @@ body.admin {
   .root-visible .root_left {
     display: block;
     position: absolute;
-    top: 45px;
-    bottom: 0px;
-    right: 0px;
+    top: 50px;
+    max-height: calc(100vh - 55px);
+    border: 1px solid $grayBorderColor;
+    //bottom: 0px;
+    right: 8px;
+    border-radius: 16px;
     z-index: 10;
     background-color: $backgroundGrayColor;
-    //@include shadow;
     animation: root_left_animation 200ms ease-out;
     width: min(100vw, 300px);
     z-index: 10000000;
     position: absolute;
-    @include shadow;
+    @include shadowLarge;
+    @include appleBackdrop;
   }
 
   .root_hamburger {
     display: flex;
-  }
-}
-
-@media (max-width: 600px) {
-  .root-visible .root_left {
-    right: 0px;
-    left: 0px;
-    width: 100vw;
-    //z-index: 10000000;
-    //position: absolute;
   }
 }
 

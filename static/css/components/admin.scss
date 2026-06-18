@@ -113,47 +113,6 @@ select.admin_timestamp_minute {
   width: 100%;
 }
 
-.view_header {
-  padding: 8px;
-  display: flex;
-  align-items: center;
-}
-
-.view_header_icon {
-  width: 16px;
-  position: relative;
-  top: 4px;
-  aspect-ratio: 1;
-  //margin-right: 8px;
-  //padding: 8px;
-  //margin-top: 8px;
-  //margin-bottom: 8px;
-  //background-color: $backgroundGrayColor;
-  //background-color: white;
-  //border: 1px solid $grayBorderColor;
-  //border-radius: 8px;
-  //margin-left: -48px;
-}
-
-.view_header_name {
-  font-weight: 500;
-  flex-grow: 10;
-  font-size: 1rem;
-  line-height: 1.3em;
-}
-
-.view_header_subname {
-  font-size: .9rem;
-  font-weight: normal;
-  line-height: 1.3em;
-  color: $gray;
-  display: block;
-}
-
-.view_header_tabs {
-  flex-shrink: 0;
-}
-
 .view_name {
   font-size: 1rem;
   margin-left: 0px;
