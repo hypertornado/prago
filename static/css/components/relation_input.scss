@@ -1,0 +1,74 @@
+@use "../variables.scss" as *;
+
+.relation_input {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.relation_input_previews {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  max-height: 300px;
+  overflow: auto;
+  margin-bottom: 8px;
+  background-color: white;
+  border-radius: 8px;
+  padding: 8px;
+  gap: 4px;
+  border: 1px solid $grayBorderColorDarker;
+  @include insetShadow;
+}
+
+.relation_input-single .relation_input_previews {
+  border: none;
+  background: transparent;
+  padding: 0px;
+  box-shadow: none;
+}
+
+.relation_input_previews:empty {
+  display: none;
+}
+
+.relation_input_preview {
+  display: flex;
+  gap: 4px;
+}
+
+.relation_input_preview-insert {
+  animation: 200ms relationInsert ease-in-out forwards;
+}
+
+.relation_input_preview-remove {
+  animation: 200ms relationInsert ease-in-out reverse forwards;
+}
+
+@keyframes relationInsert {
+
+  from {
+    opacity: 0;
+    transform: perspective(10cm) rotateX(20deg) translateY(-10px) scale(.8);
+  }
+
+  to {
+    opacity: 1;
+  }
+  
+}
+
+.relation_input_preview_action {
+  align-self: center;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.relation_input_preview_action:hover {
+  background-color: $hoverColor !important;
+}
+
+.relation_input_preview_action:active {
+  background-color: $activeColor !important;
+}

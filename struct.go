@@ -2,6 +2,7 @@ package prago
 
 import (
 	"reflect"
+	"strings"
 )
 
 func (resource *Resource) getDefaultOrder() (column string, desc bool) {
@@ -59,10 +60,25 @@ func (form *Form) initWithResourceItem(resource *Resource, item any, request *Re
 
 	focusedField := request.Param("_focus")
 
+	//TODO: show only "_fields" items
+
+	var fieldsMap map[string]bool
+	if request.Param("_fields") != "" {
+		form.AddHidden("_fields").Value = request.Param("_fields")
+		fields := strings.Split(request.Param("_fields"), ",")
+		fieldsMap = make(map[string]bool)
+		for _, field := range fields {
+			fieldsMap[field] = true
+		}
+	}
+
 	var firstField = true
 
 	for _, field := range resource.fields {
 		if !field.authorizeEdit(request) {
+			continue
+		}
+		if fieldsMap != nil && !fieldsMap[field.id] {
 			continue
 		}
 

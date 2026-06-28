@@ -13,7 +13,8 @@
     gap: 8px;
     background-color: white;
     @include softShadow;
-    border: 1px solid $grayBorderColor;
+    border: 1px solid $grayBorderColorDarker;
+    flex-grow: 100;
   }
 
   .preview:hover {

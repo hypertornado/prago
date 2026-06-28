@@ -9,11 +9,11 @@ import (
 )
 
 type viewField struct {
-	Icon     string
-	Name     string
-	Content  template.HTML
-	EditURL  string
-	EditName string
+	Icon       string
+	Name       string
+	Content    template.HTML
+	EditAction template.JS
+	EditName   string
 }
 
 func (resource *Resource) getBoxHeader(id int64, item any, request *Request) *boxHeader {
@@ -38,14 +38,14 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 			continue
 		}
 
-		var ifaceVal interface{}
+		var ifaceVal any
 		reflect.ValueOf(&ifaceVal).Elem().Set(
 			reflect.ValueOf(item).Elem().Field(i),
 		)
 
 		var editURL string
 		if f.authorizeEdit(request) {
-			editURL = resource.getURL(fmt.Sprintf("%d/edit?_focus=%s", id, f.id))
+			editURL = resource.getURL(fmt.Sprintf("%d/edit?_focus=%s&_fields=%s", id, f.id, f.id))
 		}
 
 		var content template.HTML
@@ -72,15 +72,22 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 		}
 
 		icon := f.getIcon()
+
+		vf := viewField{
+			Icon:    icon,
+			Name:    f.name(request.Locale()),
+			Content: content,
+			//EditAction: template.JS(fmt.Sprintf("popup(\"%s\")", editURL)),
+			EditName: fmt.Sprintf("Upravit položku „%s“", f.name(request.Locale())),
+		}
+
+		if editURL != "" {
+			vf.EditAction = template.JS(fmt.Sprintf("popup(\"%s\")", editURL))
+		}
+
 		ret = append(
 			ret,
-			viewField{
-				Icon:     icon,
-				Name:     f.name(request.Locale()),
-				Content:  content,
-				EditURL:  editURL,
-				EditName: messages.Get(request.Locale(), "admin_edit"),
-			},
+			vf,
 		)
 	}
 

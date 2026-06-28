@@ -1,0 +1,81 @@
+@use "../variables.scss" as *;
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 2;
+}
+
+.picker input {
+  max-width: 200px;
+  padding: 4px 8px;
+  font-size: 1rem;
+  line-height: 1.3em;
+  border-color: $grayBorderColorDarker;
+  box-shadow: none;
+  border-radius: 1000px;
+}
+
+.picker_suggestions {
+  position: relative;
+  z-index: 100000;
+  background-color: $backgroundGrayColor;
+}
+
+.picker_suggestions_content {
+  position: absolute;
+  top: 0px;
+  z-index: 100000;
+  background-color: white;
+  margin-bottom: 8px;
+  border: 1px solid $grayBorderColor;
+  @include softShadow;
+  width: 400px;
+  max-height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+  overflow: auto;
+  border-radius: 8px;
+}
+
+.picker_suggestions_content:empty {
+  display: none;
+}
+
+.picker_suggestion {
+  box-shadow: none;
+  margin: 0px !important;
+  cursor: pointer;
+  border-color: transparent;
+}
+
+.picker_suggestion:hover {
+  border-color: transparent;
+
+}
+
+.picker_suggestion-selected {
+  background: var(--baseColorBackgroundLighter) !important;
+  border-color: $baseColor !important;
+}
+
+.picker_message {
+  padding: 5px 5px;
+  color: $gray;
+}
+
+.picker_button {
+  display: block;
+  margin: 8px 0px;
+  justify-content: center;
+  width: 100%;
+  display: flex;
+  
+  position: sticky !important;
+  bottom: 4px !important;
+  left: 0px !important;
+  border: 1px solid $baseColor;
+  @include softShadow;
+}

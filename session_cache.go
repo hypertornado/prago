@@ -2,6 +2,7 @@ package prago
 
 import (
 	"context"
+	"log"
 	"sort"
 	"sync"
 	"time"
@@ -17,18 +18,30 @@ func (app *App) initSessionsCache() {
 	go func() {
 		for {
 			time.Sleep(10 * time.Second)
-			persistSessionItems := app.cleanSessionCache()
-			sort.Slice(persistSessionItems, func(i, j int) bool {
-				if persistSessionItems[i].AccessAt.Before(persistSessionItems[j].AccessAt) {
-					return true
-				}
-				return false
-			})
-			for _, item := range persistSessionItems {
-				app.persistSessionCacheItem(item)
-			}
+			sessionCachePeriodicAction(app)
+
 		}
 	}()
+}
+
+func sessionCachePeriodicAction(app *App) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("recovering from sessionCachePeriodicAction panic: %v", err)
+		}
+	}()
+
+	persistSessionItems := app.cleanSessionCache()
+	sort.Slice(persistSessionItems, func(i, j int) bool {
+		if persistSessionItems[i].AccessAt.Before(persistSessionItems[j].AccessAt) {
+			return true
+		}
+		return false
+	})
+	for _, item := range persistSessionItems {
+		app.persistSessionCacheItem(item)
+	}
+
 }
 
 type sessionCacheLog struct {

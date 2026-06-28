@@ -89,10 +89,23 @@
   color: $baseColor;
 }
 
-.btn-destroy:hover, .btn-destroy:active, .btn-destroy:focus {
+.btn-destroy:focus {
   border-color: $red !important;
-  background: $redLightest;
+}
+
+.btn-destroy:hover {
+  border-color: $red !important;
+  background: $redHover;
   color: $red;
+}
+
+.btn-destroy:active {
+  background: $redActive;
+}
+
+.btn-create:hover, .btn-create:active, .btn-create:focus {
+  border-color: $green !important;
+  color: $green;
 }
 
 .form-loading .btn-primary {
@@ -168,7 +181,7 @@
   }
 
   to {
-    background-color: $redLightest;
+    background-color: $redBackground;
   }
 }
 
@@ -266,9 +279,15 @@
 
 .form_label_required {
  margin-left: 4px;
- font-size: 1rem;
- font-weight: bold;
+ //font-size: 1rem;
+ //font-weight: 400;
+ font-size: .8rem;
  line-height: 1.3em;
+ //border: 1px solid $black;
+ padding: 0px 4px;
+ border-radius: 4px;
+ color: white;
+ background: $black;
  @include softShadow;
 }
 
@@ -319,7 +338,6 @@
   font-size: 0.9em;
   color: $red;
   padding: 2px 4px;
-  //background: $redLightest;
   display: inline-block;
   border-radius: 4px;
 }
@@ -371,9 +389,14 @@ select.input {
 
 .input[type=date], .input[type=month] {
   width: auto;
-  min-width: 120px;
+  min-width: 0px;
   max-width: 100%;
   min-height: 2.5rem;
+}
+
+.input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
 }
 
 .input[readonly],
@@ -543,12 +566,14 @@ input[type="number"] {
   appearance: textfield;
 }
 
-.form_item_plus, .form_item_minus {
+.btn-formitem {
   aspect-ratio: 1;
   width: 30px;
   border-radius: 100px;
   align-items: center;
   justify-content: center;
+  padding: 4px;
+  border: none;
 }
 
 .form_task {
@@ -560,16 +585,35 @@ input[type="number"] {
 
 .form_task_header {
   display: flex;
-  gap: 10px;
-  flex-wrap: 10px;
+  flex-direction: column;
+  gap: 4px 8px;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  padding: 4px 0px;
+  padding: 8px 16px;
+  @include softShadow;
+  align-self: center;
+  border-radius: 8px;
+  background: white;
+  justify-self: center;
+  max-width: 100%;
+  min-width: 250px;
+  margin-bottom: 4px;
+  cursor: default;
+  //align-self: center;
+}
+
+.form_task_header_top, .form_task_header_bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
 }
 
 .form_task_progress {
   appearance: none; /* Removes default styling */
-  width: min(100%, 100px);
+  width: min(100%, 250px);
   height: 10px;
   overflow: hidden;
   border-radius: 10px;
@@ -598,26 +642,44 @@ input[type="number"] {
   width: 60px;
   text-align: right;
   //font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  font-family: 
+  /*font-family: 
     'SFMono-Regular', 
     Consolas, 
     'Liberation Mono', 
     Menlo, 
     Courier, 
-    monospace;
+    monospace;*/
+  font-variant-numeric: tabular-nums;
   color: $gray;
   font-size: .8rem;
   line-height: 1.3em;
 }
 
-.form_task_status {
-  //text-align: center;
-  padding: 0px 0px 4px 0px;
+.form_task_interval {
+  font-variant-numeric: tabular-nums;
+  //padding: 0px 0px 4px 0px;
   white-space: pre-wrap;
   text-align: center;
   color: $gray;
   font-size: 0.9rem;
   line-height: 1.3em;
+  //width: 100%;
+}
+
+.form_task_status {
+  //text-align: center;
+  //padding: 0px 0px 4px 0px;
+  //white-space: no;
+  text-wrap: nowrap;
+  //text-align: center;
+  text-overflow: ellipsis;
+  color: $gray;
+  font-size: 0.9rem;
+  line-height: 1.3em;
+  flex-shrink: 100;
+  overflow: hidden;
+  max-width: 150px;
+
 }
 
 @media print {
@@ -650,7 +712,6 @@ input[type="number"] {
   .input[type=date] {
     min-height: 0px !important;
   }
-
 
   .form_label:has(.btn-primary) {
     display: none;

@@ -153,7 +153,7 @@ class ImagePicker {
 
         var commands: CMenuCommand[] = [];
         commands.push({
-          Name: "Zobrazit",
+          Name: "Detail",
           Icon: "glyphicons-basic-588-book-open-text.svg",
           URL: item.ViewURL,
         });
@@ -165,33 +165,6 @@ class ImagePicker {
               this.load();
             })
           }
-        });
-        commands.push({
-          Name: "První",
-          Icon: "glyphicons-basic-212-arrow-up.svg",
-          Handler: () => {
-            DOMinsertChildAtIndex(this.preview2, itemEl, 0);
-            this.updateHiddenData2();
-            this.load();
-          },
-        });
-        commands.push({
-          Name: "Nahoru",
-          Icon: "glyphicons-basic-828-arrow-thin-up.svg",
-          Handler: () => {
-            DOMinsertChildAtIndex(this.preview2, itemEl, i-1);
-            this.updateHiddenData2();
-            this.load();
-          },
-        });
-        commands.push({
-          Name: "Dolů",
-          Icon: "glyphicons-basic-827-arrow-thin-down.svg",
-          Handler: () => {
-            DOMinsertChildAtIndex(this.preview2, itemEl, i+2);
-            this.updateHiddenData2();
-            this.load();
-          },
         });
         commands.push({
           Name: "Kopírovat UUID",

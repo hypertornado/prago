@@ -1,0 +1,43 @@
+@use "../variables.scss" as *;
+
+.markdown_input textarea {
+  margin-top: 5px;
+  white-space: pre-wrap;
+}
+
+.markdown_input_header {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  display: none;
+}
+
+.markdown_input-expanded .markdown_input_header {
+  display: flex;
+}
+
+.markdown_input_header_buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.markdown_input_header label {
+  font-size: .8rem;
+  line-height: 1.3em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+}
+
+.markdown_input_preview {
+  margin-top: 8px;
+  border: 1px solid $grayBorderColor;
+  padding: 8px;
+  font-size: 0.9em;
+  line-height: 1.4em;
+  color: $black;
+  overflow: auto;
+  border-radius: 8px;
+}

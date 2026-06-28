@@ -1,12 +1,10 @@
 @use "../variables.scss" as *;
 
-.admin_navigation_tabs {
+.navigation_tabs {
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
   flex-grow: 100;
-  //overflow: auto;
-
   display: flex;
   margin: 8px auto;
   padding: 0px 8px;
@@ -14,7 +12,7 @@
   flex-wrap: wrap;
 }
 
-.admin_navigation_tab {
+.navigation_tab {
   white-space: nowrap;
   overflow: hidden;
   border-bottom: none;
@@ -32,21 +30,20 @@
   @include softShadow;
 }
 
-.admin_navigation_tab:hover {
+.navigation_tab:hover {
   border-color: var(--baseColor);
 }
 
-.admin_navigation_tab_icon {
+.navigation_tab_icon {
   width: 15px;
   aspect-ratio: 1;
 }
 
-.admin_navigation_tab-selected,
-.admin_navigation_tab-selected:hover {
+.navigation_tab-selected,
+.navigation_tab-selected:hover {
   background-color: var(--baseColor);
   border-color: var(--baseColor);
   color: white;
-  box-shadow: none;
 }
 
 

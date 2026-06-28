@@ -8,14 +8,6 @@
   margin-top: 0px;
 }
 
-.box:has(.admin_relationlist) {
-  //border-top: 1px solid $grayBorderColor;
-  background-color: white;
-  @include softShadow;
-  border-radius: 8px;
-  max-width: min(632px, 100vw);
-}
-
 .box_content {
   padding: 0px 8px 8px 8px;
   max-width: 100vw;
@@ -28,14 +20,15 @@
   background-repeat: no-repeat;
   background-position: center;
   display: block;
-  //width: 100%;
   padding: 4px 8px;
   position: sticky;
   top: 0px;
+  border-radius: 8px;
   gap: 4px;
-  //background-color: $backgroundGrayColor;
   background: $backgroundGrayColor;
-  z-index: 10;
+  @include appleBackdropGray;
+  z-index: 100;
+
 
   margin: 0 auto;
   max-width: min(650px, 100vw);
@@ -52,6 +45,15 @@
   width: 1em;
   margin-right: 4px;
   aspect-ratio: 1;
+}
+
+.box_image {
+  width: 1em;
+  aspect-ratio: 1;
+  margin-right: 4px;
+  border-radius: 4px;
+
+
 }
 
 .box_header_prename {

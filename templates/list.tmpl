@@ -32,7 +32,7 @@
     {{end}}
     {{range $i, $item := .Header}}
       <div class="list_header_item" data-name="{{$item.ColumnName}}" data-natural-width="{{$item.NaturalCellWidth}}">
-        <div class="list_header_item_name{{if $item.CanOrder}} list_header_item_name-canorder{{end}}" data-name="{{$item.ColumnName}}" title="{{$item.NameHuman}}">
+        <div class="list_header_item_name{{if $item.CanOrder}} list_header_item_name-canorder{{end}}" data-name="{{$item.ColumnName}}" data-tooltip="{{$item.NameHuman}}">
           {{if $item.Icon}}<img class="list_header_item_name_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBaseColor}}">{{end}}
           <div class="list_header_item_name_text">{{- $item.NameHuman -}}</div>
           <div class="list_header_item_name_ordericon"></div>

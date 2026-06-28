@@ -12,7 +12,7 @@ class Form {
 
     this.fixAufofocus();
 
-    var elements = form.querySelectorAll<HTMLDivElement>(".admin_markdown");
+    var elements = form.querySelectorAll<HTMLDivElement>(".markdown_input");
     elements.forEach((el) => {
       new MarkdownEditor(el);
     });
@@ -23,7 +23,7 @@ class Form {
     });
 
     var relations = form.querySelectorAll<HTMLDivElement>(
-      ".admin_item_relation"
+      ".relation_input"
     );
     relations.forEach((form) => {
       new RelationPicker(form);
@@ -49,6 +49,8 @@ class Form {
     this.initSuggestions();
     this.initConflictCheck();
     this.initPlusMinus();
+    this.initCalendar();
+    this.initShowpassword();
 
     form.addEventListener("submit", () => {
       this.dirty = false;
@@ -138,6 +140,37 @@ class Form {
         } else {
           input.stepDown();
         }
+        input.focus();
+        e.preventDefault();
+      })
+    }
+  }
+
+  initCalendar() {
+    let els = this.formEl.querySelectorAll(".form_item_calendar");
+    for (var i = 0; i < els.length; i++) {
+      let btnEl = els[i];
+      btnEl.addEventListener("mousedown", (e: Event) => {
+        let input = <HTMLInputElement>btnEl.parentElement.querySelector("input[type=date]");
+        input.showPicker();
+        input.focus();
+        e.preventDefault();
+      })
+    }
+  }
+
+  initShowpassword() {
+    let els = this.formEl.querySelectorAll(".form_item_showpassword");
+    for (var i = 0; i < els.length; i++) {
+      let btnEl = els[i];
+      btnEl.addEventListener("mousedown", (e: Event) => {
+        let input = <HTMLInputElement>btnEl.parentElement.querySelector("input");
+        if (input.getAttribute("type") == "password") {
+          input.setAttribute("type", "text");
+        } else {
+          input.setAttribute("type", "password");
+        }
+        //input.showPicker();
         input.focus();
         e.preventDefault();
       })

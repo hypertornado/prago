@@ -10,7 +10,7 @@ class MarkdownEditor {
   constructor(el: HTMLElement) {
     this.el = el;
     this.textarea = <HTMLTextAreaElement>el.querySelector(".textarea");
-    this.preview = <HTMLDivElement>el.querySelector(".admin_markdown_preview");
+    this.preview = <HTMLDivElement>el.querySelector(".markdown_input_preview");
 
     new Autoresize(this.textarea);
 
@@ -18,7 +18,7 @@ class MarkdownEditor {
     this.changed = false;
 
     let showChange = <HTMLInputElement>(
-      el.querySelector(".admin_markdown_preview_show")
+      el.querySelector(".markdown_input_preview_show")
     );
     showChange.addEventListener("change", () => {
       this.preview.classList.toggle("hidden");
@@ -30,6 +30,10 @@ class MarkdownEditor {
       }
     }, 100);
 
+    this.textarea.addEventListener("focus", () => {
+      this.el.classList.add("markdown_input-expanded");
+    })
+
     this.textarea.addEventListener("change", this.textareaChanged.bind(this));
     this.textarea.addEventListener("keyup", this.textareaChanged.bind(this));
     this.loadPreview();
@@ -38,7 +42,7 @@ class MarkdownEditor {
   }
 
   bindCommands() {
-    var btns: any = this.el.querySelectorAll(".admin_markdown_command");
+    var btns: any = this.el.querySelectorAll(".markdown_input_command");
     for (var i = 0; i < btns.length; i++) {
       btns[i].addEventListener("mousedown", (e: any) => {
         var cmd = e.target.getAttribute("data-cmd");

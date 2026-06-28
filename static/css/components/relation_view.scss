@@ -1,5 +1,16 @@
 @use "../variables.scss" as *;
 
+.relation_view {
+
+}
+
+.box:has(.relation_view_list) {
+  background-color: white;
+  @include softShadow;
+  border-radius: 8px;
+  max-width: min(632px, 100vw);
+}
+
 .relation_view_header {
   padding: 8px;
   display: flex;
@@ -30,4 +41,19 @@
 
 .relation_view_header_tabs {
   flex-shrink: 0;
+}
+
+.relation_view_list {
+}
+
+.relation_view_list_target {
+  padding: 0px 10px;
+}
+
+.relation_view_list_loading,
+.relation_view_list_more {
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

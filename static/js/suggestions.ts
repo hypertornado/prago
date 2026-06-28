@@ -50,17 +50,17 @@ class Suggestions {
         if (data.Message) {
           let messageEl = document.createElement("div");
           messageEl.innerText = data.Message;
-          messageEl.classList.add("relation_message");
+          messageEl.classList.add("picker_message");
           this.suggestionsEl.appendChild(messageEl);
         }
 
         for (var i = 0; i < data.Suggestions.length; i++) {
           var item = data.Suggestions[i];
           var el = createSuggestionsPreviewEl(item, false);
-          el.classList.add("admin_item_relation_picker_suggestion");
-          el.addEventListener("mouseleave", () => {
+          el.classList.add("picker_suggestion");
+          /*el.addEventListener("mouseleave", () => {
             this.unselect();
-          });
+          });*/
           el.setAttribute("data-position", i + "");
           el.addEventListener("mousedown", (e: Event) => {
             e.preventDefault();
@@ -86,7 +86,7 @@ class Suggestions {
           buttonEl.appendChild(buttonElIcon);
           buttonEl.appendChild(buttonElText);
 
-          buttonEl.classList.add("btn", "relation_button");
+          buttonEl.classList.add("btn", "picker_button");
           buttonEl.addEventListener("click", (e) => {
             this.suggestionsEl.classList.add("hidden");
             let popupForm = new PopupForm(data.Button.FormURL, (data: any) => {
@@ -101,6 +101,8 @@ class Suggestions {
           });
           this.suggestionsEl.appendChild(buttonEl);
         }
+
+        this.scrollTop();
       } else {
         console.log("Error while searching");
       }
@@ -121,7 +123,7 @@ class Suggestions {
     this.select(position);
   }
 
-  selectedClass = "admin_item_relation_picker_suggestion-selected";
+  selectedClass = "picker_suggestion-selected";
   getSelected(): number {
     var selected = this.suggestionsEl.querySelector("." + this.selectedClass);
     if (!selected) {
@@ -141,9 +143,9 @@ class Suggestions {
 
   select(i: number) {
     this.unselect();
-    this.suggestionsEl
-      .querySelectorAll(".preview")
-      [i].classList.add(this.selectedClass);
+    let selectEl = <HTMLDivElement>this.suggestionsEl.querySelectorAll(".preview")[i];
+    selectEl.classList.add(this.selectedClass);
+    scrollToChild(selectEl);
   }
 
   suggestionInput(e: any) {
@@ -152,10 +154,19 @@ class Suggestions {
         this.suggestionClick();
         e.preventDefault();
         return true;
+      case 27: //enter
+        //this.suggestionClick();
+        this.clear();
+        e.preventDefault();
+        return true;
       case 38: //up
+        if (this.suggestionsCount() == 0) {
+          return
+        }
         var i = this.getSelected();
         if (i < 1) {
-          i = this.suggestions.length - 1;
+          //i = this.suggestions.length - 1;
+          i = 0;
         } else {
           i = i - 1;
         }
@@ -163,10 +174,15 @@ class Suggestions {
         e.preventDefault();
         return false;
       case 40: //down
+        if (this.suggestionsCount() == 0) {
+          return
+        }
         var i = this.getSelected();
         if (i >= 0) {
           i += 1;
-          i = i % this.suggestions.length;
+          if (i > this.suggestionsCount() - 1) {
+            i = this.suggestionsCount() - 1;
+          }
         } else {
           i = 0;
         }
@@ -174,6 +190,10 @@ class Suggestions {
         e.preventDefault();
         return false;
     }
+  }
+
+  suggestionsCount(): number {
+    return this.suggestions.length;
   }
 
   clear() {
@@ -184,6 +204,10 @@ class Suggestions {
 
   focus() {
     this.pickerInput.focus();
+  }
+
+  scrollTop() {
+    this.suggestionsEl.scrollTo({top: 0});
   }
 }
 

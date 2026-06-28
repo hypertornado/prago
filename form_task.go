@@ -19,6 +19,7 @@ type FormTaskActivity struct {
 	lastStateRequest time.Time
 	ctx              context.Context
 	cancel           context.CancelFunc
+	isError          bool
 }
 
 func (fta *FormTaskActivity) Context() context.Context {
@@ -31,6 +32,7 @@ func (fta *FormTaskActivity) Context() context.Context {
 func (fta *FormTaskActivity) checkIfStop() {
 
 	if fta.lastStateRequest.Before(time.Now().Add(-2 * time.Minute)) {
+		fta.isError = true
 		fta.stoppedByUser = true
 	}
 
@@ -103,6 +105,7 @@ func newFormTaskActivity(request *Request, handler func(*FormTaskActivity) error
 				} else {
 					recoveryStr := fmt.Sprintf("%v, stack: %s", r, string(debug.Stack()))
 					ret.description = recoveryStr
+					ret.isError = true
 				}
 			}
 
@@ -111,9 +114,8 @@ func newFormTaskActivity(request *Request, handler func(*FormTaskActivity) error
 		}()
 		err := handler(ret)
 		if err != nil {
-			ret.description = "🔴 " + err.Error()
-		} else {
-			ret.description = "✅ " + ret.description
+			ret.description = err.Error()
+			ret.isError = true
 		}
 	}()
 
@@ -141,9 +143,14 @@ func (app *App) deleteFormTaskActivity(uuid string) {
 func (app *App) stopFormTask(uuid string) {
 	task := app.getFormTaskActivity(uuid)
 	task.stoppedByUser = true
+	task.isError = true
 	task.cancel()
+	//TODO: wait till finished
 	for {
 		time.Sleep(200 * time.Millisecond)
+		if task.finished {
+			return
+		}
 	}
 }
 
@@ -164,7 +171,23 @@ func (app *App) initFormTask() {
 			request.WriteJSON(404, "Not Found")
 			return nil
 		}
-		return activity.toView(app)
+		ret := activity.toView()
+		//ret.TableRows = activity.getTableData(app)
+		return ret
+	}).Permission(everybodyPermission)
+
+	app.API("_taskviewtable").HandlerJSON(func(request *Request) interface{} {
+		activity := app.getFormTaskActivity(request.Param("uuid"))
+		if activity == nil {
+			request.WriteJSON(404, "Not Found")
+			return nil
+		}
+		data := activity.getTableData(app)
+		if data == "" {
+			request.WriteJSON(204, "Empty")
+			return nil
+		}
+		return data
 	}).Permission(everybodyPermission)
 
 	PopupForm(app, "_taskstop", func(form *Form, request *Request) {
@@ -172,16 +195,19 @@ func (app *App) initFormTask() {
 		form.AutosubmitFirstTime = true
 	}, func(fv FormValidation, request *Request) {
 		app.stopFormTask(request.Param("uuid"))
-		fv.Data("ok")
-	}).Permission(everybodyPermission).Name(unlocalized("Ukončit úlohu"))
+		task := app.getFormTaskActivity(request.Param("uuid"))
+		fv.Data(task.toView())
+	}).Permission(everybodyPermission).Name(unlocalized("Ukončuji úlohu…"))
 
 	ActionForm(app, "form-task-example", func(form *Form, request *Request) {
 		form.AddSubmit("Spustit")
 	}, func(fv FormValidation, request *Request) {
 
 		fv.RunTask(request, func(fta *FormTaskActivity) error {
-			for i := range 10 {
-				fta.Description(fmt.Sprintf("Line %d", i))
+			//return fmt.Errorf("XXX")
+			//panic("NOOOO")
+			for i := range 5 {
+				fta.Description(fmt.Sprintf("Line %d dj iowqj dwioq jdiwoqj diwoqj diwoqj diwoqjdiwoqjdiwoq jdiwoq jdiwq", i))
 				fta.Progress(int64(i)+1, 10)
 				fta.TableCells(Cell("XXX"), Cell(i))
 				time.Sleep(1000 * time.Millisecond)

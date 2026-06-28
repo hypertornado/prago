@@ -43,7 +43,9 @@ class SearchForm {
 
     this.searchInput.addEventListener("keydown", (e) => {
       if (e.keyCode == 27) {
+        this.searchInput.value = "";
         this.searchInput.blur();
+        this.loadSuggestions();
         e.preventDefault();
         return false;
       }
@@ -120,7 +122,7 @@ class SearchForm {
     this.suggestionsEl.innerHTML = content;
 
     this.suggestions = this.suggestionsEl.querySelectorAll(
-      ".admin_search_suggestion"
+      ".search_suggestion"
     );
 
     if (this.suggestions.length > 0) {
@@ -148,16 +150,16 @@ class SearchForm {
 
   deselect() {
     var el = this.suggestionsEl.querySelector(
-      ".admin_search_suggestion-selected"
+      ".search_suggestion-selected"
     );
     if (el) {
-      el.classList.remove("admin_search_suggestion-selected");
+      el.classList.remove("search_suggestion-selected");
     }
   }
 
   getSelected(): number {
     var el = this.suggestionsEl.querySelector(
-      ".admin_search_suggestion-selected"
+      ".search_suggestion-selected"
     );
     if (el) {
       return parseInt(el.getAttribute("data-position"));
@@ -168,8 +170,8 @@ class SearchForm {
   setSelected(position: number) {
     this.deselect();
     if (position >= 0) {
-      var els = this.suggestionsEl.querySelectorAll(".admin_search_suggestion");
-      els[position].classList.add("admin_search_suggestion-selected");
+      var els = this.suggestionsEl.querySelectorAll(".search_suggestion");
+      els[position].classList.add("search_suggestion-selected");
     }
   }
 }

@@ -6756,7 +6756,7 @@ class ImagePicker {
                 e.preventDefault();
                 var commands = [];
                 commands.push({
-                    Name: "Zobrazit",
+                    Name: "Detail",
                     Icon: "glyphicons-basic-588-book-open-text.svg",
                     URL: item.ViewURL,
                 });
@@ -6768,33 +6768,6 @@ class ImagePicker {
                             this.load();
                         });
                     }
-                });
-                commands.push({
-                    Name: "První",
-                    Icon: "glyphicons-basic-212-arrow-up.svg",
-                    Handler: () => {
-                        DOMinsertChildAtIndex(this.preview2, itemEl, 0);
-                        this.updateHiddenData2();
-                        this.load();
-                    },
-                });
-                commands.push({
-                    Name: "Nahoru",
-                    Icon: "glyphicons-basic-828-arrow-thin-up.svg",
-                    Handler: () => {
-                        DOMinsertChildAtIndex(this.preview2, itemEl, i - 1);
-                        this.updateHiddenData2();
-                        this.load();
-                    },
-                });
-                commands.push({
-                    Name: "Dolů",
-                    Icon: "glyphicons-basic-827-arrow-thin-down.svg",
-                    Handler: () => {
-                        DOMinsertChildAtIndex(this.preview2, itemEl, i + 2);
-                        this.updateHiddenData2();
-                        this.load();
-                    },
                 });
                 commands.push({
                     Name: "Kopírovat UUID",
@@ -6916,6 +6889,7 @@ class List {
         this.bindInitialHeaderWidths();
         this.bindResizer();
         this.bindHeaderPositionCalculator();
+        initTooltips();
     }
     copyColumnWidths() {
         let totalWidth = this.listHeader.getBoundingClientRect().width;
@@ -8196,11 +8170,11 @@ class MarkdownEditor {
     constructor(el) {
         this.el = el;
         this.textarea = el.querySelector(".textarea");
-        this.preview = el.querySelector(".admin_markdown_preview");
+        this.preview = el.querySelector(".markdown_input_preview");
         new Autoresize(this.textarea);
         this.lastChanged = Date.now();
         this.changed = false;
-        let showChange = (el.querySelector(".admin_markdown_preview_show"));
+        let showChange = (el.querySelector(".markdown_input_preview_show"));
         showChange.addEventListener("change", () => {
             this.preview.classList.toggle("hidden");
         });
@@ -8209,6 +8183,9 @@ class MarkdownEditor {
                 this.loadPreview();
             }
         }, 100);
+        this.textarea.addEventListener("focus", () => {
+            this.el.classList.add("markdown_input-expanded");
+        });
         this.textarea.addEventListener("change", this.textareaChanged.bind(this));
         this.textarea.addEventListener("keyup", this.textareaChanged.bind(this));
         this.loadPreview();
@@ -8216,7 +8193,7 @@ class MarkdownEditor {
         this.bindShortcuts();
     }
     bindCommands() {
-        var btns = this.el.querySelectorAll(".admin_markdown_command");
+        var btns = this.el.querySelectorAll(".markdown_input_command");
         for (var i = 0; i < btns.length; i++) {
             btns[i].addEventListener("mousedown", (e) => {
                 var cmd = e.target.getAttribute("data-cmd");
@@ -8384,12 +8361,14 @@ class RelationPicker {
             this.multipleInputs = false;
         }
         this.input = el.getElementsByTagName("input")[0];
-        this.previewsContainer = (el.querySelector(".admin_relation_previews"));
+        this.previewsContainer = (el.querySelector(".relation_input_previews"));
         this.relationName = el.getAttribute("data-relation");
         this.filterID = el.getAttribute("data-filter");
         this.progress = el.querySelector("progress");
-        this.picker = (el.querySelector(".admin_item_relation_picker"));
-        this.suggestionsObject = new Suggestions(this.el.querySelector(".admin_item_relation_picker_suggestions_content"), this.picker.querySelector("input"), this.getSearchURL.bind(this), this.addPreview.bind(this));
+        this.picker = (el.querySelector(".picker"));
+        this.suggestionsObject = new Suggestions(this.el.querySelector(".picker_suggestions_content"), this.picker.querySelector("input"), this.getSearchURL.bind(this), (data) => {
+            this.addPreview(data, true);
+        });
         this.makeReordable();
         if (this.multipleInputs || parseInt(this.input.value) > 0) {
             this.getData();
@@ -8428,7 +8407,7 @@ class RelationPicker {
             if (request.status == 200) {
                 let items = JSON.parse(request.response);
                 for (var i = 0; i < items.length; i++) {
-                    this.addPreview(items[i]);
+                    this.addPreview(items[i], false);
                 }
                 if (items.length == 0) {
                     this.showSearch();
@@ -8441,20 +8420,30 @@ class RelationPicker {
         });
         request.send();
     }
-    addPreview(data) {
+    addPreview(data, animate) {
         let previewEl = document.createElement("div");
-        previewEl.classList.add("admin_relation_preview");
+        previewEl.classList.add("relation_input_preview");
+        if (animate) {
+            previewEl.classList.add("relation_input_preview-insert");
+        }
         var el = createSuggestionsPreviewEl(data, true);
         this.previewsContainer.appendChild(previewEl);
         previewEl.appendChild(el);
         let deleteButton = document.createElement("div");
-        deleteButton.classList.add("admin_relation_preview_action");
-        deleteButton.innerText = "×";
+        deleteButton.classList.add("btn");
+        deleteButton.classList.add("btn-formitem");
+        deleteButton.classList.add("relation_input_preview_action");
+        deleteButton.innerHTML = `
+      <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=base" class="btn_icon">
+    `;
         previewEl.appendChild(deleteButton);
         deleteButton.addEventListener("click", () => {
-            previewEl.remove();
-            this.updateLayout();
-            this.suggestionsObject.focus();
+            el.classList.add("relation_input_preview-remove");
+            setTimeout(() => {
+                previewEl.remove();
+                this.updateLayout();
+                this.suggestionsObject.focus();
+            }, 200);
         });
         previewEl.setAttribute("data-id", data.ID);
         this.suggestionsObject.clear();
@@ -8517,7 +8506,7 @@ class RelationPicker {
 }
 class Suggestions {
     constructor(suggestionEl, pickerInput, searchURL, returnData) {
-        this.selectedClass = "admin_item_relation_picker_suggestion-selected";
+        this.selectedClass = "picker_suggestion-selected";
         this.suggestionsEl = suggestionEl;
         this.suggestions = [];
         this.pickerInput = pickerInput;
@@ -8549,16 +8538,13 @@ class Suggestions {
                 if (data.Message) {
                     let messageEl = document.createElement("div");
                     messageEl.innerText = data.Message;
-                    messageEl.classList.add("relation_message");
+                    messageEl.classList.add("picker_message");
                     this.suggestionsEl.appendChild(messageEl);
                 }
                 for (var i = 0; i < data.Suggestions.length; i++) {
                     var item = data.Suggestions[i];
                     var el = createSuggestionsPreviewEl(item, false);
-                    el.classList.add("admin_item_relation_picker_suggestion");
-                    el.addEventListener("mouseleave", () => {
-                        this.unselect();
-                    });
+                    el.classList.add("picker_suggestion");
                     el.setAttribute("data-position", i + "");
                     el.addEventListener("mousedown", (e) => {
                         e.preventDefault();
@@ -8576,7 +8562,7 @@ class Suggestions {
                     buttonElText.innerText = data.Button.Name;
                     buttonEl.appendChild(buttonElIcon);
                     buttonEl.appendChild(buttonElText);
-                    buttonEl.classList.add("btn", "relation_button");
+                    buttonEl.classList.add("btn", "picker_button");
                     buttonEl.addEventListener("click", (e) => {
                         this.suggestionsEl.classList.add("hidden");
                         let popupForm = new PopupForm(data.Button.FormURL, (data) => {
@@ -8591,6 +8577,7 @@ class Suggestions {
                     });
                     this.suggestionsEl.appendChild(buttonEl);
                 }
+                this.scrollTop();
             }
             else {
                 console.log("Error while searching");
@@ -8626,8 +8613,9 @@ class Suggestions {
     }
     select(i) {
         this.unselect();
-        this.suggestionsEl
-            .querySelectorAll(".preview")[i].classList.add(this.selectedClass);
+        let selectEl = this.suggestionsEl.querySelectorAll(".preview")[i];
+        selectEl.classList.add(this.selectedClass);
+        scrollToChild(selectEl);
     }
     suggestionInput(e) {
         switch (e.keyCode) {
@@ -8635,10 +8623,17 @@ class Suggestions {
                 this.suggestionClick();
                 e.preventDefault();
                 return true;
+            case 27:
+                this.clear();
+                e.preventDefault();
+                return true;
             case 38:
+                if (this.suggestionsCount() == 0) {
+                    return;
+                }
                 var i = this.getSelected();
                 if (i < 1) {
-                    i = this.suggestions.length - 1;
+                    i = 0;
                 }
                 else {
                     i = i - 1;
@@ -8647,10 +8642,15 @@ class Suggestions {
                 e.preventDefault();
                 return false;
             case 40:
+                if (this.suggestionsCount() == 0) {
+                    return;
+                }
                 var i = this.getSelected();
                 if (i >= 0) {
                     i += 1;
-                    i = i % this.suggestions.length;
+                    if (i > this.suggestionsCount() - 1) {
+                        i = this.suggestionsCount() - 1;
+                    }
                 }
                 else {
                     i = 0;
@@ -8660,6 +8660,9 @@ class Suggestions {
                 return false;
         }
     }
+    suggestionsCount() {
+        return this.suggestions.length;
+    }
     clear() {
         this.suggestions = [];
         this.suggestionsEl.innerText = "";
@@ -8667,6 +8670,9 @@ class Suggestions {
     }
     focus() {
         this.pickerInput.focus();
+    }
+    scrollTop() {
+        this.suggestionsEl.scrollTo({ top: 0 });
     }
 }
 function createSuggestionsPreviewEl(data, anchor) {
@@ -8705,7 +8711,7 @@ class Form {
         this.dirty = false;
         this.formEl = form;
         this.fixAufofocus();
-        var elements = form.querySelectorAll(".admin_markdown");
+        var elements = form.querySelectorAll(".markdown_input");
         elements.forEach((el) => {
             new MarkdownEditor(el);
         });
@@ -8713,7 +8719,7 @@ class Form {
         timestamps.forEach((form) => {
             new Timestamp(form);
         });
-        var relations = form.querySelectorAll(".admin_item_relation");
+        var relations = form.querySelectorAll(".relation_input");
         relations.forEach((form) => {
             new RelationPicker(form);
         });
@@ -8735,6 +8741,8 @@ class Form {
         this.initSuggestions();
         this.initConflictCheck();
         this.initPlusMinus();
+        this.initCalendar();
+        this.initShowpassword();
         form.addEventListener("submit", () => {
             this.dirty = false;
         });
@@ -8812,6 +8820,35 @@ class Form {
             });
         }
     }
+    initCalendar() {
+        let els = this.formEl.querySelectorAll(".form_item_calendar");
+        for (var i = 0; i < els.length; i++) {
+            let btnEl = els[i];
+            btnEl.addEventListener("mousedown", (e) => {
+                let input = btnEl.parentElement.querySelector("input[type=date]");
+                input.showPicker();
+                input.focus();
+                e.preventDefault();
+            });
+        }
+    }
+    initShowpassword() {
+        let els = this.formEl.querySelectorAll(".form_item_showpassword");
+        for (var i = 0; i < els.length; i++) {
+            let btnEl = els[i];
+            btnEl.addEventListener("mousedown", (e) => {
+                let input = btnEl.parentElement.querySelector("input");
+                if (input.getAttribute("type") == "password") {
+                    input.setAttribute("type", "text");
+                }
+                else {
+                    input.setAttribute("type", "password");
+                }
+                input.focus();
+                e.preventDefault();
+            });
+        }
+    }
     messageChanged() {
         if (this.willChangeHandler) {
             this.willChangeHandler();
@@ -8843,6 +8880,7 @@ class Form {
 var primaryFormContainer;
 class FormContainer {
     constructor(formContainer, okHandler) {
+        this.taskStartedAt = 0;
         if (!window.primaryFormContainer && !formContainer.parentElement.classList.contains("popup_content")) {
             window.primaryFormContainer = this;
         }
@@ -8938,6 +8976,9 @@ class FormContainer {
                     var data = JSON.parse(request.response);
                     this.progress.classList.add("hidden");
                     this.form.formEl.classList.remove("form-loading");
+                    if (data.TaskUUID) {
+                        this.taskStartedAt = Date.now();
+                    }
                     this.formTaskUUID = data.TaskUUID;
                     this.handleOkData(data);
                 }
@@ -9031,16 +9072,20 @@ class FormContainer {
         let taskEl = this.formContainer.querySelector(".form_task");
         this.formContainer.querySelector(".form_task_stop").addEventListener("click", () => {
             new PopupForm("/admin/_taskstop?uuid=" + this.formTaskUUID, (data) => {
-                this.setTaskFinished();
+                this.setTaskFinished(data.Data);
             });
         });
         window.setInterval(() => {
             if (this.formTaskUUID) {
                 taskEl.classList.remove("hidden");
             }
+            if (this.formTaskUUID) {
+                this.setTaskDateHuman(this.taskStartedAt, Date.now());
+            }
             if (this.formTaskUUID != "" && Date.now() - this.lastTaskLoad > 500) {
                 this.lastTaskLoad = Date.now();
                 this.loadTaskProgress(this.formTaskUUID);
+                this.loadTaskTable(this.formTaskUUID);
             }
         }, 100);
     }
@@ -9061,25 +9106,59 @@ class FormContainer {
                 this.setTaskData(data);
             }
             else {
-                this.setTaskFinished();
+                this.loadTaskTable(uuid);
+                this.setTaskFinished(data);
             }
         });
         request.send();
     }
+    loadTaskTable(uuid) {
+        if (this.taskTableRequesting) {
+            return;
+        }
+        let request = new XMLHttpRequest();
+        request.open("GET", "/admin/api/_taskviewtable?uuid=" + uuid);
+        this.taskTableRequesting = true;
+        request.addEventListener("load", (e) => {
+            this.taskTableRequesting = false;
+            if (this.formTaskUUID != uuid) {
+                return;
+            }
+            if (request.status == 200) {
+                var tableData = JSON.parse(request.response);
+                this.setTaskTableData(tableData);
+            }
+        });
+        request.send();
+    }
+    setTaskDateHuman(from, to) {
+        this.formContainer.querySelector(".form_task_interval").textContent = prettyDateInterval(from, to);
+    }
     setTaskData(data) {
         this.taskHeader.classList.remove("hidden");
         let taskEl = this.formContainer.querySelector(".form_task");
-        taskEl.querySelector(".form_task_status").textContent = data.Description;
+        let statusEl = taskEl.querySelector(".form_task_status");
+        statusEl.textContent = data.Description;
+        statusEl.setAttribute("title", data.Description);
+        statusEl.setAttribute("data-tooltip", data.Description);
         taskEl.querySelector(".form_task_progress").setAttribute("value", data.Progress);
         taskEl.querySelector(".form_task_progress_text").textContent = data.ProgressText;
-        this.tableTbody.insertAdjacentHTML("beforeend", data.TableRows);
         if (data.Finished) {
-            this.setTaskFinished();
+            this.setTaskFinished(data);
         }
     }
-    setTaskFinished() {
+    setTaskFinished(data) {
         this.formTaskUUID = "";
         this.taskHeader.classList.add("hidden");
+        if (data.IsError) {
+            Prago.notificationCenter.flashNotification("Chyba při dokončování úlohy", data.Description, false, true);
+        }
+        else {
+            Prago.notificationCenter.flashNotification("Dokončeno", data.Description, true, false);
+        }
+    }
+    setTaskTableData(data) {
+        this.tableTbody.insertAdjacentHTML("beforeend", data);
     }
     cleanTable() {
         this.tableTbody.innerHTML = "";
@@ -9119,7 +9198,9 @@ class SearchForm {
         }, 30);
         this.searchInput.addEventListener("keydown", (e) => {
             if (e.keyCode == 27) {
+                this.searchInput.value = "";
                 this.searchInput.blur();
+                this.loadSuggestions();
                 e.preventDefault();
                 return false;
             }
@@ -9190,7 +9271,7 @@ class SearchForm {
     }
     addSuggestions(content) {
         this.suggestionsEl.innerHTML = content;
-        this.suggestions = this.suggestionsEl.querySelectorAll(".admin_search_suggestion");
+        this.suggestions = this.suggestionsEl.querySelectorAll(".search_suggestion");
         if (this.suggestions.length > 0) {
             this.searchForm.classList.add("searchbox-showsuggestions");
         }
@@ -9214,13 +9295,13 @@ class SearchForm {
         }
     }
     deselect() {
-        var el = this.suggestionsEl.querySelector(".admin_search_suggestion-selected");
+        var el = this.suggestionsEl.querySelector(".search_suggestion-selected");
         if (el) {
-            el.classList.remove("admin_search_suggestion-selected");
+            el.classList.remove("search_suggestion-selected");
         }
     }
     getSelected() {
-        var el = this.suggestionsEl.querySelector(".admin_search_suggestion-selected");
+        var el = this.suggestionsEl.querySelector(".search_suggestion-selected");
         if (el) {
             return parseInt(el.getAttribute("data-position"));
         }
@@ -9229,8 +9310,8 @@ class SearchForm {
     setSelected(position) {
         this.deselect();
         if (position >= 0) {
-            var els = this.suggestionsEl.querySelectorAll(".admin_search_suggestion");
-            els[position].classList.add("admin_search_suggestion-selected");
+            var els = this.suggestionsEl.querySelectorAll(".search_suggestion");
+            els[position].classList.add("search_suggestion-selected");
         }
     }
 }
@@ -9344,16 +9425,16 @@ class Menu {
 }
 class RelationList {
     constructor(el) {
-        this.targetEl = el.querySelector(".admin_relationlist_target");
+        this.targetEl = el.querySelector(".relation_view_list_target");
         this.sourceResource = el.getAttribute("data-source-resource");
         this.targetResource = el.getAttribute("data-target-resource");
         this.targetField = el.getAttribute("data-target-field");
         this.idValue = parseInt(el.getAttribute("data-id-value"));
         this.count = parseInt(el.getAttribute("data-count"));
         this.offset = 0;
-        this.loadingEl = el.querySelector(".admin_relationlist_loading");
-        this.moreEl = el.querySelector(".admin_relationlist_more");
-        this.moreButton = el.querySelector(".admin_relationlist_more .btn");
+        this.loadingEl = el.querySelector(".relation_view_list_loading");
+        this.moreEl = el.querySelector(".relation_view_list_more");
+        this.moreButton = el.querySelector(".relation_view_list_more .btn");
         this.moreButton.addEventListener("click", this.load.bind(this));
         this.load();
     }
@@ -10583,6 +10664,7 @@ class Table {
             this.bindCell(cell);
         });
         this.loadCellsAsync();
+        initTooltips();
     }
     bindCell(cell) {
         let cellAsyncURL = cell.getAttribute("data-async-data-url");
@@ -10646,6 +10728,64 @@ class Table {
         request.send();
     }
 }
+function initTooltips() {
+    deleteTooltips();
+    let els = document.querySelectorAll("[data-tooltip]");
+    for (var i = 0; i < els.length; i++) {
+        let el = els[i];
+        if (el.getAttribute("data-hastooltip")) {
+            continue;
+        }
+        el.setAttribute("data-hastooltip", "true");
+        el.addEventListener("mouseenter", (e) => {
+            let targetEl = e.target;
+            showTooltip(targetEl, el.getAttribute("data-tooltip"));
+        });
+        el.addEventListener("mouseleave", (e) => {
+            deleteTooltips();
+        });
+    }
+}
+function showTooltip(targetEl, text) {
+    deleteTooltips();
+    let tooltipEl = document.createElement("div");
+    tooltipEl.classList.add("tooltip");
+    tooltipEl.innerText = text;
+    document.body.appendChild(tooltipEl);
+    let elWidth = tooltipEl.clientWidth;
+    let elHeight = tooltipEl.clientHeight;
+    let viewportWidth = window.innerWidth;
+    let viewportHeight = window.innerHeight;
+    let rect = targetEl.getBoundingClientRect();
+    var x, y = 0;
+    x = rect.left;
+    y = rect.top + rect.height;
+    if (x + elWidth > viewportWidth) {
+        if (x > viewportWidth / 2) {
+            x = rect.x + rect.width - elWidth;
+        }
+    }
+    if (y + elHeight > viewportHeight) {
+        if (y > viewportHeight / 2) {
+            y = rect.y - elHeight;
+        }
+    }
+    if (x < 0) {
+        x = 0;
+    }
+    if (y < 0) {
+        y = 0;
+    }
+    tooltipEl.style.left = x + "px";
+    tooltipEl.style.top = y + "px";
+    return tooltipEl;
+}
+function deleteTooltips() {
+    let tooltips = document.querySelectorAll(".tooltip");
+    for (var i = 0; i < tooltips.length; i++) {
+        tooltips[i].remove();
+    }
+}
 class Prago {
     static start() {
         document.addEventListener("DOMContentLoaded", Prago.init);
@@ -10678,7 +10818,7 @@ class Prago {
         if (menuEl) {
             new Menu();
         }
-        var relationListEls = document.querySelectorAll(".admin_relationlist");
+        var relationListEls = document.querySelectorAll(".relation_view_list");
         relationListEls.forEach((el) => {
             new RelationList(el);
         });
@@ -10696,6 +10836,7 @@ class Prago {
         initDashboard();
         initGoogleMaps();
         initTables();
+        initTooltips();
         let searchboxButton = document.querySelector(".searchbox_button");
         if (searchboxButton) {
             searchboxButton.addEventListener("click", (e) => {
@@ -10740,4 +10881,21 @@ function getBaseColor() {
 }
 function getBlackColor() {
     return document.body.getAttribute("data-black-color");
+}
+function scrollToChild(child) {
+    child.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+function prettyDateInterval(from, to) {
+    const totalSeconds = Math.floor(Math.abs(to - from) / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    const parts = [];
+    if (hours > 0)
+        parts.push(`${hours} h`);
+    if (minutes > 0)
+        parts.push(`${minutes} min`);
+    if (seconds > 0)
+        parts.push(`${seconds} s`);
+    return parts.length > 0 ? parts.join(" ") : "0 s";
 }

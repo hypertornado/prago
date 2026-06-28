@@ -41,6 +41,7 @@
     "js/cmenu.ts",
     "js/timeline.ts",
     "js/table.ts",
+    "js/tooltip.ts",
     "js/prago.ts"
   ]
 }

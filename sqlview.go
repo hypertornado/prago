@@ -32,7 +32,7 @@ func (app *App) initSQLView() {
 			lastCell := Cell("")
 			if showDelete {
 				q := fmt.Sprintf("DROP TABLE %s;", tableName)
-				lastCell.Button(&TableCellButton{
+				lastCell.Button(&Button{
 					Name:    "Delete table",
 					OnClick: template.JS(fmt.Sprintf("popup(\"/admin/_sqlconsole?q=%s\")", url.QueryEscape(q))),
 				})
@@ -71,14 +71,14 @@ func (app *App) initSQLView() {
 
 				deleteFieldCell := Cell("")
 				if canDeleteField {
-					deleteFieldCell.Button(&TableCellButton{
+					deleteFieldCell.Button(&Button{
 						Name:    "Delete field",
 						OnClick: template.JS(fmt.Sprintf("popup(\"/admin/_sqlconsole?q=%s\")", url.QueryEscape(q))),
 					})
 				}
 
 				indexQ := fmt.Sprintf("CREATE INDEX `idx_%s` ON `%s` (`%s`);", fieldName, tableName, fieldName)
-				deleteFieldCell.Button(&TableCellButton{
+				deleteFieldCell.Button(&Button{
 					Name:    "Create index",
 					OnClick: template.JS(fmt.Sprintf("popup(\"/admin/_sqlconsole?q=%s\")", url.QueryEscape(indexQ))),
 				})

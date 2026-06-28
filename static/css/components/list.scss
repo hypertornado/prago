@@ -3,7 +3,7 @@
 .list {
   overflow: hidden;
 
-  height: calc(100vh - 45px);
+  height: calc(100dvh - 45px);
   display: flex;
   flex-direction: column;
   overflow: auto;
@@ -307,10 +307,6 @@
   .list_row:active .list_cell {
     background-color: var(--baseColorBackground);
   }
-}
-
-.admin-action-order {
-  cursor: move;
 }
 
 .ordered,

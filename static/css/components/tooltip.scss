@@ -1,0 +1,31 @@
+@use "../variables.scss" as *;
+
+.tooltip {
+    position: absolute;
+    z-index: 10000;
+    background: $black;
+    color: white;
+    font-size: .8rem;
+    line-height: 1.3em;
+    max-width: 300px;
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin: 2px 0px;
+    @include softShadow;
+    opacity: 0;
+
+    animation: tooltipAnimation 200ms ease-in-out forwards;
+    animation-delay: 200ms;
+}
+
+@keyframes tooltipAnimation {
+
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+    
+}

@@ -112,8 +112,6 @@ func (resource *Resource) consistencyCheck(request *Request, fta *FormTaskActivi
 			)
 		}
 
-		//time.Sleep(10 * time.Millisecond)
-
 		return nil
 	})
 

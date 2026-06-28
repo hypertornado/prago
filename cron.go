@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"log"
 	"time"
 )
 
@@ -19,13 +20,22 @@ func (app *App) initCron() {
 			time.Sleep(1 * time.Second)
 			for _, task := range app.cronTasks {
 				if cronInited.Add(task.repeatEvery).Before(time.Now()) && task.lastFinished.Add(task.repeatEvery).Before(time.Now()) {
-					task.handler()
-					task.lastFinished = time.Now()
+					task.handle()
 				}
 			}
 		}
 
 	}()
+}
+
+func (ct *cronTask) handle() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("recovering from crontask handle panic: %v", err)
+		}
+	}()
+	ct.handler()
+	ct.lastFinished = time.Now()
 }
 
 func (app *App) addCronTask(id string, repeatEvery time.Duration, handler func()) {

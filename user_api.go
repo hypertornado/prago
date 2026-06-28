@@ -17,14 +17,14 @@ func (app *App) initUserAPI() {
 		usr := request.getUser()
 		keys := Query[session](app).Is("User", usr.ID).Is("IsDeleted", false).Is("IsAPI", true).Order("id").List()
 		for _, key := range keys {
-			table.Row(Cell(key.UUID).Button(&TableCellButton{
+			table.Row(Cell(key.UUID).Button(&Button{
 				Name:    "Delete",
 				Icon:    iconDelete,
 				OnClick: template.JS(fmt.Sprintf("popup(\"/admin/_apikeydelete?uuid=%s\")", key.UUID)),
 			}))
 		}
 
-		table.Row(table.Cell("").Button(&TableCellButton{
+		table.Row(table.Cell("").Button(&Button{
 			Name:    "Generate API Key",
 			OnClick: template.JS(fmt.Sprintf("popup(\"/admin/_apikeycreate\")")),
 		}))

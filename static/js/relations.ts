@@ -30,21 +30,23 @@ class RelationPicker {
 
     this.input = <HTMLInputElement>el.getElementsByTagName("input")[0];
     this.previewsContainer = <HTMLDivElement>(
-      el.querySelector(".admin_relation_previews")
+      el.querySelector(".relation_input_previews")
     );
     this.relationName = el.getAttribute("data-relation");
     this.filterID = el.getAttribute("data-filter");
     this.progress = el.querySelector("progress");
 
     this.picker = <HTMLDivElement>(
-      el.querySelector(".admin_item_relation_picker")
+      el.querySelector(".picker")
     );
     
     this.suggestionsObject = new Suggestions(
-      this.el.querySelector(".admin_item_relation_picker_suggestions_content"),
+      this.el.querySelector(".picker_suggestions_content"),
       this.picker.querySelector("input"),
       this.getSearchURL.bind(this),
-      this.addPreview.bind(this)
+      (data: any) => {
+        this.addPreview(data, true);
+      }
     );
 
     this.makeReordable();
@@ -95,7 +97,7 @@ class RelationPicker {
       if (request.status == 200) {
         let items = JSON.parse(request.response);
         for (var i = 0; i < items.length; i++) {
-          this.addPreview(items[i]);
+          this.addPreview(items[i], false);
         }
         if (items.length == 0) {
           this.showSearch();
@@ -108,46 +110,34 @@ class RelationPicker {
     request.send();
   }
 
-  addPreview(data: any) {
+  addPreview(data: any, animate: boolean) {
     let previewEl = document.createElement("div");
-    previewEl.classList.add("admin_relation_preview");
+    previewEl.classList.add("relation_input_preview");
+    if (animate) {
+      previewEl.classList.add("relation_input_preview-insert")
+    }
 
     var el = createSuggestionsPreviewEl(data, true);
     this.previewsContainer.appendChild(previewEl);
     previewEl.appendChild(el);
 
-    /*
-    let upButton = document.createElement("div");
-    upButton.classList.add(
-      "admin_relation_preview_action",
-      "admin_relation_preview_action-up"
-    );
-    upButton.innerText = "↑";
-    previewEl.appendChild(upButton);
-    upButton.addEventListener("click", (e: Event) => {
-      this.updateOrder(e, false);
-    });
-
-    let downButton = document.createElement("div");
-    downButton.classList.add(
-      "admin_relation_preview_action",
-      "admin_relation_preview_action-down"
-    );
-    downButton.innerText = "↓";
-    previewEl.appendChild(downButton);
-    downButton.addEventListener("click", (e: Event) => {
-      this.updateOrder(e, true);
-    });
-    */
-
     let deleteButton = document.createElement("div");
-    deleteButton.classList.add("admin_relation_preview_action");
-    deleteButton.innerText = "×";
+    deleteButton.classList.add("btn");
+    deleteButton.classList.add("btn-formitem");
+    deleteButton.classList.add("relation_input_preview_action");
+
+    deleteButton.innerHTML = `
+      <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=base" class="btn_icon">
+    `
+    
     previewEl.appendChild(deleteButton);
     deleteButton.addEventListener("click", () => {
-      previewEl.remove();
-      this.updateLayout();
-      this.suggestionsObject.focus();
+      el.classList.add("relation_input_preview-remove");
+      setTimeout(() => {
+        previewEl.remove();
+        this.updateLayout();
+        this.suggestionsObject.focus();
+      }, 200);
     });
 
     previewEl.setAttribute("data-id", data.ID);

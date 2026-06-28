@@ -1,8 +1,8 @@
 @use "../variables.scss" as *;
 
 .menu2 {
-  padding-right: 5px;
-  padding-top: 10px;
+  padding-right: 4px;
+  padding-top: 4px;
 }
 
 .menu2_items {
@@ -19,13 +19,14 @@
   justify-content: center;
   opacity: 0;
   margin-left: 3px;
-  border: 1px solid transparent;
+  //border: 1px solid transparent;
   border-radius: 4px;
 }
 
 .menu2_item_icon:hover {
   background: $hoverColor;
-  border-color: $baseColor;
+  @include softShadow;
+  //border-color: $baseColor;
 
 }
 
@@ -99,16 +100,21 @@
 
 .menu2_item_content-destroy:hover {
   border-color: $red;
-  background-color: $redLightest;
+  background-color: $redHover;
 }
 
 .menu2_item_content-destroy:active {
-  background-color: $redLighter;
+  background-color: $redActive;
 }
 
 .menu2_item_content-selected.menu2_item_content-destroy, .menu2_item_content-selected.menu2_item_content-destroy:hover {
   background: $red;
   border-color: $red;
+}
+
+.menu2_item_content-selected.menu2_item_content-create, .menu2_item_content-selected.menu2_item_content-create:hover {
+  background: $green;
+  border-color: $green;
 }
 
 .menu2_item_content-accented {
@@ -117,6 +123,11 @@
 
 .menu2_item_content-create:hover {
   border-color: $green;
+  background-color: $greenHover;
+}
+
+.menu2_item_content-create:active {
+  background-color: $greenActive;
 }
 
 .menu2_item_content-selected.menu2_item_content-create, .menu2_item_content-selected.menu2_item_content-create:hover {
@@ -184,4 +195,13 @@
   border-radius: 3px;
   margin-left: -5px;
   padding-left: 5px;
+}
+
+@media (max-width: 1100px) {
+
+  .menu2 {
+    padding: 8px;
+    padding-left: 0px;
+  }
+
 }

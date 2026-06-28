@@ -98,6 +98,10 @@
   margin-bottom: 2.5px;
 }
 
+.form_table_cell_textarea {
+  max-width: calc(100%);
+}
+
 .form_table_cell_textafter {
   color: $gray;
   font-size: .8em;

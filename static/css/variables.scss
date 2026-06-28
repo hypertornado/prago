@@ -21,9 +21,17 @@ $baseColor: var(--baseColor);
 
 $red: var(--red);
 $redLighter: #de4450;
-$redLightest: hsl(355, 70%, 99%);
+$redBackground: hsl(355, 70%, 99%);
+$redBackgroundDarker: hsl(355, 70%, 95%);
+
+$redHover: $redBackground;
+$redActive: $redBackgroundDarker;
 
 $green: var(--green);
+$greenHover: hsl(120, 100%, 99%);
+$greenActive: hsl(120, 100%, 95%);
+
+
 $yellow: #ffd800;
 
 $hoverColor: var(--baseColorBackgroundLighter);

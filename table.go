@@ -51,7 +51,8 @@ type tableCellData struct {
 	Colspan           int64
 	Rowspan           int64
 	Checkboxes        []*tableCellCheckbox
-	Buttons           []*TableCellButton
+	Textarea          *tableCellTextarea
+	Buttons           []*Button
 	AsyncDataURL      string
 	Files             []*File
 	Progress          *float64
@@ -62,13 +63,17 @@ type tableCellCheckbox struct {
 	Checked bool
 }
 
-type TableCellButton struct {
+type tableCellTextarea struct {
+	Value string
+}
+
+/*type TableCellButton struct {
 	Name    string
 	Icon    string
 	URL     string
 	OnClick template.JS
 	Title   string
-}
+}*/
 
 type tableView struct {
 	Rows       []*tableRowView
@@ -78,13 +83,6 @@ type tableView struct {
 
 type tableRowView struct {
 	Cells []*tableCellData
-}
-
-func (btn TableCellButton) GetTitle() string {
-	if btn.Title != "" {
-		return btn.Title
-	}
-	return btn.Name
 }
 
 func (app *App) Table() *Table {
@@ -232,7 +230,14 @@ func (cell *TableCell) Checkbox(name string, checked bool) *TableCell {
 	return cell
 }
 
-func (cell *TableCell) Button(btn *TableCellButton) *TableCell {
+func (cell *TableCell) Textarea(value string) *TableCell {
+	cell.data.Textarea = &tableCellTextarea{
+		Value: value,
+	}
+	return cell
+}
+
+func (cell *TableCell) Button(btn *Button) *TableCell {
 	cell.data.Buttons = append(cell.data.Buttons, btn)
 	return cell
 }

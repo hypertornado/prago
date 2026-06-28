@@ -88,13 +88,16 @@ a.search_pagination_page-selected {
 
 .searchbox-showsuggestions {
   @include softShadow;
+  border-color: $baseColor;
 }
 
 .searchbox_input {
-  padding: 0px 10px;
+  padding: 0px 4px;
   font-weight: 500;
   -webkit-appearance: textfield;
-  background-color: transparent;
+  background-color: white;
+  border-radius: 800px;
+  margin-left: 4px;
   border: none;
   box-shadow: none;
   font-size: 1rem;
@@ -157,7 +160,7 @@ a.search_pagination_page-selected {
   display: block;
 }
 
-.admin_search_suggestion {
+.search_suggestion {
   display: flex;
   font-size: 0.8rem;
   line-height: 1.3em;
@@ -167,24 +170,24 @@ a.search_pagination_page-selected {
   padding-left: 50px;
 }
 
-.admin_search_suggestion_icon {
+.search_suggestion_icon {
   width: 25px;
   aspect-ratio: 1;
 }
 
-.admin_search_suggestion-noimage {
+.search_suggestion-noimage {
   padding: 5px;
 }
 
-a.admin_search_suggestion-selected {
+a.search_suggestion-selected {
   background: var(--baseColorBackgroundLighter) !important;
 }
 
-a.admin_search_suggestion-selected:active {
+a.search_suggestion-selected:active {
   background: var(--baseColorBackground) !important;
 }
 
-.admin_search_suggestion_left {
+.search_suggestion_left {
   border-radius: 10px;
   width: 40px;
   aspect-ratio: 1;
@@ -195,29 +198,29 @@ a.admin_search_suggestion-selected:active {
   background-position: center;
 }
 
-.admin_search_suggestion_right {
+.search_suggestion_right {
   flex-grow: 2;
   padding: 5px;
 }
 
-.admin_search_suggestion_category {
+.search_suggestion_category {
   text-transform: uppercase;
   color: $black;
   font-size: 0.7rem;
 }
 
-.admin_search_suggestion_prename {
+.search_suggestion_prename {
   color: $black;
   text-transform: uppercase;
   font-size: .7rem;
   line-height: 1.3em;
 }
 
-.admin_search_suggestion_name {
+.search_suggestion_name {
   font-size: 1rem;
   line-height: 1.3em;
 }
 
-.admin_search_suggestion_description {
+.search_suggestion_description {
   color: $gray;
 }

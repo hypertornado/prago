@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -104,12 +105,24 @@ func (app *App) InternalBeacon(typ, val1, val2, val3 string) {
 func deleteOldBeacons(app *App) {
 	for {
 		time.Sleep(5 * time.Minute)
-		olderThen := time.Now().AddDate(0, 0, -30)
-		beaconsToDelete := Query[Beacon](app).Where("createdat < ?", olderThen).Limit(1000).List()
-		for _, v := range beaconsToDelete {
-			DeleteItem[Beacon](app, v.ID)
-		}
+		doDeleteOldBeacons(app)
 	}
+}
+
+func doDeleteOldBeacons(app *App) {
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("recovering from doDeleteOldBeacons panic: %v", err)
+		}
+	}()
+
+	olderThen := time.Now().AddDate(0, 0, -30)
+	beaconsToDelete := Query[Beacon](app).Where("createdat < ?", olderThen).Limit(1000).List()
+	for _, v := range beaconsToDelete {
+		DeleteItem[Beacon](app, v.ID)
+	}
+
 }
 
 func (app *App) GetBeaconCount(beaconName, pageURL, val1, val2, val3 string) int64 {

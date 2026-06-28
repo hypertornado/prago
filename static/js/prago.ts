@@ -47,7 +47,7 @@ class Prago {
     }
 
     var relationListEls = document.querySelectorAll<HTMLDivElement>(
-      ".admin_relationlist"
+      ".relation_view_list"
     );
     relationListEls.forEach((el) => {
       new RelationList(el);
@@ -74,6 +74,7 @@ class Prago {
     initDashboard();
     initGoogleMaps();
     initTables();
+    initTooltips();
     
     let searchboxButton = document.querySelector(".searchbox_button");
     if (searchboxButton) {
@@ -102,9 +103,6 @@ class VisibilityReloader {
   lastRequestedTime: number;
 
   constructor(reloadIntervalMilliseconds: number, handler: any) {
-
-    //console.log("VISIB", reloadIntervalMilliseconds);
-
     this.lastRequestedTime = 0;
     window.setInterval(() => {
       if (
@@ -138,4 +136,24 @@ function getBaseColor(): string {
 
 function getBlackColor(): string {
   return document.body.getAttribute("data-black-color");
+}
+
+
+function scrollToChild(child: HTMLDivElement): void {
+  child.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
+function prettyDateInterval(from: number, to: number): string {
+  const totalSeconds = Math.floor(Math.abs(to - from) / 1000);
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const parts: string[] = [];
+  if (hours > 0) parts.push(`${hours} h`);
+  if (minutes > 0) parts.push(`${minutes} min`);
+  if (seconds > 0) parts.push(`${seconds} s`);
+
+  return parts.length > 0 ? parts.join(" ") : "0 s";
 }

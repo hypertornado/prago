@@ -1,25 +1,5 @@
 package prago
 
-import "html/template"
-
-/*type Tab struct {
-	Icon     string
-	Name     string
-	URL      string
-	Selected bool
-}*/
-
-type Button struct {
-	Icon     string
-	Name     string
-	URL      string
-	Selected bool
-}
-
-func (b *Button) SafeURL() template.URL {
-	return template.URL(b.URL)
-}
-
 func (app *App) getLoginNavigation(language, code string) (ret []*Button) {
 	ret = append(ret, &Button{
 		Name:     messages.Get(language, "admin_login_action"),

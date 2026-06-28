@@ -12,7 +12,10 @@ class FormContainer {
   tableTbody: HTMLTableSectionElement;
   taskHeader: HTMLDivElement;
 
+  taskStartedAt: number = 0;
+
   taskDataRequesting: boolean;
+  taskTableRequesting: boolean;
 
   constructor(formContainer: HTMLDivElement, okHandler: Function) {
     if (!window.primaryFormContainer && !formContainer.parentElement.classList.contains("popup_content")) {
@@ -129,6 +132,9 @@ class FormContainer {
           var data = JSON.parse(request.response);
           this.progress.classList.add("hidden");
           this.form.formEl.classList.remove("form-loading");
+          if (data.TaskUUID) {
+            this.taskStartedAt = Date.now();
+          }
           this.formTaskUUID = data.TaskUUID;
           this.handleOkData(data);
         } else {
@@ -239,7 +245,7 @@ class FormContainer {
 
     this.formContainer.querySelector(".form_task_stop").addEventListener("click", () => {
       new PopupForm("/admin/_taskstop?uuid=" + this.formTaskUUID, (data: any) => {
-        this.setTaskFinished();
+        this.setTaskFinished(data.Data);
       })
     });
 
@@ -248,9 +254,15 @@ class FormContainer {
         taskEl.classList.remove("hidden");
       }
 
+      if (this.formTaskUUID) {
+        this.setTaskDateHuman(this.taskStartedAt, Date.now());
+      }
+
       if (this.formTaskUUID != "" && Date.now() - this.lastTaskLoad > 500) {
         this.lastTaskLoad = Date.now();
+
         this.loadTaskProgress(this.formTaskUUID);
+        this.loadTaskTable(this.formTaskUUID);
       }
     }, 100);
   }
@@ -274,28 +286,81 @@ class FormContainer {
         var data = JSON.parse(request.response);
         this.setTaskData(data);
       } else {
-        this.setTaskFinished();
+        this.loadTaskTable(uuid);
+        this.setTaskFinished(data);
       }
     });
     request.send();
   }
 
+  loadTaskTable(uuid: string) {
+    //just one task progress at time
+    if (this.taskTableRequesting) {
+      return;
+    }
+
+    let request = new XMLHttpRequest();
+    request.open("GET", "/admin/api/_taskviewtable?uuid=" + uuid);
+    this.taskTableRequesting = true;
+
+    request.addEventListener("load", (e) => {
+      this.taskTableRequesting = false;
+      if (this.formTaskUUID != uuid) {
+        return;
+      }
+      if (request.status == 200) {
+        var tableData = JSON.parse(request.response);
+        this.setTaskTableData(tableData);
+      }
+    });
+    request.send();
+  }
+
+  setTaskDateHuman(from: number, to: number) {
+    this.formContainer.querySelector(".form_task_interval").textContent = prettyDateInterval(from, to);
+  }
+
   setTaskData(data: any) {
     this.taskHeader.classList.remove("hidden");
     let taskEl = this.formContainer.querySelector(".form_task");
-    taskEl.querySelector(".form_task_status").textContent = data.Description;
+    let statusEl = taskEl.querySelector(".form_task_status");
+    statusEl.textContent = data.Description;
+    statusEl.setAttribute("title", data.Description);
+    statusEl.setAttribute("data-tooltip", data.Description);
     taskEl.querySelector(".form_task_progress").setAttribute("value", data.Progress);
     taskEl.querySelector(".form_task_progress_text").textContent = data.ProgressText;
 
-    this.tableTbody.insertAdjacentHTML("beforeend", data.TableRows);
+    //this.tableTbody.insertAdjacentHTML("beforeend", data.TableRows);
+    //this.setTaskTableData(data.TableRows)
+
     if (data.Finished) {
-      this.setTaskFinished();
+      this.setTaskFinished(data);
     }
   }
 
-  setTaskFinished() {
+  setTaskFinished(data: any) {
     this.formTaskUUID = "";
     this.taskHeader.classList.add("hidden");
+
+    if (data.IsError) {
+      Prago.notificationCenter.flashNotification(
+        "Chyba při dokončování úlohy",
+        data.Description,
+        false,
+        true
+      );
+    } else {
+      Prago.notificationCenter.flashNotification(
+        "Dokončeno",
+        data.Description,
+        true,
+        false
+      );
+    }
+  }
+
+  setTaskTableData(data: any) {
+    this.tableTbody.insertAdjacentHTML("beforeend", data);
   }
 
   cleanTable() {

@@ -13,11 +13,11 @@
 {{end}}
 
 {{define "form_input_int"}}
-  <button type="button" class="btn form_item_minus">
+  <button type="button" class="btn btn-formitem form_item_minus">
     <img src="/admin/api/icons?file=glyphicons-basic-372-minus.svg&color=${getBaseColor()}" class="btn_icon">
   </button>
   <input type="number" name="{{.ID}}" value="{{.Value}}" {{if .Autocomplete}}autocomplete="{{.Autocomplete}}"{{end}} {{if .InputMode}}inputmode="{{.InputMode}}"{{end}} id="{{.UUID}}" class="input form_watcher form_input form_input-int"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
-  <button type="button" class="btn form_item_plus">
+  <button type="button" class="btn btn-formitem form_item_plus">
     <img src="/admin/api/icons?file=glyphicons-basic-371-plus.svg&color=${getBaseColor()}" class="btn_icon">
   </button>
 {{end}}
@@ -31,7 +31,16 @@
 {{end}}
 
 {{define "form_input_password"}}
-  <input name="{{.ID}}" id="{{.UUID}}" value="{{.Value}}" type="password" {{if .Autocomplete}}autocomplete="{{.Autocomplete}}"{{end}} {{if .InputMode}}inputmode="{{.InputMode}}"{{end}} class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  <input name="{{.ID}}" id="{{.UUID}}"
+    value="{{.Value}}"
+    type="password"
+    {{if .Autocomplete}}autocomplete="{{.Autocomplete}}"{{end}}
+    {{if .InputMode}}inputmode="{{.InputMode}}"{{end}}
+    class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}
+  >
+  <button type="button" class="btn btn-formitem form_item_showpassword">
+    <img src="/admin/api/icons?file=glyphicons-basic-52-eye.svg&color=${getBaseColor()}" class="btn_icon">
+  </button>
 {{end}}
 
 {{define "form_input_textarea"}}
@@ -39,22 +48,22 @@
 {{end}}
 
 {{define "form_input_markdown"}}
-  <div class="admin_markdown">
+  <div class="markdown_input">
 
-    <div class="admin_markdown_header">
-      <div class="admin_markdown_header_buttons">
-        <div class="btn admin_markdown_command" data-cmd="b" title="ctrl+b">B</div>
-        <div class="btn admin_markdown_command" data-cmd="i" title="ctrl+i">I</div>
-        <div class="btn admin_markdown_command" data-cmd="a" title="ctrl+u">Odkaz</div>
-        <div class="btn admin_markdown_command" data-cmd="h2" title="ctrl+k">Nadpis</div>
+    <div class="markdown_input_header">
+      <div class="markdown_input_header_buttons">
+        <div class="btn markdown_input_command" data-cmd="b" data-tooltip="ctrl+b">B</div>
+        <div class="btn markdown_input_command" data-cmd="i" data-tooltip="ctrl+i">I</div>
+        <div class="btn markdown_input_command" data-cmd="a" data-tooltip="ctrl+u">Odkaz</div>
+        <div class="btn markdown_input_command" data-cmd="h2" data-tooltip="ctrl+k">Nadpis</div>
       </div>
       <label>
-        <input type="checkbox" class="admin_markdown_preview_show"> Zobrazit náhled
+        <input type="checkbox" class="markdown_input_preview_show"> Zobrazit náhled
       </label>
     </div>
 
     <textarea name="{{.ID}}" id="{{.UUID}}" class="input form_watcher form_input textarea"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>{{.Value}}</textarea>
-    <div class="admin_markdown_preview hidden"></div>
+    <div class="markdown_input_preview hidden"></div>
   </div>
 {{end}}
 
@@ -78,6 +87,9 @@
 
 {{define "form_input_date"}}
   <input type="date" name="{{.ID}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input form_input-date"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}} autocomplete="off">
+  <button type="button" class="btn btn-formitem form_item_calendar">
+    <img src="/admin/api/icons?file=glyphicons-basic-46-calendar.svg&color=${getBaseColor()}" class="btn_icon">
+  </button>
 {{end}}
 
 {{define "form_input_datetime"}}
@@ -92,6 +104,9 @@
       <input type="hidden" id="{{.UUID}}" name="{{.ID}}" value="{{.Value}}">
 
       <input type="date" name="_admin_timestamp_hidden" class="input form_input form_input-date admin_timestamp_date"{{if .Focused}} autofocus{{end}} autocomplete="off">
+      <button type="button" class="btn btn-formitem form_item_calendar">
+        <img src="/admin/api/icons?file=glyphicons-basic-46-calendar.svg&color=${getBaseColor()}" class="btn_icon">
+      </button>
 
       <select class="input form_watcher form_input admin_timestamp_hour"></select>
       <span class="admin_timestamp_divider">:</span>
@@ -215,15 +230,15 @@
 {{end}}
 
 {{define "form_input_relation"}}
-<div class="admin_item_relation {{if .Data.MultiRelation}}admin_item_relation-multiple{{else}}admin_item_relation-single{{end}}" {{if .Focused}}data-autofocus="true"{{end}} data-relation="{{.Data.RelatedID}}" data-multiple="{{.Data.MultiRelation}}" data-filter="{{.FormFilterID}}">
+<div class="relation_input {{if .Data.MultiRelation}}relation_input-multiple{{else}}relation_input-single{{end}}" {{if .Focused}}data-autofocus="true"{{end}} data-relation="{{.Data.RelatedID}}" data-multiple="{{.Data.MultiRelation}}" data-filter="{{.FormFilterID}}">
   <input type="hidden" name="{{.ID}}" value="{{.Value}}">
   <progress class="progress"></progress>
-  <div class="admin_relation_previews"></div>
+  <div class="relation_input_previews"></div>
 
-  <div class="admin_item_relation_picker hidden">
+  <div class="picker hidden">
     <input class="input" placeholder="{{.Data.Placeholder}}">
-    <div class="admin_item_relation_picker_suggestions">
-      <div class="admin_item_relation_picker_suggestions_content"></div>
+    <div class="picker_suggestions">
+      <div class="picker_suggestions_content"></div>
     </div>
   </div>
 </div>

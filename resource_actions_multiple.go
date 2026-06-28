@@ -167,9 +167,6 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 				form.AddCheckbox("_previewurl", "Ukázat preview URL").Value = "on"
 			}
 
-			//form.AddHidden("_resource").Value = resource.id
-			//form.AddRelationMultiple("_items", resource.pluralName(request.Locale()), resource.id).Value = request.Param("_ids")
-
 			form.AddSubmit("Zobrazit")
 		},
 		func(items []any, fv FormValidation, request *Request) {

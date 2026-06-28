@@ -17,10 +17,6 @@ import (
 //go:embed templates
 var templatesFS embed.FS
 
-var blackColor = "444444"
-var redColor = "cb2431"
-var greenColor = "006400"
-
 type PragoTemplates struct {
 	templates      *template.Template
 	funcMap        template.FuncMap

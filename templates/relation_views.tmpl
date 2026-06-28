@@ -5,7 +5,7 @@
 {{end}}
 
 {{define "relation_view"}}
-  <div class="box">
+  <div class="box relation_view">
   {{if .Name}}
   <div class="relation_view_header">
     {{if .Name}}
@@ -23,7 +23,7 @@
     {{end}}
     <div class="relation_view_header_tabs">
       {{range $navItem := .Buttons}}
-        <a href="{{$navItem.URL}}" class="btn" title="{{$navItem.Name}}"><img src="/admin/api/icons?file={{.Icon}}&color={{PragoBlackColor}}" class="btn_icon"></a>
+        <a href="{{$navItem.URL}}" class="btn" data-tooltip="{{$navItem.Name}}"><img src="/admin/api/icons?file={{.Icon}}&color={{PragoBlackColor}}" class="btn_icon"></a>
       {{end}}
     </div>
   </div>
@@ -35,19 +35,19 @@
 {{end}}
 
 {{define "view_relationlist"}}
-  <div class="admin_relationlist"
+  <div class="relation_view_list"
     data-source-resource="{{.SourceResource}}"
     data-target-resource="{{.TargetResource}}"
     data-target-field="{{.TargetField}}"
     data-id-value="{{.IDValue}}"
     data-count="{{.Count}}"
   >
-    <div class="admin_relationlist_target">
+    <div class="relation_view_list_target">
     </div>
-    <div class="admin_relationlist_loading hidden">
+    <div class="relation_view_list_loading hidden">
       <progress class="progress list_progress"></progress>
     </div>
-    <div class="admin_relationlist_more hidden">
+    <div class="relation_view_list_more hidden">
       <div class="btn"><img src="/admin/api/icons?file=glyphicons-basic-221-chevron-down.svg&color={{PragoBlackColor}}" class="btn_icon"></div>
     </div>
   </div>

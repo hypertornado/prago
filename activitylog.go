@@ -156,7 +156,7 @@ func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int
 			}
 		}
 
-		actionCell.Button(&TableCellButton{
+		actionCell.Button(&Button{
 			Title: "Detail",
 			Icon:  iconView,
 			URL:   activityURL,

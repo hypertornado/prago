@@ -52,7 +52,7 @@ body.admin {
   justify-content: center;
   align-items: center;
   background-color: white;
-  border: 1px solid $baseColor;
+  //border: 1px solid $baseColor;
   @include softShadow;
 }
 
@@ -115,8 +115,8 @@ body.admin {
   .root-visible .root_left {
     display: block;
     position: absolute;
-    top: 50px;
-    max-height: calc(100vh - 55px);
+    top: 53px;
+    height: calc(100svh - 61px);
     border: 1px solid $grayBorderColor;
     //bottom: 0px;
     right: 8px;
@@ -124,7 +124,7 @@ body.admin {
     z-index: 10;
     background-color: $backgroundGrayColor;
     animation: root_left_animation 200ms ease-out;
-    width: min(100vw, 300px);
+    width: min(100svw, 300px);
     z-index: 10000000;
     position: absolute;
     @include shadowLarge;

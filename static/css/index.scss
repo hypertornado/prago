@@ -14,9 +14,8 @@
 @use "components/board.scss";
 @use "components/dashboard.scss";
 @use "components/pagination.scss";
-@use "components/tabs.scss";
+@use "components/navigation.scss";
 @use "components/menu.scss";
-@use "components/relationlist.scss";
 @use "components/popup.scss";
 @use "components/notification_center.scss";
 @use "components/form_table.scss";
@@ -29,5 +28,9 @@
 @use "components/videoview.scss";
 @use "components/preview.scss";
 @use "components/simple.scss";
+@use "components/tooltip.scss";
 @use "components/accordion.scss";
+@use "components/relation_input.scss";
+@use "components/markdown_input.scss";
+@use "components/picker.scss";
 

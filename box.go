@@ -2,11 +2,11 @@ package prago
 
 type boxHeader struct {
 	Style              string
+	Image              string
 	Icon               string
 	DescriptionsBefore []string
 	Name               string
 	DescriptionsAfter  []string
-	Image              string
 
 	Buttons []*buttonData
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 )
 
 func (app *App) initFieldValidations() {
@@ -98,7 +99,9 @@ func (field *Field) addValidationNonempty() {
 	}
 
 	field.Validation(func(fieldVal any, userData UserData) error {
+
 		typ := reflect.TypeOf(fieldVal)
+
 		valid := true
 		if typ.Kind() == reflect.Int64 ||
 			typ.Kind() == reflect.Int32 ||
@@ -123,6 +126,14 @@ func (field *Field) addValidationNonempty() {
 			if fieldVal.(string) == "" {
 				valid = false
 			}
+		}
+
+		if typ == reflect.TypeOf(time.Now()) {
+			t := fieldVal.(time.Time)
+			if t.IsZero() {
+				valid = false
+			}
+
 		}
 
 		if !valid {

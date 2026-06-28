@@ -1,15 +1,15 @@
 {{define "search_suggest"}}
-  <div class="admin_search_suggestions_content">
+  <div class="search_suggestions_content">
     {{range $i, $item := .}}
-      <a href="{{$item.URL}}" class="admin_search_suggestion admin_search_suggestion-noimage" data-position="{{$i}}">
+      <a href="{{$item.URL}}" class="search_suggestion search_suggestion-noimage" data-position="{{$i}}">
         {{if $item.Icon}}
-          <img class="admin_search_suggestion_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBaseColor}}">
+          <img class="search_suggestion_icon" src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBaseColor}}">
         {{end}}
-        <div class="admin_search_suggestion_right">
+        <div class="search_suggestion_right">
           {{if $item.Prename}}
-            <div class="admin_search_suggestion_prename">{{$item.Prename}}</div>
+            <div class="search_suggestion_prename">{{$item.Prename}}</div>
           {{end}}
-          <div class="admin_search_suggestion_name">{{$item.Name}}</div>
+          <div class="search_suggestion_name">{{$item.Name}}</div>
         </div>
       </a>
     {{end}}

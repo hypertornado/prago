@@ -3,15 +3,15 @@
   {{range $item := .}}
     <div class="view">
     {{if $item.Name}}
-      <div class="view_name">
+      <div class="view_header">
         {{if $item.Icon}}
-          <img src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBlackColor}}" class="view_name_icon">
+          <img src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBlackColor}}" class="view_header_icon">
         {{end}}
-        {{$item.Name}}
-        {{if $item.EditURL}}
-          <a href="{{$item.EditURL}}" class="view_edit">
-            <img src="/admin/api/icons?file=glyphicons-basic-31-pencil.svg&color={{PragoBaseColor}}" class="view_edit_icon">{{$item.EditName}}
-          </a>
+        <div class="view_header_name">{{$item.Name}}</div>
+        {{if $item.EditAction}}
+          <div onclick="{{$item.EditAction}}" class="btn view_header_btn" data-tooltip="{{$item.EditName}}">
+            <img src="/admin/api/icons?file=glyphicons-basic-31-pencil.svg&color={{PragoBlackColor}}" class="btn_icon view_header_btn_icon">
+          </div>
         {{end}}
       </div>
     {{end}}
@@ -76,7 +76,7 @@
 
 {{define "view_relation"}}
     {{if .}}
-      <div class="admin_item_view_relation">
+      <div class="item_view_relation">
       {{range $item := .}}
       <a class="preview" href="{{$item.URL}}">
         {{if $item.Image}}

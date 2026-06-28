@@ -106,6 +106,7 @@ class List {
     this.bindInitialHeaderWidths();
     this.bindResizer();
     this.bindHeaderPositionCalculator();
+    initTooltips();
   }
 
   copyColumnWidths() {

@@ -26,6 +26,7 @@ class Table {
             this.bindCell(cell);
         });
         this.loadCellsAsync();
+        initTooltips();
     }
 
     bindCell(cell: HTMLTableCellElement) {
@@ -33,13 +34,8 @@ class Table {
         if (!cellAsyncURL) {
             return;
         }
-
         cell.classList.add("form_table_cell-loading");
-
-        //let textEl = cell.querySelector(".form_table_cell_text");
-        //textEl.textContent = "⏳";
         this.cellsToLoad.push(cell);
-
     }
 
     loadCellsAsync(){

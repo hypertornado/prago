@@ -14,7 +14,7 @@ class RelationList {
   moreButton: HTMLDivElement;
 
   constructor(el: HTMLDivElement) {
-    this.targetEl = el.querySelector(".admin_relationlist_target");
+    this.targetEl = el.querySelector(".relation_view_list_target");
 
     this.sourceResource = el.getAttribute("data-source-resource");
     this.targetResource = el.getAttribute("data-target-resource");
@@ -24,9 +24,9 @@ class RelationList {
 
     this.offset = 0;
 
-    this.loadingEl = el.querySelector(".admin_relationlist_loading");
-    this.moreEl = el.querySelector(".admin_relationlist_more");
-    this.moreButton = el.querySelector(".admin_relationlist_more .btn");
+    this.loadingEl = el.querySelector(".relation_view_list_loading");
+    this.moreEl = el.querySelector(".relation_view_list_more");
+    this.moreButton = el.querySelector(".relation_view_list_more .btn");
 
     this.moreButton.addEventListener("click", this.load.bind(this));
 

@@ -5,6 +5,9 @@
         {{end}}
         {{if .Name}}
             <div class="box_name">
+                {{if .Image}}
+                    <img class="box_image" src="{{.Image}}" loading="lazy">
+                {{end}}
                 {{if .Icon}}
                     <div class="box_icon">
                         <img src="/admin/api/icons?file={{.Icon}}&color={{PragoStyleColor .Style}}">
