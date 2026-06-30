@@ -153,6 +153,15 @@ func Cached[T any](app *App, name string, createFn func() T) chan T {
 	return ret
 }
 
+func CachedNEW[T any](app *App, name string, createFn func() T) T {
+	//ret := make(chan T)
+	//go func() {
+	val := loadCache(app.cache, name, createFn)
+	//ret <- val
+	//}()
+	return val
+}
+
 func (app *App) ClearCache() {
 	app.cache.clear()
 	app.userDataCacheDeleteAll()

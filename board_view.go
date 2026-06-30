@@ -42,7 +42,7 @@ func (board *Board) boardView(request *Request) *boardView {
 	if board.action != nil {
 		boardName = board.action.name(locale)
 		if board.isMainBoard() {
-			boardName = messages.GetNameFunction("admin_signpost_long", board.app.name(locale))(locale)
+			boardName = messages.GetNameFunction("signpost_long", board.app.name(locale))(locale)
 		}
 
 		boardIcon = board.action.icon

@@ -68,7 +68,7 @@ type listMultipleAction struct {
 
 func (resource *Resource) initListAction() {
 	resource.action("list").Icon(iconTable).setPriority(defaultHighPriority).
-		Permission(resource.canView).Name(messages.GetNameFunction("admin_list")).
+		Permission(resource.canView).Name(messages.GetNameFunction("list")).
 		ui(func(request *Request, pd *pageData) {
 			listData, err := resource.getListHeader(request)
 			must(err)

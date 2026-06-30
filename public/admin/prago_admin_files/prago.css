@@ -15,6 +15,15 @@
   caret-color: var(--baseColor);
 }
 
+@keyframes insertAnimationKeyframes {
+  from {
+    opacity: 0;
+    transform: perspective(10cm) rotateX(20deg) translateY(-10px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+  }
+}
 /*! normalize.css v3.0.2 | MIT License | git.io/normalize */
 img, legend {
   border: 0;
@@ -219,6 +228,7 @@ body {
   font-size: 14px;
   line-height: 1.4em;
   color: var(--black);
+  font-variant-numeric: tabular-nums;
 }
 
 code {
@@ -477,23 +487,23 @@ body.admin {
   flex-grow: 10;
 }
 
-.admin_timestamp {
+.input_timestamp {
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
-select.admin_timestamp_date {
+select.input_timestamp_date {
   width: 150px;
   flex-grow: 0;
 }
 
-select.admin_timestamp_hour {
+select.input_timestamp_hour {
   min-width: 50px !important;
   flex-grow: 0;
 }
 
-select.admin_timestamp_minute {
+select.input_timestamp_minute {
   min-width: 50px !important;
   flex-grow: 0;
 }
@@ -548,7 +558,7 @@ select.admin_timestamp_minute {
   display: none;
 }
 
-.admin_item_view_place {
+.item_view_place {
   height: 200px;
 }
 
@@ -573,6 +583,22 @@ select.admin_timestamp_minute {
   width: 0px;
   height: 0px;
   animation: spin_animation 700ms ease-in-out infinite;
+}
+
+.error_message {
+  color: var(--red);
+  padding: 8px 16px;
+  font-size: 1.5rem;
+  background-color: hsl(355, 70%, 99%);
+  background: var(--red);
+  color: white;
+  border: 1px solid var(--red);
+  font-weight: thin;
+  line-height: 1.3em;
+  margin: 8px auto;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  max-width: min(500px, 100% - 32px);
 }
 
 @keyframes spin_animation {
@@ -1292,14 +1318,12 @@ input[type=number] {
     Menlo, 
     Courier, 
     monospace;*/
-  font-variant-numeric: tabular-nums;
   color: #999;
   font-size: 0.8rem;
   line-height: 1.3em;
 }
 
 .form_task_interval {
-  font-variant-numeric: tabular-nums;
   white-space: pre-wrap;
   text-align: center;
   color: #999;
@@ -3094,7 +3118,8 @@ a .dashboard_figure_value {
 }
 
 .form_table {
-  margin-top: 5px;
+  margin-top: 16px;
+  margin-bottom: 32px;
 }
 
 .form_table table {
@@ -3105,8 +3130,12 @@ a .dashboard_figure_value {
   border: 1px solid #eee;
 }
 
+.form_table_row-reveal {
+  animation: 200ms insertAnimationKeyframes ease-in-out forwards;
+}
+
 .form_table td {
-  padding: 5px 10px;
+  padding: 4px 8px;
   border: 1px solid #eee;
   vertical-align: top;
 }
@@ -3997,7 +4026,7 @@ a .dashboard_figure_value {
 .simple_logo {
   width: 100px;
   aspect-ratio: 1;
-  margin: 0px 8px;
+  margin: 8px 8px;
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat;
@@ -4246,22 +4275,13 @@ h1.simple_name {
 }
 
 .relation_input_preview-insert {
-  animation: 200ms relationInsert ease-in-out forwards;
+  animation: 200ms insertAnimationKeyframes ease-in-out forwards;
 }
 
 .relation_input_preview-remove {
-  animation: 200ms relationInsert ease-in-out reverse forwards;
+  animation: 200ms insertAnimationKeyframes ease-in-out reverse forwards;
 }
 
-@keyframes relationInsert {
-  from {
-    opacity: 0;
-    transform: perspective(10cm) rotateX(20deg) translateY(-10px) scale(0.8);
-  }
-  to {
-    opacity: 1;
-  }
-}
 .relation_input_preview_action {
   align-self: center;
   background-color: transparent !important;

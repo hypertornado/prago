@@ -15,14 +15,14 @@ type Board struct {
 
 func (app *App) initBoard() {
 	app.MainBoard = newBoard(app, "")
-	app.MainBoard.action.name = messages.GetNameFunction("admin_signpost")
+	app.MainBoard.action.name = messages.GetNameFunction("signpost")
 	app.MainBoard.action.icon = iconSignpost
 	app.MainBoard.action.parentBoard = app.MainBoard
 	app.dashboardTableMap = make(map[string]*dashboardTable)
 	app.dashboardFigureMap = make(map[string]*dashboardFigure)
 	app.dashboardTimelineMap = make(map[string]*Timeline)
 
-	app.optionsBoard = app.MainBoard.Child("_options", messages.GetNameFunction("admin_options"), "glyphicons-basic-137-cogwheel.svg")
+	app.optionsBoard = app.MainBoard.Child("_options", messages.GetNameFunction("options"), "glyphicons-basic-137-cogwheel.svg")
 
 	sysadminBoard = app.optionsBoard.Child("_sysadmin", unlocalized("Sysadmin"), "glyphicons-basic-501-server.svg")
 

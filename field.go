@@ -89,6 +89,8 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 		canEdit: loggedPermission,
 
 		resource: resource,
+
+		preventPasswordManager: true,
 	}
 
 	if ret.id == "name" || ret.id == "description" {
@@ -204,7 +206,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 
 				timeVal := ivalField.(time.Time)
 				if timeVal.Year() == 0 {
-					vc.AddItemError(ret.id, messages.Get(userData.Locale(), "admin_validation_date_format_error"))
+					vc.AddItemError(ret.id, messages.Get(userData.Locale(), "validation_date_format_error"))
 				}
 			})
 		}

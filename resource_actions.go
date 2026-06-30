@@ -34,7 +34,7 @@ func (resource *Resource) initDefaultResourceActions() {
 		}
 		resource.bindData(item, request, queryData)
 		form.initWithResourceItem(resource, item, request)
-		submitItem := form.AddSubmit(messages.Get(request.Locale(), "admin_create"))
+		submitItem := form.AddSubmit(messages.Get(request.Locale(), "create"))
 		submitItem.Icon = iconAdd
 
 	}, func(vc FormValidation, request *Request) {
@@ -57,7 +57,7 @@ func (resource *Resource) initDefaultResourceActions() {
 
 			must(resource.app.Notification(resource.previewer(request, item).Name()).
 				SetImage(resource.previewer(request, item).ThumbnailURL()).
-				SetPreName(messages.Get(request.Locale(), "admin_item_created")).
+				SetPreName(messages.Get(request.Locale(), "item_created")).
 				Flash(request))
 			vc.Redirect(resource.getItemURL(item, "", request))
 		}
@@ -75,13 +75,13 @@ func (resource *Resource) initDefaultResourceActions() {
 		pd.ViewFields = resource.getViewFields(id, item, request)
 		pd.RelationViews = resource.getRelationViews(id, request)
 	},
-	).Icon("glyphicons-basic-588-book-open-text.svg").Name(messages.GetNameFunction("admin_view")).setPriority(defaultHighPriority).Permission(resource.canView)
+	).Icon("glyphicons-basic-588-book-open-text.svg").Name(messages.GetNameFunction("view")).setPriority(defaultHighPriority).Permission(resource.canView)
 
 	resource.formItemAction(
 		"edit",
 		func(item any, form *Form, request *Request) {
 			form.initWithResourceItem(resource, item, request)
-			submitItem := form.AddSubmit(messages.Get(request.Locale(), "admin_edit"))
+			submitItem := form.AddSubmit(messages.Get(request.Locale(), "edit"))
 			submitItem.Icon = iconEdit
 		},
 		func(_ any, vc FormValidation, request *Request) {
@@ -93,23 +93,23 @@ func (resource *Resource) initDefaultResourceActions() {
 			if validation.Valid() {
 				resource.app.Notification(resource.previewer(request, item).Name()).
 					SetImage(resource.previewer(request, item).ThumbnailURL()).
-					SetPreName(messages.Get(request.Locale(), "admin_item_edited")).
+					SetPreName(messages.Get(request.Locale(), "item_edited")).
 					Flash(request)
 				vc.Redirect(resource.getItemURL(item, "", request))
 			} else {
 				vc.(*formValidation).validationData.Errors = validation.errors
 			}
 		},
-	).Icon(iconEdit).setPriority(defaultHighPriority).StyleAccented().Name(messages.GetNameFunction("admin_edit")).Permission(resource.canUpdate)
+	).Icon(iconEdit).setPriority(defaultHighPriority).StyleAccented().Name(messages.GetNameFunction("edit")).Permission(resource.canUpdate)
 
 	resource.formItemAction(
 		"delete",
 		func(item any, form *Form, request *Request) {
-			form.AddDeleteSubmit(messages.Get(request.Locale(), "admin_delete"))
+			form.AddDeleteSubmit(messages.Get(request.Locale(), "delete"))
 			preview := resource.previewer(request, item)
 			itemName := preview.Name()
 			form.ItemVersion = resource.currentItemVersion(preview.ID())
-			form.Title = messages.Get(request.Locale(), "admin_delete_confirmation_name", itemName)
+			form.Title = messages.Get(request.Locale(), "delete_confirmation_name", itemName)
 		},
 		func(item any, fv FormValidation, request *Request) {
 			preview := resource.previewer(request, item)
@@ -120,11 +120,11 @@ func (resource *Resource) initDefaultResourceActions() {
 			fv.(*formValidation).validationData.Errors = vc.errors
 			if vc.Valid() {
 				must(resource.deleteWithLog(item, request))
-				request.AddFlashMessage(messages.Get(request.Locale(), "admin_item_deleted"))
+				request.AddFlashMessage(messages.Get(request.Locale(), "item_deleted"))
 				fv.Redirect(resource.getURL(""))
 			}
 		},
-	).Icon(iconDelete).setPriority(-defaultHighPriority).StyleDestroy().Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete"))
+	).Icon(iconDelete).setPriority(-defaultHighPriority).StyleDestroy().Permission(resource.canDelete).Name(messages.GetNameFunction("delete"))
 
 	resource.initDefaultResourceMultipleActions()
 
@@ -134,7 +134,7 @@ func (resource *Resource) initDefaultResourceActions() {
 				request.Redirect(
 					resource.previewFn(item),
 				)
-			}).Icon("glyphicons-basic-52-eye.svg").setPriority(defaultHighPriority).Name(messages.GetNameFunction("admin_preview"))
+			}).Icon("glyphicons-basic-52-eye.svg").setPriority(defaultHighPriority).Name(messages.GetNameFunction("preview"))
 	}
 
 	bindResourceExportCSV(resource)
@@ -153,7 +153,7 @@ func (resource *Resource) initDefaultResourceActions() {
 		}).
 			Icon(iconActivity).
 			setPriority(defaultHighPriority).
-			Name(messages.GetNameFunction("admin_history")).
+			Name(messages.GetNameFunction("history")).
 			Permission(resource.canView)
 
 		resource.
@@ -173,7 +173,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			).
 			Icon(iconActivity).
 			setPriority(defaultHighPriority).
-			Name(messages.GetNameFunction("admin_history")).
+			Name(messages.GetNameFunction("history")).
 			Permission(resource.canView)
 	}
 }

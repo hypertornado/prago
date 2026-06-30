@@ -1,7 +1,8 @@
 @use "../variables.scss" as *;
 
 .form_table {
-  margin-top: 5px;
+  margin-top: 16px;
+  margin-bottom: 32px;
 }
 
 .form_table table {
@@ -12,8 +13,17 @@
   border: 1px solid $grayBorderColor;
 }
 
+.form_table_row {
+
+}
+
+.form_table_row-reveal {
+  animation: 200ms insertAnimationKeyframes ease-in-out forwards;
+  //background: blue;
+}
+
 .form_table td {
-  padding: 5px 10px;
+  padding: 4px 8px;
   border: 1px solid $grayBorderColor;
   vertical-align: top;
 }

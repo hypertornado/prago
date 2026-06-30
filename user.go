@@ -112,8 +112,8 @@ func (app *App) initUserResource() {
 	app.UsersResource = resource
 
 	resource.Name(
-		messages.GetNameFunction("admin_user"),
-		messages.GetNameFunction("admin_users"),
+		messages.GetNameFunction("user"),
+		messages.GetNameFunction("users"),
 	)
 	resource.PermissionUpdate(sysadminPermission)
 	resource.PermissionCreate(nobodyPermission)

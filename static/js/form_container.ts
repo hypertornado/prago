@@ -286,12 +286,13 @@ class FormContainer {
         var data = JSON.parse(request.response);
         this.setTaskData(data);
       } else {
-        this.loadTaskTable(uuid);
         this.setTaskFinished(data);
       }
     });
     request.send();
   }
+
+
 
   loadTaskTable(uuid: string) {
     //just one task progress at time
@@ -305,15 +306,23 @@ class FormContainer {
 
     request.addEventListener("load", (e) => {
       this.taskTableRequesting = false;
-      if (this.formTaskUUID != uuid) {
+      if (this.formTaskUUID != "" && this.formTaskUUID != uuid) {
         return;
       }
       if (request.status == 200) {
-        var tableData = JSON.parse(request.response);
-        this.setTaskTableData(tableData);
+        this.setTaskTableData(request.response);
       }
     });
     request.send();
+  }
+
+  waitForFinalLoad(uuid: string) {
+    const interval = setInterval(() => {
+      if (!this.taskTableRequesting) {
+        clearInterval(interval);
+        this.loadTaskTable(uuid);
+      }
+    }, 100);
   }
 
   setTaskDateHuman(from: number, to: number) {
@@ -330,15 +339,13 @@ class FormContainer {
     taskEl.querySelector(".form_task_progress").setAttribute("value", data.Progress);
     taskEl.querySelector(".form_task_progress_text").textContent = data.ProgressText;
 
-    //this.tableTbody.insertAdjacentHTML("beforeend", data.TableRows);
-    //this.setTaskTableData(data.TableRows)
-
     if (data.Finished) {
       this.setTaskFinished(data);
     }
   }
 
   setTaskFinished(data: any) {
+    this.loadTaskTable(this.formTaskUUID);
     this.formTaskUUID = "";
     this.taskHeader.classList.add("hidden");
 

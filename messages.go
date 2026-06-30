@@ -131,191 +131,191 @@ var m = map[string]map[string]string{
 		"cs": "neprázdné",
 	},
 
-	"admin_error": {
+	"error": {
 		"en": "Error happened",
 		"cs": "Nastala chyba",
 	},
-	"admin_admin": {
+	"admin": {
 		"en": "Administration",
 		"cs": "Administrace",
 	},
-	"admin_signpost": {
+	"signpost": {
 		"en": "Signpost",
 		"cs": "Rozcestník",
 	},
-	"admin_signpost_long": {
+	"signpost_long": {
 		"en": "Signpost of %s",
 		"cs": "Rozcestník administrace %s",
 	},
-	"admin_log_out": {
+	"log_out": {
 		"en": "Log out",
 		"cs": "Odhlásit se",
 	},
-	"admin_new": {
+	"new": {
 		"en": "New item",
 		"cs": "Nová položka",
 	},
-	"admin_list": {
+	"list": {
 		"en": "List",
 		"cs": "Seznam",
 	},
-	"admin_edit": {
+	"edit": {
 		"en": "Edit",
 		"cs": "Upravit",
 	},
-	"admin_view": {
+	"view": {
 		"en": "View",
 		"cs": "Zobrazit",
 	},
-	"admin_preview": {
+	"preview": {
 		"en": "Preview",
 		"cs": "Náhled",
 	},
-	"admin_delete": {
+	"delete": {
 		"en": "Delete",
 		"cs": "Smazat",
 	},
-	"admin_delete_confirmation": {
+	"delete_confirmation": {
 		"en": "Really want to delete this item?",
 		"cs": "Opravdu chcete položku smazat?",
 	},
-	"admin_delete_confirmation_name": {
+	"delete_confirmation_name": {
 		"en": "Really want to delete item „%s“?",
 		"cs": "Opravdu chcete smazat položku „%s“?",
 	},
-	"admin_back": {
+	"back": {
 		"en": "Back",
 		"cs": "Zpět",
 	},
-	"admin_create": {
+	"create": {
 		"en": "Create",
 		"cs": "Vytvořit",
 	},
-	"admin_export": {
+	"export": {
 		"en": "Export",
 		"cs": "Export",
 	},
-	"admin_stats": {
+	"stats": {
 		"en": "Stats",
 		"cs": "Statistiky",
 	},
-	"admin_history": {
+	"history": {
 		"en": "Edits",
 		"cs": "Úpravy",
 	},
-	"admin_history_count": {
+	"history_count": {
 		"en": "Number of edits",
 		"cs": "Počet úprav",
 	},
-	"admin_history_last": {
+	"history_last": {
 		"en": "Last edited by",
 		"cs": "Naposledy upraveno uživatelem",
 	},
-	"admin_login_name": {
+	"login_name": {
 		"en": "Log into admin",
 		"cs": "Přihlášení do administrace",
 	},
-	"admin_email": {
+	"email": {
 		"en": "Email",
 		"cs": "Email",
 	},
-	"admin_email_or_username": {
+	"email_or_username": {
 		"en": "Username or email",
 		"cs": "Uživatelské jméno nebo email",
 	},
-	"admin_password": {
+	"password": {
 		"en": "Password",
 		"cs": "Heslo",
 	},
-	"admin_login_action": {
+	"login_action": {
 		"en": "Log in",
 		"cs": "Přihlásit se",
 	},
-	"admin_save": {
+	"save": {
 		"en": "Save",
 		"cs": "Uložit",
 	},
-	"admin_change": {
+	"change": {
 		"en": "Change",
 		"cs": "Změnit",
 	},
-	"admin_forgotten": {
+	"forgotten": {
 		"en": "Forgotten password",
 		"cs": "Zapomenuté heslo",
 	},
-	"admin_register": {
+	"register": {
 		"en": "Create account",
 		"cs": "Vytvořit nový účet",
 	},
-	"admin_register_password": {
+	"register_password": {
 		"en": "Password",
 		"cs": "Heslo",
 	},
-	"admin_register_password_description": {
+	"register_password_description": {
 		"en": "At least 7 characters",
 		"cs": "Alespoň 7 znaků",
 	},
-	"admin_email_not_valid": {
+	"email_not_valid": {
 		"en": "Invalid format of email",
 		"cs": "Neplatný formát emailu.",
 	},
-	"admin_email_already_registered": {
+	"email_already_registered": {
 		"en": "User with this name already registered",
 		"cs": "Uživatel s tímto emailem je již zaregistrován.",
 	},
-	"admin_user_name_not_empty": {
+	"user_name_not_empty": {
 		"en": "Username can't be empty",
 		"cs": "Jméno uživatele nemůže být prázdné",
 	},
-	"admin_validation_not_empty": {
+	"validation_not_empty": {
 		"en": "Item can't be empty",
 		"cs": "Položka nemůže být prázdná",
 	},
-	"admin_validation_value": {
+	"validation_value": {
 		"en": "Wrong value of item",
 		"cs": "Tato hodnota není povolená",
 	},
-	"admin_validation_error": {
+	"validation_error": {
 		"en": "Error while validating data",
 		"cs": "Chyba při validaci dat",
 	},
-	"admin_validation_date_format_error": {
+	"validation_date_format_error": {
 		"en": "Wrong date format",
 		"cs": "Špatný formát data",
 	},
-	"admin_login_error": {
+	"login_error": {
 		"en": "Wrong user email or password.",
 		"cs": "Špatný email, nebo heslo.",
 	},
-	"admin_login_password_error": {
+	"login_password_error": {
 		"en": "Wrong password.",
 		"cs": "Špatné heslo.",
 	},
-	"admin_login_ok": {
+	"login_ok": {
 		"en": "Log in was succesful",
 		"cs": "Přihlášení proběhlo úspěšně",
 	},
-	"admin_logout_ok": {
+	"logout_ok": {
 		"en": "User logged out",
 		"cs": "Uživatel odhlášen",
 	},
-	"admin_403": {
+	"403": {
 		"en": "Access denied",
 		"cs": "Přístup zamítnut",
 	},
-	"admin_404": {
+	"404": {
 		"en": "Page not found",
 		"cs": "Stránka nenalezena",
 	},
-	"admin_item_created": {
+	"item_created": {
 		"en": "Item created",
 		"cs": "Položka byla vytvořena",
 	},
-	"admin_item_edited": {
+	"item_edited": {
 		"en": "Item edited",
 		"cs": "Položka byla upravena",
 	},
-	"admin_item_deleted": {
+	"item_deleted": {
 		"en": "Item deleted",
 		"cs": "Položka byla smazána",
 	},
@@ -357,132 +357,132 @@ var m = map[string]map[string]string{
 		"cs": "Místo",
 	},
 
-	"admin_list_empty": {
+	"list_empty": {
 		"en": "No items found",
 		"cs": "Nic nebylo nalezeno.",
 	},
-	"admin_tables": {
+	"tables": {
 		"en": "Tables",
 		"cs": "Tabulky",
 	},
-	"admin_table": {
+	"table": {
 		"en": "Table",
 		"cs": "Tabulka",
 	},
 
-	"admin_settings": {
+	"settings": {
 		"en": "Settings",
 		"cs": "Nastavení",
 	},
-	"admin_options": {
+	"options": {
 		"en": "Options",
 		"cs": "Možnosti",
 	},
-	"admin_settings_changed": {
+	"settings_changed": {
 		"en": "Settings changed",
 		"cs": "Nastavení změněno",
 	},
-	"admin_locale": {
+	"locale": {
 		"en": "Locale",
 		"cs": "Jazyk",
 	},
-	"admin_user": {
+	"user": {
 		"en": "User",
 		"cs": "Uživatel",
 	},
-	"admin_users": {
+	"users": {
 		"en": "Users",
 		"cs": "Uživatelé",
 	},
-	"admin_password_change": {
+	"password_change": {
 		"en": "Change password",
 		"cs": "Změnit heslo",
 	},
-	"admin_password_old": {
+	"password_old": {
 		"en": "Old password",
 		"cs": "Staré heslo",
 	},
-	"admin_password_new": {
+	"password_new": {
 		"en": "New password",
 		"cs": "Nové heslo",
 	},
-	"admin_password_length": {
+	"password_length": {
 		"en": "Password must be at least 7 characters long",
 		"cs": "Heslo musí mít alespoň 7 znaků",
 	},
-	"admin_password_changed": {
+	"password_changed": {
 		"en": "Password changed",
 		"cs": "Heslo změněno",
 	},
 
-	"admin_forgotten_name": {
+	"forgotten_name": {
 		"en": "Renew forgotten password",
 		"cs": "Obnovit zapomenuté heslo",
 	},
-	"admin_forgotten_submit": {
+	"forgotten_submit": {
 		"en": "Send renew email",
 		"cs": "Poslat email s instrukcemi",
 	},
-	"admin_forgotten_email_subject": {
+	"forgotten_email_subject": {
 		"en": "Renew your password on %s",
 		"cs": "Obnovit heslo pro %s",
 	},
-	"admin_forgotten_email_body": {
+	"forgotten_email_body": {
 		"en": "Forgot your password?<br><br>You can renew your password at <a href=\"%s\">%s</a><br><br>%s",
 		"cs": "Zapomněli jste heslo?<br><br>Vaše heslo můžete obnovit na <a href=\"%s\">%s</a><br><br>%s",
 	},
-	"admin_forgoten_sent": {
+	"forgoten_sent": {
 		"en": "Instructions for password renewal were send to %s",
 		"cs": "Instrukce pro obnovení hesla poslána na email %s",
 	},
-	"admin_forgoten_error": {
+	"forgoten_error": {
 		"en": "Can't send password renewal instructions on %s",
 		"cs": "Instrukce pro obnovu hesla nelze poslat na email %s",
 	},
-	"admin_forgoten_set": {
+	"forgoten_set": {
 		"en": "Set new password",
 		"cs": "Nastavit nové heslo",
 	},
 
-	"admin_confirm_email_subject": {
+	"confirm_email_subject": {
 		"en": "Confirm your registration email",
 		"cs": "Potvrďte svůj registrační email",
 	},
-	"admin_confirm_button": {
+	"confirm_button": {
 		"en": "Confirm your email",
 		"cs": "Potvrďte email",
 	},
-	"admin_confirm_email_body": {
+	"confirm_email_body": {
 		"en": "Thanks for your registration.",
 		"cs": "Děkujeme za registraci",
 	},
-	"admin_confirm_email_ok": {
+	"confirm_email_ok": {
 		"en": "Email confirmed",
 		"cs": "Email potvrzen",
 	},
-	"admin_confirm_email_fail": {
+	"confirm_email_fail": {
 		"en": "Failed to confirm email",
 		"cs": "Email se nepodařilo potvrdit",
 	},
-	"admin_confirm_email_send": {
+	"confirm_email_send": {
 		"en": "Registration done. Please confirm your email %s",
 		"cs": "Registrace hotova. Potvrďte prosím svůj email %s",
 	},
 
-	"admin_flash_not_confirmed": {
+	"flash_not_confirmed": {
 		"en": "Your email is not confirmed. You can confirm it by clicking on link in your inbox.",
 		"cs": "Váš email není potvrzen. Můžete ho potvrdit kliknutím na odkaz v emailu, který jsme vám poslali",
 	},
-	"admin_flash_not_approved": {
+	"flash_not_approved": {
 		"en": "Your account waits to be approved by admin.",
 		"cs": "Váš účet čeká na schválení administrátorem.",
 	},
 
-	"admin_files": {
+	"files": {
 		"en": "Files",
 		"cs": "Soubory",
 	},
-	"admin_file": {
+	"file": {
 		"en": "File",
 		"cs": "Soubor",
 	},

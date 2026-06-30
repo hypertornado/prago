@@ -5,9 +5,7 @@
     {{end}}
     <div class="form_table">
         <table>
-            {{range $row := $table.Rows}}
-                {{template "table_row" $row}}
-            {{end}}
+            {{template "table_rows" $table.Rows}}
         </table>
         <div class="form_table_footer">
             {{range $item := $table.FooterText}}
@@ -18,10 +16,16 @@
     {{end}}
 {{end}}
 
+{{define "table_rows"}}
+    {{range $row := .}}
+        {{template "table_row" $row}}
+    {{end}}
+{{end}}
+
 
 {{define "table_row"}}
 {{$row := .}}
-<tr>
+<tr class="form_table_row{{if .Reveal}} form_table_row-reveal{{end}}">
     {{range $cell := $row.Cells}}
         <td class="{{$cell.GetClassesString}}"
             {{if $cell.Rowspan}} rowspan="{{$cell.Rowspan}}"{{end}}

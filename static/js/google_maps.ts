@@ -1,7 +1,7 @@
 
 async function initGoogleMaps() {
 
-    var viewElements = document.querySelectorAll(".admin_item_view_place");
+    var viewElements = document.querySelectorAll(".item_view_place");
     var pickerElements = document.querySelectorAll<HTMLDivElement>(".map_picker");
 
     if (viewElements.length == 0 && pickerElements.length == 0) {
@@ -32,7 +32,7 @@ function initGoogleMapView(el: HTMLDivElement) {
 
     var coords = val.split(",");
     if (coords.length != 2) {
-      el.classList.remove("admin_item_view_place");
+      el.classList.remove("item_view_place");
       return;
     }
 

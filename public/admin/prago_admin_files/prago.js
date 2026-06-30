@@ -6634,7 +6634,7 @@ class VideoView {
 class ImagePicker {
     constructor(el) {
         this.el = el;
-        this.hiddenInput = (el.querySelector(".admin_images_hidden"));
+        this.hiddenInput = (el.querySelector(".imagepicker_hidden"));
         this.preview2 = el.querySelector(".imagepicker_preview");
         this.fileInput = (this.el.querySelector(".imagepicker_input"));
         this.progress = this.el.querySelector("progress");
@@ -8290,9 +8290,9 @@ class MarkdownEditor {
 class Timestamp {
     constructor(el) {
         this.elTsInput = el.getElementsByTagName("input")[0];
-        this.elTsDate = (el.getElementsByClassName("admin_timestamp_date")[0]);
-        this.elTsHour = (el.getElementsByClassName("admin_timestamp_hour")[0]);
-        this.elTsMinute = (el.getElementsByClassName("admin_timestamp_minute")[0]);
+        this.elTsDate = (el.getElementsByClassName("input_timestamp_date")[0]);
+        this.elTsHour = (el.getElementsByClassName("input_timestamp_hour")[0]);
+        this.elTsMinute = (el.getElementsByClassName("input_timestamp_minute")[0]);
         this.initClock();
         var v = this.elTsInput.value;
         this.setTimestamp(v);
@@ -8715,7 +8715,7 @@ class Form {
         elements.forEach((el) => {
             new MarkdownEditor(el);
         });
-        var timestamps = form.querySelectorAll(".admin_timestamp");
+        var timestamps = form.querySelectorAll(".input_timestamp");
         timestamps.forEach((form) => {
             new Timestamp(form);
         });
@@ -9106,7 +9106,6 @@ class FormContainer {
                 this.setTaskData(data);
             }
             else {
-                this.loadTaskTable(uuid);
                 this.setTaskFinished(data);
             }
         });
@@ -9121,15 +9120,22 @@ class FormContainer {
         this.taskTableRequesting = true;
         request.addEventListener("load", (e) => {
             this.taskTableRequesting = false;
-            if (this.formTaskUUID != uuid) {
+            if (this.formTaskUUID != "" && this.formTaskUUID != uuid) {
                 return;
             }
             if (request.status == 200) {
-                var tableData = JSON.parse(request.response);
-                this.setTaskTableData(tableData);
+                this.setTaskTableData(request.response);
             }
         });
         request.send();
+    }
+    waitForFinalLoad(uuid) {
+        const interval = setInterval(() => {
+            if (!this.taskTableRequesting) {
+                clearInterval(interval);
+                this.loadTaskTable(uuid);
+            }
+        }, 100);
     }
     setTaskDateHuman(from, to) {
         this.formContainer.querySelector(".form_task_interval").textContent = prettyDateInterval(from, to);
@@ -9148,6 +9154,7 @@ class FormContainer {
         }
     }
     setTaskFinished(data) {
+        this.loadTaskTable(this.formTaskUUID);
         this.formTaskUUID = "";
         this.taskHeader.classList.add("hidden");
         if (data.IsError) {
@@ -9873,7 +9880,6 @@ class PopupForm extends Popup {
         this.dataHandler = dataHandler;
         this.setCancelable();
         this.present();
-        this.setIcon("glyphicons-basic-30-clipboard.svg");
         this.cancelAction = () => {
             if (cancelHandler) {
                 cancelHandler();
@@ -9910,7 +9916,7 @@ class PopupForm extends Popup {
     }
 }
 async function initGoogleMaps() {
-    var viewElements = document.querySelectorAll(".admin_item_view_place");
+    var viewElements = document.querySelectorAll(".item_view_place");
     var pickerElements = document.querySelectorAll(".map_picker");
     if (viewElements.length == 0 && pickerElements.length == 0) {
         return;
@@ -9930,7 +9936,7 @@ function initGoogleMapView(el) {
     el.innerText = "";
     var coords = val.split(",");
     if (coords.length != 2) {
-        el.classList.remove("admin_item_view_place");
+        el.classList.remove("item_view_place");
         return;
     }
     const location = { lat: parseFloat(coords[0]), lng: parseFloat(coords[1]) };

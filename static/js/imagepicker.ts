@@ -10,7 +10,7 @@ class ImagePicker {
   constructor(el: HTMLDivElement) {
     this.el = el;
     this.hiddenInput = <HTMLInputElement>(
-      el.querySelector(".admin_images_hidden")
+      el.querySelector(".imagepicker_hidden")
     );
     this.preview2 = <HTMLDivElement>el.querySelector(".imagepicker_preview");
     this.fileInput = <HTMLInputElement>(

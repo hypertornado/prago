@@ -87,8 +87,8 @@ func (app *App) initFilesResource() {
 	initCDN(app)
 	resource := NewResource[File](app)
 	resource.Name(
-		messages.GetNameFunction("admin_file"),
-		messages.GetNameFunction("admin_files"),
+		messages.GetNameFunction("file"),
+		messages.GetNameFunction("files"),
 	)
 	app.FilesResource = resource
 	resource.PermissionCreate(nobodyPermission)
@@ -180,7 +180,7 @@ func (app *App) afterInitFilesResource() {
 
 	app.API("imagepicker").Permission(loggedPermission).HandlerJSON(imagePickerAPIHandler)
 
-	resource.Field("uid").Name(messages.GetNameFunction("admin_file"))
+	resource.Field("uid").Name(messages.GetNameFunction("file"))
 	resource.Field("width").Name(messages.GetNameFunction("width"))
 	resource.Field("height").Name(messages.GetNameFunction("height"))
 
@@ -367,14 +367,14 @@ func (app *App) afterInitFilesResource() {
 
 	ActionResourceForm[File](app, "upload",
 		func(f *Form, r *Request) {
-			f.AddFileInput("file", messages.Get(r.Locale(), "admin_file"))
+			f.AddFileInput("file", messages.Get(r.Locale(), "file"))
 			f.AddTextareaInput("description", messages.Get(r.Locale(), "Description"))
-			f.AddSubmit(messages.Get(r.Locale(), "admin_save"))
+			f.AddSubmit(messages.Get(r.Locale(), "save"))
 		},
 		func(vc FormValidation, request *Request) {
 			multipartFiles := request.Request().MultipartForm.File["file"]
 			if len(multipartFiles) != 1 {
-				vc.AddItemError("file", messages.Get(request.Locale(), "admin_validation_not_empty"))
+				vc.AddItemError("file", messages.Get(request.Locale(), "validation_not_empty"))
 			}
 			if vc.Valid() {
 				fileData, err := app.UploadFile(multipartFiles[0], request, request.Param("description"))

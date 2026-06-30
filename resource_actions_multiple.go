@@ -276,7 +276,7 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 	resource.formItemMultipleAction(
 		"delete-multiple",
 		func(items []any, form *Form, request *Request) {
-			form.AddDeleteSubmit(messages.Get(request.Locale(), "admin_delete"))
+			form.AddDeleteSubmit(messages.Get(request.Locale(), "delete"))
 		},
 		func(items []any, fv FormValidation, request *Request) {
 			for _, item := range items {
@@ -291,9 +291,9 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 			for _, item := range items {
 				must(resource.deleteWithLog(item, request))
 			}
-			request.AddFlashMessage(messages.Get(request.Locale(), "admin_item_deleted"))
+			request.AddFlashMessage(messages.Get(request.Locale(), "item_deleted"))
 			fv.Data(true)
 		},
-	).Icon(iconDelete).setPriority(-defaultHighPriority).StyleDestroy().Permission(resource.canDelete).Name(messages.GetNameFunction("admin_delete"))
+	).Icon(iconDelete).setPriority(-defaultHighPriority).StyleDestroy().Permission(resource.canDelete).Name(messages.GetNameFunction("delete"))
 
 }

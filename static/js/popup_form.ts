@@ -9,7 +9,7 @@ class PopupForm extends Popup {
         this.setCancelable();
         this.present();
 
-        this.setIcon("glyphicons-basic-30-clipboard.svg");
+        //this.setIcon("glyphicons-basic-30-clipboard.svg");
 
         this.cancelAction = () => {
             if (cancelHandler) {

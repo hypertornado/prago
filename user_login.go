@@ -15,14 +15,14 @@ func initUserLogin(app *App) {
 	app.nologinFormAction("login", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		emailValue := request.Param("email")
-		emailInput := form.AddEmailInput("email", messages.Get(locale, "admin_email_or_username"))
+		emailInput := form.AddEmailInput("email", messages.Get(locale, "email_or_username"))
 		emailInput.InputMode = "email"
 		emailInput.Autocomplete = "email"
 		if emailValue == "" {
 			emailInput.Focused = true
 		}
 		emailInput.Value = request.Param("email")
-		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "admin_password"))
+		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "password"))
 		passwordInput.Autocomplete = "current-password"
 		if emailValue != "" {
 			passwordInput.Focused = true
@@ -30,7 +30,7 @@ func initUserLogin(app *App) {
 
 		form.AddHidden("redirect_url").Value = request.Param("redirect")
 
-		form.AddSubmit(messages.Get(locale, "admin_login_action"))
+		form.AddSubmit(messages.Get(locale, "login_action"))
 	}, func(vc FormValidation, request *Request) {
 		locale := request.Locale()
 
@@ -39,7 +39,7 @@ func initUserLogin(app *App) {
 		password := request.Param("password")
 
 		if email == "" {
-			vc.AddError(messages.Get(locale, "admin_login_error"))
+			vc.AddError(messages.Get(locale, "login_error"))
 			return
 		}
 
@@ -52,12 +52,12 @@ func initUserLogin(app *App) {
 
 		user := q.First()
 		if user == nil {
-			vc.AddError(messages.Get(locale, "admin_login_error"))
+			vc.AddError(messages.Get(locale, "login_error"))
 			return
 		}
 
 		if !user.isPassword(password) {
-			vc.AddError(messages.Get(locale, "admin_login_error"))
+			vc.AddError(messages.Get(locale, "login_error"))
 			return
 		}
 
@@ -67,7 +67,7 @@ func initUserLogin(app *App) {
 
 		must(UpdateItem(app, user))
 		request.logInUser(user)
-		request.AddFlashMessage(messages.Get(user.Locale, "admin_login_ok"))
+		request.AddFlashMessage(messages.Get(user.Locale, "login_ok"))
 
 		redirectURL := request.Param("redirect_url")
 		if !strings.HasPrefix(redirectURL, "/") || redirectURL == "/admin/login" {

@@ -20,7 +20,7 @@ type pageData struct {
 
 	Breadcrumbs *breadcrumbs
 
-	Messages []pageMessage
+	ErrorMessage *pageMessage
 
 	PageContent template.HTML
 

@@ -82,7 +82,8 @@ type tableView struct {
 }
 
 type tableRowView struct {
-	Cells []*tableCellData
+	Cells  []*tableCellData
+	Reveal bool
 }
 
 func (app *App) Table() *Table {
@@ -337,11 +338,6 @@ func (t *Table) templateData() []*tableView {
 		}
 
 		for _, v2 := range v.Rows {
-			/*row := &tableRowView{}
-			for _, v3 := range v2.Cells {
-				row.Cells = append(row.Cells, v3.data)
-			}*/
-
 			view.Rows = append(view.Rows, tableCellsToTableRowView(v2.Cells))
 		}
 

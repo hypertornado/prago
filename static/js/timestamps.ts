@@ -7,13 +7,13 @@ class Timestamp {
   constructor(el: HTMLDivElement) {
     this.elTsInput = <HTMLInputElement>el.getElementsByTagName("input")[0];
     this.elTsDate = <HTMLInputElement>(
-      el.getElementsByClassName("admin_timestamp_date")[0]
+      el.getElementsByClassName("input_timestamp_date")[0]
     );
     this.elTsHour = <HTMLInputElement>(
-      el.getElementsByClassName("admin_timestamp_hour")[0]
+      el.getElementsByClassName("input_timestamp_hour")[0]
     );
     this.elTsMinute = <HTMLInputElement>(
-      el.getElementsByClassName("admin_timestamp_minute")[0]
+      el.getElementsByClassName("input_timestamp_minute")[0]
     );
 
     this.initClock();

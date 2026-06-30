@@ -2,7 +2,6 @@ package prago
 
 import (
 	"fmt"
-	"html/template"
 	"strings"
 	"time"
 )
@@ -32,7 +31,7 @@ func (fta *FormTaskActivity) toView() *FormTaskView {
 	return ret
 }
 
-func (fta *FormTaskActivity) getTableRows() [][]*TableCell {
+func (fta *FormTaskActivity) getTableRows() []*tableRow {
 	fta.mutex.Lock()
 	defer fta.mutex.Unlock()
 
@@ -43,19 +42,22 @@ func (fta *FormTaskActivity) getTableRows() [][]*TableCell {
 
 }
 
-func (fta *FormTaskActivity) getTableData(app *App) template.HTML {
+func (fta *FormTaskActivity) getTableData() []*tableRowView {
 	tableRows := fta.getTableRows()
 
 	if len(tableRows) == 0 {
-		return ""
+		return nil
 	}
 
-	var rowsHTML template.HTML = ""
+	var rowViews []*tableRowView
 	for _, row := range tableRows {
-		rowsHTML += app.adminTemplates.ExecuteToHTML("table_row", tableCellsToTableRowView(row))
+		rowView := tableCellsToTableRowView(row.Cells)
+		rowView.Reveal = true
+		rowViews = append(rowViews, rowView)
 	}
 
-	return rowsHTML
+	return rowViews
+
 }
 
 func formatProgressText(progress float64) string {

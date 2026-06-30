@@ -9,7 +9,7 @@ func initUserSettings(app *App) {
 
 	ActionForm(app, "settings", func(form *Form, request *Request) {
 		user := request.getUser()
-		form.Title = messages.Get(request.Locale(), "admin_settings")
+		form.Title = messages.Get(request.Locale(), "settings")
 
 		name := form.AddTextInput("name", "")
 		name.Name = messages.Get(request.Locale(), "Name")
@@ -18,7 +18,7 @@ func initUserSettings(app *App) {
 		phoneInput := form.AddTextInput("phone", "Telefon")
 		phoneInput.Value = user.Phone
 
-		sel := form.AddSelect("locale", messages.Get(request.Locale(), "admin_locale"), availableLocales)
+		sel := form.AddSelect("locale", messages.Get(request.Locale(), "locale"), availableLocales)
 		sel.Value = request.Locale()
 
 		for _, v := range app.settings.settingsArray {
@@ -33,12 +33,12 @@ func initUserSettings(app *App) {
 			}
 		}
 
-		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
+		form.AddSubmit(messages.Get(request.Locale(), "save"))
 	}, func(vc FormValidation, request *Request) {
 		locale := request.Locale()
 		name := request.Param("name")
 		if name == "" {
-			vc.AddItemError("name", messages.Get(locale, "admin_user_name_not_empty"))
+			vc.AddItemError("name", messages.Get(locale, "user_name_not_empty"))
 		}
 
 		phone := request.Param("phone")
@@ -81,26 +81,26 @@ func initUserSettings(app *App) {
 			app := request.app
 			app.userDataCacheDelete(user.ID)
 
-			request.AddFlashMessage(messages.Get(newLocale, "admin_settings_changed"))
+			request.AddFlashMessage(messages.Get(newLocale, "settings_changed"))
 			vc.Redirect("/admin")
 		}
-	}).Icon("glyphicons-basic-5-settings.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_settings")).Board(app.optionsBoard)
+	}).Icon("glyphicons-basic-5-settings.svg").Permission(loggedPermission).Name(messages.GetNameFunction("settings")).Board(app.optionsBoard)
 
 	ActionForm(
 		app,
 		"password",
 		func(form *Form, request *Request) {
 			locale := request.Locale()
-			form.Title = messages.Get(request.Locale(), "admin_password_change")
-			oldPassword := form.AddPasswordInput("oldpassword", messages.Get(locale, "admin_password_old"))
+			form.Title = messages.Get(request.Locale(), "password_change")
+			oldPassword := form.AddPasswordInput("oldpassword", messages.Get(locale, "password_old"))
 			oldPassword.Focused = true
 			oldPassword.Autocomplete = "old-password"
 
-			newPassword := form.AddPasswordInput("newpassword", messages.Get(locale, "admin_password_new"))
+			newPassword := form.AddPasswordInput("newpassword", messages.Get(locale, "password_new"))
 			newPassword.Focused = true
 			newPassword.Autocomplete = "new-password"
 
-			form.AddSubmit(messages.Get(locale, "admin_save"))
+			form.AddSubmit(messages.Get(locale, "save"))
 		}, func(vc FormValidation, request *Request) {
 			locale := request.Locale()
 
@@ -109,21 +109,21 @@ func initUserSettings(app *App) {
 			user := request.getUser()
 			if !user.isPassword(oldpassword) {
 				valid = false
-				vc.AddItemError("oldpassword", messages.Get(locale, "admin_register_password"))
+				vc.AddItemError("oldpassword", messages.Get(locale, "register_password"))
 			}
 
 			newpassword := request.Param("newpassword")
 			if len(newpassword) < 7 {
 				valid = false
-				vc.AddItemError("newpassword", messages.Get(locale, "admin_password_length"))
+				vc.AddItemError("newpassword", messages.Get(locale, "password_length"))
 			}
 
 			if valid {
 				request.app.userDataCacheDelete(user.ID)
-				request.AddFlashMessage(messages.Get(request.Locale(), "admin_password_changed"))
+				request.AddFlashMessage(messages.Get(request.Locale(), "password_changed"))
 				vc.Redirect("/admin")
 			}
-		}).Icon("glyphicons-basic-45-key.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_password_change")).Board(app.optionsBoard)
+		}).Icon("glyphicons-basic-45-key.svg").Permission(loggedPermission).Name(messages.GetNameFunction("password_change")).Board(app.optionsBoard)
 
 	ActionResourceForm[user](app, "create", func(form *Form, request *Request) {
 
@@ -153,7 +153,7 @@ func initUserSettings(app *App) {
 		form.AddTextInput("email", "Email")
 		form.AddTextInput("phone", "Telefon")
 
-		form.AddSelect("locale", messages.Get(request.Locale(), "admin_locale"), availableLocales)
+		form.AddSelect("locale", messages.Get(request.Locale(), "locale"), availableLocales)
 
 		form.AddSelect("role", "Role", roleSelect)
 		form.AddPasswordInput("password", "Heslo")
@@ -229,11 +229,11 @@ func initUserSettings(app *App) {
 
 		form.AddSelect("role", "Role", roleSelect).Value = user.Role
 
-		newPassword := form.AddPasswordInput("newpassword", messages.Get(request.Locale(), "admin_password_new"))
+		newPassword := form.AddPasswordInput("newpassword", messages.Get(request.Locale(), "password_new"))
 		newPassword.Focused = true
 		newPassword.Autocomplete = "new-password"
 
-		form.AddSubmit(messages.Get(request.Locale(), "admin_save"))
+		form.AddSubmit(messages.Get(request.Locale(), "save"))
 	}, func(usr *user, fv FormValidation, request *Request) {
 
 		cu := request.getUser()
@@ -260,7 +260,7 @@ func initUserSettings(app *App) {
 			if isPasswordValid(newpassword) {
 				must(usr.newPassword(newpassword))
 			} else {
-				fv.AddItemError("newpassword", messages.Get(request.Locale(), "admin_password_length"))
+				fv.AddItemError("newpassword", messages.Get(request.Locale(), "password_length"))
 			}
 		}
 
@@ -284,7 +284,7 @@ func initUserSettings(app *App) {
 		validateCSRF(request)
 		request.logOutUser()
 		request.Redirect(app.getAdminURL("login"))
-	}).Icon("glyphicons-basic-432-log-out.svg").Permission(loggedPermission).Name(messages.GetNameFunction("admin_log_out")).Board(app.optionsBoard)
+	}).Icon("glyphicons-basic-432-log-out.svg").Permission(loggedPermission).Name(messages.GetNameFunction("log_out")).Board(app.optionsBoard)
 }
 
 func isPasswordValid(in string) bool {

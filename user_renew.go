@@ -11,11 +11,11 @@ func initUserRenew(app *App) {
 
 	app.nologinFormAction("forgot", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
-		emailInput := form.AddEmailInput("email", messages.Get(locale, "admin_email"))
+		emailInput := form.AddEmailInput("email", messages.Get(locale, "email"))
 		emailInput.Focused = true
 		emailInput.InputMode = "email"
 		emailInput.Autocomplete = "email"
-		form.AddSubmit(messages.Get(locale, "admin_forgotten_submit"))
+		form.AddSubmit(messages.Get(locale, "forgotten_submit"))
 	}, func(vc FormValidation, request *Request) {
 		email := fixEmail(request.Param("email"))
 
@@ -29,7 +29,7 @@ func initUserRenew(app *App) {
 					if err == nil {
 						err = app.sendRenewPasswordEmail(*user)
 						if err == nil {
-							request.AddFlashMessage(messages.Get(user.Locale, "admin_forgoten_sent", user.Email))
+							request.AddFlashMessage(messages.Get(user.Locale, "forgoten_sent", user.Email))
 							vc.Redirect(app.getAdminURL("/user/login") + "?email=" + url.QueryEscape(user.Email))
 						} else {
 							reason = "can't send renew email"
@@ -48,25 +48,25 @@ func initUserRenew(app *App) {
 		}
 
 		if reason != "" {
-			vc.AddError(messages.Get(request.Locale(), "admin_forgoten_error", user.Email) + " (" + reason + ")")
+			vc.AddError(messages.Get(request.Locale(), "forgoten_error", user.Email) + " (" + reason + ")")
 		}
 	})
 
 	app.nologinFormAction(renewURL, func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
-		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "admin_password_new"))
+		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "password_new"))
 		passwordInput.Focused = true
 		passwordInput.Autocomplete = "new-password"
 
 		form.AddHidden("email").Value = request.Param("email")
 		form.AddHidden("token").Value = request.Param("token")
-		form.AddSubmit(messages.Get(locale, "admin_forgoten_set"))
+		form.AddSubmit(messages.Get(locale, "forgoten_set"))
 	}, func(vc FormValidation, request *Request) {
 		email := request.Param("email")
 		email = fixEmail(email)
 		token := request.Param("token")
 
-		errStr := messages.Get(request.Locale(), "admin_error")
+		errStr := messages.Get(request.Locale(), "error")
 
 		u := Query[user](app).Is("email", email).First()
 		if u != nil {
@@ -77,13 +77,13 @@ func initUserRenew(app *App) {
 					if err == nil {
 						err = UpdateItem(app, u)
 						if err == nil {
-							request.AddFlashMessage(messages.Get(request.Locale(), "admin_password_changed"))
+							request.AddFlashMessage(messages.Get(request.Locale(), "password_changed"))
 							vc.Redirect(app.getAdminURL("user/login") + "?email=" + url.QueryEscape(u.Email))
 							return
 						}
 					}
 				} else {
-					vc.AddItemError("password", messages.Get(request.Locale(), "admin_register_password"))
+					vc.AddItemError("password", messages.Get(request.Locale(), "register_password"))
 					return
 				}
 			}
@@ -102,9 +102,9 @@ func (app *App) getRenewPasswordURL(user user) string {
 }
 
 func (app *App) sendRenewPasswordEmail(user user) error {
-	subject := messages.Get(user.Locale, "admin_forgotten_email_subject", app.name(user.Locale))
+	subject := messages.Get(user.Locale, "forgotten_email_subject", app.name(user.Locale))
 	link := app.getRenewPasswordURL(user)
-	body := messages.Get(user.Locale, "admin_forgotten_email_body", link, link, app.name(user.Locale))
+	body := messages.Get(user.Locale, "forgotten_email_body", link, link, app.name(user.Locale))
 
 	return app.Email().To(user.Name, user.Email).Subject(subject).TextContent(body).Send()
 }

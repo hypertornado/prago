@@ -41,5 +41,5 @@ func unlocalized(name string) func(string) string {
 }
 
 func (resource *Resource) newItemName(locale string) string {
-	return fmt.Sprintf("%s „%s“", messages.GetNameFunction("admin_new")(locale), resource.singularName(locale))
+	return fmt.Sprintf("%s „%s“", messages.GetNameFunction("new")(locale), resource.singularName(locale))
 }

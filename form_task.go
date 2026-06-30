@@ -15,7 +15,7 @@ type FormTaskActivity struct {
 	progress         float64
 	finished         bool
 	stoppedByUser    bool
-	tableRows        [][]*TableCell
+	tableRows        []*tableRow
 	lastStateRequest time.Time
 	ctx              context.Context
 	cancel           context.CancelFunc
@@ -82,7 +82,10 @@ func (fta *FormTaskActivity) TableCells(cells ...*TableCell) {
 
 	fta.checkIfStop()
 
-	fta.tableRows = append(fta.tableRows, cells)
+	row := &tableRow{}
+	row.Cells = cells
+
+	fta.tableRows = append(fta.tableRows, row)
 }
 
 func newFormTaskActivity(request *Request, handler func(*FormTaskActivity) error) *FormTaskActivity {
@@ -172,22 +175,21 @@ func (app *App) initFormTask() {
 			return nil
 		}
 		ret := activity.toView()
-		//ret.TableRows = activity.getTableData(app)
 		return ret
 	}).Permission(everybodyPermission)
 
-	app.API("_taskviewtable").HandlerJSON(func(request *Request) interface{} {
+	app.API("_taskviewtable").Handler(func(request *Request) {
 		activity := app.getFormTaskActivity(request.Param("uuid"))
 		if activity == nil {
 			request.WriteJSON(404, "Not Found")
-			return nil
+			return
 		}
-		data := activity.getTableData(app)
-		if data == "" {
+		tableViewData := activity.getTableData()
+		if len(tableViewData) == 0 {
 			request.WriteJSON(204, "Empty")
-			return nil
+			return
 		}
-		return data
+		request.WriteHTML(200, app.adminTemplates, "table_rows", tableViewData)
 	}).Permission(everybodyPermission)
 
 	PopupForm(app, "_taskstop", func(form *Form, request *Request) {
@@ -204,8 +206,6 @@ func (app *App) initFormTask() {
 	}, func(fv FormValidation, request *Request) {
 
 		fv.RunTask(request, func(fta *FormTaskActivity) error {
-			//return fmt.Errorf("XXX")
-			//panic("NOOOO")
 			for i := range 5 {
 				fta.Description(fmt.Sprintf("Line %d dj iowqj dwioq jdiwoqj diwoqj diwoqj diwoqjdiwoqjdiwoq jdiwoq jdiwq", i))
 				fta.Progress(int64(i)+1, 10)

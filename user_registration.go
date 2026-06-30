@@ -23,7 +23,7 @@ func initUserRegistration(app *App) {
 					user.EmailConfirmedAt = time.Now()
 					err := UpdateItem(app, user)
 					if err == nil {
-						request.AddFlashMessage(messages.Get(user.Locale, "admin_confirm_email_ok"))
+						request.AddFlashMessage(messages.Get(user.Locale, "confirm_email_ok"))
 						request.Redirect("/admin/user/login")
 						return
 					}
@@ -36,7 +36,7 @@ func initUserRegistration(app *App) {
 			locale = user.Locale
 		}
 
-		request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_fail"))
+		request.AddFlashMessage(messages.Get(locale, "confirm_email_fail"))
 		request.Redirect("/admin/user/login")
 	})
 
@@ -45,16 +45,16 @@ func initUserRegistration(app *App) {
 		nameInput := form.AddTextInput("name", messages.Get(locale, "Name"))
 		nameInput.Focused = true
 
-		emailInput := form.AddEmailInput("email", messages.Get(locale, "admin_email"))
+		emailInput := form.AddEmailInput("email", messages.Get(locale, "email"))
 		emailInput.InputMode = "email"
 		emailInput.Autocomplete = "email"
 
-		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "admin_register_password"))
-		passwordInput.Description = messages.Get(locale, "admin_register_password_description")
+		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "register_password"))
+		passwordInput.Description = messages.Get(locale, "register_password_description")
 		passwordInput.Autocomplete = "new-password"
 
 		form.AddCAPTCHAInput("captcha", "4 + 5 =")
-		form.AddSubmit(messages.Get(locale, "admin_register"))
+		form.AddSubmit(messages.Get(locale, "register"))
 	}, registrationValidation)
 
 }
@@ -65,29 +65,29 @@ func registrationValidation(vc FormValidation, request *Request) {
 
 	name := request.Param("name")
 	if name == "" {
-		vc.AddItemError("name", messages.Get(locale, "admin_user_name_not_empty"))
+		vc.AddItemError("name", messages.Get(locale, "user_name_not_empty"))
 	}
 
 	email := request.Param("email")
 	email = fixEmail(email)
 	if !IsEmailValid(email) {
-		vc.AddItemError("email", messages.Get(locale, "admin_email_not_valid"))
+		vc.AddItemError("email", messages.Get(locale, "email_not_valid"))
 	} else {
 		user := Query[user](app).Is("email", email).First()
 		if user != nil && user.Email == email {
-			vc.AddItemError("email", messages.Get(locale, "admin_email_already_registered"))
+			vc.AddItemError("email", messages.Get(locale, "email_already_registered"))
 		}
 	}
 
 	password := request.Param("password")
 	if !isPasswordValid(password) {
-		vc.AddItemError("password", messages.Get(locale, "admin_register_password"))
+		vc.AddItemError("password", messages.Get(locale, "register_password"))
 	}
 
 	captcha := request.Param("captcha")
 	captcha = strings.Trim(captcha, " ")
 	if captcha != "9" {
-		vc.AddItemError("captcha", messages.Get(locale, "admin_error"))
+		vc.AddItemError("captcha", messages.Get(locale, "error"))
 	}
 
 	if vc.Valid() {
@@ -113,7 +113,7 @@ func registrationValidation(vc FormValidation, request *Request) {
 			app.Log().Println(err)
 		}
 
-		request.AddFlashMessage(messages.Get(locale, "admin_confirm_email_send", u.Email))
+		request.AddFlashMessage(messages.Get(locale, "confirm_email_send", u.Email))
 		vc.Redirect(app.getAdminURL("user/login") + "?email=" + url.QueryEscape(email))
 	}
 }
@@ -131,12 +131,12 @@ func (u user) sendConfirmEmail(app *App, locale string) error {
 
 		link := app.mustGetSetting("base_url") + app.getAdminURL("user/confirm_email") + "?" + urlValues.Encode()
 
-		md.Name = messages.Get(locale, "admin_confirm_email_subject")
+		md.Name = messages.Get(locale, "confirm_email_subject")
 
-		md.Description = template.HTML(messages.Get(locale, "admin_confirm_email_body"))
+		md.Description = template.HTML(messages.Get(locale, "confirm_email_body"))
 
 		md.Button = &Button{
-			Name: messages.Get(locale, "admin_confirm_button"),
+			Name: messages.Get(locale, "confirm_button"),
 			URL:  link,
 		}
 

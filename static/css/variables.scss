@@ -88,3 +88,13 @@ $radius: 8px;
   backdrop-filter: saturate(180%) blur(20px);
   background-color: rgba(250, 250, 250, 0.7);
 }
+
+@keyframes insertAnimationKeyframes {
+  from {
+    opacity: 0;
+    transform: perspective(10cm) rotateX(20deg) translateY(-10px) scale(.8);
+  }
+  to {
+    opacity: 1;
+  }
+}

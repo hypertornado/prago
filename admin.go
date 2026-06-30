@@ -75,16 +75,16 @@ func (app *App) getAdminURL(suffix string) string {
 }
 
 func renderErrorPage(request *Request, httpCode int) {
-	name := messages.Get(request.Locale(), fmt.Sprintf("admin_%d", httpCode))
+	name := messages.Get(request.Locale(), fmt.Sprintf("%d", httpCode))
 
 	if name == "" {
 		name = http.StatusText(httpCode)
 	}
 
 	pageData := createPageData(request)
-	pageData.Messages = append(pageData.Messages, pageMessage{
+	pageData.ErrorMessage = &pageMessage{
 		Name: name,
-	})
+	}
 	pageData.Name = name
 	pageData.HTTPCode = httpCode
 	pageData.renderPage(request)

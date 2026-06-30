@@ -49,8 +49,8 @@
                 {{template "menu" .Menu}}
             </div>
             <div class="root_content">
-                {{range $message := .Messages}}
-                    <h1 class="admin_message">{{$message.Name}}</h1>
+                {{if .ErrorMessage}}
+                    <h1 class="error_message">{{.ErrorMessage.Name}}</h1>
                 {{end}}
                 {{if .BoxHeader}}
                     {{template "box_header" .BoxHeader}}

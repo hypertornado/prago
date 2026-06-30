@@ -34,7 +34,7 @@ func (field *Field) addAllowedValuesValidation() {
 				return nil
 			}
 		}
-		return errors.New(messages.Get(userData.Locale(), "admin_validation_value"))
+		return errors.New(messages.Get(userData.Locale(), "validation_value"))
 	})
 
 }
@@ -137,7 +137,7 @@ func (field *Field) addValidationNonempty() {
 		}
 
 		if !valid {
-			return errors.New(messages.Get(userData.Locale(), "admin_validation_not_empty"))
+			return errors.New(messages.Get(userData.Locale(), "validation_not_empty"))
 		}
 		return nil
 	})

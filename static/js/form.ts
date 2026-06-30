@@ -17,7 +17,7 @@ class Form {
       new MarkdownEditor(el);
     });
 
-    var timestamps = form.querySelectorAll<HTMLDivElement>(".admin_timestamp");
+    var timestamps = form.querySelectorAll<HTMLDivElement>(".input_timestamp");
     timestamps.forEach((form) => {
       new Timestamp(form);
     });

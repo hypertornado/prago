@@ -279,7 +279,7 @@ func (app *App) initActivityLog() {
 	app.activityLogResource.canUpdate = Permission("nobody")
 	app.activityLogResource.canDelete = Permission("nobody")
 	app.activityLogResource.orderDesc = true
-	app.activityLogResource.Name(messages.GetNameFunction("admin_history"), messages.GetNameFunction("admin_history"))
+	app.activityLogResource.Name(messages.GetNameFunction("history"), messages.GetNameFunction("history"))
 
 	PreviewURLFunction(app, func(activityLog *activityLog) string {
 		return fmt.Sprintf("/admin/_activity?id=%d", activityLog.ID)

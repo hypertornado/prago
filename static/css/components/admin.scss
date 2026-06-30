@@ -26,27 +26,26 @@
   flex-grow: 10;
 }
 
-.admin_timestamp {
+.input_timestamp {
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
-select.admin_timestamp_date {
+select.input_timestamp_date {
   width: 150px;
   flex-grow: 0;
 }
 
-select.admin_timestamp_hour {
+select.input_timestamp_hour {
   min-width: 50px !important;
   flex-grow: 0;
   //margin: 0px 5px;
 }
 
-select.admin_timestamp_minute {
+select.input_timestamp_minute {
   min-width: 50px !important;
   flex-grow: 0;
-  //margin-left: 5px;
 }
 
 .views {
@@ -107,7 +106,7 @@ select.admin_timestamp_minute {
   display: none;
 }
 
-.admin_item_view_place {
+.item_view_place {
   height: 200px;
 }
 
@@ -133,6 +132,23 @@ select.admin_timestamp_minute {
   width: 0px;
   height: 0px;
   animation: spin_animation 700ms ease-in-out infinite;
+}
+
+.error_message {
+  color: $red;
+  padding: 8px 16px;
+  font-size: 1.5rem;
+  background-color: $redBackground;
+  background: $red;
+  color: white;
+  border: 1px solid $red;
+  font-weight: thin;
+  line-height: 1.3em;
+  margin: 8px auto;
+  border-radius: 16px;
+  @include softShadow;
+  max-width: min(500px, calc(100% - 32px));
+
 }
 
 @keyframes spin_animation {
