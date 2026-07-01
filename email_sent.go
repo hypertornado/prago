@@ -41,6 +41,13 @@ it does not work with emoji, encoding of database shoul be utf8mb4, not utf8
 
 func logEmailSent(email *Email, err error) {
 
+	defer func() {
+		if recoverErr := recover(); err != nil {
+			err = fmt.Errorf("panic in logEmailSent: %s", recoverErr)
+			return
+		}
+	}()
+
 	var attachements []string
 
 	for _, attachement := range email.attachements {

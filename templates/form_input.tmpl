@@ -171,19 +171,23 @@
 {{end}}
 
 {{define "form_input_select"}}
-  {{if gt (len .Data) 0}}
-    <select name="{{.ID}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>
-      {{$val := .Value}}
-      {{range $value := .Data}}
-        <option value="{{index $value 0}}"{{if eq $val (index $value 0)}} selected{{end}}>{{index $value 1}}</option>
-      {{end}}
-    </select>
-  {{else}}
-    {{template "form_input_select_radio" .}}
-  {{end}}
+  <select name="{{.ID}}" id="{{.UUID}}" class="input form_watcher form_input input_select"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>
+    <button>
+      <selectedcontent></selectedcontent>
+    </button>
+    {{$val := .Value}}
+    {{range $item := .Data}}
+      <option value="{{$item.ID}}"{{if eq $val ($item.ID)}} selected{{end}} class="option">
+        {{if $item.Icon}}
+          <img src="/admin/api/icons?file={{$item.Icon}}&color={{$item.GetColor}}" class="option_icon">
+        {{end}}
+        <span class="option_name">{{$item.Name}}</span>
+      </option>
+    {{end}}
+  </select>
 {{end}}
 
-{{define "form_input_select_radio"}}
+{{define "form_input_radio"}}
   {{$val := .Value}}
   {{$id := .ID}}
   <div class="form_radios">

@@ -9,7 +9,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
-func (resource *Resource) getStructScanners(value reflect.Value) (names []string, scanners []interface{}, err error) {
+func (resource *Resource) getStructScanners(value reflect.Value) (names []string, scanners []any, err error) {
 	if value.Type() != resource.typ {
 		err = errors.New("types dont match")
 		return
@@ -42,7 +42,7 @@ type scanner struct {
 	value reflect.Value
 }
 
-func (s *scanner) Scan(src interface{}) error {
+func (s *scanner) Scan(src any) error {
 	var err error
 
 	switch s.value.Type().Kind() {

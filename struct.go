@@ -42,7 +42,7 @@ func (resource *Resource) getItemStringEditableValues(item any, request *Request
 		if !field.authorizeEdit(request) && field.id != "id" {
 			continue
 		}
-		var ifaceVal interface{}
+		var ifaceVal any
 		reflect.ValueOf(&ifaceVal).Elem().Set(
 			itemVal.Field(i),
 		)

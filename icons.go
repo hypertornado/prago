@@ -50,7 +50,7 @@ func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 			v, v,
 		})
 	}
-	app.AddEnumFieldType("icon", selectData)
+	app.AddEnumShort("icon", selectData)
 }
 
 func (app *App) getIconFilenames() []string {

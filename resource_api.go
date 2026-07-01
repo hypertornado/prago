@@ -133,7 +133,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 				resource.getURL("api/multiple_edit"),
 			)
 
-			var item interface{} = reflect.New(resource.typ).Interface()
+			var item any = reflect.New(resource.typ).Interface()
 			form.initWithResourceItem(resource, item, request)
 
 			data := &MultipleEditData{

@@ -47,7 +47,7 @@ type listHeaderItem struct {
 	FilterLayout string
 	//FilterContent     template.HTML
 	RelatedResourceID string
-	FilterData        interface{}
+	FilterData        any
 	NaturalCellWidth  int64
 
 	DefaultFilterResponse *ListFilterResponse

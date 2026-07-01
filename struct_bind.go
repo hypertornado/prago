@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (resource *Resource) setOrderPosition(item interface{}, order int64) {
+func (resource *Resource) setOrderPosition(item any, order int64) {
 	value := reflect.ValueOf(item)
 
 	for i := 0; i < 10; i++ {

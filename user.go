@@ -199,7 +199,7 @@ func (app *App) afterInitUserResource() {
 }
 
 func (app *App) GetCachedUserEmail(id int64) string {
-	return <-Cached(app, fmt.Sprintf("cached-user-email-%d", id), func() string {
+	return Cached(app, fmt.Sprintf("cached-user-email-%d", id), func() string {
 		user := Query[user](app).ID(id)
 		if user == nil {
 			return ""

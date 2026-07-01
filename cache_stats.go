@@ -75,7 +75,7 @@ type cacheStats struct {
 }
 
 func (cache *cache) numberOfItems() (ret int64) {
-	cache.items.Range(func(k, v interface{}) bool {
+	cache.items.Range(func(k, v any) bool {
 		ret++
 		return true
 	})

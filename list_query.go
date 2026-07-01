@@ -16,7 +16,7 @@ type listQueryOrder struct {
 type listQuery struct {
 	context    context.Context
 	conditions []string
-	values     []interface{}
+	values     []any
 	limit      int64
 	offset     int64
 	order      []listQueryOrder
@@ -32,7 +32,7 @@ func (resource *Resource) query(ctx context.Context) *listQuery {
 	}
 }
 
-func (q *listQuery) where(condition string, values ...interface{}) *listQuery {
+func (q *listQuery) where(condition string, values ...any) *listQuery {
 	q.conditions = append(q.conditions, condition)
 	q.values = append(q.values, values...)
 	return q
@@ -101,7 +101,7 @@ func (q *listQuery) addOrder(name string, desc bool) {
 	q.order = append(q.order, listQueryOrder{name: name, desc: desc})
 }
 
-func (listQuery *listQuery) Is(name string, value interface{}) *listQuery {
+func (listQuery *listQuery) Is(name string, value any) *listQuery {
 	listQuery.where(sqlFieldToQuery(name), value)
 	return listQuery
 }

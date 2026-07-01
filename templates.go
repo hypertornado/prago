@@ -28,7 +28,7 @@ type PragoTemplates struct {
 
 func NewPragoTemplates() *PragoTemplates {
 	return &PragoTemplates{
-		funcMap:        map[string]interface{}{},
+		funcMap:        map[string]any{},
 		templatesMutex: &sync.RWMutex{},
 	}
 }
@@ -128,7 +128,7 @@ func (templates *PragoTemplates) parseTemplates() error {
 	return nil
 }
 
-func (templates *PragoTemplates) Function(name string, f interface{}) {
+func (templates *PragoTemplates) Function(name string, f any) {
 	templates.templatesMutex.Lock()
 	defer templates.templatesMutex.Unlock()
 	templates.funcMap[name] = f
@@ -149,20 +149,20 @@ func (templates *PragoTemplates) watch(app *App) {
 
 }
 
-func (templates *PragoTemplates) Execute(wr io.Writer, name string, data interface{}) error {
+func (templates *PragoTemplates) Execute(wr io.Writer, name string, data any) error {
 	templates.templatesMutex.RLock()
 	defer templates.templatesMutex.RUnlock()
 	return templates.templates.ExecuteTemplate(wr, name, data)
 }
 
-func (templates *PragoTemplates) ExecuteToString(templateName string, data interface{}) string {
+func (templates *PragoTemplates) ExecuteToString(templateName string, data any) string {
 	bufStats := new(bytes.Buffer)
 	err := templates.Execute(bufStats, templateName, data)
 	must(err)
 	return bufStats.String()
 }
 
-func (templates *PragoTemplates) ExecuteToHTML(templateName string, data interface{}) template.HTML {
+func (templates *PragoTemplates) ExecuteToHTML(templateName string, data any) template.HTML {
 	return template.HTML(templates.ExecuteToString(templateName, data))
 }
 

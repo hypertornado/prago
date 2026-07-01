@@ -294,7 +294,7 @@ func (resource *Resource) Board(board *Board) *Resource {
 	return resource
 }
 
-func (resource *Resource) getItemURL(item interface{}, suffix string, userData UserData) string {
+func (resource *Resource) getItemURL(item any, suffix string, userData UserData) string {
 	ret := resource.getURL(fmt.Sprintf("%d", resource.previewer(userData, item).ID()))
 	if suffix != "" {
 		ret += "/" + suffix
@@ -338,7 +338,7 @@ func (resource *Resource) getCachedCount() int64 {
 }
 
 func (resource *Resource) updateCachedCount() error {
-	resource.app.cache.forceLoad(resource.cachedCountName(), func() interface{} {
+	resource.app.cache.forceLoad(resource.cachedCountName(), func() any {
 		count := resource.countAllItems()
 		return count
 	})

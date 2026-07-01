@@ -222,7 +222,7 @@ func (resource *Resource) deleteWithLog(item any, request UserData) error {
 	return nil
 }
 
-func (resource *Resource) editItemWithLogAndValues(request *Request, values url.Values) (interface{}, *itemValidation) {
+func (resource *Resource) editItemWithLogAndValues(request *Request, values url.Values) (any, *itemValidation) {
 	user := request
 	id, err := strconv.Atoi(values.Get("id"))
 	must(err)

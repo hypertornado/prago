@@ -25,7 +25,7 @@ func (app *App) initResourceConflict() {
 
 	app.conflictMutex = &sync.Mutex{}
 
-	app.API("_conflict").HandlerJSON(func(request *Request) interface{} {
+	app.API("_conflict").HandlerJSON(func(request *Request) any {
 		//return &conflictResponse{}
 		version, err := strconv.Atoi(request.Param("version"))
 		if err != nil {

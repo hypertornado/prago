@@ -29,8 +29,8 @@ func (app *App) initSQLConsole() {
 					table.Header(columns...)
 
 					count := len(columns)
-					values := make([]interface{}, count)
-					valuePtrs := make([]interface{}, count)
+					values := make([]any, count)
+					valuePtrs := make([]any, count)
 
 					var cells []*TableCell
 
@@ -46,7 +46,7 @@ func (app *App) initSQLConsole() {
 							val := values[i]
 
 							b, ok := val.([]byte)
-							var v interface{}
+							var v any
 							if ok {
 								v = string(b)
 							} else {

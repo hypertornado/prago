@@ -139,7 +139,7 @@ func (request *Request) WriteHTML(statusCode int, templates *PragoTemplates, tem
 }
 
 // WriteJSON renders JSON with HTTP code
-func (request *Request) WriteJSON(statusCode int, data interface{}) {
+func (request *Request) WriteJSON(statusCode int, data any) {
 	request.Response().Header().Add("Content-type", "application/json")
 	request.Written = true
 
@@ -148,9 +148,9 @@ func (request *Request) WriteJSON(statusCode int, data interface{}) {
 		pretty = true
 	}
 
-	var responseToWrite interface{}
+	var responseToWrite any
 	if statusCode >= 400 {
-		responseToWrite = map[string]interface{}{"error": data, "errorCode": statusCode}
+		responseToWrite = map[string]any{"error": data, "errorCode": statusCode}
 	} else {
 		responseToWrite = data
 	}

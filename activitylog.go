@@ -314,7 +314,7 @@ func (activity *activityLog) getInlineDiffLog(request *Request) (ret []string) {
 }
 
 func getDiffMap(inStr string) map[string]string {
-	var objectMap map[string]interface{}
+	var objectMap map[string]any
 	var ret = map[string]string{}
 	if inStr == "" {
 		return ret

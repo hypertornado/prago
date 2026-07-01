@@ -17,7 +17,7 @@ func (cell listCell) HasImages() bool {
 	return len(cell.Images) > 0
 }
 
-func getCellViewData(userData UserData, f *Field, value interface{}) *listCell {
+func getCellViewData(userData UserData, f *Field, value any) *listCell {
 	if f.fieldType.listCellDataSource != nil {
 		return f.fieldType.listCellDataSource(userData, f, value)
 	}
@@ -33,15 +33,15 @@ func getCellViewData(userData UserData, f *Field, value interface{}) *listCell {
 	return ret
 }
 
-func textListDataSource(userData UserData, f *Field, value interface{}) *listCell {
+func textListDataSource(userData UserData, f *Field, value any) *listCell {
 	return &listCell{Name: value.(string), ItemID: f.id}
 }
 
-func markdownListDataSource(userData UserData, f *Field, value interface{}) *listCell {
+func markdownListDataSource(userData UserData, f *Field, value any) *listCell {
 	return &listCell{Name: filterMarkdown(value.(string)), ItemID: f.id}
 }
 
-func relationCellViewDataFetch(userData UserData, f *Field, value interface{}) *listCell {
+func relationCellViewDataFetch(userData UserData, f *Field, value any) *listCell {
 	ret := &listCell{
 		Name: "",
 		//FetchURL: "/teest",
@@ -72,7 +72,7 @@ func relationCellViewDataFetch(userData UserData, f *Field, value interface{}) *
 	return ret
 }
 
-func relationCellViewData(userData UserData, f *Field, value interface{}) *listCell {
+func relationCellViewData(userData UserData, f *Field, value any) *listCell {
 
 	return relationCellViewDataFetch(userData, f, value)
 
@@ -135,7 +135,7 @@ func fetchListCellRelationAPIHandler(request *Request) {
 
 }
 
-func imageCellViewData(userData UserData, f *Field, value interface{}) *listCell {
+func imageCellViewData(userData UserData, f *Field, value any) *listCell {
 	data := value.(string)
 	ret := &listCell{
 		ItemID: f.id,

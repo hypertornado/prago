@@ -9,8 +9,10 @@ import (
 type fieldType struct {
 	id string
 
+	getViewFieldContent func(request *Request, val any) *viewFieldContent
+
 	viewTemplate   string
-	viewDataSource func(*Request, *Field, interface{}) interface{}
+	viewDataSource func(*Request, *Field, any) any
 
 	dbFieldDescription string
 
@@ -18,15 +20,14 @@ type fieldType struct {
 
 	formHideLabel   bool
 	formTemplate    string
-	formDataSource  func(*Field, UserData, string) interface{}
-	ft_formStringer func(interface{}) string
+	formDataSource  func(*Field, UserData, string) any
+	ft_formStringer func(any) string
 
-	listCellDataSource func(UserData, *Field, interface{}) *listCell
+	listCellDataSource func(UserData, *Field, any) *listCell
 
 	filterLayoutTemplate   string
-	filterLayoutDataSource func(*Field, UserData) interface{}
+	filterLayoutDataSource func(*Field, UserData) any
 
-	fieldTypeIcon    string
 	naturalCellWidth int64
 }
 
@@ -69,6 +70,7 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("text", &fieldType{
 		viewTemplate: "view_textarea",
+
 		formTemplate: "form_input_textarea",
 
 		listCellDataSource: textListDataSource,
@@ -130,12 +132,12 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("relation", &fieldType{
 		viewTemplate: "view_relation",
-		viewDataSource: func(request *Request, f *Field, value interface{}) interface{} {
+		viewDataSource: func(request *Request, f *Field, value any) any {
 			valInt := value.(int64)
 			return f.relationPreview(request, fmt.Sprintf("%d", valInt))
 		},
 		formTemplate: "form_input_relation",
-		formDataSource: func(f *Field, userData UserData, value string) interface{} {
+		formDataSource: func(f *Field, userData UserData, value string) any {
 			return relationFormDataSource{
 				App:           app,
 				RelatedID:     f.getRelatedID(),
@@ -146,11 +148,11 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("multirelation", &fieldType{
 		viewTemplate: "view_relation",
-		viewDataSource: func(request *Request, f *Field, value interface{}) interface{} {
+		viewDataSource: func(request *Request, f *Field, value any) any {
 			return f.relationPreview(request, value.(string))
 		},
 		formTemplate: "form_input_relation",
-		formDataSource: func(f *Field, userData UserData, value string) interface{} {
+		formDataSource: func(f *Field, userData UserData, value string) any {
 			return relationFormDataSource{
 				App:           app,
 				RelatedID:     f.getRelatedID(),
@@ -161,7 +163,7 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("timestamp", &fieldType{
 		formTemplate: "form_input_timestamp",
-		ft_formStringer: func(i interface{}) string {
+		ft_formStringer: func(i any) string {
 			tm := i.(time.Time)
 			if tm.IsZero() {
 				return ""
@@ -172,7 +174,7 @@ func (app *App) initDefaultFieldTypes() {
 	})
 }
 
-func boolFilterLayoutDataSource(field *Field, userData UserData) interface{} {
+func boolFilterLayoutDataSource(field *Field, userData UserData) any {
 	return [][2]string{
 		{"", ""},
 		{"true", messages.Get(userData.Locale(), "yes")},
@@ -180,6 +182,6 @@ func boolFilterLayoutDataSource(field *Field, userData UserData) interface{} {
 	}
 }
 
-func markdownViewDataSource(request *Request, f *Field, value interface{}) interface{} {
+func markdownViewDataSource(request *Request, f *Field, value any) any {
 	return filterMarkdown(value.(string))
 }

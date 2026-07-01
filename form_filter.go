@@ -21,7 +21,7 @@ func (app *App) FormFilter() *FormFilter {
 	return ret
 }
 
-func (filter *FormFilter) Is(name string, value interface{}) *FormFilter {
+func (filter *FormFilter) Is(name string, value any) *FormFilter {
 	oldFn := filter.filterFunction
 	newFn := func(lq *listQuery) *listQuery {
 		lq = oldFn(lq)
@@ -32,7 +32,7 @@ func (filter *FormFilter) Is(name string, value interface{}) *FormFilter {
 	return filter
 }
 
-func (filter *FormFilter) Where(condition string, values ...interface{}) *FormFilter {
+func (filter *FormFilter) Where(condition string, values ...any) *FormFilter {
 	filter.filterFunction = func(lq *listQuery) *listQuery {
 		return lq.where(condition, values...)
 	}

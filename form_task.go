@@ -168,7 +168,7 @@ func (app *App) initFormTask() {
 
 	app.formTasksMap = map[string]*FormTaskActivity{}
 
-	app.API("_taskview").HandlerJSON(func(request *Request) interface{} {
+	app.API("_taskview").HandlerJSON(func(request *Request) any {
 		activity := app.getFormTaskActivity(request.Param("uuid"))
 		if activity == nil {
 			request.WriteJSON(404, "Not Found")

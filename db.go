@@ -27,11 +27,11 @@ type mysqlColumn struct {
 }
 
 type dbIface interface {
-	Exec(string, ...interface{}) (sql.Result, error)
-	Query(string, ...interface{}) (*sql.Rows, error)
+	Exec(string, ...any) (sql.Result, error)
+	Query(string, ...any) (*sql.Rows, error)
 }
 
-func (resource *Resource) prepareValues(value reflect.Value, onlyFields map[string]bool) (names []string, questionMarks []string, values []interface{}, err error) {
+func (resource *Resource) prepareValues(value reflect.Value, onlyFields map[string]bool) (names []string, questionMarks []string, values []any, err error) {
 	for _, field := range resource.fields {
 
 		val := value.FieldByName(field.fieldClassName)
@@ -76,7 +76,7 @@ func (resource *Resource) prepareValues(value reflect.Value, onlyFields map[stri
 }
 
 // https://stackoverflow.com/questions/696190/create-if-an-entry-if-it-doesnt-exist-otherwise-update
-func (resource *Resource) replaceItem(ctx context.Context, item interface{}, debugSQL bool) error {
+func (resource *Resource) replaceItem(ctx context.Context, item any, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	if id <= 0 {
 		return errors.New("id must be positive")
@@ -104,7 +104,7 @@ func (resource *Resource) replaceItem(ctx context.Context, item interface{}, deb
 	return nil
 }
 
-func (resource *Resource) saveItem(ctx context.Context, item interface{}, onlyFields map[string]bool, debugSQL bool) error {
+func (resource *Resource) saveItem(ctx context.Context, item any, onlyFields map[string]bool, debugSQL bool) error {
 	id := reflect.ValueOf(item).Elem().FieldByName("ID").Int()
 	if id <= 0 {
 		return errors.New("id must be positive")
@@ -140,7 +140,7 @@ func (resource *Resource) saveItem(ctx context.Context, item interface{}, onlyFi
 	return nil
 }
 
-func (resource *Resource) createItem(ctx context.Context, item interface{}, debugSQL bool) error {
+func (resource *Resource) createItem(ctx context.Context, item any, debugSQL bool) error {
 	value := reflect.ValueOf(item).Elem()
 
 	names, questionMarks, values, err := resource.prepareValues(value, nil)
@@ -229,24 +229,24 @@ func (app *App) getTableDataSize(tableName string) int64 {
 
 	// You can scan only the columns you need
 	err := row.Scan(
-		&name,            // Name
-		new(interface{}), // Engine
-		new(interface{}), // Version
-		new(interface{}), // Row_format
-		new(interface{}), // Rows (this is what we want)
-		new(interface{}), // Avg_row_length
-		&size,            // Data_length
-		new(interface{}), // Max_data_length
-		new(interface{}), // Index_length
-		new(interface{}), // Data_free
-		new(interface{}), // Auto_increment
-		new(interface{}), // Create_time
-		new(interface{}), // Update_time
-		new(interface{}), // Check_time
-		new(interface{}), // Collation
-		new(interface{}), // Checksum
-		new(interface{}), // Create_options
-		new(interface{}), // Comment
+		&name,    // Name
+		new(any), // Engine
+		new(any), // Version
+		new(any), // Row_format
+		new(any), // Rows (this is what we want)
+		new(any), // Avg_row_length
+		&size,    // Data_length
+		new(any), // Max_data_length
+		new(any), // Index_length
+		new(any), // Data_free
+		new(any), // Auto_increment
+		new(any), // Create_time
+		new(any), // Update_time
+		new(any), // Check_time
+		new(any), // Collation
+		new(any), // Checksum
+		new(any), // Create_options
+		new(any), // Comment
 	)
 	if err != nil {
 		app.Log().Errorf("can't get resource stats (%s): %s", tableName, err)
@@ -288,7 +288,7 @@ func (query *listQuery) count() (int64, error) {
 	return i, err
 }
 
-func (query *listQuery) list() (interface{}, error) {
+func (query *listQuery) list() (any, error) {
 	slice := reflect.New(reflect.SliceOf(reflect.PointerTo(query.resource.typ))).Elem()
 
 	tableName := query.resource.id

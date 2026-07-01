@@ -48,75 +48,6 @@ select.input_timestamp_minute {
   flex-grow: 0;
 }
 
-.views {
- display: flex;
- flex-direction: column;
- flex-wrap: wrap;
- gap: 8px;
- padding: 0px 8px;
- margin-bottom: 16px;
- margin-top: 8px;
-}
-
-.view {
-  border: 1px solid $grayBorderColor;
-  @include softShadow;
-  background-color: white;
-  border: 0px solid $grayBorderColor;
-  border-radius: 8px;
-  padding: 8px 8px;
-  width: 100%;
-}
-
-.view_header {
-  font-size: 1rem;
-  margin-left: 0px;
-  margin-bottom: 4px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  color: $black;
-  font-weight: 500;
-}
-
-.view_header_icon {
-  width: 15px;
-  margin-right: 4px;
-}
-
-.view_header_name {
-  flex-grow: 100;
-}
-
-.view_header_btn { 
-   
-}
-
-.view_header_btn_icon {
-  
-}
-
-.view_content {
-  clear: both;
-  word-wrap: break-word;
-  color: $black;
-}
-
-.view_content:empty {
-  display: none;
-}
-
-.item_view_place {
-  height: 200px;
-}
-
-.item_view_relation .preview {
-  border-color: transparent;
-  box-shadow: none;
-  padding: 4px;
-  margin-left: -4px;
-
-}
 
 .progress {
   padding: 8px;
@@ -204,23 +135,6 @@ select.input_timestamp_minute {
   vertical-align: middle;
   display: flex;
   align-items: center;
-}
-
-.fileview {
-
-}
-
-.fileview_preview {
-  display: block;
-  aspect-ratio: 16/9;
-  background-position: center;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-color: $backgroundGrayColor !important;
-  background-color: black !important;
-  //border-radius: 3px;
-  //border: 10px solid $backgroundGrayColor;
-  border: 20px solid black;
 }
 
 @media print {

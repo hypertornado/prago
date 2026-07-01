@@ -41,12 +41,12 @@ func (q *QueryData[T]) In(name string, value any) *QueryData[T] {
 	return q
 }
 
-func (q *QueryData[T]) Is(name string, value interface{}) *QueryData[T] {
+func (q *QueryData[T]) Is(name string, value any) *QueryData[T] {
 	q.listQuery.Is(name, value)
 	return q
 }
 
-func (q *QueryData[T]) Where(condition string, values ...interface{}) *QueryData[T] {
+func (q *QueryData[T]) Where(condition string, values ...any) *QueryData[T] {
 	q.listQuery.where(condition, values...)
 	return q
 }

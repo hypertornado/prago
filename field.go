@@ -35,7 +35,6 @@ type Field struct {
 	relatedResource *Resource
 
 	formContentGenerator func(item *FormItem) template.HTML
-	viewContentGenerator func(val any) template.HTML
 
 	helpURL string
 
@@ -281,10 +280,10 @@ func (field *Field) TextOver(textOver func(string) string) *Field {
 	return field
 }
 
-func (field *Field) ViewContentGenerator(fn func(val any) template.HTML) *Field {
+/*func (field *Field) ViewContentGenerator(fn func(val any) template.HTML) *Field {
 	field.viewContentGenerator = fn
 	return field
-}
+}*/
 
 func (field *Field) FormContentGenerator(fn func(item *FormItem) template.HTML) *Field {
 	field.formContentGenerator = fn
@@ -331,9 +330,9 @@ func (field *Field) getIcon() string {
 		return field.tags["prago-icon"]
 	}
 
-	if field.fieldType.fieldTypeIcon != "" {
+	/*if field.fieldType.fieldTypeIcon != "" {
 		return field.fieldType.fieldTypeIcon
-	}
+	}*/
 
 	if field.fieldType.isRelation() {
 		if field.relatedResource.icon != "" {
@@ -369,9 +368,9 @@ func (field *Field) getIcon() string {
 	return ""*/
 }
 
-func getDefaultStringer(t reflect.Type) func(interface{}) string {
+func getDefaultStringer(t reflect.Type) func(any) string {
 	if reflect.TypeOf(time.Now()) == t {
-		return func(i interface{}) string {
+		return func(i any) string {
 			tm := i.(time.Time)
 			if tm.IsZero() {
 				return ""
@@ -382,19 +381,19 @@ func getDefaultStringer(t reflect.Type) func(interface{}) string {
 
 	switch t.Kind() {
 	case reflect.String:
-		return func(i interface{}) string {
+		return func(i any) string {
 			return i.(string)
 		}
 	case reflect.Int64:
-		return func(i interface{}) string {
+		return func(i any) string {
 			return fmt.Sprintf("%d", i.(int64))
 		}
 	case reflect.Float64:
-		return func(i interface{}) string {
+		return func(i any) string {
 			return fmt.Sprintf("%f", i.(float64))
 		}
 	case reflect.Bool:
-		return func(i interface{}) string {
+		return func(i any) string {
 			if i.(bool) {
 				return "on"
 			}
@@ -425,6 +424,8 @@ func getDefaultFormTemplate(t reflect.Type) string {
 func (field *Field) initFieldType() {
 	fieldTypes := field.resource.app.fieldTypes
 	fieldTypeName := field.tags["prago-type"]
+
+	//fmt.Println("XXX", field.typ.Name())
 
 	ret, found := fieldTypes[fieldTypeName]
 	if !found && fieldTypeName != "" {

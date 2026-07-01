@@ -9,11 +9,18 @@ import (
 )
 
 type viewField struct {
-	Icon       string
-	Name       string
+	Icon string
+	Name string
+
+	ViewContent *viewFieldContent
+
 	Content    template.HTML
 	EditAction template.JS
 	EditName   string
+}
+
+type viewFieldContent struct {
+	Name string
 }
 
 func (resource *Resource) getBoxHeader(id int64, item any, request *Request) *boxHeader {
@@ -29,12 +36,12 @@ func (resource *Resource) getBoxHeader(id int64, item any, request *Request) *bo
 
 func (resource *Resource) getViewFields(id int64, item any, request *Request) (ret []viewField) {
 
-	for i, f := range resource.fields {
-		if !f.authorizeView(request) {
+	for i, field := range resource.fields {
+		if !field.authorizeView(request) {
 			continue
 		}
 
-		if f.id == "id" {
+		if field.id == "id" {
 			continue
 		}
 
@@ -44,41 +51,43 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 		)
 
 		var editURL string
-		if f.authorizeEdit(request) {
-			editURL = resource.getURL(fmt.Sprintf("%d/edit?_focus=%s&_fields=%s", id, f.id, f.id))
+		if field.authorizeEdit(request) {
+			editURL = resource.getURL(fmt.Sprintf("%d/edit?_focus=%s&_fields=%s", id, field.id, field.id))
 		}
 
-		var content template.HTML
-		if f.viewContentGenerator != nil {
-			content = f.viewContentGenerator(ifaceVal)
+		var contentOLD template.HTML
+
+		var viewContent *viewFieldContent
+		if field.fieldType.getViewFieldContent != nil {
+			viewContent = field.fieldType.getViewFieldContent(request, ifaceVal)
 		} else {
-			content = resource.app.adminTemplates.ExecuteToHTML(
-				f.fieldType.viewTemplate,
-				f.fieldType.viewDataSource(request, f, ifaceVal),
+			contentOLD = resource.app.adminTemplates.ExecuteToHTML(
+				field.fieldType.viewTemplate,
+				field.fieldType.viewDataSource(request, field, ifaceVal),
 			)
 		}
 
-		kind := f.typ.Kind()
+		kind := field.typ.Kind()
 		if kind == reflect.Float64 || kind == reflect.Int64 || kind == reflect.Int {
-			if content == "0" {
-				content = ""
+			if contentOLD == "0" {
+				contentOLD = ""
 			}
 		}
 
-		content = template.HTML(strings.Trim(string(content), " \n\t"))
+		contentOLD = template.HTML(strings.Trim(string(contentOLD), " \n\t"))
 
-		if content == "" {
+		if contentOLD == "" && viewContent == nil {
 			continue
 		}
 
-		icon := f.getIcon()
+		icon := field.getIcon()
 
 		vf := viewField{
-			Icon:    icon,
-			Name:    f.name(request.Locale()),
-			Content: content,
-			//EditAction: template.JS(fmt.Sprintf("popup(\"%s\")", editURL)),
-			EditName: fmt.Sprintf("Upravit položku „%s“", f.name(request.Locale())),
+			Icon:        icon,
+			Name:        field.name(request.Locale()),
+			ViewContent: viewContent,
+			Content:     contentOLD,
+			EditName:    fmt.Sprintf("Upravit položku „%s“", field.name(request.Locale())),
 		}
 
 		if editURL != "" {
@@ -98,7 +107,6 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 		ret = append(
 			ret,
 			viewField{
-				//Icon:    "glyphicons-basic-43-stats-circle.svg",
 				Name:    v.Name(request.Locale()),
 				Content: template.HTML(v.Handler(item)),
 			},
@@ -112,16 +120,16 @@ func getDefaultViewTemplate(_ reflect.Type) string {
 	return "view_text"
 }
 
-func getDefaultViewDataSource(_ *Field) func(request *Request, f *Field, value interface{}) interface{} {
-	return func(request *Request, f *Field, value interface{}) interface{} {
+func getDefaultViewDataSource(_ *Field) func(request *Request, f *Field, value any) any {
+	return func(request *Request, f *Field, value any) any {
 		return getDefaultFieldStringer(f)(request, f, value)
 	}
 }
 
-func getDefaultFieldStringer(f *Field) func(userData UserData, f *Field, value interface{}) string {
-	t := f.typ
+func getDefaultFieldStringer(field *Field) func(userData UserData, f *Field, value any) string {
+	t := field.typ
 	if t == reflect.TypeOf(time.Now()) {
-		if f.tags["prago-type"] == "timestamp" || f.fieldClassName == "CreatedAt" || f.fieldClassName == "UpdatedAt" {
+		if field.tags["prago-type"] == "timestamp" || field.fieldClassName == "CreatedAt" || field.fieldClassName == "UpdatedAt" {
 			return timestampViewDataSource
 		}
 		return timeViewDataSource
@@ -140,12 +148,12 @@ func getDefaultFieldStringer(f *Field) func(userData UserData, f *Field, value i
 	}
 }
 
-func defaultViewDataSource(userData UserData, f *Field, value interface{}) string {
+func defaultViewDataSource(userData UserData, field *Field, value any) string {
 	return fmt.Sprintf("%v", value)
 }
 
-func numberViewDataSource(userData UserData, f *Field, value interface{}) string {
-	switch f.typ.Kind() {
+func numberViewDataSource(userData UserData, field *Field, value any) string {
+	switch field.typ.Kind() {
 	case reflect.Int:
 		return humanizeNumber(int64(value.(int)))
 	case reflect.Int64:
@@ -154,7 +162,7 @@ func numberViewDataSource(userData UserData, f *Field, value interface{}) string
 	panic("not integer type")
 }
 
-func floatViewDataSource(userData UserData, f *Field, value interface{}) string {
+func floatViewDataSource(userData UserData, f *Field, value any) string {
 	return humanizeFloat(value.(float64), userData.Locale())
 }
 

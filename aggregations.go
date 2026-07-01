@@ -113,7 +113,7 @@ type intScanner struct {
 	value int64
 }
 
-func (s *intScanner) Scan(src interface{}) error {
+func (s *intScanner) Scan(src any) error {
 	ni := sql.NullInt64{}
 	err := ni.Scan(src)
 	if err != nil {

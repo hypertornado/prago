@@ -282,7 +282,7 @@ func (table *Table) currentRow() *tableRow {
 	return currentTable.Rows[len(currentTable.Rows)-1]
 }
 
-func Cell(item interface{}) *TableCell {
+func Cell(item any) *TableCell {
 
 	var number bool
 

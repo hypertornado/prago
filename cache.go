@@ -122,7 +122,7 @@ func (cache *cache) putItem(name string, createFn func() any) *cacheItem {
 
 func loadCache[T any](cache *cache, name string, createFn func() T) T {
 
-	i, err, _ := cache.group.Do(name, func() (interface{}, error) {
+	i, err, _ := cache.group.Do(name, func() (any, error) {
 		fn := func() any {
 			return createFn()
 		}
@@ -144,7 +144,7 @@ func loadCache[T any](cache *cache, name string, createFn func() T) T {
 	return item.getValue().(T)
 }
 
-func Cached[T any](app *App, name string, createFn func() T) chan T {
+func CachedChan[T any](app *App, name string, createFn func() T) chan T {
 	ret := make(chan T)
 	go func() {
 		val := loadCache(app.cache, name, createFn)
@@ -153,7 +153,7 @@ func Cached[T any](app *App, name string, createFn func() T) chan T {
 	return ret
 }
 
-func CachedNEW[T any](app *App, name string, createFn func() T) T {
+func Cached[T any](app *App, name string, createFn func() T) T {
 	//ret := make(chan T)
 	//go func() {
 	val := loadCache(app.cache, name, createFn)

@@ -15,9 +15,18 @@
         {{end}}
       </div>
     {{end}}
-    <div class="view_content">
-      {{- $item.Content -}}
-    </div>
+    {{if $item.ViewContent}}
+      <div class="view_content">
+        {{if $item.ViewContent.Name}}
+          <div class="view_content_name">{{$item.ViewContent.Name}}</div>
+        {{end}}
+      </div>
+    {{end}}
+    {{if $item.Content}}
+      <div class="view_content_html">
+        {{- $item.Content -}}
+      </div>
+    {{end}}
     </div>
   {{end}}
   </div>

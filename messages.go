@@ -73,7 +73,7 @@ func czechMonth(date time.Time) string {
 	return months[date.Month()-1]
 }
 
-func (m *messagesStruct) Get(lang, id string, params ...interface{}) string {
+func (m *messagesStruct) Get(lang, id string, params ...any) string {
 	ret := m.GetNullable(lang, id, params...)
 	if ret == nil {
 		ret = m.GetNullable(fallbackLanguage, id, params...)
@@ -84,7 +84,7 @@ func (m *messagesStruct) Get(lang, id string, params ...interface{}) string {
 	return *ret
 }
 
-func (m *messagesStruct) GetNullable(lang, id string, params ...interface{}) *string {
+func (m *messagesStruct) GetNullable(lang, id string, params ...any) *string {
 	loc, ok := m.m[id]
 	if !ok {
 		return nil
@@ -99,7 +99,7 @@ func (m *messagesStruct) GetNullable(lang, id string, params ...interface{}) *st
 	return &ret
 }
 
-func (m *messagesStruct) GetNameFunction(id string, params ...interface{}) func(string) string {
+func (m *messagesStruct) GetNameFunction(id string, params ...any) func(string) string {
 	return func(lang string) string {
 		return m.Get(lang, id, params...)
 	}

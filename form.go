@@ -42,7 +42,7 @@ type FormItem struct {
 	Hidden             bool
 	Template           string
 	Value              string
-	Data               interface{}
+	Data               any
 
 	Content template.HTML
 
@@ -191,39 +191,6 @@ func (form *Form) AddHidden(name string) *FormItem {
 	input.Template = "form_input_hidden"
 	input.Hidden = true
 	return input
-}
-
-// AddSelect to form
-func (form *Form) AddSelect(name, description string, values [][2]string) *FormItem {
-	input := form.addInput(name, description, "form_input_select")
-	input.Data = values
-	return input
-}
-
-type FormOption struct {
-	ID                string
-	Name              string
-	DescriptionBefore string
-	DescriptionAfter  string
-	ImageURL          string
-	Button            *Button
-}
-
-func (form *Form) AddOptions(name, description string, options []*FormOption) *FormItem {
-	input := form.addInput(name, description, "form_input_select_radio")
-	input.Data = options
-	return input
-}
-
-func (form *Form) AddRadio(name, description string, values [][2]string) *FormItem {
-	var options []*FormOption
-	for _, v := range values {
-		options = append(options, &FormOption{
-			ID:   v[0],
-			Name: v[1],
-		})
-	}
-	return form.AddOptions(name, description, options)
 }
 
 // AddDatePicker to form

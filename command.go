@@ -62,7 +62,7 @@ type commandFlag struct {
 	description string
 	typ         flagType
 	aliases     []string
-	value       interface{}
+	value       any
 }
 
 // AddCommand adds command to app

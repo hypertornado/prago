@@ -55,7 +55,7 @@ func (app *App) getRoleName(roleID string, locale string) string {
 }
 
 func (app *App) createRoleFieldType() *fieldType {
-	var formDataSource = func(field *Field, ud UserData, value string) interface{} {
+	var formDataSource = func(field *Field, ud UserData, value string) any {
 		var roleIDs []string
 		for k := range app.accessManager.roles {
 			if k == "" {
@@ -70,18 +70,18 @@ func (app *App) createRoleFieldType() *fieldType {
 			vals = append(vals, [2]string{id, app.getRoleName(id, ud.Locale())})
 		}
 
-		return vals
+		return getFormOptions(vals)
 	}
 	return &fieldType{
 		formTemplate:   "form_input_select",
 		formDataSource: formDataSource,
 
 		filterLayoutTemplate: "filter_layout_select",
-		filterLayoutDataSource: func(f *Field, ud UserData) interface{} {
+		filterLayoutDataSource: func(f *Field, ud UserData) any {
 			return formDataSource(f, ud, "")
 		},
 
-		listCellDataSource: func(userData UserData, f *Field, value interface{}) *listCell {
+		listCellDataSource: func(userData UserData, f *Field, value any) *listCell {
 			return &listCell{Name: app.getRoleName(value.(string), userData.Locale()), ItemID: f.id}
 		},
 	}

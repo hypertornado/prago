@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (app *App) recoveryFunction(request *Request, recoveryData interface{}) {
+func (app *App) recoveryFunction(request *Request, recoveryData any) {
 	duration := time.Since(request.receivedAt)
 
 	if app.developmentMode {
@@ -19,7 +19,7 @@ func (app *App) recoveryFunction(request *Request, recoveryData interface{}) {
 		byteData := fmt.Sprintf("%s", recoveryData)
 
 		buf := new(bytes.Buffer)
-		err = temp.ExecuteTemplate(buf, "development_error", map[string]interface{}{
+		err = temp.ExecuteTemplate(buf, "development_error", map[string]any{
 			"name":    byteData,
 			"subname": fmt.Sprintf("500 Internal Server Error (errorid %s)", request.uuid),
 			"stack":   string(debug.Stack()),

@@ -14,7 +14,7 @@ type API struct {
 	permission  Permission
 	resource    *Resource
 	handler     func(*Request)
-	handlerJSON func(*Request) interface{}
+	handlerJSON func(*Request) any
 }
 
 func newAPI(app *App, url string) *API {
@@ -86,7 +86,7 @@ func (api *API) Handler(handler func(request *Request)) *API {
 }
 
 // TODO: Deprecated
-func (api *API) HandlerJSON(handler func(request *Request) interface{}) *API {
+func (api *API) HandlerJSON(handler func(request *Request) any) *API {
 	api.handlerJSON = handler
 	return api
 }

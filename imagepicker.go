@@ -81,7 +81,7 @@ type imageFormData struct {
 	FileResponsesJSON string
 }
 
-func imageFormDataSource(mimeTypes string) func(*Field, UserData, string) interface{} {
+func imageFormDataSource(mimeTypes string) func(*Field, UserData, string) any {
 	return func(f *Field, userData UserData, value string) any {
 		return imageFormData{
 			MimeTypes: mimeTypes,

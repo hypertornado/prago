@@ -38,10 +38,7 @@ func (l *logger) writeString(typ, str string) {
 		}
 
 		str = fmt.Sprintf("%s %s %s\n", time.Now().Format("2006/01/02 15:04:05"), typ, str)
-		_, err := l.output.Write([]byte(str))
-		if err != nil {
-			panic(err)
-		}
+		l.output.Write([]byte(str)) //nolint:errcheck
 	}()
 }
 
