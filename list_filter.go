@@ -34,7 +34,7 @@ func (app *App) initListFilter() {
 			listFilterFormSelect(form, field, value, request)
 		}
 
-		if field.fieldType.isRelation() {
+		if field.isRelation() {
 			listFilterFormRelation(form, field, value, request)
 		}
 
@@ -71,7 +71,7 @@ func (app *App) initListFilter() {
 			listFilterFormSelectHandle(fv, field, request)
 		}
 
-		if field.fieldType.isRelation() {
+		if field.isRelation() {
 			listFilterFormRelationHandle(fv, field, request)
 		}
 
@@ -235,7 +235,7 @@ func listFilterGetResponse(value string, field *Field, request *Request) (ret *L
 		ret.Name = strings.Join(names, " nebo ")
 	}
 
-	if field.fieldType.isRelation() {
+	if field.isRelation() {
 		var names []string
 		if value != "" {
 			ids := strings.Split(value, ",")

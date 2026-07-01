@@ -351,7 +351,7 @@ func (resource *Resource) getListStatsTable(ctx context.Context, field *Field, u
 			counted += count
 
 			var name = v
-			if field.fieldType.isRelation() {
+			if field.isRelation() {
 				name = humanizeMultiRelationsString(v)
 			}
 
@@ -365,7 +365,7 @@ func (resource *Resource) getListStatsTable(ctx context.Context, field *Field, u
 	}
 
 	if field.typ.Kind() == reflect.Int64 {
-		if field.fieldType.isRelation() {
+		if field.isRelation() {
 			for rows.Next() {
 				var count int64
 				var v int64

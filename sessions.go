@@ -11,7 +11,7 @@ type session struct {
 	User       int64     `prago-type:"relation"`
 	UserAgent  string    `prago-type:"text" prago-name:"User Agent"`
 	IPAddress  string    `prago-type:"text" prago-name:"IP Adresa"`
-	LastAccess time.Time `prago-type:"timestamp"  prago-name:"Poslední přístup"`
+	LastAccess time.Time `prago-type:"time"  prago-name:"Poslední přístup"`
 	IsAPI      bool
 	IsDeleted  bool
 	CreatedAt  time.Time

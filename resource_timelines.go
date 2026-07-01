@@ -25,7 +25,7 @@ func (resource *Resource) initResourceTimelines() {
 				if !tdr.Request.Authorize(field2.canView) {
 					continue
 				}
-				if field2.fieldType.isRelation() {
+				if field2.isRelation() {
 					q.In(field2.id, tdr.Options[field2.id])
 				}
 
@@ -60,7 +60,7 @@ func (resource *Resource) initResourceTimelines() {
 				if !request.Authorize(field2.canView) {
 					continue
 				}
-				if field2.fieldType.isRelation() {
+				if field2.isRelation() {
 					form.AddRelationMultiple(field2.id, field2.name(request.Locale()), field2.getRelatedID()).Value = request.Param(field2.id)
 				}
 
@@ -81,7 +81,7 @@ func (resource *Resource) initResourceTimelines() {
 		})
 
 		for _, field2 := range resource.fields {
-			if field2.fieldType.isRelation() {
+			if field2.isRelation() {
 				timeline.FilterName(field2.id, func(request *Request, value string) (string, string) {
 					if !request.Authorize(field2.canEdit) {
 						return field2.id, value

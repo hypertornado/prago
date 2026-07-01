@@ -22,7 +22,7 @@ type fieldType struct {
 	formDataSource    func(*Field, UserData, string) any
 	formValueStringer func(any) string
 
-	listCellDataSource func(UserData, *Field, any) *listCell
+	listCellDataSource func(ud UserData, field *Field, item any) *listCell
 
 	filterLayoutTemplate   string
 	filterLayoutDataSource func(*Field, UserData) any
@@ -62,14 +62,15 @@ func (app *App) addFieldType(id string, fieldType *fieldType) {
 		panic(fmt.Sprintf("field type '%s' has empty formValueStringer", id))
 	}
 
-	app.fieldTypes[id] = fieldType
-}
-func (f fieldType) isRelation() bool {
-	if f.viewTemplate == "view_relation" {
-		return true
-	} else {
-		return false
+	if fieldType.listCellDataSource == nil {
+		panic(fmt.Sprintf("field type '%s' has empty listCellDataSource", id))
 	}
+
+	if fieldType.dbFieldDescription == "" {
+		panic(fmt.Sprintf("field type '%s' has empty dbFieldDescription", id))
+	}
+
+	app.fieldTypes[id] = fieldType
 }
 
 type relationFormDataSource struct {
@@ -87,39 +88,58 @@ func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("role", app.createRoleFieldType())
 
 	app.addFieldType("string", &fieldType{
-		viewTemplate:   "view_text",
-		viewDataSource: stringerToDataSource(defaultViewDataSource),
+		dbFieldDescription: "varchar(255)",
+		viewTemplate:       "view_text",
+		viewDataSource:     stringerToDataSource(defaultStringer),
 
 		formTemplate:      "form_input",
 		formValueStringer: stringerString,
+
+		listCellDataSource: basicCellDataSource(defaultStringer),
 	})
 	app.addFieldType("int64", &fieldType{
-		viewTemplate:   "view_text",
-		viewDataSource: stringerToDataSource(numberViewDataSource),
+		dbFieldDescription: "bigint(20)",
+		viewTemplate:       "view_text",
+		viewDataSource:     stringerToDataSource(numberStringer),
 
 		formTemplate:      "form_input_int",
 		formValueStringer: stringerInt64,
+
+		listCellDataSource: basicCellDataSource(numberStringer),
+
+		naturalCellWidth: 60,
 	})
 	app.addFieldType("float64", &fieldType{
-		viewTemplate:   "view_text",
-		viewDataSource: stringerToDataSource(floatViewDataSource),
+		dbFieldDescription: "double",
+		viewTemplate:       "view_text",
+		viewDataSource:     stringerToDataSource(floatStringer),
 
 		formTemplate:      "form_input_float",
 		formValueStringer: stringerFloat64,
+
+		listCellDataSource: basicCellDataSource(floatStringer),
+
+		naturalCellWidth: 60,
 	})
 	app.addFieldType("bool", &fieldType{
-		viewTemplate:   "view_text",
-		viewDataSource: stringerToDataSource(boolViewDataSource),
+		dbFieldDescription: "bool NOT NULL",
+		viewTemplate:       "view_text",
+		viewDataSource:     stringerToDataSource(boolStringer),
 
 		formTemplate:      "form_input_checkbox",
 		formValueStringer: stringerBool,
 
+		listCellDataSource: basicCellDataSource(boolStringer),
+
 		formHideLabel: true,
+
+		naturalCellWidth: 60,
 	})
 
 	app.addFieldType("text", &fieldType{
-		viewTemplate:   "view_textarea",
-		viewDataSource: stringerToDataSource(defaultViewDataSource),
+		dbFieldDescription: "text",
+		viewTemplate:       "view_textarea",
+		viewDataSource:     stringerToDataSource(defaultStringer),
 
 		formTemplate:      "form_input_textarea",
 		formValueStringer: stringerString,
@@ -127,15 +147,19 @@ func (app *App) initDefaultFieldTypes() {
 		listCellDataSource: textListDataSource,
 	})
 	app.addFieldType("order", &fieldType{
-		viewTemplate:   "view_text",
-		viewDataSource: stringerToDataSource(numberViewDataSource),
+		dbFieldDescription: "bigint(20)",
+		viewTemplate:       "view_text",
+		viewDataSource:     stringerToDataSource(numberStringer),
 
 		formValueStringer: stringerInt64,
+
+		listCellDataSource: basicCellDataSource(numberStringer),
 
 		formTemplate: "form_input_int",
 	})
 
 	app.addFieldType("cdnfile", &fieldType{
+		dbFieldDescription: "varchar(255)",
 		viewTemplate:       "view_cdn_file",
 		viewDataSource:     cdnViewDataSource,
 		formTemplate:       "form_input_cdnfile",
@@ -146,11 +170,12 @@ func (app *App) initDefaultFieldTypes() {
 	})
 
 	app.addFieldType("file", &fieldType{
-		viewTemplate:      "view_image",
-		viewDataSource:    fileViewDataSource,
-		formTemplate:      "form_input_image",
-		formDataSource:    imageFormDataSource(""),
-		formValueStringer: stringerString,
+		dbFieldDescription: "varchar(255)",
+		viewTemplate:       "view_image",
+		viewDataSource:     fileViewDataSource,
+		formTemplate:       "form_input_image",
+		formDataSource:     imageFormDataSource(""),
+		formValueStringer:  stringerString,
 
 		listCellDataSource: imageCellViewData,
 
@@ -160,6 +185,7 @@ func (app *App) initDefaultFieldTypes() {
 	})
 
 	app.addFieldType("image", &fieldType{
+		dbFieldDescription: "text",
 		viewTemplate:       "view_image",
 		viewDataSource:     fileViewDataSource,
 		formTemplate:       "form_input_image",
@@ -173,33 +199,41 @@ func (app *App) initDefaultFieldTypes() {
 		naturalCellWidth: 60,
 	})
 	app.addFieldType("video", &fieldType{
-		viewTemplate:   "view_video",
-		viewDataSource: videoViewDataSource,
+		dbFieldDescription: "varchar(255)",
+		viewTemplate:       "view_video",
+		viewDataSource:     videoViewDataSource,
 
 		formTemplate:      "form_input",
 		formValueStringer: stringerString,
+
+		listCellDataSource: basicCellDataSource(defaultStringer),
 
 		naturalCellWidth: 60,
 	})
 
 	app.addFieldType("markdown", &fieldType{
-		viewTemplate:      "view_markdown",
-		viewDataSource:    markdownViewDataSource,
-		formTemplate:      "form_input_markdown",
-		formValueStringer: stringerString,
+		dbFieldDescription: "text",
+		viewTemplate:       "view_markdown",
+		viewDataSource:     markdownViewDataSource,
+		formTemplate:       "form_input_markdown",
+		formValueStringer:  stringerString,
 
 		listCellDataSource: markdownListDataSource,
 	})
 	app.addFieldType("place", &fieldType{
-		viewTemplate:      "view_place",
-		viewDataSource:    stringerToDataSource(defaultViewDataSource),
-		formValueStringer: stringerString,
+		dbFieldDescription: "varchar(255)",
+		viewTemplate:       "view_place",
+		viewDataSource:     stringerToDataSource(defaultStringer),
+		formValueStringer:  stringerString,
+
+		listCellDataSource: basicCellDataSource(defaultStringer),
 
 		formTemplate: "form_input_place",
 	})
 
 	app.addFieldType("relation", &fieldType{
-		viewTemplate: "view_relation",
+		dbFieldDescription: "bigint(20)",
+		viewTemplate:       "view_relation",
 		viewDataSource: func(request *Request, f *Field, value any) any {
 			valInt := value.(int64)
 			return f.relationPreview(request, fmt.Sprintf("%d", valInt))
@@ -212,11 +246,17 @@ func (app *App) initDefaultFieldTypes() {
 				MultiRelation: false,
 			}
 		},
+
 		formValueStringer: stringerInt64,
+
+		listCellDataSource: relationCellViewData,
+
+		naturalCellWidth: 150,
 	})
 
 	app.addFieldType("multirelation", &fieldType{
-		viewTemplate: "view_relation",
+		dbFieldDescription: "varchar(255)",
+		viewTemplate:       "view_relation",
 		viewDataSource: func(request *Request, f *Field, value any) any {
 			return f.relationPreview(request, value.(string))
 		},
@@ -229,33 +269,34 @@ func (app *App) initDefaultFieldTypes() {
 			}
 		},
 		formValueStringer: stringerString,
-	})
 
-	app.addFieldType("Time", &fieldType{
-		viewTemplate:   "view_text",
-		viewDataSource: stringerToDataSource(timestampViewDataSource),
+		listCellDataSource: relationCellViewData,
 
-		formTemplate:      "form_input_datetime",
-		formValueStringer: stringerDate,
-		naturalCellWidth:  130,
+		naturalCellWidth: 150,
 	})
 
 	app.addFieldType("date", &fieldType{
-		viewTemplate:   "view_text",
-		viewDataSource: stringerToDataSource(dateViewDataSource),
+		dbFieldDescription: "date",
+		viewTemplate:       "view_text",
+		viewDataSource:     stringerToDataSource(dateStringer),
 
 		formTemplate:      "form_input_date",
 		formValueStringer: stringerDate,
 		naturalCellWidth:  130,
+
+		listCellDataSource: basicCellDataSource(dateStringer),
 	})
 
-	app.addFieldType("timestamp", &fieldType{
-		viewTemplate:   "view_text",
-		viewDataSource: stringerToDataSource(timestampViewDataSource),
+	app.addFieldType("time", &fieldType{
+		dbFieldDescription: "datetime",
+		viewTemplate:       "view_text",
+		viewDataSource:     stringerToDataSource(timeStringer),
 
 		formTemplate:      "form_input_timestamp",
 		formValueStringer: stringerDateTime,
 		naturalCellWidth:  130,
+
+		listCellDataSource: basicCellDataSource(timeStringer),
 	})
 }
 

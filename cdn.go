@@ -46,8 +46,8 @@ func (file *File) getCDNNamedDownloadPaths() (ret [][2]string) {
 	return ret
 }
 
-func cdnViewDataSource(request *Request, f *Field, value any) any {
-	app := f.resource.app
+func cdnViewDataSource(request *Request, field *Field, value any) any {
+	app := field.resource.app
 	return getCDNViewData(app, value.(string))
 }
 

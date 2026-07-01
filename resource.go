@@ -110,7 +110,7 @@ func NewResource[T any](app *App) *Resource {
 	for i := 0; i < typ.NumField(); i++ {
 		if ast.IsExported(typ.Field(i).Name) {
 			field := ret.newField(typ.Field(i), i)
-			if field.tags["prago-type"] == "order" {
+			if field.isOrderField() {
 				ret.orderField = field
 			}
 			ret.fields = append(ret.fields, field)

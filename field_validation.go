@@ -57,7 +57,7 @@ func (field *Field) addPragoFieldValidation(nameOfValidation string) {
 
 func (field *Field) addValidationStrongRelation() {
 
-	if !field.fieldType.isRelation() {
+	if !field.isRelation() {
 		panic(
 			fmt.Sprintf("field %s (resource %s) is not of type relation", field.id, field.resource.id),
 		)

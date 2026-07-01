@@ -99,7 +99,7 @@ func TestValidation(t *testing.T) {
 		}
 
 		app := NewTesting(t, func(app *App) {
-			app.AddEnumFieldType("myenum", [][2]string{
+			app.AddEnumShort("myenum", [][2]string{
 				{"a", "aname"},
 				{"b", "bname"},
 			})

@@ -193,8 +193,7 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 			for _, item := range items {
 				for _, field := range fields {
 					ifaceVal := reflect.ValueOf(item).Elem().FieldByName(field.fieldClassName).Interface()
-
-					cellData := getCellViewData(request, field, ifaceVal)
+					cellData := field.fieldType.listCellDataSource(request, field, ifaceVal)
 					strVal += fmt.Sprintf("%s: %v\n", field.name(request.Locale()), cellData.Name)
 				}
 

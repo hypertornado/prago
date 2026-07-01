@@ -95,7 +95,7 @@ func (app *App) relationStringer(field Field, value reflect.Value, userData User
 		if value.Type() == reflect.TypeOf(time.Now()) {
 			tm := value.Interface().(time.Time)
 			showTime := false
-			if field.tags["prago-type"] == "timestamp" {
+			if field.typeID() == "time" {
 				showTime = true
 			}
 			return messages.Timestamp(userData.Locale(), tm, showTime)

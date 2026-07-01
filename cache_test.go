@@ -9,7 +9,7 @@ func TestCache(t *testing.T) {
 
 	app := resource.app
 
-	a := <-Cached(app, "xxx", func() string {
+	a := Cached(app, "xxx", func() string {
 		return "A"
 	})
 	if a != "A" {

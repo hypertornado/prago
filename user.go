@@ -33,7 +33,7 @@ type user struct {
 
 	UserAgent  string    `prago-type:"text" prago-can-view:"sysadmin" prago-name:"User Agent"`
 	IPAddress  string    `prago-type:"text" prago-can-view:"sysadmin" prago-name:"IP Adresa"`
-	LastAccess time.Time `prago-type:"timestamp" prago-can-view:"sysadmin" prago-name:"Poslední přístup"`
+	LastAccess time.Time `prago-type:"time" prago-can-view:"sysadmin" prago-name:"Poslední přístup"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time `prago-can-view:"sysadmin"`

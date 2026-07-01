@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -59,6 +60,18 @@ func (field *Field) authorizeView(userData UserData) bool {
 		return false
 	}
 	return true
+}
+
+func (field *Field) typeID() string {
+	return field.fieldType.id
+}
+
+func (field *Field) isOrderField() bool {
+	return field.typeID() == "order"
+}
+
+func (field *Field) isRelation() bool {
+	return field.typeID() == "relation" || field.typeID() == "multirelation"
 }
 
 func (field *Field) authorizeEdit(userData UserData) bool {
@@ -280,11 +293,6 @@ func (field *Field) TextOver(textOver func(string) string) *Field {
 	return field
 }
 
-/*func (field *Field) ViewContentGenerator(fn func(val any) template.HTML) *Field {
-	field.viewContentGenerator = fn
-	return field
-}*/
-
 func (field *Field) FormContentGenerator(fn func(item *FormItem) template.HTML) *Field {
 	field.formContentGenerator = fn
 	return field
@@ -329,7 +337,7 @@ func (field *Field) getIcon() string {
 	if field.tags["prago-icon"] != "" {
 		return field.tags["prago-icon"]
 	}
-	if field.fieldType.isRelation() {
+	if field.isRelation() {
 		if field.relatedResource.icon != "" {
 			return field.relatedResource.icon
 		}
@@ -337,65 +345,12 @@ func (field *Field) getIcon() string {
 	return ""
 }
 
-/*func getDefaultStringer(t reflect.Type) func(any) string {
-	if reflect.TypeOf(time.Now()) == t {
-		return stringerDate
-	}
-
-	switch t.Kind() {
-	case reflect.String:
-		return stringerString
-	case reflect.Int64:
-		return stringerInt64
-	case reflect.Float64:
-		return stringerFloat64
-	case reflect.Bool:
-		return stringerBool
-	}
-	panic("unknown stringer for " + t.String())
-}*/
-
-func stringerString(in any) string {
-	return in.(string)
-}
-
-func stringerInt64(in any) string {
-	return fmt.Sprintf("%d", in.(int64))
-}
-
-func stringerFloat64(in any) string {
-	return fmt.Sprintf("%f", in.(float64))
-}
-
-func stringerBool(in any) string {
-	if in.(bool) {
-		return "on"
-	}
-	return ""
-}
-
-func stringerDate(in any) string {
-	tm := in.(time.Time)
-	if tm.IsZero() {
-		return ""
-	}
-	return tm.Format("2006-01-02")
-}
-
-func stringerDateTime(in any) string {
-	tm := in.(time.Time)
-	if tm.IsZero() {
-		return ""
-	}
-	return tm.Format("2006-01-02 15:04")
-}
-
 func (field *Field) initFieldType() {
 	fieldTypes := field.resource.app.fieldTypes
 	fieldTypeName := field.tags["prago-type"]
 
 	if fieldTypeName == "" {
-		fieldTypeName = field.typ.Name()
+		fieldTypeName = strings.ToLower(field.typ.Name())
 	}
 
 	ret, found := fieldTypes[fieldTypeName]
@@ -407,37 +362,10 @@ func (field *Field) initFieldType() {
 }
 
 func (field *Field) fieldDescriptionMysql(fieldTypes map[string]*fieldType) string {
-	var fieldDescription string
+	var fieldDescription = field.fieldType.dbFieldDescription
 
-	t, found := fieldTypes[field.tags["prago-type"]]
-	if found && t.dbFieldDescription != "" {
-		fieldDescription = t.dbFieldDescription
-	} else {
-		switch field.typ.Kind() {
-		case reflect.Struct:
-			dateType := reflect.TypeOf(time.Now())
-			if field.typ == dateType {
-				if field.tags["prago-type"] == "date" {
-					fieldDescription = "date"
-				} else {
-					fieldDescription = "datetime"
-				}
-			}
-		case reflect.Bool:
-			fieldDescription = "bool NOT NULL"
-		case reflect.Float64:
-			fieldDescription = "double"
-		case reflect.Int64:
-			fieldDescription = "bigint(20)"
-		case reflect.String:
-			if field.tags["prago-type"] == "text" || field.tags["prago-type"] == "image" || field.tags["prago-type"] == "markdown" {
-				fieldDescription = "text"
-			} else {
-				fieldDescription = "varchar(255)"
-			}
-		default:
-			panic("non supported type " + field.typ.Kind().String())
-		}
+	if fieldDescription == "" {
+		panic("no dbFieldDescription set for field " + field.id)
 	}
 
 	additional := ""

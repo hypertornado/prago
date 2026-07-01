@@ -191,27 +191,10 @@ func (resource *Resource) fieldsStr(userData UserData) string {
 const defaultNaturalCellWidth int64 = 100
 
 func (field *Field) getNaturalCellWidth() int64 {
-	ret := defaultNaturalCellWidth
 	if field.fieldType.naturalCellWidth > 0 {
-		ret = field.fieldType.naturalCellWidth
+		return field.fieldType.naturalCellWidth
 	}
-
-	if field.fieldType.isRelation() {
-		return 150
-	}
-
-	switch field.typ {
-	case reflect.TypeOf(time.Now()):
-		return 150
-	case reflect.TypeOf(true):
-		return 60
-	case reflect.TypeOf(int64(0)):
-		return 60
-	case reflect.TypeOf(int(0)):
-		return 60
-	}
-
-	return ret
+	return defaultNaturalCellWidth
 
 }
 

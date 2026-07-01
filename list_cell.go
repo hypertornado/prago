@@ -17,20 +17,17 @@ func (cell listCell) HasImages() bool {
 	return len(cell.Images) > 0
 }
 
-func getCellViewData(userData UserData, f *Field, value any) *listCell {
-	if f.fieldType.listCellDataSource != nil {
-		return f.fieldType.listCellDataSource(userData, f, value)
-	}
+func getCellViewData(userData UserData, field *Field, value any) *listCell {
+	return field.fieldType.listCellDataSource(userData, field, value)
+}
 
-	if f.fieldType.isRelation() {
-		return relationCellViewData(userData, f, value)
+func basicCellDataSource(fn func(userData UserData, field *Field, value any) string) func(ud UserData, field *Field, item any) *listCell {
+	return func(ud UserData, field *Field, item any) *listCell {
+		return &listCell{
+			Name:   fn(ud, field, item),
+			ItemID: field.id,
+		}
 	}
-
-	ret := &listCell{
-		Name:   getDefaultFieldStringer(f)(userData, f, value),
-		ItemID: f.id,
-	}
-	return ret
 }
 
 func textListDataSource(userData UserData, f *Field, value any) *listCell {
@@ -41,16 +38,14 @@ func markdownListDataSource(userData UserData, f *Field, value any) *listCell {
 	return &listCell{Name: filterMarkdown(value.(string)), ItemID: f.id}
 }
 
-func relationCellViewDataFetch(userData UserData, f *Field, value any) *listCell {
+func relationCellViewData(userData UserData, f *Field, value any) *listCell {
 	ret := &listCell{
 		Name: "",
-		//FetchURL: "/teest",
 	}
 
 	var urlData url.Values = map[string][]string{}
 	urlData.Add("resource_id", f.resource.id)
 	urlData.Add("field_id", f.id)
-	//urlData.Add("item_id", stat.id)
 
 	var ids string
 	intVal, ok := value.(int64)
@@ -69,40 +64,6 @@ func relationCellViewDataFetch(userData UserData, f *Field, value any) *listCell
 	urlData.Add("item_ids", ids)
 	ret.FetchURL = "/admin/api/_fetch_list_cell_relation?" + urlData.Encode()
 
-	return ret
-}
-
-func relationCellViewData(userData UserData, f *Field, value any) *listCell {
-
-	return relationCellViewDataFetch(userData, f, value)
-
-	var ids string
-
-	intVal, ok := value.(int64)
-	if ok {
-		ids = fmt.Sprintf("%d", intVal)
-	} else {
-		ids = value.(string)
-	}
-
-	previewData := f.relationPreview(userData, ids)
-	if previewData == nil {
-		return &listCell{}
-	}
-
-	var names []string
-	var images []string
-	for _, prev := range previewData {
-		if prev.Image != "" {
-			images = append(images, prev.ImageID)
-		}
-		names = append(names, prev.Name)
-	}
-
-	ret := &listCell{
-		Name:   strings.Join(names, ", "),
-		Images: images,
-	}
 	return ret
 }
 

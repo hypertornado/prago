@@ -23,6 +23,17 @@ type viewFieldContent struct {
 	Name string
 }
 
+func (vf *viewFieldContent) IsEmpty() bool {
+	if vf == nil {
+		return true
+	}
+	if vf.Name != "" {
+		return false
+	}
+	return true
+
+}
+
 func (resource *Resource) getBoxHeader(id int64, item any, request *Request) *boxHeader {
 	ret := &boxHeader{}
 	ret.DescriptionsBefore = []string{fmt.Sprintf("%s #%d", resource.singularName(request.Locale()), id)}
@@ -76,7 +87,7 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 
 		contentOLD = template.HTML(strings.Trim(string(contentOLD), " \n\t"))
 
-		if contentOLD == "" && viewContent == nil {
+		if contentOLD == "" && viewContent.IsEmpty() {
 			continue
 		}
 
@@ -116,41 +127,19 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 	return ret
 }
 
-func getDefaultFieldStringer(field *Field) func(userData UserData, field *Field, value any) string {
-	t := field.typ
-	if t == reflect.TypeOf(time.Now()) {
-		if field.tags["prago-type"] == "timestamp" || field.fieldClassName == "CreatedAt" || field.fieldClassName == "UpdatedAt" {
-			return timestampViewDataSource
-		}
-		return dateViewDataSource
-	}
-	switch t.Kind() {
-	case reflect.Bool:
-		return boolViewDataSource
-	case reflect.Int:
-		return numberViewDataSource
-	case reflect.Int64:
-		return numberViewDataSource
-	case reflect.Float64:
-		return floatViewDataSource
-	default:
-		return defaultViewDataSource
-	}
-}
-
-func defaultViewDataSource(userData UserData, field *Field, value any) string {
+func defaultStringer(userData UserData, field *Field, value any) string {
 	return fmt.Sprintf("%v", value)
 }
 
-func numberViewDataSource(userData UserData, field *Field, value any) string {
+func numberStringer(userData UserData, field *Field, value any) string {
 	return humanizeNumber(value.(int64))
 }
 
-func floatViewDataSource(userData UserData, f *Field, value any) string {
+func floatStringer(userData UserData, f *Field, value any) string {
 	return humanizeFloat(value.(float64), userData.Locale())
 }
 
-func dateViewDataSource(userData UserData, f *Field, value any) string {
+func dateStringer(userData UserData, f *Field, value any) string {
 	return messages.Timestamp(
 		userData.Locale(),
 		value.(time.Time),
@@ -158,7 +147,7 @@ func dateViewDataSource(userData UserData, f *Field, value any) string {
 	)
 }
 
-func timestampViewDataSource(userData UserData, field *Field, value any) string {
+func timeStringer(userData UserData, field *Field, value any) string {
 	return messages.Timestamp(
 		userData.Locale(),
 		value.(time.Time),
@@ -166,7 +155,7 @@ func timestampViewDataSource(userData UserData, field *Field, value any) string 
 	)
 }
 
-func boolViewDataSource(userData UserData, field *Field, value any) string {
+func boolStringer(userData UserData, field *Field, value any) string {
 	if value.(bool) {
 		return messages.Get(userData.Locale(), "yes")
 	}

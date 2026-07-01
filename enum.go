@@ -68,6 +68,7 @@ func (app *App) AddEnum(name string, items []*Enum) {
 	}
 
 	app.addFieldType(name, &fieldType{
+		dbFieldDescription: "varchar(255)",
 		getViewFieldContent: func(request *Request, val any) *viewFieldContent {
 			strVal := val.(string)
 			ret := &viewFieldContent{

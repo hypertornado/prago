@@ -53,13 +53,15 @@ func (resource *Resource) bindData(item any, request *Request, params url.Values
 				if urlValue == "" {
 					val.Set(reflect.ValueOf(time.Time{}))
 				}
-				if field.tags["prago-type"] == "timestamp" {
+
+				if field.typeID() == "time" {
 					tm, err := time.Parse("2006-01-02 15:04", urlValue)
 					if err == nil {
 						val.Set(reflect.ValueOf(tm))
 						continue
 					}
-				} else {
+				}
+				if field.typeID() == "date" {
 					tm, err := time.Parse("2006-01-02", urlValue)
 					if err == nil {
 						val.Set(reflect.ValueOf(tm))

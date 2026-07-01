@@ -158,7 +158,9 @@ func (resource *Resource) getListContent(request *Request, params url.Values) (r
 			if columnsMap[v.ColumnName] {
 				if resource.Field(v.Name) != nil {
 					fieldVal := itemVal.FieldByName(v.Name)
-					row.Items = append(row.Items, getCellViewData(request, resource.Field(v.ColumnName), fieldVal.Interface()))
+					field := resource.Field(v.ColumnName)
+					cellData := field.fieldType.listCellDataSource(request, field, fieldVal.Interface())
+					row.Items = append(row.Items, cellData)
 				} else {
 					cell := &listCell{}
 					for _, stat := range resource.itemStats {
