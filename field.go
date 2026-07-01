@@ -329,130 +329,78 @@ func (field *Field) getIcon() string {
 	if field.tags["prago-icon"] != "" {
 		return field.tags["prago-icon"]
 	}
-
-	/*if field.fieldType.fieldTypeIcon != "" {
-		return field.fieldType.fieldTypeIcon
-	}*/
-
 	if field.fieldType.isRelation() {
 		if field.relatedResource.icon != "" {
 			return field.relatedResource.icon
 		}
 	}
-
 	return ""
-
-	/*if field.id == "id" {
-		return "glyphicons-basic-740-hash.svg"
-	}
-
-	if field.id == "createdat" || field.id == "updatedat" {
-		return iconDateTime
-	}
-
-	if field.typ.Kind() == reflect.Bool {
-		return iconCheckbox
-	}
-
-	if field.typ.Kind() == reflect.String {
-		return iconText
-	}
-
-	if field.typ.Kind() == reflect.Int || field.typ.Kind() == reflect.Int64 || field.typ.Kind() == reflect.Float64 {
-		return iconNumber
-	}
-
-	if field.typ == reflect.TypeOf(time.Now()) {
-		return iconDate
-	}
-	return ""*/
 }
 
-func getDefaultStringer(t reflect.Type) func(any) string {
+/*func getDefaultStringer(t reflect.Type) func(any) string {
 	if reflect.TypeOf(time.Now()) == t {
-		return func(i any) string {
-			tm := i.(time.Time)
-			if tm.IsZero() {
-				return ""
-			}
-			return tm.Format("2006-01-02")
-		}
+		return stringerDate
 	}
 
 	switch t.Kind() {
 	case reflect.String:
-		return func(i any) string {
-			return i.(string)
-		}
+		return stringerString
 	case reflect.Int64:
-		return func(i any) string {
-			return fmt.Sprintf("%d", i.(int64))
-		}
+		return stringerInt64
 	case reflect.Float64:
-		return func(i any) string {
-			return fmt.Sprintf("%f", i.(float64))
-		}
+		return stringerFloat64
 	case reflect.Bool:
-		return func(i any) string {
-			if i.(bool) {
-				return "on"
-			}
-			return ""
-		}
+		return stringerBool
 	}
 	panic("unknown stringer for " + t.String())
+}*/
+
+func stringerString(in any) string {
+	return in.(string)
 }
 
-func getDefaultFormTemplate(t reflect.Type) string {
-	if t == reflect.TypeOf(time.Now()) {
-		return "form_input_date"
-	}
+func stringerInt64(in any) string {
+	return fmt.Sprintf("%d", in.(int64))
+}
 
-	switch t.Kind() {
-	case reflect.String:
-		return "form_input"
-	case reflect.Bool:
-		return "form_input_checkbox"
-	case reflect.Int64:
-		return "form_input_int"
-	case reflect.Float64:
-		return "form_input_float"
+func stringerFloat64(in any) string {
+	return fmt.Sprintf("%f", in.(float64))
+}
+
+func stringerBool(in any) string {
+	if in.(bool) {
+		return "on"
 	}
-	panic("unknown default form for " + t.String())
+	return ""
+}
+
+func stringerDate(in any) string {
+	tm := in.(time.Time)
+	if tm.IsZero() {
+		return ""
+	}
+	return tm.Format("2006-01-02")
+}
+
+func stringerDateTime(in any) string {
+	tm := in.(time.Time)
+	if tm.IsZero() {
+		return ""
+	}
+	return tm.Format("2006-01-02 15:04")
 }
 
 func (field *Field) initFieldType() {
 	fieldTypes := field.resource.app.fieldTypes
 	fieldTypeName := field.tags["prago-type"]
 
-	//fmt.Println("XXX", field.typ.Name())
+	if fieldTypeName == "" {
+		fieldTypeName = field.typ.Name()
+	}
 
 	ret, found := fieldTypes[fieldTypeName]
-	if !found && fieldTypeName != "" {
+	if !found {
 		panic(fmt.Sprintf("Field type '%s' not found", fieldTypeName))
-	}
-
-	if ret == nil {
-		ret = &fieldType{}
-	}
-
-	if ret.viewTemplate == "" {
-		ret.viewTemplate = getDefaultViewTemplate(field.typ)
-	}
-	if ret.viewDataSource == nil {
-		ret.viewDataSource = getDefaultViewDataSource(field)
-	}
-
-	if ret.formTemplate == "" {
-		ret.formTemplate = getDefaultFormTemplate(field.typ)
-	}
-
-	if ret.ft_formStringer == nil {
-		ret.ft_formStringer = getDefaultStringer(field.typ)
-	}
-
-	if ret.formTemplate == "form_input_checkbox" {
-		ret.formHideLabel = true
 	}
 
 	field.fieldType = ret

@@ -99,6 +99,7 @@ func (app *App) AddEnum(name string, items []*Enum) {
 		formDataSource: func(f *Field, userData UserData, value string) any {
 			return enumsToFormOptions(items, userData)
 		},
+		formValueStringer: stringerString,
 
 		listCellDataSource: func(userData UserData, f *Field, value any) *listCell {
 			str := value.(string)

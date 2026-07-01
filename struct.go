@@ -46,7 +46,7 @@ func (resource *Resource) getItemStringEditableValues(item any, request *Request
 		reflect.ValueOf(&ifaceVal).Elem().Set(
 			itemVal.Field(i),
 		)
-		strVal := field.fieldType.ft_formStringer(ifaceVal)
+		strVal := field.fieldType.formValueStringer(ifaceVal)
 		ret[field.id] = strVal
 	}
 	return ret

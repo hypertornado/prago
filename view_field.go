@@ -116,23 +116,13 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 	return ret
 }
 
-func getDefaultViewTemplate(_ reflect.Type) string {
-	return "view_text"
-}
-
-func getDefaultViewDataSource(_ *Field) func(request *Request, f *Field, value any) any {
-	return func(request *Request, f *Field, value any) any {
-		return getDefaultFieldStringer(f)(request, f, value)
-	}
-}
-
-func getDefaultFieldStringer(field *Field) func(userData UserData, f *Field, value any) string {
+func getDefaultFieldStringer(field *Field) func(userData UserData, field *Field, value any) string {
 	t := field.typ
 	if t == reflect.TypeOf(time.Now()) {
 		if field.tags["prago-type"] == "timestamp" || field.fieldClassName == "CreatedAt" || field.fieldClassName == "UpdatedAt" {
 			return timestampViewDataSource
 		}
-		return timeViewDataSource
+		return dateViewDataSource
 	}
 	switch t.Kind() {
 	case reflect.Bool:
@@ -153,20 +143,14 @@ func defaultViewDataSource(userData UserData, field *Field, value any) string {
 }
 
 func numberViewDataSource(userData UserData, field *Field, value any) string {
-	switch field.typ.Kind() {
-	case reflect.Int:
-		return humanizeNumber(int64(value.(int)))
-	case reflect.Int64:
-		return humanizeNumber(value.(int64))
-	}
-	panic("not integer type")
+	return humanizeNumber(value.(int64))
 }
 
 func floatViewDataSource(userData UserData, f *Field, value any) string {
 	return humanizeFloat(value.(float64), userData.Locale())
 }
 
-func timeViewDataSource(userData UserData, f *Field, value any) string {
+func dateViewDataSource(userData UserData, f *Field, value any) string {
 	return messages.Timestamp(
 		userData.Locale(),
 		value.(time.Time),
@@ -187,4 +171,11 @@ func boolViewDataSource(userData UserData, field *Field, value any) string {
 		return messages.Get(userData.Locale(), "yes")
 	}
 	return ""
+}
+
+func stringerToDataSource(fn func(userData UserData, field *Field, value any) string) func(request *Request, field *Field, value any) any {
+	return func(userData *Request, field *Field, value any) any {
+		retStr := fn(userData, field, value)
+		return any(retStr)
+	}
 }

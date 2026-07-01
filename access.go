@@ -73,8 +73,12 @@ func (app *App) createRoleFieldType() *fieldType {
 		return getFormOptions(vals)
 	}
 	return &fieldType{
-		formTemplate:   "form_input_select",
-		formDataSource: formDataSource,
+		viewTemplate:   "view_text",
+		viewDataSource: stringerToDataSource(defaultViewDataSource),
+
+		formTemplate:      "form_input_select",
+		formDataSource:    formDataSource,
+		formValueStringer: stringerString,
 
 		filterLayoutTemplate: "filter_layout_select",
 		filterLayoutDataSource: func(f *Field, ud UserData) any {
