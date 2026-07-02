@@ -1,9 +1,9 @@
 package prago
 
 const (
-	styleAccented = "accented"
-	styleCreate   = "create"
-	styleDestroy  = "destroy"
+	StyleAccented = "accented"
+	StyleCreate   = "create"
+	StyleDestroy  = "destroy"
 
 	blackColor = "444444"
 	redColor   = "cb2431"
@@ -11,15 +11,15 @@ const (
 )
 
 func getStyleColor(style string) string {
-	if style == styleAccented {
+	if style == StyleAccented {
 		return "base"
 	}
 
-	if style == styleCreate {
+	if style == StyleCreate {
 		return greenColor
 	}
 
-	if style == styleDestroy {
+	if style == StyleDestroy {
 		return redColor
 	}
 

@@ -15,12 +15,13 @@ import (
 func (resource *Resource) initDefaultResourceAPIs() {
 	resource.api("list").Handler(
 		func(request *Request) {
-			request.WriteJSON(200,
-				resource.getListContentJSON(
-					request,
-					request.Request().URL.Query(),
-				),
-			)
+			listContentData, err := resource.getListContent(request, request.Request().URL.Query())
+			must(err)
+			request.Response().Header().Set("Prago-List-Message", url.PathEscape(listContentData.Message))
+			request.Response().Header().Set("Prago-List-Total-Pages", fmt.Sprintf("%d", listContentData.Pagination.TotalPages))
+			request.Response().Header().Set("Prago-List-Selected-Page", fmt.Sprintf("%d", listContentData.Pagination.SelectedPage))
+
+			request.WriteHTML(200, resource.app.adminTemplates, "list_cells", listContentData)
 		},
 	)
 

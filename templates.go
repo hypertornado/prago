@@ -3,13 +3,12 @@ package prago
 import (
 	"bytes"
 	"embed"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
 	"io/fs"
 	"sync"
-
-	"github.com/golang-commonmark/markdown"
 )
 
 //TODO: use https://github.com/yuin/goldmark
@@ -38,10 +37,6 @@ func (app *App) initTemplates() {
 
 	app.adminTemplates.Function("PragoCSS", func(data string) template.CSS {
 		return template.CSS(data)
-	})
-
-	app.adminTemplates.Function("PragoMarkdown", func(text string) template.HTML {
-		return template.HTML(markdown.New(markdown.Breaks(true)).RenderToString([]byte(text)))
 	})
 
 	app.adminTemplates.Function("PragoHTML", func(text string) template.HTML {
@@ -90,6 +85,12 @@ func (app *App) initTemplates() {
 
 	app.adminTemplates.Function("PragoLightness", func() string {
 		return fmt.Sprintf("%v%%", app.lightness*100)
+	})
+
+	app.adminTemplates.Function("PragoJSON", func(in any) string {
+		data, err := json.Marshal(in)
+		must(err)
+		return string(data)
 	})
 
 	app.adminTemplates.Function("PragoStyleColor", func(style string) string {

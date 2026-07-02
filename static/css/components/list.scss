@@ -112,8 +112,15 @@
   text-overflow: ellipsis;
 }
 
+.list_cell-create {
+  background-color: $greenActive;
+}
+
+.list_cell-destroy {
+  background-color: $redActive;
+}
+
 .list_cell[data-fetch-url]:not(.list_cell-fetched) {
-    //background: red;
     background: linear-gradient(
     90deg,
     hsla(214, 50%, 50%, .0) 0%,
@@ -134,6 +141,13 @@
   width: 100%;
   text-overflow: ellipsis;
   overflow: hidden;
+}
+
+.list_cell_icon {
+  aspect-ratio: 1;
+  width: 16px;
+  margin-right: 2px;
+
 }
 
 .list_cell:first-of-type {

@@ -16,71 +16,60 @@
       </div>
     {{end}}
     {{if $item.ViewContent}}
-      <div class="view_content">
-        {{if $item.ViewContent.Name}}
-          <div class="view_content_name">{{$item.ViewContent.Name}}</div>
-        {{end}}
-      </div>
-    {{end}}
-    {{if $item.Content}}
-      <div class="view_content_html">
-        {{- $item.Content -}}
-      </div>
+      {{template "item_view_content" $item.ViewContent}}
     {{end}}
     </div>
   {{end}}
   </div>
 {{end}}
 
-{{define "view_text"}}
-  {{- if . -}}
-    {{- . -}}
-  {{- end -}}
-{{end}}
-
-{{define "view_textarea"}}
-  {{- if . -}}
-    <span>{{- . -}}</span>
-  {{- end -}}
-{{end}}
-
-{{define "view_markdown"}}
-  {{- if . -}}
-    {{- PragoMarkdown . -}}
-  {{- end -}}
-{{end}}
-
-{{define "view_cdn_file"}}
-  <div class="fileview">
-  {{if .OriginalURL}}
-      <a href="{{.OriginalURL}}" class="fileview_preview" style="background-image: url('{{.GiantURL}}');"></a>
+{{define "item_view_content"}}
+<div class="view_content{{if .Style}} view_content-{{.Style}}{{end}}">
+  {{if .HasNameOrIcon}}
+    <div class="view_content_header">
+      <div class="view_content_header_inner">
+        {{if .Icon}}<img class="view_content_icon" src="/admin/api/icons?file={{.Icon}}&color={{.IconColor}}">{{end}}
+        {{if .Name}}<div class="view_content_name">{{.Name}}</div>{{end}}
+      </div>
+    </div>
   {{end}}
-  </div>
-{{end}}
-
-{{define "view_image"}}
-  {{if .}}
-  <div class="imageview" data-images="{{.}}">
-    <progress class="progress" value="" max=""></progress>
-  </div>
+  {{if .CDNFileData}}
+    <div class="fileview">
+      {{if .CDNFileData.OriginalURL}}
+          <a href="{{.CDNFileData.OriginalURL}}" class="fileview_preview" style="background-image: url('{{.CDNFileData.GiantURL}}');"></a>
+      {{end}}
+    </div>
   {{end}}
-{{end}}
 
-{{define "view_video"}}
-  {{if .}}
-  <div class="videoview" data-videos="{{.}}">
-    <video class="videoview_video hidden"></video>
-    <progress class="progress" value="" max=""></progress>
-  </div>
+  {{if .ContentHTML}}
+    <div class="view_content_html">
+      {{.ContentHTML}}
+    </div>
   {{end}}
-{{end}}
 
-{{define "view_place"}}
-  {{if .}}
-  <div class="item_view_place" data-value="{{.}}">
-    <progress class="progress" value="" max=""></progress>
-  </div>
+  {{if .Previews}}
+    {{template "view_relation" .Previews}}
   {{end}}
+  {{if .Images}}
+    <div class="imageview" data-images="{{PragoJSON .Images}}">
+      <progress class="progress" value="" max=""></progress>
+    </div>
+  {{end}}
+
+  {{if .PlaceData}}
+    <div class="item_view_place" data-value="{{.PlaceData}}">
+      <progress class="progress" value="" max=""></progress>
+    </div>
+  {{end}}
+
+  {{if .VideoURL}}
+    <div class="videoview" data-videos="{{.VideoURL}}">
+      <video class="videoview_video hidden"></video>
+      <progress class="progress" value="" max=""></progress>
+    </div>
+  {{end}}
+
+</div>
 {{end}}
 
 {{define "view_relation"}}

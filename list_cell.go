@@ -7,8 +7,13 @@ import (
 )
 
 type listCell struct {
-	Images   []string
-	Name     string
+	Images []string
+	Name   string
+
+	Icon  string
+	Color string
+	Style string
+
 	ItemID   string
 	FetchURL string
 }
@@ -17,8 +22,11 @@ func (cell listCell) HasImages() bool {
 	return len(cell.Images) > 0
 }
 
-func getCellViewData(userData UserData, field *Field, value any) *listCell {
-	return field.fieldType.listCellDataSource(userData, field, value)
+func (cell *listCell) IconColor() string {
+	if cell.Color != "" {
+		return cell.Color
+	}
+	return getStyleColor(cell.Style)
 }
 
 func basicCellDataSource(fn func(userData UserData, field *Field, value any) string) func(ud UserData, field *Field, item any) *listCell {

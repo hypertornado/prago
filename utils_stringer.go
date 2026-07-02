@@ -17,13 +17,6 @@ func stringerFloat64(in any) string {
 	return fmt.Sprintf("%f", in.(float64))
 }
 
-func stringerBool(in any) string {
-	if in.(bool) {
-		return "on"
-	}
-	return ""
-}
-
 func stringerDate(in any) string {
 	tm := in.(time.Time)
 	if tm.IsZero() {

@@ -28,16 +28,16 @@ func (btn Button) GetTitle() string {
 }
 
 func (btn *Button) StyleAccented() *Button {
-	btn.Style = styleAccented
+	btn.Style = StyleAccented
 	return btn
 }
 
 func (btn *Button) StyleCreate() *Button {
-	btn.Style = styleCreate
+	btn.Style = StyleCreate
 	return btn
 }
 
 func (btn *Button) StyleDestroy() *Button {
-	btn.Style = styleDestroy
+	btn.Style = StyleDestroy
 	return btn
 }

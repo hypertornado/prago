@@ -19,7 +19,14 @@
       {{template "list_placeholder"}}
     </div>
   </div>
-  <div class="list_footer"></div>
+  <div class="list_footer">
+    <div class="list_message"></div>
+    <div class="pagination" {{if false}}data-total="{{.Pagination.TotalPages}}" data-selected="{{.Pagination.SelectedPage}}"{{end}}></div>
+    <button class="btn list_settings_btn2">
+      <img class="btn_icon" src="/admin/api/icons?file=glyphicons-basic-137-cogwheel.svg&color={{PragoBlackColor}}">
+      {{PragoMessage .Language "options"}}
+    </button>
+  </div>
 {{end}}
 
 {{define "list_header"}}

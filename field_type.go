@@ -2,15 +2,15 @@ package prago
 
 import (
 	"fmt"
+	"html/template"
+
+	"github.com/golang-commonmark/markdown"
 )
 
-// FieldType defines type of field
 type fieldType struct {
 	id string
 
-	getViewFieldContent func(request *Request, val any) *viewFieldContent
-	viewTemplate        string
-	viewDataSource      func(*Request, *Field, any) any
+	getViewFieldContent func(request *Request, field *Field, value any) *viewFieldContent
 
 	dbFieldDescription string
 
@@ -20,7 +20,7 @@ type fieldType struct {
 
 	formTemplate      string
 	formDataSource    func(*Field, UserData, string) any
-	formValueStringer func(any) string
+	formValueStringer func(value any) string
 
 	listCellDataSource func(ud UserData, field *Field, item any) *listCell
 
@@ -45,13 +45,7 @@ func (app *App) addFieldType(id string, fieldType *fieldType) {
 	}
 
 	if fieldType.getViewFieldContent == nil {
-		if fieldType.viewTemplate == "" {
-			panic(fmt.Sprintf("field type '%s' has empty viewTemplate", id))
-		}
-
-		if fieldType.viewDataSource == nil {
-			panic(fmt.Sprintf("field type '%s' has empty viewDataSource", id))
-		}
+		panic(fmt.Sprintf("field type '%s' has empty getViewFieldContent", id))
 	}
 
 	if fieldType.formTemplate == "" {
@@ -89,8 +83,8 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("string", &fieldType{
 		dbFieldDescription: "varchar(255)",
-		viewTemplate:       "view_text",
-		viewDataSource:     stringerToDataSource(defaultStringer),
+
+		getViewFieldContent: stringerToViewFieldContent(defaultStringer),
 
 		formTemplate:      "form_input",
 		formValueStringer: stringerString,
@@ -99,8 +93,16 @@ func (app *App) initDefaultFieldTypes() {
 	})
 	app.addFieldType("int64", &fieldType{
 		dbFieldDescription: "bigint(20)",
-		viewTemplate:       "view_text",
-		viewDataSource:     stringerToDataSource(numberStringer),
+
+		getViewFieldContent: func(request *Request, field *Field, val any) *viewFieldContent {
+			intVal := val.(int64)
+			if intVal == 0 {
+				return nil
+			}
+			return &viewFieldContent{
+				Name: humanizeNumber(intVal),
+			}
+		},
 
 		formTemplate:      "form_input_int",
 		formValueStringer: stringerInt64,
@@ -111,8 +113,16 @@ func (app *App) initDefaultFieldTypes() {
 	})
 	app.addFieldType("float64", &fieldType{
 		dbFieldDescription: "double",
-		viewTemplate:       "view_text",
-		viewDataSource:     stringerToDataSource(floatStringer),
+
+		getViewFieldContent: func(request *Request, field *Field, val any) *viewFieldContent {
+			floatVal := val.(float64)
+			if floatVal == 0 {
+				return nil
+			}
+			return &viewFieldContent{
+				Name: humanizeFloat(floatVal, request.Locale()),
+			}
+		},
 
 		formTemplate:      "form_input_float",
 		formValueStringer: stringerFloat64,
@@ -123,23 +133,47 @@ func (app *App) initDefaultFieldTypes() {
 	})
 	app.addFieldType("bool", &fieldType{
 		dbFieldDescription: "bool NOT NULL",
-		viewTemplate:       "view_text",
-		viewDataSource:     stringerToDataSource(boolStringer),
+		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+			if !value.(bool) {
+				return nil
+			}
 
-		formTemplate:      "form_input_checkbox",
-		formValueStringer: stringerBool,
+			return &viewFieldContent{
+				Name:  messages.Get(request.Locale(), "yes_plain"),
+				Icon:  "glyphicons-basic-153-square-checkbox.svg",
+				Style: "create",
+			}
+		},
 
-		listCellDataSource: basicCellDataSource(boolStringer),
+		formTemplate: "form_input_checkbox",
+		formValueStringer: func(value any) string {
+			if value.(bool) {
+				return "on"
+			}
+			return ""
+
+		},
+
+		listCellDataSource: func(ud UserData, field *Field, item any) *listCell {
+			ret := &listCell{}
+
+			if item.(bool) {
+				ret.Style = "create"
+				ret.Icon = "glyphicons-basic-153-square-checkbox.svg"
+			}
+
+			return ret
+
+		},
 
 		formHideLabel: true,
 
-		naturalCellWidth: 60,
+		naturalCellWidth: 20,
 	})
 
 	app.addFieldType("text", &fieldType{
-		dbFieldDescription: "text",
-		viewTemplate:       "view_textarea",
-		viewDataSource:     stringerToDataSource(defaultStringer),
+		dbFieldDescription:  "text",
+		getViewFieldContent: stringerToViewFieldContent(defaultStringer),
 
 		formTemplate:      "form_input_textarea",
 		formValueStringer: stringerString,
@@ -148,8 +182,11 @@ func (app *App) initDefaultFieldTypes() {
 	})
 	app.addFieldType("order", &fieldType{
 		dbFieldDescription: "bigint(20)",
-		viewTemplate:       "view_text",
-		viewDataSource:     stringerToDataSource(numberStringer),
+		getViewFieldContent: func(request *Request, field *Field, val any) *viewFieldContent {
+			return &viewFieldContent{
+				Name: humanizeNumber(val.(int64)) + ".",
+			}
+		},
 
 		formValueStringer: stringerInt64,
 
@@ -160,8 +197,11 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("cdnfile", &fieldType{
 		dbFieldDescription: "varchar(255)",
-		viewTemplate:       "view_cdn_file",
-		viewDataSource:     cdnViewDataSource,
+		getViewFieldContent: func(request *Request, field *Field, val any) *viewFieldContent {
+			return &viewFieldContent{
+				CDNFileData: getCDNViewData(app, val.(string)),
+			}
+		},
 		formTemplate:       "form_input_cdnfile",
 		listCellDataSource: imageCellViewData,
 
@@ -170,12 +210,12 @@ func (app *App) initDefaultFieldTypes() {
 	})
 
 	app.addFieldType("file", &fieldType{
-		dbFieldDescription: "varchar(255)",
-		viewTemplate:       "view_image",
-		viewDataSource:     fileViewDataSource,
-		formTemplate:       "form_input_image",
-		formDataSource:     imageFormDataSource(""),
-		formValueStringer:  stringerString,
+		dbFieldDescription:  "varchar(255)",
+		getViewFieldContent: imagePickerViewFieldContent,
+
+		formTemplate:      "form_input_image",
+		formDataSource:    imageFormDataSource(""),
+		formValueStringer: stringerString,
 
 		listCellDataSource: imageCellViewData,
 
@@ -186,8 +226,9 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("image", &fieldType{
 		dbFieldDescription: "text",
-		viewTemplate:       "view_image",
-		viewDataSource:     fileViewDataSource,
+
+		getViewFieldContent: imagePickerViewFieldContent,
+
 		formTemplate:       "form_input_image",
 		formDataSource:     imageFormDataSource(".jpg,.jpeg,.png"),
 		formValueStringer:  stringerString,
@@ -200,8 +241,16 @@ func (app *App) initDefaultFieldTypes() {
 	})
 	app.addFieldType("video", &fieldType{
 		dbFieldDescription: "varchar(255)",
-		viewTemplate:       "view_video",
-		viewDataSource:     videoViewDataSource,
+
+		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+			videoURL := filesCDN.GetVideoURL(value.(string))
+			if videoURL == "" {
+				return nil
+			}
+			return &viewFieldContent{
+				VideoURL: videoURL,
+			}
+		},
 
 		formTemplate:      "form_input",
 		formValueStringer: stringerString,
@@ -213,18 +262,36 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("markdown", &fieldType{
 		dbFieldDescription: "text",
-		viewTemplate:       "view_markdown",
-		viewDataSource:     markdownViewDataSource,
-		formTemplate:       "form_input_markdown",
-		formValueStringer:  stringerString,
+
+		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+			content := template.HTML(markdown.New(markdown.Breaks(true), markdown.HTML(true), markdown.Tables(true)).RenderToString([]byte(value.(string))))
+			if content == "" {
+				return nil
+			}
+
+			return &viewFieldContent{
+				ContentHTML: template.HTML(content),
+			}
+		},
+		formTemplate:      "form_input_markdown",
+		formValueStringer: stringerString,
 
 		listCellDataSource: markdownListDataSource,
 	})
 	app.addFieldType("place", &fieldType{
 		dbFieldDescription: "varchar(255)",
-		viewTemplate:       "view_place",
-		viewDataSource:     stringerToDataSource(defaultStringer),
-		formValueStringer:  stringerString,
+
+		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+			placeData := value.(string)
+			if placeData == "" {
+				return nil
+			}
+			return &viewFieldContent{
+				PlaceData: placeData,
+			}
+		},
+
+		formValueStringer: stringerString,
 
 		listCellDataSource: basicCellDataSource(defaultStringer),
 
@@ -233,11 +300,17 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("relation", &fieldType{
 		dbFieldDescription: "bigint(20)",
-		viewTemplate:       "view_relation",
-		viewDataSource: func(request *Request, f *Field, value any) any {
+		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
 			valInt := value.(int64)
-			return f.relationPreview(request, fmt.Sprintf("%d", valInt))
+			previews := field.relationPreview(request, fmt.Sprintf("%d", valInt))
+			if len(previews) == 0 {
+				return nil
+			}
+			return &viewFieldContent{
+				Previews: previews,
+			}
 		},
+
 		formTemplate: "form_input_relation",
 		formDataSource: func(f *Field, userData UserData, value string) any {
 			return relationFormDataSource{
@@ -256,10 +329,16 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("multirelation", &fieldType{
 		dbFieldDescription: "varchar(255)",
-		viewTemplate:       "view_relation",
-		viewDataSource: func(request *Request, f *Field, value any) any {
-			return f.relationPreview(request, value.(string))
+		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+			previews := field.relationPreview(request, value.(string))
+			if len(previews) == 0 {
+				return nil
+			}
+			return &viewFieldContent{
+				Previews: previews,
+			}
 		},
+
 		formTemplate: "form_input_relation",
 		formDataSource: func(f *Field, userData UserData, value string) any {
 			return relationFormDataSource{
@@ -276,9 +355,8 @@ func (app *App) initDefaultFieldTypes() {
 	})
 
 	app.addFieldType("date", &fieldType{
-		dbFieldDescription: "date",
-		viewTemplate:       "view_text",
-		viewDataSource:     stringerToDataSource(dateStringer),
+		dbFieldDescription:  "date",
+		getViewFieldContent: stringerToViewFieldContent(dateStringer),
 
 		formTemplate:      "form_input_date",
 		formValueStringer: stringerDate,
@@ -288,9 +366,8 @@ func (app *App) initDefaultFieldTypes() {
 	})
 
 	app.addFieldType("time", &fieldType{
-		dbFieldDescription: "datetime",
-		viewTemplate:       "view_text",
-		viewDataSource:     stringerToDataSource(timeStringer),
+		dbFieldDescription:  "datetime",
+		getViewFieldContent: stringerToViewFieldContent(timeStringer),
 
 		formTemplate:      "form_input_timestamp",
 		formValueStringer: stringerDateTime,
@@ -306,8 +383,4 @@ func boolFilterLayoutDataSource(field *Field, userData UserData) any {
 		{"true", messages.Get(userData.Locale(), "yes")},
 		{"false", messages.Get(userData.Locale(), "no")},
 	}
-}
-
-func markdownViewDataSource(request *Request, f *Field, value any) any {
-	return filterMarkdown(value.(string))
 }

@@ -73,9 +73,8 @@ func (app *App) createRoleFieldType() *fieldType {
 		return getFormOptions(vals)
 	}
 	return &fieldType{
-		dbFieldDescription: "varchar(255)",
-		viewTemplate:       "view_text",
-		viewDataSource:     stringerToDataSource(defaultStringer),
+		dbFieldDescription:  "varchar(255)",
+		getViewFieldContent: stringerToViewFieldContent(defaultStringer),
 
 		formTemplate:      "form_input_select",
 		formDataSource:    formDataSource,

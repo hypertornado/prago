@@ -86,8 +86,11 @@ func (resource *Resource) initDefaultResourceActions() {
 		},
 		func(_ any, vc FormValidation, request *Request) {
 			params := request.Params()
-			//fix browsers not sending empry checkbox values
-			resource.addBoleanFalseValuesAsEmpty(params)
+
+			fieldsMap := getFieldsFilterMap(request.Request().PostForm.Get("_fields"))
+
+			//fix browsers not sending empty checkbox values
+			resource.addBoleanFalseValuesAsEmpty(params, fieldsMap)
 			item, validation := resource.editItemWithLogAndValues(request, params)
 
 			if validation.Valid() {
@@ -253,9 +256,12 @@ func (resource *Resource) editItemWithLogAndValues(request *Request, values url.
 	return item, itemValidation
 }
 
-func (resource *Resource) addBoleanFalseValuesAsEmpty(values url.Values) {
+func (resource *Resource) addBoleanFalseValuesAsEmpty(values url.Values, fieldsMap map[string]bool) {
 	for _, field := range resource.fields {
-		if field.typ.Kind() == reflect.Bool && !values.Has(field.id) {
+		if fieldsMap != nil && !fieldsMap[field.id] {
+			continue
+		}
+		if field.typeID() == "bool" && !values.Has(field.id) {
 			values.Set(field.id, "")
 		}
 	}

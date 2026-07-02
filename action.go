@@ -175,17 +175,17 @@ func (action *Action) setStyle(styleID string) {
 }
 
 func (action *Action) StyleAccented() *Action {
-	action.setStyle(styleAccented)
+	action.setStyle(StyleAccented)
 	return action
 }
 
 func (action *Action) StyleCreate() *Action {
-	action.setStyle(styleCreate)
+	action.setStyle(StyleCreate)
 	return action
 }
 
 func (action *Action) StyleDestroy() *Action {
-	action.setStyle(styleDestroy)
+	action.setStyle(StyleDestroy)
 	return action
 }
 

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"reflect"
-	"strings"
 	"time"
 )
 
@@ -14,24 +13,57 @@ type viewField struct {
 
 	ViewContent *viewFieldContent
 
-	Content    template.HTML
+	//Content    template.HTML
 	EditAction template.JS
 	EditName   string
 }
 
 type viewFieldContent struct {
+	Empty bool
+
+	Icon string
 	Name string
+
+	Color string
+	Style string
+
+	ContentHTML template.HTML
+
+	Previews    []*Preview
+	CDNFileData *cdnFileData
+
+	Images *ImagePickerResponse
+
+	PlaceData string
+
+	VideoURL string
+}
+
+func (vfc *viewFieldContent) HasNameOrIcon() bool {
+	if vfc.Name != "" {
+		return true
+	}
+	if vfc.Icon != "" {
+		return true
+	}
+	return false
+}
+
+func (vfc *viewFieldContent) IconColor() string {
+	if vfc.Color != "" {
+		return vfc.Color
+	}
+	return getStyleColor(vfc.Style)
 }
 
 func (vf *viewFieldContent) IsEmpty() bool {
 	if vf == nil {
 		return true
 	}
-	if vf.Name != "" {
-		return false
+	if vf.Empty {
+		return true
 	}
-	return true
-
+	return false
 }
 
 func (resource *Resource) getBoxHeader(id int64, item any, request *Request) *boxHeader {
@@ -66,28 +98,14 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 			editURL = resource.getURL(fmt.Sprintf("%d/edit?_focus=%s&_fields=%s", id, field.id, field.id))
 		}
 
-		var contentOLD template.HTML
-
 		var viewContent *viewFieldContent
 		if field.fieldType.getViewFieldContent != nil {
-			viewContent = field.fieldType.getViewFieldContent(request, ifaceVal)
+			viewContent = field.fieldType.getViewFieldContent(request, field, ifaceVal)
 		} else {
-			contentOLD = resource.app.adminTemplates.ExecuteToHTML(
-				field.fieldType.viewTemplate,
-				field.fieldType.viewDataSource(request, field, ifaceVal),
-			)
+
 		}
 
-		kind := field.typ.Kind()
-		if kind == reflect.Float64 || kind == reflect.Int64 || kind == reflect.Int {
-			if contentOLD == "0" {
-				contentOLD = ""
-			}
-		}
-
-		contentOLD = template.HTML(strings.Trim(string(contentOLD), " \n\t"))
-
-		if contentOLD == "" && viewContent.IsEmpty() {
+		if viewContent.IsEmpty() {
 			continue
 		}
 
@@ -97,8 +115,8 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 			Icon:        icon,
 			Name:        field.name(request.Locale()),
 			ViewContent: viewContent,
-			Content:     contentOLD,
-			EditName:    fmt.Sprintf("Upravit položku „%s“", field.name(request.Locale())),
+			//Content:     contentOLD,
+			EditName: fmt.Sprintf("Upravit položku „%s“", field.name(request.Locale())),
 		}
 
 		if editURL != "" {
@@ -118,8 +136,10 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 		ret = append(
 			ret,
 			viewField{
-				Name:    v.Name(request.Locale()),
-				Content: template.HTML(v.Handler(item)),
+				Name: v.Name(request.Locale()),
+				ViewContent: &viewFieldContent{
+					ContentHTML: template.HTML(v.Handler(item)),
+				},
 			},
 		)
 	}
@@ -155,16 +175,16 @@ func timeStringer(userData UserData, field *Field, value any) string {
 	)
 }
 
-func boolStringer(userData UserData, field *Field, value any) string {
-	if value.(bool) {
-		return messages.Get(userData.Locale(), "yes")
-	}
-	return ""
-}
-
-func stringerToDataSource(fn func(userData UserData, field *Field, value any) string) func(request *Request, field *Field, value any) any {
-	return func(userData *Request, field *Field, value any) any {
-		retStr := fn(userData, field, value)
-		return any(retStr)
+func stringerToViewFieldContent(fn func(userData UserData, field *Field, value any) string) func(request *Request, field *Field, val any) *viewFieldContent {
+	return func(request *Request, field *Field, val any) *viewFieldContent {
+		name := fn(request, field, val)
+		var empty bool
+		if name == "" {
+			empty = true
+		}
+		return &viewFieldContent{
+			Empty: empty,
+			Name:  name,
+		}
 	}
 }

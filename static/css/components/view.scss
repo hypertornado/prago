@@ -48,10 +48,39 @@
   
 }
 
+.view_content_header_inner {
+  display: inline-flex;
+  gap: 4px;
+  padding: 2px 4px;
+  margin-left: -4px;
+  border-radius: 8px;
+  align-items: center;
+}
+
+.view_content-create .view_content_header_inner {
+  background-color: $greenActive;
+  @include softShadow;
+}
+
+.view_content-destroy .view_content_header_inner {
+  background-color: $redActive;
+  @include softShadow;
+}
+
+.view_content_icon {
+  aspect-ratio: 1;
+  width: 1em;
+
+}
+
 .view_content_html {
   clear: both;
   word-wrap: break-word;
   color: $black;
+  max-width: 100%;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  contain: content;
 }
 
 .view_content_html:empty {

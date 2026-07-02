@@ -197,18 +197,3 @@ func (resource *Resource) getListContent(request *Request, params url.Values) (r
 	ret.Colspan = int64(len(columnsMap)) + 1
 	return
 }
-
-type listContentJSON struct {
-	Content   string
-	FooterStr string
-}
-
-func (resource *Resource) getListContentJSON(request *Request, params url.Values) *listContentJSON {
-	listContentData, err := resource.getListContent(request, params)
-	must(err)
-
-	return &listContentJSON{
-		Content:   resource.app.adminTemplates.ExecuteToString("list_cells", listContentData),
-		FooterStr: resource.app.adminTemplates.ExecuteToString("list_footer", listContentData),
-	}
-}

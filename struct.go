@@ -60,16 +60,11 @@ func (form *Form) initWithResourceItem(resource *Resource, item any, request *Re
 
 	focusedField := request.Param("_focus")
 
-	//TODO: show only "_fields" items
-
 	var fieldsMap map[string]bool
-	if request.Param("_fields") != "" {
-		form.AddHidden("_fields").Value = request.Param("_fields")
-		fields := strings.Split(request.Param("_fields"), ",")
-		fieldsMap = make(map[string]bool)
-		for _, field := range fields {
-			fieldsMap[field] = true
-		}
+	fields := request.Param("_fields")
+	if fields != "" {
+		form.AddHidden("_fields").Value = fields
+		fieldsMap = getFieldsFilterMap(fields)
 	}
 
 	var firstField = true
@@ -151,4 +146,18 @@ func (form *Form) initWithResourceItem(resource *Resource, item any, request *Re
 
 		form.AddItem(item)
 	}
+}
+
+func getFieldsFilterMap(in string) map[string]bool {
+	if in == "" {
+		return nil
+	}
+
+	fields := strings.Split(in, ",")
+	fieldsMap := make(map[string]bool)
+	for _, field := range fields {
+		fieldsMap[field] = true
+	}
+
+	return fieldsMap
 }

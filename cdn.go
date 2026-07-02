@@ -16,22 +16,25 @@ func initCDN(app *App) {
 	)
 }
 
-type filesViewData struct {
+type cdnFileData struct {
 	DownloadURL string
 	MediumURL   string
 	GiantURL    string
 	OriginalURL string
 }
 
-func getCDNViewData(app *App, uid string) (ret filesViewData) {
+func getCDNViewData(app *App, uid string) (ret *cdnFileData) {
 	file := Query[File](app).Is("UID", uid).First()
+	if file == nil {
+		return nil
+	}
+	ret = &cdnFileData{}
 	ret.DownloadURL = fmt.Sprintf("/admin/file/%d/download", file.ID)
 	if file.IsImage() {
 		ret.MediumURL = file.GetMedium()
 		ret.GiantURL = file.GetGiant()
 		ret.OriginalURL = file.GetOriginal()
 	}
-
 	return ret
 
 }
@@ -44,11 +47,6 @@ func (file *File) getCDNNamedDownloadPaths() (ret [][2]string) {
 		ret = append(ret, [2]string{"small", file.GetSmall()})
 	}
 	return ret
-}
-
-func cdnViewDataSource(request *Request, field *Field, value any) any {
-	app := field.resource.app
-	return getCDNViewData(app, value.(string))
 }
 
 func (app *App) GetCDNVideoURL(uuid string) string {

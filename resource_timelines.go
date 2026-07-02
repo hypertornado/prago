@@ -113,7 +113,10 @@ func (resource *Resource) initResourceTimelines() {
 				timeline.FilterName(field2.id, func(request *Request, value string) (string, string) {
 					name := value
 					if value != "" {
-						name = field2.fieldType.viewDataSource(request, field2, value).(string)
+						content := field2.fieldType.getViewFieldContent(request, field2, value)
+						if content != nil {
+							name = content.Name
+						}
 					}
 					return field2.name(request.Locale()), name
 				})

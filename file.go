@@ -2,7 +2,6 @@ package prago
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -267,7 +266,7 @@ func (app *App) afterInitFilesResource() {
 
 		for _, resource := range app.resources {
 			for _, field := range resource.fields {
-				if field.fieldType.viewTemplate == "view_image" {
+				if field.fieldType.id == "image" || field.fieldType.id == "file" {
 					query := fmt.Sprintf("SELECT id FROM %s WHERE %s LIKE ?", resource.id, field.id)
 
 					rows, err := app.db.Query(query, "%"+file.UID+"%")
@@ -322,7 +321,7 @@ func (app *App) afterInitFilesResource() {
 		var totalConnections int64
 		for _, resource := range app.resources {
 			for _, field := range resource.fields {
-				if field.fieldType.viewTemplate == "view_image" {
+				if field.fieldType.id == "image" || field.fieldType.id == "file" {
 					query := fmt.Sprintf("SELECT id FROM %s WHERE %s LIKE ?", resource.id, field.id)
 
 					rows, err := app.db.Query(query, "%"+file.UID+"%")
@@ -443,18 +442,4 @@ func (f *File) IsImage() bool {
 		return true
 	}
 	return false
-}
-
-func fileViewDataSource(request *Request, field *Field, data any) any {
-	outData := request.app.getImagePickerResponse(data.(string))
-	if len(outData.Items) == 0 {
-		return ""
-	}
-	jsonData, err := json.Marshal(outData)
-	must(err)
-	return string(jsonData)
-}
-
-func videoViewDataSource(request *Request, field *Field, data any) any {
-	return filesCDN.GetVideoURL(data.(string))
 }

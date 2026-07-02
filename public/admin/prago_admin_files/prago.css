@@ -1572,6 +1572,14 @@ input[type=number] {
   text-overflow: ellipsis;
 }
 
+.list_cell-create {
+  background-color: hsl(120, 100%, 95%);
+}
+
+.list_cell-destroy {
+  background-color: hsl(355, 70%, 95%);
+}
+
 .list_cell[data-fetch-url]:not(.list_cell-fetched) {
   background: linear-gradient(90deg, hsla(214, 50%, 50%, 0) 0%, hsla(214, 50%, 50%, 0.2) 50%, hsla(214, 50%, 50%, 0) 100%);
   background-size: 200% 100%;
@@ -1591,6 +1599,12 @@ input[type=number] {
   width: 100%;
   text-overflow: ellipsis;
   overflow: hidden;
+}
+
+.list_cell_icon {
+  aspect-ratio: 1;
+  width: 16px;
+  margin-right: 2px;
 }
 
 .list_cell:first-of-type {
@@ -4455,10 +4469,38 @@ h1.simple_name {
   flex-grow: 100;
 }
 
+.view_content_header_inner {
+  display: inline-flex;
+  gap: 4px;
+  padding: 2px 4px;
+  margin-left: -4px;
+  border-radius: 8px;
+  align-items: center;
+}
+
+.view_content-create .view_content_header_inner {
+  background-color: hsl(120, 100%, 95%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.view_content-destroy .view_content_header_inner {
+  background-color: hsl(355, 70%, 95%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.view_content_icon {
+  aspect-ratio: 1;
+  width: 1em;
+}
+
 .view_content_html {
   clear: both;
   word-wrap: break-word;
   color: var(--black);
+  max-width: 100%;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  contain: content;
 }
 
 .view_content_html:empty {

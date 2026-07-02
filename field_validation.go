@@ -66,7 +66,6 @@ func (field *Field) addValidationStrongRelation() {
 	field.relatedResource.addDeleteValidation(func(item any, v Validation, ud UserData) {
 		itemsVal := reflect.ValueOf(item).Elem()
 		fieldID := itemsVal.FieldByName("ID").Int()
-		//var searchVal any
 
 		var relatedCount int64
 

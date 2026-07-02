@@ -69,7 +69,7 @@ func (app *App) AddEnum(name string, items []*Enum) {
 
 	app.addFieldType(name, &fieldType{
 		dbFieldDescription: "varchar(255)",
-		getViewFieldContent: func(request *Request, val any) *viewFieldContent {
+		getViewFieldContent: func(request *Request, field *Field, val any) *viewFieldContent {
 			strVal := val.(string)
 			ret := &viewFieldContent{
 				Name: strVal,
@@ -77,21 +77,17 @@ func (app *App) AddEnum(name string, items []*Enum) {
 			for _, v := range items {
 				if strVal == v.ID {
 					ret.Name = v.GetName(request.Locale())
+					ret.Icon = v.Icon
+					ret.Style = v.Style
+					ret.Color = v.Color
+
+					if ret.Name == "" {
+						ret.Empty = true
+					}
 					return ret
 				}
 			}
 			return ret
-
-		},
-
-		viewDataSource: func(request *Request, f *Field, value any) any {
-			str := value.(string)
-			for _, v := range items {
-				if str == v.ID {
-					return v.GetName(request.Locale())
-				}
-			}
-			return value
 		},
 
 		allowedValues: allowedValues,
@@ -106,11 +102,18 @@ func (app *App) AddEnum(name string, items []*Enum) {
 			str := value.(string)
 			for _, v := range items {
 				if str == v.ID {
-					return &listCell{Name: v.GetName(userData.Locale())}
+					return &listCell{
+						Name:  v.GetName(userData.Locale()),
+						Icon:  v.Icon,
+						Color: v.Color,
+						Style: v.Style,
+					}
 				}
 			}
 
-			return &listCell{Name: fmt.Sprintf("%v", value)}
+			return &listCell{
+				Name: fmt.Sprintf("%v", value),
+			}
 		},
 
 		filterLayoutTemplate: "filter_layout_select",

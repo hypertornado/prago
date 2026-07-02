@@ -41,6 +41,8 @@ class List {
 
   fetchCache: any = {};
 
+  listMessageEl: HTMLDivElement;
+
   constructor(listEl: HTMLDivElement) {
     this.listEl = listEl;
 
@@ -52,10 +54,13 @@ class List {
     this.listHeader = this.listEl.querySelector(".list_header");
     this.listFooter = this.listEl.querySelector(".list_footer");
 
+    this.listMessageEl = this.listEl.querySelector(".list_message");
+
     this.defaultVisibleColumnsStr = listEl.getAttribute("data-visible-columns");
     this.visibleColumnsStr = this.defaultVisibleColumnsStr;
 
     this.settings = new ListSettings(this);
+    this.bindSettingsButton();
 
     let urlParams = new URLSearchParams(window.location.search);
 
@@ -203,12 +208,19 @@ class List {
       this.currentRequest = null;
       this.tableContent.innerHTML = "";
       if (request.status == 200) {
-        var response = JSON.parse(request.response);
-        this.tableContent.innerHTML = response.Content;
-        this.listFooter.innerHTML = response.FooterStr;
+
+        //var response = JSON.parse(request.response);
+
+        let message = request.getResponseHeader('Prago-List-Message');
+        this.listMessageEl.innerText = decodeURIComponent(message);
+
+        let totalPages = parseInt(request.getResponseHeader('Prago-List-Total-Pages'));
+        let selectedPage = parseInt(request.getResponseHeader('Prago-List-Selected-Page'));
+
+        this.tableContent.innerHTML = request.response;
+        //this.listFooter.innerHTML = response.FooterStr;
         bindReOrder();
-        this.bindSettingsButton();
-        this.bindPagination();
+        this.bindPagination(totalPages, selectedPage);
         this.bindClick();
         this.bindFetchCellData();
         if (this.multiple.hasMultipleActions()) {
@@ -239,10 +251,9 @@ class List {
     this.settings.bindSettingsBtn(btn);
   }
 
-  bindPagination() {
+  bindPagination(totalPages: number, selectedPage: number) {
     var paginationEl = this.listEl.querySelector(".pagination");
-    var totalPages = parseInt(paginationEl.getAttribute("data-total"));
-    var selectedPage = parseInt(paginationEl.getAttribute("data-selected"));
+    paginationEl.innerHTML = "";
     if (totalPages < 2) {
       return;
     }
@@ -398,7 +409,7 @@ class List {
     for (var i = 0; i < rows.length; i++) {
       let row = <HTMLTableRowElement>rows[i];
 
-      row.addEventListener("contextmenu", this.contextClick.bind(this));
+      //row.addEventListener("contextmenu", this.contextClick.bind(this));
 
       row.addEventListener("click", (e) => {
         var el = <HTMLDivElement>e.currentTarget;
