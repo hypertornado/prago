@@ -11,10 +11,10 @@
 @use "components/list_filter.scss";
 @use "components/list_filter2.scss";
 @use "components/list_multiple.scss";
+@use "components/list_pagination.scss";
 @use "components/search.scss";
 @use "components/board.scss";
 @use "components/dashboard.scss";
-@use "components/pagination.scss";
 @use "components/navigation.scss";
 @use "components/menu.scss";
 @use "components/popup.scss";
@@ -34,5 +34,6 @@
 @use "components/relation_input.scss";
 @use "components/markdown_input.scss";
 @use "components/picker.scss";
+@use "components/pagination.scss";
 @use "components/view.scss";
 

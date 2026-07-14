@@ -23,7 +23,6 @@ func (menu menu) GetBreadcrumbs() *breadcrumbs {
 	items = append([]*breadcrumb{{
 		Logo: "/admin/logo",
 		URL:  "/admin",
-		Name: menu.AppName,
 	}}, items...)
 
 	return &breadcrumbs{

@@ -1,11 +1,10 @@
 package prago
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
-
-	"golang.org/x/net/context"
 )
 
 type ListFilterResponse struct {
@@ -30,27 +29,29 @@ func (app *App) initListFilter() {
 		form.AddHidden("_resource").Value = resource.id
 		form.AddHidden("_field").Value = field.id
 
-		if field.fieldType.filterLayoutTemplate == "filter_layout_select" {
+		filterLayout := field.fieldType.filterLayoutTemplate
+
+		if filterLayout == "filter_layout_select" {
 			listFilterFormSelect(form, field, value, request)
 		}
 
-		if field.isRelation() {
+		if filterLayout == "filter_layout_relation" {
 			listFilterFormRelation(form, field, value, request)
 		}
 
-		if field.filterLayout() == "filter_layout_date" {
+		if filterLayout == "filter_layout_date" {
 			listFilterFormDate(form, field, value, request)
 		}
 
-		if field.filterLayout() == "filter_layout_boolean" {
+		if filterLayout == "filter_layout_boolean" {
 			listFilterFormBoolean(form, field, value, request)
 		}
 
-		if field.filterLayout() == "filter_layout_text" {
+		if filterLayout == "filter_layout_text" {
 			listFilterFormText(form, field, value, request)
 		}
 
-		if field.filterLayout() == "filter_layout_number" {
+		if filterLayout == "filter_layout_number" {
 			listFilterFormNumber(form, field, value, request)
 		}
 
@@ -67,27 +68,29 @@ func (app *App) initListFilter() {
 			panic("not allowed")
 		}
 
-		if field.fieldType.filterLayoutTemplate == "filter_layout_select" {
+		filterLayout := field.fieldType.filterLayoutTemplate
+
+		if filterLayout == "filter_layout_select" {
 			listFilterFormSelectHandle(fv, field, request)
 		}
 
-		if field.isRelation() {
+		if filterLayout == "filter_layout_relation" {
 			listFilterFormRelationHandle(fv, field, request)
 		}
 
-		if field.filterLayout() == "filter_layout_date" {
+		if filterLayout == "filter_layout_date" {
 			listFilterFormDateHandle(fv, field, request)
 		}
 
-		if field.filterLayout() == "filter_layout_boolean" {
+		if filterLayout == "filter_layout_boolean" {
 			listFilterFormBooleanHandle(fv, field, request)
 		}
 
-		if field.filterLayout() == "filter_layout_text" {
+		if filterLayout == "filter_layout_text" {
 			listFilterFormTextHandle(fv, field, request)
 		}
 
-		if field.filterLayout() == "filter_layout_number" {
+		if filterLayout == "filter_layout_number" {
 			listFilterFormNumberHandle(fv, field, request)
 		}
 
@@ -100,13 +103,16 @@ func listFilterFormSelect(form *Form, field *Field, value string, userData UserD
 		valMap[item] = true
 	}
 
-	var dataItems = field.fieldType.filterLayoutDataSource(field, userData).([][2]string)
+	var dataItems = field.fieldType.filterLayoutDataSource(field, userData).([]*FormOption)
 	for _, item := range dataItems {
-		if item[0] == "" {
+		if item.ID == "" {
 			continue
 		}
-		checkbox := form.AddCheckbox(item[0], item[1])
-		if valMap[item[0]] {
+		checkbox := form.AddCheckbox(item.ID, item.Name)
+		checkbox.Icon = item.Icon
+		checkbox.Style = item.Style
+		checkbox.Color = item.Color
+		if valMap[item.ID] {
 			checkbox.Value = "on"
 		}
 	}
@@ -135,11 +141,23 @@ func listFilterFormDate(form *Form, field *Field, value string, userData UserDat
 }
 
 func listFilterFormBoolean(form *Form, field *Field, value string, userData UserData) {
-	var options [][2]string
-	options = append(options, [2]string{"", ""})
-	options = append(options, [2]string{"true", "✅ ano"})
-	options = append(options, [2]string{"false", "ne"})
-	form.AddRadio("value", field.name(userData.Locale()), options).Value = value
+
+	var options []*FormOption = []*FormOption{
+		{},
+		{
+			ID:    "true",
+			Name:  messages.Get(userData.Locale(), "yes_plain"),
+			Icon:  iconCheckbox,
+			Style: "create",
+		},
+		{
+			ID:    "false",
+			Name:  messages.Get(userData.Locale(), "no_plain"),
+			Style: "destroy",
+		},
+	}
+
+	form.AddRadioOptions("value", field.name(userData.Locale()), options).Value = value
 }
 
 func listFilterFormText(form *Form, field *Field, value string, userData UserData) {
@@ -156,13 +174,13 @@ func listFilterFormNumber(form *Form, field *Field, value string, userData UserD
 
 func listFilterFormSelectHandle(fv FormValidation, field *Field, request *Request) {
 	var values []string
-	var dataItems = field.fieldType.filterLayoutDataSource(field, request).([][2]string)
+	var dataItems = field.fieldType.filterLayoutDataSource(field, request).([]*FormOption)
 	for _, item := range dataItems {
-		if item[0] == "" {
+		if item.ID == "" {
 			continue
 		}
-		if request.Param(item[0]) == "on" {
-			values = append(values, item[0])
+		if request.Param(item.ID) == "on" {
+			values = append(values, item.ID)
 		}
 	}
 
@@ -220,12 +238,14 @@ func listFilterGetResponse(value string, field *Field, request *Request) (ret *L
 	ret.ID = value
 	ret.Name = value
 
-	if field.fieldType.filterLayoutTemplate == "filter_layout_select" {
+	filterLayout := field.fieldType.filterLayoutTemplate
+
+	if filterLayout == "filter_layout_select" {
 		var names []string
 		nameMap := map[string]string{}
-		var dataItems = field.fieldType.filterLayoutDataSource(field, request).([][2]string)
+		var dataItems = field.fieldType.filterLayoutDataSource(field, request).([]*FormOption)
 		for _, item := range dataItems {
-			nameMap[item[0]] = item[1]
+			nameMap[item.ID] = item.Name
 
 		}
 		valItems := strings.Split(value, ",")
@@ -235,7 +255,7 @@ func listFilterGetResponse(value string, field *Field, request *Request) (ret *L
 		ret.Name = strings.Join(names, " nebo ")
 	}
 
-	if field.isRelation() {
+	if filterLayout == "filter_layout_relation" {
 		var names []string
 		if value != "" {
 			ids := strings.Split(value, ",")
@@ -252,7 +272,7 @@ func listFilterGetResponse(value string, field *Field, request *Request) (ret *L
 		ret.Name = strings.Join(names, " nebo ")
 	}
 
-	if field.filterLayout() == "filter_layout_date" {
+	if filterLayout == "filter_layout_date" {
 		var names []string
 		if ret.ID != "" {
 			fields := strings.Split(ret.ID, ",")
@@ -272,7 +292,7 @@ func listFilterGetResponse(value string, field *Field, request *Request) (ret *L
 		ret.Name = strings.Join(names, " · ")
 	}
 
-	if field.filterLayout() == "filter_layout_boolean" {
+	if filterLayout == "filter_layout_boolean" {
 		if value == "true" {
 			ret.Name = "✅ ano"
 		}
@@ -280,6 +300,5 @@ func listFilterGetResponse(value string, field *Field, request *Request) (ret *L
 			ret.Name = "ne"
 		}
 	}
-
 	return
 }

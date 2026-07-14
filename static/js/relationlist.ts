@@ -65,6 +65,7 @@ class RelationList {
         if (this.offset < this.count) {
           this.moreEl.classList.remove("hidden");
         }
+        initTooltips();
       } else {
         console.error("Error while RelationList request");
       }

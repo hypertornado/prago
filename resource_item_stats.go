@@ -25,8 +25,10 @@ func ItemStatistic[T any](app *App, name func(string) string, permission Permiss
 }
 
 type listCellFetchResponse struct {
-	Name   string
-	Images []string
+	Name    string
+	Style   string
+	IconURL string
+	Images  []string
 }
 
 func itemStatsAPIHandler(request *Request) {

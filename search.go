@@ -18,12 +18,32 @@ type searchItem struct {
 	Priority int64
 }
 
-const searchPageSize int64 = 10
+const searchPageSize int64 = 20
 
 type paginationItem struct {
 	Title    int
 	Selected bool
 	URL      string
+}
+
+func searchItemsToViewField(items []*searchItem) *viewField {
+	ret := &viewField{}
+
+	ret.ViewContent = &viewFieldContent{}
+
+	for _, item := range items {
+
+		preview := &Preview{
+			Name:        item.Name,
+			Description: item.Prename,
+			Icon:        item.Icon,
+			URL:         item.URL,
+		}
+
+		ret.ViewContent.Previews = append(ret.ViewContent.Previews, preview)
+	}
+
+	return ret
 }
 
 func (app *App) initSearch() {
@@ -54,7 +74,7 @@ func (app *App) initSearch() {
 				}
 			}
 
-			result, hits, err := app.searchItems(q, request)
+			result, hits, err := app.search(q, int64(page-1)*searchPageSize, searchPageSize, request)
 			must(err)
 
 			var pages = hits / searchPageSize
@@ -62,7 +82,7 @@ func (app *App) initSearch() {
 				pages++
 			}
 
-			var pagination []paginationItem
+			var pagination []*paginationItem
 			for i := 1; i <= int(pages); i++ {
 				var selected bool
 				if page == i {
@@ -73,7 +93,7 @@ func (app *App) initSearch() {
 				if i > 0 {
 					values.Add("page", strconv.Itoa(i))
 				}
-				pagination = append(pagination, paginationItem{
+				pagination = append(pagination, &paginationItem{
 					Title:    i,
 					Selected: selected,
 					URL:      "_search?" + values.Encode(),
@@ -87,22 +107,15 @@ func (app *App) initSearch() {
 				DescriptionsAfter:  []string{fmt.Sprintf("%s výsledků", humanizeNumber(hits))},
 			}
 
-			pd.SearchResults = result
+			pd.ViewFields = append(pd.ViewFields, searchItemsToViewField(result))
+
 			pd.Pagination = pagination
 
 			pd.Name = pd.BoxHeader.Name
 
-			//pd.Views = append(pd.Views, view)
-
 			pd.SearchQuery = q
 		},
 	)
-}
-
-func (app *App) searchItems(q string, request *Request) (ret []*searchItem, hits int64, err error) {
-	ret = append(ret, app.searchWithoutElastic(q, request)...)
-	hits = int64(len(ret))
-	return
 }
 
 func (app *App) suggestItems(q string, request *Request) (ret []*searchItem, err error) {
@@ -111,18 +124,28 @@ func (app *App) suggestItems(q string, request *Request) (ret []*searchItem, err
 		return ret, nil
 	}
 
-	ret = append(ret, app.searchWithoutElastic(q, request)...)
+	var suggestLimit int64 = 20
 
-	var suggestLimit = 20
-
-	if len(ret) > suggestLimit {
-		ret = ret[0:suggestLimit]
+	suggestItems, _, err := app.search(q, 0, suggestLimit, request)
+	if err != nil {
+		return nil, err
 	}
+
+	ret = append(ret, suggestItems...)
 
 	return
 }
 
-func (app *App) searchWithoutElastic(q string, request *Request) (ret []*searchItem) {
+func (app *App) search(q string, offset int64, limit int64, request *Request) (ret []*searchItem, hits int64, err error) {
+
+	if offset < 0 {
+		return nil, 0, fmt.Errorf("offset must be non negative")
+	}
+
+	if limit <= 0 {
+		return nil, 0, fmt.Errorf("limit must be positive")
+	}
+
 	q = normalizeCzechString(q)
 	menu := app.getMenu(request, nil)
 	for _, item := range menu.Items {
@@ -146,7 +169,19 @@ func (app *App) searchWithoutElastic(q string, request *Request) (ret []*searchI
 		return ret[i].Priority < ret[j].Priority
 	})
 
-	return ret
+	hits = int64(len(ret))
+
+	if offset >= hits {
+		return nil, hits, nil
+	}
+
+	end := offset + limit
+	if end > hits {
+		end = hits
+	}
+	ret = ret[offset:end]
+
+	return ret, hits, nil
 }
 
 func (item menuItem) searchMenuItem(q string, prename string) (ret []*searchItem) {

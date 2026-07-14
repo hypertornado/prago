@@ -1,7 +1,6 @@
 package prago
 
 type boardView struct {
-	AppName     string
 	BoardIcon   string
 	BoardName   string
 	BoardURL    string
@@ -55,7 +54,6 @@ func (board *Board) boardView(request *Request) *boardView {
 	}
 
 	ret := &boardView{
-		AppName:     board.app.name(request.Locale()),
 		BoardName:   boardName,
 		BoardIcon:   boardIcon,
 		BoardURL:    boardURL,

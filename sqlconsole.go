@@ -2,6 +2,7 @@ package prago
 
 import (
 	"fmt"
+	"time"
 )
 
 func (app *App) initSQLConsole() {
@@ -19,6 +20,7 @@ func (app *App) initSQLConsole() {
 			table := app.Table()
 
 			if q != "" {
+				start := time.Now()
 				rows, err := app.db.QueryContext(request.Request().Context(), q)
 				rowCount := 0
 				if err != nil {
@@ -61,6 +63,8 @@ func (app *App) initSQLConsole() {
 					}
 				}
 				table.AddFooterText(fmt.Sprintf("%d items", rowCount))
+				table.AddFooterText(fmt.Sprintf("%s", time.Since(start)))
+
 			}
 
 			if message != "" {
@@ -78,5 +82,5 @@ func (app *App) initSQLConsole() {
 				vc.Data(true)
 			}
 
-		}).Name(unlocalized("SQL Console")).Permission(sysadminPermission).Board(sysadminBoard)
+		}).Name(unlocalized("SQL Console")).Permission(sysadminPermission).Board(sysadminBoard).Icon("glyphicons-basic-879-terminal-empty.svg")
 }

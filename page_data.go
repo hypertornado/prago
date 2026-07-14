@@ -12,9 +12,10 @@ type pageData struct {
 	CSSPaths        []string
 	JavascriptPaths []string
 
-	Icon string
-	Name string
-	App  *App
+	Icon  string
+	Style string
+	Name  string
+	App   *App
 
 	SearchQuery string
 
@@ -28,14 +29,12 @@ type pageData struct {
 
 	BoxHeader *boxHeader
 
-	Form          *Form
-	List          *list
-	RelationViews []*viewRelation
+	Form *Form
+	List *list
 
-	ViewFields []viewField
+	ViewFields []*viewField
 
-	SearchResults []*searchItem
-	Pagination    []paginationItem
+	Pagination []*paginationItem
 
 	BoardView *boardView
 
@@ -72,9 +71,12 @@ func (page *pageData) renderPage(request *Request) {
 		page.Menu = request.app.getMenu(request, nil)
 	}
 
-	page.Icon = page.Menu.GetIcon()
+	page.Icon, page.Style = page.Menu.GetIconAndStyle()
 	if page.Icon == "" {
 		page.Icon = request.app.icon
+	}
+	if page.Icon == "" {
+		page.Icon = iconResource
 	}
 
 	page.Breadcrumbs = page.Menu.GetBreadcrumbs()
@@ -90,4 +92,11 @@ func (page *pageData) renderPage(request *Request) {
 	}
 
 	request.WriteHTML(code, request.app.adminTemplates, "layout", page)
+}
+
+func (page *pageData) GetIconColor() string {
+	if page.Style == "" {
+		return page.App.getBaseColor()
+	}
+	return getStyleColor(page.Style)
 }

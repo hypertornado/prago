@@ -38,6 +38,12 @@
     overflow: hidden;
     @include softShadow;
   }
+
+  .preview_icon {
+    aspect-ratio: 1;
+    width: 32px;
+
+  }
   
   .preview_right {
     flex-grow: 2;

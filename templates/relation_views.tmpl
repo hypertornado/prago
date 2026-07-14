@@ -1,39 +1,3 @@
-{{define "relation_views"}}
-  {{range $item := .}}
-    {{template "relation_view" $item}}
-  {{end}}
-{{end}}
-
-{{define "relation_view"}}
-  <div class="box relation_view">
-  {{if .Name}}
-  <div class="relation_view_header">
-    {{if .Name}}
-      <span class="relation_view_header_name">
-        {{if .Icon}}
-          <img src="/admin/api/icons?file={{.Icon}}&color={{PragoBlackColor}}" class="relation_view_header_icon">
-        {{end}}
-        {{.Name}}
-        {{if .Subname}}
-          <span class="relation_view_header_subname">
-            {{- .Subname -}}
-          </span>
-        {{end}}
-      </span>
-    {{end}}
-    <div class="relation_view_header_tabs">
-      {{range $navItem := .Buttons}}
-        <a href="{{$navItem.URL}}" class="btn" data-tooltip="{{$navItem.Name}}"><img src="/admin/api/icons?file={{.Icon}}&color={{PragoBlackColor}}" class="btn_icon"></a>
-      {{end}}
-    </div>
-  </div>
-  {{end}}
-  {{if .Relation}}
-    {{template "view_relationlist" .Relation}}
-  {{end}}
-  </div>
-{{end}}
-
 {{define "view_relationlist"}}
   <div class="relation_view_list"
     data-source-resource="{{.SourceResource}}"

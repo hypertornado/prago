@@ -138,6 +138,17 @@ func numberToString(n int, sep rune) string {
 	return buff.String()
 }
 
+func humanizeNumberWithUnits(i int64, unitBefore string, unitAfter string) string {
+	ret := humanizeNumber(i)
+	if unitBefore != "" {
+		ret = unitBefore + ret
+	}
+	if unitAfter != "" {
+		ret = ret + unitAfter
+	}
+	return ret
+}
+
 func humanizeNumber(i int64) (ret string) {
 	return numberToString(int(i), ' ')
 }

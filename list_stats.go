@@ -359,7 +359,6 @@ func (resource *Resource) getListStatsTable(ctx context.Context, field *Field, u
 				Name:     name,
 				Count:    humanizeNumber(count),
 				Progress: statsProgress(count, total),
-				//Description: statsCountDescription(count, total),
 			})
 		}
 	}
@@ -376,7 +375,6 @@ func (resource *Resource) getListStatsTable(ctx context.Context, field *Field, u
 					Name:     fmt.Sprintf("#%d", v),
 					Count:    humanizeNumber(count),
 					Progress: statsProgress(count, total),
-					//Description: statsCountDescription(count, total),
 				}
 
 				if v == 0 {

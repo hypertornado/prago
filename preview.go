@@ -11,9 +11,18 @@ type Preview struct {
 	ID          int64
 	Image       string
 	ImageID     string
+	Icon        string
+	Style       string
 	URL         string
 	Name        string
 	Description string
+}
+
+func (preview Preview) GetIconColor() string {
+	if preview.Style == "" {
+		return "base"
+	}
+	return getStyleColor(preview.Style)
 }
 
 type previewer struct {
@@ -83,7 +92,40 @@ func (previewer *previewer) Name() string {
 		}
 	}
 	return fmt.Sprintf("#%d", previewer.ID())
+}
 
+type iconIFace interface {
+	GetIcon() string
+}
+
+func (previewer *previewer) Icon() string {
+	pointerVal := reflect.ValueOf(previewer.item)
+	var valIface = pointerVal.Interface()
+	iconIface, ok := valIface.(iconIFace)
+	if ok {
+		icon := iconIface.GetIcon()
+		if icon != "" {
+			return icon
+		}
+	}
+	return ""
+}
+
+type styleIFace interface {
+	GetStyle() string
+}
+
+func (previewer *previewer) Style() string {
+	pointerVal := reflect.ValueOf(previewer.item)
+	var valIface = pointerVal.Interface()
+	styleIface, ok := valIface.(styleIFace)
+	if ok {
+		style := styleIface.GetStyle()
+		if style != "" {
+			return style
+		}
+	}
+	return ""
 }
 
 func (f *Field) relationPreview(userData UserData, idsStr string) (ret []*Preview) {
@@ -111,6 +153,8 @@ func (previewer *previewer) Preview(relatedResource *Resource) *Preview {
 	ret.Image = previewer.ThumbnailURL()
 	ret.ImageID = previewer.ThumbnailID()
 	ret.Description = previewer.DescriptionExtended(relatedResource)
+	ret.Icon = previewer.Icon()
+	ret.Style = previewer.Style()
 	return &ret
 }
 

@@ -118,17 +118,21 @@ func (app *App) AddEnum(name string, items []*Enum) {
 
 		filterLayoutTemplate: "filter_layout_select",
 		filterLayoutDataSource: func(f *Field, userData UserData) any {
-			var ret [][2]string
+			var ret []*FormOption
 			if len(items) == 0 || items[0].ID != "" {
-				ret = append(ret, [2]string{"", ""})
+				ret = append(ret, &FormOption{})
 			}
 			for _, v := range items {
-				ret = append(ret, [2]string{
-					v.ID,
-					v.GetName(userData.Locale()),
+				ret = append(ret, &FormOption{
+					ID:    v.ID,
+					Name:  v.GetName(userData.Locale()),
+					Icon:  v.Icon,
+					Style: v.Style,
+					Color: v.Color,
 				})
 			}
 			return ret
+			//return getFormOptions(ret)
 		},
 	})
 }

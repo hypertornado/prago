@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>{{.Name}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#9900ff">
+    <meta name="theme-color" content="#{{PragoBaseColor}}">
 
     {{range $path := .CSSPaths}}
         <link rel="stylesheet" href="{{$path}}">
@@ -22,7 +22,7 @@
         <script src="{{$path}}"></script>
     {{end}}
     {{if .Icon}}
-        <link rel="icon" href="/admin/api/icons?file={{.Icon}}&color={{PragoBaseColor}}" type="image/svg+xml">
+        <link rel="icon" href="/admin/api/icons?file={{.Icon}}&color={{.GetIconColor}}" type="image/svg+xml">
     {{end}}
 
     {{template "layout_style" .}}
@@ -66,20 +66,9 @@
                 {{if .List}}
                     {{template "list" .List}}
                 {{end}}
-                {{if .RelationViews}}
-                    {{template "relation_views" .RelationViews}}
-                {{end}}
-                {{if .SearchResults}}
-                    {{template "search_results" .SearchResults}}
-                {{end}}
-
 
                 {{if .Pagination}}
-                    <div class="search_pagination">
-                    {{range $page := .Pagination}}
-                        <a href="{{$page.URL}}" class="search_pagination_page{{if $page.Selected}} search_pagination_page-selected{{end}}">{{$page.Title}}</a>
-                    {{end}}
-                    </div>
+                    {{template "pagination" .Pagination}}
                 {{end}}
 
                 {{if .BoardView}}

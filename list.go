@@ -8,7 +8,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-	"time"
 )
 
 //https://caldwell.org/projects/data/city-index
@@ -38,16 +37,14 @@ type listPaginationData struct {
 }
 
 type listHeaderItem struct {
-	Name         string
-	Icon         string
-	NameHuman    string
-	ColumnName   string
-	CanOrder     bool
-	DefaultShow  bool
-	FilterLayout string
-	//FilterContent     template.HTML
+	Name              string
+	Icon              string
+	NameHuman         string
+	ColumnName        string
+	CanOrder          bool
+	DefaultShow       bool
+	FilterLayout      string
 	RelatedResourceID string
-	FilterData        any
 	NaturalCellWidth  int64
 
 	DefaultFilterResponse *ListFilterResponse
@@ -75,6 +72,21 @@ func (resource *Resource) initListAction() {
 			pd.List = &listData
 		},
 		)
+}
+
+func (resource *Resource) initListAPI() {
+	resource.api("list").Handler(
+		func(request *Request) {
+
+			listContentData, err := resource.getListContent(request, request.Request().URL.Query())
+			must(err)
+			request.Response().Header().Set("Prago-List-Message", url.PathEscape(listContentData.Message))
+			request.Response().Header().Set("Prago-List-Total-Pages", fmt.Sprintf("%d", listContentData.Pagination.TotalPages))
+			request.Response().Header().Set("Prago-List-Selected-Page", fmt.Sprintf("%d", listContentData.Pagination.SelectedPage))
+
+			request.WriteHTML(200, resource.app.adminTemplates, "list_cells", listContentData)
+		},
+	)
 }
 
 func (row *listRow) PreName() string {
@@ -216,66 +228,13 @@ func (field *Field) getListHeaderItem(request *Request) listHeaderItem {
 		DefaultFilterResponse: listFilterGetResponse(request.Param(field.id), field, request),
 	}
 
-	headerItem.FilterLayout = field.filterLayout()
-
-	if headerItem.FilterLayout == "filter_layout_boolean" {
-		headerItem.FilterData = []string{
-			messages.Get(request.Locale(), "yes"),
-			messages.Get(request.Locale(), "no"),
-		}
-	}
-
-	if headerItem.FilterLayout == "filter_layout_select" {
-		fn := field.fieldType.filterLayoutDataSource
-		headerItem.FilterData = fn(field, request)
-	}
+	headerItem.FilterLayout = field.fieldType.filterLayoutTemplate
 
 	if field.canOrder {
 		headerItem.CanOrder = true
 	}
 
-	/*if headerItem.FilterLayout != "" {
-		headerItem.FilterContent = field.resource.app.adminTemplates.
-			ExecuteToHTML(headerItem.FilterLayout, headerItem)
-	}*/
-
 	return headerItem
-}
-
-func (field *Field) filterLayout() string {
-	if field == nil {
-		return ""
-	}
-
-	if field.fieldType.filterLayoutTemplate != "" {
-		return field.fieldType.filterLayoutTemplate
-	}
-
-	if field.typ.Kind() == reflect.String &&
-		(field.tags["prago-type"] == "" || field.tags["prago-type"] == "text" || field.tags["prago-type"] == "markdown") {
-		return "filter_layout_text"
-	}
-
-	if field.tags["prago-type"] == "multirelation" {
-		return "filter_layout_relation"
-	}
-
-	if field.typ.Kind() == reflect.Int64 || field.typ.Kind() == reflect.Int {
-		if field.tags["prago-type"] == "relation" {
-			return "filter_layout_relation"
-		}
-		return "filter_layout_number"
-	}
-
-	if field.typ.Kind() == reflect.Bool {
-		return "filter_layout_boolean"
-	}
-
-	if field.typ == reflect.TypeOf(time.Now()) {
-		return "filter_layout_date"
-	}
-
-	return ""
 }
 
 func (resource *Resource) addFilterParamsToQuery(listQuery *listQuery, params url.Values, userData UserData) *listQuery {
@@ -299,7 +258,7 @@ func (resource *Resource) addFilterToQuery(listQuery *listQuery, filter map[stri
 			continue
 		}
 
-		layout := field.filterLayout()
+		layout := field.fieldType.filterLayoutTemplate
 
 		switch layout {
 		case "filter_layout_text":

@@ -16,6 +16,19 @@
   </div>
 {{end}}
 
+{{define "search_results"}}
+    <div class="search_results">
+    {{range $result := .}}
+        <a href="{{$result.URL}}" class="search">
+        <div class="search_icon"></div>
+        <div class="search_right">
+            <div class="search_name">{{$result.Name}}</div>
+        </div>
+        </a>
+    {{end}}
+    </div>
+{{end}}
+
 {{define "searchbox"}}
   <form class="searchbox" action="/admin/_search">
     <input class="searchbox_input" type="search" placeholder="Vyhledávání" name="q" value="{{.}}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">

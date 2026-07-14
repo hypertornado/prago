@@ -7,7 +7,7 @@
         </div>
       {{end}}
       {{range $cell := $row.Items}}
-        <div class="list_cell{{if .Style}} list_cell-{{.Style}}{{end}}" {{if $cell.Name}}title="{{$cell.Name}}"{{end}} data-cell-id="{{$cell.ItemID}}" {{if $cell.FetchURL}}data-fetch-url="{{$cell.FetchURL}}"{{end}}>
+        <div class="list_cell{{if .Style}} list_cell-{{.Style}}{{end}}{{if .Alignment}} list_cell-{{.Alignment}}{{end}}" {{if $cell.Name}}title="{{$cell.Name}}"{{end}} data-cell-id="{{$cell.ItemID}}" {{if $cell.FetchURL}}data-fetch-url="{{$cell.FetchURL}}"{{end}}>
           {{template "list_cell" $cell}}
         </div>
       {{end}}
@@ -23,8 +23,6 @@
         {{- end -}}
       {{end -}}
     </span>
-    {{if .Icon}}
-      <img class="list_cell_icon" src="/admin/api/icons?file={{.Icon}}&color={{.IconColor}}">
-    {{end}}
+    <img class="list_cell_icon{{if not .Icon}} hidden{{end}}" src="{{if .Icon}}/admin/api/icons?file={{.Icon}}&color={{.IconColor}}{{end}}">
     <span class="list_cell_name">{{.Name}}</span>
 {{end}}

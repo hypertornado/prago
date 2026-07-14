@@ -73,12 +73,13 @@ class ImageView {
         container.setAttribute("type", "button");
         container.classList.add("imageview_image");
         container.setAttribute("href", file.ViewURL);
-        container.setAttribute("title", file.ImageDescription);
+        if (file.ImageDescription) {
+            container.setAttribute("data-tooltip", file.ImageDescription);
+        }
         let imgEl = document.createElement("img");
         imgEl.classList.add("imageview_image_img");
         imgEl.setAttribute("src", file.ThumbURL);
         container.appendChild(imgEl);
-        console.log(file);
         let btnEl = document.createElement("div");
         btnEl.classList.add("btn");
         btnEl.classList.add("imageview_image_btn");
@@ -6994,7 +6995,7 @@ class List {
         this.settings.bindSettingsBtn(btn);
     }
     bindPagination(totalPages, selectedPage) {
-        var paginationEl = this.listEl.querySelector(".pagination");
+        var paginationEl = this.listEl.querySelector(".list_pagination");
         paginationEl.innerHTML = "";
         if (totalPages < 2) {
             return;
@@ -7015,7 +7016,7 @@ class List {
             if (shouldBeShown) {
                 if (!beforeItemWasShown) {
                     let delimiterEl = document.createElement("div");
-                    delimiterEl.classList.add("pagination_page_delimiter");
+                    delimiterEl.classList.add("list_pagination_page_delimiter");
                     delimiterEl.innerText = "…";
                     paginationEl.appendChild(delimiterEl);
                 }
@@ -7023,10 +7024,10 @@ class List {
                 pEl.setAttribute("href", "#");
                 pEl.textContent = i + "";
                 if (i == selectedPage) {
-                    pEl.classList.add("pagination_page_current");
+                    pEl.classList.add("list_pagination_page_current");
                 }
                 else {
-                    pEl.classList.add("pagination_page");
+                    pEl.classList.add("list_pagination_page");
                     pEl.setAttribute("data-page", i + "");
                     pEl.addEventListener("click", this.paginationChange.bind(this));
                 }
@@ -7119,6 +7120,14 @@ class List {
                 imageEl.setAttribute("src", data.Images[i]);
                 cellImagesSpan.appendChild(imageEl);
             }
+        }
+        if (data.Style) {
+            cell.classList.add("list_cell-" + data.Style);
+        }
+        if (data.IconURL) {
+            let iconEl = cell.querySelector(".list_cell_icon");
+            iconEl.setAttribute("src", data.IconURL);
+            iconEl.classList.remove("hidden");
         }
     }
     bindClick() {
@@ -8449,6 +8458,7 @@ class RelationPicker {
         previewEl.setAttribute("data-id", data.ID);
         this.suggestionsObject.clear();
         this.updateLayout();
+        initTooltips();
     }
     numberOfItems() {
         return this.previewsContainer.children.length;
@@ -8578,6 +8588,7 @@ class Suggestions {
                     });
                     this.suggestionsEl.appendChild(buttonEl);
                 }
+                initTooltips();
                 this.scrollTop();
             }
             else {
@@ -9471,6 +9482,7 @@ class RelationList {
                 if (this.offset < this.count) {
                     this.moreEl.classList.remove("hidden");
                 }
+                initTooltips();
             }
             else {
                 console.error("Error while RelationList request");

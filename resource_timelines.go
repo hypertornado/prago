@@ -25,11 +25,14 @@ func (resource *Resource) initResourceTimelines() {
 				if !tdr.Request.Authorize(field2.canView) {
 					continue
 				}
-				if field2.isRelation() {
+
+				filterLayout := field.fieldType.filterLayoutTemplate
+
+				if filterLayout == "filter_layout_relation" {
 					q.In(field2.id, tdr.Options[field2.id])
 				}
 
-				if field2.filterLayout() == "filter_layout_boolean" {
+				if filterLayout == "filter_layout_boolean" {
 					val := tdr.Options[field2.id]
 					if val == "true" {
 						q.Is(field2.id, true)
@@ -39,7 +42,7 @@ func (resource *Resource) initResourceTimelines() {
 					}
 				}
 
-				if field2.filterLayout() == "filter_layout_select" {
+				if filterLayout == "filter_layout_select" {
 					val := tdr.Options[field2.id]
 					if val != "" {
 						q.Is(field2.id, val)
@@ -60,11 +63,14 @@ func (resource *Resource) initResourceTimelines() {
 				if !request.Authorize(field2.canView) {
 					continue
 				}
-				if field2.isRelation() {
+
+				filterLayout := field.fieldType.filterLayoutTemplate
+
+				if filterLayout == "filter_layout_relation" {
 					form.AddRelationMultiple(field2.id, field2.name(request.Locale()), field2.getRelatedID()).Value = request.Param(field2.id)
 				}
 
-				if field2.filterLayout() == "filter_layout_boolean" {
+				if filterLayout == "filter_layout_boolean" {
 					form.AddSelect(field2.id, field2.name(request.Locale()), [][2]string{
 						{"", ""},
 						{"true", "✅ ano"},
@@ -72,7 +78,7 @@ func (resource *Resource) initResourceTimelines() {
 					}).Value = request.Param(field2.id)
 				}
 
-				if field2.filterLayout() == "filter_layout_select" {
+				if filterLayout == "filter_layout_select" {
 					options := field2.fieldType.filterLayoutDataSource(field2, request).([][2]string)
 					form.AddSelect(field2.id, field2.name(request.Locale()), options).Value = request.Param(field2.id)
 
@@ -81,7 +87,10 @@ func (resource *Resource) initResourceTimelines() {
 		})
 
 		for _, field2 := range resource.fields {
-			if field2.isRelation() {
+
+			filterLayout := field.fieldType.filterLayoutTemplate
+
+			if filterLayout == "filter_layout_relation" {
 				timeline.FilterName(field2.id, func(request *Request, value string) (string, string) {
 					if !request.Authorize(field2.canEdit) {
 						return field2.id, value
@@ -96,7 +105,7 @@ func (resource *Resource) initResourceTimelines() {
 				})
 			}
 
-			if field2.filterLayout() == "filter_layout_boolean" {
+			if filterLayout == "filter_layout_boolean" {
 				timeline.FilterName(field2.id, func(request *Request, value string) (string, string) {
 					name := value
 					if value == "true" {
@@ -109,7 +118,7 @@ func (resource *Resource) initResourceTimelines() {
 				})
 			}
 
-			if field2.filterLayout() == "filter_layout_select" {
+			if filterLayout == "filter_layout_select" {
 				timeline.FilterName(field2.id, func(request *Request, value string) (string, string) {
 					name := value
 					if value != "" {

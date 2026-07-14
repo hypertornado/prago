@@ -136,9 +136,17 @@
   100% { background-position: -200% 0; }
 }
 
+.list_cell-right {
+  justify-content: end;
+}
+
+.list_cell-center {
+  justify-content: center;
+}
+
 .list_cell_name {
   min-width: 0px;
-  width: 100%;
+  max-width: 100%;
   text-overflow: ellipsis;
   overflow: hidden;
 }
@@ -369,11 +377,12 @@
 .list_cell_image {
   border: 1px solid transparent;
   background-color: $backgroundGrayColor;
-  border-radius: 3px;
-  width: 15px;
-  height: 15px;
+  border-radius: 4px;
+  width: 16px;
+  //height: 15px;
+  aspect-ratio: 1;
   margin: 0px;
-  margin-right: -5px;
+  margin-right: -8px;
   display: inline-block;
   object-fit: cover;
 }
@@ -421,12 +430,11 @@
   justify-content: space-between;
   align-items: stretch;
   height: 60px;
-  padding: 3px 5px;
+  padding: 4px;
   position: relative;
   border-bottom: 1px solid $grayBorderColor;
 
   background: $backgroundGrayColor;
-  //@include appleBackdrop;
 }
 
 .list_header_item_filter {

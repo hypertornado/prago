@@ -16,7 +16,13 @@
   <button type="button" class="btn btn-formitem form_item_minus">
     <img src="/admin/api/icons?file=glyphicons-basic-372-minus.svg&color=${getBaseColor()}" class="btn_icon">
   </button>
+  {{if .UnitBefore}}
+    <div class="form_item_unit">{{.UnitBefore}}</div>
+  {{end}}
   <input type="number" name="{{.ID}}" value="{{.Value}}" {{if .Autocomplete}}autocomplete="{{.Autocomplete}}"{{end}} {{if .InputMode}}inputmode="{{.InputMode}}"{{end}} id="{{.UUID}}" class="input form_watcher form_input form_input-int"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}}>
+  {{if .UnitAfter}}
+    <div class="form_item_unit">{{.UnitAfter}}</div>
+  {{end}}
   <button type="button" class="btn btn-formitem form_item_plus">
     <img src="/admin/api/icons?file=glyphicons-basic-371-plus.svg&color=${getBaseColor()}" class="btn_icon">
   </button>
@@ -73,6 +79,9 @@
     <div class="chackbox_content">
       {{range $description := .DescriptionsBefore}}
         <div class="form_label_description">{{$description}}</div>
+      {{end}}
+      {{if .Icon}}
+        <img src="/admin/api/icons?file={{.Icon}}&color={{.GetColor}}" class="checkbox_icon">
       {{end}}
       <span class="form_label_text-inline">{{PragoHTML .Name}}</span>
       {{if .Description}}
@@ -201,7 +210,12 @@
           {{if $item.DescriptionBefore}}
             <div class="form_radio_prename">{{$item.DescriptionBefore}}</div>
           {{end}}
-          <div class="form_radio_name">{{$item.Name}}</div>
+          <div class="form_radio_name">
+            {{if $item.Icon}}
+              <img src="/admin/api/icons?file={{$item.Icon}}&color={{$item.GetColor}}" class="form_radio_icon">
+            {{end}}
+            <span>{{$item.Name}}</span>
+          </div>
           {{if $item.DescriptionAfter}}
             <div class="form_radio_postname">{{$item.DescriptionAfter}}</div>
           {{end}}

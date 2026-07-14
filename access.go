@@ -54,41 +54,24 @@ func (app *App) getRoleName(roleID string, locale string) string {
 	return name(locale)
 }
 
-func (app *App) createRoleFieldType() *fieldType {
-	var formDataSource = func(field *Field, ud UserData, value string) any {
-		var roleIDs []string
-		for k := range app.accessManager.roles {
-			if k == "" {
-				continue
-			}
-			roleIDs = append(roleIDs, k)
+func userRoleFormDataSource(field *Field, ud UserData, value string) any {
+	app := field.resource.app
+
+	var roleIDs []string
+	for k := range app.accessManager.roles {
+		if k == "" {
+			continue
 		}
-		sort.Strings(roleIDs)
-
-		vals := [][2]string{}
-		for _, id := range roleIDs {
-			vals = append(vals, [2]string{id, app.getRoleName(id, ud.Locale())})
-		}
-
-		return getFormOptions(vals)
+		roleIDs = append(roleIDs, k)
 	}
-	return &fieldType{
-		dbFieldDescription:  "varchar(255)",
-		getViewFieldContent: stringerToViewFieldContent(defaultStringer),
+	sort.Strings(roleIDs)
 
-		formTemplate:      "form_input_select",
-		formDataSource:    formDataSource,
-		formValueStringer: stringerString,
-
-		filterLayoutTemplate: "filter_layout_select",
-		filterLayoutDataSource: func(f *Field, ud UserData) any {
-			return formDataSource(f, ud, "")
-		},
-
-		listCellDataSource: func(userData UserData, f *Field, value any) *listCell {
-			return &listCell{Name: app.getRoleName(value.(string), userData.Locale()), ItemID: f.id}
-		},
+	vals := [][2]string{}
+	for _, id := range roleIDs {
+		vals = append(vals, [2]string{id, app.getRoleName(id, ud.Locale())})
 	}
+
+	return getFormOptions(vals)
 }
 
 // Role adds role to admin

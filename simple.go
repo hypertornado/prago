@@ -29,7 +29,6 @@ type pageDataSimple struct {
 	NotificationsData string
 	Title             string
 	Logo              string
-	//Icon              string
 
 	Tabs []*Button
 

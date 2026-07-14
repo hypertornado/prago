@@ -46,6 +46,9 @@ type Field struct {
 
 	formFilter    *FormFilter
 	suggestionURL string
+
+	unitBefore string
+	unitAfter  string
 }
 
 func (resource *Resource) Field(name string) *Field {
@@ -330,6 +333,16 @@ func (field *Field) Wide(isWide bool) *Field {
 
 func (field *Field) PreventPasswordManager(prevent bool) *Field {
 	field.preventPasswordManager = prevent
+	return field
+}
+
+func (field *Field) UnitBefore(unit string) *Field {
+	field.unitBefore = unit
+	return field
+}
+
+func (field *Field) UnitAfter(unit string) *Field {
+	field.unitAfter = unit
 	return field
 }
 

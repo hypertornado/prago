@@ -252,7 +252,7 @@ class List {
   }
 
   bindPagination(totalPages: number, selectedPage: number) {
-    var paginationEl = this.listEl.querySelector(".pagination");
+    var paginationEl = this.listEl.querySelector(".list_pagination");
     paginationEl.innerHTML = "";
     if (totalPages < 2) {
       return;
@@ -276,7 +276,7 @@ class List {
       if (shouldBeShown) {
         if (!beforeItemWasShown) {
           let delimiterEl = document.createElement("div");
-          delimiterEl.classList.add("pagination_page_delimiter");
+          delimiterEl.classList.add("list_pagination_page_delimiter");
           delimiterEl.innerText = "…";
           paginationEl.appendChild(delimiterEl);
         }
@@ -285,9 +285,9 @@ class List {
         pEl.setAttribute("href", "#");
         pEl.textContent = i + "";
         if (i == selectedPage) {
-          pEl.classList.add("pagination_page_current");
+          pEl.classList.add("list_pagination_page_current");
         } else {
-          pEl.classList.add("pagination_page");
+          pEl.classList.add("list_pagination_page");
           pEl.setAttribute("data-page", i + "");
           pEl.addEventListener("click", this.paginationChange.bind(this));
         }
@@ -364,7 +364,6 @@ class List {
   }
 
   setFetchedData(dataURL: string, data: any) {
-
     this.fetchCache[dataURL] = data;
 
     var cells = this.listEl.querySelectorAll(".list_cell");
@@ -401,6 +400,16 @@ class List {
         imageEl.setAttribute("src", data.Images[i]);
         cellImagesSpan.appendChild(imageEl);
       }
+    }
+
+    if (data.Style) {
+      cell.classList.add("list_cell-" + data.Style);
+    }
+
+    if (data.IconURL) {
+      let iconEl = cell.querySelector(".list_cell_icon");
+      iconEl.setAttribute("src", data.IconURL);
+      iconEl.classList.remove("hidden");
     }
   }
 

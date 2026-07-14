@@ -1,58 +1,13 @@
 @use "../variables.scss" as *;
 
-.relation_view {
-
-}
-
-.box:has(.relation_view_list) {
-  background-color: white;
-  @include softShadow;
-  border-radius: 8px;
-  max-width: min(632px, 100vw);
-}
-
-.relation_view_header {
-  padding: 8px;
-  display: flex;
-  align-items: center;
-}
-
-.relation_view_header_icon {
-  width: 16px;
-  position: relative;
-  top: 4px;
-  aspect-ratio: 1;
-}
-
-.relation_view_header_name {
-  font-weight: 500;
-  flex-grow: 10;
-  font-size: 1rem;
-  line-height: 1.3em;
-}
-
-.relation_view_header_subname {
-  font-size: .9rem;
-  font-weight: normal;
-  line-height: 1.3em;
-  color: $gray;
-  display: block;
-}
-
-.relation_view_header_tabs {
-  flex-shrink: 0;
-}
-
-.relation_view_list {
-}
 
 .relation_view_list_target {
-  padding: 0px 10px;
+  //padding: 0px 10px;
 }
 
 .relation_view_list_loading,
 .relation_view_list_more {
-  height: 50px;
+  min-height: 10px;
   display: flex;
   justify-content: center;
   align-items: center;

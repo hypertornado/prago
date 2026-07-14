@@ -10,9 +10,10 @@ type listCell struct {
 	Images []string
 	Name   string
 
-	Icon  string
-	Color string
-	Style string
+	Icon      string
+	Color     string
+	Style     string
+	Alignment string
 
 	ItemID   string
 	FetchURL string
@@ -27,15 +28,6 @@ func (cell *listCell) IconColor() string {
 		return cell.Color
 	}
 	return getStyleColor(cell.Style)
-}
-
-func basicCellDataSource(fn func(userData UserData, field *Field, value any) string) func(ud UserData, field *Field, item any) *listCell {
-	return func(ud UserData, field *Field, item any) *listCell {
-		return &listCell{
-			Name:   fn(ud, field, item),
-			ItemID: field.id,
-		}
-	}
 }
 
 func textListDataSource(userData UserData, f *Field, value any) *listCell {
@@ -88,18 +80,30 @@ func fetchListCellRelationAPIHandler(request *Request) {
 	var names []string
 	var images []string
 
-	if previewData != nil {
-		for _, prev := range previewData {
-			if prev.Image != "" {
-				images = append(images, request.app.thumb(prev.ImageID))
-			}
-			names = append(names, prev.Name)
+	for _, prev := range previewData {
+		if prev.Image != "" {
+			images = append(images, request.app.thumb(prev.ImageID))
 		}
+		names = append(names, prev.Name)
+	}
+
+	var style, icon string
+
+	if len(previewData) == 1 {
+		style = previewData[0].Style
+		icon = previewData[0].Icon
+	}
+
+	var iconURL string
+	if icon != "" {
+		iconURL = fmt.Sprintf("/admin/api/icons?file=%s&color=%s", icon, getStyleColor(style))
 	}
 
 	request.WriteJSON(200, listCellFetchResponse{
-		Name:   strings.Join(names, ", "),
-		Images: images,
+		Name:    strings.Join(names, ", "),
+		Style:   style,
+		IconURL: iconURL,
+		Images:  images,
 	})
 
 }

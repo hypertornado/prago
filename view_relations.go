@@ -9,14 +9,6 @@ import (
 	"golang.org/x/net/context"
 )
 
-type viewRelation struct {
-	Icon     string
-	Name     string
-	Subname  string
-	Buttons  []*Button
-	Relation *viewRelationItem
-}
-
 type viewRelationItem struct {
 	SourceResource string
 	TargetResource string
@@ -25,7 +17,7 @@ type viewRelationItem struct {
 	Count          int64
 }
 
-func (resource *Resource) getRelationViews(id int64, request *Request) (ret []*viewRelation) {
+func (resource *Resource) getRelationViews(id int64, request *Request) (ret []*viewField) {
 	for _, v := range resource.relations {
 		vi := resource.getRelationView(id, v, request)
 		if vi != nil {
@@ -35,14 +27,14 @@ func (resource *Resource) getRelationViews(id int64, request *Request) (ret []*v
 	return
 }
 
-func (resource *Resource) getRelationView(id int64, field *relatedField, request *Request) *viewRelation {
+func (resource *Resource) getRelationView(id int64, field *relatedField, request *Request) *viewField {
 	if !request.Authorize(field.resource.canView) {
 		return nil
 	}
 
 	filteredCount := field.resource.itemWithRelationCount(request.r.Context(), field.id, int64(id))
 
-	ret := &viewRelation{}
+	ret := &viewField{}
 
 	icon := ""
 	if field.resource.icon != "" {
@@ -52,7 +44,7 @@ func (resource *Resource) getRelationView(id int64, field *relatedField, request
 
 	name := field.listName(request.Locale())
 	ret.Name = name
-	ret.Subname = messages.ItemsCount(filteredCount, request.Locale())
+	ret.SubNames = append(ret.SubNames, messages.ItemsCount(filteredCount, request.Locale()))
 
 	ret.Buttons = append(ret.Buttons, &Button{
 		//Name: field.resource.pluralName(request.Locale()),

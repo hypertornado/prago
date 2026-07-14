@@ -40,13 +40,17 @@
   flex-grow: 100;
 }
 
-.view_header_btn { 
-   
+.view_header_subname {
+  color: $gray;
+  font-size: .9rem;
+  line-height: 1.3em;
 }
 
-.view_header_btn_icon {
-  
+.view_header_buttons {
+  display: flex;
+  gap: 4px;
 }
+
 
 .view_content_header_inner {
   display: inline-flex;

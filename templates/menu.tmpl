@@ -4,12 +4,11 @@
             {{template "menu_items" .Items}}
         </div>
         <div class="menu_footer">
-            <div>{{.Username}}</div>
-            <div>{{.Email}}</div>
-            {{if .RoleWarning}}
-                <div class="menu_footer_item-warning">{{.RoleWarning}}</div>
+            {{range $item := .FooterItems}}
+                {{if $item}}
+                    <div>{{$item}}</div>
+                {{end}}
             {{end}}
-            <div>{{.AppDescription}}</div>
         </div>
     </div>
 {{end}}

@@ -44,6 +44,9 @@ type FormItem struct {
 	Value              string
 	Data               any
 
+	Style string
+	Color string
+
 	Content template.HTML
 
 	TextOver string
@@ -65,6 +68,9 @@ type FormItem struct {
 
 	IsWide                 bool
 	PreventPasswordManager bool
+
+	UnitBefore string
+	UnitAfter  string
 }
 
 func (form *Form) HeaderName() string {
@@ -83,6 +89,13 @@ func (fi *FormItem) GetContent() template.HTML {
 		return fi.form.app.adminTemplates.ExecuteToHTML(fi.Template, fi)
 	}
 	return ""
+}
+
+func (fi *FormItem) GetColor() string {
+	if fi.Color != "" {
+		return fi.Color
+	}
+	return getStyleColor(fi.Style)
 }
 
 // NewForm creates new form

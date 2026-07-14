@@ -27,14 +27,15 @@ class ImageView {
     container.setAttribute("type", "button");
     container.classList.add("imageview_image");
     container.setAttribute("href", file.ViewURL);
-    container.setAttribute("title", file.ImageDescription);
+    if (file.ImageDescription) {
+      container.setAttribute("data-tooltip", file.ImageDescription);
+    }
 
     let imgEl = document.createElement("img");
     imgEl.classList.add("imageview_image_img");
     imgEl.setAttribute("src", file.ThumbURL)
     container.appendChild(imgEl);
 
-    console.log(file);
 
     let btnEl = document.createElement("div");
     btnEl.classList.add("btn");
@@ -100,9 +101,7 @@ class ImageView {
         Rows: CMenu.rowsFromArray(file.Metadata),
       });
 
-    })
-    
-    
+    });
     
     this.el.appendChild(container);
   }

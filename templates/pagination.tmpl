@@ -1,0 +1,7 @@
+{{define "pagination"}}
+<div class="pagination">
+    {{range $page := .}}
+        <a href="{{$page.URL}}" class="pagination_page{{if $page.Selected}} pagination_page-selected{{end}}">{{$page.Title}}</a>
+    {{end}}
+</div>
+{{end}}

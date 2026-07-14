@@ -73,9 +73,10 @@ func (resource *Resource) initDefaultResourceActions() {
 		id := resource.previewer(request, item).ID()
 		pd.BoxHeader = resource.getBoxHeader(id, item, request)
 		pd.ViewFields = resource.getViewFields(id, item, request)
-		pd.RelationViews = resource.getRelationViews(id, request)
+
+		pd.ViewFields = append(pd.ViewFields, resource.getRelationViews(id, request)...)
 	},
-	).Icon("glyphicons-basic-588-book-open-text.svg").Name(messages.GetNameFunction("view")).setPriority(defaultHighPriority).Permission(resource.canView)
+	).Name(messages.GetNameFunction("view")).setPriority(defaultHighPriority).Permission(resource.canView)
 
 	resource.formItemAction(
 		"edit",
@@ -83,6 +84,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			form.initWithResourceItem(resource, item, request)
 			submitItem := form.AddSubmit(messages.Get(request.Locale(), "edit"))
 			submitItem.Icon = iconEdit
+
 		},
 		func(_ any, vc FormValidation, request *Request) {
 			params := request.Params()

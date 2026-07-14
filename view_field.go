@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"html/template"
 	"reflect"
-	"time"
 )
 
 type viewField struct {
-	Icon string
-	Name string
+	Icon     string
+	Name     string
+	SubNames []string
 
 	ViewContent *viewFieldContent
 
-	//Content    template.HTML
-	EditAction template.JS
-	EditName   string
+	Buttons []*Button
+
+	Relation *viewRelationItem
 }
 
 type viewFieldContent struct {
@@ -69,15 +69,22 @@ func (vf *viewFieldContent) IsEmpty() bool {
 func (resource *Resource) getBoxHeader(id int64, item any, request *Request) *boxHeader {
 	ret := &boxHeader{}
 	ret.DescriptionsBefore = []string{fmt.Sprintf("%s #%d", resource.singularName(request.Locale()), id)}
-	ret.Name = resource.previewer(request, item).Name()
-	ret.Icon = iconView
-	ret.Image = resource.previewer(request, item).ImageURL()
+	previewer := resource.previewer(request, item)
+	ret.Name = previewer.Name()
+	ret.Icon = previewer.Icon()
+	ret.Image = previewer.ImageURL()
+
+	style := previewer.Style()
+	if style != "" {
+		ret.Style = style
+	}
+
 	ret.Buttons = resource.getItemButtonData(request, item, true)
 	return ret
 
 }
 
-func (resource *Resource) getViewFields(id int64, item any, request *Request) (ret []viewField) {
+func (resource *Resource) getViewFields(id int64, item any, request *Request) (ret []*viewField) {
 
 	for i, field := range resource.fields {
 		if !field.authorizeView(request) {
@@ -111,16 +118,18 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 
 		icon := field.getIcon()
 
-		vf := viewField{
+		vf := &viewField{
 			Icon:        icon,
 			Name:        field.name(request.Locale()),
 			ViewContent: viewContent,
-			//Content:     contentOLD,
-			EditName: fmt.Sprintf("Upravit položku „%s“", field.name(request.Locale())),
 		}
 
 		if editURL != "" {
-			vf.EditAction = template.JS(fmt.Sprintf("popup(\"%s\")", editURL))
+			vf.Buttons = append(vf.Buttons, &Button{
+				Name:    fmt.Sprintf("Upravit položku „%s“", field.name(request.Locale())),
+				Icon:    "glyphicons-basic-31-pencil.svg",
+				OnClick: template.JS(fmt.Sprintf("popup(\"%s\")", editURL)),
+			})
 		}
 
 		ret = append(
@@ -135,7 +144,7 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 		}
 		ret = append(
 			ret,
-			viewField{
+			&viewField{
 				Name: v.Name(request.Locale()),
 				ViewContent: &viewFieldContent{
 					ContentHTML: template.HTML(v.Handler(item)),
@@ -147,44 +156,15 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 	return ret
 }
 
-func defaultStringer(userData UserData, field *Field, value any) string {
-	return fmt.Sprintf("%v", value)
-}
-
-func numberStringer(userData UserData, field *Field, value any) string {
-	return humanizeNumber(value.(int64))
-}
-
-func floatStringer(userData UserData, f *Field, value any) string {
-	return humanizeFloat(value.(float64), userData.Locale())
-}
-
-func dateStringer(userData UserData, f *Field, value any) string {
-	return messages.Timestamp(
-		userData.Locale(),
-		value.(time.Time),
-		false,
-	)
-}
-
-func timeStringer(userData UserData, field *Field, value any) string {
-	return messages.Timestamp(
-		userData.Locale(),
-		value.(time.Time),
-		true,
-	)
-}
-
-func stringerToViewFieldContent(fn func(userData UserData, field *Field, value any) string) func(request *Request, field *Field, val any) *viewFieldContent {
-	return func(request *Request, field *Field, val any) *viewFieldContent {
-		name := fn(request, field, val)
-		var empty bool
-		if name == "" {
-			empty = true
-		}
-		return &viewFieldContent{
-			Empty: empty,
-			Name:  name,
-		}
+func defaultViewFieldContent(request *Request, field *Field, val any) *viewFieldContent {
+	name := fmt.Sprintf("%v", val)
+	var empty bool
+	if name == "" {
+		empty = true
 	}
+	return &viewFieldContent{
+		Empty: empty,
+		Name:  name,
+	}
+
 }

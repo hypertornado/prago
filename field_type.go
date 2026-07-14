@@ -3,6 +3,7 @@ package prago
 import (
 	"fmt"
 	"html/template"
+	"time"
 
 	"github.com/golang-commonmark/markdown"
 )
@@ -64,6 +65,10 @@ func (app *App) addFieldType(id string, fieldType *fieldType) {
 		panic(fmt.Sprintf("field type '%s' has empty dbFieldDescription", id))
 	}
 
+	if fieldType.filterLayoutTemplate == "" {
+		panic(fmt.Sprintf("field type '%s' has empty filterLayoutTemplate", id))
+	}
+
 	app.fieldTypes[id] = fieldType
 }
 
@@ -79,17 +84,35 @@ func (rfds relationFormDataSource) Placeholder() string {
 }
 
 func (app *App) initDefaultFieldTypes() {
-	app.addFieldType("role", app.createRoleFieldType())
+	app.addFieldType("role", &fieldType{
+		dbFieldDescription:  "varchar(255)",
+		getViewFieldContent: defaultViewFieldContent,
+
+		formTemplate:      "form_input_select",
+		formDataSource:    userRoleFormDataSource,
+		formValueStringer: stringerString,
+
+		filterLayoutTemplate: "filter_layout_select",
+		filterLayoutDataSource: func(f *Field, ud UserData) any {
+			return userRoleFormDataSource(f, ud, "")
+		},
+
+		listCellDataSource: func(userData UserData, f *Field, value any) *listCell {
+			return &listCell{Name: app.getRoleName(value.(string), userData.Locale()), ItemID: f.id}
+		},
+	})
 
 	app.addFieldType("string", &fieldType{
 		dbFieldDescription: "varchar(255)",
 
-		getViewFieldContent: stringerToViewFieldContent(defaultStringer),
+		getViewFieldContent: defaultViewFieldContent,
 
 		formTemplate:      "form_input",
 		formValueStringer: stringerString,
 
-		listCellDataSource: basicCellDataSource(defaultStringer),
+		listCellDataSource: textListDataSource,
+
+		filterLayoutTemplate: "filter_layout_text",
 	})
 	app.addFieldType("int64", &fieldType{
 		dbFieldDescription: "bigint(20)",
@@ -100,14 +123,22 @@ func (app *App) initDefaultFieldTypes() {
 				return nil
 			}
 			return &viewFieldContent{
-				Name: humanizeNumber(intVal),
+				Name: humanizeNumberWithUnits(intVal, field.unitBefore, field.unitAfter),
 			}
 		},
 
 		formTemplate:      "form_input_int",
 		formValueStringer: stringerInt64,
 
-		listCellDataSource: basicCellDataSource(numberStringer),
+		listCellDataSource: func(ud UserData, field *Field, item any) *listCell {
+			return &listCell{
+				Name:      humanizeNumberWithUnits(item.(int64), field.unitBefore, field.unitAfter),
+				ItemID:    field.id,
+				Alignment: "right",
+			}
+		},
+
+		filterLayoutTemplate: "filter_layout_text",
 
 		naturalCellWidth: 60,
 	})
@@ -127,7 +158,15 @@ func (app *App) initDefaultFieldTypes() {
 		formTemplate:      "form_input_float",
 		formValueStringer: stringerFloat64,
 
-		listCellDataSource: basicCellDataSource(floatStringer),
+		listCellDataSource: func(ud UserData, field *Field, item any) *listCell {
+			return &listCell{
+				Name:      humanizeFloat(item.(float64), ud.Locale()),
+				ItemID:    field.id,
+				Alignment: "right",
+			}
+		},
+
+		filterLayoutTemplate: "filter_layout_number",
 
 		naturalCellWidth: 60,
 	})
@@ -140,7 +179,7 @@ func (app *App) initDefaultFieldTypes() {
 
 			return &viewFieldContent{
 				Name:  messages.Get(request.Locale(), "yes_plain"),
-				Icon:  "glyphicons-basic-153-square-checkbox.svg",
+				Icon:  iconCheckbox,
 				Style: "create",
 			}
 		},
@@ -156,15 +195,16 @@ func (app *App) initDefaultFieldTypes() {
 
 		listCellDataSource: func(ud UserData, field *Field, item any) *listCell {
 			ret := &listCell{}
-
+			ret.ItemID = field.id
 			if item.(bool) {
 				ret.Style = "create"
-				ret.Icon = "glyphicons-basic-153-square-checkbox.svg"
+				ret.Icon = iconCheckbox
+				ret.Alignment = "center"
 			}
-
 			return ret
-
 		},
+
+		filterLayoutTemplate: "filter_layout_boolean",
 
 		formHideLabel: true,
 
@@ -173,12 +213,14 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("text", &fieldType{
 		dbFieldDescription:  "text",
-		getViewFieldContent: stringerToViewFieldContent(defaultStringer),
+		getViewFieldContent: defaultViewFieldContent,
 
 		formTemplate:      "form_input_textarea",
 		formValueStringer: stringerString,
 
 		listCellDataSource: textListDataSource,
+
+		filterLayoutTemplate: "filter_layout_text",
 	})
 	app.addFieldType("order", &fieldType{
 		dbFieldDescription: "bigint(20)",
@@ -190,9 +232,17 @@ func (app *App) initDefaultFieldTypes() {
 
 		formValueStringer: stringerInt64,
 
-		listCellDataSource: basicCellDataSource(numberStringer),
+		listCellDataSource: func(ud UserData, field *Field, item any) *listCell {
+			return &listCell{
+				Name:      humanizeNumber(item.(int64)) + ".",
+				ItemID:    field.id,
+				Alignment: "right",
+			}
+		},
 
 		formTemplate: "form_input_int",
+
+		filterLayoutTemplate: "filter_layout_number",
 	})
 
 	app.addFieldType("cdnfile", &fieldType{
@@ -219,9 +269,9 @@ func (app *App) initDefaultFieldTypes() {
 
 		listCellDataSource: imageCellViewData,
 
-		filterLayoutTemplate:   "filter_layout_select",
-		filterLayoutDataSource: boolFilterLayoutDataSource,
-		naturalCellWidth:       60,
+		filterLayoutTemplate: "filter_layout_text",
+
+		naturalCellWidth: 60,
 	})
 
 	app.addFieldType("image", &fieldType{
@@ -234,8 +284,7 @@ func (app *App) initDefaultFieldTypes() {
 		formValueStringer:  stringerString,
 		listCellDataSource: imageCellViewData,
 
-		filterLayoutTemplate:   "filter_layout_select",
-		filterLayoutDataSource: boolFilterLayoutDataSource,
+		filterLayoutTemplate: "filter_layout_text",
 
 		naturalCellWidth: 60,
 	})
@@ -255,7 +304,9 @@ func (app *App) initDefaultFieldTypes() {
 		formTemplate:      "form_input",
 		formValueStringer: stringerString,
 
-		listCellDataSource: basicCellDataSource(defaultStringer),
+		listCellDataSource: textListDataSource,
+
+		filterLayoutTemplate: "filter_layout_text",
 
 		naturalCellWidth: 60,
 	})
@@ -277,6 +328,8 @@ func (app *App) initDefaultFieldTypes() {
 		formValueStringer: stringerString,
 
 		listCellDataSource: markdownListDataSource,
+
+		filterLayoutTemplate: "filter_layout_text",
 	})
 	app.addFieldType("place", &fieldType{
 		dbFieldDescription: "varchar(255)",
@@ -293,9 +346,11 @@ func (app *App) initDefaultFieldTypes() {
 
 		formValueStringer: stringerString,
 
-		listCellDataSource: basicCellDataSource(defaultStringer),
+		listCellDataSource: textListDataSource,
 
 		formTemplate: "form_input_place",
+
+		filterLayoutTemplate: "filter_layout_text",
 	})
 
 	app.addFieldType("relation", &fieldType{
@@ -324,6 +379,8 @@ func (app *App) initDefaultFieldTypes() {
 
 		listCellDataSource: relationCellViewData,
 
+		filterLayoutTemplate: "filter_layout_relation",
+
 		naturalCellWidth: 150,
 	})
 
@@ -351,36 +408,78 @@ func (app *App) initDefaultFieldTypes() {
 
 		listCellDataSource: relationCellViewData,
 
+		filterLayoutTemplate: "filter_layout_relation",
+
 		naturalCellWidth: 150,
 	})
 
 	app.addFieldType("date", &fieldType{
-		dbFieldDescription:  "date",
-		getViewFieldContent: stringerToViewFieldContent(dateStringer),
+		dbFieldDescription: "date",
+		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+			t := value.(time.Time)
+			ret := &viewFieldContent{
+				Name: messages.Timestamp(
+					request.Locale(),
+					t,
+					false,
+				),
+			}
+			if t.IsZero() {
+				ret.Empty = true
+			}
+			return ret
+		},
 
 		formTemplate:      "form_input_date",
 		formValueStringer: stringerDate,
 		naturalCellWidth:  130,
 
-		listCellDataSource: basicCellDataSource(dateStringer),
+		listCellDataSource: func(ud UserData, field *Field, item any) *listCell {
+			return &listCell{
+				Name: messages.TimestampCompact(
+					ud.Locale(),
+					item.(time.Time),
+					false,
+				),
+				Alignment: "right",
+			}
+		},
+
+		filterLayoutTemplate: "filter_layout_date",
 	})
 
 	app.addFieldType("time", &fieldType{
-		dbFieldDescription:  "datetime",
-		getViewFieldContent: stringerToViewFieldContent(timeStringer),
+		dbFieldDescription: "datetime",
+		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+			t := value.(time.Time)
+			ret := &viewFieldContent{
+				Name: messages.Timestamp(
+					request.Locale(),
+					t,
+					true,
+				),
+			}
+			if t.IsZero() {
+				ret.Empty = true
+			}
+			return ret
+		},
 
 		formTemplate:      "form_input_timestamp",
 		formValueStringer: stringerDateTime,
 		naturalCellWidth:  130,
 
-		listCellDataSource: basicCellDataSource(timeStringer),
-	})
-}
+		listCellDataSource: func(ud UserData, field *Field, item any) *listCell {
+			return &listCell{
+				Name: messages.TimestampCompact(
+					ud.Locale(),
+					item.(time.Time),
+					true,
+				),
+				Alignment: "right",
+			}
+		},
 
-func boolFilterLayoutDataSource(field *Field, userData UserData) any {
-	return [][2]string{
-		{"", ""},
-		{"true", messages.Get(userData.Locale(), "yes")},
-		{"false", messages.Get(userData.Locale(), "no")},
-	}
+		filterLayoutTemplate: "filter_layout_date",
+	})
 }

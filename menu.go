@@ -10,15 +10,8 @@ import (
 )
 
 type menu struct {
-	Language    string
-	SearchQuery string
 	Items       []*menuItem
-
-	Username       string
-	Email          string
-	AppDescription string
-	RoleWarning    string
-	AppName        string
+	FooterItems []string
 }
 
 type menuItem struct {
@@ -58,14 +51,12 @@ func (app *App) getMenu(request *Request, item any) (ret *menu) {
 	ret = &menu{
 		Items: app.MainBoard.getMenuItems(menuContext),
 	}
-	ret.Language = request.Locale()
 
 	user := request.getUser()
-	ret.Username = fmt.Sprintf("%s %s", user.Username, user.Name)
-	ret.Email = user.Email
+	ret.FooterItems = append(ret.FooterItems, fmt.Sprintf("%s %s", user.Username, user.Name))
+	ret.FooterItems = append(ret.FooterItems, user.Email)
 
 	var items []string
-
 	items = append(items, app.codeName)
 	items = append(items, fmt.Sprintf("%s", app.version))
 
@@ -77,30 +68,29 @@ func (app *App) getMenu(request *Request, item any) (ret *menu) {
 		}
 		items = append(items, roleName)
 	} else {
-		ret.RoleWarning = "Nebyla vám zatím administrátorem webu přidělena žádná role"
+		items = append(items, "Nebyla vám zatím administrátorem webu přidělena žádná role")
 	}
 
 	items = append(items, localeNames[user.Locale])
-	ret.AppDescription = strings.Join(items, " · ")
-	ret.AppName = app.name(request.Locale())
+	ret.FooterItems = append(ret.FooterItems, strings.Join(items, " · "))
 	return ret
 }
 
-func (menu menu) GetIcon() string {
+func (menu menu) GetIconAndStyle() (string, string) {
 	return getIconFromMenuSubsections(menu.Items)
 }
 
-func getIconFromMenuSubsections(items []*menuItem) string {
+func getIconFromMenuSubsections(items []*menuItem) (string, string) {
 	for _, v := range items {
 		if v.Selected {
-			return v.Icon
+			return v.Icon, v.Style
 		}
-		icon := getIconFromMenuSubsections(v.Subitems)
+		icon, style := getIconFromMenuSubsections(v.Subitems)
 		if icon != "" {
-			return icon
+			return icon, style
 		}
 	}
-	return ""
+	return "", ""
 }
 
 func (menu menu) GetTitle() string {
@@ -230,9 +220,6 @@ func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem
 		}
 
 		icon := v.icon
-		/*if icon == "" {
-			icon = iconForm
-		}*/
 
 		if fullURL == "/admin/_options" {
 			sortPriority = -1
@@ -306,25 +293,33 @@ func (resource *Resource) getResourceItemMenu(requestContext *menuRequestContext
 			continue
 		}
 
+		icon := v.icon
+		style := v.style
 		name := v.name(requestContext.UserData.Locale())
 		var thumbnail string
 		if v.url == "" {
 			previewer := resource.previewer(requestContext.UserData, requestContext.Item)
 			thumbnail = previewer.ThumbnailURL()
 			name = previewer.Name()
+			if icon == "" {
+				icon = previewer.Icon()
+			}
+			if style == "" {
+				style = previewer.Style()
+			}
 		}
 
 		priority := v.priority - int64(k)
 
 		item := &menuItem{
-			Icon:         v.icon,
+			Icon:         icon,
 			Image:        thumbnail,
 			Name:         name,
 			URL:          resource.getItemURL(requestContext.Item, v.url, requestContext.UserData),
 			Expanded:     true,
 			SortPriority: priority,
 			NoSearch:     true,
-			Style:        v.style,
+			Style:        style,
 		}
 
 		if requestContext.URL == item.URL {

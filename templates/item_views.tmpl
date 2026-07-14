@@ -7,17 +7,29 @@
         {{if $item.Icon}}
           <img src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBlackColor}}" class="view_header_icon">
         {{end}}
-        <div class="view_header_name">{{$item.Name}}</div>
-        {{if $item.EditAction}}
-          <div onclick="{{$item.EditAction}}" class="btn view_header_btn" data-tooltip="{{$item.EditName}}">
-            <img src="/admin/api/icons?file=glyphicons-basic-31-pencil.svg&color={{PragoBlackColor}}" class="btn_icon view_header_btn_icon">
-          </div>
-        {{end}}
+        <div class="view_header_name">
+          <div>{{$item.Name}}</div>
+          {{range $subname := $item.SubNames}}
+            <div class="view_header_subname">{{$subname}}</div>
+          {{end}}
+        </div>
+        <div class="view_header_buttons">
+          {{range $btn := .Buttons}}
+            <a class="btn" {{if $btn.URL}}href="{{$btn.URL}}"{{end}} {{if $btn.OnClick}}onclick="{{$btn.OnClick}}"{{end}} data-tooltip="{{$btn.GetTitle}}">
+              <img src="/admin/api/icons?file={{$btn.Icon}}&color={{PragoBlackColor}}" class="btn_icon">
+            </a>
+          {{end}}
+        </div>
       </div>
     {{end}}
     {{if $item.ViewContent}}
       {{template "item_view_content" $item.ViewContent}}
     {{end}}
+
+    {{if .Relation}}
+      {{template "view_relationlist" .Relation}}
+    {{end}}
+
     </div>
   {{end}}
   </div>
@@ -80,9 +92,12 @@
         {{if $item.Image}}
           <img src="{{PragoCSS $item.Image}}" class="preview_image" loading="lazy">
         {{end}}
+        {{if $item.Icon}}
+          <img src="/admin/api/icons?file={{$item.Icon}}&color={{$item.GetIconColor}}" class="preview_icon">
+        {{end}}
         <div class="preview_right">
           <div class="preview_name">{{$item.Name}}</div>
-          <div class="preview_description" title="{{$item.Description}}">{{$item.Description}}</div>
+          <div class="preview_description" {{if $item.Description}}data-tooltip="{{$item.Description}}"{{end}}>{{$item.Description}}</div>
         </div>
       </a>
       {{end}}

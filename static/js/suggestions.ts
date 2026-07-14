@@ -102,6 +102,8 @@ class Suggestions {
           this.suggestionsEl.appendChild(buttonEl);
         }
 
+        initTooltips();
+
         this.scrollTop();
       } else {
         console.log("Error while searching");

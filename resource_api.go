@@ -13,17 +13,7 @@ import (
 )
 
 func (resource *Resource) initDefaultResourceAPIs() {
-	resource.api("list").Handler(
-		func(request *Request) {
-			listContentData, err := resource.getListContent(request, request.Request().URL.Query())
-			must(err)
-			request.Response().Header().Set("Prago-List-Message", url.PathEscape(listContentData.Message))
-			request.Response().Header().Set("Prago-List-Total-Pages", fmt.Sprintf("%d", listContentData.Pagination.TotalPages))
-			request.Response().Header().Set("Prago-List-Selected-Page", fmt.Sprintf("%d", listContentData.Pagination.SelectedPage))
-
-			request.WriteHTML(200, resource.app.adminTemplates, "list_cells", listContentData)
-		},
-	)
+	resource.initListAPI()
 
 	resource.api("export").Handler(func(request *Request) {
 		if !request.Authorize(resource.canExport) {

@@ -45,7 +45,23 @@ func (*messagesStruct) Timestamp(lang string, t time.Time, showTime bool) string
 	}
 	var ret string
 	if lang == "cs" {
-		ret = t.Format("2. ") + czechMonth(t) + t.Format(" 2006")
+		ret = czechWeekday(t) + " " + t.Format("2. ") + czechMonth(t) + t.Format(" 2006")
+	} else {
+		ret = t.Format("2006-01-02")
+	}
+	if showTime {
+		ret += " " + t.Format("15:04")
+	}
+	return ret
+}
+
+func (*messagesStruct) TimestampCompact(lang string, t time.Time, showTime bool) string {
+	if t.IsZero() {
+		return ""
+	}
+	var ret string
+	if lang == "cs" {
+		ret = czechWeekdayCompact(t) + " " + t.Format("02. 01. 2006")
 	} else {
 		ret = t.Format("2006-01-02")
 	}
@@ -71,6 +87,32 @@ func czechMonth(date time.Time) string {
 		"prosince",
 	}
 	return months[date.Month()-1]
+}
+
+func czechWeekday(date time.Time) string {
+	weekdays := []string{
+		"neděle",
+		"pondělí",
+		"úterý",
+		"středa",
+		"čtvrtek",
+		"pátek",
+		"sobota",
+	}
+	return weekdays[date.Weekday()]
+}
+
+func czechWeekdayCompact(date time.Time) string {
+	weekdays := []string{
+		"ne",
+		"po",
+		"út",
+		"st",
+		"čt",
+		"pá",
+		"so",
+	}
+	return weekdays[date.Weekday()]
 }
 
 func (m *messagesStruct) Get(lang, id string, params ...any) string {

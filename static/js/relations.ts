@@ -143,6 +143,7 @@ class RelationPicker {
     previewEl.setAttribute("data-id", data.ID);
     this.suggestionsObject.clear();
     this.updateLayout();
+    initTooltips();
   }
 
   numberOfItems(): number {
