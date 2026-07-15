@@ -8361,6 +8361,10 @@ class Timestamp {
 class RelationPicker {
     constructor(el) {
         this.el = el;
+        this.readonly = false;
+        if (el.classList.contains("relation_input-readonly")) {
+            this.readonly = true;
+        }
         if (el.getAttribute("data-autofocus") == "true") {
             this.autofocus = true;
         }
@@ -8446,15 +8450,17 @@ class RelationPicker {
         deleteButton.innerHTML = `
       <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color=base" class="btn_icon">
     `;
-        previewEl.appendChild(deleteButton);
-        deleteButton.addEventListener("click", () => {
-            el.classList.add("relation_input_preview-remove");
-            setTimeout(() => {
-                previewEl.remove();
-                this.updateLayout();
-                this.suggestionsObject.focus();
-            }, 200);
-        });
+        if (!this.readonly) {
+            previewEl.appendChild(deleteButton);
+            deleteButton.addEventListener("click", () => {
+                el.classList.add("relation_input_preview-remove");
+                setTimeout(() => {
+                    previewEl.remove();
+                    this.updateLayout();
+                    this.suggestionsObject.focus();
+                }, 200);
+            });
+        }
         previewEl.setAttribute("data-id", data.ID);
         this.suggestionsObject.clear();
         this.updateLayout();
@@ -8486,7 +8492,7 @@ class RelationPicker {
         this.updateLayout();
     }
     updateLayout() {
-        if (this.multipleInputs || this.numberOfItems() == 0) {
+        if (!this.readonly && (this.multipleInputs || this.numberOfItems() == 0)) {
             this.picker.classList.remove("hidden");
         }
         else {

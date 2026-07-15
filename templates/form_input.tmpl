@@ -1,4 +1,7 @@
 {{define "form_input"}}
+  {{if .UnitBefore}}
+    <div class="form_item_unit">{{.UnitBefore}}</div>
+  {{end}}
   <input type="text"
     name="{{.ID}}"
     value="{{.Value}}"
@@ -10,6 +13,9 @@
     {{if .Focused}} autofocus{{end}}
     {{if .Readonly}} readonly{{end}}
   >
+  {{if .UnitAfter}}
+    <div class="form_item_unit">{{.UnitAfter}}</div>
+  {{end}}
 {{end}}
 
 {{define "form_input_int"}}
@@ -248,7 +254,7 @@
 {{end}}
 
 {{define "form_input_relation"}}
-<div class="relation_input {{if .Data.MultiRelation}}relation_input-multiple{{else}}relation_input-single{{end}}" {{if .Focused}}data-autofocus="true"{{end}} data-relation="{{.Data.RelatedID}}" data-multiple="{{.Data.MultiRelation}}" data-filter="{{.FormFilterID}}">
+<div class="relation_input {{if .Readonly}}relation_input-readonly{{end}} {{if .Data.MultiRelation}}relation_input-multiple{{else}}relation_input-single{{end}}" {{if .Focused}}data-autofocus="true"{{end}} data-relation="{{.Data.RelatedID}}" data-multiple="{{.Data.MultiRelation}}" data-filter="{{.FormFilterID}}">
   <input type="hidden" name="{{.ID}}" value="{{.Value}}">
   <progress class="progress"></progress>
   <div class="relation_input_previews"></div>
