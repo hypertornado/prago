@@ -50,6 +50,7 @@ class Form {
     this.initConflictCheck();
     this.initPlusMinus();
     this.initCalendar();
+    this.initDaterange();
     this.initShowpassword();
 
     form.addEventListener("submit", () => {
@@ -156,6 +157,14 @@ class Form {
         input.focus();
         e.preventDefault();
       })
+    }
+  }
+
+  initDaterange() {
+    let els = this.formEl.querySelectorAll(".form_daterange");
+    for (var i = 0; i < els.length; i++) {
+      let el = <HTMLDivElement>els[i];
+      new FormDateRange(el);
     }
   }
 

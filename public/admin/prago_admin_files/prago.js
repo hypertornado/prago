@@ -8760,6 +8760,7 @@ class Form {
         this.initConflictCheck();
         this.initPlusMinus();
         this.initCalendar();
+        this.initDaterange();
         this.initShowpassword();
         form.addEventListener("submit", () => {
             this.dirty = false;
@@ -8848,6 +8849,13 @@ class Form {
                 input.focus();
                 e.preventDefault();
             });
+        }
+    }
+    initDaterange() {
+        let els = this.formEl.querySelectorAll(".form_daterange");
+        for (var i = 0; i < els.length; i++) {
+            let el = els[i];
+            new FormDateRange(el);
         }
     }
     initShowpassword() {
@@ -9197,6 +9205,30 @@ function makeid(length) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
+}
+class FormDateRange {
+    constructor(el) {
+        let fromInput = el.querySelector(".form_input-from");
+        let toInput = el.querySelector(".form_input-to");
+        let fromCalendar = el.querySelector(".form_daterange_calendar-from");
+        let toCalendar = el.querySelector(".form_daterange_calendar-to");
+        this.bindCalendarAndInput(fromInput, fromCalendar);
+        this.bindCalendarAndInput(toInput, toCalendar);
+        el.querySelector(".form_daterange_more").addEventListener("mousedown", (e) => {
+            new PopupForm("/admin/_dateranges", (data) => {
+                let dates = data.Data.split("_");
+                fromInput.value = dates[0];
+                toInput.value = dates[1];
+            });
+        });
+    }
+    bindCalendarAndInput(input, btn) {
+        btn.addEventListener("mousedown", (e) => {
+            input.showPicker();
+            input.focus();
+            e.preventDefault();
+        });
+    }
 }
 class SearchForm {
     constructor(el) {

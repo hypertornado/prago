@@ -107,6 +107,27 @@
   </button>
 {{end}}
 
+{{define "form_input_daterange"}}
+  <div class="form_daterange">
+    <div class="form_daterange_inner">
+      <input type="date" name="{{.ID}}_from" value="{{.DateRangeFrom}}" class="input form_watcher form_input form_input-from">
+      <button type="button" class="btn form_daterange_calendar form_daterange_calendar-from">
+        <img src="/admin/api/icons?file=glyphicons-basic-46-calendar.svg&color=${getBaseColor()}" class="btn_icon">
+      </button>
+
+      <img src="/admin/api/icons?file=glyphicons-basic-214-arrow-right.svg&color=999999" class="form_daterange_arrow">
+
+      <input type="date" name="{{.ID}}_to" value="{{.DateRangeTo}}" class="input form_watcher form_input form_input-to">
+      <button type="button" class="btn form_daterange_calendar form_daterange_calendar-to">
+        <img src="/admin/api/icons?file=glyphicons-basic-46-calendar.svg&color=${getBaseColor()}" class="btn_icon">
+      </button>
+    </div>
+    <button type="button" class="btn btn-formitem form_daterange_more">
+      <img src="/admin/api/icons?file=glyphicons-basic-58-history.svg&color=${getBaseColor()}" class="btn_icon">
+    </button>
+  </div>
+{{end}}
+
 {{define "form_input_datetime"}}
   <input type="datetime-local" name="{{.ID}}" value="{{.Value}}" id="{{.UUID}}" class="input form_watcher form_input"{{if .Focused}} autofocus{{end}}{{if .Readonly}} readonly{{end}} autocomplete="off">
 {{end}}
@@ -208,7 +229,7 @@
   <div class="form_radios">
   {{range $item := .Data}}
       <label class="form_radio">
-        <input type="radio" id="{{$id}}-{{$item.ID}}" name="{{$id}}" value="{{$item.ID}}"{{if eq $val $item.ID}} checked{{end}}>
+        <input type="radio" id="{{$id}}-{{$item.ID}}" name="{{$id}}" value="{{$item.ID}}"{{if eq $val $item.ID}} checked{{end}} class="form_watcher">
         {{if .ImageURL}}
           <img src="{{.ImageURL}}" class="form_radio_image">
         {{end}}

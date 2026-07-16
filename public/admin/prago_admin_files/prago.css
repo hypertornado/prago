@@ -1353,6 +1353,48 @@ input[type=number] {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.form_daterange {
+  gap: 4px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.form_daterange_inner {
+  border: 1px solid #ddd;
+  flex-wrap: wrap;
+  gap: 4px;
+  background-color: white;
+  border-radius: 8px;
+  padding: 0px 4px;
+  display: flex;
+  align-items: center;
+}
+
+.form_daterange_inner:focus-within {
+  border: 1px solid var(--baseColor);
+}
+
+.form_input-from, .form_input-to {
+  border: none;
+  box-shadow: none;
+  outline: none;
+  min-width: 20px !important;
+  max-width: 100px !important;
+}
+
+.form_daterange_calendar {
+  border: none;
+  box-shadow: none;
+  padding: 4px;
+}
+
+.form_daterange_arrow {
+  width: 16px;
+  aspect-ratio: 1;
+  margin: 0px 16px;
+}
+
 .box {
   margin: 0 auto;
   max-width: min(650px, 100vw);

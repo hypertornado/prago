@@ -202,6 +202,7 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initListFilter()
 	app.initResourceConflict()
 	app.initMultieditChangePopup()
+	app.initDateRange()
 
 	return app
 }
