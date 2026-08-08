@@ -29,7 +29,7 @@ func initCDNProjectResource() {
 	projectResource.Name(unlocalized("Projekt"), unlocalized("Projekty"))
 
 	prago.ActionForm(app, "upload-file", func(form *prago.Form, request *prago.Request) {
-		projects := prago.Query[CDNProject](app).List()
+		projects := app.Query[CDNProject]().List()
 		var values [][2]string
 		values = append(values, [2]string{"", ""})
 		for _, p := range projects {
@@ -53,7 +53,7 @@ func initCDNProjectResource() {
 			return
 		}
 
-		project := prago.Query[CDNProject](app).Is("id", projectID).First()
+		project := app.Query[CDNProject]().Is("id", projectID).First()
 		if project == nil {
 			fv.AddItemError("project", "Projekt nenalezen")
 			return
@@ -86,7 +86,7 @@ func initCDNProjectResource() {
 
 func getCDNProjectsMap() map[string]*CDNProject {
 	var accounts = map[string]*CDNProject{}
-	projects := prago.Query[CDNProject](app).List()
+	projects := app.Query[CDNProject]().List()
 	for _, v := range projects {
 		accounts[v.Name] = v
 	}
@@ -95,7 +95,7 @@ func getCDNProjectsMap() map[string]*CDNProject {
 
 func getCDNProjectsIDMap() map[int64]*CDNProject {
 	var accounts = map[int64]*CDNProject{}
-	projects := prago.Query[CDNProject](app).List()
+	projects := app.Query[CDNProject]().List()
 	for _, v := range projects {
 		accounts[v.ID] = v
 	}

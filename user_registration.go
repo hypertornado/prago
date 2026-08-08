@@ -16,7 +16,7 @@ func initUserRegistration(app *App) {
 		email := request.Param("email")
 		token := request.Param("token")
 
-		user := Query[user](app).Is("email", email).First()
+		user := app.Query[user]().Is("email", email).First()
 		if user != nil {
 			if !user.emailConfirmed() {
 				if token == user.emailToken(app) {
@@ -73,7 +73,7 @@ func registrationValidation(vc FormValidation, request *Request) {
 	if !IsEmailValid(email) {
 		vc.AddItemError("email", messages.Get(locale, "email_not_valid"))
 	} else {
-		user := Query[user](app).Is("email", email).First()
+		user := app.Query[user]().Is("email", email).First()
 		if user != nil && user.Email == email {
 			vc.AddItemError("email", messages.Get(locale, "email_already_registered"))
 		}
@@ -97,7 +97,7 @@ func registrationValidation(vc FormValidation, request *Request) {
 		u.Locale = locale
 		must(u.newPassword(request.Param("password")))
 
-		count, err := Query[user](app).Count()
+		count, err := app.Query[user]().Count()
 		if err == nil && count == 0 {
 			u.Role = sysadminRoleName
 		}
@@ -146,7 +146,7 @@ func (u user) sendConfirmEmail(app *App, locale string) error {
 }
 
 func (u user) sendAdminEmail(app *App) error {
-	users := Query[user](app).Is("role", "sysadmin").List()
+	users := app.Query[user]().Is("role", "sysadmin").List()
 	for _, receiver := range users {
 
 		err := app.Mailing(receiver.Locale, func(md *MailingData) {

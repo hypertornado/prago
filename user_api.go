@@ -15,7 +15,7 @@ func (app *App) initUserAPI() {
 		table.Row(table.Cell("API keys").Header().DescriptionAfter(fmt.Sprintf("Use HTTP header: %s", apiHTTPHeader)))
 
 		usr := request.getUser()
-		keys := Query[session](app).Is("User", usr.ID).Is("IsDeleted", false).Is("IsAPI", true).Order("id").List()
+		keys := app.Query[session]().Is("User", usr.ID).Is("IsDeleted", false).Is("IsAPI", true).Order("id").List()
 		for _, key := range keys {
 			table.Row(Cell(key.UUID).Button(&Button{
 				Name:    "Delete",

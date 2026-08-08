@@ -18,7 +18,7 @@ func (app *App) GetPhotoGalleryImageData(idsStr string) (ret []*PhotoGalleryImag
 	ids := strings.SplitSeq(idsStr, ",")
 
 	for v := range ids {
-		file := Query[File](app).Is("uid", v).First()
+		file := app.Query[File]().Is("uid", v).First()
 		if file != nil {
 			if file.IsImage() {
 

@@ -10,7 +10,11 @@ type QueryData[T any] struct {
 	listQuery *listQuery
 }
 
-func Query[T any](app *App) *QueryData[T] {
+/*func (app *App) Query[T any]() *QueryData[T] {
+	return Query[T](app)
+}*/
+
+func (app *App) Query[T any]() *QueryData[T] {
 	res := getResource[T](app)
 	if res == nil {
 		var t T

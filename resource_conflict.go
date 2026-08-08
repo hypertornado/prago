@@ -63,14 +63,14 @@ func (app *App) getConflictResponse(request *Request, version int64) *conflictRe
 		return &conflictResponse{}
 	}
 
-	logItem := Query[activityLog](app).ID(version)
+	logItem := app.Query[activityLog]().ID(version)
 	if logItem == nil {
 		return &conflictResponse{
 			Show: true,
 			Text: fmt.Sprintf("Tuto verzi nelze najít: '%d'", version),
 		}
 	}
-	currentVersion := Query[activityLog](app).Is("resourcename", logItem.ResourceName).Is("ItemID", logItem.ItemID).OrderDesc("id").First()
+	currentVersion := app.Query[activityLog]().Is("resourcename", logItem.ResourceName).Is("ItemID", logItem.ItemID).OrderDesc("id").First()
 	if currentVersion.ID != logItem.ID {
 		if request.Authorize(app.UsersResource.canView) {
 			//logItem := Query[activityLog](app).ID(currentVersion)
@@ -175,7 +175,7 @@ func GetItemVersion[T any](request *Request, item *T) int64 {
 
 func (resource *Resource) currentItemVersion(itemID int64) int64 {
 	app := resource.app
-	lastLog := Query[activityLog](app).Is("resourcename", resource.id).Is("ItemID", itemID).OrderDesc("id").First()
+	lastLog := app.Query[activityLog]().Is("resourcename", resource.id).Is("ItemID", itemID).OrderDesc("id").First()
 	if lastLog != nil {
 		return lastLog.ID
 	}
@@ -196,7 +196,7 @@ func (resource *Resource) validateConflict(request *Request, vc *itemValidation,
 	if currentVersion != int64(oldVersion) {
 
 		if request.Authorize(app.UsersResource.canView) {
-			logItem := Query[activityLog](app).ID(currentVersion)
+			logItem := app.Query[activityLog]().ID(currentVersion)
 
 			var userName = fmt.Sprintf("#%d", logItem.User)
 			ud := app.GetUserData(logItem.User)

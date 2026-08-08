@@ -12,12 +12,12 @@ func bindStats(app *prago.App) {
 	dashboard := app.MainBoard.Dashboard(unlocalized("Soubory"))
 
 	dashboard.Figure(unlocalized("Počet souborů"), "sysadmin").Unit(unlocalized("souborů")).Value(func(r *prago.Request) int64 {
-		files := prago.Query[CDNFile](app).List()
+		files := app.Query[CDNFile]().List()
 		return int64(len(files))
 	})
 
 	dashboard.Figure(unlocalized("Velikost souborů"), "sysadmin").Unit(unlocalized("bajtů")).Value(func(r *prago.Request) int64 {
-		files := prago.Query[CDNFile](app).List()
+		files := app.Query[CDNFile]().List()
 		var ret int64
 		for _, file := range files {
 			ret += file.Filesize

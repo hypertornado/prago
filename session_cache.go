@@ -74,7 +74,7 @@ func (request *Request) writeToSessionCache() {
 
 func (app *App) persistSessionCacheItem(item *sessionCacheLog) {
 
-	ses := Query[session](app).Is("uuid", item.SessionUUID).First()
+	ses := app.Query[session]().Is("uuid", item.SessionUUID).First()
 	if ses == nil {
 		app.Log().Errorf("Can't find session to persist: %s", item.SessionUUID)
 		return
@@ -96,7 +96,7 @@ func (app *App) persistSessionCacheItem(item *sessionCacheLog) {
 		return
 	}
 
-	usr := Query[user](app).ID(ses.User)
+	usr := app.Query[user]().ID(ses.User)
 	if usr == nil {
 		app.Log().Errorf("Can't find user to persist %d", ses.User)
 		return

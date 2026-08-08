@@ -28,7 +28,7 @@ func (app *App) thumb(ids string) string {
 		return ""
 	}
 	for _, v := range strings.Split(ids, ",") {
-		image := Query[File](app).Is("uid", v).First()
+		image := app.Query[File]().Is("uid", v).First()
 		if image != nil && image.IsImage() {
 			return image.GetSmall()
 		}
@@ -41,7 +41,7 @@ func (app *App) largeImage(ids string) string {
 		return ""
 	}
 	for _, v := range strings.Split(ids, ",") {
-		image := Query[File](app).Is("uid", v).First()
+		image := app.Query[File]().Is("uid", v).First()
 		if image != nil && image.IsImage() {
 			return image.GetLarge()
 		}
@@ -56,7 +56,7 @@ func (app *App) GetFiles(ctx context.Context, ids string) []*File {
 		if v == "" {
 			continue
 		}
-		file := Query[File](app).Context(ctx).Is("uid", v).First()
+		file := app.Query[File]().Context(ctx).Is("uid", v).First()
 		if file != nil {
 			files = append(files, file)
 		}
@@ -126,7 +126,7 @@ func (app *App) afterInitFilesResource() {
 				fv.AddError("Neplatné UUID " + v)
 				return
 			}
-			file := Query[File](app).Is("uid", v).First()
+			file := app.Query[File]().Is("uid", v).First()
 			if file == nil {
 				fv.AddError("Soubor nelze nalézt " + v)
 				return
@@ -162,7 +162,7 @@ func (app *App) afterInitFilesResource() {
 				//fv.AddError("Neplatné UUID " + v)
 				continue
 			}
-			file := Query[File](app).Is("uid", v).First()
+			file := app.Query[File]().Is("uid", v).First()
 			if file == nil {
 				fv.AddError("Soubor nelze nalézt " + v)
 				return
@@ -356,7 +356,7 @@ func (app *App) afterInitFilesResource() {
 
 	app.ListenActivity(func(activity Activity) {
 		if activity.ActivityType == "delete" && activity.ResourceID == resource.id {
-			file := Query[File](app).ID(activity.ID)
+			file := app.Query[File]().ID(activity.ID)
 			err := filesCDN.DeleteFile(file.UID)
 			if err != nil {
 				app.Log().Printf("deleting CDN: %s\n", err)

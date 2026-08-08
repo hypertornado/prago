@@ -10,7 +10,7 @@ class FormDateRange {
         this.bindCalendarAndInput(fromInput, fromCalendar);
         this.bindCalendarAndInput(toInput, toCalendar);
 
-        el.querySelector(".form_daterange_more").addEventListener("mousedown", (e: Event) => {
+        el.querySelector(".form_daterange_more").addEventListener("click", (e: Event) => {
             new PopupForm("/admin/_dateranges", (data: any) => {
                 let dates = data.Data.split("_");
                 fromInput.value = dates[0];
@@ -20,7 +20,7 @@ class FormDateRange {
     }
 
     bindCalendarAndInput(input: HTMLInputElement, btn: HTMLButtonElement) {
-        btn.addEventListener("mousedown", (e: Event) => {
+        btn.addEventListener("click", (e: Event) => {
             input.showPicker();
             input.focus();
             e.preventDefault();

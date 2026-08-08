@@ -9214,7 +9214,7 @@ class FormDateRange {
         let toCalendar = el.querySelector(".form_daterange_calendar-to");
         this.bindCalendarAndInput(fromInput, fromCalendar);
         this.bindCalendarAndInput(toInput, toCalendar);
-        el.querySelector(".form_daterange_more").addEventListener("mousedown", (e) => {
+        el.querySelector(".form_daterange_more").addEventListener("click", (e) => {
             new PopupForm("/admin/_dateranges", (data) => {
                 let dates = data.Data.split("_");
                 fromInput.value = dates[0];
@@ -9223,7 +9223,7 @@ class FormDateRange {
         });
     }
     bindCalendarAndInput(input, btn) {
-        btn.addEventListener("mousedown", (e) => {
+        btn.addEventListener("click", (e) => {
             input.showPicker();
             input.focus();
             e.preventDefault();

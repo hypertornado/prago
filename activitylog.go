@@ -48,7 +48,7 @@ func (app *App) ListenActivity(handler func(Activity)) {
 var activityItemsPerPage int64 = 100
 
 func (app *App) getHistorySelect(request *Request, resource *Resource, itemID int64) (ret [][2]string) {
-	q := Query[activityLog](app)
+	q := app.Query[activityLog]()
 	if resource != nil {
 		q.Is("ResourceName", resource.getID())
 	}
@@ -79,7 +79,7 @@ func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int
 		return ret
 	}
 
-	q := Query[activityLog](app)
+	q := app.Query[activityLog]()
 	if resource != nil {
 		q.Is("ResourceName", resource.getID())
 	}
@@ -116,7 +116,7 @@ func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int
 
 	for _, v := range items {
 		var username, userurl string
-		user := Query[user](app).ID(v.User)
+		user := app.Query[user]().ID(v.User)
 		locale := request.Locale()
 		if user != nil {
 			username = user.Name
@@ -205,7 +205,7 @@ func (app *App) initActivityLog() {
 	}, func(fv FormValidation, request *Request) {
 		table := app.Table()
 
-		activity := Query[activityLog](app).ID(request.Param("id"))
+		activity := app.Query[activityLog]().ID(request.Param("id"))
 		if activity == nil {
 			fv.AfterContent("Activity not found")
 			return
@@ -223,7 +223,7 @@ func (app *App) initActivityLog() {
 		table.Row(Cell("Typ akce:").Header(), Cell(activity.ActionType).Colspan(2))
 		table.Row(Cell("Upraveno:").Header(), Cell(activity.CreatedAt.Format("2006-01-02 15:04:05")).Colspan(2))
 
-		user := Query[user](app).ID(activity.User)
+		user := app.Query[user]().ID(activity.User)
 		if user != nil {
 			var userNames []string
 			userNames = append(userNames, fmt.Sprintf("#%d", user.ID))

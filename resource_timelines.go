@@ -151,7 +151,7 @@ func (resource *Resource) initResourceTimelines() {
 		timeline.FilterName("users", func(request *Request, value string) (string, string) {
 
 			var names []string
-			users := Query[user](request.app).In("id", value).List()
+			users := request.app.Query[user]().In("id", value).List()
 			for _, v := range users {
 				names = append(names, v.Name)
 			}

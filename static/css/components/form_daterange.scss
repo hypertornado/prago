@@ -14,14 +14,18 @@
     gap: 4px;
     background-color: white;
     border-radius: 8px;
-    padding: 0px 4px;
+    padding: 0px 4px 0px 0px;
     display: flex;
     align-items: center;
+    overflow: hidden;
+    @include insetShadow;
 }
 
 
 .form_daterange_inner:focus-within {
     border: 1px solid $baseColor;
+    box-shadow: none;
+    outline: 1px solid $baseColor;
 }
 
 .form_input-from, .form_input-to {
@@ -30,6 +34,8 @@
     outline: none;
     min-width: 20px !important;
     max-width: 100px !important;
+    border-radius: 0px;
+    background: none;
 }
 
 .form_daterange_calendar {

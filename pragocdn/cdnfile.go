@@ -42,11 +42,11 @@ func getCDNFile(projectName, uuid string) *CDNFile {
 	if project == nil {
 		return nil
 	}
-	return prago.Query[CDNFile](app).Is("cdnproject", project.ID).Is("uuid", uuid).First()
+	return app.Query[CDNFile]().Is("cdnproject", project.ID).Is("uuid", uuid).First()
 }
 
 func (file *CDNFile) url(size string) string {
-	project := prago.Query[CDNProject](app).ID(file.CDNProject)
+	project := app.Query[CDNProject]().ID(file.CDNProject)
 	if project == nil {
 		panic(fmt.Errorf("can't find project id %d", file.CDNProject))
 	}
@@ -65,7 +65,7 @@ func (file *CDNFile) Project() *CDNProject {
 }
 
 func (file *CDNFile) get() (*os.File, error) {
-	project := prago.Query[CDNProject](app).ID(file.CDNProject)
+	project := app.Query[CDNProject]().ID(file.CDNProject)
 	if project == nil {
 		return nil, fmt.Errorf("can't find project id %d", file.CDNProject)
 	}
@@ -74,7 +74,7 @@ func (file *CDNFile) get() (*os.File, error) {
 }
 
 func (file *CDNFile) update() {
-	project := prago.Query[CDNProject](app).ID(file.CDNProject)
+	project := app.Query[CDNProject](app).ID(file.CDNProject)
 	if project == nil {
 		panic(fmt.Errorf("can't find project id %d", file.CDNProject))
 	}
@@ -160,114 +160,13 @@ func bindCDNFiles(app *prago.App) {
 		},
 	).Name(unlocalized("Previews"))
 
-	/*prago.ActionResourceItemForm(app, "upload-to-spaces",
-		func(cdnFile *CDNFile, form *prago.Form, request *prago.Request) {
-			form.AddSubmit("Nahrát do DO Spaces")
-		},
-		func(cdnFile *CDNFile, fv prago.FormValidation, request *prago.Request) {
-			project := getCDNProjectFromID(cdnFile.CDNProject)
-			if project == nil {
-				fv.AddError("Projekt nenalezen")
-				return
-			}
-			if !project.hasSpacesConfig() {
-				fv.AddError("Projekt nemá nakonfigurované DO Spaces")
-				return
-			}
-			if cdnFile.CDNKey != "" {
-				fv.AddError("Soubor již byl nahrán do DO Spaces (CDNKey je neprázdný)")
-				return
-			}
-			f, err := os.Open(cdnFile.getDataPath())
-			if err != nil {
-				fv.AddError(fmt.Sprintf("Chyba při otevírání souboru: %s", err))
-				return
-			}
-			defer f.Close()
-			stat, err := f.Stat()
-			if err != nil {
-				fv.AddError(fmt.Sprintf("Chyba při čtení souboru: %s", err))
-				return
-			}
-			if err := project.uploadFileToSpaces(cdnFile, f, stat.Size()); err != nil {
-				fv.AddError(fmt.Sprintf("Chyba při nahrávání: %s", err))
-				return
-			}
-			cdnFile.CDNKey = cdnFile.UUID
-			if err := prago.UpdateItem(app, cdnFile); err != nil {
-				fv.AddError(fmt.Sprintf("Chyba při ukládání: %s", err))
-				return
-			}
-		},
-	).Name(unlocalized("Nahrát do DO Spaces"))*/
-
-	//filesDashboard := app.MainBoard.Dashboard(unlocalized("Soubory"))
-
-	/*filesDashboard.AddTask(unlocalized("Create files form import"), "sysadmin", func(ta *prago.TaskActivity) error {
-		_, err := app.GetDB().Exec("DELETE FROM cdnfile;")
-		if err != nil {
-			return err
-		}
-
-		projects := prago.Query[CDNProject](app).List()
-		for _, project := range projects {
-			filepath.Walk(cdnDirPath()+"/files/"+project.Name, func(path string, info fs.FileInfo, err error) error {
-				if err == nil && !info.IsDir() {
-					before, after, ok := strings.Cut(info.Name(), ".")
-					if !ok {
-						panic("wrong filename: " + info.Name())
-					}
-					project.createFile(before, after)
-				}
-				return nil
-			})
-
-		}
-		return nil
-	})*/
-
-	/*prago.ActionForm(app, "create-files-from-import", func(form *prago.Form, request *prago.Request) {
-		form.AddSubmit("Spustit")
-	}, func(fv prago.FormValidation, request *prago.Request) {
-		fv.RunTask(request, func(ta *prago.FormTaskActivity) error {
-			_, err := app.GetDB().Exec("DELETE FROM cdnfile;")
-			if err != nil {
-				return err
-			}
-			projects := prago.Query[CDNProject](app).List()
-			for _, project := range projects {
-				filepath.Walk(cdnDirPath()+"/files/"+project.Name, func(path string, info fs.FileInfo, err error) error {
-					if err == nil && !info.IsDir() {
-						before, after, ok := strings.Cut(info.Name(), ".")
-						if !ok {
-							panic("wrong filename: " + info.Name())
-						}
-						project.createFile(before, after)
-					}
-					return nil
-				})
-
-			}
-			return nil
-		})
-	}).Permission("sysadmin").Name(unlocalized("Create files form import"))*/
-
-	/*filesDashboard.AddTask(unlocalized("Reimport files data"), "sysadmin", func(ta *prago.TaskActivity) error {
-		files := prago.Query[CDNFile](app).List()
-		totalLen := len(files)
-		for k, file := range files {
-			ta.Progress(int64(k), int64(totalLen))
-			ta.Description(file.UUID)
-			file.update()
-		}
-		return nil
-	})*/
+	
 
 	prago.ActionForm(app, "reimport-files-data", func(form *prago.Form, request *prago.Request) {
 		form.AddSubmit("Spustit")
 	}, func(fv prago.FormValidation, request *prago.Request) {
 		fv.RunTask(request, func(ta *prago.FormTaskActivity) error {
-			files := prago.Query[CDNFile](app).List()
+			files := app.Query[CDNFile]().List()
 			totalLen := len(files)
 			for k, file := range files {
 				ta.Progress(int64(k), int64(totalLen))
@@ -278,22 +177,13 @@ func bindCDNFiles(app *prago.App) {
 		})
 	}).Permission("sysadmin").Name(unlocalized("Reimport files data"))
 
-	/*filesDashboard.AddTask(unlocalized("Validate checksums"), "sysadmin", func(ta *prago.TaskActivity) error {
-		files := prago.Query[CDNFile](app).List()
-		totalLen := len(files)
-		for k, file := range files {
-			ta.Progress(int64(k), int64(totalLen))
-			ta.Description(file.UUID)
-			file.validateChecksum()
-		}
-		return nil
-	})*/
+	
 
 	prago.ActionForm(app, "validate-checksums", func(form *prago.Form, request *prago.Request) {
 		form.AddSubmit("Spustit")
 	}, func(fv prago.FormValidation, request *prago.Request) {
 		fv.RunTask(request, func(ta *prago.FormTaskActivity) error {
-			files := prago.Query[CDNFile](app).List()
+			files := app.Query[CDNFile]().List()
 			totalLen := len(files)
 			for k, file := range files {
 				ta.Progress(int64(k), int64(totalLen))
@@ -303,11 +193,6 @@ func bindCDNFiles(app *prago.App) {
 			return nil
 		})
 	}).Permission("sysadmin").Name(unlocalized("Validate checksums"))
-
-	/*filesDashboard.AddTask(unlocalized("Delete thumbs cache"), "sysadmin", func(ta *prago.TaskActivity) error {
-		cachePath := cdnDirPath() + "/cache"
-		return os.RemoveAll(cachePath)
-	})*/
 
 	prago.ActionForm(app, "delete-thumbs-cache", func(form *prago.Form, request *prago.Request) {
 		form.AddSubmit("Spustit")

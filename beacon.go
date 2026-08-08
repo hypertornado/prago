@@ -118,7 +118,7 @@ func doDeleteOldBeacons(app *App) {
 	}()
 
 	olderThen := time.Now().AddDate(0, 0, -30)
-	beaconsToDelete := Query[Beacon](app).Where("createdat < ?", olderThen).Limit(1000).List()
+	beaconsToDelete := app.Query[Beacon]().Where("createdat < ?", olderThen).Limit(1000).List()
 	for _, v := range beaconsToDelete {
 		DeleteItem[Beacon](app, v.ID)
 	}
@@ -126,7 +126,7 @@ func doDeleteOldBeacons(app *App) {
 }
 
 func (app *App) GetBeaconCount(beaconName, pageURL, val1, val2, val3 string) int64 {
-	q := Query[Beacon](app)
+	q := app.Query[Beacon]()
 	newerThen := time.Now().AddDate(0, 0, -7)
 	q.Where("createdat > ?", newerThen)
 

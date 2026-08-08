@@ -15,7 +15,7 @@ func TestAggregations(t *testing.T) {
 	CreateItem(resource.app, &resB)
 	CreateItem(resource.app, &resC)
 
-	res, err := Query[ResourceStruct](resource.app).Is("IsSomething", true).Aggregation().Count().Sum("Count").Min("Count").Max("Count").Get()
+	res, err := resource.app.Query[ResourceStruct]().Is("IsSomething", true).Aggregation().Count().Sum("Count").Min("Count").Max("Count").Get()
 	if err != nil {
 		t.Fatal(err)
 	}

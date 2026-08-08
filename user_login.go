@@ -43,7 +43,7 @@ func initUserLogin(app *App) {
 			return
 		}
 
-		q := Query[user](app)
+		q := app.Query[user]()
 		if email != "" && !strings.Contains(email, "@") {
 			q.Is("username", email)
 		} else {

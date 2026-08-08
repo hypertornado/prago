@@ -29,7 +29,7 @@ func (app *App) initBoard() {
 	sysadminGroup := sysadminBoard.Dashboard(unlocalized(""))
 
 	sysadminGroup.Timeline(unlocalized("Úpravy"), "sysadmin", func(tdr *TimelineDataRequest) float64 {
-		c, _ := Query[activityLog](app).Context(tdr.Request.r.Context()).Where("createdat >= ? and createdat < ?", tdr.From, tdr.To).Count()
+		c, _ := app.Query[activityLog]().Context(tdr.Request.r.Context()).Where("createdat >= ? and createdat < ?", tdr.From, tdr.To).Count()
 		return float64(c)
 	}).Unit(unlocalized("editací"))
 

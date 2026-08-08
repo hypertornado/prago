@@ -60,7 +60,7 @@ func (app *App) getUserIDFromSession(sessionID string, api bool) int64 {
 		return id
 	}
 
-	ses := Query[session](app).Is("isdeleted", false).Is("uuid", sessionID).Is("isapi", api).First()
+	ses := app.Query[session]().Is("isdeleted", false).Is("uuid", sessionID).Is("isapi", api).First()
 	if ses == nil {
 		return 0
 	}
@@ -74,7 +74,7 @@ func (app *App) deleteSession(sessionID string) error {
 		return fmt.Errorf("Nelze smazat prazdnou session")
 	}
 
-	ses := Query[session](app).Is("uuid", sessionID).First()
+	ses := app.Query[session]().Is("uuid", sessionID).First()
 	if ses == nil {
 		return fmt.Errorf("Nelze najít session")
 	}

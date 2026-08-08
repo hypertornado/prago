@@ -24,7 +24,7 @@ type cdnFileData struct {
 }
 
 func getCDNViewData(app *App, uid string) (ret *cdnFileData) {
-	file := Query[File](app).Is("UID", uid).First()
+	file := app.Query[File]().Is("UID", uid).First()
 	if file == nil {
 		return nil
 	}

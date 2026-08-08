@@ -100,7 +100,7 @@ func (app *App) getSetting(id string) (string, error) {
 		return cachedValue, nil
 	}
 
-	s := Query[pragoSettings](app).Is("name", id).First()
+	s := app.Query[pragoSettings]().Is("name", id).First()
 	if s == nil {
 		return setting.defaultValue, nil
 	}
@@ -126,7 +126,7 @@ func (app *App) saveSetting(id, value string, request *Request) error {
 	}
 	app.settings.cache = make(map[string]string)
 
-	s := Query[pragoSettings](app).Is("name", id).First()
+	s := app.Query[pragoSettings]().Is("name", id).First()
 	if s == nil {
 		s = &pragoSettings{
 			Name:  id,

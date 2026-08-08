@@ -126,7 +126,7 @@ func (app *App) initUserResource() {
 	ActionResourceItemForm(app, "logout", func(usr *user, form *Form, request *Request) {
 		form.AddSubmit("Odhlásit")
 	}, func(usr *user, fv FormValidation, request *Request) {
-		sessions := Query[session](app).Is("user", usr.ID).Is("IsDeleted", false).Is("IsAPI", false).List()
+		sessions := app.Query[session]().Is("user", usr.ID).Is("IsDeleted", false).Is("IsAPI", false).List()
 		for _, session := range sessions {
 			err := app.deleteSession(session.UUID)
 			if err != nil {
@@ -156,7 +156,7 @@ func (app *App) afterInitUserResource() {
 			if !IsEmailValid(usr.Email) {
 				vc.AddItemError("email", "Neplatný formát emailu")
 			} else {
-				sameEmailUsers := Query[user](app).Is("email", usr.Email).List()
+				sameEmailUsers := app.Query[user]().Is("email", usr.Email).List()
 				for _, same := range sameEmailUsers {
 					if same.ID != usr.ID {
 						vc.AddItemError("email", fmt.Sprintf("Duplicitní email s uživatelem #%d", same.ID))
@@ -176,7 +176,7 @@ func (app *App) afterInitUserResource() {
 			}
 
 			var isUsed bool
-			sameUsernameUsers := Query[user](app).Is("username", username).List()
+			sameUsernameUsers := app.Query[user]().Is("username", username).List()
 			for _, sameUser := range sameUsernameUsers {
 				if usr.ID != sameUser.ID {
 					isUsed = true
@@ -200,7 +200,7 @@ func (app *App) afterInitUserResource() {
 
 func (app *App) GetCachedUserEmail(id int64) string {
 	return Cached(app, fmt.Sprintf("cached-user-email-%d", id), func() string {
-		user := Query[user](app).ID(id)
+		user := app.Query[user]().ID(id)
 		if user == nil {
 			return ""
 		}

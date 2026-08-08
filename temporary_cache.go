@@ -17,7 +17,7 @@ func (tc TemporaryCacheData[T]) GetItemByID(id int64) *T {
 	if ok {
 		return ret
 	}
-	item := Query[T](tc.app).ID(id)
+	item := tc.app.Query[T]().ID(id)
 	tc.cache[id] = item
 	return item
 

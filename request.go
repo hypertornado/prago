@@ -60,7 +60,7 @@ func (request Request) Param(name string) string {
 
 func (request *Request) getUser() *user {
 	app := request.app
-	user := Query[user](app).ID(request.UserID())
+	user := app.Query[user]().ID(request.UserID())
 	if user == nil {
 		return nil
 	}

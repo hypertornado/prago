@@ -7,7 +7,7 @@ import (
 
 func (app *App) GetAllUsers() (ret []UserData) {
 
-	users := Query[user](app).List()
+	users := app.Query[user]().List()
 	for _, v := range users {
 		ret = append(ret, app.newUserData(v))
 	}
@@ -48,7 +48,7 @@ func (app *App) userDataCacheGet(id int64) *userData {
 		return ret
 	}
 
-	user := Query[user](app).ID(id)
+	user := app.Query[user]().ID(id)
 	if user == nil {
 		return nil
 	}

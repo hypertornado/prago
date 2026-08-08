@@ -22,7 +22,7 @@ type CDNVideo struct {
 }
 
 func (video *CDNVideo) getCDNFileURL() string {
-	project := prago.Query[CDNProject](app).ID(video.CDNProject)
+	project := app.Query[CDNProject]().ID(video.CDNProject)
 	if project == nil {
 		return ""
 	}
@@ -30,7 +30,7 @@ func (video *CDNVideo) getCDNFileURL() string {
 }
 
 func (video *CDNVideo) getHLSURL() string {
-	project := prago.Query[CDNProject](app).ID(video.CDNProject)
+	project := app.Query[CDNProject]().ID(video.CDNProject)
 	if project == nil || video.UUID == "" {
 		return ""
 	}
@@ -121,7 +121,7 @@ func (video *CDNVideo) splitToHLS() error {
 	if videoURL == "" {
 		return fmt.Errorf("no video URL available")
 	}
-	project := prago.Query[CDNProject](app).ID(video.CDNProject)
+	project := app.Query[CDNProject](app).ID(video.CDNProject)
 	if project == nil {
 		return fmt.Errorf("project not found")
 	}
@@ -182,7 +182,7 @@ func bindCDNVideos(app *prago.App) {
 			form.AddSubmit("Nahrát video")
 		},
 		func(fv prago.FormValidation, request *prago.Request) {
-			project := prago.Query[CDNProject](app).ID(request.Param("project"))
+			project := app.Query[CDNProject]().ID(request.Param("project"))
 			if project == nil {
 				fv.AddItemError("project", "Vyberte projekt")
 			}

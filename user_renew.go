@@ -20,7 +20,7 @@ func initUserRenew(app *App) {
 		email := fixEmail(request.Param("email"))
 
 		var reason = ""
-		user := Query[user](app).Is("email", email).First()
+		user := app.Query[user]().Is("email", email).First()
 		if user != nil {
 			if user.emailConfirmed() {
 				if !time.Now().AddDate(0, 0, -1).Before(user.EmailRenewedAt) {
@@ -68,7 +68,7 @@ func initUserRenew(app *App) {
 
 		errStr := messages.Get(request.Locale(), "error")
 
-		u := Query[user](app).Is("email", email).First()
+		u := app.Query[user]().Is("email", email).First()
 		if u != nil {
 			if token == u.emailToken(app) {
 				password := request.Param("password")
