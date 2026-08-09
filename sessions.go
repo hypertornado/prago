@@ -19,7 +19,7 @@ type session struct {
 }
 
 func (app *App) initSessionsResource() {
-	app.sessionsResource = NewResource[session](app).PermissionView("sysadmin").Name(unlocalized("Session"), unlocalized("Sessiony")).Board(sysadminBoard)
+	app.sessionsResource = app.NewResource[session]().PermissionView("sysadmin").Name(unlocalized("Session"), unlocalized("Sessiony")).Board(sysadminBoard)
 	app.initSessionsCache()
 
 	ActionResourceItemForm(app, "logout", func(ses *session, form *Form, request *Request) {
@@ -50,7 +50,7 @@ func (app *App) createSessionKey(user *user, isAPI bool) string {
 		User:  user.ID,
 		IsAPI: isAPI,
 	}
-	must(CreateItem(app, ses))
+	must(app.Create(ses))
 	return ses.UUID
 }
 
@@ -80,7 +80,7 @@ func (app *App) deleteSession(sessionID string) error {
 	}
 
 	ses.IsDeleted = true
-	err := UpdateItem(app, ses)
+	err := app.Update(ses)
 	if err != nil {
 		return err
 	}

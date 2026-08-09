@@ -41,8 +41,8 @@ type ResourceStructUnique struct {
 func prepareResource(t *testing.T) *Resource {
 	var resource *Resource
 	_ = NewTesting(t, func(app *App) {
-		resource = NewResource[ResourceStruct](app)
-		NewResource[ResourceStructUnique](app)
+		resource = app.NewResource[ResourceStruct]()
+		app.NewResource[ResourceStructUnique]()
 	})
 	return resource
 }
@@ -52,7 +52,7 @@ func TestBasicResource2(t *testing.T) {
 
 	item := &ResourceStruct{Name: "A", Floating: 3.14}
 
-	err := CreateItemWithContext(context.Background(), resource.app, item)
+	err := resource.app.CreateWithContext(item, context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,8 +66,8 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatal("should not be nil")
 	}
 
-	CreateItemWithContext(context.Background(), resource.app, &ResourceStruct{Name: "C"})
-	CreateItemWithContext(context.Background(), resource.app, &ResourceStruct{Name: "B"})
+	resource.app.CreateWithContext(&ResourceStruct{Name: "C"}, context.Background())
+	resource.app.CreateWithContext(&ResourceStruct{Name: "B"}, context.Background())
 
 	list := resource.app.Query[ResourceStruct]().List()
 	if len(list) != 3 {
@@ -85,7 +85,7 @@ func TestBasicResource2(t *testing.T) {
 
 	item.Name = "changed"
 
-	err = UpdateItem(resource.app, item)
+	err = resource.app.Update(item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +104,7 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatalf("wrong count %d", count)
 	}
 
-	err = DeleteItem[ResourceStruct](resource.app, item.ID)
+	err = resource.app.Delete[ResourceStruct](item.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,12 +119,12 @@ func TestBasicResource2(t *testing.T) {
 func TestQuery(t *testing.T) {
 	resource := prepareResource(t)
 
-	err := CreateItem(resource.app, &ResourceStruct{Name: "A", Floating: 3.14})
+	err := resource.app.Create(&ResourceStruct{Name: "A", Floating: 3.14})
 	if err != nil {
 		t.Fatal(err)
 	}
-	CreateItem(resource.app, &ResourceStruct{Name: "C"})
-	CreateItem(resource.app, &ResourceStruct{Name: "B"})
+	resource.app.Create(&ResourceStruct{Name: "C"})
+	resource.app.Create(&ResourceStruct{Name: "B"})
 
 	item := resource.app.Query[ResourceStruct]().Where("id = ?", 2).First()
 	if item.Name != "C" {
@@ -179,7 +179,7 @@ func TestQuery(t *testing.T) {
 		t.Fatal(list[0].Name)
 	}
 
-	err = DeleteItem[ResourceStruct](resource.app, item.ID)
+	err = resource.app.Delete[ResourceStruct](item.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -206,7 +206,7 @@ func TestQueryIn(t *testing.T) {
 		},
 	}
 	for _, v := range resources {
-		CreateItem(resource.app, v)
+		resource.app.Create(v)
 	}
 
 	items := resource.app.Query[ResourceStruct]().In("id", []int64{resources[0].ID, resources[1].ID}).Order("id").List()
@@ -282,9 +282,9 @@ func TestResourceUnique(t *testing.T) {
 
 	resource := getResource[ResourceStructUnique](app)
 
-	must(CreateItem(resource.app, &ResourceStructUnique{UniqueName: "A"}))
-	must(CreateItem(resource.app, &ResourceStructUnique{UniqueName: "B"}))
-	err := CreateItem(resource.app, &ResourceStructUnique{UniqueName: "A"})
+	must(resource.app.Create(&ResourceStructUnique{UniqueName: "A"}))
+	must(resource.app.Create(&ResourceStructUnique{UniqueName: "B"}))
+	err := resource.app.Create(&ResourceStructUnique{UniqueName: "A"})
 	if err == nil {
 		t.Fatal("Should fail")
 	}
@@ -303,7 +303,7 @@ func TestResourceDate(t *testing.T) {
 	resource := prepareResource(t)
 	tm := time.Now()
 
-	CreateItem(resource.app, &ResourceStruct{Date: tm})
+	resource.app.Create(&ResourceStruct{Date: tm})
 
 	first := resource.app.Query[ResourceStruct]().Is("date", tm.Format("2006-01-02")).First()
 	if first == nil {
@@ -316,7 +316,7 @@ func TestResourceTimestamps(t *testing.T) {
 
 	testStartTime := time.Now().Truncate(time.Second)
 
-	CreateItem(resource.app, &ResourceStruct{Name: "A"})
+	resource.app.Create(&ResourceStruct{Name: "A"})
 
 	item := resource.app.Query[ResourceStruct]().Is("id", 1).First()
 
@@ -333,7 +333,7 @@ func TestPartialSave(t *testing.T) {
 	resource := prepareResource(t)
 
 	item := &ResourceStruct{Name: "A", Text: "B"}
-	must(CreateItem(resource.app, item))
+	must(resource.app.Create(item))
 
 	item.Name = "X"
 	item.Text = "Y"
@@ -367,8 +367,8 @@ func TestPartialSave(t *testing.T) {
 func TestResourceBool(t *testing.T) {
 	resource := prepareResource(t)
 
-	CreateItem(resource.app, &ResourceStruct{Name: "A", IsSomething: false})
-	CreateItem(resource.app, &ResourceStruct{Name: "B", IsSomething: true})
+	resource.app.Create(&ResourceStruct{Name: "A", IsSomething: false})
+	resource.app.Create(&ResourceStruct{Name: "B", IsSomething: true})
 
 	trueItem := resource.app.Query[ResourceStruct]().Is("issomething", true).First()
 	if trueItem.Name != "B" {
@@ -383,7 +383,7 @@ func TestResourceBool(t *testing.T) {
 
 func TestResourceCreateWithID(t *testing.T) {
 	resource := prepareResource(t)
-	CreateItem(resource.app, &ResourceStruct{ID: 85, Name: "A"})
+	resource.app.Create(&ResourceStruct{ID: 85, Name: "A"})
 
 	item := resource.app.Query[ResourceStruct]().First()
 	id := item.ID
@@ -394,7 +394,7 @@ func TestResourceCreateWithID(t *testing.T) {
 
 func TestShouldNotSaveWithZeroID(t *testing.T) {
 	resource := prepareResource(t)
-	err := UpdateItem(resource.app, &ResourceStruct{})
+	err := resource.app.Update(&ResourceStruct{})
 	if err == nil {
 		t.Fatal("should not be nil")
 	}
@@ -406,19 +406,19 @@ func TestWorkingWithConcreteID(t *testing.T) {
 		ID:   3,
 		Name: "A",
 	}
-	err := CreateItem(resource.app, item)
+	err := resource.app.Create(item)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = DeleteItem[ResourceStruct](resource.app, 3)
+	err = resource.app.Delete[ResourceStruct](3)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	item.Name = "B"
 
-	err = CreateItem(resource.app, item)
+	err = resource.app.Create(item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -460,7 +460,7 @@ func TestLongSaveText(t *testing.T) {
 	text := "some" + string(make([]byte, 10000))
 	resource := prepareResource(t)
 	newItem := &ResourceStruct{Text: text}
-	err := CreateItem(resource.app, newItem)
+	err := resource.app.Create(newItem)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -272,7 +272,7 @@ func (app *App) initActivityLog() {
 
 	}).Permission("logged").Name(unlocalized("Úpravy")).Icon(iconActivity).Board(app.optionsBoard)
 
-	app.activityLogResource = NewResource[activityLog](app)
+	app.activityLogResource = app.NewResource[activityLog]()
 	app.activityLogResource.Board(sysadminBoard)
 	app.activityLogResource.icon = iconActivity
 	app.activityLogResource.canView = Permission(sysadminRoleName)
@@ -376,7 +376,7 @@ func (resource *Resource) logActivity(userData UserData, before, after any) erro
 	}
 
 	if resource.activityLog {
-		err = CreateItem(resource.app, log)
+		err = resource.app.Create(log)
 	}
 
 	if err == nil {

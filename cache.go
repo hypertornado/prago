@@ -144,7 +144,7 @@ func loadCache[T any](cache *cache, name string, createFn func() T) T {
 	return item.getValue().(T)
 }
 
-func CachedChan[T any](app *App, name string, createFn func() T) chan T {
+func cachedChan[T any](app *App, name string, createFn func() T) chan T {
 	ret := make(chan T)
 	go func() {
 		val := loadCache(app.cache, name, createFn)
@@ -153,12 +153,8 @@ func CachedChan[T any](app *App, name string, createFn func() T) chan T {
 	return ret
 }
 
-func Cached[T any](app *App, name string, createFn func() T) T {
-	//ret := make(chan T)
-	//go func() {
+func (app *App) Cached[T any](name string, createFn func() T) T {
 	val := loadCache(app.cache, name, createFn)
-	//ret <- val
-	//}()
 	return val
 }
 

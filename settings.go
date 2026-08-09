@@ -26,7 +26,7 @@ func (app *App) initSettings() {
 	app.settings = &settingsSingleton{
 		settingsMap:   make(map[string]*Setting),
 		settingsArray: []*Setting{},
-		resource:      NewResource[pragoSettings](app),
+		resource:      app.NewResource[pragoSettings](),
 		mutex:         new(sync.RWMutex),
 		cache:         make(map[string]string),
 	}
@@ -132,10 +132,10 @@ func (app *App) saveSetting(id, value string, request *Request) error {
 			Name:  id,
 			Value: value,
 		}
-		return CreateWithLog(s, request)
+		return request.CreateWithLog(s)
 	} else {
 		s.Value = value
-		return UpdateWithLog(s, request)
+		return request.UpdateWithLog(s)
 	}
 }
 

@@ -10,8 +10,8 @@ func TestReflectQuery(t *testing.T) {
 	resA := ResourceStruct{Name: "A"}
 	resB := ResourceStruct{Name: "B"}
 
-	CreateItem(resource.app, &resA)
-	CreateItem(resource.app, &resB)
+	resource.app.Create(&resA)
+	resource.app.Create(&resB)
 
 	item := resource.app.Query[ResourceStruct]().Is("id", resB.ID).First()
 	if item == nil {

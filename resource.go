@@ -63,7 +63,7 @@ type Resource struct {
 	customSearchFunctions []func(q string, userData UserData) []*Preview
 }
 
-func NewResource[T any](app *App) *Resource {
+func (app *App) NewResource[T any]() *Resource {
 	resourceMapMutex.Lock()
 	defer resourceMapMutex.Unlock()
 	var item T
@@ -83,7 +83,6 @@ func NewResource[T any](app *App) *Resource {
 	ret := &Resource{
 		app: app,
 		id:  columnName(defaultName),
-		//icon: iconResource,
 
 		singularName: unlocalized(defaultName),
 		pluralName:   unlocalized(defaultName),
@@ -376,7 +375,7 @@ func (resource *Resource) forEach(ctx context.Context, filter func(*listQuery), 
 	return nil
 }
 
-func ForEach[T any](app *App, ctx context.Context, filter map[string][]string, handler func(*T) error) error {
+func (app *App) ForEach[T any](ctx context.Context, filter map[string][]string, handler func(*T) error) error {
 	resource := getResource[T](app)
 
 	var filterFn func(*listQuery)

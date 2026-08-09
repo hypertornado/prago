@@ -183,31 +183,6 @@ func (resource *Resource) initDefaultResourceActions() {
 	}
 }
 
-func CreateWithLog[T any](item *T, request *Request) error {
-	resource := getResource[T](request.app)
-	return resource.createWithLog(item, request)
-}
-
-func (resource *Resource) createWithLog(item any, userData UserData) error {
-	err := resource.create(context.Background(), item)
-	if err != nil {
-		return err
-	}
-
-	err = resource.logActivity(userData, nil, item)
-	if err != nil {
-		return err
-	}
-
-	return resource.updateCachedCount()
-
-}
-
-func DeleteWithLog[T any](item *T, request *Request) error {
-	resource := getResource[T](request.app)
-	return resource.deleteWithLog(item, request)
-}
-
 func (resource *Resource) deleteWithLog(item any, request UserData) error {
 
 	err := resource.logActivity(request, item, nil)
@@ -267,11 +242,6 @@ func (resource *Resource) addBoleanFalseValuesAsEmpty(values url.Values, fieldsM
 			values.Set(field.id, "")
 		}
 	}
-}
-
-func UpdateWithLog[T any](item *T, request *Request) error {
-	resource := getResource[T](request.app)
-	return resource.updateWithLog(item, request)
 }
 
 func (resource *Resource) updateWithLog(item any, request *Request) error {

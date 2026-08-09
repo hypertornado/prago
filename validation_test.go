@@ -14,7 +14,7 @@ func TestValidation(t *testing.T) {
 		}
 
 		app := NewTesting(t, func(app *App) {
-			NewResource[TStruct](app)
+			app.NewResource[TStruct]()
 		})
 
 		if _, valid := TestValidationUpdate(app, &TStruct{}, app.TestUserData("")); valid != false {
@@ -39,19 +39,19 @@ func TestValidation(t *testing.T) {
 		}
 
 		app := NewTesting(t, func(app *App) {
-			NewResource[AStruct](app)
-			NewResource[RelatedStruct](app)
+			app.NewResource[AStruct]()
+			app.NewResource[RelatedStruct]()
 		})
 
 		var a = &AStruct{}
 
-		must(CreateItem(app, a))
+		must(app.Create(a))
 
 		if _, ok := TestValidationDelete(app, a, app.TestUserData("")); !ok {
 			t.Fatal("should be able to delete")
 		}
 
-		must(CreateItem(app, &RelatedStruct{
+		must(app.Create(&RelatedStruct{
 			AStruct: a.ID,
 		}))
 
@@ -71,19 +71,19 @@ func TestValidation(t *testing.T) {
 		}
 
 		app := NewTesting(t, func(app *App) {
-			NewResource[AStruct](app)
-			NewResource[RelatedStruct](app)
+			app.NewResource[AStruct]()
+			app.NewResource[RelatedStruct]()
 		})
 
 		var a = &AStruct{}
 
-		must(CreateItem(app, a))
+		must(app.Create(a))
 
 		if _, ok := TestValidationDelete(app, a, app.TestUserData("")); !ok {
 			t.Fatal("should be able to delete")
 		}
 
-		must(CreateItem(app, &RelatedStruct{
+		must(app.Create(&RelatedStruct{
 			AStruct: fmt.Sprintf(";%d;", a.ID),
 		}))
 
@@ -103,7 +103,7 @@ func TestValidation(t *testing.T) {
 				{"a", "aname"},
 				{"b", "bname"},
 			})
-			NewResource[AStruct](app)
+			app.NewResource[AStruct]()
 		})
 
 		if _, valid := TestValidationUpdate(app, &AStruct{Typ: ""}, app.TestUserData("")); valid != false {

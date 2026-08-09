@@ -84,7 +84,7 @@ func (f File) getExtension() string {
 
 func (app *App) initFilesResource() {
 	initCDN(app)
-	resource := NewResource[File](app)
+	resource := app.NewResource[File]()
 	resource.Name(
 		messages.GetNameFunction("file"),
 		messages.GetNameFunction("files"),

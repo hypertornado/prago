@@ -22,7 +22,7 @@ type emailSent struct {
 
 func (app *App) initEmailSentResource() {
 
-	resource := NewResource[emailSent](app)
+	resource := app.NewResource[emailSent]()
 	resource.Name(
 		unlocalized("Log odeslaného emailu"),
 		unlocalized("Log odeslaných emailů"),
@@ -75,7 +75,7 @@ func logEmailSent(email *Email, err error) {
 		logEmail.Error = err.Error()
 	}
 
-	err = CreateItem(email.app, logEmail)
+	err = email.app.Create(logEmail)
 	if err != nil {
 		email.app.Log().Errorf("can't save log error: %s", err)
 	}

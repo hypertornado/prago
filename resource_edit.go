@@ -9,11 +9,11 @@ import (
 	"golang.org/x/net/context"
 )
 
-func CreateItem[T any](app *App, item *T) error {
-	return CreateItemWithContext(context.Background(), app, item)
+func (app *App) Create[T any](item *T) error {
+	return app.CreateWithContext(item, context.Background())
 }
 
-func CreateItemWithContext[T any](ctx context.Context, app *App, item *T) error {
+func (app *App) CreateWithContext[T any](item *T, ctx context.Context) error {
 	resource := getResource[T](app)
 	return resource.create(ctx, item)
 }
@@ -24,19 +24,40 @@ func (resource *Resource) create(ctx context.Context, item any) error {
 	return resource.createItem(ctx, item, false)
 }
 
-func UpdateItem[T any](app *App, item *T) error {
+func (request *Request) CreateWithLog[T any](item *T) error {
+	resource := getResource[T](request.app)
+	return resource.createWithLog(item, request)
+}
+
+func (resource *Resource) createWithLog(item any, userData UserData) error {
+	err := resource.create(context.Background(), item)
+	if err != nil {
+		return err
+	}
+	err = resource.logActivity(userData, nil, item)
+	if err != nil {
+		return err
+	}
+	return resource.updateCachedCount()
+}
+
+func (app *App) Update[T any](item *T) error {
 	resource := getResource[T](app)
 	return resource.update(context.Background(), item, nil)
 }
 
-func UpdateItemPartial[T any](app *App, item *T, fields []string) error {
+func (request *Request) UpdateWithLog[T any](item *T) error {
+	resource := getResource[T](request.app)
+	return resource.updateWithLog(item, request)
+}
+
+func (app *App) UpdatePartial[T any](item *T, fields []string) error {
 	resource := getResource[T](app)
 	onlyFields := map[string]bool{}
 	for _, field := range fields {
 		onlyFields[resource.Field(field).fieldClassName] = true
 	}
 	return resource.update(context.Background(), item, onlyFields)
-
 }
 
 func (resource *Resource) update(ctx context.Context, item any, onlyFields map[string]bool) error {
@@ -62,13 +83,18 @@ func (resource *Resource) setTimestamp(item any, fieldName string) {
 	}
 }
 
-func DeleteItem[T any](app *App, id int64) error {
-	return DeleteItemWithContext[T](context.Background(), app, id)
+func (app *App) Delete[T any](id int64) error {
+	return app.DeleteWithContext[T](id, context.Background())
 }
 
-func DeleteItemWithContext[T any](ctx context.Context, app *App, id int64) error {
+func (app *App) DeleteWithContext[T any](id int64, ctx context.Context) error {
 	resource := getResource[T](app)
 	return resource.delete(ctx, id)
+}
+
+func (request *Request) DeleteWithLog[T any](item *T) error {
+	resource := getResource[T](request.app)
+	return resource.deleteWithLog(item, request)
 }
 
 func (resource *Resource) delete(ctx context.Context, id int64) error {

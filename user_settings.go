@@ -65,7 +65,7 @@ func initUserSettings(app *App) {
 			user.Name = name
 			user.Phone = phone
 			user.Locale = newLocale
-			must(UpdateItem(app, user))
+			must(app.Update(user))
 
 			for _, v := range app.settings.settingsArray {
 				if request.Authorize(v.permission) {
@@ -198,7 +198,7 @@ func initUserSettings(app *App) {
 			return
 		}
 
-		must(CreateWithLog(usr, request))
+		must(request.CreateWithLog(usr))
 		request.AddFlashMessage("Uživatel založen")
 		fv.Redirect(fmt.Sprintf("/admin/user/%d", usr.ID))
 
@@ -272,7 +272,7 @@ func initUserSettings(app *App) {
 		}
 
 		if fv.Valid() {
-			must(UpdateWithLog(usr, request))
+			must(request.UpdateWithLog(usr))
 			request.app.userDataCacheDelete(usr.ID)
 			request.AddFlashMessage("Upraveno")
 			fv.Redirect(fmt.Sprintf("/admin/user/%d", usr.ID))

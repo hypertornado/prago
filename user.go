@@ -108,7 +108,7 @@ func (user user) emailToken(app *App) string {
 }
 
 func (app *App) initUserResource() {
-	resource := NewResource[user](app)
+	resource := app.NewResource[user]()
 	app.UsersResource = resource
 
 	resource.Name(
@@ -199,7 +199,7 @@ func (app *App) afterInitUserResource() {
 }
 
 func (app *App) GetCachedUserEmail(id int64) string {
-	return Cached(app, fmt.Sprintf("cached-user-email-%d", id), func() string {
+	return app.Cached(fmt.Sprintf("cached-user-email-%d", id), func() string {
 		user := app.Query[user]().ID(id)
 		if user == nil {
 			return ""

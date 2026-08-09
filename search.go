@@ -220,7 +220,7 @@ type CustomSearchResult struct {
 	Priority int64
 }
 
-func AddResourceCustomSearchFunction[T any](app *App, fn func(q string, userData UserData) []*T) {
+func (app *App) AddResourceCustomSearchFunction[T any](fn func(q string, userData UserData) []*T) {
 	resource := getResource[T](app)
 	resource.customSearchFunctions = append(resource.customSearchFunctions,
 		func(q string, userData UserData) (ret []*Preview) {

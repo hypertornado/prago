@@ -160,7 +160,7 @@ func bindCDNVideos(app *prago.App) {
 	prago.ActionResourceItemForm(app, "delete-item", func(video *CDNVideo, form *prago.Form, request *prago.Request) {
 		form.AddDeleteSubmit("Smazat video")
 	}, func(video *CDNVideo, fv prago.FormValidation, request *prago.Request) {
-		err := prago.DeleteWithLog(video, request)
+		err := request.DeleteWithLog(video)
 		if err != nil {
 			fv.AddError(err.Error())
 			return

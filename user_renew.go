@@ -25,7 +25,7 @@ func initUserRenew(app *App) {
 			if user.emailConfirmed() {
 				if !time.Now().AddDate(0, 0, -1).Before(user.EmailRenewedAt) {
 					user.EmailRenewedAt = time.Now()
-					err := UpdateItem(app, user)
+					err := app.Update(user)
 					if err == nil {
 						err = app.sendRenewPasswordEmail(*user)
 						if err == nil {
@@ -75,7 +75,7 @@ func initUserRenew(app *App) {
 				if len(password) >= 7 {
 					err := u.newPassword(password)
 					if err == nil {
-						err = UpdateItem(app, u)
+						err = app.Update(u)
 						if err == nil {
 							request.AddFlashMessage(messages.Get(request.Locale(), "password_changed"))
 							vc.Redirect(app.getAdminURL("user/login") + "?email=" + url.QueryEscape(u.Email))

@@ -21,7 +21,7 @@ func initUserRegistration(app *App) {
 			if !user.emailConfirmed() {
 				if token == user.emailToken(app) {
 					user.EmailConfirmedAt = time.Now()
-					err := UpdateItem(app, user)
+					err := app.Update(user)
 					if err == nil {
 						request.AddFlashMessage(messages.Get(user.Locale, "confirm_email_ok"))
 						request.Redirect("/admin/user/login")
@@ -102,7 +102,7 @@ func registrationValidation(vc FormValidation, request *Request) {
 			u.Role = sysadminRoleName
 		}
 
-		must(CreateItemWithContext(request.Request().Context(), app, u))
+		must(app.CreateWithContext(u, request.Request().Context()))
 
 		err = u.sendConfirmEmail(app, locale)
 		if err != nil {

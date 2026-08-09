@@ -46,7 +46,7 @@ func (beacon *Beacon) UpdateInt() {
 }
 
 func (app *App) initBeacons() {
-	NewResource[Beacon](app).Name(unlocalized("Beacon"), unlocalized("Beacony")).Board(app.optionsBoard)
+	app.NewResource[Beacon]().Name(unlocalized("Beacon"), unlocalized("Beacony")).Board(app.optionsBoard)
 
 	app.SetLogHandler(func(typ, message string) {
 		defer func() {
@@ -84,7 +84,7 @@ func (app *App) initBeacons() {
 		}
 
 		beacon.UpdateInt()
-		must(CreateItem(app, beacon))
+		must(app.Create(beacon))
 	})
 
 	go deleteOldBeacons(app)
@@ -99,7 +99,7 @@ func (app *App) InternalBeacon(typ, val1, val2, val3 string) {
 		Value3Str: val3,
 	}
 	beacon.UpdateInt()
-	must(CreateItem(app, beacon))
+	must(app.Create(beacon))
 }
 
 func deleteOldBeacons(app *App) {
@@ -120,7 +120,7 @@ func doDeleteOldBeacons(app *App) {
 	olderThen := time.Now().AddDate(0, 0, -30)
 	beaconsToDelete := app.Query[Beacon]().Where("createdat < ?", olderThen).Limit(1000).List()
 	for _, v := range beaconsToDelete {
-		DeleteItem[Beacon](app, v.ID)
+		app.Delete[Beacon](v.ID)
 	}
 
 }
