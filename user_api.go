@@ -9,7 +9,7 @@ const apiHTTPHeader = "X-API-Key"
 
 func (app *App) initUserAPI() {
 
-	ActionUI(app, "_api", func(request *Request) template.HTML {
+	app.ActionUI("_api", func(request *Request) template.HTML {
 
 		table := app.Table()
 		table.Row(table.Cell("API keys").Header().DescriptionAfter(fmt.Sprintf("Use HTTP header: %s", apiHTTPHeader)))

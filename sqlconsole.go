@@ -7,7 +7,7 @@ import (
 
 func (app *App) initSQLConsole() {
 
-	ActionForm(app, "_sqlconsole",
+	app.ActionForm("_sqlconsole",
 		func(form *Form, request *Request) {
 			form.Title = "SQL Console"
 			input := form.AddTextareaInput("q", "")

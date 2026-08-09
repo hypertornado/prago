@@ -123,7 +123,7 @@ func (app *App) initUserResource() {
 	resource.Icon("glyphicons-basic-4-user.svg")
 	resource.Board(app.optionsBoard)
 
-	ActionResourceItemForm(app, "logout", func(usr *user, form *Form, request *Request) {
+	app.ActionResourceItemForm("logout", func(usr *user, form *Form, request *Request) {
 		form.AddSubmit("Odhlásit")
 	}, func(usr *user, fv FormValidation, request *Request) {
 		sessions := app.Query[session]().Is("user", usr.ID).Is("IsDeleted", false).Is("IsAPI", false).List()

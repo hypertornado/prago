@@ -185,7 +185,7 @@ func (app *App) afterInitFilesResource() {
 
 	resource.Icon("glyphicons-basic-37-file.svg")
 
-	ActionResourceItemForm(app, "download", func(file *File, form *Form, request *Request) {
+	app.ActionResourceItemForm("download", func(file *File, form *Form, request *Request) {
 		dataPaths := file.getCDNNamedDownloadPaths()
 
 		var values [][2]string
@@ -364,7 +364,7 @@ func (app *App) afterInitFilesResource() {
 		}
 	})
 
-	ActionResourceForm[File](app, "upload",
+	app.ActionResourceForm[File]("upload",
 		func(f *Form, r *Request) {
 			f.AddFileInput("file", messages.Get(r.Locale(), "file"))
 			f.AddTextareaInput("description", messages.Get(r.Locale(), "Description"))

@@ -22,7 +22,7 @@ func (app *App) initSessionsResource() {
 	app.sessionsResource = app.NewResource[session]().PermissionView("sysadmin").Name(unlocalized("Session"), unlocalized("Sessiony")).Board(sysadminBoard)
 	app.initSessionsCache()
 
-	ActionResourceItemForm(app, "logout", func(ses *session, form *Form, request *Request) {
+	app.ActionResourceItemForm("logout", func(ses *session, form *Form, request *Request) {
 		form.AddSubmit("Odhlásit")
 	}, func(ses *session, fv FormValidation, request *Request) {
 

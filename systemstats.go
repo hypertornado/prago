@@ -206,7 +206,7 @@ func (app *App) initSystemStats() {
 		return statsTable(app, environmentStats)
 	}, sysadminPermission)*/
 
-	ActionUI(app, "_routes", func(r *Request) template.HTML {
+	app.ActionUI("_routes", func(r *Request) template.HTML {
 		ret := app.Table()
 		routes := app.router.export()
 		for _, v := range routes {
@@ -216,7 +216,7 @@ func (app *App) initSystemStats() {
 		return ret.ExecuteHTML()
 	}).Permission(sysadminPermission).Name(unlocalized("Routes")).Board(sysadminBoard)
 
-	ActionUI(app, "_authorization", func(r *Request) template.HTML {
+	app.ActionUI("_authorization", func(r *Request) template.HTML {
 		ret := app.Table()
 		accessView := getResourceAccessView(app)
 

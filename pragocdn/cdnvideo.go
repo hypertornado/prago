@@ -121,7 +121,7 @@ func (video *CDNVideo) splitToHLS() error {
 	if videoURL == "" {
 		return fmt.Errorf("no video URL available")
 	}
-	project := app.Query[CDNProject](app).ID(video.CDNProject)
+	project := app.Query[CDNProject]().ID(video.CDNProject)
 	if project == nil {
 		return fmt.Errorf("project not found")
 	}
@@ -142,7 +142,7 @@ func (video *CDNVideo) splitToHLS() error {
 }
 
 func bindCDNVideos(app *prago.App) {
-	videoResource := prago.NewResource[CDNVideo](app)
+	videoResource := app.NewResource[CDNVideo]()
 	videoResource.Name(unlocalized("CDN Video"), unlocalized("CDN Videa")).PermissionUpdate("nobody")
 
 	prago.ItemStatistic(app, unlocalized("URL"), "sysadmin", func(video *CDNVideo) string {
@@ -157,7 +157,7 @@ func bindCDNVideos(app *prago.App) {
 		return app.GetAdminTemplates().ExecuteToHTML("view_video", item.getHLSURL())
 	}).Permission("sysadmin").Name(unlocalized("Přehrávač"))
 
-	prago.ActionResourceItemForm(app, "delete-item", func(video *CDNVideo, form *prago.Form, request *prago.Request) {
+	app.ActionResourceItemForm("delete-item", func(video *CDNVideo, form *prago.Form, request *prago.Request) {
 		form.AddDeleteSubmit("Smazat video")
 	}, func(video *CDNVideo, fv prago.FormValidation, request *prago.Request) {
 		err := request.DeleteWithLog(video)
@@ -173,7 +173,7 @@ func bindCDNVideos(app *prago.App) {
 		return video.getCDNFileURL()
 	})
 
-	prago.ActionForm(app, "upload-video",
+	app.ActionForm("upload-video",
 		func(form *prago.Form, request *prago.Request) {
 			form.AddRelation("project", "Projekt", "cdnproject")
 
@@ -219,7 +219,7 @@ func bindCDNVideos(app *prago.App) {
 				Filename:   originalFilename,
 				CDNProject: project.ID,
 			}
-			if err := prago.CreateWithLog(video, request); err != nil {
+			if err := request.CreateWithLog(video); err != nil {
 				fv.AddError(fmt.Sprintf("Chyba při vytváření záznamu: %s", err))
 				return
 			}

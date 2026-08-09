@@ -201,7 +201,7 @@ func (app *App) initFormTask() {
 		fv.Data(task.toView())
 	}).Permission(everybodyPermission).Name(unlocalized("Ukončuji úlohu…"))
 
-	ActionForm(app, "form-task-example", func(form *Form, request *Request) {
+	app.ActionForm("form-task-example", func(form *Form, request *Request) {
 		form.AddSubmit("Spustit")
 	}, func(fv FormValidation, request *Request) {
 

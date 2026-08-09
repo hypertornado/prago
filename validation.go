@@ -39,7 +39,7 @@ func (app *App) initValidation() {
 
 	}).Permission(loggedPermission).Name(unlocalized("Kontrola konzistence"))
 
-	ActionForm(app, "_validations",
+	app.ActionForm("_validations",
 		func(form *Form, request *Request) {
 			form.Title = "Validations check"
 

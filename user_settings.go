@@ -7,7 +7,7 @@ import (
 
 func initUserSettings(app *App) {
 
-	ActionForm(app, "settings", func(form *Form, request *Request) {
+	app.ActionForm("settings", func(form *Form, request *Request) {
 		user := request.getUser()
 		form.Title = messages.Get(request.Locale(), "settings")
 
@@ -86,8 +86,7 @@ func initUserSettings(app *App) {
 		}
 	}).Icon("glyphicons-basic-5-settings.svg").Permission(loggedPermission).Name(messages.GetNameFunction("settings")).Board(app.optionsBoard)
 
-	ActionForm(
-		app,
+	app.ActionForm(
 		"password",
 		func(form *Form, request *Request) {
 			locale := request.Locale()
@@ -125,7 +124,7 @@ func initUserSettings(app *App) {
 			}
 		}).Icon("glyphicons-basic-45-key.svg").Permission(loggedPermission).Name(messages.GetNameFunction("password_change")).Board(app.optionsBoard)
 
-	ActionResourceForm[user](app, "create", func(form *Form, request *Request) {
+	app.ActionResourceForm[user]("create", func(form *Form, request *Request) {
 
 		cu := request.getUser()
 
@@ -204,7 +203,7 @@ func initUserSettings(app *App) {
 
 	}).Name(unlocalized("Založit uživatele")).Icon("glyphicons-basic-191-circle-empty-plus.svg")
 
-	ActionResourceItemForm(app, "setup", func(user *user, form *Form, request *Request) {
+	app.ActionResourceItemForm("setup", func(user *user, form *Form, request *Request) {
 		cu := request.getUser()
 		if !app.canManageRole(cu.Role, user.Role) {
 			form.Title = "Nemůžete upravovat tohoto uživatele"
@@ -280,7 +279,7 @@ func initUserSettings(app *App) {
 
 	}).Name(unlocalized("Nastavit uživatele"))
 
-	ActionPlain(app, "logout", func(request *Request) {
+	app.ActionPlain("logout", func(request *Request) {
 		validateCSRF(request)
 		request.logOutUser()
 		request.Redirect(app.getAdminURL("login"))

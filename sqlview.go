@@ -9,7 +9,7 @@ import (
 
 func (app *App) initSQLView() {
 
-	ActionUI(app, "_sqlview", func(request *Request) template.HTML {
+	app.ActionUI("_sqlview", func(request *Request) template.HTML {
 
 		table := app.Table()
 

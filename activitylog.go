@@ -194,7 +194,7 @@ func humanizeActionType(in string) string {
 
 func (app *App) initActivityLog() {
 
-	ActionForm(app, "_activity", func(form *Form, request *Request) {
+	app.ActionForm("_activity", func(form *Form, request *Request) {
 		id := request.Param("id")
 		form.AddTextInput("id", "ID úpravy").Value = id
 		form.AddSubmit("Zobrazit")

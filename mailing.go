@@ -48,11 +48,11 @@ type MailingRecipient struct {
 
 func (app *App) initMailing() {
 
-	ActionPlain(app, "mailing-preview", func(request *Request) {
+	app.ActionPlain("mailing-preview", func(request *Request) {
 		request.w.Write([]byte(generateMailingHTMLData(getTestingMailingData(app))))
 	}).Permission("sysadmin").Board(sysadminBoard)
 
-	ActionForm(app, "send-mailing-preview", func(f *Form, r *Request) {
+	app.ActionForm("send-mailing-preview", func(f *Form, r *Request) {
 		f.AddTextInput("emails", "Emails")
 		f.AddSubmit("Odeslat")
 	}, func(fv FormValidation, request *Request) {

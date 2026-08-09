@@ -60,7 +60,7 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *form
 	return ret
 }
 
-func ActionForm(app *App, url string, formGenerator func(form *Form, request *Request), validator func(fv FormValidation, request *Request)) *Action {
+func (app *App) ActionForm(url string, formGenerator func(form *Form, request *Request), validator func(fv FormValidation, request *Request)) *Action {
 	fa := newFormAction(app, url, nil)
 
 	fa.formGenerator = formGenerator
@@ -100,7 +100,7 @@ func (app *App) nologinFormAction(path string, formHandler func(f *Form, r *Requ
 
 }
 
-func ActionResourceForm[T any](app *App, url string, formGenerator func(form *Form, request *Request), validation func(fv FormValidation, request *Request)) *Action {
+func (app *App) ActionResourceForm[T any](url string, formGenerator func(form *Form, request *Request), validation func(fv FormValidation, request *Request)) *Action {
 	resource := getResource[T](app)
 	return resource.formAction(url, formGenerator, validation)
 }
@@ -125,8 +125,7 @@ func (resource *Resource) formAction(url string, formGenerator func(*Form, *Requ
 	return action.actionForm
 }
 
-func ActionResourceItemForm[T any](
-	app *App,
+func (app *App) ActionResourceItemForm[T any](
 	url string,
 	formGenerator func(item *T, form *Form, request *Request),
 	validation func(item *T, fv FormValidation, request *Request),

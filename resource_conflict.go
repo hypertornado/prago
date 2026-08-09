@@ -37,7 +37,7 @@ func (app *App) initResourceConflict() {
 		return app.getConflictResponse(request, int64(version))
 	}).Method("POST").Permission(loggedPermission)
 
-	ActionUI(app, "_conflicts", func(request *Request) template.HTML {
+	app.ActionUI("_conflicts", func(request *Request) template.HTML {
 
 		conflicts := app.getCurrentConflicts()
 
@@ -73,7 +73,6 @@ func (app *App) getConflictResponse(request *Request, version int64) *conflictRe
 	currentVersion := app.Query[activityLog]().Is("resourcename", logItem.ResourceName).Is("ItemID", logItem.ItemID).OrderDesc("id").First()
 	if currentVersion.ID != logItem.ID {
 		if request.Authorize(app.UsersResource.canView) {
-			//logItem := Query[activityLog](app).ID(currentVersion)
 
 			var userName = fmt.Sprintf("#%d", currentVersion.User)
 			ud := app.GetUserData(currentVersion.User)

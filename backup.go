@@ -20,7 +20,7 @@ func (app *App) initBackupCRON() {
 		}
 	})
 
-	ActionForm(app, "_backupdb", func(form *Form, request *Request) {
+	app.ActionForm("_backupdb", func(form *Form, request *Request) {
 		form.AddSubmit("Spustit")
 	}, func(fv FormValidation, request *Request) {
 		fv.RunTask(request, func(ta *FormTaskActivity) error {
@@ -35,7 +35,7 @@ func (app *App) initBackupCRON() {
 		}
 	})
 
-	ActionForm(app, "_removeoldbackups", func(form *Form, request *Request) {
+	app.ActionForm("_removeoldbackups", func(form *Form, request *Request) {
 		form.AddSubmit("Spustit")
 	}, func(fv FormValidation, request *Request) {
 		fv.RunTask(request, func(ta *FormTaskActivity) error {

@@ -8,7 +8,7 @@ import (
 
 func (app *App) initCacheStats() {
 
-	ActionForm(app, "prago-cache-stats", func(form *Form, request *Request) {
+	app.ActionForm("prago-cache-stats", func(form *Form, request *Request) {
 		form.AddSelect("order", "Order By", [][2]string{
 			{"size", "Size"},
 			{"count", "Access count"},

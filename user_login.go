@@ -6,7 +6,7 @@ import (
 )
 
 func initUserLogin(app *App) {
-	ActionResourceItemPlain[user](app, "loginas",
+	app.ActionResourceItemPlain[user]("loginas",
 		func(user *user, request *Request) {
 			request.logInUser(user)
 			request.Redirect("/admin")

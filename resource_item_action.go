@@ -54,7 +54,7 @@ func (resource *Resource) itemActionUi(itemURL string, handler func(any, *Reques
 	return action
 }
 
-func ActionResourceItemPlain[T any](app *App, url string, fn func(item *T, request *Request)) *Action {
+func (app *App) ActionResourceItemPlain[T any](url string, fn func(item *T, request *Request)) *Action {
 	resource := getResource[T](app)
 	return resource.itemActionHandler(url, func(item any, request *Request) {
 		fn(item.(*T), request)

@@ -57,7 +57,7 @@ func (app *App) initSQLBackup() {
 		}
 	})
 
-	ActionForm(app, "_sqlbackup",
+	app.ActionForm("_sqlbackup",
 		func(form *Form, request *Request) {
 			form.Title = "SQL Backup"
 

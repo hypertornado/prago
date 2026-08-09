@@ -42,7 +42,7 @@ func (app *App) initCache() {
 
 	app.cache = newCache()
 
-	ActionForm(app, "_deletecache", func(form *Form, request *Request) {
+	app.ActionForm("_deletecache", func(form *Form, request *Request) {
 		form.AddSubmit("Smazat cache")
 	}, func(fv FormValidation, request *Request) {
 		app.ClearCache()
