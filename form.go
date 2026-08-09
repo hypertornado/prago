@@ -134,43 +134,43 @@ func (form *Form) addInput(id, description, template string) *FormItem {
 	return item
 }
 
-// AddTextInput to form
-func (form *Form) AddTextInput(name, description string) *FormItem {
+// AddText to form
+func (form *Form) AddText(name, description string) *FormItem {
 	input := form.addInput(name, description, "form_input")
 	return input
 }
 
-func (form *Form) AddNumberInput(name, description string) *FormItem {
+func (form *Form) AddNumber(name, description string) *FormItem {
 	input := form.addInput(name, description, "form_input_int")
 	return input
 }
 
-// AddTextareaInput to form
-func (form *Form) AddTextareaInput(name, description string) *FormItem {
+// AddTextarea to form
+func (form *Form) AddTextarea(name, description string) *FormItem {
 	input := form.addInput(name, description, "form_input_textarea")
 	return input
 }
 
-// AddEmailInput to form
-func (form *Form) AddEmailInput(name, description string) *FormItem {
+// AddEmail to form
+func (form *Form) AddEmail(name, description string) *FormItem {
 	input := form.addInput(name, description, "form_input_email")
 	return input
 }
 
-// AddPasswordInput to form
-func (form *Form) AddPasswordInput(name, description string) *FormItem {
+// AddPassword to form
+func (form *Form) AddPassword(name, description string) *FormItem {
 	input := form.addInput(name, description, "form_input_password")
 	return input
 }
 
-// AddFileInput to form
-func (form *Form) AddFileInput(name, description string) *FormItem {
+// AddFile to form
+func (form *Form) AddFile(name, description string) *FormItem {
 	input := form.addInput(name, description, "form_input_file")
 	return input
 }
 
-// AddCAPTCHAInput to form
-func (form *Form) AddCAPTCHAInput(name, description string) *FormItem {
+// AddCAPTCHA to form
+func (form *Form) AddCAPTCHA(name, description string) *FormItem {
 	return form.addInput(name, description, "form_input_captcha")
 }
 

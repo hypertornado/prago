@@ -17,11 +17,11 @@ func TestValidation(t *testing.T) {
 			app.NewResource[TStruct]()
 		})
 
-		if _, valid := TestValidationUpdate(app, &TStruct{}, app.TestUserData("")); valid != false {
+		if _, valid := app.CheckUpdateValidation(&TStruct{}, app.TestUserData("")); valid != false {
 			t.Fatal("expected")
 		}
 
-		if _, valid := TestValidationUpdate(app, &TStruct{
+		if _, valid := app.CheckUpdateValidation(&TStruct{
 			Name: "AAA",
 		}, app.TestUserData("")); valid != true {
 			t.Fatal("expected")
@@ -47,7 +47,7 @@ func TestValidation(t *testing.T) {
 
 		must(app.Create(a))
 
-		if _, ok := TestValidationDelete(app, a, app.TestUserData("")); !ok {
+		if _, ok := app.CheckDeleteValidation(a, app.TestUserData("")); !ok {
 			t.Fatal("should be able to delete")
 		}
 
@@ -55,7 +55,7 @@ func TestValidation(t *testing.T) {
 			AStruct: a.ID,
 		}))
 
-		if _, ok := TestValidationDelete(app, a, app.TestUserData("")); ok {
+		if _, ok := app.CheckDeleteValidation(a, app.TestUserData("")); ok {
 			t.Fatal("should be able to delete, because of strong relation")
 		}
 	})
@@ -79,7 +79,7 @@ func TestValidation(t *testing.T) {
 
 		must(app.Create(a))
 
-		if _, ok := TestValidationDelete(app, a, app.TestUserData("")); !ok {
+		if _, ok := app.CheckDeleteValidation(a, app.TestUserData("")); !ok {
 			t.Fatal("should be able to delete")
 		}
 
@@ -87,7 +87,7 @@ func TestValidation(t *testing.T) {
 			AStruct: fmt.Sprintf(";%d;", a.ID),
 		}))
 
-		if _, ok := TestValidationDelete(app, a, app.TestUserData("")); ok {
+		if _, ok := app.CheckDeleteValidation(a, app.TestUserData("")); ok {
 			t.Fatal("should not be able to delete, because of strong relation")
 		}
 	})
@@ -106,13 +106,13 @@ func TestValidation(t *testing.T) {
 			app.NewResource[AStruct]()
 		})
 
-		if _, valid := TestValidationUpdate(app, &AStruct{Typ: ""}, app.TestUserData("")); valid != false {
+		if _, valid := app.CheckUpdateValidation(&AStruct{Typ: ""}, app.TestUserData("")); valid != false {
 			t.Fatal("should not be allowed")
 		}
-		if _, valid := TestValidationUpdate(app, &AStruct{Typ: "c"}, app.TestUserData("")); valid != false {
+		if _, valid := app.CheckUpdateValidation(&AStruct{Typ: "c"}, app.TestUserData("")); valid != false {
 			t.Fatal("should not be allowed")
 		}
-		if _, valid := TestValidationUpdate(app, &AStruct{Typ: "a"}, app.TestUserData("")); valid == false {
+		if _, valid := app.CheckUpdateValidation(&AStruct{Typ: "a"}, app.TestUserData("")); valid == false {
 			t.Fatal("should be ok")
 		}
 

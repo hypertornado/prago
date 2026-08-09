@@ -25,7 +25,7 @@ func (app *App) initResourceConflict() {
 
 	app.conflictMutex = &sync.Mutex{}
 
-	app.API("_conflict").HandlerJSON(func(request *Request) any {
+	app.NewAPI("_conflict").HandlerJSON(func(request *Request) any {
 		//return &conflictResponse{}
 		version, err := strconv.Atoi(request.Param("version"))
 		if err != nil {
@@ -41,7 +41,7 @@ func (app *App) initResourceConflict() {
 
 		conflicts := app.getCurrentConflicts()
 
-		table := app.Table()
+		table := app.NewTable()
 
 		table.Header("Resource", "Item", "User", "Date")
 		for _, conflict := range conflicts {
@@ -165,10 +165,9 @@ func (app *App) markConflict(request *Request, resourceID string, itemID int64) 
 	}
 }
 
-func GetItemVersion[T any](request *Request, item *T) int64 {
-	app := request.app
+func (app *App) GetItemVersion[T any](item *T) int64 {
 	resource := getResource[T](app)
-	id := resource.previewer(request, item).ID()
+	id := resource.previewer(nil, item).ID()
 	return resource.currentItemVersion(id)
 }
 

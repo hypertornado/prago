@@ -24,7 +24,7 @@ func (app *App) uploadFileReader(ctx context.Context, reader io.Reader, fileName
 	file.User = userID
 	file.Description = description
 
-	err = app.CreateWithContext(&file, ctx)
+	err = app.CreateContext(ctx, &file)
 	if err != nil {
 		return nil, fmt.Errorf("saving file: %s", err)
 	}

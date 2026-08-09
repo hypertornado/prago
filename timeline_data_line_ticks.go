@@ -33,9 +33,9 @@ func niceNum(x float64, round bool) float64 {
 	return nf * math.Pow(10, exp)
 }
 
-// CalculateGraphTicks přijme minimum, maximum a přibližný počet čar, které v grafu chceš.
+// calculateGraphTicks přijme minimum, maximum a přibližný počet čar, které v grafu chceš.
 // Vrací řezy (slice) float64 hodnot, které bys měl vykreslit jako pomocné čáry.
-func CalculateGraphTicks(min, max float64, maxTicks int) []float64 {
+func calculateGraphTicks(min, max float64, maxTicks int) []float64 {
 	// Ochrana před nesmyslným vstupem
 	if max <= min {
 		return []float64{min, max}

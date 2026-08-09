@@ -20,7 +20,7 @@ func (app *App) getDashboardTableData(request *Request, uuid string) (*Table, er
 	return table.table(request), nil
 }
 
-func (group *Dashboard) Table(tableFn func(*Request) *Table, permission Permission) *dashboardTable {
+func (group *Dashboard) AddTable(tableFn func(*Request) *Table, permission Permission) *dashboardTable {
 	table := &dashboardTable{
 		uuid:       randomString(30),
 		table:      tableFn,

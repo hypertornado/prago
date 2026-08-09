@@ -71,7 +71,7 @@ func (app *App) getHistorySelect(request *Request, resource *Resource, itemID in
 
 func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int64, pageStr string) *Table {
 
-	ret := app.Table()
+	ret := app.NewTable()
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page <= 0 {
@@ -196,14 +196,14 @@ func (app *App) initActivityLog() {
 
 	app.ActionForm("_activity", func(form *Form, request *Request) {
 		id := request.Param("id")
-		form.AddTextInput("id", "ID úpravy").Value = id
+		form.AddText("id", "ID úpravy").Value = id
 		form.AddSubmit("Zobrazit")
 
 		if id != "" {
 			form.AutosubmitFirstTime = true
 		}
 	}, func(fv FormValidation, request *Request) {
-		table := app.Table()
+		table := app.NewTable()
 
 		activity := app.Query[activityLog]().ID(request.Param("id"))
 		if activity == nil {
@@ -281,7 +281,7 @@ func (app *App) initActivityLog() {
 	app.activityLogResource.orderDesc = true
 	app.activityLogResource.Name(messages.GetNameFunction("history"), messages.GetNameFunction("history"))
 
-	PreviewURLFunction(app, func(activityLog *activityLog) string {
+	app.PreviewURLFunction(func(activityLog *activityLog) string {
 		return fmt.Sprintf("/admin/_activity?id=%d", activityLog.ID)
 	})
 

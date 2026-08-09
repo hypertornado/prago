@@ -1,6 +1,6 @@
 package prago
 
-func PopupForm(app *App, url string, formGenerator func(form *Form, request *Request), validation func(fv FormValidation, request *Request)) *Action {
+func (app *App) PopupForm(url string, formGenerator func(form *Form, request *Request), validation func(fv FormValidation, request *Request)) *Action {
 	fa := newFormAction(app, url, nil)
 	fa.actionForm.parentBoard = nil
 	fa.formGenerator = formGenerator

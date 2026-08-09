@@ -5,7 +5,7 @@ type TemporaryCacheData[T any] struct {
 	cache map[int64]*T
 }
 
-func TemporaryCache[T any](app *App) *TemporaryCacheData[T] {
+func (app *App) TemporaryCache[T any]() *TemporaryCacheData[T] {
 	return &TemporaryCacheData[T]{
 		app:   app,
 		cache: make(map[int64]*T),

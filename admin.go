@@ -33,7 +33,7 @@ func (app *App) initAdminActions() {
 		return true
 	})
 
-	app.Help("markdown", unlocalized("Markdown"), func(request *Request) template.HTML {
+	app.AddHelp("markdown", unlocalized("Markdown"), func(request *Request) template.HTML {
 		return app.adminTemplates.ExecuteToHTML("help_markdown", nil)
 	})
 
@@ -57,7 +57,7 @@ func (app *App) initAdminActions() {
 		request.w.Write(iconData)
 	})
 
-	app.API("_suggestionsresource").Handler(suggestionsResource).Permission(loggedPermission)
+	app.NewAPI("_suggestionsresource").Handler(suggestionsResource).Permission(loggedPermission)
 }
 
 func (app *App) initAdminNotFoundAction() {

@@ -9,14 +9,14 @@ import (
 
 func bindStats(app *prago.App) {
 
-	dashboard := app.MainBoard.Dashboard(unlocalized("Soubory"))
+	dashboard := app.MainBoard.AddDashboard(unlocalized("Soubory"))
 
-	dashboard.Figure(unlocalized("Počet souborů"), "sysadmin").Unit(unlocalized("souborů")).Value(func(r *prago.Request) int64 {
+	dashboard.AddFigure(unlocalized("Počet souborů"), "sysadmin").Unit(unlocalized("souborů")).Value(func(r *prago.Request) int64 {
 		files := app.Query[CDNFile]().List()
 		return int64(len(files))
 	})
 
-	dashboard.Figure(unlocalized("Velikost souborů"), "sysadmin").Unit(unlocalized("bajtů")).Value(func(r *prago.Request) int64 {
+	dashboard.AddFigure(unlocalized("Velikost souborů"), "sysadmin").Unit(unlocalized("bajtů")).Value(func(r *prago.Request) int64 {
 		files := app.Query[CDNFile]().List()
 		var ret int64
 		for _, file := range files {
@@ -25,7 +25,7 @@ func bindStats(app *prago.App) {
 		return ret
 	})
 
-	dashboard.Figure(unlocalized("Datová velikost souborů"), "sysadmin").Unit(unlocalized("bajtů")).Value(func(r *prago.Request) int64 {
+	dashboard.AddFigure(unlocalized("Datová velikost souborů"), "sysadmin").Unit(unlocalized("bajtů")).Value(func(r *prago.Request) int64 {
 		var ret int64
 		filepath.Walk(cdnDirPath()+"/data", func(path string, info fs.FileInfo, err error) error {
 			if err == nil && !info.IsDir() {

@@ -168,7 +168,7 @@ func (app *App) initFormTask() {
 
 	app.formTasksMap = map[string]*FormTaskActivity{}
 
-	app.API("_taskview").HandlerJSON(func(request *Request) any {
+	app.NewAPI("_taskview").HandlerJSON(func(request *Request) any {
 		activity := app.getFormTaskActivity(request.Param("uuid"))
 		if activity == nil {
 			request.WriteJSON(404, "Not Found")
@@ -178,7 +178,7 @@ func (app *App) initFormTask() {
 		return ret
 	}).Permission(everybodyPermission)
 
-	app.API("_taskviewtable").Handler(func(request *Request) {
+	app.NewAPI("_taskviewtable").Handler(func(request *Request) {
 		activity := app.getFormTaskActivity(request.Param("uuid"))
 		if activity == nil {
 			request.WriteJSON(404, "Not Found")
@@ -192,7 +192,7 @@ func (app *App) initFormTask() {
 		request.WriteHTML(200, app.adminTemplates, "table_rows", tableViewData)
 	}).Permission(everybodyPermission)
 
-	PopupForm(app, "_taskstop", func(form *Form, request *Request) {
+	app.PopupForm("_taskstop", func(form *Form, request *Request) {
 		form.AddHidden("uuid").Value = request.Param("uuid")
 		form.AutosubmitFirstTime = true
 	}, func(fv FormValidation, request *Request) {

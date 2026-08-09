@@ -31,7 +31,7 @@ func newEmailAddress(name, email string) *emailAddress {
 	return &emailAddress{name, email}
 }
 
-func (app *App) Email() *Email {
+func (app *App) NewEmail() *Email {
 	noReplyEmail := app.mustGetSetting("no_reply_email")
 	return &Email{
 		from: newEmailAddress(app.name("en"), noReplyEmail),

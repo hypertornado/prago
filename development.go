@@ -28,7 +28,7 @@ type sass struct {
 }
 
 type developmentTemplateData struct {
-	Templates     *PragoTemplates
+	Templates     *Templates
 	WatchPath     string
 	MatchPatterns []string
 }
@@ -72,11 +72,11 @@ func (app *App) AddSassDevelopmentPaths(sourcePath, targetPath string) {
 	app.development.sass = append(app.development.sass, sass{sourcePath, targetPath})
 }
 
-func (app *App) AddPragoDevelopmentPath(path string) {
+func (app *App) AddDevelopmentPath(path string) {
 	app.AddTemplatesDevelopmentPath(app.adminTemplates, path+"/templates", "*")
 }
 
-func (app *App) AddTemplatesDevelopmentPath(templates *PragoTemplates, watchPath string, matchPatterns ...string) {
+func (app *App) AddTemplatesDevelopmentPath(templates *Templates, watchPath string, matchPatterns ...string) {
 	app.development.templateData = append(app.development.templateData, &developmentTemplateData{
 		WatchPath:     watchPath,
 		MatchPatterns: matchPatterns,

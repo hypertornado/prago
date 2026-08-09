@@ -1,7 +1,7 @@
 package prago
 
 func (request *Request) AddFlashMessage(message string) {
-	request.app.Notification(message).Flash(request)
+	request.app.NewNotification(message).Flash(request)
 }
 
 func (n *Notification) Flash(request *Request) error {

@@ -53,7 +53,7 @@ func (app *App) initMailing() {
 	}).Permission("sysadmin").Board(sysadminBoard)
 
 	app.ActionForm("send-mailing-preview", func(f *Form, r *Request) {
-		f.AddTextInput("emails", "Emails")
+		f.AddText("emails", "Emails")
 		f.AddSubmit("Odeslat")
 	}, func(fv FormValidation, request *Request) {
 		emails := strings.Split(request.Param("emails"), ",")
@@ -89,7 +89,7 @@ func getTestingMailingData(app *App) *MailingData {
 
 	section := data.AddSection("Pohlaví", "žena")
 
-	table := app.Table()
+	table := app.NewTable()
 	table.Header("Row1", "Row2")
 	table.Row(table.Cell("A"), table.Cell("B"))
 	section.Table = table
@@ -120,18 +120,18 @@ func (md *MailingData) AddSection(name, text string) *MailingDataSection {
 }
 
 func initMailingData(locale string, app *App) *MailingData {
-	ai := app.GetAppInfo()
+	info := app.Info()
 
 	data := &MailingData{
 		App:     app,
 		BaseURL: app.BaseURL(),
 		LogoURL: app.IconURL(),
-		AppName: ai.Name(locale),
+		AppName: info.Name(locale),
 
-		PreName: ai.Name(locale),
+		PreName: info.Name(locale),
 
 		FromEmail: app.mustGetSetting("no_reply_email"),
-		FromName:  ai.Name(locale),
+		FromName:  info.Name(locale),
 	}
 	return data
 }
@@ -163,7 +163,7 @@ func sendMailingData(data *MailingData) error {
 
 	htmlContent := generateMailingHTMLData(data)
 
-	email := data.App.Email().From(data.FromName, data.FromEmail).HTMLContent(htmlContent).Subject(subject)
+	email := data.App.NewEmail().From(data.FromName, data.FromEmail).HTMLContent(htmlContent).Subject(subject)
 	for _, v := range data.Tos {
 		email.To(v.Name, v.Email)
 	}

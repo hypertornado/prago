@@ -41,7 +41,7 @@ type TimelineRequest struct {
 
 func (app *App) initTimeline() {
 
-	APIJSON(app, "timeline", func(request *Request, tr *TimelineRequest) any {
+	app.NewResourceAPIJSON("timeline", func(request *Request, tr *TimelineRequest) any {
 		timeline, err := app.getTimelineData(request, tr)
 		if err != nil {
 			if err == cantFindTimelineError {
@@ -56,7 +56,7 @@ func (app *App) initTimeline() {
 	app.initTimelineSettings()
 }
 
-func (dashboard *Dashboard) Timeline(name func(string) string, permission Permission, dataSource func(tdr *TimelineDataRequest) float64) *Timeline {
+func (dashboard *Dashboard) AddTimeline(name func(string) string, permission Permission, dataSource func(tdr *TimelineDataRequest) float64) *Timeline {
 
 	if !dashboard.board.app.accessManager.permissions[permission] {
 		panic(fmt.Sprintf("Persmission '%s' is not set", permission))

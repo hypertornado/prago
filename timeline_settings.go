@@ -2,7 +2,7 @@ package prago
 
 func (app *App) initTimelineSettings() {
 
-	PopupForm(app, "_timeline-settings", func(form *Form, request *Request) {
+	app.PopupForm("_timeline-settings", func(form *Form, request *Request) {
 
 		timeline, err := app.getTimeline(request, request.Param("_uuid"))
 		must(err)

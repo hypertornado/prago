@@ -1,7 +1,6 @@
 package prago
 
-func ActionResourceMultipleItemsForm[T any](
-	app *App,
+func (app *App) ActionResourceMultipleItemsForm[T any](
 	url string,
 	formGenerator func(items []*T, form *Form, request *Request),
 	validation func(items []*T, fv FormValidation, request *Request),

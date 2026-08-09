@@ -144,7 +144,7 @@ func (app *App) initUserResource() {
 
 func (app *App) afterInitUserResource() {
 
-	ValidateUpdate(app, func(usr *user, vc Validation, userData UserData) {
+	app.AddUpdateValidation(func(usr *user, vc Validation, userData UserData) {
 
 		if usr.Phone != "" {
 			if !IsPhoneNumberValid(usr.Phone) {

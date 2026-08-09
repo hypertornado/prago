@@ -25,10 +25,10 @@ type CDNProject struct {
 }
 
 func initCDNProjectResource() {
-	projectResource = prago.NewResource[CDNProject](app)
+	projectResource = app.NewResource[CDNProject]()
 	projectResource.Name(unlocalized("Projekt"), unlocalized("Projekty"))
 
-	prago.ActionForm(app, "upload-file", func(form *prago.Form, request *prago.Request) {
+	app.ActionForm("upload-file", func(form *prago.Form, request *prago.Request) {
 		projects := app.Query[CDNProject]().List()
 		var values [][2]string
 		values = append(values, [2]string{"", ""})
@@ -36,7 +36,7 @@ func initCDNProjectResource() {
 			values = append(values, [2]string{fmt.Sprintf("%d", p.ID), p.Name})
 		}
 		form.AddSelect("project", "Projekt", values)
-		form.AddFileInput("file", "Soubor")
+		form.AddFile("file", "Soubor")
 		form.AddSubmit("Nahrát soubor")
 	}, func(fv prago.FormValidation, request *prago.Request) {
 		projectID := request.Param("project")
@@ -103,14 +103,14 @@ func getCDNProjectsIDMap() map[int64]*CDNProject {
 }
 
 func getCDNProject(name string) *CDNProject {
-	projects := <-prago.Cached(app, "get_projects_name", func() map[string]*CDNProject {
+	projects := app.Cached("get_projects_name", func() map[string]*CDNProject {
 		return getCDNProjectsMap()
 	})
 	return projects[name]
 }
 
 func getCDNProjectFromID(id int64) *CDNProject {
-	projects := <-prago.Cached(app, "get_projects_id", func() map[int64]*CDNProject {
+	projects := app.Cached("get_projects_id", func() map[int64]*CDNProject {
 		return getCDNProjectsIDMap()
 	})
 	return projects[id]

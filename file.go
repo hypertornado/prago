@@ -98,7 +98,7 @@ func (app *App) initFilesResource() {
 func (app *App) afterInitFilesResource() {
 	resource := app.FilesResource
 
-	ResourceAPI[File](app, "upload").Method("POST").Permission(resource.canUpdate).Handler(func(request *Request) {
+	app.NewResourceAPI[File]("upload").Method("POST").Permission(resource.canUpdate).Handler(func(request *Request) {
 		multipartFiles := request.Request().MultipartForm.File["file"]
 		description := request.Param("description")
 
@@ -112,8 +112,8 @@ func (app *App) afterInitFilesResource() {
 		request.WriteJSON(200, uuids)
 	})
 
-	PopupForm(app, "validate-uuid-files", func(form *Form, request *Request) {
-		form.AddTextInput("uuid", "UUID").Focused = true
+	app.PopupForm("validate-uuid-files", func(form *Form, request *Request) {
+		form.AddText("uuid", "UUID").Focused = true
 		form.AddSubmit("Vložit")
 	}, func(fv FormValidation, request *Request) {
 		uuids := request.Param("uuid")
@@ -146,8 +146,8 @@ func (app *App) afterInitFilesResource() {
 		fv.Data(strings.Join(retIDs, ","))
 	}).Permission(resource.canUpdate).Name(unlocalized("Vložit UUID"))
 
-	PopupForm(app, "edit-uuid-files", func(form *Form, request *Request) {
-		input := form.AddTextInput("ids", "ID")
+	app.PopupForm("edit-uuid-files", func(form *Form, request *Request) {
+		input := form.AddText("ids", "ID")
 		input.Value = request.Param("ids")
 		input.Focused = true
 		form.AddSubmit("Upravit")
@@ -177,7 +177,7 @@ func (app *App) afterInitFilesResource() {
 		fv.Data(strings.Join(retIDs, ","))
 	}).Permission(resource.canUpdate).Name(unlocalized("Upravit UUID"))
 
-	app.API("imagepicker").Permission(loggedPermission).HandlerJSON(imagePickerAPIHandler)
+	app.NewAPI("imagepicker").Permission(loggedPermission).HandlerJSON(imagePickerAPIHandler)
 
 	resource.Field("uid").Name(messages.GetNameFunction("file"))
 	resource.Field("width").Name(messages.GetNameFunction("width"))
@@ -198,7 +198,7 @@ func (app *App) afterInitFilesResource() {
 
 		form.AddSelect("typ", "Type", values).Value = "original"
 		if file.IsImage() {
-			form.AddTextInput("custom", "Custom size")
+			form.AddText("custom", "Custom size")
 		}
 		form.AddSubmit("Download")
 	}, func(file *File, fv FormValidation, request *Request) {
@@ -221,13 +221,13 @@ func (app *App) afterInitFilesResource() {
 
 	}).Name(unlocalized("Download")).Icon("glyphicons-basic-199-save.svg")
 
-	ActionResourceItemUI(app, "metadata", func(file *File, request *Request) template.HTML {
+	app.ActionResourceItemUI("metadata", func(file *File, request *Request) template.HTML {
 		metadata, err := filesCDN.GetMetadata(file.UID)
 		if err != nil {
 			panic(err)
 		}
 
-		table := app.Table()
+		table := app.NewTable()
 
 		table.Row(
 			Cell("UUID"),
@@ -258,8 +258,8 @@ func (app *App) afterInitFilesResource() {
 
 	}).Name(unlocalized("CDN Metadata")).Icon("glyphicons-basic-501-server.svg")
 
-	ActionResourceItemUI(app, "connections", func(file *File, request *Request) template.HTML {
-		table := app.Table()
+	app.ActionResourceItemUI("connections", func(file *File, request *Request) template.HTML {
+		table := app.NewTable()
 		table.Header("Resource", "Field", "Item")
 
 		var totalConnections = 0
@@ -313,11 +313,11 @@ func (app *App) afterInitFilesResource() {
 		return table.ExecuteHTML()
 	}).Name(unlocalized("Connections")).Icon("glyphicons-basic-63-paperclip.svg")
 
-	ItemStatistic(app, unlocalized("UUID"), app.FilesResource.canView, func(file *File) string {
+	app.AddItemStatistic(unlocalized("UUID"), app.FilesResource.canView, func(file *File) string {
 		return file.UID
 	})
 
-	ItemStatistic(app, unlocalized("Connections"), app.FilesResource.canView, func(file *File) string {
+	app.AddItemStatistic(unlocalized("Connections"), app.FilesResource.canView, func(file *File) string {
 		var totalConnections int64
 		for _, resource := range app.resources {
 			for _, field := range resource.fields {
@@ -366,8 +366,8 @@ func (app *App) afterInitFilesResource() {
 
 	app.ActionResourceForm[File]("upload",
 		func(f *Form, r *Request) {
-			f.AddFileInput("file", messages.Get(r.Locale(), "file"))
-			f.AddTextareaInput("description", messages.Get(r.Locale(), "Description"))
+			f.AddFile("file", messages.Get(r.Locale(), "file"))
+			f.AddTextarea("description", messages.Get(r.Locale(), "Description"))
 			f.AddSubmit(messages.Get(r.Locale(), "save"))
 		},
 		func(vc FormValidation, request *Request) {

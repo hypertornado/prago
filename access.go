@@ -33,10 +33,10 @@ func (app *App) initAccessManager() {
 
 	app.Permission(everybodyPermission)
 	app.Permission(nobodyPermission)
-	app.Role(sysadminRoleName, unlocalized("Sysadmin"), nil)
+	app.AddRole(sysadminRoleName, unlocalized("Sysadmin"), nil)
 	app.Permission(loggedPermission)
 	app.Permission(sysadminPermission)
-	app.Role("", unlocalized("Bez oprávnění"), []Permission{loggedPermission})
+	app.AddRole("", unlocalized("Bez oprávnění"), []Permission{loggedPermission})
 }
 
 func (app *App) validatePermission(permission Permission) error {
@@ -74,8 +74,8 @@ func userRoleFormDataSource(field *Field, ud UserData, value string) any {
 	return getFormOptions(vals)
 }
 
-// Role adds role to admin
-func (app *App) Role(roleID string, roleName func(string) string, permissions []Permission) *App {
+// AddRole adds role to admin
+func (app *App) AddRole(roleID string, roleName func(string) string, permissions []Permission) *App {
 	_, ok := app.accessManager.roles[roleID]
 	if ok {
 		panic(fmt.Sprintf("Role '%s' already added", roleID))

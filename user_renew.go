@@ -11,7 +11,7 @@ func initUserRenew(app *App) {
 
 	app.nologinFormAction("forgot", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
-		emailInput := form.AddEmailInput("email", messages.Get(locale, "email"))
+		emailInput := form.AddEmail("email", messages.Get(locale, "email"))
 		emailInput.Focused = true
 		emailInput.InputMode = "email"
 		emailInput.Autocomplete = "email"
@@ -54,7 +54,7 @@ func initUserRenew(app *App) {
 
 	app.nologinFormAction(renewURL, func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
-		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "password_new"))
+		passwordInput := form.AddPassword("password", messages.Get(locale, "password_new"))
 		passwordInput.Focused = true
 		passwordInput.Autocomplete = "new-password"
 
@@ -106,5 +106,5 @@ func (app *App) sendRenewPasswordEmail(user user) error {
 	link := app.getRenewPasswordURL(user)
 	body := messages.Get(user.Locale, "forgotten_email_body", link, link, app.name(user.Locale))
 
-	return app.Email().To(user.Name, user.Email).Subject(subject).TextContent(body).Send()
+	return app.NewEmail().To(user.Name, user.Email).Subject(subject).TextContent(body).Send()
 }

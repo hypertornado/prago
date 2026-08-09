@@ -30,7 +30,7 @@ type App struct {
 	staticFiles     staticFiles
 	commands        []*command
 	logger          *logger
-	adminTemplates  *PragoTemplates
+	adminTemplates  *Templates
 	cache           *cache
 
 	settings *settingsSingleton
@@ -240,7 +240,7 @@ func New(appName, version string) *App {
 	return createApp(appName, version, false)
 }
 
-func (app *App) GetDB() *sql.DB { return app.db }
+func (app *App) DB() *sql.DB { return app.db }
 
 // Log returns logger structure
 func (app *App) Log() *logger { return app.logger }

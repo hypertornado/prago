@@ -6,10 +6,10 @@ import (
 
 var helpBoard *Board
 
-func (app *App) Help(url string, name func(string) string, content func(request *Request) template.HTML) {
+func (app *App) AddHelp(url string, name func(string) string, content func(request *Request) template.HTML) {
 
 	if helpBoard == nil {
-		helpBoard = app.optionsBoard.Child("help", unlocalized("Nápověda"), "glyphicons-basic-196-circle-empty-info.svg")
+		helpBoard = app.optionsBoard.AddChild("help", unlocalized("Nápověda"), "glyphicons-basic-196-circle-empty-info.svg")
 	}
 
 	app.ActionUI("help/"+url, content).

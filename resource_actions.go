@@ -55,7 +55,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			preview := resource.previewer(request, item).Preview(nil)
 			vc.(*formValidation).validationData.Data = preview
 
-			must(resource.app.Notification(resource.previewer(request, item).Name()).
+			must(resource.app.NewNotification(resource.previewer(request, item).Name()).
 				SetImage(resource.previewer(request, item).ThumbnailURL()).
 				SetPreName(messages.Get(request.Locale(), "item_created")).
 				Flash(request))
@@ -96,7 +96,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			item, validation := resource.editItemWithLogAndValues(request, params)
 
 			if validation.Valid() {
-				resource.app.Notification(resource.previewer(request, item).Name()).
+				resource.app.NewNotification(resource.previewer(request, item).Name()).
 					SetImage(resource.previewer(request, item).ThumbnailURL()).
 					SetPreName(messages.Get(request.Locale(), "item_edited")).
 					Flash(request)
@@ -146,7 +146,7 @@ func (resource *Resource) initDefaultResourceActions() {
 
 	if resource.activityLog {
 		resource.formAction("_history", func(form *Form, request *Request) {
-			form.AddNumberInput("page", "Stránka").Value = "1"
+			form.AddNumber("page", "Stránka").Value = "1"
 			form.AddRelationMultiple("user", "Uživatel", "user")
 			form.AutosubmitFirstTime = true
 			form.AddSubmit("Zobrazit")
@@ -165,7 +165,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			formItemAction(
 				"_history",
 				func(item any, form *Form, request *Request) {
-					form.AddNumberInput("page", "Stránka").Value = "1"
+					form.AddNumber("page", "Stránka").Value = "1"
 					form.AddRelationMultiple("user", "Uživatel", "user")
 					form.AutosubmitFirstTime = true
 					form.AddSubmit("Zobrazit")

@@ -12,7 +12,7 @@ import (
 
 func (app *App) initMultieditChangePopup() {
 
-	PopupForm(app, "_multiedit-change", func(form *Form, request *Request) {
+	app.PopupForm("_multiedit-change", func(form *Form, request *Request) {
 
 		resource := app.getResourceByID(request.Param("resource"))
 
@@ -222,7 +222,7 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 	resource.formItemMultipleAction(
 		"clone-multiple",
 		func(items []any, form *Form, request *Request) {
-			countEl := form.AddNumberInput("count", "Počet kopií")
+			countEl := form.AddNumber("count", "Počet kopií")
 			countEl.Value = "1"
 			countEl.Focused = true
 

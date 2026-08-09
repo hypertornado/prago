@@ -17,7 +17,7 @@ func getTimelineDataLines(min, max float64) (ret []*timelineDataLine) {
 		maxTicks = 3
 	}
 
-	ticks := CalculateGraphTicks(min, max, maxTicks)
+	ticks := calculateGraphTicks(min, max, maxTicks)
 	for _, v := range ticks {
 		ret = append(ret, getTimelineDataLine(min, max, v))
 	}

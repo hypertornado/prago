@@ -116,7 +116,7 @@ func iconColorPrefix(color string) io.Reader {
 
 func (app *App) initIcons() {
 
-	app.API("icons").Permission(everybodyPermission).Method("GET").Handler(func(request *Request) {
+	app.NewAPI("icons").Permission(everybodyPermission).Method("GET").Handler(func(request *Request) {
 		if app.iconsFS == nil {
 			request.WriteJSON(404, "icon not found")
 			return
@@ -145,7 +145,7 @@ func (app *App) initIcons() {
 		io.Copy(request.Response(), file)
 	})
 
-	app.Help("icons", unlocalized("Ikony"), func(request *Request) template.HTML {
+	app.AddHelp("icons", unlocalized("Ikony"), func(request *Request) template.HTML {
 		prefix := app.iconsPrefix
 		prefix = strings.TrimRight(prefix, "/")
 

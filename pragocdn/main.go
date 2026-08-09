@@ -159,7 +159,7 @@ func main() {
 		}
 
 		file.Deleted = true
-		err := prago.UpdateItem(app, file)
+		err := app.Update(file)
 		if err != nil {
 			panic(err)
 		}

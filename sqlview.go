@@ -11,7 +11,7 @@ func (app *App) initSQLView() {
 
 	app.ActionUI("_sqlview", func(request *Request) template.HTML {
 
-		table := app.Table()
+		table := app.NewTable()
 
 		tablesArr := listTablesArr(app)
 

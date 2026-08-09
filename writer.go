@@ -3,13 +3,13 @@ package prago
 type Writer[T any] struct {
 	app          *App
 	templateName string
-	templates    *PragoTemplates
+	templates    *Templates
 
 	beforeFN func(*Request, *T)
 	afterFN  func(*Request, *T)
 }
 
-func NewWriter[T any](app *App, templates *PragoTemplates, templateName string) *Writer[T] {
+func (app *App) NewWriter[T any](templates *Templates, templateName string) *Writer[T] {
 	return &Writer[T]{
 		app:          app,
 		templateName: templateName,

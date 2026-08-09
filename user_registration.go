@@ -42,18 +42,18 @@ func initUserRegistration(app *App) {
 
 	app.nologinFormAction("registration", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
-		nameInput := form.AddTextInput("name", messages.Get(locale, "Name"))
+		nameInput := form.AddText("name", messages.Get(locale, "Name"))
 		nameInput.Focused = true
 
-		emailInput := form.AddEmailInput("email", messages.Get(locale, "email"))
+		emailInput := form.AddEmail("email", messages.Get(locale, "email"))
 		emailInput.InputMode = "email"
 		emailInput.Autocomplete = "email"
 
-		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "register_password"))
+		passwordInput := form.AddPassword("password", messages.Get(locale, "register_password"))
 		passwordInput.Description = messages.Get(locale, "register_password_description")
 		passwordInput.Autocomplete = "new-password"
 
-		form.AddCAPTCHAInput("captcha", "4 + 5 =")
+		form.AddCAPTCHA("captcha", "4 + 5 =")
 		form.AddSubmit(messages.Get(locale, "register"))
 	}, registrationValidation)
 
@@ -102,7 +102,7 @@ func registrationValidation(vc FormValidation, request *Request) {
 			u.Role = sysadminRoleName
 		}
 
-		must(app.CreateWithContext(u, request.Request().Context()))
+		must(app.Create(u))
 
 		err = u.sendConfirmEmail(app, locale)
 		if err != nil {

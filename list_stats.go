@@ -25,7 +25,7 @@ type listStatsRow struct {
 }
 
 func (app *App) initListStats() {
-	PopupForm(app, "_list-stats", func(form *Form, request *Request) {
+	app.PopupForm("_list-stats", func(form *Form, request *Request) {
 		resource := app.getResourceByID(request.Param("_resource"))
 		if !request.Authorize(resource.canView) {
 			panic("not allowed")
@@ -46,7 +46,7 @@ func (app *App) initListStats() {
 
 		form.AddSelect("field", "Sloupec", fieldOptions)
 
-		form.AddNumberInput("limit", "Počet položek").Value = "10"
+		form.AddNumber("limit", "Počet položek").Value = "10"
 
 		form.AddHidden("_params").Value = request.Param("_params")
 		form.AddHidden("_resource").Value = resource.id
@@ -84,7 +84,7 @@ func (app *App) initListStats() {
 
 		sections := getListStatsSections(request.r.Context(), field, request, urlParams, int64(limit))
 
-		table := app.Table()
+		table := app.NewTable()
 
 		for _, section := range sections {
 			table.Row(

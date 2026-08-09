@@ -86,15 +86,15 @@ type tableRowView struct {
 	Reveal bool
 }
 
-func (app *App) Table() *Table {
+func (app *App) NewTable() *Table {
 	ret := &Table{
 		app: app,
 	}
-	ret.Table()
+	ret.AddTable()
 	return ret
 }
 
-func (table *Table) Table() *Table {
+func (table *Table) AddTable() *Table {
 	table.data = append(table.data, &tableData{})
 	table.newRow()
 	return table

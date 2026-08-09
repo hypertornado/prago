@@ -7,7 +7,7 @@ import (
 
 func (app *App) initListSettings() {
 
-	PopupForm(app, "_list-items-per-page", func(form *Form, request *Request) {
+	app.PopupForm("_list-items-per-page", func(form *Form, request *Request) {
 		form.AddHidden("resource").Value = request.Param("resource")
 
 		item := form.AddSelect("count", "Počet položek na stránce", getStatsLimitSelectPlain())
@@ -30,7 +30,7 @@ func (app *App) initListSettings() {
 		fv.Data(count)
 	}).Permission(loggedPermission).Icon("glyphicons-basic-960-files-queue.svg").Name(unlocalized("Počet položek na stránce"))
 
-	PopupForm(app, "_list-items-visible", func(form *Form, request *Request) {
+	app.PopupForm("_list-items-visible", func(form *Form, request *Request) {
 		resource := app.getResourceByID(request.Param("resource"))
 		if !request.Authorize(resource.canView) {
 			panic("can't show")

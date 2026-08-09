@@ -11,7 +11,7 @@ func (app *App) initUserAPI() {
 
 	app.ActionUI("_api", func(request *Request) template.HTML {
 
-		table := app.Table()
+		table := app.NewTable()
 		table.Row(table.Cell("API keys").Header().DescriptionAfter(fmt.Sprintf("Use HTTP header: %s", apiHTTPHeader)))
 
 		usr := request.getUser()
@@ -33,7 +33,7 @@ func (app *App) initUserAPI() {
 
 	}).Permission(loggedPermission).Icon("glyphicons-basic-849-computer-network.svg").Name(unlocalized("API")).Board(app.optionsBoard)
 
-	PopupForm(app, "_apikeycreate", func(form *Form, request *Request) {
+	app.PopupForm("_apikeycreate", func(form *Form, request *Request) {
 		form.AddSubmit("Generate API key")
 	}, func(fv FormValidation, request *Request) {
 		usr := request.getUser()
@@ -41,11 +41,11 @@ func (app *App) initUserAPI() {
 		fv.Data(true)
 	}).Name(unlocalized("Generate API key")).Permission(loggedPermission)
 
-	PopupForm(app, "_apikeydelete", func(form *Form, request *Request) {
+	app.PopupForm("_apikeydelete", func(form *Form, request *Request) {
 		uuid := request.Param("uuid")
 		//form.AddHidden("uuid").Value = uuid
 
-		ti := form.AddTextareaInput("uuid", "API key")
+		ti := form.AddTextarea("uuid", "API key")
 		ti.Value = uuid
 		ti.Readonly = true
 

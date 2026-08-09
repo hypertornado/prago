@@ -20,7 +20,7 @@ func (app *App) initCacheStats() {
 		form.AddSubmit("Send")
 	}, func(fv FormValidation, request *Request) {
 
-		table := app.Table()
+		table := app.NewTable()
 
 		table.Header("Size", "Access count", "Latest access", "Last updated at", "Reload duration", "ID")
 

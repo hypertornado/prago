@@ -7,7 +7,7 @@ type AppInfo struct {
 	HasLogo  bool
 }
 
-func (app *App) GetAppInfo() AppInfo {
+func (app *App) Info() AppInfo {
 	var hasLogo bool
 	if app.logo != nil {
 		hasLogo = true

@@ -22,7 +22,7 @@ type ValidationError struct {
 
 func (app *App) initValidation() {
 
-	PopupForm(app, "_validation-consistency", func(form *Form, request *Request) {
+	app.PopupForm("_validation-consistency", func(form *Form, request *Request) {
 		form.AddHidden("resource").Value = request.Param("resource")
 		form.AutosubmitFirstTime = true
 
@@ -137,13 +137,13 @@ func (resource *Resource) validateDelete(item any, user UserData) *itemValidatio
 	return itemValidation
 }
 
-func TestValidationUpdate[T any](app *App, item *T, user UserData) ([]ValidationError, bool) {
+func (app *App) CheckUpdateValidation[T any](item *T, user UserData) ([]ValidationError, bool) {
 	resource := getResource[T](app)
 	validation := resource.validateUpdate(item, user)
 	return validation.errors, validation.Valid()
 }
 
-func TestValidationDelete[T any](app *App, item *T, user UserData) ([]ValidationError, bool) {
+func (app *App) CheckDeleteValidation[T any](item *T, user UserData) ([]ValidationError, bool) {
 	resource := getResource[T](app)
 	validation := resource.validateDelete(item, user)
 	return validation.errors, validation.Valid()

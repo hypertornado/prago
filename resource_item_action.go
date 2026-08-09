@@ -8,7 +8,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-func ActionResourceItemUI[T any](app *App, url string, contentSource func(item *T, request *Request) template.HTML) *Action {
+func (app *App) ActionResourceItemUI[T any](url string, contentSource func(item *T, request *Request) template.HTML) *Action {
 	resource := getResource[T](app)
 	action := resource.newItemAction(url)
 

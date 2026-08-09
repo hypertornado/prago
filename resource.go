@@ -138,14 +138,14 @@ func (app *App) NewResource[T any]() *Resource {
 }
 
 func (resource *Resource) afterInit() {
-	statsDashboard := resource.resourceBoard.Dashboard(unlocalized(""))
-	statsDashboard.Figure(unlocalized(""), resource.canView).Value(func(r *Request) int64 {
+	statsDashboard := resource.resourceBoard.AddDashboard(unlocalized(""))
+	statsDashboard.AddFigure(unlocalized(""), resource.canView).Value(func(r *Request) int64 {
 		c, _ := resource.query(context.Background()).count()
 		return c
 	}).Unit(unlocalized("položek")).URL(fmt.Sprintf("/admin/%s/list", resource.id))
 
 	if resource.activityLog {
-		statsDashboard.Figure(unlocalized(""), resource.canUpdate).Value(func(request *Request) int64 {
+		statsDashboard.AddFigure(unlocalized(""), resource.canUpdate).Value(func(request *Request) int64 {
 			q := resource.app.activityLogResource.query(context.Background())
 			c, _ := q.Is("resourcename", resource.id).count()
 			return c
@@ -202,7 +202,7 @@ func (resource *Resource) getResourceControl() *controller {
 	return resource.resourceController
 }
 
-func PreviewURLFunction[T any](app *App, fn func(*T) string) {
+func (app *App) PreviewURLFunction[T any](fn func(*T) string) {
 	resource := getResource[T](app)
 	resource.previewURLFunction(func(a any) string {
 		return fn(a.(*T))
@@ -261,21 +261,21 @@ func (resource *Resource) PermissionExport(permission Permission) *Resource {
 }
 
 func (resource *Resource) Dashboard(name func(string) string) *Dashboard {
-	return resource.resourceBoard.Dashboard(name)
+	return resource.resourceBoard.AddDashboard(name)
 }
 
 func (resource *Resource) addUpdateValidation(validation func(item any, vc Validation, ud UserData)) {
 	resource.updateValidations = append(resource.updateValidations, validation)
 }
 
-func ValidateUpdate[T any](app *App, fn func(item *T, validation Validation, userData UserData)) {
+func (app *App) AddUpdateValidation[T any](fn func(item *T, validation Validation, userData UserData)) {
 	resource := getResource[T](app)
 	resource.addUpdateValidation(func(item any, v Validation, userData UserData) {
 		fn(item.(*T), v, userData)
 	})
 }
 
-func ValidateDelete[T any](app *App, fn func(item *T, validation Validation, userData UserData)) {
+func (app *App) AddDeleteValidation[T any](fn func(item *T, validation Validation, userData UserData)) {
 	resource := getResource[T](app)
 	resource.addDeleteValidation(func(a any, v Validation, userData UserData) {
 		fn(a.(*T), v, userData)

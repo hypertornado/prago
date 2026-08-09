@@ -47,12 +47,12 @@ func (app *App) getAvailableAImodels() (ret [][2]string) {
 
 func (app *App) initAI() {
 
-	app.Setting("gemini_api_key", "sysadmin")
+	app.NewSetting("gemini_api_key", "sysadmin")
 
 	app.ActionForm("_aichat", func(form *Form, request *Request) {
 		form.AddSelect("model", "Model", app.getAvailableAImodels()).Value = "models/gemini-flash-latest"
-		form.AddTextareaInput("text", "Text").Focused = true
-		fileInput := form.AddFileInput("files", "Soubory")
+		form.AddTextarea("text", "Text").Focused = true
+		fileInput := form.AddFile("files", "Soubory")
 		fileInput.FileMultiple = true
 		form.AddSubmit("Odeslat")
 	}, func(fv FormValidation, request *Request) {

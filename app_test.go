@@ -52,7 +52,7 @@ func TestBasicResource2(t *testing.T) {
 
 	item := &ResourceStruct{Name: "A", Floating: 3.14}
 
-	err := resource.app.CreateWithContext(item, context.Background())
+	err := resource.app.CreateContext(context.Background(), item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,8 +66,8 @@ func TestBasicResource2(t *testing.T) {
 		t.Fatal("should not be nil")
 	}
 
-	resource.app.CreateWithContext(&ResourceStruct{Name: "C"}, context.Background())
-	resource.app.CreateWithContext(&ResourceStruct{Name: "B"}, context.Background())
+	resource.app.CreateContext(context.Background(), &ResourceStruct{Name: "C"})
+	resource.app.CreateContext(context.Background(), &ResourceStruct{Name: "B"})
 
 	list := resource.app.Query[ResourceStruct]().List()
 	if len(list) != 3 {
@@ -431,7 +431,7 @@ func TestReplace(t *testing.T) {
 		ID:   id,
 		Name: "A",
 	}
-	err := Replace(context.Background(), resource.app, item)
+	err := resource.app.ReplaceContext(context.Background(), item)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -439,7 +439,7 @@ func TestReplace(t *testing.T) {
 		t.Fatal("should not be nil")
 	}
 	item.Name = "B"
-	err = Replace(context.Background(), resource.app, item)
+	err = resource.app.ReplaceContext(context.Background(), item)
 	if err != nil {
 		t.Fatal(err)
 	}

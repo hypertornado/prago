@@ -74,7 +74,7 @@ func (file *CDNFile) get() (*os.File, error) {
 }
 
 func (file *CDNFile) update() {
-	project := app.Query[CDNProject](app).ID(file.CDNProject)
+	project := app.Query[CDNProject]().ID(file.CDNProject)
 	if project == nil {
 		panic(fmt.Errorf("can't find project id %d", file.CDNProject))
 	}
@@ -93,7 +93,7 @@ func (file *CDNFile) update() {
 		file.Width = metadata.Width
 		file.Height = metadata.Height
 	}
-	err = prago.UpdateItem(app, file)
+	err = app.Update(file)
 	if err != nil {
 		panic(fmt.Sprintf("can't update file id %s: %s", file.UUID, err))
 	}
@@ -121,7 +121,7 @@ func (project *CDNProject) createFile(uuid, suffix string) *CDNFile {
 		CDNProject: project.ID,
 	}
 
-	err := prago.CreateItem(app, file)
+	err := app.Create(file)
 	if err != nil {
 		panic(fmt.Errorf("can't save file %s: %s", file.UUID, err))
 	}
@@ -142,16 +142,16 @@ func (file *CDNFile) tempFilePath() string {
 }
 
 func bindCDNFiles(app *prago.App) {
-	fileResource := prago.NewResource[CDNFile](app)
+	fileResource := app.NewResource[CDNFile]()
 	fileResource.Name(unlocalized("CDN Soubor"), unlocalized("CDN Soubory"))
 
-	prago.PreviewURLFunction(app, func(file *CDNFile) string {
+	app.PreviewURLFunction(func(file *CDNFile) string {
 		return file.url("")
 	})
 
-	prago.ActionResourceItemForm(app, "previewer",
+	app.ActionResourceItemForm("previewer",
 		func(cdnFile *CDNFile, form *prago.Form, request *prago.Request) {
-			form.AddTextInput("size", "Size")
+			form.AddText("size", "Size")
 			form.AutosubmitFirstTime = true
 			form.AddSubmit("Zobrazit")
 		},
@@ -160,9 +160,7 @@ func bindCDNFiles(app *prago.App) {
 		},
 	).Name(unlocalized("Previews"))
 
-	
-
-	prago.ActionForm(app, "reimport-files-data", func(form *prago.Form, request *prago.Request) {
+	app.ActionForm("reimport-files-data", func(form *prago.Form, request *prago.Request) {
 		form.AddSubmit("Spustit")
 	}, func(fv prago.FormValidation, request *prago.Request) {
 		fv.RunTask(request, func(ta *prago.FormTaskActivity) error {
@@ -177,9 +175,7 @@ func bindCDNFiles(app *prago.App) {
 		})
 	}).Permission("sysadmin").Name(unlocalized("Reimport files data"))
 
-	
-
-	prago.ActionForm(app, "validate-checksums", func(form *prago.Form, request *prago.Request) {
+	app.ActionForm("validate-checksums", func(form *prago.Form, request *prago.Request) {
 		form.AddSubmit("Spustit")
 	}, func(fv prago.FormValidation, request *prago.Request) {
 		fv.RunTask(request, func(ta *prago.FormTaskActivity) error {
@@ -194,7 +190,7 @@ func bindCDNFiles(app *prago.App) {
 		})
 	}).Permission("sysadmin").Name(unlocalized("Validate checksums"))
 
-	prago.ActionForm(app, "delete-thumbs-cache", func(form *prago.Form, request *prago.Request) {
+	app.ActionForm("delete-thumbs-cache", func(form *prago.Form, request *prago.Request) {
 		form.AddSubmit("Spustit")
 	}, func(fv prago.FormValidation, request *prago.Request) {
 		fv.RunTask(request, func(ta *prago.FormTaskActivity) error {

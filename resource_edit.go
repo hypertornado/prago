@@ -10,10 +10,10 @@ import (
 )
 
 func (app *App) Create[T any](item *T) error {
-	return app.CreateWithContext(item, context.Background())
+	return app.CreateContext(context.Background(), item)
 }
 
-func (app *App) CreateWithContext[T any](item *T, ctx context.Context) error {
+func (app *App) CreateContext[T any](ctx context.Context, item *T) error {
 	resource := getResource[T](app)
 	return resource.create(ctx, item)
 }
@@ -65,7 +65,7 @@ func (resource *Resource) update(ctx context.Context, item any, onlyFields map[s
 	return resource.saveItem(ctx, item, onlyFields, false)
 }
 
-func Replace[T any](ctx context.Context, app *App, item *T) error {
+func (app *App) ReplaceContext[T any](ctx context.Context, item *T) error {
 	resource := getResource[T](app)
 	resource.setTimestamp(item, "CreatedAt")
 	resource.setTimestamp(item, "UpdatedAt")
@@ -84,10 +84,10 @@ func (resource *Resource) setTimestamp(item any, fieldName string) {
 }
 
 func (app *App) Delete[T any](id int64) error {
-	return app.DeleteWithContext[T](id, context.Background())
+	return app.DeleteContext[T](context.Background(), id)
 }
 
-func (app *App) DeleteWithContext[T any](id int64, ctx context.Context) error {
+func (app *App) DeleteContext[T any](ctx context.Context, id int64) error {
 	resource := getResource[T](app)
 	return resource.delete(ctx, id)
 }

@@ -32,7 +32,7 @@ func (c *cache) getStats() (ret []cacheStats) {
 	return ret
 }
 
-func (ci cacheItem) getJSONSize() int64 {
+func (ci *cacheItem) getJSONSize() int64 {
 	val := ci.getValue()
 	data, err := json.Marshal(val)
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 )
 
 func (app *App) initAPI() {
-	app.API("markdown").Permission(loggedPermission).Method("POST").Handler(
+	app.NewAPI("markdown").Permission(loggedPermission).Method("POST").Handler(
 		func(request *Request) {
 			data, err := io.ReadAll(request.Request().Body)
 			must(err)
@@ -15,10 +15,10 @@ func (app *App) initAPI() {
 		},
 	)
 
-	app.API("relationlist").Method("POST").Permission(loggedPermission).Handler(generateRelationListAPIHandler)
+	app.NewAPI("relationlist").Method("POST").Permission(loggedPermission).Handler(generateRelationListAPIHandler)
 
-	app.API("resource-item-stats").Permission(loggedPermission).Handler(itemStatsAPIHandler)
+	app.NewAPI("resource-item-stats").Permission(loggedPermission).Handler(itemStatsAPIHandler)
 
-	app.API("_fetch_list_cell_relation").Permission(loggedPermission).Handler(fetchListCellRelationAPIHandler)
+	app.NewAPI("_fetch_list_cell_relation").Permission(loggedPermission).Handler(fetchListCellRelationAPIHandler)
 
 }

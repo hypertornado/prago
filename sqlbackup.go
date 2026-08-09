@@ -114,7 +114,7 @@ func (app *App) initSQLBackup() {
 			vc.Redirect("/admin/api/sqlbackup?exclude=" + excludes)
 		}).Name(unlocalized("SQL Backup")).Permission(sysadminPermission).Board(sysadminBoard)
 
-	app.API("sqlbackup").Permission("sysadmin").Handler(func(r *Request) {
+	app.NewAPI("sqlbackup").Permission("sysadmin").Handler(func(r *Request) {
 
 		excludes := strings.Split(r.Param("exclude"), ",")
 

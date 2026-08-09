@@ -11,7 +11,7 @@ type itemStat struct {
 	Handler    func(item any) string
 }
 
-func ItemStatistic[T any](app *App, name func(string) string, permission Permission, statHandler func(item *T) string) {
+func (app *App) AddItemStatistic[T any](name func(string) string, permission Permission, statHandler func(item *T) string) {
 	resource := getResource[T](app)
 	must(app.validatePermission(permission))
 	resource.itemStats = append(resource.itemStats, &itemStat{

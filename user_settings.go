@@ -11,11 +11,11 @@ func initUserSettings(app *App) {
 		user := request.getUser()
 		form.Title = messages.Get(request.Locale(), "settings")
 
-		name := form.AddTextInput("name", "")
+		name := form.AddText("name", "")
 		name.Name = messages.Get(request.Locale(), "Name")
 		name.Value = user.Name
 
-		phoneInput := form.AddTextInput("phone", "Telefon")
+		phoneInput := form.AddText("phone", "Telefon")
 		phoneInput.Value = user.Phone
 
 		sel := form.AddSelect("locale", messages.Get(request.Locale(), "locale"), availableLocales)
@@ -25,7 +25,7 @@ func initUserSettings(app *App) {
 			if request.Authorize(v.permission) {
 				val, err := app.getSetting(v.id)
 				if err == nil {
-					input := form.AddTextInput("setting_"+v.id, v.name(request.Locale()))
+					input := form.AddText("setting_"+v.id, v.name(request.Locale()))
 					input.Value = val
 				} else {
 					app.Log().Errorf("can't load setting value '%s': %s", v.id, err)
@@ -91,11 +91,11 @@ func initUserSettings(app *App) {
 		func(form *Form, request *Request) {
 			locale := request.Locale()
 			form.Title = messages.Get(request.Locale(), "password_change")
-			oldPassword := form.AddPasswordInput("oldpassword", messages.Get(locale, "password_old"))
+			oldPassword := form.AddPassword("oldpassword", messages.Get(locale, "password_old"))
 			oldPassword.Focused = true
 			oldPassword.Autocomplete = "old-password"
 
-			newPassword := form.AddPasswordInput("newpassword", messages.Get(locale, "password_new"))
+			newPassword := form.AddPassword("newpassword", messages.Get(locale, "password_new"))
 			newPassword.Focused = true
 			newPassword.Autocomplete = "new-password"
 
@@ -147,15 +147,15 @@ func initUserSettings(app *App) {
 			roleSelect = append(roleSelect, [2]string{role, app.getRoleName(role, request.Locale())})
 		}
 
-		form.AddTextInput("username", "Uživatelské jméno")
-		form.AddTextInput("name", "Jméno")
-		form.AddTextInput("email", "Email")
-		form.AddTextInput("phone", "Telefon")
+		form.AddText("username", "Uživatelské jméno")
+		form.AddText("name", "Jméno")
+		form.AddText("email", "Email")
+		form.AddText("phone", "Telefon")
 
 		form.AddSelect("locale", messages.Get(request.Locale(), "locale"), availableLocales)
 
 		form.AddSelect("role", "Role", roleSelect)
-		form.AddPasswordInput("password", "Heslo")
+		form.AddPassword("password", "Heslo")
 		form.AddSubmit("Založit uživatele")
 
 	}, func(fv FormValidation, request *Request) {
@@ -186,7 +186,7 @@ func initUserSettings(app *App) {
 		}
 		usr.newPassword(password)
 
-		res, ok := TestValidationUpdate(app, usr, request)
+		res, ok := app.CheckUpdateValidation(usr, request)
 		if !ok {
 			for _, e := range res {
 				fv.AddError(fmt.Sprintf("%s: %s", e.Field, e.Text))
@@ -221,14 +221,14 @@ func initUserSettings(app *App) {
 			roleSelect = append(roleSelect, [2]string{role, app.getRoleName(role, user.Locale)})
 		}
 
-		form.AddTextInput("username", "Uživatelské jméno").Value = user.Username
-		form.AddTextInput("name", "Jméno").Value = user.Name
-		form.AddTextInput("email", "Email").Value = user.Email
-		form.AddTextInput("phone", "Telefon").Value = user.Phone
+		form.AddText("username", "Uživatelské jméno").Value = user.Username
+		form.AddText("name", "Jméno").Value = user.Name
+		form.AddText("email", "Email").Value = user.Email
+		form.AddText("phone", "Telefon").Value = user.Phone
 
 		form.AddSelect("role", "Role", roleSelect).Value = user.Role
 
-		newPassword := form.AddPasswordInput("newpassword", messages.Get(request.Locale(), "password_new"))
+		newPassword := form.AddPassword("newpassword", messages.Get(request.Locale(), "password_new"))
 		newPassword.Focused = true
 		newPassword.Autocomplete = "new-password"
 
@@ -263,7 +263,7 @@ func initUserSettings(app *App) {
 			}
 		}
 
-		res, ok := TestValidationUpdate(app, usr, request)
+		res, ok := app.CheckUpdateValidation(usr, request)
 		if !ok {
 			for _, e := range res {
 				fv.AddError(fmt.Sprintf("%s: %s", e.Field, e.Text))

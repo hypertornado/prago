@@ -16,7 +16,7 @@ import (
 //go:embed templates
 var templatesFS embed.FS
 
-type PragoTemplates struct {
+type Templates struct {
 	templates      *template.Template
 	funcMap        template.FuncMap
 	templatesMutex *sync.RWMutex
@@ -25,15 +25,15 @@ type PragoTemplates struct {
 	watchPattern   string
 }
 
-func NewPragoTemplates() *PragoTemplates {
-	return &PragoTemplates{
+func NewTemplates() *Templates {
+	return &Templates{
 		funcMap:        map[string]any{},
 		templatesMutex: &sync.RWMutex{},
 	}
 }
 
 func (app *App) initTemplates() {
-	app.adminTemplates = NewPragoTemplates()
+	app.adminTemplates = NewTemplates()
 
 	app.adminTemplates.Function("PragoCSS", func(data string) template.CSS {
 		return template.CSS(data)
@@ -109,7 +109,7 @@ func (app *App) initTemplates() {
 	must(app.adminTemplates.SetFilesystem(templatesFS, "templates/*.tmpl"))
 }
 
-func (templates *PragoTemplates) SetFilesystem(fsys fs.FS, patterns ...string) error {
+func (templates *Templates) SetFilesystem(fsys fs.FS, patterns ...string) error {
 	templates.templatesMutex.Lock()
 	defer templates.templatesMutex.Unlock()
 	templates.fs = fsys
@@ -117,7 +117,7 @@ func (templates *PragoTemplates) SetFilesystem(fsys fs.FS, patterns ...string) e
 	return templates.parseTemplates()
 }
 
-func (templates *PragoTemplates) parseTemplates() error {
+func (templates *Templates) parseTemplates() error {
 	t := template.New("")
 	t = t.Funcs(templates.funcMap)
 	var err error
@@ -129,13 +129,13 @@ func (templates *PragoTemplates) parseTemplates() error {
 	return nil
 }
 
-func (templates *PragoTemplates) Function(name string, f any) {
+func (templates *Templates) Function(name string, f any) {
 	templates.templatesMutex.Lock()
 	defer templates.templatesMutex.Unlock()
 	templates.funcMap[name] = f
 }
 
-func (templates *PragoTemplates) watch(app *App) {
+func (templates *Templates) watch(app *App) {
 	if templates.watchPattern == "" {
 		return
 	}
@@ -150,24 +150,24 @@ func (templates *PragoTemplates) watch(app *App) {
 
 }
 
-func (templates *PragoTemplates) Execute(wr io.Writer, name string, data any) error {
+func (templates *Templates) Execute(wr io.Writer, name string, data any) error {
 	templates.templatesMutex.RLock()
 	defer templates.templatesMutex.RUnlock()
 	return templates.templates.ExecuteTemplate(wr, name, data)
 }
 
-func (templates *PragoTemplates) ExecuteToString(templateName string, data any) string {
+func (templates *Templates) ExecuteToString(templateName string, data any) string {
 	bufStats := new(bytes.Buffer)
 	err := templates.Execute(bufStats, templateName, data)
 	must(err)
 	return bufStats.String()
 }
 
-func (templates *PragoTemplates) ExecuteToHTML(templateName string, data any) template.HTML {
+func (templates *Templates) ExecuteToHTML(templateName string, data any) template.HTML {
 	return template.HTML(templates.ExecuteToString(templateName, data))
 }
 
-func (app *App) GetAdminTemplates() *PragoTemplates {
+func (app *App) GetAdminTemplates() *Templates {
 	return app.adminTemplates
 }
 

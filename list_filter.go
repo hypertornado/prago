@@ -14,7 +14,7 @@ type ListFilterResponse struct {
 
 func (app *App) initListFilter() {
 
-	PopupForm(app, "_list-fiter-item", func(form *Form, request *Request) {
+	app.PopupForm("_list-fiter-item", func(form *Form, request *Request) {
 		resource := app.getResourceByID(request.Param("resource"))
 		if !request.Authorize(resource.canView) {
 			panic("not allowed")
@@ -161,13 +161,13 @@ func listFilterFormBoolean(form *Form, field *Field, value string, userData User
 }
 
 func listFilterFormText(form *Form, field *Field, value string, userData UserData) {
-	item := form.AddTextInput("value", field.name(userData.Locale()))
+	item := form.AddText("value", field.name(userData.Locale()))
 	item.Focused = true
 	item.Value = value
 }
 
 func listFilterFormNumber(form *Form, field *Field, value string, userData UserData) {
-	item := form.AddNumberInput("value", field.name(userData.Locale()))
+	item := form.AddNumber("value", field.name(userData.Locale()))
 	item.Focused = true
 	item.Value = value
 }

@@ -124,7 +124,7 @@ func getTitleFromMenuSubsections(item *menuItem) []string {
 }
 
 func (app *App) initMenuAPI() {
-	app.API("resource-counts").Permission(loggedPermission).HandlerJSON(func(request *Request) any {
+	app.NewAPI("resource-counts").Permission(loggedPermission).HandlerJSON(func(request *Request) any {
 		return getResourceCountsMap(request)
 	})
 }

@@ -306,7 +306,7 @@ func (field *Field) DBDescription(description string) *Field {
 	return field
 }
 
-func (field *Field) IsSearchable(isSearchable bool) *Field {
+func (field *Field) Searchable(isSearchable bool) *Field {
 	field.isSearchable = true
 	return field
 }

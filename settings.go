@@ -37,7 +37,7 @@ func (app *App) initSettings() {
 	initDefaultSettings(app)
 }
 
-func (app *App) Setting(id string, permission Permission) *Setting {
+func (app *App) NewSetting(id string, permission Permission) *Setting {
 
 	s := app.settings.settingsMap[id]
 	if s != nil {
@@ -140,28 +140,28 @@ func (app *App) saveSetting(id, value string, request *Request) error {
 }
 
 func initDefaultSettings(app *App) {
-	app.Setting("random", "sysadmin").DefaultValue(randomString(20))
-	app.Setting("google_key", "sysadmin")
-	app.Setting("sendgrid_key", "sysadmin")
-	app.Setting("no_reply_email", "sysadmin")
-	app.Setting("port", "sysadmin").DefaultValue(fmt.Sprintf("%d", defaultPort))
-	app.Setting("base_url", "sysadmin").DefaultValue("http://localhost:8585")
-	app.Setting("ssh", "sysadmin")
-	app.Setting("app_name", "sysadmin")
-	app.Setting("background_image_url", "sysadmin")
-	app.Setting("icon_image_url", "sysadmin")
+	app.NewSetting("random", "sysadmin").DefaultValue(randomString(20))
+	app.NewSetting("google_key", "sysadmin")
+	app.NewSetting("sendgrid_key", "sysadmin")
+	app.NewSetting("no_reply_email", "sysadmin")
+	app.NewSetting("port", "sysadmin").DefaultValue(fmt.Sprintf("%d", defaultPort))
+	app.NewSetting("base_url", "sysadmin").DefaultValue("http://localhost:8585")
+	app.NewSetting("ssh", "sysadmin")
+	app.NewSetting("app_name", "sysadmin")
+	app.NewSetting("background_image_url", "sysadmin")
+	app.NewSetting("icon_image_url", "sysadmin")
 
 	cdnCallback := func() {
 		initCDN(app)
 	}
 
-	app.Setting("cdn_url", "sysadmin").
+	app.NewSetting("cdn_url", "sysadmin").
 		DefaultValue("https://www.prago-cdn.com").
 		ValueChangeCallback(cdnCallback)
-	app.Setting("cdn_account", "sysadmin").
+	app.NewSetting("cdn_account", "sysadmin").
 		DefaultValue(app.codeName).
 		ValueChangeCallback(cdnCallback)
-	app.Setting("cdn_password", "sysadmin").
+	app.NewSetting("cdn_password", "sysadmin").
 		ValueChangeCallback(cdnCallback)
 
 	app.name = func(string) string {

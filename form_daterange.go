@@ -114,7 +114,7 @@ func relativeYearDateRange(rel int64) func() [2]time.Time {
 
 func (app *App) initDateRange() {
 
-	PopupForm(app, "_dateranges", func(form *Form, request *Request) {
+	app.PopupForm("_dateranges", func(form *Form, request *Request) {
 		var options []*FormOption
 		for _, dateRange := range defaultDateRanges {
 			dates := dateRange.DateRange()
@@ -173,7 +173,7 @@ func (fi *FormItem) DateRangeTo() string {
 	return items[1]
 }
 
-func ParseDateRange(request *Request, itemID string) *[2]time.Time {
+func (request *Request) ParseDateRange(itemID string) *[2]time.Time {
 	fromStr := request.Param(itemID + "_from")
 	toStr := request.Param(itemID + "_to")
 

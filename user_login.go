@@ -15,14 +15,14 @@ func initUserLogin(app *App) {
 	app.nologinFormAction("login", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		emailValue := request.Param("email")
-		emailInput := form.AddEmailInput("email", messages.Get(locale, "email_or_username"))
+		emailInput := form.AddEmail("email", messages.Get(locale, "email_or_username"))
 		emailInput.InputMode = "email"
 		emailInput.Autocomplete = "email"
 		if emailValue == "" {
 			emailInput.Focused = true
 		}
 		emailInput.Value = request.Param("email")
-		passwordInput := form.AddPasswordInput("password", messages.Get(locale, "password"))
+		passwordInput := form.AddPassword("password", messages.Get(locale, "password"))
 		passwordInput.Autocomplete = "current-password"
 		if emailValue != "" {
 			passwordInput.Focused = true

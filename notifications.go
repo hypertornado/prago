@@ -50,7 +50,7 @@ func (app *App) initNotifications() {
 		notificationMap: make(map[string]*Notification),
 	}
 
-	app.API("notifications").Permission(everybodyPermission).Handler(func(request *Request) {
+	app.NewAPI("notifications").Permission(everybodyPermission).Handler(func(request *Request) {
 		var notifications []*notificationView = []*notificationView{}
 		userID := request.UserID()
 		if userID > 0 {
@@ -59,7 +59,7 @@ func (app *App) initNotifications() {
 		request.WriteJSON(200, notifications)
 	})
 
-	app.API("notifications").Method("POST").Permission(loggedPermission).Handler(func(request *Request) {
+	app.NewAPI("notifications").Method("POST").Permission(loggedPermission).Handler(func(request *Request) {
 		action := request.Param("action")
 		uuid := request.Param("uuid")
 		switch action {
@@ -100,8 +100,8 @@ type notificationProgress struct {
 	Percentage float64
 }
 
-// Notification creates notification
-func (app *App) Notification(name string) *Notification {
+// NewNotification creates notification
+func (app *App) NewNotification(name string) *Notification {
 	return &Notification{
 		uuid: randomString(10),
 		app:  app,

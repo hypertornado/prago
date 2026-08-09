@@ -27,12 +27,12 @@ func newAPI(app *App, url string) *API {
 	return api
 }
 
-func (app *App) API(url string) *API {
+func (app *App) NewAPI(url string) *API {
 	api := newAPI(app, url)
 	return api
 }
 
-func APIJSON[T any](app *App, url string, handler func(*Request, *T) any) *API {
+func (app *App) NewResourceAPIJSON[T any](url string, handler func(*Request, *T) any) *API {
 	api := newAPI(app, url)
 
 	api.handler = func(request *Request) {
@@ -54,7 +54,7 @@ func APIJSON[T any](app *App, url string, handler func(*Request, *T) any) *API {
 	return api
 }
 
-func ResourceAPI[T any](app *App, url string) *API {
+func (app *App) NewResourceAPI[T any](url string) *API {
 	resource := getResource[T](app)
 	return resource.api(url)
 }

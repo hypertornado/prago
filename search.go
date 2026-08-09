@@ -48,7 +48,7 @@ func searchItemsToViewField(items []*searchItem) *viewField {
 
 func (app *App) initSearch() {
 
-	app.API("search-suggest").Permission(loggedPermission).Handler(
+	app.NewAPI("search-suggest").Permission(loggedPermission).Handler(
 		func(request *Request) {
 			results, err := app.suggestItems(request.Param("q"), request)
 			must(err)

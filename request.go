@@ -125,7 +125,7 @@ func (request *Request) Authorize(permission Permission) bool {
 }
 
 // WriteHTML renders HTML view with HTTP code
-func (request *Request) WriteHTML(statusCode int, templates *PragoTemplates, templateName string, data any) {
+func (request *Request) WriteHTML(statusCode int, templates *Templates, templateName string, data any) {
 	request.Response().Header().Add("Content-Type", "text/html; charset=utf-8")
 	request.Response().WriteHeader(statusCode)
 	request.Written = true

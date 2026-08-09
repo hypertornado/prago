@@ -145,15 +145,15 @@ func bindCDNVideos(app *prago.App) {
 	videoResource := app.NewResource[CDNVideo]()
 	videoResource.Name(unlocalized("CDN Video"), unlocalized("CDN Videa")).PermissionUpdate("nobody")
 
-	prago.ItemStatistic(app, unlocalized("URL"), "sysadmin", func(video *CDNVideo) string {
+	app.AddItemStatistic(unlocalized("URL"), "sysadmin", func(video *CDNVideo) string {
 		return video.getCDNFileURL()
 	})
 
-	prago.ItemStatistic(app, unlocalized("HLS URL"), "sysadmin", func(video *CDNVideo) string {
+	app.AddItemStatistic(unlocalized("HLS URL"), "sysadmin", func(video *CDNVideo) string {
 		return video.getHLSURL()
 	})
 
-	prago.ActionResourceItemUI(app, "videoplayer", func(item *CDNVideo, request *prago.Request) template.HTML {
+	app.ActionResourceItemUI("videoplayer", func(item *CDNVideo, request *prago.Request) template.HTML {
 		return app.GetAdminTemplates().ExecuteToHTML("view_video", item.getHLSURL())
 	}).Permission("sysadmin").Name(unlocalized("Přehrávač"))
 
@@ -169,7 +169,7 @@ func bindCDNVideos(app *prago.App) {
 		fv.Redirect("/admin/cdnvideo")
 	}).Permission("sysadmin").Name(unlocalized("Smazat video"))
 
-	prago.PreviewURLFunction(app, func(video *CDNVideo) string {
+	app.PreviewURLFunction(func(video *CDNVideo) string {
 		return video.getCDNFileURL()
 	})
 
@@ -177,7 +177,7 @@ func bindCDNVideos(app *prago.App) {
 		func(form *prago.Form, request *prago.Request) {
 			form.AddRelation("project", "Projekt", "cdnproject")
 
-			fileInput := form.AddFileInput("file", "Video soubor")
+			fileInput := form.AddFile("file", "Video soubor")
 			fileInput.FileAccept = ".mp4"
 			form.AddSubmit("Nahrát video")
 		},

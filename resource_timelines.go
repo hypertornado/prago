@@ -9,7 +9,7 @@ import (
 
 func (resource *Resource) initResourceTimelines() {
 
-	timelinesDashboard := resource.resourceBoard.Dashboard(unlocalized(""))
+	timelinesDashboard := resource.resourceBoard.AddDashboard(unlocalized(""))
 
 	timeTyp := reflect.TypeOf(time.Now())
 
@@ -18,7 +18,7 @@ func (resource *Resource) initResourceTimelines() {
 			continue
 		}
 
-		timeline := timelinesDashboard.Timeline(field.name, field.canView, func(tdr *TimelineDataRequest) float64 {
+		timeline := timelinesDashboard.AddTimeline(field.name, field.canView, func(tdr *TimelineDataRequest) float64 {
 			q := resource.query(tdr.Request.r.Context())
 
 			for _, field2 := range resource.fields {
@@ -135,7 +135,7 @@ func (resource *Resource) initResourceTimelines() {
 	}
 
 	if resource.activityLog {
-		timeline := timelinesDashboard.Timeline(unlocalized("Úpravy"), resource.canView, func(tdr *TimelineDataRequest) float64 {
+		timeline := timelinesDashboard.AddTimeline(unlocalized("Úpravy"), resource.canView, func(tdr *TimelineDataRequest) float64 {
 
 			q := resource.app.activityLogResource.query(tdr.Request.r.Context())
 			q.Is("resourcename", resource.id)

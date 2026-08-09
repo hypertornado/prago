@@ -22,20 +22,20 @@ func (app *App) initBoard() {
 	app.dashboardFigureMap = make(map[string]*dashboardFigure)
 	app.dashboardTimelineMap = make(map[string]*Timeline)
 
-	app.optionsBoard = app.MainBoard.Child("_options", messages.GetNameFunction("options"), "glyphicons-basic-137-cogwheel.svg")
+	app.optionsBoard = app.MainBoard.AddChild("_options", messages.GetNameFunction("options"), "glyphicons-basic-137-cogwheel.svg")
 
-	sysadminBoard = app.optionsBoard.Child("_sysadmin", unlocalized("Sysadmin"), "glyphicons-basic-501-server.svg")
+	sysadminBoard = app.optionsBoard.AddChild("_sysadmin", unlocalized("Sysadmin"), "glyphicons-basic-501-server.svg")
 
-	sysadminGroup := sysadminBoard.Dashboard(unlocalized(""))
+	sysadminGroup := sysadminBoard.AddDashboard(unlocalized(""))
 
-	sysadminGroup.Timeline(unlocalized("Úpravy"), "sysadmin", func(tdr *TimelineDataRequest) float64 {
+	sysadminGroup.AddTimeline(unlocalized("Úpravy"), "sysadmin", func(tdr *TimelineDataRequest) float64 {
 		c, _ := app.Query[activityLog]().Context(tdr.Request.r.Context()).Where("createdat >= ? and createdat < ?", tdr.From, tdr.To).Count()
 		return float64(c)
 	}).Unit(unlocalized("editací"))
 
 }
 
-func (parent *Board) Child(url string, name func(string) string, icon string) *Board {
+func (parent *Board) AddChild(url string, name func(string) string, icon string) *Board {
 	app := parent.app
 	board := newBoard(app, url)
 	board.parentBoard = parent

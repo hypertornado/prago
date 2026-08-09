@@ -10,7 +10,7 @@ type Dashboard struct {
 
 func (app *App) initDashboard() {
 
-	app.API("dashboard-table").Method("GET").Permission(loggedPermission).Handler(
+	app.NewAPI("dashboard-table").Method("GET").Permission(loggedPermission).Handler(
 		func(request *Request) {
 			uuid := request.Param("uuid")
 			table, err := app.getDashboardTableData(request, uuid)
@@ -20,7 +20,7 @@ func (app *App) initDashboard() {
 		},
 	)
 
-	app.API("dashboard-figure").Method("GET").Permission(loggedPermission).HandlerJSON(
+	app.NewAPI("dashboard-figure").Method("GET").Permission(loggedPermission).HandlerJSON(
 		func(request *Request) any {
 			uuid := request.Param("uuid")
 			figure, err := app.getDashboardFigureData(request, uuid)
@@ -38,7 +38,7 @@ func (app *App) initDashboard() {
 	app.initTimeline()
 }
 
-func (board *Board) Dashboard(name func(string) string) *Dashboard {
+func (board *Board) AddDashboard(name func(string) string) *Dashboard {
 	group := &Dashboard{
 		board: board,
 		name:  name,
