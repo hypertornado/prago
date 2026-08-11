@@ -26,8 +26,8 @@ func (app *App) initListFilter() {
 		}
 
 		value := request.Param("value")
-		form.AddHidden("_resource").Value = resource.id
-		form.AddHidden("_field").Value = field.id
+		form.AddHidden("_resource").SetValue(resource.id)
+		form.AddHidden("_field").SetValue(field.id)
 
 		filterLayout := field.fieldType.filterLayoutTemplate
 
@@ -113,14 +113,15 @@ func listFilterFormSelect(form *Form, field *Field, value string, userData UserD
 		checkbox.Style = item.Style
 		checkbox.Color = item.Color
 		if valMap[item.ID] {
-			checkbox.Value = "on"
+			checkbox.SetValue("on")
 		}
 	}
 }
 func listFilterFormRelation(form *Form, field *Field, value string, userData UserData) {
-	items := form.AddRelationMultiple("items", field.name(userData.Locale()), field.getRelatedID())
-	items.Focused = true
-	items.Value = strings.ReplaceAll(value, ",", ";")
+	form.
+		AddRelationMultiple("items", field.name(userData.Locale()), field.getRelatedID()).
+		SetFocused().
+		SetValue(strings.ReplaceAll(value, ",", ";"))
 }
 
 func listFilterFormDate(form *Form, field *Field, value string, userData UserData) {
@@ -130,12 +131,12 @@ func listFilterFormDate(form *Form, field *Field, value string, userData UserDat
 	dates := strings.Split(value, ",")
 	from := form.AddDatePicker("from", fieldName+" - Od")
 	if len(dates) == 2 {
-		from.Value = dates[0]
+		from.SetValue(dates[0])
 	}
 
 	to := form.AddDatePicker("to", fieldName+" - Do")
 	if len(dates) == 2 {
-		to.Value = dates[1]
+		to.SetValue(dates[1])
 	}
 
 }
@@ -157,19 +158,21 @@ func listFilterFormBoolean(form *Form, field *Field, value string, userData User
 		},
 	}
 
-	form.AddRadioOptions("value", field.name(userData.Locale()), options).Value = value
+	form.AddRadioOptions("value", field.name(userData.Locale()), options).SetValue(value)
 }
 
 func listFilterFormText(form *Form, field *Field, value string, userData UserData) {
-	item := form.AddText("value", field.name(userData.Locale()))
-	item.Focused = true
-	item.Value = value
+	form.
+		AddText("value", field.name(userData.Locale())).
+		SetFocused().
+		SetValue(value)
 }
 
 func listFilterFormNumber(form *Form, field *Field, value string, userData UserData) {
-	item := form.AddNumber("value", field.name(userData.Locale()))
-	item.Focused = true
-	item.Value = value
+	form.
+		AddNumber("value", field.name(userData.Locale())).
+		SetFocused().
+		SetValue(value)
 }
 
 func listFilterFormSelectHandle(fv FormValidation, field *Field, request *Request) {

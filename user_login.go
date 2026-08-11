@@ -19,16 +19,16 @@ func initUserLogin(app *App) {
 		emailInput.InputMode = "email"
 		emailInput.Autocomplete = "email"
 		if emailValue == "" {
-			emailInput.Focused = true
+			emailInput.SetFocused()
 		}
-		emailInput.Value = request.Param("email")
+		emailInput.SetValue(request.Param("email"))
 		passwordInput := form.AddPassword("password", messages.Get(locale, "password"))
 		passwordInput.Autocomplete = "current-password"
 		if emailValue != "" {
-			passwordInput.Focused = true
+			passwordInput.SetFocused()
 		}
 
-		form.AddHidden("redirect_url").Value = request.Param("redirect")
+		form.AddHidden("redirect_url").SetValue(request.Param("redirect"))
 
 		form.AddSubmit(messages.Get(locale, "login_action"))
 	}, func(vc FormValidation, request *Request) {

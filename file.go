@@ -113,7 +113,7 @@ func (app *App) afterInitFilesResource() {
 	})
 
 	app.PopupForm("validate-uuid-files", func(form *Form, request *Request) {
-		form.AddText("uuid", "UUID").Focused = true
+		form.AddText("uuid", "UUID").SetFocused()
 		form.AddSubmit("Vložit")
 	}, func(fv FormValidation, request *Request) {
 		uuids := request.Param("uuid")
@@ -147,9 +147,7 @@ func (app *App) afterInitFilesResource() {
 	}).Permission(resource.canUpdate).Name(unlocalized("Vložit UUID"))
 
 	app.PopupForm("edit-uuid-files", func(form *Form, request *Request) {
-		input := form.AddText("ids", "ID")
-		input.Value = request.Param("ids")
-		input.Focused = true
+		form.AddText("ids", "ID").SetValue(request.Param("ids")).SetFocused()
 		form.AddSubmit("Upravit")
 	}, func(fv FormValidation, request *Request) {
 		uuids := request.Param("ids")
@@ -196,7 +194,7 @@ func (app *App) afterInitFilesResource() {
 			})
 		}
 
-		form.AddSelect("typ", "Type", values).Value = "original"
+		form.AddSelect("typ", "Type", values).SetValue("original")
 		if file.IsImage() {
 			form.AddText("custom", "Custom size")
 		}

@@ -11,22 +11,19 @@ func initUserSettings(app *App) {
 		user := request.getUser()
 		form.Title = messages.Get(request.Locale(), "settings")
 
-		name := form.AddText("name", "")
-		name.Name = messages.Get(request.Locale(), "Name")
-		name.Value = user.Name
+		form.
+			AddText("name", messages.Get(request.Locale(), "Name")).
+			SetValue(user.Name)
 
-		phoneInput := form.AddText("phone", "Telefon")
-		phoneInput.Value = user.Phone
+		form.AddText("phone", "Telefon").SetValue(user.Phone)
 
-		sel := form.AddSelect("locale", messages.Get(request.Locale(), "locale"), availableLocales)
-		sel.Value = request.Locale()
+		form.AddSelect("locale", messages.Get(request.Locale(), "locale"), availableLocales).SetValue(request.Locale())
 
 		for _, v := range app.settings.settingsArray {
 			if request.Authorize(v.permission) {
 				val, err := app.getSetting(v.id)
 				if err == nil {
-					input := form.AddText("setting_"+v.id, v.name(request.Locale()))
-					input.Value = val
+					form.AddText("setting_"+v.id, v.name(request.Locale())).SetValue(val)
 				} else {
 					app.Log().Errorf("can't load setting value '%s': %s", v.id, err)
 				}
@@ -92,11 +89,11 @@ func initUserSettings(app *App) {
 			locale := request.Locale()
 			form.Title = messages.Get(request.Locale(), "password_change")
 			oldPassword := form.AddPassword("oldpassword", messages.Get(locale, "password_old"))
-			oldPassword.Focused = true
+			oldPassword.SetFocused()
 			oldPassword.Autocomplete = "old-password"
 
 			newPassword := form.AddPassword("newpassword", messages.Get(locale, "password_new"))
-			newPassword.Focused = true
+			newPassword.SetFocused()
 			newPassword.Autocomplete = "new-password"
 
 			form.AddSubmit(messages.Get(locale, "save"))
@@ -221,15 +218,15 @@ func initUserSettings(app *App) {
 			roleSelect = append(roleSelect, [2]string{role, app.getRoleName(role, user.Locale)})
 		}
 
-		form.AddText("username", "Uživatelské jméno").Value = user.Username
-		form.AddText("name", "Jméno").Value = user.Name
-		form.AddText("email", "Email").Value = user.Email
-		form.AddText("phone", "Telefon").Value = user.Phone
+		form.AddText("username", "Uživatelské jméno").SetValue(user.Username)
+		form.AddText("name", "Jméno").SetValue(user.Name)
+		form.AddText("email", "Email").SetValue(user.Email)
+		form.AddText("phone", "Telefon").SetValue(user.Phone)
 
-		form.AddSelect("role", "Role", roleSelect).Value = user.Role
+		form.AddSelect("role", "Role", roleSelect).SetValue(user.Role)
 
 		newPassword := form.AddPassword("newpassword", messages.Get(request.Locale(), "password_new"))
-		newPassword.Focused = true
+		newPassword.SetFocused()
 		newPassword.Autocomplete = "new-password"
 
 		form.AddSubmit(messages.Get(request.Locale(), "save"))

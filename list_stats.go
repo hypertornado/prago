@@ -46,10 +46,10 @@ func (app *App) initListStats() {
 
 		form.AddSelect("field", "Sloupec", fieldOptions)
 
-		form.AddNumber("limit", "Počet položek").Value = "10"
+		form.AddNumber("limit", "Počet položek").SetValue("10")
 
-		form.AddHidden("_params").Value = request.Param("_params")
-		form.AddHidden("_resource").Value = resource.id
+		form.AddHidden("_params").SetValue(request.Param("_params"))
+		form.AddHidden("_resource").SetValue(resource.id)
 
 		form.AddSubmit("Zobrazit statistiky")
 	}, func(fv FormValidation, request *Request) {

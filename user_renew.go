@@ -12,7 +12,7 @@ func initUserRenew(app *App) {
 	app.nologinFormAction("forgot", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		emailInput := form.AddEmail("email", messages.Get(locale, "email"))
-		emailInput.Focused = true
+		emailInput.SetFocused()
 		emailInput.InputMode = "email"
 		emailInput.Autocomplete = "email"
 		form.AddSubmit(messages.Get(locale, "forgotten_submit"))
@@ -55,11 +55,11 @@ func initUserRenew(app *App) {
 	app.nologinFormAction(renewURL, func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		passwordInput := form.AddPassword("password", messages.Get(locale, "password_new"))
-		passwordInput.Focused = true
+		passwordInput.SetFocused()
 		passwordInput.Autocomplete = "new-password"
 
-		form.AddHidden("email").Value = request.Param("email")
-		form.AddHidden("token").Value = request.Param("token")
+		form.AddHidden("email").SetValue(request.Param("email"))
+		form.AddHidden("token").SetValue(request.Param("token"))
 		form.AddSubmit(messages.Get(locale, "forgoten_set"))
 	}, func(vc FormValidation, request *Request) {
 		email := request.Param("email")

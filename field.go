@@ -316,7 +316,7 @@ func (field *Field) FixStringValue(fn func(string) string) *Field {
 	return field
 }
 
-func (field *Field) FormFilter(filter *FormFilter) *Field {
+func (field *Field) SetFormFilter(filter *FormFilter) *Field {
 	field.formFilter = filter
 	return field
 }

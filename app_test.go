@@ -350,18 +350,6 @@ func TestPartialSave(t *testing.T) {
 	if item2.Text != "B" {
 		t.Fatal(item2.Text)
 	}
-
-	//item2 := prago.CreateItem
-
-	/*item := Query[ResourceStruct](resource.app).Is("id", 1).First()
-
-	if item.UpdatedAt.Before(testStartTime) || time.Now().Before(item.UpdatedAt) {
-		t.Fatal(item.UpdatedAt)
-	}
-
-	if item.CreatedAt.Before(testStartTime) || time.Now().Before(item.CreatedAt) {
-		t.Fatal(item.CreatedAt)
-	}*/
 }
 
 func TestResourceBool(t *testing.T) {

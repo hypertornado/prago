@@ -115,6 +115,8 @@ type App struct {
 	lightness  float64
 
 	GetTrackingUUIDFunc func(request *Request) string
+
+	customDateRanges []dateRange
 }
 
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {

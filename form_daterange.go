@@ -112,11 +112,24 @@ func relativeYearDateRange(rel int64) func() [2]time.Time {
 	}
 }
 
+func (app *App) AddCustomDateRange(tm [2]time.Time) {
+	dr := dateRange{
+		DateRange: func() [2]time.Time {
+			return tm
+		},
+		Name: unlocalized(fmt.Sprintf("%s – %s", tm[0].Format("2. 1. 2006"), tm[1].Format("2. 1. 2006"))),
+	}
+	app.customDateRanges = append(app.customDateRanges, dr)
+}
+
 func (app *App) initDateRange() {
 
 	app.PopupForm("_dateranges", func(form *Form, request *Request) {
+
+		allRanges := append(defaultDateRanges, app.customDateRanges...)
+
 		var options []*FormOption
-		for _, dateRange := range defaultDateRanges {
+		for _, dateRange := range allRanges {
 			dates := dateRange.DateRange()
 			option := &FormOption{
 				ID:   fmt.Sprintf("%s_%s", dates[0].Format("2006-01-02"), dates[1].Format("2006-01-02")),
@@ -152,9 +165,9 @@ func (app *App) initDateRange() {
 }
 
 func (form *Form) AddDateRange(name, description string, from, to time.Time) *FormItem {
-	input := form.addInput(name, description, "form_input_daterange")
-	input.Value = fmt.Sprintf("%s_%s", from.Format("2006-01-02"), to.Format("2006-01-02"))
-	return input
+	return form.
+		addInput(name, description, "form_input_daterange").
+		SetValue(fmt.Sprintf("%s_%s", from.Format("2006-01-02"), to.Format("2006-01-02")))
 }
 
 func (fi *FormItem) DateRangeFrom() string {

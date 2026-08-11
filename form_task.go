@@ -193,7 +193,7 @@ func (app *App) initFormTask() {
 	}).Permission(everybodyPermission)
 
 	app.PopupForm("_taskstop", func(form *Form, request *Request) {
-		form.AddHidden("uuid").Value = request.Param("uuid")
+		form.AddHidden("uuid").SetValue(request.Param("uuid"))
 		form.AutosubmitFirstTime = true
 	}, func(fv FormValidation, request *Request) {
 		app.stopFormTask(request.Param("uuid"))

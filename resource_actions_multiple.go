@@ -16,10 +16,10 @@ func (app *App) initMultieditChangePopup() {
 
 		resource := app.getResourceByID(request.Param("resource"))
 
-		form.AddHidden("resource").Value = resource.id
-		form.AddHidden("field").Value = request.Param("field")
+		form.AddHidden("resource").SetValue(resource.id)
+		form.AddHidden("field").SetValue(request.Param("field"))
 
-		form.AddRelationMultiple("items", resource.pluralName(request.Locale()), resource.id).Value = request.Param("items")
+		form.AddRelationMultiple("items", resource.pluralName(request.Locale()), resource.id).SetValue(request.Param("items"))
 
 		newForm := app.NewForm("")
 		var item any = reflect.New(resource.typ).Interface()
@@ -32,7 +32,7 @@ func (app *App) initMultieditChangePopup() {
 
 		for _, item := range newForm.Items {
 			if item.ID == request.Param("field") {
-				item.Focused = true
+				item.SetFocused()
 				form.Items = append(form.Items, item)
 			}
 		}
@@ -151,20 +151,18 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 				if !request.Authorize(field.canView) {
 					continue
 				}
-				checkboxItem := form.AddCheckbox(field.id, field.name(request.Locale()))
-				checkboxItem.Value = "on"
+				form.AddCheckbox(field.id, field.name(request.Locale())).SetValue("on")
 			}
 
 			for _, stat := range resource.itemStats {
 				if !request.Authorize(stat.Permission) {
 					continue
 				}
-				checkboxItem := form.AddCheckbox(stat.id, stat.Name(request.Locale()))
-				checkboxItem.Value = "on"
+				form.AddCheckbox(stat.id, stat.Name(request.Locale())).SetValue("on")
 			}
 
 			if resource.previewFn != nil {
-				form.AddCheckbox("_previewurl", "Ukázat preview URL").Value = "on"
+				form.AddCheckbox("_previewurl", "Ukázat preview URL").SetValue("on")
 			}
 
 			form.AddSubmit("Zobrazit")
@@ -222,10 +220,7 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 	resource.formItemMultipleAction(
 		"clone-multiple",
 		func(items []any, form *Form, request *Request) {
-			countEl := form.AddNumber("count", "Počet kopií")
-			countEl.Value = "1"
-			countEl.Focused = true
-
+			form.AddNumber("count", "Počet kopií").SetValue("1").SetFocused()
 			form.AddSubmit("Naklonovat")
 		},
 		func(items []any, fv FormValidation, request *Request) {

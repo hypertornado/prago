@@ -196,7 +196,7 @@ func (app *App) initActivityLog() {
 
 	app.ActionForm("_activity", func(form *Form, request *Request) {
 		id := request.Param("id")
-		form.AddText("id", "ID úpravy").Value = id
+		form.AddText("id", "ID úpravy").SetValue(id)
 		form.AddSubmit("Zobrazit")
 
 		if id != "" {

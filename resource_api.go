@@ -32,7 +32,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 
 		for _, field := range resource.fields {
 			if request.Authorize(field.canView) {
-				row.AddCell().Value = field.name(request.Locale())
+				row.AddCell().SetValue(field.name(request.Locale()))
 			}
 		}
 

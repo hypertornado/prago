@@ -23,7 +23,7 @@ type ValidationError struct {
 func (app *App) initValidation() {
 
 	app.PopupForm("_validation-consistency", func(form *Form, request *Request) {
-		form.AddHidden("resource").Value = request.Param("resource")
+		form.AddHidden("resource").SetValue(request.Param("resource"))
 		form.AutosubmitFirstTime = true
 
 	}, func(fv FormValidation, request *Request) {

@@ -17,7 +17,7 @@ func bindResourceExportCSV(resource *Resource) {
 	app := resource.app
 
 	app.PopupForm("_list-export-csv", func(form *Form, request *Request) {
-		form.AddHidden("_params").Value = request.Param("_params")
+		form.AddHidden("_params").SetValue(request.Param("_params"))
 		form.AddSubmit("Stáhnout export csv")
 
 	}, func(fv FormValidation, request *Request) {

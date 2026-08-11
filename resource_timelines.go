@@ -67,7 +67,7 @@ func (resource *Resource) initResourceTimelines() {
 				filterLayout := field.fieldType.filterLayoutTemplate
 
 				if filterLayout == "filter_layout_relation" {
-					form.AddRelationMultiple(field2.id, field2.name(request.Locale()), field2.getRelatedID()).Value = request.Param(field2.id)
+					form.AddRelationMultiple(field2.id, field2.name(request.Locale()), field2.getRelatedID()).SetValue(request.Param(field2.id))
 				}
 
 				if filterLayout == "filter_layout_boolean" {
@@ -75,12 +75,12 @@ func (resource *Resource) initResourceTimelines() {
 						{"", ""},
 						{"true", "✅ ano"},
 						{"false", "ne"},
-					}).Value = request.Param(field2.id)
+					}).SetValue(request.Param(field2.id))
 				}
 
 				if filterLayout == "filter_layout_select" {
 					options := field2.fieldType.filterLayoutDataSource(field2, request).([][2]string)
-					form.AddSelect(field2.id, field2.name(request.Locale()), options).Value = request.Param(field2.id)
+					form.AddSelect(field2.id, field2.name(request.Locale()), options).SetValue(request.Param(field2.id))
 
 				}
 			}
@@ -145,7 +145,7 @@ func (resource *Resource) initResourceTimelines() {
 		})
 
 		timeline.OptionsForm(func(request *Request, form *Form) {
-			form.AddRelationMultiple("users", "Uživatel", "user").Value = request.Param("users")
+			form.AddRelationMultiple("users", "Uživatel", "user").SetValue(request.Param("users"))
 		})
 
 		timeline.FilterName("users", func(request *Request, value string) (string, string) {

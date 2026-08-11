@@ -69,7 +69,7 @@ func (form *Form) initWithResourceItem(resource *Resource, item any, request *Re
 	var fieldsMap map[string]bool
 	fields := request.Param("_fields")
 	if fields != "" {
-		form.AddHidden("_fields").Value = fields
+		form.AddHidden("_fields").SetValue(fields)
 		fieldsMap = getFieldsFilterMap(fields)
 	}
 
@@ -119,13 +119,13 @@ func (form *Form) initWithResourceItem(resource *Resource, item any, request *Re
 				item.TextOver = textOverFN(request.Locale())
 			}
 		}
-		item.AddUUID()
+		item.SetUUID()
 
 		if field.fieldType.formHideLabel {
 			item.HiddenName = true
 		}
 
-		item.Value = editableValues[field.id]
+		item.SetValue(editableValues[field.id])
 
 		if field.fieldType.formDataSource != nil {
 			item.Data = field.fieldType.formDataSource(field, request, item.Value)

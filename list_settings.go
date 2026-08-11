@@ -8,11 +8,12 @@ import (
 func (app *App) initListSettings() {
 
 	app.PopupForm("_list-items-per-page", func(form *Form, request *Request) {
-		form.AddHidden("resource").Value = request.Param("resource")
+		form.AddHidden("resource").SetValue(request.Param("resource"))
 
-		item := form.AddSelect("count", "Počet položek na stránce", getStatsLimitSelectPlain())
-		item.Value = request.Param("count")
-		item.Focused = true
+		form.
+			AddSelect("count", "Počet položek na stránce", getStatsLimitSelectPlain()).
+			SetValue(request.Param("count")).
+			SetFocused()
 
 		form.AddSubmit("Nastavit počet")
 
@@ -48,7 +49,7 @@ func (app *App) initListSettings() {
 			}
 			input := form.AddCheckbox(field.id, field.name(request.Locale()))
 			if fieldsMap[field.id] {
-				input.Value = "on"
+				input.SetValue("on")
 			}
 		}
 
@@ -58,11 +59,11 @@ func (app *App) initListSettings() {
 			}
 			input := form.AddCheckbox(stat.id, stat.Name(request.Locale()))
 			if fieldsMap[stat.id] {
-				input.Value = "on"
+				input.SetValue("on")
 			}
 		}
 
-		form.AddHidden("resource").Value = request.Param("resource")
+		form.AddHidden("resource").SetValue(request.Param("resource"))
 		form.AddSubmit("Nastavit viditelné sloupce")
 
 	}, func(fv FormValidation, request *Request) {

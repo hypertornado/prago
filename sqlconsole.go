@@ -10,9 +10,7 @@ func (app *App) initSQLConsole() {
 	app.ActionForm("_sqlconsole",
 		func(form *Form, request *Request) {
 			form.Title = "SQL Console"
-			input := form.AddTextarea("q", "")
-			input.Focused = true
-			input.Value = request.Param("q")
+			form.AddTextarea("q", "").SetFocused().SetValue(request.Param("q"))
 			form.AddSubmit("Execute SQL")
 		}, func(vc FormValidation, request *Request) {
 			q := request.Param("q")

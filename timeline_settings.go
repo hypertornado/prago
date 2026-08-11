@@ -13,7 +13,7 @@ func (app *App) initTimelineSettings() {
 			{"year", "Rok"},
 		}
 		typeItem := form.AddRadio("_type", "Typ zobrazení", typeValues)
-		typeItem.Value = request.Param("_type")
+		typeItem.SetValue(request.Param("_type"))
 		typeItem.Icon = "glyphicons-basic-46-calendar.svg"
 
 		alignValues := [][2]string{
@@ -22,7 +22,7 @@ func (app *App) initTimelineSettings() {
 			{"future", "Do budoucnosti"},
 		}
 		alignItem := form.AddRadio("_alignment", "Zarovnání časové osy", alignValues)
-		alignItem.Value = request.Param("_alignment")
+		alignItem.SetValue(request.Param("_alignment"))
 		alignItem.Icon = "glyphicons-basic-749-resize-horizontal.svg"
 
 		if timeline.optionsForm != nil {

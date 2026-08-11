@@ -42,13 +42,7 @@ func (app *App) initUserAPI() {
 	}).Name(unlocalized("Generate API key")).Permission(loggedPermission)
 
 	app.PopupForm("_apikeydelete", func(form *Form, request *Request) {
-		uuid := request.Param("uuid")
-		//form.AddHidden("uuid").Value = uuid
-
-		ti := form.AddTextarea("uuid", "API key")
-		ti.Value = uuid
-		ti.Readonly = true
-
+		form.AddTextarea("uuid", "API key").SetValue(request.Param("uuid")).SetReadonly()
 		form.AddDeleteSubmit("Delete API key")
 	}, func(fv FormValidation, request *Request) {
 		err := app.deleteSession(request.Param("uuid"))

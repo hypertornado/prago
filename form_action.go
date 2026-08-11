@@ -208,8 +208,9 @@ func (resource *Resource) formItemMultipleAction(url string, formGenerator func(
 
 	fa.formGenerator = func(form *Form, request *Request) {
 		idsStr := strings.Split(request.Param("id"), ",")
-		itemField := form.AddRelationMultiple("_item_ids", resource.pluralName(request.Locale()), resource.id)
-		itemField.Value = fmt.Sprintf(";%s;", strings.Join(idsStr, ";"))
+		form.
+			AddRelationMultiple("_item_ids", resource.pluralName(request.Locale()), resource.id).
+			SetValue(fmt.Sprintf(";%s;", strings.Join(idsStr, ";")))
 
 		items := getItemsFromIDs(resource, request.Param("id"))
 		formGenerator(items, form, request)

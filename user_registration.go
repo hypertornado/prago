@@ -43,7 +43,7 @@ func initUserRegistration(app *App) {
 	app.nologinFormAction("registration", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
 		nameInput := form.AddText("name", messages.Get(locale, "Name"))
-		nameInput.Focused = true
+		nameInput.SetFocused()
 
 		emailInput := form.AddEmail("email", messages.Get(locale, "email"))
 		emailInput.InputMode = "email"

@@ -50,8 +50,8 @@ func (app *App) initAI() {
 	app.NewSetting("gemini_api_key", "sysadmin")
 
 	app.ActionForm("_aichat", func(form *Form, request *Request) {
-		form.AddSelect("model", "Model", app.getAvailableAImodels()).Value = "models/gemini-flash-latest"
-		form.AddTextarea("text", "Text").Focused = true
+		form.AddSelect("model", "Model", app.getAvailableAImodels()).SetValue("models/gemini-flash-latest")
+		form.AddTextarea("text", "Text").SetFocused()
 		fileInput := form.AddFile("files", "Soubory")
 		fileInput.FileMultiple = true
 		form.AddSubmit("Odeslat")

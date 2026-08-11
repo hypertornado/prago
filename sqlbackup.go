@@ -91,7 +91,7 @@ func (app *App) initSQLBackup() {
 
 				item := form.AddCheckbox(v, fmt.Sprintf("Ignore table '%s' (size %s B) %s", v, humanizeNumber(tableSize), useIcon))
 				if defaultIgnore {
-					item.Value = "checked"
+					item.SetValue("checked")
 				}
 			}
 

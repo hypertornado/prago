@@ -26,76 +26,12 @@ type Form struct {
 	BoxHeader              *boxHeader
 }
 
-// FormItem represents item of form
-type FormItem struct {
-	ID                 string
-	Icon               string
-	Name               string
-	Description        string
-	DescriptionsBefore []string
-	DescriptionsAfter  []string
-	Placeholder        string
-	Required           bool
-	Focused            bool
-	Readonly           bool
-	HiddenName         bool
-	Hidden             bool
-	Template           string
-	Value              string
-	Data               any
-
-	Style string
-	Color string
-
-	Content template.HTML
-
-	TextOver string
-
-	UUID string
-	form *Form
-
-	Autocomplete string
-	InputMode    string
-
-	HelpURL string
-
-	FileMultiple bool
-	FileAccept   string
-
-	FormFilterID string
-
-	SuggestionURL string
-
-	IsWide                 bool
-	PreventPasswordManager bool
-
-	UnitBefore string
-	UnitAfter  string
-}
-
 func (form *Form) HeaderName() string {
 	return form.GetBoxHeader().Name
 }
 
 func (form *Form) HeaderIcon() string {
 	return form.GetBoxHeader().Icon
-}
-
-func (fi *FormItem) GetContent() template.HTML {
-	if fi.Content != "" {
-		return fi.Content
-	}
-	if fi.Template != "" {
-		return fi.form.app.adminTemplates.ExecuteToHTML(fi.Template, fi)
-	}
-	return ""
-}
-
-func (fi *FormItem) GetColor() string {
-	if fi.Color != "" {
-		return fi.Color
-	}
-	return getStyleColor(fi.Style)
 }
 
 // NewForm creates new form
@@ -116,7 +52,7 @@ func (form *Form) AddItem(item *FormItem) {
 // BindData to form
 func (form *Form) BindData(params url.Values) {
 	for _, v := range form.Items {
-		v.Value = params.Get(v.ID)
+		v.SetValue(params.Get(v.ID))
 	}
 }
 
@@ -129,7 +65,7 @@ func (form *Form) addInput(id, description, template string) *FormItem {
 	if description == "" {
 		item.HiddenName = true
 	}
-	item.AddUUID()
+	item.SetUUID()
 	form.AddItem(item)
 	return item
 }
@@ -238,16 +174,7 @@ func (form *Form) AddRelationMultiple(name, description string, relatedResourceI
 	return input
 }
 
-// AddUUID to form
-func (f *FormItem) AddUUID() {
-	f.UUID = "id-" + randomString(5)
-}
-
 func (form *Form) AddCSRFToken(request *Request) *Form {
 	form.CSRFToken = request.csrfToken()
 	return form
-}
-
-func (f *FormItem) AddFromFilter(formFilter *FormFilter) {
-	f.FormFilterID = formFilter.uuid
 }

@@ -146,7 +146,7 @@ func (resource *Resource) initDefaultResourceActions() {
 
 	if resource.activityLog {
 		resource.formAction("_history", func(form *Form, request *Request) {
-			form.AddNumber("page", "Stránka").Value = "1"
+			form.AddNumber("page", "Stránka").SetValue("1")
 			form.AddRelationMultiple("user", "Uživatel", "user")
 			form.AutosubmitFirstTime = true
 			form.AddSubmit("Zobrazit")
@@ -165,7 +165,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			formItemAction(
 				"_history",
 				func(item any, form *Form, request *Request) {
-					form.AddNumber("page", "Stránka").Value = "1"
+					form.AddNumber("page", "Stránka").SetValue("1")
 					form.AddRelationMultiple("user", "Uživatel", "user")
 					form.AutosubmitFirstTime = true
 					form.AddSubmit("Zobrazit")
