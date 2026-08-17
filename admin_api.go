@@ -2,8 +2,6 @@ package prago
 
 import (
 	"io"
-
-	"github.com/golang-commonmark/markdown"
 )
 
 func (app *App) initAPI() {
@@ -11,7 +9,9 @@ func (app *App) initAPI() {
 		func(request *Request) {
 			data, err := io.ReadAll(request.Request().Body)
 			must(err)
-			request.WriteJSON(200, markdown.New(markdown.HTML(true), markdown.Breaks(true)).RenderToString(data))
+			htmlData, err := markdownToHTML(string(data))
+			must(err)
+			request.WriteJSON(200, htmlData)
 		},
 	)
 

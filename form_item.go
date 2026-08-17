@@ -92,6 +92,9 @@ func (fi *FormItem) SetContent(content template.HTML) *FormItem {
 }
 
 func (fi *FormItem) SetTextOver(textOver string) *FormItem {
+	if textOver == "" {
+		textOver = fi.Name
+	}
 	fi.TextOver = textOver
 	return fi
 }

@@ -23,9 +23,14 @@
           <div class="form_label{{if .TextOver}} form_label-textover{{end}}{{if .Hidden}} form_label-hidden{{end}}{{if .Required}} form_label-required{{end}}"
             data-id="{{.ID}}"
           >
-            <a class="form_label_textover">
-              {{.TextOver}}
-            </a>
+            {{if .TextOver}}
+              <a class="form_label_textover">
+                {{if .Icon}}
+                  <img src="/admin/api/icons?file={{$item.Icon}}&color={{PragoBaseColor}}" class="form_label_textover_icon">
+                {{end}}
+                {{.TextOver}}…
+              </a>
+            {{end}}
             <div class="form_label_content">
             {{if eq .HiddenName false}}
               {{range $description := .DescriptionsBefore}}

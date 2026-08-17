@@ -254,6 +254,17 @@
 
 .form_label_textover {
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+  margin-left: -2px;
+  padding: 0px 2px;
+}
+
+.form_label_textover_icon {
+  aspect-ratio: 1;
+  width: 16px;
 }
 
 .form_label-textoverexpanded .form_label_textover {

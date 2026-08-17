@@ -60,6 +60,12 @@ func enumsToFormOptions(enums []*Enum, userData UserData) (ret []*FormOption) {
 	return ret
 }
 
+func (app *App) GetEnumName(request *Request, typeID string, typeValue string) string {
+	typ := app.fieldTypes[typeID]
+	content := typ.getViewFieldContent(request, nil, typeValue)
+	return content.Name
+}
+
 func (app *App) AddEnum(name string, items []*Enum) {
 
 	var allowedValues []string
@@ -98,7 +104,7 @@ func (app *App) AddEnum(name string, items []*Enum) {
 		},
 		formValueStringer: stringerString,
 
-		listCellDataSource: func(userData UserData, f *Field, value any) *listCell {
+		listCellDataSource: func(userData UserData, _ *Field, value any) *listCell {
 			str := value.(string)
 			for _, v := range items {
 				if str == v.ID {

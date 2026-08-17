@@ -13,6 +13,7 @@ require (
 	github.com/hypertornado/go-strip-markdown v0.0.0-20250417122110-a5ced7b70832
 	github.com/sendgrid/sendgrid-go v3.5.0+incompatible
 	github.com/tealeg/xlsx v1.0.5
+	github.com/yuin/goldmark v1.8.5
 	golang.org/x/crypto v0.48.0
 	golang.org/x/net v0.50.0
 	golang.org/x/sync v0.19.0

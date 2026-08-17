@@ -2,10 +2,7 @@ package prago
 
 import (
 	"fmt"
-	"html/template"
 	"time"
-
-	"github.com/golang-commonmark/markdown"
 )
 
 type fieldType struct {
@@ -315,13 +312,17 @@ func (app *App) initDefaultFieldTypes() {
 		dbFieldDescription: "text",
 
 		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
-			content := template.HTML(markdown.New(markdown.Breaks(true), markdown.HTML(true), markdown.Tables(true)).RenderToString([]byte(value.(string))))
-			if content == "" {
-				return nil
+			htmlContent, err := markdownToHTML(value.(string))
+			must(err)
+
+			var empty bool
+			if htmlContent == "" {
+				empty = true
 			}
 
 			return &viewFieldContent{
-				ContentHTML: template.HTML(content),
+				Empty:       empty,
+				ContentHTML: htmlContent,
 			}
 		},
 		formTemplate:      "form_input_markdown",
