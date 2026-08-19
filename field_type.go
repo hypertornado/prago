@@ -8,7 +8,7 @@ import (
 type fieldType struct {
 	id string
 
-	getViewFieldContent func(request *Request, field *Field, value any) *viewFieldContent
+	getViewFieldContent func(request *Request, field *Field, value any) *ViewContent
 
 	dbFieldDescription string
 
@@ -114,12 +114,12 @@ func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("int64", &fieldType{
 		dbFieldDescription: "bigint(20)",
 
-		getViewFieldContent: func(request *Request, field *Field, val any) *viewFieldContent {
+		getViewFieldContent: func(request *Request, field *Field, val any) *ViewContent {
 			intVal := val.(int64)
 			if intVal == 0 {
 				return nil
 			}
-			return &viewFieldContent{
+			return &ViewContent{
 				Name: humanizeNumberWithUnits(intVal, field.unitBefore, field.unitAfter),
 			}
 		},
@@ -142,12 +142,12 @@ func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("float64", &fieldType{
 		dbFieldDescription: "double",
 
-		getViewFieldContent: func(request *Request, field *Field, val any) *viewFieldContent {
+		getViewFieldContent: func(request *Request, field *Field, val any) *ViewContent {
 			floatVal := val.(float64)
 			if floatVal == 0 {
 				return nil
 			}
-			return &viewFieldContent{
+			return &ViewContent{
 				Name: humanizeFloat(floatVal, request.Locale()),
 			}
 		},
@@ -169,12 +169,12 @@ func (app *App) initDefaultFieldTypes() {
 	})
 	app.addFieldType("bool", &fieldType{
 		dbFieldDescription: "bool NOT NULL",
-		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+		getViewFieldContent: func(request *Request, field *Field, value any) *ViewContent {
 			if !value.(bool) {
 				return nil
 			}
 
-			return &viewFieldContent{
+			return &ViewContent{
 				Name:  messages.Get(request.Locale(), "yes_plain"),
 				Icon:  iconCheckbox,
 				Style: "create",
@@ -221,8 +221,8 @@ func (app *App) initDefaultFieldTypes() {
 	})
 	app.addFieldType("order", &fieldType{
 		dbFieldDescription: "bigint(20)",
-		getViewFieldContent: func(request *Request, field *Field, val any) *viewFieldContent {
-			return &viewFieldContent{
+		getViewFieldContent: func(request *Request, field *Field, val any) *ViewContent {
+			return &ViewContent{
 				Name: humanizeNumber(val.(int64)) + ".",
 			}
 		},
@@ -244,8 +244,8 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("cdnfile", &fieldType{
 		dbFieldDescription: "varchar(255)",
-		getViewFieldContent: func(request *Request, field *Field, val any) *viewFieldContent {
-			return &viewFieldContent{
+		getViewFieldContent: func(request *Request, field *Field, val any) *ViewContent {
+			return &ViewContent{
 				CDNFileData: getCDNViewData(app, val.(string)),
 			}
 		},
@@ -288,12 +288,12 @@ func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("video", &fieldType{
 		dbFieldDescription: "varchar(255)",
 
-		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+		getViewFieldContent: func(request *Request, field *Field, value any) *ViewContent {
 			videoURL := filesCDN.GetVideoURL(value.(string))
 			if videoURL == "" {
 				return nil
 			}
-			return &viewFieldContent{
+			return &ViewContent{
 				VideoURL: videoURL,
 			}
 		},
@@ -311,7 +311,7 @@ func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("markdown", &fieldType{
 		dbFieldDescription: "text",
 
-		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+		getViewFieldContent: func(request *Request, field *Field, value any) *ViewContent {
 			htmlContent, err := markdownToHTML(value.(string))
 			must(err)
 
@@ -320,7 +320,7 @@ func (app *App) initDefaultFieldTypes() {
 				empty = true
 			}
 
-			return &viewFieldContent{
+			return &ViewContent{
 				Empty:       empty,
 				ContentHTML: htmlContent,
 			}
@@ -335,12 +335,12 @@ func (app *App) initDefaultFieldTypes() {
 	app.addFieldType("place", &fieldType{
 		dbFieldDescription: "varchar(255)",
 
-		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+		getViewFieldContent: func(request *Request, field *Field, value any) *ViewContent {
 			placeData := value.(string)
 			if placeData == "" {
 				return nil
 			}
-			return &viewFieldContent{
+			return &ViewContent{
 				PlaceData: placeData,
 			}
 		},
@@ -356,13 +356,13 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("relation", &fieldType{
 		dbFieldDescription: "bigint(20)",
-		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+		getViewFieldContent: func(request *Request, field *Field, value any) *ViewContent {
 			valInt := value.(int64)
 			previews := field.relationPreview(request, fmt.Sprintf("%d", valInt))
 			if len(previews) == 0 {
 				return nil
 			}
-			return &viewFieldContent{
+			return &ViewContent{
 				Previews: previews,
 			}
 		},
@@ -387,12 +387,12 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("multirelation", &fieldType{
 		dbFieldDescription: "varchar(255)",
-		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+		getViewFieldContent: func(request *Request, field *Field, value any) *ViewContent {
 			previews := field.relationPreview(request, value.(string))
 			if len(previews) == 0 {
 				return nil
 			}
-			return &viewFieldContent{
+			return &ViewContent{
 				Previews: previews,
 			}
 		},
@@ -416,9 +416,9 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("date", &fieldType{
 		dbFieldDescription: "date",
-		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+		getViewFieldContent: func(request *Request, field *Field, value any) *ViewContent {
 			t := value.(time.Time)
-			ret := &viewFieldContent{
+			ret := &ViewContent{
 				Name: messages.Timestamp(
 					request.Locale(),
 					t,
@@ -451,9 +451,9 @@ func (app *App) initDefaultFieldTypes() {
 
 	app.addFieldType("time", &fieldType{
 		dbFieldDescription: "datetime",
-		getViewFieldContent: func(request *Request, field *Field, value any) *viewFieldContent {
+		getViewFieldContent: func(request *Request, field *Field, value any) *ViewContent {
 			t := value.(time.Time)
-			ret := &viewFieldContent{
+			ret := &ViewContent{
 				Name: messages.Timestamp(
 					request.Locale(),
 					t,

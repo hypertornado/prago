@@ -89,12 +89,12 @@ func imageFormDataSource(mimeTypes string) func(*Field, UserData, string) any {
 	}
 }
 
-func imagePickerViewFieldContent(request *Request, field *Field, value any) *viewFieldContent {
+func imagePickerViewFieldContent(request *Request, field *Field, value any) *ViewContent {
 	imageData := request.app.getImagePickerResponse(value.(string))
 	if len(imageData.Items) == 0 {
 		return nil
 	}
-	return &viewFieldContent{
+	return &ViewContent{
 		Images: imageData,
 	}
 }

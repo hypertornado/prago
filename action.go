@@ -10,14 +10,13 @@ import (
 	"golang.org/x/text/language"
 )
 
-type buttonData struct {
+/*type buttonData struct {
 	Icon     string
 	Name     string
 	URL      string
 	Priority int64
 	Style    string
-	FormURL  string
-}
+}*/
 
 // Action represents action
 type Action struct {
@@ -27,7 +26,7 @@ type Action struct {
 	method        string
 	url           string
 	handler       func(*Request)
-	constraints   []routerConstraint
+	constraints   []Constraint
 	parentBoard   *Board
 	isPartOfBoard *Board
 	style         string
@@ -90,7 +89,6 @@ func newAction(app *App, url string) *Action {
 		url:         url,
 		app:         app,
 		parentBoard: app.MainBoard,
-		//icon:        iconAction,
 	}
 }
 
@@ -189,11 +187,11 @@ func (action *Action) StyleDestroy() *Action {
 	return action
 }
 
-func (action *Action) addConstraint(constraint routerConstraint) {
+func (action *Action) addConstraint(constraint Constraint) {
 	action.constraints = append(action.constraints, constraint)
 }
 
-func (resource *Resource) getItemButtonData(userData UserData, item any, ignoreView bool) (ret []*buttonData) {
+func (resource *Resource) getItemButtonData(userData UserData, item any, ignoreView bool) (ret []*Button) {
 	for k, v := range resource.itemActions {
 		if v.method != "GET" {
 			continue
@@ -209,20 +207,15 @@ func (resource *Resource) getItemButtonData(userData UserData, item any, ignoreV
 		}
 
 		actionURL := resource.getItemURL(item, v.url, userData)
-		var formURL string
-		if v.isFormAction {
-			formURL = actionURL
-		}
 
 		priority := v.priority - int64(k)
 
-		ret = append(ret, &buttonData{
+		ret = append(ret, &Button{
 			Icon:     v.icon,
 			Name:     v.name(userData.Locale()),
 			URL:      actionURL,
 			Priority: priority,
 			Style:    v.style,
-			FormURL:  formURL,
 		},
 		)
 	}
@@ -244,8 +237,6 @@ func (resource *Resource) getItemButtonData(userData UserData, item any, ignoreV
 		} else {
 			return false
 		}
-
-		//return ret[i].Priority > ret[j].Priority
 	})
 	return ret
 }
@@ -294,19 +285,25 @@ func (action *Action) getController() *controller {
 }
 
 func (action *Action) addContent(dataSource func(*Request) template.HTML) *Action {
-	return action.ui(func(request *Request, pd *pageData) {
+	return action.ui(func(request *Request, pd *PageData) {
 		pd.PageContent = dataSource(request)
 	})
 }
 
-func (action *Action) ui(uiHandler func(*Request, *pageData)) *Action {
+func (action *Action) ui(uiHandler func(*Request, *PageData)) *Action {
 	return action.addHandler(func(request *Request) {
 		pageData := createPageData(request)
 
 		if action.isItemAction {
 			item := action.resource.query(request.r.Context()).ID(request.Param("id"))
-			pageData.Menu = action.app.getMenu(request, item)
+			pageData.MenuItems = action.app.getMenuItems(request, item)
+		} else {
+			pageData.MenuItems = action.app.getMenuItems(request, nil)
 		}
+
+		pageData.LogoURL = "/admin/logo"
+		pageData.AllowSearch = true
+		pageData.FooterItems = action.app.getFooterItems(request)
 
 		uiHandler(request, pageData)
 		pageData.renderPage(request)

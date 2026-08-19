@@ -10,6 +10,7 @@ type pageDataSimple struct {
 	Version  string
 	Icon     string
 	App      *App
+	HTTPCode int
 
 	CSSPaths        []string
 	JavascriptPaths []string
@@ -93,5 +94,11 @@ func renderPageSimple(request *Request, page *pageDataSimple) {
 
 	page.NotificationsData = request.getNotificationsData()
 	page.Title = name
-	request.WriteHTML(200, request.app.adminTemplates, "simple", page)
+
+	httpCode := page.HTTPCode
+	if httpCode == 0 {
+		httpCode = 200
+	}
+
+	request.WriteHTML(httpCode, request.app.adminTemplates, "simple", page)
 }

@@ -2761,6 +2761,10 @@ a .dashboard_figure_value {
   padding: 16px 8px 8px 36px;
 }
 
+.menu_footer a {
+  color: #999;
+}
+
 @media (max-width: 1100px) {
   .menu2 {
     padding: 8px;
@@ -4526,6 +4530,11 @@ a.pagination_page-selected {
 
 .view_content_html:empty {
   display: none;
+}
+
+.view_content_html .form_table {
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 
 .item_view_place {

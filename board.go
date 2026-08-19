@@ -53,7 +53,7 @@ func newBoard(app *App, url string) *Board {
 	ret.action.isPartOfBoard = ret
 
 	ret.action.ui(
-		func(request *Request, pd *pageData) {
+		func(request *Request, pd *PageData) {
 			pd.BoardView = ret.boardView(request)
 		})
 

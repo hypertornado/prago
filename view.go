@@ -6,19 +6,19 @@ import (
 	"reflect"
 )
 
-type viewField struct {
+type View struct {
 	Icon     string
 	Name     string
 	SubNames []string
 
-	ViewContent *viewFieldContent
+	ViewContent *ViewContent
 
 	Buttons []*Button
 
 	Relation *viewRelationItem
 }
 
-type viewFieldContent struct {
+type ViewContent struct {
 	Empty bool
 
 	Icon string
@@ -37,9 +37,11 @@ type viewFieldContent struct {
 	PlaceData string
 
 	VideoURL string
+
+	Accordions []*Accordion
 }
 
-func (vfc *viewFieldContent) HasNameOrIcon() bool {
+func (vfc *ViewContent) HasNameOrIcon() bool {
 	if vfc.Name != "" {
 		return true
 	}
@@ -49,14 +51,14 @@ func (vfc *viewFieldContent) HasNameOrIcon() bool {
 	return false
 }
 
-func (vfc *viewFieldContent) IconColor() string {
+func (vfc *ViewContent) IconColor() string {
 	if vfc.Color != "" {
 		return vfc.Color
 	}
 	return getStyleColor(vfc.Style)
 }
 
-func (vf *viewFieldContent) IsEmpty() bool {
+func (vf *ViewContent) IsEmpty() bool {
 	if vf == nil {
 		return true
 	}
@@ -66,8 +68,8 @@ func (vf *viewFieldContent) IsEmpty() bool {
 	return false
 }
 
-func (resource *Resource) getBoxHeader(id int64, item any, request *Request) *boxHeader {
-	ret := &boxHeader{}
+func (resource *Resource) getBoxHeader(id int64, item any, request *Request) *BoxHeader {
+	ret := &BoxHeader{}
 	ret.DescriptionsBefore = []string{fmt.Sprintf("%s #%d", resource.singularName(request.Locale()), id)}
 	previewer := resource.previewer(request, item)
 	ret.Name = previewer.Name()
@@ -84,7 +86,7 @@ func (resource *Resource) getBoxHeader(id int64, item any, request *Request) *bo
 
 }
 
-func (resource *Resource) getViewFields(id int64, item any, request *Request) (ret []*viewField) {
+func (resource *Resource) getViewFields(id int64, item any, request *Request) (ret []*View) {
 
 	for i, field := range resource.fields {
 		if !field.authorizeView(request) {
@@ -105,7 +107,7 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 			editURL = resource.getURL(fmt.Sprintf("%d/edit?_focus=%s&_fields=%s", id, field.id, field.id))
 		}
 
-		var viewContent *viewFieldContent
+		var viewContent *ViewContent
 		if field.fieldType.getViewFieldContent != nil {
 			viewContent = field.fieldType.getViewFieldContent(request, field, ifaceVal)
 		} else {
@@ -118,7 +120,7 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 
 		icon := field.getIcon()
 
-		vf := &viewField{
+		vf := &View{
 			Icon:        icon,
 			Name:        field.name(request.Locale()),
 			ViewContent: viewContent,
@@ -144,9 +146,9 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 		}
 		ret = append(
 			ret,
-			&viewField{
+			&View{
 				Name: v.Name(request.Locale()),
-				ViewContent: &viewFieldContent{
+				ViewContent: &ViewContent{
 					ContentHTML: template.HTML(v.Handler(item)),
 				},
 			},
@@ -156,13 +158,13 @@ func (resource *Resource) getViewFields(id int64, item any, request *Request) (r
 	return ret
 }
 
-func defaultViewFieldContent(request *Request, field *Field, val any) *viewFieldContent {
+func defaultViewFieldContent(request *Request, field *Field, val any) *ViewContent {
 	name := fmt.Sprintf("%v", val)
 	var empty bool
 	if name == "" {
 		empty = true
 	}
-	return &viewFieldContent{
+	return &ViewContent{
 		Empty: empty,
 		Name:  name,
 	}

@@ -26,10 +26,10 @@ type paginationItem struct {
 	URL      string
 }
 
-func searchItemsToViewField(items []*searchItem) *viewField {
-	ret := &viewField{}
+func searchItemsToViewField(items []*searchItem) *View {
+	ret := &View{}
 
-	ret.ViewContent = &viewFieldContent{}
+	ret.ViewContent = &ViewContent{}
 
 	for _, item := range items {
 
@@ -61,7 +61,7 @@ func (app *App) initSearch() {
 	)
 
 	app.ActionPlain("_search", nil).Permission(loggedPermission).Name(unlocalized("Vyhledávání")).Board(nil).ui(
-		func(request *Request, pd *pageData) {
+		func(request *Request, pd *PageData) {
 			q := request.Param("q")
 			pageStr := request.Param("page")
 
@@ -100,14 +100,14 @@ func (app *App) initSearch() {
 				})
 			}
 
-			pd.BoxHeader = &boxHeader{
+			pd.BoxHeader = &BoxHeader{
 				DescriptionsBefore: []string{"Vyhledávání"},
 				Icon:               "glyphicons-basic-28-search.svg",
 				Name:               fmt.Sprintf("„%s“", q),
 				DescriptionsAfter:  []string{fmt.Sprintf("%s výsledků", humanizeNumber(hits))},
 			}
 
-			pd.ViewFields = append(pd.ViewFields, searchItemsToViewField(result))
+			pd.Views = append(pd.Views, searchItemsToViewField(result))
 
 			pd.Pagination = pagination
 
@@ -147,8 +147,8 @@ func (app *App) search(q string, offset int64, limit int64, request *Request) (r
 	}
 
 	q = normalizeCzechString(q)
-	menu := app.getMenu(request, nil)
-	for _, item := range menu.Items {
+	menuItems := app.getMenuItems(request, nil)
+	for _, item := range menuItems {
 		ret = append(ret, item.searchMenuItem(q, "")...)
 	}
 
@@ -184,7 +184,7 @@ func (app *App) search(q string, offset int64, limit int64, request *Request) (r
 	return ret, hits, nil
 }
 
-func (item menuItem) searchMenuItem(q string, prename string) (ret []*searchItem) {
+func (item MenuItem) searchMenuItem(q string, prename string) (ret []*searchItem) {
 	if item.NoSearch {
 		return
 	}

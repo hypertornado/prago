@@ -27,6 +27,10 @@
 
     {{template "layout_style" .}}
 
+    {{if .AnalyticsCode}}
+      {{.AnalyticsCode}}
+    {{end}}
+
   </head>
   <body class="admin"
     data-base-color={{PragoBaseColor}}
@@ -38,7 +42,9 @@
             {{if .Breadcrumbs}}
                 {{template "breadcrumbs" .Breadcrumbs}}
             {{end}}
-            {{template "searchbox" .SearchQuery}}
+            {{if .AllowSearch}}
+                {{template "searchbox" .SearchQuery}}
+            {{end}}
             <div class="root_hamburger">
                 <img src="/admin/api/icons?file=glyphicons-basic-600-menu.svg&color={{PragoBaseColor}}" class="root_hamburger_iconopen">
                 <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color={{PragoBaseColor}}" class="root_hamburger_iconclose">
@@ -46,7 +52,7 @@
         </div>
         <div class="root_bottom">
             <div class="root_left">
-                {{template "menu" .Menu}}
+                {{template "menu" .}}
             </div>
             <div class="root_content">
                 {{if .ErrorMessage}}
@@ -56,8 +62,8 @@
                     {{template "box_header" .BoxHeader}}
                 {{end}}
 
-                {{if .ViewFields}}
-                    {{template "item_views" .ViewFields}}
+                {{if .Views}}
+                    {{template "views" .Views}}
                 {{end}}
 
                 {{if .Form}}

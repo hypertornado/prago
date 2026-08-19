@@ -27,16 +27,31 @@ type PageDataSimple struct {
 	AnalyticsCode template.HTML
 
 	FooterText template.HTML
+
+	HTTPCode int
 }
 
-type SimpleHandler struct {
+type simpleHandler struct {
 	URL string
 
 	Handler        func(pds *PageDataSimple)
 	FormValidation func(fv FormValidation, request *Request)
 }
 
-func (app *App) HandleSimple(handler *SimpleHandler) {
+func (app *App) HandleSimple(path string, handler func(*PageDataSimple)) {
+	app.HandleSimpleWithValidation(path, handler, nil)
+
+}
+
+func (app *App) HandleSimpleWithValidation(path string, handler func(*PageDataSimple), formValidation func(fv FormValidation, request *Request)) {
+	app.handleSimpleInner(&simpleHandler{
+		URL:            path,
+		Handler:        handler,
+		FormValidation: formValidation,
+	})
+}
+
+func (app *App) handleSimpleInner(handler *simpleHandler) {
 
 	if handler.FormValidation != nil {
 		app.router.route("POST", handler.URL, app.appController, func(request *Request) {
@@ -94,6 +109,8 @@ func (app *App) HandleSimple(handler *SimpleHandler) {
 			AnalyticsCode: pd.AnalyticsCode,
 
 			FooterText: pd.FooterText,
+
+			HTTPCode: pd.HTTPCode,
 		})
 	})
 }

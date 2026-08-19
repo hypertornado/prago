@@ -23,7 +23,7 @@ type Form struct {
 	AutosubmitOnDataChange bool
 	ScriptPaths            []string
 	ItemVersion            int64
-	BoxHeader              *boxHeader
+	BoxHeader              *BoxHeader
 }
 
 func (form *Form) HeaderName() string {

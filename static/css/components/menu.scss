@@ -186,7 +186,11 @@
   line-height: 1.3em;
   color: $gray;
   padding: 16px 8px 8px 36px;
-  //padding-left: 28px;
+}
+
+.menu_footer a {
+  color: $gray;
+
 }
 
 @media (max-width: 1100px) {

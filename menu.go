@@ -2,6 +2,7 @@ package prago
 
 import (
 	"fmt"
+	"html/template"
 	"sort"
 	"strings"
 
@@ -9,17 +10,12 @@ import (
 	"golang.org/x/text/language"
 )
 
-type menu struct {
-	Items       []*menuItem
-	FooterItems []string
-}
-
-type menuItem struct {
+type MenuItem struct {
 	Icon         string
 	Image        string
 	Name         string
 	URL          string
-	Subitems     []*menuItem
+	Subitems     []*MenuItem
 	Selected     bool
 	Expanded     bool
 	SortPriority int64
@@ -44,17 +40,10 @@ func getMenuRequestContextFromRequest(request *Request, item any) *menuRequestCo
 	return ret
 }
 
-func (app *App) getMenu(request *Request, item any) (ret *menu) {
-
-	menuContext := getMenuRequestContextFromRequest(request, item)
-
-	ret = &menu{
-		Items: app.MainBoard.getMenuItems(menuContext),
-	}
-
+func (app *App) getFooterItems(request *Request) (ret []template.HTML) {
 	user := request.getUser()
-	ret.FooterItems = append(ret.FooterItems, fmt.Sprintf("%s %s", user.Username, user.Name))
-	ret.FooterItems = append(ret.FooterItems, user.Email)
+	ret = append(ret, template.HTML(fmt.Sprintf("%s %s", user.Username, user.Name)))
+	ret = append(ret, template.HTML(user.Email))
 
 	var items []string
 	items = append(items, app.codeName)
@@ -72,15 +61,21 @@ func (app *App) getMenu(request *Request, item any) (ret *menu) {
 	}
 
 	items = append(items, localeNames[user.Locale])
-	ret.FooterItems = append(ret.FooterItems, strings.Join(items, " · "))
+	ret = append(ret, template.HTML(strings.Join(items, " · ")))
 	return ret
+
 }
 
-func (menu menu) GetIconAndStyle() (string, string) {
-	return getIconFromMenuSubsections(menu.Items)
+func (app *App) getMenuItems(request *Request, item any) (ret []*MenuItem) {
+	menuContext := getMenuRequestContextFromRequest(request, item)
+	return app.MainBoard.getMenuItems(menuContext)
 }
 
-func getIconFromMenuSubsections(items []*menuItem) (string, string) {
+func (pd *PageData) GetIconAndStyle() (string, string) {
+	return getIconFromMenuSubsections(pd.MenuItems)
+}
+
+func getIconFromMenuSubsections(items []*MenuItem) (string, string) {
 	for _, v := range items {
 		if v.Selected {
 			return v.Icon, v.Style
@@ -93,8 +88,8 @@ func getIconFromMenuSubsections(items []*menuItem) (string, string) {
 	return "", ""
 }
 
-func (menu menu) GetTitle() string {
-	for _, item := range menu.Items {
+func (pd *PageData) GetTitle() string {
+	for _, item := range pd.MenuItems {
 		if item.Selected {
 			return item.Name
 		}
@@ -106,7 +101,7 @@ func (menu menu) GetTitle() string {
 	return ""
 }
 
-func getTitleFromMenuSubsections(item *menuItem) []string {
+func getTitleFromMenuSubsections(item *MenuItem) []string {
 	if item.Selected {
 		return []string{
 			item.Name,
@@ -147,12 +142,12 @@ func getResourceCountsMap(request *Request) map[string]string {
 const sortPriorityBoard = 10
 const sortPriorityMainBoard = 20
 
-func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem {
+func (board *Board) getMenuItems(requestContext *menuRequestContext) []*MenuItem {
 	urlPath := requestContext.URL
 	csrfToken := requestContext.CSRFToken
 
 	app := board.app
-	var ret []*menuItem
+	var ret []*MenuItem
 
 	if board.parentResource != nil {
 		ret = board.parentResource.getResourceMenu(requestContext)
@@ -175,7 +170,7 @@ func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem
 
 			subitems := resource.resourceBoard.getMenuItems(requestContext)
 
-			ret = append(ret, &menuItem{
+			ret = append(ret, &MenuItem{
 				Icon:         icon,
 				Name:         resource.pluralName(requestContext.UserData.Locale()),
 				URL:          resourceURL,
@@ -225,7 +220,7 @@ func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem
 			sortPriority = -1
 		}
 
-		menuItem := &menuItem{
+		menuItem := &MenuItem{
 			Icon:         icon,
 			Name:         v.name(requestContext.UserData.Locale()),
 			URL:          fullURL,
@@ -245,7 +240,7 @@ func (board *Board) getMenuItems(requestContext *menuRequestContext) []*menuItem
 	return ret
 }
 
-func (resource *Resource) getResourceMenu(requestContext *menuRequestContext) (ret []*menuItem) {
+func (resource *Resource) getResourceMenu(requestContext *menuRequestContext) (ret []*MenuItem) {
 	urlPath := requestContext.URL
 	for k, v := range resource.actions {
 		if v.method != "GET" {
@@ -257,7 +252,7 @@ func (resource *Resource) getResourceMenu(requestContext *menuRequestContext) (r
 		if v.url == "" {
 			continue
 		}
-		menuItem := &menuItem{
+		menuItem := &MenuItem{
 			Icon:         v.icon,
 			Name:         v.name(requestContext.UserData.Locale()),
 			URL:          resource.getURL(v.url),
@@ -279,8 +274,8 @@ func (resource *Resource) getResourceMenu(requestContext *menuRequestContext) (r
 	return
 }
 
-func (resource *Resource) getResourceItemMenu(requestContext *menuRequestContext) *menuItem {
-	var items []*menuItem
+func (resource *Resource) getResourceItemMenu(requestContext *menuRequestContext) *MenuItem {
+	var items []*MenuItem
 
 	for k, v := range resource.itemActions {
 		if v.method != "GET" {
@@ -311,7 +306,7 @@ func (resource *Resource) getResourceItemMenu(requestContext *menuRequestContext
 
 		priority := v.priority - int64(k)
 
-		item := &menuItem{
+		item := &MenuItem{
 			Icon:         icon,
 			Image:        thumbnail,
 			Name:         name,
@@ -338,7 +333,7 @@ func (resource *Resource) getResourceItemMenu(requestContext *menuRequestContext
 
 }
 
-func sortAndExpandMenuItems(items []*menuItem) {
+func sortAndExpandMenuItems(items []*MenuItem) {
 	sortSection(items)
 	for _, item := range items {
 		var expanded bool
@@ -353,7 +348,7 @@ func sortAndExpandMenuItems(items []*menuItem) {
 	}
 }
 
-func sortSection(items []*menuItem) {
+func sortSection(items []*MenuItem) {
 	collator := collate.New(language.Czech)
 
 	sort.SliceStable(items, func(i, j int) bool {
@@ -375,6 +370,6 @@ func sortSection(items []*menuItem) {
 	})
 }
 
-func (item *menuItem) IsSelectedOrExpanded() bool {
+func (item *MenuItem) IsSelectedOrExpanded() bool {
 	return item.Selected || item.Expanded
 }

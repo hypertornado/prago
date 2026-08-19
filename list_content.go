@@ -38,7 +38,7 @@ type listRow struct {
 
 type listItemActions struct {
 	ShowOrderButton bool
-	MenuButtons     []*buttonData
+	MenuButtons     []*Button
 }
 
 func (actions *listItemActions) JSON() template.HTMLAttr {

@@ -4,10 +4,12 @@ import (
 	"html/template"
 )
 
-type pageData struct {
+type PageData struct {
 	Language  string
 	Version   string
 	GoogleKey string
+
+	LogoURL string
 
 	CSSPaths        []string
 	JavascriptPaths []string
@@ -17,6 +19,8 @@ type pageData struct {
 	Name  string
 	App   *App
 
+	AllowSearch bool
+
 	SearchQuery string
 
 	Breadcrumbs *breadcrumbs
@@ -25,14 +29,16 @@ type pageData struct {
 
 	PageContent template.HTML
 
-	Menu *menu
+	MenuItems []*MenuItem
 
-	BoxHeader *boxHeader
+	FooterItems []template.HTML
+
+	BoxHeader *BoxHeader
 
 	Form *Form
 	List *list
 
-	ViewFields []*viewField
+	Views []*View
 
 	Pagination []*paginationItem
 
@@ -41,14 +47,34 @@ type pageData struct {
 	NotificationsData string
 	HTTPCode          int
 	Hue               int64
+
+	AnalyticsCode template.HTML
 }
 
 type pageMessage struct {
 	Name string
 }
 
-func createPageData(request *Request) *pageData {
-	page := &pageData{}
+func (pd *PageData) AddView(view *View) *PageData {
+	pd.Views = append(pd.Views, view)
+	return pd
+}
+
+func (pd *PageData) AddMenuItem(item *MenuItem) *PageData {
+	pd.MenuItems = append(pd.MenuItems, item)
+	return pd
+}
+
+func (app *App) HandlePage(url string, handler func(request *Request, pageData *PageData), constraints ...Constraint) {
+	app.Handle("GET", url, func(request *Request) {
+		pd := createPageData(request)
+		handler(request, pd)
+		pd.renderPage(request)
+	}, constraints...)
+}
+
+func createPageData(request *Request) *PageData {
+	page := &PageData{}
 	page.App = request.app
 	page.Language = request.Locale()
 	page.GoogleKey = request.app.GoogleKey()
@@ -66,12 +92,9 @@ func createPageData(request *Request) *pageData {
 	return page
 }
 
-func (page *pageData) renderPage(request *Request) {
-	if page.Menu == nil {
-		page.Menu = request.app.getMenu(request, nil)
-	}
+func (page *PageData) renderPage(request *Request) {
 
-	page.Icon, page.Style = page.Menu.GetIconAndStyle()
+	page.Icon, page.Style = page.GetIconAndStyle()
 	if page.Icon == "" {
 		page.Icon = request.app.icon
 	}
@@ -79,9 +102,9 @@ func (page *pageData) renderPage(request *Request) {
 		page.Icon = iconResource
 	}
 
-	page.Breadcrumbs = page.Menu.GetBreadcrumbs()
+	page.Breadcrumbs = page.GetBreadcrumbs()
 
-	title := page.Menu.GetTitle()
+	title := page.GetTitle()
 	if title != "" {
 		page.Name = title
 	}
@@ -94,7 +117,7 @@ func (page *pageData) renderPage(request *Request) {
 	request.WriteHTML(code, request.app.adminTemplates, "layout", page)
 }
 
-func (page *pageData) GetIconColor() string {
+func (page *PageData) GetIconColor() string {
 	if page.Style == "" {
 		return page.App.getBaseColor()
 	}

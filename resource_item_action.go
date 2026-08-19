@@ -12,7 +12,7 @@ func (app *App) ActionResourceItemUI[T any](url string, contentSource func(item 
 	resource := getResource[T](app)
 	action := resource.newItemAction(url)
 
-	action.ui(func(request *Request, pd *pageData) {
+	action.ui(func(request *Request, pd *PageData) {
 		item := resource.query(request.r.Context()).ID(request.Param("id"))
 		if item == nil {
 			panic("can't find item")
@@ -40,10 +40,10 @@ func (resource *Resource) newItemAction(itemUrl string) *Action {
 	return action
 }
 
-func (resource *Resource) itemActionUi(itemURL string, handler func(any, *Request, *pageData)) *Action {
+func (resource *Resource) itemActionUi(itemURL string, handler func(any, *Request, *PageData)) *Action {
 	action := resource.newItemAction(itemURL)
 
-	action.ui(func(request *Request, pd *pageData) {
+	action.ui(func(request *Request, pd *PageData) {
 		item := resource.query(request.r.Context()).ID(request.Param("id"))
 		if item == nil {
 			panic("can't find item")

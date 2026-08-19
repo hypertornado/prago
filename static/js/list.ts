@@ -418,8 +418,6 @@ class List {
     for (var i = 0; i < rows.length; i++) {
       let row = <HTMLTableRowElement>rows[i];
 
-      //row.addEventListener("contextmenu", this.contextClick.bind(this));
-
       row.addEventListener("click", (e) => {
         var el = <HTMLDivElement>e.currentTarget;
         var url = el.getAttribute("data-url");
@@ -447,67 +445,6 @@ class List {
         window.location.href = url;
       });
     }
-  }
-
-  createCmenu(e: PointerEvent, rowEl: HTMLDivElement, alignByElement?: boolean) {
-    rowEl.classList.add("list_row-context");
-
-    let actions = JSON.parse(rowEl.getAttribute("data-actions"));
-
-    var commands: CMenuCommand[] = [];
-
-    let allowPopupForm = true;
-    if (e.altKey || e.metaKey || e.shiftKey || e.ctrlKey) {
-      allowPopupForm = false;
-    }
-
-    for (let action of actions.MenuButtons) {
-
-      let actionURL = null;
-      let handler = null;
-      if (action.FormURL && allowPopupForm) {
-        handler = () => {
-          new PopupForm(action.FormURL, (data: any) => {
-            this.load();
-          })
-        }
-      } else {
-        actionURL = action.URL;
-      }
-
-      commands.push({
-        Icon: action.Icon,
-        Name: action.Name,
-        URL: actionURL,
-        Style: action.Style,
-        Handler: handler,
-      });
-    }
-
-    let name = rowEl.getAttribute("data-name");
-    let preName = rowEl.getAttribute("data-prename")
-    if (name == preName) {
-      preName = null;
-    }
-
-    cmenu({
-      Event: e,
-      AlignByElement: alignByElement,
-      ImageURL: rowEl.getAttribute("data-image-url"),
-      PreName: preName,
-      Name: name,
-      Description: rowEl.getAttribute("data-description"),
-      Commands: commands,
-      DismissHandler: () => {
-        rowEl.classList.remove("list_row-context");
-      },
-    });
-    e.preventDefault();
-  }
-
-  contextClick(e: PointerEvent) {
-    let rowEl = <HTMLDivElement>e.currentTarget;
-    this.createCmenu(e, rowEl, false);
   }
 
   bindOrder() {

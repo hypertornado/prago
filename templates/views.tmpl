@@ -1,4 +1,4 @@
-{{define "item_views"}}
+{{define "views"}}
   <div class="box views">
   {{range $item := .}}
     <div class="view">
@@ -23,7 +23,7 @@
       </div>
     {{end}}
     {{if $item.ViewContent}}
-      {{template "item_view_content" $item.ViewContent}}
+      {{template "view_content" $item.ViewContent}}
     {{end}}
 
     {{if .Relation}}
@@ -35,7 +35,7 @@
   </div>
 {{end}}
 
-{{define "item_view_content"}}
+{{define "view_content"}}
 <div class="view_content{{if .Style}} view_content-{{.Style}}{{end}}">
   {{if .HasNameOrIcon}}
     <div class="view_content_header">
@@ -79,6 +79,10 @@
       <video class="videoview_video hidden"></video>
       <progress class="progress" value="" max=""></progress>
     </div>
+  {{end}}
+
+  {{if .Accordions}}
+    {{template "accordions" .Accordions}}
   {{end}}
 
 </div>

@@ -26,7 +26,7 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *form
 
 	ret.actionForm.childAction = ret.actionValidation
 
-	ret.actionForm.ui(func(request *Request, pd *pageData) {
+	ret.actionForm.ui(func(request *Request, pd *PageData) {
 		if ret.formGenerator == nil {
 			panic("No form set for this FormAction")
 		}

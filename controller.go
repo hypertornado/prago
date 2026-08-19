@@ -63,18 +63,18 @@ func (c *controller) callAfterActions(request *Request) bool {
 	return true
 }
 
-func (router *router) route(method string, path string, controller *controller, routeAction func(p *Request), constraints ...routerConstraint) {
+func (router *router) route(method string, path string, controller *controller, routeAction func(p *Request), constraints ...Constraint) {
 	route := newRoute(method, path, controller, routeAction, constraints)
 	router.addRoute(route)
 
 }
 
-func (c *controller) routeHandler(method, path string, action func(p *Request), constraints ...routerConstraint) {
+func (c *controller) routeHandler(method, path string, action func(p *Request), constraints ...Constraint) {
 	c.app.router.route(method, path, c, action, constraints...)
 }
 
 // Get creates new route for GET request
-func (app *App) Handle(method, path string, action func(request *Request), constraints ...routerConstraint) {
+func (app *App) Handle(method, path string, action func(request *Request), constraints ...Constraint) {
 	app.appController.routeHandler(method, path, action, constraints...)
 }
 

@@ -50,7 +50,7 @@ func TestRouterNormal(t *testing.T) {
 		return true
 	}
 
-	r = newRoute("GET", "/a/:id/:name/aa", nil, nil, []routerConstraint{constraint})
+	r = newRoute("GET", "/a/:id/:name/aa", nil, nil, []Constraint{constraint})
 
 	_, ok = r.match(ctx, "GET", "/a/123/ondra/aa")
 	if ok != true {

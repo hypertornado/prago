@@ -5,7 +5,7 @@ type boardView struct {
 	BoardName   string
 	BoardURL    string
 	IsMainBoard bool
-	Resources   []*menuItem
+	Resources   []*MenuItem
 
 	MainDashboard *dashboardView
 

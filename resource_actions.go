@@ -20,7 +20,7 @@ func (resource *Resource) initDefaultResourceActions() {
 
 	resource.action("").Icon(icon).setPriority(defaultHighPriority).
 		Permission(resource.canView).Name(resource.pluralName).ui(
-		func(request *Request, pd *pageData) {
+		func(request *Request, pd *PageData) {
 			pd.BoardView = resource.resourceBoard.boardView(request)
 		})
 
@@ -65,16 +65,16 @@ func (resource *Resource) initDefaultResourceActions() {
 		return resource.newItemName(locale)
 	})
 
-	resource.itemActionUi("", func(item any, request *Request, pd *pageData) {
+	resource.itemActionUi("", func(item any, request *Request, pd *PageData) {
 		if item == nil {
 			renderErrorPage(request, 404)
 			return
 		}
 		id := resource.previewer(request, item).ID()
 		pd.BoxHeader = resource.getBoxHeader(id, item, request)
-		pd.ViewFields = resource.getViewFields(id, item, request)
+		pd.Views = resource.getViewFields(id, item, request)
 
-		pd.ViewFields = append(pd.ViewFields, resource.getRelationViews(id, request)...)
+		pd.Views = append(pd.Views, resource.getRelationViews(id, request)...)
 	},
 	).Name(messages.GetNameFunction("view")).setPriority(defaultHighPriority).Permission(resource.canView)
 

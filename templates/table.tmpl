@@ -7,11 +7,13 @@
         <table>
             {{template "table_rows" $table.Rows}}
         </table>
-        <div class="form_table_footer">
-            {{range $item := $table.FooterText}}
-                <div class="form_table_footer_text">{{$item}}</div>
-            {{end}}
-        </div>
+        {{if $table.FooterText}}
+            <div class="form_table_footer">
+                {{range $item := $table.FooterText}}
+                    <div class="form_table_footer_text">{{$item}}</div>
+                {{end}}
+            </div>
+        {{end}}
     </div>
     {{end}}
 {{end}}

@@ -17,7 +17,7 @@ type viewRelationItem struct {
 	Count          int64
 }
 
-func (resource *Resource) getRelationViews(id int64, request *Request) (ret []*viewField) {
+func (resource *Resource) getRelationViews(id int64, request *Request) (ret []*View) {
 	for _, v := range resource.relations {
 		vi := resource.getRelationView(id, v, request)
 		if vi != nil {
@@ -27,14 +27,14 @@ func (resource *Resource) getRelationViews(id int64, request *Request) (ret []*v
 	return
 }
 
-func (resource *Resource) getRelationView(id int64, field *relatedField, request *Request) *viewField {
+func (resource *Resource) getRelationView(id int64, field *relatedField, request *Request) *View {
 	if !request.Authorize(field.resource.canView) {
 		return nil
 	}
 
 	filteredCount := field.resource.itemWithRelationCount(request.r.Context(), field.id, int64(id))
 
-	ret := &viewField{}
+	ret := &View{}
 
 	icon := ""
 	if field.resource.icon != "" {

@@ -15,7 +15,7 @@ type router struct {
 type route struct {
 	method      string
 	path        string
-	constraints []routerConstraint
+	constraints []Constraint
 	pathMatcher pathMatcherFn
 	controller  *controller
 	fn          func(p *Request)
@@ -28,7 +28,7 @@ func newRouter() *router {
 	}
 }
 
-type routerConstraint func(context.Context, url.Values) bool
+type Constraint func(context.Context, url.Values) bool
 
 func (r *router) addRoute(route *route) {
 	if route.controller.priorityRouter {
@@ -162,7 +162,7 @@ func isHTTPMethodValid(method string) bool {
 	return false
 }
 
-func newRoute(method string, path string, controller *controller, fn func(p *Request), constraints []routerConstraint) (ret *route) {
+func newRoute(method string, path string, controller *controller, fn func(p *Request), constraints []Constraint) (ret *route) {
 	if !isHTTPMethodValid(method) {
 		panic(fmt.Sprintf("unknown method: %s", method))
 	}

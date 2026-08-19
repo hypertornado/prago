@@ -27,16 +27,16 @@ func (w *Writer[T]) After(fn func(request *Request, item *T)) *Writer[T] {
 	return w
 }
 
-func (w *Writer[T]) GET(path string, handler func(request *Request, item *T), constraints ...routerConstraint) {
+func (w *Writer[T]) GET(path string, handler func(request *Request, item *T), constraints ...Constraint) {
 	w.route("GET", path, handler, constraints...)
 }
 
-func (w *Writer[T]) POST(path string, handler func(request *Request, item *T), constraints ...routerConstraint) {
+func (w *Writer[T]) POST(path string, handler func(request *Request, item *T), constraints ...Constraint) {
 	w.route("POST", path, handler, constraints...)
 
 }
 
-func (w *Writer[T]) route(method string, path string, handler func(request *Request, item *T), constraints ...routerConstraint) {
+func (w *Writer[T]) route(method string, path string, handler func(request *Request, item *T), constraints ...Constraint) {
 	action := func(request *Request) {
 		var d T
 		dp := &d

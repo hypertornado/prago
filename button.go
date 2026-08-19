@@ -10,6 +10,7 @@ type Button struct {
 	Title    string
 	Selected bool
 	Style    string
+	Priority int64
 }
 
 func (btn *Button) SafeURL() template.URL {
