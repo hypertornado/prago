@@ -32,13 +32,16 @@ type ViewContent struct {
 	Previews    []*Preview
 	CDNFileData *cdnFileData
 
-	Images *ImagePickerResponse
+	Images       []*Image
+	ImagesSimple []*Image
 
 	PlaceData string
 
 	VideoURL string
 
 	Accordions []*Accordion
+
+	Buttons []*Button
 }
 
 func (vfc *ViewContent) HasNameOrIcon() bool {

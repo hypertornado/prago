@@ -16,12 +16,20 @@ type breadcrumb struct {
 func (pd *PageData) GetBreadcrumbs() *breadcrumbs {
 	items := getBreadcrumbsFromMenuItems(pd.MenuItems)
 
-	if len(items) > 0 && pd.LogoURL != "" {
+	if pd.LogoHref != "" {
 		items = append([]*breadcrumb{{
-			Logo: pd.LogoURL,
+			Logo: pd.LogoImageURL,
+			URL:  pd.LogoHref,
+		}}, items...)
+
+	}
+
+	/*if len(items) > 0 && pd.LogoImageURL != "" {
+		items = append([]*breadcrumb{{
+			Logo: pd.LogoImageURL,
 			URL:  items[0].URL,
 		}}, items...)
-	}
+	}*/
 
 	if len(items) > 0 {
 		items = items[0 : len(items)-1]

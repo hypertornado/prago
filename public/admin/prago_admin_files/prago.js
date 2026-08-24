@@ -56,15 +56,14 @@ class ImageView {
         this.el = el;
         var filesData = JSON.parse(el.getAttribute("data-images"));
         this.addFiles(filesData);
-        console.log("done");
     }
     addFiles(filesData) {
         this.el.innerHTML = "";
-        if (!filesData.Items) {
+        if (!filesData) {
             return;
         }
-        for (var i = 0; i < filesData.Items.length; i++) {
-            let file = filesData.Items[i];
+        for (var i = 0; i < filesData.length; i++) {
+            let file = filesData[i];
             this.addFile(file, i);
         }
     }
@@ -7159,58 +7158,6 @@ class List {
             });
         }
     }
-    createCmenu(e, rowEl, alignByElement) {
-        rowEl.classList.add("list_row-context");
-        let actions = JSON.parse(rowEl.getAttribute("data-actions"));
-        var commands = [];
-        let allowPopupForm = true;
-        if (e.altKey || e.metaKey || e.shiftKey || e.ctrlKey) {
-            allowPopupForm = false;
-        }
-        for (let action of actions.MenuButtons) {
-            let actionURL = null;
-            let handler = null;
-            if (action.FormURL && allowPopupForm) {
-                handler = () => {
-                    new PopupForm(action.FormURL, (data) => {
-                        this.load();
-                    });
-                };
-            }
-            else {
-                actionURL = action.URL;
-            }
-            commands.push({
-                Icon: action.Icon,
-                Name: action.Name,
-                URL: actionURL,
-                Style: action.Style,
-                Handler: handler,
-            });
-        }
-        let name = rowEl.getAttribute("data-name");
-        let preName = rowEl.getAttribute("data-prename");
-        if (name == preName) {
-            preName = null;
-        }
-        cmenu({
-            Event: e,
-            AlignByElement: alignByElement,
-            ImageURL: rowEl.getAttribute("data-image-url"),
-            PreName: preName,
-            Name: name,
-            Description: rowEl.getAttribute("data-description"),
-            Commands: commands,
-            DismissHandler: () => {
-                rowEl.classList.remove("list_row-context");
-            },
-        });
-        e.preventDefault();
-    }
-    contextClick(e) {
-        let rowEl = e.currentTarget;
-        this.createCmenu(e, rowEl, false);
-    }
     bindOrder() {
         this.renderOrder();
         var headers = this.listEl.querySelectorAll(".list_header_item_name-canorder");
@@ -9024,6 +8971,7 @@ class FormContainer {
                 }
             }
             else {
+                this.form.formEl.classList.remove("form-loading");
                 this.progress.classList.add("hidden");
                 new Alert(`Chyba ${request.status} při nahrávání souboru.`);
             }

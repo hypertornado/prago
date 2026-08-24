@@ -161,6 +161,7 @@ class FormContainer {
           this.progress.classList.add("hidden");
         }
       } else {
+        this.form.formEl.classList.remove("form-loading");
         this.progress.classList.add("hidden");
         new Alert(`Chyba ${request.status} při nahrávání souboru.`);
       }

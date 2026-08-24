@@ -7,17 +7,16 @@ class ImageView {
     this.el = el;
     var filesData = JSON.parse(el.getAttribute("data-images"));
     this.addFiles(filesData);
-    console.log("done");
   }
 
   addFiles(filesData: any) {
     this.el.innerHTML = "";
-    if (!filesData.Items) {
+    if (!filesData) {
       return;
     }
 
-    for (var i = 0; i < filesData.Items.length; i++) {
-      let file = filesData.Items[i];
+    for (var i = 0; i < filesData.length; i++) {
+      let file = filesData[i];
       this.addFile(file, i);
     }
   }

@@ -6,11 +6,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-type ImagePickerResponse struct {
-	Items []*ImagePickerImage
-}
-
-type ImagePickerImage struct {
+type Image struct {
 	UUID             string
 	ImageName        string
 	ImageDescription string
@@ -22,9 +18,7 @@ type ImagePickerImage struct {
 	Metadata [][2]string
 }
 
-func (app *App) getImagePickerResponse(ids string) (ret *ImagePickerResponse) {
-
-	ret = &ImagePickerResponse{}
+func (app *App) GetImages(ids string) (ret []*Image) {
 
 	files := app.GetFiles(context.Background(), ids)
 	for _, file := range files {
@@ -50,7 +44,7 @@ func (app *App) getImagePickerResponse(ids string) (ret *ImagePickerResponse) {
 			})
 		}
 
-		image := &ImagePickerImage{
+		image := &Image{
 			UUID:             file.UID,
 			ImageName:        file.Name,
 			ImageDescription: file.Description,
@@ -61,7 +55,7 @@ func (app *App) getImagePickerResponse(ids string) (ret *ImagePickerResponse) {
 			Metadata:         metadata,
 		}
 
-		ret.Items = append(ret.Items, image)
+		ret = append(ret, image)
 	}
 
 	return ret
@@ -73,7 +67,7 @@ func imagePickerAPIHandler(request *Request) any {
 		panic("can't load image picker data")
 	}
 
-	return request.app.getImagePickerResponse(request.Param("ids"))
+	return request.app.GetImages(request.Param("ids"))
 }
 
 type imageFormData struct {
@@ -90,8 +84,8 @@ func imageFormDataSource(mimeTypes string) func(*Field, UserData, string) any {
 }
 
 func imagePickerViewFieldContent(request *Request, field *Field, value any) *ViewContent {
-	imageData := request.app.getImagePickerResponse(value.(string))
-	if len(imageData.Items) == 0 {
+	imageData := request.app.GetImages(value.(string))
+	if len(imageData) == 0 {
 		return nil
 	}
 	return &ViewContent{

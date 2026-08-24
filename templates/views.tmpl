@@ -68,6 +68,12 @@
     </div>
   {{end}}
 
+  {{if .ImagesSimple}}
+    <div class="imageview imageview-simple" data-images="{{PragoJSON .ImagesSimple}}">
+      <progress class="progress" value="" max=""></progress>
+    </div>
+  {{end}}
+
   {{if .PlaceData}}
     <div class="item_view_place" data-value="{{.PlaceData}}">
       <progress class="progress" value="" max=""></progress>
@@ -83,6 +89,20 @@
 
   {{if .Accordions}}
     {{template "accordions" .Accordions}}
+  {{end}}
+
+  {{if .Buttons}}
+    <div class="view_content_buttons">
+      {{range $btn := .Buttons}}
+        <a class="btn" {{if $btn.URL}}href="{{$btn.URL}}"{{end}} {{if $btn.OnClick}}onclick="{{$btn.OnClick}}"{{end}} {{if $btn.Title}}data-tooltip="{{$btn.Title}}"{{end}}>
+          {{if $btn.Icon}}
+            <img src="/admin/api/icons?file={{$btn.Icon}}&color={{PragoBlackColor}}" class="btn_icon">
+          {{end}}
+          {{$btn.Name}}
+        </a>
+      {{end}}
+    </div>
+
   {{end}}
 
 </div>

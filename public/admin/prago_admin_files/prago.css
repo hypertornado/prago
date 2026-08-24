@@ -3824,6 +3824,14 @@ a .dashboard_figure_value {
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 }
 
+.imageview-simple .imageview_image_btn {
+  display: none;
+}
+
+.imageview-simple .imageview_image_description {
+  display: none;
+}
+
 .imageview_image {
   border-radius: 8px;
   text-align: center;
@@ -4131,7 +4139,7 @@ h1.simple_name {
 }
 .tooltip {
   position: absolute;
-  z-index: 10000;
+  z-index: 10000000001;
   background: var(--black);
   color: white;
   font-size: 0.8rem;
@@ -4535,6 +4543,13 @@ a.pagination_page-selected {
 .view_content_html .form_table {
   margin-top: 0px;
   margin-bottom: 0px;
+}
+
+.view_content_buttons {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 4px 0px;
+  gap: 4px;
 }
 
 .item_view_place {

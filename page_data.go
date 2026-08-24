@@ -9,7 +9,8 @@ type PageData struct {
 	Version   string
 	GoogleKey string
 
-	LogoURL string
+	LogoHref     string
+	LogoImageURL string
 
 	CSSPaths        []string
 	JavascriptPaths []string
@@ -66,6 +67,22 @@ func (pd *PageData) AddMenuItem(item *MenuItem) *PageData {
 }
 
 func (app *App) HandlePage(url string, handler func(request *Request, pageData *PageData), constraints ...Constraint) {
+	app.HandlePageWithValidation(url, handler, nil, constraints...)
+}
+
+func (app *App) HandlePageWithValidation(url string, handler func(request *Request, pageData *PageData), formValidation func(fv FormValidation, request *Request), constraints ...Constraint) {
+
+	if formValidation != nil {
+		app.router.route("POST", url, app.appController, func(request *Request) {
+			rv := newFormValidation()
+			if request.csrfToken() != request.Param("_csrfToken") {
+				panic("wrong csrf token")
+			}
+			formValidation(rv, request)
+			request.WriteJSON(200, rv.validationData)
+		})
+	}
+
 	app.Handle("GET", url, func(request *Request) {
 		pd := createPageData(request)
 		handler(request, pd)

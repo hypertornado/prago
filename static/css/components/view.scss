@@ -96,6 +96,13 @@
   margin-bottom: 0px;
 }
 
+.view_content_buttons {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 4px 0px;
+  gap: 4px;
+}
+
 .item_view_place {
   height: 200px;
 }

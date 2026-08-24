@@ -301,7 +301,8 @@ func (action *Action) ui(uiHandler func(*Request, *PageData)) *Action {
 			pageData.MenuItems = action.app.getMenuItems(request, nil)
 		}
 
-		pageData.LogoURL = "/admin/logo"
+		pageData.LogoHref = "/admin"
+		pageData.LogoImageURL = "/admin/logo"
 		pageData.AllowSearch = true
 		pageData.FooterItems = action.app.getFooterItems(request)
 

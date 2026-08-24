@@ -5,6 +5,14 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
+
+  .imageview-simple .imageview_image_btn {
+    display: none;
+  }
+
+  .imageview-simple .imageview_image_description {
+    display: none;
+  }
   
   .imageview_image {
     border-radius: 8px;
