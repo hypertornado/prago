@@ -132,12 +132,12 @@ class ImagePicker {
 
   addFiles2(data: any) {
     this.preview2.innerHTML = "";
-    if (!data.Items) {
+    if (!data) {
       return;
     }
 
-    for (let i = 0; i < data.Items.length; i++) {
-      let item = data.Items[i];
+    for (let i = 0; i < data.length; i++) {
+      let item = data[i];
       
       let itemEl = document.createElement("button");
       itemEl.setAttribute("type", "button");
