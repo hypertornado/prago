@@ -71,7 +71,7 @@ func (app *App) ActionForm(url string, formGenerator func(form *Form, request *R
 	return fa.actionForm
 }
 
-func (app *App) nologinFormAction(path string, formHandler func(f *Form, r *Request), validator func(FormValidation, *Request)) {
+func (app *App) nologinFormAction(path string, formHandler func(form *Form, request *Request), validator func(fv FormValidation, request *Request)) {
 	app.accessController.routeHandler("GET", fmt.Sprintf("/admin/user/%s", path), func(request *Request) {
 		if request.UserID() > 0 {
 			request.Redirect("/admin")

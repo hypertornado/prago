@@ -110,6 +110,10 @@ type App struct {
 	conflictMutex *sync.Mutex
 	conflictQueue []*conflictQueueItem
 
+	Is2faEnabled bool
+	otpKeyMutex  *sync.Mutex
+	otpKeyMap    map[string]*otpKey
+
 	hue        int64
 	saturation float64
 	lightness  float64
@@ -143,6 +147,8 @@ func createApp(codeName string, version string, testing bool) *App {
 		GetTrackingUUIDFunc: func(*Request) string {
 			return ""
 		},
+
+		Is2faEnabled: true,
 	}
 
 	app.logger = newLogger(app)
@@ -205,6 +211,7 @@ func createApp(codeName string, version string, testing bool) *App {
 	app.initResourceConflict()
 	app.initMultieditChangePopup()
 	app.initDateRange()
+	app.initOtp()
 
 	return app
 }

@@ -3,7 +3,11 @@ package prago
 import (
 	"strings"
 	"time"
+
+	"golang.org/x/time/rate"
 )
+
+var userLoginLimiter = rate.NewLimiter(rate.Limit(100), 10)
 
 func initUserLogin(app *App) {
 	app.ActionResourceItemPlain[user]("loginas",
@@ -32,8 +36,10 @@ func initUserLogin(app *App) {
 
 		form.AddSubmit(messages.Get(locale, "login_action"))
 	}, func(vc FormValidation, request *Request) {
-		locale := request.Locale()
 
+		must(userLoginLimiter.Wait(request.r.Context()))
+
+		locale := request.Locale()
 		email := request.Param("email")
 		email = fixEmail(email)
 		password := request.Param("password")
@@ -61,20 +67,29 @@ func initUserLogin(app *App) {
 			return
 		}
 
-		user.LoggedInTime = time.Now()
-		user.LoggedInUseragent = request.Request().UserAgent()
-		user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
-
-		must(app.Update(user))
-		request.logInUser(user)
-		request.AddFlashMessage(messages.Get(user.Locale, "login_ok"))
-
-		redirectURL := request.Param("redirect_url")
-		if !strings.HasPrefix(redirectURL, "/") || redirectURL == "/admin/login" {
-			redirectURL = "/admin"
+		if app.Is2faEnabled && user.Email != "" {
+			otpKey := app.createOTPKey(user, request)
+			request.setCookie(otpCoookieName, otpKey.CookieID)
+			vc.Redirect("/admin/user/2f")
+			return
 		}
 
-		vc.Redirect(redirectURL)
+		vc.Redirect(app.doLogUser(request, user))
 	})
 
+}
+
+func (app *App) doLogUser(request *Request, user *user) string {
+
+	user.LoggedInTime = time.Now()
+	user.LoggedInUseragent = request.Request().UserAgent()
+	user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
+	must(app.Update(user))
+	request.logInUser(user)
+	request.AddFlashMessage(messages.Get(user.Locale, "login_ok"))
+	redirectURL := request.Param("redirect_url")
+	if !strings.HasPrefix(redirectURL, "/") || redirectURL == "/admin/login" {
+		redirectURL = "/admin"
+	}
+	return redirectURL
 }

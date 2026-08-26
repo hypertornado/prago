@@ -140,6 +140,20 @@
     }
 
 
+.section_code {
+  font-size: 24px;
+  line-height: 2em;
+  text-align: center;
+  font-weight: bold;
+  background: #fafafa;
+  border-radius: 8px;
+  margin: 4px 0px;
+
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+
+
 .form_table {
   margin-top: 5px;
 }
@@ -281,6 +295,9 @@
           <div class="section_text">{{$section.Text}}</div>
           {{if $section.Table}}
             {{$section.Table.ExecuteHTML}}
+          {{end}}
+          {{if $section.Code}}
+            <div class="section_code">{{$section.Code}}</div>
           {{end}}
         {{end}}
 

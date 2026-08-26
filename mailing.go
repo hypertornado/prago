@@ -39,6 +39,7 @@ type MailingDataSection struct {
 	Name  string
 	Text  string
 	Table *Table
+	Code  string
 }
 
 type MailingRecipient struct {
@@ -95,6 +96,8 @@ func getTestingMailingData(app *App) *MailingData {
 	section.Table = table
 
 	data.AddSection("Poznámka", "Nejdřív bylo škubnutí, pak pilotův třesoucí se hlas a nakonec náraz a horko. Tak médiím popsal okamžiky před čtvrteční havárií letadla Air India na západě Indie jediný přeživší Viswashkumar Ramesh. Muž cestoval s dalšími 241 lidmi, kteří při pádu letadla do obydlené oblasti za letištěm v Ahmadábádu.")
+
+	data.AddSection("Kod", "").Code = "122 382 637"
 
 	data.FooterDescription = "q oejw <a href=\"/xxxx\">ifoejwifoe</a> e"
 
