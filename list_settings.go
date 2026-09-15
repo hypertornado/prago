@@ -19,7 +19,7 @@ func (app *App) initListSettings() {
 
 	}, func(fv FormValidation, request *Request) {
 		resource := app.getResourceByID(request.Param("resource"))
-		if !request.Authorize(resource.canUpdate) {
+		if !request.Authorize(resource.canView) {
 			fv.AddError("Not allowed")
 			return
 		}
