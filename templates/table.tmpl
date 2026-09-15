@@ -49,7 +49,7 @@
                     {{end}}
                 {{end}}
                 </div>
-                <div class="form_table_cell_text">{{$cell.Text}}</div>
+                <div class="form_table_cell_text">{{if $cell.HTMLContent}}{{$cell.HTMLContent}}{{else}}{{$cell.Text}}{{end}}</div>
                 <div class="form_table_cell_descriptions_after">
                 {{if .DescriptionAfter}}
                     {{range $text := .DescriptionAfter}}

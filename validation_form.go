@@ -2,6 +2,7 @@ package prago
 
 import (
 	"html/template"
+	"strings"
 )
 
 type FormValidation interface {
@@ -58,6 +59,7 @@ func (fv *formValidation) AddOK(message string) {
 }
 
 func (fv *formValidation) AddItemError(key, err string) {
+	key = strings.ToLower(key)
 	fv.validationData.Errors = append(fv.validationData.Errors, ValidationError{
 		Field: key,
 		Text:  err,

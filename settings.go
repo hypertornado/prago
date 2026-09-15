@@ -88,8 +88,8 @@ type Setting struct {
 }
 
 func (app *App) getSetting(id string) (string, error) {
-	app.settings.mutex.RLock()
-	defer app.settings.mutex.RUnlock()
+	app.settings.mutex.Lock()
+	defer app.settings.mutex.Unlock()
 	setting := app.settings.settingsMap[id]
 	if setting == nil {
 		return "", fmt.Errorf("can't find setting with id: %s", id)

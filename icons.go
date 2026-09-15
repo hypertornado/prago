@@ -15,27 +15,15 @@ const iconTable = "glyphicons-basic-120-table.svg"
 const iconAdd = "glyphicons-basic-371-plus.svg"
 const iconSignpost = "glyphicons-basic-697-directions-sign.svg"
 const iconBoard = "glyphicons-basic-424-blackboard.svg"
-const iconForm = "glyphicons-basic-30-clipboard.svg"
 const iconView = "glyphicons-basic-588-book-open-text.svg"
-const iconAction = "glyphicons-basic-111-paragraph-left.svg"
 const iconEdit = "glyphicons-basic-31-pencil.svg"
 const iconDownload = "glyphicons-basic-302-square-download.svg"
 const iconDelete = "glyphicons-basic-17-bin.svg"
 const iconDuplicate = "glyphicons-basic-611-copy-duplicate.svg"
 const iconActivity = "glyphicons-basic-58-history.svg"
 
-const iconNumber = "glyphicons-basic-234-calculator.svg"
-const iconText = "glyphicons-basic-101-text.svg"
 const iconCheckbox = "glyphicons-basic-153-square-checkbox.svg"
-const iconDate = "glyphicons-basic-46-calendar.svg"
-const iconDateTime = "glyphicons-basic-55-clock.svg"
-const iconSelect = "glyphicons-basic-299-circle-selected.svg"
-const iconImage = "glyphicons-basic-38-picture.svg"
-const iconVideo = "glyphicons-basic-181-video.svg"
 const iconAI = "glyphicons-basic-954-brain.svg"
-
-const iconEmail = "glyphicons-basic-792-email.svg"
-const iconPassword = "glyphicons-basic-45-key.svg"
 
 func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 	app.iconsFS = &iconsFS
@@ -43,14 +31,17 @@ func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 
 	filenames := app.getIconFilenames()
 
-	var selectData [][2]string
-	selectData = append(selectData, [2]string{"", ""})
+	var selectData []*Enum
+	selectData = append(selectData, &Enum{})
 	for _, v := range filenames {
-		selectData = append(selectData, [2]string{
-			v, v,
+		selectData = append(selectData, &Enum{
+			ID:   v,
+			Name: unlocalized(v),
+			Icon: v,
 		})
 	}
-	app.AddEnumShort("icon", selectData)
+
+	app.AddEnum("icon", selectData)
 }
 
 func (app *App) getIconFilenames() []string {

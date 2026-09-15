@@ -285,6 +285,10 @@ func (field *Field) GetManuallySetPluralName(locale string) string {
 	return field.name(locale)
 }
 
+func (field *Field) GetName(locale string) string {
+	return field.name(locale)
+}
+
 func (field *Field) Description(description func(string) string) *Field {
 	field.description = description
 	return field

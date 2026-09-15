@@ -66,7 +66,7 @@ func (fi *FormItem) GetColor() string {
 	return getStyleColor(fi.Style)
 }
 
-func (fi *FormItem) SetFromFilter(formFilter *FormFilter) *FormItem {
+func (fi *FormItem) SetFormFilter(formFilter *FormFilter) *FormItem {
 	fi.FormFilterID = formFilter.uuid
 	return fi
 }

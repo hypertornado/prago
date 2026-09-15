@@ -17,7 +17,15 @@
       "Bash(grep '\\\\.go$')",
       "Bash(grep -v '`json:')",
       "Bash(grep -rn '\\\\s\\\\+[A-Za-z]*\\\\s\\\\+any$\\\\|\\\\svalue\\\\s\\\\+any\\\\b\\\\|\\\\sdata\\\\s\\\\+any\\\\b' .)",
-      "Bash(grep -rn 'sync.Mutex$\\\\|sync.RWMutex$' .)"
+      "Bash(grep -rn 'sync.Mutex$\\\\|sync.RWMutex$' .)",
+      "Bash(go build *)",
+      "Bash(go vet *)",
+      "Bash(go env *)",
+      "Bash(MOD=/Users/odchazel/go/pkg/mod/github.com/anthropics/anthropic-sdk-go@v1.72.0; grep -rn \"ToolParam\\\\b\" $MOD/toolparam.go 2>/dev/null | head -5; echo ---; grep -rln \"ToolChoiceToolParam\\\\|ToolChoiceUnionParam\\\\|type ToolUnionParam\" $MOD/*.go | head -10)",
+      "Read(//Users/odchazel/go/pkg/mod/github.com/anthropics/anthropic-sdk-go@v1.72.0/**)",
+      "Bash(MOD=/Users/odchazel/go/pkg/mod/github.com/anthropics/anthropic-sdk-go@v1.72.0 *)",
+      "Bash(awk '/type MessageNewParams struct/,/^}/' /Users/odchazel/go/pkg/mod/github.com/anthropics/anthropic-sdk-go@v1.72.0/message.go)",
+      "Read(//Users/odchazel/go/pkg/mod/github.com/anthropics/anthropic-sdk-go@v1.72.0/packages/param/**)"
     ]
   }
 }

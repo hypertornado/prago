@@ -32,7 +32,7 @@ func (app *App) NewAPI(url string) *API {
 	return api
 }
 
-func (app *App) NewResourceAPIJSON[T any](url string, handler func(*Request, *T) any) *API {
+func (app *App) NewResourceAPIJSON[T any](url string, handler func(request *Request, item *T) any) *API {
 	api := newAPI(app, url)
 
 	api.handler = func(request *Request) {

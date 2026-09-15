@@ -9895,7 +9895,12 @@ class PopupForm extends Popup {
             }
             else {
                 this.unpresent();
-                new Alert("Formulář nelze nahrát.");
+                if (response.status == 403) {
+                    new Alert("Přístup zamítnut");
+                }
+                else {
+                    new Alert("Formulář nelze nahrát.");
+                }
             }
         })
             .then((textVal) => {

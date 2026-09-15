@@ -87,5 +87,13 @@ func renderErrorPage(request *Request, httpCode int) {
 	}
 	pageData.Name = name
 	pageData.HTTPCode = httpCode
+
+	pageData.MenuItems = request.app.getMenuItems(request, nil)
+
+	pageData.LogoHref = "/admin"
+	pageData.LogoImageURL = "/admin/logo"
+	pageData.AllowSearch = true
+	pageData.FooterItems = request.app.getFooterItems(request)
+
 	pageData.renderPage(request)
 }

@@ -25,6 +25,7 @@ func (iv *itemValidation) AddError(err string) {
 }
 
 func (iv *itemValidation) AddItemError(key, err string) {
+	key = strings.ToLower(key)
 	iv.valid = false
 	iv.errors = append(iv.errors, ValidationError{
 		Field: key,

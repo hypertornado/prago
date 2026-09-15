@@ -29,5 +29,5 @@ func (app *App) initPprof() {
 }
 
 func (app *App) getPprofProfilePath() string {
-	return fmt.Sprintf("go tool pprof -seconds 5 -svg %s%s/profile?token=%s > flamegraph.svg", app.BaseURL(), pprofPrefix, pprofToken)
+	return fmt.Sprintf("go tool pprof -seconds 15 -svg %s%s/profile?token=%s > flamegraph_%s_%s.svg", app.BaseURL(), pprofPrefix, pprofToken, app.codeName, randomString(20))
 }

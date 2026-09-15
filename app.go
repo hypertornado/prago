@@ -11,6 +11,8 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+
+	"github.com/hypertornado/prago/pragoai"
 )
 
 //TODO: implement https://pkg.go.dev/expvar#Handler
@@ -121,6 +123,8 @@ type App struct {
 	GetTrackingUUIDFunc func(request *Request) string
 
 	customDateRanges []dateRange
+
+	AI *pragoai.Client
 }
 
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {

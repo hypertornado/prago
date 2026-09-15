@@ -46,6 +46,7 @@ type tableCellData struct {
 	Href              string
 	DescriptionBefore []string
 	Text              string
+	HTMLContent       template.HTML
 	DescriptionAfter  []string
 	TextAfter         string
 	Colspan           int64
@@ -294,6 +295,16 @@ func Cell(item any) *TableCell {
 	if reflect.TypeOf(item).Kind() == reflect.Int64 {
 		item = humanizeNumber(item.(int64))
 		number = true
+	}
+
+	if html, ok := item.(template.HTML); ok {
+		ret := &TableCell{
+			data: &tableCellData{
+				HTMLContent: html,
+			},
+		}
+		ret.CSSClass("form_table_cell")
+		return ret
 	}
 
 	ret := &TableCell{
