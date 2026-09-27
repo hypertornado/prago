@@ -26,7 +26,7 @@ func (app *App) initBackupCRON() {
 		fv.RunTask(request, func(ta *FormTaskActivity) error {
 			return backupApp(app)
 		})
-	}).Permission("sysadmin").Name(unlocalized("Backup DB")).Board(sysadminBoard)
+	}).Permission("sysadmin").Name(Unlocalized("Backup DB")).Board(sysadminBoard)
 
 	app.addCronTask("remove old backups", 24*time.Hour, func() {
 		err := app.removeOldBackups()
@@ -41,7 +41,7 @@ func (app *App) initBackupCRON() {
 		fv.RunTask(request, func(ta *FormTaskActivity) error {
 			return app.removeOldBackups()
 		})
-	}).Permission("sysadmin").Name(unlocalized("Remove old backups")).Board(sysadminBoard)
+	}).Permission("sysadmin").Name(Unlocalized("Remove old backups")).Board(sysadminBoard)
 
 	/*
 		backupDashboard.AddTask(unlocalized("remove_old_backups"), "sysadmin",

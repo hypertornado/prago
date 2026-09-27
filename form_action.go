@@ -54,7 +54,9 @@ func newFormAction(app *App, url string, injectForm func(*Form, *Request)) *form
 			panic("wrong csrf token")
 		}
 		ret.formValidation(rv, request)
-		request.WriteJSON(200, rv.validationData)
+		if !request.Written {
+			request.WriteJSON(200, rv.validationData)
+		}
 	})
 
 	return ret

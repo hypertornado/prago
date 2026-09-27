@@ -33,10 +33,10 @@ func (app *App) initAccessManager() {
 
 	app.Permission(everybodyPermission)
 	app.Permission(nobodyPermission)
-	app.AddRole(sysadminRoleName, unlocalized("Sysadmin"), nil)
+	app.AddRole(sysadminRoleName, Unlocalized("Sysadmin"), nil)
 	app.Permission(loggedPermission)
 	app.Permission(sysadminPermission)
-	app.AddRole("", unlocalized("Bez oprávnění"), []Permission{loggedPermission})
+	app.AddRole("", Unlocalized("Bez oprávnění"), []Permission{loggedPermission})
 }
 
 func (app *App) validatePermission(permission Permission) error {

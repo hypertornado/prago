@@ -37,7 +37,7 @@ func (request Request) getNotificationsData() string {
 		view := notification.getView()
 		views = append(views, view)
 		b, err := json.Marshal(views)
-		must(err)
+		Must(err)
 		return string(b)
 	}
 	return ""
@@ -129,7 +129,7 @@ func (request *Request) WriteHTML(statusCode int, templates *Templates, template
 	request.Response().Header().Add("Content-Type", "text/html; charset=utf-8")
 	request.Response().WriteHeader(statusCode)
 	request.Written = true
-	must(
+	Must(
 		templates.templates.ExecuteTemplate(
 			request.Response(),
 			templateName,

@@ -24,8 +24,8 @@ func (app *App) initEmailSentResource() {
 
 	resource := app.NewResource[emailSent]()
 	resource.Name(
-		unlocalized("Log odeslaného emailu"),
-		unlocalized("Log odeslaných emailů"),
+		Unlocalized("Log odeslaného emailu"),
+		Unlocalized("Log odeslaných emailů"),
 	)
 	resource.PermissionView("sysadmin")
 	resource.Board(sysadminBoard)

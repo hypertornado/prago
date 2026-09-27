@@ -113,7 +113,7 @@ func (listQuery *listQuery) ID(id any) any {
 
 func (listQuery *listQuery) First() any {
 	items, err := listQuery.list()
-	must(err)
+	Must(err)
 	if reflect.ValueOf(items).Len() == 0 {
 		return nil
 	}

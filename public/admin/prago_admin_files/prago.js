@@ -8517,29 +8517,13 @@ class Suggestions {
                     el.addEventListener("mouseenter", this.suggestionSelect.bind(this));
                     this.suggestionsEl.appendChild(el);
                 }
-                if (data.Button) {
-                    let buttonEl = document.createElement("a");
-                    let buttonElIcon = document.createElement("img");
-                    buttonElIcon.setAttribute("src", "/admin/api/icons?file=glyphicons-basic-371-plus.svg&color=${getBaseColor}");
-                    buttonElIcon.classList.add("btn_icon");
-                    let buttonElText = document.createElement("span");
-                    buttonElText.innerText = data.Button.Name;
-                    buttonEl.appendChild(buttonElIcon);
-                    buttonEl.appendChild(buttonElText);
-                    buttonEl.classList.add("btn", "picker_button");
-                    buttonEl.addEventListener("click", (e) => {
-                        this.suggestionsEl.classList.add("hidden");
-                        let popupForm = new PopupForm(data.Button.FormURL, (data) => {
-                            this.returnData(data.Data);
-                        });
-                        e.preventDefault();
-                        e.stopPropagation();
-                    });
-                    buttonEl.addEventListener("mousedown", (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    });
-                    this.suggestionsEl.appendChild(buttonEl);
+                if (data.Buttons) {
+                    let buttonsEl = document.createElement("div");
+                    buttonsEl.classList.add("picker_buttons");
+                    this.suggestionsEl.appendChild(buttonsEl);
+                    for (var i = 0; i < data.Buttons.length; i++) {
+                        buttonsEl.appendChild(this.createButton(data.Buttons[i]));
+                    }
                 }
                 initTooltips();
                 this.scrollTop();
@@ -8549,6 +8533,32 @@ class Suggestions {
             }
         });
         request.send();
+    }
+    createButton(data) {
+        let buttonEl = document.createElement("a");
+        buttonEl.classList.add("btn", "picker_button");
+        if (data.Icon) {
+            let buttonElIcon = document.createElement("img");
+            buttonElIcon.setAttribute("src", `/admin/api/icons?file=${data.Icon}&color=${getBaseColor()}`);
+            buttonElIcon.classList.add("btn_icon");
+            buttonEl.appendChild(buttonElIcon);
+        }
+        let buttonElText = document.createElement("span");
+        buttonElText.innerText = data.Name;
+        buttonEl.appendChild(buttonElText);
+        buttonEl.addEventListener("click", (e) => {
+            this.suggestionsEl.classList.add("hidden");
+            let popupForm = new PopupForm(data.URL, (data) => {
+                this.returnData(data.Data);
+            });
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        buttonEl.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        return buttonEl;
     }
     suggestionClick() {
         var selected = this.getSelected();
@@ -8671,10 +8681,11 @@ function createSuggestionsPreviewEl(data, anchor) {
     return ret;
 }
 class Form {
-    constructor(form) {
+    constructor(form, formContainer) {
         this.dirty = false;
         this.dirty = false;
         this.formEl = form;
+        this.formContainer = formContainer;
         this.fixAufofocus();
         var elements = form.querySelectorAll(".markdown_input");
         elements.forEach((el) => {
@@ -8709,6 +8720,7 @@ class Form {
         this.initCalendar();
         this.initDaterange();
         this.initShowpassword();
+        initTooltips();
         form.addEventListener("submit", () => {
             this.dirty = false;
         });
@@ -8738,6 +8750,9 @@ class Form {
         }, 2000);
     }
     versionCheck(version) {
+        if (this.formContainer.activeRequest) {
+            return;
+        }
         var request = new XMLHttpRequest();
         request.open("POST", "/admin/api/_conflict?version=" + version, true);
         request.addEventListener("load", (e) => {
@@ -8863,7 +8878,7 @@ class FormContainer {
         this.okHandler = okHandler;
         this.progress = formContainer.querySelector(".form_progress");
         var formEl = formContainer.querySelector("form");
-        this.form = new Form(formEl);
+        this.form = new Form(formEl, this);
         this.form.formEl.addEventListener("submit", this.submitFormAJAX.bind(this));
         this.tableTbody = this.formContainer.querySelector(".form_task_table tbody");
         this.taskHeader = this.formContainer.querySelector(".form_task_header");
@@ -8873,7 +8888,6 @@ class FormContainer {
         if (this.isAutosubmit()) {
             this.form.changeHandler = this.formChanged.bind(this);
             this.form.willChangeHandler = this.formWillChange.bind(this);
-            this.sendForm();
         }
         this.initTaskProgressReader();
     }
@@ -8975,6 +8989,11 @@ class FormContainer {
                 this.progress.classList.add("hidden");
                 new Alert(`Chyba ${request.status} při nahrávání souboru.`);
             }
+        });
+        request.addEventListener("error", (e) => {
+            this.form.formEl.classList.remove("form-loading");
+            this.progress.classList.add("hidden");
+            new Alert(`Chyba při odesílání formuláře ${JSON.stringify(e)}`);
         });
         this.progress.classList.remove("hidden");
         this.form.formEl.classList.add("form-loading");
@@ -9082,6 +9101,9 @@ class FormContainer {
             else {
                 this.setTaskFinished(data);
             }
+        });
+        request.addEventListener("error", (e) => {
+            console.error("task load error: ", e);
         });
         request.send();
     }

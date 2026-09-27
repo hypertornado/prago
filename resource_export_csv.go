@@ -39,7 +39,7 @@ func bindResourceExportCSV(resource *Resource) {
 		}
 		fv.Redirect(fmt.Sprintf("/admin/%s/api/export.csv?%s", resource.id, q.Encode()))
 
-	}).Permission(loggedPermission).Icon(iconDownload).Name(unlocalized("Export"))
+	}).Permission(loggedPermission).Icon(iconDownload).Name(Unlocalized("Export"))
 
 	resource.api("export.csv").Permission(resource.canExport).Handler(func(request *Request) {
 		if !request.Authorize(resource.canExport) {
@@ -74,49 +74,49 @@ func bindResourceExportCSV(resource *Resource) {
 			}
 		}
 
-		orderBy := resource.orderByColumn
-		if params.Get("_order") != "" {
-			orderBy = params.Get("_order")
-		}
-		orderDesc := resource.orderDesc
-		if params.Get("_desc") == "true" {
-			orderDesc = true
-		}
-		if params.Get("_desc") == "false" {
-			orderDesc = false
-		}
+		orderBy, orderDesc := resource.getOrderFromParams(request, params)
 
 		w := csv.NewWriter(request.w)
 		w.Comma = ';'
-		must(w.Write(fieldNames))
+		Must(w.Write(fieldNames))
 
-		err := resource.forEach(request.r.Context(), func(q *listQuery) {
+		iteration := 0
+		for {
+			q := resource.query(request.r.Context())
 			q = resource.addFilterParamsToQuery(q, params, request)
 			if orderDesc {
 				q = q.OrderDesc(orderBy)
 			} else {
 				q = q.Order(orderBy)
 			}
-		}, func(item any) error {
+			q.addOrder("id", false)
+			q.offset = int64(iteration * exportCSVPageLimit)
+			q.limit = exportCSVPageLimit
+			items, err := q.list()
+			Must(err)
 
-			val := reflect.ValueOf(item).Elem()
-
-			var strValuesRow []string
-
-			for _, outputField := range outputFields {
-				valIface := val.FieldByName(outputField.fieldClassName).Interface()
-				strVal := fmt.Sprintf("%v", valIface)
-				if t, ok := valIface.(time.Time); ok {
-					strVal = t.Format(time.RFC3339)
-				}
-				strValuesRow = append(strValuesRow, strVal)
+			itemsCount := reflect.ValueOf(items).Len()
+			if itemsCount == 0 {
+				break
 			}
-			must(w.Write(strValuesRow))
 
-			return nil
+			for i := 0; i < itemsCount; i++ {
+				val := reflect.ValueOf(items).Index(i).Elem()
 
-		})
-		must(err)
+				var strValuesRow []string
+
+				for _, outputField := range outputFields {
+					valIface := val.FieldByName(outputField.fieldClassName).Interface()
+					strVal := fmt.Sprintf("%v", valIface)
+					if t, ok := valIface.(time.Time); ok {
+						strVal = t.Format(time.RFC3339)
+					}
+					strValuesRow = append(strValuesRow, strVal)
+				}
+				Must(w.Write(strValuesRow))
+			}
+			iteration++
+		}
 		w.Flush()
 	})
 }

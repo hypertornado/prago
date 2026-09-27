@@ -8,9 +8,9 @@ func (app *App) initAPI() {
 	app.NewAPI("markdown").Permission(loggedPermission).Method("POST").Handler(
 		func(request *Request) {
 			data, err := io.ReadAll(request.Request().Body)
-			must(err)
+			Must(err)
 			htmlData, err := markdownToHTML(string(data))
-			must(err)
+			Must(err)
 			request.WriteJSON(200, htmlData)
 		},
 	)

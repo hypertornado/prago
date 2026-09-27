@@ -3,7 +3,9 @@ package prago
 import (
 	"bufio"
 	"bytes"
+	"encoding/binary"
 	"fmt"
+	"hash/fnv"
 	"math"
 	"math/rand/v2"
 	"net"
@@ -50,16 +52,37 @@ func prettyURL(s string) string {
 }
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-var seeded = false
+
+func Unlocalized(name string) func(string) string {
+	return func(string) string {
+		return name
+	}
+}
+
+func Must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
 
 func randomString(n int) string {
-	/*if !seeded {
-		rand.Seed(time.Now().Unix())
-		seeded = true
-	}*/
+
 	b := make([]rune, n)
 	for i := range b {
 		b[i] = letters[rand.IntN(len(letters))]
+	}
+	return string(b)
+}
+
+func pseudorandomString(seed string) string {
+	h := fnv.New128a()
+	h.Write([]byte(seed))
+	sum := h.Sum(nil)
+	r := rand.New(rand.NewPCG(binary.BigEndian.Uint64(sum[0:8]), binary.BigEndian.Uint64(sum[8:16])))
+
+	b := make([]rune, 30)
+	for i := range b {
+		b[i] = letters[r.IntN(len(letters))]
 	}
 	return string(b)
 }
@@ -192,6 +215,15 @@ func normalizeCzechString(in string) string {
 	result, _, _ := transform.String(t, in)
 	return strings.ToLower(result)
 }
+
+func MultirelationStringToMap(in string) (ret map[int64]bool) {
+	ret = map[int64]bool{}
+	for _, id := range MultirelationStringToArray(in) {
+		ret[id] = true
+	}
+	return ret
+}
+
 func MultirelationStringToArray(in string) (ret []int64) {
 	arr := strings.Split(in, ";")
 	for _, v := range arr {

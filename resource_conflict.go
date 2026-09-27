@@ -54,7 +54,7 @@ func (app *App) initResourceConflict() {
 		}
 		return table.ExecuteHTML()
 
-	}).Permission(sysadminPermission).Name(unlocalized("Conflict checks")).Board(sysadminBoard)
+	}).Permission(sysadminPermission).Name(Unlocalized("Conflict checks")).Board(sysadminBoard)
 
 }
 
@@ -187,7 +187,7 @@ func (resource *Resource) validateConflict(request *Request, vc *itemValidation,
 		return
 	}
 	oldVersion, err := strconv.Atoi(itemVersionStr)
-	must(err)
+	Must(err)
 
 	currentVersion := resource.currentItemVersion(itemID)
 

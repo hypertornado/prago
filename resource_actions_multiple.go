@@ -80,7 +80,7 @@ func (app *App) initMultieditChangePopup() {
 
 		fv.Data("OK")
 
-	}).Permission("logged").Name(unlocalized("Změnit"))
+	}).Permission("logged").Name(Unlocalized("Změnit"))
 
 }
 
@@ -125,7 +125,7 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 
 			fv.PopupFormURL(fmt.Sprintf("/admin/_multiedit-change?%s", urlPath.Encode()))
 		},
-	).Icon(iconEdit).Permission(resource.canUpdate).Name(unlocalized("Upravit")).StyleAccented()
+	).Icon(iconEdit).Permission(resource.canUpdate).Name(Unlocalized("Upravit")).StyleAccented()
 
 	resource.formItemMultipleAction(
 		"export-multiple",
@@ -142,7 +142,7 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 			redirectURL := fmt.Sprintf("/admin/%s/api/export?ids=%s", resource.id, strings.Join(ids, ","))
 			fv.Redirect(redirectURL)
 		},
-	).Icon(iconDownload).Permission(resource.canExport).Name(unlocalized("Export"))
+	).Icon(iconDownload).Permission(resource.canExport).Name(Unlocalized("Export"))
 
 	resource.formItemMultipleAction(
 		"ai-context",
@@ -215,7 +215,7 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 
 			fv.AfterContent(template.HTML(fmt.Sprintf("<textarea class=\"input\">%s</textarea>", template.HTMLEscapeString(strVal))))
 		},
-	).Icon(iconAI).Permission(resource.canDelete).Name(unlocalized("AI Kontext"))
+	).Icon(iconAI).Permission(resource.canDelete).Name(Unlocalized("AI Kontext"))
 
 	resource.formItemMultipleAction(
 		"clone-multiple",
@@ -257,7 +257,7 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 						panic(fmt.Sprintf("can't create item for clone %v: %s", item, err))
 					}
 
-					must(
+					Must(
 						resource.logActivity(request, nil, item),
 					)
 
@@ -265,7 +265,7 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 			}
 			fv.Data(true)
 		},
-	).Icon(iconDuplicate).Permission(resource.canCreate).Name(unlocalized("Naklonovat"))
+	).Icon(iconDuplicate).Permission(resource.canCreate).Name(Unlocalized("Naklonovat"))
 
 	resource.formItemMultipleAction(
 		"delete-multiple",
@@ -283,7 +283,7 @@ func (resource *Resource) initDefaultResourceMultipleActions() {
 				return
 			}
 			for _, item := range items {
-				must(resource.deleteWithLog(item, request))
+				Must(resource.deleteWithLog(item, request))
 			}
 			request.AddFlashMessage(messages.Get(request.Locale(), "item_deleted"))
 			fv.Data(true)

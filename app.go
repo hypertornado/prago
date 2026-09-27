@@ -142,7 +142,7 @@ func createApp(codeName string, version string, testing bool) *App {
 		testing:  testing,
 		codeName: codeName,
 		version:  version,
-		name:     unlocalized(codeName),
+		name:     Unlocalized(codeName),
 		//cache:    newCache(),
 		router:     newRouter(),
 		hue:        214,
@@ -324,12 +324,6 @@ func (app *App) SetAfterRequestServedHandler(fn func(*Request)) {
 
 func columnName(fieldName string) string {
 	return prettyURL(fieldName)
-}
-
-func must(err error) {
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (app *App) GetVersionString() string {

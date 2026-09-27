@@ -62,7 +62,7 @@ func (app *App) initCacheStats() {
 
 		fv.AfterContent(table.ExecuteHTML())
 
-	}).Name(unlocalized("Cache stats")).Permission("sysadmin").Board(sysadminBoard)
+	}).Name(Unlocalized("Cache stats")).Permission("sysadmin").Board(sysadminBoard)
 }
 
 type cacheStats struct {

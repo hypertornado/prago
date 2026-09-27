@@ -51,7 +51,7 @@ func (app *App) initSearch() {
 	app.NewAPI("search-suggest").Permission(loggedPermission).Handler(
 		func(request *Request) {
 			results, err := app.suggestItems(request.Param("q"), request)
-			must(err)
+			Must(err)
 			if len(results) == 0 {
 				request.WriteJSON(204, nil)
 				return
@@ -60,7 +60,7 @@ func (app *App) initSearch() {
 		},
 	)
 
-	app.ActionPlain("_search", nil).Permission(loggedPermission).Name(unlocalized("Vyhledávání")).Board(nil).ui(
+	app.ActionPlain("_search", nil).Permission(loggedPermission).Name(Unlocalized("Vyhledávání")).Board(nil).ui(
 		func(request *Request, pd *PageData) {
 			q := request.Param("q")
 			pageStr := request.Param("page")
@@ -75,7 +75,7 @@ func (app *App) initSearch() {
 			}
 
 			result, hits, err := app.search(q, int64(page-1)*searchPageSize, searchPageSize, request)
-			must(err)
+			Must(err)
 
 			var pages = hits / searchPageSize
 			if hits > 0 {

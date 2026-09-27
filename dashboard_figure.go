@@ -63,7 +63,7 @@ func (app *App) getDashboardFigureData(request *Request, uuid string) (*dashboar
 }
 
 func (dashboard *Dashboard) AddFigure(name func(string) string, permission Permission) *dashboardFigure {
-	must(dashboard.board.app.validatePermission(permission))
+	Must(dashboard.board.app.validatePermission(permission))
 	figure := &dashboardFigure{
 		uuid:               randomString(30),
 		name:               name,

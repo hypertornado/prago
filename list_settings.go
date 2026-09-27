@@ -29,7 +29,7 @@ func (app *App) initListSettings() {
 			return
 		}
 		fv.Data(count)
-	}).Permission(loggedPermission).Icon("glyphicons-basic-960-files-queue.svg").Name(unlocalized("Počet položek na stránce"))
+	}).Permission(loggedPermission).Icon("glyphicons-basic-960-files-queue.svg").Name(Unlocalized("Počet položek na stránce"))
 
 	app.PopupForm("_list-items-visible", func(form *Form, request *Request) {
 		resource := app.getResourceByID(request.Param("resource"))
@@ -96,6 +96,6 @@ func (app *App) initListSettings() {
 		}
 
 		fv.Data(strings.Join(ret, ","))
-	}).Permission(loggedPermission).Icon("glyphicons-basic-107-text-width.svg").Name(unlocalized("Viditelné sloupce"))
+	}).Permission(loggedPermission).Icon("glyphicons-basic-107-text-width.svg").Name(Unlocalized("Viditelné sloupce"))
 
 }

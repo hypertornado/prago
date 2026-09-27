@@ -37,7 +37,7 @@ func (app *App) initValidation() {
 			return resource.consistencyCheck(request, fta)
 		})
 
-	}).Permission(loggedPermission).Name(unlocalized("Kontrola konzistence"))
+	}).Permission(loggedPermission).Name(Unlocalized("Kontrola konzistence"))
 
 	app.ActionForm("_validations",
 		func(form *Form, request *Request) {
@@ -75,7 +75,7 @@ func (app *App) initValidation() {
 				return resource.consistencyCheck(request, fta)
 			})
 
-		}).Name(unlocalized("Validate resources")).Permission(sysadminPermission).Board(sysadminBoard)
+		}).Name(Unlocalized("Validate resources")).Permission(sysadminPermission).Board(sysadminBoard)
 }
 
 func (resource *Resource) consistencyCheck(request *Request, fta *FormTaskActivity) error {

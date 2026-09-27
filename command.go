@@ -44,7 +44,7 @@ func addServerCommand(app *App) {
 			if !app.developmentMode {
 				app.initExitHandler()
 			}
-			must(app.listenAndServe(port))
+			Must(app.listenAndServe(port))
 		})
 }
 

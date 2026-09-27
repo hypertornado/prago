@@ -19,7 +19,7 @@ type session struct {
 }
 
 func (app *App) initSessionsResource() {
-	app.sessionsResource = app.NewResource[session]().PermissionView("sysadmin").Name(unlocalized("Session"), unlocalized("Sessiony")).Board(sysadminBoard)
+	app.sessionsResource = app.NewResource[session]().PermissionView("sysadmin").Name(Unlocalized("Session"), Unlocalized("Sessiony")).Board(sysadminBoard)
 	app.initSessionsCache()
 
 	app.ActionResourceItemForm("logout", func(ses *session, form *Form, request *Request) {
@@ -32,7 +32,7 @@ func (app *App) initSessionsResource() {
 		} else {
 			fv.AddOK("Session odhlášena")
 		}
-	}).Name(unlocalized("Odhlásit"))
+	}).Name(Unlocalized("Odhlásit"))
 }
 
 func generateSessionKey(isAPI bool) string {
@@ -50,7 +50,7 @@ func (app *App) createSessionKey(user *user, isAPI bool) string {
 		User:  user.ID,
 		IsAPI: isAPI,
 	}
-	must(app.Create(ses))
+	Must(app.Create(ses))
 	return ses.UUID
 }
 

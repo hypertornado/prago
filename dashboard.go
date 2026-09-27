@@ -14,9 +14,9 @@ func (app *App) initDashboard() {
 		func(request *Request) {
 			uuid := request.Param("uuid")
 			table, err := app.getDashboardTableData(request, uuid)
-			must(err)
+			Must(err)
 			err = request.app.adminTemplates.templates.ExecuteTemplate(request.Response(), "form_table", table.templateData())
-			must(err)
+			Must(err)
 		},
 	)
 

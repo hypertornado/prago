@@ -138,7 +138,6 @@ func (app *App) AddEnum(name string, items []*Enum) {
 				})
 			}
 			return ret
-			//return getFormOptions(ret)
 		},
 	})
 }

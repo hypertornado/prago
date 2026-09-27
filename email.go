@@ -31,6 +31,10 @@ func newEmailAddress(name, email string) *emailAddress {
 	return &emailAddress{name, email}
 }
 
+func (app *App) canSendEmails() bool {
+	return app.mustGetSetting("sendgrid_key") != ""
+}
+
 func (app *App) NewEmail() *Email {
 	noReplyEmail := app.mustGetSetting("no_reply_email")
 	return &Email{

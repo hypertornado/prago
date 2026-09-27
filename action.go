@@ -83,7 +83,7 @@ func (resource *Resource) initActions() {
 
 func newAction(app *App, url string) *Action {
 	return &Action{
-		name:        unlocalized(url),
+		name:        Unlocalized(url),
 		permission:  "",
 		method:      "GET",
 		url:         url,
@@ -134,7 +134,7 @@ func (action *Action) Name(name func(string) string) *Action {
 }
 
 func (action *Action) Permission(permission Permission) *Action {
-	must(action.app.validatePermission(permission))
+	Must(action.app.validatePermission(permission))
 	action.permission = permission
 	if action.childAction != nil {
 		action.childAction.permission = permission

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -171,6 +172,7 @@ func buildOrderString(params []listQueryOrder) string {
 	}
 	items := []string{}
 	for _, v := range params {
+		mustBeSQLIdentifier(v.name)
 		order := "ASC"
 		if v.desc {
 			order = "DESC"
@@ -205,7 +207,16 @@ func buildWhereString(conditions []string) string {
 	return fmt.Sprintf("WHERE %s", where)
 }
 
+var sqlIdentifierRegexp = regexp.MustCompile(`^[a-zA-Z0-9_]+$`)
+
+func mustBeSQLIdentifier(name string) {
+	if !sqlIdentifierRegexp.MatchString(name) {
+		panic(fmt.Sprintf("invalid sql identifier: %q", name))
+	}
+}
+
 func sqlFieldToQuery(fieldName string) string {
+	mustBeSQLIdentifier(fieldName)
 	return fmt.Sprintf("`%s`=?", fieldName)
 }
 

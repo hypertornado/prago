@@ -46,6 +46,7 @@ type listHeaderItem struct {
 	FilterLayout      string
 	RelatedResourceID string
 	NaturalCellWidth  int64
+	Focused           bool
 
 	DefaultFilterResponse *ListFilterResponse
 }
@@ -68,7 +69,7 @@ func (resource *Resource) initListAction() {
 		Permission(resource.canView).Name(messages.GetNameFunction("list")).
 		ui(func(request *Request, pd *PageData) {
 			listData, err := resource.getListHeader(request)
-			must(err)
+			Must(err)
 			pd.List = &listData
 		},
 		)
@@ -79,7 +80,7 @@ func (resource *Resource) initListAPI() {
 		func(request *Request) {
 
 			listContentData, err := resource.getListContent(request, request.Request().URL.Query())
-			must(err)
+			Must(err)
 			request.Response().Header().Set("Prago-List-Message", url.PathEscape(listContentData.Message))
 			request.Response().Header().Set("Prago-List-Total-Pages", fmt.Sprintf("%d", listContentData.Pagination.TotalPages))
 			request.Response().Header().Set("Prago-List-Selected-Page", fmt.Sprintf("%d", listContentData.Pagination.SelectedPage))
@@ -95,7 +96,7 @@ func (row *listRow) PreName() string {
 
 func (lhi listHeaderItem) DefaultFilterResponseJSON() template.HTMLAttr {
 	data, err := json.Marshal(lhi.DefaultFilterResponse)
-	must(err)
+	Must(err)
 	return template.HTMLAttr(data)
 }
 
@@ -133,6 +134,9 @@ func (resource *Resource) getListHeader(request *Request) (list list, err error)
 	for _, v := range resource.fields {
 		if v.authorizeView(request) {
 			headerItem := (*v).getListHeaderItem(request)
+			if v.id != "id" {
+				headerItem.Focused = true
+			}
 			if headerItem.DefaultShow {
 				list.Colspan++
 			}
@@ -249,6 +253,29 @@ func (resource *Resource) addFilterParamsToQuery(listQuery *listQuery, params ur
 		}
 	}
 	return resource.addFilterToQuery(listQuery, filter)
+}
+
+// getOrderFromParams returns validated order column and direction.
+// Falls back to resource default if the requested column is unknown,
+// not orderable or not visible to the user.
+func (resource *Resource) getOrderFromParams(userData UserData, params url.Values) (string, bool) {
+	orderBy := resource.orderByColumn
+	orderDesc := resource.orderDesc
+
+	if requested := params.Get("_order"); requested != "" {
+		field := resource.fieldMap[requested]
+		if field != nil && field.canOrder && field.authorizeView(userData) {
+			orderBy = field.id
+		}
+	}
+
+	switch params.Get("_desc") {
+	case "true":
+		orderDesc = true
+	case "false":
+		orderDesc = false
+	}
+	return orderBy, orderDesc
 }
 
 func (resource *Resource) addFilterToQuery(listQuery *listQuery, filter map[string]string) *listQuery {

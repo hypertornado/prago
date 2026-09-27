@@ -76,13 +76,13 @@ func renderPageSimple(request *Request, page *pageDataSimple) {
 
 	var err error
 	page.BackgroundImageURL, err = request.app.getSetting("background_image_url")
-	must(err)
+	Must(err)
 	if page.BackgroundImageURL == "" {
 		page.BackgroundImageURL = defaultBackgroundImageURL
 	}
 
 	page.Logo, err = request.app.getSetting("icon_image_url")
-	must(err)
+	Must(err)
 
 	for _, v := range page.Tabs {
 		if v.Selected {

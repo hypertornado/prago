@@ -31,7 +31,7 @@ func (app *App) initUserAPI() {
 
 		return table.ExecuteHTML()
 
-	}).Permission(loggedPermission).Icon("glyphicons-basic-849-computer-network.svg").Name(unlocalized("API")).Board(app.optionsBoard)
+	}).Permission(loggedPermission).Icon("glyphicons-basic-849-computer-network.svg").Name(Unlocalized("API")).Board(app.optionsBoard)
 
 	app.PopupForm("_apikeycreate", func(form *Form, request *Request) {
 		form.AddSubmit("Generate API key")
@@ -39,7 +39,7 @@ func (app *App) initUserAPI() {
 		usr := request.getUser()
 		request.app.createSessionKey(usr, true)
 		fv.Data(true)
-	}).Name(unlocalized("Generate API key")).Permission(loggedPermission)
+	}).Name(Unlocalized("Generate API key")).Permission(loggedPermission)
 
 	app.PopupForm("_apikeydelete", func(form *Form, request *Request) {
 		form.AddTextarea("uuid", "API key").SetValue(request.Param("uuid")).SetReadonly()
@@ -54,6 +54,6 @@ func (app *App) initUserAPI() {
 		request.AddFlashMessage("API key deleted")
 
 		fv.Data(true)
-	}).Name(unlocalized("Delete API key")).Permission(loggedPermission)
+	}).Name(Unlocalized("Delete API key")).Permission(loggedPermission)
 
 }

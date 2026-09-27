@@ -17,7 +17,7 @@ func (app *App) initBuild() {
 	})
 
 	app.addCommand("backup").Callback(func() {
-		must(backupApp(app))
+		Must(backupApp(app))
 	})
 
 	app.addCommand("syncbackups").Callback(func() {
@@ -26,7 +26,7 @@ func (app *App) initBuild() {
 			app.Log().Println("no ssh value set in settings")
 			return
 		}
-		must(syncBackups(appName, ssh))
+		Must(syncBackups(appName, ssh))
 	})
 
 	app.addCommand("party").Callback(func() {
@@ -34,7 +34,7 @@ func (app *App) initBuild() {
 		if ssh == "" {
 			panic("no ssh value set in settings")
 		}
-		must(party(appName, version, ssh))
+		Must(party(appName, version, ssh))
 	})
 }
 

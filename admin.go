@@ -14,16 +14,6 @@ var ErrItemNotFound = errors.New("item not found")
 
 func (app *App) initAdminActions() {
 
-	/*
-		app.adminController.addAroundAction(func(request *Request, next func()) {
-			if request.UserID() == 0 {
-				urlPath := url.PathEscape(request.Request().URL.Path)
-				request.Redirect(app.getAdminURL("user/login") + "?redirect=" + urlPath)
-				return
-			}
-			next()
-		})*/
-
 	app.adminController.addBeforeAction(func(request *Request) bool {
 		if request.UserID() == 0 {
 			urlPath := url.PathEscape(request.Request().URL.Path)
@@ -33,7 +23,7 @@ func (app *App) initAdminActions() {
 		return true
 	})
 
-	app.AddHelp("markdown", unlocalized("Markdown"), func(request *Request) template.HTML {
+	app.AddHelp("markdown", loggedPermission, Unlocalized("Markdown"), "glyphicons-basic-101-text.svg", func(request *Request) template.HTML {
 		return app.adminTemplates.ExecuteToHTML("help_markdown", nil)
 	})
 
@@ -51,13 +41,15 @@ func (app *App) initAdminActions() {
 			iconName = app.icon
 		}
 		iconData, err := app.loadIcon(iconName, blackColor)
-		must(err)
+		Must(err)
 
 		request.Response().Header().Add("Content-Type", "image/svg+xml")
 		request.w.Write(iconData)
 	})
 
 	app.NewAPI("_suggestionsresource").Handler(suggestionsResource).Permission(loggedPermission)
+	app.initSuggestionsAdvanced()
+
 }
 
 func (app *App) initAdminNotFoundAction() {

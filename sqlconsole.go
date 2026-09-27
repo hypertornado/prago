@@ -25,7 +25,7 @@ func (app *App) initSQLConsole() {
 					message = err.Error()
 				} else {
 					columns, err := rows.Columns()
-					must(err)
+					Must(err)
 					table.Header(columns...)
 
 					count := len(columns)
@@ -80,5 +80,5 @@ func (app *App) initSQLConsole() {
 				vc.Data(true)
 			}
 
-		}).Name(unlocalized("SQL Console")).Permission(sysadminPermission).Board(sysadminBoard).Icon("glyphicons-basic-879-terminal-empty.svg")
+		}).Name(Unlocalized("SQL Console")).Permission(sysadminPermission).Board(sysadminBoard).Icon("glyphicons-basic-879-terminal-empty.svg")
 }

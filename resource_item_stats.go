@@ -13,7 +13,7 @@ type itemStat struct {
 
 func (app *App) AddItemStatistic[T any](name func(string) string, permission Permission, statHandler func(item *T) string) {
 	resource := getResource[T](app)
-	must(app.validatePermission(permission))
+	Must(app.validatePermission(permission))
 	resource.itemStats = append(resource.itemStats, &itemStat{
 		id:         fmt.Sprintf("_stat-%d", len(resource.itemStats)+1),
 		Name:       name,

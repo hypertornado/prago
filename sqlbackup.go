@@ -99,7 +99,7 @@ func (app *App) initSQLBackup() {
 		}, func(vc FormValidation, request *Request) {
 
 			tables, err := listTables(app.db)
-			must(err)
+			Must(err)
 
 			var exclude []string
 
@@ -112,7 +112,7 @@ func (app *App) initSQLBackup() {
 			excludes := strings.Join(exclude, ",")
 
 			vc.Redirect("/admin/api/sqlbackup?exclude=" + excludes)
-		}).Name(unlocalized("SQL Backup")).Permission(sysadminPermission).Board(sysadminBoard)
+		}).Name(Unlocalized("SQL Backup")).Permission(sysadminPermission).Board(sysadminBoard)
 
 	app.NewAPI("sqlbackup").Permission("sysadmin").Handler(func(r *Request) {
 
@@ -131,7 +131,7 @@ func (app *App) initSQLBackup() {
 
 func listTablesArr(app *App) []string {
 	tables, err := listTables(app.db)
-	must(err)
+	Must(err)
 
 	var tablesAr []string
 

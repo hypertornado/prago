@@ -46,7 +46,7 @@ func (app *App) initOtp() {
 
 	}, func(fv FormValidation, request *Request) {
 
-		must(otpLimiter.Wait(request.r.Context()))
+		Must(otpLimiter.Wait(request.r.Context()))
 
 		key := app.getOTPKey(request)
 		if key == nil {
@@ -109,7 +109,7 @@ func (app *App) createOTPKey(user *user, request *Request) *otpKey {
 		}
 
 	})
-	must(err)
+	Must(err)
 
 	return key
 }

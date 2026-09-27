@@ -24,14 +24,14 @@ func (app *App) initBoard() {
 
 	app.optionsBoard = app.MainBoard.AddChild("_options", messages.GetNameFunction("options"), "glyphicons-basic-137-cogwheel.svg")
 
-	sysadminBoard = app.optionsBoard.AddChild("_sysadmin", unlocalized("Sysadmin"), "glyphicons-basic-501-server.svg")
+	sysadminBoard = app.optionsBoard.AddChild("_sysadmin", Unlocalized("Sysadmin"), "glyphicons-basic-501-server.svg")
 
-	sysadminGroup := sysadminBoard.AddDashboard(unlocalized(""))
+	sysadminGroup := sysadminBoard.AddDashboard(Unlocalized(""))
 
-	sysadminGroup.AddTimeline(unlocalized("Úpravy"), "sysadmin", func(tdr *TimelineDataRequest) float64 {
+	sysadminGroup.AddTimeline(Unlocalized("Úpravy"), "sysadmin", func(tdr *TimelineDataRequest) float64 {
 		c, _ := app.Query[activityLog]().Context(tdr.Request.r.Context()).Where("createdat >= ? and createdat < ?", tdr.From, tdr.To).Count()
 		return float64(c)
-	}).Unit(unlocalized("editací"))
+	}).Unit(Unlocalized("editací"))
 
 }
 
@@ -59,7 +59,7 @@ func newBoard(app *App, url string) *Board {
 
 	ret.action.permission = loggedPermission
 	ret.mainDashboard = &Dashboard{
-		name:  unlocalized(""),
+		name:  Unlocalized(""),
 		board: ret,
 	}
 	return ret

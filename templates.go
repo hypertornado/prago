@@ -89,7 +89,7 @@ func (app *App) initTemplates() {
 
 	app.adminTemplates.Function("PragoJSON", func(in any) string {
 		data, err := json.Marshal(in)
-		must(err)
+		Must(err)
 		return string(data)
 	})
 
@@ -106,7 +106,7 @@ func (app *App) initTemplates() {
 		return blackColor
 	})
 
-	must(app.adminTemplates.SetFilesystem(templatesFS, "templates/*.tmpl"))
+	Must(app.adminTemplates.SetFilesystem(templatesFS, "templates/*.tmpl"))
 }
 
 func (templates *Templates) SetFilesystem(fsys fs.FS, patterns ...string) error {
@@ -159,7 +159,7 @@ func (templates *Templates) Execute(wr io.Writer, name string, data any) error {
 func (templates *Templates) ExecuteToString(templateName string, data any) string {
 	bufStats := new(bytes.Buffer)
 	err := templates.Execute(bufStats, templateName, data)
-	must(err)
+	Must(err)
 	return bufStats.String()
 }
 

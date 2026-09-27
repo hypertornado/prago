@@ -95,14 +95,14 @@ func registrationValidation(vc FormValidation, request *Request) {
 		u.Email = email
 		u.Name = request.Param("name")
 		u.Locale = locale
-		must(u.newPassword(request.Param("password")))
+		Must(u.newPassword(request.Param("password")))
 
 		count, err := app.Query[user]().Count()
 		if err == nil && count == 0 {
 			u.Role = sysadminRoleName
 		}
 
-		must(app.Create(u))
+		Must(app.Create(u))
 
 		err = u.sendConfirmEmail(app, locale)
 		if err != nil {

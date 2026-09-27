@@ -14,7 +14,7 @@ func initUserLogin(app *App) {
 		func(user *user, request *Request) {
 			request.logInUser(user)
 			request.Redirect("/admin")
-		}).Name(unlocalized("Přihlásit se jako")).Permission(sysadminPermission)
+		}).Name(Unlocalized("Přihlásit se jako")).Permission(sysadminPermission)
 
 	app.nologinFormAction("login", func(form *Form, request *Request) {
 		locale := localeFromRequest(request)
@@ -37,7 +37,7 @@ func initUserLogin(app *App) {
 		form.AddSubmit(messages.Get(locale, "login_action"))
 	}, func(vc FormValidation, request *Request) {
 
-		must(userLoginLimiter.Wait(request.r.Context()))
+		Must(userLoginLimiter.Wait(request.r.Context()))
 
 		locale := request.Locale()
 		email := request.Param("email")
@@ -67,7 +67,7 @@ func initUserLogin(app *App) {
 			return
 		}
 
-		if app.Is2faEnabled && user.Email != "" {
+		if app.Is2faEnabled && !app.developmentMode && app.canSendEmails() && user.Email != "" {
 			otpKey := app.createOTPKey(user, request)
 			request.setCookie(otpCoookieName, otpKey.CookieID)
 			vc.Redirect("/admin/user/2f")
@@ -84,7 +84,7 @@ func (app *App) doLogUser(request *Request, user *user) string {
 	user.LoggedInTime = time.Now()
 	user.LoggedInUseragent = request.Request().UserAgent()
 	user.LoggedInIP = request.Request().Header.Get("X-Forwarded-For")
-	must(app.Update(user))
+	Must(app.Update(user))
 	request.logInUser(user)
 	request.AddFlashMessage(messages.Get(user.Locale, "login_ok"))
 	redirectURL := request.Param("redirect_url")

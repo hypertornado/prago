@@ -62,13 +62,13 @@ func initUserSettings(app *App) {
 			user.Name = name
 			user.Phone = phone
 			user.Locale = newLocale
-			must(app.Update(user))
+			Must(app.Update(user))
 
 			for _, v := range app.settings.settingsArray {
 				if request.Authorize(v.permission) {
 					val := request.Params().Get("setting_" + v.id)
 					err := app.saveSetting(v.id, val, request)
-					must(err)
+					Must(err)
 					if v.changeCallback != nil {
 						v.changeCallback()
 					}
@@ -194,11 +194,11 @@ func initUserSettings(app *App) {
 			return
 		}
 
-		must(request.CreateWithLog(usr))
+		Must(request.CreateWithLog(usr))
 		request.AddFlashMessage("Uživatel založen")
 		fv.Redirect(fmt.Sprintf("/admin/user/%d", usr.ID))
 
-	}).Name(unlocalized("Založit uživatele")).Icon("glyphicons-basic-191-circle-empty-plus.svg")
+	}).Name(Unlocalized("Založit uživatele")).Icon("glyphicons-basic-191-circle-empty-plus.svg")
 
 	app.ActionResourceItemForm("setup", func(user *user, form *Form, request *Request) {
 		cu := request.getUser()
@@ -254,7 +254,7 @@ func initUserSettings(app *App) {
 		newpassword := request.Param("newpassword")
 		if newpassword != "" {
 			if isPasswordValid(newpassword) {
-				must(usr.newPassword(newpassword))
+				Must(usr.newPassword(newpassword))
 			} else {
 				fv.AddItemError("newpassword", messages.Get(request.Locale(), "password_length"))
 			}
@@ -268,13 +268,13 @@ func initUserSettings(app *App) {
 		}
 
 		if fv.Valid() {
-			must(request.UpdateWithLog(usr))
+			Must(request.UpdateWithLog(usr))
 			request.app.userDataCacheDelete(usr.ID)
 			request.AddFlashMessage("Upraveno")
 			fv.Redirect(fmt.Sprintf("/admin/user/%d", usr.ID))
 		}
 
-	}).Name(unlocalized("Nastavit uživatele"))
+	}).Name(Unlocalized("Nastavit uživatele"))
 
 	app.ActionPlain("logout", func(request *Request) {
 		validateCSRF(request)

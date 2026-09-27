@@ -16,7 +16,7 @@ func (app *App) listenAndServe(port int) error {
 	if !app.developmentMode {
 		file, err := os.OpenFile(app.dotPath()+"/prago.log",
 			os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
-		must(err)
+		Must(err)
 		app.logger.SetOutput(file)
 	}
 

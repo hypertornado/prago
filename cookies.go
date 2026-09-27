@@ -88,7 +88,7 @@ func (request *Request) logOutUser() {
 		panic("can't logout api this way")
 	}
 	if sessionID != "" {
-		must(app.deleteSession(sessionID))
+		Must(app.deleteSession(sessionID))
 	}
 	request.AddFlashMessage("Odhlášení proběhlo v pořádku")
 	request.deleteCookie(app.getLoginCookieID())

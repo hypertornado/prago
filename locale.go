@@ -34,12 +34,6 @@ func localeFromAcceptLanguageString(acceptHeader string) string {
 	return availableLocales[0][0]
 }
 
-func unlocalized(name string) func(string) string {
-	return func(string) string {
-		return name
-	}
-}
-
 func (resource *Resource) newItemName(locale string) string {
 	return fmt.Sprintf("%s „%s“", messages.GetNameFunction("new")(locale), resource.singularName(locale))
 }

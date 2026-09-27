@@ -26,7 +26,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 
 		file := xlsx.NewFile()
 		sheet, err := file.AddSheet(resource.pluralName(request.Locale()))
-		must(err)
+		Must(err)
 
 		row := sheet.AddRow()
 
@@ -95,7 +95,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 
 			decoder := json.NewDecoder(request.Request().Body)
 			var t = map[string][]int{}
-			must(decoder.Decode(&t))
+			Must(decoder.Decode(&t))
 
 			order, ok := t["order"]
 			if !ok {
@@ -106,7 +106,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 				item := resource.query(request.r.Context()).ID(id)
 				resource.setOrderPosition(item, int64(i))
 				err := resource.update(request.r.Context(), item, nil)
-				must(err)
+				Must(err)
 			}
 			request.WriteJSON(200, true)
 		},
@@ -151,7 +151,7 @@ func (resource *Resource) initDefaultResourceAPIs() {
 
 			for _, idStr := range strings.Split(idsStr, ",") {
 				id, err := strconv.Atoi(idStr)
-				must(err)
+				Must(err)
 
 				var usedValues url.Values = make(map[string][]string)
 				usedValues.Set("id", idStr)

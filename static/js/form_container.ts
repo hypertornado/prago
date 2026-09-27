@@ -29,7 +29,7 @@ class FormContainer {
     this.okHandler = okHandler;
     this.progress = formContainer.querySelector(".form_progress");
     var formEl: HTMLFormElement = formContainer.querySelector("form");
-    this.form = new Form(formEl);
+    this.form = new Form(formEl, this);
     this.form.formEl.addEventListener("submit", this.submitFormAJAX.bind(this));
 
     this.tableTbody = this.formContainer.querySelector(".form_task_table tbody");
@@ -42,7 +42,7 @@ class FormContainer {
     if (this.isAutosubmit()) {
       this.form.changeHandler = this.formChanged.bind(this);
       this.form.willChangeHandler = this.formWillChange.bind(this);
-      this.sendForm();
+      //this.sendForm();
     }
 
     this.initTaskProgressReader();
@@ -167,6 +167,12 @@ class FormContainer {
       }
     });
 
+    request.addEventListener("error", (e) => {
+      this.form.formEl.classList.remove("form-loading");
+      this.progress.classList.add("hidden");
+      new Alert(`Chyba při odesílání formuláře ${JSON.stringify(e)}`);
+    })
+
     this.progress.classList.remove("hidden");
     this.form.formEl.classList.add("form-loading");
     request.send(formData);
@@ -290,6 +296,9 @@ class FormContainer {
         this.setTaskFinished(data);
       }
     });
+    request.addEventListener("error", (e) => {
+      console.error("task load error: ", e);
+    })
     request.send();
   }
 

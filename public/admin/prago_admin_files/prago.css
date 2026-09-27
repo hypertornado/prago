@@ -1045,7 +1045,9 @@ select.input_timestamp_minute {
   object-fit: cover;
   width: 40px;
   border-radius: 4px;
+  flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background-color: #fafafa;
   aspect-ratio: 1;
 }
 
@@ -1071,6 +1073,17 @@ select.input_timestamp_minute {
 .form_radio_prename, .form_radio_postname {
   font-size: 0.8rem;
   line-height: 1.3em;
+}
+
+.form_radio_textafter {
+  font-size: 0.8rem;
+  line-height: 1.3em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .form_progress {
@@ -4377,7 +4390,7 @@ h1.simple_name {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 4px;
+  padding: 0px;
   overflow: auto;
   border-radius: 8px;
 }
@@ -4399,25 +4412,30 @@ h1.simple_name {
 
 .picker_suggestion-selected {
   background: var(--baseColorBackgroundLighter) !important;
-  border-color: var(--baseColor) !important;
 }
 
 .picker_message {
-  padding: 5px 5px;
+  padding: 8px;
   color: #999;
 }
 
-.picker_button {
-  display: block;
-  margin: 8px 0px;
-  justify-content: center;
-  width: 100%;
-  display: flex;
+.picker_buttons {
   position: sticky !important;
-  bottom: 4px !important;
-  left: 0px !important;
-  border: 1px solid var(--baseColor);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  bottom: 0px !important;
+  width: 100%;
+  flex-wrap: wrap;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 8px 8px;
+}
+
+.picker_button {
+  justify-content: center;
+  display: flex;
 }
 
 .pagination {
@@ -4521,6 +4539,12 @@ a.pagination_page-selected {
 .view_content-destroy .view_content_header_inner {
   background-color: hsl(355, 70%, 95%);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.view_content_name {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .view_content_icon {

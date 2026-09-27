@@ -143,7 +143,7 @@ func (resource *Resource) getPreviews(ctx context.Context, listRequest relationL
 	q.Offset(listRequest.Offset)
 
 	rowItems, err := q.list()
-	must(err)
+	Must(err)
 
 	itemVals := reflect.ValueOf(rowItems)
 

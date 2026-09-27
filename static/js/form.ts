@@ -5,10 +5,12 @@ class Form {
   lastChanged: number;
   changeHandler: any;
   willChangeHandler: any;
+  formContainer: FormContainer;
 
-  constructor(form: HTMLFormElement) {
+  constructor(form: HTMLFormElement, formContainer: FormContainer) {
     this.dirty = false;
     this.formEl = form;
+    this.formContainer = formContainer;
 
     this.fixAufofocus();
 
@@ -52,6 +54,7 @@ class Form {
     this.initCalendar();
     this.initDaterange();
     this.initShowpassword();
+    initTooltips();
 
     form.addEventListener("submit", () => {
       this.dirty = false;
@@ -96,6 +99,9 @@ class Form {
   }
 
   versionCheck(version: string) {
+    if (this.formContainer.activeRequest) {
+      return;
+    }
     var request = new XMLHttpRequest();
     request.open("POST", "/admin/api/_conflict?version="+version, true);
     request.addEventListener("load", (e: any) => {

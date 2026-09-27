@@ -46,7 +46,7 @@ func (app *App) InstallDatabase(rootPassword, codeName string) error {
 	}
 
 	db, err := connectMysql("root", rootPassword, "")
-	must(err)
+	Must(err)
 	defer db.Close()
 
 	_, err = db.Exec(fmt.Sprintf("CREATE DATABASE %s CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci;", codeName))
@@ -55,7 +55,7 @@ func (app *App) InstallDatabase(rootPassword, codeName string) error {
 	}
 
 	password, err := generateRandomPassword(12)
-	must(err)
+	Must(err)
 
 	_, err = db.Exec(fmt.Sprintf("CREATE USER '%s'@'localhost' IDENTIFIED BY '%s';", codeName, password))
 	if err != nil {

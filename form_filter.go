@@ -1,17 +1,24 @@
 package prago
 
+import "fmt"
+
 type FormFilter struct {
 	uuid           string
 	filterFunction func(*listQuery) *listQuery
 }
 
-func (app *App) FormFilter() *FormFilter {
+func (app *App) FormFilter(id string) *FormFilter {
 	if app.formFilters == nil {
 		app.formFilters = map[string]*FormFilter{}
 	}
 
+	uuid := pseudorandomString(id)
+	if app.formFilters[uuid] != nil {
+		panic(fmt.Sprintf("form filter %s already defined", id))
+	}
+
 	ret := &FormFilter{
-		uuid: randomString(30),
+		uuid: uuid,
 		filterFunction: func(in *listQuery) *listQuery {
 			return in
 		},

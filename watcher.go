@@ -25,11 +25,11 @@ func (app *App) watchPath(prefix string, path string, handler func()) {
 
 func dirChangedAfter(dirPath string, t time.Time) bool {
 	files, err := os.ReadDir(dirPath)
-	must(err)
+	Must(err)
 
 	for _, v := range files {
 		i, err := v.Info()
-		must(err)
+		Must(err)
 		if t.Before(i.ModTime()) {
 			return true
 		}

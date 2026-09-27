@@ -94,7 +94,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 	ret := &Field{
 		fieldClassName: f.Name,
 		id:             columnName(f.Name),
-		name:           unlocalized(f.Name),
+		name:           Unlocalized(f.Name),
 		typ:            f.Type,
 		tags:           make(map[string]string),
 		fieldOrder:     order,
@@ -148,7 +148,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 	}
 
 	if ret.tags["prago-description"] != "" {
-		ret.description = unlocalized(ret.tags["prago-description"])
+		ret.description = Unlocalized(ret.tags["prago-description"])
 	}
 
 	if ret.tags["prago-preview"] == "true" {
@@ -200,7 +200,7 @@ func (resource *Resource) newField(f reflect.StructField, order int) *Field {
 	name := ret.tags["prago-name"]
 	if name != "" {
 		ret.nameSetManually = true
-		ret.name = unlocalized(name)
+		ret.name = Unlocalized(name)
 	} else {
 		nameFunction := getNameFunctionFromStructName(ret.fieldClassName)
 		if nameFunction != nil {

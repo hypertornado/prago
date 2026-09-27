@@ -1,10 +1,13 @@
 package prago
 
+import "fmt"
+
 type FormOption struct {
 	ID                string
 	Name              string
 	DescriptionBefore string
 	DescriptionAfter  string
+	TextAfter         string
 	Color             string
 	Icon              string
 	Style             string
@@ -47,5 +50,16 @@ func getFormOptions(values [][2]string) (ret []*FormOption) {
 			Name: v[1],
 		})
 	}
+	return ret
+}
+
+func previewerToFormOption(preview *previewer) *FormOption {
+	ret := &FormOption{
+		ID:        fmt.Sprintf("%d", preview.ID()),
+		Name:      preview.Name(),
+		TextAfter: preview.DescriptionExtended(nil),
+		ImageURL:  preview.ImageURL(),
+	}
+
 	return ret
 }

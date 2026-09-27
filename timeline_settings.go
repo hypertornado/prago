@@ -5,7 +5,7 @@ func (app *App) initTimelineSettings() {
 	app.PopupForm("_timeline-settings", func(form *Form, request *Request) {
 
 		timeline, err := app.getTimeline(request, request.Param("_uuid"))
-		must(err)
+		Must(err)
 
 		typeValues := [][2]string{
 			{"day", "Den"},
@@ -37,6 +37,6 @@ func (app *App) initTimelineSettings() {
 			data[k] = params.Get(k)
 		}
 		fv.Data(data)
-	}).Permission(loggedPermission).Name(unlocalized("Nastavení časové osy")).Icon("glyphicons-basic-137-cogwheel.svg")
+	}).Permission(loggedPermission).Name(Unlocalized("Nastavení časové osy")).Icon("glyphicons-basic-137-cogwheel.svg")
 
 }

@@ -9,7 +9,7 @@ import (
 type Suggestions struct {
 	Message     string
 	Suggestions []*Suggestion
-	Button      *SuggestionsButton
+	Buttons     []*Button
 }
 
 type Suggestion struct {
@@ -18,11 +18,6 @@ type Suggestion struct {
 	URL         string
 	Name        string
 	Description string
-}
-
-type SuggestionsButton struct {
-	Name    string
-	FormURL string
 }
 
 func previewtoSuggestion(preview *Preview) *Suggestion {
@@ -51,7 +46,6 @@ func suggestionsResource(request *Request) {
 	q := request.Param("q")
 
 	filterID := request.Param("filter")
-	//app := request.app
 
 	var formFilter *FormFilter
 	if filterID != "" {
@@ -129,11 +123,18 @@ func suggestionsResource(request *Request) {
 	}
 
 	if request.Authorize(resource.canCreate) {
-		ret.Button = &SuggestionsButton{
-			Name:    resource.newItemName(request.Locale()),
-			FormURL: resource.getURL("new"),
-		}
+		ret.Buttons = append(ret.Buttons, &Button{
+			Icon: "glyphicons-basic-371-plus.svg",
+			Name: resource.newItemName(request.Locale()),
+			URL:  resource.getURL("new"),
+		})
 	}
+
+	ret.Buttons = append(ret.Buttons, &Button{
+		Icon: "glyphicons-basic-395-filter.svg",
+		Name: fmt.Sprintf("Filtrovat „%s“", resource.pluralName("cs")),
+		URL:  fmt.Sprintf("/admin/_suggestionsadvanced?resource=%s", resource.id),
+	})
 
 	request.WriteJSON(200, ret)
 }

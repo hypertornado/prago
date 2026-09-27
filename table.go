@@ -41,6 +41,8 @@ type TableCellAsyncData struct {
 }
 
 type tableCellData struct {
+	OriginalValue any
+
 	CSSClasses        []string
 	Style             template.CSS
 	Href              string
@@ -326,6 +328,8 @@ func Cell(item any) *TableCell {
 		ret.Nowrap()
 	}
 
+	ret.data.OriginalValue = item
+
 	return ret
 }
 
@@ -372,7 +376,7 @@ func (t *Table) ExportXLSX(writer io.Writer) error {
 
 	for k, table := range t.data {
 		sheet, err := f.AddSheet(fmt.Sprintf("Sheet %d", k+1))
-		must(err)
+		Must(err)
 
 		for _, v1 := range table.Rows {
 			row := sheet.AddRow()

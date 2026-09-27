@@ -14,67 +14,67 @@ import (
 func (app *App) initSystemStats() {
 	startedAt := time.Now()
 
-	currentStatsDashboard := sysadminBoard.AddDashboard(unlocalized("Requests"))
+	currentStatsDashboard := sysadminBoard.AddDashboard(Unlocalized("Requests"))
 
-	currentStatsDashboard.AddFigure(unlocalized("Current requests"), "sysadmin").Value(func(request *Request) int64 {
+	currentStatsDashboard.AddFigure(Unlocalized("Current requests"), "sysadmin").Value(func(request *Request) int64 {
 		return currentRequestCounter.Load()
 	}).RefreshTime(1)
 
-	currentStatsDashboard.AddFigure(unlocalized("Total requests from server start"), "sysadmin").Value(func(request *Request) int64 {
+	currentStatsDashboard.AddFigure(Unlocalized("Total requests from server start"), "sysadmin").Value(func(request *Request) int64 {
 		return totalRequestCounter.Load()
 	}).RefreshTime(1)
 
-	currentStatsDashboard.AddFigure(unlocalized("Form tasks"), "sysadmin").Value(func(request *Request) int64 {
+	currentStatsDashboard.AddFigure(Unlocalized("Form tasks"), "sysadmin").Value(func(request *Request) int64 {
 		return int64(len(app.formTasksMap))
 	}).RefreshTime(1)
 
-	currentStatsDashboard.AddFigure(unlocalized("Conflict checks"), "sysadmin").Value(func(request *Request) int64 {
+	currentStatsDashboard.AddFigure(Unlocalized("Conflict checks"), "sysadmin").Value(func(request *Request) int64 {
 		return int64(len(app.getCurrentConflicts()))
 	}).RefreshTime(1).URL("/admin/_conflicts")
 
-	dbStatsDashboard := sysadminBoard.AddDashboard(unlocalized("Database"))
+	dbStatsDashboard := sysadminBoard.AddDashboard(Unlocalized("Database"))
 
-	dbStatsDashboard.AddFigure(unlocalized("Idle"), "sysadmin").Value(func(request *Request) int64 {
+	dbStatsDashboard.AddFigure(Unlocalized("Idle"), "sysadmin").Value(func(request *Request) int64 {
 		return int64(app.db.Stats().Idle)
 	}).RefreshTime(1)
 
-	dbStatsDashboard.AddFigure(unlocalized("OpenConnections"), "sysadmin").Value(func(request *Request) int64 {
+	dbStatsDashboard.AddFigure(Unlocalized("OpenConnections"), "sysadmin").Value(func(request *Request) int64 {
 		return int64(app.db.Stats().OpenConnections)
 	}).RefreshTime(1)
 
-	dbStatsDashboard.AddFigure(unlocalized("MaxOpenConnections"), "sysadmin").Value(func(request *Request) int64 {
+	dbStatsDashboard.AddFigure(Unlocalized("MaxOpenConnections"), "sysadmin").Value(func(request *Request) int64 {
 		return int64(app.db.Stats().MaxOpenConnections)
 	}).RefreshTime(1)
 
-	dbStatsDashboard.AddFigure(unlocalized("InUse"), "sysadmin").Value(func(request *Request) int64 {
+	dbStatsDashboard.AddFigure(Unlocalized("InUse"), "sysadmin").Value(func(request *Request) int64 {
 		return int64(app.db.Stats().InUse)
 	}).RefreshTime(1)
 
-	dbStatsDashboard.AddFigure(unlocalized("WaitCount"), "sysadmin").Value(func(request *Request) int64 {
+	dbStatsDashboard.AddFigure(Unlocalized("WaitCount"), "sysadmin").Value(func(request *Request) int64 {
 		return int64(app.db.Stats().WaitCount)
 	}).RefreshTime(1)
 
-	dbStatsDashboard.AddFigure(unlocalized("WaitDuration"), "sysadmin").ValueString(func(request *Request) string {
+	dbStatsDashboard.AddFigure(Unlocalized("WaitDuration"), "sysadmin").ValueString(func(request *Request) string {
 		return app.db.Stats().WaitDuration.String()
 	}).RefreshTime(1)
 
-	dbStatsDashboard.AddFigure(unlocalized("MaxIdleClosed"), "sysadmin").Value(func(request *Request) int64 {
+	dbStatsDashboard.AddFigure(Unlocalized("MaxIdleClosed"), "sysadmin").Value(func(request *Request) int64 {
 		return int64(app.db.Stats().MaxIdleClosed)
 	}).RefreshTime(1)
 
-	dbStatsDashboard.AddFigure(unlocalized("MaxIdleTimeClosed"), "sysadmin").Value(func(request *Request) int64 {
+	dbStatsDashboard.AddFigure(Unlocalized("MaxIdleTimeClosed"), "sysadmin").Value(func(request *Request) int64 {
 		return int64(app.db.Stats().MaxIdleTimeClosed)
 	}).RefreshTime(1)
 
-	dbStatsDashboard.AddFigure(unlocalized("MaxLifetimeClosed"), "sysadmin").Value(func(request *Request) int64 {
+	dbStatsDashboard.AddFigure(Unlocalized("MaxLifetimeClosed"), "sysadmin").Value(func(request *Request) int64 {
 		return int64(app.db.Stats().MaxLifetimeClosed)
 	}).RefreshTime(1)
 
-	sysadminBoard.AddDashboard(unlocalized("DB import")).AddTable(func(request *Request) *Table {
+	sysadminBoard.AddDashboard(Unlocalized("DB import")).AddTable(func(request *Request) *Table {
 		ret := app.NewTable()
 
 		dbConfig, err := GetDBConnectConfig(app.codeName)
-		must(err)
+		Must(err)
 
 		ret.Row(Cell(fmt.Sprintf("mysql -u %s -p%s -f -D %s < script.sql",
 			dbConfig.User,
@@ -84,93 +84,93 @@ func (app *App) initSystemStats() {
 		return ret
 	}, "sysadmin")
 
-	sysadminBoard.AddDashboard(unlocalized("pprof command")).AddTable(func(request *Request) *Table {
+	sysadminBoard.AddDashboard(Unlocalized("pprof command")).AddTable(func(request *Request) *Table {
 		ret := app.NewTable()
 
 		ret.Row(Cell(app.getPprofProfilePath()))
 		return ret
 	}, "sysadmin")
 
-	cacheInfoDashboard := sysadminBoard.AddDashboard(unlocalized("Cache"))
-	cacheInfoDashboard.AddFigure(unlocalized("Number of items"), sysadminPermission).Value(func(r *Request) int64 {
+	cacheInfoDashboard := sysadminBoard.AddDashboard(Unlocalized("Cache"))
+	cacheInfoDashboard.AddFigure(Unlocalized("Number of items"), sysadminPermission).Value(func(r *Request) int64 {
 		return app.cache.numberOfItems()
 	}).RefreshTime(1)
-	cacheInfoDashboard.AddFigure(unlocalized("Total requests"), sysadminPermission).Value(func(r *Request) int64 {
+	cacheInfoDashboard.AddFigure(Unlocalized("Total requests"), sysadminPermission).Value(func(r *Request) int64 {
 		return app.cache.totalRequests.Load()
 	}).RefreshTime(1)
-	cacheInfoDashboard.AddFigure(unlocalized("Current requests"), sysadminPermission).Value(func(r *Request) int64 {
+	cacheInfoDashboard.AddFigure(Unlocalized("Current requests"), sysadminPermission).Value(func(r *Request) int64 {
 		return app.cache.currentRequests.Load()
 	}).RefreshTime(1)
-	cacheInfoDashboard.AddFigure(unlocalized("Reload waiting"), sysadminPermission).Value(func(r *Request) int64 {
+	cacheInfoDashboard.AddFigure(Unlocalized("Reload waiting"), sysadminPermission).Value(func(r *Request) int64 {
 		return app.cache.reloadWaiting.Load()
 	}).RefreshTime(1)
 
-	baseAppInfoDashboard := sysadminBoard.AddDashboard(unlocalized("Base app info"))
+	baseAppInfoDashboard := sysadminBoard.AddDashboard(Unlocalized("Base app info"))
 
-	baseAppInfoDashboard.AddFigure(unlocalized("App name"), sysadminPermission).ValueString(func(r *Request) string {
+	baseAppInfoDashboard.AddFigure(Unlocalized("App name"), sysadminPermission).ValueString(func(r *Request) string {
 		return app.codeName
 	})
-	baseAppInfoDashboard.AddFigure(unlocalized("App version"), sysadminPermission).ValueString(func(r *Request) string {
+	baseAppInfoDashboard.AddFigure(Unlocalized("App version"), sysadminPermission).ValueString(func(r *Request) string {
 		return app.version
 	})
-	baseAppInfoDashboard.AddFigure(unlocalized("Development mode"), sysadminPermission).ValueString(func(r *Request) string {
+	baseAppInfoDashboard.AddFigure(Unlocalized("Development mode"), sysadminPermission).ValueString(func(r *Request) string {
 		if app.developmentMode {
 			return "true"
 		}
 		return "false"
 	})
-	baseAppInfoDashboard.AddFigure(unlocalized("Started at"), sysadminPermission).ValueString(func(r *Request) string {
+	baseAppInfoDashboard.AddFigure(Unlocalized("Started at"), sysadminPermission).ValueString(func(r *Request) string {
 		return startedAt.Format(time.RFC3339)
 	})
-	baseAppInfoDashboard.AddFigure(unlocalized("Go version"), sysadminPermission).ValueString(func(r *Request) string {
+	baseAppInfoDashboard.AddFigure(Unlocalized("Go version"), sysadminPermission).ValueString(func(r *Request) string {
 		return runtime.Version()
 	})
-	baseAppInfoDashboard.AddFigure(unlocalized("Compiler"), sysadminPermission).ValueString(func(r *Request) string {
+	baseAppInfoDashboard.AddFigure(Unlocalized("Compiler"), sysadminPermission).ValueString(func(r *Request) string {
 		return runtime.Compiler
 	})
-	baseAppInfoDashboard.AddFigure(unlocalized("GOARCH"), sysadminPermission).ValueString(func(r *Request) string {
+	baseAppInfoDashboard.AddFigure(Unlocalized("GOARCH"), sysadminPermission).ValueString(func(r *Request) string {
 		return runtime.GOARCH
 	})
-	baseAppInfoDashboard.AddFigure(unlocalized("GOOS"), sysadminPermission).ValueString(func(r *Request) string {
+	baseAppInfoDashboard.AddFigure(Unlocalized("GOOS"), sysadminPermission).ValueString(func(r *Request) string {
 		return runtime.GOOS
 	})
-	baseAppInfoDashboard.AddFigure(unlocalized("GOMAXPROCS"), sysadminPermission).ValueString(func(r *Request) string {
+	baseAppInfoDashboard.AddFigure(Unlocalized("GOMAXPROCS"), sysadminPermission).ValueString(func(r *Request) string {
 		return fmt.Sprintf("%d", runtime.GOMAXPROCS(-1))
 	})
-	baseAppInfoDashboard.AddFigure(unlocalized("Localhost URL"), sysadminPermission).ValueString(func(r *Request) string {
+	baseAppInfoDashboard.AddFigure(Unlocalized("Localhost URL"), sysadminPermission).ValueString(func(r *Request) string {
 		return fmt.Sprintf("%s:%d", getLocalIP(), app.port)
 	})
 
-	osInfoDashboard := sysadminBoard.AddDashboard(unlocalized("OS info"))
+	osInfoDashboard := sysadminBoard.AddDashboard(Unlocalized("OS info"))
 
-	osInfoDashboard.AddFigure(unlocalized("EGID"), sysadminPermission).ValueString(func(r *Request) string {
+	osInfoDashboard.AddFigure(Unlocalized("EGID"), sysadminPermission).ValueString(func(r *Request) string {
 		return fmt.Sprintf("%d", os.Getegid())
 	})
-	osInfoDashboard.AddFigure(unlocalized("EUID"), sysadminPermission).ValueString(func(r *Request) string {
+	osInfoDashboard.AddFigure(Unlocalized("EUID"), sysadminPermission).ValueString(func(r *Request) string {
 		return fmt.Sprintf("%d", os.Geteuid())
 	})
-	osInfoDashboard.AddFigure(unlocalized("GID"), sysadminPermission).ValueString(func(r *Request) string {
+	osInfoDashboard.AddFigure(Unlocalized("GID"), sysadminPermission).ValueString(func(r *Request) string {
 		return fmt.Sprintf("%d", os.Getgid())
 	})
-	osInfoDashboard.AddFigure(unlocalized("Page size"), sysadminPermission).ValueString(func(r *Request) string {
+	osInfoDashboard.AddFigure(Unlocalized("Page size"), sysadminPermission).ValueString(func(r *Request) string {
 		return fmt.Sprintf("%d", os.Getpagesize())
 	})
-	osInfoDashboard.AddFigure(unlocalized("PID"), sysadminPermission).ValueString(func(r *Request) string {
+	osInfoDashboard.AddFigure(Unlocalized("PID"), sysadminPermission).ValueString(func(r *Request) string {
 		return fmt.Sprintf("%d", os.Getpid())
 	})
-	osInfoDashboard.AddFigure(unlocalized("PPID"), sysadminPermission).ValueString(func(r *Request) string {
+	osInfoDashboard.AddFigure(Unlocalized("PPID"), sysadminPermission).ValueString(func(r *Request) string {
 		return fmt.Sprintf("%d", os.Getppid())
 	})
-	osInfoDashboard.AddFigure(unlocalized("Working directory"), sysadminPermission).ValueString(func(r *Request) string {
+	osInfoDashboard.AddFigure(Unlocalized("Working directory"), sysadminPermission).ValueString(func(r *Request) string {
 		wd, _ := os.Getwd()
 		return wd
 	})
-	osInfoDashboard.AddFigure(unlocalized("Hostname"), sysadminPermission).ValueString(func(r *Request) string {
+	osInfoDashboard.AddFigure(Unlocalized("Hostname"), sysadminPermission).ValueString(func(r *Request) string {
 		hostname, _ := os.Hostname()
 		return hostname
 	})
 
-	memoryInfoDashboard := sysadminBoard.AddDashboard(unlocalized("Memory"))
+	memoryInfoDashboard := sysadminBoard.AddDashboard(Unlocalized("Memory"))
 	var mStatsExmaple runtime.MemStats
 	fieldCount := reflect.TypeOf(mStatsExmaple).NumField()
 	for i := 0; i < fieldCount; i++ {
@@ -178,7 +178,7 @@ func (app *App) initSystemStats() {
 		if field.Type.Kind() != reflect.Uint64 {
 			continue
 		}
-		memoryInfoDashboard.AddFigure(unlocalized(field.Name), sysadminPermission).Value(func(r *Request) int64 {
+		memoryInfoDashboard.AddFigure(Unlocalized(field.Name), sysadminPermission).Value(func(r *Request) int64 {
 			var mStats runtime.MemStats
 			runtime.ReadMemStats(&mStats)
 			uinvVal := reflect.ValueOf(mStats).Field(i).Uint()
@@ -187,10 +187,10 @@ func (app *App) initSystemStats() {
 
 	}
 
-	environmentDashboard := sysadminBoard.AddDashboard(unlocalized("Enviroment variables"))
+	environmentDashboard := sysadminBoard.AddDashboard(Unlocalized("Enviroment variables"))
 	for _, e := range os.Environ() {
 		pair := strings.Split(e, "=")
-		environmentDashboard.AddFigure(unlocalized(pair[0]), sysadminPermission).ValueString(func(r *Request) string {
+		environmentDashboard.AddFigure(Unlocalized(pair[0]), sysadminPermission).ValueString(func(r *Request) string {
 			return pair[1]
 		})
 
@@ -214,7 +214,7 @@ func (app *App) initSystemStats() {
 		}
 
 		return ret.ExecuteHTML()
-	}).Permission(sysadminPermission).Name(unlocalized("Routes")).Board(sysadminBoard)
+	}).Permission(sysadminPermission).Name(Unlocalized("Routes")).Board(sysadminBoard)
 
 	app.ActionUI("_authorization", func(r *Request) template.HTML {
 		ret := app.NewTable()
@@ -247,7 +247,7 @@ func (app *App) initSystemStats() {
 		}
 
 		return ret.ExecuteHTML()
-	}).Permission(sysadminPermission).Name(unlocalized("Authorization")).Board(sysadminBoard)
+	}).Permission(sysadminPermission).Name(Unlocalized("Authorization")).Board(sysadminBoard)
 
 }
 

@@ -100,7 +100,7 @@
 {{define "filter_layout2"}}
   <div class="list_filter2" data-filter-content="{{.DefaultFilterResponseJSON}}">
     <div class="list_filter2_name"></div>
-    <input class="list_filter2_input">
+    <input class="list_filter2_input"  {{if .Focused}}autofocus{{end}}>
     <div class="list_filter2_close hidden">
       <img src="/admin/api/icons?file=glyphicons-basic-599-menu-close.svg&color={{PragoBaseColor}}" class="list_filter2_close_icon">
     </div>

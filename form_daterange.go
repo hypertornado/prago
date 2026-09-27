@@ -14,32 +14,32 @@ type dateRange struct {
 
 var defaultDateRanges = []dateRange{
 	{
-		Name: unlocalized("Předevčírem"),
+		Name: Unlocalized("Předevčírem"),
 		DateRange: func() [2]time.Time {
 			return [2]time.Time{time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, -2)}
 		},
 	},
 	{
-		Name: unlocalized("Včera"),
+		Name: Unlocalized("Včera"),
 		DateRange: func() [2]time.Time {
 			return [2]time.Time{time.Now().AddDate(0, 0, -1), time.Now().AddDate(0, 0, -1)}
 		},
 	},
 	{
-		Name: unlocalized("Dnes"),
+		Name: Unlocalized("Dnes"),
 		DateRange: func() [2]time.Time {
 			return [2]time.Time{time.Now(), time.Now()}
 		},
 		Highlight: true,
 	},
 	{
-		Name: unlocalized("Zítra"),
+		Name: Unlocalized("Zítra"),
 		DateRange: func() [2]time.Time {
 			return [2]time.Time{time.Now().AddDate(0, 0, 1), time.Now().AddDate(0, 0, 1)}
 		},
 	},
 	{
-		Name: unlocalized("Pozítří"),
+		Name: Unlocalized("Pozítří"),
 		DateRange: func() [2]time.Time {
 			return [2]time.Time{time.Now().AddDate(0, 0, 2), time.Now().AddDate(0, 0, 2)}
 		},
@@ -117,7 +117,7 @@ func (app *App) AddCustomDateRange(tm [2]time.Time) {
 		DateRange: func() [2]time.Time {
 			return tm
 		},
-		Name: unlocalized(fmt.Sprintf("%s – %s", tm[0].Format("2. 1. 2006"), tm[1].Format("2. 1. 2006"))),
+		Name: Unlocalized(fmt.Sprintf("%s – %s", tm[0].Format("2. 1. 2006"), tm[1].Format("2. 1. 2006"))),
 	}
 	app.customDateRanges = append(app.customDateRanges, dr)
 }
@@ -160,7 +160,7 @@ func (app *App) initDateRange() {
 			return
 		}
 		fv.Data(dateStr)
-	}).Permission("everybody").Name(unlocalized("Vybrat interval")).Icon("glyphicons-basic-58-history.svg")
+	}).Permission("everybody").Name(Unlocalized("Vybrat interval")).Icon("glyphicons-basic-58-history.svg")
 
 }
 

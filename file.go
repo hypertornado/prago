@@ -106,7 +106,7 @@ func (app *App) afterInitFilesResource() {
 
 		for _, v := range multipartFiles {
 			file, err := app.UploadFile(v, request, description)
-			must(err)
+			Must(err)
 			uuids = append(uuids, file.UID)
 		}
 		request.WriteJSON(200, uuids)
@@ -144,7 +144,7 @@ func (app *App) afterInitFilesResource() {
 			return
 		}
 		fv.Data(strings.Join(retIDs, ","))
-	}).Permission(resource.canUpdate).Name(unlocalized("Vložit UUID"))
+	}).Permission(resource.canUpdate).Name(Unlocalized("Vložit UUID"))
 
 	app.PopupForm("edit-uuid-files", func(form *Form, request *Request) {
 		form.AddText("ids", "ID").SetValue(request.Param("ids")).SetFocused()
@@ -173,7 +173,7 @@ func (app *App) afterInitFilesResource() {
 		}
 		fv.Redirect("/")
 		fv.Data(strings.Join(retIDs, ","))
-	}).Permission(resource.canUpdate).Name(unlocalized("Upravit UUID"))
+	}).Permission(resource.canUpdate).Name(Unlocalized("Upravit UUID"))
 
 	app.NewAPI("imagepicker").Permission(loggedPermission).HandlerJSON(imagePickerAPIHandler)
 
@@ -217,7 +217,7 @@ func (app *App) afterInitFilesResource() {
 		}
 		fv.AddError("No size selected")
 
-	}).Name(unlocalized("Download")).Icon("glyphicons-basic-199-save.svg")
+	}).Name(Unlocalized("Download")).Icon("glyphicons-basic-199-save.svg")
 
 	app.ActionResourceItemUI("metadata", func(file *File, request *Request) template.HTML {
 		metadata, err := filesCDN.GetMetadata(file.UID)
@@ -254,7 +254,7 @@ func (app *App) afterInitFilesResource() {
 
 		return table.ExecuteHTML()
 
-	}).Name(unlocalized("CDN Metadata")).Icon("glyphicons-basic-501-server.svg")
+	}).Name(Unlocalized("CDN Metadata")).Icon("glyphicons-basic-501-server.svg")
 
 	app.ActionResourceItemUI("connections", func(file *File, request *Request) template.HTML {
 		table := app.NewTable()
@@ -309,13 +309,13 @@ func (app *App) afterInitFilesResource() {
 		}
 
 		return table.ExecuteHTML()
-	}).Name(unlocalized("Connections")).Icon("glyphicons-basic-63-paperclip.svg")
+	}).Name(Unlocalized("Connections")).Icon("glyphicons-basic-63-paperclip.svg")
 
-	app.AddItemStatistic(unlocalized("UUID"), app.FilesResource.canView, func(file *File) string {
+	app.AddItemStatistic(Unlocalized("UUID"), app.FilesResource.canView, func(file *File) string {
 		return file.UID
 	})
 
-	app.AddItemStatistic(unlocalized("Connections"), app.FilesResource.canView, func(file *File) string {
+	app.AddItemStatistic(Unlocalized("Connections"), app.FilesResource.canView, func(file *File) string {
 		var totalConnections int64
 		for _, resource := range app.resources {
 			for _, field := range resource.fields {
@@ -382,7 +382,7 @@ func (app *App) afterInitFilesResource() {
 				}
 			}
 		},
-	).setPriority(1000000).Permission(resource.canUpdate).Name(unlocalized("Nahrát soubor"))
+	).setPriority(1000000).Permission(resource.canUpdate).Name(Unlocalized("Nahrát soubor"))
 }
 
 type fileUploadResponse struct {

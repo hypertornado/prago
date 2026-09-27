@@ -137,7 +137,7 @@ func (app *App) initUserResource() {
 
 		fv.AddOK("Uživatel odhlášen ze všech session")
 
-	}).Permission("sysadmin").Name(unlocalized("Odhlásit"))
+	}).Permission("sysadmin").Name(Unlocalized("Odhlásit"))
 
 	app.initUserAPI()
 }
@@ -196,6 +196,7 @@ func (app *App) afterInitUserResource() {
 	initUserLogin(app)
 	initUserSettings(app)
 	initUserRenew(app)
+	initUserPreference(app)
 }
 
 func (app *App) GetCachedUserEmail(id int64) string {

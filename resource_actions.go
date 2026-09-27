@@ -30,7 +30,12 @@ func (resource *Resource) initDefaultResourceActions() {
 		var item any = reflect.New(resource.typ).Interface()
 		queryData := request.Request().URL.Query()
 		for k, v := range resource.defaultValues {
-			queryData.Set(k, v(request))
+			if queryData.Get(k) == "" {
+				defaultValue := v(request)
+				if defaultValue != "" {
+					queryData.Set(k, defaultValue)
+				}
+			}
 		}
 		resource.bindData(item, request, queryData)
 		form.initWithResourceItem(resource, item, request)
@@ -50,12 +55,12 @@ func (resource *Resource) initDefaultResourceActions() {
 				count, _ := resource.query(request.Request().Context()).count()
 				resource.setOrderPosition(item, count+1)
 			}
-			must(resource.createWithLog(item, request))
+			Must(resource.createWithLog(item, request))
 
 			preview := resource.previewer(request, item).Preview(nil)
 			vc.(*formValidation).validationData.Data = preview
 
-			must(resource.app.NewNotification(resource.previewer(request, item).Name()).
+			Must(resource.app.NewNotification(resource.previewer(request, item).Name()).
 				SetImage(resource.previewer(request, item).ThumbnailURL()).
 				SetPreName(messages.Get(request.Locale(), "item_created")).
 				Flash(request))
@@ -124,7 +129,7 @@ func (resource *Resource) initDefaultResourceActions() {
 			fmt.Println(vc.errors)
 			fv.(*formValidation).validationData.Errors = vc.errors
 			if vc.Valid() {
-				must(resource.deleteWithLog(item, request))
+				Must(resource.deleteWithLog(item, request))
 				request.AddFlashMessage(messages.Get(request.Locale(), "item_deleted"))
 				fv.Redirect(resource.getURL(""))
 			}
@@ -205,7 +210,7 @@ func (resource *Resource) deleteWithLog(item any, request UserData) error {
 func (resource *Resource) editItemWithLogAndValues(request *Request, values url.Values) (any, *itemValidation) {
 	user := request
 	id, err := strconv.Atoi(values.Get("id"))
-	must(err)
+	Must(err)
 
 	beforeItem := resource.query(request.r.Context()).ID(id)
 	if beforeItem == nil {
@@ -220,7 +225,7 @@ func (resource *Resource) editItemWithLogAndValues(request *Request, values url.
 	err = resource.bindData(
 		item, user, values,
 	)
-	must(err)
+	Must(err)
 
 	itemValidation := resource.validateUpdate(item, request)
 	resource.validateConflict(request, itemValidation, int64(id))
@@ -229,7 +234,7 @@ func (resource *Resource) editItemWithLogAndValues(request *Request, values url.
 	}
 
 	err = resource.updateWithLog(item, request)
-	must(err)
+	Must(err)
 	return item, itemValidation
 }
 
@@ -257,7 +262,7 @@ func (resource *Resource) updateWithLog(item any, request *Request) error {
 		return fmt.Errorf("can't save item (%d): %s", id, err)
 	}
 
-	must(
+	Must(
 		resource.logActivity(request, beforeItem, item),
 	)
 

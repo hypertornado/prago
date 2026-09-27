@@ -32,6 +32,10 @@ func (ft *fieldType) helpURL() string {
 	if ft.id == "markdown" {
 		return "/admin/help/markdown"
 	}
+
+	if ft.id == "icon" {
+		return "/admin/help/icons"
+	}
 	return ""
 }
 
@@ -313,7 +317,7 @@ func (app *App) initDefaultFieldTypes() {
 
 		getViewFieldContent: func(request *Request, field *Field, value any) *ViewContent {
 			htmlContent, err := markdownToHTML(value.(string))
-			must(err)
+			Must(err)
 
 			var empty bool
 			if htmlContent == "" {

@@ -45,13 +45,13 @@ func TestValidation(t *testing.T) {
 
 		var a = &AStruct{}
 
-		must(app.Create(a))
+		Must(app.Create(a))
 
 		if _, ok := app.CheckDeleteValidation(a, app.TestUserData("")); !ok {
 			t.Fatal("should be able to delete")
 		}
 
-		must(app.Create(&RelatedStruct{
+		Must(app.Create(&RelatedStruct{
 			AStruct: a.ID,
 		}))
 
@@ -77,13 +77,13 @@ func TestValidation(t *testing.T) {
 
 		var a = &AStruct{}
 
-		must(app.Create(a))
+		Must(app.Create(a))
 
 		if _, ok := app.CheckDeleteValidation(a, app.TestUserData("")); !ok {
 			t.Fatal("should be able to delete")
 		}
 
-		must(app.Create(&RelatedStruct{
+		Must(app.Create(&RelatedStruct{
 			AStruct: fmt.Sprintf(";%d;", a.ID),
 		}))
 

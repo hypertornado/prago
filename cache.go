@@ -48,8 +48,9 @@ func (app *App) initCache() {
 		app.ClearCache()
 		fv.AddOK("Cache smazána")
 
-	}).Permission(sysadminPermission).Name(unlocalized("Smazat cache")).Board(app.optionsBoard).Icon("glyphicons-basic-246-clean.svg")
+	}).Permission(sysadminPermission).Name(Unlocalized("Smazat cache")).Board(app.optionsBoard).Icon("glyphicons-basic-246-clean.svg")
 
+	app.initCachePermanent()
 }
 
 func (item *cacheItem) isStale() bool {
@@ -142,15 +143,6 @@ func loadCache[T any](cache *cache, name string, createFn func() T) T {
 	item.accessCount.Add(1)
 	item.lastAccess.Set(time.Now())
 	return item.getValue().(T)
-}
-
-func cachedChan[T any](app *App, name string, createFn func() T) chan T {
-	ret := make(chan T)
-	go func() {
-		val := loadCache(app.cache, name, createFn)
-		ret <- val
-	}()
-	return ret
 }
 
 func (app *App) Cached[T any](name string, createFn func() T) T {

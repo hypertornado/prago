@@ -46,7 +46,7 @@ func (beacon *Beacon) UpdateInt() {
 }
 
 func (app *App) initBeacons() {
-	app.NewResource[Beacon]().Name(unlocalized("Beacon"), unlocalized("Beacony")).Board(app.optionsBoard)
+	app.NewResource[Beacon]().Name(Unlocalized("Beacon"), Unlocalized("Beacony")).Board(app.optionsBoard)
 
 	app.SetLogHandler(func(typ, message string) {
 		defer func() {
@@ -65,11 +65,11 @@ func (app *App) initBeacons() {
 
 	app.Handle("POST", "/beacon", func(request *Request) {
 		data, err := io.ReadAll(request.Request().Body)
-		must(err)
+		Must(err)
 
 		var beaconRequest BeaconRequest
 		err = json.Unmarshal(data, &beaconRequest)
-		must(err)
+		Must(err)
 
 		beacon := &Beacon{
 			Name:    beaconRequest.Name,
@@ -84,7 +84,7 @@ func (app *App) initBeacons() {
 		}
 
 		beacon.UpdateInt()
-		must(app.Create(beacon))
+		Must(app.Create(beacon))
 	})
 
 	go deleteOldBeacons(app)
@@ -99,7 +99,7 @@ func (app *App) InternalBeacon(typ, val1, val2, val3 string) {
 		Value3Str: val3,
 	}
 	beacon.UpdateInt()
-	must(app.Create(beacon))
+	Must(app.Create(beacon))
 }
 
 func deleteOldBeacons(app *App) {

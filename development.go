@@ -50,7 +50,7 @@ func (app *App) initDevelopment() {
 		Callback(
 			func() {
 				app.startDevelopment()
-				must(app.migrate(false))
+				Must(app.migrate(false))
 				err := app.listenAndServe(port)
 				if err != nil {
 					panic(err)

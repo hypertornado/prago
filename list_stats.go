@@ -108,7 +108,7 @@ func (app *App) initListStats() {
 			}
 		}
 		fv.AfterContent(table.ExecuteHTML())
-	}).Permission(loggedPermission).Name(unlocalized("Statistiky")).Icon("glyphicons-basic-43-stats-circle.svg")
+	}).Permission(loggedPermission).Name(Unlocalized("Statistiky")).Icon("glyphicons-basic-43-stats-circle.svg")
 
 }
 

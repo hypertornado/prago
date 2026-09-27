@@ -33,7 +33,7 @@ func (app *App) initSettings() {
 	app.settings.resource.PermissionView("sysadmin")
 	app.settings.resource.Board(sysadminBoard)
 
-	must(app.settings.resource.migrate(false))
+	Must(app.settings.resource.migrate(false))
 	initDefaultSettings(app)
 }
 
@@ -47,7 +47,7 @@ func (app *App) NewSetting(id string, permission Permission) *Setting {
 	setting := &Setting{
 		app:        app,
 		id:         id,
-		name:       unlocalized(id),
+		name:       Unlocalized(id),
 		permission: permission,
 	}
 
@@ -74,7 +74,7 @@ func (setting *Setting) ValueChangeCallback(fn func()) *Setting {
 
 func (setting *Setting) GetValue() string {
 	ret, err := setting.app.getSetting(setting.id)
-	must(err)
+	Must(err)
 	return ret
 }
 
@@ -112,7 +112,7 @@ func (app *App) getSetting(id string) (string, error) {
 
 func (app *App) mustGetSetting(id string) string {
 	val, err := app.getSetting(id)
-	must(err)
+	Must(err)
 	return val
 }
 

@@ -43,7 +43,7 @@ type listItemActions struct {
 
 func (actions *listItemActions) JSON() template.HTMLAttr {
 	b, err := json.Marshal(actions)
-	must(err)
+	Must(err)
 	return template.HTMLAttr(b)
 }
 
@@ -72,17 +72,7 @@ func (resource *Resource) getListContent(request *Request, params url.Values) (r
 		columnsMap[v] = true
 	}
 
-	orderBy := resource.orderByColumn
-	if params.Get("_order") != "" {
-		orderBy = params.Get("_order")
-	}
-	orderDesc := resource.orderDesc
-	if params.Get("_desc") == "true" {
-		orderDesc = true
-	}
-	if params.Get("_desc") == "false" {
-		orderDesc = false
-	}
+	orderBy, orderDesc := resource.getOrderFromParams(request, params)
 
 	q := resource.query(ctx)
 	if orderDesc {

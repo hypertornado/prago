@@ -199,7 +199,7 @@ func (app *App) initFormTask() {
 		app.stopFormTask(request.Param("uuid"))
 		task := app.getFormTaskActivity(request.Param("uuid"))
 		fv.Data(task.toView())
-	}).Permission(everybodyPermission).Name(unlocalized("Ukončuji úlohu…"))
+	}).Permission(everybodyPermission).Name(Unlocalized("Ukončuji úlohu…"))
 
 	app.ActionForm("form-task-example", func(form *Form, request *Request) {
 		form.AddSubmit("Spustit")
@@ -216,6 +216,6 @@ func (app *App) initFormTask() {
 			return nil
 		})
 
-	}).Permission("sysadmin").Name(unlocalized("Form úloha vzor")).Board(sysadminBoard)
+	}).Permission("sysadmin").Name(Unlocalized("Form úloha vzor")).Board(sysadminBoard)
 
 }

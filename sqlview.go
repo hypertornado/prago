@@ -93,7 +93,7 @@ func (app *App) initSQLView() {
 			}
 		}
 		return table.ExecuteHTML()
-	}).Permission("sysadmin").Board(sysadminBoard).Name(unlocalized("SQL View"))
+	}).Permission("sysadmin").Board(sysadminBoard).Name(Unlocalized("SQL View"))
 
 }
 

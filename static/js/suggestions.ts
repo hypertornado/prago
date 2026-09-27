@@ -58,9 +58,6 @@ class Suggestions {
           var item = data.Suggestions[i];
           var el = createSuggestionsPreviewEl(item, false);
           el.classList.add("picker_suggestion");
-          /*el.addEventListener("mouseleave", () => {
-            this.unselect();
-          });*/
           el.setAttribute("data-position", i + "");
           el.addEventListener("mousedown", (e: Event) => {
             e.preventDefault();
@@ -70,36 +67,14 @@ class Suggestions {
           this.suggestionsEl.appendChild(el);
         }
 
-        if (data.Button) {
-          let buttonEl = document.createElement("a");
+        if (data.Buttons) {
+          let buttonsEl = document.createElement("div");
+          buttonsEl.classList.add("picker_buttons");
+          this.suggestionsEl.appendChild(buttonsEl);
 
-          let buttonElIcon = document.createElement("img");
-          buttonElIcon.setAttribute(
-            "src",
-            "/admin/api/icons?file=glyphicons-basic-371-plus.svg&color=${getBaseColor}",
-          );
-          buttonElIcon.classList.add("btn_icon");
-
-          let buttonElText = document.createElement("span");
-          buttonElText.innerText = data.Button.Name;
-
-          buttonEl.appendChild(buttonElIcon);
-          buttonEl.appendChild(buttonElText);
-
-          buttonEl.classList.add("btn", "picker_button");
-          buttonEl.addEventListener("click", (e) => {
-            this.suggestionsEl.classList.add("hidden");
-            let popupForm = new PopupForm(data.Button.FormURL, (data: any) => {
-              this.returnData(data.Data);
-            });
-            e.preventDefault();
-            e.stopPropagation();
-          });
-          buttonEl.addEventListener("mousedown", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          });
-          this.suggestionsEl.appendChild(buttonEl);
+          for (var i = 0; i < data.Buttons.length; i++) {
+            buttonsEl.appendChild(this.createButton(data.Buttons[i]));
+          }
         }
 
         initTooltips();
@@ -110,6 +85,40 @@ class Suggestions {
       }
     });
     request.send();
+  }
+
+  createButton(data: any): HTMLAnchorElement {
+    let buttonEl = document.createElement("a");
+    buttonEl.classList.add("btn", "picker_button");
+
+    if (data.Icon) {
+      let buttonElIcon = document.createElement("img");
+      buttonElIcon.setAttribute(
+        "src",
+        `/admin/api/icons?file=${data.Icon}&color=${getBaseColor()}`,
+      );
+      buttonElIcon.classList.add("btn_icon");
+      buttonEl.appendChild(buttonElIcon);
+    }
+
+    let buttonElText = document.createElement("span");
+    buttonElText.innerText = data.Name;
+    buttonEl.appendChild(buttonElText);
+
+    buttonEl.addEventListener("click", (e) => {
+      this.suggestionsEl.classList.add("hidden");
+      let popupForm = new PopupForm(data.URL, (data: any) => {
+        this.returnData(data.Data);
+      });
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    buttonEl.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    return buttonEl;
   }
 
   suggestionClick() {

@@ -84,8 +84,8 @@ func (app *App) NewResource[T any]() *Resource {
 		app: app,
 		id:  columnName(defaultName),
 
-		singularName: unlocalized(defaultName),
-		pluralName:   unlocalized(defaultName),
+		singularName: Unlocalized(defaultName),
+		pluralName:   Unlocalized(defaultName),
 
 		activityLog: true,
 
@@ -129,7 +129,7 @@ func (app *App) NewResource[T any]() *Resource {
 	}
 
 	ret.resourceBoard.mainDashboard = &Dashboard{
-		name:  unlocalized(""),
+		name:  Unlocalized(""),
 		board: ret.resourceBoard,
 	}
 
@@ -138,18 +138,18 @@ func (app *App) NewResource[T any]() *Resource {
 }
 
 func (resource *Resource) afterInit() {
-	statsDashboard := resource.resourceBoard.AddDashboard(unlocalized(""))
-	statsDashboard.AddFigure(unlocalized(""), resource.canView).Value(func(r *Request) int64 {
+	statsDashboard := resource.resourceBoard.AddDashboard(Unlocalized(""))
+	statsDashboard.AddFigure(Unlocalized(""), resource.canView).Value(func(r *Request) int64 {
 		c, _ := resource.query(context.Background()).count()
 		return c
-	}).Unit(unlocalized("položek")).URL(fmt.Sprintf("/admin/%s/list", resource.id))
+	}).Unit(Unlocalized("položek")).URL(fmt.Sprintf("/admin/%s/list", resource.id))
 
 	if resource.activityLog {
-		statsDashboard.AddFigure(unlocalized(""), resource.canUpdate).Value(func(request *Request) int64 {
+		statsDashboard.AddFigure(Unlocalized(""), resource.canUpdate).Value(func(request *Request) int64 {
 			q := resource.app.activityLogResource.query(context.Background())
 			c, _ := q.Is("resourcename", resource.id).count()
 			return c
-		}).Unit(unlocalized("úprav")).URL(fmt.Sprintf("/admin/%s/_history", resource.id))
+		}).Unit(Unlocalized("úprav")).URL(fmt.Sprintf("/admin/%s/_history", resource.id))
 	}
 
 	resource.initResourceTimelines()
@@ -225,13 +225,13 @@ func (resource *Resource) ItemsPerPage(itemsPerPage int64) *Resource {
 }
 
 func (resource *Resource) PermissionView(permission Permission) *Resource {
-	must(resource.app.validatePermission(permission))
+	Must(resource.app.validatePermission(permission))
 	resource.canView = permission
 	return resource
 }
 
 func (resource *Resource) PermissionUpdate(permission Permission) *Resource {
-	must(resource.app.validatePermission(permission))
+	Must(resource.app.validatePermission(permission))
 	if resource.canCreate == loggedPermission {
 		resource.canCreate = permission
 	}
@@ -243,19 +243,19 @@ func (resource *Resource) PermissionUpdate(permission Permission) *Resource {
 }
 
 func (resource *Resource) PermissionCreate(permission Permission) *Resource {
-	must(resource.app.validatePermission(permission))
+	Must(resource.app.validatePermission(permission))
 	resource.canCreate = permission
 	return resource
 }
 
 func (resource *Resource) PermissionDelete(permission Permission) *Resource {
-	must(resource.app.validatePermission(permission))
+	Must(resource.app.validatePermission(permission))
 	resource.canDelete = permission
 	return resource
 }
 
 func (resource *Resource) PermissionExport(permission Permission) *Resource {
-	must(resource.app.validatePermission(permission))
+	Must(resource.app.validatePermission(permission))
 	resource.canExport = permission
 	return resource
 }

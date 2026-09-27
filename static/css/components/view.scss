@@ -71,6 +71,12 @@
   @include softShadow;
 }
 
+.view_content_name {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .view_content_icon {
   aspect-ratio: 1;
   width: 1em;

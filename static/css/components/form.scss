@@ -471,7 +471,9 @@
   object-fit: cover;
   width: 40px;
   border-radius: 4px;
+  flex-shrink: 0;
   @include softShadow;
+  background-color: $backgroundGrayColor;
   aspect-ratio: 1;
 }
 
@@ -497,6 +499,17 @@
 .form_radio_prename, .form_radio_postname {
   font-size: .8rem;
   line-height: 1.3em;
+}
+
+.form_radio_textafter {
+  font-size: .8rem;
+  line-height: 1.3em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .form_progress {

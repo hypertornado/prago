@@ -36,7 +36,7 @@ func (app *App) SetIcons(iconsFS embed.FS, prefix string) {
 	for _, v := range filenames {
 		selectData = append(selectData, &Enum{
 			ID:   v,
-			Name: unlocalized(v),
+			Name: Unlocalized(v),
 			Icon: v,
 		})
 	}
@@ -117,7 +117,7 @@ func (app *App) initIcons() {
 		request.Response().Header().Add("Cache-Control", "max-age=604800")
 
 		file, err := app.iconsFS.Open(app.iconsPrefix + request.Param("file"))
-		must(err)
+		Must(err)
 		defer file.Close()
 
 		color := request.Param("color")
@@ -136,12 +136,12 @@ func (app *App) initIcons() {
 		io.Copy(request.Response(), file)
 	})
 
-	app.AddHelp("icons", unlocalized("Ikony"), func(request *Request) template.HTML {
+	app.AddHelp("icons", loggedPermission, Unlocalized("Ikony"), "glyphicons-basic-157-thumbnails.svg", func(request *Request) template.HTML {
 		prefix := app.iconsPrefix
 		prefix = strings.TrimRight(prefix, "/")
 
 		icons, err := app.iconsFS.ReadDir(prefix)
-		must(err)
+		Must(err)
 
 		var ret []string
 		for _, v := range icons {

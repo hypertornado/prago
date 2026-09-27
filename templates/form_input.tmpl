@@ -246,6 +246,9 @@
           {{if $item.DescriptionAfter}}
             <div class="form_radio_postname">{{$item.DescriptionAfter}}</div>
           {{end}}
+          {{if $item.TextAfter}}
+            <div class="form_radio_textafter" data-tooltip="{{$item.TextAfter}}">{{$item.TextAfter}}</div>
+          {{end}}
         </div>
         {{if .Button}}
           <a href="{{.Button.URL}}" class="btn form_radio_btn">

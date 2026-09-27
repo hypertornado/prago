@@ -73,11 +73,11 @@ func (field *Field) addValidationStrongRelation() {
 		if field.typ.Kind() == reflect.String {
 			var err error
 			relatedCount, err = field.resource.query(context.Background()).where(fmt.Sprintf("%s LIKE '%%;%d;%%'", field.id, fieldID)).count()
-			must(err)
+			Must(err)
 		} else {
 			var err error
 			relatedCount, err = field.resource.query(context.Background()).Is(field.id, fieldID).count()
-			must(err)
+			Must(err)
 		}
 
 		if relatedCount > 0 {

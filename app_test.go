@@ -282,8 +282,8 @@ func TestResourceUnique(t *testing.T) {
 
 	resource := getResource[ResourceStructUnique](app)
 
-	must(resource.app.Create(&ResourceStructUnique{UniqueName: "A"}))
-	must(resource.app.Create(&ResourceStructUnique{UniqueName: "B"}))
+	Must(resource.app.Create(&ResourceStructUnique{UniqueName: "A"}))
+	Must(resource.app.Create(&ResourceStructUnique{UniqueName: "B"}))
 	err := resource.app.Create(&ResourceStructUnique{UniqueName: "A"})
 	if err == nil {
 		t.Fatal("Should fail")
@@ -333,7 +333,7 @@ func TestPartialSave(t *testing.T) {
 	resource := prepareResource(t)
 
 	item := &ResourceStruct{Name: "A", Text: "B"}
-	must(resource.app.Create(item))
+	Must(resource.app.Create(item))
 
 	item.Name = "X"
 	item.Text = "Y"
@@ -341,7 +341,7 @@ func TestPartialSave(t *testing.T) {
 	err := resource.saveItem(context.Background(), item, map[string]bool{
 		"Name": true,
 	}, false)
-	must(err)
+	Must(err)
 
 	item2 := resource.app.Query[ResourceStruct]().ID(item.ID)
 	if item2.Name != "X" {

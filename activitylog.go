@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"strconv"
 	"strings"
 	"time"
@@ -57,7 +58,7 @@ func (app *App) getHistorySelect(request *Request, resource *Resource, itemID in
 	}
 
 	total, err := q.Count()
-	must(err)
+	Must(err)
 
 	pages := total / activityItemsPerPage
 	for i := 0; i <= int(pages); i++ {
@@ -90,7 +91,7 @@ func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int
 	q.In("user", request.Param("user"))
 
 	total, err := q.Count()
-	must(err)
+	Must(err)
 
 	offset := activityItemsPerPage * (int64(page) - 1)
 
@@ -157,9 +158,10 @@ func (app *App) getHistoryTable(request *Request, resource *Resource, itemID int
 		}
 
 		actionCell.Button(&Button{
-			Title: "Detail",
-			Icon:  iconView,
-			URL:   activityURL,
+			Name:    "Zobrazit změnu",
+			Icon:    iconView,
+			OnClick: template.JS(fmt.Sprintf("popup(\"%s\")", activityURL)),
+			//URL:     activityURL,
 		})
 
 		itemCell := Cell([2]string{resource.getURL(fmt.Sprintf("%d", v.ItemID)), itemName})
@@ -192,16 +194,25 @@ func humanizeActionType(in string) string {
 	return in
 }
 
+func humanizeActionTypePast(in string) string {
+	if in == "delete" {
+		return "Smazal"
+	}
+	if in == "new" {
+		return "Vytvořil"
+	}
+	if in == "edit" {
+		return "Upravil"
+	}
+	return in
+}
+
 func (app *App) initActivityLog() {
 
-	app.ActionForm("_activity", func(form *Form, request *Request) {
+	app.PopupForm("_activity", func(form *Form, request *Request) {
 		id := request.Param("id")
-		form.AddText("id", "ID úpravy").SetValue(id)
-		form.AddSubmit("Zobrazit")
-
-		if id != "" {
-			form.AutosubmitFirstTime = true
-		}
+		form.AddHidden("id").SetValue(id)
+		form.AutosubmitFirstTime = true
 	}, func(fv FormValidation, request *Request) {
 		table := app.NewTable()
 
@@ -217,30 +228,30 @@ func (app *App) initActivityLog() {
 			return
 		}
 
-		table.Row(Cell("Editace:").Header(), Cell(fmt.Sprintf("#%d", activity.ID)).Colspan(2).URL(fmt.Sprintf("/admin/activitylog/%d", activity.ID)))
-		table.Row(Cell("Tabulka:").Header(), Cell(resource.pluralName(request.Locale())).Colspan(2).URL(resource.getURL("")))
-		table.Row(Cell("Položka:").Header(), Cell(fmt.Sprintf("#%d", activity.ItemID)).Colspan(2).URL(resource.getURL(fmt.Sprintf("%d", activity.ItemID))))
-		table.Row(Cell("Typ akce:").Header(), Cell(activity.ActionType).Colspan(2))
-		table.Row(Cell("Upraveno:").Header(), Cell(activity.CreatedAt.Format("2006-01-02 15:04:05")).Colspan(2))
-
-		user := app.Query[user]().ID(activity.User)
-		if user != nil {
-			var userNames []string
-			userNames = append(userNames, fmt.Sprintf("#%d", user.ID))
-			if user.Username != "" {
-				userNames = append(userNames, user.Username)
-			}
-			if user.Name != "" {
-				userNames = append(userNames, user.Name)
-			}
-			if user.Email != "" {
-				userNames = append(userNames, user.Email)
-			}
-			table.Row(Cell("Upraveno uživatelem:").Header(), Cell(strings.Join(userNames, " · ")).Colspan(2).URL(fmt.Sprintf("/admin/user/%d", user.ID)))
+		item := resource.query(context.Background()).ID(activity.ItemID)
+		var itemName string
+		if item != nil {
+			itemName = resource.previewer(request, item).Name()
+		} else {
+			itemName = fmt.Sprintf("#%d", activity.ItemID)
 		}
+
+		//table.Row(Cell("Editace").Header(), Cell(fmt.Sprintf("#%d", activity.ID)).Colspan(2).URL(fmt.Sprintf("/admin/activitylog/%d", activity.ID)))
+		//table.Row(Cell("Tabulka").Header(), Cell(resource.pluralName(request.Locale())).Colspan(2).URL(resource.getURL("")))
+		table.Row(Cell(resource.singularName(request.Locale())).Header(), Cell(itemName).Colspan(2).URL(resource.getURL(fmt.Sprintf("%d", activity.ItemID))))
+		//table.Row(Cell("Typ akce").Header(), Cell(activity.ActionType).Colspan(2))
+		//table.Row(Cell("Upraveno").Header(), Cell(activity.CreatedAt.Format("2. 1. 2006 15:04:05")).Colspan(2))
+		//Cell(app.GetUserName(activity.User)).Colspan(2).URL(fmt.Sprintf("/admin/user/%d", activity.User))
+		userCell := Cell(app.GetUserName(activity.User)).Colspan(2).URL(fmt.Sprintf("/admin/user/%d", activity.User))
+		userCell.DescriptionAfter(activity.CreatedAt.Format("2. 1. 2006 15:04:05"))
+		userCell.DescriptionAfter(fmt.Sprintf("Úprava #%d", activity.ID))
+
+		table.Row(Cell(humanizeActionTypePast(activity.ActionType)).Header(), userCell)
 
 		fromMap := getDiffMap(activity.ContentBefore)
 		toMap := getDiffMap(activity.ContentAfter)
+
+		table.AddTable()
 
 		table.Header("Jméno pole", "Před", "Po")
 
@@ -270,7 +281,7 @@ func (app *App) initActivityLog() {
 
 		fv.AfterContent(table.ExecuteHTML())
 
-	}).Permission("logged").Name(unlocalized("Úpravy")).Icon(iconActivity).Board(app.optionsBoard)
+	}).Permission("logged").Name(Unlocalized("Úprava")).Icon(iconActivity)
 
 	app.activityLogResource = app.NewResource[activityLog]()
 	app.activityLogResource.Board(sysadminBoard)
@@ -319,7 +330,7 @@ func getDiffMap(inStr string) map[string]string {
 	if inStr == "" {
 		return ret
 	}
-	must(json.Unmarshal([]byte(inStr), &objectMap))
+	Must(json.Unmarshal([]byte(inStr), &objectMap))
 
 	for k, v := range objectMap {
 		ret[strings.ToLower(k)] = fmt.Sprintf("%v", v)

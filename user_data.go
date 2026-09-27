@@ -1,6 +1,7 @@
 package prago
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -36,7 +37,20 @@ func (app *App) initUserDataCache() {
 
 func (app *App) GetUserData(id int64) *userData {
 	return app.userDataCacheGet(id)
+}
 
+func (app *App) GetUserName(id int64) string {
+	if id == 0 {
+		return ""
+	}
+	ud := app.userDataCacheGet(id)
+	if ud != nil {
+		name := ud.Name()
+		if name != "" {
+			return name
+		}
+	}
+	return fmt.Sprintf("#%d", id)
 }
 
 func (app *App) userDataCacheGet(id int64) *userData {
