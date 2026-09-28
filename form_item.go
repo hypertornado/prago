@@ -40,7 +40,7 @@ type FormItem struct {
 
 	FormFilterID string
 
-	SuggestionURL string
+	SuggestionsCustom *SuggestionsCustom
 
 	IsWide                 bool
 	PreventPasswordManager bool

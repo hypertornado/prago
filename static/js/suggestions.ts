@@ -2,13 +2,13 @@ class Suggestions {
   pickerInput: HTMLInputElement;
   suggestionsEl: HTMLDivElement;
   suggestions: any;
-  searchURL: (q: string) => string;
+  searchData: (q: string) => any;
   returnData: (data: any) => void;
 
   constructor(
     suggestionEl: HTMLDivElement,
     pickerInput: HTMLInputElement,
-    searchURL: (q: string) => string,
+    searchData: (q: string) => any,
     returnData: (data: any) => void
   ) {
     this.suggestionsEl = suggestionEl;
@@ -16,7 +16,7 @@ class Suggestions {
     this.suggestions = [];
 
     this.pickerInput = pickerInput;
-    this.searchURL = searchURL;
+    this.searchData = searchData;
     this.returnData = returnData;
 
     this.pickerInput.addEventListener("input", () => {
@@ -37,7 +37,7 @@ class Suggestions {
 
   getSuggestions(q: string) {
     var request = new XMLHttpRequest();
-    request.open("GET", this.searchURL(q), true);
+    request.open("POST", "/admin/api/_suggestions", true);
     request.addEventListener("load", () => {
       if (request.status == 200) {
         if (q != this.pickerInput.value) {
@@ -81,10 +81,13 @@ class Suggestions {
 
         this.scrollTop();
       } else {
-        console.log("Error while searching");
+        new Alert("Nelze načíst nápovědu " + request.status);
       }
     });
-    request.send();
+    request.addEventListener("error", () => {
+      new Alert("Chyba při načítání nápovědy");
+    })
+    request.send(JSON.stringify(this.searchData(q)));
   }
 
   createButton(data: any): HTMLAnchorElement {
@@ -251,10 +254,6 @@ function createSuggestionsPreviewEl(
     image.setAttribute("src", data.Image);
     image.setAttribute("loading", "lazy");
     ret.appendChild(image);
-  } else {
-    //let imageDiv = document.createElement("div");
-    //imageDiv.classList.add("preview_image");
-    //ret.appendChild(imageDiv);
   }
 
   right.appendChild(name);

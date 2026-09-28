@@ -8327,7 +8327,7 @@ class RelationPicker {
         this.filterID = el.getAttribute("data-filter");
         this.progress = el.querySelector("progress");
         this.picker = (el.querySelector(".picker"));
-        this.suggestionsObject = new Suggestions(this.el.querySelector(".picker_suggestions_content"), this.picker.querySelector("input"), this.getSearchURL.bind(this), (data) => {
+        this.suggestionsObject = new Suggestions(this.el.querySelector(".picker_suggestions_content"), this.picker.querySelector("input"), this.getSearchData.bind(this), (data) => {
             this.addPreview(data, true);
         });
         this.makeReordable();
@@ -8344,13 +8344,13 @@ class RelationPicker {
             this.updateLayout();
         });
     }
-    getSearchURL(q) {
-        var encoded = encodeParams({
-            q: q,
-            filter: this.filterID,
-            resource: this.relationName,
-        });
-        return "/admin/api/_suggestionsresource" + encoded;
+    getSearchData(q) {
+        var data = {
+            Q: q,
+            Filter: this.filterID,
+            Resource: this.relationName,
+        };
+        return data;
     }
     getData() {
         if (!this.input.value) {
@@ -8469,12 +8469,12 @@ class RelationPicker {
     }
 }
 class Suggestions {
-    constructor(suggestionEl, pickerInput, searchURL, returnData) {
+    constructor(suggestionEl, pickerInput, searchData, returnData) {
         this.selectedClass = "picker_suggestion-selected";
         this.suggestionsEl = suggestionEl;
         this.suggestions = [];
         this.pickerInput = pickerInput;
-        this.searchURL = searchURL;
+        this.searchData = searchData;
         this.returnData = returnData;
         this.pickerInput.addEventListener("input", () => {
             this.getSuggestions(this.pickerInput.value);
@@ -8490,7 +8490,7 @@ class Suggestions {
     }
     getSuggestions(q) {
         var request = new XMLHttpRequest();
-        request.open("GET", this.searchURL(q), true);
+        request.open("POST", "/admin/api/_suggestions", true);
         request.addEventListener("load", () => {
             if (request.status == 200) {
                 if (q != this.pickerInput.value) {
@@ -8529,10 +8529,13 @@ class Suggestions {
                 this.scrollTop();
             }
             else {
-                console.log("Error while searching");
+                new Alert("Nelze načíst nápovědu " + request.status);
             }
         });
-        request.send();
+        request.addEventListener("error", () => {
+            new Alert("Chyba při načítání nápovědy");
+        });
+        request.send(JSON.stringify(this.searchData(q)));
     }
     createButton(data) {
         let buttonEl = document.createElement("a");
@@ -8673,8 +8676,6 @@ function createSuggestionsPreviewEl(data, anchor) {
         image.setAttribute("loading", "lazy");
         ret.appendChild(image);
     }
-    else {
-    }
     right.appendChild(name);
     right.appendChild(description);
     ret.appendChild(right);
@@ -8781,7 +8782,22 @@ class Form {
         let suggestionEls = this.formEl.querySelectorAll(".form_suggestions");
         for (var i = 0; i < suggestionEls.length; i++) {
             let suggestionEl = suggestionEls[i];
-            console.log(suggestionEl);
+            let parentEl = suggestionEl.parentElement;
+            let inputEl = parentEl.querySelector(".form_input");
+            let uuid = suggestionEl.getAttribute("data-suggestions-custom-id");
+            console.log(parentEl);
+            console.log(inputEl);
+            console.log(uuid);
+            new Suggestions(suggestionEl.querySelector(".picker_suggestions_content"), inputEl, (q) => {
+                return {
+                    CustomUUID: uuid,
+                    Q: q,
+                };
+            }, (data) => {
+                inputEl.value = data.ID;
+                inputEl.blur();
+                console.log(data);
+            });
         }
     }
     initPlusMinus() {

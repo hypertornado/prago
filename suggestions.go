@@ -1,28 +1,47 @@
 package prago
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"reflect"
 	"strconv"
 )
 
-type Suggestions struct {
+type SuggestionsRequest struct {
+	CustomUUID    string
+	Resource      string
+	Q             string
+	Filter        string
+	ContextValues map[string]string
+}
+
+type SuggestionsResponse struct {
 	Message     string
 	Suggestions []*Suggestion
 	Buttons     []*Button
 }
 
 type Suggestion struct {
-	ID          int64
+	ID          string
 	Image       string
 	URL         string
 	Name        string
 	Description string
+
+	SetValues map[string]string
+}
+
+func (app *App) initSuggestions() {
+	app.initSuggestionsAdvanced()
+	app.initSuggestionsCustom()
+
+	app.NewAPI("_suggestions").Handler(suggestionsResource).Permission(loggedPermission).Method("POST")
 }
 
 func previewtoSuggestion(preview *Preview) *Suggestion {
 	return &Suggestion{
-		ID:          preview.ID,
+		ID:          fmt.Sprintf("%d", preview.ID),
 		Image:       preview.Image,
 		URL:         preview.URL,
 		Name:        preview.Name,
@@ -32,9 +51,37 @@ func previewtoSuggestion(preview *Preview) *Suggestion {
 
 func suggestionsResource(request *Request) {
 
-	app := request.app
+	data, err := io.ReadAll(request.Request().Body)
+	Must(err)
 
-	resource := app.getResourceByID(request.Param("resource"))
+	var suggestionRequest SuggestionsRequest
+	err = json.Unmarshal(data, &suggestionRequest)
+	Must(err)
+
+	var ret *SuggestionsResponse
+
+	if suggestionRequest.CustomUUID != "" {
+		ret = suggestionRequest.getSuggestionsCustom(request)
+	} else {
+		ret = suggestionRequest.getSuggestionsResource(request)
+	}
+	request.WriteJSON(200, ret)
+}
+
+func (suggestionRequest SuggestionsRequest) getSuggestionsCustom(request *Request) *SuggestionsResponse {
+	suggestion := request.app.getSuggestionCustom(suggestionRequest.CustomUUID)
+	if suggestion == nil {
+		return nil
+	}
+	if !request.Authorize(suggestion.permission) {
+		return nil
+	}
+	return suggestion.handler(suggestionRequest)
+}
+
+func (suggestionRequest SuggestionsRequest) getSuggestionsResource(request *Request) *SuggestionsResponse {
+	app := request.app
+	resource := app.getResourceByID(suggestionRequest.Resource)
 	if resource == nil {
 		panic("can't find resource")
 	}
@@ -43,9 +90,8 @@ func suggestionsResource(request *Request) {
 
 	}
 
-	q := request.Param("q")
-
-	filterID := request.Param("filter")
+	q := suggestionRequest.Q
+	filterID := suggestionRequest.Filter
 
 	var formFilter *FormFilter
 	if filterID != "" {
@@ -55,7 +101,7 @@ func suggestionsResource(request *Request) {
 		}
 	}
 
-	ret := &Suggestions{}
+	ret := &SuggestionsResponse{}
 
 	usedIDs := map[int64]bool{}
 
@@ -136,5 +182,6 @@ func suggestionsResource(request *Request) {
 		URL:  fmt.Sprintf("/admin/_suggestionsadvanced?resource=%s", resource.id),
 	})
 
-	request.WriteJSON(200, ret)
+	return ret
+
 }

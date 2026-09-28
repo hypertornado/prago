@@ -131,8 +131,24 @@ class Form {
   initSuggestions() {
     let suggestionEls = this.formEl.querySelectorAll(".form_suggestions");
     for (var i = 0; i < suggestionEls.length; i++) {
-      let suggestionEl = suggestionEls[i];
-      console.log(suggestionEl);
+      let suggestionEl = <HTMLDivElement>suggestionEls[i];
+      let parentEl = suggestionEl.parentElement;
+      let inputEl = <HTMLInputElement>parentEl.querySelector(".form_input");
+      let uuid = suggestionEl.getAttribute("data-suggestions-custom-id");
+      console.log(parentEl);
+      console.log(inputEl);
+      console.log(uuid);
+
+      new Suggestions(suggestionEl.querySelector(".picker_suggestions_content"), inputEl, (q: string): any => {
+        return {
+          CustomUUID: uuid,
+          Q: q,
+        }
+      }, (data: any) => {
+        inputEl.value = data.ID;
+        inputEl.blur();
+        console.log(data);
+      })
     }
   }
 

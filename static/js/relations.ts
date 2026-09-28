@@ -50,7 +50,7 @@ class RelationPicker {
     this.suggestionsObject = new Suggestions(
       this.el.querySelector(".picker_suggestions_content"),
       this.picker.querySelector("input"),
-      this.getSearchURL.bind(this),
+      this.getSearchData.bind(this),
       (data: any) => {
         this.addPreview(data, true);
       }
@@ -72,14 +72,13 @@ class RelationPicker {
     });
   }
 
-  getSearchURL(q: string): string {
-    var encoded = encodeParams({
-      q: q,
-      filter: this.filterID,
-      resource: this.relationName,
-    });
-
-    return "/admin/api/_suggestionsresource" + encoded;
+  getSearchData(q: string): any {
+    var data = {
+      Q: q,
+      Filter: this.filterID,
+      Resource: this.relationName,
+    };
+    return data;
   }
 
   getData() {

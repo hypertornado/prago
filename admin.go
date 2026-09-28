@@ -47,8 +47,7 @@ func (app *App) initAdminActions() {
 		request.w.Write(iconData)
 	})
 
-	app.NewAPI("_suggestionsresource").Handler(suggestionsResource).Permission(loggedPermission)
-	app.initSuggestionsAdvanced()
+	app.initSuggestions()
 
 }
 

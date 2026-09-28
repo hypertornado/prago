@@ -44,8 +44,9 @@ type Field struct {
 
 	fixStringValueFN func(string) string
 
-	formFilter    *FormFilter
-	suggestionURL string
+	formFilter *FormFilter
+
+	suggestionsCustom *SuggestionsCustom
 
 	unitBefore string
 	unitAfter  string
@@ -325,8 +326,8 @@ func (field *Field) SetFormFilter(filter *FormFilter) *Field {
 	return field
 }
 
-func (field *Field) SuggestionURL(suggestionURL string) *Field {
-	field.suggestionURL = suggestionURL
+func (field *Field) SuggestionsCustom(customSuggestion *SuggestionsCustom) *Field {
+	field.suggestionsCustom = customSuggestion
 	return field
 }
 

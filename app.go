@@ -124,6 +124,9 @@ type App struct {
 
 	customDateRanges []dateRange
 
+	suggestionsCustom      map[string]*SuggestionsCustom
+	suggestionsCustomMutex *sync.RWMutex
+
 	AI *pragoai.Client
 }
 

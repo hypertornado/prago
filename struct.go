@@ -54,15 +54,11 @@ func (resource *Resource) getItemStringEditableValues(item any, request *Request
 
 func (form *Form) initWithResourceItem(resource *Resource, item any, request *Request) {
 
-	//start := time.Now()
-
 	editableValues := resource.getItemStringEditableValues(item, request)
 
 	itemID := resource.previewer(request, item).ID()
 
-	//fmt.Println("Item version since", time.Since(start))
 	form.ItemVersion = resource.currentItemVersion(itemID)
-	//fmt.Println("Item version end", time.Since(start))
 
 	focusedField := request.Param("_focus")
 
@@ -151,12 +147,11 @@ func (form *Form) initWithResourceItem(resource *Resource, item any, request *Re
 			item.FormFilterID = field.formFilter.uuid
 		}
 
-		item.SuggestionURL = field.suggestionURL
+		item.SuggestionsCustom = field.suggestionsCustom
 
 		form.AddItem(item)
 	}
 
-	//fmt.Println("DONE", time.Since(start))
 }
 
 func getFieldsFilterMap(in string) map[string]bool {

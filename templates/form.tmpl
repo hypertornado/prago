@@ -58,8 +58,10 @@
             <div class="form_label_errors hidden"></div>
             <div class="form_label_contents">
               {{.GetContent}}
-              {{if .SuggestionURL}}
-                <div class="form_suggestions" data-suggestions-url="{{.SuggestionURL}}"></div>
+              {{if .SuggestionsCustom}}
+                <div class="form_suggestions picker_suggestions" data-suggestions-custom-id="{{.SuggestionsCustom.UUID}}" data-suggestions-custom-context-fields="{{.SuggestionsCustom.ContextFields}}">
+                  <div class="picker_suggestions_content"></div>
+                </div>
               {{end}}
             </div>
             </div>
