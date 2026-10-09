@@ -6948,9 +6948,7 @@ class List {
         var encoded = encodeParams(params);
         window.history.replaceState(null, null, document.location.pathname + encoded);
         var columns = this.visibleColumnsStr;
-        if (columns != this.defaultVisibleColumnsStr) {
-            params["_columns"] = columns;
-        }
+        params["_columns"] = columns;
         params["_pagesize"] = this.itemsPerPage;
         encoded = encodeParams(params);
         request.open("GET", "/admin/" + this.typeName + "/api/list" + encoded, true);
@@ -8330,6 +8328,7 @@ class RelationPicker {
         this.suggestionsObject = new Suggestions(this.el.querySelector(".picker_suggestions_content"), this.picker.querySelector("input"), this.getSearchData.bind(this), (data) => {
             this.addPreview(data, true);
         });
+        this.suggestionsObject.clearOnEscape = true;
         this.makeReordable();
         if (this.multipleInputs || parseInt(this.input.value) > 0) {
             this.getData();
@@ -8470,6 +8469,7 @@ class RelationPicker {
 }
 class Suggestions {
     constructor(suggestionEl, pickerInput, searchData, returnData) {
+        this.clearOnEscape = false;
         this.selectedClass = "picker_suggestion-selected";
         this.suggestionsEl = suggestionEl;
         this.suggestions = [];
@@ -8505,17 +8505,19 @@ class Suggestions {
                     messageEl.classList.add("picker_message");
                     this.suggestionsEl.appendChild(messageEl);
                 }
-                for (var i = 0; i < data.Suggestions.length; i++) {
-                    var item = data.Suggestions[i];
-                    var el = createSuggestionsPreviewEl(item, false);
-                    el.classList.add("picker_suggestion");
-                    el.setAttribute("data-position", i + "");
-                    el.addEventListener("mousedown", (e) => {
-                        e.preventDefault();
-                    });
-                    el.addEventListener("click", this.suggestionClick.bind(this));
-                    el.addEventListener("mouseenter", this.suggestionSelect.bind(this));
-                    this.suggestionsEl.appendChild(el);
+                if (data.Suggestions) {
+                    for (var i = 0; i < data.Suggestions.length; i++) {
+                        var item = data.Suggestions[i];
+                        var el = createSuggestionsPreviewEl(item, false);
+                        el.classList.add("picker_suggestion");
+                        el.setAttribute("data-position", i + "");
+                        el.addEventListener("mousedown", (e) => {
+                            e.preventDefault();
+                        });
+                        el.addEventListener("click", this.suggestionClick.bind(this));
+                        el.addEventListener("mouseenter", this.suggestionSelect.bind(this));
+                        this.suggestionsEl.appendChild(el);
+                    }
                 }
                 if (data.Buttons) {
                     let buttonsEl = document.createElement("div");
@@ -8602,7 +8604,12 @@ class Suggestions {
                 e.preventDefault();
                 return true;
             case 27:
-                this.clear();
+                if (this.clearOnEscape) {
+                    this.clear();
+                }
+                else {
+                    this.pickerInput.blur();
+                }
                 e.preventDefault();
                 return true;
             case 38:
@@ -8785,20 +8792,56 @@ class Form {
             let parentEl = suggestionEl.parentElement;
             let inputEl = parentEl.querySelector(".form_input");
             let uuid = suggestionEl.getAttribute("data-suggestions-custom-id");
-            console.log(parentEl);
-            console.log(inputEl);
-            console.log(uuid);
+            let contextFieldsStr = suggestionEl.getAttribute("data-suggestions-custom-context-fields");
+            let contextFieldsArr = [];
+            if (contextFieldsStr) {
+                contextFieldsArr = contextFieldsStr.split(",");
+            }
             new Suggestions(suggestionEl.querySelector(".picker_suggestions_content"), inputEl, (q) => {
                 return {
                     CustomUUID: uuid,
                     Q: q,
+                    ContextValues: this.getContextMap(contextFieldsArr),
                 };
             }, (data) => {
                 inputEl.value = data.ID;
+                if (data.SetValues) {
+                    for (let key in data.SetValues) {
+                        this.setFieldValue(key, data.SetValues[key]);
+                    }
+                }
                 inputEl.blur();
-                console.log(data);
             });
         }
+    }
+    getContextMap(fields) {
+        let ret = {};
+        for (let i = 0; i < fields.length; i++) {
+            let fieldID = fields[i];
+            ret[fieldID] = this.getFieldValue(fieldID);
+        }
+        return ret;
+    }
+    getFieldInput(id) {
+        let labelEl = this.formEl.querySelector(`.form_label[data-id=${id}]`);
+        if (!labelEl) {
+            return null;
+        }
+        return labelEl.querySelector(".form_input");
+    }
+    getFieldValue(id) {
+        let input = this.getFieldInput(id);
+        if (!input) {
+            return null;
+        }
+        return input.value;
+    }
+    setFieldValue(id, value) {
+        let input = this.getFieldInput(id);
+        if (!input) {
+            return;
+        }
+        input.value = value;
     }
     initPlusMinus() {
         let els = this.formEl.querySelectorAll(".form_item_plus,.form_item_minus");

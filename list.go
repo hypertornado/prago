@@ -13,27 +13,20 @@ import (
 //https://caldwell.org/projects/data/city-index
 
 type list struct {
-	Name                 string
-	Language             string
-	TypeID               string
-	Colspan              int64
-	Header               []listHeaderItem
-	VisibleColumns       string
-	Columns              string
-	CanChangeOrder       bool
-	CanExport            bool
-	OrderColumn          string
-	OrderDesc            bool
-	Locale               string
-	ItemsPerPage         int64
-	StatsLimitSelectData []listPaginationData
-	MultipleActions      []listMultipleAction
-}
-
-type listPaginationData struct {
-	Name     string
-	Value    int64
-	Selected bool
+	Name            string
+	Language        string
+	TypeID          string
+	Colspan         int64
+	Header          []listHeaderItem
+	VisibleColumns  string
+	Columns         string
+	CanChangeOrder  bool
+	CanExport       bool
+	OrderColumn     string
+	OrderDesc       bool
+	Locale          string
+	ItemsPerPage    int64
+	MultipleActions []listMultipleAction
 }
 
 type listHeaderItem struct {
@@ -107,6 +100,12 @@ func (resource *Resource) getListHeader(request *Request) (list list, err error)
 	list.Language = lang
 	list.TypeID = resource.id
 	list.VisibleColumns = resource.defaultVisibleFieldsStr(request)
+
+	customVisibleColumns := request.GetUserPreference(getUserPreferenceNameVisibleFields(resource))
+	if customVisibleColumns != nil {
+		list.VisibleColumns = *customVisibleColumns
+	}
+
 	list.Columns = resource.fieldsStr(request)
 
 	list.OrderColumn = resource.orderByColumn
@@ -115,7 +114,14 @@ func (resource *Resource) getListHeader(request *Request) (list list, err error)
 
 	list.ItemsPerPage = resource.defaultItemsPerPage
 
-	list.StatsLimitSelectData = getStatsLimitSelectData(request.Locale())
+	itemsPerPageStr := request.GetUserPreference(getUserPreferenceNameItemsPerPage(resource))
+	if itemsPerPageStr != nil {
+		count, err := strconv.Atoi(*itemsPerPageStr)
+		if err == nil && count > 0 {
+			list.ItemsPerPage = int64(count)
+		}
+	}
+
 	list.MultipleActions = resource.getMultipleActions(request)
 
 	orderField, ok := resource.fieldMap[resource.orderByColumn]
@@ -295,7 +301,11 @@ func (resource *Resource) addFilterToQuery(listQuery *listQuery, filter map[stri
 				str := fmt.Sprintf("`%s` = ?", k)
 				listQuery.where(str, qStr)
 			} else {
-				v = "%" + v + "%"
+				if field.filterByPrefix {
+					v = v + "%"
+				} else {
+					v = "%" + v + "%"
+				}
 				str := fmt.Sprintf("`%s` LIKE ?", k)
 				listQuery.where(str, v)
 			}

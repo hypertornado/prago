@@ -147,7 +147,7 @@ func (form *Form) initWithResourceItem(resource *Resource, item any, request *Re
 			item.FormFilterID = field.formFilter.uuid
 		}
 
-		item.SuggestionsCustom = field.suggestionsCustom
+		item.SetCustomSuggestion(field.suggestionsCustom)
 
 		form.AddItem(item)
 	}

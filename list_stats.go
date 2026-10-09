@@ -112,37 +112,6 @@ func (app *App) initListStats() {
 
 }
 
-/*func (row *listStatsRow) GetTitle() string {
-	var fields []string
-
-	fields = append(fields, row.Name)
-	fields = append(fields, row.Description.Count)
-	if row.Description.Percent != "" {
-		fields = append(fields, row.Description.Percent)
-	}
-
-	return strings.Join(fields, " — ")
-}*/
-
-/*func statsCountPercent(count, total int64) template.HTML {
-	if total == 0 {
-		return ""
-	}
-	return template.HTML(fmt.Sprintf("%.2f%%", (100*float64(count))/float64(total)))
-}*/
-
-/*
-func statsCountDescription(count, total int64) listStatsDescription {
-	//percentStr := statsCountPercent(count, total)
-	var progress float64 = float64(count) / float64(total)
-	return listStatsDescription{
-		Count: humanizeNumber(count),
-		//PercentCSS: percentStr,
-		//Percent:    string(percentStr),
-		Progress: &progress,
-	}
-}*/
-
 func statsProgress(count, total int64) *float64 {
 	var progress float64 = float64(count) / float64(total)
 	return &progress
@@ -517,26 +486,4 @@ func (resource *Resource) getListStatsTableInt(ctx context.Context, field *Field
 	})
 
 	return table
-}
-
-func getStatsLimitSelectPlain() (ret [][2]string) {
-	data := getStatsLimitSelectData("cs")
-	for _, item := range data {
-		ret = append(ret, [2]string{fmt.Sprintf("%d", item.Value), item.Name})
-	}
-	return ret
-}
-
-func getStatsLimitSelectData(locale string) (ret []listPaginationData) {
-	var ints = []int64{10, 20, 100, 200, 500, 1000, 2000, 5000, 10000}
-
-	for _, v := range ints {
-		ret = append(ret, listPaginationData{
-			Name:  messages.ItemsCount(v, locale),
-			Value: v,
-		})
-	}
-
-	ret[0].Selected = true
-	return ret
 }

@@ -123,8 +123,6 @@ func (suggestionRequest SuggestionsRequest) getSuggestionsResource(request *Requ
 		previews = append(previews, fn(q, request)...)
 	}
 
-	filter := "%" + q + "%"
-
 	var searchLimit int64 = 25
 
 	searchableFields := resource.getSearchableFields(request)
@@ -138,7 +136,12 @@ func (suggestionRequest SuggestionsRequest) getSuggestionsResource(request *Requ
 			query = formFilter.filterFunction(query)
 		}
 
-		items, err := query.Limit(searchLimit).where(field.id+" LIKE ?", filter).OrderDesc("id").list()
+		filterQuery := "%" + q + "%"
+		if field.filterByPrefix {
+			filterQuery = q + "%"
+		}
+
+		items, err := query.Limit(searchLimit).where(field.id+" LIKE ?", filterQuery).OrderDesc("id").list()
 		if err != nil {
 			panic(err)
 		}

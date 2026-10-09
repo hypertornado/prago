@@ -20,6 +20,7 @@ func (app *App) initSuggestionsCustom() {
 func SuggestionsResponseFromArray(in []string) *SuggestionsResponse {
 	ret := &SuggestionsResponse{}
 	for _, v := range in {
+
 		ret.Suggestions = append(ret.Suggestions, &Suggestion{
 			ID:   v,
 			Name: v,
@@ -53,7 +54,11 @@ func (app *App) getSuggestionCustom(uuid string) *SuggestionsCustom {
 	return app.suggestionsCustom[uuid]
 }
 
-func (fi *FormItem) SetCustomSuggestionID(suggestionCustom *SuggestionsCustom) *FormItem {
+func (fi *FormItem) SetCustomSuggestion(suggestionCustom *SuggestionsCustom) *FormItem {
 	fi.SuggestionsCustom = suggestionCustom
+	if suggestionCustom != nil {
+		fi.Autocomplete = "off"
+	}
+
 	return fi
 }

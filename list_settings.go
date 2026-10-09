@@ -1,9 +1,18 @@
 package prago
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
+
+func getUserPreferenceNameItemsPerPage(resource *Resource) string {
+	return fmt.Sprintf("_prago_itemsperpage-%s", resource.id)
+}
+
+func getUserPreferenceNameVisibleFields(resource *Resource) string {
+	return fmt.Sprintf("_prago_visiblefields-%s", resource.id)
+}
 
 func (app *App) initListSettings() {
 
@@ -11,7 +20,7 @@ func (app *App) initListSettings() {
 		form.AddHidden("resource").SetValue(request.Param("resource"))
 
 		form.
-			AddSelect("count", "Počet položek na stránce", getStatsLimitSelectPlain()).
+			AddNumber("count", "Počet položek na stránce").
 			SetValue(request.Param("count")).
 			SetFocused()
 
@@ -28,6 +37,9 @@ func (app *App) initListSettings() {
 			fv.AddError("Špatný počet")
 			return
 		}
+
+		request.SetUserPreference(getUserPreferenceNameItemsPerPage(resource), fmt.Sprintf("%d", count))
+
 		fv.Data(count)
 	}).Permission(loggedPermission).Icon("glyphicons-basic-960-files-queue.svg").Name(Unlocalized("Počet položek na stránce"))
 
@@ -95,7 +107,11 @@ func (app *App) initListSettings() {
 			ret = append(ret, stat.id)
 		}
 
-		fv.Data(strings.Join(ret, ","))
+		dataStr := strings.Join(ret, ",")
+
+		request.SetUserPreference(getUserPreferenceNameVisibleFields(resource), dataStr)
+
+		fv.Data(dataStr)
 	}).Permission(loggedPermission).Icon("glyphicons-basic-107-text-width.svg").Name(Unlocalized("Viditelné sloupce"))
 
 }

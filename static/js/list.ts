@@ -59,6 +59,7 @@ class List {
     this.defaultVisibleColumnsStr = listEl.getAttribute("data-visible-columns");
     this.visibleColumnsStr = this.defaultVisibleColumnsStr;
 
+
     this.settings = new ListSettings(this);
     this.bindSettingsButton();
 
@@ -191,9 +192,10 @@ class List {
     );
 
     var columns = this.visibleColumnsStr;
-    if (columns != this.defaultVisibleColumnsStr) {
+    /*if (columns != this.defaultVisibleColumnsStr) {
       params["_columns"] = columns;
-    }
+    }*/
+    params["_columns"] = columns; //TODO remove
     params["_pagesize"] = this.itemsPerPage;
 
     encoded = encodeParams(params);
@@ -208,9 +210,6 @@ class List {
       this.currentRequest = null;
       this.tableContent.innerHTML = "";
       if (request.status == 200) {
-
-        //var response = JSON.parse(request.response);
-
         let message = request.getResponseHeader('Prago-List-Message');
         this.listMessageEl.innerText = decodeURIComponent(message);
 

@@ -46,6 +46,8 @@ type Field struct {
 
 	formFilter *FormFilter
 
+	filterByPrefix bool
+
 	suggestionsCustom *SuggestionsCustom
 
 	unitBefore string
@@ -348,6 +350,11 @@ func (field *Field) UnitBefore(unit string) *Field {
 
 func (field *Field) UnitAfter(unit string) *Field {
 	field.unitAfter = unit
+	return field
+}
+
+func (field *Field) FilterByPrefix() *Field {
+	field.filterByPrefix = true
 	return field
 }
 

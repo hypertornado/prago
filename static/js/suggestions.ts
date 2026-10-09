@@ -5,6 +5,8 @@ class Suggestions {
   searchData: (q: string) => any;
   returnData: (data: any) => void;
 
+  clearOnEscape: boolean = false;
+
   constructor(
     suggestionEl: HTMLDivElement,
     pickerInput: HTMLInputElement,
@@ -54,17 +56,19 @@ class Suggestions {
           this.suggestionsEl.appendChild(messageEl);
         }
 
-        for (var i = 0; i < data.Suggestions.length; i++) {
-          var item = data.Suggestions[i];
-          var el = createSuggestionsPreviewEl(item, false);
-          el.classList.add("picker_suggestion");
-          el.setAttribute("data-position", i + "");
-          el.addEventListener("mousedown", (e: Event) => {
-            e.preventDefault();
-          });
-          el.addEventListener("click", this.suggestionClick.bind(this));
-          el.addEventListener("mouseenter", this.suggestionSelect.bind(this));
-          this.suggestionsEl.appendChild(el);
+        if (data.Suggestions) {
+          for (var i = 0; i < data.Suggestions.length; i++) {
+            var item = data.Suggestions[i];
+            var el = createSuggestionsPreviewEl(item, false);
+            el.classList.add("picker_suggestion");
+            el.setAttribute("data-position", i + "");
+            el.addEventListener("mousedown", (e: Event) => {
+              e.preventDefault();
+            });
+            el.addEventListener("click", this.suggestionClick.bind(this));
+            el.addEventListener("mouseenter", this.suggestionSelect.bind(this));
+            this.suggestionsEl.appendChild(el);
+          }
         }
 
         if (data.Buttons) {
@@ -168,9 +172,12 @@ class Suggestions {
         this.suggestionClick();
         e.preventDefault();
         return true;
-      case 27: //enter
-        //this.suggestionClick();
-        this.clear();
+      case 27: //escape
+        if (this.clearOnEscape) {
+          this.clear();
+        } else {
+          this.pickerInput.blur();
+        }
         e.preventDefault();
         return true;
       case 38: //up

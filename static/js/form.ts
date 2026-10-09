@@ -135,21 +135,62 @@ class Form {
       let parentEl = suggestionEl.parentElement;
       let inputEl = <HTMLInputElement>parentEl.querySelector(".form_input");
       let uuid = suggestionEl.getAttribute("data-suggestions-custom-id");
-      console.log(parentEl);
-      console.log(inputEl);
-      console.log(uuid);
+      let contextFieldsStr = suggestionEl.getAttribute("data-suggestions-custom-context-fields");
+
+      let contextFieldsArr: string[] = [];
+      if (contextFieldsStr) {
+        contextFieldsArr = contextFieldsStr.split(",")
+      }
 
       new Suggestions(suggestionEl.querySelector(".picker_suggestions_content"), inputEl, (q: string): any => {
         return {
           CustomUUID: uuid,
           Q: q,
+          ContextValues: this.getContextMap(contextFieldsArr),
         }
       }, (data: any) => {
         inputEl.value = data.ID;
+        if (data.SetValues) {
+          for (let key in data.SetValues) {
+            this.setFieldValue(key, data.SetValues[key]);
+          }
+        }
         inputEl.blur();
-        console.log(data);
       })
     }
+  }
+
+  getContextMap(fields: string[]): Record<string, any> {
+    let ret: Record<string, any> = {};
+    for (let i = 0; i < fields.length; i++) {
+      let fieldID = fields[i];
+      ret[fieldID] = this.getFieldValue(fieldID);
+    }
+    return ret;
+  }
+
+  getFieldInput(id: string): HTMLInputElement {
+    let labelEl = this.formEl.querySelector(`.form_label[data-id=${id}]`);
+    if (!labelEl) {
+      return null;
+    }
+    return labelEl.querySelector(".form_input");
+  }
+
+  getFieldValue(id: string): any {
+    let input = this.getFieldInput(id);
+    if (!input) {
+      return null;
+    }
+    return input.value;
+  }
+
+  setFieldValue(id: string, value: string) {
+    let input = this.getFieldInput(id);
+    if (!input) {
+      return;
+    }
+    input.value = value;
   }
 
   initPlusMinus() {

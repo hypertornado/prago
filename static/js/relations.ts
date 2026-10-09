@@ -55,6 +55,7 @@ class RelationPicker {
         this.addPreview(data, true);
       }
     );
+    this.suggestionsObject.clearOnEscape = true;
 
     this.makeReordable();
 
