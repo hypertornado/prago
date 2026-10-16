@@ -63,6 +63,9 @@ func (request *Request) getLoginSessionID() (string, bool) {
 	app := request.app
 
 	apiHeader := request.r.Header.Get(apiHTTPHeader)
+	if apiHeader == "" {
+		apiHeader, _ = strings.CutPrefix(request.r.Header.Get("Authorization"), "Bearer ")
+	}
 
 	if strings.HasPrefix(apiHeader, "PAK_") {
 		return apiHeader, true

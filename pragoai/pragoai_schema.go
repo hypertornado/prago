@@ -93,11 +93,14 @@ func structSchema(t reflect.Type) (map[string]any, error) {
 				required = append(required, name)
 			}
 		}
-		return map[string]any{
+		ret := map[string]any{
 			"type":       "object",
 			"properties": properties,
-			"required":   required,
-		}, nil
+		}
+		if len(required) > 0 {
+			ret["required"] = required
+		}
+		return ret, nil
 	default:
 		return nil, fmt.Errorf("nepodporovaný typ %s", t.Kind())
 	}

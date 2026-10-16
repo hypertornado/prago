@@ -127,7 +127,8 @@ type App struct {
 	suggestionsCustom      map[string]*SuggestionsCustom
 	suggestionsCustomMutex *sync.RWMutex
 
-	AI *pragoai.Client
+	AI       *pragoai.Client
+	mcpTools []*MCPTool
 }
 
 func NewTesting(t *testing.T, initHandler func(app *App)) *App {
@@ -242,6 +243,7 @@ func (app *App) afterInit() {
 	app.initAdminNotFoundAction()
 	app.initRelations()
 	app.initFieldValidations()
+	app.afterInitMCPTools()
 }
 
 func (app *App) initDefaultResourceActions() {

@@ -165,7 +165,7 @@ func (request *Request) WriteJSON(statusCode int, data any) {
 	}
 
 	if e != nil {
-		panic("error while generating JSON output")
+		panic("error while generating JSON output: " + e.Error())
 	}
 	request.Response().WriteHeader(statusCode)
 	request.Response().Write(result)
