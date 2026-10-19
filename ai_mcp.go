@@ -115,7 +115,7 @@ func (app *App) initAIMCP() {
 		}
 
 		return table.ExecuteHTML()
-	}).Permission(loggedPermission).Name(Unlocalized("MCP server")).Board(aiBoard).Icon("glyphicons-basic-849-computer-network.svg")
+	}).Permission("sysadmin").Name(Unlocalized("MCP server")).Board(aiBoard).Icon("glyphicons-basic-849-computer-network.svg")
 }
 
 func (app *App) afterInitMCPTools() {

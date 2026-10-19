@@ -116,7 +116,7 @@ func (app *App) initDefaultFieldTypes() {
 		filterLayoutTemplate: "filter_layout_text",
 	})
 	app.addFieldType("int64", &fieldType{
-		dbFieldDescription: "bigint(20)",
+		dbFieldDescription: "bigint(20) NOT NULL DEFAULT 0",
 
 		getViewFieldContent: func(request *Request, field *Field, val any) *ViewContent {
 			intVal := val.(int64)
@@ -139,12 +139,12 @@ func (app *App) initDefaultFieldTypes() {
 			}
 		},
 
-		filterLayoutTemplate: "filter_layout_text",
+		filterLayoutTemplate: "filter_layout_number",
 
 		naturalCellWidth: 60,
 	})
 	app.addFieldType("float64", &fieldType{
-		dbFieldDescription: "double",
+		dbFieldDescription: "double NOT NULL DEFAULT 0",
 
 		getViewFieldContent: func(request *Request, field *Field, val any) *ViewContent {
 			floatVal := val.(float64)
@@ -172,7 +172,7 @@ func (app *App) initDefaultFieldTypes() {
 		naturalCellWidth: 60,
 	})
 	app.addFieldType("bool", &fieldType{
-		dbFieldDescription: "bool NOT NULL",
+		dbFieldDescription: "bool NOT NULL DEFAULT 0",
 		getViewFieldContent: func(request *Request, field *Field, value any) *ViewContent {
 			if !value.(bool) {
 				return nil

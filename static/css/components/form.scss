@@ -167,7 +167,11 @@
 }
 
 .form {
-  padding: 0px 10px;
+  padding: 0px 8px;
+}
+
+.simple_content .form {
+  padding: 0px 0px;
 }
 
 .form-errors {
@@ -474,6 +478,15 @@
   flex-shrink: 0;
   @include softShadow;
   background-color: $backgroundGrayColor;
+  aspect-ratio: 1;
+}
+
+.form_radio_color {
+  object-fit: cover;
+  width: 16px;
+  border-radius: 100px;
+  flex-shrink: 0;
+  @include softShadow;
   aspect-ratio: 1;
 }
 

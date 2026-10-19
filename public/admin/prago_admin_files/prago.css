@@ -754,7 +754,11 @@ select.input_timestamp_minute {
 }
 
 .form {
-  padding: 0px 10px;
+  padding: 0px 8px;
+}
+
+.simple_content .form {
+  padding: 0px 0px;
 }
 
 .form-errors {
@@ -1048,6 +1052,15 @@ select.input_timestamp_minute {
   flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   background-color: #fafafa;
+  aspect-ratio: 1;
+}
+
+.form_radio_color {
+  object-fit: cover;
+  width: 16px;
+  border-radius: 100px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   aspect-ratio: 1;
 }
 
@@ -4044,7 +4057,7 @@ a .dashboard_figure_value {
 .simple_logo {
   width: 100px;
   aspect-ratio: 1;
-  margin: 8px 8px;
+  margin: 0px 0px 8px 0px;
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat;

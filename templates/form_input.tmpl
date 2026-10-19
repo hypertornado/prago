@@ -207,6 +207,9 @@
 {{end}}
 
 {{define "form_input_select"}}
+  {{range $item := .Data}}
+    {{if $item.Font}}<link rel="stylesheet" href="{{$item.FontURL}}">{{end}}
+  {{end}}
   <select name="{{.ID}}" id="{{.UUID}}" class="input form_watcher form_input input_select"{{if .Focused}} autofocus{{end}}{{if .Readonly}} disabled{{end}}>
     <button>
       <selectedcontent></selectedcontent>
@@ -217,7 +220,7 @@
         {{if $item.Icon}}
           <img src="/admin/api/icons?file={{$item.Icon}}&color={{$item.GetColor}}" class="option_icon">
         {{end}}
-        <span class="option_name">{{$item.Name}}</span>
+        <span class="option_name"{{if $item.Font}} style="font-family: '{{$item.Font}}';"{{end}}>{{$item.Name}}</span>
       </option>
     {{end}}
   </select>
@@ -233,6 +236,9 @@
         {{if .ImageURL}}
           <img src="{{.ImageURL}}" class="form_radio_image">
         {{end}}
+        {{if .Color}}
+          <div class="form_radio_color" style="background-color: #{{.Color}};"></div>
+        {{end}}
         <div class="form_radio_content">
           {{if $item.DescriptionBefore}}
             <div class="form_radio_prename">{{$item.DescriptionBefore}}</div>
@@ -241,7 +247,12 @@
             {{if $item.Icon}}
               <img src="/admin/api/icons?file={{$item.Icon}}&color={{$item.GetColor}}" class="form_radio_icon">
             {{end}}
-            <span>{{$item.Name}}</span>
+            {{if $item.Font}}
+              <link rel="stylesheet" href="{{$item.FontURL}}">
+              <span style="font-family: '{{$item.Font}}';">{{$item.Name}}</span>
+            {{else}}
+              <span>{{$item.Name}}</span>
+            {{end}}
           </div>
           {{if $item.DescriptionAfter}}
             <div class="form_radio_postname">{{$item.DescriptionAfter}}</div>

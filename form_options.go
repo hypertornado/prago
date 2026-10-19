@@ -1,6 +1,9 @@
 package prago
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 type FormOption struct {
 	ID                string
@@ -13,6 +16,8 @@ type FormOption struct {
 	Style             string
 	ImageURL          string
 	Button            *Button
+	//Google Fonts family name (e.g. "Playfair Display"), option name is rendered in this font
+	Font string
 }
 
 func (fo *FormOption) GetColor() string {
@@ -20,6 +25,10 @@ func (fo *FormOption) GetColor() string {
 		return fo.Color
 	}
 	return getStyleColor(fo.Style)
+}
+
+func (fo *FormOption) FontURL() string {
+	return "https://fonts.googleapis.com/css2?family=" + url.QueryEscape(fo.Font) + "&display=swap"
 }
 
 func (form *Form) AddSelectOptions(name, description string, options []*FormOption) *FormItem {

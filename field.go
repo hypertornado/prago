@@ -308,10 +308,10 @@ func (field *Field) FormContentGenerator(fn func(item *FormItem) template.HTML) 
 	return field
 }
 
-func (field *Field) DBDescription(description string) *Field {
+/*func (field *Field) DBDescription(description string) *Field {
 	field.fieldType.dbFieldDescription = description
 	return field
-}
+}*/
 
 func (field *Field) Searchable(isSearchable bool) *Field {
 	field.isSearchable = true
@@ -387,6 +387,10 @@ func (field *Field) initFieldType() {
 }
 
 func (field *Field) fieldDescriptionMysql(fieldTypes map[string]*fieldType) string {
+	if field.id == "id" {
+		return fmt.Sprintf("`%s` bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY", field.id)
+	}
+
 	var fieldDescription = field.fieldType.dbFieldDescription
 
 	if fieldDescription == "" {
@@ -394,12 +398,8 @@ func (field *Field) fieldDescriptionMysql(fieldTypes map[string]*fieldType) stri
 	}
 
 	additional := ""
-	if field.id == "id" {
-		additional = "NOT NULL AUTO_INCREMENT PRIMARY KEY"
-	} else {
-		if field.unique {
-			additional = "UNIQUE"
-		}
+	if field.unique {
+		additional = "UNIQUE"
 	}
 	return fmt.Sprintf("`%s` %s %s", field.id, fieldDescription, additional)
 }
